@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -63,6 +63,6 @@ void D3DResourceSystem::DestroyIndexBuffer(void* pIndexBuffer) {
 }
 
 // 0x730B70
-void D3DResourceSystem::DestroyTexture(void* pTexture) {
-    plugin::Call<0x730B70, void*>(pTexture);
+void D3DResourceSystem::DestroyTexture(void* texture) {
+    plugin::Call<0x730B70, void*>(texture);
 }

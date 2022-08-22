@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,17 +10,12 @@
 
 class CTaskComplexEnterCarAsDriver : public CTaskComplexEnterCar {
 public:
-    CTaskComplexEnterCarAsDriver(CVehicle* pTargetVehicle);
-    ~CTaskComplexEnterCarAsDriver() {}
+    static constexpr auto Type = TASK_COMPLEX_ENTER_CAR_AS_DRIVER;
 
+    explicit CTaskComplexEnterCarAsDriver(CVehicle* targetVehicle);
+    ~CTaskComplexEnterCarAsDriver() override = default;
+
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_ENTER_CAR_AS_DRIVER; }
-
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
-    CTask* Clone_Reversed();
 };
-
 VALIDATE_SIZE(CTaskComplexEnterCarAsDriver, 0x50);

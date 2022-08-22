@@ -11,6 +11,8 @@ enum eHeatHazeFXType {
     HEAT_HAZE_2,
     HEAT_HAZE_3,
     HEAT_HAZE_4,
+
+    MAX_HEAT_HAZE_TYPES
 };
 
 class CPostEffects {
@@ -103,24 +105,24 @@ public:
     static float& m_fHeatHazeFXInsideBuildingFadeSpeed;
     static float& m_HeatHazeFXHourOfDayEnd;
     static float& m_HeatHazeFXHourOfDayStart;
-    static float& m_HeatHazeFXRenderSizeX;
-    static float& m_HeatHazeFXRenderSizeY;
-    static float& m_HeatHazeFXScanSizeX;
-    static float& m_HeatHazeFXScanSizeY;
+    static int32& m_HeatHazeFXRenderSizeX;
+    static int32& m_HeatHazeFXRenderSizeY;
+    static int32& m_HeatHazeFXScanSizeX;
+    static int32& m_HeatHazeFXScanSizeY;
 
     static bool& m_bInfraredVision;
     static float& m_fInfraredVisionFilterRadius;
     static float& m_fInfraredVisionSwitchOnFXCount;
     static int32& m_InfraredVisionGrainStrength;
-    static RwRGBA& m_InfraredVisionCol;
-    static RwRGBA& m_InfraredVisionMainCol;
+    static CRGBA& m_InfraredVisionCol;
+    static CRGBA& m_InfraredVisionMainCol;
     static RwRGBAReal& m_fInfraredVisionHeatObjectCol;
 
     static bool& m_bNightVision;
     static float& m_fNightVisionSwitchOnFXCount;
     static float& m_fNightVisionSwitchOnFXTime;
     static int32& m_NightVisionGrainStrength;
-    static RwRGBA& m_NightVisionMainCol;
+    static CRGBA& m_NightVisionMainCol;
 
     static bool& m_bWaterDepthDarkness;
     static float& m_fWaterFXStartUnderWaterness;
@@ -130,7 +132,7 @@ public:
     static float& m_waterStrength;
     static float& m_waterSpeed;
     static float& m_waterFreq;
-    static RwRGBA& m_waterCol;
+    static CRGBA& m_waterCol;
 
 public:
     static void InjectHooks();
@@ -141,10 +143,10 @@ public:
     static void SetupBackBufferVertex();
     static void Update();
 
-    static void DrawQuad(float x1, float y1, float x2, float y2, char red, uint32 green, uint32 blue, uint8 alpha, RwRaster* raster);
+    static void DrawQuad(float x1, float y1, float x2, float y2, uint8 red, uint8 green, uint8 blue, uint8 alpha, RwRaster* raster);
     static void DrawQuadSetDefaultUVs();
-    static void DrawQuadSetPixelUVs(float a1, float a2, float a3, float a4, float a5, float a6, float a7, float a8);
-    static void DrawQuadSetUVs(float a1, float a2, float a3, float a4, float a5, float a6, float a7, float a8);
+    static void DrawQuadSetPixelUVs(float u0, float v0, float u1, float v1, float u3, float v3, float u2, float v2);
+    static void DrawQuadSetUVs(float u1, float v1, float u2, float v2, float u3, float v3, float u4, float v4);
 
     static void FilterFX_RestoreDayNightBalance();
     static void FilterFX_StoreAndSetDayNightBalance();
@@ -154,7 +156,7 @@ public:
     static void ImmediateModeRenderStatesStore();
     static void ImmediateModeRenderStatesReStore();
 
-    static void RasterCreatePostEffects(RwRect rect);
+    static RwRaster* RasterCreatePostEffects(RwRect rect);
 
     static void ScriptCCTVSwitch(bool enable);
     static void ScriptDarknessFilterSwitch(bool enable, int32 alpha);
@@ -163,18 +165,18 @@ public:
     static void ScriptNightVisionSwitch(bool enable);
     static void ScriptResetForEffects();
 
-    static void UnderWaterRipple(RwRGBA a1, float a2, float a3, int32 a4, float a5, float a6);
+    static void UnderWaterRipple(RwRGBA col, float xoffset, float yoffset, int32 strength, float speed, float freq);
     static void UnderWaterRippleFadeToFX();
 
     static void HeatHazeFXInit();
-    static void HeatHazeFX(float a1, bool a2);
+    static void HeatHazeFX(float fIntensity, bool bAlphaMaskMode);
 
     static bool IsVisionFXActive();
 
     static void NightVision();
     static void NightVisionSetLights();
 
-    static void SetFilterMainColour(RwRGBA a1, RwRGBA a2);
+    static void SetFilterMainColour(RwRaster* raster, RwRGBA color);
     static void InfraredVision(RwRGBA color, RwRGBA colorMain);
     static void InfraredVisionSetLightsForDefaultObjects();
     static void InfraredVisionSetLightsForHeatObjects();
@@ -183,11 +185,11 @@ public:
 
     static void Fog();
     static void CCTV();
-    static void Grain(int32 strength, bool a2);
+    static void Grain(int32 strengthMask, bool update);
     static void SpeedFX(float speed);
-    static void DarknessFilter(int32 a1);
-    static void ColourFilter(int32 pass1, int32 pass2);
-    static void Radiosity(int32 a1, int32 a2, int32 a3, int32 a4);
+    static void DarknessFilter(int32 alpha);
+    static void ColourFilter(RwRGBA pass1, RwRGBA pass2);
+    static void Radiosity(int32 intensityLimit, int32 filterPasses, int32 renderPasses, int32 intensity);
 
     static void Render();
 };

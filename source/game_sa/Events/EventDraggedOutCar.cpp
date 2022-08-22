@@ -1,50 +1,33 @@
 #include "StdInc.h"
 
-void CEventDraggedOutCar::InjectHooks()
-{
-    ReversibleHooks::Install("CEventDraggedOutCar", "Constructor", 0x4AD250, &CEventDraggedOutCar::Constructor);
-    ReversibleHooks::Install("CEventDraggedOutCar", "CloneEditable_Reversed", 0x4B6DC0, &CEventDraggedOutCar::CloneEditable_Reversed);
-}
+#include "EventDraggedOutCar.h"
 
-CEventDraggedOutCar::CEventDraggedOutCar(CVehicle* vehicle, CPed* carjacker, bool IsDriverSeat)
-{
-    m_carjacker = carjacker;
-    m_vehicle = vehicle;
+// 0x4AD250
+CEventDraggedOutCar::CEventDraggedOutCar(CVehicle* vehicle, CPed* carjacker, bool IsDriverSeat) : CEventEditableResponse() {
+    m_CarJacker = carjacker;
+    m_Vehicle   = vehicle;
     m_IsDriverSeat = IsDriverSeat;
-    if (m_vehicle)
-        m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    if (m_carjacker)
-        m_carjacker->RegisterReference(reinterpret_cast<CEntity**>(&m_carjacker));
+    CEntity::SafeRegisterRef(m_Vehicle);
+    CEntity::SafeRegisterRef(m_CarJacker);
 }
 
-CEventDraggedOutCar::~CEventDraggedOutCar()
-{
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    if (m_carjacker)
-        m_carjacker->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_carjacker));
+// 0x4AD330
+CEventDraggedOutCar::~CEventDraggedOutCar() {
+    CEntity::SafeCleanUpRef(m_Vehicle);
+    CEntity::SafeCleanUpRef(m_CarJacker);
 }
 
-CEventDraggedOutCar* CEventDraggedOutCar::Constructor(CVehicle* vehicle, CPed* carjacker, bool IsDriverSeat)
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventDraggedOutCar*, 0x4AD250, CEvent*, CVehicle*, CPed*, bool>(this, vehicle, carjacker, IsDriverSeat);
-#else
-    this->CEventDraggedOutCar::CEventDraggedOutCar(vehicle, carjacker, IsDriverSeat);
-    return this;
-#endif
+// 0x4AD3A0
+bool CEventDraggedOutCar::AffectsPed(CPed* ped) {
+    return ped->IsAlive() && m_CarJacker;
 }
 
-CEventEditableResponse* CEventDraggedOutCar::CloneEditable()
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventEditableResponse*, 0x4B6DC0, CEvent*>(this);
-#else
-    return CEventDraggedOutCar::CloneEditable_Reversed();
-#endif
+// 0x4AD3C0
+bool CEventDraggedOutCar::AffectsPedGroup(CPedGroup* pedGroup) {
+    return FindPlayerPed() == pedGroup->GetMembership().GetLeader();
 }
 
-CEventEditableResponse* CEventDraggedOutCar::CloneEditable_Reversed()
-{
-    return new CEventDraggedOutCar(m_vehicle, m_carjacker, m_IsDriverSeat);
+// 0x4B6DC0
+CEventEditableResponse* CEventDraggedOutCar::CloneEditable() {
+    return new CEventDraggedOutCar(m_Vehicle, m_CarJacker, m_IsDriverSeat);
 }

@@ -2,33 +2,13 @@
 
 #include "TaskSimpleSetStayInSamePlace.h"
 
-void CTaskSimpleSetStayInSamePlace::InjectHooks()
-{
-    ReversibleHooks::Install("CTaskSimpleSetStayInSamePlace", "Constructor", 0x62F590, &CTaskSimpleSetStayInSamePlace::Constructor);
-    //VTABLE
-    ReversibleHooks::Install("CTaskSimpleSetStayInSamePlace", "ProcessPed", 0x62F5E0, &CTaskSimpleSetStayInSamePlace::ProcessPed_Reversed);
-}
-
-CTaskSimpleSetStayInSamePlace* CTaskSimpleSetStayInSamePlace::Constructor(bool bStayInSamePlace)
-{
-    this->CTaskSimpleSetStayInSamePlace::CTaskSimpleSetStayInSamePlace(bStayInSamePlace);
-    return this;
-}
-
 // 0x62F590
-CTaskSimpleSetStayInSamePlace::CTaskSimpleSetStayInSamePlace(bool bStayInSamePlace)
-{
+CTaskSimpleSetStayInSamePlace::CTaskSimpleSetStayInSamePlace(bool bStayInSamePlace) : CTaskSimple() {
     m_bStayInSamePlace = bStayInSamePlace;
 }
 
 // 0x62F5E0
-bool CTaskSimpleSetStayInSamePlace::ProcessPed(CPed* ped)
-{
-    return ProcessPed_Reversed(ped);
-}
-
-bool CTaskSimpleSetStayInSamePlace::ProcessPed_Reversed(CPed* ped)
-{
+bool CTaskSimpleSetStayInSamePlace::ProcessPed(CPed* ped) {
     ped->bStayInSamePlace = m_bStayInSamePlace;
     return true;
 }

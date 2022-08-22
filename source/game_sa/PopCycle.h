@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,7 +7,7 @@
 #pragma once
 
 #include "ZoneInfo.h"
-#include "Zone.h"
+class CZone;
 
 enum ePedType : uint32;
 
@@ -54,6 +54,7 @@ enum ePopcycleGroup {
     POPCYCLE_GROUP_OUT_OF_TOWN_FACTORY_WORKERS,
     POPCYCLE_GROUP_DESERT_FOLK,
     POPCYCLE_GROUP_AIRCREW_RUNWAY,
+
     POPCYCLE_GROUP_BALLAS,
     POPCYCLE_GROUP_GROVE,
     POPCYCLE_GROUP_VAGOS,
@@ -189,7 +190,7 @@ public:
     static int32&      m_nCurrentZoneType;
     static int32&      m_nCurrentTimeOfWeek;
     static int32&      m_nCurrentTimeIndex;
-    static char*       m_nPercTypeGroup; // char m_nPercTypeGroup[8640]; // see ePopcycleGroupPerc
+    static inline ePopcycleGroupPerc (&m_nPercTypeGroup)[12][2][20][POPCYCLE_TOTAL_GROUP_PERCS] = *(ePopcycleGroupPerc(*)[12][2][20][18])0xC0BC78;
     static uint8*      m_nPercOther;     // uint8 m_nPercOther[480];
     static uint8*      m_nPercCops;      // uint8 m_nPercCops[480];
     static uint8*      m_nPercGang;      // uint8 m_nPercGang[480];
@@ -198,10 +199,10 @@ public:
     static uint8*      m_nMaxNumPeds;    // uint8 m_nMaxNumPeds[480];
     static float&      m_NumDealers_Peds;
 
-    static bool  FindNewPedType(ePedType* arg1, int32* modelindex, bool arg3, bool arg4);
-    static float GetCurrentPercOther_Peds();
     static void  Initialise();
-    static bool  IsPedAppropriateForCurrentZone(int32 modelindex);
+    static bool  FindNewPedType(ePedType* arg1, int32* modelIndex, bool arg3, bool arg4);
+    static float GetCurrentPercOther_Peds();
+    static bool  IsPedAppropriateForCurrentZone(int32 modelIndex);
     static bool  IsPedInGroup(int32 modelIndex, int32 PopCycle_Group);
     static bool  PedIsAcceptableInCurrentZone(int32 modelIndex);
     static int32 PickARandomGroupOfOtherPeds();
@@ -211,7 +212,11 @@ public:
     static void  UpdateAreaDodgyness();
     static void  UpdateDealerStrengths();
     static void  UpdatePercentages();
-    static char  GetCurrentPercTypeGroup(int32 groupId, uint8 zonePopulationType) {
-        return m_nPercTypeGroup[720 * m_nCurrentTimeIndex + 360 * m_nCurrentTimeOfWeek + 18 * zonePopulationType + groupId];
+    static ePopcycleGroupPerc GetCurrentPercTypeGroup(int32 groupId) {
+        return m_nPercTypeGroup[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_pCurrZoneInfo->zonePopulationType][groupId];
+    }
+
+    static bool IsPedInGroupTheseGroups(int32 modelIndex, std::initializer_list<ePopcycleGroup> groups) {
+        return rng::any_of(groups, [=](auto group) { return IsPedInGroup(modelIndex, group); });
     }
 };

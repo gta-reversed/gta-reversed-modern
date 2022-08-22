@@ -1,193 +1,187 @@
 #include "StdInc.h"
 
+#include "Birds.h"
+#include "Clouds.h"
+
 bool& CBirds::bHasBirdBeenShot = *(bool*)0xC6A8A0;
 uint32& CBirds::uiNumberOfBirds = *(uint32*)0xC6A8A4;
-CBird* CBirds::aBirds = (CBird*)0xC6A8B0;
 CVector& CBirds::vecBirdShotAt = *(CVector*)0xC6AA48;
 
-float* CBirds::faCreationCoorsX = (float*)0x8D5250; // Size: 6
-float* CBirds::faCreationCoorsY = (float*)0x8D5268; // Size: 6
-float* CBirds::faCreationCoorsZ = (float*)0x8D5280; // Size: 6
-float* CBirds::faRenderCoorsU = (float*)0x8D52B8; // Size: 8
-float* CBirds::faRenderCoorsV = (float*)0x8D5298; // Size: 8
-float* CBirds::faRenderPosY = (float*)0x8D52D8; // Size: 8
-uint32* CBirds::auRenderIndices = (uint32*)0x8D52F8; // Size: 30
+/*
+These spawn in a formation like this:
+    4           5
+             1
+          2
+       6           3
+*/
+float CBirds::faCreationCoorsX[6] = { 0.0f, -1.0f, 2.0f, -3.0f, 1.0f, -2.0f }; // 0x8D5250
+float CBirds::faCreationCoorsY[6] = { 0.0f, -1.0f, -2.0f, 1.0f, 1.0f, -2.0f }; // 0x8D5268
+float CBirds::faCreationCoorsZ[6] = { 0.0f, 0.5f, 1.0f, 0.7f, 2.0f, 1.2f };    // 0x8D5280
 
-void CBirds::InjectHooks()
-{
-    ReversibleHooks::Install("CBirds", "Init", 0x711EC0, &CBirds::Init);
-    ReversibleHooks::Install("CBirds", "Shutdown", 0x712300, &CBirds::Shutdown);
-    ReversibleHooks::Install("CBirds", "HandleGunShot", 0x712E40, &CBirds::HandleGunShot);
-    ReversibleHooks::Install("CBirds", "Update", 0x712330, &CBirds::Update);
-    ReversibleHooks::Install("CBirds", "CreateNumberOfBirds", 0x711EF0, &CBirds::CreateNumberOfBirds);
-    ReversibleHooks::Install("CBirds", "Render", 0x712810, &CBirds::Render);
+float CBirds::faRenderCoorsU[8] = { 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.5f }; // 0x8D52B8
+float CBirds::faRenderCoorsV[8] = { 0.5f, 0.5f, 0.75f, 0.75f, 1.0f, 1.0f, 1.0f, 0.5f }; // 0x8D5298
+float CBirds::faRenderPosY[8] = { 0.25f, -0.25f, 0.25f, -0.25f, 0.0f, -0.25f, -0.35f, -0.35f }; // 0x8D52D8;
+
+uint32 CBirds::auRenderIndices[30] = { 0, 3, 1, 0, 2, 3, 2, 4, 5, 2, 5, 3, 0, 1, 3, 0, 3, 2, 2, 5, 4, 2, 3, 5, 0, 6, 7, 0, 7, 6 }; // 0x8D52F8
+
+void CBirds::InjectHooks() {
+    RH_ScopedClass(CBirds);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x711EC0);
+    RH_ScopedInstall(Shutdown, 0x712300);
+    RH_ScopedInstall(HandleGunShot, 0x712E40);
+    RH_ScopedInstall(Update, 0x712330);
+    RH_ScopedInstall(CreateNumberOfBirds, 0x711EF0);
+    RH_ScopedInstall(Render, 0x712810);
 }
 
-void CBirds::Init()
-{
-    for (int32 i = 0; i < MAX_BIRDS; ++i) {
-        auto& pBird = aBirds[i];
-        pBird.m_bCreated = false;
+// 0x711EC0
+void CBirds::Init() {
+    for (auto& bird : aBirds) {
+        bird.m_bCreated = false;
     }
-    CBirds::uiNumberOfBirds = 0;
-    CBirds::bHasBirdBeenShot = false;
+    uiNumberOfBirds = 0;
+    bHasBirdBeenShot = false;
 }
 
-void CBirds::CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int32 iBirdCount, eBirdsBiome eBiome, bool bCheckObstacles)
-{
-    float fMaxDistance;
-
-    switch (eBiome) {
-    case eBirdsBiome::BIOME_WATER:
-        fMaxDistance = 45.0F;
-        break;
-    case eBirdsBiome::BIOME_DESERT:
-        fMaxDistance = 80.0F;
-        break;
+inline float GetMaxDistance(eBirdsBiome biome) {
+    switch (biome) {
+    case eBirdsBiome::BIOME_WATER:  return 45.0F;
+    case eBirdsBiome::BIOME_DESERT: return 80.0F;
     case eBirdsBiome::BIOME_NORMAL:
-    default:
-        fMaxDistance = 40.0F;
-        break;
+    default:                        return 40.0F;
     }
+};
 
+// 0x711EF0
+void CBirds::CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int32 iBirdCount, eBirdsBiome biome, bool bCheckObstacles) {
     if (iBirdCount <= 0)
         return;
 
-    for (int32 i = 0; i < iBirdCount; ++i) {
-        int32 iFreeBirdIndex = 0;
-        while (iFreeBirdIndex < MAX_BIRDS) {
-            auto& pBird = CBirds::aBirds[iFreeBirdIndex];
-            if (!pBird.m_bCreated)
+    const float fMaxDistance = GetMaxDistance(biome);
+    for (auto i = 0; i < iBirdCount; ++i) {
+        auto iFreeBirdIndex = 0;
+        while (iFreeBirdIndex < (int32)std::size(aBirds)) {
+            if (!aBirds[iFreeBirdIndex].m_bCreated)
                 break;
-
             ++iFreeBirdIndex;
         }
-
-        if (iFreeBirdIndex >= MAX_BIRDS)
+        if (iFreeBirdIndex >= (int32)std::size(aBirds))
             return;
 
-        auto& pBird = CBirds::aBirds[iFreeBirdIndex];
-        pBird.m_vecPosn = vecStartPos;
+        auto& bird = aBirds[iFreeBirdIndex];
+        bird.m_vecPosn = vecStartPos;
 
-        auto vecBirdDirection = vecTargetPos - pBird.m_vecPosn;
+        auto vecBirdDirection = vecTargetPos - bird.m_vecPosn;
         vecBirdDirection.Normalise();
-        auto vecCheckPos = pBird.m_vecPosn + (vecBirdDirection * fMaxDistance * 2.4F);
-        if (bCheckObstacles && !CWorld::GetIsLineOfSightClear(pBird.m_vecPosn, vecCheckPos, true, false, false, false, false, false, false))
+        auto vecCheckPos = bird.m_vecPosn + (vecBirdDirection * fMaxDistance * 2.4F);
+        if (bCheckObstacles && !CWorld::GetIsLineOfSightClear(bird.m_vecPosn, vecCheckPos, true, false, false, false, false, false, false))
             continue;
 
-        auto fAngle = atan2(vecBirdDirection.x, vecBirdDirection.y);
-        uint32 iSpeedRandFactor = rand() % 31;
+        assert(i < (int32)std::size(faCreationCoorsX));
 
-        ++CBirds::uiNumberOfBirds;
-        pBird.m_bCreated = true;
-        pBird.m_fMaxBirdDistance = fMaxDistance;
-        pBird.m_eBirdMode = eBirdMode::BIRD_DRAW_UPDATE;
-        pBird.m_nUpdateAfterMS = 0;
-        pBird.m_bMustDoCurves = false;
-        pBird.m_fAngle = fAngle;
-        pBird.m_vecPosn.x += CBirds::faCreationCoorsX[i];
-        pBird.m_vecPosn.y += CBirds::faCreationCoorsY[i];
-        pBird.m_vecPosn.z += CBirds::faCreationCoorsZ[i];
+        ++uiNumberOfBirds;
+        bird.m_bCreated = true;
+        bird.m_fMaxBirdDistance = fMaxDistance;
+        bird.m_eBirdMode = eBirdMode::BIRD_DRAW_UPDATE;
+        bird.m_nUpdateAfterMS = 0;
+        bird.m_bMustDoCurves = false;
+        bird.m_fAngle = std::atan2(vecBirdDirection.x, vecBirdDirection.y);
+        bird.m_vecPosn.x += faCreationCoorsX[i];
+        bird.m_vecPosn.y += faCreationCoorsY[i];
+        bird.m_vecPosn.z += faCreationCoorsZ[i];
 
+        auto iSpeedRandFactor = CGeneral::GetRandomNumber() % 31;
         float fSpeedMult;
-        switch (eBiome) {
+        switch (biome) {
         case eBirdsBiome::BIOME_WATER:
-            fSpeedMult = (float)iSpeedRandFactor * 0.02F + 4.0F;    // [4.0 : 4.6]
-            pBird.m_BodyColor.Set(rand() % 64 + 0x50);          // [80 : 143]
-            pBird.m_WingsColor.Set(rand() % 64 - 0x4C);         // [166 : 242]
-            pBird.m_fSize = CGeneral::GetRandomNumberInRange(0.8F, 1.2F);
-            pBird.m_nWingStillness = 1000 - 12 * iSpeedRandFactor;  // [640 : 1000]
+            fSpeedMult = (float)(iSpeedRandFactor) / 50.0f + 4.0f;          // [4.0 : 4.6]
+            bird.m_BodyColor.Set(CGeneral::GetRandomNumber() % 64 + 80);    // [80 : 143]
+            bird.m_WingsColor.Set(CGeneral::GetRandomNumber() % 64 - 76);   // [166 : 242]
+            bird.m_fSize = CGeneral::GetRandomNumberInRange(0.8F, 1.2F);
+            bird.m_nWingStillness = 1000 - 12 * iSpeedRandFactor;           // [640 : 1000]
             break;
         case eBirdsBiome::BIOME_DESERT:
-            fSpeedMult = (float)iSpeedRandFactor * 0.02F + 3.0F;    // [3.0 : 3.6]
-            pBird.m_BodyColor.Set(30, 15, 10);
-            pBird.m_WingsColor.Set(80, 15, 10);
-            pBird.m_fSize = CGeneral::GetRandomNumberInRange(2.0F, 2.5F);
-            pBird.m_nWingStillness = 12 * (125 - iSpeedRandFactor); // [1140 : 1500]
-            if (rand() & 4)
-                pBird.m_nWingStillness = 1000000; // Not moving it's wings
+            fSpeedMult = (float)(iSpeedRandFactor) / 50.0f + 3.0f; // [3.0 : 3.6]
+            bird.m_BodyColor.Set(30, 15, 10);
+            bird.m_WingsColor.Set(80, 15, 10);
+            bird.m_fSize = CGeneral::GetRandomNumberInRange(2.0F, 2.5F);
+            bird.m_nWingStillness = 12 * (125 - iSpeedRandFactor); // [1140 : 1500]
+            if (CGeneral::GetRandomNumber() & 4)
+                bird.m_nWingStillness = 1'000'000; // Not moving it's wings
 
-            if (rand() & 8)
-                pBird.m_bMustDoCurves = true;
+            if (CGeneral::GetRandomNumber() & 8)
+                bird.m_bMustDoCurves = true;
 
             break;
         case eBirdsBiome::BIOME_NORMAL:
         default:
-            fSpeedMult = (float)iSpeedRandFactor * 0.02F + 5.0F;    // [5.0 : 5.6]
-            pBird.m_BodyColor.Set(rand() % 128 + 0x80);          // [127 : 255]
-            pBird.m_WingsColor.Set(rand() % 128 + 0x80);         // [127 : 255]
-            pBird.m_fSize = CGeneral::GetRandomNumberInRange(0.5F, 0.6F);
-            pBird.m_nWingStillness = 500 - 6 * iSpeedRandFactor;    // [320 : 500]
+            fSpeedMult = (float)(iSpeedRandFactor) / 50.0f + 5.0F; // [5.0 : 5.6]
+            bird.m_BodyColor.Set(CGeneral::GetRandomNumberInRange(128, 256));
+            bird.m_WingsColor.Set(CGeneral::GetRandomNumberInRange(128, 256));
+            bird.m_fSize = CGeneral::GetRandomNumberInRange(0.5F, 0.6F);
+            bird.m_nWingStillness = 500 - 6 * iSpeedRandFactor;    // [320 : 500]
             break;
         }
 
-        pBird.m_vecTargetVelocity = vecBirdDirection * fSpeedMult;
-        pBird.m_vecCurrentVelocity = pBird.m_vecTargetVelocity;
+        bird.m_vecTargetVelocity = vecBirdDirection * fSpeedMult;
+        bird.m_vecCurrentVelocity = bird.m_vecTargetVelocity;
     }
 }
 
-void CBirds::Shutdown()
-{
-    for (int32 i = 0; i < MAX_BIRDS; ++i) {
-        auto& pBird = aBirds[i];
-        if (pBird.m_bCreated)
-            pBird.m_bCreated = false;
+// 0x712300
+void CBirds::Shutdown() {
+    for (auto& bird : aBirds) {
+        if (bird.m_bCreated) {
+            bird.m_bCreated = false;
+        }
     }
-    CBirds::uiNumberOfBirds = 0;
+    uiNumberOfBirds = 0;
 }
 
-void CBirds::Update()
-{
-    auto const& vecCamPos = TheCamera.GetPosition();
+// 0x712330
+void CBirds::Update() {
+    const auto& vecCamPos = TheCamera.GetPosition();
 
     if (!CGame::currArea
-        && CBirds::uiNumberOfBirds < MAX_BIRDS
-        && CClock::ms_nGameClockHours < 22U
-        && CClock::ms_nGameClockHours > 5U
-        && (CTimer::GetFrameCounter() & 0x1FF) == MAX_BIRDS) {
-
-        auto iNumBirdsToCreate = (uint32)CGeneral::GetRandomNumberInRange(1, MAX_BIRDS + 1 - CBirds::uiNumberOfBirds);
-        eBirdsBiome eBiome = eBirdsBiome::BIOME_WATER;
+        && uiNumberOfBirds < std::size(aBirds)
+        && CClock::ClockHoursInRange(5, 22)
+        && (CTimer::GetFrameCounter() % 512) == std::size(aBirds)
+    ) {
+        auto iNumBirdsToCreate = (uint32)CGeneral::GetRandomNumberInRange(1, std::size(aBirds) + 1 - uiNumberOfBirds);
+        eBirdsBiome biome = eBirdsBiome::BIOME_WATER;
 
         if (TheCamera.m_fDistanceToWater > 30.0F) {
             if (CWeather::WeatherRegion == eWeatherRegion::WEATHER_REGION_DESERT) {
-                eBiome = eBirdsBiome::BIOME_DESERT;
-                iNumBirdsToCreate = std::min(iNumBirdsToCreate, CBirds::uiNumberOfBirds);
+                biome = eBirdsBiome::BIOME_DESERT;
+                iNumBirdsToCreate = std::min(iNumBirdsToCreate, uiNumberOfBirds);
             }
             else {
-                eBiome = eBirdsBiome::BIOME_NORMAL;
+                biome = eBirdsBiome::BIOME_NORMAL;
             }
         }
 
         if (iNumBirdsToCreate > 0) {
-            rand(); // Called 2 times for some reason
-            rand();
+            CGeneral::GetRandomNumber(); // Called 2 times for some reason
+            CGeneral::GetRandomNumber();
 
-            float fFlightHeight;
-            float fSpawnDistance;
-
-            switch (eBiome) {
-            case eBirdsBiome::BIOME_WATER:
-                fFlightHeight = CGeneral::GetRandomNumberInRange(4.0F, 13.0F);
-                fSpawnDistance = 45.0F;
-                break;
-            case eBirdsBiome::BIOME_DESERT:
-                fFlightHeight = CGeneral::GetRandomNumberInRange(15.0F, 25.0F);
-                fSpawnDistance = 80.0F;
-                break;
-            case eBirdsBiome::BIOME_NORMAL:
-            default:
-                fFlightHeight = CGeneral::GetRandomNumberInRange(2.0F, 10.0F);
-                fSpawnDistance = 40.0F;
-                break;
-            }
+            float fSpawnDistance = GetMaxDistance(biome);
+            float fFlightHeight = [&biome]() {
+                switch (biome) {
+                case eBirdsBiome::BIOME_WATER:  return CGeneral::GetRandomNumberInRange(4.0F, 13.0F);
+                case eBirdsBiome::BIOME_DESERT: return CGeneral::GetRandomNumberInRange(15.0F,25.0F);
+                case eBirdsBiome::BIOME_NORMAL:
+                default:                        return CGeneral::GetRandomNumberInRange(2.0F, 10.0F);
+                }
+            }();
 
             if (fFlightHeight > 5.0F) {
                 float fBirdSpawnZ = fFlightHeight + vecCamPos.z;
                 float fSpawnAngleCamRelative;
 
-                if (rand() % 2)
-                    fSpawnAngleCamRelative = (float)(uint8)(rand() % 256) * 0.024531251F; // [0 : 255] mapped to [0 : 2π]
+                if (CGeneral::GetRandomNumber() % 2)
+                    fSpawnAngleCamRelative = (float)(uint8)(CGeneral::GetRandomNumber() % 256) * 0.024531251F; // [0 : 255] mapped to [0 : 2π]
                 else {
                     auto vecForward = TheCamera.m_mCameraMatrix.GetForward();
                     vecForward.z = 0.0F;
@@ -195,13 +189,15 @@ void CBirds::Update()
                         vecForward.x = 0.01F;
 
                     vecForward.Normalise();
-                    uint8 cRand = (uint8)(rand() % 256) - 128;
-                    fSpawnAngleCamRelative = ((float)cRand) / 256.0F + atan2(vecForward.x, vecForward.y); // [0 : 1] + atan2(...)
+                    uint8 cRand = (uint8)(CGeneral::GetRandomNumber() % 256) - 128;
+                    fSpawnAngleCamRelative = ((float)cRand) / 256.0F + std::atan2(vecForward.x, vecForward.y); // [0 : 1] + atan2(...)
                 }
-                    
-                auto vecBirdSpawnPos = CVector(sin(fSpawnAngleCamRelative) * fSpawnDistance + vecCamPos.x,
-                                               cos(fSpawnAngleCamRelative) * fSpawnDistance + vecCamPos.y,
-                                               fBirdSpawnZ);
+
+                auto vecBirdSpawnPos = CVector(
+                    std::sin(fSpawnAngleCamRelative) * fSpawnDistance + vecCamPos.x,
+                    std::cos(fSpawnAngleCamRelative) * fSpawnDistance + vecCamPos.y,
+                    fBirdSpawnZ
+                );
 
                 float fWaterLevel;
                 if (!CWaterLevel::GetWaterLevelNoWaves(vecBirdSpawnPos.x, vecBirdSpawnPos.y, vecBirdSpawnPos.z, &fWaterLevel, nullptr, nullptr) || fWaterLevel + 4.0F < fBirdSpawnZ) {
@@ -212,166 +208,161 @@ void CBirds::Update()
                     auto vecFlightTargetPos = vecCamPos + (vecForward * 8.0F);
                     vecFlightTargetPos.z = fBirdSpawnZ;
 
-                    CBirds::CreateNumberOfBirds(vecBirdSpawnPos, vecFlightTargetPos, iNumBirdsToCreate, eBiome, true);
+                    CreateNumberOfBirds(vecBirdSpawnPos, vecFlightTargetPos, iNumBirdsToCreate, biome, true);
                 }
             }
         }
     }
 
-    int32 iBirdIndex = CTimer::GetFrameCounter() % MAX_BIRDS;
-    auto& pCheckedBird = CBirds::aBirds[iBirdIndex];
-    if (pCheckedBird.m_bCreated && DistanceBetweenPoints2D(CVector2D(pCheckedBird.m_vecPosn), CVector2D(vecCamPos)) > pCheckedBird.m_fMaxBirdDistance)
+    auto iBirdIndex = CTimer::GetFrameCounter() % std::size(aBirds);
+    auto& checkedBird = aBirds[iBirdIndex];
+    if (checkedBird.m_bCreated && DistanceBetweenPoints2D(vecCamPos, checkedBird.m_vecPosn) > checkedBird.m_fMaxBirdDistance)
     {
-        pCheckedBird.m_bCreated = false;
-        CBirds::uiNumberOfBirds--;
+        checkedBird.m_bCreated = false;
+        uiNumberOfBirds--;
     }
 
-    for (int32 i = 0; i < MAX_BIRDS; ++i) {
-        auto& pBird = aBirds[i];
-        if (!pBird.m_bCreated)
+    for (auto & bird : aBirds) {
+        if (!bird.m_bCreated)
             continue;
 
-        if (pBird.m_eBirdMode != eBirdMode::BIRD_DRAW_UPDATE || pBird.m_nUpdateAfterMS > CTimer::GetTimeInMS())
+        if (bird.m_eBirdMode != eBirdMode::BIRD_DRAW_UPDATE || bird.m_nUpdateAfterMS > CTimer::GetTimeInMS())
             continue;
 
-        if (pBird.m_bMustDoCurves) {
-            auto fCircleProgress = CTimer::GetTimeStep() / 500.0F; // todo: GetTimeStepInMS?
-            auto vecCurTarget = CVector2D(pBird.m_vecTargetVelocity);
-            auto fSinAngle = sin(fCircleProgress);
-            auto fCosAngle = cos(fCircleProgress);
+        if (bird.m_bMustDoCurves) {
+            auto fCircleProgress = CTimer::GetTimeStepInSeconds() / 10.0f;
+            auto vecCurTarget = CVector2D(bird.m_vecTargetVelocity);
+            auto fSinAngle = std::sin(fCircleProgress);
+            auto fCosAngle = std::cos(fCircleProgress);
 
-            pBird.m_vecTargetVelocity.x = fCosAngle * vecCurTarget.x + fSinAngle * vecCurTarget.y;
-            pBird.m_vecTargetVelocity.y = fCosAngle * vecCurTarget.y - fSinAngle * vecCurTarget.x;
+            bird.m_vecTargetVelocity.x = fCosAngle * vecCurTarget.x + fSinAngle * vecCurTarget.y;
+            bird.m_vecTargetVelocity.y = fCosAngle * vecCurTarget.y - fSinAngle * vecCurTarget.x;
         }
 
         auto fTimeStep = CTimer::GetTimeStepInSeconds();
-        auto fLerp = std::min(fTimeStep * 0.5F, 1.0F);
-        pBird.m_vecCurrentVelocity = Lerp(pBird.m_vecCurrentVelocity, pBird.m_vecTargetVelocity, fLerp);
-        pBird.m_vecPosn += (fTimeStep * pBird.m_vecCurrentVelocity);
-        pBird.m_fAngle = atan2(pBird.m_vecTargetVelocity.x, pBird.m_vecTargetVelocity.y);
+        bird.m_vecCurrentVelocity = Lerp(bird.m_vecCurrentVelocity, bird.m_vecTargetVelocity, std::min(fTimeStep / 2.0F, 1.0F));
+        bird.m_vecPosn += (fTimeStep * bird.m_vecCurrentVelocity);
+        bird.m_fAngle = std::atan2(bird.m_vecTargetVelocity.x, bird.m_vecTargetVelocity.y);
     }
 }
 
-void CBirds::Render()
-{
-    if (!CBirds::uiNumberOfBirds)
+// 0x712810
+void CBirds::Render() {
+    if (uiNumberOfBirds == 0)
         return;
 
     uint32 uiWingMoveTimeOffset = 0;
     uiTempBufferIndicesStored = 0;
     uiTempBufferVerticesStored = 0;
 
-    for (int32 i = 0; i < MAX_BIRDS; ++i) {
-        const auto& pBird = aBirds[i];
-        if (!pBird.m_bCreated) {
+    for (auto& bird : aBirds) {
+        if (!bird.m_bCreated) {
             uiWingMoveTimeOffset += 100;
             continue;
         }
 
-        auto matBirdTransform = CMatrix();
-        matBirdTransform.SetTranslate(pBird.m_vecPosn);
+        CMatrix matBirdTransform;
+        matBirdTransform.SetTranslate(bird.m_vecPosn);
 
-        if (pBird.m_eBirdMode == eBirdMode::BIRD_DRAW_NOUPDATE || pBird.m_eBirdMode == eBirdMode::BIRD_DRAW_UPDATE) {
+        if (bird.m_eBirdMode == eBirdMode::BIRD_DRAW_NOUPDATE || bird.m_eBirdMode == eBirdMode::BIRD_DRAW_UPDATE) {
             auto& vecPos = matBirdTransform.GetPosition();
             auto uiTime = CTimer::GetTimeInMS() + uiWingMoveTimeOffset;
-            vecPos.z += sin((float)(uiTime % pBird.m_nWingStillness) * (TWO_PI / (float)pBird.m_nWingStillness)) * 0.1F;
+            vecPos.z += std::sin((float)(uiTime % bird.m_nWingStillness) * (TWO_PI / (float)bird.m_nWingStillness)) * 0.1F;
         }
 
-        auto vecScreenPos = RwV3d();
+        CVector vecScreenPos;
         float fScreenWidth;
         float fScreenHeight;
         if (CSprite::CalcScreenCoors(matBirdTransform.GetPosition(), &vecScreenPos, &fScreenWidth, &fScreenHeight, false, true)) {
-            auto fAngle = pBird.m_fAngle;
-            auto fCosSize = cos(fAngle) * pBird.m_fSize;
-            auto fSinSize = sin(fAngle) * pBird.m_fSize;
+            auto fCosSize = std::cos(bird.m_fAngle) * bird.m_fSize;
+            auto fSinSize = std::sin(bird.m_fAngle) * bird.m_fSize;
 
             matBirdTransform.GetRight().Set(fCosSize, -fSinSize, 0.0F);
             matBirdTransform.GetForward().Set(fSinSize, fCosSize, 0.0F);
-            matBirdTransform.GetUp().Set(0.0F, 0.0F, pBird.m_fSize);
+            matBirdTransform.GetUp().Set(0.0F, 0.0F, bird.m_fSize);
 
-            if (pBird.m_eBirdMode == eBirdMode::BIRD_DRAW_NOUPDATE || pBird.m_eBirdMode == eBirdMode::BIRD_DRAW_UPDATE) {
-                for (int32 iIndice = 0; iIndice < 30; ++iIndice) {
-                    auto uiVertInd = static_cast<RxVertexIndex>(uiTempBufferVerticesStored + CBirds::auRenderIndices[iIndice]);
-                    aTempBufferIndices[uiTempBufferIndicesStored + iIndice] = uiVertInd;
-                    aTempBufferIndices[uiTempBufferIndicesStored + iIndice + 30] = uiVertInd + 8;
+            if (bird.m_eBirdMode == eBirdMode::BIRD_DRAW_NOUPDATE || bird.m_eBirdMode == eBirdMode::BIRD_DRAW_UPDATE) {
+                for (auto index = 0u; index < std::size(auRenderIndices); ++index) {
+                    auto uiVertInd = static_cast<RxVertexIndex>(uiTempBufferVerticesStored + auRenderIndices[index]);
+                    aTempBufferIndices[uiTempBufferIndicesStored + index] = uiVertInd;
+                    aTempBufferIndices[uiTempBufferIndicesStored + index + std::size(auRenderIndices)] = uiVertInd + 8;
                 }
 
                 auto uiTime = CTimer::GetTimeInMS() + uiWingMoveTimeOffset;
-                auto fSin1 = -sin((float)((uiTime + pBird.m_nWingStillness / 6) % pBird.m_nWingStillness) * TWO_PI / (float)pBird.m_nWingStillness);
-                auto fSin2 = -sin((float)((uiTime + pBird.m_nWingStillness) % pBird.m_nWingStillness) * TWO_PI / (float)pBird.m_nWingStillness);
+                auto fSin1 = -std::sin((float)((uiTime + bird.m_nWingStillness / 6) % bird.m_nWingStillness) * TWO_PI / (float)bird.m_nWingStillness);
+                auto fSin2 = -std::sin((float)((uiTime + bird.m_nWingStillness) % bird.m_nWingStillness) * TWO_PI / (float)bird.m_nWingStillness);
 
-                auto fSizeUsed = std::max(1.0F, pBird.m_fSize);
+                auto fSizeUsed = std::max(1.0F, bird.m_fSize);
                 auto fSin1Factor = fSin1 / fSizeUsed;
                 auto fSin2Factor = fSin2 / fSizeUsed;
 
-                auto fOffX1 = cos(fSin1Factor) * 0.5F;
-                auto fOffZ1 = sin(fSin1Factor) * 0.5F;
-                auto fOffX2 = cos(fSin2Factor) * 0.5F;
-                auto fOffZ2 = sin(fSin2Factor) * 0.5F;
+                auto fOffX1 = std::cos(fSin1Factor) * 0.5F;
+                auto fOffZ1 = std::sin(fSin1Factor) * 0.5F;
+                auto fOffX2 = std::cos(fSin2Factor) * 0.5F;
+                auto fOffZ2 = std::sin(fSin2Factor) * 0.5F;
 
                 RwUInt8 cAlpha = 255;
                 const auto& vecCameraPos = TheCamera.GetPosition();
-                auto fCameraDist = DistanceBetweenPoints(vecCameraPos, pBird.m_vecPosn);
-                auto fAlphaCutoffDist = pBird.m_fMaxBirdDistance * 0.7F;
-                if (fCameraDist > fAlphaCutoffDist) {
-                    auto fTransparency = 1.0F - invLerp(fAlphaCutoffDist, pBird.m_fMaxBirdDistance, fCameraDist);
-                    fTransparency = clamp(0.0F, 1.0F, fTransparency);
+                auto fCameraDist = DistanceBetweenPoints(vecCameraPos, bird.m_vecPosn);
+                auto fAlphaCutoffDist = bird.m_fMaxBirdDistance * 0.7F;
+                if (fCameraDist > fAlphaCutoffDist) { // 0x712AF3 todo: review
+                    auto fTransparency = 1.0F - invLerp(fAlphaCutoffDist, bird.m_fMaxBirdDistance, fCameraDist);
+                    fTransparency = std::max(fTransparency, 0.0f);
                     cAlpha = static_cast<RwUInt8>(fTransparency * 255.0F);
                 }
 
-                for (int32 uiVertInd = 0; uiVertInd < 8; ++uiVertInd) {
-                    CVector vecPoint;
-                    CBirdColor vertColor;
-
-                    switch (uiVertInd) {
-                    case 0:
-                    case 1:
-                    case 7:
-                        vecPoint.x = 0.0F;
-                        vecPoint.z = 0.0F;
-                        vertColor = pBird.m_BodyColor;
-                        break;
-                    case 2:
-                    case 3:
-                        vecPoint.x = fOffX1;
-                        vecPoint.z = fOffZ1;
-                        vertColor = pBird.m_BodyColor;
-                        break;
-                    case 4:
-                    case 5:
-                        vecPoint.x = fOffX1 + fOffX2;
-                        vecPoint.z = fOffZ1 + fOffZ2;
-                        vertColor = pBird.m_WingsColor;
-                        break;
-                    case 6:
-                        vecPoint.x = 0.1F;
-                        vecPoint.z = 0.0F;
-                        vertColor = pBird.m_BodyColor;
-                        break;
-                    }
-
-                    vecPoint.y = CBirds::faRenderPosY[uiVertInd];
-                    auto vecWorldPos = matBirdTransform * vecPoint;
+                for (auto uiVertInd = 0u; uiVertInd < std::size(faRenderPosY); ++uiVertInd) {
+                    auto [point, color] = [&] {
+                        switch (uiVertInd) {
+                        case 0:
+                        case 1:
+                        case 7:
+                            return std::make_pair(
+                                CVector{ 0.0f, faRenderPosY[uiVertInd], 0.0f },
+                                bird.m_BodyColor
+                            );
+                        case 2:
+                        case 3:
+                            return std::make_pair(
+                                CVector{ fOffX1, faRenderPosY[uiVertInd], fOffZ1 },
+                                bird.m_BodyColor
+                            );
+                        case 4:
+                        case 5:
+                            return std::make_pair(
+                                CVector{ fOffX1 + fOffX2, faRenderPosY[uiVertInd], fOffZ1 + fOffZ2 },
+                                bird.m_WingsColor
+                            );
+                        case 6:
+                            return std::make_pair(
+                                CVector{ 0.1f, faRenderPosY[uiVertInd], 0.0f },
+                                bird.m_BodyColor
+                            );
+                        }
+                        NOTSA_UNREACHABLE("CBirds::Render::lambda suppress warning");
+                        return std::make_pair(CVector(), CBirdColor());
+                    }();
+                    auto vecWorldPos = matBirdTransform * point;
 
                     auto iBufferInd = uiTempBufferVerticesStored + uiVertInd;
-                    auto pVert1 = &aTempBufferVertices[iBufferInd];
-                    RwRGBA rwColor = CRGBA(vertColor.cRed, vertColor.cGreen, vertColor.cBlue, cAlpha).ToRwRGBA();
-                    RxObjSpace3DVertexSetPreLitColor(pVert1, &rwColor);
-                    RxObjSpace3DVertexSetPos(pVert1, &vecWorldPos);
-                    RxObjSpace3DVertexSetU(pVert1, CBirds::faRenderCoorsU[uiVertInd]);
-                    RxObjSpace3DVertexSetV(pVert1, CBirds::faRenderCoorsV[uiVertInd]);
+                    auto vert1 = &aTempBufferVertices[iBufferInd];
+                    RwRGBA rwColor = CRGBA(color.cRed, color.cGreen, color.cBlue, cAlpha).ToRwRGBA();
+                    RxObjSpace3DVertexSetPreLitColor(vert1, &rwColor);
+                    RxObjSpace3DVertexSetPos(vert1, &vecWorldPos);
+                    RxObjSpace3DVertexSetU(vert1, faRenderCoorsU[uiVertInd]);
+                    RxObjSpace3DVertexSetV(vert1, faRenderCoorsV[uiVertInd]);
 
                     // Mirror on the other side with slightly changed colors
-                    vecPoint.x = -vecPoint.x;
-                    vecWorldPos = matBirdTransform * vecPoint;
-                    vertColor.Scale(0.8F);
-                    rwColor = CRGBA(vertColor.cRed, vertColor.cGreen, vertColor.cBlue, cAlpha).ToRwRGBA();
+                    point.x = -point.x;
+                    vecWorldPos = matBirdTransform * point;
+                    color.Scale(0.8F);
+                    rwColor = CRGBA(color.cRed, color.cGreen, color.cBlue, cAlpha).ToRwRGBA();
 
-                    auto pVert2 = &aTempBufferVertices[iBufferInd + 8];
-                    RxObjSpace3DVertexSetPreLitColor(pVert2, &rwColor);
-                    RxObjSpace3DVertexSetPos(pVert2, &vecWorldPos);
-                    RxObjSpace3DVertexSetU(pVert2, CBirds::faRenderCoorsU[uiVertInd]);
-                    RxObjSpace3DVertexSetV(pVert2, CBirds::faRenderCoorsV[uiVertInd]);
+                    auto vert2 = &aTempBufferVertices[iBufferInd + 8];
+                    RxObjSpace3DVertexSetPreLitColor(vert2, &rwColor);
+                    RxObjSpace3DVertexSetPos(vert2, &vecWorldPos);
+                    RxObjSpace3DVertexSetU(vert2, faRenderCoorsU[uiVertInd]);
+                    RxObjSpace3DVertexSetV(vert2, faRenderCoorsV[uiVertInd]);
                 }
 
                 uiTempBufferIndicesStored += 60;
@@ -382,35 +373,30 @@ void CBirds::Render()
     }
 
     if (uiTempBufferVerticesStored) {
-        RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, (void*)rwTEXTUREADDRESSCLAMP);
-        RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)gpCloudTex[1]->raster);
+        RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,    RWRSTATE(rwTEXTUREADDRESSCLAMP));
+        RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(gpCloudMaskTex->raster));
         CBrightLights::RenderOutGeometryBuffer();
     }
 }
 
-void CBirds::HandleGunShot(CVector const* pointA, CVector const* pointB)
-{
-    CColLine colLine(*pointA, *pointB);
-
-    for (int32 i = 0; i < MAX_BIRDS; ++i) {
-        auto& pBird = aBirds[i];
-        if (!pBird.m_bCreated)
+// 0x712E40
+void CBirds::HandleGunShot(const CVector* pointA, const CVector* pointB) {
+    for (auto& bird : aBirds) {
+        if (!bird.m_bCreated)
             continue;
 
-        auto birdSphere = CColSphere();
-        birdSphere.m_fRadius = 0.5F;
-        birdSphere.m_vecCenter = pBird.m_vecPosn;
+        CColLine line{ *pointA, *pointB };
+        CColSphere sphere{ 0.5f, bird.m_vecPosn };
 
-        if (CCollision::TestLineSphere(colLine, birdSphere))
-        {
-            CBirds::vecBirdShotAt = pBird.m_vecPosn;
-            CBirds::bHasBirdBeenShot = true;
-            CBirds::uiNumberOfBirds--;
-            pBird.m_bCreated = false;
+        if (CCollision::TestLineSphere(line, sphere)) {
+            vecBirdShotAt = bird.m_vecPosn;
+            bHasBirdBeenShot = true;
+            bird.m_bCreated = false;
+            uiNumberOfBirds--;
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -35,8 +35,17 @@ enum eModelInfoSpecialType : uint8 {
     BREAKABLE_STATUE = 11,
 };
 
-class CVehicleModelInfo;
 class CTimeInfo;
+
+class CAtomicModelInfo;
+class CClumpModelInfo;
+class CDamageAtomicModelInfo;
+class CLodAtomicModelInfo;
+class CLodTimeModelInfo;
+class CPedModelInfo;
+class CTimeModelInfo;
+class CVehicleModelInfo;
+struct RwObject;
 
 // originally an abstract class
 class CBaseModelInfo {
@@ -93,45 +102,31 @@ public:
     CColModel* m_pColModel;     // 20
     float      m_fDrawDistance; // 24
     union {
-        struct RwObject* m_pRwObject;
-        struct RpClump*  m_pRwClump;
-        struct RpAtomic* m_pRwAtomic;
+        RwObject* m_pRwObject;
+        RpClump*  m_pRwClump;
+        RpAtomic* m_pRwAtomic;
     };
 
 public:
-    static void InjectHooks();
-
     CBaseModelInfo();
-
-    // vtable
     virtual ~CBaseModelInfo() { assert(0); }
-    virtual class CAtomicModelInfo* AsAtomicModelInfoPtr();
-    virtual class CDamageAtomicModelInfo* AsDamageAtomicModelInfoPtr();
-    virtual class CLodAtomicModelInfo* AsLodAtomicModelInfoPtr();
+
+    virtual CAtomicModelInfo* AsAtomicModelInfoPtr();
+    virtual CDamageAtomicModelInfo* AsDamageAtomicModelInfoPtr();
+    virtual CLodAtomicModelInfo* AsLodAtomicModelInfoPtr();
     virtual ModelInfoType GetModelType() = 0;
     virtual CTimeInfo* GetTimeInfo();
     virtual void Init();
     virtual void Shutdown();
     virtual void DeleteRwObject() = 0;
     virtual uint32 GetRwModelType() = 0;
-    virtual struct RwObject* CreateInstance() = 0;
-    virtual struct RwObject* CreateInstance(RwMatrix* matrix) = 0;
-    virtual void SetAnimFile(char const* filename);
+    virtual RwObject* CreateInstance() = 0;                 // todo: check order
+    virtual RwObject* CreateInstance(RwMatrix* matrix) = 0; // todo: check order
+    virtual void SetAnimFile(const char* filename);
     virtual void ConvertAnimFileIndex();
-    virtual signed int GetAnimFileIndex();
+    virtual int32 GetAnimFileIndex();
 
-    // vtable methods implementations
-    class CAtomicModelInfo* AsAtomicModelInfoPtr_Reversed();
-    class CDamageAtomicModelInfo* AsDamageAtomicModelInfoPtr_Reversed();
-    class CLodAtomicModelInfo* AsLodAtomicModelInfoPtr_Reversed();
-    CTimeInfo* GetTimeInfo_Reversed();
-    void Init_Reversed();
-    void Shutdown_Reversed();
-    void SetAnimFile_Reversed(char const* filename);
-    void ConvertAnimFileIndex_Reversed();
-    signed int GetAnimFileIndex_Reversed();
-
-    void SetTexDictionary(char const* txdName);
+    void SetTexDictionary(const char* txdName);
     void ClearTexDictionary();
     void AddTexDictionaryRef();
     void RemoveTexDictionaryRef();
@@ -146,38 +141,62 @@ public:
     void Add2dEffect(C2dEffect* effect);
 
     // Those further ones are completely inlined in final version, not present at all in android version;
-    inline CVehicleModelInfo* AsVehicleModelInfoPtr() { return reinterpret_cast<CVehicleModelInfo*>(this); }
-    inline CColModel* GetColModel() { return m_pColModel; }
+    CVehicleModelInfo* AsVehicleModelInfoPtr() { return reinterpret_cast<CVehicleModelInfo*>(this); }
+    CPedModelInfo*     AsPedModelInfoPtr()     { return reinterpret_cast<CPedModelInfo*>(this); }
 
-    inline bool GetIsDrawLast() { return bDrawLast; }
-    inline bool HasBeenPreRendered() { return bHasBeenPreRendered; }
-    inline bool HasComplexHierarchy() { return bHasComplexHierarchy; }
-    inline bool IsBackfaceCulled() { return bIsBackfaceCulled; }
-    inline bool IsLod() { return bIsLod; }
-    inline bool IsRoad() { return bIsRoad; }
-    inline void SetHasBeenPreRendered(int32 bPreRendered) { bHasBeenPreRendered = bPreRendered; }
-    inline void SetIsLod(bool bLod) { bIsLod = bLod; }
-    inline void SetOwnsColModel(bool bOwns) { bDoWeOwnTheColModel = bOwns; }
-    inline void IncreaseAlpha() {
+    [[nodiscard]] CColModel* GetColModel() const { return m_pColModel; }
+
+    [[nodiscard]] bool GetIsDrawLast() const { return bDrawLast; }
+    [[nodiscard]] bool HasBeenPreRendered() const { return bHasBeenPreRendered; }
+    [[nodiscard]] bool HasComplexHierarchy() const { return bHasComplexHierarchy; }
+    [[nodiscard]] bool IsBackfaceCulled() const { return bIsBackfaceCulled; }
+    [[nodiscard]] bool IsLod() const { return bIsLod; }
+    [[nodiscard]] bool IsRoad() const { return bIsRoad; }
+    void SetHasBeenPreRendered(int32 bPreRendered) { bHasBeenPreRendered = bPreRendered; }
+    void SetIsLod(bool bLod) { bIsLod = bLod; }
+    void SetOwnsColModel(bool bOwns) { bDoWeOwnTheColModel = bOwns; }
+    void IncreaseAlpha() {
         if (m_nAlpha >= 239)
             m_nAlpha = 255;
         else
             m_nAlpha += 16;
     };
-    inline void SetModelName(const char* modelName) {
-        m_nKey = CKeyGen::GetUppercaseKey(modelName);
+    [[nodiscard]] auto GetModelName() const noexcept { return m_nKey; }
+    void SetModelName(const char* modelName) { m_nKey = CKeyGen::GetUppercaseKey(modelName); }
+
+    [[nodiscard]] bool IsSwayInWind1()         const { return nSpecialType == eModelInfoSpecialType::TREE; }               // 0x0800
+    [[nodiscard]] bool IsSwayInWind2()         const { return nSpecialType == eModelInfoSpecialType::PALM; }               // 0x1000
+    [[nodiscard]] bool SwaysInWind()           const { return IsSwayInWind1() || IsSwayInWind2(); }
+    [[nodiscard]] bool IsGlassType1()          const { return nSpecialType == eModelInfoSpecialType::GLASS_TYPE_1; }       // 0x2000
+    [[nodiscard]] bool IsGlassType2()          const { return nSpecialType == eModelInfoSpecialType::GLASS_TYPE_2; }       // 0x2800
+    [[nodiscard]] bool IsGlass()               const { return IsGlassType1() || IsGlassType2(); }
+    [[nodiscard]] bool IsTagModel()            const { return nSpecialType == eModelInfoSpecialType::TAG; }                // 0x3000
+    [[nodiscard]] bool IsGarageDoor()          const { return nSpecialType == eModelInfoSpecialType::GARAGE_DOOR; }        // 0x3800
+    [[nodiscard]] bool IsBreakableStatuePart() const { return nSpecialType == eModelInfoSpecialType::BREAKABLE_STATUE; }
+    [[nodiscard]] bool IsCrane()               const { return nSpecialType == eModelInfoSpecialType::CRANE; }              // 0x4800
+
+    void SetBaseModelInfoFlags(uint32 flags); // Wrapper for the static function. I honestly think this is how they did it..
+
+    // NOTSA helpers
+    auto CreateInstanceAddRef() {
+        auto* inst = CreateInstance();
+        AddRef();
+        return inst;
     }
 
-    inline bool IsSwayInWind1() { return nSpecialType == eModelInfoSpecialType::TREE; }        // 0x0800
-    inline bool IsSwayInWind2() { return nSpecialType == eModelInfoSpecialType::PALM; }        // 0x1000
-    inline bool SwaysInWind() { return IsSwayInWind1() || IsSwayInWind2(); }
-    inline bool IsGlassType1() { return nSpecialType == eModelInfoSpecialType::GLASS_TYPE_1; } // 0x2000
-    inline bool IsGlassType2() { return nSpecialType == eModelInfoSpecialType::GLASS_TYPE_2; } // 0x2800
-    inline bool IsGlass() { return IsGlassType1() || IsGlassType2(); }
-    inline bool IsTagModel() { return nSpecialType == eModelInfoSpecialType::TAG; }            // 0x3000
-    inline bool IsGarageDoor() { return nSpecialType == eModelInfoSpecialType::GARAGE_DOOR; }  // 0x3800
-    inline bool IsBreakableStatuePart() { return nSpecialType == eModelInfoSpecialType::BREAKABLE_STATUE; }
-    inline bool IsCrane() { return nSpecialType == eModelInfoSpecialType::CRANE; } // 0x4800
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CAtomicModelInfo* AsAtomicModelInfoPtr_Reversed();
+    CDamageAtomicModelInfo* AsDamageAtomicModelInfoPtr_Reversed();
+    CLodAtomicModelInfo* AsLodAtomicModelInfoPtr_Reversed();
+    CTimeInfo* GetTimeInfo_Reversed();
+    void Init_Reversed();
+    void Shutdown_Reversed();
+    void SetAnimFile_Reversed(const char* filename);
+    void ConvertAnimFileIndex_Reversed();
+    int32 GetAnimFileIndex_Reversed();
 };
 VALIDATE_SIZE(CBaseModelInfo, 0x20);
 

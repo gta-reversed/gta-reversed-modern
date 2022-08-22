@@ -1,17 +1,26 @@
 #include "StdInc.h"
 
+#include "ColTrianglePlane.h"
+
 void CColTrianglePlane::InjectHooks()
 {
-    ReversibleHooks::Install("CColTrianglePlane", "GetNormal", 0x411610, &CColTrianglePlane::GetNormal);
-    ReversibleHooks::Install("CColTrianglePlane", "Set", 0x411660, &CColTrianglePlane::Set);
+    RH_ScopedClass(CColTrianglePlane);
+    RH_ScopedCategory("Collision");
+
+    RH_ScopedOverloadedInstall(GetNormal, "Out", 0x411610, void(CColTrianglePlane::*)(CVector&));
+    RH_ScopedInstall(Set, 0x411660);
 }
 
 void CColTrianglePlane::GetNormal(CVector& out)
 {
-    out = UncompressUnitVector(m_normal);
+    out = GetNormal();
 }
 
-void CColTrianglePlane::Set(CompressedVector const* vertices, CColTriangle& triangle)
+CVector CColTrianglePlane::GetNormal() const noexcept {
+    return UncompressUnitVector(m_normal);
+}
+
+void CColTrianglePlane::Set(const CompressedVector* vertices, CColTriangle& triangle)
 {
     const auto vecA = UncompressVector(vertices[triangle.m_nVertA]);
     const auto vecB = UncompressVector(vertices[triangle.m_nVertB]);

@@ -6,10 +6,13 @@ uint32& CBrightLights::NumBrightLights = *(uint32*)0xC7C6FC;
 tBrightLight (&CBrightLights::aBrightLights)[MAX_NUM_BRIGHTLIGHTS] = *(tBrightLight(*)[MAX_NUM_BRIGHTLIGHTS])0xC7CB58;
 
 void CBrightLights::InjectHooks() {
-    ReversibleHooks::Install("CBrightLights", "Init", 0x722140, &CBrightLights::Init);
-    ReversibleHooks::Install("CBrightLights", "RenderOutGeometryBuffer", 0x722150, &CBrightLights::RenderOutGeometryBuffer);
-    ReversibleHooks::Install("CBrightLights", "Render", 0x7241C0, &CBrightLights::Render);
-    ReversibleHooks::Install("CBrightLights", "RegisterOne", 0x724770, &CBrightLights::RegisterOne);
+    RH_ScopedClass(CBrightLights);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x722140);
+    RH_ScopedInstall(RenderOutGeometryBuffer, 0x722150);
+    RH_ScopedInstall(Render, 0x7241C0);
+    RH_ScopedInstall(RegisterOne, 0x724770);
 }
 
 // 0x722140
@@ -36,12 +39,12 @@ void CBrightLights::Render() {
     if (NumBrightLights == 0)
         return;
 
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)nullptr);
-    RwRenderStateSet(rwRENDERSTATECULLMODE,          (void*)rwCULLMODECULLNONE);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          RWRSTATE(rwCULLMODECULLNONE));
 
     uiTempBufferVerticesStored = 0;
     uiTempBufferIndicesStored = 0;
@@ -121,7 +124,7 @@ CRGBA tBrightLight::GetColorRGBA() const {
     };
 
     // Originally R* used:
-    //const auto rnd = (uint8)((float)(uint8)rand() / 5.0f);
+    //const auto rnd = (uint8)((float)(uint8)CGeneral::GetRandomNumber() / 5.0f);
     const auto rnd = (uint8)CGeneral::GetRandomNumberInRange(0, 255 / 5);
     switch (m_nColor) {
     case BRIGHTLIGHT_GREEN_BIG:
@@ -137,7 +140,7 @@ CRGBA tBrightLight::GetColorRGBA() const {
         return { 255, rnd, rnd, GetAlpha() };
 
     default: { // NOTSA
-        assert(0); 
+        NOTSA_UNREACHABLE();
         return { 255, 255, 255, 255 }; // Shouldn't reach this point.. in theory that is..
     }
     }
@@ -161,7 +164,7 @@ void tBrightLight::Render() const {
     };
 
     // Push a vertex index. `vertIdx` is passed to `GetVertexRealIdx`
-    auto PushVerexIndex = [=, idx = 0](unsigned vertIdx) mutable {
+    auto PushVertexIndex = [=, idx = 0](unsigned vertIdx) mutable {
         aTempBufferIndices[(unsigned)uiTempBufferIndicesStored + idx++] = GetVertexRealIdx(vertIdx);
     };
 
@@ -170,11 +173,8 @@ void tBrightLight::Render() const {
     case BRIGHTLIGHT_GREEN_BIG:
     case BRIGHTLIGHT_YELLOW_BIG:
     case BRIGHTLIGHT_RED_BIG: {
-        // 0x5C0A7C
-        constexpr float TrafficLightsUp[] = { 0.162f, 0.162f, 0.0f, -0.162f, -0.162f, 0.0f };
-
-        // 0x5C0A94 
-        constexpr float TrafficLightsSide[] = { -0.09f, 0.09f, 0.162f, 0.09f, -0.09f, -0.162f };
+        static constexpr float TrafficLightsUp[]   = { 0.162f, 0.162f, 0.0f, -0.162f, -0.162f, 0.0f };  // 0x5C0A7C
+        static constexpr float TrafficLightsSide[] = { -0.09f, 0.09f, 0.162f, 0.09f, -0.09f, -0.162f }; // 0x5C0A94
 
         for (unsigned i = 0; i < 6; i++) {
             RxObjSpace3DVertexSetPreLitColor(GetVertex(i), &color);
@@ -187,11 +187,12 @@ void tBrightLight::Render() const {
         }
 
         // 0x8D5DBC
-        constexpr RxVertexIndex TrafficLightIndices[] = { 0, 1, 5, 1, 2, 3, 1, 3, 4, 1, 4, 5 };
-        for (unsigned i = 0; i < 12; i++)
-            PushVerexIndex(TrafficLightIndices[i]);
+        static constexpr RxVertexIndex TrafficLightIndices[] = { 0, 1, 5, 1, 2, 3, 1, 3, 4, 1, 4, 5 };
+        for (auto& index : TrafficLightIndices) {
+            PushVertexIndex(index);
+        }
 
-        uiTempBufferIndicesStored += 12;
+        uiTempBufferIndicesStored += (uint16)std::size(TrafficLightIndices);
         uiTempBufferVerticesStored += 6;
         break;
     }
@@ -199,7 +200,7 @@ void tBrightLight::Render() const {
     case BRIGHTLIGHT_YELLOW_SMALL:
     case BRIGHTLIGHT_RED_SMALL: {
         constexpr unsigned segCount = 8;
-        constexpr float    segAngleStep = 2 * rwPI / (float)(segCount);
+        constexpr float    segAngleStep = 2 * PI / (float)(segCount);
         constexpr float    segSize = 0.1f;
         for (unsigned i = 0; i < segCount; i++) {
             RxObjSpace3DVertexSetPreLitColor(GetVertex(i), &color);
@@ -213,9 +214,9 @@ void tBrightLight::Render() const {
         }
 
         for (unsigned i = 1; i <= 6; i++) {
-            PushVerexIndex(0);
-            PushVerexIndex(i);
-            PushVerexIndex(i + 1);
+            PushVertexIndex(0);
+            PushVertexIndex(i);
+            PushVertexIndex(i + 1);
         }
 
         uiTempBufferIndicesStored += 18;

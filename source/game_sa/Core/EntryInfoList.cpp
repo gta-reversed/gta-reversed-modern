@@ -1,30 +1,36 @@
 #include "StdInc.h"
 
+#include "EntryInfoList.h"
+
 void CEntryInfoList::InjectHooks()
 {
-    ReversibleHooks::Install("CEntryInfoList", "Flush", 0x536E10, &CEntryInfoList::Flush);
+    RH_ScopedClass(CEntryInfoList);
+    RH_ScopedCategory("Core");
+
+    RH_ScopedInstall(Flush, 0x536E10);
 }
 
 void CEntryInfoList::Flush()
 {
-    CEntryInfoNode* pCurNode = m_pNode;
-    while (pCurNode) {
-        auto pNextNode = pCurNode->m_pNext;
-        CEntryInfoList::DeleteNode(pCurNode);
-        pCurNode = pNextNode;
+    CEntryInfoNode* curNode = m_node;
+    while (curNode) {
+        auto nextNode = curNode->m_next;
+        CEntryInfoList::DeleteNode(curNode);
+        curNode = nextNode;
     }
 }
 
-void CEntryInfoList::DeleteNode(CEntryInfoNode* pNode)
+// 0x?
+void CEntryInfoList::DeleteNode(CEntryInfoNode* node)
 {
-    if(m_pNode == pNode)
-        m_pNode = pNode->m_pNext;
+    if (m_node == node)
+        m_node = node->m_next;
 
-    if (pNode->m_pPrevious)
-        pNode->m_pPrevious->m_pNext = pNode->m_pNext;
+    if (node->m_previous)
+        node->m_previous->m_next = node->m_next;
 
-    if (pNode->m_pNext)
-        pNode->m_pNext->m_pPrevious = pNode->m_pPrevious;
+    if (node->m_next)
+        node->m_next->m_previous = node->m_previous;
 
-    delete pNode;
+    delete node;
 }

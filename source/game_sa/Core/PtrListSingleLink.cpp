@@ -1,53 +1,53 @@
 #include "StdInc.h"
 
-void CPtrListSingleLink::InjectHooks()
-{
-    ReversibleHooks::Install("CPtrListSingleLink", "Flush", 0x552400, &CPtrListSingleLink::Flush);
-    ReversibleHooks::Install("CPtrListSingleLink", "AddItem", 0x5335E0, &CPtrListSingleLink::AddItem);
-    ReversibleHooks::Install("CPtrListSingleLink", "DeleteItem", 0x533610, &CPtrListSingleLink::DeleteItem);
+#include "PtrListSingleLink.h"
+
+void CPtrListSingleLink::InjectHooks() {
+    RH_ScopedClass(CPtrListSingleLink);
+    RH_ScopedCategory("Core");
+
+    RH_ScopedInstall(Flush, 0x552400);
+    RH_ScopedInstall(AddItem, 0x5335E0);
+    RH_ScopedInstall(DeleteItem, 0x533610);
 }
 
-void CPtrListSingleLink::Flush()
-{
-    if (!pNode)
+void CPtrListSingleLink::Flush() {
+    if (!m_node)
         return;
 
     // Simplified the logic a lot, same end result
-    CPtrNodeSingleLink* pCurNode;
-    while ((pCurNode = GetNode()))
-        CPtrListSingleLink::DeleteNode(pCurNode, GetNode());
+    CPtrNodeSingleLink* curNode;
+    while ((curNode = GetNode()))
+        CPtrListSingleLink::DeleteNode(curNode, GetNode());
 }
 
-CPtrNodeSingleLink* CPtrListSingleLink::AddItem(void* item)
-{
+CPtrNodeSingleLink* CPtrListSingleLink::AddItem(void* item) {
     auto pNewSingleLink = new CPtrNodeSingleLink(item);
     pNewSingleLink->AddToList(this);
     return pNewSingleLink;
 }
 
-void CPtrListSingleLink::DeleteItem(void* item)
-{
-    if (!pNode)
+void CPtrListSingleLink::DeleteItem(void* item) {
+    if (!m_node)
         return;
 
-    auto* pCurNode = GetNode();
-    CPtrNodeSingleLink* pLastNode = nullptr;
-    while (pCurNode->pItem != item) {
-        pLastNode = pCurNode;
-        pCurNode = reinterpret_cast<CPtrNodeSingleLink*>(pCurNode->pNext);
-        if (!pCurNode)
+    auto* curNode = GetNode();
+    CPtrNodeSingleLink* lastNode = nullptr;
+    while (curNode->m_item != item) {
+        lastNode = curNode;
+        curNode = reinterpret_cast<CPtrNodeSingleLink*>(curNode->m_next);
+        if (!curNode)
             return;
     }
 
-    CPtrListSingleLink::DeleteNode(pCurNode, pLastNode);
+    CPtrListSingleLink::DeleteNode(curNode, lastNode);
 }
 
-void CPtrListSingleLink::DeleteNode(CPtrNodeSingleLink* node, CPtrNodeSingleLink* lastNode)
-{
+void CPtrListSingleLink::DeleteNode(CPtrNodeSingleLink* node, CPtrNodeSingleLink* lastNode) {
     if (GetNode() == node)
-        pNode = reinterpret_cast<CPtrNode*>(node->pNext);
+        m_node = reinterpret_cast<CPtrNode*>(node->m_next);
     else if (lastNode)
-        lastNode->pNext = node->pNext;
+        lastNode->m_next = node->m_next;
 
     delete node;
 }

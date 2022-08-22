@@ -1,17 +1,22 @@
 #include "StdInc.h"
 
+#include "MouseControllerState.h"
+
 void CMouseControllerState::InjectHooks() {
-    ReversibleHooks::Install("CMouseControllerState", "CMouseControllerState", 0x53F220, &CMouseControllerState::Constructor);
-    ReversibleHooks::Install("CMouseControllerState", "Clear", 0x53F250, &CMouseControllerState::Clear);
-    ReversibleHooks::Install("CMouseControllerState", "CheckForInput", 0x53F270, &CMouseControllerState::CheckForInput);
+    RH_ScopedClass(CMouseControllerState);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Constructor, 0x53F220);
+    RH_ScopedInstall(Clear, 0x53F250);
+    RH_ScopedInstall(CheckForInput, 0x53F270);
 }
 
 // 0x53F220
 CMouseControllerState::CMouseControllerState() {
-    this->Z = 0.0f;
-    this->X = 0.0f;
-    this->Y = 0.0f;
-    this->Clear();
+    Z = 0.0f;
+    X = 0.0f;
+    Y = 0.0f;
+    Clear();
 }
 
 CMouseControllerState* CMouseControllerState::Constructor() {
@@ -31,7 +36,7 @@ void CMouseControllerState::Clear() {
 }
 
 // 0x53F270
-bool CMouseControllerState::CheckForInput() {
+bool CMouseControllerState::CheckForInput() const {
     return (
         lmb
         || rmb
@@ -44,5 +49,3 @@ bool CMouseControllerState::CheckForInput() {
         || Y != 0.0f
     );
 }
-
-

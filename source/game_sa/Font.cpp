@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,7 +10,7 @@
 
 #include "eLanguage.h"
 
-CFontChar (&setup)[9] = *(CFontChar(*)[9])0xC716B0;
+CFontChar (&FontRenderStateBuf)[9] = *(CFontChar(*)[9])0xC716B0;
 CFontChar* pEmptyChar = (CFontChar*)0xC716A8;
 
 CFontChar& CFont::RenderState = *(CFontChar*)0xC71AA0;
@@ -42,59 +42,60 @@ uint8& CFont::m_nFontOutlineSize = *(uint8*)0xC71A9B;
 uint8& CFont::m_nFontOutline = *(uint8*)0xC71A9C;
 uint8& CFont::m_nFontOutlineOrShadow = *(uint8*)0xC71A9C;
 
-tFontData* gFontData = (tFontData*)0xC718B0;
+tFontData (&gFontData)[2] = *(tFontData(*)[2])0xC718B0;
 
 void CFont::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CFont", "Initialise", 0x5BA690, &CFont::Initialise);
-    Install("CFont", "Shutdown", 0x7189B0, &CFont::Shutdown);
-    // Install("CFont", "PrintChar", 0x718A10, &CFont::PrintChar);
-    Install("CFont", "ParseToken", 0x718F00, &CFont::ParseToken);
+    RH_ScopedClass(CFont);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Initialise, 0x5BA690);
+    RH_ScopedInstall(Shutdown, 0x7189B0);
+    // RH_ScopedInstall(PrintChar, 0x718A10);
+    RH_ScopedInstall(ParseToken, 0x718F00);
 
     // styling functions
-    Install("CFont", "SetScale", 0x719380, &CFont::SetScale);
-    Install("CFont", "SetScaleForCurrentLanguage", 0x7193A0, &CFont::SetScaleForCurrentLanguage);
-    Install("CFont", "SetSlantRefPoint", 0x719400, &CFont::SetSlantRefPoint);
-    Install("CFont", "SetSlant", 0x719420, &CFont::SetSlant);
-    Install("CFont", "SetColor", 0x719430, &CFont::SetColor);
-    Install("CFont", "SetFontStyle", 0x719490, &CFont::SetFontStyle);
-    Install("CFont", "SetWrapx", 0x7194D0, &CFont::SetWrapx);
-    Install("CFont", "SetCentreSize", 0x7194E0, &CFont::SetCentreSize);
-    Install("CFont", "SetRightJustifyWrap", 0x7194F0, &CFont::SetRightJustifyWrap);
-    Install("CFont", "SetAlphaFade", 0x719500, &CFont::SetAlphaFade);
-    Install("CFont", "SetDropColor", 0x719510, &CFont::SetDropColor);
-    Install("CFont", "SetDropShadowPosition", 0x719570, &CFont::SetDropShadowPosition);
-    Install("CFont", "SetEdge", 0x719590, &CFont::SetEdge);
-    Install("CFont", "SetProportional", 0x7195B0, &CFont::SetProportional);
-    Install("CFont", "SetBackground", 0x7195C0, &CFont::SetBackground);
-    Install("CFont", "SetBackgroundColor", 0x7195E0, &CFont::SetBackgroundColor);
-    Install("CFont", "SetJustify", 0x719600, &CFont::SetJustify);
-    Install("CFont", "SetOrientation", 0x719610, &CFont::SetOrientation);
+    RH_ScopedInstall(SetScale, 0x719380);
+    RH_ScopedInstall(SetScaleForCurrentLanguage, 0x7193A0);
+    RH_ScopedInstall(SetSlantRefPoint, 0x719400);
+    RH_ScopedInstall(SetSlant, 0x719420);
+    RH_ScopedInstall(SetColor, 0x719430);
+    RH_ScopedInstall(SetFontStyle, 0x719490);
+    RH_ScopedInstall(SetWrapx, 0x7194D0);
+    RH_ScopedInstall(SetCentreSize, 0x7194E0);
+    RH_ScopedInstall(SetRightJustifyWrap, 0x7194F0);
+    RH_ScopedInstall(SetAlphaFade, 0x719500);
+    RH_ScopedInstall(SetDropColor, 0x719510);
+    RH_ScopedInstall(SetDropShadowPosition, 0x719570);
+    RH_ScopedInstall(SetEdge, 0x719590);
+    RH_ScopedInstall(SetProportional, 0x7195B0);
+    RH_ScopedInstall(SetBackground, 0x7195C0);
+    RH_ScopedInstall(SetBackgroundColor, 0x7195E0);
+    RH_ScopedInstall(SetJustify, 0x719600);
+    RH_ScopedInstall(SetOrientation, 0x719610);
 
-    Install("CFont", "InitPerFrame", 0x719800, &CFont::InitPerFrame);
-    // Install("CFont", "RenderFontBuffer", 0x719840, &CFont::RenderFontBuffer);
-    Install("CFont", "GetStringWidth", 0x71A0E0, &CFont::GetStringWidth);
-    Install("CFont", "DrawFonts", 0x71A210, &CFont::DrawFonts);
-    // Install("CFont", "ProcessCurrentString", 0x71A220, &CFont::ProcessCurrentString);
-    Install("CFont", "GetNumberLines", 0x71A5E0, &CFont::GetNumberLines);
-    Install("CFont", "ProcessStringToDisplay", 0x71A600, &CFont::ProcessStringToDisplay);
-    Install("CFont", "GetTextRect", 0x71A620, &CFont::GetTextRect);
-    Install("CFont", "PrintString", 0x71A700, &CFont::PrintString);
-    Install("CFont", "PrintStringFromBottom", 0x71A820, &CFont::PrintStringFromBottom);
-    Install("CFont", "GetCharacterSize", 0x719750, &CFont::GetCharacterSize);
-
-    Install("", "ReadFontsDat", 0x7187C0, &ReadFontsDat);
+    RH_ScopedInstall(InitPerFrame, 0x719800);
+    // RH_ScopedInstall(RenderFontBuffer, 0x719840);
+    RH_ScopedInstall(GetStringWidth, 0x71A0E0);
+    RH_ScopedInstall(DrawFonts, 0x71A210);
+    // RH_ScopedInstall(ProcessCurrentString, 0x71A220);
+    RH_ScopedInstall(GetNumberLines, 0x71A5E0);
+    RH_ScopedInstall(ProcessStringToDisplay, 0x71A600);
+    RH_ScopedInstall(GetTextRect, 0x71A620);
+    RH_ScopedInstall(PrintString, 0x71A700);
+    RH_ScopedInstall(PrintStringFromBottom, 0x71A820);
+    RH_ScopedInstall(GetCharacterSize, 0x719750);
+    RH_ScopedInstall(LoadFontValues, 0x7187C0);
     // Install("", "GetScriptLetterSize", 0x719670, &GetScriptLetterSize);
-    // Install("", "GetIDforPropVal", 0x7192C0, &GetIDforPropVal);
-    Install("", "GetLetterIdPropValue", 0x718770, &GetLetterIdPropValue);
+    // dont't hook! RH_ScopedInstall(FindSubFontCharacter, 0x7192C0);
+    RH_ScopedGlobalInstall(GetLetterIdPropValue, 0x718770);
 }
 
 // 0x7187C0
-void ReadFontsDat() {
-    CFileMgr::SetDir(gta_empty_string);
-    auto file = CFileMgr::OpenFile("DATA\\FONTS.DAT", "rb");
+void CFont::LoadFontValues() {
+    CFileMgr::SetDir("");
+    auto* file = CFileMgr::OpenFile("DATA\\FONTS.DAT", "rb");
 
-    char* attrib[26];
+    char attrib[32];
 
     uint32 totalFonts = 0;
     uint32 fontId = 0;
@@ -103,7 +104,7 @@ void ReadFontsDat() {
         if (*line == '\0' || *line == '#')
             continue;
 
-        if (sscanf(line, "%s", &attrib) == EOF)
+        if (sscanf(line, "%31s", attrib) == EOF) // FIX_BUGS: buffer overflow
             continue;
 
         if (!memcmp(attrib, "[TOTAL_FONTS]", 14)) {
@@ -126,14 +127,16 @@ void ReadFontsDat() {
         else if (!memcmp(attrib, "[PROP]", 7)) {
             for (int32 i = 0; i < 26; i++) {
                 auto nextLine = CFileLoader::LoadLine(file);
-                uint32 propValues[8];
+                int32 propValues[8];
 
                 sscanf(nextLine, "%d  %d  %d  %d  %d  %d  %d  %d",
                     &propValues[0], &propValues[1], &propValues[2], &propValues[3],
-                    &propValues[4], &propValues[5], &propValues[6], &propValues[7]);
+                    &propValues[4], &propValues[5], &propValues[6], &propValues[7]
+               );
 
-                for (int32 j = 0; j < 8; j++)
+                for (auto j = 0u; j < std::size(propValues); j++) {
                     gFontData[fontId].m_propValues[i * 8 + j] = propValues[j];
+                }
             }
         }
         else if (!memcmp(attrib, "[UNPROP]", 9)) {
@@ -158,11 +161,11 @@ void CFont::Initialise() {
     Sprite[0].SetTexture("font2", "font2m");
     Sprite[1].SetTexture("font1", "font1m");
 
-    ReadFontsDat();
+    LoadFontValues();
 
     SetScale(1.0f, 1.0f);
     SetSlantRefPoint(SCREEN_WIDTH, 0.0f);
-    SetSlant(0.0);
+    SetSlant(0.0f);
 
     SetColor(CRGBA(255, 255, 255, 0));
     SetOrientation(eFontAlignment::ALIGN_LEFT);
@@ -196,30 +199,20 @@ void CFont::Initialise() {
 }
 
 // 0x7189B0
-void CFont::Shutdown()
-{
-    Sprite[0].Delete();
-    Sprite[1].Delete();
-
-    auto fontSlot = CTxdStore::FindTxdSlot("fonts");
-    CTxdStore::RemoveTxdSlot(fontSlot);
-
-    for (CSprite2d& bs : ButtonSprite) {
-        bs.Delete();
-    }
-
-    auto buttonSlot = CTxdStore::FindTxdSlot("ps2btns");
-    CTxdStore::RemoveTxdSlot(buttonSlot);
+void CFont::Shutdown() {
+    std::ranges::for_each(Sprite, [](CSprite2d& sprite) { sprite.Delete(); });
+    CTxdStore::SafeRemoveTxdSlot("fonts"); // FIX_BUGS: Added check for is slot exists
+    std::ranges::for_each(ButtonSprite, [](CSprite2d& sprite) { sprite.Delete(); });
+    CTxdStore::SafeRemoveTxdSlot("ps2btns"); // FIX_BUGS: Added check for is slot exists
 }
 
+// this adds a single character into rendering buffer
 // 0x718A10
-void CFont::PrintChar(float x, float y, char character)
-{
-    plugin::Call<0x718A10, float, float, char>(x, y, character);
+void CFont::PrintChar(float x, float y, char character) {
+    return plugin::Call<0x718A10, float, float, char>(x, y, character);
 
     // todo: check the fucking uv values
 
-    /*
     // out of screen
     if (x < 0.0f || x > SCREEN_WIDTH || y < 0.0f || y > SCREEN_HEIGHT)
         return;
@@ -233,7 +226,6 @@ void CFont::PrintChar(float x, float y, char character)
             17.0f * RenderState.m_fHeight + x,
             19.0f * RenderState.m_fHeight + y
         };
-            
 
         ButtonSprite[PS2Symbol].Draw(rt, { 255, 255, 255, RenderState.m_color.a });
 
@@ -254,7 +246,7 @@ void CFont::PrintChar(float x, float y, char character)
 
         auto propval = propValue / 32.0f;
 
-        if (RenderState.m_dwFontTexture && RenderState.m_dwFontTexture != 1) {
+        if (RenderState.m_wFontTexture && RenderState.m_wFontTexture != 1) {
             if (!zeroed) {
                 CRect rt = {
                     y,
@@ -268,7 +260,7 @@ void CFont::PrintChar(float x, float y, char character)
                 float u2 = propval / 16.0f + u1;
                 float v2 = v1;
                 float u3 = u1;
-                float v3 = v1 + 0.0625;
+                float v3 = v1 + 0.0625f;
                 float u4 = u2 - 0.0001f;
                 float v4 = v3 - 0.0001f;
 
@@ -334,12 +326,11 @@ void CFont::PrintChar(float x, float y, char character)
             }
         }
     }
-    */
 }
 
+// Tags processing
 // 0x718F00
-char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
-{
+char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag) {
     // info about tokens: https://gtamods.com/wiki/GXT#Tokens
 
     char* next = ++text;
@@ -471,16 +462,16 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
     return next + 2;
 }
 
+// Text scaling
 // 0x719380
-void CFont::SetScale(float w, float h)
-{
+void CFont::SetScale(float w, float h) {
     m_Scale.Set(w, h);
 }
 
+// Text scaling depends on current language
 // 0x7193A0
-void CFont::SetScaleForCurrentLanguage(float w, float h)
-{
-    switch (FrontEndMenuManager.m_nLanguage) {
+void CFont::SetScaleForCurrentLanguage(float w, float h) {
+    switch (FrontEndMenuManager.m_nPrefsLanguage) {
     case eLanguage::FRENCH:
     case eLanguage::GERMAN:
     case eLanguage::ITALIAN:
@@ -492,32 +483,31 @@ void CFont::SetScaleForCurrentLanguage(float w, float h)
     }
 }
 
+// Set text rotation point
 // 0x719400
-void CFont::SetSlantRefPoint(float x, float y)
-{
+void CFont::SetSlantRefPoint(float x, float y) {
     m_fSlantRefPoint.Set(x, y);
 }
 
+// Set text rotation angle
 // 0x719420
-void CFont::SetSlant(float value)
-{
+void CFont::SetSlant(float value) {
     m_fSlant = value;
 }
 
-// TODO: const CRGBA& color
+// Set text color
 // 0x719430
-void CFont::SetColor(CRGBA color)
-{
+void CFont::SetColor(CRGBA color) {
     m_Color = color;
 
     if (m_fFontAlpha < 255.0f) {
-        m_Color.a = (uint8)((color.a * m_fFontAlpha) / 255.0f);
+        m_Color.a = (uint8)(float(color.a) * m_fFontAlpha / 255.0f);
     }
 }
 
+// Set text style
 // 0x719490
-void CFont::SetFontStyle(eFontStyle style)
-{
+void CFont::SetFontStyle(eFontStyle style) {
     switch (style) {
     case eFontStyle::FONT_PRICEDOWN:
         m_FontTextureId = 1;
@@ -533,48 +523,48 @@ void CFont::SetFontStyle(eFontStyle style)
     }
 }
 
+// Set line width at right
 // 0x7194D0
-void CFont::SetWrapx(float value)
-{
+void CFont::SetWrapx(float value) {
     m_fWrapx = value;
 }
 
+// Set line width at center
 // 0x7194E0
-void CFont::SetCentreSize(float value)
-{
+void CFont::SetCentreSize(float value) {
     m_fFontCentreSize = value;
 }
 
 // 0x7194F0
-void CFont::SetRightJustifyWrap(float value)
-{
+void CFont::SetRightJustifyWrap(float value) {
     m_fRightJustifyWrap = value;
 }
 
+// Like a 'global' font alpha, multiplied with each text alpha (from SetColor)
 // 0x719500
-void CFont::SetAlphaFade(float alpha)
-{
+void CFont::SetAlphaFade(float alpha) {
     m_fFontAlpha = alpha;
 }
 
-// TODO: const CRGBA& color
+// Drop color is used for text shadow and text outline
 // 0x719510
-void CFont::SetDropColor(CRGBA color)
-{
+void CFont::SetDropColor(CRGBA color) {
     m_FontDropColor = color;
 
-    if (m_fFontAlpha < 255.0f)
-        m_FontDropColor.a = (uint8)(m_Color.a * m_fFontAlpha);
+    if (m_fFontAlpha < 255.0f) {
+        m_FontDropColor.a = (uint8)(float(m_Color.a) * m_fFontAlpha);
+    }
 }
 
+// Set shadow size
 // 0x719570
-void CFont::SetDropShadowPosition(int16 value)
-{
+void CFont::SetDropShadowPosition(int16 value) {
     m_nFontOutlineSize = 0;
     m_nFontOutlineOrShadow = 0;
     m_nFontShadow = (uint8)value;
 }
 
+// Set outline size
 // 0x719590
 void CFont::SetEdge(int8 value) {
     m_nFontShadow = 0;
@@ -582,73 +572,66 @@ void CFont::SetEdge(int8 value) {
     m_nFontOutlineOrShadow = value;
 }
 
+// Toggles character proportions in text
 // 0x7195B0
-void CFont::SetProportional(bool on)
-{
+void CFont::SetProportional(bool on) {
     m_bFontPropOn = on;
 }
 
+// Setups text background
 // 0x7195C0
-void CFont::SetBackground(bool enable, bool includeWrap)
-{
+void CFont::SetBackground(bool enable, bool includeWrap) {
     m_bFontBackground = enable;
     m_bEnlargeBackgroundBox = includeWrap;
 }
 
-// TODO: const CRGBA& color
+// Sets background color
 // 0x7195E0
-void CFont::SetBackgroundColor(CRGBA color)
-{
+void CFont::SetBackgroundColor(CRGBA color) {
     m_FontBackgroundColor = color;
 }
 
 // 0x719600
-void CFont::SetJustify(bool on)
-{
+void CFont::SetJustify(bool on) {
     m_bFontJustify = on;
 }
 
 // 0x719610
-void CFont::SetOrientation(eFontAlignment alignment)
-{
+void CFont::SetOrientation(eFontAlignment alignment) {
     m_bFontCentreAlign = alignment == eFontAlignment::ALIGN_CENTER;
     m_bFontRightAlign = alignment == eFontAlignment::ALIGN_RIGHT;
 }
 
+// Need to call this each frame
 // 0x719800
-void CFont::InitPerFrame()
-{
+void CFont::InitPerFrame() {
     m_nFontOutline = 0;
     m_nFontOutlineOrShadow = 0;
     m_nFontShadow = 0;
     m_bNewLine = false;
     PS2Symbol = EXSYMBOL_NONE;
-    RenderState.m_wFontTexture = 0;
-    pEmptyChar = &setup[0];
+    RenderState.m_wFontTexture = 0; // todo: -1
+    pEmptyChar = &FontRenderStateBuf[0]; // FontRenderStatePointer.pRenderState
 
     CSprite::InitSpriteBuffer();
 }
 
+// Draw text we have in buffer
 // 0x719840
-void CFont::RenderFontBuffer()
-{
+void CFont::RenderFontBuffer() {
     plugin::Call<0x719840>();
 }
 
 // 0x71A0E0
-float CFont::GetStringWidth(char* string, bool full, bool scriptText)
-{
+float CFont::GetStringWidth(const char* string, bool full, bool scriptText) {
     size_t len = CMessages::GetStringLength(string);
-
     char data[400] = {0};
 
     strncpy(data, string, len);
-
     CMessages::InsertPlayerControlKeysInString(data);
 
     float width = 0.0f;
-    bool bLastWasTag = false, bLastWasLetter = false;
-
+    bool lastWasTag = false, lastWasLetter = false;
     char* pStr = data;
 
     while (true) {
@@ -658,7 +641,7 @@ float CFont::GetStringWidth(char* string, bool full, bool scriptText)
             break;
 
         if (*pStr == '~') {
-            if (!full && (bLastWasTag || bLastWasLetter))
+            if (!full && (lastWasTag || lastWasLetter))
                 return width;
 
             char* next = pStr + 1;
@@ -669,11 +652,11 @@ float CFont::GetStringWidth(char* string, bool full, bool scriptText)
 
             pStr = next + 1;
 
-            if (bLastWasLetter || *pStr == '~')
-                bLastWasTag = true;
+            if (lastWasLetter || *pStr == '~')
+                lastWasTag = true;
         }
         else {
-            if (!full && *pStr == ' ' && bLastWasTag)
+            if (!full && *pStr == ' ' && lastWasTag)
                 return width;
 
             char upper = *pStr - 0x20;
@@ -685,6 +668,8 @@ float CFont::GetStringWidth(char* string, bool full, bool scriptText)
             else {
                 width += GetCharacterSize(upper);
             }
+
+            lastWasLetter = true;
         }
     }
 
@@ -697,26 +682,22 @@ void CFont::DrawFonts() {
 }
 
 // 0x71A220
-int16 CFont::ProcessCurrentString(bool print, float x, float y, const char* text)
-{
+int16 CFont::ProcessCurrentString(bool print, float x, float y, const char* text) {
     return plugin::CallAndReturn<int16, 0x71A220, bool, float, float, const char*>(print, x, y, text);
 }
 
 // 0x71A5E0
-int16 CFont::GetNumberLines(float x, float y, const char* text)
-{
+int16 CFont::GetNumberLines(float x, float y, const char* text) {
     return ProcessCurrentString(false, x, y, text);
 }
 
 // 0x71A600
-int16 CFont::ProcessStringToDisplay(float x, float y, const char* text)
-{
+int16 CFont::ProcessStringToDisplay(float x, float y, const char* text) {
     return ProcessCurrentString(true, x, y, text);
 }
 
 // 0x71A620
-void CFont::GetTextRect(CRect* rect, float x, float y, const char* text)
-{
+void CFont::GetTextRect(CRect* rect, float x, float y, const char* text) {
     if (m_bFontCentreAlign) {
         rect->left = x - (m_fFontCentreSize / 2.0f + 4.0f);
         rect->right = m_fFontCentreSize / 2.0f + x + 4.0f;
@@ -731,12 +712,11 @@ void CFont::GetTextRect(CRect* rect, float x, float y, const char* text)
     }
 
     rect->bottom = y - 4.0f;
-    rect->top = y + 4.0f + (m_Scale.y * 32.0f / 2.0f + m_Scale.y + m_Scale.y) * (float)GetNumberLines(x, y, text); // TODO: CFont::GetHeight
+    rect->top = y + 4.0f + GetHeight() * (float)GetNumberLines(x, y, text);
 }
 
 // 0x71A700
-void CFont::PrintString(float x, float y, const char* text)
-{
+void CFont::PrintString(float x, float y, const char* text) {
     if (*text == '\0' || *text == '*')
         return;
 
@@ -752,19 +732,19 @@ void CFont::PrintString(float x, float y, const char* text)
             rt.top += 1.0f;
             rt.bottom -= 1.0f;
 
-            FrontEndMenuManager.DrawWindow(rt, '\0', 0, m_FontBackgroundColor, false, true);
+            FrontEndMenuManager.DrawWindow(rt, nullptr, 0, m_FontBackgroundColor, false, true);
         } else {
             CSprite2d::DrawRect(rt, m_FontBackgroundColor);
         }
+        m_bFontBackground = false;
     }
 
     ProcessStringToDisplay(x, y, text);
 }
 
 // 0x71A820
-void CFont::PrintStringFromBottom(float x, float y, const char* text)
-{
-    float drawY = y - (m_Scale.y * 32.0f / 2.0f + m_Scale.y + m_Scale.y) * (float)GetNumberLines(x, y, text); // TODO: CFont::GetHeight
+void CFont::PrintStringFromBottom(float x, float y, const char* text) {
+    float drawY = y - GetHeight() * (float)GetNumberLines(x, y, text);
 
     if (m_fSlant != 0.0f)
         drawY -= (m_fSlantRefPoint.x - x) * m_fSlant + m_fSlantRefPoint.y;
@@ -773,8 +753,7 @@ void CFont::PrintStringFromBottom(float x, float y, const char* text)
 }
 
 // 0x719750
-float CFont::GetCharacterSize(uint8 letterId)
-{
+float CFont::GetCharacterSize(uint8 letterId) {
     uint8 propValueIdx = letterId;
 
     if (letterId == '?') {
@@ -783,10 +762,10 @@ float CFont::GetCharacterSize(uint8 letterId)
     }
 
     if (m_FontStyle)
-        propValueIdx = GetIDforPropVal(letterId, m_FontStyle);
-    else if (propValueIdx == 0x91)
+        propValueIdx = FindSubFontCharacter(letterId, m_FontStyle);
+    else if (propValueIdx == 145)
         propValueIdx = '@';
-    else if (propValueIdx > 0x9B)
+    else if (propValueIdx > 155)
         propValueIdx = 0;
 
     if (m_bFontPropOn) {
@@ -796,58 +775,48 @@ float CFont::GetCharacterSize(uint8 letterId)
     }
 }
 
+// Android
+float CFont::GetHeight(bool a1) {
+    assert(a1 == false && "NOT IMPLEMENTED");
+    const float y = a1 ? 0.0f : m_Scale.y;
+    return y * 32.0f / 2.0f + y + y;
+}
+
 // 0x719670, original name unknown
-float GetScriptLetterSize(uint8 letterId)
-{
+float GetScriptLetterSize(uint8 letterId) {
     return plugin::CallAndReturn<float, 0x719670, uint8>(letterId);
 }
 
 // 0x7192C0
-uint8 GetIDforPropVal(uint8 letterId, uint8 fontStyle)
-{
-    if (fontStyle == 1) {
+uint8 CFont::FindSubFontCharacter(uint8 letterId, uint8 fontStyle) {
+    if (fontStyle == 1) { // eFontStyle::FONT_PRICEDOWN
         switch (letterId) {
-        case 1:
-            return 208;
-        case 4:
-            return 93;
-        case 7:
-            return 206;
-        case 14:
-            return 207;
+        case 1:  return 208;
+        case 4:  return 93;
+        case 7:  return 206;
+        case 8:
+        case 9:  return letterId + 86;
+        case 14: return 207;
+        case 26: return 154;
         }
     }
 
-    switch (letterId) {
-    case 6:
-        return 10;
-    case 8:
-        return 94;
-    case 9:
-        return 95;
-    case 26:
-        return 154;
-    case 31:
-        return 91;
-    case 62:
-        return 32;
-    case 143:
-        return 205;
-    }
-
-    if (letterId >= 16 && letterId <= 25)
-        return letterId - 128;
-    if (letterId >= 21 && letterId <= 58)
-        return letterId + 122;
-    if (letterId >= 64 && letterId <= 90)
-        return letterId + 90;
+    if (letterId == 6)                      return 10;
+    if (letterId >=  16 && letterId <=  25) return letterId - 128;
+    if (letterId == 31)                     return 91;
+    if (letterId >=  33 && letterId <=  58) return letterId + 122;
+    if (letterId == 62)                     return 32;
+    if (letterId >=  65 && letterId <=  90) return letterId + 90;
+    if (letterId >=  96 && letterId <= 118) return letterId + 85;
+    if (letterId >= 119 && letterId <= 140) return letterId + 62;
+    if (letterId >= 141 && letterId <= 142) return 204;
+    if (letterId == 143)                    return 205;
 
     return letterId;
 }
 
 // 0x718770
-float GetLetterIdPropValue(uint8 letterId)
-{
+float GetLetterIdPropValue(uint8 letterId) {
     uint8 id = letterId;
 
     if (letterId == '?')

@@ -1,67 +1,77 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
-
 #include "StdInc.h"
+
+#include "PlayerPed.h"
+#include "TagManager.h"
+#include "PedClothesDesc.h"
+#include "PedStats.h"
 
 bool (&abTempNeverLeavesGroup)[7] = *(bool (*)[7])0xC0BC08;
 int32& gPlayIdlesAnimBlockIndex = *(int32*)0xC0BC10;
 bool& CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText = *(bool*)0xC0BC15;
 
+bool CPlayerPed::bDebugPlayerInvincible;
+bool CPlayerPed::bDebugTargeting;
+bool CPlayerPed::bDebugTapToTarget;
+
 void CPlayerPed::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CPlayerPed", "ResetSprintEnergy", 0x60A530, &CPlayerPed::ResetSprintEnergy);
-    Install("CPlayerPed", "ResetPlayerBreath", 0x60A8A0, &CPlayerPed::ResetPlayerBreath);
-    Install("CPlayerPed", "RemovePlayerPed", 0x6094A0, &CPlayerPed::RemovePlayerPed);
-    Install("CPlayerPed", "Busted", 0x609EF0, &CPlayerPed::Busted);
-    Install("CPlayerPed", "GetWantedLevel", 0x41BE60, &CPlayerPed::GetWantedLevel);
-    Install("CPlayerPed", "SetWantedLevel", 0x609F10, &CPlayerPed::SetWantedLevel);
-    Install("CPlayerPed", "SetWantedLevelNoDrop", 0x609F30, &CPlayerPed::SetWantedLevelNoDrop);
-    Install("CPlayerPed", "CheatWantedLevel", 0x609F50, &CPlayerPed::CheatWantedLevel);
-    Install("CPlayerPed", "DoStuffToGoOnFire", 0x60A020, &CPlayerPed::DoStuffToGoOnFire);
-    Install("CPlayerPed", "Load", 0x5D46E0, &CPlayerPed::Load_Reversed);
-    Install("CPlayerPed", "Save", 0x5D57E0, &CPlayerPed::Save_Reversed);
-    Install("CPlayerPed", "DeactivatePlayerPed", 0x609520, &CPlayerPed::DeactivatePlayerPed);
-    Install("CPlayerPed", "ReactivatePlayerPed", 0x609540, &CPlayerPed::ReactivatePlayerPed);
-    Install("CPlayerPed", "GetPadFromPlayer", 0x609560, &CPlayerPed::GetPadFromPlayer);
-    Install("CPlayerPed", "CanPlayerStartMission", 0x609590, &CPlayerPed::CanPlayerStartMission);
-    Install("CPlayerPed", "IsHidden", 0x609620, &CPlayerPed::IsHidden);
-    Install("CPlayerPed", "ReApplyMoveAnims", 0x609650, &CPlayerPed::ReApplyMoveAnims);
-    Install("CPlayerPed", "DoesPlayerWantNewWeapon", 0x609710, &CPlayerPed::DoesPlayerWantNewWeapon);
-    Install("CPlayerPed", "ProcessPlayerWeapon", 0x6097F0, &CPlayerPed::ProcessPlayerWeapon);
-    Install("CPlayerPed", "PickWeaponAllowedFor2Player", 0x609800, &CPlayerPed::PickWeaponAllowedFor2Player);
-    Install("CPlayerPed", "UpdateCameraWeaponModes", 0x609830, &CPlayerPed::UpdateCameraWeaponModes);
-    Install("CPlayerPed", "ClearWeaponTarget", 0x609c80, &CPlayerPed::ClearWeaponTarget);
-    Install("CPlayerPed", "GetWeaponRadiusOnScreen", 0x609CD0, &CPlayerPed::GetWeaponRadiusOnScreen);
-    Install("CPlayerPed", "PedCanBeTargettedVehicleWise", 0x609D90, &CPlayerPed::PedCanBeTargettedVehicleWise);
-    Install("CPlayerPed", "FindTargetPriority", 0x609DE0, &CPlayerPed::FindTargetPriority);
-    Install("CPlayerPed", "Clear3rdPersonMouseTarget", 0x609ED0, &CPlayerPed::Clear3rdPersonMouseTarget);
-    Install("CPlayerPed", "CanIKReachThisTarget", 0x609F80, &CPlayerPed::CanIKReachThisTarget);
-    Install("CPlayerPed", "GetPlayerInfoForThisPlayerPed", 0x609FF0, &CPlayerPed::GetPlayerInfoForThisPlayerPed);
-    Install("CPlayerPed", "AnnoyPlayerPed", 0x60A040, &CPlayerPed::AnnoyPlayerPed);
-    Install("CPlayerPed", "ClearAdrenaline", 0x60A070, &CPlayerPed::ClearAdrenaline);
-    Install("CPlayerPed", "DisbandPlayerGroup", 0x60A0A0, &CPlayerPed::DisbandPlayerGroup);
-    Install("CPlayerPed", "MakeGroupRespondToPlayerTakingDamage", 0x60A110, &CPlayerPed::MakeGroupRespondToPlayerTakingDamage);
-    Install("CPlayerPed", "TellGroupToStartFollowingPlayer", 0x60A1D0, &CPlayerPed::TellGroupToStartFollowingPlayer);
-    Install("CPlayerPed", "MakePlayerGroupDisappear", 0x60A440, &CPlayerPed::MakePlayerGroupDisappear);
-    Install("CPlayerPed", "MakePlayerGroupReappear", 0x60A4B0, &CPlayerPed::MakePlayerGroupReappear);
-    Install("CPlayerPed", "HandleSprintEnergy", 0x60A550, &CPlayerPed::HandleSprintEnergy);
-    // Install("CPlayerPed", "GetButtonSprintResults", 0x60A820, &CPlayerPed::GetButtonSprintResults);
-    Install("CPlayerPed", "HandlePlayerBreath", 0x60A8D0, &CPlayerPed::HandlePlayerBreath);
-    Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60B460, static_cast<void(CPlayerPed::*)(eWeaponType)>(&CPlayerPed::MakeChangesForNewWeapon));
-    Install("CPlayerPed", "LOSBlockedBetweenPeds", 0x60B550, &LOSBlockedBetweenPeds);
-    Install("CPlayerPed", "DoesTargetHaveToBeBroken", 0x60C0C0, &CPlayerPed::DoesTargetHaveToBeBroken);
-    Install("CPlayerPed", "SetPlayerMoveBlendRatio", 0x60C520, &CPlayerPed::SetPlayerMoveBlendRatio);
-    Install("CPlayerPed", "FindPedToAttack", 0x60C5F0, &CPlayerPed::FindPedToAttack);
-    Install("CPlayerPed", "ForceGroupToAlwaysFollow", 0x60C7C0, &CPlayerPed::ForceGroupToAlwaysFollow);
-    Install("CPlayerPed", "ForceGroupToNeverFollow", 0x60C800, &CPlayerPed::ForceGroupToNeverFollow);
-    Install("CPlayerPed", "MakeChangesForNewWeapon_BySlot", 0x60D000, static_cast<void(CPlayerPed::*)(uint32)>(&CPlayerPed::MakeChangesForNewWeapon));
-    Install("CPlayerPed", "EvaluateTarget", 0x60D020, &CPlayerPed::EvaluateTarget);
-    Install("CPlayerPed", "PlayerHasJustAttackedSomeone", 0x60D5A0, &CPlayerPed::PlayerHasJustAttackedSomeone);
-    Install("CPlayerPed", "SetupPlayerPed", 0x60D790, &CPlayerPed::SetupPlayerPed);
+    RH_ScopedClass(CPlayerPed);
+    RH_ScopedCategory("Entity/Ped");
+
+    RH_ScopedInstall(ResetSprintEnergy, 0x60A530);
+    RH_ScopedInstall(ResetPlayerBreath, 0x60A8A0);
+    RH_ScopedInstall(RemovePlayerPed, 0x6094A0);
+    RH_ScopedInstall(Busted, 0x609EF0);
+    RH_ScopedInstall(GetWantedLevel, 0x41BE60);
+    RH_ScopedInstall(SetWantedLevel, 0x609F10);
+    RH_ScopedInstall(SetWantedLevelNoDrop, 0x609F30);
+    RH_ScopedInstall(CheatWantedLevel, 0x609F50);
+    RH_ScopedInstall(DoStuffToGoOnFire, 0x60A020);
+    // RH_ScopedVirtualInstall(Load, 0x5D46E0);
+    // RH_ScopedVirtualInstall(Save, 0x5D57E0);
+    RH_ScopedInstall(DeactivatePlayerPed, 0x609520);
+    RH_ScopedInstall(ReactivatePlayerPed, 0x609540);
+    RH_ScopedInstall(GetPadFromPlayer, 0x609560);
+    RH_ScopedInstall(CanPlayerStartMission, 0x609590);
+    RH_ScopedInstall(IsHidden, 0x609620);
+    RH_ScopedInstall(ReApplyMoveAnims, 0x609650);
+    RH_ScopedInstall(DoesPlayerWantNewWeapon, 0x609710);
+    RH_ScopedInstall(ProcessPlayerWeapon, 0x6097F0);
+    RH_ScopedInstall(PickWeaponAllowedFor2Player, 0x609800);
+    RH_ScopedInstall(UpdateCameraWeaponModes, 0x609830);
+    RH_ScopedInstall(ClearWeaponTarget, 0x609c80);
+    RH_ScopedInstall(GetWeaponRadiusOnScreen, 0x609CD0);
+    RH_ScopedInstall(PedCanBeTargettedVehicleWise, 0x609D90);
+    RH_ScopedInstall(FindTargetPriority, 0x609DE0);
+    RH_ScopedInstall(Clear3rdPersonMouseTarget, 0x609ED0);
+    RH_ScopedInstall(CanIKReachThisTarget, 0x609F80);
+    RH_ScopedInstall(GetPlayerInfoForThisPlayerPed, 0x609FF0);
+    RH_ScopedInstall(AnnoyPlayerPed, 0x60A040);
+    RH_ScopedInstall(ClearAdrenaline, 0x60A070);
+    RH_ScopedInstall(DisbandPlayerGroup, 0x60A0A0);
+    RH_ScopedInstall(MakeGroupRespondToPlayerTakingDamage, 0x60A110);
+    RH_ScopedInstall(TellGroupToStartFollowingPlayer, 0x60A1D0);
+    RH_ScopedInstall(MakePlayerGroupDisappear, 0x60A440);
+    RH_ScopedInstall(MakePlayerGroupReappear, 0x60A4B0);
+    RH_ScopedInstall(HandleSprintEnergy, 0x60A550);
+    // RH_ScopedInstall(GetButtonSprintResults, 0x60A820);
+    RH_ScopedInstall(HandlePlayerBreath, 0x60A8D0);
+    RH_ScopedOverloadedInstall(MakeChangesForNewWeapon, "", 0x60B460, void(CPlayerPed::*)(eWeaponType));
+    RH_ScopedGlobalInstall(LOSBlockedBetweenPeds, 0x60B550);
+    RH_ScopedInstall(DoesTargetHaveToBeBroken, 0x60C0C0);
+    RH_ScopedInstall(SetPlayerMoveBlendRatio, 0x60C520);
+    RH_ScopedInstall(FindPedToAttack, 0x60C5F0);
+    RH_ScopedInstall(ForceGroupToAlwaysFollow, 0x60C7C0);
+    RH_ScopedInstall(ForceGroupToNeverFollow, 0x60C800);
+    RH_ScopedOverloadedInstall(MakeChangesForNewWeapon, "BySlot", 0x60D000, void(CPlayerPed::*)(uint32));
+    RH_ScopedInstall(EvaluateTarget, 0x60D020);
+    RH_ScopedInstall(PlayerHasJustAttackedSomeone, 0x60D5A0);
+    RH_ScopedInstall(SetupPlayerPed, 0x60D790);
 
 }
 
@@ -75,8 +85,11 @@ struct WorkBufferSaveData {
 VALIDATE_SIZE(WorkBufferSaveData, 132u + 4u);
 
 // calls of LoadDataFromWorkBuffer are optimized
+// todo: fix
 // 0x5D46E0
 bool CPlayerPed::Load_Reversed() {
+    return plugin::CallMethodAndReturn<bool, 0x5D46E0, CPlayerPed*>(this);
+
     CPed::Load();
 
     WorkBufferSaveData savedData{};
@@ -86,15 +99,18 @@ bool CPlayerPed::Load_Reversed() {
     wanted->m_nChaosLevel = savedData.chaosLevel;
     wanted->m_nWantedLevel= savedData.wantedLevel;
 
-    m_pPlayerData->m_nChosenWeapon = savedData.chosenWeapon;
-    *m_pPlayerData->m_pPedClothesDesc = savedData.clothesDesc;
+    m_pPlayerData->m_nChosenWeapon   = savedData.chosenWeapon;
+    m_pPlayerData->m_pPedClothesDesc = &savedData.clothesDesc;
 
     return true;
 }
 
 // calls of SaveDataToWorkBuffer are optimized
+// todo: fix
 // 0x5D57E0
 bool CPlayerPed::Save_Reversed() {
+    return plugin::CallMethodAndReturn<bool, 0x5D57E0>(this);
+
     WorkBufferSaveData saveData{};
 
     CWanted* wanted = m_pPlayerData->m_pWanted;
@@ -102,7 +118,7 @@ bool CPlayerPed::Save_Reversed() {
     saveData.wantedLevel = wanted->m_nWantedLevel;
 
     saveData.chosenWeapon = m_pPlayerData->m_nChosenWeapon;
-    saveData.clothesDesc = *m_pPlayerData->m_pPedClothesDesc;
+    saveData.clothesDesc  = m_pPlayerData->m_pPedClothesDesc;
 
     CGenericGameStorage::SaveDataToWorkBuffer(&saveData, sizeof(WorkBufferSaveData));
 
@@ -110,8 +126,46 @@ bool CPlayerPed::Save_Reversed() {
 }
 
 // 0x60D5B0
-CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(plugin::dummy) {
-    plugin::CallMethod<0x60D5B0, CPlayerPed *, int32, bool>(this, playerId, bGroupCreated);
+CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(PED_TYPE_PLAYER1) {
+    m_pPlayerData = &CWorld::Players[playerId].m_PlayerData;
+    m_pPlayerData->AllocateData();
+
+    SetModelIndex(MODEL_PLAYER); // V1053 Calling the 'SetModelIndex' virtual function in the constructor may lead to unexpected result at runtime
+
+    CPlayerPed::SetInitialState(bGroupCreated);
+
+    CEntity::ClearReference(m_pTargetedObject);
+
+    SetPedState(PEDSTATE_IDLE);
+
+    gPlayIdlesAnimBlockIndex = CAnimManager::GetAnimationBlockIndex("playidles");
+
+    if (!bGroupCreated) {
+        m_pPlayerData->m_nPlayerGroup = CPedGroups::AddGroup();
+
+        auto& group = CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup);
+        group.GetIntelligence().SetDefaultTaskAllocatorType(5);
+        group.m_bIsMissionGroup = true;
+        group.m_groupMembership.SetLeader(this);
+        group.Process();
+
+        m_pPlayerData->m_bGroupStuffDisabled = false; // m_pPlayerData->m_nPlayerFlags &= ~0x100u;
+        m_pPlayerData->m_bGroupAlwaysFollow  = false; // m_pPlayerData->m_nPlayerFlags &= ~0x200u;
+        m_pPlayerData->m_bGroupNeverFollow   = false; // m_pPlayerData->m_nPlayerFlags &= ~0x400u;
+    }
+
+    m_fMaxHealth = CStats::GetFatAndMuscleModifier(STAT_MOD_MAX_HEALTH);
+    m_fHealth    = m_fMaxHealth;
+
+    m_nFightingStyle      = STYLE_GRAB_KICK;
+    m_nAllowedAttackMoves = 15;
+
+    m_p3rdPersonMouseTarget = nullptr;
+    field_7A0 = 0;
+    m_pedSpeech.Initialise(this);
+    m_pIntelligence->m_fDmRadius = 30.0f;
+    m_pIntelligence->m_nDmNumPedsToScan = 2;
+    bUsedForReplay = true;
 }
 
 // 0x6094A0
@@ -148,10 +202,10 @@ void CPlayerPed::ReactivatePlayerPed(int32 playerId) {
 // 0x609560
 CPad* CPlayerPed::GetPadFromPlayer() {
     switch (m_nPedType) {
-    case ePedType::PED_TYPE_PLAYER1:
+    case PED_TYPE_PLAYER1:
         return CPad::GetPad(0);
 
-    case ePedType::PED_TYPE_PLAYER2:
+    case PED_TYPE_PLAYER2:
         return CPad::GetPad(1);
     }
     assert(0); // shouldn't happen
@@ -160,32 +214,30 @@ CPad* CPlayerPed::GetPadFromPlayer() {
 
 // 0x609590
 bool CPlayerPed::CanPlayerStartMission() {
-    if (CGameLogic::GameState != GAME_STATE_INITIAL)
-        return false;
-
-    if (CGameLogic::IsCoopGameGoingOn())
+    if (CGameLogic::GameState != GAME_STATE_INITIAL || CGameLogic::IsCoopGameGoingOn())
         return false;
 
     if (!IsPedInControl() && !IsStateDriving())
         return false;
 
-    if (GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_ATTACK))
+    auto& taskMgr = GetTaskManager();
+    if (taskMgr.GetTaskPrimary(TASK_PRIMARY_PHYSICAL_RESPONSE))
         return false;
 
-    if (GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_SAY))
+    if (taskMgr.GetTaskPrimary(TASK_PRIMARY_EVENT_RESPONSE_NONTEMP))
         return false;
 
-    if (auto task = GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_FACIAL_COMPLEX)) {
-        if (task->GetTaskType() == eTaskType::TASK_SIMPLE_CAR_DRIVE) {
-            return false;
-        }
-    }
+    auto primaryTask = taskMgr.GetTaskPrimary(TASK_PRIMARY_PRIMARY);
+    if (primaryTask != nullptr && primaryTask->GetTaskType() != TASK_SIMPLE_CAR_DRIVE)
+        return false;
+
+    if (taskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK))
+        return false;
 
     if (!IsAlive())
         return false;
 
-    return !GetEventGroup().GetEventOfType(eEventType::EVENT_SCRIPT_COMMAND);
-   
+    return !GetEventGroup().GetEventOfType(EVENT_SCRIPT_COMMAND);
 }
 
 // 0x609620
@@ -196,11 +248,11 @@ bool CPlayerPed::IsHidden() {
 // 0x609650
 void CPlayerPed::ReApplyMoveAnims() {
     constexpr AnimationId anims[]{
-        AnimationId::ANIM_ID_WALK,
-        AnimationId::ANIM_ID_RUN,
-        AnimationId::ANIM_ID_SPRINT,
-        AnimationId::ANIM_ID_IDLE,
-        AnimationId::ANIM_ID_WALK_START
+        ANIM_ID_WALK,
+        ANIM_ID_RUN,
+        ANIM_ID_SPRINT,
+        ANIM_ID_IDLE,
+        ANIM_ID_WALK_START
     };
     for (const AnimationId& id : anims) {
         if (CAnimBlendAssociation* anim = RpAnimBlendClumpGetAssociation(m_pRwClump, id)) {
@@ -209,7 +261,7 @@ void CPlayerPed::ReApplyMoveAnims() {
                 addedAnim->m_fBlendDelta = anim->m_fBlendDelta;
                 addedAnim->m_fBlendAmount = anim->m_fBlendAmount;
 
-                anim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
+                anim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
                 anim->m_fBlendDelta = -1000.0f;
             }
         }
@@ -243,8 +295,8 @@ bool CPlayerPed::DoesPlayerWantNewWeapon(eWeaponType weaponType, bool arg1) {
 
     if (m_nActiveWeaponSlot == weaponSlot) {
         switch (m_nPedState) {
-        case ePedState::PEDSTATE_ATTACK:
-        case ePedState::PEDSTATE_AIMGUN:
+        case PEDSTATE_ATTACK:
+        case PEDSTATE_AIMGUN:
             return false;
         }
     }
@@ -300,9 +352,7 @@ void CPlayerPed::ProcessAnimGroups() {
 // 0x609C80
 void CPlayerPed::ClearWeaponTarget() {
     if (IsPlayer()) {
-        if (m_pTargetedObject)
-            m_pTargetedObject->CleanUpOldReference(&m_pTargetedObject);
-        m_pTargetedObject = nullptr;
+        CEntity::ClearReference(m_pTargetedObject);
         TheCamera.ClearPlayerWeaponMode();
         CWeaponEffects::ClearCrossHair(m_nPedType);
     }
@@ -327,8 +377,8 @@ float CPlayerPed::GetWeaponRadiusOnScreen() {
         const float rangeProg = std::min(1.0f, 15.0f / wepInfo.m_fWeaponRange);
         const float radius = (m_pPlayerData->m_fAttackButtonCounter * 0.5f + 1.0f) * rangeProg * accuracyProg;
         if (bIsDucking)
-            return radius / 2.0f;
-        return radius;
+            return std::max(0.2f, radius / 2.0f);
+        return std::max(0.2f, radius);
     }
     }
 }
@@ -345,25 +395,23 @@ bool CPlayerPed::PedCanBeTargettedVehicleWise(CPed* ped) {
 // 0x609DE0
 float CPlayerPed::FindTargetPriority(CEntity* entity) {
     switch (entity->m_nType) {
-    case eEntityType::ENTITY_TYPE_VEHICLE:
+    case ENTITY_TYPE_VEHICLE:
         return 0.1f;
 
-    case eEntityType::ENTITY_TYPE_PED: {
+    case ENTITY_TYPE_PED: {
         auto ped = entity->AsPed();
 
         if (ped->bThisPedIsATargetPriority)
             return 1.0f;
 
-        if (ped->GetTaskManager().FindActiveTaskByType(eTaskType::TASK_COMPLEX_KILL_PED_ON_FOOT) ||
-            ped->GetTaskManager().FindActiveTaskByType(eTaskType::TASK_COMPLEX_ARREST_PED)
-        ) {
+        if (ped->GetTaskManager().HasAnyOf<TASK_COMPLEX_KILL_PED_ON_FOOT, TASK_COMPLEX_ARREST_PED>()) {
             return 0.8f;
         }
 
         if (CPedGroups::AreInSameGroup(this, ped))
             return 0.05f;
 
-        if (ped->m_nPedType == ePedType::PED_TYPE_GANG2)
+        if (ped->m_nPedType == PED_TYPE_GANG2)
             return 0.06f;
 
         if (ped->IsCreatedByMission())
@@ -372,7 +420,7 @@ float CPlayerPed::FindTargetPriority(CEntity* entity) {
         return 0.1f;
     }
 
-    case eEntityType::ENTITY_TYPE_OBJECT: {
+    case ENTITY_TYPE_OBJECT: {
         switch (entity->AsObject()->m_nObjectType) {
         case eObjectType::OBJECT_MISSION:
         case eObjectType::OBJECT_MISSION2:
@@ -390,10 +438,7 @@ float CPlayerPed::FindTargetPriority(CEntity* entity) {
 
 // 0x609ED0
 void CPlayerPed::Clear3rdPersonMouseTarget() {
-    if (m_p3rdPersonMouseTarget) {
-        m_p3rdPersonMouseTarget->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_p3rdPersonMouseTarget));
-        m_p3rdPersonMouseTarget = nullptr;
-    }
+    CEntity::ClearReference(m_p3rdPersonMouseTarget);
 }
 
 // 0x609EF0
@@ -443,7 +488,7 @@ bool CPlayerPed::CanIKReachThisTarget(CVector posn, CWeapon* weapon, bool arg2) 
 
 // 0x609FF0
 CPlayerInfo* CPlayerPed::GetPlayerInfoForThisPlayerPed() {
-    // TODO: Use range for here 
+    // TODO: Use range for here
     for (int i = 0; i < MAX_PLAYERS; i++) {
         if (FindPlayerPed(i) == this)
             return &FindPlayerInfo(i);
@@ -473,11 +518,9 @@ void CPlayerPed::AnnoyPlayerPed(bool arg0) {
 
 // 0x60A070
 void CPlayerPed::ClearAdrenaline() {
-    if (m_pPlayerData->m_bAdrenaline) {
-        if (m_pPlayerData->m_nAdrenalineEndTime) {
-            m_pPlayerData->m_nAdrenalineEndTime = 0;
-            CTimer::ResetTimeScale();
-        }
+    if (m_pPlayerData->m_bAdrenaline && m_pPlayerData->m_nAdrenalineEndTime != 0) {
+        m_pPlayerData->m_nAdrenalineEndTime = 0;
+        CTimer::ResetTimeScale();
     }
 }
 
@@ -486,7 +529,7 @@ void CPlayerPed::DisbandPlayerGroup() {
     CPedGroupMembership& membership = GetGroupMembership();
     const uint32 nMembers = membership.CountMembersExcludingLeader();
     if (nMembers > 0)
-        Say(nMembers > 1 ? 149 : 150, 0, 1.0f, 0, 0, 0);
+        Say(nMembers > 1 ? 149 : 150);
     else
         membership.RemoveAllFollowers(true);
 }
@@ -644,7 +687,7 @@ float CPlayerPed::GetButtonSprintResults(eSprintType sprintType) {
     return plugin::CallMethodAndReturn<float, 0x60A820, CPlayerPed *, eSprintType>(this, sprintType);
 
     // Forces the compiler to preserve the value of `edx`.
-    // Otherwise it's value is lost when called from 0x60B44C. 
+    // Otherwise it's value is lost when called from 0x60B44C.
     // which causes a crash (as it is used to store a pointer to an anim blend assoc)
     __asm { and edx, edx };
 
@@ -666,14 +709,16 @@ void CPlayerPed::ResetPlayerBreath() {
 void CPlayerPed::HandlePlayerBreath(bool bDecreaseAir, float fMultiplier) {
     float& breath = m_pPlayerData->m_fBreath;
     float  decreaseAmount = CTimer::GetTimeStep() * fMultiplier;
-    if (!bDecreaseAir || CCheat::m_aCheatsActive[CHEAT_INFINITE_OXYGEN]) {
-        breath += decreaseAmount * 2.0f;
+    if (!bDecreaseAir || CCheat::IsActive(CHEAT_INFINITE_OXYGEN)) {
+        if (CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) > breath)
+            breath += decreaseAmount * 2.0f;
     } else {
         if (breath > 0.0f && bDrownsInWater)
             breath = std::max(0.0f, breath - decreaseAmount);
         else
-            CWeapon::GenerateDamageEvent(this, this, eWeaponType::WEAPON_DROWNING, (int32)(decreaseAmount * 3.0f), ePedPieceTypes::PED_PIECE_TORSO, 0);
+            CWeapon::GenerateDamageEvent(this, this, eWeaponType::WEAPON_DROWNING, (int32)(decreaseAmount * 3.0f), PED_PIECE_TORSO, 0);
     }
+    m_pPlayerData->m_bRequireHandleBreath = false;
 }
 
 // 0x60A9C0
@@ -684,7 +729,7 @@ void CPlayerPed::SetRealMoveAnim() {
 // 0x60B460
 void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
     GetActiveWeapon().StopWeaponEffect();
-    if (m_nPedState == ePedState::PEDSTATE_SNIPER_MODE)
+    if (m_nPedState == PEDSTATE_SNIPER_MODE)
         TheCamera.ClearPlayerWeaponMode();
 
     SetCurrentWeapon(weaponType);
@@ -704,8 +749,8 @@ void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
         m_pPlayerData->m_bFreeAiming = false;
 
 
-    if (auto anim = RpAnimBlendClumpGetAssociation(m_pRwClump, AnimationId::ANIM_ID_FIRE))
-        anim->m_nFlags |= ANIM_FLAG_STARTED & ANIM_FLAG_UNLOCK_LAST_FRAME;
+    if (auto anim = RpAnimBlendClumpGetAssociation(m_pRwClump, ANIM_ID_FIRE))
+        anim->m_nFlags |= ANIMATION_STARTED & ANIMATION_UNLOCK_LAST_FRAME;
 
     TheCamera.ClearPlayerWeaponMode();
 }
@@ -753,7 +798,7 @@ bool CPlayerPed::DoesTargetHaveToBeBroken(CEntity* entity, CWeapon* weapon) {
         return true;
 
     if (weapon->m_nType == eWeaponType::WEAPON_SPRAYCAN) {
-        if (entity->m_nType == eEntityType::ENTITY_TYPE_BUILDING) {
+        if (entity->IsBuilding()) {
             if (CTagManager::IsTag(entity)) {
                 if (CTagManager::GetAlpha(entity) == 255) { // they probably used -1
                     return true;
@@ -810,8 +855,8 @@ CPed* CPlayerPed::FindPedToAttack() {
     float closestDistance = std::numeric_limits<float>::max();
 
     CPedGroupMembership& membership = GetGroupMembership();
-    for (int i = 0; CPools::ms_pPedPool->GetSize(); i++) {
-        CPed* ped = CPools::ms_pPedPool->GetAt(i);
+    for (int i = 0; GetPedPool()->GetSize(); i++) {
+        CPed* ped = GetPedPool()->GetAt(i);
         if (!ped)
             continue;
         if (ped->IsPlayer())
@@ -820,7 +865,7 @@ CPed* CPlayerPed::FindPedToAttack() {
             continue;
         if (membership.IsMember(ped))
             continue;
-        if (ped->m_nPedType == ePedType::PED_TYPE_GANG2)
+        if (ped->m_nPedType == PED_TYPE_GANG2)
             continue;
 
         CVector point = ped->GetPosition();
@@ -890,7 +935,7 @@ void CPlayerPed::EvaluateTarget(CEntity* target, CEntity *& outTarget, float & o
     if (DoesTargetHaveToBeBroken(target, &GetActiveWeapon()))
         return;
 
-    const float targetAngleDeg = fabs(RWRAD2DEG(CGeneral::LimitRadianAngle(CGeneral::GetATanOf(dir) - compensationRotRad)));
+    const float targetAngleDeg = std::fabs(RadiansToDegrees(CGeneral::LimitRadianAngle(CGeneral::GetATanOf(dir) - compensationRotRad)));
 
     float viewAngleMultiplier = 1.0f - targetAngleDeg / PLAYER_MAX_TARGET_VIEW_ANGLE;
     if (dist > 1.0f)
@@ -925,7 +970,7 @@ void CPlayerPed::SetupPlayerPed(int32 playerId) {
     playerInfo.m_pPed = ped;
 
     if (playerId == 1)
-        ped->m_nPedType = ePedType::PED_TYPE_PLAYER2;
+        ped->m_nPedType = PED_TYPE_PLAYER2;
 
     ped->SetOrientation(0.0f, 0.0f, 0.0f);
     CWorld::Add(ped);
@@ -946,4 +991,12 @@ bool CPlayerPed::FindWeaponLockOnTarget() {
 // 0x60E530
 bool CPlayerPed::FindNextWeaponLockOnTarget(CEntity* arg0, bool arg1) {
     return plugin::CallMethodAndReturn<bool, 0x60E530, CPlayerPed *, CEntity*, bool>(this, arg0, arg1);
+}
+
+bool CPlayerPed::Load() {
+    return CPlayerPed::Load_Reversed();
+}
+
+bool CPlayerPed::Save() {
+    return CPlayerPed::Save_Reversed();
 }

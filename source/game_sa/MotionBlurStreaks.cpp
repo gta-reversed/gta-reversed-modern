@@ -8,10 +8,13 @@ RxVertexIndex(&CMotionBlurStreaks::aIndices)[NUM_STREAK_INDICES] = *(RxVertexInd
 
 void CMotionBlurStreaks::InjectHooks()
 {
-    ReversibleHooks::Install("CMotionBlurStreaks", "Init", 0x721D90, &CMotionBlurStreaks::Init);
-    ReversibleHooks::Install("CMotionBlurStreaks", "Update", 0x7240C0, &CMotionBlurStreaks::Update);
-    ReversibleHooks::Install("CMotionBlurStreaks", "Render", 0x7240E0, &CMotionBlurStreaks::Render);
-    ReversibleHooks::Install("CMotionBlurStreaks", "RegisterStreak", 0x721DC0, &CMotionBlurStreaks::RegisterStreak);
+    RH_ScopedClass(CMotionBlurStreaks);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x721D90);
+    RH_ScopedInstall(Update, 0x7240C0);
+    RH_ScopedInstall(Render, 0x7240E0);
+    RH_ScopedInstall(RegisterStreak, 0x721DC0);
 }
 
 // 0x721D90
@@ -39,21 +42,21 @@ void CMotionBlurStreaks::Render()
         if (streak.m_nId) {
             if (!bRenderParamsSet) {
                 bRenderParamsSet = true;
-                RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
-                RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-                RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)TRUE);
-                RwRenderStateSet(rwRENDERSTATEFOGCOLOR,          (void*)CTimeCycle::GetCurrentSkyBottomColor().ToIntARGB());
-                RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-                RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-                RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)nullptr);
+                RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+                RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+                RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
+                RwRenderStateSet(rwRENDERSTATEFOGCOLOR,          RWRSTATE(CTimeCycle::GetCurrentSkyBottomColor().ToIntARGB()));
+                RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+                RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+                RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
             }
             streak.Render();
         }
     }
 
     if (bRenderParamsSet) {
-        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
     }
 }
 

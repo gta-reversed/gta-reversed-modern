@@ -1,12 +1,13 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-/* multitheftauto /MTA10/sdk/game/TaskTypes.h */
+/* https://github.com/multitheftauto/mtasa-blue/blob/master/Client/sdk/game/TaskTypes.h */
+#include "Base.h"
 
 enum eTaskType : int32 {
     // player tasks
@@ -402,7 +403,7 @@ enum eTaskType : int32 {
     // new weapon/fight tasks
     TASK_SIMPLE_FIGHT,
     TASK_SIMPLE_USE_GUN,
-    TASK_SIMPLE_THROW,
+    TASK_SIMPLE_THROW_PROJECTILE,
     TASK_SIMPLE_FIGHT_CTRL,
     TASK_SIMPLE_GUN_CTRL,
     // SCRIPT_DECISION

@@ -1,5 +1,5 @@
-    /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+/*
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -9,11 +9,11 @@
 #include "TaskSimple.h"
 #include "Vector.h"
 #include "Vector2D.h"
-#include "WeaponInfo.h"
-#include "AnimBlendAssociation.h"
-#include "Entity.h"
+class CWeaponInfo;
+class CAnimBlendAssociation;
+class CEntity;
 
-class CTaskSimpleUseGun : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleUseGun : public CTaskSimple {
 public:
     bool m_bIsFinished;
     bool m_bIsInControl;
@@ -31,7 +31,6 @@ public:
 
     uint8 m_nNextCommand; // 0x1 reloading - 0x2 firing
     uint8 m_nLastCommand; // active command - 0x1 reloading - 0x2 firing
-    char _pad[3];
     CVector2D m_vecMoveCommand;
     CEntity* m_pTarget;
     CVector m_vecTarget;
@@ -48,11 +47,13 @@ public:
     bool m_bAimImmediate;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_USE_GUN;
+
     CTaskSimpleUseGun(CEntity* targetEntity, CVector vecTarget, uint8 nCommand, uint16 nBurstLength = 1, bool bAimImmediate = false);
     ~CTaskSimpleUseGun() override;
 
     CTask* Clone() override { return new CTaskSimpleUseGun(m_pTarget, m_vecTarget, m_nLastCommand, m_nBurstLength, m_bAimImmediate); }
-    eTaskType GetTaskType() override { return TASK_SIMPLE_USE_GUN; };
+    eTaskType GetTaskType() override { return Type; };
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;

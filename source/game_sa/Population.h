@@ -1,16 +1,18 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "LoadedCarGroup.h"
-#include "Ped.h"
-#include "Dummy.h"
-#include "DummyObject.h"
-#include "Zone.h"
+#include "eLevelName.h"
+
+class CLoadedCarGroup;
+class CPed;
+class CDummy;
+class CDummyObject;
+class CZone;
 
 enum ePedRace {
     RACE_DEFAULT = 0,
@@ -28,34 +30,29 @@ enum eUpdatePedCounterState {
 // for the most part, pedGroupIds[0] is used, but in some cases
 // it's used like this: pedGroupIds[CPopulation::CurrentWorldZone]
 struct tPedGroupTranslationData {
-    int32 pedGroupIds[3]; // see ePopcyclePedGroup
+    ePopcyclePedGroup pedGroupIds[3]{};
 };
-
 VALIDATE_SIZE(tPedGroupTranslationData, 0xC);
 
 class CPopulation {
 public:
-    // static variables
-
     static float&  PedDensityMultiplier;
     static int32&  m_AllRandomPedsThisType;
     static uint32& MaxNumberOfPedsInUse;
     static uint32& NumberOfPedsInUseInterior;
-    // static tPedGroupTranslationData m_TranslationArray[33]
-    static tPedGroupTranslationData* m_TranslationArray; // see ePopcycleGroup
+    static inline tPedGroupTranslationData (&m_TranslationArray)[33] = *(tPedGroupTranslationData(*)[33])0x8D2540;
     static CLoadedCarGroup&          m_LoadedBoats;
     static CLoadedCarGroup&          m_InAppropriateLoadedCars;
     static CLoadedCarGroup&          m_AppropriateLoadedCars;
-    // static CLoadedCarGroup m_LoadedGangCars[10]
-    static CLoadedCarGroup* m_LoadedGangCars;
-    static bool&            bZoneChangeHasHappened;
-    static uint8&           m_CountDownToPedsAtStart;
-    static uint32&          ms_nTotalMissionPeds;
-    static uint32&          ms_nTotalPeds;
-    static uint32&          ms_nTotalGangPeds;
-    static uint32&          ms_nTotalCivPeds;
-    static uint32&          ms_nTotalCarPassengerPeds;
-    static uint32&          ms_nNumDealers;
+    static CLoadedCarGroup           (&m_LoadedGangCars)[10];
+    static bool&                     bZoneChangeHasHappened;
+    static uint8&                    m_CountDownToPedsAtStart;
+    static uint32&                   ms_nTotalMissionPeds;
+    static uint32&                   ms_nTotalPeds;
+    static uint32&                   ms_nTotalGangPeds;
+    static uint32&                   ms_nTotalCivPeds;
+    static uint32&                   ms_nTotalCarPassengerPeds;
+    static uint32&                   ms_nNumDealers;
     // static uint32 ms_nNumGang[10]
     static uint32* ms_nNumGang;
     static uint32& ms_nNumEmergency;
@@ -111,7 +108,7 @@ public:
     // returns false
     static bool IsSecurityGuard(ePedType pedType);
     // checks if surface at this point is skateable
-    static bool IsSkateable(CVector const& point);
+    static bool IsSkateable(const CVector& point);
     // calls CGangs::ChooseGangPedModel(int32); parameter - gang id?
     static void ChooseGangOccupation(int32 arg0);
     // empty function, returns ped
@@ -131,31 +128,31 @@ public:
     static bool CanSolicitPlayerInCar(int32 modelIndex);
     // returns true if ped type is PED_TYPE_CIVMALE
     static bool CanJeerAtStripper(int32 modelIndex);
-    static void PlaceGangMembers(ePedType pedType, int32 arg1, CVector const& posn);
+    static void PlaceGangMembers(ePedType pedType, int32 arg1, const CVector& posn);
     static void LoadSpecificDriverModelsForCar(int32 carModelIndex);
     // returns ped model index
     static int32 FindSpecificDriverModelForCar_ToUse(int32 carModelIndex);
     static void  RemoveSpecificDriverModelsForCar(int32 carModelIndex);
-    static bool  IsCorrectTimeOfDayForEffect(C2dEffect const* effect);
+    static bool  IsCorrectTimeOfDayForEffect(const C2dEffect* effect);
     // return CPopulation::m_bMoreCarsAndFewerPeds? 1.7f : 1.0f;
     static float FindCarMultiplierMotorway();
     // return 1.0f;
     static float FindPedMultiplierMotorway();
-    static void  ManagePed(CPed* ped, CVector const& playerPosn);
+    static void  ManagePed(CPed* ped, const CVector& playerPosn);
     static int32 FindNumberOfPedsWeCanPlaceOnBenches();
     static void  RemoveAllRandomPeds();
     static bool  TestRoomForDummyObject(CObject* object);
     static bool  TestSafeForRealObject(CDummyObject* dummyObject);
-    static CPed* AddPed(ePedType pedType, uint32 modelIndex, CVector const& posn, bool makeWander);
+    static CPed* AddPed(ePedType pedType, uint32 modelIndex, const CVector& posn, bool makeWander);
     // creates male01 ped in front of car?
-    static CPed* AddDeadPedInFrontOfCar(CVector const& posn, CVehicle* vehicle);
+    static CPed* AddDeadPedInFrontOfCar(const CVector& posn, CVehicle* vehicle);
     static int32 ChooseCivilianOccupation(bool male, bool female, int32 animType, int32 ignoreModelIndex, int32 statType, bool arg5, bool arg6, bool checkAttractor, char* attrName);
     static void  ChooseCivilianCoupleOccupations(int32& model1, int32& model2);
     static int32 ChooseCivilianOccupationForVehicle(bool male, CVehicle* vehicle);
     static void  CreateWaitingCoppers(CVector posn, float arg1);
     // Creates ped in a vehicle. gangPedType can be set to -1
     static CPed* AddPedInCar(CVehicle* vehicle, bool driver, int32 gangPedType, int32 seatNumber, bool male, bool criminal);
-    static void  PlaceMallPedsAsStationaryGroup(CVector const& posn);
+    static void  PlaceMallPedsAsStationaryGroup(const CVector& posn);
     static void  PlaceCouple(ePedType pedType1, int32 modelIndex1, ePedType pedType2, int32 modelIndex2, CVector posn);
     // Creates ped at attractor. decisionMakerType can be set to -1
     static bool  AddPedAtAttractor(int32 modelIndex, C2dEffect* attractor, CVector posn, CEntity* entity, int32 decisionMakerType);
@@ -168,8 +165,8 @@ public:
     // returns number of generated peds?
     static int32 GeneratePedsAtAttractors(CVector posn, float arg1, float arg2, float arg3, float arg4, int32 decisionMakerType, int32 numPeds);
     static void GeneratePedsAtStartOfGame();
-    static void ManageObject(CObject* object, CVector const& posn);
-    static void ManageDummy(CDummy* dummy, CVector const& posn);
+    static void ManageObject(CObject* object, const CVector& posn);
+    static void ManageDummy(CDummy* dummy, const CVector& posn);
     static void ManageAllPopulation();
     static void ManagePopulation();
     static void RemovePedsIfThePoolGetsFull();
@@ -177,7 +174,9 @@ public:
     static void PopulateInterior(int32 numPeds, CVector posn);
     static void Update(bool generatePeds);
     static bool DoesCarGroupHaveModelId(int32 carGroupId, int32 modelId);
-    static ePopcyclePedGroup GetPedGroupId(ePopcycleGroup popcycleGroup, int32 worldZone) { return static_cast<ePopcyclePedGroup>(m_TranslationArray[popcycleGroup].pedGroupIds[worldZone]); }
+
+    static ePopcyclePedGroup GetPedGroupId(ePopcycleGroup popcycleGroup, size_t worldZone = 0) { return static_cast<ePopcyclePedGroup>(m_TranslationArray[popcycleGroup].pedGroupIds[worldZone]); }
+    static ePopcyclePedGroup GetGangGroupId(eGangID gang, int32 worldZone = 0) { return static_cast<ePopcyclePedGroup>(m_TranslationArray[gang + POPCYCLE_GROUP_BALLAS].pedGroupIds[worldZone]); }
     static int32 GetNumPedsInGroup(ePopcycleGroup popcycleGroup, int32 worldZone) { return m_nNumPedsInGroup[GetPedGroupId(popcycleGroup, worldZone)]; }
     static int32 GetNumPedsInGroup(ePopcyclePedGroup pedGroup) { return m_nNumPedsInGroup[pedGroup]; }
     static int32 GetPedGroupModelId(ePopcyclePedGroup pedGroup, int32 slot) { return m_PedGroups[pedGroup][slot]; }

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -13,7 +13,7 @@ struct tVehicleComponentFlag {
     uint32      m_nFlag;
 };
 
-class CAtomicModelInfo : public CBaseModelInfo {
+class NOTSA_EXPORT_VTABLE CAtomicModelInfo : public CBaseModelInfo {
 public:
     CAtomicModelInfo() : CBaseModelInfo() {}
 
@@ -44,7 +44,7 @@ public:
 
     // class methods
     struct RpAtomic* GetAtomicFromDistance(float distance);
-    void SetupVehicleUpgradeFlags(char const* name);
+    void SetupVehicleUpgradeFlags(const char* name);
 };
 
 void SetAtomicModelInfoFlags(CAtomicModelInfo* modelInfo, uint32 dwFlags);

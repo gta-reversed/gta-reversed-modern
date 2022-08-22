@@ -14,7 +14,7 @@ newoption {
     description = "Output directory for the build files"
 }
 if not _OPTIONS["outdir"] then
-    _OPTIONS["outdir"] = "Build"
+    _OPTIONS["outdir"] = "build"
 end
 
 
@@ -28,20 +28,27 @@ solution "gta_reversed"
 
     location( _OPTIONS["outdir"] )
     targetprefix "" -- no 'lib' prefix on gcc
-    targetdir "Bin"
-    implibdir "Bin"
+    targetdir "bin"
+	targetdir("bin/" .. "%{cfg.buildcfg}")
+    implibdir("bin/" .. "%{cfg.buildcfg}")
     
     configuration "Debug*"
         flags { symbols ("On") }
-        buildoptions {"/MDd"}          
+        -- buildoptions {"/MDd"}
+        staticruntime "off"
+        runtime "Debug"
     configuration "Release*"
         defines { "NDEBUG" }
         flags { symbols ("On") }
-        buildoptions {"/MD"}
+        -- buildoptions {"/MD"}
+        staticruntime "off"
+        runtime "Release"
         optimize "Full"
     configuration "vs*"
-         linkoptions   { "/ignore:4099" }      
-         buildoptions {"/EHsc"}
+        flags {"MultiProcessorCompile"}
+        linkoptions   { "/ignore:4099,4251,4275" }
+        buildoptions {"/EHsc", "/Zc:preprocessor"}
+        disablewarnings { 26812, 26495, 4099, 4251, 4275 }
 
     flags {
         characterset ("MBCS"), --fix strings
@@ -64,7 +71,8 @@ group "Dependencies"
         includedirs { "libs/vorbis/include", "libs/ogg/include", "libs/ogg/include" }
         language "C++"
         kind "StaticLib"
-        targetname "ogg"       
+        targetname "ogg"
+        warnings "Off"
         files {
             "libs/ogg/**.h",
             "libs/ogg/**.c"
@@ -79,7 +87,8 @@ group "Dependencies"
         includedirs { "libs/vorbis/include", "libs/ogg/include", "%{cfg.targetdir}" }
         language "C++"
         kind "StaticLib"
-        targetname "vorbis"   
+        targetname "vorbis"
+        warnings "Off"
 
         local filePaths = {
             "backends.h", "bitrate.h", "codebook.h", "codec_internal.h", "envelope.h", "highlevel.h", "lookup.h", "lookup_data.h", "lpc.h", "lsp.h", "masking.h", "mdct.h", "misc.h", "os.h", "psy.h", "registry.h", "scales.h", "smallft.h", "window.h",
@@ -111,6 +120,7 @@ group "Dependencies"
         kind "StaticLib"
         targetname "vorbisfile"   
         files { "libs/vorbis/lib/vorbisfile.c", "/libs/vorbis/win32/vorbisfile.def" }
+        warnings "Off"
 
     project "imgui"
         vpaths {
@@ -122,6 +132,7 @@ group "Dependencies"
         language "C++"
         kind "StaticLib"
         targetname "imgui" 
+        warnings "Off"
 
         local filePaths = {
             "imconfig.h", "imgui.h", "imgui_internal.h", "imstb_rectpack.h", "imstb_textedit.h", "imstb_truetype.h", 
@@ -147,7 +158,8 @@ group ""
             ["Sources/*"] = {"source/**.c*",},
             ["*"] = {"premake5.lua", "CMakeLists.txt"}
         }
-        defines { "NOMINMAX", "USE_GTASA_ALLOCATOR", "EXTRA_DEBUG_FEATURES" }
+
+        defines { "NOMINMAX", "USE_GTASA_ALLOCATOR", "EXTRA_DEBUG_FEATURES", "FIX_BUGS" }
         includedirs {
             "source", "source/**",
             "libs/vorbis/include",
@@ -160,12 +172,14 @@ group ""
             "%{cfg.targetdir}/ogg.lib", "%{cfg.targetdir}/vorbis.lib", "%{cfg.targetdir}/vorbisfile.lib", 
             "%{cfg.targetdir}/vorbisenc.lib",  "%{cfg.targetdir}/imgui.lib", "libs/dxsdk/d3d9.lib", "libs/dxsdk/dinput.lib"
         }
-        language "C++"
+
+        cppdialect "C++20"        
+
         kind "SharedLib"
         targetname "gta_reversed"
         targetextension ".asi"
         pchheader "StdInc.h"
-        pchsource "source/StdInc.cpp"           
+        pchsource "source/StdInc.cpp"   
         files {
             "source/StdInc.h",
             "source/StdInc.cpp",

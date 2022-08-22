@@ -1,13 +1,12 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-enum eWeaponType : uint32
-{
+enum eWeaponType : uint32 {
     WEAPON_UNARMED = 0,
     WEAPON_BRASSKNUCKLE,
     WEAPON_GOLFCLUB,
@@ -35,7 +34,7 @@ enum eWeaponType : uint32
     WEAPON_FREEFALL_BOMB,
 
     // FIRST SKILL WEAPON
-    WEAPON_PISTOL, 
+    WEAPON_PISTOL,
     WEAPON_PISTOL_SILENCED,
     WEAPON_DESERT_EAGLE,
     WEAPON_SHOTGUN,
@@ -43,19 +42,19 @@ enum eWeaponType : uint32
     WEAPON_SPAS12_SHOTGUN,
     WEAPON_MICRO_UZI,
     WEAPON_MP5,
-    WEAPON_AK47, // 30     
+    WEAPON_AK47, // 30
     WEAPON_M4,
-    WEAPON_TEC9, 
+    WEAPON_TEC9,
     // END SKILL WEAPONS
 
-    WEAPON_COUNTRYRIFLE,  
+    WEAPON_COUNTRYRIFLE,
     WEAPON_SNIPERRIFLE,
-    WEAPON_RLAUNCHER, 
+    WEAPON_RLAUNCHER,
     WEAPON_RLAUNCHER_HS,
     WEAPON_FLAMETHROWER,
     WEAPON_MINIGUN,
     WEAPON_REMOTE_SATCHEL_CHARGE,
-    WEAPON_DETONATOR, // 40 
+    WEAPON_DETONATOR, // 40
     WEAPON_SPRAYCAN,
     WEAPON_EXTINGUISHER,
     WEAPON_CAMERA,
@@ -78,3 +77,4 @@ enum eWeaponType : uint32
     WEAPON_ANYWEAPON,
     WEAPON_FLARE,
 };
+constexpr const auto NUM_WEAPONS{ (size_t)WEAPON_LAST_WEAPON + 1 };

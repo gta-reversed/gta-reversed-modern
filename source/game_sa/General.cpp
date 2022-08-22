@@ -1,27 +1,29 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
 #include <random>
-#include <cassert>
 
 static std::random_device randomDevice;
 static std::mt19937 randomEngine(randomDevice());
 
 void CGeneral::InjectHooks() {
-    ReversibleHooks::Install("CGeneral", "LimitAngle", 0x53CB00, &CGeneral::LimitAngle);
-    ReversibleHooks::Install("CGeneral", "LimitRadianAngle", 0x53CB50, &CGeneral::LimitRadianAngle);
-    ReversibleHooks::Install("CGeneral", "GetRadianAngleBetweenPoints", 0x53CBE0, &CGeneral::GetRadianAngleBetweenPoints);
-    ReversibleHooks::Install("CGeneral", "GetATanOfXY", 0x53CC70, &CGeneral::GetATanOfXY);
-    ReversibleHooks::Install("CGeneral", "GetNodeHeadingFromVector", 0x53CDC0, &CGeneral::GetNodeHeadingFromVector);
-    ReversibleHooks::Install("CGeneral", "SolveQuadratic", 0x53CE30, &CGeneral::SolveQuadratic);
-    ReversibleHooks::Install("CGeneral", "GetAngleBetweenPoints", 0x53CEA0, &CGeneral::GetAngleBetweenPoints);
-    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_int", 0x407180, (int32 (*)(const int32, const int32)) & CGeneral::GetRandomNumberInRange);
-    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_float", 0x41BD90, (float (*)(const float, const float)) & CGeneral::GetRandomNumberInRange);
+    RH_ScopedClass(CGeneral);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(LimitAngle, 0x53CB00);
+    RH_ScopedInstall(LimitRadianAngle, 0x53CB50);
+    RH_ScopedOverloadedInstall(GetRadianAngleBetweenPoints, "", 0x53CBE0, float(*)(float, float, float, float));
+    RH_ScopedInstall(GetATanOfXY, 0x53CC70);
+    RH_ScopedInstall(GetNodeHeadingFromVector, 0x53CDC0);
+    RH_ScopedInstall(SolveQuadratic, 0x53CE30);
+    RH_ScopedInstall(GetAngleBetweenPoints, 0x53CEA0);
+    RH_ScopedOverloadedInstall(GetRandomNumberInRange, "int", 0x407180, int32 (*)(const int32, const int32));
+    RH_ScopedOverloadedInstall(GetRandomNumberInRange, "float", 0x41BD90, float (*)(const float, const float));
 }
 
 // 0x53CB00
@@ -39,7 +41,7 @@ float CGeneral::LimitAngle(float angle) {
 
 // 0x53CB50
 float CGeneral::LimitRadianAngle(float angle) {
-    float result = clamp(angle, -25.0f, 25.0f);
+    float result = std::clamp(angle, -25.0f, 25.0f);
 
     while (result >= PI) {
         result -= 2 * PI;
@@ -116,12 +118,12 @@ uint32 CGeneral::GetNodeHeadingFromVector(float x, float y) {
     if (angle < 0.0f)
         angle += TWO_PI;
 
-    angle = RWDEG2RAD(22.5f) + TWO_PI - angle;
+    angle = TWO_PI - angle + DegreesToRadians(22.5f);
 
     if (angle >= TWO_PI)
         angle -= TWO_PI;
 
-    return (int32)floor(angle / RWDEG2RAD(45.0f));
+    return (uint32)floor(angle / DegreesToRadians(45.0f));
 }
 
 // 0x53CE30
@@ -138,7 +140,17 @@ bool CGeneral::SolveQuadratic(float a, float b, float c, float& x1, float& x2) {
 
 // 0x53CEA0
 float CGeneral::GetAngleBetweenPoints(float x1, float y1, float x2, float y2) {
-    return RWRAD2DEG(GetRadianAngleBetweenPoints(x1, y1, x2, y2));
+    return RadiansToDegrees(GetRadianAngleBetweenPoints(x1, y1, x2, y2));
+}
+
+uint16 CGeneral::GetRandomNumber()
+{
+    static_assert(RAND_MAX == 0x7FFF, "PC-generated random numbers should not exceed 32767");
+#ifdef BETTER_RNG
+    static_assert(false, "PC-generated random numbers should not exceed 32767");
+#else
+    return rand();
+#endif
 }
 
 /**
@@ -152,7 +164,7 @@ int32 CGeneral::GetRandomNumberInRange(const int32 min, const int32 max) {
 #ifdef BETTER_RNG
     // TODO: Use better RNG
 #else
-    return min + static_cast<int32>(rand() * RAND_MAX_INT_RECIPROCAL * (max - min));
+    return min + static_cast<int32>((float)GetRandomNumber() * RAND_MAX_INT_RECIPROCAL * (float)(max - min));
 #endif
 }
 
@@ -168,6 +180,10 @@ float CGeneral::GetRandomNumberInRange(const float min, const float max) {
     std::uniform_real_distribution<float> uniform_dist(min, max);
     return uniform_dist(randomEngine);
 #else
-    return min + (max - min) * rand() * RAND_MAX_FLOAT_RECIPROCAL;
+    return min + (max - min) * (float)GetRandomNumber() * RAND_MAX_FLOAT_RECIPROCAL;
 #endif
+}
+
+float CGeneral::GetRadianAngleBetweenPoints(CVector2D a, CVector2D b) {
+    return GetRadianAngleBetweenPoints(a.x, a.y, b.x, b.y);
 }

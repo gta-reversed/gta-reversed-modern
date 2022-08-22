@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,7 +7,9 @@
 #pragma once
 
 #include "Vector.h"
+#include "eLevelName.h"
 #include "Zone.h"
+#include "ZoneInfo.h"
 
 class CTheZones {
 public:
@@ -15,9 +17,9 @@ public:
     static char*       ZonesVisited;                 // Explored territories. Count: 100
     static int32&      ZonesRevealed;                // Number of explored territories
     static int16&      TotalNumberOfNavigationZones; // Info zones
-    static CZone*      NavigationZoneArray;          // Count: 380
+    static CZone       (&NavigationZoneArray)[380];
     static int16&      TotalNumberOfMapZones;        // Map zones
-    static CZone*      MapZoneArray;                 // Count: 39
+    static CZone       (&MapZoneArray)[39];
     static int16&      TotalNumberOfZoneInfos;
     static CZoneInfo*  ZoneInfoArray;
 
@@ -32,10 +34,10 @@ public:
     // Returns true if point lies within zone
     static bool PointLiesWithinZone(const CVector* point, CZone* zone);
     // Returns eLevelName from position
-    static eLevelName GetLevelFromPosition(CVector const& point);
+    static eLevelName GetLevelFromPosition(const CVector& point);
     // Returns pointer to zone by a point
     static CZone* FindSmallestZoneForPosition(const CVector& point, bool FindOnlyZonesType0);
-    static CZoneExtraInfo* GetZoneInfo(const CVector& point, CZone** outZone);
+    static CZoneInfo* GetZoneInfo(const CVector& point, CZone** outZone);
     static void FillZonesWithGangColours(bool disableRadarGangColors);
     // Returns pointer to zone by index
     static CZone* GetNavigationZone(uint16 index);
@@ -54,4 +56,16 @@ public:
     static void Save();
     static void Load();
     static void PostZoneCreation();
+
+    // NOTSA
+    static const char* GetZoneName(const CVector& point);
+
+    static CZoneInfo* GetZoneInfo(const CZone* zone) {
+        auto idx = zone->m_nZoneExtraIndexInfo;
+
+        if (!idx)
+            return nullptr;
+
+        return &ZoneInfoArray[idx];
+    }
 };

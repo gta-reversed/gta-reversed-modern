@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -8,13 +8,15 @@
 
 #include "Ped.h"
 
-class CEmergencyPed : public CPed {
+class NOTSA_EXPORT_VTABLE CEmergencyPed : public CPed {
 public:
-    CEmergencyPed(uint32 pedType, uint32 modelIndex);
+    CEmergencyPed(ePedType pedType, uint32 modelIndex);
+    ~CEmergencyPed() override = default;
 
+    void MedicAI();
+    void FiremanAI();
+    void ProcessControl() override;
     bool InRange(CPed* ped);
-
-    void ProcessControl();
 };
 
 VALIDATE_SIZE(CEmergencyPed, 0x79C);

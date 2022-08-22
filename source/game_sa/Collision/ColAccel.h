@@ -17,7 +17,7 @@ struct CColAccelColEntry {
     int16        m_wModelStart;
     int16        m_wModelEnd;
     uint8        m_nColSlot;
-    bool         m_bUnkn;
+    bool         m_bColModelNotEmpty;
 };
 VALIDATE_SIZE(CColAccelColEntry, 0x30);
 
@@ -44,9 +44,15 @@ enum eColAccelState : int32 {
     COLACCEL_LOADING = 2,
 };
 
-struct PackedModelStartEnd {
-    int16 wModelStart;
-    int16 wModelEnd;
+// If you ever see a cast like: `(PackedModelStartEnd)modelId`
+// That's (in theory) the same as `PackedModelStartEnd{.start = modelId, .end = 0}`, as
+// no model has the MSB 16 bits set (as no model's ID is higher than 65535)
+union PackedModelStartEnd {
+    struct {
+        int16 wModelStart;
+        int16 wModelEnd;
+    };
+    int32 modelId;
 };
 VALIDATE_SIZE(PackedModelStartEnd, 0x4);
 
@@ -63,14 +69,15 @@ public:
     static int32&              m_iNumIPLItems;
     static int32&              m_iNumSections;
     static int32&              m_iNumColBounds;
-    static char const*         mp_cCacheName; // MODELS\CINFO.BIN
+    static const char*         mp_cCacheName;
 
 public:
     static void InjectHooks();
 
     static bool   isCacheLoading();
+    static void   startCache();
     static void   endCache();
-    static void   addCacheCol(PackedModelStartEnd startEnd, CColModel const& colModel);
+    static void   addCacheCol(PackedModelStartEnd startEnd, const CColModel& colModel);
     static void   cacheLoadCol();
     static void   addColDef(ColDef colDef);
     static void   getColDef(ColDef& colDef);
@@ -78,5 +85,4 @@ public:
     static IplDef getIplDef(int32 iplIndex);
     static void   cacheIPLSection(CEntity** ppEntities, int32 entitiesCount);
     static void   addIPLEntity(CEntity** ppEntities, int32 entitiesCount, int32 entityIndex);
-    static void   startCache();
 };

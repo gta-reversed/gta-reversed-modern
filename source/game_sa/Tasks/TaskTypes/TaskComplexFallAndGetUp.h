@@ -9,13 +9,14 @@ public:
     int32        m_nFallDownTime;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_FALL_AND_GET_UP;
+
     CTaskComplexFallAndGetUp(AnimationId nFallAnimId, AssocGroupId nFallAnimGroup, int32 nFallDownTime);
     CTaskComplexFallAndGetUp(int32 nDir, int32 nFallDownTime);
-    ~CTaskComplexFallAndGetUp() override { }
+    ~CTaskComplexFallAndGetUp() override = default;
 
-
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override { return new CTaskComplexFallAndGetUp(m_nFallAnimId, m_nFallAnimGroup, m_nFallDownTime); }
-    eTaskType GetTaskType() override { return TASK_COMPLEX_FALL_AND_GET_UP; }
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
@@ -37,5 +38,4 @@ private:
     CTask* ControlSubTask_Reversed(CPed* ped);
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
 };
-
 VALIDATE_SIZE(CTaskComplexFallAndGetUp, 0x18);

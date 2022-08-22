@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,27 +7,42 @@
 #pragma once
 
 #include "Matrix.h"
+#include "Vector.h"
+
+enum eMirrorType : uint8 {
+    MIRROR_TYPE_0 = 0,
+    MIRROR_TYPE_1 = 1,
+    MIRROR_TYPE_2 = 2,
+};
 
 class CMirrors {
 public:
     static RwRaster*& pBuffer;
     static RwRaster*& pZBuffer;
-    static uint32&    TypeOfMirror;
     static bool&      bRenderingReflection;
     static bool&      d3dRestored;
-    static uint32&    MirrorFlags;
+    static eMirrorType& TypeOfMirror;
+    static uint8&     MirrorFlags;
     static float&     MirrorV;
     static CVector&   MirrorNormal;
 
+public:
+    static void InjectHooks();
+
+    static void Init();
+    static void ShutDown();
+
     static void BeforeConstructRenderList();
     static void BeforeMainRender();
-    static void BuildCamMatrix(CMatrix* mat, CVector pointA, CVector pointB);
-    static void BuildCameraMatrixForScreens(CMatrix* mat);
-    static void CreateBuffer();
-    static void Init();
-    static void RenderMirrorBuffer();
-    static void ShutDown();
-};
 
-extern bool &bFudgeNow;
-extern float *Screens8Track; // float Screens8Track[24]
+    static void BuildCamMatrix(CMatrix& mat, CVector pointA, CVector pointB);
+    static void BuildCameraMatrixForScreens(CMatrix& mat);
+
+    static void CreateBuffer();
+
+    static void RenderMirrorBuffer();
+    static void RenderReflBuffer(bool);
+    static void RenderReflections();
+
+    static bool ShouldRenderPeds();
+};

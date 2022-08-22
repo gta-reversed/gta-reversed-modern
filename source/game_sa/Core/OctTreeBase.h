@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -8,17 +8,24 @@
 
 #include "OctTree.h"
 
-class COctTreeBase : public COctTree {
+class NOTSA_EXPORT_VTABLE COctTreeBase : public COctTree {
 public:
-    uint32 numBranches;
-    bool32 hasTransparentPixels;
+    uint32 m_nNumBranches;
+    bool32 m_bHasTransparentPixels;
 
 public:
-    COctTreeBase();
+    COctTreeBase() = default;  // 0x5A7570
+    ~COctTreeBase() = default; // 0x856690
+
+    bool InsertTree(uint8 red, uint8 green, uint8 blue) override;
+    void FillPalette(uint8* colors) override;
 
     void Init(int32 numBranches);
-    bool Insert(uint8 colorRed, uint8 colorGreen, uint8 colorBlue);
+    bool Insert(uint8 red, uint8 green, uint8 blue);
     void ReduceBranches(int32 newBranchesCount);
+    void Reduce();
 };
+
+extern COctTreeBase& gOctTreeBase;
 
 VALIDATE_SIZE(COctTreeBase, 0x30);

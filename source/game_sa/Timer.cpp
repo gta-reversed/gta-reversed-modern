@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -45,19 +45,22 @@ uint32& CTimer::m_snPreviousTimeInMilliseconds = *(uint32*)0xB7CB78;
 
 void CTimer::InjectHooks()
 {
-    ReversibleHooks::Install("CTimer", "Initialise", 0x5617E0, &CTimer::Initialise);
-    ReversibleHooks::Install("CTimer", "Shutdown", 0x5618C0, &CTimer::Shutdown);
-    ReversibleHooks::Install("CTimer", "Suspend", 0x5619D0, &CTimer::Suspend);
-    ReversibleHooks::Install("CTimer", "Resume", 0x561A00, &CTimer::Resume);
-    ReversibleHooks::Install("CTimer", "Stop", 0x561AA0, &CTimer::Stop);
-    ReversibleHooks::Install("CTimer", "StartUserPause", 0x561AF0, &CTimer::StartUserPause);
-    ReversibleHooks::Install("CTimer", "EndUserPause", 0x561B00, &CTimer::EndUserPause);
-    ReversibleHooks::Install("CTimer", "GetCyclesPerMillisecond", 0x561A40, &CTimer::GetCyclesPerMillisecond);
-    ReversibleHooks::Install("CTimer", "GetCyclesPerFrame", 0x561A50, &CTimer::GetCyclesPerFrame);
-    ReversibleHooks::Install("CTimer", "GetCurrentTimeInCycles", 0x561A80, &CTimer::GetCurrentTimeInCycles);
-    ReversibleHooks::Install("CTimer", "GetIsSlowMotionActive", 0x561AD0, &CTimer::GetIsSlowMotionActive);
-    ReversibleHooks::Install("CTimer", "UpdateVariables", 0x5618D0, &CTimer::UpdateVariables);
-    ReversibleHooks::Install("CTimer", "Update", 0x561B10, &CTimer::Update);
+    RH_ScopedClass(CTimer);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Initialise, 0x5617E0);
+    RH_ScopedInstall(Shutdown, 0x5618C0);
+    RH_ScopedInstall(Suspend, 0x5619D0);
+    RH_ScopedInstall(Resume, 0x561A00);
+    RH_ScopedInstall(Stop, 0x561AA0);
+    RH_ScopedInstall(StartUserPause, 0x561AF0);
+    RH_ScopedInstall(EndUserPause, 0x561B00);
+    RH_ScopedInstall(GetCyclesPerMillisecond, 0x561A40);
+    RH_ScopedInstall(GetCyclesPerFrame, 0x561A50);
+    RH_ScopedInstall(GetCurrentTimeInCycles, 0x561A80);
+    RH_ScopedInstall(GetIsSlowMotionActive, 0x561AD0);
+    RH_ScopedInstall(UpdateVariables, 0x5618D0);
+    RH_ScopedInstall(Update, 0x561B10);
 }
 
 // 64-bit RsTimer wrapper
@@ -91,10 +94,9 @@ void CTimer::Initialise()
     game_FPS = 0.0f;
 
     ms_fTimeScale = 1.0f;
-    ms_fSlowMotionScale = -1.0f;
+    ms_fSlowMotionScale = -1.0f; // unused
     ms_fTimeStep = 1.0f;
     ms_fOldTimeStep = 1.0f;
-    // unused dword_B7CB60 = 0xBF800000;
 
     TimerFunction_t timerFunc;
     auto frequency = GetOSWPerformanceFrequency();
@@ -184,7 +186,7 @@ bool CTimer::GetIsSlowMotionActive()
 }
 
 // 0x5618D0
-void CTimer::UpdateVariables(float timeStep)
+void CTimer::UpdateVariables(float timeElapsed)
 {
     /* Izzotop: from IDA directly to here (tested)
     float step = timeStep / float(m_snTimerDivider);
@@ -215,7 +217,7 @@ void CTimer::UpdateVariables(float timeStep)
     */
 
     // Pirulax: Shorter code, same functionality.
-    const float realStep = (float)timeStep / (float)m_snTimerDivider;
+    const float realStep = (float)timeElapsed / (float)m_snTimerDivider;
     m_snTimeInMillisecondsNonClipped += (uint32)realStep;
     ms_fTimeStepNonClipped = 0.05f * realStep; // step / 20.0f;
 
@@ -226,7 +228,7 @@ void CTimer::UpdateVariables(float timeStep)
     }
 
     ms_fOldTimeStep = ms_fTimeStep;
-    ms_fTimeStep = clamp<float>(ms_fTimeStepNonClipped, 0.00001f, 3.0f);
+    ms_fTimeStep = std::clamp(ms_fTimeStepNonClipped, 0.00001f, 3.0f);
 }
 
 // 0x561B10

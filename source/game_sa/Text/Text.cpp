@@ -15,9 +15,6 @@
 
 CText& TheText = *(CText*)0xC1B340;
 
-// 0xC1AEB8
-char GxtErrorString[32];
-
 // 0x56D3A4
 static constexpr uint8 FrenchUpperCaseTable[] = {
     0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F,
@@ -37,28 +34,50 @@ static constexpr uint8 FrenchUpperCaseTable[] = {
     0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF,
     0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9, 0xEA, 0xEB, 0xEC, 0xED, 0xEE, 0xEF,
     0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF,
-    };
+};
 
 void CText::InjectHooks() {
-    //    ReversibleHooks::Install("CMissionTextOffsets", "Load", 0x69F670, &CMissionTextOffsets::Load);
+    RH_ScopedClass(CText);
+    RH_ScopedCategory("Text");
 
-    ReversibleHooks::Install("CData", "Unload", 0x69F640, &CData::Unload);
-    //    ReversibleHooks::Install("CData", "Load", 0x69F5D0, &CData::Load);
 
-    ReversibleHooks::Install("CKeyArray", "Unload", 0x69F510, &CKeyArray::Unload);
-    //    ReversibleHooks::Install("CKeyArray", "Load", 0x69F490, &CKeyArray::Load);
-    ReversibleHooks::Install("CKeyArray", "BinarySearch", 0x69F570, &CKeyArray::BinarySearch);
-    ReversibleHooks::Install("CKeyArray", "Search", 0x6A0000, &CKeyArray::Search);
+    RH_ScopedInstall(Constructor, 0x6A00F0);
+    RH_ScopedInstall(Destructor, 0x6A0140);
+    RH_ScopedInstall(Get, 0x6A0050);
+    RH_ScopedInstall(GetNameOfLoadedMissionText, 0x69FBD0);
+    //    RH_ScopedInstall(ReadChunkHeader, 0x69F940);
+    //    RH_ScopedInstall(LoadMissionPackText, 0x69F9A0);
+    //    RH_ScopedInstall(LoadMissionText, 0x69FBF0);
+    RH_ScopedInstall(Load, 0x6A01A0);
+    RH_ScopedInstall(Unload, 0x69FF20);
 
-    ReversibleHooks::Install("CText", "CText", 0x6A00F0, &CText::Constructor);
-    ReversibleHooks::Install("CText", "~CText", 0x6A0140, &CText::Destructor);
-    ReversibleHooks::Install("CText", "Get", 0x6A0050, &CText::Get);
-    ReversibleHooks::Install("CText", "GetNameOfLoadedMissionText", 0x69FBD0, &CText::GetNameOfLoadedMissionText);
-    //    ReversibleHooks::Install("CText", "ReadChunkHeader", 0x69F940, &CText::ReadChunkHeader);
-    //    ReversibleHooks::Install("CText", "LoadMissionPackText", 0x69F9A0, &CText::LoadMissionPackText);
-    //    ReversibleHooks::Install("CText", "LoadMissionText", 0x69FBF0, &CText::LoadMissionText);
-    ReversibleHooks::Install("CText", "Load", 0x6A01A0, &CText::Load);
-    ReversibleHooks::Install("CText", "Unload", 0x69FF20, &CText::Unload);
+    //
+    // TODO: These should be moved to their respective files...
+    //
+
+    {
+        RH_ScopedClass(CMissionTextOffsets);
+        //    RH_ScopedInstall(Load, 0x69F670);
+    }
+
+    {
+        RH_ScopedClass(CData);
+        RH_ScopedInstall(Unload, 0x69F640);
+        //    RH_ScopedInstall(Load, 0x69F5D0);
+
+
+    }
+
+    {
+        RH_ScopedClass(CKeyArray);
+
+        RH_ScopedCategory("Text");
+        RH_ScopedInstall(Unload, 0x69F510);
+
+        RH_ScopedInstall(BinarySearch, 0x69F570);
+        RH_ScopedInstall(Search, 0x6A0000);
+        //    RH_ScopedInstall(Load, 0x69F490);
+    }
 }
 
 // 0x6A00F0
@@ -109,7 +128,7 @@ void CText::Load(bool bKeepMissionPack) {
     Unload(bKeepMissionPack);
 
     char filename[32] = {0};
-    switch (static_cast<eLanguage>(FrontEndMenuManager.m_nLanguage)) {
+    switch (static_cast<eLanguage>(FrontEndMenuManager.m_nPrefsLanguage)) {
     case eLanguage::AMERICAN:
         sprintf(filename, "AMERICAN.GXT");
         break;
@@ -136,7 +155,7 @@ void CText::Load(bool bKeepMissionPack) {
     }
 
     CFileMgr::SetDir("TEXT");
-    FILESTREAM file = CFileMgr::OpenFile(filename, "rb");
+    auto file = CFileMgr::OpenFile(filename, "rb");
 
     uint16 version = 0;
     uint16 encoding = 0;
@@ -177,7 +196,7 @@ void CText::Load(bool bKeepMissionPack) {
     strcpy(m_szCdErrorText, GxtCharToAscii(text, 0));
     m_bCdErrorLoaded = true;
 
-    CFileMgr::SetDir(gta_empty_string);
+    CFileMgr::SetDir("");
 
     if (bKeepMissionPack)
         return;
@@ -186,7 +205,7 @@ void CText::Load(bool bKeepMissionPack) {
         if (FrontEndMenuManager.CheckMissionPackValidMenu()) {
             CTimer::Suspend();
             LoadMissionPackText();
-            CFileMgr::SetDir(gta_empty_string);
+            CFileMgr::SetDir("");
             CTimer::Resume();
         }
     }

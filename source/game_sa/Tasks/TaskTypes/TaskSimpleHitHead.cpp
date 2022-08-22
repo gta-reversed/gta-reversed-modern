@@ -2,61 +2,43 @@
 
 #include "TaskSimpleHitHead.h"
 
-void CTaskSimpleHitHead::InjectHooks()
-{
-    ReversibleHooks::Install("CTaskSimpleHitHead", "Constructor", 0x653060, &CTaskSimpleHitHead::Constructor);
-    ReversibleHooks::Install("CTaskSimpleHitHead", "FinishAnimCB", 0x653150, &CTaskSimpleHitHead::FinishAnimCB);
-    //VTABLE
-    ReversibleHooks::Install("CTaskSimpleHitHead", "MakeAbortable", 0x6530F0, &CTaskSimpleHitHead::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimpleHitHead", "ProcessPed", 0x657A10, &CTaskSimpleHitHead::ProcessPed_Reversed);
-}
+void CTaskSimpleHitHead::InjectHooks() {
+    RH_ScopedClass(CTaskSimpleHitHead);
+    RH_ScopedCategory("Tasks/TaskTypes");
 
-CTaskSimpleHitHead* CTaskSimpleHitHead::Constructor()
-{
-    this->CTaskSimpleHitHead::CTaskSimpleHitHead();
-    return this;
+    RH_ScopedInstall(Constructor, 0x653060);
+    RH_ScopedInstall(FinishAnimCB, 0x653150);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x6530F0);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x657A10);
 }
+CTaskSimpleHitHead* CTaskSimpleHitHead::Constructor() { this->CTaskSimpleHitHead::CTaskSimpleHitHead(); return this; }
+bool CTaskSimpleHitHead::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable_Reversed(ped, priority, event); }
+bool CTaskSimpleHitHead::ProcessPed(CPed* ped) { return ProcessPed_Reversed(ped); }
 
 // 0x653060
-CTaskSimpleHitHead::CTaskSimpleHitHead()
-{
+CTaskSimpleHitHead::CTaskSimpleHitHead() : CTaskSimple() {
     m_bIsFinished = false;
     m_pAnim = nullptr;
 }
 
 // 0x653090
-CTaskSimpleHitHead::~CTaskSimpleHitHead()
-{
-    if (m_pAnim)
+CTaskSimpleHitHead::~CTaskSimpleHitHead() {
+    if (m_pAnim) {
         m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
-}
-
-// 0x6530F0
-bool CTaskSimpleHitHead::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
-    return MakeAbortable_Reversed(ped, priority, event);
-}
-
-// 0x657A10
-bool CTaskSimpleHitHead::ProcessPed(CPed* ped)
-{
-    return ProcessPed_Reversed(ped);
+    }
 }
 
 // 0x653150
-void CTaskSimpleHitHead::FinishAnimCB(CAnimBlendAssociation* pAnim, void* data)
-{
-    auto pTask = reinterpret_cast<CTaskSimpleHitHead*>(data);
-    pTask->m_pAnim = nullptr;
-    pTask->m_bIsFinished = true;
+void CTaskSimpleHitHead::FinishAnimCB(CAnimBlendAssociation* anim, void* data) {
+    auto task = reinterpret_cast<CTaskSimpleHitHead*>(data);
+    task->m_pAnim = nullptr;
+    task->m_bIsFinished = true;
 }
 
-bool CTaskSimpleHitHead::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
-    if (priority == ABORT_PRIORITY_URGENT || priority == ABORT_PRIORITY_IMMEDIATE)
-    {
-        if (m_pAnim)
-        {
+// 0x6530F0
+bool CTaskSimpleHitHead::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
+    if (priority == ABORT_PRIORITY_URGENT || priority == ABORT_PRIORITY_IMMEDIATE) {
+        if (m_pAnim) {
             m_pAnim->m_fBlendDelta = -4.0F;
             m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
             m_pAnim = nullptr;
@@ -65,22 +47,19 @@ bool CTaskSimpleHitHead::MakeAbortable_Reversed(CPed* ped, eAbortPriority priori
         m_bIsFinished = true;
         return true;
     }
-    else
-    {
-        if (m_pAnim)
-            m_pAnim->m_fBlendDelta = -4.0F;
 
-        return false;
+    if (m_pAnim) {
+        m_pAnim->m_fBlendDelta = -4.0F;
     }
+    return false;
 }
 
-bool CTaskSimpleHitHead::ProcessPed_Reversed(CPed* ped)
-{
+// 0x657A10
+bool CTaskSimpleHitHead::ProcessPed_Reversed(CPed* ped) {
     if (m_bIsFinished)
         return true;
 
-    if (!m_pAnim)
-    {
+    if (!m_pAnim) {
         m_pAnim = CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_HIT_WALL, 8.0F);
         m_pAnim->SetFinishCallback(FinishAnimCB, this);
     }

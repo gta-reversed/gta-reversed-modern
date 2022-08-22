@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -383,7 +383,7 @@ do                                                                       \
         if (hx > 0)                                                      \
         {                                                                \
             /* acos(1) = 0  */                                           \
-            result = (0.0);                                              \
+            result = (0.0f);                                              \
         }                                                                \
         else                                                             \
         {                                                                \
@@ -2542,15 +2542,15 @@ struct RwFreeList
  *
  * \param  pMem   Pointer to the start of the current entries.
  *
- * \param  pData   User-defined data pointer.
+ * \param  data   User-defined data pointer.
  *
  * \see RwFreeListForAllUsed
  *
  */
 #endif /* RWADOXYGENEXTERNAL */
-typedef void        (*RwFreeListCallBack) (void *pMem, void *pData);
-typedef void       *(*RwMemoryAllocFn)    (RwFreeList * fl, RwUInt32 hint);
-typedef RwFreeList *(*RwMemoryFreeFn)     (RwFreeList * fl, void *pData);
+typedef void        (*RwFreeListCallBack) (void* mem, void *data);
+typedef void       *(*RwMemoryAllocFn)    (RwFreeList* fl, RwUInt32 hint);
+typedef RwFreeList *(*RwMemoryFreeFn)     (RwFreeList* fl, void *data);
 
 #if (defined(RWDEBUG) && defined(RWNOFREELISTS) && !defined(RWKEEPFREELISTS))
 
@@ -3212,6 +3212,34 @@ typedef RwMatrixTag RwMatrix;
  * Use the RwMatrix API functions to access.
  */
 #endif /* (!defined(DOXYGEN)) */
+
+#define rwMatrixSetFlags(m, flagsbit)     ((m)->flags = (flagsbit))
+#define rwMatrixGetFlags(m)               ((m)->flags)
+#define rwMatrixTestFlags(m, flagsbit)    ((m)->flags & (RwInt32)(flagsbit))
+
+#if (!defined(RwMatrixCopyMacro))
+#define RwMatrixCopyMacro(_target, _source)             \
+    ( *(_target) = *(_source) )
+#endif /* (!defined(RwMatrixCopyMacro)) */
+
+#if (!defined(RwMatrixSetIdentityMacro))
+#define RwMatrixSetIdentityMacro(m)                                     \
+MACRO_START                                                             \
+{                                                                       \
+    (m)->right.x = (m)->up.y    = (m)->at.z    = (RwReal)((1.0));       \
+    (m)->right.y = (m)->right.z = (m)->up.x    = (RwReal)((0.0));       \
+    (m)->up.z    = (m)->at.x    = (m)->at.y    = (RwReal)((0.0));       \
+    (m)->pos.x   = (m)->pos.y   = (m)->pos.z   = (RwReal)((0.0));       \
+    rwMatrixSetFlags((m),                                               \
+                     rwMatrixGetFlags(m) |                              \
+                     (rwMATRIXINTERNALIDENTITY |                        \
+                      rwMATRIXTYPEORTHONORMAL));                        \
+}                                                                       \
+MACRO_STOP
+#endif /* (!defined(RwMatrixSetIdentityMacro)) */
+
+#define RwMatrixCopy(dst, src)   RwMatrixCopyMacro(dst, src)
+#define RwMatrixSetIdentity(m)   RwMatrixSetIdentityMacro(m)
 
 typedef void (RWASMCALL * rwMatrixMultFn) (RwMatrix * dstMat,
                                            const RwMatrix * matA,
@@ -4366,7 +4394,7 @@ typedef enum RwCoreDeviceSystemFn RwCoreDeviceSystemFn;
  */
 
 /* Standard functions */
-typedef RwBool (*RwStandardFunc)(void *pOut,void *pInOut,RwInt32 nI);
+typedef RwBool (*RwStandardFunc)(void *out,void *pInOut, RwInt32 nI);
 
 typedef struct RwEngineOpenParams RwEngineOpenParams;
 #ifndef RWADOXYGENEXTERNAL
@@ -4863,6 +4891,13 @@ typedef void        (*RwDebugHandler) (RwDebugType type,
 #define RWPLUGINOFFSETCONST(_type, _base, _offset)              \
    ((const _type *)((const RwUInt8 *)(_base) + (_offset)))
 
+/* macro used to access global data structure (the root type is RwGlobals) */
+#define RWSRCGLOBAL(variable) \
+   (((RwGlobals *)RwEngineInstance)->variable)
+
+#define RWASSERTISTYPE(_f, _t) \
+   RWASSERT((((const RwObject *)(_f))->type)==(_t))
+
 /****************************************************************************
  Global Types
  */
@@ -5207,12 +5242,12 @@ RwBool RwFreeListDestroy(RwFreeList* freelist); // 0x801B80
 void RwFreeListSetFlags(RwFreeList* freeList, RwUInt32 flags); // 0x801C10
 RwUInt32 RwFreeListGetFlags(RwFreeList* freeList); // 0x801C20
 RwInt32 RwFreeListPurge(RwFreeList* freelist); // 0x801E00
-RwFreeList* RwFreeListForAllUsed(RwFreeList* freelist, RwFreeListCallBack fpCallBack, void* pData); // 0x801E90
+RwFreeList* RwFreeListForAllUsed(RwFreeList* freelist, RwFreeListCallBack fpCallBack, void* data); // 0x801E90
 RwInt32 RwFreeListPurgeAllFreeLists(); // 0x801F90
 void RwStreamSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc); // 0x7EC760
-RwStream* _rwStreamInitialize(RwStream* stream, RwBool rwOwned, RwStreamType type, RwStreamAccessType accessType, const void* pData); // 0x7EC810
-RwStream* RwStreamOpen(RwStreamType type, RwStreamAccessType accessType, const void* pData); // 0x7ECEF0
-RwBool RwStreamClose(RwStream* stream, void* pData); // 0x7ECE20
+RwStream* _rwStreamInitialize(RwStream* stream, RwBool rwOwned, RwStreamType type, RwStreamAccessType accessType, const void* data); // 0x7EC810
+RwStream* RwStreamOpen(RwStreamType type, RwStreamAccessType accessType, const void* data); // 0x7ECEF0
+RwBool RwStreamClose(RwStream* stream, void* data); // 0x7ECE20
 RwUInt32 RwStreamRead(RwStream* stream, void* buffer, RwUInt32 length); // 0x7EC9D0
 RwStream* RwStreamWrite(RwStream* stream, const void* buffer, RwUInt32 length); // 0x7ECB30
 RwStream* RwStreamSkip(RwStream* stream, RwUInt32 offset); // 0x7ECD00

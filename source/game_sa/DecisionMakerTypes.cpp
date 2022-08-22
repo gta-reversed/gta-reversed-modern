@@ -1,6 +1,11 @@
 #include "StdInc.h"
 
+#include "DecisionMakerTypes.h"
+
 void CDecisionMakerTypesFileLoader::InjectHooks() {
+    RH_ScopedClass(CDecisionMakerTypesFileLoader);
+    RH_ScopedCategoryGlobal();
+
 
 }
 
@@ -26,8 +31,7 @@ void CDecisionMakerTypesFileLoader::LoadDecisionMaker(const char* filepath, eDec
 {
     CDecisionMaker decisionMaker;
     LoadDecisionMaker(filepath, &decisionMaker);
-    CDecisionMakerTypes* pDecisionMakerTypes = CDecisionMakerTypes::GetInstance();
-    CDecisionMakerTypes::AddDecisionMaker(pDecisionMakerTypes, &decisionMaker, decisionMakerType, bUseMissionCleanup);
+    CDecisionMakerTypes::AddDecisionMaker(CDecisionMakerTypes::GetInstance(), &decisionMaker, decisionMakerType, bUseMissionCleanup);
 }
 
 // 0x6076B0
@@ -36,6 +40,9 @@ void CDecisionMakerTypesFileLoader::LoadDecisionMaker(const char *filepath, CDec
 }
 
 void CDecisionMakerTypes::InjectHooks() {
+    RH_ScopedClass(CDecisionMakerTypes);
+    RH_ScopedCategoryGlobal();
+
 
 }
 
@@ -51,16 +58,16 @@ CDecisionMakerTypes* CDecisionMakerTypes::GetInstance() {
 
 // 0x606E70
 void CDecisionMakerTypes::MakeDecision(CPed* ped, int32 eventType, int32 eventSourceType, bool bIsPedInVehicle, int32 taskId1,
-    int32 taskId2, int32 taskId3, int32 taskId4, bool bDecisionMakerTypeInGroup, int16* taskId, int16* field_10)
+    int32 taskId2, int32 taskId3, int32 taskId4, bool bInGroup, int16& taskId, int16& field_10)
 {
-    plugin::CallMethod<0x606E70, CDecisionMakerTypes*, CPed*, int32, int32, bool, int32, int32, int32, int32, bool, int16*, int16*>
-        (this, ped, eventType, eventSourceType, bIsPedInVehicle, taskId1, taskId2, taskId3, taskId4, bDecisionMakerTypeInGroup, taskId, field_10);
+    plugin::CallMethod<0x606E70, CDecisionMakerTypes*, CPed*, int32, int32, bool, int32, int32, int32, int32, bool, int16&, int16&>
+        (this, ped, eventType, eventSourceType, bIsPedInVehicle, taskId1, taskId2, taskId3, taskId4, bInGroup, taskId, field_10);
 }
 
 // 0x606F80
-int32 CDecisionMakerTypes::MakeDecision(CPedGroup* pPedGroup, int32 eventType, int32 eventSourceType, bool bIsPedInVehicle, int32 taskId1, int32 taskId2, int32 taskId3, int32 taskId4) {
+int32 CDecisionMakerTypes::MakeDecision(CPedGroup* pedGroup, int32 eventType, int32 eventSourceType, bool bIsPedInVehicle, int32 taskId1, int32 taskId2, int32 taskId3, int32 taskId4) {
     return plugin::CallMethodAndReturn <int32, 0x606F80, CDecisionMakerTypes*, CPedGroup*, int32, int32, bool, int32, int32, int32, int32>
-        (this, pPedGroup, eventType, eventSourceType, bIsPedInVehicle, taskId1, taskId2, taskId3, taskId4);
+        (this, pedGroup, eventType, eventSourceType, bIsPedInVehicle, taskId1, taskId2, taskId3, taskId4);
 }
 
 // 0x6044C0

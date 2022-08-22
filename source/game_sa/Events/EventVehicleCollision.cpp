@@ -8,29 +8,30 @@
 
 void CEventVehicleCollision::InjectHooks()
 {
-    ReversibleHooks::Install("CEventVehicleCollision", "Constructor",0x4AC840, &CEventVehicleCollision::Constructor);
-    ReversibleHooks::Install("CEventVehicleCollision", "Clone",0x4B6BC0, &CEventVehicleCollision::Clone_Reversed);
-    ReversibleHooks::Install("CEventVehicleCollision", "AffectsPed",0x4B2EE0, &CEventVehicleCollision::AffectsPed_Reversed);
+    RH_ScopedClass(CEventVehicleCollision);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AC840);
+    RH_ScopedVirtualInstall(Clone, 0x4B6BC0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B2EE0);
 }
 
 CEventVehicleCollision::CEventVehicleCollision(int16 pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, int8 moveState, int16 evadeType)
 {
-    m_pieceType = pieceType;
-    m_evadeType = evadeType;
-    m_fDamageIntensity = damageIntensity;
-    m_vehicle = vehicle;
+    m_pieceType               = pieceType;
+    m_evadeType               = evadeType;
+    m_fDamageIntensity        = damageIntensity;
+    m_vehicle                 = vehicle;
     m_collisionImpactVelocity = collisionImpactVelocity;
-    m_collisionPosition = collisionPosition;
-    m_moveState = moveState;
-    field_31 = 0;
-    if (vehicle)
-        vehicle->RegisterReference(reinterpret_cast<CEntity**>(m_vehicle));
+    m_collisionPosition       = collisionPosition;
+    m_moveState               = moveState;
+    field_31                  = 0;
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
 CEventVehicleCollision::~CEventVehicleCollision()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(m_vehicle));
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
 // 0x4AC840
@@ -69,7 +70,7 @@ bool CEventVehicleCollision::AffectsPed_Reversed(CPed* ped)
         return false;
 
     if (ped->bInVehicle
-        || m_vehicle->m_vehicleType == VEHICLE_BOAT
+        || m_vehicle->IsBoat()
         || -DotProduct(m_collisionImpactVelocity, ped->GetForward()) < 0.35f)
     {
         return false;

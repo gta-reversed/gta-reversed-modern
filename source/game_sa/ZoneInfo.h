@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) header file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
@@ -12,7 +12,7 @@ class CZoneInfo {
 public:
     uint8  GangDensity[10];
     uint8  DrugDealerCounter;
-    RwRGBA ZoneColor;
+    CRGBA  ZoneColor;
     union {
         struct {
             uint8 zonePopulationType : 5;

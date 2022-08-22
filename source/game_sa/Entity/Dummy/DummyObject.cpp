@@ -1,61 +1,68 @@
 #include "StdInc.h"
 
-void CDummyObject::InjectHooks()
-{
-    ReversibleHooks::Install("CDummyObject", "CreateObject", 0x59EAC0, &CDummyObject::CreateObject);
-    ReversibleHooks::Install("CDummyObject", "UpdateFromObject", 0x59EB70, &CDummyObject::UpdateFromObject);
+#include "DummyObject.h"
+#include "TheScripts.h"
+
+void CDummyObject::InjectHooks() {
+    RH_ScopedClass(CDummyObject);
+    RH_ScopedCategory("Entity/Dummy");
+
+    RH_ScopedInstall(CreateObject, 0x59EAC0);
+    RH_ScopedInstall(UpdateFromObject, 0x59EB70);
 }
 
-CDummyObject::CDummyObject(CObject* pObj) : CDummy()
-{
-    CEntity::SetModelIndexNoCreate(m_nModelIndex);
-    if (pObj->m_pRwObject)
-        CEntity::AttachToRwObject(pObj->m_pRwObject, true);
+// 0x59EA00
+CDummyObject::CDummyObject() : CDummy() {
+    // NOP
+}
 
-    pObj->DetachFromRwObject();
-    m_nIplIndex = pObj->m_nIplIndex;
-    m_nAreaCode = pObj->m_nAreaCode;
+// 0x59EA20
+CDummyObject::CDummyObject(CObject* obj) : CDummy() {
+    CEntity::SetModelIndexNoCreate(m_nModelIndex);
+    if (obj->m_pRwObject)
+        CEntity::AttachToRwObject(obj->m_pRwObject, true);
+
+    obj->DetachFromRwObject();
+    m_nIplIndex = obj->m_nIplIndex;
+    m_nAreaCode = obj->m_nAreaCode;
     CIplStore::IncludeEntity(m_nIplIndex, this);
 }
 
-CObject* CDummyObject::CreateObject()
-{
-    m_bImBeingRendered = true; //BUG? Seems like that flag doesn't fit here
-    auto* pObj = CObject::Create(this);
+// 0x59EAC0
+CObject* CDummyObject::CreateObject() {
+    m_bImBeingRendered = true; // BUG? Seems like that flag doesn't fit here
+    auto* obj = CObject::Create(this);
     m_bImBeingRendered = false;
 
-    if (pObj)
-    {
-        CTheScripts::ScriptsForBrains.CheckIfNewEntityNeedsScript(pObj, 1, nullptr);
+    if (obj) {
+        CTheScripts::ScriptsForBrains.CheckIfNewEntityNeedsScript(obj, 1, nullptr);
         m_bIsVisible = false;
         m_bUsesCollision = false;
 
-        pObj->m_nLodIndex = m_nLodIndex;
+        obj->m_nLodIndex = m_nLodIndex;
         m_nLodIndex = 0;
     }
 
-    return pObj;
+    return obj;
 }
 
-void CDummyObject::UpdateFromObject(CObject* pObject)
-{
+// 0x59EB70
+void CDummyObject::UpdateFromObject(CObject* obj) {
     m_bIsVisible = true;
     m_bUsesCollision = true;
 
-    pObject->m_bImBeingRendered = true;
-    CEntity::AttachToRwObject(pObject->m_pRwObject, false);
-    pObject->m_bImBeingRendered = false;
+    obj->m_bImBeingRendered = true;
+    CEntity::AttachToRwObject(obj->m_pRwObject, false);
+    obj->m_bImBeingRendered = false;
     CEntity::UpdateRW();
-    pObject->DetachFromRwObject();
+    obj->DetachFromRwObject();
 
-    if (pObject->m_nIplIndex && CIplStore::HasDynamicStreamingDisabled(pObject->m_nIplIndex))
-    {
-        m_bRenderDamaged = pObject->m_bRenderDamaged;
-        m_bIsVisible = pObject->m_bIsVisible;
-        m_bUsesCollision = pObject->m_bUsesCollision;
+    if (obj->m_nIplIndex && CIplStore::HasDynamicStreamingDisabled(obj->m_nIplIndex)) {
+        m_bRenderDamaged = obj->m_bRenderDamaged;
+        m_bIsVisible = obj->m_bIsVisible;
+        m_bUsesCollision = obj->m_bUsesCollision;
     }
 
-    m_nLodIndex = pObject->m_nLodIndex;
-    pObject->m_nLodIndex = 0;
-
+    m_nLodIndex = obj->m_nLodIndex;
+    obj->m_nLodIndex = 0;
 }

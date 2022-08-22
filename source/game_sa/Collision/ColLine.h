@@ -1,5 +1,5 @@
 /*
-        Plugin-SDK (Grand Theft Auto San Andreas) header file
+        Plugin-SDK file
         Authors: GTA Community. See more here
         https://github.com/DK22Pac/plugin-sdk
         Do not delete this comment block. Respect others' work!
@@ -15,10 +15,13 @@ public:
     CVector m_vecEnd;
     float   m_fEndSize;
 
-    CColLine(CVector const& start, CVector const& end);
-    void Set(CVector const& start, CVector const& end);
-
+public:
     static void InjectHooks();
+
+    CColLine() = default;
+    CColLine(const CVector& start, const CVector& end);
+
+    void Set(const CVector& start, const CVector& end);
 };
 
 VALIDATE_SIZE(CColLine, 0x20);

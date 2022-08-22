@@ -2,34 +2,22 @@
 
 #include "AEAudioEntity.h"
 
-enum class eSlotState : int32 {
-    ONE = 1,
-    TWO = 2,
-    THREE = 3,
-    FOUR = 4,
-    FIVE = 5,
-    SIX = 6,
-    SEVEN = 7,
-};
-
-enum class eScannerPlaybackState : int32 {
-    ZERO = 0,
-    ONE = 1,
-    TWO = 2,
-    THREE = 3,
-    FOUR = 4,
-    FIVE = 5,
-    SIX = 6,
-    SEVEN = 7,
-};
-
 struct tScannerSlot {
     int16 bankId;
     int16 sfxId;
 
     tScannerSlot() {
+        Clear();
+    }
+
+    void Clear() {
         bankId = -1;
-        sfxId = -1;
+        sfxId  = -1;
+    }
+
+    // bad name?
+    [[nodiscard]] bool IsNotInitialized() const {
+        return bankId < 0 || sfxId < 0;
     }
 
     tScannerSlot& operator=(int16 value) {
@@ -45,30 +33,38 @@ struct tScannerSlot {
     }
 };
 
-class CAEPoliceScannerAudioEntity : public CAEAudioEntity {
+class NOTSA_EXPORT_VTABLE CAEPoliceScannerAudioEntity : public CAEAudioEntity {
 public:
+    enum State : int32 {
+        STATE_INITIAL = 0,
+        ONE           = 1,
+        TWO           = 2,
+        THREE         = 3,
+        FOUR          = 4,
+        FIVE          = 5,
+        SIX           = 6,
+        SEVEN         = 7,
+    };
+
     static float&     s_fVolumeOffset;
     static bool&      s_bStoppingScanner;
     static CAESound*& s_pSound;
-    static int16&     word_B61D04;
     static uint32&    s_nAbortPlaybackTime;
     static uint32&    s_nPlaybackStartTime;
     static int16&     s_nSectionPlaying;
-    static int32&     s_SlotState;
-    static int32&     dword_B61D18;
-    static int16&     word_B61D1C;
 
-    static tScannerSlot*& s_pCurrentSlots;
-    static tScannerSlot*  s_ScannerSlotSecond;
-    static tScannerSlot*  s_ScannerSlotFirst;
+    static int16         (&s_SlotState)[5];
+    static tScannerSlot* (&s_pCurrentSlots);
+    static tScannerSlot  (&s_ScannerSlotFirst)[5];
+    static tScannerSlot  (&s_ScannerSlotSecond)[5];
 
     static CAEPoliceScannerAudioEntity* s_pPSControlling;
-    static eScannerPlaybackState&       s_nScannerPlaybackState;
+    static State&                       s_nScannerPlaybackState;
     static bool&                        s_bScannerDisabled;
     static uint32&                      s_NextNewScannerDialogueTime;
 
 public:
-    CAEPoliceScannerAudioEntity();
+    CAEPoliceScannerAudioEntity() = default; // 0x56DA00
     ~CAEPoliceScannerAudioEntity();
 
     static void StaticInitialise();
@@ -86,13 +82,13 @@ public:
     static void FinishedPlayingScannerDialogue();
     void PlayLoadedDialogue();
 
-    static void PopulateScannerDialogueLists(tScannerSlot* first, tScannerSlot* second);
+    static void PopulateScannerDialogueLists(const tScannerSlot* first, const tScannerSlot* second);
     static bool CanWePlayNewScannerDialogue();
     void PlayPoliceScannerDialogue(tScannerSlot* first, tScannerSlot* second);
 
     void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
 
-    void Service();
+    static void Service();
 
 private:
     friend void InjectHooksMain();

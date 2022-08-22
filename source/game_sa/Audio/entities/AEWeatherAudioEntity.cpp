@@ -11,13 +11,8 @@ CAETwinLoopSoundEntity& gTwinLoopSoundEntityFirst = *(CAETwinLoopSoundEntity*)0x
 CAETwinLoopSoundEntity& gTwinLoopSoundEntitySecond = *(CAETwinLoopSoundEntity*)0xB6BBC0;
 
 // 0x72A620
-CAEWeatherAudioEntity::CAEWeatherAudioEntity() /* missing  : CAEAudioEntity() */ {
+CAEWeatherAudioEntity::CAEWeatherAudioEntity() : CAEAudioEntity() {
     m_nThunderFrequencyVariationCounter = 0;
-}
-
-// 0x72A400
-CAEWeatherAudioEntity::~CAEWeatherAudioEntity() {
-    // NOP
 }
 
 // 0x5B9A70
@@ -52,30 +47,16 @@ void CAEWeatherAudioEntity::Service() {
 }
 
 void CAEWeatherAudioEntity::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CAEWeatherAudioEntity", "CAEWeatherAudioEntity", 0x72A620, &CAEWeatherAudioEntity::Constructor);
-    Install("CAEWeatherAudioEntity", "~CAEWeatherAudioEntity", 0x72A400, &CAEWeatherAudioEntity::Destructor);
-    Install("CAEWeatherAudioEntity", "StaticInitialise", 0x5B9A70, &CAEWeatherAudioEntity::StaticInitialise);
-    Install("CAEWeatherAudioEntity", "StaticReset", 0x5052B0, &CAEWeatherAudioEntity::StaticReset);
-    // Install("CAEWeatherAudioEntity", "AddAudioEvent", 0x506800, &CAEWeatherAudioEntity::AddAudioEvent);
-    // Install("CAEWeatherAudioEntity", "UpdateParameters", 0x505A00, &CAEWeatherAudioEntity::UpdateParameters_Reversed);
-    // Install("CAEWeatherAudioEntity", "Service", 0x5052F0, &CAEWeatherAudioEntity::Service);
-}
+    RH_ScopedClass(CAEWeatherAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
 
-CAEWeatherAudioEntity* CAEWeatherAudioEntity::Constructor() {
-    this->CAEWeatherAudioEntity::CAEWeatherAudioEntity();
-    return this;
-}
-
-CAEWeatherAudioEntity* CAEWeatherAudioEntity::Destructor() {
-    this->CAEWeatherAudioEntity::~CAEWeatherAudioEntity();
-    return this;
+    RH_ScopedInstall(StaticInitialise, 0x5B9A70);
+    RH_ScopedInstall(StaticReset, 0x5052B0);
+    // RH_ScopedInstall(AddAudioEvent, 0x506800);
+    // RH_ScopedVirtualInstall(UpdateParameters, 0x505A00);
+    // RH_ScopedInstall(Service, 0x5052F0);
 }
 
 void CAEWeatherAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {
     CAEWeatherAudioEntity::UpdateParameters(sound, curPlayPos);
-}
-
-void WeatherAudioEntityTestCode() {
-    CWeather::m_WeatherAudioEntity.AddAudioEvent(AE_THUNDER);
 }

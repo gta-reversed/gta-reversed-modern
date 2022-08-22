@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,18 +7,19 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "ColModel.h"
-#include "Entity.h"
+
+class CColModel;
+class CEntity;
 
 class CGame {
 public:
     //! Current number of area
-    static char(&aDatFile)[32]; // static char aDatFile[32]
-    static int32 &currLevel;
-    static uint8 &bMissionPackGame;
-    static int32 &currArea;
-    static RwMatrix *&m_pWorkingMatrix1;
-    static RwMatrix *&m_pWorkingMatrix2;
+    static char (&aDatFile)[32];
+    static int32& currLevel;
+    static uint8& bMissionPackGame;
+    static int32& currArea;
+    static RwMatrix*& m_pWorkingMatrix1;
+    static RwMatrix*& m_pWorkingMatrix2;
 
 public:
     static void InjectHooks();
@@ -28,9 +29,9 @@ public:
 
     static void GenerateTempPedAtStartOfNetworkGame();
 
-    static bool Init1(char const *datFile);
-    static void Init2(char const *datFile);
-    static void Init3(char const *datFile);
+    static bool Init1(const char* datFile);
+    static bool Init2(const char* datFile);
+    static bool Init3(const char* datFile);
     static void Initialise(char const *datFile);
     static void InitialiseCoreDataAfterRW();
     static bool InitialiseEssentialsAfterRW();

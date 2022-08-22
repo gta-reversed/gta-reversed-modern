@@ -21,14 +21,15 @@ public:
         };
         uint8 m_nFlags;
     };
-    char _pad_25[3];
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL;
+
     CTaskComplexGoToPointAndStandStill(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint);
     ~CTaskComplexGoToPointAndStandStill() override;
 
+    eTaskType GetTaskType() override { return Type; }
     CTask*    Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL; };
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
@@ -39,7 +40,7 @@ public:
     CTask* ControlSubTask_Reversed(CPed* ped);
 
     void   GoToPoint(const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUpdateTargetEvenIfItsTheSame);
-    void   SelectMoveState(CTaskSimpleGoToPoint* pGotoPointTask, CPed* pPed, float fMoveStateRadius, float fRunOrSprintRadius);
+    void   SelectMoveState(CTaskSimpleGoToPoint* pGotoPointTask, CPed* ped, float fMoveStateRadius, float fRunOrSprintRadius);
     CTask* CreateFirstSubTask(int32 taskId, CPed* ped);
 
 private:
@@ -48,5 +49,4 @@ private:
 
     CTaskComplexGoToPointAndStandStill* Constructor(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint);
 };
-
 VALIDATE_SIZE(CTaskComplexGoToPointAndStandStill, 0x28);

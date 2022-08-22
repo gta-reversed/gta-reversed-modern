@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -11,20 +11,16 @@
 
 class CPtrListSingleLink : public CPtrList {
 public:
-    inline CPtrNodeSingleLink *GetNode() {
-        return reinterpret_cast<CPtrNodeSingleLink *>(pNode);
-    }
+    ~CPtrListSingleLink() { Flush(); }
 
-    inline ~CPtrListSingleLink() {
-        Flush();
-    }
-
-public:
     static void InjectHooks();
+
     void Flush();
     CPtrNodeSingleLink* AddItem(void* item);
     void DeleteItem(void* item);
-    void DeleteNode(CPtrNodeSingleLink* node, CPtrNodeSingleLink* lastNode); //Most likely inlined in the final exe,
+    void DeleteNode(CPtrNodeSingleLink* node, CPtrNodeSingleLink* lastNode); // Most likely inlined in the final exe,
+
+    CPtrNodeSingleLink* GetNode() { return reinterpret_cast<CPtrNodeSingleLink*>(m_node); }
 };
 
 VALIDATE_SIZE(CPtrListSingleLink, 4);

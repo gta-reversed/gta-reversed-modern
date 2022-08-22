@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -24,6 +24,7 @@ public:
 class CVehiclePotentialCollisionScanner {
 public:
     CTaskTimer m_timer;
+    void ScanForVehiclePotentialCollisionEvents(const CPed& ped, CEntity** entities, int32 count);
 };
 
 class CObjectPotentialCollisionScanner {
@@ -57,8 +58,15 @@ public:
     CSexyPedScanner                   m_sexyPedScanner;
     CNearbyFireScanner                m_nearbyFireScanner;
 
-    void ScanForEvents(CPed* pPed);
-    void ScanForEventsNow(CPed* ped, bool bDontScan);
+    static inline uint32 m_sDeadPedWalkingTimer = *(uint32*)0xC0B038;
+
+public:
+    CEventScanner();
+    ~CEventScanner() = default;
+
+    void Clear();
+    void ScanForEvents(CPed& ped);
+    void ScanForEventsNow(const CPed& ped, bool bDontScan);
 };
 
 VALIDATE_SIZE(CEventScanner, 0xD4);

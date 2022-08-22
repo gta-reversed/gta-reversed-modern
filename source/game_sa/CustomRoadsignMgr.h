@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Vector.h"
+
 #define SIGN_CHAR_WIDTH 8
 #define SIGN_CHAR_HEIGHT 16
 #define SIGN_PIXEL_BYTES 4
@@ -14,14 +16,14 @@ public:
 
     static bool Initialise();
     static void Shutdown();
-    static bool RenderTest(CVector const& vecUnused) { return true; };
+    static bool RenderTest(const CVector& vecUnused) { return true; };
     static void DebugDrawInternalTexture() {}
-    static RwTexture* CreateRoadsignTexture(char* pName, int32 numOfChars);
-    static RwTexture* SetupRoadsignAtomic(RpAtomic* pAtomic, char* pName, int32 numOfChars);
-    static RpAtomic* SetAtomicAlpha(RpAtomic* pAtomic, uint8 alpha);
-    static RpAtomic* CreateRoadsignAtomicA(float fWidth, float fHeight, signed int numLines, char* pLine1, char* pLine2, char* pLine3, char* pLine4, int32 lettersPerLine, uint8 ucPallete);
-    static RpAtomic* CreateRoadsignAtomic(float xScale, float yScale, signed int numLines, char* pLine1, char* pLine2, char* pLine3, char* pLine4, int32 lettersPerLine, uint8 ucPallete);
-    static RpAtomic* RenderRoadsignAtomic(RpAtomic* pAtomic, CVector const& vecPos);
+    static RwTexture* CreateRoadsignTexture(char* name, int32 numOfChars);
+    static RwTexture* SetupRoadsignAtomic(RpAtomic* atomic, char* name, int32 numOfChars);
+    static RpAtomic* SetAtomicAlpha(RpAtomic* atomic, uint8 alpha);
+    static RpAtomic* CreateRoadsignAtomicA(float fWidth, float fHeight, int32 numLines, char* line1, char* line2, char* line3, char* line4, int32 lettersPerLine, uint8 ucPallete);
+    static RpAtomic* CreateRoadsignAtomic(float xScale, float yScale, int32 numLines, char* line1, char* line2, char* line3, char* line4, int32 lettersPerLine, uint8 ucPallete);
+    static RpAtomic* RenderRoadsignAtomic(RpAtomic* atomic, const CVector& vecPos);
 };
 
 RpMaterial* RoadsignSetMaterialAlphaCB(RpMaterial* material, void* data); //data is uint8 alpha

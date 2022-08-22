@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,6 +7,8 @@
 #pragma once
 
 #include "Fire.h"
+
+class CEntity;
 
 #define MAX_NUM_FIRES 60
 
@@ -47,9 +49,13 @@ public:
 
     CFire* StartFire(CVector pos, float size, uint8 unused, CEntity* creator, uint32 nTimeToBurn, int8 nGenerations, uint8 unused_);
     CFire* StartFire(CEntity* target, CEntity* creator, _IGNORED_ float size, _IGNORED_ uint8 arg3, uint32 time, int8 numGenerations);
-    int32 StartScriptFire(CVector const& point, CEntity* target, _IGNORED_ float arg2, _IGNORED_ uint8 arg3, int8 numGenerations, int32 size);
+    int32 StartScriptFire(const CVector& point, CEntity* target, _IGNORED_ float arg2, _IGNORED_ uint8 arg3, int8 numGenerations, int32 size);
 
     void Update();
+
+    // NOTSA funcs
+    uint32 GetNumOfFires();
+    CFire& GetRandomFire();
 
 private:
     friend void InjectHooksMain();
@@ -61,7 +67,6 @@ private:
     // NOTSA
     CFire& Get(size_t idx) { return m_aFires[idx]; }
     auto GetIndexOf(const CFire* fire) const { return std::distance(std::begin(m_aFires), fire); }
-    uint32 GetNumOfFires();
 };
 
 VALIDATE_SIZE(CFireManager, 0x964);

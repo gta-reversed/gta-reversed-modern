@@ -31,8 +31,8 @@ public:
 public:
     static void InjectHooks();
 
-    CAESoundManager();
-    ~CAESoundManager();
+    CAESoundManager() = default;  // 0x4EFD30
+    ~CAESoundManager() = default; // 0x4EFD60
 
     bool      Initialise();
     void      Terminate();
@@ -45,13 +45,13 @@ public:
     int16     AreSoundsOfThisEventPlayingForThisEntityAndPhysical(int16 eventId, CAEAudioEntity* audioEntity, CPhysical* physical);
     void      CancelSoundsOfThisEventPlayingForThisEntity(int16 eventId, CAEAudioEntity* audioEntity);
     void      CancelSoundsOfThisEventPlayingForThisEntityAndPhysical(int16 eventId, CAEAudioEntity* audioEntity, CPhysical* physical);
-    void      CancelSoundsInBankSlot(int16 bankSlot, uint8 bFullStop);
-    void      CancelSoundsOwnedByAudioEntity(CAEAudioEntity* audioEntity, uint8 bFullStop);
+    void      CancelSoundsInBankSlot(int16 bankSlot, bool bFullStop);
+    void      CancelSoundsOwnedByAudioEntity(CAEAudioEntity* audioEntity, bool bFullStop);
     int16     GetVirtualChannelForPhysicalChannel(int16 physicalChannel);
 
 public:
     bool IsPaused() const { return CTimer::GetIsPaused() || m_bManuallyPaused; }
-    bool IsSoundPaused(CAESound const& sound) const { return CAESoundManager::IsPaused() && !sound.GetUnpausable(); }
+    bool IsSoundPaused(const CAESound& sound) const { return CAESoundManager::IsPaused() && !sound.GetUnpausable(); }
 };
 VALIDATE_SIZE(CAESoundManager, 0x8CBC);
 

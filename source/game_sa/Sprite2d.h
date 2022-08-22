@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -17,12 +17,11 @@ class CSprite2d {
 public:
     RwTexture* m_pTexture;
 
-public:
-    static int32& nextBufferIndex;
-    static int32& nextBufferVertex;
-    static float& NearScreenZ;
-    static float& RecipNearClip;
-    static RwIm2DVertex* maVertices; // count: 8
+    static inline int32& nextBufferIndex = *(int32*)0xC80458;
+    static inline int32& nextBufferVertex = *(int32*)0xC8045C;
+    static inline float& NearScreenZ = *(float*)0xC80460;
+    static inline float& RecipNearClip = *(float*)0xC80464;
+    static inline RwIm2DVertex (&maVertices)[8] = *(RwIm2DVertex(*)[8])0xC80468;
 
 public:
     static void InjectHooks();
@@ -35,8 +34,8 @@ public:
 
     void Delete();
 
-    void SetTexture(char* name);
-    void SetTexture(char* name, char* maskName);
+    void SetTexture(Const char* name);
+    void SetTexture(Const char* name, Const char* maskName);
     void SetAddressingUV(RwTextureAddressMode modeU, RwTextureAddressMode modeV);
     void SetAddressing(RwTextureAddressMode modeUV);
     void SetRenderState();
@@ -65,12 +64,16 @@ public:
     static void DrawRect(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4);
     static void DrawRectXLU(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4);
     static void DrawAnyRect(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4);
-    static void DrawCircleAtNearClip(CVector2D const& posn, float size, const CRGBA& color, int32 angle);
+    static void DrawCircleAtNearClip(const CVector2D& posn, float size, const CRGBA& color, int32 angle);
     static void SetVerticesForSniper(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4);
     static void OffsetTexCoordForBilinearFiltering(float width, float height);
     static void AddToBuffer(const CRect& posn, const CRGBA& color, float u1, float v1, float u2, float v2, float u3, float v3, float u4, float v4);
     static void Draw2DPolygon(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color);
     static void DrawBarChart(float x, float y, uint16 width, uint8 height, float progress, int8 progressAdd, uint8 drawPercentage, uint8 drawBlackBorder, CRGBA color, CRGBA addColor);
+
+    static auto* GetVertices()      { return maVertices; }
+    static auto& GetNearScreenZ()   { return NearScreenZ; }
+    static auto& GetRecipNearClip() { return RecipNearClip; }
 };
 
 VALIDATE_SIZE(CSprite2d, 4);

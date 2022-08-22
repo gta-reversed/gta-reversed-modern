@@ -9,8 +9,7 @@ CTaskSimpleUseGun::CTaskSimpleUseGun(CEntity* targetEntity, CVector vecTarget, u
 
 // 0x61DF30
 CTaskSimpleUseGun::~CTaskSimpleUseGun() {
-    if (m_pTarget)
-        m_pTarget->CleanUpOldReference(&m_pTarget);
+    CEntity::SafeCleanUpRef(m_pTarget);
 
     if (m_pAnim)
         m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
@@ -56,6 +55,8 @@ bool CTaskSimpleUseGun::SetPedPosition(CPed* ped) {
 }
 
 void CTaskSimpleUseGun::InjectHooks() {
+    RH_ScopedClass(CTaskSimpleUseGun);
+    RH_ScopedCategory("Tasks/TaskTypes");
     using namespace ReversibleHooks;
 }
 

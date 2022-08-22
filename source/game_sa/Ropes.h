@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,25 +10,29 @@
 
 class CRopes {
 public:
-    static constexpr int32 MAX_NUM_ROPES = 8;
-    static CRope (&aRopes)[MAX_NUM_ROPES]; // Access using CRopes::GetRope()
+    static constexpr auto MAX_NUM_ROPES{ 8u };
+
+    static inline std::array<CRope, MAX_NUM_ROPES>& aRopes = *(std::array<CRope, MAX_NUM_ROPES>*)0xB768B8; // Access using CRopes::GetRope()
     static int32& PlayerControlsCrane;
+    static uint32& m_nRopeIdCreationCounter;
 
-    static void  CreateRopeForSwatPed(CVector const& startPos);
-    static float FindPickupHeight(CEntity* entity);
+public:
+    static void InjectHooks();
 
-    // Returns id to array
-    static int32 FindRope(uint32 id);
-    static void  Init();
-    static bool  IsCarriedByRope(CEntity* entity);
-
-    // Must be used in loop to make attached to holder
-    static bool RegisterRope(CEntity* ropeId, uint32 ropeType, CVector startPos, bool bExpires, uint8 segmentCount, uint8 flags, CEntity* holder, uint32 timeExpire);
-    static void Render();
-    static void SetSpeedOfTopNode(uint32 ropeId, CVector dirSpeed);
+    static void Init();
     static void Shutdown();
     static void Update();
-    static bool FindCoorsAlongRope(uint32 ropeId, float fCoordAlongRope, CVector* pVecPosition, CVector* arg4);
+    static void Render();
+
+    static bool RegisterRope(CEntity* ropeObj, uint32 ropeType, CVector startPos, bool bExpires, uint8 segmentCount, uint8, CPhysical* holder, uint32 timeExpire);
+
+    static float FindPickupHeight(CEntity* entity);
+    static int32 FindRope(uint32 id);
+    static bool  FindCoorsAlongRope(uint32 ropeId, float fDistAlongRope, CVector* outPosn, CVector* outSpeed);
+
+    static int32 CreateRopeForSwatPed(const CVector& startPos);
+    static bool IsCarriedByRope(CPhysical* entity);
+    static void SetSpeedOfTopNode(uint32 ropeId, CVector dirSpeed);
 
 public:
     static inline CRope& GetRope(int32 index) { return aRopes[index]; }

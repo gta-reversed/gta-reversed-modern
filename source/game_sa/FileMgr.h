@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -12,14 +12,13 @@
 typedef FILE* FILESTREAM;
 constexpr size_t DIRNAMELENGTH = 128;
 
+static constexpr auto TopLineEmptyFile{ "THIS FILE IS NOT VALID YET" };
+
 class CFileMgr {
 public:
-    // variables
-    // length: 128
-    static char* ms_dirName;
-    // length: 128
-    static char* ms_rootDirName;
-    // functions
+    static char (&ms_dirName)[128];
+    static char (&ms_rootDirName)[128];
+
     static void Initialise();
     static int32 ChangeDir(const char* path);
     static int32 SetDir(const char* path);
@@ -33,7 +32,7 @@ public:
     static bool Seek(FILESTREAM file, long offset, int32 origin);
     static bool ReadLine(FILESTREAM file, char* str, int32 num);
     static int32 CloseFile(FILESTREAM file);
-    static int32 GetFileLength(FILESTREAM file);
+    static int32 GetTotalSize(FILESTREAM file);
     static int32 Tell(FILESTREAM file);
     static bool GetErrorReadWrite(FILESTREAM file);
 

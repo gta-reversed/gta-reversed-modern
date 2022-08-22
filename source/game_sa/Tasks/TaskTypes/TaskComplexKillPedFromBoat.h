@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -9,8 +9,10 @@
 #include "TaskComplex.h"
 #include "Ped.h"
 
-class CTaskComplexKillPedFromBoat : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexKillPedFromBoat : public CTaskComplex {
 public:
+    static constexpr auto Type = TASK_KILL_PED_FROM_BOAT;
+
     CPed* m_pPed;
 
 public:

@@ -186,6 +186,10 @@ RxPipeline* RxLockedPipeSetEntryPoint(RxLockedPipe* pipeline, RxNodeInput in) {
     return ((RxPipeline*(__cdecl *)(RxLockedPipe*, RxNodeInput))0x807070)(pipeline, in);
 }
 
+RxPipeline* RxLockedPipeAddFragment(RxLockedPipe* pipeline, RwUInt32 firstIndex, RxNodeDefinition* nodeDef0, RwUInt32 nodeUnk) {
+    return plugin::CallAndReturn<RxPipeline*, 0x806BE0, RxLockedPipe*, RwUInt32, RxNodeDefinition*, RwUInt32>(pipeline, firstIndex, nodeDef0, nodeUnk);
+}
+
 RxPipelineNode* RxLockedPipeGetEntryPoint(RxLockedPipe* pipeline) {
     return ((RxPipelineNode*(__cdecl *)(RxLockedPipe*))0x8070D0)(pipeline);
 }
@@ -470,8 +474,8 @@ RwTexture* RwTextureCreate(RwRaster* raster) {
     return ((RwTexture*(__cdecl *)(RwRaster*))0x7F37C0)(raster);
 }
 
-RwTexture* RwTextureRead(char const* name, char const* maskName) {
-    return plugin::CallAndReturn<RwTexture*, 0x7F3AC0, char const*, char const*>(name, maskName);
+RwTexture* RwTextureRead(const char* name, const char* maskName) {
+    return plugin::CallAndReturn<RwTexture*, 0x7F3AC0, const char*, const char*>(name, maskName);
 }
 
 RwBool RwTextureDestroy(RwTexture* texture) {
@@ -502,12 +506,12 @@ RwTexDictionary* RwTexDictionarySetCurrent(RwTexDictionary* dict) {
     return ((RwTexDictionary*(__cdecl *)(RwTexDictionary*))0x7F3A70)(dict);
 }
 
-const RwTexDictionary* RwTexDictionaryForAllTextures(const RwTexDictionary* dict, RwTextureCallBack fpCallBack, void* pData) {
-    return ((const RwTexDictionary*(__cdecl *)(const RwTexDictionary*, RwTextureCallBack, void*))0x7F3730)(dict, fpCallBack, pData);
+const RwTexDictionary* RwTexDictionaryForAllTextures(const RwTexDictionary* dict, RwTextureCallBack fpCallBack, void* data) {
+    return ((const RwTexDictionary*(__cdecl *)(const RwTexDictionary*, RwTextureCallBack, void*))0x7F3730)(dict, fpCallBack, data);
 }
 
-RwBool RwTexDictionaryForAllTexDictionaries(RwTexDictionaryCallBack fpCallBack, void* pData) {
-    return ((RwBool(__cdecl *)(RwTexDictionaryCallBack, void*))0x7F3770)(fpCallBack, pData);
+RwBool RwTexDictionaryForAllTexDictionaries(RwTexDictionaryCallBack fpCallBack, void* data) {
+    return ((RwBool(__cdecl *)(RwTexDictionaryCallBack, void*))0x7F3770)(fpCallBack, data);
 }
 
 RwInt32 RwTextureRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB) {
@@ -1140,4 +1144,12 @@ const RwCamera* RwCameraStreamWrite(const RwCamera* camera, RwStream* stream) {
 
 RwCameraChunkInfo* RwCameraChunkInfoRead(RwStream* stream, RwCameraChunkInfo* cameraChunkInfo, RwInt32* bytesRead) {
     return ((RwCameraChunkInfo*(__cdecl *)(RwStream*, RwCameraChunkInfo*, RwInt32*))0x808EF0)(stream, cameraChunkInfo, bytesRead);
+}
+
+void _rwObjectHasFrameSetFrame(void *object, RwFrame *frame) {
+    plugin::Call<0x804EF0, void*, RwFrame*>(object, frame);
+}
+
+void _rwObjectHasFrameReleaseFrame(void *object) {
+    plugin::Call<0x804F40, void*>(object);
 }

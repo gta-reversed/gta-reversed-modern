@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -16,41 +16,41 @@
 #include "EntryInfoList.h"
 
 enum ePhysicalFlags {
-    PHYSICAL_b01 = 0x1,
-    PHYSICAL_APPLY_GRAVITY = 0x2,
+    PHYSICAL_b01                     = 0x1,
+    PHYSICAL_APPLY_GRAVITY           = 0x2,
     PHYSICAL_DISABLE_COLLISION_FORCE = 0x4,
-    PHYSICAL_COLLIDABLE = 0x8, 
-    PHYSICAL_DISABLE_TURN_FORCE = 0x10,
-    PHYSICAL_DISABLE_MOVE_FORCE = 0x20,
-    PHYSICAL_INFINITE_MASS = 0x40,
-    PHYSICAL_DISABLE_Z = 0x80,
+    PHYSICAL_COLLIDABLE              = 0x8,
+    PHYSICAL_DISABLE_TURN_FORCE      = 0x10,
+    PHYSICAL_DISABLE_MOVE_FORCE      = 0x20,
+    PHYSICAL_INFINITE_MASS           = 0x40,
+    PHYSICAL_DISABLE_Z               = 0x80,
 
-    PHYSICAL_SUBMERGED_IN_WATER = 0x100,
-    PHYSICAL_ON_SOLID_SURFACE = 0x200,
-    PHYSICAL_BROKEN = 0x400,
-    PHYSICAL_b12 = 0x800,
-    PHYSICAL_b13 = 0x1000,
-    PHYSICAL_DONT_APPLY_SPEED = 0x2000,
-    PHYSICAL_b15 = 0x4000,
-    PHYSICAL_b16 = 0x8000,
+    PHYSICAL_SUBMERGED_IN_WATER      = 0x100,
+    PHYSICAL_ON_SOLID_SURFACE        = 0x200,
+    PHYSICAL_BROKEN                  = 0x400,
+    PHYSICAL_b12                     = 0x800,
+    PHYSICAL_b13                     = 0x1000,
+    PHYSICAL_DONT_APPLY_SPEED        = 0x2000,
+    PHYSICAL_b15                     = 0x4000,
+    PHYSICAL_b16                     = 0x8000,
 
-    PHYSICAL_17 = 0x10000,
-    PHYSICAL_18 = 0x20000,
-    PHYSICAL_BULLETPROOF = 0x40000,
-    PHYSICAL_FIREPROOF = 0x80000,
-    PHYSICAL_COLLISIONPROOF = 0x100000,
-    PHYSICAL_MEELEPROOF = 0x200000,
-    PHYSICAL_INVULNERABLE = 0x400000,
-    PHYSICAL_EXPLOSIONPROOF = 0x800000,
+    PHYSICAL_17                      = 0x10000,
+    PHYSICAL_18                      = 0x20000,
+    PHYSICAL_BULLETPROOF             = 0x40000,
+    PHYSICAL_FIREPROOF               = 0x80000,
+    PHYSICAL_COLLISIONPROOF          = 0x100000,
+    PHYSICAL_MEELEPROOF              = 0x200000,
+    PHYSICAL_INVULNERABLE            = 0x400000,
+    PHYSICAL_EXPLOSIONPROOF          = 0x800000,
 
-    PHYSICAL_25 = 0x1000000,
-    PHYSICAL_ATTACHEDTOENTITY = 0x2000000,
-    PHYSICAL_27 = 0x4000000,
-    PHYSICAL_TOUCHINGWATER = 0x8000000,
-    PHYSICAL_CANBECOLLIDEDWITH = 0x10000000,
-    PHYSICAL_DESTROYED = 0x20000000,
-    PHYSICAL_31 = 0x40000000,
-    PHYSICAL_32 = 0x80000000,
+    PHYSICAL_DONTCOLLIDEWITHFLYERS   = 0x1000000,
+    PHYSICAL_ATTACHEDTOENTITY        = 0x2000000,
+    PHYSICAL_27                      = 0x4000000,
+    PHYSICAL_TOUCHINGWATER           = 0x8000000,
+    PHYSICAL_CANBECOLLIDEDWITH       = 0x10000000,
+    PHYSICAL_DESTROYED               = 0x20000000,
+    PHYSICAL_31                      = 0x40000000,
+    PHYSICAL_32                      = 0x80000000,
 };
 
 enum eEntityAltCollision : uint16 {
@@ -61,10 +61,7 @@ enum eEntityAltCollision : uint16 {
     ALT_ENITY_COL_BOAT,
 };
 
-class CPhysical : public CEntity {
-public:
-    CPhysical();
-    ~CPhysical() override;
+class NOTSA_EXPORT_VTABLE CPhysical : public CEntity {
 public:
     float  field_38;
     uint32 m_nLastCollisionTime;
@@ -93,7 +90,7 @@ public:
             uint32 bBulletProof : 1;
             uint32 bFireProof : 1;
             uint32 bCollisionProof : 1;
-            uint32 bMeeleProof : 1;
+            uint32 bMeleeProof : 1;
             uint32 bInvulnerable : 1;
             uint32 bExplosionProof : 1;
 
@@ -125,8 +122,7 @@ public:
     CPtrNodeDoubleLink* m_pMovingList;
     uint8               m_nFakePhysics;
     uint8               m_nNumEntitiesCollided;
-    uint8               m_nContactSurface;
-    char                field_BB;
+    eSurfaceType        m_nContactSurface;
     CEntity*            m_apCollidedEntities[6];
     float               m_fMovingSpeed; // ref @ CTheScripts::IsVehicleStopped
     float               m_fDamageIntensity;
@@ -134,8 +130,7 @@ public:
     CVector             m_vecLastCollisionImpactVelocity;
     CVector             m_vecLastCollisionPosn;
     uint16              m_nPieceType;
-    int16               field_FA;
-    class CPhysical*    m_pAttachedTo;
+    CPhysical*          m_pAttachedTo;
     CVector             m_vecAttachOffset;
     CVector             m_vecAttachedEntityRotation;
     CQuaternion         m_qAttachedEntityRotation;
@@ -156,35 +151,31 @@ public:
     static float& HIGHSPEED_ELASTICITY_MULT_COPCAR;
     static CVector& fxDirection;
 
-    static void InjectHooks();
+public:
+    CPhysical();
+    ~CPhysical() override;
 
     // originally virtual functions
     void Add() override;
     void Remove() override;
-    CRect* GetBoundRect(CRect* pRect) override;
+    CRect* GetBoundRect(CRect* rect) override;
     void ProcessControl() override;
     void ProcessCollision() override;
     void ProcessShift() override;
     bool TestCollision(bool bApplySpeed) override;
-    virtual int32 ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint);
-private:
-    void Add_Reversed();
-    void Remove_Reversed();
-    CRect* GetBoundRect_Reversed(CRect* pRect);
-    void ProcessControl_Reversed();
-    void ProcessCollision_Reversed();
-    void ProcessShift_Reversed();
-    bool TestCollision_Reversed(bool bApplySpeed);
-    int32 ProcessEntityCollision_Reversed(CPhysical* entity, CColPoint* colpoint);
+    virtual int32 ProcessEntityCollision(CEntity* entity, CColPoint* colPoint);
+
 public:
     void RemoveAndAdd();
     void AddToMovingList();
+
     void RemoveFromMovingList();
-    void SetDamagedPieceRecord(float fDamageIntensity, CEntity* entity, CColPoint* colPoint, float fDistanceMult);
+    void SetDamagedPieceRecord(float fDamageIntensity, CEntity* entity, CColPoint& colPoint, float fDistanceMult);
     void ApplyMoveForce(float x, float y, float z);
     void ApplyMoveForce(CVector force);
     void ApplyTurnForce(CVector force, CVector point);
     void ApplyForce(CVector vecMoveSpeed, CVector point, bool bUpdateTurnSpeed);
+
     CVector GetSpeed( CVector point);
     void ApplyMoveSpeed();
     void ApplyTurnSpeed();
@@ -192,54 +183,83 @@ public:
     void ApplyFrictionMoveForce(CVector moveForce);
     void ApplyFrictionTurnForce(CVector posn, CVector velocity);
     void ApplyFrictionForce(CVector vecMoveForce, CVector point);
+
     void SkipPhysics();
     void AddCollisionRecord(CEntity* collidedEntity);
     bool GetHasCollidedWith(CEntity* entity);
     bool GetHasCollidedWithAnyObject();
-    bool ApplyCollision(CEntity* pEntity, CColPoint* pColPoint, float* pDamageIntensity);
-    bool ApplySoftCollision(CEntity* pEntity, CColPoint* pColPoint, float* pDamageIntensity);
+
+    bool ApplyCollision(CEntity* entity, CColPoint& colPoint, float& damageIntensity);
+    bool ApplySoftCollision(CEntity* entity, CColPoint& colPoint, float& damageIntensity);
     bool ApplySpringCollision(float fSuspensionForceLevel, CVector& direction, CVector& collisionPoint, float fSpringLength, float fSuspensionBias, float& fSpringForceDampingLimit);
     bool ApplySpringCollisionAlt(float fSuspensionForceLevel, CVector& direction, CVector& collisionPoint, float fSpringLength, float fSuspensionBias, CVector& normal, float& fSpringForceDampingLimit);
     bool ApplySpringDampening(float fDampingForce, float fSpringForceDampingLimit, CVector& direction, CVector& collisionPoint, CVector& collisionPos);
     bool ApplySpringDampeningOld(float arg0, float arg1, CVector& arg2, CVector& arg3, CVector& arg4);
+
     void RemoveRefsToEntity(CEntity* entity);
     void DettachEntityFromEntity(float x, float y, float z, bool bApplyTurnForce);
     void DettachAutoAttachedEntity();
     float GetLightingFromCol(bool bInteriorLighting);
     float GetLightingTotal();
     bool CanPhysicalBeDamaged(eWeaponType weapon, bool* bDamagedDueToFireOrExplosionOrBullet);
+
     void ApplyAirResistance();
-    bool ApplyCollisionAlt(CPhysical* pEntity, CColPoint* pColPoint, float* pDamageIntensity, CVector* pVecMoveSpeed, CVector* pVecTurnSpeed);
-    bool ApplyFriction(float fFriction, CColPoint* pColPoint);
-    bool ApplyFriction(CPhysical* pEntity, float fFriction, CColPoint* pColPoint);
+    bool ApplyCollisionAlt(CPhysical* entity, CColPoint& colPoint, float& damageIntensity, CVector& outVecMoveSpeed, CVector& outVecTurnSpeed);
+    bool ApplyFriction(float fFriction, CColPoint& colPoint);
+    bool ApplyFriction(CPhysical* entity, float fFriction, CColPoint& colPoint);
+
     bool ProcessShiftSectorList(int32 sectorX, int32 sectorY);
     static void PlacePhysicalRelativeToOtherPhysical(CPhysical* relativeToPhysical, CPhysical* physicalToPlace, CVector offset);
+
     float ApplyScriptCollision(CVector arg0, float arg1, float arg2, CVector* arg3);
     void PositionAttachedEntity();
     void ApplySpeed();
     void UnsetIsInSafePosition();
     void ApplyFriction();
-    bool ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity);
-    bool ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity);
+    bool ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& thisDamageIntensity, float& entityDamageIntensity);
+    bool ApplySoftCollision(CPhysical* physical, CColPoint& colPoint, float& thisDamageIntensity, float& entityDamageIntensity);
+
     bool ProcessCollisionSectorList(int32 sectorX, int32 sectorY);
-    bool ProcessCollisionSectorList_SimpleCar(CRepeatSector* pRepeatSector);
+    bool ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector);
     void AttachEntityToEntity(CPhysical* entity, CVector offset, CVector rotation);
     void AttachEntityToEntity(CPhysical* pEntityAttachTo, CVector* vecAttachOffset, CQuaternion* attachRotation);
     bool CheckCollision();
     bool CheckCollision_SimpleCar();
 
+    CVector& GetMoveSpeed() { return m_vecMoveSpeed; }
     void ResetMoveSpeed() { m_vecMoveSpeed = CVector(); }
+
+    CVector& GetTurnSpeed() { return m_vecTurnSpeed; }
     void ResetTurnSpeed() { m_vecTurnSpeed = CVector(); }
+
     void ResetFrictionMoveSpeed() { m_vecFrictionMoveSpeed = CVector(); }
     void ResetFrictionTurnSpeed() { m_vecFrictionTurnSpeed = CVector(); }
 
-    float GetMass(const CVector& pos, const CVector& dir) {
+    [[nodiscard]] float GetMass(const CVector& pos, const CVector& dir) const {
         return 1.0f / (CrossProduct(pos, dir).SquaredMagnitude() / m_fTurnMass + 1.0f / m_fMass);
     }
 
 // HELPERS
-public:
-    inline bool IsImmovable()const { return physicalFlags.bDisableZ || physicalFlags.bInfiniteMass || physicalFlags.bDisableMoveForce; }
+    [[nodiscard]] bool IsImmovable() const { return physicalFlags.bDisableZ || physicalFlags.bInfiniteMass || physicalFlags.bDisableMoveForce; }
+
+    auto GetCollidingEntities() const { return std::span{ m_apCollidedEntities, m_nNumEntitiesCollided }; }
+
+    const auto& GetBoundingBox() { return GetColModel()->m_boundBox; }
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CPhysical* Constructor() { this->CPhysical::CPhysical(); return this; }
+    CPhysical* Destructor() { this->CPhysical::~CPhysical(); return this; }
+
+    void Add_Reversed() { CPhysical::Add(); }
+    void Remove_Reversed() { CPhysical::Remove(); }
+    CRect* GetBoundRect_Reversed(CRect* rect) { return CPhysical::GetBoundRect(rect); }
+    void ProcessControl_Reversed() { CPhysical::ProcessControl(); }
+    int32 ProcessEntityCollision_Reversed(CEntity* entity, CColPoint* colPoint) { return CPhysical::ProcessEntityCollision(entity, colPoint); }
+    void ProcessCollision_Reversed() { CPhysical::ProcessCollision(); }
+    void ProcessShift_Reversed() { CPhysical::ProcessShift(); }
+    bool TestCollision_Reversed(bool bApplySpeed) { return CPhysical::TestCollision(bApplySpeed); }
 };
 
 VALIDATE_SIZE(CPhysical, 0x138);

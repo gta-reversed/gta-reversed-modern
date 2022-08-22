@@ -5,15 +5,20 @@
 #include "TaskSimpleAbseil.h"
 #include "TaskSimplePause.h"
 #include "TaskSimpleNone.h"
+#include "PedPlacement.h"
+#include "Rope.h"
+#include "Ropes.h"
 
 void CTaskComplexUseSwatRope::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "Constructor", 0x659470, &CTaskComplexUseSwatRope::Constructor);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "CreateSubTask", 0x659620, &CTaskComplexUseSwatRope::CreateSubTask);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "Clone", 0x659C30, &CTaskComplexUseSwatRope::Clone_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "CreateFirstSubTask", 0x65A440, &CTaskComplexUseSwatRope::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "CreateNextSubTask", 0x65A3E0, &CTaskComplexUseSwatRope::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "ControlSubTask", 0x65A460, &CTaskComplexUseSwatRope::ControlSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "MakeAbortable", 0x659530, &CTaskComplexUseSwatRope::MakeAbortable_Reversed);
+    RH_ScopedClass(CTaskComplexUseSwatRope);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x659470);
+    RH_ScopedInstall(CreateSubTask, 0x659620);
+    RH_ScopedVirtualInstall(Clone, 0x659C30);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x65A440);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x65A3E0);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x65A460);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x659530);
 }
 
 CTaskComplexUseSwatRope* CTaskComplexUseSwatRope::Constructor(uint32 ropeId, CHeli* heli) {
@@ -28,6 +33,7 @@ CTaskComplexUseSwatRope::CTaskComplexUseSwatRope(uint32 ropeId, CHeli* heli) : C
     m_fCoorAlongRope = 0.0F;
     m_bIsOnHeli      = true;
 
+    // todo: CEntity::SafeRegisterRef
     m_pHeli->RegisterReference(reinterpret_cast<CEntity**>(&m_pHeli));
 }
 
@@ -90,11 +96,10 @@ bool CTaskComplexUseSwatRope::MakeAbortable_Reversed(CPed* ped, eAbortPriority p
         || ped->m_fHealth <= 20.0F
         )
         && m_pSubTask->MakeAbortable(ped, priority, event)
-        )
-    {
+    ) {
         ped->bIsStanding = false;
         ped->m_bUsesCollision = true;
-        ped->m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
+        ped->ResetMoveSpeed();
         return true;
     }
     else
@@ -128,7 +133,7 @@ CTask* CTaskComplexUseSwatRope::ControlSubTask_Reversed(CPed* ped) {
     ) {
         ped->bIsStanding = false;
         ped->m_bUsesCollision = true;
-        ped->m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
+        ped->ResetMoveSpeed();
         return nullptr;
     }
 
@@ -136,7 +141,7 @@ CTask* CTaskComplexUseSwatRope::ControlSubTask_Reversed(CPed* ped) {
 
     if (subTaskType == TASK_SIMPLE_PAUSE || subTaskType == TASK_SIMPLE_ABSEIL) {
         CVector groundCoord = ped->GetPosition();
-        CPedPlacement::FindZCoorForPed(&groundCoord);
+        CPedPlacement::FindZCoorForPed(groundCoord);
         if (ped->GetPosition().z - 2.0F < groundCoord.z && m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr))
             return CreateSubTask(TASK_NONE, ped);
 
@@ -146,7 +151,7 @@ CTask* CTaskComplexUseSwatRope::ControlSubTask_Reversed(CPed* ped) {
             ped->SetPosn(posn);
             ped->m_fAimingRotation = ped->m_fCurrentRotation - CTimer::GetTimeStep() * 0.05F;
             ped->m_vecMoveSpeed.z = -0.03f;
-            ped->Say(177, 0, 1.0F, false, false, false);
+            ped->Say(177);
         }
     }
 
@@ -159,12 +164,13 @@ CTask* CTaskComplexUseSwatRope::CreateSubTask(eTaskType taskType, CPed* ped) {
     case TASK_SIMPLE_ABSEIL:
         return new CTaskSimpleAbseil();
     case TASK_SIMPLE_PAUSE:
-        return new CTaskSimplePause(100000);
+        return new CTaskSimplePause(100'000);
     case TASK_NONE:
         return new CTaskSimpleNone();
     case TASK_FINISHED:
         ped->m_bUsesCollision = true;
-        ped->m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
+        ped->ResetMoveSpeed();
+        return nullptr;
     default:
         return nullptr;
     }

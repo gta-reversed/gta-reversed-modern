@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -14,10 +14,10 @@ struct RpAtomic;
 struct RpClump;
 
 struct tCompSearchStructByName {
-    char*    m_pName;
-    RwFrame* m_pFrame;
+    const char* m_pName;
+    RwFrame*    m_pFrame;
 
-    inline tCompSearchStructByName(char* name, RwFrame* frame) : m_pName(name), m_pFrame(frame) {}
+    inline tCompSearchStructByName(const char* name, RwFrame* frame) : m_pName(name), m_pFrame(frame) {}
 };
 
 struct tCompSearchStructById {
@@ -27,11 +27,11 @@ struct tCompSearchStructById {
     inline tCompSearchStructById(int32 id, RwFrame* frame) : m_nId(id), m_pFrame(frame) {}
 };
 
-class CClumpModelInfo : public CBaseModelInfo {
+class NOTSA_EXPORT_VTABLE CClumpModelInfo : public CBaseModelInfo {
 public:
     union {
         char*  m_animFileName;
-        uint32 m_dwAnimFileIndex;
+        uint32 m_nAnimFileIndex;
     };
 
 public:
@@ -47,9 +47,9 @@ public:
     uint32 GetRwModelType() override;
     RwObject* CreateInstance() override;
     RwObject* CreateInstance(RwMatrix* matrix) override;
-    void SetAnimFile(char const* filename) override;
+    void SetAnimFile(const char* filename) override;
     void ConvertAnimFileIndex() override;
-    signed int GetAnimFileIndex() override;
+    int32 GetAnimFileIndex() override;
 
     // Added vtable methods
     virtual CBox* GetBoundingBox();
@@ -63,19 +63,21 @@ public:
     uint32 GetRwModelType_Reversed();
     RwObject* CreateInstance_Reversed();
     RwObject* CreateInstance_Reversed(RwMatrix* matrix);
-    void SetAnimFile_Reversed(char const* filename);
+    void SetAnimFile_Reversed(const char* filename);
     void ConvertAnimFileIndex_Reversed();
-    signed int GetAnimFileIndex_Reversed();
+    int32 GetAnimFileIndex_Reversed();
     CBox* GetBoundingBox_Reversed();
     void SetClump_Reversed(RpClump* clump);
 
     // Class functions
     void SetFrameIds(RwObjectNameIdAssocation* data);
 
+    void SetClumpModelInfoFlags(uint32 flags); // Also calls SetBaseModelInfoFlags
+
     // static functions
     static RpAtomic* SetAtomicRendererCB(RpAtomic* atomic, void* renderFunc);
     static RpAtomic* AtomicSetupLightingCB(RpAtomic* atomic, void* data);
-    static RpAtomic* SetHierarchyForSkinAtomic(RpAtomic* pAtomic, void* data);
+    static RpAtomic* SetHierarchyForSkinAtomic(RpAtomic* atomic, void* data);
     /* struct tSearchData { char *name; RwFrame *result; };
       returns 0 if we found frame, or last frame if we need to continue searching */
     static RwFrame* FindFrameFromNameCB(RwFrame* frame, void* searchData);
@@ -83,7 +85,7 @@ public:
     static RwFrame* FindFrameFromIdCB(RwFrame* frame, void* searchData);
     static RwFrame* FillFrameArrayCB(RwFrame* frame, void* data);
     static RwFrame* GetFrameFromId(RpClump* clump, int32 id);
-    static RwFrame* GetFrameFromName(RpClump* clump, char* name);
+    static RwFrame* GetFrameFromName(RpClump* clump, const char* name);
     static void FillFrameArray(RpClump* clump, RwFrame** frames);
 };
 

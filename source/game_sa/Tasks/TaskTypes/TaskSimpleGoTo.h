@@ -1,11 +1,11 @@
 #pragma once
+
 #include "TaskSimple.h"
 #include "Vector.h"
 
-class CTaskSimpleGoTo : public CTaskSimple
-{
+class CTaskSimpleGoTo : public CTaskSimple {
 public:
-    int32     m_moveState;
+    int32   m_moveState;
     CVector m_vecTargetPoint;
     float   m_fRadius;
     union {
@@ -20,19 +20,22 @@ public:
         } gotoFlags;
         uint8 m_GoToFlags;
     };
-private:
-    uint8 field_1D[3]; // padding
-public:
+
     static float& ms_fLookAtThresholdDotProduct;
+
+public:
+    CTaskSimpleGoTo(int32 moveState, const CVector& targetPoint, float fRadius);
+    ~CTaskSimpleGoTo() override = default; // 0x667A00
+
+    bool HasCircledTarget(CPed* ped);
+    void SetUpIK(CPed* ped);
+    void QuitIK(CPed* ped);
+
+private:
+    friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskSimpleGoTo(int32 moveState, const CVector& targetPoint, float fRadius);
     CTaskSimpleGoTo* Constructor(int32 moveState, const CVector& targetPoint, float fRadius);
-    ~CTaskSimpleGoTo();
-
-    bool HasCircledTarget(CPed* pPed);
-    void SetUpIK(CPed* pPed);
-    void QuitIK(CPed* pPed);
 };
 
 VALIDATE_SIZE(CTaskSimpleGoTo, 0x20);

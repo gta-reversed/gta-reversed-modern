@@ -1,7 +1,10 @@
 #pragma once
 
+#include "Enums/eWeaponType.h"
+
 class CVector;
 class CEntity;
+class CBulletTrace;
 
 class CBulletTraces {
 public:
@@ -17,5 +20,5 @@ public:
     static void Render();
 
     static CBulletTrace* GetFree(); // Inlined function (Kinda NOTSA)
-    static size_t GetTraceIndex(CBulletTrace* pTrace) { return std::distance(std::begin(aTraces), pTrace); } // NOTSA
+    static size_t        GetTraceIndex(CBulletTrace* pTrace) { return std::distance(std::begin(aTraces), pTrace); } // NOTSA
 };

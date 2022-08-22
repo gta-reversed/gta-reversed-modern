@@ -1,18 +1,12 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
-uint32 MAX_POINTLIGHTS = 32;
-
-uint32& CPointLights::NumLights = *(uint32*)0xC3F0D0;
-CPointLight* CPointLights::aLights = (CPointLight*)0xC3F0E0;
-float* CPointLights::aCachedMapReadResults = (float*)0xC3F050;
-uint32& CPointLights::NextCachedValue = *(uint32*)0xC3F0D4;
-CVector* CPointLights::aCachedMapReads = (CVector*)0xC3F6E0;
+#include "PointLights.h"
 
 // 0x6FFB40
 void CPointLights::Init() {
@@ -20,13 +14,13 @@ void CPointLights::Init() {
 }
 
 // 0x6FFBB0
-float CPointLights::GenerateLightsAffectingObject(CVector const* point, float* totalLighting, CEntity* entity) {
-    return plugin::CallAndReturn<float, 0x6FFBB0, CVector const*, float*, CEntity*>(point, totalLighting, entity);
+float CPointLights::GenerateLightsAffectingObject(const CVector* point, float* totalLighting, CEntity* entity) {
+    return plugin::CallAndReturn<float, 0x6FFBB0, const CVector*, float*, CEntity*>(point, totalLighting, entity);
 }
 
 // 0x6FFE70
-float CPointLights::GetLightMultiplier(CVector const* point) {
-    return plugin::CallAndReturn<float, 0x6FFE70, CVector const*>(point);
+float CPointLights::GetLightMultiplier(const CVector* point) {
+    return plugin::CallAndReturn<float, 0x6FFE70, const CVector*>(point);
 }
 
 // 0x6FFFE0

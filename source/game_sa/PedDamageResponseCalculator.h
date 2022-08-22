@@ -1,12 +1,14 @@
 #pragma once
-#include "PedDamageResponse.h"
-#include "eWeaponType.h"
-#include "Ped.h"
 
-class CPedDamageResponseCalculator
-{
+#include "eWeaponType.h"
+
+class CEntity;
+class CPed;
+class CPedDamageResponse;
+
+class CPedDamageResponseCalculator {
 public:
-    CEntity *      m_pDamager;
+    const CEntity* m_pDamager;
     float          m_fDamageFactor;
     ePedPieceTypes m_bodyPart;
     eWeaponType    m_weaponType;
@@ -14,15 +16,23 @@ public:
 
     static float& ms_damageFactor;
 
-    static void InjectHooks();
-    CPedDamageResponseCalculator(CEntity* pEntity, float fDamage, eWeaponType weaponType, ePedPieceTypes bodyPart, bool bSpeak);
-    ~CPedDamageResponseCalculator();
-private:
-    CPedDamageResponseCalculator* Constructor(CEntity * pEntity, float fDamage, eWeaponType weaponType, ePedPieceTypes bodyPart, bool bSpeak);
 public:
+    CPedDamageResponseCalculator(const CEntity* entity, float fDamage, eWeaponType weaponType, ePedPieceTypes bodyPart, bool bSpeak);
+    ~CPedDamageResponseCalculator() = default; // 0x4AD420
 
-    void ComputeDamageResponse(CPed * pPed, CPedDamageResponse * pDamageResponse, bool bSpeak);
-    
+    void AccountForPedDamageStats(CPed* ped, CPedDamageResponse& response);
+    void AccountForPedArmour(CPed* ped, CPedDamageResponse& response);
+    void AdjustPedDamage(CPed* ped);
+    bool ComputeWillForceDeath(CPed* ped, CPedDamageResponse& response);
+    void ComputeWillKillPed(CPed* ped, CPedDamageResponse& response, bool bSpeak);
+    bool IsBleedingWeapon(CPed* ped) const;
+    void ComputeDamageResponse(CPed* ped, CPedDamageResponse& response, bool bSpeak);
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CPedDamageResponseCalculator* Constructor(CEntity* entity, float fDamage, eWeaponType weaponType, ePedPieceTypes bodyPart, bool bSpeak);
 };
 
 VALIDATE_SIZE(CPedDamageResponseCalculator, 0x14);

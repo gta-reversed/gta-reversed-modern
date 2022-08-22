@@ -2,7 +2,7 @@
 
 #include "PedAttractor.h"
 
-class CPedShelterAttractor : public CPedAttractor {
+class NOTSA_EXPORT_VTABLE CPedShelterAttractor : public CPedAttractor {
 public:
     // SArray& ms_displacements;
 
@@ -19,7 +19,7 @@ public:
     bool IsAtHeadOfQueue(CPed* ped) override { return true; }
 
     static CVector GetDisplacement(int32 pedId);
-    void ComputeAttractPos(int32 pedId, CVector& outPosn) override;
+    void ComputeAttractPos(int32 pedId, CVector& outPos) override;
     void ComputeAttractHeading(int32 bQueue, float& heading) override;
     void BroadcastDeparture(CPed* ped) override;
 

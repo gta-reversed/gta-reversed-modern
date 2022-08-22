@@ -6,6 +6,7 @@
 
 // 0x718600
 void AsciiToGxtChar(const char* src, GxtChar* dst) {
+    assert(src && dst);
     for (int32 i = 0; src[i]; ++i) {
         dst[i] = src[i];
         dst[i + 1] = 0;
@@ -99,4 +100,10 @@ void TextCopy(GxtChar* dst, const GxtChar* src) {
         ++dst;
     }
     *dst = '\0';
+}
+
+// 0x718660
+GxtChar* GxtCharStrcpy(GxtChar* dst, const GxtChar* src) {
+    TextCopy(dst, src);
+    return dst;
 }

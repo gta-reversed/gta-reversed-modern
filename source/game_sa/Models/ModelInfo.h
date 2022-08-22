@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -16,15 +16,6 @@
 #include "LodTimeModelInfo.h"
 #include "PedModelInfo.h"
 
-enum eModelInfoType : uint8 {
-    MODEL_INFO_TYPE_ATOMIC = 1,
-    MODEL_INFO_TYPE_TIME = 3,
-    MODEL_INFO_TYPE_WEAPON = 4,
-    MODEL_INFO_TYPE_CLUMP = 5,
-    MODEL_INFO_TYPE_VEHICLE = 6,
-    MODEL_INFO_TYPE_PED = 7,
-    MODEL_INFO_TYPE_LOD_ATOMIC = 8,
-};
 
 class CModelInfo {
 public:
@@ -78,9 +69,9 @@ public:
     static CVehicleModelInfo* AddVehicleModel(int32 index);
     static class CPedModelInfo* AddPedModel(int32 index);
     static void Initialise();
-    static CBaseModelInfo* GetModelInfo(const char* name, int32* index);
-    static CBaseModelInfo* GetModelInfoFromHashKey(uint32 uiHash, int32* index);
-    static CBaseModelInfo* GetModelInfoUInt16(const char* name, uint16* pOutIndex);
+    static CBaseModelInfo* GetModelInfo(const char* name, int32* index = nullptr);
+    static CBaseModelInfo* GetModelInfoFromHashKey(uint32 uiHash, int32* index = nullptr);
+    static CBaseModelInfo* GetModelInfoUInt16(const char* name, uint16* pOutIndex = nullptr);
     // get model in range (search for model only in range (min;max))
     static CBaseModelInfo* GetModelInfo(const char* name, int32 minIndex, int32 maxIndex);
     static CStore<C2dEffect, NUM_2DFX_INFOS>* Get2dEffectStore();

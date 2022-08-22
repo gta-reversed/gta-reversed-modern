@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -8,10 +8,11 @@
 
 class CPtrNode {
 public:
-    void*     pItem;
-    CPtrNode* pNext;
+    void*     m_item;
+    CPtrNode* m_next;
 
-    inline CPtrNode(void* item) : pItem(item) {}
+    CPtrNode(void* item) : m_item(item) {}
+    CPtrNode* GetNext() const { return m_next; }
 };
 
 VALIDATE_SIZE(CPtrNode, 8);

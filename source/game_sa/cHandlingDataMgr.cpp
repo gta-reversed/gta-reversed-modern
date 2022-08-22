@@ -2,11 +2,12 @@
 
 #include "cHandlingDataMgr.h"
 
-cHandlingDataMgr& gHandlingDataMgr = *(cHandlingDataMgr*)0xC2B9C8;
-
 void cHandlingDataMgr::InjectHooks(){
-    ReversibleHooks::Install("cHandlingDataMgr", "ConvertBikeDataToWorldUnits", 0x6F5240, &cHandlingDataMgr::ConvertBikeDataToWorldUnits);
-    ReversibleHooks::Install("cHandlingDataMgr", "ConvertBikeDataToGameUnits", 0x6F5290, &cHandlingDataMgr::ConvertBikeDataToGameUnits);
+    RH_ScopedClass(cHandlingDataMgr);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(ConvertBikeDataToWorldUnits, 0x6F5240);
+    RH_ScopedInstall(ConvertBikeDataToGameUnits, 0x6F5290);
 };
 
 tFlyingHandlingData* cHandlingDataMgr::GetFlyingPointer(uint8 handlingId)
@@ -31,8 +32,8 @@ bool cHandlingDataMgr::HasRearWheelDrive(uint8 handlingId)
 
 // get handling id by name
 // 0x6F4FD0
-int32 cHandlingDataMgr::GetHandlingId(char* name) {
-    return plugin::CallMethodAndReturn<int32, 0x6F4FD0, cHandlingDataMgr*, char*>(this, name);
+int32 cHandlingDataMgr::GetHandlingId(const char* name) {
+    return plugin::CallMethodAndReturn<int32, 0x6F4FD0>(this, name);
 }
 
 // update some handling variables with some world-specific multipliers

@@ -1,32 +1,34 @@
 #include "StdInc.h"
 
 #include "TaskSimpleSwim.h"
-
-float& CTaskSimpleSwim::SWIM_DIVE_UNDER_ANGLE = *reinterpret_cast<float*>(0x8D2FC4);
-float& CTaskSimpleSwim::SWIM_STOP_TIME = *reinterpret_cast<float*>(0x8D2FC0);
+#include "TaskSimpleClimb.h"
 
 void CTaskSimpleSwim::InjectHooks() {
-    ReversibleHooks::Install("CTaskSimpleSwim", "CTaskSimpleSwim", 0x688930, &CTaskSimpleSwim::Constructor);
-    ReversibleHooks::Install("CTaskSimpleSwim", "Clone", 0x68B050, &CTaskSimpleSwim::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimpleSwim", "GetTaskType", 0x6889F0, &CTaskSimpleSwim::GetId_Reversed);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessPed", 0x68B1C0, &CTaskSimpleSwim::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleSwim", "MakeAbortable", 0x68B100, &CTaskSimpleSwim::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ApplyRollAndPitch", 0x68A8E0, &CTaskSimpleSwim::ApplyRollAndPitch);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessSwimAnims", 0x6899F0, &CTaskSimpleSwim::ProcessSwimAnims);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessSwimmingResistance", 0x68A1D0, &CTaskSimpleSwim::ProcessSwimmingResistance);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessEffects", 0x68AA70, &CTaskSimpleSwim::ProcessEffects);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessControlAI", 0x689640, &CTaskSimpleSwim::ProcessControlAI);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessControlInput", 0x688A90, &CTaskSimpleSwim::ProcessControlInput);
-    ReversibleHooks::Install("CTaskSimpleSwim", "CreateFxSystem", 0x68A9F0, &CTaskSimpleSwim::CreateFxSystem);
-    ReversibleHooks::Install("CTaskSimpleSwim", "DestroyFxSystem", 0x68AA50, &CTaskSimpleSwim::DestroyFxSystem);
-}
+    RH_ScopedClass(CTaskSimpleSwim);
+    RH_ScopedCategory("Tasks/TaskTypes");
 
-CTaskSimpleSwim::CTaskSimpleSwim(CVector* pPosition, CPed* pPed) : CTaskSimple() {
+    RH_ScopedInstall(Constructor, 0x688930);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x68B1C0);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x68B100);
+    RH_ScopedInstall(ApplyRollAndPitch, 0x68A8E0);
+    RH_ScopedInstall(ProcessSwimAnims, 0x6899F0);
+    RH_ScopedInstall(ProcessSwimmingResistance, 0x68A1D0);
+    RH_ScopedInstall(ProcessEffects, 0x68AA70);
+    RH_ScopedInstall(ProcessControlAI, 0x689640);
+    RH_ScopedInstall(ProcessControlInput, 0x688A90);
+    RH_ScopedInstall(CreateFxSystem, 0x68A9F0);
+    RH_ScopedInstall(DestroyFxSystem, 0x68AA50);
+}
+CTaskSimpleSwim* CTaskSimpleSwim::Constructor(CVector* pos, CPed* ped) { this->CTaskSimpleSwim::CTaskSimpleSwim(pos, ped); return this; }
+bool CTaskSimpleSwim::MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable_Reversed(ped, priority, event); }
+bool CTaskSimpleSwim::ProcessPed(CPed* ped) { return ProcessPed_Reversed(ped); }
+
+// 0x688930
+CTaskSimpleSwim::CTaskSimpleSwim(CVector* pos, CPed* ped) : CTaskSimple(), m_vecPos{ CVector() } {
     m_bFinishedBlending = false;
     m_bAnimBlockRefAdded = false;
     m_fAnimSpeed = -1.0f;
-    m_vecPos = CVector(0.0f, 0.0f, 0.0f);
-    m_pPed = pPed;
+    m_pPed = ped;
     m_fRotationX = 0.0f;
     m_fTurningRotationY = 0.0f;
     m_fUpperTorsoRotationX = 0.0f;
@@ -38,829 +40,633 @@ CTaskSimpleSwim::CTaskSimpleSwim(CVector* pPosition, CPed* pPed) : CTaskSimple()
     m_nSwimState = SWIM_TREAD;
     m_AnimID = ANIM_ID_NO_ANIMATION_SET;
 
-    if (pPosition)
-        m_vecPos = *pPosition;
+    if (pos)
+        m_vecPos = *pos;
 
-    if (pPed)
-        pPed->RegisterReference(reinterpret_cast<CEntity**>(&m_pPed));
+    CEntity::SafeRegisterRef(m_pPed);
 
     m_pFxSystem = nullptr;
     m_bTriggerWaterSplash = false;
     m_fRandomMoveBlendRatio = 0.0f;
 }
 
-
+// 0x688A00
 CTaskSimpleSwim::~CTaskSimpleSwim() {
     if (m_bAnimBlockRefAdded) {
-        CAnimBlock* pAnimBlock = CAnimManager::ms_aAnimAssocGroups[ANIM_GROUP_SWIM].m_pAnimBlock;
-        CAnimManager::RemoveAnimBlockRef(pAnimBlock - CAnimManager::ms_aAnimBlocks);
+        CAnimManager::RemoveAnimBlockRef(CAnimManager::GetAnimationBlockIndex(ANIM_GROUP_SWIM));
     }
 
-    if (m_pEntity)
-        m_pEntity->CleanUpOldReference(&m_pEntity);
-
-    if (m_pPed)
-        m_pPed->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pPed));
+    CEntity::SafeCleanUpRef(m_pEntity); // todo: m_pEntity not registered CEntity::SafeRegisterRef() in ctor
+    CEntity::SafeCleanUpRef(m_pPed);
 }
 
-// 0x688930
-CTaskSimpleSwim* CTaskSimpleSwim::Constructor(CVector* pPosition, CPed* pPed) {
-    this->CTaskSimpleSwim::CTaskSimpleSwim(pPosition, pPed);
-    return this;
+// 0x68A9F0
+void CTaskSimpleSwim::CreateFxSystem(CPed* ped, RwMatrix* mat) {
+    CVector point{};
+    m_pFxSystem = g_fxMan.CreateFxSystem("water_ripples", &point, mat, false);
+    if (m_pFxSystem) {
+        m_pFxSystem->CopyParentMatrix();
+        m_pFxSystem->Play();
+    }
 }
 
-// 0x68B050
-CTask* CTaskSimpleSwim::Clone() {
-    return CTaskSimpleSwim::Clone_Reversed();
-}
-
-// 0x6889F0
-eTaskType CTaskSimpleSwim::GetTaskType() {
-    return CTaskSimpleSwim::GetId_Reversed();
+// 0x68AA50
+void CTaskSimpleSwim::DestroyFxSystem() {
+    FxSystem_c::SafeKillAndClear(m_pFxSystem);
 }
 
 // 0x68B100
-bool CTaskSimpleSwim::MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event)
-{
-    return MakeAbortable_Reversed(ped, priority, event);
-}
-
-// 0x68B1C0
-bool CTaskSimpleSwim::ProcessPed(CPed* pPed)
-{
-    return ProcessPed_Reversed(pPed);
-}
-
-CTask* CTaskSimpleSwim::Clone_Reversed() {
-    return new CTaskSimpleSwim(&m_vecPos, m_pPed);
-}
-
-bool CTaskSimpleSwim::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event)
-{
-    const auto* damageEvent = static_cast<const CEventDamage*>(event);
-
-    if (priority == ABORT_PRIORITY_IMMEDIATE)
-    {
+bool CTaskSimpleSwim::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event) {
+    if (priority == ABORT_PRIORITY_IMMEDIATE) {
         CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.0f);
         ped->m_nMoveState = PEDMOVE_STILL;
         ped->m_nSwimmingMoveState = PEDMOVE_STILL;
 
-        if (m_AnimID != ANIM_ID_NO_ANIMATION_SET)
-        {
-            auto pAnimAssociation = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, m_AnimID);
-            if (pAnimAssociation)
-            {
-                pAnimAssociation->m_fBlendDelta = -1000.0f;
+        if (m_AnimID != ANIM_ID_NO_ANIMATION_SET) {
+            auto assoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, m_AnimID);
+            if (assoc) {
+                assoc->m_fBlendDelta = -1000.0f;
             }
         }
 
         ped->RestoreHeadingRate();
+
+        DestroyFxSystem();
+        return true;
     }
-    else if (!event || event->GetEventPriority() < 71
-        && (event->GetEventType() != EVENT_DAMAGE || !damageEvent->m_damageResponse.m_bHealthZero || !damageEvent->m_bAddToEventGroup))
-    {
+
+    if (!event) {
         return false;
     }
-
-    if (m_pFxSystem)
-    {
-        m_pFxSystem->Kill();
-        m_pFxSystem = nullptr;
+    const auto* dmgEvent = static_cast<const CEventDamage*>(event);
+    if (event->GetEventPriority() >= 71 || event->GetEventType() == EVENT_DAMAGE && dmgEvent->m_damageResponse.m_bHealthZero && dmgEvent->m_bAddToEventGroup) {
+        DestroyFxSystem();
+        return true;
     }
-    return true;
+    return false;
 }
 
-bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
-{
-    if (m_pEntity)
-    {
-        CAnimManager::BlendAnimation(pPed->m_pRwClump, pPed->m_nAnimGroup, ANIM_ID_IDLE, 8.0f);
-        pPed->m_nMoveState = PEDMOVE_STILL;
-        pPed->m_nSwimmingMoveState = PEDMOVE_STILL;
+// 0x68B1C0
+bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* ped) {
+    if (m_pEntity) {
+        CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 8.0f);
+        ped->m_nMoveState = PEDMOVE_STILL;
+        ped->m_nSwimmingMoveState = PEDMOVE_STILL;
 
-        FxSystem_c* pFxSystem = m_pFxSystem;
-        if (pFxSystem)
-        {
-            pFxSystem->Kill();
-            m_pFxSystem = nullptr;
-        }
+        DestroyFxSystem();
         return true;
     }
 
-    if (m_fSwimStopTime > CTaskSimpleSwim::SWIM_STOP_TIME || pPed->bIsStanding)
-    {
-        CAnimBlendAssociation* pAnimAssociation = nullptr;
-        if (m_AnimID != ANIM_ID_NO_ANIMATION_SET)
-        {
-            pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, m_AnimID);
+    if (m_fSwimStopTime > SWIM_STOP_TIME || ped->bIsStanding) {
+        CAnimBlendAssociation* assoc = nullptr;
+        if (m_AnimID != ANIM_ID_NO_ANIMATION_SET) {
+            assoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, m_AnimID);
         }
         AnimationId animId = ANIM_ID_IDLE;
-        pPed->m_nSwimmingMoveState = PEDMOVE_STILL;
-        pPed->m_nMoveState = PEDMOVE_STILL;
-        if (pAnimAssociation)
-        {
-            if (pAnimAssociation->m_nAnimId == ANIM_ID_CLIMB_JUMP)
-                pAnimAssociation->m_nFlags |= ANIM_FLAG_UNLOCK_LAST_FRAME;
+        ped->m_nSwimmingMoveState = PEDMOVE_STILL;
+        ped->m_nMoveState = PEDMOVE_STILL;
+        if (assoc) {
+            if (assoc->m_nAnimId == ANIM_ID_CLIMB_JUMP)
+                assoc->m_nFlags |= ANIMATION_UNLOCK_LAST_FRAME;
             else
-                pAnimAssociation->m_fBlendDelta = -4.0f;
-            if (m_AnimID == ANIM_ID_SWIM_BREAST)
-            {
+                assoc->m_fBlendDelta = -4.0f;
+
+            if (m_AnimID == ANIM_ID_SWIM_BREAST) {
                 animId = ANIM_ID_WALK;
-                pPed->m_nSwimmingMoveState = PEDMOVE_WALK;
-                pPed->m_nMoveState = PEDMOVE_WALK;
-            }
-            else if (m_AnimID == ANIM_ID_SWIM_CRAWL)
-            {
+                ped->m_nSwimmingMoveState = PEDMOVE_WALK;
+                ped->m_nMoveState = PEDMOVE_WALK;
+            } else if (m_AnimID == ANIM_ID_SWIM_CRAWL) {
                 animId = ANIM_ID_RUN;
-                pPed->m_nSwimmingMoveState = PEDMOVE_RUN;
-                pPed->m_nMoveState = PEDMOVE_RUN;
+                ped->m_nSwimmingMoveState = PEDMOVE_RUN;
+                ped->m_nMoveState = PEDMOVE_RUN;
             }
         }
-        CAnimManager::BlendAnimation(pPed->m_pRwClump, pPed->m_nAnimGroup, animId, 4.0f);
-        pPed->RestoreHeadingRate();
-        FxSystem_c* pFxSystem = m_pFxSystem;
-        if (pFxSystem) {
-            pFxSystem->Kill();
-            m_pFxSystem = nullptr;
-        }
+        CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, animId, 4.0f);
+        ped->RestoreHeadingRate();
+        DestroyFxSystem();
         return true;
     }
 
-    pPed->bIsInTheAir = false;
+    ped->bIsInTheAir = false;
 
-    if (pPed->IsPlayer())
-    {
-        if (m_nTimeStep && m_nSwimState != SWIM_UNDERWATER_SPRINTING)
-        {
-            ProcessControlAI(pPed);
-            uint32 swimmingTimeStep = static_cast<uint32>((CTimer::GetTimeStepInSeconds()) * 1000.0f);
+    if (ped->IsPlayer()) {
+        if (m_nTimeStep && m_nSwimState != SWIM_UNDERWATER_SPRINTING) {
+            ProcessControlAI(ped);
+            auto swimmingTimeStep = static_cast<uint32>(CTimer::GetTimeStepInMS());
             if (m_nTimeStep <= swimmingTimeStep)
                 m_nTimeStep = 0;
             else
                 m_nTimeStep -= swimmingTimeStep;
 
-            CVector vecOut = m_vecPos - pPed->GetPosition();
-            pPed->m_pPlayerData->m_fMoveBlendRatio = vecOut.Magnitude();
-            CPlayerPedData * pPlayerData = pPed->m_pPlayerData;
-            if (pPlayerData->m_fMoveBlendRatio < 0.5f) {
-                pPlayerData->m_fMoveBlendRatio = 0.0f;
-                CAnimManager::BlendAnimation(pPed->m_pRwClump, pPed->m_nAnimGroup, ANIM_ID_IDLE, 4.0f);
-                pPed->RestoreHeadingRate();
+            ped->m_pPlayerData->m_fMoveBlendRatio = DistanceBetweenPoints(ped->GetPosition(), m_vecPos);
+            if (ped->m_pPlayerData->m_fMoveBlendRatio < 0.5f) {
+                ped->m_pPlayerData->m_fMoveBlendRatio = 0.0f;
+                CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 4.0f);
+                ped->RestoreHeadingRate();
                 DestroyFxSystem();
                 return true;
             }
-            if (pPlayerData->m_fMoveBlendRatio > 1.0f)
-                pPlayerData->m_fMoveBlendRatio = 1.0f;
-        }
-        else
-        {
-            ProcessControlInput(reinterpret_cast<CPlayerPed*>(pPed));
+            ped->m_pPlayerData->m_fMoveBlendRatio = std::min(ped->m_pPlayerData->m_fMoveBlendRatio, 1.0f);
+        } else {
+            ProcessControlInput(ped->AsPlayer());
             m_nTimeStep = 0;
         }
+
         bool bDecreaseAir = false;
-        float fDecreaseAirMultiplicator = 1.0;
-        if (m_nSwimState == SWIM_UNDERWATER_SPRINTING)
-        {
+        float fDecreaseAirMult = 1.0f;
+        if (m_nSwimState == SWIM_UNDERWATER_SPRINTING) {
             bDecreaseAir = true;
-            CAnimBlendAssociation* pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, ANIM_ID_SWIM_UNDER);
-            if (pAnimAssociation)
-            {
-                fDecreaseAirMultiplicator = pAnimAssociation->m_fSpeed * pAnimAssociation->m_fBlendAmount + 1.0f;
+            CAnimBlendAssociation* assocUnder = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_SWIM_UNDER);
+            if (assocUnder) {
+                fDecreaseAirMult = assocUnder->m_fSpeed * assocUnder->m_fBlendAmount + 1.0f;
             }
         }
 
-        auto* pPlayerPed = reinterpret_cast<CPlayerPed*> (pPed);
-        pPlayerPed->HandlePlayerBreath(bDecreaseAir, fDecreaseAirMultiplicator);
-        if (m_pPed)
-        {
-            if (m_nSwimState != SWIM_UNDERWATER_SPRINTING)
-            {
-              CPlayerPedData * pPlayerData = pPed->m_pPlayerData;
-                if (CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 0.5f > pPlayerData->m_fBreath)
-                    pPed->Say(356, 0, 1.0f, 0, 0, 0);
+        ped->AsPlayer()->HandlePlayerBreath(bDecreaseAir, fDecreaseAirMult);
+        if (m_pPed && m_nSwimState != SWIM_UNDERWATER_SPRINTING) {
+            if (CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 0.5f > ped->m_pPlayerData->m_fBreath) {
+                ped->Say(356);
             }
         }
-        pPed->SetMoveState(PEDMOVE_NONE);
-    }
-    else
-    {
-        ProcessControlAI(pPed);
+        ped->SetMoveState(PEDMOVE_NONE);
+    } else {
+        ProcessControlAI(ped);
 
         if (m_nSwimState == SWIM_UNDERWATER_SPRINTING) {
             CPedDamageResponseCalculator damageCalculator(nullptr, CTimer::GetTimeStep(), WEAPON_DROWNING, PED_PIECE_TORSO, false);
-            CEventDamage eventDamage(nullptr, CTimer::GetTimeInMS(), WEAPON_DROWNING, PED_PIECE_TORSO, 0, false, pPed->bInVehicle);
-            if (eventDamage.AffectsPed(pPed))
-                damageCalculator.ComputeDamageResponse(pPed, &eventDamage.m_damageResponse, true);
+            CEventDamage eventDamage(nullptr, CTimer::GetTimeInMS(), WEAPON_DROWNING, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
+            if (eventDamage.AffectsPed(ped))
+                damageCalculator.ComputeDamageResponse(ped, eventDamage.m_damageResponse, true);
             else
                 eventDamage.m_damageResponse.m_bDamageCalculated = true;
-            pPed->m_pIntelligence->m_eventGroup.Add(&eventDamage, false);
+            ped->GetEventGroup().Add(&eventDamage, false);
         }
     }
-    ProcessSwimAnims(pPed);
-    ProcessSwimmingResistance(pPed);
-    ProcessEffects(pPed);
+
+    ProcessSwimAnims(ped);
+    ProcessSwimmingResistance(ped);
+    ProcessEffects(ped);
     return false;
 }
 
 // 0x68A8E0
-void CTaskSimpleSwim::ApplyRollAndPitch(CPed* pPed)
-{
-    LimbOrientation theLimbOrientation;
-    theLimbOrientation.m_fYaw = m_fAimingRotation;
-    theLimbOrientation.m_fPitch = m_fUpperTorsoRotationX;
-    pPed->m_pedIK.RotateTorso(pPed->m_apBones[PED_NODE_UPPER_TORSO], theLimbOrientation, rwCOMBINEREPLACE);
-    RwObject* pRwObject = pPed->m_pRwObject;
-    if (pRwObject)
-    {
-        CMatrix pedMatrix(pPed->GetModellingMatrix(), false);
+void CTaskSimpleSwim::ApplyRollAndPitch(CPed* ped) const {
+    LimbOrientation orientation(m_fAimingRotation, m_fUpperTorsoRotationX);
+    ped->m_pedIK.RotateTorso(ped->m_apBones[PED_NODE_UPPER_TORSO], orientation, rwCOMBINEREPLACE);
+    if (ped->m_pRwObject) {
+        CMatrix pedMatrix(ped->GetModellingMatrix(), false);
         CMatrix rotationMatrix;
         rotationMatrix.SetTranslate(CVector(0.0f, 0.0f, 0.0f));
         rotationMatrix.RotateY(m_fTurningRotationY);
         rotationMatrix.RotateX(m_fRotationX);
         pedMatrix *= rotationMatrix;
         pedMatrix.UpdateRW();
-        pPed->UpdateRwFrame();
+        ped->UpdateRwFrame();
     }
 }
 
 // 0x6899F0
-void CTaskSimpleSwim::ProcessSwimAnims(CPed* pPed)
-{
-    auto* pPlayerPed = (CPlayerPed*)pPed;
-    CAnimBlendAssociation* pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, ANIM_ID_SWIM_TREAD);
+void CTaskSimpleSwim::ProcessSwimAnims(CPed* ped) {
+    auto* player = ped->AsPlayer();
+    const CVector& pedPos = player->GetPosition();
+    CAnimBlendAssociation* assocTread = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_SWIM_TREAD);
     if (m_bFinishedBlending) {
-        if (pAnimAssociation
-            && pAnimAssociation->m_fBlendAmount < 1.0f
-            && pAnimAssociation->m_fBlendDelta <= 0.0f) {
-            CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_SWIM_TREAD, 8.0f);
+        if (assocTread && assocTread->m_fBlendAmount < 1.0f && assocTread->m_fBlendDelta <= 0.0f) {
+            CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_SWIM_TREAD, 8.0f);
         }
-    }
-    else {
-        if (pAnimAssociation
-            || (pAnimAssociation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_SWIM_TREAD, 8.0f)) != nullptr)
-        {
-            if (pAnimAssociation->m_fBlendAmount >= 1.0f)
+    } else {
+        if (assocTread || (assocTread = CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_SWIM_TREAD, 8.0f)) != nullptr) {
+            if (assocTread->m_fBlendAmount >= 1.0f) {
                 m_bFinishedBlending = true;
+            }
         }
-        RpAnimBlendClumpSetBlendDeltas(pPlayerPed->m_pRwClump, 0x10, -8.0f);
-        FxSystem_c* pFixSystem = pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_pFxSystem;
-        if (pFixSystem)
-        {
-            pFixSystem->Kill();
-            pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_pFxSystem = nullptr;
-        }
+        RpAnimBlendClumpSetBlendDeltas(player->m_pRwClump, 0x10, -8.0f); // todo: ANIMATION_PARTIAL ?
+        FxSystem_c::SafeKillAndClear(player->GetActiveWeapon().m_pFxSystem); // Removes fire or something in water
 
-        if (pPlayerPed->IsPlayer() && !m_nSwimState)
-        {
-            CVector& vecPos = pPlayerPed->GetPosition();
+        if (player->IsPlayer() && !m_nSwimState) {
             float waterLevel = 0.0f;
-            if (CWaterLevel::GetWaterLevel(vecPos.x, vecPos.y, vecPos.z, &waterLevel, 1, nullptr))
-            {
-                if (waterLevel - 2.0f > vecPos.z)
+            if (CWaterLevel::GetWaterLevel(pedPos, waterLevel, true)) {
+                if (waterLevel - 2.0f > pedPos.z) {
                     m_nSwimState = SWIM_UNDERWATER_SPRINTING;
+                }
             }
         }
     }
 
     if (!m_bAnimBlockRefAdded) {
-        CAnimBlock* pAnimBlock = CAnimManager::ms_aAnimAssocGroups[ANIM_GROUP_SWIM].m_pAnimBlock;
-        if (!pAnimBlock) {
-            char* pBlockName = CAnimManager::GetAnimBlockName(ANIM_GROUP_SWIM);
-            pAnimBlock = CAnimManager::GetAnimationBlock(pBlockName);
+        CAnimBlock* animBlock = CAnimManager::GetAnimationBlock(ANIM_GROUP_SWIM);
+
+        if (!animBlock) {
+            const char* blockName = CAnimManager::GetAnimBlockName(ANIM_GROUP_SWIM);
+            animBlock = CAnimManager::GetAnimationBlock(blockName);
         }
-        if (pAnimBlock->bLoaded) {
-            CAnimManager::AddAnimBlockRef(pAnimBlock - CAnimManager::ms_aAnimBlocks);
+
+        const auto blockIndex = CAnimManager::GetAnimationBlockIndex(animBlock);
+        if (animBlock->bLoaded) {
+            CAnimManager::AddAnimBlockRef(blockIndex);
             m_bAnimBlockRefAdded = true;
-        }
-        else {
-            CStreaming::RequestModel(pAnimBlock - CAnimManager::ms_aAnimBlocks + RESOURCE_ID_IFP, STREAMING_KEEP_IN_MEMORY);
+        } else {
+            CStreaming::RequestModel(IFPToModelId(blockIndex), STREAMING_KEEP_IN_MEMORY);
         }
     }
 
-    if (m_bFinishedBlending && m_bAnimBlockRefAdded) {
-        switch (m_nSwimState){
-        case SWIM_TREAD: {
-            if (m_AnimID != ANIM_ID_SWIM_TREAD)
-            {
-                CAnimBlendAssociation* pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_SWIM_BREAST);
-                if (pAnimAssociation)
-                    pAnimAssociation->m_fBlendDelta = -1.0f;
-                pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_SWIM_CRAWL);
-                if (pAnimAssociation)
-                    pAnimAssociation->m_fBlendDelta = -1.0f;
-                pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_SWIM_DIVE_UNDER);
-                if (pAnimAssociation)
-                    pAnimAssociation->m_fBlendDelta = -4.0f;
-                pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_SWIM_UNDER);
-                if (pAnimAssociation)
-                    pAnimAssociation->m_fBlendDelta = -2.0f;
-                pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_SWIM_GLIDE);
-                if (pAnimAssociation)
-                    pAnimAssociation->m_fBlendDelta = -2.0f;
-                pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_SWIM_JUMPOUT);
-                if (pAnimAssociation)
-                    pAnimAssociation->m_fBlendDelta = -4.0f;
-                pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_CLIMB_JUMP);
-                if (pAnimAssociation)
-                    pAnimAssociation->m_fBlendDelta = -4.0f;
-                m_AnimID = ANIM_ID_SWIM_TREAD;
-            }
-            break;
-        }
-        case SWIM_SPRINT: {
-            if (m_AnimID == ANIM_ID_SWIM_BREAST)
-            {
-                CAnimBlendAssociation* pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_SWIM_BREAST);
-                if (!pAnimAssociation)
-                {
-                    m_nSwimState = SWIM_TREAD;
-                    break;
-                }
-                if (pPlayerPed->IsPlayer())
-                {
-                    pAnimAssociation->m_fSpeed = pPlayerPed->m_pPlayerData->m_fMoveBlendRatio;
-                }
-                else if (m_fAnimSpeed > 0.0f && m_fAnimSpeed <= 1.0f)
-                {
-                    pAnimAssociation->m_fSpeed = m_fAnimSpeed;
-                }
-            }
-            else
-            {
-                CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_SWIM, ANIM_ID_SWIM_BREAST, 2.0f);
-                m_AnimID = ANIM_ID_SWIM_BREAST;
-            }
-            break;
-        }
-        case SWIM_SPRINTING:
-        {
-            if (m_AnimID == ANIM_ID_SWIM_CRAWL)
-            {
-                CAnimBlendAssociation* pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_SWIM_CRAWL);
-                if (!pAnimAssociation)
-                {
-                    m_nSwimState = SWIM_TREAD;
-                    break;
-                }
-                if (pPlayerPed->m_pPlayerData)
-                {
-                    float buttonSprintResults = pPlayerPed->GetButtonSprintResults(SPRINT_WATER);
-                    pAnimAssociation->m_fSpeed = static_cast <float> (std::max(1.0f, buttonSprintResults));
-                }
-                else if (m_fAnimSpeed > 1.0)
-                {
-                    float taskAnimSpeed = static_cast <float> (m_fAnimSpeed - 1.0f);
-                    pAnimAssociation->m_fSpeed = static_cast <float> (std::min(1.5f, taskAnimSpeed));
-                }
-            }
-            else
-            {
-                CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_SWIM, ANIM_ID_SWIM_CRAWL, 2.0f);
-                m_AnimID = ANIM_ID_SWIM_CRAWL;
-            }
-            break;
-        }
-        case SWIM_DIVE_UNDERWATER:
-        {
-            if (m_AnimID == ANIM_ID_SWIM_DIVE_UNDER)
-            {
-                CAnimBlendAssociation* pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_SWIM_DIVE_UNDER);
-                if (!pAnimAssociation)
-                {
-                    m_nSwimState = SWIM_TREAD;
-                    break;
-                }
+    if (!m_bFinishedBlending || !m_bAnimBlockRefAdded)
+        return;
 
-                if (pAnimAssociation->m_pHierarchy->m_fTotalTime == pAnimAssociation->m_fCurrentTime)
-                    m_nSwimState = SWIM_UNDERWATER_SPRINTING;
-            }
-            else
-            {
-                CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_SWIM, ANIM_ID_SWIM_DIVE_UNDER, 8.0f);
-                m_AnimID = ANIM_ID_SWIM_DIVE_UNDER;
-            }
+    switch (m_nSwimState) {
+    case SWIM_TREAD: {
+        if (m_AnimID == ANIM_ID_SWIM_TREAD)
             break;
+
+        constexpr struct { AnimationId anim; float delta; } mapping[] = {
+            { ANIM_ID_SWIM_BREAST,      -1.0f },
+            { ANIM_ID_SWIM_CRAWL,       -1.0f },
+            { ANIM_ID_SWIM_DIVE_UNDER,  -4.0f },
+            { ANIM_ID_SWIM_UNDER,       -2.0f },
+            { ANIM_ID_SWIM_GLIDE,       -2.0f },
+            { ANIM_ID_SWIM_JUMPOUT,     -4.0f },
+            { ANIM_ID_CLIMB_JUMP,       -4.0f },
+        };
+        for (const auto& [anim, delta] : mapping) {
+            if (auto* assoc = RpAnimBlendClumpGetAssociation(player->m_pRwClump, anim)) {
+                assoc->m_fBlendDelta = delta;
+            }
         }
-        case SWIM_UNDERWATER_SPRINTING:
-        {
-            if ((m_AnimID == ANIM_ID_SWIM_UNDER || m_AnimID == ANIM_ID_SWIM_GLIDE) && m_fStateChanger >= 0.0f)
-            {
-                if (pPlayerPed->m_pPlayerData && pPlayerPed->GetButtonSprintResults(SPRINT_UNDERWATER) >= 1.0f)
-                {
-                    CAnimBlendAssociation* pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_SWIM_UNDER);
-                    if (!pAnimAssociation
-                        || pAnimAssociation->m_fBlendDelta < 0.0f
-                        || pAnimAssociation->m_fBlendAmount == 0.0f)
-                    {
-                        pAnimAssociation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_SWIM, ANIM_ID_SWIM_UNDER, 4.0f);
+        m_AnimID = ANIM_ID_SWIM_TREAD;
+        break;
+    }
+    case SWIM_SPRINT: {
+        if (m_AnimID == ANIM_ID_SWIM_BREAST) {
+            CAnimBlendAssociation* assoc = RpAnimBlendClumpGetAssociation(player->m_pRwClump, ANIM_ID_SWIM_BREAST);
+            if (!assoc) {
+                m_nSwimState = SWIM_TREAD;
+                break;
+            }
+            if (player->IsPlayer()) {
+                assoc->m_fSpeed = player->m_pPlayerData->m_fMoveBlendRatio;
+            } else if (m_fAnimSpeed > 0.0f && m_fAnimSpeed <= 1.0f) {
+                assoc->m_fSpeed = m_fAnimSpeed;
+            }
+        } else {
+            CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_SWIM, ANIM_ID_SWIM_BREAST, 2.0f);
+            m_AnimID = ANIM_ID_SWIM_BREAST;
+        }
+        break;
+    }
+    case SWIM_SPRINTING: {
+        if (m_AnimID == ANIM_ID_SWIM_CRAWL) {
+            CAnimBlendAssociation* assoc = RpAnimBlendClumpGetAssociation(player->m_pRwClump, ANIM_ID_SWIM_CRAWL);
+            if (!assoc) {
+                m_nSwimState = SWIM_TREAD;
+                break;
+            }
+            if (player->m_pPlayerData) {
+                float buttonSprintResults = player->GetButtonSprintResults(SPRINT_WATER);
+                assoc->m_fSpeed = std::max(1.0f, buttonSprintResults);
+            } else if (m_fAnimSpeed > 1.0f) {
+                assoc->m_fSpeed = std::min(1.5f, m_fAnimSpeed - 1.0f);
+            }
+        } else {
+            CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_SWIM, ANIM_ID_SWIM_CRAWL, 2.0f);
+            m_AnimID = ANIM_ID_SWIM_CRAWL;
+        }
+        break;
+    }
+    case SWIM_DIVE_UNDERWATER: {
+        if (m_AnimID == ANIM_ID_SWIM_DIVE_UNDER) {
+            CAnimBlendAssociation* assocUnder = RpAnimBlendClumpGetAssociation(player->m_pRwClump, ANIM_ID_SWIM_DIVE_UNDER);
+            if (!assocUnder) {
+                m_nSwimState = SWIM_TREAD;
+                break;
+            }
+
+            if (assocUnder->m_pHierarchy->m_fTotalTime == assocUnder->m_fCurrentTime) {
+                m_nSwimState = SWIM_UNDERWATER_SPRINTING;
+            }
+        } else {
+            CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_SWIM, ANIM_ID_SWIM_DIVE_UNDER, 8.0f);
+            m_AnimID = ANIM_ID_SWIM_DIVE_UNDER;
+        }
+        break;
+    }
+    case SWIM_UNDERWATER_SPRINTING: {
+        if ((m_AnimID == ANIM_ID_SWIM_UNDER || m_AnimID == ANIM_ID_SWIM_GLIDE) && m_fStateChanger >= 0.0f) {
+            if (player->m_pPlayerData && player->GetButtonSprintResults(SPRINT_UNDERWATER) >= 1.0f) {
+                CAnimBlendAssociation* assocUnder = RpAnimBlendClumpGetAssociation(player->m_pRwClump, ANIM_ID_SWIM_UNDER);
+                if (!assocUnder || assocUnder->m_fBlendDelta < 0.0f || assocUnder->m_fBlendAmount == 0.0f) {
+                    assocUnder = CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_SWIM, ANIM_ID_SWIM_UNDER, 4.0f);
+                }
+                if (assocUnder->m_pHierarchy->m_fTotalTime == assocUnder->m_fCurrentTime) {
+                    assocUnder->Start(0.0f);
+                    assocUnder->m_fSpeed = std::max(0.7f, player->GetButtonSprintResults(SPRINT_UNDERWATER));
+                }
+                m_AnimID = ANIM_ID_SWIM_UNDER;
+            } else {
+                CAnimBlendAssociation* assocGlide = RpAnimBlendClumpGetAssociation(player->m_pRwClump, ANIM_ID_SWIM_GLIDE);
+                if (!assocGlide || assocGlide->m_fBlendDelta < 0.0f || assocGlide->m_fBlendAmount == 0.0f) {
+                    CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_SWIM, ANIM_ID_SWIM_GLIDE, 4.0f);
+                }
+                m_AnimID = ANIM_ID_SWIM_GLIDE;
+            }
+        } else {
+            CAnimBlendAssociation* assocUnder = RpAnimBlendClumpGetAssociation(player->m_pRwClump, ANIM_ID_SWIM_UNDER);
+            if (assocUnder) {
+                if (m_fStateChanger < 0.0f && assocUnder->m_fBlendAmount >= 0.99f) {
+                    if (m_fStateChanger > -2.0f) {
+                        m_fStateChanger = 0.0f;
+                        m_fRotationX = DegreesToRadians(CTaskSimpleSwim::SWIM_DIVE_UNDER_ANGLE);
+                    } else {
+                        m_fRotationX = DegreesToRadians(80.0f);
+                        m_fStateChanger = 0.0f;
                     }
-                    if (pAnimAssociation->m_pHierarchy->m_fTotalTime == pAnimAssociation->m_fCurrentTime)
-                    {
-                        pAnimAssociation->Start(0.0f);
-                        float buttonSprintResults = pPlayerPed->GetButtonSprintResults(SPRINT_UNDERWATER);
-                        pAnimAssociation->m_fSpeed = static_cast <float> (std::max(0.7f, buttonSprintResults));
-                    }
+                }
+            } else {
+                CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_SWIM, ANIM_ID_SWIM_UNDER, 1000.0f);
+                if (m_AnimID == ANIM_ID_SWIM_TREAD || m_AnimID == ANIM_ID_NO_ANIMATION_SET) {
+                    m_fStateChanger = -2.0f;
+                    m_AnimID = ANIM_ID_SWIM_UNDER;
+                } else {
+                    m_fStateChanger = -1.0f;
                     m_AnimID = ANIM_ID_SWIM_UNDER;
                 }
-                else
-                {
-                    CAnimBlendAssociation* pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_SWIM_GLIDE);
-                    if (!pAnimAssociation
-                        || pAnimAssociation->m_fBlendDelta < 0.0f
-                        || pAnimAssociation->m_fBlendAmount == 0.0f)
-                    {
-                        CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_SWIM, ANIM_ID_SWIM_GLIDE, 4.0f);
-                    }
-                    m_AnimID = ANIM_ID_SWIM_GLIDE;
-                }
             }
-            else
-            {
-                CAnimBlendAssociation* pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_SWIM_UNDER);
-                if (pAnimAssociation)
-                {
-                    if (m_fStateChanger < 0.0f && pAnimAssociation->m_fBlendAmount >= 0.99f)
-                    {
-                        if (m_fStateChanger > -2.0f)
-                        {
-                            m_fStateChanger = 0.0f;
-                            m_fRotationX = DegreesToRadians(CTaskSimpleSwim::SWIM_DIVE_UNDER_ANGLE);
-                        }
-                        else
-                        {
-                            m_fRotationX = DegreesToRadians(80.0f);
-                            m_fStateChanger = 0.0f;
-                        }
-                    }
-                }
-                else
-                {
-                    CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_SWIM, ANIM_ID_SWIM_UNDER, 1000.0f);
-                    if (m_AnimID == ANIM_ID_SWIM_TREAD || m_AnimID == ANIM_ID_NO_ANIMATION_SET)
-                    {
-                        m_fStateChanger = -2.0f;
-                        m_AnimID = ANIM_ID_SWIM_UNDER;
-                    }
-                    else
-                    {
-                        m_fStateChanger = -1.0f;
-                        m_AnimID = ANIM_ID_SWIM_UNDER;
-                    }
-                }
-            }
-            break;
         }
-        case SWIM_BACK_TO_SURFACE:
-        {
-            if (m_AnimID == ANIM_ID_SWIM_JUMPOUT)
-            {
-                CAnimBlendAssociation* pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_SWIM_JUMPOUT);
-                if (pAnimAssociation)
-                {
-                    if (pAnimAssociation->m_pHierarchy->m_fTotalTime * 0.25f <= pAnimAssociation->m_fTimeStep
-                        + pAnimAssociation->m_fCurrentTime) {
-                        pAnimAssociation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_CLIMB_JUMP, 8.0f);
-                        pAnimAssociation->m_nFlags |= ANIM_FLAG_UNLOCK_LAST_FRAME;
-                        m_AnimID = ANIM_ID_CLIMB_JUMP;
+        break;
+    }
+    case SWIM_BACK_TO_SURFACE: {
+        if (m_AnimID == ANIM_ID_SWIM_JUMPOUT) {
+            CAnimBlendAssociation* assocJumpOut = RpAnimBlendClumpGetAssociation(player->m_pRwClump, ANIM_ID_SWIM_JUMPOUT);
+            if (assocJumpOut) {
+                if (assocJumpOut->m_pHierarchy->m_fTotalTime / 4.0f <= assocJumpOut->m_fTimeStep + assocJumpOut->m_fCurrentTime) {
+                    assocJumpOut = CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_CLIMB_JUMP, 8.0f);
+                    assocJumpOut->m_nFlags |= ANIMATION_UNLOCK_LAST_FRAME;
+                    m_AnimID = ANIM_ID_CLIMB_JUMP;
+                }
+                break;
+            }
+        } else {
+            if (m_AnimID != ANIM_ID_CLIMB_JUMP) {
+                CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_SWIM, ANIM_ID_SWIM_JUMPOUT, 8.0f);
+                m_AnimID = ANIM_ID_SWIM_JUMPOUT;
+                player->m_vecMoveSpeed.z = 8.0f / player->m_fMass;
+                m_pEntity = CTaskSimpleClimb::TestForClimb(player, m_pClimbPos, m_fAngle, m_nSurfaceType, true);
+                CEntity::SafeRegisterRef(m_pEntity);
+                break;
+            }
+            if (RpAnimBlendClumpGetAssociation(player->m_pRwClump, ANIM_ID_CLIMB_JUMP)) { // 0x689C4B
+                float waterLevel1 = 0.0f;
+                if (CWaterLevel::GetWaterLevel(pedPos, waterLevel1, true)) {
+                    if (pedPos.z + 0.5f < waterLevel1) {
+                        return; // todo: check this
                     }
                     break;
                 }
             }
-            else {
-                if (m_AnimID != ANIM_ID_CLIMB_JUMP)
-                {
-                    CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_SWIM, ANIM_ID_SWIM_JUMPOUT, 8.0f);
-                    m_AnimID = ANIM_ID_SWIM_JUMPOUT;
-                    pPlayerPed->m_vecMoveSpeed.z = static_cast <float> (8.0f / pPlayerPed->m_fMass);
-                    CEntity* pEntity = CTaskSimpleClimb::TestForClimb(pPlayerPed, m_pClimbPos, m_fAngle, m_nSurfaceType, true);
-                    m_pEntity = pEntity;
-                    if (pEntity)
-                        pEntity->RegisterReference(&m_pEntity);
-                    break;
-                }
-                if (RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_CLIMB_JUMP)) {
-                    CVector& position = pPlayerPed->GetPosition();
-                    float waterLevel = 0.0f;
-                    if (!CWaterLevel::GetWaterLevel(position.x, position.y, position.z, &waterLevel, 1, nullptr)|| position.z + 0.5f >= waterLevel)
-                        break;
-                }
-            }
-            m_nSwimState = SWIM_TREAD;
-            break;
         }
-        default:
-        {
-            break;
-        }
-        }
+        m_nSwimState = SWIM_TREAD;
+        break;
+    }
+    default: {
+        break;
+    }
+    }
 
-        CPlayerPedData * pPlayerData = pPlayerPed->m_pPlayerData;
-        if (pPlayerData && (pPlayerData->m_fMoveBlendRatio > 0.5 || m_nSwimState == SWIM_UNDERWATER_SPRINTING))
-            CStats::UpdateStatsWhenSwimming(m_nSwimState == SWIM_UNDERWATER_SPRINTING, m_nSwimState == SWIM_SPRINTING);
-        return;
+    if (player->m_pPlayerData && (player->m_pPlayerData->m_fMoveBlendRatio > 0.5f || m_nSwimState == SWIM_UNDERWATER_SPRINTING)) {
+        CStats::UpdateStatsWhenSwimming(m_nSwimState == SWIM_UNDERWATER_SPRINTING, m_nSwimState == SWIM_SPRINTING);
     }
 }
 
 // 0x68A1D0
-void CTaskSimpleSwim::ProcessSwimmingResistance(CPed* pPed)
-{
+void CTaskSimpleSwim::ProcessSwimmingResistance(CPed* ped) {
     float fSubmergeZ = -1.0f;
-    CVector vecPedMoveSpeed;
+    CVector vecPedMoveSpeed{};
 
-    switch (m_nSwimState)
-    {
+    switch (m_nSwimState) {
     case SWIM_TREAD:
     case SWIM_SPRINT:
-    case SWIM_SPRINTING:
-    {
-        CAnimBlendAssociation* pAnimSwimBreast = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, ANIM_ID_SWIM_BREAST);
-        CAnimBlendAssociation* pAnimSwimCrawl = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, ANIM_ID_SWIM_CRAWL);
-
+    case SWIM_SPRINTING: {
         float fAnimBlendSum = 0.0f;
         float fAnimBlendDifference = 1.0f;
-        if (pAnimSwimBreast) {
-            fAnimBlendSum = 0.4f * pAnimSwimBreast->m_fBlendAmount;
-            fAnimBlendDifference = 1.0f - pAnimSwimBreast->m_fBlendAmount;
+
+        CAnimBlendAssociation* animSwimBreast = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_SWIM_BREAST);
+        if (animSwimBreast) {
+            fAnimBlendSum = 0.4f * animSwimBreast->m_fBlendAmount;
+            fAnimBlendDifference = 1.0f - animSwimBreast->m_fBlendAmount;
         }
 
-        if (pAnimSwimCrawl) {
-            fAnimBlendSum += 0.2f * pAnimSwimCrawl->m_fBlendAmount;
-            fAnimBlendDifference -= pAnimSwimCrawl->m_fBlendAmount;
+        CAnimBlendAssociation* animSwimCrawl = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_SWIM_CRAWL);
+        if (animSwimCrawl) {
+            fAnimBlendSum += 0.2f * animSwimCrawl->m_fBlendAmount;
+            fAnimBlendDifference -= animSwimCrawl->m_fBlendAmount;
         }
-
         if (fAnimBlendDifference < 0.0f) {
             fAnimBlendDifference = 0.0f;
         }
 
         fSubmergeZ = fAnimBlendDifference * 0.55f + fAnimBlendSum;
 
-        vecPedMoveSpeed = pPed->m_vecAnimMovingShiftLocal.x * pPed->GetRight();
-        vecPedMoveSpeed += pPed->m_vecAnimMovingShiftLocal.y * pPed->GetForward();
+        vecPedMoveSpeed =  ped->m_vecAnimMovingShiftLocal.x * ped->GetRight();
+        vecPedMoveSpeed += ped->m_vecAnimMovingShiftLocal.y * ped->GetForward();
         break;
     }
-    case SWIM_DIVE_UNDERWATER:
-    {
-        vecPedMoveSpeed = pPed->m_vecAnimMovingShiftLocal.x * pPed->GetRight();
-        vecPedMoveSpeed += pPed->m_vecAnimMovingShiftLocal.y * pPed->GetForward();
+    case SWIM_DIVE_UNDERWATER: {
+        vecPedMoveSpeed =  ped->m_vecAnimMovingShiftLocal.x * ped->GetRight();
+        vecPedMoveSpeed += ped->m_vecAnimMovingShiftLocal.y * ped->GetForward();
 
-        auto pAnimSwimDiveUnder = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, ANIM_ID_SWIM_DIVE_UNDER);
-        if (pAnimSwimDiveUnder)
-        {
-            vecPedMoveSpeed.z = pAnimSwimDiveUnder->m_fCurrentTime / pAnimSwimDiveUnder->m_pHierarchy->m_fTotalTime * -0.1f;
+        auto animSwimDiveUnder = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_SWIM_DIVE_UNDER);
+        if (animSwimDiveUnder) {
+            vecPedMoveSpeed.z = animSwimDiveUnder->m_fCurrentTime / animSwimDiveUnder->m_pHierarchy->m_fTotalTime * -0.1f;
         }
         break;
     }
-    case SWIM_UNDERWATER_SPRINTING:
-    {
-        vecPedMoveSpeed = pPed->m_vecAnimMovingShiftLocal.x * pPed->GetRight();
-        vecPedMoveSpeed += cos(m_fRotationX) * pPed->m_vecAnimMovingShiftLocal.y * pPed->GetForward();
-        vecPedMoveSpeed.z += sin(m_fRotationX) * pPed->m_vecAnimMovingShiftLocal.y + 0.01f;
+    case SWIM_UNDERWATER_SPRINTING: {
+        vecPedMoveSpeed   =  ped->m_vecAnimMovingShiftLocal.x * ped->GetRight();
+        vecPedMoveSpeed   += std::cos(m_fRotationX) * ped->m_vecAnimMovingShiftLocal.y * ped->GetForward();
+        vecPedMoveSpeed.z += std::sin(m_fRotationX) * ped->m_vecAnimMovingShiftLocal.y + 0.01f;
         break;
     }
-    case SWIM_BACK_TO_SURFACE:
-    {
-        auto pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, ANIM_ID_CLIMB_JUMP);
-        if (!pAnimAssociation)
-            pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, ANIM_ID_SWIM_JUMPOUT);
+    case SWIM_BACK_TO_SURFACE: {
+        auto animClimb = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_CLIMB_JUMP);
+        if (!animClimb)
+            animClimb = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_SWIM_JUMPOUT);
 
-        if (pAnimAssociation) {
-            if (pAnimAssociation->m_pHierarchy->m_fTotalTime > pAnimAssociation->m_fCurrentTime
-                && (pAnimAssociation->m_fBlendAmount >= 1.0f || pAnimAssociation->m_fBlendDelta > 0.0f)) {
-                float fMoveForceZ = CTimer::GetTimeStep() * pPed->m_fMass * 0.3f * 0.008f;
-                pPed->ApplyMoveForce(0.0f, 0.0f, fMoveForceZ);
+        if (animClimb) {
+            if (animClimb->m_pHierarchy->m_fTotalTime > animClimb->m_fCurrentTime &&
+                (animClimb->m_fBlendAmount >= 1.0f || animClimb->m_fBlendDelta > 0.0f)
+            ) {
+                float fMoveForceZ = CTimer::GetTimeStep() * ped->m_fMass * 0.3f * 0.008f;
+                ped->ApplyMoveForce(0.0f, 0.0f, fMoveForceZ);
             }
         }
         return;
     }
-    default:
-    {
+    default: {
         return;
     }
     }
 
-    float fTheTimeStep = pow(0.89999998f, CTimer::GetTimeStep());
-    vecPedMoveSpeed *= (1.0f - fTheTimeStep);
-    pPed->m_vecMoveSpeed *= fTheTimeStep;
-    pPed->m_vecMoveSpeed += vecPedMoveSpeed;
+    float fTheTimeStep = std::pow(0.9f, CTimer::GetTimeStep());
+    vecPedMoveSpeed *= 1.0f - fTheTimeStep;
+    ped->m_vecMoveSpeed *= fTheTimeStep;
+    ped->m_vecMoveSpeed += vecPedMoveSpeed;
 
+    auto& pedPos = ped->GetPosition();
     bool bUpdateRotationX = true;
-    const CVector& vecPedPosition = pPed->GetPosition();
-    CVector vecCheckWaterLevelPos = CTimer::GetTimeStep() * pPed->m_vecMoveSpeed + pPed->GetPosition();
-    float fWaterLevel = 0.0;
-    if (!CWaterLevel::GetWaterLevel(vecCheckWaterLevelPos.x, vecCheckWaterLevelPos.y, vecPedPosition.z, &fWaterLevel, true, nullptr)) {
+    CVector vecCheckWaterLevelPos = CTimer::GetTimeStep() * ped->m_vecMoveSpeed + pedPos;
+    float fWaterLevel = 0.0f;
+    if (!CWaterLevel::GetWaterLevel(vecCheckWaterLevelPos, fWaterLevel, true)) {
         fSubmergeZ = -1.0f;
         bUpdateRotationX = false;
-    }
-    else {
+    } else {
         if (m_nSwimState != SWIM_UNDERWATER_SPRINTING || m_fStateChanger < 0.0f) {
             bUpdateRotationX = false;
-        }
-        else {
-            if (vecPedPosition.z + 0.65f > fWaterLevel && m_fRotationX > 0.7854f) {
+        } else {
+            if (pedPos.z + 0.65f > fWaterLevel && m_fRotationX > 0.7854f) { // todo: magic number
                 m_nSwimState = SWIM_TREAD;
-                m_fStateChanger = 0.0;
+                m_fStateChanger = 0.0f;
                 bUpdateRotationX = false;
             }
         }
     }
 
-    if (bUpdateRotationX)
-    {
+    if (bUpdateRotationX) {
         if (m_fRotationX >= 0.0f) {
-            if (vecPedPosition.z + 0.65f <= fWaterLevel) {
+            if (pedPos.z + 0.65f <= fWaterLevel) {
                 if (m_fStateChanger <= 0.001f)
                     m_fStateChanger = 0.0f;
                 else
                     m_fStateChanger *= 0.95f;
-            }
-            else {
+            } else {
                 float fMinimumSpeed = 0.05f * 0.5f;
-                if (m_fStateChanger > fMinimumSpeed)
+                if (m_fStateChanger > fMinimumSpeed) {
                     m_fStateChanger *= 0.95f;
+                }
                 if (m_fStateChanger < fMinimumSpeed) {
-                    m_fStateChanger += CTimer::GetTimeStep() * 0.002f;
+                    m_fStateChanger += CTimer::GetTimeStepInSeconds() / 10.0f;
                     m_fStateChanger = std::min(fMinimumSpeed, m_fStateChanger);
                 }
                 m_fRotationX += CTimer::GetTimeStep() * m_fStateChanger;
-                fSubmergeZ = (0.55f - 0.2f) * (m_fRotationX * 1.2732395f) * 0.75f + 0.2f;
+                fSubmergeZ = (0.55f - 0.2f) * (m_fRotationX * 4.0f / PI) * 0.75f + 0.2f;
             }
-        }
-        else {
-            if (vecPedPosition.z - sin(m_fRotationX) + 0.65f <= fWaterLevel) {
+        } else {
+            if (pedPos.z - sin(m_fRotationX) + 0.65f <= fWaterLevel) {
                 if (m_fStateChanger > 0.001f)
                     m_fStateChanger *= 0.95f;
                 else
                     m_fStateChanger = 0.0f;
-            }
-            else {
-                m_fStateChanger += CTimer::GetTimeStep() * 0.002f;
-                if (m_fStateChanger > 0.05f)
-                    m_fStateChanger = 0.05f;
+            } else {
+                m_fStateChanger += CTimer::GetTimeStepInSeconds() / 10.0f;
+                m_fStateChanger = std::min(m_fStateChanger, 0.05f);
             }
             m_fRotationX += CTimer::GetTimeStep() * m_fStateChanger;
         }
     }
 
     if (fSubmergeZ > 0.0f) {
-        fWaterLevel -= (fSubmergeZ + vecPedPosition.z);
+        fWaterLevel -= fSubmergeZ + pedPos.z;
         float fTimeStepMoveSpeedZ = fWaterLevel / CTimer::GetTimeStep();
         float fTimeStep = CTimer::GetTimeStep() * 0.1f;
-        if (fTimeStepMoveSpeedZ > fTimeStep)
-            fTimeStepMoveSpeedZ = fTimeStep;
-        if (-fTimeStep > fTimeStepMoveSpeedZ)
-            fTimeStepMoveSpeedZ = -fTimeStep;
-
-        fTimeStepMoveSpeedZ -= pPed->m_vecMoveSpeed.z;
-
-        fTimeStep = CTimer::GetTimeStep() * 0.02f;
-        if (fTimeStepMoveSpeedZ > fTimeStep)
-            fTimeStepMoveSpeedZ = fTimeStep;
-        if (-fTimeStep > fTimeStepMoveSpeedZ)
-            fTimeStepMoveSpeedZ = -fTimeStep;
-
-        pPed->m_vecMoveSpeed.z += fTimeStepMoveSpeedZ;
+        fTimeStepMoveSpeedZ = std::clamp(fTimeStepMoveSpeedZ, -fTimeStep, fTimeStep);
+        fTimeStepMoveSpeedZ -= ped->m_vecMoveSpeed.z;
+        fTimeStep = CTimer::GetTimeStepInSeconds();
+        fTimeStepMoveSpeedZ = std::clamp(fTimeStepMoveSpeedZ, -fTimeStep, fTimeStep);
+        ped->m_vecMoveSpeed.z += fTimeStepMoveSpeedZ;
     }
 
-    CVector* pPedPosition = &pPed->GetPosition();
-    if (pPedPosition->z < -69.0f) {
-        pPedPosition->z = -69.0f;
-        if (pPed->m_vecMoveSpeed.z < 0.0f)
-            pPed->m_vecMoveSpeed.z = 0.0f;
+    if (pedPos.z < -69.0f) {
+        pedPos.z = -69.0f;
+        ped->m_vecMoveSpeed.z = std::max(ped->m_vecMoveSpeed.z, 0.0f);
     }
 }
 
 // 0x68AA70
-void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
-{
-    CVector vecParticlePosition = pPed->GetForwardVector();
-    vecParticlePosition *= 0.4f;
-    vecParticlePosition += pPed->GetPosition();
+void CTaskSimpleSwim::ProcessEffects(CPed* ped) {
+    const auto& pedPos = ped->GetPosition();
+    CVector particlePosition = ped->GetForwardVector();
+    particlePosition *= 0.4f;
+    particlePosition += pedPos;
 
-    CPlayerPedData * pPlayerData = pPed->m_pPlayerData;
-
-    if (pPlayerData)
-        vecParticlePosition.z = pPlayerData->m_fWaterHeight;
+    if (ped->m_pPlayerData)
+        particlePosition.z = ped->m_pPlayerData->m_fWaterHeight;
     else
-        vecParticlePosition.z += 0.5f;
+        particlePosition.z += 0.5f;
 
     if (m_nSwimState != SWIM_TREAD) {
-        if (m_pFxSystem) {
-            m_pFxSystem->Kill();
-            m_pFxSystem = nullptr;
+        DestroyFxSystem();
+    } else {
+        RwMatrix* mat = RwMatrixCreate();
+        mat->pos = *((RwV3d*)&particlePosition);
+        RwMatrixUpdate(mat);
+        if (!m_pFxSystem) {
+            CreateFxSystem(ped, mat);
         }
-    }
-    else {
-        RwMatrix* pNewMatrix = RwMatrixCreate();
-        pNewMatrix->pos = *((RwV3d*)& vecParticlePosition);
-        RwMatrixUpdate(pNewMatrix);
-        if (!m_pFxSystem)
-            CreateFxSystem(pPed, pNewMatrix);
 
         if (m_pFxSystem) {
-            m_pFxSystem->SetMatrix(pNewMatrix);
-            m_pFxSystem->SetLocalParticles(1);
+            m_pFxSystem->SetMatrix(mat);
+            m_pFxSystem->SetLocalParticles(true);
         }
-        RwMatrixDestroy(pNewMatrix);
+        RwMatrixDestroy(mat);
     }
 
     if (m_nSwimState != SWIM_DIVE_UNDERWATER)
         m_bTriggerWaterSplash = false;
 
-    switch (m_nSwimState)
-    {
+    switch (m_nSwimState) {
     case SWIM_SPRINT:
-    case SWIM_SPRINTING:
-    {
-        const CVector& vecPedUp = pPed->GetForward();
+    case SWIM_SPRINTING: {
+        const CVector& vecPedUp = ped->GetForward();
 
         float fRadianAngle = CGeneral::GetAngleBetweenPoints(vecPedUp.x, vecPedUp.y, 0.0f, 0.0f);
         float fLimitedRadianAngle = CGeneral::LimitAngle(fRadianAngle) + 180.0f;
 
         FxPrtMult_c fxPrtMult(1.0f, 1.0f, 1.0f, 0.2f, 0.4f, 0.0f, 0.5f);
-        CVector vecParticleVelocity;
-        g_fx.m_pPrtWake->AddParticle((RwV3d*)& vecParticlePosition, (RwV3d*)& vecParticleVelocity, 0.0f, (FxPrtMult_c*)& fxPrtMult, fLimitedRadianAngle, 1.2f, 0.6f, 0);
-        pPed->m_pedAudio.AddAudioEvent(76, 0.0, 1.0f, nullptr, 0, 0, 0);
+        CVector particleVelocity;
+        g_fx.m_Wake->AddParticle(&particlePosition, &particleVelocity, 0.0f, &fxPrtMult, fLimitedRadianAngle, 1.2f, 0.6f, 0);
+        ped->m_pedAudio.AddAudioEvent(AE_PED_SWIM_WAKE, 0.0f, 1.0f);
 
-        if (m_nSwimState == SWIM_SPRINTING)
-        {
-            RpHAnimHierarchy* pAnimHierarchy = GetAnimHierarchyFromSkinClump(pPed->m_pRwClump);
-            int32 boneRHandIndex = RpHAnimIDGetIndex(pAnimHierarchy, BONE_R_HAND);
-            RwV3d* pBoneRHandPos = &RpHAnimHierarchyGetMatrixArray(pAnimHierarchy)[boneRHandIndex].pos;
-            int32 boneLHandIndex = RpHAnimIDGetIndex(pAnimHierarchy, BONE_L_HAND);
-            RwV3d* pBoneLHandPos = &RpHAnimHierarchyGetMatrixArray(pAnimHierarchy)[boneLHandIndex].pos;
-            int32 boneRFootIndex = RpHAnimIDGetIndex(pAnimHierarchy, BONE_R_FOOT);
-            RwV3d* pBoneRFootPos = &RpHAnimHierarchyGetMatrixArray(pAnimHierarchy)[boneRFootIndex].pos;
-            int32 boneLFootIndex = RpHAnimIDGetIndex(pAnimHierarchy, BONE_L_FOOT);
-            RwV3d* pBoneLFootPos = &RpHAnimHierarchyGetMatrixArray(pAnimHierarchy)[boneLFootIndex].pos;
+        if (m_nSwimState == SWIM_SPRINTING) {
+            RpHAnimHierarchy* animHierarchy = GetAnimHierarchyFromSkinClump(ped->m_pRwClump); // todo: almost CPed::GetBoneMatrix
+            const auto GetBonePos = [&](auto boneId) {
+                auto index = RpHAnimIDGetIndex(animHierarchy, boneId);
+                return &RpHAnimHierarchyGetMatrixArray(animHierarchy)[index].pos;
+            };
 
-            float fPedPosZ = pPed->GetPosition().z;
-            if (fabs(pBoneRHandPos->z - fPedPosZ) < 0.05f)
-            {
-                auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneRHandPos, nullptr, false);
-                if (pFxSystem)
-                {
-                    pFxSystem->PlayAndKill();
-                    pPed->m_pedAudio.AddAudioEvent(74, 0.0, 1.0f, nullptr, 0, 0, 0);
+            const auto AddAudioEvent = [&](RwV3d* bonePos) {
+                if (std::fabs(bonePos->z - pedPos.z) < 0.05f) {
+                    auto fx = g_fxMan.CreateFxSystem("water_swim", static_cast<CVector*>(bonePos), nullptr, false);
+                    if (fx) {
+                        fx->PlayAndKill();
+                        ped->m_pedAudio.AddAudioEvent(AE_PED_SWIM_STROKE_SPLASH, 0.0f, 1.0f);
+                    }
                 }
-            }
-
-            if (fabs(pBoneLHandPos->z - fPedPosZ) < 0.05f)
-            {
-                auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneLHandPos, nullptr, false);
-                if (pFxSystem)
-                {
-                    pFxSystem->PlayAndKill();
-                    pPed->m_pedAudio.AddAudioEvent(74, 0.0, 1.0f, nullptr, 0, 0, 0);
-                }
-            }
-            if (fabs(pBoneRFootPos->z - fPedPosZ) < 0.05f)
-            {
-                auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneRFootPos, nullptr, false);
-                if (pFxSystem)
-                {
-                    pFxSystem->PlayAndKill();
-                    pPed->m_pedAudio.AddAudioEvent(74, 0.0, 1.0f, nullptr, 0, 0, 0);
-                }
-            }
-            if (fabs(pBoneLFootPos->z - fPedPosZ) < 0.05f)
-            {
-                auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneLFootPos, nullptr, false);
-                if (pFxSystem)
-                {
-                    pFxSystem->PlayAndKill();
-                    pPed->m_pedAudio.AddAudioEvent(74, 0.0, 1.0f, nullptr, 0, 0, 0);
-                    return;
-                }
+            };
+            for (const auto& bone : { BONE_R_HAND, BONE_L_HAND, BONE_R_FOOT, BONE_L_FOOT }) {
+                AddAudioEvent(GetBonePos(bone));
             }
         }
         break;
     }
-    case SWIM_DIVE_UNDERWATER:
-    {
-        if (m_bTriggerWaterSplash)
-        {
+    case SWIM_DIVE_UNDERWATER: {
+        if (m_bTriggerWaterSplash) {
             return;
         }
-        g_fx.TriggerWaterSplash(vecParticlePosition);
+        g_fx.TriggerWaterSplash(particlePosition);
         m_bTriggerWaterSplash = true;
-        pPed->m_pedAudio.AddAudioEvent(75, 0.0, 1.0, nullptr, 0, 0, 0);
-        return;
+        ped->m_pedAudio.AddAudioEvent(AE_PED_SWIM_DIVE_SPLASH, 0.0f, 1.0f);
+        break;
     }
-    case SWIM_UNDERWATER_SPRINTING:
-    {
+    case SWIM_UNDERWATER_SPRINTING: {
         uint32 oxygen = 5;
-        if (pPed->IsPlayer())
-        {
-            oxygen = static_cast<uint32>(
-                ((100.0f - pPlayerData->m_fBreath / CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 100.0f) * 0.33333334f));
+        if (ped->IsPlayer()) {
+            oxygen = static_cast<uint32>(((100.0f - ped->m_pPlayerData->m_fBreath / CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 100.0f) / 3.0f));
         }
-        if ((unsigned)CGeneral::GetRandomNumberInRange(0, 100) < oxygen)
-        {
-            RpHAnimHierarchy* pRwAnimHierarchy = GetAnimHierarchyFromSkinClump(pPed->m_pRwClump);
-            RwV3d* pBoneSpine1Pos = &RpHAnimHierarchyGetMatrixArray(pRwAnimHierarchy)[BONE_SPINE1].pos;
-            static FxPrtMult_c fxPrtMult(1.0f, 1.0f, 1.0f, 0.25f, 0.30000001f, 0.0f, 0.5f);
-            RwV3d vecParticleVelocity = { 0.0f, 0.0f, 2.0f };
-            g_fx.m_pPrtBubble->AddParticle(pBoneSpine1Pos, &vecParticleVelocity, 0.0f, &fxPrtMult, -1.0f, 1.2f, 0.60000002f, 0);
+        if ((unsigned)CGeneral::GetRandomNumberInRange(0, 100) < oxygen) {
+            RpHAnimHierarchy* hier = GetAnimHierarchyFromSkinClump(ped->m_pRwClump); // todo: almost CPed::GetBoneMatrix
+            CVector* bonePos = static_cast<CVector*>(&RpHAnimHierarchyGetMatrixArray(hier)[BONE_JAW].pos); // FIX_BUGS: Air bubbles from ass :D (BONE_SPINE1)
+
+            static FxPrtMult_c fxPrtMult(1.0f, 1.0f, 1.0f, 0.25f, 0.3f, 0.0f, 0.5f);
+            CVector vecParticleVelocity = { 0.0f, 0.0f, 2.0f };
+            g_fx.m_Bubble->AddParticle(bonePos, &vecParticleVelocity, 0.0f, &fxPrtMult, -1.0f, 1.2f, 0.6f, false);
         }
         break;
     }
@@ -868,548 +674,344 @@ void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
 }
 
 // 0x689640
-void CTaskSimpleSwim::ProcessControlAI(CPed* pPed)
-{
+void CTaskSimpleSwim::ProcessControlAI(CPed* ped) {
+    const auto& pedPos = ped->GetPosition();
     m_nSwimState = SWIM_TREAD;
-    if (m_pPed)
-    {
-        CVector vecPosition(m_pPed->GetPosition() - pPed->GetPosition());
+    if (m_pPed) {
+        const auto& taskPedPos = m_pPed->GetPosition();
+        CVector vecPosition(taskPedPos - pedPos);
         vecPosition.Normalise();
-        if (m_fRandomMoveBlendRatio == 0.0f)
-        {
-            m_fRandomMoveBlendRatio = (rand() % 4) * 0.5f + 1.5f;
+        if (m_fRandomMoveBlendRatio == 0.0f) {
+            m_fRandomMoveBlendRatio = float(CGeneral::GetRandomNumber() % 4) / 2.0f + 1.5f;
         }
 
         vecPosition *= m_fRandomMoveBlendRatio;
-        m_vecPos = m_pPed->GetPosition() - vecPosition;
+        m_vecPos = taskPedPos - vecPosition;
     }
 
     bool bPedGroupSet = false;
-    if (m_vecPos.x != 0.0 || m_vecPos.y != 0.0 || m_vecPos.z != 0.0)
-    {
-        CVector vecPosition(m_vecPos - pPed->GetPosition());
-        pPed->m_fAimingRotation = atan2(-vecPosition.x, vecPosition.y);
+    CVector vecPosition(m_vecPos - pedPos);
+    auto dist2d = vecPosition.Magnitude2D();
+    if (m_vecPos != 0.0f) {
+        ped->m_fAimingRotation = std::atan2(-vecPosition.x, vecPosition.y);
 
         float fMinimum2DDistanceBetweenPeds = 1.0f;
-        if (pPed->IsPlayer())
-        {
+        if (ped->IsPlayer()) {
             fMinimum2DDistanceBetweenPeds = 0.5f;
         }
 
-        if (vecPosition.Magnitude2D() > fMinimum2DDistanceBetweenPeds)
-        {
+        if (dist2d > fMinimum2DDistanceBetweenPeds) {
             m_nSwimState = SWIM_SPRINT;
-            if (m_pPed)
-            {
-                CPedGroup* pPedGroup = CPedGroups::GetPedsGroup(pPed);
-                if (pPedGroup && pPedGroup->m_groupMembership.GetLeader() == m_pPed)
-                {
+            if (m_pPed) {
+                CPedGroup* pedGroup = CPedGroups::GetPedsGroup(ped);
+                if (pedGroup && pedGroup->GetMembership().GetLeader() == m_pPed) {
                     bPedGroupSet = true;
-                    auto pSwimTask = m_pPed->m_pIntelligence->GetTaskSwim();
-                    if (pSwimTask && pSwimTask->m_nSwimState == SWIM_SPRINTING)
-                    {
-                        CVector distance = m_vecPos - pPed->GetPosition();
-                        if (distance.Magnitude() > 5.0f)
-                        {
-                            m_nSwimState = SWIM_SPRINTING;
-                        }
+                    auto swimTask = m_pPed->GetIntelligence()->GetTaskSwim();
+                    if (swimTask &&
+                        swimTask->m_nSwimState == SWIM_SPRINTING &&
+                        vecPosition.Magnitude() > 5.0f
+                    ) {
+                        m_nSwimState = SWIM_SPRINTING;
                     }
                 }
-            }
-            else if (m_fAnimSpeed > 1.0f)
-            {
-                if (vecPosition.Magnitude2D() > 2.0f)
-                {
-                    m_nSwimState = SWIM_SPRINTING;
-                }
+            } else if (m_fAnimSpeed > 1.0f && dist2d > 2.0f) {
+                m_nSwimState = SWIM_SPRINTING;
             }
         }
     }
 
-    CVector vecPosition(m_vecPos - pPed->GetPosition());
-    if (m_pPed && m_pPed->bIsStanding && !m_pPed->physicalFlags.bSubmergedInWater
-        || pPed->bIsDyingStuck && !m_pPed->physicalFlags.bSubmergedInWater
-        && vecPosition.Magnitude2D() < 1.0f)
-    {
-        if (!((pPed->m_nRandomSeedUpperByte + CTimer::GetFrameCounter() - 4) & 0x7F)) {
-            if (CTaskSimpleClimb::TestForClimb(pPed, m_pClimbPos, m_fAngle, m_nSurfaceType, true))
+    if (m_pPed && m_pPed->bIsStanding && !m_pPed->physicalFlags.bSubmergedInWater ||
+        ped->bIsDyingStuck && !m_pPed->physicalFlags.bSubmergedInWater && dist2d < 1.0f) {
+        if (!((ped->m_nRandomSeedUpperByte + CTimer::GetFrameCounter() - 4) & 127)) {
+            if (CTaskSimpleClimb::TestForClimb(ped, m_pClimbPos, m_fAngle, m_nSurfaceType, true)) {
                 m_nSwimState = SWIM_BACK_TO_SURFACE;
+            }
         }
     }
     m_fAimingRotation = 0.0f;
     m_fUpperTorsoRotationX = 0.0f;
 
-    if (!bPedGroupSet && !pPed->IsPlayer() && m_fAnimSpeed < 0.0f)
-        pPed->m_vecAnimMovingShiftLocal *= 0.5f;
+    if (!bPedGroupSet && !ped->IsPlayer() && m_fAnimSpeed < 0.0f) {
+        ped->m_vecAnimMovingShiftLocal /= 2.0f;
+    }
 }
 
 // 0x688A90
-void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* pPed)
-{
-    CVector vecPedWalk;
-    CPlayerPedData * pPlayerData = pPed->m_pPlayerData;
-    if (!m_bFinishedBlending || !m_bAnimBlockRefAdded)
-    {
-        pPlayerData->m_fMoveBlendRatio = 0.0f;
+void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* ped) {
+    CPlayerPedData* playerData = ped->m_pPlayerData;
+    if (!m_bFinishedBlending || !m_bAnimBlockRefAdded) {
+        playerData->m_fMoveBlendRatio = 0.0f;
         return;
     }
 
-    CPad* pPad = pPed->GetPadFromPlayer();
-    int16 pedWalkUpDown = pPad->GetPedWalkUpDown();
-    int16 pedWalkLeftRight = pPad->GetPedWalkLeftRight();
-    vecPedWalk.x = pedWalkLeftRight / 128.0f;
-    vecPedWalk.y = pedWalkUpDown / 128.0f;
-
+    CPad* pad = ped->GetPadFromPlayer();
+    CVector vecPedWalk{
+        (float)pad->GetPedWalkLeftRight() / 128.0f,
+        (float)pad->GetPedWalkUpDown()    / 128.0f,
+        0.0f
+    };
     float fWalkMagnitude = vecPedWalk.Magnitude2D();
-    if (m_nSwimState < SWIM_SPRINTING)
-    {
-        if (pPad->JumpJustDown())
-        {
+    if (m_nSwimState < SWIM_SPRINTING) {
+        if (pad->JumpJustDown()) {
             m_nSwimState = SWIM_BACK_TO_SURFACE;
-        }
-        else if (pPad->WeaponJustDown(pPed))
-        {
+        } else if (pad->WeaponJustDown(ped)) {
             m_nSwimState = SWIM_DIVE_UNDERWATER;
-            pPed->m_pPlayerData->m_fMoveBlendRatio = 0.0f;
+            playerData->m_fMoveBlendRatio = 0.0f;
         }
     }
 
-    switch (m_nSwimState)
-    {
+    switch (m_nSwimState) {
     case SWIM_TREAD:
     case SWIM_SPRINT:
-    case SWIM_SPRINTING:
-    {
+    case SWIM_SPRINTING: {
         float pedWalkX = 0.0f;
         bool bPlayerUse2PlayerControls = false;
-        if (CGameLogic::IsPlayerUse2PlayerControls(pPed))
-        {
-            bPlayerUse2PlayerControls = true;;
+        if (CGameLogic::IsPlayerUse2PlayerControls(ped)) {
+            bPlayerUse2PlayerControls = true;
             pedWalkX = vecPedWalk.x;
-            if (fWalkMagnitude > 0)
-            {
+            if (fWalkMagnitude > 0) {
                 float negativePedWalkX = -pedWalkX;
-                float fRadianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0, 0.0, negativePedWalkX, vecPedWalk.y)
-                    - TheCamera.m_fOrientation;
-                float fLimitedRadianAngle = CGeneral::LimitRadianAngle(fRadianAngle);
+                float fRadianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, negativePedWalkX, vecPedWalk.y) - TheCamera.m_fOrientation;
+                float angle = CGeneral::LimitRadianAngle(fRadianAngle);
 
-                CVector vecPedWalkDirection(0.0f, -sin(fLimitedRadianAngle), cos(fLimitedRadianAngle));
-                if (fLimitedRadianAngle <= pPed->m_fCurrentRotation + DegreesToRadians(180.0f))
-                {
-                    if (fLimitedRadianAngle < pPed->m_fCurrentRotation - DegreesToRadians(180.0f))
-                    {
-                        fLimitedRadianAngle += DegreesToRadians(360.0f);
+                CVector vecPedWalkDirection(0.0f, -std::sin(angle), std::cos(angle));
+                if (angle <= ped->m_fCurrentRotation + DegreesToRadians(180.0f)) {
+                    if (angle < ped->m_fCurrentRotation - DegreesToRadians(180.0f)) {
+                        angle += DegreesToRadians(360.0f);
                     }
-                }
-                else
-                {
-                    fLimitedRadianAngle -= DegreesToRadians(360.0f);
+                } else {
+                    angle -= DegreesToRadians(360.0f);
                 }
 
-                float fCurrenRotation = fLimitedRadianAngle - pPed->m_fCurrentRotation;
-                if (fCurrenRotation <= 1.0f)
-                {
-                    if (fCurrenRotation < -1.0f)
-                        fCurrenRotation = -1.0f;
-                }
-                else
-                {
-                    fCurrenRotation = 1.0f;
-                }
+                float fCurrenRotation = angle - ped->m_fCurrentRotation;
+                fCurrenRotation = std::clamp(fCurrenRotation, -1.0f, 1.0f);
 
-                pPed->m_fAimingRotation = fCurrenRotation * (CTimer::GetTimeStep() * 0.079999998f) + pPed->m_fCurrentRotation;
-                if (pPed->m_fAimingRotation <= DegreesToRadians(180.0f))
-                {
-                    if (pPed->m_fAimingRotation < -DegreesToRadians(180.0f))
-                    {
-                        pPed->m_fAimingRotation += DegreesToRadians(360.0f);
+                ped->m_fAimingRotation = fCurrenRotation * (CTimer::GetTimeStep() * 0.08f) + ped->m_fCurrentRotation;
+                if (ped->m_fAimingRotation <= DegreesToRadians(180.0f)) {
+                    if (ped->m_fAimingRotation < -DegreesToRadians(180.0f)) {
+                        ped->m_fAimingRotation += DegreesToRadians(360.0f);
                     }
+                } else {
+                    ped->m_fAimingRotation -= DegreesToRadians(360.0f);
                 }
-                else
-                {
-                    pPed->m_fAimingRotation -= DegreesToRadians(360.0f);
-                }
-                if (CGameLogic::IsPlayerAllowedToGoInThisDirection(pPed, vecPedWalkDirection.x, vecPedWalkDirection.y, vecPedWalkDirection.z, 0.0f))
-                {
-                    CMatrixLink* pPedMatrix = pPed->m_matrix;
-                    pedWalkX = (vecPedWalkDirection.y * pPedMatrix->GetRight().y
-                        + vecPedWalkDirection.x * pPedMatrix->GetRight().x
-                        + pPedMatrix->GetRight().z * 0.0f)
-                        * fWalkMagnitude;
-                    vecPedWalk.y = -((vecPedWalkDirection.y * pPedMatrix->GetForward().y
-                        + pPedMatrix->GetForward().z * 0.0f
-                        + vecPedWalkDirection.x * pPedMatrix->GetForward().x)
-                        * fWalkMagnitude);
-                }
-                else
-                {
+                if (CGameLogic::IsPlayerAllowedToGoInThisDirection(ped, vecPedWalkDirection.x, vecPedWalkDirection.y, vecPedWalkDirection.z, 0.0f)) {
+                    pedWalkX = (
+                        vecPedWalkDirection.x * ped->m_matrix->GetRight().x +
+                        vecPedWalkDirection.y * ped->m_matrix->GetRight().y +
+                        0.0f                  * ped->m_matrix->GetRight().z
+                    );
+                    pedWalkX *= fWalkMagnitude;
+                    vecPedWalk.y = -((vecPedWalkDirection.y * ped->m_matrix->GetForward().y + ped->m_matrix->GetForward().z * 0.0f + vecPedWalkDirection.x * ped->m_matrix->GetForward().x) * fWalkMagnitude);
+                } else {
                     pedWalkX = 0.0f;
                     fWalkMagnitude = 0.0f;
                     vecPedWalk.y = 0.0f;
                 }
             }
-        }
-        else // if CGameLogic::IsPlayerUse2PlayerControls(pPed) == false
+        } else
         {
             pedWalkX = vecPedWalk.x;
         }
 
         float fRotation = pedWalkX;
 
-        if (!CCamera::m_bUseMouse3rdPerson)
-        {
-            if (fWalkMagnitude <= 0.0f)
-            {
-                if (pPlayerData->m_fMoveBlendRatio > 0.0f)
-                {
-                    pPlayerData->m_fMoveBlendRatio -= CTimer::GetTimeStep() * 0.05f;
-                    if (pPlayerData->m_fMoveBlendRatio < 0.0f)
-                    {
-                        pPlayerData->m_fMoveBlendRatio = 0.0f;
+        if (!CCamera::m_bUseMouse3rdPerson) {
+            if (fWalkMagnitude <= 0.0f) {
+                if (playerData->m_fMoveBlendRatio > 0.0f) {
+                    playerData->m_fMoveBlendRatio -= CTimer::GetTimeStep() * 0.05f;
+                    if (playerData->m_fMoveBlendRatio < 0.0f) {
+                        playerData->m_fMoveBlendRatio = 0.0f;
                     }
                 }
-            }
-            else
-            {
+            } else {
                 bool bUpdateMoveBlendRatio = false;
-                if (!bPlayerUse2PlayerControls)
-                {
-                    pPed->m_fAimingRotation += CTimer::GetTimeStep() * -0.03f * pedWalkX;
-                    if (pPed->m_fAimingRotation <= DegreesToRadians(180.0f))
-                    {
-                        if (pPed->m_fAimingRotation < -DegreesToRadians(180.0f))
-                        {
-                            pPed->m_fAimingRotation += DegreesToRadians(360.0f);
+                if (!bPlayerUse2PlayerControls) {
+                    ped->m_fAimingRotation += CTimer::GetTimeStep() * -0.03f * pedWalkX;
+                    if (ped->m_fAimingRotation <= DegreesToRadians(180.0f)) {
+                        if (ped->m_fAimingRotation < -DegreesToRadians(180.0f)) {
+                            ped->m_fAimingRotation += DegreesToRadians(360.0f);
                         }
-                    }
-                    else
-                    {
-                        pPed->m_fAimingRotation -= DegreesToRadians(360.0f);
-                    }
-                    float pedWalkY = vecPedWalk.y;
-                    float negativePedWalkY = 0.0f;
-                    if (m_nSwimState)
-                    {
-                        if (pedWalkY > 0.0f)
-                        {
-                            fWalkMagnitude -= vecPedWalk.y;
-                        }
-                    }
-                    else
-                    {
-                        fWalkMagnitude = -pedWalkY;
+                    } else {
+                        ped->m_fAimingRotation -= DegreesToRadians(360.0f);
                     }
 
-                    if (fWalkMagnitude < 0.0f)
-                    {
-                        fWalkMagnitude = 0.0f;
+                    if (m_nSwimState) {
+                        if (vecPedWalk.y > 0.0f) {
+                            fWalkMagnitude -= vecPedWalk.y;
+                        }
+                    } else {
+                        fWalkMagnitude = -vecPedWalk.y;
                     }
+                    fWalkMagnitude = std::max(fWalkMagnitude, 0.0f);
 
                     bUpdateMoveBlendRatio = true;
                 }
 
-                if (bPlayerUse2PlayerControls || bUpdateMoveBlendRatio)
-                {
+                if (bPlayerUse2PlayerControls || bUpdateMoveBlendRatio) {
                     float fTimeStep = CTimer::GetTimeStep() * 0.07f;
-                    if (fWalkMagnitude - pPlayerData->m_fMoveBlendRatio <= fTimeStep)
-                    {
-                        pPlayerData->m_fMoveBlendRatio = fWalkMagnitude;
-                    }
-                    else
-                    {
-                        pPlayerData->m_fMoveBlendRatio += fTimeStep;
+                    if (fWalkMagnitude - playerData->m_fMoveBlendRatio <= fTimeStep) {
+                        playerData->m_fMoveBlendRatio = fWalkMagnitude;
+                    } else {
+                        playerData->m_fMoveBlendRatio += fTimeStep;
                     }
                 }
             }
-        }
-        else
-        {
-            pPed->m_fAimingRotation = atan2(
-                -TheCamera.m_aCams[TheCamera.m_nActiveCam].m_vecFront.x,
-                TheCamera.m_aCams[TheCamera.m_nActiveCam].m_vecFront.y);
-            if (TheCamera.GetLookDirection() != 3)
-            {
-                pPed->m_fAimingRotation += DegreesToRadians(180.0f);
-                if (pPed->m_fAimingRotation > DegreesToRadians(180.0f))
-                {
-                    pPed->m_fAimingRotation -= DegreesToRadians(360.0f);
+        } else {
+            const auto& camFront = CCamera::GetActiveCamera().m_vecFront;
+            ped->m_fAimingRotation = std::atan2(-camFront.x, camFront.y); // heading
+            if (TheCamera.GetLookDirection() != LOOKING_DIRECTION_FORWARD) {
+                ped->m_fAimingRotation += DegreesToRadians(180.0f);
+                if (ped->m_fAimingRotation > DegreesToRadians(180.0f)) {
+                    ped->m_fAimingRotation -= DegreesToRadians(360.0f);
                 }
             }
 
+            // 0x6891C9
             float negativePedWalkY = -vecPedWalk.y;
             float fTimeStep = CTimer::GetTimeStep() * 0.07f;
-            if (negativePedWalkY - pPlayerData->m_fMoveBlendRatio > fTimeStep)
-            {
-                pPlayerData->m_fMoveBlendRatio += fTimeStep;
-            }
-            else
-            {
-                pPlayerData->m_fMoveBlendRatio = negativePedWalkY;
+            if (negativePedWalkY - playerData->m_fMoveBlendRatio > fTimeStep) {
+                playerData->m_fMoveBlendRatio += fTimeStep;
+            } else {
+                playerData->m_fMoveBlendRatio = negativePedWalkY;
             }
 
-            fRotation = -(pPed->m_fAimingRotation - pPed->m_fCurrentRotation);
-            if (fRotation <= DegreesToRadians(180.0f))
-            {
-                if (fRotation < -DegreesToRadians(180.0f))
-                {
-                    fRotation = DegreesToRadians(360.0f) - (pPed->m_fAimingRotation - pPed->m_fCurrentRotation);
+            fRotation = -(ped->m_fAimingRotation - ped->m_fCurrentRotation);
+            if (fRotation <= DegreesToRadians(180.0f)) {
+                if (fRotation < -DegreesToRadians(180.0f)) {
+                    fRotation = DegreesToRadians(360.0f) - ped->m_fAimingRotation - ped->m_fCurrentRotation;
                 }
-
-            }
-            else
-            {
+            } else {
                 fRotation -= DegreesToRadians(360.0f);
             }
-
-            fRotation *= 10.0f;
-            fRotation = std::max(-1.0f, fRotation);
-            fRotation = std::min(1.0f, fRotation);
+            fRotation = std::clamp(fRotation * 10.0f, -1.0f, 1.0f);
         }
 
-        m_fAimingRotation += CTimer::GetTimeStep() * 0.079999998f * fRotation;
+        m_fAimingRotation += CTimer::GetTimeStep() * 0.08f * fRotation;
 
-        if (m_nSwimState == SWIM_SPRINTING)
-        {
-            m_fTurningRotationY += CTimer::GetTimeStep() * 0.039999999f * fRotation;
-        }
-        else if (m_nSwimState == SWIM_SPRINT)
-        {
-            m_fUpperTorsoRotationX += fabs(pedWalkX) * CTimer::GetTimeStep() * 0.039999999f;
+        if (m_nSwimState == SWIM_SPRINTING) {
+            m_fTurningRotationY += CTimer::GetTimeStep() * 0.04f * fRotation;
+        } else if (m_nSwimState == SWIM_SPRINT) {
+            m_fUpperTorsoRotationX += fabs(pedWalkX) * CTimer::GetTimeStep() * 0.04f;
         }
 
-        if (m_nSwimState == SWIM_SPRINTING)
-        {
-            float fWaterLevel1 = 0.0f;
-            float fWaterLevel2 = 0.0f;
-            CVector distance = pPed->GetPosition() - pPed->GetForward();
-            CVector position = pPed->GetPosition() + pPed->GetForward();
-            if (CWaterLevel::GetWaterLevel(position.x, position.y, position.z, &fWaterLevel1, 1, nullptr)) {
-                if (CWaterLevel::GetWaterLevel(distance.x, distance.y, distance.z, &fWaterLevel2, 1, nullptr))
-                    m_fRotationX = atan2(fWaterLevel1 - fWaterLevel2, 2.0f) * 1.0f;
+        if (m_nSwimState == SWIM_SPRINTING) {
+            float fWaterLevel1{}, fWaterLevel2{};
+            const auto& pedPos = ped->GetPosition();
+            CVector distance = pedPos - ped->GetForward();
+            CVector position = pedPos + ped->GetForward();
+            if (CWaterLevel::GetWaterLevel(position, fWaterLevel1, true) && CWaterLevel::GetWaterLevel(distance, fWaterLevel2, true)) {
+                m_fRotationX = std::atan2(fWaterLevel1 - fWaterLevel2, 2.0f) * 1.0f;
             }
         }
-        if (pPed->ControlButtonSprint(SPRINT_WATER) < 1.0f)
-        {
-            m_nSwimState = static_cast<eSwimState>(pPed->m_pPlayerData->m_fMoveBlendRatio > 0.5f);
-        }
-        else
-        {
+
+        if (ped->ControlButtonSprint(SPRINT_WATER) < 1.0f) {
+            m_nSwimState = playerData->m_fMoveBlendRatio > 0.5f ? SWIM_SPRINT : SWIM_TREAD;
+        } else {
             m_nSwimState = SWIM_SPRINTING;
         }
         break;
     }
-    case SWIM_DIVE_UNDERWATER:
-    {
-        if (m_fStateChanger > 0.0f)
-        {
+    case SWIM_DIVE_UNDERWATER: {
+        if (m_fStateChanger > 0.0f) {
             m_fStateChanger = 0.0f;
         }
         break;
     }
-    case SWIM_UNDERWATER_SPRINTING:
-    {
-        float fUpperTorsoRotationX = 0.0f;
-        if (CCamera::m_bUseMouse3rdPerson)
-        {
-            CVector vecActiveCamFront = TheCamera.m_aCams[TheCamera.m_nActiveCam].m_vecFront;;
-            if (TheCamera.GetLookDirection() != 3)
-            {
+    case SWIM_UNDERWATER_SPRINTING: {
+        float rotX{};
+        if (CCamera::m_bUseMouse3rdPerson) {
+            CVector vecActiveCamFront = CCamera::GetActiveCamera().m_vecFront;
+            if (TheCamera.GetLookDirection() != LOOKING_DIRECTION_FORWARD) {
                 vecActiveCamFront.x *= -1.0f;
                 vecActiveCamFront.y *= -1.0f;
                 vecActiveCamFront.z = 0.0f;
             }
 
-            pPed->m_fAimingRotation = atan2(-vecActiveCamFront.x, vecActiveCamFront.y);
-            float fRotation = -(pPed->m_fAimingRotation - pPed->m_fCurrentRotation);
-            if (fRotation <= DegreesToRadians(180.0f))
-            {
+            ped->m_fAimingRotation = std::atan2(-vecActiveCamFront.x, vecActiveCamFront.y);
+            float fRotation = -(ped->m_fAimingRotation - ped->m_fCurrentRotation);
+            if (fRotation <= DegreesToRadians(180.0f)) {
                 if (fRotation < -DegreesToRadians(180.0f))
                     fRotation += DegreesToRadians(360.0f);
-            }
-            else
-            {
+            } else {
                 fRotation -= DegreesToRadians(360.0f);
             }
+            fRotation = std::clamp(fRotation * 10.0f, -1.0f, 1.0f);
 
-            fRotation *= 10.0f;
-            fRotation = std::max(-1.0f, fRotation);
-            fRotation = std::min(1.0f, fRotation);
+            m_fTurningRotationY += CTimer::GetTimeStep() * 0.04f * fRotation;
+            m_fAimingRotation   += CTimer::GetTimeStep() * 0.08f * fRotation;
 
-            m_fTurningRotationY += CTimer::GetTimeStep() * 0.039999999f * fRotation;
-            m_fAimingRotation += CTimer::GetTimeStep() * 0.079999998f * fRotation;
-
-            float fRotationX = (asin(vecActiveCamFront.z) - m_fRotationX) * 10.0f;
-            fRotationX = std::max(-1.0f, fRotationX);
-            fRotationX = std::min(1.0f, fRotationX);
-            if (m_fStateChanger == 0.0f || fRotationX > 0.0f)
-            {
-                m_fRotationX += CTimer::GetTimeStep() * 0.02f * fRotationX;
+            float fRotationX = (std::asin(vecActiveCamFront.z) - m_fRotationX) * 10.0f;
+            fRotationX = std::clamp(fRotationX, -1.0f, 1.0f); // originally min/max used
+            if (m_fStateChanger == 0.0f || fRotationX > 0.0f) {
+                m_fRotationX += CTimer::GetTimeStepInSeconds() * fRotationX;
             }
-            fUpperTorsoRotationX = m_fTurningRotationY / 0.5f;
-            if (fUpperTorsoRotationX > 1.0f || fUpperTorsoRotationX >= -1.0f)
-            {
-                if (fUpperTorsoRotationX > 1.0f)
-                {
-                    fUpperTorsoRotationX = 1.0f;
+            rotX = m_fTurningRotationY / 0.5f;
+            rotX = std::clamp(rotX, -1.0f, 1.0f);
+            rotX = fRotationX + rotX * -0.08f * fRotation;
+        } else if (fWalkMagnitude > 0.0f) {
+            float fNormalizedWalkMagnitude = 1.0f / fWalkMagnitude;
+            vecPedWalk.x   = vecPedWalk.x * fNormalizedWalkMagnitude;
+            float pedWalkY = vecPedWalk.y * fNormalizedWalkMagnitude;
+            ped->m_fAimingRotation += CTimer::GetTimeStep() * -0.03f * vecPedWalk.x;
+
+            if (ped->m_fAimingRotation <= DegreesToRadians(180.0f)) {
+                if (ped->m_fAimingRotation < -DegreesToRadians(180.0f)) {
+                    ped->m_fAimingRotation += DegreesToRadians(360.0f);
                 }
-            }
-            else
-            {
-                fUpperTorsoRotationX = -1.0f;
+            } else {
+                ped->m_fAimingRotation -= DegreesToRadians(360.0f);
             }
 
-            fUpperTorsoRotationX = fRotationX + fUpperTorsoRotationX * -0.079999998f * fRotation;
-            if (fUpperTorsoRotationX <= 1.0f)
-            {
-                if (fUpperTorsoRotationX < -1.0f)
-                {
-                    fUpperTorsoRotationX = -1.0f;
-                }
+            m_fTurningRotationY += CTimer::GetTimeStep() * 0.04f * vecPedWalk.x;
+            m_fAimingRotation   += CTimer::GetTimeStep() * 0.08f * vecPedWalk.x;
+            if (m_fStateChanger == 0.0f || pedWalkY > 0.0f) {
+                m_fRotationX += CTimer::GetTimeStepInSeconds() * pedWalkY;
             }
-            else
-            {
-                fUpperTorsoRotationX = 1.0;
-            }
-
-            m_fUpperTorsoRotationX += CTimer::GetTimeStep() * -0.079999998f * fUpperTorsoRotationX;
+            rotX = m_fTurningRotationY / 0.5f;
+            rotX = std::clamp(rotX, -1.0f, 1.0f);
+            rotX = pedWalkY + rotX * -0.08f * vecPedWalk.x;
         }
-        else
-        {
-            if (fWalkMagnitude > 0.0f)
-            {
-                float fNormalizedWalkMagnitude = 1.0f / fWalkMagnitude;
-                vecPedWalk.x = vecPedWalk.x * fNormalizedWalkMagnitude;
-                float pedWalkY = fNormalizedWalkMagnitude * vecPedWalk.y;
-                pPed->m_fAimingRotation += CTimer::GetTimeStep() * -0.029999999f * vecPedWalk.x;
-
-                if (pPed->m_fAimingRotation <= DegreesToRadians(180.0f))
-                {
-                    if (pPed->m_fAimingRotation < -DegreesToRadians(180.0f))
-                    {
-                        pPed->m_fAimingRotation += DegreesToRadians(360.0f);
-                    }
-                }
-                else
-                {
-                    pPed->m_fAimingRotation -= DegreesToRadians(360.0f);
-                }
-
-                m_fTurningRotationY += CTimer::GetTimeStep() * 0.039999999f * vecPedWalk.x;
-                m_fAimingRotation += CTimer::GetTimeStep() * 0.079999998f * vecPedWalk.x;
-                if (m_fStateChanger == 0.0f || pedWalkY > 0.0f)
-                {
-                    m_fRotationX += CTimer::GetTimeStep() * 0.02f * pedWalkY;
-                }
-
-                fUpperTorsoRotationX = m_fTurningRotationY / 0.5f;
-                if (fUpperTorsoRotationX > 1.0f || fUpperTorsoRotationX >= -1.0f)
-                {
-                    if (fUpperTorsoRotationX > 1.0f)
-                    {
-                        fUpperTorsoRotationX = 1.0f;
-                    }
-                }
-                else
-                {
-                    fUpperTorsoRotationX = -1.0f;
-                }
-
-                fUpperTorsoRotationX = pedWalkY + fUpperTorsoRotationX * -0.079999998f * vecPedWalk.x;
-                if (fUpperTorsoRotationX <= 1.0f)
-                {
-                    if (fUpperTorsoRotationX < -1.0f)
-                    {
-                        fUpperTorsoRotationX = -1.0f;
-                    }
-                }
-                else
-                {
-                    fUpperTorsoRotationX = 1.0f;
-                }
-
-                m_fUpperTorsoRotationX += CTimer::GetTimeStep() * -0.079999998f * fUpperTorsoRotationX;
-            }
-        }
-
-        m_fRotationX += CTimer::GetTimeStep() * 0.001f;
-        m_fRotationX = clamp<float>(m_fRotationX, -DegreesToRadians(80.0f), DegreesToRadians(80.0f));
+        m_fUpperTorsoRotationX += CTimer::GetTimeStep() * -0.08f * std::clamp(rotX, -1.0f, 1.0f);
+        m_fRotationX += CTimer::GetTimeStep() / 1000.0f;
+        m_fRotationX = std::clamp(m_fRotationX, -DegreesToRadians(80.0f), DegreesToRadians(80.0f));
         // BUG: it should be m_fTimeCanRun <= 0.1f
-        if (pPed->m_pPlayerData->m_fTimeCanRun <= 0.0f)
-            pPed->m_pPlayerData->m_fTimeCanRun = 0.1f;
-        pPed->ControlButtonSprint(SPRINT_UNDERWATER);
+        if (playerData->m_fTimeCanRun <= 0.0f) {
+            playerData->m_fTimeCanRun = 0.1f;
+        }
+        ped->ControlButtonSprint(SPRINT_UNDERWATER);
         break;
     }
     }
 
+    float fRotation = m_nSwimState == SWIM_UNDERWATER_SPRINTING || m_nSwimState == SWIM_SPRINTING ? 0.95f : 0.95f; // same value like in OG
 
-    float fRotation = 0.95f;
-    if (m_nSwimState == SWIM_UNDERWATER_SPRINTING || m_nSwimState == SWIM_SPRINTING)
-    {
-        fRotation = 0.95f;
-    }
-
-    if (m_fTurningRotationY > 0.01f || m_fTurningRotationY < -0.01f)
-    {
-        m_fTurningRotationY *= pow(fRotation, CTimer::GetTimeStep());
-    }
-    else
-    {
+    if (m_fTurningRotationY > 0.01f || m_fTurningRotationY < -0.01f) {
+        m_fTurningRotationY *= std::pow(fRotation, CTimer::GetTimeStep());
+    } else {
         m_fTurningRotationY = 0.0f;
     }
-    if (m_nSwimState != SWIM_UNDERWATER_SPRINTING && m_nSwimState != SWIM_SPRINTING)
-    {
-        if (m_fRotationX > 0.01f || m_fRotationX < -0.01f)
-        {
-            m_fRotationX *= pow(fRotation, CTimer::GetTimeStep());
-        }
-        else
-        {
+
+    if (m_nSwimState != SWIM_UNDERWATER_SPRINTING && m_nSwimState != SWIM_SPRINTING) {
+        if (m_fRotationX > 0.01f || m_fRotationX < -0.01f) {
+            m_fRotationX *= std::pow(fRotation, CTimer::GetTimeStep());
+        } else {
             m_fRotationX = 0.0f;
         }
     }
 
-    if (m_nSwimState == SWIM_DIVE_UNDERWATER || m_nSwimState == SWIM_BACK_TO_SURFACE)
-        fRotation = 0.95f;
-    else
-        fRotation = 0.92f;
+    fRotation = m_nSwimState == SWIM_DIVE_UNDERWATER || m_nSwimState == SWIM_BACK_TO_SURFACE ? 0.95f : 0.92f;
 
-    if (m_fAimingRotation > 0.01f
-        || m_fAimingRotation < -0.01f
-        || m_fUpperTorsoRotationX > 0.01f
-        || m_fUpperTorsoRotationX < -0.01f)
-    {
-        float fTimeStepRotation = pow(fRotation, CTimer::GetTimeStep());
-        m_fAimingRotation *= fTimeStepRotation;
+    if (m_fAimingRotation > 0.01f || m_fAimingRotation < -0.01f || m_fUpperTorsoRotationX > 0.01f || m_fUpperTorsoRotationX < -0.01f) {
+        float fTimeStepRotation = std::pow(fRotation, CTimer::GetTimeStep());
+        m_fAimingRotation      *= fTimeStepRotation;
         m_fUpperTorsoRotationX *= fTimeStepRotation;
-    }
-    else {
+    } else {
         m_fAimingRotation = 0.0f;
         m_fUpperTorsoRotationX = 0.0f;
     }
+
     if (m_nSwimState == SWIM_SPRINT)
-        pPed->HandleSprintEnergy(false, 0.5f);
+        ped->HandleSprintEnergy(false, 0.5f);
     else if (m_nSwimState != SWIM_SPRINTING)
-        pPed->HandleSprintEnergy(false, 1.0f);
-}
-
-// 0x68A9F0
-void CTaskSimpleSwim::CreateFxSystem(CPed* pPed, RwMatrixTag* pRwMatrix)
-{
-    RwV3d point = { 0.0f, 0.0f, 0.0f };
-    m_pFxSystem = g_fxMan.CreateFxSystem("water_ripples", &point, pRwMatrix, false);
-    if (m_pFxSystem)
-    {
-        m_pFxSystem->CopyParentMatrix();
-        m_pFxSystem->Play();
-    }
-}
-
-// 0x68AA50
-void CTaskSimpleSwim::DestroyFxSystem()
-{
-    if (m_pFxSystem)
-    {
-        m_pFxSystem->Kill();
-        m_pFxSystem = nullptr;
-    }
+        ped->HandleSprintEnergy(false, 1.0f);
 }

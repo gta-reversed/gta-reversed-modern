@@ -2,31 +2,32 @@
 
 #include "TaskSimpleCarSetPedInAsDriver.h"
 
-CTaskSimpleCarSetPedInAsDriver::CTaskSimpleCarSetPedInAsDriver(CVehicle* pTargetVehicle, CTaskUtilityLineUpPedWithCar* pUtility)
-{
+// 0x6470E0
+CTaskSimpleCarSetPedInAsDriver::CTaskSimpleCarSetPedInAsDriver(CVehicle* targetVehicle, CTaskUtilityLineUpPedWithCar* utility) : CTaskSimple() {
     m_bIsFinished = 0;
     m_pAnim = 0;
-    m_pTargetVehicle = pTargetVehicle;
-    m_pUtility = pUtility;
+    m_pTargetVehicle = targetVehicle;
+    m_pUtility = utility;
     m_bWarpingInToCar = 0;
     m_nDoorFlagsToClear = 0;
     m_nNumGettingInToClear = 0;
-    if (pTargetVehicle)
-        pTargetVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
+    CEntity::SafeRegisterRef(m_pTargetVehicle);
 }
 
-CTaskSimpleCarSetPedInAsDriver::~CTaskSimpleCarSetPedInAsDriver()
-{
-    if (m_pTargetVehicle)
-        m_pTargetVehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
+CTaskSimpleCarSetPedInAsDriver::~CTaskSimpleCarSetPedInAsDriver() {
+    CEntity::SafeCleanUpRef(m_pTargetVehicle);
 }
 
-CTask* CTaskSimpleCarSetPedInAsDriver::Clone()
-{
-    return plugin::CallMethodAndReturn<CTask*, 0x649E00, CTask*>(this);
+// 0x649E00
+CTask* CTaskSimpleCarSetPedInAsDriver::Clone() {
+    auto task = new CTaskSimpleCarSetPedInAsDriver(m_pTargetVehicle, m_pUtility);
+    task->m_bWarpingInToCar = m_bWarpingInToCar;
+    task->m_nDoorFlagsToClear = m_nDoorFlagsToClear;
+    task->m_nNumGettingInToClear = m_nNumGettingInToClear;
+    return task;
 }
 
-bool CTaskSimpleCarSetPedInAsDriver::ProcessPed(CPed* ped)
-{
+// 0x64B950
+bool CTaskSimpleCarSetPedInAsDriver::ProcessPed(CPed* ped) {
     return plugin::CallMethodAndReturn<bool, 0x64B950, CTask*, CPed*>(this, ped);
 }

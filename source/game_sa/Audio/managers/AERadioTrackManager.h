@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -35,7 +35,7 @@ struct tRadioSettings {
     int8  m_iPrevTrackIndex;
 
     void Reset() {
-        for (int32 i = 0; i < std::size(m_aTrackQueue); i++) {
+        for (auto i = 0u; i < std::size(m_aTrackQueue); i++) {
             m_aTrackQueue[i]   = -1;
             m_aTrackTypes[i]   = TYPE_NONE;
             m_aTrackIndexes[i] = -1;
@@ -68,7 +68,7 @@ class CAERadioTrackManager {
 public:
     bool           m_bInitialised;
     bool           m_bDisplayStationName;
-    char           field_2;
+    char           m_prev;
     bool           m_bEnabledInPauseMode;
     bool           m_bBassEnhance;
     bool           m_bPauseMode;

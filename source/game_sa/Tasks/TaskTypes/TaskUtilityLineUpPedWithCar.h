@@ -1,26 +1,35 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "TaskSimple.h"
-#include "Ped.h"
+#include "Base.h"
+#include "Vector.h"
 
 class CTaskUtilityLineUpPedWithCar {
 public:
-    CVector vecOffsets;
-    int32 field_C;
-    int32 m_nTime;
-    int32 field_14;
-    int32 field_18;
+    CVector m_Offset;
+    float   m_fDoorOpenPosZ;
+    int32   m_fTime;
+    int32   m_nDoorOpenPosType;
+    int32   m_nDoorIdx;
 
-    CTaskUtilityLineUpPedWithCar(CVector const& offsets, int32 nTime, int32 arg3, int32 arg4);
-    CVector* GetLocalPositionToOpenCarDoor(int32 unused, CVehicle* pVehicle, float arg3, CAnimBlendAssociation* pAnimBlendAssoc);
-    void ProcessPed(CPed* pPed, CVehicle* pVehicle, CAnimBlendAssociation* pAnimBlendAssoc);
-    RwV3d* GetPositionToOpenCarDoor(int32 unused, CVehicle* pVehicle, float arg2, CAnimBlendAssociation* pAnimBlendAssoc);
+public:
+    CTaskUtilityLineUpPedWithCar(const CVector& offset, int32 time, int32 doorOpenPosType, int32 doorIdx);
+    ~CTaskUtilityLineUpPedWithCar() = default;
+
+    CVector GetLocalPositionToOpenCarDoor(CVehicle* vehicle, float animProgress, CAnimBlendAssociation* assoc);
+    CVector GetPositionToOpenCarDoor(CVehicle* vehicle, float animProgress, CAnimBlendAssociation* assoc);
+    bool ProcessPed(CPed* ped, CVehicle* vehicle, CAnimBlendAssociation* assoc);
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskUtilityLineUpPedWithCar* Constructor(const CVector& offsets, int32 nTime, int32 doorOpenPosType, int32 doorIdx) { this->CTaskUtilityLineUpPedWithCar::CTaskUtilityLineUpPedWithCar(offsets, nTime, doorOpenPosType, doorIdx); return this; }
+    CTaskUtilityLineUpPedWithCar* Destructor() { this->CTaskUtilityLineUpPedWithCar::~CTaskUtilityLineUpPedWithCar(); return this; }
 };
-
 VALIDATE_SIZE(CTaskUtilityLineUpPedWithCar, 0x1C);

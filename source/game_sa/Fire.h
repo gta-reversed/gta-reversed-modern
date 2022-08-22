@@ -1,13 +1,14 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Entity.h"
-#include "FxSystem_c.h"
+class CEntity;
+class CFire;
+class FxSystem_c;
 
 class CFire {
 public:
@@ -33,27 +34,35 @@ public:
     FxSystem_c* m_pFxSystem;
 
 public:
-    CFire() = default;
+    static void InjectHooks();
+
+    CFire();
     ~CFire() = default;
+    CFire* Constructor();
 
     void Initialise();
-    void Start(CEntity* creator, CVector pos, uint32_t nTimeToBurn, uint8_t nGens);
-    void Start(CEntity* creator, CEntity* target, uint32_t nTimeToBurn, uint8_t nGens);
-    void Start(CVector pos, float fStrength, CEntity* target, uint8_t nGens); /* For script */
-    void CreateFxSysForStrength(const CVector& point, RwMatrixTag* matrix);
+    void Start(CEntity* creator, CVector pos, uint32 nTimeToBurn, uint8 nGens);
+    void Start(CEntity* creator, CEntity* target, uint32 nTimeToBurn, uint8 nGens);
+    void Start(CVector pos, float fStrength, CEntity* target, uint8 nGens); /* For script */
+    void CreateFxSysForStrength(const CVector& point, RwMatrix* matrix);
     void Extinguish();
     void ExtinguishWithWater(float fWaterStrength);
     void ProcessFire();
 
+    // Inlined
     bool IsActive() const { return active; }
     bool IsScript() const { return createdByScript; }
     bool IsFirstGen() const { return firstGeneration; }
     bool IsBeingExtinguished() const { return beingExtinguished; }
 
-    // NOTSA funcs
+    // NOTSA funcs:
+    auto GetFireParticleNameForStrength() const;
     void DestroyFx();
     void SetTarget(CEntity* target);
     void SetCreator(CEntity* creator);
+
+    bool HasTimeToBurn() const;
+    bool IsNotInRemovalDistance() const;
 };
 
 VALIDATE_SIZE(CFire, 0x28);

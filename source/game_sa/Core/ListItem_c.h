@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -13,12 +13,12 @@
  */
 class ListItem_c {
 protected:
-    ListItem_c* m_pPrev;
-    ListItem_c* m_pNext;
+    ListItem_c* m_pPrev{};
+    ListItem_c* m_pNext{};
 
 protected:
-    ListItem_c();
-    ~ListItem_c();
+    ListItem_c() = default;  // 0x4A8DB0
+    ~ListItem_c() = default; // 0x49EA70
 
     friend class List_c;
 };

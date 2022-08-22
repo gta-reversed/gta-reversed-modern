@@ -15,7 +15,7 @@ typedef GxtChar const* PCGxtStr; // 8-bit null terminated constant GXT string
  * @param   src     pointer to null-terminated source string
  * @param   dst    pointer to destination buffer
  */
-void AsciiToGxtChar(char const* src, GxtChar* dst);
+void AsciiToGxtChar(const char* src, GxtChar* dst);
 
 /**
  * Convert GXT bull terminated string to ANSI string
@@ -59,3 +59,12 @@ void MakeLowerCase(char* str);
  * @param   src    pointer to null-terminated string you wanna copy
  */
 void TextCopy(GxtChar* dst, const GxtChar* src);
+
+/**
+ * Copy GXT null terminated strings
+ *
+ * @param   dst    pointer to destination buffer containing null-terminated string
+ * @param   src    pointer to null-terminated string you wanna copy to destination
+ * @return  pointer to destination buffer
+ */
+GxtChar* GxtCharStrcpy(GxtChar* dst, const GxtChar* src);

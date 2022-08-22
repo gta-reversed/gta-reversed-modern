@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,9 +7,11 @@
 #pragma once
 
 #include "eWeaponType.h"
-#include "FxSystem_c.h"
 #include "Vector2D.h"
-#include "ColPoint.h"
+#include "eWeaponSkill.h"
+
+class FxSystem_c;
+class CColPoint;
 
 enum ePedPieceTypes;
 
@@ -21,9 +23,27 @@ enum eWeaponState : uint32 {
     WEAPONSTATE_MELEE_MADECONTACT
 };
 
+/* Source: https://wiki.multitheftauto.com/wiki/GetPedWeaponSlot */
+enum class eWeaponSlot : uint32 {
+    UNARMED,
+    MELEE,
+    HANDGUN,
+    SHOTGUN,
+    SMG,        // Used for drive-by's
+    RIFLE,
+    SNIPER,
+    HEAVY,
+    THROWN,
+    SPECIAL,
+    GIFT,
+    PARACHUTE,
+    DETONATOR,
+};
+
 class CPed;
 class CVehicle;
 class CColModel;
+class CWeaponInfo;
 
 class CWeapon {
 public:
@@ -33,7 +53,7 @@ public:
     uint32       m_nTotalAmmo;
     uint32       m_nTimeForNextShot;
     uint8        field_14;
-    uint8        m_bNoModel;
+    bool         m_bNoModel; // Used in case of goggles (infrared/nightvision) : When they're put on the weapon model isn't and shouldn't be loaded.
     uint8        field_16;
     uint8        field_17;
     FxSystem_c*  m_pFxSystem; // flamethrower, spraycan, extinguisher particle
@@ -44,8 +64,13 @@ public:
     static CColModel& ms_PelletTestCol;
 
 public:
-    CWeapon(plugin::dummy_func_t) {}
+    CWeapon() { // 0x441E00
+        field_14    = 0;
+        m_bNoModel  = false;
+        m_pFxSystem = nullptr;
+    };
     CWeapon(eWeaponType weaponType, int32 ammo);
+    CWeapon(const CWeapon&) = delete;
 
     void Initialise(eWeaponType weaponType, int32 ammo, CPed* owner);
     static void InitialiseWeapons();
@@ -91,11 +116,12 @@ public:
     static void DoDriveByAutoAiming(CEntity* owner, CVehicle* vehicle, CVector* startPoint, CVector* endPoint, bool canAimVehicles);
     static void FindNearestTargetEntityWithScreenCoors(float screenX, float screenY, float range, CVector point, float* outX, float* outY);
     static float EvaluateTargetForHeatSeekingMissile(CEntity* entity, CVector& posn, CVector& direction, float distanceMultiplier, bool fromVehicle, CEntity* lastEntity);
-    static bool CheckForShootingVehicleOccupant(CEntity** pCarEntity, CColPoint* colPoint, eWeaponType weaponType, CVector const& origin, CVector const& target);
+    static bool CheckForShootingVehicleOccupant(CEntity** pCarEntity, CColPoint* colPoint, eWeaponType weaponType, const CVector& origin, const CVector& target);
     static CEntity* PickTargetForHeatSeekingMissile(CVector origin, CVector direction, float distanceMultiplier, CEntity* ignoreEntity, bool fromVehicle, CEntity* lastEntity);
-    static bool ProcessLineOfSight(CVector const& startPoint, CVector const& endPoint, CColPoint& outColPoint, CEntity*& outEntity, eWeaponType weaponType, CEntity* arg5, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool arg11, bool doIgnoreCameraCheck);
+    static bool ProcessLineOfSight(const CVector& startPoint, const CVector& endPoint, CColPoint& outColPoint, CEntity*& outEntity, eWeaponType weaponType, CEntity* arg5, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool arg11, bool doIgnoreCameraCheck);
 
     CWeaponInfo& GetWeaponInfo(CPed* owner = nullptr);
+    CWeaponInfo& GetWeaponInfo(eWeaponSkill skill);
 
 private:
     friend void InjectHooksMain();

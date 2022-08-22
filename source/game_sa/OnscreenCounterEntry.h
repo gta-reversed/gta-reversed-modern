@@ -1,28 +1,33 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
+#include "HudColours.h"
+#include "eOnscreenCounter.h"
+
 class COnscreenCounterEntry {
 public:
-    uint32 m_nVarId;
-    uint32 m_nMaxVarValue;
-    char   m_szDescriptionTextKey[10];
-    uint16 m_nType;               // 0 - counter (%), 1 - line, 2 - conter counter (%/%)
-    char   m_szDisplayedText[42]; // possibly 2b padding?
-    bool   m_bEnabled;
-    bool   m_bFlashWhenFirstDisplayed;
-    uint8  m_nColourId; // color index from HudColours
+    uint32           m_nVarId;
+    uint32           m_nMaxVarValue;
+    char             m_szDescriptionTextKey[10];
+    eOnscreenCounter m_nType;
+    char             m_szDisplayedText[42]; // possibly 2b padding?
+    bool             m_bEnabled;
+    bool             m_bFlashWhenFirstDisplayed;
+    eHudColours      m_nColourId;
 
 public:
     static void InjectHooks();
 
-    //! unused
-    void ProcessForDisplayCounter(uint16 type);
-    //! unused
-    void SetColourID(uint8 a2);
+    void Init();  // NOTSA
+    void Clear(); // NOTSA
+
+    void ProcessForDisplayCounter(eOnscreenCounter type);
+    void SetColourID(eHudColours colorId);
 };
+
 VALIDATE_SIZE(COnscreenCounterEntry, 0x44);

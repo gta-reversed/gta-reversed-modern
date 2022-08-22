@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Clock.h"
+
 uint8 CClock::daysInMonth[12] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; // 0x8CCF24
 
 bool& CClock::bClockHasBeenStored = *reinterpret_cast<bool*>(0xB70144);
@@ -20,15 +22,18 @@ uint32& CClock::ms_nLastClockTick = *reinterpret_cast<uint32*>(0xB70158);
 uint32& CClock::ms_nMillisecondsPerGameMinute = *reinterpret_cast<uint32*>(0xB7015C);
 
 void CClock::InjectHooks() {
-    ReversibleHooks::Install("CClock", "Initialise", 0x52CD90, &CClock::Initialise);
-    ReversibleHooks::Install("CClock", "Update", 0x52CF10, &CClock::Update);
-    ReversibleHooks::Install("CClock", "GetGameClockMinutesUntil", 0x52CEB0, &CClock::GetGameClockMinutesUntil);
-    ReversibleHooks::Install("CClock", "GetIsTimeInRange", 0x52CEE0, &CClock::GetIsTimeInRange);
-    ReversibleHooks::Install("CClock", "NormaliseGameClock", 0x52CDE0, &CClock::NormaliseGameClock);
-    ReversibleHooks::Install("CClock", "OffsetClockByADay", 0x52D0B0, &CClock::OffsetClockByADay);
-    ReversibleHooks::Install("CClock", "SetGameClock", 0x52D150, &CClock::SetGameClock);
-    ReversibleHooks::Install("CClock", "StoreClock", 0x52D020, &CClock::StoreClock);
-    ReversibleHooks::Install("CClock", "RestoreClock", 0x52D070, &CClock::RestoreClock);
+    RH_ScopedClass(CClock);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Initialise, 0x52CD90);
+    RH_ScopedInstall(Update, 0x52CF10);
+    RH_ScopedInstall(GetGameClockMinutesUntil, 0x52CEB0);
+    RH_ScopedInstall(GetIsTimeInRange, 0x52CEE0);
+    RH_ScopedInstall(NormaliseGameClock, 0x52CDE0);
+    RH_ScopedInstall(OffsetClockByADay, 0x52D0B0);
+    RH_ScopedInstall(SetGameClock, 0x52D150);
+    RH_ScopedInstall(StoreClock, 0x52D020);
+    RH_ScopedInstall(RestoreClock, 0x52D070);
 }
 
 /*
@@ -53,13 +58,16 @@ void CClock::Initialise(uint32 millisecondsPerGameMinute) {
  * @addr  0x52CF10
  */
 void CClock::Update() {
-    if (ms_nMillisecondsPerGameMinute < (CTimer::GetTimeInMS() - ms_nLastClockTick) || CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK]) {
-        if (!CCheat::m_aCheatsActive[CHEAT_ALWAYS_MIDNIGHT] && !CCheat::m_aCheatsActive[CHEAT_STOP_GAME_CLOCK_ORANGE_SKY]) {
+    if (gbFreezeTime) { // NOTSA
+        ms_nLastClockTick = CTimer::GetTimeInMS();
+    }
+    else if (ms_nMillisecondsPerGameMinute < (CTimer::GetTimeInMS() - ms_nLastClockTick) || CCheat::IsActive(CHEAT_FASTER_CLOCK)) {
+        if (!CCheat::IsActive(CHEAT_ALWAYS_MIDNIGHT) && !CCheat::IsActive(CHEAT_STOP_GAME_CLOCK_ORANGE_SKY)) {
             // next minute
             ms_nGameClockMinutes++;
             ms_nLastClockTick += ms_nMillisecondsPerGameMinute;
 
-            if (CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK])
+            if (CCheat::IsActive(CHEAT_FASTER_CLOCK))
                 ms_nLastClockTick = CTimer::GetTimeInMS();
 
             // next hour
@@ -80,10 +88,10 @@ void CClock::Update() {
                     CStats::IncrementStat(STAT_DAYS_PASSED_IN_GAME, 1.0f);
 
                     // next month
-                    if (ms_nGameClockDays >= daysInMonth[ms_nGameClockMonth]) {
+                    if (ms_nGameClockDays >= daysInMonth[ms_nGameClockMonth - 1]) {
                         ms_nGameClockDays = 1;
                         if (++ms_nGameClockMonth > 12u)
-                                ms_nGameClockMonth = 1;
+                            ms_nGameClockMonth = 1;
                     }
                 }
             }
@@ -184,7 +192,7 @@ void CClock::OffsetClockByADay(uint32 timeDirection) {
             if (ms_nGameClockMonth == 0)
                 ms_nGameClockMonth = 12;
 
-            ms_nGameClockDays = daysInMonth[ms_nGameClockMonth];
+            ms_nGameClockDays = daysInMonth[ms_nGameClockMonth - 1];
         }
         CurrentDay--;
 
@@ -193,7 +201,7 @@ void CClock::OffsetClockByADay(uint32 timeDirection) {
     } else {
         ms_nGameClockDays++;
 
-        if (daysInMonth[ms_nGameClockMonth] < ms_nGameClockDays) {
+        if (daysInMonth[ms_nGameClockMonth - 1] < ms_nGameClockDays) {
             ms_nGameClockMonth++;
             ms_nGameClockDays = 1;
 

@@ -1,14 +1,17 @@
 #include "StdInc.h"
 
 #include "TaskComplexGoToPointAndStandStillTimed.h"
+#include "PedPlacement.h"
 
 void CTaskComplexGoToPointAndStandStillTimed::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStillTimed", "CTaskComplexGoToPointAndStandStillTimed", 0x6685E0, &CTaskComplexGoToPointAndStandStillTimed::Constructor);
-    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStillTimed", "Clone", 0x66CF30, &CTaskComplexGoToPointAndStandStillTimed::Clone_Reversed);
-    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStillTimed", "StopTimer", 0x6686A0, &CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed);
-    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStillTimed", "MakeAbortable", 0x668640, &CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStillTimed", "CreateFirstSubTask", 0x66DC90, &CTaskComplexGoToPointAndStandStillTimed::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStillTimed", "ControlSubTask", 0x66DCE0, &CTaskComplexGoToPointAndStandStillTimed::ControlSubTask_Reversed);
+    RH_ScopedClass(CTaskComplexGoToPointAndStandStillTimed);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x6685E0);
+    RH_ScopedVirtualInstall(Clone, 0x66CF30);
+    RH_ScopedVirtualInstall(StopTimer, 0x6686A0);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x668640);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x66DC90);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x66DCE0);
 }
 
 CTaskComplexGoToPointAndStandStillTimed::CTaskComplexGoToPointAndStandStillTimed(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int32 time)
@@ -80,7 +83,7 @@ CTask* CTaskComplexGoToPointAndStandStillTimed::CreateFirstSubTask_Reversed(CPed
 
 CTask* CTaskComplexGoToPointAndStandStillTimed::ControlSubTask_Reversed(CPed* ped) {
     if (m_timer.Reset()) {
-        if (m_timer.IsOutOfTime() && m_pSubTask->GetTaskType() != TASK_SIMPLE_STAND_STILL && CPedPlacement::FindZCoorForPed(&m_vecTargetPoint)) {
+        if (m_timer.IsOutOfTime() && m_pSubTask->GetTaskType() != TASK_SIMPLE_STAND_STILL && CPedPlacement::FindZCoorForPed(m_vecTargetPoint)) {
             ped->SetPosn(m_vecTargetPoint);
         }
     }

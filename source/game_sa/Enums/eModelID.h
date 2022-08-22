@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,10 +10,11 @@
 // The list was generated from unmodified data of GTA San Andreas.
 // Author: fastman92
 
-enum eModelID	// Number of entries: 14832
-{
+enum eModelID { // Number of entries: 14832
+    UNLOAD_MODEL  = -2,
     MODEL_INVALID = -1,
-    MODEL_NULL = 0,
+
+    MODEL_PLAYER = 0,
     MODEL_CSPLAY = 1,
     MODEL_MALE01 = 7,
     MODEL_BFORI = 9,

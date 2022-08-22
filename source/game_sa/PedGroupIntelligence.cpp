@@ -1,29 +1,116 @@
 #include "StdInc.h"
 
+#include "PedGroupIntelligence.h"
+
+void CPedGroupIntelligence::InjectHooks() {
+    RH_ScopedClass(CPedGroupIntelligence);
+    RH_ScopedCategoryGlobal();
+
+    // RH_ScopedInstall(Constructor, 0x5F7250);
+    // RH_ScopedInstall(Destructor, 0x5F7350);
+    // RH_ScopedInstall(AddEvent, 0x5F7470);
+    // RH_ScopedInstall(SetScriptCommandTask, 0x5F8560);
+    // RH_ScopedInstall(GetTaskMain, 0x5F85A0);
+    // RH_ScopedInstall(ComputeDefaultTasks, 0x5F88D0);
+    // RH_ScopedInstall(GetTaskScriptCommand, 0x5F8690);
+    // RH_ScopedInstall(GetTaskSecondary, 0x5F8620);
+    // RH_ScopedInstall(GetTaskSecondarySlot, 0x5F8650);
+    // RH_ScopedInstall(SetGroupDecisionMakerType, 0x5F7340);
+    // RH_ScopedInstall(SetPrimaryTaskAllocator, 0x5F7410);
+    // RH_ScopedInstall(SetDefaultTaskAllocatorType, 0x5FBB70);
+    // RH_ScopedInstall(ReportFinishedTask, 0x5F86F0);
+}
+
+// 0x5F7250
+CPedGroupIntelligence::CPedGroupIntelligence() {
+    plugin::CallMethod<0x5F7250, CPedGroupIntelligence*>(this);
+}
+
+// 0x5F7350
+CPedGroupIntelligence::~CPedGroupIntelligence() {
+    plugin::CallMethod<0x5F7350, CPedGroupIntelligence*>(this);
+}
+
+// 0x5F7470
 bool CPedGroupIntelligence::AddEvent(CEvent* event) {
     return plugin::CallMethodAndReturn<bool, 0x5F7470, CPedGroupIntelligence*, CEvent*>(this, event);
 }
 
-void CPedGroupIntelligence::SetScriptCommandTask(CPed* ped, CTask const* task) {
-    plugin::CallMethod<0x5F8560, CPedGroupIntelligence*, CPed*, CTask const*>(this, ped, task);
+// 0x5F8560
+void CPedGroupIntelligence::SetScriptCommandTask(CPed* ped, const CTask* task) {
+    plugin::CallMethod<0x5F8560, CPedGroupIntelligence*, CPed*, const CTask*>(this, ped, task);
 }
 
+CTask* CPedGroupIntelligence::GetTask(CPed* ped, const CPedTaskPair* taskPair) {
+    const CPedTaskPair* tp;
+    auto index = 0;
+    while (true) {
+        auto taskPed = taskPair[index].m_pPed;
+        tp = &taskPair[index++];
+        if (taskPed == ped)
+            break;
+        if (index == 8)
+            return nullptr;
+    }
+    return tp->m_pTask;
+}
+
+// 0x5F85A0
+CTask* CPedGroupIntelligence::GetTaskMain(CPed* ped) {
+    CTask* task = GetTask(ped, &m_groupTasks[16]);
+    if (!task) {
+        task = GetTask(ped, &m_groupTasks[0]);
+        if (!task)
+            return GetTask(ped, &m_groupTasks[24]);
+    }
+    return task;
+}
+
+CTask* CPedGroupIntelligence::GetTaskDefault(CPed* ped) {
+    return GetTask(ped, &m_groupTasks[24]);
+}
+
+// 0x5F8690
+CTask* CPedGroupIntelligence::GetTaskScriptCommand(CPed* ped) {
+    return GetTask(ped, &m_groupTasks[16]);
+}
+
+// 0x5F8620
+CTask* CPedGroupIntelligence::GetTaskSecondary(CPed* ped) {
+    return GetTask(ped, &m_groupTasks[8]);
+}
+
+// 0x5F8650
+int32 CPedGroupIntelligence::GetTaskSecondarySlot(CPed* ped) {
+    return plugin::CallMethodAndReturn<int32, 0x5F8650>(this, ped);
+}
+
+// 0x5F88D0
 void CPedGroupIntelligence::ComputeDefaultTasks(CPed* ped) {
     plugin::CallMethod<0x5F88D0, CPedGroupIntelligence*, CPed*>(this, ped);
 }
 
-CTask* CPedGroupIntelligence::GetTaskScriptCommand(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x5F8690, CPedGroupIntelligence*, CPed*>(this, ped);
-}
-
+// 0x5F7340
 int32 CPedGroupIntelligence::SetGroupDecisionMakerType(int32 a2) {
     return plugin::CallMethodAndReturn<int32, 0x5F7340, CPedGroupIntelligence*, int32>(this, a2);
 }
 
+// 0x5F7410
 void CPedGroupIntelligence::SetPrimaryTaskAllocator(CTaskAllocator* taskAllocator) {
     plugin::CallMethod<0x5F7410, CPedGroupIntelligence*, CTaskAllocator*>(this, taskAllocator);
 }
 
+// 0x5FBB70
 void CPedGroupIntelligence::SetDefaultTaskAllocatorType(int32 nPedGroupTaskAllocator) {
     plugin::CallMethod<0x5FBB70, CPedGroupIntelligence*, int32>(this, nPedGroupTaskAllocator);
+}
+
+// 0x5F86F0
+bool CPedGroupIntelligence::ReportFinishedTask(const CPed* ped, const CTask* task) {
+    return plugin::CallMethodAndReturn<bool, 0x5F86F0>(this, ped, task);
+}
+
+// 0x5F7540
+void CPedGroupIntelligence::SetTask(CPed* ped, const CTask* task, CPedTaskPair* pair, int32 arg5, bool arg6) {
+    plugin::Call<0x5F7540, CPed*, const CTask*, CPedTaskPair*, int32, bool>(ped, task, pair, arg5, arg6);
 }

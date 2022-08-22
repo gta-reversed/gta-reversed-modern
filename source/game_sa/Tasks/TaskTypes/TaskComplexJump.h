@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -19,10 +19,12 @@ public:
     bool             m_bHighJump;
 
 public:
-    CTaskComplexJump(eComplexJumpType type);
-    ~CTaskComplexJump() override {}
+    static constexpr auto Type = TASK_COMPLEX_JUMP;
 
-    eTaskType GetTaskType() override { return TASK_COMPLEX_JUMP; }
+    explicit CTaskComplexJump(eComplexJumpType type);
+    ~CTaskComplexJump() override = default;
+
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override;
     CTask* ControlSubTask(CPed* ped) override { return m_pSubTask; }
     CTask* CreateFirstSubTask(CPed* ped) override;

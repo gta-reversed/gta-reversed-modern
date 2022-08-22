@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -19,10 +19,8 @@
 
 extern RwGlobals *&RwEngineInstance;
 
-/* macro used to access global data structure (the root type is RwGlobals) */
-#define RWSRCGLOBAL(variable) (RwEngineInstance->variable)
-
 extern RsGlobalType &RsGlobal;
+static inline bool RwInitialized = *(bool*)0xC920E8;
 
 extern RwPluginRegistry &geometryTKList;
 
@@ -38,5 +36,9 @@ _D3DMATRIX *GetD3DViewTransform();
 _D3DMATRIX *GetD3DProjTransform();
 
 #define RWRSTATE(a) (reinterpret_cast<void *>(a))
+#define PSGLOBAL(var) (((psGlobalType *)(RsGlobal.ps))->var)
 
-#define PLUGINOFFSET(type, base, offset) ((type*)((char*)(base) + (offset)))
+struct RwResEntrySA : RwResEntry {
+    RxD3D9ResEntryHeader header;
+    RxD3D9InstanceData meshData;
+};

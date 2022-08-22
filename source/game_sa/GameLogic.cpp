@@ -31,34 +31,36 @@ float& CGameLogic::MaxPlayerDistance = *reinterpret_cast<float*>(0x8A5E4C); // d
 int32& CGameLogic::n2PlayerPedInFocus = *reinterpret_cast<int32*>(0x8A5E50); // default 2
 
 void CGameLogic::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CGameLogic", "CalcDistanceToForbiddenTrainCrossing", 0x4418E0, &CGameLogic::CalcDistanceToForbiddenTrainCrossing);
-    // Install("CGameLogic", "ClearSkip", 0x441560, &CGameLogic::ClearSkip);
-    // Install("CGameLogic", "DoWeaponStuffAtStartOf2PlayerGame", 0x4428B0, &CGameLogic::DoWeaponStuffAtStartOf2PlayerGame);
-    // Install("CGameLogic", "StorePedsWeapons", 0x0, &CGameLogic::StorePedsWeapons);
-    // Install("CGameLogic", "FindCityClosestToPoint", 0x441B70, &CGameLogic::FindCityClosestToPoint);
-    Install("CGameLogic", "ForceDeathRestart", 0x441240, &CGameLogic::ForceDeathRestart);
-    Install("CGameLogic", "InitAtStartOfGame", 0x441210, &CGameLogic::InitAtStartOfGame);
-    Install("CGameLogic", "IsCoopGameGoingOn", 0x441390, &CGameLogic::IsCoopGameGoingOn);
-    // Install("CGameLogic", "IsPlayerAllowedToGoInThisDirection", 0x441E10, &CGameLogic::IsPlayerAllowedToGoInThisDirection);
-    // Install("CGameLogic", "IsPlayerUse2PlayerControls", 0x442020, &CGameLogic::IsPlayerUse2PlayerControls);
-    // Install("CGameLogic", "IsPointWithinLineArea", 0x4416E0, &CGameLogic::IsPointWithinLineArea);
-    Install("CGameLogic", "IsSkipWaitingForScriptToFadeIn", 0x4416C0, &CGameLogic::IsSkipWaitingForScriptToFadeIn);
-    // Install("CGameLogic", "LaRiotsActiveHere", 0x441C10, &CGameLogic::LaRiotsActiveHere);
-    // Install("CGameLogic", "Save", 0x5D33C0, &CGameLogic::Save);
-    // Install("CGameLogic", "Load", 0x5D3440, &CGameLogic::Load);
-    // Install("CGameLogic", "PassTime", 0x4414C0, &CGameLogic::PassTime);
-    // Install("CGameLogic", "Remove2ndPlayerIfPresent", 0x4413C0, &CGameLogic::Remove2ndPlayerIfPresent);
-    // Install("CGameLogic", "ResetStuffUponResurrection", 0x442980, &CGameLogic::ResetStuffUponResurrection);
-    // Install("CGameLogic", "RestorePedsWeapons", 0x441D30, &CGameLogic::RestorePedsWeapons);
-    // Install("CGameLogic", "RestorePlayerStuffDuringResurrection", 0x442060, &CGameLogic::RestorePlayerStuffDuringResurrection);
-    // Install("CGameLogic", "SetPlayerWantedLevelForForbiddenTerritories", 0x441770, &CGameLogic::SetPlayerWantedLevelForForbiddenTerritories);
-    // Install("CGameLogic", "SetUpSkip", 0x4423C0, &CGameLogic::SetUpSkip);
-    // Install("CGameLogic", "SkipCanBeActivated", 0x4415C0, &CGameLogic::SkipCanBeActivated);
-    Install("CGameLogic", "SortOutStreamingAndMemory", 0x441440, &CGameLogic::SortOutStreamingAndMemory);
-    // Install("CGameLogic", "StopPlayerMovingFromDirection", 0x441290, &CGameLogic::StopPlayerMovingFromDirection);
-    // Install("CGameLogic", "Update", 0x442AD0, &CGameLogic::Update);
-    // Install("CGameLogic", "UpdateSkip", 0x442480, &CGameLogic::UpdateSkip);
+    RH_ScopedClass(CGameLogic);
+    RH_ScopedCategoryGlobal();
+
+    // RH_ScopedInstall(CalcDistanceToForbiddenTrainCrossing, 0x4418E0);
+    // RH_ScopedInstall(ClearSkip, 0x441560);
+    // RH_ScopedInstall(DoWeaponStuffAtStartOf2PlayerGame, 0x4428B0);
+    // RH_ScopedInstall(StorePedsWeapons, 0x0);
+    // RH_ScopedInstall(FindCityClosestToPoint, 0x441B70);
+    RH_ScopedInstall(ForceDeathRestart, 0x441240);
+    RH_ScopedInstall(InitAtStartOfGame, 0x441210);
+    RH_ScopedInstall(IsCoopGameGoingOn, 0x441390);
+    // RH_ScopedInstall(IsPlayerAllowedToGoInThisDirection, 0x441E10);
+    // RH_ScopedInstall(IsPlayerUse2PlayerControls, 0x442020);
+    // RH_ScopedInstall(IsPointWithinLineArea, 0x4416E0);
+    RH_ScopedInstall(IsSkipWaitingForScriptToFadeIn, 0x4416C0);
+    // RH_ScopedInstall(LaRiotsActiveHere, 0x441C10);
+    // RH_ScopedInstall(Save, 0x5D33C0);
+    // RH_ScopedInstall(Load, 0x5D3440);
+    // RH_ScopedInstall(PassTime, 0x4414C0);
+    // RH_ScopedInstall(Remove2ndPlayerIfPresent, 0x4413C0);
+    // RH_ScopedInstall(ResetStuffUponResurrection, 0x442980);
+    // RH_ScopedInstall(RestorePedsWeapons, 0x441D30);
+    // RH_ScopedInstall(RestorePlayerStuffDuringResurrection, 0x442060);
+    // RH_ScopedInstall(SetPlayerWantedLevelForForbiddenTerritories, 0x441770);
+    // RH_ScopedInstall(SetUpSkip, 0x4423C0);
+    // RH_ScopedInstall(SkipCanBeActivated, 0x4415C0);
+    RH_ScopedInstall(SortOutStreamingAndMemory, 0x441440);
+    // RH_ScopedInstall(StopPlayerMovingFromDirection, 0x441290);
+    // RH_ScopedInstall(Update, 0x442AD0);
+    // RH_ScopedInstall(UpdateSkip, 0x442480);
 }
 
 // 0x4418E0
@@ -115,8 +117,8 @@ bool CGameLogic::IsCoopGameGoingOn() {
 }
 
 // 0x441E10
-bool CGameLogic::IsPlayerAllowedToGoInThisDirection(CPed* pPed, float moveDirectionX, float moveDirectionY, float moveDirectionZ, float distanceLimit) {
-    return plugin::CallAndReturn<bool, 0x441E10, CPed*, float, float, float, float>(pPed, moveDirectionX, moveDirectionY, moveDirectionZ, distanceLimit);
+bool CGameLogic::IsPlayerAllowedToGoInThisDirection(CPed* ped, float moveDirectionX, float moveDirectionY, float moveDirectionZ, float distanceLimit) {
+    return plugin::CallAndReturn<bool, 0x441E10, CPed*, float, float, float, float>(ped, moveDirectionX, moveDirectionY, moveDirectionZ, distanceLimit);
 }
 
 // 0x442020
@@ -125,8 +127,8 @@ bool CGameLogic::IsPlayerUse2PlayerControls(CPed* ped) {
 }
 
 // 0x4416E0
-bool CGameLogic::IsPointWithinLineArea(signed int a1, float x, float y) {
-    return plugin::CallAndReturn<bool, 0x4416E0, signed int, float, float>(a1, x, y);
+bool CGameLogic::IsPointWithinLineArea(int32 a1, float x, float y) {
+    return plugin::CallAndReturn<bool, 0x4416E0, int32, float, float>(a1, x, y);
 }
 
 // 0x4416C0
@@ -190,7 +192,20 @@ void CGameLogic::ResetStuffUponResurrection() {
 
 // 0x441D30
 void CGameLogic::RestorePedsWeapons(CPed* ped) {
-    plugin::Call<0x441D30, CPed*>(ped);
+    return plugin::Call<0x441D30, CPed*>(ped);
+
+    static CWeapon (&s_SavedWeapons)[13] = *(CWeapon(*)[13])0x96A9B8;
+
+    ped->ClearWeapons();
+    for (auto& weapon : s_SavedWeapons) {
+        auto modelId1 = CWeaponInfo::GetWeaponInfo(weapon.m_nType, eWeaponSkill::STD)->m_nModelId1;
+        auto modelId2 = CWeaponInfo::GetWeaponInfo(weapon.m_nType, eWeaponSkill::STD)->m_nModelId2;
+        if (   (modelId1 == MODEL_INVALID || CStreaming::GetInfo(modelId1).IsLoaded())
+            && (modelId2 == MODEL_INVALID || CStreaming::GetInfo(modelId2).IsLoaded()) // FIX_BUGS: They checked modelId1 twice
+        ) {
+            ped->GiveWeapon(weapon.m_nType, weapon.m_nTotalAmmo, true);
+        }
+    }
 }
 
 // 0x442060
@@ -210,12 +225,12 @@ void CGameLogic::SetUpSkip(int32 fX, int32 fY, int32 fZ, float fAngle, bool bAft
 }
 
 // 0x4415C0
-void CGameLogic::SkipCanBeActivated() {
-    plugin::Call<0x4415C0>();
+bool CGameLogic::SkipCanBeActivated() {
+    return plugin::CallAndReturn<bool, 0x4415C0>();
 }
 
 // 0x441440
-void CGameLogic::SortOutStreamingAndMemory(CVector const& translation, float angle) {
+void CGameLogic::SortOutStreamingAndMemory(const CVector& translation, float angle) {
     CTimer::Stop();
     float farClip = CTimeCycle::FindFarClipForCoors(translation);
     RwCameraSetFarClipPlane(TheCamera.m_pRwCamera, farClip);

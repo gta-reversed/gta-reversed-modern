@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -20,13 +20,12 @@ public:
 
 public:
     static void InjectHooks();
-
-    CEventGroup(CPed* ped);
-    virtual ~CEventGroup();
-private:
     CEventGroup* Constructor(CPed* ped);
-public:
-    CEvent * Add(CEvent* event, bool bValid);
+
+    explicit CEventGroup(CPed* ped);
+    virtual ~CEventGroup();
+
+    CEvent* Add(CEvent* event, bool bValid = false);
     bool HasScriptCommandOfTaskType(eTaskType taskId);
     bool HasEventOfType(CEvent* event);
     bool HasEvent(CEvent* event);
@@ -37,6 +36,9 @@ public:
     void Reorganise();
     void Flush(bool bAvoidFlushingTaskComplexBeInGroup);
     CEvent* GetEventOfType(eEventType type) const noexcept;
+
+    auto GetEvents()       { return std::span{ m_events, (size_t)m_count }; }
+    auto GetEvents() const { return std::span{ m_events, (size_t)m_count }; }
 };
 
 VALIDATE_SIZE(CEventGroup, 0x4C);

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -35,7 +35,7 @@ public:
     int32 FindExactWord(char* line, char* nameTable, int32 entrySize, int32 entryCount);
     bool HasFrontWheelDrive(uint8 handlingId);
     bool HasRearWheelDrive(uint8 handlingId);
-    int32 GetHandlingId(char* name);
+    int32 GetHandlingId(const char* name);
     void ConvertDataToWorldUnits(tHandlingData* handling);
     void ConvertDataToGameUnits(tHandlingData* handling);
     void ConvertBikeDataToWorldUnits(tBikeHandlingData* bikeHandling);
@@ -45,8 +45,10 @@ public:
     // get boat handling by id
     tBoatHandlingData* GetBoatPointer(uint8 handlingId);
     tHandlingData* GetVehiclePointer(uint32 handlingId) { return &m_aVehicleHandling[handlingId]; };
+    tBikeHandlingData* GetBikeHandlingPointer(uint32 handlingId) { return &m_aBikeHandling[handlingId]; }
 };
 
 VALIDATE_SIZE(cHandlingDataMgr, 0xC624);
 
-extern cHandlingDataMgr& gHandlingDataMgr;
+// If you're searching for `mod_HandlingManager`, you can use this:
+static inline cHandlingDataMgr& gHandlingDataMgr = *(cHandlingDataMgr*)0xC2B9C8;

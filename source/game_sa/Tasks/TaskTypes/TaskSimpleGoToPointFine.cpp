@@ -1,18 +1,20 @@
 #include "StdInc.h"
 
 #include "TaskSimpleGoToPointFine.h"
+#include "TaskSimpleDuck.h"
 
 void CTaskSimpleGoToPointFine::InjectHooks()
 {
-    using namespace ReversibleHooks;
-    Install("CTaskSimpleGoToPointFine", "CTaskSimpleGoToPointFine", 0x65EEB0, &CTaskSimpleGoToPointFine::Constructor);
-    Install("CTaskSimpleGoToPointFine", "Clone", 0x662040, &CTaskSimpleGoToPointFine::Clone_Reversed);
-    Install("CTaskSimpleGoToPointFine", "MakeAbortable", 0x663500, &CTaskSimpleGoToPointFine::MakeAbortable_Reversed);
-    Install("CTaskSimpleGoToPointFine", "ProcessPed", 0x663540, &CTaskSimpleGoToPointFine::ProcessPed_Reversed);
-    Install("CTaskSimpleGoToPointFine", "SetBlendedMoveAnim", 0x65EF80, &CTaskSimpleGoToPointFine::SetBlendedMoveAnim);
-    Install("CTaskSimpleGoToPointFine", "Finish", 0x65EF00, &CTaskSimpleGoToPointFine::Finish);
-    Install("CTaskSimpleGoToPointFine", "SetTargetPos", 0x65F330, &CTaskSimpleGoToPointFine::SetTargetPos);
-    Install("CTaskSimpleGoToPointFine", "BaseRatio", 0x65EF30, &CTaskSimpleGoToPointFine::BaseRatio);
+    RH_ScopedClass(CTaskSimpleGoToPointFine);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x65EEB0);
+    RH_ScopedVirtualInstall(Clone, 0x662040);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x663500);
+    RH_ScopedVirtualInstall(ProcessPed, 0x663540);
+    RH_ScopedInstall(SetBlendedMoveAnim, 0x65EF80);
+    RH_ScopedInstall(Finish, 0x65EF00);
+    RH_ScopedInstall(SetTargetPos, 0x65F330);
+    RH_ScopedInstall(BaseRatio, 0x65EF30);
 }
 
 // 0x65EEB0
@@ -148,7 +150,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped)
                 runAnimAssoc->m_fBlendAmount = 0.0f;
                 runAnimAssoc->m_fSpeed = 1.0f;
             }
-            runAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
+            runAnimAssoc->m_nFlags |= ANIMATION_STARTED;
             runAnimAssoc->m_fBlendDelta = 0.0f;
             runAnimAssoc->m_fBlendAmount = 3.0f - m_fMoveRatio;
             if (!sprintAnimAssoc)
@@ -157,7 +159,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped)
                 sprintAnimAssoc->m_fBlendAmount = 0.0f;
                 sprintAnimAssoc->m_fSpeed = 1.0f;
             }
-            sprintAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
+            sprintAnimAssoc->m_nFlags |= ANIMATION_STARTED;
             sprintAnimAssoc->m_fBlendDelta = 0.0f;
             moveState = PEDMOVE_SPRINT;
             sprintAnimAssoc->m_fBlendAmount = m_fMoveRatio - 2.0f;
@@ -168,7 +170,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped)
                 walkAnimAssoc->m_fBlendAmount = 0.0f;
                 walkAnimAssoc->m_fSpeed = 1.0f;
             }
-            walkAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
+            walkAnimAssoc->m_nFlags |= ANIMATION_STARTED;
             walkAnimAssoc->m_fBlendDelta = 0.0f;
             walkAnimAssoc->m_fBlendAmount = 2.0f - m_fMoveRatio;
             if (!runAnimAssoc)
@@ -177,7 +179,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped)
                 runAnimAssoc->m_fBlendAmount = 0.0f;
                 runAnimAssoc->m_fSpeed = 1.0f;
             }
-            runAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
+            runAnimAssoc->m_nFlags |= ANIMATION_STARTED;
             runAnimAssoc->m_fBlendDelta = 0.0f;
             runAnimAssoc->m_fBlendAmount = m_fMoveRatio - 1.0f;
             delete sprintAnimAssoc;
@@ -190,7 +192,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped)
             walkAnimAssoc->m_fBlendAmount = 0.0f;
             walkAnimAssoc->m_fSpeed = 1.0f;
         }
-        walkAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
+        walkAnimAssoc->m_nFlags |= ANIMATION_STARTED;
         walkAnimAssoc->m_fBlendAmount = 1.0f;
         walkAnimAssoc->m_fBlendDelta = 0.0f;
         delete runAnimAssoc;

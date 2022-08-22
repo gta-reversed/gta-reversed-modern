@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -8,17 +8,24 @@
 
 #include "Box.h"
 #include "ColPoint.h"
+#include "ColSurface.h"
 
 class CColBox : public CBox {
 public:
-    uint8        m_nMaterial;
-    uint8        m_nFlags;
-    tColLighting m_nLighting;
-    uint8        m_nBrightness;
+    CColSurface m_Surface;
 
 public:
-    void     Set(CVector const& sup, CVector const& inf, uint8 material, uint8 flags, uint8 lighting);
-    CColBox& operator=(CColBox const& right);
-};
+    CColBox() = default;
 
+    constexpr CColBox(const CBox& box) : CBox(box) {}
+
+    constexpr CColBox(const CBox& box, eSurfaceType material, uint8 pieceType, tColLighting lightning) : CBox(box) {
+        m_Surface.m_nMaterial = material;
+        m_Surface.m_nPiece = pieceType;
+        m_Surface.m_nLighting = lightning;
+    }
+
+    void Set(const CVector& sup, const CVector& inf, eSurfaceType material, uint8 pieceType, tColLighting lighting);
+    CColBox& operator=(const CColBox& right);
+};
 VALIDATE_SIZE(CColBox, 0x1C);

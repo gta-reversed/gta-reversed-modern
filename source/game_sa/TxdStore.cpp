@@ -1,62 +1,63 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
 #include "TxdStore.h"
 
-CPool<TxdDef>*& CTxdStore::ms_pTxdPool = *reinterpret_cast<CPool<TxdDef>**>(0xC8800C);
+CTxdPool*& CTxdStore::ms_pTxdPool = *reinterpret_cast<CTxdPool**>(0xC8800C);
 RwTexDictionary*& CTxdStore::ms_pStoredTxd = *reinterpret_cast<RwTexDictionary**>(0xC88010);
 int32& CTxdStore::ms_lastSlotFound = *reinterpret_cast<int32*>(0xC88014);
 
 int16 (&CTxdStore::defaultTxds)[4] = *reinterpret_cast<int16 (*)[4]>(0xC88004);
 
-int32& TexDictionaryLinkPluginOffset = *reinterpret_cast<int32*>(0xC88018);
-
 // variables list is not finished. Need to make CPools before.
 
 void CTxdStore::InjectHooks() {
-    ReversibleHooks::Install("CTxdStore", "PushCurrentTxd", 0x7316A0, &CTxdStore::PushCurrentTxd);
-    ReversibleHooks::Install("CTxdStore", "PopCurrentTxd", 0x7316B0, &CTxdStore::PopCurrentTxd);
-    ReversibleHooks::Install("CTxdStore", "FindTxdSlot_name", 0x731850, static_cast<int32 (*)(const char*)>(&CTxdStore::FindTxdSlot));
-    ReversibleHooks::Install("CTxdStore", "FindTxdSlot_hash", 0x7318E0, static_cast<int32 (*)(uint32)>(&CTxdStore::FindTxdSlot));
-    ReversibleHooks::Install("CTxdStore", "StartLoadTxd", 0x731930, &CTxdStore::StartLoadTxd);
-    ReversibleHooks::Install("CTxdStore", "Create", 0x731990, &CTxdStore::Create);
-    ReversibleHooks::Install("CTxdStore", "SetCurrentTxd", 0x7319C0, &CTxdStore::SetCurrentTxd);
-    ReversibleHooks::Install("CTxdStore", "AddRef", 0x731A00, &CTxdStore::AddRef);
-    ReversibleHooks::Install("CTxdStore", "RemoveRef", 0x731A30, &CTxdStore::RemoveRef);
-    ReversibleHooks::Install("CTxdStore", "RemoveRefWithoutDelete", 0x731A70, &CTxdStore::RemoveRefWithoutDelete);
-    ReversibleHooks::Install("CTxdStore", "GetNumRefs", 0x731AA0, &CTxdStore::GetNumRefs);
-    ReversibleHooks::Install("CTxdStore", "AddTxdSlot", 0x731C80, &CTxdStore::AddTxdSlot);
-    ReversibleHooks::Install("CTxdStore", "RemoveTxdSlot", 0x731CD0, &CTxdStore::RemoveTxdSlot);
-    ReversibleHooks::Install("CTxdStore", "LoadTxd_stream", 0x731DD0, static_cast<bool (*)(int32, RwStream*)>(&CTxdStore::LoadTxd));
-    ReversibleHooks::Install("CTxdStore", "LoadTxd_filename", 0x7320B0, static_cast<bool (*)(int32, const char*)>(&CTxdStore::LoadTxd));
-    ReversibleHooks::Install("CTxdStore", "FinishLoadTxd", 0x731E40, &CTxdStore::FinishLoadTxd);
-    ReversibleHooks::Install("CTxdStore", "RemoveTxd", 0x731E90, &CTxdStore::RemoveTxd);
-    ReversibleHooks::Install("CTxdStore", "Initialise", 0x731F20, &CTxdStore::Initialise);
-    ReversibleHooks::Install("CTxdStore", "Shutdown", 0x732000, &CTxdStore::Shutdown);
-    ReversibleHooks::Install("CTxdStore", "GameShutdown", 0x732060, &CTxdStore::GameShutdown);
-    ReversibleHooks::Install("CTxdStore", "GetParentTxdSlot", 0x408370, &CTxdStore::GetParentTxdSlot);
-    ReversibleHooks::Install("CTxdStore", "GetTxd", 0x408340, &CTxdStore::GetTxd);
-    ReversibleHooks::Install("CTxdStore", "TxdStoreFindCB", 0x731720, &CTxdStore::TxdStoreFindCB);
-    ReversibleHooks::Install("CTxdStore", "TxdStoreLoadCB", 0x731710, &CTxdStore::TxdStoreLoadCB);
-    ReversibleHooks::Install("CTxdStore", "SetupTxdParent", 0x731D50, &CTxdStore::SetupTxdParent);
+    RH_ScopedClass(CTxdStore);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(PushCurrentTxd, 0x7316A0);
+    RH_ScopedInstall(PopCurrentTxd, 0x7316B0);
+    RH_ScopedOverloadedInstall(FindTxdSlot, "name", 0x731850, int32 (*)(const char*));
+    RH_ScopedOverloadedInstall(FindTxdSlot, "hash", 0x7318E0, int32 (*)(uint32));
+    RH_ScopedInstall(StartLoadTxd, 0x731930);
+    RH_ScopedInstall(Create, 0x731990);
+    RH_ScopedInstall(SetCurrentTxd, 0x7319C0);
+    RH_ScopedInstall(AddRef, 0x731A00);
+    RH_ScopedInstall(RemoveRef, 0x731A30);
+    RH_ScopedInstall(RemoveRefWithoutDelete, 0x731A70);
+    RH_ScopedInstall(GetNumRefs, 0x731AA0);
+    RH_ScopedInstall(AddTxdSlot, 0x731C80);
+    RH_ScopedInstall(RemoveTxdSlot, 0x731CD0);
+    RH_ScopedOverloadedInstall(LoadTxd, "stream", 0x731DD0, bool (*)(int32, RwStream*));
+    RH_ScopedOverloadedInstall(LoadTxd, "filename", 0x7320B0, bool (*)(int32, const char*));
+    RH_ScopedInstall(FinishLoadTxd, 0x731E40);
+    RH_ScopedInstall(RemoveTxd, 0x731E90);
+    RH_ScopedInstall(Initialise, 0x731F20);
+    RH_ScopedInstall(Shutdown, 0x732000);
+    RH_ScopedInstall(GameShutdown, 0x732060);
+    RH_ScopedInstall(GetParentTxdSlot, 0x408370);
+    RH_ScopedInstall(GetTxd, 0x408340);
+    RH_ScopedInstall(TxdStoreFindCB, 0x731720);
+    RH_ScopedInstall(TxdStoreLoadCB, 0x731710);
+    RH_ScopedInstall(SetupTxdParent, 0x731D50);
 
     // global
-    ReversibleHooks::Install("common", "RemoveIfRefCountIsGreaterThanOne", 0x731680, &RemoveIfRefCountIsGreaterThanOne);
+    RH_ScopedGlobalInstall(RemoveIfRefCountIsGreaterThanOne, 0x731680);
 }
 
 // initialise txd store
 // 0x731F20
 void CTxdStore::Initialise() {
     if (!ms_pTxdPool)
-        ms_pTxdPool = new CPool<TxdDef>(TOTAL_TXD_MODEL_IDS, "TexDictionary");
+        ms_pTxdPool = new CTxdPool(TOTAL_TXD_MODEL_IDS, "TexDictionary");
 
-    for (int32 i = 0; i < 4; i++)
-        defaultTxds[i] = static_cast<int16>(AddTxdSlot("*"));
+    for (auto& txd : defaultTxds)
+        txd = static_cast<int16>(AddTxdSlot("*"));
 
     RwTextureSetFindCallBack(TxdStoreFindCB);
     RwTextureSetReadCallBack(TxdStoreLoadCB);
@@ -266,7 +267,7 @@ void CTxdStore::RemoveRef(int32 index) {
         return;
 
     if (--txd->m_wRefsCount <= 0)
-        CStreaming::RemoveModel(index + RESOURCE_ID_TXD);
+        CStreaming::RemoveModel(TXDToModelId(index));
 }
 
 // remove reference without deleting
@@ -282,14 +283,6 @@ void CTxdStore::RemoveRefWithoutDelete(int32 index) {
 int32 CTxdStore::GetNumRefs(int32 index) {
     TxdDef* txd = ms_pTxdPool->GetAt(index);
     return txd ? txd->m_wRefsCount : 0;
-}
-
-RwTexDictionary* CTxdStore::GetTxdParent(RwTexDictionary* txd) {
-    return *PLUGINOFFSET(RwTexDictionary*, txd, TexDictionaryLinkPluginOffset);
-}
-
-void CTxdStore::SetTxdParent(RwTexDictionary* txd, RwTexDictionary* parent) {
-    *PLUGINOFFSET(RwTexDictionary*, txd, TexDictionaryLinkPluginOffset) = parent;
 }
 
 // 0x731D50

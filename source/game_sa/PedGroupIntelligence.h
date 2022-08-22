@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,9 +7,9 @@
 #pragma once
 
 #include "PedTaskPair.h"
-#include "Ped.h"
-#include "Task.h"
 
+class CPed;
+class CTask;
 class CGroupEventHandler;
 class CPedGroupDefaultTaskAllocator;
 class CTaskAllocator;
@@ -18,30 +18,36 @@ class CPedGroup;
 class CEventGroupEvent;
 
 class CPedGroupIntelligence {
-    PLUGIN_NO_DEFAULT_CONSTRUCTION(CPedGroupIntelligence)
-
 public:
     CPedGroup*                     m_pPedGroup;
-    CEventGroupEvent*              m_oldEventGroupEvent;
-    CEventGroupEvent*              m_eventGroupEvent;
-    CPedTaskPair                   m_groupTasks[32];
+    CEventGroupEvent*              m_pOldEventGroupEvent;
+    CEventGroupEvent*              m_pEventGroupEvent;
+    CPedTaskPair                   m_groupTasks[32]; // todo: split array
     CPedGroupDefaultTaskAllocator* m_pPedGroupDefaultTaskAllocator;
     CTaskAllocator*                m_pPrimaryTaskAllocator;
     CTaskAllocator*                m_pEventResponseTaskAllocator;
-    int32                          m_dwDecisionMakerType;
-    int32                          m_taskSequenceId; // Used in CTaskSequences::ms_taskSequence
+    int32                          m_nDecisionMakerType;
+    int32                          m_nTaskSequenceId; // Used in CTaskSequences::ms_taskSequence
 
 public:
+    static void InjectHooks();
+
+    CPedGroupIntelligence();
+    ~CPedGroupIntelligence();
+
     bool       AddEvent(CEvent* event);
     void       ComputeDefaultTasks(CPed* ped);
     void*      ComputeEventResponseTasks();
     void       ComputeScriptCommandTasks();
-    void       FlushTasks(CPedTaskPair* taskpair, CPed* ped);
-    CTask*     GetTask(CPed* ped, CPedTaskPair const* taskpair);
+    static void       FlushTasks(CPedTaskPair* taskpair, CPed* ped);
+
+    CTask*     GetTask(CPed* ped, CPedTaskPair const* taskPair);
+    CTask*     GetTaskMain(CPed* ped);
     CTask*     GetTaskDefault(CPed* ped);
     CTask*     GetTaskScriptCommand(CPed* ped);
     CTask*     GetTaskSecondary(CPed* ped);
-    signed int GetTaskSecondarySlot(CPed* ped);
+    int32      GetTaskSecondarySlot(CPed* ped);
+
     bool       IsCurrentEventValid();
     bool       IsGroupResponding();
     void       Process();
@@ -49,21 +55,21 @@ public:
     void       ReportAllBarScriptTasksFinished();
     void       ReportAllTasksFinished(CPedTaskPair* taskpair);
     void       ReportAllTasksFinished();
-    bool       ReportFinishedTask(CPed const* ped, CTask const* task, CPedTaskPair* taskpair);
-    bool       ReportFinishedTask(CPed const* ped, CTask const* task);
-    void       SetDefaultTask(CPed* ped, CTask const* task);
+    bool       ReportFinishedTask(const CPed* ped, const CTask* task, CPedTaskPair* taskpair);
+    bool       ReportFinishedTask(const CPed* ped, const CTask* task);
+    void       SetDefaultTask(CPed* ped, const CTask* task);
     void       SetDefaultTaskAllocator(CPedGroupDefaultTaskAllocator const* PedGroupDefaultTaskAllocator);
     //! see ePedGroupTaskAllocator
     void SetDefaultTaskAllocatorType(int32 nPedGroupTaskAllocator);
     //! arg3 always true
     //! arg5 always false
     //! arg7 always  -1
-    void  SetEventResponseTask(CPed* ped, bool arg3, CTask const* task1, bool arg5, CTask const* task2, int32 arg7);
+    void  SetEventResponseTask(CPed* ped, bool arg3, const CTask* task1, bool arg5, const CTask* task2, int32 arg7);
     int32 SetEventResponseTaskAllocator(int32 a2);
     int32 SetGroupDecisionMakerType(int32 a2);
     void  SetPrimaryTaskAllocator(CTaskAllocator* taskAllocator);
-    void  SetScriptCommandTask(CPed* ped, CTask const* task);
-    void  SetTask(CPed* ped, CTask const* task, CPedTaskPair* taskpair, int32 arg5, bool arg6);
+    void  SetScriptCommandTask(CPed* ped, const CTask* task);
+    static void SetTask(CPed* ped, const CTask* task, CPedTaskPair* pair, int32 arg5 = -1, bool arg6 = false);
 };
 
 VALIDATE_SIZE(CPedGroupIntelligence, 0x2A0);

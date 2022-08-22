@@ -157,7 +157,7 @@ void CAETwinLoopSoundEntity::PlayTwinLoopSound(CVector posn, float volume, float
     if (m_pSound2)
         m_pSound2->StopSoundAndForget();
 
-    eSoundEnvironment envFlags = static_cast<eSoundEnvironment>(flags | SOUND_REQUEST_UPDATES | SOUND_REQUEST_UPDATES);
+    auto envFlags = static_cast<eSoundEnvironment>(flags | SOUND_START_PERCENTAGE | SOUND_REQUEST_UPDATES);
 
     CAESound sound;
     sound.Initialise(m_nBankSlotId, m_nSoundId1, this, posn, volume, maxDistance, speed, timeScale, 0, envFlags, 0.0f, 0);
@@ -177,11 +177,14 @@ void CAETwinLoopSoundEntity::UpdateParameters_Reversed(CAESound* sound, int16 cu
 }
 
 void CAETwinLoopSoundEntity::InjectHooks() {
-    ReversibleHooks::Install("CAETwinLoopSoundEntity", "Initialise", 0x4F28A0, &CAETwinLoopSoundEntity::Initialise);
-    ReversibleHooks::Install("CAETwinLoopSoundEntity", "UpdateTwinLoopSound", 0x4F29A0, &CAETwinLoopSoundEntity::UpdateTwinLoopSound);
-    ReversibleHooks::Install("CAETwinLoopSoundEntity", "UpdateParameters", 0x4F2E90, &CAETwinLoopSoundEntity::UpdateParameters_Reversed);
-    ReversibleHooks::Install("CAETwinLoopSoundEntity", "SwapSounds", 0x4F2C10, &CAETwinLoopSoundEntity::SwapSounds);
-    ReversibleHooks::Install("CAETwinLoopSoundEntity", "StopSoundAndForget", 0x4F2960, &CAETwinLoopSoundEntity::StopSoundAndForget);
-    ReversibleHooks::Install("CAETwinLoopSoundEntity", "PlayTwinLoopSound", 0x4F2CB0, &CAETwinLoopSoundEntity::PlayTwinLoopSound);
-    ReversibleHooks::Install("CAETwinLoopSoundEntity", "DoSoundsSwitchThisFrame", 0x4F2CA0, &CAETwinLoopSoundEntity::DoSoundsSwitchThisFrame);
+    RH_ScopedClass(CAETwinLoopSoundEntity);
+    RH_ScopedCategory("Audio/Entities");
+
+    RH_ScopedInstall(Initialise, 0x4F28A0);
+    RH_ScopedInstall(UpdateTwinLoopSound, 0x4F29A0);
+    RH_ScopedVirtualInstall(UpdateParameters, 0x4F2E90);
+    RH_ScopedInstall(SwapSounds, 0x4F2C10);
+    RH_ScopedInstall(StopSoundAndForget, 0x4F2960);
+    RH_ScopedInstall(PlayTwinLoopSound, 0x4F2CB0);
+    RH_ScopedInstall(DoSoundsSwitchThisFrame, 0x4F2CA0);
 }

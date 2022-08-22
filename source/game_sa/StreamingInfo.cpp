@@ -1,15 +1,18 @@
 #include "StdInc.h"
 
-CStreamingInfo*& CStreamingInfo::ms_pArrayBase = *reinterpret_cast<CStreamingInfo**>(0x9654B4);
+CStreamingInfo*& CStreamingInfo::ms_pArrayBase = *reinterpret_cast<CStreamingInfo**>(0x9654B4); // Just a pointer to `CStreaming::ms_aInfoForModel`
 
 void CStreamingInfo::InjectHooks() {
-    ReversibleHooks::Install("CStreamingInfo", "Init", 0x407460, &CStreamingInfo::Init);
-    ReversibleHooks::Install("CStreamingInfo", "AddToList", 0x407480, &CStreamingInfo::AddToList);
-    ReversibleHooks::Install("CStreamingInfo", "GetCdPosn", 0x407570, &CStreamingInfo::GetCdPosn);
-    ReversibleHooks::Install("CStreamingInfo", "SetCdPosnAndSize", 0x4075E0, &CStreamingInfo::SetCdPosnAndSize);
-    ReversibleHooks::Install("CStreamingInfo", "GetCdPosnAndSize", 0x4075A0, &CStreamingInfo::GetCdPosnAndSize);
-    ReversibleHooks::Install("CStreamingInfo", "InList", 0x407560, &CStreamingInfo::InList);
-    ReversibleHooks::Install("CStreamingInfo", "RemoveFromList", 0x4074E0, &CStreamingInfo::RemoveFromList);
+    RH_ScopedClass(CStreamingInfo);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x407460);
+    RH_ScopedInstall(AddToList, 0x407480);
+    RH_ScopedInstall(GetCdPosn, 0x407570);
+    RH_ScopedInstall(SetCdPosnAndSize, 0x4075E0);
+    RH_ScopedInstall(GetCdPosnAndSize, 0x4075A0);
+    RH_ScopedInstall(InList, 0x407560);
+    RH_ScopedInstall(RemoveFromList, 0x4074E0);
 }
 
 // 0x407460
@@ -23,6 +26,9 @@ void CStreamingInfo::Init() {
     m_nCdPosn = 0;
 }
 
+// Used to adding `info` to a linked list
+// This is done with the help of `m_nNextIndex` and `m_nPrevIndex`
+// which are just `indices` into `ms_aInfoForModel`.
 // 0x407480
 void CStreamingInfo::AddToList(CStreamingInfo* listStart) {
     m_nNextIndex = listStart->m_nNextIndex;
@@ -32,19 +38,19 @@ void CStreamingInfo::AddToList(CStreamingInfo* listStart) {
 }
 
 // 0x407570
-uint32 CStreamingInfo::GetCdPosn() {
+size_t CStreamingInfo::GetCdPosn() const {
     return m_nCdPosn + CStreaming::ms_files[m_nImgId].m_StreamHandle;
 }
 
 // 0x4075E0
-void CStreamingInfo::SetCdPosnAndSize(uint32 CdPosn, uint32 CdSize) {
+void CStreamingInfo::SetCdPosnAndSize(size_t CdPosn, size_t CdSize) {
     m_nCdPosn = CdPosn;
     m_nCdSize = CdSize;
 }
 
 // 0x4075A0
-bool CStreamingInfo::GetCdPosnAndSize(uint32& CdPosn, uint32& CdSize) {
-    if (!m_nCdSize)
+bool CStreamingInfo::GetCdPosnAndSize(size_t& CdPosn, size_t& CdSize) {
+    if (!HasCdPosnAndSize())
         return false;
     CdPosn = GetCdPosn();
     CdSize = m_nCdSize;
@@ -52,7 +58,7 @@ bool CStreamingInfo::GetCdPosnAndSize(uint32& CdPosn, uint32& CdSize) {
 }
 
 // 0x407560
-bool CStreamingInfo::InList() {
+bool CStreamingInfo::InList() const {
     return m_nNextIndex != -1;
 }
 

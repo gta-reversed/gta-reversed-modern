@@ -1,35 +1,39 @@
 #include "StdInc.h"
 
 #include "FireManager.h"
+#include "TheScripts.h"
+#include "Shadows.h"
 
 CFireManager& gFireManager = *reinterpret_cast<CFireManager*>(0xB71F80);
 
 void CFireManager::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CFireManager", "CFireManager", 0x539DA0, &CFireManager::Constructor);
-    Install("CFireManager", "~CFireManager", 0x538BB0, &CFireManager::Destructor);
-    Install("CFireManager", "Init", 0x538BC0, &CFireManager::Init);
-    Install("CFireManager", "Shutdown", 0x539DD0, &CFireManager::Shutdown);
-    Install("CFireManager", "GetNumOfNonScriptFires", 0x538F10, &CFireManager::GetNumOfNonScriptFires);
-    Install("CFireManager", "FindNearestFire", 0x538F40, &CFireManager::FindNearestFire);
-    Install("CFireManager", "PlentyFiresAvailable", 0x539340, &CFireManager::PlentyFiresAvailable);
-    Install("CFireManager", "ExtinguishPoint", 0x539450, &CFireManager::ExtinguishPoint);
-    Install("CFireManager", "ExtinguishPointWithWater", 0x5394C0, &CFireManager::ExtinguishPointWithWater);
-    Install("CFireManager", "IsScriptFireExtinguished", 0x5396E0, &CFireManager::IsScriptFireExtinguished);
-    Install("CFireManager", "RemoveScriptFire", 0x539700, &CFireManager::RemoveScriptFire);
-    Install("CFireManager", "RemoveAllScriptFires", 0x539720, &CFireManager::RemoveAllScriptFires);
-    Install("CFireManager", "ClearAllScriptFireFlags", 0x5397A0, &CFireManager::ClearAllScriptFireFlags);
-    Install("CFireManager", "SetScriptFireAudio", 0x5397B0, &CFireManager::SetScriptFireAudio);
-    Install("CFireManager", "GetScriptFireCoords", 0x5397E0, &CFireManager::GetScriptFireCoords);
-    Install("CFireManager", "GetNumFiresInRange", 0x5397F0, &CFireManager::GetNumFiresInRange);
-    Install("CFireManager", "GetNumFiresInArea", 0x539860, &CFireManager::GetNumFiresInArea);
-    Install("CFireManager", "DestroyAllFxSystems", 0x539D10, &CFireManager::DestroyAllFxSystems);
-    Install("CFireManager", "CreateAllFxSystems", 0x539D50, &CFireManager::CreateAllFxSystems);
-    Install("CFireManager", "GetNextFreeFire", 0x539E50, &CFireManager::GetNextFreeFire);
-    Install("CFireManager", "StartFire_NoTarget", 0x539F00, static_cast<CFire*(CFireManager::*)(CVector, float, uint8, CEntity*, uint32, int8, uint8)>(&CFireManager::StartFire));
-    Install("CFireManager", "StartFire", 0x53A050, static_cast<CFire *(CFireManager::*)(CEntity*, CEntity*, float, uint8, uint32, int8)>(&CFireManager::StartFire));
-    Install("CFireManager", "StartScriptFire", 0x53A270, &CFireManager::StartScriptFire);
-    Install("CFireManager", "Update", 0x53AF00, &CFireManager::Update);
+    RH_ScopedClass(CFireManager);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Constructor, 0x539DA0);
+    RH_ScopedInstall(Destructor, 0x538BB0);
+    RH_ScopedInstall(Init, 0x538BC0);
+    RH_ScopedInstall(Shutdown, 0x539DD0);
+    RH_ScopedInstall(GetNumOfNonScriptFires, 0x538F10);
+    RH_ScopedInstall(FindNearestFire, 0x538F40);
+    RH_ScopedInstall(PlentyFiresAvailable, 0x539340);
+    RH_ScopedInstall(ExtinguishPoint, 0x539450);
+    RH_ScopedInstall(ExtinguishPointWithWater, 0x5394C0);
+    RH_ScopedInstall(IsScriptFireExtinguished, 0x5396E0);
+    RH_ScopedInstall(RemoveScriptFire, 0x539700);
+    RH_ScopedInstall(RemoveAllScriptFires, 0x539720);
+    RH_ScopedInstall(ClearAllScriptFireFlags, 0x5397A0);
+    RH_ScopedInstall(SetScriptFireAudio, 0x5397B0);
+    RH_ScopedInstall(GetScriptFireCoords, 0x5397E0);
+    RH_ScopedInstall(GetNumFiresInRange, 0x5397F0);
+    RH_ScopedInstall(GetNumFiresInArea, 0x539860);
+    RH_ScopedInstall(DestroyAllFxSystems, 0x539D10);
+    RH_ScopedInstall(CreateAllFxSystems, 0x539D50);
+    RH_ScopedInstall(GetNextFreeFire, 0x539E50);
+    RH_ScopedOverloadedInstall(StartFire, "NoTarget", 0x539F00, CFire*(CFireManager::*)(CVector, float, uint8, CEntity*, uint32, int8, uint8));
+    RH_ScopedOverloadedInstall(StartFire, "", 0x53A050, CFire *(CFireManager::*)(CEntity*, CEntity*, float, uint8, uint32, int8));
+    RH_ScopedInstall(StartScriptFire, 0x53A270);
+    RH_ScopedInstall(Update, 0x53AF00);
 }
 
 // 0x539DA0
@@ -85,7 +89,7 @@ uint32 CFireManager::GetNumOfFires() {
 }
 
 // 0x538F40
-CFire* CFireManager::FindNearestFire(CVector const& point, bool bCheckIsBeingExtinguished, bool bCheckWasCreatedByScript) {
+CFire* CFireManager::FindNearestFire(const CVector& point, bool bCheckIsBeingExtinguished, bool bCheckWasCreatedByScript) {
     float fNearestDist2DSq = std::numeric_limits<float>::max(); // Izzotop :thinking
     CFire* nearestFire{};
     for (CFire& fire : m_aFires) {
@@ -252,7 +256,7 @@ CFire* CFireManager::GetNextFreeFire(bool bMayExtinguish) {
     if (!bMayExtinguish)
         return nullptr;
 
-    // At this point there are no inactive fires in the pool 
+    // At this point there are no inactive fires in the pool
     // So try to extinguish a script / first generation fire
     for (CFire& fire : m_aFires) {
         if (fire.IsFirstGen() || fire.IsScript()) {
@@ -280,8 +284,8 @@ CFire* CFireManager::StartFire(CVector pos, float size, uint8 unused, CEntity* c
 CFire* CFireManager::StartFire(CEntity* target, CEntity* creator, float size, uint8 unused, uint32 lifetime, int8 numGenerations) {
     /* Do few checks, and clear `m_pFire` if `target` */
     switch (target->m_nType) {
-    case eEntityType::ENTITY_TYPE_PED: {
-        auto pedTarget = static_cast<CPed*>(target);
+    case ENTITY_TYPE_PED: {
+        auto pedTarget = target->AsPed();
         if (!pedTarget->IsPedInControl())
             return nullptr;
         if (pedTarget->m_pFire)
@@ -290,13 +294,13 @@ CFire* CFireManager::StartFire(CEntity* target, CEntity* creator, float size, ui
             return nullptr;
         break;
     }
-    case eEntityType::ENTITY_TYPE_VEHICLE: {
-        auto vehTarget = static_cast<CVehicle*>(target);
+    case ENTITY_TYPE_VEHICLE: {
+        auto vehTarget = target->AsVehicle();
         if (vehTarget->m_pFire)
             return nullptr;
 
         if (vehTarget->IsAutomobile()) {
-            if (static_cast<CAutomobile*>(target)->m_damageManager.GetEngineStatus() >= 225)
+            if (target->AsAutomobile()->m_damageManager.GetEngineStatus() >= 225)
                 return nullptr;
         }
 
@@ -304,8 +308,8 @@ CFire* CFireManager::StartFire(CEntity* target, CEntity* creator, float size, ui
             return nullptr;
         break;
     }
-    case eEntityType::ENTITY_TYPE_OBJECT: {
-        if (static_cast<CObject*>(target)->m_pFire)
+    case ENTITY_TYPE_OBJECT: {
+        if (target->AsObject()->m_pFire)
             return nullptr;
         break;
     }
@@ -326,20 +330,20 @@ int32 CFireManager::StartScriptFire(const CVector& pos, CEntity* target, float _
             fire->createdByScript = false;
         };
         switch (target->m_nType) {
-        case eEntityType::ENTITY_TYPE_PED: {
-            auto pedTarget = static_cast<CPed*>(target);
+        case ENTITY_TYPE_PED: {
+            auto pedTarget = target->AsPed();
             if (pedTarget->m_pFire)
                 StopFire(pedTarget->m_pFire);
             break;
         }
-        case eEntityType::ENTITY_TYPE_VEHICLE: {
-            auto vehTarget = static_cast<CVehicle*>(target);
+        case ENTITY_TYPE_VEHICLE: {
+            auto vehTarget = target->AsVehicle();
             if (vehTarget->m_pFire)
                 StopFire(vehTarget->m_pFire);
 
             /* Set engine status for automobiles */
             if (vehTarget->IsAutomobile()) {
-                auto& dmgMgr = static_cast<CAutomobile*>(vehTarget)->m_damageManager;
+                auto& dmgMgr = vehTarget->AsAutomobile()->m_damageManager;
                 if (dmgMgr.GetEngineStatus() >= 225)
                     dmgMgr.SetEngineStatus(215);
             }
@@ -350,22 +354,25 @@ int32 CFireManager::StartScriptFire(const CVector& pos, CEntity* target, float _
 
     if (auto fire = GetNextFreeFire(true)) {
         fire->Start(pos, (float)nStrength, target, std::min<uint8>((uint8)m_nMaxFireGenerationsAllowed, nGenerations));
-        return CTheScripts::GetNewUniqueScriptThingIndex(GetIndexOf(fire), 5);
+        return CTheScripts::GetNewUniqueScriptThingIndex(GetIndexOf(fire), SCRIPT_THING_FIRE);
     }
     return -1;
 }
 
 // 0x53AF00
 void CFireManager::Update() {
-    if (CReplay::Mode == REPLAY_MODE_1)
+    if (CReplay::Mode == MODE_PLAYBACK)
         return;
 
     for (CFire& fire : m_aFires) {
-        fire.ProcessFire();
+        if (fire.IsActive())
+            fire.ProcessFire();
     }
 
-    if (CGameLogic::LaRiotsActiveHere() && (CTimer::GetTimeInMS() / 500u != CTimer::GetPreviousTimeInMS() / 500u)) {
-        const float fRandomAngleRad = CGeneral::GetRandomNumberInRange(0.0f, 2 * rwPI);
+    if (CGameLogic::LaRiotsActiveHere()
+     && CTimer::GetTimeInMS() / 500u != CTimer::GetPreviousTimeInMS() / 500u
+    ) {
+        const float fRandomAngleRad = CGeneral::GetRandomNumberInRange(0.0f, TWO_PI);
         const float fRandomDir = CGeneral::GetRandomNumberInRange(35.0f, 60.0f);
         CVector point = TheCamera.GetPosition() + CVector{
             std::sin(fRandomAngleRad) * fRandomDir,
@@ -373,9 +380,9 @@ void CFireManager::Update() {
             10.0f
         };
 
-        CEntity* pHitEntity{};
+        CEntity* hitEntity{};
         bool bHit{};
-        point.z = CWorld::FindGroundZFor3DCoord(point.x, point.y, point.z, &bHit, &pHitEntity);
+        point.z = CWorld::FindGroundZFor3DCoord(point, &bHit, &hitEntity);
 
         CVector pointToCamDirNorm = (TheCamera.GetPosition() - point);
         pointToCamDirNorm.Normalise();
@@ -385,10 +392,10 @@ void CFireManager::Update() {
         // Android values used here, and on the PC version the array access isn't
         // a 100% clear to me.
         // TODO: Use the array here
-        if (DotProduct(TheCamera.GetForward(), pointToCamDirNorm) > 0.2f || rand() < RAND_MAX / 2) {
-            auto pFx = g_fxMan.CreateFxSystem("riot_smoke", &point, nullptr, true);
-            if (pFx)
-                pFx->PlayAndKill();
+        if (DotProduct(TheCamera.GetForward(), pointToCamDirNorm) > 0.2f || CGeneral::GetRandomNumber() < RAND_MAX / 2) {
+            auto fx = g_fxMan.CreateFxSystem("riot_smoke", &point, nullptr, true);
+            if (fx)
+                fx->PlayAndKill();
         } else {
             StartFire(point, CGeneral::GetRandomNumberInRange(0.5f, 2.5f), true, nullptr, 30000u, 5, 1);
         }
@@ -397,8 +404,8 @@ void CFireManager::Update() {
     auto nFires = (int32)GetNumOfFires();
     bool firesVisited[MAX_NUM_FIRES] = { false }; // Lookup table to see if a fire's strength was already included into a group of fires
     while (nFires > 0) {
-        // Repeat until there are no active fires left 
-        // Find strongest un-visited fire, and sum of the strength of all fires within 6.0 units of it 
+        // Repeat until there are no active fires left
+        // Find strongest un-visited fire, and sum of the strength of all fires within 6.0 units of it
         // Based on this strength possibly create a shadow (if combined strength > 4), and coronas (combined strength > 6)
 
         // Find the strongest fire, which hasn't yet been visited
@@ -462,6 +469,7 @@ void CFireManager::Update() {
                     0.0f
                 );
             }
+
             if (fCombinedStrength > 6.0f) {
                 // Create coronas in a _|_ like shape.
                 // Keep in mind, the right line's end is always pointing towards the camera,
@@ -473,7 +481,7 @@ void CFireManager::Update() {
                     camToPointDirNorm.Normalise();
                     point += camToPointDirNorm * 3.5f;
                 }
-                
+
                 auto strongestId = reinterpret_cast<uint32>(strongest);
                 // Wrapper lambda for code readability
                 const auto RegisterCorona = [&](auto idx, CVector pos, eCoronaFlareType flare = eCoronaFlareType::FLARETYPE_NONE) {
@@ -522,4 +530,9 @@ void CFireManager::Update() {
         }
 
     }
+}
+
+// NOTSA
+CFire& CFireManager::GetRandomFire() {
+    return m_aFires[CGeneral::GetRandomNumberInRange(0, std::size(m_aFires))];
 }

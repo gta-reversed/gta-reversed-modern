@@ -1,15 +1,16 @@
 #include "StdInc.h"
 
-CProjectile::CProjectile(int32 dwModelId) : CObject()
-{
+#include "Projectile.h"
+
+CProjectile::CProjectile(int32 modelId) : CObject() {
     m_bTunnelTransition = true;
     m_fMass = 1.0F;
     m_fTurnMass = 1.0F;
     m_fAirResistance = 0.99999F;
     m_fElasticity = 0.75F;
-    m_fBuoyancyConstant = 0.0008F; // 1.0 / 1250.0
+    m_fBuoyancyConstant = 1.0F / 1250.0F; // 0.0008F
     CObject::SetIsStatic(false);
     physicalFlags.bExplosionProof = true;
-    CEntity::SetModelIndex(dwModelId);
+    CEntity::SetModelIndex(modelId);
     m_nObjectType = eObjectType::OBJECT_TYPE_DECORATION;
 }

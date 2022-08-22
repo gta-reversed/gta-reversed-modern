@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -30,28 +30,20 @@ enum eQuadBikeNodes {
     QUAD_HANDLEBARS = 17,
     QUAD_MISC_A = 18,
     QUAD_MISC_B = 19,
+
     QUAD_NUM_NODES
 };
 
 class CQuadBike : public CAutomobile {
-protected:
-    CQuadBike(plugin::dummy_func_t) : CAutomobile(plugin::dummy) {}
 public:
-    void*         m_pHandling;
-    CRideAnimData m_sRideAnimData;
-    float         field_9A8;
-    int32         field_9AC;
-    int32         field_9B0;
-    int32         field_9B4;
-    uint8         m_nQuadFlags;
-    char          _pad1[3];
+    tBikeHandlingData* m_pHandling;
+    CRideAnimData      m_sRideAnimData;
+    float              field_9A8[4]; // unused
+    uint8              m_nQuadFlags;
 
 public:
-    static void InjectHooks();
-
     CQuadBike(int32 modelIndex, eVehicleCreatedBy createdBy);
-
-    ~CQuadBike() override;
+    ~CQuadBike() override = default; // 0x6CDC30
 
     void Fix() override;
     CRideAnimData* GetRideAnimData() override;
@@ -59,24 +51,29 @@ public:
     bool ProcessAI(uint32& extraHandlingFlags) override;
     void ProcessControl() override;
     void ProcessControlInputs(uint8 playerNum) override;
-    void ProcessDrivingAnims(CPed* driver, uint8 bBlend) override;
+    void ProcessDrivingAnims(CPed* driver, bool blend) override;
     void ProcessSuspension() override;
     void ResetSuspension() override;
     void SetupDamageAfterLoad() override;
     void SetupSuspensionLines() override;
 
 private:
-    void Fix_Reversed();
-    CRideAnimData* GetRideAnimData_Reversed();
-    void PreRender_Reversed();
-    bool ProcessAI_Reversed(uint32& extraHandlingFlags);
-    void ProcessControl_Reversed();
-    void ProcessControlInputs_Reversed(uint8 playerNum);
-    void ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend);
-    void ProcessSuspension_Reversed();
-    void ResetSuspension_Reversed();
-    void SetupDamageAfterLoad_Reversed();
-    void SetupSuspensionLines_Reversed();
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CQuadBike* Constructor(int32 modelIndex, eVehicleCreatedBy createdBy);
+
+    void Fix_Reversed() { CQuadBike::Fix(); }
+    CRideAnimData* GetRideAnimData_Reversed() { return CQuadBike::GetRideAnimData(); }
+    void PreRender_Reversed() { CQuadBike::PreRender(); }
+    bool ProcessAI_Reversed(uint32& extraHandlingFlags) { return CQuadBike::ProcessAI(extraHandlingFlags); }
+    void ProcessControl_Reversed() { CQuadBike::ProcessControl(); }
+    void ProcessControlInputs_Reversed(uint8 playerNum) { CQuadBike::ProcessControlInputs(playerNum); }
+    void ProcessDrivingAnims_Reversed(CPed* driver, bool blend) { CQuadBike::ProcessDrivingAnims(driver, blend); }
+    void ProcessSuspension_Reversed() { CQuadBike::ProcessSuspension(); }
+    void ResetSuspension_Reversed() { CQuadBike::ResetSuspension(); }
+    void SetupDamageAfterLoad_Reversed() { CQuadBike::SetupDamageAfterLoad(); }
+    void SetupSuspensionLines_Reversed() { CQuadBike::SetupSuspensionLines(); }
 };
 
 VALIDATE_SIZE(CQuadBike, 0x9BC);

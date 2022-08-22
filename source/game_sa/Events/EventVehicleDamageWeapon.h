@@ -1,20 +1,20 @@
-#pragma once 
+#pragma once
 
 #include "EventVehicleDamage.h"
 
-class CEventVehicleDamageWeapon : public CEventVehicleDamage
-{
+class NOTSA_EXPORT_VTABLE CEventVehicleDamageWeapon : public CEventVehicleDamage {
 public:
-
-    static void InjectHooks();
-
     CEventVehicleDamageWeapon(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType);
-    ~CEventVehicleDamageWeapon();
-private:
-    CEventVehicleDamageWeapon* Constructor(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType);
-public:
+    ~CEventVehicleDamageWeapon() override = default;
+
     eEventType GetEventType() const override { return EVENT_VEHICLE_DAMAGE_WEAPON; }
     CEventEditableResponse* CloneEditable() override;
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CEventVehicleDamageWeapon* Constructor(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType);
     CEventEditableResponse* CloneEditable_Reversed();
 };
 

@@ -1,18 +1,20 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
+#include "RepeatSector.h"
 class CEntity;
 class CPed;
 
-class CEntityScanner {
-protected:
-    void* vtable;
+// Just a theory..
+// Since this is originally a virtual class..
+// Maybe it was templated? Like: `template<class Entity_t, size_t MaxCount>` ?
 
+class CEntityScanner {
 public:
     int32    field_4;
     uint32   m_nCount;
@@ -22,9 +24,11 @@ public:
 public:
     static void InjectHooks();
 
-    void     Clear();
-    void     ScanForEntitiesInRange(int32 arg2, CPed* pPed);
-    CEntity* GetClosestPedInRange();
+    CEntityScanner();
+    ~CEntityScanner();
+
+    void Clear();
+    virtual void ScanForEntitiesInRange(eRepeatSectorList sectorList, const CPed& ped);
 };
 
 VALIDATE_SIZE(CEntityScanner, 0x50);

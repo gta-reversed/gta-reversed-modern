@@ -8,52 +8,65 @@
 
 void CEventPedCollisionWithPed::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPedCollisionWithPed", "CEventPedCollisionWithPed", 0x4AC990, &CEventPedCollisionWithPed::Constructor);
-    ReversibleHooks::Install("CEventPedCollisionWithPed", "TakesPriorityOver_Reversed", 0x4ACAD0, &CEventPedCollisionWithPed::TakesPriorityOver_Reversed);
-    ReversibleHooks::Install("CEventPedCollisionWithPed", "AffectsPed_Reversed", 0x4ACB10, &CEventPedCollisionWithPed::AffectsPed_Reversed);
+    RH_ScopedClass(CEventPedCollisionWithPed);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AC990);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4ACAD0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4ACB10);
 }
 
 void CEventPedCollisionWithPlayer::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPedCollisionWithPlayer", "CEventPedCollisionWithPlayer", 0x5FED40, &CEventPedCollisionWithPlayer::Constructor);
+    RH_ScopedClass(CEventPedCollisionWithPlayer);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x5FED40);
 }
 
 void CEventPlayerCollisionWithPed::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPlayerCollisionWithPed", "CEventPlayerCollisionWithPed", 0x5FEE40, &CEventPlayerCollisionWithPed::Constructor);
+    RH_ScopedClass(CEventPlayerCollisionWithPed);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x5FEE40);
 }
 
 void CEventObjectCollision::InjectHooks()
 {
-    ReversibleHooks::Install("CEventObjectCollision", "CEventObjectCollision", 0x4ACCF0, &CEventObjectCollision::Constructor);
-    ReversibleHooks::Install("CEventObjectCollision", "AffectsPed_Reversed", 0x4ACE30, &CEventObjectCollision::AffectsPed_Reversed);
+    RH_ScopedClass(CEventObjectCollision);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4ACCF0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4ACE30);
 }
 
 void CEventBuildingCollision::InjectHooks()
 {
-    ReversibleHooks::Install("CEventBuildingCollision", "CEventBuildingCollision", 0x4ACF00, &CEventBuildingCollision::Constructor);
-    ReversibleHooks::Install("CEventBuildingCollision", "AffectsPed_Reversed", 0x4AD070, &CEventBuildingCollision::AffectsPed_Reversed);
-    ReversibleHooks::Install("CEventBuildingCollision", "IsHeadOnCollision", 0x4AD1E0, &CEventBuildingCollision::IsHeadOnCollision);
-    ReversibleHooks::Install("CEventBuildingCollision", "CanTreatBuildingAsObject", 0x4B3120, &CEventBuildingCollision::CanTreatBuildingAsObject);
+    RH_ScopedClass(CEventBuildingCollision);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4ACF00);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AD070);
+    RH_ScopedInstall(IsHeadOnCollision, 0x4AD1E0);
+    RH_ScopedInstall(CanTreatBuildingAsObject, 0x4B3120);
 }
 
 CEventPedCollisionWithPed::CEventPedCollisionWithPed(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState, int16 victimMoveState)
 {
-    m_pieceType = pieceType;
-    m_damageIntensity = damageIntensity;
-    m_victim = victim;
+    m_pieceType               = pieceType;
+    m_damageIntensity         = damageIntensity;
+    m_victim                  = victim;
     m_collisionImpactVelocity = *collisionImpactVelocity;
-    m_collisionPos = *collisionPos;
-    m_movestate = moveState;
-    m_victimMoveState = victimMoveState;
-    if (victim)
-        victim->RegisterReference(reinterpret_cast<CEntity**>(&m_victim));
+    m_collisionPos            = *collisionPos;
+    m_movestate               = moveState;
+    m_victimMoveState         = victimMoveState;
+    CEntity::SafeRegisterRef(m_victim);
 }
 
 CEventPedCollisionWithPed::~CEventPedCollisionWithPed()
 {
-    if (m_victim)
-        m_victim->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_victim));
+    CEntity::SafeCleanUpRef(m_victim);
 }
 
 CEventPedCollisionWithPed* CEventPedCollisionWithPed::Constructor(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState, int16 victimMoveState)
@@ -81,45 +94,52 @@ bool CEventPedCollisionWithPed::TakesPriorityOver_Reversed(const CEvent& refEven
     return CEvent::TakesPriorityOver(refEvent);
 }
 
-bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped)
-{
-    if (ped->IsAlive() && !ped->m_pAttachedTo && m_victim && !ped->bInVehicle && !m_victim->bInVehicle &&
-        m_victim->GetIntelligence()->m_AnotherStaticCounter <= 30 && !ped->GetIntelligence()->IsThreatenedBy(*m_victim)) {
-        if (m_movestate < PEDMOVE_WALK) {
-            CPedGroup* victimGroup = CPedGroups::GetPedsGroup(m_victim);
-            if (victimGroup && !victimGroup->GetMembership().IsLeader(m_victim)) {
-                if (DotProduct(m_collisionImpactVelocity, ped->GetForward()) > -0.5f)
-                    return false;
-                CTask* pedPartnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL);
-                if (!pedPartnerTask)
-                    pedPartnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET);
-                if (pedPartnerTask) {
-                    CTask* victimPartnerTask = m_victim->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL);
-                    if (!victimPartnerTask)
-                        victimPartnerTask = m_victim->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET);
-                    if (victimPartnerTask) {
-                        if (pedPartnerTask->GetTaskType() == victimPartnerTask->GetTaskType())
-                            return false;
-                    }
-                }
-                CTask* pedActiveTask = ped->GetTaskManager().GetActiveTask();
-                if (pedActiveTask && pedActiveTask->GetTaskType() == TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING
-                    && reinterpret_cast<CTaskComplexAvoidOtherPedWhileWandering*>(pedActiveTask)->m_ped == m_victim)
-                {
-                    return false;
-                }
-                auto pTaskKillPedOnFoot = reinterpret_cast<CTaskComplexKillPedOnFoot*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_KILL_PED_ON_FOOT));
-                if (pTaskKillPedOnFoot && pTaskKillPedOnFoot->m_target == m_victim
-                    && ped->GetTaskManager().FindActiveTaskByType(TASK_SIMPLE_FIGHT_CTRL)) {
-                    return false;
-                }
-                else {
-                    return true;
-                }
+bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped) {
+    if (!ped->IsAlive() || ped->m_pAttachedTo || ped->bInVehicle) {
+        return false;
+    }
+
+    if (!m_victim || m_victim->bInVehicle || ped->GetIntelligence()->IsThreatenedBy(*m_victim) || m_victim->GetIntelligence()->m_AnotherStaticCounter > 30) {
+        return false;
+    }
+
+    switch (m_movestate) {
+    case PEDMOVE_NONE:
+    case PEDMOVE_STILL:
+    case PEDMOVE_TURN_L:
+    case PEDMOVE_TURN_R:
+        break;
+    default:
+        return false;
+    }
+
+    if (const auto victimsGroup = CPedGroups::GetPedsGroup(m_victim); !victimsGroup || victimsGroup->GetMembership().IsLeader(m_victim)) {
+        return false;
+    }
+
+    if (DotProduct(m_collisionImpactVelocity, ped->GetForward()) > -0.5f) { // If collision's velocity is not in [-120, 120] - So basically, if coming from behind
+        return false;
+    }
+
+    if (ped->GetTaskManager().IsFirstFoundTaskMatching<TASK_COMPLEX_PARTNER_DEAL, TASK_COMPLEX_PARTNER_GREET>(m_victim->GetTaskManager())) {
+        return false;
+    }
+                
+    if (const auto task = ped->GetTaskManager().GetActiveTaskAs<CTaskComplexAvoidOtherPedWhileWandering>()) {
+        if (task->m_ped == m_victim) {
+            return false;
+        }
+    }
+
+    if (const auto task = ped->GetTaskManager().Find<CTaskComplexKillPedOnFoot>()) {
+        if (task->m_target == m_victim) {
+            if (ped->GetTaskManager().Find<TASK_SIMPLE_FIGHT_CTRL>()) {
+                return false;
             }
         }
     }
-    return false;
+
+    return true;
 }
 
 CEventPedCollisionWithPlayer::CEventPedCollisionWithPlayer(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState, int16 victimMoveState) :
@@ -152,14 +172,12 @@ CEventObjectCollision::CEventObjectCollision(int16 pieceType, float damageIntens
     m_object = object;
     m_collisionImpactVelocity = *collisionImpactVelocity;
     m_collisionPos = *collisionPos;
-    if (m_object)
-        m_object->RegisterReference(reinterpret_cast<CEntity**>(&m_object));
+    CEntity::SafeRegisterRef(m_object);
 }
 
 CEventObjectCollision::~CEventObjectCollision()
 {
-    if (m_object)
-        m_object->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_object));
+    CEntity::SafeCleanUpRef(m_object);
 }
 
 CEventObjectCollision* CEventObjectCollision::Constructor(int16 pieceType, float damageIntensity, CObject* object, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState)
@@ -168,13 +186,10 @@ CEventObjectCollision* CEventObjectCollision::Constructor(int16 pieceType, float
     return this;
 }
 
+// 0x4ACE30
 bool CEventObjectCollision::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4ACE30, CEventObjectCollision*, CPed*>(this, ped);
-#else
     return CEventObjectCollision::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventObjectCollision::AffectsPed_Reversed(CPed* ped)
@@ -196,14 +211,12 @@ CEventBuildingCollision::CEventBuildingCollision(int16 pieceType, float damageIn
     m_building = building;
     m_collisionImpactVelocity = *collisionImpactVelocity;
     m_collisionPos = *collisionPos;
-    if (building)
-        m_building->RegisterReference(reinterpret_cast<CEntity**>(&m_building));
+    CEntity::SafeRegisterRef(m_building);
 }
 
 CEventBuildingCollision::~CEventBuildingCollision()
 {
-    if (m_building)
-        m_building->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_building));
+    CEntity::SafeCleanUpRef(m_building);
 }
 
 CEventBuildingCollision* CEventBuildingCollision::Constructor(int16 pieceType, float damageIntensity, CBuilding* building, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState)
@@ -212,13 +225,10 @@ CEventBuildingCollision* CEventBuildingCollision::Constructor(int16 pieceType, f
     return this;
 }
 
+// 0x4AD070
 bool CEventBuildingCollision::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AD070, CEventBuildingCollision*, CPed*>(this, ped);
-#else
     return CEventBuildingCollision::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventBuildingCollision::AffectsPed_Reversed(CPed* ped)
@@ -240,32 +250,28 @@ bool CEventBuildingCollision::AffectsPed_Reversed(CPed* ped)
             }
             // CEventPotentialWalkIntoBuilding doesn't even exist on PC
             assert (ped->GetEventHandler().GetCurrentEventType() != EVENT_POTENTIAL_WALK_INTO_BUILDING);
-            if (dotProduct <= -0.5f && !ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_CLIMB))
+            if (dotProduct <= -0.5f && !ped->GetTaskManager().Find<TASK_COMPLEX_CLIMB>())
                 return ped->GetEventHandler().GetCurrentEventType() != EVENT_GUN_AIMED_AT;
         }
     }
     return false;
 }
 
+// 0x4AD1E0
 bool CEventBuildingCollision::IsHeadOnCollision(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AD1E0, CEventBuildingCollision*, CPed*>(this, ped);
-#else
     CVector velocity = m_collisionImpactVelocity;
     velocity.z = 0.0f;
     velocity.Normalise();
     return -DotProduct(velocity, ped->GetForward()) > 0.866f;
-#endif
 }
 
+// 0x4B3120
 bool CEventBuildingCollision::CanTreatBuildingAsObject(CBuilding* building)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<bool, 0x4B3120, CBuilding*>(building);
-#else
     if (building->m_bIsTempBuilding)
         return true;
+
     CColModel* colModel = CModelInfo::GetModelInfo(building->m_nModelIndex)->GetColModel();
     CVector& boundMax = colModel->m_boundBox.m_vecMax;
     CVector& boundMin = colModel->m_boundBox.m_vecMin;
@@ -278,5 +284,4 @@ bool CEventBuildingCollision::CanTreatBuildingAsObject(CBuilding* building)
         return true;
     }
     return false;
-#endif
 }

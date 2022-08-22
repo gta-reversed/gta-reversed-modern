@@ -1,22 +1,23 @@
 #pragma once
+
 #include "AtomicModelInfo.h"
 
-class CLodAtomicModelInfo : public CAtomicModelInfo {
-public:
-    CLodAtomicModelInfo();
+class NOTSA_EXPORT_VTABLE CLodAtomicModelInfo : public CAtomicModelInfo {
 public:
     int16 field_20;
     int16 field_22;
 
 public:
-    static void InjectHooks();
+    CLodAtomicModelInfo();
 
-    // VTABLE
     CLodAtomicModelInfo* AsLodAtomicModelInfoPtr() override;
     ModelInfoType GetModelType() override;
     void Init() override;
 
-    // VTABLE Implementations
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
     CLodAtomicModelInfo* AsLodAtomicModelInfoPtr_Reversed();
     ModelInfoType GetModelType_Reversed();
     void Init_Reversed();

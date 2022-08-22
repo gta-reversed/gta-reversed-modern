@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -17,51 +17,47 @@ struct tPedColNodeInfo {
     float   m_fRadius;
 };
 
-class CPedModelInfo : public CClumpModelInfo {
+class NOTSA_EXPORT_VTABLE CPedModelInfo : public CClumpModelInfo {
 public:
-    CPedModelInfo() : CClumpModelInfo(), m_pHitColModel(nullptr) {}
-    ~CPedModelInfo() { if (m_pHitColModel) delete m_pHitColModel; }
-public:
-    int32      m_nAnimType;
-    uint32     m_nPedType;
-    uint32     m_nStatType;
-    uint16     m_nCarsCanDriveMask;
-    uint16     m_nPedFlags;
-    CColModel* m_pHitColModel;
-    uint8      m_nRadio1;
-    uint8      m_nRadio2;
-    uint8      m_nRace;
-    char       _pad;
-    int16      m_nPedAudioType;
-    int16      m_nVoiceMin;
-    int16      m_nVoiceMax;
-    int16      m_nVoiceId;
+    AssocGroupId m_nAnimType;
+    ePedType     m_nPedType;
+    ePedStats    m_nStatType;
+    uint16       m_nCarsCanDriveMask;
+    uint16       m_nPedFlags;
+    CColModel*   m_pHitColModel;
+    eRadioID     m_nRadio1;
+    eRadioID     m_nRadio2;
+    uint8        m_nRace;
+    int16        m_nPedAudioType;
+    int16        m_nVoiceMin; // Also called voice1
+    int16        m_nVoiceMax; // Also called voice2
+    int16        m_nVoiceId;  // In `LoadPedObject` this is set to be the same as `m_nVoiceMin` (Which doesn't mean it will always be the same)
 
-public:
     static constexpr int32 NUM_PED_NAME_ID_ASSOC = 13;
-    static RwObjectNameIdAssocation (&m_pPedIds)[NUM_PED_NAME_ID_ASSOC];
     static constexpr int32 NUM_PED_COL_NODE_INFOS = 12;
-    static tPedColNodeInfo(&m_pColNodeInfos)[NUM_PED_COL_NODE_INFOS];
+
+    static inline RwObjectNameIdAssocation(&m_pPedIds)[NUM_PED_NAME_ID_ASSOC] = *(RwObjectNameIdAssocation(*)[NUM_PED_NAME_ID_ASSOC])0x8A6268;
+    static inline tPedColNodeInfo(&m_pColNodeInfos)[NUM_PED_COL_NODE_INFOS] = *(tPedColNodeInfo(*)[NUM_PED_COL_NODE_INFOS])0x8A6308;
 
 public:
     static void InjectHooks();
 
-// virtual
+    CPedModelInfo() : CClumpModelInfo(), m_pHitColModel(nullptr) {} // 0x4C57A0
+    ~CPedModelInfo() { delete m_pHitColModel; } // 0x4C62F0
+
     ModelInfoType GetModelType() override;
     void DeleteRwObject() override;
     void SetClump(RpClump* clump) override;
 
-// virtual implementations
     ModelInfoType GetModelType_Reversed();
     void DeleteRwObject_Reversed();
     void SetClump_Reversed(RpClump* clump);
 
-// class
-    void AddXtraAtomics(RpClump* pClump); //empty
-    void SetFaceTexture(RwTexture* pTexture); //empty
-    void CreateHitColModelSkinned(RpClump* pClump);
-    CColModel* AnimatePedColModelSkinned(RpClump* pClump);
-    CColModel* AnimatePedColModelSkinnedWorld(RpClump* pClump);
+    void AddXtraAtomics(RpClump* clump);
+    void SetFaceTexture(RwTexture* texture);
+    void CreateHitColModelSkinned(RpClump* clump);
+    CColModel* AnimatePedColModelSkinned(RpClump* clump);
+    CColModel* AnimatePedColModelSkinnedWorld(RpClump* clump);
     void IncrementVoice();
 };
 

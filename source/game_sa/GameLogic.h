@@ -2,18 +2,9 @@
 
 #include "Vector.h"
 
-enum eGameState {
-    GAME_STATE_INITIAL = 0,
-    GAME_STATE_LOGO = 1,
-    GAME_STATE_PLAYING_LOGO = 2,
-    GAME_STATE_TITLE = 3,
-    GAME_STATE_PLAYING_INTRO = 4,
-    GAME_STATE_FRONTEND_LOADING = 5,
-    GAME_STATE_FRONTEND_LOADED = 6,
-    GAME_STATE_FRONTEND_IDLE = 7,
-    GAME_STATE_LOADING_STARTED = 8,
-    GAME_STATE_LOADING_FINISHED = 9,
-};
+class CEntity;
+class CPed;
+class CVehicle;
 
 enum eSkipState {
     SKIP_STATE_0,
@@ -67,9 +58,9 @@ public:
     static void ForceDeathRestart();
     static void InitAtStartOfGame();
     static bool IsCoopGameGoingOn();
-    static bool IsPlayerAllowedToGoInThisDirection(CPed* pPed, float moveDirectionX, float moveDirectionY, float moveDirectionZ, float distanceLimit);
+    static bool IsPlayerAllowedToGoInThisDirection(CPed* ped, float moveDirectionX, float moveDirectionY, float moveDirectionZ, float distanceLimit);
     static bool IsPlayerUse2PlayerControls(CPed* ped);
-    static bool IsPointWithinLineArea(signed int a1, float x, float y);
+    static bool IsPointWithinLineArea(int32 a1, float x, float y);
     static bool IsSkipWaitingForScriptToFadeIn();
     static bool LaRiotsActiveHere();
     static void Save();
@@ -81,8 +72,8 @@ public:
     static void RestorePlayerStuffDuringResurrection(CPlayerPed* player, float x, float y, float z, float playerStartHeading);
     static void SetPlayerWantedLevelForForbiddenTerritories(uint16 townNumber);
     static void SetUpSkip(int32 fX, int32 fY, int32 fZ, float fAngle, bool bAfterMission, CEntity* vehicle, bool bFinishedByScript);
-    static void SkipCanBeActivated();
-    static void SortOutStreamingAndMemory(CVector const& translation, float angle);
+    static bool SkipCanBeActivated();
+    static void SortOutStreamingAndMemory(const CVector& translation, float angle);
     static void StopPlayerMovingFromDirection(int32 playerId, CVector direction);
     static void Update();
     static void UpdateSkip();

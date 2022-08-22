@@ -1,19 +1,24 @@
 #include "StdInc.h"
 
+#include "MatrixLinkList.h"
+
 CMatrixLinkList& gMatrixList = *(CMatrixLinkList*)0xB74288;
 
 void CMatrixLinkList::InjectHooks()
 {
-    ReversibleHooks::Install("CMatrixLinkList", "Init", 0x54F0D0, &CMatrixLinkList::Init);
-    ReversibleHooks::Install("CMatrixLinkList", "Shutdown", 0x54E990, &CMatrixLinkList::Shutdown);
-    ReversibleHooks::Install("CMatrixLinkList", "AddToList1", 0x54E9D0, &CMatrixLinkList::AddToList1);
-    ReversibleHooks::Install("CMatrixLinkList", "AddToList2", 0x54EA10, &CMatrixLinkList::AddToList2);
-    ReversibleHooks::Install("CMatrixLinkList", "MoveToList1", 0x54EA60, &CMatrixLinkList::MoveToList1);
-    ReversibleHooks::Install("CMatrixLinkList", "MoveToList2", 0x54EA90, &CMatrixLinkList::MoveToList2);
-    ReversibleHooks::Install("CMatrixLinkList", "MoveToFreeList", 0x54EAD0, &CMatrixLinkList::MoveToFreeList);
-    ReversibleHooks::Install("CMatrixLinkList", "GetNumFree", 0x54EB10, &CMatrixLinkList::GetNumFree);
-    ReversibleHooks::Install("CMatrixLinkList", "GetNumUsed1", 0x54EB30, &CMatrixLinkList::GetNumUsed1);
-    ReversibleHooks::Install("CMatrixLinkList", "GetNumUsed2", 0x54EB50, &CMatrixLinkList::GetNumUsed2);
+    RH_ScopedClass(CMatrixLinkList);
+    RH_ScopedCategory("Core");
+
+    RH_ScopedInstall(Init, 0x54F0D0);
+    RH_ScopedInstall(Shutdown, 0x54E990);
+    RH_ScopedInstall(AddToList1, 0x54E9D0);
+    RH_ScopedInstall(AddToList2, 0x54EA10);
+    RH_ScopedInstall(MoveToList1, 0x54EA60);
+    RH_ScopedInstall(MoveToList2, 0x54EA90);
+    RH_ScopedInstall(MoveToFreeList, 0x54EAD0);
+    RH_ScopedInstall(GetNumFree, 0x54EB10);
+    RH_ScopedInstall(GetNumUsed1, 0x54EB30);
+    RH_ScopedInstall(GetNumUsed2, 0x54EB50);
 }
 
 CMatrixLinkList::CMatrixLinkList() : m_head(), m_tail(), m_allocatedListHead(), m_allocatedListTail(), m_freeListHead(), m_freeListTail()
@@ -35,8 +40,8 @@ void CMatrixLinkList::Init(int32 count)
     m_allocatedListTail.m_pPrev = &m_allocatedListHead;
 
     for (int32 i = count - 1; i >= 0; --i) {
-        auto& pMat = m_pObjects[i];
-        m_freeListHead.Insert(&pMat);
+        auto& mat = m_pObjects[i];
+        m_freeListHead.Insert(&mat);
     }
 }
 
@@ -66,30 +71,30 @@ CMatrixLink* CMatrixLinkList::AddToList2()
     return pNextFree;
 }
 
-void CMatrixLinkList::MoveToList1(CMatrixLink* pMat)
+void CMatrixLinkList::MoveToList1(CMatrixLink* mat)
 {
-    pMat->Remove();
-    m_head.Insert(pMat);
+    mat->Remove();
+    m_head.Insert(mat);
 }
 
-void CMatrixLinkList::MoveToList2(CMatrixLink* pMat)
+void CMatrixLinkList::MoveToList2(CMatrixLink* mat)
 {
-    pMat->Remove();
-    m_allocatedListHead.Insert(pMat);
+    mat->Remove();
+    m_allocatedListHead.Insert(mat);
 }
 
-void CMatrixLinkList::MoveToFreeList(CMatrixLink* pMat)
+void CMatrixLinkList::MoveToFreeList(CMatrixLink* mat)
 {
-    pMat->Remove();
-    m_freeListHead.Insert(pMat);
+    mat->Remove();
+    m_freeListHead.Insert(mat);
 }
 
 int32 CMatrixLinkList::GetNumFree()
 {
     int32 result = 0;
-    auto pCur = m_freeListHead.m_pNext;
-    while (pCur != &m_freeListTail) {
-        pCur = pCur->m_pNext;
+    auto cur = m_freeListHead.m_pNext;
+    while (cur != &m_freeListTail) {
+        cur = cur->m_pNext;
         ++result;
     }
 
@@ -99,9 +104,9 @@ int32 CMatrixLinkList::GetNumFree()
 int32 CMatrixLinkList::GetNumUsed1()
 {
     int32 result = 0;
-    auto pCur = m_head.m_pNext;
-    while (pCur != &m_tail) {
-        pCur = pCur->m_pNext;
+    auto cur = m_head.m_pNext;
+    while (cur != &m_tail) {
+        cur = cur->m_pNext;
         ++result;
     }
 
@@ -111,9 +116,9 @@ int32 CMatrixLinkList::GetNumUsed1()
 int32 CMatrixLinkList::GetNumUsed2()
 {
     int32 result = 0;
-    auto pCur = m_allocatedListHead.m_pNext;
-    while (pCur != &m_allocatedListTail) {
-        pCur = pCur->m_pNext;
+    auto cur = m_allocatedListHead.m_pNext;
+    while (cur != &m_allocatedListTail) {
+        cur = cur->m_pNext;
         ++result;
     }
 

@@ -3,7 +3,7 @@
 #include "AEAudioEntity.h"
 #include "AETwinLoopSoundEntity.h"
 
-class CAEFrontendAudioEntity : public CAEAudioEntity {
+class NOTSA_EXPORT_VTABLE CAEFrontendAudioEntity : public CAEAudioEntity {
 protected:
     bool                   m_bAmplifierWakeUp;
     uint8                  m_nbLoadingTuneSeed;
@@ -23,7 +23,7 @@ public:
     void Initialise();
     void Reset();
 
-    void AddAudioEvent(int32 eventCode, float fVolumeBoost = 0.0f, float fSpeed = 1.0f);
+    void AddAudioEvent(eAudioEvents event, float fVolumeBoost = 0.0f, float fSpeed = 1.0f);
 
     bool IsRadioTuneSoundActive();
     bool IsLoadingTuneActive();

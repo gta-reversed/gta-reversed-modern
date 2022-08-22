@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -8,7 +8,7 @@
 
 #include "Object.h"
 
-class CHandObject : public CObject {
+class NOTSA_EXPORT_VTABLE CHandObject : public CObject {
 public:
     class CPed* m_pPed;
     uint32      m_nBoneIndex;
@@ -19,7 +19,7 @@ public:
 public:
     static void InjectHooks();
 
-    CHandObject(int32 handModelIndex, CPed* pPed, bool bLeftHand);
+    CHandObject(int32 handModelIndex, CPed* ped, bool bLeftHand);
     ~CHandObject() = default;
 
     void ProcessControl() override;

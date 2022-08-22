@@ -1,51 +1,46 @@
 #include "StdInc.h"
 
+#include "EventVehicleDied.h"
+
 void CEventVehicleDied::InjectHooks()
 {
-    ReversibleHooks::Install("CEventVehicleDied", "Constructor", 0x4B0D10, &CEventVehicleDied::Constructor);
-    ReversibleHooks::Install("CEventVehicleDied", "Clone_Reversed", 0x4B76D0, &CEventVehicleDied::Clone_Reversed);
-    ReversibleHooks::Install("CEventVehicleDied", "AffectsPed_Reversed", 0x4B0E00, &CEventVehicleDied::AffectsPed_Reversed);
+    RH_ScopedClass(CEventVehicleDied);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B0D10);
+    RH_ScopedVirtualInstall(Clone, 0x4B76D0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B0E00);
 }
 
 CEventVehicleDied::CEventVehicleDied (CVehicle* vehicle)
 {
     m_vehicle = vehicle;
     m_IsOccupantLeavingCar = false;
-    m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle)); // todo: possible nullptr
 }
 
 CEventVehicleDied::~CEventVehicleDied ()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
+// 0x4B0D10
 CEventVehicleDied* CEventVehicleDied::Constructor(CVehicle* vehicle)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventVehicleDied*, 0x4B0D10, CEvent*, CVehicle*>(this, vehicle);
-#else
     this->CEventVehicleDied::CEventVehicleDied(vehicle);
     return this;
-#endif
 }
 
+// 0x4B76D0
 CEvent* CEventVehicleDied::Clone()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEvent*, 0x4B76D0, CEvent*>(this);
-#else
     return CEventVehicleDied::Clone_Reversed();
-#endif
 }
 
+// 0x4B0E00
 bool CEventVehicleDied::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B0E00, CEvent*, CPed*>(this, ped);
-#else
     return CEventVehicleDied::AffectsPed_Reversed(ped);
-#endif
 }
 
 CEvent* CEventVehicleDied::Clone_Reversed()
@@ -56,8 +51,7 @@ CEvent* CEventVehicleDied::Clone_Reversed()
 bool CEventVehicleDied::AffectsPed_Reversed(CPed* ped)
 {
     if (ped->IsAlive() && !m_IsOccupantLeavingCar) {
-        CTask* pTaskComplexLeaveCar = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_LEAVE_CAR);
-        m_IsOccupantLeavingCar = pTaskComplexLeaveCar ? true : false;
+        m_IsOccupantLeavingCar = ped->GetTaskManager().Has<TASK_COMPLEX_LEAVE_CAR>();
         if ((m_IsOccupantLeavingCar || ped->bInVehicle) && m_vehicle)
             return ped->m_pVehicle == m_vehicle;
     }
