@@ -268,6 +268,8 @@
 #include "TaskSimpleDrownInCar.h"
 #include "TaskSimpleDieInCar.h"
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
+#include <TaskSimpleTired.h>
+#include "TaskSimpleCarOpenDoorFromOutside.h"
 #include "TaskSimpleTired.h"
 #include "TaskSimpleCarWaitToSlowDown.h"    
 #include "TaskSimpleClearLookAt.h"
@@ -722,7 +724,7 @@ void InjectHooksMain() {
         // CTaskSimpleCarGetOut::InjectHooks();
         // CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse::InjectHooks();
         // CTaskSimpleCarJumpOut::InjectHooks();
-        // CTaskSimpleCarOpenDoorFromOutside::InjectHooks();
+        CTaskSimpleCarOpenDoorFromOutside::InjectHooks();
         // CTaskSimpleCarOpenLockedDoorFromOutside::InjectHooks();
         // CTaskSimpleCarSetPedSlowDraggedOut::InjectHooks();
         // CTaskSimpleCarSetTempAction::InjectHooks();
