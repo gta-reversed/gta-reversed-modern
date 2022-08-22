@@ -330,7 +330,7 @@ public:
     char                m_nAllowedAttackMoves;
     uint8               field_72F; // taskId related? 0x4B5C47
     CFire*              m_pFire;
-    float               field_734;
+    float               m_fireDmgMult;
     CEntity*            m_pLookTarget;
     float               m_fLookDirection; // In RAD
     int32               m_nWeaponModelId;
