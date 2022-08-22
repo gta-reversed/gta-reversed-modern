@@ -7,36 +7,21 @@ class CEvent;
 class CTaskSimpleSay;
 class CPed;
 
-class NOTSA_EXPORT_VTABLE CTaskSimpleSay : public CTaskSimple {
+class CTaskSimpleSay : public CTaskSimple {
+public:
+    uint32 m_SayId;
+    uint32 m_SayDuration;
+    CTaskTimer m_Timer;
 
 public:
-    uint32      m_sayId{};
-    uint32      m_sayDuration{};
-    CTaskTimer  m_timer{};
+    constexpr static auto Type = TASK_SIMPLE_SAY;
 
-public:
-    static void InjectHooks();
+    CTaskSimpleSay(uint32 sayId, uint32 sayDuration); // 0x48E360
+    ~CTaskSimpleSay() override = default; // 0x48E4E0
 
-    constexpr static auto Type = eTaskType::TASK_SIMPLE_SAY;
-
-    CTaskSimpleSay(uint32 sayId, uint32 sayDuration);
-    CTaskSimpleSay(const CTaskSimpleSay& o) : CTaskSimpleSay{o.m_sayId, o.m_sayDuration} {} // NOTSA
-    ~CTaskSimpleSay() = default;
-
-    CTask* Clone() override { return new CTaskSimpleSay(*this); }
     eTaskType GetTaskType() override { return Type; }
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; }
-    bool      ProcessPed(CPed* ped) override;
-
-private: // Wrappers for hooks
-    // 0x48E360
-    CTaskSimpleSay* Constructor(uint32 sayId, uint32 sayDuration) {
-        this->CTaskSimpleSay::CTaskSimpleSay(sayId, sayDuration);
-        return this;
-    }
-    // 0x48E4E0
-    CTaskSimpleSay* Destructor() {
-        this->CTaskSimpleSay::~CTaskSimpleSay();
-        return this;
-    }
+    CTask* Clone() override { return new CTaskSimpleSay(m_SayId, m_SayDuration); }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; }
+    bool ProcessPed(CPed* ped) override;
 };
+VALIDATE_SIZE(CTaskSimpleSay, 0x28);
