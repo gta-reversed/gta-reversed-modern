@@ -407,7 +407,6 @@ public:
     static inline tHydraulicData(&m_aSpecialHydraulicData)[4] = *(tHydraulicData(*)[4])0xC1CB60;
 
 public:
-    CVehicle(plugin::dummy_func_t) : CPhysical() { /* todo: remove NOTSA */ }
     CVehicle(eVehicleCreatedBy createdBy);
     ~CVehicle() override;
 
@@ -446,7 +445,7 @@ public:
     virtual bool IsOpenTopCar(){ return false; }
     // remove ref to this entity
     virtual void RemoveRefsToVehicle(CEntity* entity) { /* Do nothing */ }
-    virtual void BlowUpCar(CEntity* damager, uint8 bHideExplosion) { /* Do nothing */ }
+    virtual void BlowUpCar(CEntity* damager, bool bHideExplosion) { /* Do nothing */ }
     virtual void BlowUpCarCutSceneNoExtras(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound) { /* Do nothing */ }
     virtual bool SetUpWheelColModel(CColModel* wheelCol) { return false; }
     // returns false if it's not possible to burst vehicle's tyre or it is already damaged. bPhysicalEffect=true applies random moving force to vehicle
@@ -689,6 +688,7 @@ public: // NOTSA functions
             return m_pHandlingData->m_fDragMult / 1000.0f / 2.0f;
         }
     }
+    bool IsDriverAPlayer() const;
 
 private:
     friend void InjectHooksMain();

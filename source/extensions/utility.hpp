@@ -7,16 +7,17 @@ namespace notsa {
 */
 template<typename Fn>
 struct AutoCallOnDestruct {
-    AutoCallOnDestruct(Fn&& fn) :
+    AutoCallOnDestruct(Fn fn) :
         m_fn{ std::move(fn) }
     {
     }
 
     ~AutoCallOnDestruct() {
-        m_fn();
+        std::invoke(m_fn);
     }
 
 private:
     Fn m_fn;
 };
+
 };

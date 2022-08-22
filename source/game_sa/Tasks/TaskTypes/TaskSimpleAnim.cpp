@@ -2,64 +2,52 @@
 
 #include "TaskSimpleAnim.h"
 
-void CTaskSimpleAnim::InjectHooks()
-{
+void CTaskSimpleAnim::InjectHooks() {
     RH_ScopedClass(CTaskSimpleAnim);
     RH_ScopedCategory("Tasks/TaskTypes");
-    RH_ScopedVirtualInstall(MakeAbortable, 0x61A790);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x61A790);
 }
+bool CTaskSimpleAnim::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return CTaskSimpleAnim::MakeAbortable_Reversed(ped, priority, event); }
 
-CTaskSimpleAnim::CTaskSimpleAnim(bool bHoldLastFrame) : CTaskSimple()
-{
+// 0x61A6C0
+CTaskSimpleAnim::CTaskSimpleAnim(bool bHoldLastFrame) : CTaskSimple() {
     m_bIsFinished = false;
     m_bDontInterrupt = false;
     m_bHoldLastFrame = bHoldLastFrame;
     m_pAnim = nullptr;
 }
 
-CTaskSimpleAnim::~CTaskSimpleAnim()
-{
+// 0x61A6F0
+CTaskSimpleAnim::~CTaskSimpleAnim() {
     if (!m_pAnim)
         return;
 
     m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
     m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
-    if (!m_bHoldLastFrame)
-    {
-        if (m_pAnim->m_fBlendAmount > 0.0F && m_pAnim->m_fBlendDelta >= 0.0F)
-            m_pAnim->m_fBlendDelta = -4.0F;
+    if (!m_bHoldLastFrame &&
+        m_pAnim->m_fBlendAmount > 0.0f &&
+        m_pAnim->m_fBlendDelta >= 0.0f
+    ) {
+        m_pAnim->m_fBlendDelta = -4.0f;
     }
-
     m_pAnim = nullptr;
 }
 
-bool CTaskSimpleAnim::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
-    return CTaskSimpleAnim::MakeAbortable_Reversed(ped, priority, event);
-}
-bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
+// 0x61A790
+bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     bool bSkipBlend = false;
     auto fBlend = -4.0F;
-    if (priority == eAbortPriority::ABORT_PRIORITY_IMMEDIATE)
-    {
+    if (priority == eAbortPriority::ABORT_PRIORITY_IMMEDIATE) {
         fBlend = -1000.0F;
         m_bHoldLastFrame = false;
-    }
-    else if (m_bDontInterrupt)
-    {
+    } else if (m_bDontInterrupt) {
         if (event && event->GetEventType() != eEventType::EVENT_SCRIPT_COMMAND)
             return false;
-    }
-    else if (event)
-    {
-        if (event->GetEventType() == eEventType::EVENT_SCRIPT_COMMAND)
-        {
+    } else if (event) {
+        if (event->GetEventType() == eEventType::EVENT_SCRIPT_COMMAND) {
             const auto* scriptCommand = static_cast<const CEventScriptCommand*>(event);
-            if (scriptCommand->m_task)
-            {
-                if (scriptCommand->m_task->GetTaskType() == TASK_SIMPLE_NAMED_ANIM)
-                {
+            if (scriptCommand->m_task) {
+                if (scriptCommand->m_task->GetTaskType() == TASK_SIMPLE_NAMED_ANIM) {
                     if (m_pAnim)
                         m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
 
@@ -69,13 +57,10 @@ bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
         }
     }
 
-    if (!bSkipBlend)
-    {
-        if (m_pAnim)
-        {
+    if (!bSkipBlend) {
+        if (m_pAnim) {
             m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
-            if (!m_bHoldLastFrame)
-            {
+            if (!m_bHoldLastFrame) {
                 if (m_pAnim->m_nFlags & ANIMATION_PARTIAL)
                     m_pAnim->m_fBlendDelta = fBlend;
                 else
@@ -84,25 +69,21 @@ bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
         }
     }
 
-    if (priority != eAbortPriority::ABORT_PRIORITY_IMMEDIATE
-        && priority != eAbortPriority::ABORT_PRIORITY_URGENT
-        && !m_bHoldLastFrame)
-    {
-        return false;
+    if (priority == ABORT_PRIORITY_IMMEDIATE || priority == ABORT_PRIORITY_URGENT || m_bHoldLastFrame) {
+        if (m_pAnim) {
+            m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
+            m_bIsFinished = true;
+            m_pAnim = nullptr;
+        }
+        return true;
     }
 
-    if (m_pAnim)
-    {
-        m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
-        m_bIsFinished = true;
-        m_pAnim = nullptr;
-    }
-
-    return true;
+    return false;
 }
 
-void CTaskSimpleAnim::FinishRunAnimCB(CAnimBlendAssociation* blendAssoc, void* data)
-{
+// data is CTaskSimpleAnim
+// 0x61A8A0
+void CTaskSimpleAnim::FinishRunAnimCB(CAnimBlendAssociation* blendAssoc, void* data) {
     static_cast<CTaskSimpleAnim*>(data)->m_bIsFinished = true;
     static_cast<CTaskSimpleAnim*>(data)->m_pAnim = nullptr;
 }

@@ -2,7 +2,7 @@
 
 #include "EventGunShot.h"
 
-class CEventGunShotWhizzedBy : public CEventGunShot {
+class NOTSA_EXPORT_VTABLE CEventGunShotWhizzedBy : public CEventGunShot {
 public:
     static void InjectHooks();
 

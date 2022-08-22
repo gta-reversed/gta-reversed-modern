@@ -28,14 +28,12 @@ bool CUpsideDownCarCheck::IsCarUpsideDown(int32 carHandle) {
 bool CUpsideDownCarCheck::IsCarUpsideDown(/* const */ CVehicle* vehicle) {
     const auto GetNumContactWheels = [=]() -> uint32 {
         switch (vehicle->m_nVehicleType) {
-        case eVehicleType::VEHICLE_TYPE_BIKE:
-            return vehicle->AsBike()->m_nNumContactWheels;
-        case eVehicleType::VEHICLE_TYPE_AUTOMOBILE:
-            return vehicle->AsAutomobile()->m_nNumContactWheels;
-        default:
-            return 0u;
+        case eVehicleType::VEHICLE_TYPE_BIKE:       return vehicle->AsBike()->m_nNoOfContactWheels;
+        case eVehicleType::VEHICLE_TYPE_AUTOMOBILE: return vehicle->AsAutomobile()->m_nNumContactWheels;
+        default: return 0u;
         }
     };
+
     if (!vehicle->CanPedStepOutCar(false)) {
         const auto& up = vehicle->GetUp();
         return up.z < 0.3f && GetNumContactWheels() < 4  // Not totally up-side down
