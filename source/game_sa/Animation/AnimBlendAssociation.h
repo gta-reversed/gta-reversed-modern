@@ -25,9 +25,9 @@ enum eAnimationFlags {
     ANIMATION_TRANSLATE_Y        = 0x40,
     ANIMATION_TRANSLATE_X        = 0x80,
     ANIMATION_WALK               = 0x100,
-    ANIMATION_200                = 0x200,
+    ANIMATION_200                = 0x200, // Possibly flag for idle anims? Check references using VS
     ANIMATION_ADD_TO_BLEND       = 0x400, // Possibly should be renamed to ANIMATION_IDLE, see `CPed::PlayFootSteps()`
-    ANIMATION_800                = 0x800,
+    ANIMATION_800                = 0x800, // Possibly related to animations to get up? See `aStdAnimDescs`
     ANIMATION_SECONDARY_TASK_ANIM= 0x1000,
     ANIMATION_FREEZE_TRANSLATION = 0x2000,
     ANIMATION_BLOCK_REFERENCED   = 0x4000,
