@@ -5,30 +5,25 @@ class CAnimBlendAssociation;
 
 class CTaskSimpleBeKickedOnGround : public CTaskSimple{
 public:
-    bool                   m_animHasFinished{};
-    CAnimBlendAssociation* m_anim{};
-public:
-    static void InjectHooks();
+    bool m_bIsFinished;
+    CAnimBlendAssociation* m_Anim;
 
-    constexpr static auto Type = eTaskType::TASK_SIMPLE_BE_KICKED_ON_GROUND;
+public:
+    constexpr static auto Type = TASK_SIMPLE_BE_KICKED_ON_GROUND;
 
     CTaskSimpleBeKickedOnGround();
-    ~CTaskSimpleBeKickedOnGround();
+    ~CTaskSimpleBeKickedOnGround() override;
 
-    static void FinishAnimBeKickedOnGroundCB(CAnimBlendAssociation* anim, void* data);
-    void StartAnim(CPed* ped);
-
-    CTask* Clone() override { return new CTaskSimpleBeKickedOnGround{ *this }; }
     eTaskType GetTaskType() override { return Type; }
-    bool MakeAbortable(CPed * ped, eAbortPriority priority, CEvent const* event) override;
-    bool ProcessPed(CPed * ped) override;
+    CTask* Clone() override { return new CTaskSimpleBeKickedOnGround(); }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool ProcessPed(CPed* ped) override;
 
-private: // Wrappers for hooks
-    // 0x61FC20
+    void StartAnim(CPed* ped);
+    static void FinishAnimBeKickedOnGroundCB(CAnimBlendAssociation* anim, void* data);
+
+    static void InjectHooks();
     CTaskSimpleBeKickedOnGround* Constructor() { this->CTaskSimpleBeKickedOnGround::CTaskSimpleBeKickedOnGround(); return this; }
-
-    // 0x61FC50
     CTaskSimpleBeKickedOnGround* Destructor() { this->CTaskSimpleBeKickedOnGround::~CTaskSimpleBeKickedOnGround(); return this; }
-
 };
 VALIDATE_SIZE(CTaskSimpleBeKickedOnGround, 0x10);
