@@ -56,18 +56,18 @@ class CShopping {
     static constexpr auto NUM_PRICE_MODIFIERS = 20u;
     static constexpr auto NUM_ITEMS = 560u; // ?
     static constexpr auto NUM_BUYABLE_ITEMS = 300u; // ?
-    static constexpr auto NUM_SHOPS = 24u;
     static constexpr auto NUM_SECTION_NAMES = 11u;
 
     inline static ePriceSection& ms_priceSectionLoaded = *(ePriceSection*)0xA9A7C8;
     inline static int32& ms_numPrices = *(int32*)0xA9A7CC;
     inline static int32& ms_numPriceModifiers = *(int32*)0xA9A7D0;
     inline static int32& ms_numItemsInShop = *(int32*)0xA9A7F0;
-    inline static std::array<int8, NUM_SHOPS>& ms_shopLoaded = *(std::array<int8, NUM_SHOPS>*)0xA9A7D8;
+    inline static char(&ms_shopLoaded)[24] = *(char(*)[24])0xA9A7D8;
     inline static uint32& ms_numBuyableItems = *(uint32*)0xA9A310;
     inline static std::array<PriceModifier, NUM_PRICE_MODIFIERS>& ms_priceModifiers = *(std::array<PriceModifier, NUM_PRICE_MODIFIERS>*)0xA98650;
     inline static std::array<bool, NUM_ITEMS>& ms_bHasBought = *(std::array<bool, NUM_ITEMS>*)0xA972A0;
     inline static std::array<uint32, NUM_ITEMS>& ms_keys = *(std::array<uint32, NUM_ITEMS>*)0xA97D90;
+    inline static std::array<uint32, NUM_BUYABLE_ITEMS>& ms_shopContents = *(std::array<uint32, NUM_BUYABLE_ITEMS>*)0xA9A318;
 
     inline static std::array<ItemPrice, NUM_BUYABLE_ITEMS>& ms_prices = *(std::array<ItemPrice, NUM_BUYABLE_ITEMS>*)0xA986F0;
     inline static std::array<const char*, NUM_SECTION_NAMES>& ms_sectionNames = *(std::array<const char*, NUM_SECTION_NAMES>*)0x8A61D8;

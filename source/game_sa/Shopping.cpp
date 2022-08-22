@@ -36,8 +36,8 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(HasPlayerBought, 0x49B5E0);
     // RH_ScopedInstall(IncrementStat, 0x0, { .reversed = false });
     // RH_ScopedInstall(IncrementStat2, 0x0, { .reversed = false });
-    RH_ScopedInstall(LoadPrices, 0x49B8D0, { .reversed = false });
-    RH_ScopedInstall(LoadShop, 0x49BBE0, { .reversed = false });
+    RH_ScopedInstall(LoadPrices, 0x49B8D0);
+    RH_ScopedInstall(LoadShop, 0x49BBE0, {.reversed = false});
     RH_ScopedInstall(LoadStats, 0x49B6A0, { .reversed = false });
     // RH_ScopedInstall(RemoveLoadedPrices, 0x0, { .reversed = false });
     RH_ScopedInstall(RemoveLoadedShop, 0x49AE30);
@@ -245,7 +245,6 @@ void CShopping::IncrementStat2(int32 a1, int32 a2) {
 // 0x49B8D0
 void CShopping::LoadPrices(const char* sectionName) {
     auto priceSection = GetPriceSectionFromName(sectionName);
-
     if (priceSection == ms_priceSectionLoaded)
         return;
 
@@ -263,50 +262,52 @@ void CShopping::LoadPrices(const char* sectionName) {
     }
 
     for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file), ms_numPrices++) {
-        if (*line != '\0' && *line != '#') {
-            if (!strncmp(line, "end", 3u))
-                break;
+        if (*line == '\0' || *line == '#')
+            continue;
 
-            auto& priceInfo = ms_prices[ms_numPrices];
+        if (!strncmp(line, "end", 3u))
+            break;
 
-            auto model = strtok(line, " \t,");
-            priceInfo.key = GetKey(model, ms_priceSectionLoaded);
+        auto& priceInfo = ms_prices[ms_numPrices];
 
-            auto nameTag = strtok(nullptr, " \t,");
-            strncpy(priceInfo.nameTag, nameTag, 8u);
+        auto model = strtok(line, " \t,");
+        priceInfo.key = GetKey(model, ms_priceSectionLoaded);
 
-            switch (ms_priceSectionLoaded) {
-            case PRICE_SECTION_CLOTHES:
-            case PRICE_SECTION_HAIRDRESSING: {
-                priceInfo.clothes.modelKey = CKeyGen::GetUppercaseKey(strtok(nullptr, " \t,"));
-                priceInfo.clothes.type = std::atoi(strtok(nullptr, " \t,"));
-                break;
-            }
-            case PRICE_SECTION_TATTOOS: {
-                auto type = strtok(nullptr, " \t,");
-                auto txtkey = strtok(nullptr, " \t,");
-                priceInfo.tattoos.type1 = (type[0] == '-') ? -1 : std::atoi(txtkey);
-                priceInfo.tattoos.texKey = CKeyGen::GetUppercaseKey(txtkey);
-                break;
-            }
-            case PRICE_SECTION_WEAPONS: {
-                priceInfo.weapon.ammo = std::atoi(strtok(nullptr, " \t,"));
-                break;
-            }
-            default:
-                break;
-            }
+        auto nameTag = strtok(nullptr, " \t,");
+        strncpy(priceInfo.nameTag, nameTag, 8u);
 
-            for (auto i = 0; i < 4; i++)
-                RET_IGNORED(strtok(nullptr, " \t,"));
-
-            priceInfo.price = std::atoi(strtok(nullptr, " \t,"));
-            rng::for_each_n(ms_priceModifiers.begin(), ms_numPriceModifiers, [&priceInfo](auto priceModifier) {
-                if (priceInfo.key == priceModifier.key) {
-                    priceInfo.price = priceModifier.price;
-                }
-            });
+        switch (ms_priceSectionLoaded) {
+        case PRICE_SECTION_CLOTHES:
+        case PRICE_SECTION_HAIRDRESSING: {
+            priceInfo.clothes.modelKey = CKeyGen::GetUppercaseKey(strtok(nullptr, " \t,"));
+            priceInfo.clothes.type = std::atoi(strtok(nullptr, " \t,"));
+            break;
         }
+        case PRICE_SECTION_TATTOOS: {
+            auto type = strtok(nullptr, " \t,");
+            auto txtkey = strtok(nullptr, " \t,");
+            priceInfo.tattoos.type1 = (type[0] == '-') ? -1 : std::atoi(txtkey);
+            priceInfo.tattoos.texKey = CKeyGen::GetUppercaseKey(txtkey);
+            break;
+        }
+        case PRICE_SECTION_WEAPONS: {
+            priceInfo.weapon.ammo = std::atoi(strtok(nullptr, " \t,"));
+            break;
+        }
+        default:
+            break;
+        }
+
+        for (auto i = 0; i < 4; i++)
+            RET_IGNORED(strtok(nullptr, " \t,"));
+
+        priceInfo.price = std::atoi(strtok(nullptr, " \t,"));
+        rng::for_each_n(ms_priceModifiers.begin(), ms_numPriceModifiers, [&priceInfo](auto priceModifier) {
+            if (priceInfo.key == priceModifier.key) {
+                priceInfo.price = priceModifier.price;
+            }
+        });
+
     }
     CFileMgr::CloseFile(file);
 
@@ -320,7 +321,48 @@ void CShopping::LoadPrices(const char* sectionName) {
 
 // 0x49BBE0
 void CShopping::LoadShop(const char* sectionName) {
-    plugin::Call<0x49BBE0, const char*>(sectionName);
+    if (_stricmp(sectionName, ms_shopLoaded)) {
+        strcpy_s(ms_shopLoaded, sectionName);
+        CTimer::Suspend();
+        ms_numItemsInShop = 0;
+
+        if (!_stricmp("bought", sectionName)) {
+            rng::for_each_n(ms_prices.begin(), ms_numPrices, [](auto& price) {
+                auto idx = GetItemIndex(price.key);
+                if (ms_bHasBought[idx])
+                    ms_shopContents[ms_numItemsInShop++] = price.key;
+            });
+        } else {
+            auto file = CFileMgr::OpenFile("data\\shopping.dat", "r");
+            if (FindSection(file, "shops")) {
+                FindSection(file, sectionName);
+            }
+
+            char buf[14];
+            for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file), ms_numItemsInShop++) {
+                if (*line == '\0' || *line == '#')
+                    continue;
+
+                if (!strncmp(line, "end", 3u))
+                    break;
+
+                auto v9 = strtok(line, " \t");
+                if (!strcmp("type", v9)) {
+                    strcpy_s(buf, strtok(nullptr, " \t"));
+                    LoadPrices(buf);
+                } else if (!strcmp("item", v9)) {
+                    auto model = strtok(nullptr, " \t");
+                    auto modelKey = GetKey(model, ms_priceSectionLoaded);
+
+                    if (ms_priceSectionLoaded != -1 || IsValidModForVehicle(modelKey, FindPlayerVehicle())) {
+                        ms_shopContents[ms_numItemsInShop++] = modelKey;
+                    }
+                }
+            }
+            CFileMgr::CloseFile(file);
+            CTimer::Resume();
+        }
+    }
 }
 
 // 0x49B6A0
@@ -339,7 +381,7 @@ void CShopping::RemoveLoadedPrices() {
 
 // 0x49AE30
 void CShopping::RemoveLoadedShop() {
-    ms_shopLoaded[0] = false;
+    ms_shopLoaded[0] = '\0';
     RemoveLoadedPrices();
 }
 

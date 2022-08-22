@@ -223,6 +223,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(GetRopeHeightForHeli, 0x6D3D10);
     RH_ScopedInstall(SetRopeHeightForHeli, 0x6D3D30);
 
+    // RH_ScopedGlobalInstall(IsValidModForVehicle, 0x49B010);
     // RH_ScopedGlobalInstall(SetVehicleAtomicVisibilityCB, 0x6D2690);
     // RH_ScopedGlobalInstall(SetVehicleAtomicVisibilityCB, 0x6D26D0);
     // RH_ScopedGlobalInstall(SetCompAlphaCB, 0x6D2950);
@@ -3268,6 +3269,10 @@ void CVehicle::SetupUpgradesAfterLoad() {
 // 0x6E3440
 void CVehicle::GetPlaneWeaponFiringStatus(bool& status, eOrdnanceType& ordnanceType) {
     ((void(__thiscall*)(CVehicle*, bool&, eOrdnanceType&))0x6E3440)(this, status, ordnanceType);
+}
+
+bool IsValidModForVehicle(uint32 modelId, CVehicle* vehicle) {
+    return plugin::CallAndReturn<bool, 0x49B010, uint32, CVehicle*>(modelId, vehicle);
 }
 
 // 0x6E38F0
