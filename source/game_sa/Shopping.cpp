@@ -24,21 +24,21 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(GetExtraInfo, 0x49ADE0);
     RH_ScopedInstall(GetItemIndex, 0x49AB10);
     RH_ScopedInstall(GetKey, 0x49AB30);
-    // RH_ScopedInstall(GetNameTag, 0x0, { .reversed = false });
+    RH_ScopedInstall(GetNameTag, 0x49ADA0);
     RH_ScopedInstall(GetNextSection, 0x49AF10);
     RH_ScopedInstall(GetPrice, 0x49AD50);
     RH_ScopedInstall(GetPriceSectionFromName, 0x49AAD0);
     RH_ScopedInstall(SetPlayerHasBought, 0x49B610);
     RH_ScopedInstall(HasPlayerBought, 0x49B5E0);
-    RH_ScopedInstall(IncrementStat, 0x49BE70); // not tested
+    RH_ScopedInstall(IncrementStat, 0x49BE70);
     RH_ScopedInstall(IncrementStat2, 0x49AFD0);
     RH_ScopedInstall(LoadPrices, 0x49B8D0);
     RH_ScopedInstall(LoadShop, 0x49BBE0);
-    RH_ScopedInstall(LoadStats, 0x49B6A0, { .reversed = true });
-    // RH_ScopedInstall(RemoveLoadedPrices, 0x0, { .reversed = false });
+    RH_ScopedInstall(LoadStats, 0x49B6A0);
+    // RH_ScopedInstall(RemoveLoadedPrices, 0x0, { .reversed = false }); <-- address?
     RH_ScopedInstall(RemoveLoadedShop, 0x49AE30);
-    //RH_ScopedInstall(RemovePriceModifier, 0x0, { .reversed = false });
-    //RH_ScopedInstall(RemovePriceModifier, 0x0, { .reversed = false });
+    //RH_ScopedInstall(RemovePriceModifier, 0x0, { .reversed = false }); <-- address?
+    //RH_ScopedInstall(RemovePriceModifier, 0x0, { .reversed = false }); <-- address?
     RH_ScopedInstall(RestoreClothesState, 0x49B240);
     RH_ScopedInstall(RestoreVehicleMods, 0x49B3C0);
     RH_ScopedInstall(ShutdownForRestart, 0x49B640);
@@ -79,13 +79,22 @@ int32 GetChangingStatIndex(const char* stat) {
 }
 
 // 0x
-void CShopping::AddPriceModifier(const char* a1, const char* a2, int32 a3) {
-    plugin::Call<0x0, const char*, const char*, int32>(a1, a2, a3);
+void CShopping::AddPriceModifier(const char* name, const char* section, int32 price) {
+    AddPriceModifier(GetKey(name, GetPriceSectionFromName(section)), price);
 }
 
-// 0x
-void CShopping::AddPriceModifier(uint32 a1, int32 a2) {
-    plugin::Call<0x0, uint32, int32>(a1, a2);
+// 0x (inlined)
+void CShopping::AddPriceModifier(uint32 key, int32 price) {
+    // the code may not be same, can not test.
+    for (auto&& [i, priceMod] : notsa::enumerate(std::span{ms_priceModifiers.data(), (size_t)ms_numPriceModifiers})) {
+        if (key == priceMod.key) {
+            priceMod.price = price;
+            return;
+        }
+    }
+    ms_priceModifiers[ms_numPriceModifiers].key = key;
+    ms_priceModifiers[ms_numPriceModifiers].price = price;
+    ms_numPriceModifiers++;
 }
 
 // 0x49BF70
@@ -93,7 +102,7 @@ void CShopping::Buy(uint32 a1, int32 a2) {
     plugin::Call<0x49BF70, uint32, int32>(a1, a2);
 }
 
-// inlined
+// 0x49ADA0 (inlined)
 int32 CShopping::FindItem(uint32 itemKey) {
     auto itemId = -1;
     if (ms_numPrices >= 1) {
@@ -113,8 +122,7 @@ bool CShopping::FindSection(FILESTREAM file, const char* sectionName) {
     return plugin::CallAndReturn<bool, 0x49AE70, FILESTREAM, const char*>(file, sectionName);
 }
 
-// unused
-// 0x49AF90
+// 0x49AF90 (unused)
 bool CShopping::FindSectionInSection(FILESTREAM file, const char* parentSection, const char* childSection) {
     return FindSection(file, parentSection) && FindSection(file, childSection);
 }
@@ -449,13 +457,29 @@ void CShopping::RemoveLoadedShop() {
 }
 
 // 0x
-void CShopping::RemovePriceModifier(const char* a1, const char* a2) {
-    plugin::Call<0x0, const char*, const char*>(a1, a2);
+void CShopping::RemovePriceModifier(const char* name, const char* section) {
+    RemovePriceModifier(GetKey(name, GetPriceSectionFromName(section)));
 }
 
-// 0x
-void CShopping::RemovePriceModifier(uint32 a1) {
-    plugin::Call<0x0, uint32>(a1);
+// 0x (inlined)
+void CShopping::RemovePriceModifier(uint32 key) {
+    if (ms_numPriceModifiers <= 0)
+        return;
+
+    auto idx = ms_numPriceModifiers;
+    for (auto&& [i, priceMod] : notsa::enumerate(std::span{ms_priceModifiers.data(), (size_t)ms_numPriceModifiers})) {
+        if (key == priceMod.key) {
+            idx = i;
+            break;
+        }
+    }
+    if (idx == ms_numPriceModifiers)
+        return;
+
+    ms_numPriceModifiers--;
+    if (ms_numPriceModifiers >= 1u) {
+        ms_priceModifiers[idx] = ms_priceModifiers[ms_numPriceModifiers];
+    }
 }
 
 // 0x49B240

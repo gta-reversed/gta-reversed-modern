@@ -63,7 +63,7 @@ class CShopping {
     };
     VALIDATE_SIZE(StatModifiers, 0x4);
 
-    static constexpr auto NUM_PRICE_MODIFIERS = 20u;
+    static constexpr auto MAX_PRICE_MODIFIERS = 20u;
     static constexpr auto NUM_ITEMS = 560u; // ?
     static constexpr auto NUM_BUYABLE_ITEMS = 300u; // ?
     static constexpr auto NUM_SECTION_NAMES = 11u;
@@ -75,7 +75,7 @@ class CShopping {
     inline static int32& ms_numItemsInShop = *(int32*)0xA9A7F0;
     inline static char(&ms_shopLoaded)[24] = *(char(*)[24])0xA9A7D8;
     inline static uint32& ms_numBuyableItems = *(uint32*)0xA9A310;
-    inline static std::array<PriceModifier, NUM_PRICE_MODIFIERS>& ms_priceModifiers = *(std::array<PriceModifier, NUM_PRICE_MODIFIERS>*)0xA98650;
+    inline static std::array<PriceModifier, MAX_PRICE_MODIFIERS>& ms_priceModifiers = *(std::array<PriceModifier, MAX_PRICE_MODIFIERS>*)0xA98650;
     inline static std::array<bool, NUM_ITEMS>& ms_bHasBought = *(std::array<bool, NUM_ITEMS>*)0xA972A0;
     inline static std::array<uint32, NUM_ITEMS>& ms_keys = *(std::array<uint32, NUM_ITEMS>*)0xA97D90;
     inline static std::array<uint32, NUM_BUYABLE_ITEMS>& ms_shopContents = *(std::array<uint32, NUM_BUYABLE_ITEMS>*)0xA9A318;
@@ -109,8 +109,8 @@ public:
     static void LoadStats();
     static void RemoveLoadedPrices();
     static void RemoveLoadedShop();
-    static void RemovePriceModifier(const char* a1, const char* a2);
-    static void RemovePriceModifier(uint32 a1);
+    static void RemovePriceModifier(const char* name, const char* section);
+    static void RemovePriceModifier(uint32 key);
     static void RestoreClothesState();
     static void RestoreVehicleMods();
     static void SetCurrentProperty(CMultiBuilding* property);
