@@ -76,13 +76,13 @@ void CTaskComplexFleePoint::SetFleePosition(CVector const& fleePos, float safeDi
 * @addr 0x65B820
 * @brief Compute random `m_fleeToPos`
 */
-void CTaskComplexFleePoint::ComputeTargetPoint(CPed const* ped) {
+void CTaskComplexFleePoint::ComputeTargetPoint(const CPed* ped) {
     // https://www.desmos.com/calculator/o793zwzy5f
 
     const auto pedPos   = ped->GetPosition();
     const auto angleRad = CGeneral::GetRandomNumberInRange(-0.33f, 0.33f); // TODO: Seemingly magic numbers?
     const auto dir      = Normalized2D(CVector2D{ pedPos - m_vFleePos}) * CVector2D{ std::cos(angleRad), std::sin(angleRad) };
-    const auto spread   = CGeneral::GetRandomNumberInRange(3, 6);
+    const auto spread   = (float)CGeneral::GetRandomNumberInRange(3, 6);
 
     m_vTargetPoint = pedPos;
 

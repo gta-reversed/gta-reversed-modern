@@ -42,7 +42,7 @@ public:
 
     auto CreateSubTask(eTaskType taskType) -> CTask*;
     void SetFleePosition(CVector const& fleePos, float safeDistance, bool scream);
-    void ComputeTargetPoint(CPed const* ped);
+    void ComputeTargetPoint(const CPed* ped);
 
     static void InjectHooks();
     CTaskComplexFleePoint* Constructor(CVector const& point, bool a3, float radius, int32 timeLimit) { this->CTaskComplexFleePoint::CTaskComplexFleePoint(point, a3, radius, timeLimit); return this; }

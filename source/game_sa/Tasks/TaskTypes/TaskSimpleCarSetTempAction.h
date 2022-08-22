@@ -16,10 +16,10 @@ public:
     constexpr static auto Type = TASK_SIMPLE_CAR_SET_TEMP_ACTION;
 
     CTaskSimpleCarSetTempAction(CVehicle* vehicle, uint32 action, uint32 timeMs);
-    ~CTaskSimpleCarSetTempAction() = default;
+    ~CTaskSimpleCarSetTempAction() override = default;
 
     eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override { return new CTaskSimpleCarSetTempAction(m_Action, m_DurationMs); }
+    CTask* Clone() override { return new CTaskSimpleCarSetTempAction(m_pVehicle, m_Action, m_DurationMs); }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 

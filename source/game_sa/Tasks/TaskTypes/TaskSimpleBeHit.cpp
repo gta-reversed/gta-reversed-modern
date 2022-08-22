@@ -59,7 +59,7 @@ CTask* CTaskSimpleBeHit::Clone() {
 
 /*!
 * @addr 0x620900
-* @brief The finish callback of `m_anim`
+* @brief The finish callback of `m_Anim`
 */
 void CTaskSimpleBeHit::FinishAnimBeHitCB(CAnimBlendAssociation* anim, void* data) {
     const auto self = static_cast<CTaskSimpleBeHit*>(data);

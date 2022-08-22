@@ -13,5 +13,5 @@ public:
     ~CTaskSimpleHandsUp() override = default;
 
     CTask* Clone() override { return new CTaskSimpleHandsUp(m_nDurationMs); }
-    virtual bool IsInterruptable(CPed const* ped) { return false; }
+    virtual bool IsInterruptable(const CPed* ped) { return false; }
 };
