@@ -17,7 +17,7 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(Init, 0x49C290);
     //RH_ScopedOverloadedInstall(AddPriceModifier, 0x0, { .reversed = false }); <-- address?
     //RH_ScopedOverloadedInstall(AddPriceModifier, 0x0, { .reversed = false }); <-- address?
-    RH_ScopedInstall(Buy, 0x49BF70, { .reversed = false });
+    RH_ScopedInstall(Buy, 0x49BF70);
     // RH_ScopedInstall(FindItem, 0x0, { .reversed = false }); <-- address?
     RH_ScopedInstall(FindSection, 0x49AE70);
     RH_ScopedInstall(FindSectionInSection, 0x49AF90);
@@ -98,10 +98,138 @@ void CShopping::AddPriceModifier(uint32 key, int32 price) {
 }
 
 // 0x49BF70
-void CShopping::Buy(uint32 a1, int32 a2) {
-    plugin::Call<0x49BF70, uint32, int32>(a1, a2);
+void CShopping::Buy(uint32 key, int32 extraInfo) {
+    auto index = GetItemIndex(key);
+
+    auto ped = FindPlayerPed();
+    auto playerClothes = ped->m_pPlayerData->m_pPedClothesDesc;
+    auto& playerInfo = FindPlayerInfo();
+    if (gClothesHaveBeenStored) {
+        playerClothes = &gStoredClothesState;
+    }
+
+    auto priceInfo = ms_prices[FindItem(key)];
+    auto price = GetPrice(key);
+    auto fPrice = static_cast<float>(price);
+    playerInfo.m_nMoney -= price;
+
+    for (const auto stat : ms_statModifiers[index].stat) {
+        IncrementStat(stat.index, stat.change);
+    }
+    CStats::ModifyStat(STAT_TOTAL_SHOPPING_BUDGET, fPrice);
+    ms_bHasBought[index] = true;
+
+    switch (ms_priceSectionLoaded) {
+    case PRICE_SECTION_CAR_MODS: {
+        auto veh = FindPlayerVehicle();
+        auto upgradeModel = CModelInfo::GetModelInfo(key);
+        auto vehModel = veh->GetModelInfo()->AsVehicleModelInfoPtr();
+        veh->AddVehicleUpgrade(key);
+        if (veh->IsAutomobile()) {
+            auto car = veh->AsAutomobile();
+
+            // todo: refactor
+            auto idx = (upgradeModel->m_nFlags >> 10) & 0x1f;
+            auto parentId = vehModel->m_pVehicleStruct->m_aUpgrades[idx].m_nParentComponentId;
+            if (upgradeModel->bUsesVehDummy) {
+                parentId = idx;
+            }
+
+            switch (parentId) {
+            case CAR_WHEEL_RF:
+                car->FixTyre(CAR_WHEEL_FRONT_LEFT);
+                car->FixTyre(CAR_WHEEL_FRONT_RIGHT);
+                car->FixTyre(CAR_WHEEL_REAR_LEFT);
+                car->FixTyre(CAR_WHEEL_REAR_RIGHT);
+                break;
+            case CAR_BUMP_FRONT:
+                car->FixPanel(12, FRONT_BUMPER);
+                break;
+            case CAR_BUMP_REAR:
+                car->FixPanel(13, REAR_BUMPER);
+                break;
+            case CAR_BONNET:
+                car->FixDoor(16, DOOR_BONNET);
+                break;
+            case CAR_BOOT:
+                car->FixDoor(17, DOOR_BOOT);
+                break;
+            default:
+                break;
+            }
+        }
+
+        [[fallthrough]];
+    }
+
+    case PRICE_SECTION_CAR_PAINTJOBS:
+        CStats::ModifyStat(STAT_CAR_MODIFICATION_BUDGET, fPrice);
+        break;
+
+    case PRICE_SECTION_CLOTHES: {
+        CStats::ModifyStat(STAT_FASHION_BUDGET, fPrice);
+        auto texKey = playerClothes->m_anTextureKeys[priceInfo.clothes.type];
+        if (texKey) {
+            UpdateStats(GetItemIndex(texKey), false);
+        }
+        playerClothes->SetTextureAndModel(key, priceInfo.clothes.modelKey, (eClothesTexturePart)priceInfo.clothes.type);
+
+        switch (CClothes::GetTextureDependency((eClothesTexturePart)priceInfo.clothes.type)) {
+        case CLOTHES_MODEL_TORSO:
+        case CLOTHES_MODEL_LEGS:
+        case CLOTHES_MODEL_HEAD:
+        case CLOTHES_MODEL_GLASSES:
+        case CLOTHES_MODEL_HATS:
+            FindPlayerWanted()->ClearWantedLevelAndGoOnParole();
+            break;
+        default:
+            break;
+        }
+        break;
+    }
+
+    case PRICE_SECTION_HAIRCUTS: {
+        CStats::ModifyStat(STAT_HAIRDRESSING_BUDGET, fPrice);
+        auto texKey = playerClothes->m_anTextureKeys[priceInfo.clothes.type];
+        if (texKey) {
+            UpdateStats(GetItemIndex(texKey), false);
+        }
+        playerClothes->SetTextureAndModel(key, priceInfo.clothes.modelKey, (eClothesTexturePart)priceInfo.clothes.type);
+
+        FindPlayerWanted()->ClearWantedLevelAndGoOnParole();
+        break;
+    }
+
+    case PRICE_SECTION_TATTOOS:
+        CStats::ModifyStat(STAT_TATTOO_BUDGET, fPrice);
+        playerClothes->SetTextureAndModel(key, 0u, (eClothesTexturePart)priceInfo.clothes.modelKey);
+        break;
+
+    case PRICE_SECTION_GIFTS:
+        ped->GiveWeapon(WEAPON_FLOWERS, 0, false);
+        break;
+
+    case PRICE_SECTION_FOOD:
+        CStats::ModifyStat(STAT_FOOD_BUDGET, fPrice);
+        CStats::ModifyStat(STAT_NUMBER_OF_MEALS_EATEN, 1.0f);
+        break;
+
+    case PRICE_SECTION_WEAPONS:
+        CStats::ModifyStat(STAT_WEAPON_BUDGET, fPrice);
+        if (key == WEAPON_ARMOUR) {
+            ped->m_fArmour = playerInfo.m_nMaxArmour;
+        } else {
+            ped->GiveWeapon((eWeaponType)key, priceInfo.weapon.ammo, false);
+            ped->SetCurrentWeapon((eWeaponType)key);
+        }
+        break;
+
+    default:
+        break;
+    }
 }
 
+// Searchs through ms_prices
 // 0x49ADA0 (inlined)
 int32 CShopping::FindItem(uint32 itemKey) {
     auto itemId = -1;
@@ -159,6 +287,7 @@ int32 CShopping::GetExtraInfo(uint32 itemKey, int32 index) {
     return 0;
 }
 
+// Searchs through ms_keys
 // 0x49AB10
 int32 CShopping::GetItemIndex(uint32 itemKey) {
     for (auto&& [i, key] : notsa::enumerate(ms_keys)) {

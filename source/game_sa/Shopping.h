@@ -39,7 +39,7 @@ class CShopping {
             } weapon;
             struct {
                 uint32 modelKey;
-                uint32 type;
+                uint32 type; // a/k/a textureKey
             } clothes;
             struct {
                 uint32 type1;
