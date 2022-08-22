@@ -290,6 +290,7 @@
 #include "TaskComplexTrackEntity.h"
 #include "TaskComplexOnFire.h"
 #include "TaskSimpleCower.h"
+#include "TaskSimpleAffectSecondaryBehaviour.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -719,7 +720,7 @@ void InjectHooksMain() {
         // CTaskComplexWalkRoundBuildingAttempt::InjectHooks();
         // CTaskComplexWalkRoundFire::InjectHooks();
         // CTaskComplexWanderFlee::InjectHooks();
-        // CTaskSimpleAffectSecondaryBehaviour::InjectHooks();
+        CTaskSimpleAffectSecondaryBehaviour::InjectHooks();
         CTaskSimpleArrestPed__InjectHooks();
         CTaskSimpleBeHit::InjectHooks();
         // CTaskSimpleBeHitWhileMoving::InjectHooks();
