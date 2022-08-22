@@ -54,7 +54,7 @@ public:
     /*!
     * @brief Make the timer be finished immidiately (So that `IsOutOfTime` returns true)
     */
-    inline void SetFinished() {
+    inline void SetOutOfTime() {
         m_nStartTime = CTimer::GetTimeInMS();
         m_nInterval = -1;
         m_bStarted = true;

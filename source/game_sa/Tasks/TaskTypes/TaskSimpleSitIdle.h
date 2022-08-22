@@ -22,11 +22,11 @@ public:
 
     constexpr static auto Type = eTaskType::TASK_SIMPLE_SIT_IDLE;
 
-    CTaskSimpleSitIdle(int32 durationMs, uint8 sitAfterStep);
+    CTaskSimpleSitIdle(int32 durationMs, bool sitAfterStep);
     CTaskSimpleSitIdle(const CTaskSimpleSitIdle&);
     ~CTaskSimpleSitIdle() = default;
 
-    CAnimBlendAssociation* StartAnim(CPed* ped);
+    void StartAnim(CPed* ped);
 
     CTask*    Clone() override { return new CTaskSimpleSitIdle{ *this }; }
     eTaskType GetTaskType() override { return Type; }
@@ -35,7 +35,7 @@ public:
 
 private: // Wrappers for hooks
     // 0x631160
-    CTaskSimpleSitIdle* Constructor(int32 durationMs, uint8 sitAfterStep) {
+    CTaskSimpleSitIdle* Constructor(int32 durationMs, bool sitAfterStep) {
         this->CTaskSimpleSitIdle::CTaskSimpleSitIdle(durationMs, sitAfterStep);
         return this;
     }

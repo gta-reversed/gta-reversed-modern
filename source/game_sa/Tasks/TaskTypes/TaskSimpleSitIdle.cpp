@@ -18,7 +18,7 @@ void CTaskSimpleSitIdle::InjectHooks() {
 }
 
 // 0x631160
-CTaskSimpleSitIdle::CTaskSimpleSitIdle(int32 durationMs, uint8 sitAfterStep) :
+CTaskSimpleSitIdle::CTaskSimpleSitIdle(int32 durationMs, bool sitAfterStep) :
     m_durationMs{durationMs},
     m_bSitAfterStep{sitAfterStep}
 {
@@ -30,7 +30,7 @@ CTaskSimpleSitIdle::CTaskSimpleSitIdle(const CTaskSimpleSitIdle& o) :
 }
 
 // 0x631260
-CAnimBlendAssociation* CTaskSimpleSitIdle::StartAnim(CPed* ped) {
+void CTaskSimpleSitIdle::StartAnim(CPed* ped) {
     m_animStartedTimer.Start(m_durationMs);
 
     const auto StartAnim = [this, ped](auto grpId, auto animId) { m_anim = CAnimManager::BlendAnimation(ped->m_pRwClump, grpId, animId, 256.f); };
@@ -69,7 +69,7 @@ bool CTaskSimpleSitIdle::ProcessPed(CPed* ped) {
         StartAnim(ped);
     }
 
-    // Do lookat with random chance
+    // Do look at somewhere/another ped with random chance
     if (!g_ikChainMan.IsLooking(ped) && CGeneral::RandomBool(5)) {
         const auto lookTime = CGeneral::GetRandomNumberInRange(3000, 5000);
 
