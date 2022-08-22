@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "TaskSimpleCarWaitForDoorNotToBeInUse.h"
 
 void CTaskSimpleCarWaitForDoorNotToBeInUse::InjectHooks() {
@@ -6,9 +7,7 @@ void CTaskSimpleCarWaitForDoorNotToBeInUse::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x646B70);
-
     RH_ScopedInstall(Destructor, 0x646C00);
-
     RH_ScopedVMTInstall(Clone, 0x649D20);
     RH_ScopedVMTInstall(GetTaskType, 0x646BE0);
     RH_ScopedVMTInstall(MakeAbortable, 0x646BF0);
@@ -19,38 +18,37 @@ void CTaskSimpleCarWaitForDoorNotToBeInUse::InjectHooks() {
 /*!
 * @addr 0x646B70
 * @brief Wait until either of the 2 doors are ready
-* @param veh            The vehicle whose door we have to wait for
-* @param doorToWaitFor1 Main door to wait for
-* @param doorToWaitFor2 Alternative door
+* @param targetVehicle The vehicle whose door we have to wait for
+* @param targetDoor Main door to wait for
+* @param targetDoorOpposite Alternative door
 */
-CTaskSimpleCarWaitForDoorNotToBeInUse::CTaskSimpleCarWaitForDoorNotToBeInUse(CVehicle* veh, uint32 doorToWaitFor1, uint32 doorToWaitFor2) :
-    m_veh{veh},
-    m_doorsToWaitFor{doorToWaitFor1, doorToWaitFor2}
+CTaskSimpleCarWaitForDoorNotToBeInUse::CTaskSimpleCarWaitForDoorNotToBeInUse(CVehicle* targetVehicle, int32 targetDoor, int32 targetDoorOpposite) :
+    CTaskSimple(),
+    m_TargetVehicle{targetVehicle},
+    m_nTargetDoor{ targetDoor },
+    m_nTargetDoorOpposite{ targetDoorOpposite }
 {
-    CEntity::SafeRegisterRef(m_veh);
+    CEntity::SafeRegisterRef(m_TargetVehicle);
 }
-
-CTaskSimpleCarWaitForDoorNotToBeInUse::CTaskSimpleCarWaitForDoorNotToBeInUse(const CTaskSimpleCarWaitForDoorNotToBeInUse& o)
-    : CTaskSimpleCarWaitForDoorNotToBeInUse{o.m_veh, o.m_doorsToWaitFor[0], o.m_doorsToWaitFor[1]} {}
 
 // 0x646C00
 CTaskSimpleCarWaitForDoorNotToBeInUse::~CTaskSimpleCarWaitForDoorNotToBeInUse() {
-    CEntity::SafeCleanUpRef(m_veh);
+    CEntity::SafeCleanUpRef(m_TargetVehicle);
 }
 
 // 0x646BF0
-bool CTaskSimpleCarWaitForDoorNotToBeInUse::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskSimpleCarWaitForDoorNotToBeInUse::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return true;
 }
 
 // 0x646C90
 bool CTaskSimpleCarWaitForDoorNotToBeInUse::ProcessPed(CPed* ped) {
-    return !m_veh || m_veh->AnyOfDoorsReady(m_doorsToWaitFor[0], m_doorsToWaitFor[1]);
+    return !m_TargetVehicle || m_TargetVehicle->AnyOfDoorsReady(m_nTargetDoor, m_nTargetDoorOpposite);
 }
 
 // 0x646CC0
 bool CTaskSimpleCarWaitForDoorNotToBeInUse::SetPedPosition(CPed* ped) {
-    if (ped->IsInVehicle(m_veh)) {
+    if (ped->IsInVehicle(m_TargetVehicle)) {
         ped->SetPedPositionInCar();
     }
     return true;
