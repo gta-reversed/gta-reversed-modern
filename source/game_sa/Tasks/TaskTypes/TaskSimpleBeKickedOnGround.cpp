@@ -86,6 +86,7 @@ bool CTaskSimpleBeKickedOnGround::MakeAbortable(CPed* ped, eAbortPriority priori
     }
     default:
         NOTSA_UNREACHABLE();
+        return false;
     }
 }
 
