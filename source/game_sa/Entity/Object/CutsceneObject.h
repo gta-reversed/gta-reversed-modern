@@ -8,7 +8,7 @@
 
 #include "Object.h"
 
-class CCutsceneObject : public CObject {
+class NOTSA_EXPORT_VTABLE CCutsceneObject : public CObject {
 public:
     union {
         RwFrame* m_pAttachTo;

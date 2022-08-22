@@ -13,7 +13,7 @@ struct tCollisionAudioEntry {
 };
 VALIDATE_SIZE(tCollisionAudioEntry, 0x14);
 
-class CAECollisionAudioEntity : public CAEAudioEntity {
+class NOTSA_EXPORT_VTABLE CAECollisionAudioEntity : public CAEAudioEntity {
 public:
     int16                m_aHistory[194]; // NUM_FUCKING_SURFACES
     int16                field_200;

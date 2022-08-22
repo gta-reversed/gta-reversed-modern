@@ -97,7 +97,7 @@ struct SClumpAnimAssoc {
     [[nodiscard]] bool IsIndestructible() const { return (m_nFlags & ANIMATION_INDESTRUCTIBLE) != 0; }
 };
 
-class CAnimBlendAssociation : public SClumpAnimAssoc {
+class NOTSA_EXPORT_VTABLE CAnimBlendAssociation : public SClumpAnimAssoc {
 public:
     eAnimBlendCallbackType m_nCallbackType;
     void (*m_pCallbackFunc)(CAnimBlendAssociation*, void*);
@@ -144,6 +144,7 @@ public:
     }
 
     auto GetNodes() { return std::span{ &m_pNodeArray, m_nNumBlendNodes }; }
+    auto SetDefaultFinishCallback() { SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); }
 
 private:
     friend void InjectHooksMain();

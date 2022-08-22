@@ -2,6 +2,7 @@
 
 #include "Boat.h"
 #include "CarCtrl.h"
+#include "ControllerConfigManager.h"
 
 float& CBoat::MAX_WAKE_LENGTH = *(float*)0x8D3938;   // 50.0f
 float& CBoat::MIN_WAKE_INTERVAL = *(float*)0x8D393C; // 2.0f
@@ -433,7 +434,7 @@ void CBoat::ProcessControl_Reversed() {
         break;
     }
 
-    if (m_nStatus == eEntityStatus::STATUS_PLAYER || m_nStatus == eEntityStatus::STATUS_HELI || m_nStatus == eEntityStatus::STATUS_PHYSICS) {
+    if (m_nStatus == eEntityStatus::STATUS_PLAYER || m_nStatus == eEntityStatus::STATUS_REMOTE_CONTROLLED || m_nStatus == eEntityStatus::STATUS_PHYSICS) {
         auto fSTDPropSpeed = 0.0F;
         auto fROCPropSpeed = CPlane::PLANE_ROC_PROP_SPEED;
         if (m_nModelIndex == MODEL_SKIMMER)
@@ -809,7 +810,7 @@ void CBoat::ProcessControlInputs_Reversed(uint8 ucPadNum) {
 
     auto pad = CPad::GetPad(ucPadNum);
     float fBrakePower = (static_cast<float>(pad->GetBrake()) * (1.0F / 255.0F) - m_fBreakPedal) * 0.1F + m_fBreakPedal;
-    fBrakePower = clamp(fBrakePower, 0.0F, 1.0F);
+    fBrakePower = std::clamp(fBrakePower, 0.0F, 1.0F);
     m_fBreakPedal = fBrakePower;
 
     auto fGasPower = fBrakePower * -0.3F;

@@ -1026,8 +1026,8 @@ void CPedIntelligence::ProcessFirst() {
         CVehicle* vehicle = m_pPed->m_pVehicle;
         if (vehicle && vehicle->IsBike()) {
             auto* bike = vehicle->AsBike();
-            bike->m_bPedLeftHandFixed = false;
-            bike->m_bPedRightHandFixed = false;
+            bike->m_nFixLeftHand = false;
+            bike->m_nFixRightHand = false;
         }
     }
     m_pPed->bMoveAnimSpeedHasBeenSetByTask = false;
