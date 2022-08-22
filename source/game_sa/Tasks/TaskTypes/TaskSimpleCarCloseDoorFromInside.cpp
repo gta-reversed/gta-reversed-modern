@@ -32,8 +32,8 @@ CTaskSimpleCarCloseDoorFromInside::CTaskSimpleCarCloseDoorFromInside(CVehicle* t
 // 0x646380
 CTaskSimpleCarCloseDoorFromInside::~CTaskSimpleCarCloseDoorFromInside() {
     CEntity::SafeCleanUpRef(m_TargetVehicle);
-    if (m_anim) {
-        m_anim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
+    if (m_Anim) {
+        m_Anim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
     }
 }
 
@@ -48,10 +48,10 @@ void CTaskSimpleCarCloseDoorFromInside::FinishAnimCarCloseDoorFromInsideCB(CAnim
     }
 
     // The anim has just finished and they do this? Maybe inlined?
-    if (self->m_anim) {
-        self->m_anim->m_fBlendDelta = -1000.f;
+    if (self->m_Anim) {
+        self->m_Anim->m_fBlendDelta = -1000.f;
     }
-    self->m_anim = nullptr;
+    self->m_Anim = nullptr;
 }
 
 // 0x646410
@@ -77,14 +77,14 @@ auto CTaskSimpleCarCloseDoorFromInside::ComputeAnimID_Helper() -> std::tuple<Ass
 }
 
 // 0x64AFB0
-void CTaskSimpleCarCloseDoorFromInside::StartAnim(CPed const* ped) {
+void CTaskSimpleCarCloseDoorFromInside::StartAnim(const CPed* ped) {
     const auto [groupId, animId] = ComputeAnimID_Helper();
-    m_anim = CAnimManager::BlendAnimation(ped->m_pRwClump, groupId, animId, 1000.f);
-    m_anim->SetFinishCallback(FinishAnimCarCloseDoorFromInsideCB, this);
+    m_Anim = CAnimManager::BlendAnimation(ped->m_pRwClump, groupId, animId, 1000.f);
+    m_Anim->SetFinishCallback(FinishAnimCarCloseDoorFromInsideCB, this);
 }
 
 // NOTSA
-void CTaskSimpleCarCloseDoorFromInside::ProcessDoorOpen(CPed const* ped) {
+void CTaskSimpleCarCloseDoorFromInside::ProcessDoorOpen(const CPed* ped) {
     const auto [groupId, animId] = ComputeAnimID_Helper();
     m_TargetVehicle->ProcessOpenDoor(nullptr, m_nTargetDoor, groupId, animId, 1.f);
 }
@@ -93,8 +93,8 @@ void CTaskSimpleCarCloseDoorFromInside::ProcessDoorOpen(CPed const* ped) {
 bool CTaskSimpleCarCloseDoorFromInside::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     switch (priority) {
     case ABORT_PRIORITY_IMMEDIATE: {
-        if (m_anim) {
-            m_anim->m_fBlendDelta = -1000.f;
+        if (m_Anim) {
+            m_Anim->m_fBlendDelta = -1000.f;
         }
         if (m_TargetVehicle) {
             ProcessDoorOpen(ped);
@@ -121,21 +121,21 @@ bool CTaskSimpleCarCloseDoorFromInside::ProcessPed(CPed* ped) {
         return true;
     }
 
-    if (!m_anim) {
+    if (!m_Anim) {
         if (ped->m_nPedState == PEDSTATE_ARRESTED) {
             return true;
         }
         StartAnim(ped);
     }
 
-    const auto animId = (AnimationId)m_anim->m_nAnimId;
-    m_TargetVehicle->ProcessOpenDoor(ped, m_nTargetDoor, (AssocGroupId)m_TargetVehicle->GetAnimGroup().GetGroup(animId), animId, m_anim->m_fCurrentTime);
+    const auto animId = (AnimationId)m_Anim->m_nAnimId;
+    m_TargetVehicle->ProcessOpenDoor(ped, m_nTargetDoor, (AssocGroupId)m_TargetVehicle->GetAnimGroup().GetGroup(animId), animId, m_Anim->m_fCurrentTime);
 
     return false;
 }
 
 // 0x6463F0
 bool CTaskSimpleCarCloseDoorFromInside::SetPedPosition(CPed* ped) {
-    m_Utility->ProcessPed(ped, m_TargetVehicle, m_anim);
+    m_Utility->ProcessPed(ped, m_TargetVehicle, m_Anim);
     return true;
 }

@@ -9,7 +9,7 @@ class CTaskUtilityLineUpPedWithCar;
 class NOTSA_EXPORT_VTABLE CTaskSimpleCarCloseDoorFromInside : public CTaskSimple {
 public:
     bool m_bIsFinished;
-    CAnimBlendAssociation* m_anim;
+    CAnimBlendAssociation* m_Anim;
     CVehicle* m_TargetVehicle;
     uint32 m_nTargetDoor;
     CTaskUtilityLineUpPedWithCar* m_Utility;
@@ -28,8 +28,8 @@ public:
 
     void ComputeAnimID(AssocGroupId& outGroup, AnimationId& outAnimId);
     auto ComputeAnimID_Helper() -> std::tuple<AssocGroupId, AnimationId>;
-    void StartAnim(CPed const* ped);
-    void ProcessDoorOpen(CPed const* ped); // NOTSA
+    void StartAnim(const CPed* ped);
+    void ProcessDoorOpen(const CPed* ped); // NOTSA
 
     static void FinishAnimCarCloseDoorFromInsideCB(CAnimBlendAssociation* anim, void* data);
 
