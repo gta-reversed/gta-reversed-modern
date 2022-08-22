@@ -9,15 +9,17 @@ extern std::array<float, NUM_LEVELS>& gPriceMultipliers;
 class CMultiBuilding {};
 
 enum ePriceSection : int32 {
-    PRICE_SECTION_UNDEFINED = 0,
-    PRICE_SECTION_CAR_MOD_1 = 1, // possibly pay'n spray
-    PRICE_SECTION_CAR_MOD_2 = 2, // possibly mod garages
+    PRICE_SECTION_NONE = 0,
+    PRICE_SECTION_CAR_MODS = 1,
+    PRICE_SECTION_CAR_PAINTJOBS = 2, // Pay 'n' Spray paintjobs
+    PRICE_SECTION_FURNITURE = 3,
     PRICE_SECTION_CLOTHES = 4,
-    PRICE_SECTION_HAIRDRESSING = 5,
+    PRICE_SECTION_HAIRCUTS = 5,
     PRICE_SECTION_TATTOOS = 6,
-    PRICE_SECTION_FLOWERS = 7, // look CShopping::Buy
-    PRICE_SECTION_FOODS = 8,
-    PRICE_SECTION_WEAPONS = 9
+    PRICE_SECTION_GIFTS = 7,
+    PRICE_SECTION_FOOD = 8,
+    PRICE_SECTION_WEAPONS = 9,
+    PRICE_SECTION_PROPERTY = 10
 };
 
 class CShopping {
@@ -25,7 +27,7 @@ class CShopping {
         uint32 key;
         uint32 price;
     };
-    VALIDATE_SIZE(PriceModifier, 8u);
+    VALIDATE_SIZE(PriceModifier, 0x8);
 
     struct ItemPrice {
         uint32 key;
@@ -53,6 +55,14 @@ class CShopping {
     };
     VALIDATE_SIZE(ItemPrice, 0x18);
 
+    struct StatModifiers {
+        struct {
+            int8 index;
+            int8 change;
+        } stat[2];
+    };
+    VALIDATE_SIZE(StatModifiers, 0x4);
+
     static constexpr auto NUM_PRICE_MODIFIERS = 20u;
     static constexpr auto NUM_ITEMS = 560u; // ?
     static constexpr auto NUM_BUYABLE_ITEMS = 300u; // ?
@@ -61,6 +71,7 @@ class CShopping {
     inline static ePriceSection& ms_priceSectionLoaded = *(ePriceSection*)0xA9A7C8;
     inline static int32& ms_numPrices = *(int32*)0xA9A7CC;
     inline static int32& ms_numPriceModifiers = *(int32*)0xA9A7D0;
+    inline static std::array<StatModifiers, NUM_ITEMS>& ms_statModifiers = *(std::array<StatModifiers, NUM_ITEMS>*)0xA974D0;
     inline static int32& ms_numItemsInShop = *(int32*)0xA9A7F0;
     inline static char(&ms_shopLoaded)[24] = *(char(*)[24])0xA9A7D8;
     inline static uint32& ms_numBuyableItems = *(uint32*)0xA9A310;
@@ -84,7 +95,7 @@ public:
     static bool FindSectionInSection(FILESTREAM file, const char* parentSection, const char* childSection);
     static int32 GetExtraInfo(uint32 itemKey, int32 index);
     static int32 GetItemIndex(uint32 itemKey);
-    static uint32 GetKey(const char* modelName, int32 index);
+    static uint32 GetKey(const char* modelName, ePriceSection section);
     static const char* GetNameTag(uint32 itemKey);
     static const char* GetNextSection(FILESTREAM file);
     static int32 GetPrice(uint32 itemId);

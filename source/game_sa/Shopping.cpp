@@ -2,10 +2,6 @@
 #include <extensions/enumerate.hpp>
 #include "Shopping.h"
 #include "PedClothesDesc.h"
-#include <AECutsceneTrackManager.h>
-#include <AEAmbienceTrackManager.h>
-#include <AEAudioHardware.h>
-#include <AESoundManager.h>
 
 CPedClothesDesc& gStoredClothesState = *(CPedClothesDesc*)0xA9A810;
 char& gClothesHaveBeenStored = *(char*)0xA97298;
@@ -37,8 +33,8 @@ void CShopping::InjectHooks() {
     // RH_ScopedInstall(IncrementStat, 0x0, { .reversed = false });
     // RH_ScopedInstall(IncrementStat2, 0x0, { .reversed = false });
     RH_ScopedInstall(LoadPrices, 0x49B8D0);
-    RH_ScopedInstall(LoadShop, 0x49BBE0, {.reversed = false});
-    RH_ScopedInstall(LoadStats, 0x49B6A0, { .reversed = false });
+    RH_ScopedInstall(LoadShop, 0x49BBE0);
+    RH_ScopedInstall(LoadStats, 0x49B6A0, { .reversed = true });
     // RH_ScopedInstall(RemoveLoadedPrices, 0x0, { .reversed = false });
     RH_ScopedInstall(RemoveLoadedShop, 0x49AE30);
     //RH_ScopedInstall(RemovePriceModifier, 0x0, { .reversed = false });
@@ -69,7 +65,7 @@ void CShopping::Init() {
 // 0x49ABD0
 int32 GetChangingStatIndex(const char* stat) {
     static constexpr const char* statNames[] = {
-        "fat", "respect", "sexy", "health", "calories"
+        "fat", "respect", "sexy", "health", "stamina", "calories"
     };
 
     // todo: use notsa::enumerate
@@ -151,24 +147,23 @@ int32 CShopping::GetItemIndex(uint32 itemKey) {
 }
 
 // 0x49AB30
-uint32 CShopping::GetKey(const char* modelName, int32 index) {
-    // todo: enum
-    switch (index) {
-    case 4:
-    case 5:
-    case 6:
+uint32 CShopping::GetKey(const char* modelName, ePriceSection section) {
+    switch (section) {
+    case PRICE_SECTION_CLOTHES:
+    case PRICE_SECTION_HAIRCUTS:
+    case PRICE_SECTION_TATTOOS:
         return CKeyGen::GetUppercaseKey(modelName);
-    case 9:
+    case PRICE_SECTION_WEAPONS:
         return CWeaponInfo::FindWeaponType(modelName);
+    case PRICE_SECTION_CAR_PAINTJOBS:
+        return PRICE_SECTION_CAR_PAINTJOBS;
     default:
         break;
     }
 
-    if (index != 2) {
-        index = -1;
-        CModelInfo::GetModelInfo(modelName, &index);
-    }
-    return index;
+    int32 ret = -1;
+    CModelInfo::GetModelInfo(modelName, &ret);
+    return static_cast<uint32>(ret);
 }
 
 // inlined
@@ -248,7 +243,7 @@ void CShopping::LoadPrices(const char* sectionName) {
     if (priceSection == ms_priceSectionLoaded)
         return;
 
-    if (ms_priceSectionLoaded != PRICE_SECTION_UNDEFINED) {
+    if (ms_priceSectionLoaded != PRICE_SECTION_NONE) {
         RemoveLoadedPrices();
     }
     ms_priceSectionLoaded = priceSection;
@@ -278,7 +273,7 @@ void CShopping::LoadPrices(const char* sectionName) {
 
         switch (ms_priceSectionLoaded) {
         case PRICE_SECTION_CLOTHES:
-        case PRICE_SECTION_HAIRDRESSING: {
+        case PRICE_SECTION_HAIRCUTS: {
             priceInfo.clothes.modelKey = CKeyGen::GetUppercaseKey(strtok(nullptr, " \t,"));
             priceInfo.clothes.type = std::atoi(strtok(nullptr, " \t,"));
             break;
@@ -341,7 +336,7 @@ void CShopping::LoadShop(const char* sectionName) {
         }
 
         char buf[14];
-        for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file), ms_numItemsInShop++) {
+        for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
             if (*line == '\0' || *line == '#')
                 continue;
 
@@ -368,7 +363,52 @@ void CShopping::LoadShop(const char* sectionName) {
 
 // 0x49B6A0
 void CShopping::LoadStats() {
-    plugin::Call<0x49B6A0>();
+    auto file = CFileMgr::OpenFile("data\\shopping.dat", "r");
+    FindSection(file, "prices");
+    ms_numBuyableItems = 0u;
+
+    const auto ProcessSection = [file](ePriceSection section) {
+        for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
+            if (*line == '\0' || *line == '#')
+                continue;
+
+            if (!strncmp(line, "end", 3u))
+                break;
+
+            ms_keys[ms_numBuyableItems] = GetKey(strtok(line, " \t,"), section);
+            ms_bHasBought[ms_numBuyableItems] = false;
+            RET_IGNORED(strtok(nullptr, " \t,"));
+
+            switch (section) {
+            case PRICE_SECTION_CLOTHES:
+            case PRICE_SECTION_HAIRCUTS:
+            case PRICE_SECTION_TATTOOS:
+                RET_IGNORED(strtok(nullptr, " \t,"));
+                [[fallthrough]];
+
+            case PRICE_SECTION_WEAPONS:
+                RET_IGNORED(strtok(nullptr, " \t,"));
+                break;
+            default:
+                break;
+            }
+
+            for (auto& stat : ms_statModifiers[ms_numBuyableItems].stat) {
+                stat = {
+                    (int8)GetChangingStatIndex(strtok(nullptr, " \t,")),
+                    (int8)std::atoi(strtok(nullptr, " \t,"))
+                };
+            }
+
+            ms_numBuyableItems++;
+        }
+    };
+
+    for (auto section = GetNextSection(file); section; section = GetNextSection(file)) {
+        ProcessSection(GetPriceSectionFromName(section));
+    }
+
+    CFileMgr::CloseFile(file);
 }
 
 // 0x
@@ -377,7 +417,7 @@ void CShopping::RemoveLoadedPrices() {
     if (animBlockIndex != -1) {
         CStreaming::SetModelIsDeletable(IFPToModelId(animBlockIndex));
     }
-    ms_priceSectionLoaded = PRICE_SECTION_UNDEFINED;
+    ms_priceSectionLoaded = PRICE_SECTION_NONE;
 }
 
 // 0x49AE30
