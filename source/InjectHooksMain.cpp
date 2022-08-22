@@ -293,6 +293,7 @@
 #include "TaskSimpleAffectSecondaryBehaviour.h"
 #include "TaskSimpleCarSetTempAction.h"
 #include "TaskSimpleCarWaitForDoorNotToBeInUse.h"
+#include "TaskComplexLeaveBoat.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -667,7 +668,7 @@ void InjectHooksMain() {
         // CTaskComplexKillPedOnFootArmed::InjectHooks();
         // CTaskComplexKillPedOnFootMelee::InjectHooks();
         // CTaskComplexKillPedOnFootStealth::InjectHooks();
-        // CTaskComplexLeaveBoat::InjectHooks();
+        CTaskComplexLeaveBoat::InjectHooks();
         // CTaskComplexLeaveCarAndDie::InjectHooks();
         // CTaskComplexLeaveCarAndFlee::InjectHooks();
         // CTaskComplexLeaveCarAndWander::InjectHooks();
