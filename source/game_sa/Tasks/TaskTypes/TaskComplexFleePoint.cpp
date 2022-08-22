@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "TaskComplexFleePoint.h"
 #include "TaskComplexGoToPointAndStandStill.h"
 #include "TaskSimpleGoToPoint.h"
@@ -14,11 +15,9 @@ void CTaskComplexFleePoint::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x65B390);
     RH_ScopedInstall(Destructor, 0x65B410);
-
     RH_ScopedInstall(CreateSubTask, 0x65B460);
     RH_ScopedInstall(SetFleePosition, 0x65B7B0);
     RH_ScopedInstall(ComputeTargetPoint, 0x65B820);
-
     RH_ScopedVMTInstall(Clone, 0x65CDE0);
     RH_ScopedVMTInstall(GetTaskType, 0x65B400);
     RH_ScopedVMTInstall(MakeAbortable, 0x65B420);
@@ -28,27 +27,22 @@ void CTaskComplexFleePoint::InjectHooks() {
 }
 
 // 0x65B390
-CTaskComplexFleePoint::CTaskComplexFleePoint(CVector const& fleeFromPos, bool pedScream, float safeDist, int32 durationMs) :
-    m_fleeFromPos{fleeFromPos},
-    m_bScream{pedScream},
-    m_safeDist{safeDist},
-    m_durationMs{durationMs}
+CTaskComplexFleePoint::CTaskComplexFleePoint(const CVector& fleePos, bool bScream, float fSafeDistance, int32 fleeTime) :
+      m_vFleePos{fleePos},
+      m_bScream{ bScream },
+      m_fSafeDistance{ fSafeDistance },
+      m_nFleeTime{ fleeTime }
 {
-    m_timer.Start(durationMs);
-}
-
-CTaskComplexFleePoint::CTaskComplexFleePoint(const CTaskComplexFleePoint& o) :
-    CTaskComplexFleePoint{o.m_fleeFromPos, o.m_bScream, o.m_safeDist, o.m_durationMs}
-{
+    m_Timer.Start(fleeTime);
 }
 
 // 0x65B460
-CTask * CTaskComplexFleePoint::CreateSubTask(eTaskType taskType) {
+CTask* CTaskComplexFleePoint::CreateSubTask(eTaskType taskType) {
     switch (taskType) {
     case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL:
-        return new CTaskComplexGoToPointAndStandStill{ PEDMOVE_SPRINT, m_fleeToPos, 0.5f, 2.f, false, false };
+        return new CTaskComplexGoToPointAndStandStill{ PEDMOVE_SPRINT, m_vTargetPoint, 0.5f, 2.f, false, false };
     case TASK_SIMPLE_GO_TO_POINT:
-        return new CTaskSimpleGoToPoint{ PEDMOVE_SPRINT, m_fleeToPos, 0.5f, false, false };
+        return new CTaskSimpleGoToPoint{ PEDMOVE_SPRINT, m_vTargetPoint, 0.5f, false, false };
     case TASK_COMPLEX_LEAVE_ANY_CAR:
         return new CTaskComplexLeaveAnyCar{ 0, true, false };
     case TASK_COMPLEX_SEQUENCE: {
@@ -61,6 +55,7 @@ CTask * CTaskComplexFleePoint::CreateSubTask(eTaskType taskType) {
         return nullptr;
     default:
         NOTSA_UNREACHABLE("Invalid taskType: {}", (int)taskType);
+        return nullptr;
     }
 }
 
@@ -69,10 +64,10 @@ CTask * CTaskComplexFleePoint::CreateSubTask(eTaskType taskType) {
 * @brief Set a new flee position
 */
 void CTaskComplexFleePoint::SetFleePosition(CVector const& fleePos, float safeDistance, bool scream) {
-    if (m_fleeFromPos != fleePos) {
-        m_fleeFromPos = fleePos;
-        m_safeDist = safeDistance;
-        m_newFleePosWasSet = true;
+    if (m_vFleePos != fleePos) {
+        m_vFleePos = fleePos;
+        m_fSafeDistance = safeDistance;
+        m_bNewFleePoint = true;
     }
     m_bScream = scream;
 }
@@ -86,25 +81,25 @@ void CTaskComplexFleePoint::ComputeTargetPoint(CPed const* ped) {
 
     const auto pedPos   = ped->GetPosition();
     const auto angleRad = CGeneral::GetRandomNumberInRange(-0.33f, 0.33f); // TODO: Seemingly magic numbers?
-    const auto dir      = Normalized2D(CVector2D{ pedPos - m_fleeFromPos }) * CVector2D{ std::cos(angleRad), std::sin(angleRad) };
+    const auto dir      = Normalized2D(CVector2D{ pedPos - m_vFleePos}) * CVector2D{ std::cos(angleRad), std::sin(angleRad) };
     const auto spread   = CGeneral::GetRandomNumberInRange(3, 6);
 
-    m_fleeToPos = pedPos;
+    m_vTargetPoint = pedPos;
 
-    m_fleeToPos.x += (dir.x + dir.y) * spread;
-    m_fleeToPos.y += (dir.x - dir.y) * spread;
+    m_vTargetPoint.x += (dir.x + dir.y) * spread;
+    m_vTargetPoint.y += (dir.x - dir.y) * spread;
 }
 
  // 0x65B420
 bool CTaskComplexFleePoint::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority == ABORT_PRIORITY_LEISURE) {
-        m_durationMs = -1;
+        m_nFleeTime = -1;
 
         // Leads to running `TASK_SEQUENCE` => `TASK_FINISHED`
         // TODO: Below is probably something inlined, so unline it...
-        m_timer.m_nStartTime = CTimer::GetTimeInMS();
-        m_timer.m_nInterval = -1;
-        m_timer.m_bStarted = 1;
+        m_Timer.m_nStartTime = CTimer::GetTimeInMS();
+        m_Timer.m_nInterval = -1;
+        m_Timer.m_bStarted = 1;
     }
     return m_pSubTask->MakeAbortable(ped, priority, event);
 }
@@ -121,7 +116,7 @@ CTask* CTaskComplexFleePoint::CreateNextSubTask(CPed* ped) {
     case TASK_SIMPLE_GO_TO_POINT: {
         ComputeTargetPoint(ped);
         return CreateSubTask(
-            IsPointInSphere(ped->GetPosition(), m_fleeToPos, m_safeDist) // Still in danger zone?
+            IsPointInSphere(ped->GetPosition(), m_vTargetPoint, m_fSafeDistance) // Still in danger zone?
                 ? TASK_SIMPLE_GO_TO_POINT                  // Go to `m_fleeToPos`
                 : TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL // This will eventually create a `TASK_COMPLEX_SEQUENCE` which then leads to `TASK_FINISHED`
         );
@@ -148,7 +143,7 @@ CTask* CTaskComplexFleePoint::ControlSubTask(CPed* ped) {
     case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL:
         break;
     default: {
-        g_ikChainMan.AbortLookAt(ped); // Dropped redudant `IsLooking` check (As task existance is checked by `AbortLookAt` as well.
+        g_ikChainMan.AbortLookAt(ped); // Dropped redundant `IsLooking` check (As task existence is checked by `AbortLookAt` as well.
         return m_pSubTask;
     }
     }
@@ -160,18 +155,17 @@ CTask* CTaskComplexFleePoint::ControlSubTask(CPed* ped) {
     // Moved this here for simplicity, logic unchanged
     if (!g_ikChainMan.IsLooking(ped)) {
         if (CGeneral::GetRandomNumberInRange(0, 100) <= 5) { // TODO: CGeneral::DoCoinFlip()
-            g_ikChainMan.LookAt("TaskFleePoint", ped, nullptr, 2000, ePedBones::BONE_UNKNOWN, &m_fleeFromPos, false, 0.25f, 500, 3, false);
+            g_ikChainMan.LookAt("TaskFleePoint", ped, nullptr, 2000, ePedBones::BONE_UNKNOWN, &m_vFleePos, false, 0.25f, 500, 3, false);
         }
     }
 
-    if (m_newFleePosWasSet) {
-        m_newFleePosWasSet = false;
-        m_timer.Start(m_durationMs);
+    if (m_bNewFleePoint) {
+        m_bNewFleePoint = false;
+        m_Timer.Start(m_nFleeTime);
         return CreateFirstSubTask(ped); // Do it all over again :D
-    } else if (m_timer.IsOutOfTime()) {
+    } else if (m_Timer.IsOutOfTime()) {
         return CreateSubTask(TASK_COMPLEX_SEQUENCE);
     }
 
     return m_pSubTask;
 }
-
