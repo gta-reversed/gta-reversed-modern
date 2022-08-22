@@ -5,7 +5,7 @@
 // 0x48E360
 CTaskSimpleSay::CTaskSimpleSay(uint32 sayId, uint32 sayDuration) :
     CTaskSimple(),
-    m_SayId{ sayId }
+    m_SayId{ sayId },
     m_SayDuration{ sayDuration }
 {
 }

@@ -24,4 +24,4 @@ public:
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; }
     bool ProcessPed(CPed* ped) override;
 };
-VALIDATE_SIZE(CTaskSimpleSay, 0x28);
+VALIDATE_SIZE(CTaskSimpleSay, 0x1C);
