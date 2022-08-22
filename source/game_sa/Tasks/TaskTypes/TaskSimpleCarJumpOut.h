@@ -6,50 +6,37 @@ class CAnimBlendAssociation;
 class CTaskUtilityLineUpPedWithCar;
 class CVehicle;
 
-// VMT: 0x86ee70 | Size: 9
 class NOTSA_EXPORT_VTABLE CTaskSimpleCarJumpOut : public CTaskSimple {
+public:
+    bool m_bIsFinished;
+    CAnimBlendAssociation* m_Anim;
+    CVehicle* m_TargetVehicle;
+    float m_fStartCarSpeed;
+    uint32 m_nTargetDoor;
+    uint8 m_nDoorFlagsToClear;
+    uint8 m_nNumGettingInToClear;
+    CTaskUtilityLineUpPedWithCar* m_Utility;
 
 public:
-    bool m_finishedAnim = {};                        // 8
-    CAnimBlendAssociation* m_anim = {};              // 0xC
-    CVehicle* m_veh = {};                            // 0x10
-    float m_initialVehSpeed = {};                    // 0x14
-    uint32 m_door = {};                               // 0x18
-    uint8 m_doorFlagsToClear = {};                   // 0x1C
-    uint8 m_numGettingInToClear = {};                // 0x1D
-    CTaskUtilityLineUpPedWithCar* m_lineUpTask = {}; // 0x20
+    constexpr static auto Type = TASK_SIMPLE_CAR_JUMP_OUT;
 
-public:
-    static void InjectHooks();
+    CTaskSimpleCarJumpOut(CVehicle* targetVehicle, uint32 targetDoor, CTaskUtilityLineUpPedWithCar* utility);
+    ~CTaskSimpleCarJumpOut() override;
 
-    constexpr static auto Type = eTaskType::TASK_SIMPLE_CAR_JUMP_OUT;
-
-    CTaskSimpleCarJumpOut(CVehicle* veh, uint32 door, CTaskUtilityLineUpPedWithCar* lineUpTask);
-    CTaskSimpleCarJumpOut(const CTaskSimpleCarJumpOut&);
-    ~CTaskSimpleCarJumpOut();
-
-    static void FinishAnimCarJumpOutCB(CAnimBlendAssociation* anim, void* data);
+    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override { return new CTaskSimpleCarJumpOut(m_TargetVehicle, m_nTargetDoor, m_Utility); }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool ProcessPed(CPed* ped) override;
+    bool SetPedPosition(CPed* ped) override;
 
     void StartAnim(const CPed* ped);
     auto ComputeAnimID() -> std::pair<AssocGroupId, AnimationId>; // NOTSA: Changed return type
     void ComputeAnimID_ToHook(AssocGroupId& animGroup, AnimationId& animId) { std::tie(animGroup, animId) = ComputeAnimID(); } // Hooking this instead
 
-    CTask* Clone() override { return new CTaskSimpleCarJumpOut{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
-    bool ProcessPed(CPed* ped) override;
-    bool SetPedPosition(CPed* ped) override;
+    static void FinishAnimCarJumpOutCB(CAnimBlendAssociation* anim, void* data);
 
-private: // Wrappers for hooks
-    // 0x64BE40
-    CTaskSimpleCarJumpOut* Constructor(CVehicle* veh, uint32 door, CTaskUtilityLineUpPedWithCar* lineUpTask) {
-        this->CTaskSimpleCarJumpOut::CTaskSimpleCarJumpOut(veh, door, lineUpTask);
-        return this;
-    }
-
-    // 0x647490
-    CTaskSimpleCarJumpOut* Destructor() {
-        this->CTaskSimpleCarJumpOut::~CTaskSimpleCarJumpOut();
-        return this;
-    }
+    static void InjectHooks();
+    CTaskSimpleCarJumpOut* Constructor(CVehicle* veh, uint32 door, CTaskUtilityLineUpPedWithCar* lineUpTask) { this->CTaskSimpleCarJumpOut::CTaskSimpleCarJumpOut(veh, door, lineUpTask); return this; }
+    CTaskSimpleCarJumpOut* Destructor() { this->CTaskSimpleCarJumpOut::~CTaskSimpleCarJumpOut(); return this; }
 };
+VALIDATE_SIZE(CTaskSimpleCarJumpOut, 0x24);
