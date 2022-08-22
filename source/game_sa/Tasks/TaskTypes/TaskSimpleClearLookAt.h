@@ -6,29 +6,15 @@ class CPed;
 class CEvent;
 class CTaskSimpleClearLookAt;
 
-class NOTSA_EXPORT_VTABLE CTaskSimpleClearLookAt : public CTaskSimple {
+class CTaskSimpleClearLookAt : public CTaskSimple {
 public:
-    static void InjectHooks();
-
-    constexpr static auto Type = eTaskType::TASK_SIMPLE_IK_LOOK_AT;
+    constexpr static auto Type = TASK_SIMPLE_IK_LOOK_AT;
 
     CTaskSimpleClearLookAt() = default;
     ~CTaskSimpleClearLookAt() = default;
 
-    CTask*    Clone() override { return new CTaskSimpleClearLookAt(*this); }
     eTaskType GetTaskType() override { return Type; }
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; }
-    bool      ProcessPed(CPed* ped) override;
-
-private: // Wrappers for hooks
-    // 0x634670
-    CTaskSimpleClearLookAt* Constructor() {
-        this->CTaskSimpleClearLookAt::CTaskSimpleClearLookAt();
-        return this;
-    }
-    // 0x6346A0
-    CTaskSimpleClearLookAt* Destructor() {
-        this->CTaskSimpleClearLookAt::~CTaskSimpleClearLookAt();
-        return this;
-    }
+    CTask* Clone() override { return new CTaskSimpleClearLookAt(); }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; }
+    bool ProcessPed(CPed* ped) override;
 };
