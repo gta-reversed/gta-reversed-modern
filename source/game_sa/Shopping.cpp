@@ -30,8 +30,8 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(GetPriceSectionFromName, 0x49AAD0);
     RH_ScopedInstall(SetPlayerHasBought, 0x49B610);
     RH_ScopedInstall(HasPlayerBought, 0x49B5E0);
-    // RH_ScopedInstall(IncrementStat, 0x0, { .reversed = false });
-    // RH_ScopedInstall(IncrementStat2, 0x0, { .reversed = false });
+    RH_ScopedInstall(IncrementStat, 0x49BE70); // not tested
+    RH_ScopedInstall(IncrementStat2, 0x49AFD0);
     RH_ScopedInstall(LoadPrices, 0x49B8D0);
     RH_ScopedInstall(LoadShop, 0x49BBE0);
     RH_ScopedInstall(LoadStats, 0x49B6A0, { .reversed = true });
@@ -227,14 +227,36 @@ bool CShopping::HasPlayerBought(uint32 itemKey) {
     return ms_bHasBought[GetItemIndex(itemKey)];
 }
 
-// 0x
-void CShopping::IncrementStat(int32 a1, int32 a2) {
-    plugin::Call<0x0, int32, int32>(a1, a2);
+// Increments by stat index
+// 0x49BE70
+void CShopping::IncrementStat(uint32 statIndex, int32 change) {
+    if (statIndex == -1)
+        return;
+
+    static constexpr eStats indexStats[] = {
+        STAT_FAT, STAT_CLOTHES_RESPECT, STAT_APPEARANCE,
+        STAT_RIOT_MISSION_ACCOMPLISHED, STAT_STAMINA, STAT_CALORIES
+    };
+    assert(statIndex < std::size(indexStats));
+
+    IncrementStat2(indexStats[statIndex], change);
 }
 
-// 0x
-void CShopping::IncrementStat2(int32 a1, int32 a2) {
-    plugin::Call<0x0, int32, int32>(a1, a2);
+// Increments by stat id
+// 0x49AFD0 (inlined)
+void CShopping::IncrementStat2(eStats stat, int32 change) {
+    assert(stat != (eStats)(-1));
+
+    switch (stat) {
+    case STAT_CLOTHES_RESPECT:
+    case STAT_APPEARANCE:
+        change *= 10;
+        break;
+    default:
+        break;
+    }
+
+    CStats::ModifyStat(stat, static_cast<float>(change));
 }
 
 // 0x49B8D0

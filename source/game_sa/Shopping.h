@@ -102,8 +102,8 @@ public:
     static ePriceSection GetPriceSectionFromName(const char* name);
     static void SetPlayerHasBought(uint32 itemKey);
     static bool HasPlayerBought(uint32 itemKey);
-    static void IncrementStat(int32 a1, int32 a2);
-    static void IncrementStat2(int32 a1, int32 a2);
+    static void IncrementStat(uint32 statIndex, int32 change);
+    static void IncrementStat2(eStats stat, int32 change);
     static void LoadPrices(const char* sectionName);
     static void LoadShop(const char* sectionName);
     static void LoadStats();
