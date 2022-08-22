@@ -14,7 +14,7 @@ public:
     CVector  m_TargetPos;
 
 public:
-    static constexpr auto Type = eTaskType::TASK_SIMPLE_THROW_CTRL;
+    static constexpr auto Type = TASK_SIMPLE_THROW_CTRL;
 
     CTaskSimpleThrowControl(CEntity* targetEntity, const CVector* pos);
     ~CTaskSimpleThrowControl() override;

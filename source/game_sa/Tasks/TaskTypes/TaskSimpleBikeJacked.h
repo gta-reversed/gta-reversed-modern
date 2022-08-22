@@ -19,7 +19,7 @@ class CTaskSimpleBikeJacked : public CTaskSimple {
     CTaskUtilityLineUpPedWithCar* m_Utility;
 
 public:
-    constexpr static auto Type = eTaskType::TASK_SIMPLE_BIKE_JACKED;
+    constexpr static auto Type = TASK_SIMPLE_BIKE_JACKED;
 
     CTaskSimpleBikeJacked(CVehicle* targetVehicle, int32 targetDoor, int32 downTime, CPed* draggingPed, bool bWasDriver);
     ~CTaskSimpleBikeJacked() override;

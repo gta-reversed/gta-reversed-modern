@@ -8,45 +8,34 @@ class CAnimBlendAssociation;
 class CVehicle;
 
 class CTaskSimpleCarAlign : public CTaskSimple {
+public:
+    bool m_bIsFinished;
+    CAnimBlendAssociation* m_Anim;
+
+    CVehicle* m_TargetVehicle;
+    CVector   m_TargetDoorPos;
+    uint32    m_nTargetDoor;
+
+    CTaskUtilityLineUpPedWithCar* m_Utility;
 
 public:
-    bool m_animHasFinished = {};                     // 8
-    CAnimBlendAssociation* m_anim = {};              // 0xC
-    CVehicle* m_veh = {};                            // 0x10
-    CVector m_doorPos = {};                          // 0x14
-    uint32 m_door = {};                              // 0x20
-    CTaskUtilityLineUpPedWithCar* m_lineUpTask = {}; // 0x24
+    static constexpr auto Type = TASK_SIMPLE_CAR_ALIGN;
 
-public:
-    static void InjectHooks();
+    CTaskSimpleCarAlign(CVehicle* targetVehicle, CVector const& targetDoorPos, uint32 targetDoor, CTaskUtilityLineUpPedWithCar* utility);
+    ~CTaskSimpleCarAlign() override;
 
-    static constexpr auto Type = eTaskType::TASK_SIMPLE_CAR_ALIGN;
-
-    CTaskSimpleCarAlign(CVehicle* veh, CVector const& doorPos, uint32 targetDoor, CTaskUtilityLineUpPedWithCar* taskLineUp);
-    CTaskSimpleCarAlign(const CTaskSimpleCarAlign&);
-    ~CTaskSimpleCarAlign();
-
-    static void FinishAnimCarAlignCB(CAnimBlendAssociation*, void*);
-
-    void FixHeading(CPed* ped);
-    void StartAnim(CPed* ped);
-
-    CTask* Clone() override { return new CTaskSimpleCarAlign{ *this }; }
     eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override { return new CTaskSimpleCarAlign(m_TargetVehicle, m_TargetDoorPos, m_nTargetDoor, m_Utility); }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;
 
-private: // Wrappers for hooks
-    // 0x645B40
-    CTaskSimpleCarAlign* Constructor(CVehicle* veh, CVector const& doorPos, int32 targetDoor, CTaskUtilityLineUpPedWithCar* taskLineUp) {
-        this->CTaskSimpleCarAlign::CTaskSimpleCarAlign(veh, doorPos, targetDoor, taskLineUp);
-        return this;
-    }
+    void FixHeading(CPed* ped);
+    void StartAnim(CPed* ped);
 
-    // 0x645BE0
-    CTaskSimpleCarAlign* Destructor() {
-        this->CTaskSimpleCarAlign::~CTaskSimpleCarAlign();
-        return this;
-    }
+    static void FinishAnimCarAlignCB(CAnimBlendAssociation*, void*);
+
+    static void InjectHooks();
+    CTaskSimpleCarAlign* Constructor(CVehicle* veh, CVector const& doorPos, int32 targetDoor, CTaskUtilityLineUpPedWithCar* taskLineUp) { this->CTaskSimpleCarAlign::CTaskSimpleCarAlign(veh, doorPos, targetDoor, taskLineUp); return this; }
+    CTaskSimpleCarAlign* Destructor() { this->CTaskSimpleCarAlign::~CTaskSimpleCarAlign(); return this; }
 };
