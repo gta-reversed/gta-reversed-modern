@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Base.h"
+
 class CEntity;
 class CVector;
 class CPed;
@@ -11,3 +13,4 @@ public:
     virtual ~CEntitySeekPosCalculator() = default;
     virtual void ComputeEntitySeekPos(const CPed& seeker, const CEntity& target, CVector& outPos) = 0;
 };
+VALIDATE_SIZE(CEntitySeekPosCalculator, 0x4);
