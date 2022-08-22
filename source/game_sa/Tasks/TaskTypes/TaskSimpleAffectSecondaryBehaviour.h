@@ -14,27 +14,20 @@ class CTaskSimpleAffectSecondaryBehaviour;
  */
 class NOTSA_EXPORT_VTABLE CTaskSimpleAffectSecondaryBehaviour : public CTaskSimple {
 public:
-    bool           m_bAdd{};
-    eSecondaryTask m_secTaskType{};
-    CTask*         m_task{};
+    bool           m_bAdd;
+    eSecondaryTask m_SecTaskType;
+    CTask*         m_Task;
 
 public:
-    static void InjectHooks();
-
-    constexpr static auto Type = eTaskType::TASK_SIMPLE_AFFECT_SECONDARY_BEHAVIOUR;
+    constexpr static auto Type = TASK_SIMPLE_AFFECT_SECONDARY_BEHAVIOUR;
 
     CTaskSimpleAffectSecondaryBehaviour(bool add, eSecondaryTask secondaryTaskType, CTask* task);
-    CTaskSimpleAffectSecondaryBehaviour(const CTaskSimpleAffectSecondaryBehaviour&); // NOTSA
 
-    CTask*    Clone() override { return new CTaskSimpleAffectSecondaryBehaviour(*this); }
     eTaskType GetTaskType() override { return Type; }
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return false; }
-    bool      ProcessPed(CPed* ped) override;
+    CTask* Clone() override { return new CTaskSimpleAffectSecondaryBehaviour(m_bAdd, m_SecTaskType, m_Task); }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return false; }
+    bool ProcessPed(CPed* ped) override;
 
-private: // Wrappers for hooks
-    // 0x691270
-    CTaskSimpleAffectSecondaryBehaviour* Constructor(bool add, eSecondaryTask secondaryTaskType, CTask* a4) {
-        this->CTaskSimpleAffectSecondaryBehaviour::CTaskSimpleAffectSecondaryBehaviour(add, secondaryTaskType, a4);
-        return this;
-    }
+    static void InjectHooks();
+    CTaskSimpleAffectSecondaryBehaviour* Constructor(bool add, eSecondaryTask secondaryTaskType, CTask* a4) { this->CTaskSimpleAffectSecondaryBehaviour::CTaskSimpleAffectSecondaryBehaviour(add, secondaryTaskType, a4); return this; }
 };
