@@ -292,6 +292,7 @@
 #include "TaskSimpleCower.h"
 #include "TaskSimpleAffectSecondaryBehaviour.h"
 #include "TaskSimpleCarSetTempAction.h"
+#include "TaskSimpleCarWaitForDoorNotToBeInUse.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -742,7 +743,7 @@ void InjectHooksMain() {
         CTaskSimpleCarSetTempAction::InjectHooks();
         // CTaskSimpleCarShuffle::InjectHooks();
         // CTaskSimpleCarSlowBeDraggedOut::InjectHooks();
-        // CTaskSimpleCarWaitForDoorNotToBeInUse::InjectHooks();
+        CTaskSimpleCarWaitForDoorNotToBeInUse::InjectHooks();
         CTaskSimpleCarWaitToSlowDown::InjectHooks();
         // CTaskSimpleChat::InjectHooks();
         // + CTaskSimpleClearLookAt::InjectHooks();

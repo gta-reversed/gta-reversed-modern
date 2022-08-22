@@ -574,12 +574,18 @@ public:
     CPlayerPed*    AsPlayer()    { return reinterpret_cast<CPlayerPed*>(this); }
 
     bool IsFollowerOfGroup(const CPedGroup& group) const;
+
     RwMatrix& GetBoneMatrix(ePedBones bone) const;
+
     void CreateDeadPedPickupCoors(CVector& pickupPos);
     RpHAnimHierarchy& GetAnimHierarchy() const;
     CAnimBlendClumpData& GetAnimBlendData() const;
+
     bool IsInVehicle() const { return bInVehicle && m_pVehicle; }
+    bool IsInVehicle(const CVehicle* vehicle) const { return bInVehicle && m_pVehicle == vehicle; }
+
     CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
+
     int32 GetPadNumber() const;
 
 private:
