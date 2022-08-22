@@ -12,16 +12,15 @@ void CTaskComplexDestroyCar::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x621C00);
     RH_ScopedInstall(Destructor, 0x621CB0);
 
-    RH_ScopedInstall(CreateSubTask, 0x6287A0);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x621C80);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x62D9E0);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x62DA90);
+    // RH_ScopedInstall(CreateSubTask, 0x6287A0);
+    // RH_ScopedInstall(MakeAbortable_Reversed, 0x621C80);
+    // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x62D9E0);
+    // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x62DA90);
     // RH_ScopedVirtualInstall2(ControlSubTask, 0x6288C0);
 }
-bool CTaskComplexDestroyCar::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable_Reversed(ped, priority, event); }
-CTask* CTaskComplexDestroyCar::ControlSubTask(CPed* ped) { return ControlSubTask_Reversed(ped); }
-CTask* CTaskComplexDestroyCar::CreateFirstSubTask(CPed* ped) { return CreateFirstSubTask_Reversed(ped); }
-}
+// bool CTaskComplexDestroyCar::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable_Reversed(ped, priority, event); }
+// CTask* CTaskComplexDestroyCar::ControlSubTask(CPed* ped) { return ControlSubTask_Reversed(ped); }
+// CTask* CTaskComplexDestroyCar::CreateFirstSubTask(CPed* ped) { return CreateFirstSubTask_Reversed(ped); }
 
 // 0x621C00
 CTaskComplexDestroyCar::CTaskComplexDestroyCar(CVehicle* vehicleToDestroy, uint32 a3, uint32 a4, uint32 a5) :

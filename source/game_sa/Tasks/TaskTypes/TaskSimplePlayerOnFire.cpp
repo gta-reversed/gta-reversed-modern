@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "TaskSimplePlayerOnFire.h"
 
 void CTaskSimplePlayerOnFire::InjectHooks() {
@@ -6,9 +7,7 @@ void CTaskSimplePlayerOnFire::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x633560);
-
     RH_ScopedInstall(Destructor, 0x6335B0);
-
     RH_ScopedVMTInstall(Clone, 0x636E80);
     RH_ScopedVMTInstall(GetTaskType, 0x633590);
     RH_ScopedVMTInstall(MakeAbortable, 0x6335A0);
@@ -32,8 +31,8 @@ bool CTaskSimplePlayerOnFire::ProcessPed(CPed* ped) {
     }
 
     // TODO: Add stubs
-    CDamageResponseInfo dmgResp;
-    CTaskComplexOnFire::ComputeFireDamage(ped, dmgResp);
+    CPedDamageResponse dmgResp;
+    // CTaskComplexOnFire::ComputeFireDamage(ped, dmgResp);
     if (!dmgResp.m_bHealthZero || m_bAddedDamageEvent) {
         if (CLocalisation::PedsOnFire()) { // Moved code a little to avoid dup
             ped->Say(346, 0, 0.1f);

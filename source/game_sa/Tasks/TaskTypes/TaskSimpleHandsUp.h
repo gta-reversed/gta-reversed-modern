@@ -7,26 +7,15 @@ class CTaskSimpleHandsUp;
 
 class NOTSA_EXPORT_VTABLE CTaskSimpleHandsUp : public CTaskSimpleRunTimedAnim {
 public:
-    static void InjectHooks();
+    constexpr static auto Type = TASK_SIMPLE_HANDS_UP;
 
-    constexpr static auto Type = eTaskType::TASK_SIMPLE_HANDS_UP;
+    explicit CTaskSimpleHandsUp(uint32 duration) : CTaskSimpleRunTimedAnim(ANIM_GROUP_DEFAULT, ANIM_ID_HANDSUP, 4.0f, -4.0f, duration, Type, "HandsUp", 0) {}
+    ~CTaskSimpleHandsUp() override = default;
 
-    CTaskSimpleHandsUp(uint32 duration) : CTaskSimpleRunTimedAnim{ANIM_GROUP_DEFAULT, ANIM_ID_HANDSUP, 4.0, -4.0, duration, Type, "HandsUp", 0} {}
-    CTaskSimpleHandsUp(const CTaskSimpleHandsUp& o) : CTaskSimpleHandsUp{o.m_durationMs} {}
-    ~CTaskSimpleHandsUp();
-
-    CTask* Clone() override { return new CTaskSimpleHandsUp{*this}; }
+    CTask* Clone() override { return new CTaskSimpleHandsUp(m_durationMs); }
     virtual bool IsInterruptable(CPed const* ped) { return false; }
 
-private: // Wrappers for hooks
-    // 0x48E970
-    CTaskSimpleHandsUp* Constructor(int32 nTime) {
-        this->CTaskSimpleHandsUp::CTaskSimpleHandsUp(nTime);
-        return this;
-    }
-    // 0x48EA60
-    CTaskSimpleHandsUp* Destructor() {
-        this->CTaskSimpleHandsUp::~CTaskSimpleHandsUp();
-        return this;
-    }
+    static void InjectHooks();
+    CTaskSimpleHandsUp* Constructor(int32 nTime) { this->CTaskSimpleHandsUp::CTaskSimpleHandsUp(nTime); return this; }
+    CTaskSimpleHandsUp* Destructor() { this->CTaskSimpleHandsUp::~CTaskSimpleHandsUp(); return this; }
 };
