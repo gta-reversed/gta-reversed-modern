@@ -5,28 +5,17 @@
 class CTaskSimpleCower;
 class CPed;
 
-class NOTSA_EXPORT_VTABLE CTaskSimpleCower : public CTaskSimpleRunAnim {
-
+class CTaskSimpleCower : public CTaskSimpleRunAnim {
 public:
-    static void InjectHooks();
+    constexpr static auto Type = TASK_SIMPLE_COWER;
 
-    constexpr static auto Type = eTaskType::TASK_SIMPLE_COWER;
-
-    CTaskSimpleCower() : CTaskSimpleRunAnim{ ANIM_GROUP_DEFAULT, ANIM_ID_HANDSCOWER, 4.0, Type, "Cower", false } {}
-    ~CTaskSimpleCower() = default;
+    CTaskSimpleCower() : CTaskSimpleRunAnim{ ANIM_GROUP_DEFAULT, ANIM_ID_HANDSCOWER, 4.0f, Type, "Cower", false } {} // 0x48DE70
+    ~CTaskSimpleCower() override = default; // 0x48E900
 
     CTask* Clone() override { return new CTaskSimpleCower{}; }
-    virtual bool IsInterruptable(CPed const* ped) { return false; } // NOTE: Possible leftover from `CTaskSimpleRunAnim`?
+    virtual bool IsInterruptable(const CPed* ped) { return false; } // NOTE: Possible leftover from `CTaskSimpleRunAnim`?
 
-private: // Wrappers for hooks
-    // 0x48DE70
-    CTaskSimpleCower* Constructor() {
-        this->CTaskSimpleCower::CTaskSimpleCower();
-        return this;
-    }
-    // 0x48E900
-    CTaskSimpleCower* Destructor() {
-        this->CTaskSimpleCower::~CTaskSimpleCower();
-        return this;
-    }
+    static void InjectHooks();
+    CTaskSimpleCower* Constructor() { this->CTaskSimpleCower::CTaskSimpleCower(); return this; }
+    CTaskSimpleCower* Destructor() { this->CTaskSimpleCower::~CTaskSimpleCower(); return this; }
 };
