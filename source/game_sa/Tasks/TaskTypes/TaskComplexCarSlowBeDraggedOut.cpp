@@ -44,7 +44,7 @@ CTask* CTaskComplexCarSlowBeDraggedOut::CreateSubTask(eTaskType taskType) {
 }
 
 // 0x64C600
-bool CTaskComplexCarSlowBeDraggedOut::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskComplexCarSlowBeDraggedOut::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return plugin::CallMethodAndReturn<bool, 0x64C600, CTaskComplexCarSlowBeDraggedOut*, CPed*, eAbortPriority, CEvent const*>(this, ped, priority, event);
 }
 

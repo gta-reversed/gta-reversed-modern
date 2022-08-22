@@ -25,7 +25,7 @@ public:
 
     CTask* Clone() override { return new CTaskSimpleSay(*this); }
     eTaskType GetTaskType() override { return Type; }
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return true; }
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; }
     bool      ProcessPed(CPed* ped) override;
 
 private: // Wrappers for hooks

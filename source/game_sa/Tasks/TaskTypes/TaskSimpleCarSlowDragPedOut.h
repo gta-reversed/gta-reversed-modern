@@ -31,7 +31,7 @@ public:
 
     CTask* Clone() override { return new CTaskSimpleCarSlowDragPedOut(m_Vehicle, m_TargetDoor, m_LineUpPedWithCarTask, m_bWasPedStatic); } // 0x649FD0
     eTaskType GetTaskType() override { return Type; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;
 
@@ -47,7 +47,7 @@ private:
 
     CTask * Clone_Reversed() { return CTaskSimpleCarSlowDragPedOut::Clone(); }
     eTaskType GetTaskType_Reversed() { return CTaskSimpleCarSlowDragPedOut::GetTaskType(); }
-    bool MakeAbortable_Reversed(CPed * ped, eAbortPriority priority, CEvent const* event) { return CTaskSimpleCarSlowDragPedOut::MakeAbortable(ped, priority, event); }
+    bool MakeAbortable_Reversed(CPed * ped, eAbortPriority priority, const CEvent* event) { return CTaskSimpleCarSlowDragPedOut::MakeAbortable(ped, priority, event); }
     bool ProcessPed_Reversed(CPed * ped) { return CTaskSimpleCarSlowDragPedOut::ProcessPed(ped); }
     bool SetPedPosition_Reversed(CPed * ped) { return CTaskSimpleCarSlowDragPedOut::SetPedPosition(ped); }
 };

@@ -42,7 +42,7 @@ int16 CTaskSimpleFightingControl::CalcMoveCommand(CPed* ped) {
 }
 
 // 0x61DD00
-bool CTaskSimpleFightingControl::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskSimpleFightingControl::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return plugin::CallMethodAndReturn<bool, 0x61DD00, CTaskSimpleFightingControl*, CPed*, eAbortPriority, CEvent const*>(this, ped, priority, event);
 }
 

@@ -88,7 +88,7 @@ void CTaskSimpleCarAlign::StartAnim(CPed* ped) {
 }
 
 // 0x645C50
-bool CTaskSimpleCarAlign::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskSimpleCarAlign::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     switch (priority) {
     case ABORT_PRIORITY_IMMEDIATE: {
         if (m_Anim) {

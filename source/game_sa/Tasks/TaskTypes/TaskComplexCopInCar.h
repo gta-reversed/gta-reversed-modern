@@ -30,7 +30,7 @@ public:
 
     CTask* Clone() override { return new CTaskComplexCopInCar{ *this }; }
     eTaskType GetTaskType() override { return Type; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
@@ -44,7 +44,7 @@ private:
 
     CTask* Clone_Reversed() { return CTaskComplexCopInCar::Clone(); }
     eTaskType GetTaskType_Reversed() { return CTaskComplexCopInCar::GetTaskType(); }
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent const* event) { return CTaskComplexCopInCar::MakeAbortable(ped, priority, event); }
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) { return CTaskComplexCopInCar::MakeAbortable(ped, priority, event); }
     CTask* CreateNextSubTask_Reversed(CPed* ped) { return CTaskComplexCopInCar::CreateNextSubTask(ped); }
     CTask* CreateFirstSubTask_Reversed(CPed* ped) { return CTaskComplexCopInCar::CreateFirstSubTask(ped); }
     CTask* ControlSubTask_Reversed(CPed* ped) { return CTaskComplexCopInCar::ControlSubTask(ped); }

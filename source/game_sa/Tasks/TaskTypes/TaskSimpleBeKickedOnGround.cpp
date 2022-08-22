@@ -67,7 +67,7 @@ void CTaskSimpleBeKickedOnGround::StartAnim(CPed* ped) {
 }
 
 // 0x61FCC0
-bool CTaskSimpleBeKickedOnGround::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskSimpleBeKickedOnGround::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     switch (priority) {
     case ABORT_PRIORITY_URGENT:
     case ABORT_PRIORITY_IMMEDIATE: {

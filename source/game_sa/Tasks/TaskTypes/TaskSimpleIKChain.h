@@ -39,7 +39,7 @@ public:
 
     eTaskType GetTaskType() override { return Type; } // 0x62EC30
     CTask* Clone() override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 
     virtual bool CreateIKChain(CPed* ped);
@@ -55,7 +55,7 @@ private:
     CTaskSimpleIKChain* Destructor() { this->CTaskSimpleIKChain::~CTaskSimpleIKChain(); return this; }
     CTask* Clone_Reversed() { return CTaskSimpleIKChain::Clone(); }
     eTaskType GetTaskType_Reversed() { return CTaskSimpleIKChain::GetTaskType(); }
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent const* event) { return CTaskSimpleIKChain::MakeAbortable(ped, priority, event); }
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) { return CTaskSimpleIKChain::MakeAbortable(ped, priority, event); }
     bool ProcessPed_Reversed(CPed* ped) { return CTaskSimpleIKChain::ProcessPed(ped); }
     bool CreateIKChain_Reversed(CPed* ped) { return CTaskSimpleIKChain::CreateIKChain(ped); }
 };

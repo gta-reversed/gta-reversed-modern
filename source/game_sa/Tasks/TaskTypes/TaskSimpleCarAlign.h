@@ -26,7 +26,7 @@ public:
 
     eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override { return new CTaskSimpleCarAlign(m_TargetVehicle, m_TargetDoorPos, m_nTargetDoor, m_Utility); }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;
 

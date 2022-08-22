@@ -21,7 +21,7 @@ public:
 
     CTask* Clone() override { return new CTaskSimpleWaitUntilPedIsOutCar(m_PedToWaitFor, m_Pos); }
     eTaskType GetTaskType() override { return Type; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return true; }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; }
     bool ProcessPed(CPed * ped) override;
 
 private:
@@ -33,7 +33,7 @@ private:
 
     CTask * Clone_Reversed() { return CTaskSimpleWaitUntilPedIsOutCar::Clone(); }
     eTaskType GetTaskType_Reversed() { return CTaskSimpleWaitUntilPedIsOutCar::GetTaskType(); }
-    bool MakeAbortable_Reversed(CPed * ped, eAbortPriority priority, CEvent const* event) { return CTaskSimpleWaitUntilPedIsOutCar::MakeAbortable(ped, priority, event); }
+    bool MakeAbortable_Reversed(CPed * ped, eAbortPriority priority, const CEvent* event) { return CTaskSimpleWaitUntilPedIsOutCar::MakeAbortable(ped, priority, event); }
     bool ProcessPed_Reversed(CPed * ped) { return CTaskSimpleWaitUntilPedIsOutCar::ProcessPed(ped); }
 };
 VALIDATE_SIZE(CTaskSimpleWaitUntilPedIsOutCar, 0x1C);

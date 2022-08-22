@@ -46,7 +46,7 @@ CTaskComplexCopInCar::~CTaskComplexCopInCar() {
     CEntity::SafeCleanUpRef(m_Cop);
     CEntity::SafeCleanUpRef(m_Suspect);
 }
- 
+
 // 0x68C9E0
 CTask* CTaskComplexCopInCar::CreateSubTask(eTaskType taskType, CPed* copPed) {
     switch (taskType) {
@@ -109,7 +109,7 @@ CTask* CTaskComplexCopInCar::CreateSubTask(eTaskType taskType, CPed* copPed) {
 }
 
 // 0x68C940
-bool CTaskComplexCopInCar::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskComplexCopInCar::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (!m_pSubTask) {
         return true;
     }

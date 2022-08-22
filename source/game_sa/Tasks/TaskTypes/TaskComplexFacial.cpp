@@ -33,7 +33,7 @@ void CTaskComplexFacial::StopAll() {
 }
 
 // 0x690DA0
-bool CTaskComplexFacial::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskComplexFacial::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return priority == ABORT_PRIORITY_IMMEDIATE && m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_IMMEDIATE, event);
 }
 

@@ -66,7 +66,7 @@ private:
     CTaskSimpleCarDrive* Destructor() { this->CTaskSimpleCarDrive::~CTaskSimpleCarDrive(); return this; }
     CTask* Clone_Reversed() { return CTaskSimpleCarDrive::Clone(); }
     eTaskType GetTaskType_Reversed() { return CTaskSimpleCarDrive::GetTaskType(); }
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent const* event) { return CTaskSimpleCarDrive::MakeAbortable(ped, priority, event); }
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) { return CTaskSimpleCarDrive::MakeAbortable(ped, priority, event); }
     bool ProcessPed_Reversed(CPed* ped) { return CTaskSimpleCarDrive::ProcessPed(ped); }
     bool SetPedPosition_Reversed(CPed* ped) { return CTaskSimpleCarDrive::SetPedPosition(ped); }
 };

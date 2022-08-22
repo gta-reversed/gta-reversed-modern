@@ -22,7 +22,7 @@ public:
 
     eTaskType GetTaskType() override { return Type; } // 0x621C70
     CTask* Clone() override { return new CTaskComplexDestroyCar(m_VehicleToDestroy, dword14, dword18, dword1C); } // 0x623530
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

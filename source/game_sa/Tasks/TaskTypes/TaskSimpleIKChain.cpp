@@ -73,7 +73,7 @@ IKChain_c* CTaskSimpleIKChain::GetIKChain() {
 }
 
 // 0x639450
-bool CTaskSimpleIKChain::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskSimpleIKChain::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority == eAbortPriority::ABORT_PRIORITY_IMMEDIATE) {
         return true;
     }

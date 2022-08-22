@@ -96,7 +96,7 @@ void CTaskComplexFleePoint::ComputeTargetPoint(CPed const* ped) {
 }
 
  // 0x65B420
-bool CTaskComplexFleePoint::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskComplexFleePoint::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority == ABORT_PRIORITY_LEISURE) {
         m_durationMs = -1;
 

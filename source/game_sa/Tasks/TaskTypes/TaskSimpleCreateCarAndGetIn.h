@@ -21,7 +21,7 @@ public:
 
     CTask* Clone() override { return new CTaskSimpleCreateCarAndGetIn{ *this }; }
     eTaskType GetTaskType() override { return Type; };
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 
 private:
@@ -33,7 +33,7 @@ private:
     CTaskSimpleCreateCarAndGetIn* Destructor() { this->CTaskSimpleCreateCarAndGetIn::~CTaskSimpleCreateCarAndGetIn(); return this; }
     CTask * Clone_Reversed() { return CTaskSimpleCreateCarAndGetIn::Clone(); }
     auto GetTaskType_Reversed() { return CTaskSimpleCreateCarAndGetIn::GetTaskType(); }
-    bool MakeAbortable_Reversed(CPed * ped, eAbortPriority priority, CEvent const* event) { return CTaskSimpleCreateCarAndGetIn::MakeAbortable(ped, priority, event); }
+    bool MakeAbortable_Reversed(CPed * ped, eAbortPriority priority, const CEvent* event) { return CTaskSimpleCreateCarAndGetIn::MakeAbortable(ped, priority, event); }
     bool ProcessPed_Reversed(CPed * ped) { return CTaskSimpleCreateCarAndGetIn::ProcessPed(ped); }
 };
 VALIDATE_SIZE(CTaskSimpleCreateCarAndGetIn, 0x34);

@@ -36,7 +36,7 @@ private:
     CTaskComplexBeInGroup* Destructor() { this->CTaskComplexBeInGroup::~CTaskComplexBeInGroup(); return this; }
     CTask*    Clone_Reversed() { return CTaskComplexBeInGroup::Clone(); }
     eTaskType GetTaskType_Reversed() { return CTaskComplexBeInGroup::GetTaskType(); }
-    bool      MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent const* event) { return CTaskComplexBeInGroup::MakeAbortable(ped, priority, event); }
+    bool      MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) { return CTaskComplexBeInGroup::MakeAbortable(ped, priority, event); }
     CTask*    CreateNextSubTask_Reversed(CPed* ped) { return CTaskComplexBeInGroup::CreateNextSubTask(ped); }
     CTask*    CreateFirstSubTask_Reversed(CPed* ped) { return CTaskComplexBeInGroup::CreateFirstSubTask(ped); }
     CTask*    ControlSubTask_Reversed(CPed* ped) { return CTaskComplexBeInGroup::ControlSubTask(ped); }

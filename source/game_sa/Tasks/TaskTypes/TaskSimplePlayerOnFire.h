@@ -24,7 +24,7 @@ public:
 
     CTask*    Clone() override { return new CTaskSimplePlayerOnFire{*this}; }
     eTaskType GetTaskType() override { return Type; }
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return false; }
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return false; }
     bool      ProcessPed(CPed* ped) override;
 private: // Wrappers for hooks
     // 0x633560

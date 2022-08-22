@@ -60,7 +60,7 @@ void CTaskComplexTrackEntity::CalcMoveRatio(CPed* ped) {
 }
 
 // 0x65F4C0
-bool CTaskComplexTrackEntity::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskComplexTrackEntity::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return m_pSubTask->MakeAbortable(ped, priority, event);
 }
 

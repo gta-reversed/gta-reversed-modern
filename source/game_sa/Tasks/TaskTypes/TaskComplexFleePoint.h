@@ -10,7 +10,7 @@ class CPed;
 
 /*!
 * Task to make a ped run away from a position ASAP.
-* 
+*
 * Sequence goes like:
 * - If in vehicle, TASK_COMPLEX_LEAVE_ANY_CAR
 * - TASK_SIMPLE_GO_TO_POINT => Repeat until not in danger or `m_timer` expires
@@ -42,11 +42,11 @@ public:
 
     CTask*    Clone() override { return new CTaskComplexFleePoint{ *this }; }
     eTaskType GetTaskType() override { return Type; }
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask*    CreateNextSubTask(CPed * ped) override;
     CTask*    CreateFirstSubTask(CPed * ped) override;
     CTask*    ControlSubTask(CPed * ped) override;
- 
+
 private: // Wrappers for hooks
 
 // 0x65B390

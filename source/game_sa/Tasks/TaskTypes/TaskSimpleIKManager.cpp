@@ -52,7 +52,7 @@ CTask* CTaskSimpleIKManager::Clone() {
 }
 
 // 0x6338A0
-bool CTaskSimpleIKManager::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskSimpleIKManager::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority == eAbortPriority::ABORT_PRIORITY_IMMEDIATE) {
         for (auto&& task : m_pIKChainTasks) {
             delete task;

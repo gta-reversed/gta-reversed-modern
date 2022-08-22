@@ -12,46 +12,35 @@ class CEvent;
 
 class NOTSA_EXPORT_VTABLE CTaskSimpleCarOpenDoorFromOutside : public CTaskSimple {
 public:
-    bool m_finished = {};                            // 0x8
-    CAnimBlendAssociation* m_anim = {};              // 0xC
-    CVehicle* m_veh = {};                            // 0x10
-    int32 m_door = {};                               // 0x14
-    bool m_disallowPlayerDriverToExitCar = {};       // 0x18
-    bool m_hasSetPlayerCanExitCarFlag = {};             // 0x19
-    CTaskUtilityLineUpPedWithCar* m_lineUpTask = {}; // 0x1C
-    float m_doorOpenAngleRatio = {};                 // 0x20
+    bool m_bIsFinished;
+    CAnimBlendAssociation* m_Anim;
+    CVehicle* m_TargetVehicle;
+    int32 m_nTargetDoor;
+    bool m_bQuitAfterOpeningDoor;
+    bool m_bHasSetCanPlayerExitCarFlag;
+    CTaskUtilityLineUpPedWithCar* m_Utility;
+    float m_fDoorStartRatio;
 
 public:
-    static void InjectHooks();
+    constexpr static auto Type = TASK_SIMPLE_CAR_OPEN_DOOR_FROM_OUTSIDE;
 
-    constexpr static auto Type = eTaskType::TASK_SIMPLE_CAR_OPEN_DOOR_FROM_OUTSIDE;
+    CTaskSimpleCarOpenDoorFromOutside(CVehicle* targetVehicle, int32 targetDoor, CTaskUtilityLineUpPedWithCar* utility, bool bQuitAfterOpeningDoor);
+    ~CTaskSimpleCarOpenDoorFromOutside() override;
 
-    CTaskSimpleCarOpenDoorFromOutside(CVehicle* veh, int32 door, CTaskUtilityLineUpPedWithCar* lineUpTask, bool disallowPlayerDriverToExitCar);
-    CTaskSimpleCarOpenDoorFromOutside(const CTaskSimpleCarOpenDoorFromOutside&); // NOTSA
-    ~CTaskSimpleCarOpenDoorFromOutside();
+    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override { return new CTaskSimpleCarOpenDoorFromOutside(m_TargetVehicle, m_nTargetDoor, m_Utility, m_bQuitAfterOpeningDoor); }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool ProcessPed(CPed* ped) override;
+    bool SetPedPosition(CPed* ped) override;
 
-    static void FinishAnimCarOpenDoorFromOutsideCB(CAnimBlendAssociation* anim, void* data);
-
-    void ComputeAnimID_ToHook(AssocGroupId& grp, AnimationId& id);
+    void ComputeAnimID_ToHook(AssocGroupId& group, AnimationId& animation);
     auto ComputeAnimID() -> std::pair<AssocGroupId, AnimationId>;
     void StartAnim(CPed* ped);
     void IfNotAlreadySetPlayerCanExitCarFlag(); // NOTSA?
 
-    CTask* Clone() override { return new CTaskSimpleCarOpenDoorFromOutside{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
-    bool ProcessPed(CPed* ped) override;
-    bool SetPedPosition(CPed* ped) override;
+    static void FinishAnimCarOpenDoorFromOutsideCB(CAnimBlendAssociation* anim, void* data);
 
-private: // Wrappers for hooks
-    // 0x645E50
-    CTaskSimpleCarOpenDoorFromOutside* Constructor(CVehicle* veh, int32 door, CTaskUtilityLineUpPedWithCar* lineUpTask, bool disallowPlayerDriverToExitCar) {
-        this->CTaskSimpleCarOpenDoorFromOutside::CTaskSimpleCarOpenDoorFromOutside(veh, door, lineUpTask, disallowPlayerDriverToExitCar);
-        return this;
-    }
-    // 0x645EE0
-    CTaskSimpleCarOpenDoorFromOutside* Destructor() {
-        this->CTaskSimpleCarOpenDoorFromOutside::~CTaskSimpleCarOpenDoorFromOutside();
-        return this;
-    }
+    static void InjectHooks();
+    CTaskSimpleCarOpenDoorFromOutside* Constructor(CVehicle* veh, int32 door, CTaskUtilityLineUpPedWithCar* lineUpTask, bool disallowPlayerDriverToExitCar) { this->CTaskSimpleCarOpenDoorFromOutside::CTaskSimpleCarOpenDoorFromOutside(veh, door, lineUpTask, disallowPlayerDriverToExitCar); return this; }
+    CTaskSimpleCarOpenDoorFromOutside* Destructor() { this->CTaskSimpleCarOpenDoorFromOutside::~CTaskSimpleCarOpenDoorFromOutside(); return this; }
 };

@@ -37,7 +37,7 @@ CTaskSimpleCreateCarAndGetIn::~CTaskSimpleCreateCarAndGetIn() {
 }
 
 // 0x649440
-bool CTaskSimpleCreateCarAndGetIn::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskSimpleCreateCarAndGetIn::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return true;
 }
 
@@ -97,7 +97,7 @@ bool CTaskSimpleCreateCarAndGetIn::ProcessPed(CPed* ped) {
         CTaskSimpleCarSetPedInAsDriver task{ m_CreatedVeh, nullptr };
         task.ProcessPed(ped);
     }
- 
+
     if (!m_CreatedVeh->IsStatic()) {
         return false;
     }

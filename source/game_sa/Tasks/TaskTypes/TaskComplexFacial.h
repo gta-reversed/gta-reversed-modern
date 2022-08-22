@@ -25,7 +25,7 @@ public:
 
     eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override { return new CTaskComplexFacial(); }; // 0x6928B0
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
@@ -40,7 +40,7 @@ private:
 
     CTask* Clone_Reversed() { return CTaskComplexFacial::Clone(); }
     int32  GetTaskType_Reversed() { return CTaskComplexFacial::GetTaskType(); }
-    bool   MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent const* event) { return CTaskComplexFacial::MakeAbortable(ped, priority, event); }
+    bool   MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) { return CTaskComplexFacial::MakeAbortable(ped, priority, event); }
     CTask* CreateNextSubTask_Reversed(CPed* ped) { return CTaskComplexFacial::CreateNextSubTask(ped); }
     CTask* CreateFirstSubTask_Reversed(CPed* ped) { return CTaskComplexFacial::CreateFirstSubTask(ped); }
     CTask* ControlSubTask_Reversed(CPed* ped) { return CTaskComplexFacial::ControlSubTask(ped); }

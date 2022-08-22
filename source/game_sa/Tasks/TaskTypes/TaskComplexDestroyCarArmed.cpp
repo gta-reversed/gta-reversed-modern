@@ -23,7 +23,7 @@ void CTaskComplexDestroyCarArmed::InjectHooks() {
 }
 
 // 0x621F50
-CTaskComplexDestroyCarArmed::CTaskComplexDestroyCarArmed(CVehicle* vehicleToDestroy, uint32 a3, uint32 a4, uint32 a5) : 
+CTaskComplexDestroyCarArmed::CTaskComplexDestroyCarArmed(CVehicle* vehicleToDestroy, uint32 a3, uint32 a4, uint32 a5) :
     ctor58{ a3 },
     ctor5C{ a4 },
     ctor60{ a5 },
@@ -104,7 +104,7 @@ CTask* CTaskComplexDestroyCarArmed::CreateSubTask(eTaskType taskType, CPed* ped)
 }
 
 // 0x622070
-bool CTaskComplexDestroyCarArmed::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskComplexDestroyCarArmed::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     switch (priority) {
     case ABORT_PRIORITY_URGENT:
     case ABORT_PRIORITY_IMMEDIATE:
