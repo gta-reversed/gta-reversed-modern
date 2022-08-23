@@ -10,7 +10,7 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(Init, 0x49C290);
     RH_ScopedInstall(ShutdownForRestart, 0x49B640);
     RH_ScopedInstall(Buy, 0x49BF70);
-    RH_ScopedInstall(FindItem, 0x49AD20); // <-- test
+    RH_ScopedInstall(FindItem, 0x49AD20);
     RH_ScopedInstall(FindSection, 0x49AE70);
     RH_ScopedInstall(FindSectionInSection, 0x49AF90);
     RH_ScopedInstall(GetExtraInfo, 0x49ADE0);
@@ -27,12 +27,8 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(LoadPrices, 0x49B8D0);
     RH_ScopedInstall(LoadShop, 0x49BBE0);
     RH_ScopedInstall(LoadStats, 0x49B6A0);
-    RH_ScopedInstall(RemoveLoadedPrices, 0x49AC90); // <-- test
+    RH_ScopedInstall(RemoveLoadedPrices, 0x49AC90);
     RH_ScopedInstall(RemoveLoadedShop, 0x49AE30);
-    //RH_ScopedOverloadedInstall(AddPriceModifier, 0x0, { .reversed = false }); <-- address?
-    //RH_ScopedOverloadedInstall(AddPriceModifier, 0x0, { .reversed = false }); <-- address?
-    //RH_ScopedInstall(RemovePriceModifier, 0x0, { .reversed = false }); <-- address?
-    //RH_ScopedInstall(RemovePriceModifier, 0x0, { .reversed = false }); <-- address?
     RH_ScopedInstall(StoreClothesState, 0x49B200);
     RH_ScopedInstall(StoreVehicleMods, 0x49B280);
     RH_ScopedInstall(RestoreClothesState, 0x49B240);
@@ -40,6 +36,12 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(UpdateStats, 0x49BEF0);
     RH_ScopedInstall(Load, 0x5D3E40);
     RH_ScopedInstall(Save, 0x5D3DE0);
+
+    // address?
+    // RH_ScopedInstall(AddPriceModifier, 0x0, { .reversed = false });
+    // RH_ScopedInstall(AddPriceModifier, 0x0, { .reversed = false });
+    // RH_ScopedInstall(RemovePriceModifier, 0x0, { .reversed = false });
+    // RH_ScopedInstall(RemovePriceModifier, 0x0, { .reversed = false });
 
     // unused
     RH_ScopedInstall(SetCurrentProperty, 0x49B1F0);
