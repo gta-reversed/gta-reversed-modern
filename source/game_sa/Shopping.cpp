@@ -392,7 +392,6 @@ void CShopping::IncrementStat(uint32 statIndex, int32 change) {
         STAT_FAT, STAT_CLOTHES_RESPECT, STAT_APPEARANCE,
         STAT_RIOT_MISSION_ACCOMPLISHED, STAT_STAMINA, STAT_CALORIES
     };
-    assert(statIndex < std::size(indexStats));
 
     IncrementStat2(indexStats[statIndex], change);
 }
@@ -506,6 +505,8 @@ void CShopping::LoadShop(const char* sectionName) {
             if (ms_bHasBought[idx])
                 ms_shopContents[ms_numItemsInShop++] = price.key;
         });
+
+        // FIX_BUGS: CTimer::Resume()?
     } else {
         auto file = CFileMgr::OpenFile("data\\shopping.dat", "r");
         if (FindSection(file, "shops")) {
