@@ -24,6 +24,11 @@ CTaskSimpleStandUp::CTaskSimpleStandUp(bool sitAfterStep) :
 {
 }
 
+CTaskSimpleStandUp::CTaskSimpleStandUp(const CTaskSimpleStandUp& o) :
+    CTaskSimpleStandUp{o.m_sitAfterStep}
+{
+}
+
 // 0x631320
 CTaskSimpleStandUp::~CTaskSimpleStandUp() {
     if (m_anim) {
