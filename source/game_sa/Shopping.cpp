@@ -512,7 +512,7 @@ void CShopping::LoadShop(const char* sectionName) {
             FindSection(file, sectionName);
         }
 
-        char buf[14];
+        char buf[32];
         for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
             if (*line == '\0' || *line == '#')
                 continue;
@@ -525,11 +525,10 @@ void CShopping::LoadShop(const char* sectionName) {
                 strcpy_s(buf, strtok(nullptr, " \t"));
                 LoadPrices(buf);
             } else if (!strcmp("item", type)) {
-                auto model = strtok(nullptr, " \t");
-                auto modelKey = GetKey(model, ms_priceSectionLoaded);
-
-                if (ms_priceSectionLoaded != -1 || IsValidModForVehicle(modelKey, FindPlayerVehicle())) {
-                    ms_shopContents[ms_numItemsInShop++] = modelKey;
+                auto model = GetKey(strtok(nullptr, " \t"), ms_priceSectionLoaded);
+                auto veh = FindPlayerVehicle();
+                if (ms_priceSectionLoaded != PRICE_SECTION_CAR_MODS || IsValidModForVehicle(model, veh)) {
+                    ms_shopContents[ms_numItemsInShop++] = model;
                 }
             }
         }
