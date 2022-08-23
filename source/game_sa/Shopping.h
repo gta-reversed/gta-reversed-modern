@@ -130,8 +130,9 @@ public:
 
 static constexpr auto NUM_COMPONENTS = 20u; // ?
 
-extern char& gClothesHaveBeenStored;
-extern std::array<eDamageState, NUM_COMPONENTS>& gComponentDamageState;
-extern std::array<int16, NUM_VEHICLE_UPGRADES>& gStoredVehicleMods;
-extern CPedClothesDesc& gStoredClothesState;
-extern CMultiBuilding* gpCurrentProperty;
+static inline char& gClothesHaveBeenStored = *(char*)0xA97298;
+static inline CPedClothesDesc& gStoredClothesState = *(CPedClothesDesc*)0xA9A810;
+static inline std::array<eDamageState, NUM_COMPONENTS>& gComponentDamageState = *(std::array<eDamageState, 20u>*)0xA97258;
+static inline std::array<int16, NUM_VEHICLE_UPGRADES>& gStoredVehicleMods = *(std::array<int16, 15u>*)0xA97274;
+static inline std::array<float, NUM_LEVELS>& gPriceMultipliers = *(std::array<float, NUM_LEVELS>*)0x8A6204;
+static inline CMultiBuilding* gpCurrentProperty = (CMultiBuilding*)0xA97294;

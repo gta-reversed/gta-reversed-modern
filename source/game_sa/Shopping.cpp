@@ -1,24 +1,16 @@
 #include "StdInc.h"
-#include <extensions/enumerate.hpp>
 #include "Shopping.h"
 #include "PedClothesDesc.h"
-
-CPedClothesDesc& gStoredClothesState = *(CPedClothesDesc*)0xA9A810;
-char& gClothesHaveBeenStored = *(char*)0xA97298;
-std::array<eDamageState, NUM_COMPONENTS>& gComponentDamageState = *(std::array<eDamageState, 20u>*)0xA97258;
-std::array<int16, NUM_VEHICLE_UPGRADES>& gStoredVehicleMods = *(std::array<int16, 15u>*)0xA97274;
-std::array<float, NUM_LEVELS>& gPriceMultipliers = *(std::array<float, NUM_LEVELS>*)0x8A6204;
-CMultiBuilding* gpCurrentProperty = (CMultiBuilding*)0x0;
+#include <extensions/enumerate.hpp>
 
 void CShopping::InjectHooks() {
     RH_ScopedClass(CShopping);
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x49C290);
-    //RH_ScopedOverloadedInstall(AddPriceModifier, 0x0, { .reversed = false }); <-- address?
-    //RH_ScopedOverloadedInstall(AddPriceModifier, 0x0, { .reversed = false }); <-- address?
+    RH_ScopedInstall(ShutdownForRestart, 0x49B640);
     RH_ScopedInstall(Buy, 0x49BF70);
-    // RH_ScopedInstall(FindItem, 0x0, { .reversed = false }); <-- address?
+    RH_ScopedInstall(FindItem, 0x49AD20); // <-- test
     RH_ScopedInstall(FindSection, 0x49AE70);
     RH_ScopedInstall(FindSectionInSection, 0x49AF90);
     RH_ScopedInstall(GetExtraInfo, 0x49ADE0);
@@ -35,18 +27,41 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(LoadPrices, 0x49B8D0);
     RH_ScopedInstall(LoadShop, 0x49BBE0);
     RH_ScopedInstall(LoadStats, 0x49B6A0);
-    // RH_ScopedInstall(RemoveLoadedPrices, 0x0, { .reversed = false }); <-- address?
+    RH_ScopedInstall(RemoveLoadedPrices, 0x49AC90); // <-- test
     RH_ScopedInstall(RemoveLoadedShop, 0x49AE30);
+    //RH_ScopedOverloadedInstall(AddPriceModifier, 0x0, { .reversed = false }); <-- address?
+    //RH_ScopedOverloadedInstall(AddPriceModifier, 0x0, { .reversed = false }); <-- address?
     //RH_ScopedInstall(RemovePriceModifier, 0x0, { .reversed = false }); <-- address?
     //RH_ScopedInstall(RemovePriceModifier, 0x0, { .reversed = false }); <-- address?
-    RH_ScopedInstall(RestoreClothesState, 0x49B240);
-    RH_ScopedInstall(RestoreVehicleMods, 0x49B3C0);
-    RH_ScopedInstall(ShutdownForRestart, 0x49B640);
     RH_ScopedInstall(StoreClothesState, 0x49B200);
     RH_ScopedInstall(StoreVehicleMods, 0x49B280);
+    RH_ScopedInstall(RestoreClothesState, 0x49B240);
+    RH_ScopedInstall(RestoreVehicleMods, 0x49B3C0);
     RH_ScopedInstall(UpdateStats, 0x49BEF0);
     RH_ScopedInstall(Load, 0x5D3E40);
     RH_ScopedInstall(Save, 0x5D3DE0);
+
+    // unused
+    RH_ScopedInstall(SetCurrentProperty, 0x49B1F0);
+}
+
+/*!
+ * @brief Get changing stat index from name. (Used only in CShopping::LoadStats)
+ * @addr 0x49ABD0
+ * @param stat Changing stat name.
+ * @returns Stat index from the list provided in the function.
+ */
+int32 GetChangingStatIndex(const char* stat) {
+    static constexpr const char* statNames[] = {"fat", "respect", "sexy", "health", "stamina", "calories"};
+
+    // todo: use notsa::enumerate
+    for (auto i = 0u; i < std::size(statNames); i++) {
+        if (!strcmp(statNames[i], stat)) {
+            return i;
+        }
+    }
+
+    return -1;
 }
 
 // 0x49C290
@@ -61,45 +76,17 @@ void CShopping::Init() {
     LoadStats();
 }
 
-// Used only in CShopping::LoadStats()
-// 0x49ABD0
-int32 GetChangingStatIndex(const char* stat) {
-    static constexpr const char* statNames[] = {
-        "fat", "respect", "sexy", "health", "stamina", "calories"
-    };
+// 0x49B640
+void CShopping::ShutdownForRestart() {
+    RemoveLoadedShop();
 
-    // todo: use notsa::enumerate
-    for (auto i = 0u; i < std::size(statNames); i++) {
-        if (!strcmp(statNames[i], stat)) {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-// 0x
-void CShopping::AddPriceModifier(const char* name, const char* section, int32 price) {
-    AddPriceModifier(GetKey(name, GetPriceSectionFromName(section)), price);
-}
-
-// 0x (inlined)
-void CShopping::AddPriceModifier(uint32 key, int32 price) {
-    // the code may not be same, can not test.
-    for (auto&& [i, priceMod] : notsa::enumerate(std::span{ms_priceModifiers.data(), (size_t)ms_numPriceModifiers})) {
-        if (key == priceMod.key) {
-            priceMod.price = price;
-            return;
-        }
-    }
-    ms_priceModifiers[ms_numPriceModifiers].key = key;
-    ms_priceModifiers[ms_numPriceModifiers].price = price;
-    ms_numPriceModifiers++;
+    ms_numPriceModifiers = 0;
+    rng::fill(ms_bHasBought, false);
 }
 
 // 0x49BF70
 void CShopping::Buy(uint32 key, int32 extraInfo) {
-    auto index = GetItemIndex(key);
+    const auto index = GetItemIndex(key);
 
     auto ped = FindPlayerPed();
     auto& playerInfo = FindPlayerInfo();
@@ -230,23 +217,31 @@ void CShopping::Buy(uint32 key, int32 extraInfo) {
     }
 }
 
-// Searchs through ms_prices
-// 0x49ADA0 (inlined)
+/*!
+ * @brief Find item by searching through ms_prices.
+ * @addr 0x49AD20 (inlined)
+ * @param item Key ID of the item.
+ * @returns 'Buyable' index of the item
+ */
 int32 CShopping::FindItem(uint32 itemKey) {
-    auto itemId = -1;
     if (ms_numPrices >= 1) {
         for (auto&& [i, p] : notsa::enumerate(std::span{ms_prices.data(), (size_t)ms_numPrices})) {
             if (p.key == itemKey) {
-                itemId = i;
+                return i;
             }
         }
     }
 
-    assert(itemId != -1);
-    return itemId;
+    NOTSA_UNREACHABLE();
 }
 
-// 0x49AE70
+/*!
+ * @brief Find a section inside the file.
+ * @addr 0x49AE70
+ * @param file A shopping.dat-like formatted file.
+ * @param The section to find
+ * @returns If the section was found. The file's read pointer will be right after the section's beginning (after the `section` line)
+ */
 bool CShopping::FindSection(FILESTREAM file, const char* sectionName) {
     auto counter = 0;
     for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
@@ -288,8 +283,12 @@ int32 CShopping::GetExtraInfo(uint32 itemKey, int32 index) {
     return 0;
 }
 
-// Searchs through ms_keys
-// 0x49AB10
+/*!
+ * @brief Find item by searching through ms_keys.
+ * @addr 0x49AB10
+ * @param itemKey Key ID of the item.
+ * @returns 'Absolute' index of the item
+ */
 int32 CShopping::GetItemIndex(uint32 itemKey) {
     for (auto&& [i, key] : notsa::enumerate(ms_keys)) {
         if (key == itemKey) {
@@ -297,8 +296,7 @@ int32 CShopping::GetItemIndex(uint32 itemKey) {
         }
     }
 
-    assert(false);
-    return -1;
+    NOTSA_UNREACHABLE();
 }
 
 // 0x49AB30
@@ -326,8 +324,12 @@ const char* CShopping::GetNameTag(uint32 itemKey) {
     return ms_prices[FindItem(itemKey)].nameTag;
 }
 
-// Finds the next 'root' section name from shopping.dat
-// 0x49AF10
+/*!
+ * @brief Finds the next 'root' section name from the file
+ * @addr 0x49AF10
+ * @param file A shopping.dat-like formatted file.
+ * @returns The file's read pointer right after the next section, nullptr if no next section is available.
+ */
 const char* CShopping::GetNextSection(FILESTREAM file) {
     auto line = CFileLoader::LoadLine(file);
     if (!line)
@@ -361,15 +363,13 @@ int32 CShopping::GetPrice(uint32 itemKey) {
 
 // 0x49AAD0
 ePriceSection CShopping::GetPriceSectionFromName(const char* name) {
-    auto ret = -1;
     for (auto&& [i, sectionName] : notsa::enumerate(ms_sectionNames)) {
         if (!_stricmp(name, sectionName)) {
-            ret = i;
+            return static_cast<ePriceSection>(i);
         }
     }
 
-    assert(ret != -1);
-    return static_cast<ePriceSection>(ret);
+    NOTSA_UNREACHABLE();
 }
 
 // 0x49B610
@@ -382,8 +382,12 @@ bool CShopping::HasPlayerBought(uint32 itemKey) {
     return ms_bHasBought[GetItemIndex(itemKey)];
 }
 
-// Increments by stat index
-// 0x49BE70
+/*!
+ * @brief Increments the stat from stat index
+ * @addr 0x49BE70
+ * @param statIndex Index of a stat list described in the function.
+ * @param change Change value of the stat.
+ */
 void CShopping::IncrementStat(uint32 statIndex, int32 change) {
     if (statIndex == -1)
         return;
@@ -396,8 +400,12 @@ void CShopping::IncrementStat(uint32 statIndex, int32 change) {
     IncrementStat2(indexStats[statIndex], change);
 }
 
-// Increments by stat id
-// 0x49AFD0 (inlined)
+/*!
+ * @brief Increments the stat from real stat id
+ * @addr 0x49AFD0 (inlined)
+ * @param stat Stat id
+ * @param change Change value of the stat.
+ */
 void CShopping::IncrementStat2(eStats stat, int32 change) {
     assert(stat != (eStats)(-1));
 
@@ -513,7 +521,7 @@ void CShopping::LoadShop(const char* sectionName) {
             FindSection(file, sectionName);
         }
 
-        char buf[32];
+        char sectionName[32];
         for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
             if (*line == '\0' || *line == '#')
                 continue;
@@ -523,8 +531,8 @@ void CShopping::LoadShop(const char* sectionName) {
 
             auto type = strtok(line, " \t");
             if (!strcmp("type", type)) {
-                strcpy_s(buf, strtok(nullptr, " \t"));
-                LoadPrices(buf);
+                strcpy_s(sectionName, strtok(nullptr, " \t"));
+                LoadPrices(sectionName);
             } else if (!strcmp("item", type)) {
                 auto model = GetKey(strtok(nullptr, " \t"), ms_priceSectionLoaded);
                 auto veh = FindPlayerVehicle();
@@ -588,7 +596,7 @@ void CShopping::LoadStats() {
     CFileMgr::CloseFile(file);
 }
 
-// 0x
+// 0x49AC90
 void CShopping::RemoveLoadedPrices() {
     auto animBlockIndex = CAnimManager::GetAnimationBlockIndex(ms_sectionNames[ms_priceSectionLoaded]);
     if (animBlockIndex != -1) {
@@ -601,6 +609,25 @@ void CShopping::RemoveLoadedPrices() {
 void CShopping::RemoveLoadedShop() {
     ms_shopLoaded[0] = '\0';
     RemoveLoadedPrices();
+}
+
+// 0x
+void CShopping::AddPriceModifier(const char* name, const char* section, int32 price) {
+    AddPriceModifier(GetKey(name, GetPriceSectionFromName(section)), price);
+}
+
+// 0x (inlined)
+void CShopping::AddPriceModifier(uint32 key, int32 price) {
+    // the code may not be same, can not test.
+    for (auto&& [i, priceMod] : notsa::enumerate(std::span{ms_priceModifiers.data(), (size_t)ms_numPriceModifiers})) {
+        if (key == priceMod.key) {
+            priceMod.price = price;
+            return;
+        }
+    }
+    ms_priceModifiers[ms_numPriceModifiers].key = key;
+    ms_priceModifiers[ms_numPriceModifiers].price = price;
+    ms_numPriceModifiers++;
 }
 
 // 0x
@@ -626,6 +653,56 @@ void CShopping::RemovePriceModifier(uint32 key) {
     ms_numPriceModifiers--;
     if (ms_numPriceModifiers >= 1u) {
         ms_priceModifiers[idx] = ms_priceModifiers[ms_numPriceModifiers];
+    }
+}
+
+// 0x49B200
+void CShopping::StoreClothesState() {
+    // todo: operator=
+    memcpy(&gStoredClothesState, FindPlayerPed()->GetClothesDesc(), sizeof(CPedClothesDesc));
+    gClothesHaveBeenStored = 1u;
+}
+
+// 0x49B280
+void CShopping::StoreVehicleMods() {
+    auto veh = FindPlayerVehicle();
+
+    std::copy_n(veh->m_anUpgrades.begin(), veh->m_anUpgrades.size(), gStoredVehicleMods.begin());
+
+    if (!veh->IsAutomobile())
+        return;
+
+    const auto& damage = veh->AsAutomobile()->m_damageManager;
+    for (const auto& [i, state] : notsa::enumerate(gComponentDamageState)) {
+        switch (i) {
+        case 2:
+            state = (eDamageState)damage.GetWheelStatus(CAR_WHEEL_FRONT_RIGHT);
+            break;
+        case 4:
+            state = (eDamageState)damage.GetWheelStatus(CAR_WHEEL_REAR_RIGHT);
+            break;
+        case 5:
+            state = (eDamageState)damage.GetWheelStatus(CAR_WHEEL_FRONT_LEFT);
+            break;
+        case 7:
+            state = (eDamageState)damage.GetWheelStatus(CAR_WHEEL_REAR_LEFT);
+            break;
+        case 12:
+            state = (eDamageState)damage.GetPanelStatus(FRONT_BUMPER);
+            break;
+        case 13:
+            state = (eDamageState)damage.GetPanelStatus(REAR_BUMPER);
+            break;
+        case 16:
+            state = (eDamageState)damage.GetDoorStatus(DOOR_BONNET);
+            break;
+        case 17:
+            state = (eDamageState)damage.GetDoorStatus(DOOR_BOOT);
+            break;
+        default:
+            state = DAMAGE_STATE_OK;
+            break;
+        }
     }
 }
 
@@ -698,74 +775,15 @@ void CShopping::RestoreVehicleMods() {
     }
 }
 
-// unused
-// 0x
+// 0x49B1F0 (unused)
 void CShopping::SetCurrentProperty(CMultiBuilding* property) {
-    //gpCurrentProperty = property;
-}
-
-// 0x49B640
-void CShopping::ShutdownForRestart() {
-    RemoveLoadedShop();
-
-    ms_numPriceModifiers = 0;
-    rng::fill(ms_bHasBought, false);
-}
-
-// 0x49B200
-void CShopping::StoreClothesState() {
-    // todo: operator=
-    memcpy(&gStoredClothesState, FindPlayerPed()->GetClothesDesc(), sizeof(CPedClothesDesc));
-    gClothesHaveBeenStored = 1u;
-}
-
-// 0x49B280
-void CShopping::StoreVehicleMods() {
-    auto veh = FindPlayerVehicle();
-
-    std::copy_n(veh->m_anUpgrades.begin(), veh->m_anUpgrades.size(), gStoredVehicleMods.begin());
-
-    if (!veh->IsAutomobile())
-        return;
-
-    const auto& damage = veh->AsAutomobile()->m_damageManager;
-    for (const auto& [i, state] : notsa::enumerate(gComponentDamageState)) {
-        switch (i) {
-        case 2:
-            state = (eDamageState)damage.GetWheelStatus(CAR_WHEEL_FRONT_RIGHT);
-            break;
-        case 4:
-            state = (eDamageState)damage.GetWheelStatus(CAR_WHEEL_REAR_RIGHT);
-            break;
-        case 5:
-            state = (eDamageState)damage.GetWheelStatus(CAR_WHEEL_FRONT_LEFT);
-            break;
-        case 7:
-            state = (eDamageState)damage.GetWheelStatus(CAR_WHEEL_REAR_LEFT);
-            break;
-        case 12:
-            state = (eDamageState)damage.GetPanelStatus(FRONT_BUMPER);
-            break;
-        case 13:
-            state = (eDamageState)damage.GetPanelStatus(REAR_BUMPER);
-            break;
-        case 16:
-            state = (eDamageState)damage.GetDoorStatus(DOOR_BONNET);
-            break;
-        case 17:
-            state = (eDamageState)damage.GetDoorStatus(DOOR_BOOT);
-            break;
-        default:
-            state = DAMAGE_STATE_OK;
-            break;
-        }
-    }
+    gpCurrentProperty = property;
 }
 
 // 0x49BEF0
 void CShopping::UpdateStats(size_t index, bool increment) {
     for (auto& stat : ms_statModifiers[index].stat) {
-        IncrementStat(stat.index, (!increment) ? (-1) : (1) * stat.change);
+        IncrementStat(stat.index, (!increment) ? -stat.change : stat.change);
     }
 }
 
