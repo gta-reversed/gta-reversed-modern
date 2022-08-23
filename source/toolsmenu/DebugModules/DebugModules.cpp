@@ -6,11 +6,13 @@
 #include "Collision\CollisionDebugModule.h"
 #include "Cheat\CheatDebugModule.h"
 #include "Vehicle\VehicleDebugModule.h"
-#include "Ped\PedDebugModule.h"
+#include "Ped\PedSpawnerModule.h"
+#include "Ped/PedDebugModule.h"
 #include "Script\MissionDebugModule.h"
 #include "Audio\CutsceneTrackManagerDebugModule.h"
 #include "Audio\AmbienceTrackManagerDebugModule.h"
 #include "Audio\PoliceScannerAudioEntityDebugModule.h"
+#include "PedSpawnerModule.h"
 #include "CStreamingDebugModule.h"
 #include "CPickupsDebugModule.h"
 #include "HooksDebugModule.h"
@@ -22,11 +24,12 @@
 
 bool DebugModules::m_ShowFPS = false;
 bool DebugModules::m_ShowExtraDebugFeatures = false;
+bool m_ShowPedsDebugModule = false;
 
 void DebugModules::Initialise(ImGuiContext* ctx) {
     TeleportDebugModule::Initialise(*ctx);
     VehicleDebugModule::Initialise();
-    PedDebugModule::Initialise();
+    PedSpawnerModule::Initialise();
     MissionDebugModule::Initialise();
     FXDebugModule::Initialise();
 }
@@ -34,7 +37,7 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
 void SpawnTab() {
     if (ImGui::BeginTabBar("")) {
         if (ImGui::BeginTabItem("Ped")) {
-            PedDebugModule::ProcessImGui();
+            PedSpawnerModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 
@@ -95,6 +98,7 @@ void DebugModules::DisplayMainWindow() {
             if (ImGui::Button("Streamer: ReInit")) {
                 CStreaming::ReInit();
             }
+            ImGui::Checkbox("Display ped debug windows", &m_ShowPedsDebugModule);
             ImGui::EndTabItem();
         }
 
@@ -194,4 +198,5 @@ void DebugModules::Display(bool showMenu) {
     DisplayFramePerSecond();
     DisplayExtraDebugFeatures();
     TeleportDebugModule::ProcessInput();
+    PedDebugModule::ProcessImGui();
 }
