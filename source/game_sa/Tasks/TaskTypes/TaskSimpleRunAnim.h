@@ -9,7 +9,7 @@
 #include "TaskSimpleAnim.h"
 #include "AnimBlendAssociation.h"
 
-class CTaskSimpleRunAnim : public CTaskSimpleAnim {
+class NOTSA_EXPORT_VTABLE CTaskSimpleRunAnim : public CTaskSimpleAnim {
 public:
     AssocGroupId m_nAnimGroup;
     AnimationId  m_nAnimId;

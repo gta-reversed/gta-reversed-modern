@@ -43,8 +43,8 @@ void CCarCtrl::InjectHooks()
     RH_ScopedInstall(Init, 0x4212E0);
     RH_ScopedInstall(ReInit, 0x4213B0);
     RH_ScopedInstall(InitSequence, 0x421740);
-    Install("CCarCtrl", "ChooseGangCarModel", 0x421A40, &CCarCtrl::ChooseGangCarModel, false, 7);
-    Install("CCarCtrl", "ChoosePoliceCarModel", 0x421980, &CCarCtrl::ChoosePoliceCarModel, false, 7);
+    Install("CCarCtrl", "ChooseGangCarModel", 0x421A40, &CCarCtrl::ChooseGangCarModel, { .jmpCodeSize = 7 });
+    Install("CCarCtrl", "ChoosePoliceCarModel", 0x421980, &CCarCtrl::ChoosePoliceCarModel, { .jmpCodeSize = 7 });
     RH_ScopedInstall(CreateCarForScript, 0x431F80);
     RH_ScopedInstall(ChooseBoatModel, 0x421970);
     RH_ScopedInstall(ChooseCarModelToLoad, 0x421900);
@@ -669,6 +669,8 @@ void CCarCtrl::RemoveDistantCars() {
                     vehicle->m_nPedsPositionForRoadBlock,
                     vehicle->IsLawEnforcementVehicle() ? PED_TYPE_COP : PED_TYPE_GANG1
                 );
+
+                vehicle->vehicleFlags.bCreateRoadBlockPeds = false;
             }
         }
     }

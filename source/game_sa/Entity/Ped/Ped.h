@@ -102,7 +102,7 @@ class CVehicle;
 class CPedStat;
 class CPedStats;
 
-class CPed : public CPhysical {
+class NOTSA_EXPORT_VTABLE CPed : public CPhysical {
 public:
     static inline int16 m_sGunFlashBlendStart = 10'000; // 0x8D1370
 

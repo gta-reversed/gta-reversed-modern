@@ -18,6 +18,7 @@ static void dev_printf(int lineno, const char* file, const char* fmt, ...) {
 #else
 #define DEV_LOG(...)
 #endif
+
 #define PUSH_RENDERGROUP(str) 0
 #define POP_RENDERGROUP() 0
 

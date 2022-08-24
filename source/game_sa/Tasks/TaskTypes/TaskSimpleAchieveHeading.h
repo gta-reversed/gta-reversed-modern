@@ -15,17 +15,19 @@ public:
     };
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_ACHIEVE_HEADING;
+
     CTaskSimpleAchieveHeading(float fAngle, float changeRateMult, float maxHeading);
     ~CTaskSimpleAchieveHeading() override = default; // 0x667E70
 
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override { return new CTaskSimpleAchieveHeading(m_fAngle, m_fChangeRateMult, m_fMaxHeading); } // 0x66CCF0
-    eTaskType GetTaskType() override { return TASK_SIMPLE_ACHIEVE_HEADING; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(class CPed* ped) override;
 
     void QuitIK(CPed* ped) const;
     void SetUpIK(CPed* ped);
 
-    static void InjectHooks();
+    static void InjectHooks() {};
 };
 VALIDATE_SIZE(CTaskSimpleAchieveHeading, 0x18);

@@ -26,21 +26,21 @@ enum eBmxNodes {
 
 class CBmx : public CBike {
 public:
-    float m_fTimeStep;         // todo: change name; related to time step
-    float m_fBaseAnimLean;     // always 0.0f
-    float m_fRotPedalChainset; // rotX for BMX_CHAINSET
-    float m_fRotPedalR;        // rotX BMX_PEDAL_R
-    float m_fRotPedalL;        // rotX BMX_PEDAL_L
-    float m_fDistanceBetweenWheels;
-    float m_fWheelsBalance;
-    float m_f830; // see CBmx::GetFrameOffset, ctor
-    bool  m_b831;
+    float m_fControlJump;
+    float m_fControlPedaling;     // always 0.0f
+    float m_fSprintLeanAngle;
+    float m_fCrankAngle;
+    float m_fPedalAngleL;
+    float m_fPedalAngleR;
+    float m_fMidWheelDistY;
+    float m_fMidWheelFracY;
+    bool  m_bIsFreewheeling;
 
 public:
     CBmx(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CBmx() override;
 
-    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
+    void BlowUpCar(CEntity* damager, bool bHideExplosion) override;
     bool SetUpWheelColModel(CColModel* wheelCol) override;
     bool BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) override;
     void ProcessControl() override;
@@ -49,9 +49,9 @@ public:
     void PreRender() override;
     bool ProcessAI(uint32& extraHandlingFlags) override;
 
-    void GetFrameOffset(float& a1, float& a2);
+    void GetFrameOffset(float& fZOffset, float& fAngleOffset);
     void ProcessBunnyHop();
-    static void LaunchBunnyHopCB(CAnimBlendAssociation* blendAssoc, void* data); // data is a ptr to CBmx
+    static void LaunchBunnyHopCB(CAnimBlendAssociation* blendAssoc, void* data);
 
 private:
     friend void InjectHooksMain();
@@ -60,7 +60,7 @@ private:
     CBmx* Constructor(int32 modelIndex, eVehicleCreatedBy createdBy) { this->CBmx::CBmx(modelIndex, createdBy); return this; }
     CBmx* Destructor() { this->CBmx::~CBmx(); return this; }
 
-    void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) { CBmx::BlowUpCar(damager, bHideExplosion); }
+    void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) { CBmx::BlowUpCar(damager, bHideExplosion); }
     bool SetUpWheelColModel_Reversed(CColModel* wheelCol) { return CBmx::SetUpWheelColModel(wheelCol); }
     bool BurstTyre_Reversed(uint8 tyreComponentId, bool bPhysicalEffect) { return CBmx::BurstTyre(tyreComponentId, bPhysicalEffect); }
     void ProcessControl_Reversed() { CBmx::ProcessControl(); }

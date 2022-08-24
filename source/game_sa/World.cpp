@@ -128,6 +128,18 @@ void CWorld::InjectHooks() {
     RH_ScopedInstall(CameraToIgnoreThisObject, 0x563F40);
     RH_ScopedInstall(RemoveReferencesToDeletedObject, 0x565510);
     RH_ScopedInstall(ClearForRestart, 0x564360);
+
+    RH_ScopedGlobalInstall(FindPlayerCoors, 0x56E010);
+    RH_ScopedGlobalInstall(FindPlayerSpeed, 0x56E090);
+    RH_ScopedGlobalInstall(FindPlayerEntity, 0x56E120);
+    RH_ScopedGlobalInstall(FindPlayerTrain, 0x56E160);
+    RH_ScopedGlobalInstall(FindPlayerCentreOfWorld, 0x56E250);
+    // RH_ScopedGlobalInstall(FindPlayerCentreOfWorld_NoSniperShift, 0x56E320);
+    // RH_ScopedGlobalInstall(FindPlayerCentreOfWorld_NoInteriorShift, 0x56E400);
+    RH_ScopedGlobalInstall(FindPlayerHeading, 0x56E450);
+    RH_ScopedGlobalInstall(FindPlayerPed, 0x56E210);
+    RH_ScopedGlobalInstall(FindPlayerVehicle, 0x56E0D0);
+    RH_ScopedGlobalInstall(FindPlayerWanted, 0x56E230);
 }
 
 // 0x5631C0

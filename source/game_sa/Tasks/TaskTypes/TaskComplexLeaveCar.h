@@ -29,15 +29,17 @@ public:
 public:
     static constexpr auto Type = TASK_COMPLEX_LEAVE_CAR;
 
-    CTaskComplexLeaveCar(CVehicle* targetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut);
-    ~CTaskComplexLeaveCar();
+    explicit CTaskComplexLeaveCar(CVehicle* targetVehicle, int32 nTargetDoor, int32 nDelayTime);
+    explicit CTaskComplexLeaveCar(CVehicle* targetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut);
+    ~CTaskComplexLeaveCar() override;
 
-    CTask*    Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_LEAVE_CAR; }
+    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override { return new CTaskComplexLeaveCar(m_pTargetVehicle, m_nTargetDoor, m_nDelayTime, m_bSensibleLeaveCar, m_bForceGetOut); } // 0x63D9E0
     bool   MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
+    CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
 private:
     friend void InjectHooksMain();
@@ -45,5 +47,4 @@ private:
 
     CTaskComplexLeaveCar* Constructor(CVehicle* targetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut);
 };
-
 VALIDATE_SIZE(CTaskComplexLeaveCar, 0x34);

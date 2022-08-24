@@ -21,7 +21,8 @@ public:
     CVector(const CVector2D& v2d, float Z); // DO NOT DEFAULT Z TO 0 HERE, BECAUSE IMPLICIT CONVERSIONS WILL HAPPEN!
     constexpr CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
     constexpr CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; }
-    
+    constexpr explicit CVector(float value) { x = y = z = value; }
+
 public:
     static void InjectHooks();
 
@@ -98,7 +99,7 @@ public:
         return x * x + y * y + z * z;
     }
 
-    inline float SquaredMagnitude2D() {
+    inline float SquaredMagnitude2D() const {
         return x * x + y * y;
     }
 
@@ -120,7 +121,12 @@ public:
     static CVector AverageN(const CVector* begin, size_t n) {
         return Average(begin, begin + n);
     }
+
+    [[nodiscard]] float Heading() const {
+        return std::atan2(-x, y);
+    }
 };
+VALIDATE_SIZE(CVector, 0xC);
 
 constexpr inline CVector operator-(const CVector& vecOne, const CVector& vecTwo) {
     return { vecOne.x - vecTwo.x, vecOne.y - vecTwo.y, vecOne.z - vecTwo.z };
@@ -191,4 +197,7 @@ static CVector Normalized(CVector v) { v.Normalise(); return v; }
 static CVector ProjectVector(const CVector& what, const CVector& onto) {
     return onto * (DotProduct(what, onto) / onto.SquaredMagnitude());
 }
-VALIDATE_SIZE(CVector, 0xC);
+
+CVector Multiply3x3(const CMatrix& m, const CVector& v);
+CVector Multiply3x3(const CVector& v, const CMatrix& m);
+CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec);

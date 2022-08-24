@@ -1480,7 +1480,7 @@ void CCamera::Process() {
 void CCamera::DrawBordersForWideScreen() {
     CRect rect;
     GetScreenRect(&rect);
-    if (!m_nBlurType || m_nBlurType == 2) {
+    if (m_nBlurType == MOTION_BLUR_NONE  || m_nBlurType == MOTION_BLUR_LIGHT_SCENE) {
         m_nMotionBlurAddAlpha = 80;
     }
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));

@@ -9,7 +9,7 @@ class CPed;
 class CTaskSimpleIKChain;
 class IKChain_c;
 
-class CTaskSimpleIKChain : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleIKChain : public CTaskSimple {
 public:
     int32     m_nTime;
     int32     m_nBlendTime;
@@ -31,12 +31,14 @@ public:
     int32     m_bIsBlendingOut;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_IK_CHAIN;
+
     CTaskSimpleIKChain(const char* name, ePedBones effectorBoneTag, CVector effectorPos, ePedBones pivotBoneTag, CEntity* entity, ePedBones offsetBoneTag, CVector offsetPos,
                        float speed, int32 time, int32 blendTime);
     ~CTaskSimpleIKChain() override;
 
-    CTaskSimpleIKChain* Clone() override;
-    eTaskType GetTaskType() override { return TASK_SIMPLE_IK_CHAIN; } // 0x62EC30
+    eTaskType GetTaskType() override { return Type; } // 0x62EC30
+    CTask* Clone() override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     bool ProcessPed(CPed* ped) override;
 

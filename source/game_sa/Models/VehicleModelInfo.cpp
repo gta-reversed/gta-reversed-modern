@@ -9,6 +9,7 @@
 #include "VehicleModelInfo.h"
 #include "CustomCarPlateMgr.h"
 #include "LoadingScreen.h"
+#include "CarFXRenderer.h"
 
 CVehicleModelInfo::CLinkedUpgradeList& CVehicleModelInfo::ms_linkedUpgrades = *(CVehicleModelInfo::CLinkedUpgradeList*)0xB4E6D8;
 RwTexture* &CVehicleModelInfo::ms_pRemapTexture = *(RwTexture**)0xB4E47C;
@@ -1262,16 +1263,12 @@ void CVehicleModelInfo::SetupCommonData()
     LoadEnvironmentMaps();
     CLoadingScreen::NewChunkLoaded();
 
-    auto iTxd = CTxdStore::FindTxdSlot("vehicle");
-    if (iTxd == -1)
-        iTxd = CTxdStore::AddTxdSlot("vehicle");
-
-    CTxdStore::LoadTxd(iTxd, "MODELS\\GENERIC\\VEHICLE.TXD");
-    CTxdStore::AddRef(iTxd);
-
-    if (iTxd != -1)
-        vehicleTxd = CTxdStore::ms_pTxdPool->GetAt(iTxd)->m_pRwDictionary;
-
+    auto slot = CTxdStore::FindOrAddTxdSlot("vehicle");
+    CTxdStore::LoadTxd(slot, "MODELS\\GENERIC\\VEHICLE.TXD");
+    CTxdStore::AddRef(slot);
+    if (slot != -1)
+        vehicleTxd = CTxdStore::ms_pTxdPool->GetAt(slot)->m_pRwDictionary;
+    assert(vehicleTxd);
     ms_pLightsTexture = RwTexDictionaryFindNamedTexture(vehicleTxd, "vehiclelights128");
     ms_pLightsOnTexture = RwTexDictionaryFindNamedTexture(vehicleTxd, "vehiclelightson128");
     CLoadingScreen::NewChunkLoaded();

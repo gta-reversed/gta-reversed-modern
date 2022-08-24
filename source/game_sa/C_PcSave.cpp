@@ -15,11 +15,11 @@ void C_PcSave::InjectHooks() {
 
     // See note in CGenericGameStorage::InjectHooks as to why all this is unhooked by default
 
-    RH_ScopedInstall(SetSaveDirectory, 0x619040, true);
-    RH_ScopedInstall(GenerateGameFilename, 0x6190A0, true);
-    RH_ScopedInstall(PopulateSlotInfo, 0x619140, true);
-    RH_ScopedInstall(SaveSlot, 0x619060, true);
-    RH_ScopedInstall(DeleteSlot, 0x6190D0, true);
+    RH_ScopedInstall(SetSaveDirectory, 0x619040, { .reversed = false });
+    RH_ScopedInstall(GenerateGameFilename, 0x6190A0, { .reversed = false });
+    RH_ScopedInstall(PopulateSlotInfo, 0x619140, { .reversed = false });
+    RH_ScopedInstall(SaveSlot, 0x619060, { .reversed = false });
+    RH_ScopedInstall(DeleteSlot, 0x6190D0, { .reversed = false });
 }
 
 // 0x619040

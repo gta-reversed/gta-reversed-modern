@@ -343,6 +343,7 @@ public:
 
 private:
     static void SetBrightness(float brightness, bool arg2);
+    const char* GetMovieFileName() const;
 };
 
 VALIDATE_SIZE(CMenuManager, 0x1B78);
