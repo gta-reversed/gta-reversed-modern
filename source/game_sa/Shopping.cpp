@@ -629,6 +629,7 @@ void CShopping::AddPriceModifier(uint32 key, int32 price) {
     rng::for_each_n(ms_priceModifiers.begin(), ms_numPriceModifiers, [key, price](auto priceModifier) {
         if (key == priceModifier.key) {
             priceModifier.price = price;
+            return;
         }
     });
 
