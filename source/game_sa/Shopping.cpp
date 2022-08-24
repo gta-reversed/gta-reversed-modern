@@ -111,6 +111,7 @@ void CShopping::Buy(uint32 key, int32 extraInfo) {
 
     switch (ms_priceSectionLoaded) {
     case PRICE_SECTION_CAR_MODS: {
+        // inlined:
         auto veh = FindPlayerVehicle();
         auto upgradeModel = CModelInfo::GetModelInfo(key);
         auto vehModel = veh->GetModelInfo()->AsVehicleModelInfoPtr();
