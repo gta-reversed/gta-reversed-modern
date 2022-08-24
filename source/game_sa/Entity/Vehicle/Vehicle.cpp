@@ -2957,7 +2957,7 @@ void CVehicle::FirePlaneGuns() {
 
     // Shake pad (if necessary)
     const auto GetPadIdToShake = [this]() -> std::optional<int32> {
-        if (m_nStatus == STATUS_HELI) {
+        if (m_nStatus == STATUS_REMOTE_CONTROLLED) {
             return 0;
         }
 
@@ -3553,11 +3553,11 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
 
             if (wasAnyCPValid) {
                 if (entity.IsPed() && !CTimer::IsTimeInRange(planeRotorDmgTimeMS - 2000, planeRotorDmgTimeMS)) {
-                    if (m_nStatus == STATUS_HELI) {
+                    if (m_nStatus == STATUS_REMOTE_CONTROLLED) {
                         AudioEngine.ReportCollision(this, &entity, SURFACE_CAR_PANEL, SURFACE_CAR, cpOnRotor, nullptr, 0.15f, 1.f, false, false);
                     } else {
-                        const auto& gc = *TheCamera.GetGameCamPosition();
-                        auto fuckingBullshit = gc + Normalized(cpOnRotor - gc) * 4.f;
+                        const auto& gameCamPos = *TheCamera.GetGameCamPosition();
+                        auto fuckingBullshit = gameCamPos + Normalized(cpOnRotor - gameCamPos) * 4.f;
                         AudioEngine.ReportCollision(this, &entity, SURFACE_CAR_PANEL, SURFACE_CAR, fuckingBullshit, nullptr, 0.15f, 1.f, false, false);
                     }
                     planeRotorDmgTimeMS = CTimer::GetTimeInMS() + CGeneral::GetRandomNumberInRange(150, 250);

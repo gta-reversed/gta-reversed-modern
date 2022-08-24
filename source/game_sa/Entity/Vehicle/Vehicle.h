@@ -171,7 +171,7 @@ struct tHydraulicData {
 
 VALIDATE_SIZE(tHydraulicData, 0x28);
 
-class CVehicle : public CPhysical {
+class NOTSA_EXPORT_VTABLE CVehicle : public CPhysical {
 public:
     CAEVehicleAudioEntity m_vehicleAudio;
     tHandlingData*        m_pHandlingData;
