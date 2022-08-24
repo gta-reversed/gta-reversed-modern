@@ -24,7 +24,7 @@
 
 bool DebugModules::m_ShowFPS = false;
 bool DebugModules::m_ShowExtraDebugFeatures = false;
-bool m_ShowPedsDebugModule = false;
+static PedDebugModule::Module s_PedDebugModule{};
 
 void DebugModules::Initialise(ImGuiContext* ctx) {
     TeleportDebugModule::Initialise(*ctx);
@@ -98,7 +98,6 @@ void DebugModules::DisplayMainWindow() {
             if (ImGui::Button("Streamer: ReInit")) {
                 CStreaming::ReInit();
             }
-            ImGui::Checkbox("Display ped debug windows", &m_ShowPedsDebugModule);
             ImGui::EndTabItem();
         }
 
@@ -187,16 +186,21 @@ void DebugModules::ProcessExtraDebugFeatures() {
             ImGui::EndTabItem();
         }
 
+        if (ImGui::BeginTabItem("Peds")) {
+            s_PedDebugModule.ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
         ImGui::EndTabBar();
     }
 }
 
-void DebugModules::Display(bool showMenu) {
+void DebugModules::ProcessRender(bool showMenu) {
     if (showMenu) {
         DisplayMainWindow();
     }
     DisplayFramePerSecond();
     DisplayExtraDebugFeatures();
     TeleportDebugModule::ProcessInput();
-    PedDebugModule::ProcessImGui();
+    s_PedDebugModule.ProcessRender();
 }
