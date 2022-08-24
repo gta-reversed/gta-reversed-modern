@@ -6,12 +6,13 @@
 */
 #include "StdInc.h"
 
+#include <optional>
 #include <functional>
-#include <TaskComplexEnterCarAsDriver.h>
-#include <TaskComplexEnterCarAsPassenger.h>
-#include "ModelIndices.h"
 #include "extensions/utility.hpp"
+
 #include "Vehicle.h"
+
+#include "ModelIndices.h"
 #include "CustomCarPlateMgr.h"
 #include "Buoyancy.h"
 #include "CarCtrl.h"
@@ -21,7 +22,8 @@
 #include "Rope.h"
 #include "Ropes.h"
 #include "IKChainManager_c.h"
-#include <optional>
+#include "TaskComplexEnterCarAsDriver.h"
+#include "TaskComplexEnterCarAsPassenger.h"
 
 uint32& planeRotorDmgTimeMS = *(uint32*)0xC1CC1C;
 float& CVehicle::WHEELSPIN_TARGET_RATE = *(float*)0x8D3498;          // 1.0f
@@ -2565,20 +2567,16 @@ void CVehicle::UpdateWinch() {
 // 0x6D3C70
 void CVehicle::RemoveWinch() {
     // NOTE: This function is not correct, as in
-    //       the original code uses `&this[29]` as the rope index (and not `GetRopeIndex()`).
+    //       the original code uses `&this[29]` as the rope index (and not `GetRopeID()`).
     //       BUT it's not used anywhere, so..
 
     NOTSA_UNREACHABLE("Unused function");
 
-    if (const auto ropeIdx = GetRopeIndex(); ropeIdx >= 0)
+    if (const auto ropeIdx = GetRopeID(); ropeIdx >= 0) {
         CRopes::GetRope(ropeIdx).Remove();
+    }
 
     m_ropeType = 0;
-}
-
-// NOTSA
-int32 CVehicle::GetRopeIndex() {
-    return CRopes::FindRope((uint32)&m_nFlags + 1);
 }
 
 CVehicleAnimGroup& CVehicle::GetAnimGroup() const {
@@ -2591,27 +2589,27 @@ AssocGroupId CVehicle::GetAnimGroupId() const {
 
 // 0x6D3CB0
 void CVehicle::ReleasePickedUpEntityWithWinch() {
-    return CRopes::GetRope(GetRopeIndex()).ReleasePickedUpObject();
+    return CRopes::GetRope(GetRopeID()).ReleasePickedUpObject();
 }
 
 // 0x6D3CD0
 void CVehicle::PickUpEntityWithWinch(CEntity* entity) {
-    return CRopes::GetRope(GetRopeIndex()).PickUpObject(entity);
+    return CRopes::GetRope(GetRopeID()).PickUpObject(entity);
 }
 
 // 0x6D3CF0
 CEntity* CVehicle::QueryPickedUpEntityWithWinch() {
-    return CRopes::GetRope(GetRopeIndex()).m_pRopeAttachObject;
+    return CRopes::GetRope(GetRopeID()).m_pRopeAttachObject;
 }
 
 // 0x6D3D10
 float CVehicle::GetRopeHeightForHeli() {
-    return CRopes::GetRope(GetRopeIndex()).m_fSegmentLength;
+    return CRopes::GetRope(GetRopeID()).m_fSegmentLength;
 }
 
 // 0x6D3D30
 void CVehicle::SetRopeHeightForHeli(float height) {
-    CRopes::GetRope(GetRopeIndex()).m_fSegmentLength = height;
+    CRopes::GetRope(GetRopeID()).m_fSegmentLength = height;
 }
 
 // 0x6D3D60
@@ -3440,45 +3438,22 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
         // Not sure how this works in the real world, as the code only uses -3
         assert(rotorType == -3); // NOTSA: Testing my theory (Pirulax)
         switch (rotorType) {
-        case -3:
-            return {
-                -matrix.GetUp(),
-                {0.f, 0.f, -0.2f},
-            };
-        case -2:
-            return {
-                -matrix.GetForward(),
-                {0.f, -0.2f, 0.f},
-            };
-        case -1:
-            return {
-                -matrix.GetRight(),
-                {-0.2f, 0.f, 0.f},
-            };
-        case 1:
-            return {
-                matrix.GetRight(),
-                {0.2f, 0.f, 0.f},
-            };
-        case 2:
-            return {
-                matrix.GetForward(),
-                {0.f, 0.2f, 0.f},
-            };
-        case 3:
-            return {
-                matrix.GetUp(),
-                {0.f, 0.f, 0.2f},
-            };
+        case -3: return { -matrix.GetUp(),      {  0.0f,  0.0f, -0.2f }, };
+        case -2: return { -matrix.GetForward(), {  0.0f, -0.2f,  0.0f }, };
+        case -1: return { -matrix.GetRight(),   { -0.2f,  0.0f,  0.0f }, };
+        case  1: return {  matrix.GetRight(),   {  0.2f,  0.0f,  0.0f }, };
+        case  2: return {  matrix.GetForward(), {  0.0f,  0.2f,  0.0f }, };
+        case  3: return {  matrix.GetUp(),      {  0.0f,  0.0f,  0.2f }, };
         default:
             NOTSA_UNREACHABLE("Unknown rotorType");
+            return { {}, {} };
         }
     };
 
     const auto [rotorUp, rotorSizeMS] = GetRotorDirUpAndThickness();
     const auto rotorSize              = Multiply3x3(matrix, rotorSizeMS);
     const auto colModelCenter         = MultiplyMatrixWithVector(matrix, colModel.GetBoundCenter());
-    const auto thisPosn               = GetPosition();
+    const auto& thisPosn              = GetPosition();
 
     for (CPtrNode* it = ptrList.GetNode(), *next{}; it; it = next) {
         next = it->GetNext();
@@ -3502,16 +3477,7 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
             continue;
         }
 
-        const auto numColls = CCollision::ProcessColModels(
-            matrix,
-            colModel,
-            *entity.m_matrix,
-            *entityCM,
-            CWorld::m_aTempColPts,
-            nullptr,
-            nullptr,
-            false
-        );
+        const auto numColls = CCollision::ProcessColModels(matrix, colModel, *entity.m_matrix, *entityCM, CWorld::m_aTempColPts, nullptr, nullptr, false);
         if (numColls <= 0) {
             continue;
         }
@@ -3536,12 +3502,8 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
 
             if (CLocalisation::Blood()) {
                 if (ped.GetIsOnScreen()) {
-                    g_fx.AddBlood(
-                        thisPosn + CVector{ CVector2D{dirThisToPed} *0.35f, 0.6f }, // TODO: Magic 0.6f
-                        dirThisToPed / 100.f,
-                        16,
-                        ped.m_fContactSurfaceBrightness
-                    );
+                    auto origin = thisPosn + CVector{ CVector2D{ dirThisToPed } * 0.35f, 0.6f}; // TODO: Magic 0.6f
+                    g_fx.AddBlood(origin, dirThisToPed / 100.f, 16, ped.m_fContactSurfaceBrightness);
                 }
             }
         } else if (entity.m_nModelIndex != eModelID::MODEL_MISSILE) {
@@ -3566,16 +3528,7 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
                            cpOnRotor    = cp.m_vecPoint - rotorUp * rotorUpDotCpToCenter;
                       auto collForceDir = CrossProduct(rotorSize, cpOnRotor - colModelCenter);
                 const auto fxForce      = collForceDir.NormaliseAndMag();
-                g_fx.AddSparks(
-                    cpOnRotor,
-                    collForceDir,
-                    fxForce,
-                    16,
-                    CVector{},
-                    eSparkType::SPARK_PARTICLE_SPARK,
-                    .2f,
-                    1.f
-                );
+                g_fx.AddSparks(cpOnRotor, collForceDir, fxForce, 16, CVector{}, eSparkType::SPARK_PARTICLE_SPARK, .2f, 1.f);
 
                 if (IsAutomobile()) {
                     const auto au = AsAutomobile();
@@ -3601,33 +3554,11 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
             if (wasAnyCPValid) {
                 if (entity.IsPed() && !CTimer::IsTimeInRange(planeRotorDmgTimeMS - 2000, planeRotorDmgTimeMS)) {
                     if (m_nStatus == STATUS_HELI) {
-                        AudioEngine.ReportCollision(
-                            this,
-                            &entity,
-                            SURFACE_CAR_PANEL,
-                            SURFACE_CAR,
-                            cpOnRotor,
-                            nullptr,
-                            0.15f,
-                            1.f,
-                            false,
-                            false
-                        );
+                        AudioEngine.ReportCollision(this, &entity, SURFACE_CAR_PANEL, SURFACE_CAR, cpOnRotor, nullptr, 0.15f, 1.f, false, false);
                     } else {
                         const auto& gc = *TheCamera.GetGameCamPosition();
-                         auto fuckingBullshit = gc + Normalized(cpOnRotor - gc) * 4.f;
-                        AudioEngine.ReportCollision(
-                            this,
-                            &entity,
-                            SURFACE_CAR_PANEL,
-                            SURFACE_CAR,
-                            fuckingBullshit,
-                            nullptr,
-                            0.15f,
-                            1.f,
-                            false,
-                            false
-                        );
+                        auto fuckingBullshit = gc + Normalized(cpOnRotor - gc) * 4.f;
+                        AudioEngine.ReportCollision(this, &entity, SURFACE_CAR_PANEL, SURFACE_CAR, fuckingBullshit, nullptr, 0.15f, 1.f, false, false);
                     }
                     planeRotorDmgTimeMS = CTimer::GetTimeInMS() + CGeneral::GetRandomNumberInRange(150, 250);
                 }
@@ -3652,14 +3583,12 @@ void CVehicle::SetComponentRotation(RwFrame* component, eRotationAxis axis, floa
             // We're using the `Only` version of `SetRotate`, that way the position
             // That way 0x6DBB69 can be omitted (and 0x6DBB02 because it's just there to cancel out the former)
             switch (axis) {
-            case AXIS_Z:
-                return bResetPosition ? &CMatrix::SetRotateZOnly : &CMatrix::RotateZ;
-            case AXIS_Y:
-                return bResetPosition ? &CMatrix::SetRotateYOnly : &CMatrix::RotateY;
-            case AXIS_X:
-                return bResetPosition ? &CMatrix::SetRotateXOnly : &CMatrix::RotateX;
+            case AXIS_Z: return bResetPosition ? &CMatrix::SetRotateZOnly : &CMatrix::RotateZ;
+            case AXIS_Y: return bResetPosition ? &CMatrix::SetRotateYOnly : &CMatrix::RotateY;
+            case AXIS_X: return bResetPosition ? &CMatrix::SetRotateXOnly : &CMatrix::RotateX;
             default:
-                NOTSA_UNREACHABLE();
+                NOTSA_UNREACHABLE("Supress warn");
+                return &CMatrix::RotateX;
             }
         }(),
         &mat, angle
@@ -4122,7 +4051,7 @@ void CVehicle::AddWaterSplashParticles() {
             auto pieceOfShit = vertices[0]
                 + v0v1 * CGeneral::GetRandomNumberInRange(0.f, 1.f)
                 + v1v2 * CGeneral::GetRandomNumberInRange(0.f, 1.f);
-            g_fx.m_pPrtSplash->AddParticle(&pieceOfShit, &velocity, 0.f, &fxPrtMult, -1.f, 1.2f, 0.6f, 0u);
+            g_fx.m_Splash->AddParticle(&pieceOfShit, &velocity, 0.f, &fxPrtMult, -1.f, 1.2f, 0.6f, 0u);
         }
     }
 }
@@ -4259,20 +4188,22 @@ bool CVehicle::GetSpecialColModel() {
     if (specialCMSlot == m_aSpecialColVehicle.end()) {
         return false;
     }
+
     const auto specialCMIdx = rng::distance(m_aSpecialColVehicle.begin(), specialCMSlot);
     m_vehicleSpecialColIndex = specialCMIdx;
     physicalFlags.bAddMovingCollisionSpeed = true;
     *specialCMSlot = this;
     CEntity::RegisterReference(*specialCMSlot);
+
     auto& cm = m_aSpecialColModel[m_vehicleSpecialColIndex];
     cm.RemoveTrianglePlanes();
     if (!cm.m_pColData) {
         cm.AllocateData();
     }
     cm = *GetModelInfo()->m_pColModel;
-    auto& specialHydrDat = m_aSpecialHydraulicData[specialCMIdx];
-    specialHydrDat.m_fSuspensionExtendedUpperLimit = 100.f;
-    rng::fill(specialHydrDat.m_aWheelSuspension, 0);
+
+    m_aSpecialHydraulicData[specialCMIdx].m_fSuspensionExtendedUpperLimit = 100.f;
+    rng::fill(m_aSpecialHydraulicData[specialCMIdx].m_aWheelSuspension, 0.0f);
     return true;
 }
 

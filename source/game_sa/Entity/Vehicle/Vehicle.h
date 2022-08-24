@@ -505,7 +505,7 @@ public:
     bool IsUpsideDown();
     bool IsOnItsSide();
     bool CanPedOpenLocks(CPed* ped);
-    bool CanDoorsBeDamaged() const;
+    [[nodiscard]] bool CanDoorsBeDamaged() const;
     bool CanPedEnterCar();
     void ProcessCarAlarm();
     void DestroyVehicleAndDriverAndPassengers(CVehicle* vehicle);
@@ -544,7 +544,7 @@ public:
     // return upgrade model id or -1 if not present
     int32 GetReplacementUpgrade(int32 nodeId);
     void RemoveAllUpgrades();
-    int32 GetSpareHasslePosId() const;
+    [[nodiscard]] int32 GetSpareHasslePosId() const;
     void SetHasslePosId(int32 hasslePos, bool enable);
     void InitWinch(int32 arg0);
     void UpdateWinch();
@@ -681,12 +681,13 @@ public: // NOTSA functions
     CVehicleModelInfo* GetVehicleModelInfo(); // todo: inline
 
     CVector GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace = true);
-    int32 GetRopeIndex();
     [[nodiscard]] auto GetRopeID() const { return (uint32)&m_nFlags + 1; }
     [[nodiscard]] CVehicleAnimGroup& GetAnimGroup() const;
     [[nodiscard]] AssocGroupId GetAnimGroupId() const;
+
     auto GetPassengers() { return std::span{ m_apPassengers, m_nMaxPassengers }; }
     auto GetMaxPassengerSeats() { return std::span{ m_apPassengers, m_nMaxPassengers }; } // NOTE: Added this because I plan to refactor `GetPassengers()`
+
     [[nodiscard]] float GetDefaultAirResistance() const {
         if (m_pHandlingData->m_fDragMult <= 0.01f) {
             return m_pHandlingData->m_fDragMult;
