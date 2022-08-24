@@ -119,6 +119,7 @@
 
 // Tasks
 #include "TaskComplexInvestigateDeadPed.h"
+#include "TaskComplexSignalAtPed.h"
 #include "TaskSimpleBeHit.h"
 #include "EntitySeekPosCalculator.h"
 #include "EntitySeekPosCalculatorStandard.h"
@@ -671,7 +672,7 @@ void InjectHooksMain() {
         // CTaskComplexSeekEntityAiming::InjectHooks();
         // CTaskComplexSeekEntityAnyMeans<CEntitySeekPosCalculatorXYOffset>::InjectHooks();
         // CTaskComplexShuffleSeats::InjectHooks();
-        // CTaskComplexSignalAtPed::InjectHooks();
+        CTaskComplexSignalAtPed::InjectHooks();
         // CTaskComplexSitDownThenIdleThenStandUp::InjectHooks();
         CTaskComplexSmartFleeEntity::InjectHooks();
         // CTaskComplexSmartFleePoint::InjectHooks();
