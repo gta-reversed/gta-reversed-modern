@@ -70,31 +70,35 @@ char*& HandlingFilename = *(char**)0x8D3970;
 char (&VehicleNames)[100][14] = *(char(*)[100][14])0x8D3978;
 
 void CVehicle::InjectHooks() {
-    RH_ScopedClass(CVehicle);
+    RH_ScopedVirtualClass(CVehicle, 0x871e80, 66);
     RH_ScopedCategory("Vehicle");
 
-    RH_ScopedVirtualInstall(SetModelIndex, 0x6D6A40);
-    RH_ScopedVirtualInstall(DeleteRwObject, 0x6D6410);
-    RH_ScopedVirtualInstall(SpecialEntityPreCollisionStuff, 0x6D6640);
-    RH_ScopedVirtualInstall(SpecialEntityCalcCollisionSteps, 0x6D0E90);
-    RH_ScopedVirtualInstall(SetupLighting, 0x553F20);
-    RH_ScopedVirtualInstall(RemoveLighting, 0x5533D0);
-    RH_ScopedVirtualInstall(PreRender, 0x6D6480);
-    RH_ScopedVirtualInstall(Render, 0x6D0E60);
-    RH_ScopedVirtualInstall(ProcessOpenDoor, 0x6D56C0);
+    RH_ScopedVMTInstall(SetModelIndex, 0x6D6A40);
+    RH_ScopedVMTInstall(DeleteRwObject, 0x6D6410);
+    RH_ScopedVMTInstall(SpecialEntityPreCollisionStuff, 0x6D6640);
+    RH_ScopedVMTInstall(SpecialEntityCalcCollisionSteps, 0x6D0E90);
+    RH_ScopedVMTInstall(SetupLighting, 0x553F20);
+    RH_ScopedVMTInstall(RemoveLighting, 0x5533D0);
+    RH_ScopedVMTInstall(PreRender, 0x6D6480);
+    RH_ScopedVMTInstall(Render, 0x6D0E60);
+    RH_ScopedVMTInstall(ProcessOpenDoor, 0x6D56C0);
+    RH_ScopedVMTInstall(GetHeightAboveRoad, 0x6D63F0);
+    RH_ScopedVMTInstall(CanPedStepOutCar, 0x6D1F30);
+    RH_ScopedVMTInstall(CanPedJumpOutCar, 0x6D2030);
+    RH_ScopedVMTInstall(GetTowHitchPos, 0x6DFB70);
+    RH_ScopedVMTInstall(GetTowBarPos, 0x6DFBE0);
+    RH_ScopedVMTInstall(Save, 0x5D4760);
+    RH_ScopedVMTInstall(Load, 0x5D2900);
 
     // It can't be properly unhooked, original function assumes that CVehicle::GetVehicleAppearance doesn't spoil ECX register, and calls
     // it without making sure that the pointer in it still points to current instance. While it worked for original function, we can't
     // force the compiler to keep ECX unchanged through function execution
-    RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6DF4A0, {.enabled = true, .locked = true});
+    RH_ScopedVMTInstall(ProcessDrivingAnims, 0x6DF4A0, { .enabled = true, .locked = true });
 
-    RH_ScopedVirtualInstall(GetHeightAboveRoad, 0x6D63F0);
-    RH_ScopedVirtualInstall(CanPedStepOutCar, 0x6D1F30);
-    RH_ScopedVirtualInstall(CanPedJumpOutCar, 0x6D2030);
-    RH_ScopedVirtualInstall(GetTowHitchPos, 0x6DFB70);
-    RH_ScopedVirtualInstall(GetTowBarPos, 0x6DFBE0);
-    RH_ScopedVirtualInstall(Save, 0x5D4760);
-    RH_ScopedVirtualInstall(Load, 0x5D2900);
+    RH_ScopedOverloadedInstall(IsPassenger, "Ped", 0x6D1BD0, bool(CVehicle::*)(CPed*) const);
+    RH_ScopedOverloadedInstall(IsPassenger, "ModelID", 0x6D1C00, bool(CVehicle::*)(int32) const);
+    RH_ScopedOverloadedInstall(IsDriver, "Ped", 0x6D1C40, bool(CVehicle::*)(CPed*) const);
+    RH_ScopedOverloadedInstall(IsDriver, "ModelID", 0x6D1C60, bool(CVehicle::*)(int32) const);
     RH_ScopedInstall(Shutdown, 0x6D0B40);
     RH_ScopedInstall(GetRemapIndex, 0x6D0B70);
     RH_ScopedInstall(SetRemap, 0x6D0C00);
@@ -102,10 +106,6 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(UpdateLightingFromStoredPolys, 0x6D0CC0);
     RH_ScopedInstall(CalculateLightingFromCollision, 0x6D0CF0);
     RH_ScopedInstall(ProcessWheel, 0x6D6C00);
-    RH_ScopedOverloadedInstall(IsPassenger, "Ped", 0x6D1BD0, bool(CVehicle::*)(CPed*) const);
-    RH_ScopedOverloadedInstall(IsPassenger, "ModelID", 0x6D1C00, bool(CVehicle::*)(int32) const);
-    RH_ScopedOverloadedInstall(IsDriver, "Ped", 0x6D1C40, bool(CVehicle::*)(CPed*) const);
-    RH_ScopedOverloadedInstall(IsDriver, "ModelID", 0x6D1C60, bool(CVehicle::*)(int32) const);
     RH_ScopedInstall(AddExhaustParticles, 0x6DE240);
     RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
     RH_ScopedInstall(ProcessBoatControl, 0x6DBCE0);
