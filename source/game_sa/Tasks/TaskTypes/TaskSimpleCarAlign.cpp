@@ -54,7 +54,7 @@ void CTaskSimpleCarAlign::FinishAnimCarAlignCB(CAnimBlendAssociation* anim, void
 
 // 0x645CB0
 void CTaskSimpleCarAlign::FixHeading(CPed* ped) {
-    if (m_veh || !m_veh->IsAutomobile()) {
+    if (!m_veh || !m_veh->IsAutomobile()) {
         return;
     }
 
