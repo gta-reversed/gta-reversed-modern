@@ -32,7 +32,7 @@ bool CTaskSimplePlayerOnFire::ProcessPed(CPed* ped) {
     }
 
     // TODO: Add stubs
-    CDamageResponseInfo dmgResp;
+    CPedDamageResponse dmgResp;
     CTaskComplexOnFire::ComputeFireDamage(ped, dmgResp);
     if (!dmgResp.m_bHealthZero || m_bAddedDamageEvent) {
         if (CLocalisation::PedsOnFire()) { // Moved code a little to avoid dup
