@@ -103,11 +103,13 @@ void** GetVTableAddress(std::string_view className) {
     CHAR buffer[1024];
     sprintf_s(buffer, "??_7%.*s@@6B@", (int)className.length(), className.data());
     if (const auto vtbl = reinterpret_cast<void**>(GetProcAddress(s_hThisDLL, buffer))) {
+#ifdef HOOKS_DEBUG
+        std::cout << std::format("{}: Our VMT: {} \n", className, (void*)vtbl);
+#endif
         return vtbl;
     }
-    
-    NOTSA_UNREACHABLE("Couldn't find VTable of {}", className); // To fix this, add `NOTSA_EXPORT_VTABLE` to the class
-    return nullptr;
+
+    NOTSA_UNREACHABLE("Couldn't find VTable of `{}`", className);
 }
 
 }; // namespace detail
