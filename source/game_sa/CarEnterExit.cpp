@@ -25,7 +25,7 @@ void CCarEnterExit::InjectHooks() {
     // RH_ScopedInstall(CarHasPartiallyOpenDoor, 0x0);
     // RH_ScopedInstall(ComputeDoorFlag, 0x0);
     // RH_ScopedInstall(ComputeOppositeDoorFlag, 0x0);
-    // RH_ScopedInstall(ComputePassengerIndexFromCarDoor, 0x64F1E0);
+    RH_ScopedInstall(ComputePassengerIndexFromCarDoor, 0x64F1E0);
     // RH_ScopedInstall(ComputeSlowJackedPed, 0x64F070);
     // RH_ScopedInstall(ComputeTargetDoorToEnterAsPassenger, 0x64F190);
     // RH_ScopedInstall(ComputeTargetDoorToExit, 0x64F110);
@@ -90,7 +90,26 @@ int32 CCarEnterExit::ComputeOppositeDoorFlag(const CVehicle* vehicle, int32 door
 
 // 0x64F1E0
 int32 CCarEnterExit::ComputePassengerIndexFromCarDoor(const CVehicle* vehicle, int32 doorId) {
-    return plugin::CallAndReturn<int32, 0x64F1E0, const CVehicle*, int32>(vehicle, doorId);
+    if (vehicle->IsAutomobile() || vehicle->m_pHandlingData->m_bTandemSeats) {
+        switch (doorId) {
+        case 9:
+        case 11:
+            return 0;
+        default:
+            return -1;
+        }
+    }
+
+    switch (doorId) {
+    case 8:
+        return 0;
+    case 9:
+        return 2;
+    case 11:
+        return 1;
+    default:
+        return -1;
+    }
 }
 
 // 0x64F070
