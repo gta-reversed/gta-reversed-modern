@@ -26,7 +26,7 @@ void CCarEnterExit::InjectHooks() {
     // RH_ScopedInstall(ComputeDoorFlag, 0x0);
     // RH_ScopedInstall(ComputeOppositeDoorFlag, 0x0);
     RH_ScopedInstall(ComputePassengerIndexFromCarDoor, 0x64F1E0);
-    // RH_ScopedInstall(ComputeSlowJackedPed, 0x64F070);
+    RH_ScopedInstall(ComputeSlowJackedPed, 0x64F070);
     RH_ScopedInstall(ComputeTargetDoorToEnterAsPassenger, 0x64F190);
     // RH_ScopedInstall(ComputeTargetDoorToExit, 0x64F110);
     // RH_ScopedInstall(GetNearestCarDoor, 0x6528F0);
