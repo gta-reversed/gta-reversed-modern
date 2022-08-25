@@ -203,7 +203,7 @@ bool CTaskSimpleCarJumpOut::SetPedPosition(CPed* ped) {
         switch (m_anim->m_nAnimId) {
         case ANIM_ID_CAR_ROLLOUT_RHS:
         case ANIM_ID_CAR_ROLLOUT_LHS: {
-            const auto pedPos = ped->GetPosition();
+            const auto& pedPos = ped->GetPosition();
             auto pedPosAdj{ pedPos };
 
             CWorld::pIgnoreEntity = ped;
