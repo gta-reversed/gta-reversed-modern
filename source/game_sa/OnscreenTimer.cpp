@@ -2,6 +2,7 @@
 
 #include "OnscreenTimer.h"
 #include "OnscreenTimerEntry.h"
+#include "Hud.h"
 
 void COnscreenTimer::InjectHooks() {
     RH_ScopedClass(COnscreenTimer);

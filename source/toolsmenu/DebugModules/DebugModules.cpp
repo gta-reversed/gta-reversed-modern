@@ -10,6 +10,7 @@
 #include "Script\MissionDebugModule.h"
 #include "Audio\CutsceneTrackManagerDebugModule.h"
 #include "Audio\AmbienceTrackManagerDebugModule.h"
+#include "Audio\PoliceScannerAudioEntityDebugModule.h"
 #include "CStreamingDebugModule.h"
 #include "CPickupsDebugModule.h"
 #include "HooksDebugModule.h"
@@ -17,6 +18,7 @@
 #include "FXDebugModule.h"
 #include "Pools\PoolsDebugModule.h"
 #include "TimecycEditor.h"
+#include "CullZonesDebugModule.h"
 
 bool DebugModules::m_ShowFPS = false;
 bool DebugModules::m_ShowExtraDebugFeatures = false;
@@ -107,8 +109,9 @@ void DebugModules::DisplayFramePerSecond() {
 
     // Top-left framerate display overlay window.
     ImGui::SetNextWindowPos(ImVec2(10, 10));
+    ImGui::SetNextWindowSize({ 265, 20 });
     ImGui::Begin("FPS", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
-    ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
+    ImGui::Text("FPS: %.2f [RsGlobal.frameLimit=%i]", ImGui::GetIO().Framerate, RsGlobal.frameLimit);
     ImGui::End();
 }
 
@@ -134,18 +137,29 @@ void DebugModules::ProcessRenderTool() {
 
 void DebugModules::ProcessExtraDebugFeatures() {
     if (ImGui::BeginTabBar("Modules")) {
-        if (ImGui::BeginTabItem("Occlusion")) {
-            COcclusionDebugModule::ProcessImGui();
+        if (ImGui::BeginTabItem("OCCL/CULL")) {
+            if (ImGui::CollapsingHeader("Occlusion")) {
+                COcclusionDebugModule::ProcessImGui();
+            }
+            if (ImGui::CollapsingHeader("Cull Zones")) {
+                CullZonesDebugModule::ProcessImGui();
+            }
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("Audio")) {
-            ImGui::Text("Cutscene Track Manager");
-            CutsceneTrackManagerDebugModule::ProcessImGui();
+            if (ImGui::CollapsingHeader("Cutscene Track Manager")) {
+                CutsceneTrackManagerDebugModule::ProcessImGui();
+            }
 
-            ImGui::NewLine();
-            ImGui::Text("Ambience Track Manager");
-            AmbienceTrackManagerDebugModule::ProcessImGui();
+            if (ImGui::CollapsingHeader("Ambience Track Manager")) {
+                AmbienceTrackManagerDebugModule::ProcessImGui();
+            }
+
+            if (ImGui::CollapsingHeader("Police Scanner Audio Entity")) {
+                PoliceScannerAudioEntityDebugModule::ProcessImGui();
+            }
+
             ImGui::EndTabItem();
         }
 

@@ -6,6 +6,7 @@
 
 #include "TaskSimpleJetPack.h"
 #include "PostEffects.h"
+#include "Hud.h"
 
 /*
  * Interesting links:
@@ -273,15 +274,9 @@ void CCheat::AllCarsAreShitCheat() {
 void CCheat::BeachPartyCheat() {
     Toggle(CHEAT_BEACH_PARTY);
     if (IsActive(CHEAT_BEACH_PARTY)) {
-        int32 peds[8] = {
-            MODEL_BMYBE,
-            MODEL_HMYBE,
-            MODEL_WFYBE,
-            MODEL_BFYBE,
-            MODEL_HFYBE,
-            -2,
-            -2,
-            -2,
+        int32 peds[] = {
+            MODEL_BMYBE, MODEL_HMYBE, MODEL_WFYBE, MODEL_BFYBE,
+            MODEL_HFYBE, UNLOAD_MODEL, UNLOAD_MODEL, UNLOAD_MODEL,
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
@@ -324,19 +319,13 @@ void CCheat::BlowUpCarsCheat() {
 void CCheat::CountrysideInvasionCheat() {
     Toggle(CHEAT_COUNTRY_TRAFFIC);
     if (IsActive(CHEAT_COUNTRY_TRAFFIC)) {
-        int32 peds[8] = {
-            MODEL_CWFOFR,
-            MODEL_CWFOHB,
-            MODEL_CWFYFR1,
-            MODEL_CWFYHB,
-            MODEL_CWMOFR,
-            MODEL_CWMOHB1,
-            MODEL_CWMOHB2,
-            MODEL_CWMYFR,
+        int32 peds[] = {
+            MODEL_CWFOFR, MODEL_CWFOHB, MODEL_CWFYFR1, MODEL_CWFYHB,
+            MODEL_CWMOFR, MODEL_CWMOHB1, MODEL_CWMOHB2, MODEL_CWMYFR,
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
-        CPlayerPed *player = FindPlayerPed();
+        CPlayerPed* player = FindPlayerPed();
         player->GetClothesDesc()->SetTextureAndModel("timberfawn", "bask1", CLOTHES_TEXTURE_SHOES);
         player->GetClothesDesc()->SetTextureAndModel("captruck", "captruck", CLOTHES_TEXTURE_HATS);
         player->GetClothesDesc()->SetTextureAndModel("countrytr", "countrytr", CLOTHES_TEXTURE_SPECIAL);
@@ -386,17 +375,10 @@ void CCheat::DuskCheat() {
 void CCheat::ElvisLivesCheat() {
     Toggle(CHEAT_ELVIS_IS_EVERYWHERE);
     if (IsActive(CHEAT_ELVIS_IS_EVERYWHERE)) {
-        int32 peds[8] = {
-            MODEL_VHMYELV,
-            MODEL_VBMYELV,
-            MODEL_VIMYELV,
-            -2,
-            -2,
-            -2,
-            -2,
-            -2,
+        int32 peds[] = {
+            MODEL_VHMYELV, MODEL_VBMYELV, MODEL_VIMYELV, UNLOAD_MODEL,
+            UNLOAD_MODEL, UNLOAD_MODEL, UNLOAD_MODEL, UNLOAD_MODEL,
         };
-
         CStreaming::StreamPedsIntoRandomSlots(peds);
     }
 }
@@ -450,19 +432,13 @@ void CCheat::FunhouseCheat() {
     if (IsActive(CHEAT_FUNHOUSE_THEME)) {
         CPostEffects::m_bHeatHazeFX = false;
     } else {
-        int32 peds[8] = {
-            MODEL_WMYBELL,
-            MODEL_WFYBURG,
-            MODEL_WMOICE,
-            -2,
-            -2,
-            -2,
-            -2,
-            -2,
+        int32 peds[] = {
+            MODEL_WMYBELL, MODEL_WFYBURG, MODEL_WMOICE, UNLOAD_MODEL,
+            UNLOAD_MODEL, UNLOAD_MODEL, UNLOAD_MODEL, UNLOAD_MODEL,
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
-        CPlayerPed *player = FindPlayerPed();
+        CPlayerPed* player = FindPlayerPed();
         player->GetClothesDesc()->SetTextureAndModel(nullptr, nullptr, CLOTHES_TEXTURE_SPECIAL); // FIX_BUGS
         player->GetClothesDesc()->SetTextureAndModel("torso", "torso", CLOTHES_TEXTURE_TORSO);
         player->GetClothesDesc()->SetTextureAndModel("legsheart", "legs", CLOTHES_TEXTURE_LEGS);
@@ -491,15 +467,9 @@ void CCheat::GangLandCheat() {
 void CCheat::GangsCheat() {
     Toggle(CHEAT_GANGMEMBERS_EVERYWHERE);
     if (IsActive(CHEAT_GANGMEMBERS_EVERYWHERE)) {
-        int32 peds[8] = {
-            MODEL_BALLAS1,
-            MODEL_BALLAS2,
-            MODEL_BALLAS3,
-            MODEL_FAM1,
-            MODEL_FAM2,
-            MODEL_LSV1,
-            MODEL_LSV2,
-            MODEL_LSV3,
+        int32 peds[] = {
+            MODEL_BALLAS1, MODEL_BALLAS2, MODEL_BALLAS3, MODEL_FAM1,
+            MODEL_FAM2, MODEL_LSV1, MODEL_LSV2, MODEL_LSV3,
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
     }
@@ -537,7 +507,7 @@ void CCheat::HealthCheat() {
 
     vehicle->m_fHealth = 1000.0f;
     if (vehicle->IsBike()) {
-        vehicle->AsBike()->m_fFireBlowUpTimer = 0.0f;
+        vehicle->AsBike()->m_BlowUpTimer = 0.0f;
         vehicle->AsBike()->Fix();
     } else if (vehicle->IsAutomobile()) {
         vehicle->AsAutomobile()->m_fBurnTimer = 0.0f;
@@ -560,19 +530,13 @@ void CCheat::JetpackCheat() {
 void CCheat::LoveConquersAllCheat() {
     Toggle(CHEAT_SLUT_MAGNET);
     if (IsActive(CHEAT_SLUT_MAGNET)) {
-        int32 peds[8] = {
-            MODEL_BMYPIMP,
-            MODEL_BFYPRO,
-            MODEL_HFYPRO,
-            MODEL_SWFOPRO,
-            MODEL_SBFYPRO,
-            MODEL_VWFYPRO,
-            MODEL_VHFYPRO,
-            -2,
+        int32 peds[] = {
+            MODEL_BMYPIMP, MODEL_BFYPRO, MODEL_HFYPRO, MODEL_SWFOPRO,
+            MODEL_SBFYPRO, MODEL_VWFYPRO, MODEL_VHFYPRO, UNLOAD_MODEL,
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
-        CPlayerPed *player = FindPlayerPed();
+        CPlayerPed* player = FindPlayerPed();
         player->GetClothesDesc()->SetTextureAndModel("gimpleg", "gimpleg", CLOTHES_TEXTURE_SPECIAL);
         if (player->m_nPedState != PEDSTATE_DRIVING) {
             CClothes::RebuildPlayer(player, false);
@@ -659,15 +623,9 @@ void CCheat::NinjaCheat() {
             Disable(CHEAT_BLACK_TRAFFIC);
         }
     } else {
-        int32 peds[8] = {
-            MODEL_TRIADA,
-            MODEL_TRIADB,
-            MODEL_TRIBOSS,
-            -2,
-            -2,
-            -2,
-            -2,
-            -2,
+        int32 peds[] = {
+            MODEL_TRIADA, MODEL_TRIADB, MODEL_TRIBOSS, UNLOAD_MODEL,
+            UNLOAD_MODEL, UNLOAD_MODEL, UNLOAD_MODEL, UNLOAD_MODEL,
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
@@ -769,14 +727,91 @@ void CCheat::TankerCheat() {
     auto* trailer = new CTrailer(MODEL_PETROTR, RANDOM_VEHICLE);
     trailer->SetPosn(vehicle->GetPosition());
     trailer->SetOrientation(0.0f, 0.0f, DegreesToRadians(200));
-    trailer->m_nStatus = static_cast<eEntityStatus>(trailer->m_nStatus & STATUS_TRAIN_MOVING);
+    trailer->m_nStatus = STATUS_ABANDONED;
     CWorld::Add(trailer);
     trailer->SetTowLink(vehicle, true);
 }
 
 // 0x43A0B0
-CVehicle* CCheat::VehicleCheat(eModelID vehicleModelId) {
-    return plugin::CallAndReturn<CVehicle*, 0x43A0B0, eModelID>(vehicleModelId); // CAutomobile::PlaceOnRoadProperly Places skimmer incorrectly, it's placed at millions units underground
+CVehicle* CCheat::VehicleCheat(eModelID modelId) {
+    return plugin::CallAndReturn<CVehicle*, 0x43A0B0, eModelID>(modelId);
+
+    const auto player = FindPlayerPed();
+    if (player->m_nAreaCode != AREA_CODE_NORMAL_WORLD) {
+        return nullptr;
+    }
+
+    //    for (auto i = 0; i < 50; ++i) {
+    //        auto vehicle = CPools::ms_pVehiclePool->GetAtRef(i);
+    //        if (vehicle)
+    //    }
+
+    CStreaming::RequestModel(modelId, STREAMING_GAME_REQUIRED);
+    CStreaming::LoadAllRequestedModels(false);
+    if (!CStreaming::IsModelLoaded(modelId)) {
+        return nullptr;
+    }
+
+    if (!CStreaming::GetInfo(modelId).IsGameRequired()) {
+        CStreaming::SetModelIsDeletable(modelId);
+        CStreaming::SetModelTxdIsDeletable(modelId);
+    }
+
+    const auto GetVehicle = [](auto modelId) -> CVehicle* {
+        const auto* mi = CModelInfo::GetModelInfo(modelId)->AsVehicleModelInfoPtr();
+        switch (mi->m_nVehicleType) {
+        case VEHICLE_TYPE_MTRUCK:
+            return new CMonsterTruck(modelId, RANDOM_VEHICLE);
+        case VEHICLE_TYPE_QUAD:
+            return new CQuadBike(modelId, RANDOM_VEHICLE);
+        case VEHICLE_TYPE_HELI:
+            return new CHeli(modelId, RANDOM_VEHICLE);
+        case VEHICLE_TYPE_PLANE:
+            return new CPlane(modelId, RANDOM_VEHICLE);
+        case VEHICLE_TYPE_BOAT:
+            return new CBoat(modelId, RANDOM_VEHICLE);
+        case VEHICLE_TYPE_BIKE: {
+            auto* vehicle = new CBike(modelId, RANDOM_VEHICLE);
+            vehicle->bikeFlags.bOnSideStand = true;
+            return vehicle;
+        }
+        case VEHICLE_TYPE_BMX: {
+            auto* vehicle = new CBmx(modelId, RANDOM_VEHICLE);
+            vehicle->bikeFlags.bOnSideStand = true;
+            return vehicle;
+        }
+        case VEHICLE_TYPE_TRAILER:
+            return new CTrailer(modelId, RANDOM_VEHICLE);
+        default:
+            return new CAutomobile(modelId, RANDOM_VEHICLE, true);
+        }
+    };
+    auto* vehicle = GetVehicle(modelId);
+
+    const float radius      = vehicle->GetModelInfo()->GetColModel()->GetBoundRadius();
+    const auto  rotZ        = player->m_fCurrentRotation + HALF_PI;
+    const auto  vehiclePosn = player->GetPosition() + (radius + 2.0f) * player->GetForward();
+
+    vehicle->SetPosn(vehiclePosn);
+    vehicle->SetOrientation(0.0f, 0.0f, rotZ);
+    vehicle->m_nStatus = STATUS_ABANDONED;
+    vehicle->m_nDoorLock = CARLOCK_UNLOCKED;
+    CWorld::Add(vehicle);
+    CTheScripts::ClearSpaceForMissionEntity(vehiclePosn, vehicle);
+
+    switch (vehicle->m_nVehicleType) {
+    case VEHICLE_TYPE_BOAT:
+        break;
+    case VEHICLE_TYPE_BIKE:
+        vehicle->AsBike()->PlaceOnRoadProperly();
+        break;
+    default:
+        // todo: CAutomobile::PlaceOnRoadProperly Places skimmer incorrectly, it's placed at millions units underground
+        vehicle->AsAutomobile()->PlaceOnRoadProperly();
+        break;
+    }
+
+    return vehicle;
 }
 
 // 0x43a550
@@ -879,15 +914,9 @@ void CCheat::VillagePeopleCheat() {
         Disable(CHEAT_EVERYONE_ARMED);
         EverybodyAttacksPlayerCheat();
     } else {
-        int32 peds[8] = {
-            MODEL_WMYCON,
-            MODEL_CWMYFR,
-            MODEL_ARMY,
-            MODEL_LAPDM1,
-            MODEL_BIKERB,
-            -2,
-            -2,
-            -2,
+        int32 peds[] = {
+            MODEL_WMYCON, MODEL_CWMYFR, MODEL_ARMY, MODEL_LAPDM1,
+            MODEL_BIKERB, UNLOAD_MODEL, UNLOAD_MODEL, UNLOAD_MODEL,
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
         EverybodyAttacksPlayerCheat();

@@ -6,13 +6,20 @@
 
 class CVehicle;
 
-class CTaskComplexCarDrive : public CTaskComplex {
+enum {
+    AS_DRIVER         = 0,
+    AS_PASSENGER      = 1,
+    ANY_CAR_AS_DRIVER = 2
+};
+
+class NOTSA_EXPORT_VTABLE CTaskComplexCarDrive : public CTaskComplex {
 public:
     CVehicle* m_pVehicle;
     float     m_fSpeed;
     int32     m_carModelIndexToCreate;
-    int32     m_nCarDrivingStyle; // `eCarDrivingStyle`, sadly we cant use it as the member type, because the underlaying type isn't int32
-    char      field_1C; // 0: AS_DRIVER 1: AS_PASSENGER 2: ANY_CAR_AS_DRIVER
+    eCarDrivingStyle m_nCarDrivingStyle;
+    int8      _align[3];
+    int8      field_1C; //
     int8      m_nOldCarDrivingStyle;
     int8      m_nCarMission;
     uint8     m_nSpeed;

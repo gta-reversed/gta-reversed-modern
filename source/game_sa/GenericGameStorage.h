@@ -2,6 +2,12 @@
 
 static constexpr auto MAX_SAVEGAME_SLOTS{ 8u };
 
+enum class eSlotState {
+    IN_USE,
+    EMPTY,
+    CORRUPT
+};
+
 class CGenericGameStorage {
     static constexpr auto BUFFER_SIZE{ (uint32)(50u * 1024u) };
 
@@ -46,14 +52,7 @@ class CGenericGameStorage {
         LOADING,
         SAVING
     };
-
-public:
-    enum class eSlotState {
-        IN_USE,
-        EMPTY,
-        CORRUPT
-    };
-
+        
 public:
     static inline uint32& ms_WorkBufferSize = *(uint32*)0x8D2BE0;
     static inline char(&ms_SaveFileNameJustSaved)[MAX_PATH] = *(char(*)[MAX_PATH])0xC16030;

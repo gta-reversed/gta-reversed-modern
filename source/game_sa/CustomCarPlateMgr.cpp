@@ -6,21 +6,21 @@ void CCustomCarPlateMgr::InjectHooks() {
     RH_ScopedClass(CCustomCarPlateMgr);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(Initialise, 0x6FD500, false);
-    RH_ScopedInstall(GeneratePlateText, 0x6FD5B0, false);
-    RH_ScopedInstall(Shutdown, 0x6FD720, false);
-    RH_ScopedInstall(GetMapRegionPlateDesign, 0x6FD7A0, false);
-    RH_ScopedInstall(SetupMaterialPlatebackTexture, 0x6FDE50, false);
-    RH_ScopedInstall(CreatePlateTexture, 0x6FDEA0, false);
-    RH_ScopedInstall(SetupClumpAfterVehicleUpgrade, 0x6FDFE0, false);
-    RH_ScopedInstall(MaterialUpgradeSetCarplateTextureCB, 0x6FDF50, false);
-    RH_ScopedInstall(AtomicUpgradeSetCarplateTextureCB, 0x6FDFC0, false);
-    RH_ScopedInstall(SetupMaterialPlateTexture, 0x6FE020, false);
-    // RH_ScopedInstall(GetCharacterPositionInCharSet, 0x6FD7C0, true); // Incompatible with original function (As it uses __usercall and passes the first arg in `al`)
-    RH_ScopedInstall(MaterialSetCarplateTextureCB, 0x6FE060, false);
-    RH_ScopedInstall(AtomicSetCarplateTextureCB, 0x6FE0D0, false);
-    RH_ScopedInstall(SetupClump, 0x6FE0F0, false);
-    RH_ScopedInstall(RenderLicenseplateTextToRaster, 0x6FDD70, false);
+    RH_ScopedInstall(Initialise, 0x6FD500);
+    RH_ScopedInstall(GeneratePlateText, 0x6FD5B0);
+    RH_ScopedInstall(Shutdown, 0x6FD720);
+    RH_ScopedInstall(GetMapRegionPlateDesign, 0x6FD7A0);
+    RH_ScopedInstall(SetupMaterialPlatebackTexture, 0x6FDE50);
+    RH_ScopedInstall(CreatePlateTexture, 0x6FDEA0);
+    RH_ScopedInstall(SetupClumpAfterVehicleUpgrade, 0x6FDFE0);
+    RH_ScopedInstall(MaterialUpgradeSetCarplateTextureCB, 0x6FDF50);
+    RH_ScopedInstall(AtomicUpgradeSetCarplateTextureCB, 0x6FDFC0);
+    RH_ScopedInstall(SetupMaterialPlateTexture, 0x6FE020);
+    // RH_ScopedInstall(GetCharacterPositionInCharSet, 0x6FD7C0, { .enabled = false }); // Incompatible with original function (As it uses __usercall and passes the first arg in `al`)
+    RH_ScopedInstall(MaterialSetCarplateTextureCB, 0x6FE060);
+    RH_ScopedInstall(AtomicSetCarplateTextureCB, 0x6FE0D0);
+    RH_ScopedInstall(SetupClump, 0x6FE0F0);
+    RH_ScopedInstall(RenderLicenseplateTextToRaster, 0x6FDD70);
 }
 
 // 0x6FD500
@@ -69,8 +69,7 @@ void CCustomCarPlateMgr::Shutdown() {
         }
     }
 
-    if (const auto slot = CTxdStore::FindTxdSlot("vehicle"); slot != -1)
-        CTxdStore::RemoveTxd(slot);
+    CTxdStore::SafeRemoveTxdSlot("vehicle");
 }
 
 // Returns texture index in pPlatebackTexTab. See texture names in ::Initialise.

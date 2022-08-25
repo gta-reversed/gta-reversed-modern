@@ -383,7 +383,7 @@ void CAESoundManager::CancelSoundsOfThisEventPlayingForThisEntityAndPhysical(int
     }
 }
 
-void CAESoundManager::CancelSoundsInBankSlot(int16 bankSlot, uint8 bFullStop) {
+void CAESoundManager::CancelSoundsInBankSlot(int16 bankSlot, bool bFullStop) {
     for (CAESound& sound : m_aSounds) {
         if (!sound.IsUsed() || sound.m_nBankSlotId != bankSlot)
             continue;
@@ -395,7 +395,7 @@ void CAESoundManager::CancelSoundsInBankSlot(int16 bankSlot, uint8 bFullStop) {
     }
 }
 
-void CAESoundManager::CancelSoundsOwnedByAudioEntity(CAEAudioEntity* audioEntity, uint8 bFullStop) {
+void CAESoundManager::CancelSoundsOwnedByAudioEntity(CAEAudioEntity* audioEntity, bool bFullStop) {
     for (CAESound& sound : m_aSounds) {
         if (!sound.IsUsed() || sound.m_pBaseAudio != audioEntity)
             continue;

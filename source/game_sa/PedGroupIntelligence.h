@@ -39,7 +39,7 @@ public:
     void       ComputeDefaultTasks(CPed* ped);
     void*      ComputeEventResponseTasks();
     void       ComputeScriptCommandTasks();
-    void       FlushTasks(CPedTaskPair* taskpair, CPed* ped);
+    static void       FlushTasks(CPedTaskPair* taskpair, CPed* ped);
 
     CTask*     GetTask(CPed* ped, CPedTaskPair const* taskPair);
     CTask*     GetTaskMain(CPed* ped);
@@ -69,7 +69,7 @@ public:
     int32 SetGroupDecisionMakerType(int32 a2);
     void  SetPrimaryTaskAllocator(CTaskAllocator* taskAllocator);
     void  SetScriptCommandTask(CPed* ped, const CTask* task);
-    void  SetTask(CPed* ped, const CTask* task, CPedTaskPair* taskpair, int32 arg5, bool arg6);
+    static void SetTask(CPed* ped, const CTask* task, CPedTaskPair* pair, int32 arg5 = -1, bool arg6 = false);
 };
 
 VALIDATE_SIZE(CPedGroupIntelligence, 0x2A0);

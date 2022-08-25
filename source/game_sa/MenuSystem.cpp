@@ -309,7 +309,7 @@ void CMenuSystem::DisplayStandardMenu(MenuId id, bool bRightFont /*bBrightFont*/
             break;
         }
         default:
-            NOTSA_UNREACHABLE;
+            NOTSA_UNREACHABLE();
         }
         float y = SCREEN_STRETCH_Y(20.0f) + menu->m_vPosn.y;
 
@@ -391,7 +391,7 @@ void CMenuSystem::DisplayStandardMenu(MenuId id, bool bRightFont /*bBrightFont*/
                 y2 = fBaseY + menu->m_vPosn.y;
                 break;
             default:
-                NOTSA_UNREACHABLE;
+                NOTSA_UNREACHABLE();
             }
             CFont::PrintString(x1, y2, buffer);
         }

@@ -90,15 +90,21 @@ target_include_directories(${RE_PROJECT_LIB_NAME} PRIVATE
     game_sa/Events/
     game_sa/Frontend/
     game_sa/Fx/
+    game_sa/Fx/Blueprints/
+    game_sa/Fx/Blueprints/Interp
     game_sa/Interior/
     game_sa/Memory/
     game_sa/Models/
     game_sa/Plugins/
+    game_sa/Pipelines/
+    game_sa/Pipelines/CustomBuilding
+    game_sa/Pipelines/CustomCarEnvMap
     game_sa/RenderWare/
     game_sa/RenderWare/rw/
     game_sa/Scripts/
     game_sa/Tasks/
     game_sa/Tasks/TaskTypes/
+    game_sa/Tasks/TaskTypes/SeekPosCalculators/
 
     app/
     app/platform/

@@ -178,7 +178,7 @@ void CPlane::InitPlaneGenerationAndRemoval() {
 }
 
 // 0x6CCCF0
-void CPlane::BlowUpCar(CEntity* damager, uint8 bHideExplosion) {
+void CPlane::BlowUpCar(CEntity* damager, bool bHideExplosion) {
     return plugin::CallMethod<0x6CCCF0, CPlane*, CEntity*, uint8>(this, damager, bHideExplosion);
 
     // untested \ wip
@@ -316,7 +316,7 @@ void CPlane::IsAlreadyFlying() {
 // 0x6CAC20
 void CPlane::SetGearUp() {
     m_fLandingGearStatus = 1.0f;
-    m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0f * 0.5f * m_pFlyingHandlingData->m_fGearUpR;
+    m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0f / 2.0f * m_pFlyingHandlingData->m_fGearUpR;
     m_damageManager.SetWheelStatus(CAR_WHEEL_FRONT_LEFT,  WHEEL_STATUS_MISSING);
     m_damageManager.SetWheelStatus(CAR_WHEEL_REAR_LEFT,   WHEEL_STATUS_MISSING);
     m_damageManager.SetWheelStatus(CAR_WHEEL_FRONT_RIGHT, WHEEL_STATUS_MISSING);
@@ -326,7 +326,7 @@ void CPlane::SetGearUp() {
 // 0x6CAC70
 void CPlane::SetGearDown() {
     m_fLandingGearStatus = 0.0f;
-    m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0f * 0.5f;
+    m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0f / 2.0f;
     m_damageManager.SetWheelStatus(CAR_WHEEL_FRONT_LEFT,  WHEEL_STATUS_OK);
     m_damageManager.SetWheelStatus(CAR_WHEEL_REAR_LEFT,   WHEEL_STATUS_OK);
     m_damageManager.SetWheelStatus(CAR_WHEEL_FRONT_RIGHT, WHEEL_STATUS_OK);
@@ -336,13 +336,12 @@ void CPlane::SetGearDown() {
 // 0x6CCA50
 uint32 CPlane::CountPlanesAndHelis() {
     uint32 counter = 0;
-
-    for (auto& vehicle : GetVehiclePool()->GetAllValid()) {
-        if (vehicle.IsSubHeli() || vehicle.IsSubPlane()) {
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        auto vehicle = GetVehiclePool()->GetAt(i);
+        if (vehicle && (vehicle->IsSubHeli() || vehicle->IsSubPlane())) {
             counter++;
         }
     }
-
     return counter;
 }
 
@@ -351,19 +350,17 @@ bool CPlane::AreWeInNoPlaneZone() {
     const auto& camPos = TheCamera.GetPosition();
     constexpr CVector vec1 = { -1073.0f, -675.0f, 50.0f };
 
-    return DistanceBetweenPoints(camPos, vec1) < 200.0f
-           || camPos.x > -2743.0f && camPos.x < -2626.0f && camPos.y > 1300.0f && camPos.y < 2200.0f
-           || camPos.x > -1668.0f && camPos.x < -1122.0f && camPos.y > 541.0f && camPos.y < 1118.0f;
+    return DistanceBetweenPoints(vec1, camPos) < 200.0f ||
+           camPos.x > -2743.0f && camPos.x < -2626.0f && camPos.y > 1300.0f && camPos.y < 2200.0f || // todo: Is point inside
+           camPos.x > -1668.0f && camPos.x < -1122.0f && camPos.y > 541.0f && camPos.y < 1118.0f;
 }
 
 // 0x6CCBB0
 bool CPlane::AreWeInNoBigPlaneZone() {
     // untested
     const auto& camPos = TheCamera.GetPosition();
-    constexpr CVector2D vec1 = { +1522.0f, -1237.0f };
-    constexpr CVector2D vec2 = { -1836.0f, +659.0f  };
-
-    return DistanceBetweenPoints2D(camPos, vec1) < 800.0f || DistanceBetweenPoints2D(camPos, vec2) < 800.0f;
+    return DistanceBetweenPoints2D({ +1522.0f, -1237.0f }, camPos) < 800.0f ||
+           DistanceBetweenPoints2D({ -1836.0f, +659.0f }, camPos) < 800.0f;
 }
 
 // 0x6CCC50
@@ -449,8 +446,8 @@ void CPlane::ProcessControl() {
         m_pSmokeParticle->GetCompositeMatrix(&out);
         CVector velocity = -m_vecMoveSpeed * 5.0f;
         auto particleData = FxPrtMult_c(0.0f, 0.0f, 0.0f, 0.2f, 1.0f, 1.0f, 0.1f);
-        g_fx.m_pPrtSmoke_huge->AddParticle(&out.pos, &velocity, 0.00f, &particleData, -1.0f, 1.2f, 0.6f, 0);
-        g_fx.m_pPrtSmoke_huge->AddParticle(&out.pos, &velocity, 0.05f, &particleData, -1.0f, 1.2f, 0.6f, 0);
+        g_fx.m_SmokeHuge->AddParticle((CVector*)&out.pos, &velocity, 0.00f, &particleData, -1.0f, 1.2f, 0.6f, false);
+        g_fx.m_SmokeHuge->AddParticle((CVector*)&out.pos, &velocity, 0.05f, &particleData, -1.0f, 1.2f, 0.6f, false);
         if (m_nSmokeTimer <= 0 || vehicleFlags.bIsDrowning) {
             m_pSmokeParticle->Kill();
             m_pSmokeParticle = nullptr;

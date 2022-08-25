@@ -43,8 +43,8 @@ void CCarCtrl::InjectHooks()
     RH_ScopedInstall(Init, 0x4212E0);
     RH_ScopedInstall(ReInit, 0x4213B0);
     RH_ScopedInstall(InitSequence, 0x421740);
-    Install("CCarCtrl", "ChooseGangCarModel", 0x421A40, &CCarCtrl::ChooseGangCarModel, false, 7);
-    Install("CCarCtrl", "ChoosePoliceCarModel", 0x421980, &CCarCtrl::ChoosePoliceCarModel, false, 7);
+    Install("CCarCtrl", "ChooseGangCarModel", 0x421A40, &CCarCtrl::ChooseGangCarModel, { .jmpCodeSize = 7 });
+    Install("CCarCtrl", "ChoosePoliceCarModel", 0x421980, &CCarCtrl::ChoosePoliceCarModel, { .jmpCodeSize = 7 });
     RH_ScopedInstall(CreateCarForScript, 0x431F80);
     RH_ScopedInstall(ChooseBoatModel, 0x421970);
     RH_ScopedInstall(ChooseCarModelToLoad, 0x421900);
@@ -141,25 +141,25 @@ int32 CCarCtrl::ChooseModel(int32* arg1) {
 
 int32 CCarCtrl::ChoosePoliceCarModel(uint32 ignoreLvpd1Model) {
     CWanted* playerWanted = FindPlayerWanted();
-    if (playerWanted->AreSwatRequired() 
-        && CStreaming::IsModelLoaded(MODEL_ENFORCER) 
+    if (playerWanted->AreSwatRequired()
+        && CStreaming::IsModelLoaded(MODEL_ENFORCER)
         && CStreaming::IsModelLoaded(MODEL_SWAT)
     ) {
         if (CGeneral::GetRandomNumberInRange(0, 3) == 2)
-            return MODEL_ENFORCER; 
+            return MODEL_ENFORCER;
     }
     else
     {
-        if (playerWanted->AreFbiRequired() 
+        if (playerWanted->AreFbiRequired()
             && CStreaming::IsModelLoaded(MODEL_FBIRANCH)
             && CStreaming::IsModelLoaded(MODEL_FBI))
-            return MODEL_FBIRANCH; 
+            return MODEL_FBIRANCH;
 
-        if (playerWanted->AreArmyRequired() 
+        if (playerWanted->AreArmyRequired()
             && CStreaming::IsModelLoaded(MODEL_RHINO)
             && CStreaming::IsModelLoaded(MODEL_BARRACKS)
             && CStreaming::IsModelLoaded(MODEL_ARMY))
-            return (rand() < 0x3FFF) + MODEL_RHINO;
+            return (CGeneral::GetRandomNumber() < 0x3FFF) + MODEL_RHINO;
     }
     return CStreaming::GetDefaultCopCarModel(ignoreLvpd1Model);
 }
@@ -542,8 +542,8 @@ bool CCarCtrl::PickNextNodeAccordingStrategy(CVehicle* vehicle) {
 // 0x421740
 void CCarCtrl::InitSequence(int32 numSequenceElements) {
     SequenceElements = numSequenceElements;
-    SequenceRandomOffset = rand() % numSequenceElements;
-    bSequenceOtherWay = (rand() / 4) % 2;
+    SequenceRandomOffset = CGeneral::GetRandomNumber() % numSequenceElements;
+    bSequenceOtherWay = (CGeneral::GetRandomNumber() / 4) % 2;
 }
 
 // 0x42DE80
@@ -597,7 +597,7 @@ void CCarCtrl::PossiblyRemoveVehicle(CVehicle* vehicle) {
 
 // 0x423F10
 void CCarCtrl::PruneVehiclesOfInterest() {
-    if ((CTimer::GetFrameCounter() & 63) == 19 && FindPlayerCoors(-1).z < 950.0f) {
+    if ((CTimer::GetFrameCounter() % 64) == 19 && FindPlayerCoors(-1).z < 950.0f) {
         for (size_t i = 0; i < std::size(apCarsToKeep); i++) {
             if (apCarsToKeep[i]) {
                 if (CTimer::GetTimeInMS() > aCarsToKeepTime[i] + 180000) {
@@ -669,6 +669,8 @@ void CCarCtrl::RemoveDistantCars() {
                     vehicle->m_nPedsPositionForRoadBlock,
                     vehicle->IsLawEnforcementVehicle() ? PED_TYPE_COP : PED_TYPE_GANG1
                 );
+
+                vehicle->vehicleFlags.bCreateRoadBlockPeds = false;
             }
         }
     }

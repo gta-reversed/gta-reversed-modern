@@ -17,7 +17,6 @@
 #include "VehicleRecording.h"
 #include "Garages.h"
 
-int32 CWorld::TOTAL_PLAYERS = 2;
 int32& CWorld::ms_iProcessLineNumCrossings = *(int32*)0xB7CD60;
 float& CWorld::fWeaponSpreadRate = *(float*)0xB7CD64;
 CEntity*& CWorld::pIgnoreEntity = *(CEntity**)0xB7CD68;
@@ -130,7 +129,18 @@ void CWorld::InjectHooks() {
     RH_ScopedInstall(CameraToIgnoreThisObject, 0x563F40);
     RH_ScopedInstall(RemoveReferencesToDeletedObject, 0x565510);
     RH_ScopedInstall(ClearForRestart, 0x564360);
-    RH_ScopedGlobalInstall(ScaleLighting, 0x59F0C0);
+
+    RH_ScopedGlobalInstall(FindPlayerCoors, 0x56E010);
+    RH_ScopedGlobalInstall(FindPlayerSpeed, 0x56E090);
+    RH_ScopedGlobalInstall(FindPlayerEntity, 0x56E120);
+    RH_ScopedGlobalInstall(FindPlayerTrain, 0x56E160);
+    RH_ScopedGlobalInstall(FindPlayerCentreOfWorld, 0x56E250);
+    // RH_ScopedGlobalInstall(FindPlayerCentreOfWorld_NoSniperShift, 0x56E320);
+    // RH_ScopedGlobalInstall(FindPlayerCentreOfWorld_NoInteriorShift, 0x56E400);
+    RH_ScopedGlobalInstall(FindPlayerHeading, 0x56E450);
+    RH_ScopedGlobalInstall(FindPlayerPed, 0x56E210);
+    RH_ScopedGlobalInstall(FindPlayerVehicle, 0x56E0D0);
+    RH_ScopedGlobalInstall(FindPlayerWanted, 0x56E230);
 }
 
 // 0x5631C0
@@ -864,10 +874,10 @@ void CWorld::FindObjectsKindaCollidingSectorList(CPtrList& ptrList, const CVecto
 
         const float fRadiusToCheck = CModelInfo::GetModelInfo(entity->m_nModelIndex)->GetColModel()->GetBoundRadius() + radius;
         if (b2D) {
-            if (DistanceBetweenPoints2D(CVector2D{ point }, entity->GetBoundCentre()) >= fRadiusToCheck)
+            if (DistanceBetweenPoints2D(entity->GetBoundCentre(), point) >= fRadiusToCheck)
                 continue;
         } else {
-            if (DistanceBetweenPoints(point, entity->GetBoundCentre()) >= fRadiusToCheck)
+            if (DistanceBetweenPoints(entity->GetBoundCentre(), point) >= fRadiusToCheck)
                 continue;
         }
 
@@ -996,9 +1006,10 @@ void CWorld::FindNearestObjectOfTypeSectorList(int32 modelId, CPtrList& ptrList,
         entity->SetCurrentScanCode();
 
         const auto GetDistance = [&] {
-            if (b2D)
-                return DistanceBetweenPoints2D({ point }, { entity->GetPosition() });
-            return DistanceBetweenPoints(point, entity->GetPosition());
+            if (b2D) {
+                return DistanceBetweenPoints2D(entity->GetPosition(), point);
+            }
+            return DistanceBetweenPoints(entity->GetPosition(), point);
         };
 
         if (const float dist = GetDistance(); dist <= radius) {
@@ -1389,8 +1400,8 @@ void CWorld::ClearCarsFromArea(float minX, float minY, float minZ, float maxX, f
             CEntity::ClearReference(driver); // Not even sure why this is done - Ped::Remove already unlinks it from the vehicle it's in
         }
 
-        for (auto j = 0; j < veh->m_nMaxPassengers; j++) {
-            if (auto passenger = veh->m_apPassengers[j]) {
+        for (const auto passenger : veh->GetPassengers()) {
+            if (passenger) {
                 veh->RemovePassenger(passenger);
                 CPopulation::RemovePed(passenger);
             }
@@ -1489,7 +1500,7 @@ CVehicle* CWorld::FindUnsuspectingTargetCar(CVector point, CVector playerPosn) {
             continue;
         }
 
-        const float dist2D = DistanceBetweenPoints2D(point, veh->GetPosition());
+        const float dist2D = DistanceBetweenPoints2D(veh->GetPosition(), point);
         if (dist2D >= nearestDist2D)
             continue;
 
@@ -1523,7 +1534,7 @@ CPed* CWorld::FindUnsuspectingTargetPed(CVector point, CVector playerPosn) {
                 continue;
 
         const CVector pedPos = ped->GetPosition();
-        const float dist2D = DistanceBetweenPoints2D(point, pedPos);
+        const float dist2D = DistanceBetweenPoints2D(pedPos, point);
         if (dist2D >= nearestDist2D)
             continue;
 
@@ -1732,6 +1743,7 @@ bool CWorld::ProcessVerticalLine(const CVector& origin, float distance, CColPoin
 
 // 0x567620
 bool CWorld::ProcessVerticalLine_FillGlobeColPoints(const CVector& origin, float distance, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly) {
+    IncrementCurrentScanCode();
     FilledColPointIndex = 0;
 
     const int32 secX = GetSectorX(origin.x), secY = GetSectorY(origin.y);
@@ -1917,7 +1929,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
                         ped->bIsStanding = false;
                         impactVelocity.z += 4.f;
                     } else {
-                        impactVelocity.z += static_cast<float>(CTimer::GetTimeStepInMS()) * ped->m_fMass / 125.f;
+                        impactVelocity.z += CTimer::GetTimeStepInMS() * ped->m_fMass / 125.f;
                     }
 
                     ped->ApplyMoveForce(impactVelocity);
@@ -2351,10 +2363,10 @@ float CWorld::FindGroundZForCoord(float x, float y) {
 }
 
 // 0x5696C0
-float CWorld::FindGroundZFor3DCoord(float x, float y, float z, bool* outResult, CEntity** outEntity) {
+float CWorld::FindGroundZFor3DCoord(CVector coord, bool* outResult, CEntity** outEntity) {
     CEntity* localOutEntity{};
     CColPoint colPoint{};
-    if (ProcessVerticalLine({ x, y, z }, -1000.0f, colPoint, localOutEntity, true, false, false, false, true, false, nullptr)) {
+    if (ProcessVerticalLine(coord, -1000.0f, colPoint, localOutEntity, true, false, false, false, true, false, nullptr)) {
         if (outResult)
             *outResult = true;
         if (outEntity)
@@ -2416,7 +2428,7 @@ void CWorld::RepositionOneObject(CEntity* object) {
     // Recalculate position to be on ground level where is `point`
     const auto RecalcZPosAtPoint = [&](const CVector2D& point) {
         auto& pos = object->GetMatrix().GetPosition();
-        pos.z = FindGroundZFor3DCoord(point.x, point.y, pos.z + std::max(2.f, colModel->m_boundBox.GetHeight()), nullptr, nullptr) - colModel->m_boundBox.m_vecMin.z;
+        pos.z = FindGroundZFor3DCoord({point.x, point.y, pos.z + std::max(2.f, colModel->m_boundBox.GetHeight())}, nullptr, nullptr) - colModel->m_boundBox.m_vecMin.z;
         object->UpdateRW();
         object->UpdateRwFrame();
     };
@@ -2579,8 +2591,8 @@ void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint
             CEntity::ClearReference(driver);
         }
 
-        for (auto j = 0; j < veh->m_nMaxPassengers; j++) {
-            if (auto passenger = veh->m_apPassengers[j]) {
+        for (auto& passenger : veh->GetPassengers()) {
+            if (passenger) {
                 veh->RemovePassenger(passenger);
                 CPopulation::RemovePed(passenger);
             }
@@ -3034,10 +3046,4 @@ CPtrListSingleLink& CWorld::GetLodPtrList(int32 x, int32 y) {
     assert(y < MAX_LOD_PTR_LISTS_Y);
 
     return ms_aLodPtrLists[y][x];
-}
-
-// 0x59F0C0
-float ScaleLighting(uint8 lighting, float scale) {
-    return (float)(lighting & 15) * scale / 15.0f * (1.0f - CCustomBuildingDNPipeline::m_fDNBalanceParam)
-         + (float)(lighting >> 4) * scale / 15.0f * (1.0f * CCustomBuildingDNPipeline::m_fDNBalanceParam);
 }

@@ -9,7 +9,7 @@ public:
     uint8 wheelDown;
     uint8 bmx1;
     uint8 bmx2;
-    char  __align;
+    char  _align;
     float Z;
     float X;
     float Y;
@@ -21,7 +21,6 @@ public:
     CMouseControllerState* Constructor();
 
     void Clear();
-    bool CheckForInput();
+    [[nodiscard]] bool CheckForInput() const;
 };
-
 VALIDATE_SIZE(CMouseControllerState, 0x14);

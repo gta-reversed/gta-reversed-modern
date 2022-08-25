@@ -3,6 +3,7 @@
 #include "RunningScript.h"
 #include "TheScripts.h"
 #include "CarGenerator.h"
+#include "Hud.h"
 
 // https://library.sannybuilder.com/#/sa
 
@@ -60,28 +61,28 @@ void CRunningScript::InjectHooks() {
     // RH_ScopedInstall(CharInAngledAreaCheckCommand, 0x487F60);
     // RH_ScopedInstall(FlameInAngledAreaCheckCommand, 0x488780);
     // RH_ScopedInstall(ObjectInAngledAreaCheckCommand, 0x4883F0);
-    RH_ScopedInstall(CollectParameters, 0x464080, false, 5, 1);
-    RH_ScopedInstall(CollectNextParameterWithoutIncreasingPC, 0x464250, false, 5, 0);
-    RH_ScopedInstall(StoreParameters, 0x464370, false, 5, 1);
-    RH_ScopedInstall(ReadArrayInformation, 0x463CF0, false, 5, 3);
-    RH_ScopedInstall(ReadParametersForNewlyStartedScript, 0x464500, false, 5, 1);
-    RH_ScopedInstall(ReadTextLabelFromScript, 0x463D50, false, 5, 2);
-    RH_ScopedInstall(GetIndexOfGlobalVariable, 0x464700, false, 5, 0);
+    RH_ScopedInstall(CollectParameters, 0x464080, { .stackArguments = 1 });
+    RH_ScopedInstall(CollectNextParameterWithoutIncreasingPC, 0x464250, { .stackArguments = 0 });
+    RH_ScopedInstall(StoreParameters, 0x464370, { .stackArguments = 1 });
+    RH_ScopedInstall(ReadArrayInformation, 0x463CF0, { .stackArguments = 3 });
+    RH_ScopedInstall(ReadParametersForNewlyStartedScript, 0x464500, { .stackArguments = 1 });
+    RH_ScopedInstall(ReadTextLabelFromScript, 0x463D50, { .stackArguments = 2 });
+    RH_ScopedInstall(GetIndexOfGlobalVariable, 0x464700, { .stackArguments = 0 });
     RH_ScopedInstall(GetPadState, 0x485B10);
-    RH_ScopedInstall(GetPointerToLocalVariable, 0x463CA0, false, 5, 1);
-    RH_ScopedInstall(GetPointerToLocalArrayElement, 0x463CC0, false, 5, 3);
-    RH_ScopedInstall(GetPointerToScriptVariable, 0x464790, false, 5, 1);
+    RH_ScopedInstall(GetPointerToLocalVariable, 0x463CA0, { .stackArguments = 1 });
+    RH_ScopedInstall(GetPointerToLocalArrayElement, 0x463CC0, { .stackArguments = 3 });
+    RH_ScopedInstall(GetPointerToScriptVariable, 0x464790, { .stackArguments = 1 });
     RH_ScopedInstall(DoDeathArrestCheck, 0x485A50);
     RH_ScopedInstall(SetCharCoordinates, 0x464DC0);
     RH_ScopedInstall(GivePedScriptedTask, 0x465C20);
-    RH_ScopedInstall(AddScriptToList, 0x464C00, false, 5, 1);
-    RH_ScopedInstall(RemoveScriptFromList, 0x464BD0, false, 5, 1);
+    RH_ScopedInstall(AddScriptToList, 0x464C00, { .stackArguments = 1 });
+    RH_ScopedInstall(RemoveScriptFromList, 0x464BD0, { .stackArguments = 1 });
     // RH_ScopedInstall(ShutdownThisScript, 0x465AA0);
     RH_ScopedInstall(IsPedDead, 0x464D70);
     RH_ScopedInstall(ThisIsAValidRandomPed, 0x489490);
     // RH_ScopedInstall(ScriptTaskPickUpObject, 0x46AF50);
-    RH_ScopedInstall(UpdateCompareFlag, 0x4859D0, false, 5, 1);
-    RH_ScopedInstall(UpdatePC, 0x464DA0, false, 5, 1);
+    RH_ScopedInstall(UpdateCompareFlag, 0x4859D0, { .stackArguments = 1 });
+    RH_ScopedInstall(UpdatePC, 0x464DA0, { .stackArguments = 1 });
     RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
     RH_ScopedInstall(Process, 0x469F00);
 }

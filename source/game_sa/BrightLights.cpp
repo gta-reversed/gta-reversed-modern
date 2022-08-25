@@ -124,7 +124,7 @@ CRGBA tBrightLight::GetColorRGBA() const {
     };
 
     // Originally R* used:
-    //const auto rnd = (uint8)((float)(uint8)rand() / 5.0f);
+    //const auto rnd = (uint8)((float)(uint8)CGeneral::GetRandomNumber() / 5.0f);
     const auto rnd = (uint8)CGeneral::GetRandomNumberInRange(0, 255 / 5);
     switch (m_nColor) {
     case BRIGHTLIGHT_GREEN_BIG:
@@ -140,7 +140,7 @@ CRGBA tBrightLight::GetColorRGBA() const {
         return { 255, rnd, rnd, GetAlpha() };
 
     default: { // NOTSA
-        NOTSA_UNREACHABLE;
+        NOTSA_UNREACHABLE();
         return { 255, 255, 255, 255 }; // Shouldn't reach this point.. in theory that is..
     }
     }

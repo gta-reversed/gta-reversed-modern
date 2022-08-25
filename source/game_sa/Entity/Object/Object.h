@@ -22,7 +22,7 @@ enum eObjectType {
 class CDummyObject;
 class CFire;
 
-class CObject : public CPhysical {
+class NOTSA_EXPORT_VTABLE CObject : public CPhysical {
 public:
     CPtrNodeDoubleLink* m_pControlCodeList;
     uint8               m_nObjectType; // see enum eObjectType
@@ -100,8 +100,8 @@ public:
     explicit CObject(CDummyObject* dummyObj);
     ~CObject() override;
 
-    static void* operator new(unsigned size);
-    static void* operator new(unsigned size, int32 poolRef);
+    static void* operator new(size_t size);
+    static void* operator new(size_t size, int32 poolRef);
     static void operator delete(void* obj);
     static void operator delete(void* obj, int32 poolRef);
 
@@ -120,11 +120,11 @@ public:
     bool Save();
 
     void     ProcessGarageDoorBehaviour();
-    bool     CanBeDeleted();
+    [[nodiscard]] bool CanBeDeleted() const;
     void     SetRelatedDummy(CDummyObject* relatedDummy);
     bool     TryToExplode();
     void     SetObjectTargettable(bool targetable);
-    bool     CanBeTargetted();
+    [[nodiscard]] bool CanBeTargetted() const;
     void     RefModelInfo(int32 modelIndex);
     void     SetRemapTexture(RwTexture* remapTexture, int16 txdIndex);
     float    GetRopeHeight();

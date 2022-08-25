@@ -40,7 +40,7 @@ CTrailer::CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(
     if (m_nModelIndex == MODEL_BAGBOXA || m_nModelIndex == MODEL_BAGBOXB)
         m_fTrailerTowedRatio = -1000.0f;
 
-    SetupSuspensionLines();
+    SetupSuspensionLines(); // V1053 Calling the 'SetupSuspensionLines' virtual function in the constructor may lead to unexpected result at runtime.
 
     m_nStatus = eEntityStatus::STATUS_ABANDONED;
 }
@@ -56,11 +56,11 @@ bool CTrailer::SetTowLink(CVehicle* vehicle, bool setMyPosToTowBar) {
         return false;
     }
 
-    if (m_nStatus != STATUS_PHYSICS && m_nStatus != STATUS_REMOTE_CONTROLLED && m_nStatus != STATUS_ABANDONED) {
+    if (m_nStatus != STATUS_PHYSICS && m_nStatus != STATUS_IS_TOWED && m_nStatus != STATUS_ABANDONED) {
         return false;
     }
 
-    m_nStatus = STATUS_REMOTE_CONTROLLED;
+    m_nStatus = STATUS_IS_TOWED;
 
     m_pTractor = vehicle;
     m_pTractor->RegisterReference(m_pTractor);
@@ -128,7 +128,7 @@ void CTrailer::ScanForTowLink() {
             continue;
         }
 
-        const auto dist = DistanceBetweenPoints2D(towHitchPos, towBarPos);
+        const auto dist = DistanceBetweenPoints2D(towBarPos, towHitchPos);
         if (dist < RELINK_TRAILER_DIFF_LIMIT_XY && std::fabs(towHitchPos.z - towBarPos.z) < RELINK_TRAILER_DIFF_LIMIT_Z) {
             SetTowLink(vehicle, false);
             return;
@@ -221,7 +221,7 @@ bool CTrailer::BreakTowLink() {
         CEntity::ClearReference(m_pTractor);
     }
 
-    if (m_nStatus != STATUS_REMOTE_CONTROLLED && m_nStatus != STATUS_PLAYER_DISABLED) {
+    if (m_nStatus != STATUS_IS_TOWED && m_nStatus != STATUS_IS_SIMPLE_TOWED) {
         return false;
     }
 
