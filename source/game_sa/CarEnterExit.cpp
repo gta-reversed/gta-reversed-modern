@@ -19,7 +19,7 @@ void CCarEnterExit::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     // RH_ScopedInstall(AddInCarAnim, 0x64F720);
-    // RH_ScopedInstall(CarHasDoorToClose, 0x64EE10);
+    RH_ScopedInstall(CarHasDoorToClose, 0x64EE10);
     // RH_ScopedInstall(CarHasDoorToOpen, 0x0);
     // RH_ScopedInstall(CarHasOpenableDoor, 0x0);
     // RH_ScopedInstall(CarHasPartiallyOpenDoor, 0x0);
@@ -59,7 +59,8 @@ void CCarEnterExit::AddInCarAnim(const CVehicle* vehicle, CPed* ped, bool bAsDri
 
 // 0x64EE10
 bool CCarEnterExit::CarHasDoorToClose(const CVehicle* vehicle, int32 doorId) {
-    return plugin::CallAndReturn<bool, 0x64EE10, const CVehicle*, int32>(vehicle, doorId);
+    auto& veh = const_cast<CVehicle&>(*vehicle);
+    return !veh.IsDoorMissing(doorId) && !veh.IsDoorClosed(doorId);
 }
 
 // 0x
