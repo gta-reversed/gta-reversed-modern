@@ -10,11 +10,13 @@
 #include <initializer_list>
 #include <RenderWare.h>
 
+#include "AnimationEnums.h"
 #include "Vector.h"
 #include "Vector2D.h"
 #include "Matrix.h"
 #include "Draw.h"
 
+class CAnimBlendAssociation;
 class CAnimBlendClumpData;
 class CSimpleTransform;
 
