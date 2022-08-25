@@ -101,20 +101,20 @@ CPedIntelligence::CPedIntelligence(CPed* ped) :
     m_eventHandler{ CEventHandler(ped) },
     m_eventGroup{ CEventGroup(ped) }
 {
-    m_nDecisionMakerType        = DM_EVENT_UNDEFINED;
-    m_nDecisionMakerTypeInGroup = -1;
-    m_fHearingRange             = 15.0f;
-    m_fSeeingRange              = 15.0f;
-    m_nDmNumPedsToScan          = 3;
-    m_fDmRadius                 = 15.0f;
-    field_CC                    = 30.0f;
-    field_D0                    = -1;
-    m_nEventId                  = 0;
-    m_nEventPriority            = 0;
-    field_188                   = 0;
-    field_260                   = false;
-    m_AnotherStaticCounter      = 0;
-    m_StaticCounter             = 0;
+    m_nDecisionMakerType                  = DM_EVENT_UNDEFINED;
+    m_nDecisionMakerTypeInGroup           = -1;
+    m_fHearingRange                       = 15.0f;
+    m_fSeeingRange                        = 15.0f;
+    m_nDmNumPedsToScan                    = 3;
+    m_fDmRadius                           = 15.0f;
+    field_CC                              = 30.0f;
+    field_D0                              = -1;
+    m_nEventId                            = 0;
+    m_nEventPriority                      = 0;
+    field_188                             = 0;
+    m_collisionScanner.m_bAlreadyHitByCar = false;
+    m_AnotherStaticCounter                = 0;
+    m_StaticCounter                       = 0;
     if (IsPedTypeGang(ped->m_nPedType)) {
         m_fSeeingRange = 40.f;
         m_fHearingRange = 40.f;
@@ -1003,14 +1003,7 @@ void CPedIntelligence::ProcessFirst() {
 
     ProcessStaticCounter();
     if (!m_pedStuckChecker.TestPedStuck(m_pPed, &m_eventGroup))
-    {
-        // Yes, this is very awkward. field_260 is just a boolean, and we are passing its address as a class instance,.
-        // ScanForCollisionEvents might set it to false. The calling convention of the function was probably __cdecl,
-        // but the compiler messed up and used ecx for it. The code works though. Just remember that
-        // CPedIntelligence::field_260 is just a boolean, not a class instance. Let's keep it this way for now.
-        auto* ppCollisionEventScanner = (CCollisionEventScanner*)& field_260;
-        ppCollisionEventScanner->ScanForCollisionEvents(m_pPed, &m_eventGroup);
-    }
+        m_collisionScanner.ScanForCollisionEvents(m_pPed, &m_eventGroup);
 
     if (m_pPed->m_fDamageIntensity > 0.0f)
     {
@@ -1026,8 +1019,8 @@ void CPedIntelligence::ProcessFirst() {
         CVehicle* vehicle = m_pPed->m_pVehicle;
         if (vehicle && vehicle->IsBike()) {
             auto* bike = vehicle->AsBike();
-            bike->m_bPedLeftHandFixed = false;
-            bike->m_bPedRightHandFixed = false;
+            bike->m_nFixLeftHand = false;
+            bike->m_nFixRightHand = false;
         }
     }
     m_pPed->bMoveAnimSpeedHasBeenSetByTask = false;

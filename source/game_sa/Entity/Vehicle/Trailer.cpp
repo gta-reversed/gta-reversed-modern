@@ -221,7 +221,7 @@ bool CTrailer::BreakTowLink() {
         CEntity::ClearReference(m_pTractor);
     }
 
-    if (m_nStatus != STATUS_IS_TOWED && m_nStatus != STATUS_PLAYER_DISABLED) {
+    if (m_nStatus != STATUS_IS_TOWED && m_nStatus != STATUS_IS_SIMPLE_TOWED) {
         return false;
     }
 

@@ -231,11 +231,11 @@ bool CPools::LoadVehiclePool() {
             break;
         case VEHICLE_TYPE_BIKE:
             vehicle = new CBike(modelId, RANDOM_VEHICLE);
-            vehicle->AsBike()->bikeFlags.bIsStanding = true;
+            vehicle->AsBike()->bikeFlags.bOnSideStand = true;
             break;
         case VEHICLE_TYPE_BMX:
             vehicle = new CBmx(modelId, RANDOM_VEHICLE);
-            vehicle->AsBike()->bikeFlags.bIsStanding = true;
+            vehicle->AsBike()->bikeFlags.bOnSideStand = true;
             break;
         case VEHICLE_TYPE_TRAILER:
             vehicle = new CTrailer(modelId, RANDOM_VEHICLE);

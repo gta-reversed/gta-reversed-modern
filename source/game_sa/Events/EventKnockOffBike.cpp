@@ -87,7 +87,7 @@ void CEventKnockOffBike::ReportCriminalEvent(CPed* ped)
 bool CEventKnockOffBike::AffectsPed_Reversed(CPed* ped)
 {
     if (ped->IsAlive()) {
-        if (m_vehicle && m_vehicle->m_nStatus == STATUS_TRAILER)
+        if (m_vehicle && m_vehicle->m_nStatus == STATUS_GHOST)
             return false;
         if (ped->CantBeKnockedOffBike && !ped->bHasBeenRendered && !m_forceKnockOff)
             return false;
@@ -161,7 +161,7 @@ int32 CEventKnockOffBike::CalcForcesAndAnims(CPed* ped)
     uint8 numContactWheels = 0;
     float massRatio = ped->m_fMass / m_vehicle->m_fMass;
     if (m_vehicle->IsBike())
-        numContactWheels = m_vehicle->AsBike()->m_nNumContactWheels;
+        numContactWheels = m_vehicle->AsBike()->m_nNoOfContactWheels;
     else if (m_vehicle->IsAutomobile())
         numContactWheels = m_vehicle->AsAutomobile()->m_nNumContactWheels;
 
@@ -289,7 +289,7 @@ bool CEventKnockOffBike::SetPedSafePosition(CPed* ped)
 {
     if (m_vehicle->IsBike()) {
         CBike* bike = m_vehicle->AsBike();
-        bike->m_rideAnimData.m_fAnimLean = 0.0f;
+        bike->m_RideAnimData.m_fAnimLean = 0.0f;
         bike->m_bLeanMatrixCalculated = false;
         ped->SetPedPositionInCar();
     }
