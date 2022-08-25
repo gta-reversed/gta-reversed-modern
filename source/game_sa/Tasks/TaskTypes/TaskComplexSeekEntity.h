@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TaskComplex.h"
+#include "TaskTimer.h"
 #include "EntitySeekPosCalculatorRadiusAngleOffset.h"
 #include "EntitySeekPosCalculatorStandard.h"
 #include "EntitySeekPosCalculatorXYOffset.h"
@@ -8,7 +9,7 @@
 template <typename EntitySeekT>
 class CTaskComplexSeekEntity : public CTaskComplex {
     CEntity* m_entity{};
-    uint32 m_taskIntervals[2];
+    int32 m_taskIntervals[2];
     float m_maxEntityDist2D{};
     float m_unk1{};
     float m_minEntityDist2D{};
@@ -16,8 +17,10 @@ class CTaskComplexSeekEntity : public CTaskComplex {
     CTaskTimer m_taskTimers[2]{};
     EntitySeekT m_entitySeekPosCalculator{};
     uint32 m_unk3{};
-    uint8 m_flags{};
-
+    bool m_flag0 : 1{};
+    bool m_flag1 : 1{};
+    bool m_flag3 : 1{};
+    bool m_flag4 : 1{};
 public:
     CTaskComplexSeekEntity(
         CEntity* entity,

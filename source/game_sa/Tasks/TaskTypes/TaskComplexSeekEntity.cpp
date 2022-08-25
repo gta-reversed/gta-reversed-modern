@@ -17,7 +17,8 @@ CTaskComplexSeekEntity<T>::CTaskComplexSeekEntity(
     m_taskIntervals{taskTimer1Interval, taskTimer2Interval},
     m_unk1{unk1},
     m_unk2{unk2},
-    m_flags{0xF0 | flag0 << 0 | flag1 << 1}
+    m_flag0{flag0},
+    m_flag1{flag1}
 {
     CEntity::SafeRegisterRef(m_entity);
 }
