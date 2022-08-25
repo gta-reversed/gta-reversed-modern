@@ -113,8 +113,33 @@ int32 CCarEnterExit::ComputePassengerIndexFromCarDoor(const CVehicle* vehicle, i
 }
 
 // 0x64F070
-int32 CCarEnterExit::ComputeSlowJackedPed(const CVehicle* vehicle, int32 doorId) {
-    return plugin::CallAndReturn<int32, 0x64F070, const CVehicle*, int32>(vehicle, doorId);
+CPed* CCarEnterExit::ComputeSlowJackedPed(const CVehicle* vehicle, int32 doorId) {
+    if (vehicle->IsBike() || vehicle->m_pHandlingData->m_bTandemSeats) {
+        switch (doorId) {
+        case 8:
+        case 10:
+        case 18:
+            return vehicle->m_pDriver;
+        case 9:
+        case 11:
+            return vehicle->m_apPassengers[0];
+        default:
+            return nullptr;
+        }
+    }
+
+    switch (doorId) {
+    case 8:
+        return vehicle->m_apPassengers[0];
+    case 9:
+        return vehicle->m_apPassengers[2];
+    case 10:
+        return vehicle->m_pDriver;
+    case 11:
+        return vehicle->m_apPassengers[1];
+    default:
+        return nullptr;
+    }
 }
 
 // 0x64F190

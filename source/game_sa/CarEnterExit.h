@@ -35,7 +35,7 @@ public:
     static int32 ComputeDoorFlag(const CVehicle* vehicle, int32 doorId, bool bCheckVehicleType);
     static int32 ComputeOppositeDoorFlag(const CVehicle* vehicle, int32 doorId, bool bCheckVehicleType);
     static int32 ComputePassengerIndexFromCarDoor(const CVehicle* vehicle, int32 doorId);
-    static int32 ComputeSlowJackedPed(const CVehicle* vehicle, int32 doorId);
+    static CPed* ComputeSlowJackedPed(const CVehicle* vehicle, int32 doorId);
     static int32 ComputeTargetDoorToEnterAsPassenger(const CVehicle* vehicle, int32 nPassengerNum);
     static int32 ComputeTargetDoorToExit(const CVehicle* vehicle, const CPed* ped);
     static bool GetNearestCarDoor(const CPed* ped, const CVehicle* vehicle, CVector* outPos, int32 doorId);
