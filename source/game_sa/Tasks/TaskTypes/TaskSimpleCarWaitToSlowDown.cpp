@@ -12,7 +12,7 @@ void CTaskSimpleCarWaitToSlowDown::InjectHooks() {
     RH_ScopedVMTInstall(GetTaskType, 0x6469F0);
     RH_ScopedVMTInstall(MakeAbortable, 0x646A60);
     RH_ScopedVMTInstall(ProcessPed, 0x646AD0);
-    RH_ScopedVMTInstall(SetPedPosition, 0x646AB0);
+    // crash RH_ScopedVMTInstall(SetPedPosition, 0x646AB0);
 }
 
 // 0x646990
