@@ -77,11 +77,12 @@ auto CTaskSimpleCarCloseDoorFromOutside::ComputeAnimID_Helper() -> std::tuple<As
 
 // 0x64B080
 void CTaskSimpleCarCloseDoorFromOutside::StartAnim(CPed const* ped) {
-    const auto pedPos = ped->GetPosition();
-    auto realPedPos{pedPos};
-    CPedPlacement::FindZCoorForPed(realPedPos);
+    const auto& pedPos = ped->GetPosition();
+
+    auto pedAdjustedPos{pedPos};
+    CPedPlacement::FindZCoorForPed(pedAdjustedPos);
     
-    if (pedPos.z - 1.f >= realPedPos.z) {
+    if (pedPos.z - 1.f >= pedAdjustedPos.z) {
         m_animHasFinished = true;
         return;
     }
