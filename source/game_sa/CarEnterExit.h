@@ -18,7 +18,6 @@ public:
     static const float& ms_fMaxSpeed_PlayerCanDragPedOut;
     static bool& ms_bPedOffsetsCalculated;
     static CVector& ms_vecPedGetUpAnimOffset;
-    static CVector& ms_vecPedQuickDraggedOutCarAnimOffset;
     static CVector& ms_vecPedBedLAnimOffset;
     static CVector& ms_vecPedBedRAnimOffset;
     static CVector& ms_vecPedDeskAnimOffset;
@@ -38,7 +37,7 @@ public:
     static CPed* ComputeSlowJackedPed(const CVehicle* vehicle, int32 doorId);
     static int32 ComputeTargetDoorToEnterAsPassenger(const CVehicle* vehicle, int32 nPassengerNum);
     static int32 ComputeTargetDoorToExit(const CVehicle* vehicle, const CPed* ped);
-    static bool GetNearestCarDoor(const CPed* ped, const CVehicle* vehicle, CVector* outPos, int32 doorId);
+    static bool GetNearestCarDoor(const CPed* ped, const CVehicle* vehicle, CVector& outPos, int32& doorId);
     static bool GetNearestCarPassengerDoor(const CPed* ped, const CVehicle* vehicle, CVector* outVec, int32* doorId, bool CheckIfOccupiedTandemSeat, bool CheckIfDoorIsEnterable, bool CheckIfRoomToGetIn);
     static CVector GetPositionToOpenCarDoor(const CVehicle* vehicle, int32 doorId);
     static bool IsCarDoorInUse(const CVehicle* vehicle, int32 firstDoorId, int32 secondDoorId);
@@ -46,10 +45,10 @@ public:
     static bool IsCarQuickJackPossible(const CVehicle* vehicle, int32 doorId, const CPed* ped);
     static bool IsCarSlowJackRequired(const CVehicle* vehicle, int32 doorId);
     static bool IsClearToDriveAway(const CVehicle* outVehicle);
-    static bool IsPathToDoorBlockedByVehicleCollisionModel(const CPed* ped, CVehicle* vehicle, const CVector* pos);
+    static bool IsPathToDoorBlockedByVehicleCollisionModel(const CPed* ped, const CVehicle* vehicle, const CVector* pos);
     static bool IsPedHealthy(CPed* vehicle);
     static bool IsPlayerToQuitCarEnter(const CPed* ped, const CVehicle* vehicle, int32 startTime, CTask* task);
-    static bool IsRoomForPedToLeaveCar(const CVehicle* vehicle, int32 doorId, CVector* pos);
+    static bool IsRoomForPedToLeaveCar(const CVehicle* vehicle, int32 doorId, CVector* pos = nullptr);
     static bool IsVehicleHealthy(const CVehicle* vehicle);
     static bool IsVehicleStealable(const CVehicle* vehicle, const CPed* ped);
     static void MakeUndraggedDriverPedLeaveCar(const CVehicle* vehicle, const CPed* ped);

@@ -1,5 +1,6 @@
 #include "StdInc.h"
 
+#include "PedStats.h"
 #include "CarEnterExit.h"
 
 /*
@@ -29,7 +30,7 @@ void CCarEnterExit::InjectHooks() {
     RH_ScopedInstall(ComputeSlowJackedPed, 0x64F070);
     RH_ScopedInstall(ComputeTargetDoorToEnterAsPassenger, 0x64F190);
     RH_ScopedInstall(ComputeTargetDoorToExit, 0x64F110);
-    // RH_ScopedInstall(GetNearestCarDoor, 0x6528F0);
+    RH_ScopedInstall(GetNearestCarDoor, 0x6528F0);
     // RH_ScopedInstall(GetNearestCarPassengerDoor, 0x650BB0);
     // RH_ScopedInstall(GetPositionToOpenCarDoor, 0x64E740);
     // RH_ScopedInstall(IsCarDoorInUse, 0x0);
@@ -183,8 +184,142 @@ int32 CCarEnterExit::ComputeTargetDoorToExit(const CVehicle* vehicle, const CPed
 }
 
 // 0x6528F0
-bool CCarEnterExit::GetNearestCarDoor(const CPed* ped, const CVehicle* vehicle, CVector* outPos, int32 doorId) {
-    const auto driverDraggedOutOffset = 
+bool CCarEnterExit::GetNearestCarDoor(const CPed* ped, const CVehicle* vehicle, CVector& outPos, int32& doorId) {
+    auto driverDraggedOutOffset = vehicle->m_pDriver ? &ms_vecPedQuickDraggedOutCarAnimOffset : nullptr;
+    auto psgrDraggedOutOffset = vehicle->m_apPassengers[0] ? &ms_vecPedQuickDraggedOutCarAnimOffset : nullptr;
+
+    if ((vehicle->IsBike() && !vehicle->IsSubBMX()) || vehicle->IsSubQuad()) {
+        driverDraggedOutOffset = nullptr;
+        psgrDraggedOutOffset = nullptr;
+
+        if (ped->GetTaskManager().GetActiveTask()->GetTaskType() != TASK_COMPLEX_ENTER_CAR_AS_PASSENGER) {
+            if (std::abs(vehicle->GetRight().z) < 0.1f) { // Isn't on it's side
+                // Check if ped is 30 degrees to the left of the vehicle
+                // Original code used atan and whatnot, but this achieves the same result
+                if (DotProduct2D(vehicle->GetRight(), ped->GetForward()) > 0 // On the left
+                 && DotProduct2D(vehicle->GetForward(), ped->GetForward()) > std::cos(PI / 6.f)
+                ) {
+                    if ((ped->IsPlayer() && ped->m_pPlayerData->m_fMoveBlendRatio > 1.5f && doorId == 0) 
+                    || (!ped->IsPlayer() && ped->m_nPedType != PED_TYPE_COP && ped->m_nMoveState == PEDMOVE_RUN && ped->m_pStats->m_nTemper > 65 && doorId == 0)
+                    ) {
+                        // 18 here is probably either from eBikeNodes or eQuadNodes, not sure?
+                        if (IsRoomForPedToLeaveCar(vehicle, 18)) {
+                            doorId = 18;
+                            outPos = GetPositionToOpenCarDoor(vehicle, 18);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    } else if (vehicle->vehicleFlags.bIsBus || vehicle->vehicleFlags.bLowVehicle) {
+        driverDraggedOutOffset = nullptr;
+        psgrDraggedOutOffset = nullptr;
+    }
+
+
+    const auto posDoorFLeft = GetPositionToOpenCarDoor(vehicle, CAR_DOOR_LF);
+    const auto posDoorFRight = GetPositionToOpenCarDoor(vehicle, CAR_DOOR_RF);
+
+    CVector2D pedPos2D = ped->GetPosition();
+    CVector2D dir2DToDoorFLeft = posDoorFLeft - pedPos2D, dir2DToDoorFRight = posDoorFRight - pedPos2D;
+
+    if (vehicle->m_pTrailer) {
+        if (dir2DToDoorFLeft.SquaredMagnitude() < dir2DToDoorFRight.SquaredMagnitude()) {
+            if (IsPathToDoorBlockedByVehicleCollisionModel(ped, vehicle, &posDoorFRight)) {
+                dir2DToDoorFRight = { 999.90002f, 999.90002f };
+            } else if (IsPathToDoorBlockedByVehicleCollisionModel(ped, vehicle, &posDoorFLeft)) {
+                dir2DToDoorFLeft = { 999.90002f, 999.90002f };
+            }
+        }
+    }
+
+    if (vehicle->m_pHandlingData->m_bForceDoorCheck && vehicle->IsAutomobile()) {
+        const auto aut = static_cast<const CAutomobile*>(vehicle);
+
+        if (aut->m_aCarNodes[CAR_DOOR_RF]) { // Inverted
+            if (!aut->m_aCarNodes[CAR_DOOR_LF]) {
+                if (IsRoomForPedToLeaveCar(vehicle, CAR_DOOR_RF, driverDraggedOutOffset)) {
+                    doorId = CAR_DOOR_RF;
+                    outPos = posDoorFRight;
+                    return true;
+                }
+            }
+        } else {
+            if (IsRoomForPedToLeaveCar(vehicle, CAR_DOOR_LF, driverDraggedOutOffset)) {
+                doorId = CAR_DOOR_LF;
+                outPos = posDoorFLeft;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    if (doorId != CAR_NODE_NONE && IsRoomForPedToLeaveCar(vehicle, doorId, driverDraggedOutOffset)) {
+        switch (doorId) {
+        case CAR_DOOR_LF: {
+            doorId = CAR_DOOR_LF;
+            outPos = posDoorFLeft;
+            return true;
+        }
+        case CAR_DOOR_RF: {
+            doorId = CAR_DOOR_RF;
+            outPos = posDoorFRight;
+            return true;
+        }
+        default:
+            return false;
+        }
+    }
+
+    if (!vehicle->m_pDriver
+    || (CPedGroups::AreInSameGroup(ped, vehicle->m_pDriver) && !vehicle->m_pDriver->bDontDragMeOutCar)
+    ) {
+        if (vehicle->vehicleFlags.bIsBus
+         || dir2DToDoorFRight.SquaredMagnitude() > dir2DToDoorFLeft.SquaredMagnitude()
+        ) {
+            if (IsRoomForPedToLeaveCar(vehicle, CAR_DOOR_LF, driverDraggedOutOffset)) {
+                doorId = CAR_DOOR_LF;
+                outPos = posDoorFLeft;
+                return true;
+            }
+            if (IsRoomForPedToLeaveCar(vehicle, CAR_DOOR_RF, driverDraggedOutOffset)) {
+                doorId = CAR_DOOR_RF;
+                outPos = posDoorFRight;
+                return true;
+            }
+        } else {
+            if (IsRoomForPedToLeaveCar(vehicle, CAR_DOOR_RF, driverDraggedOutOffset)) {
+                if ((
+                           vehicle->m_apPassengers[0]
+                        && !vehicle->IsBike()
+                        && !vehicle->m_pHandlingData->m_bTandemSeats
+                        && (CPedGroups::AreInSameGroup(vehicle->m_apPassengers[0], ped) || vehicle->m_apPassengers[0]->bDontDragMeOutCar || vehicle->IsMissionVehicle())
+                        && IsRoomForPedToLeaveCar(vehicle, CAR_DOOR_LF, driverDraggedOutOffset)
+                    ) || (
+                        vehicle->m_nGettingInFlags & 4
+                        && IsRoomForPedToLeaveCar(vehicle, CAR_DOOR_LF, driverDraggedOutOffset)
+                    )
+                ) {
+                    doorId = CAR_DOOR_LF;
+                    outPos = posDoorFLeft;
+                    return true;
+                } else {
+                    doorId = CAR_DOOR_RF;
+                    outPos = posDoorFRight;
+                    return true;
+                }
+            }
+
+            if (IsRoomForPedToLeaveCar(vehicle, CAR_DOOR_LF, driverDraggedOutOffset)) {
+                doorId = CAR_DOOR_LF;
+                outPos = posDoorFLeft;
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 // 0x650BB0
@@ -226,8 +361,8 @@ bool CCarEnterExit::IsClearToDriveAway(const CVehicle* outVehicle) {
 }
 
 // 0x651210
-bool CCarEnterExit::IsPathToDoorBlockedByVehicleCollisionModel(const CPed* ped, CVehicle* vehicle, const CVector* pos) {
-    return plugin::CallAndReturn<bool, 0x651210, const CPed*, CVehicle*, const CVector*>(ped, vehicle, pos);
+bool CCarEnterExit::IsPathToDoorBlockedByVehicleCollisionModel(const CPed* ped, const CVehicle* vehicle, const CVector* pos) {
+    return plugin::CallAndReturn<bool, 0x651210, const CPed*, const CVehicle*, const CVector*>(ped, vehicle, pos);
 }
 
 // 0x64EEE0

@@ -301,7 +301,7 @@ public:
     int16             m_nAlarmState;
     int16             m_nForcedRandomRouteSeed; // if this is non-zero the random wander gets deterministic
     CPed*             m_pDriver;
-    CPed*             m_apPassengers[8];
+    CPed*             m_apPassengers[8]{};
     uint8             m_nNumPassengers;
     uint8             m_nNumGettingIn;
     uint8             m_nGettingInFlags;
