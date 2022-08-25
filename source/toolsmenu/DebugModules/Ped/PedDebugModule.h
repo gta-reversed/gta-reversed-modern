@@ -24,6 +24,7 @@ private:
     void ProcessPed(CPed&);
 private:
     float  m_collapseToggleDist{20.f};
+    float  m_drawDist{ 200.f };
     bool    m_visible{};
     bool    m_autoCollapse{};
     Tasks   m_tasksDebug{};
