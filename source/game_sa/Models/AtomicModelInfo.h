@@ -13,7 +13,7 @@ struct tVehicleComponentFlag {
     uint32      m_nFlag;
 };
 
-class CAtomicModelInfo : public CBaseModelInfo {
+class NOTSA_EXPORT_VTABLE CAtomicModelInfo : public CBaseModelInfo {
 public:
     CAtomicModelInfo() : CBaseModelInfo() {}
 

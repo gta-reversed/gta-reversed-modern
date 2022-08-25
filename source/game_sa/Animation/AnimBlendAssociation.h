@@ -97,7 +97,7 @@ struct SClumpAnimAssoc {
     [[nodiscard]] bool IsIndestructible() const { return (m_nFlags & ANIMATION_INDESTRUCTIBLE) != 0; }
 };
 
-class CAnimBlendAssociation : public SClumpAnimAssoc {
+class NOTSA_EXPORT_VTABLE CAnimBlendAssociation : public SClumpAnimAssoc {
 public:
     eAnimBlendCallbackType m_nCallbackType;
     void (*m_pCallbackFunc)(CAnimBlendAssociation*, void*);

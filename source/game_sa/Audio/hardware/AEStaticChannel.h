@@ -1,7 +1,7 @@
 #pragma once
 #include "AEAudioChannel.h"
 
-class CAEStaticChannel : public CAEAudioChannel {
+class NOTSA_EXPORT_VTABLE CAEStaticChannel : public CAEAudioChannel {
 public:
     bool                  m_bUnkn1;
     bool                  m_bUnkn2;
