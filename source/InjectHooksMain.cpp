@@ -269,7 +269,9 @@
 #include "TaskSimpleDieInCar.h"
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskSimpleTired.h"
-#include "TaskSimpleCarWaitToSlowDown.h"    
+#include "TaskSimpleCarWaitToSlowDown.h"
+#include "TaskSimpleCarAlign.h"
+
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
 #include "EventPassObject.h"
