@@ -66,22 +66,3 @@ protected: // Wrappers for hooks
         return this;
     }
 };
-
-class CTaskComplexSeekEntity_CEntitySeekPosCalculatorRadiusAngleOffset : public CTaskComplexSeekEntity<CEntitySeekPosCalculatorRadiusAngleOffset> {
-public:
-    static void InjectHooks();
-
-};
-VALIDATE_SIZE(CTaskComplexSeekEntity_CEntitySeekPosCalculatorRadiusAngleOffset, 0x54);
-
-class CTaskComplexSeekEntity_CEntitySeekPosCalculatorStandard : public CTaskComplexSeekEntity<CEntitySeekPosCalculatorStandard> {
-public:
-    static void InjectHooks();
-};
-VALIDATE_SIZE(CTaskComplexSeekEntity_CEntitySeekPosCalculatorStandard, 0x4C);
-
-class CTaskComplexSeekEntity_CEntitySeekPosCalculatorXYOffset : public CTaskComplexSeekEntity<CEntitySeekPosCalculatorXYOffset> {
-public:
-    static void InjectHooks();
-};
-VALIDATE_SIZE(CTaskComplexSeekEntity_CEntitySeekPosCalculatorXYOffset, 0x58);
