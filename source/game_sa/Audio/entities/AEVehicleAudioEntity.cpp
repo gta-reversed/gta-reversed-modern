@@ -548,6 +548,7 @@ void CAEVehicleAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 cur
 
         const auto fBaseVolume = GetDefaultVolume(AE_BONNET_FLUBBER_FLUBBER);
         sound->m_fVolume = fBaseVolume + GetFlyingMetalVolume(sound->m_pPhysicalEntity->AsPhysical());
+        return;
     }
 
     if (sound->m_nEvent == AE_BOAT_HIT_WAVE) {
