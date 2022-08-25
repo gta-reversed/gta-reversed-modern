@@ -45,10 +45,10 @@ solution "gta_reversed"
         runtime "Release"
         optimize "Full"
     configuration "vs*"
-         flags {"MultiProcessorCompile"}
-         linkoptions   { "/ignore:4099" }
-         buildoptions {"/EHsc", "/Zc:preprocessor"}
-         disablewarnings { 26812, 26495 }
+        flags {"MultiProcessorCompile"}
+        linkoptions   { "/ignore:4099,4251,4275" }
+        buildoptions {"/EHsc", "/Zc:preprocessor"}
+        disablewarnings { 26812, 26495, 4099, 4251, 4275 }
 
     flags {
         characterset ("MBCS"), --fix strings
@@ -158,6 +158,7 @@ group ""
             ["Sources/*"] = {"source/**.c*",},
             ["*"] = {"premake5.lua", "CMakeLists.txt"}
         }
+
         defines { "NOMINMAX", "USE_GTASA_ALLOCATOR", "EXTRA_DEBUG_FEATURES", "FIX_BUGS" }
         includedirs {
             "source", "source/**",

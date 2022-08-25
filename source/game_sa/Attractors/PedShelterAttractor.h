@@ -2,7 +2,7 @@
 
 #include "PedAttractor.h"
 
-class CPedShelterAttractor : public CPedAttractor {
+class NOTSA_EXPORT_VTABLE CPedShelterAttractor : public CPedAttractor {
 public:
     // SArray& ms_displacements;
 
