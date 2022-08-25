@@ -74,7 +74,12 @@ void CVehicle::InjectHooks() {
     RH_ScopedVirtualInstall(PreRender, 0x6D6480);
     RH_ScopedVirtualInstall(Render, 0x6D0E60);
     RH_ScopedVirtualInstall(ProcessOpenDoor, 0x6D56C0);
-    RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6DF4A0);
+
+    // It can't be properly unhooked, original function assumes that CVehicle::GetVehicleAppearance doesn't spoil ECX register, and calls
+    // it without making sure that the pointer in it still points to current instance. While it worked for original function, we can't
+    // force the compiler to keep ECX unchanged through function execution
+    RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6DF4A0, {.enabled = true, .locked = true});
+
     RH_ScopedVirtualInstall(GetHeightAboveRoad, 0x6D63F0);
     RH_ScopedVirtualInstall(CanPedStepOutCar, 0x6D1F30);
     RH_ScopedVirtualInstall(CanPedJumpOutCar, 0x6D2030);
@@ -223,6 +228,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(GetRopeHeightForHeli, 0x6D3D10);
     RH_ScopedInstall(SetRopeHeightForHeli, 0x6D3D30);
 
+    // RH_ScopedGlobalInstall(IsValidModForVehicle, 0x49B010);
     // RH_ScopedGlobalInstall(SetVehicleAtomicVisibilityCB, 0x6D2690);
     // RH_ScopedGlobalInstall(SetVehicleAtomicVisibilityCB, 0x6D26D0);
     // RH_ScopedGlobalInstall(SetCompAlphaCB, 0x6D2950);
@@ -491,7 +497,7 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
 
     if (physicalFlags.bSubmergedInWater
         && m_nStatus != eEntityStatus::STATUS_PLAYER
-        && (m_nStatus != eEntityStatus::STATUS_HELI && colPhysical->DoesNotCollideWithFlyers())) //Bug? Seems like it should check for it being heli
+        && (m_nStatus != eEntityStatus::STATUS_REMOTE_CONTROLLED && colPhysical->DoesNotCollideWithFlyers())) //Bug? Seems like it should check for it being heli
     {
         bCollisionDisabled = true;
         return;
@@ -2253,7 +2259,7 @@ void CVehicle::FirePlaneGuns() {
         // DoPlaneGunFireFX(this, &weapon, &planeGunsPos, &posn, m_nGunsFlags & 3);
     }
 
-    if (m_nStatus == STATUS_PLANE) {
+    if (m_nStatus == STATUS_FORCED_STOP) {
         CPad::GetPad(0)->StartShake(240, frequency, 0);
     } else if (m_pDriver && m_pDriver->IsPlayer()) {
         switch (m_pDriver->m_nPedType) {
@@ -2363,7 +2369,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
         bAlreadySkidding = true;
         adhesion *= m_pHandlingData->m_fTractionLoss;
         if (*wheelState == WHEEL_STATE_SPINNING) {
-            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_HELI)
+            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_REMOTE_CONTROLLED)
                 adhesion *= (1.0f - fabs(m_fGasPedal) * WS_ALREADY_SPINNING_LOSS);
         }
     }
@@ -2380,7 +2386,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
 
     if (bDriving) {
         fwd = thrust;
-        right = clamp<float>(right, -adhesion, adhesion);
+        right = std::clamp(right, -adhesion, adhesion);
     }
     else if (contactSpeedFwd != 0.0f) {
         fwd = -contactSpeedFwd / wheelsOnGround;
@@ -2403,7 +2409,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
                 *wheelState = WHEEL_STATE_FIXED;
             }
         } else {
-            fwd = clamp<float>(fwd, -brake, brake);
+            fwd = std::clamp(fwd, -brake, brake);
         }
     }
 
@@ -2423,7 +2429,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
         if (bAlreadySkidding) {
             tractionLoss = 1.0f;
         } else if (*wheelState == WHEEL_STATE_SPINNING) {
-            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_HELI) {
+            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_REMOTE_CONTROLLED) {
                 tractionLoss = tractionLoss * (1.0f - std::fabs(m_fGasPedal) * WS_ALREADY_SPINNING_LOSS);
             }
         }
@@ -3256,6 +3262,9 @@ void CVehicle::AddVehicleUpgrade(int32 modelId) {
 // 0x6E3400
 void CVehicle::SetupUpgradesAfterLoad() {
     for (auto& upgrade : m_anUpgrades) {
+        if (upgrade == -1)
+            continue;
+
         auto savedUpgrade = upgrade;
         upgrade = -1;
         AddVehicleUpgrade(savedUpgrade);
@@ -3265,6 +3274,10 @@ void CVehicle::SetupUpgradesAfterLoad() {
 // 0x6E3440
 void CVehicle::GetPlaneWeaponFiringStatus(bool& status, eOrdnanceType& ordnanceType) {
     ((void(__thiscall*)(CVehicle*, bool&, eOrdnanceType&))0x6E3440)(this, status, ordnanceType);
+}
+
+bool IsValidModForVehicle(uint32 modelId, CVehicle* vehicle) {
+    return plugin::CallAndReturn<bool, 0x49B010, uint32, CVehicle*>(modelId, vehicle);
 }
 
 // 0x6E38F0

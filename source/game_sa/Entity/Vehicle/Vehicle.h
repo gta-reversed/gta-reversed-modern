@@ -169,6 +169,8 @@ struct tHydraulicData {
 
 VALIDATE_SIZE(tHydraulicData, 0x28);
 
+static constexpr auto NUM_VEHICLE_UPGRADES = 15u;
+
 class CVehicle : public CPhysical {
 public:
     CAEVehicleAudioEntity m_vehicleAudio;
@@ -292,7 +294,7 @@ public:
     uint8             m_nTertiaryColor;
     uint8             m_nQuaternaryColor;
     uint8             m_anExtras[2];
-    std::array<int16, 15> m_anUpgrades;
+    std::array<int16, NUM_VEHICLE_UPGRADES> m_anUpgrades;
     float             m_fWheelScale;
     int16             m_nAlarmState;
     int16             m_nForcedRandomRouteSeed; // if this is non-zero the random wander gets deterministic
@@ -407,7 +409,6 @@ public:
     static inline tHydraulicData(&m_aSpecialHydraulicData)[4] = *(tHydraulicData(*)[4])0xC1CB60;
 
 public:
-    CVehicle(plugin::dummy_func_t) : CPhysical() { /* todo: remove NOTSA */ }
     CVehicle(eVehicleCreatedBy createdBy);
     ~CVehicle() override;
 
@@ -446,7 +447,7 @@ public:
     virtual bool IsOpenTopCar(){ return false; }
     // remove ref to this entity
     virtual void RemoveRefsToVehicle(CEntity* entity) { /* Do nothing */ }
-    virtual void BlowUpCar(CEntity* damager, uint8 bHideExplosion) { /* Do nothing */ }
+    virtual void BlowUpCar(CEntity* damager, bool bHideExplosion) { /* Do nothing */ }
     virtual void BlowUpCarCutSceneNoExtras(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound) { /* Do nothing */ }
     virtual bool SetUpWheelColModel(CColModel* wheelCol) { return false; }
     // returns false if it's not possible to burst vehicle's tyre or it is already damaged. bPhysicalEffect=true applies random moving force to vehicle
@@ -719,6 +720,7 @@ private:
 };
 VALIDATE_SIZE(CVehicle, 0x5A0);
 
+bool IsValidModForVehicle(uint32 modelId, CVehicle* vehicle);
 bool IsVehiclePointerValid(CVehicle* vehicle);
 RpAtomic* RemoveUpgradeCB(RpAtomic* atomic, void* data);
 RpAtomic* FindUpgradeCB(RpAtomic* atomic, void* data);

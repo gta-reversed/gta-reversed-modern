@@ -558,11 +558,11 @@ void CRadar::LimitToMap(float* pX, float* pY)
 
     float xMin = (FrontEndMenuManager.m_vMapOrigin.x - zoom) * SCREEN_WIDTH_UNIT;
     float xMax = (FrontEndMenuManager.m_vMapOrigin.x + zoom) * SCREEN_WIDTH_UNIT;
-    *pX = clamp(*pX, xMin, xMax);
+    *pX = std::clamp(*pX, xMin, xMax);
 
     float yMin = (FrontEndMenuManager.m_vMapOrigin.y - zoom) * SCREEN_HEIGHT_UNIT;
     float yMax = (FrontEndMenuManager.m_vMapOrigin.y + zoom) * SCREEN_HEIGHT_UNIT;
-    *pY = clamp(*pY, yMin, yMax);
+    *pY = std::clamp(*pY, yMin, yMax);
 }
 
 // 0x583420

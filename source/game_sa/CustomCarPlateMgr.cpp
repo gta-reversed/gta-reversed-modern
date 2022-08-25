@@ -69,8 +69,7 @@ void CCustomCarPlateMgr::Shutdown() {
         }
     }
 
-    if (const auto slot = CTxdStore::FindTxdSlot("vehicle"); slot != -1)
-        CTxdStore::RemoveTxd(slot);
+    CTxdStore::SafeRemoveTxdSlot("vehicle");
 }
 
 // Returns texture index in pPlatebackTexTab. See texture names in ::Initialise.

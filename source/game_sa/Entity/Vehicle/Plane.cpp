@@ -178,7 +178,7 @@ void CPlane::InitPlaneGenerationAndRemoval() {
 }
 
 // 0x6CCCF0
-void CPlane::BlowUpCar(CEntity* damager, uint8 bHideExplosion) {
+void CPlane::BlowUpCar(CEntity* damager, bool bHideExplosion) {
     return plugin::CallMethod<0x6CCCF0, CPlane*, CEntity*, uint8>(this, damager, bHideExplosion);
 
     // untested \ wip
@@ -316,7 +316,7 @@ void CPlane::IsAlreadyFlying() {
 // 0x6CAC20
 void CPlane::SetGearUp() {
     m_fLandingGearStatus = 1.0f;
-    m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0f * 0.5f * m_pFlyingHandlingData->m_fGearUpR;
+    m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0f / 2.0f * m_pFlyingHandlingData->m_fGearUpR;
     m_damageManager.SetWheelStatus(CAR_WHEEL_FRONT_LEFT,  WHEEL_STATUS_MISSING);
     m_damageManager.SetWheelStatus(CAR_WHEEL_REAR_LEFT,   WHEEL_STATUS_MISSING);
     m_damageManager.SetWheelStatus(CAR_WHEEL_FRONT_RIGHT, WHEEL_STATUS_MISSING);
@@ -326,7 +326,7 @@ void CPlane::SetGearUp() {
 // 0x6CAC70
 void CPlane::SetGearDown() {
     m_fLandingGearStatus = 0.0f;
-    m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0f * 0.5f;
+    m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0f / 2.0f;
     m_damageManager.SetWheelStatus(CAR_WHEEL_FRONT_LEFT,  WHEEL_STATUS_OK);
     m_damageManager.SetWheelStatus(CAR_WHEEL_REAR_LEFT,   WHEEL_STATUS_OK);
     m_damageManager.SetWheelStatus(CAR_WHEEL_FRONT_RIGHT, WHEEL_STATUS_OK);
