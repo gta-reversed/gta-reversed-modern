@@ -2902,12 +2902,16 @@ void CAutomobile::SetupModelNodes()
 
 // 0x6A07A0
 void CAutomobile::HydraulicControl() {
-    if (m_nStatus != STATUS_PLAYER || m_nStatus != STATUS_PHYSICS) {
+    if (m_nStatus == STATUS_PHYSICS) {
+        if (!IsCreatedBy(MISSION_VEHICLE))
+            return;
+
+        if (m_vehicleSpecialColIndex < 0)
+            return;
+    } else if (m_nStatus != STATUS_PLAYER) {
         return;
     }
-    if (!IsCreatedBy(MISSION_VEHICLE) || m_vehicleSpecialColIndex < 0) {
-        return;
-    }
+
     if (handlingFlags.bHydraulicNone) {
         return;
     }
