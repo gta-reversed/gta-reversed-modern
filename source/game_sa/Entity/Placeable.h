@@ -10,20 +10,18 @@
 #include "MatrixLink.h"
 
 class CPlaceable {
-protected:
-    CPlaceable(plugin::dummy_func_t) {}
-    CPlaceable();
-    virtual ~CPlaceable();
-
 public:
     CSimpleTransform m_placement;
     CMatrixLink *m_matrix;
 
 public:
     static void InjectHooks();
-    
+
+    CPlaceable();
+    virtual ~CPlaceable();
+
     CMatrixLink& GetMatrix();
-    
+
     static void ShutdownMatrixArray();
     static void InitMatrixArray();
 
@@ -50,7 +48,7 @@ public:
     bool IsEntityInRange(const CPlaceable* entity, float range) { return IsPointInRange(entity->GetPosition(), range); }
 public:
     static constexpr uint32 NUM_MATRICES_TO_CREATE = 900;
-    
+
     inline CVector& GetRight() const { return m_matrix->GetRight(); }
     inline CVector& GetForward() const { return m_matrix->GetForward(); }
     inline CVector& GetUp() const { return m_matrix->GetUp(); }

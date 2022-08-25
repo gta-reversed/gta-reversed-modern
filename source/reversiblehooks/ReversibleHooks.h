@@ -26,7 +26,6 @@
     const auto pGTAVTbl = (void**)addrGTAVtbl; \
     const auto pOurVTbl = ReversibleHooks::detail::GetVTableAddress(#cls); \
     const auto nVirtFns = nVirtFns_; \
-    std::cout << std::format("{}: VMT: Our: {} | GTA: {}\n", RHCurrentScopeName.name, (void*)pOurVTbl, (void*)pGTAVTbl); \
 
 // Use when `name` is a namespace
 #define RH_ScopedNamespace(name) \
@@ -86,7 +85,7 @@ namespace ReversibleHooks {
     struct ScopeName {
         std::string name{};
     };
-    
+
     struct ScopeCategory {
         std::string name{};
     };
@@ -108,24 +107,24 @@ namespace ReversibleHooks {
                 m_addr{ address },
                 m_sz{ sz }
             {
-                if (VirtualProtect(address, sz, newProtect, &m_oldProtect) == 0) {
+                if (VirtualProtect(address, sz, newProtect, &m_initialProtect) == 0) {
                     assert(0); // Failed
                 }
             }
 
             ~ScopedVirtualProtectModify() {
                 DWORD oldProtect{};
-                if (VirtualProtect(m_addr, m_sz, m_oldProtect, &oldProtect) == 0) {
+                if (VirtualProtect(m_addr, m_sz, m_initialProtect, &oldProtect) == 0) {
                     assert(0); // Failed
                 }
             }
 
         private:
-            DWORD  m_oldProtect{};
+            DWORD  m_initialProtect{};
             LPVOID m_addr{};
             DWORD  m_sz{};
         };
-    
+
 
         void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, HookInstallOptions&& opt);
 
