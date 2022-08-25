@@ -4,7 +4,7 @@
 
 class CAEStreamingDecoder;
 
-class CAEStreamingChannel : public CAEAudioChannel {
+class NOTSA_EXPORT_VTABLE CAEStreamingChannel : public CAEAudioChannel {
 public:
     uint8                field_60;
     uint8                field_61;

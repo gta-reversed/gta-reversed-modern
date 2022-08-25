@@ -93,7 +93,7 @@ public:
     void ProcessFlyingCarStuff() override;
     void PreRender() override;
     void Render() override;
-    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
+    void BlowUpCar(CEntity* damager, bool bHideExplosion) override;
     void Fix() override;
     void OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) override;
     void SetupDamageAfterLoad() override;
@@ -126,7 +126,7 @@ private:
     void ProcessFlyingCarStuff_Reversed() { CPlane::ProcessFlyingCarStuff(); };
     void PreRender_Reversed() { CPlane::PreRender(); };
     void Render_Reversed() { CPlane::Render(); };
-    void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) { CPlane::BlowUpCar(damager, bHideExplosion); };
+    void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) { CPlane::BlowUpCar(damager, bHideExplosion); };
     void Fix_Reversed() { CPlane::Fix(); };
     void OpenDoor_Reversed(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) { CPlane::OpenDoor(ped, componentId, door, doorOpenRatio, playSound); };
     void SetupDamageAfterLoad_Reversed() { CPlane::SetupDamageAfterLoad(); };

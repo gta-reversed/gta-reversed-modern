@@ -4,15 +4,12 @@
 
 class CTaskComplexObserveTrafficLights : public CTaskComplex {
 public:
-    int32 dwordC;
-    int32 dword10;
-    int8  byte14;
-    int8  byte15;
+    CTaskTimer m_Timer;
 
 public:
     static constexpr auto Type = TASK_COMPLEX_OBSERVE_TRAFFIC_LIGHTS;
 
-    CTaskComplexObserveTrafficLights();
+    CTaskComplexObserveTrafficLights() = default; // 0x631790
     ~CTaskComplexObserveTrafficLights() override = default; // 0x6317C0
 
     eTaskType GetTaskType() override { return Type; }    // 0x6317B0

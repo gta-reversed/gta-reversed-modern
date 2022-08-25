@@ -9,7 +9,7 @@
 #include "AtomicModelInfo.h"
 #include "TimeInfo.h"
 
-class CTimeModelInfo : public CAtomicModelInfo {
+class NOTSA_EXPORT_VTABLE CTimeModelInfo : public CAtomicModelInfo {
 public:
     CTimeInfo m_timeInfo;
 
