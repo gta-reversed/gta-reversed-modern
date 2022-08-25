@@ -11,7 +11,7 @@ void CCullZones::InjectHooks() {
     RH_ScopedInstall(AddTunnelAttributeZone, 0x72DB50);
     RH_ScopedInstall(AddMirrorAttributeZone, 0x72DC10);
     RH_ScopedInstall(InRoomForAudio, 0x72DD70);
-	RH_ScopedInstall(FewerCars, 0x72DD80);
+    RH_ScopedInstall(FewerCars, 0x72DD80);
     RH_ScopedInstall(CamNoRain, 0x72DDB0);
     RH_ScopedInstall(PlayerNoRain, 0x72DDC0);
     RH_ScopedInstall(FewerPeds, 0x72DD90);
