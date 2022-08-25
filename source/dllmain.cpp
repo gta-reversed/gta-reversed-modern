@@ -6,7 +6,7 @@
 
 #include "config.h"
 
-void InjectHooksMain();
+void InjectHooksMain(HMODULE hThisDLL);
 
 void DisplayConsole()
 {
@@ -70,7 +70,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 
         DisplayConsole();
         CommandLineArguments::Process();
-        InjectHooksMain();
+        InjectHooksMain(hModule);
         break;
     }
     case DLL_THREAD_ATTACH:

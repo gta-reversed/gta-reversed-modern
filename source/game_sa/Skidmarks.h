@@ -18,7 +18,7 @@ public:
     static void Clear();
     static void Update();
     static void Render();
-    static void RegisterOne(uint32 index, const CVector& posn, float dirX, float dirY, eSkidMarkType type, bool* bloodState, float length);
+    static void RegisterOne(uint32 index, const CVector& posn, float dirX, float dirY, eSkidmarkType type, bool* bloodState, float length);
     static void RegisterOne(uint32 index, const CVector& posn, float dirX, float dirY, bool* isSandy, bool* bloodState, float length);
 
     static CSkidmark* FindById(uint32 id);

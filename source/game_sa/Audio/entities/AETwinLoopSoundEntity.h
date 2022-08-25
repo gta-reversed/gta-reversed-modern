@@ -18,7 +18,7 @@
 
 #include "AEAudioEntity.h"
 
-class CAETwinLoopSoundEntity : public CAEAudioEntity {
+class NOTSA_EXPORT_VTABLE CAETwinLoopSoundEntity : public CAEAudioEntity {
 public:
     int16           m_nBankSlotId;
     int16           m_nSoundId1;

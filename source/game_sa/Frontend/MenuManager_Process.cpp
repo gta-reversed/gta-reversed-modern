@@ -13,6 +13,7 @@
 #include "VideoMode.h"
 #include "C_PcSave.h"
 #include "Radar.h"
+#include "ControllerConfigManager.h"
 
 // 0x57B440
 void CMenuManager::Process() {
@@ -490,18 +491,40 @@ bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
 
         if (pressedLR > 0) {
             do {
-                m_nDisplayVideoMode = m_nPrefsVideoMode ? (m_nPrefsVideoMode - 1) : (numVideoModes - 1);
-            } while (!videoModes[m_nPrefsVideoMode]);
+                ++m_nDisplayVideoMode;
+            }
+#ifdef FIX_BUGS // Out of array bounds access
+            while (m_nDisplayVideoMode < numVideoModes && !videoModes[m_nDisplayVideoMode]);
+#else
+            while (!videoModes[m_nDisplayVideoMode]);
+#endif
+
+            if (m_nDisplayVideoMode >= numVideoModes) {
+                m_nDisplayVideoMode = 0;
+                while (!videoModes[m_nDisplayVideoMode])
+                    ++m_nDisplayVideoMode;
+            }
         } else {
             do {
-                m_nDisplayVideoMode = (m_nPrefsVideoMode + 1) % numVideoModes;
-            } while (!videoModes[m_nPrefsVideoMode]);
+                --m_nDisplayVideoMode;
+            }
+#ifdef FIX_BUGS // Out of array bounds access
+            while (m_nDisplayVideoMode >= 0 && !videoModes[m_nDisplayVideoMode]);
+#else
+            while (!videoModes[m_nDisplayVideoMode]);
+#endif
+
+            if (m_nDisplayVideoMode < 0) {
+                m_nDisplayVideoMode = numVideoModes - 1;
+                while (!videoModes[m_nDisplayVideoMode])
+                    --m_nDisplayVideoMode;
+            }
         }
 
         return true;
     }
     case MENU_ACTION_RESET_CFG: {
-        auto targetMenu = aScreens[m_nCurrentScreen].m_aItems[2].m_nTargetMenu; // ?
+        const auto& targetMenu = aScreens[m_nCurrentScreen].m_aItems[2].m_nTargetMenu; // ?
         SetDefaultPreferences(targetMenu);
         if (targetMenu == SCREEN_DISPLAY_ADVANCED) {
             RwD3D9ChangeMultiSamplingLevels(m_nPrefsAntialiasing);
