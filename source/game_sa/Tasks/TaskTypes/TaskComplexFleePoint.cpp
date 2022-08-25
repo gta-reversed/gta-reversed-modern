@@ -84,10 +84,10 @@ void CTaskComplexFleePoint::SetFleePosition(CVector const& fleePos, float safeDi
 void CTaskComplexFleePoint::ComputeTargetPoint(CPed const* ped) {
     // https://www.desmos.com/calculator/o793zwzy5f
 
-    const auto pedPos   = ped->GetPosition();
-    const auto angleRad = CGeneral::GetRandomNumberInRange(-0.33f, 0.33f); // TODO: Seemingly magic numbers?
-    const auto dir      = Normalized2D(CVector2D{ pedPos - m_fleeFromPos }) * CVector2D{ std::cos(angleRad), std::sin(angleRad) };
-    const auto spread   = CGeneral::GetRandomNumberInRange(3, 6);
+    const auto& pedPos   = ped->GetPosition();
+    const auto  angleRad = CGeneral::GetRandomNumberInRange(-0.33f, 0.33f); // TODO: Seemingly magic numbers?
+    const auto  dir      = Normalized2D(CVector2D{ pedPos - m_fleeFromPos }) * CVector2D{ std::cos(angleRad), std::sin(angleRad) };
+    const auto  spread   = CGeneral::GetRandomNumberInRange(3, 6);
 
     m_fleeToPos = pedPos;
 
