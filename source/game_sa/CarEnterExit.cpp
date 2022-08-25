@@ -7,12 +7,12 @@ const float& CCarEnterExit::ms_fMaxSpeed_CanDragPedOut = *(float*)0x0;
 const float& CCarEnterExit::ms_fMaxSpeed_PlayerCanDragPedOut = *(float*)0x0;
 bool& CCarEnterExit::ms_bPedOffsetsCalculated = *(bool*)0x0;
 CVector& CCarEnterExit::ms_vecPedGetUpAnimOffset = *(CVector*)0x0;
-CVector& CCarEnterExit::ms_vecPedQuickDraggedOutCarAnimOffset = *(CVector*)0x0;
 CVector& CCarEnterExit::ms_vecPedBedLAnimOffset = *(CVector*)0x0;
 CVector& CCarEnterExit::ms_vecPedBedRAnimOffset = *(CVector*)0x0;
 CVector& CCarEnterExit::ms_vecPedDeskAnimOffset = *(CVector*)0x0;
 CVector& CCarEnterExit::ms_vecPedChairAnimOffset = *(CVector*)0x0;
 */
+CVector& ms_vecPedQuickDraggedOutCarAnimOffset = *(CVector*)0xC18C48;
 
 void CCarEnterExit::InjectHooks() {
     RH_ScopedClass(CCarEnterExit);
@@ -184,7 +184,7 @@ int32 CCarEnterExit::ComputeTargetDoorToExit(const CVehicle* vehicle, const CPed
 
 // 0x6528F0
 bool CCarEnterExit::GetNearestCarDoor(const CPed* ped, const CVehicle* vehicle, CVector* outPos, int32 doorId) {
-    return plugin::CallAndReturn<bool, 0x6528F0, const CPed*, const CVehicle*, CVector*, int32>(ped, vehicle, outPos, doorId);
+    const auto driverDraggedOutOffset = 
 }
 
 // 0x650BB0
@@ -193,8 +193,11 @@ bool CCarEnterExit::GetNearestCarPassengerDoor(const CPed* ped, const CVehicle* 
 }
 
 // 0x64E740
-CVector* CCarEnterExit::GetPositionToOpenCarDoor(CVector* out, const CVehicle* vehicle, int32 doorId) {
-    return plugin::CallAndReturn<CVector*, 0x64E740, CVector*, const CVehicle*, int32>(out, vehicle, doorId);
+// Originally RVO'd
+CVector CCarEnterExit::GetPositionToOpenCarDoor(const CVehicle* vehicle, int32 doorId) {
+    CVector out;
+    plugin::CallAndReturn<CVector*, 0x64E740, CVector*, const CVehicle*, int32>(&out, vehicle, doorId);
+    return out;
 }
 
 // 0x

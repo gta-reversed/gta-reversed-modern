@@ -40,7 +40,7 @@ public:
     static int32 ComputeTargetDoorToExit(const CVehicle* vehicle, const CPed* ped);
     static bool GetNearestCarDoor(const CPed* ped, const CVehicle* vehicle, CVector* outPos, int32 doorId);
     static bool GetNearestCarPassengerDoor(const CPed* ped, const CVehicle* vehicle, CVector* outVec, int32* doorId, bool CheckIfOccupiedTandemSeat, bool CheckIfDoorIsEnterable, bool CheckIfRoomToGetIn);
-    static CVector* GetPositionToOpenCarDoor(CVector* out, const CVehicle* vehicle, int32 doorId);
+    static CVector GetPositionToOpenCarDoor(const CVehicle* vehicle, int32 doorId);
     static bool IsCarDoorInUse(const CVehicle* vehicle, int32 firstDoorId, int32 secondDoorId);
     static bool IsCarDoorReady(const CVehicle* vehicle, int32 doorId);
     static bool IsCarQuickJackPossible(const CVehicle* vehicle, int32 doorId, const CPed* ped);
