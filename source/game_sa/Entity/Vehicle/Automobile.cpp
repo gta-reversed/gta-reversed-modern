@@ -244,8 +244,8 @@ CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool set
         auto& bonnet = m_doors[DOOR_BONNET];
         bonnet.m_nAxis = 0;
         bonnet.m_fClosedAngle = 0.f;
-        bonnet.m_fOpenAngle = m_pHandlingData->m_bReverseBonnet ? PI * 0.3f : -PI * 0.3f;
-        bonnet.m_nDirn = m_pHandlingData->m_bReverseBonnet ? 33 : 36;
+        bonnet.m_fOpenAngle = m_pHandlingData->m_bReverseBonnet ? -PI * 0.3f : PI * 0.3f;
+        bonnet.m_nDirn = m_pHandlingData->m_bReverseBonnet ? 36 : 33;
     }
 
     // 0x6B0DF4
@@ -2902,12 +2902,16 @@ void CAutomobile::SetupModelNodes()
 
 // 0x6A07A0
 void CAutomobile::HydraulicControl() {
-    if (m_nStatus != STATUS_PLAYER || m_nStatus != STATUS_PHYSICS) {
+    if (m_nStatus == STATUS_PHYSICS) {
+        if (!IsCreatedBy(MISSION_VEHICLE))
+            return;
+
+        if (m_vehicleSpecialColIndex < 0)
+            return;
+    } else if (m_nStatus != STATUS_PLAYER) {
         return;
     }
-    if (!IsCreatedBy(MISSION_VEHICLE) || m_vehicleSpecialColIndex < 0) {
-        return;
-    }
+
     if (handlingFlags.bHydraulicNone) {
         return;
     }
