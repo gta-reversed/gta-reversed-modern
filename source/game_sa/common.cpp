@@ -7,6 +7,7 @@
 
 #include "StdInc.h"
 
+#include "Garages.h"
 #include "common.h"
 #include "GxtChar.h"
 #include "CDebugMenu.h"

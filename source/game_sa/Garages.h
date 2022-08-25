@@ -82,7 +82,7 @@ public:
     static void StopCarFromBlowingUp(CAutomobile* vehicle);
     static int32 CountCarsInHideoutGarage(eGarageType type);
 
-    static void TriggerMessage(const char* tagMsg, int16 msgMin, uint16 time, int16 msgMax);
+    static void TriggerMessage(const char* tagMsg, int16 msgMin = -1, uint16 time = 5000, int16 msgMax = -1);
     static void PrintMessages();
 
     static bool Load();
