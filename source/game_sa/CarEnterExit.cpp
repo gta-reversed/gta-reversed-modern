@@ -28,7 +28,7 @@ void CCarEnterExit::InjectHooks() {
     RH_ScopedInstall(ComputePassengerIndexFromCarDoor, 0x64F1E0);
     RH_ScopedInstall(ComputeSlowJackedPed, 0x64F070);
     RH_ScopedInstall(ComputeTargetDoorToEnterAsPassenger, 0x64F190);
-    // RH_ScopedInstall(ComputeTargetDoorToExit, 0x64F110);
+    RH_ScopedInstall(ComputeTargetDoorToExit, 0x64F110);
     // RH_ScopedInstall(GetNearestCarDoor, 0x6528F0);
     // RH_ScopedInstall(GetNearestCarPassengerDoor, 0x650BB0);
     // RH_ScopedInstall(GetPositionToOpenCarDoor, 0x64E740);
@@ -162,7 +162,24 @@ int32 CCarEnterExit::ComputeTargetDoorToEnterAsPassenger(const CVehicle* vehicle
 
 // 0x64F110
 int32 CCarEnterExit::ComputeTargetDoorToExit(const CVehicle* vehicle, const CPed* ped) {
-    return plugin::CallAndReturn<int32, 0x64F110, const CVehicle*, const CPed*>(vehicle, ped);
+    if (vehicle->m_pDriver == ped) {
+        return 10;
+    }
+
+    // Theoritically the rest here is the same as `ComputeTargetDoorToEnterAsPassenger`
+    // but I'm not quite sure, as in that function they just check `bIsBus`, while here they check the anim groups
+    // So, using the below switch I make sure the theory is right.
+    switch (vehicle->GetAnimGroupId()) {
+    case ANIM_GROUP_COACHCARANIMS:
+    case ANIM_GROUP_BUSCARANIMS:
+        assert(vehicle->vehicleFlags.bIsBus);
+    }
+
+    if (const auto optIndex = vehicle->GetPassengerIndex(ped)) {
+        return ComputeTargetDoorToEnterAsPassenger(vehicle, *optIndex);
+    }
+
+    return -1;
 }
 
 // 0x6528F0
