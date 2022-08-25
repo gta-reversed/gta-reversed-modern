@@ -18,6 +18,7 @@
 #include "C_PcSave.h"
 #include "platform.h"
 #include "Hud.h"
+#include "ControllerConfigManager.h"
 
 CMenuManager& FrontEndMenuManager = *(CMenuManager*)0xBA6748;
 
@@ -169,9 +170,7 @@ void CMenuManager::LoadAllTextures() {
         CStreaming::ImGonnaUseStreamingMemory();
         CGame::TidyUpMemory(false, true);
         CTxdStore::PushCurrentTxd();
-        auto slot = CTxdStore::FindTxdSlot(slotName);
-        if (slot == -1)
-            slot = CTxdStore::AddTxdSlot(slotName);
+        auto slot = CTxdStore::FindOrAddTxdSlot(slotName);
         CTxdStore::LoadTxd(slot, txdName);
         CTxdStore::AddRef(slot);
         CTxdStore::SetCurrentTxd(slot);
@@ -205,9 +204,7 @@ void CMenuManager::SwapTexturesRound(bool round) {
         CStreaming::MakeSpaceFor(size);
         CStreaming::ImGonnaUseStreamingMemory();
         CTxdStore::PushCurrentTxd();
-        auto slot = CTxdStore::FindTxdSlot(slotName);
-        if (slot == -1)
-            slot = CTxdStore::AddTxdSlot(slotName);
+        auto slot = CTxdStore::FindOrAddTxdSlot(slotName);
         CTxdStore::LoadTxd(slot, txdName);
         CTxdStore::AddRef(slot);
         CTxdStore::SetCurrentTxd(slot);
@@ -1070,4 +1067,13 @@ void CMenuManager::SmallMessageScreen(const char* key) {
 // NOTSA
 void CMenuManager::SetBrightness(float brightness, bool arg2) {
     gamma.SetGamma(brightness / 512.0f, arg2);
+}
+
+// NOTSA 0x748BDD
+const char* CMenuManager::GetMovieFileName() const {
+    if (m_nTitleLanguage == 12 || m_nTitleLanguage == 7) {
+        return "movies\\GTAtitlesGER.mpg";
+    } else {
+        return "movies\\GTAtitles.mpg";
+    }
 }

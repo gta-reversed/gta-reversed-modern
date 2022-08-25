@@ -2,7 +2,7 @@
 
 #include "Ped.h"
 
-class CCivilianPed : public CPed {
+class NOTSA_EXPORT_VTABLE CCivilianPed : public CPed {
 public:
     CCivilianPed(ePedType pedType, uint32 modelIndex);
     ~CCivilianPed() override = default; // 0x5DDBE0

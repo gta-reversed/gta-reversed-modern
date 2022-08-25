@@ -6,7 +6,7 @@ class CEntity;
 class CPed;
 class CPedGroup;
 
-class CEventGlobalGroup : public CEventGroup {
+class NOTSA_EXPORT_VTABLE CEventGlobalGroup : public CEventGroup {
 public:
     static void InjectHooks();
 

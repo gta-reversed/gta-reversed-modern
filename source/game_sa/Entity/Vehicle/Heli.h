@@ -86,7 +86,7 @@ public:
     uint32       m_nShootTimer;
     uint32       m_nPoliceShoutTimer;
     FxSystem_c** m_ppGunflashFx;
-    int8         m_nFiringMultiplier;
+    uint8        m_nFiringMultiplier;
     bool         m_bSearchLightEnabled;
     float        field_A14;
 
@@ -101,7 +101,7 @@ public:
     CHeli(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CHeli() override; // 0x6C4340, 0x6C4810
 
-    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
+    void BlowUpCar(CEntity* damager, bool bHideExplosion) override;
     void Fix() override;
     bool BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) override;
     bool SetUpWheelColModel(CColModel* wheelCol) override;
@@ -141,7 +141,7 @@ private:
     static void InjectHooks();
 
     CHeli* Constructor(int32 modelIndex, eVehicleCreatedBy createdBy) { this->CHeli::CHeli(modelIndex, createdBy); return this;}
-    void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) { return CHeli::BlowUpCar(damager, bHideExplosion); }
+    void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) { return CHeli::BlowUpCar(damager, bHideExplosion); }
     void Fix_Reversed() { CHeli::Fix(); }
     bool BurstTyre_Reversed(uint8 tyreComponentId, bool bPhysicalEffect) { return CHeli::BurstTyre(tyreComponentId, bPhysicalEffect); }
     bool SetUpWheelColModel_Reversed(CColModel* wheelCol) { return CHeli::SetUpWheelColModel(wheelCol); }

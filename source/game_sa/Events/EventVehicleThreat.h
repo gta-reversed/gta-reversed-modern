@@ -2,7 +2,7 @@
 
 class CEventEditableResponse;
 
-class CEventVehicleThreat : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventVehicleThreat : public CEventEditableResponse {
 public:
     CVehicle* m_Vehicle;
 

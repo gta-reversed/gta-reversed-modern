@@ -200,19 +200,10 @@ void CFont::Initialise() {
 
 // 0x7189B0
 void CFont::Shutdown() {
-    for (CSprite2d& sprite : Sprite) {
-        sprite.Delete();
-    }
-
-    auto fontSlot = CTxdStore::FindTxdSlot("fonts");
-    CTxdStore::RemoveTxdSlot(fontSlot);
-
-    for (CSprite2d& sprite : ButtonSprite) {
-        sprite.Delete();
-    }
-
-    auto buttonSlot = CTxdStore::FindTxdSlot("ps2btns");
-    CTxdStore::RemoveTxdSlot(buttonSlot);
+    std::ranges::for_each(Sprite, [](CSprite2d& sprite) { sprite.Delete(); });
+    CTxdStore::SafeRemoveTxdSlot("fonts"); // FIX_BUGS: Added check for is slot exists
+    std::ranges::for_each(ButtonSprite, [](CSprite2d& sprite) { sprite.Delete(); });
+    CTxdStore::SafeRemoveTxdSlot("ps2btns"); // FIX_BUGS: Added check for is slot exists
 }
 
 // this adds a single character into rendering buffer
