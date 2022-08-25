@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <optional>
+
 #include "Physical.h"
 #include "AEVehicleAudioEntity.h"
 #include "tHandlingData.h"
@@ -621,6 +623,8 @@ public:
 
     bool AreAnyOfPassengersFollowerOfGroup(const CPedGroup& group);
 
+    auto GetPassengerIndex(const CPed* ped) const -> std::optional<size_t>;
+
     static void Shutdown();
     static void SetComponentAtomicAlpha(RpAtomic* atomic, int32 alpha);
 
@@ -682,7 +686,7 @@ public: // NOTSA functions
     int32 GetRopeIndex();
     [[nodiscard]] CVehicleAnimGroup& GetAnimGroup() const;
     [[nodiscard]] AssocGroupId GetAnimGroupId() const;
-    auto GetPassengers() { return std::span{ m_apPassengers, m_nMaxPassengers }; }
+    auto GetPassengers() const { return std::span{ m_apPassengers, m_nMaxPassengers }; }
     [[nodiscard]] float GetDefaultAirResistance() const {
         if (m_pHandlingData->m_fDragMult <= 0.01f) {
             return m_pHandlingData->m_fDragMult;

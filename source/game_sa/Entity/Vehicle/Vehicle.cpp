@@ -3321,3 +3321,17 @@ bool CVehicle::AreAnyOfPassengersFollowerOfGroup(const CPedGroup& group) {
         return group.GetMembership().IsFollower(passenger);
     }) != end;
 }
+
+/*!
+* @notsa
+* @return The index of a passenger, or `std::nullopt` if the given ped isn't a passenger.
+*/
+auto CVehicle::GetPassengerIndex(const CPed* passenger) const -> std::optional<size_t> {
+    const auto passengers = GetPassengers();
+    const auto it = rng::find(passengers, passenger);
+    if (it == passengers.end()) {
+        return std::nullopt;
+    }
+    return (size_t)rng::distance(passengers.begin(), it);
+}
+
