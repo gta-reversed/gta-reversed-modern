@@ -140,6 +140,7 @@ namespace rng = std::ranges;
 #include "game_sa\Enums\eWeaponType.h"
 #include "game_sa\Enums\eWinchType.h"
 #include "game_sa\Enums\eItemDefinitionFlags.h"
+#include "game_sa\Enums\eMeleeCombo.h"
 
 #include "game_sa\constants.h"
 #include "game_sa\ModelIndices.h"
