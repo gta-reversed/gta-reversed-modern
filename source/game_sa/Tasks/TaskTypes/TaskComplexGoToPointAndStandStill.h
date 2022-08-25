@@ -13,11 +13,11 @@ public:
     float   m_fMoveStateRadius; // The ped will either sprint, run, or walk depending on far it is from the radius
     union {
         struct {
-            uint8 m_b01 : 1;
-            uint8 m_bGoToPoint : 1;
-            uint8 m_bTargetPointUpdated : 1;
-            uint8 m_b04 : 1;
-            uint8 m_b05 : 1;
+            uint8 m_b01 : 1;                    // 0x1
+            uint8 m_bGoToPoint : 1;             // 0x2
+            uint8 m_bTargetPointUpdated : 1;    // 0x4
+            uint8 m_b04 : 1;                    // 0x8
+            uint8 m_b05 : 1;                    // 0x10
         };
         uint8 m_nFlags;
     };

@@ -111,8 +111,8 @@ void CTaskComplexFollowNodeRoute::ComputePathNodes(const CPed* ped) {
 }
 
 // 0x671750
-void CTaskComplexFollowNodeRoute::SetTarget(CPed* ped, const CVector& target, float radius, float fUnkn1, float fUnkn2, bool bForce) {
-    assert(0);
+void CTaskComplexFollowNodeRoute::SetTarget(CPed* ped, const CVector& target, float radius, float fMoveStateRadius, float fUnkn2, bool bForce) {
+    return plugin::CallMethodAndReturn<void, 0x671750>(this, ped, &target, radius, fMoveStateRadius, fUnkn2, bForce);
 }
 
 // 0x671800

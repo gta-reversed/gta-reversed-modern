@@ -2,25 +2,27 @@
 
 #include "TaskComplex.h"
 #include "TaskTimer.h"
+#include "EntitySeekPosCalculator.h"
 #include "EntitySeekPosCalculatorRadiusAngleOffset.h"
-#include "EntitySeekPosCalculatorStandard.h"
-#include "EntitySeekPosCalculatorXYOffset.h"
 
 template <typename EntitySeekT>
+    //requires (std::is_base_of_v<CEntitySeekPosCalculator, EntitySeekT>)
 class CTaskComplexSeekEntity : public CTaskComplex {
     CEntity* m_entity{};
-    int32 m_taskIntervals[2];
+    int32 m_seekInterval{};
+    int32 m_scanInterval{};
     float m_maxEntityDist2D{};
-    float m_unk1{};
+    float m_moveStateRadius{};
     float m_minEntityDist2D{};
     float m_unk2{};
-    CTaskTimer m_taskTimers[2]{};
+    CTaskTimer m_seekTimer{};
+    CTaskTimer m_scanTimer{};
     EntitySeekT m_entitySeekPosCalculator{};
-    uint32 m_unk3{};
-    bool m_flag0 : 1{};
-    bool m_flag1 : 1{};
-    bool m_flag3 : 1{};
-    bool m_flag4 : 1{};
+    uint32 m_unk3{6};
+    bool m_flag0x1 : 1{};
+    bool m_flag0x2 : 1{};
+    bool m_flag0x4 : 1{};
+    bool m_flag0x8 : 1{};
 public:
     CTaskComplexSeekEntity(
         CEntity* entity,

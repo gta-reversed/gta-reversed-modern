@@ -586,6 +586,7 @@ public:
     CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
 
     int32 GetPadNumber() const;
+    bool IsJoggingOrFaster() const;
 
 private:
     void RenderThinBody() const;
