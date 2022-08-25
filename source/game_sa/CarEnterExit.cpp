@@ -27,7 +27,7 @@ void CCarEnterExit::InjectHooks() {
     // RH_ScopedInstall(ComputeOppositeDoorFlag, 0x0);
     RH_ScopedInstall(ComputePassengerIndexFromCarDoor, 0x64F1E0);
     // RH_ScopedInstall(ComputeSlowJackedPed, 0x64F070);
-    // RH_ScopedInstall(ComputeTargetDoorToEnterAsPassenger, 0x64F190);
+    RH_ScopedInstall(ComputeTargetDoorToEnterAsPassenger, 0x64F190);
     // RH_ScopedInstall(ComputeTargetDoorToExit, 0x64F110);
     // RH_ScopedInstall(GetNearestCarDoor, 0x6528F0);
     // RH_ScopedInstall(GetNearestCarPassengerDoor, 0x650BB0);
@@ -143,8 +143,21 @@ CPed* CCarEnterExit::ComputeSlowJackedPed(const CVehicle* vehicle, int32 doorId)
 }
 
 // 0x64F190
-int32 CCarEnterExit::ComputeTargetDoorToEnterAsPassenger(const CVehicle* vehicle, int32 nPassengerNum) {
-    return plugin::CallAndReturn<int32, 0x64F190, const CVehicle*, int32>(vehicle, nPassengerNum);
+int32 CCarEnterExit::ComputeTargetDoorToEnterAsPassenger(const CVehicle* vehicle, int32 psgrIdx) {
+    if (vehicle->vehicleFlags.bIsBus) {
+        return 8;
+    }
+
+    switch (psgrIdx) {
+    case 0:
+        return (vehicle->IsBike() || vehicle->m_pHandlingData->m_bTandemSeats) ? 11 : 8; // Inverted condition
+    case 1:
+        return 11;
+    case 2:
+        return 9;
+    default:
+        return -1;
+    }
 }
 
 // 0x64F110
