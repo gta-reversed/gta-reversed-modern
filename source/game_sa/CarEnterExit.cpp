@@ -84,7 +84,7 @@ int32 CCarEnterExit::ComputeOppositeDoorFlag(const CVehicle* vehicle, int32 door
 
 // 0x64F1E0
 int32 CCarEnterExit::ComputePassengerIndexFromCarDoor(const CVehicle* vehicle, int32 doorId) {
-    if (vehicle->IsAutomobile() || vehicle->m_pHandlingData->m_bTandemSeats) {
+    if (vehicle->IsBike() || vehicle->m_pHandlingData->m_bTandemSeats) {
         switch (doorId) {
         case 9:
         case 11:
