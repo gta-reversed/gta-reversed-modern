@@ -39,7 +39,7 @@ void CCarEnterExit::InjectHooks() {
     // RH_ScopedInstall(IsCarSlowJackRequired, 0x0);
     RH_ScopedInstall(IsClearToDriveAway, 0x6509B0);
     RH_ScopedInstall(IsPathToDoorBlockedByVehicleCollisionModel, 0x651210);
-    // RH_ScopedInstall(IsPedHealthy, 0x64EEE0);
+    RH_ScopedInstall(IsPedHealthy, 0x64EEE0);
     // RH_ScopedInstall(IsPlayerToQuitCarEnter, 0x64F240);
     // RH_ScopedInstall(IsRoomForPedToLeaveCar, 0x6504C0);
     // RH_ScopedInstall(IsVehicleHealthy, 0x64EEC0);
@@ -386,8 +386,8 @@ bool CCarEnterExit::IsPathToDoorBlockedByVehicleCollisionModel(const CPed* ped, 
 }
 
 // 0x64EEE0
-bool CCarEnterExit::IsPedHealthy(CPed* vehicle) {
-    return plugin::CallAndReturn<bool, 0x64EEE0, CPed*>(vehicle);
+bool CCarEnterExit::IsPedHealthy(CPed* ped) {
+    return ped->m_fHealth > 0.f;
 }
 
 // 0x64F240
