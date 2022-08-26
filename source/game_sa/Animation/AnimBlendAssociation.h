@@ -20,7 +20,7 @@ enum eAnimationFlags {
     ANIMATION_LOOPED             = 0x2,
     ANIMATION_FREEZE_LAST_FRAME  = 0x4,
     ANIMATION_UNLOCK_LAST_FRAME  = 0x8,  // Animation will be stuck on last frame, if not set
-    ANIMATION_PARTIAL            = 0x10,
+    ANIMATION_PARTIAL            = 0x10, // TODO: Flag name is possibly incorrect? Following the usual logic (like `ANIMATION_MOVEMENT`), it should be `ANIMATION_GET_IN_CAR` (See  `RemoveGetInAnims`)
     ANIMATION_MOVEMENT           = 0x20,
     ANIMATION_TRANSLATE_Y        = 0x40,
     ANIMATION_TRANSLATE_X        = 0x80,

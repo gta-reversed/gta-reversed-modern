@@ -48,7 +48,7 @@ void CCarEnterExit::InjectHooks() {
     // RH_ScopedInstall(MakeUndraggedPassengerPedsLeaveCar, 0x0);
     // RH_ScopedInstall(QuitEnteringCar, 0x0);
     RH_ScopedInstall(RemoveCarSitAnim, 0x64F680);
-    // RH_ScopedInstall(RemoveGetInAnims, 0x64F6E0);
+    RH_ScopedInstall(RemoveGetInAnims, 0x64F6E0);
     // RH_ScopedInstall(SetAnimOffsetForEnterOrExitVehicle, 0x64F860);
     // RH_ScopedInstall(SetPedInCarDirect, 0x650280);
 }
@@ -502,7 +502,10 @@ void CCarEnterExit::RemoveCarSitAnim(CPed* ped) {
 
 // 0x64F6E0
 void CCarEnterExit::RemoveGetInAnims(const CPed* ped) {
-    plugin::Call<0x64F6E0, const CPed*>(ped);
+    for (auto anim = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_PARTIAL); anim; anim = RpAnimBlendGetNextAssociation(anim, ANIMATION_PARTIAL)) {
+        anim->SetFlag(ANIMATION_FREEZE_LAST_FRAME);
+        anim->m_fBlendDelta = -1000.f;
+    }
 }
 
 // 0x64F860
