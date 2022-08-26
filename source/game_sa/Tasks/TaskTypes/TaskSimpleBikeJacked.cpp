@@ -63,8 +63,8 @@ void CTaskSimpleBikeJacked::FinishAnimBikeHitCB(CAnimBlendAssociation* anim, voi
     self->m_animWasPlayed = true;
     self->m_secondAnimId = [self] {
         switch (self->m_door) {
-        case 8:
-        case 10:
+        case CAR_DOOR_RF:
+        case CAR_DOOR_LF:
             return ANIM_ID_BIKE_FALL_OFF;
         default:
             return ANIM_ID_BIKE_FALLR;
