@@ -103,6 +103,9 @@ template<typename... Ts>
 // Eventually could instead verify the returned value? In case of `sscanf` etc...
 #define RET_IGNORED(x) (void)(x);
 
+/// Check if expression evaluates true, assert in debug if not.
+#define RET_CHECK(expr) do { const bool x = !!(expr); assert(x); } while(false)
+
 #define _IGNORED_
 #define _CAN_BE_NULL_
 

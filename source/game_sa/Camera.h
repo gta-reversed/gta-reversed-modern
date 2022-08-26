@@ -465,7 +465,7 @@ public:
     float FindCamFOV();
     void FinishCutscene();
 
-    void GetArrPosForVehicleType(eVehicleType type, int32& arrPos);
+    bool GetArrPosForVehicleType(eVehicleType type, int32& arrPos);
     uint32 GetCutSceneFinishTime();
     [[nodiscard]] bool GetFading() const;
     [[nodiscard]] int32 GetFadingDirection() const;

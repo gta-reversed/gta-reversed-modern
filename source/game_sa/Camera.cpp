@@ -93,7 +93,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(SetParametersForScriptInterpolation, 0x50C030);
     RH_ScopedInstall(SetPercentAlongCutScene, 0x50C070);
     RH_ScopedInstall(SetZoomValueFollowPedScript, 0x50C160);
-    // + RH_ScopedInstall(SetZoomValueCamStringScript, 0x50C1B0);
+    RH_ScopedInstall(SetZoomValueCamStringScript, 0x50C1B0);
 //    RH_ScopedInstall(UpdateTargetEntity, 0x50C360);
 //    RH_ScopedInstall(TakeControl, 0x50C7C0);
     RH_ScopedInstall(TakeControlNoEntity, 0x50C8B0);
@@ -478,25 +478,25 @@ int32 CCamera::GetLookDirection() {
 }
 
 // 0x50AF00
-void CCamera::GetArrPosForVehicleType(eVehicleType type, int32& arrPos) {
+bool CCamera::GetArrPosForVehicleType(eVehicleType type, int32& arrPos) {
     switch (type) {
     case VEHICLE_TYPE_MTRUCK:
         arrPos = 0;
-        break;
+        return true;
     case VEHICLE_TYPE_QUAD:
         arrPos = 1;
-        break;
+        return true;
     case VEHICLE_TYPE_HELI:
         arrPos = 2;
-        break;
+        return true;
     case VEHICLE_TYPE_PLANE:
         arrPos = 4;
-        break;
+        return true;
     case VEHICLE_TYPE_BOAT:
         arrPos = 3;
-        break;
+        return true;
     default:
-        break;
+        return false;
     }
 }
 
@@ -880,33 +880,28 @@ void CCamera::SetZoomValueFollowPedScript(int16 zoomMode) {
 // zoomMode : 0- ZOOM_ONE , 1- ZOOM_TWO , 2- ZOOM_THREE
 // 0x50C1B0
 void CCamera::SetZoomValueCamStringScript(int16 zoomMode) {
-    return plugin::CallMethod<0x50C1B0, CCamera*, int16>(this, zoomMode);
-
-    static constexpr float ZOOM_ONE_DISTANCE_ptr[]   = { +1.0f, +1.4f, +0.65f, 1.90f, +6.49f }; // 0x8CC3F4
-    static constexpr float ZOOM_TWO_DISTANCE_ptr[]   = { +6.0f, +6.0f, +15.9f, 15.9f, +15.0f }; // 0x8CC408
-    static constexpr float ZOOM_THREE_DISTANCE_ptr[] = { -1.0f, -0.2f, -3.20f, 0.05f, -2.41f }; // 0x8CC3E0
-
     auto entity = m_aCams[0].m_pCamTargetEntity;
-    if (entity->m_nStatus == STATUS_SIMPLE) {
-        int32 arrPos = 0;
-        auto appearance = static_cast<eVehicleType>(entity->AsVehicle()->GetVehicleAppearance());
-        GetArrPosForVehicleType(appearance, arrPos);
-        switch (zoomMode) {
-        case 1:
-            m_fCarZoomValueScript = ZOOM_ONE_DISTANCE_ptr[arrPos];
-            break;
-        case 2:
-            m_fCarZoomValueScript = ZOOM_TWO_DISTANCE_ptr[arrPos];
-            break;
-        default:
-            m_fCarZoomValueScript = ZOOM_THREE_DISTANCE_ptr[arrPos];
-            break;
-        }
-        m_bUseScriptZoomValueCar = true;
-        return;
-    }
 
-    SetZoomValueFollowPedScript(zoomMode);
+    if (entity->m_nStatus == STATUS_SIMPLE) {
+        int32 arrPos{};
+        RET_CHECK(GetArrPosForVehicleType(static_cast<eVehicleType>(entity->AsVehicle()->GetVehicleAppearance()), arrPos));
+        m_fCarZoomValueScript = [zoomMode]{
+            switch (zoomMode) {
+            case 0:
+                return std::array{ -1.0f, -0.2f, -3.20f, 0.05f, -2.41f }; // 0x8CC3E0
+            case 1:
+                return std::array{ +1.0f, +1.4f, +0.65f, 1.90f, +6.49f }; // 0x8CC3F4
+            case 2:
+                return std::array{ +6.0f, +6.0f, +15.9f, 15.9f, +15.0f }; // 0x8CC408
+            default:
+                NOTSA_UNREACHABLE("Unexpected zoom mode: {}", zoomMode);
+            }
+        }()[arrPos];
+    
+        m_bUseScriptZoomValueCar = true;
+    } else {
+        SetZoomValueFollowPedScript(zoomMode);
+    }
 }
 
 // 0x50C260
