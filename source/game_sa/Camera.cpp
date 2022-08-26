@@ -87,7 +87,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(Restore, 0x50B930);
     RH_ScopedInstall(RestoreWithJumpCut, 0x50BAB0);
     RH_ScopedInstall(SetCamCutSceneOffSet, 0x50BD20);
-//    RH_ScopedInstall(SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString, 0x50BDA0);
+    RH_ScopedInstall(SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString, 0x50BDA0);
     RH_ScopedInstall(SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString, 0x50BE30);
     RH_ScopedInstall(Using1stPersonWeaponMode, 0x50BFF0);
     RH_ScopedInstall(SetParametersForScriptInterpolation, 0x50C030);
@@ -727,7 +727,16 @@ void CCamera::SetCameraDirectlyInFrontForFollowPed_CamOnAString() {
 // unused
 // 0x50BDA0
 void CCamera::SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString(CPed* targetPed) {
-    return plugin::CallMethod<0x50BDA0, CCamera*, CPed*>(this, targetPed);
+    if (!targetPed) {
+        return;
+    }
+
+    m_bCamDirectlyBehind = true;
+    m_bLookingAtPlayer = false;
+
+    TheCamera.m_pTargetEntity = targetPed;
+    CEntity::ChangeEntityReference(GetActiveCamera().m_pCamTargetEntity, targetPed);
+    m_fPedOrientForBehindOrInFront = targetPed->GetHeading();
 }
 
 // 0x50BE30
