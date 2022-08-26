@@ -89,10 +89,9 @@ bool CTaskSimpleBikeJacked::ProcessPed(CPed* ped) {
         // Inverted + refactored a little
         if (ped->IsPlayer()) {
             m_vehicle->m_vehicleAudio.PlayerAboutToExitVehicleAsDriver();
-        } else  {
-            if (m_vehicle->IsDriver(ped)) {
-                ped->SetRadioStation();
-            }
+        } else if (m_vehicle->IsDriver(ped)) {
+            ped->SetRadioStation();
+        }
         }
         
         if (!m_firstAnim &&
