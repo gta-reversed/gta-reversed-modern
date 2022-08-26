@@ -132,7 +132,7 @@ public:
     [[nodiscard]] uint32 GetHashKey() const noexcept;
 
     // NOTSA
-    void SetFlag(eAnimationFlags flag, bool value) {
+    void SetFlag(eAnimationFlags flag, bool value = true) {
         if (value)
             m_nFlags |= (int)flag;
         else
