@@ -162,7 +162,7 @@ bool CGangWars::CanPlayerStartAGangWarHere(CZoneInfo* zoneInfo) {
 
 // 0x444040
 void CGangWars::CheerVictory() {
-    auto& playerGroup = FindPlayerPed()->GetGroup();
+    auto& playerGroup = FindPlayerPed()->GetPlayerGroup();
 
     CPed* nearestMember = nullptr;
     playerGroup.FindDistanceToNearestMember(&nearestMember);
