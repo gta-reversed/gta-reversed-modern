@@ -93,6 +93,8 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(SetMaterialAlphaCB, 0x533280);
     RH_ScopedGlobalInstall(MaterialUpdateUVAnimCB, 0x532D70);
     RH_ScopedGlobalInstall(IsEntityPointerValid, 0x533310);
+
+    RH_ScopedGlobalInstall(IsGlassModel, 0x46A760);
 }
 
 CEntity::CEntity() : CPlaceable() {
@@ -149,17 +151,17 @@ void CEntity::Add_Reversed(const CRect& rect)
     if (usedRect.right >= 3000.0F)
         usedRect.right = 2999.0F;
 
-    if (usedRect.top < -3000.0F)
-        usedRect.top = -3000.0F;
+    if (usedRect.bottom < -3000.0F)
+        usedRect.bottom = -3000.0F;
 
-    if (usedRect.bottom >= 3000.0F)
-        usedRect.bottom = 2999.0F;
+    if (usedRect.top >= 3000.0F)
+        usedRect.top = 2999.0F;
 
     if (m_bIsBIGBuilding) {
         int32 startSectorX = CWorld::GetLodSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetLodSectorY(usedRect.top);
+        int32 startSectorY = CWorld::GetLodSectorY(usedRect.bottom);
         int32 endSectorX = CWorld::GetLodSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetLodSectorY(usedRect.bottom);
+        int32 endSectorY = CWorld::GetLodSectorY(usedRect.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 auto& pLodListEntry = CWorld::GetLodPtrList(sectorX, sectorY);
@@ -169,9 +171,9 @@ void CEntity::Add_Reversed(const CRect& rect)
     }
     else {
         int32 startSectorX = CWorld::GetSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetSectorY(usedRect.top);
+        int32 startSectorY = CWorld::GetSectorY(usedRect.bottom);
         int32 endSectorX = CWorld::GetSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetSectorY(usedRect.bottom);
+        int32 endSectorY = CWorld::GetSectorY(usedRect.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 CPtrListDoubleLink* list = nullptr;
@@ -220,17 +222,17 @@ void CEntity::Remove_Reversed()
     if (usedRect.right >= 3000.0F)
         usedRect.right = 2999.0F;
 
-    if (usedRect.top < -3000.0F)
-        usedRect.top = -3000.0F;
+    if (usedRect.bottom < -3000.0F)
+        usedRect.bottom = -3000.0F;
 
-    if (usedRect.bottom >= 3000.0F)
-        usedRect.bottom = 2999.0F;
+    if (usedRect.top >= 3000.0F)
+        usedRect.top = 2999.0F;
 
     if (m_bIsBIGBuilding) {
         int32 startSectorX = CWorld::GetLodSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetLodSectorY(usedRect.top);
+        int32 startSectorY = CWorld::GetLodSectorY(usedRect.bottom);
         int32 endSectorX = CWorld::GetLodSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetLodSectorY(usedRect.bottom);
+        int32 endSectorY = CWorld::GetLodSectorY(usedRect.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 auto& list = CWorld::GetLodPtrList(sectorX, sectorY);
@@ -240,9 +242,9 @@ void CEntity::Remove_Reversed()
     }
     else {
         int32 startSectorX = CWorld::GetSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetSectorY(usedRect.top);
+        int32 startSectorY = CWorld::GetSectorY(usedRect.bottom);
         int32 endSectorX = CWorld::GetSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetSectorY(usedRect.bottom);
+        int32 endSectorY = CWorld::GetSectorY(usedRect.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 CPtrListDoubleLink* list = nullptr;
@@ -2555,4 +2557,16 @@ bool CEntity::IsScanCodeCurrent() const {
 
 void CEntity::SetCurrentScanCode() {
     m_nScanCode = GetCurrentScanCode();
+}
+
+// 0x46A760
+bool IsGlassModel(CEntity* entity) {
+    if (!entity->IsObject())
+        return false;
+
+    auto mi = CModelInfo::GetModelInfo(entity->m_nModelIndex);
+    if (!mi->AsAtomicModelInfoPtr())
+        return false;
+
+    return mi->IsGlass();
 }

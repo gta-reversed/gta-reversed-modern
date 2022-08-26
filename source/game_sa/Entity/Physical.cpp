@@ -160,9 +160,9 @@ void CPhysical::Add()
     CRect boundRect;
     GetBoundRect(&boundRect);
     int32 startSectorX = CWorld::GetSectorX(boundRect.left);
-    int32 startSectorY = CWorld::GetSectorY(boundRect.top);
+    int32 startSectorY = CWorld::GetSectorY(boundRect.bottom);
     int32 endSectorX = CWorld::GetSectorX(boundRect.right);
-    int32 endSectorY = CWorld::GetSectorY(boundRect.bottom);
+    int32 endSectorY = CWorld::GetSectorY(boundRect.top);
     for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             CPtrListDoubleLink* list = nullptr;
@@ -271,18 +271,18 @@ void CPhysical::ProcessCollision()
             return;
         }
 
-        if (m_nStatus == STATUS_TRAILER) {
+        if (m_nStatus == STATUS_GHOST) {
             CColPoint* wheelsColPoints = nullptr;
             float* pfWheelsSuspensionCompression = nullptr;
             CVector* wheelsCollisionPositions = nullptr;
             if (vehicle->m_nVehicleSubType) { // todo: m_nVehicleSubType
-                bike->m_apWheelCollisionEntity[0] = nullptr; // todo: enum
-                bike->m_apWheelCollisionEntity[1] = nullptr;
-                bike->m_apWheelCollisionEntity[2] = nullptr;
-                bike->m_apWheelCollisionEntity[3] = nullptr;
-                wheelsColPoints = bike->m_aWheelColPoint;
-                pfWheelsSuspensionCompression = bike->m_fWheelsSuspensionCompression;
-                wheelsCollisionPositions = bike->m_avTouchPointsLocalSpace;
+                bike->m_aGroundPhysicalPtrs[0] = nullptr; // todo: enum
+                bike->m_aGroundPhysicalPtrs[1] = nullptr;
+                bike->m_aGroundPhysicalPtrs[2] = nullptr;
+                bike->m_aGroundPhysicalPtrs[3] = nullptr;
+                wheelsColPoints = bike->m_aWheelColPoints;
+                pfWheelsSuspensionCompression = bike->m_aWheelRatios;
+                wheelsCollisionPositions = bike->m_aGroundOffsets;
             }
             else {
                 automobile->m_apWheelCollisionEntity[0] = nullptr;
@@ -404,10 +404,10 @@ void CPhysical::ProcessCollision()
                 if (IsVehicle()) {
                     if (vehicle->m_nVehicleType) { // todo: m_nVehicleType
                         if (vehicle->IsBike()) {
-                            bike->m_fWheelsSuspensionCompression[0] = 1.0f; // todo: enum
-                            bike->m_fWheelsSuspensionCompression[1] = 1.0f;
-                            bike->m_fWheelsSuspensionCompression[2] = 1.0f;
-                            bike->m_fWheelsSuspensionCompression[3] = 1.0f;
+                            bike->m_aWheelRatios[0] = 1.0f; // todo: enum
+                            bike->m_aWheelRatios[1] = 1.0f;
+                            bike->m_aWheelRatios[2] = 1.0f;
+                            bike->m_aWheelRatios[3] = 1.0f;
                         }
                         else if (vehicle->IsTrailer()) {
                             automobile->m_fWheelsSuspensionCompression[0] = 1.0f;
@@ -514,9 +514,9 @@ void CPhysical::ProcessShift()
 
         // todo: shadow var
         int32 startSectorX = CWorld::GetSectorX(boundingBox.left);
-        int32 startSectorY = CWorld::GetSectorY(boundingBox.top);
+        int32 startSectorY = CWorld::GetSectorY(boundingBox.bottom);
         int32 endSectorX = CWorld::GetSectorX(boundingBox.right);
-        int32 endSectorY = CWorld::GetSectorY(boundingBox.bottom);
+        int32 endSectorY = CWorld::GetSectorY(boundingBox.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 if (ProcessShiftSectorList(sectorX, sectorY))
@@ -529,9 +529,9 @@ void CPhysical::ProcessShift()
             CWorld::IncrementCurrentScanCode();
             bool bShifted2 = false;
             int32 startSectorX = CWorld::GetSectorX(boundingBox.left);
-            int32 startSectorY = CWorld::GetSectorY(boundingBox.top);
+            int32 startSectorY = CWorld::GetSectorY(boundingBox.bottom);
             int32 endSectorX = CWorld::GetSectorX(boundingBox.right);
-            int32 endSectorY = CWorld::GetSectorY(boundingBox.bottom);
+            int32 endSectorY = CWorld::GetSectorY(boundingBox.top);
             for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
                 for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                     if (ProcessCollisionSectorList(sectorX, sectorY)) {
@@ -613,9 +613,9 @@ void CPhysical::RemoveAndAdd()
     CRect boundRect;
     GetBoundRect(&boundRect);
     int32 startSectorX = CWorld::GetSectorX(boundRect.left);
-    int32 startSectorY = CWorld::GetSectorY(boundRect.top);
+    int32 startSectorY = CWorld::GetSectorY(boundRect.bottom);
     int32 endSectorX = CWorld::GetSectorX(boundRect.right);
-    int32 endSectorY = CWorld::GetSectorY(boundRect.bottom);
+    int32 endSectorY = CWorld::GetSectorY(boundRect.top);
     for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             CPtrListDoubleLink* list = nullptr;
@@ -1188,7 +1188,7 @@ bool CPhysical::ApplySpringDampening(float fDampingForce, float fSpringForceDamp
     if (physicalFlags.bMakeMassTwiceAsBig)
         fDampingForceTimeStep *= 2.0f;
 
-    fDampingForceTimeStep = clamp<float>(fDampingForceTimeStep, -DAMPING_LIMIT_IN_FRAME, DAMPING_LIMIT_IN_FRAME);
+    fDampingForceTimeStep = std::clamp(fDampingForceTimeStep, -DAMPING_LIMIT_IN_FRAME, DAMPING_LIMIT_IN_FRAME);
     float fDampingSpeed = -(fDampingForceTimeStep * fCollisionPosDotProduct);
     if (fDampingSpeed > 0.0f && fDampingSpeed + fCollisionPointSpeedDotProduct > 0.0f) {
         if (fCollisionPointSpeedDotProduct >= 0.0f)
@@ -2354,7 +2354,7 @@ void CPhysical::PositionAttachedEntity()
                 fRotationInRadians -= PI * 2;
             else if (fRotationInRadians < -PI)
                 fRotationInRadians += PI * 2;
-            fRotationInRadians = clamp<float>(fRotationInRadians, -0.5f, 0.5f);
+            fRotationInRadians = std::clamp(fRotationInRadians, -0.5f, 0.5f);
             m_vecTurnSpeed.z += fRotationInRadians / 100'000.0f * m_fMass;
         }
     }
@@ -4844,9 +4844,9 @@ bool CPhysical::CheckCollision()
     CRect boundRect;
     GetBoundRect(&boundRect);
     int32 startSectorX = CWorld::GetSectorX(boundRect.left);
-    int32 startSectorY = CWorld::GetSectorY(boundRect.top);
+    int32 startSectorY = CWorld::GetSectorY(boundRect.bottom);
     int32 endSectorX = CWorld::GetSectorX(boundRect.right);
-    int32 endSectorY = CWorld::GetSectorY(boundRect.bottom);
+    int32 endSectorY = CWorld::GetSectorY(boundRect.top);
     for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             if (ProcessCollisionSectorList(sectorX, sectorY))

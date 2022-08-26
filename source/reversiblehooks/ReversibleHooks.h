@@ -26,7 +26,6 @@
     const auto pGTAVTbl = (void**)addrGTAVtbl; \
     const auto pOurVTbl = ReversibleHooks::detail::GetVTableAddress(#cls); \
     const auto nVirtFns = nVirtFns_; \
-    std::cout << std::format("{}: VMT: Our: {} | GTA: {}\n", RHCurrentScopeName.name, (void*)pOurVTbl, (void*)pGTAVTbl); \
 
 // Use when `name` is a namespace
 #define RH_ScopedNamespace(name) \
@@ -77,7 +76,7 @@
     ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, fnName, fnAddr, &RHCurrentNS::fn __VA_OPT__(,) __VA_ARGS__)
 
 // Install a hook on a virtual function. To use it, `RH_ScopedVirtualClass` must be used instead of `RH_ScopedClass`
-#define RH_ScopedVMTlInstall(fn, fnGTAAddr, ...) \
+#define RH_ScopedVMTInstall(fn, fnGTAAddr, ...) \
     ReversibleHooks::InstallVirtual(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn, pGTAVTbl, pOurVTbl, (void*)fnGTAAddr, nVirtFns __VA_OPT__(,) __VA_ARGS__)
 
 namespace ReversibleHooks {
@@ -86,7 +85,7 @@ namespace ReversibleHooks {
     struct ScopeName {
         std::string name{};
     };
-    
+
     struct ScopeCategory {
         std::string name{};
     };
@@ -108,24 +107,24 @@ namespace ReversibleHooks {
                 m_addr{ address },
                 m_sz{ sz }
             {
-                if (VirtualProtect(address, sz, newProtect, &m_oldProtect) == 0) {
+                if (VirtualProtect(address, sz, newProtect, &m_initialProtect) == 0) {
                     assert(0); // Failed
                 }
             }
 
             ~ScopedVirtualProtectModify() {
                 DWORD oldProtect{};
-                if (VirtualProtect(m_addr, m_sz, m_oldProtect, &oldProtect) == 0) {
+                if (VirtualProtect(m_addr, m_sz, m_initialProtect, &oldProtect) == 0) {
                     assert(0); // Failed
                 }
             }
 
         private:
-            DWORD  m_oldProtect{};
+            DWORD  m_initialProtect{};
             LPVOID m_addr{};
             DWORD  m_sz{};
         };
-    
+
 
         void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, HookInstallOptions&& opt);
 

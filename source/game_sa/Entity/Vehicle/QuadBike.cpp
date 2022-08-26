@@ -2,6 +2,7 @@
 
 #include "QuadBike.h"
 #include "VehicleRecording.h"
+#include "ControllerConfigManager.h"
 
 bool& bDoQuadDamping = *(bool*)0x8D3450; // true 0x8D3450
 float& QUAD_HBSTEER_ANIM_MULT = *(float*)0x8D3454; // -0.4f 0x8D3454
@@ -170,7 +171,7 @@ bool CQuadBike::ProcessAI(uint32& extraHandlingFlags) {
             if (IsAnyWheelNotMakingContactWithGround() && pad) {
                 float steeringLeftRightProgress = (float)pad->GetSteeringLeftRight() / 128.0f;
                 if (CCamera::m_bUseMouse3rdPerson && fabs(steeringLeftRightProgress) < 0.05f) {
-                    steeringLeftRightProgress = clamp(CPad::NewMouseControllerState.X / 100.0f, -1.5f, 1.5f);
+                    steeringLeftRightProgress = std::clamp(CPad::NewMouseControllerState.X / 100.0f, -1.5f, 1.5f);
                 }
                 if (vehicleFlags.bIsHandbrakeOn) {
                     const float fTurnSpeed_Dot_MatUp = DotProduct(m_vecTurnSpeed, m_matrix->GetUp());

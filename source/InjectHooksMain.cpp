@@ -29,6 +29,8 @@
 #include "AEPedlessSpeechAudioEntity.h"
 #include "AEPoliceScannerAudioEntity.h"
 #include "AudioEngine.h"
+#include "Garage.h"
+#include "Garages.h"
 
 #include "CDebugMenu.h"
 
@@ -118,6 +120,11 @@
 #include "CarFXRenderer.h"
 
 // Tasks
+#include "TaskComplexInvestigateDeadPed.h"
+#include "TaskComplexSignalAtPed.h"
+#include "TaskSimpleCarCloseDoorFromOutside.h"
+#include "TaskSimpleCarGetIn.h"
+#include "TaskSimpleBeHit.h"
 #include "EntitySeekPosCalculator.h"
 #include "EntitySeekPosCalculatorStandard.h"
 #include "EntitySeekPosCalculatorRadiusAngleOffset.h"
@@ -267,8 +274,16 @@
 #include "TaskSimpleDrownInCar.h"
 #include "TaskSimpleDieInCar.h"
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
-#include <TaskSimpleTired.h>
-#include <TaskSimpleCarGetOut.h>
+#include "TaskSimpleTired.h"
+#include "TaskSimpleCarGetOut.h"
+#include "TaskSimpleTired.h"
+#include "TaskSimpleCarOpenDoorFromOutside.h"
+#include "TaskSimpleCarJumpOut.h"
+#include "TaskSimpleCarCloseDoorFromInside.h"
+#include "TaskSimpleClearLookAt.h"
+#include "TaskSimpleCarWaitToSlowDown.h"    
+#include "TaskSimpleRunTimedAnim.h"
+#include "TaskSimpleSay.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -282,6 +297,7 @@
 #include "Plugins\BreakablePlugin\BreakablePlugin.h"
 
 #include "platform/win/VideoPlayer/VideoPlayer.h"
+#include "platform/win/VideoMode.h"
 #include "platform/win/win.h"
 #include "platform/platform.h"
 
@@ -291,10 +307,9 @@ void InjectHooksMain() {
     HookInstall(0x53E230, &Render2dStuff);   // [ImGui] This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without
     HookInstall(0x541DD0, CPad::UpdatePads); // [ImGui] Changes logic of the function and shouldn't be toggled on/off
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
-    
-    CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    RwHelperInjectHooks();
     CPad::InjectHooks();
     InjectCommonHooks();
     CEscalator::InjectHooks();
@@ -634,7 +649,7 @@ void InjectHooksMain() {
         CTaskComplexHitByGunResponse::InjectHooks();
         CTaskComplexHitResponse::InjectHooks();
         // CTaskComplexInWater::InjectHooks();
-        // CTaskComplexInvestigateDeadPed::InjectHooks();
+        CTaskComplexInvestigateDeadPed::InjectHooks();
         // CTaskComplexInvestigateDisturbance::InjectHooks();
         // CTaskComplexKillAllThreats::InjectHooks();
         // CTaskComplexKillCriminal::InjectHooks();
@@ -669,7 +684,7 @@ void InjectHooksMain() {
         // CTaskComplexSeekEntityAiming::InjectHooks();
         // CTaskComplexSeekEntityAnyMeans<CEntitySeekPosCalculatorXYOffset>::InjectHooks();
         // CTaskComplexShuffleSeats::InjectHooks();
-        // CTaskComplexSignalAtPed::InjectHooks();
+        CTaskComplexSignalAtPed::InjectHooks();
         // CTaskComplexSitDownThenIdleThenStandUp::InjectHooks();
         CTaskComplexSmartFleeEntity::InjectHooks();
         // CTaskComplexSmartFleePoint::InjectHooks();
@@ -699,29 +714,29 @@ void InjectHooksMain() {
         // CTaskComplexWanderFlee::InjectHooks();
         // CTaskSimpleAffectSecondaryBehaviour::InjectHooks();
         CTaskSimpleArrestPed__InjectHooks();
-        // CTaskSimpleBeHit::InjectHooks();
+        CTaskSimpleBeHit::InjectHooks();
         // CTaskSimpleBeHitWhileMoving::InjectHooks();
         // CTaskSimpleBeKickedOnGround::InjectHooks();
         // CTaskSimpleBikeJacked::InjectHooks();
         // CTaskSimpleCarAlign::InjectHooks();
-        // CTaskSimpleCarCloseDoorFromInside::InjectHooks();
-        // CTaskSimpleCarCloseDoorFromOutside::InjectHooks();
+        CTaskSimpleCarCloseDoorFromInside::InjectHooks();
+        CTaskSimpleCarCloseDoorFromOutside::InjectHooks();
         // CTaskSimpleCarFallOut::InjectHooks();
         // CTaskSimpleCarForcePedOut::InjectHooks();
-        // CTaskSimpleCarGetIn::InjectHooks();
         CTaskSimpleCarGetOut::InjectHooks();
+        CTaskSimpleCarGetIn::InjectHooks();
         // CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse::InjectHooks();
-        // CTaskSimpleCarJumpOut::InjectHooks();
-        // CTaskSimpleCarOpenDoorFromOutside::InjectHooks();
+        CTaskSimpleCarOpenDoorFromOutside::InjectHooks();
+        CTaskSimpleCarJumpOut::InjectHooks();
         // CTaskSimpleCarOpenLockedDoorFromOutside::InjectHooks();
         // CTaskSimpleCarSetPedSlowDraggedOut::InjectHooks();
         // CTaskSimpleCarSetTempAction::InjectHooks();
         // CTaskSimpleCarShuffle::InjectHooks();
         // CTaskSimpleCarSlowBeDraggedOut::InjectHooks();
         // CTaskSimpleCarWaitForDoorNotToBeInUse::InjectHooks();
-        // CTaskSimpleCarWaitToSlowDown::InjectHooks();
+        CTaskSimpleCarWaitToSlowDown::InjectHooks();
         // CTaskSimpleChat::InjectHooks();
-        // CTaskSimpleClearLookAt::InjectHooks();
+        CTaskSimpleClearLookAt::InjectHooks();
         // CTaskSimpleCower::InjectHooks();
         // CTaskSimpleDead::InjectHooks();
         // CTaskSimpleDetonate::InjectHooks();
@@ -756,8 +771,8 @@ void InjectHooksMain() {
         // CTaskSimplePickUpBike::InjectHooks();
         // CTaskSimplePlayerOnFire::InjectHooks();
         // CTaskSimpleRunAnimLoopedMiddle::InjectHooks();
-        // CTaskSimpleRunTimedAnim::InjectHooks();
-        // CTaskSimpleSay::InjectHooks();
+        CTaskSimpleRunTimedAnim::InjectHooks();
+        CTaskSimpleSay::InjectHooks();
         // CTaskSimpleSetCharDecisionMaker::InjectHooks();
         // CTaskSimpleSetCharIgnoreWeaponRangeFlag::InjectHooks();
         // CTaskSimpleSetKindaStayInSamePlace::InjectHooks();
@@ -866,7 +881,7 @@ void InjectHooksMain() {
         CTaskComplexTreatAccident::InjectHooks();
         CTaskComplexGoToPointAndStandStillTimed::InjectHooks();
         CTaskComplexPartnerShove::InjectHooks();
-        // CTaskSimpleRunNamedAnim::InjectHooks();
+        CTaskSimpleRunNamedAnim::InjectHooks();
         // CTaskComplexProstituteSolicit::InjectHooks();
         CTaskComplexStuckInAir::InjectHooks();
         CTaskSimpleHoldEntity::InjectHooks();
@@ -886,7 +901,7 @@ void InjectHooksMain() {
         CTaskSimpleFight::InjectHooks();
         CTaskComplexUseWaterCannon::InjectHooks();
         // CTaskComplexDriveToPoint::InjectHooks();
-        // CTaskSimpleSlideToCoord::InjectHooks();
+        CTaskSimpleSlideToCoord::InjectHooks();
         // CTaskComplexPartnerDeal::InjectHooks();
         CTaskSimplePickUpEntity::InjectHooks();
         CTaskComplexBeInGroup::InjectHooks();
@@ -1030,6 +1045,7 @@ void InjectHooksMain() {
         Securom::InjectHooks();
         Win32InjectHooks();
         RsInjectHooks();
+        VideoModeInjectHooks();
     };
 
     const auto Animation = []() {
