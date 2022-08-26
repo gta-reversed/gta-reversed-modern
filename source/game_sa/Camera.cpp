@@ -84,7 +84,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(CalculateMirroredMatrix, 0x50B380);
     RH_ScopedInstall(DealWithMirrorBeforeConstructRenderList, 0x50B510);
     RH_ScopedInstall(ProcessFade, 0x50B5D0);
-    // + RH_ScopedInstall(ProcessMusicFade, 0x50B6D0);
+    RH_ScopedInstall(ProcessMusicFade, 0x50B6D0);
     RH_ScopedInstall(Restore, 0x50B930);
     RH_ScopedInstall(RestoreWithJumpCut, 0x50BAB0);
     RH_ScopedInstall(SetCamCutSceneOffSet, 0x50BD20);
@@ -1231,9 +1231,9 @@ bool CCamera::IsSphereVisible(const CVector& origin, float radius, RwMatrix* tra
     return plugin::CallMethodAndReturn<bool, 0x420C40, CCamera*, const CVector&, float, RwMatrix*>(this, origin, radius, transformMatrix);
 }
 
-// 0x420D40
+// 0x420D40 - NOTE: Function has no hook
 bool CCamera::IsSphereVisible(const CVector& origin, float radius) {
-    return plugin::CallMethodAndReturn<bool, 0x420D40, CCamera*, const CVector&, float>(this, origin, radius);
+    return IsSphereVisible(origin, radius, (RwMatrix*)&m_mMatInverse) || (m_bMirrorActive && IsSphereVisible(origin, radius, (RwMatrix*)&m_mMatMirrorInverse));
 }
 
 // 0x50CEB0
@@ -1358,8 +1358,6 @@ void CCamera::ProcessFade() {
 
 // 0x50B6D0
 void CCamera::ProcessMusicFade() {
-    return plugin::CallMethod<0x50B6D0, CCamera*>(this);
-
     if (!m_bMusicFading)
         return;
 
