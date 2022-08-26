@@ -280,6 +280,7 @@
 #include "TaskSimpleCarCloseDoorFromInside.h"
 #include "TaskSimpleClearLookAt.h"
 #include "TaskSimpleCarWaitToSlowDown.h"    
+#include "TaskSimpleRunTimedAnim.h"
 #include "TaskSimpleSay.h"
 
 #include "EventSeenPanickedPed.h"
@@ -768,7 +769,7 @@ void InjectHooksMain() {
         // CTaskSimplePickUpBike::InjectHooks();
         // CTaskSimplePlayerOnFire::InjectHooks();
         // CTaskSimpleRunAnimLoopedMiddle::InjectHooks();
-        // CTaskSimpleRunTimedAnim::InjectHooks();
+        CTaskSimpleRunTimedAnim::InjectHooks();
         CTaskSimpleSay::InjectHooks();
         // CTaskSimpleSetCharDecisionMaker::InjectHooks();
         // CTaskSimpleSetCharIgnoreWeaponRangeFlag::InjectHooks();
