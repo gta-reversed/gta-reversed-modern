@@ -53,13 +53,13 @@ void CTaskSimpleCarGetOut::FinishAnimCarGetOutCB(CAnimBlendAssociation* anim, vo
     self->m_anim = nullptr;
 }
 
-// Wrapper for `0x648100`
+// Wrapper for `0x647330`
 void CTaskSimpleCarGetOut::ComputeAnimID_ToHook(AssocGroupId& animGroup, AnimationId& animId) {
     std::tie(animGroup, animId) = ComputeAnimID();
 }
 
 // Signature changed, `ComputeAnimID_Wrapper` is hooked instead.
-// 0x648100
+// 0x647330
 auto CTaskSimpleCarGetOut::ComputeAnimID() -> std::pair<AssocGroupId, AnimationId> {
     if (m_veh->IsAutomobile() && CUpsideDownCarCheck{}.IsCarUpsideDown(m_veh)) {
         m_isUpsideDown = true;
