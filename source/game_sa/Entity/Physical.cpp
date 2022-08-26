@@ -160,9 +160,9 @@ void CPhysical::Add()
     CRect boundRect;
     GetBoundRect(&boundRect);
     int32 startSectorX = CWorld::GetSectorX(boundRect.left);
-    int32 startSectorY = CWorld::GetSectorY(boundRect.top);
+    int32 startSectorY = CWorld::GetSectorY(boundRect.bottom);
     int32 endSectorX = CWorld::GetSectorX(boundRect.right);
-    int32 endSectorY = CWorld::GetSectorY(boundRect.bottom);
+    int32 endSectorY = CWorld::GetSectorY(boundRect.top);
     for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             CPtrListDoubleLink* list = nullptr;
@@ -514,9 +514,9 @@ void CPhysical::ProcessShift()
 
         // todo: shadow var
         int32 startSectorX = CWorld::GetSectorX(boundingBox.left);
-        int32 startSectorY = CWorld::GetSectorY(boundingBox.top);
+        int32 startSectorY = CWorld::GetSectorY(boundingBox.bottom);
         int32 endSectorX = CWorld::GetSectorX(boundingBox.right);
-        int32 endSectorY = CWorld::GetSectorY(boundingBox.bottom);
+        int32 endSectorY = CWorld::GetSectorY(boundingBox.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 if (ProcessShiftSectorList(sectorX, sectorY))
@@ -529,9 +529,9 @@ void CPhysical::ProcessShift()
             CWorld::IncrementCurrentScanCode();
             bool bShifted2 = false;
             int32 startSectorX = CWorld::GetSectorX(boundingBox.left);
-            int32 startSectorY = CWorld::GetSectorY(boundingBox.top);
+            int32 startSectorY = CWorld::GetSectorY(boundingBox.bottom);
             int32 endSectorX = CWorld::GetSectorX(boundingBox.right);
-            int32 endSectorY = CWorld::GetSectorY(boundingBox.bottom);
+            int32 endSectorY = CWorld::GetSectorY(boundingBox.top);
             for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
                 for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                     if (ProcessCollisionSectorList(sectorX, sectorY)) {
@@ -613,9 +613,9 @@ void CPhysical::RemoveAndAdd()
     CRect boundRect;
     GetBoundRect(&boundRect);
     int32 startSectorX = CWorld::GetSectorX(boundRect.left);
-    int32 startSectorY = CWorld::GetSectorY(boundRect.top);
+    int32 startSectorY = CWorld::GetSectorY(boundRect.bottom);
     int32 endSectorX = CWorld::GetSectorX(boundRect.right);
-    int32 endSectorY = CWorld::GetSectorY(boundRect.bottom);
+    int32 endSectorY = CWorld::GetSectorY(boundRect.top);
     for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             CPtrListDoubleLink* list = nullptr;
@@ -4844,9 +4844,9 @@ bool CPhysical::CheckCollision()
     CRect boundRect;
     GetBoundRect(&boundRect);
     int32 startSectorX = CWorld::GetSectorX(boundRect.left);
-    int32 startSectorY = CWorld::GetSectorY(boundRect.top);
+    int32 startSectorY = CWorld::GetSectorY(boundRect.bottom);
     int32 endSectorX = CWorld::GetSectorX(boundRect.right);
-    int32 endSectorY = CWorld::GetSectorY(boundRect.bottom);
+    int32 endSectorY = CWorld::GetSectorY(boundRect.top);
     for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             if (ProcessCollisionSectorList(sectorX, sectorY))

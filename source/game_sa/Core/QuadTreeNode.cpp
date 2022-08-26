@@ -100,7 +100,7 @@ int32 CQuadTreeNode::FindSector(const CRect& rect)
         return -1;
 
     // This stuff for sure can be simplified, but my attempts break the logic
-    if (center.y > rect.bottom)
+    if (center.y > rect.top)
     {
         if (center.x > rect.right)
             return 2;
@@ -108,7 +108,7 @@ int32 CQuadTreeNode::FindSector(const CRect& rect)
             return -1;
         return 3;
     }
-    if (center.y >= rect.top)
+    if (center.y >= rect.bottom)
         return -1;
     if (center.x > rect.right)
         return 0;
@@ -206,8 +206,8 @@ bool CQuadTreeNode::InSector(const CRect& rect, int32 sector) const
 
     if (   sectorRect.left <= rect.right // LinesInside???
         && sectorRect.right >= rect.left
-        && sectorRect.top <= rect.bottom
-        && sectorRect.bottom >= rect.top
+        && sectorRect.bottom <= rect.top
+        && sectorRect.top >= rect.bottom
     )
     {
         return true;
@@ -232,19 +232,19 @@ CRect CQuadTreeNode::GetSectorRect(int32 sector) const
     {
     case 0:
         sectorRect.right = center.x;
-        sectorRect.top = center.y;
+        sectorRect.bottom = center.y;
         break;
     case 1:
         sectorRect.left = center.x;
-        sectorRect.top = center.y;
+        sectorRect.bottom = center.y;
         break;
     case 2:
         sectorRect.right = center.x;
-        sectorRect.bottom = center.y;
+        sectorRect.top = center.y;
         break;
     case 3:
         sectorRect.left = center.x;
-        sectorRect.bottom = center.y;
+        sectorRect.top = center.y;
         break;
     default:
         assert(false); // Shouldn't ever get here
