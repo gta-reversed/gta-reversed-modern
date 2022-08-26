@@ -34,7 +34,6 @@ public:
     bool      m_bResetStatics;
     bool      m_bRotating;
     eCamMode  m_nMode;
-    char      _pad[2];
     uint32    m_nFinishTime;
     uint32    m_nDoCollisionChecksOnFrameNum;
     uint32    m_nDoCollisionCheckEveryNumOfFrames;

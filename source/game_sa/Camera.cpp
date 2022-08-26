@@ -66,7 +66,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(Get_Just_Switched_Status, 0x50AE10);
     RH_ScopedInstall(GetGameCamPosition, 0x50AE50);
 
-    // RH_ScopedInstall(Constructor, 0x51A450);
+    RH_ScopedInstall(Constructor, 0x51A450);
     RH_ScopedInstall(InitCameraVehicleTweaks, 0x50A3B0);
     RH_ScopedInstall(ApplyVehicleCameraTweaks, 0x50A480);
     RH_ScopedInstall(CamShake, 0x50A9F0);
@@ -164,177 +164,63 @@ CCamera::~CCamera() {
 
 // 0x5BC520
 void CCamera::Init() {
-    return plugin::CallMethod<0x5BC520, CCamera*>(this);
-
-    memset(&m_bAboveGroundTrainNodesLoaded, 0, 0xD60u);
-    m_pRwCamera = nullptr;
     InitialiseScriptableComponents();
-    m_bPlayerWasOnBike = false;
-    m_b1rstPersonRunCloseToAWall = false;
-    m_fPositionAlongSpline = 0.0f;
-    m_bCameraJustRestored = false;
-
+    
     for (auto& camera : m_aCams) {
         camera.Init();
     }
 
-    m_bEnable1rstPersonCamCntrlsScript = false;
-    m_bAllow1rstPersonWeaponsCamera = false;
-    m_bCooperativeCamMode = false;
-    m_bAllowShootingWith2PlayersInCar = true;
-    m_bVehicleSuspenHigh = false;
-
-    m_aCams[0].m_nMode = MODE_FOLLOWPED;
-    m_aCams[0].m_fTargetCloseInDist = 2.0837801f - 1.85f;
-    m_aCams[0].m_fMinRealGroundDist = 1.85f;
-    m_aCams[0].m_fTargetZoomGroundOne = -0.55f;
-    m_aCams[0].m_fTargetZoomGroundTwo = 1.5f;
-    m_aCams[0].m_fTargetZoomGroundThree = 3.6f;
-    m_aCams[0].m_fTargetZoomOneZExtra = 0.06f;
-    m_aCams[0].m_fTargetZoomTwoZExtra = -0.1f;
-    m_aCams[0].m_fTargetZoomTwoInteriorZExtra = 0.0f;
-    m_aCams[0].m_fTargetZoomThreeZExtra = -0.07f;
-    m_aCams[0].m_fTargetZoomZCloseIn = 0.90040702f;
-
-    m_aCams[0].m_pCamTargetEntity = nullptr;
-    m_aCams[0].m_fCamBufferedHeight = 0.0f;
-    m_aCams[0].m_fCamBufferedHeightSpeed = 0.0f;
-    m_aCams[0].m_bCamLookingAtVector = false;
-    m_aCams[0].m_fPlayerVelocity = 0.0f;
-
-    m_aCams[1].m_nMode = MODE_FOLLOWPED;
-    m_aCams[1].m_pCamTargetEntity = nullptr;
-    m_aCams[1].m_fCamBufferedHeight = 0.0f;
-    m_aCams[1].m_fCamBufferedHeightSpeed = 0.0f;
-    m_aCams[1].m_bCamLookingAtVector = false;
-    m_aCams[1].m_fPlayerVelocity = 0.0f;
-
-    m_aCams[2].m_pCamTargetEntity = nullptr;
-    m_aCams[2].m_bCamLookingAtVector = false;
-    m_aCams[2].m_fPlayerVelocity = 0.0f;
-
-    m_bMoveCamToAvoidGeom = false;
-    ClearPlayerWeaponMode();
-    m_bInATunnelAndABigVehicle = false;
-
-    m_bHeadBob = false;
-    m_fFractionInterToStopMoving = 0.25f;
-    m_fFractionInterToStopCatchUp = 0.75f;
-    m_fGaitSwayBuffer = 0.85f;
-    m_bScriptParametersSetForInterp = false;
-    m_nCamShakeStart = 0;
-    m_fCamShakeForce = 0.0f;
-    m_nModeObbeCamIsInForCar = 30;
-    m_bIgnoreFadingStuffForMusic = false;
-    m_bWaitForInterpolToFinish = false;
-
-    m_pToGarageWeAreIn = nullptr;
-    m_pToGarageWeAreInForHackAvoidFirstPerson = nullptr;
-    m_bPlayerIsInGarage = false;
-    m_bJustCameOutOfGarage = false;
-
-    m_fNearClipScript = 0.9f;
-    m_bUseNearClipScript = false;
-    m_bDoingSpecialInterp = false;
-    m_bBelowGroundTrainNodesLoaded = false;
-
-    m_nModeForTwoPlayersSeparateCars = MODE_TWOPLAYER_SEPARATE_CARS;
-    m_nModeForTwoPlayersSameCarShootingAllowed = MODE_TWOPLAYER_IN_CAR_AND_SHOOTING;
-    m_nModeForTwoPlayersSameCarShootingNotAllowed = MODE_BEHINDCAR;
-    m_nModeForTwoPlayersNotBothInCar = MODE_TWOPLAYER;
-
-    m_bWideScreenOn = false;
-    m_fFOV_Wide_Screen = 0.0f;
-    m_bRestoreByJumpCut = false;
-
-    m_nCarZoom = 2;
-    m_nPedZoom = 2;
-
-    m_fCarZoomSmoothed = 0.0f;
-    m_fCarZoomTotal = 0.0f;
-    m_fCarZoomBase = 0.0f;
-    m_fPedZoomSmoothed = 0.0f;
-    m_fPedZoomTotal = 0.0f;
-    m_fPedZoomBase = 0.0f;
-    if (FindPlayerVehicle()) {
-        m_pTargetEntity = FindPlayerVehicle();
-    } else {
-        m_pTargetEntity = FindPlayerPed();
+    {
+        auto& cam = m_aCams[0];
+        cam.m_nMode = MODE_FOLLOWPED;
+        cam.m_fTargetCloseInDist = 2.0837801f - 1.85f;
+        cam.m_fMinRealGroundDist = 1.85f;
+        cam.m_fTargetZoomGroundOne = -0.55f;
+        cam.m_fTargetZoomGroundTwo = 1.5f;
+        cam.m_fTargetZoomGroundThree = 3.6f;
+        cam.m_fTargetZoomOneZExtra = 0.06f;
+        cam.m_fTargetZoomTwoZExtra = -0.1f;
+        cam.m_fTargetZoomTwoInteriorZExtra = 0.0f;
+        cam.m_fTargetZoomThreeZExtra = -0.07f;
+        cam.m_fTargetZoomZCloseIn = 0.90040702f;
+        cam.m_pCamTargetEntity = nullptr;
+        cam.m_fCamBufferedHeight = 0.0f;
+        cam.m_fCamBufferedHeightSpeed = 0.0f;
+        cam.m_bCamLookingAtVector = false;
+        cam.m_fPlayerVelocity = 0.0f;
     }
+
+    {
+        auto& cam = m_aCams[1];
+        cam.m_nMode = MODE_FOLLOWPED;
+        cam.m_pCamTargetEntity = nullptr;
+        cam.m_fCamBufferedHeight = 0.0f;
+        cam.m_fCamBufferedHeightSpeed = 0.0f;
+        cam.m_bCamLookingAtVector = false;
+        cam.m_fPlayerVelocity = 0.0f;
+    }
+
+    {
+        auto& cam = m_aCams[2];
+        cam.m_pCamTargetEntity = nullptr;
+        cam.m_bCamLookingAtVector = false;
+        cam.m_fPlayerVelocity = 0.0f;
+    }
+
+    ClearPlayerWeaponMode();
+
+    m_pTargetEntity = FindPlayerEntity();
     CEntity::SafeRegisterRef(m_pTargetEntity);
 
-    m_bInitialNodeFound = false;
-    m_fScreenReductionPercentage = 0.0f;
-    m_fScreenReductionSpeed = 0.0f;
-    m_bWideScreenOn = false;
-    m_bWantsToSwitchWidescreenOff = false;
-    m_bWorldViewerBeingUsed = false;
-    m_fPlayerExhaustion = 1.0f;
-    m_fPedOrientForBehindOrInFront = 0.0f;
-
     if (!FrontEndMenuManager.m_bStartGameLoading) {
-        m_bFading = false;
         CDraw::FadeValue = 0;
-        m_fFadeAlpha = 0.0f;
-        m_bMusicFading = false;
-        m_fTimeToFadeMusic = 0.0f;
-        m_fEffectsFaderScalingFactor = 0.0f;
         m_fMouseAccelVertical = 0.0015f;
     }
-
-    if (FrontEndMenuManager.m_bStartGameLoading)
-        m_fTimeToFadeMusic = 0.0f;
-
-    m_bStartingSpline = false;
-    m_nTypeOfSwitch = eSwitchType::INTERPOLATION;
-    m_bUseScriptZoomValuePed = false;
-    m_bUseScriptZoomValueCar = false;
-    m_fPedZoomValueScript = 0.0f;
-    m_fCarZoomValueScript = 0.0f;
-    m_bUseSpecialFovTrain = false;
-    m_fFovForTrain = 70.0f;
-    m_nModeToGoTo = MODE_FOLLOWPED;
-    m_bJust_Switched = false;
-    m_bUseTransitionBeta = false;
-    m_mCameraMatrix.SetScale(1.0f);
-    m_bTargetJustBeenOnTrain = false;
-    m_bInitialNoNodeStaticsSet = false;
-    m_nLongestTimeInMill = 5000;
-    m_nTimeLastChange = 0;
-    m_bIdleOn = false;
-    m_nTimeWeLeftIdle_StillNoInput = 0;
-    m_nTimeWeEnteredIdle = 0;
-    m_fLODDistMultiplier = 1.0f;
-    m_bCamDirectlyBehind = false;
-    m_bCamDirectlyInFront = false;
-    m_nMotionBlur = 0;
-    m_bGarageFixedCamPositionSet = false;
+    
     SetMotionBlur(255, 255, 255, 0, 0);
-    m_bCullZoneChecksOn = false;
-    m_bFailedCullZoneTestPreviously = false;
-    m_nCheckCullZoneThisNumFrames = 6;
-    m_nZoneCullFrameNumWereAt = 0;
-    m_fCameraAverageSpeed = 0.0f;
-    m_fCameraSpeedSoFar = 0.0f;
-
-    m_vecPreviousCameraPosition = CVector{};
-
-    m_nWorkOutSpeedThisNumFrames = 4;
-    m_nNumFramesSoFar = 0;
-    m_bJustInitialized = true;
-    m_bTransitionState = false;
-
-    m_nTimeTransitionStart = 0;
-
-    m_bLookingAtPlayer = true;
-    m_bLookingAtVector = false;
 
     m_f3rdPersonCHairMultX = 0.53f;
     m_f3rdPersonCHairMultY = 0.4f;
-
-    m_fAvoidTheGeometryProbsTimer = 0.0f;
-    m_nAvoidTheGeometryProbsDirn = 0;
-
     gPlayerPedVisible = 1;
     m_bResetOldMatrix = true;
 }
