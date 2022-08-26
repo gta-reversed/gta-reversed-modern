@@ -406,9 +406,9 @@ void CMenuSystem::DisplayGridMenu(MenuId id, bool bFade) {
     if (menu->m_bColumnBackground) {
         CRect rect;
         rect.left   = menu->m_vPosn.x;
-        rect.top    = menu->m_vPosn.y;
+        rect.bottom    = menu->m_vPosn.y;
         rect.right  = (float)menu->m_nNumColumns * columnWidth + menu->m_vPosn.x;
-        rect.bottom = (float)menu->m_nNumColumns * columnWidth + menu->m_vPosn.y;
+        rect.top = (float)menu->m_nNumColumns * columnWidth + menu->m_vPosn.y;
         FrontEndMenuManager.DrawWindow(rect, nullptr, bFade ? 0 : 120, { 0, 0, 0, 190 }, false, true);
     }
 
@@ -419,9 +419,9 @@ void CMenuSystem::DisplayGridMenu(MenuId id, bool bFade) {
             if (index == menu->m_nSelectedRow) {
                 CRect rect;
                 rect.left   = (float)r * columnWidth + menu->m_vPosn.x;
-                rect.top    = (float)c * columnWidth + menu->m_vPosn.y;
+                rect.bottom    = (float)c * columnWidth + menu->m_vPosn.y;
                 rect.right  = ((float)r + 1.0f) * columnWidth + menu->m_vPosn.x;
-                rect.bottom = ((float)c + 1.0f) * columnWidth + menu->m_vPosn.y;
+                rect.top = ((float)c + 1.0f) * columnWidth + menu->m_vPosn.y;
                 CSprite2d::DrawRect(rect, { 225, 225, 225, 255 });
             }
 
@@ -430,9 +430,9 @@ void CMenuSystem::DisplayGridMenu(MenuId id, bool bFade) {
             auto& color = CVehicleModelInfo::ms_vehicleColourTable[colorIndex];
             CRect rect;
             rect.left   = (float)r * columnWidth + menu->m_vPosn.x + SCREEN_STRETCH_X(3.0f);
-            rect.top    = (float)c * columnWidth + menu->m_vPosn.y + SCREEN_STRETCH_Y(3.0f);
+            rect.bottom    = (float)c * columnWidth + menu->m_vPosn.y + SCREEN_STRETCH_Y(3.0f);
             rect.right  = (float)r * columnWidth + menu->m_vPosn.x + columnWidth - SCREEN_STRETCH_X(3.0f);
-            rect.bottom = (float)c * columnWidth + menu->m_vPosn.y + columnWidth - SCREEN_STRETCH_Y(3.0f);
+            rect.top = (float)c * columnWidth + menu->m_vPosn.y + columnWidth - SCREEN_STRETCH_Y(3.0f);
             CSprite2d::DrawRect(rect, { color.r, color.g, color.b, 255 });
             index++;
         }

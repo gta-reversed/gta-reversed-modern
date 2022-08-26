@@ -7,7 +7,7 @@ void CEventGroup::InjectHooks() {
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AB340);
-    RH_ScopedInstall(Add, 0x4AB420);
+    RH_ScopedOverloadedInstall(Add, "", 0x4AB420, CEvent*(CEventGroup::*)(CEvent*, bool));
     RH_ScopedInstall(HasScriptCommandOfTaskType, 0x4AB840);
     RH_ScopedInstall(HasEventOfType, 0x4AB5E0);
     RH_ScopedInstall(HasEvent, 0x4AB6A0);
