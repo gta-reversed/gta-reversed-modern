@@ -6,17 +6,17 @@
 
 class CVehicle;
 
-class CTaskComplexDestroyCarMelee : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexDestroyCarMelee : public CTaskComplex {
 public:
-    bool      m_bNeedsToCreatefirstSubTask;
-    bool      byteD;
-    CVehicle* m_VehToDestroy;
-    CVector   m_VehiclePos;
-    float     m_MaxTargetFightDist;
-    float     m_PedVehicleAngleRad;
-    float     m_MaxFightCtrlRadius;
-    int32     dword2C;
-    int32     m_nTimeMs;
+    bool      m_bNeedsToCreatefirstSubTask{};
+    bool      byteD{};
+    CVehicle* m_VehToDestroy{};
+    CVector   m_VehiclePos{};
+    float     m_MaxTargetFightDist{};
+    float     m_PedVehicleAngleRad{};
+    float     m_MaxFightCtrlRadius{};
+    int32     dword2C{};
+    int32     m_nTimeMs{ -1 };
 
 public:
     static void InjectHooks();

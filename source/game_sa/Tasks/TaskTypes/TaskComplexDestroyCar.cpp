@@ -6,7 +6,7 @@
 #include "TaskComplexLeaveCar.h"
 
 void CTaskComplexDestroyCar::InjectHooks() {
-    RH_ScopedClass(CTaskComplexDestroyCar);
+    RH_ScopedVirtualClass(CTaskComplexDestroyCar, 0x86d968, 11);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x621C00);
@@ -14,22 +14,21 @@ void CTaskComplexDestroyCar::InjectHooks() {
 
     RH_ScopedInstall(CreateSubTask, 0x6287A0);
 
-    RH_ScopedVirtualInstall2(Clone, 0x623530);
-    RH_ScopedVirtualInstall2(GetTaskType, 0x621C70);
-    RH_ScopedVirtualInstall2(MakeAbortable, 0x621C80);
-    RH_ScopedVirtualInstall2(CreateNextSubTask, 0x62D9E0);
-    RH_ScopedVirtualInstall2(CreateFirstSubTask, 0x62DA90);
-    RH_ScopedVirtualInstall2(ControlSubTask, 0x6288C0, { .enabled = false, .locked = true });
+    RH_ScopedVMTInstall(Clone, 0x623530);
+    RH_ScopedVMTInstall(GetTaskType, 0x621C70);
+    RH_ScopedVMTInstall(MakeAbortable, 0x621C80);
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x62D9E0);
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x62DA90);
+    RH_ScopedVMTInstall(ControlSubTask, 0x6288C0, { .reversed = false });
 }
 
 // 0x621C00
-CTaskComplexDestroyCar::CTaskComplexDestroyCar(CVehicle* vehicleToDestroy, uint32 a3, uint32 a4, uint32 a5) :
+CTaskComplexDestroyCar::CTaskComplexDestroyCar(CVehicle* vehicleToDestroy, uint32 unused, uint32 unused2, uint32 unused3) :
       m_VehicleToDestroy{ vehicleToDestroy },
-      dword14{ a3 },
-      dword18{ a4 },
-      dword1C{ a5 }
+      m_unused{ unused },
+      m_unused2{ unused2 },
+      m_unused3{ unused3 }
 {
-    assert(m_VehicleToDestroy);
     CEntity::SafeRegisterRef(m_VehicleToDestroy);
 }
 
@@ -83,7 +82,7 @@ CTask* CTaskComplexDestroyCar::CreateNextSubTask(CPed* ped) {
 CTask* CTaskComplexDestroyCar::CreateSubTask(eTaskType taskType, CPed* ped) {
     switch (taskType) {
     case TASK_COMPLEX_DESTROY_CAR_ARMED:
-        return new CTaskComplexDestroyCarArmed(m_VehicleToDestroy, dword14, dword18, dword1C);
+        return new CTaskComplexDestroyCarArmed(m_VehicleToDestroy, m_unused, m_unused2, m_unused3);
     case TASK_COMPLEX_LEAVE_CAR:
         return new CTaskComplexLeaveCar(ped->m_pVehicle, 0, 0, true, false);
     case TASK_COMPLEX_DESTROY_CAR_MELEE:

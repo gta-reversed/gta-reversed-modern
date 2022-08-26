@@ -3,33 +3,27 @@
 #include "TaskComplexDestroyCarMelee.h"
 
 void CTaskComplexDestroyCarMelee::InjectHooks() {
-    RH_ScopedClass(CTaskComplexDestroyCarMelee);
+    RH_ScopedVirtualClass(CTaskComplexDestroyCarMelee, 0x86d994, 11);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x621D10);
     RH_ScopedInstall(Destructor, 0x621DA0);
-    RH_ScopedVirtualInstall2(Clone, 0x6235A0, { .enabled = false, .locked = true });
-    RH_ScopedVirtualInstall2(GetTaskType, 0x621D90);
-    RH_ScopedVirtualInstall2(MakeAbortable, 0x621E00, { .enabled = false, .locked = true });
-    RH_ScopedVirtualInstall2(CreateNextSubTask, 0x62DC20, { .enabled = false, .locked = true });
-    RH_ScopedVirtualInstall2(CreateFirstSubTask, 0x62DB20, { .enabled = false, .locked = true });
-    RH_ScopedVirtualInstall2(ControlSubTask, 0x62DDB0, { .enabled = false, .locked = true });
-    RH_ScopedInstall(CreateSubTask, 0x628A70, { .enabled = false, .locked = true });
-    RH_ScopedInstall(CalculateSearchPositionAndRanges, 0x6289F0, { .enabled = false, .locked = true });
+
+    RH_ScopedInstall(CreateSubTask, 0x628A70, { .reversed = false });
+    RH_ScopedInstall(CalculateSearchPositionAndRanges, 0x6289F0);
+
+    RH_ScopedVMTInstall(Clone, 0x6235A0);
+    RH_ScopedVMTInstall(GetTaskType, 0x621D90);
+    RH_ScopedVMTInstall(MakeAbortable, 0x621E00);
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x62DC20);
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x62DB20);
+    RH_ScopedVMTInstall(ControlSubTask, 0x62DDB0);
 }
 
 // 0x621D10
 CTaskComplexDestroyCarMelee::CTaskComplexDestroyCarMelee(CVehicle* vehToDestroy) :
-    CTaskComplex(),
-    m_VehiclePos{},
-    dword2C{ 0 },
-    m_nTimeMs{ -1 }
+    m_VehToDestroy{ vehToDestroy }
 {
-    m_VehToDestroy = vehToDestroy;
-    m_bNeedsToCreatefirstSubTask = false;
-    byteD = false;
-    m_MaxTargetFightDist = 0.0f;
-    m_MaxFightCtrlRadius = 0.0f;
     CEntity::SafeRegisterRef(m_VehToDestroy);
 }
 
@@ -181,5 +175,6 @@ void CTaskComplexDestroyCarMelee::CalculateSearchPositionAndRanges(CPed* ped) {
 
 // 0x628A70
 CTask* CTaskComplexDestroyCarMelee::CreateSubTask(eTaskType taskType, CPed* ped) {
+    // Missing stub for `CTaskComplexSeekEntity`
     return plugin::CallMethodAndReturn<CTask*, 0x628A70, CTaskComplexDestroyCarMelee*, eTaskType, CPed*>(this, taskType, ped);
 }
