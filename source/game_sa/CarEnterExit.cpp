@@ -37,7 +37,7 @@ void CCarEnterExit::InjectHooks() {
     // RH_ScopedInstall(IsCarDoorReady, 0x0);
     // RH_ScopedInstall(IsCarQuickJackPossible, 0x0);
     // RH_ScopedInstall(IsCarSlowJackRequired, 0x0);
-    // RH_ScopedInstall(IsClearToDriveAway, 0x6509B0);
+    RH_ScopedInstall(IsClearToDriveAway, 0x6509B0);
     // RH_ScopedInstall(IsPathToDoorBlockedByVehicleCollisionModel, 0x651210);
     // RH_ScopedInstall(IsPedHealthy, 0x64EEE0);
     // RH_ScopedInstall(IsPlayerToQuitCarEnter, 0x64F240);
@@ -356,8 +356,12 @@ bool CCarEnterExit::IsCarSlowJackRequired(const CVehicle* vehicle, int32 doorId)
 }
 
 // 0x6509B0
-bool CCarEnterExit::IsClearToDriveAway(const CVehicle* outVehicle) {
-    return plugin::CallAndReturn<bool, 0x6509B0, const CVehicle*>(outVehicle);
+bool CCarEnterExit::IsClearToDriveAway(const CVehicle* vehicle) {
+    const auto& vehPos = vehicle->GetPosition();
+    const auto  bbSizeY = vehicle->GetModelInfo()->GetColModel()->GetBoundingBox().GetSize().y;
+    CEntity* hitEntity{};
+    CColPoint hitCP{};
+    return !CWorld::ProcessLineOfSight(vehPos + vehicle->GetForward() * bbSizeY, vehPos, hitCP, hitEntity, true, true, false, false, false, true, true, false) || hitEntity == vehicle;
 }
 
 // 0x651210
