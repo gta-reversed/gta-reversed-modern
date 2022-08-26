@@ -61,7 +61,7 @@ CTask* CTaskComplexOnFire::CreateSubTask(eTaskType taskType) {
             1.f
         };
     case TASK_FINISHED:
-        break;
+        return nullptr;
     default:
         NOTSA_UNREACHABLE();
     }
@@ -97,6 +97,7 @@ CTask* CTaskComplexOnFire::ControlSubTask(CPed* ped) {
             MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
             return nullptr;
         }
+
         if (CLocalisation::PedsOnFire()) {
             ped->Say(346, 0, 0.1f);
         }
