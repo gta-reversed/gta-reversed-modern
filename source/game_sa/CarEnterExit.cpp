@@ -42,7 +42,7 @@ void CCarEnterExit::InjectHooks() {
     RH_ScopedInstall(IsPedHealthy, 0x64EEE0);
     // RH_ScopedInstall(IsPlayerToQuitCarEnter, 0x64F240);
     // RH_ScopedInstall(IsRoomForPedToLeaveCar, 0x6504C0);
-    // RH_ScopedInstall(IsVehicleHealthy, 0x64EEC0);
+    RH_ScopedInstall(IsVehicleHealthy, 0x64EEC0);
     // RH_ScopedInstall(IsVehicleStealable, 0x6510D0);
     // RH_ScopedInstall(MakeUndraggedDriverPedLeaveCar, 0x0);
     // RH_ScopedInstall(MakeUndraggedPassengerPedsLeaveCar, 0x0);
@@ -402,7 +402,7 @@ bool CCarEnterExit::IsRoomForPedToLeaveCar(const CVehicle* vehicle, int32 doorId
 
 // 0x64EEC0
 bool CCarEnterExit::IsVehicleHealthy(const CVehicle* vehicle) {
-    return plugin::CallAndReturn<bool, 0x64EEC0, const CVehicle*>(vehicle);
+    return vehicle->m_nStatus != STATUS_WRECKED;
 }
 
 // 0x6510D0
