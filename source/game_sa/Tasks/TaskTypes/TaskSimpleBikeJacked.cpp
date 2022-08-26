@@ -48,16 +48,13 @@ CTaskSimpleBikeJacked::~CTaskSimpleBikeJacked() {
 
 // 0x648CE0
 bool CTaskSimpleBikeJacked::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
-    switch (priority) {
-    case ABORT_PRIORITY_IMMEDIATE: {
+    if (priority == ABORT_PRIORITY_IMMEDIATE) {
         if (m_firstAnim) {
             m_firstAnim->m_fBlendDelta = -1000.f;
         }
         return true;
     }
-    default:
-        return false;
-    }
+    return false;
 }
 
 void CTaskSimpleBikeJacked::FinishAnimBikeHitCB(CAnimBlendAssociation* anim, void* data) {
