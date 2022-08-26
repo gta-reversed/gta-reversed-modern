@@ -690,7 +690,10 @@ public: // NOTSA functions
             return m_pHandlingData->m_fDragMult / 1000.0f / 2.0f;
         }
     }
+
     bool IsDriverAPlayer() const;
+    [[nodiscard]] bool IsTotallyUpsideDown() const { return GetUp().z < 0.f; }
+
 
 private:
     friend void InjectHooksMain();
