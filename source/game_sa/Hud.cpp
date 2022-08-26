@@ -7,6 +7,7 @@
 #include "StdInc.h"
 
 #include "Hud.h"
+#include "Garages.h"
 #include "IdleCam.h"
 #include "MenuSystem.h"
 #include "Radar.h"
