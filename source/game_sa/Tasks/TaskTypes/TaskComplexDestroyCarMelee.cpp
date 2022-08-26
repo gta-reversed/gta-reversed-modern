@@ -173,8 +173,10 @@ CTask* CTaskComplexDestroyCarMelee::ControlSubTask(CPed* ped) {
 
 // 0x6289F0
 void CTaskComplexDestroyCarMelee::CalculateSearchPositionAndRanges(CPed* ped) {
-    DistanceBetweenPointsSquared(ped->GetPosition(), m_VehToDestroy->GetPosition());
-    return plugin::CallMethodAndReturn<void, 0x6289F0, CTaskComplexDestroyCarMelee*, CPed*>(this, ped);
+    m_MaxTargetFightDist = m_MaxFightCtrlRadius = m_VehToDestroy->GetModelInfo()->GetColModel()->GetBoundRadius() + 0.35f;
+
+    const auto dir = CVector2D{ ped->GetPosition() - m_VehToDestroy->GetPosition() };
+    m_PedVehicleAngleRad = std::atan2(dir.x, -dir.y); // Or `std::atan2(dir.y, dir.x)` should work too (?)
 }
 
 // 0x628A70
