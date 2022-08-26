@@ -73,7 +73,7 @@ public:
     float     m_fTrueBeta;
     float     m_fTrueAlpha;
     float     m_fInitialPlayerOrientation;
-    float     m_fVerticalAngle;
+    float     m_fVerticalAngle;  ///< The radian angle ([-pi/2, pi/2]) relative to the entity the camera is locked on (the player usually)
     float     m_fAlphaSpeed;
     float     m_fFOV;
     float     m_fFOVSpeed;

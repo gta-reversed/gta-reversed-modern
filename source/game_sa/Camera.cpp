@@ -6,7 +6,7 @@
 #include "TaskSimpleDuck.h"
 #include "Hud.h"
 
-float& CCamera::m_f3rdPersonCHairMultY = *reinterpret_cast<float*>(0xB6EC10);
+float& CCamera::m_f3rdPersonCHairMultY = *reinterpret_cast<float*>(0xB6EC10); ///< Where the player will be on the screen in relative coords when quick aiming
 float& CCamera::m_f3rdPersonCHairMultX = *reinterpret_cast<float*>(0xB6EC14);
 float& CCamera::m_fMouseAccelVertical = *reinterpret_cast<float*>(0xB6EC18);
 float& CCamera::m_fMouseAccelHorzntl = *reinterpret_cast<float*>(0xB6EC1C);
@@ -73,7 +73,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(GetScreenRect, 0x50AB50);
     RH_ScopedInstall(Enable1rstPersonWeaponsCamera, 0x50AC10);
     RH_ScopedInstall(Fade, 0x50AC20);
-    // + RH_ScopedInstall(Find3rdPersonQuickAimPitch, 0x50AD40);
+    RH_ScopedInstall(Find3rdPersonQuickAimPitch, 0x50AD40);
     RH_ScopedInstall(GetCutSceneFinishTime, 0x50AD90);
     RH_ScopedInstall(GetScreenFadeStatus, 0x50AE20);
     RH_ScopedInstall(GetLookingLRBFirstPerson, 0x50AE60);
@@ -385,16 +385,18 @@ float CCamera::FindCamFOV() {
     return m_aCams[m_nActiveCam].m_fFOV;
 }
 
-// 0x50AD40
+/*!
+* @addr 0x50AD40
+* @return Rotation in radians at which the gun should point at, relative to the camera's vertical angle
+*/
 float CCamera::Find3rdPersonQuickAimPitch() {
-    return plugin::CallMethodAndReturn<float, 0x50AD40, CCamera*>(this);
-
     const auto& cam = m_aCams[m_nActiveCam];
-    const auto radians = DegreesToRadians(cam.m_fFOV / 2.0f);
-    const auto tan1  = std::tan(radians) * (0.5f - m_f3rdPersonCHairMultY + 0.5f - m_f3rdPersonCHairMultY) * (1.0f / CDraw::ms_fAspectRatio);
-    const auto atan1 = std::atan2(tan1, 1.0f);
-    const auto pitch = atan1 + cam.m_fVerticalAngle;
-    return -pitch;
+
+    // https://mathworld.wolfram.com/images/eps-svg/SOHCAHTOA_500.svg
+    const auto adjacent = (0.5f - m_f3rdPersonCHairMultY) * 2.f;
+    const auto opposite = std::tan(RWDEG2RAD(cam.m_fFOV / 2.0f)) * adjacent;
+    const auto relAngle = cam.m_fVerticalAngle - std::atan(opposite / CDraw::ms_fAspectRatio);
+    return -relAngle; // Flip it
 }
 
 // 0x50AD90
