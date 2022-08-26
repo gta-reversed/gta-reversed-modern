@@ -488,8 +488,10 @@ public:
     float GetCutsceneBarHeight();
     int32 GetCamDirectlyBehind();
 
+    auto& GetActiveCam() { return m_aCams[m_nActiveCam]; }
+
 public:
-    static CCam& GetActiveCamera();
+    static CCam& GetActiveCamera(); // TODO: Replace this with `TheCamera.GetActiveCam()`
 
     RwMatrix* GetRwMatrix() { return RwFrameGetMatrix(RwCameraGetFrame(m_pRwCamera)); }
     CMatrix& GetViewMatrix() { return m_mViewMatrix; }

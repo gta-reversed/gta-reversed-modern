@@ -2,6 +2,7 @@
 
 #include "Camera.h"
 
+#include "TaskSimpleGangDriveBy.h"
 #include "TaskSimpleHoldEntity.h"
 #include "TaskSimpleDuck.h"
 #include "Hud.h"
@@ -94,8 +95,8 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(SetPercentAlongCutScene, 0x50C070);
     RH_ScopedInstall(SetZoomValueFollowPedScript, 0x50C160);
     RH_ScopedInstall(SetZoomValueCamStringScript, 0x50C1B0);
-//    RH_ScopedInstall(UpdateTargetEntity, 0x50C360);
-//    RH_ScopedInstall(TakeControl, 0x50C7C0);
+    RH_ScopedInstall(UpdateTargetEntity, 0x50C360);
+    RH_ScopedInstall(TakeControl, 0x50C7C0);
     RH_ScopedInstall(TakeControlNoEntity, 0x50C8B0);
 //    RH_ScopedInstall(TakeControlAttachToEntity, 0x50C910);
     RH_ScopedInstall(TakeControlWithSpline, 0x50CAE0);
@@ -937,12 +938,150 @@ void CCamera::StoreValuesDuringInterPol(CVector* sourceDuringInter, CVector* tar
 
 // 0x50C360
 void CCamera::UpdateTargetEntity() {
-    plugin::CallMethod<0x50C360, CCamera*>(this);
+    m_bPlayerWasOnBike = m_pTargetEntity->IsVehicle() && m_pTargetEntity->AsVehicle()->m_vecMoveSpeed.SquaredMagnitude() > 0.3f;
+
+    const auto player = FindPlayerPed();
+    assert(player);
+
+    auto something{ true };
+    if (m_nWhoIsInControlOfTheCamera == 2) {
+        m_nModeObbeCamIsInForCar = m_nModeObbeCamIsInForCar;
+        switch (m_nModeObbeCamIsInForCar) {
+        case 8:
+        case 7: {
+            if (player->m_nPedState != PEDSTATE_ARRESTED) {
+                something = false;
+            }
+
+            if (!FindPlayerVehicle()) {
+                CEntity::ChangeEntityReference(m_pTargetEntity, player);
+            }
+
+            break;
+        }
+        }
+    }
+
+    if (!m_bLookingAtPlayer && !something || m_bTransitionState) {
+        if (m_pTargetEntity) {
+            if (!m_bTargetJustBeenOnTrain) {
+                return;
+            }
+        }
+        
+    }
+
+    bool playerDoingSomethingWhileDriveBy{};
+    if ([&, this]() { // Check is player doing drive-by
+        if (!FindPlayerVehicle()) {
+            return true;
+        }
+
+        if (!CGameLogic::IsCoopGameGoingOn()) {
+            if (player->GetTaskManager().GetSimplestActiveTaskAs<CTaskSimpleGangDriveBy>()) {
+                return true;
+            }
+        }
+
+        return false;
+    }()) {
+        CEntity::ChangeEntityReference(m_pTargetEntity, player);
+
+        playerDoingSomethingWhileDriveBy = [this, player] {
+            switch (player->m_nPedState) {
+            case PEDSTATE_ENTER_CAR:
+            case PEDSTATE_CARJACK:
+            case PEDSTATE_OPEN_DOOR:
+                return true;
+            }
+            return false;
+        }();
+
+        if (!playerDoingSomethingWhileDriveBy) {
+            auto& cam = GetActiveCam();
+            if (cam.m_pCamTargetEntity != m_pTargetEntity) {
+                CEntity::ChangeEntityReference(cam.m_pCamTargetEntity, m_pTargetEntity);
+            }
+        }
+    } else {
+        CEntity::ChangeEntityReference(m_pTargetEntity, FindPlayerVehicle());
+    }
+
+    const auto canEnterCar = player && player->m_pVehicle && player->m_pVehicle->CanPedOpenLocks(player); // Inverted this variable
+
+    if (player->m_nPedState == PEDSTATE_ENTER_CAR && canEnterCar && !playerDoingSomethingWhileDriveBy) {
+        if (m_nCarZoom) {
+            CEntity::ChangeEntityReference(m_pTargetEntity, FindPlayerEntity());
+        }
+    }
+
+    if (canEnterCar) {
+        switch (player->m_nPedState) {
+        case PEDSTATE_CARJACK:
+        case PEDSTATE_OPEN_DOOR: {
+            if (!playerDoingSomethingWhileDriveBy) {
+                if (m_nCarZoom) {
+                    CEntity::ChangeEntityReference(m_pTargetEntity, FindPlayerEntity());
+                }
+            }
+
+            if (!FindPlayerVehicle()) {
+                CEntity::ChangeEntityReference(m_pTargetEntity, player);
+            }
+        }
+        }
+    }
+
+    switch (player->m_nPedState) {
+    case PEDSTATE_EXIT_CAR:
+    case PEDSTATE_DRAGGED_FROM_CAR:
+        CEntity::ChangeEntityReference(m_pTargetEntity, player);
+    }
+
+    if (m_pTargetEntity->IsVehicle()) {
+        if (m_nCarZoom == 0) {
+            if (player->m_nPedState == PEDSTATE_ARRESTED) {
+                CEntity::ChangeEntityReference(m_pTargetEntity, player);
+            }
+        }
+    }
 }
 
 // 0x50C7C0
 void CCamera::TakeControl(CEntity* target, eCamMode modeToGoTo, eSwitchType switchType, int32 whoIsInControlOfTheCamera) {
-    plugin::CallMethod<0x50C7C0, CCamera*, CEntity*, eCamMode, eSwitchType, int32>(this, target, modeToGoTo, switchType, whoIsInControlOfTheCamera);
+    if (!m_bCinemaCamera) {
+        if (whoIsInControlOfTheCamera == 2 && m_nWhoIsInControlOfTheCamera == 1) {
+            return;
+        }
+    }
+
+    const auto [newGoToMode, newTargetEntity] = [&, this]() -> std::tuple<eCamMode, CEntity*>{
+        if (target) {
+            return {
+                [&, this] {
+                    if (modeToGoTo == MODE_NONE) {
+                        switch (target->m_nType) {
+                        case ENTITY_TYPE_PED:
+                            return MODE_FOLLOWPED;
+                        case ENTITY_TYPE_VEHICLE:
+                            return MODE_CAM_ON_A_STRING;
+                        }
+                    }
+                    return modeToGoTo;
+                }(),
+                target
+            };
+        }
+
+        return { modeToGoTo, FindPlayerEntity() };
+    }();
+
+    CEntity::ChangeEntityReference(m_pTargetEntity, newTargetEntity);
+    m_nModeToGoTo = newGoToMode;
+
+    m_nMusicFadingDirection = (eFadeFlag)switchType; // TODO: Investigate, this looks sus
+    m_bLookingAtPlayer = m_bLookingAtVector = false;
+    m_bStartInterScript = true;
 }
 
 // 0x50C8B0
