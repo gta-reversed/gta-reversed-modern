@@ -43,7 +43,7 @@ void CCarEnterExit::InjectHooks() {
     // RH_ScopedInstall(IsPlayerToQuitCarEnter, 0x64F240);
     // RH_ScopedInstall(IsRoomForPedToLeaveCar, 0x6504C0);
     RH_ScopedInstall(IsVehicleHealthy, 0x64EEC0);
-    // RH_ScopedInstall(IsVehicleStealable, 0x6510D0);
+    RH_ScopedInstall(IsVehicleStealable, 0x6510D0);
     // RH_ScopedInstall(MakeUndraggedDriverPedLeaveCar, 0x0);
     // RH_ScopedInstall(MakeUndraggedPassengerPedsLeaveCar, 0x0);
     // RH_ScopedInstall(QuitEnteringCar, 0x0);
@@ -407,7 +407,75 @@ bool CCarEnterExit::IsVehicleHealthy(const CVehicle* vehicle) {
 
 // 0x6510D0
 bool CCarEnterExit::IsVehicleStealable(const CVehicle* vehicle, const CPed* ped) {
-    return plugin::CallAndReturn<bool, 0x6510D0, const CVehicle*, const CPed*>(vehicle, ped);
+    switch (vehicle->m_nVehicleSubType) {
+    case VEHICLE_TYPE_PLANE:
+    case VEHICLE_TYPE_HELI:
+        return false;
+    }
+
+    switch (vehicle->m_nVehicleType) {
+    case VEHICLE_TYPE_AUTOMOBILE:
+    case VEHICLE_TYPE_BIKE:
+        break;
+    default:
+        return false;
+    }
+
+    if (ped->m_pVehicle != vehicle) {
+        switch (vehicle->m_nCreatedBy) {
+        case RANDOM_VEHICLE:
+        case PARKED_VEHICLE:
+            break;
+        default:
+            return false;
+        }
+    }
+
+    if (CUpsideDownCarCheck{}.IsCarUpsideDown(vehicle)) {
+        return false;
+    }
+
+    if (!vehicle->CanBeDriven()) {
+        return false;
+    }
+
+    if (vehicle->IsLawEnforcementVehicle()) {
+        return false;
+    }
+
+    if (const auto drvr = vehicle->m_pDriver) {
+        if (   drvr->IsCreatedByMission()
+            || drvr->IsPlayer()
+            || ped->GetIntelligence()->IsFriendlyWith(*drvr)
+            || CPedGroups::AreInSameGroup(ped, drvr)
+        ) {
+            return false;
+        }
+    }
+
+    if (const auto grp = ped->GetGroup()) {
+        if (grp->IsAnyoneUsingCar(vehicle)) {
+            return false;
+        }
+    }
+
+    if (vehicle->m_pFire) {
+        return false;
+    }
+
+    if (vehicle->m_fHealth <= 600.f) {
+        return false;
+    }
+
+    if (vehicle->IsUpsideDown() || vehicle->IsOnItsSide()) {
+        return false;
+    }
+
+    if (!IsClearToDriveAway(vehicle)) {
+        return false;
+    }
+
+    return true;
 }
 
 void CCarEnterExit::MakeUndraggedDriverPedLeaveCar(const CVehicle* vehicle, const CPed* ped) {
