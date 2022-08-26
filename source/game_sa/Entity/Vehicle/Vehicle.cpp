@@ -1061,10 +1061,10 @@ float CVehicle::GetHeightAboveRoad_Reversed() {
 }
 
 // 0x6D1F30
-bool CVehicle::CanPedStepOutCar(bool bIgnoreSpeedUpright) {
+bool CVehicle::CanPedStepOutCar(bool bIgnoreSpeedUpright) const {
     return CVehicle::CanPedStepOutCar_Reversed(bIgnoreSpeedUpright);
 }
-bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright) {
+bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright) const {
     auto const fUpZ = m_matrix->GetUp().z;
     if (std::fabs(fUpZ) <= 0.1F) {
         if (std::fabs(m_vecMoveSpeed.z) > 0.05F || m_vecMoveSpeed.Magnitude2D() > 0.01F || m_vecTurnSpeed.SquaredMagnitude() > 0.0004F) { // 0.02F / 50.0f
@@ -1449,12 +1449,12 @@ void CVehicle::KillPedsInVehicle() {
 }
 
 // 0x6D1D90
-bool CVehicle::IsUpsideDown() {
+bool CVehicle::IsUpsideDown() const {
     return m_matrix->GetUp().z <= -0.9f;
 }
 
 // 0x6D1DD0
-bool CVehicle::IsOnItsSide() {
+bool CVehicle::IsOnItsSide() const {
     return m_matrix->GetRight().z >= 0.8f || m_matrix->GetRight().z <= -0.8f;
 }
 
@@ -1510,7 +1510,7 @@ void CVehicle::ChangeLawEnforcerState(bool bIsEnforcer) {
 }
 
 // 0x6D2370
-bool CVehicle::IsLawEnforcementVehicle() {
+bool CVehicle::IsLawEnforcementVehicle() const {
     switch (m_nModelIndex) {
     case MODEL_ENFORCER:
     case MODEL_PREDATOR:
@@ -1637,7 +1637,7 @@ void CVehicle::SetComponentAtomicAlpha(RpAtomic* atomic, int32 alpha) {
     RpGeometryForAllMaterials(geometry, SetCompAlphaCB, reinterpret_cast<void*>(alpha));
 }
 
-CVehicleModelInfo* CVehicle::GetVehicleModelInfo() {
+CVehicleModelInfo* CVehicle::GetVehicleModelInfo() const {
     return CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
 }
 
@@ -2285,7 +2285,7 @@ void CVehicle::FireUnguidedMissile(eOrdnanceType type, bool bCheckTime) {
 }
 
 // 0x6D5400
-bool CVehicle::CanBeDriven() {
+bool CVehicle::CanBeDriven() const {
     if (IsSubTrailer() || IsSubTrain() && AsTrain()->m_nTrackId || vehicleFlags.bIsRCVehicle) {
         return false;
     }
