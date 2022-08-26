@@ -270,9 +270,10 @@
 #include "TaskSimpleDrownInCar.h"
 #include "TaskSimpleDieInCar.h"
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
+#include "TaskSimpleCarJumpOut.h"
 #include "TaskSimpleTired.h"
+#include "TaskSimpleClearLookAt.h"
 #include "TaskSimpleCarWaitToSlowDown.h"    
-
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
 #include "EventPassObject.h"
@@ -714,7 +715,7 @@ void InjectHooksMain() {
         // CTaskSimpleCarGetIn::InjectHooks();
         // CTaskSimpleCarGetOut::InjectHooks();
         // CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse::InjectHooks();
-        // CTaskSimpleCarJumpOut::InjectHooks();
+        CTaskSimpleCarJumpOut::InjectHooks();
         // CTaskSimpleCarOpenDoorFromOutside::InjectHooks();
         // CTaskSimpleCarOpenLockedDoorFromOutside::InjectHooks();
         // CTaskSimpleCarSetPedSlowDraggedOut::InjectHooks();
@@ -724,7 +725,7 @@ void InjectHooksMain() {
         // CTaskSimpleCarWaitForDoorNotToBeInUse::InjectHooks();
         CTaskSimpleCarWaitToSlowDown::InjectHooks();
         // CTaskSimpleChat::InjectHooks();
-        // CTaskSimpleClearLookAt::InjectHooks();
+        CTaskSimpleClearLookAt::InjectHooks();
         // CTaskSimpleCower::InjectHooks();
         // CTaskSimpleDead::InjectHooks();
         // CTaskSimpleDetonate::InjectHooks();
