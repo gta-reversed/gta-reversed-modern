@@ -15,6 +15,7 @@
 #include "Shadows.h"
 #include "CustomBuildingDNPipeline.h"
 #include "VehicleRecording.h"
+#include "Garages.h"
 
 int32& CWorld::ms_iProcessLineNumCrossings = *(int32*)0xB7CD60;
 float& CWorld::fWeaponSpreadRate = *(float*)0xB7CD64;

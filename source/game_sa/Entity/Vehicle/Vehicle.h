@@ -169,6 +169,8 @@ struct tHydraulicData {
 
 VALIDATE_SIZE(tHydraulicData, 0x28);
 
+static constexpr auto NUM_VEHICLE_UPGRADES = 15u;
+
 class CVehicle : public CPhysical {
 public:
     CAEVehicleAudioEntity m_vehicleAudio;
@@ -292,7 +294,7 @@ public:
     uint8             m_nTertiaryColor;
     uint8             m_nQuaternaryColor;
     uint8             m_anExtras[2];
-    std::array<int16, 15> m_anUpgrades;
+    std::array<int16, NUM_VEHICLE_UPGRADES> m_anUpgrades;
     float             m_fWheelScale;
     int16             m_nAlarmState;
     int16             m_nForcedRandomRouteSeed; // if this is non-zero the random wander gets deterministic
@@ -689,6 +691,10 @@ public: // NOTSA functions
         }
     }
 
+    bool IsDriverAPlayer() const;
+    [[nodiscard]] bool IsTotallyUpsideDown() const { return GetUp().z < 0.f; }
+
+
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
@@ -718,6 +724,7 @@ private:
 };
 VALIDATE_SIZE(CVehicle, 0x5A0);
 
+bool IsValidModForVehicle(uint32 modelId, CVehicle* vehicle);
 bool IsVehiclePointerValid(CVehicle* vehicle);
 RpAtomic* RemoveUpgradeCB(RpAtomic* atomic, void* data);
 RpAtomic* FindUpgradeCB(RpAtomic* atomic, void* data);
