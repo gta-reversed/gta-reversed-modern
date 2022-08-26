@@ -44,7 +44,7 @@ public:
 
     // Helper so events can be directly passed in without having to put them into a variable
     template<typename T>
-    CEvent* Add(T event, bool valid) requires std::is_base_of_v<CEvent, T> {
+    CEvent* Add(T event, bool valid = false) requires std::is_base_of_v<CEvent, T> {
         return Add(&event, valid);
     }
 };
