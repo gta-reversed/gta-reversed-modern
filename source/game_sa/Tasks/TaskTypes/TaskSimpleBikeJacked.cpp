@@ -89,7 +89,6 @@ bool CTaskSimpleBikeJacked::ProcessPed(CPed* ped) {
         } else if (m_vehicle->IsDriver(ped)) {
             ped->SetRadioStation();
         }
-        }
         
         if (!m_firstAnim &&
             [this, ped] {
