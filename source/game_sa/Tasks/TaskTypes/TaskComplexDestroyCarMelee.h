@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Base.h"
 #include "TaskComplex.h"
 #include "Vector.h"
 
@@ -18,6 +19,8 @@ public:
     int32     m_nTimeMs;
 
 public:
+    static void InjectHooks();
+
     static constexpr eTaskType Type = TASK_COMPLEX_DESTROY_CAR_MELEE;
 
     explicit CTaskComplexDestroyCarMelee(CVehicle* vehToDestroy);
@@ -27,13 +30,13 @@ public:
     CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
     eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override { return new CTaskComplexDestroyCarMelee(m_VehToDestroy); } // 0x6235A0
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
-    CTask* CreateNextSubTask(CPed* ped) override;
-    CTask* CreateFirstSubTask(CPed* ped) override;
-    CTask* ControlSubTask(CPed* ped) override;
+    CTask*    Clone() override { return new CTaskComplexDestroyCarMelee(m_VehToDestroy); } // 0x6235A0
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    CTask*    CreateNextSubTask(CPed* ped) override;
+    CTask*    CreateFirstSubTask(CPed* ped) override;
+    CTask*    ControlSubTask(CPed* ped) override;
 
-    static void InjectHooks();
+private:
     CTaskComplexDestroyCarMelee* Constructor(CVehicle* vehToDestroy) { this->CTaskComplexDestroyCarMelee::CTaskComplexDestroyCarMelee(vehToDestroy); return this; }
     CTaskComplexDestroyCarMelee* Destructor() { this->CTaskComplexDestroyCarMelee::~CTaskComplexDestroyCarMelee(); return this; }
 };

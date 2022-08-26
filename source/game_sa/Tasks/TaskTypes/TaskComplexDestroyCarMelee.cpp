@@ -42,24 +42,58 @@ CTaskComplexDestroyCarMelee::~CTaskComplexDestroyCarMelee() {
 bool CTaskComplexDestroyCarMelee::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     switch (priority) {
     case ABORT_PRIORITY_IMMEDIATE:
-        return m_pSubTask->MakeAbortable(ped, priority, event);
+        return m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_IMMEDIATE, event);
+
     case ABORT_PRIORITY_URGENT: {
 
-        break;
+        if (event) {
+            switch (event->GetEventType()) {
+            case EVENT_VEHICLE_COLLISION: {
+                if (!m_VehToDestroy || static_cast<const CEventVehicleCollision*>(event)->m_vehicle != m_VehToDestroy) {
+                    break;
+                }
+
+                const auto vehVelocitySq = m_VehToDestroy->m_vecMoveSpeed.SquaredMagnitude();
+                if (vehVelocitySq == 0.f) {
+                    return false;
+                }
+
+                if (vehVelocitySq >= sq(0.15f)) {
+                    break;
+                }
+
+                // Check if the vehicle's velocity is pointing at the ped
+                if (DotProduct(
+                        ped->GetPosition() - m_VehToDestroy->GetPosition(),
+                        Normalized(m_VehToDestroy->m_vecMoveSpeed) // TODO: I don't think this needs to be normalized either, since we're only checking the direction
+                ) > 0.f) {
+                    return false;
+                }
+
+                break;
+            }
+            case EVENT_POTENTIAL_WALK_INTO_VEHICLE: {
+                if (m_VehToDestroy && static_cast<const CEventPotentialWalkIntoVehicle*>(event)->m_vehicle == m_VehToDestroy) {
+                    return false;
+                }
+                break;
+            }
+            }
+        }
+
+        return m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
     }
     case ABORT_PRIORITY_LEISURE: {
         m_bNeedsToCreatefirstSubTask = true;
         return false;
     }
     default:
-        NOTSA_UNREACHABLE("Invalid priority");
+        NOTSA_UNREACHABLE("Invalid priority: {}", (int)priority);
     }
 }
 
 // 0x62DC20
 CTask* CTaskComplexDestroyCarMelee::CreateNextSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x62DC20, CTaskComplexDestroyCarMelee*, CPed*>(this, ped);
-
     if (m_bNeedsToCreatefirstSubTask) {
         return nullptr;
     }
@@ -109,8 +143,6 @@ CTask* CTaskComplexDestroyCarMelee::CreateFirstSubTask(CPed* ped) {
 
 // 0x62DDB0
 CTask* CTaskComplexDestroyCarMelee::ControlSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x62DDB0, CTaskComplexDestroyCarMelee*, CPed*>(this, ped);
-
     if (byteD) {
         return CreateFirstSubTask(ped);
     }
