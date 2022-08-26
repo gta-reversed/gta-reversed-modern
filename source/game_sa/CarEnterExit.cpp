@@ -15,7 +15,7 @@ void CCarEnterExit::InjectHooks() {
     RH_ScopedClass(CCarEnterExit);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(AddInCarAnim, 0x64F720);
+    RH_ScopedInstall(AddInCarAnim, 0x64F720);
     RH_ScopedInstall(CarHasDoorToClose, 0x64EE10);
     // RH_ScopedInstall(CarHasDoorToOpen, 0x0);
     // RH_ScopedInstall(CarHasOpenableDoor, 0x0);
@@ -51,7 +51,31 @@ void CCarEnterExit::InjectHooks() {
 
 // 0x64F720
 void CCarEnterExit::AddInCarAnim(const CVehicle* vehicle, CPed* ped, bool bAsDriver) {
-    plugin::Call<0x64F720, const CVehicle*, CPed*, bool>(vehicle, ped, bAsDriver);
+    const auto [grpId, animId] = [&]() -> std::pair<AssocGroupId, AnimationId> {
+        if (bAsDriver) { // Inverted
+            if (const auto data = const_cast<CVehicle*>(vehicle)->GetRideAnimData()) {
+                return { data->m_nAnimGroup, ANIM_ID_BIKE_RIDE };
+            } else if (vehicle->IsBoat()) {
+                if (vehicle->m_pHandlingData->m_bSitInBoat) {
+                    return { ANIM_GROUP_DEFAULT, ANIM_ID_DRIVE_BOAT };
+                }
+            } else if (vehicle->vehicleFlags.bLowVehicle) {
+                return { ANIM_GROUP_DEFAULT, ANIM_ID_CAR_SITPLO };
+            }
+
+            return { ANIM_GROUP_DEFAULT, ANIM_ID_CAR_SIT };
+        } else {
+            if (const auto data = const_cast<CVehicle*>(vehicle)->GetRideAnimData()) {
+                return { data->m_nAnimGroup, ANIM_ID_BIKE_RIDE };
+            } else if (vehicle->vehicleFlags.bLowVehicle) {
+                return { ANIM_GROUP_DEFAULT, ANIM_ID_CAR_SITPLO };
+            }
+
+            return { ANIM_GROUP_DEFAULT, ANIM_ID_CAR_SITP };
+        }
+    }();
+    CAnimManager::BlendAnimation(ped->m_pRwClump, grpId, animId, 1000.f);
+    ped->StopNonPartialAnims();
 }
 
 // 0x64EE10
