@@ -2,6 +2,9 @@
 
 #include "PedStats.h"
 #include "CarEnterExit.h"
+#include "TaskSimpleCarSetPedInAsDriver.h"
+#include "TaskComplexDriveWander.h"
+#include "TaskSimpleCarSetPedInAsPassenger.h"
 
 /*
 const float& CCarEnterExit::ms_fMaxSpeed_CanDragPedOut = *(float*)0x0;
@@ -43,7 +46,7 @@ void CCarEnterExit::InjectHooks() {
     RH_ScopedInstall(RemoveCarSitAnim, 0x64F680);
     RH_ScopedInstall(RemoveGetInAnims, 0x64F6E0);
     RH_ScopedInstall(SetAnimOffsetForEnterOrExitVehicle, 0x64F860);
-    // RH_ScopedInstall(SetPedInCarDirect, 0x650280);
+    RH_ScopedInstall(SetPedInCarDirect, 0x650280);
 }
 
 // 0x64F720
@@ -557,6 +560,51 @@ void CCarEnterExit::SetAnimOffsetForEnterOrExitVehicle() {
 }
 
 // 0x650280
-void CCarEnterExit::SetPedInCarDirect(CPed* ped, CVehicle* vehicle, int32 seatNumber, bool bAsDriver) {
-    plugin::Call<0x650280, CPed*, CVehicle*, int32, bool>(ped, vehicle, seatNumber, bAsDriver);
+bool CCarEnterExit::SetPedInCarDirect(CPed* ped, CVehicle* vehicle, int32 doorId, bool bAsDriver) {
+    if (bAsDriver) {
+        // Warp ped into vehicle
+        CTaskSimpleCarSetPedInAsDriver task{ vehicle };
+        task.m_bWarpingInToCar = true;
+        task.ProcessPed(ped);
+
+        // And make them drive
+        ped->GetTaskManager().SetTask(new CTaskComplexCarDriveWander{ vehicle, vehicle->m_autoPilot.m_nCarDrivingStyle, (float)vehicle->m_autoPilot.m_nCruiseSpeed }, TASK_PRIMARY_PRIMARY);
+
+        return true;
+    }
+
+    // Warp ped into vehicle
+    {
+        CTaskSimpleCarSetPedInAsPassenger task{ vehicle, doorId };
+        task.m_bWarpingInToCar = true;
+        task.ProcessPed(ped);
+    }
+
+    if (vehicle->IsBike()) {
+        ped->GetTaskManager().SetTask(new CTaskComplexCarDrive{ vehicle, false }, TASK_PRIMARY_PRIMARY);
+    }
+
+    // Set mutal acquaintance respect between the ped and all other occupants up to the ped's seat
+    // I assume the function is only ever called with `bAsDriver` if there are no passengers
+    // So that's why this code-path is only reachable if `bAsDriver` is false
+
+    const auto SetMutalAcquaintanceWith = [ped](CPed* other) {
+        if (other) {
+            const auto SetWith = [](CPed* of, CPed* with) {
+                if (!of->IsCreatedByMission()) {
+                    of->GetAcquaintance().SetAsAcquaintance(ACQUAINTANCE_RESPECT, CPedType::GetPedFlag(with->m_nPedType));
+                }
+            };
+            SetWith(ped, other);
+            SetWith(other, ped);
+        }
+    };
+
+    SetMutalAcquaintanceWith(vehicle->m_pDriver);
+
+    const auto psgrIdx = ComputePassengerIndexFromCarDoor(vehicle, doorId);
+    assert(psgrIdx != -1); // I really doubt this can happen, if it does, an `if` has to be added
+    rng::for_each(vehicle->GetPassengers() | rng::views::take((size_t)psgrIdx), SetMutalAcquaintanceWith); // Set with all other passengers up to the ped's seat
+
+    return true;
 }

@@ -59,5 +59,5 @@ public:
     static void RemoveCarSitAnim(CPed* ped);
     static void RemoveGetInAnims(const CPed* ped);
     static void SetAnimOffsetForEnterOrExitVehicle();
-    static void SetPedInCarDirect(CPed* ped, CVehicle* vehicle, int32 seatNumber, bool bAsDriver);
+    static bool SetPedInCarDirect(CPed* ped, CVehicle* vehicle, int32 seatNumber, bool bAsDriver);
 };
