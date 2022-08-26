@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AnimationEnums.h"
 #include "TaskSimpleRunTimedAnim.h"
 
 class CPed;
@@ -13,7 +14,7 @@ public:
 
     CTaskSimpleHandsUp(uint32 duration) : CTaskSimpleRunTimedAnim{ANIM_GROUP_DEFAULT, ANIM_ID_HANDSUP, 4.0, -4.0, duration, Type, "HandsUp", 0} {}
     CTaskSimpleHandsUp(const CTaskSimpleHandsUp& o) : CTaskSimpleHandsUp{o.m_durationMs} {}
-    ~CTaskSimpleHandsUp();
+    ~CTaskSimpleHandsUp() override = default;
 
     CTask* Clone() override { return new CTaskSimpleHandsUp{*this}; }
     virtual bool IsInterruptable(CPed const* ped) { return false; }
