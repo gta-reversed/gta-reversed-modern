@@ -120,6 +120,8 @@
 #include "CarFXRenderer.h"
 
 // Tasks
+#include "TaskComplexInvestigateDeadPed.h"
+#include "TaskComplexSignalAtPed.h"
 #include "TaskSimpleCarCloseDoorFromOutside.h"
 #include "TaskSimpleCarGetIn.h"
 #include "TaskSimpleBeHit.h"
@@ -641,7 +643,7 @@ void InjectHooksMain() {
         CTaskComplexHitByGunResponse::InjectHooks();
         CTaskComplexHitResponse::InjectHooks();
         // CTaskComplexInWater::InjectHooks();
-        // CTaskComplexInvestigateDeadPed::InjectHooks();
+        CTaskComplexInvestigateDeadPed::InjectHooks();
         // CTaskComplexInvestigateDisturbance::InjectHooks();
         // CTaskComplexKillAllThreats::InjectHooks();
         // CTaskComplexKillCriminal::InjectHooks();
@@ -676,7 +678,7 @@ void InjectHooksMain() {
         // CTaskComplexSeekEntityAiming::InjectHooks();
         // CTaskComplexSeekEntityAnyMeans<CEntitySeekPosCalculatorXYOffset>::InjectHooks();
         // CTaskComplexShuffleSeats::InjectHooks();
-        // CTaskComplexSignalAtPed::InjectHooks();
+        CTaskComplexSignalAtPed::InjectHooks();
         // CTaskComplexSitDownThenIdleThenStandUp::InjectHooks();
         CTaskComplexSmartFleeEntity::InjectHooks();
         // CTaskComplexSmartFleePoint::InjectHooks();
