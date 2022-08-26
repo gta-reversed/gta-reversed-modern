@@ -13,11 +13,11 @@ void CTaskSimpleCarGetOut::InjectHooks() {
     RH_ScopedInstall(ComputeAnimID_ToHook, 0x647330);
     RH_ScopedInstall(StartAnim, 0x64BDE0);
 
-    RH_ScopedVMTlInstall(Clone, 0x649E70);
-    RH_ScopedVMTlInstall(GetTaskType, 0x647250);
-    RH_ScopedVMTlInstall(MakeAbortable, 0x6472D0);
-    RH_ScopedVMTlInstall(ProcessPed, 0x64DC70);
-    RH_ScopedVMTlInstall(SetPedPosition, 0x6472F0);
+    RH_ScopedVMTInstall(Clone, 0x649E70);
+    RH_ScopedVMTInstall(GetTaskType, 0x647250);
+    RH_ScopedVMTInstall(MakeAbortable, 0x6472D0);
+    RH_ScopedVMTInstall(ProcessPed, 0x64DC70);
+    RH_ScopedVMTInstall(SetPedPosition, 0x6472F0);
         
     RH_ScopedGlobalInstall(FinishAnimCarGetOutCB, 0x647480);
 }
