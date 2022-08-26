@@ -6,14 +6,7 @@
 /*
 const float& CCarEnterExit::ms_fMaxSpeed_CanDragPedOut = *(float*)0x0;
 const float& CCarEnterExit::ms_fMaxSpeed_PlayerCanDragPedOut = *(float*)0x0;
-bool& CCarEnterExit::ms_bPedOffsetsCalculated = *(bool*)0x0;
-CVector& CCarEnterExit::ms_vecPedGetUpAnimOffset = *(CVector*)0x0;
-CVector& CCarEnterExit::ms_vecPedBedLAnimOffset = *(CVector*)0x0;
-CVector& CCarEnterExit::ms_vecPedBedRAnimOffset = *(CVector*)0x0;
-CVector& CCarEnterExit::ms_vecPedDeskAnimOffset = *(CVector*)0x0;
-CVector& CCarEnterExit::ms_vecPedChairAnimOffset = *(CVector*)0x0;
 */
-CVector& ms_vecPedQuickDraggedOutCarAnimOffset = *(CVector*)0xC18C48;
 
 void CCarEnterExit::InjectHooks() {
     RH_ScopedClass(CCarEnterExit);
@@ -49,7 +42,7 @@ void CCarEnterExit::InjectHooks() {
     // RH_ScopedInstall(QuitEnteringCar, 0x0);
     RH_ScopedInstall(RemoveCarSitAnim, 0x64F680);
     RH_ScopedInstall(RemoveGetInAnims, 0x64F6E0);
-    // RH_ScopedInstall(SetAnimOffsetForEnterOrExitVehicle, 0x64F860);
+    RH_ScopedInstall(SetAnimOffsetForEnterOrExitVehicle, 0x64F860);
     // RH_ScopedInstall(SetPedInCarDirect, 0x650280);
 }
 
@@ -510,7 +503,57 @@ void CCarEnterExit::RemoveGetInAnims(const CPed* ped) {
 
 // 0x64F860
 void CCarEnterExit::SetAnimOffsetForEnterOrExitVehicle() {
-    plugin::Call<0x64F860>();
+    if (ms_bPedOffsetsCalculated) {
+        return;
+    }
+
+    const auto animBlockIdxs = {
+        CAnimManager::GetAnimationBlockIndex("int_house"),
+        CAnimManager::GetAnimationBlockIndex("int_office")
+    };
+
+    for (const auto idx : animBlockIdxs) {
+        CStreaming::RequestModel(IFPToModelId(idx), STREAMING_KEEP_IN_MEMORY);
+    }
+    CStreaming::LoadAllRequestedModels(false);
+
+    for (const auto idx : animBlockIdxs) {
+        CAnimManager::AddAnimBlockRef(idx);
+    }
+
+    {
+        const auto anim = CAnimManager::GetAnimAssociation(ANIM_GROUP_DEFAULT, ANIM_ID_GETUP_0);
+        CAnimManager::UncompressAnimation(anim->m_pHierarchy);
+        const auto& seq = anim->m_pHierarchy->GetSequences()[0];
+        ms_vecPedGetUpAnimOffset = seq.m_nFrameCount ? seq.GetUncompressedFrame(0)->translation : CVector{};
+    }
+
+    ms_vecPedQuickDraggedOutCarAnimOffset = CVector{ -1.841797f, -0.3261719f, -0.01269531f };
+
+    const std::tuple<AssocGroupId, AnimationId, CVector*> toProcess[]{
+        {ANIM_GROUP_INT_HOUSE,  ANIM_ID_BED_IN_L,   &ms_vecPedBedLAnimOffset  },
+        {ANIM_GROUP_INT_HOUSE,  ANIM_ID_BED_IN_R,   &ms_vecPedBedRAnimOffset  },
+        {ANIM_GROUP_INT_OFFICE, ANIM_ID_OFF_SIT_IN, &ms_vecPedDeskAnimOffset  },
+        {ANIM_GROUP_INT_HOUSE,  ANIM_ID_LOU_IN,     &ms_vecPedChairAnimOffset },
+    };
+    for (const auto [grpId, animId, out] : toProcess) {
+        // Calculate translation delta between first and last sequence frames
+        *out = [grpId, animId] {
+            const auto anim = CAnimManager::GetAnimAssociation(grpId, animId);
+            CAnimManager::UncompressAnimation(anim->m_pHierarchy);
+            const auto& seq = anim->m_pHierarchy->GetSequences()[0];
+            if (seq.m_nFrameCount > 0) {
+                return seq.GetUncompressedFrame(seq.m_nFrameCount - 1)->translation - seq.GetUncompressedFrame(0)->translation;
+            }
+            return CVector{};
+        }();
+    }
+
+    for (const auto idx : animBlockIdxs) {
+        CAnimManager::RemoveAnimBlockRef(idx);
+    }
+
+    ms_bPedOffsetsCalculated = true;
 }
 
 // 0x650280

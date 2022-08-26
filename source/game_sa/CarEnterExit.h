@@ -16,12 +16,14 @@ class CCarEnterExit {
 public:
     static const float& ms_fMaxSpeed_CanDragPedOut;
     static const float& ms_fMaxSpeed_PlayerCanDragPedOut;
-    static bool& ms_bPedOffsetsCalculated;
-    static CVector& ms_vecPedGetUpAnimOffset;
-    static CVector& ms_vecPedBedLAnimOffset;
-    static CVector& ms_vecPedBedRAnimOffset;
-    static CVector& ms_vecPedDeskAnimOffset;
-    static CVector& ms_vecPedChairAnimOffset;
+
+    static inline bool& ms_bPedOffsetsCalculated = *(bool*)0xC18C20;
+    static inline CVector& ms_vecPedGetUpAnimOffset = *(CVector*)0xC18C3C;
+    static inline CVector& ms_vecPedBedLAnimOffset = *(CVector*)0xC18C54;
+    static inline CVector& ms_vecPedBedRAnimOffset = *(CVector*)0xC18C60;
+    static inline CVector& ms_vecPedDeskAnimOffset = *(CVector*)0xC18C6C;
+    static inline CVector& ms_vecPedChairAnimOffset = *(CVector*)0xC18C78;
+    static inline CVector& ms_vecPedQuickDraggedOutCarAnimOffset = *(CVector*)0xC18C48;
 
 public:
     static void InjectHooks();
