@@ -42,7 +42,7 @@ CTaskComplexInvestigateDeadPed::~CTaskComplexInvestigateDeadPed() {
 
 // 0x696EE0
 void CTaskComplexInvestigateDeadPed::ComputeTargetPos(CPed* ped, CVector& targetPos) {
-    const auto deadPedPos = m_deadPed->GetPosition();
+    const auto& deadPedPos = m_deadPed->GetPosition();
     targetPos = deadPedPos + Normalized(ped->GetPosition() - deadPedPos) * 2.f;
 }
 
