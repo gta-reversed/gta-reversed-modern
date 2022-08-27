@@ -283,6 +283,7 @@
 #include "TaskSimpleBikeJacked.h"
 #include "TaskSimpleRunTimedAnim.h"
 #include "TaskSimpleSay.h"
+#include "TaskComplexLeaveCarAndDie.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -657,7 +658,7 @@ void InjectHooksMain() {
         // CTaskComplexKillPedOnFootMelee::InjectHooks();
         // CTaskComplexKillPedOnFootStealth::InjectHooks();
         // CTaskComplexLeaveBoat::InjectHooks();
-        // CTaskComplexLeaveCarAndDie::InjectHooks();
+        CTaskComplexLeaveCarAndDie::InjectHooks();
         // CTaskComplexLeaveCarAndFlee::InjectHooks();
         // CTaskComplexLeaveCarAndWander::InjectHooks();
         // CTaskComplexLeaveCarAsPassengerWait::InjectHooks();
