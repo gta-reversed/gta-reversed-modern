@@ -92,14 +92,17 @@ void PerPedDebug::ProcessImGui() {
 
     
 }
-struct PedInfo {
-    CPed* ped{};
-    CVector posWorld{};
-    CVector posScreen{};
-};
+
+// https://stackoverflow.com/a/60971856
+template<rng::range R>
+constexpr auto to_vector(R&& r) {
+    using elem_t = std::decay_t<rng::range_value_t<R>>;
+    return std::vector<elem_t>{r.begin(), r.end()};
+}
+
 void PerPedDebug::ProcessRender() {
     if (m_visible) {
-        std::vector<PedInfo> peds = to_vector(
+        auto peds = to_vector(
             GetPedPool()->GetAllValid()
             | rng::views::filter([](CPed& ped) { return ped.GetIsOnScreen(); })
             | rng::views::transform([](CPed& ped) {
@@ -111,20 +114,13 @@ void PerPedDebug::ProcessRender() {
                 return PedInfo{ &ped, pos, posScreen };
             })
         );
-        // Sort by depth
-        rng::sort(peds, {}, [](const PedInfo& pi) -> float { return pi.posScreen.z; });
+        // Sort by depth (furthest away first, this way when windows are rendered the closest ped's will be drawn last => on top of everythign else)
+        rng::sort(peds, std::greater<>{}, [](const PedInfo& pi) -> float { return pi.posScreen.z; });
 
         for (PedInfo& pi : peds) {
             ProcessPed(pi);
         }
     }
-}
-
-// https://stackoverflow.com/a/60971856
-template<rng::range R>
-constexpr auto to_vector(R&& r) {
-    using elem_t = std::decay_t<rng::range_value_t<R>>;
-    return std::vector<elem_t>{r.begin(), r.end()};
 }
 
 void PerPedDebug::ProcessPed(PedInfo& pi) {
@@ -136,39 +132,35 @@ void PerPedDebug::ProcessPed(PedInfo& pi) {
         return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
     };
     
-    const auto depth = pedHeadOnScreenPos.z;
+    const auto depth = pi.posScreen.z;
 
     if (depth > 100.f) {
         return; // Too distant
     }
 
-    SetNextWindowPos(ImVec2{ pedHeadOnScreenPos.x, pedHeadOnScreenPos.y });
+    SetNextWindowPos(CVector2D{ pi.posScreen });
     SetNextWindowSize(CVector2D{ 600, 400 } / remap(depth, 0.f, 100.f, 1.f, 4.f));
     //SetNextWindowSize({ 600, 400 }, ImGuiCond_FirstUseEver);
 
     // Format a title with a custom ID that should hopefully match only this ped
     char title[1024];
-    *std::format_to(title, "Ped Debug###{}{}", (ptrdiff_t)(&ped), ped.m_nRandomSeed) = 0; // Null terminate :D
+    *std::format_to(title, "Ped Debug###{}{}", (ptrdiff_t)(&pi.ped), pi.ped->m_nRandomSeed) = 0; // Null terminate :D
 
     if (m_autoCollapse) {
-        SetNextWindowCollapsed(!IsPointInSphere(ped.GetPosition(), TheCamera.GetPosition(), m_collapseToggleDist));
+        SetNextWindowCollapsed(!IsPointInSphere(pi.ped->GetPosition(), TheCamera.GetPosition(), m_collapseToggleDist));
     } else {
         SetNextWindowCollapsed(true, ImGuiCond_Once);
     }
 
     if (Begin(title, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoFocusOnAppearing)) {
         if (BeginTabBar("##tabbar")) {
-            m_tasksDebug.ProcessPed(ped);
-            m_generalDebug.ProcessPed(ped);
+            m_tasksDebug.ProcessPed(*pi.ped);
+            m_generalDebug.ProcessPed(*pi.ped);
             EndTabBar();
         }
-        //const auto scale = pedHeadOnScreenPos.z;
-        //SetWindowSize(CVector2D(GetWindowSize()) / scale); // Scale down by depth
-        //SetWindowSize(CVector2D(GetWindowSize()) * scale); // Scale back, this way user resizes are preserved (hopefully?)
     }
 
     End();
- 
 }
 
 // Called from inside a tab item

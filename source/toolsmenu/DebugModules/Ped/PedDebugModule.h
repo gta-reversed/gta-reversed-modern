@@ -1,6 +1,13 @@
 #pragma once
 
 namespace PedDebugModule {
+// TODO: move to detail
+struct PedInfo {
+    CPed* ped{};
+    CVector posWorld{};
+    CVector posScreen{};
+};
+
 class Tasks {
 public:
     void ProcessPed(CPed&);
@@ -21,7 +28,7 @@ public:
     void ProcessRender();
 
 private:
-    void ProcessPed(CPed&);
+    void ProcessPed(PedInfo&);
 private:
     float  m_collapseToggleDist{20.f};
     float  m_drawDist{ 200.f };

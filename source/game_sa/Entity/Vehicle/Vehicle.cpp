@@ -293,7 +293,7 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     m_nGettingInFlags = 0;
     m_nGettingOutFlags = 0;
 
-    std::ranges::fill(GetPassengers(), nullptr);
+    std::ranges::fill(m_apPassengers, nullptr);
 
     m_nBombOnBoard = 0;
     m_nOverrideLights = eVehicleOverrideLightsState::NO_CAR_LIGHT_OVERRIDE;
