@@ -206,7 +206,7 @@ bool CTaskSimpleCarJumpOut::SetPedPosition(CPed* ped) {
             const auto& pedPos = ped->GetPosition();
             auto pedPosAdj{ pedPos };
 
-            CWorld::pIgnoreEntity = ped;
+            CWorld::pIgnoreEntity = m_veh;
             CPedPlacement::FindZCoorForPed(pedPosAdj);
             CWorld::pIgnoreEntity = nullptr;
 
@@ -222,7 +222,6 @@ bool CTaskSimpleCarJumpOut::SetPedPosition(CPed* ped) {
             break;
         }
         }
-
     }
 
     return true;

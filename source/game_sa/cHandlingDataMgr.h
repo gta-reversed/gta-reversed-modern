@@ -46,7 +46,7 @@ public:
     // get boat handling by id
     tBoatHandlingData* GetBoatPointer(uint8 handlingId);
     tHandlingData* GetVehiclePointer(uint32 handlingId) { return &m_aVehicleHandling[handlingId]; };
-    tBikeHandlingData* GetBikeHandlingPointer(uint32 handlingId) { return &m_aBikeHandling[handlingId >= 163 ? handlingId - 163 : handlingId]; } // NOTE: 163 = eVehicleType::BIKE
+    tBikeHandlingData* GetBikeHandlingPointer(uint32 handlingId) { return &m_aBikeHandling[handlingId >= 162 ? handlingId - 162 : handlingId]; } // NOTE: 162 = VT_BIKE
 };
 
 VALIDATE_SIZE(cHandlingDataMgr, 0xC624);
