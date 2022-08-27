@@ -2,7 +2,7 @@
 
 #include "TaskSimpleCarSetPedOut.h"
 
-CTaskSimpleCarSetPedOut::CTaskSimpleCarSetPedOut(CVehicle* targetVehicle, int32 nTargetDoor, bool bSwitchOffEngine)
+CTaskSimpleCarSetPedOut::CTaskSimpleCarSetPedOut(CVehicle* targetVehicle, uint32 nTargetDoor, bool bSwitchOffEngine)
 {
     m_nTargetDoor = nTargetDoor;
     m_pTargetVehicle = targetVehicle;

@@ -47,6 +47,7 @@
 #include "VehicleRecording.h"
 #include "ColAccel.h"
 #include "app.h"
+#include "Garages.h"
 #include "TaskSimpleClimb.h"
 #include "PedAttractor.h"
 #include "MBlur.h"

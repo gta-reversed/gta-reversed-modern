@@ -3529,7 +3529,7 @@ void CAutomobile::FixDoor(int32 nodeIndex, eDoors door) {
 }
 
 // 0x6A3670
-void CAutomobile::FixPanel(int32 nodeIndex, ePanels panel) {
+void CAutomobile::FixPanel(eCarNodes nodeIndex, ePanels panel) {
     m_damageManager.SetPanelStatus(panel, DAMSTATE_OK);
 
     // Remove any bouncing panels belonging to this node
