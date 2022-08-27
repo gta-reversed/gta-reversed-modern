@@ -1394,7 +1394,7 @@ void CWorld::ClearCarsFromArea(float minX, float minY, float minZ, float maxX, f
         if (veh->vehicleFlags.bIsLocked || !veh->CanBeDeleted())
             continue;
 
-        RemoveVeicleAndItsOccupants(veh);
+        RemoveVehicleAndItsOccupants(veh);
     }
 }
 
@@ -2566,7 +2566,7 @@ void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint
         if (CGarages::IsPointWithinHideOutGarage(veh->GetPosition()))
             continue;
 
-        RemoveVeicleAndItsOccupants(veh);
+        RemoveVehicleAndItsOccupants(veh);
     }
 
     CObject::DeleteAllTempObjectsInArea(point, radius);
@@ -2989,7 +2989,7 @@ void CWorld::IncrementCurrentScanCode() {
 * @notsa 
 * @brief Remove a vehicle from the world, along with all of it's occupants.
 */
-void CWorld::RemoveVeicleAndItsOccupants(CVehicle* veh) {
+void CWorld::RemoveVehicleAndItsOccupants(CVehicle* veh) {
     if (const auto driver = veh->m_pDriver) {
         CPopulation::RemovePed(driver);
         // CEntity::ClearReference(driver); // Entity has been deleted, it makes no sense to call this

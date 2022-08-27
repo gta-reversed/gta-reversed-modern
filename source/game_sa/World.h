@@ -202,7 +202,7 @@ public:
             && pos.y > -3000.0f && pos.y < 3000.0f;
     }
 
-    static void RemoveVeicleAndItsOccupants(CVehicle* veh);
+    static void RemoveVehicleAndItsOccupants(CVehicle* veh);
 };
 
 extern uint32 &FilledColPointIndex;
