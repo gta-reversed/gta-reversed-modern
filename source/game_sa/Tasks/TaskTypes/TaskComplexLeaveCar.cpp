@@ -42,6 +42,11 @@ CTaskComplexLeaveCar::~CTaskComplexLeaveCar() {
     delete m_pTaskUtilityLineUpPedWithCar;
 }
 
+CTaskComplexLeaveCar::CTaskComplexLeaveCar(const CTaskComplexLeaveCar& o) :
+    CTaskComplexLeaveCar{ m_pTargetVehicle, m_nTargetDoor, m_nDelayTime, m_bSensibleLeaveCar, m_bForceGetOut }
+{
+}
+
 // 0x641100
 bool CTaskComplexLeaveCar::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return plugin::CallMethodAndReturn<bool, 0x641100, CTask*, CPed*, int32, const CEvent*>(this, ped, priority, event);
