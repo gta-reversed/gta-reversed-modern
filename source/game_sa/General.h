@@ -26,6 +26,7 @@ public:
 
     // NOTSA - Helpers
     static float GetRadianAngleBetweenPoints(CVector2D a, CVector2D b);
+    static bool DoCoinFlip();
 };
 
 constexpr float RAND_MAX_INT_RECIPROCAL = 1.0f / static_cast<float>(RAND_MAX + 1); // 1.0 / 32768.0 == 1.0 / (RAND_MAX + 1) = 0.0000305175781

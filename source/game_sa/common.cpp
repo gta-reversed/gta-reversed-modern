@@ -318,3 +318,16 @@ std::string UnicodeToUTF8(const std::wstring& str) {
 
     return out;
 }
+
+/*!
+* @notsa
+* @return The anim first found from `ids`
+*/
+CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, std::initializer_list<AnimationId> ids) {
+    for (const auto id : ids) {
+        if (const auto anim = RpAnimBlendClumpGetAssociation(clump, (int32)id)) {
+            return anim;
+        }
+    }
+    return nullptr;
+}
