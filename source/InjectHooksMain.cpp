@@ -280,6 +280,7 @@
 #include "TaskSimpleCarCloseDoorFromInside.h"
 #include "TaskSimpleClearLookAt.h"
 #include "TaskSimpleCarWaitToSlowDown.h"    
+#include "TaskComplexOnFire.h"
 #include "TaskSimpleBikeJacked.h"
 #include "TaskSimpleRunTimedAnim.h"
 #include "TaskSimpleSay.h"
@@ -663,7 +664,7 @@ void InjectHooksMain() {
         // CTaskComplexLeaveCarAndWander::InjectHooks();
         // CTaskComplexLeaveCarAsPassengerWait::InjectHooks();
         // CTaskComplexMoveBackAndJump::InjectHooks();
-        // CTaskComplexOnFire::InjectHooks();
+        CTaskComplexOnFire::InjectHooks();
         // CTaskComplexOpenDriverDoor::InjectHooks();
         // CTaskComplexOpenPassengerDoor::InjectHooks();
         // CTaskComplexPassObject::InjectHooks();
