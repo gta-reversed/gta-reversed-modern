@@ -7,7 +7,7 @@ class NOTSA_EXPORT_VTABLE CTaskComplexGoToBoatSteeringWheel : public CTaskComple
 public:
     CVector   m_TargetPos{};
     CVehicle* m_Vehicle{};
-    bool      m_unused{}; // Unused
+    bool      m_unused{};
     uint32    m_FirstSubTaskStartTime{};
 
 public:
