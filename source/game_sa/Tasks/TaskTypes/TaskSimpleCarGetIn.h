@@ -12,7 +12,6 @@ class CAnimBlendAssociation;
 * In case of vehicles it is created right after the door opening anim ends.
 */
 class NOTSA_EXPORT_VTABLE CTaskSimpleCarGetIn : public CTaskSimple {
-
 public:
     bool m_finished{};                            ///< Has the anim finished (=> meaning task has finished)
     CAnimBlendAssociation* m_anim{};              ///< The animation playing
@@ -21,6 +20,7 @@ public:
     CVehicle* m_veh{};                            ///< The vehicle we're getting into
     uint32 m_door{};                              ///< The door we want to enter at
     CTaskUtilityLineUpPedWithCar* m_lineUpTask{}; ///< Utility lineup task
+
 
 public:
     static void InjectHooks();
@@ -54,3 +54,4 @@ private: // Wrappers for hooks
         return this;
     }
 };
+VALIDATE_SIZE(CTaskSimpleCarGetIn, 0x24);
