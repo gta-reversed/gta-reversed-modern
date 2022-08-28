@@ -201,6 +201,8 @@ public:
         return pos.x > -3000.0f && pos.x < 3000.0f
             && pos.y > -3000.0f && pos.y < 3000.0f;
     }
+
+    static void RemoveVehicleAndItsOccupants(CVehicle* veh);
 };
 
 extern uint32 &FilledColPointIndex;

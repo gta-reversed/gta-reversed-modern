@@ -194,3 +194,11 @@ float CGeneral::GetRadianAngleBetweenPoints(CVector2D a, CVector2D b) {
 bool CGeneral::RandomBool(uint8 chanceOfTrue) {
     return (uint8)CGeneral::GetRandomNumberInRange(0, 100) < chanceOfTrue;
 }
+
+/*!
+* @return true/false with 50/50 change
+* @addr notsa
+*/
+bool CGeneral::DoCoinFlip() 
+	return CGeneral::GetRandomNumber() >= RAND_MAX / 2;
+}
