@@ -161,6 +161,7 @@
 #include "TaskUtilityLineUpPedWithCar.h"
 #include "TaskSimpleLand.h"
 #include "TaskSimpleJetPack.h"
+#include "TaskSimpleSitIdle.h"
 #include "TaskSimpleSetStayInSamePlace.h"
 #include "TaskSimpleJump.h"
 #include "TaskSimpleFall.h"
@@ -765,7 +766,7 @@ void InjectHooksMain() {
         // CTaskSimpleSetPedAsAutoDriver::InjectHooks();
         // CTaskSimpleShakeFist::InjectHooks();
         // CTaskSimpleSitDown::InjectHooks();
-        // CTaskSimpleSitIdle::InjectHooks();
+        CTaskSimpleSitIdle::InjectHooks();
         // CTaskSimpleStandUp::InjectHooks();
         // CTaskSimpleThrowControl::InjectHooks();
         CTaskSimpleTired::InjectHooks();
