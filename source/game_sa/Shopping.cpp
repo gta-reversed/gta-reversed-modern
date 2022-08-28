@@ -488,7 +488,7 @@ void CShopping::LoadPrices(const char* sectionName) {
             RET_IGNORED(strtok(nullptr, " \t,"));
 
         priceInfo.price = std::atoi(strtok(nullptr, " \t,"));
-        for (auto& priceModifier : std::span{ms_priceModifiers.data(), (size_t)ms_numPriceModifiers}) {
+        for (auto& priceModifier : ms_priceModifiers | rng::views::take((size_t)ms_numPriceModifiers)) {
             if (priceInfo.key == priceModifier.key) {
                 priceInfo.price = priceModifier.price;
                 break;
