@@ -10,18 +10,18 @@ class CEvent;
 
 class NOTSA_EXPORT_VTABLE CTaskComplexDestroyCarArmed : public CTaskComplex {
 public:
-    bool m_bNeedsToCreatefirstSubTask{};
+    bool      m_bNeedsToCreatefirstSubTask{};
     CVehicle* m_VehToDestroy{};
-    CVector m_PedPos{};
-    CVector m_VehiclePos{};
-    CVector m_PedToVehDirUnnorm{};
-    float m_fWeaponRange{};
-    int32 dword3C{};
-    float m_fWeaponRangeClamped{};
-    int32 dword44{};
-    float m_PedVehDist{};
-    float dword4C{};
-    bool m_bGotoPointAndStandStill{};
+    CVector   m_PedPos{};
+    CVector   m_VehiclePos{};
+    CVector   m_PedToVehDirUnnorm{};
+    float     m_fWeaponRange{};
+    int32     dword3C{};
+    float     m_fWeaponRangeClamped{};
+    int32     dword44{};
+    float     m_PedVehDist{};
+    float     dword4C{};
+    bool      m_bGotoPointAndStandStill{};
     int32     dword54{-1};
     uint32    ctor58{};
     uint32    ctor5C{};

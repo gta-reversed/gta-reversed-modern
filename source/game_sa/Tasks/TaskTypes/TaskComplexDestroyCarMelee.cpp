@@ -39,7 +39,6 @@ bool CTaskComplexDestroyCarMelee::MakeAbortable(CPed* ped, eAbortPriority priori
         return m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_IMMEDIATE, event);
 
     case ABORT_PRIORITY_URGENT: {
-
         if (event) {
             switch (event->GetEventType()) {
             case EVENT_VEHICLE_COLLISION: {
