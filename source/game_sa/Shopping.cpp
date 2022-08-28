@@ -488,12 +488,12 @@ void CShopping::LoadPrices(const char* sectionName) {
             RET_IGNORED(strtok(nullptr, " \t,"));
 
         priceInfo.price = std::atoi(strtok(nullptr, " \t,"));
-        rng::for_each_n(ms_priceModifiers.begin(), ms_numPriceModifiers, [&priceInfo](auto priceModifier) {
+        for (auto& priceModifier : ms_priceModifiers | rng::views::take((size_t)ms_numPriceModifiers)) {
             if (priceInfo.key == priceModifier.key) {
                 priceInfo.price = priceModifier.price;
+                break;
             }
-        });
-
+        }
     }
     CFileMgr::CloseFile(file);
 
@@ -626,12 +626,12 @@ void CShopping::AddPriceModifier(const char* name, const char* section, int32 pr
 // 0x (inlined)
 void CShopping::AddPriceModifier(uint32 key, int32 price) {
     // the code may not be same, can not test.
-    rng::for_each_n(ms_priceModifiers.begin(), ms_numPriceModifiers, [key, price](auto priceModifier) {
+    for (auto& priceModifier : std::span{ms_priceModifiers.data(), (size_t)ms_numPriceModifiers}) {
         if (key == priceModifier.key) {
             priceModifier.price = price;
             return;
         }
-    });
+    }
 
     ms_priceModifiers[ms_numPriceModifiers].key = key;
     ms_priceModifiers[ms_numPriceModifiers].price = price;
