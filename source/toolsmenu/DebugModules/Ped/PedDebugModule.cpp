@@ -87,7 +87,7 @@ void PerPedDebug::ProcessImGui() {
         SliderFloat("Draw distance", &m_drawDist, 4.f, 300.f); // Realistically GTA won't generate peds even at 200 units
         if (TreeNode("Auto-collapse")) {
             Checkbox("Enabled", &m_autoCollapse);
-            SliderFloat("Distance", &m_collapseToggleDist, 4.f, m_drawDist);
+            SliderFloat("Distance", &m_collapseToggleDist, 4.f, 300.f);
             TreePop();
         }
         TreePop();
@@ -110,6 +110,9 @@ void PerPedDebug::ProcessRender() {
                     const auto& pos = ped.GetPosition();
                     CVector posScreen{};
                     if (CalcScreenCoors(ped.GetBonePosition(BONE_HEAD) + ped.GetRightVector() * 0.5f, &posScreen)) {
+                        if (posScreen.z >= m_drawDist) { // posScreen.z == depth == distance from camera
+                            return std::nullopt;
+                        }
                         return PedInfo{ &ped, pos, posScreen };
                     }
                     DEV_LOG("Failed to calculate on-screen coords of ped");
