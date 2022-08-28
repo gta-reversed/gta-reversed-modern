@@ -192,6 +192,5 @@ float CGeneral::GetRadianAngleBetweenPoints(CVector2D a, CVector2D b) {
 * @returns True `chanceOfTrue` % of the time, false othertimes
 */
 bool CGeneral::RandomBool(uint8 chanceOfTrue) {
-    // NOTE: I'm not quite sure whenever this really returns true exactly `chanceOfTruec` % of the time
-    return CGeneral::GetRandomNumberInRange(0, 100) < chanceOfTrue;
+    return (uint8)CGeneral::GetRandomNumberInRange(0, 100) < chanceOfTrue;
 }
