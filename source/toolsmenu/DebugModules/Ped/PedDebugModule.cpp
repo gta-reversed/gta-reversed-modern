@@ -20,8 +20,11 @@ namespace PedDebugModule {
 
 void General::ProcessPed(CPed& ped) {
     if (BeginTabItem("General")) {
-        if (Button("Remove")) {
-            CPopulation::RemovePed(&ped);
+        // Don't allow CJ to be removed kekw
+        if (FindPlayerPed() != &ped) {
+            if (Button("Remove")) {
+                CPopulation::RemovePed(&ped);
+            }
         }
         SameLine();
         if (Button("Catapult")) {
@@ -67,7 +70,7 @@ void Tasks::ProcessTaskCategory(const char* label, const auto& tasks) {
 }
 
 /*!
-* @brief Process a single ped. This is call is done within a imgui window
+* @brief Process a single ped. This call is done within an imgui tab 
 */
 void Tasks::ProcessPed(CPed& ped) {
     if (BeginTabItem("Tasks")) {
@@ -89,8 +92,6 @@ void PerPedDebug::ProcessImGui() {
         }
         TreePop();
     }
-
-    
 }
 
 // https://stackoverflow.com/a/60971856
@@ -103,16 +104,20 @@ constexpr auto to_vector(R&& r) {
 void PerPedDebug::ProcessRender() {
     if (m_visible) {
         auto peds = to_vector(
-            GetPedPool()->GetAllValid()
-            | rng::views::filter([](CPed& ped) { return ped.GetIsOnScreen(); })
-            | rng::views::transform([](CPed& ped) {
-                const auto& pos = ped.GetPosition();
-                CVector posScreen{};
-                if (!CalcScreenCoors(ped.GetBonePosition(BONE_HEAD) + ped.GetRightVector() * 0.5f, &posScreen)) {
+              GetPedPool()->GetAllValid()
+            | rng::views::transform([](CPed& ped) -> std::optional<PedInfo> {
+                if (ped.GetIsOnScreen()) {
+                    const auto& pos = ped.GetPosition();
+                    CVector posScreen{};
+                    if (CalcScreenCoors(ped.GetBonePosition(BONE_HEAD) + ped.GetRightVector() * 0.5f, &posScreen)) {
+                        return PedInfo{ &ped, pos, posScreen };
+                    }
                     DEV_LOG("Failed to calculate on-screen coords of ped");
                 }
-                return PedInfo{ &ped, pos, posScreen };
+                return std::nullopt;
             })
+            | rng::views::filter([](auto&& optpi) { return optpi.has_value(); })
+            | rng::views::transform([](auto&& optpi) { return *optpi; })
         );
         // Sort by depth (furthest away first, this way when windows are rendered the closest ped's will be drawn last => on top of everythign else)
         rng::sort(peds, std::greater<>{}, [](const PedInfo& pi) -> float { return pi.posScreen.z; });
@@ -144,18 +149,19 @@ void PerPedDebug::ProcessPed(PedInfo& pi) {
 
     // Format a title with a custom ID that should hopefully match only this ped
     char title[1024];
-    *std::format_to(title, "Ped Debug###{}{}", (ptrdiff_t)(&pi.ped), pi.ped->m_nRandomSeed) = 0; // Null terminate :D
+    *std::format_to(title, "Ped Debug###{}{}", (ptrdiff_t)(pi.ped), pi.ped->m_nRandomSeed) = 0; // Null terminate :D
 
     if (m_autoCollapse) {
-        SetNextWindowCollapsed(!IsPointInSphere(pi.ped->GetPosition(), TheCamera.GetPosition(), m_collapseToggleDist));
+        SetNextWindowCollapsed((pi.ped->GetPosition() - TheCamera.GetPosition()).SquaredMagnitude() >= sq(m_collapseToggleDist));
     } else {
         SetNextWindowCollapsed(true, ImGuiCond_Once);
     }
 
-    if (Begin(title, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoFocusOnAppearing)) {
+    if (Begin(title, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing)) {
         if (BeginTabBar("##tabbar")) {
             m_tasksDebug.ProcessPed(*pi.ped);
             m_generalDebug.ProcessPed(*pi.ped);
+
             EndTabBar();
         }
     }
