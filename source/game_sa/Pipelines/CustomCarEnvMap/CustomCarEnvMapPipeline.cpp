@@ -152,12 +152,12 @@ RpMaterial* CCustomCarEnvMapPipeline::CustomPipeMaterialSetup(RpMaterial* materi
 
     if (GetFxEnvShininess(material) != 0.0f) {
         if (const auto tex = GetFxEnvTexture(material)) {
-            flags |= RwTextureGetName(tex)[0] == 'x' ? (1 << 1) : (1 << 0);
-    }
+            flags |= RwTextureGetName(tex)[0] == 'x' ? 0b10 : 0b01;
+        }
     }
 
     if (GetFxSpecSpecularity(material) != 0.0f && GetFxSpecTexture(material)) {
-        flags |= 1 << 3;
+        flags |= 0b100;
     }
 
     return material;
