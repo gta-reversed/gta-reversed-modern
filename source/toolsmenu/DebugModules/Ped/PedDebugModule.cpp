@@ -5,6 +5,7 @@
 #include "Hud.h"
 #include <vector>
 #include <list>
+#include <optional>
 #include <format>
 
 // Define extra conversion function from our vector type to imgui's vec2d
@@ -105,22 +106,29 @@ void PerPedDebug::ProcessRender() {
     if (m_visible) {
         auto peds = to_vector(
               GetPedPool()->GetAllValid()
-            | rng::views::transform([](CPed& ped) -> std::optional<PedInfo> {
-                if (ped.GetIsOnScreen()) {
-                    const auto& pos = ped.GetPosition();
-                    CVector posScreen{};
-                    if (CalcScreenCoors(ped.GetBonePosition(BONE_HEAD) + ped.GetRightVector() * 0.5f, &posScreen)) {
-                        if (posScreen.z >= m_drawDist) { // posScreen.z == depth == distance from camera
-                            return std::nullopt;
-                        }
-                        return PedInfo{ &ped, pos, posScreen };
-                    }
-                    DEV_LOG("Failed to calculate on-screen coords of ped");
+            | rng::views::transform([this](CPed& ped) -> std::optional<PedInfo> {
+                if (!ped.GetIsOnScreen()) {
+                    return std::nullopt;
                 }
-                return std::nullopt;
+
+                PedInfo pi{
+                    .ped = &ped,
+                    .posWorld = ped.GetPosition()
+                };
+
+                if (!CalcScreenCoors(ped.GetBonePosition(BONE_HEAD) + ped.GetRightVector() * 0.5f, &pi.posScreen)) {
+                    DEV_LOG("Failed to calculate on-screen coords of ped");
+                    return std::nullopt;
+                }
+               
+                if (pi.posScreen.z >= m_drawDist) { // posScreen.z == depth == distance from camera
+                    return std::nullopt;
+                }
+
+                return pi;
             })
-            | rng::views::filter([](auto&& optpi) { return optpi.has_value(); })
-            | rng::views::transform([](auto&& optpi) { return *optpi; })
+            | rng::views::filter([](auto&& optPI) { return optPI.has_value(); })
+            | rng::views::transform([](auto&& optPI) { return *optPI; })
         );
         // Sort by depth (furthest away first, this way when windows are rendered the closest ped's will be drawn last => on top of everythign else)
         rng::sort(peds, std::greater<>{}, [](const PedInfo& pi) -> float { return pi.posScreen.z; });
