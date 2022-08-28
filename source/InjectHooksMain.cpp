@@ -285,6 +285,7 @@
 #include "TaskSimpleRunTimedAnim.h"
 #include "TaskSimpleSay.h"
 #include "TaskComplexEnterCar.h"
+#include "TaskComplexSmartFleePoint.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -688,7 +689,7 @@ void InjectHooksMain() {
         CTaskComplexSignalAtPed::InjectHooks();
         // CTaskComplexSitDownThenIdleThenStandUp::InjectHooks();
         CTaskComplexSmartFleeEntity::InjectHooks();
-        // CTaskComplexSmartFleePoint::InjectHooks();
+        CTaskComplexSmartFleePoint::InjectHooks();
         // CTaskComplexStareAtPed::InjectHooks();
         // CTaskComplexStealCar::InjectHooks();
         // CTaskComplexTrackEntity::InjectHooks();
