@@ -39,7 +39,6 @@ bool CTaskComplexDestroyCarMelee::MakeAbortable(CPed* ped, eAbortPriority priori
         return m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_IMMEDIATE, event);
 
     case ABORT_PRIORITY_URGENT: {
-
         if (event) {
             switch (event->GetEventType()) {
             case EVENT_VEHICLE_COLLISION: {
@@ -169,8 +168,7 @@ CTask* CTaskComplexDestroyCarMelee::ControlSubTask(CPed* ped) {
 void CTaskComplexDestroyCarMelee::CalculateSearchPositionAndRanges(CPed* ped) {
     m_MaxTargetFightDist = m_MaxFightCtrlRadius = m_VehToDestroy->GetModelInfo()->GetColModel()->GetBoundRadius() + 0.35f;
 
-    const auto dir = CVector2D{ ped->GetPosition() - m_VehToDestroy->GetPosition() };
-    m_PedVehicleAngleRad = std::atan2(dir.x, -dir.y); // Or `std::atan2(dir.y, dir.x)` should work too (?)
+    m_PedVehicleAngleRad = (ped->GetPosition() - m_VehToDestroy->GetPosition()).Heading();
 }
 
 // 0x628A70
