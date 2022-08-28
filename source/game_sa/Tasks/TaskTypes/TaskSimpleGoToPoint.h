@@ -28,7 +28,7 @@ public:
     bool ProcessPed(CPed* ped) override;
 
     // bDontCheckRadius is always false
-    void UpdatePoint(const CVector& targetPosition, float fRadius, bool bDontCheckRadius);
+    void UpdatePoint(const CVector& targetPosition, float fRadius, bool bDontCheckRadius = false);
 
     static void InjectHooks();
     CTaskSimpleGoToPoint* Constructor(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6);
