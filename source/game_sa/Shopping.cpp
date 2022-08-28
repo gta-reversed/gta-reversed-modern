@@ -120,10 +120,10 @@ void CShopping::Buy(uint32 key, int32 extraInfo) {
             const auto car = veh->AsAutomobile();
 
             // todo: refactor
-            const auto idx = (upgradeModel->m_nFlags >> 10) & 0x1f;
-            auto parentId = vehModel->m_pVehicleStruct->m_aUpgrades[idx].m_nParentComponentId;
+            const auto carModId = upgradeModel->nCarmodId;
+            auto parentId = vehModel->m_pVehicleStruct->m_aUpgrades[carModId].m_nParentComponentId;
             if (upgradeModel->bUsesVehDummy) {
-                parentId = idx;
+                parentId = carModId;
             }
 
             switch (parentId) {
@@ -134,16 +134,16 @@ void CShopping::Buy(uint32 key, int32 extraInfo) {
                 car->FixTyre(CAR_WHEEL_REAR_RIGHT);
                 break;
             case CAR_BUMP_FRONT:
-                car->FixPanel(12, FRONT_BUMPER);
+                car->FixPanel(CAR_BUMP_FRONT, FRONT_BUMPER);
                 break;
             case CAR_BUMP_REAR:
-                car->FixPanel(13, REAR_BUMPER);
+                car->FixPanel(CAR_BUMP_REAR, REAR_BUMPER);
                 break;
             case CAR_BONNET:
-                car->FixDoor(16, DOOR_BONNET);
+                car->FixDoor(CAR_BONNET, DOOR_BONNET);
                 break;
             case CAR_BOOT:
-                car->FixDoor(17, DOOR_BOOT);
+                car->FixDoor(CAR_BOOT, DOOR_BOOT);
                 break;
             default:
                 break;

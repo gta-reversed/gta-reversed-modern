@@ -282,9 +282,12 @@
 #include "TaskSimpleCarCloseDoorFromInside.h"
 #include "TaskSimpleClearLookAt.h"
 #include "TaskSimpleCarWaitToSlowDown.h"    
+#include "TaskComplexOnFire.h"
 #include "TaskSimpleBikeJacked.h"
 #include "TaskSimpleRunTimedAnim.h"
 #include "TaskSimpleSay.h"
+#include "TaskComplexEnterCar.h"
+#include "TaskComplexSmartFleePoint.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -664,7 +667,7 @@ void InjectHooksMain() {
         // CTaskComplexLeaveCarAndWander::InjectHooks();
         // CTaskComplexLeaveCarAsPassengerWait::InjectHooks();
         // CTaskComplexMoveBackAndJump::InjectHooks();
-        // CTaskComplexOnFire::InjectHooks();
+        CTaskComplexOnFire::InjectHooks();
         // CTaskComplexOpenDriverDoor::InjectHooks();
         // CTaskComplexOpenPassengerDoor::InjectHooks();
         // CTaskComplexPassObject::InjectHooks();
@@ -688,7 +691,7 @@ void InjectHooksMain() {
         CTaskComplexSignalAtPed::InjectHooks();
         // CTaskComplexSitDownThenIdleThenStandUp::InjectHooks();
         CTaskComplexSmartFleeEntity::InjectHooks();
-        // CTaskComplexSmartFleePoint::InjectHooks();
+        CTaskComplexSmartFleePoint::InjectHooks();
         // CTaskComplexStareAtPed::InjectHooks();
         // CTaskComplexStealCar::InjectHooks();
         // CTaskComplexTrackEntity::InjectHooks();
@@ -843,7 +846,7 @@ void InjectHooksMain() {
         CTaskComplexJump::InjectHooks();
         // CTaskComplexWanderStandard::InjectHooks();
         // CTaskComplexSunbathe::InjectHooks();
-        // CTaskComplexEnterCar::InjectHooks();
+        CTaskComplexEnterCar::InjectHooks();
         // CTaskSimpleTogglePedThreatScanner::InjectHooks();
         CTaskComplexUseGoggles::InjectHooks();
         // CTaskComplexCrossRoadLookAndAchieveHeading::InjectHooks();

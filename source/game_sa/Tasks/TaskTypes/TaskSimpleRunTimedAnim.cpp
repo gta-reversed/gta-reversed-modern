@@ -41,6 +41,7 @@ CTaskSimpleRunTimedAnim::CTaskSimpleRunTimedAnim(AssocGroupId groupId, Animation
 // 0x61AC50
 void CTaskSimpleRunTimedAnim::StartAnim(CPed* ped) {
     m_pAnim = CAnimManager::BlendAnimation(ped->m_pRwClump, m_animGrpId, m_animId, m_blendDelta);
+    m_pAnim->SetDeleteCallback(CTaskSimpleAnim::FinishRunAnimCB, this);
 }
 
 // 0x61BBE0
