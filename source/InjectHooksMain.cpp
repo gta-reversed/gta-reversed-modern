@@ -286,6 +286,7 @@
 #include "TaskSimpleBikeJacked.h"
 #include "TaskSimpleRunTimedAnim.h"
 #include "TaskSimpleSay.h"
+#include "TaskSimpleHandsUp.h"
 #include "TaskComplexEnterCar.h"
 #include "TaskComplexSmartFleePoint.h"
 
@@ -757,7 +758,7 @@ void InjectHooksMain() {
         // CTaskSimpleGunControl::InjectHooks();
         // CTaskSimpleHailTaxi::InjectHooks();
         // CTaskSimpleHailTaxiAndPause::InjectHooks();
-        // CTaskSimpleHandsUp::InjectHooks();
+        CTaskSimpleHandsUp::InjectHooks();
         // CTaskSimpleHitByGunFromFront::InjectHooks();
         // CTaskSimpleHitByGunFromLeft::InjectHooks();
         // CTaskSimpleHitByGunFromRear::InjectHooks();
