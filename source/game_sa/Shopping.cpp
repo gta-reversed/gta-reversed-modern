@@ -120,10 +120,10 @@ void CShopping::Buy(uint32 key, int32 extraInfo) {
             const auto car = veh->AsAutomobile();
 
             // todo: refactor
-            const auto idx = (upgradeModel->m_nFlags >> 10) & 0x1f;
-            auto parentId = vehModel->m_pVehicleStruct->m_aUpgrades[idx].m_nParentComponentId;
+            const auto carModId = upgradeModel->nCarmodId;
+            auto parentId = vehModel->m_pVehicleStruct->m_aUpgrades[carModId].m_nParentComponentId;
             if (upgradeModel->bUsesVehDummy) {
-                parentId = idx;
+                parentId = carModId;
             }
 
             switch (parentId) {
@@ -134,16 +134,16 @@ void CShopping::Buy(uint32 key, int32 extraInfo) {
                 car->FixTyre(CAR_WHEEL_REAR_RIGHT);
                 break;
             case CAR_BUMP_FRONT:
-                car->FixPanel(12, FRONT_BUMPER);
+                car->FixPanel(CAR_BUMP_FRONT, FRONT_BUMPER);
                 break;
             case CAR_BUMP_REAR:
-                car->FixPanel(13, REAR_BUMPER);
+                car->FixPanel(CAR_BUMP_REAR, REAR_BUMPER);
                 break;
             case CAR_BONNET:
-                car->FixDoor(16, DOOR_BONNET);
+                car->FixDoor(CAR_BONNET, DOOR_BONNET);
                 break;
             case CAR_BOOT:
-                car->FixDoor(17, DOOR_BOOT);
+                car->FixDoor(CAR_BOOT, DOOR_BOOT);
                 break;
             default:
                 break;
@@ -488,12 +488,12 @@ void CShopping::LoadPrices(const char* sectionName) {
             RET_IGNORED(strtok(nullptr, " \t,"));
 
         priceInfo.price = std::atoi(strtok(nullptr, " \t,"));
-        rng::for_each_n(ms_priceModifiers.begin(), ms_numPriceModifiers, [&priceInfo](auto priceModifier) {
+        for (auto& priceModifier : ms_priceModifiers | rng::views::take((size_t)ms_numPriceModifiers)) {
             if (priceInfo.key == priceModifier.key) {
                 priceInfo.price = priceModifier.price;
+                break;
             }
-        });
-
+        }
     }
     CFileMgr::CloseFile(file);
 
@@ -626,12 +626,12 @@ void CShopping::AddPriceModifier(const char* name, const char* section, int32 pr
 // 0x (inlined)
 void CShopping::AddPriceModifier(uint32 key, int32 price) {
     // the code may not be same, can not test.
-    rng::for_each_n(ms_priceModifiers.begin(), ms_numPriceModifiers, [key, price](auto priceModifier) {
+    for (auto& priceModifier : std::span{ms_priceModifiers.data(), (size_t)ms_numPriceModifiers}) {
         if (key == priceModifier.key) {
             priceModifier.price = price;
             return;
         }
-    });
+    }
 
     ms_priceModifiers[ms_numPriceModifiers].key = key;
     ms_priceModifiers[ms_numPriceModifiers].price = price;
