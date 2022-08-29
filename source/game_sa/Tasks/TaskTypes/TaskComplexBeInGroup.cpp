@@ -53,7 +53,7 @@ void CTaskComplexBeInGroup::MonitorSecondaryGroupTask(CPed* ped) {
     auto& groupIntel = CPedGroups::GetGroup(m_nGroupId).GetIntelligence();
     const auto grpSecTask = groupIntel.GetTaskSecondary(ped);
     const auto pedGrpSecTaskSlot = groupIntel.GetTaskSecondarySlot(ped);
-    const auto pedGrpSecTask = ped->GetTaskManager().GetTaskSecondary(pedGrpSecTaskSlot);
+     const auto pedGrpSecTask = ped->GetTaskManager().GetTaskSecondary(pedGrpSecTaskSlot);
     if (m_SecondaryTask == grpSecTask) {
         if (m_SecondaryTask) { // Check if theres any task at all (Not both nullptr)
             // Check if ped has finished the task

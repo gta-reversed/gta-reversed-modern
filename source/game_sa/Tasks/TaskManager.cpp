@@ -36,26 +36,14 @@ void CTaskManager::InjectHooks() {
 }
 
 // 0x6816A0
-CTaskManager::CTaskManager(CPed* ped) {
-    m_pPed = ped;
-
-    std::fill(std::begin(m_aPrimaryTasks), std::end(m_aPrimaryTasks), nullptr);
-    std::fill(std::begin(m_aSecondaryTasks), std::end(m_aSecondaryTasks), nullptr);
+CTaskManager::CTaskManager(CPed* ped) :
+    m_pPed{ped}
+{
 }
 
 // 0x6816D0
 CTaskManager::~CTaskManager() {
     Flush();
-}
-
-CTaskManager* CTaskManager::Constructor(CPed* ped) {
-    this->CTaskManager::CTaskManager(ped);
-    return this;
-}
-
-CTaskManager* CTaskManager::Destructor() {
-    this->CTaskManager::~CTaskManager();
-    return this;
 }
 
 // 0x681720
@@ -88,7 +76,8 @@ CTask* CTaskManager::FindActiveTaskByType(int32 taskType) {
         }
     }
     // TODO, NOTE: This is stupid. Why go begin -> end, and return the last match, when
-    // going end -> begin and returning the last matching sub-task would do the same?
+    // going end -> begin and returning the first matching sub-task would do the same? (Eg.: doing the above loop in reverse)
+    // TBH I think they just forgot to put a break, but who knows.
     return lastFound;
 }
 

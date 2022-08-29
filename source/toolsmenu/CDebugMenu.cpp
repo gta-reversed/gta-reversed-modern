@@ -156,7 +156,7 @@ void CDebugMenu::ImGuiDrawLoop() {
     ImGui_ImplDX9_NewFrame();
     ImGui::NewFrame();
 
-    DebugModules::Display(m_ShowMenu);
+    DebugModules::ProcessRender(m_ShowMenu);
 
     ImGui::EndFrame();
     ImGui::Render();
