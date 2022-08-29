@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <optional>
+
 #include "Physical.h"
 #include "AEVehicleAudioEntity.h"
 #include "tHandlingData.h"
@@ -299,7 +301,7 @@ public:
     int16             m_nAlarmState;
     int16             m_nForcedRandomRouteSeed; // if this is non-zero the random wander gets deterministic
     CPed*             m_pDriver;
-    CPed*             m_apPassengers[8];
+    CPed*             m_apPassengers[8]{};
     uint8             m_nNumPassengers;
     uint8             m_nNumGettingIn;
     uint8             m_nGettingInFlags;
@@ -465,7 +467,7 @@ public:
     virtual void PlayCarHorn() { /* Do nothing */ }
     virtual int32 GetNumContactWheels() { return 4; }
     virtual void VehicleDamage(float damageIntensity, eVehicleCollisionComponent collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { /* Do nothing */ }
-    virtual bool CanPedStepOutCar(bool bIgnoreSpeedUpright);
+    virtual bool CanPedStepOutCar(bool bIgnoreSpeedUpright) const;
     virtual bool CanPedJumpOutCar(CPed* ped);
     virtual bool GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
     virtual bool GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
@@ -501,15 +503,15 @@ public:
     bool IsDriver(CPed* ped) const;
     [[nodiscard]] bool IsDriver(int32 modelIndex) const;
     void KillPedsInVehicle();
-    bool IsUpsideDown();
-    bool IsOnItsSide();
+    bool IsUpsideDown() const;
+    bool IsOnItsSide() const;
     bool CanPedOpenLocks(CPed* ped);
     bool CanDoorsBeDamaged();
     bool CanPedEnterCar();
     void ProcessCarAlarm();
     bool IsVehicleNormal();
     void ChangeLawEnforcerState(bool bIsEnforcer);
-    bool IsLawEnforcementVehicle();
+    bool IsLawEnforcementVehicle() const;
     static bool ShufflePassengersToMakeSpace();
     void ExtinguishCarFire();
     void ActivateBomb();
@@ -566,7 +568,7 @@ public:
     void DoPlaneGunFireFX(CWeapon* weapon, CVector& particlePos, CVector& gunshellPos, int32 particleIndex);
     void FirePlaneGuns();
     void FireUnguidedMissile(eOrdnanceType type, bool bCheckTime);
-    bool CanBeDriven();
+    bool CanBeDriven() const;
     void ReactToVehicleDamage(CPed* ped);
     bool GetVehicleLightsStatus();
     bool CanPedLeanOut(CPed* ped);
@@ -620,6 +622,8 @@ public:
     void DoDriveByShootings();
 
     bool AreAnyOfPassengersFollowerOfGroup(const CPedGroup& group);
+
+    auto GetPassengerIndex(const CPed* ped) const -> std::optional<size_t>;
 
     static void Shutdown();
     static void SetComponentAtomicAlpha(RpAtomic* atomic, int32 alpha);
@@ -676,13 +680,13 @@ public: // NOTSA functions
     CPlane* AsPlane() { return reinterpret_cast<CPlane*>(this); }
     CHeli*  AsHeli()  { return reinterpret_cast<CHeli*>(this); }
 
-    CVehicleModelInfo* GetVehicleModelInfo(); // todo: inline
+    CVehicleModelInfo* GetVehicleModelInfo() const;
 
     CVector GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace = true);
     int32 GetRopeIndex();
     [[nodiscard]] CVehicleAnimGroup& GetAnimGroup() const;
     [[nodiscard]] AssocGroupId GetAnimGroupId() const;
-    auto GetPassengers() { return std::span{ m_apPassengers, m_nMaxPassengers }; }
+    auto GetPassengers() const { return std::span{ m_apPassengers, m_nMaxPassengers }; }
     [[nodiscard]] float GetDefaultAirResistance() const {
         if (m_pHandlingData->m_fDragMult <= 0.01f) {
             return m_pHandlingData->m_fDragMult;
@@ -715,7 +719,7 @@ private:
     void ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 animId, float fTime);
     void ProcessDrivingAnims_Reversed(CPed* driver, bool blend);
     float GetHeightAboveRoad_Reversed();
-    bool CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright);
+    bool CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright) const;
     bool CanPedJumpOutCar_Reversed(CPed* ped);
     bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
     bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
