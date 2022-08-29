@@ -5,17 +5,17 @@
 
 class CEntity;
 
-class CTaskSimpleFightingControl : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleFightingControl : public CTaskSimple {
 public:
-    bool m_bool = {};
-    bool m_bool2 = {};
-    uint16 m_uint16 = {};
-    CEntity* m_entity = {};
-    float m_angleRad = {};
-    float m_dist = {};
-    float m_unk3 = {1.f};
-    uint32 m_unk4 = {};
-    uint32 m_unk5 = {};
+    bool m_bool{};
+    bool m_bool2{};
+    uint16 m_uint16{};
+    CEntity* m_target{};
+    float m_angleRad{};
+    float m_maxAttackRange{};
+    float m_unk3{};
+    uint32 m_nextAttackTime{};
+    uint32 m_someTime{};
 
 public:
     static void InjectHooks();

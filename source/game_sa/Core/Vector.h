@@ -6,10 +6,10 @@
 */
 #pragma once
 
-#include "PluginBase.h" // !!!
-
-#include "RenderWare.h"
 #include <numeric>
+
+#include "PluginBase.h" // !!!
+#include "RenderWare.h"
 
 class CMatrix;
 
@@ -120,9 +120,11 @@ public:
         return Average(begin, begin + n);
     }
 
-    [[nodiscard]] float Heading() const {
-        return std::atan2(-x, y);
-    }
+    /*!
+    * @param reMapRangeTo0To2Pi Return value will be in interval [0, 2pi] instead of [-pi, pi]
+    * @returning The heading of the vector in radians.
+    */
+    [[nodiscard]] float Heading(bool reMapRangeTo0To2Pi = false) const;
 };
 VALIDATE_SIZE(CVector, 0xC);
 
