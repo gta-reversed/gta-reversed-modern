@@ -16,15 +16,6 @@
 #include "LodTimeModelInfo.h"
 #include "PedModelInfo.h"
 
-enum eModelInfoType : uint8 {
-    MODEL_INFO_TYPE_ATOMIC = 1,
-    MODEL_INFO_TYPE_TIME = 3,
-    MODEL_INFO_TYPE_WEAPON = 4,
-    MODEL_INFO_TYPE_CLUMP = 5,
-    MODEL_INFO_TYPE_VEHICLE = 6,
-    MODEL_INFO_TYPE_PED = 7,
-    MODEL_INFO_TYPE_LOD_ATOMIC = 8,
-};
 
 class CModelInfo {
 public:

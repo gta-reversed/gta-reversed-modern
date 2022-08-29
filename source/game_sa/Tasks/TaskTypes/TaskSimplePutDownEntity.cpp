@@ -61,17 +61,14 @@ CTask* CTaskSimplePutDownEntity::Clone_Reversed() {
             m_fPutDownHeightZ
         );
     }
-    else {
-        return new CTaskSimplePutDownEntity(
-            m_pEntityToHold,
-            &m_vecPosition,
-            m_nBoneFrameId,
-            m_bBoneFlags,
-            m_nAnimId,
-            m_nAnimGroupId,
-            false,
-            m_fPutDownHeightZ
-        );
-    }
-    return nullptr;
+    return new CTaskSimplePutDownEntity(
+        m_pEntityToHold,
+        &m_vecPosition,
+        m_nBoneFrameId,
+        m_bBoneFlags,
+        m_nAnimId,
+        m_nAnimGroupId,
+        false,
+        m_fPutDownHeightZ
+    );
 }

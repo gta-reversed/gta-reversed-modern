@@ -16,7 +16,7 @@ struct tScannerSlot {
     }
 
     // bad name?
-    bool IsNotInitialized() const {
+    [[nodiscard]] bool IsNotInitialized() const {
         return bankId < 0 || sfxId < 0;
     }
 
@@ -33,7 +33,7 @@ struct tScannerSlot {
     }
 };
 
-class CAEPoliceScannerAudioEntity : public CAEAudioEntity {
+class NOTSA_EXPORT_VTABLE CAEPoliceScannerAudioEntity : public CAEAudioEntity {
 public:
     enum State : int32 {
         STATE_INITIAL = 0,
@@ -52,13 +52,11 @@ public:
     static uint32&    s_nAbortPlaybackTime;
     static uint32&    s_nPlaybackStartTime;
     static int16&     s_nSectionPlaying;
-    static int32&     s_SlotState;
-    static int32&     dword_B61D18;
-    static int16&     word_B61D1C;
 
-    static tScannerSlot*& s_pCurrentSlots;
-    static tScannerSlot (&s_ScannerSlotSecond)[5];
-    static tScannerSlot (&s_ScannerSlotFirst)[5];
+    static int16         (&s_SlotState)[5];
+    static tScannerSlot* (&s_pCurrentSlots);
+    static tScannerSlot  (&s_ScannerSlotFirst)[5];
+    static tScannerSlot  (&s_ScannerSlotSecond)[5];
 
     static CAEPoliceScannerAudioEntity* s_pPSControlling;
     static State&                       s_nScannerPlaybackState;
@@ -84,7 +82,7 @@ public:
     static void FinishedPlayingScannerDialogue();
     void PlayLoadedDialogue();
 
-    static void PopulateScannerDialogueLists(tScannerSlot* first, tScannerSlot* second);
+    static void PopulateScannerDialogueLists(const tScannerSlot* first, const tScannerSlot* second);
     static bool CanWePlayNewScannerDialogue();
     void PlayPoliceScannerDialogue(tScannerSlot* first, tScannerSlot* second);
 

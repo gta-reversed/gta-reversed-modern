@@ -61,7 +61,7 @@ enum eEntityAltCollision : uint16 {
     ALT_ENITY_COL_BOAT,
 };
 
-class CPhysical : public CEntity {
+class NOTSA_EXPORT_VTABLE CPhysical : public CEntity {
 public:
     float  field_38;
     uint32 m_nLastCollisionTime;
@@ -90,7 +90,7 @@ public:
             uint32 bBulletProof : 1;
             uint32 bFireProof : 1;
             uint32 bCollisionProof : 1;
-            uint32 bMeeleProof : 1;
+            uint32 bMeleeProof : 1;
             uint32 bInvulnerable : 1;
             uint32 bExplosionProof : 1;
 
@@ -122,7 +122,7 @@ public:
     CPtrNodeDoubleLink* m_pMovingList;
     uint8               m_nFakePhysics;
     uint8               m_nNumEntitiesCollided;
-    uint8               m_nContactSurface;
+    eSurfaceType        m_nContactSurface;
     CEntity*            m_apCollidedEntities[6];
     float               m_fMovingSpeed; // ref @ CTheScripts::IsVehicleStopped
     float               m_fDamageIntensity;

@@ -10,8 +10,9 @@
 
 class CAEExplosionAudioEntity;
 
-enum eExplosionType : uint32 {
-    EXPLOSION_GRENADE,
+enum eExplosionType : int32 {
+    EXPLOSION_UNDEFINED = -1,
+    EXPLOSION_GRENADE = 0,
     EXPLOSION_MOLOTOV,
     EXPLOSION_ROCKET,
     EXPLOSION_WEAK_ROCKET,
@@ -30,6 +31,8 @@ class CEntity;
 
 class CExplosion {
 public:
+    static constexpr auto NUM_FUEL = 3;
+
     eExplosionType m_nType;
     CVector        m_vecPosition;
     float          m_fRadius{1.0f};
@@ -45,9 +48,9 @@ public:
     float          m_fVisibleDistance;
     float          m_fGroundZ;
     int32          m_nFuelTimer;
-    CVector        m_vecFuelDirection[3];
-    float          m_fFuelOffsetDistance[3];
-    float          m_fFuelSpeed[3];
+    CVector        m_vecFuelDirection[NUM_FUEL];
+    float          m_fFuelOffsetDistance[NUM_FUEL];
+    float          m_fFuelSpeed[NUM_FUEL];
 
     static CAEExplosionAudioEntity& m_ExplosionAudioEntity;
     static CExplosion (&aExplosions)[16];
@@ -59,14 +62,14 @@ public:
     static void Shutdown();
     static void ClearAllExplosions();
 
-    static int8 GetExplosionActiveCounter(uint8 id);
+    static uint8 GetExplosionActiveCounter(uint8 id);
     static void ResetExplosionActiveCounter(uint8 id);
     static bool DoesExplosionMakeSound(uint8 id);
     static int32 GetExplosionType(uint8 id);
     static const CVector& GetExplosionPosition(uint8 id);
 
     static bool TestForExplosionInArea(eExplosionType type, float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
-    static void RemoveAllExplosionsInArea(CVector pos, float r);
+    static void RemoveAllExplosionsInArea(CVector pos, float radius);
     static void AddExplosion(CEntity* victim, CEntity* creator, eExplosionType type, CVector pos, uint32 lifetime, uint8 usesSound, float cameraShake, uint8 isVisible);
     static void Update();
 

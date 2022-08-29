@@ -9,6 +9,7 @@
 #include "VehicleModelInfo.h"
 #include "CustomCarPlateMgr.h"
 #include "LoadingScreen.h"
+#include "CarFXRenderer.h"
 
 CVehicleModelInfo::CLinkedUpgradeList& CVehicleModelInfo::ms_linkedUpgrades = *(CVehicleModelInfo::CLinkedUpgradeList*)0xB4E6D8;
 RwTexture* &CVehicleModelInfo::ms_pRemapTexture = *(RwTexture**)0xB4E47C;
@@ -16,8 +17,6 @@ RwTexture* &CVehicleModelInfo::ms_pLightsTexture = *(RwTexture**)0xB4E68C;
 RwTexture* &CVehicleModelInfo::ms_pLightsOnTexture = *(RwTexture**)0xB4E690;
 uint8 (&CVehicleModelInfo::ms_currentCol)[NUM_CURRENT_COLORS] = *(uint8(*)[NUM_CURRENT_COLORS])0xB4E3F0;
 CRGBA (&CVehicleModelInfo::ms_vehicleColourTable)[NUM_VEHICLE_COLORS] = *(CRGBA(*)[NUM_VEHICLE_COLORS])0xB4E480;
-char (&CVehicleModelInfo::ms_compsUsed)[NUM_COMPS_USAGE] = *(char(*)[NUM_COMPS_USAGE])0xB4E478;
-char (&CVehicleModelInfo::ms_compsToUse)[NUM_COMPS_USAGE] = *(char(*)[NUM_COMPS_USAGE])0x8A6458;
 int16(&CVehicleModelInfo::ms_numWheelUpgrades)[NUM_WHEELS] = *(int16(*)[NUM_WHEELS])0xB4E470;
 int32 (&CVehicleModelInfo::ms_wheelFrameIDs)[NUM_WHEELS] = *(int32(*)[NUM_WHEELS])0x8A7770;
 int16(&CVehicleModelInfo::ms_upgradeWheels)[NUM_WHEEL_UPGRADES][NUM_WHEELS] = *(int16(*)[NUM_WHEEL_UPGRADES][NUM_WHEELS])0xB4E3F8;
@@ -601,7 +600,7 @@ void CVehicleModelInfo::PreprocessHierarchy()
             RwFrameForAllChildren(RpClumpGetFrame(m_pRwClump), CClumpModelInfo::FindFrameFromNameWithoutIdCB, &searchStruct);
             if (searchStruct.m_pFrame) {
                 if (flags.bIsDummy) {
-                    auto& vecDummyPos = *GetModelDummyPosition(static_cast<eVehicleDummies>(nameIdAssoc->m_dwHierarchyId));
+                    auto& vecDummyPos = *GetModelDummyPosition(static_cast<eVehicleDummy>(nameIdAssoc->m_dwHierarchyId));
                     vecDummyPos = *RwMatrixGetPos(RwFrameGetMatrix(searchStruct.m_pFrame));
                     auto parent = RwFrameGetParent(searchStruct.m_pFrame);
                     if (parent) {
@@ -768,7 +767,7 @@ int32 CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors(int32 mod
             break;
 
         if (mi->IsBike() || gHandlingDataMgr.GetVehiclePointer(mi->m_nHandlingId)->m_bTandemSeats) {
-            return mi->m_pVehicleStruct->IsDummyActive(eVehicleDummies::DUMMY_SEAT_REAR) ? 1 : 0;
+            return mi->m_pVehicleStruct->IsDummyActive(eVehicleDummy::DUMMY_SEAT_REAR) ? 1 : 0;
         }
         else {
             if (modelId == MODEL_RCBANDIT || modelId == MODEL_RCTIGER)
@@ -1264,16 +1263,12 @@ void CVehicleModelInfo::SetupCommonData()
     LoadEnvironmentMaps();
     CLoadingScreen::NewChunkLoaded();
 
-    auto iTxd = CTxdStore::FindTxdSlot("vehicle");
-    if (iTxd == -1)
-        iTxd = CTxdStore::AddTxdSlot("vehicle");
-
-    CTxdStore::LoadTxd(iTxd, "MODELS\\GENERIC\\VEHICLE.TXD");
-    CTxdStore::AddRef(iTxd);
-
-    if (iTxd != -1)
-        vehicleTxd = CTxdStore::ms_pTxdPool->GetAt(iTxd)->m_pRwDictionary;
-
+    auto slot = CTxdStore::FindOrAddTxdSlot("vehicle");
+    CTxdStore::LoadTxd(slot, "MODELS\\GENERIC\\VEHICLE.TXD");
+    CTxdStore::AddRef(slot);
+    if (slot != -1)
+        vehicleTxd = CTxdStore::ms_pTxdPool->GetAt(slot)->m_pRwDictionary;
+    assert(vehicleTxd);
     ms_pLightsTexture = RwTexDictionaryFindNamedTexture(vehicleTxd, "vehiclelights128");
     ms_pLightsOnTexture = RwTexDictionaryFindNamedTexture(vehicleTxd, "vehiclelightson128");
     CLoadingScreen::NewChunkLoaded();

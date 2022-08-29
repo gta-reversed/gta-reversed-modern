@@ -2,10 +2,10 @@
 
 #include "Event.h"
 
-class CEventInAir : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventInAir : public CEvent {
 public:
-    CEventInAir() {};
-    ~CEventInAir() {};
+    CEventInAir() = default;
+    ~CEventInAir() override = default;
 
     eEventType GetEventType() const override { return EVENT_IN_AIR; }
     int32 GetEventPriority() const override { return 61; }
@@ -22,13 +22,13 @@ private:
     bool AffectsPed_Reversed(CPed* ped);
 };
 
-class CEventStuckInAir : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventStuckInAir : public CEvent {
 public:
     CPed* m_ped;
 
 public:
     CEventStuckInAir(CPed* ped);
-    ~CEventStuckInAir();
+    ~CEventStuckInAir() override;
 
     eEventType GetEventType() const override { return EVENT_STUCK_IN_AIR; }
     int32 GetEventPriority() const override;

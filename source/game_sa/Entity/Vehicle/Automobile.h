@@ -15,7 +15,7 @@
 #include "eSurfaceType.h"
 #include "eCarWheel.h"
 #include "eCarNodes.h"
-enum class eSkidMarkType : uint32;
+enum class eSkidmarkType : uint32;
 
 class CVehicleModelInfo;
 
@@ -48,7 +48,7 @@ public:
     float m_fIntertiaValue1; //  m_anWheelSurfaceType[2]
     float m_fIntertiaValue2;
 
-    std::array<eSkidMarkType, 4> m_wheelSkidmarkType;       // 0x810
+    std::array<eSkidmarkType, 4> m_wheelSkidmarkType;       // 0x810
     std::array<bool,          4> m_wheelSkidmarkBloodState; // 0x820
     std::array<bool,          4> m_wheelSkidmarkMuddy;      // 0x824
     std::array<float,         4> m_wheelRotation;           // 0x828
@@ -62,7 +62,7 @@ public:
             float m_fHeliWheelSpeed4;
         };
     };
-    std::array<float, 4> m_wheelRotationUnused; // 0x858 - Passed to CVehicle::ProcessWheel as last 3rd parameter, but it's not used
+    std::array<float, 4> m_fWheelBurnoutSpeed; // 0x858 - Passed to CVehicle::ProcessWheel as last 3rd parameter, but it's not used
 
     struct {
         uint8 bTaxiLightOn : 1 { m_sAllTaxiLights };
@@ -74,7 +74,7 @@ public:
         uint8 bLostTraction : 1 ;
         uint8 bSoftSuspension : 1 ;
     } npcFlags;
-
+    int8   _align;
     bool   m_bDoingBurnout;                         // 0x86A
     uint16 m_wMiscComponentAngle;                   // 0x86C
     uint16 m_wMiscComponentAnglePrev;               // 0x86E
@@ -110,8 +110,7 @@ public:
     uint8 m_nNumContactWheels;
     uint8 m_nWheelsOnGround;
     uint8 m_wheelsOnGrounPrev;
-    char  field_963;
-    float m_fSomeGasPedalStuff;
+    float m_fGasPedalAudio; // [0; 1] adjusts the speed of playback of the skiding sound
 
     std::array<tWheelState, 4> m_aWheelState;
     std::array<FxSystem_c*, 2> m_exhaustNitroFxSystem;
@@ -158,7 +157,7 @@ public:
     bool IsDoorMissing(uint32 door) override;
     bool IsOpenTopCar() override;
     void RemoveRefsToVehicle(CEntity* entity) override;
-    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
+    void BlowUpCar(CEntity* damager, bool bHideExplosion) override;
     void BlowUpCarCutSceneNoExtras(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound) override;
     bool SetUpWheelColModel(CColModel* wheelCol) override;
     bool BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) override;
@@ -226,7 +225,7 @@ public:
     // Repair vehicle's door. "nodeIndex" is an index of component in m_modelNodes array
     void FixDoor(int32 nodeIndex, eDoors door);
     // Repair vehicle's panel. "nodeIndex" is an index of component in m_modelNodes array
-    void FixPanel(int32 nodeIndex, ePanels panel);
+    void FixPanel(eCarNodes nodeIndex, ePanels panel);
     // Enable/disable taxi light for taxi
     void SetTaxiLight(bool enable);
     // Enable taxi light for all taxis (CAutomobile::m_sAllTaxiLights = true;)
@@ -372,8 +371,6 @@ public:
         return false;
     }
 
-    bool IsRealHeli() { return !!(m_pHandlingData->m_nModelFlags & VEHICLE_HANDLING_MODEL_IS_HELI); }
-
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
@@ -415,7 +412,7 @@ private:
     bool IsDoorMissing_Reversed(uint32 door) { return CAutomobile::IsDoorMissing(door); }
     bool IsOpenTopCar_Reversed() { return CAutomobile::IsOpenTopCar(); }
     void RemoveRefsToVehicle_Reversed(CEntity* entity) { CAutomobile::RemoveRefsToVehicle(entity); }
-    void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) { CAutomobile::BlowUpCar(damager, bHideExplosion); }
+    void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) { CAutomobile::BlowUpCar(damager, bHideExplosion); }
     void BlowUpCarCutSceneNoExtras_Reversed(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound) { CAutomobile::BlowUpCarCutSceneNoExtras(bNoCamShake, bNoSpawnFlyingComps, bDetachWheels, bExplosionSound); }
     bool SetUpWheelColModel_Reversed(CColModel* wheelCol) { return CAutomobile::SetUpWheelColModel(wheelCol); }
     bool BurstTyre_Reversed(uint8 tyreComponentId, bool bPhysicalEffect) { return CAutomobile::BurstTyre(tyreComponentId, bPhysicalEffect); }
@@ -439,6 +436,12 @@ private:
 };
 
 VALIDATE_SIZE(CAutomobile, 0x988);
+VALIDATE_OFFSET(CAutomobile, m_damageManager, 0x5A0);
+VALIDATE_OFFSET(CAutomobile, m_wheelColPoint, 0x724);
+VALIDATE_OFFSET(CAutomobile, npcFlags, 0x868);
+VALIDATE_OFFSET(CAutomobile, m_bDoingBurnout, 0x86A);
+VALIDATE_OFFSET(CAutomobile, m_wMiscComponentAngle, 0x86C);
+VALIDATE_OFFSET(CAutomobile, m_fGasPedalAudio, 0x964);
 
 extern CColPoint *aAutomobileColPoints;
 

@@ -49,14 +49,85 @@ RwCamera* psCameraShowRaster(RwCamera* camera) {
     return RwCameraShowRaster(camera, PSGLOBAL(window), flags);
 }
 
+// our bug: Loading screens not displaying correctly when loading a game for the first time
 // 0x745270
 uint32 psTimer() {
+    return plugin::CallAndReturn<uint32, 0x745270>();
     return OS_TimeMS();
 }
 
 // 0x7452B0
 RwImage* psGrabScreen(RwCamera* camera) {
-    return plugin::CallAndReturn<RwImage*, 0x7452B0, RwCamera*>(camera);
+    auto* device = static_cast<IDirect3DDevice9*>(RwD3D9GetCurrentD3DDevice());
+    assert(device);
+
+    D3DDISPLAYMODE displayMode{};
+    VERIFY(SUCCEEDED(device->GetDisplayMode(0, &displayMode)));
+
+    IDirect3DSurface9* surface = nullptr;
+    VERIFY(SUCCEEDED(device->CreateOffscreenPlainSurface(displayMode.Width, displayMode.Height, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &surface, nullptr)));
+    VERIFY(SUCCEEDED(device->GetFrontBufferData(0, surface)));
+
+    D3DLOCKED_RECT lockedRect{};
+#ifndef FIX_BUGS
+    // It's not needed as ClientToScreen func works with fullscreen mode.
+    if (PSGLOBAL(fullScreen)) { // todo: Doesn't work properly with III.VC.SA.WindowedMode.asi
+        VERIFY(SUCCEEDED(surface->LockRect(&lockedRect, nullptr, D3DLOCK_READONLY)));
+    } else {
+#endif
+        RECT rect;
+#ifdef FIX_BUGS
+        // SA code gets the whole window of the game, which includes the titlebar etc.
+        //
+        // BUG: There should be bugs for older versions of Windows IIRC.
+        // One example would be Vista version of the func doesn't count Aero effects of windows.
+        //
+        // TODO: Test with dual monitors etc.
+
+        GetClientRect(PSGLOBAL(window), &rect);
+
+        // GetClientRect returns relative positions unlike GetWindowRect.
+        // i.e. will return { 0, 0, width, height }.
+        ClientToScreen(PSGLOBAL(window), (POINT*)(&rect)); // kinda hacky but should work.
+        rect.right += rect.left;
+        rect.bottom += rect.top;
+#else
+        GetWindowRect(PSGLOBAL(window), &rect);
+#endif
+        displayMode.Height = rect.bottom - rect.top;
+        displayMode.Width = rect.right - rect.left;
+        VERIFY(SUCCEEDED(surface->LockRect(&lockedRect, &rect, D3DLOCK_READONLY)));
+#ifndef FIX_BUGS
+    }
+#endif
+
+    RwImage* image = RwImageCreate(int32(displayMode.Width), int32(displayMode.Height), 32);
+    if (image) {
+        RwImageAllocatePixels(image);
+
+        auto* pixels = (RwRGBA*)RwImageGetPixels(image);
+        auto* imagePixels = (uint8*)lockedRect.pBits;
+        assert(pixels && imagePixels);
+
+        for (auto h = 0u; h < displayMode.Height; h++) {
+            for (auto w = 0u; w < displayMode.Width; w++) {
+                pixels->red   = imagePixels[sizeof(RwRGBA) * w + 2];
+                pixels->green = imagePixels[sizeof(RwRGBA) * w + 1];
+                pixels->blue  = imagePixels[sizeof(RwRGBA) * w + 0];
+                pixels->alpha = 255;
+                pixels++;
+            }
+            imagePixels += lockedRect.Pitch;
+        }
+    }
+
+    { // FIX_BUGS
+        surface->UnlockRect();
+        surface->Release();
+        delete surface;
+    }
+
+    return image;
 }
 
 // 0x7453E0

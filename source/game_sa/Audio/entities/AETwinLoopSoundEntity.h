@@ -18,25 +18,21 @@
 
 #include "AEAudioEntity.h"
 
-class CAETwinLoopSoundEntity : public CAEAudioEntity {
+class NOTSA_EXPORT_VTABLE CAETwinLoopSoundEntity : public CAEAudioEntity {
 public:
     int16           m_nBankSlotId;
     int16           m_nSoundId1;
     int16           m_nSoundId2;
-    // char            _pad1[2];
     CAEAudioEntity* m_pBaseAudio;
     int16           m_bIsInitialised;
     int16           unused_field_8A;
     int16           unused_field_8C;
     uint16          m_nPlayTimeMin;
     uint16          m_nPlayTimeMax;
-    // char            _pad2[2];
     uint32          m_nTimeToSwapSounds;
     bool            m_bPlayingFirstSound;
-    char            _pad3;
     int16           m_nSoundPlayStart1; // 0 - 99 percentage
     int16           m_nSoundPlayStart2; // 0 - 99 percentage
-    // char            _pad_field_9E[2];
     CAESound*       m_pSound1;
     CAESound*       m_pSound2;
 

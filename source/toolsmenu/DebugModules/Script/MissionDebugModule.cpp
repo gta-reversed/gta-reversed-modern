@@ -9,6 +9,7 @@
 #include "CDebugMenuToolInput.h"
 #include "EntryExitManager.h"
 #include "TheScripts.h"
+#include "Hud.h"
 
 namespace MissionDebugModule {
 

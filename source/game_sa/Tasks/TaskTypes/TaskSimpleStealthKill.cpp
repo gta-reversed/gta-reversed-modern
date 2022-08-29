@@ -171,7 +171,7 @@ void CTaskSimpleStealthKill::ManageAnim(CPed* ped)
     }
     else
     {
-        m_nTime += CTimer::GetTimeStepInMS();
+        m_nTime += (uint32)CTimer::GetTimeStepInMS();
         if (m_nTime > 10000)
             m_bIsAborting = true;
     }

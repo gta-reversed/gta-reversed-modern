@@ -15,13 +15,13 @@ CTaskSimplePickUpEntity::CTaskSimplePickUpEntity(CEntity* entityToHold, CVector*
     : CTaskSimpleHoldEntity(entityToHold, posn, boneFrameId, boneFlags, pAnimBlock, animHierarchy, animFlags)
 {
     m_fMovePedUntilAnimProgress = fMovePedUntilAnimProgress;
-} 
+}
 
 CTaskSimplePickUpEntity::CTaskSimplePickUpEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, AnimationId animId, AssocGroupId groupId, float fMovePedUntilAnimProgress)
     : CTaskSimpleHoldEntity(entityToHold, posn, boneFrameId, boneFlags, animId, groupId, false)
 {
     m_fMovePedUntilAnimProgress = fMovePedUntilAnimProgress;
-} 
+}
 
 // 0x691870
 CTaskSimplePickUpEntity* CTaskSimplePickUpEntity::Constructor(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags, float fMovePedUntilAnimProgress) {
@@ -53,21 +53,19 @@ CTask* CTaskSimplePickUpEntity::Clone_Reversed() {
             &m_vecPosition,
             m_nBoneFrameId,
             m_bBoneFlags,
-            m_pAnimBlock, 
+            m_pAnimBlock,
             m_pAnimBlendHierarchy,
             static_cast<eAnimationFlags>(m_animFlags),
             m_fMovePedUntilAnimProgress
         );
     }
-    else {
-        return new CTaskSimplePickUpEntity(
-            m_pEntityToHold,
-            &m_vecPosition,
-            m_nBoneFrameId,
-            m_bBoneFlags,
-            m_nAnimId,
-            m_nAnimGroupId, 
-            m_fMovePedUntilAnimProgress
-        );
-    }
+    return new CTaskSimplePickUpEntity(
+        m_pEntityToHold,
+        &m_vecPosition,
+        m_nBoneFrameId,
+        m_bBoneFlags,
+        m_nAnimId,
+        m_nAnimGroupId,
+        m_fMovePedUntilAnimProgress
+    );
 }

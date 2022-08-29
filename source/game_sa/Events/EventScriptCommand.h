@@ -4,7 +4,7 @@
 
 class CTask;
 
-class CEventScriptCommand : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventScriptCommand : public CEvent {
 public:
     int32  m_primaryTaskIndex;
     CTask* m_task;
@@ -12,7 +12,7 @@ public:
 
 public:
     CEventScriptCommand(int32 primaryTaskIndex, CTask* task, bool affectsDeadPeds);
-    ~CEventScriptCommand();
+    ~CEventScriptCommand() override;
 
     eEventType GetEventType() const override { return EVENT_SCRIPT_COMMAND; }
     int32 GetEventPriority() const override;

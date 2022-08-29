@@ -9,6 +9,8 @@
 
 #include "AtomicModelInfo.h"
 #include "TagManager.h"
+#include "CustomBuildingRenderer.h"
+#include "CarFXRenderer.h"
 
 void CAtomicModelInfo::InjectHooks()
 {
@@ -20,8 +22,8 @@ void CAtomicModelInfo::InjectHooks()
     RH_ScopedVirtualInstall(Init, 0x4C4430);
     RH_ScopedVirtualInstall(DeleteRwObject, 0x4C4440);
     RH_ScopedVirtualInstall(GetRwModelType, 0x4C5580);
-    RH_ScopedVirtualOverloadedInstall(CreateInstance, "void", 0x4C4530, RwObject * (CAtomicModelInfo::*)());
-    RH_ScopedVirtualOverloadedInstall(CreateInstance, "rwmat", 0x4C44D0, RwObject * (CAtomicModelInfo::*)(RwMatrix*));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(CreateInstance, "void", 0x4C4530, RwObject * (CAtomicModelInfo::*)());
+    // clang moment: RH_ScopedVirtualOverloadedInstall(CreateInstance, "rwmat", 0x4C44D0, RwObject * (CAtomicModelInfo::*)(RwMatrix*));
     RH_ScopedVirtualInstall(SetAtomic, 0x4C4360);
 
     RH_ScopedInstall(GetAtomicFromDistance, 0x4C44B0);

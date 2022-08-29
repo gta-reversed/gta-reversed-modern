@@ -3,7 +3,7 @@
 #include "Event.h"
 #include "Ped.h"
 
-class CEventPedToFlee : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventPedToFlee : public CEvent {
 public:
     CPed* m_ped;
 
@@ -16,14 +16,5 @@ public:
     int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override;
     bool AffectsPed(CPed* ped) override { return ped->IsAlive(); }
-
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
-    CEventPedToFlee* Constructor(CPed* ped);
-
-    CEvent* Clone_Reversed();
 };
-
 VALIDATE_SIZE(CEventPedToFlee, 0x10);

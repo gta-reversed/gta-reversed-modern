@@ -48,7 +48,7 @@ bool gRenderStencil() {
 
     // todo:
     const auto depth = RwRasterGetDepth(RwCameraGetRaster(Scene.m_pRwCamera));
-    if ( g_fx.GetFxQuality() < FXQUALITY_MEDIUM || depth < 32 )
+    if ( g_fx.GetFxQuality() < FX_QUALITY_MEDIUM || depth < 32 )
         return false;
 
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,             RWRSTATE(FALSE));
@@ -59,8 +59,8 @@ bool gRenderStencil() {
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,        RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATESRCBLEND,                 RWRSTATE(1u));
     RwRenderStateSet(rwRENDERSTATEDESTBLEND,                RWRSTATE(2u));
-    RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONMASK,      RWRSTATE(-1u)); // todo: check conversion to void* C4146
-    RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONWRITEMASK, RWRSTATE(-1u));
+    RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONMASK,      RWRSTATE(uint32(-1)));
+    RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONWRITEMASK, RWRSTATE(uint32(-1)));
     RwRenderStateSet(rwRENDERSTATESTENCILFUNCTION,          RWRSTATE(8u));
     RwRenderStateSet(rwRENDERSTATESTENCILFAIL,              RWRSTATE(1u));
     RwRenderStateSet(rwRENDERSTATESTENCILZFAIL,             RWRSTATE(1u));

@@ -20,14 +20,16 @@
 #include "TrafficLights.h"
 #include "Glass.h"
 #include "TheScripts.h"
+#include "Shadows.h"
+#include "CustomBuildingRenderer.h"
 
 void CEntity::InjectHooks()
 {
     RH_ScopedClass(CEntity);
     RH_ScopedCategory("Entity");
 
-    RH_ScopedVirtualOverloadedInstall(Add, "void", 0x533020, void(CEntity::*)());
-    RH_ScopedVirtualOverloadedInstall(Add, "rect", 0x5347D0, void(CEntity::*)(const CRect&));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(Add, "void", 0x533020, void(CEntity::*)());
+    // clang moment: RH_ScopedVirtualOverloadedInstall(Add, "rect", 0x5347D0, void(CEntity::*)(const CRect&));
     RH_ScopedVirtualInstall(Remove, 0x534AE0);
     RH_ScopedVirtualInstall(SetIsStatic, 0x403E20);
     RH_ScopedVirtualInstall(SetModelIndexNoCreate, 0x533700);
@@ -78,7 +80,7 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(UpdateAnim, 0x535F00);
     RH_ScopedInstall(IsVisible, 0x536BC0);
     RH_ScopedInstall(GetDistanceFromCentreOfMassToBaseOfModel, 0x536BE0);
-    RH_ScopedInstall(CleanUpOldReference, 0x571A00);
+    RH_ScopedOverloadedInstall(CleanUpOldReference, "", 0x571A00, void(CEntity::*)(CEntity**));
     RH_ScopedInstall(ResolveReferences, 0x571A40);
     RH_ScopedInstall(PruneReferences, 0x571A90);
     RH_ScopedOverloadedInstall(RegisterReference, "", 0x571B70, void(CEntity::*)(CEntity**));
@@ -91,12 +93,13 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(SetMaterialAlphaCB, 0x533280);
     RH_ScopedGlobalInstall(MaterialUpdateUVAnimCB, 0x532D70);
     RH_ScopedGlobalInstall(IsEntityPointerValid, 0x533310);
+
+    RH_ScopedGlobalInstall(IsGlassModel, 0x46A760);
 }
 
-CEntity::CEntity() : CPlaceable()
-{
-    m_nStatus = eEntityStatus::STATUS_PLAYER;
-    m_nType = ENTITY_TYPE_BUILDING;
+CEntity::CEntity() : CPlaceable() {
+    m_nStatus = STATUS_ABANDONED;
+    m_nType = ENTITY_TYPE_NOTHING;
 
     m_nFlags = 0;
     m_bIsVisible = true;
@@ -107,7 +110,7 @@ CEntity::CEntity() : CPlaceable()
     m_nModelIndex = 0xFFFF;
     m_pRwObject = nullptr;
     m_nIplIndex = 0;
-    m_nRandomSeed = rand();
+    m_nRandomSeed = CGeneral::GetRandomNumber();
     m_pReferences = nullptr;
     m_pStreamingLink = nullptr;
     m_nNumLodChildren = 0;
@@ -148,17 +151,17 @@ void CEntity::Add_Reversed(const CRect& rect)
     if (usedRect.right >= 3000.0F)
         usedRect.right = 2999.0F;
 
-    if (usedRect.top < -3000.0F)
-        usedRect.top = -3000.0F;
+    if (usedRect.bottom < -3000.0F)
+        usedRect.bottom = -3000.0F;
 
-    if (usedRect.bottom >= 3000.0F)
-        usedRect.bottom = 2999.0F;
+    if (usedRect.top >= 3000.0F)
+        usedRect.top = 2999.0F;
 
     if (m_bIsBIGBuilding) {
         int32 startSectorX = CWorld::GetLodSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetLodSectorY(usedRect.top);
+        int32 startSectorY = CWorld::GetLodSectorY(usedRect.bottom);
         int32 endSectorX = CWorld::GetLodSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetLodSectorY(usedRect.bottom);
+        int32 endSectorY = CWorld::GetLodSectorY(usedRect.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 auto& pLodListEntry = CWorld::GetLodPtrList(sectorX, sectorY);
@@ -168,9 +171,9 @@ void CEntity::Add_Reversed(const CRect& rect)
     }
     else {
         int32 startSectorX = CWorld::GetSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetSectorY(usedRect.top);
+        int32 startSectorY = CWorld::GetSectorY(usedRect.bottom);
         int32 endSectorX = CWorld::GetSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetSectorY(usedRect.bottom);
+        int32 endSectorY = CWorld::GetSectorY(usedRect.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 CPtrListDoubleLink* list = nullptr;
@@ -219,17 +222,17 @@ void CEntity::Remove_Reversed()
     if (usedRect.right >= 3000.0F)
         usedRect.right = 2999.0F;
 
-    if (usedRect.top < -3000.0F)
-        usedRect.top = -3000.0F;
+    if (usedRect.bottom < -3000.0F)
+        usedRect.bottom = -3000.0F;
 
-    if (usedRect.bottom >= 3000.0F)
-        usedRect.bottom = 2999.0F;
+    if (usedRect.top >= 3000.0F)
+        usedRect.top = 2999.0F;
 
     if (m_bIsBIGBuilding) {
         int32 startSectorX = CWorld::GetLodSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetLodSectorY(usedRect.top);
+        int32 startSectorY = CWorld::GetLodSectorY(usedRect.bottom);
         int32 endSectorX = CWorld::GetLodSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetLodSectorY(usedRect.bottom);
+        int32 endSectorY = CWorld::GetLodSectorY(usedRect.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 auto& list = CWorld::GetLodPtrList(sectorX, sectorY);
@@ -239,9 +242,9 @@ void CEntity::Remove_Reversed()
     }
     else {
         int32 startSectorX = CWorld::GetSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetSectorY(usedRect.top);
+        int32 startSectorY = CWorld::GetSectorY(usedRect.bottom);
         int32 endSectorX = CWorld::GetSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetSectorY(usedRect.bottom);
+        int32 endSectorY = CWorld::GetSectorY(usedRect.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 CPtrListDoubleLink* list = nullptr;
@@ -546,12 +549,14 @@ void CEntity::PreRender_Reversed()
 
         mi->IncreaseAlpha();
 
+        // PC Only
         if (ami) {
             CCustomBuildingDNPipeline::PreRenderUpdate(ami->m_pRwAtomic, false);
         }
         else if (mi->GetModelType() == MODEL_INFO_CLUMP) {
             RpClumpForAllAtomics(mi->m_pRwClump, CCustomBuildingDNPipeline::PreRenderUpdateRpAtomicCB, reinterpret_cast<void*>(false));
         }
+        // PC Only
     }
 
     if (!m_bHasPreRenderEffects)
@@ -561,9 +566,7 @@ void CEntity::PreRender_Reversed()
         && ami->SwaysInWind()
         && (!IsObject() || !AsObject()->objectFlags.bIsExploded)
     ) {
-        auto vecCamPos = CVector2D(TheCamera.GetPosition());
-        auto vecEntPos = CVector2D(GetPosition());
-        auto fDist = DistanceBetweenPoints2D(vecCamPos, vecEntPos);
+        auto fDist = DistanceBetweenPoints2D(GetPosition(), TheCamera.GetPosition());
         CObject::fDistToNearestTree = std::min(CObject::fDistToNearestTree, fDist);
         ModifyMatrixForTreeInWind();
     }
@@ -603,7 +606,7 @@ void CEntity::PreRender_Reversed()
         else if (m_nModelIndex == MODEL_MISSILE) {
             if (CReplay::Mode != MODE_PLAYBACK) {
                 CVector vecPos = GetPosition();
-                auto fRand = static_cast<float>(rand() % 16) / 16.0F;
+                auto fRand = static_cast<float>(CGeneral::GetRandomNumber() % 16) / 16.0F;
                 CShadows::StoreShadowToBeRendered(
                     eShadowTextureType::SHADOW_TEX_PED,
                     gpShadowExplosionTex,
@@ -663,7 +666,7 @@ void CEntity::PreRender_Reversed()
         }
         else if (m_nModelIndex == ModelIndices::MI_FLARE) {
             CVector vecPos = GetPosition();
-            auto fRand = static_cast<float>(rand() % 16) / 16.0F;
+            auto fRand = static_cast<float>(CGeneral::GetRandomNumber() % 16) / 16.0F;
             fRand = std::max(fRand, 0.5F);
             CShadows::StoreShadowToBeRendered(
                 eShadowTextureType::SHADOW_TEX_PED,
@@ -1098,15 +1101,15 @@ bool IsEntityPointerValid(CEntity* entity)
 
     switch (entity->m_nType) {
     case ENTITY_TYPE_BUILDING:
-        return IsBuildingPointerValid(reinterpret_cast<CBuilding*>(entity));
+        return IsBuildingPointerValid(entity->AsBuilding());
     case ENTITY_TYPE_VEHICLE:
-        return IsVehiclePointerValid(reinterpret_cast<CVehicle*>(entity));
+        return IsVehiclePointerValid(entity->AsVehicle());
     case ENTITY_TYPE_PED:
         return IsPedPointerValid(entity->AsPed());
     case ENTITY_TYPE_OBJECT:
-        return IsObjectPointerValid(reinterpret_cast<CObject*>(entity));
+        return IsObjectPointerValid(entity->AsObject());
     case ENTITY_TYPE_DUMMY:
-        return IsDummyPointerValid(reinterpret_cast<CDummy*>(entity));
+        return IsDummyPointerValid(entity->AsDummy());
     case ENTITY_TYPE_NOTINPOOLS:
         return true;
     }
@@ -1604,12 +1607,15 @@ RwMatrix* CEntity::GetModellingMatrix() {
 }
 
 // 0x535300
-CColModel* CEntity::GetColModel()
-{
-    if (IsVehicle() && AsVehicle()->m_vehicleSpecialColIndex > -1)
-        return &CVehicle::m_aSpecialColModel[AsVehicle()->m_vehicleSpecialColIndex];
-    else
-        return CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
+CColModel* CEntity::GetColModel() const {
+    if (IsVehicle()) {
+        const auto veh = static_cast<const CVehicle*>(this);
+        if (veh->m_vehicleSpecialColIndex > -1) {
+            return &CVehicle::m_aSpecialColModel[veh->m_vehicleSpecialColIndex];
+        }
+    }
+    
+    return CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
 }
 
 // 0x535340
@@ -2177,7 +2183,7 @@ void CEntity::ProcessLightsForEntity()
                 bSkipCoronaChecks = true;
                 auto fBrightness = fIntensity;
                 if (effect->light.m_bBlinking1)
-                    fBrightness = (1.0F - (rand() % 32) * 0.012F) * fIntensity;
+                    fBrightness = (1.0F - (CGeneral::GetRandomNumber() % 32) * 0.012F) * fIntensity;
 
                 if (effect->light.m_bBlinking2 && (CTimer::GetFrameCounter() + uiRand) & 3)
                     fBrightness = 0.0F;
@@ -2446,8 +2452,8 @@ bool CEntity::IsEntityOccluded()
             auto vecMin = GetMatrix() * bounding.m_vecMin;
             if (!CalcScreenCoors(vecMin, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
-                || !activeOccluder.IsPointBehindOccluder(vecMin, 0.0F)) {
-
+                || !activeOccluder.IsPointBehindOccluder(vecMin, 0.0F)
+            ) {
                 bInView = true;
             }
 
@@ -2455,8 +2461,8 @@ bool CEntity::IsEntityOccluded()
             if (bInView
                 || !CalcScreenCoors(vecMax, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
-                || !activeOccluder.IsPointBehindOccluder(vecMax, 0.0F)) {
-
+                || !activeOccluder.IsPointBehindOccluder(vecMax, 0.0F)
+            ) {
                 bInView = true;
             }
 
@@ -2464,8 +2470,8 @@ bool CEntity::IsEntityOccluded()
             if (bInView
                 || !CalcScreenCoors(vecDiag1, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
-                || !activeOccluder.IsPointBehindOccluder(vecDiag1, 0.0F)) {
-
+                || !activeOccluder.IsPointBehindOccluder(vecDiag1, 0.0F)
+            ) {
                 bInView = true;
             }
 
@@ -2473,15 +2479,15 @@ bool CEntity::IsEntityOccluded()
             if (!bInView
                 && CalcScreenCoors(vecDiag2, &vecScreen)
                 && activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
-                && activeOccluder.IsPointBehindOccluder(vecDiag2, 0.0F)) {
-
-                if (bounding.m_vecMax.x - bounding.m_vecMin.x <= 60.0F)
+                && activeOccluder.IsPointBehindOccluder(vecDiag2, 0.0F)
+            ) {
+                if (bounding.GetWidth() <= 60.0F)
                     return true;
 
-                if (bounding.m_vecMax.y - bounding.m_vecMin.y <= 60.0F)
+                if (bounding.GetLength() <= 60.0F)
                     return true;
 
-                if (bounding.m_vecMax.z - bounding.m_vecMin.z <= 30.0F)
+                if (bounding.GetHeight() <= 30.0F)
                     return true;
 
                 auto vecDiag3 = GetMatrix() * CVector(bounding.m_vecMin.x, bounding.m_vecMin.y, bounding.m_vecMax.z);
@@ -2496,8 +2502,8 @@ bool CEntity::IsEntityOccluded()
                 if (!bInView
                     && CalcScreenCoors(vecDiag4, &vecScreen)
                     && activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
-                    && activeOccluder.IsPointBehindOccluder(vecDiag4, 0.0F)) {
-
+                    && activeOccluder.IsPointBehindOccluder(vecDiag4, 0.0F)
+                ) {
                     return true;
                 }
             }
@@ -2554,4 +2560,16 @@ bool CEntity::IsScanCodeCurrent() const {
 
 void CEntity::SetCurrentScanCode() {
     m_nScanCode = GetCurrentScanCode();
+}
+
+// 0x46A760
+bool IsGlassModel(CEntity* entity) {
+    if (!entity->IsObject())
+        return false;
+
+    auto mi = CModelInfo::GetModelInfo(entity->m_nModelIndex);
+    if (!mi->AsAtomicModelInfoPtr())
+        return false;
+
+    return mi->IsGlass();
 }

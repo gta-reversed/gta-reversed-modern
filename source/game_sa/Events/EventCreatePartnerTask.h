@@ -2,7 +2,7 @@
 
 #include "Event.h"
 
-class CEventCreatePartnerTask : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventCreatePartnerTask : public CEvent {
 public:
     int32 m_randomNumber;
     CPed* m_partner;
@@ -18,13 +18,5 @@ public:
     int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override { return new CEventCreatePartnerTask(m_randomNumber, m_partner, m_leadSpeaker, m_distanceMultiplier); }
     bool AffectsPed(CPed* ped) override { return true; }
-
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
-    CEventCreatePartnerTask* Constructor(int32 randomNumber, CPed* partner, bool leadSpeaker, float distanceMultiplier);
-
 };
-
 VALIDATE_SIZE(CEventCreatePartnerTask, 0x1C);

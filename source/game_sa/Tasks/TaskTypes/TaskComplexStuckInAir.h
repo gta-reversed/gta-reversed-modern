@@ -1,5 +1,7 @@
 #pragma once
 
+#include "TaskComplex.h"
+
 class CTaskComplexStuckInAir : public CTaskComplex {
 public:
     static constexpr auto Type = TASK_COMPLEX_STUCK_IN_AIR;
@@ -7,7 +9,7 @@ public:
     CTaskComplexStuckInAir() = default;           // 0x67BA40
     ~CTaskComplexStuckInAir() override = default; // 0x67BA70
 
-    eTaskType GetTaskType() override { return TASK_COMPLEX_STUCK_IN_AIR; } // 0x67BA60
+    eTaskType GetTaskType() override { return Type; } // 0x67BA60
     CTask* Clone() override { return new CTaskComplexStuckInAir(); }       // 0x67C700
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

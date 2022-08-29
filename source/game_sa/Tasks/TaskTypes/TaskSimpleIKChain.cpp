@@ -45,8 +45,7 @@ CTaskSimpleIKChain::~CTaskSimpleIKChain() {
 }
 
 // 0x633B00
-CTaskSimpleIKChain* CTaskSimpleIKChain::Clone() {
-
+CTask* CTaskSimpleIKChain::Clone() {
     auto* task = new CTaskSimpleIKChain("", m_nEffectorBoneTag, m_vecEffectorVec, m_nPivotBoneTag, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, m_fSpeed, m_nTime, m_nBlendTime);
     if (m_pIKChain) {
         task->m_fBlend       = m_fBlend;
@@ -128,7 +127,7 @@ bool CTaskSimpleIKChain::ProcessPed(CPed* ped) {
 
     // 0x633D98
     if ((int32)CTimer::GetTimeInMS() <= m_nTargetTime) {
-        m_fBlend += (m_fTargetBlend - m_fBlend) * std::min(1.f, (float)CTimer::GetTimeStepInMS() / (float)(m_nTargetTime - CTimer::GetTimeStepInMS() - CTimer::GetTimeInMS()));
+        m_fBlend += (m_fTargetBlend - m_fBlend) * std::min(1.0f, CTimer::GetTimeStepInMS() / (float)(m_nTargetTime - CTimer::GetTimeStepInMS() - CTimer::GetTimeInMS()));
     } else {
         m_fBlend = m_fTargetBlend;
     }

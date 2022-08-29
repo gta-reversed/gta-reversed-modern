@@ -26,10 +26,10 @@ void CStreamingInfo::Init() {
     m_nCdPosn = 0;
 }
 
-// 0x407480
 // Used to adding `info` to a linked list
 // This is done with the help of `m_nNextIndex` and `m_nPrevIndex`
 // which are just `indices` into `ms_aInfoForModel`.
+// 0x407480
 void CStreamingInfo::AddToList(CStreamingInfo* listStart) {
     m_nNextIndex = listStart->m_nNextIndex;
     m_nPrevIndex = static_cast<ptrdiff_t>(listStart - ms_pArrayBase);
@@ -38,18 +38,18 @@ void CStreamingInfo::AddToList(CStreamingInfo* listStart) {
 }
 
 // 0x407570
-uint32 CStreamingInfo::GetCdPosn() {
+size_t CStreamingInfo::GetCdPosn() const {
     return m_nCdPosn + CStreaming::ms_files[m_nImgId].m_StreamHandle;
 }
 
 // 0x4075E0
-void CStreamingInfo::SetCdPosnAndSize(uint32 CdPosn, uint32 CdSize) {
+void CStreamingInfo::SetCdPosnAndSize(size_t CdPosn, size_t CdSize) {
     m_nCdPosn = CdPosn;
     m_nCdSize = CdSize;
 }
 
 // 0x4075A0
-bool CStreamingInfo::GetCdPosnAndSize(uint32& CdPosn, uint32& CdSize) {
+bool CStreamingInfo::GetCdPosnAndSize(size_t& CdPosn, size_t& CdSize) {
     if (!HasCdPosnAndSize())
         return false;
     CdPosn = GetCdPosn();
@@ -58,7 +58,7 @@ bool CStreamingInfo::GetCdPosnAndSize(uint32& CdPosn, uint32& CdSize) {
 }
 
 // 0x407560
-bool CStreamingInfo::InList() {
+bool CStreamingInfo::InList() const {
     return m_nNextIndex != -1;
 }
 

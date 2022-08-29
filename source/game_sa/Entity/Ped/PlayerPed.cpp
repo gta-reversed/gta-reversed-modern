@@ -15,6 +15,10 @@ bool (&abTempNeverLeavesGroup)[7] = *(bool (*)[7])0xC0BC08;
 int32& gPlayIdlesAnimBlockIndex = *(int32*)0xC0BC10;
 bool& CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText = *(bool*)0xC0BC15;
 
+bool CPlayerPed::bDebugPlayerInvincible;
+bool CPlayerPed::bDebugTargeting;
+bool CPlayerPed::bDebugTapToTarget;
+
 void CPlayerPed::InjectHooks() {
     RH_ScopedClass(CPlayerPed);
     RH_ScopedCategory("Entity/Ped");
@@ -126,7 +130,7 @@ CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(PED_TYPE_PLAYE
     m_pPlayerData = &CWorld::Players[playerId].m_PlayerData;
     m_pPlayerData->AllocateData();
 
-    SetModelIndex(MODEL_PLAYER);
+    SetModelIndex(MODEL_PLAYER); // V1053 Calling the 'SetModelIndex' virtual function in the constructor may lead to unexpected result at runtime
 
     CPlayerPed::SetInitialState(bGroupCreated);
 
@@ -196,7 +200,7 @@ void CPlayerPed::ReactivatePlayerPed(int32 playerId) {
 }
 
 // 0x609560
-CPad* CPlayerPed::GetPadFromPlayer() {
+CPad* CPlayerPed::GetPadFromPlayer() const {
     switch (m_nPedType) {
     case PED_TYPE_PLAYER1:
         return CPad::GetPad(0);
@@ -257,7 +261,7 @@ void CPlayerPed::ReApplyMoveAnims() {
                 addedAnim->m_fBlendDelta = anim->m_fBlendDelta;
                 addedAnim->m_fBlendAmount = anim->m_fBlendAmount;
 
-                anim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
+                anim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
                 anim->m_fBlendDelta = -1000.0f;
             }
         }
@@ -484,7 +488,7 @@ bool CPlayerPed::CanIKReachThisTarget(CVector posn, CWeapon* weapon, bool arg2) 
 
 // 0x609FF0
 CPlayerInfo* CPlayerPed::GetPlayerInfoForThisPlayerPed() {
-    // TODO: Use range for here 
+    // TODO: Use range for here
     for (int i = 0; i < MAX_PLAYERS; i++) {
         if (FindPlayerPed(i) == this)
             return &FindPlayerInfo(i);
@@ -514,17 +518,15 @@ void CPlayerPed::AnnoyPlayerPed(bool arg0) {
 
 // 0x60A070
 void CPlayerPed::ClearAdrenaline() {
-    if (m_pPlayerData->m_bAdrenaline) {
-        if (m_pPlayerData->m_nAdrenalineEndTime) {
-            m_pPlayerData->m_nAdrenalineEndTime = 0;
-            CTimer::ResetTimeScale();
-        }
+    if (m_pPlayerData->m_bAdrenaline && m_pPlayerData->m_nAdrenalineEndTime != 0) {
+        m_pPlayerData->m_nAdrenalineEndTime = 0;
+        CTimer::ResetTimeScale();
     }
 }
 
 // 0x60A0A0
 void CPlayerPed::DisbandPlayerGroup() {
-    CPedGroupMembership& membership = GetGroupMembership();
+    CPedGroupMembership& membership = GetPlayerGroup().GetMembership();
     const uint32 nMembers = membership.CountMembersExcludingLeader();
     if (nMembers > 0)
         Say(nMembers > 1 ? 149 : 150);
@@ -534,7 +536,7 @@ void CPlayerPed::DisbandPlayerGroup() {
 
 // 0x60A110
 void CPlayerPed::MakeGroupRespondToPlayerTakingDamage(CEventDamage& damageEvent) {
-    auto& group = GetGroup();
+    auto& group = GetPlayerGroup();
     if (!damageEvent.m_pSourceEntity)
         return;
     if (group.GetMembership().CountMembersExcludingLeader() < 1)
@@ -553,7 +555,7 @@ void CPlayerPed::TellGroupToStartFollowingPlayer(bool arg0, bool arg1, bool arg2
     if (m_pPlayerData->m_bGroupNeverFollow && arg0)
         return;
 
-    CPedGroup& group = GetGroup();
+    CPedGroup& group = GetPlayerGroup();
     CPedGroupIntelligence& groupIntel = group.GetIntelligence();
     CPedGroupMembership& membership = group.GetMembership();
     if (!arg2 && !membership.CountMembersExcludingLeader())
@@ -601,7 +603,7 @@ void CPlayerPed::TellGroupToStartFollowingPlayer(bool arg0, bool arg1, bool arg2
 
 // 0x60A440
 void CPlayerPed::MakePlayerGroupDisappear() {
-    CPedGroupMembership& membership = GetGroupMembership();
+    CPedGroupMembership& membership = GetPlayerGroup().GetMembership();
     for (int i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
         if (CPed* member = membership.GetMember(i)) {
             if (!member->IsCreatedByMission()) {
@@ -616,7 +618,7 @@ void CPlayerPed::MakePlayerGroupDisappear() {
 
 // 0x60A4B0
 void CPlayerPed::MakePlayerGroupReappear() {
-    CPedGroupMembership& membership = GetGroupMembership();
+    CPedGroupMembership& membership = GetPlayerGroup().GetMembership();
     for (int i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
         if (CPed* member = membership.GetMember(i)) {
             if (!member->IsCreatedByMission()) {
@@ -685,7 +687,7 @@ float CPlayerPed::GetButtonSprintResults(eSprintType sprintType) {
     return plugin::CallMethodAndReturn<float, 0x60A820, CPlayerPed *, eSprintType>(this, sprintType);
 
     // Forces the compiler to preserve the value of `edx`.
-    // Otherwise it's value is lost when called from 0x60B44C. 
+    // Otherwise it's value is lost when called from 0x60B44C.
     // which causes a crash (as it is used to store a pointer to an anim blend assoc)
     __asm { and edx, edx };
 
@@ -708,13 +710,15 @@ void CPlayerPed::HandlePlayerBreath(bool bDecreaseAir, float fMultiplier) {
     float& breath = m_pPlayerData->m_fBreath;
     float  decreaseAmount = CTimer::GetTimeStep() * fMultiplier;
     if (!bDecreaseAir || CCheat::IsActive(CHEAT_INFINITE_OXYGEN)) {
-        breath += decreaseAmount * 2.0f;
+        if (CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) > breath)
+            breath += decreaseAmount * 2.0f;
     } else {
         if (breath > 0.0f && bDrownsInWater)
             breath = std::max(0.0f, breath - decreaseAmount);
         else
             CWeapon::GenerateDamageEvent(this, this, eWeaponType::WEAPON_DROWNING, (int32)(decreaseAmount * 3.0f), PED_PIECE_TORSO, 0);
     }
+    m_pPlayerData->m_bRequireHandleBreath = false;
 }
 
 // 0x60A9C0
@@ -746,7 +750,7 @@ void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
 
 
     if (auto anim = RpAnimBlendClumpGetAssociation(m_pRwClump, ANIM_ID_FIRE))
-        anim->m_nFlags |= ANIM_FLAG_STARTED & ANIM_FLAG_UNLOCK_LAST_FRAME;
+        anim->m_nFlags |= ANIMATION_STARTED & ANIMATION_UNLOCK_LAST_FRAME;
 
     TheCamera.ClearPlayerWeaponMode();
 }
@@ -850,7 +854,7 @@ CPed* CPlayerPed::FindPedToAttack() {
     CPed* closestPed{};
     float closestDistance = std::numeric_limits<float>::max();
 
-    CPedGroupMembership& membership = GetGroupMembership();
+    CPedGroupMembership& membership = GetPlayerGroup().GetMembership();
     for (int i = 0; GetPedPool()->GetSize(); i++) {
         CPed* ped = GetPedPool()->GetAt(i);
         if (!ped)

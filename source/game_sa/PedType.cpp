@@ -3,6 +3,7 @@
 #include "PedType.h"
 
 CAcquaintance*& CPedType::ms_apPedTypes = *(CAcquaintance**)0xC0BBE8;
+CAcquaintance* CPedType::ms_apPedTypesOld = {}; // NOTSA
 
 void CPedType::InjectHooks() {
     RH_ScopedClass(CPedType);
@@ -26,12 +27,14 @@ void CPedType::InjectHooks() {
 // 0x608E40
 void CPedType::Initialise() {
     ms_apPedTypes = new CAcquaintance[PED_TYPE_COUNT]();
+    ms_apPedTypesOld = new CAcquaintance[PED_TYPE_COUNT](); // NOTSA
     LoadPedData();
 }
 
 // 0x608B00
 void CPedType::Shutdown() {
     delete[] ms_apPedTypes;
+    delete[] ms_apPedTypesOld; // NOTSA
 }
 
 // 0x608B30
@@ -118,11 +121,12 @@ ePedType CPedType::FindPedType(const char* pedTypeName) {
 }
 
 // 0x608830
+// TODO: Stuff related to this should use `size_t`'s
 uint32 CPedType::GetPedFlag(ePedType pedType) {
-    if (pedType >= PED_TYPE_MISSION8) {
-        return PED_TYPE_PLAYER1;
+    if ((size_t)pedType < (sizeof(uint32) * 8)) { // Make sure we aren't shifting more than 31 bits, otherwise it's U.B.
+        return 1 << (size_t)pedType;
     } else {
-        return PED_TYPE_PLAYER2 << pedType;
+        return 0;
     }
 }
 

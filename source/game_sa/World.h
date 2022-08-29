@@ -30,12 +30,11 @@ constexpr int32 MAX_LOD_PTR_LISTS_X = 30;
 constexpr int32 MAX_LOD_PTR_LISTS_Y = 30;
 constexpr int32 MAX_LOD_PTR_LISTS = MAX_LOD_PTR_LISTS_X * MAX_LOD_PTR_LISTS_Y;
 
-const CRect WORLD_BOUNDS{ -3000.0F, -3000.0F, 3000.0F, 3000.0F };
+constexpr inline CRect WORLD_BOUNDS{-3000.0F, -3000.0F, 3000.0F, 3000.0F};
 constexpr float MAP_Z_LOW_LIMIT = -100.0f;
 
 class CWorld {
 public:
-    static int32 TOTAL_PLAYERS;
     static int32& ms_iProcessLineNumCrossings;
     static float& fWeaponSpreadRate;
     // entity to ignore
@@ -66,10 +65,12 @@ public:
 
     static void InjectHooks();
 
-    static void ResetLineTestOptions();
     static void Initialise();
+    static void ShutDown();
+    static void ClearForRestart();
     static void Add(CEntity* entity);
     static void Remove(CEntity* entity);
+    static void ResetLineTestOptions();
     static bool ProcessVerticalLineSectorList(CPtrList& ptrList, const CColLine& colLine, CColPoint& colPoint, float& maxTouchDistance, CEntity*& outEntity, bool doSeeThroughCheck, CStoredCollPoly* collPoly);
     static void CastShadowSectorList(CPtrList& ptrList, float arg1, float arg2, float arg3, float arg4);
     static void ProcessForAnimViewer();
@@ -82,17 +83,12 @@ public:
     static void TestForBuildingsOnTopOfEachOther(CPtrList& ptrList);
     static void TestForUnusedModels(CPtrList& ptrList, int32* models);
     static void RemoveEntityInsteadOfProcessingIt(CEntity* entity);
-    static void CallOffChaseForAreaSectorListVehicles(CPtrList& ptrList, float x1, float y1, float x2, float y2, float arg5, float arg6, float arg7, float arg8);
+    static void CallOffChaseForAreaSectorListVehicles(CPtrList& ptrList, float x1, float y1, float x2, float y2, float minX, float minY, float maxX, float maxY);
     static void CallOffChaseForAreaSectorListPeds(CPtrList& ptrList, float x1, float y1, float x2, float y2, float minX, float minY, float maxX, float maxY);
     static bool CameraToIgnoreThisObject(CEntity* entity);
-    // returns player ID (0 or 1), -1 - not found
     static int32 FindPlayerSlotWithPedPointer(void* ptr);
-    // returns player ID (0 or 1), -1 - not found
     static int32 FindPlayerSlotWithRemoteVehiclePointer(void* ptr);
-    // returns player ID (0 or 1), -1 - not found
     static int32 FindPlayerSlotWithVehiclePointer(CEntity* vehiclePtr);
-    static void ShutDown();
-    static void ClearForRestart();
     static bool ProcessVerticalLineSector_FillGlobeColPoints(CSector& sector, CRepeatSector& repeatSector, const CColLine& colLine, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly);
     static bool ProcessVerticalLineSector(CSector& sector, CRepeatSector& repeatSector, const CColLine& colLine, CColPoint& outColPoint, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly);
     static void CastShadow(float x1, float y1, float x2, float y2);
@@ -114,7 +110,7 @@ public:
     static void RemoveFallenPeds();
     static void RemoveFallenCars();
     static void UseDetonator(CPed* creator);
-    // returns entity
+    static CEntity* TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius, CEntity* ignoreEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doCameraIgnoreCheck);
     static CEntity* TestSphereAgainstSectorList(CPtrList& ptrList, CVector sphereCenter, float sphereRadius, CEntity* ignoreEntity, bool doCameraIgnoreCheck);
     static void PrintCarChanges();
     static void TestForBuildingsOnTopOfEachOther();
@@ -128,7 +124,7 @@ public:
     static CVehicle* FindUnsuspectingTargetCar(CVector point, CVector playerPosn);
     static CPed* FindUnsuspectingTargetPed(CVector point, CVector playerPosn);
     static bool ProcessLineOfSightSectorList(CPtrList& ptrList, const CColLine& colLine, CColPoint& outColPoint, float& minTouchDistance, CEntity*& outEntity, bool doSeeThroughCheck, bool doIgnoreCameraCheck, bool doShootThroughCheck);
-    static bool ProcessVerticalLine(const CVector& origin, float distance, CColPoint& outColPoint, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly);
+    static bool ProcessVerticalLine(const CVector& origin, float distance, CColPoint& outColPoint, CEntity*& outEntity, bool buildings = false, bool vehicles = false, bool peds = false, bool objects = false, bool dummies = false, bool doSeeThroughCheck = false, CStoredCollPoly* outCollPoly = nullptr);
     static bool ProcessVerticalLine_FillGlobeColPoints(const CVector& origin, float distance, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly);
     static void TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point, float radius, float visibleDistance, CEntity* victim, CEntity* creator, bool processVehicleBombTimer, float damage);
     static void Process();
@@ -139,12 +135,10 @@ public:
     static void FindMissionEntitiesIntersectingCube(const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehicles, bool peds, bool objects);
     static CEntity* FindNearestObjectOfType(int32 modelId, const CVector& point, float radius, bool b2D, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
     static float FindGroundZForCoord(float x, float y);
-    static float FindGroundZFor3DCoord(float x, float y, float z, bool* outResult, CEntity** outEntity);
+    static float FindGroundZFor3DCoord(CVector coord, bool* outResult, CEntity** outEntity);
     static float FindRoofZFor3DCoord(float x, float y, float z, bool* outResult);
     static float FindLowestZForCoord(float x, float y);
     static void RepositionOneObject(CEntity* object);
-    // returns entity
-    static CEntity* TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius, CEntity* ignoreEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doCameraIgnoreCheck);
     static void ClearExcitingStuffFromArea(const CVector& point, float radius, uint8 bRemoveProjectilesAndShadows);
     static bool GetIsLineOfSightClear(const CVector& origin, const CVector& target, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck);
     static bool ProcessLineOfSightSector(CSector& sector, CRepeatSector& repeatSector, const CColLine& colLine, CColPoint& outColPoint, float& maxTouchDistance, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck, bool doShootThroughCheck);
@@ -155,17 +149,15 @@ public:
     static void IncrementCurrentScanCode();
     static CPtrListSingleLink& GetLodPtrList(int32 x, int32 y);
 
-    static CPlayerInfo& GetFocusedPlayerInfo() { return Players[PlayerInFocus]; }
-
     // Returns sector index in range -60 to 60 (Example: -3000 => -60, 3000 => 60)
-    static float GetHalfMapSectorX(float x) { return x / (MAX_WORLD_UNITS / MAX_SECTORS_X); }
-    static float GetHalfMapSectorY(float y) { return y / (MAX_WORLD_UNITS / MAX_SECTORS_Y); }
+    static float GetHalfMapSectorX(float x) { return x / static_cast<float>(MAX_WORLD_UNITS / MAX_SECTORS_X); }
+    static float GetHalfMapSectorY(float y) { return y / static_cast<float>(MAX_WORLD_UNITS / MAX_SECTORS_Y); }
 
     // Returns sector index in range 0 to 120 (Example: -3000 => 0, 3000 => 120)
-    static float GetSectorfX(float x) { return GetHalfMapSectorX(x) + (MAX_SECTORS_X / 2); }
-    static float GetSectorfY(float y) { return GetHalfMapSectorY(y) + (MAX_SECTORS_Y / 2); }
+    static float GetSectorfX(float x) { return GetHalfMapSectorX(x) + static_cast<float>(MAX_SECTORS_X / 2); }
+    static float GetSectorfY(float y) { return GetHalfMapSectorY(y) + static_cast<float>(MAX_SECTORS_Y / 2); }
 
-    // returns sector index in range 0 to 120 (covers full map) 
+    // returns sector index in range 0 to 120 (covers full map)
     static int32 GetSectorX(float x) { return static_cast<int32>(std::floor(GetSectorfX(x))); }
     static int32 GetSectorY(float y) { return static_cast<int32>(std::floor(GetSectorfY(y))); }
 
@@ -185,30 +177,32 @@ public:
 
     static CVector2D GetSectorPos(int32 sector) { return { GetSectorPosX(sector), GetSectorPosY(sector) }; }
 
-    // returns sector index in range 0 to 15 (covers half of the map) 
-    static float GetHalfMapLodSectorX(float fSector) { return fSector / (MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_X); }
-    static float GetHalfMapLodSectorY(float fSector) { return fSector / (MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_Y); }
-    static float GetLodSectorfX(float fSector) { return GetHalfMapLodSectorX(fSector) + (MAX_LOD_PTR_LISTS_X / 2); }
-    static float GetLodSectorfY(float fSector) { return GetHalfMapLodSectorY(fSector) + (MAX_LOD_PTR_LISTS_Y / 2); }
-    // returns sector index in range 0 to 30 (covers full map) 
+    // returns sector index in range 0 to 15 (covers half of the map)
+    static float GetHalfMapLodSectorX(float sector) { return sector / static_cast<float>(MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_X); }
+    static float GetHalfMapLodSectorY(float sector) { return sector / static_cast<float>(MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_Y); }
+    static float GetLodSectorfX(float sector) { return GetHalfMapLodSectorX(sector) + static_cast<float>(MAX_LOD_PTR_LISTS_X / 2); }
+    static float GetLodSectorfY(float sector) { return GetHalfMapLodSectorY(sector) + static_cast<float>(MAX_LOD_PTR_LISTS_Y / 2); }
+    // returns sector index in range 0 to 30 (covers full map)
     static int32 GetLodSectorX(float fSector) { return static_cast<int32>(std::floor(GetLodSectorfX(fSector))); }
-    static int32 GetLodSectorY(float fSector) { return static_cast<int32>(std::floor(GetLodSectorfY(fSector)));  }
+    static int32 GetLodSectorY(float fSector) { return static_cast<int32>(std::floor(GetLodSectorfY(fSector))); }
     static float GetLodSectorPosX(int32 sector)
     {
         const int32 HalfOfTotalSectorsX = MAX_LOD_PTR_LISTS_X / 2;
-        const float fTotalMapUnitsX = MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_X;
+        const float fTotalMapUnitsX = static_cast<float>(MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_X);
         return (sector - HalfOfTotalSectorsX) * fTotalMapUnitsX + (fTotalMapUnitsX / 2);
     }
     static float GetLodSectorPosY(int32 sector)
     {
         const int32 HalfOfTotalSectorsY = MAX_LOD_PTR_LISTS_Y / 2;
-        const float fTotalMapUnitsY = MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_Y;
+        const float fTotalMapUnitsY = static_cast<float>(MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_Y);
         return (sector - HalfOfTotalSectorsY) * fTotalMapUnitsY + (fTotalMapUnitsY / 2);
     }
     static bool IsInWorldBounds(CVector2D pos) { // NOTSA
         return pos.x > -3000.0f && pos.x < 3000.0f
             && pos.y > -3000.0f && pos.y < 3000.0f;
     }
+
+    static void RemoveVehicleAndItsOccupants(CVehicle* veh);
 };
 
 extern uint32 &FilledColPointIndex;
@@ -219,4 +213,17 @@ uint16 GetCurrentScanCode();
 CSector* GetSector(int32 x, int32 y);
 CRepeatSector* GetRepeatSector(int32 x, int32 y);
 
-float ScaleLighting(uint8 lighting, float fScale);
+CPlayerInfo&   FindPlayerInfo(int32 playerId = -1);
+CPlayerPed*    FindPlayerPed(int32 playerId = -1);
+CVehicle*      FindPlayerVehicle(int32 playerId = -1, bool bIncludeRemote = false);
+CVector        FindPlayerCoors(int32 playerId = -1);
+CVector&       FindPlayerSpeed(int32 playerId = -1);
+CEntity*       FindPlayerEntity(int32 playerId = -1);
+CTrain*        FindPlayerTrain(int32 playerId = -1);
+const CVector& FindPlayerCentreOfWorld(int32 playerId = -1);
+const CVector& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId = -1);
+CVector        FindPlayerCentreOfWorld_NoInteriorShift(int32 playerId = -1);
+float          FindPlayerHeading(int32 playerId = -1);
+float          FindPlayerHeight(int32 playerId = -1);
+CWanted*       FindPlayerWanted(int32 playerId = -1);
+CPedGroup&     FindPlayerGroup(int32 playerId = -1);

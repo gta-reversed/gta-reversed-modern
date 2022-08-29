@@ -1,10 +1,14 @@
 #pragma once
 #pragma message("Compiling precompiled header.\n")
 
+#include <WinSock2.h>
 #include <Windows.h>
 #include <cstdio>
 #include <cmath>
+#include <cinttypes>
 #include <algorithm>
+#include <numeric>
+#include <random>
 #include <list>
 #include <map>
 #include <set>
@@ -19,6 +23,7 @@
 #include <cstring>
 #include <tuple>
 #include <initializer_list>
+#include <format>
 
 #include <ranges>
 namespace rng = std::ranges;
@@ -60,7 +65,11 @@ namespace rng = std::ranges;
 // oswrapper
 #include "oswrapper/oswrapper.h"
 
-#include "debug.h"
+#include "app_debug.h"
+
+#include "app/app.h"
+#include "app/app_light.h"
+#include "platform.h"
 
 #include "EntryInfoNode.h"
 #include "EntryInfoList.h"
@@ -88,6 +97,7 @@ namespace rng = std::ranges;
 #include "SArray.h"
 
 #include "GxtChar.h"
+#include "RwHelper.h"
 
 #include "game_sa\common.h"
 
@@ -105,6 +115,8 @@ namespace rng = std::ranges;
 #include "game_sa\Enums\eEntityStatus.h"
 #include "game_sa\Enums\eEntityType.h"
 #include "game_sa\Enums\eEventType.h"
+#include "game_sa\Enums\eFontAlignment.h"
+#include "game_sa\Enums\eGameState.h"
 #include "game_sa\Enums\eModelID.h"
 #include "game_sa\Enums\ePedBones.h"
 #include "game_sa\Enums\ePedModel.h"
@@ -129,6 +141,7 @@ namespace rng = std::ranges;
 #include "game_sa\Enums\eWeaponType.h"
 #include "game_sa\Enums\eWinchType.h"
 #include "game_sa\Enums\eItemDefinitionFlags.h"
+#include "game_sa\Enums\eMeleeCombo.h"
 
 #include "game_sa\constants.h"
 #include "game_sa\ModelIndices.h"
@@ -136,7 +149,6 @@ namespace rng = std::ranges;
 #include "game_sa\Debug.h"
 #include "game_sa\MemoryMgr.h"
 #include "game_sa\CullZones.h"
-#include "game_sa\GridRef.h"
 #include "game_sa\VehicleScanner.h"
 #include "game_sa\LoadMonitor.h"
 #include "game_sa\PedStuckChecker.h"
@@ -190,7 +202,6 @@ namespace rng = std::ranges;
 #include "game_sa\SurfaceInfo_c.h"
 #include "game_sa\SurfaceInfos_c.h"
 #include "game_sa\Replay.h"
-#include "game_sa\VehicleRecording.h"
 #include "game_sa\VehicleAnimGroupData.h"
 #include "game_sa\Collision\ColStore.h"
 #include "game_sa\Collision\ColAccel.h"
@@ -207,7 +218,6 @@ namespace rng = std::ranges;
 #include "game_sa\AccidentManager.h"
 #include "game_sa\AttractorScanner.h"
 #include "game_sa\AutoPilot.h"
-#include "game_sa\Birds.h"
 #include "game_sa\BouncingPanel.h"
 #include "game_sa\Bridge.h"
 #include "game_sa\BrightLights.h"
@@ -222,13 +232,11 @@ namespace rng = std::ranges;
 #include "game_sa\Clock.h"
 #include "game_sa\Clothes.h"
 #include "game_sa\ClothesBuilder.h"
-#include "game_sa\ControllerConfigManager.h"
 #include "game_sa\Coronas.h"
 #include "game_sa\Cover.h"
 #include "game_sa\CoverPoint.h"
 #include "game_sa\Cranes.h"
 #include "game_sa\CrimeBeingQd.h"
-#include "game_sa\CustomCarEnvMapPipeline.h"
 #include "game_sa\CutsceneMgr.h"
 #include "game_sa\Darkel.h"
 #include "game_sa\Date.h"
@@ -249,12 +257,9 @@ namespace rng = std::ranges;
 #include "game_sa\GangInfo.h"
 #include "game_sa\Gangs.h"
 #include "game_sa\GangWars.h"
-#include "game_sa\Garage.h"
-#include "game_sa\Garages.h"
 #include "game_sa\General.h"
 #include "game_sa\GenericGameStorage.h"
 #include "game_sa\cHandlingDataMgr.h"
-#include "game_sa\Hud.h"
 #include "game_sa\HudColours.h"
 #include "game_sa\IniFile.h"
 #include "game_sa\IplStore.h"
@@ -264,7 +269,6 @@ namespace rng = std::ranges;
 #include "game_sa\Messages.h"
 #include "game_sa\Mirrors.h"
 #include "game_sa\MissionCleanup.h"
-#include "game_sa\ModelInfoAccelerator.h"
 #include "game_sa\NodeAddress.h"
 #include "game_sa\NodeRoute.h"
 #include "game_sa\ObjectData.h"
@@ -298,18 +302,14 @@ namespace rng = std::ranges;
 #include "game_sa\Population.h"
 #include "game_sa\ProjectileInfo.h"
 #include "game_sa\QueuedMode.h"
-#include "game_sa\RealTimeShadow.h"
-#include "game_sa\RealTimeShadowManager.h"
 #include "game_sa\Reference.h"
 #include "game_sa\References.h"
 #include "game_sa\RegisteredCorona.h"
 #include "game_sa\RegisteredMotionBlurStreak.h"
 #include "game_sa\Renderer.h"
-#include "game_sa\CustomBuildingRenderer.h"
 #include "game_sa\RepeatSector.h"
 #include "game_sa\Restart.h"
 #include "game_sa\RGBA.h"
-#include "game_sa\RideAnims.h"
 #include "game_sa\RideAnimData.h"
 #include "game_sa\RoadBlocks.h"
 #include "game_sa\Scene.h"
@@ -318,8 +318,6 @@ namespace rng = std::ranges;
 #include "game_sa\Sector.h"
 #include "game_sa\SetPiece.h"
 #include "game_sa\SetPieces.h"
-#include "game_sa\ShadowCamera.h"
-#include "game_sa\Shadows.h"
 #include "game_sa\ShinyTexts.h"
 #include "game_sa\Shopping.h"
 #include "game_sa\ShotInfo.h"
@@ -440,6 +438,7 @@ namespace rng = std::ranges;
 #include "game_sa\Plugins\NodeNamePlugin\NodeName.h"
 #include "game_sa\Plugins\PipelinePlugin\PipelinePlugin.h"
 #include "game_sa\Plugins\CollisionPlugin\CollisionPlugin.h"
+#include "game_sa\Plugins\RpAnimBlendPlugin\RpAnimBlend.h"
 
 #include "game_sa\Scripts\RunningScript.h"
 #include "game_sa\Scripts\TheScripts.h"

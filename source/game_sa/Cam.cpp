@@ -59,7 +59,7 @@ CCam::CCam() {
 }
 
 CCam* CCam::Constructor() {
-    CCam::CCam();
+    this->CCam::CCam();
     return this;
 }
 

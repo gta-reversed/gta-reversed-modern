@@ -8,10 +8,31 @@
 #include "Pad.h"
 #include "MenuSystem.h"
 #include "PostEffects.h"
+#include "app/platform/platform.h"
 
 // 0x57C290
 void CMenuManager::DrawFrontEnd() {
-    plugin::CallMethod<0x57C290, CMenuManager*>(this);
+    if (m_bDontDrawFrontEnd)
+        return;
+
+    CFont::SetAlphaFade(255.0f);
+    CSprite2d::InitPerFrame();
+    CFont::InitPerFrame();
+    DefinedState2d();
+    SetFrontEndRenderStates();
+
+    m_bRadioAvailable = !AudioEngine.IsRadioRetuneInProgress();
+
+    if (m_nCurrentScreen == SCREEN_INITIAL) {
+        m_nCurrentScreen = m_bMainMenuSwitch ? SCREEN_MAIN_MENU : SCREEN_PAUSE_MENU;
+    }
+
+    const auto& menu = aScreens[m_nCurrentScreen];
+    if (m_nCurrentScreenItem == 0 && menu.m_aItems[0].m_nActionType == MENU_ACTION_TEXT) {
+        m_nCurrentScreenItem = 1;
+    }
+
+    DrawBackground();
 }
 
 // NOTSA
@@ -31,7 +52,7 @@ void CMenuManager::DrawBuildInfo() {
     strcpy(buf + strlen(buf), version);
 
     CFont::SetProportional(true);
-    CFont::SetScale(SCREEN_STRETCH_X(0.25f), StretchY(0.5f));
+    CFont::SetScale(StretchX(0.25f), StretchY(0.5f));
     CFont::SetColor({ 255, 255, 255, 100 });
     CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
     CFont::SetFontStyle(eFontStyle::FONT_SUBTITLES);
@@ -40,9 +61,6 @@ void CMenuManager::DrawBuildInfo() {
 
 // 0x57B750
 void CMenuManager::DrawBackground() {
-    return plugin::CallMethod<0x57B750, CMenuManager*>(this);
-    // todo: fix 0x57BC19 pressing esc, test more
-
     if (!m_bTexturesLoaded) {
         return;
     }
@@ -98,21 +116,21 @@ void CMenuManager::DrawBackground() {
         case SCREEN_DELETE_SUCCESSFUL:
         case SCREEN_SAVE_WRITE_ASK:
             return {
-                SCREEN_WIDTH - StretchX(256.0),
+                SCREEN_WIDTH - StretchX(256.0f),
                 0.0f,
                 SCREEN_WIDTH,
-                StretchY(256.0),
+                StretchY(256.0f),
             };
         case SCREEN_GAME_SAVE:
             return {
-                SCREEN_WIDTH / 2.0f - StretchX(128.0),
+                SCREEN_WIDTH / 2.0f - StretchX(128.0f),
                 0.0f,
-                StretchX(128.0) + SCREEN_WIDTH / 2.0f,
-                StretchY(256.0),
+                StretchX(128.0f) + SCREEN_WIDTH / 2.0f,
+                StretchY(256.0f),
             };
         case SCREEN_SAVE_DONE_2:
             return {
-                SCREEN_WIDTH - StretchX(300.0),
+                SCREEN_WIDTH - StretchX(300.0f),
                 0.0f,
                 SCREEN_WIDTH,
                 StretchY(200.0f),
@@ -140,9 +158,6 @@ void CMenuManager::DrawBackground() {
         auto zoom   = m_fMapZoom;
 
         PrintMap();
-        assert(m_fMapZoom == zoom);
-        assert(m_vMapOrigin.x == origin.x);
-        assert(m_vMapOrigin.y == origin.y);
 
         m_fMapZoom   = zoom;
         m_vMapOrigin = origin;
@@ -162,7 +177,7 @@ void CMenuManager::DrawBackground() {
     }
 
     auto pad = CPad::GetPad(m_nPlayerNumber);
-    // 0x57BA6B untested
+    // 0x57BA6B
     if (m_nControllerError) {
         if (!field_1B4C_b1) {
             field_1B4C_b1 = true;
@@ -192,7 +207,7 @@ void CMenuManager::DrawBackground() {
         }
         CFont::RenderFontBuffer();
         auto time = CTimer::GetTimeInMSPauseMode() - field_1B48;
-        if (time > 7000 || (CPad::IsEscJustPressed() && time > 1000)) {
+        if (time > 7000 || (pad->IsEscJustPressed() && time > 1000)) {
             m_nControllerError = 0;
             field_1B44 = true;
         }
@@ -252,27 +267,26 @@ void CMenuManager::DrawBackground() {
             s_bUpdateScanningTime = false;
         }
 
-        if (AEUserRadioTrackManager.ScanUserTracks() || CPad::IsEscJustPressed()) {
-            if (CTimer::GetTimeInMSPauseMode() - m_nUserTrackScanningTimeMs > 3000 || CPad::IsEscJustPressed()) {
+        if (AEUserRadioTrackManager.ScanUserTracks() || pad->IsEscJustPressed()) {
+            if (CTimer::GetTimeInMSPauseMode() - m_nUserTrackScanningTimeMs > 3000 || pad->IsEscJustPressed()) {
                 auto helperText = HELPER_NONE;
                 switch (AEUserRadioTrackManager.m_nUserTracksScanState) {
                 case USER_TRACK_SCAN_COMPLETE:
                     AEUserRadioTrackManager.m_nUserTracksScanState = USER_TRACK_SCAN_OFF;
-                    if (!CPad::IsEscJustPressed()) {
+                    if (!pad->IsEscJustPressed()) {
                         AEUserRadioTrackManager.Initialise();
                         helperText = FEA_SCS;
                     }
                     break;
                 case USER_TRACK_SCAN_ERROR:
                     AEUserRadioTrackManager.m_nUserTracksScanState = USER_TRACK_SCAN_OFF;
-                    if (!CPad::IsEscJustPressed()) {
+                    if (!pad->IsEscJustPressed()) {
                         helperText = FEA_SCF;
                     }
                     break;
-                default:
-                    if (CPad::IsEscJustPressed()) {
-                        helperText = FEA_SCF;
-                    }
+                }
+                if (pad->IsEscJustPressed()) {
+                    helperText = FEA_SCF;
                 }
 
                 if (helperText) {
@@ -294,19 +308,19 @@ void CMenuManager::DrawBackground() {
             CRect rect;
 
             rect.left   = x + StretchX(6.0f);
-            rect.top    = y + StretchY(3.0f);
+            rect.bottom    = y + StretchY(3.0f);
             rect.right  = x + SCREEN_STRETCH_X(24.0f);
-            rect.bottom = y + SCREEN_SCALE_Y(21.0f);
+            rect.top = y + SCREEN_SCALE_Y(21.0f);
             m_aFrontEndSprites[spriteId].Draw(rect, { 100, 100, 100, 50 }); // shadow
 
             rect.left   = x;
-            rect.top    = y;
+            rect.bottom    = y;
             rect.right  = x + SCREEN_STRETCH_X(18.0f);
-            rect.bottom = y + SCREEN_SCALE_Y(18.0f);
+            rect.top = y + SCREEN_SCALE_Y(18.0f);
             m_aFrontEndSprites[spriteId].Draw(rect, { 255, 255, 255, 255 });
         };
 
-        CRect mapRect(StretchX(60.0f), StretchY(60.0f), SCREEN_WIDTH - StretchX(60.0), SCREEN_HEIGHT - StretchY(60.0));
+        CRect mapRect(StretchX(60.0f), StretchY(60.0f), SCREEN_WIDTH - StretchX(60.0f), SCREEN_HEIGHT - StretchY(60.0f));
 
         if (m_nCurrentScreen == SCREEN_MAP && CPad::NewMouseControllerState.lmb && mapRect.IsPointInside(CVector2D(x, y))) {
             DrawCursor(FRONTEND_SPRITE_CROSS_HAIR);
@@ -337,26 +351,60 @@ void CMenuManager::DrawWindow(const CRect& coords, const char* key, uint8 color,
         CFont::SetScale(SCREEN_SCALE_X(1.0f), SCREEN_SCALE_Y(1.4f));
 
         float x = coords.left + SCREEN_SCALE_X(10.0f);
-        float y = std::min(coords.top, coords.bottom) - SCREEN_SCALE_Y(16);
+        float y = std::min(coords.bottom, coords.top) - SCREEN_SCALE_Y(16);
         CFont::PrintString(x, y, TheText.Get(const_cast<char*>(key)));
     }
 }
 
-// 0x578F50
-void CMenuManager::DrawWindowedText(float a2, float a3, float a4, Const char* str, Const char* str1, eFontAlignment alignment) {
-    plugin::CallMethod<0x578F50, CMenuManager*, float, float, float, Const char*, Const char*, eFontAlignment>(this, a2, a3, a4, str, str1, alignment);
+// 0x578F50, untested
+void CMenuManager::DrawWindowedText(float x, float y, float wrap, const char* str1, const char* str2, eFontAlignment alignment) {
+    // return plugin::CallMethod<0x578F50, CMenuManager*, float, float, float, Const char*, Const char*, eFontAlignment>(this, x, y, a4, str, str2, alignment);
+
+    CFont::SetWrapx(x + wrap - StretchX(10.0f));
+    CFont::SetRightJustifyWrap(StretchX(10.0f) + wrap);
+    CFont::SetCentreSize(wrap - 2.0f * StretchX(10.0f));
+    CFont::SetFontStyle(FONT_SUBTITLES);
+    CFont::SetOrientation(alignment);
+    CFont::SetScale(StretchX(0.7f), StretchY(1.0f));
+
+    CRect rt;
+    CFont::GetTextRect(&rt, x, y, TheText.Get(str2));
+    rt.left -= 4.0f;
+    rt.bottom  += StretchY(22.0f);
+    CSprite2d::DrawRect(rt, {0, 0, 0, 255});
+    CFont::SetColor({225, 225, 225, 255});
+    CFont::SetDropColor({0, 0, 0, 255});
+    CFont::SetEdge(2);
+    CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
+    CFont::SetFontStyle(FONT_GOTHIC);
+    CFont::SetScaleForCurrentLanguage(StretchX(1.1f), StretchY(1.4f));
+    CFont::SetWrapx(rt.right);
+
+    if (str1 && *str1) {
+        CFont::PrintString(rt.left + StretchX(20.0f), rt.top - StretchY(16.0f), TheText.Get(str1));
+    }
+
+    if (str2 && *str2) {
+        CFont::SetWrapx(x + wrap - StretchX(10.0f));
+        CFont::SetRightJustifyWrap(StretchX(10.0f) + wrap);
+        CFont::SetCentreSize(wrap - 2.0f * StretchX(10.0f));
+        CFont::SetFontStyle(FONT_SUBTITLES);
+        CFont::SetOrientation(alignment);
+        CFont::SetScale(StretchX(0.7f), StretchY(1.0f));
+
+        CFont::SetDropShadowPosition(2);
+        CFont::SetDropColor({ 0, 0, 0, 255 });
+        CFont::PrintString(x, y + StretchY(15.0f), TheText.Get(str2));
+    }
 }
 
 // 0x57D860
 void CMenuManager::DrawQuitGameScreen() {
-    plugin::CallMethod<0x57D860, CMenuManager*>(this);
-    /*
     m_bDrawMouse = false;
-    CRect coords(0.0, 0.0f, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
+    CRect coords(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT);
     CSprite2d::DrawRect(coords, { 0, 0, 0, 255 });
     SaveSettings();
-    RsEventHandler(rsQUITAPP, 0);
-     */
+    RsEventHandler(rsQUITAPP, nullptr);
 }
 
 // 0x57D8D0

@@ -2,7 +2,7 @@
 
 #include "PedAttractor.h"
 
-class CPedScriptedAttractor : public CPedAttractor {
+class NOTSA_EXPORT_VTABLE CPedScriptedAttractor : public CPedAttractor {
 public:
     // 0x5EEA30
     CPedScriptedAttractor(C2dEffect* effect, CEntity* entity, int a4)

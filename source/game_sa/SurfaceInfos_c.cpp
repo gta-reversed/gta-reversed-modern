@@ -270,7 +270,7 @@ void SurfaceInfos_c::LoadAdhesiveLimits()
             continue;
 
         char value[4];
-        sscanf(line, "%s", &value);
+        sscanf(line, "%3s", value); // FIX_BUGS: buffer overflow
         for (auto i = *line; i != ' '; i = *++line) {
             if (i == '\t')
                 break;
@@ -310,9 +310,9 @@ void SurfaceInfos_c::LoadSurfaceInfos()
         surface.tyreGrip = uint32(si.TyreGrip * 10.0f);
         surface.wetGrip  = uint32(si.WetGrip  * 100.0f); // BUG:? Data has negative values, with *original* conversion we loose sign
 
-        if (!strcmp(si.SkidMark, "DEFAULT")) surface.ucSkidmarkType = static_cast<uint32>(eSkidMarkType::DEFAULT);
-        if (!strcmp(si.SkidMark, "SANDY"))   surface.ucSkidmarkType = static_cast<uint32>(eSkidMarkType::SANDY);
-        if (!strcmp(si.SkidMark, "MUDDY"))   surface.ucSkidmarkType = static_cast<uint32>(eSkidMarkType::MUDDY);
+        if (!strcmp(si.SkidMark, "DEFAULT")) surface.ucSkidmarkType = static_cast<uint32>(eSkidmarkType::DEFAULT);
+        if (!strcmp(si.SkidMark, "SANDY"))   surface.ucSkidmarkType = static_cast<uint32>(eSkidmarkType::SANDY);
+        if (!strcmp(si.SkidMark, "MUDDY"))   surface.ucSkidmarkType = static_cast<uint32>(eSkidmarkType::MUDDY);
 
         if      (!strcmp(si.FrictionEffect, "NONE"))   surface.ucFrictionEffect = FRICTION_EFFECT_NONE;
         else if (!strcmp(si.FrictionEffect, "SPARKS")) surface.ucFrictionEffect = FRICTION_EFFECT_SPARKS;
@@ -372,16 +372,8 @@ void SurfaceInfos_c::LoadSurfaceAudioInfos()
             continue;
 
         char  name[64];
-        int32 concrete;
-        int32 grass;
-        int32 sand;
-        int32 gravel;
-        int32 wood;
-        int32 water;
-        int32 metal;
-        int32 longGrass;
-        int32 tile;
-        (void)sscanf(line, "%s %d %d %d %d %d %d %d %d %d", name, &concrete, &grass, &sand, &gravel, &wood, &water, &metal, &longGrass, &tile);
+        int32 concrete, grass, sand, gravel, wood, water, metal, longGrass, tile;
+        (void)sscanf(line, "%31s %d %d %d %d %d %d %d %d %d", name, &concrete, &grass, &sand, &gravel, &wood, &water, &metal, &longGrass, &tile); // FIX_BUGS: buffer overflow
 
         auto id = GetSurfaceIdFromName(name);
         auto& surface = m_surfaces[id];

@@ -10,6 +10,7 @@
 
 #include "CDebugMenu.h"
 #include "ControllerConfigManager.h"
+#include "app.h"
 
 // mouse states
 CMouseControllerState& CPad::PCTempMouseControllerState = *(CMouseControllerState*)0xB73404;
@@ -32,8 +33,6 @@ static char& byte_B73401 = *(char*)0xB73401; // unused, unknown
 void CPad::InjectHooks() {
     RH_ScopedClass(CPad);
     RH_ScopedCategoryGlobal();
-
-    HookInstall(0x541DD0, CPad::UpdatePads); // changes logic of the function and shouldn't be toggled on/off
 
     // CPad", 0x541D80, &CPad::Constructor);
     // CPad~", 0x53ED60, &CPad::Destructor);
@@ -228,8 +227,8 @@ void CPad::UpdatePads() {
     OldKeyState = NewKeyState;
     NewKeyState = TempKeyState;
 
-    CDebugMenu::ImguiInitialise();
-    CDebugMenu::ImguiInputUpdate();
+    CDebugMenu::ImGuiInitialise();
+    CDebugMenu::ImGuiInputUpdate();
 }
 
 // 0x53F3C0
@@ -873,11 +872,8 @@ int16 CPad::GetDisplayVitalStats(CPed* ped) const {
     if (DisablePlayerControls || bDisablePlayerDisplayVitalStats)
         return false;
 
-    if (Mode <= 3) {
-        return ped && ped->GetIntelligence()->IsUsingGun() && NewState.LeftShoulder1;
-    } else {
-        return false;
-    }
+    bool isUsingGun = ped && ped->GetIntelligence()->IsUsingGun();
+    return Mode <= 3u && !isUsingGun && NewState.LeftShoulder1 != 0;
 }
 
 // 0x540A70
@@ -1107,7 +1103,7 @@ bool CPad::sub_540A10() {
 bool CPad::GetAnaloguePadLeft() {
     static int16 oldfStickY = 0; // 0xB736F0
     auto leftStickY = GetPad()->GetLeftStickY();
-    
+
     if (leftStickY < -15 && oldfStickY >= -5) {
         oldfStickY = leftStickY;
         return true;
@@ -1121,7 +1117,7 @@ bool CPad::GetAnaloguePadLeft() {
 bool CPad::GetAnaloguePadUp() {
     static int16 oldfStickX = 0; // 0xB736F8
     auto leftStickX = GetPad()->GetLeftStickX();
-    
+
     if (leftStickX < -15 && oldfStickX >= -5) {
         oldfStickX = leftStickX;
         return true;
@@ -1182,4 +1178,24 @@ bool CPad::sub_540530() const noexcept {
     default:
         return false;
     }
+}
+
+/*!
+ * CTRL + M or F7
+ */
+bool CPad::DebugMenuJustPressed() {
+    return (IsCtrlPressed() && IsStandardKeyJustPressed('M')) || IsF7JustPressed();
+}
+
+// 0x541490
+int GetCurrentKeyPressed(RsKeyCodes& keys) {
+    return plugin::CallAndReturn<int, 0x541490, RsKeyCodes&>(keys);
+}
+
+IDirectInputDevice8* DIReleaseMouse() {
+    return plugin::CallAndReturn<IDirectInputDevice8*, 0x746F70>();
+}
+
+void InitialiseMouse(bool exclusive) {
+    plugin::Call<0x7469A0, bool>(exclusive);
 }
