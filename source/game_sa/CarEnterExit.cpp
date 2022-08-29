@@ -20,7 +20,7 @@ void CCarEnterExit::InjectHooks() {
 
     // RH_ScopedInstall(AddInCarAnim, 0x64F720);
     // RH_ScopedInstall(CarHasDoorToClose, 0x64EE10);
-    // RH_ScopedInstall(CarHasDoorToOpen, 0x0);
+    // RH_ScopedInstall(CarHasDoorToOpen, 0X64EDD0);
     // RH_ScopedInstall(CarHasOpenableDoor, 0x0);
     // RH_ScopedInstall(CarHasPartiallyOpenDoor, 0x0);
     // RH_ScopedInstall(ComputeDoorFlag, 0x0);
@@ -62,9 +62,9 @@ bool CCarEnterExit::CarHasDoorToClose(const CVehicle* vehicle, int32 doorId) {
     return plugin::CallAndReturn<bool, 0x64EE10, const CVehicle*, int32>(vehicle, doorId);
 }
 
-// 0x
+// 0X64EDD0
 bool CCarEnterExit::CarHasDoorToOpen(const CVehicle* vehicle, int32 doorId) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32>(vehicle, doorId);
+    return plugin::CallAndReturn<bool, 0X64EDD0, const CVehicle*, int32>(vehicle, doorId);
 }
 
 // 0x
@@ -191,8 +191,8 @@ void CCarEnterExit::QuitEnteringCar(CPed* ped, CVehicle* vehicle, int32 doorId, 
 }
 
 // 0x64F680
-void CCarEnterExit::RemoveCarSitAnim(CPed* ped) {
-    plugin::Call<0x64F680, CPed*>(ped);
+void CCarEnterExit::RemoveCarSitAnim(const CPed* ped) {
+    plugin::Call<0x64F680, const CPed*>(ped);
 }
 
 // 0x64F6E0

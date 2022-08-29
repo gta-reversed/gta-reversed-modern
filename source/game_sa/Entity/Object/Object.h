@@ -81,7 +81,7 @@ public:
     float         m_fDoorStartAngle; // this is used for door objects
     float         m_fScale;
     CObjectData*  m_pObjectInfo;
-    CFire*        m_pFire; // CFire *
+    CFire*        m_pFire;
     int16         m_wScriptTriggerIndex;
     int16         m_wRemapTxd;     // this is used for detached car parts
     RwTexture*    m_pRemapTexture; // this is used for detached car parts
