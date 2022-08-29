@@ -267,6 +267,7 @@
 #include "TaskComplexGetOnBoatSeat.h"
 #include "TaskComplexGoToAttractor.h"
 #include "TaskComplexGoToBoatSteeringWheel.h"
+#include "TaskSimpleSitDown.h"
 #include "TaskComplexGoToCarDoorAndStandStill.h"
 #include "TaskComplexGoToPointAiming.h"
 #include "TaskComplexGoToPointAndStandStillAndAchieveHeading.h"
@@ -284,6 +285,7 @@
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskComplexTrackEntity.h"
 #include "TaskSimpleTired.h"
+#include "TaskSimpleCarWaitToSlowDown.h"
 #include "TaskComplexLeaveBoat.h"
 #include "TaskSimpleCarGetOut.h"
 #include "TaskSimpleTired.h"
@@ -794,7 +796,7 @@ void InjectHooksMain() {
         // CTaskSimpleSetKindaStayInSamePlace::InjectHooks();
         // CTaskSimpleSetPedAsAutoDriver::InjectHooks();
         // CTaskSimpleShakeFist::InjectHooks();
-        // CTaskSimpleSitDown::InjectHooks();
+        CTaskSimpleSitDown::InjectHooks();
         CTaskSimpleSitIdle::InjectHooks();
         // CTaskSimpleStandUp::InjectHooks();
         CTaskSimpleThrowControl::InjectHooks();
