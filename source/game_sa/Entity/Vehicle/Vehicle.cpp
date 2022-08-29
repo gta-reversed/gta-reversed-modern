@@ -3316,6 +3316,11 @@ void CVehicle::DoDriveByShootings() {
     plugin::CallMethod<0x741FD0, CVehicle*>(this);
 }
 
+// 0x64EC90
+bool CVehicle::AnyOfDoorsReady(uint32 door1, uint32 door2) {
+    return plugin::CallMethodAndReturn<bool, 0x64EC90, CVehicle*, uint32, uint32>(this, door1, door2);
+}
+
 // NOTSA
 bool CVehicle::AreAnyOfPassengersFollowerOfGroup(const CPedGroup& group) {
     const auto end = m_apPassengers + m_nMaxPassengers;

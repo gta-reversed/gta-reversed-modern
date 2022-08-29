@@ -290,6 +290,7 @@
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskComplexTrackEntity.h"
 #include "TaskSimpleTired.h"
+#include "TaskSimpleCarWaitForDoorNotToBeInUse.h"
 #include "TaskSimpleCarWaitToSlowDown.h"
 #include "TaskComplexLeaveBoat.h"
 #include "TaskSimpleCarGetOut.h"
@@ -758,8 +759,8 @@ void InjectHooksMain() {
         CTaskSimpleCarSetTempAction::InjectHooks();
         // CTaskSimpleCarShuffle::InjectHooks();
         // CTaskSimpleCarSlowBeDraggedOut::InjectHooks();
-        // CTaskSimpleCarWaitForDoorNotToBeInUse::InjectHooks();
         CTaskSimpleCarWaitToSlowDown::InjectHooks();
+        CTaskSimpleCarWaitForDoorNotToBeInUse::InjectHooks();
         // CTaskSimpleChat::InjectHooks();
         CTaskSimpleCower::InjectHooks();
         CTaskSimpleClearLookAt::InjectHooks();
