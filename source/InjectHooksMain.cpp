@@ -253,6 +253,7 @@
 #include "TaskGangHasslePed.h"
 #include "TaskGangHassleVehicle.h"
 #include "TaskGoToVehicleAndLean.h"
+#include "TaskSimpleSetCharDecisionMaker.h"
 #include "TaskLeanOnVehicle.h"
 #include "TaskComplexCarSlowBeDraggedOut.h"
 #include "TaskComplexCarSlowBeDraggedOutAndStandUp.h"
@@ -780,7 +781,7 @@ void InjectHooksMain() {
         // CTaskSimpleRunAnimLoopedMiddle::InjectHooks();
         CTaskSimpleRunTimedAnim::InjectHooks();
         CTaskSimpleSay::InjectHooks();
-        // CTaskSimpleSetCharDecisionMaker::InjectHooks();
+        CTaskSimpleSetCharDecisionMaker::InjectHooks();
         // CTaskSimpleSetCharIgnoreWeaponRangeFlag::InjectHooks();
         // CTaskSimpleSetKindaStayInSamePlace::InjectHooks();
         // CTaskSimpleSetPedAsAutoDriver::InjectHooks();
