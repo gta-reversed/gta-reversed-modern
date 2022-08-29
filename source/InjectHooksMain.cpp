@@ -256,6 +256,7 @@
 #include "TaskGoToVehicleAndLean.h"
 #include "TaskSimpleSetCharDecisionMaker.h"
 #include "TaskLeanOnVehicle.h"
+#include "TaskSimpleTurn180.h"
 #include "TaskComplexCarSlowBeDraggedOut.h"
 #include "TaskComplexCarSlowBeDraggedOutAndStandUp.h"
 #include "TaskComplexGangFollower.h"
@@ -798,7 +799,7 @@ void InjectHooksMain() {
         // CTaskSimpleThrowControl::InjectHooks();
         CTaskSimpleTired::InjectHooks();
         // CTaskSimpleTriggerEvent::InjectHooks();
-        // CTaskSimpleTurn180::InjectHooks();
+        CTaskSimpleTurn180::InjectHooks();
         // CTaskSimpleUseAtm::InjectHooks();
         // CTaskSimpleWaitForBus::InjectHooks();
         // CTaskSimpleWaitForPizza::InjectHooks();
