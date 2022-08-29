@@ -60,8 +60,8 @@ void CTaskSimpleCarAlign::FixHeading(CPed* ped) {
 
     const auto carLeftOrRight = [this] {
         switch (m_door) {
-        case 10:
-        case 11:
+        case CAR_DOOR_LF:
+        case CAR_DOOR_LR:
             return m_veh->GetRight() * -1.f; // Left
         default:
             return m_veh->GetRight();
@@ -84,8 +84,8 @@ void CTaskSimpleCarAlign::StartAnim(CPed* ped) {
         CCarEnterExit::GetPositionToOpenCarDoor(&doorOpenPos, m_veh, m_door);
         const auto z = doorOpenPos.z - ped->GetPosition().z;
         switch (m_door) {
-        case 10:
-        case 11:
+        case CAR_DOOR_LF:
+        case CAR_DOOR_LR:
             return (z <= 4.4f) ? ANIM_ID_CAR_ALIGN_LHS : ANIM_ID_CAR_ALIGNHI_LHS;
         default:
             return (z <= 4.4f) ? ANIM_ID_CAR_ALIGN_RHS : ANIM_ID_CAR_ALIGNHI_RHS;
