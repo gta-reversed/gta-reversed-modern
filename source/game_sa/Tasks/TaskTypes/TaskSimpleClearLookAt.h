@@ -10,7 +10,7 @@ class NOTSA_EXPORT_VTABLE CTaskSimpleClearLookAt : public CTaskSimple {
 public:
     static void InjectHooks();
 
-    constexpr static auto Type = eTaskType::TASK_SIMPLE_IK_LOOK_AT;
+    constexpr static auto Type = eTaskType::TASK_SIMPLE_CLEAR_LOOK_AT;
 
     CTaskSimpleClearLookAt() = default;
     ~CTaskSimpleClearLookAt() = default;
