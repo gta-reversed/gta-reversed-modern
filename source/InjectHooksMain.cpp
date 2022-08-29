@@ -129,6 +129,7 @@
 #include "EntitySeekPosCalculatorStandard.h"
 #include "EntitySeekPosCalculatorRadiusAngleOffset.h"
 #include "EntitySeekPosCalculatorXYOffset.h"
+#include "EntitySeekPosCalculatorFixedPos.h"
 #include "TaskComplexSmartFleeEntity.h"
 #include "TaskSimpleArrestPed.h"
 #include "TaskComplexDragPedFromCar.h"
@@ -939,6 +940,7 @@ void InjectHooksMain() {
             CEntitySeekPosCalculatorStandard::InjectHooks();
             CEntitySeekPosCalculatorRadiusAngleOffset::InjectHooks();
             CEntitySeekPosCalculatorXYOffset::InjectHooks();
+            CEntitySeekPosCalculatorFixedPos::InjectHooks();
         };
         EntitySeekPosCalculators();
     };

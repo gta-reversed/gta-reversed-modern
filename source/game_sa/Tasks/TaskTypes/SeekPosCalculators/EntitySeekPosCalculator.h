@@ -1,10 +1,12 @@
 #pragma once
 
+#include "Base.h"
+
 class CEntity;
 class CVector;
 class CPed;
 
-class CEntitySeekPosCalculator {
+class NOTSA_EXPORT_VTABLE CEntitySeekPosCalculator {
 public:
     static void InjectHooks() {}
 
