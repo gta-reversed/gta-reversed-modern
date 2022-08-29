@@ -280,6 +280,7 @@
 #include "TaskSimpleThrowControl.h"
 #include "TaskSimpleDieInCar.h"
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
+#include "TaskComplexTrackEntity.h"
 #include "TaskSimpleTired.h"
 #include "TaskComplexLeaveBoat.h"
 #include "TaskSimpleCarGetOut.h"
@@ -703,7 +704,7 @@ void InjectHooksMain() {
         CTaskComplexSmartFleePoint::InjectHooks();
         // CTaskComplexStareAtPed::InjectHooks();
         // CTaskComplexStealCar::InjectHooks();
-        // CTaskComplexTrackEntity::InjectHooks();
+        CTaskComplexTrackEntity::InjectHooks();
         CTaskComplexTurnToFaceEntityOrCoord::InjectHooks();
         // CTaskComplexUseAttractor::InjectHooks();
         // CTaskComplexUseAttractorPartner::InjectHooks();
