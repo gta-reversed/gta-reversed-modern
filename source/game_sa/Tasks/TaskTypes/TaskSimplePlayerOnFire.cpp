@@ -1,12 +1,12 @@
 #include "StdInc.h"
 #include "TaskSimplePlayerOnFire.h"
+#include "TaskComplexOnFire.h"
 
 void CTaskSimplePlayerOnFire::InjectHooks() {
     RH_ScopedVirtualClass(CTaskSimplePlayerOnFire, 0x86e334, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x633560);
-
     RH_ScopedInstall(Destructor, 0x6335B0);
 
     RH_ScopedVMTInstall(Clone, 0x636E80);
@@ -24,6 +24,7 @@ bool CTaskSimplePlayerOnFire::ProcessPed(CPed* ped) {
     }
 
     if (m_timer.IsOutOfTime() || ped->GetIntelligence()->GetTaskSwim()) {
+        ped->m_pFire->Extinguish();
         return true;
     }
 
@@ -36,7 +37,7 @@ bool CTaskSimplePlayerOnFire::ProcessPed(CPed* ped) {
     CTaskComplexOnFire::ComputeFireDamage(ped, dmgResp);
     if (!dmgResp.m_bHealthZero || m_bAddedDamageEvent) {
         if (CLocalisation::PedsOnFire()) { // Moved code a little to avoid dup
-            ped->Say(346, 0, 0.1f);
+            ped->Say(346, 0, 0.1f); // Screaming
         }
     }
 
