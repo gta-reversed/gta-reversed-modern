@@ -691,6 +691,10 @@ public: // NOTSA functions
         }
     }
 
+    bool IsDriverAPlayer() const;
+    [[nodiscard]] bool IsTotallyUpsideDown() const { return GetUp().z < 0.f; }
+
+
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
