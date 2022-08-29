@@ -199,6 +199,6 @@ bool CGeneral::RandomBool(uint8 chanceOfTrue) {
 * @return true/false with 50/50 change
 * @addr notsa
 */
-bool CGeneral::DoCoinFlip() 
+bool CGeneral::DoCoinFlip() {
 	return CGeneral::GetRandomNumber() >= RAND_MAX / 2;
 }
