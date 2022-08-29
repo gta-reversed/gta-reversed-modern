@@ -213,6 +213,7 @@
 #include "TaskComplexCarDrive.h"
 #include "TaskComplexKillPedFromBoat.h"
 #include "TaskComplexLeaveCar.h"
+#include "TaskSimpleCarSetTempAction.h"
 #include "TaskComplexTreatAccident.h"
 #include "TaskComplexGoToPointAndStandStillTimed.h"
 #include "TaskComplexPartnerShove.h"
@@ -253,6 +254,7 @@
 #include "TaskGangHasslePed.h"
 #include "TaskGangHassleVehicle.h"
 #include "TaskGoToVehicleAndLean.h"
+#include "TaskSimpleSetCharDecisionMaker.h"
 #include "TaskLeanOnVehicle.h"
 #include "TaskComplexCarSlowBeDraggedOut.h"
 #include "TaskComplexCarSlowBeDraggedOutAndStandUp.h"
@@ -274,10 +276,11 @@
 #include "TaskComplexDieInCar.h"
 #include "TaskComplexFallToDeath.h"
 #include "TaskSimpleDrownInCar.h"
+#include "TaskSimpleThrowControl.h"
 #include "TaskSimpleDieInCar.h"
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskSimpleTired.h"
-#include "TaskSimpleCarSetTempAction.h"
+#include "TaskComplexLeaveBoat.h"
 #include "TaskSimpleCarGetOut.h"
 #include "TaskSimpleTired.h"
 #include "TaskSimpleCarOpenDoorFromOutside.h"
@@ -285,6 +288,7 @@
 #include "TaskSimpleCarCloseDoorFromInside.h"
 #include "TaskSimpleClearLookAt.h"
 #include "TaskSimpleCarWaitToSlowDown.h"    
+#include "TaskSimplePlayerOnFire.h"
 #include "TaskComplexOnFire.h"
 #include "TaskSimpleBikeJacked.h"
 #include "TaskSimpleRunTimedAnim.h"
@@ -665,7 +669,7 @@ void InjectHooksMain() {
         // CTaskComplexKillPedOnFootArmed::InjectHooks();
         // CTaskComplexKillPedOnFootMelee::InjectHooks();
         // CTaskComplexKillPedOnFootStealth::InjectHooks();
-        // CTaskComplexLeaveBoat::InjectHooks();
+        CTaskComplexLeaveBoat::InjectHooks();
         // CTaskComplexLeaveCarAndDie::InjectHooks();
         // CTaskComplexLeaveCarAndFlee::InjectHooks();
         // CTaskComplexLeaveCarAndWander::InjectHooks();
@@ -777,11 +781,11 @@ void InjectHooksMain() {
         // CTaskSimpleLookAbout::InjectHooks();
         // CTaskSimpleOnEscalator::InjectHooks();
         // CTaskSimplePickUpBike::InjectHooks();
-        // CTaskSimplePlayerOnFire::InjectHooks();
+        CTaskSimplePlayerOnFire::InjectHooks();
         // CTaskSimpleRunAnimLoopedMiddle::InjectHooks();
         CTaskSimpleRunTimedAnim::InjectHooks();
         CTaskSimpleSay::InjectHooks();
-        // CTaskSimpleSetCharDecisionMaker::InjectHooks();
+        CTaskSimpleSetCharDecisionMaker::InjectHooks();
         // CTaskSimpleSetCharIgnoreWeaponRangeFlag::InjectHooks();
         // CTaskSimpleSetKindaStayInSamePlace::InjectHooks();
         // CTaskSimpleSetPedAsAutoDriver::InjectHooks();
@@ -789,6 +793,8 @@ void InjectHooksMain() {
         // CTaskSimpleSitDown::InjectHooks();
         // CTaskSimpleSitIdle::InjectHooks();
         // CTaskSimpleStandUp::InjectHooks();
+        CTaskSimpleThrowControl::InjectHooks();
+        // CTaskSimpleTired::InjectHooks();
         // CTaskSimpleThrowControl::InjectHooks();
         CTaskSimpleTired::InjectHooks();
         // CTaskSimpleTriggerEvent::InjectHooks();
