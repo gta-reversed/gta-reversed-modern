@@ -224,6 +224,7 @@
 #include "TaskComplexStuckInAir.h"
 #include "TaskSimpleHoldEntity.h"
 #include "TaskSimpleGoTo.h"
+#include "TaskSimpleUseAtm.h"
 #include "TaskComplexPartner.h"
 #include "TaskSimpleCarSetPedInAsDriver.h"
 #include "TaskComplexWander.h"
@@ -804,8 +805,8 @@ void InjectHooksMain() {
         // CTaskSimpleThrowControl::InjectHooks();
         CTaskSimpleTired::InjectHooks();
         // CTaskSimpleTriggerEvent::InjectHooks();
+        CTaskSimpleUseAtm::InjectHooks();
         CTaskSimpleTurn180::InjectHooks();
-        // CTaskSimpleUseAtm::InjectHooks();
         // CTaskSimpleWaitForBus::InjectHooks();
         // CTaskSimpleWaitForPizza::InjectHooks();
         // CTaskSimpleWaitUntilAreaCodesMatch::InjectHooks();
