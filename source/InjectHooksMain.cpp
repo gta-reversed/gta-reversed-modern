@@ -276,10 +276,11 @@
 #include "TaskComplexDieInCar.h"
 #include "TaskComplexFallToDeath.h"
 #include "TaskSimpleDrownInCar.h"
+#include "TaskSimpleThrowControl.h"
 #include "TaskSimpleDieInCar.h"
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskSimpleTired.h"
-=======
+#include "TaskComplexLeaveBoat.h"
 #include "TaskSimpleCarGetOut.h"
 #include "TaskSimpleTired.h"
 #include "TaskSimpleCarOpenDoorFromOutside.h"
@@ -668,7 +669,7 @@ void InjectHooksMain() {
         // CTaskComplexKillPedOnFootArmed::InjectHooks();
         // CTaskComplexKillPedOnFootMelee::InjectHooks();
         // CTaskComplexKillPedOnFootStealth::InjectHooks();
-        // CTaskComplexLeaveBoat::InjectHooks();
+        CTaskComplexLeaveBoat::InjectHooks();
         // CTaskComplexLeaveCarAndDie::InjectHooks();
         // CTaskComplexLeaveCarAndFlee::InjectHooks();
         // CTaskComplexLeaveCarAndWander::InjectHooks();
@@ -792,6 +793,8 @@ void InjectHooksMain() {
         // CTaskSimpleSitDown::InjectHooks();
         // CTaskSimpleSitIdle::InjectHooks();
         // CTaskSimpleStandUp::InjectHooks();
+        CTaskSimpleThrowControl::InjectHooks();
+        // CTaskSimpleTired::InjectHooks();
         // CTaskSimpleThrowControl::InjectHooks();
         CTaskSimpleTired::InjectHooks();
         // CTaskSimpleTriggerEvent::InjectHooks();
