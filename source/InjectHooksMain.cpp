@@ -253,6 +253,7 @@
 #include "TaskSimpleCreateCarAndGetIn.h"
 #include "TaskSimpleIKChain.h"
 #include "TaskSimpleIKLookAt.h"
+#include "TaskSimplePickUpBike.h"
 #include "TaskSimpleIKManager.h"
 #include "TaskSimpleIKPointArm.h"
 #include "TaskSimpleCarSlowDragPedOut.h"
@@ -794,7 +795,7 @@ void InjectHooksMain() {
         // CTaskSimpleKillPedWithCar::InjectHooks();
         // CTaskSimpleLookAbout::InjectHooks();
         // CTaskSimpleOnEscalator::InjectHooks();
-        // CTaskSimplePickUpBike::InjectHooks();
+        CTaskSimplePickUpBike::InjectHooks();
         CTaskSimplePlayerOnFire::InjectHooks();
         // CTaskSimpleRunAnimLoopedMiddle::InjectHooks();
         CTaskSimpleRunTimedAnim::InjectHooks();
