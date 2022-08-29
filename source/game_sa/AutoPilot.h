@@ -88,6 +88,9 @@ public:
     bool            m_bPlaneDogfightSomething;
     int16           field_96;
 
+    // NOTSA Section
+    void SetTempAction(uint32 action, uint32 timeMs) noexcept;
+    void ClearTempAction() noexcept;
 public:
     CAutoPilot();
 

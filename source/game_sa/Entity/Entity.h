@@ -213,8 +213,13 @@ public:
     }
 
     template<typename T>
-    void RegisterReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
-        RegisterReference(reinterpret_cast<CEntity**>(&ref));
+    static void RegisterReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
+        ref->RegisterReference(reinterpret_cast<CEntity**>(&ref));
+    }
+
+    template<typename T>
+    static void CleanUpOldReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
+        ref->CleanUpOldReference(reinterpret_cast<CEntity**>(&ref));
     }
 
     template<typename T>

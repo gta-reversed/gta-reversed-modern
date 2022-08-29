@@ -144,8 +144,7 @@ public:
     }
 
     auto GetNodes() { return std::span{ &m_pNodeArray, m_nNumBlendNodes }; }
-    auto SetDefaultFinishCallback() { SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); }
-
+    void SetDefaultFinishCallback() { SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); }
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
