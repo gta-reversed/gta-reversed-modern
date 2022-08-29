@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "TagManager.h"
+#include "Garages.h"
 
 tTagDesc (&CTagManager::ms_tagDesc)[MAX_TAGS] = *(tTagDesc(*)[MAX_TAGS])0xA9A8C0;
 int32& CTagManager::ms_numTags = *(int32*)0xA9AD70;
