@@ -39,7 +39,7 @@ public:
     bool Load() override;
     bool Save() override;
 
-    CPad* GetPadFromPlayer();
+    CPad* GetPadFromPlayer() const;
     bool CanPlayerStartMission();
     bool IsHidden();
     void ReApplyMoveAnims();

@@ -200,7 +200,7 @@ void CPlayerPed::ReactivatePlayerPed(int32 playerId) {
 }
 
 // 0x609560
-CPad* CPlayerPed::GetPadFromPlayer() {
+CPad* CPlayerPed::GetPadFromPlayer() const {
     switch (m_nPedType) {
     case PED_TYPE_PLAYER1:
         return CPad::GetPad(0);

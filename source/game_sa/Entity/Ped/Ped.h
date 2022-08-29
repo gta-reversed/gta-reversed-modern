@@ -206,7 +206,7 @@ public:
         uint32 bNeverEverTargetThisPed : 1 = false;
         uint32 bThisPedIsATargetPriority : 1 = false;
         uint32 bCrouchWhenScared : 1 = false;
-        uint32 bKnockedOffBike : 1 = false;
+        uint32 bKnockedOffBike : 1 = false; // TODO: Maybe rename to `bIsJumpingOut` or something similar, see x-refs
 
         // 9th byte starts here (m_nThirdPedFlags)
         uint32 bDonePositionOutOfCollision : 1 = false;
@@ -330,7 +330,7 @@ public:
     char                m_nAllowedAttackMoves;
     uint8               field_72F; // taskId related? 0x4B5C47
     CFire*              m_pFire;
-    float               field_734;
+    float               m_fireDmgMult;
     CEntity*            m_pLookTarget;
     float               m_fLookDirection; // In RAD
     int32               m_nWeaponModelId;
@@ -564,8 +564,8 @@ public:
     bool IsStateDying() const noexcept { return m_nPedState == PEDSTATE_DEAD || m_nPedState == PEDSTATE_DIE; }
     bool IsInVehicleAsPassenger() const noexcept;
 
-    bool IsGangster() const noexcept { return m_nPedType >= PED_TYPE_GANG1 && m_nPedType <= PED_TYPE_GANG10; }
-    static bool IsGangster(ePedType pedType) noexcept { return pedType >= PED_TYPE_GANG1 && pedType <= PED_TYPE_GANG10; }
+    bool IsCop()      const noexcept { return m_nPedType ==  PED_TYPE_COP; }
+    bool IsGangster() const noexcept { return IsPedTypeGang(m_nPedType); }
     bool IsCivilian() const noexcept { return m_nPedType == PED_TYPE_CIVMALE || m_nPedType == PED_TYPE_CIVFEMALE; }
 
     CCopPed*       AsCop()       { return reinterpret_cast<CCopPed*>(this); }
@@ -574,17 +574,12 @@ public:
     CPlayerPed*    AsPlayer()    { return reinterpret_cast<CPlayerPed*>(this); }
 
     bool IsFollowerOfGroup(const CPedGroup& group) const;
-
     RwMatrix& GetBoneMatrix(ePedBones bone) const;
-
     void CreateDeadPedPickupCoors(CVector& pickupPos);
     RpHAnimHierarchy& GetAnimHierarchy() const;
     CAnimBlendClumpData& GetAnimBlendData() const;
-
     bool IsInVehicle() const { return bInVehicle && m_pVehicle; }
-
     CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
-
     int32 GetPadNumber() const;
 
 private:

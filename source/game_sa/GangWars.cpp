@@ -8,6 +8,7 @@
 
 #include <extensions/enumerate.hpp>
 
+#include "Garages.h"
 #include "GangWars.h"
 #include "GangWarsSaveStructure.h"
 #include "ModelIndices.h"

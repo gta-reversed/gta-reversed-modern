@@ -84,9 +84,9 @@ bool CCarEnterExit::CarHasDoorToClose(const CVehicle* vehicle, int32 doorId) {
     return !veh.IsDoorMissing(doorId) && !veh.IsDoorClosed(doorId);
 }
 
-// 0x
+// 0X64EDD0
 bool CCarEnterExit::CarHasDoorToOpen(const CVehicle* vehicle, int32 doorId) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32>(vehicle, doorId);
+    return plugin::CallAndReturn<bool, 0X64EDD0, const CVehicle*, int32>(vehicle, doorId);
 }
 
 // 0x
@@ -512,7 +512,7 @@ void CCarEnterExit::QuitEnteringCar(CPed* ped, CVehicle* vehicle, int32 doorId, 
 }
 
 // 0x64F680
-void CCarEnterExit::RemoveCarSitAnim(CPed* ped) {
+void CCarEnterExit::RemoveCarSitAnim(const CPed* ped) {
     for (auto anim = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_SECONDARY_TASK_ANIM); anim; anim = RpAnimBlendGetNextAssociation(anim, ANIMATION_SECONDARY_TASK_ANIM)) {
         anim->SetFlag(ANIMATION_FREEZE_LAST_FRAME);
         anim->m_fBlendDelta = -1000.f;
