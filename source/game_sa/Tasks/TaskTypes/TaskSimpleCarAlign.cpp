@@ -80,8 +80,7 @@ void CTaskSimpleCarAlign::FixHeading(CPed* ped) {
 // 0x64AC00
 void CTaskSimpleCarAlign::StartAnim(CPed* ped) {
     const auto animId = [this, ped] {
-        CVector doorOpenPos{};
-        CCarEnterExit::GetPositionToOpenCarDoor(&doorOpenPos, m_veh, m_door);
+        const auto doorOpenPos = CCarEnterExit::GetPositionToOpenCarDoor(m_veh, m_door);
         const auto z = doorOpenPos.z - ped->GetPosition().z;
         switch (m_door) {
         case CAR_DOOR_LF:
@@ -128,8 +127,7 @@ bool CTaskSimpleCarAlign::ProcessPed(CPed* ped) {
 
 // 0x645C70
 bool CTaskSimpleCarAlign::SetPedPosition(CPed* ped) {
-    CVector doorOpenPos{};
-    CCarEnterExit::GetPositionToOpenCarDoor(&doorOpenPos, m_veh, m_door);
+    //const auto doorOpenPos = CCarEnterExit::GetPositionToOpenCarDoor(m_veh, m_door); // Result unused
     m_lineUpTask->ProcessPed(ped, m_veh, m_anim);
     return true;
 }
