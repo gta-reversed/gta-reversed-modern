@@ -47,7 +47,8 @@ int16 CTaskSimpleFightingControl::CalcMoveCommand(CPed* ped) {
         return -1;
     }
 
-    const auto& targetPos = m_target->GetPosition(), pedPos = ped->GetPosition();
+    const auto& targetPos = m_target->GetPosition();
+    const auto& pedPos    = ped->GetPosition();
 
     const auto segmentPedToTarget = targetPos - pedPos;
 
