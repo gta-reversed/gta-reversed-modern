@@ -224,6 +224,7 @@
 #include "TaskComplexProstituteSolicit.h"
 #include "TaskComplexStuckInAir.h"
 #include "TaskSimpleHoldEntity.h"
+#include "TaskSimpleCower.h"
 #include "TaskSimpleGoTo.h"
 #include "TaskSimpleUseAtm.h"
 #include "TaskComplexPartner.h"
@@ -759,8 +760,8 @@ void InjectHooksMain() {
         // CTaskSimpleCarWaitForDoorNotToBeInUse::InjectHooks();
         CTaskSimpleCarWaitToSlowDown::InjectHooks();
         // CTaskSimpleChat::InjectHooks();
+        CTaskSimpleCower::InjectHooks();
         CTaskSimpleClearLookAt::InjectHooks();
-        // CTaskSimpleCower::InjectHooks();
         // CTaskSimpleDead::InjectHooks();
         // CTaskSimpleDetonate::InjectHooks();
         // + CTaskSimpleDieInCar
