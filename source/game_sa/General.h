@@ -26,6 +26,7 @@ public:
 
     // NOTSA - Helpers
     static float GetRadianAngleBetweenPoints(CVector2D a, CVector2D b);
+    static bool  RandomBool(uint8 chanceOfTrue);
     static bool DoCoinFlip();
 };
 
