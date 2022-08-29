@@ -75,7 +75,7 @@ bool CEventAcquaintancePed::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
             CPed* leader = membership.GetLeader();
             if (leader && leader->IsPlayer())
                 return false;
-            return FindPlayerPed()->GetGroup().GetMembership().IsMember(m_ped);
+            return FindPlayerPed()->GetPlayerGroup().GetMembership().IsMember(m_ped);
         }
     }
     return false;

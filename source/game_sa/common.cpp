@@ -7,6 +7,7 @@
 
 #include "StdInc.h"
 
+#include "Garages.h"
 #include "common.h"
 #include "GxtChar.h"
 #include "CDebugMenu.h"
@@ -14,6 +15,7 @@
 #include "UserDisplay.h"
 #include "PostEffects.h"
 #include "SpecialFX.h"
+
 #include "Hud.h"
 #include "app.h"
 
@@ -315,4 +317,17 @@ std::string UnicodeToUTF8(const std::wstring& str) {
     }
 
     return out;
+}
+
+/*!
+* @notsa
+* @return The anim first found from `ids`
+*/
+CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, std::initializer_list<AnimationId> ids) {
+    for (const auto id : ids) {
+        if (const auto anim = RpAnimBlendClumpGetAssociation(clump, (int32)id)) {
+            return anim;
+        }
+    }
+    return nullptr;
 }
