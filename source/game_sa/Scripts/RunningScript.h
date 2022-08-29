@@ -7,6 +7,7 @@
 #pragma once
 
 #include "eScriptCommands.h"
+#include "OpcodeResult.h"
 #include "eWeaponType.h"
 #include "Ped.h"
 
@@ -93,13 +94,6 @@ enum {
     NUM_TIMERS      = 2
 };
 
-enum OpcodeResult : int8 {
-    OR_CONTINUE        = 0,
-    OR_WAIT            = 1,
-    OR_INTERRUPT       = -1,
-    OR_IMPLEMENTED_YET = -2 // NOTSA
-};
-
 class CRunningScript {
     /*!
      * Needed for compound if statements.
@@ -170,7 +164,6 @@ public:
     using CommandHandlerTable_t = std::array<CommandHandlerFn_t, 27>;
 
     static inline CommandHandlerTable_t& CommandHandlerTable = *(CommandHandlerTable_t*)0x8A6168;
-    static        CommandHandlerTable_t  reSA_CommandHandlerTable;
 
 public:
     static void InjectHooks();
@@ -227,40 +220,17 @@ public:
 
     OpcodeResult ProcessOneCommand();
     OpcodeResult Process();
-    OpcodeResult ProcessCommands0To99(int32 commandId);
-    OpcodeResult ProcessCommands100To199(int32 commandId);
-    OpcodeResult ProcessCommands200To299(int32 commandId);
-    OpcodeResult ProcessCommands300To399(int32 commandId);
-    OpcodeResult ProcessCommands400To499(int32 commandId);
-    OpcodeResult ProcessCommands500To599(int32 commandId);
-    OpcodeResult ProcessCommands600To699(int32 commandId);
-    OpcodeResult ProcessCommands700To799(int32 commandId);
-    OpcodeResult ProcessCommands800To899(int32 commandId);
-    OpcodeResult ProcessCommands900To999(int32 commandId);
-    OpcodeResult ProcessCommands1000To1099(int32 commandId);
-    OpcodeResult ProcessCommands1100To1199(int32 commandId);
-    OpcodeResult ProcessCommands1200To1299(int32 commandId);
-    OpcodeResult ProcessCommands1300To1399(int32 commandId);
-    OpcodeResult ProcessCommands1400To1499(int32 commandId);
-    OpcodeResult ProcessCommands1500To1599(int32 commandId);
-    OpcodeResult ProcessCommands1600To1699(int32 commandId);
-    OpcodeResult ProcessCommands1700To1799(int32 commandId);
-    OpcodeResult ProcessCommands1800To1899(int32 commandId);
-    OpcodeResult ProcessCommands1900To1999(int32 commandId);
-    OpcodeResult ProcessCommands2000To2099(int32 commandId);
-    OpcodeResult ProcessCommands2100To2199(int32 commandId);
-    OpcodeResult ProcessCommands2200To2299(int32 commandId);
-    OpcodeResult ProcessCommands2300To2399(int32 commandId);
-    OpcodeResult ProcessCommands2400To2499(int32 commandId);
-    OpcodeResult ProcessCommands2500To2599(int32 commandId);
-    OpcodeResult ProcessCommands2600To2699(int32 commandId);
-    OpcodeResult ProcessExternalCommands(int32 commandId); // NOTSA
 
     void SetName(const char* name)  { assert(strlen(name) < sizeof(m_szName)); strcpy(m_szName, name); }
     void SetBaseIp(uint8* ip)       { m_pBaseIP = ip; }
     void SetCurrentIp(uint8* ip)    { m_pCurrentIP = ip; }
     void SetActive(bool active)     { m_bIsActive = active; }
     void SetExternal(bool external) { m_bIsExternal = external; }
+
+    template<eScriptCommands Command>
+    OpcodeResult ProcessCommand() {
+        return OR_IMPLEMENTED_YET;
+    }
 };
 
 VALIDATE_SIZE(CRunningScript, 0xE0);

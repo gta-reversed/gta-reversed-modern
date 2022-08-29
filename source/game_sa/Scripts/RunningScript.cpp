@@ -4,39 +4,42 @@
 #include "TheScripts.h"
 #include "CarGenerator.h"
 #include "Hud.h"
+#include "CommandProcessors.hpp"
 
 // https://library.sannybuilder.com/#/sa
 
-//! @NOTSA - Our reversed command handler table. See \r ProcessOneCommand
-CRunningScript::CommandHandlerTable_t CRunningScript::reSA_CommandHandlerTable = {
-    &CRunningScript::ProcessCommands0To99,
-    &CRunningScript::ProcessCommands100To199,
-    &CRunningScript::ProcessCommands200To299,
-    &CRunningScript::ProcessCommands300To399,
-    &CRunningScript::ProcessCommands400To499,
-    &CRunningScript::ProcessCommands500To599,
-    &CRunningScript::ProcessCommands600To699,
-    &CRunningScript::ProcessCommands700To799,
-    &CRunningScript::ProcessCommands800To899,
-    &CRunningScript::ProcessCommands900To999,
-    &CRunningScript::ProcessCommands1000To1099,
-    &CRunningScript::ProcessCommands1100To1199,
-    &CRunningScript::ProcessCommands1200To1299,
-    &CRunningScript::ProcessCommands1300To1399,
-    &CRunningScript::ProcessCommands1400To1499,
-    &CRunningScript::ProcessCommands1500To1599,
-    &CRunningScript::ProcessCommands1600To1699,
-    &CRunningScript::ProcessCommands1700To1799,
-    &CRunningScript::ProcessCommands1800To1899,
-    &CRunningScript::ProcessCommands1900To1999,
-    &CRunningScript::ProcessCommands2000To2099,
-    &CRunningScript::ProcessCommands2100To2199,
-    &CRunningScript::ProcessCommands2200To2299,
-    &CRunningScript::ProcessCommands2300To2399,
-    &CRunningScript::ProcessCommands2400To2499,
-    &CRunningScript::ProcessCommands2500To2599,
-    &CRunningScript::ProcessCommands2600To2699
-};
+namespace detail {
+// We have to balance between recursion and index seq. size, because:
+// - Fold op. by default has maxes out at 256 arg
+// - contexpr recursion is limited to ~1000
+// So we can't rely on using only 1 method, gotta use both at the same time
+// In case we'd ever run into either the fold or recursion limit, this value can be changed.
+constexpr auto FILL_LUT_CHUNK_SIZE = 128;
+
+template<size_t base = 0, bool end = false, size_t lut_size, typename FnT, size_t... idx>
+constexpr void FillLUT(std::array<FnT, lut_size>& lut, std::index_sequence<idx...>) {
+    constexpr auto rem = lut_size - base;
+    if constexpr (sizeof...(idx) > rem) {
+        FillLUT<base, true>(lut, std::make_index_sequence<rem>{});
+    }
+    else {
+        ((lut[base + idx] = &CRunningScript::ProcessCommand<(eScriptCommands)(base + idx)>), ...);
+
+        if constexpr (!end) {
+            FillLUT<base + FILL_LUT_CHUNK_SIZE>(lut, std::make_index_sequence<FILL_LUT_CHUNK_SIZE>{});
+        }
+    }
+}
+
+constexpr auto CreateCommandProcessorLUT() {
+    //constexpr auto lut
+    std::array<OpcodeResult(CRunningScript::*)(), (size_t)COMMAND_HIGHEST_ID> lut{};
+    FillLUT(lut, std::make_index_sequence<FILL_LUT_CHUNK_SIZE>{});
+    return lut;
+}
+}
+
+static constexpr auto s_CommandHandlerLUT = detail::CreateCommandProcessorLUT();
 
 constexpr auto SHORT_STRING_SIZE = 8;
 constexpr auto LONG_STRING_SIZE  = 16;
@@ -803,23 +806,18 @@ void CRunningScript::UpdatePC(int32 newIP) {
 OpcodeResult CRunningScript::ProcessOneCommand() {
     ++CTheScripts::CommandsExecuted;
 
-    int32 command = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+    auto command = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
 
     m_bNotFlag = (command & 0x8000) != 0;
     command &= 0x7FFF;
 
-    const auto InvokeHandlerFromTable = [this, idx = command / 100, command](auto&& tbl) {
-        return std::invoke(tbl[idx], this, command);
-    };
-
     // NOTSA: First we try to call our (reversed) implementation for the current command
-    if (const auto ret = InvokeHandlerFromTable(reSA_CommandHandlerTable); ret != OR_IMPLEMENTED_YET) {
-        // printf("Command %d\n", command);
+    if (const auto ret = std::invoke(s_CommandHandlerLUT[(size_t)command], this); ret != OR_IMPLEMENTED_YET) {
         return ret; // Implemented, don't call original handler.
     }
 
     // Not implemented -> invoke the original opcode
-    return InvokeHandlerFromTable(CommandHandlerTable);
+    return std::invoke(CommandHandlerTable[command / 100], this, command);
 }
 
 // 0x469F00
