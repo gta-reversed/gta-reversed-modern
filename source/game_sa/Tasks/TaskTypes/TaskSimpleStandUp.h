@@ -17,7 +17,7 @@ public:
 public:
     static void InjectHooks();
 
-    constexpr static auto Type = eTaskType::TASK_SIMPLE_CAR_SET_TEMP_ACTION;
+    constexpr static auto Type = eTaskType::TASK_SIMPLE_STAND_UP;
 
     CTaskSimpleStandUp(bool sitAfterStep);
     CTaskSimpleStandUp(const CTaskSimpleStandUp&);
