@@ -160,6 +160,7 @@ public:
     static void AddMirrorAttributeZone(const CVector& center, float unk1, float fWidthY, float fBottomZ, float fWidthX, float unk2, float fTopZ, eZoneAttributes flags, float cm, float vX, float vY, float vZ);
 
     static bool InRoomForAudio();
+    static bool FewerCars();
     static bool CamNoRain();
     static bool PlayerNoRain();
     static bool FewerPeds();
