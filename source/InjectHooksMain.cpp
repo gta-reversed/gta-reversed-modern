@@ -152,6 +152,7 @@
 #include "TaskComplexHitPedWithCar.h"
 #include "TaskSimplePlayerOnFoot.h"
 #include "TaskComplexFollowPedFootsteps.h"
+#include "TaskSimpleFightingControl.h"
 #include "TaskComplexGetUpAndStandStill.h"
 #include "TaskComplexGoPickUpEntity.h"
 #include "TaskSimpleDie.h"
@@ -772,7 +773,7 @@ void InjectHooksMain() {
         // CTaskSimpleDuckWhileShotsWhizzing::InjectHooks();
         // CTaskSimpleEvasiveDive::InjectHooks();
         // CTaskSimpleEvasiveStep::InjectHooks();
-        // CTaskSimpleFightingControl::InjectHooks();
+        CTaskSimpleFightingControl::InjectHooks();
         // CTaskSimpleFinishBrain::InjectHooks();
         // CTaskSimpleGunControl::InjectHooks();
         // CTaskSimpleHailTaxi::InjectHooks();
