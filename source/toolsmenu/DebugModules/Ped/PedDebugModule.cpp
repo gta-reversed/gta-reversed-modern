@@ -36,7 +36,7 @@ void General::ProcessPed(CPed& ped) {
         Text("Pool ID: %d", GetPedPool()->GetIndex(&ped));
         Text("Skin Model: %d", ped.m_nModelIndex);
 
-        const auto pos = ped.GetPosition();
+        const auto& pos = ped.GetPosition();
         Text("Position: %.3f, %.3f, %.3f", pos.x, pos.y, pos.z);
 
         EndTabItem();
