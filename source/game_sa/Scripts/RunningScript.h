@@ -27,15 +27,21 @@ enum eScriptParameterType {
     // Number arrays
     SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY,
     SCRIPT_PARAM_LOCAL_NUMBER_ARRAY,
+
     SCRIPT_PARAM_STATIC_SHORT_STRING,
+
     SCRIPT_PARAM_GLOBAL_SHORT_STRING_VARIABLE,
     SCRIPT_PARAM_LOCAL_SHORT_STRING_VARIABLE,
+
     SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY,
     SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY,
+
     SCRIPT_PARAM_STATIC_PASCAL_STRING,
     SCRIPT_PARAM_STATIC_LONG_STRING,
+
     SCRIPT_PARAM_GLOBAL_LONG_STRING_VARIABLE,
     SCRIPT_PARAM_LOCAL_LONG_STRING_VARIABLE,
+
     SCRIPT_PARAM_GLOBAL_LONG_STRING_ARRAY,
     SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY,
 };
@@ -147,7 +153,7 @@ public:
     tScriptParam    m_aLocalVars[NUM_LOCAL_VARS];
     int32           m_anTimers[NUM_TIMERS];
     bool            m_bIsActive;
-    bool            m_bCondResult;
+    bool            m_bCondResult; ///< Used for `COMMAND_GOTO_IF_FALSE`
     bool            m_bUseMissionCleanup;
     bool            m_bIsExternal;
     bool            m_bTextBlockOverride;

@@ -8,13 +8,15 @@
 #include "CarGenerator.h"
 #include "TheCarGenerators.h"
 #include "FireManager.h"
+#include "CommandParser/Parser.hpp"
 
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_ALL_TAXIS_HAVE_NITRO>() {
     CollectParameters(1);
     if (ScriptParams[0].iParam) {
         CCheat::ApplyCheat(CHEAT_ALL_TAXIS_NITRO);
-    } else {
+    }
+    else {
         CCheat::Disable(CHEAT_ALL_TAXIS_NITRO);
     }
     return OR_CONTINUE;
@@ -110,7 +112,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_TERMINATE_ALL_SCRIPTS_WITH_T
     for (int i = 0; i < 8; i++)
         str[i] = tolower(str[i]);
 
-    CRunningScript *script = CTheScripts::pActiveScripts;
+    CRunningScript* script = CTheScripts::pActiveScripts;
     while (script) {
         CRunningScript* next = script->m_pNext;
         if (!strcmp(script->m_szName, str)) {
@@ -753,37 +755,37 @@ template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SPECIAL_0>() { // 0x0B2 | NOTSA
     NOTSA_UNREACHABLE();
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SPECIAL_1>() { // 0x0B3 | NOTSA
     NOTSA_UNREACHABLE();
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SPECIAL_2>() { // 0x0B4 | NOTSA
     NOTSA_UNREACHABLE();
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SPECIAL_3>() { // 0x0B5 | NOTSA
     NOTSA_UNREACHABLE();
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SPECIAL_4>() { // 0x0B6 | NOTSA
     NOTSA_UNREACHABLE();
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SPECIAL_5>() { // 0x0B7 | NOTSA
     NOTSA_UNREACHABLE();
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SPECIAL_6>() { // 0x0B8 | NOTSA
     NOTSA_UNREACHABLE();
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SPECIAL_7>() { // 0x0B9 | NOTSA
     NOTSA_UNREACHABLE();
@@ -796,21 +798,21 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_WAIT>() { // 0x001
     m_nWakeTime = ScriptParams[0].uParam + CTimer::GetTimeInMS();
     return OR_WAIT;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_GOTO>() { // 0x002 
     CollectParameters(1);
     UpdatePC(ScriptParams[0].iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SHAKE_CAM>() { // 0x003 
     CollectParameters(1);
     CamShakeNoPos(&TheCamera, ScriptParams[0].fParam / 1000.0f);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_VAR_INT>() { // 0x004
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -818,7 +820,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_VAR_INT>() { // 0x004
     *var = ScriptParams[0];
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_VAR_FLOAT>() { // 0x005
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -826,7 +828,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_VAR_FLOAT>() { // 0x005
     *var = ScriptParams[0];
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_LVAR_INT>() { // 0x006
     tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
@@ -834,7 +836,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_LVAR_INT>() { // 0x006
     *var = ScriptParams[0];
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_LVAR_FLOAT>() { // 0x007
     tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
@@ -842,7 +844,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_LVAR_FLOAT>() { // 0x007
     *var = ScriptParams[0];
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_VAL_TO_INT_VAR>() { // 0x008
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -850,7 +852,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_VAL_TO_INT_VAR>() { // 0
     var->iParam += ScriptParams[0].iParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_VAL_TO_FLOAT_VAR>() { // 0x009
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -858,7 +860,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_VAL_TO_FLOAT_VAR>() { //
     var->fParam += ScriptParams[0].fParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_VAL_TO_INT_LVAR>() { // 0x00A
     tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
@@ -866,7 +868,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_VAL_TO_INT_LVAR>() { // 
     var->iParam += ScriptParams[0].iParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_VAL_TO_FLOAT_LVAR>() { // 0x00B
     tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
@@ -874,7 +876,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_VAL_TO_FLOAT_LVAR>() { /
     var->fParam += ScriptParams[0].fParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_VAL_FROM_INT_VAR>() { // 0x00C
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -882,7 +884,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_VAL_FROM_INT_VAR>() { //
     var->iParam -= ScriptParams[0].iParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_VAL_FROM_FLOAT_VAR>() { // 0x00D
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -890,7 +892,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_VAL_FROM_FLOAT_VAR>() { 
     var->fParam -= ScriptParams[0].fParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_VAL_FROM_INT_LVAR>() { // 0x00E
     tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
@@ -898,7 +900,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_VAL_FROM_INT_LVAR>() { /
     var->iParam -= ScriptParams[0].iParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_VAL_FROM_FLOAT_LVAR>() { // 0x00F
     tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
@@ -906,7 +908,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_VAL_FROM_FLOAT_LVAR>() {
     var->fParam -= ScriptParams[0].fParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_MULT_INT_VAR_BY_VAL>() { // 0x010
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -914,7 +916,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_MULT_INT_VAR_BY_VAL>() { // 
     var->iParam *= ScriptParams[0].iParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_MULT_FLOAT_VAR_BY_VAL>() { // 0x011
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -922,7 +924,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_MULT_FLOAT_VAR_BY_VAL>() { /
     var->fParam *= ScriptParams[0].fParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_MULT_INT_LVAR_BY_VAL>() { // 0x012
     tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
@@ -930,7 +932,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_MULT_INT_LVAR_BY_VAL>() { //
     var->iParam *= ScriptParams[0].iParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_MULT_FLOAT_LVAR_BY_VAL>() { // 0x013
     tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
@@ -938,7 +940,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_MULT_FLOAT_LVAR_BY_VAL>() { 
     var->fParam *= ScriptParams[0].fParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_DIV_INT_VAR_BY_VAL>() { // 0x014
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -946,7 +948,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_DIV_INT_VAR_BY_VAL>() { // 0
     var->iParam /= ScriptParams[0].iParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_DIV_FLOAT_VAR_BY_VAL>() { // 0x015
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -954,7 +956,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_DIV_FLOAT_VAR_BY_VAL>() { //
     var->fParam /= ScriptParams[0].fParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_DIV_INT_LVAR_BY_VAL>() { // 0x016
     tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
@@ -962,7 +964,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_DIV_INT_LVAR_BY_VAL>() { // 
     var->iParam /= ScriptParams[0].iParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_DIV_FLOAT_LVAR_BY_VAL>() { // 0x017
     tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
@@ -970,7 +972,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_DIV_FLOAT_LVAR_BY_VAL>() { /
     var->fParam /= ScriptParams[0].fParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER>() { // 0x018
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -978,7 +980,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_GREATER_THAN_NUMB
     UpdateCompareFlag(var->iParam > ScriptParams[0].iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_LVAR_GREATER_THAN_NUMBER>() { // 0x019
     tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
@@ -986,7 +988,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_LVAR_GREATER_THAN_NUM
     UpdateCompareFlag(var->iParam > ScriptParams[0].iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_NUMBER_GREATER_THAN_INT_VAR>() { // 0x01A
     CollectParameters(1);
@@ -994,7 +996,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_NUMBER_GREATER_THAN_INT_V
     UpdateCompareFlag(ScriptParams[0].iParam > var->iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_NUMBER_GREATER_THAN_INT_LVAR>() { // 0x01B
     CollectParameters(1);
@@ -1002,7 +1004,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_NUMBER_GREATER_THAN_INT_L
     UpdateCompareFlag(ScriptParams[0].iParam > var->iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_GREATER_THAN_INT_VAR>() { // 0x01C
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1010,7 +1012,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_GREATER_THAN_INT_
     UpdateCompareFlag(var1->iParam > var2->iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_LVAR_GREATER_THAN_INT_LVAR>() { // 0x01D
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1018,7 +1020,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_LVAR_GREATER_THAN_INT
     UpdateCompareFlag(var1->iParam > var2->iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_GREATER_THAN_INT_LVAR>() { // 0x01E
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1026,7 +1028,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_GREATER_THAN_INT_
     UpdateCompareFlag(var1->iParam > var2->iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_LVAR_GREATER_THAN_INT_VAR>() { // 0x01F
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1034,7 +1036,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_LVAR_GREATER_THAN_INT
     UpdateCompareFlag(var1->iParam > var2->iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_GREATER_THAN_NUMBER>() { // 0x020
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1042,7 +1044,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_GREATER_THAN_NU
     UpdateCompareFlag(var->fParam > ScriptParams[0].fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_LVAR_GREATER_THAN_NUMBER>() { // 0x021
     tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1050,7 +1052,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_LVAR_GREATER_THAN_N
     UpdateCompareFlag(var->fParam > ScriptParams[0].fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_NUMBER_GREATER_THAN_FLOAT_VAR>() { // 0x022
     CollectParameters(1);
@@ -1058,7 +1060,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_NUMBER_GREATER_THAN_FLOAT
     UpdateCompareFlag(ScriptParams[0].fParam > var->fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_NUMBER_GREATER_THAN_FLOAT_LVAR>() { // 0x023
     CollectParameters(1);
@@ -1066,7 +1068,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_NUMBER_GREATER_THAN_FLOAT
     UpdateCompareFlag(ScriptParams[0].fParam > var->fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_GREATER_THAN_FLOAT_VAR>() { // 0x024
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1074,7 +1076,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_GREATER_THAN_FL
     UpdateCompareFlag(var1->fParam > var2->fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_LVAR_GREATER_THAN_FLOAT_LVAR>() { // 0x025
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1082,7 +1084,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_LVAR_GREATER_THAN_F
     UpdateCompareFlag(var1->fParam > var2->fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_GREATER_THAN_FLOAT_LVAR>() { // 0x026
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1090,7 +1092,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_GREATER_THAN_FL
     UpdateCompareFlag(var1->fParam > var2->fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_LVAR_GREATER_THAN_FLOAT_VAR>() { // 0x027
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1098,7 +1100,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_LVAR_GREATER_THAN_F
     UpdateCompareFlag(var1->fParam > var2->fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_TO_NUMBER>() { // 0x028
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1106,7 +1108,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_
     UpdateCompareFlag(var->iParam >= ScriptParams[0].iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL_TO_NUMBER>() { // 0x029
     tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1114,7 +1116,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL
     UpdateCompareFlag(var->iParam >= ScriptParams[0].iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_NUMBER_GREATER_OR_EQUAL_TO_INT_VAR>() { // 0x02A
     CollectParameters(1);
@@ -1122,7 +1124,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_NUMBER_GREATER_OR_EQUAL_T
     UpdateCompareFlag(ScriptParams[0].iParam >= var->iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_NUMBER_GREATER_OR_EQUAL_TO_INT_LVAR>() { // 0x02B
     CollectParameters(1);
@@ -1130,7 +1132,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_NUMBER_GREATER_OR_EQUAL_T
     UpdateCompareFlag(ScriptParams[0].iParam >= var->iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_TO_INT_VAR>() { // 0x02C
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1138,7 +1140,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_
     UpdateCompareFlag(var1->iParam >= var2->iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL_TO_INT_LVAR>() { // 0x02D
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1146,7 +1148,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL
     UpdateCompareFlag(var1->iParam >= var2->iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_TO_INT_LVAR>() { // 0x02E
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1154,7 +1156,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_
     UpdateCompareFlag(var1->iParam >= var2->iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL_TO_INT_VAR>() { // 0x02F
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1162,7 +1164,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL
     UpdateCompareFlag(var1->iParam >= var2->iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_GREATER_OR_EQUAL_TO_NUMBER>() { // 0x030
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1170,7 +1172,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_GREATER_OR_EQUA
     UpdateCompareFlag(var->fParam >= ScriptParams[0].fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_LVAR_GREATER_OR_EQUAL_TO_NUMBER>() { // 0x031
     tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1178,7 +1180,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_LVAR_GREATER_OR_EQU
     UpdateCompareFlag(var->fParam >= ScriptParams[0].fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_NUMBER_GREATER_OR_EQUAL_TO_FLOAT_VAR>() { // 0x032
     CollectParameters(1);
@@ -1186,7 +1188,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_NUMBER_GREATER_OR_EQUAL_T
     UpdateCompareFlag(ScriptParams[0].fParam >= var->fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_NUMBER_GREATER_OR_EQUAL_TO_FLOAT_LVAR>() { // 0x033
     CollectParameters(1);
@@ -1194,7 +1196,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_NUMBER_GREATER_OR_EQUAL_T
     UpdateCompareFlag(ScriptParams[0].fParam >= var->fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_GREATER_OR_EQUAL_TO_FLOAT_VAR>() { // 0x034
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1202,7 +1204,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_GREATER_OR_EQUA
     UpdateCompareFlag(var1->fParam >= var2->fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_LVAR_GREATER_OR_EQUAL_TO_FLOAT_LVAR>() { // 0x035
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1210,7 +1212,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_LVAR_GREATER_OR_EQU
     UpdateCompareFlag(var1->fParam >= var2->fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_GREATER_OR_EQUAL_TO_FLOAT_LVAR>() { // 0x036
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1218,7 +1220,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_GREATER_OR_EQUA
     UpdateCompareFlag(var1->fParam >= var2->fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_LVAR_GREATER_OR_EQUAL_TO_FLOAT_VAR>() { // 0x037
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1226,7 +1228,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_LVAR_GREATER_OR_EQU
     UpdateCompareFlag(var1->fParam >= var2->fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_EQUAL_TO_NUMBER>() { // 0x038
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1234,7 +1236,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_EQUAL_TO_NUMBER>(
     UpdateCompareFlag(var->iParam == ScriptParams[0].iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_LVAR_EQUAL_TO_NUMBER>() { // 0x039
     tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1242,7 +1244,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_LVAR_EQUAL_TO_NUMBER>
     UpdateCompareFlag(var->iParam == ScriptParams[0].iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_EQUAL_TO_INT_VAR>() { // 0x03A
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1250,7 +1252,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_EQUAL_TO_INT_VAR>
     UpdateCompareFlag(var1->iParam == var2->iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_LVAR_EQUAL_TO_INT_LVAR>() { // 0x03B
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1258,7 +1260,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_LVAR_EQUAL_TO_INT_LVA
     UpdateCompareFlag(var1->iParam == var2->iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_EQUAL_TO_INT_LVAR>() { // 0x03C
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1266,7 +1268,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_EQUAL_TO_INT_LVAR
     UpdateCompareFlag(var1->iParam == var2->iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_EQUAL_TO_NUMBER>() { // 0x042
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1274,7 +1276,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_EQUAL_TO_NUMBER
     UpdateCompareFlag(var->fParam == ScriptParams[0].fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_LVAR_EQUAL_TO_NUMBER>() { // 0x043
     tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1282,7 +1284,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_LVAR_EQUAL_TO_NUMBE
     UpdateCompareFlag(var->fParam == ScriptParams[0].fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_EQUAL_TO_FLOAT_VAR>() { // 0x044
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1290,7 +1292,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_EQUAL_TO_FLOAT_
     UpdateCompareFlag(var1->fParam == var2->fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_LVAR_EQUAL_TO_FLOAT_LVAR>() { // 0x045
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1298,7 +1300,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_LVAR_EQUAL_TO_FLOAT
     UpdateCompareFlag(var1->fParam == var2->fParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_EQUAL_TO_FLOAT_LVAR>() { // 0x046
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1306,16 +1308,14 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_FLOAT_VAR_EQUAL_TO_FLOAT_
     UpdateCompareFlag(var1->fParam == var2->fParam);
     return OR_CONTINUE;
 }
-    
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_GOTO_IF_FALSE>() { // 0x04D 
-    CollectParameters(1);
-    if (m_bCondResult)
-        return OR_CONTINUE;
-    UpdatePC(ScriptParams[0].iParam);
-    return OR_CONTINUE;
+
+void GoToIfFalse(CRunningScript& S, int32 label) { // COMMAND_GOTO_IF_FALSE
+    if (S.m_bCondResult) {
+        S.UpdatePC(label);
+    }
 }
-    
+REGISTER_PARSED_COMMAND(COMMAND_GOTO_IF_FALSE, GoToIfFalse)
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_TERMINATE_THIS_SCRIPT>() { // 0x04E 
     if (m_bIsMission)
@@ -1325,7 +1325,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_TERMINATE_THIS_SCRIPT>() { /
     ShutdownThisScript();
     return OR_WAIT;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_START_NEW_SCRIPT>() { // 0x04F
     CollectParameters(1);
@@ -1338,7 +1338,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_START_NEW_SCRIPT>() { // 0x0
     ReadParametersForNewlyStartedScript(script);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_GOSUB>() { // 0x050 
     CollectParameters(1);
@@ -1346,19 +1346,19 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_GOSUB>() { // 0x050
     UpdatePC(ScriptParams[0].iParam);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_RETURN>() { // 0x051
     m_pCurrentIP = m_apStack[--m_nSP];
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_LINE>() { // 0x052
     CollectParameters(6);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_CREATE_PLAYER>() { // 0x053
     CollectParameters(4);
@@ -1371,7 +1371,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_CREATE_PLAYER>() { // 0x053
 
     CPlayerPed::SetupPlayerPed(index);
     CPlayerInfo* playerInfo = &CWorld::Players[index];
-    CPlayerPed*  player      = playerInfo->m_pPed;
+    CPlayerPed* player = playerInfo->m_pPed;
     player->SetCharCreatedBy(PED_MISSION);
     CPlayerPed::DeactivatePlayerPed(index);
 
@@ -1390,7 +1390,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_CREATE_PLAYER>() { // 0x053
     player->GetTaskManager().SetTask(task, TASK_PRIMARY_DEFAULT);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_GET_PLAYER_COORDINATES>() { // 0x054 | NOTSA
     CollectParameters(1);
@@ -1399,7 +1399,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_GET_PLAYER_COORDINATES>() { 
     StoreParameters(3);
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_PLAYER_IN_AREA_2D>() { // 0x056 | NOTSA
     CollectParameters(6);
@@ -1422,7 +1422,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_PLAYER_IN_AREA_2D>() { //
 
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_PLAYER_IN_AREA_3D>() { // 0x057 | NOTSA
     CollectParameters(8);
@@ -1443,7 +1443,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_PLAYER_IN_AREA_3D>() { //
 
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_INT_VAR_TO_INT_VAR>() { // 0x058
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1451,7 +1451,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_INT_VAR_TO_INT_VAR>() { 
     var1->iParam += var2->iParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_FLOAT_VAR_TO_FLOAT_VAR>() { // 0x059
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1459,7 +1459,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_FLOAT_VAR_TO_FLOAT_VAR>(
     var1->fParam += var2->fParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_INT_LVAR_TO_INT_LVAR>() { // 0x05A
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1467,7 +1467,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_INT_LVAR_TO_INT_LVAR>() 
     var1->iParam += var2->iParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_FLOAT_LVAR_TO_FLOAT_LVAR>() { // 0x05B
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1475,7 +1475,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_FLOAT_LVAR_TO_FLOAT_LVAR
     var1->fParam += var2->fParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_INT_VAR_TO_INT_LVAR>() { // 0x05C
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1483,7 +1483,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_INT_VAR_TO_INT_LVAR>() {
     var1->iParam += var2->iParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_FLOAT_VAR_TO_FLOAT_LVAR>() { // 0x05D
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1491,7 +1491,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_FLOAT_VAR_TO_FLOAT_LVAR>
     var1->fParam += var2->fParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_INT_LVAR_TO_INT_VAR>() { // 0x05E
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1499,7 +1499,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_INT_LVAR_TO_INT_VAR>() {
     var1->iParam += var2->iParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_FLOAT_LVAR_TO_FLOAT_VAR>() { // 0x05F
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1507,7 +1507,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_FLOAT_LVAR_TO_FLOAT_VAR>
     var1->fParam += var2->fParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_INT_VAR_FROM_INT_VAR>() { // 0x060
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1515,7 +1515,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_INT_VAR_FROM_INT_VAR>() 
     var1->iParam -= var2->iParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_FLOAT_VAR_FROM_FLOAT_VAR>() { // 0x061
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
@@ -1523,7 +1523,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_FLOAT_VAR_FROM_FLOAT_VAR
     var1->fParam -= var2->fParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_INT_LVAR_FROM_INT_LVAR>() { // 0x062
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
@@ -1531,7 +1531,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_INT_LVAR_FROM_INT_LVAR>(
     var1->iParam -= var2->iParam;
     return OR_CONTINUE;
 }
-    
+
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_FLOAT_LVAR_FROM_FLOAT_LVAR>() { // 0x063
     tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
@@ -2964,7 +2964,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_SWITCH_CAR_GENERATOR>() { //
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_ANDOR>() { // 0x0D6
     CollectParameters(1);
-        m_nLogicalOp = ScriptParams[0].iParam;
+    m_nLogicalOp = ScriptParams[0].iParam;
     if (m_nLogicalOp == ANDOR_NONE)
     {
         m_bCondResult = false;
@@ -2982,9 +2982,37 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_ANDOR>() { // 0x0D6
     return OR_CONTINUE;
 }
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_LAUNCH_MISSION>() { // 0x0D7
-    CollectParameters(1);
-    CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[ScriptParams[0].iParam]);
-    return OR_CONTINUE;
+void LaunchMission(uint32 label) {
+    CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[label]);
 }
+REGISTER_PARSED_COMMAND(COMMAND_LAUNCH_MISSION, LaunchMission)
+
+void AttachCameraToVehicleLookAtVehicle(CVehicle& attachTo, CVector offset, CVehicle& lookAt, float tilt, eSwitchType switchType) {
+    CVector zero{};
+    TheCamera.TakeControlAttachToEntity(
+        &lookAt,
+        &attachTo,
+        &offset,
+        &zero,
+        tilt,
+        switchType,
+        1
+    );
+}
+REGISTER_PARSED_COMMAND(COMMAND_ATTACH_CAMERA_TO_VEHICLE_LOOK_AT_VEHICLE, AttachCameraToVehicleLookAtVehicle)
+
+float GetCarSpeed(CVehicle& veh) {
+    return veh.m_vecMoveSpeed.Magnitude() * 50.f;
+}
+REGISTER_PARSED_COMMAND(COMMAND_GET_CAR_SPEED, GetCarSpeed)
+
+notsa::script::CompareFlagUpdate IsCharInArea2D(CRunningScript& S, CPed& ped, CVector2D a, CVector2D b, bool drawSphere) {
+    const auto Check = [&](const auto& e) { return e.IsWithinArea(a.x, a.y, b.x, b.y); };
+
+    if (drawSphere) {
+        CTheScripts::HighlightImportantArea(reinterpret_cast<int32>(&S) + reinterpret_cast<int32>(S.m_pCurrentIP), a.x, a.y, b.x, b.y, -100.f);
+    }
+
+    return { ped.IsInVehicle() ? Check(*ped.m_pVehicle) : Check(ped) };
+}
+REGISTER_PARSED_COMMAND(COMMAND_IS_CHAR_IN_AREA_2D, IsCharInArea2D)
