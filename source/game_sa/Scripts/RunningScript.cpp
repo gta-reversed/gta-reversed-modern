@@ -6,7 +6,22 @@
 #include "Hud.h"
 
 // Commands stuff
+#include "Commands/Basic.hpp"
+#include "Commands/Car.hpp"
+#include "Commands/Comparasion.hpp"
 #include "Commands/Generic.hpp"
+#include "Commands/Mission.hpp"
+#include "Commands/Player.hpp"
+#include "Commands/Sequence.hpp"
+#include "Commands/Utility.hpp"
+#include "Commands/Camera.hpp"
+#include "Commands/Char.hpp"
+#include "Commands/Clock.hpp"
+#include "Commands/Game.hpp"
+#include "Commands/Math.hpp"
+#include "Commands/Pad.hpp"
+#include "Commands/Script.hpp"
+#include "Commands/Text.hpp"
 
 #include "CommandParser/LUTGenerator.hpp"
 
