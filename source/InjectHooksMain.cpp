@@ -239,6 +239,7 @@
 #include "TaskSimpleFight.h"
 #include "TaskComplexUseWaterCannon.h"
 #include "TaskComplexDriveToPoint.h"
+#include "TaskSimpleSetPedAsAutoDriver.h"
 #include "TaskSimpleSlideToCoord.h"
 #include "TaskComplexPartnerDeal.h"
 #include "TaskSimplePickUpEntity.h"
@@ -804,7 +805,7 @@ void InjectHooksMain() {
         CTaskSimpleSetCharDecisionMaker::InjectHooks();
         // CTaskSimpleSetCharIgnoreWeaponRangeFlag::InjectHooks();
         // CTaskSimpleSetKindaStayInSamePlace::InjectHooks();
-        // CTaskSimpleSetPedAsAutoDriver::InjectHooks();
+        CTaskSimpleSetPedAsAutoDriver::InjectHooks();
         // CTaskSimpleShakeFist::InjectHooks();
         CTaskSimpleSitDown::InjectHooks();
         CTaskSimpleSitIdle::InjectHooks();
