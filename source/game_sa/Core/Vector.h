@@ -7,7 +7,7 @@
 #pragma once
 
 #include <numeric>
-
+#include <span>
 #include "PluginBase.h" // !!!
 #include "RenderWare.h"
 
@@ -118,6 +118,10 @@ public:
 
     static CVector AverageN(const CVector* begin, size_t n) {
         return Average(begin, begin + n);
+    }
+
+    auto GetComponents() const {
+        return std::span{ reinterpret_cast<const float*>(this), 3 };
     }
 
     /*!
