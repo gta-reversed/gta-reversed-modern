@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <span>
+
 #include "RenderWare.h"
 
 class CVector2D : public RwV2d {
@@ -76,6 +78,10 @@ public:
      
     [[nodiscard]] float Heading() const {
         return std::atan2(-x, y);
+    }
+
+    auto GetComponents() const {
+        return std::span{ reinterpret_cast<const float*>(this), 2 };
     }
 };
 
