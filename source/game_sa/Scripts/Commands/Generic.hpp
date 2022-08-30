@@ -2939,48 +2939,23 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_RESTORE_CLOCK>() { // 0x254
     return OR_CONTINUE;
 }
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_PLAYER_PLAYING>() { // 0x256
-    CollectParameters(1);
-    UpdateCompareFlag(FindPlayerInfo(ScriptParams[0].iParam).m_nPlayerState == PLAYERSTATE_PLAYING);
-    return OR_CONTINUE;
+auto IsPlayerPlaying(int32 playerId) -> notsa::script::CompareFlagUpdate {
+    return { FindPlayerInfo(playerId).m_nPlayerState == PLAYERSTATE_PLAYING };
 }
+REGISTER_PARSED_COMMAND(COMMAND_IS_PLAYER_PLAYING, IsPlayerPlaying)
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_SWITCH_CAR_GENERATOR>() { // 0x14C
-    CollectParameters(2);
-    CCarGenerator* generator = CTheCarGenerators::Get(ScriptParams[0].iParam);
-    if (ScriptParams[1].iParam) {
+void SwitchCarGenerator(int32 generatorId, int32 count) {
+    const auto generator = CTheCarGenerators::Get(generatorId);
+    if (count) {
         generator->SwitchOn();
-        if (ScriptParams[1].iParam <= 100)
-            generator->m_nGenerateCount = ScriptParams[1].iParam;
-    }
-    else {
+        if (count <= 100) {
+            generator->m_nGenerateCount = count;
+        }
+    } else {
         generator->SwitchOff();
     }
-    return OR_CONTINUE;
 }
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_ANDOR>() { // 0x0D6
-    CollectParameters(1);
-    m_nLogicalOp = ScriptParams[0].iParam;
-    if (m_nLogicalOp == ANDOR_NONE)
-    {
-        m_bCondResult = false;
-    }
-    else if (m_nLogicalOp >= ANDS_1 && m_nLogicalOp <= ANDS_8)
-    {
-        m_nLogicalOp++;
-        m_bCondResult = true;
-    }
-    else if (m_nLogicalOp >= ORS_1 && m_nLogicalOp <= ORS_8)
-    {
-        m_nLogicalOp++;
-        m_bCondResult = false;
-    }
-    return OR_CONTINUE;
-}
+REGISTER_PARSED_COMMAND(COMMAND_SWITCH_CAR_GENERATOR, SwitchCarGenerator)
 
 void LaunchMission(uint32 label) {
     CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[label]);
@@ -3006,7 +2981,7 @@ float GetCarSpeed(CVehicle& veh) {
 }
 REGISTER_PARSED_COMMAND(COMMAND_GET_CAR_SPEED, GetCarSpeed)
 
-notsa::script::CompareFlagUpdate IsCharInArea2D(CRunningScript& S, CPed& ped, CVector2D a, CVector2D b, bool drawSphere) {
+auto IsCharInArea2D(CRunningScript& S, CPed& ped, CVector2D a, CVector2D b, bool drawSphere) -> notsa::script::CompareFlagUpdate {
     const auto Check = [&](const auto& e) { return e.IsWithinArea(a.x, a.y, b.x, b.y); };
 
     if (drawSphere) {
@@ -3016,3 +2991,24 @@ notsa::script::CompareFlagUpdate IsCharInArea2D(CRunningScript& S, CPed& ped, CV
     return { ped.IsInVehicle() ? Check(*ped.m_pVehicle) : Check(ped) };
 }
 REGISTER_PARSED_COMMAND(COMMAND_IS_CHAR_IN_AREA_2D, IsCharInArea2D)
+
+template<>
+OpcodeResult CRunningScript::ProcessCommand<COMMAND_ANDOR>() { // 0x0D6
+    CollectParameters(1);
+    m_nLogicalOp = ScriptParams[0].iParam;
+    if (m_nLogicalOp == ANDOR_NONE)
+    {
+        m_bCondResult = false;
+    }
+    else if (m_nLogicalOp >= ANDS_1 && m_nLogicalOp <= ANDS_8)
+    {
+        m_nLogicalOp++;
+        m_bCondResult = true;
+    }
+    else if (m_nLogicalOp >= ORS_1 && m_nLogicalOp <= ORS_8)
+    {
+        m_nLogicalOp++;
+        m_bCondResult = false;
+    }
+    return OR_CONTINUE;
+}
