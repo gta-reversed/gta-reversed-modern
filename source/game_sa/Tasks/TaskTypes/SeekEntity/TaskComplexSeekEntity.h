@@ -2,9 +2,7 @@
 
 #include "TaskComplex.h"
 #include "TaskTimer.h"
-#include "Ped.h" // eMoveState
-#include "EntitySeekPosCalculator.h"
-#include "EntitySeekPosCalculatorRadiusAngleOffset.h"
+#include "Ped.h" // TODO: eMoveState (When possible move to an enum file)
 #include "extensions/utility.hpp"
 #include "PedPlacement.h"
 #include "TaskSimpleCarDriveTimed.h"
