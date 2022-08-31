@@ -222,7 +222,7 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
     m_pEntityIgnoredCollision = nullptr;
     m_nSwimmingMoveState = 0;
     m_pFire = nullptr;
-    field_734 = 1.0f;
+    m_fireDmgMult = 1.0f;
     m_pTargetedObject = nullptr;
     m_pLookTarget = nullptr;
     m_fLookDirection = 0.0f;

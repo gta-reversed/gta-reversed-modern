@@ -183,7 +183,7 @@ void CAnimBlendSequence::Print() {
 
 // Can return child frame casted as root frame, the translation shouldn't be accessed then
 // 0x4CF1F0
-KeyFrameTrans* CAnimBlendSequence::GetUncompressedFrame(int32 frame) {
+KeyFrameTrans* CAnimBlendSequence::GetUncompressedFrame(int32 frame) const {
     if (m_isRoot) {
         return &static_cast<KeyFrameTrans*>(m_pFrames)[frame];
     }
@@ -194,7 +194,7 @@ KeyFrameTrans* CAnimBlendSequence::GetUncompressedFrame(int32 frame) {
 
 // Can return child frame casted as root frame, the translation shouldn't be accessed then
 // 0x4CF220
-KeyFrameTransCompressed* CAnimBlendSequence::GetCompressedFrame(int32 frame) {
+KeyFrameTransCompressed* CAnimBlendSequence::GetCompressedFrame(int32 frame) const {
     if (m_isRoot) {
         return &static_cast<KeyFrameTransCompressed*>(m_pFrames)[frame];
     }
