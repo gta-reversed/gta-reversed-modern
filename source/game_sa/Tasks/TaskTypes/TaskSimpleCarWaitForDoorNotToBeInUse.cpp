@@ -45,7 +45,7 @@ bool CTaskSimpleCarWaitForDoorNotToBeInUse::MakeAbortable(CPed* ped, eAbortPrior
 
 // 0x646C90
 bool CTaskSimpleCarWaitForDoorNotToBeInUse::ProcessPed(CPed* ped) {
-    return !m_veh || m_veh->AnyOfDoorsReady(m_doorsToWaitFor[0], m_doorsToWaitFor[1]);
+    return !m_veh || !CCarEnterExit::IsCarDoorInUse(m_veh, m_doorsToWaitFor[0], m_doorsToWaitFor[1]);
 }
 
 // 0x646CC0
