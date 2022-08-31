@@ -251,7 +251,7 @@ public:
             notsa::AutoCallOnDestruct makePedTalkOnReturn{ [this, ped] {
                 if (m_entityToSeek && m_entityToSeek->IsPed()) {
                     if (m_entityToSeek->AsPed()->IsPlayer()) { // Entity to seek is a player
-                        if (FindPlayerPed()->GetGroup().GetMembership().IsFollower(ped)) { // And ped is part of the player's group
+                        if (FindPlayerPed()->GetPlayerGroup().GetMembership().IsFollower(ped)) { // And ped is part of the player's group
                             if (ped->IsJoggingOrFaster()) {
                                 if (((uint16)CTimer::GetFrameCounter() + ped->m_nRandomSeed) % 16384 == 0) {
                                     ped->Say(91);
