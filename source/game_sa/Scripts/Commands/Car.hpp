@@ -1,5 +1,7 @@
 #pragma once
 
+#include "TheCarGenerators.h"
+
 /*!
 * Various utility commands
 */
@@ -28,9 +30,18 @@ void SwitchCarGenerator(int32 generatorId, int32 count) {
         generator->SwitchOff();
     }
 }
-REGISTER_PARSED_COMMAND(COMMAND_SWITCH_CAR_GENERATOR, SwitchCarGenerator)
+REGISTER_COMMAND_HANDLER(COMMAND_SWITCH_CAR_GENERATOR, SwitchCarGenerator);
 
 float GetCarSpeed(CVehicle& veh) {
     return veh.m_vecMoveSpeed.Magnitude() * 50.f;
 }
-REGISTER_PARSED_COMMAND(COMMAND_GET_CAR_SPEED, GetCarSpeed)
+REGISTER_COMMAND_HANDLER(COMMAND_GET_CAR_SPEED, GetCarSpeed);
+
+template<>
+OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_CAR_DRIVING_STYLE>() { // 0x0AE
+    CollectParameters(2);
+    auto* vehicle = GetVehiclePool()->GetAtRef(ScriptParams[0].iParam);
+    assert(vehicle);
+    vehicle->m_autoPilot.m_nCarDrivingStyle = static_cast<eCarDrivingStyle>(ScriptParams[1].u8Param);
+    return OR_CONTINUE;
+}

@@ -11,7 +11,7 @@ namespace notsa {
 namespace script {
 namespace detail {
 template<typename T_FnRet, typename... T_FnArgs, typename... T_CollectedArgs>
-void CollectArgsAndCall(CRunningScript* S, T_FnRet(*CommandFn)(T_FnArgs...), T_CollectedArgs&&... args) {
+OpcodeResult CollectArgsAndCall(CRunningScript* S, T_FnRet(*CommandFn)(T_FnArgs...), T_CollectedArgs&&... args) {
     if constexpr (sizeof...(T_CollectedArgs) == sizeof...(T_FnArgs)) { // Has it collected enough args?
         const auto CallCommandFn = [&] {
             return std::invoke(CommandFn, std::forward<T_CollectedArgs>(args)...);
@@ -19,16 +19,21 @@ void CollectArgsAndCall(CRunningScript* S, T_FnRet(*CommandFn)(T_FnArgs...), T_C
         if constexpr (std::is_same_v<T_FnRet, void>) {
             CallCommandFn(); // Returns void, nothing to push
         } else {
-            ::notsa::script::StoreArg(S, CallCommandFn()); // Push result to script
+            const auto ret = CallCommandFn(); 
+            if constexpr (std::is_same_v<T_FnRet, OpcodeResult>) { // Special handling for OpcodeResult's, hopefully soon to be removed (once all commands start using the parser)
+                return ret;
+            } else {
+                StoreArg(S, ret); // Store result to script
+            }
         }
+        return OR_CONTINUE;
     } else {
-        using namespace notsa;
         // Not enough args, collect more.
-        CollectArgsAndCall(
+        return CollectArgsAndCall(
             S,
             CommandFn,
             std::forward<T_CollectedArgs>(args)..., // Forward read ones
-            script::Read<nth_element_t<sizeof...(T_CollectedArgs), T_FnArgs...>>(S) // Read next parameter
+            notsa::script::Read<nth_element_t<sizeof...(T_CollectedArgs), T_FnArgs...>>(S) // Read next parameter
         ); 
     }
 }
@@ -36,18 +41,22 @@ void CollectArgsAndCall(CRunningScript* S, T_FnRet(*CommandFn)(T_FnArgs...), T_C
 
 template<eScriptCommands Command, auto* CommandFn>
 OpcodeResult CommandParser(CRunningScript* S) {
-    detail::CollectArgsAndCall(S, CommandFn);
-    return OR_CONTINUE;
+    return detail::CollectArgsAndCall(S, CommandFn);
 }
 
 };
 };
 
+template<eScriptCommands Command>
+struct CommandHandler : std::false_type {};
+
 /*!
 * Use this macro to register a parsed function
 */
-#define REGISTER_PARSED_COMMAND(cmd, fn) \
+#define REGISTER_COMMAND_HANDLER(cmd, fn) \
     template<> \
-    OpcodeResult CRunningScript::ProcessCommand<cmd>() { \
-        return notsa::script::CommandParser<cmd, fn>(this); \
+    struct CommandHandler<cmd> : std::true_type { \
+        constexpr static auto Command  = cmd; \
+        constexpr static auto Function = fn; \
     } \
+

@@ -6,6 +6,8 @@
 #include "Hud.h"
 
 // Commands stuff
+#include "CommandParser/Parser.hpp"
+
 #include "Commands/Basic.hpp"
 #include "Commands/Car.hpp"
 #include "Commands/Comparasion.hpp"
@@ -23,11 +25,12 @@
 #include "Commands/Script.hpp"
 #include "Commands/Text.hpp"
 
+// Must be included after the commands
 #include "CommandParser/LUTGenerator.hpp"
 
 // https://library.sannybuilder.com/#/sa
 
-static constexpr auto s_CommandHandlerLUT = notsa::detail::script::GenerateLUT();
+static constexpr auto s_CommandHandlerLUT = notsa::script::detail::GenerateLUT();
 
 constexpr auto SHORT_STRING_SIZE = 8;
 constexpr auto LONG_STRING_SIZE  = 16;
@@ -455,7 +458,7 @@ tScriptParam* CRunningScript::GetPointerToScriptVariable(eScriptVariableType var
         return GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, arrElemSize);
 
     default:
-        return nullptr;
+        NOTSA_UNREACHABLE();
     }
 }
 
@@ -789,23 +792,27 @@ void CRunningScript::UpdatePC(int32 newIP) {
     else
         m_pCurrentIP = &m_pBaseIP[-newIP];
 }
+static std::array<size_t, COMMAND_HIGHEST_ID> counter{};
 
 // 0x469EB0, inlined
 OpcodeResult CRunningScript::ProcessOneCommand() {
     ++CTheScripts::CommandsExecuted;
 
-    auto command = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+    union {
+        int16 op;
+        struct {
+            uint16 command : 15;
+            uint16 notFlag : 1;
+        };
+    } op = { CTheScripts::Read2BytesFromScript(m_pCurrentIP) };
 
-    m_bNotFlag = (command & 0x8000) != 0;
-    command &= 0x7FFF;
+    counter[op.command]++;
 
-    // NOTSA: First we try to call our (reversed) implementation for the current command
-    if (const auto ret = std::invoke(s_CommandHandlerLUT[(size_t)command], this); ret != OR_IMPLEMENTED_YET) {
-        return ret; // Implemented, don't call original handler.
-    }
+    m_bNotFlag = op.notFlag;
 
-    // Not implemented -> invoke the original opcode
-    return std::invoke(CommandHandlerTable[command / 100], this, command);
+    //return std::invoke(CommandHandlerTable[(size_t)op.command / 100], this, (eScriptCommands)op.command);
+
+    return std::invoke(s_CommandHandlerLUT[(size_t)op.command], this);
 }
 
 // 0x469F00

@@ -235,7 +235,8 @@ public:
 
     template<eScriptCommands Command>
     OpcodeResult ProcessCommand() {
-        return OR_IMPLEMENTED_YET;
+        // By default call original GTA handler
+        return std::invoke(CommandHandlerTable[(size_t)Command / 100], this, Command);
     }
 };
 

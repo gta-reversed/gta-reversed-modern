@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CommandParser/Parser.hpp"
+
 /*!
 * Various mission commands
 */
@@ -89,5 +91,5 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_START_SCRIPT_FIRE>() { // 0x
 void LaunchMission(uint32 label) {
     CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[label]);
 }
-REGISTER_PARSED_COMMAND(COMMAND_LAUNCH_MISSION, LaunchMission)
+REGISTER_COMMAND_HANDLER(COMMAND_LAUNCH_MISSION, LaunchMission);
 

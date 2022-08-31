@@ -81,6 +81,12 @@ CRunningScript& Read<CRunningScript&>(CRunningScript* S) {
     return *S;
 }
 
+// Same as above, but returns a pointer instead
+template<>
+CRunningScript* Read<CRunningScript*>(CRunningScript* S) {
+    return S;
+}
+
 template<>
 CVector Read<CVector>(CRunningScript* S) {
     return { Read<float>(S), Read<float>(S), Read<float>(S) };

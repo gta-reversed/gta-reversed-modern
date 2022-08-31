@@ -1,9 +1,11 @@
 #pragma once
 
+#include "RunningScript.h"
+#include "CommandParser/Parser.hpp"
+
 /*!
 * Various player commands
 */
-
 
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_CREATE_PLAYER>() { // 0x053
@@ -94,5 +96,5 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_PLAYER_IN_AREA_3D>() { //
 auto IsPlayerPlaying(int32 playerId) -> notsa::script::CompareFlagUpdate {
     return { FindPlayerInfo(playerId).m_nPlayerState == PLAYERSTATE_PLAYING };
 }
-REGISTER_PARSED_COMMAND(COMMAND_IS_PLAYER_PLAYING, IsPlayerPlaying)
+REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_PLAYING, IsPlayerPlaying);
 

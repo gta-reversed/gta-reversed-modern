@@ -13,7 +13,7 @@ auto IsCharInArea2D(CRunningScript& S, CPed& ped, CVector2D a, CVector2D b, bool
 
     return { ped.IsInVehicle() ? Check(*ped.m_pVehicle) : Check(ped) };
 }
-REGISTER_PARSED_COMMAND(COMMAND_IS_CHAR_IN_AREA_2D, IsCharInArea2D)
+REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_AREA_2D, IsCharInArea2D);
 
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_CHAR_PROOFS>() { // 0x2AB
@@ -27,5 +27,3 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_CHAR_PROOFS>() { // 0x2A
     ped->physicalFlags.bMeleeProof = ScriptParams[5].uParam;
     return OR_CONTINUE;
 }
-
-
