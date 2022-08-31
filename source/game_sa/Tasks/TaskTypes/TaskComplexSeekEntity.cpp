@@ -1,11 +1,19 @@
 #include "StdInc.h"
+
 #include "TaskComplexSeekEntity.h"
+
+#include "extensions/utility.hpp"
+#include "PedPlacement.h"
+#include "TaskSimpleCarDriveTimed.h"
 #include "TaskSimpleTired.h"
 #include "TaskComplexFollowNodeRoute.h"
-#include "extensions/utility.hpp"
 #include "TaskComplexGoToPointAndStandStill.h"
+#include "TaskSimpleCarDrive.h"
+#include "TaskComplexLeaveCar.h"
+#include "TaskComplexSequence.h"
+#include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskSimpleStandStill.h"
-#include "PedPlacement.h"
+#include "TaskSimpleTired.h"
 
 // 0x493730
 /*!
@@ -22,69 +30,162 @@ CTaskComplexSeekEntity<T>::CTaskComplexSeekEntity(
     bool     flag0,
     bool     flag1
 ) :
-    m_entity{entity},
+    m_entityToSeek{entity},
     m_seekInterval{ seekInterval },
     m_scanInterval{ scanInterval },
     m_maxEntityDist2D{maxEntityDist2D},
     m_moveStateRadius{moveStateRadius},
     m_unk2{unk2},
     m_flag0x1{flag0},
-    m_flag0x2{flag1}
+    m_faceSeekEntityAfterReachingIt{flag1}
 {
-    CEntity::SafeRegisterRef(m_entity);
+    CEntity::SafeRegisterRef(m_entityToSeek);
 }
 
-// 0x493890
+template<typename T>
+CTaskComplexSeekEntity<T>::CTaskComplexSeekEntity(const CTaskComplexSeekEntity& o) :
+    m_entityToSeek{ o.m_entityToSeek },
+    m_seekInterval{ o.m_seekInterval },
+    m_scanInterval{ o.m_scanInterval },
+    m_maxEntityDist2D{ o.m_maxEntityDist2D },
+    m_moveStateRadius{ o.m_moveStateRadius },
+    m_unk2{ o.m_unk2 },
+    m_entitySeekPosCalculator{ o.m_entitySeekPosCalculator },
+    m_minEntityDist2D{ o.m_minEntityDist2D },
+    m_moveState{ o.m_moveState },
+    m_flag0x1{ o.m_flag0x1 },
+    m_faceSeekEntityAfterReachingIt{ true },
+    m_hasReachedSeekEntity{ o.m_hasReachedSeekEntity }
+{
+    CEntity::SafeRegisterRef(m_entityToSeek);
+}
+
 template<typename T>
 CTaskComplexSeekEntity<T>::~CTaskComplexSeekEntity() {
-    CEntity::SafeCleanUpRef(m_entity);
+    CEntity::SafeCleanUpRef(m_entityToSeek);
 }
 
 template<typename T>
 CTask* CTaskComplexSeekEntity<T>::CreateSubTask(eTaskType type, CPed* ped) {
-    return nullptr;
+    switch (type) {
+    case TASK_FINISHED:
+        return nullptr;
+    case TASK_COMPLEX_TURN_TO_FACE_ENTITY:
+        return new CTaskComplexTurnToFaceEntityOrCoord{ m_entityToSeek };
+    case TASK_COMPLEX_FOLLOW_NODE_ROUTE:
+        return new CTaskComplexFollowNodeRoute{
+            m_moveState,
+            GetSeekPos(),
+            m_moveStateRadius,
+            m_unk2,
+            false,
+            -1,
+            true
+        };
+    case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL:
+        return new CTaskComplexGoToPointAndStandStill{
+            m_moveState,
+            GetSeekPos(),
+            m_maxEntityDist2D,
+            m_moveStateRadius,
+            false,
+            false
+        };
+    case TASK_SIMPLE_CAR_DRIVE_TIMED:
+        return new CTaskSimpleCarDriveTimed{ ped->m_pVehicle, 2000 };
+    case TASK_COMPLEX_LEAVE_CAR:
+        return new CTaskComplexLeaveCar{ ped->m_pVehicle, TARGET_DOOR_FRONT_LEFT, 0, true, false };
+    case TASK_COMPLEX_SEQUENCE: {
+        const auto seq = new CTaskComplexSequence{};
+        if (m_faceSeekEntityAfterReachingIt) {
+            seq->AddTask(new CTaskComplexTurnToFaceEntityOrCoord{ m_entityToSeek });
+        }
+        seq->AddTask(new CTaskSimpleStandStill{ 100 });
+        return seq;
+    }
+    case TASK_SIMPLE_STAND_STILL:
+        return new CTaskSimpleStandStill{ 2000 };
+    case TASK_SIMPLE_TIRED:
+        return new CTaskSimpleTired{ 1000u };
+    default:
+        NOTSA_UNREACHABLE();
+    }
 }
 
-// 0x495FB0
-template<typename T>
-CTask* CTaskComplexSeekEntity<T>::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x495FB0, CTaskComplexSeekEntity<T>*>(this);
-}
-
-// 0x493800
-template<typename T>
-eTaskType CTaskComplexSeekEntity<T>::GetTaskType() {
-    return plugin::CallMethodAndReturn<eTaskType, 0x493800, CTaskComplexSeekEntity<T>*>(this);
-}
-
-// 0x493810
 template<typename T>
 bool CTaskComplexSeekEntity<T>::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
-    return plugin::CallMethodAndReturn<bool, 0x493810, CTaskComplexSeekEntity<T>*, CPed*, eAbortPriority, CEvent const*>(this, ped, priority, event);
+    if (priority == ABORT_PRIORITY_LEISURE) {
+        m_scanInterval = -1;
+        m_scanTimer.SetAsOutOfTime();
+    }
+
+    if (m_pSubTask->MakeAbortable(ped, priority, event)) {
+        m_seekTimer.SetAsOutOfTime();
+        return true;
+    }
+
+    return false;
 }
 
-// 0x496080
 template<typename T>
 CTask* CTaskComplexSeekEntity<T>::CreateNextSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x496080, CTaskComplexSeekEntity<T>*, CPed*>(this, ped);
+    switch (m_pSubTask->GetTaskType()) {
+    case TASK_COMPLEX_SEQUENCE:
+    case TASK_COMPLEX_TURN_TO_FACE_ENTITY:
+        return CreateSubTask(TASK_FINISHED, ped);
+    case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL: {
+        if (const auto dist2DSq = (ped->GetPosition() - GetSeekPos(ped)).SquaredMagnitude2D(); dist2DSq > sq(m_maxEntityDist2D)) {
+            return CreateSubTaskWhenPedIsTooFarFromEntity(ped, dist2DSq);
+        }
+        m_hasReachedSeekEntity = true;
+        return CreateSubTask(m_faceSeekEntityAfterReachingIt ? TASK_COMPLEX_TURN_TO_FACE_ENTITY : TASK_FINISHED, ped); // Ternary inverted
+    }
+    case TASK_SIMPLE_CAR_DRIVE_TIMED:
+        return CreateFirstSubTask(ped);
+    case TASK_COMPLEX_LEAVE_CAR:
+        return CreateSubTask(ped->bInVehicle ? TASK_FINISHED : TASK_SIMPLE_CAR_DRIVE_TIMED, ped);
+    case TASK_SIMPLE_STAND_STILL:
+        return CreateSubTask(TASK_SIMPLE_STAND_STILL, ped);
+    case TASK_SIMPLE_TIRED: {
+        CTaskSimpleStandStill task{ -1 };
+        task.ProcessPed(ped);
+        return CreateSubTask(TASK_FINISHED, ped);
+    }
+    default:
+        NOTSA_UNREACHABLE();
+    }
 }
 
-// 0x496600
 template<typename T>
 CTask* CTaskComplexSeekEntity<T>::CreateFirstSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x496600, CTaskComplexSeekEntity<T>*, CPed*>(this, ped);
+    m_scanTimer.Start(m_scanInterval);
+
+    if (!m_entityToSeek) {
+        return CreateSubTask(TASK_SIMPLE_TIRED, ped);
+    }
+
+    if (ped->IsInVehicle()) {
+        return CreateSubTask(TASK_COMPLEX_LEAVE_CAR, ped);
+    }
+ 
+    if (const auto dist2DSq = (ped->GetPosition() - GetSeekPos(ped)).SquaredMagnitude2D(); dist2DSq > sq(m_maxEntityDist2D)) {
+        return CreateSubTaskWhenPedIsTooFarFromEntity(ped, dist2DSq);
+    }
+
+    m_hasReachedSeekEntity = true;
+    ped->SetMoveState(PEDMOVE_STILL);
+    return CreateSubTask(TASK_COMPLEX_SEQUENCE, ped);
 }
 
-// 0x496760
 template<typename T>
 CTask* CTaskComplexSeekEntity<T>::ControlSubTask(CPed* ped) {
-    // Boat in contact with both peds (that is, in case m_entity is a ped)
+    // Boat in contact with both peds (that is, in case m_entityToSeek is a ped)
     const auto commonBoat = [this, ped]() -> CBoat* {
-        if (!m_entity || !m_entity->IsPed()) {
+        if (!m_entityToSeek || !m_entityToSeek->IsPed()) {
             return nullptr;
         }
 
-        const auto toSeekPed = m_entity->AsPed();
+        const auto toSeekPed = m_entityToSeek->AsPed();
 
         if (!CPedGroups::AreInSameGroup(toSeekPed, ped)) {
             return nullptr;
@@ -120,8 +221,8 @@ CTask* CTaskComplexSeekEntity<T>::ControlSubTask(CPed* ped) {
         || m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)
     ) {
         notsa::AutoCallOnDestruct makePedTalkOnReturn{ [this, ped] {
-            if (m_entity && m_entity->IsPed()) {
-                if (m_entity->AsPed()->IsPlayer()) { // Entity to seek is a player
+            if (m_entityToSeek && m_entityToSeek->IsPed()) {
+                if (m_entityToSeek->AsPed()->IsPlayer()) { // Entity to seek is a player
                     if (FindPlayerPed()->GetGroup().GetMembership().IsFollower(ped)) { // And ped is part of the player's group
                         if (ped->IsJoggingOrFaster()) {
                             if (((uint16)CTimer::GetFrameCounter() + ped->m_nRandomSeed) % 16384 == 0) {
@@ -142,7 +243,7 @@ CTask* CTaskComplexSeekEntity<T>::ControlSubTask(CPed* ped) {
             return nullptr;
         }
 
-        if (!m_entity) {
+        if (!m_entityToSeek) {
             return m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr) ? nullptr : m_pSubTask;
         }
 
@@ -165,7 +266,7 @@ CTask* CTaskComplexSeekEntity<T>::ControlSubTask(CPed* ped) {
         m_seekTimer.Start(m_seekInterval);
 
         CVector seekPos{};
-        m_entitySeekPosCalculator.ComputeEntitySeekPos(*ped, *m_entity, seekPos);
+        m_entitySeekPosCalculator.ComputeEntitySeekPos(*ped, *m_entityToSeek, seekPos);
         const auto pedToSeekPosDist2dSq = (ped->GetPosition() - seekPos).SquaredMagnitude2D();
 
         if (subTaskType == TASK_COMPLEX_FOLLOW_NODE_ROUTE) {
@@ -205,4 +306,29 @@ CTask* CTaskComplexSeekEntity<T>::ControlSubTask(CPed* ped) {
     );
 
     return new CTaskSimpleStandStill{ 2000 };
+}
+
+/*!
+* @notsa
+* @brief Calculate the seek position
+*/
+template<typename T>
+CVector CTaskComplexSeekEntity<T>::GetSeekPos(CPed* ped) {
+    CVector seekPos{};
+    m_entitySeekPosCalculator.ComputeEntitySeekPos(*ped, *m_entityToSeek, seekPos);
+    return seekPos;
+}
+
+/*!
+* @notsa
+* @brief Create task in the special case that the see
+*/
+template<typename T>
+CTask* CTaskComplexSeekEntity<T>::CreateSubTaskWhenPedIsTooFarFromEntity(CPed* ped, float pedToSeekPosDist2DSq) {
+    return CreateSubTask(
+        (m_minEntityDist2D == 0.f || pedToSeekPosDist2DSq > sq(m_minEntityDist2D))
+            ? TASK_COMPLEX_FOLLOW_NODE_ROUTE
+            : TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL,
+        ped
+    );
 }
