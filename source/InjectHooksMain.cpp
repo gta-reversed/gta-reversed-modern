@@ -210,6 +210,7 @@
 #include "TaskComplexWanderCriminal.h"
 #include "TaskComplexWanderProstitute.h"
 #include "TaskComplexPartnerGreet.h"
+#include "TaskSimpleShakeFist.h"
 #include "TaskComplexWalkRoundCar.h"
 #include "TaskSimpleDuck.h"
 #include "TaskComplexMedicTreatInjuredPed.h"
@@ -807,7 +808,7 @@ void InjectHooksMain() {
         // CTaskSimpleSetCharIgnoreWeaponRangeFlag::InjectHooks();
         // CTaskSimpleSetKindaStayInSamePlace::InjectHooks();
         CTaskSimpleSetPedAsAutoDriver::InjectHooks();
-        // CTaskSimpleShakeFist::InjectHooks();
+        CTaskSimpleShakeFist::InjectHooks();
         CTaskSimpleSitDown::InjectHooks();
         CTaskSimpleSitIdle::InjectHooks();
         // CTaskSimpleStandUp::InjectHooks();
