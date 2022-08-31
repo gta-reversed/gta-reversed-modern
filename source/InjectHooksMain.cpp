@@ -234,6 +234,7 @@
 #include "TaskComplexWander.h"
 #include "TaskSimplePutDownEntity.h"
 #include "TaskComplexUseSwatRope.h"
+#include "TaskComplexRoadRage.h"
 #include "TaskSimpleGoToPointFine.h"
 #include "TaskComplexDie.h"
 #include "TaskComplexEnterBoatAsDriver.h"
@@ -700,7 +701,7 @@ void InjectHooksMain() {
         // CTaskComplexPresentIDToCop::InjectHooks();
         // CTaskComplexReactToAttack::InjectHooks();
         // CTaskComplexReactToGunAimedAt::InjectHooks();
-        // CTaskComplexRoadRage::InjectHooks();
+        CTaskComplexRoadRage::InjectHooks();
         // CTaskComplexScreamInCarThenLeave::InjectHooks();
         // CTaskComplexSeekCoverUntilTargetDead::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculator>::InjectHooks();
