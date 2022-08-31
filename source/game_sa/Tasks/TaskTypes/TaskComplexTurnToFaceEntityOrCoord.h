@@ -17,8 +17,8 @@ public:
 public:
     constexpr static auto Type = TASK_COMPLEX_TURN_TO_FACE_ENTITY;
 
-    CTaskComplexTurnToFaceEntityOrCoord(CEntity* entity, float changeRateMult, float maxHeading);
-    CTaskComplexTurnToFaceEntityOrCoord(const CVector& coords, float changeRateMult, float maxHeading);
+    CTaskComplexTurnToFaceEntityOrCoord(CEntity* entity, float changeRateMult = 0.5f, float maxHeading = 0.2f);
+    CTaskComplexTurnToFaceEntityOrCoord(const CVector& coords, float changeRateMult = 0.5f, float maxHeading = 0.2f);
     ~CTaskComplexTurnToFaceEntityOrCoord() override;
 
     eTaskType GetTaskType() override { return Type; } // 0x66B900
