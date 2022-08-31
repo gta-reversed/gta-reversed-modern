@@ -8,6 +8,17 @@
 // Commands stuff
 #include "CommandParser/Parser.hpp"
 
+/*!
+* Make sure to include the command headers here, otherwise they won't be registered,
+* and the default GTA handler will be called.
+* 
+* Currently we don't include the Commands/CLEO headers at all.
+*
+* Eventually we'll get rid of this header based approach, and switch to using cpp files instead,
+* currently it's not possible because of the way it's set up.
+* (Once all old functions are reworked to use the parser)
+*/
+
 #include "Commands/Basic.hpp"
 #include "Commands/Car.hpp"
 #include "Commands/Comparasion.hpp"
