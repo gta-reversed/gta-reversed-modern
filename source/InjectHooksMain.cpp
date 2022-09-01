@@ -242,6 +242,7 @@
 #include "TaskComplexUseWaterCannon.h"
 #include "TaskComplexDriveToPoint.h"
 #include "TaskSimpleSetPedAsAutoDriver.h"
+#include "TaskComplexWalkRoundFire.h"
 #include "TaskSimpleSlideToCoord.h"
 #include "TaskComplexPartnerDeal.h"
 #include "TaskSimplePickUpEntity.h"
@@ -741,7 +742,7 @@ void InjectHooksMain() {
         // CTaskComplexWaitForDryWeather::InjectHooks();
         // CTaskComplexWalkAlongsidePed::InjectHooks();
         // CTaskComplexWalkRoundBuildingAttempt::InjectHooks();
-        // CTaskComplexWalkRoundFire::InjectHooks();
+        CTaskComplexWalkRoundFire::InjectHooks();
         // CTaskComplexWanderFlee::InjectHooks();
         // CTaskSimpleAffectSecondaryBehaviour::InjectHooks();
         CTaskSimpleArrestPed__InjectHooks();
