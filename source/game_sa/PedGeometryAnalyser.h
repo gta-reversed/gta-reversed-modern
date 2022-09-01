@@ -1,22 +1,40 @@
 #pragma once
 
+#include <array>
+
+#include "Vector.h"
+#include "Base.h"
+
 class CVector;
 class CEntity;
 class CPed;
-class CEntity;
 class CColSphere;
 class CPhysical;
 
 class CPointRoute {
 public:
-    uint32  m_nNumPoints;
-    CVector m_vecPoints[8];
-
-    CPointRoute() : m_nNumPoints(0) {}
+    CPointRoute() = default;
     CPointRoute(CPointRoute* from);
 
     static void* operator new(uint32 size);
     static void operator delete(void* ptr, size_t sz);
+
+    bool IsEmpty() const { return m_nNumPoints == 0; }
+    bool IsFull()  const { return (size_t)m_nNumPoints >= std::size(m_vecPoints); }
+
+    template<typename... T_Points>
+    void AddPoints(T_Points&&... point) { (m_vecPoints[m_nNumPoints++] = point, ...); }
+    void MaybeAddPoint(const CVector& point) {
+        if (!IsFull()) {
+            AddPoints(point);
+        }
+    }
+    template<typename... T_Points>
+    void MaybeAddPoints(T_Points&&... point) { (MaybeAddPoint(point), ...); }
+
+    // TODO: Make private
+    uint32                 m_nNumPoints{};
+    std::array<CVector, 8> m_vecPoints;
 };
 
 VALIDATE_SIZE(CPointRoute, 0x64);
