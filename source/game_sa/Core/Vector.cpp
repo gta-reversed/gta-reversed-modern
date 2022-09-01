@@ -147,9 +147,9 @@ CVector CVector::Average(const CVector* begin, const CVector* end) {
     return std::accumulate(begin, end, CVector{}) / (float)std::distance(begin, end);
 }
 
-float CVector::Heading(bool reMapRangeTo0To2Pi) const {
+float CVector::Heading(bool limitAngle) const {
     const auto heading = std::atan2(-x, y);
-    if (reMapRangeTo0To2Pi) {
+    if (limitAngle) {
         return CGeneral::LimitRadianAngle(heading);
     }
     return heading;
