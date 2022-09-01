@@ -12,7 +12,14 @@ class CGeneral {
 public:
     static void InjectHooks();
 
+    /*!
+    * @brief Normalize the `angle` to be between [-180, 180] deg
+    */
     static float LimitAngle(float angle);
+
+    /*!
+    * @brief Normalize the angle to be between [-pi, pi]
+    */
     static float LimitRadianAngle(float angle);
     static float GetRadianAngleBetweenPoints(float x1, float y1, float x2, float y2);
     static float GetATanOfXY(float x, float y);
