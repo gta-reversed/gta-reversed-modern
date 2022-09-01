@@ -582,6 +582,7 @@ public:
     bool IsInVehicle(const CVehicle* veh) const { return bInVehicle && m_pVehicle == veh; }
     CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
     int32 GetPadNumber() const;
+    bool IsJoggingOrFaster() const;
 
 private:
     void RenderThinBody() const;
