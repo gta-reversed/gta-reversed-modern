@@ -77,6 +77,13 @@ public:
     [[nodiscard]] float Heading() const {
         return std::atan2(-x, y);
     }
+
+    /*!
+    * @return A copy of this vector projected onto the input vector, which is assumed to be unit length.
+    */
+    CVector2D ProjectOnToNormal(const CVector2D& projectOnTo) const {
+        return projectOnTo * DotProduct2D(projectOnTo, *this);
+    }
 };
 
 constexpr inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {
