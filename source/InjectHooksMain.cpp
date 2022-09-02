@@ -209,6 +209,7 @@
 #include "TaskSimpleRunAnim.h"
 #include "TaskComplexWanderCriminal.h"
 #include "TaskComplexWanderProstitute.h"
+#include "TaskSimpleLookAbout.h"
 #include "TaskComplexPartnerGreet.h"
 #include "TaskSimpleShakeFist.h"
 #include "TaskComplexWalkRoundCar.h"
@@ -801,7 +802,7 @@ void InjectHooksMain() {
         // CTaskSimpleHitWall::InjectHooks();
         // CTaskSimpleHurtPedWithCar::InjectHooks();
         // CTaskSimpleKillPedWithCar::InjectHooks();
-        // CTaskSimpleLookAbout::InjectHooks();
+        CTaskSimpleLookAbout::InjectHooks();
         // CTaskSimpleOnEscalator::InjectHooks();
         CTaskSimplePickUpBike::InjectHooks();
         CTaskSimplePlayerOnFire::InjectHooks();
