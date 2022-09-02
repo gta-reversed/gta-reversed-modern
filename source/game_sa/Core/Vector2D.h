@@ -18,7 +18,15 @@ public:
 
     static void InjectHooks();
 
+    /// Normalize this vector in-place
     void  Normalise();
+
+    /// Get a normalized copy of this vector
+    auto Normalized() const {
+        CVector2D cpy = *this;
+        cpy.Normalise();
+        return cpy;
+    }
 
     [[nodiscard]] constexpr inline float SquaredMagnitude() const {
         return x * x + y * y;
