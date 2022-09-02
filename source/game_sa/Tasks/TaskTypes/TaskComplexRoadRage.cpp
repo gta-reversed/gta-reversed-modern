@@ -3,9 +3,9 @@
 #include "TaskComplexRoadRage.h"
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskComplexLeaveCar.h"
-//#include "CTaskSimpleShakeFist.h" // TODO
+#include "TaskSimpleShakeFist.h"
 #include "TaskComplexEnterCarAsDriver.h"
-//#include "TaskComplexSeekEntityStandard.h" // TODO
+#include "TaskComplexSeekEntityStandard.h"
 #include "TaskComplexDestroyCar.h"
 #include "TaskComplexKillPedOnFoot.h"
 
@@ -45,21 +45,26 @@ CTaskComplexRoadRage::~CTaskComplexRoadRage() {
 
 // 0x629080
 CTask* CTaskComplexRoadRage::CreateSubTask(eTaskType taskType, CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x629080, CTaskComplexRoadRage*, eTaskType, CPed*>(this, taskType, ped);
-
-    /*
-    * Missing 2 stubs (see todos below)
     switch (taskType) {
     case TASK_COMPLEX_TURN_TO_FACE_ENTITY:
         return new CTaskComplexTurnToFaceEntityOrCoord{ m_rageWith };
     case TASK_COMPLEX_LEAVE_CAR:
         return new CTaskComplexLeaveCar{ ped->m_pVehicle,eTargetDoor::TARGET_DOOR_FRONT_LEFT, 0, true, false };
     case TASK_SIMPLE_SHAKE_FIST:
-        return new CTaskSimpleShakeFist{}; // TODO
+        return new CTaskSimpleShakeFist{};
     case TASK_COMPLEX_ENTER_CAR_AS_DRIVER:
         return new CTaskComplexEnterCarAsDriver{ ped->m_pVehicle };
     case TASK_COMPLEX_SEEK_ENTITY:
-        return new CTaskComplexSeekEntityStandard{ ped->m_pVehicle, 20000u, 1000u, m_rageWith->m_pVehicle->GetModelInfo()->GetColModel()->GetBoundRadius() + 1.f, 2.f, 2.f, true, true };
+        return new CTaskComplexSeekEntityStandard{
+            ped->m_pVehicle,
+            20'000u,
+            1000u,
+            m_rageWith->m_pVehicle->GetModelInfo()->GetColModel()->GetBoundRadius() + 1.f,
+            2.f,
+            2.f,
+            true,
+            true
+        };
     case TASK_COMPLEX_DESTROY_CAR:
         return new CTaskComplexDestroyCar{ m_rageWith->m_pVehicle };
     case TASK_COMPLEX_KILL_PED_ON_FOOT:
@@ -67,7 +72,6 @@ CTask* CTaskComplexRoadRage::CreateSubTask(eTaskType taskType, CPed* ped) {
     default:
         NOTSA_UNREACHABLE();
     }
-    */
 }
 
 // 0x622170
@@ -86,7 +90,12 @@ CTask* CTaskComplexRoadRage::CreateNextSubTask(CPed* ped) {
     case TASK_SIMPLE_SHAKE_FIST:
         return CreateSubTask(TASK_COMPLEX_SEEK_ENTITY, ped);
     case TASK_COMPLEX_LEAVE_CAR:
-        return CreateSubTask(ped->bInVehicle ? TASK_FINISHED : TASK_COMPLEX_TURN_TO_FACE_ENTITY, ped); // Ternary inverted
+        return CreateSubTask(
+            ped->bInVehicle // Ternary inverted
+                ? TASK_FINISHED
+                : TASK_COMPLEX_TURN_TO_FACE_ENTITY,
+            ped
+        ); 
     case TASK_COMPLEX_ENTER_CAR_AS_DRIVER: {
         if (ped->m_pVehicle) {
             ped->m_pVehicle->m_autoPilot.SetCarMission(MISSION_CRUISE, 10);
@@ -94,7 +103,12 @@ CTask* CTaskComplexRoadRage::CreateNextSubTask(CPed* ped) {
         return CreateSubTask(TASK_FINISHED, ped);
     }
     case TASK_COMPLEX_SEEK_ENTITY:
-        return CreateSubTask((m_rageWith->IsInVehicle() && !ped->IsCurrentlyUnarmed()) ? TASK_COMPLEX_DESTROY_CAR : TASK_COMPLEX_KILL_PED_ON_FOOT, ped);
+        return CreateSubTask(
+            m_rageWith->IsInVehicle() && !ped->IsCurrentlyUnarmed()
+                ? TASK_COMPLEX_DESTROY_CAR
+                : TASK_COMPLEX_KILL_PED_ON_FOOT,
+            ped
+        );
     default:
         NOTSA_UNREACHABLE();
     }
@@ -110,12 +124,10 @@ CTask* CTaskComplexRoadRage::CreateFirstSubTask(CPed* ped) {
     if (ped->IsGangster()) { // Inverted
         ped->GiveDelayedWeapon(WEAPON_PISTOL, 2000u);
         ped->SetCurrentWeapon(WEAPON_PISTOL);
-    } else {
-        if (CGeneral::DoCoinFlip()) {
-            const auto wtype = CGeneral::RandomChoice(std::array{ WEAPON_BASEBALLBAT, WEAPON_GOLFCLUB, WEAPON_SHOVEL });
-            ped->GiveDelayedWeapon(wtype, 1);
-            ped->SetCurrentWeapon(wtype);
-        }
+    } else if (CGeneral::DoCoinFlip()) {
+        const auto wtype = CGeneral::RandomChoice(std::array{ WEAPON_BASEBALLBAT, WEAPON_GOLFCLUB, WEAPON_SHOVEL });
+        ped->GiveDelayedWeapon(wtype, 1);
+        ped->SetCurrentWeapon(wtype);     
     }
 
     g_InterestingEvents.Add(CInterestingEvents::INTERESTING_EVENT_18, ped);
