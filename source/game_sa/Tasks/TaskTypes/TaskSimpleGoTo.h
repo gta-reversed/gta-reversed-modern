@@ -35,7 +35,11 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskSimpleGoTo* Constructor(int32 moveState, const CVector& targetPoint, float fRadius);
+    // 0x6679C0
+    auto Constructor(eMoveState moveState, const CVector& targetPoint, float fRadius) {
+        this->CTaskSimpleGoTo::CTaskSimpleGoTo(moveState, targetPoint, fRadius);
+        return this;
+    }
 };
 
 VALIDATE_SIZE(CTaskSimpleGoTo, 0x20);

@@ -7,10 +7,10 @@ class CTaskSimpleGoToPoint;
 
 class CTaskComplexGoToPointAndStandStill : public CTaskComplex {
 public:
-    int32   m_moveState;
-    CVector m_vecTargetPoint;
-    float   m_fRadius;          // ped stops moving after it is within the radius of the point.
-    float   m_fMoveStateRadius; // The ped will either sprint, run, or walk depending on far it is from the radius
+    eMoveState m_moveState;
+    CVector    m_vecTargetPoint;
+    float      m_fRadius;          ///< Ped stops moving after it is within the radius of the point.
+    float      m_fMoveStateRadius; ///< The ped will either sprint, run, or walk depending on far it is from the radius
     union {
         struct {
             uint8 m_b01 : 1;                    // 0x1
@@ -25,7 +25,7 @@ public:
 public:
     static constexpr auto Type = TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL;
 
-    CTaskComplexGoToPointAndStandStill(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint);
+    CTaskComplexGoToPointAndStandStill(eMoveState moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint);
     ~CTaskComplexGoToPointAndStandStill() override;
 
     eTaskType GetTaskType() override { return Type; }
@@ -47,6 +47,10 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskComplexGoToPointAndStandStill* Constructor(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint);
+    // 0x668120
+    CTaskComplexGoToPointAndStandStill* Constructor(eMoveState moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint) {
+        this->CTaskComplexGoToPointAndStandStill::CTaskComplexGoToPointAndStandStill(moveState, targetPoint, fRadius, fMoveStateRadius, bUnknown, bGoToPoint);
+        return this;
+    }
 };
 VALIDATE_SIZE(CTaskComplexGoToPointAndStandStill, 0x28);

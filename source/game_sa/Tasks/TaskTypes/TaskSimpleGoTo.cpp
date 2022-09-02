@@ -16,19 +16,12 @@ void CTaskSimpleGoTo::InjectHooks() {
     RH_ScopedInstall(QuitIK, 0x667CA0);
 }
 
-CTaskSimpleGoTo::CTaskSimpleGoTo(int32 moveState, const CVector& targetPoint, float fRadius)
+CTaskSimpleGoTo::CTaskSimpleGoTo(eMoveState moveState, const CVector& targetPoint, float fRadius)
 {
     m_moveState = moveState;
     m_vecTargetPoint = targetPoint;
     m_fRadius = fRadius;
     m_GoToFlags = 0;
-}
-
-// 0x6679C0
-CTaskSimpleGoTo* CTaskSimpleGoTo::Constructor(int32 moveState, const CVector& targetPoint, float fRadius)
-{
-    this->CTaskSimpleGoTo::CTaskSimpleGoTo(moveState, targetPoint, fRadius);
-    return this;
 }
 
 // 0x667A10

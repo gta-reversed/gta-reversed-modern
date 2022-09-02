@@ -46,7 +46,7 @@ bool CTaskComplexWalkRoundFire::ComputeDetourTarget(const CPed& ped, CVector& ou
 // 0x6584E0
 CTask* CTaskComplexWalkRoundFire::CreateFirstSubTask(CPed* ped) {
     m_initialPedPos = ped->GetPosition();
-    return new CTaskSimpleGoToPoint{ (int32)m_moveState, GetDetourTarget(*ped) };
+    return new CTaskSimpleGoToPoint{ m_moveState, GetDetourTarget(*ped) };
 }
 
 // 0x6585C0
