@@ -105,7 +105,7 @@ public:
             };
         case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL:
             return new CTaskComplexGoToPointAndStandStill{
-                (int32)m_moveState,
+                m_moveState,
                 GetSeekPos(ped),
                 m_maxEntityDist2D,
                 m_moveStateRadius,
