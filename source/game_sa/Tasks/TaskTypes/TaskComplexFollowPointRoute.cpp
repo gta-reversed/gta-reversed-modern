@@ -53,6 +53,10 @@ CTaskComplexFollowPointRoute::CTaskComplexFollowPointRoute(
 {
 }
 
+CTaskComplexFollowPointRoute::~CTaskComplexFollowPointRoute() {
+    delete m_route;
+}
+
 CTaskComplexFollowPointRoute::CTaskComplexFollowPointRoute(const CTaskComplexFollowPointRoute& o) :
     CTaskComplexFollowPointRoute{
         o.m_moveState,
@@ -82,6 +86,8 @@ eTaskType CTaskComplexFollowPointRoute::GetSubTaskType() {
     }
 
     if (m_currPointIdx == m_route->m_nNumPoints) { // Current is the last point
+        m_nRouteTraversals++;
+
         switch (m_mode) {
         case Mode::ONE_WAY: {
             if (m_bUseBlending) {
@@ -136,7 +142,7 @@ CTask* CTaskComplexFollowPointRoute::CreateTask(eTaskType taskType, CPed* ped) {
                 }
             }(),
             false,
-            m_pParentTask->GetTaskType() == TASK_COMPLEX_WALK_ROUND_CAR && static_cast<CTaskComplexWalkRoundCar*>(m_pParentTask)->IsGoingForDoor()
+            m_pParentTask && m_pParentTask->GetTaskType() == TASK_COMPLEX_WALK_ROUND_CAR && static_cast<CTaskComplexWalkRoundCar*>(m_pParentTask)->IsGoingForDoor()
         };
     case TASK_SIMPLE_GO_TO_POINT:
         return new CTaskSimpleGoToPoint{
@@ -154,6 +160,8 @@ CTask* CTaskComplexFollowPointRoute::CreateTask(eTaskType taskType, CPed* ped) {
         return new CTaskComplexLeaveCar{ ped->m_pVehicle, TARGET_DOOR_FRONT_LEFT, 0, true, false };
     case TASK_FINISHED:
         return nullptr;
+    default:
+        NOTSA_UNREACHABLE();
     }
 }
 

@@ -49,6 +49,7 @@ public:
 
     CTaskComplexFollowPointRoute(eMoveState moveState, CPointRoute const& route, Mode mode, float targetRadius, float slowDownDist, bool overshootTarget, bool useBlending, bool standStillAfterMove);
     CTaskComplexFollowPointRoute(const CTaskComplexFollowPointRoute&);
+    ~CTaskComplexFollowPointRoute() override;
 
     eTaskType GetSubTaskType();
     CTask*    CreateTask(eTaskType taskType, CPed* ped);
