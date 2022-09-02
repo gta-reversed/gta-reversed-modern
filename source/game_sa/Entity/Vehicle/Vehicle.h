@@ -620,7 +620,6 @@ public:
     void DoFixedMachineGuns();
     void FireFixedMachineGuns();
     void DoDriveByShootings();
-    bool AnyOfDoorsReady(uint32 door1, uint32 door2);
 
     bool AreAnyOfPassengersFollowerOfGroup(const CPedGroup& group);
 
