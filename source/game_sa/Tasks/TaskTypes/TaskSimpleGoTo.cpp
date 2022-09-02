@@ -32,19 +32,16 @@ bool CTaskSimpleGoTo::HasCircledTarget(CPed* ped)
         return false;
 
     if (m_vecTargetPoint.x > pedPos.x)
-        gotoFlags.m_b01 = true;
+        gotoFlags.m_targetCircledFlags |= 1;
     else if (m_vecTargetPoint.x < pedPos.x)
-        gotoFlags.m_b02 = true;
+        gotoFlags.m_targetCircledFlags |= 1 << 1;
 
     if (m_vecTargetPoint.y > pedPos.y)
-        gotoFlags.m_b03 = true;
+        gotoFlags.m_targetCircledFlags |= 1 << 2;
     else if (m_vecTargetPoint.y < pedPos.y) 
-        gotoFlags.m_b04 = true;
+        gotoFlags.m_targetCircledFlags |= 1 << 3;
 
-    if (gotoFlags.m_b01 && gotoFlags.m_b02 && gotoFlags.m_b03 && gotoFlags.m_b04)
-        return true;
-
-    return false;
+    return gotoFlags.m_targetCircledFlags == 0b1111;
 }
 
 // 0x667AD0

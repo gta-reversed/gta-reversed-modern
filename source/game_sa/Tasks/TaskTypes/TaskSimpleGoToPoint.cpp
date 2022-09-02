@@ -160,7 +160,7 @@ void CTaskSimpleGoToPoint::UpdatePoint(const CVector& targetPosition, float fRad
         m_vecTargetPoint = targetPosition;
         m_fRadius = fRadius;
 
-        gotoFlags.m_b01 = gotoFlags.m_b02 = gotoFlags.m_b03 = gotoFlags.m_b04 = false;
+        gotoFlags.m_targetCircledFlags = 0;
         gotoFlags.m_bTargetPointUpdated = true;
     }
 }
