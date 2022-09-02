@@ -4,7 +4,7 @@
 
 class CPed;
 
-class  CTaskSimpleHitWall : public CTaskSimpleRunAnim {
+class NOTSA_EXPORT_VTABLE CTaskSimpleHitWall : public CTaskSimpleRunAnim {
 public:
     static void InjectHooks();
 
