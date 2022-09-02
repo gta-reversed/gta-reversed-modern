@@ -125,11 +125,11 @@
 #include "TaskSimpleCarCloseDoorFromOutside.h"
 #include "TaskSimpleCarGetIn.h"
 #include "TaskSimpleBeHit.h"
-#include "EntitySeekPosCalculator.h"
-#include "EntitySeekPosCalculatorStandard.h"
-#include "EntitySeekPosCalculatorRadiusAngleOffset.h"
-#include "EntitySeekPosCalculatorXYOffset.h"
-#include "EntitySeekPosCalculatorFixedPos.h"
+#include "SeekEntity/PosCalculators/EntitySeekPosCalculator.h"
+#include "SeekEntity/PosCalculators/EntitySeekPosCalculatorStandard.h"
+#include "SeekEntity/PosCalculators/EntitySeekPosCalculatorRadiusAngleOffset.h"
+#include "SeekEntity/PosCalculators/EntitySeekPosCalculatorXYOffset.h"
+#include "SeekEntity/PosCalculators/EntitySeekPosCalculatorFixedPos.h"
 #include "TaskComplexSmartFleeEntity.h"
 #include "TaskSimpleArrestPed.h"
 #include "TaskComplexDragPedFromCar.h"
@@ -215,6 +215,9 @@
 #include "TaskComplexWalkRoundCar.h"
 #include "TaskSimpleDuck.h"
 #include "TaskComplexMedicTreatInjuredPed.h"
+#include "SeekEntity/TaskComplexSeekEntityRadiusAngleOffset.h"
+#include "SeekEntity/TaskComplexSeekEntityXYOffset.h"
+#include "SeekEntity/TaskComplexSeekEntityStandard.h"
 #include "TaskSimplePlayHandSignalAnim.h"
 #include "TaskComplexCarDrive.h"
 #include "TaskComplexKillPedFromBoat.h"
@@ -243,6 +246,7 @@
 #include "TaskComplexUseWaterCannon.h"
 #include "TaskComplexDriveToPoint.h"
 #include "TaskSimpleSetPedAsAutoDriver.h"
+#include "TaskComplexWalkRoundFire.h"
 #include "TaskSimpleSlideToCoord.h"
 #include "TaskComplexPartnerDeal.h"
 #include "TaskSimplePickUpEntity.h"
@@ -708,11 +712,11 @@ void InjectHooksMain() {
         // CTaskComplexSeekEntity<CEntitySeekPosCalculator>::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculatorDriving>::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculatorEntitySurface>::InjectHooks();
-        // CTaskComplexSeekEntity<CEntitySeekPosCalculatorFixedPos>::InjectHooks();
-        // CTaskComplexSeekEntity<CEntitySeekPosCalculatorRadiusAngleOffset>::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculatorStandard>::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculatorVehicleId>::InjectHooks();
-        // CTaskComplexSeekEntity<CEntitySeekPosCalculatorXYOffset>::InjectHooks();
+        CTaskComplexSeekEntityRadiusAngleOffset::InjectHooks();
+        CTaskComplexSeekEntityStandard::InjectHooks();
+        CTaskComplexSeekEntityXYOffset::InjectHooks();
         // CTaskComplexSeekEntityAiming::InjectHooks();
         // CTaskComplexSeekEntityAnyMeans<CEntitySeekPosCalculatorXYOffset>::InjectHooks();
         // CTaskComplexShuffleSeats::InjectHooks();
@@ -742,7 +746,7 @@ void InjectHooksMain() {
         // CTaskComplexWaitForDryWeather::InjectHooks();
         // CTaskComplexWalkAlongsidePed::InjectHooks();
         CTaskComplexWalkRoundBuildingAttempt::InjectHooks();
-        // CTaskComplexWalkRoundFire::InjectHooks();
+        CTaskComplexWalkRoundFire::InjectHooks();
         // CTaskComplexWanderFlee::InjectHooks();
         // CTaskSimpleAffectSecondaryBehaviour::InjectHooks();
         CTaskSimpleArrestPed__InjectHooks();
