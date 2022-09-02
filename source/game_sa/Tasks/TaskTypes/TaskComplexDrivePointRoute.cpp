@@ -27,7 +27,6 @@ CTaskComplexDrivePointRoute::CTaskComplexDrivePointRoute(CVehicle* vehicle, CPoi
     m_drivingStyle{drivingStyle}
 {
     // CEntity::SafeRegisterRef(m_veh); // NOTE: Missing from OG code
-    assert(!route.IsEmpty());
 }
 
 CTaskComplexDrivePointRoute::CTaskComplexDrivePointRoute(const CTaskComplexDrivePointRoute& o) :
@@ -55,9 +54,7 @@ CTask* CTaskComplexDrivePointRoute::CreateTaskForCurrentPoint() const {
 
 // 0x63CF90
 CTask* CTaskComplexDrivePointRoute::CreateNextSubTask(CPed* ped) {
-    m_currPtIdx++;
-    
-    if (m_currPtIdx == m_route->m_nNumPoints) {
+    if (m_currPtIdx++ == m_route->m_nNumPoints) {
         return nullptr;
     }
 
