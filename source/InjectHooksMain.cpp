@@ -221,6 +221,7 @@
 #include "TaskSimplePlayHandSignalAnim.h"
 #include "TaskComplexCarDrive.h"
 #include "TaskComplexKillPedFromBoat.h"
+#include "TaskSimpleHitWall.h"
 #include "TaskComplexLeaveCar.h"
 #include "TaskSimpleCarSetTempAction.h"
 #include "TaskComplexTreatAccident.h"
@@ -801,7 +802,7 @@ void InjectHooksMain() {
         // CTaskSimpleHitFromFront::InjectHooks();
         // CTaskSimpleHitFromLeft::InjectHooks();
         // CTaskSimpleHitFromRight::InjectHooks();
-        // CTaskSimpleHitWall::InjectHooks();
+        CTaskSimpleHitWall::InjectHooks();
         // CTaskSimpleHurtPedWithCar::InjectHooks();
         // CTaskSimpleKillPedWithCar::InjectHooks();
         CTaskSimpleLookAbout::InjectHooks();
