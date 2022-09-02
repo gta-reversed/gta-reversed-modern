@@ -32,11 +32,17 @@ public:
     // Returns length of 2d vector
     float Magnitude2D() const;
 
-    // Normalises a vector
+    // Normalises a vector in-place
     void Normalise();
 
     // Normalises a vector and returns length (in-place)
     float NormaliseAndMag();
+
+    /// Get a normalized copy of this vector
+    auto Normalized() const -> CVector;
+
+    /// Perform a dot product with this and `o`, returning the result
+    auto Dot(const CVector& o) const -> float;
 
     // Performs cross calculation
     void Cross(const CVector& left, const CVector& right);
