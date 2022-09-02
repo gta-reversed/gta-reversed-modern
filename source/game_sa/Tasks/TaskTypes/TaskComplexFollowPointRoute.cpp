@@ -394,10 +394,10 @@ CTask* CTaskComplexFollowPointRoute::CreateFirstSubTask(CPed* ped) {
             for (auto i = 0u; i < npts; i++) {
                 const auto nextPtIdx       = (i + 1) % npts;
 
-                const auto thisPtPos       = (*m_route)[i]; // No need for `%` here, trust me
-                const auto thisToNextPt    = (*m_route)[nextPtIdx] - thisPtPos;
-                const auto thisToNextPtDir = thisToNextPt.Normalized();
-                const auto dot             = (pedPos - thisPtPos).Dot(thisToNextPtDir); // NOTE: Since the first argument isn't normalized the dot will be scaled by it's magnitue.
+                const auto& thisPtPos       = (*m_route)[i]; // No need for `%` here, trust me
+                const auto  thisToNextPt    = (*m_route)[nextPtIdx] - thisPtPos;
+                const auto  thisToNextPtDir = thisToNextPt.Normalized();
+                const auto  dot             = (pedPos - thisPtPos).Dot(thisToNextPtDir); // NOTE: Since the first argument isn't normalized the dot will be scaled by it's magnitue.
 
                 if (dot <= 0.f) { 
                     continue; // Ped is in the opposite direction compared to the next point relative to the current point.
