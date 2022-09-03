@@ -56,7 +56,7 @@ CTask* CTaskComplexExtinguishFires::CreateNextSubTask(CPed* ped) {
         }
 
         if (ped->GetActiveWeapon().m_nType == WEAPON_EXTINGUISHER) { // Inverted
-            return new CTaskSimpleGunControl{ nullptr, nearestFireNow->GetPosition(), false, 5, true, -1 };
+            return new CTaskSimpleGunControl{ nullptr, nearestFireNow->GetPosition(), {}, eGunCommand::PISTOLWHIP, 1, -1 };
         } else {
             return new CTaskSimpleStandStill{ 2000 };
         }
@@ -85,15 +85,16 @@ CTask* CTaskComplexExtinguishFires::ControlSubTask(CPed* ped) {
                 return CreateFirstSubTask(ped);
             }
         }
+        break;
     }
     case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL: {
         if (!nearestFireNow) {
             return nullptr;
         }
-
         if (m_fireToExt != nearestFireNow) {
             static_cast<CTaskComplexGoToPointAndStandStill*>(m_pSubTask)->GoToPoint(nearestFireNow->GetPosition());
         }
+        break;
     }
     case TASK_SIMPLE_STAND_STILL:
         break;
