@@ -59,6 +59,10 @@ void InstallVirtual(std::string_view category, std::string fnName, void** vtblGT
     const auto spanGTAVTbl = std::span{ vtblGTA, nVirtFns };
     const auto iter = rng::find(spanGTAVTbl, fnGTAAddr);
     if (iter == spanGTAVTbl.end()) {
+        /* Tips in case you ever encounter this
+        * - Make sure the vtable address and size is correct
+        * - Make sure function address you're hooking is correct
+        */
         NOTSA_UNREACHABLE("{}: Couldn't find function [{} @ {}] in vtable\n", category, fnName, fnGTAAddr);
     }
     const auto fnVTblIdx = (size_t)rng::distance(spanGTAVTbl.begin(), iter);
@@ -103,11 +107,13 @@ void** GetVTableAddress(std::string_view className) {
     CHAR buffer[1024];
     sprintf_s(buffer, "??_7%.*s@@6B@", (int)className.length(), className.data());
     if (const auto vtbl = reinterpret_cast<void**>(GetProcAddress(s_hThisDLL, buffer))) {
+#ifdef HOOKS_DEBUG
+        std::cout << std::format("{}: Our VMT: {} \n", className, (void*)vtbl);
+#endif
         return vtbl;
     }
 
-    NOTSA_UNREACHABLE("Couldn't find VTable of {}", className);
-    return nullptr;
+    NOTSA_UNREACHABLE("Couldn't find VTable of `{}`", className);
 }
 
 }; // namespace detail

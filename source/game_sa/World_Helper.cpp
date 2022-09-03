@@ -117,5 +117,5 @@ CWanted* FindPlayerWanted(int32 playerId) {
 
 // Returns player's group
 CPedGroup& FindPlayerGroup(int32 playerId) {
-    return FindPlayerPed(playerId)->GetGroup();
+    return FindPlayerPed(playerId)->GetPlayerGroup();
 }

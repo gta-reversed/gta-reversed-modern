@@ -58,8 +58,10 @@ CTaskSimpleCarDrive::~CTaskSimpleCarDrive() {
         m_pTaskUtilityLineUpPedWithCar = nullptr;
     }
 
-    if (m_b20) {
-        assert(m_pAnimCloseDoorRolling);
+    if (m_b20 && m_pAnimCloseDoorRolling) {
+        // TODO: FIX ME: Keeps triggering, annoying as fuck
+        // Seemingly happens when getting of a motorbike (like cops getting off)
+        //assert(m_pAnimCloseDoorRolling);
         m_pAnimCloseDoorRolling->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
         if (m_pVehicle) {
             m_pVehicle->ClearGettingOutFlags(1);

@@ -7,6 +7,7 @@
 
 #include "StdInc.h"
 
+#include "Garages.h"
 #include "common.h"
 #include "GxtChar.h"
 #include "CDebugMenu.h"
@@ -14,6 +15,7 @@
 #include "UserDisplay.h"
 #include "PostEffects.h"
 #include "SpecialFX.h"
+
 #include "Hud.h"
 #include "app.h"
 
@@ -170,17 +172,24 @@ bool CalcScreenCoors(const CVector& in, CVector* out, float* screenX, float* scr
     return true;
 }
 
-// 0x71DAB0
+/*!
+* @0x71DAB0
+* @brief Calculate a 3D position on the screen
+* @param in  in  The 3D to get the screen position of
+* @param out out The 2D screen position (Also includes the depth in the `z` component)
+* @returns False if the depth was <= 1 (in which case the `x, y` positions are not not calculated, but `z` is)
+*/
 bool CalcScreenCoors(const CVector& in, CVector* out) {
     return plugin::CallAndReturn<bool, 0x71DAB0, const CVector&, CVector*>(in, out);
 
-    *out = TheCamera.m_mViewMatrix * in;
+    *out = TheCamera.GetViewMatrix() * in;
     if (out->z <= 1.0f)
         return false;
 
-    auto invZ = 1.0f / out->z;
-    out->x = SCREEN_WIDTH * invZ * out->x;
-    out->y = SCREEN_HEIGHT * invZ * out->y;
+    const auto depthRecp = 1.0f / out->z;
+    out->x = SCREEN_WIDTH * depthRecp * out->x;
+    out->y = SCREEN_HEIGHT * depthRecp * out->y;
+
     return true;
 }
 
@@ -315,4 +324,17 @@ std::string UnicodeToUTF8(const std::wstring& str) {
     }
 
     return out;
+}
+
+/*!
+* @notsa
+* @return The anim first found from `ids`
+*/
+CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, std::initializer_list<AnimationId> ids) {
+    for (const auto id : ids) {
+        if (const auto anim = RpAnimBlendClumpGetAssociation(clump, (int32)id)) {
+            return anim;
+        }
+    }
+    return nullptr;
 }

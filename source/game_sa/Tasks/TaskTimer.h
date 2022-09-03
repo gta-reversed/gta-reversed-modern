@@ -42,6 +42,14 @@ public:
         return false;
     }
 
+    void StartIfNotAlready(uint32 interval) { // NOTSA
+        if (!m_bStarted) {
+            m_nStartTime = CTimer::GetTimeInMS();
+            m_nInterval = (int32)interval;
+            m_bStarted = true;
+        }
+    }
+
     inline bool Stop() {
         if (m_bStarted) {
             m_bStopped = true;
@@ -49,6 +57,15 @@ public:
             return true;
         }
         return false;
+    }
+
+    /*!
+    * @brief Make the timer be finished immidiately (So that `IsOutOfTime` returns true)
+    */
+    inline void SetOutOfTime() {
+        m_nStartTime = CTimer::GetTimeInMS();
+        m_nInterval = -1;
+        m_bStarted = true;
     }
 
     inline bool Reset() {
@@ -60,6 +77,15 @@ public:
             return true;
         }
         return false;
+    }
+
+    /*!
+    * @brief Make it so that when `IsOutOfTime()` is called it returns true.
+    */
+    void SetAsOutOfTime() {
+        m_nStartTime = CTimer::GetTimeInMS();
+        m_nInterval = -1;
+        m_bStarted = 1;
     }
 
     bool IsOutOfTime();

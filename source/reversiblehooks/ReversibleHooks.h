@@ -12,13 +12,18 @@
 //
 
 // Set scoped namespace name (This only works if you only use `ScopedGlobal` macros)
-#define RH_ScopedNamespaceName(name) \
-    ReversibleHooks::ScopeName RHCurrentScopeName {name};
+#define RH_ScopedNamespaceName(ns) \
+    ReversibleHooks::ScopeName RHCurrentScopeName {ns};
 
 // Use when `name` is a class
-#define RH_ScopedClass(name) \
-    using RHCurrentNS = name; \
-    ReversibleHooks::ScopeName RHCurrentScopeName {#name};
+#define RH_ScopedClass(cls) \
+    using RHCurrentNS = cls; \
+    ReversibleHooks::ScopeName RHCurrentScopeName {#cls};
+
+// Use when `name` is a class
+#define RH_ScopedNamedClass(cls, name) \
+    using RHCurrentNS = cls; \
+    ReversibleHooks::ScopeName RHCurrentScopeName {name};
 
 #define RH_ScopedVirtualClass(cls, addrGTAVtbl, nVirtFns_) \
     using RHCurrentNS = cls; \
@@ -26,7 +31,6 @@
     const auto pGTAVTbl = (void**)addrGTAVtbl; \
     const auto pOurVTbl = ReversibleHooks::detail::GetVTableAddress(#cls); \
     const auto nVirtFns = nVirtFns_; \
-    // std::cout << std::format("{}: VMT: Our: {} | GTA: {}\n", RHCurrentScopeName.name, (void*)pOurVTbl, (void*)pGTAVTbl); \
 
 // Use when `name` is a namespace
 #define RH_ScopedNamespace(name) \
@@ -108,20 +112,20 @@ namespace ReversibleHooks {
                 m_addr{ address },
                 m_sz{ sz }
             {
-                if (VirtualProtect(address, sz, newProtect, &m_oldProtect) == 0) {
+                if (VirtualProtect(address, sz, newProtect, &m_initialProtect) == 0) {
                     assert(0); // Failed
                 }
             }
 
             ~ScopedVirtualProtectModify() {
                 DWORD oldProtect{};
-                if (VirtualProtect(m_addr, m_sz, m_oldProtect, &oldProtect) == 0) {
+                if (VirtualProtect(m_addr, m_sz, m_initialProtect, &oldProtect) == 0) {
                     assert(0); // Failed
                 }
             }
 
         private:
-            DWORD  m_oldProtect{};
+            DWORD  m_initialProtect{};
             LPVOID m_addr{};
             DWORD  m_sz{};
         };

@@ -898,7 +898,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* player) {
         moveSpeed.y = moveSpeedMultiplier * moveSpeed.y;
     }
 
-    taskUseGun->ControlGunMove(&moveSpeed);
+    taskUseGun->ControlGunMove(moveSpeed);
     if (pad->DuckJustDown()) {
         if (CTaskSimpleDuck::CanPedDuck(player)) {
             player->GetIntelligence()->SetTaskDuckSecondary(0);
@@ -961,7 +961,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
             moveSpeed.x = 1.0f;
             moveSpeed.y = 0.0f;
             CTaskSimpleUseGun* pTaskSimpleUseGun = player->GetIntelligence()->GetTaskUseGun();
-            pTaskSimpleUseGun->ControlGunMove(&moveSpeed);
+            pTaskSimpleUseGun->ControlGunMove(moveSpeed);
         }
     } else if (!pad->GetTarget() || player->GetActiveWeapon().IsTypeMelee()) {
         if (pedMoveBlendRatio > 0.0f) {
