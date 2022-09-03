@@ -304,6 +304,7 @@
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskComplexTrackEntity.h"
 #include "TaskSimpleTired.h"
+#include "TaskSimpleAffectSecondaryBehaviour.h"
 #include "TaskSimpleCarWaitForDoorNotToBeInUse.h"
 #include "TaskSimpleCarWaitToSlowDown.h"
 #include "TaskSimpleCarAlign.h"
@@ -753,7 +754,7 @@ void InjectHooksMain() {
         // CTaskComplexWalkRoundBuildingAttempt::InjectHooks();
         CTaskComplexWalkRoundFire::InjectHooks();
         // CTaskComplexWanderFlee::InjectHooks();
-        // CTaskSimpleAffectSecondaryBehaviour::InjectHooks();
+        CTaskSimpleAffectSecondaryBehaviour::InjectHooks();
         CTaskSimpleArrestPed__InjectHooks();
         CTaskSimpleBeHit::InjectHooks();
         // CTaskSimpleBeHitWhileMoving::InjectHooks();
