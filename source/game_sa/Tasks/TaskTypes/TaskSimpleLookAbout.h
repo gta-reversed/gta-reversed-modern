@@ -5,7 +5,7 @@ class CTaskSimpleLookAbout;
 class CPed;
 
 
-class  CTaskSimpleLookAbout : public CTaskSimpleRunTimedAnim {
+class NOTSA_EXPORT_VTABLE CTaskSimpleLookAbout : public CTaskSimpleRunTimedAnim {
  
 public:
     static void InjectHooks();
