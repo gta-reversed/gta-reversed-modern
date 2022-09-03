@@ -267,6 +267,7 @@
 #include "TaskSimpleIKLookAt.h"
 #include "TaskSimplePickUpBike.h"
 #include "TaskSimpleIKManager.h"
+#include "TaskSimpleGunControl.h"
 #include "TaskSimpleIKPointArm.h"
 #include "TaskSimpleCarSlowDragPedOut.h"
 #include "TaskSimpleWaitUntilPedIsOutCar.h"
@@ -790,7 +791,7 @@ void InjectHooksMain() {
         // CTaskSimpleEvasiveStep::InjectHooks();
         CTaskSimpleFightingControl::InjectHooks();
         // CTaskSimpleFinishBrain::InjectHooks();
-        // CTaskSimpleGunControl::InjectHooks();
+        CTaskSimpleGunControl::InjectHooks();
         // CTaskSimpleHailTaxi::InjectHooks();
         // CTaskSimpleHailTaxiAndPause::InjectHooks();
         CTaskSimpleHandsUp::InjectHooks();

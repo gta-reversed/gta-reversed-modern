@@ -584,7 +584,7 @@ public:
     int32 GetPadNumber() const;
     bool IsCurrentlyUnarmed() { return GetActiveWeapon().m_nType == WEAPON_UNARMED; }
     bool IsJoggingOrFaster() const;
-
+    bool IsRightArmBlockedNow() const;
 private:
     void RenderThinBody() const;
     void RenderBigHead() const;
