@@ -237,6 +237,7 @@
 #include "TaskSimpleCarOpenLockedDoorFromOutside.h"
 #include "TaskComplexPartner.h"
 #include "TaskComplexFollowPointRoute.h"
+#include "TaskComplexDrivePointRoute.h"
 #include "TaskSimpleCarSetPedInAsDriver.h"
 #include "TaskComplexWander.h"
 #include "TaskSimplePutDownEntity.h"
@@ -654,7 +655,7 @@ void InjectHooksMain() {
         CTaskComplexDieInCar::InjectHooks();
         // CTaskComplexDiveFromAttachedEntityAndGetUp::InjectHooks();
         CTaskComplexDragPedFromCar__InjectHooks();
-        // CTaskComplexDrivePointRoute::InjectHooks();
+        CTaskComplexDrivePointRoute::InjectHooks();
         // CTaskComplexEnterCarAsDriverTimed::InjectHooks();
         // CTaskComplexEnterCarAsPassengerTimed::InjectHooks();
         // CTaskComplexEnterCarAsPassengerWait::InjectHooks();
