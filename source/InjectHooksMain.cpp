@@ -263,6 +263,7 @@
 #include "TaskComplexLeaveAnyCar.h"
 #include "TaskSimpleLeaveGroup.h"
 #include "TaskSimpleCreateCarAndGetIn.h"
+#include "TaskComplexWaitForBackup.h"
 #include "TaskSimpleIKChain.h"
 #include "TaskSimpleIKLookAt.h"
 #include "TaskSimplePickUpBike.h"
@@ -747,7 +748,7 @@ void InjectHooksMain() {
         // CTaskComplexUseScriptedAttractor::InjectHooks();
         // CTaskComplexUseScriptedBrain::InjectHooks();
         // CTaskComplexWaitAtAttractor::InjectHooks();
-        // CTaskComplexWaitForBackup::InjectHooks();
+        CTaskComplexWaitForBackup::InjectHooks();
         // CTaskComplexWaitForBus::InjectHooks();
         // CTaskComplexWaitForDryWeather::InjectHooks();
         // CTaskComplexWalkAlongsidePed::InjectHooks();
