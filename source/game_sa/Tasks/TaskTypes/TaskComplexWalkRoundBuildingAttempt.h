@@ -21,7 +21,7 @@ public:
     CVector      m_normal{};                        ///< Some kind of normal (maybe the buildings?)
     CEntity*     m_entity{};                        ///< Unused
     CVector      m_offset{};                        ///< Unused (See `m_target`)
-    int8         m_moveState{};                     ///< Uses eMoveState
+    int8         m_moveState{};                     ///< Type is: `eMoveState`
     bool         m_flag0x1 : 1{};                   ///< Set from constructor
     bool         m_routeHasPoints : 1{};            ///< Whenever `m_route` has points
     bool         m_flag0x4 : 1{};                   ///< Seemingly indicates whenever `m_targetEntity` should be present
@@ -35,7 +35,7 @@ public:
 
     static constexpr auto Type = eTaskType::TASK_COMPLEX_WALK_ROUND_BUILDING_ATTEMPT;
 
-    CTaskComplexWalkRoundBuildingAttempt(int32 moveState, CVector const& targetPos, CVector const& pos, CVector const& normal, bool flag_0x1);
+    CTaskComplexWalkRoundBuildingAttempt(eMoveState moveState, CVector const& targetPos, CVector const& pos, CVector const& normal, bool flag_0x1);
     CTaskComplexWalkRoundBuildingAttempt(const CTaskComplexWalkRoundBuildingAttempt&);
     ~CTaskComplexWalkRoundBuildingAttempt();
 
@@ -53,7 +53,7 @@ public:
 
 private: // Wrappers for hooks
     // 0x654740
-    CTaskComplexWalkRoundBuildingAttempt* Constructor(int32 moveState, CVector const& targetPos, CVector const& pos, CVector const& normal, bool flag_0x1) {
+    CTaskComplexWalkRoundBuildingAttempt* Constructor(eMoveState moveState, CVector const& targetPos, CVector const& pos, CVector const& normal, bool flag_0x1) {
         this->CTaskComplexWalkRoundBuildingAttempt::CTaskComplexWalkRoundBuildingAttempt(moveState, targetPos, pos, normal, flag_0x1);
         return this;
     }
@@ -63,3 +63,4 @@ private: // Wrappers for hooks
         return this;
     }
 };
+VALIDATE_SIZE(CTaskComplexWalkRoundBuildingAttempt, 0x4C);

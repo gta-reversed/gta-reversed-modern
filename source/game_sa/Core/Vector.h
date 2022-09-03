@@ -12,6 +12,7 @@
 #include "RenderWare.h"
 
 class CMatrix;
+class CVector2D;
 
 class CVector : public RwV3d {
 public:
@@ -20,8 +21,8 @@ public:
     constexpr CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
     constexpr CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; }
     constexpr explicit CVector(float value) { x = y = z = value; }
-    constexpr explicit CVector(CVector2D v2, float z) : CVector(v2.x, v2.y, z) {}
 
+    explicit CVector(const CVector2D& v2, float z);
 
 public:
     static void InjectHooks();

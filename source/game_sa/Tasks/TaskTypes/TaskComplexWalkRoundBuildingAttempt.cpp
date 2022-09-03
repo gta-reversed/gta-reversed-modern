@@ -2,12 +2,12 @@
 
 #include "TaskComplexWalkRoundBuildingAttempt.h"
 #include "TaskSimpleAchieveHeading.h"
-//#include "TaskComplexFollowPointRoute.h"
+#include "TaskComplexFollowPointRoute.h"
 #include "TaskSimpleGoToPoint.h"
 #include "TaskSimpleStandStill.h"
-//#include "TaskSimpleHitWall.h"
+#include "TaskSimpleHitWall.h"
 #include "TaskSimpleScratchHead.h"
-//#include "TaskSimpleLookAbout.h"
+#include "TaskSimpleLookAbout.h"
 
 void CTaskComplexWalkRoundBuildingAttempt::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexWalkRoundBuildingAttempt, 0x86f334, 11);
@@ -30,19 +30,19 @@ void CTaskComplexWalkRoundBuildingAttempt::InjectHooks() {
 }
 
 // 0x654740
-CTaskComplexWalkRoundBuildingAttempt::CTaskComplexWalkRoundBuildingAttempt(int32 moveState, CVector const& targetPos, CVector const& pos, CVector const& normal, bool flag_0x1) :
+CTaskComplexWalkRoundBuildingAttempt::CTaskComplexWalkRoundBuildingAttempt(eMoveState moveState, CVector const& targetPos, CVector const& pos, CVector const& normal, bool flag_0x1) :
     m_target{targetPos},
     m_pos{pos},
     m_normal{normal},
     m_flag0x1{flag_0x1},
-    m_moveState{moveState}
+    m_moveState{(int8)moveState}
 {
     m_normal.z = 0.f;
     m_normal.Normalise();
 }
 
 CTaskComplexWalkRoundBuildingAttempt::CTaskComplexWalkRoundBuildingAttempt(const CTaskComplexWalkRoundBuildingAttempt& o) :
-    CTaskComplexWalkRoundBuildingAttempt{o.m_moveState, o.m_target, o.m_pos, o.m_normal, o.m_flag0x1}
+    CTaskComplexWalkRoundBuildingAttempt{(eMoveState)o.m_moveState, o.m_target, o.m_pos, o.m_normal, o.m_flag0x1}
 {
 }
 
@@ -93,7 +93,7 @@ CTask* CTaskComplexWalkRoundBuildingAttempt::CreateSubTask(eTaskType taskType, C
         };*/
     case TASK_SIMPLE_GO_TO_POINT:
         return new CTaskSimpleGoToPoint{
-            m_moveState,
+            (eMoveState)m_moveState,
             m_target,
             0.5f,
             false,

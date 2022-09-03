@@ -20,7 +20,7 @@ public:
 public:
     static constexpr auto Type = TASK_SIMPLE_STAND_STILL;
 
-    CTaskSimpleStandStill(int32 nTime, bool Looped = false, bool bUseAnimIdleStance = false, float fBlendData = 8.0f);
+    CTaskSimpleStandStill(int32 nTime = 0, bool Looped = false, bool bUseAnimIdleStance = false, float fBlendData = 8.0f);
     ~CTaskSimpleStandStill() override = default;
 
 public:
