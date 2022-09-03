@@ -224,17 +224,17 @@ bool CTaskSimpleGunControl::ProcessPed(CPed* ped) {
 
         if ([&, this]{
             if (useGunTask && (m_firingTask != END_LEISURE || !useGunTask->m_bIsFinished)) {
-                if (!useGunTask->m_bFiredGun) {
-                    return false;
-                }
-
-                switch ((eGunCommand)useGunTask->m_nLastCommand) {
-                case FIRE:
-                case FIREBURST:
-                    return false;
+                if (useGunTask->m_bFiredGun) {
+                    switch ((eGunCommand)useGunTask->m_nLastCommand) {
+                    case FIRE:
+                    case FIREBURST:
+                        break;
+                    default:
+                        return true;
+                    }
                 }
             }
-            return true;
+            return false;
         }()) {
             useGunTask->m_nCountDownFrames = 2;
             useGunTask->m_bFiredGun = false;
