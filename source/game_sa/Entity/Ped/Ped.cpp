@@ -3688,3 +3688,10 @@ int32 CPed::GetPadNumber() const {
         return 0;
     }
 }
+
+bool CPed::IsRightArmBlockedNow() const {
+    if (bIsDucking) {
+        return bDuckRightArmBlocked;
+    }
+    return bRightArmBlocked;
+}
