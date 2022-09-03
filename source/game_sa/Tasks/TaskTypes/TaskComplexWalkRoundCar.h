@@ -38,6 +38,7 @@ public:
     static constexpr auto Type = TASK_COMPLEX_WALK_ROUND_CAR;
 
     void SetNewVehicle(CVehicle* vehicle, uint8 flags);
+    bool IsGoingForDoor() const;
 };
 
 VALIDATE_SIZE(CTaskComplexWalkRoundCar, 0x78);

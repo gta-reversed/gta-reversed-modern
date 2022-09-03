@@ -38,18 +38,16 @@ class CPed;
 
 class CTaskManager {
 public:
-    CTask* m_aPrimaryTasks[TASK_PRIMARY_MAX];
-    CTask* m_aSecondaryTasks[TASK_SECONDARY_MAX];
-    CPed*  m_pPed;
+
+    std::array<CTask*, TASK_PRIMARY_MAX>   m_aPrimaryTasks{};
+    std::array<CTask*, TASK_SECONDARY_MAX> m_aSecondaryTasks{};
+    CPed*                                  m_pPed{};
 
 public:
     static void InjectHooks();
 
     explicit CTaskManager(CPed* ped);
     ~CTaskManager();
-
-    CTaskManager* Constructor(CPed* ped);
-    CTaskManager* Destructor();
 
     CTask* GetActiveTask();
     CTask* FindActiveTaskByType(int32 taskType);
@@ -80,6 +78,10 @@ public:
     CTask* GetTaskPrimary(int32 taskIndex) noexcept {
         return m_aPrimaryTasks[taskIndex];
     }
+
+    auto& GetPrimaryTasks() const { return m_aPrimaryTasks; }
+    auto& GetSecondaryTasks() const { return m_aSecondaryTasks; }
+
 
     // NOTSA - Check if any of the given tasks is active
     bool IsAnyTaskActiveByType(std::initializer_list<int32> types) {
@@ -167,6 +169,17 @@ public:
             }
         }
         return false;
+    }
+
+private:
+    CTaskManager* Constructor(CPed* ped) {
+        this->CTaskManager::CTaskManager(ped);
+        return this;
+    }
+
+    CTaskManager* Destructor() {
+        this->CTaskManager::~CTaskManager();
+        return this;
     }
 };
 

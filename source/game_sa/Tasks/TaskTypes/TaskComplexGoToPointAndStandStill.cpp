@@ -21,7 +21,7 @@ void CTaskComplexGoToPointAndStandStill::InjectHooks() {
 }
 
 // 0x668120
-CTaskComplexGoToPointAndStandStill::CTaskComplexGoToPointAndStandStill(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint) : CTaskComplex() {
+CTaskComplexGoToPointAndStandStill::CTaskComplexGoToPointAndStandStill(eMoveState moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint) : CTaskComplex() {
     m_moveState           = moveState;
     m_nFlags              = 0;
     m_b01                 = bUnknown;
@@ -54,12 +54,6 @@ CTaskComplexGoToPointAndStandStill::CTaskComplexGoToPointAndStandStill(int32 mov
 
 CTaskComplexGoToPointAndStandStill::~CTaskComplexGoToPointAndStandStill() {
     // NOP
-}
-
-// 0x668120
-CTaskComplexGoToPointAndStandStill* CTaskComplexGoToPointAndStandStill::Constructor(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint) {
-    this->CTaskComplexGoToPointAndStandStill::CTaskComplexGoToPointAndStandStill(moveState, targetPoint, fRadius, fMoveStateRadius, bUnknown, bGoToPoint);
-    return this;
 }
 
 // 0x66CEA0

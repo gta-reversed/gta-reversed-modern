@@ -1,22 +1,60 @@
 #pragma once
 
+#include <array>
+#include <span>
+
+#include "Vector.h"
+#include "Base.h"
+
 class CVector;
 class CEntity;
 class CPed;
-class CEntity;
 class CColSphere;
 class CPhysical;
 
 class CPointRoute {
 public:
-    uint32  m_nNumPoints;
-    CVector m_vecPoints[8];
-
-    CPointRoute() : m_nNumPoints(0) {}
-    CPointRoute(CPointRoute* from);
-
     static void* operator new(uint32 size);
     static void operator delete(void* ptr, size_t sz);
+
+    /// Get all active points
+    auto GetPoints()       { return m_vecPoints | rng::views::take(m_nNumPoints); }
+    auto GetPoints() const { return m_vecPoints | rng::views::take(m_nNumPoints); }
+
+    /// Are there are no points
+    bool IsEmpty() const { return m_nNumPoints == 0; }
+
+    /// Is there space for more points
+    bool IsFull()  const { return (size_t)m_nNumPoints >= std::size(m_vecPoints); }
+
+    /// Add a point (Doesn't check whenever there's space for it)
+    template<typename... T_Points>
+    void AddPoints(T_Points&&... point) { ((m_vecPoints[m_nNumPoints++] = point), ...); }
+
+    /// Add a point if we aren't full yet
+    void MaybeAddPoint(const CVector& point) {
+        if (!IsFull()) {
+            AddPoints(point);
+        }
+    }
+
+    /// Add points if there's space for them
+    template<typename... T_Points>
+    void MaybeAddPoints(T_Points&&... point) { (MaybeAddPoint(point), ...); }
+
+    /// Reverse the order of points
+    void Reverse() { rng::reverse(GetPoints()); }
+
+    /// Clear all points
+    void Clear() { m_nNumPoints = 0; }
+
+    // Access active points
+    CVector& operator[](size_t idx)       { return GetPoints()[idx]; }
+    CVector  operator[](size_t idx) const { return GetPoints()[idx]; }
+
+    // TODO: Make private
+    uint32                 m_nNumPoints{};
+    std::array<CVector, 8> m_vecPoints; // NOTE: Use `GetPoints` to iterate over only the valid points
 };
 
 VALIDATE_SIZE(CPointRoute, 0x64);
@@ -41,9 +79,9 @@ public:
     static void ComputeEntityBoundingBoxCentreUncachedAll(float zPos, CEntity& entity, CVector& center);
     static void ComputeEntityBoundingBoxCorners(float zPos, CEntity& entity, CVector* corners);
     static void ComputeEntityBoundingBoxCornersUncached(float zPos, CEntity& entity, CVector* corners);
-    static void ComputeEntityBoundingBoxPlanes(float zPos, CEntity& entity, CVector* planes, float* planes_D);
-    static void ComputeEntityBoundingBoxPlanesUncached(float zPos, const CVector* corners, CVector* planes, float* planes_D);
-    static void ComputeEntityBoundingBoxPlanesUncachedAll(float zPos, CEntity& entity, CVector* posn, float* a4);
+    static void ComputeEntityBoundingBoxPlanes(float zPos, CEntity& entity, CVector(*outPlanes)[4], float* outPlanesDot);
+    static void ComputeEntityBoundingBoxPlanesUncached(float zPos, const CVector* corners, CVector(*outPlanes)[4], float* outPlanesDot);
+    static void ComputeEntityBoundingBoxPlanesUncachedAll(float zPos, CEntity& entity, CVector (*outPlanes)[4], float* outPlanesDot);
     static void ComputeEntityBoundingBoxSegmentPlanes(float zPos, CEntity& entity, CVector*, float*);
     static CVector* ComputeEntityBoundingBoxSegmentPlanesUncached(const CVector* corners, CVector& center, CVector* a3, float* a4);
     static CVector* ComputeEntityBoundingBoxSegmentPlanesUncachedAll(float zPos, CEntity& entity, CVector* a3, float* a4);

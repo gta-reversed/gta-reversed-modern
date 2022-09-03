@@ -51,84 +51,48 @@ void CTaskComplexFollowNodeRoute::StopTimer(const CEvent* event) {
     }
 }
 
-// 0x669520
-bool CTaskComplexFollowNodeRoute::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return plugin::CallMethodAndReturn<bool, 0x669520, CTaskComplexFollowNodeRoute*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
-}
-
-// 0x669690
-CTask* CTaskComplexFollowNodeRoute::CreateSubTask(eTaskType taskType, CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x669690, CTaskComplexFollowNodeRoute*, eTaskType, CPed*>(this, taskType, ped);
-}
-
-uint32 CTaskComplexFollowNodeRoute::GetRouteSize() {
-    assert(0);
-    return 0;
-}
-
-eTaskType CTaskComplexFollowNodeRoute::GetSubTaskType(int32 unkn, bool bUnkn, const CPointRoute& pointRoute) {
-    assert(0);
-    return (eTaskType)-1;
-}
-
-// 0x6698E0
-CVector CTaskComplexFollowNodeRoute::GetLastWaypoint(CPed* ped) {
-    assert(0);
-    return 0;
-}
-
-CVector CTaskComplexFollowNodeRoute::GetNextWaypoint(CPed* ped) {
-    assert(0);
-    return 0;
-}
-
-// 0x6699E0
-void CTaskComplexFollowNodeRoute::ComputeRoute() {
-    assert(0);
-}
-
 // 0x66EBE0
 eTaskType CTaskComplexFollowNodeRoute::CalcGoToTaskType(CPed* ped, eTaskType taskType) {
-    assert(0);
-    return (eTaskType)-1;
-}
-
-// 0x66EDC0
-float CTaskComplexFollowNodeRoute::CalcBlendRatio(CPed* ped, bool bUsePointRoute) {
-    assert(0);
-    return 0;
-}
-
-// 0x66EF20
-bool CTaskComplexFollowNodeRoute::CanGoStraightThere(CPed* ped, const CVector& from, const CVector& to, float maxDist) {
-    assert(0);
-    return 0;
-}
-
-// 0x66EFA0
-void CTaskComplexFollowNodeRoute::ComputePathNodes(const CPed* ped) {
-    assert(0);
+    return plugin::CallMethodAndReturn<eTaskType, 0x66EBE0, CTaskComplexFollowNodeRoute*, CPed*, eTaskType>(this, ped, taskType);
 }
 
 // 0x671750
 void CTaskComplexFollowNodeRoute::SetTarget(CPed* ped, const CVector& target, float radius, float fUnkn1, float fUnkn2, bool bForce) {
-    assert(0);
+    return plugin::CallMethodAndReturn<void, 0x671750, CTaskComplexFollowNodeRoute*, CPed const*, CVector const&, float, float, float, bool>(this, ped, target, radius, fUnkn1, fUnkn2, bForce);
 }
 
-// 0x671800
-CTask* CTaskComplexFollowNodeRoute::CreateFirstSubTask(CPed* ped) {
-    assert(0);
-    return 0;
+// 0x669690
+CTask* CTaskComplexFollowNodeRoute::CreateSubTask(eTaskType taskType, CPed* ped) {
+    return plugin::CallMethodAndReturn<CTask*, 0x669690, CTaskComplexFollowNodeRoute*, int32, CPed*>(this, taskType, ped);
+}
+
+// 0x6698E0
+CVector CTaskComplexFollowNodeRoute::GetLastWaypoint(CPed* ped) {
+    NOTSA_UNREACHABLE(); // This shit is RVO'd => I'm lazy to fix it
+}
+
+// 0x66EFA0
+void CTaskComplexFollowNodeRoute::ComputePathNodes(CPed const* ped) {
+    return plugin::CallMethodAndReturn<void, 0x66EFA0, CTaskComplexFollowNodeRoute*, CPed const*>(this, ped);
+}
+
+// 0x669520
+bool CTaskComplexFollowNodeRoute::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+    return plugin::CallMethodAndReturn<bool, 0x669520, CTaskComplexFollowNodeRoute*, CPed*, eAbortPriority, CEvent const*>(this, ped, priority, event);
 }
 
 // 0x6718D0
 CTask* CTaskComplexFollowNodeRoute::CreateNextSubTask(CPed* ped) {
-    assert(0);
-    return 0;
+    return plugin::CallMethodAndReturn< CTask*, 0x6718D0, CTaskComplexFollowNodeRoute*, CPed*>(this, ped);
+}
+
+// 0x671800
+CTask* CTaskComplexFollowNodeRoute::CreateFirstSubTask(CPed* ped) {
+    return plugin::CallMethodAndReturn< CTask*, 0x671800, CTaskComplexFollowNodeRoute*, CPed*>(this, ped);
 }
 
 // 0x671AB0
 CTask* CTaskComplexFollowNodeRoute::ControlSubTask(CPed* ped) {
-    assert(0);
-    return 0;
+    return plugin::CallMethodAndReturn< CTask*, 0x671AB0, CTaskComplexFollowNodeRoute*, CPed*>(this, ped);
 }
+
