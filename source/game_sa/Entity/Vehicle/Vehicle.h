@@ -231,7 +231,7 @@ public:
 
             uint32 bIsVan : 1;                       // Is this vehicle a van (doors at back of vehicle)
             uint32 bIsBus : 1;                       // Is this vehicle a bus
-            uint32 bIsBig : 1;                       // Is this vehicle a bus
+            uint32 bIsBig : 1;                       // Is this vehicle big
             uint32 bLowVehicle : 1;                  // Need this for sporty type cars to use low getting-in/out anims
             uint32 bComedyControls : 1;              // Will make the car hard to control (hopefully in a funny way)
             uint32 bWarnedPeds : 1;                  // Has scan and warn peds of danger been processed?
@@ -620,7 +620,6 @@ public:
     void DoFixedMachineGuns();
     void FireFixedMachineGuns();
     void DoDriveByShootings();
-    bool AnyOfDoorsReady(uint32 door1, uint32 door2);
 
     bool AreAnyOfPassengersFollowerOfGroup(const CPedGroup& group);
 

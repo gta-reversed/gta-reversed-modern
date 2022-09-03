@@ -29,7 +29,7 @@ void CCarEnterExit::InjectHooks() {
     RH_ScopedInstall(GetNearestCarDoor, 0x6528F0);
     // RH_ScopedInstall(GetNearestCarPassengerDoor, 0x650BB0);
     // RH_ScopedInstall(GetPositionToOpenCarDoor, 0x64E740);
-    // RH_ScopedInstall(IsCarDoorInUse, 0x0);
+    // RH_ScopedInstall(IsCarDoorInUse, 0x64ec90);
     // RH_ScopedInstall(IsCarDoorReady, 0x0);
     // RH_ScopedInstall(IsCarQuickJackPossible, 0x0);
     // RH_ScopedInstall(IsCarSlowJackRequired, 0x0);
@@ -355,9 +355,9 @@ CVector CCarEnterExit::GetPositionToOpenCarDoor(const CVehicle* vehicle, int32 d
     return out;
 }
 
-// 0x
+// 0x64ec90
 bool CCarEnterExit::IsCarDoorInUse(const CVehicle* vehicle, int32 firstDoorId, int32 secondDoorId) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32, int32>(vehicle, firstDoorId, secondDoorId);
+    return plugin::CallAndReturn<bool, 0x64ec90, const CVehicle*, int32, int32>(vehicle, firstDoorId, secondDoorId);
 }
 
 // 0x

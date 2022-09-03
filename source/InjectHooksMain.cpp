@@ -210,6 +210,7 @@
 #include "TaskComplexWanderCriminal.h"
 #include "TaskComplexWanderProstitute.h"
 #include "TaskComplexWalkRoundBuildingAttempt.h"
+#include "TaskSimpleLookAbout.h"
 #include "TaskComplexPartnerGreet.h"
 #include "TaskSimpleShakeFist.h"
 #include "TaskComplexWalkRoundCar.h"
@@ -221,6 +222,7 @@
 #include "TaskSimplePlayHandSignalAnim.h"
 #include "TaskComplexCarDrive.h"
 #include "TaskComplexKillPedFromBoat.h"
+#include "TaskSimpleHitWall.h"
 #include "TaskComplexLeaveCar.h"
 #include "TaskSimpleCarSetTempAction.h"
 #include "TaskComplexTreatAccident.h"
@@ -235,10 +237,12 @@
 #include "TaskSimpleUseAtm.h"
 #include "TaskSimpleCarOpenLockedDoorFromOutside.h"
 #include "TaskComplexPartner.h"
+#include "TaskComplexFollowPointRoute.h"
 #include "TaskSimpleCarSetPedInAsDriver.h"
 #include "TaskComplexWander.h"
 #include "TaskSimplePutDownEntity.h"
 #include "TaskComplexUseSwatRope.h"
+#include "TaskComplexRoadRage.h"
 #include "TaskSimpleGoToPointFine.h"
 #include "TaskComplexDie.h"
 #include "TaskComplexEnterBoatAsDriver.h"
@@ -668,7 +672,7 @@ void InjectHooksMain() {
         // CTaskComplexFollowLeaderAnyMeans::InjectHooks();
         // CTaskComplexFollowNodeRouteShooting::InjectHooks();
         // CTaskComplexFollowPatrolRoute::InjectHooks();
-        // CTaskComplexFollowPointRoute::InjectHooks();
+        CTaskComplexFollowPointRoute::InjectHooks();
         CTaskComplexGangFollower::InjectHooks();
         CTaskComplexGangJoinRespond::InjectHooks();
         CTaskComplexGangLeader::InjectHooks();
@@ -706,7 +710,7 @@ void InjectHooksMain() {
         // CTaskComplexPresentIDToCop::InjectHooks();
         // CTaskComplexReactToAttack::InjectHooks();
         // CTaskComplexReactToGunAimedAt::InjectHooks();
-        // CTaskComplexRoadRage::InjectHooks();
+        CTaskComplexRoadRage::InjectHooks();
         // CTaskComplexScreamInCarThenLeave::InjectHooks();
         // CTaskComplexSeekCoverUntilTargetDead::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculator>::InjectHooks();
@@ -799,10 +803,10 @@ void InjectHooksMain() {
         // CTaskSimpleHitFromFront::InjectHooks();
         // CTaskSimpleHitFromLeft::InjectHooks();
         // CTaskSimpleHitFromRight::InjectHooks();
-        // CTaskSimpleHitWall::InjectHooks();
+        CTaskSimpleHitWall::InjectHooks();
         // CTaskSimpleHurtPedWithCar::InjectHooks();
         // CTaskSimpleKillPedWithCar::InjectHooks();
-        // CTaskSimpleLookAbout::InjectHooks();
+        CTaskSimpleLookAbout::InjectHooks();
         // CTaskSimpleOnEscalator::InjectHooks();
         CTaskSimplePickUpBike::InjectHooks();
         CTaskSimplePlayerOnFire::InjectHooks();

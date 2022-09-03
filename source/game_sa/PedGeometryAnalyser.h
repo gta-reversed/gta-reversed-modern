@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <span>
 
 #include "Vector.h"
 #include "Base.h"
@@ -13,28 +14,47 @@ class CPhysical;
 
 class CPointRoute {
 public:
-    CPointRoute() = default;
-    CPointRoute(CPointRoute* from);
-
     static void* operator new(uint32 size);
     static void operator delete(void* ptr, size_t sz);
 
+    /// Get all active points
+    auto GetPoints()       { return m_vecPoints | rng::views::take(m_nNumPoints); }
+    auto GetPoints() const { return m_vecPoints | rng::views::take(m_nNumPoints); }
+
+    /// Are there are no points
     bool IsEmpty() const { return m_nNumPoints == 0; }
+
+    /// Is there space for more points
     bool IsFull()  const { return (size_t)m_nNumPoints >= std::size(m_vecPoints); }
 
+    /// Add a point (Doesn't check whenever there's space for it)
     template<typename... T_Points>
-    void AddPoints(T_Points&&... point) { (m_vecPoints[m_nNumPoints++] = point, ...); }
+    void AddPoints(T_Points&&... point) { ((m_vecPoints[m_nNumPoints++] = point), ...); }
+
+    /// Add a point if we aren't full yet
     void MaybeAddPoint(const CVector& point) {
         if (!IsFull()) {
             AddPoints(point);
         }
     }
+
+    /// Add points if there's space for them
     template<typename... T_Points>
     void MaybeAddPoints(T_Points&&... point) { (MaybeAddPoint(point), ...); }
 
+    /// Reverse the order of points
+    void Reverse() { rng::reverse(GetPoints()); }
+
+    /// Clear all points
+    void Clear() { m_nNumPoints = 0; }
+
+    // Access active points
+    CVector& operator[](size_t idx)       { return GetPoints()[idx]; }
+    CVector  operator[](size_t idx) const { return GetPoints()[idx]; }
+
     // TODO: Make private
     uint32                 m_nNumPoints{};
-    std::array<CVector, 8> m_vecPoints;
+    std::array<CVector, 8> m_vecPoints; // NOTE: Use `GetPoints` to iterate over only the valid points
 };
 
 VALIDATE_SIZE(CPointRoute, 0x64);
