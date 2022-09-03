@@ -4,7 +4,8 @@
 #define VERIFY VERIFY_IMPL
 
 #ifdef _DEBUG
-static void dev_printf(int lineno, const char* file, const char* fmt, ...) {
+namespace notsa {
+static void DevPrintf(int lineno, const char* file, const char* fmt, ...) {
     (void)printf("[%s @ %i]: ", file, lineno);
 
     va_list vargs;
@@ -14,7 +15,8 @@ static void dev_printf(int lineno, const char* file, const char* fmt, ...) {
 
     printf("\n");
 }
-#define DEV_LOG(...) dev_printf(__LINE__, __FILE__, ##__VA_ARGS__)
+};
+#define DEV_LOG(...) notsa::DevPrintf(__LINE__, __FILE__, ##__VA_ARGS__)
 #else
 #define DEV_LOG(...)
 #endif

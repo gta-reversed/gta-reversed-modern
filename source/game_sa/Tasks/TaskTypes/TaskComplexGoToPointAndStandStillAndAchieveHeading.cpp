@@ -20,7 +20,7 @@ void CTaskComplexGoToPointAndStandStillAndAchieveHeading::InjectHooks() {
 }
 
 // 0x668CD0
-CTaskComplexGoToPointAndStandStillAndAchieveHeading::CTaskComplexGoToPointAndStandStillAndAchieveHeading(int32 moveState, const CVector& targetPos, float angle, float radius, float changeRateMult, float maxHeading)
+CTaskComplexGoToPointAndStandStillAndAchieveHeading::CTaskComplexGoToPointAndStandStillAndAchieveHeading(eMoveState moveState, const CVector& targetPos, float angle, float radius, float changeRateMult, float maxHeading)
     : CTaskComplex()
 {
     m_MoveState = moveState;
