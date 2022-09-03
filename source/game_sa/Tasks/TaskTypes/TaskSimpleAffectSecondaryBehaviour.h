@@ -8,9 +8,9 @@ class CPed;
 class CTaskSimpleAffectSecondaryBehaviour;
 
 /*!
- *  Keep trying until the given secondary task is done/can be aborted
+ *  Keep trying until the current task (GetTaskSecondary(m_secTaskType)) is done/can be aborted
  *  using `ABORT_PRIORITY_URGENT` and then add the given task as a
- *  secondary task as the specified type.
+ *  secondary task in it's place.
  */
 class NOTSA_EXPORT_VTABLE CTaskSimpleAffectSecondaryBehaviour : public CTaskSimple {
 public:
