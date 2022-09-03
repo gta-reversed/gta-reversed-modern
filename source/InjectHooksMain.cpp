@@ -237,6 +237,7 @@
 #include "TaskSimpleCarOpenLockedDoorFromOutside.h"
 #include "TaskComplexPartner.h"
 #include "TaskComplexFollowPointRoute.h"
+#include "TaskComplexDrivePointRoute.h"
 #include "TaskSimpleCarSetPedInAsDriver.h"
 #include "TaskComplexWander.h"
 #include "TaskSimplePutDownEntity.h"
@@ -267,6 +268,7 @@
 #include "TaskSimpleIKLookAt.h"
 #include "TaskSimplePickUpBike.h"
 #include "TaskSimpleIKManager.h"
+#include "TaskSimpleGunControl.h"
 #include "TaskSimpleIKPointArm.h"
 #include "TaskSimpleCarSlowDragPedOut.h"
 #include "TaskSimpleWaitUntilPedIsOutCar.h"
@@ -654,7 +656,7 @@ void InjectHooksMain() {
         CTaskComplexDieInCar::InjectHooks();
         // CTaskComplexDiveFromAttachedEntityAndGetUp::InjectHooks();
         CTaskComplexDragPedFromCar__InjectHooks();
-        // CTaskComplexDrivePointRoute::InjectHooks();
+        CTaskComplexDrivePointRoute::InjectHooks();
         // CTaskComplexEnterCarAsDriverTimed::InjectHooks();
         // CTaskComplexEnterCarAsPassengerTimed::InjectHooks();
         // CTaskComplexEnterCarAsPassengerWait::InjectHooks();
@@ -790,7 +792,7 @@ void InjectHooksMain() {
         // CTaskSimpleEvasiveStep::InjectHooks();
         CTaskSimpleFightingControl::InjectHooks();
         // CTaskSimpleFinishBrain::InjectHooks();
-        // CTaskSimpleGunControl::InjectHooks();
+        CTaskSimpleGunControl::InjectHooks();
         // CTaskSimpleHailTaxi::InjectHooks();
         // CTaskSimpleHailTaxiAndPause::InjectHooks();
         CTaskSimpleHandsUp::InjectHooks();

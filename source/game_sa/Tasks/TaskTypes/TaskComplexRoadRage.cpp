@@ -81,6 +81,10 @@ bool CTaskComplexRoadRage::MakeAbortable(CPed* ped, eAbortPriority priority, CEv
 
 // 0x62E270
 CTask* CTaskComplexRoadRage::CreateNextSubTask(CPed* ped) {
+    if (!m_rageWith) {
+        return nullptr;
+    }
+
     switch (m_pSubTask->GetTaskType()) {
     case TASK_COMPLEX_TURN_TO_FACE_ENTITY:
         return CreateSubTask(TASK_SIMPLE_SHAKE_FIST, ped);
