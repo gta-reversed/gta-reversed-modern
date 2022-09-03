@@ -81,16 +81,16 @@ CTask* CTaskComplexWalkRoundBuildingAttempt::CreateSubTask(eTaskType taskType, C
             0.1f
         };
     case TASK_COMPLEX_FOLLOW_POINT_ROUTE:
-        /*return new CTaskComplexFollowPointRoute{
-            m_moveState,
-            m_route,
-            false,
+        return new CTaskComplexFollowPointRoute{
+            (eMoveState)m_moveState,
+            *m_route,
+            CTaskComplexFollowPointRoute::Mode::ONE_WAY,
             0.5f,
             0.5f,
             false,
             false,
             true
-        };*/
+        };
     case TASK_SIMPLE_GO_TO_POINT:
         return new CTaskSimpleGoToPoint{
             (eMoveState)m_moveState,
@@ -102,11 +102,11 @@ CTask* CTaskComplexWalkRoundBuildingAttempt::CreateSubTask(eTaskType taskType, C
     case TASK_SIMPLE_STAND_STILL:
         return new CTaskSimpleStandStill{1000};
     case TASK_SIMPLE_HIT_WALL:
-        /*return new CTaskSimpleHitWall{};*/
+        return new CTaskSimpleHitWall{};
     case TASK_SIMPLE_SCRATCH_HEAD:
         return new CTaskSimpleScratchHead{};
     case TASK_SIMPLE_LOOK_ABOUT:
-        /*return new CTaskSimpleLookAbout{1000};*/
+        return new CTaskSimpleLookAbout{1000};
     case TASK_FINISHED:
         return nullptr;
     default:
