@@ -14,10 +14,10 @@
 #include "Pool.h"
 #include "TaskSimpleSlideToCoord.h"
 
-class CopPed;
-class CHeli;
+class CPed;
+class CVehicle;
 class CBuilding;
-class CutsceneObject;
+class CObject;
 class CDummy;
 class CColModel;
 class CTask;
@@ -25,11 +25,13 @@ class CPedIntelligence;
 class CPtrNodeSingleLink;
 class CPtrNodeDoubleLink;
 class CEntryInfoNode;
-class CPedGeometryAnalyser;
 class CPointRoute;
 class CPatrolRoute;
+class CEvent;
+class CNodeRoute;
 class CTaskAllocator;
 class CPedAttractor;
+class CCutsceneObject;
 
 #ifdef GetObject
 #undef GetObject

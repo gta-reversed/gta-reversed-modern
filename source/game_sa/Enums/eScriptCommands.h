@@ -2910,4 +2910,7 @@ enum eScriptCommands {
     COMMAND_WRITE_FLOAT_TO_INI_FILE                       = 0x0AF3,
     COMMAND_READ_STRING_FROM_INI_FILE                     = 0x0AF4,
     COMMAND_WRITE_STRING_TO_INI_FILE                      = 0x0AF5, // 2805
+
+    // Make sure this is always up to date!
+    COMMAND_HIGHEST_ID = COMMAND_PERLIN_NOISE_FRACTAL_3D
 };

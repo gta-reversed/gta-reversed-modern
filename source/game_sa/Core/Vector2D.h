@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <span>
+
 #include "RenderWare.h"
 
 class CVector;
@@ -89,10 +91,14 @@ public:
         return std::atan2(-x, y);
     }
 
+
+    auto GetComponents() const {
+        return std::span{ reinterpret_cast<const float*>(this), 2 };
+    }
+
     constexpr friend CVector2D operator*(const CVector2D& vec, float multiplier) {
         return { vec.x * multiplier, vec.y * multiplier };
     }
-
 
     /// Calculate the dot product with another vector
     float Dot(const CVector2D& lhs) const {
