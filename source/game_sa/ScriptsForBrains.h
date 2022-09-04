@@ -12,25 +12,19 @@ class CEntity;
 class CObject;
 
 struct tScriptForBrains {
-    int16  m_nIMGindex;
-    int8   m_nAttachType;
-    int8   m_nType;
-    int8   m_ucStatus;
-    float  m_fRadius;
-    uint16 m_nModelID;
-    uint16 m_nPriority;
-    int32  field_10;
-
-    tScriptForBrains() {
-        m_nIMGindex   = -1;
-        m_nModelID    = 0;
-        m_nPriority   = 0;
-        field_10      = 0;
-        m_nAttachType = -1;
-        m_nType       = -1;
-        m_ucStatus    = 1;
-        m_fRadius     = 5.0f;
-    }
+    int16  m_nIMGindex{-1};     /// SCM ID for `CStreaming` (Translated using SCMToModelId)
+    int8   m_nAttachType{-1};
+    int8   m_nType{-1};
+    int8   m_ucStatus{1};
+    float  m_fRadius{5.f};
+    union {
+        struct {
+            int16  m_pedModelOrPedGeneratorIndex;
+            uint16 m_percentageChance;
+            uint32 m_pad;
+        };
+        char m_scriptName[8]{};
+    };
 };
 
 class CScriptsForBrains {
