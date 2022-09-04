@@ -52,7 +52,7 @@ CTask* CTaskComplexGoToPointAndStandStillAndAchieveHeading::CreateSubTask(eTaskT
     case TASK_SIMPLE_ACHIEVE_HEADING:
         return new CTaskSimpleAchieveHeading(m_Angle, m_ChangeRateMult, m_MaxHeading);
     case TASK_SIMPLE_STAND_STILL:
-        return new CTaskSimpleStandStill();
+        return new CTaskSimpleStandStill{};
     case TASK_SIMPLE_GO_TO_POINT:
         return new CTaskSimpleGoToPoint(m_MoveState, m_TargetPos, m_Radius, false, false);
     default:
