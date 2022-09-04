@@ -47,7 +47,7 @@ solution "gta_reversed"
     configuration "vs*"
         flags {"MultiProcessorCompile"}
         linkoptions   { "/ignore:4099,4251,4275" }
-        buildoptions {"/EHsc", "/Zc:preprocessor"}
+        buildoptions {"/EHsc", "/Zc:preprocessor", "/bigobj"}
         disablewarnings { 26812, 26495, 4099, 4251, 4275 }
 
     flags {
