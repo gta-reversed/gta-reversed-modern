@@ -6,18 +6,15 @@
 * Various utility commands
 */
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_CAR_PROOFS>() { // 0x2AC
-    CollectParameters(6);
-    auto* vehicle = GetVehiclePool()->GetAt(ScriptParams[0].iParam >> 8);
-    assert(vehicle);
-    vehicle->physicalFlags.bBulletProof = ScriptParams[1].uParam;
-    vehicle->physicalFlags.bFireProof = ScriptParams[2].uParam;
-    vehicle->physicalFlags.bExplosionProof = ScriptParams[3].uParam;
-    vehicle->physicalFlags.bCollisionProof = ScriptParams[4].uParam;
-    vehicle->physicalFlags.bMeleeProof = ScriptParams[5].uParam;
-    return OR_CONTINUE;
+void SetCarProofs(CVehicle& veh, bool bullet, bool fire, bool explosion, bool collision, bool melee) {
+    auto& flags = veh.physicalFlags;
+    flags.bBulletProof = bullet;
+    flags.bFireProof = fire;
+    flags.bExplosionProof = explosion;
+    flags.bCollisionProof = collision;
+    flags.bMeleeProof = melee;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_SET_CAR_PROOFS, SetCarProofs);
 
 void SwitchCarGenerator(int32 generatorId, int32 count) {
     const auto generator = CTheCarGenerators::Get(generatorId);
@@ -37,11 +34,7 @@ float GetCarSpeed(CVehicle& veh) {
 }
 REGISTER_COMMAND_HANDLER(COMMAND_GET_CAR_SPEED, GetCarSpeed);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_CAR_DRIVING_STYLE>() { // 0x0AE
-    CollectParameters(2);
-    auto* vehicle = GetVehiclePool()->GetAtRef(ScriptParams[0].iParam);
-    assert(vehicle);
-    vehicle->m_autoPilot.m_nCarDrivingStyle = static_cast<eCarDrivingStyle>(ScriptParams[1].u8Param);
-    return OR_CONTINUE;
+void SetCarDrivingStyle(CVehicle& veh, eCarDrivingStyle style) {
+    veh.m_autoPilot.m_nCarDrivingStyle = style;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_SET_CAR_DRIVING_STYLE, SetCarDrivingStyle);
