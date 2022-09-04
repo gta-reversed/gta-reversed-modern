@@ -1009,7 +1009,7 @@ void CCamera::UpdateTargetEntity() {
 
     const auto canEnterCar = player && player->m_pVehicle && player->m_pVehicle->CanPedOpenLocks(player); // Inverted this variable
 
-    if (player->m_nPedState == PEDSTATE_ENTER_CAR && canEnterCar && !playerDoingSomethingWhileDriveBy) {
+    if (canEnterCar && player->m_nPedState == PEDSTATE_ENTER_CAR && !playerDoingSomethingWhileDriveBy) {
         if (m_nCarZoom) {
             CEntity::ChangeEntityReference(m_pTargetEntity, FindPlayerEntity());
         }
