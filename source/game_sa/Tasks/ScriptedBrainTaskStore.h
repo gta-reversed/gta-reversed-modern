@@ -31,7 +31,15 @@ public:
     static void InjectHooks();
 
     static CTask* SetTask(CPed* ped, CTask* task);
+
+    /// Get brain entry task of ped (possibly null)
     static CTask* GetTask(CPed* ped);
+
     static void Clear(CPed* ped);
     static void Clear(CTask* task);
+
+    /* NOTSA */
+
+    /// Get brain of `ped`, nullptr if not found.
+    static auto GetOf(CPed* ped) -> CScriptedBrainTaskEntry*;
 };
