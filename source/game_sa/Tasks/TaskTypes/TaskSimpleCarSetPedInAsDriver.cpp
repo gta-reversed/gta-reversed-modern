@@ -14,6 +14,12 @@ CTaskSimpleCarSetPedInAsDriver::CTaskSimpleCarSetPedInAsDriver(CVehicle* targetV
     CEntity::SafeRegisterRef(m_pTargetVehicle);
 }
 
+CTaskSimpleCarSetPedInAsDriver::CTaskSimpleCarSetPedInAsDriver(CVehicle* targetVehicle, bool warpingInToCar, CTaskUtilityLineUpPedWithCar* utility) : // NOTSA
+    CTaskSimpleCarSetPedInAsDriver{ targetVehicle, utility }
+{
+    m_bWarpingInToCar = warpingInToCar;
+}
+
 CTaskSimpleCarSetPedInAsDriver::~CTaskSimpleCarSetPedInAsDriver() {
     CEntity::SafeCleanUpRef(m_pTargetVehicle);
 }

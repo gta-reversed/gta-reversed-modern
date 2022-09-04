@@ -37,6 +37,10 @@ public:
        top = fBottom;
        assert(!IsFlipped());
     }
+    constexpr CRect(const CVector2D& top, const CVector2D& bottom) :
+        CRect{top.x, top.y, bottom.x, bottom.y}
+    {
+    }
 
     [[nodiscard]] constexpr inline bool IsFlipped() const { // 0x404190
         return left > right || bottom > top;
