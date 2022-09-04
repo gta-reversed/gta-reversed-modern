@@ -22,11 +22,10 @@ void CCustomRoadsignMgr::InjectHooks()
     RH_ScopedGlobalInstall(RoadsignGenerateTextRaster, 0x6FEB70);
 }
 
-bool CCustomRoadsignMgr::Initialise()
-{
-    const auto iTxdSlot = CTxdStore::FindTxdSlot("particle");
+// 0x6FE120
+bool CCustomRoadsignMgr::Initialise() {
     CTxdStore::PushCurrentTxd();
-    CTxdStore::SetCurrentTxd(iTxdSlot);
+    CTxdStore::SetCurrentTxd(CTxdStore::FindTxdSlot("particle"));
 
     auto* texture = RwTextureRead("roadsignfont", nullptr);
     RwTextureSetFilterMode(texture, rwFILTERNEAREST);
@@ -182,7 +181,7 @@ RpAtomic* CCustomRoadsignMgr::CreateRoadsignAtomicA(float fWidth, float fHeight,
                 /*pVerts[0] = { 0.0F, 0.0F, 0.0F };
                 pVerts[1] = { xScale, 0.0F, 0.0F };
                 pVerts[2] = { xScale, fLineY * 0.95F, 0.0F };
-                pVerts[3] = { 0.0F, fLineY * 0.95F , 0.0F };*/ 
+                pVerts[3] = { 0.0F, fLineY * 0.95F , 0.0F };*/
 
                 auto fNewY = 0.0F;
                 switch(numLines)
@@ -355,7 +354,7 @@ bool RoadsignGenerateTextRaster(char* roadName, int32 numLetters, RwRaster* char
     const auto charStride = RwRasterGetStride(charsetRaster);
     if (!charStride)
         return false;
-    
+
     const auto signStride = RwRasterGetStride(signRaster);
     if (!signStride)
         return false;

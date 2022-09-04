@@ -7,20 +7,21 @@
 #include "TaskSimpleHoldEntity.h"
 #include "TaskSimpleDuck.h"
 
-void CTaskSimpleGoToPoint::InjectHooks()
-{
+void CTaskSimpleGoToPoint::InjectHooks() {
     RH_ScopedClass(CTaskSimpleGoToPoint);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x667CD0);
-    RH_ScopedVirtualInstall(Clone, 0x66CC60);
     RH_ScopedVirtualInstall(MakeAbortable, 0x667D60);
     RH_ScopedVirtualInstall(ProcessPed, 0x66D710);
     RH_ScopedInstall(UpdatePoint, 0x645700);
 }
 
+bool CTaskSimpleGoToPoint::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return CTaskSimpleGoToPoint::MakeAbortable_Reversed(ped, priority, event); }
+bool CTaskSimpleGoToPoint::ProcessPed(CPed* ped) { return CTaskSimpleGoToPoint::ProcessPed_Reversed(ped); }
+
 // 0x667CD0
-CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6) :
+CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(eMoveState moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6) :
     CTaskSimpleGoTo(moveState, targetPoint, fRadius)
 {
     m_GoToPointFlags = 0;
@@ -28,44 +29,8 @@ CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(int32 moveState, const CVector& targe
     gotoPointFlags.m_b04 = a6;
 }
 
-// 0x667CD0
-CTaskSimpleGoToPoint* CTaskSimpleGoToPoint::Constructor(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6)
-{
-    this->CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(moveState, targetPoint, fRadius, bMoveTowardsTargetPoint, a6);
-    return this;
-}
-
-// 0x66CC60
-CTask* CTaskSimpleGoToPoint::Clone()
-{
-    return CTaskSimpleGoToPoint::Clone_Reversed();
-}
-
 // 0x667D60
-bool CTaskSimpleGoToPoint::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
-    return CTaskSimpleGoToPoint::MakeAbortable_Reversed(ped, priority, event);
-}
-
-// 0x66D710
-bool CTaskSimpleGoToPoint::ProcessPed(CPed* ped)
-{
-    return CTaskSimpleGoToPoint::ProcessPed_Reversed(ped);
-}
-
-CTask* CTaskSimpleGoToPoint::Clone_Reversed()
-{
-    return new CTaskSimpleGoToPoint(
-        m_moveState,
-        m_vecTargetPoint,
-        m_fRadius,
-        gotoPointFlags.m_bMoveTowardsTargetPoint,
-        gotoPointFlags.m_b04
-    );
-}
-
-bool CTaskSimpleGoToPoint::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
+bool CTaskSimpleGoToPoint::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (gotoFlags.m_bIsIKChainSet) {
         if (g_ikChainMan.IsLooking(ped))
             g_ikChainMan.AbortLookAt(ped, 250);
@@ -82,8 +47,7 @@ bool CTaskSimpleGoToPoint::MakeAbortable_Reversed(CPed* ped, eAbortPriority prio
 }
 
 // 0x66D710
-bool CTaskSimpleGoToPoint::ProcessPed_Reversed(CPed* ped)
-{
+bool CTaskSimpleGoToPoint::ProcessPed_Reversed(CPed* ped) {
     CPlayerPed* player = ped->AsPlayer();
     ped->m_pedIK.bSlopePitch = true;
     if (HasCircledTarget(ped)) {
@@ -194,10 +158,9 @@ void CTaskSimpleGoToPoint::UpdatePoint(const CVector& targetPosition, float fRad
     if (bDontCheckRadius || m_vecTargetPoint != targetPosition || m_fRadius != fRadius)
     {
         m_vecTargetPoint = targetPosition;
-        gotoFlags.m_b01 = false;
-        gotoFlags.m_b02 = false;
-        gotoFlags.m_b03 = false;
-        gotoFlags.m_b04 = false;
+        m_fRadius = fRadius;
+
+        gotoFlags.m_targetCircledFlags = 0;
         gotoFlags.m_bTargetPointUpdated = true;
     }
 }

@@ -13,6 +13,7 @@
 
 #include "Pool.h"
 #include "TaskSimpleSlideToCoord.h"
+
 #include "CopPed.h"
 #include "Heli.h"
 #include "Building.h"
@@ -24,11 +25,27 @@
 #include "PtrNodeSingleLink.h"
 #include "PtrNodeDoubleLink.h"
 #include "EntryInfoNode.h"
-#include "PedGeometryAnalyser.h"
 #include "PedGeometryAnalyser.h" // PointRoute
 //#include "PatrolRoute.h"
 #include "TaskAllocator.h"
 #include "PedAttractor.h"
+
+class CopPed;
+class CHeli;
+class CBuilding;
+class CutsceneObject;
+class CDummy;
+class CColModel;
+class CTask;
+class CPedIntelligence;
+class CPtrNodeSingleLink;
+class CPtrNodeDoubleLink;
+class CEntryInfoNode;
+class CPedGeometryAnalyser;
+class CPointRoute;
+class CPatrolRoute;
+class CTaskAllocator;
+class CPedAttractor;
 
 #ifdef GetObject
 #undef GetObject

@@ -16,37 +16,42 @@
 #include "LoadingScreen.h"
 #include "VideoMode.h"
 #include "ControllerConfigManager.h"
+#include "app.h" // todo: remove
 // #include "Input.h"
 
 static LPSTR AppClassName = LPSTR("Grand theft auto San Andreas");
 
 void Win32InjectHooks() {
-    RH_ScopedNamespaceName("Win32");
-    RH_ScopedCategoryGlobal();
-
     {
-    RH_ScopedNamespaceName("Ps");
-    RH_ScopedCategoryGlobal();
+        RH_ScopedNamespaceName("Win32");
+        RH_ScopedCategoryGlobal();
 
-    RH_ScopedGlobalInstall(psWindowSetText, 0x7451B0);
-    RH_ScopedGlobalInstall(psErrorMessage, 0x7451D0);
-    RH_ScopedGlobalInstall(psWarningMessage, 0x7451F0);
-    // RH_ScopedGlobalInstall(psCameraBeginUpdate, 0x745210);
-    RH_ScopedGlobalInstall(psCameraShowRaster, 0x745240);
-    // - RH_ScopedGlobalInstall(psTimer, 0x745270);
-    // RH_ScopedGlobalInstall(psGrabScreen, 0x7452B0);
-    RH_ScopedGlobalInstall(psMouseSetVisibility, 0x7453E0);
-    RH_ScopedGlobalInstall(psMouseSetPos, 0x7453F0);
-    // RH_ScopedGlobalInstall(psPathnameCreate, 0x745470);
-    RH_ScopedGlobalInstall(psPathnameDestroy, 0x7454E0);
-    RH_ScopedGlobalInstall(psPathGetSeparator, 0x745500);
-    // RH_ScopedGlobalInstall(psInstallFileSystem, 0x745520);
-    // RH_ScopedGlobalInstall(psNativeTextureSupport, 0x745530);
-    // RH_ScopedGlobalInstall(psDebugMessageHandler, 0x745540);
-    RH_ScopedGlobalInstall(psTerminate, 0x7458A0);
-    RH_ScopedGlobalInstall(psAlwaysOnTop, 0x7458B0);
-    // RH_ScopedGlobalInstall(psSelectDevice, 0x746190);
-    // RH_ScopedGlobalInstall(psInitialize, 0x747420);
+        RH_ScopedGlobalInstall(Idle, 0x53E920);
+        RH_ScopedGlobalInstall(RenderScene, 0x53DF40);
+    }
+    {
+        RH_ScopedNamespaceName("Ps");
+        RH_ScopedCategoryGlobal();
+
+        RH_ScopedGlobalInstall(psWindowSetText, 0x7451B0);
+        RH_ScopedGlobalInstall(psErrorMessage, 0x7451D0);
+        RH_ScopedGlobalInstall(psWarningMessage, 0x7451F0);
+        // RH_ScopedGlobalInstall(psCameraBeginUpdate, 0x745210);
+        RH_ScopedGlobalInstall(psCameraShowRaster, 0x745240);
+        // - RH_ScopedGlobalInstall(psTimer, 0x745270);
+        // RH_ScopedGlobalInstall(psGrabScreen, 0x7452B0);
+        RH_ScopedGlobalInstall(psMouseSetVisibility, 0x7453E0);
+        RH_ScopedGlobalInstall(psMouseSetPos, 0x7453F0);
+        // RH_ScopedGlobalInstall(psPathnameCreate, 0x745470);
+        RH_ScopedGlobalInstall(psPathnameDestroy, 0x7454E0);
+        RH_ScopedGlobalInstall(psPathGetSeparator, 0x745500);
+        // RH_ScopedGlobalInstall(psInstallFileSystem, 0x745520);
+        // RH_ScopedGlobalInstall(psNativeTextureSupport, 0x745530);
+        // RH_ScopedGlobalInstall(psDebugMessageHandler, 0x745540);
+        RH_ScopedGlobalInstall(psTerminate, 0x7458A0);
+        RH_ScopedGlobalInstall(psAlwaysOnTop, 0x7458B0);
+        // RH_ScopedGlobalInstall(psSelectDevice, 0x746190);
+        // RH_ScopedGlobalInstall(psInitialize, 0x747420);
     }
 }
 

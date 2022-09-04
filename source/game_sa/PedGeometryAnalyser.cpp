@@ -144,18 +144,18 @@ void CPedGeometryAnalyser::ComputeEntityBoundingBoxCornersUncached(float zPos, C
 }
 
 // 0x5F3660
-void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanes(float zPos, CEntity& entity, CVector* planes, float* planes_D) {
+void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanes(float zPos, CEntity& entity, CVector(*outPlanes)[4], float* outPlanesDot) {
     CVector corners[4];
     ComputeEntityBoundingBoxCornersUncached(zPos, entity, corners);
-    ComputeEntityBoundingBoxPlanesUncached(zPos, corners, planes, planes_D);
+    ComputeEntityBoundingBoxPlanesUncached(zPos, corners, outPlanes, outPlanesDot);
 }
 
 // 0x5F1670
-void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncached(float zPos, const CVector* corners, CVector* planes, float* planes_D) {
+void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncached(float zPos, const CVector* corners, CVector(*outPlanes)[4], float* outPlanesDot) {
     const CVector* corner2 = &corners[3];
     for (auto i = 0; i < 4; i++) {
         const CVector& corner = corners[i];
-        CVector& plane = planes[i];
+        CVector& plane = (*outPlanes)[i];
         CVector direction = corner - *corner2;
         direction.Normalise();
         plane.x = direction.y;
@@ -164,13 +164,16 @@ void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncached(float zPos, co
         // point-normal plane equation:
         // ax + by + cz + d = 0
         // d = - n . P
-        planes_D[i] = -DotProduct(plane, *corner2);
+        outPlanesDot[i] = -DotProduct(plane, *corner2);
+
         corner2 = &corner;
     }
 }
 
-void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncachedAll(float zPos, CEntity& entity, CVector* posn, float* a4) {
-    assert(false);
+void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncachedAll(float zPos, CEntity& entity, CVector (*outPlanes)[4], float* outPlanesDot) {
+    CVector corners[4];
+    CPedGeometryAnalyser::ComputeEntityBoundingBoxCornersUncached(zPos, entity, corners);
+    CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncached(zPos, corners, outPlanes, outPlanesDot);
 }
 
 void CPedGeometryAnalyser::ComputeEntityBoundingBoxSegmentPlanes(float zPos, CEntity& entity, CVector*, float*) {
@@ -288,10 +291,12 @@ bool CPedGeometryAnalyser::LiesInsideBoundingBox(const CPed& ped, const CVector&
     return plugin::CallAndReturn<bool, 0x5F3880, const CPed&, const CVector&, CEntity&>(ped, posn, entity);
 }
 
+// 0x41B7C0
 void* CPointRoute::operator new(uint32 size) {
     return CPools::ms_pPointRoutePool->New();
 }
 
+// 0x41B7D0
 void CPointRoute::operator delete(void* ptr, size_t sz) {
     CPools::ms_pPointRoutePool->Delete(reinterpret_cast<CPointRoute*>(ptr));
 }

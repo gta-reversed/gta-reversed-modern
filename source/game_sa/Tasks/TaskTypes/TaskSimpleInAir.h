@@ -6,12 +6,11 @@
 */
 #pragma once
 
-
 #include "TaskSimple.h"
 #include "TaskTimer.h"
 #include "Vector.h"
-#include "AnimBlendAssociation.h"
-#include "Entity.h"
+class CAnimBlendAssociation;
+class CEntity;
 
 class CTaskSimpleInAir : public CTaskSimple {
 public:
@@ -42,8 +41,8 @@ public:
     CTaskSimpleInAir(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump);
     ~CTaskSimpleInAir() override;
 
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override { return new CTaskSimpleInAir(m_bUsingJumpGlide, m_bUsingFallGlide, m_bUsingClimbJump); }
-    eTaskType GetTaskType() override { return TASK_SIMPLE_IN_AIR; }
     bool ProcessPed(CPed* ped) override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
 
@@ -55,5 +54,4 @@ public:
     static void InjectHooks();
     CTaskSimpleInAir* Constructor(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump);
 };
-
 VALIDATE_SIZE(CTaskSimpleInAir, 0x3C);

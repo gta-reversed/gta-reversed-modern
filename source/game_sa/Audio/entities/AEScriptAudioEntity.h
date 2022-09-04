@@ -2,6 +2,7 @@
 
 #include "eAudioEvents.h"
 #include "AEExplosionAudioEntity.h"
+#include "AEDoorAudioEntity.h"
 
 class CEntity;
 class CVector;
@@ -26,7 +27,7 @@ struct CAudioLink {
 
 VALIDATE_SIZE(CAudioLink, 0x20);
 
-class CAEScriptAudioEntity : public CAEAudioEntity {
+class NOTSA_EXPORT_VTABLE CAEScriptAudioEntity : public CAEAudioEntity {
 public:
     static constexpr auto MISSION_AUDIO_COUNT = 4;
 

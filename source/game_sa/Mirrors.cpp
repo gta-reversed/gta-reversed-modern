@@ -8,6 +8,7 @@
 #include "Clouds.h"
 #include "PostEffects.h"
 #include "Shadows.h"
+#include "CarFXRenderer.h"
 
 RwRaster*& CMirrors::pBuffer = *(RwRaster**)0xC7C71C;
 RwRaster*& CMirrors::pZBuffer = *(RwRaster**)0xC7C720;
@@ -80,13 +81,13 @@ void CMirrors::CreateBuffer() {
     const auto depth = RwRasterGetDepth(RwCameraGetRaster(Scene.m_pRwCamera));
 
     switch (g_fx.GetFxQuality()) {
-    case FXQUALITY_LOW:
+    case FX_QUALITY_LOW:
         pBuffer = RwRasterCreate(512, 256, depth, rwRASTERTYPECAMERATEXTURE);
         pZBuffer = RwRasterCreate(512, 256, depth, rwRASTERTYPEZBUFFER);
         break;
-    case FXQUALITY_MEDIUM:
-    case FXQUALITY_HIGH:
-    case FXQUALITY_VERY_HIGH:
+    case FX_QUALITY_MEDIUM:
+    case FX_QUALITY_HIGH:
+    case FX_QUALITY_VERY_HIGH:
         pBuffer = RwRasterCreate(1024, 512, depth, rwRASTERTYPECAMERATEXTURE);
         if (!pBuffer)
             break;
@@ -297,61 +298,54 @@ void CMirrors::BeforeConstructRenderList() {
         Init();
     }
 
-    bool bActiveMirror = false;
     CCullZoneReflection* mirrorAttrs = nullptr;
 
-    while (true) {
+    const auto mirrorActive = [&](){
         // Check player is in heli/plane
         if (auto* vehicle = FindPlayerVehicle()) {
             if (vehicle->IsSubHeli() || vehicle->IsSubPlane()) {
                 ShutDown();
-                break;
+                return false;
             }
         }
 
         mirrorAttrs = CCullZones::FindMirrorAttributesForCoors(TheCamera.GetPosition());
         if (!mirrorAttrs) {
-            ShutDown();
-            break;
+            return false;
         }
 
-        bActiveMirror = true;
         if ((mirrorAttrs->flags & CAM_STAIRS_FOR_PLAYER) == 0) {
-            ShutDown();
-            break;
+            return true;
         }
 
-        bActiveMirror = false;
-        for (auto & track : Screens8Track) {
+        return rng::any_of(Screens8Track, [](const auto& track) {
             TheCamera.m_bMirrorActive = false;
             const auto origin = CVector::AverageN(std::begin(track), 4);
-            if (TheCamera.IsSphereVisible(origin, 8.0f)) {
-                bActiveMirror = true;
-            }
-        }
-        break;
-    };
+            return TheCamera.IsSphereVisible(origin, 8.0f);
+        });
+    }();
 
-    if (!bActiveMirror) {
-        ShutDown();
-    } else {
+    if (mirrorActive) {
         // Actually update cam
         assert(mirrorAttrs);
+
         MirrorV = mirrorAttrs->cm;
         MirrorNormal = CVector{ (float)mirrorAttrs->vx, (float)mirrorAttrs->vy, (float)mirrorAttrs->vz } / 100.0f;
         MirrorFlags = mirrorAttrs->flags;
 
         TypeOfMirror = std::fabs(MirrorNormal.z) <= 0.7f ? MIRROR_TYPE_1 : MIRROR_TYPE_2;
         CreateBuffer();
+    } else {
+        ShutDown();
     }
 
     if ((MirrorFlags & CAM_STAIRS_FOR_PLAYER) != 0 || bFudgeNow) {
         CMatrix mat{};
         BuildCameraMatrixForScreens(mat);
-        TheCamera.DealWithMirrorBeforeConstructRenderList(bActiveMirror, MirrorNormal, MirrorV, &mat);
+        TheCamera.DealWithMirrorBeforeConstructRenderList(mirrorActive, MirrorNormal, MirrorV, &mat);
     } else {
-        TheCamera.DealWithMirrorBeforeConstructRenderList(bActiveMirror, MirrorNormal, MirrorV, nullptr);
-    }
+        TheCamera.DealWithMirrorBeforeConstructRenderList(mirrorActive, MirrorNormal, MirrorV, nullptr);
+    }    
 }
 
 void RenderScene();
@@ -386,83 +380,4 @@ void CMirrors::BeforeMainRender() {
 
         TheCamera.RestoreCameraAfterMirror();
     }
-}
-
-// 0x53DF40
-void RenderScene() {
-    bool underWater = CWeather::UnderWaterness <= 0.0f;
-
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(FALSE));
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
-
-    if (CMirrors::TypeOfMirror == MIRROR_TYPE_0) {
-        CMovingThings::Render_BeforeClouds();
-        CClouds::Render();
-    }
-
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,  RWRSTATE(TRUE));
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
-    RwRenderStateSet(rwRENDERSTATESHADEMODE,    RWRSTATE(rwSHADEMODEGOURAUD));
-
-    CCarFXRenderer::PreRenderUpdate();
-    CRenderer::RenderRoads();
-    CCoronas::RenderReflections();
-    CRenderer::RenderEverythingBarRoads();
-    g_breakMan.Render(false);
-
-    CRenderer::RenderFadingInUnderwaterEntities();
-    if (underWater) {
-        RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
-        CWaterLevel::RenderWater();
-        RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLBACK));
-    }
-
-    CRenderer::RenderFadingInEntities();
-    if (!CMirrors::bRenderingReflection) {
-        float nearClipPlaneOld = RwCameraGetNearClipPlane(Scene.m_pRwCamera);
-        float farPlane  = RwCameraGetFarClipPlane(Scene.m_pRwCamera);
-
-        float v3;
-        float z = CCamera::GetActiveCamera().m_vecFront.z;
-        if (z <= 0.0f)
-            v3 = -z;
-        else
-            v3 = 0.0f;
-
-        constexpr float flt_8CD4F0 = 2.0f;
-        constexpr float flt_8CD4EC = 5.9604645e-8f;
-
-        float unknown = ((flt_8CD4F0 * flt_8CD4EC * 0.25f - flt_8CD4F0 * flt_8CD4EC) * v3 + flt_8CD4F0 * flt_8CD4EC) * (farPlane - nearClipPlaneOld);
-
-        RwCameraEndUpdate(Scene.m_pRwCamera);
-        RwCameraSetNearClipPlane(Scene.m_pRwCamera, unknown + nearClipPlaneOld);
-        RwCameraBeginUpdate(Scene.m_pRwCamera);
-        CShadows::UpdateStaticShadows();
-        CShadows::RenderStaticShadows();
-        CShadows::RenderStoredShadows();
-        RwCameraEndUpdate(Scene.m_pRwCamera);
-        RwCameraSetNearClipPlane(Scene.m_pRwCamera, nearClipPlaneOld);
-        RwCameraBeginUpdate(Scene.m_pRwCamera);
-    }
-
-    g_breakMan.Render(true);
-    CPlantMgr::Render();
-
-    RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
-
-    if (CMirrors::TypeOfMirror == MIRROR_TYPE_0) {
-        CClouds::RenderBottomFromHeight();
-        CWeather::RenderRainStreaks();
-        CCoronas::RenderSunReflection();
-    }
-
-    if (underWater) {
-        RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
-        CWaterLevel::RenderWater();
-        RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLBACK));
-    }
-
-    gRenderStencil();
 }

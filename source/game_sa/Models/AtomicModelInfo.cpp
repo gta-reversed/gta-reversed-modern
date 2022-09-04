@@ -10,6 +10,7 @@
 #include "AtomicModelInfo.h"
 #include "TagManager.h"
 #include "CustomBuildingRenderer.h"
+#include "CarFXRenderer.h"
 
 void CAtomicModelInfo::InjectHooks()
 {

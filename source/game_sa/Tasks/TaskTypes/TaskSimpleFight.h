@@ -7,8 +7,10 @@
 #pragma once
 
 #include "TaskSimple.h"
-#include "AnimBlendAssociation.h"
-#include "Entity.h"
+class CAnimBlendAssociation;
+class CEntity;
+class CPed;
+class CPlayerPed;
 
 enum eFightAttackType : int8 {
     FIGHT_ATTACK_HIT_1 = 0,
@@ -37,10 +39,7 @@ public:
 };
 VALIDATE_SIZE(CMeleeInfo, 0x88);
 
-class CPed;
-class CPlayerPed;
-
-class CTaskSimpleFight : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleFight : public CTaskSimple {
 public:
     bool                   m_bIsFinished;
     bool                   m_bIsInControl;
@@ -66,8 +65,8 @@ public:
     CTaskSimpleFight(CEntity* entity, int32 nCommand, uint32 nIdlePeriod = 10000);
     ~CTaskSimpleFight() override;
 
-    CTask* Clone() override;
-    eTaskType GetTaskType() override { return TASK_SIMPLE_FIGHT_CTRL; }
+    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override { return new CTaskSimpleFight(m_pTargetEntity, m_nLastCommand, m_nIdlePeriod); } // 0x622E40
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 

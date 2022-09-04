@@ -201,6 +201,8 @@ public:
         return pos.x > -3000.0f && pos.x < 3000.0f
             && pos.y > -3000.0f && pos.y < 3000.0f;
     }
+
+    static void RemoveVehicleAndItsOccupants(CVehicle* veh);
 };
 
 extern uint32 &FilledColPointIndex;
@@ -210,3 +212,18 @@ extern int16 &TAG_SPRAYING_INCREMENT_VAL; // default 8
 uint16 GetCurrentScanCode();
 CSector* GetSector(int32 x, int32 y);
 CRepeatSector* GetRepeatSector(int32 x, int32 y);
+
+CPlayerInfo&   FindPlayerInfo(int32 playerId = -1);
+CPlayerPed*    FindPlayerPed(int32 playerId = -1);
+CVehicle*      FindPlayerVehicle(int32 playerId = -1, bool bIncludeRemote = false);
+CVector        FindPlayerCoors(int32 playerId = -1);
+CVector&       FindPlayerSpeed(int32 playerId = -1);
+CEntity*       FindPlayerEntity(int32 playerId = -1);
+CTrain*        FindPlayerTrain(int32 playerId = -1);
+const CVector& FindPlayerCentreOfWorld(int32 playerId = -1);
+const CVector& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId = -1);
+CVector        FindPlayerCentreOfWorld_NoInteriorShift(int32 playerId = -1);
+float          FindPlayerHeading(int32 playerId = -1);
+float          FindPlayerHeight(int32 playerId = -1);
+CWanted*       FindPlayerWanted(int32 playerId = -1);
+CPedGroup&     FindPlayerGroup(int32 playerId = -1);
