@@ -67,6 +67,16 @@ float CVector::NormaliseAndMag()
     return 1.0F / fRecip;
 }
 
+auto CVector::Normalized() const -> CVector {
+    CVector cpy = *this;
+    cpy.Normalise();
+    return cpy;
+}
+
+auto CVector::Dot(const CVector& o) const -> float{
+    return DotProduct(*this, o);
+}
+
 // Performs cross calculation
 void CVector::Cross(const CVector& left, const CVector &right)
 {
@@ -146,6 +156,15 @@ void CVector::FromMultiply3x3(const CMatrix& matrix, const CVector& vector)
 CVector CVector::Average(const CVector* begin, const CVector* end) {
     return std::accumulate(begin, end, CVector{}) / (float)std::distance(begin, end);
 }
+
+float CVector::Heading(bool reMapRangeTo0To2Pi) const {
+    const auto heading = std::atan2(-x, y);
+    if (reMapRangeTo0To2Pi) {
+        return CGeneral::LimitRadianAngle(heading);
+    }
+    return heading;
+}
+
 
 CVector* CrossProduct(CVector* out, CVector* a, CVector* b)
 {

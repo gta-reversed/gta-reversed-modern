@@ -96,7 +96,7 @@ public:
     CTaskSimpleThrowProjectile* GetTaskThrow();
     CTask* GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask);
     CTaskSimpleSwim* GetTaskSwim();
-    CTaskSimpleDuck* GetTaskDuck(bool bIgnoreCheckingForSimplestActiveTask);
+    CTaskSimpleDuck* GetTaskDuck(bool bIgnoreCheckingForSimplestActiveTask = true);
     CTaskSimpleJetPack* GetTaskJetPack();
     CTaskSimpleInAir* GetTaskInAir();
     CTaskSimpleClimb* GetTaskClimb();

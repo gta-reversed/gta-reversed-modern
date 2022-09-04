@@ -542,7 +542,7 @@ public:
     bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }
 
     int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
-    CPedGroup& GetGroup() { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); } // TODO: Change this, it's misleading. Should be GetPlayerGroup
+    CPedGroup* GetGroup() const { return CPedGroups::GetPedsGroup(this); }
     CPedClothesDesc* GetClothesDesc() { return m_pPlayerData->m_pPedClothesDesc; }
 
     CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
@@ -579,9 +579,12 @@ public:
     RpHAnimHierarchy& GetAnimHierarchy() const;
     CAnimBlendClumpData& GetAnimBlendData() const;
     bool IsInVehicle() const { return bInVehicle && m_pVehicle; }
+    bool IsInVehicle(const CVehicle* veh) const { return bInVehicle && m_pVehicle == veh; }
     CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
     int32 GetPadNumber() const;
-
+    bool IsCurrentlyUnarmed() { return GetActiveWeapon().m_nType == WEAPON_UNARMED; }
+    bool IsJoggingOrFaster() const;
+    bool IsRightArmBlockedNow() const;
 private:
     void RenderThinBody() const;
     void RenderBigHead() const;

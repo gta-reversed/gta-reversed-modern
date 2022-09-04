@@ -88,3 +88,9 @@ bool CTaskSimpleDuck::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
 bool CTaskSimpleDuck::ProcessPed_Reversed(CPed* ped) {
     return CTaskSimpleDuck::ProcessPed(ped);
 }
+
+// 0x6924B0
+void CTaskSimpleDuck::ForceStopMove() {
+    m_bIsInControl = true;
+    m_vecMoveCommand.y = 0.f;
+}

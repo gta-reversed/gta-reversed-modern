@@ -48,7 +48,7 @@ void CVehicleAnimGroup::CopyAnimGroup(CVehicleAnimGroup* src) {
     GetInOutTiming(eInOutTiming::TIMING_END) = src->GetInOutTiming(eInOutTiming::TIMING_END);
 }
 
-uint32 CVehicleAnimGroup::GetGroup(AnimationId animId) {
+uint32 CVehicleAnimGroup::GetGroup(AnimationId animId) { // TODO: Return `AssocGroupId`
     switch (animId)
     {
     case ANIM_ID_CAR_ALIGN_LHS:
