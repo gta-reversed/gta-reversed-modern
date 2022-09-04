@@ -49,3 +49,11 @@ void CScripted2dEffects::ReturnScripted2DEffect(int32 index) {
     ms_activated[index] = false;
     return GetPedAttractorManager()->RemoveEffect(&ms_effects[index]);
 }
+
+auto CScripted2dEffects::IndexOfEffect(const C2dEffect* effect) -> std::optional<size_t> {
+    const auto idx = std::distance(ms_effects.data(), effect);
+    if (idx >= 0 && idx <= ms_effects.size()) {
+        return (size_t)idx;
+    }
+    return std::nullopt;
+}
