@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CommandParser/Parser.hpp"
+
 /*!
 * Various utility commands
 */

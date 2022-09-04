@@ -1,43 +1,34 @@
 #pragma once
 
+#include "CommandParser/Parser.hpp"
+using namespace notsa::script;
+
 /*!
 * Various clock commands
 */
 
-
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_GET_TIME_OF_DAY>() { // 0x0BF
-    ScriptParams[0].iParam = CClock::ms_nGameClockHours;
-    ScriptParams[1].iParam = CClock::ms_nGameClockMinutes;
-    StoreParameters(2);
-    return OR_CONTINUE;
+/// Get hours and minutes
+MultiRet<uint8, uint8> GetTimeOfDay() {
+    return { CClock::ms_nGameClockHours, CClock::ms_nGameClockMinutes };
 }
+REGISTER_COMMAND_HANDLER(COMMAND_GET_TIME_OF_DAY, GetTimeOfDay);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_TIME_OF_DAY>() { // 0x0C0
-    CollectParameters(2);
-    CClock::SetGameClock(ScriptParams[0].iParam, ScriptParams[1].iParam, 0);
-    return OR_CONTINUE;
+void SetTimeOfDay(uint8 hours, uint8 minutes) {
+    CClock::SetGameClock(hours, minutes, 0);
 }
+REGISTER_COMMAND_HANDLER(COMMAND_SET_TIME_OF_DAY, SetTimeOfDay);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_GET_MINUTES_TO_TIME_OF_DAY>() { // 0x0C1
-    CollectParameters(2);
-    ScriptParams[0].iParam = CClock::GetGameClockMinutesUntil(ScriptParams[0].iParam, ScriptParams[1].iParam);
-    StoreParameters(1);
-    return OR_CONTINUE;
+uint16 GetMinutesToTimeOfDay(uint8 hours, uint8 minutes) {
+    return CClock::GetGameClockMinutesUntil(hours, minutes);
 }
+REGISTER_COMMAND_HANDLER(COMMAND_GET_MINUTES_TO_TIME_OF_DAY, GetMinutesToTimeOfDay);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_STORE_CLOCK>() { // 0x253
+void StoreClock() {
     CClock::StoreClock();
-    return OR_CONTINUE;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_STORE_CLOCK, StoreClock);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_RESTORE_CLOCK>() { // 0x254
+void RestoreClock() {
     CClock::RestoreClock();
-    return OR_CONTINUE;
 }
-
+REGISTER_COMMAND_HANDLER(COMMAND_RESTORE_CLOCK, RestoreClock);
