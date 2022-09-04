@@ -4,10 +4,7 @@
 * Various utility commands
 */
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_GENERATE_RANDOM_INT>() { // 0x099
-    tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
-    var->iParam = CGeneral::GetRandomNumber();
-    return OR_CONTINUE;
+void GenerateRandomInt(CRunningScript* S) {
+    S->GetPointerToScriptVariable(VAR_GLOBAL)->iParam = CGeneral::GetRandomNumber();
 }
-
+REGISTER_COMMAND_HANDLER(COMMAND_GENERATE_RANDOM_INT, GenerateRandomInt);
