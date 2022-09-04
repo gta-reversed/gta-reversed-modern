@@ -323,6 +323,7 @@
 #include "TaskSimpleCarCloseDoorFromInside.h"
 #include "TaskSimpleClearLookAt.h"
 #include "TaskSimpleCarWaitToSlowDown.h"    
+#include "TaskComplexFleePoint.h"
 #include "TaskSimpleWaitUntilAreaCodesMatch.h"
 #include "TaskSimplePlayerOnFire.h"
 #include "TaskComplexOnFire.h"
@@ -678,7 +679,7 @@ void InjectHooksMain() {
         CTaskComplexFallToDeath::InjectHooks();
         // CTaskComplexFleeAnyMeans::InjectHooks();
         // CTaskComplexFleeEntity::InjectHooks();
-        // CTaskComplexFleePoint::InjectHooks();
+        CTaskComplexFleePoint::InjectHooks();
         // CTaskComplexFleeShooting::InjectHooks();
         // CTaskComplexFollowLeaderAnyMeans::InjectHooks();
         // CTaskComplexFollowNodeRouteShooting::InjectHooks();
