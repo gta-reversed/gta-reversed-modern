@@ -244,6 +244,7 @@
 #include "TaskComplexUseSwatRope.h"
 #include "TaskComplexRoadRage.h"
 #include "TaskSimpleGoToPointFine.h"
+#include "TaskComplexExtinguishFires.h"
 #include "TaskComplexDie.h"
 #include "TaskComplexEnterBoatAsDriver.h"
 #include "TaskSimpleFight.h"
@@ -664,7 +665,7 @@ void InjectHooksMain() {
         // CTaskComplexEvasiveDiveAndGetUp::InjectHooks();
         // CTaskComplexEvasiveStep::InjectHooks();
         // CTaskComplexExtinguishFireOnFoot::InjectHooks();
-        // CTaskComplexExtinguishFires::InjectHooks();
+        CTaskComplexExtinguishFires::InjectHooks();
         // CTaskComplexFallAndStayDown::InjectHooks();
         CTaskComplexFallToDeath::InjectHooks();
         // CTaskComplexFleeAnyMeans::InjectHooks();

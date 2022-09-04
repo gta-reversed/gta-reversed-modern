@@ -2,6 +2,7 @@
 
 #include "CDebugMenu.h"
 #include "TaskComplexFollowPointRoute.h"
+#include "TaskComplexExtinguishFires.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -114,11 +115,12 @@ void CDebugMenu::ImGuiInputUpdate() {
 static void DebugCode() {
     CPad* pad = CPad::GetPad();
 
+    const auto player = FindPlayerPed();
+
     if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
         return;
 
     if (pad->IsStandardKeyJustPressed('8')) {
-        const auto player = FindPlayerPed();
 
         CPointRoute route{};
 
@@ -141,6 +143,16 @@ static void DebugCode() {
             },
             TASK_PRIMARY_PRIMARY
         );
+    }
+
+    if (pad->IsStandardKeyJustPressed('0')) {
+        for (auto& ped : GetPedPool()->GetAllValid()) {
+            if (&ped != player) {
+                ped.GiveWeapon(WEAPON_EXTINGUISHER, 10000, false);
+                ped.SetCurrentWeapon(WEAPON_EXTINGUISHER);
+                ped.GetTaskManager().SetTask(new CTaskComplexExtinguishFires{}, TASK_PRIMARY_PRIMARY);
+            }
+        }
     }
 
     if (pad->IsStandardKeyJustPressed('1')) {
