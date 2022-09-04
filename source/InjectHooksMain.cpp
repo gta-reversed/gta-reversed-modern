@@ -317,6 +317,7 @@
 #include "TaskSimpleCarCloseDoorFromInside.h"
 #include "TaskSimpleClearLookAt.h"
 #include "TaskSimpleCarWaitToSlowDown.h"    
+#include "TaskSimpleWaitUntilAreaCodesMatch.h"
 #include "TaskSimplePlayerOnFire.h"
 #include "TaskComplexOnFire.h"
 #include "TaskSimpleBikeJacked.h"
@@ -833,7 +834,7 @@ void InjectHooksMain() {
         CTaskSimpleTurn180::InjectHooks();
         // CTaskSimpleWaitForBus::InjectHooks();
         // CTaskSimpleWaitForPizza::InjectHooks();
-        // CTaskSimpleWaitUntilAreaCodesMatch::InjectHooks();
+        CTaskSimpleWaitUntilAreaCodesMatch::InjectHooks();
         // CTaskSimpleWaitUntilLeaderAreaCodesMatch::InjectHooks();
         CTaskSimpleWaitUntilPedIsInCar::InjectHooks();
         CTaskComplexAvoidEntity::InjectHooks();
