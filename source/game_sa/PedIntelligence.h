@@ -151,9 +151,9 @@ public:
     CEventScanner&   GetEventScanner()    { return m_eventScanner; }
     CPedScanner&     GetPedScanner()      { return m_pedScanner; }
     CVehicleScanner& GetVehicleScanner()  { return m_vehicleScanner; }
-    CEntity**        GetPedEntities()     { return m_pedScanner.m_apEntities; }     // 0x4893E0
+    CEntity**        GetPedEntities()     { return m_pedScanner.m_apEntities.data(); }     // 0x4893E0
     CEntity*         GetPedEntity(uint32 index) { return GetPedEntities()[index]; } // todo: GetPedEntity or degrades readability?
-    CEntity**        GetVehicleEntities() { return m_vehicleScanner.m_apEntities; }
+    CEntity**        GetVehicleEntities() { return m_vehicleScanner.m_apEntities.data(); }
 
 private:
     CPedIntelligence* Constructor(CPed* ped);
