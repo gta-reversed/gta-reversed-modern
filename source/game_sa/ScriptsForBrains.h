@@ -55,7 +55,7 @@ public:
     void MarkAttractorScriptBrainWithThisNameAsNoLongerNeeded(const char* name);
     void RequestAttractorScriptBrainWithThisName(const char* name);
 
-    void StartAttractorScriptBrainWithThisName(const char* name, CEntity* entity, bool bHasAScriptBrain);
+    void StartAttractorScriptBrainWithThisName(const char* name, CPed* ped, bool bHasAScriptBrain);
     void StartNewStreamedScriptBrain(uint8 index, CEntity* entity, bool bHasAScriptBrain);
     void StartOrRequestNewStreamedScriptBrain(uint8 index, CEntity* entity, int8 attachType, bool bAddToWaitingArray);
     void StartOrRequestNewStreamedScriptBrainWithThisName(const char* name, CEntity* entity, int8 attachType);

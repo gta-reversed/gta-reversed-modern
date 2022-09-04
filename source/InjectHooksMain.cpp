@@ -1091,6 +1091,7 @@ void InjectHooksMain() {
     };
 
     const auto Scripts = []() {
+        CScriptsForBrains::InjectHooks();
         CRunningScript::InjectHooks();
         CTheScripts::InjectHooks();
         CStreamedScripts::InjectHooks();
