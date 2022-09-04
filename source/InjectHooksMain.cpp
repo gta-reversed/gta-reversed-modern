@@ -242,6 +242,8 @@
 #include "TaskComplexFollowPointRoute.h"
 #include "TaskComplexDrivePointRoute.h"
 #include "TaskSimpleCarSetPedInAsDriver.h"
+#include "TaskComplexWaitForBus.h"
+#include "TaskSimpleWaitForBus.h"
 #include "TaskSimpleStandUp.h"
 #include "TaskComplexWander.h"
 #include "TaskSimplePutDownEntity.h"
@@ -758,8 +760,8 @@ void InjectHooksMain() {
         CTaskComplexUseScriptedBrain::InjectHooks();
         CTaskComplexUseScriptedAttractor::InjectHooks();
         // CTaskComplexWaitAtAttractor::InjectHooks();
+        CTaskComplexWaitForBus::InjectHooks();
         CTaskComplexWaitForBackup::InjectHooks();
-        // CTaskComplexWaitForBus::InjectHooks();
         CTaskComplexWaitForDryWeather::InjectHooks();
         // CTaskComplexWalkAlongsidePed::InjectHooks();
         CTaskComplexWalkRoundBuildingAttempt::InjectHooks();
@@ -841,7 +843,7 @@ void InjectHooksMain() {
         // CTaskSimpleTriggerEvent::InjectHooks();
         CTaskSimpleUseAtm::InjectHooks();
         CTaskSimpleTurn180::InjectHooks();
-        // CTaskSimpleWaitForBus::InjectHooks();
+        CTaskSimpleWaitForBus::InjectHooks();
         // CTaskSimpleWaitForPizza::InjectHooks();
         CTaskSimpleWaitUntilAreaCodesMatch::InjectHooks();
         // CTaskSimpleWaitUntilLeaderAreaCodesMatch::InjectHooks();
