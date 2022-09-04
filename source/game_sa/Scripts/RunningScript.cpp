@@ -4,7 +4,7 @@
 #include "TheScripts.h"
 #include "CarGenerator.h"
 #include "Hud.h"
-#include "ReversibleHook/ScriptCommand.h"
+#include "ReversibleHooks/ReversibleHook/ScriptCommand.h"
 
 // Commands stuff
 #include "CommandParser/Parser.hpp"
