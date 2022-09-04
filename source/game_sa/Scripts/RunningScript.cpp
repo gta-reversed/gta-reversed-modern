@@ -43,9 +43,6 @@
 
 static constexpr auto s_CommandHandlerLUT = notsa::script::detail::GenerateLUT();
 
-constexpr auto SHORT_STRING_SIZE = 8;
-constexpr auto LONG_STRING_SIZE  = 16;
-
 void CRunningScript::InjectHooks() {
     RH_ScopedClass(CRunningScript);
     RH_ScopedCategory("Scripts");
