@@ -10,6 +10,10 @@ endif()
 
 project(GTASA C CXX)
 
+if (MSVC)
+    add_compile_options("/bigobj")
+endif()
+
 option(BUILD_DOC "Build documentation" OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
