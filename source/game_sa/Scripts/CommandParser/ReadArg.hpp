@@ -101,6 +101,15 @@ template<>
 CRect Read<CRect>(CRunningScript* S) {
     return { Read<CVector2D>(S), Read<CVector2D>(S) };
 }
+template<>
+CPlayerInfo& Read<CPlayerInfo&>(CRunningScript* S) {
+    return FindPlayerInfo(Read<int32>(S));
+}
+
+template<>
+CPlayerPed& Read<CPlayerPed&>(CRunningScript* S) {
+    return *FindPlayerPed(Read<int32>(S));
+}
 
 }; // namespace script
 }; // namespace notsa

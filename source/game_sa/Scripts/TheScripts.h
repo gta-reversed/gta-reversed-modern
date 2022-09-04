@@ -500,8 +500,10 @@ public:
 
     static void DrawScriptSpheres();
     static void HighlightImportantArea(uint32 markerId, float fromX, float fromY, float toX, float toY, float height);
+    static void HighlightImportantArea(uint32 markerId, const CRect& area, float height) { HighlightImportantArea(markerId, area.left, area.top, area.right, area.bottom, height); } // NOTSA
     static void HighlightImportantAngledArea(uint32 markerId, float fromX, float fromY, float toX, float toY, float angledToX, float angledToY, float angledFromX, float angledFromY, float height);
     static void DrawDebugSquare(float, float, float, float);
+    static void DrawDebugSquare(const CRect& area) { DrawDebugSquare(area.left, area.top, area.right, area.bottom); }
     static void DrawDebugAngledSquare(const CVector2D& inf, const CVector2D& sup, const CVector2D& rotSup, const CVector2D& rotInf);
     static void DrawDebugCube(const CVector& inf, const CVector& sup);
     static void DrawDebugAngledCube(const CVector& inf, const CVector& sup, const CVector2D& rotSup, const CVector2D& rotInf);
