@@ -74,7 +74,7 @@ CTask* CTaskComplexWaitForBackup::CreateNextSubTask(CPed* ped) {
         return CreateSubTask(TASK_FINISHED, ped);
     }
     case TASK_SIMPLE_ACHIEVE_HEADING: {
-        const auto winfo = ped->GetActiveWeapon().GetWeaponInfo();
+        const auto& winfo = ped->GetActiveWeapon().GetWeaponInfo();
         return CreateSubTask(
             winfo.m_nWeaponFire == eWeaponFire::WEAPON_FIRE_INSTANT_HIT
                 ? TASK_SIMPLE_GUN_CTRL
