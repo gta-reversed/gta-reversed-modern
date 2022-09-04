@@ -898,7 +898,7 @@ void InjectHooksMain() {
         // CTaskComplexWaitForPed::InjectHooks();
         CTaskComplexJump::InjectHooks();
         // CTaskComplexWanderStandard::InjectHooks();
-        // CTaskComplexSunbathe::InjectHooks();
+        CTaskComplexSunbathe::InjectHooks();
         CTaskComplexEnterCar::InjectHooks();
         // CTaskSimpleTogglePedThreatScanner::InjectHooks();
         CTaskComplexUseGoggles::InjectHooks();
