@@ -92,6 +92,7 @@ void CRunningScript::InjectHooks() {
     RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
     RH_ScopedInstall(Process, 0x469F00);
 
+    // Enable in `StdInc.h` if needed (Don't forget to disabled it when committing)
 #ifdef ENABLE_SCRIPT_COMMAND_HOOKS
     const auto HookCommand = []<size_t Idx>() {
         using namespace ReversibleHooks::ReversibleHook;

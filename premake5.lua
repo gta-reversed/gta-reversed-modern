@@ -13,6 +13,11 @@ newoption {
     value       = "path",
     description = "Output directory for the build files"
 }
+newoption {
+    trigger     = "allow-script-cmd-hooks",
+    description = "Whenever script command hooks should be generated (Slows down (full) build by a lot)"
+}
+
 if not _OPTIONS["outdir"] then
     _OPTIONS["outdir"] = "build"
 end
@@ -190,3 +195,11 @@ group ""
             "source/**/errcom.def", --bugfix for premake5
             "source/**/errcore.def"
         }
+
+        filter {"vs*", "options:allow-script-cmd-hooks"}
+            buildoptions { "/bigobj"}
+
+        filter {"options:allow-script-cmd-hooks"}
+            defines { "ENABLE_SCRIPT_COMMAND_HOOKS" }   
+
+        filter {} -- Clear filter
