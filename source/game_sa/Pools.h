@@ -27,7 +27,7 @@
 #include "EntryInfoNode.h"
 #include "PedGeometryAnalyser.h" // PointRoute
 //#include "PatrolRoute.h"
-#include "TaskAllocator.h"
+#include "Allocators/TaskAllocator.h"
 #include "PedAttractor.h"
 
 class CopPed;
