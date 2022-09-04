@@ -7,12 +7,14 @@
 #pragma once
 
 #include "TaskComplexEnterCar.h"
+#include "Ped.h" // eMoveState
 
 class CTaskComplexEnterCarAsDriver : public CTaskComplexEnterCar {
 public:
     static constexpr auto Type = TASK_COMPLEX_ENTER_CAR_AS_DRIVER;
 
     explicit CTaskComplexEnterCarAsDriver(CVehicle* targetVehicle);
+    CTaskComplexEnterCarAsDriver(CVehicle* targetVehicle, eMoveState moveState);
     ~CTaskComplexEnterCarAsDriver() override = default;
 
     eTaskType GetTaskType() override { return Type; }
