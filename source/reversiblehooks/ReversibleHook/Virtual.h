@@ -13,8 +13,9 @@ struct Virtual : public Base {
     Virtual(std::string fnName, void** vtblGTA, void** vtblOur, size_t fnIdx);
     ~Virtual() override = default;
 
-    void Switch() override;
-    void Check() override { m_simpleHook.Check(); }
+    void        Switch() override;
+    void        Check() override { m_simpleHook.Check(); }
+    const char* Symbol() const override { return "V"; }
 
     auto GetHookGTAAddress() const { return m_pfns[GTA]; }
     auto GetHookOurAddress() const { return m_pfns[OUR]; }

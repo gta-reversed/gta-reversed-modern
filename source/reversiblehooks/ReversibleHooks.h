@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+#include "ReversibleHook/Base.h"
+
 //
 // Helper macros - For help regarding usage see how they're used (`Find all references` and take a look)
 // Generally on top of `InjectHooks` you will need to call `RH_ScopedClass` (or `RH_ScopedNamespace`) and `RH_ScopedCategory`
@@ -148,6 +150,12 @@ namespace ReversibleHooks {
     }
 
     void InstallVirtual(std::string_view category, std::string fnName, void** vtblGTA, void** vtblOur, void* fnGTAAddr, size_t nVirtFns, const HookInstallOptions& opt = {});
+
+    /*!
+    * @param category Category's path, eg.: "Global/"
+    * @param item     Item to add
+    */
+    void AddItemToCategory(std::string_view category, std::shared_ptr<ReversibleHook::Base> item);
 
     /*static void Switch(std::shared_ptr<SReversibleHook> pHook) {
         detail::HookSwitch(pHook);

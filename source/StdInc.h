@@ -1,6 +1,9 @@
 #pragma once
 #pragma message("Compiling precompiled header.\n")
 
+/// Enable this if you want script command hooks to be available in the hooks panel. It takes more time to compile that's why it's under a define.
+//#define ENABLE_SCRIPT_COMMAND_HOOKS
+
 #include <WinSock2.h>
 #include <Windows.h>
 #include <cstdio>
