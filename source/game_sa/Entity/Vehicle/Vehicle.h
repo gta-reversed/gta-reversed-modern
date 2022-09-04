@@ -695,9 +695,14 @@ public: // NOTSA functions
         }
     }
 
+    /// Is there a driver who is also a ped
     bool IsDriverAPlayer() const;
+
+    /// Is the vehicle totally flipped (Should probably be moved to `CPlaceable`)
     [[nodiscard]] bool IsTotallyUpsideDown() const { return GetUp().z < 0.f; }
 
+    /// Is there enough space for at least one more passenger
+    [[nodiscard]] bool HasSpaceForAPassenger() const { return m_nMaxPassengers > m_nNumPassengers + 1; }
 
 private:
     friend void InjectHooksMain();

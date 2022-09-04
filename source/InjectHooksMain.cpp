@@ -239,6 +239,7 @@
 #include "TaskComplexFollowPointRoute.h"
 #include "TaskComplexDrivePointRoute.h"
 #include "TaskSimpleCarSetPedInAsDriver.h"
+#include "TaskSimpleWaitForBus.h"
 #include "TaskComplexWander.h"
 #include "TaskSimplePutDownEntity.h"
 #include "TaskComplexUseSwatRope.h"
@@ -831,7 +832,7 @@ void InjectHooksMain() {
         // CTaskSimpleTriggerEvent::InjectHooks();
         CTaskSimpleUseAtm::InjectHooks();
         CTaskSimpleTurn180::InjectHooks();
-        // CTaskSimpleWaitForBus::InjectHooks();
+        CTaskSimpleWaitForBus::InjectHooks();
         // CTaskSimpleWaitForPizza::InjectHooks();
         // CTaskSimpleWaitUntilAreaCodesMatch::InjectHooks();
         // CTaskSimpleWaitUntilLeaderAreaCodesMatch::InjectHooks();
