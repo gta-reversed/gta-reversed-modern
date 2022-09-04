@@ -240,6 +240,7 @@
 #include "TaskComplexFollowPointRoute.h"
 #include "TaskComplexDrivePointRoute.h"
 #include "TaskSimpleCarSetPedInAsDriver.h"
+#include "TaskSimpleStandUp.h"
 #include "TaskComplexWander.h"
 #include "TaskSimplePutDownEntity.h"
 #include "TaskComplexUseSwatRope.h"
@@ -288,6 +289,7 @@
 #include "TaskComplexGetOnBoatSeat.h"
 #include "TaskComplexGoToAttractor.h"
 #include "TaskComplexGoToBoatSteeringWheel.h"
+#include "TaskComplexUseScriptedAttractor.h"
 #include "TaskSimpleSitDown.h"
 #include "TaskComplexGoToCarDoorAndStandStill.h"
 #include "TaskComplexGoToPointAiming.h"
@@ -318,6 +320,7 @@
 #include "TaskSimpleCarCloseDoorFromInside.h"
 #include "TaskSimpleClearLookAt.h"
 #include "TaskSimpleCarWaitToSlowDown.h"    
+#include "TaskSimpleWaitUntilAreaCodesMatch.h"
 #include "TaskSimplePlayerOnFire.h"
 #include "TaskComplexOnFire.h"
 #include "TaskSimpleBikeJacked.h"
@@ -327,6 +330,7 @@
 #include "TaskSimpleHandsUp.h"
 #include "TaskComplexEnterCar.h"
 #include "TaskComplexSmartFleePoint.h"
+
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -746,8 +750,8 @@ void InjectHooksMain() {
         // CTaskComplexUseEffectSprinting::InjectHooks();
         // CTaskComplexUseEntryExit::InjectHooks();
         // CTaskComplexUsePairedAttractor::InjectHooks();
-        // CTaskComplexUseScriptedAttractor::InjectHooks();
         CTaskComplexUseScriptedBrain::InjectHooks();
+        CTaskComplexUseScriptedAttractor::InjectHooks();
         // CTaskComplexWaitAtAttractor::InjectHooks();
         // CTaskComplexWaitForBackup::InjectHooks();
         // CTaskComplexWaitForBus::InjectHooks();
@@ -824,7 +828,7 @@ void InjectHooksMain() {
         CTaskSimpleShakeFist::InjectHooks();
         CTaskSimpleSitDown::InjectHooks();
         CTaskSimpleSitIdle::InjectHooks();
-        // CTaskSimpleStandUp::InjectHooks();
+        CTaskSimpleStandUp::InjectHooks();
         CTaskSimpleThrowControl::InjectHooks();
         // CTaskSimpleTired::InjectHooks();
         // CTaskSimpleThrowControl::InjectHooks();
@@ -834,7 +838,7 @@ void InjectHooksMain() {
         CTaskSimpleTurn180::InjectHooks();
         // CTaskSimpleWaitForBus::InjectHooks();
         // CTaskSimpleWaitForPizza::InjectHooks();
-        // CTaskSimpleWaitUntilAreaCodesMatch::InjectHooks();
+        CTaskSimpleWaitUntilAreaCodesMatch::InjectHooks();
         // CTaskSimpleWaitUntilLeaderAreaCodesMatch::InjectHooks();
         CTaskSimpleWaitUntilPedIsInCar::InjectHooks();
         CTaskComplexAvoidEntity::InjectHooks();
