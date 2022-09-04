@@ -64,3 +64,8 @@ jobs:
                 uses: github/codeql-action/upload-sarif@v2
                 with:
                     sarif_file: ${{ steps.run-analysis.outputs.sarif }}
+
+            -   name: "Doxygenerate"
+                uses: mattnotmitt/doxygen-action@v1.9.4
+                with:
+                    doxyfile-path: 'docs/'
