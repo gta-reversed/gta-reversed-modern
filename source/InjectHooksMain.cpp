@@ -253,6 +253,7 @@
 #include "TaskComplexExtinguishFires.h"
 #include "TaskComplexDie.h"
 #include "TaskComplexEnterBoatAsDriver.h"
+#include "TaskComplexUseAttractor.h"
 #include "TaskSimpleFight.h"
 #include "TaskComplexUseWaterCannon.h"
 #include "TaskComplexDriveToPoint.h"
@@ -747,7 +748,7 @@ void InjectHooksMain() {
         // CTaskComplexStealCar::InjectHooks();
         CTaskComplexTrackEntity::InjectHooks();
         CTaskComplexTurnToFaceEntityOrCoord::InjectHooks();
-        // CTaskComplexUseAttractor::InjectHooks();
+        CTaskComplexUseAttractor::InjectHooks();
         // CTaskComplexUseAttractorPartner::InjectHooks();
         // CTaskComplexUseClosestFreeScriptedAttractor::InjectHooks();
         // CTaskComplexUseClosestFreeScriptedAttractorRun::InjectHooks();
