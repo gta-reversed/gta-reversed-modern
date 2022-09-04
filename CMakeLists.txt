@@ -11,7 +11,7 @@ endif()
 project(GTASA C CXX)
 
 if (MSVC)
-    set_target_properties(GTASA COMPILE_OPTIONS "/bigobj")
+    set_target_properties(GTASA PROPERTIES COMPILE_OPTIONS "/bigobj")
 endif()
 
 option(BUILD_DOC "Build documentation" OFF)
