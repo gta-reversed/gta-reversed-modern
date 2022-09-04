@@ -25,7 +25,7 @@ public:
     void Shutdown();
 
     uint32 GetNumOfNonScriptFires();
-    CFire* FindNearestFire(const CVector& point, bool bCheckWasExtinguished, bool bCheckWasCreatedByScript);
+    CFire* FindNearestFire(const CVector& point, bool bCheckWasExtinguished = false, bool bCheckWasCreatedByScript = false);
     bool PlentyFiresAvailable();
 
     void ExtinguishPoint(CVector point, float fRadiusSq);

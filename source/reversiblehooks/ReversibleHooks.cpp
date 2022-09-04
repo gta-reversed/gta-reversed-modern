@@ -59,6 +59,10 @@ void InstallVirtual(std::string_view category, std::string fnName, void** vtblGT
     const auto spanGTAVTbl = std::span{ vtblGTA, nVirtFns };
     const auto iter = rng::find(spanGTAVTbl, fnGTAAddr);
     if (iter == spanGTAVTbl.end()) {
+        /* Tips in case you ever encounter this
+        * - Make sure the vtable address and size is correct
+        * - Make sure function address you're hooking is correct
+        */
         NOTSA_UNREACHABLE("{}: Couldn't find function [{} @ {}] in vtable\n", category, fnName, fnGTAAddr);
     }
     const auto fnVTblIdx = (size_t)rng::distance(spanGTAVTbl.begin(), iter);

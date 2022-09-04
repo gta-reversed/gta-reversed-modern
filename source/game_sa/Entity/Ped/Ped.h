@@ -582,7 +582,9 @@ public:
     bool IsInVehicle(const CVehicle* veh) const { return bInVehicle && m_pVehicle == veh; }
     CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
     int32 GetPadNumber() const;
-
+    bool IsCurrentlyUnarmed() { return GetActiveWeapon().m_nType == WEAPON_UNARMED; }
+    bool IsJoggingOrFaster() const;
+    bool IsRightArmBlockedNow() const;
 private:
     void RenderThinBody() const;
     void RenderBigHead() const;

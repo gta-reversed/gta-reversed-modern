@@ -99,10 +99,10 @@ CTask* CTaskComplexTrackEntity::CreateFirstSubTask(CPed* ped) {
     if (m_fMoveRatio < 0.0) {
         m_fMoveRatio = [ped] {
             switch (ped->m_nMoveState) {
-            case 1: return 0.0;
-            case 4: return 1.0;
-            case 6: return 2.0;
-            default: return 3.0;
+            case 1: return 0.0f;
+            case 4: return 1.0f;
+            case 6: return 2.0f;
+            default: return 3.0f;
             }
         }();
     }
