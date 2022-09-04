@@ -209,6 +209,7 @@
 #include "TaskSimpleRunAnim.h"
 #include "TaskComplexWanderCriminal.h"
 #include "TaskComplexWanderProstitute.h"
+#include "TaskComplexWalkRoundBuildingAttempt.h"
 #include "TaskSimpleLookAbout.h"
 #include "TaskComplexPartnerGreet.h"
 #include "TaskComplexWaitForDryWeather.h"
@@ -757,7 +758,7 @@ void InjectHooksMain() {
         // CTaskComplexWaitForBus::InjectHooks();
         CTaskComplexWaitForDryWeather::InjectHooks();
         // CTaskComplexWalkAlongsidePed::InjectHooks();
-        // CTaskComplexWalkRoundBuildingAttempt::InjectHooks();
+        CTaskComplexWalkRoundBuildingAttempt::InjectHooks();
         CTaskComplexWalkRoundFire::InjectHooks();
         // CTaskComplexWanderFlee::InjectHooks();
         CTaskSimpleAffectSecondaryBehaviour::InjectHooks();

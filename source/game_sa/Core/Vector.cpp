@@ -8,6 +8,7 @@
 #include "StdInc.h"
 
 #include "Vector.h"
+#include "Vector2D.h"
 
 void CVector::InjectHooks()
 {
@@ -24,7 +25,12 @@ void CVector::InjectHooks()
     RH_ScopedInstall(FromMultiply, 0x59C670);
     RH_ScopedInstall(FromMultiply3x3, 0x59C6D0);
     RH_ScopedGlobalOverloadedInstall(CrossProduct, "out", 0x59C730, CVector*(*)(CVector*, CVector*, CVector*));
-    RH_ScopedGlobalOverloadedInstall(DotProduct, "vec*vec*", 0x59C6D0, float(*)(CVector*, CVector*));
+    RH_ScopedGlobalOverloadedInstall(DotProduct, "v3d*v3d*", 0x59C6D0, float(*)(CVector*, CVector*));
+}
+
+CVector::CVector(const CVector2D& v2, float z) :
+    CVector(v2.x, v2.y, z)
+{
 }
 
 CVector CVector::Random(float min, float max) {
@@ -157,9 +163,9 @@ CVector CVector::Average(const CVector* begin, const CVector* end) {
     return std::accumulate(begin, end, CVector{}) / (float)std::distance(begin, end);
 }
 
-float CVector::Heading(bool reMapRangeTo0To2Pi) const {
+float CVector::Heading(bool limitAngle) const {
     const auto heading = std::atan2(-x, y);
-    if (reMapRangeTo0To2Pi) {
+    if (limitAngle) {
         return CGeneral::LimitRadianAngle(heading);
     }
     return heading;
