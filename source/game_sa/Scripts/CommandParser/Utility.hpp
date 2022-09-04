@@ -51,7 +51,10 @@ auto& PoolOf<CPedAttractor>() { return *GetPedAttractorPool(); }
 * Eg.: MultiRet<int, int> => Push 2 ints using `StoreParameters`
 */
 template<typename... Ts>
-struct MultiRet : std::tuple<Ts...> {};
+using MultiRet = std::tuple<Ts...>;
+//struct MultiRet : public std::tuple<Ts...> {
+//    using std::tuple::tuple;
+//};
 
 /*!
 * Special return value used to update the compare flag.
