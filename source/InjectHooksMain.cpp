@@ -287,6 +287,7 @@
 #include "TaskComplexGetOnBoatSeat.h"
 #include "TaskComplexGoToAttractor.h"
 #include "TaskComplexGoToBoatSteeringWheel.h"
+#include "TaskComplexUseScriptedAttractor.h"
 #include "TaskSimpleSitDown.h"
 #include "TaskComplexGoToCarDoorAndStandStill.h"
 #include "TaskComplexGoToPointAiming.h"
@@ -745,7 +746,7 @@ void InjectHooksMain() {
         // CTaskComplexUseEffectSprinting::InjectHooks();
         // CTaskComplexUseEntryExit::InjectHooks();
         // CTaskComplexUsePairedAttractor::InjectHooks();
-        // CTaskComplexUseScriptedAttractor::InjectHooks();
+        CTaskComplexUseScriptedAttractor::InjectHooks();
         // CTaskComplexUseScriptedBrain::InjectHooks();
         // CTaskComplexWaitAtAttractor::InjectHooks();
         // CTaskComplexWaitForBackup::InjectHooks();
