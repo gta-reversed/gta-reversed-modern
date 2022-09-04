@@ -6,11 +6,11 @@
 */
 #pragma once
 
-
 #include "TaskComplex.h"
 #include "TaskTimer.h"
-#include "AnimBlock.h"
-#include "Object.h"
+
+class CAnimBlock;
+class CObject;
 
 enum eSunbatherType : uint32
 {
@@ -43,6 +43,7 @@ public:
 
     CTaskComplexSunbathe(CObject* towel, bool bStartStanding);
     CTaskComplexSunbathe(const CTaskComplexSunbathe&);
+    ~CTaskComplexSunbathe();
     
     CTask*    Clone() override { return new CTaskComplexSunbathe{ *this }; }
     eTaskType GetTaskType() override { return Type; }
