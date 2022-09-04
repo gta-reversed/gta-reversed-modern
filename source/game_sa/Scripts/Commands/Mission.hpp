@@ -59,6 +59,8 @@ void LoadAndLaunchMissionInternal(int32 missionId) {
 REGISTER_COMMAND_HANDLER(COMMAND_LOAD_AND_LAUNCH_MISSION_INTERNAL, LoadAndLaunchMissionInternal);
 
 void ScriptName(CRunningScript* S, std::string_view name) {
+    char lowered[8]{0};
+    rng::transform(name, lowered, [](char c) { return (char)std::tolower(c); });
     S->SetName(name);
 }
 REGISTER_COMMAND_HANDLER(COMMAND_SCRIPT_NAME, ScriptName);
