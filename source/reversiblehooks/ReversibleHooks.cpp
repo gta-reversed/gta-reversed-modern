@@ -74,6 +74,10 @@ void InstallVirtual(std::string_view category, std::string fnName, void** vtblGT
     auto item = std::make_shared<ReversibleHook::Virtual>(std::move(fnName), vtblGTA, vtblOur, fnVTblIdx);
     item->State(opt.enabled);
     item->LockState(opt.locked);
+    AddItemToCategory(category, std::move(item));
+}
+
+void AddItemToCategory(std::string_view category, std::shared_ptr<ReversibleHook::Base> item) {
     s_RootCategory.AddItemToNamedCategory(category, std::move(item));
 }
 
@@ -91,7 +95,7 @@ void HookInstall(std::string_view category, std::string fnName, uint32 installAd
     auto item = std::make_shared<ReversibleHook::Simple>(std::move(fnName), installAddress, addressToJumpTo, opt.jmpCodeSize, opt.stackArguments);
     item->State(opt.enabled);
     item->LockState(opt.locked);
-    s_RootCategory.AddItemToNamedCategory(category, std::move(item));
+    AddItemToCategory(category, std::move(item));
 }
 
 void VirtualCopy(void* dst, void* src, size_t nbytes) {

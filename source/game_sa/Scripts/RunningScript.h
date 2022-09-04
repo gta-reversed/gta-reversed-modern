@@ -242,6 +242,8 @@ public:
         // By default call original GTA handler
         return std::invoke(CommandHandlerTable[(size_t)Command / 100], this, Command);
     }
+
+    static void SetCommandHandler(eScriptCommands cmd, OpcodeResult(*handler)(CRunningScript*));
 };
 
 VALIDATE_SIZE(CRunningScript, 0xE0);

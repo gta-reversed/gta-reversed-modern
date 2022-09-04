@@ -12,8 +12,6 @@
 #define VALIDATE_OFFSET(struc, member, offset) \
 	static_assert(offsetof(struc, member) == offset, "The offset of " #member " in " #struc " is not " #offset "...")
 
-
-
 VALIDATE_SIZE(bool, 1);
 VALIDATE_SIZE(char, 1);
 VALIDATE_SIZE(short, 2);

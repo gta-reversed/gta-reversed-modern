@@ -4,6 +4,7 @@
 #include "TheScripts.h"
 #include "CarGenerator.h"
 #include "Hud.h"
+#include "ReversibleHooks/ReversibleHook/ScriptCommand.h"
 
 // Commands stuff
 #include "CommandParser/Parser.hpp"
@@ -41,7 +42,7 @@
 
 // https://library.sannybuilder.com/#/sa
 
-static constexpr auto s_CommandHandlerLUT = notsa::script::detail::GenerateLUT();
+static auto s_CommandHandlerLUT = notsa::script::GenerateLUT();
 
 void CRunningScript::InjectHooks() {
     RH_ScopedClass(CRunningScript);
@@ -87,6 +88,18 @@ void CRunningScript::InjectHooks() {
     RH_ScopedInstall(UpdatePC, 0x464DA0, { .stackArguments = 1 });
     RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
     RH_ScopedInstall(Process, 0x469F00);
+
+    // Enable in `StdInc.h` if needed (Don't forget to disabled it when committing)
+#ifdef ENABLE_SCRIPT_COMMAND_HOOKS
+    const auto HookCommand = []<size_t Idx>() {
+        using namespace ReversibleHooks::ReversibleHook;
+        ReversibleHooks::AddItemToCategory(
+            "Scripts/Commands",
+            std::make_shared<ScriptCommand<(eScriptCommands)Idx>>()
+        );
+    };
+    notsa::script::IterateCommandIDs(HookCommand);
+#endif
 }
 
 // 0x4648E0
@@ -850,4 +863,8 @@ OpcodeResult CRunningScript::Process() {
     }
 
     return OR_CONTINUE;
+}
+
+void CRunningScript::SetCommandHandler(eScriptCommands cmd, OpcodeResult(*handler)(CRunningScript*)) {
+    s_CommandHandlerLUT[(size_t)cmd] = handler;
 }
