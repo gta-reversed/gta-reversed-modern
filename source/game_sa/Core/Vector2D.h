@@ -111,6 +111,9 @@ public:
     CVector2D ProjectOnToNormal(const CVector2D& projectOnTo) const {
         return projectOnTo * Dot(projectOnTo);
     }
+
+    /// Wrapper around `CGeneral::GetNodeHeadingFromVector`
+    uint32 NodeHeading() const;
 };
 
 constexpr inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {

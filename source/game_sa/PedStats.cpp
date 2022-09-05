@@ -29,7 +29,7 @@ void CPedStats::Initialise() {
         ms_apPedStats[statIndex].m_nSexiness = 50;
         ms_apPedStats[statIndex].m_fAttackStrength = 1.0f;
         ms_apPedStats[statIndex].m_fDefendWeakness = 1.0f;
-        ms_apPedStats[statIndex].m_wShootingRate = 0;
+        ms_apPedStats[statIndex].m_flags = 0;
         ms_apPedStats[statIndex].m_nDefaultDecisionMaker = 0;
     }
     LoadPedStats();
@@ -88,7 +88,7 @@ void CPedStats::LoadPedStats() {
         ms_apPedStats[statIndex].m_nSexiness = sexiness;
         ms_apPedStats[statIndex].m_fAttackStrength = attackStrength;
         ms_apPedStats[statIndex].m_fDefendWeakness = defendWeakness;
-        ms_apPedStats[statIndex].m_wShootingRate = shootingRate;
+        ms_apPedStats[statIndex].m_flags = shootingRate;
         ms_apPedStats[statIndex].m_nDefaultDecisionMaker = defaultDecisionMaker;
 
         statIndex++;
