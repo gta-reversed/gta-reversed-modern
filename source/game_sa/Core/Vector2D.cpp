@@ -32,7 +32,6 @@ void CVector2D::Normalise() {
     } else {
         x = 1.0f;
     }
-
 }
 
 uint32 CVector2D::NodeHeading() const {
