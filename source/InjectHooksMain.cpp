@@ -130,6 +130,7 @@
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorRadiusAngleOffset.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorXYOffset.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorFixedPos.h"
+#include "TaskComplexSeekEntityAnyMeansXYOffset.h"
 #include "TaskComplexSmartFleeEntity.h"
 #include "TaskSimpleArrestPed.h"
 #include "TaskComplexDragPedFromCar.h"
@@ -737,7 +738,7 @@ void InjectHooksMain() {
         CTaskComplexSeekEntityStandard::InjectHooks();
         CTaskComplexSeekEntityXYOffset::InjectHooks();
         // CTaskComplexSeekEntityAiming::InjectHooks();
-        // CTaskComplexSeekEntityAnyMeans<CEntitySeekPosCalculatorXYOffset>::InjectHooks();
+        CTaskComplexSeekEntityAnyMeansXYOffset::InjectHooks();
         // CTaskComplexShuffleSeats::InjectHooks();
         CTaskComplexSignalAtPed::InjectHooks();
         // CTaskComplexSitDownThenIdleThenStandUp::InjectHooks();
