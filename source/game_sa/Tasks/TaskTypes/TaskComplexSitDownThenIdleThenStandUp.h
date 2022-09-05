@@ -8,7 +8,7 @@ class CPed;
 class NOTSA_EXPORT_VTABLE CTaskComplexSitDownThenIdleThenStandUp : public CTaskComplex {
 
 public:
-    uint32 m_durationMs = {};      // 0xC
+    int32 m_durationMs = {};      // 0xC
     bool   m_sitOnStep = {};       // 0x10
     bool   m_doInstantly = {};     // 0x11
     bool   m_animBlockRefAdded = {}; // 0x12
