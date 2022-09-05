@@ -20,7 +20,7 @@ public:
     static void InjectHooks();
 
     CTaskSimpleRunTimedAnim(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, uint32 durationMs, bool holdLastFrame);
-    CTaskSimpleRunTimedAnim(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, uint32 durationMs, uint32 taskId, const char* unused2, bool holdLastFrame);
+    CTaskSimpleRunTimedAnim(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, uint32 durationMs, uint32 taskId, const char* taskName, bool holdLastFrame);
     CTaskSimpleRunTimedAnim(const CTaskSimpleRunTimedAnim& o) : CTaskSimpleRunTimedAnim{o.m_animGrpId, o.m_animId, o.m_blendDelta, o.m_unused1, o.m_durationMs, o.m_bHoldLastFrame} {} // NOTSA
     ~CTaskSimpleRunTimedAnim() = default;
 

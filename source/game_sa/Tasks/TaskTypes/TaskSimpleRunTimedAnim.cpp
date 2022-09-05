@@ -27,14 +27,16 @@ CTaskSimpleRunTimedAnim::CTaskSimpleRunTimedAnim(AssocGroupId groupId, Animation
     m_animGrpId{groupId}
 {
 }
+
 // 0x61ABE0
-CTaskSimpleRunTimedAnim::CTaskSimpleRunTimedAnim(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, uint32 durationMs, uint32 taskId, const char* unused2, bool holdLastFrame) :
+CTaskSimpleRunTimedAnim::CTaskSimpleRunTimedAnim(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, uint32 durationMs, uint32 taskId, const char* taskName, bool holdLastFrame) :
     CTaskSimpleAnim{ holdLastFrame },
     m_blendDelta{ blendDelta },
     m_unused1{ unused1 },
     m_durationMs{ durationMs },
     m_animId{ animId },
-    m_animGrpId{ groupId }
+    m_animGrpId{ groupId },
+    m_taskId{taskId}
 {
 }
 
