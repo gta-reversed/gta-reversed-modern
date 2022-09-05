@@ -16,7 +16,8 @@ namespace ReversibleHook {
 struct Base {
     enum class HookType { // Sadly can't use `Type` alone as it's some function..
         Simple,
-        Virtual
+        Virtual,
+        ScriptCommand
     };
 
     Base(std::string fnName, HookType type, bool locked = false) :
@@ -53,10 +54,12 @@ struct Base {
         m_bIsLocked = locked;
     }
 
+    /// Symbol in ImGui (On the left side of the checkbox)
+    virtual const char* Symbol() const = 0;
+
     const auto& Name()   const { return m_fnName; }
     const auto  Type()   const { return m_type; }
     const auto  Hooked() const { return m_bIsHooked; }
-    const char* Symbol() const { return Type() == HookType::Simple ? "S" : "V"; } // Symbol in ImGui
     const auto  Locked() const { return m_bIsLocked; }
 
 public:

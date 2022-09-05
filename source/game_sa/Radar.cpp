@@ -445,9 +445,9 @@ void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType)
 
     CRect rt;
     rt.left = (float)x;
-    rt.top = (float)y;
+    rt.bottom = (float)y;
 
-    CFont::PrintString(SCREEN_WIDTH_UNIT * 20.0f + rt.left, SCREEN_HEIGHT_UNIT * 3.0f + rt.top, blipName);
+    CFont::PrintString(SCREEN_WIDTH_UNIT * 20.0f + rt.left, SCREEN_HEIGHT_UNIT * 3.0f + rt.bottom, blipName);
 
     auto blipId = (int32)blipType;
 
@@ -456,7 +456,7 @@ void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType)
         CRGBA color(255, 255, 255, 255);
 
         rt.right = rt.left + SCREEN_WIDTH_UNIT * 16.0f;
-        rt.bottom = rt.top + SCREEN_WIDTH_UNIT * 16.0f;
+        rt.top = rt.bottom + SCREEN_WIDTH_UNIT * 16.0f;
 
         RadarBlipSprites[blipId].Draw(rt, color);
 
@@ -519,15 +519,15 @@ void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType)
         break;
     }
     case RADAR_TRACE_NORMAL: {
-        rt.top    = posY - SCREEN_HEIGHT_UNIT * 5.0f;
-        rt.bottom = posY + SCREEN_HEIGHT_UNIT * 5.0f;
+        rt.bottom    = posY - SCREEN_HEIGHT_UNIT * 5.0f;
+        rt.top = posY + SCREEN_HEIGHT_UNIT * 5.0f;
         rt.left   = posX - SCREEN_WIDTH_UNIT * 5.0f;
         rt.right  = posX + SCREEN_WIDTH_UNIT * 5.0f;
 
         CSprite2d::DrawRect(rt, black);
 
-        rt.top    = posY - SCREEN_HEIGHT_UNIT * 4.0f;
-        rt.bottom = posY + SCREEN_HEIGHT_UNIT * 4.0f;
+        rt.bottom    = posY - SCREEN_HEIGHT_UNIT * 4.0f;
+        rt.top = posY + SCREEN_HEIGHT_UNIT * 4.0f;
         rt.left   = posX - SCREEN_WIDTH_UNIT * 4.0f;
         rt.right  = posX + SCREEN_WIDTH_UNIT * 4.0f;
 
@@ -936,9 +936,9 @@ void CRadar::DrawYouAreHereSprite(float x, float y)
 void CRadar::SetupRadarRect(int32 x, int32 y)
 {
     m_radarRect.left   = 500.0f * (x - 6) - 500.0f;
-    m_radarRect.top    = 500.0f * (5 - y) - 500.0f;
+    m_radarRect.bottom    = 500.0f * (5 - y) - 500.0f;
     m_radarRect.right  = 500.0f * (x - 4);
-    m_radarRect.bottom = 500.0f * (7 - y);
+    m_radarRect.top = 500.0f * (7 - y);
 }
 
 // unused
@@ -1255,9 +1255,9 @@ void CRadar::DrawRadarMap()
         float angle = std::atan2(-vehicle->m_matrix->GetForward().z, vehicle->m_matrix->GetUp().z);
         CRect rt;
         rt.left   = playerPos.x - 1000.0f;
-        rt.top    = playerPos.y - (2 * RadiansToDegrees(angle));
+        rt.bottom    = playerPos.y - (2 * RadiansToDegrees(angle));
         rt.right  = playerPos.x + 1000.0f;
-        rt.bottom = playerPos.y + 2000.0f;
+        rt.top = playerPos.y + 2000.0f;
 
         CRGBA color(20, 175, 20, 200); // light green with some transparency
         DrawAreaOnRadar(rt, color, false);

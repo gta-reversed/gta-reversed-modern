@@ -6,19 +6,32 @@
 */
 #pragma once
 
+#include <span>
+
 #include "RenderWare.h"
+
+class CVector;
 
 class CVector2D : public RwV2d {
 public:
     constexpr CVector2D() = default;
     constexpr CVector2D(float X, float Y) : RwV2d{ X, Y } {}
-    constexpr CVector2D(const CVector& vec3d)   { x = vec3d.x; y = vec3d.y; }
     constexpr CVector2D(const RwV2d& vec2d)     { x = vec2d.x; y = vec2d.y; }
     constexpr CVector2D(const CVector2D& vec2d) { x = vec2d.x; y = vec2d.y; }
 
+    CVector2D(const CVector& vec3d);
+
     static void InjectHooks();
 
+    /// Normalize this vector in-place
     void  Normalise();
+
+    /// Get a normalized copy of this vector
+    auto Normalized() const {
+        CVector2D cpy = *this;
+        cpy.Normalise();
+        return cpy;
+    }
 
     [[nodiscard]] constexpr inline float SquaredMagnitude() const {
         return x * x + y * y;
@@ -77,6 +90,27 @@ public:
     [[nodiscard]] float Heading() const {
         return std::atan2(-x, y);
     }
+
+
+    auto GetComponents() const {
+        return std::span{ reinterpret_cast<const float*>(this), 2 };
+    }
+
+    constexpr friend CVector2D operator*(const CVector2D& vec, float multiplier) {
+        return { vec.x * multiplier, vec.y * multiplier };
+    }
+
+    /// Calculate the dot product with another vector
+    float Dot(const CVector2D& lhs) const {
+        return x * lhs.x + y * lhs.y;
+    }
+
+    /*!
+    * @return A copy of this vector projected onto the input vector, which is assumed to be unit length.
+    */
+    CVector2D ProjectOnToNormal(const CVector2D& projectOnTo) const {
+        return projectOnTo * Dot(projectOnTo);
+    }
 };
 
 constexpr inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {
@@ -89,10 +123,6 @@ constexpr inline CVector2D operator+(const CVector2D& vecOne, const CVector2D& v
 
 constexpr inline CVector2D operator*(const CVector2D& vecOne, const CVector2D& vecTwo) {
     return { vecOne.x * vecTwo.x, vecOne.y * vecTwo.y };
-}
-
-constexpr inline CVector2D operator*(const CVector2D& vec, float multiplier) {
-    return { vec.x * multiplier, vec.y * multiplier };
 }
 
 constexpr inline CVector2D operator/(const CVector2D& vec, float dividend) {
@@ -139,3 +169,5 @@ constexpr static bool IsPointWithinBounds2D(CVector2D min, CVector2D max, CVecto
 constexpr static bool IsPointInRectangle2D(CVector2D rectTopLeft, CVector2D rectSize, CVector2D point) {
     return IsPointWithinBounds2D(rectTopLeft + rectSize, rectTopLeft, point);
 }
+
+static CVector2D Normalized2D(CVector2D v) { v.Normalise(); return v; }

@@ -4,39 +4,45 @@
 #include "TheScripts.h"
 #include "CarGenerator.h"
 #include "Hud.h"
+#include "ReversibleHooks/ReversibleHook/ScriptCommand.h"
+
+// Commands stuff
+#include "CommandParser/Parser.hpp"
+
+/*!
+* Make sure to include the command headers here, otherwise they won't be registered,
+* and the default GTA handler will be called.
+* 
+* Currently we don't include the Commands/CLEO headers at all.
+*
+* Eventually we'll get rid of this header based approach, and switch to using cpp files instead,
+* currently it's not possible because of the way it's set up.
+* (Once all old functions are reworked to use the parser)
+*/
+
+#include "Commands/Basic.hpp"
+#include "Commands/Car.hpp"
+#include "Commands/Comparasion.hpp"
+#include "Commands/Generic.hpp"
+#include "Commands/Mission.hpp"
+#include "Commands/Player.hpp"
+#include "Commands/Sequence.hpp"
+#include "Commands/Utility.hpp"
+#include "Commands/Camera.hpp"
+#include "Commands/Char.hpp"
+#include "Commands/Clock.hpp"
+#include "Commands/Game.hpp"
+#include "Commands/Math.hpp"
+#include "Commands/Pad.hpp"
+#include "Commands/Script.hpp"
+#include "Commands/Text.hpp"
+
+// Must be included after the commands
+#include "CommandParser/LUTGenerator.hpp"
 
 // https://library.sannybuilder.com/#/sa
 
-//! @NOTSA - Our reversed command handler table. See \r ProcessOneCommand
-CRunningScript::CommandHandlerTable_t CRunningScript::reSA_CommandHandlerTable = {
-    &CRunningScript::ProcessCommands0To99,
-    &CRunningScript::ProcessCommands100To199,
-    &CRunningScript::ProcessCommands200To299,
-    &CRunningScript::ProcessCommands300To399,
-    &CRunningScript::ProcessCommands400To499,
-    &CRunningScript::ProcessCommands500To599,
-    &CRunningScript::ProcessCommands600To699,
-    &CRunningScript::ProcessCommands700To799,
-    &CRunningScript::ProcessCommands800To899,
-    &CRunningScript::ProcessCommands900To999,
-    &CRunningScript::ProcessCommands1000To1099,
-    &CRunningScript::ProcessCommands1100To1199,
-    &CRunningScript::ProcessCommands1200To1299,
-    &CRunningScript::ProcessCommands1300To1399,
-    &CRunningScript::ProcessCommands1400To1499,
-    &CRunningScript::ProcessCommands1500To1599,
-    &CRunningScript::ProcessCommands1600To1699,
-    &CRunningScript::ProcessCommands1700To1799,
-    &CRunningScript::ProcessCommands1800To1899,
-    &CRunningScript::ProcessCommands1900To1999,
-    &CRunningScript::ProcessCommands2000To2099,
-    &CRunningScript::ProcessCommands2100To2199,
-    &CRunningScript::ProcessCommands2200To2299,
-    &CRunningScript::ProcessCommands2300To2399,
-    &CRunningScript::ProcessCommands2400To2499,
-    &CRunningScript::ProcessCommands2500To2599,
-    &CRunningScript::ProcessCommands2600To2699
-};
+static auto s_CommandHandlerLUT = notsa::script::GenerateLUT();
 
 constexpr auto SHORT_STRING_SIZE = 8;
 constexpr auto LONG_STRING_SIZE  = 16;
@@ -85,6 +91,18 @@ void CRunningScript::InjectHooks() {
     RH_ScopedInstall(UpdatePC, 0x464DA0, { .stackArguments = 1 });
     RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
     RH_ScopedInstall(Process, 0x469F00);
+
+    // Enable in `StdInc.h` if needed (Don't forget to disabled it when committing)
+#ifdef ENABLE_SCRIPT_COMMAND_HOOKS
+    const auto HookCommand = []<size_t Idx>() {
+        using namespace ReversibleHooks::ReversibleHook;
+        ReversibleHooks::AddItemToCategory(
+            "Scripts/Commands",
+            std::make_shared<ScriptCommand<(eScriptCommands)Idx>>()
+        );
+    };
+    notsa::script::IterateCommandIDs(HookCommand);
+#endif
 }
 
 // 0x4648E0
@@ -464,7 +482,7 @@ tScriptParam* CRunningScript::GetPointerToScriptVariable(eScriptVariableType var
         return GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, arrElemSize);
 
     default:
-        return nullptr;
+        NOTSA_UNREACHABLE();
     }
 }
 
@@ -798,28 +816,27 @@ void CRunningScript::UpdatePC(int32 newIP) {
     else
         m_pCurrentIP = &m_pBaseIP[-newIP];
 }
+static std::array<size_t, COMMAND_HIGHEST_ID> counter{};
 
 // 0x469EB0, inlined
 OpcodeResult CRunningScript::ProcessOneCommand() {
     ++CTheScripts::CommandsExecuted;
 
-    int32 command = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+    union {
+        int16 op;
+        struct {
+            uint16 command : 15;
+            uint16 notFlag : 1;
+        };
+    } op = { CTheScripts::Read2BytesFromScript(m_pCurrentIP) };
 
-    m_bNotFlag = (command & 0x8000) != 0;
-    command &= 0x7FFF;
+    counter[op.command]++;
 
-    const auto InvokeHandlerFromTable = [this, idx = command / 100, command](auto&& tbl) {
-        return std::invoke(tbl[idx], this, command);
-    };
+    m_bNotFlag = op.notFlag;
 
-    // NOTSA: First we try to call our (reversed) implementation for the current command
-    if (const auto ret = InvokeHandlerFromTable(reSA_CommandHandlerTable); ret != OR_IMPLEMENTED_YET) {
-        // printf("Command %d\n", command);
-        return ret; // Implemented, don't call original handler.
-    }
+    //return std::invoke(CommandHandlerTable[(size_t)op.command / 100], this, (eScriptCommands)op.command);
 
-    // Not implemented -> invoke the original opcode
-    return InvokeHandlerFromTable(CommandHandlerTable);
+    return std::invoke(s_CommandHandlerLUT[(size_t)op.command], this);
 }
 
 // 0x469F00
@@ -849,4 +866,8 @@ OpcodeResult CRunningScript::Process() {
     }
 
     return OR_CONTINUE;
+}
+
+void CRunningScript::SetCommandHandler(eScriptCommands cmd, OpcodeResult(*handler)(CRunningScript*)) {
+    s_CommandHandlerLUT[(size_t)cmd] = handler;
 }

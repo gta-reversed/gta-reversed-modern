@@ -8,6 +8,7 @@
 
 #include <extensions/enumerate.hpp>
 
+#include "Garages.h"
 #include "GangWars.h"
 #include "GangWarsSaveStructure.h"
 #include "ModelIndices.h"
@@ -162,7 +163,7 @@ bool CGangWars::CanPlayerStartAGangWarHere(CZoneInfo* zoneInfo) {
 
 // 0x444040
 void CGangWars::CheerVictory() {
-    auto& playerGroup = FindPlayerPed()->GetGroup();
+    auto& playerGroup = FindPlayerPed()->GetPlayerGroup();
 
     CPed* nearestMember = nullptr;
     playerGroup.FindDistanceToNearestMember(&nearestMember);

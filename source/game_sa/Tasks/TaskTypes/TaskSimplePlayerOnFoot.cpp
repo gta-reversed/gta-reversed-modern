@@ -898,7 +898,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* player) {
         moveSpeed.y = moveSpeedMultiplier * moveSpeed.y;
     }
 
-    taskUseGun->ControlGunMove(&moveSpeed);
+    taskUseGun->ControlGunMove(moveSpeed);
     if (pad->DuckJustDown()) {
         if (CTaskSimpleDuck::CanPedDuck(player)) {
             player->GetIntelligence()->SetTaskDuckSecondary(0);
@@ -961,7 +961,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
             moveSpeed.x = 1.0f;
             moveSpeed.y = 0.0f;
             CTaskSimpleUseGun* pTaskSimpleUseGun = player->GetIntelligence()->GetTaskUseGun();
-            pTaskSimpleUseGun->ControlGunMove(&moveSpeed);
+            pTaskSimpleUseGun->ControlGunMove(moveSpeed);
         }
     } else if (!pad->GetTarget() || player->GetActiveWeapon().IsTypeMelee()) {
         if (pedMoveBlendRatio > 0.0f) {
@@ -1107,15 +1107,17 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
 void CTaskSimplePlayerOnFoot::InjectHooks() {
     RH_ScopedClass(CTaskSimplePlayerOnFoot);
     RH_ScopedCategory("Tasks/TaskTypes");
-    RH_ScopedInstall(Constructor, 0x685750);
-    RH_ScopedInstall(Destructor, 0x6857D0);
-    RH_ScopedVirtualInstall(ProcessPed, 0x688810);
-    RH_ScopedVirtualInstall(MakeAbortable, 0x6857E0);
-    // RH_ScopedInstall(ProcessPlayerWeapon, 0x6859A0);
-    RH_ScopedInstall(PlayIdleAnimations, 0x6872C0);
-    RH_ScopedInstall(PlayerControlZeldaWeapon, 0x687C20);
-    RH_ScopedInstall(PlayerControlDucked, 0x687F30);
-    RH_ScopedInstall(PlayerControlZelda, 0x6883D0);
+
+    // All locked for now, because when unhooked code asserts with "esp value...." in `ProcessPed`
+    RH_ScopedInstall(Constructor, 0x685750, { .locked = true });
+    RH_ScopedInstall(Destructor, 0x6857D0, { .locked = true });
+    RH_ScopedVirtualInstall(ProcessPed, 0x688810, { .locked = true });
+    RH_ScopedVirtualInstall(MakeAbortable, 0x6857E0, { .locked = true });
+    // RH_ScopedInstall(ProcessPlayerWeapon, 0x6859A0, { .locked = true });
+    RH_ScopedInstall(PlayIdleAnimations, 0x6872C0, { .locked = true });
+    RH_ScopedInstall(PlayerControlZeldaWeapon, 0x687C20, { .locked = true });
+    RH_ScopedInstall(PlayerControlDucked, 0x687F30, { .locked = true });
+    RH_ScopedInstall(PlayerControlZelda, 0x6883D0, { .locked = true });
 }
 
 // 0x685750

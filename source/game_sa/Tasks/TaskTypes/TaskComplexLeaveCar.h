@@ -31,10 +31,11 @@ public:
 
     explicit CTaskComplexLeaveCar(CVehicle* targetVehicle, int32 nTargetDoor, int32 nDelayTime);
     explicit CTaskComplexLeaveCar(CVehicle* targetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut);
+    CTaskComplexLeaveCar(const CTaskComplexLeaveCar& o); // NOTSA
     ~CTaskComplexLeaveCar() override;
 
     eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override { return new CTaskComplexLeaveCar(m_pTargetVehicle, m_nTargetDoor, m_nDelayTime, m_bSensibleLeaveCar, m_bForceGetOut); } // 0x63D9E0
+    CTask* Clone() override { return new CTaskComplexLeaveCar{ *this }; } // 0x63D9E0
     bool   MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

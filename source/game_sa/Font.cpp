@@ -276,11 +276,11 @@ void CFont::PrintChar(float x, float y, char character) {
             rt.left = x;
 
             if (RenderState.m_fSlant == 0.0f) {
-                rt.top = y;
+                rt.bottom = y;
                 rt.right = 32.0f * RenderState.m_fWidth + x;
 
                 if (character < 0xC0) {
-                    rt.bottom = 20.0f * RenderState.m_fHeight + y;
+                    rt.top = 20.0f * RenderState.m_fHeight + y;
 
                     float u1 = (character & 0xF) / 16.0f;
                     float v1 = (character >> 4) / 12.8f + 0.0021f;
@@ -294,7 +294,7 @@ void CFont::PrintChar(float x, float y, char character) {
                     CSprite2d::AddToBuffer(rt, RenderState.m_color, u1, v1, u2, v2, u3, v3, u4, v4);
                 }
                 else {
-                    rt.bottom = 16.0f * RenderState.m_fHeight + y;
+                    rt.top = 16.0f * RenderState.m_fHeight + y;
 
                     float u1 = (character & 0xF) / 16.0f;
                     float v1 = (character >> 4) / 12.8f + 0.0021f;
@@ -309,9 +309,9 @@ void CFont::PrintChar(float x, float y, char character) {
                 }
             }
             else {
-                rt.top = y + 0.015f;
+                rt.bottom = y + 0.015f;
                 rt.right = 32.0f * RenderState.m_fWidth + x;
-                rt.bottom = 20.0f * RenderState.m_fHeight + y + 0.015f;
+                rt.top = 20.0f * RenderState.m_fHeight + y + 0.015f;
 
                 float u1 = (character & 0xF) / 16.0f;
                 float v1 = (character >> 4) / 12.8f + 0.00055f;
@@ -711,8 +711,8 @@ void CFont::GetTextRect(CRect* rect, float x, float y, const char* text) {
         rect->right = m_fWrapx + 4.0f;
     }
 
-    rect->bottom = y - 4.0f;
-    rect->top = y + 4.0f + GetHeight() * (float)GetNumberLines(x, y, text);
+    rect->top = y - 4.0f;
+    rect->bottom = y + 4.0f + GetHeight() * (float)GetNumberLines(x, y, text);
 }
 
 // 0x71A700
@@ -729,8 +729,8 @@ void CFont::PrintString(float x, float y, const char* text) {
         if (m_bEnlargeBackgroundBox) {
             rt.left -= 1.0f;
             rt.right += 1.0f;
-            rt.top += 1.0f;
-            rt.bottom -= 1.0f;
+            rt.bottom += 1.0f;
+            rt.top -= 1.0f;
 
             FrontEndMenuManager.DrawWindow(rt, nullptr, 0, m_FontBackgroundColor, false, true);
         } else {

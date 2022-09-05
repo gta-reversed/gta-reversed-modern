@@ -23,8 +23,8 @@ void CTaskComplexAvoidEntity::InjectHooks() {
 }
 
 // 0x66AA20
-CTaskComplexAvoidEntity::CTaskComplexAvoidEntity(int32 a2, CEntity* entity, const CVector& pos) : CTaskComplex() {
-    field_10 = a2;
+CTaskComplexAvoidEntity::CTaskComplexAvoidEntity(eMoveState moveState, CEntity* entity, const CVector& pos) : CTaskComplex() {
+    m_moveState = moveState;
     m_Entity = entity;
     f20 = pos;
     f2C = pos;
@@ -75,7 +75,7 @@ CTask* CTaskComplexAvoidEntity::CreateFirstSubTask(CPed* ped) {
         return CreateNextSubTask(ped);
     }
 
-    return new CTaskSimpleGoToPoint(field_10, &f2C, 0.5f, false, false);
+    return new CTaskSimpleGoToPoint(m_moveState, &f2C, 0.5f, false, false);
 }
 
 // 0x66AD70

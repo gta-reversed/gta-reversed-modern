@@ -1484,8 +1484,8 @@ void CCamera::DrawBordersForWideScreen() {
         m_nMotionBlurAddAlpha = 80;
     }
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
-    CSprite2d::DrawRect({ -5.f, -5.f,     SCREEN_WIDTH + 5.f, rect.bottom         }, { 0, 0, 0, 255 });
-    CSprite2d::DrawRect({ -5.f, rect.top, SCREEN_WIDTH + 5.f, SCREEN_HEIGHT + 5.f }, { 0, 0, 0, 255 });
+    CSprite2d::DrawRect({ -5.f, -5.f,     SCREEN_WIDTH + 5.f, rect.top         }, { 0, 0, 0, 255 });
+    CSprite2d::DrawRect({ -5.f, rect.bottom, SCREEN_WIDTH + 5.f, SCREEN_HEIGHT + 5.f }, { 0, 0, 0, 255 });
 }
 
 // 0x514950
@@ -1576,11 +1576,11 @@ void CCamera::GetScreenRect(CRect* rect) {
     rect->right = SCREEN_WIDTH;
 
     if (m_bWideScreenOn) {
-        rect->bottom = (float)(RsGlobal.maximumHeight / 2)          * m_fScreenReductionPercentage / 100.f - SCREEN_SCALE_Y(22.0f);
-        rect->top    = SCREEN_HEIGHT - (RsGlobal.maximumHeight / 2) * m_fScreenReductionPercentage / 100.f - SCREEN_SCALE_Y(14.0f);
+        rect->top = (float)(RsGlobal.maximumHeight / 2)          * m_fScreenReductionPercentage / 100.f - SCREEN_SCALE_Y(22.0f);
+        rect->bottom    = SCREEN_HEIGHT - (RsGlobal.maximumHeight / 2) * m_fScreenReductionPercentage / 100.f - SCREEN_SCALE_Y(14.0f);
     } else {
-        rect->bottom = 0.0f;
-        rect->top    = SCREEN_HEIGHT;
+        rect->top = 0.0f;
+        rect->bottom    = SCREEN_HEIGHT;
     }
 }
 

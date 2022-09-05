@@ -79,13 +79,13 @@ int32 CGangs::ChooseGangPedModel(int16 gangId) {
 
 // unused (0x5DE500)
 bool CGangs::GetWillAttackPlayerWithCops(ePedType pedType) {
-    assert(CPed::IsGangster(pedType));
+    assert(IsPedTypeGang(pedType));
     return GangAttackWithCops[pedType - PED_TYPE_GANG1];
 }
 
 // unused (0x5DE4E0)
 void CGangs::SetWillAttackPlayerWithCops(ePedType pedType, bool attackPlayerWithCops) {
-    assert(CPed::IsGangster(pedType));
+    assert(IsPedTypeGang(pedType));
     GangAttackWithCops[pedType - PED_TYPE_GANG1] = attackPlayerWithCops;
 }
 

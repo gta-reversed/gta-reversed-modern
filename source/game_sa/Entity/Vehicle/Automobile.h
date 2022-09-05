@@ -225,7 +225,7 @@ public:
     // Repair vehicle's door. "nodeIndex" is an index of component in m_modelNodes array
     void FixDoor(int32 nodeIndex, eDoors door);
     // Repair vehicle's panel. "nodeIndex" is an index of component in m_modelNodes array
-    void FixPanel(int32 nodeIndex, ePanels panel);
+    void FixPanel(eCarNodes nodeIndex, ePanels panel);
     // Enable/disable taxi light for taxi
     void SetTaxiLight(bool enable);
     // Enable taxi light for all taxis (CAutomobile::m_sAllTaxiLights = true;)
