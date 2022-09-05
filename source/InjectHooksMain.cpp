@@ -197,6 +197,7 @@
 #include "TaskSimplePause.h"
 #include "TaskComplexEnterCarAsPassenger.h"
 #include "TaskComplexEnterCarAsDriver.h"
+#include "TaskComplexReactToGunAimedAt.h"
 #include "TaskSimpleNone.h"
 #include "TaskComplexKillPedOnFoot.h"
 #include "TaskSimpleThrowProjectile.h"
@@ -725,7 +726,7 @@ void InjectHooksMain() {
         // CTaskComplexPassObject::InjectHooks();
         // CTaskComplexPresentIDToCop::InjectHooks();
         // CTaskComplexReactToAttack::InjectHooks();
-        // CTaskComplexReactToGunAimedAt::InjectHooks();
+        CTaskComplexReactToGunAimedAt::InjectHooks();
         CTaskComplexRoadRage::InjectHooks();
         // CTaskComplexScreamInCarThenLeave::InjectHooks();
         // CTaskComplexSeekCoverUntilTargetDead::InjectHooks();
