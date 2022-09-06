@@ -17,6 +17,15 @@ class CEvent;
 class CPedGroup;
 class CEventGroupEvent;
 
+enum class ePedGroupDefaultTaskAllocatorType : uint32 {
+    FOLLOW_ANY_MEANS,
+    FOLLOW_LIMITED,
+    STAND_STILL,
+    CHAT,
+    SIT_IN_LEADER_CAR,
+    RANDOM,
+};
+
 class CPedGroupIntelligence {
 public:
     CPedGroup*                     m_pPedGroup;
@@ -59,8 +68,8 @@ public:
     bool       ReportFinishedTask(const CPed* ped, const CTask* task);
     void       SetDefaultTask(CPed* ped, const CTask* task);
     void       SetDefaultTaskAllocator(CPedGroupDefaultTaskAllocator const* PedGroupDefaultTaskAllocator);
-    //! see ePedGroupTaskAllocator
-    void SetDefaultTaskAllocatorType(int32 nPedGroupTaskAllocator);
+    //! see ePedGroupDefaultTaskAllocatorType
+    void SetDefaultTaskAllocatorType(ePedGroupDefaultTaskAllocatorType nPedGroupTaskAllocator);
     //! arg3 always true
     //! arg5 always false
     //! arg7 always  -1
@@ -69,6 +78,16 @@ public:
     int32 SetGroupDecisionMakerType(int32 a2);
     void  SetPrimaryTaskAllocator(CTaskAllocator* taskAllocator);
     void  SetScriptCommandTask(CPed* ped, const CTask* task);
+
+    bool AddEvent(CEvent* event);
+
+    // Helper so events can be directly passed in without having to it into a variable
+    template<typename T>
+        requires std::is_base_of_v<CEvent, T>
+    CEvent* AddEvent(T event) {
+        return AddEvent(&event);
+    }
+
     static void SetTask(CPed* ped, const CTask* task, CPedTaskPair* pair, int32 arg5 = -1, bool arg6 = false);
 };
 
