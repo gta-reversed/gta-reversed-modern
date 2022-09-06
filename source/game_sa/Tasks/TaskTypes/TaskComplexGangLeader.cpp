@@ -127,6 +127,8 @@ void CTaskComplexGangLeader::DoGangAbuseSpeech(CPed* talker, CPed* sayTo) {
             return 5;
         case PED_TYPE_GANG8:
             return 3;
+        default:
+            return 0;
         }
     }()) {
         talker->Say(phrase);
@@ -157,13 +159,15 @@ bool CTaskComplexGangLeader::MakeAbortable(CPed* ped, eAbortPriority priority, C
 
 // 0x65DFF0
 CTask* CTaskComplexGangLeader::CreateNextSubTask(CPed* ped) {
-    switch (m_pSubTask->GetTaskType()) {
-    case TASK_SIMPLE_STAND_STILL:
-    case TASK_COMPLEX_HANDSIGNAL_ANIM: {
-        if (const auto mem = m_gang->GetMembership().GetRandom()) {
-            return new CTaskComplexTurnToFaceEntityOrCoord{ mem };
+    if (m_pSubTask) {
+        switch (m_pSubTask->GetTaskType()) {
+        case TASK_SIMPLE_STAND_STILL:
+        case TASK_COMPLEX_HANDSIGNAL_ANIM: {
+            if (const auto mem = m_gang->GetMembership().GetRandom()) {
+                return new CTaskComplexTurnToFaceEntityOrCoord{ mem };
+            }
         }
-    }
+        }
     }
 
     if (CGeneral::RandomBool(5) || 3 > m_gang->GetMembership().CountMembers()) {
@@ -182,7 +186,7 @@ CTask* CTaskComplexGangLeader::CreateFirstSubTask(CPed* ped) {
 // 0x662370
 CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
     // Make sure anmims are loaded (if they can/need to be)
-    if (m_animsReferenced) {
+    if (m_animsReferenced) { // 0x66239B
         if (!ShouldLoadGangAnims()) {
             UnrefAnimBlock();
         }
@@ -197,7 +201,7 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
     }
 
     // If we're wandering and the wander time is out of time, return `TaskSimpleStandStill`
-    if (const auto wander = CTask::DynCast<CTaskComplexWander>(m_pSubTask)) {
+    if (const auto wander = CTask::DynCast<CTaskComplexWander>(m_pSubTask)) { // 0x66241F
         if (m_wanderTimer.IsOutOfTime()) {
             if (wander->GetDistSqOfClosestPathNodeToPed(ped) <= 2.f) {
                 m_gang->GetIntelligence().SetDefaultTaskAllocatorType(ePedGroupDefaultTaskAllocatorType::RANDOM);
@@ -206,7 +210,7 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
         }
     }
 
-    if (m_exhaleTimer.IsOutOfTime()) {
+    if (m_exhaleTimer.IsOutOfTime()) { // 0x6624C1
         if (ped->m_pRwClump) {
             if (auto matrix = RwFrameGetMatrix(RpClumpGetFrame(ped->m_pRwClump))) {
                 RwV3d PoS{ 0.f, 0.1f, 0.f };
@@ -226,7 +230,7 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
     }
 
     // If ped isn't already looking at someone, find a random meber to look at them
-    if (!g_ikChainMan.IsLooking(ped) && CGeneral::RandomBool(5)) {
+    if (!g_ikChainMan.IsLooking(ped) && CGeneral::RandomBool(5)) { // 0x662574
         // The random logic has changed a little here for the sole reason
         // that I want to use `GetRandom()`.
         // This code path is very infrequent anyways (5% chance)...
@@ -249,8 +253,8 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
         }
     }
 
-    if (!m_animsReferenced || ped->IsRunningOrSprinting()) {
-        return false;
+    if (!m_animsReferenced || ped->IsRunningOrSprinting()) { // 0x66261A
+        return m_pSubTask;
     }
 
     const auto pedHeldEntity = ped->GetEntityThatThisPedIsHolding();
@@ -296,7 +300,7 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
     const bool anyOfTheAnimsPlaying = rng::any_of(anims, notsa::NotIsNull{});
 
     // If any of the anims are playing, stop looking, start exhale timer of smkcig anims
-    if (anyOfTheAnimsPlaying) {
+    if (anyOfTheAnimsPlaying) { // 0x662696
         if (g_ikChainMan.IsLooking(ped)) {
             g_ikChainMan.AbortLookAt(ped);
         }
@@ -317,7 +321,7 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
         }
     }
 
-    if (pedHeldEntity->m_nModelIndex == ModelIndices::MI_GANG_DRINK) {
+    if (pedHeldEntity->m_nModelIndex == ModelIndices::MI_GANG_DRINK) { // 0x662729
         ped->Say(23, 0, 0.2f);
     } else if (pedHeldEntity->m_nModelIndex == ModelIndices::MI_GANG_SMOKE) {
         ped->Say(200, 0, 0.2f);
@@ -325,7 +329,7 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
 
     // Now, pass on the entity held in hand (if not already)
 
-    if (ped->GetTaskManager().Find<TASK_COMPLEX_PASS_OBJECT>()) {
+    if (ped->GetTaskManager().Find<TASK_COMPLEX_PASS_OBJECT>()) { // 0x662766
         return m_pSubTask;
     }
 
@@ -338,11 +342,11 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
         return m_pSubTask;
     }
 
-    if (anyOfTheAnimsPlaying) {
+    if (anyOfTheAnimsPlaying) { // 0x66279A
         return m_pSubTask;
     }
 
-    if (const auto passObjTo = TryToPassObject(ped, m_gang)) {
+    if (const auto passObjTo = TryToPassObject(ped, m_gang)) { // 0x6627CD
         if (!passObjTo->GetEntityThatThisPedIsHolding() && passObjTo->IsCurrentlyUnarmed()) {    
             // Very similar to code above, but not quite the same!
             if (pedHeldEntity->m_nModelIndex == ModelIndices::MI_GANG_DRINK) {
@@ -370,6 +374,7 @@ void CTaskComplexGangLeader::ScanForStuff(CPed* ped) {
     if (rndChance < 5) { // 5% chance
         // Find a nearby vehicle to lean onto
         for (auto& veh : ped->GetIntelligence()->GetVehicleScanner().GetEntities<CVehicle>()) {
+            // 0x65E2C1
             if (!veh.IsAutomobile()) {
                 continue;
             }
@@ -386,7 +391,8 @@ void CTaskComplexGangLeader::ScanForStuff(CPed* ped) {
                 continue;
             }
 
-            if (const auto vehToPed = pedPos - veh.GetPosition(); vehToPed.SquaredMagnitude() >= 300.f || std::abs(vehToPed.z) >= 5.f) {
+            // 0x65E351 || 0x65E330 (in that order)
+            if (const auto vehToPed = pedPos - veh.GetPosition(); std::abs(vehToPed.z) >= 5.f || vehToPed.SquaredMagnitude() >= 300.f) {
                 continue;
             }
 
@@ -399,6 +405,7 @@ void CTaskComplexGangLeader::ScanForStuff(CPed* ped) {
 
             m_scanTimer.Start(60'000);
 
+            // 0x65E3E8
 #ifdef FIX_BUGS
             break;
 #endif
@@ -418,13 +425,13 @@ void CTaskComplexGangLeader::ScanForStuff(CPed* ped) {
             }
 
             // In the player's gang
-            if (FindPlayerPed()->GetPlayerGroup().GetMembership().IsMember(&scannedPed)) {
+            if (FindPlayerPed()->GetPlayerGroup().GetMembership().IsMember(&scannedPed)) { // 0x65E494
                 continue;
             }
 
             // Can it join a gang at all?
 #ifdef FIX_BUGS
-            if (const auto wander = scannedPed.GetTaskManager().Find<CTaskComplexWander>()) {
+            if (const auto wander = scannedPed.GetTaskManager().Find<CTaskComplexWander>()) { // 0x65E4BE
 #else
             if (const auto wander = ped->GetTaskManager().Find<CTaskComplexWander>()) {
 #endif
@@ -436,7 +443,7 @@ void CTaskComplexGangLeader::ScanForStuff(CPed* ped) {
             }
 
             // If scanned ped has no group try to add them to this gang
-            if (!scannedPedGrp && m_gang->GetMembership().CanAddFollower()) {
+            if (!scannedPedGrp && m_gang->GetMembership().CanAddFollower()) { // 0x65E4EA
                 m_gang->GetIntelligence().AddEvent(
                     CEventScriptCommand{
                         TASK_PRIMARY_PRIMARY,
@@ -447,7 +454,7 @@ void CTaskComplexGangLeader::ScanForStuff(CPed* ped) {
             }
 
             // Find a member close enough to the scanned ped, and make the partners
-            if (const auto [closestMem, distSq] = m_gang->GetMembership().GetMemberClosestTo(&scannedPed);
+            if (const auto [closestMem, distSq] = m_gang->GetMembership().GetMemberClosestTo(&scannedPed); // 0x65E61F
                 closestMem && sq(10.f) >= distSq && distSq >= sq(4.f)
             ) {           
                 const auto partnerType = CGeneral::GetRandomNumberInRange(0, 7);
