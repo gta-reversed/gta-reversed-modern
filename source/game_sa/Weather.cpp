@@ -112,26 +112,17 @@ void CWeather::AddSandStormParticles() {
     CVector velocity = CWeather::WindDir * 25.0f;
 
     auto prtInfo = FxPrtMult_c(0.67f, 0.65f, 0.55f, 0.25f, 1.0f, 0.0f, 0.2f);
-    g_fx.m_pPrtSand2->AddParticle(&position, &velocity, 0.0f, &prtInfo, -1.0f, 1.2f, 0.6f, 0);
+    g_fx.m_Sand2->AddParticle(&position, &velocity, 0.0f, &prtInfo, -1.0f, 1.2f, 0.6f, 0);
 }
 
 // 0x72A520
 const eWeatherType* CWeather::FindWeatherTypesList() {
     switch (WeatherRegion) {
-    case WEATHER_REGION_LA:
-        return WeatherTypesListLA;
-
-    case WEATHER_REGION_SF:
-        return WeatherTypesListSF;
-
-    case WEATHER_REGION_LV:
-        return WeatherTypesListVegas;
-
-    case WEATHER_REGION_DESERT:
-        return WeatherTypesListDesert;
-
-    default:
-        return WeatherTypesListDefault;
+    case WEATHER_REGION_LA:     return WeatherTypesListLA;
+    case WEATHER_REGION_SF:     return WeatherTypesListSF;
+    case WEATHER_REGION_LV:     return WeatherTypesListVegas;
+    case WEATHER_REGION_DESERT: return WeatherTypesListDesert;
+    default:                    return WeatherTypesListDefault;
     }
 }
 

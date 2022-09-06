@@ -16,12 +16,14 @@ namespace ReversibleHook {
 struct Base {
     enum class HookType { // Sadly can't use `Type` alone as it's some function..
         Simple,
-        Virtual
+        Virtual,
+        ScriptCommand
     };
 
-    Base(std::string fnName, HookType type) :
+    Base(std::string fnName, HookType type, bool locked = false) :
         m_fnName{std::move(fnName)},
-        m_type{type}
+        m_type{type},
+        m_bIsLocked{locked}
     {
     }
 
@@ -30,25 +32,45 @@ struct Base {
     virtual void Switch() = 0;
     virtual void Check() = 0;
 
-    void State(bool hooked) {
-        if (m_bIsHooked != hooked) {
-            Switch();
+    /*!
+    * @brief Hook/unhook
+    * 
+    * @param hooked If this hook should be installed/uninstalled (true/false)
+    *
+    * @returns If state is already the same as `hooked`
+    */
+    bool State(bool hooked) {
+        if (hooked == m_bIsHooked) {
+            return true;
         }
+        if (m_bIsLocked) {
+            return false;
+        }
+        Switch();
+        return true;
     }
+
+    void LockState(bool locked) {
+        m_bIsLocked = locked;
+    }
+
+    /// Symbol in ImGui (On the left side of the checkbox)
+    virtual const char* Symbol() const = 0;
 
     const auto& Name()   const { return m_fnName; }
     const auto  Type()   const { return m_type; }
     const auto  Hooked() const { return m_bIsHooked; }
-    const char* Symbol() const { return Type() == HookType::Simple ? "S" : "V"; } // Symbol in ImGui
+    const auto  Locked() const { return m_bIsLocked; }
 
 public:
     // ImGui stuff
-    bool m_isVisible{};
+    bool m_isVisible{true};
 
 protected:
-    bool        m_bIsHooked{};     // Is hook installed
-    std::string m_fnName{}; // Name of function, eg.: `Add` (Referring to CEntity::Add)
+    bool        m_bIsHooked{};  // Is hook installed
+    std::string m_fnName{};     // Name of function, eg.: `Add` (Referring to CEntity::Add)
     HookType    m_type{};
+    bool        m_bIsLocked{};  // Is hook locked, i.e.: the hooked state can't be changed.
 };
 };
 };

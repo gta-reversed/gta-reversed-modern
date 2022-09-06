@@ -3,7 +3,7 @@
 #include "EventEditableResponse.h"
 #include "Vehicle.h"
 
-class CEventGotKnockedOverByCar : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventGotKnockedOverByCar : public CEventEditableResponse {
 public:
     CVehicle* m_vehicle;
 

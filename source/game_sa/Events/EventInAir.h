@@ -2,7 +2,7 @@
 
 #include "Event.h"
 
-class CEventInAir : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventInAir : public CEvent {
 public:
     CEventInAir() = default;
     ~CEventInAir() override = default;
@@ -22,7 +22,7 @@ private:
     bool AffectsPed_Reversed(CPed* ped);
 };
 
-class CEventStuckInAir : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventStuckInAir : public CEvent {
 public:
     CPed* m_ped;
 

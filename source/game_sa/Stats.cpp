@@ -9,6 +9,7 @@
 
 #include "Stats.h"
 #include "MenuSystem.h"
+#include "Hud.h"
 
 tStatMessage (&CStats::StatMessage)[8] = *(tStatMessage(*)[8])0xB78200;
 char (&CStats::LastMissionPassedName)[8] = *(char(*)[8])0xB78A00;
@@ -412,7 +413,7 @@ void CStats::ProcessReactionStatsOnIncrement(eStats stat) {
 }
 
 // 0x55B980
-void CStats::DisplayScriptStatUpdateMessage(uint8 state, eStats stat, float value) {
+void CStats::DisplayScriptStatUpdateMessage(eStatUpdateState state, eStats stat, float value) {
     if (CPad::GetPad(0)->JustOutOfFrontEnd
         || !bShowUpdateStats
         || TheCamera.m_bWideScreenOn
@@ -557,7 +558,7 @@ void CStats::IncrementStat(eStats stat, float value)
     // STAT_RIOT_MISSION_ACCOMPLISHED increment, enum name incorrect?
 
     float kcals = playerInfo->m_nNumHoursDidntEat - value / 2.0f;
-    kcals = clamp(kcals, 0.0f, 36.0f);
+    kcals = std::clamp(kcals, 0.0f, 36.0f);
 
     float healthDiff = playerInfo->m_nMaxHealth - player->m_fHealth;
 
@@ -584,7 +585,7 @@ void CStats::UpdateStatsWhenSprinting() {
     } else {
         m_SprintStaminaCounter = 0;
         IncrementStat(STAT_STAMINA, StatReactionValue[STAT_INC_SPRINT_STAMINA]);
-        DisplayScriptStatUpdateMessage(1, STAT_STAMINA, StatReactionValue[STAT_INC_SPRINT_STAMINA]);
+        DisplayScriptStatUpdateMessage(STAT_UPDATE_INCREASE, STAT_STAMINA, StatReactionValue[STAT_INC_SPRINT_STAMINA]);
     }
 }
 
@@ -596,7 +597,7 @@ void CStats::UpdateStatsWhenRunning() {
     } else {
         m_RunningCounter = 0;
         IncrementStat(STAT_STAMINA, StatReactionValue[STAT_INC_RUNNING]);
-        DisplayScriptStatUpdateMessage(1, STAT_STAMINA, StatReactionValue[STAT_INC_RUNNING]);
+        DisplayScriptStatUpdateMessage(STAT_UPDATE_INCREASE, STAT_STAMINA, StatReactionValue[STAT_INC_RUNNING]);
     }
 }
 
@@ -627,14 +628,14 @@ void CStats::UpdateStatsWhenOnMotorBike(CBike* bike) {
         const float bikeMoveSpeed = bike->m_vecMoveSpeed.Magnitude();
         const auto  fTimeStep = CTimer::GetTimeStepInMS();
 
-        if (bikeMoveSpeed > 0.6f || bike->m_nNumContactWheels < 3u && bikeMoveSpeed > 0.1f)
+        if (bikeMoveSpeed > 0.6f || bike->m_nNoOfContactWheels < 3u && bikeMoveSpeed > 0.1f)
             m_BikeCounter = static_cast<uint32>(fTimeStep * 1.5f + bikeCounter);
         else if (bikeMoveSpeed > 0.2f)
             m_BikeCounter = static_cast<uint32>(fTimeStep * 0.5f + bikeCounter);
     } else {
         m_BikeCounter = 0;
         IncrementStat(STAT_BIKE_SKILL, StatReactionValue[STAT_INC_MOTORBIKE_SKILL]);
-        DisplayScriptStatUpdateMessage(1, STAT_BIKE_SKILL, StatReactionValue[STAT_INC_MOTORBIKE_SKILL]);
+        DisplayScriptStatUpdateMessage(STAT_UPDATE_INCREASE, STAT_BIKE_SKILL, StatReactionValue[STAT_INC_MOTORBIKE_SKILL]);
     }
 }
 

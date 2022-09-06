@@ -15,5 +15,5 @@ public:
     static void ProcessRenderTool();
     static void ProcessExtraDebugFeatures();
 
-    static void Display(bool showMenu);
+    static void ProcessRender(bool showMenu);
 };

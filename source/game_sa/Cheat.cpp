@@ -6,6 +6,7 @@
 
 #include "TaskSimpleJetPack.h"
 #include "PostEffects.h"
+#include "Hud.h"
 
 /*
  * Interesting links:
@@ -506,7 +507,7 @@ void CCheat::HealthCheat() {
 
     vehicle->m_fHealth = 1000.0f;
     if (vehicle->IsBike()) {
-        vehicle->AsBike()->m_fFireBlowUpTimer = 0.0f;
+        vehicle->AsBike()->m_BlowUpTimer = 0.0f;
         vehicle->AsBike()->Fix();
     } else if (vehicle->IsAutomobile()) {
         vehicle->AsAutomobile()->m_fBurnTimer = 0.0f;
@@ -771,12 +772,12 @@ CVehicle* CCheat::VehicleCheat(eModelID modelId) {
             return new CBoat(modelId, RANDOM_VEHICLE);
         case VEHICLE_TYPE_BIKE: {
             auto* vehicle = new CBike(modelId, RANDOM_VEHICLE);
-            vehicle->bikeFlags.bIsStanding = true;
+            vehicle->bikeFlags.bOnSideStand = true;
             return vehicle;
         }
         case VEHICLE_TYPE_BMX: {
             auto* vehicle = new CBmx(modelId, RANDOM_VEHICLE);
-            vehicle->bikeFlags.bIsStanding = true;
+            vehicle->bikeFlags.bOnSideStand = true;
             return vehicle;
         }
         case VEHICLE_TYPE_TRAILER:

@@ -14,16 +14,18 @@ public:
     int8 m_nPriority;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_IK_LOOK_AT;
+
     CTaskSimpleIKLookAt(Const char* name, CEntity* lookAtEntity, int32 time, ePedBones pedBoneID, CVector lookAtOffset, bool useTorso, float speed, int32 blendTime, int8 priority);
     ~CTaskSimpleIKLookAt() override = default; // 0x633EF0
+
+    eTaskType GetTaskType() override { return Type; }
+    CTaskSimpleIKLookAt* Clone() override;
+    bool CreateIKChain(CPed* ped) override;
 
     void UpdateLookAtInfo(const char* strPurpose, CPed* ped, CEntity* targetPed, int32 time, ePedBones pedBoneID, RwV3d lookAtOffset, bool useTorso, float fSpeed, int32 blendTime, int32 unused);
     CEntity* GetLookAtEntity();
     CVector GetLookAtOffset();
-
-    CTaskSimpleIKLookAt* Clone() override;
-    eTaskType GetTaskType() override { return TASK_SIMPLE_IK_LOOK_AT; }
-    bool CreateIKChain(CPed* ped) override;
 
 private:
     friend void InjectHooksMain();

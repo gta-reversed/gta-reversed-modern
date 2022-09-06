@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "CurrentVehicle.h"
+#include "Hud.h"
 
 void CCurrentVehicle::InjectHooks() {
     RH_ScopedClass(CCurrentVehicle);

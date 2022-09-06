@@ -78,6 +78,8 @@ struct sVehAnimGroupInOutTiming {
     float m_afTimings[4]; // access using eInOutTimingMode
 
 public:
+    float operator[](eInOutTimingMode mode) { return m_afTimings[(size_t)mode]; } // TODO: Instead of using enums, just use named fields...
+
     sVehAnimGroupInOutTiming() : m_afTimings{0.0F} {}
 };
 

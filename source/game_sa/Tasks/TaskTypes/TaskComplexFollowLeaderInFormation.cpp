@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "TaskComplexFollowLeaderInFormation.h"
 
 void CTaskComplexFollowLeaderInFormation::InjectHooks() {

@@ -680,12 +680,25 @@ int32 CIplStore::SetupRelatedIpls(const char* iplFilePath, int32 entityArraysInd
         return 0;
     }
 
-    constexpr auto interiors = std::to_array({
-        "gen_int1", "gen_int2", "gen_int3", "gen_int4",
-        "gen_int5", "gen_intb", "savehous", "stadint",
-        "int_la", "int_sf", "int_veg", "int_cont", "levelmap"
-    });
-    const bool isIPLAnInterior = rng::any_of(interiors, [&](auto v) { return !_stricmp(v, iplName); });
+    const auto isIPLAnInterior = [&iplName] {
+        if (!_stricmp(iplName, "gen_int1") ||
+            !_stricmp(iplName, "gen_int2") ||
+            !_stricmp(iplName, "gen_int3") ||
+            !_stricmp(iplName, "gen_int4") ||
+            !_stricmp(iplName, "gen_int5") ||
+            !_stricmp(iplName, "gen_intb") ||
+            !_stricmp(iplName, "savehous") ||
+            !_stricmp(iplName, "stadint")  ||
+            !_stricmp(iplName, "int_la")   ||
+            !_stricmp(iplName, "int_sf")   ||
+            !_stricmp(iplName, "int_veg")  ||
+            !_stricmp(iplName, "int_cont") ||
+            !_stricmp(iplName, "levelmap")
+        ) {
+            return true;
+        }
+        return false;
+    }();
 
     strcat_s(iplName, "_stream");
     const auto iplNameLen = strlen(iplName);

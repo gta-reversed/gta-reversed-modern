@@ -1,44 +1,41 @@
 #pragma once
+
 #include "TaskSimple.h"
 
-class CTaskSimpleJump : public CTaskSimple
-{
+class CTaskSimpleJump : public CTaskSimple {
 public:
-    CVector m_vecClimbPos;
-    float m_fClimbAngle;
-    uint8 m_nClimbSurfaceType;
-    uint8 _pad_19[3];
+    CVector  m_vecClimbPos;
+    float    m_fClimbAngle;
+    uint8    m_nClimbSurfaceType;
     CEntity* m_pClimbEntity;
-    uint8 m_bIsFinished;
-    uint8 m_bIsJumpBlocked;
-    uint8 m_bClimbJump;
-    uint8 m_bLaunchAnimStarted;
-    uint8 m_bCanClimb;
-    uint8 m_bHighJump;
-    uint8 _pad_26[2];
+    uint8    m_bIsFinished;
+    uint8    m_bIsJumpBlocked;
+    uint8    m_bClimbJump;
+    uint8    m_bLaunchAnimStarted;
+    uint8    m_bCanClimb;
+    uint8    m_bHighJump;
     CAnimBlendAssociation* m_pAnim;
 
-private:
-    CTaskSimpleJump* Constructor(bool bCanClimb);
 public:
-    CTaskSimpleJump(bool bCanClimb);
+    static constexpr auto Type = TASK_SIMPLE_JUMP;
+
+    explicit CTaskSimpleJump(bool bCanClimb);
     ~CTaskSimpleJump() override;
 
-    static void InjectHooks();
-
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override;
-    eTaskType GetTaskType() override { return TASK_SIMPLE_JUMP; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
-
-    CTask* Clone_Reversed();
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
-    bool ProcessPed_Reversed(CPed* ped);
 
     bool CheckIfJumpBlocked(CPed* ped);
     void Launch(CPed* ped);
     bool StartLaunchAnim(CPed* ped);
     static void JumpAnimFinishCB(CAnimBlendAssociation* anim, void* data);
-};
 
+    static void InjectHooks();
+    CTaskSimpleJump* Constructor(bool bCanClimb);
+    CTask* Clone_Reversed();
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
+    bool ProcessPed_Reversed(CPed* ped);
+};
 VALIDATE_SIZE(CTaskSimpleJump, 0x2C);

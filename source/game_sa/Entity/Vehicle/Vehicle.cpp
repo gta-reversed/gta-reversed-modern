@@ -74,7 +74,12 @@ void CVehicle::InjectHooks() {
     RH_ScopedVirtualInstall(PreRender, 0x6D6480);
     RH_ScopedVirtualInstall(Render, 0x6D0E60);
     RH_ScopedVirtualInstall(ProcessOpenDoor, 0x6D56C0);
-    RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6DF4A0);
+
+    // It can't be properly unhooked, original function assumes that CVehicle::GetVehicleAppearance doesn't spoil ECX register, and calls
+    // it without making sure that the pointer in it still points to current instance. While it worked for original function, we can't
+    // force the compiler to keep ECX unchanged through function execution
+    RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6DF4A0, {.enabled = true, .locked = true});
+
     RH_ScopedVirtualInstall(GetHeightAboveRoad, 0x6D63F0);
     RH_ScopedVirtualInstall(CanPedStepOutCar, 0x6D1F30);
     RH_ScopedVirtualInstall(CanPedJumpOutCar, 0x6D2030);
@@ -223,6 +228,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(GetRopeHeightForHeli, 0x6D3D10);
     RH_ScopedInstall(SetRopeHeightForHeli, 0x6D3D30);
 
+    // RH_ScopedGlobalInstall(IsValidModForVehicle, 0x49B010);
     // RH_ScopedGlobalInstall(SetVehicleAtomicVisibilityCB, 0x6D2690);
     // RH_ScopedGlobalInstall(SetVehicleAtomicVisibilityCB, 0x6D26D0);
     // RH_ScopedGlobalInstall(SetCompAlphaCB, 0x6D2950);
@@ -286,8 +292,6 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     m_nNumGettingIn = 0;
     m_nGettingInFlags = 0;
     m_nGettingOutFlags = 0;
-
-    std::ranges::fill(GetPassengers(), nullptr);
 
     m_nBombOnBoard = 0;
     m_nOverrideLights = eVehicleOverrideLightsState::NO_CAR_LIGHT_OVERRIDE;
@@ -491,7 +495,7 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
 
     if (physicalFlags.bSubmergedInWater
         && m_nStatus != eEntityStatus::STATUS_PLAYER
-        && (m_nStatus != eEntityStatus::STATUS_HELI && colPhysical->DoesNotCollideWithFlyers())) //Bug? Seems like it should check for it being heli
+        && (m_nStatus != eEntityStatus::STATUS_REMOTE_CONTROLLED && colPhysical->DoesNotCollideWithFlyers())) //Bug? Seems like it should check for it being heli
     {
         bCollisionDisabled = true;
         return;
@@ -1057,10 +1061,10 @@ float CVehicle::GetHeightAboveRoad_Reversed() {
 }
 
 // 0x6D1F30
-bool CVehicle::CanPedStepOutCar(bool bIgnoreSpeedUpright) {
+bool CVehicle::CanPedStepOutCar(bool bIgnoreSpeedUpright) const {
     return CVehicle::CanPedStepOutCar_Reversed(bIgnoreSpeedUpright);
 }
-bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright) {
+bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright) const {
     auto const fUpZ = m_matrix->GetUp().z;
     if (std::fabs(fUpZ) <= 0.1F) {
         if (std::fabs(m_vecMoveSpeed.z) > 0.05F || m_vecMoveSpeed.Magnitude2D() > 0.01F || m_vecTurnSpeed.SquaredMagnitude() > 0.0004F) { // 0.02F / 50.0f
@@ -1439,18 +1443,22 @@ bool CVehicle::IsDriver(int32 modelIndex) const {
     return m_pDriver && m_pDriver->m_nModelIndex == modelIndex;
 }
 
+bool CVehicle::IsDriverAPlayer() const {
+    return m_pDriver && m_pDriver->IsPlayer();
+}
+
 // 0x6D1C80
 void CVehicle::KillPedsInVehicle() {
     ((void(__thiscall*)(CVehicle*))0x6D1C80)(this);
 }
 
 // 0x6D1D90
-bool CVehicle::IsUpsideDown() {
+bool CVehicle::IsUpsideDown() const {
     return m_matrix->GetUp().z <= -0.9f;
 }
 
 // 0x6D1DD0
-bool CVehicle::IsOnItsSide() {
+bool CVehicle::IsOnItsSide() const {
     return m_matrix->GetRight().z >= 0.8f || m_matrix->GetRight().z <= -0.8f;
 }
 
@@ -1506,7 +1514,7 @@ void CVehicle::ChangeLawEnforcerState(bool bIsEnforcer) {
 }
 
 // 0x6D2370
-bool CVehicle::IsLawEnforcementVehicle() {
+bool CVehicle::IsLawEnforcementVehicle() const {
     switch (m_nModelIndex) {
     case MODEL_ENFORCER:
     case MODEL_PREDATOR:
@@ -1633,7 +1641,7 @@ void CVehicle::SetComponentAtomicAlpha(RpAtomic* atomic, int32 alpha) {
     RpGeometryForAllMaterials(geometry, SetCompAlphaCB, reinterpret_cast<void*>(alpha));
 }
 
-CVehicleModelInfo* CVehicle::GetVehicleModelInfo() {
+CVehicleModelInfo* CVehicle::GetVehicleModelInfo() const {
     return CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
 }
 
@@ -2253,7 +2261,7 @@ void CVehicle::FirePlaneGuns() {
         // DoPlaneGunFireFX(this, &weapon, &planeGunsPos, &posn, m_nGunsFlags & 3);
     }
 
-    if (m_nStatus == STATUS_PLANE) {
+    if (m_nStatus == STATUS_FORCED_STOP) {
         CPad::GetPad(0)->StartShake(240, frequency, 0);
     } else if (m_pDriver && m_pDriver->IsPlayer()) {
         switch (m_pDriver->m_nPedType) {
@@ -2281,7 +2289,7 @@ void CVehicle::FireUnguidedMissile(eOrdnanceType type, bool bCheckTime) {
 }
 
 // 0x6D5400
-bool CVehicle::CanBeDriven() {
+bool CVehicle::CanBeDriven() const {
     if (IsSubTrailer() || IsSubTrain() && AsTrain()->m_nTrackId || vehicleFlags.bIsRCVehicle) {
         return false;
     }
@@ -2363,7 +2371,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
         bAlreadySkidding = true;
         adhesion *= m_pHandlingData->m_fTractionLoss;
         if (*wheelState == WHEEL_STATE_SPINNING) {
-            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_HELI)
+            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_REMOTE_CONTROLLED)
                 adhesion *= (1.0f - fabs(m_fGasPedal) * WS_ALREADY_SPINNING_LOSS);
         }
     }
@@ -2380,7 +2388,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
 
     if (bDriving) {
         fwd = thrust;
-        right = clamp<float>(right, -adhesion, adhesion);
+        right = std::clamp(right, -adhesion, adhesion);
     }
     else if (contactSpeedFwd != 0.0f) {
         fwd = -contactSpeedFwd / wheelsOnGround;
@@ -2403,7 +2411,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
                 *wheelState = WHEEL_STATE_FIXED;
             }
         } else {
-            fwd = clamp<float>(fwd, -brake, brake);
+            fwd = std::clamp(fwd, -brake, brake);
         }
     }
 
@@ -2423,7 +2431,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
         if (bAlreadySkidding) {
             tractionLoss = 1.0f;
         } else if (*wheelState == WHEEL_STATE_SPINNING) {
-            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_HELI) {
+            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_REMOTE_CONTROLLED) {
                 tractionLoss = tractionLoss * (1.0f - std::fabs(m_fGasPedal) * WS_ALREADY_SPINNING_LOSS);
             }
         }
@@ -2931,7 +2939,7 @@ void CVehicle::DoBoatSplashes(float fWaterDamping) {
     FxPrtMult_c particleData(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f);
 
     auto alpha = alpha0 / 255.0f;
-    particleData.m_color.alpha = alpha >= 1.0f ? 1.0f : alpha;
+    particleData.m_Color.alpha = alpha >= 1.0f ? 1.0f : alpha;
 
     auto v12 = v48 * 10.0f;
     auto size = v12 + 0.75f * 0.1f;
@@ -2958,7 +2966,7 @@ void CVehicle::DoBoatSplashes(float fWaterDamping) {
     vel0 -= GetRight() * CGeneral::GetRandomNumberInRange(0.3f, 0.7f); // minus
     vel0 += GetUp() * CGeneral::GetRandomNumberInRange(0.8f, 1.2f);
     vel0 *= v12;
-    g_fx.m_pPrtBoatsplash->AddParticle(&p0, &vel0, 0.0f, &particleData, -1.0f, 1.2f, 0.6f, 0);
+    g_fx.m_BoatSplash->AddParticle(&p0, &vel0, 0.0f, &particleData, -1.0f, 1.2f, 0.6f, false);
 
     CVector p1 = { colMax.x * X_MULT, colMax.y / 2.0f, colMin.z * Z_MULT };
     p1 = MultiplyMatrixWithVector(*m_matrix, &p1);
@@ -2966,7 +2974,7 @@ void CVehicle::DoBoatSplashes(float fWaterDamping) {
     vel1 += GetRight() * CGeneral::GetRandomNumberInRange(0.3f, 0.7f);  // plus
     vel1 += GetUp() * CGeneral::GetRandomNumberInRange(0.8f, 1.2f);
     vel1 *= v12;
-    g_fx.m_pPrtBoatsplash->AddParticle(&p1, &vel1, 0.0f, &particleData, -1.0f, 1.2f, 0.6f, 0);
+    g_fx.m_BoatSplash->AddParticle(&p1, &vel1, 0.0f, &particleData, -1.0f, 1.2f, 0.6f, false);
 }
 
 // 0x6DD6F0
@@ -3055,39 +3063,39 @@ void CVehicle::AddExhaustParticles() {
     float fLife = std::max(0.2f - fMoveSpeed, 0.0f);
     FxPrtMult_c fxPrt(0.9f, 0.9f, 1.0f, particleAlpha, 0.2f, 1.0f, fLife);
 
-    for (int32 i = 0; i < 2; i++) {
-        FxSystem_c* firstExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
+    for (auto i = 0; i < 2; i++) {
+        FxSystem_c* firstExhaustFxSystem = g_fx.m_SmokeII3expand;
         if (bFirstExhaustSubmergedInWater) {
-            fxPrt.m_color.alpha = particleAlpha * 0.5f;
+            fxPrt.m_Color.alpha = particleAlpha * 0.5f;
             fxPrt.m_fSize = 0.6f;
-            firstExhaustFxSystem = g_fx.m_pPrtBubble;
+            firstExhaustFxSystem = g_fx.m_Bubble;
         }
         firstExhaustFxSystem->AddParticle(&firstExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
         if (bHasDoubleExhaust) {
-            FxSystem_c* secondExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
+            FxSystem_c* secondExhaustFxSystem = g_fx.m_SmokeII3expand;
             if (bSecondExhaustSubmergedInWater) {
-                fxPrt.m_color.alpha = particleAlpha * 0.5f;
+                fxPrt.m_Color.alpha = particleAlpha * 0.5f;
                 fxPrt.m_fSize = 0.6f;
-                secondExhaustFxSystem = g_fx.m_pPrtBubble;
+                secondExhaustFxSystem = g_fx.m_Bubble;
             }
             secondExhaustFxSystem->AddParticle(&secondExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
         }
 
         if (m_fGasPedal > 0.5f && m_nCurrentGear < 3) {
             if (CGeneral::GetRandomNumber() % 2) {
-                FxSystem_c* secondaryExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
+                FxSystem_c* secondaryExhaustFxSystem = g_fx.m_SmokeII3expand;
                 if (bFirstExhaustSubmergedInWater) {
-                    fxPrt.m_color.alpha = particleAlpha * 0.5f;
+                    fxPrt.m_Color.alpha = particleAlpha * 0.5f;
                     fxPrt.m_fSize = 0.6f;
-                    secondaryExhaustFxSystem = g_fx.m_pPrtBubble;
+                    secondaryExhaustFxSystem = g_fx.m_Bubble;
                 }
                 secondaryExhaustFxSystem->AddParticle(&firstExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
             } else if (bHasDoubleExhaust) {
-                FxSystem_c* secondaryExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
+                FxSystem_c* secondaryExhaustFxSystem = g_fx.m_SmokeII3expand;
                 if (bSecondExhaustSubmergedInWater) {
-                    fxPrt.m_color.alpha = particleAlpha * 0.5f;
+                    fxPrt.m_Color.alpha = particleAlpha * 0.5f;
                     fxPrt.m_fSize = 0.6f;
-                    secondaryExhaustFxSystem = g_fx.m_pPrtBubble;
+                    secondaryExhaustFxSystem = g_fx.m_Bubble;
                 }
                 secondaryExhaustFxSystem->AddParticle(&secondExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
             }
@@ -3256,6 +3264,9 @@ void CVehicle::AddVehicleUpgrade(int32 modelId) {
 // 0x6E3400
 void CVehicle::SetupUpgradesAfterLoad() {
     for (auto& upgrade : m_anUpgrades) {
+        if (upgrade == -1)
+            continue;
+
         auto savedUpgrade = upgrade;
         upgrade = -1;
         AddVehicleUpgrade(savedUpgrade);
@@ -3265,6 +3276,10 @@ void CVehicle::SetupUpgradesAfterLoad() {
 // 0x6E3440
 void CVehicle::GetPlaneWeaponFiringStatus(bool& status, eOrdnanceType& ordnanceType) {
     ((void(__thiscall*)(CVehicle*, bool&, eOrdnanceType&))0x6E3440)(this, status, ordnanceType);
+}
+
+bool IsValidModForVehicle(uint32 modelId, CVehicle* vehicle) {
+    return plugin::CallAndReturn<bool, 0x49B010, uint32, CVehicle*>(modelId, vehicle);
 }
 
 // 0x6E38F0
@@ -3308,3 +3323,17 @@ bool CVehicle::AreAnyOfPassengersFollowerOfGroup(const CPedGroup& group) {
         return group.GetMembership().IsFollower(passenger);
     }) != end;
 }
+
+/*!
+* @notsa
+* @return The index of a passenger, or `std::nullopt` if the given ped isn't a passenger.
+*/
+auto CVehicle::GetPassengerIndex(const CPed* passenger) const -> std::optional<size_t> {
+    const auto passengers = GetPassengers();
+    const auto it = rng::find(passengers, passenger);
+    if (it == passengers.end()) {
+        return std::nullopt;
+    }
+    return (size_t)rng::distance(passengers.begin(), it);
+}
+

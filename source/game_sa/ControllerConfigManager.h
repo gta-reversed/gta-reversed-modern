@@ -99,32 +99,32 @@ enum eControllerType {
     CONTROLLER_PAD = 3,
 };
 
-class CControllerKey {
-public:
-    uint32 keyCode;
-    uint32 priority;
+struct CControllerKey {
+    uint32 KeyCode;
+    uint32 Priority;
 };
 
-class CControllerAction {
-public:
-    CControllerKey keys[4];
+struct CControllerAction {
+    CControllerKey Keys[4];
 };
 
 class CControllerConfigManager {
 public:
-    char              field_0;
-    char              field_1;
-    char              m_prev;
-    char              field_3;
-    DIJOYSTATE2       m_prevPadState;
-    DIJOYSTATE2       m_currPadState;
-    char              m_aszEventNames[59][40];
-    char              field_B5C[17]; // pad button states
-    char              _pad1[3];
-    CControllerAction m_actions[59];
-    char              field_12D0[16];
-    char              field_12E0;
-    char              _pad2[3];
+    bool              m_bJoyJustInitialised;
+
+    DIJOYSTATE2       m_OldJoyState;
+    DIJOYSTATE2       m_NewJoyState;
+
+    char              m_arrControllerActionName[59][40]; // todo: 182
+    bool              m_ButtonStates[17];
+    CControllerAction m_Actions[59];
+
+    bool m_bStickL_X_Rgh_Lft_MovementBothDown[4];
+    bool m_bStickL_Up_Dwn_MovementBothDown[4];
+    bool m_bStickR_X_Rgh_Lft_MovementBothDown[4];
+    bool m_bStickR_Up_Dwn_MovementBothDown[4];
+
+    bool MouseFoundInitSet;
 
 public:
     static void InjectHooks();
@@ -132,8 +132,8 @@ public:
     CControllerConfigManager();
     CControllerConfigManager* Constructor();
 
-    bool LoadSettings(FILE* file);
-    void SaveSettings(FILE* file);
+    bool LoadSettings(FILESTREAM file);
+    void SaveSettings(FILESTREAM file);
 
     void InitDefaultControlConfiguration();
     void InitialiseControllerActionNameArray();
@@ -154,7 +154,7 @@ public:
     bool GetIsMouseButtonUp(RsKeyCodes key);
     bool GetIsMouseButtonJustUp(RsKeyCodes key);
     bool GetIsKeyBlank(int32 a1, eControllerType controller);
-    eActionType GetActionType(eControllerAction);
+    eActionType GetActionType(eControllerAction action);
     char* GetControllerSettingTextMouse(eControllerAction action);
     char* GetControllerSettingTextJoystick(eControllerAction action);
 
@@ -162,9 +162,8 @@ public:
     void MakeControllerActionsBlank();
     void AffectPadFromKeyBoard();
     void AffectPadFromMouse();
-    void DeleteMatchingActionInitiators(eControllerAction action, int32 a2, eControllerType type);
+    void DeleteMatchingActionInitiators(eControllerAction Action, int32 KeyToBeChecked, eControllerType ControllerTypeToBeChecked);
 };
-
 VALIDATE_SIZE(CControllerConfigManager, 0x12E4);
 
 extern CControllerConfigManager &ControlsManager;

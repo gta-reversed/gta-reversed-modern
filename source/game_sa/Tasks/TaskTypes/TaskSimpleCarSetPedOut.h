@@ -7,12 +7,12 @@
 #pragma once
 
 #include "TaskSimple.h"
-#include "Vehicle.h"
+class CVehicle;
 
 class CTaskSimpleCarSetPedOut : public CTaskSimple {
 public:
     CVehicle* m_pTargetVehicle;
-    int32     m_nTargetDoor;
+    uint32     m_nTargetDoor;
     bool      m_bSwitchOffEngine;
     bool      m_bWarpingOutOfCar;
     bool      m_bFallingOutOfCar; // jumping or falling off car or bike
@@ -23,13 +23,12 @@ public:
 public:
     static constexpr auto Type = TASK_SIMPLE_CAR_SET_PED_OUT;
 
-    CTaskSimpleCarSetPedOut(CVehicle* targetVehicle, int32 nTargetDoor, bool bSwitchOffEngine);
-    ~CTaskSimpleCarSetPedOut();
+    CTaskSimpleCarSetPedOut(CVehicle* targetVehicle, uint32 nTargetDoor, bool bSwitchOffEngine);
+    ~CTaskSimpleCarSetPedOut() override;
 
+    eTaskType GetTaskType() override { return Type; };
     CTask* Clone() override;
-    eTaskType GetTaskType() override { return TASK_SIMPLE_CAR_SET_PED_OUT; };
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return false; }
     bool ProcessPed(CPed* ped) override;
 };
-
 VALIDATE_SIZE(CTaskSimpleCarSetPedOut, 0x18);

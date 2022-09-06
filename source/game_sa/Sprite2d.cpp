@@ -300,7 +300,7 @@ void CSprite2d::SetVertices(RwIm2DVertex* vertices, const CRect& posn, const CRG
     float u1, float v1, float u2, float v2, float u3, float v3, float u4, float v4)
 {
     RwIm2DVertexSetScreenX(&vertices[0], posn.left);
-    RwIm2DVertexSetScreenY(&vertices[0], posn.top);
+    RwIm2DVertexSetScreenY(&vertices[0], posn.bottom);
     RwIm2DVertexSetScreenZ(&vertices[0], NearScreenZ);
     RwIm2DVertexSetRecipCameraZ(&vertices[0], RecipNearClip);
     RwIm2DVertexSetU(&vertices[0], u1, RecipNearClip);
@@ -308,7 +308,7 @@ void CSprite2d::SetVertices(RwIm2DVertex* vertices, const CRect& posn, const CRG
     RwIm2DVertexSetIntRGBA(&vertices[0], color3.r, color3.g, color3.b, color3.a);
 
     RwIm2DVertexSetScreenX(&vertices[1], posn.right);
-    RwIm2DVertexSetScreenY(&vertices[1], posn.top);
+    RwIm2DVertexSetScreenY(&vertices[1], posn.bottom);
     RwIm2DVertexSetScreenZ(&vertices[1], NearScreenZ);
     RwIm2DVertexSetRecipCameraZ(&vertices[1], RecipNearClip);
     RwIm2DVertexSetU(&vertices[1], u2, RecipNearClip);
@@ -316,7 +316,7 @@ void CSprite2d::SetVertices(RwIm2DVertex* vertices, const CRect& posn, const CRG
     RwIm2DVertexSetIntRGBA(&vertices[1], color4.r, color4.g, color4.b, color4.a);
 
     RwIm2DVertexSetScreenX(&vertices[2], posn.right);
-    RwIm2DVertexSetScreenY(&vertices[2], posn.bottom);
+    RwIm2DVertexSetScreenY(&vertices[2], posn.top);
     RwIm2DVertexSetScreenZ(&vertices[2], NearScreenZ);
     RwIm2DVertexSetRecipCameraZ(&vertices[2], RecipNearClip);
     RwIm2DVertexSetU(&vertices[2], u4, RecipNearClip);
@@ -324,7 +324,7 @@ void CSprite2d::SetVertices(RwIm2DVertex* vertices, const CRect& posn, const CRG
     RwIm2DVertexSetIntRGBA(&vertices[2], color2.r, color2.g, color2.b, color2.a);
 
     RwIm2DVertexSetScreenX(&vertices[3], posn.left);
-    RwIm2DVertexSetScreenY(&vertices[3], posn.bottom);
+    RwIm2DVertexSetScreenY(&vertices[3], posn.top);
     RwIm2DVertexSetScreenZ(&vertices[3], NearScreenZ);
     RwIm2DVertexSetRecipCameraZ(&vertices[3], RecipNearClip);
     RwIm2DVertexSetU(&vertices[3], u3, RecipNearClip);
@@ -455,7 +455,7 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
     RwRenderStateSet(rwRENDERSTATESHADEMODE,     RWRSTATE(rwSHADEMODEFLAT));
 
-    progress = std::max(0.0f, progress);
+    progress = std::clamp(progress, 0.0f, 100.0f);
 
     const float endX = x + (float)width;
     const float unclampedCurrX = x + (float)width * progress / 100.0f;
@@ -463,22 +463,9 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
     const auto fheight = (float)height;
 
     // Progress rect
-    DrawRect({
-        x,
-        y,
-        currX,
-        y + fheight
-    }, color);
-
+    DrawRect({ x, y, currX, y + fheight }, color);
     // Background (from currX to endX)
-    CRGBA loadingBarBgColor = color / 2.0f;
-    loadingBarBgColor.a = color.a;
-    DrawRect({
-        currX,
-        y,
-        endX,
-        y + fheight
-    }, loadingBarBgColor);
+    DrawRect({ currX, y, endX, y + fheight }, { uint8(color.r / 2.0f), uint8(color.g / 2.0f), uint8(color.b / 2.0f), color.a });
 
     if (progressAdd) {
         addColor.a = color.a;
@@ -491,7 +478,7 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
     }
 
     if (drawBlackBorder) {
-        const float w = SCREEN_SCALE_X(2.0f), h = SCREEN_SCALE_Y(2.0f);
+        const float w = SCREEN_STRETCH_X(2.0f), h = SCREEN_SCALE_Y(2.0f);
         const CRect rects[] = {
             //left,     top,              right,    bottom
             { x,        y,                endX,     y + h       },       // Top
@@ -500,15 +487,16 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
             { endX - w, y,                endX,     y + fheight }        // Right
         };
 
+        const auto black = CRGBA{ 0, 0, 0, color.a };
         for (const CRect& rect : rects) {
-            DrawRect(rect, { 0, 0, 0, color.a });
+            DrawRect(rect, black);
         }
     }
 
     // unused
     if (drawPercentage) {
         char text[12];
-        sprintf(text, "%d%%", (unsigned)progress);
+        sprintf(text, "%d%%", (int)progress);
 
         GxtChar gxtText[12];
         AsciiToGxtChar(text, gxtText);

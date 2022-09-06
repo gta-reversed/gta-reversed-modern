@@ -127,7 +127,7 @@ void CEventHandler::RecordPassiveEvent(const CEvent& event) {
 
 // 0x4B9340
 void CEventHandler::RegisterKill(const CPed* ped, const CEntity* entity, eWeaponType weaponType, bool a4) {
-    plugin::CallMethod<0x4B9340, CEventHandler*, const CPed*, const CEntity*, eWeaponType, bool>(this, ped, entity, weaponType, a4);
+    plugin::Call<0x4B9340, const CPed*, const CEntity*, eWeaponType, bool>(ped, entity, weaponType, a4);
 }
 
 // 0x4BC600

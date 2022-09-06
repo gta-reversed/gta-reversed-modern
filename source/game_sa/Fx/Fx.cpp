@@ -61,19 +61,9 @@ void Fx_c::InjectHooks() {
     RH_ScopedGlobalInstall(RenderBegin, 0x4A13B0);
 }
 
-// 0x49E620
-Fx_c::Fx_c() {
-    ((void(__thiscall*)(Fx_c*))0x49E620)(this);
-}
-
 Fx_c* Fx_c::Constructor() {
     this->Fx_c::Fx_c();
     return this;
-}
-
-// 0x49E630
-Fx_c::~Fx_c() {
-    ((void(__thiscall*)(Fx_c*))0x49E630)(this);
 }
 
 Fx_c* Fx_c::Destructor() {
@@ -84,44 +74,44 @@ Fx_c* Fx_c::Destructor() {
 // 0x49E660
 void Fx_c::InitStaticSystems() {
     CVector point;
-    m_pPrtBlood          = g_fxMan.CreateFxSystem("prt_blood",            &point, nullptr, true);
-    m_pPrtBoatsplash     = g_fxMan.CreateFxSystem("prt_boatsplash",       &point, nullptr, true);
-    m_pPrtBubble         = g_fxMan.CreateFxSystem("prt_bubble",           &point, nullptr, true);
-    m_pPrtCardebris      = g_fxMan.CreateFxSystem("prt_cardebris",        &point, nullptr, true);
-    m_pPrtCollisionsmoke = g_fxMan.CreateFxSystem("prt_collisionsmoke",   &point, nullptr, true);
-    m_pPrtGunshell       = g_fxMan.CreateFxSystem("prt_gunshell",         &point, nullptr, true);
-    m_pPrtSand           = g_fxMan.CreateFxSystem("prt_sand",             &point, nullptr, true);
-    m_pPrtSand2          = g_fxMan.CreateFxSystem("prt_sand2",            &point, nullptr, true);
-    m_pPrtSmoke_huge     = g_fxMan.CreateFxSystem("prt_smoke_huge",       &point, nullptr, true);
-    m_pPrtSmokeII3expand = g_fxMan.CreateFxSystem("prt_smokeII_3_expand", &point, nullptr, true);
-    m_pPrtSpark          = g_fxMan.CreateFxSystem("prt_spark",            &point, nullptr, true);
-    m_pPrtSpark2         = g_fxMan.CreateFxSystem("prt_spark_2",          &point, nullptr, true);
-    m_pPrtSplash         = g_fxMan.CreateFxSystem("prt_splash",           &point, nullptr, true);
-    m_pPrtWake           = g_fxMan.CreateFxSystem("prt_wake",             &point, nullptr, true);
-    m_pPrtWatersplash    = g_fxMan.CreateFxSystem("prt_watersplash",      &point, nullptr, true);
-    m_pPrtWheeldirt      = g_fxMan.CreateFxSystem("prt_wheeldirt",        &point, nullptr, true);
-    m_pPrtGlass          = g_fxMan.CreateFxSystem("prt_glass",            &point, nullptr, true);
+    m_Blood          = g_fxMan.CreateFxSystem("prt_blood",            &point, nullptr, true);
+    m_BoatSplash     = g_fxMan.CreateFxSystem("prt_boatsplash",       &point, nullptr, true);
+    m_Bubble         = g_fxMan.CreateFxSystem("prt_bubble",           &point, nullptr, true);
+    m_Cardebris      = g_fxMan.CreateFxSystem("prt_cardebris",        &point, nullptr, true);
+    m_CollisionSmoke = g_fxMan.CreateFxSystem("prt_collisionsmoke",   &point, nullptr, true);
+    m_GunShell       = g_fxMan.CreateFxSystem("prt_gunshell",         &point, nullptr, true);
+    m_Sand           = g_fxMan.CreateFxSystem("prt_sand",             &point, nullptr, true);
+    m_Sand2          = g_fxMan.CreateFxSystem("prt_sand2",            &point, nullptr, true);
+    m_SmokeHuge      = g_fxMan.CreateFxSystem("prt_smoke_huge",       &point, nullptr, true);
+    m_SmokeII3expand = g_fxMan.CreateFxSystem("prt_smokeII_3_expand", &point, nullptr, true);
+    m_Spark          = g_fxMan.CreateFxSystem("prt_spark",            &point, nullptr, true);
+    m_Spark2         = g_fxMan.CreateFxSystem("prt_spark_2",          &point, nullptr, true);
+    m_Splash         = g_fxMan.CreateFxSystem("prt_splash",           &point, nullptr, true);
+    m_Wake           = g_fxMan.CreateFxSystem("prt_wake",             &point, nullptr, true);
+    m_WaterSplash    = g_fxMan.CreateFxSystem("prt_watersplash",      &point, nullptr, true);
+    m_WheelDirt      = g_fxMan.CreateFxSystem("prt_wheeldirt",        &point, nullptr, true);
+    m_Glass          = g_fxMan.CreateFxSystem("prt_glass",            &point, nullptr, true);
 }
 
 // 0x49E850
 void Fx_c::ExitStaticSystems() {
-    g_fxMan.DestroyFxSystem(m_pPrtBlood);
-    g_fxMan.DestroyFxSystem(m_pPrtBoatsplash);
-    g_fxMan.DestroyFxSystem(m_pPrtBubble);
-    g_fxMan.DestroyFxSystem(m_pPrtCardebris);
-    g_fxMan.DestroyFxSystem(m_pPrtCollisionsmoke);
-    g_fxMan.DestroyFxSystem(m_pPrtGunshell);
-    g_fxMan.DestroyFxSystem(m_pPrtSand);
-    g_fxMan.DestroyFxSystem(m_pPrtSand2);
-    g_fxMan.DestroyFxSystem(m_pPrtSmoke_huge);
-    g_fxMan.DestroyFxSystem(m_pPrtSmokeII3expand);
-    g_fxMan.DestroyFxSystem(m_pPrtSpark);
-    g_fxMan.DestroyFxSystem(m_pPrtSpark2);
-    g_fxMan.DestroyFxSystem(m_pPrtSplash);
-    g_fxMan.DestroyFxSystem(m_pPrtWake);
-    g_fxMan.DestroyFxSystem(m_pPrtWatersplash);
-    g_fxMan.DestroyFxSystem(m_pPrtWheeldirt);
-    g_fxMan.DestroyFxSystem(m_pPrtGlass);
+    g_fxMan.DestroyFxSystem(m_Blood);
+    g_fxMan.DestroyFxSystem(m_BoatSplash);
+    g_fxMan.DestroyFxSystem(m_Bubble);
+    g_fxMan.DestroyFxSystem(m_Cardebris);
+    g_fxMan.DestroyFxSystem(m_CollisionSmoke);
+    g_fxMan.DestroyFxSystem(m_GunShell);
+    g_fxMan.DestroyFxSystem(m_Sand);
+    g_fxMan.DestroyFxSystem(m_Sand2);
+    g_fxMan.DestroyFxSystem(m_SmokeHuge);
+    g_fxMan.DestroyFxSystem(m_SmokeII3expand);
+    g_fxMan.DestroyFxSystem(m_Spark);
+    g_fxMan.DestroyFxSystem(m_Spark2);
+    g_fxMan.DestroyFxSystem(m_Splash);
+    g_fxMan.DestroyFxSystem(m_Wake);
+    g_fxMan.DestroyFxSystem(m_WaterSplash);
+    g_fxMan.DestroyFxSystem(m_WheelDirt);
+    g_fxMan.DestroyFxSystem(m_Glass);
 }
 
 // 0x49EA60
@@ -158,8 +148,8 @@ void Fx_c::Reset() {
 }
 
 // 0x4A11E0
-void Fx_c::CreateEntityFx(CEntity* entity, char* fxName, RwV3d* posn, RwMatrix* transform) {
-    ((void(__thiscall*)(Fx_c*, CEntity*, char*, RwV3d*, RwMatrix*))0x4A11E0)(this, entity, fxName, posn, transform);
+void Fx_c::CreateEntityFx(CEntity* entity, char* fxName, CVector* posn, RwMatrix* transform) {
+    ((void(__thiscall*)(Fx_c*, CEntity*, char*, CVector*, RwMatrix*))0x4A11E0)(this, entity, fxName, posn, transform);
 }
 
 // 0x4A1280
@@ -184,12 +174,12 @@ void Fx_c::CreateMatFromVec(RwMatrix* out, CVector* origin, CVector* direction) 
 
 // 0x49EA40
 void Fx_c::SetFxQuality(FxQuality_e quality) {
-    m_fxQuality = quality;
+    m_FxQuality = quality;
 }
 
 // 0x49EA50
 FxQuality_e Fx_c::GetFxQuality() const {
-    return m_fxQuality;
+    return m_FxQuality;
 }
 
 // 0x49EB00
@@ -292,6 +282,7 @@ void Fx_c::TriggerFootSplash(CVector& posn) {
     ((void(__thiscall*)(Fx_c*, CVector&))0x4A1150)(this, posn);
 }
 
+// see RwIm3DTransformFlags
 // 0x4A13B0
 void RenderBegin(RwRaster* newRaster, RwMatrix* transform, uint32 transformRenderFlags) {
     g_fx.m_pTransformLTM = transform;

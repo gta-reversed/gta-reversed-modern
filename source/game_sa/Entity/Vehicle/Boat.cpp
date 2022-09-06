@@ -2,6 +2,7 @@
 
 #include "Boat.h"
 #include "CarCtrl.h"
+#include "ControllerConfigManager.h"
 
 float& CBoat::MAX_WAKE_LENGTH = *(float*)0x8D3938;   // 50.0f
 float& CBoat::MIN_WAKE_INTERVAL = *(float*)0x8D393C; // 2.0f
@@ -17,18 +18,21 @@ RxObjSpace3DVertex* CBoat::aRenderVertices = (RxObjSpace3DVertex*)0xC278F8;
 RxVertexIndex* CBoat::auRenderIndices = (RxVertexIndex*)0xC27988;
 
 void CBoat::InjectHooks() {
-    RH_ScopedClass(CBoat);
+    RH_ScopedVirtualClass(CBoat, 0x8721a0, 66);
     RH_ScopedCategory("Vehicle");
 
-    RH_ScopedVirtualInstall(SetModelIndex, 0x6F1140);
-    RH_ScopedVirtualInstall(ProcessControl, 0x6F1770);
-    RH_ScopedVirtualInstall(Teleport, 0x6F20E0);
-    RH_ScopedVirtualInstall(PreRender, 0x6F1180);
-    RH_ScopedVirtualInstall(Render, 0x6F0210);
-    RH_ScopedVirtualInstall(ProcessControlInputs, 0x6F0A10);
-    RH_ScopedVirtualInstall(GetComponentWorldPosition, 0x6F01D0);
-    RH_ScopedVirtualInstall(ProcessOpenDoor, 0x6F0190);
-    RH_ScopedVirtualInstall(BlowUpCar, 0x6F21B0);
+    RH_ScopedInstall(Constructor, 0x6F2940);
+    RH_ScopedInstall(Destructor, 0x6F00F0);
+
+    RH_ScopedVMTInstall(SetModelIndex, 0x6F1140);
+    RH_ScopedVMTInstall(ProcessControl, 0x6F1770);
+    RH_ScopedVMTInstall(Teleport, 0x6F20E0);
+    RH_ScopedVMTInstall(PreRender, 0x6F1180);
+    RH_ScopedVMTInstall(Render, 0x6F0210);
+    RH_ScopedVMTInstall(ProcessControlInputs, 0x6F0A10);
+    RH_ScopedVMTInstall(GetComponentWorldPosition, 0x6F01D0);
+    RH_ScopedVMTInstall(ProcessOpenDoor, 0x6F0190);
+    RH_ScopedVMTInstall(BlowUpCar, 0x6F21B0);
     RH_ScopedInstall(PruneWakeTrail, 0x6F0E20);
     RH_ScopedInstall(AddWakePoint, 0x6F2550);
     RH_ScopedInstall(SetupModelNodes, 0x6F01A0);
@@ -71,10 +75,7 @@ CBoat::CBoat(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy
     m_fElasticity = 0.1F;
     m_fBuoyancyConstant = m_pHandlingData->m_fBuoyancyConstant;
 
-    if (m_pHandlingData->m_fDragMult <= 0.01F)
-        m_fAirResistance = m_pHandlingData->m_fDragMult;
-    else
-        m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0F * 0.5F;
+    m_fAirResistance = GetDefaultAirResistance();
 
     physicalFlags.bTouchingWater = true;
     physicalFlags.bSubmergedInWater = true;
@@ -109,9 +110,7 @@ CBoat::CBoat(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy
     }
 
     m_vehicleAudio.Initialise(this);
-    for (auto& fx : m_apPropSplashFx) {
-        fx = nullptr;
-    }
+    std::ranges::fill(m_apPropSplashFx, nullptr);
 }
 
 // 0x6F00F0
@@ -438,7 +437,7 @@ void CBoat::ProcessControl_Reversed() {
         break;
     }
 
-    if (m_nStatus == eEntityStatus::STATUS_PLAYER || m_nStatus == eEntityStatus::STATUS_HELI || m_nStatus == eEntityStatus::STATUS_PHYSICS) {
+    if (m_nStatus == eEntityStatus::STATUS_PLAYER || m_nStatus == eEntityStatus::STATUS_REMOTE_CONTROLLED || m_nStatus == eEntityStatus::STATUS_PHYSICS) {
         auto fSTDPropSpeed = 0.0F;
         auto fROCPropSpeed = CPlane::PLANE_ROC_PROP_SPEED;
         if (m_nModelIndex == MODEL_SKIMMER)
@@ -814,7 +813,7 @@ void CBoat::ProcessControlInputs_Reversed(uint8 ucPadNum) {
 
     auto pad = CPad::GetPad(ucPadNum);
     float fBrakePower = (static_cast<float>(pad->GetBrake()) * (1.0F / 255.0F) - m_fBreakPedal) * 0.1F + m_fBreakPedal;
-    fBrakePower = clamp(fBrakePower, 0.0F, 1.0F);
+    fBrakePower = std::clamp(fBrakePower, 0.0F, 1.0F);
     m_fBreakPedal = fBrakePower;
 
     auto fGasPower = fBrakePower * -0.3F;
@@ -830,20 +829,22 @@ void CBoat::ProcessControlInputs_Reversed(uint8 ucPadNum) {
         if (CPad::NewMouseControllerState.X == 0.0F && bChangedInput) { // No longer using mouse controls
             m_fRawSteerAngle += (static_cast<float>(-pad->GetSteeringLeftRight()) * (1.0F / 128.0F) - m_fRawSteerAngle) * 0.2F * CTimer::GetTimeStep();
             CVehicle::m_nLastControlInput = eControllerType::CONTROLLER_KEYBOARD1;
-        } else if (m_fRawSteerAngle != 0.0F || m_fRawSteerAngle != 0.0F) {
+        } else if (m_fRawSteerAngle != 0.0F || m_fRawSteerAngle != 0.0F) { // todo: doesn't match OG and duplicateExpression: Same expression on both sides of '||'.
             CVehicle::m_nLastControlInput = eControllerType::CONTROLLER_MOUSE;
-            if (!pad->NewState.m_bVehicleMouseLook)
+            if (!pad->NewState.m_bVehicleMouseLook) {
                 m_fRawSteerAngle += CPad::NewMouseControllerState.X * -0.0035F;
+            }
 
-            if (fabs(m_fRawSteerAngle) < 0.5 || pad->NewState.m_bVehicleMouseLook)
-                m_fRawSteerAngle *= pow(0.985F, CTimer::GetTimeStep());
+            if (std::fabs(m_fRawSteerAngle) < 0.5f || pad->NewState.m_bVehicleMouseLook) {
+                m_fRawSteerAngle *= std::pow(0.985F, CTimer::GetTimeStep());
+            }
         }
     } else {
         m_fRawSteerAngle += (static_cast<float>(-pad->GetSteeringLeftRight()) * (1.0F / 128.0F) - m_fRawSteerAngle) * 0.2F * CTimer::GetTimeStep();
         CVehicle::m_nLastControlInput = eControllerType::CONTROLLER_KEYBOARD1;
     }
 
-    m_fRawSteerAngle = clamp(m_fRawSteerAngle, -1.0F, 1.0F);
+    m_fRawSteerAngle = std::clamp(m_fRawSteerAngle, -1.0F, 1.0F);
     auto fSignedPow = m_fRawSteerAngle * fabs(m_fRawSteerAngle);
     m_fSteerAngle = DegreesToRadians(m_pHandlingData->m_fSteeringLock * fSignedPow);
 }
@@ -859,7 +860,7 @@ void CBoat::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint32 a
 }
 
 // 0x6F21B0
-void CBoat::BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) {
+void CBoat::BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) {
     if (!vehicleFlags.bCanBeDamaged)
         return;
 
@@ -950,4 +951,4 @@ void CBoat::Render() { return CBoat::Render_Reversed(); }
 void CBoat::ProcessControlInputs(uint8 playerNum) { return CBoat::ProcessControlInputs_Reversed(playerNum); }
 void CBoat::GetComponentWorldPosition(int32 componentId, CVector& outPos) { return CBoat::GetComponentWorldPosition_Reversed(componentId, outPos); }
 void CBoat::ProcessOpenDoor(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 animId, float fTime) { return CBoat::ProcessOpenDoor_Reversed(ped, doorComponentId, animGroup, animId, fTime); }
-void CBoat::BlowUpCar(CEntity* damager, uint8 bHideExplosion) { return CBoat::BlowUpCar_Reversed(damager, bHideExplosion); }
+void CBoat::BlowUpCar(CEntity* damager, bool bHideExplosion) { return CBoat::BlowUpCar_Reversed(damager, bHideExplosion); }

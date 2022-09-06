@@ -8,6 +8,7 @@
 
 #include "extensions/enumerate.hpp"
 
+#include "Garages.h"
 #include "Pickups.h"
 #include "tPickupMessage.h"
 #include "Radar.h"

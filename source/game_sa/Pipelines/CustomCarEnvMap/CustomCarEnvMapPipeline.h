@@ -64,15 +64,15 @@ struct CustomSpecMapPipeMaterialData {
 };
 VALIDATE_SIZE(CustomSpecMapPipeMaterialData, 0x8);
 
-typedef CPool<CustomEnvMapPipeMaterialData>  CustomEnvMapPipeMaterialDataPool;
-typedef CPool<CustomEnvMapPipeAtomicData>    CustomEnvMapPipeAtomicDataPool;
-typedef CPool<CustomSpecMapPipeMaterialData> CustomSpecMapPipeMaterialDataPool;
+typedef CPool<CustomEnvMapPipeMaterialData, CustomEnvMapPipeMaterialData, true>  CustomEnvMapPipeMaterialDataPool;
+typedef CPool<CustomEnvMapPipeAtomicData, CustomEnvMapPipeAtomicData, true>    CustomEnvMapPipeAtomicDataPool;
+typedef CPool<CustomSpecMapPipeMaterialData, CustomSpecMapPipeMaterialData, true> CustomSpecMapPipeMaterialDataPool;
 
 class CCustomCarEnvMapPipeline {
 public:
-    static inline uint32& ms_envMapPluginOffset = *(uint32*)0x8D12C4;      // -1
-    static inline uint32& ms_envMapAtmPluginOffset = *(uint32*)0x8D12C8;   // -1
-    static inline uint32& ms_specularMapPluginOffset = *(uint32*)0x8D12CC; // -1
+    static inline int32& ms_envMapPluginOffset = *(int32*)0x8D12C4;      // -1
+    static inline int32& ms_envMapAtmPluginOffset = *(int32*)0x8D12C8;   // -1
+    static inline int32& ms_specularMapPluginOffset = *(int32*)0x8D12CC; // -1
 
     static inline RxPipeline*& ObjPipeline = *(RxPipeline**)0xC02D24;
 

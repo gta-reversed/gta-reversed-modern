@@ -8,13 +8,11 @@ void CTaskSimplePlayHandSignalAnim::InjectHooks() {
     RH_ScopedClass(CTaskSimplePlayHandSignalAnim);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    RH_ScopedVirtualInstall(Clone, 0x61B980);
-    RH_ScopedVirtualInstall(GetId, 0x61AEA0);
-    RH_ScopedVirtualInstall(MakeAbortable, 0x61AF50);
-    RH_ScopedVirtualInstall(ProcessPed, 0x61BDA0);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x61BDA0);
     RH_ScopedInstall(StartAnim, 0x61AF60);
 }
 
+// 0x61AE50
 CTaskSimplePlayHandSignalAnim::CTaskSimplePlayHandSignalAnim(AnimationId animationId, float fBlendFactor, bool bFatHands, bool bHoldLastFrame) : CTaskSimpleAnim(bHoldLastFrame) {
     m_nAnimationBlockIndex = animationId;
     m_pLeftHandObject = nullptr;
@@ -35,27 +33,6 @@ CTaskSimplePlayHandSignalAnim::~CTaskSimplePlayHandSignalAnim() {
         delete m_pRightHandObject;
         --CObject::nNoTempObjects;
     }
-}
-
-CTask* CTaskSimplePlayHandSignalAnim::Clone() {
-    return CTaskSimplePlayHandSignalAnim::Clone_Reversed();
-}
-CTask* CTaskSimplePlayHandSignalAnim::Clone_Reversed() {
-    return new CTaskSimplePlayHandSignalAnim(m_nAnimationBlockIndex, m_fBlendFactor, m_bUseFatHands, m_bHoldLastFrame);
-}
-
-eTaskType CTaskSimplePlayHandSignalAnim::GetTaskType() {
-    return CTaskSimplePlayHandSignalAnim::GetId_Reversed();
-}
-eTaskType CTaskSimplePlayHandSignalAnim::GetId_Reversed() {
-    return TASK_SIMPLE_HANDSIGNAL_ANIM;
-}
-
-bool CTaskSimplePlayHandSignalAnim::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return CTaskSimplePlayHandSignalAnim::MakeAbortable_Reversed(ped, priority, event);
-}
-bool CTaskSimplePlayHandSignalAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return CTaskSimpleAnim::MakeAbortable(ped, priority, event);
 }
 
 bool CTaskSimplePlayHandSignalAnim::ProcessPed(CPed* ped) {

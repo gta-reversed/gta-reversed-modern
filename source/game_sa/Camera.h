@@ -13,6 +13,7 @@
 #include "eCamMode.h"
 #include "eVehicleType.h"
 #include "ePedType.h"
+#include "Hud.h"
 
 class CEntity;
 class CVector;
@@ -44,6 +45,19 @@ enum class eGroundHeightType : int32 {
     ENTITY_BOUNDINGBOX_BOTTOM = 0, // ground height + boundingBoxMin.z of colliding entity
     EXACT_GROUND_HEIGHT = 1,       // ignores height of colliding entity at position
     ENTITY_BOUNDINGBOX_TOP = 2     // ground height + boundingBoxMax.z of colliding entity
+};
+
+enum {
+    MOTION_BLUR_NONE = 0,
+    MOTION_BLUR_SNIPER,
+    MOTION_BLUR_LIGHT_SCENE,
+    MOTION_BLUR_SECURITY_CAM,
+    MOTION_BLUR_CUT_SCENE,
+    MOTION_BLUR_INTRO,
+    MOTION_BLUR_INTRO2,
+    MOTION_BLUR_SNIPER_ZOOM,
+    MOTION_BLUR_INTRO3,
+    MOTION_BLUR_INTRO4,
 };
 
 struct CamTweak {
@@ -453,17 +467,17 @@ public:
 
     void GetArrPosForVehicleType(eVehicleType type, int32& arrPos);
     uint32 GetCutSceneFinishTime();
-    bool GetFading() const;
-    int32 GetFadingDirection() const;
+    [[nodiscard]] bool GetFading() const;
+    [[nodiscard]] int32 GetFadingDirection() const;
     CVector* GetGameCamPosition();
     int32 GetLookDirection();
     bool GetLookingForwardFirstPerson();
     bool GetLookingLRBFirstPerson();
-    float GetPositionAlongSpline() const;
+    [[nodiscard]] float GetPositionAlongSpline() const;
     float GetRoughDistanceToGround();
-    int32 GetScreenFadeStatus() const;
+    [[nodiscard]] enum eNameState GetScreenFadeStatus() const;
     void GetScreenRect(CRect* rect);
-    bool Get_Just_Switched_Status() const;
+    [[nodiscard]] bool Get_Just_Switched_Status() const;
 
     void HandleCameraMotionForDucking(CPed* ped, CVector* source, CVector* targPosn, bool arg5);
     void HandleCameraMotionForDuckingDuringAim(CPed* ped, CVector* source, CVector* targPosn, bool arg5);

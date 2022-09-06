@@ -4,7 +4,7 @@
 
 class CVehicle;
 
-class CEventVehicleDied : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventVehicleDied : public CEvent {
 public:
     CVehicle* m_vehicle;
     bool      m_IsOccupantLeavingCar;

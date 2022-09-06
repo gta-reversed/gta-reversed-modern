@@ -4,7 +4,7 @@
 
 class CVehicle;
 
-class CTaskSimpleCarDriveTimed : public CTaskSimpleCarDrive {
+class NOTSA_EXPORT_VTABLE CTaskSimpleCarDriveTimed : public CTaskSimpleCarDrive {
 public:
     int32      m_nTime;
     CTaskTimer m_nTimer;
@@ -16,15 +16,13 @@ public:
     CTaskSimpleCarDriveTimed(CVehicle* vehicle, int32 nTime);
     ~CTaskSimpleCarDriveTimed() override = default;
 
-    eTaskType GetTaskType() override { return TASK_SIMPLE_CAR_DRIVE_TIMED; }
-    CTask* Clone() override;
+    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override { return new CTaskSimpleCarDriveTimed(m_pVehicle, m_nTime); }
     bool ProcessPed(class CPed* ped) override;
 
 private:
     friend void InjectHooksMain();
-    static void InjectHooks();
-
+    static void InjectHooks() {};
     CTaskSimpleCarDriveTimed* Constructor(CVehicle* vehicle, int32 nTime);
 };
-
 VALIDATE_SIZE(CTaskSimpleCarDriveTimed, 0x70);

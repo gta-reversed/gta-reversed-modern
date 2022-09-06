@@ -14,7 +14,7 @@ void CTaskComplexGoToPointAndStandStillTimed::InjectHooks() {
     RH_ScopedVirtualInstall(ControlSubTask, 0x66DCE0);
 }
 
-CTaskComplexGoToPointAndStandStillTimed::CTaskComplexGoToPointAndStandStillTimed(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int32 time)
+CTaskComplexGoToPointAndStandStillTimed::CTaskComplexGoToPointAndStandStillTimed(eMoveState moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int32 time)
     : CTaskComplexGoToPointAndStandStill(moveState, targetPoint, fRadius, fMoveStateRadius, false, false)
 {
     m_nTime = time;
@@ -22,12 +22,6 @@ CTaskComplexGoToPointAndStandStillTimed::CTaskComplexGoToPointAndStandStillTimed
 
 CTaskComplexGoToPointAndStandStillTimed::~CTaskComplexGoToPointAndStandStillTimed() {
     // nothing here
-}
-
-// 0x6685E0
-CTaskComplexGoToPointAndStandStillTimed* CTaskComplexGoToPointAndStandStillTimed::Constructor(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int32 time) {
-    this->CTaskComplexGoToPointAndStandStillTimed::CTaskComplexGoToPointAndStandStillTimed(moveState, targetPoint, fRadius, fMoveStateRadius, time);
-    return this;
 }
 
 // 0x66CF30

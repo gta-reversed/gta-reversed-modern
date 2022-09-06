@@ -7,19 +7,19 @@ class CPedGroup;
 class CPed;
 
 class CTaskComplexFollowLeaderInFormation : public CTaskComplex {
-    CPedGroup* m_group;     // 0xC
-    CPed*      m_leader;    // 0x10        
-    CVector    m_pos;       // 0x14
-    uint32     m_int;       // 0x20
-    float      m_dist;      // 0x24 - Max distance between m_pos and some point, not sure. See `ControlSubTask`. Ignored if < 0
+    CPedGroup* m_Group;
+    CPed*      m_Leader;
+    CVector    m_Pos;
+    uint32     m_Int;
+    float      m_Dist; // Max distance between m_pos and some point, not sure. See `ControlSubTask`. Ignored if < 0
 
 public:
     static constexpr auto Type = TASK_COMPLEX_FOLLOW_LEADER_IN_FORMATION;
 
-    CTaskComplexFollowLeaderInFormation(CPedGroup* pedGroup, CPed* ped, const CVector& posn, float dist);
+    CTaskComplexFollowLeaderInFormation(CPedGroup* pedGroup, CPed* ped, const CVector& posn, float dist = -1.f);
     ~CTaskComplexFollowLeaderInFormation() override;
 
-    eTaskType GetTaskType() override { return TASK_COMPLEX_FOLLOW_LEADER_IN_FORMATION; }
+    eTaskType GetTaskType() override { return Type; }
     CTask*    Clone() override { return plugin::CallMethodAndReturn<CTask*, 0x695740, CTaskComplexFollowLeaderInFormation*>(this); } // 0x695740
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;

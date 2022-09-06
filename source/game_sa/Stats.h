@@ -10,7 +10,7 @@
 #include "eStatModAbilities.h"
 #include "eStatsReactions.h"
 
-enum eStatUpdateState {
+enum eStatUpdateState : uint8 {
     STAT_UPDATE_DECREASE = 0,
     STAT_UPDATE_INCREASE = 1
 };
@@ -101,7 +101,7 @@ public:
     static char* FindCriminalRatingString();
     static int32 ConstructStatLine(int32 arg0, uint8 arg1);
     static void ProcessReactionStatsOnIncrement(eStats stat);
-    static void DisplayScriptStatUpdateMessage(uint8 state, eStats stat, float value);
+    static void DisplayScriptStatUpdateMessage(eStatUpdateState state, eStats stat, float value);
     static void UpdateRespectStat(uint8 arg0);
     static void UpdateSexAppealStat();
     static void Init();

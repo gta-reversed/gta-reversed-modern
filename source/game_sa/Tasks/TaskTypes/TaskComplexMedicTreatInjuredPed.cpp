@@ -60,7 +60,7 @@ CTask* CTaskComplexMedicTreatInjuredPed::CreateSubTask(eTaskType taskType) {
     case TASK_COMPLEX_TREAT_ACCIDENT:
         return new CTaskComplexTreatAccident(m_pAccident);
     case TASK_SIMPLE_STAND_STILL:
-        return new CTaskSimpleStandStill(10000, false, false, 8.0F);
+        return new CTaskSimpleStandStill(10'000, false, false, 8.0F);
     case TASK_COMPLEX_ENTER_CAR_AS_PASSENGER:
         return new CTaskComplexEnterCarAsPassenger(m_pVehicle, 11, false);
     case TASK_COMPLEX_ENTER_CAR_AS_DRIVER:
@@ -71,7 +71,7 @@ CTask* CTaskComplexMedicTreatInjuredPed::CreateSubTask(eTaskType taskType) {
     case TASK_SIMPLE_CAR_DRIVE:
         return new CTaskSimpleCarDrive(m_pVehicle, nullptr, false);
     case TASK_COMPLEX_CAR_DRIVE_TO_POINT:
-        return new CTaskComplexDriveToPoint(m_pVehicle, m_vecAccidentPosition, 30.0F, 0, -1, -1.0F, 2);
+        return new CTaskComplexDriveToPoint(m_pVehicle, m_vecAccidentPosition, 30.0F, 0, -1, -1.0F, DRIVING_STYLE_AVOID_CARS);
     case TASK_COMPLEX_CAR_DRIVE_WANDER:
         return new CTaskComplexCarDriveWander(m_pVehicle, DRIVING_STYLE_AVOID_CARS, 30.0F);
     case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL:

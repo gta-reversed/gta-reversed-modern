@@ -46,11 +46,10 @@ public:
 
     CTaskSimpleHoldEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, const char* animName, const char* animBlockName, eAnimationFlags animFlags);
     CTaskSimpleHoldEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* animBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags);
-    ~CTaskSimpleHoldEntity();
+    ~CTaskSimpleHoldEntity() override;
 
-    // original virtual functions
+    eTaskType GetTaskType() override { return Type; }; // 0x691460
     CTask* Clone() override;
-    eTaskType GetTaskType() override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;
@@ -72,7 +71,6 @@ private:
     CTaskSimpleHoldEntity* Constructor(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* animBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags);
 
     CTask* Clone_Reversed();
-    eTaskType GetId_Reversed() { return TASK_SIMPLE_HOLD_ENTITY; };
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed_Reversed(CPed* ped);
     bool SetPedPosition_Reversed(CPed* ped);

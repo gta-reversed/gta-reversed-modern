@@ -13,6 +13,11 @@ newoption {
     value       = "path",
     description = "Output directory for the build files"
 }
+newoption {
+    trigger     = "allow-script-cmd-hooks",
+    description = "Whenever script command hooks should be generated (Slows down (full) build by a lot)"
+}
+
 if not _OPTIONS["outdir"] then
     _OPTIONS["outdir"] = "build"
 end
@@ -45,10 +50,10 @@ solution "gta_reversed"
         runtime "Release"
         optimize "Full"
     configuration "vs*"
-         flags {"MultiProcessorCompile"}
-         linkoptions   { "/ignore:4099" }
-         buildoptions {"/EHsc", "/Zc:preprocessor"}
-         disablewarnings { 26812, 26495 }
+        flags {"MultiProcessorCompile"}
+        linkoptions   { "/ignore:4099,4251,4275" }
+        buildoptions {"/EHsc", "/Zc:preprocessor", "/bigobj"}
+        disablewarnings { 26812, 26495, 4099, 4251, 4275 }
 
     flags {
         characterset ("MBCS"), --fix strings
@@ -158,6 +163,7 @@ group ""
             ["Sources/*"] = {"source/**.c*",},
             ["*"] = {"premake5.lua", "CMakeLists.txt"}
         }
+
         defines { "NOMINMAX", "USE_GTASA_ALLOCATOR", "EXTRA_DEBUG_FEATURES", "FIX_BUGS" }
         includedirs {
             "source", "source/**",
@@ -189,3 +195,11 @@ group ""
             "source/**/errcom.def", --bugfix for premake5
             "source/**/errcore.def"
         }
+
+        filter {"vs*", "options:allow-script-cmd-hooks"}
+            buildoptions { "/bigobj"}
+
+        filter {"options:allow-script-cmd-hooks"}
+            defines { "ENABLE_SCRIPT_COMMAND_HOOKS" }   
+
+        filter {} -- Clear filter

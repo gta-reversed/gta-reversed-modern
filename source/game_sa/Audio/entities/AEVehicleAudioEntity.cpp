@@ -548,6 +548,7 @@ void CAEVehicleAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 cur
 
         const auto fBaseVolume = GetDefaultVolume(AE_BONNET_FLUBBER_FLUBBER);
         sound->m_fVolume = fBaseVolume + GetFlyingMetalVolume(sound->m_pPhysicalEntity->AsPhysical());
+        return;
     }
 
     if (sound->m_nEvent == AE_BOAT_HIT_WAVE) {
@@ -677,20 +678,19 @@ int16 CAEVehicleAudioEntity::GetVehicleTypeForAudio() {
 // 0x4F4F70
 bool CAEVehicleAudioEntity::IsAccInhibited(cVehicleParams& params) const {
     return !AEAudioHardware.IsSoundBankLoaded(m_nEngineAccelerateSoundBankId, 40)
-        || params.m_nBreakState > 0
-        || params.m_bHandbrakeOn
-        || IsAccInhibitedBackwards(params);
+        || params.ThisBrake > 0
+        || params.bHandbrakeOn || IsAccInhibitedBackwards(params);
 }
 
 // inlined?
 // 0x4F4FC0
 bool CAEVehicleAudioEntity::IsAccInhibitedBackwards(cVehicleParams& params) const {
-    return params.m_fWheelSpinForAudio > 5.0f || !params.m_nWheelsOnGround;
+    return params.fWheelSpin > 5.0f || !params.NumDriveWheelsOnGround;
 }
 
 // 0x4F4FF0
 bool CAEVehicleAudioEntity::IsAccInhibitedForLowSpeed(cVehicleParams& params) const {
-    return !m_bInhibitAccForLowSpeed && params.m_fVelocity < 0.1f; // 0.1f is static
+    return !m_bInhibitAccForLowSpeed && params.fSpeed < 0.1f; // 0.1f is static
 }
 
 // inlined?
@@ -721,8 +721,8 @@ void CAEVehicleAudioEntity::GetAccelAndBrake(cVehicleParams& params) {
     return plugin::CallMethod<0x4F5080, CAEVehicleAudioEntity*, cVehicleParams&>(this, params);
 
     if (CReplay::Mode == MODE_PLAYBACK) {
-        params.m_nGasState   = (int16)(std::clamp(params.m_pVehicle->m_fGasPedal,   0.0f, 1.0f) * 255.0f);
-        params.m_nBreakState = (int16)(std::clamp(params.m_pVehicle->m_fBreakPedal, 0.0f, 1.0f) * 255.0f);
+        params.ThisAccel = (int16)(std::clamp(params.Vehicle->m_fGasPedal,   0.0f, 1.0f) * 255.0f);
+        params.ThisBrake = (int16)(std::clamp(params.Vehicle->m_fBreakPedal, 0.0f, 1.0f) * 255.0f);
         return;
     }
 
@@ -732,13 +732,13 @@ void CAEVehicleAudioEntity::GetAccelAndBrake(cVehicleParams& params) {
         && s_pPlayerDriver->IsAlive()
     ) {
         CPad* pad = s_pPlayerDriver->AsPlayer()->GetPadFromPlayer();
-        params.m_nGasState   = pad->GetAccelerate();
-        params.m_nBreakState = pad->GetBrake();
+        params.ThisAccel = pad->GetAccelerate();
+        params.ThisBrake = pad->GetBrake();
         return;
     }
 
-    params.m_nGasState   = 0;
-    params.m_nBreakState = 0;
+    params.ThisAccel = 0;
+    params.ThisBrake = 0;
 }
 
 // 0x4F51F0
@@ -806,8 +806,8 @@ float CAEVehicleAudioEntity::GetFrequencyForDummyIdle(float fGearRevProgress, fl
 }
 
 // 0x4F53D0
-float CAEVehicleAudioEntity::GetVolumeForDummyRev(float a2, float a3) {
-    return plugin::CallMethodAndReturn<float, 0x4F53D0, CAEVehicleAudioEntity*, float, float>(this, a2, a3);
+float CAEVehicleAudioEntity::GetVolumeForDummyRev(float fRatio, float fFadeRatio) {
+    return plugin::CallMethodAndReturn<float, 0x4F53D0, CAEVehicleAudioEntity*, float, float>(this, fRatio, fFadeRatio);
 
     static float points[][2] = { // 0x8CC114
         { 0.0000f, 0.000f },
@@ -817,18 +817,18 @@ float CAEVehicleAudioEntity::GetVolumeForDummyRev(float a2, float a3) {
         { 1.0001f, 1.000f },
     };
 
-    auto v4 = (a2 - 0.15f) / (1.0f - 0.15f);
+    auto v4 = (fRatio - 0.15f) / (1.0f - 0.15f);
     auto volume = 4.5f * std::clamp(v4, 0.0f, 1.0f) + -4.5f;
 
     if (m_nEngineState == 2) {
-        if (a3 <= 0.99f) {
-            auto p = CAEAudioUtility::GetPiecewiseLinear(a3, (int16)std::size(points), points);
+        if (fFadeRatio <= 0.99f) {
+            auto p = CAEAudioUtility::GetPiecewiseLinear(fFadeRatio, (int16)std::size(points), points);
             volume += CAEAudioUtility::AudioLog10(p) * 20.0f;
         } else {
             volume += 0.0f;
         }
     } else {
-        volume += CAEAudioUtility::AudioLog10(1.0f - a3) * 10.0f;
+        volume += CAEAudioUtility::AudioLog10(1.0f - fFadeRatio) * 10.0f;
     }
 
     assert(m_pEntity->IsVehicle());
@@ -844,8 +844,8 @@ float CAEVehicleAudioEntity::GetVolumeForDummyRev(float a2, float a3) {
 }
 
 // 0x4F54F0
-float CAEVehicleAudioEntity::GetFrequencyForDummyRev(float a, float b) {
-    return plugin::CallMethodAndReturn<float, 0x4F54F0, CAEVehicleAudioEntity*, float, float>(this, a, b);
+float CAEVehicleAudioEntity::GetFrequencyForDummyRev(float fRatio, float fFadeRatio) {
+    return plugin::CallMethodAndReturn<float, 0x4F54F0, CAEVehicleAudioEntity*, float, float>(this, fRatio, fFadeRatio);
 
     static float points[][2] = { // 0x8CC13C
         { 0.0000f, 1.0f },
@@ -855,12 +855,12 @@ float CAEVehicleAudioEntity::GetFrequencyForDummyRev(float a, float b) {
         { 1.0001f, 1.0f },
     };
 
-    auto v4 = (a - 0.15f) / (1.0f - 0.15f);
+    auto v4 = (fRatio - 0.15f) / (1.0f - 0.15f);
     auto baseFreq = (1.5f - 0.9f) * std::clamp(v4, 0.0f, 1.0f) + 0.9f;
 
     float frequency;
-    if (m_nEngineState == 2 && b <= 0.99f)
-        frequency = CAEAudioUtility::GetPiecewiseLinear(b, (int16)std::size(points), points);
+    if (m_nEngineState == 2 && fFadeRatio <= 0.99f)
+        frequency = CAEAudioUtility::GetPiecewiseLinear(fFadeRatio, (int16)std::size(points), points);
     else
         frequency = 1.0f;
 
@@ -1071,7 +1071,7 @@ bool CAEVehicleAudioEntity::CopHeli() {
 }
 
 // 0x4F5C60
-float CAEVehicleAudioEntity::GetFreqForIdle(float velocityPercentage) const {
+float CAEVehicleAudioEntity::GetFreqForIdle(float fRatio) const {
     static float points[][2] = {
         { 0.0000f, 0.00f },
         { 0.0750f, 0.70f },
@@ -1079,7 +1079,7 @@ float CAEVehicleAudioEntity::GetFreqForIdle(float velocityPercentage) const {
         { 0.2500f, 1.25f },
         { 1.0001f, 1.70f },
     };
-    return CAEAudioUtility::GetPiecewiseLinear(velocityPercentage, (int16)std::size(points), points);
+    return CAEAudioUtility::GetPiecewiseLinear(fRatio, (int16)std::size(points), points);
 }
 
 // 0x4F60B0
@@ -1103,13 +1103,13 @@ float CAEVehicleAudioEntity::GetVolForPlayerEngineSound(cVehicleParams& params, 
     float fVolume = 0.0f;
     switch (gear) {
     case 1:
-        fVolume = 4.0f * params.m_fVelocityChangingPercentage - 4.0f;
+        fVolume = 4.0f * params.fRealRevsRatio - 4.0f;
         break;
     case 2: {
-        if (params.m_pVehicle->m_nModelIndex == MODEL_CADDY)
+        if (params.Vehicle->m_nModelIndex == MODEL_CADDY)
             fVolume = -30.0f - 3.0f;
         else
-            fVolume = 1.5f * params.m_fVelocityChangingPercentage - 3.0f;
+            fVolume = 1.5f * params.fRealRevsRatio - 3.0f;
         break;
     }
     case 3: {
@@ -1173,8 +1173,7 @@ void CAEVehicleAudioEntity::UpdateGasPedalAudio(CVehicle* vehicle, int32 vehicle
     const float power = std::fabs(vehicle->m_fGasPedal);
     float& gasPtr = (
         vehicleType == VEHICLE_TYPE_BIKE
-            ? vehicle->AsBike()->m_fGasPedalAudio
-            : vehicle->AsAutomobile()->m_fGasPedalAudio
+            ? vehicle->AsBike()->m_fGasPedalAudioRevs : vehicle->AsAutomobile()->m_fGasPedalAudio
     );
 
     if (power <= gasPtr)
@@ -1247,7 +1246,7 @@ void CAEVehicleAudioEntity::GetSirenState(bool& bSirenOrAlarm, bool& bHorn, cVeh
         return;
     }
 
-    CVehicle* vehicle = params.m_pVehicle;
+    CVehicle* vehicle = params.Vehicle;
     if (vehicle->vehicleFlags.bSirenOrAlarm == 0u) {
         bSirenOrAlarm = false;
         return;
@@ -1626,7 +1625,7 @@ void CAEVehicleAudioEntity::PlayHornOrSiren(bool bPlayHornTone, bool bPlaySirenO
             if (m_SirenSound || !AEAudioHardware.IsSoundBankLoaded(74u, SLOT_HORNS_AND_SIRENS))
                 return;
 
-            const bool bIsWhoopieModel = params.m_pVehicle->m_nModelIndex == MODEL_MRWHOOP;
+            const bool bIsWhoopieModel = params.Vehicle->m_nModelIndex == MODEL_MRWHOOP;
             if (bIsWhoopieModel)
                 if (!AEAudioHardware.IsSoundBankLoaded(79u, 40))
                     return;
@@ -1787,19 +1786,16 @@ void CAEVehicleAudioEntity::ProcessVehicleFlatTyre(cVehicleParams& params) {
 void CAEVehicleAudioEntity::ProcessVehicleRoadNoise(cVehicleParams& params) {
     return plugin::CallMethod<0x4F8B00, CAEVehicleAudioEntity*, cVehicleParams&>(this, params);
 
-    CVehicle* vehicle = params.m_pVehicle;
+    CVehicle* vehicle = params.Vehicle;
 
     const auto CancelRoadNoise = [=] { PlayRoadNoiseSound(-1, 0.0f, 0.0f); };
 
     // Check if any wheels touch the ground. (Perhaps params.m_nWheelsOnGround could be used?)
     const auto GetNumContactWheels = [=]() -> uint8 {
-        switch (params.m_nVehicleType) {
-        case VEHICLE_TYPE_AUTOMOBILE:
-            return vehicle->AsAutomobile()->m_nNumContactWheels;
-        case VEHICLE_TYPE_BIKE:
-            return vehicle->AsBike()->m_nNumContactWheels;
-        default:
-            return 4;
+        switch (params.nBaseVehicleType) {
+        case VEHICLE_TYPE_AUTOMOBILE: return vehicle->AsAutomobile()->m_nNumContactWheels;
+        case VEHICLE_TYPE_BIKE: return vehicle->AsBike()->m_nNoOfContactWheels;
+        default: return 4;
         }
     };
 
@@ -1813,14 +1809,14 @@ void CAEVehicleAudioEntity::ProcessVehicleRoadNoise(cVehicleParams& params) {
         }
         break;
     default: {
-        if (!params.m_pTransmission) {
+        if (!params.Transmission) {
             CancelRoadNoise();
             return;
         }
     }
     }
 
-    const float velocity = std::fabs(params.m_fVelocity);
+    const float velocity = std::fabs(params.fSpeed);
     if (velocity <= 0.0f) {
         CancelRoadNoise();
         return;
@@ -1866,12 +1862,12 @@ void CAEVehicleAudioEntity::ProcessReverseGear(cVehicleParams& params) {
     static constexpr float SPEED_MULT  = +0.20f; // 0x8CBD28
     static constexpr float BASE_VOLUME = -6.00f; // 0x8CBD28
 
-    const auto vehicle = params.m_pVehicle->AsAutomobile();
+    const auto vehicle = params.Vehicle->AsAutomobile();
     if (vehicle->vehicleFlags.bEngineOn && (vehicle->m_fGasPedal < 0.0f || !vehicle->m_nCurrentGear)) { // Check if we are reversing
 
         float fReverseGearVelocityProgress = 0.0f;
         if (vehicle->m_nWheelsOnGround) {
-            fReverseGearVelocityProgress = params.m_fVelocity / params.m_pTransmission->m_maxReverseGearVelocity;
+            fReverseGearVelocityProgress = params.fSpeed / params.Transmission->m_maxReverseGearVelocity;
         } else {
             if (vehicle->m_wheelsOnGrounPrev)
                 vehicle->m_fGasPedalAudio *= 0.4f;
@@ -1902,11 +1898,11 @@ void CAEVehicleAudioEntity::ProcessVehicleSkidding(cVehicleParams& params) {
     float fUnk = 0.0f;
     auto nWheels = 0;
 
-    switch (params.m_nVehicleType) {
+    switch (params.nBaseVehicleType) {
     case VEHICLE_TYPE_AUTOMOBILE: {
         nWheels = 4;
 
-        auto vehicle = params.m_pVehicle->AsAutomobile();
+        auto vehicle = params.Vehicle->AsAutomobile();
         fUnk = vehicle->m_fGasPedalAudio;
 
         bAreRearWheelsNotSkidding = vehicle->m_aWheelState[CAR_WHEEL_REAR_LEFT] != WHEEL_STATE_SKIDDING && vehicle->m_aWheelState[CAR_WHEEL_REAR_RIGHT] != WHEEL_STATE_SKIDDING;
@@ -1917,10 +1913,10 @@ void CAEVehicleAudioEntity::ProcessVehicleSkidding(cVehicleParams& params) {
     case VEHICLE_TYPE_BIKE: {
         nWheels = 2;
 
-        auto* bike = params.m_pVehicle->AsBike();
-        fUnk = bike->m_fGasPedalAudio;
-        bAreRearWheelsNotSkidding = bike->m_anWheelState[1] != WHEEL_STATE_SKIDDING;
-        wheelStates = bike->m_anWheelState;
+        auto* bike = params.Vehicle->AsBike();
+        fUnk = bike->m_fGasPedalAudioRevs;
+        bAreRearWheelsNotSkidding = bike->m_aWheelState[1] != WHEEL_STATE_SKIDDING;
+        wheelStates = bike->m_aWheelState;
         // todo: aWheelTimers = bike->m_wheelCollisionState;
         break;
     }
@@ -1941,11 +1937,11 @@ void CAEVehicleAudioEntity::ProcessVehicleSkidding(cVehicleParams& params) {
         if (bAreRearWheelsNotSkidding && bIsFrontWheel && thisWheelState == WHEEL_STATE_SKIDDING)
             continue;
 
-        const auto dt = params.m_pTransmission->m_nDriveType;
+        const auto dt = params.Transmission->m_nDriveType;
         if (dt == '4' || dt == 'F' && bIsFrontWheel || dt == 'R' && !bIsFrontWheel) {
-            fTotalSkidValue += GetVehicleDriveWheelSkidValue(params.m_pVehicle, thisWheelState, fUnk, *params.m_pTransmission, params.m_fVelocity);
+            fTotalSkidValue += GetVehicleDriveWheelSkidValue(params.Vehicle, thisWheelState, fUnk, *params.Transmission, params.fSpeed);
         } else {
-            fTotalSkidValue += GetVehicleNonDriveWheelSkidValue(params.m_pVehicle, thisWheelState, *params.m_pTransmission, params.m_fVelocity);
+            fTotalSkidValue += GetVehicleNonDriveWheelSkidValue(params.Vehicle, thisWheelState, *params.Transmission, params.fSpeed);
         }
     }
 
@@ -1963,11 +1959,11 @@ void CAEVehicleAudioEntity::ProcessVehicleSkidding(cVehicleParams& params) {
         fBaseVolume = -12.0f;
         fSpeed = 0.9f + fTotalSkidValue * 0.25f;
     } else {
-        if (IsSurfaceAudioGrass(params.m_pVehicle->m_nContactSurface)) {
+        if (IsSurfaceAudioGrass(params.Vehicle->m_nContactSurface)) {
             soundId = 6;
             fBaseVolume = -12.0f;
             fSpeed = 0.2f * fTotalSkidValue + 0.9f;
-        } else if (IsSurfaceAudioEitherGravelWaterSand(params.m_pVehicle->m_nContactSurface)) {
+        } else if (IsSurfaceAudioEitherGravelWaterSand(params.Vehicle->m_nContactSurface)) {
             soundId = 8;
             fBaseVolume = -9.0f;
             fSpeed = 0.2f * fTotalSkidValue + 0.9f;
@@ -2027,11 +2023,11 @@ void CAEVehicleAudioEntity::ProcessRainOnVehicle(cVehicleParams& params) {
 void CAEVehicleAudioEntity::ProcessBoatMovingOverWater(cVehicleParams& params) {
     return plugin::CallMethod<0x4FA0C0, CAEVehicleAudioEntity*, cVehicleParams&>(this, params);
 
-    auto* boat = params.m_pVehicle->AsBoat();
+    auto* boat = params.Vehicle->AsBoat();
 
     // Originally there was a multiply by 1.33, that's the recp. of 0.75f, which makes sense
     // because the abs. velocity is clamped to 0.75f
-    const float fVelocityProgress = std::min(0.75f, std::fabs(params.m_fVelocity)) / 0.75f;
+    const float fVelocityProgress = std::min(0.75f, std::fabs(params.fSpeed)) / 0.75f;
 
     float fVolume = -100.0f;
     if (boat->m_nBoatFlags.bOnWater && fVelocityProgress >= 0.00001f) {
@@ -2107,7 +2103,7 @@ void CAEVehicleAudioEntity::ProcessNitro(cVehicleParams& params) {
 void CAEVehicleAudioEntity::ProcessMovingParts(cVehicleParams& params) {
     return plugin::CallMethod<0x4FB260, CAEVehicleAudioEntity*, cVehicleParams&>(this, params);
 
-    switch (params.m_pVehicle->m_nModelIndex) {
+    switch (params.Vehicle->m_nModelIndex) {
     case MODEL_PACKER:
     case MODEL_DOZER:
     case MODEL_DUMPER:
@@ -2123,7 +2119,7 @@ void CAEVehicleAudioEntity::ProcessMovingParts(cVehicleParams& params) {
         return;
     }
 
-    auto* vehicle = params.m_pVehicle->AsAutomobile();
+    auto* vehicle = params.Vehicle->AsAutomobile();
 
     float fComponentMoveProgress = (float)(vehicle->m_wMiscComponentAngle - vehicle->m_wMiscComponentAnglePrev) / 30.0f;
     fComponentMoveProgress = std::clamp<float>(std::fabs(fComponentMoveProgress), 0.0f, 1.0f);
@@ -2222,8 +2218,8 @@ void CAEVehicleAudioEntity::ProcessPlayerVehicleEngine(cVehicleParams& params) {
 }
 
 // 0x4FCA10
-void CAEVehicleAudioEntity::ProcessDummyStateTransition(int16 a1, float a2, cVehicleParams& params) {
-    plugin::CallMethod<0x4FCA10, CAEVehicleAudioEntity*, int16, float, cVehicleParams&>(this, a1, a2, params);
+void CAEVehicleAudioEntity::ProcessDummyStateTransition(int16 newState, float fRatio, cVehicleParams& params) {
+    plugin::CallMethod<0x4FCA10, CAEVehicleAudioEntity*, int16, float, cVehicleParams&>(this, newState, fRatio, params);
 }
 
 // 0x4FD290
@@ -2267,8 +2263,8 @@ void CAEVehicleAudioEntity::ProcessDummySeaPlane(cVehicleParams& params) {
 }
 
 // 0x4FF900
-void CAEVehicleAudioEntity::ProcessGenericJet(uint8 a1, cVehicleParams& params, float a3, float a4, float a5, float a6, float a7) {
-    plugin::CallMethod<0x4FF900, CAEVehicleAudioEntity*, uint8, cVehicleParams&, float, float, float, float, float>(this, a1, params, a3, a4, a5, a6, a7);
+void CAEVehicleAudioEntity::ProcessGenericJet(bool bEngineOn, cVehicleParams& params, float fEngineSpeed, float fAccelRatio, float fBrakeRatio, float fStalledVolume, float fStalledFrequency) {
+    plugin::CallMethod<0x4FF900, CAEVehicleAudioEntity*, uint8, cVehicleParams&, float, float, float, float, float>(this, bEngineOn, params, fEngineSpeed, fAccelRatio, fBrakeRatio, fStalledVolume, fStalledFrequency);
 }
 
 // 0x4FFDC0
@@ -2289,8 +2285,8 @@ void CAEVehicleAudioEntity::ProcessVehicleSirenAlarmHorn(cVehicleParams& params)
     GetSirenState(bSirenOrAlarm, bHorn, params);
 
     if (!bSirenOrAlarm) {
-        CVehicle* vehicle = params.m_pVehicle;
-        if (!vehicle->m_nAlarmState || vehicle->m_nAlarmState == -1 || vehicle->m_nStatus == STATUS_WRECKED) {
+        CVehicle* vehicle = params.Vehicle;
+        if (vehicle->m_nAlarmState == 0 || vehicle->m_nAlarmState == -1 || vehicle->m_nStatus == STATUS_WRECKED) {
             GetHornState(&bHorn, params);
         } else {
             const auto time = CTimer::GetTimeInMS();
@@ -2357,24 +2353,24 @@ void CAEVehicleAudioEntity::ProcessDummyJet(cVehicleParams& params) {
 }
 
 // 0x501C50
-void CAEVehicleAudioEntity::ProcessAircraft(cVehicleParams& vehParams) {
+void CAEVehicleAudioEntity::ProcessAircraft(cVehicleParams& params) {
     if (m_bSoundsStopped) // location optimized
         return;
 
     if (!AEAudioHardware.IsSoundBankLoaded(138u, 19))
         return;
 
-    auto* vehicle = vehParams.m_pVehicle;
+    auto* vehicle = params.Vehicle;
     switch (m_Settings.m_nVehicleSoundType) {
     case VEHICLE_SOUND_HELI: {
         if (s_HelicoptorsDisabled || m_bDisableHeliEngineSounds)
             JustWreckedVehicle();
         else if (m_bPlayerDriver)
-            ProcessPlayerHeli(vehParams);
+            ProcessPlayerHeli(params);
         else if (vehicle->m_nStatus == STATUS_PHYSICS)
-            ProcessAIHeli(vehParams);
+            ProcessAIHeli(params);
         else
-            ProcessDummyHeli(vehParams);
+            ProcessDummyHeli(params);
         break;
     }
     case VEHICLE_SOUND_PLANE: {
@@ -2384,27 +2380,27 @@ void CAEVehicleAudioEntity::ProcessAircraft(cVehicleParams& vehParams) {
         case MODEL_AT400:
         case MODEL_ANDROM: { // Originally there was an `isPlane` variable. I just rearranged stuff, to look nicer
             if (m_bPlayerDriver)
-                ProcessPlayerJet(vehParams);
+                ProcessPlayerJet(params);
             else
-                ProcessDummyJet(vehParams);
+                ProcessDummyJet(params);
             break;
         }
         default: {
             if (m_bPlayerDriver)
-                ProcessPlayerProp(vehParams);
+                ProcessPlayerProp(params);
             else if (vehicle->m_nStatus == STATUS_PHYSICS || vehicle->m_autoPilot.m_vehicleRecordingId >= 0)
-                ProcessAIProp(vehParams);
+                ProcessAIProp(params);
             else
-                ProcessDummyProp(vehParams);
+                ProcessDummyProp(params);
         }
         }
         break;
     }
     case VEHICLE_SOUND_NON_VEH: {
         if (m_bPlayerDriver)
-            ProcessPlayerSeaPlane(vehParams);
+            ProcessPlayerSeaPlane(params);
         else
-            ProcessDummySeaPlane(vehParams);
+            ProcessDummySeaPlane(params);
         break;
     }
     }
@@ -2419,18 +2415,12 @@ void CAEVehicleAudioEntity::ProcessVehicle(CPhysical* physical) {
     const auto bIsNotSimple = vehicle->m_nStatus != STATUS_SIMPLE;
 
     cVehicleParams params{};
-    params.m_pVehicle = vehicle;
-    params.m_pTransmission = vehicle->m_pHandlingData ? &vehicle->m_pHandlingData->m_transmissionData : nullptr;
-    params.m_nModelType = physical->m_nModelIndex - 400;
-    float velocity;
-    if (!bIsNotSimple) {
-        velocity = vehicle->m_autoPilot.m_speed / 50.0f;
-    } else {
-        velocity = DotProduct(physical->m_vecMoveSpeed, physical->m_matrix->GetForward());
-    }
-    params.m_fVelocity = velocity;
-    params.m_nVehicleType = vehicle->m_nVehicleType;
-    params.m_nVehicleSubType = vehicle->m_nVehicleSubType;
+    params.Vehicle = vehicle;
+    params.Transmission = vehicle->m_pHandlingData ? &vehicle->m_pHandlingData->m_transmissionData : nullptr;
+    params.nModelIndexMinusOffset = physical->m_nModelIndex - 400;
+    params.fSpeed = !bIsNotSimple ? vehicle->m_autoPilot.m_speed / 50.0f : DotProduct(physical->m_vecMoveSpeed, physical->m_matrix->GetForward());
+    params.nBaseVehicleType = vehicle->m_nVehicleType;
+    params.nSpecificVehicleType = vehicle->m_nVehicleSubType;
 
     switch (m_Settings.m_nVehicleSoundType) {
     case VEHICLE_SOUND_CAR:
@@ -2460,15 +2450,15 @@ void CAEVehicleAudioEntity::ProcessVehicle(CPhysical* physical) {
 
         ProcessRainOnVehicle(params);
 
-        if (params.m_pVehicle->IsAutomobile())
+        if (params.Vehicle->IsAutomobile())
             ProcessNitro(params);
 
         ProcessMovingParts(params);
 
-        if (params.m_pVehicle->m_nModelIndex == MODEL_COMBINE)
+        if (params.Vehicle->m_nModelIndex == MODEL_COMBINE)
             ProcessPlayerCombine(params);
 
-        vehicle->AsAutomobile()->m_fMoveDirection = params.m_fVelocity;
+        vehicle->AsAutomobile()->m_fMoveDirection = params.fSpeed;
         break;
 
     case VEHICLE_SOUND_MOTORCYCLE:
@@ -2496,7 +2486,7 @@ void CAEVehicleAudioEntity::ProcessVehicle(CPhysical* physical) {
 
         ProcessRainOnVehicle(params);
 
-        vehicle->AsBike()->field_7B8 = params.m_pTransmission;
+        vehicle->AsBike()->m_fPrevSpeed = params.fSpeed;
         break;
 
     case VEHICLE_SOUND_BICYCLE:
@@ -2513,7 +2503,7 @@ void CAEVehicleAudioEntity::ProcessVehicle(CPhysical* physical) {
         else
             ProcessDummyBicycle(params);
 
-        vehicle->AsBike()->field_7B8 = params.m_pTransmission;
+        vehicle->AsBike()->m_fPrevSpeed = params.fSpeed;
         break;
 
     case VEHICLE_SOUND_BOAT:
@@ -2564,7 +2554,7 @@ void CAEVehicleAudioEntity::ProcessVehicle(CPhysical* physical) {
 void CAEVehicleAudioEntity::ProcessSpecialVehicle(cVehicleParams& params) {
     return plugin::CallMethod<0x501AB0, CAEVehicleAudioEntity*, cVehicleParams*>(this, &params);
 
-    switch (params.m_pVehicle->m_nModelIndex) {
+    switch (params.Vehicle->m_nModelIndex) {
     case MODEL_ARTICT1:
     case MODEL_ARTICT2:
     case MODEL_PETROTR:
@@ -2585,7 +2575,7 @@ void CAEVehicleAudioEntity::ProcessSpecialVehicle(cVehicleParams& params) {
         ProcessVehicleSirenAlarmHorn(params);
         ProcessDummyGolfCart(params);
         ProcessRainOnVehicle(params);
-        if (params.m_pVehicle->m_nStatus != STATUS_SIMPLE)
+        if (params.Vehicle->m_nStatus != STATUS_SIMPLE)
             ProcessEngineDamage(params);
         break;
     }

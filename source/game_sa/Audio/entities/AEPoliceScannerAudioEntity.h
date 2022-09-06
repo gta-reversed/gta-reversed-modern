@@ -33,7 +33,7 @@ struct tScannerSlot {
     }
 };
 
-class CAEPoliceScannerAudioEntity : public CAEAudioEntity {
+class NOTSA_EXPORT_VTABLE CAEPoliceScannerAudioEntity : public CAEAudioEntity {
 public:
     enum State : int32 {
         STATE_INITIAL = 0,

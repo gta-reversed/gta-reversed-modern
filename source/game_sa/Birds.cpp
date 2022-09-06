@@ -45,23 +45,21 @@ void CBirds::Init() {
     bHasBirdBeenShot = false;
 }
 
+inline float GetMaxDistance(eBirdsBiome biome) {
+    switch (biome) {
+    case eBirdsBiome::BIOME_WATER:  return 45.0F;
+    case eBirdsBiome::BIOME_DESERT: return 80.0F;
+    case eBirdsBiome::BIOME_NORMAL:
+    default:                        return 40.0F;
+    }
+};
+
 // 0x711EF0
 void CBirds::CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int32 iBirdCount, eBirdsBiome biome, bool bCheckObstacles) {
-    const float fMaxDistance = [&biome]{
-        switch (biome) {
-        case eBirdsBiome::BIOME_WATER:
-            return 45.0F;
-        case eBirdsBiome::BIOME_DESERT:
-            return 80.0F;
-        case eBirdsBiome::BIOME_NORMAL:
-        default:
-            return 40.0F;
-        }
-    }();
-
     if (iBirdCount <= 0)
         return;
 
+    const float fMaxDistance = GetMaxDistance(biome);
     for (auto i = 0; i < iBirdCount; ++i) {
         auto iFreeBirdIndex = 0;
         while (iFreeBirdIndex < (int32)std::size(aBirds)) {
@@ -149,8 +147,8 @@ void CBirds::Update() {
     if (!CGame::currArea
         && uiNumberOfBirds < std::size(aBirds)
         && CClock::ClockHoursInRange(5, 22)
-        && (CTimer::GetFrameCounter() % 512) == std::size(aBirds)) {
-
+        && (CTimer::GetFrameCounter() % 512) == std::size(aBirds)
+    ) {
         auto iNumBirdsToCreate = (uint32)CGeneral::GetRandomNumberInRange(1, std::size(aBirds) + 1 - uiNumberOfBirds);
         eBirdsBiome biome = eBirdsBiome::BIOME_WATER;
 
@@ -168,24 +166,15 @@ void CBirds::Update() {
             CGeneral::GetRandomNumber(); // Called 2 times for some reason
             CGeneral::GetRandomNumber();
 
-            float fFlightHeight;
-            float fSpawnDistance;
-
-            switch (biome) {
-            case eBirdsBiome::BIOME_WATER:
-                fFlightHeight = CGeneral::GetRandomNumberInRange(4.0F, 13.0F);
-                fSpawnDistance = 45.0F;
-                break;
-            case eBirdsBiome::BIOME_DESERT:
-                fFlightHeight = CGeneral::GetRandomNumberInRange(15.0F, 25.0F);
-                fSpawnDistance = 80.0F;
-                break;
-            case eBirdsBiome::BIOME_NORMAL:
-            default:
-                fFlightHeight = CGeneral::GetRandomNumberInRange(2.0F, 10.0F);
-                fSpawnDistance = 40.0F;
-                break;
-            }
+            float fSpawnDistance = GetMaxDistance(biome);
+            float fFlightHeight = [&biome]() {
+                switch (biome) {
+                case eBirdsBiome::BIOME_WATER:  return CGeneral::GetRandomNumberInRange(4.0F, 13.0F);
+                case eBirdsBiome::BIOME_DESERT: return CGeneral::GetRandomNumberInRange(15.0F,25.0F);
+                case eBirdsBiome::BIOME_NORMAL:
+                default:                        return CGeneral::GetRandomNumberInRange(2.0F, 10.0F);
+                }
+            }();
 
             if (fFlightHeight > 5.0F) {
                 float fBirdSpawnZ = fFlightHeight + vecCamPos.z;
@@ -251,8 +240,7 @@ void CBirds::Update() {
         }
 
         auto fTimeStep = CTimer::GetTimeStepInSeconds();
-        auto fLerp = std::min(fTimeStep * 0.5F, 1.0F);
-        bird.m_vecCurrentVelocity = Lerp(bird.m_vecCurrentVelocity, bird.m_vecTargetVelocity, fLerp);
+        bird.m_vecCurrentVelocity = Lerp(bird.m_vecCurrentVelocity, bird.m_vecTargetVelocity, std::min(fTimeStep / 2.0F, 1.0F));
         bird.m_vecPosn += (fTimeStep * bird.m_vecCurrentVelocity);
         bird.m_fAngle = std::atan2(bird.m_vecTargetVelocity.x, bird.m_vecTargetVelocity.y);
     }
@@ -282,13 +270,12 @@ void CBirds::Render() {
             vecPos.z += std::sin((float)(uiTime % bird.m_nWingStillness) * (TWO_PI / (float)bird.m_nWingStillness)) * 0.1F;
         }
 
-        auto vecScreenPos = RwV3d();
+        CVector vecScreenPos;
         float fScreenWidth;
         float fScreenHeight;
         if (CSprite::CalcScreenCoors(matBirdTransform.GetPosition(), &vecScreenPos, &fScreenWidth, &fScreenHeight, false, true)) {
-            auto fAngle = bird.m_fAngle;
-            auto fCosSize = std::cos(fAngle) * bird.m_fSize;
-            auto fSinSize = std::sin(fAngle) * bird.m_fSize;
+            auto fCosSize = std::cos(bird.m_fAngle) * bird.m_fSize;
+            auto fSinSize = std::sin(bird.m_fAngle) * bird.m_fSize;
 
             matBirdTransform.GetRight().Set(fCosSize, -fSinSize, 0.0F);
             matBirdTransform.GetForward().Set(fSinSize, fCosSize, 0.0F);
@@ -318,9 +305,9 @@ void CBirds::Render() {
                 const auto& vecCameraPos = TheCamera.GetPosition();
                 auto fCameraDist = DistanceBetweenPoints(vecCameraPos, bird.m_vecPosn);
                 auto fAlphaCutoffDist = bird.m_fMaxBirdDistance * 0.7F;
-                if (fCameraDist > fAlphaCutoffDist) {
+                if (fCameraDist > fAlphaCutoffDist) { // 0x712AF3 todo: review
                     auto fTransparency = 1.0F - invLerp(fAlphaCutoffDist, bird.m_fMaxBirdDistance, fCameraDist);
-                    fTransparency = clamp(0.0F, 1.0F, fTransparency);
+                    fTransparency = std::max(fTransparency, 0.0f);
                     cAlpha = static_cast<RwUInt8>(fTransparency * 255.0F);
                 }
 
@@ -398,7 +385,7 @@ void CBirds::Render() {
 
 // 0x712E40
 void CBirds::HandleGunShot(const CVector* pointA, const CVector* pointB) {
-    for (auto & bird : aBirds) {
+    for (auto& bird : aBirds) {
         if (!bird.m_bCreated)
             continue;
 

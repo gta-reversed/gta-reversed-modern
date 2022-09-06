@@ -187,7 +187,7 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float lowFre
     auto v17 = (vecNormal.x + vecNormal.y + vecNormal.z) * 0.57700002f;
 
     colorMult = std::max(v17, 0.0f) * 0.65f + 0.27f;
-    glare = clamp(8.0f * v17 - 5.0f, 0.0f, 0.99f) * CWeather::SunGlare;
+    glare = std::clamp(8.0f * v17 - 5.0f, 0.0f, 0.99f) * CWeather::SunGlare;
 }
 
 // 0x6E6D10

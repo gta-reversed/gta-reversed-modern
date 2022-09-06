@@ -11,7 +11,7 @@
 
 //typedef int32 AnimationId;
 
-class CTaskComplexPlayHandSignalAnim : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexPlayHandSignalAnim : public CTaskComplex {
 public:
     int32   m_animationId;
     float m_fBlendFactor;

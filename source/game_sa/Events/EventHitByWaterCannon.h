@@ -2,7 +2,7 @@
 
 #include "Event.h"
 
-class CEventHitByWaterCannon : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventHitByWaterCannon : public CEvent {
 public:
     CVector m_point;
     CVector m_moveSpeed;

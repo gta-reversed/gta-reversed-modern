@@ -9,15 +9,6 @@
 
 #include "TaskSimple.h"
 
-void CTaskSimple::InjectHooks() {
-    RH_ScopedClass(CTaskSimple);
-    RH_ScopedCategory("Tasks");
-
-    RH_ScopedVirtualInstall(GetSubTask, 0x43E300);
-    RH_ScopedVirtualInstall(IsSimple, 0x43E310);
-    RH_ScopedVirtualInstall(SetPedPosition, 0x43E320);
-}
-
 // 0x61A390
 CTaskSimple::CTaskSimple() {
     m_pParentTask = nullptr;
@@ -25,15 +16,15 @@ CTaskSimple::CTaskSimple() {
 
 // 0x43E300
 CTask* CTaskSimple::GetSubTask() {
-    return CTaskSimple::GetSubTask_Reversed();
+    return nullptr;
 }
 
 // 0x43E310
 bool CTaskSimple::IsSimple() {
-    return CTaskSimple::IsSimple_Reversed();
+    return true;
 }
 
 // 0x43E320
 bool CTaskSimple::SetPedPosition(CPed* ped) {
-    return CTaskSimple::SetPedPosition_Reversed(ped);
+    return false;
 }

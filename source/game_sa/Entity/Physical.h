@@ -61,7 +61,7 @@ enum eEntityAltCollision : uint16 {
     ALT_ENITY_COL_BOAT,
 };
 
-class CPhysical : public CEntity {
+class NOTSA_EXPORT_VTABLE CPhysical : public CEntity {
 public:
     float  field_38;
     uint32 m_nLastCollisionTime;

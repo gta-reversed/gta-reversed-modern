@@ -11,6 +11,7 @@
 #include "Occlusion.h"
 #include "PostEffects.h"
 #include "Shadows.h"
+#include "CarFXRenderer.h"
 
 #ifdef EXTRA_DEBUG_FEATURES
 #include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
@@ -565,7 +566,7 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
             if (FindPlayerVehicle() == entity && gbFirstPersonRunThisFrame && CReplay::Mode != MODE_PLAYBACK) {
                 uint32 dwDirectionWasLooking = CCamera::GetActiveCamera().m_nDirectionWasLooking;
                 CVehicle* vehicle = FindPlayerVehicle();
-                if (!vehicle->IsBike() || !(vehicle->AsBike()->bikeFlags.bWheelieCam))
+                if (!vehicle->IsBike() || !(vehicle->AsBike()->bikeFlags.bWheelieForCamera))
                 {
                     if (dwDirectionWasLooking == 3)
                         return RENDERER_CULLED;

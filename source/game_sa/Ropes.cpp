@@ -10,7 +10,6 @@
 #include "Rope.h"
 #include "Ropes.h"
 
-CRope (&CRopes::aRopes)[MAX_NUM_ROPES] = *(CRope(*)[MAX_NUM_ROPES])0xB768B8;
 int32& CRopes::PlayerControlsCrane = *(int32*)0xB76898;
 uint32& CRopes::m_nRopeIdCreationCounter = *(uint32*)0xB781F8;
 
@@ -91,8 +90,8 @@ int32 CRopes::FindRope(uint32 id) {
 
 // a4 always nullptr
 // 0x555E40
-bool CRopes::FindCoorsAlongRope(uint32 ropeId, float fCoorAlongRope, CVector* outPosn, CVector* a4) {
-    return plugin::CallAndReturn<bool, 0x555E40, uint32, float, CVector*, CVector*>(ropeId, fCoorAlongRope, outPosn, a4);
+bool CRopes::FindCoorsAlongRope(uint32 ropeId, float fDistAlongRope, CVector* outPosn, CVector* outSpeed) {
+    return plugin::CallAndReturn<bool, 0x555E40, uint32, float, CVector*, CVector*>(ropeId, fDistAlongRope, outPosn, outSpeed);
 }
 
 // 0x558D10

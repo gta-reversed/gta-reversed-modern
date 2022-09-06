@@ -135,9 +135,7 @@ int32 CBaseModelInfo::GetAnimFileIndex_Reversed() {
 }
 
 void CBaseModelInfo::SetTexDictionary(const char* txdName) {
-    m_nTxdIndex = CTxdStore::FindTxdSlot(txdName);
-    if (m_nTxdIndex == -1)
-        m_nTxdIndex = CTxdStore::AddTxdSlot(txdName);
+    m_nTxdIndex = CTxdStore::FindOrAddTxdSlot(txdName);
 }
 
 void CBaseModelInfo::ClearTexDictionary() {
