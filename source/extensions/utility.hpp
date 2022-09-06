@@ -29,6 +29,13 @@ bool IsNull(T value) { return value == nullptr; }
 template<typename T>
 auto Not(bool(*fn)(T)) { return [fn](const T& value) { return !fn(value); }; }
 
+struct NotIsNull {
+    template<typename T>
+    bool operator()(const T* ptr) {
+        return ptr != nullptr;
+    }
+};
+
 /*!
 * @tparam Start     The number at which to start the iteration
 * @tparam Stop      The number at which to stop the iteration
