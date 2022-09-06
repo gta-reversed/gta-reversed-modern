@@ -13,6 +13,9 @@
 
 class NOTSA_EXPORT_VTABLE CTaskComplexPlayHandSignalAnim : public CTaskComplex {
 public:
+    static inline uint32& ms_animBlock = *(uint32*)0x8D2E38;
+
+public:
     AnimationId m_animationId{};
     float       m_fBlendFactor{};
     bool        m_bLeftHandLoaded : 1{};
@@ -23,7 +26,7 @@ public:
 public:
     static constexpr auto Type = TASK_COMPLEX_HANDSIGNAL_ANIM;
 
-    void InjectHooks();
+    static void InjectHooks();
 
     explicit CTaskComplexPlayHandSignalAnim(AnimationId animationId = ANIM_ID_UNDEFINED, float blendFactor = 4.f);
     CTaskComplexPlayHandSignalAnim(const CTaskComplexPlayHandSignalAnim&);
@@ -35,7 +38,6 @@ public:
 
     CTask*    Clone() override;
     eTaskType GetTaskType() override { return Type; }
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;

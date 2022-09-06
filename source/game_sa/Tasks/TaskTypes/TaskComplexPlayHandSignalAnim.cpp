@@ -6,7 +6,7 @@ void CTaskComplexPlayHandSignalAnim::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x61B2B0);
-    RH_ScopedInstall(Destructor, 0x61BDF0, { .reversed = false });
+    RH_ScopedInstall(Destructor, 0x61BDF0);
 
     RH_ScopedInstall(GetAnimIdForPed, 0x61B460, {.reversed = false});
     RH_ScopedInstall(CreateSubTask, 0x61B2F0, {.reversed = false});
@@ -27,7 +27,35 @@ CTaskComplexPlayHandSignalAnim::CTaskComplexPlayHandSignalAnim(AnimationId anima
 
 // 0x61BDF0
 CTaskComplexPlayHandSignalAnim::~CTaskComplexPlayHandSignalAnim() {
-    DebugBreak(); // Unhooked in InjectHooks, so never reached.
+    enum {
+        RIGHT,
+        LEFT,
+    };
+    enum {
+        NONFAT,
+        FAT
+    };
+    const eModelID handModels[2][2]{
+        // nonfat           fat
+        { MODEL_SHANDL, MODEL_FHANDL }, // left
+        { MODEL_SHANDR, MODEL_FHANDR }  // right
+    };
+
+    // Remove hand model refs
+    for (const auto i : { LEFT, RIGHT }) {
+        CModelInfo::GetModelInfo(handModels[i][m_bUseFatHands ? FAT : NONFAT])->RemoveRef();
+    }
+
+    // Deal with anim
+    if (m_bAnimationLoaded) { // Remove anim ref
+        CAnimManager::RemoveAnimBlockRef(ms_animBlock);
+    } else if (ms_animBlock != -1 && !CAnimManager::ms_aAnimBlocks[ms_animBlock].usRefs) { 
+        if (!rng::all_of(std::array{ LEFT, RIGHT }, [&, this](auto i) { // Unload anim block if not all of the models has refs
+            return CModelInfo::GetModelInfo(handModels[i][m_bUseFatHands ? FAT : NONFAT])->m_nRefCount != 0;
+        })) {
+            CStreaming::RemoveModel(IFPToModelId(ms_animBlock));        
+        }
+    }
 }
 
 // 0x61B460
