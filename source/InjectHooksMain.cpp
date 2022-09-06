@@ -163,6 +163,7 @@
 #include "TaskSimpleFacial.h"
 #include "TaskComplexCopInCar.h"
 #include "TaskComplexFacial.h"
+#include "TaskComplexPlayHandSignalAnim.h"
 #include "TaskComplexInAirAndLand.h"
 #include "TaskSimpleGetUp.h"
 #include "TaskSimpleUninterruptable.h"
@@ -897,7 +898,7 @@ void InjectHooksMain() {
         CTaskSimpleJump::InjectHooks();
         CTaskSimpleFall::InjectHooks();
         CTaskSimpleClimb::InjectHooks();
-        // CTaskComplexPlayHandSignalAnim::InjectHooks();
+        CTaskComplexPlayHandSignalAnim::InjectHooks();
         // CTaskComplexWaitForPed::InjectHooks();
         CTaskComplexJump::InjectHooks();
         // CTaskComplexWanderStandard::InjectHooks();
