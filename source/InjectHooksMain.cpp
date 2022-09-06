@@ -154,6 +154,7 @@
 #include "TaskComplexHitPedWithCar.h"
 #include "TaskSimplePlayerOnFoot.h"
 #include "TaskComplexFollowPedFootsteps.h"
+#include "TaskComplexFollowLeaderAnyMeans.h"
 #include "TaskSimpleFightingControl.h"
 #include "TaskComplexGetUpAndStandStill.h"
 #include "TaskComplexGoPickUpEntity.h"
@@ -688,7 +689,7 @@ void InjectHooksMain() {
         // CTaskComplexFleeEntity::InjectHooks();
         CTaskComplexFleePoint::InjectHooks();
         // CTaskComplexFleeShooting::InjectHooks();
-        // CTaskComplexFollowLeaderAnyMeans::InjectHooks();
+        CTaskComplexFollowLeaderAnyMeans::InjectHooks();
         // CTaskComplexFollowNodeRouteShooting::InjectHooks();
         // CTaskComplexFollowPatrolRoute::InjectHooks();
         CTaskComplexFollowPointRoute::InjectHooks();

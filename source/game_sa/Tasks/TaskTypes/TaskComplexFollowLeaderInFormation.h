@@ -16,7 +16,7 @@ class CTaskComplexFollowLeaderInFormation : public CTaskComplex {
 public:
     static constexpr auto Type = TASK_COMPLEX_FOLLOW_LEADER_IN_FORMATION;
 
-    CTaskComplexFollowLeaderInFormation(CPedGroup* pedGroup, CPed* ped, const CVector& posn, float dist);
+    CTaskComplexFollowLeaderInFormation(CPedGroup* pedGroup, CPed* ped, const CVector& posn, float dist = -1.f);
     ~CTaskComplexFollowLeaderInFormation() override;
 
     eTaskType GetTaskType() override { return Type; }
