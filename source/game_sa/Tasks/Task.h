@@ -68,9 +68,9 @@ public:
     }
 
     /// Works like `static_cast` + in debug mode asserts the type to be as expected.
-    template<Task T>
-    static T* Cast(CTask* task) {
-        assert(task->GetTaskType() == T::Type);
+    template<Task T, typename Y>
+    static T* Cast(Y* task) {
+        assert(static_cast<CTask*>(task)->GetTaskType() == T::Type);
         return static_cast<T*>(task);
     }
 };
