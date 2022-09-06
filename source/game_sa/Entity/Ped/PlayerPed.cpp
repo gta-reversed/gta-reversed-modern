@@ -144,7 +144,7 @@ CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(PED_TYPE_PLAYE
         m_pPlayerData->m_nPlayerGroup = CPedGroups::AddGroup();
 
         auto& group = CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup);
-        group.GetIntelligence().SetDefaultTaskAllocatorType(5);
+        group.GetIntelligence().SetDefaultTaskAllocatorType(ePedGroupDefaultTaskAllocatorType::RANDOM);
         group.m_bIsMissionGroup = true;
         group.m_groupMembership.SetLeader(this);
         group.Process();
@@ -562,7 +562,7 @@ void CPlayerPed::TellGroupToStartFollowingPlayer(bool arg0, bool arg1, bool arg2
         return;
 
     group.m_bMembersEnterLeadersVehicle = arg0;
-    groupIntel.SetDefaultTaskAllocatorType(5); // TODO enum probably missing
+    groupIntel.SetDefaultTaskAllocatorType(ePedGroupDefaultTaskAllocatorType::RANDOM);
     if (arg0) {
         CEventPlayerCommandToGroup playerCmdEvent;
         playerCmdEvent.ComputeResponseTaskType(&group);

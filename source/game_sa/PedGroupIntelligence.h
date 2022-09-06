@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <concepts>
+
 #include "PedTaskPair.h"
 
 class CPed;
@@ -79,12 +81,9 @@ public:
     void  SetPrimaryTaskAllocator(CTaskAllocator* taskAllocator);
     void  SetScriptCommandTask(CPed* ped, const CTask* task);
 
-    bool AddEvent(CEvent* event);
-
-    // Helper so events can be directly passed in without having to it into a variable
-    template<typename T>
-        requires std::is_base_of_v<CEvent, T>
-    CEvent* AddEvent(T event) {
+    /// Helper so events can be directly passed in without having to it into a variable
+    template<std::derived_from<CEvent> T>
+    auto AddEvent(T event) {
         return AddEvent(&event);
     }
 

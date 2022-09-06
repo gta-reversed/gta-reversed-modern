@@ -27,7 +27,7 @@ public:
     CTaskComplexPassObject(const CTaskComplexPassObject&);
     ~CTaskComplexPassObject();
 
-    static void __stdcall AbortIK(CPed* ped);
+    static void AbortIK(CPed* ped);
 
     CTask*    Clone() override { return new CTaskComplexPassObject{ *this }; }
     eTaskType GetTaskType() override { return Type; }

@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace ReversibleHooks{
+ namespace ReversibleHooks{
 
 // TODO: Maybe this should go into `detail`
 constexpr uint32 JUMP_OPCODE = 0xE9;
