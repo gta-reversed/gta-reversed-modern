@@ -430,7 +430,6 @@ void InjectHooksMain() {
     CBulletTraces::InjectHooks();
     CDebug::InjectHooks();
     CGame::InjectHooks();
-    CPools::InjectHooks();
     CControllerState::InjectHooks();
     CKeyboardState::InjectHooks();
     CMouseControllerState::InjectHooks();
@@ -611,6 +610,29 @@ void InjectHooksMain() {
     CCustomBuildingRenderer::InjectHooks();
     CCustomBuildingDNPipeline::InjectHooks();
     CCustomCarEnvMapPipeline::InjectHooks();
+
+    const auto Pools = [] {
+        CPools::InjectHooks();
+        CIplDefPool::InjectHooks();
+        CPedPool::InjectHooks();
+        CVehiclePool::InjectHooks();
+        CBuildingPool::InjectHooks();
+        CObjectPool::InjectHooks();
+        CDummyPool::InjectHooks();
+        CColModelPool::InjectHooks();
+        CTaskPool::InjectHooks();
+        CPedIntelligencePool::InjectHooks();
+        CPtrNodeSingleLinkPool::InjectHooks();
+        CPtrNodeDoubleLinkPool::InjectHooks();
+        CEntryInfoNodePool::InjectHooks();
+        CPointRoutePool::InjectHooks();
+        //CPatrolRoutePool::InjectHooks();
+        CEventPool::InjectHooks();
+        CNodeRoutePool::InjectHooks();
+        CTaskAllocatorPool::InjectHooks();
+        CPedAttractorPool::InjectHooks();
+    };
+    Pools();
 
     const auto Audio = []() {
         CAEVehicleAudioEntity::InjectHooks();
