@@ -190,7 +190,12 @@ public:
     }
 
     // 0x5A1C00
-    A* New(int32 ref) {
+    /*!
+    * @brief Allocate object at ref
+    * @returns A ptr to the object at ref
+    */
+    A* NewAt(int32 ref) {
+        // TODO/NOTE: Maybe check if where we're allocating at is free?
         A* result = &m_pObjects[GetIndexFromRef(ref)]; // GetIndexFromRef asserts if idx out of range
         CreateAtRef(ref);
         return result;

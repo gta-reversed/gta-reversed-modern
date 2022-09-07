@@ -1,5 +1,7 @@
 #pragma once
 
+#include <concepts>
+
 #include "TaskComplex.h"
 #include "TaskTimer.h"
 #include "Ped.h" // TODO: eMoveState (When possible move to an enum file)
@@ -15,9 +17,9 @@
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskSimpleStandStill.h"
 #include "TaskSimpleTired.h"
+#include "PosCalculators/EntitySeekPosCalculator.h"
 
-template <typename EntitySeekT>
-    //requires (std::is_base_of_v<CEntitySeekPosCalculator, EntitySeekT>)
+template <std::derived_from<CEntitySeekPosCalculator> EntitySeekT>
 class NOTSA_EXPORT_VTABLE CTaskComplexSeekEntity : public CTaskComplex {
     CEntity* m_entityToSeek{};
     int32 m_seekInterval{};
@@ -344,8 +346,8 @@ public:
     CTask* CreateSubTaskWhenPedIsTooFarFromEntity(CPed* ped, float pedToSeekPosDist2DSq) {
         return CreateSubTask(
             (m_minEntityDist2D == 0.f || pedToSeekPosDist2DSq > sq(m_minEntityDist2D))
-            ? TASK_COMPLEX_FOLLOW_NODE_ROUTE
-            : TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL,
+                ? TASK_COMPLEX_FOLLOW_NODE_ROUTE
+                : TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL,
             ped
         );
     }
