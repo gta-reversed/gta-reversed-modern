@@ -102,8 +102,8 @@ void CWeather::AddRain() {
 // 0x72A820
 void CWeather::AddSandStormParticles() {
     CVector position = TheCamera.GetPosition();
-    position.x += TheCamera.m_mCameraMatrix.GetForward().x * 10.0f;
-    position.y += TheCamera.m_mCameraMatrix.GetForward().y * 10.0f;
+    position.x += TheCamera.m_mCameraMatrix.GetUp().x * 10.0f;
+    position.y += TheCamera.m_mCameraMatrix.GetUp().y * 10.0f;
 
     position.x += CGeneral::GetRandomNumberInRange(0.0f, 40.0f) - 20.0f;
     position.y += CGeneral::GetRandomNumberInRange(0.0f, 40.0f) - 20.0f;
