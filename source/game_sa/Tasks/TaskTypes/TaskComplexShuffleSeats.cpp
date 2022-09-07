@@ -151,12 +151,11 @@ CTask* CTaskComplexShuffleSeats::CreateNextSubTask(CPed* ped) {
 // 0x643700
 CTask* CTaskComplexShuffleSeats::CreateFirstSubTask(CPed* ped) {
     return CreateSubTask([this, ped] {
-        if (!m_veh || !CCarEnterExit::IsVehicleHealthy(m_veh) || !CCarEnterExit::IsPedHealthy(ped)) {
-            return TASK_NONE;
-        } else {
+        if (m_veh && CCarEnterExit::IsVehicleHealthy(m_veh) && CCarEnterExit::IsPedHealthy(ped)) {
             CreateTaskUtilityLineUpPedWithCar(ped);
             return TASK_SIMPLE_CAR_SHUFFLE;
-        }
+        } 
+        return TASK_NONE;
     }(), ped);
 }
 
