@@ -4,7 +4,7 @@
 #include "TaskComplexFollowPointRoute.h"
 #include "TaskComplexExtinguishFires.h"
 #include "TaskComplexStealCar.h"
-#include "TaskSimplePlayerOnFoot.h"
+#include "TaskComplexMoveBackAndJump.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -162,9 +162,8 @@ static void DebugCode() {
     }
 
     if (pad->IsStandardKeyJustPressed('9')) {
-        player->GetTaskManager().SetTask(new CTaskSimplePlayerOnFoot{ }, TASK_PRIMARY_PRIMARY);
+        player->GetTaskManager().SetTask(new CTaskComplexMoveBackAndJump{ }, TASK_PRIMARY_PRIMARY);
     }
-
 
     if (pad->IsStandardKeyJustPressed('1')) {
         CCheat::JetpackCheat();

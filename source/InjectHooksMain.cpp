@@ -207,6 +207,7 @@
 #include "TaskSimpleThrowProjectile.h"
 #include "TaskSimpleGoToPoint.h"
 #include "TaskComplexWanderMedic.h"
+#include "TaskComplexMoveBackAndJump.h"
 #include "TaskSimpleCarDriveTimed.h"
 #include "TaskComplexDriveWander.h"
 #include "TaskSimpleStealthKill.h"
@@ -747,7 +748,7 @@ void InjectHooksMain() {
         CTaskComplexLeaveCarAndFlee::InjectHooks();
         // CTaskComplexLeaveCarAndWander::InjectHooks();
         // CTaskComplexLeaveCarAsPassengerWait::InjectHooks();
-        // CTaskComplexMoveBackAndJump::InjectHooks();
+        CTaskComplexMoveBackAndJump::InjectHooks();
         CTaskComplexOnFire::InjectHooks();
         // CTaskComplexOpenDriverDoor::InjectHooks();
         // CTaskComplexOpenPassengerDoor::InjectHooks();
