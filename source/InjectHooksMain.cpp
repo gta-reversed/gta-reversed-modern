@@ -165,6 +165,7 @@
 #include "TaskSimpleFacial.h"
 #include "TaskComplexCopInCar.h"
 #include "TaskComplexFacial.h"
+#include "TaskComplexInWater.h"
 #include "TaskComplexInAirAndLand.h"
 #include "TaskSimpleGetUp.h"
 #include "TaskSimpleUninterruptable.h"
@@ -731,7 +732,7 @@ void InjectHooksMain() {
         CTaskComplexGotoDoorAndOpen::InjectHooks();
         CTaskComplexHitByGunResponse::InjectHooks();
         CTaskComplexHitResponse::InjectHooks();
-        // CTaskComplexInWater::InjectHooks();
+        CTaskComplexInWater::InjectHooks();
         CTaskComplexInvestigateDeadPed::InjectHooks();
         // CTaskComplexInvestigateDisturbance::InjectHooks();
         // CTaskComplexKillAllThreats::InjectHooks();
