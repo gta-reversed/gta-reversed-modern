@@ -5,7 +5,7 @@
 class CPed;
 class CTaskComplexInWater;
 
-class CTaskComplexInWater : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexInWater : public CTaskComplex {
 
 public:
     static void InjectHooks();

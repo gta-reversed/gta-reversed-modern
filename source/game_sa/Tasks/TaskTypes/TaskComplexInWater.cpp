@@ -67,7 +67,7 @@ CTask* CTaskComplexInWater::CreateFirstSubTask(CPed* ped) {
     }
 
     if (ped->IsCreatedByMission()) {
-        if (const auto goTo = ped->GetTaskManager().Find<CTaskSimpleGoTo>()) {
+        if (const auto goTo = ped->GetTaskManager().Find<CTaskSimpleGoToPoint>()) {
             return new CTaskSimpleSwim{ &goTo->m_vecTargetPoint, nullptr };
         }
     }
