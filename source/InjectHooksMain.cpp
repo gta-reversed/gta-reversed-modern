@@ -121,6 +121,7 @@
 
 // Tasks
 #include "TaskComplexSitDownThenIdleThenStandUp.h"
+#include "TaskComplexLeaveCarAsPassengerWait.h"
 #include "TaskComplexInvestigateDeadPed.h"
 #include "TaskComplexSignalAtPed.h"
 #include "TaskSimpleCarCloseDoorFromOutside.h"
@@ -746,7 +747,7 @@ void InjectHooksMain() {
         CTaskComplexLeaveBoat::InjectHooks();
         CTaskComplexLeaveCarAndFlee::InjectHooks();
         // CTaskComplexLeaveCarAndWander::InjectHooks();
-        // CTaskComplexLeaveCarAsPassengerWait::InjectHooks();
+        CTaskComplexLeaveCarAsPassengerWait::InjectHooks();
         // CTaskComplexMoveBackAndJump::InjectHooks();
         CTaskComplexOnFire::InjectHooks();
         // CTaskComplexOpenDriverDoor::InjectHooks();

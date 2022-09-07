@@ -166,7 +166,7 @@ bool CTaskSimpleCarJumpOut::ProcessPed(CPed* ped) {
 
     // 0x64DEC0
     {
-        CTaskSimpleCarSetPedOut getOutTask{ m_veh, m_door, true };
+        CTaskSimpleCarSetPedOut getOutTask{ m_veh, (eTargetDoor)m_door, true };
         getOutTask.m_nDoorFlagsToClear = m_doorFlagsToClear;
         getOutTask.m_nNumGettingInToClear = m_numGettingInToClear;
         getOutTask.ProcessPed(ped);
