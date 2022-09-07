@@ -3,7 +3,7 @@
 #include "ScriptsForBrains.h"
 #include "PedAttractor.h"
 #include "TaskSimpleUseAtm.h"
-//#include "TaskComplexSitDownThenIdleThenStandUp.h"
+#include "TaskComplexSitDownThenIdleThenStandUp.h"
 #include "TaskComplexWaitForBus.h"
 #include "TaskComplexWaitForDryWeather.h"
 #include "TaskComplexUseScriptedBrain.h"
@@ -16,14 +16,13 @@ void CTaskComplexUseAttractor::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x6326F0);
-
     RH_ScopedInstall(Destructor, 0x632720);
 
-    RH_ScopedVMTInstall(Clone, 0x6369B0, {.reversed = false});
-    RH_ScopedVMTInstall(GetTaskType, 0x632710, {.reversed = false});
-    RH_ScopedVMTInstall(CreateNextSubTask, 0x632730, {.reversed = false});
-    RH_ScopedVMTInstall(CreateFirstSubTask, 0x6385D0, {.reversed = false});
-    RH_ScopedVMTInstall(ControlSubTask, 0x6327C0, {.reversed = false});
+    RH_ScopedVMTInstall(Clone, 0x6369B0);
+    RH_ScopedVMTInstall(GetTaskType, 0x632710);
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x632730);
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x6385D0);
+    RH_ScopedVMTInstall(ControlSubTask, 0x6327C0);
 }
 
 // 0x6326F0
@@ -63,12 +62,11 @@ CTask* CTaskComplexUseAttractor::CreateFirstSubTask(CPed* ped) {
             return new CTaskSimpleUseAtm{};
         case PED_ATTRACTOR_SEAT:
         case PED_ATTRACTOR_STEP:
-            NOTSA_UNREACHABLE();
-            //return new CTaskComplexSitDownThenIdleThenStandUp{
-            //    CGeneral::RandomBool(40) ? CGeneral::GetRandomNumberInRange(15'000, 60'000) : gDefaultTaskTime,
-            //    type == PED_ATTRACTOR_STEP,
-            //    ped->bStayInSamePlace
-            //};
+            return new CTaskComplexSitDownThenIdleThenStandUp{
+                CGeneral::RandomBool(40) ? CGeneral::GetRandomNumberInRange(15'000, 60'000) : gDefaultTaskTime,
+                type == PED_ATTRACTOR_STEP,
+                !!ped->bStayInSamePlace
+            };
         case PED_ATTRACTOR_STOP:
             return new CTaskComplexWaitForBus{};
         case PED_ATTRACTOR_PIZZA:

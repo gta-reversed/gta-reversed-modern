@@ -21,7 +21,7 @@ enum eSunbatherType : uint32
     SUNBATHER_FEMALE_3,
 };
 
-class CTaskComplexSunbathe : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexSunbathe : public CTaskComplex {
 public:
     bool           m_bStartStanding{};
     bool           m_bBathing{};
