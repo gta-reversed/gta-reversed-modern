@@ -48,24 +48,23 @@ CTaskSimpleGunControl::~CTaskSimpleGunControl() {
 bool CTaskSimpleGunControl::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
     const auto urgent = priority == ABORT_PRIORITY_URGENT;
 
-    if (urgent) {
-        if (event) {
-            if (event->GetEventPriority() < 22) {
-                return false;
-            }
-
-            switch (event->GetEventType()) {
-            case EVENT_VEHICLE_COLLISION:
-            case EVENT_PED_COLLISION_WITH_PED:
-            case EVENT_PED_COLLISION_WITH_PLAYER:
-            case EVENT_PLAYER_COLLISION_WITH_PED:
-            case EVENT_OBJECT_COLLISION:
-            case EVENT_BUILDING_COLLISION:
-                break;
-            default:
-                return false;
-            }
+    if (urgent && event) {
+        if (event->GetEventPriority() < 22) {
+            return false;
         }
+
+        switch (event->GetEventType()) {
+        case EVENT_VEHICLE_COLLISION:
+        case EVENT_PED_COLLISION_WITH_PED:
+        case EVENT_PED_COLLISION_WITH_PLAYER:
+        case EVENT_PLAYER_COLLISION_WITH_PED:
+        case EVENT_OBJECT_COLLISION:
+        case EVENT_BUILDING_COLLISION:
+            return false;
+        default:
+            break;
+        }
+        
     }
 
     if (const auto useGun = ped->GetIntelligence()->GetTaskUseGun()) {
