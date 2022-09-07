@@ -103,7 +103,6 @@ CTask* CTaskComplexShuffleSeats::CreateNextSubTask(CPed* ped) {
             case TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER:
                 return TASK_SIMPLE_CAR_SET_PED_OUT;
             case TASK_NONE:
-                return TASK_FINISHED;
             case TASK_SIMPLE_CAR_SET_PED_OUT:
                 return TASK_FINISHED;
             default:
