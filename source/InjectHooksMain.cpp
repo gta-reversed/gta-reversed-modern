@@ -223,6 +223,7 @@
 #include "TaskComplexWalkRoundCar.h"
 #include "TaskSimpleDuck.h"
 #include "TaskComplexLeaveCarAndFlee.h"
+#include "TaskComplexLeaveCarAndWander.h"
 #include "TaskComplexMedicTreatInjuredPed.h"
 #include "SeekEntity/TaskComplexSeekEntityRadiusAngleOffset.h"
 #include "SeekEntity/TaskComplexSeekEntityXYOffset.h"
@@ -745,7 +746,7 @@ void InjectHooksMain() {
         CTaskComplexLeaveCarAndDie::InjectHooks();
         CTaskComplexLeaveBoat::InjectHooks();
         CTaskComplexLeaveCarAndFlee::InjectHooks();
-        // CTaskComplexLeaveCarAndWander::InjectHooks();
+        CTaskComplexLeaveCarAndWander::InjectHooks();
         // CTaskComplexLeaveCarAsPassengerWait::InjectHooks();
         // CTaskComplexMoveBackAndJump::InjectHooks();
         CTaskComplexOnFire::InjectHooks();
