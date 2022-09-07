@@ -3,7 +3,8 @@
 #include "CDebugMenu.h"
 #include "TaskComplexFollowPointRoute.h"
 #include "TaskComplexExtinguishFires.h"
-#include "TaskComplexLeaveCarAndFlee.h"
+#include "TaskComplexStealCar.h"
+#include "TaskSimplePlayerOnFoot.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -155,20 +156,15 @@ static void DebugCode() {
         //    }
         //}
 
-        //const auto veh = player->GetIntelligence()->GetVehicleScanner().GetClosestVehicleInRange();
-        const auto veh = player->m_pVehicle;
-        const auto fleePos = veh->GetPosition() + veh->GetForward() * 10.f;
-        player->GetTaskManager().SetTask(
-            new CTaskComplexLeaveCarAndFlee{
-                veh,
-                fleePos,
-                TARGET_DOOR_DRIVER,
-                1000,
-                false
-            },
-            TASK_PRIMARY_PRIMARY
-        );
+        const auto veh = player->GetIntelligence()->GetVehicleScanner().GetClosestVehicleInRange();
+
+        player->GetTaskManager().SetTask(new CTaskComplexStealCar{veh}, TASK_PRIMARY_PRIMARY);
     }
+
+    if (pad->IsStandardKeyJustPressed('9')) {
+        player->GetTaskManager().SetTask(new CTaskSimplePlayerOnFoot{ }, TASK_PRIMARY_PRIMARY);
+    }
+
 
     if (pad->IsStandardKeyJustPressed('1')) {
         CCheat::JetpackCheat();

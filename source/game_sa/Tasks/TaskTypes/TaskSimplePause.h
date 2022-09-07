@@ -11,7 +11,7 @@ public:
 public:
     static constexpr auto Type = TASK_SIMPLE_PAUSE;
 
-    CTaskSimplePause(int32 time);
+    explicit CTaskSimplePause(int32 time = 0);
     ~CTaskSimplePause() = default;
 
     CTask* Clone() override;

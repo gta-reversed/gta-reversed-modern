@@ -153,6 +153,7 @@
 #include "TaskSimpleInAir.h"
 #include "TaskComplexHitPedWithCar.h"
 #include "TaskSimplePlayerOnFoot.h"
+#include "TaskComplexStealCar.h"
 #include "TaskComplexFollowPedFootsteps.h"
 #include "TaskComplexFollowLeaderAnyMeans.h"
 #include "TaskSimpleFightingControl.h"
@@ -232,6 +233,7 @@
 #include "TaskSimpleHitWall.h"
 #include "TaskComplexLeaveCar.h"
 #include "TaskSimpleCarSetTempAction.h"
+#include "TaskComplexWaitAtAttractor.h"
 #include "TaskComplexTreatAccident.h"
 #include "TaskComplexGoToPointAndStandStillTimed.h"
 #include "TaskComplexPartnerShove.h"
@@ -771,7 +773,7 @@ void InjectHooksMain() {
         CTaskComplexSmartFleeEntity::InjectHooks();
         CTaskComplexSmartFleePoint::InjectHooks();
         // CTaskComplexStareAtPed::InjectHooks();
-        // CTaskComplexStealCar::InjectHooks();
+        CTaskComplexStealCar::InjectHooks();
         CTaskComplexTrackEntity::InjectHooks();
         CTaskComplexTurnToFaceEntityOrCoord::InjectHooks();
         // CTaskComplexUseAttractor::InjectHooks();
@@ -786,7 +788,7 @@ void InjectHooksMain() {
         // CTaskComplexUsePairedAttractor::InjectHooks();
         CTaskComplexUseScriptedBrain::InjectHooks();
         CTaskComplexUseScriptedAttractor::InjectHooks();
-        // CTaskComplexWaitAtAttractor::InjectHooks();
+        CTaskComplexWaitAtAttractor::InjectHooks();
         CTaskComplexWaitForBus::InjectHooks();
         CTaskComplexWaitForBackup::InjectHooks();
         CTaskComplexWaitForDryWeather::InjectHooks();
