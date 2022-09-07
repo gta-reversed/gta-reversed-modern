@@ -1,4 +1,5 @@
 #include "StdInc.h"
+#include "extensions/enumerate.hpp"
 #include "PedDebugModule.h"
 #include "Pools.h"
 #include "TaskManager.h"
@@ -44,12 +45,19 @@ void General::ProcessPed(CPed& ped) {
 }
 
 
-void Tasks::ProcessTask(CTask* task) {
+void Tasks::ProcessTask(CTask* task, std::optional<size_t> idx) {
     const auto taskType = task->GetTaskType();
+
+    const auto DoTreeNode = [&] {
+        return idx // If set, this is a root task
+            ? TreeNodeEx(task, ImGuiTreeNodeFlags_DefaultOpen, "%i: %s", (int)*idx, GetTaskTypeName(taskType)) // For root tasks show index, eventually as a string from `ePrimaryTasks` and `eSecondaryTask`
+            : TreeNodeEx(GetTaskTypeName(taskType), ImGuiTreeNodeFlags_DefaultOpen);
+    };
+
     PushID((int)taskType);
-    if (TreeNodeEx(GetTaskTypeName(taskType), ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (DoTreeNode()) {
         if (const auto sub = task->GetSubTask()) {
-            ProcessTask(sub);
+            ProcessTask(sub, std::nullopt);
         }
         TreePop();
     }
@@ -61,9 +69,9 @@ void Tasks::ProcessTask(CTask* task) {
 */
 void Tasks::ProcessTaskCategory(const char* label, const auto& tasks) {
     if (TreeNodeEx(label, ImGuiTreeNodeFlags_DefaultOpen)) {
-        for (const auto task : tasks) {
+        for (const auto& [idx, task] : notsa::enumerate(tasks)) {
             if (task) {
-                ProcessTask(task);
+                ProcessTask(task, idx);
             }
         }
         TreePop();
