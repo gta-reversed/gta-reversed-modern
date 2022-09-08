@@ -40,8 +40,8 @@ public:
     * @return An item from the range choosen randomly. Same as Python's `random.choice`
     */
     template<rng::random_access_range R>
-    static auto& RandomChoice(const R& range) {
-        return range[(size_t)CGeneral::GetRandomNumberInRange(0, range.size())];
+    static auto&& RandomChoice(const R& range) {
+        return range[(size_t)CGeneral::GetRandomNumberInRange(0, (int)rng::size(range))];
     }
 };
 
