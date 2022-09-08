@@ -222,9 +222,11 @@
 #include "TaskComplexPartnerGreet.h"
 #include "TaskComplexWaitForDryWeather.h"
 #include "TaskSimpleShakeFist.h"
+#include "TaskComplexFleeShooting.h"
 #include "TaskComplexWalkRoundCar.h"
 #include "TaskSimpleDuck.h"
 #include "TaskComplexLeaveCarAndFlee.h"
+#include "TaskComplexLeaveCarAndWander.h"
 #include "TaskComplexMedicTreatInjuredPed.h"
 #include "SeekEntity/TaskComplexSeekEntityRadiusAngleOffset.h"
 #include "SeekEntity/TaskComplexSeekEntityXYOffset.h"
@@ -298,6 +300,7 @@
 #include "TaskGoToVehicleAndLean.h"
 #include "TaskSimpleSetCharDecisionMaker.h"
 #include "TaskLeanOnVehicle.h"
+#include "TaskComplexSeekCoverUntilTargetDead.h"
 #include "TaskSimpleTurn180.h"
 #include "TaskComplexCarSlowBeDraggedOut.h"
 #include "TaskComplexCarSlowBeDraggedOutAndStandUp.h"
@@ -717,7 +720,7 @@ void InjectHooksMain() {
         // CTaskComplexFleeAnyMeans::InjectHooks();
         // CTaskComplexFleeEntity::InjectHooks();
         CTaskComplexFleePoint::InjectHooks();
-        // CTaskComplexFleeShooting::InjectHooks();
+        CTaskComplexFleeShooting::InjectHooks();
         CTaskComplexFollowLeaderAnyMeans::InjectHooks();
         // CTaskComplexFollowNodeRouteShooting::InjectHooks();
         // CTaskComplexFollowPatrolRoute::InjectHooks();
@@ -749,8 +752,8 @@ void InjectHooksMain() {
         CTaskComplexLeaveCarAndDie::InjectHooks();
         CTaskComplexLeaveBoat::InjectHooks();
         CTaskComplexLeaveCarAndFlee::InjectHooks();
-        // CTaskComplexLeaveCarAndWander::InjectHooks();
         CTaskComplexLeaveCarAsPassengerWait::InjectHooks();
+        CTaskComplexLeaveCarAndWander::InjectHooks();
         CTaskComplexMoveBackAndJump::InjectHooks();
         CTaskComplexOnFire::InjectHooks();
         // CTaskComplexOpenDriverDoor::InjectHooks();
@@ -761,7 +764,7 @@ void InjectHooksMain() {
         CTaskComplexReactToGunAimedAt::InjectHooks();
         CTaskComplexRoadRage::InjectHooks();
         // CTaskComplexScreamInCarThenLeave::InjectHooks();
-        // CTaskComplexSeekCoverUntilTargetDead::InjectHooks();
+        CTaskComplexSeekCoverUntilTargetDead::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculator>::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculatorDriving>::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculatorEntitySurface>::InjectHooks();

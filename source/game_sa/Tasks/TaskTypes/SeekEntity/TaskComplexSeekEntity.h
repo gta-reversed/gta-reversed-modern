@@ -19,7 +19,7 @@
 #include "TaskSimpleTired.h"
 #include "PosCalculators/EntitySeekPosCalculator.h"
 
-template <std::derived_from<CEntitySeekPosCalculator> EntitySeekT>
+template <std::derived_from<CEntitySeekPosCalculator> T_PosCalc>
 class NOTSA_EXPORT_VTABLE CTaskComplexSeekEntity : public CTaskComplex {
     CEntity* m_entityToSeek{};
     int32 m_seekInterval{};
@@ -30,7 +30,7 @@ class NOTSA_EXPORT_VTABLE CTaskComplexSeekEntity : public CTaskComplex {
     float m_unk2{}; // TODO: Used as the value for `CTaskComplexFollowNodeRoute::m_fUnkn2`
     CTaskTimer m_seekTimer{};
     CTaskTimer m_scanTimer{};
-    EntitySeekT m_entitySeekPosCalculator{};
+    T_PosCalc m_entitySeekPosCalculator{};
     eMoveState m_moveState{ PEDMOVE_RUN };
     bool m_flag0x1 : 1{};
     bool m_faceSeekEntityAfterReachingIt : 1{};
@@ -46,14 +46,15 @@ public:
     //static constexpr auto Type = eTaskType::TASK_COMPLEX_SEEK_ENTITY;
 
     CTaskComplexSeekEntity(
-        CEntity* entity,
-        int32    scanInterval,
-        int32    seekInterval,
-        float    maxEntityDist2D,
-        float    moveStateRadius,
-        float    unk2,
-        bool     flag0,
-        bool     faceSeekEntityAfterReachingIt
+        CEntity*  entity,
+        int32     scanInterval,
+        int32     seekInterval,
+        float     maxEntityDist2D,
+        float     moveStateRadius,
+        float     unk2,
+        bool      flag0,
+        bool      faceSeekEntityAfterReachingIt,
+        T_PosCalc seekPosCalculator = {}
     ) :
         m_entityToSeek{ entity },
         m_seekInterval{ seekInterval },
@@ -62,7 +63,8 @@ public:
         m_moveStateRadius{ moveStateRadius },
         m_unk2{ unk2 },
         m_flag0x1{ flag0 },
-        m_faceSeekEntityAfterReachingIt{ faceSeekEntityAfterReachingIt }
+        m_faceSeekEntityAfterReachingIt{ faceSeekEntityAfterReachingIt },
+        m_entitySeekPosCalculator{ seekPosCalculator }
     {
         CEntity::SafeRegisterRef(m_entityToSeek);
     }
