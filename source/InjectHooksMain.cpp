@@ -253,6 +253,7 @@
 #include "TaskComplexPartner.h"
 #include "TaskComplexFollowPointRoute.h"
 #include "TaskComplexDrivePointRoute.h"
+#include "TaskComplexStareAtPed.h"
 #include "TaskSimpleCarSetPedInAsDriver.h"
 #include "TaskComplexWaitForBus.h"
 #include "TaskSimpleWaitForBus.h"
@@ -779,7 +780,7 @@ void InjectHooksMain() {
         CTaskComplexSitDownThenIdleThenStandUp::InjectHooks();
         CTaskComplexSmartFleeEntity::InjectHooks();
         CTaskComplexSmartFleePoint::InjectHooks();
-        // CTaskComplexStareAtPed::InjectHooks();
+        CTaskComplexStareAtPed::InjectHooks();
         CTaskComplexStealCar::InjectHooks();
         CTaskComplexTrackEntity::InjectHooks();
         CTaskComplexTurnToFaceEntityOrCoord::InjectHooks();
