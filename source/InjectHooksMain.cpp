@@ -234,6 +234,7 @@
 #include "TaskSimpleHitWall.h"
 #include "TaskComplexLeaveCar.h"
 #include "TaskSimpleCarSetTempAction.h"
+#include "TaskComplexWanderFlee.h"
 #include "TaskComplexWaitAtAttractor.h"
 #include "TaskComplexTreatAccident.h"
 #include "TaskComplexGoToPointAndStandStillTimed.h"
@@ -797,7 +798,7 @@ void InjectHooksMain() {
         // CTaskComplexWalkAlongsidePed::InjectHooks();
         CTaskComplexWalkRoundBuildingAttempt::InjectHooks();
         CTaskComplexWalkRoundFire::InjectHooks();
-        // CTaskComplexWanderFlee::InjectHooks();
+        CTaskComplexWanderFlee::InjectHooks();
         CTaskSimpleAffectSecondaryBehaviour::InjectHooks();
         CTaskSimpleArrestPed__InjectHooks();
         CTaskSimpleBeHit::InjectHooks();
