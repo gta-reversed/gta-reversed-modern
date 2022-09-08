@@ -221,6 +221,7 @@
 #include "TaskComplexPartnerGreet.h"
 #include "TaskComplexWaitForDryWeather.h"
 #include "TaskSimpleShakeFist.h"
+#include "TaskComplexFleeShooting.h"
 #include "TaskComplexWalkRoundCar.h"
 #include "TaskSimpleDuck.h"
 #include "TaskComplexLeaveCarAndFlee.h"
@@ -717,7 +718,7 @@ void InjectHooksMain() {
         // CTaskComplexFleeAnyMeans::InjectHooks();
         // CTaskComplexFleeEntity::InjectHooks();
         CTaskComplexFleePoint::InjectHooks();
-        // CTaskComplexFleeShooting::InjectHooks();
+        CTaskComplexFleeShooting::InjectHooks();
         CTaskComplexFollowLeaderAnyMeans::InjectHooks();
         // CTaskComplexFollowNodeRouteShooting::InjectHooks();
         // CTaskComplexFollowPatrolRoute::InjectHooks();
