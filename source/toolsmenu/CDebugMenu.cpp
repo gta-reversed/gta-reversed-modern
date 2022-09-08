@@ -3,8 +3,8 @@
 #include "CDebugMenu.h"
 #include "TaskComplexFollowPointRoute.h"
 #include "TaskComplexExtinguishFires.h"
-#include "TaskComplexLeaveCarAndWander.h"
-#include "TaskSimplePlayerOnFoot.h"
+#include "TaskComplexStealCar.h"
+#include "TaskComplexScreamInCarThenLeave.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -162,7 +162,7 @@ static void DebugCode() {
     }
 
     if (pad->IsStandardKeyJustPressed('9')) {
-        player->GetTaskManager().SetTask(new CTaskSimplePlayerOnFoot{ }, TASK_PRIMARY_PRIMARY);
+        player->GetTaskManager().SetTask(new CTaskComplexScreamInCarThenLeave{ player->m_pVehicle, TARGET_DOOR_DRIVER }, TASK_PRIMARY_PRIMARY);
     }
 
     if (pad->IsStandardKeyJustPressed('1')) {
