@@ -291,7 +291,7 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
         // Otherwise create a new partial anim task
         ped->GetTaskManager().SetTaskSecondary([this, ped]() -> CTask* {
             const auto rnd = CGeneral::GetRandomNumberInRange(0, 500);
-            if (rnd >= 50 || rnd >= 56) { // 5%
+            if (50 >= rnd || rnd >= 56) { // 5%
                 if (rnd != 100) { // 99.8%
                     return m_pSubTask;
                 }
