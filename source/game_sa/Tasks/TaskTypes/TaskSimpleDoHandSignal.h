@@ -1,0 +1,39 @@
+#pragma once
+
+#include "TaskSimple.h"
+
+class CTaskSimpleDoHandSignal;
+class CPed;
+class CEvent;
+
+class NOTSA_EXPORT_VTABLE CTaskSimpleDoHandSignal : public CTaskSimple {
+
+public:
+    bool m_initialised = {}; // 0x8
+
+public:
+    static void InjectHooks();
+
+    static constexpr auto Type = eTaskType::TASK_SIMPLE_DO_HAND_SIGNAL;
+
+    CTaskSimpleDoHandSignal();
+    CTaskSimpleDoHandSignal(const CTaskSimpleDoHandSignal&);
+    ~CTaskSimpleDoHandSignal();
+
+    CTask*    Clone() override { return new CTaskSimpleDoHandSignal{*this}; }
+    eTaskType GetTaskType() override { return Type; }
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return true; }
+    bool      ProcessPed(CPed* ped) override;
+
+private: // Wrappers for hooks
+    // 0x660880
+    CTaskSimpleDoHandSignal* Constructor() {
+        this->CTaskSimpleDoHandSignal::CTaskSimpleDoHandSignal();
+        return this;
+    }
+    // 0x6608B0
+    CTaskSimpleDoHandSignal* Destructor() {
+        this->CTaskSimpleDoHandSignal::~CTaskSimpleDoHandSignal();
+        return this;
+    }
+};
