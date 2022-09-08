@@ -119,22 +119,3 @@ bool CPedGroupMembership::CanAddFollower() {
 CPed* CPedGroupMembership::GetRandom() {
     return CGeneral::RandomChoice(m_apMembers | rng::views::take(CountMembers()));
 }
-
-auto CPedGroupMembership::GetMemberClosestTo(CPed* ped) -> std::tuple<CPed*, float> {
-    const auto& pedPos = ped->GetPosition();
-
-    float closestDistSq{std::numeric_limits<float>::max()};
-    CPed* closest{};
-    for (auto& mem : GetMembers()) {
-        if (&mem == ped) {
-            continue;
-        }
-
-        if (const auto distSq = (pedPos - mem.GetPosition()).SquaredMagnitude(); closestDistSq > distSq) {
-            closestDistSq = distSq;
-            closest = &mem;
-        }
-    }
-
-    return { closest, closestDistSq };
-}
