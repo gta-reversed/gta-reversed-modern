@@ -297,6 +297,7 @@
 #include "TaskGoToVehicleAndLean.h"
 #include "TaskSimpleSetCharDecisionMaker.h"
 #include "TaskLeanOnVehicle.h"
+#include "TaskComplexSeekCoverUntilTargetDead.h"
 #include "TaskSimpleTurn180.h"
 #include "TaskComplexCarSlowBeDraggedOut.h"
 #include "TaskComplexCarSlowBeDraggedOutAndStandUp.h"
@@ -760,7 +761,7 @@ void InjectHooksMain() {
         CTaskComplexReactToGunAimedAt::InjectHooks();
         CTaskComplexRoadRage::InjectHooks();
         // CTaskComplexScreamInCarThenLeave::InjectHooks();
-        // CTaskComplexSeekCoverUntilTargetDead::InjectHooks();
+        CTaskComplexSeekCoverUntilTargetDead::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculator>::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculatorDriving>::InjectHooks();
         // CTaskComplexSeekEntity<CEntitySeekPosCalculatorEntitySurface>::InjectHooks();
