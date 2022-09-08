@@ -49,9 +49,9 @@ CTask* CTaskComplexShuffleSeats::CreateSubTask(eTaskType taskType, CPed* ped) {
     case TASK_SIMPLE_CAR_SHUFFLE:
         return new CTaskSimpleCarShuffle{ m_veh, m_startDoor, m_utilityLineUp };
     case TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER:
-        return new CTaskSimpleCarSetPedInAsPassenger{ m_veh, (int32)m_targetDoor, m_utilityLineUp };
+        return new CTaskSimpleCarSetPedInAsPassenger{ m_veh, m_targetDoor, false, m_utilityLineUp };
     case TASK_SIMPLE_CAR_SET_PED_OUT:
-        return new CTaskSimpleCarSetPedOut{ m_veh, CCarEnterExit::ComputeTargetDoorToExit(m_veh, ped), true };
+        return new CTaskSimpleCarSetPedOut{ m_veh, (eTargetDoor)CCarEnterExit::ComputeTargetDoorToExit(m_veh, ped), true };
     case TASK_FINISHED: {
         if (!ped->bInVehicle) {
             ped->m_bUsesCollision = true;
