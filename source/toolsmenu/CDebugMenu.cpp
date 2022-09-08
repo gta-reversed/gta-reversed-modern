@@ -156,9 +156,9 @@ static void DebugCode() {
         //    }
         //}
 
-        const auto veh = player->GetIntelligence()->GetVehicleScanner().GetClosestVehicleInRange();
-
-        player->GetTaskManager().SetTask(new CTaskComplexStealCar{veh}, TASK_PRIMARY_PRIMARY);
+        //const auto veh = player->GetIntelligence()->GetVehicleScanner().GetClosestVehicleInRange();
+        //const auto veh = player->m_pVehicle;
+        //player->GetTaskManager().SetTask(new CTaskComplexLeaveCarAsPassengerWait{veh}, TASK_PRIMARY_PRIMARY);
     }
 
     if (pad->IsStandardKeyJustPressed('9')) {
