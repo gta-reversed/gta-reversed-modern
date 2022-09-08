@@ -34,18 +34,24 @@ void CTaskComplexGangLeader::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x65DED0);
     RH_ScopedInstall(Destructor, 0x65DF30);
 
-    RH_ScopedInstall(GetRandomGangAmbientAnim, 0x65E730);
-    RH_ScopedInstall(ShouldLoadGangAnims, 0x65E7F0);
-    RH_ScopedInstall(DoGangAbuseSpeech, 0x65E860);
-    RH_ScopedInstall(TryToPassObject, 0x65EA50);
+    /*
+    * There are some weird crashes when these are hooked.
+    * I'm not entirely sure which function it's caused by.
+    * See PR#449 for more info.
+    */
 
-    RH_ScopedVMTInstall(Clone, 0x661FA0);
-    RH_ScopedVMTInstall(GetTaskType, 0x65DF20);
-    RH_ScopedVMTInstall(MakeAbortable, 0x65DFA0);
-    RH_ScopedVMTInstall(CreateNextSubTask, 0x65DFF0);
-    RH_ScopedVMTInstall(CreateFirstSubTask, 0x65E1F0);
-    RH_ScopedVMTInstall(ControlSubTask, 0x662370);
-    RH_ScopedVMTInstall(ScanForStuff, 0x65E200);
+    RH_ScopedInstall(GetRandomGangAmbientAnim, 0x65E730, { .enabled = false, .locked = true });
+    RH_ScopedInstall(ShouldLoadGangAnims, 0x65E7F0, { .enabled = false, .locked = true });
+    RH_ScopedInstall(DoGangAbuseSpeech, 0x65E860, { .enabled = false, .locked = true });
+    RH_ScopedInstall(TryToPassObject, 0x65EA50, { .enabled = false, .locked = true });
+
+    RH_ScopedVMTInstall(Clone, 0x661FA0, { .enabled = false, .locked = true });
+    RH_ScopedVMTInstall(GetTaskType, 0x65DF20, { .enabled = false, .locked = true });
+    RH_ScopedVMTInstall(MakeAbortable, 0x65DFA0, { .enabled = false, .locked = true });
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x65DFF0, { .enabled = false, .locked = true });
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x65E1F0, { .enabled = false, .locked = true });
+    RH_ScopedVMTInstall(ControlSubTask, 0x662370, { .enabled = false, .locked = true });
+    RH_ScopedVMTInstall(ScanForStuff, 0x65E200, { .enabled = false, .locked = true });
 }
 
 // 0x65DED0
