@@ -72,5 +72,5 @@ CTask* CTaskComplexInWater::CreateFirstSubTask(CPed* ped) {
         }
     }
 
-    return new CTaskSimpleRunAnim{ ANIM_GROUP_DEFAULT, ANIM_ID_SWIM_TREAD };
+    return new CTaskSimpleRunAnim{ ANIM_GROUP_DEFAULT, ANIM_ID_SWIM_TREAD, 8.f };
 }
