@@ -61,6 +61,7 @@ public:
     void Flush();
     void FlushImmediately();
 
+    /// Create the next subtask of `task`
     void SetNextSubTask(CTaskComplex* task);
 
     void StopTimers(const CEvent* event);
@@ -68,7 +69,7 @@ public:
     CTaskSimple* GetSimplestTask(int32 taskIndex);
     static CTaskSimple* GetSimplestTask(CTask* task);
 
-    void AddSubTasks(CTaskComplex* task);
+    void AddSubTasks(CTask* task);
     void ParentsControlChildren(CTaskComplex* task);
     void SetTask(CTask* task, int32 taskIndex, bool unused = false);
     void SetTaskSecondary(CTask* task, int32 taskIndex);
@@ -170,6 +171,15 @@ public:
             }
         }
         return false;
+    }
+
+    /*!
+    * @notsa
+    * @brief Apply function to all tasks in `m_aPrimaryTasks` and `m_aSecondaryTasks`
+    */
+    void ApplyToRootTasks(const auto& fn) {
+        rng::for_each(m_aPrimaryTasks, fn);
+        rng::for_each(m_aSecondaryTasks, fn);
     }
 
 private:

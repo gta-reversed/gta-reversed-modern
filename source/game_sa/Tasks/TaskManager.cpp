@@ -118,51 +118,39 @@ bool CTaskManager::HasTaskSecondary(const CTask* task) {
 
 // 0x681850
 void CTaskManager::Flush() {
-    const auto DeleteAndNull = [](CTask*& task) {
+    ApplyToRootTasks([](CTask*& task) {
         delete task;
         task = nullptr;
-    };
-    rng::for_each(m_aPrimaryTasks, DeleteAndNull);
-    rng::for_each(m_aSecondaryTasks, DeleteAndNull);
+    });
 }
 
 // 0x6818A0
 void CTaskManager::FlushImmediately() {
-    for (auto& primaryTask : m_aPrimaryTasks) {
-        if (primaryTask && primaryTask->MakeAbortable(m_pPed, ABORT_PRIORITY_IMMEDIATE, nullptr)) {
-            delete primaryTask;
+    ApplyToRootTasks([this](CTask*& task) {
+        if (task) {
+            if (task->MakeAbortable(m_pPed, ABORT_PRIORITY_IMMEDIATE, nullptr)) {
+                delete task;
+                task = nullptr;
+            }
         }
-        primaryTask = nullptr;
-    }
-
-    for (auto& secondaryTask : m_aSecondaryTasks) {
-        if (secondaryTask && secondaryTask->MakeAbortable(m_pPed, ABORT_PRIORITY_IMMEDIATE, nullptr)) {
-            delete secondaryTask;
-        }
-        secondaryTask = nullptr;
-    }
+    });
 }
 
 // 0x681920
-void CTaskManager::SetNextSubTask(CTaskComplex* task) {
-    CTask* nextSubTask = nullptr;
-    if (!task)
+void CTaskManager::SetNextSubTask(CTaskComplex* ofTask) {
+    if (!ofTask) {
         return;
+    }
 
-    while (true) {
-        nextSubTask = task->CreateNextSubTask(m_pPed);
-        if (nextSubTask) {
+    for (auto task = ofTask; task = static_cast<CTaskComplex*>(task->m_pParentTask); task) {
+        if (const auto next = task->CreateNextSubTask(m_pPed)) {
+            task->SetSubTask(next);
+            AddSubTasks(next);
             break;
-        }
-        task->SetSubTask(nullptr);
-        task = task->m_pParentTask->AsComplex();
-
-        if (!task) {
-            return;
+        } else {
+            task->SetSubTask(nullptr);
         }
     }
-    task->SetSubTask(nextSubTask);
-    AddSubTasks(nextSubTask->AsComplex());
 }
 
 // 0x681970
@@ -193,7 +181,7 @@ CTaskSimple* CTaskManager::GetSimplestTask(int32 taskIndex) {
 }
 
 // 0x681A30
-void CTaskManager::AddSubTasks(CTaskComplex* task) {
+void CTaskManager::AddSubTasks(CTask* task) {
     if (!task)
         return;
 
@@ -203,9 +191,9 @@ void CTaskManager::AddSubTasks(CTaskComplex* task) {
             break;
         }
 
-        subTask = task->CreateFirstSubTask(m_pPed);
+        subTask = task->AsComplex()->CreateFirstSubTask(m_pPed);
         if (subTask) {
-            task->SetSubTask(subTask);
+            task->AsComplex()->SetSubTask(subTask);
         } else {
             SetNextSubTask(task->m_pParentTask->AsComplex());
         }
