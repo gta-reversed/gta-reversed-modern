@@ -6,7 +6,7 @@
 
 class CEntity;
 
-class CTaskComplexSmartFleeEntity : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexSmartFleeEntity : public CTaskComplex {
 public:
     CEntity*   m_entity{};                      /// Entity to flee from
     CVector    m_pos{};                         /// The current position to flee from (It's the entity's position with some tolerance, see `m_posCheckTimer`)
