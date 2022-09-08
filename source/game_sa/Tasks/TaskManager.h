@@ -74,7 +74,12 @@ public:
     * @brief Create the subtasks recursively iff `task` is complex.
     */
     void AddSubTasks(CTask* task);
-    void ParentsControlChildren(CTaskComplex* task);
+
+    /*!
+    * @addr 0x681A80
+    * @brief Control the given task and all it's subtasks, as in, call `ControlSubTask` on each one (iff it's complex)
+    */
+    void ParentsControlChildren(CTask* task);
     void SetTask(CTask* task, int32 taskIndex, bool unused = false);
     void SetTaskSecondary(CTask* task, int32 taskIndex);
     void ClearTaskEventResponse();

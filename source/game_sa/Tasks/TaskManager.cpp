@@ -155,10 +155,10 @@ void CTaskManager::SetNextSubTask(CTaskComplex* ofTask) {
 
 // 0x681970
 CTaskSimple* CTaskManager::GetSimplestTask(CTask* task) {
-    CTask* last = nullptr;
+    auto last{task};
     for (; task; task = task->GetSubTask())
         last = task;
-    return last->AsSimple();
+    return static_cast<CTaskSimple*>(task);
 }
 
 // 0x6819A0
@@ -201,18 +201,18 @@ void CTaskManager::AddSubTasks(CTask* toTask) {
 }
 
 // 0x681A80
-void CTaskManager::ParentsControlChildren(CTaskComplex* task) {
-    if (!task)
-        return;
-
-    for (; !task->IsSimple(); task = task->GetSubTask()->AsComplex()) {
-        CTask* subTask = task->GetSubTask();
-        auto* controlSubTask = task->ControlSubTask(m_pPed)->AsComplex();
-        if (subTask != controlSubTask) {
+void CTaskManager::ParentsControlChildren(CTask* parent) {
+    for (auto task = parent; task && !task->IsSimple();) {
+        const auto ctask = task->AsComplex();
+        const auto subTask = ctask->GetSubTask();
+        const auto newSubTask = ctask->ControlSubTask(m_pPed); // The function might return a new or the current sub-task or null, the latter indicating that the task is done
+        if (newSubTask == subTask) { // [Invered] Subtask hasn't changed, so continue
+            task = subTask;
+        } else { // Subtask has changed, abort old, set new
             subTask->MakeAbortable(m_pPed, ABORT_PRIORITY_URGENT, nullptr);
-            task->SetSubTask(controlSubTask);
-            AddSubTasks(controlSubTask);
-            return;
+            ctask->SetSubTask(newSubTask);
+            AddSubTasks(newSubTask);
+            break;
         }
     }
 }
