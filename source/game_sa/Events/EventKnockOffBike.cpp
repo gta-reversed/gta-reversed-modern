@@ -148,7 +148,7 @@ void CEventKnockOffBike::SetPedOutCar(CPed* ped)
         m_exitDoor = TARGET_DOOR_REAR_LEFT;
     else if (m_vehicle->m_apPassengers[2] == ped)
         m_exitDoor = TARGET_DOOR_REAR_RIGHT;
-    CTaskSimpleCarSetPedOut taskCarSetPedOut(m_vehicle, m_exitDoor, true);
+    CTaskSimpleCarSetPedOut taskCarSetPedOut(m_vehicle, (eTargetDoor)m_exitDoor, true);
     taskCarSetPedOut.m_bKnockedOffBike = true;
     taskCarSetPedOut.m_bSwitchOffEngine = false;
     taskCarSetPedOut.ProcessPed(ped);

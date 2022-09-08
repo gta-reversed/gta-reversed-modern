@@ -4,9 +4,14 @@
 #include "Vector2D.h"
 
 class CEntitySeekPosCalculatorRadiusAngleOffset : public CEntitySeekPosCalculator {
-    CVector2D m_offset{};
+    float m_radius{};
+    float m_angle{};
 public:
     static void InjectHooks();
+
+    CEntitySeekPosCalculatorRadiusAngleOffset() = default;
+    CEntitySeekPosCalculatorRadiusAngleOffset(float radius, float angle);
+
     void ComputeEntitySeekPos(const CPed& seeker, const CEntity& target, CVector& outPos) override;
 };
 VALIDATE_SIZE(CEntitySeekPosCalculatorRadiusAngleOffset, 0xC);
