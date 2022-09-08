@@ -69,6 +69,10 @@ public:
     CTaskSimple* GetSimplestTask(int32 taskIndex);
     static CTaskSimple* GetSimplestTask(CTask* task);
 
+    /*!
+    * @addr 0x681A30
+    * @brief Create the subtasks recursively iff `task` is complex.
+    */
     void AddSubTasks(CTask* task);
     void ParentsControlChildren(CTaskComplex* task);
     void SetTask(CTask* task, int32 taskIndex, bool unused = false);

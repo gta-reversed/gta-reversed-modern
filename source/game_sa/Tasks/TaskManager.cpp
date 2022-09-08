@@ -181,24 +181,23 @@ CTaskSimple* CTaskManager::GetSimplestTask(int32 taskIndex) {
 }
 
 // 0x681A30
-void CTaskManager::AddSubTasks(CTask* task) {
-    if (!task)
+void CTaskManager::AddSubTasks(CTask* toTask) {
+    if (!toTask) {
         return;
+    }
 
-    CTask* subTask = nullptr;
-    do {
-        if (task->IsSimple()) {
+    for (auto task = toTask; !task->IsSimple();) {
+        const auto ctask = task->AsComplex();
+        if (const auto sub = ctask->CreateFirstSubTask(m_pPed)) {
+            ctask->SetSubTask(sub);
+            task = sub; // Go on creating the subtask of the created task
+        } else { // No sub task, so we can stop here
+            if (ctask->m_pParentTask) {
+                SetNextSubTask(ctask->m_pParentTask->AsComplex()); // We're a subtask of the parent (if any), thus parent must be complex
+            }
             break;
         }
-
-        subTask = task->AsComplex()->CreateFirstSubTask(m_pPed);
-        if (subTask) {
-            task->AsComplex()->SetSubTask(subTask);
-        } else {
-            SetNextSubTask(task->m_pParentTask->AsComplex());
-        }
-        task = subTask->AsComplex();
-    } while (subTask);
+    }
 }
 
 // 0x681A80
