@@ -49,7 +49,7 @@ CTask* CTaskComplexSitDownThenIdleThenStandUp::CreateSubTask(eTaskType taskType)
     case TASK_FINISHED:
         return nullptr;
     case TASK_SIMPLE_SIT_DOWN:
-        return new CTaskSimpleSitDown{m_sitOnStep}; // TODO
+        return new CTaskSimpleSitDown{ m_sitOnStep };
     case TASK_SIMPLE_SIT_IDLE:
         return new CTaskSimpleSitIdle{ m_durationMs, m_sitOnStep };
     case TASK_SIMPLE_STAND_UP:

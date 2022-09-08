@@ -89,7 +89,7 @@ public:
     void SetAsOutOfTime() {
         m_nStartTime = CTimer::GetTimeInMS();
         m_nInterval = -1;
-        m_bStarted = 1;
+        m_bStarted = true;
     }
 
     bool IsStarted() const { return m_bStarted; }
