@@ -67,6 +67,14 @@ public:
     void StopTimers(const CEvent* event);
     CTask* GetSimplestActiveTask();
     CTaskSimple* GetSimplestTask(int32 taskIndex);
+
+    /*!
+    * @addr 0x681970
+    * @param The first task, `nullptr` is allowed, in which case it is returned.
+    * @return Last task in the task-chain
+    *
+    * This function has a horrible naming, it should be `GetLastSubTask` or of similar nature.
+    */
     static CTaskSimple* GetSimplestTask(CTask* task);
 
     /*!
@@ -80,7 +88,7 @@ public:
     * @brief Control the given task and all it's subtasks, as in, call `ControlSubTask` on each one (iff it's complex)
     */
     void ParentsControlChildren(CTask* task);
-    void SetTask(CTask* task, int32 taskIndex, bool unused = false);
+    void SetTask(CTask* task, ePrimaryTasks taskIndex, bool unused = false);
     void SetTaskSecondary(CTask* task, int32 taskIndex);
     void ClearTaskEventResponse();
     void ManageTasks();

@@ -35,6 +35,11 @@ void CTaskManager::InjectHooks() {
     RH_ScopedInstall(ManageTasks, 0x681C10);
 }
 
+static void DeleteTaskAndNull(CTask*& task) {
+    delete task;
+    task = nullptr;
+}
+
 // 0x6816A0
 CTaskManager::CTaskManager(CPed* ped) :
     m_pPed{ped}
@@ -118,10 +123,7 @@ bool CTaskManager::HasTaskSecondary(const CTask* task) {
 
 // 0x681850
 void CTaskManager::Flush() {
-    ApplyToRootTasks([](CTask*& task) {
-        delete task;
-        task = nullptr;
-    });
+    ApplyToRootTasks(DeleteTaskAndNull);
 }
 
 // 0x6818A0
@@ -129,8 +131,7 @@ void CTaskManager::FlushImmediately() {
     ApplyToRootTasks([this](CTask*& task) {
         if (task) {
             if (task->MakeAbortable(m_pPed, ABORT_PRIORITY_IMMEDIATE, nullptr)) {
-                delete task;
-                task = nullptr;
+                DeleteTaskAndNull(task);
             }
         }
     });
@@ -218,37 +219,32 @@ void CTaskManager::ParentsControlChildren(CTask* parent) {
 }
 
 // 0x681AF0
-void CTaskManager::SetTask(CTask* task, int32 taskIndex, bool unused) {
-    CTask* primaryTask = nullptr;
+void CTaskManager::SetTask(CTask* task, ePrimaryTasks taskIndex, bool unused) {
+    auto& taskInSlot = m_aPrimaryTasks[taskIndex];
+
+    // If we're nulling this slot, just delete current task, and return.
     if (!task) {
-        primaryTask = m_aPrimaryTasks[taskIndex];
-        if (primaryTask) {
-            delete primaryTask;
-            m_aPrimaryTasks[taskIndex] = nullptr;
-            return;
-        }
+        DeleteTaskAndNull(taskInSlot);
+        return;
     }
 
-    primaryTask = m_aPrimaryTasks[taskIndex];
-    if (primaryTask == task)
+    // Same task task is already set, do nothing
+    if (taskInSlot == task) {
         return;
+    }
 
-    delete primaryTask;
+    // Different tasks...
 
-    m_aPrimaryTasks[taskIndex] = task;
-    AddSubTasks(task->AsComplex());
-    if (GetTaskPrimary(taskIndex)) {
-        CTask* simplestTask = GetSimplestTask(m_aPrimaryTasks[taskIndex]);
-        if (!simplestTask->IsSimple()) {
-            primaryTask = m_aPrimaryTasks[taskIndex];
-            if (!primaryTask) {
-                m_aPrimaryTasks[taskIndex] = nullptr;
-                return;
-            }
-            delete primaryTask;
-            m_aPrimaryTasks[taskIndex] = nullptr;
-            return;
-        }
+    // Delete old (no need to null this time, as it's overwritten below)
+    delete taskInSlot;
+
+    // Set the task in the slot, and add it's subtasks
+    taskInSlot = task;
+    AddSubTasks(taskInSlot);
+
+    // Now, check if it's still there, and if it's last sub-task isn't simple
+    if (taskInSlot && !GetSimplestTask(taskInSlot)->IsSimple()) {
+        DeleteTaskAndNull(taskInSlot); // Delete it (TODO: Why?)
     }
 }
 
