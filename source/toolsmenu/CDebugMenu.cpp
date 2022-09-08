@@ -165,7 +165,6 @@ static void DebugCode() {
         player->GetTaskManager().SetTask(new CTaskComplexScreamInCarThenLeave{ player->m_pVehicle, TARGET_DOOR_DRIVER }, TASK_PRIMARY_PRIMARY);
     }
 
-
     if (pad->IsStandardKeyJustPressed('1')) {
         CCheat::JetpackCheat();
     }
