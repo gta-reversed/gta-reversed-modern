@@ -82,7 +82,7 @@ CTask* CTaskManager::FindActiveTaskByType(int32 taskType) {
 }
 
 // 0x6817D0
-CTask* CTaskManager::FindTaskByType(int32 taskIndex, int32 taskId) {
+CTask* CTaskManager::FindTaskByType(ePrimaryTasks taskIndex, eTaskType taskId) {
     for (CTask* task = GetTaskPrimary(taskIndex); task; task = task->GetSubTask()) {
         if (task->GetTaskType() == taskId) {
             return task;
@@ -92,15 +92,16 @@ CTask* CTaskManager::FindTaskByType(int32 taskIndex, int32 taskId) {
 }
 
 // 0x681810
-CTask* CTaskManager::GetTaskSecondary(int32 taskIndex) {
+CTask* CTaskManager::GetTaskSecondary(eSecondaryTask taskIndex) {
     return m_aSecondaryTasks[taskIndex];
 }
 
 // NOTSA?
 bool CTaskManager::HasTaskPrimary(const CTask* task) {
     for (auto& primaryTask : m_aPrimaryTasks) {
-        if (primaryTask && primaryTask == task)
+        if (primaryTask && primaryTask == task) {
             return true;
+        }
     }
     return false;
 }
@@ -108,23 +109,21 @@ bool CTaskManager::HasTaskPrimary(const CTask* task) {
 // 0x681820
 bool CTaskManager::HasTaskSecondary(const CTask* task) {
     for (auto& secondaryTask : m_aSecondaryTasks) {
-        if (secondaryTask && secondaryTask == task)
+        if (secondaryTask && secondaryTask == task) {
             return true;
+        }
     }
     return false;
 }
 
 // 0x681850
 void CTaskManager::Flush() {
-    for (auto& primaryTask : m_aPrimaryTasks) {
-        delete primaryTask;
-        primaryTask = nullptr;
-    }
-
-    for (auto& secondaryTask : m_aSecondaryTasks) {
-        delete secondaryTask;
-        secondaryTask = nullptr;
-    }
+    const auto DeleteAndNull = [](CTask*& task) {
+        delete task;
+        task = nullptr;
+    };
+    rng::for_each(m_aPrimaryTasks, DeleteAndNull);
+    rng::for_each(m_aSecondaryTasks, DeleteAndNull);
 }
 
 // 0x6818A0

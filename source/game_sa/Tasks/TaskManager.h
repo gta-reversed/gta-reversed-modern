@@ -51,12 +51,13 @@ public:
 
     CTask* GetActiveTask();
     CTask* FindActiveTaskByType(int32 taskType);
-    CTask* FindTaskByType(int32 taskIndex, int32 taskType);
-    CTask* GetTaskSecondary(int32 taskIndex);
+    CTask* FindTaskByType(ePrimaryTasks taskIndex, eTaskType taskType);
+    CTask* GetTaskSecondary(eSecondaryTask taskIndex);
 
     bool HasTaskPrimary(const CTask* task);
     bool HasTaskSecondary(const CTask* task);
 
+    /// Delete all tasks
     void Flush();
     void FlushImmediately();
 
