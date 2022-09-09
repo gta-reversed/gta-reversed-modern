@@ -133,6 +133,7 @@
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorXYOffset.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorFixedPos.h"
 #include "TaskComplexSeekEntityAnyMeansXYOffset.h"
+#include "TaskComplexFleeEntity.h"
 #include "TaskComplexSmartFleeEntity.h"
 #include "TaskSimpleArrestPed.h"
 #include "TaskComplexDragPedFromCar.h"
@@ -721,7 +722,7 @@ void InjectHooksMain() {
         // CTaskComplexFallAndStayDown::InjectHooks();
         CTaskComplexFallToDeath::InjectHooks();
         CTaskComplexFleeAnyMeans::InjectHooks();
-        // CTaskComplexFleeEntity::InjectHooks();
+        CTaskComplexFleeEntity::InjectHooks();
         CTaskComplexFleePoint::InjectHooks();
         CTaskComplexFleeShooting::InjectHooks();
         CTaskComplexFollowLeaderAnyMeans::InjectHooks();
