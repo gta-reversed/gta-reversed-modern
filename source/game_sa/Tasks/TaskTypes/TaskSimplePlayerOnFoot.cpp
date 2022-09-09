@@ -1093,7 +1093,9 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
         case MODE_ROCKETLAUNCHER_HS:
         case MODE_M16_1STPERSON:
         case MODE_HELICANNON_1STPERSON:
-        case MODE_CAMERA: {
+        case MODE_CAMERA:
+            break;
+        default: {
             player->ClearWeaponTarget();
             if (const auto task = player->GetTaskManager().GetActiveTask()) {
                 if (!CTask::IsA<TASK_COMPLEX_JUMP>(task)) {
