@@ -51,3 +51,25 @@ void CAutoPilot::ModifySpeed(float target) {
 void CAutoPilot::RemoveOnePathNode() {
     plugin::CallMethod<0x41B950, CAutoPilot*>(this);
 }
+
+
+/*!
+* @notsa
+* @brief Adds a temporary action
+* @param action The action to add
+* @param timeMs The action's duration in milliseconds
+*/
+void CAutoPilot::SetTempAction(uint32 action, uint32 durationMs) noexcept {
+    m_nTempAction = action;
+    m_nTempActionTime = CTimer::GetTimeInMS() + durationMs;
+}
+
+/*!
+* @notsa
+* @brief Clears the temporary action
+*/
+void CAutoPilot::ClearTempAction() noexcept {
+    // Seems like they really had a function like this, and it seemingly used `SetTempAction(0, 0)`
+    m_nTempAction = 0;
+    m_nTempActionTime = 0;
+}

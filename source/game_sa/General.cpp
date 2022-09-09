@@ -41,7 +41,7 @@ float CGeneral::LimitAngle(float angle) {
 
 // 0x53CB50
 float CGeneral::LimitRadianAngle(float angle) {
-    float result = clamp(angle, -25.0f, 25.0f);
+    float result = std::clamp(angle, -25.0f, 25.0f);
 
     while (result >= PI) {
         result -= 2 * PI;
@@ -186,4 +186,19 @@ float CGeneral::GetRandomNumberInRange(const float min, const float max) {
 
 float CGeneral::GetRadianAngleBetweenPoints(CVector2D a, CVector2D b) {
     return GetRadianAngleBetweenPoints(a.x, a.y, b.x, b.y);
+}
+
+/*!
+* @returns True `chanceOfTrue` % of the time, false othertimes
+*/
+bool CGeneral::RandomBool(uint8 chanceOfTrue) {
+    return (uint8)CGeneral::GetRandomNumberInRange(0, 100) < chanceOfTrue;
+}
+
+/*!
+* @return true/false with 50/50 change
+* @addr notsa
+*/
+bool CGeneral::DoCoinFlip() {
+	return CGeneral::GetRandomNumber() >= RAND_MAX / 2;
 }

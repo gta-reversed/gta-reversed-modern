@@ -7,29 +7,33 @@
 #include "TaskComplexWander.h"
 
 void CTaskComplexCarDrive::InjectHooks() {
-    RH_ScopedClass(CTaskComplexCarDrive);
+    RH_ScopedVirtualClass(CTaskComplexCarDrive, 0x86E934, 14);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    RH_ScopedInstall(Constructor_0, 0x63C9D0);
-    RH_ScopedInstall(Constructor_1, 0x63C940);
+    RH_ScopedInstall(Constructor_0, 0x63C9D0, { .enabled = false});
+    RH_ScopedInstall(Constructor_1, 0x63C940, { .enabled = false});
     RH_ScopedInstall(Destructor, 0x63CA40);
-    RH_ScopedVirtualInstall(Clone, 0x63DC90);
-    RH_ScopedVirtualInstall(CreateNextSubTask, 0x644E20, { .reversed = false });
-    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x645100);
-    RH_ScopedVirtualInstall(ControlSubTask, 0x645240);
-    RH_ScopedVirtualInstall(SetUpCar, 0x63CAE0);
-    RH_ScopedVirtualInstall(CreateSubTaskCannotGetInCar, 0x643200);
-    RH_ScopedVirtualInstall(Drive, 0x63CAD0);
-    RH_ScopedVirtualInstall(CreateSubTask, 0x642FA0, { .reversed = false });
+
+    RH_ScopedInstall(CreateSubTask, 0x642FA0, { .enabled = false, .locked = true });
+
+    RH_ScopedVMTInstall(CreateSubTaskCannotGetInCar, 0x643200, { .enabled = false});
+    RH_ScopedVMTInstall(SetUpCar, 0x63CAE0, { .enabled = false});
+    RH_ScopedVMTInstall(Drive, 0x63CAD0, { .enabled = false});
+    RH_ScopedVMTInstall(Clone, 0x63DC90, { .enabled = false});
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x644E20, { .enabled = false, .locked = true });
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x645100, { .enabled = false, .locked = true});
+    RH_ScopedVMTInstall(ControlSubTask, 0x645240, { .enabled = false});
 }
 
 // 0x63C9D0
-CTaskComplexCarDrive::CTaskComplexCarDrive(CVehicle* vehicle) : CTaskComplex() {
+// asDriver stuff is NOTSA
+CTaskComplexCarDrive::CTaskComplexCarDrive(CVehicle* vehicle, bool asDriver) :
+    m_asDriver{asDriver}
+{
     m_pVehicle              = vehicle;
     m_fSpeed                = 0.0f;
     m_carModelIndexToCreate = -1;
     m_nCarDrivingStyle      = DRIVING_STYLE_STOP_FOR_CARS;
-    field_1C                = AS_PASSENGER;
     m_bSavedVehicleBehavior = false;
     CEntity::SafeRegisterRef(m_pVehicle);
 }
@@ -40,7 +44,6 @@ CTaskComplexCarDrive::CTaskComplexCarDrive(CVehicle* vehicle, float speed, int32
     m_carModelIndexToCreate = carModelIndexToCreate;
     m_pVehicle              = vehicle;
     m_nCarDrivingStyle      = carDrivingStyle;
-    field_1C                = AS_PASSENGER;
     m_bSavedVehicleBehavior = false;
     CEntity::SafeRegisterRef(m_pVehicle);
 }
@@ -60,7 +63,7 @@ CTaskComplexCarDrive::~CTaskComplexCarDrive() {
 // 0x63DC90
 CTask* CTaskComplexCarDrive::Clone() {
     auto* task = new CTaskComplexCarDrive(m_pVehicle, m_fSpeed, m_carModelIndexToCreate, static_cast<eCarDrivingStyle>(m_nCarDrivingStyle));
-    task->field_1C = field_1C;
+    task->m_asDriver = m_asDriver;
     return task;
 }
 
@@ -77,7 +80,7 @@ CTask* CTaskComplexCarDrive::CreateFirstSubTask(CPed* ped) {
             m_pVehicle->RegisterReference(reinterpret_cast<CEntity**>(m_pVehicle));
             return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
         }
-        return field_1C ? CreateSubTask(TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER, ped) : nullptr;
+        return m_asDriver ? CreateSubTask(TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER, ped) : nullptr;
     }
 
     if (ped->m_pVehicle && ped->bInVehicle) {
@@ -89,11 +92,11 @@ CTask* CTaskComplexCarDrive::CreateFirstSubTask(CPed* ped) {
         if (!m_pVehicle->IsBike()) {
             CUpsideDownCarCheck carCheck;
             if (carCheck.IsCarUpsideDown(m_pVehicle) == 0) {
-                return CreateSubTask(field_1C ? TASK_COMPLEX_ENTER_CAR_AS_DRIVER : TASK_COMPLEX_ENTER_CAR_AS_PASSENGER, ped);
+                return CreateSubTask(m_asDriver ? TASK_COMPLEX_ENTER_CAR_AS_DRIVER : TASK_COMPLEX_ENTER_CAR_AS_PASSENGER, ped);
             }
-            return field_1C ? CreateSubTask(TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER, ped) : nullptr;
+            return m_asDriver ? CreateSubTask(TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER, ped) : nullptr;
         }
-        return CreateSubTask(field_1C ? TASK_COMPLEX_ENTER_CAR_AS_DRIVER : TASK_COMPLEX_ENTER_CAR_AS_PASSENGER, ped);
+        return CreateSubTask(m_asDriver ? TASK_COMPLEX_ENTER_CAR_AS_DRIVER : TASK_COMPLEX_ENTER_CAR_AS_PASSENGER, ped);
     }
 }
 

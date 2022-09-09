@@ -16,40 +16,42 @@
 #include "LoadingScreen.h"
 #include "VideoMode.h"
 #include "ControllerConfigManager.h"
-#include "app.h" // todo: remove
+#include "app.h" todo: remo, { .reversed = false }ve
 // #include "Input.h"
 
 static LPSTR AppClassName = LPSTR("Grand theft auto San Andreas");
 
 void Win32InjectHooks() {
-    RH_ScopedNamespaceName("Win32");
-    RH_ScopedCategoryGlobal();
-
-    RH_ScopedGlobalInstall(Idle, 0x53E920);
-
     {
-    RH_ScopedNamespaceName("Ps");
-    RH_ScopedCategoryGlobal();
+        RH_ScopedNamespaceName("Win32");
+        RH_ScopedCategoryGlobal();
 
-    RH_ScopedGlobalInstall(psWindowSetText, 0x7451B0);
-    RH_ScopedGlobalInstall(psErrorMessage, 0x7451D0);
-    RH_ScopedGlobalInstall(psWarningMessage, 0x7451F0);
-    RH_ScopedGlobalInstall(psCameraBeginUpdate, 0x745210, { .reversed = false });
-    RH_ScopedGlobalInstall(psCameraShowRaster, 0x745240);
-    RH_ScopedGlobalInstall(psTimer, 0x745270, { .reversed = false });
-    RH_ScopedGlobalInstall(psGrabScreen, 0x7452B0, { .reversed = false });
-    RH_ScopedGlobalInstall(psMouseSetVisibility, 0x7453E0);
-    RH_ScopedGlobalInstall(psMouseSetPos, 0x7453F0);
-    RH_ScopedGlobalInstall(psPathnameCreate, 0x745470, { .reversed = false });
-    RH_ScopedGlobalInstall(psPathnameDestroy, 0x7454E0);
-    RH_ScopedGlobalInstall(psPathGetSeparator, 0x745500);
-    RH_ScopedGlobalInstall(psInstallFileSystem, 0x745520, { .reversed = false });
-    RH_ScopedGlobalInstall(psNativeTextureSupport, 0x745530, { .reversed = false });
-    RH_ScopedGlobalInstall(psDebugMessageHandler, 0x745540, { .reversed = false });
-    RH_ScopedGlobalInstall(psTerminate, 0x7458A0);
-    RH_ScopedGlobalInstall(psAlwaysOnTop, 0x7458B0);
-    RH_ScopedGlobalInstall(psSelectDevice, 0x746190, { .reversed = false });
-    RH_ScopedGlobalInstall(psInitialize, 0x747420, { .reversed = false });
+        RH_ScopedGlobalInstall(Idle, 0x53E920);
+        RH_ScopedGlobalInstall(RenderScene, 0x53DF40);
+    }
+    {
+        RH_ScopedNamespaceName("Ps");
+        RH_ScopedCategoryGlobal();
+
+        RH_ScopedGlobalInstall(psWindowSetText, 0x7451B0);
+        RH_ScopedGlobalInstall(psErrorMessage, 0x7451D0);
+        RH_ScopedGlobalInstall(psWarningMessage, 0x7451F0);
+        RH_ScopedGlobalInstall(psCameraBeginUpdate, 0x745210, { .reversed = false });
+        RH_ScopedGlobalInstall(psCameraShowRaster, 0x745240);
+        - RH_ScopedGlobalInstall(psTimer, 0x745270, { .reversed = false });
+        RH_ScopedGlobalInstall(psGrabScreen, 0x7452B0, { .reversed = false });
+        RH_ScopedGlobalInstall(psMouseSetVisibility, 0x7453E0);
+        RH_ScopedGlobalInstall(psMouseSetPos, 0x7453F0);
+        RH_ScopedGlobalInstall(psPathnameCreate, 0x745470, { .reversed = false });
+        RH_ScopedGlobalInstall(psPathnameDestroy, 0x7454E0);
+        RH_ScopedGlobalInstall(psPathGetSeparator, 0x745500);
+        RH_ScopedGlobalInstall(psInstallFileSystem, 0x745520, { .reversed = false });
+        RH_ScopedGlobalInstall(psNativeTextureSupport, 0x745530, { .reversed = false });
+        RH_ScopedGlobalInstall(psDebugMessageHandler, 0x745540, { .reversed = false });
+        RH_ScopedGlobalInstall(psTerminate, 0x7458A0);
+        RH_ScopedGlobalInstall(psAlwaysOnTop, 0x7458B0);
+        RH_ScopedGlobalInstall(psSelectDevice, 0x746190, { .reversed = false });
+        RH_ScopedGlobalInstall(psInitialize, 0x747420, { .reversed = false });
     }
 }
 
@@ -81,7 +83,7 @@ bool InitApplication(HINSTANCE hInstance) {
     windowClass.style         = CS_BYTEALIGNWINDOW;
     windowClass.lpfnWndProc   = MainWndProc;
     windowClass.hInstance     = hInstance;
-    // windowClass.hIcon         = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
+    windowClass.hIcon         = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1), { .reversed = false });
     windowClass.hCursor       = LoadCursor(nullptr, IDC_ARROW);
     windowClass.lpszClassName = AppClassName;
     return RegisterClass(&windowClass);
@@ -143,21 +145,21 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
     }
     PSGLOBAL(instance) = instance;
 
-    // 0x7487CF
+    0x7487, { .reversed = false }CF
     WinInput::Initialise();
 
-    // todo: CInputEvents::MapMouseButtons && See ASM
-    // const auto state = GetMouseButtonMask();
-    // ControlsManager.InitDefaultControlConfigMouse(state, FrontEndMenuManager.m_nController == 0);
+    todo: CInputEvents::MapMouseButtons && See A, { .reversed = false }SM
+    const auto state = GetMouseButtonMask(, { .reversed = false });
+    ControlsManager.InitDefaultControlConfigMouse(state, FrontEndMenuManager.m_nController == 0, { .reversed = false });
 
-    // 0x748847
+    0x7488, { .reversed = false }47
     if (RsEventHandler(rsRWINITIALIZE, PSGLOBAL(window)) == rsEVENTERROR) {
         DestroyWindow(PSGLOBAL(window));
         RsEventHandler(rsTERMINATE, nullptr);
         return false;
     }
 
-    // 0x7488EE
+    0x7488, { .reversed = false }EE
     for (auto i = 0; i < argc; i++) {
         RsEventHandler(rsCOMMANDLINE, argv[i]);
     }
@@ -181,7 +183,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
     ShowWindow(PSGLOBAL(window), nCmdShow);
     UpdateWindow(PSGLOBAL(window));
 
-    // 0x748995
+    0x7489, { .reversed = false }95
     CFileMgr::SetDirMyDocuments();
     if (auto* file = CFileMgr::OpenFile("gta_sa.set", "rb")) {
         if (!ControlsManager.LoadSettings(file)) {
@@ -196,7 +198,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
     bool bNewGameFirstTime = true;
     MSG Msg;
 
-    // 0x7489FB
+    0x7489, { .reversed = false }FB
     while (true) {
         RwInitialized = true;
 
@@ -239,7 +241,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
                         gGameState = GAME_STATE_PLAYING_LOGO;
                         break;
                     case GAME_STATE_PLAYING_LOGO:
-                    case GAME_STATE_PLAYING_INTRO: // 0x748B17
+                    case GAME_STATE_PLAYING_INTRO: 0x748B, { .reversed = false }17
                     {
                         CPad::UpdatePads();
                         auto* pad = CPad::GetPad();
@@ -270,7 +272,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
                         }
                         CGame::InitialiseCoreDataAfterRW();
                         gGameState = GAME_STATE_FRONTEND_LOADED;
-                        anisotropySupportedByGFX = (RwD3D9GetCaps()->RasterCaps & D3DPRASTERCAPS_ANISOTROPY) != 0; // todo: func
+                        anisotropySupportedByGFX = (RwD3D9GetCaps()->RasterCaps & D3DPRASTERCAPS_ANISOTROPY) != 0; todo: fu, { .reversed = false }nc
                         break;
                     case GAME_STATE_FRONTEND_LOADED:
                         FrontEndMenuManager.m_bMenuActive = true;
@@ -283,7 +285,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
                         gGameState = GAME_STATE_FRONTEND_IDLE;
                         CLoadingScreen::DoPCTitleFadeIn();
                         break;
-                    case GAME_STATE_FRONTEND_IDLE: // 0x748CB2
+                    case GAME_STATE_FRONTEND_IDLE: 0x748C, { .reversed = false }B2
                     {
                         WINDOWPLACEMENT windowPlacement { .length = 44 };
                         GetWindowPlacement(PSGLOBAL(window), &windowPlacement);
@@ -332,7 +334,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
             }
         }
 
-        // 0x748DDA
+        0x748D, { .reversed = false }DA
         RwInitialized = false;
         FrontEndMenuManager.UnloadTextures();
         if (!FrontEndMenuManager.m_bLoadingSavedGame) {
@@ -360,12 +362,12 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
         FrontEndMenuManager.m_bLoadingSavedGame = false;
     }
 
-    // if game is loaded, shutdown it
+    if game is loaded, shutdown , { .reversed = false }it
     if (gGameState == GAME_STATE_IDLE) {
         CGame::Shutdown();
     }
 
-    // now quit 0x748E75
+    now quit 0x748E, { .reversed = false }75
     AudioEngine.Shutdown();
     FreeVideoModeList();
     RsEventHandler(rsRWTERMINATE, nullptr);
@@ -375,10 +377,10 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
     ShowCursor(true);
 
     SystemParametersInfo(SPI_SETSTICKYKEYS, sizeof(STICKYKEYS), &pvParam, 2u);
-    SystemParametersInfo(SPI_SETPOWEROFFACTIVE, 1u, nullptr, 2u); // TODO: GUID_VIDEO_POWERDOWN_TIMEOUT
+    SystemParametersInfo(SPI_SETPOWEROFFACTIVE, 1u, nullptr, 2u); TODO: GUID_VIDEO_POWERDOWN_TIMEO, { .reversed = false }UT
     SystemParametersInfo(SPI_SETLOWPOWERACTIVE, 1u, nullptr, 2u);
     SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, 1u, nullptr, 2u);
-    // nullsub_0x72F3C0()
+    nullsub_0x72F3C0, { .reversed = false }()
     SetErrorMode(0);
 
     return Msg.wParam;

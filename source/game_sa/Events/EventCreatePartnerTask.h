@@ -2,7 +2,7 @@
 
 #include "Event.h"
 
-class CEventCreatePartnerTask : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventCreatePartnerTask : public CEvent {
 public:
     int32 m_randomNumber;
     CPed* m_partner;

@@ -2,7 +2,7 @@
 
 #include "TaskComplex.h"
 
-class CTaskComplexEnterAnyCarAsDriver : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexEnterAnyCarAsDriver : public CTaskComplex {
 public:
     static constexpr auto Type = TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER;
 

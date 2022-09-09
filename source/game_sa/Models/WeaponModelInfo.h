@@ -9,7 +9,7 @@
 #include "ClumpModelInfo.h"
 #include "eWeaponType.h"
 
-class CWeaponModelInfo : public CClumpModelInfo {
+class NOTSA_EXPORT_VTABLE CWeaponModelInfo : public CClumpModelInfo {
 public:
     eWeaponType m_weaponInfo;
 

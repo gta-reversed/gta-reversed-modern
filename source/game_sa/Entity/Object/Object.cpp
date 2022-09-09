@@ -15,6 +15,7 @@
 #include "Ropes.h"
 #include "TheScripts.h"
 #include "Shadows.h"
+#include "Garages.h"
 #include "CustomBuildingRenderer.h"
 
 uint16& CObject::nNoTempObjects = *(uint16*)(0xBB4A70);
@@ -167,13 +168,13 @@ CObject::~CObject() {
 }
 
 // 0x5A1EE0
-void* CObject::operator new(unsigned size) {
+void* CObject::operator new(size_t size) {
     return GetObjectPool()->New();
 }
 
 // 0x5A1EF0
 void* CObject::operator new(unsigned size, int32 poolRef) {
-    return GetObjectPool()->New(poolRef);
+    return GetObjectPool()->NewAt(poolRef);
 }
 
 // 0x5A1F20
@@ -679,8 +680,8 @@ bool CObject::CanBeDeleted() const {
 
 // 0x59F160
 void CObject::SetRelatedDummy(CDummyObject* relatedDummy) {
+    assert(relatedDummy);
     m_pDummyObject = relatedDummy;
-    assert(m_pDummyObject);
     m_pDummyObject->RegisterReference(reinterpret_cast<CEntity**>(&m_pDummyObject));
 }
 
@@ -1130,42 +1131,46 @@ void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection
     }
 
     // Particle creation
-    if (!bWasDestroyed || !bExploded)
-    {
-        if (m_pObjectInfo->m_nFxType == eObjectFxType::NO_FX)
-            return;
+    if (bWasDestroyed && bExploded)
+        return;
 
-        bool bCreateParticle = false;
-        if (m_pObjectInfo->m_nFxType == eObjectFxType::PLAY_ON_HIT_DESTROYED)
-            bCreateParticle = true;
-        else if (m_pObjectInfo->m_nFxType == eObjectFxType::PLAY_ON_DESTROYED)
-            bCreateParticle = bWasDestroyed;
-        else if (m_pObjectInfo->m_nFxType == eObjectFxType::PLAY_ON_HIT)
-            bCreateParticle = damage > 30.0F;
-
-        if (!bCreateParticle)
-            return;
-
-        if (m_pObjectInfo->m_vFxOffset.x < -500.0F)
-        {
-            if (!fxOrigin)
-                return;
-
-            RwMatrix particleMat;
-            g_fx.CreateMatFromVec(&particleMat, fxOrigin, fxDirection);
-            auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, &particleMat, nullptr, false);
-            if (fxSystem)
-                fxSystem->PlayAndKill();
-
-            return;
+    switch (m_pObjectInfo->m_nFxType) {
+    case eObjectFxType::NO_FX:
+        return;
+    case eObjectFxType::PLAY_ON_HIT_DESTROYED:
+        break;
+    case eObjectFxType::PLAY_ON_DESTROYED:
+        if (bWasDestroyed) {
+            break;
         }
+        return;
+    case eObjectFxType::PLAY_ON_HIT:
+        if (damage > 30.0f) {
+            break;
+        }
+        return;
+    default:
+        return;
+    }
 
-        auto vecPoint = Multiply3x3(*m_matrix, m_pObjectInfo->m_vFxOffset);
-        vecPoint += GetPosition();
-        auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, &vecPoint, nullptr, false);
+    if (m_pObjectInfo->m_vFxOffset.x < -500.0F) {
+        if (!fxOrigin)
+            return;
+
+        RwMatrix particleMat;
+        g_fx.CreateMatFromVec(&particleMat, fxOrigin, fxDirection);
+        auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, &particleMat, nullptr, false);
         if (fxSystem)
             fxSystem->PlayAndKill();
+
+        return;
     }
+
+    auto vecPoint = *m_matrix * m_pObjectInfo->m_vFxOffset;
+    vecPoint += GetPosition();
+    auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, &vecPoint, nullptr, false);
+    if (fxSystem)
+        fxSystem->PlayAndKill();
 }
 
 // 0x5A1340
@@ -1177,7 +1182,7 @@ void CObject::Explode() {
     if (m_nColDamageEffect == COL_DAMAGE_EFFECT_BREAKABLE || m_nColDamageEffect == COL_DAMAGE_EFFECT_BREAKABLE_REMOVED) {
         vecPos.z -= 1.0F;
         auto vecDir = CVector(0.0F, 0.0F, 1.0F);
-        ObjectDamage(10000.0F, &vecPos, &vecDir, this, eWeaponType::WEAPON_EXPLOSION);
+        ObjectDamage(10'000.0F, &vecPos, &vecDir, this, eWeaponType::WEAPON_EXPLOSION);
     } else if (!physicalFlags.bDisableCollisionForce) {
         m_vecMoveSpeed.x += CGeneral::GetRandomNumberInRange(-0.0256F, 0.0256F);
         m_vecMoveSpeed.y += CGeneral::GetRandomNumberInRange(-0.0256F, 0.0256F);
@@ -1190,8 +1195,7 @@ void CObject::Explode() {
     }
 
     if (m_pObjectInfo->m_nFxType == eObjectFxType::PLAY_ON_DESTROYED) {
-        auto particleMat = CMatrix(*m_matrix);
-        auto vecPoint = Multiply3x3(particleMat, m_pObjectInfo->m_vFxOffset);
+        auto vecPoint = *m_matrix * m_pObjectInfo->m_vFxOffset;
         vecPoint += GetPosition();
         auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, &vecPoint, nullptr, false);
         if (fxSystem)
@@ -1249,14 +1253,10 @@ void CObject::ObjectFireDamage(float damage, CEntity* damager) {
 
 // 0x5A1840
 void CObject::TryToFreeUpTempObjects(int32 numObjects) {
-    const auto poolSize = GetObjectPool()->GetSize();
-    if (!poolSize)
+    if (numObjects <= 0)
         return;
 
-    for (auto i = poolSize - 1; i >= 0; --i) {
-        if (numObjects <= 0)
-            return;
-
+    for (auto i = 0; i < GetObjectPool()->GetSize(); ++i) {
         auto* obj = GetObjectPool()->GetAt(i);
         if (obj && obj->IsTemporary() && !obj->IsVisible()) {
             CWorld::Remove(obj);
@@ -1268,11 +1268,7 @@ void CObject::TryToFreeUpTempObjects(int32 numObjects) {
 
 // 0x5A18B0
 void CObject::DeleteAllTempObjects() {
-    const auto poolSize = GetObjectPool()->GetSize();
-    if (!poolSize)
-        return;
-
-    for (auto i = 0; i < poolSize; ++i) {
+    for (auto i = 0; i < GetObjectPool()->GetSize(); ++i) {
         auto* obj = GetObjectPool()->GetAt(i);
         if (obj && obj->IsTemporary()) {
             CWorld::Remove(obj);
@@ -1283,11 +1279,7 @@ void CObject::DeleteAllTempObjects() {
 
 // 0x5A1910
 void CObject::DeleteAllMissionObjects() {
-    const auto poolSize = GetObjectPool()->GetSize();
-    if (!poolSize)
-        return;
-
-    for (auto i = 0; i < poolSize; ++i)  {
+    for (auto i = 0; i < GetObjectPool()->GetSize(); ++i)  {
         auto* obj = GetObjectPool()->GetAt(i);
         if (obj && obj->IsMissionObject()) {
             CWorld::Remove(obj);
@@ -1298,11 +1290,7 @@ void CObject::DeleteAllMissionObjects() {
 
 // 0x5A1980
 void CObject::DeleteAllTempObjectsInArea(CVector point, float radius) {
-    const auto poolSize = GetObjectPool()->GetSize();
-    if (!poolSize)
-        return;
-
-    for (auto i = 0; i < poolSize; ++i) {
+    for (auto i = 0; i < GetObjectPool()->GetSize(); ++i) {
         auto* obj = GetObjectPool()->GetAt(i);
         if (!obj || !obj->IsTemporary())
             continue;

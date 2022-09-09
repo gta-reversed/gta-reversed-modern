@@ -81,4 +81,6 @@ public:
     static void UpdateInTunnelness();
     static void UpdateWeatherRegion(CVector* posn);
     static bool IsRainy();
+
+    static bool IsUnderWater() { return UnderWaterness <= 0.0f; } // NOTSA
 };

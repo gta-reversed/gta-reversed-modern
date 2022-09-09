@@ -188,7 +188,7 @@ AssocGroupId CAnimManager::GetAnimationGroupId(const char* name) {
             return (AssocGroupId)i;
         }
     }
-    return (AssocGroupId)ms_numAnimAssocDefinitions;
+    return AssocGroupId::ANIM_GROUP_DEFAULT;
 }
 
 // 0x4D3A40

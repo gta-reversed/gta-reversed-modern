@@ -11,7 +11,7 @@ class CAnimBlendAssociation;
 class CEntity;
 class CWeaponInfo;
 
-class CTaskSimpleGangDriveBy : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleGangDriveBy : public CTaskSimple {
 public:
     bool                   m_bIsFinished;
     bool                   m_bAnimsReferenced;

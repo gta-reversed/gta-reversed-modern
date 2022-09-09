@@ -39,7 +39,7 @@ public:
 };
 VALIDATE_SIZE(CMeleeInfo, 0x88);
 
-class CTaskSimpleFight : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleFight : public CTaskSimple {
 public:
     bool                   m_bIsFinished;
     bool                   m_bIsInControl;
@@ -60,7 +60,7 @@ public:
     static inline CMeleeInfo (&m_aComboData)[12] = *(CMeleeInfo(*)[12])0xC170D0;
 
 public:
-    static constexpr auto Type = TASK_SIMPLE_FIGHT_CTRL;
+    static constexpr auto Type = eTaskType::TASK_SIMPLE_FIGHT;
 
     CTaskSimpleFight(CEntity* entity, int32 nCommand, uint32 nIdlePeriod = 10000);
     ~CTaskSimpleFight() override;

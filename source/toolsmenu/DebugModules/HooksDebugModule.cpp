@@ -3,8 +3,9 @@
 #include <reversiblehooks/RootHookCategory.h>
 #include "HooksDebugModule.h"
 #include "Utility.h"
-#include "reversiblehooks/ReversibleHook/Base.h"
-#include "reversiblehooks/ReversibleHook/Simple.h"
+#include <reversiblehooks/ReversibleHook/Base.h>
+#include <reversiblehooks/ReversibleHook/Simple.h>
+#include <reversiblehooks/ReversibleHook/Virtual.h>
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -381,21 +382,36 @@ void RenderCategoryItems(RH::HookCategory& cat) {
             continue;
         }
 
+        
+
+        const auto ProcessToolTip = [](const auto& i) {
+            const auto DrawToolTip = [](void* gta, void* our, bool locked) {
+                const auto AddrToClipboard = [](void* addr) {
+                    SetClipboardText(std::format("{}", addr).c_str());
+                };
+
+                std::string tooltipText = std::format("SA: {} / Our: {}", gta, our);
+                if (locked) {
+                    tooltipText += "\n(locked)";
+                }
+                SetTooltip(tooltipText.c_str());
+
+                if (IsItemClicked(ImGuiMouseButton_Right)) {
+                    AddrToClipboard(gta);
+                } else if (IsItemClicked(ImGuiMouseButton_Middle)) {
+                    AddrToClipboard(our);
+                }
+            };
+            DrawToolTip(i->GetHookGTAAddress(), i->GetHookOurAddress(), i->Locked());
+        };
+
         switch (item->Type()) {
         case RH::ReversibleHook::Base::HookType::Simple: {
-            auto s = static_cast<RH::ReversibleHook::Simple*>(item.get());
-
-            std::string tooltipText = std::format("SA: {:#x} - Our: {:#x}", s->m_iRealHookedAddress, s->m_iLibFunctionAddress);
-            if (item->Locked()) {
-                tooltipText += "\n(locked)";
-            }
-            SetTooltip(tooltipText.c_str());
-
-            if (IsItemClicked(ImGuiMouseButton_Middle)) {
-                SetClipboardText(std::format("{:#x}", s->m_iRealHookedAddress).c_str());
-            } else if (IsItemClicked(ImGuiMouseButton_Right)) {
-                SetClipboardText(std::format("{:#x}", s->m_iLibFunctionAddress).c_str());
-            }
+            ProcessToolTip(std::static_pointer_cast<RH::ReversibleHook::Simple>(item));
+            break;
+        }
+        case RH::ReversibleHook::Base::HookType::Virtual: {
+            ProcessToolTip(std::static_pointer_cast<RH::ReversibleHook::Virtual>(item));
             break;
         }
         }

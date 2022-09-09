@@ -186,7 +186,7 @@ bool CTimer::GetIsSlowMotionActive()
 }
 
 // 0x5618D0
-void CTimer::UpdateVariables(float timeStep)
+void CTimer::UpdateVariables(float timeElapsed)
 {
     /* Izzotop: from IDA directly to here (tested)
     float step = timeStep / float(m_snTimerDivider);
@@ -217,7 +217,7 @@ void CTimer::UpdateVariables(float timeStep)
     */
 
     // Pirulax: Shorter code, same functionality.
-    const float realStep = (float)timeStep / (float)m_snTimerDivider;
+    const float realStep = (float)timeElapsed / (float)m_snTimerDivider;
     m_snTimeInMillisecondsNonClipped += (uint32)realStep;
     ms_fTimeStepNonClipped = 0.05f * realStep; // step / 20.0f;
 
@@ -228,7 +228,7 @@ void CTimer::UpdateVariables(float timeStep)
     }
 
     ms_fOldTimeStep = ms_fTimeStep;
-    ms_fTimeStep = clamp<float>(ms_fTimeStepNonClipped, 0.00001f, 3.0f);
+    ms_fTimeStep = std::clamp(ms_fTimeStepNonClipped, 0.00001f, 3.0f);
 }
 
 // 0x561B10

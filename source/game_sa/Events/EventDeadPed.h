@@ -4,7 +4,7 @@
 
 class CPed;
 
-class CEventDeadPed : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventDeadPed : public CEventEditableResponse {
     CPed*  m_ped;
     bool   field_18;
     uint32 m_deathTimeInMs;

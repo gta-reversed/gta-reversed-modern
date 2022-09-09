@@ -669,6 +669,8 @@ void CCarCtrl::RemoveDistantCars() {
                     vehicle->m_nPedsPositionForRoadBlock,
                     vehicle->IsLawEnforcementVehicle() ? PED_TYPE_COP : PED_TYPE_GANG1
                 );
+
+                vehicle->vehicleFlags.bCreateRoadBlockPeds = false;
             }
         }
     }

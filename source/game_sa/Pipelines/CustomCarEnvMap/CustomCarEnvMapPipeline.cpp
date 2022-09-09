@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "CustomCarEnvMapPipeline.h"
+#include "app_light.h"
 
 void CCustomCarEnvMapPipeline::InjectHooks() {
     RH_ScopedClass(CCustomCarEnvMapPipeline);
@@ -10,7 +11,7 @@ void CCustomCarEnvMapPipeline::InjectHooks() {
     RH_ScopedInstall(CreatePipe, 0x5DA020);
     RH_ScopedInstall(DestroyPipe, 0x5DA130);
     RH_ScopedInstall(PreRenderUpdate, 0x5D8870);
-    RH_ScopedInstall(CustomPipeMaterialSetup, 0x5DA560, { .reversed = false });
+    RH_ScopedInstall(CustomPipeMaterialSetup, 0x5DA560);
     RH_ScopedInstall(CustomPipeAtomicSetup, 0x5DA610);
     RH_ScopedInstall(CreateCustomObjPipe, 0x5D9F80);
     RH_ScopedInstall(CustomPipeInstanceCB, 0x5D8490);
@@ -139,23 +140,26 @@ void CCustomCarEnvMapPipeline::PreRenderUpdate() {
 
 // 0x5DA560
 RpMaterial* CCustomCarEnvMapPipeline::CustomPipeMaterialSetup(RpMaterial* material, void* data) {
-    return plugin::CallAndReturn<RpMaterial*, 0x5DA560, RpMaterial*, void*>(material, data);
+    // No other explanation honestly.
+    // According to the docs, `specular` isn't used, so I guess that explains it?
+    auto& flags = reinterpret_cast<uint32&>(material->surfaceProps.specular);
 
-    material->surfaceProps.specular = 0.0f;
+    flags = 0u;
 
     if (RpMatFXMaterialGetEffects(material) == rpMATFXEFFECTENVMAP) {
         SetFxEnvTexture(material, nullptr);
     }
 
-    uint32 flags = 0;
-    if (GetFxEnvShininess(material) != 0.0f && GetFxEnvTexture(material)) {
-        flags = GetFxEnvTexture(material)->name[0] == 'x' ? 2 : 1; // Like Android
-    }
-    if (GetFxSpecSpecularity(material) != 0.0f && GetFxSpecTexture(material)) {
-        flags |= 4;
+    if (GetFxEnvShininess(material) != 0.0f) {
+        if (const auto tex = GetFxEnvTexture(material)) {
+            flags |= RwTextureGetName(tex)[0] == 'x' ? 0b10 : 0b01;
+        }
     }
 
-    material->surfaceProps.specular = 0.0f; // todo: fix
+    if (GetFxSpecSpecularity(material) != 0.0f && GetFxSpecTexture(material)) {
+        flags |= 0b100;
+    }
+
     return material;
 }
 

@@ -20,7 +20,7 @@ void CTaskComplexGoToPointAndStandStillAndAchieveHeading::InjectHooks() {
 }
 
 // 0x668CD0
-CTaskComplexGoToPointAndStandStillAndAchieveHeading::CTaskComplexGoToPointAndStandStillAndAchieveHeading(int32 moveState, const CVector& targetPos, float angle, float radius, float changeRateMult, float maxHeading)
+CTaskComplexGoToPointAndStandStillAndAchieveHeading::CTaskComplexGoToPointAndStandStillAndAchieveHeading(eMoveState moveState, const CVector& targetPos, float angle, float radius, float changeRateMult, float maxHeading)
     : CTaskComplex()
 {
     m_MoveState = moveState;
@@ -52,7 +52,7 @@ CTask* CTaskComplexGoToPointAndStandStillAndAchieveHeading::CreateSubTask(eTaskT
     case TASK_SIMPLE_ACHIEVE_HEADING:
         return new CTaskSimpleAchieveHeading(m_Angle, m_ChangeRateMult, m_MaxHeading);
     case TASK_SIMPLE_STAND_STILL:
-        return new CTaskSimpleStandStill();
+        return new CTaskSimpleStandStill{};
     case TASK_SIMPLE_GO_TO_POINT:
         return new CTaskSimpleGoToPoint(m_MoveState, m_TargetPos, m_Radius, false, false);
     default:

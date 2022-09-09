@@ -10,7 +10,7 @@
 
 class CPed;
 
-class CTaskComplex : public CTask {
+class NOTSA_EXPORT_VTABLE CTaskComplex : public CTask {
 public:
     CTask* m_pSubTask;
 

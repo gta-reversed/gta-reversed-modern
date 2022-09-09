@@ -2,7 +2,7 @@
 
 #include "TaskSimple.h"
 
-class CTaskSimpleNone : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleNone : public CTaskSimple {
 public:
     static constexpr auto Type = TASK_NONE;
 

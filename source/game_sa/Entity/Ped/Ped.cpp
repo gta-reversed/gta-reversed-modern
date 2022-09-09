@@ -223,7 +223,7 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
     m_pEntityIgnoredCollision = nullptr;
     m_nSwimmingMoveState = 0;
     m_pFire = nullptr;
-    field_734 = 1.0f;
+    m_fireDmgMult = 1.0f;
     m_pTargetedObject = nullptr;
     m_pLookTarget = nullptr;
     m_fLookDirection = 0.0f;
@@ -3640,6 +3640,25 @@ CVector CPed::GetBonePosition(ePedBones boneId, bool updateSkinBones) {
     return pos;
 }
 
+bool CPed::IsJoggingOrFaster() const {
+    switch (m_nMoveState) {
+    case PEDMOVE_JOG:
+    case PEDMOVE_RUN:
+    case PEDMOVE_SPRINT:
+        return true;
+    }
+    return false;
+}
+
+bool CPed::IsRunningOrSprinting() const {
+    switch (m_nMoveState) {
+    case PEDMOVE_RUN:
+    case PEDMOVE_SPRINT:
+        return true;
+    }
+    return false;
+}
+
 // 0x6497A0
 bool SayJacked(CPed* jacked, CVehicle* vehicle, uint32 offset) {
     if (vehicle->m_vehicleAudio.GetVehicleTypeForAudio())
@@ -3673,4 +3692,11 @@ int32 CPed::GetPadNumber() const {
         assert(true && "Inappropriate usage of GetPadNumber");
         return 0;
     }
+}
+
+bool CPed::IsRightArmBlockedNow() const {
+    if (bIsDucking) {
+        return bDuckRightArmBlocked;
+    }
+    return bRightArmBlocked;
 }

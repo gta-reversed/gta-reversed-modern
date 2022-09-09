@@ -3,7 +3,7 @@
 #include "TaskSimple.h"
 #include "TaskTimer.h"
 
-class CTaskSimplePause : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimplePause : public CTaskSimple {
 public:
     CTaskTimer m_timer;
     int32      m_nTime;
@@ -11,7 +11,7 @@ public:
 public:
     static constexpr auto Type = TASK_SIMPLE_PAUSE;
 
-    CTaskSimplePause(int32 time);
+    explicit CTaskSimplePause(int32 time = 0);
     ~CTaskSimplePause() = default;
 
     CTask* Clone() override;

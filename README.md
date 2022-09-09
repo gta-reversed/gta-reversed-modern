@@ -1,4 +1,4 @@
-## gtasa-reversed [![Build Status](https://github.com/Updated-Classic/gta-reversed-modern/workflows/Build/badge.svg?event=push&branch=master)](https://github.com/Updated-Classic/gta-reversed-modern/actions?query=workflow%3ABuild)
+## gtasa-reversed [![Build Status](https://github.com/gta-reversed/gta-reversed-modern/workflows/Build/badge.svg?event=push&branch=master)](https://github.com/gta-reversed/gta-reversed-modern/actions?query=workflow%3ABuild)
 
 A project to reverse Grand Theft Auto San Andreas completely, and to rewrite and document every function. 
 
@@ -33,7 +33,7 @@ You can either build with **Premake5** or **CMake**; that's up to you, but a C++
 
 First clone the project, including the submodules:
 ```shell
-git clone --recurse-submodules https://github.com/Updated-Classic/gta-reversed-modern.git
+git clone --recurse-submodules https://github.com/gta-reversed/gta-reversed-modern.git
 ```
 
 <details>
@@ -91,6 +91,9 @@ cd contrib
 link_asi.bat "<GAME_PATH>/scripts"
 ```
 Replace `<GAME_PATH>` with the path to the game's root directory (i.e.: Where the `exe` is)
+    
+### What to work on?
+Check [this](https://github.com/gta-reversed/gta-reversed-modern/discussions/402) out for some inspiration ;)
     
 ### Credits
 - All contributors of the [plugin-sdk](https://github.com/DK22Pac/plugin-sdk) project.

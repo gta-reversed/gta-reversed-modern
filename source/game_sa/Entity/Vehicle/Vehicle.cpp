@@ -74,7 +74,12 @@ void CVehicle::InjectHooks() {
     RH_ScopedVirtualInstall(PreRender, 0x6D6480);
     RH_ScopedVirtualInstall(Render, 0x6D0E60);
     RH_ScopedVirtualInstall(ProcessOpenDoor, 0x6D56C0);
-    RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6DF4A0);
+
+    // It can't be properly unhooked, original function assumes that CVehicle::GetVehicleAppearance doesn't spoil ECX register, and calls
+    // it without making sure that the pointer in it still points to current instance. While it worked for original function, we can't
+    // force the compiler to keep ECX unchanged through function execution
+    RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6DF4A0, {.enabled = true, .locked = true});
+
     RH_ScopedVirtualInstall(GetHeightAboveRoad, 0x6D63F0);
     RH_ScopedVirtualInstall(CanPedStepOutCar, 0x6D1F30);
     RH_ScopedVirtualInstall(CanPedJumpOutCar, 0x6D2030);
@@ -223,17 +228,6 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(GetRopeHeightForHeli, 0x6D3D10);
     RH_ScopedInstall(SetRopeHeightForHeli, 0x6D3D30);
 
-    RH_ScopedGlobalOverloadedInstall(SetVehicleAtomicVisibilityCB, "obj", 0x6D2690, RwObject*(*)(RwObject*, void*), { .reversed = false });
-    RH_ScopedGlobalOverloadedInstall(SetVehicleAtomicVisibilityCB, "frame", 0x6D26D0, RwFrame*(*)(RwFrame*, void*), { .reversed = false });
-    RH_ScopedGlobalInstall(SetCompAlphaCB, 0x6D2950, { .reversed = false });
-    RH_ScopedGlobalInstall(IsVehiclePointerValid, 0x6E38F0, { .reversed = false });
-    RH_ScopedGlobalInstall(RemoveUpgradeCB, 0x6D3300, { .reversed = false });
-    RH_ScopedGlobalInstall(FindUpgradeCB, 0x6D3370, { .reversed = false });
-    RH_ScopedGlobalOverloadedInstall(RemoveObjectsCB, "obj", 0x6D33B0, RwObject*(*)(RwObject*, void*), { .reversed = false });
-    RH_ScopedGlobalOverloadedInstall(RemoveObjectsCB, "frame", 0x6D3420, RwFrame*(*)(RwFrame*, void*), { .reversed = false });
-    RH_ScopedGlobalInstall(CopyObjectsCB, 0x6D3450, { .reversed = false });
-    RH_ScopedGlobalInstall(FindReplacementUpgradeCB, 0x6D3490, { .reversed = false });
-    RH_ScopedGlobalInstall(RemoveAllUpgradesCB, 0x6D34D0);
 }
 
 // 0x6D5F10
@@ -245,7 +239,6 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     m_nType = ENTITY_TYPE_VEHICLE;
 
     m_fRawSteerAngle = 0.0f;
-    m_fSteerAngle = 0.0f;
     m_f2ndSteerAngle = 0.0f;
     m_nCurrentGear = 1;
     m_fGearChangeCount = 0.0f;
@@ -286,8 +279,6 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     m_nNumGettingIn = 0;
     m_nGettingInFlags = 0;
     m_nGettingOutFlags = 0;
-
-    std::ranges::fill(GetPassengers(), nullptr);
 
     m_nBombOnBoard = 0;
     m_nOverrideLights = eVehicleOverrideLightsState::NO_CAR_LIGHT_OVERRIDE;
@@ -1057,10 +1048,10 @@ float CVehicle::GetHeightAboveRoad_Reversed() {
 }
 
 // 0x6D1F30
-bool CVehicle::CanPedStepOutCar(bool bIgnoreSpeedUpright) {
+bool CVehicle::CanPedStepOutCar(bool bIgnoreSpeedUpright) const {
     return CVehicle::CanPedStepOutCar_Reversed(bIgnoreSpeedUpright);
 }
-bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright) {
+bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright) const {
     auto const fUpZ = m_matrix->GetUp().z;
     if (std::fabs(fUpZ) <= 0.1F) {
         if (std::fabs(m_vecMoveSpeed.z) > 0.05F || m_vecMoveSpeed.Magnitude2D() > 0.01F || m_vecTurnSpeed.SquaredMagnitude() > 0.0004F) { // 0.02F / 50.0f
@@ -1439,18 +1430,22 @@ bool CVehicle::IsDriver(int32 modelIndex) const {
     return m_pDriver && m_pDriver->m_nModelIndex == modelIndex;
 }
 
+bool CVehicle::IsDriverAPlayer() const {
+    return m_pDriver && m_pDriver->IsPlayer();
+}
+
 // 0x6D1C80
 void CVehicle::KillPedsInVehicle() {
     ((void(__thiscall*)(CVehicle*))0x6D1C80)(this);
 }
 
 // 0x6D1D90
-bool CVehicle::IsUpsideDown() {
+bool CVehicle::IsUpsideDown() const {
     return m_matrix->GetUp().z <= -0.9f;
 }
 
 // 0x6D1DD0
-bool CVehicle::IsOnItsSide() {
+bool CVehicle::IsOnItsSide() const {
     return m_matrix->GetRight().z >= 0.8f || m_matrix->GetRight().z <= -0.8f;
 }
 
@@ -1506,7 +1501,7 @@ void CVehicle::ChangeLawEnforcerState(bool bIsEnforcer) {
 }
 
 // 0x6D2370
-bool CVehicle::IsLawEnforcementVehicle() {
+bool CVehicle::IsLawEnforcementVehicle() const {
     switch (m_nModelIndex) {
     case MODEL_ENFORCER:
     case MODEL_PREDATOR:
@@ -1633,7 +1628,7 @@ void CVehicle::SetComponentAtomicAlpha(RpAtomic* atomic, int32 alpha) {
     RpGeometryForAllMaterials(geometry, SetCompAlphaCB, reinterpret_cast<void*>(alpha));
 }
 
-CVehicleModelInfo* CVehicle::GetVehicleModelInfo() {
+CVehicleModelInfo* CVehicle::GetVehicleModelInfo() const {
     return CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
 }
 
@@ -2281,7 +2276,7 @@ void CVehicle::FireUnguidedMissile(eOrdnanceType type, bool bCheckTime) {
 }
 
 // 0x6D5400
-bool CVehicle::CanBeDriven() {
+bool CVehicle::CanBeDriven() const {
     if (IsSubTrailer() || IsSubTrain() && AsTrain()->m_nTrackId || vehicleFlags.bIsRCVehicle) {
         return false;
     }
@@ -2380,7 +2375,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
 
     if (bDriving) {
         fwd = thrust;
-        right = clamp<float>(right, -adhesion, adhesion);
+        right = std::clamp(right, -adhesion, adhesion);
     }
     else if (contactSpeedFwd != 0.0f) {
         fwd = -contactSpeedFwd / wheelsOnGround;
@@ -2403,7 +2398,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
                 *wheelState = WHEEL_STATE_FIXED;
             }
         } else {
-            fwd = clamp<float>(fwd, -brake, brake);
+            fwd = std::clamp(fwd, -brake, brake);
         }
     }
 
@@ -3256,6 +3251,9 @@ void CVehicle::AddVehicleUpgrade(int32 modelId) {
 // 0x6E3400
 void CVehicle::SetupUpgradesAfterLoad() {
     for (auto& upgrade : m_anUpgrades) {
+        if (upgrade == -1)
+            continue;
+
         auto savedUpgrade = upgrade;
         upgrade = -1;
         AddVehicleUpgrade(savedUpgrade);
@@ -3265,6 +3263,10 @@ void CVehicle::SetupUpgradesAfterLoad() {
 // 0x6E3440
 void CVehicle::GetPlaneWeaponFiringStatus(bool& status, eOrdnanceType& ordnanceType) {
     ((void(__thiscall*)(CVehicle*, bool&, eOrdnanceType&))0x6E3440)(this, status, ordnanceType);
+}
+
+bool IsValidModForVehicle(uint32 modelId, CVehicle* vehicle) {
+    return plugin::CallAndReturn<bool, 0x49B010, uint32, CVehicle*>(modelId, vehicle);
 }
 
 // 0x6E38F0
@@ -3308,3 +3310,17 @@ bool CVehicle::AreAnyOfPassengersFollowerOfGroup(const CPedGroup& group) {
         return group.GetMembership().IsFollower(passenger);
     }) != end;
 }
+
+/*!
+* @notsa
+* @return The index of a passenger, or `std::nullopt` if the given ped isn't a passenger.
+*/
+auto CVehicle::GetPassengerIndex(const CPed* passenger) const -> std::optional<size_t> {
+    const auto passengers = GetPassengers();
+    const auto it = rng::find(passengers, passenger);
+    if (it == passengers.end()) {
+        return std::nullopt;
+    }
+    return (size_t)rng::distance(passengers.begin(), it);
+}
+

@@ -2,7 +2,7 @@
 
 #include "TaskComplex.h"
 
-class CScriptedEffectPair;
+struct CScriptedEffectPair;
 
 class CTaskComplexAttractorPartnerWait : public CTaskComplex {
 public:

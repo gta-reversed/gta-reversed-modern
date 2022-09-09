@@ -6,7 +6,7 @@ class CEntity;
 class CVehicle;
 enum eWeaponType : uint32;
 
-class CEventVehicleDamage : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventVehicleDamage : public CEventEditableResponse {
 public:
     CVehicle*   m_vehicle;
     CEntity*    m_attacker;

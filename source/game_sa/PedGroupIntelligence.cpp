@@ -83,8 +83,8 @@ CTask* CPedGroupIntelligence::GetTaskSecondary(CPed* ped) {
 }
 
 // 0x5F8650
-int32 CPedGroupIntelligence::GetTaskSecondarySlot(CPed* ped) {
-    return plugin::CallMethodAndReturn<int32, 0x5F8650>(this, ped);
+eSecondaryTask CPedGroupIntelligence::GetTaskSecondarySlot(CPed* ped) {
+    return plugin::CallMethodAndReturn<eSecondaryTask, 0x5F8650>(this, ped);
 }
 
 // 0x5F88D0
@@ -103,8 +103,8 @@ void CPedGroupIntelligence::SetPrimaryTaskAllocator(CTaskAllocator* taskAllocato
 }
 
 // 0x5FBB70
-void CPedGroupIntelligence::SetDefaultTaskAllocatorType(int32 nPedGroupTaskAllocator) {
-    plugin::CallMethod<0x5FBB70, CPedGroupIntelligence*, int32>(this, nPedGroupTaskAllocator);
+void CPedGroupIntelligence::SetDefaultTaskAllocatorType(ePedGroupDefaultTaskAllocatorType nPedGroupTaskAllocator) {
+    plugin::CallMethod<0x5FBB70, CPedGroupIntelligence*, ePedGroupDefaultTaskAllocatorType>(this, nPedGroupTaskAllocator);
 }
 
 // 0x5F86F0

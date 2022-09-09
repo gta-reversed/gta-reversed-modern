@@ -4,7 +4,7 @@
 
 class CVehicle;
 
-class CEventVehicleToSteal : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventVehicleToSteal : public CEvent {
 public:
     CVehicle* m_vehicle;
 
