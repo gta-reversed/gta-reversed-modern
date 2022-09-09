@@ -141,7 +141,7 @@ void CTaskManager::SetNextSubTask(CTaskComplex* ofTask) {
         return;
     }
 
-    for (auto task = ofTask; task = static_cast<CTaskComplex*>(task->m_pParentTask); task) {
+    for (auto task = ofTask; task; task = static_cast<CTaskComplex*>(task->m_pParentTask)) {
         if (const auto next = task->CreateNextSubTask(m_pPed)) {
             task->SetSubTask(next);
             AddSubTasks(next);
