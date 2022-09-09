@@ -81,8 +81,8 @@ CTask* CPedGroupIntelligence::GetTaskSecondary(CPed* ped) {
 }
 
 // 0x5F8650
-int32 CPedGroupIntelligence::GetTaskSecondarySlot(CPed* ped) {
-    return plugin::CallMethodAndReturn<int32, 0x5F8650>(this, ped);
+eSecondaryTask CPedGroupIntelligence::GetTaskSecondarySlot(CPed* ped) {
+    return plugin::CallMethodAndReturn<eSecondaryTask, 0x5F8650>(this, ped);
 }
 
 // 0x5F88D0
