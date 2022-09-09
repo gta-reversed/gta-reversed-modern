@@ -273,13 +273,13 @@ void CTaskManager::ManageTasks() {
         bool bProcessPedFailed = false;
         while (true) {
             ParentsControlChildren((CTaskComplex*)secondaryTask);
-            CTaskSimple* simplestTask1 = GetSimplestTask(secondaryTask);
+            auto simplestTask1 = GetSimplestTask(secondaryTask);
             if (!simplestTask1->IsSimple()) {
                 break;
             }
 
             simplestTask1 = GetSimplestTask(secondaryTask);
-            if (!simplestTask1->ProcessPed(m_pPed)) {
+            if (!simplestTask1->AsSimple()->ProcessPed(m_pPed)) {
                 bProcessPedFailed = true;
                 break;
             }

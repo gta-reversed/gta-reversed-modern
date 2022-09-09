@@ -90,7 +90,7 @@ public:
     void AddTaskEventResponseTemp(CTask* task, int32 unUsed);
     void AddTaskEventResponseNonTemp(CTask* task, int32 unUsed);
     void AddTaskPrimaryMaybeInGroup(CTask* task, bool bAffectsPed);
-    CTask* FindTaskByType(int32 taskId);
+    CTask* FindTaskByType(eTaskType taskId);
     CTaskSimpleFight* GetTaskFighting();
     CTaskSimpleUseGun* GetTaskUseGun();
     CTaskSimpleThrowProjectile* GetTaskThrow();

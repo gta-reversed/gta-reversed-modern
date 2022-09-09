@@ -41,12 +41,12 @@ public:
     void       ComputeScriptCommandTasks();
     static void       FlushTasks(CPedTaskPair* taskpair, CPed* ped);
 
-    CTask*     GetTask(CPed* ped, CPedTaskPair const* taskPair);
-    CTask*     GetTaskMain(CPed* ped);
-    CTask*     GetTaskDefault(CPed* ped);
-    CTask*     GetTaskScriptCommand(CPed* ped);
-    CTask*     GetTaskSecondary(CPed* ped);
-    int32      GetTaskSecondarySlot(CPed* ped);
+    CTask*         GetTask(CPed* ped, CPedTaskPair const* taskPair);
+    CTask*         GetTaskMain(CPed* ped);
+    CTask*         GetTaskDefault(CPed* ped);
+    CTask*         GetTaskScriptCommand(CPed* ped);
+    CTask*         GetTaskSecondary(CPed* ped);
+    eSecondaryTask GetTaskSecondarySlot(CPed* ped);
 
     bool       IsCurrentEventValid();
     bool       IsGroupResponding();

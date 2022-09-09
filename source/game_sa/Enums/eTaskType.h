@@ -10,6 +10,8 @@
 #include "Base.h"
 
 enum eTaskType : int32 {
+    TASK_INVALID = -1,
+
     // player tasks
     TASK_SIMPLE_PLAYER_ON_FOOT = 0,
 

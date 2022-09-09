@@ -1086,16 +1086,21 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
         && !pad->GetTarget()
         && !player->m_pAttachedTo
     ) {
-        eCamMode cameraMode = CCamera::GetActiveCamera().m_nMode; // Looks like inlined code
-        if (cameraMode != MODE_SNIPER && cameraMode != MODE_ROCKETLAUNCHER && cameraMode != MODE_ROCKETLAUNCHER_HS && cameraMode != MODE_M16_1STPERSON &&
-            cameraMode != MODE_HELICANNON_1STPERSON && cameraMode != MODE_CAMERA
-        ) {
+        // Possibly inlined code? Like CCamera::IsInSniperMode()
+        switch (CCamera::GetActiveCamera().m_nMode) {
+        case MODE_SNIPER:
+        case MODE_ROCKETLAUNCHER:
+        case MODE_ROCKETLAUNCHER_HS:
+        case MODE_M16_1STPERSON:
+        case MODE_HELICANNON_1STPERSON:
+        case MODE_CAMERA: {
             player->ClearWeaponTarget();
-            if (player->GetTaskManager().GetActiveTask()) {
-                CTask* pActiveTask = player->GetTaskManager().GetActiveTask();
-                if (pActiveTask->GetTaskType() != TASK_COMPLEX_JUMP)
-                    player->GetTaskManager().SetTask(new CTaskComplexJump(COMPLEX_JUMP_TYPE_JUMP), 3, false);
+            if (const auto task = player->GetTaskManager().GetActiveTask()) {
+                if (!CTask::IsA<TASK_COMPLEX_JUMP>(task)) {
+                    player->GetTaskManager().SetTask(new CTaskComplexJump(COMPLEX_JUMP_TYPE_JUMP), TASK_PRIMARY_PRIMARY, false);
+                }
             }
+        }
         }
     }
 
