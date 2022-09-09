@@ -160,7 +160,7 @@ CTask* CTaskManager::GetSimplestTask(CTask* task) {
     auto last{task};
     for (; task; task = task->GetSubTask())
         last = task;
-    return task;
+    return last;
 }
 
 // 0x6819A0
