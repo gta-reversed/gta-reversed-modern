@@ -1120,7 +1120,7 @@ void CTaskSimplePlayerOnFoot::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x6857D0, { .locked = true });
     RH_ScopedVirtualInstall(ProcessPed, 0x688810, { .locked = true });
     RH_ScopedVirtualInstall(MakeAbortable, 0x6857E0, { .locked = true });
-    // RH_ScopedInstall(ProcessPlayerWeapon, 0x6859A0, { .locked = true });
+    RH_ScopedInstall(ProcessPlayerWeapon, 0x6859A0, { .reversed = false });
     RH_ScopedInstall(PlayIdleAnimations, 0x6872C0, { .locked = true });
     RH_ScopedInstall(PlayerControlZeldaWeapon, 0x687C20, { .locked = true });
     RH_ScopedInstall(PlayerControlDucked, 0x687F30, { .locked = true });
