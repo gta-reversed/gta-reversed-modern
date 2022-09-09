@@ -55,13 +55,13 @@ CTask* CTaskComplexGoToPointAndStandStillTimed::Clone_Reversed() {
 
 void CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed(const CEvent* event) {
     if (!CEventHandler::IsTemporaryEvent(*event))
-        m_timer.Stop();
+        m_timer.Pause();
 }
 
 bool CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     bool bSubTaskAbortable = m_pSubTask->MakeAbortable(ped, priority, event);
     if (bSubTaskAbortable && priority == ABORT_PRIORITY_URGENT && (!event || !CEventHandler::IsTemporaryEvent(*event)))
-        m_timer.Stop();
+        m_timer.Pause();
 
     return bSubTaskAbortable;
 }

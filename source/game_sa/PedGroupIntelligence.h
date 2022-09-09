@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <concepts>
+
 #include "PedTaskPair.h"
 
 class CPed;
@@ -17,12 +19,27 @@ class CEvent;
 class CPedGroup;
 class CEventGroupEvent;
 
+enum class ePedGroupDefaultTaskAllocatorType : uint32 {
+    FOLLOW_ANY_MEANS,
+    FOLLOW_LIMITED,
+    STAND_STILL,
+    CHAT,
+    SIT_IN_LEADER_CAR,
+    RANDOM,
+};
+
 class CPedGroupIntelligence {
 public:
     CPedGroup*                     m_pPedGroup;
     CEventGroupEvent*              m_pOldEventGroupEvent;
     CEventGroupEvent*              m_pEventGroupEvent;
     CPedTaskPair                   m_groupTasks[32]; // todo: split array
+    /* TODO: Split above to below:
+    * CPedTaskPair m_pedTaskPairs[8];
+    * CPedTaskPair m_secondaryPedTaskPairs[8];
+    * CPedTaskPair m_scriptCommandPedTaskPairs[8];
+    * CPedTaskPair m_defaultPedTaskPairs[8];
+    */
     CPedGroupDefaultTaskAllocator* m_pPedGroupDefaultTaskAllocator;
     CTaskAllocator*                m_pPrimaryTaskAllocator;
     CTaskAllocator*                m_pEventResponseTaskAllocator;
@@ -59,8 +76,8 @@ public:
     bool       ReportFinishedTask(const CPed* ped, const CTask* task);
     void       SetDefaultTask(CPed* ped, const CTask* task);
     void       SetDefaultTaskAllocator(CPedGroupDefaultTaskAllocator const* PedGroupDefaultTaskAllocator);
-    //! see ePedGroupTaskAllocator
-    void SetDefaultTaskAllocatorType(int32 nPedGroupTaskAllocator);
+    //! see ePedGroupDefaultTaskAllocatorType
+    void SetDefaultTaskAllocatorType(ePedGroupDefaultTaskAllocatorType nPedGroupTaskAllocator);
     //! arg3 always true
     //! arg5 always false
     //! arg7 always  -1
@@ -69,6 +86,13 @@ public:
     int32 SetGroupDecisionMakerType(int32 a2);
     void  SetPrimaryTaskAllocator(CTaskAllocator* taskAllocator);
     void  SetScriptCommandTask(CPed* ped, const CTask* task);
+
+    /// Helper so events can be directly passed in without having to it into a variable
+    template<std::derived_from<CEvent> T>
+    auto AddEvent(T event) {
+        return AddEvent(&event);
+    }
+
     static void SetTask(CPed* ped, const CTask* task, CPedTaskPair* pair, int32 arg5 = -1, bool arg6 = false);
 };
 

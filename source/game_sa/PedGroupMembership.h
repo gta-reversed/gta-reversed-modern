@@ -19,7 +19,7 @@ const int32 TOTAL_PED_GROUP_FOLLOWERS = TOTAL_PED_GROUP_MEMBERS - 1;
 class CPedGroupMembership {
 public:
     CPedGroup* m_pPedGroup;
-    std::array<CPed*, TOTAL_PED_GROUP_MEMBERS> m_apMembers; // m_apMembers[7] is a leader
+    std::array<CPed*, TOTAL_PED_GROUP_MEMBERS> m_apMembers; // m_apMembers[7] is the leader
     float m_fSeparationRange;
 
     static const float& ms_fMaxSeparation;
@@ -33,7 +33,7 @@ public:
     void  AddFollower(CPed* ped);
     void  AddMember(CPed* member, int32 memberID);
     void  AppointNewLeader();
-    int32 CountMembers();
+    size_t CountMembers();
     int32 CountMembersExcludingLeader();
     void  Flush();
     void  From(const CPedGroupMembership& obj);
@@ -47,6 +47,12 @@ public:
     void  RemoveMember(int32 memberID);
     char  RemoveNFollowers(int32 count);
     void  SetLeader(CPed* ped);
+
+    /// Get a random ped from the group. Might return null.
+    CPed* GetRandom();
+
+    /// Whenever `AddFollower` can be called to add a new follower
+    bool CanAddFollower();
 
     /// Get all the members (including the leader)
     auto GetMembers() {

@@ -13,7 +13,7 @@ public:
     void ProcessPed(CPed&);
 
 private:
-    void ProcessTask(CTask* task);
+    void ProcessTask(CTask* task, std::optional<size_t> idx);
     void ProcessTaskCategory(const char* label, const auto& tasks);
 };
 
