@@ -55,10 +55,12 @@ CTaskComplexSmartFleeEntity::~CTaskComplexSmartFleeEntity() {
 CTask* CTaskComplexSmartFleeEntity::CreateNextSubTask(CPed* ped) {
      return CreateSubTask([this] {
          switch (m_pSubTask->GetTaskType()) {
+         /* Dead code
          case TASK_SIMPLE_STAND_STILL:
              return m_entity
                     ? TASK_COMPLEX_SMART_FLEE_POINT
                     : TASK_FINISHED;
+         */
          case TASK_COMPLEX_SMART_FLEE_POINT:
              return TASK_FINISHED;
          default:
@@ -131,10 +133,13 @@ CTask* CTaskComplexSmartFleeEntity::ControlSubTask(CPed* ped) {
 // 0x65C530
 CTask* CTaskComplexSmartFleeEntity::CreateSubTask(eTaskType taskType) {
     switch (taskType) {
+    /* Dead code
     case TASK_SIMPLE_STAND_STILL:
         return new CTaskSimpleStandStill{ CGeneral::GetRandomNumberInRange(0, 50) };
+    */
     case TASK_COMPLEX_SMART_FLEE_POINT: {
         m_posCheckTimer.Start(m_posCheckPeriod);
+        m_pos = m_entity->GetPosition();
         return new CTaskComplexSmartFleePoint{
             m_pos,
             m_pedScream,
