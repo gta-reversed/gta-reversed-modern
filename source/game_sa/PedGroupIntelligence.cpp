@@ -9,7 +9,7 @@ void CPedGroupIntelligence::InjectHooks() {
     //RH_ScopedInstall(Constructor, 0x5F7250, { .reversed = false });
     //RH_ScopedInstall(Destructor, 0x5F7350, { .reversed = false });
 
-    RH_ScopedInstall(AddEvent, 0x5F7470, { .reversed = false });
+    RH_ScopedOverloadedInstall(AddEvent, "", 0x5F7470, bool(CPedGroupIntelligence::*)(CEvent*), { .reversed = false });
     RH_ScopedInstall(SetScriptCommandTask, 0x5F8560, { .reversed = false });
     RH_ScopedInstall(GetTaskMain, 0x5F85A0, { .reversed = false });
     RH_ScopedInstall(ComputeDefaultTasks, 0x5F88D0, { .reversed = false });

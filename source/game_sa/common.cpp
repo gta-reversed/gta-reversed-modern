@@ -26,8 +26,8 @@ void InjectCommonHooks() {
     RH_ScopedGlobalInstall(MakeUpperCase, 0x7186E0);
     RH_ScopedGlobalInstall(AsciiToGxtChar, 0x718600);
     RH_ScopedGlobalInstall(WriteRaster, 0x005A4150);
-    RH_ScopedOverloadedInstall(CalcScreenCoors, "VVff", 0x71DA00, bool(*)(const CVector&, CVector*, float*, float*), { .reversed = false });
-    RH_ScopedOverloadedInstall(CalcScreenCoors, "VV", 0x71DAB0, bool(*)(const CVector&, CVector*), { .reversed = false });
+    RH_ScopedGlobalOverloadedInstall(CalcScreenCoors, "VVff", 0x71DA00, bool(*)(const CVector&, CVector*, float*, float*), { .reversed = false });
+    RH_ScopedGlobalOverloadedInstall(CalcScreenCoors, "VV", 0x71DAB0, bool(*)(const CVector&, CVector*), { .reversed = false });
     RH_ScopedGlobalInstall(LittleTest, 0x541330);
 }
 

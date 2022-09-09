@@ -12,10 +12,10 @@ void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedInstall(StopTimer, 0x6694E0, { .reversed = false });
     RH_ScopedInstall(MakeAbortable, 0x669520, { .reversed = false });
     RH_ScopedInstall(CreateSubTask, 0x669690, { .reversed = false });
-    RH_ScopedInstall(ComputeRoute, 0x6699E0, { .reversed = false });
+    //RH_ScopedInstall(ComputeRoute, 0x6699E0, { .reversed = false });
     RH_ScopedInstall(CalcGoToTaskType, 0x66EBE0, { .reversed = false });
-    RH_ScopedInstall(CalcBlendRatio, 0x66EDC0, { .reversed = false });
-    RH_ScopedInstall(CanGoStraightThere, 0x66EF20, { .reversed = false });
+    //RH_ScopedInstall(CalcBlendRatio, 0x66EDC0, { .reversed = false });
+    //RH_ScopedInstall(CanGoStraightThere, 0x66EF20, { .reversed = false });
     RH_ScopedInstall(ComputePathNodes, 0x66EFA0, { .reversed = false });
     RH_ScopedInstall(SetTarget, 0x671750, { .reversed = false });
     RH_ScopedInstall(CreateFirstSubTask, 0x671800, { .reversed = false });

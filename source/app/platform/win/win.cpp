@@ -38,7 +38,7 @@ void Win32InjectHooks() {
         RH_ScopedGlobalInstall(psWarningMessage, 0x7451F0);
         RH_ScopedGlobalInstall(psCameraBeginUpdate, 0x745210, { .reversed = false });
         RH_ScopedGlobalInstall(psCameraShowRaster, 0x745240);
-        - RH_ScopedGlobalInstall(psTimer, 0x745270, { .reversed = false });
+        RH_ScopedGlobalInstall(psTimer, 0x745270, { .reversed = false });
         RH_ScopedGlobalInstall(psGrabScreen, 0x7452B0, { .reversed = false });
         RH_ScopedGlobalInstall(psMouseSetVisibility, 0x7453E0);
         RH_ScopedGlobalInstall(psMouseSetPos, 0x7453F0);
@@ -83,7 +83,7 @@ bool InitApplication(HINSTANCE hInstance) {
     windowClass.style         = CS_BYTEALIGNWINDOW;
     windowClass.lpfnWndProc   = MainWndProc;
     windowClass.hInstance     = hInstance;
-    windowClass.hIcon         = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1), { .reversed = false });
+    windowClass.hIcon         = LoadIcon(hInstance, MAKEINTRESOURCE(100 /*IDI_ICON1*/));
     windowClass.hCursor       = LoadCursor(nullptr, IDC_ARROW);
     windowClass.lpszClassName = AppClassName;
     return RegisterClass(&windowClass);
