@@ -158,7 +158,7 @@ static void DebugCode() {
 
         //const auto veh = player->GetIntelligence()->GetVehicleScanner().GetClosestVehicleInRange();
         //const auto veh = player->m_pVehicle;
-        //player->GetTaskManager().SetTask(new CTaskComplexLeaveCarAndWander{veh, TARGET_DOOR_DRIVER, 0, false}, TASK_PRIMARY_DEFAULT);
+        //player->GetTaskManager().SetTask(new CTaskComplexLeaveCarAsPassengerWait{veh}, TASK_PRIMARY_PRIMARY);
     }
 
     if (pad->IsStandardKeyJustPressed('9')) {
