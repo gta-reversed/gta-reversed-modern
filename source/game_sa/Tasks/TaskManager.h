@@ -49,24 +49,76 @@ public:
     explicit CTaskManager(CPed* ped);
     ~CTaskManager();
 
+    /*!
+    * @0x681720
+    * @brief Get the first primary task (that is, the first non-null entry from `m_aPrimaryTasks`)
+    */
     CTask* GetActiveTask();
-    CTask* FindActiveTaskByType(int32 taskType);
+
+    /*!
+    * @addr 0x681740
+    * @brief Find the first task with type `taskType`
+    */
+    CTask* FindActiveTaskByType(eTaskType taskType);
+
+    /*!
+    * @addr 0x681810
+    * @brief Similar to `FindActiveTaskByType` but only checks the given primary task
+    */
     CTask* FindTaskByType(ePrimaryTasks taskIndex, eTaskType taskType);
+
+    /*
+    * @addr 0x681810
+    * @brief Get the secondary task at `taskIndex`
+    */
     CTask* GetTaskSecondary(eSecondaryTask taskIndex);
 
+    /*
+    * @addr unknown
+    * @brief Check if any of the tasks in `m_aPrimaryTasks` is `task`
+    */
     bool HasTaskPrimary(const CTask* task);
+
+    /*
+    * @addr 0x681820
+    * @brief Check if any of the tasks in `m_aSecondaryTasks` is `task`
+    */
     bool HasTaskSecondary(const CTask* task);
 
-    /// Delete all tasks
-    void Flush();
+    /*!
+    * @addr 0x6818A0
+    * @brief Try aborting all tasks, if successful they're deleted
+    */
     void FlushImmediately();
 
+    /*!
+    * @addr 0x681850
+    * @brief Similar to `FlushImmediately` but doesn't try to abort, just deletes all tasks.
+    */
+    void Flush();
+
+
+
     /// Create the next subtask of `task`
+    /*!
+    * @addr 0x681920
+    * @brief Set the next sub task of `task`
+    */
     void SetNextSubTask(CTaskComplex* task);
 
     void StopTimers(const CEvent* event);
-    CTask* GetSimplestActiveTask();
-    CTaskSimple* GetSimplestTask(int32 taskIndex);
+
+    /*
+    * @addr 0x6819D0
+    * @brief Get simplest active primary task
+    */
+    CTask* GetSimplestActiveTask() { return GetSimplestTask(GetActiveTask()); }
+
+    /*
+    * @addr 0x681A00
+    * @brief Get the simplest task of the given primary task at `taskIndex`
+    */
+    CTask* GetSimplestTask(ePrimaryTasks taskIndex) { return GetSimplestTask(GetTaskPrimary(taskIndex)); }
 
     /*!
     * @addr 0x681970
@@ -75,7 +127,7 @@ public:
     *
     * This function has a horrible naming, it should be `GetLastSubTask` or of similar nature.
     */
-    static CTaskSimple* GetSimplestTask(CTask* task);
+    static CTask* GetSimplestTask(CTask* task);
 
     /*!
     * @addr 0x681A30
@@ -88,8 +140,26 @@ public:
     * @brief Control the given task and all it's subtasks, as in, call `ControlSubTask` on each one (iff it's complex)
     */
     void ParentsControlChildren(CTask* task);
-    void SetTask(CTask* task, ePrimaryTasks taskIndex, bool unused = false);
-    void SetTaskSecondary(CTask* task, int32 taskIndex);
+
+    /*!
+    * @addr 0x681AF0
+    * @brief Set primary task
+    * @param task The new task, might be null, in case the specified task is to be removed
+    * @param taskIndex The index of the primary task to be changed
+    */
+    void SetTask(CTask* task, ePrimaryTasks taskIndex, bool unused = false) { ChangeTaskInSlot(m_aPrimaryTasks[taskIndex], task); }
+
+    /*!
+    * @addr 0x681B60
+    * @brief Set the seconady task
+    * @param task The new task, might be null, in case the specified task is to be removed
+    * @param taskIndex The index of the secondary task to be changed
+    */
+    void SetTaskSecondary(CTask* task, eSecondaryTask taskIndex) { ChangeTaskInSlot(m_aSecondaryTasks[taskIndex], task); }
+
+    /*!
+    * @brief Clear primary tasks `TASK_PRIMARY_EVENT_RESPONSE_TEMP` and `TASK_PRIMARY_EVENT_RESPONSE_NONTEMP`
+    */
     void ClearTaskEventResponse();
     void ManageTasks();
 
@@ -103,9 +173,9 @@ public:
 
 
     // NOTSA - Check if any of the given tasks is active
-    bool IsAnyTaskActiveByType(std::initializer_list<int32> types) {
-        return std::any_of(types.begin(), types.end(), [this](auto type) {
-            return FindActiveTaskByType(type);
+    bool IsAnyTaskActiveByType(std::initializer_list<eTaskType> types) {
+        return rng::any_of(types, [this](auto type) {
+            return FindActiveTaskByType(type) != nullptr;
         });
     }
 
@@ -118,7 +188,10 @@ public:
         return nullptr;
     }
 
-    // Find active task, check if its of type `T`, and return it, nullptr othetwise (if not found/not of the requrested type)
+    /*!
+    * @notsa
+    * @brief Find active task, check if its of type `T`, and return it, nullptr othetwise (if not found/not of the requrested type
+    */
     template<Task T>
     T* GetActiveTaskAs() {
         if (const auto task = GetActiveTask()) {
@@ -129,7 +202,10 @@ public:
         return nullptr;
     }
 
-    // Find simplest active task, check if its of type `T`, and return it, nullptr othetwise (if not found/not of the requrested type)
+    /*!
+    * @notsa
+    * @brief Find simplest active task, check if its of type `T`, and return it, nullptr othetwise (if not found/not of the requrested type)
+    */
     template<Task T>
     T* GetSimplestActiveTaskAs() {
         if (const auto task = GetSimplestActiveTask()) {
@@ -140,7 +216,10 @@ public:
         return nullptr;
     }
 
-    // Find an active task from the give types and return the first one.
+    /*!
+    * @notsa
+    * @brief Find an active task from the give types and return the first one.
+    */
     template<eTaskType... Ts>
     auto Find() { // TODO: For now just return `CTask*`, but would be nice to return the first common base class somehow
         CTask* ret{};
@@ -148,17 +227,28 @@ public:
         return ret;
     }
 
-    // Find an active task from the given types and return the first one.
+    /*!
+    * @notsa
+    * @brief Find an active task from the given types and return the first one.
+    */
     template<Task... Ts>
     auto Find() requires(sizeof...(Ts) > 1) { // Only use this overload if there's more than 1 Task
         return Find<Ts::Type...>();
     }
 
+    /*!
+    * @notsa
+    * @brief Find task of the given type `T`
+    */
     template<Task T>
     T* Find() {
         return static_cast<T*>(Find<T::Type>());
     }
 
+    /*!
+    * @notsa
+    * @brief Check if any of the active tasks is of the given types
+    */
     template<Task... Ts>
     bool HasAnyOf() {
         // This won't work if the task has no `Type` member
@@ -172,16 +262,23 @@ public:
         return (... || Find<Ts>());
     }
 
+    /*!
+    * @notsa
+    * @brief Check if any active task is of type `T`
+    */
     template<eTaskType T>
     bool Has() {
         return Find<T>();
     }
 
-    // Checks if the first found task is the same for both
+    /*!
+    * @notsa
+    * @brief Check if the first found task is the same in both managers
+    */
     template<eTaskType... Ts>
     bool IsFirstFoundTaskMatching(CTaskManager& mgr) {
         if (const auto our = Find<Ts...>()) {
-            if (const auto other = mgr.Find<Ts...>()) { // Find first task from the list
+            if (const auto other = mgr.Find<Ts...>()) {
                 if (our->GetTaskType() == other->GetTaskType()) {
                     return true;
                 }
@@ -198,7 +295,15 @@ public:
         rng::for_each(m_aPrimaryTasks, fn);
         rng::for_each(m_aSecondaryTasks, fn);
     }
-
+protected:
+    /*
+    * @notsa
+    * @brief Helper of `SetTask`, `SetTaskSecondary`
+    *
+    * @param taskInSlot Reference to either `m_aPrimaryTasks` and `m_aSecondaryTasks`
+    * @param changeTo The new slot to be set, allowed to be `nullptr`, in which case `taskInSlot` is deleted and nulled out
+    */
+    void ChangeTaskInSlot(CTask*& taskInSlot, CTask* changeTo);
 private:
     CTaskManager* Constructor(CPed* ped) {
         this->CTaskManager::CTaskManager(ped);
