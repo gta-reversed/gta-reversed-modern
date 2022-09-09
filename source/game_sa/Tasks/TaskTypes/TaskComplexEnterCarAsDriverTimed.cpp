@@ -41,7 +41,7 @@ CTaskComplexEnterCarAsDriverTimed::~CTaskComplexEnterCarAsDriverTimed() {
 // 0x63AFF0
 void CTaskComplexEnterCarAsDriverTimed::StopTimer(CEvent const* event) {
     if (!CEventHandler::IsTemporaryEvent(*event)) {
-        m_enterBeganTimer.Stop();
+        m_enterBeganTimer.Pause();
     }
 }
 
@@ -52,7 +52,7 @@ bool CTaskComplexEnterCarAsDriverTimed::MakeAbortable(CPed* ped, eAbortPriority 
             switch (priority) {
             case ABORT_PRIORITY_URGENT:
             case ABORT_PRIORITY_IMMEDIATE:
-                m_enterBeganTimer.Stop();
+                m_enterBeganTimer.Pause();
             }
         }
         return true;

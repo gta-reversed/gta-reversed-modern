@@ -36,6 +36,16 @@ struct NotIsNull {
     }
 };
 
+// Find first non-null value in range. If found it's returned, `null` otherwise.
+template<rng::input_range R, typename T_Ret = rng::range_value_t<R>>
+    requires(std::is_pointer_v<T_Ret>)
+T_Ret FirstNonNull(R&& range) {
+    const auto it = rng::find_if(range, NotIsNull{});
+    return it != rng::end(range)
+        ? *it
+        : nullptr;
+}
+
 /*!
 * @tparam Start     The number at which to start the iteration
 * @tparam Stop      The number at which to stop the iteration

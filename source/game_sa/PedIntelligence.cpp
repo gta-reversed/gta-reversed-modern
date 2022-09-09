@@ -27,6 +27,14 @@
 #include "TaskComplexEnterCarAsDriver.h"
 #include "TaskComplexEnterCarAsPassenger.h"
 #include "TaskSimpleCarDrive.h"
+#include "TaskSimpleFight.h"
+#include "TaskSimpleUseGun.h"
+#include "TaskSimpleThrowProjectile.h"
+#include "TaskSimpleJetPack.h"
+#include "TaskSimpleInAir.h"
+#include "TaskSimpleHoldEntity.h"
+#include "TaskSimpleSwim.h"
+#include <extensions/enumerate.hpp>
 
 
 float& CPedIntelligence::STEALTH_KILL_RANGE = *reinterpret_cast<float*>(0x8D2398); // 2.5f
@@ -42,56 +50,56 @@ void CPedIntelligence::InjectHooks()
     RH_ScopedInstall(Constructor, 0x607140);
     RH_ScopedInstall(Destructor, 0x607300);
 
-    RH_ScopedInstall(GetPedEntities, 0x4893E0);
-    RH_ScopedInstall(SetPedDecisionMakerType, 0x600B50);
-    RH_ScopedInstall(SetPedDecisionMakerTypeInGroup, 0x600BB0);
-    RH_ScopedInstall(RestorePedDecisionMakerType, 0x600BC0);
-    RH_ScopedInstall(SetHearingRange, 0x600BE0);
-    RH_ScopedInstall(SetSeeingRange, 0x600BF0);
-    RH_ScopedInstall(IsInSeeingRange, 0x600C60);
-    RH_ScopedInstall(FindRespectedFriendInInformRange, 0x600CF0);
-    RH_ScopedInstall(IsRespondingToEvent, 0x600DB0);
-    RH_ScopedInstall(AddTaskPhysResponse, 0x600DC0);
-    RH_ScopedInstall(AddTaskEventResponseTemp, 0x600DE0);
-    RH_ScopedInstall(AddTaskEventResponseNonTemp, 0x600E00);
-    RH_ScopedInstall(AddTaskPrimaryMaybeInGroup, 0x600E20);
-    RH_ScopedInstall(FindTaskByType, 0x600EE0);
-    RH_ScopedInstall(GetTaskFighting, 0x600F30);
-    RH_ScopedInstall(GetTaskUseGun, 0x600F70);
-    RH_ScopedInstall(GetTaskThrow, 0x600FB0);
-    RH_ScopedInstall(GetTaskHold, 0x600FF0);
-    RH_ScopedInstall(GetTaskSwim, 0x601070);
-    RH_ScopedInstall(GetTaskDuck, 0x6010A0);
-    RH_ScopedInstall(GetTaskJetPack, 0x601110);
-    RH_ScopedInstall(GetTaskInAir, 0x601150);
-    RH_ScopedInstall(GetTaskClimb, 0x601180);
-    RH_ScopedInstall(GetUsingParachute, 0x6011B0);
-    RH_ScopedInstall(SetTaskDuckSecondary, 0x601230);
-    RH_ScopedInstall(ClearTaskDuckSecondary, 0x601390);
-    RH_ScopedInstall(ClearTasks, 0x601420);
-    RH_ScopedInstall(FlushImmediately, 0x601640);
-    RH_ScopedInstall(GetEffectInUse, 0x6018D0);
-    RH_ScopedInstall(SetEffectInUse, 0x6018E0);
-    RH_ScopedInstall(ProcessAfterProcCol, 0x6018F0);
-    RH_ScopedInstall(ProcessAfterPreRender, 0x6019B0);
-    RH_ScopedInstall(ProcessEventHandler, 0x601BB0);
-    RH_ScopedInstall(IsFriendlyWith, 0x601BC0);
-    RH_ScopedInstall(IsThreatenedBy, 0x601C30);
-    RH_ScopedInstall(Respects, 0x601C90);
-    RH_ScopedInstall(IsInACarOrEnteringOne, 0x601CC0);
-    RH_ScopedInstall(AreFriends, 0x601D10);
-    RH_ScopedInstall(GetMoveStateFromGoToTask, 0x601D70);
-    RH_ScopedInstall(FlushIntelligence, 0x601DA0);
-    RH_ScopedInstall(TestForStealthKill, 0x601E00);
-    RH_ScopedInstall(RecordEventForScript, 0x602050);
-    RH_ScopedInstall(IsInterestingEntity, 0x6020A0);
-    RH_ScopedInstall(LookAtInterestingEntities, 0x6020D0);
-    RH_ScopedInstall(IsPedGoingForCarDoor, 0x602350);
-    RH_ScopedInstall(CanSeeEntityWithLights, 0x605550);
-    RH_ScopedInstall(ProcessStaticCounter, 0x605650);
-    RH_ScopedInstall(ProcessFirst, 0x6073A0);
-    RH_ScopedInstall(Process, 0x608260);
-    RH_ScopedInstall(GetActivePrimaryTask, 0x4B85B0);
+    RH_ScopedInstall(GetPedEntities, 0x4893E0, { .enabled = false });
+    RH_ScopedInstall(SetPedDecisionMakerType, 0x600B50, {.enabled = false});
+    RH_ScopedInstall(SetPedDecisionMakerTypeInGroup, 0x600BB0, {.enabled = false});
+    RH_ScopedInstall(RestorePedDecisionMakerType, 0x600BC0, {.enabled = false});
+    RH_ScopedInstall(SetHearingRange, 0x600BE0, {.enabled = false});
+    RH_ScopedInstall(SetSeeingRange, 0x600BF0, {.enabled = false});
+    RH_ScopedInstall(IsInSeeingRange, 0x600C60, {.enabled = false});
+    RH_ScopedInstall(FindRespectedFriendInInformRange, 0x600CF0, {.enabled = false});
+    RH_ScopedInstall(IsRespondingToEvent, 0x600DB0, {.enabled = false});
+    RH_ScopedInstall(AddTaskPhysResponse, 0x600DC0, {.enabled = false});
+    RH_ScopedInstall(AddTaskEventResponseTemp, 0x600DE0, {.enabled = false});
+    RH_ScopedInstall(AddTaskEventResponseNonTemp, 0x600E00, {.enabled = false});
+    RH_ScopedInstall(AddTaskPrimaryMaybeInGroup, 0x600E20, {.enabled = false});
+    RH_ScopedInstall(FindTaskByType, 0x600EE0, {.enabled = false});
+    RH_ScopedInstall(GetTaskFighting, 0x600F30, {.enabled = false});
+    RH_ScopedInstall(GetTaskUseGun, 0x600F70, {.enabled = false});
+    RH_ScopedInstall(GetTaskThrow, 0x600FB0, {.enabled = false});
+    RH_ScopedInstall(GetTaskHold, 0x600FF0, {.enabled = false});
+    RH_ScopedInstall(GetTaskSwim, 0x601070, {.enabled = false});
+    RH_ScopedInstall(GetTaskDuck, 0x6010A0, {.enabled = false});
+    RH_ScopedInstall(GetTaskJetPack, 0x601110, {.enabled = false});
+    RH_ScopedInstall(GetTaskInAir, 0x601150, {.enabled = false});
+    RH_ScopedInstall(GetTaskClimb, 0x601180, {.enabled = false});
+    RH_ScopedInstall(GetUsingParachute, 0x6011B0, {.enabled = false});
+    RH_ScopedInstall(SetTaskDuckSecondary, 0x601230, {.enabled = false});
+    RH_ScopedInstall(ClearTaskDuckSecondary, 0x601390, {.enabled = false});
+    RH_ScopedInstall(ClearTasks, 0x601420, {.enabled = false});
+    RH_ScopedInstall(FlushImmediately, 0x601640, {.enabled = false});
+    RH_ScopedInstall(GetEffectInUse, 0x6018D0, {.enabled = false});
+    RH_ScopedInstall(SetEffectInUse, 0x6018E0, {.enabled = false});
+    RH_ScopedInstall(ProcessAfterProcCol, 0x6018F0, {.enabled = false});
+    RH_ScopedInstall(ProcessAfterPreRender, 0x6019B0, {.enabled = false});
+    RH_ScopedInstall(ProcessEventHandler, 0x601BB0, {.enabled = false});
+    RH_ScopedInstall(IsFriendlyWith, 0x601BC0, {.enabled = false});
+    RH_ScopedInstall(IsThreatenedBy, 0x601C30, {.enabled = false});
+    RH_ScopedInstall(Respects, 0x601C90, {.enabled = false});
+    RH_ScopedInstall(IsInACarOrEnteringOne, 0x601CC0, {.enabled = false});
+    RH_ScopedInstall(AreFriends, 0x601D10, {.enabled = false});
+    RH_ScopedInstall(GetMoveStateFromGoToTask, 0x601D70, {.enabled = false});
+    RH_ScopedInstall(FlushIntelligence, 0x601DA0, {.enabled = false});
+    RH_ScopedInstall(TestForStealthKill, 0x601E00, {.enabled = false});
+    RH_ScopedInstall(RecordEventForScript, 0x602050, {.enabled = false});
+    RH_ScopedInstall(IsInterestingEntity, 0x6020A0, {.enabled = false});
+    RH_ScopedInstall(LookAtInterestingEntities, 0x6020D0, {.enabled = false});
+    RH_ScopedInstall(IsPedGoingForCarDoor, 0x602350, {.enabled = false});
+    RH_ScopedInstall(CanSeeEntityWithLights, 0x605550, {.enabled = false});
+    RH_ScopedInstall(ProcessStaticCounter, 0x605650, {.enabled = false});
+    RH_ScopedInstall(ProcessFirst, 0x6073A0, {.enabled = false});
+    RH_ScopedInstall(Process, 0x608260, {.enabled = false});
+    RH_ScopedInstall(GetActivePrimaryTask, 0x4B85B0, {.enabled = false});
 }
 
 // 0x607140
@@ -242,127 +250,88 @@ void CPedIntelligence::AddTaskPrimaryMaybeInGroup(CTask* task, bool bAffectsPed)
 }
 
 // 0x600EE0
-CTask* CPedIntelligence::FindTaskByType(int32 taskId) {
-    CTaskManager* taskManager = &m_TaskMgr;
-    CTask* result = taskManager->FindTaskByType(TASK_PRIMARY_DEFAULT, taskId);
-    if (result)
-        return result;
-
-    result = taskManager->FindTaskByType(TASK_PRIMARY_PRIMARY, taskId);
-    if (result)
-        return result;
-
-    result = taskManager->FindTaskByType(TASK_PRIMARY_EVENT_RESPONSE_TEMP, taskId);
-    if (result)
-        return result;
-
-    return taskManager->FindTaskByType(TASK_PRIMARY_EVENT_RESPONSE_NONTEMP, taskId);
+CTask* CPedIntelligence::FindTaskByType(eTaskType type) {
+    for (const auto idx : { TASK_PRIMARY_DEFAULT, TASK_PRIMARY_PRIMARY, TASK_PRIMARY_EVENT_RESPONSE_TEMP, TASK_PRIMARY_EVENT_RESPONSE_NONTEMP }) {
+        if (const auto task = m_TaskMgr.FindTaskByType(idx, type)) {
+            return task;
+        }
+    }
+    return nullptr;
 }
 
 // 0x600F30
 CTaskSimpleFight* CPedIntelligence::GetTaskFighting() {
-    CTask* task = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK);
-    if (task && task->GetTaskType() == TASK_SIMPLE_FIGHT) {
-        return (CTaskSimpleFight*)task;
-    }
-    return nullptr;
+    return CTask::DynCast<CTaskSimpleFight>(m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK));
 }
 
 // 0x600F70
 CTaskSimpleUseGun* CPedIntelligence::GetTaskUseGun() {
-    CTask* task = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK);
-    if (task && task->GetTaskType() == TASK_SIMPLE_USE_GUN) {
-        return (CTaskSimpleUseGun*)task;
-    }
-    return nullptr;
+    return CTask::DynCast<CTaskSimpleUseGun>(m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK));
 }
 
 // 0x600FB0
 CTaskSimpleThrowProjectile* CPedIntelligence::GetTaskThrow() {
-    CTask* task = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK);
-    if (task && task->GetTaskType() == TASK_SIMPLE_THROW_PROJECTILE) {
-        return (CTaskSimpleThrowProjectile*)task;
-    }
-    return nullptr;
+    return CTask::DynCast<CTaskSimpleThrowProjectile>(m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK));
 }
 
 // 0x600FF0
 CTask* CPedIntelligence::GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask) {
-    CTask* secondaryTask = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
-    if (secondaryTask) {
-        if (secondaryTask->GetTaskType() == TASK_SIMPLE_HOLD_ENTITY) {
-            return secondaryTask->AsComplex();
+    if (const auto task = CTask::DynCast<CTaskSimpleHoldEntity>(m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM))) {
+        return task;
+    }
+
+    if (!bIgnoreCheckingForSimplestActiveTask) {
+        if (const auto task = m_TaskMgr.GetSimplestActiveTask()) {
+            if (CTask::IsA<TASK_SIMPLE_PICKUP_ENTITY, TASK_SIMPLE_PUTDOWN_ENTITY>(task)) {
+                return task;
+            }
         }
     }
 
-    if (bIgnoreCheckingForSimplestActiveTask) {
-        return nullptr;
-    }
-
-    CTask* activeSimplestTask = m_TaskMgr.GetSimplestActiveTask();
-    if (!activeSimplestTask
-        || activeSimplestTask->GetTaskType() != TASK_SIMPLE_PICKUP_ENTITY
-        && activeSimplestTask->GetTaskType() != TASK_SIMPLE_PUTDOWN_ENTITY)
-    {
-        return nullptr;
-    }
-    return activeSimplestTask->AsComplex();
+    return nullptr;
 }
 
 // 0x601070
 CTaskSimpleSwim* CPedIntelligence::GetTaskSwim() {
-    CTask* task = m_TaskMgr.GetSimplestActiveTask();
-    if (task && task->GetTaskType() == TASK_SIMPLE_SWIM) {
-        return (CTaskSimpleSwim*)task;
-    }
-    return nullptr;
+    return CTask::DynCast<CTaskSimpleSwim>(m_TaskMgr.GetSimplestActiveTask());
 }
 
 // 0x6010A0
 CTaskSimpleDuck* CPedIntelligence::GetTaskDuck(bool bIgnoreCheckingForSimplestActiveTask) {
+    if (const auto task = CTask::DynCast<CTaskSimpleDuck>(m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_DUCK))) {
+        return task;
+    }
+
     auto* secondaryTask = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_DUCK);
     if (secondaryTask && secondaryTask->GetTaskType() == TASK_SIMPLE_DUCK) {
         return (CTaskSimpleDuck*)secondaryTask;
     }
 
-    if (bIgnoreCheckingForSimplestActiveTask) {
-        return nullptr;
+    if (!bIgnoreCheckingForSimplestActiveTask) {
+        if (const auto task = CTask::DynCast<CTaskSimpleDuck>(m_TaskMgr.GetSimplestActiveTask())) {
+            return task;
+        }
     }
 
-    CTask* activeSimplestTask = m_TaskMgr.GetSimplestActiveTask();
-    if (!activeSimplestTask || activeSimplestTask->GetTaskType() != TASK_SIMPLE_DUCK) {
-        return nullptr;
-    }
-    return (CTaskSimpleDuck*)activeSimplestTask;
+    return nullptr;
 }
 
 // 0x601110
 CTaskSimpleJetPack* CPedIntelligence::GetTaskJetPack() {
     if (m_pPed->IsPlayer()) {
-        CTask* task = m_TaskMgr.GetSimplestActiveTask();
-        if (task && task->GetTaskType() == TASK_SIMPLE_JETPACK) {
-            return (CTaskSimpleJetPack*)task;
-        }
+        return CTask::DynCast<CTaskSimpleJetPack>(m_TaskMgr.GetSimplestActiveTask());
     }
     return nullptr;
 }
 
 // 0x601150
 CTaskSimpleInAir* CPedIntelligence::GetTaskInAir() {
-    CTask* task = m_TaskMgr.GetSimplestActiveTask();
-    if (task && task->GetTaskType() == TASK_SIMPLE_IN_AIR) {
-        return (CTaskSimpleInAir*)task;
-    }
-    return nullptr;
+    return CTask::DynCast<CTaskSimpleInAir>(m_TaskMgr.GetSimplestActiveTask());
 }
 
 // 0x601180
 CTaskSimpleClimb* CPedIntelligence::GetTaskClimb() {
-    auto task = m_TaskMgr.GetSimplestActiveTask();
-    if (task && task->GetTaskType() == TASK_SIMPLE_CLIMB) {
-        return (CTaskSimpleClimb*)task;
-    }
-    return nullptr;
+    return CTask::DynCast<CTaskSimpleClimb>(m_TaskMgr.GetSimplestActiveTask());
 }
 
 // 0x6011B0
@@ -399,25 +368,19 @@ bool CPedIntelligence::GetUsingParachute() {
 
 // 0x601230
 void CPedIntelligence::SetTaskDuckSecondary(uint16 nLengthOfDuck) {
-    CTask* secondaryTask = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_DUCK);
-
-    if (secondaryTask && secondaryTask->GetTaskType() == TASK_SIMPLE_DUCK) {
-        auto duckTask = (CTaskSimpleDuck*)secondaryTask;
-        if (duckTask->m_nDuckControlType == DUCK_SCRIPT_CONTROLLED) {
+    if (const auto duck = GetTaskDuck()) {
+        if (duck->m_nDuckControlType == DUCK_SCRIPT_CONTROLLED) {
             return;
         }
     }
 
     m_TaskMgr.SetTaskSecondary(new CTaskSimpleDuck(DUCK_TASK_CONTROLLED, nLengthOfDuck), TASK_SECONDARY_DUCK);
 
-    CTask* secondaryAttackTask = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK);
-    if (secondaryAttackTask && secondaryAttackTask->GetTaskType() == TASK_SIMPLE_USE_GUN) {
-        auto taskUseGun = (CTaskSimpleUseGun*)secondaryAttackTask;
-        taskUseGun->ClearAnim(m_pPed);
+    if (const auto useGun = GetTaskUseGun()) {
+        useGun->ClearAnim(m_pPed);
     }
 
-    auto duckTask = (CTaskSimpleDuck*)m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_DUCK);
-    duckTask->ProcessPed(m_pPed);
+    CTask::Cast<CTaskSimpleDuck>(m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_DUCK))->ProcessPed(m_pPed);
 }
 
 // 0x601390
@@ -481,17 +444,19 @@ void CPedIntelligence::ClearTasks(bool bClearPrimaryTasks, bool bClearSecondaryT
     if (!bClearSecondaryTasks)
         return;
 
-    for (int32 secondaryTaskIndex = 0; secondaryTaskIndex < TASK_SECONDARY_MAX; secondaryTaskIndex++) {
-        if (secondaryTaskIndex == TASK_SECONDARY_FACIAL_COMPLEX)
+    for (const auto [idx, task] : notsa::enumerate(m_TaskMgr.GetSecondaryTasks())) {
+        if (!task) {
             continue;
+        }
 
-        CTask* secondaryTask = m_TaskMgr.GetTaskSecondary(secondaryTaskIndex);
-        if (secondaryTask) {
-            if (secondaryTask->MakeAbortable(m_pPed, ABORT_PRIORITY_URGENT, nullptr)) {
-                m_TaskMgr.SetTaskSecondary(nullptr, secondaryTaskIndex);
-            } else {
-                secondaryTask->MakeAbortable(m_pPed, ABORT_PRIORITY_LEISURE, nullptr);
-            }
+        if ((eSecondaryTask)idx == TASK_SECONDARY_FACIAL_COMPLEX) {
+            continue;
+        }
+
+        if (task->MakeAbortable(m_pPed, ABORT_PRIORITY_URGENT, nullptr)) {
+            m_TaskMgr.SetTaskSecondary(nullptr, (eSecondaryTask)idx);
+        } else {
+            task->MakeAbortable(m_pPed, ABORT_PRIORITY_LEISURE, nullptr);
         }
     }
 }
@@ -601,7 +566,7 @@ void CPedIntelligence::ProcessAfterProcCol() {
         if (!bPositionSet) {
             auto* simplestTask = m_TaskMgr.GetSimplestTask(TASK_PRIMARY_DEFAULT);
             if (simplestTask && simplestTask->IsSimple()) {
-                bPositionSet = simplestTask->SetPedPosition(m_pPed);
+                bPositionSet = simplestTask->AsSimple()->SetPedPosition(m_pPed);
             }
         }
 

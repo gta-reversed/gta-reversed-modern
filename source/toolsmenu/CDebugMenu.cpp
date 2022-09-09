@@ -148,35 +148,11 @@ static void DebugCode() {
     }
 
     if (pad->IsStandardKeyJustPressed('0')) {
-        //for (auto& ped : GetPedPool()->GetAllValid()) {
-        //    if (&ped != player) {
-        //        ped.GiveWeapon(WEAPON_EXTINGUISHER, 10000, false);
-        //        ped.SetCurrentWeapon(WEAPON_EXTINGUISHER);
-        //        ped.GetTaskManager().SetTask(new CTaskComplexExtinguishFires{}, TASK_PRIMARY_PRIMARY);
-        //    }
-        //}
-
-        //const auto veh = player->GetIntelligence()->GetVehicleScanner().GetClosestVehicleInRange();
-        //const auto veh = player->m_pVehicle;
-        //player->GetTaskManager().SetTask(new CTaskComplexLeaveCarAndWander{veh, TARGET_DOOR_DRIVER, 0, false}, TASK_PRIMARY_DEFAULT);
-
-        const auto ped = player->GetIntelligence()->GetPedScanner().GetClosestPedInRange();
-        player->GetTaskManager().SetTask(new CTaskComplexFleeAnyMeans{
-            ped,
-            true,
-            100.f,
-            10000,
-            100,
-            100,
-            -1.f,
-            0,
-            0.f
-        }, TASK_PRIMARY_PRIMARY);
 
     }
 
     if (pad->IsStandardKeyJustPressed('9')) {
-        //player->GetTaskManager().SetTask(new CTaskComplexScreamInCarThenLeave{ player->m_pVehicle, TARGET_DOOR_DRIVER }, TASK_PRIMARY_PRIMARY);
+    
     }
 
     if (pad->IsStandardKeyJustPressed('1')) {

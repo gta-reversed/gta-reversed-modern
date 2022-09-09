@@ -30,7 +30,7 @@ public:
     ~CEntityScanner();
 
     /// View of all non-null entities as a view of `T&`
-    template<typename T = CEntity*>
+    template<typename T = CEntity>
     auto GetEntities() const {
         using namespace rng::views;
         using namespace notsa;
