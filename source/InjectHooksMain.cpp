@@ -252,6 +252,11 @@
 #include "TaskComplexStuckInAir.h"
 #include "TaskSimpleHoldEntity.h"
 #include "TaskSimpleCower.h"
+#include "TaskSimpleHitFromBack.h"
+#include "TaskSimpleHitFromBehind.h"
+#include "TaskSimpleHitFromFront.h"
+#include "TaskSimpleHitFromLeft.h"
+#include "TaskSimpleHitFromRight.h"
 #include "TaskSimpleGoTo.h"
 #include "TaskSimpleUseAtm.h"
 #include "TaskSimpleCarOpenLockedDoorFromOutside.h"
@@ -854,11 +859,11 @@ void InjectHooksMain() {
         // CTaskSimpleHitByGunFromLeft::InjectHooks();
         // CTaskSimpleHitByGunFromRear::InjectHooks();
         // CTaskSimpleHitByGunFromRight::InjectHooks();
-        // CTaskSimpleHitFromBack::InjectHooks();
-        // CTaskSimpleHitFromBehind::InjectHooks();
-        // CTaskSimpleHitFromFront::InjectHooks();
-        // CTaskSimpleHitFromLeft::InjectHooks();
-        // CTaskSimpleHitFromRight::InjectHooks();
+        CTaskSimpleHitFromBack::InjectHooks();
+        CTaskSimpleHitFromBehind::InjectHooks();
+        CTaskSimpleHitFromFront::InjectHooks();
+        CTaskSimpleHitFromLeft::InjectHooks();
+        CTaskSimpleHitFromRight::InjectHooks();
         CTaskSimpleHitWall::InjectHooks();
         // CTaskSimpleHurtPedWithCar::InjectHooks();
         // CTaskSimpleKillPedWithCar::InjectHooks();
