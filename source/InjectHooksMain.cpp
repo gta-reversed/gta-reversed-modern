@@ -246,6 +246,7 @@
 #include "TaskComplexTreatAccident.h"
 #include "TaskComplexGoToPointAndStandStillTimed.h"
 #include "TaskComplexPartnerShove.h"
+#include "TaskComplexFleeAnyMeans.h"
 #include "TaskSimpleRunNamedAnim.h"
 #include "TaskComplexProstituteSolicit.h"
 #include "TaskComplexStuckInAir.h"
@@ -720,7 +721,7 @@ void InjectHooksMain() {
         CTaskComplexExtinguishFires::InjectHooks();
         // CTaskComplexFallAndStayDown::InjectHooks();
         CTaskComplexFallToDeath::InjectHooks();
-        // CTaskComplexFleeAnyMeans::InjectHooks();
+        CTaskComplexFleeAnyMeans::InjectHooks();
         CTaskComplexFleeEntity::InjectHooks();
         CTaskComplexFleePoint::InjectHooks();
         CTaskComplexFleeShooting::InjectHooks();

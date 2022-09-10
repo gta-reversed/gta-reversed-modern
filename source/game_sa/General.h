@@ -43,6 +43,14 @@ public:
     static auto& RandomChoice(const R& range) {
         return range[(size_t)CGeneral::GetRandomNumberInRange(0, rng::size(range))];
     }
+
+    /*
+    * @notsa
+    * @brief Return a random node heading, or direction as commonly referred to. See `GetNodeHeadingFromVector`
+    */
+    static auto RandomNodeHeading() {
+        return (uint8)CGeneral::GetRandomNumberInRange(0, 8);
+    }
 };
 
 constexpr float RAND_MAX_INT_RECIPROCAL = 1.0f / static_cast<float>(RAND_MAX + 1); // 1.0 / 32768.0 == 1.0 / (RAND_MAX + 1) = 0.0000305175781
