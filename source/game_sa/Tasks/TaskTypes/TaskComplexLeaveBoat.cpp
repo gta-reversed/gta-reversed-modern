@@ -39,7 +39,7 @@ CTaskComplexLeaveBoat::~CTaskComplexLeaveBoat() {
 CTask* CTaskComplexLeaveBoat::CreateSubTask(eTaskType taskType) {
     switch (taskType) {
     case TASK_SIMPLE_CAR_SET_PED_OUT: {
-        return new CTaskSimpleCarSetPedOut{ m_veh, 0, true };
+        return new CTaskSimpleCarSetPedOut{ m_veh, TARGET_DOOR_FRONT_LEFT, true };
     }
     }
     return nullptr;

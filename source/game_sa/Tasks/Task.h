@@ -57,14 +57,14 @@ public:
         return nullptr;
     }
 
-    template<Task T>
+    template<Task... T>
     static bool IsA(CTask* task) {
-        return task->GetTaskType() == T::Type;
+        return ((task->GetTaskType() == T::Type) || ...);
     }
 
-    template<eTaskType Type>
+    template<eTaskType... Type>
     static bool IsA(CTask* task) {
-        return task->GetTaskType() == Type;
+        return ((task->GetTaskType() == Type) || ...);
     }
 
     /// Works like `static_cast` + in debug mode asserts the type to be as expected.

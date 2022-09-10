@@ -354,9 +354,9 @@ bool CTaskSimpleHoldEntity::CanThrowEntity() const {
 }
 
 // 0x691720
-void CTaskSimpleHoldEntity::PlayAnim(AnimationId groupId, AssocGroupId animId) {
-    m_nAnimId = groupId;
-    m_nAnimGroupId = animId;
+void CTaskSimpleHoldEntity::PlayAnim(AnimationId animId, AssocGroupId grpId) {
+    m_nAnimId = animId;
+    m_nAnimGroupId = grpId;
 }
 
 // 0x691740

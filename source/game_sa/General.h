@@ -40,8 +40,16 @@ public:
     * @return An item from the range choosen randomly. Same as Python's `random.choice`
     */
     template<rng::random_access_range R>
-    static auto&& RandomChoice(const R& range) {
-        return range[(size_t)CGeneral::GetRandomNumberInRange(0, (int)rng::size(range))];
+    static auto& RandomChoice(const R& range) {
+        return range[(size_t)CGeneral::GetRandomNumberInRange(0, rng::size(range))];
+    }
+
+    /*
+    * @notsa
+    * @brief Return a random node heading, or direction as commonly referred to. See `GetNodeHeadingFromVector`
+    */
+    static auto RandomNodeHeading() {
+        return (uint8)CGeneral::GetRandomNumberInRange(0, 8);
     }
 };
 

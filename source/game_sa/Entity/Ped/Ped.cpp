@@ -3639,10 +3639,6 @@ CVector CPed::GetBonePosition(ePedBones boneId, bool updateSkinBones) {
     return pos;
 }
 
-/*!
-* @notsa
-* @brief Is the ped jogging, running or sprinting
-*/
 bool CPed::IsJoggingOrFaster() const {
     switch (m_nMoveState) {
     case PEDMOVE_JOG:
@@ -3653,6 +3649,14 @@ bool CPed::IsJoggingOrFaster() const {
     return false;
 }
 
+bool CPed::IsRunningOrSprinting() const {
+    switch (m_nMoveState) {
+    case PEDMOVE_RUN:
+    case PEDMOVE_SPRINT:
+        return true;
+    }
+    return false;
+}
 
 // 0x6497A0
 bool SayJacked(CPed* jacked, CVehicle* vehicle, uint32 offset) {
