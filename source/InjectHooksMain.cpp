@@ -127,6 +127,10 @@
 #include "TaskSimpleCarCloseDoorFromOutside.h"
 #include "TaskSimpleCarGetIn.h"
 #include "TaskSimpleBeHit.h"
+#include "TaskSimpleHitByGunFromFront.h"
+#include "TaskSimpleHitByGunFromLeft.h"
+#include "TaskSimpleHitByGunFromRear.h"
+#include "TaskSimpleHitByGunFromRight.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculator.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorStandard.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorRadiusAngleOffset.h"
@@ -855,10 +859,10 @@ void InjectHooksMain() {
         // CTaskSimpleHailTaxi::InjectHooks();
         // CTaskSimpleHailTaxiAndPause::InjectHooks();
         CTaskSimpleHandsUp::InjectHooks();
-        // CTaskSimpleHitByGunFromFront::InjectHooks();
-        // CTaskSimpleHitByGunFromLeft::InjectHooks();
-        // CTaskSimpleHitByGunFromRear::InjectHooks();
-        // CTaskSimpleHitByGunFromRight::InjectHooks();
+        CTaskSimpleHitByGunFromFront::InjectHooks();
+        CTaskSimpleHitByGunFromLeft::InjectHooks();
+        CTaskSimpleHitByGunFromRear::InjectHooks();
+        CTaskSimpleHitByGunFromRight::InjectHooks();
         CTaskSimpleHitFromBack::InjectHooks();
         CTaskSimpleHitFromBehind::InjectHooks();
         CTaskSimpleHitFromFront::InjectHooks();
