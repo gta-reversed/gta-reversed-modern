@@ -61,10 +61,8 @@ void CPlaneTrail::RegisterPoint(CVector pos) {
     const bool bDoShift = lastUpdate && CTimer::GetTimeInMS() - lastUpdate > 2000;
     if (bDoShift) {
         // Shift right
-        for (auto i = PLANE_TRAIL_BUF_SIZE - 1; i; i--) {
-            m_Timepoints[i] = m_Timepoints[i - 1];
-            m_Positions[i]  = m_Positions[i - 1];
-        }
+        rng::shift_right(m_Timepoints);
+        rng::shift_right(m_Positions);
     }
 
     m_Positions[0] = pos;
