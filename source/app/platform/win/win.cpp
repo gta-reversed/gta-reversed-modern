@@ -16,7 +16,7 @@
 #include "LoadingScreen.h"
 #include "VideoMode.h"
 #include "ControllerConfigManager.h"
-#include "app.h" todo: remo, { .reversed = false }ve
+#include "app.h" // todo: remove
 // #include "Input.h"
 
 static LPSTR AppClassName = LPSTR("Grand theft auto San Andreas");
@@ -83,7 +83,7 @@ bool InitApplication(HINSTANCE hInstance) {
     windowClass.style         = CS_BYTEALIGNWINDOW;
     windowClass.lpfnWndProc   = MainWndProc;
     windowClass.hInstance     = hInstance;
-    windowClass.hIcon         = LoadIcon(hInstance, MAKEINTRESOURCE(100 /*IDI_ICON1*/));
+    // windowClass.hIcon         = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
     windowClass.hCursor       = LoadCursor(nullptr, IDC_ARROW);
     windowClass.lpszClassName = AppClassName;
     return RegisterClass(&windowClass);
@@ -148,18 +148,18 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
     0x7487, { .reversed = false }CF
     WinInput::Initialise();
 
-    todo: CInputEvents::MapMouseButtons && See A, { .reversed = false }SM
-    const auto state = GetMouseButtonMask(, { .reversed = false });
-    ControlsManager.InitDefaultControlConfigMouse(state, FrontEndMenuManager.m_nController == 0, { .reversed = false });
+    // todo: CInputEvents::MapMouseButtons && See ASM
+    // const auto state = GetMouseButtonMask();
+    // ControlsManager.InitDefaultControlConfigMouse(state, FrontEndMenuManager.m_nController == 0);
 
-    0x7488, { .reversed = false }47
+    // 0x748847
     if (RsEventHandler(rsRWINITIALIZE, PSGLOBAL(window)) == rsEVENTERROR) {
         DestroyWindow(PSGLOBAL(window));
         RsEventHandler(rsTERMINATE, nullptr);
         return false;
     }
 
-    0x7488, { .reversed = false }EE
+    // 0x7488EE
     for (auto i = 0; i < argc; i++) {
         RsEventHandler(rsCOMMANDLINE, argv[i]);
     }
@@ -183,7 +183,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
     ShowWindow(PSGLOBAL(window), nCmdShow);
     UpdateWindow(PSGLOBAL(window));
 
-    0x7489, { .reversed = false }95
+    // 0x748995
     CFileMgr::SetDirMyDocuments();
     if (auto* file = CFileMgr::OpenFile("gta_sa.set", "rb")) {
         if (!ControlsManager.LoadSettings(file)) {
@@ -198,7 +198,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
     bool bNewGameFirstTime = true;
     MSG Msg;
 
-    0x7489, { .reversed = false }FB
+    // 0x7489FB
     while (true) {
         RwInitialized = true;
 
@@ -241,7 +241,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
                         gGameState = GAME_STATE_PLAYING_LOGO;
                         break;
                     case GAME_STATE_PLAYING_LOGO:
-                    case GAME_STATE_PLAYING_INTRO: 0x748B, { .reversed = false }17
+                    case GAME_STATE_PLAYING_INTRO: // 0x748B17
                     {
                         CPad::UpdatePads();
                         auto* pad = CPad::GetPad();
@@ -272,7 +272,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
                         }
                         CGame::InitialiseCoreDataAfterRW();
                         gGameState = GAME_STATE_FRONTEND_LOADED;
-                        anisotropySupportedByGFX = (RwD3D9GetCaps()->RasterCaps & D3DPRASTERCAPS_ANISOTROPY) != 0; todo: fu, { .reversed = false }nc
+                        anisotropySupportedByGFX = (RwD3D9GetCaps()->RasterCaps & D3DPRASTERCAPS_ANISOTROPY) != 0; // todo: func
                         break;
                     case GAME_STATE_FRONTEND_LOADED:
                         FrontEndMenuManager.m_bMenuActive = true;
@@ -285,7 +285,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
                         gGameState = GAME_STATE_FRONTEND_IDLE;
                         CLoadingScreen::DoPCTitleFadeIn();
                         break;
-                    case GAME_STATE_FRONTEND_IDLE: 0x748C, { .reversed = false }B2
+                    case GAME_STATE_FRONTEND_IDLE: // 0x748CB2
                     {
                         WINDOWPLACEMENT windowPlacement { .length = 44 };
                         GetWindowPlacement(PSGLOBAL(window), &windowPlacement);
@@ -334,7 +334,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
             }
         }
 
-        0x748D, { .reversed = false }DA
+        // 0x748DDA
         RwInitialized = false;
         FrontEndMenuManager.UnloadTextures();
         if (!FrontEndMenuManager.m_bLoadingSavedGame) {
@@ -362,12 +362,12 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
         FrontEndMenuManager.m_bLoadingSavedGame = false;
     }
 
-    if game is loaded, shutdown , { .reversed = false }it
+    // if game is loaded, shutdown it
     if (gGameState == GAME_STATE_IDLE) {
         CGame::Shutdown();
     }
 
-    now quit 0x748E, { .reversed = false }75
+    // now quit 0x748E75
     AudioEngine.Shutdown();
     FreeVideoModeList();
     RsEventHandler(rsRWTERMINATE, nullptr);
@@ -377,10 +377,10 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
     ShowCursor(true);
 
     SystemParametersInfo(SPI_SETSTICKYKEYS, sizeof(STICKYKEYS), &pvParam, 2u);
-    SystemParametersInfo(SPI_SETPOWEROFFACTIVE, 1u, nullptr, 2u); TODO: GUID_VIDEO_POWERDOWN_TIMEO, { .reversed = false }UT
+    SystemParametersInfo(SPI_SETPOWEROFFACTIVE, 1u, nullptr, 2u); // TODO: GUID_VIDEO_POWERDOWN_TIMEOUT
     SystemParametersInfo(SPI_SETLOWPOWERACTIVE, 1u, nullptr, 2u);
     SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, 1u, nullptr, 2u);
-    nullsub_0x72F3C0, { .reversed = false }()
+    // nullsub_0x72F3C0()
     SetErrorMode(0);
 
     return Msg.wParam;
