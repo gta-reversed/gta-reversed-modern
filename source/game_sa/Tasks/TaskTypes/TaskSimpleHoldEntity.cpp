@@ -58,6 +58,33 @@ CTaskSimpleHoldEntity::CTaskSimpleHoldEntity(CEntity* entityToHold, CVector* pos
     }
 }
 
+CTaskSimpleHoldEntity::CTaskSimpleHoldEntity(CEntity* entityToHold,
+    const CVector& posn,
+    uint8 boneFrameId,
+    uint8 boneFlags,
+    AnimationId animId,
+    AssocGroupId groupId,
+    bool bDisAllowDroppingOnAnimEnd
+) :
+    m_pEntityToHold{ entityToHold },
+    m_vecPosition{ posn },
+    m_nBoneFrameId{ boneFrameId },
+    m_bBoneFlags{ boneFlags },
+    m_nAnimId{ animId },
+    m_nAnimGroupId{ groupId },
+    m_bDisallowDroppingOnAnimEnd{ bDisAllowDroppingOnAnimEnd },
+    m_pAnimBlock{},
+    m_pAnimBlendHierarchy{},
+    m_bEntityDropped{},
+    m_bEntityRequiresProcessing{ true },
+    m_pAnimBlendAssociation{}
+{
+    if (m_pEntityToHold) {
+        m_pEntityToHold->m_bStreamingDontDelete = true;
+        CEntity::RegisterReference(m_pEntityToHold);
+    }
+}
+
 // 0x691470
 CTaskSimpleHoldEntity::CTaskSimpleHoldEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, const char* animName, const char* animBlockName, eAnimationFlags animFlags) : CTaskSimple()
 {
@@ -327,9 +354,9 @@ bool CTaskSimpleHoldEntity::CanThrowEntity() const {
 }
 
 // 0x691720
-void CTaskSimpleHoldEntity::PlayAnim(AnimationId groupId, AssocGroupId animId) {
-    m_nAnimId = groupId;
-    m_nAnimGroupId = animId;
+void CTaskSimpleHoldEntity::PlayAnim(AnimationId animId, AssocGroupId grpId) {
+    m_nAnimId = animId;
+    m_nAnimGroupId = grpId;
 }
 
 // 0x691740

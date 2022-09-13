@@ -1,5 +1,7 @@
 #pragma once
 
+#include <concepts>
+
 #include "TaskComplex.h"
 #include "TaskTimer.h"
 #include "Ped.h" // TODO: eMoveState (When possible move to an enum file)
@@ -15,9 +17,9 @@
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskSimpleStandStill.h"
 #include "TaskSimpleTired.h"
+#include "PosCalculators/EntitySeekPosCalculator.h"
 
-template <typename EntitySeekT>
-    //requires (std::is_base_of_v<CEntitySeekPosCalculator, EntitySeekT>)
+template <std::derived_from<CEntitySeekPosCalculator> T_PosCalc>
 class NOTSA_EXPORT_VTABLE CTaskComplexSeekEntity : public CTaskComplex {
     CEntity* m_entityToSeek{};
     int32 m_seekInterval{};
@@ -28,7 +30,7 @@ class NOTSA_EXPORT_VTABLE CTaskComplexSeekEntity : public CTaskComplex {
     float m_unk2{}; // TODO: Used as the value for `CTaskComplexFollowNodeRoute::m_fUnkn2`
     CTaskTimer m_seekTimer{};
     CTaskTimer m_scanTimer{};
-    EntitySeekT m_entitySeekPosCalculator{};
+    T_PosCalc m_entitySeekPosCalculator{};
     eMoveState m_moveState{ PEDMOVE_RUN };
     bool m_flag0x1 : 1{};
     bool m_faceSeekEntityAfterReachingIt : 1{};
@@ -44,14 +46,15 @@ public:
     //static constexpr auto Type = eTaskType::TASK_COMPLEX_SEEK_ENTITY;
 
     CTaskComplexSeekEntity(
-        CEntity* entity,
-        int32    scanInterval,
-        int32    seekInterval,
-        float    maxEntityDist2D,
-        float    moveStateRadius,
-        float    unk2,
-        bool     flag0,
-        bool     faceSeekEntityAfterReachingIt
+        CEntity*  entity,
+        int32     scanInterval,
+        int32     seekInterval,
+        float     maxEntityDist2D,
+        float     moveStateRadius,
+        float     unk2,
+        bool      flag0,
+        bool      faceSeekEntityAfterReachingIt,
+        T_PosCalc seekPosCalculator = {}
     ) :
         m_entityToSeek{ entity },
         m_seekInterval{ seekInterval },
@@ -60,7 +63,8 @@ public:
         m_moveStateRadius{ moveStateRadius },
         m_unk2{ unk2 },
         m_flag0x1{ flag0 },
-        m_faceSeekEntityAfterReachingIt{ faceSeekEntityAfterReachingIt }
+        m_faceSeekEntityAfterReachingIt{ faceSeekEntityAfterReachingIt },
+        m_entitySeekPosCalculator{ seekPosCalculator }
     {
         CEntity::SafeRegisterRef(m_entityToSeek);
     }
@@ -344,8 +348,8 @@ public:
     CTask* CreateSubTaskWhenPedIsTooFarFromEntity(CPed* ped, float pedToSeekPosDist2DSq) {
         return CreateSubTask(
             (m_minEntityDist2D == 0.f || pedToSeekPosDist2DSq > sq(m_minEntityDist2D))
-            ? TASK_COMPLEX_FOLLOW_NODE_ROUTE
-            : TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL,
+                ? TASK_COMPLEX_FOLLOW_NODE_ROUTE
+                : TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL,
             ped
         );
     }

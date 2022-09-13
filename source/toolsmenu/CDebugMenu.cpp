@@ -3,7 +3,8 @@
 #include "CDebugMenu.h"
 #include "TaskComplexFollowPointRoute.h"
 #include "TaskComplexExtinguishFires.h"
-#include "TaskComplexEnterCarAsDriverTimed.h"
+#include "TaskComplexStealCar.h"
+#include "TaskComplexFleeAnyMeans.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -147,17 +148,11 @@ static void DebugCode() {
     }
 
     if (pad->IsStandardKeyJustPressed('0')) {
-        //for (auto& ped : GetPedPool()->GetAllValid()) {
-        //    if (&ped != player) {
-        //        ped.GiveWeapon(WEAPON_EXTINGUISHER, 10000, false);
-        //        ped.SetCurrentWeapon(WEAPON_EXTINGUISHER);
-        //        ped.GetTaskManager().SetTask(new CTaskComplexExtinguishFires{}, TASK_PRIMARY_PRIMARY);
-        //    }
-        //}
 
-        const auto veh = player->GetIntelligence()->GetVehicleScanner().GetClosestVehicleInRange();
+    }
 
-        player->GetTaskManager().SetTask(new CTaskComplexEnterCarAsDriverTimed{veh, 100}, TASK_PRIMARY_PRIMARY);
+    if (pad->IsStandardKeyJustPressed('9')) {
+    
     }
 
     if (pad->IsStandardKeyJustPressed('1')) {

@@ -70,7 +70,7 @@ void CTaskComplexBeInGroup::MonitorSecondaryGroupTask(CPed* ped) {
     } else { // Group has a new task, apply it to the ped
 
         // Abort peds task in the previous stored slot
-        if (const auto task = ped->GetTaskManager().GetTaskSecondary(m_nSecondaryTaskSlot)) {
+        if (const auto task = ped->GetTaskManager().GetTaskSecondary((eSecondaryTask)m_nSecondaryTaskSlot)) {
             task->MakeAbortable(ped, ABORT_PRIORITY_LEISURE, nullptr);
         }
 
