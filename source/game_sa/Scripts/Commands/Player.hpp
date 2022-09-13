@@ -7,94 +7,77 @@
 * Various player commands
 */
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_CREATE_PLAYER>() { // 0x053
-    CollectParameters(4);
-    int32 index = ScriptParams[0].iParam;
+/*!
+* @brief Create a player at the given world position
+* @param playerId Player's id (0 or 1)
+* @param pos      World position
+*/
+int32 CreatePlayer(int32 playerId, CVector pos) {
     if (!CStreaming::IsModelLoaded(0 /*MI_PLAYER*/)) // todo (Izzotop): rename MODEL_NULL -> MI_PLAYER
     {
         CStreaming::RequestSpecialModel(0, "player", STREAMING_GAME_REQUIRED | STREAMING_KEEP_IN_MEMORY | STREAMING_PRIORITY_REQUEST);
         CStreaming::LoadAllRequestedModels(true);
     }
 
-    CPlayerPed::SetupPlayerPed(index);
-    CPlayerInfo* playerInfo = &CWorld::Players[index];
-    CPlayerPed* player = playerInfo->m_pPed;
+    // Create
+    CPlayerPed::SetupPlayerPed(playerId);
+    auto player = FindPlayerPed(playerId);
     player->SetCharCreatedBy(PED_MISSION);
-    CPlayerPed::DeactivatePlayerPed(index);
+    CPlayerPed::DeactivatePlayerPed(playerId);
 
-    CVector pos = CTheScripts::ReadCVectorFromScript(1);
-    if (pos.z <= MAP_Z_LOW_LIMIT)
+    // Position in the world
+    if (pos.z <= MAP_Z_LOW_LIMIT) {
         pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-
+    }
     pos.z += player->GetDistanceFromCentreOfMassToBaseOfModel();
     player->SetPosn(pos);
     CTheScripts::ClearSpaceForMissionEntity(pos, player);
-    CPlayerPed::ReactivatePlayerPed(index);
-    ScriptParams[0].iParam = index;
-    StoreParameters(1);
+    CPlayerPed::ReactivatePlayerPed(playerId);
 
-    CTask* task = new CTaskSimplePlayerOnFoot();
-    player->GetTaskManager().SetTask(task, TASK_PRIMARY_DEFAULT);
-    return OR_CONTINUE;
+    // Set task
+    player->GetTaskManager().SetTask(new CTaskSimplePlayerOnFoot(), TASK_PRIMARY_DEFAULT);
+
+    return playerId;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_CREATE_PLAYER, CreatePlayer);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_GET_PLAYER_COORDINATES>() { // 0x054 | NOTSA
-    CollectParameters(1);
-    auto& playerInfo = FindPlayerInfo(ScriptParams[0].iParam);
-    *(CVector*)&ScriptParams[0] = playerInfo.GetPos();
-    StoreParameters(3);
-    return OR_CONTINUE;
+/// Get the position of a player
+CVector GetPlayerCoordinates(CPlayerInfo& pinfo) {
+    return pinfo.GetPos();
 }
+REGISTER_COMMAND_HANDLER(COMMAND_GET_PLAYER_COORDINATES, GetPlayerCoordinates);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_PLAYER_IN_AREA_2D>() { // 0x056 | NOTSA
-    CollectParameters(6);
-    CPlayerPed* player = FindPlayerPed(ScriptParams[0].iParam);
-    float x1 = ScriptParams[1].fParam;
-    float y1 = ScriptParams[2].fParam;
-    float x2 = ScriptParams[3].fParam;
-    float y2 = ScriptParams[4].fParam;
+bool IsPlyerInArea2D(CRunningScript* S, CPlayerPed& player, CRect area, bool highlightArea) {
+    if (highlightArea) {
+        CTheScripts::HighlightImportantArea((uint32)S + (uint32)S->m_pCurrentIP, area, MAP_Z_LOW_LIMIT);
+    }
 
-    if (player->bInVehicle)
-        UpdateCompareFlag(player->m_pVehicle->IsWithinArea(x1, y1, x2, y2));
-    else
-        UpdateCompareFlag(player->IsWithinArea(x1, y1, x2, y2));
+    if (CTheScripts::DbgFlag) {
+        CTheScripts::DrawDebugSquare(area);
+    }
 
-    if (ScriptParams[5].bParam)
-        CTheScripts::HighlightImportantArea(reinterpret_cast<uint32>((uint32)this + m_pCurrentIP), x1, y1, x2, y2, MAP_Z_LOW_LIMIT);
-
-    if (CTheScripts::DbgFlag)
-        CTheScripts::DrawDebugSquare(x1, y1, x2, y2);
-
-    return OR_CONTINUE;
+    return player.bInVehicle
+        ? player.m_pVehicle->IsWithinArea(area.left, area.top, area.right, area.bottom)
+        : player.IsWithinArea(area.left, area.top, area.right, area.bottom);
 }
+REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_IN_AREA_2D, IsPlyerInArea2D);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_PLAYER_IN_AREA_3D>() { // 0x057 | NOTSA
-    CollectParameters(8);
-    CPlayerPed* player = FindPlayerPed(ScriptParams[0].iParam);
-    const CVector p1 = CTheScripts::ReadCVectorFromScript(1);
-    const CVector p2 = CTheScripts::ReadCVectorFromScript(4);
+bool IsPlyerInArea3D(CRunningScript* S, CPlayerPed& player, CVector p1, CVector p2, bool highlightArea) {
+    if (highlightArea) {
+        CTheScripts::HighlightImportantArea((uint32)S + (uint32)S->m_pCurrentIP, p1.x, p1.y, p2.x, p2.y, (p1.z + p2.z) / 2.0f);
+    }
 
-    if (player->bInVehicle)
-        UpdateCompareFlag(player->m_pVehicle->IsWithinArea(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z));
-    else
-        UpdateCompareFlag(player->IsWithinArea(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z));
-
-    if (ScriptParams[7].bParam)
-        CTheScripts::HighlightImportantArea(reinterpret_cast<uint32>((uint32)this + m_pCurrentIP), p1.x, p1.y, p2.x, p2.y, (p1.z + p2.z) / 2.0f);
-
-    if (CTheScripts::DbgFlag)
+    if (CTheScripts::DbgFlag) {
         CTheScripts::DrawDebugCube(p1, p2);
+    }
 
-    return OR_CONTINUE;
+    return player.bInVehicle
+        ? player.m_pVehicle->IsWithinArea(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z)
+        : player.IsWithinArea(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
 }
-
+REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_IN_AREA_3D, IsPlyerInArea3D);
 
 auto IsPlayerPlaying(int32 playerId) -> notsa::script::CompareFlagUpdate {
     return { FindPlayerInfo(playerId).m_nPlayerState == PLAYERSTATE_PLAYING };
 }
 REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_PLAYING, IsPlayerPlaying);
-

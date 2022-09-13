@@ -127,12 +127,17 @@
 #include "TaskSimpleCarCloseDoorFromOutside.h"
 #include "TaskSimpleCarGetIn.h"
 #include "TaskSimpleBeHit.h"
+#include "TaskSimpleHitByGunFromFront.h"
+#include "TaskSimpleHitByGunFromLeft.h"
+#include "TaskSimpleHitByGunFromRear.h"
+#include "TaskSimpleHitByGunFromRight.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculator.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorStandard.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorRadiusAngleOffset.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorXYOffset.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorFixedPos.h"
 #include "TaskComplexSeekEntityAnyMeansXYOffset.h"
+#include "TaskComplexFleeEntity.h"
 #include "TaskComplexSmartFleeEntity.h"
 #include "TaskSimpleArrestPed.h"
 #include "TaskComplexDragPedFromCar.h"
@@ -245,11 +250,17 @@
 #include "TaskComplexTreatAccident.h"
 #include "TaskComplexGoToPointAndStandStillTimed.h"
 #include "TaskComplexPartnerShove.h"
+#include "TaskComplexFleeAnyMeans.h"
 #include "TaskSimpleRunNamedAnim.h"
 #include "TaskComplexProstituteSolicit.h"
 #include "TaskComplexStuckInAir.h"
 #include "TaskSimpleHoldEntity.h"
 #include "TaskSimpleCower.h"
+#include "TaskSimpleHitFromBack.h"
+#include "TaskSimpleHitFromBehind.h"
+#include "TaskSimpleHitFromFront.h"
+#include "TaskSimpleHitFromLeft.h"
+#include "TaskSimpleHitFromRight.h"
 #include "TaskSimpleGoTo.h"
 #include "TaskSimpleUseAtm.h"
 #include "TaskSimpleCarOpenLockedDoorFromOutside.h"
@@ -719,8 +730,8 @@ void InjectHooksMain() {
         CTaskComplexExtinguishFires::InjectHooks();
         // CTaskComplexFallAndStayDown::InjectHooks();
         CTaskComplexFallToDeath::InjectHooks();
-        // CTaskComplexFleeAnyMeans::InjectHooks();
-        // CTaskComplexFleeEntity::InjectHooks();
+        CTaskComplexFleeAnyMeans::InjectHooks();
+        CTaskComplexFleeEntity::InjectHooks();
         CTaskComplexFleePoint::InjectHooks();
         CTaskComplexFleeShooting::InjectHooks();
         CTaskComplexFollowLeaderAnyMeans::InjectHooks();
@@ -848,15 +859,15 @@ void InjectHooksMain() {
         // CTaskSimpleHailTaxi::InjectHooks();
         // CTaskSimpleHailTaxiAndPause::InjectHooks();
         CTaskSimpleHandsUp::InjectHooks();
-        // CTaskSimpleHitByGunFromFront::InjectHooks();
-        // CTaskSimpleHitByGunFromLeft::InjectHooks();
-        // CTaskSimpleHitByGunFromRear::InjectHooks();
-        // CTaskSimpleHitByGunFromRight::InjectHooks();
-        // CTaskSimpleHitFromBack::InjectHooks();
-        // CTaskSimpleHitFromBehind::InjectHooks();
-        // CTaskSimpleHitFromFront::InjectHooks();
-        // CTaskSimpleHitFromLeft::InjectHooks();
-        // CTaskSimpleHitFromRight::InjectHooks();
+        CTaskSimpleHitByGunFromFront::InjectHooks();
+        CTaskSimpleHitByGunFromLeft::InjectHooks();
+        CTaskSimpleHitByGunFromRear::InjectHooks();
+        CTaskSimpleHitByGunFromRight::InjectHooks();
+        CTaskSimpleHitFromBack::InjectHooks();
+        CTaskSimpleHitFromBehind::InjectHooks();
+        CTaskSimpleHitFromFront::InjectHooks();
+        CTaskSimpleHitFromLeft::InjectHooks();
+        CTaskSimpleHitFromRight::InjectHooks();
         CTaskSimpleHitWall::InjectHooks();
         // CTaskSimpleHurtPedWithCar::InjectHooks();
         // CTaskSimpleKillPedWithCar::InjectHooks();

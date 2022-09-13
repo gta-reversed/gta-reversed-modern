@@ -3,35 +3,54 @@
 #include "TaskComplexGoToPointAiming.h"
 
 void CTaskComplexGoToPointAiming::InjectHooks() {
-    RH_ScopedClass(CTaskComplexGoToPointAiming);
+    RH_ScopedVirtualClass(CTaskComplexGoToPointAiming, 0x86fe00, 11);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x668790);
     RH_ScopedInstall(Destructor, 0x668870);
     RH_ScopedInstall(CreateSubTask, 0x6688D0, { .reversed = false });
-    RH_ScopedInstall(Clone, 0x66CD80, { .reversed = false });
-    RH_ScopedInstall(CreateFirstSubTask, 0x66DDB0, { .reversed = false });
-    RH_ScopedInstall(ControlSubTask, 0x6689E0, { .reversed = false });
+
+    RH_ScopedVMTInstall(Clone, 0x66CD80);
+    RH_ScopedVMTInstall(GetTaskType, 0x668860);
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x66DD70);
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x66DDB0, { .reversed = false });
+    RH_ScopedVMTInstall(ControlSubTask, 0x6689E0, { .reversed = false });
 }
 
 // 0x668790
-CTaskComplexGoToPointAiming::CTaskComplexGoToPointAiming(int32 a1, const CVector& p1, CEntity* entity, CVector p2, float a6, float a7) : CTaskComplex() {
-    v14 = p2;
-    dwordC = a1;
-    m_Entity = entity;
-    CEntity::SafeRegisterRef(m_Entity);
+CTaskComplexGoToPointAiming::CTaskComplexGoToPointAiming(
+    eMoveState moveState,
+    const CVector& movePos,
+    CEntity* aimAtEntity,
+    CVector aimPos,
+    const float targetRadius,
+    const float slowDownDist
+) :
+    m_aimPos{aimPos},
+    m_aimAtEntity{aimAtEntity},
+    m_moveState{moveState},
+    m_movePos{movePos},
+    m_moveTargetRadius{targetRadius},
+    m_slowDownDistance{slowDownDist}
+{
+    CEntity::SafeRegisterRef(m_aimAtEntity);
+}
 
-    if (v20 != p1 || float2C != a6 || float30 != a7) {
-        v20 = p1;
-        float2C = a6;
-        float30 = a7;
-        m_Flags = m_Flags | 1;
+CTaskComplexGoToPointAiming::CTaskComplexGoToPointAiming(const CTaskComplexGoToPointAiming& o) :
+    CTaskComplexGoToPointAiming{
+        o.m_moveState,
+        o.m_movePos,
+        o.m_aimAtEntity,
+        o.m_aimPos,
+        o.m_moveTargetRadius,
+        o.m_slowDownDistance
     }
+{
 }
 
 // 0x668870
 CTaskComplexGoToPointAiming::~CTaskComplexGoToPointAiming() {
-    CEntity::SafeCleanUpRef(m_Entity);
+    CEntity::SafeCleanUpRef(m_aimAtEntity);
 }
 
 // 0x6688D0
@@ -46,7 +65,7 @@ CTask* CTaskComplexGoToPointAiming::CreateNextSubTask(CPed* ped) {
     case TASK_SIMPLE_GUN_CTRL:
         return CreateSubTask(TASK_FINISHED);
     default:
-        return nullptr;
+        NOTSA_UNREACHABLE();
     }
 }
 
