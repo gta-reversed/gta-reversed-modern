@@ -20,16 +20,16 @@ void CCoronas::InjectHooks() {
     RH_ScopedClass(CCoronas);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Init, 0x6FAA70);
-    // RH_ScopedInstall(Shutdown, 0x6FAB00);
-    // RH_ScopedInstall(Update, 0x6FADF0);
-    // RH_ScopedInstall(Render, 0x6FAEC0);
-    // RH_ScopedInstall(RenderReflections, 0x6FB630);
-    // RH_ScopedInstall(RenderSunReflection, 0x6FBAA0);
-    // RH_ScopedInstall(RegisterCorona, 0x6FC180);
-    // RH_ScopedInstall(RegisterCorona, 0x6FC580);
-    // RH_ScopedInstall(UpdateCoronaCoors, 0x6FC4D0);
-    // RH_ScopedInstall(DoSunAndMoon, 0x6FC5A0);
+    RH_ScopedInstall(Init, 0x6FAA70, { .reversed = false });
+    RH_ScopedInstall(Shutdown, 0x6FAB00, { .reversed = false });
+    RH_ScopedInstall(Update, 0x6FADF0, { .reversed = false });
+    RH_ScopedInstall(Render, 0x6FAEC0, { .reversed = false });
+    RH_ScopedInstall(RenderReflections, 0x6FB630, { .reversed = false });
+    RH_ScopedInstall(RenderSunReflection, 0x6FBAA0, { .reversed = false });
+    RH_ScopedOverloadedInstall(RegisterCorona, "type", 0x6FC180, void(*)(uint32, CEntity*, uint8, uint8, uint8, uint8, const CVector&, float, float, RwTexture*, eCoronaFlareType, bool, bool, int32, float, bool, float, uint8, float, bool, bool reflectionDelay), { .reversed = false });
+    RH_ScopedOverloadedInstall(RegisterCorona, "texture", 0x6FC580, void(*)(uint32, CEntity*, uint8, uint8, uint8, uint8, const CVector&, float, float, eCoronaType, eCoronaFlareType, bool, bool, int32, float, bool, float, uint8, float, bool, bool reflectionDelay), { .reversed = false });
+    RH_ScopedInstall(UpdateCoronaCoors, 0x6FC4D0, { .reversed = false });
+    RH_ScopedInstall(DoSunAndMoon, 0x6FC5A0, { .reversed = false });
 }
 
 // Initialises coronas

@@ -6,19 +6,21 @@ void CPedGroupIntelligence::InjectHooks() {
     RH_ScopedClass(CPedGroupIntelligence);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Constructor, 0x5F7250);
-    // RH_ScopedInstall(Destructor, 0x5F7350);
-    // RH_ScopedInstall(AddEvent, 0x5F7470);
-    // RH_ScopedInstall(SetScriptCommandTask, 0x5F8560);
-    // RH_ScopedInstall(GetTaskMain, 0x5F85A0);
-    // RH_ScopedInstall(ComputeDefaultTasks, 0x5F88D0);
-    // RH_ScopedInstall(GetTaskScriptCommand, 0x5F8690);
-    // RH_ScopedInstall(GetTaskSecondary, 0x5F8620);
-    // RH_ScopedInstall(GetTaskSecondarySlot, 0x5F8650);
-    // RH_ScopedInstall(SetGroupDecisionMakerType, 0x5F7340);
-    // RH_ScopedInstall(SetPrimaryTaskAllocator, 0x5F7410);
-    // RH_ScopedInstall(SetDefaultTaskAllocatorType, 0x5FBB70);
-    // RH_ScopedInstall(ReportFinishedTask, 0x5F86F0);
+    //RH_ScopedInstall(Constructor, 0x5F7250, { .reversed = false });
+    //RH_ScopedInstall(Destructor, 0x5F7350, { .reversed = false });
+
+    RH_ScopedOverloadedInstall(AddEvent, "", 0x5F7470, bool(CPedGroupIntelligence::*)(CEvent*), { .reversed = false });
+    RH_ScopedInstall(SetScriptCommandTask, 0x5F8560, { .reversed = false });
+    RH_ScopedInstall(GetTaskMain, 0x5F85A0, { .reversed = false });
+    RH_ScopedInstall(ComputeDefaultTasks, 0x5F88D0, { .reversed = false });
+    RH_ScopedInstall(GetTaskScriptCommand, 0x5F8690, { .reversed = false });
+    RH_ScopedInstall(GetTaskSecondary, 0x5F8620, { .reversed = false });
+    RH_ScopedInstall(GetTaskSecondarySlot, 0x5F8650, { .reversed = false });
+    RH_ScopedInstall(SetGroupDecisionMakerType, 0x5F7340, { .reversed = false });
+    RH_ScopedInstall(SetPrimaryTaskAllocator, 0x5F7410, { .reversed = false });
+    RH_ScopedInstall(SetDefaultTaskAllocatorType, 0x5FBB70, { .reversed = false });
+
+    RH_ScopedOverloadedInstall(ReportFinishedTask, "", 0x5F86F0, bool(CPedGroupIntelligence::*)(const CPed*, const CTask*), { .reversed = false });
 }
 
 // 0x5F7250
