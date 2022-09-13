@@ -52,7 +52,7 @@ void CWeapon::InjectHooks() {
     RH_ScopedInstall(FireSniper, 0x73AAC0);
     RH_ScopedInstall(TakePhotograph, 0x73C1F0);
     RH_ScopedInstall(DoDoomAiming, 0x73CDC0);
-    // untested RH_ScopedInstall(FireInstantHitFromCar2, 0x73CBA0);
+    RH_ScopedInstall(FireInstantHitFromCar2, 0x73CBA0, { .reversed = false });
 }
 
 // 0x73B430

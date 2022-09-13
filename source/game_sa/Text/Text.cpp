@@ -45,9 +45,9 @@ void CText::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x6A0140);
     RH_ScopedInstall(Get, 0x6A0050);
     RH_ScopedInstall(GetNameOfLoadedMissionText, 0x69FBD0);
-    //    RH_ScopedInstall(ReadChunkHeader, 0x69F940);
-    //    RH_ScopedInstall(LoadMissionPackText, 0x69F9A0);
-    //    RH_ScopedInstall(LoadMissionText, 0x69FBF0);
+    RH_ScopedInstall(ReadChunkHeader, 0x69F940, { .reversed = false });
+    RH_ScopedInstall(LoadMissionPackText, 0x69F9A0, { .reversed = false });
+    RH_ScopedInstall(LoadMissionText, 0x69FBF0, { .reversed = false });
     RH_ScopedInstall(Load, 0x6A01A0);
     RH_ScopedInstall(Unload, 0x69FF20);
 
@@ -57,13 +57,13 @@ void CText::InjectHooks() {
 
     {
         RH_ScopedClass(CMissionTextOffsets);
-        //    RH_ScopedInstall(Load, 0x69F670);
+        RH_ScopedInstall(Load, 0x69F670, { .reversed = false });
     }
 
     {
         RH_ScopedClass(CData);
         RH_ScopedInstall(Unload, 0x69F640);
-        //    RH_ScopedInstall(Load, 0x69F5D0);
+        RH_ScopedInstall(Load, 0x69F5D0, { .reversed = false });
 
 
     }
@@ -76,7 +76,7 @@ void CText::InjectHooks() {
 
         RH_ScopedInstall(BinarySearch, 0x69F570);
         RH_ScopedInstall(Search, 0x6A0000);
-        //    RH_ScopedInstall(Load, 0x69F490);
+        RH_ScopedInstall(Load, 0x69F490, { .reversed = false });
     }
 }
 

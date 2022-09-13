@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <filesystem>
 
 #include "ReversibleHook/Base.h"
 
@@ -168,4 +169,6 @@ namespace ReversibleHooks {
 
     void OnInjectionBegin(HMODULE hModule);
     void OnInjectionEnd();
+
+    void WriteHooksToFile(const std::filesystem::path&);
 };

@@ -100,6 +100,9 @@ enum {
     NUM_TIMERS      = 2
 };
 
+constexpr auto SHORT_STRING_SIZE = 8;
+constexpr auto LONG_STRING_SIZE = 16;
+
 class CRunningScript {
     /*!
      * Needed for compound if statements.
@@ -227,11 +230,12 @@ public:
     OpcodeResult ProcessOneCommand();
     OpcodeResult Process();
 
-    void SetName(const char* name)  { assert(strlen(name) < sizeof(m_szName)); strcpy(m_szName, name); }
-    void SetBaseIp(uint8* ip)       { m_pBaseIP = ip; }
-    void SetCurrentIp(uint8* ip)    { m_pCurrentIP = ip; }
-    void SetActive(bool active)     { m_bIsActive = active; }
-    void SetExternal(bool external) { m_bIsExternal = external; }
+    void SetName(const char* name)      { strcpy_s(m_szName, name); }
+    void SetName(std::string_view name) { assert(name.size() < sizeof(m_szName)); strncpy(m_szName, name.data(), name.size()); }
+    void SetBaseIp(uint8* ip)           { m_pBaseIP = ip; }
+    void SetCurrentIp(uint8* ip)        { m_pCurrentIP = ip; }
+    void SetActive(bool active)         { m_bIsActive = active; }
+    void SetExternal(bool external)     { m_bIsExternal = external; }
 
     template<eScriptCommands Command>
     OpcodeResult ProcessCommand() {

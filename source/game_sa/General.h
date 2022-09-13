@@ -41,7 +41,15 @@ public:
     */
     template<rng::random_access_range R>
     static auto& RandomChoice(const R& range) {
-        return range[(size_t)CGeneral::GetRandomNumberInRange(0, range.size())];
+        return range[(size_t)CGeneral::GetRandomNumberInRange(0, rng::size(range))];
+    }
+
+    /*
+    * @notsa
+    * @brief Return a random node heading, or direction as commonly referred to. See `GetNodeHeadingFromVector`
+    */
+    static auto RandomNodeHeading() {
+        return (uint8)CGeneral::GetRandomNumberInRange(0, 8);
     }
 };
 

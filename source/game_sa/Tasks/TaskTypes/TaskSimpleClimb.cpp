@@ -41,14 +41,14 @@ void CTaskSimpleClimb::InjectHooks() {
     RH_ScopedInstall(TestForStandUp, 0x680570);
     RH_ScopedInstall(TestForVault, 0x6804D0);
     RH_ScopedInstall(TestForClimb, 0x6803A0);
-    // RH_ScopedInstall(StartAnim, 0x67DBE0);
+    RH_ScopedInstall(StartAnim, 0x67DBE0, { .reversed = false });
     RH_ScopedInstall(StartSpeech, 0x67A320);
     RH_ScopedInstall(DeleteAnimCB, 0x67A380);
     RH_ScopedInstall(Shutdown, 0x67A250);
     RH_ScopedInstall(Constructor, 0x67A110);
     RH_ScopedInstall(GetCameraStickModifier, 0x67A5D0);
     RH_ScopedInstall(GetCameraTargetPos, 0x67A390);
-    // RH_ScopedVirtualInstall(ProcessPed, 0x680DC0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x680DC0, { .reversed = false });
     RH_ScopedVirtualInstall(MakeAbortable, 0x67A280);
 }
 

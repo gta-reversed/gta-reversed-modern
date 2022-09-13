@@ -10,7 +10,7 @@ void CHandShaker::InjectHooks() {
 
     RH_ScopedInstall(SetDefaults, 0x517330);
     RH_ScopedInstall(Reset, 0x50D860);
-    // RH_ScopedInstall(Process, 0x50D930);
+    RH_ScopedInstall(Process, 0x50D930, { .reversed = false });
 }
 
 // 0x517330

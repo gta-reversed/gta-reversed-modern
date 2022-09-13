@@ -1086,16 +1086,23 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
         && !pad->GetTarget()
         && !player->m_pAttachedTo
     ) {
-        eCamMode cameraMode = CCamera::GetActiveCamera().m_nMode; // Looks like inlined code
-        if (cameraMode != MODE_SNIPER && cameraMode != MODE_ROCKETLAUNCHER && cameraMode != MODE_ROCKETLAUNCHER_HS && cameraMode != MODE_M16_1STPERSON &&
-            cameraMode != MODE_HELICANNON_1STPERSON && cameraMode != MODE_CAMERA
-        ) {
+        // Possibly inlined code? Like CCamera::IsInSniperMode()
+        switch (CCamera::GetActiveCamera().m_nMode) {
+        case MODE_SNIPER:
+        case MODE_ROCKETLAUNCHER:
+        case MODE_ROCKETLAUNCHER_HS:
+        case MODE_M16_1STPERSON:
+        case MODE_HELICANNON_1STPERSON:
+        case MODE_CAMERA:
+            break;
+        default: {
             player->ClearWeaponTarget();
-            if (player->GetTaskManager().GetActiveTask()) {
-                CTask* pActiveTask = player->GetTaskManager().GetActiveTask();
-                if (pActiveTask->GetTaskType() != TASK_COMPLEX_JUMP)
-                    player->GetTaskManager().SetTask(new CTaskComplexJump(COMPLEX_JUMP_TYPE_JUMP), 3, false);
+            if (const auto task = player->GetTaskManager().GetActiveTask()) {
+                if (!CTask::IsA<TASK_COMPLEX_JUMP>(task)) {
+                    player->GetTaskManager().SetTask(new CTaskComplexJump(COMPLEX_JUMP_TYPE_JUMP), TASK_PRIMARY_PRIMARY, false);
+                }
             }
+        }
         }
     }
 
@@ -1113,7 +1120,7 @@ void CTaskSimplePlayerOnFoot::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x6857D0, { .locked = true });
     RH_ScopedVirtualInstall(ProcessPed, 0x688810, { .locked = true });
     RH_ScopedVirtualInstall(MakeAbortable, 0x6857E0, { .locked = true });
-    // RH_ScopedInstall(ProcessPlayerWeapon, 0x6859A0, { .locked = true });
+    RH_ScopedInstall(ProcessPlayerWeapon, 0x6859A0, { .reversed = false });
     RH_ScopedInstall(PlayIdleAnimations, 0x6872C0, { .locked = true });
     RH_ScopedInstall(PlayerControlZeldaWeapon, 0x687C20, { .locked = true });
     RH_ScopedInstall(PlayerControlDucked, 0x687F30, { .locked = true });

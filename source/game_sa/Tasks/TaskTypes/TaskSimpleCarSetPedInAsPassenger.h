@@ -8,23 +8,27 @@
 
 #include "TaskSimple.h"
 #include "TaskUtilityLineUpPedWithCar.h"
-class Vehicle;
+
+class CVehicle;
+class CAnimBlendAssociation;
+class CTaskUtilityLineUpPedWithCar;
+
 
 class CTaskSimpleCarSetPedInAsPassenger : public CTaskSimple {
 public:
-    bool                          m_bIsFinished;
-    CAnimBlendAssociation*        m_pAnim;
-    CVehicle*                     m_pTargetVehicle;
-    int32                         m_nTargetDoor;
-    CTaskUtilityLineUpPedWithCar* m_pUtility;
-    bool                          m_bWarpingInToCar;
-    uint8                         m_nDoorFlagsToClear;
-    uint8                         m_nNumGettingInToClear;
+    bool                          m_bIsFinished{};
+    CAnimBlendAssociation*        m_pAnim{};
+    CVehicle*                     m_pTargetVehicle{};
+    eTargetDoor                   m_nTargetDoor{};
+    CTaskUtilityLineUpPedWithCar* m_pUtility{};
+    bool                          m_bWarpingInToCar{};
+    uint8                         m_nDoorFlagsToClear{};
+    uint8                         m_nNumGettingInToClear{};
 
 public:
     static constexpr auto Type = TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER;
 
-    CTaskSimpleCarSetPedInAsPassenger(CVehicle* targetVehicle, int32 nTargetDoor, CTaskUtilityLineUpPedWithCar* utility = nullptr);
+    CTaskSimpleCarSetPedInAsPassenger(CVehicle* targetVehicle, eTargetDoor nTargetDoor, bool warpingInToCar /* notsa arg */ = false, CTaskUtilityLineUpPedWithCar* utility = nullptr);
     ~CTaskSimpleCarSetPedInAsPassenger() override;
 
     eTaskType GetTaskType() override { return Type; }

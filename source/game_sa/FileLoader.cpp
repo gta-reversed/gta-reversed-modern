@@ -22,6 +22,8 @@
 char(&CFileLoader::ms_line)[512] = *reinterpret_cast<char(*)[512]>(0xB71848);
 uint32& gAtomicModelId = *reinterpret_cast<uint32*>(0xB71840);
 
+void LinkLods(int32 a1);
+
 void CFileLoader::InjectHooks() {
     RH_ScopedClass(CFileLoader);
     RH_ScopedCategoryGlobal();
@@ -74,7 +76,8 @@ void CFileLoader::InjectHooks() {
     RH_ScopedInstall(LoadLevel, 0x5B9030);
     RH_ScopedInstall(LoadScene, 0x5B8700);
     RH_ScopedInstall(LoadObjectTypes, 0x5B8400);
-    // RH_ScopedInstall(LinkLods, 0x5B51E0);
+
+    RH_ScopedGlobalInstall(LinkLods, 0x5B51E0, { .reversed = false });
 }
 
 // copy textures from dictionary to baseDictionary

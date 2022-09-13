@@ -6,7 +6,13 @@ void CEntitySeekPosCalculatorRadiusAngleOffset::InjectHooks() {
     RH_ScopedClass(CEntitySeekPosCalculatorRadiusAngleOffset);
     RH_ScopedCategory("Tasks/TaskTypes/SeekPosCalculators");
 
-    // RH_ScopedVirtualInstall2(ComputeEntitySeekPos, 0x6946f0);
+    RH_ScopedVirtualInstall2(ComputeEntitySeekPos, 0x6946f0, { .reversed = false });
+}
+
+CEntitySeekPosCalculatorRadiusAngleOffset::CEntitySeekPosCalculatorRadiusAngleOffset(float radius, float angle) :
+    m_radius{ radius },
+    m_angle{ angle }
+{
 }
 
 void CEntitySeekPosCalculatorRadiusAngleOffset::ComputeEntitySeekPos(const CPed& seeker, const CEntity& target, CVector& outPos) {

@@ -122,6 +122,7 @@ public:
     // returns ped creation distance multiplier
     static float PedCreationDistMultiplier();
     static bool  IsSunbather(int32 modelIndex);
+    static bool  IsSunbather(CPed* ped); // NOTSA
     // returns false
     static bool CanSolicitPlayerOnFoot(int32 modelIndex);
     // returns true if ped type is PED_TYPE_PROSTITUTE

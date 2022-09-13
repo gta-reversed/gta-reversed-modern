@@ -9,7 +9,6 @@ void CTaskSimpleSitDown::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x631070);
 
     RH_ScopedInstall(FinishAnimSitDownCB, 0x631150);
-
     RH_ScopedInstall(StartAnim, 0x6379F0);
 
     RH_ScopedVMTInstall(Clone, 0x636200);
@@ -19,8 +18,9 @@ void CTaskSimpleSitDown::InjectHooks() {
 }
 
 // 0x631030
-CTaskSimpleSitDown::CTaskSimpleSitDown(bool sitOnStep) {
-    assert(false && "Constructor not reversed"); // TODO: Reverse constructor}
+CTaskSimpleSitDown::CTaskSimpleSitDown(bool sitOnStep) :
+    m_sitOnStep{ sitOnStep }
+{
 }
 
 CTaskSimpleSitDown::CTaskSimpleSitDown(const CTaskSimpleSitDown& o) :
@@ -47,7 +47,9 @@ void CTaskSimpleSitDown::FinishAnimSitDownCB(CAnimBlendAssociation* anim, void* 
 void CTaskSimpleSitDown::StartAnim(CPed* ped) {
     assert(!m_anim);
 
-    const auto SetAnim = [this, ped](auto grpId, auto animId) { m_anim = CAnimManager::BlendAnimation(ped->m_pRwClump, grpId, animId, 4.f); };
+    const auto SetAnim = [this, ped](auto grpId, auto animId) {
+        m_anim = CAnimManager::BlendAnimation(ped->m_pRwClump, grpId, animId, 4.f);
+    };
     if (m_sitOnStep) {
         SetAnim(ANIM_GROUP_ATTRACTORS, ANIM_ID_STEPSIT_IN);
     } else {
@@ -91,7 +93,7 @@ bool CTaskSimpleSitDown::ProcessPed(CPed* ped) {
     if (m_animFinished) {
         return true;
     }
-    if (m_anim) {
+    if (!m_anim) {
         StartAnim(ped);
     }
     return false;
