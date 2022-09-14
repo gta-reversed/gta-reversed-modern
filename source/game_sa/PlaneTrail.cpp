@@ -2,6 +2,8 @@
 
 #include "PlaneTrail.h"
 
+constexpr auto POINT_EXPIRATION_TIME = 30'000u;
+
 void CPlaneTrail::InjectHooks() {
     RH_ScopedClass(CPlaneTrail);
     RH_ScopedCategoryGlobal();
@@ -19,37 +21,38 @@ void CPlaneTrail::Init() {
 // 0x717180
 void CPlaneTrail::Render(float intensity) {
     const auto maxAlpha = (int32)(intensity * 110.0f);
-    if (!maxAlpha)
+    if (!maxAlpha) {
         return;
+    }
 
-    uint32 nVertices = 0;
+    auto nvert{0u}; // num of vertices stored
     RxObjSpace3DVertex vertBuff[PLANE_TRAIL_BUF_SIZE];
-    for (auto i = 0; i < PLANE_TRAIL_BUF_SIZE; i++) {
+    for (auto i = 0u; i < PLANE_TRAIL_BUF_SIZE; i++) {
         const uint32 timeDelta = CTimer::GetTimeInMS() - m_Timepoints[i];
-        if (m_Timepoints[i] && timeDelta <= 30'000) {
-            const CVector& pos = m_Positions[i];
+        if (IsPointInUse(i) && timeDelta <= POINT_EXPIRATION_TIME) {
             RxObjSpace3DVertex& vert = vertBuff[i];
 
-            const float fAlphaMult = std::min(1.0f, (30'000.0f - (float)timeDelta) / 10'000.0f); // Clamped to 1.0f
+            const float fAlphaMult = std::min(1.0f, ((float)POINT_EXPIRATION_TIME - (float)timeDelta) / 10'000.0f); // Clamped to 1.0f
             RwIm3DVertexSetRGBA(&vert, 255, 255, 255, (uint8)((float)maxAlpha * fAlphaMult));
-            RwIm3DVertexSetPos(&vert, pos.x, pos.y, pos.z);
 
-            nVertices++;
-        } else {
+            RwV3dAssign(RwIm3DVertexGetPos(&vert), &m_Positions[i]);
+
+            nvert++;
+        } else { // This one has expired, set to 0
             m_Timepoints[i] = 0;
         }
     }
 
-    if (nVertices > 1) {
+    if (nvert) {
         RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
         RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
         RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
         RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
-        if (RwIm3DTransform(vertBuff, nVertices, nullptr, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXRGBA)) {
+        if (RwIm3DTransform(vertBuff, nvert, nullptr, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXRGBA)) {
             static RwImVertexIndex indices[] = { // From 0x8D5B98, size 32
                 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16
             };
-            RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, indices, 2 * nVertices - 2);
+            RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, indices, 2 * nvert - 2);
             RwIm3DEnd();
         }
     }
@@ -61,16 +64,24 @@ void CPlaneTrail::RegisterPoint(CVector pos) {
     const bool bDoShift = lastUpdate && CTimer::GetTimeInMS() - lastUpdate > 2000;
     if (bDoShift) {
         // Shift right
+#if __cpp_lib_shift >= 202202L 
         rng::shift_right(m_Timepoints);
         rng::shift_right(m_Positions);
+#else
+        for (auto i = PLANE_TRAIL_BUF_SIZE - 1; i; i--) {
+            m_Timepoints[i] = m_Timepoints[i - 1];
+            m_Positions[i] = m_Positions[i - 1];
+        }
+#endif
     }
 
     m_Positions[0] = pos;
-    if (bDoShift || !m_Timepoints[0]) {
+    if (bDoShift || !IsPointInUse(0)) {
         m_Timepoints[0] = CTimer::GetTimeInMS();
     }
 }
 
+// From `CPlaneTrails::Update`
 void CPlaneTrail::Update(CVector pos, const CRGBA& color, uint32 coronaIdx, uint32 timeModifierMs, uint8 afterHour, uint8 beforeHour) {
     const float fTimeProg = (float)(CTimer::GetTimeInMS() % 131072) / 20860.0f; // or * 0.000047936901.. Not sure where this comes from..
     const CVector currPos = pos * CVector(std::sin(fTimeProg), std::cos(fTimeProg), 1.0f);
@@ -105,4 +116,8 @@ void CPlaneTrail::Update(CVector pos, const CRGBA& color, uint32 coronaIdx, uint
     } else {
         CCoronas::UpdateCoronaCoors(coronaIdx, currPos, 2000.0f, 0.0f);
     }
+}
+
+bool CPlaneTrail::IsPointInUse(size_t pt) {
+    return m_Timepoints[pt] != 0;
 }
