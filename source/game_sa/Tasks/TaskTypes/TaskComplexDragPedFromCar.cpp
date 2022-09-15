@@ -7,7 +7,7 @@ void CTaskComplexDragPedFromCar__InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(ControlSubTask_Reversed, 0x640530);
-    // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x643D00);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x643D00, { .reversed = false });
 }
 CTask* CTaskComplexDragPedFromCar::ControlSubTask(CPed* ped) { return ControlSubTask_Reversed(ped); }
 CTask* CTaskComplexDragPedFromCar::CreateFirstSubTask(CPed* ped) { return CreateFirstSubTask_Reversed(ped); }

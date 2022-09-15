@@ -13,7 +13,6 @@ void CQuadBike::InjectHooks() {
     RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(Constructor, 0x6CE370);
-
     RH_ScopedVMTInstall(Fix, 0x6CE2B0);
     RH_ScopedVMTInstall(GetRideAnimData, 0x6CDC90);
     RH_ScopedVMTInstall(PreRender, 0x6CEAD0);

@@ -6,10 +6,10 @@ void CStencilShadowObject::InjectHooks() {
     RH_ScopedClass(CStencilShadowObject);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Shutdown, 0x711390);
-    // RH_ScopedInstall(Render, 0x710D50);
-    // RH_ScopedInstall(RenderForVehicle, 0x70FAE0);
-    // RH_ScopedInstall(RenderForObject, 0x710310);
+    RH_ScopedInstall(Shutdown, 0x711390, { .reversed = false });
+    RH_ScopedInstall(Render, 0x710D50, { .reversed = false });
+    RH_ScopedInstall(RenderForVehicle, 0x70FAE0, { .reversed = false });
+    RH_ScopedInstall(RenderForObject, 0x710310, { .reversed = false });
 }
 
 // 0x711280

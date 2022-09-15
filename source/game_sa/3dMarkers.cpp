@@ -6,12 +6,12 @@ void C3dMarkers::InjectHooks() {
     RH_ScopedClass(C3dMarkers);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Init, 0x724E40);
-    // RH_ScopedInstall(Update, 0x7227B0);
-    // RH_ScopedInstall(Shutdown, 0x722710);
-    // RH_ScopedInstall(Render, 0x725040);
-    // RH_ScopedInstall(LoadUser3dMarkers, 0x5D42E0);
-    // RH_ScopedInstall(SaveUser3dMarkers, 0x5D4300);
+    RH_ScopedInstall(Init, 0x724E40, { .reversed = false });
+    RH_ScopedInstall(Update, 0x7227B0, { .reversed = false });
+    RH_ScopedInstall(Shutdown, 0x722710, { .reversed = false });
+    RH_ScopedInstall(Render, 0x725040, { .reversed = false });
+    RH_ScopedInstall(LoadUser3dMarkers, 0x5D42E0, { .reversed = false });
+    RH_ScopedInstall(SaveUser3dMarkers, 0x5D4300, { .reversed = false });
 }
 
 // 0x724E40
