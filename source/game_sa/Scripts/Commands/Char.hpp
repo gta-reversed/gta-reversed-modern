@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CommandParser/Parser.hpp"
+
 /*!
 * Various utility commands
 */
@@ -15,15 +17,13 @@ auto IsCharInArea2D(CRunningScript& S, CPed& ped, CVector2D a, CVector2D b, bool
 }
 REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_AREA_2D, IsCharInArea2D);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_CHAR_PROOFS>() { // 0x2AB
-    CollectParameters(6);
-    auto* ped = GetPedPool()->GetAt(ScriptParams[0].iParam >> 8);
-    assert(ped);
-    ped->physicalFlags.bBulletProof = ScriptParams[1].uParam;
-    ped->physicalFlags.bFireProof = ScriptParams[2].uParam;
-    ped->physicalFlags.bExplosionProof = ScriptParams[3].uParam;
-    ped->physicalFlags.bCollisionProof = ScriptParams[4].uParam;
-    ped->physicalFlags.bMeleeProof = ScriptParams[5].uParam;
-    return OR_CONTINUE;
+void SetCharProofs(CPed& ped, bool bullet, bool fire, bool explosion, bool collision, bool melee) {
+    auto& flags = ped.physicalFlags;
+    flags.bBulletProof = bullet;
+    flags.bFireProof = fire;
+    flags.bExplosionProof = explosion;
+    flags.bCollisionProof = collision;
+    flags.bMeleeProof = melee;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_PROOFS, SetCharProofs);
+

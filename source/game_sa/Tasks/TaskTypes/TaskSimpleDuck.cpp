@@ -8,11 +8,11 @@ void CTaskSimpleDuck::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x691FC0);
     RH_ScopedInstall(Destructor, 0x692030);
-    // RH_ScopedInstall(CanPedDuck, 0x692610);
-    // RH_ScopedInstall(ControlDuckMove, 0x6923F0);
-    // RH_ScopedInstall(IsTaskInUseByOtherTasks, 0x61C3D0);
-    // RH_ScopedVirtualInstall(MakeAbortable, 0x692100);
-    // RH_ScopedVirtualInstall(ProcessPed, 0x694390);
+    RH_ScopedInstall(CanPedDuck, 0x692610, { .reversed = false });
+    RH_ScopedInstall(ControlDuckMove, 0x6923F0, { .reversed = false });
+    RH_ScopedInstall(IsTaskInUseByOtherTasks, 0x61C3D0, { .reversed = false });
+    RH_ScopedVirtualInstall(MakeAbortable, 0x692100, { .reversed = false });
+    RH_ScopedVirtualInstall(ProcessPed, 0x694390, { .reversed = false });
 }
 
 // 0x691FC0
