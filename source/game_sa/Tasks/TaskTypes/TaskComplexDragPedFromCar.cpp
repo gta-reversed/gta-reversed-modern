@@ -16,7 +16,7 @@ CTask* CTaskComplexDragPedFromCar::CreateFirstSubTask(CPed* ped) { return Create
 CTaskComplexDragPedFromCar::CTaskComplexDragPedFromCar(CPed* ped, int32 draggedPedDownTime) : CTaskComplexEnterCar(nullptr, false, false, true, false) {
     m_Ped = ped;
     CEntity::SafeRegisterRef(m_Ped);
-    m_nDraggedPedDownTime = draggedPedDownTime;
+    m_draggedPedDownTime = draggedPedDownTime;
 }
 
 // 0x6404D0
@@ -26,7 +26,7 @@ CTaskComplexDragPedFromCar::~CTaskComplexDragPedFromCar() {
 
 // 0x640530
 CTask* CTaskComplexDragPedFromCar::ControlSubTask_Reversed(CPed* ped) {
-    if (m_nNumGettingInSet)
+    if (m_numGettingInSet)
         return CTaskComplexEnterCar::ControlSubTask(ped);
 
     if (!m_Ped || m_Ped->bInVehicle || !m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr))
