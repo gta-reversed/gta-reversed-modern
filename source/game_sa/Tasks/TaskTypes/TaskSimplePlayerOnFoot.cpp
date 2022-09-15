@@ -18,6 +18,28 @@ uint32& gLastTouchTimeDelta = *reinterpret_cast<uint32*>(0xC19664);
 float& gDuckAnimBlendData = *reinterpret_cast<float*>(0x8D2FF0); // 4.0f
 bool& gbUnknown_8D2FE8 = *reinterpret_cast<bool*>(0x8D2FE8); // default value true; also always true
 
+void CTaskSimplePlayerOnFoot::InjectHooks() {
+    RH_ScopedVirtualClass(CTaskSimplePlayerOnFoot, 0x8708ec, 9);
+    RH_ScopedCategory("Tasks/TaskTypes");
+
+    RH_ScopedInstall(Constructor, 0x685750);
+    RH_ScopedInstall(Destructor, 0x6857D0);
+
+
+    RH_ScopedInstall(PlayerControlZeldaWeapon, 0x687C20);
+    RH_ScopedInstall(PlayerControlDucked, 0x687F30);
+
+    RH_ScopedInstall(ProcessPlayerWeapon, 0x6859A0);
+    RH_ScopedInstall(PlayIdleAnimations, 0x6872C0);
+    RH_ScopedInstall(PlayerControlFighter, 0x687530);
+    RH_ScopedInstall(PlayerControlZelda, 0x6883D0);
+
+    RH_ScopedVMTInstall(Clone, 0x68AFF0);
+    RH_ScopedVMTInstall(GetTaskType, 0x6857C0);
+    RH_ScopedVMTInstall(MakeAbortable, 0x6857E0);
+    RH_ScopedVMTInstall(ProcessPed, 0x688810);
+}
+
 // 0x685750
 CTaskSimplePlayerOnFoot::CTaskSimplePlayerOnFoot() : CTaskSimple() {
     m_nAnimationBlockIndex = CAnimManager::GetAnimationBlockIndex("playidles");
@@ -29,80 +51,80 @@ CTaskSimplePlayerOnFoot::CTaskSimplePlayerOnFoot() : CTaskSimple() {
 
 // 0x6857E0
 bool CTaskSimplePlayerOnFoot::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    if ([&, this]{
-        switch (priority) {
-        case ABORT_PRIORITY_IMMEDIATE: {
-            ped->m_pPlayerData->m_fMoveBlendRatio = 0.0f;
-            CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.0f);
-            return true;
+    // Try making abortion possible, if unsuccessful it returns false, otherwise proceeds
+    switch (priority) {
+    case ABORT_PRIORITY_IMMEDIATE: {
+        ped->m_pPlayerData->m_fMoveBlendRatio = 0.0f;
+        CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.0f);
+        break;
+    }
+    case ABORT_PRIORITY_URGENT: {
+        if (ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
+            break;
         }
-        case ABORT_PRIORITY_URGENT: {
-            if (ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
-                return true;
-            }
             
-            if (event) {
-                if (event->GetEventPriority() <= 60) {
-                    return false;
-                }
+        if (event) {
+            if (event->GetEventPriority() <= 60) {
+                break;
+            }
 
-                if (event->GetEventType() == EVENT_DAMAGE) {
-                    if (static_cast<const CEventDamage*>(event)->m_bKnockOffPed || ped->GetIntelligence()->GetTaskThrow()) {
-                        ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)->MakeAbortable(ped, ABORT_PRIORITY_URGENT, event);
-                    }
+            if (event->GetEventType() == EVENT_DAMAGE) {
+                if (static_cast<const CEventDamage*>(event)->m_bKnockOffPed || ped->GetIntelligence()->GetTaskThrow()) {
+                    ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)->MakeAbortable(ped, ABORT_PRIORITY_URGENT, event);
+                }
+                break;
+            }
+        }
+
+        if (const auto attack = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
+            return attack->MakeAbortable(ped, ABORT_PRIORITY_URGENT, event);
+        }
+
+        return false;
+    }
+    default:
+        return false;
+    }
+
+    // In some specific secnarios clear weapon mode
+    if (   (ped->m_pTargetedObject || (ped->m_pPlayerData->m_nPlayerFlags & 8) != 0 || TheCamera.Using1stPersonWeaponMode())
+        && event
+    ) {
+        if ([&, this] {
+            switch (event->GetEventType()) {
+            case EVENT_DAMAGE: {
+                const auto dmg = static_cast<const CEventDamage*>(event);
+                if (dmg->m_damageResponse.m_bHealthZero && dmg->m_bAddToEventGroup) {
                     return true;
                 }
-            }
-
-            if (const auto attack = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
-                return attack->MakeAbortable(ped, ABORT_PRIORITY_URGENT, event);
-            }
-
-            return true;
-        }
-        }
-        return false;
-    }()) {
-        if (   (ped->m_pTargetedObject || (ped->m_pPlayerData->m_nPlayerFlags & 8) != 0 || TheCamera.Using1stPersonWeaponMode())
-            && event
-        ) {
-            if ([&, this] {
-                switch (event->GetEventType()) {
-                case EVENT_DAMAGE: {
-                    const auto dmg = static_cast<const CEventDamage*>(event);
-                    if (dmg->m_damageResponse.m_bHealthZero && dmg->m_bAddToEventGroup) {
+                if (!ped->m_pAttachedTo) {
+                    if (dmg->m_bKnockOffPed) {
                         return true;
                     }
-                    if (!ped->m_pAttachedTo) {
-                        if (dmg->m_bKnockOffPed) {
-                            return true;
-                        }
 
-                        if (dmg->m_weaponType > WEAPON_LAST_WEAPON && dmg->m_weaponType != WEAPON_UZI_DRIVEBY) {
-                            return true;
-                        }
+                    if (dmg->m_weaponType > WEAPON_LAST_WEAPON && dmg->m_weaponType != WEAPON_UZI_DRIVEBY) {
+                        return true;
                     }
-                    return false;
-                }
-                case EVENT_IN_WATER:
-                    return true;
                 }
                 return false;
-            }()) {
-                TheCamera.ClearPlayerWeaponMode();
-                CWeaponEffects::ClearCrossHair(ped->m_nPedType);
-                CEntity::ClearReference(ped->m_pTargetedObject);
             }
+            case EVENT_IN_WATER:
+                return true;
+            }
+            return false;
+        }()) {
+            TheCamera.ClearPlayerWeaponMode();
+            CWeaponEffects::ClearCrossHair(ped->m_nPedType);
+            CEntity::ClearReference(ped->m_pTargetedObject);
         }
-        return true;
     }
-    return false;
+
+    // This is only reached if switch (at the beginning) didn't `return false`
+    return true;
 }
 
 // 0x688810
 bool CTaskSimplePlayerOnFoot::ProcessPed(CPed* ped) {
-    // return plugin::CallMethodAndReturn<bool, 0x688810, CTaskSimplePlayerOnFoot*, CPed*>(this, ped);
-
     auto* player = static_cast<CPlayerPed*>(ped);
 
     if (player->GetPadFromPlayer()) {
@@ -850,8 +872,6 @@ void CTaskSimplePlayerOnFoot::PlayerControlFighter(CPlayerPed* player) {
 
 // 0x687C20
 void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* player) {
-    // return plugin::Call<0x687C20, CPlayerPed*>(player);
-
     CTaskSimpleUseGun* taskUseGun = player->GetIntelligence()->GetTaskUseGun();
     if (!taskUseGun)
         return;
@@ -1019,10 +1039,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
 }
 
 // 0x6883D0
-int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPlayerPed* player, bool bAvoidJumpingAndDucking)
-{
-    // return plugin::CallMethodAndReturn<int32, 0x6883D0, CTaskSimplePlayerOnFoot*, CPlayerPed*, bool>(this, player, bAvoidJumpingAndDucking);
-
+int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPlayerPed* player, bool bAvoidJumpingAndDucking) {
     CPlayerPedData * playerData = player->m_pPlayerData;
     playerData->m_vecFightMovement = CVector2D();
 
@@ -1125,41 +1142,4 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
     PlayIdleAnimations(player);
     player->m_pedIK.bSlopePitch = true;
     return player->m_pedIK.m_nFlags;
-}
-
-void CTaskSimplePlayerOnFoot::InjectHooks() {
-    RH_ScopedClass(CTaskSimplePlayerOnFoot);
-    RH_ScopedCategory("Tasks/TaskTypes");
-
-    // All locked for now, because when unhooked code asserts with "esp value...." in `ProcessPed`
-    RH_ScopedInstall(Constructor, 0x685750, { .locked = true });
-    RH_ScopedInstall(Destructor, 0x6857D0, { .locked = true });
-    RH_ScopedVirtualInstall(ProcessPed, 0x688810, { .locked = true });
-    RH_ScopedVirtualInstall(MakeAbortable, 0x6857E0, { .locked = true });
-    RH_ScopedInstall(ProcessPlayerWeapon, 0x6859A0, { .locked = true });
-    RH_ScopedInstall(PlayIdleAnimations, 0x6872C0, { .locked = true });
-    RH_ScopedInstall(PlayerControlZeldaWeapon, 0x687C20, { .locked = true });
-    RH_ScopedInstall(PlayerControlDucked, 0x687F30, { .locked = true });
-    RH_ScopedInstall(PlayerControlZelda, 0x6883D0, { .locked = true });
-}
-
-// 0x685750
-CTaskSimplePlayerOnFoot* CTaskSimplePlayerOnFoot::Constructor() {
-    this->CTaskSimplePlayerOnFoot::CTaskSimplePlayerOnFoot();
-    return this;
-}
-
-// 0x68B0C0
-CTaskSimplePlayerOnFoot* CTaskSimplePlayerOnFoot::Destructor() {
-    this->CTaskSimplePlayerOnFoot::~CTaskSimplePlayerOnFoot();
-    return this;
-}
-
-bool CTaskSimplePlayerOnFoot::ProcessPed_Reversed(CPed* ped) {
-    return CTaskSimplePlayerOnFoot::ProcessPed(ped);
-}
-
-// 0x6857E0
-bool CTaskSimplePlayerOnFoot::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return CTaskSimplePlayerOnFoot::MakeAbortable(ped, priority, event);
 }
