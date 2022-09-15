@@ -49,7 +49,7 @@ public:
     void GetLimits(eRotationAxis axis, float& min, float& max);
 
     void AddChild(BoneNode_c * children);
-    RwMatrix* CalcWldMat(const RwMatrix* boneMatrix);
+    void CalcWldMat(const RwMatrix* boneMatrix);
 
     const auto& GetPosition() const { return *RwMatrixGetPos(&m_WorldMat); }
     const auto& GetMatrix() const { return m_WorldMat;  }

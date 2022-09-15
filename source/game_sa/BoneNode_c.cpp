@@ -23,7 +23,7 @@ void BoneNode_c::InjectHooks() {
     RH_ScopedInstall(SetLimits, 0x616C50);
     RH_ScopedInstall(GetLimits, 0x616BF0);
     RH_ScopedInstall(AddChild, 0x616BD0);
-    RH_ScopedInstall(CalcWldMat, 0x616CD0, { .reversed = false });
+    RH_ScopedInstall(CalcWldMat, 0x616CD0, { .reversed = true });
 }
 
 // 0x6177B0
@@ -188,6 +188,30 @@ void BoneNode_c::AddChild(BoneNode_c* children) {
 }
 
 // 0x616CD0
-RwMatrix* BoneNode_c::CalcWldMat(const RwMatrix* boneMatrix) {
-    return plugin::CallMethodAndReturn<RwMatrix*, 0x616CD0, BoneNode_c*, const RwMatrix*>(this, boneMatrix);
+void BoneNode_c::CalcWldMat(const RwMatrix* boneMatrix) {
+    static RwMatrix math;
+
+    float dst = 2.0f / ((m_Orientation.imag.x * m_Orientation.imag.x) + (m_Orientation.imag.y * m_Orientation.imag.y) + (m_Orientation.imag.z * m_Orientation.imag.z) +
+                        (m_Orientation.real * m_Orientation.real));
+
+    math.right.x = 1.0f - ((m_Orientation.imag.y * (m_Orientation.imag.y * dst)) + (m_Orientation.imag.z + (m_Orientation.imag.z * dst)));
+    math.right.y = (m_Orientation.imag.x * (m_Orientation.imag.y * dst)) + (m_Orientation.real * (m_Orientation.imag.z * dst));
+    math.right.z = (m_Orientation.imag.z * (m_Orientation.imag.x * dst)) - (m_Orientation.real * (m_Orientation.imag.y * dst));
+
+    math.up.x = (m_Orientation.imag.x * (m_Orientation.imag.y * dst)) - (m_Orientation.real * (m_Orientation.imag.z * dst));
+    math.up.y = 1.0f - ((m_Orientation.imag.z + (m_Orientation.imag.z * dst)) + (m_Orientation.imag.x * (m_Orientation.imag.x * dst)));
+    math.up.z = (m_Orientation.imag.y * (m_Orientation.imag.z * dst)) + (m_Orientation.real * (m_Orientation.imag.x * dst));
+
+    math.at.x = (m_Orientation.imag.z * (m_Orientation.imag.x * dst)) + (m_Orientation.real * (m_Orientation.imag.y * dst));
+    math.at.y = (m_Orientation.imag.y * (m_Orientation.imag.z * dst)) - (m_Orientation.real * (m_Orientation.imag.x * dst));
+    math.at.z = 1.0f - ((m_Orientation.imag.x * (m_Orientation.imag.x * dst)) + (m_Orientation.imag.y * (m_Orientation.imag.y * dst)));
+
+    math.flags = 3;
+    math.pos = m_Pos;
+
+    RwMatrixMultiply(&m_WorldMat, &math, boneMatrix);
+
+    for (BoneNode_c* bone = (BoneNode_c*)m_Childs.m_pHead; bone != nullptr; bone = (BoneNode_c*)bone->m_pNext) {
+        bone->CalcWldMat(&m_WorldMat);
+    }
 }
