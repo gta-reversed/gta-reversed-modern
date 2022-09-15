@@ -23,7 +23,7 @@ void BoneNode_c::InjectHooks() {
     RH_ScopedInstall(SetLimits, 0x616C50);
     RH_ScopedInstall(GetLimits, 0x616BF0);
     RH_ScopedInstall(AddChild, 0x616BD0);
-    RH_ScopedInstall(CalcWldMat, 0x616CD0, { .reversed = true });
+    RH_ScopedInstall(CalcWldMat, 0x616CD0, { .reversed = true }); // Not tested!!
 }
 
 // 0x6177B0
