@@ -757,8 +757,6 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
 
 // 0x6872C0
 void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
-    // return plugin::CallMethod<0x6872C0, CTaskSimplePlayerOnFoot*, CPlayerPed*>(this, player);
-
     if (CGameLogic::IsCoopGameGoingOn())
         return;
 
@@ -817,8 +815,8 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
             animNewAssoc->m_nFlags |= ANIMATION_200;
             gLastTouchTimeDelta = touchTimeDelta;
             gLastRandomNumberForIdleAnimationID = randomNumber;
-            if (CStats::GetStatValue(STAT_MANAGEMENT_ISSUES_MISSION_ACCOMPLISHED) != 0.0f && CTimer::GetTimeInMS() > 1200000) {
-                player->Say(336, 0, 0.2f, 0, 0, 0);
+            if (CStats::GetStatValue(STAT_MANAGEMENT_ISSUES_MISSION_ACCOMPLISHED) != 0.0f && CTimer::GetTimeInMS() > 1'200'000) {
+                player->Say(336, 0, 0.2f);
             }
         }
     };
@@ -826,7 +824,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
     CAnimBlendAssociation* animAssoc1 = RpAnimBlendClumpGetFirstAssociation(player->m_pRwClump);
     if (animAssoc1) {
         while (true) {
-            // TODO
+            // TODO: Fix up this bitshifting mess
             uint32 animHierarchyIndex = (uint32)animAssoc1->m_pHierarchy - (uint32)CAnimManager::ms_aAnimations.data();
             animHierarchyIndex = animHierarchyIndex / 6 + (animHierarchyIndex >> 31) >> 2;
             animHierarchyIndex = animHierarchyIndex + (animHierarchyIndex >> 31);
