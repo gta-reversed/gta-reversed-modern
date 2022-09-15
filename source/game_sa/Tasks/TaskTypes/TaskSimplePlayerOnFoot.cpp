@@ -29,66 +29,74 @@ CTaskSimplePlayerOnFoot::CTaskSimplePlayerOnFoot() : CTaskSimple() {
 
 // 0x6857E0
 bool CTaskSimplePlayerOnFoot::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    // return plugin::CallMethodAndReturn<bool, 0x6857E0, CTaskSimplePlayerOnFoot*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
+    if ([&, this]{
+        switch (priority) {
+        case ABORT_PRIORITY_IMMEDIATE: {
+            ped->m_pPlayerData->m_fMoveBlendRatio = 0.0f;
+            CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.0f);
+            return true;
+        }
+        case ABORT_PRIORITY_URGENT: {
+            if (ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
+                return true;
+            }
+            
+            if (event) {
+                if (event->GetEventPriority() <= 60) {
+                    return false;
+                }
 
-    bool abortable = false;
-    auto eventDamage = static_cast<const CEventDamage*>(event);
+                if (event->GetEventType() == EVENT_DAMAGE) {
+                    if (static_cast<const CEventDamage*>(event)->m_bKnockOffPed || ped->GetIntelligence()->GetTaskThrow()) {
+                        ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)->MakeAbortable(ped, ABORT_PRIORITY_URGENT, event);
+                    }
+                    return true;
+                }
+            }
 
-    if (priority == ABORT_PRIORITY_IMMEDIATE) {
-        ped->m_pPlayerData->m_fMoveBlendRatio = 0.0f;
-        CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.0f);
-        abortable = true;
-        goto LABEL_15;
-    }
+            if (const auto attack = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
+                return attack->MakeAbortable(ped, ABORT_PRIORITY_URGENT, event);
+            }
 
-    if (priority == ABORT_PRIORITY_URGENT) {
-        if (!ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK))
-            goto LABEL_12;
+            return true;
+        }
+        }
+        return false;
+    }()) {
+        if (   (ped->m_pTargetedObject || (ped->m_pPlayerData->m_nPlayerFlags & 8) != 0 || TheCamera.Using1stPersonWeaponMode())
+            && event
+        ) {
+            if ([&, this] {
+                switch (event->GetEventType()) {
+                case EVENT_DAMAGE: {
+                    const auto dmg = static_cast<const CEventDamage*>(event);
+                    if (dmg->m_damageResponse.m_bHealthZero && dmg->m_bAddToEventGroup) {
+                        return true;
+                    }
+                    if (!ped->m_pAttachedTo) {
+                        if (dmg->m_bKnockOffPed) {
+                            return true;
+                        }
 
-        if (event) {
-            if (event->GetEventPriority() < 61)
+                        if (dmg->m_weaponType > WEAPON_LAST_WEAPON && dmg->m_weaponType != WEAPON_UZI_DRIVEBY) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+                case EVENT_IN_WATER:
+                    return true;
+                }
                 return false;
-
-            if (event->GetEventType() == EVENT_DAMAGE) {
-                auto secondary = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK);
-                if (secondary->GetTaskType() == TASK_SIMPLE_THROW_PROJECTILE || eventDamage->m_bKnockOffPed) {
-                    ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)->MakeAbortable(ped, ABORT_PRIORITY_URGENT, event);
-                }
-                goto LABEL_12;
+            }()) {
+                TheCamera.ClearPlayerWeaponMode();
+                CWeaponEffects::ClearCrossHair(ped->m_nPedType);
+                CEntity::ClearReference(ped->m_pTargetedObject);
             }
         }
-
-        if (!ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
-        LABEL_12:
-            abortable = true;
-            goto LABEL_15;
-        }
-
-        abortable = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)->MakeAbortable(ped, ABORT_PRIORITY_URGENT, event);
-        if (abortable) {
-        LABEL_15:
-            if (
-                (ped->m_pTargetedObject || (ped->m_pPlayerData->m_nPlayerFlags & 8) != 0 || TheCamera.Using1stPersonWeaponMode())
-                && event && (event->GetEventType() == EVENT_DAMAGE || event->GetEventType() == EVENT_IN_WATER)
-            ) {
-                if (   event->GetEventType() != EVENT_DAMAGE
-                    || eventDamage->m_damageResponse.m_bHealthZero
-                    && eventDamage->m_bAddToEventGroup
-                    || !ped->m_pAttachedTo
-                    && (
-                         eventDamage->m_bKnockOffPed
-                      || eventDamage->m_weaponType > WEAPON_LAST_WEAPON
-                      && eventDamage->m_weaponType != WEAPON_UZI_DRIVEBY
-                    )
-                ) {
-                    TheCamera.ClearPlayerWeaponMode();
-                    CWeaponEffects::ClearCrossHair(ped->m_nPedType);
-                    CEntity::ClearReference(ped->m_pTargetedObject);
-                }
-            }
-        }
+        return true;
     }
-    return abortable;
+    return false;
 }
 
 // 0x688810
