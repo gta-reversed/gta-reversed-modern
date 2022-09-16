@@ -189,7 +189,7 @@ void BoneNode_c::AddChild(BoneNode_c* children) {
 
 // 0x616CD0
 void BoneNode_c::CalcWldMat(const RwMatrix* boneMatrix) {
-    static RwMatrix math;
+    RwMatrix math;
 
     float dst = 2.0f / ((m_Orientation.imag.x * m_Orientation.imag.x) + (m_Orientation.imag.y * m_Orientation.imag.y) + (m_Orientation.imag.z * m_Orientation.imag.z) +
                         (m_Orientation.real * m_Orientation.real));
@@ -211,7 +211,7 @@ void BoneNode_c::CalcWldMat(const RwMatrix* boneMatrix) {
 
     RwMatrixMultiply(&m_WorldMat, &math, boneMatrix);
 
-    for (BoneNode_c* bone = (BoneNode_c*)m_Childs.m_pHead; bone != nullptr; bone = (BoneNode_c*)bone->m_pNext) {
+    for (BoneNode_c* bone = static_cast<BoneNode_c*>(m_Childs.m_pHead); bone != nullptr; bone = static_cast<BoneNode_c*>(bone->m_pNext)) {
         bone->CalcWldMat(&m_WorldMat);
     }
 }
