@@ -2,7 +2,7 @@
 
 #include "AEWeaponAudioEntity.h"
 
-class CAEGlobalWeaponAudioEntity : public CAEWeaponAudioEntity {
+class NOTSA_EXPORT_VTABLE CAEGlobalWeaponAudioEntity : public CAEWeaponAudioEntity {
 public:
     CAEGlobalWeaponAudioEntity();
     ~CAEGlobalWeaponAudioEntity();

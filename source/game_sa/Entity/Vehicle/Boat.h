@@ -27,7 +27,7 @@ enum eBoatNodes {
     BOAT_NUM_NODES
 };
 
-class CBoat : public CVehicle {
+class NOTSA_EXPORT_VTABLE CBoat : public CVehicle {
 public:
     float m_fMovingHiRotation; // works as counter also
     float m_fPropSpeed;        // propeller speed
@@ -87,7 +87,7 @@ public:
     void ProcessControlInputs(uint8 playerNum) override;
     void GetComponentWorldPosition(int32 componentId, CVector& outPos) override;
     void ProcessOpenDoor(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 animId, float fTime) override;
-    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
+    void BlowUpCar(CEntity* damager, bool bHideExplosion) override;
 
     inline void SetupModelNodes(); // fill m_aBoatNodes array
     void DebugCode();
@@ -114,7 +114,14 @@ private:
     void ProcessControlInputs_Reversed(uint8 ucPadNum);
     void GetComponentWorldPosition_Reversed(int32 componentId, CVector& outPos);
     void ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint32 arg2, uint32 arg3, float arg4);
-    void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion);
+    void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion);
+
+private: // Wrappers for hooks
+    // 0x6F2940
+    CBoat* Constructor(int32 modelId, eVehicleCreatedBy createdBy) { this->CBoat::CBoat(modelId, createdBy); return this; }
+
+    // 0x6F00F0
+    CBoat* Destructor() { this->CBoat::~CBoat(); return this; }
 };
 
 VALIDATE_SIZE(CBoat, 0x7E8);

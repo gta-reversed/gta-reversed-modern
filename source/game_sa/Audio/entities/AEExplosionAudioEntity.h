@@ -8,7 +8,7 @@
 
 #include "AEAudioEntity.h"
 
-class CAEExplosionAudioEntity : public CAEAudioEntity {
+class NOTSA_EXPORT_VTABLE CAEExplosionAudioEntity : public CAEAudioEntity {
 public:
     uint32 m_Speed;
 

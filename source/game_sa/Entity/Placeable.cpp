@@ -8,8 +8,7 @@
 
 #include "Placeable.h"
 
-void CPlaceable::InjectHooks()
-{
+void CPlaceable::InjectHooks() {
     RH_ScopedClass(CPlaceable);
     RH_ScopedCategory("Entity");
 
@@ -18,8 +17,8 @@ void CPlaceable::InjectHooks()
     RH_ScopedInstall(SetOrientation, 0x439A80);
     RH_ScopedInstall(SetHeading, 0x43E0C0);
     RH_ScopedInstall(GetHeading, 0x441DB0);
-    RH_ScopedOverloadedInstall(IsWithinArea, "xy", 0x54F200, bool(CPlaceable::*)(float, float, float, float));
-    RH_ScopedOverloadedInstall(IsWithinArea, "xyz", 0x54F2B0, bool(CPlaceable::*)(float, float, float, float, float, float));
+    RH_ScopedOverloadedInstall(IsWithinArea, "xy", 0x54F200, bool(CPlaceable::*)(float, float, float, float) const);
+    RH_ScopedOverloadedInstall(IsWithinArea, "xyz", 0x54F2B0, bool(CPlaceable::*)(float, float, float, float, float, float) const);
     RH_ScopedInstall(RemoveMatrix, 0x54F3B0);
     RH_ScopedInstall(AllocateStaticMatrix, 0x54F4C0);
     RH_ScopedInstall(AllocateMatrix, 0x54F560);
@@ -30,13 +29,11 @@ void CPlaceable::InjectHooks()
     RH_ScopedInstall(FreeStaticMatrix, 0x54F010);
 }
 
-CPlaceable::CPlaceable() : m_placement()
-{
+CPlaceable::CPlaceable() : m_placement() {
     m_matrix = nullptr;
 }
 
-CPlaceable::~CPlaceable()
-{
+CPlaceable::~CPlaceable() {
     if (m_matrix) {
         CPlaceable::RemoveMatrix();
         --numMatrices;
@@ -45,41 +42,35 @@ CPlaceable::~CPlaceable()
     m_matrix = reinterpret_cast<CMatrixLink*>(&gDummyMatrix);
 }
 
-CVector CPlaceable::GetRightVector()
-{
+CVector CPlaceable::GetRightVector() {
     if (m_matrix)
         return m_matrix->GetRight();
-    return CVector(cos(m_placement.m_fHeading), sin(m_placement.m_fHeading), 0.0f);
+    return { std::cos(m_placement.m_fHeading), std::sin(m_placement.m_fHeading), 0.0f };
 }
 
-CVector CPlaceable::GetForwardVector()
-{
+CVector CPlaceable::GetForwardVector() {
     if (m_matrix)
         return m_matrix->GetForward();
-    return CVector(-sin(m_placement.m_fHeading), cos(m_placement.m_fHeading), 0.0f);
+    return { -std::sin(m_placement.m_fHeading), std::cos(m_placement.m_fHeading), 0.0f };
 }
 
-CVector CPlaceable::GetUpVector()
-{
+CVector CPlaceable::GetUpVector() {
     if (m_matrix)
         return m_matrix->GetUp();
-    return CVector(0.0f, 0.0f, 1.0f);
+    return {0.0f, 0.0f, 1.0f};
 }
 
-void CPlaceable::SetPosn(float x, float y, float z)
-{
+void CPlaceable::SetPosn(float x, float y, float z) {
     auto& pos = GetPosition();
     pos.Set(x, y, z);
 }
 
-void CPlaceable::SetPosn(const CVector& posn)
-{
+void CPlaceable::SetPosn(const CVector& posn) {
     auto& pos = GetPosition();
     pos = posn;
 }
 
-void CPlaceable::SetOrientation(float x, float y, float z)
-{
+void CPlaceable::SetOrientation(float x, float y, float z) {
     if (!m_matrix) {
         m_placement.m_fHeading = z;
         return;
@@ -90,41 +81,35 @@ void CPlaceable::SetOrientation(float x, float y, float z)
     m_matrix->GetPosition() += vecPos;
 }
 
-void CPlaceable::SetHeading(float heading)
-{
+void CPlaceable::SetHeading(float heading) {
     if (m_matrix)
         m_matrix->SetRotateZOnly(heading);
     else
         m_placement.m_fHeading = heading;
 }
 
-float CPlaceable::GetHeading()
-{
+float CPlaceable::GetHeading() {
     if (!m_matrix)
         return m_placement.m_fHeading;
 
-    auto& vecForward = m_matrix->GetForward();
-    return atan2(-vecForward.x, vecForward.y);
+    const auto& vecForward = m_matrix->GetForward();
+    return std::atan2(-vecForward.x, vecForward.y);
 }
 
-bool CPlaceable::IsWithinArea(float x1, float y1, float x2, float y2)
-{
-    auto& vecPos = GetPosition();
+bool CPlaceable::IsWithinArea(float x1, float y1, float x2, float y2) const {
+    const auto& vecPos = GetPosition();
     if (x1 > x2)
         std::swap(x1, x2);
 
     if (y1 > y2)
         std::swap(y1, y2);
 
-    return vecPos.x >= x1
-        && vecPos.x <= x2
-        && vecPos.y >= y1
-        && vecPos.y <= y2;
+    return vecPos.x >= x1 && vecPos.x <= x2 && vecPos.y >= y1 && vecPos.y <= y2;
 }
 
-bool CPlaceable::IsWithinArea(float x1, float y1, float z1, float x2, float y2, float z2)
-{
-    auto& vecPos = GetPosition();
+
+bool CPlaceable::IsWithinArea(float x1, float y1, float z1, float x2, float y2, float z2) const {
+    const auto& vecPos = GetPosition();
     if (x1 > x2)
         std::swap(x1, x2);
 
@@ -142,10 +127,9 @@ bool CPlaceable::IsWithinArea(float x1, float y1, float z1, float x2, float y2, 
         && vecPos.z <= z2;
 }
 
-void CPlaceable::RemoveMatrix()
-{
-    auto& vecForward = m_matrix->GetForward();
-    auto fHeading = atan2(-vecForward.x, vecForward.y);
+void CPlaceable::RemoveMatrix() {
+    const auto& vecForward = m_matrix->GetForward();
+    auto fHeading = std::atan2(-vecForward.x, vecForward.y);
 
     m_placement.m_vPosn = m_matrix->GetPosition();
     m_placement.m_fHeading = fHeading;
@@ -155,8 +139,7 @@ void CPlaceable::RemoveMatrix()
     m_matrix = nullptr;
 }
 
-void CPlaceable::AllocateStaticMatrix()
-{
+void CPlaceable::AllocateStaticMatrix() {
     if (m_matrix)
         return gMatrixList.MoveToList2(m_matrix);
 
@@ -167,8 +150,7 @@ void CPlaceable::AllocateStaticMatrix()
     m_matrix->m_pOwner = this;
 }
 
-void CPlaceable::AllocateMatrix()
-{
+void CPlaceable::AllocateMatrix() {
     if (m_matrix)
         return;
 
@@ -179,12 +161,11 @@ void CPlaceable::AllocateMatrix()
     m_matrix->m_pOwner = this;
 }
 
-void CPlaceable::SetMatrix(CMatrix& matrix)
-{
+void CPlaceable::SetMatrix(CMatrix& matrix) {
     if (!m_matrix) {
         if (matrix.GetUp().z == 1.0F) {
             auto& vecForward = matrix.GetForward();
-            auto fHeading = atan2(-vecForward.x, vecForward.y);
+            auto fHeading = std::atan2(-vecForward.x, vecForward.y);
 
             m_placement.m_vPosn = matrix.GetPosition();
             m_placement.m_fHeading = fHeading;
@@ -194,6 +175,11 @@ void CPlaceable::SetMatrix(CMatrix& matrix)
     }
 
     *static_cast<CMatrix*>(m_matrix) = matrix;
+}
+
+// NOTSA
+bool CPlaceable::IsPointInRange(const CVector& point, float range) {
+    return DistanceBetweenPointsSquared(point, GetPosition()) <= sq(range);
 }
 
 CMatrixLink& CPlaceable::GetMatrix() {
@@ -217,8 +203,7 @@ void CPlaceable::FreeStaticMatrix() {
     gMatrixList.MoveToList1(m_matrix);
 }
 
-void CPlaceable::GetOrientation(float& x, float& y, float& z)
-{
+void CPlaceable::GetOrientation(float& x, float& y, float& z) {
     if (!m_matrix) {
         z = m_placement.m_fHeading;
         return;
@@ -226,10 +211,10 @@ void CPlaceable::GetOrientation(float& x, float& y, float& z)
 
     x = asinf(GetForward().z);
 
-    float cosx = cosf(x);
+    float cosx = std::cosf(x);
     float cosy = GetUp().z / cosx;
-    y = acosf(cosy);
+    y = std::acosf(cosy);
 
     float cosz = GetForward().y / cosx;
-    z = acosf(cosz);
+    z = std::acosf(cosz);
 }

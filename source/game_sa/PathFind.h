@@ -289,7 +289,8 @@ public:
     // Helpers - NOTSA
     bool FindNodeCoorsForScript(CVector& outPos, CNodeAddress addr);
     auto FindIntersection(const CNodeAddress& startNodeAddress, const CNodeAddress& targetNodeAddress) -> CPathIntersectionInfo*;
-
+    
+    bool IsNodesLoaded(CNodeAddress addr) const { return m_pPathNodes[addr.m_wAreaId]; }
 };
 
 VALIDATE_SIZE(CPathFind, 0x3C80);

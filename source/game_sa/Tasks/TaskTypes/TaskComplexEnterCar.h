@@ -13,7 +13,7 @@
 
 // Note: This class is abstract, that is, it can't be directly constructed,
 // rather, use one of the derived classes.
-class CTaskComplexEnterCar : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexEnterCar : public CTaskComplex {
 public:
     CVehicle* m_pTargetVehicle;
     union {
@@ -33,30 +33,41 @@ public:
 
     uint8                         m_nNumGettingInSet;
     uint8                         m_nCamMovementChoice;
-    char                          _pad2[2];
     CVector                       m_vTargetDoorPos;
     CTaskUtilityLineUpPedWithCar* m_pTaskUtilityLineUpPedWithCar;
     bool                          m_bIsAborting;
-    char                          _pad3[3];
     CPed*                         m_pDraggedPed;
     uint8                         m_nDoorFlagsSet; // used for CVehicle::SetGettingInFlags
-    char                          _pad4[3];
     float                         m_fCruiseSpeed;
     int32                         m_nEnterCarStartTime;
 
 public:
-    // Shouldn't be used directly, use CTaskComplexEnterCarAsDriver or CTaskComplexEnterCarAsPassenger instead
+    static void InjectHooks();
+
+    // Shouldn't be used directly, use `CTaskComplexEnterCarAsDriver` or `CTaskComplexEnterCarAsPassenger` instead
     CTaskComplexEnterCar(CVehicle* targetVehicle, bool bAsDriver, bool bQuitAfterOpeningDoor, bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff = false);
-    ~CTaskComplexEnterCar();
+    ~CTaskComplexEnterCar() override;
 
     bool           MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask*         CreateNextSubTask(CPed* ped) override;
     CTask*         CreateFirstSubTask(CPed* ped) override;
     CTask*         ControlSubTask(CPed* ped) override;
+    CTask*         CreateSubTask(eTaskType type, CPed* ped);
     virtual CTask* CreateNextSubTask_AfterSimpleCarAlign(CPed* ped);
     CVector        GetTargetPos();
 
     auto GetVehicle() const { return m_pTargetVehicle; }
-};
+private:
+    // 0x63A220
+    CTaskComplexEnterCar* Constructor(CVehicle* vehicle, bool bAsDriver, bool bQuitAfterOpeningDoor, bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff) {
+        this->CTaskComplexEnterCar::CTaskComplexEnterCar(vehicle, bAsDriver, bQuitAfterOpeningDoor, bQuitAfterDraggingPedOut, bCarryOnAfterFallingOff);
+        return this;
+    }
 
+    // 0x63DFA0
+    CTaskComplexEnterCar* Destructor() {
+        this->CTaskComplexEnterCar::~CTaskComplexEnterCar();
+        return this;
+    }
+};
 VALIDATE_SIZE(CTaskComplexEnterCar, 0x50);

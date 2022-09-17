@@ -8,7 +8,7 @@
 
 #include "Entity.h"
 
-class CBuilding : public CEntity {
+class NOTSA_EXPORT_VTABLE CBuilding : public CEntity {
 public:
     CBuilding();
     static void* operator new(unsigned size);

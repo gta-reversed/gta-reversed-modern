@@ -1,20 +1,40 @@
 #pragma once
 
 #include "TaskComplexCarDrive.h"
-#include "Vehicle.h"
+class CVehicle;
+
+enum field_30_enum : int32 {
+    DEFAULT,
+    ACCURATE,
+    STRAIGHT_LINE,
+    RACING,
+};
 
 class CTaskComplexDriveToPoint : public CTaskComplexCarDrive {
 public:
-    CVector point;
-    int32   field_30;
-    int32   field_34;
-    int32   field_38;
+    CVector m_Point;
+    field_30_enum field_30;
+    float m_Radius;
+    bool field_38;
 
 public:
     static constexpr auto Type = TASK_COMPLEX_CAR_DRIVE_TO_POINT;
 
-    CTaskComplexDriveToPoint(CVehicle* vehicle, CVector& point, float speed, int32 arg4, int32 arg5, float arg6, int32 arg7);
-    ~CTaskComplexDriveToPoint();
-};
+    CTaskComplexDriveToPoint(CVehicle* vehicle, const CVector& point, float speed, int32 arg4, int32 carModelIndexToCreate, float radius, eCarDrivingStyle drivingStyle);
+    ~CTaskComplexDriveToPoint() override = default;
 
+    eTaskType GetTaskType() override { return Type;}
+    CTask* Clone() override { return new CTaskComplexDriveToPoint(m_pVehicle, m_Point, m_fSpeed, field_30, m_carModelIndexToCreate, m_Radius, m_nCarDrivingStyle); }
+
+    void SetUpCar() override;
+    CTask* CreateSubTaskCannotGetInCar(CPed* ped) override;
+    CTask* Drive(CPed* ped) override;
+
+
+    bool IsTargetBlocked(CPed* ped) const;
+    bool IsTargetBlocked(CPed* ped, CEntity** entities, int32 numEntities) const;
+
+    /// NOTSA
+    void GoToPoint(const CVector& point);
+};
 VALIDATE_SIZE(CTaskComplexDriveToPoint, 0x3C);

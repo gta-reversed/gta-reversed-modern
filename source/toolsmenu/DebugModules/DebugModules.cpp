@@ -6,7 +6,8 @@
 #include "Collision\CollisionDebugModule.h"
 #include "Cheat\CheatDebugModule.h"
 #include "Vehicle\VehicleDebugModule.h"
-#include "Ped\PedDebugModule.h"
+#include "Ped/PedSpawnerModule.h"
+#include "Ped/PedDebugModule.h"
 #include "Script\MissionDebugModule.h"
 #include "Audio\CutsceneTrackManagerDebugModule.h"
 #include "Audio\AmbienceTrackManagerDebugModule.h"
@@ -22,11 +23,12 @@
 
 bool DebugModules::m_ShowFPS = false;
 bool DebugModules::m_ShowExtraDebugFeatures = false;
+static PedDebugModule::Module s_PedDebugModule{};
 
 void DebugModules::Initialise(ImGuiContext* ctx) {
     TeleportDebugModule::Initialise(*ctx);
     VehicleDebugModule::Initialise();
-    PedDebugModule::Initialise();
+    PedSpawnerModule::Initialise();
     MissionDebugModule::Initialise();
     FXDebugModule::Initialise();
 }
@@ -34,7 +36,7 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
 void SpawnTab() {
     if (ImGui::BeginTabBar("")) {
         if (ImGui::BeginTabItem("Ped")) {
-            PedDebugModule::ProcessImGui();
+            PedSpawnerModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 
@@ -109,8 +111,9 @@ void DebugModules::DisplayFramePerSecond() {
 
     // Top-left framerate display overlay window.
     ImGui::SetNextWindowPos(ImVec2(10, 10));
+    ImGui::SetNextWindowSize({ 265, 20 });
     ImGui::Begin("FPS", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
-    ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
+    ImGui::Text("FPS: %.2f [RsGlobal.frameLimit=%i]", ImGui::GetIO().Framerate, RsGlobal.frameLimit);
     ImGui::End();
 }
 
@@ -182,15 +185,21 @@ void DebugModules::ProcessExtraDebugFeatures() {
             ImGui::EndTabItem();
         }
 
+        if (ImGui::BeginTabItem("Peds")) {
+            s_PedDebugModule.ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
         ImGui::EndTabBar();
     }
 }
 
-void DebugModules::Display(bool showMenu) {
+void DebugModules::ProcessRender(bool showMenu) {
     if (showMenu) {
         DisplayMainWindow();
     }
     DisplayFramePerSecond();
     DisplayExtraDebugFeatures();
     TeleportDebugModule::ProcessInput();
+    s_PedDebugModule.ProcessRender();
 }

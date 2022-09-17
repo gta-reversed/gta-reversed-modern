@@ -9,7 +9,7 @@
 #include "TaskSimple.h"
 #include "TaskTimer.h"
 
-class CTaskSimpleStandStill : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleStandStill : public CTaskSimple {
 public:
     int32      m_nTime;
     CTaskTimer m_timer;
@@ -24,8 +24,8 @@ public:
     ~CTaskSimpleStandStill() override = default;
 
 public:
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override { return new CTaskSimpleStandStill(m_nTime, m_bLooped, m_bUseAnimIdleStance, m_fBlendData); } // 0x635CF0
-    eTaskType GetTaskType() override { return TASK_SIMPLE_STAND_STILL; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 
@@ -37,5 +37,4 @@ private:
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed_Reversed(CPed* ped);
 };
-
 VALIDATE_SIZE(CTaskSimpleStandStill, 0x20);

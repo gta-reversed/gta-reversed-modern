@@ -237,11 +237,11 @@ void CCarGenerator::DoInternalProcessing()
             break;
         case VEHICLE_TYPE_BIKE:
             vehicle = new CBike(actualModelId, PARKED_VEHICLE);
-            vehicle->AsBike()->bikeFlags.bIsStanding = true;
+            vehicle->AsBike()->bikeFlags.bOnSideStand = true;
             break;
         case VEHICLE_TYPE_BMX:
             vehicle = new CBmx(actualModelId, PARKED_VEHICLE);
-            vehicle->AsBike()->bikeFlags.bIsStanding = true;
+            vehicle->AsBike()->bikeFlags.bOnSideStand = true;
             break;
         case VEHICLE_TYPE_TRAILER:
             vehicle = new CTrailer(actualModelId, PARKED_VEHICLE);

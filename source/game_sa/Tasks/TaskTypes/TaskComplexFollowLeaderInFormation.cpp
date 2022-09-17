@@ -1,18 +1,19 @@
 #include "StdInc.h"
+
 #include "TaskComplexFollowLeaderInFormation.h"
 
 void CTaskComplexFollowLeaderInFormation::InjectHooks() {
     RH_ScopedClass(CTaskComplexFollowLeaderInFormation);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    // RH_ScopedInstall(Constructor, 0x6949A0);
+    RH_ScopedInstall(Constructor, 0x6949A0, { .reversed = false });
     // RH_ScopedOverloadedInstall(Destructor, "", 0x694A40, CTaskComplexFollowLeaderInFormation * (CTaskComplexFollowLeaderInFormation::*)());
 
-    // RH_ScopedVirtualInstall(Clone, 0x695740);
-    // RH_ScopedVirtualInstall(GetTaskType, 0x694A30);
-    // RH_ScopedVirtualInstall(CreateNextSubTask, 0x696820);
-    // RH_ScopedVirtualInstall(CreateFirstSubTask, 0x6968E0);
-    // RH_ScopedVirtualInstall(ControlSubTask, 0x696940);
+    RH_ScopedVirtualInstall(Clone, 0x695740, { .reversed = false });
+    RH_ScopedVirtualInstall(GetTaskType, 0x694A30, { .reversed = false });
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x696820, { .reversed = false });
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x6968E0, { .reversed = false });
+    RH_ScopedVirtualInstall(ControlSubTask, 0x696940, { .reversed = false });
 }
 
 // 0x6949A0

@@ -14,7 +14,7 @@ enum eKnockOffType : uint8 {
 
 class CVehicle;
 
-class CEventKnockOffBike : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventKnockOffBike : public CEvent {
 public:
     CVector   m_moveSpeed;
     CVector   m_collisionImpactVelocity;

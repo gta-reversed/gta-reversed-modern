@@ -8,34 +8,34 @@ void CControllerConfigManager::InjectHooks() {
     RH_ScopedClass(CControllerConfigManager);
     RH_ScopedCategoryGlobal();
 
-//    RH_ScopedInstall(Constructor, 0x531EE0);
-//    RH_ScopedInstall(LoadSettings, 0x530530);
-//    RH_ScopedInstall(SaveSettings, 0x52D200);
-//    RH_ScopedInstall(InitDefaultControlConfiguration, 0x530640);
-//    RH_ScopedInstall(InitialiseControllerActionNameArray, 0x52D260);
-//    RH_ScopedInstall(ReinitControls, 0x531F20);
-//    RH_ScopedInstall(StoreMouseButtonState, 0x52DA30);
-//    RH_ScopedInstall(UpdateJoyInConfigMenus_ButtonDown, 0x52DAB0);
-//    RH_ScopedInstall(AffectControllerStateOn_ButtonDown_DebugStuff, 0x52DC10);
-//    RH_ScopedInstall(UpdateJoyInConfigMenus_ButtonUp, 0x52DC20);
-//    RH_ScopedInstall(AffectControllerStateOn_ButtonUp_DebugStuff, 0x52DD80);
-//    RH_ScopedInstall(ClearSimButtonPressCheckers, 0x52DD90);
-//    RH_ScopedInstall(GetJoyButtonJustUp, 0x52D1C0);
-//    RH_ScopedInstall(GetJoyButtonJustDown, 0x52D1E0);
-//    RH_ScopedInstall(GetIsKeyboardKeyDown, 0x52DDB0);
-//    RH_ScopedInstall(GetIsKeyboardKeyJustDown, 0x52E450);
-//    RH_ScopedInstall(GetIsMouseButtonDown, 0x52EF30);
-//    RH_ScopedInstall(GetIsMouseButtonUp, 0x52F020);
-//    RH_ScopedInstall(GetIsMouseButtonJustUp, 0x52F110);
-//    RH_ScopedInstall(GetIsKeyBlank, 0x52F2A0);
-//    RH_ScopedInstall(GetActionType, 0x52F2F0);
-//    RH_ScopedInstall(GetControllerSettingTextMouse, 0x52F390);
-//    RH_ScopedInstall(GetControllerSettingTextJoystick, 0x52F450);
-//    RH_ScopedInstall(ClearSettingsAssociatedWithAction, 0x52FD70);
-//    RH_ScopedInstall(MakeControllerActionsBlank, 0x530500);
-//    RH_ScopedInstall(AffectPadFromKeyBoard, 0x531140);
-//    RH_ScopedInstall(AffectPadFromMouse, 0x5314A0);
-//    RH_ScopedInstall(DeleteMatchingActionInitiators, 0x531C90);
+RH_ScopedInstall(Constructor, 0x531EE0, { .reversed = false });
+RH_ScopedInstall(LoadSettings, 0x530530, { .reversed = false });
+RH_ScopedInstall(SaveSettings, 0x52D200, { .reversed = false });
+RH_ScopedInstall(InitDefaultControlConfiguration, 0x530640, { .reversed = false });
+RH_ScopedInstall(InitialiseControllerActionNameArray, 0x52D260, { .reversed = false });
+RH_ScopedInstall(ReinitControls, 0x531F20, { .reversed = false });
+RH_ScopedInstall(StoreMouseButtonState, 0x52DA30, { .reversed = false });
+RH_ScopedInstall(UpdateJoyInConfigMenus_ButtonDown, 0x52DAB0, { .reversed = false });
+RH_ScopedInstall(AffectControllerStateOn_ButtonDown_DebugStuff, 0x52DC10, { .reversed = false });
+RH_ScopedInstall(UpdateJoyInConfigMenus_ButtonUp, 0x52DC20, { .reversed = false });
+RH_ScopedInstall(AffectControllerStateOn_ButtonUp_DebugStuff, 0x52DD80, { .reversed = false });
+RH_ScopedInstall(ClearSimButtonPressCheckers, 0x52DD90, { .reversed = false });
+RH_ScopedInstall(GetJoyButtonJustUp, 0x52D1C0, { .reversed = false });
+RH_ScopedInstall(GetJoyButtonJustDown, 0x52D1E0, { .reversed = false });
+RH_ScopedInstall(GetIsKeyboardKeyDown, 0x52DDB0, { .reversed = false });
+RH_ScopedInstall(GetIsKeyboardKeyJustDown, 0x52E450, { .reversed = false });
+RH_ScopedInstall(GetIsMouseButtonDown, 0x52EF30, { .reversed = false });
+RH_ScopedInstall(GetIsMouseButtonUp, 0x52F020, { .reversed = false });
+RH_ScopedInstall(GetIsMouseButtonJustUp, 0x52F110, { .reversed = false });
+RH_ScopedInstall(GetIsKeyBlank, 0x52F2A0, { .reversed = false });
+RH_ScopedInstall(GetActionType, 0x52F2F0, { .reversed = false });
+RH_ScopedInstall(GetControllerSettingTextMouse, 0x52F390, { .reversed = false });
+RH_ScopedInstall(GetControllerSettingTextJoystick, 0x52F450, { .reversed = false });
+RH_ScopedInstall(ClearSettingsAssociatedWithAction, 0x52FD70, { .reversed = false });
+RH_ScopedInstall(MakeControllerActionsBlank, 0x530500, { .reversed = false });
+RH_ScopedInstall(AffectPadFromKeyBoard, 0x531140, { .reversed = false });
+RH_ScopedInstall(AffectPadFromMouse, 0x5314A0, { .reversed = false });
+RH_ScopedInstall(DeleteMatchingActionInitiators, 0x531C90, { .reversed = false });
 }
 
 // 0x531EE0
@@ -49,12 +49,12 @@ CControllerConfigManager* CControllerConfigManager::Constructor() {
 }
 
 // 0x530530
-bool CControllerConfigManager::LoadSettings(FILE* file) {
-    return plugin::CallMethodAndReturn<bool, 0x530530, CControllerConfigManager*, FILE*>(this, file);
+bool CControllerConfigManager::LoadSettings(FILESTREAM file) {
+    return plugin::CallMethodAndReturn<bool, 0x530530, CControllerConfigManager*, FILESTREAM>(this, file);
 }
 
 // 0x52D200
-void CControllerConfigManager::SaveSettings(FILE* file) {
+void CControllerConfigManager::SaveSettings(FILESTREAM file) {
     plugin::CallMethod<0x52D200, CControllerConfigManager*, FILE*>(this, file);
 }
 
@@ -273,6 +273,6 @@ void CControllerConfigManager::AffectPadFromMouse() {
 }
 
 // 0x531C90
-void CControllerConfigManager::DeleteMatchingActionInitiators(eControllerAction action, int32 a2, eControllerType type) {
-    plugin::CallMethod<0x531C90, CControllerConfigManager*, eControllerAction, int32, eControllerType>(this, action, a2, type);
+void CControllerConfigManager::DeleteMatchingActionInitiators(eControllerAction Action, int32 KeyToBeChecked, eControllerType ControllerTypeToBeChecked) {
+    plugin::CallMethod<0x531C90, CControllerConfigManager*, eControllerAction, int32, eControllerType>(this, Action, KeyToBeChecked, ControllerTypeToBeChecked);
 }

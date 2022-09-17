@@ -49,7 +49,7 @@ public:
     CTaskComplexWander(int32 moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
     ~CTaskComplexWander() override = default;
 
-    eTaskType GetTaskType() override { return TASK_COMPLEX_WANDER; } // 0x460CD0
+    eTaskType GetTaskType() override { return Type; } // 0x460CD0
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
@@ -58,16 +58,18 @@ public:
     virtual void UpdateDir(CPed* ped);
     virtual void UpdatePathNodes(const CPed* ped, uint8 dir, CNodeAddress& originNode, CNodeAddress& targetNode, uint8& outDir);
 
-    CTask* CreateSubTask(CPed* ped, int32 taskId);
-    void ComputeTargetPos(const CPed* ped, CVector& foutTargetPos, const CNodeAddress& targetNodeAddress);
+    CTask* CreateSubTask(CPed* ped, eTaskType taskType);
+    void ComputeTargetPos(const CPed* ped, CVector& outTargetPos, const CNodeAddress& targetNodeAddress);
     float ComputeTargetHeading(CPed* ped);
-    bool ValidNodes() const;
+    [[nodiscard]] bool ValidNodes() const;
     void ScanForBlockedNodes(CPed* ped);
     bool ScanForBlockedNode(CPed* ped, const CNodeAddress& targetNodeAddress);
-    bool ScanForBlockedNode(CVector* position, class CEntity* entity);
+    bool ScanForBlockedNode(const CVector& position, class CEntity* entity);
+
+    /// Get sq. distance of the path node (either `m_LastNode` or `m_NextNode`) closest to the ped
+    float GetDistSqOfClosestPathNodeToPed(CPed* ped);
 
     static CTaskComplexWander* GetWanderTaskByPedType(CPed* ped);
-
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
@@ -78,5 +80,4 @@ private:
     void UpdateDir_Reversed(CPed* ped);
     void UpdatePathNodes_Reversed(const CPed* ped, uint8 dir, CNodeAddress& originNode, CNodeAddress& targetNode, uint8& outDir);
 };
-
 VALIDATE_SIZE(CTaskComplexWander, 0x28);

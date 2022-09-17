@@ -35,8 +35,8 @@ void RsInjectHooks() {
     RH_ScopedGlobalInstall(RsGrabScreen, 0x619AF0);
     RH_ScopedGlobalInstall(RsErrorMessage, 0x619B00);
     RH_ScopedGlobalInstall(RsWarningMessage, 0x619B30);
-    // RH_ScopedGlobalInstall(RsEventHandler, 0x619B60);
-    // RH_ScopedGlobalInstall(RsRwInitialize, 0x619C90);
+    RH_ScopedGlobalInstall(RsEventHandler, 0x619B60);
+    RH_ScopedGlobalInstall(RsRwInitialize, 0x619C90, { .reversed = false });
 }
 
 static std::array<uint8, 256>& KeysShifted = *(std::array<uint8, 256>*)0x8D2D00;
@@ -295,8 +295,6 @@ bool RsRwInitialize(void* param) {
 
 // 0x619B60
 RsEventStatus RsEventHandler(RsEvent event, void* param) {
-    return plugin::CallAndReturn<RsEventStatus, 0x619B60, RsEvent, void*>(event, param);
-
     RsEventStatus result = AppEventHandler(event, param);
 
     if (event == rsQUITAPP)
@@ -322,7 +320,7 @@ RsEventStatus RsEventHandler(RsEvent event, void* param) {
         return rsEVENTPROCESSED;
 
     case rsSELECTDEVICE:
-        return RSEVENT_SUCCEED(psSelectDevice());
+        return RSEVENT_SUCCEED(RsSelectDevice());
 
     case rsINITIALIZE:
         return RSEVENT_SUCCEED(RsInitialize());

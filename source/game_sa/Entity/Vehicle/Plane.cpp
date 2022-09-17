@@ -32,7 +32,7 @@ void CPlane::InjectHooks() {
     RH_ScopedInstall(InitPlaneGenerationAndRemoval, 0x6CAD90);
     RH_ScopedVirtualInstall(SetUpWheelColModel, 0x6C9140);
     RH_ScopedVirtualInstall(BurstTyre, 0x6C9150);
-    // RH_ScopedVirtualInstall(PreRender, 0x6C94A0);
+    RH_ScopedVirtualInstall(PreRender, 0x6C94A0, { .reversed = false });
     RH_ScopedVirtualInstall(Render, 0x6CAB70);
     RH_ScopedInstall(IsAlreadyFlying, 0x6CAB90);
     RH_ScopedVirtualInstall(Fix, 0x6CABB0);
@@ -40,17 +40,17 @@ void CPlane::InjectHooks() {
     RH_ScopedInstall(SetGearUp, 0x6CAC20);
     RH_ScopedInstall(SetGearDown, 0x6CAC70);
     RH_ScopedVirtualInstall(OpenDoor, 0x6CACB0);
-    // RH_ScopedVirtualInstall(ProcessControl, 0x6C9260);
-    // RH_ScopedVirtualInstall(ProcessControlInputs, 0x6CADD0);
-    // RH_ScopedVirtualInstall(ProcessFlyingCarStuff, 0x6CB7C0);
-    // RH_ScopedVirtualInstall(VehicleDamage, 0x6CC4B0);
+    RH_ScopedVirtualInstall(ProcessControl, 0x6C9260, { .reversed = false });
+    RH_ScopedVirtualInstall(ProcessControlInputs, 0x6CADD0, { .reversed = false });
+    RH_ScopedVirtualInstall(ProcessFlyingCarStuff, 0x6CB7C0, { .reversed = false });
+    RH_ScopedVirtualInstall(VehicleDamage, 0x6CC4B0, { .reversed = false });
     RH_ScopedInstall(CountPlanesAndHelis, 0x6CCA50);
     RH_ScopedInstall(AreWeInNoPlaneZone, 0x6CCAA0);
     RH_ScopedInstall(AreWeInNoBigPlaneZone, 0x6CCBB0);
-    // RH_ScopedInstall(SwitchAmbientPlanes, 0x6CCC50);
-    // RH_ScopedVirtualInstall(BlowUpCar, 0x6CCCF0);
-    // RH_ScopedInstall(FindPlaneCreationCoors, 0x6CD090);
-    // RH_ScopedInstall(DoPlaneGenerationAndRemoval, 0x6CD2F0);
+    RH_ScopedInstall(SwitchAmbientPlanes, 0x6CCC50, { .reversed = false });
+    RH_ScopedVirtualInstall(BlowUpCar, 0x6CCCF0, { .reversed = false });
+    RH_ScopedInstall(FindPlaneCreationCoors, 0x6CD090, { .reversed = false });
+    RH_ScopedInstall(DoPlaneGenerationAndRemoval, 0x6CD2F0, { .reversed = false });
 }
 
 // 0x6C8E20
@@ -178,7 +178,7 @@ void CPlane::InitPlaneGenerationAndRemoval() {
 }
 
 // 0x6CCCF0
-void CPlane::BlowUpCar(CEntity* damager, uint8 bHideExplosion) {
+void CPlane::BlowUpCar(CEntity* damager, bool bHideExplosion) {
     return plugin::CallMethod<0x6CCCF0, CPlane*, CEntity*, uint8>(this, damager, bHideExplosion);
 
     // untested \ wip
@@ -316,7 +316,7 @@ void CPlane::IsAlreadyFlying() {
 // 0x6CAC20
 void CPlane::SetGearUp() {
     m_fLandingGearStatus = 1.0f;
-    m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0f * 0.5f * m_pFlyingHandlingData->m_fGearUpR;
+    m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0f / 2.0f * m_pFlyingHandlingData->m_fGearUpR;
     m_damageManager.SetWheelStatus(CAR_WHEEL_FRONT_LEFT,  WHEEL_STATUS_MISSING);
     m_damageManager.SetWheelStatus(CAR_WHEEL_REAR_LEFT,   WHEEL_STATUS_MISSING);
     m_damageManager.SetWheelStatus(CAR_WHEEL_FRONT_RIGHT, WHEEL_STATUS_MISSING);
@@ -326,7 +326,7 @@ void CPlane::SetGearUp() {
 // 0x6CAC70
 void CPlane::SetGearDown() {
     m_fLandingGearStatus = 0.0f;
-    m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0f * 0.5f;
+    m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0f / 2.0f;
     m_damageManager.SetWheelStatus(CAR_WHEEL_FRONT_LEFT,  WHEEL_STATUS_OK);
     m_damageManager.SetWheelStatus(CAR_WHEEL_REAR_LEFT,   WHEEL_STATUS_OK);
     m_damageManager.SetWheelStatus(CAR_WHEEL_FRONT_RIGHT, WHEEL_STATUS_OK);
@@ -446,8 +446,8 @@ void CPlane::ProcessControl() {
         m_pSmokeParticle->GetCompositeMatrix(&out);
         CVector velocity = -m_vecMoveSpeed * 5.0f;
         auto particleData = FxPrtMult_c(0.0f, 0.0f, 0.0f, 0.2f, 1.0f, 1.0f, 0.1f);
-        g_fx.m_pPrtSmoke_huge->AddParticle(&out.pos, &velocity, 0.00f, &particleData, -1.0f, 1.2f, 0.6f, 0);
-        g_fx.m_pPrtSmoke_huge->AddParticle(&out.pos, &velocity, 0.05f, &particleData, -1.0f, 1.2f, 0.6f, 0);
+        g_fx.m_SmokeHuge->AddParticle((CVector*)&out.pos, &velocity, 0.00f, &particleData, -1.0f, 1.2f, 0.6f, false);
+        g_fx.m_SmokeHuge->AddParticle((CVector*)&out.pos, &velocity, 0.05f, &particleData, -1.0f, 1.2f, 0.6f, false);
         if (m_nSmokeTimer <= 0 || vehicleFlags.bIsDrowning) {
             m_pSmokeParticle->Kill();
             m_pSmokeParticle = nullptr;

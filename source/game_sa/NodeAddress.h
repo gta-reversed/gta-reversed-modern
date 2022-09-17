@@ -17,12 +17,11 @@ public:
     bool operator==(CNodeAddress const&) const = default;
     bool operator!=(CNodeAddress const&) const = default;
 
-    inline bool IsAreaValid() const {
-        return m_wAreaId != (uint16)-1;
-    }
-    inline bool IsValid() const {
-        return m_wAreaId != (uint16)-1 || m_wNodeId != (uint16)-1;
-    }
+    void ResetAreaId() { m_wAreaId = UINT16_MAX; }
+    void ResetNodeId() { m_wNodeId = UINT16_MAX; }
+
+    [[nodiscard]] bool IsAreaValid() const { return m_wAreaId != (uint16)-1; }
+    [[nodiscard]] bool IsValid() const { return m_wAreaId != (uint16)-1 || m_wNodeId != (uint16)-1; }
 };
 
 VALIDATE_SIZE(CNodeAddress, 0x4);

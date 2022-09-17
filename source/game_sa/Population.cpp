@@ -172,6 +172,10 @@ bool CPopulation::IsSunbather(int32 modelIndex) {
     return ((bool(__cdecl*)(int32))0x611760)(modelIndex);
 }
 
+bool CPopulation::IsSunbather(CPed* ped) {
+    return IsSunbather(ped->m_nModelIndex);
+}
+
 // 0x611780
 bool CPopulation::CanSolicitPlayerOnFoot(int32 modelIndex) {
     return ((bool(__cdecl*)(int32))0x611780)(modelIndex);

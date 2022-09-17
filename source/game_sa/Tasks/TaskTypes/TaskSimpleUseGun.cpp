@@ -15,8 +15,8 @@ CTaskSimpleUseGun::~CTaskSimpleUseGun() {
         m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
 }
 
-bool CTaskSimpleUseGun::ControlGunMove(CVector2D* moveSpeed) {
-    return plugin::CallMethodAndReturn<bool, 0x61E0C0, CTaskSimpleUseGun*, CVector2D*>(this, moveSpeed);
+bool CTaskSimpleUseGun::ControlGunMove(const CVector2D& moveSpeed) {
+    return plugin::CallMethodAndReturn<bool, 0x61E0C0, CTaskSimpleUseGun*>(this, &moveSpeed);
 }
 
 bool CTaskSimpleUseGun::PlayerPassiveControlGun() {
@@ -63,4 +63,8 @@ void CTaskSimpleUseGun::InjectHooks() {
 CTaskSimpleUseGun* CTaskSimpleUseGun::Constructor(CEntity* targetEntity, CVector vecTarget, uint8 nCommand, uint16 nBurstLength, bool bAimImmediate) {
     this->CTaskSimpleUseGun::CTaskSimpleUseGun(targetEntity, vecTarget, nCommand, nBurstLength, bAimImmediate);
     return this;
+}
+
+void CTaskSimpleUseGun::Reset(CPed* ped, CEntity* entity, CVector posn, int8 unused, int16 burstAmmoCnt) {
+    plugin::CallMethod<0x624DC0>(this, ped, entity, posn, unused, burstAmmoCnt);
 }

@@ -9,11 +9,11 @@ public:
 public:
     static constexpr auto Type = TASK_SIMPLE_GO_TO_POINT_FINE;
 
-    CTaskSimpleGoToPointFine(float moveRatio, CVector targetPoint, float fRadius, CEntity* entity);
+    CTaskSimpleGoToPointFine(float moveRatio, CVector targetPoint, float fRadius = 0.5f, CEntity* entity = nullptr);
     ~CTaskSimpleGoToPointFine() override = default;
 
+    eTaskType GetTaskType() override { return Type; }
     CTask*    Clone() override;
-    eTaskType GetTaskType() override { return TASK_SIMPLE_GO_TO_POINT_FINE; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool      ProcessPed(CPed* ped) override;
 
@@ -34,5 +34,4 @@ private:
     bool   MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool   ProcessPed_Reversed(CPed* ped);
 };
-
 VALIDATE_SIZE(CTaskSimpleGoToPointFine, 0x24);

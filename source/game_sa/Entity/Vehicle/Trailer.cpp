@@ -14,15 +14,15 @@ void CTrailer::InjectHooks() {
     RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(Constructor, 0x6D03A0);
-    // RH_ScopedInstall(SetupSuspensionLines, 0x6CF1A0);
+    RH_ScopedInstall(SetupSuspensionLines, 0x6CF1A0, { .reversed = false });
     RH_ScopedInstall(SetTowLink, 0x6CFDF0);
     RH_ScopedInstall(ScanForTowLink, 0x6CF030);
     RH_ScopedInstall(ResetSuspension, 0x6CEE50);
-    // RH_ScopedInstall(ProcessSuspension, 0x6CF6A0);
-    // RH_ScopedInstall(ProcessEntityCollision, 0x6CFFD0);
-    // RH_ScopedInstall(ProcessControl, 0x6CED20);
-    // RH_ScopedInstall(ProcessAI, 0x6CF590);
-    // RH_ScopedInstall(PreRender, 0x6CFAC0);
+    RH_ScopedInstall(ProcessSuspension, 0x6CF6A0, { .reversed = false });
+    RH_ScopedInstall(ProcessEntityCollision, 0x6CFFD0, { .reversed = false });
+    RH_ScopedInstall(ProcessControl, 0x6CED20, { .reversed = false });
+    RH_ScopedInstall(ProcessAI, 0x6CF590, { .reversed = false });
+    RH_ScopedInstall(PreRender, 0x6CFAC0, { .reversed = false });
     RH_ScopedInstall(GetTowHitchPos, 0x6CEEA0);
     RH_ScopedInstall(GetTowBarPos, 0x6CFD60);
     RH_ScopedInstall(BreakTowLink, 0x6CEFB0);
@@ -56,11 +56,11 @@ bool CTrailer::SetTowLink(CVehicle* vehicle, bool setMyPosToTowBar) {
         return false;
     }
 
-    if (m_nStatus != STATUS_PHYSICS && m_nStatus != STATUS_REMOTE_CONTROLLED && m_nStatus != STATUS_ABANDONED) {
+    if (m_nStatus != STATUS_PHYSICS && m_nStatus != STATUS_IS_TOWED && m_nStatus != STATUS_ABANDONED) {
         return false;
     }
 
-    m_nStatus = STATUS_REMOTE_CONTROLLED;
+    m_nStatus = STATUS_IS_TOWED;
 
     m_pTractor = vehicle;
     m_pTractor->RegisterReference(m_pTractor);
@@ -221,7 +221,7 @@ bool CTrailer::BreakTowLink() {
         CEntity::ClearReference(m_pTractor);
     }
 
-    if (m_nStatus != STATUS_REMOTE_CONTROLLED && m_nStatus != STATUS_PLAYER_DISABLED) {
+    if (m_nStatus != STATUS_IS_TOWED && m_nStatus != STATUS_IS_SIMPLE_TOWED) {
         return false;
     }
 

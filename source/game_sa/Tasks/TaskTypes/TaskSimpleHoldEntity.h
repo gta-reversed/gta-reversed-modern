@@ -43,21 +43,28 @@ public:
         AssocGroupId groupId = AssocGroupId::ANIM_GROUP_DEFAULT,
         bool bDisAllowDroppingOnAnimEnd = true
     );
-
+    CTaskSimpleHoldEntity(  // NOTSA
+        CEntity* entityToHold,
+        const CVector& posn,
+        uint8 boneFrameId,
+        uint8 boneFlags = HOLD_ENTITY_UPDATE_TRANSLATION_ONLY,
+        AnimationId animId = AnimationId::ANIM_ID_NO_ANIMATION_SET,
+        AssocGroupId groupId = AssocGroupId::ANIM_GROUP_DEFAULT,
+        bool bDisAllowDroppingOnAnimEnd = true
+    );
     CTaskSimpleHoldEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, const char* animName, const char* animBlockName, eAnimationFlags animFlags);
     CTaskSimpleHoldEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* animBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags);
-    ~CTaskSimpleHoldEntity();
+    ~CTaskSimpleHoldEntity() override;
 
-    // original virtual functions
+    eTaskType GetTaskType() override { return Type; }; // 0x691460
     CTask* Clone() override;
-    eTaskType GetTaskType() override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;
 
     void ReleaseEntity();
     bool CanThrowEntity() const;
-    void PlayAnim(AnimationId groupId, AssocGroupId animId);
+    void PlayAnim(AnimationId animId, AssocGroupId grpId);
     static void FinishAnimHoldEntityCB(CAnimBlendAssociation* pAnimAssoc, void* data);
     void StartAnim(CPed* ped);
     void DropEntity(CPed* ped, bool bAddEventSoundQuiet);
@@ -72,7 +79,6 @@ private:
     CTaskSimpleHoldEntity* Constructor(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* animBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags);
 
     CTask* Clone_Reversed();
-    eTaskType GetId_Reversed() { return TASK_SIMPLE_HOLD_ENTITY; };
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed_Reversed(CPed* ped);
     bool SetPedPosition_Reversed(CPed* ped);

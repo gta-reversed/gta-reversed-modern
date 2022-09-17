@@ -3,8 +3,9 @@
 #include <reversiblehooks/RootHookCategory.h>
 #include "HooksDebugModule.h"
 #include "Utility.h"
-#include "reversiblehooks/ReversibleHook/Base.h"
-#include "reversiblehooks/ReversibleHook/Simple.h"
+#include <reversiblehooks/ReversibleHook/Base.h>
+#include <reversiblehooks/ReversibleHook/Simple.h>
+#include <reversiblehooks/ReversibleHook/Virtual.h>
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -331,120 +332,171 @@ namespace HookFilter {
     }
 };
 
+template<typename T> 
+struct IDScope_Helper {
+    IDScope_Helper(T id) { PushID(id); }
+    ~IDScope_Helper() { PopID(); }
+};
+
+struct DisabledScope_Helper {
+    DisabledScope_Helper(bool disabled) { BeginDisabled(disabled); }
+    ~DisabledScope_Helper() { EndDisabled(); }
+};
+
+// https://stackoverflow.com/a/17624752
+#define CONCAT(a, b) CONCAT_INNER(a, b)
+#define CONCAT_INNER(a, b) a ## b
+#define UNIQUE_VAR_NAME(base) CONCAT(base, __COUNTER__)
+#define IDScope(id) IDScope_Helper UNIQUE_VAR_NAME(__helper){id}
+#define DisabledScope(disabled) DisabledScope_Helper UNIQUE_VAR_NAME(__helper){disabled}
+
+void RenderCategoryItems(RH::HookCategory& cat) {
+    for (auto& item : cat.Items()) {
+        if (!item->m_isVisible) {
+            continue;
+        }
+
+        // Use hook's address as unique ID - Hooks aren't dynamically created, so this should really be unique
+        IDScope(item.get());
+
+        // Draw hook symbol (`S` or `V`)
+        {
+            PushStyleVar(ImGuiStyleVar_Alpha, GetStyle().Alpha * 0.5f);
+            AlignTextToFramePadding();
+            Text(item->Symbol());
+            PopStyleVar();
+        }
+
+        // State checkbox
+        {
+            IDScope("state");
+            DisabledScope(item->Locked());
+
+            bool hooked{ item->Hooked() };
+            if (SameLine(); Checkbox(item->Name().c_str(), &hooked) && !item->Locked()) {
+                cat.SetItemEnabled(item, hooked);
+            }
+        }
+
+        if (!IsItemHovered()) {
+            continue;
+        }
+
+        
+
+        const auto ProcessToolTip = [](const auto& i) {
+            const auto DrawToolTip = [](void* gta, void* our, bool locked) {
+                const auto AddrToClipboard = [](void* addr) {
+                    SetClipboardText(std::format("{}", addr).c_str());
+                };
+
+                std::string tooltipText = std::format("SA: {} / Our: {}", gta, our);
+                if (locked) {
+                    tooltipText += "\n(locked)";
+                }
+                SetTooltip(tooltipText.c_str());
+
+                if (IsItemClicked(ImGuiMouseButton_Right)) {
+                    AddrToClipboard(gta);
+                } else if (IsItemClicked(ImGuiMouseButton_Middle)) {
+                    AddrToClipboard(our);
+                }
+            };
+            DrawToolTip(i->GetHookGTAAddress(), i->GetHookOurAddress(), i->Locked());
+        };
+
+        switch (item->Type()) {
+        case RH::ReversibleHook::Base::HookType::Simple: {
+            ProcessToolTip(std::static_pointer_cast<RH::ReversibleHook::Simple>(item));
+            break;
+        }
+        case RH::ReversibleHook::Base::HookType::Virtual: {
+            ProcessToolTip(std::static_pointer_cast<RH::ReversibleHook::Virtual>(item));
+            break;
+        }
+        }
+    }
+}
+
 void RenderCategory(RH::HookCategory& cat) {
     if (!cat.Visible()) {
         return;
     }
 
+    // We copy ImGui style here to alter it for indication.
+    const auto styleRestore = ImGui::GetStyle();
+    auto& style = ImGui::GetStyle();
+
     // NOTE: Won't work properly if `cat::m_items`s type is changed from `std::list`
     // Using this instead of the name as it's faster than encoding a string (And we care about performance, since this is mostly run in debug mode)
-    PushID(&cat);
+    IDScope(&cat);
 
     const auto& name = cat.Name();
 
-    const auto TreeNodeWithCheckbox = [](auto label, ImTristate triState, bool& cbStateOut, bool& cbClicked, bool& open) {
-        // TODO/NOTE: The Tree's label is a workaround for when the label is shorter than the visual checkbox (otherwise the checkbox can't be clicked)
-        open = TreeNodeEx("##         ", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth);
 
+    // @returns tuple<bool open, bool cbStateChanged, bool cbState>
+    const auto TreeNodeWithCheckbox = [](auto label, ImTristate triState, bool disabled) {
+        // TODO/NOTE: The Tree's label is a workaround for when the label is shorter than the visual checkbox (otherwise the checkbox can't be clic
+        const auto open = TreeNodeEx("##         ", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth);
+        
         SameLine();
 
-        // Checkbox + it's label will be the tree name
-        cbClicked = CheckboxTristate(label, triState, cbStateOut);
-    };
+        // Tree is never disabled, otherwise it couldn't be opened
+        DisabledScope(disabled);
 
-    bool isCategoryOpen{};
+        // Checkbox + it's label will be the tree name
+        bool cbState{};
+        const auto stateChanged = CheckboxTristate(label, triState, cbState);
+
+        return std::make_tuple(open, stateChanged, cbState);
+    };
 
     // Disable all hooks in category at once
     {
         SetNextItemOpen(cat.Open());
 
-        bool cbClicked{};
-        bool cbState{};
-        TreeNodeWithCheckbox(cat.Name().c_str(), cat.OverallState(), cbState, cbClicked, isCategoryOpen);
-        if (cbClicked) {
-            cat.SetAllItemsEnabled(cbState);
+        const auto [open, stateChanged, cbState] = TreeNodeWithCheckbox(cat.Name().c_str(), cat.OverallState(), cat.Disabled());
+        if (stateChanged) {
+            cat.ToggleAllItemsState();
+            //if (cat.OverallState() == RH::HookCategory::HooksState::MIXED) {
+            //} else {
+            //    cat.SetAllItemsEnabled(cbState);
+            //}
         }
+        cat.Open(open);
+    }
 
-        cat.Open(isCategoryOpen);
+    if (!cat.Open()) {
+        return;
     }
 
     // Draw hooks, and subcategories
-    if (isCategoryOpen) {
-        // Draw hooks (if any)
-        if (!cat.Items().empty() && cat.m_anyItemsVisible) {
-            const auto DrawItems = [&] {
-                for (auto& item : cat.Items()) {
-                    if (!item->m_isVisible) {
-                        continue;
-                    }
 
-                    PushID(item.get()); // Use hook's address as unique ID - Hooks aren't dynamically created, so this should really be unique
+    // Draw hooks (items) (if any)
+    if (!cat.Items().empty() && cat.m_anyItemsVisible) {
+        if (cat.SubCategories().empty()) { // If there are no subcategories we can draw all items directly
+            RenderCategoryItems(cat);
+        } else { // Otherwise use a tree node + checkbox
+            const auto [open, stateChanged, cbState] = TreeNodeWithCheckbox("Hooks", cat.ItemsState(), cat.ItemsDisabled());
 
-                    // Draw hook symbol (`S` or `V`)
-                    {
-                        PushStyleVar(ImGuiStyleVar_Alpha, GetStyle().Alpha * 0.5f);
-                        AlignTextToFramePadding();
-                        Text(item->Symbol());
-                        PopStyleVar();
-                    }
+            if (stateChanged) {
+                //cat.SetOurItemsState(cbState);
+                cat.ToggleAllItemsState();
+            }
 
-                    // State checkbox
-                    {
-                        PushID("state");
-                        bool hooked{ item->Hooked() };
-                        if (SameLine(); Checkbox(item->Name().c_str(), &hooked)) {
-                            cat.SetItemEnabled(item, hooked);
-                        }
-                        PopID(); // State checkbox
-                    }
-
-                    if (IsItemHovered()) {
-                        switch (item->Type()) {
-                        case RH::ReversibleHook::Base::HookType::Simple: {
-                            auto s = static_cast<RH::ReversibleHook::Simple*>(item.get());
-
-                            SetTooltip("GTA: %#x | Our: %#x", s->m_iRealHookedAddress, s->m_iLibFunctionAddress);
-
-                            if (IsItemClicked(ImGuiMouseButton_Middle)) {
-                                SetClipboardText(std::format("{:#x}", s->m_iRealHookedAddress).c_str());
-                            } else if (IsItemClicked(ImGuiMouseButton_Right)) {
-                                SetClipboardText(std::format("{:#x}", s->m_iLibFunctionAddress).c_str());
-                            }
-                            break;
-                        }
-                        }
-                    }
-
-                    PopID(); // This hook
-                }
-            };
-
-            if (cat.SubCategories().empty()) { // If there are no subcategories we can draw all items directly
-                DrawItems();
-            } else { // Otherwise use a tree node + checkbox
-                bool hooksNodeOpen{};
-                bool cbState{};
-                bool cbClicked{};
-                TreeNodeWithCheckbox("Hooks", cat.ItemsState(), cbState, cbClicked, hooksNodeOpen);
-                if (cbClicked) {
-                    cat.SetOurItemsEnabled(cbState);
-                }
-                if (hooksNodeOpen) {
-                    DrawItems();
-                    TreePop();
-                }
+            if (open) {
+                RenderCategoryItems(cat);
+                TreePop();
             }
         }
-
-        // Draw subcategories
-        for (auto& v : cat.SubCategories()) {
-            RenderCategory(v);
-        }
-
-        TreePop();
     }
 
-    PopID();
+    // Draw subcategories
+    for (auto& v : cat.SubCategories()) {
+        RenderCategory(v);
+    }
+
+    TreePop();
 }
 
 namespace HooksDebugModule {

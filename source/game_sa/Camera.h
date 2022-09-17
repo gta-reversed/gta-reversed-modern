@@ -47,6 +47,19 @@ enum class eGroundHeightType : int32 {
     ENTITY_BOUNDINGBOX_TOP = 2     // ground height + boundingBoxMax.z of colliding entity
 };
 
+enum {
+    MOTION_BLUR_NONE = 0,
+    MOTION_BLUR_SNIPER,
+    MOTION_BLUR_LIGHT_SCENE,
+    MOTION_BLUR_SECURITY_CAM,
+    MOTION_BLUR_CUT_SCENE,
+    MOTION_BLUR_INTRO,
+    MOTION_BLUR_INTRO2,
+    MOTION_BLUR_SNIPER_ZOOM,
+    MOTION_BLUR_INTRO3,
+    MOTION_BLUR_INTRO4,
+};
+
 struct CamTweak {
     int32 m_nModelIndex;
     float m_fDistance;

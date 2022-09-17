@@ -22,7 +22,7 @@ void CClothes::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x5A80D0);
-    // RH_ScopedInstall(LoadClothesFile, 0x5A7B30);
+    RH_ScopedInstall(LoadClothesFile, 0x5A7B30, { .reversed = false });
     RH_ScopedInstall(ConstructPedModel, 0x5A81E0);
     RH_ScopedInstall(RequestMotionGroupAnims, 0x5A8120);
     RH_ScopedInstall(RebuildPlayerIfNeeded, 0x5A8390);

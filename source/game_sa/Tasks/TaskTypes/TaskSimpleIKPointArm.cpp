@@ -23,7 +23,7 @@ CTaskSimpleIKPointArm::CTaskSimpleIKPointArm(const char* purpose, int32 hand, CE
 }
 
 // 0x634250
-CTaskSimpleIKPointArm* CTaskSimpleIKPointArm::Clone() {
+CTask* CTaskSimpleIKPointArm::Clone() {
     auto* task = new CTaskSimpleIKPointArm("", m_Hand, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, m_fSpeed, m_nBlendTime);
     if (m_pIKChain) {
         task->m_fBlend       = m_fBlend;

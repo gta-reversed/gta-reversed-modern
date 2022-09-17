@@ -6,19 +6,6 @@ class CEntity;
 class CPed;
 class CVehicle;
 
-enum eGameState : uint8 {
-    GAME_STATE_INITIAL = 0,
-    GAME_STATE_LOGO = 1,
-    GAME_STATE_PLAYING_LOGO = 2,
-    GAME_STATE_TITLE = 3,
-    GAME_STATE_PLAYING_INTRO = 4,
-    GAME_STATE_FRONTEND_LOADING = 5,
-    GAME_STATE_FRONTEND_LOADED = 6,
-    GAME_STATE_FRONTEND_IDLE = 7,
-    GAME_STATE_LOADING_STARTED = 8,
-    GAME_STATE_LOADING_FINISHED = 9,
-};
-
 enum eSkipState {
     SKIP_STATE_0,
     SKIP_STATE_1,

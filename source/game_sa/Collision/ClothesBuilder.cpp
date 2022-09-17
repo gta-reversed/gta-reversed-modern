@@ -9,41 +9,41 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedClass(CClothesBuilder);
     RH_ScopedCategory("Collision");
 
-    // RH_ScopedInstall(LoadCdDirectory, 0x5A4190);
-    // RH_ScopedInstall(RequestGeometry, 0x5A41C0);
-    // RH_ScopedInstall(RequestTexture, 0x5A4220); 
-    // todo: RH_ScopedInstall(nullptr, 0x5A42B0); 
-    // todo: RH_ScopedInstall(nullptr, 0x5A4380); AtomicInstanceCB
-    // todo: RH_ScopedInstall(nullptr, 0x5A43A0);
-    // todo: RH_ScopedInstall(nullptr, 0x5A44A0); DestroyTextureCB
-    // RH_ScopedInstall(PreprocessClothesDesc, 0x5A44C0);
-    // RH_ScopedInstall(ReleaseGeometry, 0x5A47B0);
-    // RH_ScopedInstall(FindAtomicFromNameCB, 0x5A47E0);
-    // RH_ScopedInstall(GetAtomicWithName, 0x5A4810);
-    // RH_ScopedInstall(sub_5A4840, 0x5A4840);
-    // RH_ScopedInstall(StoreBoneArray, 0x5A48B0);
+    RH_ScopedInstall(LoadCdDirectory, 0x5A4190, { .reversed = false });
+    RH_ScopedInstall(RequestGeometry, 0x5A41C0, { .reversed = false });
+    RH_ScopedInstall(RequestTexture, 0x5A4220, { .reversed = false }); 
+    //RH_ScopedInstall(nullptr, 0x5A42B0, { .reversed = false }); 
+    //RH_ScopedInstall(nullptr, 0x5A4380, { .reversed = false }); AtomicInstanceCB
+    //RH_ScopedInstall(nullptr, 0x5A43A0, { .reversed = false });
+    //RH_ScopedInstall(nullptr, 0x5A44A0, { .reversed = false }); DestroyTextureCB
+    RH_ScopedInstall(PreprocessClothesDesc, 0x5A44C0, { .reversed = false });
+    RH_ScopedInstall(ReleaseGeometry, 0x5A47B0, { .reversed = false });
+    RH_ScopedGlobalInstall(FindAtomicFromNameCB, 0x5A47E0, { .reversed = false });
+    RH_ScopedGlobalInstall(GetAtomicWithName, 0x5A4810, { .reversed = false });
+    RH_ScopedInstall(sub_5A4840, 0x5A4840, { .reversed = false });
+    RH_ScopedInstall(StoreBoneArray, 0x5A48B0, { .reversed = false });
     // RH_ScopedOverloadedInstall(BlendGeometry, "", 0x5A4940, RpGeometry* (*)(RpClump*, const char*, const char*, const char*, float, float, float));
     // RH_ScopedOverloadedInstall(BlendGeometry, "", 0x5A4F10, RpGeometry* (*)(RpClump*, const char*, const char*, float, float));
-    // RH_ScopedInstall(CopyGeometry, 0x5A5340);
-    // RH_ScopedInstall(ConstructGeometryArray, 0x5A55A0);
-    // RH_ScopedInstall(DestroySkinArrays, 0x5A56C0);
-    // RH_ScopedInstall(BuildBoneIndexConversionTable, 0x5A56E0);
-    // RH_ScopedInstall(CopyTexture, 0x5A5730);
-    // RH_ScopedInstall(PlaceTextureOnTopOfTexture, 0x5A57B0);
+    RH_ScopedInstall(CopyGeometry, 0x5A5340, { .reversed = false });
+    RH_ScopedInstall(ConstructGeometryArray, 0x5A55A0, { .reversed = false });
+    RH_ScopedInstall(DestroySkinArrays, 0x5A56C0, { .reversed = false });
+    RH_ScopedInstall(BuildBoneIndexConversionTable, 0x5A56E0, { .reversed = false });
+    RH_ScopedInstall(CopyTexture, 0x5A5730, { .reversed = false });
+    RH_ScopedInstall(PlaceTextureOnTopOfTexture, 0x5A57B0, { .reversed = false });
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A5820, void (*)(RwTexture*, RwTexture*, float, float, int32));
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A59C0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32));
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A5BC0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32, RwTexture*));
-    // RH_ScopedInstall(InitPaletteOctTree, 0x5A5EB0);
-    // RH_ScopedInstall(ShutdownPaletteOctTree, 0x5A5EE0);
-    // RH_ScopedInstall(ReducePaletteOctTree, 0x5A5EF0);
-    // RH_ScopedInstall(AddColour, 0x5A5F00);
-    // RH_ScopedInstall(FillPalette, 0x5A5F30);
-    // RH_ScopedInstall(FindNearestColour, 0x5A5F40);
-    // RH_ScopedInstall(GetTextureFromTxdAndLoadNextTxd, 0x5A5F70);
-    // RH_ScopedInstall(ConstructTextures, 0x5A6040);
-    // RH_ScopedInstall(ConstructGeometryAndSkinArrays, 0x5A6530);
-    // RH_ScopedInstall(ReducePaletteSize, 0x5A6870);
-    // RH_ScopedInstall(CreateSkinnedClump, 0x5A69D0);
+    RH_ScopedInstall(InitPaletteOctTree, 0x5A5EB0, { .reversed = false });
+    RH_ScopedInstall(ShutdownPaletteOctTree, 0x5A5EE0, { .reversed = false });
+    RH_ScopedInstall(ReducePaletteOctTree, 0x5A5EF0, { .reversed = false });
+    RH_ScopedInstall(AddColour, 0x5A5F00, { .reversed = false });
+    RH_ScopedInstall(FillPalette, 0x5A5F30, { .reversed = false });
+    RH_ScopedInstall(FindNearestColour, 0x5A5F40, { .reversed = false });
+    RH_ScopedGlobalInstall(GetTextureFromTxdAndLoadNextTxd, 0x5A5F70, { .reversed = false });
+    RH_ScopedInstall(ConstructTextures, 0x5A6040, { .reversed = false });
+    RH_ScopedInstall(ConstructGeometryAndSkinArrays, 0x5A6530, { .reversed = false });
+    RH_ScopedInstall(ReducePaletteSize, 0x5A6870, { .reversed = false });
+    RH_ScopedInstall(CreateSkinnedClump, 0x5A69D0, { .reversed = false });
 }
 
 // inlined

@@ -6,13 +6,13 @@
 */
 #pragma once
 
-class CRope;
+#include "Rope.h"
 
 class CRopes {
 public:
     static constexpr auto MAX_NUM_ROPES{ 8u };
 
-    static CRope (&aRopes)[MAX_NUM_ROPES]; // Access using CRopes::GetRope()
+    static inline std::array<CRope, MAX_NUM_ROPES>& aRopes = *(std::array<CRope, MAX_NUM_ROPES>*)0xB768B8; // Access using CRopes::GetRope()
     static int32& PlayerControlsCrane;
     static uint32& m_nRopeIdCreationCounter;
 
@@ -28,12 +28,12 @@ public:
 
     static float FindPickupHeight(CEntity* entity);
     static int32 FindRope(uint32 id);
-    static bool  FindCoorsAlongRope(uint32 ropeId, float fCoorAlongRope, CVector* outPosn, CVector* a4);
+    static bool  FindCoorsAlongRope(uint32 ropeId, float fDistAlongRope, CVector* outPosn, CVector* outSpeed);
 
     static int32 CreateRopeForSwatPed(const CVector& startPos);
     static bool IsCarriedByRope(CPhysical* entity);
     static void SetSpeedOfTopNode(uint32 ropeId, CVector dirSpeed);
 
 public:
-    static inline CRope& GetRope(int32 index) { assert(index >= 0); return aRopes[index]; }
+    static inline CRope& GetRope(int32 index) { return aRopes[index]; }
 };

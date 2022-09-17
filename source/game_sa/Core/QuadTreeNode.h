@@ -74,8 +74,8 @@ public:
     bool LiesInside(const CRect& rect) const {
         return    m_Rect.left <= rect.right
                && m_Rect.right >= rect.left
-               && m_Rect.top <= rect.bottom
-               && m_Rect.bottom >= rect.top;
+               && m_Rect.bottom <= rect.top
+               && m_Rect.top >= rect.bottom;
     };
 };
 

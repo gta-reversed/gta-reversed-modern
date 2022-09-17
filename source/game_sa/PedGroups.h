@@ -32,7 +32,7 @@ public:
 
     static bool IsGroupLeader(CPed* ped);
 
-    static CPedGroup* GetPedsGroup(CPed* ped);
+    static CPedGroup* GetPedsGroup(const CPed* ped);
     static int32 GetGroupId(CPedGroup* pedGroup);
 
     static void Process();

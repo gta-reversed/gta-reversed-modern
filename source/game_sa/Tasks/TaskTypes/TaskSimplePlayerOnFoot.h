@@ -16,7 +16,7 @@ extern bool& gbUnknown_8D2FE8;
 
 class CPed;
 
-class CTaskSimplePlayerOnFoot : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimplePlayerOnFoot : public CTaskSimple {
 public:
     uint32   m_nAnimationBlockIndex;
     uint32   m_nFrameCounter;
@@ -30,9 +30,9 @@ public:
     CTaskSimplePlayerOnFoot();
     ~CTaskSimplePlayerOnFoot() override = default;
 
-    eTaskType GetTaskType() override { return TASK_SIMPLE_PLAYER_ON_FOOT; }               // 0x6857C0
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() override { return Type; } // 0x6857C0
     CTask* Clone() override { return new CTaskSimplePlayerOnFoot(); }                     // 0x68AFF0
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 
     void ProcessPlayerWeapon(CPlayerPed* player);
@@ -42,15 +42,23 @@ public:
     static void PlayerControlDucked(CPlayerPed* player);
     int32 PlayerControlZelda(CPlayerPed* player, bool bAvoidJumpingAndDucking);
 
+
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskSimplePlayerOnFoot* Constructor();
-    CTaskSimplePlayerOnFoot* Destructor();
+    // 0x685750
+    CTaskSimplePlayerOnFoot* Constructor() {
+        this->CTaskSimplePlayerOnFoot::CTaskSimplePlayerOnFoot();
+        return this;
+    }
 
-    bool ProcessPed_Reversed(CPed* ped);
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
+    // 0x68B0C0
+    CTaskSimplePlayerOnFoot* Destructor() {
+        this->CTaskSimplePlayerOnFoot::~CTaskSimplePlayerOnFoot();
+        return this;
+    }
+
 };
 
 VALIDATE_SIZE(CTaskSimplePlayerOnFoot, 0x1C);
