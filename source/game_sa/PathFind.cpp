@@ -450,3 +450,7 @@ bool CPathFind::Save() {
     }
     return true;
 }
+
+bool CPathFind::IsNodeAreaLoaded(const std::initializer_list<CNodeAddress>& addrs) const {
+    return rng::all_of(addrs, [this](auto&& addr) { return IsNodeAreaLoaded(addr); });
+}
