@@ -64,6 +64,9 @@ public:
     auto GetKeys() { return std::span{ m_MainKeyArray.m_data, m_MainKeyArray.m_size }; }
     auto GetMissionKeys() { return std::span{ m_MissionKeyArray.m_data, m_MissionKeyArray.m_size }; }
 
+    // NOTSA
+    auto& GetMissionName() const { return m_szMissionName; }
+
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

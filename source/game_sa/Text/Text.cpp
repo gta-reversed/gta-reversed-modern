@@ -234,7 +234,7 @@ void CText::LoadMissionText(const char* mission) {
 
     char tablName[8]{0};
     CFileMgr::Read(file, tablName, sizeof(tablName));
-    DEV_LOG("[CText]: Loaded a text table for mission: '%s'", tablName);
+    // DEV_LOG("[CText]: Loaded a text table for mission: '%s'", tablName);
     // RET_IGNORED(strncmp(tablName, mission, sizeof(tablName))); // ?
 
     uint32 offset = sizeof(uint16) * 2; // skip version and encoding
