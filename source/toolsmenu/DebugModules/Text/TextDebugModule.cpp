@@ -18,13 +18,13 @@ void ProcessImGui() {
             ImGui::PushID(&entry);
 
             ImGui::TableNextColumn();
-            ImGui::Text("%s", tabl);
+            ImGui::TextUnformatted(tabl);
 
             ImGui::TableNextColumn();
             ImGui::Text("%08X", entry.hash);
 
             ImGui::TableNextColumn();
-            ImGui::Text("%s", entry.string);
+            ImGui::TextUnformatted(entry.string);
 
             ImGui::PopID();
         };
