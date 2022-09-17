@@ -38,7 +38,7 @@ public:
     static bool PointInTriangle(const CVector& point, const CVector* triPoints);
     static float DistToLineSqr(const CVector* lineStart, const CVector* lineEnd, const CVector* point);
     static float DistToMathematicalLine(const CVector* lineStart, const CVector* lineEnd, const CVector* point);
-    static float DistToMathematicalLine2D(float lineStartX, float lineStartY, float lineEndX, float lineEndY, float pointX, float pointY);
+    static float DistToMathematicalLine2D(float lineStartX, float lineStartY, float lineEndX, float lineDirY, float pointDirX, float pointY);
     static float DistAlongLine2D(float lineX, float lineY, float lineDirX, float lineDirY, float pointX, float pointY);
     static bool ProcessLineSphere(const CColLine& line, const CColSphere& sphere, CColPoint& colPoint, float& depth);
     static bool TestLineBox_DW(const CColLine& line, const CBox& box);
@@ -86,6 +86,11 @@ public:
     static bool CheckCameraCollisionObjects(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5);
     static bool BuildCacheOfCameraCollision(CColSphere* sphere1, CColSphere* sphere2);
     static bool CameraConeCastVsWorldCollision(CColSphere* sphere1, CColSphere* sphere2, float* arg2, float arg3);
+
+    /// @notsa
+    static float DistToMathematicalLine2D(CVector2D lineStart, CVector2D lineDir, CVector2D point) {
+        return DistToMathematicalLine2D(lineStart.x, lineStart.y, lineDir.x, lineDir.y, point.x, point.y);
+    }
 };
 
 void CalculateColPointInsideBox(const CBox& box, const CVector& point, CColPoint& colPoint);

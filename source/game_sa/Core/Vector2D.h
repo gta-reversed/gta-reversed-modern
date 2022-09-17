@@ -106,6 +106,28 @@ public:
     }
 
     /*!
+    * @notsa
+    * 
+    * @brief Calculate the cross product of *this and `lhs`
+    * 
+    * @param lhs The vector to calculate the cross product with
+    *
+    * @return Magnitude of the vector that would result from a regular 3D cross product of the input vectors taking their Z values implicitly as 0.
+    *
+    * Returns the signed magnitude of the vector that would result
+    * from a regular 3D cross product of the input vectors,
+    * taking their Z values implicitly as 0
+    * (i.e. treating the 2D space as a plane in the 3D space).
+    * The 3D cross product will be perpendicular to that plane,
+    * and thus have 0 X & Y components
+    * (thus the scalar returned is the Z value of the 3D cross product vector).
+    * Copied from (with 1 change): https://stackoverflow.com/a/243977
+    */
+    auto Cross(const CVector2D& lhs) const {
+        return x * lhs.y - y * lhs.x;
+    }
+
+    /*!
     * @return A copy of this vector projected onto the input vector, which is assumed to be unit length.
     */
     CVector2D ProjectOnToNormal(const CVector2D& projectOnTo) const {

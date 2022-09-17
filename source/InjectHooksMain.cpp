@@ -118,6 +118,7 @@
 #include "Birds.h"
 #include "Hud.h"
 #include "CarFXRenderer.h"
+#include "Curves.h"
 
 // Tasks
 #include "TaskComplexSitDownThenIdleThenStandUp.h"
@@ -417,6 +418,7 @@ void InjectHooksMain() {
     CRopes::InjectHooks();
     CWeaponInfo::InjectHooks();
     CCurrentVehicle::InjectHooks();
+    CCurves::InjectHooks();
     CPlaceName::InjectHooks();
     CUserDisplay::InjectHooks();
     COnscreenTimer::InjectHooks();
