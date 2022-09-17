@@ -44,6 +44,12 @@ VALIDATE_SIZE(CForbiddenArea, 0x1C);
 
 class CCarPathLinkAddress {
 public:
+    CCarPathLinkAddress(size_t area, size_t nodeId) :
+        m_wCarPathLinkId{ (uint16)nodeId },
+        m_wAreaId{ (uint16)area }
+    {
+    }
+
     CCarPathLinkAddress() {
         m_wCarPathLinkId = -1;
         m_wAreaId = -1;
@@ -89,7 +95,7 @@ public:
     struct {
         int16 x;
         int16 y;
-    } m_posn;
+    } m_posn; /// Fixed-point ("compressed") position
     CNodeAddress m_address;
     int8         m_nDirX;
     int8         m_nDirY;
@@ -100,7 +106,7 @@ public:
     uint8        unk1 : 1;
 
     uint16 m_nTrafficLightState : 2; // 1 - North-South, 2 - West-East cycle, enum: eTrafficLightsDirection
-    uint16 m_bTrainCrossing : 1;
+    uint16 m_bridgeLights : 1;
 
     float OneWayLaneOffset() const {
         if (m_nNumLeftLanes) {
@@ -110,6 +116,11 @@ public:
             return 0.5f - (float)m_nPathNodeWidth * 0.011574074f / 2.f;
         }
         return 0.5 - (float)m_nNumLeftLanes / 2.f;
+    }
+
+    /// Get uncompressed world position
+    auto GetNodeCoors() const {
+        return CVector2D{ (float)m_posn.x, (float)m_posn.y } / 8.f;
     }
 };
 VALIDATE_SIZE(CCarPathLink, 0xE);
@@ -163,13 +174,7 @@ class CPathFind {
 public:
     CNodeAddress           m_Info; // 0x0
     CPathNode*             m_apNodesSearchLists[512]; // 0x4
-    union {
-        CPathNode* m_pPathNodes[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS]; // 0x804
-        struct {
-            CPathNode* m_mapPathNodes[NUM_PATH_MAP_AREA_X][NUM_PATH_MAP_AREA_Y];
-            CPathNode* m_interiorPathNodes[NUM_PATH_INTERIOR_AREAS];
-        };
-    };
+    CPathNode*             m_pPathNodes[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS]; // 0x804
     // Use CPathFind::GetCarPathLink to access
     CCarPathLink*          m_pNaviNodes[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS]; // 0x924
     CNodeAddress*          m_pNodeLinks[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS]; // 0xA44
@@ -316,7 +321,7 @@ public:
     * @notsa
     * @return The path nodes in the area or null if the area isn't loaded.
     */
-    CPathNode* GetPathNodesInArea(size_t areaId);
+    CPathNode* GetPathNodesInArea(size_t areaId) const { return m_pPathNodes[areaId]; }
 
     /*!
     * @notsa
@@ -326,14 +331,20 @@ public:
     *
     * @copyreturn GetPathNodesInArea(size_t)
     */
-    CPathNode* GetPathNodesInArea(size_t x, size_t y) { return GetPathNodesInArea(y * NUM_PATH_MAP_AREA_Y + x); }
+    CPathNode* GetPathNodesInArea(size_t x, size_t y) const { return GetPathNodesInArea(y * NUM_PATH_MAP_AREA_Y + x); }
+
+    /*!
+    * @notsa
+    * @return Whenever the area is loaded
+    */
+    bool IsAreaLoaded(size_t areaId) const { return GetPathNodesInArea(areaId) != nullptr; }
 
     /*!
     * @addr 0x420AA0
     * @brief Check if the node's area is loaded
     * @param node Must have a valid area
     */
-    bool IsAreaNodesAvailable(CNodeAddress node) const { assert(node.IsAreaValid()); return m_pPathNodes[node.m_wAreaId]; }
+    bool IsAreaNodesAvailable(CNodeAddress node) const { assert(node.IsAreaValid()); return IsAreaLoaded(node.m_wAreaId); }
 
     bool FindNodeCoorsForScript(CVector& outPos, CNodeAddress addr);
 

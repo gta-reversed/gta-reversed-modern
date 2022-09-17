@@ -95,7 +95,7 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(AreNodesLoadedForArea, 0x44DD10);
     //RH_ScopedInstall(ReleaseRequestedNodes, 0x44DD00);
     //RH_ScopedInstall(SetPathsNeededAtPosition, 0x44DCD0);
-    //RH_ScopedInstall(SetLinksBridgeLights, 0x44D960);
+    RH_ScopedInstall(SetLinksBridgeLights, 0x44D960);
     //RH_ScopedInstall(Load, 0x5D3500);
 }
 
@@ -272,8 +272,21 @@ void CPathFind::DoPathSearch(
                                         maxUnkLimit, oneSideOnly, forbiddenNodeAddr, includeNodesWithoutLinks, waterPath);
 }
 
-void CPathFind::SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, float fYMax, bool bTrainCrossing) {
-    return plugin::CallMethod<0x44D960, CPathFind*, float, float, float, float, bool>(this, fXMin, fXMax, fYMin, fYMax, bTrainCrossing);
+void CPathFind::SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, float fYMax, bool value) {
+    const auto areaRect = CRect{ {fXMax, fYMax}, {fXMin, fYMin} };
+
+    for (auto areaId = 0u; areaId < NUM_PATH_MAP_AREAS; areaId++) {
+        if (!IsAreaLoaded(areaId)) {
+            continue;
+        }
+
+        for (auto n = 0u; n < m_anNumCarPathLinks[areaId]; n++) {
+            auto& node = GetCarPathLink({ areaId, n });
+            if (areaRect.IsPointInside(node.GetNodeCoors())) {
+                node.m_bridgeLights = value;
+            }
+        }
+    }
 }
 
 // 0x4505E0
@@ -311,10 +324,6 @@ void CPathFind::SwitchRoadsOffInAreaForOneRegion(float xMin, float xMax, float y
 CPathNode* CPathFind::GetPathNode(CNodeAddress address) {
     assert(address.IsValid());
     return &m_pPathNodes[address.m_wAreaId][address.m_wNodeId];
-}
-
-CPathNode* CPathFind::GetPathNodesInArea(size_t areaId) {
-    return m_pPathNodes[areaId];
 }
 
 // NOTSA
