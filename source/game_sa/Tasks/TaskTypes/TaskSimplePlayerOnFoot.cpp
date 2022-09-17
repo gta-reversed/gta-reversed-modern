@@ -18,6 +18,28 @@ uint32& gLastTouchTimeDelta = *reinterpret_cast<uint32*>(0xC19664);
 float& gDuckAnimBlendData = *reinterpret_cast<float*>(0x8D2FF0); // 4.0f
 bool& gbUnknown_8D2FE8 = *reinterpret_cast<bool*>(0x8D2FE8); // default value true; also always true
 
+void CTaskSimplePlayerOnFoot::InjectHooks() {
+    RH_ScopedVirtualClass(CTaskSimplePlayerOnFoot, 0x8708ec, 9);
+    RH_ScopedCategory("Tasks/TaskTypes");
+
+    RH_ScopedInstall(Constructor, 0x685750);
+    RH_ScopedInstall(Destructor, 0x6857D0);
+
+
+    RH_ScopedInstall(PlayerControlZeldaWeapon, 0x687C20);
+    RH_ScopedInstall(PlayerControlDucked, 0x687F30);
+
+    RH_ScopedInstall(ProcessPlayerWeapon, 0x6859A0);
+    RH_ScopedInstall(PlayIdleAnimations, 0x6872C0);
+    RH_ScopedInstall(PlayerControlFighter, 0x687530);
+    RH_ScopedInstall(PlayerControlZelda, 0x6883D0);
+
+    RH_ScopedVMTInstall(Clone, 0x68AFF0);
+    RH_ScopedVMTInstall(GetTaskType, 0x6857C0);
+    RH_ScopedVMTInstall(MakeAbortable, 0x6857E0);
+    RH_ScopedVMTInstall(ProcessPed, 0x688810);
+}
+
 // 0x685750
 CTaskSimplePlayerOnFoot::CTaskSimplePlayerOnFoot() : CTaskSimple() {
     m_nAnimationBlockIndex = CAnimManager::GetAnimationBlockIndex("playidles");
@@ -29,72 +51,80 @@ CTaskSimplePlayerOnFoot::CTaskSimplePlayerOnFoot() : CTaskSimple() {
 
 // 0x6857E0
 bool CTaskSimplePlayerOnFoot::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    // return plugin::CallMethodAndReturn<bool, 0x6857E0, CTaskSimplePlayerOnFoot*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
-
-    bool abortable = false;
-    auto eventDamage = static_cast<const CEventDamage*>(event);
-
-    if (priority == ABORT_PRIORITY_IMMEDIATE) {
+    // Try making abortion possible, if unsuccessful it returns false, otherwise proceeds
+    switch (priority) {
+    case ABORT_PRIORITY_IMMEDIATE: {
         ped->m_pPlayerData->m_fMoveBlendRatio = 0.0f;
         CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.0f);
-        abortable = true;
-        goto LABEL_15;
+        break;
     }
-
-    if (priority == ABORT_PRIORITY_URGENT) {
-        if (!ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK))
-            goto LABEL_12;
-
+    case ABORT_PRIORITY_URGENT: {
+        if (ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
+            break;
+        }
+            
         if (event) {
-            if (event->GetEventPriority() < 61)
-                return false;
+            if (event->GetEventPriority() <= 60) {
+                break;
+            }
 
             if (event->GetEventType() == EVENT_DAMAGE) {
-                auto secondary = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK);
-                if (secondary->GetTaskType() == TASK_SIMPLE_THROW_PROJECTILE || eventDamage->m_bKnockOffPed) {
+                if (static_cast<const CEventDamage*>(event)->m_bKnockOffPed || ped->GetIntelligence()->GetTaskThrow()) {
                     ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)->MakeAbortable(ped, ABORT_PRIORITY_URGENT, event);
                 }
-                goto LABEL_12;
+                break;
             }
         }
 
-        if (!ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
-        LABEL_12:
-            abortable = true;
-            goto LABEL_15;
+        if (const auto attack = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
+            return attack->MakeAbortable(ped, ABORT_PRIORITY_URGENT, event);
         }
 
-        abortable = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)->MakeAbortable(ped, ABORT_PRIORITY_URGENT, event);
-        if (abortable) {
-        LABEL_15:
-            if (
-                (ped->m_pTargetedObject || (ped->m_pPlayerData->m_nPlayerFlags & 8) != 0 || TheCamera.Using1stPersonWeaponMode())
-                && event && (event->GetEventType() == EVENT_DAMAGE || event->GetEventType() == EVENT_IN_WATER)
-            ) {
-                if (   event->GetEventType() != EVENT_DAMAGE
-                    || eventDamage->m_damageResponse.m_bHealthZero
-                    && eventDamage->m_bAddToEventGroup
-                    || !ped->m_pAttachedTo
-                    && (
-                         eventDamage->m_bKnockOffPed
-                      || eventDamage->m_weaponType > WEAPON_LAST_WEAPON
-                      && eventDamage->m_weaponType != WEAPON_UZI_DRIVEBY
-                    )
-                ) {
-                    TheCamera.ClearPlayerWeaponMode();
-                    CWeaponEffects::ClearCrossHair(ped->m_nPedType);
-                    CEntity::ClearReference(ped->m_pTargetedObject);
+        return false;
+    }
+    default:
+        return false;
+    }
+
+    // In some specific secnarios clear weapon mode
+    if (   (ped->m_pTargetedObject || (ped->m_pPlayerData->m_nPlayerFlags & 8) != 0 || TheCamera.Using1stPersonWeaponMode())
+        && event
+    ) {
+        if ([&, this] {
+            switch (event->GetEventType()) {
+            case EVENT_DAMAGE: {
+                const auto dmg = static_cast<const CEventDamage*>(event);
+                if (dmg->m_damageResponse.m_bHealthZero && dmg->m_bAddToEventGroup) {
+                    return true;
                 }
+                if (!ped->m_pAttachedTo) {
+                    if (dmg->m_bKnockOffPed) {
+                        return true;
+                    }
+
+                    if (dmg->m_weaponType > WEAPON_LAST_WEAPON && dmg->m_weaponType != WEAPON_UZI_DRIVEBY) {
+                        return true;
+                    }
+                }
+                return false;
             }
+            case EVENT_IN_WATER:
+                return true;
+            }
+            return false;
+        }()) {
+            TheCamera.ClearPlayerWeaponMode();
+            CWeaponEffects::ClearCrossHair(ped->m_nPedType);
+            CEntity::ClearReference(ped->m_pTargetedObject);
         }
     }
-    return abortable;
+
+    // This is only reached if switch (at the beginning) didn't `return false`
+    return true;
 }
 
 // 0x688810
 bool CTaskSimplePlayerOnFoot::ProcessPed(CPed* ped) {
-    // return plugin::CallMethodAndReturn<bool, 0x688810, CTaskSimplePlayerOnFoot*, CPed*>(this, ped);
-
     auto* player = static_cast<CPlayerPed*>(ped);
 
     if (player->GetPadFromPlayer()) {
@@ -135,9 +165,6 @@ bool CTaskSimplePlayerOnFoot::ProcessPed(CPed* ped) {
 // 0x6859A0
 void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
 {
-    return plugin::CallMethod<0x6859A0, CTaskSimplePlayerOnFoot*, CPlayerPed*>(this, player);
-
-    /*
     CPlayerPedData* playerData = player->m_pPlayerData;
     CPedIntelligence* intelligence = player->GetIntelligence();
     CTaskManager* taskManager = &player->GetTaskManager();
@@ -154,10 +181,10 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
 
     player->m_nWeaponAccuracy = weaponInfo->flags.bCanAim ? 95 : 100;
 
-    if (    pad->WeaponJustDown(player)
-        && (player->m_pTargetedObject || CCamera::m_bUseMouse3rdPerson && player->m_p3rdPersonMouseTarget)
-    ) {
-        player->PlayerHasJustAttackedSomeone();
+    if (pad->WeaponJustDown(player)) {
+        if (player->m_pTargetedObject || CCamera::m_bUseMouse3rdPerson && player->m_p3rdPersonMouseTarget) {
+            player->PlayerHasJustAttackedSomeone();
+        }
     }
 
     if (player->m_pFire || !weaponInfo->flags.b1stPerson) {
@@ -168,8 +195,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
     } else {
         if (   pad->GetEnterTargeting()
             || TheCamera.m_bJustJumpedOutOf1stPersonBecauseOfTarget
-            || pad->GetTarget()
-            && m_nFrameCounter < (CTimer::GetFrameCounter() - 1)
+            || (pad->GetTarget() && m_nFrameCounter < (CTimer::GetFrameCounter() - 1))
         ) {
             auto weaponMode = eCamMode::MODE_NONE;
             switch (weaponType) {
@@ -215,49 +241,49 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
     }
 
     CTaskSimpleUseGun* newSimpleUseGunTask = nullptr;
-    int32 gunCommand[4] = {0};
+    int32 gunCommand = 0;
 
-    if (weaponInfo->m_nWeaponFire == WEAPON_FIRE_MELEE) {
+    switch (weaponInfo->m_nWeaponFire) {
+    case WEAPON_FIRE_MELEE: {
         int32 fightCommand = 0;
-        gunCommand[0] = 0;
+        gunCommand = 0;
 
-        if (!player->m_pTargetedObject && !pad->GetTarget() && !taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
+        if (   !player->m_pTargetedObject
+            && !pad->GetTarget()
+            && !taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)
+        ) {
             if (pad->MeleeAttackJustDown(false)) {
                 fightCommand = 11;
-                gunCommand[0] = 11;
+                gunCommand = 11;
             }
 
-            CAnimBlendAssociation* animAssoc = RpAnimBlendClumpGetAssociation(player->m_pRwClump, ANIM_ID_KILL_PARTIAL);
-            if (animAssoc) {
-                animAssoc->m_fBlendAmount = -2.0f;
+            if (auto anim = RpAnimBlendClumpGetAssociation(player->m_pRwClump, ANIM_ID_KILL_PARTIAL)) {
+                anim->m_fBlendAmount = -2.0f;
             }
 
-            if (fightCommand == 0) {
+            switch (fightCommand) {
+            case 0: {
             HANDLE_FIGHTING_TASK_IF_EXISTS:
-                if (intelligence->GetTaskFighting()) {
-                    auto taskSimpleFight = static_cast<CTaskSimpleFight*>(taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK));
-                    if (player->m_nMoveState == PEDMOVE_STILL && pad->GetSprint()) {
-                        taskSimpleFight->ControlFight(player->m_pTargetedObject, 15);
-                    } else {
-                        if (playerData->m_nChosenWeapon == player->m_nActiveWeaponSlot) {
-                            taskSimpleFight->ControlFight(player->m_pTargetedObject, 0);
-                        } else {
-                            taskSimpleFight->ControlFight(player->m_pTargetedObject, 1);
-                        }
-                    }
+                if (const auto fight = intelligence->GetTaskFighting()) {
+                    fight->ControlFight(
+                        player->m_pTargetedObject,
+                        player->m_nMoveState == PEDMOVE_STILL && pad->GetSprint()
+                            ? 15
+                            : playerData->m_nChosenWeapon == player->m_nActiveWeaponSlot 
+                                ? 0
+                                : 1
+                    );
                 }
-                goto PED_WEAPON_AIMING_CODE;
+                break;
             }
-
-            // fightCommand cannot be 19 here, so we don't need the code here.
-            if (fightCommand == 19) {
+            case 19: {
+                // It cannot be 19 here, so we don't need the code here.
                 // Just in case, if this executes somehow, then we probably need to add the code.
                 // But It won't.
-                assert(fightCommand != 19);
                 // LAB_00685c62:
+                NOTSA_UNREACHABLE();
             }
-
-            goto EXECUTE_MELEE_ATTACK;
+            }
         } else {
             CPed* targetEntity = nullptr;
             if (!player->m_pTargetedObject) {
@@ -271,7 +297,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
             }
 
             CAnimBlendAssociation* animAssociation = nullptr;
-            int32 animGroupID = weaponInfo->m_eAnimGroup;
+            const auto animGroupID = weaponInfo->m_eAnimGroup;
             if (   targetEntity
                 && pad->GetTarget()
                 && playerData->m_fMoveBlendRatio < 1.9f
@@ -306,7 +332,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
             uint8 meleeAttackJustDown = pad->MeleeAttackJustDown(bCheckButtonCircleStateOnly);
             if (meleeAttackJustDown && animAssociation && animAssociation->m_fBlendAmount > 0.5f && targetEntity && intelligence->TestForStealthKill(targetEntity, true)) {
                 auto* pTaskSimpleStealthKill = new CTaskSimpleStealthKill(true, targetEntity, weaponInfo->m_eAnimGroup);
-                taskManager->SetTask(pTaskSimpleStealthKill, 3, false);
+                taskManager->SetTask(pTaskSimpleStealthKill, TASK_PRIMARY_PRIMARY, false);
 
                 eWeaponType activeWeaponType = player->GetActiveWeapon().m_nType;
                 CPedDamageResponseCalculator damageCalculator(player, 0.0f, activeWeaponType, PED_PIECE_TORSO, false);
@@ -322,22 +348,22 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
                 switch (meleeAttackJustDown) {
                 case 1: {
                     fightCommand = 11;
-                    gunCommand[0] = fightCommand;
+                    gunCommand = fightCommand;
                     break;
                 }
                 case 4: {
-                    if (!CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_nType, eWeaponSkill::WEAPSKILL_STD)->flags.bHeavy) {
+                    if (!CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_nType, eWeaponSkill::STD)->flags.bHeavy) {
                         fightCommand = 12;
-                        gunCommand[0] = 12;
+                        gunCommand = 12;
                     } else {
                         fightCommand = 11;
-                        gunCommand[0] = fightCommand;
+                        gunCommand = fightCommand;
                     }
                     break;
                 }
                 case 3: {
                     fightCommand = 2;
-                    gunCommand[0] = fightCommand;
+                    gunCommand = fightCommand;
                     break;
                 }
                 default: {
@@ -346,140 +372,149 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
                         && taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)
                     ) {
                         fightCommand = 11;
-                        gunCommand[0] = fightCommand;
+                        gunCommand = fightCommand;
                     } else {
                         goto HANDLE_FIGHTING_TASK_IF_EXISTS;
                     }
                 }
-                };
-
-            EXECUTE_MELEE_ATTACK:
-                if (taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
-                    if (intelligence->GetTaskFighting()) {
-                        auto* taskSimpleFight = static_cast<CTaskSimpleFight*>(taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK));
-                        taskSimpleFight->ControlFight(player->m_pTargetedObject, gunCommand[0]);
-                    }
-                } else {
-                    auto* taskSimpleFight = new CTaskSimpleFight(player->m_pTargetedObject, fightCommand, 2000u);
-                    taskManager->SetTaskSecondary(taskSimpleFight, TASK_SECONDARY_ATTACK);
                 }
             }
-        }
-    } else {
-        if (weaponInfo->m_nWeaponFire == WEAPON_FIRE_USE) {
-            if (pad->WeaponJustDown(nullptr)) {
-                uint8 activeWeaponSlot = player->m_nActiveWeaponSlot;
-                weaponType = player->m_aWeapons[activeWeaponSlot].m_nType;
-                CWeapon* playerWeapon = &player->m_aWeapons[activeWeaponSlot];
-                if (weaponType == WEAPON_DETONATOR) {
-                    playerWeapon->Fire(player, &player->GetPosition(), &player->GetPosition(), nullptr, nullptr, nullptr);
-                } else if (weaponType > WEAPON_CAMERA && weaponType <= WEAPON_INFRARED && !taskManager->GetTaskPrimary(TASK_PRIMARY_PRIMARY)) {
-                    auto* pCTaskComplexUseGoggles = new CTaskComplexUseGoggles();
-                    taskManager->SetTask(pCTaskComplexUseGoggles, 3, false);
-                    player->m_pPlayerData->m_bDontAllowWeaponChange = true;
-                }
-            }
-        } else {
-            if (!pad->GetWeapon(player)) {
-                if (intelligence->GetTaskThrow()) {
-                    auto pTaskSimpleThrowProjectile = static_cast<CTaskSimpleThrowProjectile*>(taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK));
-                    pTaskSimpleThrowProjectile->ControlThrow(true, nullptr, nullptr);
+            if (taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
+                if (intelligence->GetTaskFighting()) {
+                    auto* taskSimpleFight = static_cast<CTaskSimpleFight*>(taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK));
+                    taskSimpleFight->ControlFight(player->m_pTargetedObject, gunCommand);
                 }
             } else {
-                uint32 nWeaponFire = weaponInfo->m_nWeaponFire;
-                if (player->m_nMoveState != PEDMOVE_SPRINT && playerData->m_nChosenWeapon == player->m_nActiveWeaponSlot && (nWeaponFire - 1) < 4) {
-                    switch (nWeaponFire) {
-                    case WEAPON_FIRE_INSTANT_HIT:
-                    case WEAPON_FIRE_AREA_EFFECT: {
-                        CEntity* targetedObject = player->m_pTargetedObject;
-                        gunCommand[0] = 2;
-                        if (CTaskSimpleUseGun::RequirePistolWhip(player, targetedObject)) {
-                            gunCommand[0] = 5;
-                        } else if (player->GetActiveWeapon().m_nState == 2) {
-                            if (!pad->GetTarget() && !targetedObject && !playerData->m_bFreeAiming) {
-                                break;
-                            }
-                            gunCommand[0] = 1;
-                        }
-                        CTask* secondaryTask = taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
-                        if (secondaryTask) {
-                            if (secondaryTask->GetTaskType() == TASK_SIMPLE_USE_GUN) {
-                                CTaskSimpleUseGun* taskUseGun = intelligence->GetTaskUseGun();
-                                if (taskUseGun) {
-                                    taskUseGun->ControlGun(player, targetedObject, gunCommand[0]);
-                                }
-                            } else {
-                                secondaryTask->MakeAbortable(player, ABORT_PRIORITY_URGENT, nullptr);
-                            }
-                        } else {
-                            auto* taskUseGun = new CTaskSimpleUseGun(targetedObject, CVector(0.0f, 0.0f, 0.f), gunCommand[0], 1, false);
-                            taskManager->SetTaskSecondary(taskUseGun, 0);
-                            player->m_pPlayerData->m_fAttackButtonCounter = 0;
-                        }
-                        if (!pad->GetTarget()) {
-                            if (player->GetActiveWeapon().m_nType == WEAPON_EXTINGUISHER) {
-                                playerData->m_fLookPitch = -CWeapon::ms_fExtinguisherAimAngle;
-                            } else {
-                                playerData->m_fLookPitch = 0.0f;
-                            }
-                        }
-                        break;
-                    }
-                    case WEAPON_FIRE_PROJECTILE: {
-                        uint8 activeWeaponSlot = player->m_nActiveWeaponSlot;
-                        CWeapon* activeWeapon = &player->m_aWeapons[activeWeaponSlot];
-                        if (activeWeapon->m_nType == WEAPON_RLAUNCHER || activeWeapon->m_nType == WEAPON_RLAUNCHER_HS) {
-                            gunCommand[0] = 2;
-                            if (activeWeapon->m_nState == WEAPONSTATE_RELOADING) {
-                                gunCommand[0] = 1;
-                            }
-                            CTask* secondaryTask = taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
-                            if (secondaryTask) {
-                                if (secondaryTask->GetTaskType() == TASK_SIMPLE_USE_GUN) {
-                                    if (intelligence->GetTaskUseGun()) {
-                                        auto* taskUseGun = static_cast<CTaskSimpleUseGun*>(secondaryTask);
-                                        taskUseGun->ControlGun(player, player->m_pTargetedObject, gunCommand[0]);
-                                    }
-                                } else {
-                                    taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)->MakeAbortable(player, ABORT_PRIORITY_URGENT, nullptr);
-                                }
-                            } else {
-                                auto* taskUseGun = new CTaskSimpleUseGun(player->m_pTargetedObject, CVector(0.0f, 0.0f, 0.0f), gunCommand[0], 1, false);
-                                taskManager->SetTaskSecondary(taskUseGun, 0);
-                            }
-                        } else {
-                            if (taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK) || !pad->WeaponJustDown(player)) {
-                                CTask* secondaryTask = taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
-                                if (secondaryTask && secondaryTask->GetTaskType() != TASK_SIMPLE_THROW) {
-                                    secondaryTask->MakeAbortable(player, ABORT_PRIORITY_URGENT, nullptr);
-                                } else if (intelligence->GetTaskThrow()) {
-                                    auto pTaskSimpleThrowProjectile = static_cast<CTaskSimpleThrowProjectile*>(secondaryTask);
-                                    pTaskSimpleThrowProjectile->ControlThrow(pad->WeaponJustDown(player), nullptr, nullptr);
-                                }
-                            } else {
-                                auto* pTaskSimpleThrowProjectile = new CTaskSimpleThrowProjectile(nullptr, CVector(0.0f, 0.0f, 0.0f));
-                                taskManager->SetTaskSecondary(pTaskSimpleThrowProjectile, 0);
-                            }
-                        }
-                        break;
-                    }
-                    case WEAPON_FIRE_CAMERA: {
-                        uint8 activeWeaponSlot = player->m_nActiveWeaponSlot;
-                        CWeapon* activeWeapon = &player->m_aWeapons[activeWeaponSlot];
-                        if (CCamera::GetActiveCamera().m_nMode == MODE_CAMERA && CTimer::GetTimeInMS() > activeWeapon->m_nTimeForNextShot) {
-                            CVector firingPoint(0.0f, 0.0f, 0.6f);
-                            CVector outputFiringPoint = *player->m_matrix * firingPoint;
-                            activeWeapon->Fire(player, &outputFiringPoint, nullptr, nullptr, nullptr, nullptr);
-                        }
-                        break;
-                    }
-                    };
-                }
+                auto* taskSimpleFight = new CTaskSimpleFight(player->m_pTargetedObject, fightCommand, 2000u);
+                taskManager->SetTaskSecondary(taskSimpleFight, TASK_SECONDARY_ATTACK);
             }
         }
+        break;
     }
+    case WEAPON_FIRE_USE: {
+        if (pad->WeaponJustDown(nullptr)) {
+            uint8 activeWeaponSlot = player->m_nActiveWeaponSlot;
+            weaponType = player->m_aWeapons[activeWeaponSlot].m_nType;
+            CWeapon* playerWeapon = &player->m_aWeapons[activeWeaponSlot];
+            if (weaponType == WEAPON_DETONATOR) {
+                playerWeapon->Fire(player, &player->GetPosition(), &player->GetPosition(), nullptr, nullptr, nullptr);
+            } else if (weaponType > WEAPON_CAMERA && weaponType <= WEAPON_INFRARED && !taskManager->GetTaskPrimary(TASK_PRIMARY_PRIMARY)) {
+                auto* pCTaskComplexUseGoggles = new CTaskComplexUseGoggles();
+                taskManager->SetTask(pCTaskComplexUseGoggles, TASK_PRIMARY_PRIMARY, false);
+                player->m_pPlayerData->m_bDontAllowWeaponChange = true;
+            }
+        }
+        break;
+    }
+    default: {
+        if (!pad->GetWeapon(player)) {
+            if (intelligence->GetTaskThrow()) {
+                auto pTaskSimpleThrowProjectile = static_cast<CTaskSimpleThrowProjectile*>(taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK));
+                pTaskSimpleThrowProjectile->ControlThrow(true, nullptr, nullptr);
+            }
+        } else {
+            uint32 nWeaponFire = weaponInfo->m_nWeaponFire;
+            if (player->m_nMoveState == PEDMOVE_SPRINT) {
+                break;
+            }
 
-PED_WEAPON_AIMING_CODE:
+            if (playerData->m_nChosenWeapon != player->m_nActiveWeaponSlot || (nWeaponFire - 1) >= 4) {
+                break;
+            }
+
+            switch (nWeaponFire) {
+            case WEAPON_FIRE_INSTANT_HIT:
+            case WEAPON_FIRE_AREA_EFFECT: {
+                CEntity* targetedObject = player->m_pTargetedObject;
+                gunCommand = 2;
+                if (CTaskSimpleUseGun::RequirePistolWhip(player, targetedObject)) {
+                    gunCommand = 5;
+                } else if (player->GetActiveWeapon().m_nState == 2) {
+                    if (!pad->GetTarget() && !targetedObject && !playerData->m_bFreeAiming) {
+                        break;
+                    }
+                    gunCommand = 1;
+                }
+                CTask* secondaryTask = taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
+                if (secondaryTask) {
+                    if (secondaryTask->GetTaskType() == TASK_SIMPLE_USE_GUN) {
+                        CTaskSimpleUseGun* taskUseGun = intelligence->GetTaskUseGun();
+                        if (taskUseGun) {
+                            taskUseGun->ControlGun(player, targetedObject, gunCommand);
+                        }
+                    } else {
+                        secondaryTask->MakeAbortable(player, ABORT_PRIORITY_URGENT, nullptr);
+                    }
+                } else {
+                    auto* taskUseGun = new CTaskSimpleUseGun(targetedObject, CVector(0.0f, 0.0f, 0.f), gunCommand, 1, false);
+                    taskManager->SetTaskSecondary(taskUseGun, TASK_SECONDARY_ATTACK);
+                    player->m_pPlayerData->m_fAttackButtonCounter = 0;
+                }
+                if (!pad->GetTarget()) {
+                    if (player->GetActiveWeapon().m_nType == WEAPON_EXTINGUISHER) {
+                        playerData->m_fLookPitch = -CWeapon::ms_fExtinguisherAimAngle;
+                    } else {
+                        playerData->m_fLookPitch = 0.0f;
+                    }
+                }
+                break;
+            }
+            case WEAPON_FIRE_PROJECTILE: {
+                uint8 activeWeaponSlot = player->m_nActiveWeaponSlot;
+                CWeapon* activeWeapon = &player->m_aWeapons[activeWeaponSlot];
+                if (activeWeapon->m_nType == WEAPON_RLAUNCHER || activeWeapon->m_nType == WEAPON_RLAUNCHER_HS) {
+                    gunCommand = 2;
+                    if (activeWeapon->m_nState == WEAPONSTATE_RELOADING) {
+                        gunCommand = 1;
+                    }
+
+                    CTask* secondaryTask = taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
+                    if (secondaryTask) {
+                        if (secondaryTask->GetTaskType() == TASK_SIMPLE_USE_GUN) {
+                            if (intelligence->GetTaskUseGun()) {
+                                auto* taskUseGun = static_cast<CTaskSimpleUseGun*>(secondaryTask);
+                                taskUseGun->ControlGun(player, player->m_pTargetedObject, gunCommand);
+                            }
+                        } else {
+                            taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)->MakeAbortable(player, ABORT_PRIORITY_URGENT, nullptr);
+                        }
+                    } else {
+                        auto* taskUseGun = new CTaskSimpleUseGun(player->m_pTargetedObject, CVector(0.0f, 0.0f, 0.0f), gunCommand, 1, false);
+                        taskManager->SetTaskSecondary(taskUseGun, TASK_SECONDARY_ATTACK);
+                    }
+                } else {
+                    if (taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK) || !pad->WeaponJustDown(player)) {
+                        CTask* secondaryTask = taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
+                        if (secondaryTask && secondaryTask->GetTaskType() != TASK_SIMPLE_THROW_PROJECTILE) {
+                            secondaryTask->MakeAbortable(player, ABORT_PRIORITY_URGENT, nullptr);
+                        } else if (intelligence->GetTaskThrow()) {
+                            auto pTaskSimpleThrowProjectile = static_cast<CTaskSimpleThrowProjectile*>(secondaryTask);
+                            pTaskSimpleThrowProjectile->ControlThrow(pad->WeaponJustDown(player), nullptr, nullptr);
+                        }
+                    } else {
+                        taskManager->SetTaskSecondary(
+                            new CTaskSimpleThrowProjectile(nullptr, CVector(0.0f, 0.0f, 0.0f)),
+                            TASK_SECONDARY_ATTACK
+                        );
+                    }
+                }
+                break;
+            }
+            case WEAPON_FIRE_CAMERA: {
+                uint8 activeWeaponSlot = player->m_nActiveWeaponSlot;
+                CWeapon* activeWeapon = &player->m_aWeapons[activeWeaponSlot];
+                if (CCamera::GetActiveCamera().m_nMode == MODE_CAMERA && CTimer::GetTimeInMS() > activeWeapon->m_nTimeForNextShot) {
+                    CVector firingPoint(0.0f, 0.0f, 0.6f);
+                    CVector outputFiringPoint = *player->m_matrix * firingPoint;
+                    activeWeapon->Fire(player, &outputFiringPoint, nullptr, nullptr, nullptr, nullptr);
+                }
+                break;
+            }
+            }
+        }
+        break;
+    }
+    }
 
     CVector firingPoint(0.0f, 0.0f, 0.0f);
     CVector upVector(0.0f, 0.0f, 0.0f);
@@ -511,9 +546,16 @@ PED_WEAPON_AIMING_CODE:
     }
 
     int32 fightCommand = 0;
-    if (!pad->GetTarget() || player->m_pPlayerData->m_nChosenWeapon != player->m_nActiveWeaponSlot || player->m_nMoveState == PEDMOVE_SPRINT && weaponInfo->m_nWeaponFire || TheCamera.Using1stPersonWeaponMode()) {
-        if (!pad->GetTarget() && !player->m_pAttachedTo || player->m_pPlayerData->m_nChosenWeapon != player->m_nActiveWeaponSlot || player->m_nMoveState == PEDMOVE_SPRINT ||
-            !TheCamera.Using1stPersonWeaponMode()) {
+    if (   !pad->GetTarget()
+        || player->m_pPlayerData->m_nChosenWeapon != player->m_nActiveWeaponSlot
+        || (player->m_nMoveState == PEDMOVE_SPRINT && weaponInfo->m_nWeaponFire != WEAPON_FIRE_MELEE)
+        || TheCamera.Using1stPersonWeaponMode()
+    ) {
+        if (  !pad->GetTarget() && !player->m_pAttachedTo
+           || player->m_pPlayerData->m_nChosenWeapon != player->m_nActiveWeaponSlot
+           || player->m_nMoveState == PEDMOVE_SPRINT
+           || !TheCamera.Using1stPersonWeaponMode()
+        ) {
             if ((player->m_pTargetedObject || player->m_pPlayerData->m_bFreeAiming) && intelligence->GetTaskFighting()) {
                 if (playerData->m_vecFightMovement.y >= -0.5) {
                     fightCommand = 15;
@@ -551,154 +593,152 @@ PED_WEAPON_AIMING_CODE:
             }
             player->Clear3rdPersonMouseTarget();
             playerData->m_bFreeAiming = 0;
-            goto MAKE_PLAYER_LOOK_AT_ENTITY;
-        }
-        if (!taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
+        } else if (!taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
             newSimpleUseGunTask = new CTaskSimpleUseGun(player->m_pTargetedObject, CVector(0.0f, 0.0f, 0.0f), 1, 1, false);
             firingPoint.Set(0.0f, 0.0f, 0.0f);
 
-            taskManager->SetTaskSecondary(newSimpleUseGunTask, 0);
-            goto MAKE_PLAYER_LOOK_AT_ENTITY;
-        }
-        if (intelligence->GetTaskUseGun()) {
+            taskManager->SetTaskSecondary(newSimpleUseGunTask, eSecondaryTask::TASK_SECONDARY_ATTACK);
+        } else if (intelligence->GetTaskUseGun()) {
             auto taskUseGun = (CTaskSimpleUseGun*)taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
             taskUseGun->ControlGun(player, player->m_pTargetedObject, 1);
         }
-        goto MAKE_PLAYER_LOOK_AT_ENTITY;
-    }
-    if (!weaponInfo->flags.bCanAim || playerData->m_bFreeAiming) {
-        if (playerData->m_bFreeAiming && weaponInfo->flags.bCanAim && (pad->ShiftTargetLeftJustDown() || pad->ShiftTargetRightJustDown()) && !CCamera::m_bUseMouse3rdPerson) {
-            if (player->m_pTargetedObject) {
-                if (pad->ShiftTargetLeftJustDown()) {
-                    player->FindNextWeaponLockOnTarget(player->m_pTargetedObject, true);
+    } else {
+        if (!weaponInfo->flags.bCanAim || playerData->m_bFreeAiming) {
+            if (playerData->m_bFreeAiming && weaponInfo->flags.bCanAim && (pad->ShiftTargetLeftJustDown() || pad->ShiftTargetRightJustDown()) && !CCamera::m_bUseMouse3rdPerson) {
+                if (player->m_pTargetedObject) {
+                    if (pad->ShiftTargetLeftJustDown()) {
+                        player->FindNextWeaponLockOnTarget(player->m_pTargetedObject, true);
+                    }
+                    if (pad->ShiftTargetRightJustDown()) {
+                        player->FindNextWeaponLockOnTarget(player->m_pTargetedObject, false);
+                    }
+                } else {
+                    bool shiftTargetLeftJustDown = pad->ShiftTargetLeftJustDown();
+                    player->FindNextWeaponLockOnTarget(nullptr, shiftTargetLeftJustDown);
                 }
-                if (pad->ShiftTargetRightJustDown()) {
-                    player->FindNextWeaponLockOnTarget(player->m_pTargetedObject, false);
+            } else if (!weaponInfo->flags.bOnlyFreeAim || player->m_pTargetedObject || playerData->m_bFreeAiming) {
+                if (CCamera::m_bUseMouse3rdPerson && playerData->m_bFreeAiming) {
+                    bool bWeaponIsNotMelee = true;
+                    if (!weaponInfo->m_nWeaponFire) {
+                        bWeaponIsNotMelee = false;
+                    }
+                    player->Compute3rdPersonMouseTarget(bWeaponIsNotMelee);
                 }
             } else {
-                bool shiftTargetLeftJustDown = pad->ShiftTargetLeftJustDown();
-                player->FindNextWeaponLockOnTarget(nullptr, shiftTargetLeftJustDown);
-            }
-        } else if (!weaponInfo->flags.bOnlyFreeAim || player->m_pTargetedObject || playerData->m_bFreeAiming) {
-            if (CCamera::m_bUseMouse3rdPerson && playerData->m_bFreeAiming) {
-                bool bWeaponIsNotMelee = true;
-                if (!weaponInfo->m_nWeaponFire) {
-                    bWeaponIsNotMelee = false;
-                }
-                player->Compute3rdPersonMouseTarget(bWeaponIsNotMelee);
+                playerData->m_bFreeAiming = true;
             }
         } else {
-            playerData->m_bFreeAiming = 1;
-        }
-    } else {
-        if (player->m_pTargetedObject) {
-            CPed* targetedEntity = (CPed*)player->m_pTargetedObject;
-            CWeapon* activeWeapon = &player->GetActiveWeapon();
-            auto weaponSkill = eWeaponSkill::WEAPSKILL_POOR;
-            int32 pedState = 0;
-            if (
-                (fabs((float)pad->AimWeaponLeftRight(player)) > 100.0f || fabs((float)pad->AimWeaponUpDown(player)) > 100.0f)
-                && !CGameLogic::IsCoopGameGoingOn()
-                || targetedEntity == (CPed*)nullptr
-                || CCamera::m_bUseMouse3rdPerson == true
-                || targetedEntity
-                && targetedEntity->IsPed()
-                && (
-                      !CPlayerPed::PedCanBeTargettedVehicleWise(targetedEntity)
-                   || !CLocalisation::KickingWhenDown()
-                   && ((pedState = targetedEntity->m_nPedState, pedState == PEDSTATE_DIE)
-                   || pedState == PEDSTATE_DEAD)
-                  )
-                || player->DoesTargetHaveToBeBroken(player->m_pTargetedObject, activeWeapon)
-                || !player->bCanPointGunAtTarget
-                && (activeWeapon->m_nType, weaponSkill = player->GetWeaponSkill(), !(CWeaponInfo::GetWeaponInfo(activeWeapon->m_nType, weaponSkill)->flags.bCanAim))
-            ) {
-                player->ClearWeaponTarget();
-                playerData->m_bFreeAiming = 1;
-            }
-
             if (player->m_pTargetedObject) {
-                if (pad->ShiftTargetLeftJustDown()) {
-                    player->FindNextWeaponLockOnTarget(player->m_pTargetedObject, true);
+                CPed* targetedEntity = (CPed*)player->m_pTargetedObject;
+                CWeapon* activeWeapon = &player->GetActiveWeapon();
+                auto weaponSkill = eWeaponSkill::POOR;
+                int32 pedState = 0;
+                if (
+                    (fabs((float)pad->AimWeaponLeftRight(player)) > 100.0f || fabs((float)pad->AimWeaponUpDown(player)) > 100.0f)
+                    && !CGameLogic::IsCoopGameGoingOn()
+                    || targetedEntity == (CPed*)nullptr
+                    || CCamera::m_bUseMouse3rdPerson == true
+                    || targetedEntity
+                    && targetedEntity->IsPed()
+                    && (
+                          !CPlayerPed::PedCanBeTargettedVehicleWise(targetedEntity)
+                       || !CLocalisation::KickingWhenDown()
+                       && ((pedState = targetedEntity->m_nPedState, pedState == PEDSTATE_DIE)
+                       || pedState == PEDSTATE_DEAD)
+                      )
+                    || player->DoesTargetHaveToBeBroken(player->m_pTargetedObject, activeWeapon)
+                    || !player->bCanPointGunAtTarget
+                    && (activeWeapon->m_nType, weaponSkill = player->GetWeaponSkill(), !(CWeaponInfo::GetWeaponInfo(activeWeapon->m_nType, weaponSkill)->flags.bCanAim))
+                ) {
+                    player->ClearWeaponTarget();
+                    playerData->m_bFreeAiming = 1;
                 }
-                if (pad->ShiftTargetRightJustDown()) {
-                    player->FindNextWeaponLockOnTarget(player->m_pTargetedObject, false);
-                }
-            }
 
-            if (CWeaponInfo::GetWeaponInfo(activeWeapon->m_nType, eWeaponSkill::WEAPSKILL_STD)->m_nWeaponFire == WEAPON_FIRE_INSTANT_HIT) {
-                targetedEntity = (CPed*)player->m_pTargetedObject;
-                if (targetedEntity && targetedEntity->IsPed() && intelligence->IsInSeeingRange(player->GetPosition())) {
-                    CTask* activePrimaryTask = intelligence->GetActivePrimaryTask();
-                    if (!activePrimaryTask || activePrimaryTask->GetTaskType() != TASK_COMPLEX_REACT_TO_GUN_AIMED_AT) {
-                        if (activeWeapon->m_nType != WEAPON_PISTOL_SILENCED) {
-                            player->Say(176);
-                        }
-                        CPedGroup* pedGroup = CPedGroups::GetPedsGroup(targetedEntity);
-                        if (pedGroup) {
-                            if (!CPedGroups::AreInSameGroup(targetedEntity, player)) {
-                                auto* eventGunAimedAt = new CEventGunAimedAt(player);
-                                CEventGroupEvent eventGroupEvent(targetedEntity, eventGunAimedAt);
-                                pedGroup->m_groupIntelligence.AddEvent(&eventGroupEvent);
+                if (player->m_pTargetedObject) {
+                    if (pad->ShiftTargetLeftJustDown()) {
+                        player->FindNextWeaponLockOnTarget(player->m_pTargetedObject, true);
+                    }
+                    if (pad->ShiftTargetRightJustDown()) {
+                        player->FindNextWeaponLockOnTarget(player->m_pTargetedObject, false);
+                    }
+                }
+
+                if (CWeaponInfo::GetWeaponInfo(activeWeapon->m_nType, eWeaponSkill::STD)->m_nWeaponFire == WEAPON_FIRE_INSTANT_HIT) {
+                    targetedEntity = (CPed*)player->m_pTargetedObject;
+                    if (targetedEntity && targetedEntity->IsPed() && intelligence->IsInSeeingRange(player->GetPosition())) {
+                        CTask* activePrimaryTask = intelligence->GetActivePrimaryTask();
+                        if (!activePrimaryTask || activePrimaryTask->GetTaskType() != TASK_COMPLEX_REACT_TO_GUN_AIMED_AT) {
+                            if (activeWeapon->m_nType != WEAPON_PISTOL_SILENCED) {
+                                player->Say(176);
                             }
-                        } else {
-                            CEventGunAimedAt eventGunAimedAt(player);
-                            intelligence->m_eventGroup.Add(&eventGunAimedAt, false);
+                            CPedGroup* pedGroup = CPedGroups::GetPedsGroup(targetedEntity);
+                            if (pedGroup) {
+                                if (!CPedGroups::AreInSameGroup(targetedEntity, player)) {
+                                    auto* eventGunAimedAt = new CEventGunAimedAt(player);
+                                    CEventGroupEvent eventGroupEvent(targetedEntity, eventGunAimedAt);
+                                    pedGroup->m_groupIntelligence.AddEvent(&eventGroupEvent);
+                                }
+                            } else {
+                                CEventGunAimedAt eventGunAimedAt(player);
+                                intelligence->m_eventGroup.Add(&eventGunAimedAt, false);
+                            }
                         }
                     }
                 }
+            } else if (CCamera::m_bUseMouse3rdPerson) {
+                player->ClearWeaponTarget();
+            } else if (pad->GetEnterTargeting() || TheCamera.m_bJustJumpedOutOf1stPersonBecauseOfTarget || m_nFrameCounter < (uint32)(CTimer::GetFrameCounter() - 1)) {
+                player->FindWeaponLockOnTarget();
             }
-        } else if (CCamera::m_bUseMouse3rdPerson) {
-            player->ClearWeaponTarget();
-        } else if (pad->GetEnterTargeting() || TheCamera.m_bJustJumpedOutOf1stPersonBecauseOfTarget || m_nFrameCounter < (uint32)(CTimer::GetFrameCounter() - 1)) {
-            player->FindWeaponLockOnTarget();
+            if (!player->m_pTargetedObject) {
+                playerData->m_bFreeAiming = 1;
+            }
         }
-        if (!player->m_pTargetedObject) {
-            playerData->m_bFreeAiming = 1;
+
+        if (player->m_pTargetedObject) {
+            if (weaponInfo->m_nWeaponFire || player->bIsDucking) {
+                playerData->m_bFreeAiming = 0;
+            }
+        } else if ([&]{
+            switch (weaponInfo->m_nWeaponFire) {
+            case WEAPON_FIRE_MELEE:
+            case WEAPON_FIRE_PROJECTILE:
+            case WEAPON_FIRE_USE:
+                return false;
+            }
+            return true;
+        }()) {
+            TheCamera.SetNewPlayerWeaponMode(MODE_AIMWEAPON, 0, 0);
+
+            if (player->m_pTargetedObject) {
+                TheCamera.UpdateAimingCoors(&player->m_pTargetedObject->GetPosition());
+            } else {
+                CMatrix* playerMatrix = player->m_matrix;
+                firingPoint = playerMatrix->GetForward();
+
+                firingPoint.x = firingPoint.x * 5.0f;
+                firingPoint.y = firingPoint.y * 5.0f;
+                firingPoint.z = (std::sin(player->m_pPlayerData->m_fLookPitch) + firingPoint.z) * 5.0f;
+
+                firingPoint += player->GetPosition();
+                TheCamera.UpdateAimingCoors(&firingPoint);
+            }
+
+            if (taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
+                if (intelligence->GetTaskUseGun()) {
+                    auto taskUseGun = (CTaskSimpleUseGun*)taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
+                    taskUseGun->ControlGun(player, player->m_pTargetedObject, 1);
+                }
+            } else {
+                newSimpleUseGunTask = new CTaskSimpleUseGun(player->m_pTargetedObject, CVector(0.0f, 0.0f, 0.0f), 1, 1, false);
+                firingPoint.Set(0.0f, 0.0f, 0.0f);
+                taskManager->SetTaskSecondary(newSimpleUseGunTask, TASK_SECONDARY_ATTACK);
+            }
         }
     }
-
-    if (player->m_pTargetedObject) {
-        if (weaponInfo->m_nWeaponFire || player->bIsDucking) {
-            playerData->m_bFreeAiming = 0;
-        }
-    } else {
-        uint32 nWeaponFire = weaponInfo->m_nWeaponFire;
-        if (!nWeaponFire || nWeaponFire == WEAPON_FIRE_PROJECTILE || nWeaponFire == WEAPON_FIRE_USE) {
-            goto MAKE_PLAYER_LOOK_AT_ENTITY;
-        }
-    }
-
-    TheCamera.SetNewPlayerWeaponMode(MODE_AIMWEAPON, 0, 0);
-
-    if (player->m_pTargetedObject) {
-        TheCamera.UpdateAimingCoors(&player->m_pTargetedObject->GetPosition());
-    } else {
-        CMatrix* playerMatrix = player->m_matrix;
-        firingPoint = playerMatrix->GetForward();
-
-        firingPoint.x = firingPoint.x * 5.0f;
-        firingPoint.y = firingPoint.y * 5.0f;
-        firingPoint.z = (std::sin(player->m_pPlayerData->m_fLookPitch) + firingPoint.z) * 5.0f;
-
-        firingPoint += player->GetPosition();
-        TheCamera.UpdateAimingCoors(&firingPoint);
-    }
-
-    if (taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
-        if (intelligence->GetTaskUseGun()) {
-            auto taskUseGun = (CTaskSimpleUseGun*)taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
-            taskUseGun->ControlGun(player, player->m_pTargetedObject, 1);
-        }
-    } else {
-        newSimpleUseGunTask = new CTaskSimpleUseGun(player->m_pTargetedObject, CVector(0.0f, 0.0f, 0.0f), 1, 1, false);
-        firingPoint.Set(0.0f, 0.0f, 0.0f);
-        taskManager->SetTaskSecondary(newSimpleUseGunTask, 0);
-    }
-
-MAKE_PLAYER_LOOK_AT_ENTITY:
 
     playerData->m_bHaveTargetSelected = player->m_pTargetedObject ? true : false;
+
     CPed* targetedObject = player->m_pTargetedObject->AsPed();
     const auto AbortLookingIfPossible = [&]() {
         if (m_pLookingAtEntity && g_ikChainMan.IsLooking(player) && g_ikChainMan.GetLookAtEntity(player) == m_pLookingAtEntity) {
@@ -735,13 +775,10 @@ MAKE_PLAYER_LOOK_AT_ENTITY:
     }
 
     m_pLookingAtEntity = targetedObject;
-    */
 }
 
 // 0x6872C0
 void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
-    // return plugin::CallMethod<0x6872C0, CTaskSimplePlayerOnFoot*, CPlayerPed*>(this, player);
-
     if (CGameLogic::IsCoopGameGoingOn())
         return;
 
@@ -800,8 +837,8 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
             animNewAssoc->m_nFlags |= ANIMATION_200;
             gLastTouchTimeDelta = touchTimeDelta;
             gLastRandomNumberForIdleAnimationID = randomNumber;
-            if (CStats::GetStatValue(STAT_MANAGEMENT_ISSUES_MISSION_ACCOMPLISHED) != 0.0f && CTimer::GetTimeInMS() > 1200000) {
-                player->Say(336, 0, 0.2f, 0, 0, 0);
+            if (CStats::GetStatValue(STAT_MANAGEMENT_ISSUES_MISSION_ACCOMPLISHED) != 0.0f && CTimer::GetTimeInMS() > 1'200'000) {
+                player->Say(336, 0, 0.2f);
             }
         }
     };
@@ -809,6 +846,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
     CAnimBlendAssociation* animAssoc1 = RpAnimBlendClumpGetFirstAssociation(player->m_pRwClump);
     if (animAssoc1) {
         while (true) {
+            // TODO: Fix up this bitshifting mess
             uint32 animHierarchyIndex = (uint32)animAssoc1->m_pHierarchy - (uint32)CAnimManager::ms_aAnimations.data();
             animHierarchyIndex = animHierarchyIndex / 6 + (animHierarchyIndex >> 31) >> 2;
             animHierarchyIndex = animHierarchyIndex + (animHierarchyIndex >> 31);
@@ -834,8 +872,6 @@ void CTaskSimplePlayerOnFoot::PlayerControlFighter(CPlayerPed* player) {
 
 // 0x687C20
 void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* player) {
-    // return plugin::Call<0x687C20, CPlayerPed*>(player);
-
     CTaskSimpleUseGun* taskUseGun = player->GetIntelligence()->GetTaskUseGun();
     if (!taskUseGun)
         return;
@@ -1003,10 +1039,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
 }
 
 // 0x6883D0
-int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPlayerPed* player, bool bAvoidJumpingAndDucking)
-{
-    // return plugin::CallMethodAndReturn<int32, 0x6883D0, CTaskSimplePlayerOnFoot*, CPlayerPed*, bool>(this, player, bAvoidJumpingAndDucking);
-
+int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPlayerPed* player, bool bAvoidJumpingAndDucking) {
     CPlayerPedData * playerData = player->m_pPlayerData;
     playerData->m_vecFightMovement = CVector2D();
 
@@ -1109,41 +1142,4 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
     PlayIdleAnimations(player);
     player->m_pedIK.bSlopePitch = true;
     return player->m_pedIK.m_nFlags;
-}
-
-void CTaskSimplePlayerOnFoot::InjectHooks() {
-    RH_ScopedClass(CTaskSimplePlayerOnFoot);
-    RH_ScopedCategory("Tasks/TaskTypes");
-
-    // All locked for now, because when unhooked code asserts with "esp value...." in `ProcessPed`
-    RH_ScopedInstall(Constructor, 0x685750, { .locked = true });
-    RH_ScopedInstall(Destructor, 0x6857D0, { .locked = true });
-    RH_ScopedVirtualInstall(ProcessPed, 0x688810, { .locked = true });
-    RH_ScopedVirtualInstall(MakeAbortable, 0x6857E0, { .locked = true });
-    RH_ScopedInstall(ProcessPlayerWeapon, 0x6859A0, { .reversed = false });
-    RH_ScopedInstall(PlayIdleAnimations, 0x6872C0, { .locked = true });
-    RH_ScopedInstall(PlayerControlZeldaWeapon, 0x687C20, { .locked = true });
-    RH_ScopedInstall(PlayerControlDucked, 0x687F30, { .locked = true });
-    RH_ScopedInstall(PlayerControlZelda, 0x6883D0, { .locked = true });
-}
-
-// 0x685750
-CTaskSimplePlayerOnFoot* CTaskSimplePlayerOnFoot::Constructor() {
-    this->CTaskSimplePlayerOnFoot::CTaskSimplePlayerOnFoot();
-    return this;
-}
-
-// 0x68B0C0
-CTaskSimplePlayerOnFoot* CTaskSimplePlayerOnFoot::Destructor() {
-    this->CTaskSimplePlayerOnFoot::~CTaskSimplePlayerOnFoot();
-    return this;
-}
-
-bool CTaskSimplePlayerOnFoot::ProcessPed_Reversed(CPed* ped) {
-    return CTaskSimplePlayerOnFoot::ProcessPed(ped);
-}
-
-// 0x6857E0
-bool CTaskSimplePlayerOnFoot::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return CTaskSimplePlayerOnFoot::MakeAbortable(ped, priority, event);
 }
