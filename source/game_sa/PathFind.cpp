@@ -116,8 +116,8 @@ void CPathFind::ReleaseRequestedNodes() {
 * @addr notsa 100% inlined
 */
 auto CPathFind::FindIntersection(const CNodeAddress& startNodeAddress, const CNodeAddress& targetNodeAddress) -> CPathIntersectionInfo* {
-    // Make sure all node areas are loaded
-    if (!IsNodesLoaded({ targetNodeAddress, startNodeAddress })) {
+    // Make sure both nodes areas are loaded
+    if (!IsNodeAreaLoaded({ targetNodeAddress, startNodeAddress })) {
         return nullptr;
     }
 
@@ -136,13 +136,13 @@ auto CPathFind::FindIntersection(const CNodeAddress& startNodeAddress, const CNo
 // 0x44D790
 bool CPathFind::TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress) {
     const auto intersect = FindIntersection(startNodeAddress, targetNodeAddress);
-    return intersect ? intersect->m_bRoadCross : false;
+    return intersect && intersect->m_bRoadCross;
 }
 
 // 0x44D480
 bool CPathFind::TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress) {
     const auto intersect = FindIntersection(startNodeAddress, targetNodeAddress);
-    return intersect ? intersect->m_bPedTrafficLight : false;
+    return intersect && intersect->m_bPedTrafficLight;
 }
 
 CVector CPathFind::TakeWidthIntoAccountForWandering(CNodeAddress nodeAddress, uint16 randomSeed) {
