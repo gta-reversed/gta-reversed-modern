@@ -250,9 +250,23 @@ void CPathFind::FindNextNodeWandering(uint8 nodeType, CVector vecPos, CNodeAddre
     plugin::CallMethod<0x451B70, CPathFind*, uint8, CVector, CNodeAddress*, CNodeAddress*, uint8, uint8*>(this, nodeType, vecPos, originAddress, targetAddress, dir, outDir);
 }
 
-void CPathFind::DoPathSearch(uint8 pathType, CVector origin, CNodeAddress originAddr, CVector target, CNodeAddress* pResultNodes, int16* pNodesCount, int32 maxNodesToFind,
-                             float* pDistance, float maxSearchDistance, CNodeAddress* targetAddr, float maxUnkLimit, bool oneSideOnly, CNodeAddress forbiddenNodeAddr,
-                             bool includeNodesWithoutLinks, bool waterPath) {
+void CPathFind::DoPathSearch(
+    ePathType pathType,
+    CVector origin,
+    CNodeAddress originAddr,
+    CVector target,
+    CNodeAddress* pResultNodes,
+    int16* pNodesCount,
+    int32 maxNodesToFind,
+    float* pDistance,
+    float maxSearchDistance,
+    CNodeAddress* targetAddr,
+    float maxUnkLimit,
+    bool oneSideOnly,
+    CNodeAddress forbiddenNodeAddr,
+    bool includeNodesWithoutLinks,
+    bool waterPath
+) {
     ((void(__thiscall*)(CPathFind*, uint8, CVector, CNodeAddress, CVector, CNodeAddress*, int16*, int32, float*, float, CNodeAddress*, float, bool, CNodeAddress, bool,
                         bool))0x4515D0)(this, pathType, origin, originAddr, target, pResultNodes, pNodesCount, maxNodesToFind, pDistance, maxSearchDistance, targetAddr,
                                         maxUnkLimit, oneSideOnly, forbiddenNodeAddr, includeNodesWithoutLinks, waterPath);
