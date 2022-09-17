@@ -116,21 +116,12 @@ void CPathFind::ReleaseRequestedNodes() {
 * @addr notsa 100% inlined
 */
 auto CPathFind::FindIntersection(const CNodeAddress& startNodeAddress, const CNodeAddress& targetNodeAddress) -> CPathIntersectionInfo* {
-    const auto& nodesInStartArea = m_pPathNodes[startNodeAddress.m_wAreaId];
-    if (!nodesInStartArea) {
+    // Make sure all node areas are loaded
+    if (!IsNodesLoaded({ targetNodeAddress, startNodeAddress })) {
         return nullptr;
     }
 
-    if (!m_pPathNodes[targetNodeAddress.m_wAreaId]) {
-        return nullptr;
-    }
-
-    // Check if the start node has any links (TODO: could be omitted I think, as the loop condition checks for this as well)
-    const auto& startNode = nodesInStartArea[startNodeAddress.m_wNodeId];
-    if (!startNode.m_nNumLinks) {
-        return nullptr;
-    }
-
+    const auto& startNode = m_pPathNodes[startNodeAddress.m_wAreaId][startNodeAddress.m_wNodeId];
     const auto& nodeLinks = m_pNodeLinks[startNodeAddress.m_wAreaId];
     for (auto i = 0u; i < startNode.m_nNumLinks; i++) {
         const auto linkedNodeIdx = startNode.m_wBaseLinkId + i;
