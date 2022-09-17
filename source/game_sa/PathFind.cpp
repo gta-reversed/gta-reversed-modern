@@ -92,7 +92,7 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(AddDynamicLinkBetween2Nodes_For1Node, 0x44E000);
     RH_ScopedInstall(StartNewInterior, 0x44DE80);
     //RH_ScopedInstall(LoadSceneForPathNodes, 0x44DE00);
-    //RH_ScopedInstall(AreNodesLoadedForArea, 0x44DD10);
+    RH_ScopedInstall(AreNodesLoadedForArea, 0x44DD10);
     //RH_ScopedInstall(ReleaseRequestedNodes, 0x44DD00);
     //RH_ScopedInstall(SetPathsNeededAtPosition, 0x44DCD0);
     //RH_ScopedInstall(SetLinksBridgeLights, 0x44D960);
@@ -136,7 +136,24 @@ void CPathFind::ReInit() {
 
 // 0x44DD10
 bool CPathFind::AreNodesLoadedForArea(float minX, float maxX, float minY, float maxY) {
-    return plugin::CallMethodAndReturn<bool, 0x44DD10, CPathFind*, float, float, float, float>(this, minX, maxX, minY, maxY);
+    const auto AreaOfPos = [](const CVector2D& pos) -> std::tuple<uint32, uint32> {
+        const auto AreaOf = [](float p, auto nareas) {
+            return std::clamp((uint32)(p + 3000.f / (6000.f / (float)nareas)), 0u, (uint32)nareas);
+        };
+        return { AreaOf(pos.x, NUM_PATH_MAP_AREA_X), AreaOf(pos.y, NUM_PATH_MAP_AREA_Y) };
+    };
+    const auto [minAreaX, minAreaY] = AreaOfPos({ minX, minY });
+    const auto [maxAreaX, maxAreaY] = AreaOfPos({ maxX, maxY });
+
+    for (auto x = minAreaX; x < maxAreaX; x++) {
+        for (auto y = minAreaY; y < maxAreaY; y++) {
+            if (!GetPathNodesInArea(x, y)) {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 // 0x450950
@@ -280,6 +297,10 @@ void CPathFind::SwitchRoadsOffInAreaForOneRegion(float xMin, float xMax, float y
 CPathNode* CPathFind::GetPathNode(CNodeAddress address) {
     assert(address.IsValid());
     return &m_pPathNodes[address.m_wAreaId][address.m_wNodeId];
+}
+
+CPathNode* CPathFind::GetPathNodesInArea(size_t areaId) {
+    return m_pPathNodes[areaId];
 }
 
 // NOTSA

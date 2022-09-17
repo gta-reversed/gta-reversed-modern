@@ -163,7 +163,13 @@ class CPathFind {
 public:
     CNodeAddress           m_Info; // 0x0
     CPathNode*             m_apNodesSearchLists[512]; // 0x4
-    CPathNode*             m_pPathNodes[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS]; // 0x804
+    union {
+        CPathNode* m_pPathNodes[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS]; // 0x804
+        struct {
+            CPathNode* m_mapPathNodes[NUM_PATH_MAP_AREA_X][NUM_PATH_MAP_AREA_Y];
+            CPathNode* m_interiorPathNodes[NUM_PATH_INTERIOR_AREAS];
+        };
+    };
     // Use CPathFind::GetCarPathLink to access
     CCarPathLink*          m_pNaviNodes[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS]; // 0x924
     CNodeAddress*          m_pNodeLinks[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS]; // 0xA44
@@ -273,7 +279,13 @@ public:
     void MakeRequestForNodesToBeLoaded(float x1, float x2, float y1, float y2);
     void ReleaseRequestedNodes();
     void ReInit();
+
+    /*!
+    * @addr 0x44DD10
+    * @return If all areas within the given bounding box are loaded
+    */
     bool AreNodesLoadedForArea(float minX, float maxX, float minY, float maxY);
+
     bool HaveRequestedNodesBeenLoaded();
     void LoadSceneForPathNodes(CVector point);
     bool IsWaterNodeNearby(CVector position, float radius);
@@ -300,6 +312,21 @@ public:
         return m_pNaviNodes[address.m_wAreaId][address.m_wCarPathLinkId];
     }
 
+    /*!
+    * @notsa
+    * @return The path nodes in the area or null if the area isn't loaded.
+    */
+    CPathNode* GetPathNodesInArea(size_t areaId);
+
+    /*!
+    * @notsa
+    * 
+    * @param x The X of the area
+    * @param y The Y of the area
+    *
+    * @copyreturn GetPathNodesInArea(size_t)
+    */
+    CPathNode* GetPathNodesInArea(size_t x, size_t y) { return GetPathNodesInArea(y * NUM_PATH_MAP_AREA_Y + x); }
 
     /*!
     * @addr 0x420AA0
