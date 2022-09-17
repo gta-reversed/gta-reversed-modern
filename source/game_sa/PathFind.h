@@ -49,6 +49,8 @@ public:
         m_wAreaId = -1;
     }
 
+    operator CNodeAddress() const { return CNodeAddress{ m_wAreaId, m_wCarPathLinkId }; }
+
 public:
     uint16 m_wCarPathLinkId : 10;
     uint16 m_wAreaId : 6;
@@ -91,7 +93,7 @@ public:
     CNodeAddress m_address;
     int8         m_nDirX;
     int8         m_nDirY;
-    int8         m_nPathNodeWidth;
+    int8         m_nPathNodeWidth; /// Has to be divided by `0.011574074f` (not yet sure why)
     uint8        m_nNumLeftLanes : 3;
     uint8        m_nNumRightLanes : 3;
     uint8        m_bTrafficLightDirection : 1; // 1 if the navi node has the same direction as the traffic light and 0 if the navi node points somewhere else
@@ -99,6 +101,16 @@ public:
 
     uint16 m_nTrafficLightState : 2; // 1 - North-South, 2 - West-East cycle, enum: eTrafficLightsDirection
     uint16 m_bTrainCrossing : 1;
+
+    float OneWayLaneOffset() const {
+        if (m_nNumLeftLanes) {
+            return 0.5f - (float)m_nNumRightLanes / 2.f;
+        }        
+        if (m_nNumRightLanes) {
+            return 0.5f - (float)m_nPathNodeWidth * 0.011574074f / 2.f;
+        }
+        return 0.5 - (float)m_nNumLeftLanes / 2.f;
+    }
 };
 VALIDATE_SIZE(CCarPathLink, 0xE);
 
@@ -284,7 +296,9 @@ public:
 
     // Helpers - NOTSA
     bool FindNodeCoorsForScript(CVector& outPos, CNodeAddress addr);
-    bool IsNodesLoaded(CNodeAddress addr) const { return m_pPathNodes[addr.m_wAreaId]; }
+
+    bool IsNodeAreaLoaded(CNodeAddress addr) const { assert(addr.IsAreaValid()); return m_pPathNodes[addr.m_wAreaId]; }
+    bool IsNodeAreaLoaded(const std::initializer_list<CNodeAddress>& addrs) const;
 };
 
 VALIDATE_SIZE(CPathFind, 0x3C80);
