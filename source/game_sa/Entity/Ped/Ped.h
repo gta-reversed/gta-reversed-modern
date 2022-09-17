@@ -579,9 +579,28 @@ public:
     RpHAnimHierarchy& GetAnimHierarchy() const;
     CAnimBlendClumpData& GetAnimBlendData() const;
     bool IsInVehicle() const { return bInVehicle && m_pVehicle; }
+    bool IsInVehicle(const CVehicle* veh) const { return bInVehicle && m_pVehicle == veh; }
     CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
     int32 GetPadNumber() const;
+    bool IsCurrentlyUnarmed() { return GetActiveWeapon().m_nType == WEAPON_UNARMED; }
 
+    /*!
+     * @notsa
+     * @brief Is the ped jogging, running or sprinting
+     */
+    bool IsJoggingOrFaster() const;
+
+    /*!
+     * @notsa
+     * @brief Is the ped running or sprinting
+     */
+    bool IsRunningOrSprinting() const;
+
+    /*!
+     * @notsa
+     * @brief Is the ped's right arm blocked right now
+     */
+    bool IsRightArmBlockedNow() const;
 private:
     void RenderThinBody() const;
     void RenderBigHead() const;

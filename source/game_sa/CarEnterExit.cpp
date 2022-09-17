@@ -27,17 +27,17 @@ void CCarEnterExit::InjectHooks() {
     RH_ScopedInstall(ComputeTargetDoorToEnterAsPassenger, 0x64F190);
     RH_ScopedInstall(ComputeTargetDoorToExit, 0x64F110);
     RH_ScopedInstall(GetNearestCarDoor, 0x6528F0);
-    // RH_ScopedInstall(GetNearestCarPassengerDoor, 0x650BB0);
-    // RH_ScopedInstall(GetPositionToOpenCarDoor, 0x64E740);
-    // RH_ScopedInstall(IsCarDoorInUse, 0x0);
+    RH_ScopedInstall(GetNearestCarPassengerDoor, 0x650BB0, { .reversed = false });
+    RH_ScopedInstall(GetPositionToOpenCarDoor, 0x64E740, { .reversed = false });
+    RH_ScopedInstall(IsCarDoorInUse, 0x64ec90, { .reversed = false });
     // RH_ScopedInstall(IsCarDoorReady, 0x0);
     // RH_ScopedInstall(IsCarQuickJackPossible, 0x0);
     // RH_ScopedInstall(IsCarSlowJackRequired, 0x0);
     RH_ScopedInstall(IsClearToDriveAway, 0x6509B0);
     RH_ScopedInstall(IsPathToDoorBlockedByVehicleCollisionModel, 0x651210);
     RH_ScopedInstall(IsPedHealthy, 0x64EEE0);
-    // RH_ScopedInstall(IsPlayerToQuitCarEnter, 0x64F240);
-    // RH_ScopedInstall(IsRoomForPedToLeaveCar, 0x6504C0);
+    RH_ScopedInstall(IsPlayerToQuitCarEnter, 0x64F240, { .reversed = false });
+    RH_ScopedInstall(IsRoomForPedToLeaveCar, 0x6504C0, { .reversed = false });
     RH_ScopedInstall(IsVehicleHealthy, 0x64EEC0);
     RH_ScopedInstall(IsVehicleStealable, 0x6510D0);
     // RH_ScopedInstall(MakeUndraggedDriverPedLeaveCar, 0x0);
@@ -355,9 +355,9 @@ CVector CCarEnterExit::GetPositionToOpenCarDoor(const CVehicle* vehicle, int32 d
     return out;
 }
 
-// 0x
+// 0x64ec90
 bool CCarEnterExit::IsCarDoorInUse(const CVehicle* vehicle, int32 firstDoorId, int32 secondDoorId) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32, int32>(vehicle, firstDoorId, secondDoorId);
+    return plugin::CallAndReturn<bool, 0x64ec90, const CVehicle*, int32, int32>(vehicle, firstDoorId, secondDoorId);
 }
 
 // 0x
@@ -599,7 +599,7 @@ bool CCarEnterExit::SetPedInCarDirect(CPed* ped, CVehicle* vehicle, int32 doorId
 
     // Warp ped into vehicle
     {
-        CTaskSimpleCarSetPedInAsPassenger task{ vehicle, doorId };
+        CTaskSimpleCarSetPedInAsPassenger task{ vehicle, (eTargetDoor)doorId };
         task.m_bWarpingInToCar = true;
         task.ProcessPed(ped);
     }

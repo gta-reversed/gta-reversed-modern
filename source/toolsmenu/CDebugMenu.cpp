@@ -1,6 +1,10 @@
 #include "StdInc.h"
 
 #include "CDebugMenu.h"
+#include "TaskComplexFollowPointRoute.h"
+#include "TaskComplexExtinguishFires.h"
+#include "TaskComplexStealCar.h"
+#include "TaskComplexFleeAnyMeans.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -114,8 +118,43 @@ void CDebugMenu::ImGuiInputUpdate() {
 static void DebugCode() {
     CPad* pad = CPad::GetPad();
 
+    const auto player = FindPlayerPed();
+
     if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
         return;
+
+    if (pad->IsStandardKeyJustPressed('8')) {
+
+        CPointRoute route{};
+
+        const auto r = 10.f;
+        const auto totalAngle = PI * 2.f;
+        for (auto a = 0.f; a < totalAngle; a += totalAngle / 8.f) {
+            route.AddPoints(player->GetPosition() + CVector{std::cosf(a), std::sinf(a), 0.f} *r);
+        }
+
+        player->GetTaskManager().SetTask(
+            new CTaskComplexFollowPointRoute{
+                PEDMOVE_SPRINT,
+                route,
+                CTaskComplexFollowPointRoute::Mode::ONE_WAY,
+                3.f,
+                3.f,
+                false,
+                true,
+                true
+            },
+            TASK_PRIMARY_PRIMARY
+        );
+    }
+
+    if (pad->IsStandardKeyJustPressed('0')) {
+
+    }
+
+    if (pad->IsStandardKeyJustPressed('9')) {
+    
+    }
 
     if (pad->IsStandardKeyJustPressed('1')) {
         CCheat::JetpackCheat();
@@ -157,7 +196,7 @@ void CDebugMenu::ImGuiDrawLoop() {
     ImGui_ImplDX9_NewFrame();
     ImGui::NewFrame();
 
-    DebugModules::Display(m_ShowMenu);
+    DebugModules::ProcessRender(m_ShowMenu);
 
     ImGui::EndFrame();
     ImGui::Render();

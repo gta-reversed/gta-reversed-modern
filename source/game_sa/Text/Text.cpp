@@ -46,7 +46,7 @@ void CText::InjectHooks() {
     RH_ScopedInstall(GetNameOfLoadedMissionText, 0x69FBD0);
     RH_ScopedInstall(ReadChunkHeader, 0x69F940);
     RH_ScopedInstall(LoadMissionPackText, 0x69F9A0);
-    // RH_ScopedInstall(LoadMissionText, 0x69FBF0);
+    RH_ScopedInstall(LoadMissionText, 0x69FBF0, { .reversed = false });
     RH_ScopedInstall(Load, 0x6A01A0);
     RH_ScopedInstall(Unload, 0x69FF20);
 

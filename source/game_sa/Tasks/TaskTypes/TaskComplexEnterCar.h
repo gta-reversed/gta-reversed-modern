@@ -44,7 +44,7 @@ public:
 public:
     static void InjectHooks();
 
-    // Shouldn't be used directly, use CTaskComplexEnterCarAsDriver or CTaskComplexEnterCarAsPassenger instead
+    // Shouldn't be used directly, use `CTaskComplexEnterCarAsDriver` or `CTaskComplexEnterCarAsPassenger` instead
     CTaskComplexEnterCar(CVehicle* targetVehicle, bool bAsDriver, bool bQuitAfterOpeningDoor, bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff = false);
     ~CTaskComplexEnterCar() override;
 
@@ -57,7 +57,6 @@ public:
     CVector        GetTargetPos();
 
     auto GetVehicle() const { return m_pTargetVehicle; }
-
 private:
     // 0x63A220
     CTaskComplexEnterCar* Constructor(CVehicle* vehicle, bool bAsDriver, bool bQuitAfterOpeningDoor, bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff) {

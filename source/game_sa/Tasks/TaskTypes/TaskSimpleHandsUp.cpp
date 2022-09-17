@@ -6,7 +6,6 @@ void CTaskSimpleHandsUp::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x48E970);
-
     RH_ScopedInstall(Destructor, 0x48EA60);
 
     RH_ScopedVMTInstall(Clone, 0x48E9C0);

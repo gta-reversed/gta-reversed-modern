@@ -6,12 +6,13 @@
 */
 #pragma once
 
-#include "PluginBase.h" // !!!
-
-#include "RenderWare.h"
 #include <numeric>
+#include <span>
+#include "PluginBase.h" // !!!
+#include "RenderWare.h"
 
 class CMatrix;
+class CVector2D;
 
 class CVector : public RwV3d {
 public:
@@ -20,6 +21,8 @@ public:
     constexpr CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
     constexpr CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; }
     constexpr explicit CVector(float value) { x = y = z = value; }
+
+    explicit CVector(const CVector2D& v2, float z);
 
 public:
     static void InjectHooks();
@@ -32,11 +35,17 @@ public:
     // Returns length of 2d vector
     float Magnitude2D() const;
 
-    // Normalises a vector
+    // Normalises a vector in-place
     void Normalise();
 
     // Normalises a vector and returns length (in-place)
     float NormaliseAndMag();
+
+    /// Get a normalized copy of this vector
+    auto Normalized() const -> CVector;
+
+    /// Perform a dot product with this and `o`, returning the result
+    auto Dot(const CVector& o) const -> float;
 
     // Performs cross calculation
     void Cross(const CVector& left, const CVector& right);
@@ -113,16 +122,25 @@ public:
         return (&x)[i];
     }
 
-    // Calculate the average position
+    //! Calculate the average position
     static CVector Average(const CVector* begin, const CVector* end);
 
     static CVector AverageN(const CVector* begin, size_t n) {
         return Average(begin, begin + n);
     }
 
-    [[nodiscard]] float Heading() const {
-        return std::atan2(-x, y);
+    auto GetComponents() const {
+        return std::span{ reinterpret_cast<const float*>(this), 3 };
     }
+
+    //! Unit Z axis vector (0,0,1)
+    static auto ZAxisVector() { return CVector{ 0.f, 0.f, 1.f }; }
+
+    /*!
+    * @param reMapRangeTo0To2Pi Return value will be in interval [0, 2pi] instead of [-pi, pi]
+    * @returning The heading of the vector in radians.
+    */
+    [[nodiscard]] float Heading(bool reMapRangeTo0To2Pi = false) const;
 };
 VALIDATE_SIZE(CVector, 0xC);
 

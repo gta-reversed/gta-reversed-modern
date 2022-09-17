@@ -19,7 +19,7 @@ public:
 public:
     static constexpr auto Type = TASK_SIMPLE_GO_TO_POINT;
 
-    CTaskSimpleGoToPoint(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6);
+    CTaskSimpleGoToPoint(eMoveState moveState, const CVector& targetPoint, float fRadius = 0.5f, bool bMoveTowardsTargetPoint = false, bool a6 = false);
     ~CTaskSimpleGoToPoint() override = default;
 
     eTaskType GetTaskType() override { return Type; }
@@ -28,10 +28,10 @@ public:
     bool ProcessPed(CPed* ped) override;
 
     // bDontCheckRadius is always false
-    void UpdatePoint(const CVector& targetPosition, float fRadius, bool bDontCheckRadius = false);
+    void UpdatePoint(const CVector& targetPosition, float fRadius = 0.5f, bool bDontCheckRadius = false);
 
     static void InjectHooks();
-    CTaskSimpleGoToPoint* Constructor(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6);
+    auto Constructor(eMoveState moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6) { this->CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(moveState, targetPoint, fRadius, bMoveTowardsTargetPoint, a6); return this; }
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed_Reversed(CPed* ped);
 };

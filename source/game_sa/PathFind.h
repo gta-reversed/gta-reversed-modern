@@ -284,7 +284,7 @@ public:
 
     // Helpers - NOTSA
     bool FindNodeCoorsForScript(CVector& outPos, CNodeAddress addr);
-
+    bool IsNodesLoaded(CNodeAddress addr) const { return m_pPathNodes[addr.m_wAreaId]; }
 };
 
 VALIDATE_SIZE(CPathFind, 0x3C80);

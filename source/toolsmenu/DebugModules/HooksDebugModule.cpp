@@ -382,33 +382,36 @@ void RenderCategoryItems(RH::HookCategory& cat) {
             continue;
         }
 
-        const auto DrawToolTip = [](void* gta, void* our, bool locked) {
-            const auto AddrToClipboard = [](void* addr) {
-                SetClipboardText(std::format("{}", addr).c_str());
+        
+
+        const auto ProcessToolTip = [](const auto& i) {
+            const auto DrawToolTip = [](void* gta, void* our, bool locked) {
+                const auto AddrToClipboard = [](void* addr) {
+                    SetClipboardText(std::format("{}", addr).c_str());
+                };
+
+                std::string tooltipText = std::format("SA: {} / Our: {}", gta, our);
+                if (locked) {
+                    tooltipText += "\n(locked)";
+                }
+                SetTooltip(tooltipText.c_str());
+
+                if (IsItemClicked(ImGuiMouseButton_Right)) {
+                    AddrToClipboard(gta);
+                } else if (IsItemClicked(ImGuiMouseButton_Middle)) {
+                    AddrToClipboard(our);
+                }
             };
-
-            std::string tooltipText = std::format("SA: {} / Our: {}", gta, our);
-            if (locked) {
-                tooltipText += "\n(locked)";
-            }
-            SetTooltip(tooltipText.c_str());
-
-            if (IsItemClicked(ImGuiMouseButton_Right)) {
-                AddrToClipboard(gta);
-            } else if (IsItemClicked(ImGuiMouseButton_Middle)) {
-                AddrToClipboard(our);
-            }
+            DrawToolTip(i->GetHookGTAAddress(), i->GetHookOurAddress(), i->Locked());
         };
 
         switch (item->Type()) {
         case RH::ReversibleHook::Base::HookType::Simple: {
-            auto s = static_cast<RH::ReversibleHook::Simple*>(item.get());
-            DrawToolTip(s->GetHookGTAAddress(), s->GetHookOurAddress(), s->Locked());
+            ProcessToolTip(std::static_pointer_cast<RH::ReversibleHook::Simple>(item));
             break;
         }
         case RH::ReversibleHook::Base::HookType::Virtual: {
-            auto v = static_cast<RH::ReversibleHook::Virtual*>(item.get());
-            DrawToolTip(v->GetHookGTAAddress(), v->GetHookOurAddress(), v->Locked());
+            ProcessToolTip(std::static_pointer_cast<RH::ReversibleHook::Virtual>(item));
             break;
         }
         }

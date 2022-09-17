@@ -11,16 +11,16 @@ void CEntryExit::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(GenerateAmbientPeds, 0x43E8B0);
-    // RH_ScopedInstall(GetEntryExitToDisplayNameOf, 0x43E650);
-    // RH_ScopedInstall(GetPositionRelativeToOutsideWorld, 0x43EA00);
-    // RH_ScopedInstall(FindValidTeleportPoint, 0x43EAF0);
-    // RH_ScopedInstall(IsInArea, 0x43E460);
-    // RH_ScopedInstall(TransitionStarted, 0x43FFD0);
-    // RH_ScopedInstall(TransitionFinished, 0x4404A0);
+    RH_ScopedInstall(GetEntryExitToDisplayNameOf, 0x43E650, { .reversed = false });
+    RH_ScopedInstall(GetPositionRelativeToOutsideWorld, 0x43EA00, { .reversed = false });
+    RH_ScopedInstall(FindValidTeleportPoint, 0x43EAF0, { .reversed = false });
+    RH_ScopedInstall(IsInArea, 0x43E460, { .reversed = false });
+    RH_ScopedInstall(TransitionStarted, 0x43FFD0, { .reversed = false });
+    RH_ScopedInstall(TransitionFinished, 0x4404A0, { .reversed = false });
     RH_ScopedInstall(RequestObjectsInFrustum, 0x43E690);
     RH_ScopedInstall(RequestAmbientPeds, 0x43E6D0);
-    // RH_ScopedInstall(WarpGangWithPlayer, 0x43F1F0);
-    // RH_ScopedInstall(ProcessStealableObjects, 0x43E990);
+    RH_ScopedInstall(WarpGangWithPlayer, 0x43F1F0, { .reversed = false });
+    RH_ScopedInstall(ProcessStealableObjects, 0x43E990, { .reversed = false });
 }
 
 // 0x43E8B0

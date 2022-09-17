@@ -66,8 +66,10 @@ public:
     bool ScanForBlockedNode(CPed* ped, const CNodeAddress& targetNodeAddress);
     bool ScanForBlockedNode(const CVector& position, class CEntity* entity);
 
-    static CTaskComplexWander* GetWanderTaskByPedType(CPed* ped);
+    /// Get sq. distance of the path node (either `m_LastNode` or `m_NextNode`) closest to the ped
+    float GetDistSqOfClosestPathNodeToPed(CPed* ped);
 
+    static CTaskComplexWander* GetWanderTaskByPedType(CPed* ped);
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

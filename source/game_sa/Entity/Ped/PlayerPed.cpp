@@ -32,8 +32,8 @@ void CPlayerPed::InjectHooks() {
     RH_ScopedInstall(SetWantedLevelNoDrop, 0x609F30);
     RH_ScopedInstall(CheatWantedLevel, 0x609F50);
     RH_ScopedInstall(DoStuffToGoOnFire, 0x60A020);
-    // RH_ScopedVirtualInstall(Load, 0x5D46E0);
-    // RH_ScopedVirtualInstall(Save, 0x5D57E0);
+    RH_ScopedVirtualInstall(Load, 0x5D46E0, { .reversed = false });
+    RH_ScopedVirtualInstall(Save, 0x5D57E0, { .reversed = false });
     RH_ScopedInstall(DeactivatePlayerPed, 0x609520);
     RH_ScopedInstall(ReactivatePlayerPed, 0x609540);
     RH_ScopedInstall(GetPadFromPlayer, 0x609560);
@@ -59,7 +59,7 @@ void CPlayerPed::InjectHooks() {
     RH_ScopedInstall(MakePlayerGroupDisappear, 0x60A440);
     RH_ScopedInstall(MakePlayerGroupReappear, 0x60A4B0);
     RH_ScopedInstall(HandleSprintEnergy, 0x60A550);
-    // RH_ScopedInstall(GetButtonSprintResults, 0x60A820);
+    RH_ScopedInstall(GetButtonSprintResults, 0x60A820, { .reversed = false });
     RH_ScopedInstall(HandlePlayerBreath, 0x60A8D0);
     RH_ScopedOverloadedInstall(MakeChangesForNewWeapon, "", 0x60B460, void(CPlayerPed::*)(eWeaponType));
     RH_ScopedGlobalInstall(LOSBlockedBetweenPeds, 0x60B550);
@@ -144,7 +144,7 @@ CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(PED_TYPE_PLAYE
         m_pPlayerData->m_nPlayerGroup = CPedGroups::AddGroup();
 
         auto& group = CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup);
-        group.GetIntelligence().SetDefaultTaskAllocatorType(5);
+        group.GetIntelligence().SetDefaultTaskAllocatorType(ePedGroupDefaultTaskAllocatorType::RANDOM);
         group.m_bIsMissionGroup = true;
         group.m_groupMembership.SetLeader(this);
         group.Process();
@@ -562,7 +562,7 @@ void CPlayerPed::TellGroupToStartFollowingPlayer(bool arg0, bool arg1, bool arg2
         return;
 
     group.m_bMembersEnterLeadersVehicle = arg0;
-    groupIntel.SetDefaultTaskAllocatorType(5); // TODO enum probably missing
+    groupIntel.SetDefaultTaskAllocatorType(ePedGroupDefaultTaskAllocatorType::RANDOM);
     if (arg0) {
         CEventPlayerCommandToGroup playerCmdEvent;
         playerCmdEvent.ComputeResponseTaskType(&group);

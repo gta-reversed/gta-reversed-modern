@@ -3,6 +3,9 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <filesystem>
+
+#include "ReversibleHook/Base.h"
 
 //
 // Helper macros - For help regarding usage see how they're used (`Find all references` and take a look)
@@ -12,13 +15,18 @@
 //
 
 // Set scoped namespace name (This only works if you only use `ScopedGlobal` macros)
-#define RH_ScopedNamespaceName(name) \
-    ReversibleHooks::ScopeName RHCurrentScopeName {name};
+#define RH_ScopedNamespaceName(ns) \
+    ReversibleHooks::ScopeName RHCurrentScopeName {ns};
 
 // Use when `name` is a class
-#define RH_ScopedClass(name) \
-    using RHCurrentNS = name; \
-    ReversibleHooks::ScopeName RHCurrentScopeName {#name};
+#define RH_ScopedClass(cls) \
+    using RHCurrentNS = cls; \
+    ReversibleHooks::ScopeName RHCurrentScopeName {#cls};
+
+// Use when `name` is a class
+#define RH_ScopedNamedClass(cls, name) \
+    using RHCurrentNS = cls; \
+    ReversibleHooks::ScopeName RHCurrentScopeName {name};
 
 #define RH_ScopedVirtualClass(cls, addrGTAVtbl, nVirtFns_) \
     using RHCurrentNS = cls; \
@@ -144,6 +152,12 @@ namespace ReversibleHooks {
 
     void InstallVirtual(std::string_view category, std::string fnName, void** vtblGTA, void** vtblOur, void* fnGTAAddr, size_t nVirtFns, const HookInstallOptions& opt = {});
 
+    /*!
+    * @param category Category's path, eg.: "Global/"
+    * @param item     Item to add
+    */
+    void AddItemToCategory(std::string_view category, std::shared_ptr<ReversibleHook::Base> item);
+
     /*static void Switch(std::shared_ptr<SReversibleHook> pHook) {
         detail::HookSwitch(pHook);
     }*/
@@ -155,4 +169,6 @@ namespace ReversibleHooks {
 
     void OnInjectionBegin(HMODULE hModule);
     void OnInjectionEnd();
+
+    void WriteHooksToFile(const std::filesystem::path&);
 };
