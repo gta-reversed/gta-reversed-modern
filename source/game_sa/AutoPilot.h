@@ -22,17 +22,17 @@ public:
     CNodeAddress        m_currentAddress;
     CNodeAddress        m_startingRouteNode;
     CNodeAddress        m_endingRouteNode;
-    int32               field_C;
-    uint32              m_nSpeedScaleFactor;
+    uint32              m_timeToLeaveLink;
+    uint32              m_timeToNextLink;
     CCarPathLinkAddress m_nCurrentPathNodeInfo;
     CCarPathLinkAddress m_nNextPathNodeInfo;
     CCarPathLinkAddress m_nPreviousPathNodeInfo;
     char                field_1A[2];
     uint32              m_nTimeToStartMission;
     uint32              m_nTimeSwitchedToRealPhysics;
-    int8                _smthPrev;
-    int8                _smthCurr;
-    int8                _smthNext;
+    int8                _smthPrev; // Probably `m_inverseDirToPrevLink`
+    int8                m_inverseDirToCurrLink;
+    int8                m_inverseDirToNextLink;
     int8                m_nCurrentLane;
     int8                m_nNextLane;
     eCarDrivingStyle    m_nCarDrivingStyle;
@@ -79,7 +79,7 @@ public:
     char            field_51;
     char            field_52[10];
     CVector         m_vecDestinationCoors;
-    CNodeAddress    m_aPathFindNodesInfo[8];
+    std::array<CNodeAddress, 8> m_aPathFindNodesInfo;
     uint16          m_nPathFindNodesCount;
     char            field_8A[2];
     CVehicle*       m_pTargetCar; // More like "target entity", see 0x63C5B9
@@ -93,6 +93,8 @@ public:
     void ClearTempAction() noexcept;
 public:
     CAutoPilot();
+
+    static void InjectHooks();
 
     void ModifySpeed(float target);
     void RemoveOnePathNode();
