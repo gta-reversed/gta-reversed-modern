@@ -46,7 +46,7 @@ void CText::InjectHooks() {
     RH_ScopedInstall(GetNameOfLoadedMissionText, 0x69FBD0);
     RH_ScopedInstall(ReadChunkHeader, 0x69F940);
     RH_ScopedInstall(LoadMissionPackText, 0x69F9A0);
-    RH_ScopedInstall(LoadMissionText, 0x69FBF0, { .reversed = false });
+    RH_ScopedInstall(LoadMissionText, 0x69FBF0);
     RH_ScopedInstall(Load, 0x6A01A0);
     RH_ScopedInstall(Unload, 0x69FF20);
 
@@ -80,7 +80,7 @@ CText::CText() {
 
     m_bIsMissionPackLoaded = false;
     m_bIsMissionTextOffsetsLoaded = false;
-    m_nLangCode = 'e'; // english
+    m_nLangCode = eTextLangCode::ENGLISH;
 
     m_szCdErrorText[0] = '\0';
     m_szMissionName[0] = '\0';
@@ -135,6 +135,7 @@ void CText::Load(bool bKeepMissionPack) {
 
     CFileMgr::SetDir("TEXT");
     auto file = CFileMgr::OpenFile(GetGxtName(), "rb");
+    assert(file);
 
     uint16 version = 0;
     uint16 encoding = 0;
@@ -150,19 +151,19 @@ void CText::Load(bool bKeepMissionPack) {
         if (header.size == 0)
             continue;
 
-        if (strncmp(header.magic, CHUNK_TABL, sizeof(header.magic)) == 0) {
+        if (!strncmp(header.magic, CHUNK_TABL, sizeof(header.magic))) {
             m_MissionTextOffsets.Load(header.size, file, &offset, 0x58000); // todo: magic. Android have different value 0x64000
             m_bIsMissionTextOffsetsLoaded = true;
             continue;
         }
 
-        if (strncmp(header.magic, CHUNK_TKEY, sizeof(header.magic)) == 0) {
+        if (!strncmp(header.magic, CHUNK_TKEY, sizeof(header.magic))) {
             m_MainKeyArray.Load(header.size, file, &offset, false);
             bTKEY = true;
             continue;
         }
 
-        if (strncmp(header.magic, CHUNK_TDAT, sizeof(header.magic)) == 0) {
+        if (!strncmp(header.magic, CHUNK_TDAT, sizeof(header.magic))) {
             m_MainText.Load(header.size, file, &offset, false);
             bTDAT = true;
             continue;
@@ -196,8 +197,6 @@ void CText::Load(bool bKeepMissionPack) {
 
 // 0x69FBF0
 void CText::LoadMissionText(const char* mission) {
-    // plugin::CallMethod<0x69FBF0, CText*, char*>(this, mission);
-
     if (CGame::bMissionPackGame != 0)
         return;
 
@@ -207,58 +206,54 @@ void CText::LoadMissionText(const char* mission) {
     m_MissionText.Unload();
 
     m_bIsMissionPackLoaded = false;
-    std::memset(m_szMissionName, '\0', sizeof(m_szMissionName));
+    rng::fill(m_szMissionName, '\0');
 
     if (m_MissionTextOffsets.GetSize() == 0) {
         return;
     }
 
-    auto v21 = 0;
+    // SA GXT's have a table for every mission, table offset can be found with CMTO::GetTextOffset(offsetId);
+    auto missionIdxFound = false;
     auto offsetId = 0;
-    while (!v21) {
-        if (strlen(mission) == strlen(m_MissionTextOffsets.GetTextOffset(offsetId).szMissionName) &&
-            !strncmp(m_MissionTextOffsets.GetTextOffset(offsetId).szMissionName, mission, strlen(mission))
-        ) {
-            v21 = 1;
-        } else {
-            ++offsetId;
-        }
-
-        if (offsetId >= m_MissionTextOffsets.GetSize()) {
-            if (!v21)
-                return;
+    for (; offsetId < m_MissionTextOffsets.GetSize(); offsetId++) {
+        if (!strcmp(m_MissionTextOffsets.GetTextOffset(offsetId).szMissionName, mission)) {
+            missionIdxFound = true;
             break;
         }
     }
+    if (!missionIdxFound) {
+        NOTSA_UNREACHABLE("Index of the mission %s is not defined.", mission);
+    }
 
     CFileMgr::SetDir("TEXT");
-
     CTimer::Suspend();
 
     auto textOffset = m_MissionTextOffsets.GetTextOffset(offsetId);
     auto file = CFileMgr::OpenFile(GetGxtName(), "rb");
     CFileMgr::Seek(file, textOffset.offset, 0);
 
-    char buf[8];
-    CFileMgr::Read(file, buf, sizeof(buf)); // OG: CFileMgr::Read(file, buf++, 1u);
-    strncmp(buf, mission, sizeof(buf));     // ?
+    char tablName[8]{0};
+    CFileMgr::Read(file, tablName, sizeof(tablName));
+    DEV_LOG("[CText]: Loaded a text table for mission: '%s'", tablName);
+    // RET_IGNORED(strncmp(tablName, mission, sizeof(tablName))); // ?
 
     uint32 offset = sizeof(uint16) * 2; // skip version and encoding
     auto missionKeyArrayLoaded = false;
     auto missionTextLoaded = false;
     ChunkHeader header{};
+
     while (!missionKeyArrayLoaded || !missionTextLoaded) {
         ReadChunkHeader(&header, file, &offset, false);
         if (header.size == 0)
             continue;
 
-        if (strncmp(header.magic, CHUNK_TKEY, sizeof(header.magic)) == 0) {
+        if (!strncmp(header.magic, CHUNK_TKEY, sizeof(header.magic))) {
             m_MissionKeyArray.Load(header.size, file, &offset, 0);
             missionKeyArrayLoaded = true;
             continue;
         }
 
-        if (strncmp(header.magic, CHUNK_TDAT, sizeof(header.magic)) == 0) {
+        if (!strncmp(header.magic, CHUNK_TDAT, sizeof(header.magic))) {
             m_MissionText.Load(header.size, file, &offset, 0);
             missionTextLoaded = true;
             continue;
@@ -269,6 +264,7 @@ void CText::LoadMissionText(const char* mission) {
     }
 
     m_MissionKeyArray.Update(m_MissionText.m_data);
+
     CFileMgr::CloseFile(file);
     CTimer::Resume();
     CFileMgr::SetDir("");
@@ -287,13 +283,13 @@ void CText::LoadMissionPackText() {
     m_MissionText.Unload();
 
     m_bIsMissionPackLoaded = false;
-    std::memset(m_szMissionName, '\0', sizeof(m_szMissionName));
+    rng::fill(m_szMissionName, '\0');
 
     CFileMgr::SetDirMyDocuments();
     char filename[64];
     sprintf(filename, "MPACK//MPACK%d//TEXT.GXT", CGame::bMissionPackGame);
 
-    auto* file = CFileMgr::OpenFile(filename, "rb");
+    auto file = CFileMgr::OpenFile(filename, "rb");
     if (!file) {
         return;
     }
@@ -306,9 +302,10 @@ void CText::LoadMissionPackText() {
     assert(GAME_ENCODING == encoding && ("File %s was compiled with %d-bit char but %d-bit is required.", filename, encoding, GAME_ENCODING));
 
     uint32 offset = sizeof(uint16) * 2;
-    bool bkey = false, btext = false;
     ChunkHeader header{};
-    while (!bkey && !btext) {
+
+    bool bKey = false, bText = false;
+    while (!bKey && !bText) {
         if (ReadChunkHeader(&header, file, &offset, false)) {
             m_bIsMissionPackLoaded = false;
             CFileMgr::CloseFile(file);
@@ -317,20 +314,20 @@ void CText::LoadMissionPackText() {
 
         if (!strncmp(header.magic, CHUNK_TKEY, sizeof(header.magic))) {
             m_MissionKeyArray.Load(header.size, file, &offset, false);
-            bkey = true;
+            bKey = true;
             continue;
         }
 
         if (!strncmp(header.magic, CHUNK_TDAT, sizeof(header.magic))) {
             m_MissionText.Load(header.size, file, &offset, false);
-            btext = true;
+            bText = true;
             continue;
         }
 
         // Skip any other data
-        int8 bTmp;
+        int8 tmp;
         for (auto i = 0; i < header.size; ++i) {
-            if (!CFileMgr::Read(file, &bTmp, sizeof(int8))) {
+            if (!CFileMgr::Read(file, &tmp, sizeof(int8))) {
                 m_bIsMissionPackLoaded = false;
                 CFileMgr::CloseFile(file);
                 return;
@@ -348,7 +345,6 @@ void CText::LoadMissionPackText() {
 char* CText::Get(const char* key) {
     if (key[0] && key[0] != ' ') {
         bool found = false;
-
         char* str = m_MainKeyArray.Search(key, &found);
         if (found) {
             return str;
@@ -377,7 +373,6 @@ void CText::GetNameOfLoadedMissionText(char* outStr) {
 
 // 0x69F940
 bool CText::ReadChunkHeader(ChunkHeader* header, FILESTREAM file, uint32* offset, uint8 unknown) {
-    // ***: original code loops 8 times to read 1 byte with CFileMgr::Read, that's retarded
     // Same as in Android 2.0
     if (!CFileMgr::Read(file, header, sizeof(ChunkHeader))) {
         return false;
@@ -391,12 +386,12 @@ char CText::GetUpperCase(char c) const {
     switch (m_nLangCode) {
     case 'e': // english
         if (c >= 'a' && c <= 'z')
-            return c - 32;
+            return std::toupper(c);
         break;
 
     case 'f':
         if (c >= 'a' && c <= 'z')
-            return c - 32;
+            return std::toupper(c);
 
         if (c >= 128 && c <= 255)
             return FrenchUpperCaseTable[c - 128];
@@ -406,7 +401,7 @@ char CText::GetUpperCase(char c) const {
     case 'i': // italian
     case 's': // spanish
         if (c >= 'a' && c <= 'z')
-            return c - 32;
+            return std::toupper(c);
 
         if (c >= 128 && c <= 255)
             return UpperCaseTable[c - 128];

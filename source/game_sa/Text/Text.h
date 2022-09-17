@@ -10,7 +10,7 @@
 #include "KeyArray.h"
 #include "MissionTextOffsets.h"
 
-namespace TextDebugModule { void ProcessImgui(); };
+namespace TextDebugModule { void ProcessImGui(); };
 
 struct ChunkHeader {
     char  magic[4];
@@ -48,7 +48,7 @@ private:
     CData               m_MissionText;
 
 public:
-    uint8               m_nLangCode;
+    eTextLangCode       m_nLangCode;
     bool                m_bIsMissionTextOffsetsLoaded;
     bool                m_bCdErrorLoaded;
     bool                m_bIsMissionPackLoaded;
@@ -71,7 +71,7 @@ private:
     CText* Constructor();
     CText* Destructor();
 
-    friend void TextDebugModule::ProcessImgui();
+    friend void TextDebugModule::ProcessImGui();
 };
 
 VALIDATE_SIZE(CText, 0xA90);

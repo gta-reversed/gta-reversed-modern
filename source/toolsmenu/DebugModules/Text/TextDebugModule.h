@@ -2,6 +2,6 @@
 
 namespace TextDebugModule {
 
-void ProcessImgui();
+void ProcessImGui();
 
 }
