@@ -31,8 +31,8 @@ public:
     CText();
     ~CText();
 
-    void Load(bool bKeepMissionPack);
-    void Unload(bool bUnloadMissionData);
+    void Load(bool keepMissionPack);
+    void Unload(bool unloadMissionData);
 
     char* Get(const char* key);
     void GetNameOfLoadedMissionText(char* outStr);
@@ -73,7 +73,6 @@ private:
 
     friend void TextDebugModule::ProcessImGui();
 };
-
 VALIDATE_SIZE(CText, 0xA90);
 
 static inline CText& TheText = *(CText*)0xC1B340;
