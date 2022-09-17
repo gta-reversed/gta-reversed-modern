@@ -341,7 +341,7 @@ float CTaskComplexWander::GetDistSqOfClosestPathNodeToPed(CPed* ped) {
     return rng::min(
         std::array{ m_NextNode, m_LastNode }
      | rng::views::transform([ped](CNodeAddress node) {
-            if (node.IsValid() && ThePaths.IsNodeAreaLoaded(node)) {
+            if (node.IsValid() && ThePaths.IsAreaNodesAvailable(node)) {
                 return (ped->GetPosition() - ThePaths.GetPathNode(node)->GetNodeCoors()).SquaredMagnitude();
             }
             return 999'999.f;

@@ -149,6 +149,8 @@ public:
     // byte 3
 public:
     static void InjectHooks();
+
+    /// Get uncompressed world position
     CVector GetNodeCoors();
 
     inline bool IsLowTrafficLevel() const {
@@ -298,13 +300,27 @@ public:
         return m_pNaviNodes[address.m_wAreaId][address.m_wCarPathLinkId];
     }
 
-    // Helpers - NOTSA
+
+    /*!
+    * @addr 0x420AA0
+    * @brief Check if the node's area is loaded
+    * @param node Must have a valid area
+    */
+    bool IsAreaNodesAvailable(CNodeAddress node) const { assert(node.IsAreaValid()); return m_pPathNodes[node.m_wAreaId]; }
+
     bool FindNodeCoorsForScript(CVector& outPos, CNodeAddress addr);
-    
+
+    /*!
+    * @notsa
+    * @return The intersection info (if any) of 2 nodes or null if either node's area isn't loaded or if there's no intersection
+    */
     auto FindIntersection(const CNodeAddress& startNodeAddress, const CNodeAddress& targetNodeAddress) -> CPathIntersectionInfo*;
-    
-    bool IsNodeAreaLoaded(CNodeAddress addr) const { assert(addr.IsAreaValid()); return m_pPathNodes[addr.m_wAreaId]; }
-    bool IsNodeAreaLoaded(const std::initializer_list<CNodeAddress>& addrs) const;
+
+    /*!
+    * @notsa
+    * @brief Check if all node's areas in the list are loaded
+    */
+    bool AreNodeAreasLoaded(const std::initializer_list<CNodeAddress>& addrs) const;
 };
 
 VALIDATE_SIZE(CPathFind, 0x3C80);

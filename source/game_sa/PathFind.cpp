@@ -19,22 +19,84 @@ void CPathFind::InjectHooks() {
     RH_ScopedClass(CPathFind);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(Init, 0x44D080);
-    RH_ScopedInstall(ReInit, 0x44E4E0);
+    // Hooks commented out because most of the functions have no definitions
+    // thus it's not possible to take their address
+    // And I'm lazy to add stubs
+
+    //RH_ScopedInstall(AddNodeToNewInterior, 0x450E90);
+    //RH_ScopedInstall(FindNearestExteriorNodeToInteriorNode, 0x450F30);
+    //RH_ScopedInstall(ThisNodeHasToBeSwitchedOff, 0x44D3E0);
+    //RH_ScopedInstall(SwitchRoadsInAngledArea, 0x44D3D0);
+    //RH_ScopedInstall(RegisterMarker, 0x44D300);
+    //RH_ScopedInstall(AllocatePathFindInfoMem, 0x44D2B0);
+    //RH_ScopedInstall(These2NodesAreAdjacent, 0x44D230);
+    //RH_ScopedInstall(PreparePathData, 0x44D0E0);
+    //RH_ScopedInstall(FindRegionForCoors, 0x44D830);
+    //RH_ScopedInstall(FindYRegionForCoors, 0x44D8C0);
+    //RH_ScopedInstall(AddInteriorLinkToExternalNode, 0x44DF30);
+    //RH_ScopedInstall(AddInteriorLink, 0x44DED0);
+    //RH_ScopedInstall(MarkRegionsForCoors, 0x44DB60);
+    //RH_ScopedInstall(FindStartPointOfRegion, 0x44D930);
+    //RH_ScopedInstall(FindYCoorsForRegion, 0x44D910);
+    //RH_ScopedInstall(FindXCoorsForRegion, 0x44D8F0);
+    //RH_ScopedInstall(FindXRegionForCoors, 0x44D890);
+    RH_ScopedInstall(IsAreaNodesAvailable, 0x420AA0);
+    //RH_ScopedInstall(HaveRequestedNodesBeenLoaded, 0x450DB0);
+    //RH_ScopedInstall(MakeRequestForNodesToBeLoaded, 0x450D70);
+    //RH_ScopedInstall(UpdateStreaming, 0x450A60);
+    //RH_ScopedInstall(TakeWidthIntoAccountForWandering, 0x4509A0);
     RH_ScopedInstall(Shutdown, 0x450950);
-    RH_ScopedInstall(TidyUpNodeSwitchesAfterMission, 0x44D3B0);
-    RH_ScopedInstall(UnMarkAllRoadNodesAsDontWander, 0x44D400);
-    RH_ScopedInstall(ReleaseRequestedNodes, 0x44DD00);
+    //RH_ScopedOverloadedInstall(FindNodeCoorsForScript, "", 0x450780, CVector(CPathFind::*)(CNodeAddress, CNodeAddress, float*, bool*));
+    //RH_ScopedOverloadedInstall(FindNodeCoorsForScript, "", 0x4505E0, CVector(CPathFind::*)(CNodeAddress, bool*));
+    //RH_ScopedInstall(IsWaterNodeNearby, 0x450DE0);
+    //RH_ScopedInstall(CountNeighboursToBeSwitchedOff, 0x4504F0);
+    //RH_ScopedInstall(FindNodeOrientationForCarPlacement, 0x450320);
+    //RH_ScopedInstall(FindNodePairClosestToCoors, 0x44FEE0);
+    //RH_ScopedInstall(FindNodeClosestToCoorsFavourDirection, 0x44FCE0);
+    //RH_ScopedInstall(RecordNodesInCircle, 0x44FB60);
+    //RH_ScopedInstall(FindNodeClosestToCoors, 0x44FA30);
     RH_ScopedInstall(MarkRoadNodeAsDontWander, 0x450560);
+    //RH_ScopedInstall(AddDynamicLinkBetween2Nodes, 0x4512D0);
+    RH_ScopedOverloadedInstall(LoadPathFindData, "Area", 0x452F40, void(CPathFind::*)(int32));
+    RH_ScopedOverloadedInstall(LoadPathFindData, "FromStream", 0x4529F0, void(CPathFind::*)(RwStream*, int32));
+    //RH_ScopedInstall(SwitchPedRoadsOffInArea, 0x452F00);
+    //RH_ScopedInstall(SwitchRoadsOffInArea, 0x452C80);
+    //RH_ScopedInstall(SwitchRoadsOffInAreaForOneRegion, 0x452820);
+    //RH_ScopedInstall(ComputeRoute, 0x452760);
+    //RH_ScopedInstall(CompleteNewInterior, 0x452270);
+    //RH_ScopedInstall(SwitchOffNodeAndNeighbours, 0x452160);
+    //RH_ScopedInstall(Find2NodesForCarCreation, 0x452090);
+    //RH_ScopedInstall(TestCoorsCloseness, 0x452000);
+    //RH_ScopedInstall(FindNextNodeWandering, 0x451B70);
+    //RH_ScopedInstall(DoPathSearch, 0x4515D0);
+    //RH_ScopedInstall(FindParkingNodeInArea, 0x4513F0);
+    //RH_ScopedInstall(FindLinkBetweenNodes, 0x451350);
     RH_ScopedInstall(ReturnInteriorNodeIndex, 0x451300);
-    RH_ScopedInstall(StartNewInterior, 0x44DE80);
-    RH_ScopedOverloadedInstall(LoadPathFindData, "void", 0x452F40, void(CPathFind::*)(int32));
-    RH_ScopedOverloadedInstall(LoadPathFindData, "stream", 0x4529F0, void(CPathFind::*)(RwStream*, int32));
-    RH_ScopedInstall(UnLoadPathFindData, 0x44D0F0);
-    RH_ScopedInstall(GetPathNode, 0x420AC0);
-    RH_ScopedInstall(AddDynamicLinkBetween2Nodes_For1Node, 0x44E000);
-    RH_ScopedInstall(TestCrossesRoad, 0x44D790);
+    //RH_ScopedInstall(FindNthNodeClosestToCoors, 0x44F8C0);
+    //RH_ScopedInstall(FindNodeClosestInRegion, 0x44F2C0);
+    //RH_ScopedInstall(CalcDistToAnyConnectingLinks, 0x44F190);
+    //RH_ScopedInstall(CalcRoadDensity, 0x44EFC0);
     RH_ScopedInstall(TestForPedTrafficLight, 0x44D480);
+    RH_ScopedInstall(UnMarkAllRoadNodesAsDontWander, 0x44D400);
+    RH_ScopedInstall(TidyUpNodeSwitchesAfterMission, 0x44D3B0);
+    //RH_ScopedInstall(ThisNodeWillLeadIntoADeadEnd, 0x44D310);
+    //RH_ScopedInstall(AddNodeToList, 0x44D1E0);
+    //RH_ScopedInstall(RemoveNodeFromList, 0x44D1B0);
+    RH_ScopedInstall(UnLoadPathFindData, 0x44D0F0);
+    RH_ScopedInstall(Init, 0x44D080);
+    RH_ScopedInstall(GetPathNode, 0x420AC0);
+    RH_ScopedInstall(TestCrossesRoad, 0x44D790);
+    //RH_ScopedInstall(Save, 0x5D34C0);
+    RH_ScopedInstall(ReInit, 0x44E4E0);
+    //RH_ScopedInstall(RemoveInterior, 0x44E1A0);
+    RH_ScopedInstall(AddDynamicLinkBetween2Nodes_For1Node, 0x44E000);
+    RH_ScopedInstall(StartNewInterior, 0x44DE80);
+    //RH_ScopedInstall(LoadSceneForPathNodes, 0x44DE00);
+    //RH_ScopedInstall(AreNodesLoadedForArea, 0x44DD10);
+    //RH_ScopedInstall(ReleaseRequestedNodes, 0x44DD00);
+    //RH_ScopedInstall(SetPathsNeededAtPosition, 0x44DCD0);
+    //RH_ScopedInstall(SetLinksBridgeLights, 0x44D960);
+    //RH_ScopedInstall(Load, 0x5D3500);
 }
 
 void CPathNode::InjectHooks() {
@@ -117,7 +179,7 @@ void CPathFind::ReleaseRequestedNodes() {
 */
 auto CPathFind::FindIntersection(const CNodeAddress& startNodeAddress, const CNodeAddress& targetNodeAddress) -> CPathIntersectionInfo* {
     // Make sure both nodes areas are loaded
-    if (!IsNodeAreaLoaded({ targetNodeAddress, startNodeAddress })) {
+    if (!AreNodeAreasLoaded({ targetNodeAddress, startNodeAddress })) {
         return nullptr;
     }
 
@@ -145,10 +207,16 @@ bool CPathFind::TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddre
     return intersect && intersect->m_bPedTrafficLight;
 }
 
+// 0x4509A0
 CVector CPathFind::TakeWidthIntoAccountForWandering(CNodeAddress nodeAddress, uint16 randomSeed) {
-    CVector vecOut;
-    plugin::CallMethod<0x4509A0, CPathFind*, CVector*, CNodeAddress, uint16>(this, &vecOut, nodeAddress, randomSeed);
-    return vecOut;
+    // Invalid area, or area not loaded
+    if (!nodeAddress.IsAreaValid() || !IsAreaNodesAvailable(nodeAddress)) {
+        return {};
+    } else {
+        const auto nbits = 4u;
+        const auto Random = [](uint16 seed) { return (float)(seed % (1 << nbits) - 7); };
+        return GetPathNode(nodeAddress)->GetNodeCoors() + CVector{ Random(randomSeed), Random(randomSeed >> nbits), 0.f };
+    }
 }
 
 //  0x44F8C0
@@ -451,6 +519,6 @@ bool CPathFind::Save() {
     return true;
 }
 
-bool CPathFind::IsNodeAreaLoaded(const std::initializer_list<CNodeAddress>& addrs) const {
-    return rng::all_of(addrs, [this](auto&& addr) { return IsNodeAreaLoaded(addr); });
+bool CPathFind::AreNodeAreasLoaded(const std::initializer_list<CNodeAddress>& addrs) const {
+    return rng::all_of(addrs, [this](auto&& addr) { return IsAreaNodesAvailable(addr); });
 }
