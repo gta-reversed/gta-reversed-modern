@@ -47,7 +47,7 @@ void CPathFind::InjectHooks() {
     //RH_ScopedInstall(TakeWidthIntoAccountForWandering, 0x4509A0);
     RH_ScopedInstall(Shutdown, 0x450950);
     //RH_ScopedOverloadedInstall(FindNodeCoorsForScript, "", 0x450780, CVector(CPathFind::*)(CNodeAddress, CNodeAddress, float*, bool*));
-    //RH_ScopedOverloadedInstall(FindNodeCoorsForScript, "", 0x4505E0, CVector(CPathFind::*)(CNodeAddress, bool*));
+    RH_ScopedOverloadedInstall(FindNodeCoorsForScript, "OneNode", 0x4505E0, CVector(CPathFind::*)(CNodeAddress, bool*));
     //RH_ScopedInstall(IsWaterNodeNearby, 0x450DE0);
     //RH_ScopedInstall(CountNeighboursToBeSwitchedOff, 0x4504F0);
     //RH_ScopedInstall(FindNodeOrientationForCarPlacement, 0x450320);
@@ -291,9 +291,40 @@ void CPathFind::SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, floa
 
 // 0x4505E0
 CVector CPathFind::FindNodeCoorsForScript(CNodeAddress address, bool* bFound) {
-    CVector vecOut;
-    plugin::CallMethod<0x4505E0, CPathFind*, CVector*, CNodeAddress, bool*>(this, &vecOut, address, bFound);
-    return vecOut;
+    const auto SetFound = [&](bool found) {
+        if (bFound) {
+            *bFound = found;
+        }
+    };
+    if (!address.IsAreaValid() || IsAreaNodesAvailable(address)) {
+        SetFound(false);
+        return {};
+    } else {
+        SetFound(true);
+
+        const auto node = GetPathNode(address);
+        const auto nodePos = node->GetNodeCoors();
+
+        // If this node has a link return some kind of position between this and the first link
+        if (node->m_nPathWidth && node->m_nNumLinks) {
+            if (const auto firstLink = m_pNodeLinks[node->m_wBaseLinkId]) {
+                if (const auto firstLinkedNode = GetPathNode(*firstLink)) {
+                    auto dir = CVector2D{ firstLinkedNode->GetNodeCoors() - nodePos }.Normalized();
+
+                    // By negating here we invert the direction
+                    dir = dir.x >= 0 ? dir : -dir ;
+
+                    // Rotate by +90 degrees (Source: https://stackoverflow.com/q/243945 - comments under the OP's question)
+                    dir = { -dir.y, dir.x };
+
+                    return nodePos + CVector{ dir * ((float)node->m_nPathWidth / 16.f + 2.7f) };
+                }
+            }
+        }
+
+        // Otherwise just return this node's position
+        return nodePos;
+    }
 }
 
 // 0x450780

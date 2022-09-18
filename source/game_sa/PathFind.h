@@ -138,7 +138,7 @@ public:
     uint8            m_nFloodFill;
 
     // byte 0
-    uint32 m_nNumLinks : 4;
+    uint32 m_nNumLinks : 4; // Mask: 0xF
     uint32 m_nTrafficLevel : 2; // TrafficLevel uses 4 steps: 0 = full 1 = high 2 = medium 3 = low
     uint32 m_bRoadBlocks : 1;
     uint32 m_bWaterNode : 1;
