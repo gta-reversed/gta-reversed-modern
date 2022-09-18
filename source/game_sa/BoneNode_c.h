@@ -38,7 +38,7 @@ public:
     void ClampLimitsCurrent(bool LimitX, bool LimitY, bool LimitZ);
     void ClampLimitsDefault(bool LimitX, bool LimitY, bool LimitZ);
 
-    void Limit(float lim);
+    void Limit(float blend);
 
     void BlendKeyframe(float blend);
 

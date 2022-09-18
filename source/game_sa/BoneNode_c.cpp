@@ -16,7 +16,7 @@ void BoneNode_c::InjectHooks() {
     RH_ScopedGlobalInstall(GetIdFromBoneTag, 0x617050);
     RH_ScopedInstall(ClampLimitsCurrent, 0x6175D0);
     RH_ScopedInstall(ClampLimitsDefault, 0x617530);
-    RH_ScopedInstall(Limit, 0x617650, { .reversed = false });
+    RH_ScopedInstall(Limit, 0x617650);
     RH_ScopedInstall(BlendKeyframe, 0x616E30, { .reversed = false });
     RH_ScopedInstall(GetSpeed, 0x616CB0);
     RH_ScopedInstall(SetSpeed, 0x616CC0);
@@ -148,9 +148,30 @@ void BoneNode_c::ClampLimitsDefault(bool LimitX, bool LimitY, bool LimitZ) {
     }
 }
 
+// argumnet (float blend) - ignored
 // 0x617650
-void BoneNode_c::Limit(float lim) {
-    plugin::CallMethod<0x617650, BoneNode_c*, float>(this, lim);
+void BoneNode_c::Limit(float blend) {
+    CVector eulerOrientation{};
+
+    BoneNode_c::QuatToEuler(&m_Orientation, &eulerOrientation);
+
+    eulerOrientation.x = std::clamp(eulerOrientation.x, m_LimitMin.x, m_LimitMax.x);
+    eulerOrientation.y = std::clamp(eulerOrientation.y, m_LimitMin.y, m_LimitMax.y);
+
+    float clampZMin = m_LimitMin.z;
+    float clampZMax = m_LimitMax.z;
+
+    if (m_BoneTag == ePedBones::BONE_HEAD) {
+        float maxHeadZ = BoneNodeManager_c::ms_boneInfos[GetIdFromBoneTag(ePedBones::BONE_HEAD)].m_Max.z;
+        float multy = std::max(abs(eulerOrientation.x) / -45.0f + 1.0f, 0.0f);
+
+        clampZMin = maxHeadZ + (m_LimitMin.z - maxHeadZ) * multy;
+        clampZMax = maxHeadZ + (m_LimitMax.z - maxHeadZ) * multy;
+    }
+
+    eulerOrientation.z = std::clamp(eulerOrientation.z, clampZMin, clampZMax);
+
+    BoneNode_c::EulerToQuat(&eulerOrientation, &m_Orientation);
 }
 
 // 0x616E30
