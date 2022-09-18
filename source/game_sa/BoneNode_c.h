@@ -32,7 +32,7 @@ public:
 
     // Originally these 2 took in the return value as a pointer, lets see if this is ABI compatible..
     static CQuaternion EulerToQuat(CVector* angles, CQuaternion* quat);
-    static CVector QuatToEuler(CQuaternion* quat, CVector* angles);
+    static void QuatToEuler(CQuaternion* quat, CVector* angles);
     static int32  GetIdFromBoneTag(ePedBones bone);
 
     void ClampLimitsCurrent(bool LimitX, bool LimitY, bool LimitZ);

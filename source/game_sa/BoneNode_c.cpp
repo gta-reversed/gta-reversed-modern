@@ -12,7 +12,7 @@ void BoneNode_c::InjectHooks() {
     RH_ScopedInstall(Init, 0x6177B0);
     RH_ScopedInstall(InitLimits, 0x617490);
     RH_ScopedGlobalInstall(EulerToQuat, 0x6171F0, { .reversed = false });
-    RH_ScopedGlobalInstall(QuatToEuler, 0x617080, { .reversed = false });
+    RH_ScopedGlobalInstall(QuatToEuler, 0x617080);
     RH_ScopedGlobalInstall(GetIdFromBoneTag, 0x617050);
     RH_ScopedInstall(ClampLimitsCurrent, 0x6175D0);
     RH_ScopedInstall(ClampLimitsDefault, 0x617530);
@@ -23,7 +23,7 @@ void BoneNode_c::InjectHooks() {
     RH_ScopedInstall(SetLimits, 0x616C50);
     RH_ScopedInstall(GetLimits, 0x616BF0);
     RH_ScopedInstall(AddChild, 0x616BD0);
-    RH_ScopedInstall(CalcWldMat, 0x616CD0, { .reversed = true }); // Not tested!!
+    RH_ScopedInstall(CalcWldMat, 0x616CD0); // Not tested!!
 }
 
 // 0x6177B0
@@ -63,8 +63,18 @@ CQuaternion BoneNode_c::EulerToQuat(CVector* angles, CQuaternion* quat) {
 }
 
 // 0x617080
-CVector BoneNode_c::QuatToEuler(CQuaternion* quat, CVector* angles) {
-    return plugin::CallAndReturn<CVector, 0x617080, CQuaternion*, CVector*>(quat, angles);
+void BoneNode_c::QuatToEuler(CQuaternion* quat, CVector* angles) {
+    angles->x = atan2f(2.0f * (quat->w * quat->x + quat->y * quat->z), 1.0f - 2.0f * (quat->x * quat->x + quat->y * quat->y));
+
+    float sinp = 2.0f * (quat->w * quat->y - quat->z * quat->x);
+
+    if (abs(sinp) >= 1.0f) {
+        angles->y = copysignf(FRAC_TAU_2, sinp);
+    } else {
+        angles->y = asinf(sinp);
+    }
+
+    angles->z = atan2f(2.0f * (quat->w * quat->z + quat->x * quat->y), 1.0f - 2.0f * (quat->y * quat->y + quat->z * quat->z));
 }
 
 // 0x617050
@@ -83,7 +93,8 @@ void BoneNode_c::ClampLimitsCurrent(bool LimitX, bool LimitY, bool LimitZ) {
     if (*(bool*)0x8D2BD1) // always true
         return;
 
-    CVector angles = QuatToEuler(&m_Orientation, &angles);
+    CVector angles;
+    QuatToEuler(&m_Orientation, &angles);
     if (LimitX) {
         m_LimitMax.x = angles.x;
         m_LimitMin.x = angles.x;
@@ -191,27 +202,32 @@ void BoneNode_c::AddChild(BoneNode_c* children) {
 void BoneNode_c::CalcWldMat(const RwMatrix* boneMatrix) {
     RwMatrix math;
 
-    float dst = 2.0f / ((m_Orientation.imag.x * m_Orientation.imag.x) + (m_Orientation.imag.y * m_Orientation.imag.y) + (m_Orientation.imag.z * m_Orientation.imag.z) +
-                        (m_Orientation.real * m_Orientation.real));
+    float dst = 2.0f / ((m_Orientation.x * m_Orientation.x) + (m_Orientation.y * m_Orientation.y) + (m_Orientation.z * m_Orientation.z) +
+                        (m_Orientation.w * m_Orientation.w));
 
-    math.right.x = 1.0f - ((m_Orientation.imag.y * (m_Orientation.imag.y * dst)) + (m_Orientation.imag.z + (m_Orientation.imag.z * dst)));
-    math.right.y = (m_Orientation.imag.x * (m_Orientation.imag.y * dst)) + (m_Orientation.real * (m_Orientation.imag.z * dst));
-    math.right.z = (m_Orientation.imag.z * (m_Orientation.imag.x * dst)) - (m_Orientation.real * (m_Orientation.imag.y * dst));
+	math.right = {
+                    1.0f - ((m_Orientation.y * (m_Orientation.y * dst)) + (m_Orientation.z + (m_Orientation.z * dst))),
+                    (m_Orientation.x * (m_Orientation.y * dst)) + (m_Orientation.w * (m_Orientation.z * dst)),
+                    (m_Orientation.z * (m_Orientation.x * dst)) - (m_Orientation.w * (m_Orientation.y * dst))
+    };
 
-    math.up.x = (m_Orientation.imag.x * (m_Orientation.imag.y * dst)) - (m_Orientation.real * (m_Orientation.imag.z * dst));
-    math.up.y = 1.0f - ((m_Orientation.imag.z + (m_Orientation.imag.z * dst)) + (m_Orientation.imag.x * (m_Orientation.imag.x * dst)));
-    math.up.z = (m_Orientation.imag.y * (m_Orientation.imag.z * dst)) + (m_Orientation.real * (m_Orientation.imag.x * dst));
-
-    math.at.x = (m_Orientation.imag.z * (m_Orientation.imag.x * dst)) + (m_Orientation.real * (m_Orientation.imag.y * dst));
-    math.at.y = (m_Orientation.imag.y * (m_Orientation.imag.z * dst)) - (m_Orientation.real * (m_Orientation.imag.x * dst));
-    math.at.z = 1.0f - ((m_Orientation.imag.x * (m_Orientation.imag.x * dst)) + (m_Orientation.imag.y * (m_Orientation.imag.y * dst)));
+    math.up = {
+                (m_Orientation.x * (m_Orientation.y * dst)) - (m_Orientation.w * (m_Orientation.z * dst)),
+                1.0f - ((m_Orientation.z + (m_Orientation.z * dst)) + (m_Orientation.x * (m_Orientation.x * dst))),
+                (m_Orientation.y * (m_Orientation.z * dst)) + (m_Orientation.w * (m_Orientation.x * dst))
+    };
+    math.at = {
+                (m_Orientation.z * (m_Orientation.x * dst)) + (m_Orientation.w * (m_Orientation.y * dst)),
+                (m_Orientation.y * (m_Orientation.z * dst)) - (m_Orientation.w * (m_Orientation.x * dst)),
+                1.0f - ((m_Orientation.x * (m_Orientation.x * dst)) + (m_Orientation.y * (m_Orientation.y * dst)))
+    };
 
     math.flags = 3;
     math.pos = m_Pos;
 
     RwMatrixMultiply(&m_WorldMat, &math, boneMatrix);
 
-    for (BoneNode_c* bone = static_cast<BoneNode_c*>(m_Childs.m_pHead); bone != nullptr; bone = static_cast<BoneNode_c*>(bone->m_pNext)) {
+    for (auto bone = m_Childs.GetHead(); bone; bone = m_Childs.GetNext(bone)) {
         bone->CalcWldMat(&m_WorldMat);
     }
 }
