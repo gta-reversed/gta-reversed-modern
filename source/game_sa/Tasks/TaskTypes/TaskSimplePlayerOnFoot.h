@@ -16,7 +16,7 @@ extern bool& gbUnknown_8D2FE8;
 
 class CPed;
 
-class NOTSA_EXPORT_VTABLE CTaskSimplePlayerOnFoot : public CTaskSimple {
+class CTaskSimplePlayerOnFoot : public CTaskSimple {
 public:
     uint32   m_nAnimationBlockIndex;
     uint32   m_nFrameCounter;
@@ -42,23 +42,15 @@ public:
     static void PlayerControlDucked(CPlayerPed* player);
     int32 PlayerControlZelda(CPlayerPed* player, bool bAvoidJumpingAndDucking);
 
-
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    // 0x685750
-    CTaskSimplePlayerOnFoot* Constructor() {
-        this->CTaskSimplePlayerOnFoot::CTaskSimplePlayerOnFoot();
-        return this;
-    }
+    CTaskSimplePlayerOnFoot* Constructor();
+    CTaskSimplePlayerOnFoot* Destructor();
 
-    // 0x68B0C0
-    CTaskSimplePlayerOnFoot* Destructor() {
-        this->CTaskSimplePlayerOnFoot::~CTaskSimplePlayerOnFoot();
-        return this;
-    }
-
+    bool ProcessPed_Reversed(CPed* ped);
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
 };
 
 VALIDATE_SIZE(CTaskSimplePlayerOnFoot, 0x1C);

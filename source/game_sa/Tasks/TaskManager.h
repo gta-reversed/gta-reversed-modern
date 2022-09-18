@@ -156,7 +156,7 @@ public:
     /*!
     * @addr 0x681B60
     * @brief Set the seconady task
-    * @param task The new, dynamically allocated, task, might be null, in case the specified task will be removed.
+    * @param task The new task, might be null, in case the specified task is to be removed
     * @param taskIndex The index of the secondary task to be changed
     */
     void SetTaskSecondary(CTask* task, eSecondaryTask taskIndex) { ChangeTaskInSlot(m_aSecondaryTasks[taskIndex], task); }
