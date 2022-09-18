@@ -17,13 +17,13 @@ void BoneNode_c::InjectHooks() {
     RH_ScopedInstall(ClampLimitsCurrent, 0x6175D0);
     RH_ScopedInstall(ClampLimitsDefault, 0x617530);
     RH_ScopedInstall(Limit, 0x617650);
-    RH_ScopedInstall(BlendKeyframe, 0x616E30, { .reversed = false });
+    RH_ScopedInstall(BlendKeyframe, 0x616E30);
     RH_ScopedInstall(GetSpeed, 0x616CB0);
     RH_ScopedInstall(SetSpeed, 0x616CC0);
     RH_ScopedInstall(SetLimits, 0x616C50);
     RH_ScopedInstall(GetLimits, 0x616BF0);
     RH_ScopedInstall(AddChild, 0x616BD0);
-    RH_ScopedInstall(CalcWldMat, 0x616CD0); // Not tested!!
+    RH_ScopedInstall(CalcWldMat, 0x616CD0);
 }
 
 // 0x6177B0
@@ -176,7 +176,21 @@ void BoneNode_c::Limit(float blend) {
 
 // 0x616E30
 void BoneNode_c::BlendKeyframe(float blend) {
-    plugin::CallMethod<0x616E30, BoneNode_c*, float>(this, blend);
+    if (blend <= 0.0f || blend >= 1.0f) {
+        m_InterpFrame->orientation = m_Orientation;
+        return;
+    }
+
+    RtQuatSlerpCache sCache;
+
+    RtQuatSetupSlerpCache(reinterpret_cast<RtQuat*>(&m_InterpFrame), reinterpret_cast<RtQuat*>(&m_Orientation), &sCache);
+
+    m_InterpFrame->orientation = CQuaternion{
+        sCache.raFrom.imag.x * (1.0f - blend) + sCache.raTo.imag.x * blend,
+        sCache.raFrom.imag.y * (1.0f - blend) + sCache.raTo.imag.y * blend,
+        sCache.raFrom.imag.z * (1.0f - blend) + sCache.raTo.imag.z * blend,
+        sCache.raFrom.real * (1.0f - blend) + sCache.raTo.real * blend
+    };
 }
 
 // 0x616CB0
