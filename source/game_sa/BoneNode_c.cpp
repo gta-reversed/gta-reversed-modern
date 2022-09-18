@@ -11,7 +11,7 @@ void BoneNode_c::InjectHooks() {
 
     RH_ScopedInstall(Init, 0x6177B0);
     RH_ScopedInstall(InitLimits, 0x617490);
-    RH_ScopedGlobalInstall(EulerToQuat, 0x6171F0, { .reversed = false });
+    RH_ScopedGlobalInstall(EulerToQuat, 0x6171F0);
     RH_ScopedGlobalInstall(QuatToEuler, 0x617080);
     RH_ScopedGlobalInstall(GetIdFromBoneTag, 0x617050);
     RH_ScopedInstall(ClampLimitsCurrent, 0x6175D0);
@@ -58,8 +58,24 @@ void BoneNode_c::InitLimits() {
 }
 
 // 0x6171F0
-CQuaternion BoneNode_c::EulerToQuat(CVector* angles, CQuaternion* quat) {
-    return plugin::CallAndReturn<CQuaternion, 0x6171F0, CVector*>(angles);
+void BoneNode_c::EulerToQuat(CVector* angles, CQuaternion* quat) {
+    CVector radAngles = {
+        DegreesToRadians(angles->x),
+        DegreesToRadians(angles->y),
+        DegreesToRadians(angles->z)
+    };
+
+    float cr = cos(radAngles.x * 0.5f);
+    float sr = sin(radAngles.x * 0.5f);
+    float cp = cos(radAngles.y * 0.5f);
+    float sp = sin(radAngles.y * 0.5f);
+    float cy = cos(radAngles.z * 0.5f);
+    float sy = sin(radAngles.z * 0.5f);
+
+    quat->w = cr * cp * cy + sr * sp * sy;
+    quat->x = sr * cp * cy - cr * sp * sy;
+    quat->y = cr * sp * cy + sr * cp * sy;
+    quat->z = cr * cp * sy - sr * sp * cy;
 }
 
 // 0x617080
