@@ -65,12 +65,12 @@ void BoneNode_c::EulerToQuat(CVector* angles, CQuaternion* quat) {
         DegreesToRadians(angles->z)
     };
 
-    float cr = cos(radAngles.x * 0.5f);
-    float sr = sin(radAngles.x * 0.5f);
-    float cp = cos(radAngles.y * 0.5f);
-    float sp = sin(radAngles.y * 0.5f);
-    float cy = cos(radAngles.z * 0.5f);
-    float sy = sin(radAngles.z * 0.5f);
+    float cr = std::cos(radAngles.x * 0.5f);
+    float sr = std::sin(radAngles.x * 0.5f);
+    float cp = std::cos(radAngles.y * 0.5f);
+    float sp = std::sin(radAngles.y * 0.5f);
+    float cy = std::cos(radAngles.z * 0.5f);
+    float sy = std::sin(radAngles.z * 0.5f);
 
     quat->w = cr * cp * cy + sr * sp * sy;
     quat->x = sr * cp * cy - cr * sp * sy;
@@ -80,17 +80,17 @@ void BoneNode_c::EulerToQuat(CVector* angles, CQuaternion* quat) {
 
 // 0x617080
 void BoneNode_c::QuatToEuler(CQuaternion* quat, CVector* angles) {
-    angles->x = atan2f(2.0f * (quat->w * quat->x + quat->y * quat->z), 1.0f - 2.0f * (quat->x * quat->x + quat->y * quat->y));
+    angles->x = std::atan2f(2.0f * (quat->w * quat->x + quat->y * quat->z), 1.0f - 2.0f * (sq(quat->x) + sq(quat->y)));
 
     float sinp = 2.0f * (quat->w * quat->y - quat->z * quat->x);
 
-    if (abs(sinp) >= 1.0f) {
-        angles->y = copysignf(FRAC_TAU_2, sinp);
+    if (std::abs(sinp) >= 1.0f) {
+        angles->y = std::copysignf(FRAC_TAU_2, sinp);
     } else {
-        angles->y = asinf(sinp);
+        angles->y = std::asinf(sinp);
     }
 
-    angles->z = atan2f(2.0f * (quat->w * quat->z + quat->x * quat->y), 1.0f - 2.0f * (quat->y * quat->y + quat->z * quat->z));
+    angles->z = std::atan2f(2.0f * (quat->w * quat->z + quat->x * quat->y), 1.0f - 2.0f * (sq(quat->y) + sq(quat->z)));
 }
 
 // 0x617050
@@ -110,7 +110,7 @@ void BoneNode_c::ClampLimitsCurrent(bool LimitX, bool LimitY, bool LimitZ) {
         return;
 
     CVector angles;
-    QuatToEuler(&m_Orientation, &angles);
+    BoneNode_c::QuatToEuler(&m_Orientation, &angles);
     if (LimitX) {
         m_LimitMax.x = angles.x;
         m_LimitMin.x = angles.x;
@@ -182,14 +182,13 @@ void BoneNode_c::BlendKeyframe(float blend) {
     }
 
     RtQuatSlerpCache sCache;
-
     RtQuatSetupSlerpCache(reinterpret_cast<RtQuat*>(&m_InterpFrame), reinterpret_cast<RtQuat*>(&m_Orientation), &sCache);
 
     m_InterpFrame->orientation = CQuaternion{
-        sCache.raFrom.imag.x * (1.0f - blend) + sCache.raTo.imag.x * blend,
-        sCache.raFrom.imag.y * (1.0f - blend) + sCache.raTo.imag.y * blend,
-        sCache.raFrom.imag.z * (1.0f - blend) + sCache.raTo.imag.z * blend,
-        sCache.raFrom.real * (1.0f - blend) + sCache.raTo.real * blend
+        std::lerp(sCache.raFrom.imag.x, sCache.raTo.imag.x, blend),
+        std::lerp(sCache.raFrom.imag.y, sCache.raTo.imag.y, blend),
+        std::lerp(sCache.raFrom.imag.z, sCache.raTo.imag.z, blend),
+        std::lerp(sCache.raFrom.real, sCache.raTo.real, blend)
     };
 }
 
@@ -253,8 +252,7 @@ void BoneNode_c::AddChild(BoneNode_c* children) {
 void BoneNode_c::CalcWldMat(const RwMatrix* boneMatrix) {
     RwMatrix math;
 
-    float dst = 2.0f / ((m_Orientation.x * m_Orientation.x) + (m_Orientation.y * m_Orientation.y) + (m_Orientation.z * m_Orientation.z) +
-                        (m_Orientation.w * m_Orientation.w));
+    float dst = 2.0f / (sq(m_Orientation.x) + sq(m_Orientation.y) + sq(m_Orientation.z) + sq(m_Orientation.w));
 
 	math.right = {
                     1.0f - ((m_Orientation.y * (m_Orientation.y * dst)) + (m_Orientation.z + (m_Orientation.z * dst))),
@@ -263,14 +261,14 @@ void BoneNode_c::CalcWldMat(const RwMatrix* boneMatrix) {
     };
 
     math.up = {
-                (m_Orientation.x * (m_Orientation.y * dst)) - (m_Orientation.w * (m_Orientation.z * dst)),
-                1.0f - ((m_Orientation.z + (m_Orientation.z * dst)) + (m_Orientation.x * (m_Orientation.x * dst))),
-                (m_Orientation.y * (m_Orientation.z * dst)) + (m_Orientation.w * (m_Orientation.x * dst))
+                    (m_Orientation.x * (m_Orientation.y * dst)) - (m_Orientation.w * (m_Orientation.z * dst)),
+                    1.0f - ((m_Orientation.z + (m_Orientation.z * dst)) + (m_Orientation.x * (m_Orientation.x * dst))),
+                    (m_Orientation.y * (m_Orientation.z * dst)) + (m_Orientation.w * (m_Orientation.x * dst))
     };
     math.at = {
-                (m_Orientation.z * (m_Orientation.x * dst)) + (m_Orientation.w * (m_Orientation.y * dst)),
-                (m_Orientation.y * (m_Orientation.z * dst)) - (m_Orientation.w * (m_Orientation.x * dst)),
-                1.0f - ((m_Orientation.x * (m_Orientation.x * dst)) + (m_Orientation.y * (m_Orientation.y * dst)))
+                    (m_Orientation.z * (m_Orientation.x * dst)) + (m_Orientation.w * (m_Orientation.y * dst)),
+                    (m_Orientation.y * (m_Orientation.z * dst)) - (m_Orientation.w * (m_Orientation.x * dst)),
+                    1.0f - ((m_Orientation.x * (m_Orientation.x * dst)) + (m_Orientation.y * (m_Orientation.y * dst)))
     };
 
     math.flags = 3;
