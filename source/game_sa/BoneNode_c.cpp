@@ -272,7 +272,7 @@ void BoneNode_c::CalcWldMat(const RwMatrix* boneMatrix) {
                     1.0f - ((m_Orientation.x * (m_Orientation.x * dst)) + (m_Orientation.y * (m_Orientation.y * dst)))
     };
 
-    math.flags = 3; // todo: enum
+    math.flags = rwMATRIXTYPEORTHONORMAL;
     math.pos = m_Pos;
 
     RwMatrixMultiply(&m_WorldMat, &math, boneMatrix);
