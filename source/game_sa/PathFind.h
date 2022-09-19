@@ -221,7 +221,11 @@ public:
     void AddNodeToList(CPathNode* node, int list);
     float CalcDistToAnyConnectingLinks(CPathNode* node, CVector pos);
     void FindNodeClosestInRegion(CNodeAddress* outAddress, uint16 areaId, CVector pos, uint8 nodeType, float* outDist, bool bLowTraffic, bool bUnkn, bool bBoats, bool bUnused);
-    bool These2NodesAreAdjacent(CNodeAddress address1, CNodeAddress address2);
+    /*!
+    * @addr 0x44D230
+    * @return If `nodeAddress2` is linked by `nodeAddress1`
+    */
+    bool These2NodesAreAdjacent(CNodeAddress nodeAddress1, CNodeAddress nodeAddress2);
     void RecordNodesInCircle(const CVector& center, float radius, uint8 nodeType, int maxNum, CNodeAddress* outAddresses, bool bLowTraffic, bool a8, bool bUnkn, bool maxNumNodes, bool bUnused);
     CNodeAddress FindNodeClosestToCoorsFavourDirection(CVector pos, uint8 nodeType, float dirX, float dirY);
     void FindNodePairClosestToCoors(CVector pos, uint8 nodeType, CNodeAddress* outFirst, CNodeAddress* outSecond, float* outDist, float minDist, float maxDist, bool bLowTraffic, bool bUnused, bool bBoats);

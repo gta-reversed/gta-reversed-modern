@@ -29,7 +29,7 @@ void CPathFind::InjectHooks() {
     //RH_ScopedInstall(SwitchRoadsInAngledArea, 0x44D3D0);
     //RH_ScopedInstall(RegisterMarker, 0x44D300);
     //RH_ScopedInstall(AllocatePathFindInfoMem, 0x44D2B0);
-    //RH_ScopedInstall(These2NodesAreAdjacent, 0x44D230);
+    RH_ScopedInstall(These2NodesAreAdjacent, 0x44D230);
     //RH_ScopedInstall(PreparePathData, 0x44D0E0);
     //RH_ScopedInstall(FindRegionForCoors, 0x44D830);
     //RH_ScopedInstall(FindYRegionForCoors, 0x44D8C0);
@@ -567,6 +567,17 @@ void CPathFind::AddDynamicLinkBetween2Nodes_For1Node(CNodeAddress first, CNodeAd
     m_pPathIntersections[first.m_wAreaId][firstLinkId + firstPathInfo.m_nNumLinks].Clear();
     firstPathInfo.m_nNumLinks++;
     firstPathInfo.m_wBaseLinkId = firstLinkId;
+}
+
+// 0x44D230
+bool CPathFind::These2NodesAreAdjacent(CNodeAddress nodeAddress1, CNodeAddress nodeAddress2) {
+    const auto node1 = GetPathNode(nodeAddress1);
+    for (auto i = 0u; i < node1->m_nNumLinks; i++) {
+        if (m_pNodeLinks[node1->m_wAreaId][node1->m_wBaseLinkId + i] == nodeAddress2) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // 0x44FCE0
