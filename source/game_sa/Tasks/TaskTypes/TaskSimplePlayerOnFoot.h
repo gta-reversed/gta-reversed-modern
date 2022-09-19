@@ -30,8 +30,12 @@ public:
     CTaskSimplePlayerOnFoot();
     ~CTaskSimplePlayerOnFoot() override = default;
 
-    eTaskType GetTaskType() override { return Type; } // 0x6857C0
-    CTask* Clone() override { return new CTaskSimplePlayerOnFoot(); }                     // 0x68AFF0
+    eTaskType GetTaskType() override {
+        return Type;
+    } // 0x6857C0
+    CTask* Clone() override {
+        return new CTaskSimplePlayerOnFoot();
+    } // 0x68AFF0
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 
@@ -41,7 +45,6 @@ public:
     static void PlayerControlZeldaWeapon(CPlayerPed* player);
     static void PlayerControlDucked(CPlayerPed* player);
     int32 PlayerControlZelda(CPlayerPed* player, bool bAvoidJumpingAndDucking);
-
 
 private:
     friend void InjectHooksMain();
@@ -58,7 +61,6 @@ private:
         this->CTaskSimplePlayerOnFoot::~CTaskSimplePlayerOnFoot();
         return this;
     }
-
 };
 
 VALIDATE_SIZE(CTaskSimplePlayerOnFoot, 0x1C);
