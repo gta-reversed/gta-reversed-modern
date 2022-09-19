@@ -30,7 +30,7 @@ void CTaskSimplePlayerOnFoot::InjectHooks() {
 
     RH_ScopedInstall(ProcessPlayerWeapon, 0x6859A0);
     RH_ScopedInstall(PlayIdleAnimations, 0x6872C0);
-    // RH_ScopedInstall(PlayerControlFighter, 0x687530);
+    RH_ScopedInstall(PlayerControlFighter, 0x687530, {.reversed = false});
     RH_ScopedInstall(PlayerControlZelda, 0x6883D0);
 
     RH_ScopedVMTInstall(Clone, 0x68AFF0);
@@ -102,12 +102,14 @@ bool CTaskSimplePlayerOnFoot::ProcessPed(CPed* ped) {
     if (player->GetPadFromPlayer()) {
         CPedIntelligence* intelligence = player->GetIntelligence();
         bool bPedMoving = player->m_nMoveState >= PEDMOVE_WALK;
-        if (player->GetActiveWeapon().m_nType == WEAPON_CHAINSAW && intelligence->GetTaskFighting() && intelligence->GetTaskFighting()->m_nCurrentMove == FIGHT_ATTACK_FIGHTIDLE) {
-            bPedMoving = true;
+        if (player->GetActiveWeapon().m_nType == WEAPON_CHAINSAW) {
+            if (const auto fightingTask = intelligence->GetTaskFighting()) {
+                if (fightingTask->m_nCurrentMove == FIGHT_ATTACK_FIGHTIDLE) {
+                    bPedMoving = true;
+                }
+            }
         }
-
         player->SetMoveState(PEDMOVE_STILL);
-
         if (player->bIsDucking) {
             PlayerControlDucked(player);
         } else if (!intelligence->GetTaskFighting() || bPedMoving) {
