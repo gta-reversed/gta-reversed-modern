@@ -148,7 +148,7 @@ void BoneNode_c::ClampLimitsDefault(bool LimitX, bool LimitY, bool LimitZ) {
     }
 }
 
-// argumnet (float blend) - ignored
+// argument (float blend) - ignored
 // 0x617650
 void BoneNode_c::Limit(float blend) {
     CVector eulerOrientation{};
@@ -272,7 +272,7 @@ void BoneNode_c::CalcWldMat(const RwMatrix* boneMatrix) {
                     1.0f - ((m_Orientation.x * (m_Orientation.x * dst)) + (m_Orientation.y * (m_Orientation.y * dst)))
     };
 
-    math.flags = 3;
+    math.flags = 3; // todo: enum
     math.pos = m_Pos;
 
     RwMatrixMultiply(&m_WorldMat, &math, boneMatrix);
