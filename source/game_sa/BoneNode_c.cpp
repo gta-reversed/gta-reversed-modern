@@ -163,7 +163,7 @@ void BoneNode_c::Limit(float blend) {
 
     if (m_BoneTag == ePedBones::BONE_HEAD) {
         float maxHeadZ = BoneNodeManager_c::ms_boneInfos[GetIdFromBoneTag(ePedBones::BONE_HEAD)].m_Max.z;
-        float multy = std::max(abs(eulerOrientation.x) / -45.0f + 1.0f, 0.0f);
+        float multy = std::max(std::abs(eulerOrientation.x) / -45.0f + 1.0f, 0.0f);
 
         clampZMin = maxHeadZ + (m_LimitMin.z - maxHeadZ) * multy;
         clampZMax = maxHeadZ + (m_LimitMax.z - maxHeadZ) * multy;
