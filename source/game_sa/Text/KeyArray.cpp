@@ -23,7 +23,6 @@ void CKeyArray::Unload() {
 // 0x69F490
 bool CKeyArray::Load(uint32 length, FILESTREAM file, uint32* offset, uint8 unknown) {
     // todo: add OG code
-    // taken from ***
     m_size = length / sizeof(CKeyEntry);
     m_data = new CKeyEntry[m_size];
 
@@ -41,16 +40,12 @@ void CKeyArray::Update(char* offset) {
 }
 
 // 0x6A0000
-char* CKeyArray::Search(const char* key, bool* found) {
+char* CKeyArray::Search(const char* key, bool& found) {
     uint32 hash = CKeyGen::GetUppercaseKey(key);
     CKeyEntry* entry = BinarySearch(hash, m_data, 0, m_size - 1);
-    if (entry) {
-        *found = true;
-        return entry->string;
-    } else {
-        *found = false;
-        return nullptr;
-    }
+
+    found = entry != nullptr;
+    return (found) ? entry->string : nullptr;
 }
 
 // 0x69F570

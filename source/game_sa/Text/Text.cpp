@@ -134,14 +134,18 @@ void CText::Load(bool keepMissionPack) {
     Unload(keepMissionPack);
 
     CFileMgr::SetDir("TEXT");
-    auto file = CFileMgr::OpenFile(GetGxtName(), "rb");
+    auto fileName = GetGxtName();
+    auto file = CFileMgr::OpenFile(fileName, "rb");
     assert(file);
 
-    uint16 version = 0;
-    uint16 encoding = 0;
+    uint16 version = 0, encoding = 0;
     CFileMgr::Read(file, &version, sizeof(version));
     CFileMgr::Read(file, &encoding, sizeof(encoding));
 
+    DEV_LOG("[CText]: Loading '%s' version=%02d (%d-bit)\n", fileName, version, encoding);
+    if (GAME_ENCODING != encoding) {
+        NOTSA_UNREACHABLE("File {} was compiled with {}-bit char but {}-bit is required.", fileName, encoding, GAME_ENCODING);
+    }
     uint32 offset = sizeof(uint16) * 2; // skip version and encoding
     bool bTKEY = false;
     bool bTDAT = false;
@@ -176,8 +180,7 @@ void CText::Load(bool keepMissionPack) {
     m_MainKeyArray.Update(m_MainText.m_data);
     CFileMgr::CloseFile(file);
 
-    const auto text = Get("CDERROR");
-    strcpy(m_szCdErrorText, GxtCharToAscii(text, 0));
+    strcpy(m_szCdErrorText, GxtCharToAscii(Get("CDERROR"), 0));
     m_bCdErrorLoaded = true;
 
     CFileMgr::SetDir("");
@@ -286,10 +289,10 @@ void CText::LoadMissionPackText() {
     rng::fill(m_szMissionName, '\0');
 
     CFileMgr::SetDirMyDocuments();
-    char filename[64];
-    sprintf(filename, "MPACK//MPACK%d//TEXT.GXT", CGame::bMissionPackGame);
+    char fileName[64];
+    sprintf(fileName, "MPACK//MPACK%d//TEXT.GXT", CGame::bMissionPackGame);
 
-    auto file = CFileMgr::OpenFile(filename, "rb");
+    auto file = CFileMgr::OpenFile(fileName, "rb");
     if (!file) {
         return;
     }
@@ -298,9 +301,10 @@ void CText::LoadMissionPackText() {
     CFileMgr::Read(file, &version, sizeof(version));
     CFileMgr::Read(file, &encoding, sizeof(encoding));
 
-    DEV_LOG("[CText]: Loading '%s' version=%02d (%d-bit)\n", filename, version, encoding);
-    assert(GAME_ENCODING == encoding && ("File %s was compiled with %d-bit char but %d-bit is required.", filename, encoding, GAME_ENCODING));
-
+    DEV_LOG("[CText]: Loading '%s' version=%02d (%d-bit)\n", fileName, version, encoding);
+    if (GAME_ENCODING != encoding) {
+        NOTSA_UNREACHABLE("File {} was compiled with {}-bit char but {}-bit is required.", fileName, encoding, GAME_ENCODING);
+    }
     uint32 offset = sizeof(uint16) * 2;
     ChunkHeader header{};
 
@@ -345,14 +349,14 @@ void CText::LoadMissionPackText() {
 char* CText::Get(const char* key) {
     if (key[0] && key[0] != ' ') {
         bool found = false;
-        char* str = m_MainKeyArray.Search(key, &found);
+        char* str = m_MainKeyArray.Search(key, found);
         if (found) {
             return str;
         }
 
         // check mission keys block if no entry found yet
         if ((CGame::bMissionPackGame || m_bIsMissionTextOffsetsLoaded) && m_bIsMissionPackLoaded) {
-            str = m_MissionKeyArray.Search(key, &found);
+            str = m_MissionKeyArray.Search(key, found);
             if (found) {
                 return str;
             }
@@ -384,12 +388,12 @@ bool CText::ReadChunkHeader(ChunkHeader* header, FILESTREAM file, uint32* offset
 // 0x69F750
 char CText::GetUpperCase(char c) const {
     switch (m_nLangCode) {
-    case 'e': // english
+    case eTextLangCode::ENGLISH:
         if (c >= 'a' && c <= 'z')
             return std::toupper(c);
         break;
 
-    case 'f':
+    case eTextLangCode::FRENCH:
         if (c >= 'a' && c <= 'z')
             return std::toupper(c);
 
@@ -397,9 +401,9 @@ char CText::GetUpperCase(char c) const {
             return FrenchUpperCaseTable[c - 128];
         break;
 
-    case 'g': // german
-    case 'i': // italian
-    case 's': // spanish
+    case eTextLangCode::GERMAN:
+    case eTextLangCode::ITALIAN:
+    case eTextLangCode::SPANISH:
         if (c >= 'a' && c <= 'z')
             return std::toupper(c);
 

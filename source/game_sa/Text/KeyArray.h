@@ -19,7 +19,7 @@ public:
     void Unload();
 
     void /* inline */ Update(char* offset);
-    char* Search(const char* key, bool* found);
+    char* Search(const char* key, bool& found);
 
 private:
     CKeyEntry* BinarySearch(uint32 key, CKeyEntry* entries, int16 firstIndex, int16 lastIndex);
