@@ -65,12 +65,12 @@ void BoneNode_c::EulerToQuat(CVector* angles, CQuaternion* quat) {
         DegreesToRadians(angles->z)
     };
 
-    float cr = std::cos(radAngles.x * 0.5f);
-    float sr = std::sin(radAngles.x * 0.5f);
-    float cp = std::cos(radAngles.y * 0.5f);
-    float sp = std::sin(radAngles.y * 0.5f);
-    float cy = std::cos(radAngles.z * 0.5f);
-    float sy = std::sin(radAngles.z * 0.5f);
+    float cr = std::cos(radAngles.x / 2.0f);
+    float sr = std::sin(radAngles.x / 2.0f);
+    float cp = std::cos(radAngles.y / 2.0f);
+    float sp = std::sin(radAngles.y / 2.0f);
+    float cy = std::cos(radAngles.z / 2.0f);
+    float sy = std::sin(radAngles.z / 2.0f);
 
     quat->w = cr * cp * cy + sr * sp * sy;
     quat->x = sr * cp * cy - cr * sp * sy;
@@ -250,6 +250,7 @@ void BoneNode_c::AddChild(BoneNode_c* children) {
 
 // 0x616CD0
 void BoneNode_c::CalcWldMat(const RwMatrix* boneMatrix) {
+    printf("CalcWldMat\n");
     RwMatrix math;
 
     float dst = 2.0f / (sq(m_Orientation.x) + sq(m_Orientation.y) + sq(m_Orientation.z) + sq(m_Orientation.w));
