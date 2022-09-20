@@ -141,6 +141,14 @@ public:
     * @returning The heading of the vector in radians.
     */
     [[nodiscard]] float Heading(bool reMapRangeTo0To2Pi = false) const;
+
+    /*!
+    * @notsa
+    * @return Make all component's values absolute (positive).
+    */
+    static friend CVector abs(CVector vec) {
+        return { std::abs(vec.x), std::abs(vec.y), std::abs(vec.z) };
+    }
 };
 VALIDATE_SIZE(CVector, 0xC);
 
