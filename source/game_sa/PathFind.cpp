@@ -15,6 +15,10 @@ int32& CPathFind::NumNodesGiven = *(int32*)0x96EF80;
 int32& CPathFind::NumLinksToExteriorNodes = *(int32*)0x96EAB8;
 int32& CPathFind::NewInteriorSlot = *(int32*)0x96EF84;
 
+// TODO (When done): Move into the class itself
+CVector& s_pathsNeededPosn = *(CVector*)0x977B70;
+bool&    s_bLoadPathsNeeded  = *(bool*)0x96F030;
+
 void CPathFind::InjectHooks() {
     RH_ScopedClass(CPathFind);
     RH_ScopedCategoryGlobal();
@@ -53,7 +57,6 @@ void CPathFind::InjectHooks() {
     //RH_ScopedInstall(FindNodeOrientationForCarPlacement, 0x450320);
     //RH_ScopedInstall(FindNodePairClosestToCoors, 0x44FEE0);
     RH_ScopedInstall(FindNodeClosestToCoorsFavourDirection, 0x44FCE0);
-    //RH_ScopedInstall(RecordNodesInCircle, 0x44FB60);
     //RH_ScopedInstall(FindNodeClosestToCoors, 0x44FA30);
     RH_ScopedInstall(MarkRoadNodeAsDontWander, 0x450560);
     //RH_ScopedInstall(AddDynamicLinkBetween2Nodes, 0x4512D0);
@@ -94,7 +97,7 @@ void CPathFind::InjectHooks() {
     //RH_ScopedInstall(LoadSceneForPathNodes, 0x44DE00);
     RH_ScopedInstall(AreNodesLoadedForArea, 0x44DD10);
     //RH_ScopedInstall(ReleaseRequestedNodes, 0x44DD00);
-    //RH_ScopedInstall(SetPathsNeededAtPosition, 0x44DCD0);
+    RH_ScopedInstall(SetPathsNeededAtPosition, 0x44DCD0);
     RH_ScopedInstall(SetLinksBridgeLights, 0x44D960);
     //RH_ScopedInstall(Load, 0x5D3500);
 }
@@ -624,4 +627,9 @@ bool CPathFind::Save() {
 
 bool CPathFind::AreNodeAreasLoaded(const std::initializer_list<CNodeAddress>& addrs) const {
     return rng::all_of(addrs, [this](auto&& addr) { return IsAreaNodesAvailable(addr); });
+}
+
+void CPathFind::SetPathsNeededAtPosition(const CVector& posn) {
+    s_pathsNeededPosn = posn;
+    s_bLoadPathsNeeded = true;
 }

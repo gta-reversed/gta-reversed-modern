@@ -308,7 +308,7 @@ public:
     CVector TakeWidthIntoAccountForWandering(CNodeAddress nodeAddress, uint16 randomSeed);
     void TakeWidthIntoAccountForCoors(CNodeAddress address, CNodeAddress address2, uint16 seed, float* fOut1, float* fOut2);
     static void MarkRegionsForCoors(CVector vecPos, float radius);
-    void SetPathsNeededAtPosition(const CVector& vecPos);
+    void SetPathsNeededAtPosition(const CVector& posn);
     void UpdateStreaming(bool bForceStreaming);
     void MakeRequestForNodesToBeLoaded(float x1, float x2, float y1, float y2);
     void ReleaseRequestedNodes();
