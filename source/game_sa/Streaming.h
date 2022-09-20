@@ -122,7 +122,7 @@ inline int32 DFFToModelId(int32 relativeId) { return RESOURCE_ID_DFF + relativeI
 inline int32 TXDToModelId(int32 relativeId) { return RESOURCE_ID_TXD + relativeId; }
 inline int32 COLToModelId(int32 relativeId) { return RESOURCE_ID_COL + relativeId; }
 inline int32 IPLToModelId(int32 relativeId) { return RESOURCE_ID_IPL + relativeId; }
-inline int32 DATToModelId(int32 relativeId) { return RESOURCE_ID_DAT + relativeId; }
+inline int32 DATToModelId(size_t relativeId) { return (size_t)RESOURCE_ID_DAT + relativeId; }
 inline int32 IFPToModelId(int32 relativeId) { return RESOURCE_ID_IFP + relativeId; }
 inline int32 RRRToModelId(int32 relativeId) { return RESOURCE_ID_RRR + relativeId; }
 inline int32 SCMToModelId(int32 relativeId) { return RESOURCE_ID_SCM + relativeId; }
