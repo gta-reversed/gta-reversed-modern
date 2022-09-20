@@ -344,7 +344,6 @@ void CText::LoadMissionPackText() {
     CFileMgr::CloseFile(file);
 }
 
-// Returns text pointer by GXT key
 // 0x6A0050
 char* CText::Get(const char* key) {
     if (key[0] && key[0] != ' ') {

@@ -41,11 +41,10 @@ void CKeyArray::Update(char* offset) {
 
 // 0x6A0000
 char* CKeyArray::Search(const char* key, bool& found) {
-    uint32 hash = CKeyGen::GetUppercaseKey(key);
-    CKeyEntry* entry = BinarySearch(hash, m_data, 0, m_size - 1);
-
+    const auto entry = BinarySearch(CKeyGen::GetUppercaseKey(key), m_data, 0, m_size - 1);
     found = entry != nullptr;
-    return (found) ? entry->string : nullptr;
+
+    return entry ? entry->string : nullptr;
 }
 
 // 0x69F570

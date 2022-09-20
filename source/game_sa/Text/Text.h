@@ -34,7 +34,14 @@ public:
     void Load(bool keepMissionPack);
     void Unload(bool unloadMissionData);
 
-    char* Get(const char* key);
+    /*!
+     * @brief Get translated text by it's key
+     *
+     * @param     key   The text's key
+     *
+     * @return The text identified by the given key or the GXT error string.
+     */
+    [[nodiscard]] char* Get(const char* key);
     void GetNameOfLoadedMissionText(char* outStr);
 
     void LoadMissionText(const char* mission);
@@ -58,7 +65,7 @@ public:
 
 private:
     bool ReadChunkHeader(ChunkHeader* header, FILESTREAM file, uint32* offset, uint8 unknown);
-    char GetUpperCase(char c) const;
+    [[nodiscard]] char GetUpperCase(char c) const;
 
 public:
     auto GetKeys() { return std::span{ m_MainKeyArray.m_data, m_MainKeyArray.m_size }; }
