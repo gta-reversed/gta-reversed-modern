@@ -37,7 +37,7 @@ void CPathFind::InjectHooks() {
 
     RH_ScopedInstall(AddNodeToNewInterior, 0x450E90);
     RH_ScopedInstall(FindNearestExteriorNodeToInteriorNode, 0x450F30);
-    //RH_ScopedInstall(ThisNodeHasToBeSwitchedOff, 0x44D3E0);
+    RH_ScopedInstall(ThisNodeHasToBeSwitchedOff, 0x44D3E0);
     //RH_ScopedInstall(SwitchRoadsInAngledArea, 0x44D3D0);
     //RH_ScopedInstall(RegisterMarker, 0x44D300);
     //RH_ScopedInstall(AllocatePathFindInfoMem, 0x44D2B0);
@@ -758,6 +758,16 @@ void CPathFind::MarkRegionsForCoors(CVector pos, float radius) {
     );
 }
 
+bool CPathFind::ThisNodeHasToBeSwitchedOff(CPathNode* node) {
+    switch (node->m_nBehaviourType) {
+    case 1:
+    case 2:
+        return false;
+    default:
+        return true;
+    }
+}
+
 // notsa
 std::span<CPathNode> CPathFind::GetPathNodesInArea(size_t areaId, ePathType ptype) const {
     if (const auto allNodes = m_pPathNodes[areaId]) {
@@ -776,4 +786,3 @@ std::span<CPathNode> CPathFind::GetPathNodesInArea(size_t areaId, ePathType ptyp
     }
     return {};
 }
-
