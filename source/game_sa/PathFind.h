@@ -18,8 +18,10 @@ static constexpr auto NUM_PATH_INTERIOR_AREAS{ 8 };
 static constexpr auto NUM_DYNAMIC_LINKS_PER_AREA{ 16 };
 
 enum ePathType : uint8 {
-    PATH_TYPE_CARS = 0,
-    PATH_TYPE_BOATS
+    PATH_TYPE_VEH, /// Cars, boats, race tracks
+    PATH_TYPE_PED, /// Peds
+
+    PATH_TYPE_ALL /// @notsa
 };
 
 enum eTrafficLevel {
@@ -132,8 +134,8 @@ public:
     CompressedVector m_vPos;
     uint16           m_wSearchList; // search list id
     int16            m_wBaseLinkId;
-    int16            m_wAreaId;
-    int16            m_wNodeId;
+    uint16           m_wAreaId; // TODO: Replace these 2 with `CNodeAddress`
+    uint16           m_wNodeId;
     uint8            m_nPathWidth;
     uint8            m_nFloodFill;
 
@@ -162,19 +164,34 @@ public:
     static void InjectHooks();
 
     /// Get uncompressed world position
-    CVector GetNodeCoors();
+    CVector GetNodeCoors() const {
+        return UncompressLargeVector(m_vPos);
+    }
 
     inline bool IsLowTrafficLevel() const {
         return m_nTrafficLevel == TRAFFIC_MEDIUM || m_nTrafficLevel == TRAFFIC_LOW;
+    }
+
+    CNodeAddress GetAddress() const {
+        return { m_wAreaId, m_wNodeId };
     }
 };
 VALIDATE_SIZE(CPathNode, 0x1C);
 
 class CPathFind {
+    static constexpr auto NUM_TOTAL_PATH_NODE_AREAS = NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS;
+
 public:
     CNodeAddress           m_Info; // 0x0
     CPathNode*             m_apNodesSearchLists[512]; // 0x4
+
+    /*!
+    * Pointer to an array containing all path nodes in an area (count: `m_anNumNodes`)
+    * The first part of the array has the vehicle nodes (count: `m_anNumVehicleNodes`)
+    * the remaining part has ped nodes (count: `m_anNumPedNodes`)
+    */
     CPathNode*             m_pPathNodes[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS]; // 0x804
+
     // Use CPathFind::GetCarPathLink to access
     CCarPathLink*          m_pNaviNodes[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS]; // 0x924
     CNodeAddress*          m_pNodeLinks[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS]; // 0xA44
@@ -227,7 +244,15 @@ public:
     */
     bool These2NodesAreAdjacent(CNodeAddress nodeAddress1, CNodeAddress nodeAddress2);
     void RecordNodesInCircle(const CVector& center, float radius, uint8 nodeType, int maxNum, CNodeAddress* outAddresses, bool bLowTraffic, bool a8, bool bUnkn, bool maxNumNodes, bool bUnused);
-    CNodeAddress FindNodeClosestToCoorsFavourDirection(CVector pos, uint8 nodeType, float dirX, float dirY);
+
+    /*
+    * @brief Find the node closest to `pos` favoring the direction `dir`
+    *
+    * @param pos The position to search around
+    * @param nodeType The path node type to search
+    * @param dir The direction, doesn't need to be unit length (eg.: normalized), it is normalized by the function
+    */
+    CNodeAddress FindNodeClosestToCoorsFavourDirection(CVector pos, ePathType nodeType, CVector2D dir); // "dir" was 2 floats originally
     void FindNodePairClosestToCoors(CVector pos, uint8 nodeType, CNodeAddress* outFirst, CNodeAddress* outSecond, float* outDist, float minDist, float maxDist, bool bLowTraffic, bool bUnused, bool bBoats);
     float FindNodeOrientationForCarPlacement(CNodeAddress address);
     float FindNodeOrientationForCarPlacementFacingDestination(CNodeAddress address, float dirX, float dirY, bool bUnkn) { return 0.0f; } /*noop, not in PC idb, unused in mobile*/
@@ -323,28 +348,50 @@ public:
 
     /*!
     * @notsa
-    * @return The path nodes in the area or null if the area isn't loaded.
+    *
+    * @return A span of the specified path nodes in the area, or an empty one if the area is not loaded (or it has no nodes of the specified type)
+    *
+    * Code based on 0x44FD6E
     */
-    CPathNode* GetPathNodesInArea(size_t areaId) const { return m_pPathNodes[areaId]; }
+    std::span<CPathNode> GetPathNodesInArea(size_t areaId, ePathType ptype = PATH_TYPE_ALL) const {
+        if (const auto allNodes = m_pPathNodes[areaId]) {
+            const auto numVehNodes = m_anNumVehicleNodes[areaId];
+            switch (ptype) {
+            case ePathType::PATH_TYPE_VEH: // Vehicles, boats, race tracks
+                return std::span{ allNodes, m_anNumVehicleNodes[areaId] };
+            case ePathType::PATH_TYPE_PED: // Peds only
+                assert(m_anNumPedNodes[areaId] == m_anNumNodes[areaId] - numVehNodes); // Pirulax: I'm assuming this is true, so if this doesnt assert for a long time remove it
+                return std::span{ allNodes + numVehNodes, m_anNumPedNodes[areaId] };
+            case ePathType::PATH_TYPE_ALL: // All of the above
+                return std::span{ allNodes, m_anNumNodes[areaId] };
+            default:
+                NOTSA_UNREACHABLE("Invalid pathType: {}", (int)ptype);
+            }
+        }
+        return {};
+    }
 
     /*!
     * @notsa
     * 
-    * @param x The X of the area
-    * @param y The Y of the area
-    *
-    * @copyreturn GetPathNodesInArea(size_t)
+    * @return Whenever the area is loaded
     */
-    CPathNode* GetPathNodesInArea(size_t x, size_t y) const { return GetPathNodesInArea(y * NUM_PATH_MAP_AREA_Y + x); }
+    bool IsAreaLoaded(size_t areaId) const { return m_pPathNodes[areaId] != nullptr; }
 
     /*!
     * @notsa
-    * @return Whenever the area is loaded
+    * 
+    * @param x The X (column) of the area 
+    * @param y The Y (row) of the area
     */
-    bool IsAreaLoaded(size_t areaId) const { return GetPathNodesInArea(areaId) != nullptr; }
+    auto GetAreaIdFromXY(size_t x, size_t y) {
+        assert(x <= NUM_PATH_MAP_AREA_X && y <= NUM_PATH_MAP_AREA_Y);
+        return y * NUM_PATH_MAP_AREA_Y + x;
+    }
 
     /*!
     * @addr 0x420AA0
+    * 
     * @brief Check if the node's area is loaded
     * @param node Must have a valid area
     */
@@ -354,12 +401,14 @@ public:
 
     /*!
     * @notsa
+    * 
     * @return The intersection info (if any) of 2 nodes or null if either node's area isn't loaded or if there's no intersection
     */
     auto FindIntersection(const CNodeAddress& startNodeAddress, const CNodeAddress& targetNodeAddress) -> CPathIntersectionInfo*;
 
     /*!
     * @notsa
+    * 
     * @brief Check if all node's areas in the list are loaded
     */
     bool AreNodeAreasLoaded(const std::initializer_list<CNodeAddress>& addrs) const;

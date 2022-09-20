@@ -52,7 +52,7 @@ void CPathFind::InjectHooks() {
     //RH_ScopedInstall(CountNeighboursToBeSwitchedOff, 0x4504F0);
     //RH_ScopedInstall(FindNodeOrientationForCarPlacement, 0x450320);
     //RH_ScopedInstall(FindNodePairClosestToCoors, 0x44FEE0);
-    //RH_ScopedInstall(FindNodeClosestToCoorsFavourDirection, 0x44FCE0);
+    RH_ScopedInstall(FindNodeClosestToCoorsFavourDirection, 0x44FCE0);
     //RH_ScopedInstall(RecordNodesInCircle, 0x44FB60);
     //RH_ScopedInstall(FindNodeClosestToCoors, 0x44FA30);
     RH_ScopedInstall(MarkRoadNodeAsDontWander, 0x450560);
@@ -105,10 +105,6 @@ void CPathNode::InjectHooks() {
     RH_ScopedInstall(GetNodeCoors, 0x420A10);
 }
 
-CVector CPathNode::GetNodeCoors() {
-    return UncompressLargeVector(m_vPos);
-}
-
 // 0x44D080
 void CPathFind::Init() {
     static int32 NumTempExternalNodes = 0; // Unused
@@ -147,7 +143,7 @@ bool CPathFind::AreNodesLoadedForArea(float minX, float maxX, float minY, float 
 
     for (auto x = minAreaX; x < maxAreaX; x++) {
         for (auto y = minAreaY; y < maxAreaY; y++) {
-            if (!GetPathNodesInArea(x, y)) {
+            if (!IsAreaLoaded(GetAreaIdFromXY(x, y))) {
                 return false;
             }
         }
@@ -381,6 +377,8 @@ void CPathFind::LoadPathFindData(RwStream* stream, int32 areaId) {
     RwStreamRead(stream, &m_anNumCarPathLinks[areaId], sizeof(m_anNumCarPathLinks[areaId]));
     RwStreamRead(stream, &m_anNumAddresses[areaId],    sizeof(m_anNumAddresses[areaId]));
 
+    assert(m_anNumNodes[areaId] == m_anNumVehicleNodes[areaId] + m_anNumPedNodes[areaId]);
+
     auto numNodes = m_anNumNodes[areaId];
     if (numNodes) {
         m_pPathNodes[areaId] = new CPathNode[numNodes];
@@ -581,10 +579,29 @@ bool CPathFind::These2NodesAreAdjacent(CNodeAddress nodeAddress1, CNodeAddress n
 }
 
 // 0x44FCE0
-CNodeAddress CPathFind::FindNodeClosestToCoorsFavourDirection(CVector pos, uint8 nodeType, float dirX, float dirY) {
-    CNodeAddress outAddress;
-    plugin::CallMethod<0x44FCE0, CPathFind*, CNodeAddress*, CVector, uint8, float, float>(this, &outAddress, pos, nodeType, dirX, dirY);
-    return outAddress;
+CNodeAddress CPathFind::FindNodeClosestToCoorsFavourDirection(CVector pos, ePathType nodeType, CVector2D dir) {
+    dir = dir.Normalized(); // In-place normalize
+    
+    CNodeAddress closest{};
+    float        scoreOfClosest{std::numeric_limits<float>::max()};
+    for (auto areaId{ 0u }; areaId < NUM_TOTAL_PATH_NODE_AREAS; areaId++) {
+        for (const auto& node : GetPathNodesInArea(areaId, nodeType)) { // NOTE: Function takes care of checking whenever the area is loaded
+            const auto dirToNodeUN = pos - node.GetNodeCoors();
+
+            const auto dotScore = (abs(dirToNodeUN) * CVector { 0.f, 0.f, 3.f }).ComponentwiseSum();
+            if (dotScore >= scoreOfClosest) {
+                continue;
+            }
+
+            const auto score = dotScore - (dir.Dot(dirToNodeUN) - 1.f) * 20.f;
+            if (score <= scoreOfClosest) {
+                scoreOfClosest = score;
+                closest = node.GetAddress();
+            }
+        }
+    }
+
+    return closest;
 }
 
 // 0x5D3500

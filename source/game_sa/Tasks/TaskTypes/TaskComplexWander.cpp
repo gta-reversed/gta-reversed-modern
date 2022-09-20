@@ -221,7 +221,7 @@ void CTaskComplexWander::UpdatePathNodes_Reversed(const CPed* ped, uint8 dir, CN
     originNode = targetNode;
     targetNode.m_wAreaId = (uint16)-1;
     const CVector& pos = ped->GetPosition();
-    ThePaths.FindNextNodeWandering(PATH_TYPE_BOATS, pos, &originNode, &targetNode, dir, &outDir);
+    ThePaths.FindNextNodeWandering(PATH_TYPE_PED, pos, &originNode, &targetNode, dir, &outDir);
 }
 
 // 0x671CB0
