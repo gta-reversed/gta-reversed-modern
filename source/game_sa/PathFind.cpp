@@ -22,6 +22,10 @@ bool&    s_bLoadPathsNeeded  = *(bool*)0x96F030;
 // TODO: Remove this and use a stack array or smth..
 static std::array<bool, NUM_PATH_MAP_AREAS>& ToBeStreamed = *(std::array<bool, NUM_PATH_MAP_AREAS>*)0x96EFD0;
 
+static std::array<float, 64>& XCoorGiven = *(std::array<float, 64>*)0x96EE80;
+static std::array<float, 64>& YCoorGiven = *(std::array<float, 64>*)0x96ED80;
+static std::array<float, 64>& ZCoorGiven = *(std::array<float, 64>*)0x96EC80;
+
 void CPathFind::InjectHooks() {
     RH_ScopedClass(CPathFind);
     RH_ScopedCategoryGlobal();
@@ -31,7 +35,7 @@ void CPathFind::InjectHooks() {
     // And I'm lazy to add stubs
 
     //RH_ScopedInstall(AddNodeToNewInterior, 0x450E90);
-    //RH_ScopedInstall(FindNearestExteriorNodeToInteriorNode, 0x450F30);
+    RH_ScopedInstall(FindNearestExteriorNodeToInteriorNode, 0x450F30);
     //RH_ScopedInstall(ThisNodeHasToBeSwitchedOff, 0x44D3E0);
     //RH_ScopedInstall(SwitchRoadsInAngledArea, 0x44D3D0);
     //RH_ScopedInstall(RegisterMarker, 0x44D300);
@@ -593,9 +597,16 @@ CVector CPathFind::FindParkingNodeInArea(float minX, float maxX, float minY, flo
 
 // 0x450F30
 CNodeAddress CPathFind::FindNearestExteriorNodeToInteriorNode(int32 interiorId) {
-    CNodeAddress outAddress;
-    plugin::CallMethod<0x450F30, CPathFind*, CNodeAddress*, int32>(this, &outAddress, interiorId);
-    return outAddress;
+    return FindNodeClosestToCoors(
+        { XCoorGiven[interiorId], YCoorGiven[interiorId], ZCoorGiven[interiorId] },
+        ePathType::PATH_TYPE_PED,
+        3.f,
+        0,
+        0,
+        0,
+        0,
+        true
+    );
 }
 
 // 0x44E000
