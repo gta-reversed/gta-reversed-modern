@@ -76,7 +76,7 @@ void CPathFind::InjectHooks() {
     //RH_ScopedInstall(FindNextNodeWandering, 0x451B70);
     //RH_ScopedInstall(DoPathSearch, 0x4515D0);
     //RH_ScopedInstall(FindParkingNodeInArea, 0x4513F0);
-    //RH_ScopedInstall(FindLinkBetweenNodes, 0x451350);
+    RH_ScopedInstall(FindLinkBetweenNodes, 0x451350);
     RH_ScopedInstall(ReturnInteriorNodeIndex, 0x451300);
     //RH_ScopedInstall(FindNthNodeClosestToCoors, 0x44F8C0);
     //RH_ScopedInstall(FindNodeClosestInRegion, 0x44F2C0);
@@ -529,8 +529,6 @@ void CPathFind::UpdateStreaming(bool bForceStreaming) {
                         : STREAMING_KEEP_IN_MEMORY
                 );
                 DEV_LOG("Requested area: %i", (int)areaId);
-            } else {
-                DEV_LOG("Area already loaded: %i", (int)areaId);
             }
         } else if (IsAreaLoaded(areaId)) {
             CStreaming::RemoveModel(DATToModelId(areaId));
@@ -573,10 +571,17 @@ CNodeAddress CPathFind::ReturnInteriorNodeIndex(int32 unkn, CNodeAddress address
 }
 
 // 0x451350
-CNodeAddress CPathFind::FindLinkBetweenNodes(CNodeAddress node1, CNodeAddress node2) {
-    CNodeAddress outAddress;
-    plugin::CallMethod<0x451350, CPathFind*, CNodeAddress*, CNodeAddress, CNodeAddress>(this, &outAddress, node1, node2);
-    return outAddress;
+CCarPathLinkAddress CPathFind::FindLinkBetweenNodes(CNodeAddress nodeAddrA, CNodeAddress nodeAddrB) {
+    if (AreNodeAreasLoaded({ nodeAddrA, nodeAddrB })) {
+        const auto nodeA = GetPathNode(nodeAddrA);
+        for (auto i = 0u; i < nodeA->m_nNumLinks; i++) {
+            const auto linkIdx = nodeA->m_wBaseLinkId + i;
+            if (m_pNodeLinks[nodeA->m_wAreaId][linkIdx] == nodeAddrB) {
+                return m_pNaviLinks[nodeA->m_wAreaId][linkIdx];
+            }
+        }
+    }
+    return {};
 }
 
 // 0x4513F0
