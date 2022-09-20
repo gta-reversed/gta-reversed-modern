@@ -20,12 +20,16 @@ CVector& s_pathsNeededPosn = *(CVector*)0x977B70;
 bool&    s_bLoadPathsNeeded  = *(bool*)0x96F030;
 
 // TODO: Remove this and use a stack array or smth..
-static std::array<bool, NUM_PATH_MAP_AREAS>& ToBeStreamed = *(std::array<bool, NUM_PATH_MAP_AREAS>*)0x96EFD0;
+std::array<bool, NUM_PATH_MAP_AREAS>& ToBeStreamed = *(std::array<bool, NUM_PATH_MAP_AREAS>*)0x96EFD0;
 
-static std::array<float, 64>& XCoorGiven = *(std::array<float, 64>*)0x96EE80;
-static std::array<float, 64>& YCoorGiven = *(std::array<float, 64>*)0x96ED80;
-static std::array<float, 64>& ZCoorGiven = *(std::array<float, 64>*)0x96EC80;
-static std::array<std::array<int8, 8>, 64>& ConnectsToGiven = *(std::array<std::array<int8, 8>, 64>*)0x96EAC0;
+std::array<float, 64>& XCoorGiven = *(std::array<float, 64>*)0x96EE80;
+std::array<float, 64>& YCoorGiven = *(std::array<float, 64>*)0x96ED80;
+std::array<float, 64>& ZCoorGiven = *(std::array<float, 64>*)0x96EC80;
+std::array<std::array<int8, 8>, 64>& ConnectsToGiven = *(std::array<std::array<int8, 8>, 64>*)0x96EAC0;
+
+std::array<int32, NUM_PATH_INTERIOR_AREAS>& aInteriorNodeLinkedToExterior = *(std::array<int32, NUM_PATH_INTERIOR_AREAS>*)0x96EA98;
+std::array<CNodeAddress, NUM_PATH_INTERIOR_AREAS>& aExteriorNodeLinkedTo = *(std::array<CNodeAddress, NUM_PATH_INTERIOR_AREAS>*)0x977B7C;
+
 
 void CPathFind::InjectHooks() {
     RH_ScopedClass(CPathFind);
@@ -38,15 +42,11 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(AddNodeToNewInterior, 0x450E90);
     RH_ScopedInstall(FindNearestExteriorNodeToInteriorNode, 0x450F30);
     RH_ScopedInstall(ThisNodeHasToBeSwitchedOff, 0x44D3E0);
-    //RH_ScopedInstall(SwitchRoadsInAngledArea, 0x44D3D0);
-    //RH_ScopedInstall(RegisterMarker, 0x44D300);
-    //RH_ScopedInstall(AllocatePathFindInfoMem, 0x44D2B0);
     RH_ScopedInstall(These2NodesAreAdjacent, 0x44D230);
-    //RH_ScopedInstall(PreparePathData, 0x44D0E0);
     RH_ScopedInstall(FindRegionForCoors, 0x44D830);
     RH_ScopedInstall(FindYRegionForCoors, 0x44D8C0);
     RH_ScopedInstall(FindXRegionForCoors, 0x44D890);
-    //RH_ScopedInstall(AddInteriorLinkToExternalNode, 0x44DF30);
+    RH_ScopedInstall(AddInteriorLinkToExternalNode, 0x44DF30);
     //RH_ScopedInstall(AddInteriorLink, 0x44DED0);
     RH_ScopedInstall(MarkRegionsForCoors, 0x44DB60);
     //RH_ScopedInstall(FindStartPointOfRegion, 0x44D930);
@@ -758,6 +758,7 @@ void CPathFind::MarkRegionsForCoors(CVector pos, float radius) {
     );
 }
 
+// 0x44D3E0
 bool CPathFind::ThisNodeHasToBeSwitchedOff(CPathNode* node) {
     switch (node->m_nBehaviourType) {
     case 1:
@@ -766,6 +767,13 @@ bool CPathFind::ThisNodeHasToBeSwitchedOff(CPathNode* node) {
     default:
         return true;
     }
+}
+
+// 0x44DF30
+void CPathFind::AddInteriorLinkToExternalNode(int32 interiorNodeIdx, CNodeAddress externalNodeAddr) {
+    const auto idx = NumLinksToExteriorNodes++;
+    aInteriorNodeLinkedToExterior[idx] = interiorNodeIdx;
+    aExteriorNodeLinkedTo[idx] = externalNodeAddr;
 }
 
 // notsa

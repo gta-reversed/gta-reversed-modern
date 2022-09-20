@@ -339,7 +339,11 @@ public:
     void StartNewInterior(int interiorNum);
     CNodeAddress AddNodeToNewInterior(float x, float y, float z, bool bDontWander, int8 con0, int8 con1, int8 con2, int8 con3, int8 con4, int8 con5);
     void AddInteriorLink(int unkn1, int unkn2);
-    void AddInteriorLinkToExternalNode(int unkn, CNodeAddress interiorAddress, CNodeAddress exteriorAddress);
+
+    /*!
+    * @addr 0x44DF30
+    */
+    void AddInteriorLinkToExternalNode(int32 interiorNodeIdx, CNodeAddress externalNodeAddr);
     void RemoveInteriorLinks(int unkn);
     CNodeAddress FindNearestExteriorNodeToInteriorNode(int interiorId);
     void AddDynamicLinkBetween2Nodes_For1Node(CNodeAddress node1, CNodeAddress node2);
