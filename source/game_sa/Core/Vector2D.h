@@ -114,6 +114,14 @@ public:
 
     /// Wrapper around `CGeneral::GetNodeHeadingFromVector`
     uint32 NodeHeading() const;
+
+    /*!
+    * @notsa
+    * @return Make all component's values absolute (positive).
+    */
+    static friend CVector2D abs(CVector2D v2) {
+        return { std::abs(v2.x), std::abs(v2.y) };
+    }
 };
 
 /// Negate all components of the vector
