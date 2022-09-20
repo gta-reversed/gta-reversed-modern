@@ -10,6 +10,7 @@
 #include "Vector.h"
 #include "NodeAddress.h"
 #include "NodeRoute.h"
+#include <functional>
 
 static constexpr auto NUM_PATH_MAP_AREA_X{ 8 };
 static constexpr auto NUM_PATH_MAP_AREA_Y{ 8 };
@@ -117,7 +118,7 @@ public:
         if (m_nNumRightLanes) {
             return 0.5f - (float)m_nPathNodeWidth * 0.011574074f / 2.f;
         }
-        return 0.5 - (float)m_nNumLeftLanes / 2.f;
+        return 0.5f - (float)m_nNumLeftLanes / 2.f;
     }
 
     /// Get uncompressed world position
@@ -211,7 +212,7 @@ public:
     CNodeAddress           m_aInteriorNodes[NUM_PATH_INTERIOR_AREAS];
     uint32                 m_nNumForbiddenAreas;
     CForbiddenArea         m_aForbiddenAreas[NUM_PATH_MAP_AREAS];
-    bool                   m_bNodesLoadingRequested;
+    bool                   m_bForbiddenForScriptedCarsEnabled;
     float                  m_fForbiddenForScrCarsX1;
     float                  m_fForbiddenForScrCarsX2;
     float                  m_fForbiddenForScrCarsY1;
@@ -279,14 +280,9 @@ public:
     void MarkRoadsBetweenLevelsNodeAndNeighbours(int) { /*noop*/ }
     bool TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
     bool TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
-    uint32 FindRegionForCoors(float x, float y);
     void GeneratePedCreationCoors_Interior(float x, float y, CVector* outCoords, CNodeAddress* unused1, CNodeAddress* unused2, float* outOrientation);
     void GeneratePedCreationCoors(float x, float y, float minDist1, float maxDist1, float minDist2, float maxDist2, CVector* outCoords, CNodeAddress* outAddress1,
                                   CNodeAddress* outAddress2, float* outOrientation, bool bLowTraffic, CMatrix* transformMatrix);
-    uint32 FindXRegionForCoors(float x);
-    uint32 FindYRegionForCoors(float y);
-    float FindXCoorsForRegion(uint32 regionX);
-    float FindYCoorsForRegion(uint32 regionY);
     CNodeAddress FindNodeClosestToCoors(CVector pos, int32 nodeType, float maxDistance, uint16 unk2, int32 unk3, uint16 unk4,
                                          uint16 bBoatsOnly, int32 unk6);
     void MarkRoadNodeAsDontWander(float x, float y, float z);
@@ -307,7 +303,16 @@ public:
     void Shutdown();
     CVector TakeWidthIntoAccountForWandering(CNodeAddress nodeAddress, uint16 randomSeed);
     void TakeWidthIntoAccountForCoors(CNodeAddress address, CNodeAddress address2, uint16 seed, float* fOut1, float* fOut2);
-    static void MarkRegionsForCoors(CVector vecPos, float radius);
+
+    /*!
+    * TODO: Move this garbage to source file instead, no need for it in here.
+    */
+    void MarkRegionsForCoors(CVector vecPos, float radius);
+
+    /*!
+    * @addr 0x44DCD0
+    * @brief Load paths around the given position in a 350 radius next time `UpdateStreaming` is called
+    */
     void SetPathsNeededAtPosition(const CVector& posn);
     void UpdateStreaming(bool bForceStreaming);
     void MakeRequestForNodesToBeLoaded(float x1, float x2, float y1, float y2);
@@ -316,7 +321,7 @@ public:
 
     /*!
     * @addr 0x44DD10
-    * @return If all areas within the given bounding box are loaded
+    * @return If all areas within the given bounding rect are loaded
     */
     bool AreNodesLoadedForArea(float minX, float maxX, float minY, float maxY);
 
@@ -355,29 +360,45 @@ public:
     }
 
     /*!
+    * @addr 0x44D830
+    * @brief Find the AreaId in which the given coords are
+    */
+    size_t FindRegionForCoors(CVector2D posn) { // NOTSA: Using a v2d instead of 2 floats here
+        const auto [x, y] = FindXYRegionForCoors(posn);
+        return GetAreaIdFromXY(x, y);
+    }
+
+    /*!
+    * @addr 0x44D890
+    * @brief Find the X region of an X axis coord
+    */
+    size_t FindXRegionForCoors(float x) const;
+
+    /*!
+    * @addr 0x44D8C0
+    * @brief Find the Y region of a Y axis coord
+    */
+    size_t FindYRegionForCoors(float y) const;
+
+    /*!
+    * @notsa
+    * @brief Return a pair of X, Y coords for a coordinate. The actual AreaId can be obtained using `GetAreaIdFromXY` (Or by using `FindRegionForCoors` directly)
+    */
+    std::pair<size_t, size_t> FindXYRegionForCoors(CVector2D coors) const {
+        return { FindXRegionForCoors(coors.x), FindYRegionForCoors(coors.y) };
+    }
+
+    float FindXCoorsForRegion(uint32 regionX);
+    float FindYCoorsForRegion(uint32 regionY);
+
+    /*!
     * @notsa
     *
     * @return A span of the specified path nodes in the area, or an empty one if the area is not loaded (or it has no nodes of the specified type)
     *
     * Code based on 0x44FD6E
     */
-    std::span<CPathNode> GetPathNodesInArea(size_t areaId, ePathType ptype = PATH_TYPE_ALL) const {
-        if (const auto allNodes = m_pPathNodes[areaId]) {
-            const auto numVehNodes = m_anNumVehicleNodes[areaId];
-            switch (ptype) {
-            case ePathType::PATH_TYPE_VEH: // Vehicles, boats, race tracks
-                return std::span{ allNodes, m_anNumVehicleNodes[areaId] };
-            case ePathType::PATH_TYPE_PED: // Peds only
-                assert(m_anNumPedNodes[areaId] == m_anNumNodes[areaId] - numVehNodes); // Pirulax: I'm assuming this is true, so if this doesnt assert for a long time remove it
-                return std::span{ allNodes + numVehNodes, m_anNumPedNodes[areaId] };
-            case ePathType::PATH_TYPE_ALL: // All of the above
-                return std::span{ allNodes, m_anNumNodes[areaId] };
-            default:
-                NOTSA_UNREACHABLE("Invalid pathType: {}", (int)ptype);
-            }
-        }
-        return {};
-    }
+    std::span<CPathNode> GetPathNodesInArea(size_t areaId, ePathType ptype = PATH_TYPE_ALL) const;
 
     /*!
     * @notsa
@@ -392,8 +413,8 @@ public:
     * @param x The X (column) of the area 
     * @param y The Y (row) of the area
     */
-    auto GetAreaIdFromXY(size_t x, size_t y) {
-        assert(x <= NUM_PATH_MAP_AREA_X && y <= NUM_PATH_MAP_AREA_Y);
+    static constexpr size_t GetAreaIdFromXY(size_t x, size_t y) {
+        assert(x < NUM_PATH_MAP_AREA_X && y < NUM_PATH_MAP_AREA_Y);
         return y * NUM_PATH_MAP_AREA_Y + x;
     }
 
@@ -403,7 +424,7 @@ public:
     * @brief Check if the node's area is loaded
     * @param node Must have a valid area
     */
-    bool IsAreaNodesAvailable(CNodeAddress node) const { assert(node.IsAreaValid()); return IsAreaLoaded(node.m_wAreaId); }
+    bool IsAreaNodesAvailable(CNodeAddress node) const { return IsAreaLoaded(node.m_wAreaId); }
 
     bool FindNodeCoorsForScript(CVector& outPos, CNodeAddress addr);
 
@@ -420,6 +441,30 @@ public:
     * @brief Check if all node's areas in the list are loaded
     */
     bool AreNodeAreasLoaded(const std::initializer_list<CNodeAddress>& addrs) const;
+
+    /*!
+    * @notsa
+    * 
+    * @brief Call function `fn` with each area ID touching the specified rect.
+    * 
+    * @param rect The rectangle
+    * @param fn   The function to be called with each area's ID. If it returns `false` iteration is stopped and `false` is returned from this function, continues iteration otherwise.
+    * 
+    * @return If `fn` returned `false` at any point then false, otherwise true.
+    */
+    template<std::predicate<size_t> T>
+    bool IterAreasTouchingRect(CRect rect, T&& fn) {
+        const auto [minAreaX, minAreaY] = FindXYRegionForCoors({ rect.left, rect.bottom });
+        const auto [maxAreaX, maxAreaY] = FindXYRegionForCoors({ rect.right, rect.top });
+        for (auto x = minAreaX; x <= maxAreaX; x++) {
+            for (auto y = minAreaY; y <= maxAreaY; y++) {
+                if (!std::invoke(fn, GetAreaIdFromXY(x, y))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 };
 
 VALIDATE_SIZE(CPathFind, 0x3C80);

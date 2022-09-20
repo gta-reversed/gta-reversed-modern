@@ -38,19 +38,19 @@ void CPathFind::InjectHooks() {
     //RH_ScopedInstall(AllocatePathFindInfoMem, 0x44D2B0);
     RH_ScopedInstall(These2NodesAreAdjacent, 0x44D230);
     //RH_ScopedInstall(PreparePathData, 0x44D0E0);
-    //RH_ScopedInstall(FindRegionForCoors, 0x44D830);
-    //RH_ScopedInstall(FindYRegionForCoors, 0x44D8C0);
+    RH_ScopedInstall(FindRegionForCoors, 0x44D830);
+    RH_ScopedInstall(FindYRegionForCoors, 0x44D8C0);
+    RH_ScopedInstall(FindXRegionForCoors, 0x44D890);
     //RH_ScopedInstall(AddInteriorLinkToExternalNode, 0x44DF30);
     //RH_ScopedInstall(AddInteriorLink, 0x44DED0);
-    //RH_ScopedInstall(MarkRegionsForCoors, 0x44DB60);
+    RH_ScopedInstall(MarkRegionsForCoors, 0x44DB60);
     //RH_ScopedInstall(FindStartPointOfRegion, 0x44D930);
     //RH_ScopedInstall(FindYCoorsForRegion, 0x44D910);
     //RH_ScopedInstall(FindXCoorsForRegion, 0x44D8F0);
-    //RH_ScopedInstall(FindXRegionForCoors, 0x44D890);
     RH_ScopedInstall(IsAreaNodesAvailable, 0x420AA0);
     //RH_ScopedInstall(HaveRequestedNodesBeenLoaded, 0x450DB0);
     //RH_ScopedInstall(MakeRequestForNodesToBeLoaded, 0x450D70);
-    //RH_ScopedInstall(UpdateStreaming, 0x450A60);
+    RH_ScopedInstall(UpdateStreaming, 0x450A60);
     //RH_ScopedInstall(TakeWidthIntoAccountForWandering, 0x4509A0);
     RH_ScopedInstall(Shutdown, 0x450950);
     //RH_ScopedOverloadedInstall(FindNodeCoorsForScript, "", 0x450780, CVector(CPathFind::*)(CNodeAddress, CNodeAddress, float*, bool*));
@@ -115,7 +115,7 @@ void CPathNode::InjectHooks() {
 void CPathFind::Init() {
     static int32 NumTempExternalNodes = 0; // Unused
     m_nNumForbiddenAreas = 0;
-    m_bNodesLoadingRequested = false;
+    m_bForbiddenForScriptedCarsEnabled = false;
 
     for (auto i = 0u; i < NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS; ++i) {
         m_pPathNodes[i] = nullptr;
@@ -133,29 +133,12 @@ void CPathFind::Init() {
 // 0x44E4E0
 void CPathFind::ReInit() {
     m_nNumForbiddenAreas = 0;
-    m_bNodesLoadingRequested = false;
+    m_bForbiddenForScriptedCarsEnabled = false;
 }
 
 // 0x44DD10
 bool CPathFind::AreNodesLoadedForArea(float minX, float maxX, float minY, float maxY) {
-    const auto AreaOfPos = [](const CVector2D& pos) -> std::tuple<uint32, uint32> {
-        const auto AreaOf = [](float p, auto nareas) {
-            return std::clamp((uint32)(p + 3000.f / (6000.f / (float)nareas)), 0u, (uint32)nareas);
-        };
-        return { AreaOf(pos.x, NUM_PATH_MAP_AREA_X), AreaOf(pos.y, NUM_PATH_MAP_AREA_Y) };
-    };
-    const auto [minAreaX, minAreaY] = AreaOfPos({ minX, minY });
-    const auto [maxAreaX, maxAreaY] = AreaOfPos({ maxX, maxY });
-
-    for (auto x = minAreaX; x < maxAreaX; x++) {
-        for (auto y = minAreaY; y < maxAreaY; y++) {
-            if (!IsAreaLoaded(GetAreaIdFromXY(x, y))) {
-                return false;
-            }
-        }
-    }
-
-    return true;
+    return IterAreasTouchingRect({ minX, minY, maxX, maxY }, [this](auto areaId) -> bool { return IsAreaLoaded(areaId); });
 }
 
 // 0x450950
@@ -189,7 +172,7 @@ void CPathFind::UnMarkAllRoadNodesAsDontWander() {
 
 // 0x44DD00
 void CPathFind::ReleaseRequestedNodes() {
-    m_bNodesLoadingRequested = false;
+    m_bForbiddenForScriptedCarsEnabled = false;
 }
 
 /*!
@@ -487,7 +470,73 @@ CNodeAddress CPathFind::FindNodeClosestToCoors(CVector pos, int32 nodeType, floa
 
 // 0x450A60
 void CPathFind::UpdateStreaming(bool bForceStreaming) {
-    return plugin::CallMethod<0x450A60, CPathFind*, bool>(this, bForceStreaming);
+    // The time thingy I think is some kind of `% 512`, not sure yet, will have to figure it out.
+    if (!s_bLoadPathsNeeded && !bForceStreaming && (CTimer::m_snTimeInMilliseconds ^ CTimer::m_snPreviousTimeInMilliseconds) < 512) {
+        return;
+    }
+
+    rng::fill(ToBeStreamed, false);
+    std::array<bool, NUM_PATH_MAP_AREAS> ToBeStreamedForScript{};
+
+    // Mark areas around the player
+    if (FindPlayerPed()) {
+        MarkRegionsForCoors(FindPlayerCoors(), 350.f);
+    }
+
+    // Mark areas requested by `SetPathsNeededAtPosition`
+    if (s_bLoadPathsNeeded) {
+        MarkRegionsForCoors(s_pathsNeededPosn, 300.f);
+        s_bLoadPathsNeeded = false;
+    }
+
+    // Mark paths around some specific mission vehicles
+    for (const auto& veh : GetVehiclePool()->GetAllValid()) {
+        if (!veh.IsMissionVehicle()) {
+            continue;
+        }
+
+        switch (veh.m_nVehicleSubType) {
+        case VEHICLE_TYPE_HELI:
+        case VEHICLE_TYPE_PLANE:
+        case VEHICLE_TYPE_BOAT:
+        case VEHICLE_TYPE_TRAIN:
+        case VEHICLE_TYPE_FPLANE:
+            break;
+        default:
+            MarkRegionsForCoors(veh.GetPosition(), 300.f);
+        }
+    }
+
+    // Mark areas inside the forbidden scripted cars rect
+    if (m_bForbiddenForScriptedCarsEnabled) { // TODO: This doesn't make sense
+        IterAreasTouchingRect(
+            { m_fForbiddenForScrCarsX1, m_fForbiddenForScrCarsY1, m_fForbiddenForScrCarsX2, m_fForbiddenForScrCarsY2 },
+            [&, this](auto areaId) {
+                ToBeStreamed[areaId] = ToBeStreamedForScript[areaId] = true;
+                return true;
+            }
+        );
+    }
+
+    // Load/unload areas as per `ToBeStreamed`
+    for (const auto [areaId, shouldBeLoaded] : notsa::enumerate(ToBeStreamed)) {
+        if (shouldBeLoaded) {
+            if (!IsAreaLoaded(areaId)) {
+                CStreaming::RequestModel(
+                    DATToModelId(areaId),
+                    ToBeStreamedForScript[areaId]
+                        ? STREAMING_MISSION_REQUIRED
+                        : STREAMING_KEEP_IN_MEMORY
+                );
+                DEV_LOG("Requested area: %i", (int)areaId);
+            } else {
+                DEV_LOG("Area already loaded: %i", (int)areaId);
+            }
+        } else if (IsAreaLoaded(areaId)) {
+            CStreaming::RemoveModel(DATToModelId(areaId));
+            DEV_LOG("Removed area: %i", (int)areaId);
+        }
+    }
 }
 
 // 0x44DE80
@@ -647,7 +696,54 @@ bool CPathFind::AreNodeAreasLoaded(const std::initializer_list<CNodeAddress>& ad
     return rng::all_of(addrs, [this](auto&& addr) { return IsAreaNodesAvailable(addr); });
 }
 
+// 0x44DCD0
 void CPathFind::SetPathsNeededAtPosition(const CVector& posn) {
     s_pathsNeededPosn = posn;
     s_bLoadPathsNeeded = true;
 }
+
+namespace detail {
+constexpr size_t RegionValueOf(float p, size_t nareas) {
+    return std::clamp((uint32)((p + 3000.f) / (6000.f / (float)nareas)), 0u, (uint32)nareas - 1);
+}
+}; // namespace detail
+
+size_t CPathFind::FindXRegionForCoors(float x) const {
+    return detail::RegionValueOf(x, NUM_PATH_MAP_AREA_X);
+}
+
+size_t CPathFind::FindYRegionForCoors(float y) const {
+    return detail::RegionValueOf(y, NUM_PATH_MAP_AREA_Y);
+}
+
+// 0x44DB60
+void CPathFind::MarkRegionsForCoors(CVector pos, float radius) {
+    // HACK: Since the below function isnt `static` (TODO...) we gotta use the class instance here...
+    ThePaths.IterAreasTouchingRect(
+        { pos, radius },
+        [](auto areaId) {
+            ToBeStreamed[areaId] = true;
+            return true;
+        }
+    );
+}
+
+// notsa
+std::span<CPathNode> CPathFind::GetPathNodesInArea(size_t areaId, ePathType ptype) const {
+    if (const auto allNodes = m_pPathNodes[areaId]) {
+        const auto numVehNodes = m_anNumVehicleNodes[areaId];
+        switch (ptype) {
+        case ePathType::PATH_TYPE_VEH: // Vehicles, boats, race tracks
+            return std::span{ allNodes, m_anNumVehicleNodes[areaId] };
+        case ePathType::PATH_TYPE_PED: // Peds only
+            assert(m_anNumPedNodes[areaId] == m_anNumNodes[areaId] - numVehNodes); // Pirulax: I'm assuming this is true, so if this doesnt assert for a long time remove it
+            return std::span{ allNodes + numVehNodes, m_anNumPedNodes[areaId] };
+        case ePathType::PATH_TYPE_ALL: // All of the above
+            return std::span{ allNodes, m_anNumNodes[areaId] };
+        default:
+            NOTSA_UNREACHABLE("Invalid pathType: {}", (int)ptype);
+        }
+    }
+    return {};
+}
+
