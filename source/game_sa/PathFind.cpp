@@ -96,7 +96,7 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(StartNewInterior, 0x44DE80);
     //RH_ScopedInstall(LoadSceneForPathNodes, 0x44DE00);
     RH_ScopedInstall(AreNodesLoadedForArea, 0x44DD10);
-    //RH_ScopedInstall(ReleaseRequestedNodes, 0x44DD00);
+    RH_ScopedInstall(ReleaseRequestedNodes, 0x44DD00);
     RH_ScopedInstall(SetPathsNeededAtPosition, 0x44DCD0);
     RH_ScopedInstall(SetLinksBridgeLights, 0x44D960);
     //RH_ScopedInstall(Load, 0x5D3500);
