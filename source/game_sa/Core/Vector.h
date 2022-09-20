@@ -149,6 +149,10 @@ public:
     static friend CVector abs(CVector vec) {
         return { std::abs(vec.x), std::abs(vec.y), std::abs(vec.z) };
     }
+
+    static friend CVector pow(CVector vec, float power) {
+        return { std::pow(vec.x, power), std::pow(vec.y, power), std::pow(vec.z, power) };
+    }
 };
 VALIDATE_SIZE(CVector, 0xC);
 
