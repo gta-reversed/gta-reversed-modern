@@ -25,6 +25,7 @@ static std::array<bool, NUM_PATH_MAP_AREAS>& ToBeStreamed = *(std::array<bool, N
 static std::array<float, 64>& XCoorGiven = *(std::array<float, 64>*)0x96EE80;
 static std::array<float, 64>& YCoorGiven = *(std::array<float, 64>*)0x96ED80;
 static std::array<float, 64>& ZCoorGiven = *(std::array<float, 64>*)0x96EC80;
+static std::array<std::array<int8, 8>, 64>& ConnectsToGiven = *(std::array<std::array<int8, 8>, 64>*)0x96EAC0;
 
 void CPathFind::InjectHooks() {
     RH_ScopedClass(CPathFind);
@@ -34,7 +35,7 @@ void CPathFind::InjectHooks() {
     // thus it's not possible to take their address
     // And I'm lazy to add stubs
 
-    //RH_ScopedInstall(AddNodeToNewInterior, 0x450E90);
+    RH_ScopedInstall(AddNodeToNewInterior, 0x450E90);
     RH_ScopedInstall(FindNearestExteriorNodeToInteriorNode, 0x450F30);
     //RH_ScopedInstall(ThisNodeHasToBeSwitchedOff, 0x44D3E0);
     //RH_ScopedInstall(SwitchRoadsInAngledArea, 0x44D3D0);
@@ -557,11 +558,24 @@ void CPathFind::StartNewInterior(int32 interiorNum) {
 }
 
 // 0x450E90
-CNodeAddress CPathFind::AddNodeToNewInterior(float x, float y, float z, bool bDontWander, int8 con0, int8 con1, int8 con2, int8 con3, int8 con4, int8 con5) {
-    CNodeAddress outAddress;
-    plugin::CallMethod<0x450E90, CPathFind*, CNodeAddress*, float, float, float, bool, int8, int8, int8, int8, int8, int8>(this, &outAddress, x, y, z, bDontWander, con0, con1,
-                                                                                                                           con2, con3, con4, con5);
-    return outAddress;
+CNodeAddress CPathFind::AddNodeToNewInterior(
+    float x,
+    float y,
+    float z,
+    bool bDontWander,
+    int8 con0,
+    int8 con1,
+    int8 con2,
+    int8 con3,
+    int8 con4,
+    int8 con5
+) {
+    const auto idx = NumNodesGiven++;
+    XCoorGiven[idx] = x;
+    YCoorGiven[idx] = y;
+    ZCoorGiven[idx] = z;
+    rng::copy(std::array{ con0, con1, con2, con3, con4, con5 }, ConnectsToGiven[idx].begin());
+    return { NUM_PATH_MAP_AREAS + NewInteriorSlot, idx };
 }
 
 // 0x451300 unused
