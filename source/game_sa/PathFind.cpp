@@ -96,7 +96,6 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(Init, 0x44D080);
     RH_ScopedInstall(GetPathNode, 0x420AC0);
     RH_ScopedInstall(TestCrossesRoad, 0x44D790);
-    //RH_ScopedInstall(Save, 0x5D34C0);
     RH_ScopedInstall(ReInit, 0x44E4E0);
     //RH_ScopedInstall(RemoveInterior, 0x44E1A0);
     RH_ScopedInstall(AddDynamicLinkBetween2Nodes_For1Node, 0x44E000);
@@ -106,7 +105,8 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(ReleaseRequestedNodes, 0x44DD00);
     RH_ScopedInstall(SetPathsNeededAtPosition, 0x44DCD0);
     RH_ScopedInstall(SetLinksBridgeLights, 0x44D960);
-    //RH_ScopedInstall(Load, 0x5D3500);
+    RH_ScopedInstall(Save, 0x5D34C0);
+    RH_ScopedInstall(Load, 0x5D3500);
 }
 
 void CPathNode::InjectHooks() {
