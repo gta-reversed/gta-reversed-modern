@@ -55,7 +55,7 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(Shutdown, 0x450950);
     //RH_ScopedOverloadedInstall(FindNodeCoorsForScript, "", 0x450780, CVector(CPathFind::*)(CNodeAddress, CNodeAddress, float*, bool*));
     RH_ScopedOverloadedInstall(FindNodeCoorsForScript, "OneNode", 0x4505E0, CVector(CPathFind::*)(CNodeAddress, bool*));
-    //RH_ScopedInstall(IsWaterNodeNearby, 0x450DE0);
+    RH_ScopedInstall(IsWaterNodeNearby, 0x450DE0);
     //RH_ScopedInstall(CountNeighboursToBeSwitchedOff, 0x4504F0);
     //RH_ScopedInstall(FindNodeOrientationForCarPlacement, 0x450320);
     //RH_ScopedInstall(FindNodePairClosestToCoors, 0x44FEE0);
@@ -465,7 +465,16 @@ void CPathFind::LoadSceneForPathNodes(CVector point) {
 
 // 0x450DE0
 bool CPathFind::IsWaterNodeNearby(CVector position, float radius) {
-    return plugin::CallMethodAndReturn<bool, 0x450DE0, CPathFind*, CVector, float>(this, position, radius);
+    for (auto areaId = 0u; areaId < NUM_PATH_MAP_AREAS; areaId++) {
+        for (const auto& node : GetPathNodesInArea(areaId, PATH_TYPE_VEH)) {
+            if (node.m_bWaterNode) {
+                if ((node.GetNodeCoors() - position).SquaredMagnitude() <= sq(radius)) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 // 0x44F460

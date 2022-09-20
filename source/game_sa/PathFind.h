@@ -326,6 +326,10 @@ public:
     * @brief Request all paths in a radius of 350 units from the point to be loaded
     */
     void LoadSceneForPathNodes(CVector point);
+    /*!
+    * @addr 0x450DE0
+    * @return If there's a water node on the map for vehicles in the given radius
+    */
     bool IsWaterNodeNearby(CVector position, float radius);
     void StartNewInterior(int interiorNum);
     CNodeAddress AddNodeToNewInterior(float x, float y, float z, bool bDontWander, int8 con0, int8 con1, int8 con2, int8 con3, int8 con4, int8 con5);
