@@ -321,6 +321,10 @@ public:
     bool AreNodesLoadedForArea(float minX, float maxX, float minY, float maxY);
 
     bool HaveRequestedNodesBeenLoaded();
+    /*
+    * @addr 0x44DE00
+    * @brief Request all paths in a radius of 350 units from the point to be loaded
+    */
     void LoadSceneForPathNodes(CVector point);
     bool IsWaterNodeNearby(CVector position, float radius);
     void StartNewInterior(int interiorNum);

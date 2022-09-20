@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-
+#include <extensions/enumerate.hpp>
 #include "PathFind.h"
 
 CPathFind& ThePaths = *(CPathFind*)(0x96F050);
@@ -18,6 +18,9 @@ int32& CPathFind::NewInteriorSlot = *(int32*)0x96EF84;
 // TODO (When done): Move into the class itself
 CVector& s_pathsNeededPosn = *(CVector*)0x977B70;
 bool&    s_bLoadPathsNeeded  = *(bool*)0x96F030;
+
+// TODO: Remove this and use a stack array or smth..
+static std::array<bool, NUM_PATH_MAP_AREAS>& ToBeStreamed = *(std::array<bool, NUM_PATH_MAP_AREAS>*)0x96EFD0;
 
 void CPathFind::InjectHooks() {
     RH_ScopedClass(CPathFind);
@@ -94,7 +97,7 @@ void CPathFind::InjectHooks() {
     //RH_ScopedInstall(RemoveInterior, 0x44E1A0);
     RH_ScopedInstall(AddDynamicLinkBetween2Nodes_For1Node, 0x44E000);
     RH_ScopedInstall(StartNewInterior, 0x44DE80);
-    //RH_ScopedInstall(LoadSceneForPathNodes, 0x44DE00);
+    RH_ScopedInstall(LoadSceneForPathNodes, 0x44DE00);
     RH_ScopedInstall(AreNodesLoadedForArea, 0x44DD10);
     RH_ScopedInstall(ReleaseRequestedNodes, 0x44DD00);
     RH_ScopedInstall(SetPathsNeededAtPosition, 0x44DCD0);
@@ -451,7 +454,13 @@ void CPathFind::UnLoadPathFindData(int32 index) {
 
 // 0x44DE00
 void CPathFind::LoadSceneForPathNodes(CVector point) {
-    plugin::CallMethod<0x44DE00, CPathFind*, CVector>(this, point);
+    rng::fill(ToBeStreamed, false);
+    MarkRegionsForCoors(point, 350.f);
+    for (const auto [areaId, load] : notsa::enumerate(ToBeStreamed)) {
+        if (load) {
+            CStreaming::RequestModel(DATToModelId((int32)areaId), STREAMING_DEFAULT);
+        }
+    }
 }
 
 // 0x450DE0
