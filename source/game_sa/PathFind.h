@@ -564,13 +564,13 @@ public:
 
     /*!
     * @notsa
-    * @brief Get a span of all the given node's links
+    * 
+    * @brief Get all links of the given node as a span of `CPathNode&`. If a link's area isn't loaded it won't be present in the span either.
     */
     auto GetNodeLinkedNodes(const CPathNode& node) {
         return std::span{ m_pNodeLinks[node.m_wBaseLinkId], node.m_nNumLinks }
-             | rng::views::transform([this](auto addr) { return GetPathNode(addr); }) // Transform linked address to a node
-             | rng::views::filter([](auto node) { return !!node; })                   // Drop nulls
-             | rng::views::transform([this](auto node) { return std::ref(*node); });  // Transform to reference
+             | rng::views::filter([this](auto addr) { return !IsAreaNodesAvailable(addr); })          // Drop nodes whose area isn't loaded
+             | rng::views::transform([this](auto addr) -> CPathNode& { return *GetPathNode(addr); }); // Transform linked address to a node ref
     }
 };
 

@@ -83,7 +83,7 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(TestForPedTrafficLight, 0x44D480);
     RH_ScopedInstall(UnMarkAllRoadNodesAsDontWander, 0x44D400);
     RH_ScopedInstall(TidyUpNodeSwitchesAfterMission, 0x44D3B0);
-    //RH_ScopedInstall(ThisNodeWillLeadIntoADeadEnd, 0x44D310);
+    RH_ScopedInstall(ThisNodeWillLeadIntoADeadEnd, 0x44D310);
     //RH_ScopedInstall(AddNodeToList, 0x44D1E0);
     //RH_ScopedInstall(RemoveNodeFromList, 0x44D1B0);
     RH_ScopedInstall(UnLoadPathFindData, 0x44D0F0);
@@ -168,6 +168,32 @@ void CPathFind::Shutdown() {
                 CStreaming::RemoveModel(DATToModelId(relativeId));
             }
         }
+    }
+}
+
+bool CPathFind::ThisNodeWillLeadIntoADeadEnd(CPathNode* startNode, CPathNode* endNode) {
+    auto curr = startNode, prev = endNode;
+    while (true) {
+        CPathNode* next{}; // If node has no links (or neither links area is loaded) this will be nullptr
+        for (auto& linked : GetNodeLinkedNodes(*curr)) {
+            if (&linked == prev) { // Obviously don't count the previous node
+                continue;
+            }
+            if (linked.m_nBehaviourType == 4u || linked.m_nBehaviourType > 10u) { // TODO: Enum?
+                // I'm unsure what's happening here
+                // I think, since this function isn't recursive, they just
+                // consider having 2 appropriate links as a non-deadend
+                if (next) {
+                    return false;
+                }
+                next = &linked;
+            }
+        }
+        if (!next) { 
+            return true;
+        }
+        prev = curr;
+        curr = next;
     }
 }
 
@@ -803,7 +829,7 @@ bool CPathFind::ThisNodeHasToBeSwitchedOff(CPathNode* node) {
 
 // 0x4504F0
 size_t CPathFind::CountNeighboursToBeSwitchedOff(const CPathNode& node) {
-    return (size_t)rng::count_if(GetNodeLinkedNodes(node), CPathNode::DoesThisNodeHasToBeSwitchedOff);
+    return (size_t)rng::count_if(GetNodeLinkedNodes(node), &CPathNode::DoesThisNodeHasToBeSwitchedOff);
 }
 
 // 0x44DF30
@@ -829,7 +855,7 @@ namespace detail {
 constexpr auto GetCoorsOfRegion(size_t p, size_t nareas) {
     return (6000.f / (float)nareas) * (float)p - 3000.f;
 }
-    return (size_t)rng::count_if(GetNodeLinkedNodes(node), &CPathNode::DoesThisNodeHasToBeSwitchedOff);
+};
 
 // 0x44D8F0
 float CPathFind::FindXCoorsForRegion(size_t x) {
