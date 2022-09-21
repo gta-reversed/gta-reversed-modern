@@ -17,7 +17,7 @@ public:
 public:
     static constexpr auto Type = TASK_SIMPLE_ACHIEVE_HEADING;
 
-    CTaskSimpleAchieveHeading(float fAngle, float changeRateMult, float maxHeading);
+    CTaskSimpleAchieveHeading(float fAngle, float changeRateMult = 0.5f, float maxHeading = 0.2f);
     ~CTaskSimpleAchieveHeading() override = default; // 0x667E70
 
     eTaskType GetTaskType() override { return Type; }

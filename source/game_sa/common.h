@@ -7,13 +7,16 @@
 #pragma once
 
 #include <string>
+#include <initializer_list>
 #include <RenderWare.h>
 
+#include "AnimationEnums.h"
 #include "Vector.h"
 #include "Vector2D.h"
 #include "Matrix.h"
 #include "Draw.h"
 
+class CAnimBlendAssociation;
 class CAnimBlendClumpData;
 class CSimpleTransform;
 
@@ -213,6 +216,8 @@ bool DoesInfiniteLineTouchScreen(float baseX, float baseY, float deltaX, float d
 bool IsPointInsideLine(float fLineBaseX, float fLineBaseY, float fDeltaX, float fDeltaY, float fTestPointX, float fTestPointY, float fRadius);
 
 void LittleTest();
+
+CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, std::initializer_list<enum AnimationId> ids);
 
 std::wstring UTF8ToUnicode(const std::string& str);
 std::string UnicodeToUTF8(const std::wstring& str);

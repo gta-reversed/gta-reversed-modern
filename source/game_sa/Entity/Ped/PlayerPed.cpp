@@ -32,8 +32,8 @@ void CPlayerPed::InjectHooks() {
     RH_ScopedInstall(SetWantedLevelNoDrop, 0x609F30);
     RH_ScopedInstall(CheatWantedLevel, 0x609F50);
     RH_ScopedInstall(DoStuffToGoOnFire, 0x60A020);
-    // RH_ScopedVirtualInstall(Load, 0x5D46E0);
-    // RH_ScopedVirtualInstall(Save, 0x5D57E0);
+    RH_ScopedVirtualInstall(Load, 0x5D46E0, { .reversed = false });
+    RH_ScopedVirtualInstall(Save, 0x5D57E0, { .reversed = false });
     RH_ScopedInstall(DeactivatePlayerPed, 0x609520);
     RH_ScopedInstall(ReactivatePlayerPed, 0x609540);
     RH_ScopedInstall(GetPadFromPlayer, 0x609560);
@@ -59,7 +59,7 @@ void CPlayerPed::InjectHooks() {
     RH_ScopedInstall(MakePlayerGroupDisappear, 0x60A440);
     RH_ScopedInstall(MakePlayerGroupReappear, 0x60A4B0);
     RH_ScopedInstall(HandleSprintEnergy, 0x60A550);
-    // RH_ScopedInstall(GetButtonSprintResults, 0x60A820);
+    RH_ScopedInstall(GetButtonSprintResults, 0x60A820, { .reversed = false });
     RH_ScopedInstall(HandlePlayerBreath, 0x60A8D0);
     RH_ScopedOverloadedInstall(MakeChangesForNewWeapon, "", 0x60B460, void(CPlayerPed::*)(eWeaponType));
     RH_ScopedGlobalInstall(LOSBlockedBetweenPeds, 0x60B550);
@@ -144,7 +144,7 @@ CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(PED_TYPE_PLAYE
         m_pPlayerData->m_nPlayerGroup = CPedGroups::AddGroup();
 
         auto& group = CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup);
-        group.GetIntelligence().SetDefaultTaskAllocatorType(5);
+        group.GetIntelligence().SetDefaultTaskAllocatorType(ePedGroupDefaultTaskAllocatorType::RANDOM);
         group.m_bIsMissionGroup = true;
         group.m_groupMembership.SetLeader(this);
         group.Process();
@@ -200,7 +200,7 @@ void CPlayerPed::ReactivatePlayerPed(int32 playerId) {
 }
 
 // 0x609560
-CPad* CPlayerPed::GetPadFromPlayer() {
+CPad* CPlayerPed::GetPadFromPlayer() const {
     switch (m_nPedType) {
     case PED_TYPE_PLAYER1:
         return CPad::GetPad(0);
@@ -526,7 +526,7 @@ void CPlayerPed::ClearAdrenaline() {
 
 // 0x60A0A0
 void CPlayerPed::DisbandPlayerGroup() {
-    CPedGroupMembership& membership = GetGroupMembership();
+    CPedGroupMembership& membership = GetPlayerGroup().GetMembership();
     const uint32 nMembers = membership.CountMembersExcludingLeader();
     if (nMembers > 0)
         Say(nMembers > 1 ? 149 : 150);
@@ -536,7 +536,7 @@ void CPlayerPed::DisbandPlayerGroup() {
 
 // 0x60A110
 void CPlayerPed::MakeGroupRespondToPlayerTakingDamage(CEventDamage& damageEvent) {
-    auto& group = GetGroup();
+    auto& group = GetPlayerGroup();
     if (!damageEvent.m_pSourceEntity)
         return;
     if (group.GetMembership().CountMembersExcludingLeader() < 1)
@@ -555,14 +555,14 @@ void CPlayerPed::TellGroupToStartFollowingPlayer(bool arg0, bool arg1, bool arg2
     if (m_pPlayerData->m_bGroupNeverFollow && arg0)
         return;
 
-    CPedGroup& group = GetGroup();
+    CPedGroup& group = GetPlayerGroup();
     CPedGroupIntelligence& groupIntel = group.GetIntelligence();
     CPedGroupMembership& membership = group.GetMembership();
     if (!arg2 && !membership.CountMembersExcludingLeader())
         return;
 
     group.m_bMembersEnterLeadersVehicle = arg0;
-    groupIntel.SetDefaultTaskAllocatorType(5); // TODO enum probably missing
+    groupIntel.SetDefaultTaskAllocatorType(ePedGroupDefaultTaskAllocatorType::RANDOM);
     if (arg0) {
         CEventPlayerCommandToGroup playerCmdEvent;
         playerCmdEvent.ComputeResponseTaskType(&group);
@@ -603,7 +603,7 @@ void CPlayerPed::TellGroupToStartFollowingPlayer(bool arg0, bool arg1, bool arg2
 
 // 0x60A440
 void CPlayerPed::MakePlayerGroupDisappear() {
-    CPedGroupMembership& membership = GetGroupMembership();
+    CPedGroupMembership& membership = GetPlayerGroup().GetMembership();
     for (int i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
         if (CPed* member = membership.GetMember(i)) {
             if (!member->IsCreatedByMission()) {
@@ -618,7 +618,7 @@ void CPlayerPed::MakePlayerGroupDisappear() {
 
 // 0x60A4B0
 void CPlayerPed::MakePlayerGroupReappear() {
-    CPedGroupMembership& membership = GetGroupMembership();
+    CPedGroupMembership& membership = GetPlayerGroup().GetMembership();
     for (int i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
         if (CPed* member = membership.GetMember(i)) {
             if (!member->IsCreatedByMission()) {
@@ -854,7 +854,7 @@ CPed* CPlayerPed::FindPedToAttack() {
     CPed* closestPed{};
     float closestDistance = std::numeric_limits<float>::max();
 
-    CPedGroupMembership& membership = GetGroupMembership();
+    CPedGroupMembership& membership = GetPlayerGroup().GetMembership();
     for (int i = 0; GetPedPool()->GetSize(); i++) {
         CPed* ped = GetPedPool()->GetAt(i);
         if (!ped)

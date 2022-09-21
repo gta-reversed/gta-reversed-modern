@@ -116,15 +116,17 @@ void CTaskComplexSequence::AddTask(CTask* task) {
     }
 
     delete task;
+    DEV_LOG("Failed to add task to sequence");
 }
 
 // 0x632D50
-void CTaskComplexSequence::AddTask(int32 taskId, CTask* task) {
-    if (taskId >= (int32)std::size(m_aTasks)) {
+void CTaskComplexSequence::AddTask(int32 sequenceIdx, CTask* task) {
+    if (sequenceIdx >= (int32)std::size(m_aTasks)) {
         delete task;
+        DEV_LOG("Failed to add task to sequence");
     } else {
-        delete m_aTasks[taskId];
-        m_aTasks[taskId] = task;
+        delete m_aTasks[sequenceIdx];
+        m_aTasks[sequenceIdx] = task;
     }
 }
 

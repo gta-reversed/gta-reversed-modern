@@ -16,8 +16,8 @@ public:
     int16     m_evadeType;
     float     m_fDamageIntensity;
     CVehicle* m_vehicle;
-    CVector   m_collisionImpactVelocity;
-    CVector   m_collisionPosition;
+    CVector   m_impactNormal;
+    CVector   m_impactPos;
     int8      m_moveState;
     int8      field_31;
     int8      field_32[2];

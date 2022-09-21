@@ -14,7 +14,7 @@ class CTaskComplexBeInGroup : public CTaskComplex {
 public:
     static constexpr auto Type = TASK_COMPLEX_BE_IN_GROUP;
 
-    CTaskComplexBeInGroup(int32 groupId, bool isLeader);
+    explicit CTaskComplexBeInGroup(int32 groupId, bool isLeader = false);
     ~CTaskComplexBeInGroup() override = default; // 0x632EA0
 
     CTask* MonitorMainGroupTask(CPed* ped);

@@ -45,6 +45,7 @@ class CLodTimeModelInfo;
 class CPedModelInfo;
 class CTimeModelInfo;
 class CVehicleModelInfo;
+class CWeaponModelInfo;
 struct RwObject;
 
 // originally an abstract class
@@ -143,6 +144,7 @@ public:
     // Those further ones are completely inlined in final version, not present at all in android version;
     CVehicleModelInfo* AsVehicleModelInfoPtr() { return reinterpret_cast<CVehicleModelInfo*>(this); }
     CPedModelInfo*     AsPedModelInfoPtr()     { return reinterpret_cast<CPedModelInfo*>(this); }
+    CWeaponModelInfo*  AsWeaponModelInfoPtr()  { return reinterpret_cast<CWeaponModelInfo*>(this); }
 
     [[nodiscard]] CColModel* GetColModel() const { return m_pColModel; }
 

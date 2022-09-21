@@ -25,7 +25,8 @@ void Win32InjectHooks() {
     RH_ScopedNamespaceName("Win32");
     RH_ScopedCategoryGlobal();
 
-
+    RH_ScopedGlobalInstall(Idle, 0x53E920);
+    RH_ScopedGlobalInstall(RenderScene, 0x53DF40);
 }
 
 // 0x7468E0
@@ -117,7 +118,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
     }
     PSGLOBAL(instance) = instance;
 
-    // 0x7487CF
+    0x7487, { .reversed = false }CF
     WinInput::Initialise();
 
     // todo: CInputEvents::MapMouseButtons && See ASM

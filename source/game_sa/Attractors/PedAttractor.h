@@ -9,23 +9,23 @@ class CTask;
 
 class CPedAttractor {
 public:
-    tEffectPedAttractor* m_pEffect;
-    CEntity*             m_pEntity;
-    SArray<CPed>         field_C;
-    SArray<CPed>         m_pedQueue;
-    SArray<CTask>        m_pedTasks;
-    int32                field_3C;
-    float                queueMp;
-    float                time1;
-    float                time2;
-    char                 field_4C[8];
-    float                m_fRange;
-    float                m_fDeltaHeading;
-    CVector              m_vecAttractorPosn;
-    CVector              m_vecQueueDir;
-    CVector              m_vecUseDir;
-    int32                field_80;
-    char                 m_szScriptName[8];
+    C2dEffect*    m_pEffect;
+    CEntity*      m_pEntity;
+    SArray<CPed>  field_C;
+    SArray<CPed>  m_pedQueue;
+    SArray<CTask> m_pedTasks;
+    int32         field_3C;
+    float         queueMp;
+    float         time1;
+    float         time2;
+    char          field_4C[8];
+    float         m_fRange;
+    float         m_fDeltaHeading;
+    CVector       m_vecAttractorPosn;
+    CVector       m_vecQueueDir;
+    CVector       m_vecUseDir;
+    int32         field_80;
+    char          m_szScriptName[8];
 
 public:
     static void InjectHooks();

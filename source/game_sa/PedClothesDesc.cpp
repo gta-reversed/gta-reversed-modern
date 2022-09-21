@@ -9,8 +9,8 @@ void CPedClothesDesc::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x5A8020);
     RH_ScopedInstall(Initialise, 0x5A78F0);
     RH_ScopedInstall(GetIsWearingBalaclava, 0x5A7950);
-    // RH_ScopedInstall(HasVisibleNewHairCut, 0x5A7970);
-    // RH_ScopedInstall(HasVisibleTattoo, 0x5A79D0);
+    RH_ScopedInstall(HasVisibleNewHairCut, 0x5A7970, { .reversed = false });
+    RH_ScopedInstall(HasVisibleTattoo, 0x5A79D0, { .reversed = false });
 }
 
 CPedClothesDesc::CPedClothesDesc() {

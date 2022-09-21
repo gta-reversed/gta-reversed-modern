@@ -46,8 +46,8 @@ public:
     void SetNumFrames(int32 count, bool root, bool compressed, CAnimBlendSequence* frameData); // root -> isTranslated?
     void Uncompress(uint8* frameData);
 
-    KeyFrameTrans* GetUncompressedFrame(int32 frame);
-    KeyFrameTransCompressed* GetCompressedFrame(int32 frame);
+    KeyFrameTrans* GetUncompressedFrame(int32 frame) const;
+    KeyFrameTransCompressed* GetCompressedFrame(int32 frame) const;
 
     CAnimBlendSequence* Constructor() { this->CAnimBlendSequence::CAnimBlendSequence(); return this; }
     CAnimBlendSequence* Destructor() { this->CAnimBlendSequence::~CAnimBlendSequence(); return this; }

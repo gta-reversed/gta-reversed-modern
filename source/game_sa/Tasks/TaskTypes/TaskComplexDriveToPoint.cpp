@@ -4,7 +4,7 @@
 #include "TaskComplexGoToPointAnyMeans.h"
 
 // 0x63CE00
-CTaskComplexDriveToPoint::CTaskComplexDriveToPoint(CVehicle* vehicle, CVector& point, float speed, int32 arg4, int32 carModelIndexToCreate, float radius, eCarDrivingStyle drivingStyle) :
+CTaskComplexDriveToPoint::CTaskComplexDriveToPoint(CVehicle* vehicle, const CVector& point, float speed, int32 arg4, int32 carModelIndexToCreate, float radius, eCarDrivingStyle drivingStyle) :
       CTaskComplexCarDrive(vehicle, speed, carModelIndexToCreate, drivingStyle),
       m_Point{ point },
       field_30{ arg4 },
@@ -118,4 +118,8 @@ bool CTaskComplexDriveToPoint::IsTargetBlocked(CPed* ped, CEntity** entities, in
         }
     }
     return false;
+}
+
+void CTaskComplexDriveToPoint::GoToPoint(const CVector& point) {
+    m_Point = point;
 }

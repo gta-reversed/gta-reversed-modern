@@ -34,10 +34,10 @@ enum eQuadBikeNodes {
     QUAD_NUM_NODES
 };
 
-class CQuadBike : public CAutomobile {
+class NOTSA_EXPORT_VTABLE CQuadBike : public CAutomobile {
 public:
     tBikeHandlingData* m_pHandling;
-    CRideAnimData      m_sRideAnimData;
+    CRideAnimData      m_sRideAnimData{ ANIM_GROUP_QUAD };
     float              field_9A8[4]; // unused
     uint8              m_nQuadFlags;
 

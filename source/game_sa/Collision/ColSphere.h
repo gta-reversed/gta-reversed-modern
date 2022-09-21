@@ -19,7 +19,7 @@ public:
 
     CColSphere() = default;
 
-    explicit CColSphere(const CSphere& sp) : CSphere(sp) {}
+    CColSphere(const CSphere& sp) : CSphere(sp) {}
 
     constexpr CColSphere(CSphere sp, eSurfaceType material, uint8 pieceType, tColLighting lighting = tColLighting(0xFF)) : CSphere(sp) {
         m_Surface.m_nMaterial = material;

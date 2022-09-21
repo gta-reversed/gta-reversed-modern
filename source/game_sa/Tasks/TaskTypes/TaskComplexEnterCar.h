@@ -13,7 +13,7 @@
 
 // Note: This class is abstract, that is, it can't be directly constructed,
 // rather, use one of the derived classes.
-class CTaskComplexEnterCar : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexEnterCar : public CTaskComplex {
 public:
     CVehicle* m_pTargetVehicle;
     union {
@@ -42,7 +42,9 @@ public:
     int32                         m_nEnterCarStartTime;
 
 public:
-    // Shouldn't be used directly, use CTaskComplexEnterCarAsDriver or CTaskComplexEnterCarAsPassenger instead
+    static void InjectHooks();
+
+    // Shouldn't be used directly, use `CTaskComplexEnterCarAsDriver` or `CTaskComplexEnterCarAsPassenger` instead
     CTaskComplexEnterCar(CVehicle* targetVehicle, bool bAsDriver, bool bQuitAfterOpeningDoor, bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff = false);
     ~CTaskComplexEnterCar() override;
 
@@ -55,5 +57,17 @@ public:
     CVector        GetTargetPos();
 
     auto GetVehicle() const { return m_pTargetVehicle; }
+private:
+    // 0x63A220
+    CTaskComplexEnterCar* Constructor(CVehicle* vehicle, bool bAsDriver, bool bQuitAfterOpeningDoor, bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff) {
+        this->CTaskComplexEnterCar::CTaskComplexEnterCar(vehicle, bAsDriver, bQuitAfterOpeningDoor, bQuitAfterDraggingPedOut, bCarryOnAfterFallingOff);
+        return this;
+    }
+
+    // 0x63DFA0
+    CTaskComplexEnterCar* Destructor() {
+        this->CTaskComplexEnterCar::~CTaskComplexEnterCar();
+        return this;
+    }
 };
 VALIDATE_SIZE(CTaskComplexEnterCar, 0x50);

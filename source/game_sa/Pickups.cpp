@@ -8,6 +8,7 @@
 
 #include "extensions/enumerate.hpp"
 
+#include "Garages.h"
 #include "Pickups.h"
 #include "tPickupMessage.h"
 #include "Radar.h"
@@ -20,42 +21,42 @@ void CPickups::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x454A70);
-    // RH_ScopedInstall(ReInit, 0x456E60);
-    // RH_ScopedInstall(AddToCollectedPickupsArray, 0x455240);
-    // RH_ScopedInstall(CreatePickupCoorsCloseToCoors, 0x458A80);
-    // RH_ScopedInstall(CreateSomeMoney, 0x458970);
-    // RH_ScopedInstall(DetonateMinesHitByGunShot, 0x4590C0);
-    // RH_ScopedInstall(DoCollectableEffects, 0x455E20);
-    // RH_ScopedInstall(DoMineEffects, 0x4560E0);
-    // RH_ScopedInstall(DoMoneyEffects, 0x454E80);
-    // RH_ScopedInstall(DoPickUpEffects, 0x455720);
-    // RH_ScopedInstall(FindPickUpForThisObject, 0x4551C0);
-    // RH_ScopedInstall(GenerateNewOne, 0x456F20);
-    // RH_ScopedInstall(GenerateNewOne_WeaponType, 0x457380);
-    // RH_ScopedInstall(GetActualPickupIndex, 0x4552A0);
-    // RH_ScopedInstall(GetNewUniquePickupIndex, 0x456A30);
-    // RH_ScopedInstall(GetUniquePickupIndex, 0x455280);
+    RH_ScopedInstall(ReInit, 0x456E60, { .reversed = false });
+    RH_ScopedInstall(AddToCollectedPickupsArray, 0x455240, { .reversed = false });
+    //RH_ScopedInstall(CreatePickupCoorsCloseToCoors, 0x458A80, { .reversed = false });
+    RH_ScopedInstall(CreateSomeMoney, 0x458970, { .reversed = false });
+    RH_ScopedInstall(DetonateMinesHitByGunShot, 0x4590C0, { .reversed = false });
+    RH_ScopedInstall(DoCollectableEffects, 0x455E20, { .reversed = false });
+    RH_ScopedInstall(DoMineEffects, 0x4560E0, { .reversed = false });
+    RH_ScopedInstall(DoMoneyEffects, 0x454E80, { .reversed = false });
+    RH_ScopedInstall(DoPickUpEffects, 0x455720, { .reversed = false });
+    RH_ScopedInstall(FindPickUpForThisObject, 0x4551C0, { .reversed = false });
+    RH_ScopedInstall(GenerateNewOne, 0x456F20, { .reversed = false });
+    RH_ScopedInstall(GenerateNewOne_WeaponType, 0x457380, { .reversed = false });
+    RH_ScopedInstall(GetActualPickupIndex, 0x4552A0, { .reversed = false });
+    RH_ScopedInstall(GetNewUniquePickupIndex, 0x456A30, { .reversed = false });
+    RH_ScopedInstall(GetUniquePickupIndex, 0x455280, { .reversed = false });
     RH_ScopedInstall(GivePlayerGoodiesWithPickUpMI, 0x4564F0);
     RH_ScopedInstall(IsPickUpPickedUp, 0x454B40);
     RH_ScopedInstall(ModelForWeapon, 0x454AC0);
     RH_ScopedInstall(PassTime, 0x455200);
     RH_ScopedInstall(PickedUpHorseShoe, 0x455390);
     RH_ScopedInstall(PickedUpOyster, 0x4552D0);
-    // RH_ScopedInstall(PictureTaken, 0x456A70);
+    RH_ScopedInstall(PictureTaken, 0x456A70, { .reversed = false });
     RH_ScopedInstall(PlayerCanPickUpThisWeaponTypeAtThisMoment, 0x4554C0);
     RH_ScopedInstall(RemoveMissionPickUps, 0x456DE0);
     RH_ScopedInstall(RemovePickUp, 0x4573D0);
-    // RH_ScopedInstall(RemovePickUpsInArea, 0x456D30);
+    RH_ScopedInstall(RemovePickUpsInArea, 0x456D30, { .reversed = false });
     RH_ScopedInstall(RemovePickupObjects, 0x455470);
     RH_ScopedInstall(RemoveUnnecessaryPickups, 0x4563A0);
-    // RH_ScopedInstall(RenderPickUpText, 0x455000);
+    RH_ScopedInstall(RenderPickUpText, 0x455000, { .reversed = false });
     RH_ScopedInstall(TestForPickupsInBubble, 0x456450);
-    // RH_ScopedInstall(TryToMerge_WeaponType, 0x4555A0);
-    // RH_ScopedInstall(Update, 0x458DE0);
-    // RH_ScopedInstall(UpdateMoneyPerDay, 0x455680);
-    // RH_ScopedInstall(WeaponForModel, 0x454AE0);
-    // RH_ScopedInstall(Load, 0x5D35A0);
-    // RH_ScopedInstall(Save, 0x5D3540);
+    RH_ScopedInstall(TryToMerge_WeaponType, 0x4555A0, { .reversed = false });
+    RH_ScopedInstall(Update, 0x458DE0, { .reversed = false });
+    RH_ScopedInstall(UpdateMoneyPerDay, 0x455680, { .reversed = false });
+    RH_ScopedInstall(WeaponForModel, 0x454AE0, { .reversed = false });
+    RH_ScopedInstall(Load, 0x5D35A0, { .reversed = false });
+    RH_ScopedInstall(Save, 0x5D3540, { .reversed = false });
 }
 
 // 0x454A70

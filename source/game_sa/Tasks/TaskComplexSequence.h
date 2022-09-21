@@ -18,6 +18,17 @@ public:
 public:
     static constexpr auto Type = TASK_COMPLEX_SEQUENCE;
 
+    /*!
+    * Construct using multiple tasks, same as constructing
+    * and then calling `AddTask` for every task passed in.
+    */
+    template<Task... T>
+    CTaskComplexSequence(T*... tasks)
+        : CTaskComplexSequence{}
+    {
+        (AddTask(tasks), ...);
+    }
+
     CTaskComplexSequence();
     ~CTaskComplexSequence() override;
 
