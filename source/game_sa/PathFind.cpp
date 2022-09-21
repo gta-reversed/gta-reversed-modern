@@ -51,8 +51,8 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(UpdateStreaming, 0x450A60);
     RH_ScopedInstall(TakeWidthIntoAccountForWandering, 0x4509A0);
     RH_ScopedInstall(Shutdown, 0x450950);
-    //RH_ScopedOverloadedInstall(FindNodeCoorsForScript, "", 0x450780, CVector(CPathFind::*)(CNodeAddress, CNodeAddress, float*, bool*));
-    RH_ScopedOverloadedInstall(FindNodeCoorsForScript, "OneNode", 0x4505E0, CVector(CPathFind::*)(CNodeAddress, bool*));
+    RH_ScopedOverloadedInstall(FindNodeCoorsForScript, "TwoNodes", 0x450780, CVector(CPathFind::*)(CNodeAddress, CNodeAddress, float&, bool*));
+    RH_ScopedOverloadedInstall(FindNodeCoorsForScript, "LinkedNode", 0x4505E0, CVector(CPathFind::*)(CNodeAddress, bool*));
     RH_ScopedInstall(IsWaterNodeNearby, 0x450DE0);
     //RH_ScopedInstall(CountNeighboursToBeSwitchedOff, 0x4504F0);
     //RH_ScopedInstall(FindNodeOrientationForCarPlacement, 0x450320);
@@ -292,6 +292,16 @@ void CPathFind::SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, floa
     }
 }
 
+namespace detail {
+// NOTSA
+CVector GetPosnBetweenNodesForScript(CPathNode* nodeA, CVector2D dir) {
+    // Rotate by +90 degrees (Source: https://stackoverflow.com/q/243945 - comments under the OP's question)
+    dir = { -dir.y, dir.x };
+
+    return nodeA->GetNodeCoors() + CVector{dir * ((float)nodeA->m_nPathWidth / 16.f + 2.7f)};
+}
+};
+
 // 0x4505E0
 CVector CPathFind::FindNodeCoorsForScript(CNodeAddress address, bool* bFound) {
     const auto SetFound = [&](bool found) {
@@ -317,10 +327,7 @@ CVector CPathFind::FindNodeCoorsForScript(CNodeAddress address, bool* bFound) {
                     // By negating here we invert the direction
                     dir = dir.x >= 0 ? dir : -dir ;
 
-                    // Rotate by +90 degrees (Source: https://stackoverflow.com/q/243945 - comments under the OP's question)
-                    dir = { -dir.y, dir.x };
-
-                    return nodePos + CVector{ dir * ((float)node->m_nPathWidth / 16.f + 2.7f) };
+                    return detail::GetPosnBetweenNodesForScript(node, dir);
                 }
             }
         }
@@ -331,10 +338,28 @@ CVector CPathFind::FindNodeCoorsForScript(CNodeAddress address, bool* bFound) {
 }
 
 // 0x450780
-CVector CPathFind::FindNodeCoorsForScript(CNodeAddress address1, CNodeAddress address2, float* fOutDir, bool* bFound) {
-    CVector vecOut;
-    plugin::CallMethod<0x450780, CPathFind*, CVector*, CNodeAddress, CNodeAddress, float*, bool*>(this, &vecOut, address1, address2, fOutDir, bFound);
-    return vecOut;
+CVector CPathFind::FindNodeCoorsForScript(CNodeAddress nodeAddrA, CNodeAddress nodeAddrB, float& outHeadingDeg, bool* outFound) {
+    const auto SetFound = [&](bool found) {
+        if (outFound) {
+            *outFound = found;
+        }
+    };
+    if (nodeAddrA.IsAreaValid() && nodeAddrB.IsAreaValid() && AreNodeAreasLoaded({ nodeAddrA, nodeAddrB })) { // Inverted
+        SetFound(true);
+
+        const auto nodeA = GetPathNode(nodeAddrA);
+        const auto posA  = nodeA->GetNodeCoors();
+        const auto dir   = CVector2D{ GetPathNode(nodeAddrB)->GetNodeCoors() - posA }.Normalized();
+
+        outHeadingDeg = RWRAD2DEG(dir.Heading());
+
+        return nodeA->m_nPathWidth
+            ? detail::GetPosnBetweenNodesForScript(nodeA, dir)
+            : posA;
+    } else {
+        SetFound(false);
+        return {};
+    }
 }
 
 // 0x450560

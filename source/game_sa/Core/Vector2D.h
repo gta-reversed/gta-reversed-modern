@@ -91,7 +91,6 @@ public:
         return std::atan2(-x, y);
     }
 
-
     auto GetComponents() const {
         return std::span{ reinterpret_cast<const float*>(this), 2 };
     }

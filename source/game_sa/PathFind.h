@@ -137,7 +137,7 @@ public:
     int16            m_wBaseLinkId;
     uint16           m_wAreaId; // TODO: Replace these 2 with `CNodeAddress`
     uint16           m_wNodeId;
-    uint8            m_nPathWidth;
+    uint8            m_nPathWidth; // Fixed-point float, divide by 16
     uint8            m_nFloodFill;
 
     // byte 0
@@ -299,8 +299,32 @@ public:
     bool TestCoorsCloseness(CVector vecEnd, uint8 nodeType, CVector vecStart); // unused
     void ComputeRoute(uint8 nodeType, const CVector& vecStart, const CVector& vecEnd, const CNodeAddress& address, CNodeRoute& nodeRoute);
     void SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, float fYMax, bool bTrainCrossing);
+
+    /*!
+    * @addr 0x4505E0
+    *
+    * @brief Similar to the other overload, but uses the given node's first link as the second node
+    * 
+    * @param address           The nodes address
+    * @param outFound out, opt Whenever the returned position is valid (Isn't if either node's areas aren't loaded or are invalid)
+    *
+    * @return Same as the other overload, but between this node's first linked node
+    */
     CVector FindNodeCoorsForScript(CNodeAddress address, bool* bFound);
-    CVector FindNodeCoorsForScript(CNodeAddress address1, CNodeAddress address2, float* fOutDir, bool* bFound);
+
+    /*!
+    * @addr 0x450780
+    * @brief Find position between 2 nodes for the script
+    * 
+    * @param nodeAddrA              First nodes address
+    * @param nodeAddrB              Second nodes address
+    * @param outHeadingDeg out      Heading from node A to node B in degrees
+    * @param outFound      out, opt Whenever the returned position is valid (Isn't if either node's areas aren't loaded or are invalid)
+    *
+    * @return The position between 2 nodes (TODO: Explain this in a little more detail)
+    */
+    CVector FindNodeCoorsForScript(CNodeAddress nodeAddrA, CNodeAddress nodeAddrB, float& outHeadingDeg, bool* outFound);
+
     void Shutdown();
     CVector TakeWidthIntoAccountForWandering(CNodeAddress nodeAddress, uint16 randomSeed);
     void TakeWidthIntoAccountForCoors(CNodeAddress address, CNodeAddress address2, uint16 seed, float* fOut1, float* fOut2);
