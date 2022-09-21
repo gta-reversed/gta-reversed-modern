@@ -23,6 +23,7 @@
 #include "Birds.h"
 #include "VehicleRecording.h"
 #include "Shadows.h"
+#include "Garages.h"
 
 // 0x53E170
 void RenderEffects() {
@@ -174,9 +175,11 @@ void FrontendIdle() {
 
 // 0x53DF40
 void RenderScene() {
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(FALSE));
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    bool underWater = CWeather::UnderWaterness <= 0.0f;
+
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
 
     if (CMirrors::TypeOfMirror == MIRROR_TYPE_NONE) {
@@ -184,9 +187,9 @@ void RenderScene() {
         CClouds::Render();
     }
 
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,  RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
-    RwRenderStateSet(rwRENDERSTATESHADEMODE,    RWRSTATE(rwSHADEMODEGOURAUD));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE, RWRSTATE(rwSHADEMODEGOURAUD));
 
     CCarFXRenderer::PreRenderUpdate();
     CRenderer::RenderRoads();
@@ -195,7 +198,10 @@ void RenderScene() {
     g_breakMan.Render(false);
 
     CRenderer::RenderFadingInUnderwaterEntities();
-    if (CWeather::IsUnderWater()) {
+
+    // If under water render this immediately, otherwise 
+    // only after rendering the stuff below.
+    if (underWater) {
         RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
         CWaterLevel::RenderWater();
         RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLBACK));
@@ -203,25 +209,31 @@ void RenderScene() {
 
     CRenderer::RenderFadingInEntities();
     if (!CMirrors::bRenderingReflection) {
-        float nearClipPlane = RwCameraGetNearClipPlane(Scene.m_pRwCamera);
-        float farPlane  = RwCameraGetFarClipPlane(Scene.m_pRwCamera);
+        float nearClipPlaneOld = RwCameraGetNearClipPlane(Scene.m_pRwCamera);
+        float farPlane = RwCameraGetFarClipPlane(Scene.m_pRwCamera);
 
+        float v3;
         float z = CCamera::GetActiveCamera().m_vecFront.z;
-        float camZ = z <= 0.0f ? -z : 0.0f;
+        if (z <= 0.0f)
+            v3 = -z;
+        else
+            v3 = 0.0f;
 
         constexpr float flt_8CD4F0 = 2.0f;
-        constexpr float flt_8CD4EC = 5.9604645e-8f;
+        constexpr float flt_8CD4EC = 5.9604645e-8f; // Same as 1 / (float)(1 << 24) => 1 / 16777216.f ; Not sure if that means anything..
 
-        float unknown = ((flt_8CD4F0 * flt_8CD4EC * 0.25f - flt_8CD4F0 * flt_8CD4EC) * camZ + flt_8CD4F0 * flt_8CD4EC) * (farPlane - nearClipPlane);
+        float unknown = ((flt_8CD4F0 * flt_8CD4EC * 0.25f - flt_8CD4F0 * flt_8CD4EC) * v3 + flt_8CD4F0 * flt_8CD4EC) * (farPlane - nearClipPlaneOld);
 
         RwCameraEndUpdate(Scene.m_pRwCamera);
-        RwCameraSetNearClipPlane(Scene.m_pRwCamera, unknown + nearClipPlane);
+
+        RwCameraSetNearClipPlane(Scene.m_pRwCamera, unknown + nearClipPlaneOld);
         RwCameraBeginUpdate(Scene.m_pRwCamera);
         CShadows::UpdateStaticShadows();
         CShadows::RenderStaticShadows();
         CShadows::RenderStoredShadows();
         RwCameraEndUpdate(Scene.m_pRwCamera);
-        RwCameraSetNearClipPlane(Scene.m_pRwCamera, nearClipPlane);
+        RwCameraSetNearClipPlane(Scene.m_pRwCamera, nearClipPlaneOld);
+
         RwCameraBeginUpdate(Scene.m_pRwCamera);
     }
 
@@ -236,7 +248,7 @@ void RenderScene() {
         CCoronas::RenderSunReflection();
     }
 
-    if (CWeather::IsUnderWater()) {
+    if (!underWater) {
         RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
         CWaterLevel::RenderWater();
         RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLBACK));
