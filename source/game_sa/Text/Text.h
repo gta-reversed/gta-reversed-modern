@@ -37,7 +37,7 @@ public:
     /*!
      * @brief Get translated text by it's key
      *
-     * @param     key   The text's key
+     * @param key The text's key
      *
      * @return The text identified by the given key or the GXT error string.
      */

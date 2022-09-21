@@ -115,17 +115,24 @@ void CText::Unload(bool unloadMissionData) {
 // NOTSA
 const char* GetGxtName() {
     switch (FrontEndMenuManager.m_nPrefsLanguage) {
-    case eLanguage::AMERICAN:   return "AMERICAN.GXT";
-    case eLanguage::FRENCH:     return "FRENCH.GXT";
-    case eLanguage::GERMAN:     return "GERMAN.GXT";
-    case eLanguage::ITALIAN:    return "ITALIAN.GXT";
-    case eLanguage::SPANISH:    return "SPANISH.GXT";
+    case eLanguage::AMERICAN:
+        return "AMERICAN.GXT";
+    case eLanguage::FRENCH:
+        return "FRENCH.GXT";
+    case eLanguage::GERMAN:
+        return "GERMAN.GXT";
+    case eLanguage::ITALIAN:
+        return "ITALIAN.GXT";
+    case eLanguage::SPANISH:
+        return "SPANISH.GXT";
 #ifdef MORE_LANGUAGES
-    case eLanguage::RUSSIAN:    return "RUSSIAN.GXT";
-    case eLanguage::JAPANESE:   return "JAPANESE.GXT";
+    case eLanguage::RUSSIAN:
+        return "RUSSIAN.GXT";
+    case eLanguage::JAPANESE:
+        return "JAPANESE.GXT";
 #endif
     default:
-        NOTSA_UNREACHABLE();
+        NOTSA_UNREACHABLE("GXT file for language={:02d} is not defined.", (uint8)FrontEndMenuManager.m_nPrefsLanguage);
     }
 }
 
@@ -141,12 +148,11 @@ void CheckFileEncoding(const char* file, uint16 version, uint16 encoding) {
             return std::format("{}-bit unknown", e);
         }
     };
-    auto gameEncoding = GetEncodingName(GAME_ENCODING);
     auto fileEncoding = GetEncodingName(encoding);
 
     DEV_LOG("[CText]: Loading '%s' version=%02d (%s)\n", file, version, fileEncoding.c_str());
     if (encoding != GAME_ENCODING) {
-        NOTSA_UNREACHABLE("File {} was compiled with {} encoding but {} is required.", file, fileEncoding, gameEncoding);
+        NOTSA_UNREACHABLE("File {} was compiled with {} encoding but {} is required.", file, fileEncoding, GetEncodingName(GAME_ENCODING));
     }
 }
 
