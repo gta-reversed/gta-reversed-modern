@@ -75,23 +75,22 @@ void InitialiseJoys() {
 BOOL CALLBACK EnumDevicesCallback(LPCDIDEVICEINSTANCEA inst, LPVOID) {
     static int32 snJoyCount = 0;
 
-    LPDIRECTINPUTDEVICE8* joy = nullptr;
-    switch (snJoyCount) {
-    case 0:
-        joy = &g_joy1;
-        break;
-    case 1:
-        joy = &g_joy2;
-        break;
-    default:
-        assert(false);
-    }
+    LPDIRECTINPUTDEVICE8* joy = [] {
+        switch (snJoyCount) {
+        case 0:
+            return &g_joy1;
+        case 1:
+            return &g_joy2;
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
 
-    if (g_input->CreateDevice(inst->guidInstance, joy, nullptr)) {
+    if (SUCCEEDED(g_input->CreateDevice(inst->guidInstance, joy, nullptr))) {
         return TRUE;
     }
 
-    if ((*joy)->SetDataFormat(&c_dfDIJoystick2)) {
+    if (SUCCEEDED((*joy)->SetDataFormat(&c_dfDIJoystick2))) {
         (*joy)->Release();
         return TRUE;
     }

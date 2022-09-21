@@ -13,11 +13,11 @@ struct PresetView {
 };
 
 // 3x3 identity matrix
-CVector PresetViewAxisX = { 1.0f, 0.0f, 0.0f }; // 0x8D2E00
-CVector PresetViewAxisY = { 0.0f, 1.0f, 0.0f }; // 0x8D2E0C
-CVector PresetViewAxisZ = { 0.0f, 0.0f, 1.0f }; // 0x8D2E18
+constexpr CVector PresetViewAxisX = {1.0f, 0.0f, 0.0f}; // 0x8D2E00
+constexpr CVector PresetViewAxisY = {0.0f, 1.0f, 0.0f}; // 0x8D2E0C
+constexpr CVector PresetViewAxisZ = {0.0f, 0.0f, 1.0f};   // 0x8D2E18
 
-const char* ViewsFileName = "./views.txt"; // 0x8D2E24;
+constexpr auto ViewsFileName = "./views.txt"; // 0x8D2E24;
 
 PresetView*& PresetViews = *(PresetView**)0xC1707C;
 uint32& NumPresetViews = *(uint32*)0xC17080;
@@ -32,6 +32,7 @@ bool RsSetPresetView(RwCamera* camera, int32 viewNum) {
     int v3 = NumPresetViews - viewNum - 1u;
     for (CurrentPresetView = viewNum; v3 > 0; --v3) {
         if (!pv) {
+            NOTSA_UNREACHABLE();
             break;
         }
 
