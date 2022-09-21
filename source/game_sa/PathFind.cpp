@@ -47,7 +47,7 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(FindYRegionForCoors, 0x44D8C0);
     RH_ScopedInstall(FindXRegionForCoors, 0x44D890);
     RH_ScopedInstall(AddInteriorLinkToExternalNode, 0x44DF30);
-    //RH_ScopedInstall(AddInteriorLink, 0x44DED0);
+    RH_ScopedInstall(AddInteriorLink, 0x44DED0);
     RH_ScopedInstall(MarkRegionsForCoors, 0x44DB60);
     //RH_ScopedInstall(FindStartPointOfRegion, 0x44D930);
     //RH_ScopedInstall(FindYCoorsForRegion, 0x44D910);
@@ -774,6 +774,18 @@ void CPathFind::AddInteriorLinkToExternalNode(int32 interiorNodeIdx, CNodeAddres
     const auto idx = NumLinksToExteriorNodes++;
     aInteriorNodeLinkedToExterior[idx] = interiorNodeIdx;
     aExteriorNodeLinkedTo[idx] = externalNodeAddr;
+}
+
+// 0x44DED0
+void CPathFind::AddInteriorLink(int32 intNodeA, int32 intNodeB) {
+    const auto AddLink = [](int32 intIdx, int32 linkTo) {
+        // NOTE: Original code compared >= 0, but it's most likely -1.. If anything goes bad use `>= 0`
+        const auto it = rng::find(ConnectsToGiven[intIdx], -1); 
+        assert(*it >= 0);
+        *it = linkTo;
+    };
+    AddLink(intNodeA, intNodeB);
+    AddLink(intNodeB, intNodeA);
 }
 
 // notsa
