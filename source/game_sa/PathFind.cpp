@@ -829,7 +829,7 @@ namespace detail {
 constexpr auto GetCoorsOfRegion(size_t p, size_t nareas) {
     return (6000.f / (float)nareas) * (float)p - 3000.f;
 }
-};
+    return (size_t)rng::count_if(GetNodeLinkedNodes(node), &CPathNode::DoesThisNodeHasToBeSwitchedOff);
 
 // 0x44D8F0
 float CPathFind::FindXCoorsForRegion(size_t x) {
