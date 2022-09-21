@@ -11,19 +11,19 @@ void BoneNode_c::InjectHooks() {
 
     RH_ScopedInstall(Init, 0x6177B0);
     RH_ScopedInstall(InitLimits, 0x617490);
-    RH_ScopedGlobalInstall(EulerToQuat, 0x6171F0, { .reversed = false });
-    RH_ScopedGlobalInstall(QuatToEuler, 0x617080, { .reversed = false });
+    RH_ScopedGlobalInstall(EulerToQuat, 0x6171F0);
+    RH_ScopedGlobalInstall(QuatToEuler, 0x617080);
     RH_ScopedGlobalInstall(GetIdFromBoneTag, 0x617050);
     RH_ScopedInstall(ClampLimitsCurrent, 0x6175D0);
     RH_ScopedInstall(ClampLimitsDefault, 0x617530);
-    RH_ScopedInstall(Limit, 0x617650, { .reversed = false });
-    RH_ScopedInstall(BlendKeyframe, 0x616E30, { .reversed = false });
+    RH_ScopedInstall(Limit, 0x617650);
+    RH_ScopedInstall(BlendKeyframe, 0x616E30);
     RH_ScopedInstall(GetSpeed, 0x616CB0);
     RH_ScopedInstall(SetSpeed, 0x616CC0);
     RH_ScopedInstall(SetLimits, 0x616C50);
     RH_ScopedInstall(GetLimits, 0x616BF0);
     RH_ScopedInstall(AddChild, 0x616BD0);
-    RH_ScopedInstall(CalcWldMat, 0x616CD0, { .reversed = false });
+    RH_ScopedInstall(CalcWldMat, 0x616CD0);
 }
 
 // 0x6177B0
@@ -58,13 +58,39 @@ void BoneNode_c::InitLimits() {
 }
 
 // 0x6171F0
-CQuaternion BoneNode_c::EulerToQuat(CVector* angles, CQuaternion* quat) {
-    return plugin::CallAndReturn<CQuaternion, 0x6171F0, CVector*>(angles);
+void BoneNode_c::EulerToQuat(CVector* angles, CQuaternion* quat) {
+    CVector radAngles = {
+        DegreesToRadians(angles->x),
+        DegreesToRadians(angles->y),
+        DegreesToRadians(angles->z)
+    };
+
+    float cr = std::cos(radAngles.x / 2.0f);
+    float sr = std::sin(radAngles.x / 2.0f);
+    float cp = std::cos(radAngles.y / 2.0f);
+    float sp = std::sin(radAngles.y / 2.0f);
+    float cy = std::cos(radAngles.z / 2.0f);
+    float sy = std::sin(radAngles.z / 2.0f);
+
+    quat->w = cr * cp * cy + sr * sp * sy;
+    quat->x = sr * cp * cy - cr * sp * sy;
+    quat->y = cr * sp * cy + sr * cp * sy;
+    quat->z = cr * cp * sy - sr * sp * cy;
 }
 
 // 0x617080
-CVector BoneNode_c::QuatToEuler(CQuaternion* quat, CVector* angles) {
-    return plugin::CallAndReturn<CVector, 0x617080, CQuaternion*, CVector*>(quat, angles);
+void BoneNode_c::QuatToEuler(CQuaternion* quat, CVector* angles) {
+    angles->x = std::atan2f(2.0f * (quat->w * quat->x + quat->y * quat->z), 1.0f - 2.0f * (sq(quat->x) + sq(quat->y)));
+
+    float sinp = 2.0f * (quat->w * quat->y - quat->z * quat->x);
+
+    if (std::abs(sinp) >= 1.0f) {
+        angles->y = std::copysignf(FRAC_TAU_2, sinp);
+    } else {
+        angles->y = std::asinf(sinp);
+    }
+
+    angles->z = std::atan2f(2.0f * (quat->w * quat->z + quat->x * quat->y), 1.0f - 2.0f * (sq(quat->y) + sq(quat->z)));
 }
 
 // 0x617050
@@ -83,7 +109,8 @@ void BoneNode_c::ClampLimitsCurrent(bool LimitX, bool LimitY, bool LimitZ) {
     if (*(bool*)0x8D2BD1) // always true
         return;
 
-    CVector angles = QuatToEuler(&m_Orientation, &angles);
+    CVector angles;
+    BoneNode_c::QuatToEuler(&m_Orientation, &angles);
     if (LimitX) {
         m_LimitMax.x = angles.x;
         m_LimitMin.x = angles.x;
@@ -121,14 +148,48 @@ void BoneNode_c::ClampLimitsDefault(bool LimitX, bool LimitY, bool LimitZ) {
     }
 }
 
+// argument (float blend) - ignored
 // 0x617650
-void BoneNode_c::Limit(float lim) {
-    plugin::CallMethod<0x617650, BoneNode_c*, float>(this, lim);
+void BoneNode_c::Limit(float blend) {
+    CVector eulerOrientation{};
+
+    BoneNode_c::QuatToEuler(&m_Orientation, &eulerOrientation);
+
+    eulerOrientation.x = std::clamp(eulerOrientation.x, m_LimitMin.x, m_LimitMax.x);
+    eulerOrientation.y = std::clamp(eulerOrientation.y, m_LimitMin.y, m_LimitMax.y);
+
+    float clampZMin = m_LimitMin.z;
+    float clampZMax = m_LimitMax.z;
+
+    if (m_BoneTag == ePedBones::BONE_HEAD) {
+        float maxHeadZ = BoneNodeManager_c::ms_boneInfos[GetIdFromBoneTag(ePedBones::BONE_HEAD)].m_Max.z;
+        float multy = std::max(std::abs(eulerOrientation.x) / -45.0f + 1.0f, 0.0f);
+
+        clampZMin = maxHeadZ + (m_LimitMin.z - maxHeadZ) * multy;
+        clampZMax = maxHeadZ + (m_LimitMax.z - maxHeadZ) * multy;
+    }
+
+    eulerOrientation.z = std::clamp(eulerOrientation.z, clampZMin, clampZMax);
+
+    BoneNode_c::EulerToQuat(&eulerOrientation, &m_Orientation);
 }
 
 // 0x616E30
 void BoneNode_c::BlendKeyframe(float blend) {
-    plugin::CallMethod<0x616E30, BoneNode_c*, float>(this, blend);
+    if (blend <= 0.0f || blend >= 1.0f) {
+        m_InterpFrame->orientation = m_Orientation;
+        return;
+    }
+
+    RtQuatSlerpCache sCache;
+    RtQuatSetupSlerpCache(reinterpret_cast<RtQuat*>(&m_InterpFrame), reinterpret_cast<RtQuat*>(&m_Orientation), &sCache);
+
+    m_InterpFrame->orientation = CQuaternion{
+        std::lerp(sCache.raFrom.imag.x, sCache.raTo.imag.x, blend),
+        std::lerp(sCache.raFrom.imag.y, sCache.raTo.imag.y, blend),
+        std::lerp(sCache.raFrom.imag.z, sCache.raTo.imag.z, blend),
+        std::lerp(sCache.raFrom.real, sCache.raTo.real, blend)
+    };
 }
 
 // 0x616CB0
@@ -188,6 +249,34 @@ void BoneNode_c::AddChild(BoneNode_c* children) {
 }
 
 // 0x616CD0
-RwMatrix* BoneNode_c::CalcWldMat(const RwMatrix* boneMatrix) {
-    return plugin::CallMethodAndReturn<RwMatrix*, 0x616CD0, BoneNode_c*, const RwMatrix*>(this, boneMatrix);
+void BoneNode_c::CalcWldMat(const RwMatrix* boneMatrix) {
+    RwMatrix math;
+
+    float dst = 2.0f / (sq(m_Orientation.x) + sq(m_Orientation.y) + sq(m_Orientation.z) + sq(m_Orientation.w));
+
+	math.right = {
+                    1.0f - ((m_Orientation.y * (m_Orientation.y * dst)) + (m_Orientation.z + (m_Orientation.z * dst))),
+                    (m_Orientation.x * (m_Orientation.y * dst)) + (m_Orientation.w * (m_Orientation.z * dst)),
+                    (m_Orientation.z * (m_Orientation.x * dst)) - (m_Orientation.w * (m_Orientation.y * dst))
+    };
+
+    math.up = {
+                    (m_Orientation.x * (m_Orientation.y * dst)) - (m_Orientation.w * (m_Orientation.z * dst)),
+                    1.0f - ((m_Orientation.z + (m_Orientation.z * dst)) + (m_Orientation.x * (m_Orientation.x * dst))),
+                    (m_Orientation.y * (m_Orientation.z * dst)) + (m_Orientation.w * (m_Orientation.x * dst))
+    };
+    math.at = {
+                    (m_Orientation.z * (m_Orientation.x * dst)) + (m_Orientation.w * (m_Orientation.y * dst)),
+                    (m_Orientation.y * (m_Orientation.z * dst)) - (m_Orientation.w * (m_Orientation.x * dst)),
+                    1.0f - ((m_Orientation.x * (m_Orientation.x * dst)) + (m_Orientation.y * (m_Orientation.y * dst)))
+    };
+
+    rwMatrixSetFlags(&math, rwMATRIXTYPEORTHONORMAL);
+    math.pos = m_Pos;
+
+    RwMatrixMultiply(&m_WorldMat, &math, boneMatrix);
+
+    for (auto bone = m_Childs.GetHead(); bone; bone = m_Childs.GetNext(bone)) {
+        bone->CalcWldMat(&m_WorldMat);
+    }
 }
