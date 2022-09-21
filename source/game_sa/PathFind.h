@@ -317,9 +317,21 @@ public:
     */
     void SetPathsNeededAtPosition(const CVector& posn);
     void UpdateStreaming(bool bForceStreaming);
-    void MakeRequestForNodesToBeLoaded(float x1, float x2, float y1, float y2);
-    void ReleaseRequestedNodes();
     void ReInit();
+
+    /*!
+    * @addr 0x44DD00
+    * 
+    * @brief Un-request areas that've been requested loaded with `MakeRequestForNodesToBeLoaded`.
+    */
+    void ReleaseRequestedNodes();
+
+    /*!
+    * @addr 0x450D70
+    * 
+    * @brief Request and keep all areas inside a rect to be loaded ASAP until `ReleaseRequestedNodes` is called.
+    */
+    void MakeRequestForNodesToBeLoaded(float minX, float maxX, float minY, float maxY);
 
     /*!
     * @addr 0x44DD10
@@ -328,6 +340,10 @@ public:
     */
     bool AreNodesLoadedForArea(float minX, float maxX, float minY, float maxY);
 
+    /*!
+    * @addr 0x450DB0
+    * @return If areas requested via `MakeRequestForNodesToBeLoaded` are loaded now
+    */
     bool HaveRequestedNodesBeenLoaded();
     /*
     * @addr 0x44DE00

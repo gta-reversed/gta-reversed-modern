@@ -46,8 +46,8 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(FindYCoorsForRegion, 0x44D910);
     RH_ScopedInstall(FindXCoorsForRegion, 0x44D8F0);
     RH_ScopedInstall(IsAreaNodesAvailable, 0x420AA0);
-    //RH_ScopedInstall(HaveRequestedNodesBeenLoaded, 0x450DB0);
-    //RH_ScopedInstall(MakeRequestForNodesToBeLoaded, 0x450D70);
+    RH_ScopedInstall(HaveRequestedNodesBeenLoaded, 0x450DB0);
+    RH_ScopedInstall(MakeRequestForNodesToBeLoaded, 0x450D70);
     RH_ScopedInstall(UpdateStreaming, 0x450A60);
     //RH_ScopedInstall(TakeWidthIntoAccountForWandering, 0x4509A0);
     RH_ScopedInstall(Shutdown, 0x450950);
@@ -113,7 +113,7 @@ void CPathNode::InjectHooks() {
 void CPathFind::Init() {
     static int32 NumTempExternalNodes = 0; // Unused
     m_nNumForbiddenAreas = 0;
-    m_bForbiddenForScriptedCarsEnabled = false;
+    m_loadAreaRequestPending = false;
 
     for (auto i = 0u; i < NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS; ++i) {
         m_pPathNodes[i] = nullptr;
@@ -131,12 +131,32 @@ void CPathFind::Init() {
 // 0x44E4E0
 void CPathFind::ReInit() {
     m_nNumForbiddenAreas = 0;
-    m_bForbiddenForScriptedCarsEnabled = false;
+    m_loadAreaRequestPending = false;
+}
+
+// 0x44DD00
+void CPathFind::MakeRequestForNodesToBeLoaded(float minX, float maxX, float minY, float maxY) {
+    m_loadAreaRequestPending = true;
+    m_loadAreaRequestMinX = minX;
+    m_loadAreaRequestMaxX = maxX;
+    m_loadAreaRequestMinY = minY;
+    m_loadAreaRequestMaxY = maxY;
+    UpdateStreaming(true);
 }
 
 // 0x44DD10
 bool CPathFind::AreNodesLoadedForArea(float minX, float maxX, float minY, float maxY) {
     return IterAreasTouchingRect({ minX, minY, maxX, maxY }, [this](auto areaId) -> bool { return IsAreaLoaded(areaId); });
+}
+
+// 0x450DB0
+bool CPathFind::HaveRequestedNodesBeenLoaded() {
+    return AreNodesLoadedForArea(
+        m_loadAreaRequestMinX,
+        m_loadAreaRequestMaxX,
+        m_loadAreaRequestMinY,
+        m_loadAreaRequestMaxY
+    );
 }
 
 // 0x450950
