@@ -170,7 +170,7 @@ void CPathFind::UnMarkAllRoadNodesAsDontWander() {
 
 // 0x44DD00
 void CPathFind::ReleaseRequestedNodes() {
-    m_bForbiddenForScriptedCarsEnabled = false;
+    m_loadAreaRequestPending = false;
 }
 
 /*!
@@ -505,10 +505,10 @@ void CPathFind::UpdateStreaming(bool bForceStreaming) {
         }
     }
 
-    // Mark areas inside the forbidden scripted cars rect
-    if (m_bForbiddenForScriptedCarsEnabled) { // TODO: This doesn't make sense
+    // Mark areas inside load request rect
+    if (m_loadAreaRequestPending) {
         IterAreasTouchingRect(
-            { m_fForbiddenForScrCarsX1, m_fForbiddenForScrCarsY1, m_fForbiddenForScrCarsX2, m_fForbiddenForScrCarsY2 },
+            { m_loadAreaRequestMinX, m_loadAreaRequestMinY, m_loadAreaRequestMaxX, m_loadAreaRequestMaxY },
             [&, this](auto areaId) {
                 ToBeStreamed[areaId] = ToBeStreamedForScript[areaId] = true;
                 return true;

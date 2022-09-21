@@ -212,11 +212,13 @@ public:
     CNodeAddress           m_aInteriorNodes[NUM_PATH_INTERIOR_AREAS];
     uint32                 m_nNumForbiddenAreas;
     CForbiddenArea         m_aForbiddenAreas[NUM_PATH_MAP_AREAS];
-    bool                   m_bForbiddenForScriptedCarsEnabled;
-    float                  m_fForbiddenForScrCarsX1;
-    float                  m_fForbiddenForScrCarsX2;
-    float                  m_fForbiddenForScrCarsY1;
-    float                  m_fForbiddenForScrCarsY2;
+
+    bool                   m_loadAreaRequestPending; /// Whenever an area to be loaded was requested via `MakeRequestForNodesToBeLoaded`
+    // TODO: Replace below with CRect
+    float                  m_loadAreaRequestMinX;
+    float                  m_loadAreaRequestMaxX;
+    float                  m_loadAreaRequestMinY;
+    float                  m_loadAreaRequestMaxY;
 
 public:
     static inline int32&  InteriorIDBeingBuilt = *(int32*)0x96EF88;
