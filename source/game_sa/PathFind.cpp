@@ -8,14 +8,7 @@
 #include <extensions/enumerate.hpp>
 #include "PathFind.h"
 
-CPathFind& ThePaths = *(CPathFind*)(0x96F050);
-int32& CPathFind::InteriorIDBeingBuilt = *(int32*)0x96EF88;
-bool& CPathFind::bInteriorBeingBuilt = *(bool*)0x96F031;
-int32& CPathFind::NumNodesGiven = *(int32*)0x96EF80;
-int32& CPathFind::NumLinksToExteriorNodes = *(int32*)0x96EAB8;
-int32& CPathFind::NewInteriorSlot = *(int32*)0x96EF84;
-
-// TODO (When done): Move into the class itself
+// TODO: Move into the class itself
 CVector& s_pathsNeededPosn = *(CVector*)0x977B70;
 bool&    s_bLoadPathsNeeded  = *(bool*)0x96F030;
 

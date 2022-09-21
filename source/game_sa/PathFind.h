@@ -477,4 +477,4 @@ public:
 
 VALIDATE_SIZE(CPathFind, 0x3C80);
 
-extern CPathFind& ThePaths;
+static inline CPathFind& ThePaths = *(CPathFind*)(0x96F050);
