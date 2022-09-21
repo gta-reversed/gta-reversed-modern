@@ -49,7 +49,7 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(HaveRequestedNodesBeenLoaded, 0x450DB0);
     RH_ScopedInstall(MakeRequestForNodesToBeLoaded, 0x450D70);
     RH_ScopedInstall(UpdateStreaming, 0x450A60);
-    //RH_ScopedInstall(TakeWidthIntoAccountForWandering, 0x4509A0);
+    RH_ScopedInstall(TakeWidthIntoAccountForWandering, 0x4509A0);
     RH_ScopedInstall(Shutdown, 0x450950);
     //RH_ScopedOverloadedInstall(FindNodeCoorsForScript, "", 0x450780, CVector(CPathFind::*)(CNodeAddress, CNodeAddress, float*, bool*));
     RH_ScopedOverloadedInstall(FindNodeCoorsForScript, "OneNode", 0x4505E0, CVector(CPathFind::*)(CNodeAddress, bool*));
