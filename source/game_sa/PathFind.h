@@ -219,11 +219,11 @@ public:
     float                  m_fForbiddenForScrCarsY2;
 
 public:
-    static int32& InteriorIDBeingBuilt;
-    static bool& bInteriorBeingBuilt;
-    static int32& NumNodesGiven;
-    static int32& NumLinksToExteriorNodes;
-    static int32& NewInteriorSlot;
+    static inline int32&  InteriorIDBeingBuilt = *(int32*)0x96EF88;
+    static inline bool&   bInteriorBeingBuilt = *(bool*)0x96F031;
+    static inline uint32& NumNodesGiven = *(uint32*)0x96EF80;
+    static inline int32&  NumLinksToExteriorNodes = *(int32*)0x96EAB8;
+    static inline int32&  NewInteriorSlot = *(int32*)0x96EF84;
 
 public:
     static void InjectHooks();
@@ -296,7 +296,6 @@ public:
                       bool includeNodesWithoutLinks, bool waterPath);
     bool TestCoorsCloseness(CVector vecEnd, uint8 nodeType, CVector vecStart); // unused
     void ComputeRoute(uint8 nodeType, const CVector& vecStart, const CVector& vecEnd, const CNodeAddress& address, CNodeRoute& nodeRoute);
-    void FindStartPointOfRegion(int regionX, int regionY, float& outX, float& outY);
     void SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, float fYMax, bool bTrainCrossing);
     CVector FindNodeCoorsForScript(CNodeAddress address, bool* bFound);
     CVector FindNodeCoorsForScript(CNodeAddress address1, CNodeAddress address2, float* fOutDir, bool* bFound);
@@ -311,6 +310,7 @@ public:
 
     /*!
     * @addr 0x44DCD0
+    * 
     * @brief Load paths around the given position in a 350 radius next time `UpdateStreaming` is called
     */
     void SetPathsNeededAtPosition(const CVector& posn);
@@ -321,6 +321,7 @@ public:
 
     /*!
     * @addr 0x44DD10
+    * 
     * @return If all areas within the given bounding rect are loaded
     */
     bool AreNodesLoadedForArea(float minX, float maxX, float minY, float maxY);
@@ -328,11 +329,13 @@ public:
     bool HaveRequestedNodesBeenLoaded();
     /*
     * @addr 0x44DE00
+    * 
     * @brief Request all paths in a radius of 350 units from the point to be loaded
     */
     void LoadSceneForPathNodes(CVector point);
     /*!
     * @addr 0x450DE0
+    * 
     * @return If there's a water node on the map for vehicles in the given radius
     */
     bool IsWaterNodeNearby(CVector position, float radius);
@@ -367,8 +370,24 @@ public:
         return m_pNaviNodes[address.m_wAreaId][address.m_wCarPathLinkId];
     }
 
+
+    /*!
+    * @notsa
+    * 
+    * @brief Find the X and Y coordinates of an area identified by it's x, y position on the grid (so basically it's areaId in a way)
+    */
+    CVector2D FindStartPointOfRegion(size_t x, size_t y);
+
+    /*!
+    * @addr 0x44D930
+    * 
+    * @copybrief FindStartPointOfRegion(size_t, size_t)
+    */
+    void FindStartPointOfRegion(size_t x, size_t y, float& outX, float& outY);
+
     /*!
     * @addr 0x44D830
+    * 
     * @brief Find the AreaId in which the given coords are
     */
     size_t FindRegionForCoors(CVector2D posn) { // NOTSA: Using a v2d instead of 2 floats here
@@ -378,26 +397,38 @@ public:
 
     /*!
     * @addr 0x44D890
+    * 
     * @brief Find the X region of an X axis coord
     */
     size_t FindXRegionForCoors(float x) const;
 
     /*!
     * @addr 0x44D8C0
+    * 
     * @brief Find the Y region of a Y axis coord
     */
     size_t FindYRegionForCoors(float y) const;
 
     /*!
     * @notsa
-    * @brief Return a pair of X, Y coords for a coordinate. The actual AreaId can be obtained using `GetAreaIdFromXY` (Or by using `FindRegionForCoors` directly)
+    * 
+    * @brief Return a pair of X, Y grid coords for a world coords. The actual AreaId can be obtained using `GetAreaIdFromXY` (Or by using `FindRegionForCoors` directly)
     */
     std::pair<size_t, size_t> FindXYRegionForCoors(CVector2D coors) const {
         return { FindXRegionForCoors(coors.x), FindYRegionForCoors(coors.y) };
     }
 
-    float FindXCoorsForRegion(uint32 regionX);
-    float FindYCoorsForRegion(uint32 regionY);
+    /*!
+    * @addr 0x44D8F0
+    * @brief Get X world coordinates of an area (aka region) from it's X grid pos
+    */
+    float FindXCoorsForRegion(size_t x);
+
+    /*!
+    * @addr 0x44D910
+    * @brief Get X world coordinates of an area (aka region) from it's X grid pos
+    */
+    float FindYCoorsForRegion(size_t y);
 
     /*!
     * @notsa

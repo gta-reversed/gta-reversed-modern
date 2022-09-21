@@ -42,9 +42,9 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(AddInteriorLinkToExternalNode, 0x44DF30);
     RH_ScopedInstall(AddInteriorLink, 0x44DED0);
     RH_ScopedInstall(MarkRegionsForCoors, 0x44DB60);
-    //RH_ScopedInstall(FindStartPointOfRegion, 0x44D930);
-    //RH_ScopedInstall(FindYCoorsForRegion, 0x44D910);
-    //RH_ScopedInstall(FindXCoorsForRegion, 0x44D8F0);
+    RH_ScopedOverloadedInstall(FindStartPointOfRegion, "", 0x44D930, void(CPathFind::*)(size_t, size_t, float&, float&));
+    RH_ScopedInstall(FindYCoorsForRegion, 0x44D910);
+    RH_ScopedInstall(FindXCoorsForRegion, 0x44D8F0);
     RH_ScopedInstall(IsAreaNodesAvailable, 0x420AA0);
     //RH_ScopedInstall(HaveRequestedNodesBeenLoaded, 0x450DB0);
     //RH_ScopedInstall(MakeRequestForNodesToBeLoaded, 0x450D70);
@@ -568,7 +568,7 @@ CNodeAddress CPathFind::AddNodeToNewInterior(
     YCoorGiven[idx] = y;
     ZCoorGiven[idx] = z;
     rng::copy(std::array{ con0, con1, con2, con3, con4, con5 }, ConnectsToGiven[idx].begin());
-    return { NUM_PATH_MAP_AREAS + NewInteriorSlot, idx };
+    return { (uint16)(NUM_PATH_MAP_AREAS + NewInteriorSlot), (uint16)idx };
 }
 
 // 0x451300 unused
@@ -767,6 +767,34 @@ void CPathFind::AddInteriorLinkToExternalNode(int32 interiorNodeIdx, CNodeAddres
     const auto idx = NumLinksToExteriorNodes++;
     aInteriorNodeLinkedToExterior[idx] = interiorNodeIdx;
     aExteriorNodeLinkedTo[idx] = externalNodeAddr;
+}
+
+// 0x44D930
+void CPathFind::FindStartPointOfRegion(size_t x, size_t y, float& outX, float& outY) {
+    const auto pos = FindStartPointOfRegion(x, y);
+    outX = pos.x;
+    outY = pos.y;
+}
+
+// notsa
+CVector2D CPathFind::FindStartPointOfRegion(size_t x, size_t y) {
+    return { FindXCoorsForRegion(x), FindYCoorsForRegion(y) };
+}
+
+namespace detail {
+constexpr auto GetCoorsOfRegion(size_t p, size_t nareas) {
+    return (6000.f / (float)nareas) * (float)p - 3000.f;
+}
+};
+
+// 0x44D8F0
+float CPathFind::FindXCoorsForRegion(size_t x) {
+    return detail::GetCoorsOfRegion(x, NUM_PATH_MAP_AREA_X);
+}
+
+// 0x44D910
+float CPathFind::FindYCoorsForRegion(size_t y) {
+    return detail::GetCoorsOfRegion(y, NUM_PATH_MAP_AREA_Y);
 }
 
 // 0x44DED0
