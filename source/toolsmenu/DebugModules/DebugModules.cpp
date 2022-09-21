@@ -3,23 +3,24 @@
 #include "DebugModules.h"
 #include "imgui.h"
 
-#include "Collision\CollisionDebugModule.h"
-#include "Cheat\CheatDebugModule.h"
-#include "Vehicle\VehicleDebugModule.h"
+#include "Collision/CollisionDebugModule.h"
+#include "Cheat/CheatDebugModule.h"
+#include "Vehicle/VehicleDebugModule.h"
 #include "Ped/PedSpawnerModule.h"
 #include "Ped/PedDebugModule.h"
-#include "Script\MissionDebugModule.h"
-#include "Audio\CutsceneTrackManagerDebugModule.h"
-#include "Audio\AmbienceTrackManagerDebugModule.h"
-#include "Audio\PoliceScannerAudioEntityDebugModule.h"
+#include "Script/MissionDebugModule.h"
+#include "Audio/CutsceneTrackManagerDebugModule.h"
+#include "Audio/AmbienceTrackManagerDebugModule.h"
+#include "Audio/PoliceScannerAudioEntityDebugModule.h"
 #include "CStreamingDebugModule.h"
 #include "CPickupsDebugModule.h"
 #include "HooksDebugModule.h"
 #include "CTeleportDebugModule.h"
 #include "FXDebugModule.h"
-#include "Pools\PoolsDebugModule.h"
+#include "Pools/PoolsDebugModule.h"
 #include "TimecycEditor.h"
 #include "CullZonesDebugModule.h"
+#include "Text/TextDebugModule.h"
 
 bool DebugModules::m_ShowFPS = false;
 bool DebugModules::m_ShowExtraDebugFeatures = false;
@@ -187,6 +188,11 @@ void DebugModules::ProcessExtraDebugFeatures() {
 
         if (ImGui::BeginTabItem("Peds")) {
             s_PedDebugModule.ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Text")) {
+            TextDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 
