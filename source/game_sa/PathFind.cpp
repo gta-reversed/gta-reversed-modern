@@ -54,7 +54,7 @@ void CPathFind::InjectHooks() {
     RH_ScopedOverloadedInstall(FindNodeCoorsForScript, "TwoNodes", 0x450780, CVector(CPathFind::*)(CNodeAddress, CNodeAddress, float&, bool*));
     RH_ScopedOverloadedInstall(FindNodeCoorsForScript, "LinkedNode", 0x4505E0, CVector(CPathFind::*)(CNodeAddress, bool*));
     RH_ScopedInstall(IsWaterNodeNearby, 0x450DE0);
-    //RH_ScopedInstall(CountNeighboursToBeSwitchedOff, 0x4504F0);
+    RH_ScopedInstall(CountNeighboursToBeSwitchedOff, 0x4504F0);
     //RH_ScopedInstall(FindNodeOrientationForCarPlacement, 0x450320);
     //RH_ScopedInstall(FindNodePairClosestToCoors, 0x44FEE0);
     RH_ScopedInstall(FindNodeClosestToCoorsFavourDirection, 0x44FCE0);
@@ -796,15 +796,14 @@ void CPathFind::MarkRegionsForCoors(CVector pos, float radius) {
     );
 }
 
-// 0x44D3E0
+// 0x44D3E0 - Moved to CPathNode
 bool CPathFind::ThisNodeHasToBeSwitchedOff(CPathNode* node) {
-    switch (node->m_nBehaviourType) {
-    case 1:
-    case 2:
-        return false;
-    default:
-        return true;
-    }
+    return node->DoesThisNodeHasToBeSwitchedOff();
+}
+
+// 0x4504F0
+size_t CPathFind::CountNeighboursToBeSwitchedOff(const CPathNode& node) {
+    return (size_t)rng::count_if(GetNodeLinkedNodes(node), CPathNode::DoesThisNodeHasToBeSwitchedOff);
 }
 
 // 0x44DF30

@@ -176,6 +176,21 @@ public:
     CNodeAddress GetAddress() const {
         return { m_wAreaId, m_wNodeId };
     }
+
+
+    /*!
+    * @notsa
+    * @brief Code based on 0x44D3E0
+    */
+    bool DoesThisNodeHasToBeSwitchedOff() {
+        switch (m_nBehaviourType) {
+        case 1:
+        case 2:
+            return false;
+        default:
+            return true;
+        }
+    }
 };
 VALIDATE_SIZE(CPathNode, 0x1C);
 
@@ -269,7 +284,7 @@ public:
     void TidyUpNodeSwitchesAfterMission();
     void SwitchRoadsInAngledArea(float, float, float, float, float, float, float, uint8, uint8) { /*noop*/ }
     bool ThisNodeHasToBeSwitchedOff(CPathNode* node);
-    int CountNeighboursToBeSwitchedOff(CPathNode* node);
+    size_t CountNeighboursToBeSwitchedOff(const CPathNode& node);
     void SwitchOffNodeAndNeighbours(CPathNode* node, CPathNode** out1, CPathNode** out2, char bLowTraffic, uint8 areaId);
     void SwitchRoadsOffInAreaForOneRegion(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, bool bLowTraffic, uint8 nodeType, int areaId, uint8 bUnused);
     void SwitchRoadsOffInArea(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, bool bLowTraffic, uint8 nodeType, bool bForbidden);
@@ -545,6 +560,17 @@ public:
             }
         }
         return true;
+    }
+
+    /*!
+    * @notsa
+    * @brief Get a span of all the given node's links
+    */
+    auto GetNodeLinkedNodes(const CPathNode& node) {
+        return std::span{ m_pNodeLinks[node.m_wBaseLinkId], node.m_nNumLinks }
+             | rng::views::transform([this](auto addr) { return GetPathNode(addr); }) // Transform linked address to a node
+             | rng::views::filter([](auto node) { return !!node; })                   // Drop nulls
+             | rng::views::transform([this](auto node) { return std::ref(*node); });  // Transform to reference
     }
 };
 
