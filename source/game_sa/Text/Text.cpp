@@ -115,15 +115,38 @@ void CText::Unload(bool unloadMissionData) {
 // NOTSA
 const char* GetGxtName() {
     switch (FrontEndMenuManager.m_nPrefsLanguage) {
-    case eLanguage::AMERICAN:    return "AMERICAN.GXT";
-    case eLanguage::FRENCH:      return "FRENCH.GXT";
-    case eLanguage::GERMAN:      return "GERMAN.GXT";
-    case eLanguage::ITALIAN:     return "ITALIAN.GXT";
-    case eLanguage::SPANISH:     return "SPANISH.GXT";
+    case eLanguage::AMERICAN:   return "AMERICAN.GXT";
+    case eLanguage::FRENCH:     return "FRENCH.GXT";
+    case eLanguage::GERMAN:     return "GERMAN.GXT";
+    case eLanguage::ITALIAN:    return "ITALIAN.GXT";
+    case eLanguage::SPANISH:    return "SPANISH.GXT";
 #ifdef MORE_LANGUAGES
-    case eLanguage::RUSSIAN:     return "RUSSIAN.GXT";
-    case eLanguage::JAPANESE:    return "JAPANESE.GXT";
+    case eLanguage::RUSSIAN:    return "RUSSIAN.GXT";
+    case eLanguage::JAPANESE:   return "JAPANESE.GXT";
 #endif
+    default:
+        NOTSA_UNREACHABLE();
+    }
+}
+
+// NOTSA
+void CheckFileEncoding(const char* file, uint16 version, uint16 encoding) {
+    const auto GetEncodingName = [](uint16 e) -> std::string {
+        switch (e) {
+        case 8:
+            return "8-bit ASCII";
+        case 16:
+            return "16-bit UTF-16";
+        default:
+            return std::format("{}-bit unknown", e);
+        }
+    };
+    auto gameEncoding = GetEncodingName(GAME_ENCODING);
+    auto fileEncoding = GetEncodingName(encoding);
+
+    DEV_LOG("[CText]: Loading '%s' version=%02d (%s)\n", file, version, fileEncoding.c_str());
+    if (encoding != GAME_ENCODING) {
+        NOTSA_UNREACHABLE("File {} was compiled with {} encoding but {} is required.", file, fileEncoding, gameEncoding);
     }
 }
 
@@ -141,11 +164,8 @@ void CText::Load(bool keepMissionPack) {
     uint16 version = 0, encoding = 0;
     CFileMgr::Read(file, &version, sizeof(version));
     CFileMgr::Read(file, &encoding, sizeof(encoding));
+    CheckFileEncoding(fileName, version, encoding);
 
-    DEV_LOG("[CText]: Loading '%s' version=%02d (%d-bit)\n", fileName, version, encoding);
-    if (GAME_ENCODING != encoding) {
-        NOTSA_UNREACHABLE("File {} was compiled with {}-bit char but {}-bit is required.", fileName, encoding, GAME_ENCODING);
-    }
     uint32 offset = sizeof(uint16) * 2; // skip version and encoding
     bool bTKEY = false;
     bool bTDAT = false;
@@ -217,7 +237,7 @@ void CText::LoadMissionText(const char* mission) {
 
     // SA GXT's have a table for every mission, table offset can be found with CMTO::GetTextOffset(offsetId);
     auto missionIdxFound = false;
-    auto offsetId = 0;
+    auto offsetId = 0u;
     for (; offsetId < m_MissionTextOffsets.GetSize(); offsetId++) {
         if (!strcmp(m_MissionTextOffsets.GetTextOffset(offsetId).szMissionName, mission)) {
             missionIdxFound = true;
@@ -300,11 +320,8 @@ void CText::LoadMissionPackText() {
     uint16 version = 0, encoding = 0;
     CFileMgr::Read(file, &version, sizeof(version));
     CFileMgr::Read(file, &encoding, sizeof(encoding));
+    CheckFileEncoding(fileName, version, encoding);
 
-    DEV_LOG("[CText]: Loading '%s' version=%02d (%d-bit)\n", fileName, version, encoding);
-    if (GAME_ENCODING != encoding) {
-        NOTSA_UNREACHABLE("File {} was compiled with {}-bit char but {}-bit is required.", fileName, encoding, GAME_ENCODING);
-    }
     uint32 offset = sizeof(uint16) * 2;
     ChunkHeader header{};
 
