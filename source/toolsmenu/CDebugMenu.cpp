@@ -70,6 +70,7 @@ void UpdateKeyboard() {
             io->KeysDown[i] = false;
         }
     }
+
     io->KeyCtrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
     io->KeyShift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
     io->KeyAlt = (GetKeyState(VK_MENU) & 0x8000) != 0;

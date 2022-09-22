@@ -111,16 +111,16 @@ class CRunningScript {
      *   1. the number of conditions = `n` (max 8)
      *   2. logical operation between conditions (AND/OR, hence the command name)
      * - `n` commands that update the conditional flag
-     * 
+     *
      * For instance `if ($A > 0 && $B > 0 && $C > 0)` would generate:
-     * 
+     *
      * ```
      * COMMAND_ANDOR                          ANDS_2 // (three conditions joined by AND)
      * COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER $A 0
      * COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER $B 0
      * COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER $C 0
      * ```
-     * 
+     *
      * Each time a condition is tested, the result is AND/OR'd with the previous
      * result and the ANDOR state is decremented until it reaches the lower bound,
      * meaning that all conditions were tested.
