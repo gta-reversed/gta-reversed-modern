@@ -23,7 +23,7 @@ bool CPlayerPed::bDebugTargeting;
 bool CPlayerPed::bDebugTapToTarget;
 
 void CPlayerPed::InjectHooks() {
-    RH_ScopedClass(CPlayerPed);
+    RH_ScopedVirtualClass(CPlayerPed, 0x86D168, 26);
     RH_ScopedCategory("Entity/Ped");
 
     RH_ScopedInstall(ResetSprintEnergy, 0x60A530);
@@ -35,7 +35,6 @@ void CPlayerPed::InjectHooks() {
     RH_ScopedInstall(SetWantedLevelNoDrop, 0x609F30);
     RH_ScopedInstall(CheatWantedLevel, 0x609F50);
     RH_ScopedInstall(DoStuffToGoOnFire, 0x60A020);
-    RH_ScopedVirtualInstall(CPlayerPed::ProcessControl, 0x60EA90);
     RH_ScopedVirtualInstall(Load, 0x5D46E0, { .reversed = false });
     RH_ScopedVirtualInstall(Save, 0x5D57E0, { .reversed = false });
     RH_ScopedInstall(DeactivatePlayerPed, 0x609520);
@@ -77,6 +76,7 @@ void CPlayerPed::InjectHooks() {
     RH_ScopedInstall(PlayerHasJustAttackedSomeone, 0x60D5A0);
     RH_ScopedInstall(SetupPlayerPed, 0x60D790);
 
+    RH_ScopedVMTInstall(ProcessControl, 0x60EA90);
 }
 
 struct WorkBufferSaveData {

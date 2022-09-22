@@ -111,9 +111,6 @@ public:
 
     // NOTSA
     CPedGroup& GetPlayerGroup() const noexcept { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
-
-private:
-    void ProcessControl_Reversed() { CPlayerPed::ProcessControl(); }
 };
 
 VALIDATE_SIZE(CPlayerPed, 0x7A4);
