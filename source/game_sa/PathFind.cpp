@@ -256,13 +256,13 @@ bool CPathFind::TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddre
 // 0x4509A0
 CVector CPathFind::TakeWidthIntoAccountForWandering(CNodeAddress nodeAddress, uint16 randomSeed) {
     // Invalid area, or area not loaded
-    if (!nodeAddress.IsAreaValid() || !IsAreaNodesAvailable(nodeAddress)) {
-        return {};
-    } else {
+    if (nodeAddress.IsAreaValid() && IsAreaNodesAvailable(nodeAddress)) {
         const auto nbits = 4u;
         const auto Random = [](uint16 seed) { return (float)(seed % (1 << nbits) - 7); };
         return GetPathNode(nodeAddress)->GetNodeCoors() + CVector{ Random(randomSeed), Random(randomSeed >> nbits), 0.f };
     }
+
+    return {};
 }
 
 //  0x44F8C0
@@ -321,7 +321,7 @@ void CPathFind::SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, floa
 namespace detail {
 // NOTSA
 CVector GetPosnBetweenNodesForScript(CPathNode* nodeA, CVector2D dir) {
-    // Rotate by +90 degrees (Source: https://stackoverflow.com/q/243945 - comments under the OP's question)
+    // Rotate by 90 degrees counter clockwise (Source: https://stackoverflow.com/q/243945 - comments under the OP's question)
     dir = { -dir.y, dir.x };
 
     return nodeA->GetNodeCoors() + CVector{dir * ((float)nodeA->m_nPathWidth / 16.f + 2.7f)};
@@ -351,7 +351,7 @@ CVector CPathFind::FindNodeCoorsForScript(CNodeAddress address, bool* bFound) {
                     auto dir = CVector2D{ firstLinkedNode->GetNodeCoors() - nodePos }.Normalized();
 
                     // By negating here we invert the direction
-                    dir = dir.x >= 0 ? dir : -dir ;
+                    dir = dir.x >= 0 ? dir : -dir;
 
                     return detail::GetPosnBetweenNodesForScript(node, dir);
                 }
@@ -480,7 +480,6 @@ void CPathFind::LoadPathFindData(RwStream* stream, int32 areaId) {
         auto& area = m_aForbiddenAreas[i];
         SwitchRoadsOffInAreaForOneRegion(area.m_fXMin, area.m_fXMax, area.m_fYMin, area.m_fYMax, area.m_fZMin, area.m_fZMax, area.m_bEnable, area.m_nType, areaId, false);
     }
-    
     for (auto i = 0u; i < NUM_DYNAMIC_LINKS_PER_AREA; ++i) {
         rng::fill(m_aDynamicLinksBaseIds[i], -1);
         rng::fill(m_aDynamicLinksIds[i], -1);
@@ -750,7 +749,7 @@ CNodeAddress CPathFind::FindNodeClosestToCoorsFavourDirection(CVector pos, ePath
         for (const auto& node : GetPathNodesInArea(areaId, nodeType)) { // NOTE: Function takes care of checking whenever the area is loaded
             const auto dirToNodeUN = pos - node.GetNodeCoors();
 
-            const auto dotScore = (abs(dirToNodeUN) * CVector { 0.f, 0.f, 3.f }).ComponentwiseSum();
+            const auto dotScore = (abs(dirToNodeUN) * CVector { 1.f, 1.f, 3.f }).ComponentwiseSum();
             if (dotScore >= scoreOfClosest) {
                 continue;
             }
@@ -855,7 +854,7 @@ void CPathFind::RemoveInterior(uint32 intId) {
 
                 // Remove all link of this node that point to a node int the current interior
                 bool foundNodeFromOtherInt{}, foundNodeFromThisInt{};
-                rng::remove_if(GetNodeLinkedNodes(node, false), [&](CPathNode& linkedNode) {
+                (void)rng::remove_if(GetNodeLinkedNodes(node, false), [&](CPathNode& linkedNode) {
                     if (linkedNode.m_wAreaId == intSlotAreaId) {
                         node.m_nNumLinks--;
                         foundNodeFromOtherInt = true;
@@ -877,13 +876,13 @@ void CPathFind::RemoveInterior(uint32 intId) {
 
                 // Delete dynamic link of this area
                 // Honestly, this doesn't make much sense... As in, I don't think these are dynamic areas? We'll see.. TODO
-                const auto& dynLinks  = m_aDynamicLinksIds[intSlotAreaId];
+                const auto& dynLinks  = m_aDynamicLinksIds[intSlot];
                 const auto  dynLinkIt = rng::find(dynLinks, (int32)node.m_wBaseLinkId);
                 if (dynLinkIt != rng::end(dynLinks)) {
                     const auto dynLinkIdx = rng::distance(rng::begin(dynLinks), dynLinkIt);
-                    node.m_wBaseLinkId = m_aDynamicLinksBaseIds[intSlotAreaId][dynLinkIdx];
-                    m_aDynamicLinksBaseIds[intSlotAreaId][dynLinkIdx] = -1;
-                    m_aDynamicLinksIds[intSlotAreaId][dynLinkIdx] = -1;
+                    node.m_wBaseLinkId = m_aDynamicLinksBaseIds[intSlot][dynLinkIdx];
+                    m_aDynamicLinksBaseIds[intSlot][dynLinkIdx] = -1;
+                    m_aDynamicLinksIds[intSlot][dynLinkIdx] = -1;
                 }
             }
         }
