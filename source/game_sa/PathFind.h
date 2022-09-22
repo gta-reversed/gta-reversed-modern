@@ -118,8 +118,7 @@ VALIDATE_SIZE(CCarPathLink, 0xE);
 
 class CPathNode {
 public:
-    void*            ptr;
-    void*            ptr2;
+    CPathNode        *m_prev, *m_next;
     CompressedVector m_vPos;
     uint16           m_wSearchList; // search list id
     int16            m_wBaseLinkId;
@@ -186,7 +185,7 @@ class CPathFind {
     static constexpr auto NUM_TOTAL_PATH_NODE_AREAS = NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS;
 public:
     CNodeAddress           m_Info; // 0x0
-    CPathNode*             m_apNodesSearchLists[512]; // 0x4
+    CPathNode*             m_pathFindHashTable[512]; // 0x4
 
     /*!
     * Pointer to an array containing all path nodes in an area (count: `m_anNumNodes`)
@@ -210,7 +209,7 @@ public:
     uint32                 m_anNumAddresses[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
     int32                  m_aDynamicLinksBaseIds[NUM_PATH_MAP_AREAS][NUM_DYNAMIC_LINKS_PER_AREA];
     int32                  m_aDynamicLinksIds[NUM_PATH_MAP_AREAS][NUM_DYNAMIC_LINKS_PER_AREA];
-    uint32                 m_dwTotalNumNodesInSearchList;
+    uint32                 m_totalNumNodesInPathFindHashTable; // Number of items in total in all buckets of `m_pathFindHashTable`
     uint32                 m_interiorIDs[NUM_PATH_INTERIOR_AREAS];
     uint32                 m_nNumForbiddenAreas;
     CForbiddenArea         m_aForbiddenAreas[NUM_PATH_MAP_AREAS];
@@ -239,15 +238,31 @@ public:
     void CountFloodFillGroups(uint8 type);
     void CheckGrid();
     float CalcRoadDensity(float x, float y);
+
+    /*
+    * @addr 0x44D1B0
+    * 
+    * @brief Remove the node from the internal path-finding linked-list (Added to using `AddNodeToList`)
+    */
     void RemoveNodeFromList(CPathNode* node);
-    void AddNodeToList(CPathNode* node, int list);
+
+    /*
+    * @addr 0x44D1E0
+    * 
+    * @brief Make node as the head of it's bucket's linked list
+    */
+    void AddNodeToList(CPathNode* node, uint32 list);
+
     float CalcDistToAnyConnectingLinks(CPathNode* node, CVector pos);
     void FindNodeClosestInRegion(CNodeAddress* outAddress, uint16 areaId, CVector pos, uint8 nodeType, float* outDist, bool bLowTraffic, bool bUnkn, bool bBoats, bool bUnused);
+
     /*!
     * @addr 0x44D230
+    * 
     * @return If `nodeAddress2` is linked by `nodeAddress1`
     */
     bool These2NodesAreAdjacent(CNodeAddress nodeAddress1, CNodeAddress nodeAddress2);
+
     void RecordNodesInCircle(const CVector& center, float radius, uint8 nodeType, int maxNum, CNodeAddress* outAddresses, bool bLowTraffic, bool a8, bool bUnkn, bool maxNumNodes, bool bUnused);
 
     /*

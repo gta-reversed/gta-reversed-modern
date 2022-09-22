@@ -84,8 +84,8 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(UnMarkAllRoadNodesAsDontWander, 0x44D400);
     RH_ScopedInstall(TidyUpNodeSwitchesAfterMission, 0x44D3B0);
     RH_ScopedInstall(ThisNodeWillLeadIntoADeadEnd, 0x44D310);
-    //RH_ScopedInstall(AddNodeToList, 0x44D1E0);
-    //RH_ScopedInstall(RemoveNodeFromList, 0x44D1B0);
+    RH_ScopedInstall(AddNodeToList, 0x44D1E0);
+    RH_ScopedInstall(RemoveNodeFromList, 0x44D1B0);
     RH_ScopedInstall(UnLoadPathFindData, 0x44D0F0);
     RH_ScopedInstall(Init, 0x44D080);
     RH_ScopedInstall(GetPathNode, 0x420AC0);
@@ -962,5 +962,42 @@ std::span<CPathNode> CPathFind::GetPathNodesInArea(size_t areaId, ePathType ptyp
             NOTSA_UNREACHABLE("Invalid pathType: {}", (int)ptype);
         }
     }
-    return {};
+    return {}; // Area not loaded, return nothing.. Perhaps assert here instead?
+}
+
+// 0x44D1B0
+void CPathFind::RemoveNodeFromList(CPathNode* node) {
+    node->m_next->m_prev = node->m_prev;
+    if (node->m_prev) {
+        node->m_prev->m_next = node->m_next;
+    }
+
+    m_totalNumNodesInPathFindHashTable--;
+}
+
+
+void CPathFind::AddNodeToList(CPathNode* node, uint32 list) {
+    // Insert the node as the head into it's bucket
+
+    auto& head = m_pathFindHashTable[list % std::size(m_pathFindHashTable)];
+
+    node->m_prev = head;
+
+    // Make this node's `next` point to the head in the hash table
+    // I guess this works as long as you only access the `m_prev` variable
+    // as that's at offset 0
+    // This is a really bad hack to avoid having to do special handling
+    // for the head in `RemoveNodeFromList`...
+    node->m_next = reinterpret_cast<CPathNode*>(&head);
+
+    if (head) {
+        head->m_next = node;
+    }
+
+    head = node;
+
+    assert(list <= std::numeric_limits<decltype(node->m_wSearchList)>::max()); // Prevent bugs from overflow
+    node->m_wSearchList = (uint16)list;
+
+    m_totalNumNodesInPathFindHashTable++;
 }
