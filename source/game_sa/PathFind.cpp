@@ -281,24 +281,26 @@ void CPathFind::FindNextNodeWandering(uint8 nodeType, CVector vecPos, CNodeAddre
 
 void CPathFind::DoPathSearch(
     ePathType pathType,
-    CVector origin,
-    CNodeAddress originAddr,
-    CVector target,
-    CNodeAddress* pResultNodes,
-    int16* pNodesCount,
+    CVector originPos,
+    CNodeAddress originAddrAddr, // If invalid/area not loaded the closest node to `originPos` is used.
+    CVector targetPos,
+    CNodeAddress* outResultNodes,
+    int16& outNodesCount,
     int32 maxNodesToFind,
-    float* pDistance,
+    float* outDistance,
     float maxSearchDistance,
-    CNodeAddress* targetAddr,
+    CNodeAddress* targetNodeAddr, // If null/invalid/area not loaded the closest node to `targetPos` is used.
     float maxUnkLimit,
     bool oneSideOnly,
     CNodeAddress forbiddenNodeAddr,
     bool includeNodesWithoutLinks,
     bool waterPath
 ) {
-    ((void(__thiscall*)(CPathFind*, uint8, CVector, CNodeAddress, CVector, CNodeAddress*, int16*, int32, float*, float, CNodeAddress*, float, bool, CNodeAddress, bool,
-                        bool))0x4515D0)(this, pathType, origin, originAddr, target, pResultNodes, pNodesCount, maxNodesToFind, pDistance, maxSearchDistance, targetAddr,
-                                        maxUnkLimit, oneSideOnly, forbiddenNodeAddr, includeNodesWithoutLinks, waterPath);
+    const auto ResolveNode = [](CNodeAddress* addr) {
+        if (addr && addr->IsAreaValid()) {
+
+        }
+    };
 }
 
 void CPathFind::SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, float fYMax, bool value) {
