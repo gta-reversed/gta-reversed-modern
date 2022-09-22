@@ -169,7 +169,8 @@ CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(PED_TYPE_PLAYE
     m_pedSpeech.Initialise(this);
     m_pIntelligence->m_fDmRadius = 30.0f;
     m_pIntelligence->m_nDmNumPedsToScan = 2;
-    bUsedForReplay = true;
+
+    bUsedForReplay = bGroupCreated;
 }
 
 // 0x6094A0
