@@ -91,7 +91,7 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(GetPathNode, 0x420AC0);
     RH_ScopedInstall(TestCrossesRoad, 0x44D790);
     RH_ScopedInstall(ReInit, 0x44E4E0);
-    //RH_ScopedInstall(RemoveInterior, 0x44E1A0);
+    RH_ScopedInstall(RemoveInterior, 0x44E1A0);
     RH_ScopedInstall(AddDynamicLinkBetween2Nodes_For1Node, 0x44E000);
     RH_ScopedInstall(StartNewInterior, 0x44DE80);
     RH_ScopedInstall(LoadSceneForPathNodes, 0x44DE00);
@@ -125,7 +125,7 @@ void CPathFind::Init() {
         m_aUnused[i] = nullptr;    // BUG: Out of array bounds write, same as in original code
     }
 
-    memset(m_aInteriorNodes, 0xFF, sizeof(m_aInteriorNodes));
+    memset(m_interiorIDs, 0xFF, sizeof(m_interiorIDs));
 }
 
 // 0x44E4E0
@@ -480,10 +480,10 @@ void CPathFind::LoadPathFindData(RwStream* stream, int32 areaId) {
         auto& area = m_aForbiddenAreas[i];
         SwitchRoadsOffInAreaForOneRegion(area.m_fXMin, area.m_fXMax, area.m_fYMin, area.m_fYMax, area.m_fZMin, area.m_fZMax, area.m_bEnable, area.m_nType, areaId, false);
     }
-
+    
     for (auto i = 0u; i < NUM_DYNAMIC_LINKS_PER_AREA; ++i) {
-        m_aDynamicLinksBaseIds[areaId].m_aLinks[i].value = (uint32)-1;
-        m_aDynamicLinksIds[areaId].m_aLinks[i].value = (uint32)-1;
+        rng::fill(m_aDynamicLinksBaseIds[i], -1);
+        rng::fill(m_aDynamicLinksIds[i], -1);
     }
 }
 
@@ -615,7 +615,7 @@ void CPathFind::StartNewInterior(int32 interiorNum) {
 
     // BUG: Possible endless loop if 8 interiors are loaded i think
     NewInteriorSlot = 0;
-    while (m_aInteriorNodes[NewInteriorSlot].IsValid()) {
+    while (m_interiorIDs[NewInteriorSlot] != -1) {
         NewInteriorSlot++;
         assert(NewInteriorSlot < 8);
     }
@@ -643,13 +643,13 @@ CNodeAddress CPathFind::AddNodeToNewInterior(
 }
 
 // 0x451300 unused
-CNodeAddress CPathFind::ReturnInteriorNodeIndex(int32 unkn, CNodeAddress addressToFind, int16 nodeId) {
-    for (auto interiorInd = 0; interiorInd < NUM_PATH_INTERIOR_AREAS; ++interiorInd) {
-        if (m_aInteriorNodes[interiorInd] == addressToFind)
-            return CNodeAddress(NUM_PATH_MAP_AREAS + interiorInd, nodeId);
+CNodeAddress CPathFind::ReturnInteriorNodeIndex(int32 unkn, uint32 intId, int16 nodeId) {
+    for (auto i = 0; i < NUM_PATH_INTERIOR_AREAS; ++i) {
+        if (m_interiorIDs[i] == intId) {
+            return CNodeAddress(NUM_PATH_MAP_AREAS + i, nodeId);
+        }
     }
-
-    return CNodeAddress((uint16)-1, addressToFind.m_wNodeId);
+    return {};
 }
 
 // 0x451350
@@ -699,7 +699,7 @@ void CPathFind::AddDynamicLinkBetween2Nodes_For1Node(CNodeAddress first, CNodeAd
         auto* nodeLink = &m_pNodeLinks[first.m_wAreaId][numAddresses];
         auto linkCounter = 0u;
         while (!nodeLink->IsAreaValid()) {
-            nodeLink += 12; // No clue why we jump 12 objects each time
+            nodeLink += 12; // No clue why we jump 12 objects each time (Search: MAGIC_NUM_12)
             ++linkCounter;
         }
 
@@ -713,13 +713,11 @@ void CPathFind::AddDynamicLinkBetween2Nodes_For1Node(CNodeAddress first, CNodeAd
         if (first.m_wAreaId < NUM_PATH_MAP_AREAS) {
             auto& linkInfo = m_aDynamicLinksBaseIds[first.m_wAreaId];
             for (auto i = 0u; i < NUM_DYNAMIC_LINKS_PER_AREA; ++i) {
-                // Uninitialized dynamic link is set to -1, so if it's assigned anything last bit will change, no clue why R* didn't compare with -1 directly
-                if (!linkInfo.m_aLinks[i].lastBit)
-                    continue;
-
-                m_aDynamicLinksBaseIds[first.m_wAreaId].m_aLinks[i].value = firstPathInfo.m_wBaseLinkId;
-                m_aDynamicLinksIds[first.m_wAreaId].m_aLinks[i].value = firstLinkId;
-                break;
+                if (linkInfo[i] == -1) {
+                    m_aDynamicLinksBaseIds[first.m_wAreaId][i] = firstPathInfo.m_wBaseLinkId;
+                    m_aDynamicLinksIds[first.m_wAreaId][i] = firstLinkId;
+                    break;
+                }
             }
         }
     }
@@ -837,6 +835,75 @@ void CPathFind::AddInteriorLinkToExternalNode(int32 interiorNodeIdx, CNodeAddres
     const auto idx = NumLinksToExteriorNodes++;
     aInteriorNodeLinkedToExterior[idx] = interiorNodeIdx;
     aExteriorNodeLinkedTo[idx] = externalNodeAddr;
+}
+
+// 0x44E1A0
+void CPathFind::RemoveInterior(uint32 intId) {
+    for (auto intSlot = 0u; intSlot < NUM_PATH_INTERIOR_AREAS; intSlot++) {
+        const auto intSlotAreaId = NUM_PATH_MAP_AREAS + intSlot;
+
+        if (m_interiorIDs[intSlot] != intId) {
+            continue;
+        }
+
+        for (auto areaId = 0u; areaId < NUM_TOTAL_PATH_NODE_AREAS; areaId++) {
+            for (auto& node : GetPathNodesInArea(areaId, PATH_TYPE_PED)) {
+                // I assume this checks if the link is an interior link?
+                if (node.m_wBaseLinkId < m_anNumAddresses[areaId]) {
+                    continue;
+                }
+
+                // Remove all link of this node that point to a node int the current interior
+                bool foundNodeFromOtherInt{}, foundNodeFromThisInt{};
+                rng::remove_if(GetNodeLinkedNodes(node, false), [&](CPathNode& linkedNode) {
+                    if (linkedNode.m_wAreaId == intSlotAreaId) {
+                        node.m_nNumLinks--;
+                        foundNodeFromOtherInt = true;
+                        return true;
+                    } else if (linkedNode.m_wAreaId >= NUM_PATH_MAP_AREAS) {
+                        foundNodeFromThisInt = true;
+                    }
+                    return false;
+                });
+
+                // If we found a linked node and there was no other node from another interior
+                if (foundNodeFromOtherInt || !foundNodeFromThisInt) {
+                    continue;
+                }
+
+                // TODO: Magic number `12` (Search: MAGIC_NUM_12)
+                // Null out all links of this node
+                rng::fill(std::span{ &m_pNodeLinks[node.m_wAreaId][node.m_wBaseLinkId], 12 }, CNodeAddress{});
+
+                // Delete dynamic link of this area
+                // Honestly, this doesn't make much sense... As in, I don't think these are dynamic areas? We'll see.. TODO
+                const auto& dynLinks  = m_aDynamicLinksIds[intSlotAreaId];
+                const auto  dynLinkIt = rng::find(dynLinks, (int32)node.m_wBaseLinkId);
+                if (dynLinkIt != rng::end(dynLinks)) {
+                    const auto dynLinkIdx = rng::distance(rng::begin(dynLinks), dynLinkIt);
+                    node.m_wBaseLinkId = m_aDynamicLinksBaseIds[intSlotAreaId][dynLinkIdx];
+                    m_aDynamicLinksBaseIds[intSlotAreaId][dynLinkIdx] = -1;
+                    m_aDynamicLinksIds[intSlotAreaId][dynLinkIdx] = -1;
+                }
+            }
+        }
+
+        // Finally, unload area and related data
+        const auto FreeAndNull = [](auto& ptr) {
+            CMemoryMgr::Free(ptr);
+            ptr = nullptr;
+        };
+        FreeAndNull(m_pPathIntersections[intSlotAreaId]);
+        FreeAndNull(m_pLinkLengths[intSlotAreaId]);
+        FreeAndNull(m_pPathNodes[intSlotAreaId]);
+        FreeAndNull(m_pLinkLengths[intSlotAreaId]);
+
+        m_anNumAddresses[intSlotAreaId] = 0;
+        m_anNumCarPathLinks[intSlotAreaId] = 0;
+        m_anNumPedNodes[intSlotAreaId] = 0;
+        m_anNumVehicleNodes[intSlotAreaId] = 0;
+        m_anNumNodes[intSlotAreaId] = 0;
+    }
 }
 
 // 0x44D930

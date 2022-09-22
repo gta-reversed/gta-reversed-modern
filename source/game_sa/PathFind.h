@@ -81,18 +81,6 @@ public:
 };
 VALIDATE_SIZE(CPathIntersectionInfo, 0x1);
 
-class CPathUnknClass {
-public:
-    union {
-        uint32 value;
-        struct {
-            uint32 pad : 31;
-            uint32 lastBit : 1;
-        };
-    } m_aLinks[NUM_DYNAMIC_LINKS_PER_AREA];
-};
-VALIDATE_SIZE(CPathUnknClass, 0x40);
-
 class CCarPathLink {
 public:
     struct {
@@ -196,7 +184,6 @@ VALIDATE_SIZE(CPathNode, 0x1C);
 
 class CPathFind {
     static constexpr auto NUM_TOTAL_PATH_NODE_AREAS = NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS;
-
 public:
     CNodeAddress           m_Info; // 0x0
     CPathNode*             m_apNodesSearchLists[512]; // 0x4
@@ -221,10 +208,10 @@ public:
     uint32                 m_anNumPedNodes[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS]; // 0x11E4
     uint32                 m_anNumCarPathLinks[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
     uint32                 m_anNumAddresses[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
-    CPathUnknClass         m_aDynamicLinksBaseIds[NUM_PATH_MAP_AREAS];
-    CPathUnknClass         m_aDynamicLinksIds[NUM_PATH_MAP_AREAS];
+    int32                  m_aDynamicLinksBaseIds[NUM_PATH_MAP_AREAS][NUM_DYNAMIC_LINKS_PER_AREA];
+    int32                  m_aDynamicLinksIds[NUM_PATH_MAP_AREAS][NUM_DYNAMIC_LINKS_PER_AREA];
     uint32                 m_dwTotalNumNodesInSearchList;
-    CNodeAddress           m_aInteriorNodes[NUM_PATH_INTERIOR_AREAS];
+    uint32                 m_interiorIDs[NUM_PATH_INTERIOR_AREAS];
     uint32                 m_nNumForbiddenAreas;
     CForbiddenArea         m_aForbiddenAreas[NUM_PATH_MAP_AREAS];
 
@@ -408,13 +395,13 @@ public:
     * @addr 0x44DF30
     */
     void AddInteriorLinkToExternalNode(int32 interiorNodeIdx, CNodeAddress externalNodeAddr);
-    void RemoveInteriorLinks(int unkn);
+    void RemoveInteriorLinks(uint32 intIdx);
     CNodeAddress FindNearestExteriorNodeToInteriorNode(int interiorId);
     void AddDynamicLinkBetween2Nodes_For1Node(CNodeAddress node1, CNodeAddress node2);
     void AddDynamicLinkBetween2Nodes(CNodeAddress node1, CNodeAddress node2);
     void CompleteNewInterior(CNodeAddress* outAddress);
     void RemoveInterior(uint32 interior);
-    CNodeAddress ReturnInteriorNodeIndex(int32 unkn, CNodeAddress addressToFind, int16 nodeId);
+    CNodeAddress ReturnInteriorNodeIndex(int32 unkn, uint32 intId, int16 nodeId);
     CCarPathLinkAddress FindLinkBetweenNodes(CNodeAddress node1, CNodeAddress node2);
     CVector FindParkingNodeInArea(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
     bool Load();
@@ -564,13 +551,16 @@ public:
 
     /*!
     * @notsa
+    *
+    * @param node                   The node to get the links of
+    * @param checkLinksAreaIsLoaded Whenever linked nodes should be checked whenever this area is loaded. If not, they won't be included in the list. If this is `false` and the area isn't loaded it's UB (probably a crash)
     * 
     * @brief Get all links of the given node as a span of `CPathNode&`. If a link's area isn't loaded it won't be present in the span either.
     */
-    auto GetNodeLinkedNodes(const CPathNode& node) {
-        return std::span{ m_pNodeLinks[node.m_wBaseLinkId], node.m_nNumLinks }
-             | rng::views::filter([this](auto addr) { return !IsAreaNodesAvailable(addr); })          // Drop nodes whose area isn't loaded
-             | rng::views::transform([this](auto addr) -> CPathNode& { return *GetPathNode(addr); }); // Transform linked address to a node ref
+    auto GetNodeLinkedNodes(const CPathNode& node, bool checkLinksAreaIsLoaded = true) {
+        return std::span{ &m_pNodeLinks[node.m_wAreaId][node.m_wBaseLinkId], node.m_nNumLinks }
+             | rng::views::filter([=, this](auto addr) { return !checkLinksAreaIsLoaded || !IsAreaNodesAvailable(addr); }) // Drop nodes whose area isn't loaded
+             | rng::views::transform([this](auto addr) -> CPathNode& { return *GetPathNode(addr); });             // Transform linked address to a node ref
     }
 };
 
