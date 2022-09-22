@@ -3,30 +3,33 @@
 #include "DebugModules.h"
 #include "imgui.h"
 
-#include "Collision\CollisionDebugModule.h"
-#include "Cheat\CheatDebugModule.h"
-#include "Vehicle\VehicleDebugModule.h"
-#include "Ped\PedDebugModule.h"
-#include "Script\MissionDebugModule.h"
-#include "Audio\CutsceneTrackManagerDebugModule.h"
-#include "Audio\AmbienceTrackManagerDebugModule.h"
-#include "Audio\PoliceScannerAudioEntityDebugModule.h"
+#include "Collision/CollisionDebugModule.h"
+#include "Cheat/CheatDebugModule.h"
+#include "Vehicle/VehicleDebugModule.h"
+#include "Ped/PedSpawnerModule.h"
+#include "Ped/PedDebugModule.h"
+#include "Script/MissionDebugModule.h"
+#include "Audio/CutsceneTrackManagerDebugModule.h"
+#include "Audio/AmbienceTrackManagerDebugModule.h"
+#include "Audio/PoliceScannerAudioEntityDebugModule.h"
 #include "CStreamingDebugModule.h"
 #include "CPickupsDebugModule.h"
 #include "HooksDebugModule.h"
 #include "CTeleportDebugModule.h"
 #include "FXDebugModule.h"
-#include "Pools\PoolsDebugModule.h"
+#include "Pools/PoolsDebugModule.h"
 #include "TimecycEditor.h"
 #include "CullZonesDebugModule.h"
+#include "Text/TextDebugModule.h"
 
 bool DebugModules::m_ShowFPS = false;
 bool DebugModules::m_ShowExtraDebugFeatures = false;
+static PedDebugModule::Module s_PedDebugModule{};
 
 void DebugModules::Initialise(ImGuiContext* ctx) {
     TeleportDebugModule::Initialise(*ctx);
     VehicleDebugModule::Initialise();
-    PedDebugModule::Initialise();
+    PedSpawnerModule::Initialise();
     MissionDebugModule::Initialise();
     FXDebugModule::Initialise();
 }
@@ -34,7 +37,7 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
 void SpawnTab() {
     if (ImGui::BeginTabBar("")) {
         if (ImGui::BeginTabItem("Ped")) {
-            PedDebugModule::ProcessImGui();
+            PedSpawnerModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 
@@ -183,15 +186,26 @@ void DebugModules::ProcessExtraDebugFeatures() {
             ImGui::EndTabItem();
         }
 
+        if (ImGui::BeginTabItem("Peds")) {
+            s_PedDebugModule.ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Text")) {
+            TextDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
         ImGui::EndTabBar();
     }
 }
 
-void DebugModules::Display(bool showMenu) {
+void DebugModules::ProcessRender(bool showMenu) {
     if (showMenu) {
         DisplayMainWindow();
     }
     DisplayFramePerSecond();
     DisplayExtraDebugFeatures();
     TeleportDebugModule::ProcessInput();
+    s_PedDebugModule.ProcessRender();
 }

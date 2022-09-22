@@ -17,6 +17,7 @@
 #include "PedScanner.h"
 #include "MentalHealth.h"
 #include "PedScanner.h"
+#include "Collision/CollisionEventScanner.h"
 
 class CPed;
 class CEntity;
@@ -34,32 +35,32 @@ class CTaskSimpleInAir;
 
 class CPedIntelligence {
 public:
-    CPed*            m_pPed;
-    CTaskManager     m_TaskMgr;
-    CEventHandler    m_eventHandler;
-    CEventGroup      m_eventGroup;
-    int32            m_nDecisionMakerType;
-    int32            m_nDecisionMakerTypeInGroup;
-    float            m_fHearingRange;
-    float            m_fSeeingRange;
-    uint32           m_nDmNumPedsToScan;
-    float            m_fDmRadius;
-    float            field_CC;
-    char             field_D0;
-    uint8            m_nEventId;
-    uint8            m_nEventPriority;
-    char             field_D3;
-    CVehicleScanner  m_vehicleScanner;
-    CPedScanner      m_pedScanner;
-    CMentalState     m_mentalState;
-    char             field_188;
-    CEventScanner    m_eventScanner;
-    bool             field_260;
-    CPedStuckChecker m_pedStuckChecker;
-    int32            m_AnotherStaticCounter;
-    int32            m_StaticCounter;
-    CVector          m_vecLastPedPosDuringDamageEntity;
-    CEntity*         m_apInterestingEntities[3];
+    CPed*                  m_pPed;
+    CTaskManager           m_TaskMgr;
+    CEventHandler          m_eventHandler;
+    CEventGroup            m_eventGroup;
+    int32                  m_nDecisionMakerType;
+    int32                  m_nDecisionMakerTypeInGroup;
+    float                  m_fHearingRange;
+    float                  m_fSeeingRange;
+    uint32                 m_nDmNumPedsToScan;
+    float                  m_fDmRadius;
+    float                  field_CC;
+    char                   field_D0;
+    uint8                  m_nEventId;
+    uint8                  m_nEventPriority;
+    char                   field_D3;
+    CVehicleScanner        m_vehicleScanner;
+    CPedScanner            m_pedScanner;
+    CMentalState           m_mentalState;
+    char                   field_188;
+    CEventScanner          m_eventScanner;
+    CCollisionEventScanner m_collisionScanner;
+    CPedStuckChecker       m_pedStuckChecker;
+    int32                  m_AnotherStaticCounter;
+    int32                  m_StaticCounter;
+    CVector                m_vecLastPedPosDuringDamageEntity;
+    CEntity*               m_apInterestingEntities[3];
 
     static float& STEALTH_KILL_RANGE;
     static float& LIGHT_AI_LEVEL_MAX;
@@ -89,13 +90,13 @@ public:
     void AddTaskEventResponseTemp(CTask* task, int32 unUsed);
     void AddTaskEventResponseNonTemp(CTask* task, int32 unUsed);
     void AddTaskPrimaryMaybeInGroup(CTask* task, bool bAffectsPed);
-    CTask* FindTaskByType(int32 taskId);
+    CTask* FindTaskByType(eTaskType taskId);
     CTaskSimpleFight* GetTaskFighting();
     CTaskSimpleUseGun* GetTaskUseGun();
     CTaskSimpleThrowProjectile* GetTaskThrow();
     CTask* GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask);
     CTaskSimpleSwim* GetTaskSwim();
-    CTaskSimpleDuck* GetTaskDuck(bool bIgnoreCheckingForSimplestActiveTask);
+    CTaskSimpleDuck* GetTaskDuck(bool bIgnoreCheckingForSimplestActiveTask = true);
     CTaskSimpleJetPack* GetTaskJetPack();
     CTaskSimpleInAir* GetTaskInAir();
     CTaskSimpleClimb* GetTaskClimb();
@@ -150,9 +151,9 @@ public:
     CEventScanner&   GetEventScanner()    { return m_eventScanner; }
     CPedScanner&     GetPedScanner()      { return m_pedScanner; }
     CVehicleScanner& GetVehicleScanner()  { return m_vehicleScanner; }
-    CEntity**        GetPedEntities()     { return m_pedScanner.m_apEntities; }     // 0x4893E0
+    CEntity**        GetPedEntities()     { return m_pedScanner.m_apEntities.data(); }     // 0x4893E0
     CEntity*         GetPedEntity(uint32 index) { return GetPedEntities()[index]; } // todo: GetPedEntity or degrades readability?
-    CEntity**        GetVehicleEntities() { return m_vehicleScanner.m_apEntities; }
+    CEntity**        GetVehicleEntities() { return m_vehicleScanner.m_apEntities.data(); }
 
 private:
     CPedIntelligence* Constructor(CPed* ped);

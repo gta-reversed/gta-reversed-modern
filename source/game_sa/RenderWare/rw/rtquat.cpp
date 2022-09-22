@@ -65,3 +65,7 @@ RwV3d* RtQuatTransformVectors(RwV3d* vectorsOut, const RwV3d* vectorsIn, const R
 RwReal RtQuatModulus(RtQuat* q) {
     return ((RwReal(__cdecl *)(RtQuat*))0x7EBD10)(q);
 }
+
+void RtQuatSetupSlerpCache(RtQuat* qpFrom, RtQuat* qpTo, RtQuatSlerpCache* sCache) {
+    ((void(__cdecl*)(RtQuat*, RtQuat*, RtQuatSlerpCache*))0x7EC220)(qpFrom, qpTo, sCache);
+}

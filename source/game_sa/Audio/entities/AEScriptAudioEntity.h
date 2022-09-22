@@ -2,6 +2,7 @@
 
 #include "eAudioEvents.h"
 #include "AEExplosionAudioEntity.h"
+#include "AEDoorAudioEntity.h"
 
 class CEntity;
 class CVector;

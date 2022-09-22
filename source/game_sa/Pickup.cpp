@@ -6,18 +6,18 @@ void CPickup::InjectHooks() {
     RH_ScopedClass(CPickup);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(ExtractAmmoFromPickup, 0x454BE0);
+    RH_ScopedInstall(ExtractAmmoFromPickup, 0x454BE0, { .reversed = false });
     RH_ScopedInstall(FindStringForTextIndex, 0x455540);
     RH_ScopedInstall(FindTextIndexForString, 0x455500);
     RH_ScopedInstall(GetPosn, 0x4549A0);
     RH_ScopedInstall(GetRidOfObjects, 0x454CF0);
-    // RH_ScopedInstall(GiveUsAPickUpObject, 0x4567E0);
+    RH_ScopedInstall(GiveUsAPickUpObject, 0x4567E0, { .reversed = false });
     RH_ScopedInstall(IsVisible, 0x454C70);
-    // RH_ScopedInstall(PickUpShouldBeInvisible, 0x454D20);
+    RH_ScopedInstall(PickUpShouldBeInvisible, 0x454D20, { .reversed = false });
     RH_ScopedInstall(ProcessGunShot, 0x4588B0);
-    // RH_ScopedInstall(Remove, 0x4556C0);
+    RH_ScopedInstall(Remove, 0x4556C0, { .reversed = false });
     RH_ScopedInstall(SetPosn, 0x454960);
-    // RH_ScopedInstall(Update, 0x457410);
+    RH_ScopedInstall(Update, 0x457410, { .reversed = false });
 }
 
 // Give player an ammo from weapon pickup

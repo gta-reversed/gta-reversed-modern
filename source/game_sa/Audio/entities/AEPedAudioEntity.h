@@ -43,7 +43,7 @@ public:
     static void StaticInitialise();
     void Terminate();
 
-    void AddAudioEvent(eAudioEvents event, float volume, float speed, CPhysical* ped = nullptr, uint8 surfaceId = 0, int32 a7 = 0, uint32 maxVol = 0);
+    void AddAudioEvent(eAudioEvents event, float volume = 0.0f, float speed = 1.0f, CPhysical* ped = nullptr, uint8 surfaceId = 0, int32 a7 = 0, uint32 maxVol = 0);
 
     void TurnOnJetPack();
     void TurnOffJetPack();

@@ -9,37 +9,38 @@ float& QUAD_HBSTEER_ANIM_MULT = *(float*)0x8D3454; // -0.4f 0x8D3454
 CVector& vecQuadResistance = *(CVector*)0x8D3458; // { 0.995f, 0.995f, 1.0f } // 0x8D3458
 
 void CQuadBike::InjectHooks() {
-    RH_ScopedClass(CQuadBike);
+    RH_ScopedVirtualClass(CQuadBike, 0x871ae8, 71);
     RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(Constructor, 0x6CE370);
-    RH_ScopedVirtualInstall(Fix, 0x6CE2B0);
-    RH_ScopedVirtualInstall(GetRideAnimData, 0x6CDC90);
-    RH_ScopedVirtualInstall(PreRender, 0x6CEAD0);
-    RH_ScopedVirtualInstall(ProcessAI, 0x6CE460);
-    // RH_ScopedVirtualInstall(ProcessControl, 0x6CDCC0);
-    RH_ScopedVirtualInstall(ProcessControlInputs, 0x6CE020);
-    RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6CE280);
-    RH_ScopedVirtualInstall(ProcessSuspension, 0x6CE270);
-    RH_ScopedVirtualInstall(ResetSuspension, 0x6CDCB0);
-    RH_ScopedVirtualInstall(SetupDamageAfterLoad, 0x6CE340);
-    RH_ScopedVirtualInstall(SetupSuspensionLines, 0x6CDCA0);
+    RH_ScopedVMTInstall(Fix, 0x6CE2B0);
+    RH_ScopedVMTInstall(GetRideAnimData, 0x6CDC90);
+    RH_ScopedVMTInstall(PreRender, 0x6CEAD0);
+    RH_ScopedVMTInstall(ProcessAI, 0x6CE460);
+    RH_ScopedVMTInstall(ProcessControl, 0x6CDCC0, { .reversed = false });
+    RH_ScopedVMTInstall(ProcessControlInputs, 0x6CE020);
+    RH_ScopedVMTInstall(ProcessDrivingAnims, 0x6CE280);
+    RH_ScopedVMTInstall(ProcessSuspension, 0x6CE270);
+    RH_ScopedVMTInstall(ResetSuspension, 0x6CDCB0);
+    RH_ScopedVMTInstall(SetupDamageAfterLoad, 0x6CE340);
+    RH_ScopedVMTInstall(SetupSuspensionLines, 0x6CDCA0);
 }
 
 // 0x6CE370
-CQuadBike::CQuadBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, false) {
-    m_sRideAnimData.m_nAnimGroup = ANIM_GROUP_QUAD;
+CQuadBike::CQuadBike(int32 modelIndex, eVehicleCreatedBy createdBy) :
+    CAutomobile(modelIndex, createdBy, false)
+{
     m_pHandling = gHandlingDataMgr.GetBikeHandlingPointer(GetVehicleModelInfo()->m_nHandlingId);
     m_nVehicleSubType = VEHICLE_TYPE_QUAD;
 
     { // unused
-    field_9A8[0] = 0;
-    field_9A8[1] = 0;
-    field_9A8[2] = 0;
-    field_9A8[3] = 1.0f; // see SetupSuspensionLines
+        field_9A8[0] = 1.f;
+        field_9A8[1] = 0.f;
+        field_9A8[2] = 0.f;
+        field_9A8[3] = 0.0f; // see SetupSuspensionLines
     }
 
-    SetupSuspensionLines(); // V1053 Calling the 'SetupSuspensionLines' virtual function in the constructor may lead to unexpected result at runtime.
+    CQuadBike::SetupSuspensionLines();
 
     m_nQuadFlags &= ~1u; // useless
     m_fSteerAngle = 0.0f;

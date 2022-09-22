@@ -170,8 +170,8 @@ CEventObjectCollision::CEventObjectCollision(int16 pieceType, float damageIntens
     m_moveState = moveState;
     m_damageIntensity = damageIntensity;
     m_object = object;
-    m_collisionImpactVelocity = *collisionImpactVelocity;
-    m_collisionPos = *collisionPos;
+    m_impactNormal = *collisionImpactVelocity;
+    m_impactPos = *collisionPos;
     CEntity::SafeRegisterRef(m_object);
 }
 
@@ -209,8 +209,8 @@ CEventBuildingCollision::CEventBuildingCollision(int16 pieceType, float damageIn
     m_moveState = moveState;
     m_damageIntensity = damageIntensity;
     m_building = building;
-    m_collisionImpactVelocity = *collisionImpactVelocity;
-    m_collisionPos = *collisionPos;
+    m_impactNormal = *collisionImpactVelocity;
+    m_impactPos = *collisionPos;
     CEntity::SafeRegisterRef(m_building);
 }
 
@@ -236,10 +236,10 @@ bool CEventBuildingCollision::AffectsPed_Reversed(CPed* ped)
     if (!ped->IsPlayer()
         && ped->IsAlive()
         && m_moveState != PEDMOVE_STILL
-        && (m_collisionImpactVelocity.z <= 0.707f || m_building->m_bIsTempBuilding)
+        && (m_impactNormal.z <= 0.707f || m_building->m_bIsTempBuilding)
         && !ped->m_pAttachedTo)
     {
-        CVector direction(m_collisionImpactVelocity.x, m_collisionImpactVelocity.y, 0.0f);
+        CVector direction(m_impactNormal.x, m_impactNormal.y, 0.0f);
         direction.Normalise();
         float dotProduct = DotProduct(direction, ped->GetForward());
         if (dotProduct <= -0.422f) {
@@ -260,7 +260,7 @@ bool CEventBuildingCollision::AffectsPed_Reversed(CPed* ped)
 // 0x4AD1E0
 bool CEventBuildingCollision::IsHeadOnCollision(CPed* ped)
 {
-    CVector velocity = m_collisionImpactVelocity;
+    CVector velocity = m_impactNormal;
     velocity.z = 0.0f;
     velocity.Normalise();
     return -DotProduct(velocity, ped->GetForward()) > 0.866f;

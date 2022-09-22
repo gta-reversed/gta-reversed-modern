@@ -31,12 +31,16 @@ char** GetVideoModeList() {
     assert(numVidModes != -1 && "Failed to get Video Modes");
 
     gVideoModes = (char**)CMemoryMgr::Calloc(numVidModes, sizeof(char*));
-
+        
     RwVideoMode videoMode{};
     for (auto modeId = 0u; modeId < numVidModes; modeId++) {
         VERIFY(RwEngineGetVideoModeInfo(&videoMode, modeId));
 
         gVideoModes[modeId] = nullptr;
+        if ((videoMode.flags & rwVIDEOMODEEXCLUSIVE) == 0) {
+            DEV_LOG("Unavailable video mode id=%02d: %lu X %lu X %lu [reason: video mode not exclusive]", modeId, videoMode.width, videoMode.height, videoMode.depth);
+            continue;
+        }
 
         if (videoMode.width < APP_MINIMAL_WIDTH || videoMode.height < APP_MINIMAL_HEIGHT) {
             DEV_LOG("Unavailable video mode id=%02d: %lu X %lu X %lu [reason: size]", modeId, videoMode.width, videoMode.height, videoMode.depth);
@@ -55,7 +59,7 @@ char** GetVideoModeList() {
             }
         }
 
-        gVideoModes[modeId] = (char*)CMemoryMgr::Calloc(100, sizeof(char)); // 100 chars
+        gVideoModes[modeId] = (char*)CMemoryMgr::Calloc(100, sizeof(char));                                  // 100 chars
         sprintf(gVideoModes[modeId], "%lu X %lu X %lu", videoMode.width, videoMode.height, videoMode.depth); // rwsprintf
 
         DEV_LOG("Available video mode id=%02d: %s", modeId, gVideoModes[modeId]);

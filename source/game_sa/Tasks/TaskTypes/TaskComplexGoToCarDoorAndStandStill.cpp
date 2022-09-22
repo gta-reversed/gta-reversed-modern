@@ -8,16 +8,16 @@ void CTaskComplexGoToCarDoorAndStandStill::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x645780);
     RH_ScopedInstall(Destructor, 0x64A580);
-    // RH_ScopedInstall(IsVehicleInRange, 0x6458A0);
-    // RH_ScopedInstall(ComputeRouteToDoor, 0x645910);
-    // RH_ScopedInstall(CreateSubTask_Reversed, 0x64A5F0);
-    // RH_ScopedInstall(Clone_Reversed, 0x6498B0);
-    // RH_ScopedInstall(MakeAbortable_Reversed, 0x645840);
-    // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x64D2B0);
-    // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x64D440);
-    // RH_ScopedInstall(ControlSubTask_Reversed, 0x64A820);
+    RH_ScopedInstall(IsVehicleInRange, 0x6458A0, { .reversed = false });
+    RH_ScopedInstall(ComputeRouteToDoor, 0x645910, { .reversed = false });
+
+    RH_ScopedVirtualInstall2(CreateSubTask, 0x64A5F0, { .reversed = false });
+    RH_ScopedVirtualInstall2(Clone, 0x6498B0, { .reversed = false });
+    RH_ScopedVirtualInstall2(MakeAbortable, 0x645840, { .reversed = false });
+    RH_ScopedVirtualInstall2(CreateNextSubTask, 0x64D2B0, { .reversed = false });
+    RH_ScopedVirtualInstall2(CreateFirstSubTask, 0x64D440, { .reversed = false });
+    RH_ScopedVirtualInstall2(ControlSubTask, 0x64A820, { .reversed = false });
 }
-bool CTaskComplexGoToCarDoorAndStandStill::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable_Reversed(ped, priority, event); }
 
 // 0x645780
 CTaskComplexGoToCarDoorAndStandStill::CTaskComplexGoToCarDoorAndStandStill(CVehicle* vehicle, int32 moveState, bool a4, int32 a5, float radius, float a7, float a8, int32 a9) {
@@ -47,7 +47,7 @@ CTaskComplexGoToCarDoorAndStandStill::~CTaskComplexGoToCarDoorAndStandStill() {
 }
 
 // 0x645840
-bool CTaskComplexGoToCarDoorAndStandStill::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
+bool CTaskComplexGoToCarDoorAndStandStill::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return plugin::CallMethodAndReturn<bool, 0x645840, CTaskComplexGoToCarDoorAndStandStill*, CPed*, int32, CEvent const*>(this, ped, priority, event);
 }
 

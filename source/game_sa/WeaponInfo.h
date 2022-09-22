@@ -48,8 +48,8 @@ public:
             uint32 bOnlyFreeAim : 1;
             uint32 bMoveAim : 1;  // can move when aiming
             uint32 bMoveFire : 1; // can move when firing
-            uint32  : 1;        
-            uint32  : 1;        
+            uint32  : 1;
+            uint32  : 1;
 
             uint32 bThrow : 1;
             uint32 bHeavy : 1; // can't run fast with this weapon
@@ -108,20 +108,14 @@ public:
     static eWeaponFire FindWeaponFireType(const char *name);
     static eStats GetSkillStatIndex(eWeaponType weaponType);
 
-    auto GetCrouchReloadAnimationID() -> AnimationId;
-    auto GetTargetHeadRange() -> float;
-    auto GetWeaponReloadTime() -> uint32;
+    auto GetCrouchReloadAnimationID() const -> AnimationId;
+    auto GetTargetHeadRange() const -> float;
+    auto GetWeaponReloadTime() const -> uint32;
 
-    // NOTSA
-
-    // Check if weapon has skill stats
     static bool WeaponHasSkillStats(eWeaponType type);
-
-    // Get weapon info index for this type and with this skill
     static uint32 GetWeaponInfoIndex(eWeaponType weaponType, eWeaponSkill skill);
-
     // Return both model IDs as an array
-    auto GetModels() const { return std::to_array({ m_nModelId1, m_nModelId2 }); }
+    [[nodiscard]] auto GetModels() const { return std::to_array({ m_nModelId1, m_nModelId2 }); }
 };
 
 VALIDATE_SIZE(CWeaponInfo, 0x70);

@@ -34,33 +34,33 @@ void CGameLogic::InjectHooks() {
     RH_ScopedClass(CGameLogic);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(CalcDistanceToForbiddenTrainCrossing, 0x4418E0);
-    // RH_ScopedInstall(ClearSkip, 0x441560);
-    // RH_ScopedInstall(DoWeaponStuffAtStartOf2PlayerGame, 0x4428B0);
-    // RH_ScopedInstall(StorePedsWeapons, 0x0);
-    // RH_ScopedInstall(FindCityClosestToPoint, 0x441B70);
+    RH_ScopedInstall(CalcDistanceToForbiddenTrainCrossing, 0x4418E0, { .reversed = false });
+    RH_ScopedInstall(ClearSkip, 0x441560, { .reversed = false });
+    RH_ScopedInstall(DoWeaponStuffAtStartOf2PlayerGame, 0x4428B0, { .reversed = false });
+    //RH_ScopedInstall(StorePedsWeapons, 0x0, { .reversed = false });
+    RH_ScopedInstall(FindCityClosestToPoint, 0x441B70, { .reversed = false });
     RH_ScopedInstall(ForceDeathRestart, 0x441240);
     RH_ScopedInstall(InitAtStartOfGame, 0x441210);
     RH_ScopedInstall(IsCoopGameGoingOn, 0x441390);
-    // RH_ScopedInstall(IsPlayerAllowedToGoInThisDirection, 0x441E10);
-    // RH_ScopedInstall(IsPlayerUse2PlayerControls, 0x442020);
-    // RH_ScopedInstall(IsPointWithinLineArea, 0x4416E0);
+    RH_ScopedInstall(IsPlayerAllowedToGoInThisDirection, 0x441E10, { .reversed = false });
+    RH_ScopedInstall(IsPlayerUse2PlayerControls, 0x442020, { .reversed = false });
+    RH_ScopedInstall(IsPointWithinLineArea, 0x4416E0, { .reversed = false });
     RH_ScopedInstall(IsSkipWaitingForScriptToFadeIn, 0x4416C0);
-    // RH_ScopedInstall(LaRiotsActiveHere, 0x441C10);
-    // RH_ScopedInstall(Save, 0x5D33C0);
-    // RH_ScopedInstall(Load, 0x5D3440);
-    // RH_ScopedInstall(PassTime, 0x4414C0);
-    // RH_ScopedInstall(Remove2ndPlayerIfPresent, 0x4413C0);
-    // RH_ScopedInstall(ResetStuffUponResurrection, 0x442980);
-    // RH_ScopedInstall(RestorePedsWeapons, 0x441D30);
-    // RH_ScopedInstall(RestorePlayerStuffDuringResurrection, 0x442060);
-    // RH_ScopedInstall(SetPlayerWantedLevelForForbiddenTerritories, 0x441770);
-    // RH_ScopedInstall(SetUpSkip, 0x4423C0);
-    // RH_ScopedInstall(SkipCanBeActivated, 0x4415C0);
+    RH_ScopedInstall(LaRiotsActiveHere, 0x441C10, { .reversed = false });
+    RH_ScopedInstall(Save, 0x5D33C0, { .reversed = false });
+    RH_ScopedInstall(Load, 0x5D3440, { .reversed = false });
+    RH_ScopedInstall(PassTime, 0x4414C0, { .reversed = false });
+    RH_ScopedInstall(Remove2ndPlayerIfPresent, 0x4413C0, { .reversed = false });
+    RH_ScopedInstall(ResetStuffUponResurrection, 0x442980, { .reversed = false });
+    RH_ScopedInstall(RestorePedsWeapons, 0x441D30, { .reversed = false });
+    RH_ScopedInstall(RestorePlayerStuffDuringResurrection, 0x442060, { .reversed = false });
+    RH_ScopedInstall(SetPlayerWantedLevelForForbiddenTerritories, 0x441770, { .reversed = false });
+    RH_ScopedInstall(SetUpSkip, 0x4423C0, { .reversed = false });
+    RH_ScopedInstall(SkipCanBeActivated, 0x4415C0, { .reversed = false });
     RH_ScopedInstall(SortOutStreamingAndMemory, 0x441440);
-    // RH_ScopedInstall(StopPlayerMovingFromDirection, 0x441290);
-    // RH_ScopedInstall(Update, 0x442AD0);
-    // RH_ScopedInstall(UpdateSkip, 0x442480);
+    RH_ScopedInstall(StopPlayerMovingFromDirection, 0x441290, { .reversed = false });
+    RH_ScopedInstall(Update, 0x442AD0, { .reversed = false });
+    RH_ScopedInstall(UpdateSkip, 0x442480, { .reversed = false });
 }
 
 // 0x4418E0

@@ -8,15 +8,15 @@ void FxSystemBP_c::InjectHooks() {
 
     using namespace ReversibleHooks;
     // Install("FxSystemBP_c", "operator new", 0x4AA100, &FxSystemBP_c::operator new);
-    // RH_ScopedInstall(Constructor, 0x4AA0D0);
-    // RH_ScopedInstall(Destructor, 0x4AA0F0);
-    // RH_ScopedInstall(Load, 0x5C05F0);
-    // RH_ScopedInstall(Unload, 0x4AA120);
-    // RH_ScopedInstall(Update, 0x4AA130);
-    // RH_ScopedInstall(Render, 0x4AA160);
-    // RH_ScopedInstall(FreePrtFromSystem, 0x4AA1B0);
-    // RH_ScopedInstall(GetBoundingSphere, 0x4AA1F0);
-    // RH_ScopedInstall(SetBoundingSphere, 0x4AA200);
+    RH_ScopedInstall(Constructor, 0x4AA0D0, { .reversed = false });
+    RH_ScopedInstall(Destructor, 0x4AA0F0, { .reversed = false });
+    RH_ScopedInstall(Load, 0x5C05F0, { .reversed = false });
+    RH_ScopedInstall(Unload, 0x4AA120, { .reversed = false });
+    RH_ScopedInstall(Update, 0x4AA130, { .reversed = false });
+    RH_ScopedInstall(Render, 0x4AA160, { .reversed = false });
+    RH_ScopedInstall(FreePrtFromSystem, 0x4AA1B0, { .reversed = false });
+    RH_ScopedInstall(GetBoundingSphere, 0x4AA1F0, { .reversed = false });
+    RH_ScopedInstall(SetBoundingSphere, 0x4AA200, { .reversed = false });
 }
 
 // 0x4AA100

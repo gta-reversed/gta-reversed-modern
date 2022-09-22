@@ -20,7 +20,7 @@ public:
 public:
     static constexpr auto Type = TASK_COMPLEX_CAR_DRIVE_TO_POINT;
 
-    CTaskComplexDriveToPoint(CVehicle* vehicle, CVector& point, float speed, int32 arg4, int32 carModelIndexToCreate, float radius, eCarDrivingStyle drivingStyle);
+    CTaskComplexDriveToPoint(CVehicle* vehicle, const CVector& point, float speed, int32 arg4, int32 carModelIndexToCreate, float radius, eCarDrivingStyle drivingStyle);
     ~CTaskComplexDriveToPoint() override = default;
 
     eTaskType GetTaskType() override { return Type;}
@@ -30,7 +30,11 @@ public:
     CTask* CreateSubTaskCannotGetInCar(CPed* ped) override;
     CTask* Drive(CPed* ped) override;
 
+
     bool IsTargetBlocked(CPed* ped) const;
     bool IsTargetBlocked(CPed* ped, CEntity** entities, int32 numEntities) const;
+
+    /// NOTSA
+    void GoToPoint(const CVector& point);
 };
 VALIDATE_SIZE(CTaskComplexDriveToPoint, 0x3C);

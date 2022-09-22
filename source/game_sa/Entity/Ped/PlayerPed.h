@@ -39,7 +39,7 @@ public:
     bool Load() override;
     bool Save() override;
 
-    CPad* GetPadFromPlayer();
+    CPad* GetPadFromPlayer() const;
     bool CanPlayerStartMission();
     bool IsHidden();
     void ReApplyMoveAnims();
@@ -109,8 +109,7 @@ public:
     static void SetupPlayerPed(int playerId);
 
     // NOTSA
-    CPedGroup& GetGroup() const noexcept { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
-    CPedGroupMembership& GetGroupMembership() const noexcept { return GetGroup().GetMembership(); }
+    CPedGroup& GetPlayerGroup() const noexcept { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
 };
 
 VALIDATE_SIZE(CPlayerPed, 0x7A4);
