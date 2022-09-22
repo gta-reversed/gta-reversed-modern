@@ -275,7 +275,7 @@ void CCarGenerator::DoInternalProcessing()
 
         CVector vehPosn = vehicle->GetPosition();
         CNodeAddress pathLink = ThePaths.FindNodeClosestToCoors(vehPosn, 0, 20.0F, 0, 0, 0, 0, 1);
-        if (pathLink.IsAreaValid())
+        if (pathLink.IsValid())
         {
             assert(pathLink.IsValid());
 

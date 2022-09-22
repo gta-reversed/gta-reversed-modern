@@ -256,7 +256,7 @@ bool CPathFind::TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddre
 // 0x4509A0
 CVector CPathFind::TakeWidthIntoAccountForWandering(CNodeAddress nodeAddress, uint16 randomSeed) {
     // Invalid area, or area not loaded
-    if (nodeAddress.IsAreaValid() && IsAreaNodesAvailable(nodeAddress)) {
+    if (nodeAddress.IsValid() && IsAreaNodesAvailable(nodeAddress)) {
         const auto nbits = 4u;
         const auto Random = [](uint16 seed) { return (float)(seed % (1 << nbits) - 7); };
         return GetPathNode(nodeAddress)->GetNodeCoors() + CVector{ Random(randomSeed), Random(randomSeed >> nbits), 0.f };
@@ -297,7 +297,7 @@ void CPathFind::DoPathSearch(
     bool waterPath
 ) {
     const auto ResolveNode = [](CNodeAddress* addr) {
-        if (addr && addr->IsAreaValid()) {
+        if (addr && addr->IsValid()) {
 
         }
     };
@@ -337,7 +337,7 @@ CVector CPathFind::FindNodeCoorsForScript(CNodeAddress address, bool* bFound) {
             *bFound = found;
         }
     };
-    if (!address.IsAreaValid() || IsAreaNodesAvailable(address)) {
+    if (!address.IsValid() || IsAreaNodesAvailable(address)) {
         SetFound(false);
         return {};
     } else {
@@ -372,7 +372,7 @@ CVector CPathFind::FindNodeCoorsForScript(CNodeAddress nodeAddrA, CNodeAddress n
             *outFound = found;
         }
     };
-    if (nodeAddrA.IsAreaValid() && nodeAddrB.IsAreaValid() && AreNodeAreasLoaded({ nodeAddrA, nodeAddrB })) { // Inverted
+    if (nodeAddrA.IsValid() && nodeAddrB.IsValid() && AreNodeAreasLoaded({ nodeAddrA, nodeAddrB })) { // Inverted
         SetFound(true);
 
         const auto nodeA = GetPathNode(nodeAddrA);
@@ -394,10 +394,9 @@ CVector CPathFind::FindNodeCoorsForScript(CNodeAddress nodeAddrA, CNodeAddress n
 void CPathFind::MarkRoadNodeAsDontWander(float x, float y, float z) {
     CVector pos = {x, y, z};
     auto node = FindNodeClosestToCoors(pos, 0, 999999.88f, 0, 0, 0, 0, 0);
-    if (!node.IsValid())
-        return;
-
-    m_pPathNodes[node.m_wAreaId][node.m_wNodeId].m_bDontWander = true;
+    if (node.IsValid()) {
+        m_pPathNodes[node.m_wAreaId][node.m_wNodeId].m_bDontWander = true;
+    }
 }
 
 // 0x452820
@@ -699,7 +698,7 @@ void CPathFind::AddDynamicLinkBetween2Nodes_For1Node(CNodeAddress first, CNodeAd
     else {
         auto* nodeLink = &m_pNodeLinks[first.m_wAreaId][numAddresses];
         auto linkCounter = 0u;
-        while (!nodeLink->IsAreaValid()) {
+        while (!nodeLink->IsValid()) {
             nodeLink += 12; // No clue why we jump 12 objects each time (Search: MAGIC_NUM_12)
             ++linkCounter;
         }
