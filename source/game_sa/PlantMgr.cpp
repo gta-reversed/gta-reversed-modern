@@ -74,7 +74,7 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedInstall(ReloadConfig, 0x5DD780, {.reversed = false});
     RH_ScopedInstall(MoveLocTriToList, 0x5DB590);
     RH_ScopedInstall(MoveColEntToList, 0x5DB5F0);
-    RH_ScopedInstall(SetPlantFriendlyFlagInAtomicMI, 0x5DB650, {.reversed = false});
+    RH_ScopedInstall(SetPlantFriendlyFlagInAtomicMI, 0x5DB650);
     RH_ScopedInstall(Update, 0x5DCFA0);
     RH_ScopedInstall(PreUpdateOnceForNewCameraPos, 0x5DCF30);
     RH_ScopedInstall(UpdateAmbientColor, 0x5DB310);
@@ -248,7 +248,24 @@ void CPlantMgr::MoveColEntToList(CPlantColEntEntry*& oldList, CPlantColEntEntry*
 
 // 0x5DB650
 void CPlantMgr::SetPlantFriendlyFlagInAtomicMI(CAtomicModelInfo* ami) {
-    plugin::Call<0x5DB650, CAtomicModelInfo*>(ami);
+    ami->m_nFlags &= ~0x200u;
+
+    auto colData = ami->GetColModel()->GetData();
+    if (!colData)
+        return;
+
+    auto numTriangles = colData->m_nNumTriangles;
+    if (numTriangles <= 0)
+        return;
+
+    for (auto& triangle : std::span{colData->m_pTriangles, numTriangles}) {
+        if (g_surfaceInfos->CreatesPlants(triangle.m_nMaterial)
+            || g_surfaceInfos->CreatesObjects(triangle.m_nMaterial)) {
+            ami->m_nFlags |= 0x200u;
+
+            return;
+        }
+    }
 }
 
 // 0x5DCFA0
