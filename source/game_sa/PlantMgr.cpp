@@ -408,7 +408,23 @@ void CPlantMgr::_ColEntityCache_Update(const CVector& cameraPos, bool fast) {
 
 // 0x5DCD80
 void CPlantMgr::_ProcessEntryCollisionDataSections(CPlantColEntEntry* entry, const CVector& center, int32 a3) {
-    plugin::Call<0x5DCD80, CPlantColEntEntry*, const CVector&, int32>(entry, center, a3);
+    return plugin::Call<0x5DCD80, CPlantColEntEntry*, const CVector&, int32>(entry, center, a3);
+
+    auto colData = entry->m_Entity->GetColData();
+    if (!colData)
+        return;
+
+    auto numTriangles = entry->m_numTriangles;
+    if (numTriangles != colData->m_nNumTriangles)
+        return;
+
+    _ProcessEntryCollisionDataSections_RemoveLocTris(entry, center, a3, 0, numTriangles - 1);
+
+    if (!colData->bHasFaceGroups) {
+        return _ProcessEntryCollisionDataSections_AddLocTris(entry, center, a3, 0, numTriangles - 1);
+    }
+
+    // ...
 }
 
 // 0x5DC8B0
