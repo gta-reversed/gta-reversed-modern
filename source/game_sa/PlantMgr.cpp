@@ -79,12 +79,13 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedInstall(PreUpdateOnceForNewCameraPos, 0x5DCF30);
     RH_ScopedInstall(UpdateAmbientColor, 0x5DB310);
     RH_ScopedInstall(CalculateWindBending, 0x5DB3D0, {.reversed = false});
-    RH_ScopedInstall(_ColEntityCache_Add, 0x5DBEB0, {.reversed = false});
-    RH_ScopedInstall(_ColEntityCache_FindInCache, 0x5DB530, {.reversed = false});
-    RH_ScopedInstall(_ColEntityCache_Remove, 0x5DBEF0, {.reversed = false});
+    RH_ScopedInstall(_ColEntityCache_Add, 0x5DBEB0);
+    RH_ScopedInstall(_ColEntityCache_FindInCache, 0x5DB530);
+    RH_ScopedInstall(_ColEntityCache_Remove, 0x5DBEF0);
     RH_ScopedInstall(_ColEntityCache_Update, 0x5DC510, {.reversed = false});
     RH_ScopedInstall(_ProcessEntryCollisionDataSections, 0x5DCD80, {.reversed = false});
     RH_ScopedInstall(_UpdateLocTris, 0x5DCF00, {.reversed = true});
+    RH_ScopedInstall(_CalcDistanceSqrToEntity, 0x5DBE40, {.reversed = false}); // bad call conv.
 
     RH_ScopedGlobalInstall(LoadModels, 0x5DD220);
 
@@ -305,14 +306,8 @@ void CPlantMgr::Render() {
 
 // 0x5DBEB0
 void CPlantMgr::_ColEntityCache_Add(CEntity* entity, bool checkAlreadyExists) {
-    //plugin::Call<0x5DBEB0, CEntity*>(entity, checkAlreadyExists);
-    if (checkAlreadyExists && CPlantMgr::m_CloseColEntListHead) {
-        for (auto i = CPlantMgr ::m_CloseColEntListHead; i; i = i->m_NextEntry) {
-            if (i->m_Entity == entity) {
-                return;
-            }
-        }
-    }
+    if (checkAlreadyExists && _ColEntityCache_FindInCache(entity))
+        return;
 
     if (auto head = CPlantMgr::m_UnusedColEntListHead) {
         head->AddEntry(entity);
@@ -320,18 +315,50 @@ void CPlantMgr::_ColEntityCache_Add(CEntity* entity, bool checkAlreadyExists) {
 }
 
 // 0x5DB530
-void CPlantMgr::_ColEntityCache_FindInCache(CEntity* entity) {
-    plugin::Call<0x5DB530, CEntity*>(entity);
+CPlantColEntEntry* CPlantMgr::_ColEntityCache_FindInCache(CEntity* entity) {
+    if (!CPlantMgr::m_CloseColEntListHead)
+        return nullptr;
+
+    for (auto i = CPlantMgr ::m_CloseColEntListHead; i; i = i->m_NextEntry) {
+        if (i->m_Entity == entity) {
+            return i;
+        }
+    }
+    return nullptr;
 }
 
 // 0x5DBEF0
 void CPlantMgr::_ColEntityCache_Remove(CEntity* entity) {
-    plugin::Call<0x5DBEF0, CEntity*>(entity);
+    if (auto entry = _ColEntityCache_FindInCache(entity)) {
+        entry->ReleaseEntry();
+    }
 }
 
 // 0x5DC510
-void CPlantMgr::_ColEntityCache_Update(const CVector& cameraPos, bool last) {
-    plugin::Call<0x5DC510, const CVector&, bool>(cameraPos, last);
+void CPlantMgr::_ColEntityCache_Update(const CVector& cameraPos, bool fast) {
+    return plugin::Call<0x5DC510, const CVector&, bool>(cameraPos, fast);
+
+    if (fast) {
+        // prune ones that has no entity.
+        for (auto i = CPlantMgr::m_CloseColEntListHead; i; i = i->m_NextEntry) {
+            if (!i->m_Entity) {
+                i->ReleaseEntry();
+            }
+        }
+
+        return;
+    }
+    for (auto i = CPlantMgr::m_CloseColEntListHead; i; i = i->m_NextEntry) {
+        if (!i->m_Entity || _CalcDistanceSqrToEntity(i->m_Entity, cameraPos) > 115600.0f || !i->m_Entity->IsInCurrentAreaOrBarberShopInterior()) {
+            i->ReleaseEntry();
+        }
+    }
+
+    if (!CPlantMgr::m_UnusedColEntListHead)
+        return;
+
+
+    // ...
 }
 
 // 0x5DCD80
@@ -354,6 +381,20 @@ void CPlantMgr::_UpdateLocTris(const CVector& center, int32 a2) {
     for (auto i = m_CloseColEntListHead; i; i = i->m_NextEntry) {
         _ProcessEntryCollisionDataSections(i, center, a2);
     }
+}
+
+// 0x5DBE40
+float CPlantMgr::_CalcDistanceSqrToEntity(CEntity* entity, const CVector& posn) {
+    auto colModel = entity->GetColModel();
+    CVector dst;
+    entity->TransformFromObjectSpace(dst, colModel->m_boundSphere.m_vecCenter);
+
+    auto d = DistanceBetweenPoints(dst, posn);
+    if (d > colModel->m_boundSphere.m_fRadius) {
+        d -= colModel->m_boundSphere.m_fRadius;
+    }
+
+    return sq(d);
 }
 
 bool CPlantMgr::DbgCountCachedEntities(uint32*) {

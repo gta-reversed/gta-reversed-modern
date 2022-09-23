@@ -39,16 +39,18 @@ public:
     static void Render();
 
 private:
-    static void _ColEntityCache_Add(CEntity* entity, bool a2);
-    static void _ColEntityCache_FindInCache(CEntity* entity);
+    static void _ColEntityCache_Add(CEntity* entity, bool checkAlreadyExists);
+    static CPlantColEntEntry* _ColEntityCache_FindInCache(CEntity* entity);
     static void _ColEntityCache_Remove(CEntity* entity);
-    static void _ColEntityCache_Update(const CVector& cameraPos, bool last);
+    static void _ColEntityCache_Update(const CVector& cameraPos, bool fast);
 
     static void _ProcessEntryCollisionDataSections(CPlantColEntEntry* entry, const CVector& center, int32 a3);
     static void _ProcessEntryCollisionDataSections_AddLocTris(CPlantColEntEntry*, const CVector&, int32, int32, int32);
     static void _ProcessEntryCollisionDataSections_RemoveLocTris(CPlantColEntEntry*, const CVector&, int32, int32, int32);
 
     static void _UpdateLocTris(const CVector& center, int32);
+
+    static float _CalcDistanceSqrToEntity(CEntity* entity, const CVector& posn);
 
     static bool DbgCountCachedEntities(uint32*);
     static bool DbgCountLocTrisAndPlants(uint32, uint32*, uint32*);
