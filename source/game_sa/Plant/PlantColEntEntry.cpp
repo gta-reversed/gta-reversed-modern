@@ -24,25 +24,24 @@ CPlantColEntEntry* CPlantColEntEntry::AddEntry(CEntity* entity) {
     m_numTriangles = colData->m_nNumTriangles;
     m_Objects = (CPlantLocTri**)CMemoryMgr::Calloc(m_numTriangles, sizeof(CPlantLocTri*)); // originally Malloc zeroed afterwards
 
-    if (auto next = m_NextEntry) {
-        if (auto prev = m_PrevEntry) {
-            prev->m_NextEntry = next;
+    if (auto prev = m_PrevEntry) {
+        if (auto next = m_NextEntry) {
             next->m_PrevEntry = prev;
+            prev->m_NextEntry = next;
         } else {
-            next->m_PrevEntry = nullptr;
+            prev->m_NextEntry = next;
         }
     } else {
-        CPlantMgr::m_UnusedColEntListHead = m_PrevEntry;
-        if (m_PrevEntry) {
-            CPlantMgr::m_UnusedColEntListHead->m_NextEntry = nullptr;
+        if (CPlantMgr::m_UnusedColEntListHead = m_NextEntry) {
+            CPlantMgr::m_UnusedColEntListHead->m_PrevEntry = nullptr;
         }
     }
-    m_PrevEntry = CPlantMgr::m_CloseColEntListHead;
-    m_NextEntry = nullptr;
-    CPlantMgr::m_CloseColEntListHead = this;
+    m_NextEntry = CPlantMgr::m_CloseColEntListHead;
+    m_PrevEntry = nullptr;
+    CPlantMgr::m_CloseColEntListHead = nullptr;
 
-    if (auto prev = m_PrevEntry) {
-        prev->m_NextEntry = this;
+    if (auto next = m_NextEntry) {
+        next->m_PrevEntry = this;
     }
 
     return this;
@@ -65,25 +64,21 @@ void CPlantColEntEntry::ReleaseEntry() {
     CEntity::SafeCleanUpRef(m_Entity);
     m_Entity = nullptr;
 
-    if (auto next = m_NextEntry) {
-        if (auto prev = m_PrevEntry) {
-            prev->m_NextEntry = next;
+    if (auto prev = m_PrevEntry) {
+        if (auto next = m_NextEntry) {
             next->m_PrevEntry = prev;
+            prev->m_NextEntry = next;
         } else {
-            next->m_PrevEntry = nullptr;
+            prev->m_NextEntry = nullptr;
         }
     } else {
-        CPlantMgr::m_CloseColEntListHead = m_PrevEntry;
-
-        if (auto head = CPlantMgr::m_CloseColEntListHead) {
-            head->m_NextEntry = nullptr;
+        if (CPlantMgr::m_CloseColEntListHead = m_NextEntry) {
+            CPlantMgr::m_CloseColEntListHead->m_PrevEntry = nullptr;
         }
     }
-
-    m_PrevEntry = CPlantMgr::m_UnusedColEntListHead;
-    m_NextEntry = nullptr;
-    CPlantMgr::m_UnusedColEntListHead = this;
-    if (auto prev = m_PrevEntry) {
-        prev->m_NextEntry = this;
+    m_NextEntry = CPlantMgr::m_UnusedColEntListHead;
+    m_PrevEntry = nullptr;
+    if (auto next = m_NextEntry) {
+        next->m_PrevEntry = this;
     }
 }

@@ -20,7 +20,7 @@ void CPlantLocTri::InjectHooks() {
     RH_ScopedCategory("Plant");
 
     RH_ScopedInstall(Add, 0x5DC290);
-    RH_ScopedInstall(Release, 0x5DB6D0);
+    RH_ScopedInstall(Release, 0x5DB6D0, {.reversed = false});
 
     RH_ScopedGlobalInstall(GetPlantDensity, 0x5DC210);
 }

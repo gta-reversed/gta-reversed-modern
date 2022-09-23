@@ -277,9 +277,9 @@ void CPlantMgr::PreUpdateOnceForNewCameraPos(const CVector& posn) {
     CGrassRenderer::SetGlobalCameraPos(posn);
     UpdateAmbientColor();
     CGrassRenderer::SetGlobalWindBending(CalculateWindBending());
-    _ColEntityCache_Update(posn, 0);
+    _ColEntityCache_Update(posn, false);
 
-    for (auto i = m_CloseColEntListHead; i; i = i->m_PrevEntry) {
+    for (auto i = m_CloseColEntListHead; i; i = i->m_NextEntry) {
         _ProcessEntryCollisionDataSections(i, posn, 0xFAFAFAFA);
     }
 }
