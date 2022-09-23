@@ -220,7 +220,7 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
     if (!ThePaths.AreNodesLoadedForArea(PointOfAttack.x, PointOfAttack.x, PointOfAttack.y, PointOfAttack.y))
         return false;
 
-    auto node = ThePaths.FindNodeClosestToCoors(PointOfAttack, 0, 400.0f, 0, 0, 0, 0, 1);
+    auto node = ThePaths.FindNodeClosestToCoors(PointOfAttack, PATH_TYPE_VEH, 400.0f, 0, 0, 0, 0, 1);
     if (!node.IsValid())
         return false;
 

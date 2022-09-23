@@ -81,32 +81,43 @@ public:
 };
 VALIDATE_SIZE(CPathIntersectionInfo, 0x1);
 
-class CCarPathLink {
+class CCarPathLink { // "Navi Nodes"
 public:
     struct {
-        int16 x;
-        int16 y;
-    } m_posn; /// Fixed-point ("compressed") position
-    CNodeAddress m_address;
-    int8         m_nDirX;
-    int8         m_nDirY;
-    int8         m_nPathNodeWidth; /// Has to be divided by `0.011574074f` (not yet sure why)
-    uint8        m_nNumLeftLanes : 3;
-    uint8        m_nNumRightLanes : 3;
-    uint8        m_bTrafficLightDirection : 1; // 1 if the navi node has the same direction as the traffic light and 0 if the navi node points somewhere else
-    uint8        unk1 : 1;
+        int16 x, y;
+    } m_posn;                  /// Fixed-point ("compressed") position. Divide by 8.
+    CNodeAddress m_attachedTo; /// Identifies the target node a navi node is attached to.
+    /*!
+    * This is a normalized vector pointing towards above mentioned target node,
+    * thus defining the general direction of the path segment.
+    * The vector components are represented by signed bytes
+    * with values within the interval[-100, 100],
+    * which corresponds to the range of floating point values[-1.0, 1.0].
+    */
+    struct {
+        int8 x, y;
+    } m_dir; // 0x10
+    int8         m_nPathNodeWidth;              /// Fixed-point path node width, usually a copy of the linked node's path width (byte). Divide by 16.
+    uint8        m_numOppositeDirLanes : 3;     /// Number of (left) lanes that are opposite to this lane's direction, eg.: dotproduct is < 0
+    uint8        m_numSameDirLanes : 3;         /// Number of (right) lanes that are the going the same direction as this node's direction, eg.: dotproduct is > 0
+    uint8        m_bTrafficLightDirection : 1;  /// 1 if the navi node has the same direction as the traffic light and 0 if the navi node points somewhere else
+    uint8        : 1;                           /// Unused
+    uint16       m_nTrafficLightState : 2;      /// `eTrafficLightsDirection`
+    uint16       m_bridgeLights : 1;            /// See `SetLinksBridgeLights`
 
-    uint16 m_nTrafficLightState : 2; // 1 - North-South, 2 - West-East cycle, enum: eTrafficLightsDirection
-    uint16 m_bridgeLights : 1;
+    float GetNodePathWidth() const {
+        return (float)m_nPathNodeWidth / 16.f;
+    }
 
     float OneWayLaneOffset() const {
-        if (m_nNumLeftLanes) {
-            return 0.5f - (float)m_nNumRightLanes / 2.f;
+        if (m_numOppositeDirLanes) {
+            return 0.5f - (float)m_numSameDirLanes / 2.f;
         }        
-        if (m_nNumRightLanes) {
-            return 0.5f - (float)m_nPathNodeWidth * 0.011574074f / 2.f;
+        if (m_numSameDirLanes) {
+            // 0.011574074 = 1 / 16.f / 5.4f
+            return 0.5f - GetNodePathWidth() / 5.4f / 2.f;
         }
-        return 0.5f - (float)m_nNumLeftLanes / 2.f;
+        return 0.5f - (float)m_numOppositeDirLanes / 2.f;
     }
 
     /// Get uncompressed world position
@@ -118,9 +129,9 @@ VALIDATE_SIZE(CCarPathLink, 0xE);
 
 class CPathNode {
 public:
-    CPathNode        *m_prev, *m_next;
+    CPathNode        *m_next, *m_prev;
     CompressedVector m_vPos;
-    uint16           m_wSearchList; // search list id
+    int16            m_totalDistFromOrigin; /// Sum of linkLength's up to this node. Using this the current hash bucket (in `m_pathFindHashTable`) can be obtained by `% std::size(m_pathFindHashTable)`. Used in `DoPathSearch`. `SHRT_MAX - 1` by default.
     int16            m_wBaseLinkId;
     uint16           m_wAreaId; // TODO: Replace these 2 with `CNodeAddress`
     uint16           m_wNodeId;
@@ -129,12 +140,13 @@ public:
 
     // byte 0
     uint32 m_nNumLinks : 4; // Mask: 0xF
-    uint32 m_nTrafficLevel : 2; // TrafficLevel uses 4 steps: 0 = full 1 = high 2 = medium 3 = low
+    uint32 m_onDeadEnd : 1;
+    uint32 m_isSwitchedOff : 1;
     uint32 m_bRoadBlocks : 1;
     uint32 m_bWaterNode : 1;
 
     // byte 1
-    uint32 m_bEmergencyVehiclesOnly : 1;
+    uint32 m_isOriginallyOnDeadEnd : 1;
     uint32 unk1 : 1; // not used in paths data files
     uint32 m_bDontWander : 1;
     uint32 unk2 : 1; // not used in paths data files
@@ -156,20 +168,18 @@ public:
         return UncompressLargeVector(m_vPos);
     }
 
-    inline bool IsLowTrafficLevel() const {
-        return m_nTrafficLevel == TRAFFIC_MEDIUM || m_nTrafficLevel == TRAFFIC_LOW;
-    }
-
     CNodeAddress GetAddress() const {
         return { m_wAreaId, m_wNodeId };
     }
 
+    friend bool operator==(const CPathNode& lhs, const CPathNode& rhs) { return lhs.GetAddress() == rhs.GetAddress(); }
+    friend bool operator!=(const CPathNode& lhs, const CPathNode& rhs) { return !(lhs == rhs); }
 
     /*!
     * @notsa
     * @brief Code based on 0x44D3E0
     */
-    bool DoesThisNodeHasToBeSwitchedOff() {
+    bool HasToBeSwitchedOff() const {
         switch (m_nBehaviourType) {
         case 1:
         case 2:
@@ -185,7 +195,8 @@ class CPathFind {
     static constexpr auto NUM_TOTAL_PATH_NODE_AREAS = NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS;
 public:
     CNodeAddress           m_Info; // 0x0
-    CPathNode*             m_pathFindHashTable[512]; // 0x4
+
+    CPathNode*             m_pathFindHashTable[512]; ///< Hash table used for pathfinding, the key hash used is the distance from the node.
 
     /*!
     * Pointer to an array containing all path nodes in an area (count: `m_anNumNodes`)
@@ -251,7 +262,7 @@ public:
     * 
     * @brief Make node as the head of it's bucket's linked list
     */
-    void AddNodeToList(CPathNode* node, uint32 list);
+    void AddNodeToList(CPathNode* node, int32 distFromOrigin);
 
     float CalcDistToAnyConnectingLinks(CPathNode* node, CVector pos);
     void FindNodeClosestInRegion(CNodeAddress* outAddress, uint16 areaId, CVector pos, uint8 nodeType, float* outDist, bool bLowTraffic, bool bUnkn, bool bBoats, bool bUnused);
@@ -287,7 +298,7 @@ public:
     void SwitchRoadsInAngledArea(float, float, float, float, float, float, float, uint8, uint8) { /*noop*/ }
     bool ThisNodeHasToBeSwitchedOff(CPathNode* node);
     size_t CountNeighboursToBeSwitchedOff(const CPathNode& node);
-    void SwitchOffNodeAndNeighbours(CPathNode* node, CPathNode** out1, CPathNode** out2, char bLowTraffic, uint8 areaId);
+    void SwitchOffNodeAndNeighbours(CPathNode* node, CPathNode*& outNext1, CPathNode** outNext2, bool lowTraffic, bool backToOriginal);
     void SwitchRoadsOffInAreaForOneRegion(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, bool bLowTraffic, uint8 nodeType, int areaId, uint8 bUnused);
     void SwitchRoadsOffInArea(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, bool bLowTraffic, uint8 nodeType, bool bForbidden);
     void SwitchPedRoadsOffInArea(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, bool bLowTraffic, uint8 nodeType);
@@ -302,7 +313,7 @@ public:
     void GeneratePedCreationCoors_Interior(float x, float y, CVector* outCoords, CNodeAddress* unused1, CNodeAddress* unused2, float* outOrientation);
     void GeneratePedCreationCoors(float x, float y, float minDist1, float maxDist1, float minDist2, float maxDist2, CVector* outCoords, CNodeAddress* outAddress1,
                                   CNodeAddress* outAddress2, float* outOrientation, bool bLowTraffic, CMatrix* transformMatrix);
-    CNodeAddress FindNodeClosestToCoors(CVector pos, int32 nodeType, float maxDistance, uint16 unk2, int32 unk3, uint16 unk4,
+    CNodeAddress FindNodeClosestToCoors(CVector pos, ePathType nodeType, float maxDistance, uint16 unk2, int32 unk3, uint16 unk4,
                                          uint16 bBoatsOnly, int32 unk6);
     void MarkRoadNodeAsDontWander(float x, float y, float z);
     void RecordNodesClosestToCoors(CVector pos, uint8 nodeType, int count, CNodeAddress* outAddresses, float maxDist, bool, bool, bool, bool);
@@ -310,6 +321,27 @@ public:
     CNodeAddress FindNthNodeClosestToCoors(CVector pos, uint8 nodeType, float maxDistance, bool bLowTraffic, bool bUnkn, int nthNode, bool bBoatsOnly, bool bIgnoreInterior,
                                            CNodeAddress* outNode);
     void FindNextNodeWandering(uint8 nodeType, CVector vecPos, CNodeAddress* originAddress, CNodeAddress* targetAddress, uint8 dir, uint8* outDir);
+
+    /*!
+    * @addr 0x4515D0
+    * 
+    * @brief Find the nodes to follow connecting `originPos` and `targetPos`
+    *
+    * @param pathType                       Path type to find
+    * @param originPos                      The origin position
+    * @param originAddrAddrHint             A node close to the origin. It's a hint because if it's area is not loaded another node is searched that is the cloest to the origin position but in a loaded area
+    * @param targetPos                      Same as `originPos` but for the target
+    * @param outResultNodes                 The out nodes, that is the nodes to follow that are connecting the `origin` and `target`
+    * @param outNodesCount                  The number of nodes in `outResultNodes`
+    * @param maxNodesToFind                 The size of the `outResultNodes` array
+    * @param outDistance                opt The sum of distances following the nodes from origin to target
+    * @param targetNodeAddrHint         opt Same as `originAddrAddrHint` but for the target
+    * @param maxSearchDepth                 If too low search might fail. If too high will take a long time.
+    * @param sameLaneOnly                   If we should always stay in our lane
+    * @param forbiddenNodeAddr              One node we should avoid
+    * @param bAllowWaterNodeTransitions     Whenever it is allowed to go from water nodes to non-water nodes and vice versa.
+    * @param forBoats                       Use water nodes instead of regular ones (for boats)
+    */
     void DoPathSearch(
         ePathType pathType,
         CVector originPos,
@@ -564,7 +596,7 @@ public:
     * @return If `fn` returned `false` at any point then false, otherwise true.
     */
     template<std::predicate<size_t> T>
-    bool IterAreasTouchingRect(CRect rect, T&& fn) {
+    bool IterAreasTouchingRect(CRect rect, T&& fn) const {
         const auto [minAreaX, minAreaY] = FindXYRegionForCoors({ rect.left, rect.bottom });
         const auto [maxAreaX, maxAreaY] = FindXYRegionForCoors({ rect.right, rect.top });
         for (auto x = minAreaX; x <= maxAreaX; x++) {
@@ -587,8 +619,8 @@ public:
     */
     auto GetNodeLinkedNodes(const CPathNode& node, bool checkLinksAreaIsLoaded = true) {
         return std::span{ &m_pNodeLinks[node.m_wAreaId][node.m_wBaseLinkId], node.m_nNumLinks }
-             | rng::views::filter([=, this](auto addr) { return !checkLinksAreaIsLoaded || !IsAreaNodesAvailable(addr); }) // Drop nodes whose area isn't loaded
-             | rng::views::transform([this](auto addr) -> CPathNode& { return *GetPathNode(addr); });             // Transform linked address to a node ref
+             | rng::views::filter([=, this](auto addr) { return !checkLinksAreaIsLoaded || IsAreaNodesAvailable(addr); }) // Drop nodes whose area isn't loaded
+             | rng::views::transform([this](auto addr) -> CPathNode& { return *GetPathNode(addr); });                     // Transform linked address to a node ref
     }
 };
 
