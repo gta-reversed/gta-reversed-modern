@@ -71,7 +71,7 @@ void CPlantMgr::InjectHooks() {
 
     RH_ScopedInstall(Initialise, 0x5DD910);
     RH_ScopedInstall(Shutdown, 0x5DB940);
-    RH_ScopedInstall(ReloadConfig, 0x5DD780, {.reversed = false});
+    RH_ScopedInstall(ReloadConfig, 0x5DD780);
     RH_ScopedInstall(MoveLocTriToList, 0x5DB590);
     RH_ScopedInstall(MoveColEntToList, 0x5DB5F0);
     RH_ScopedInstall(SetPlantFriendlyFlagInAtomicMI, 0x5DB650);
@@ -84,7 +84,7 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedInstall(_ColEntityCache_Remove, 0x5DBEF0);
     RH_ScopedInstall(_ColEntityCache_Update, 0x5DC510, {.reversed = false});
     RH_ScopedInstall(_ProcessEntryCollisionDataSections, 0x5DCD80, {.reversed = false});
-    RH_ScopedInstall(_UpdateLocTris, 0x5DCF00, {.reversed = true});
+    RH_ScopedInstall(_UpdateLocTris, 0x5DCF00);
     RH_ScopedInstall(_CalcDistanceSqrToEntity, 0x5DBE40, {.reversed = false}); // bad call conv.
 
     RH_ScopedGlobalInstall(LoadModels, 0x5DD220);
@@ -185,8 +185,6 @@ void CPlantMgr::Shutdown() {
 
 // 0x5DD780
 bool CPlantMgr::ReloadConfig() {
-    return plugin::CallAndReturn<bool, 0x5DD780>();
-
     if (!CPlantSurfPropMgr::Initialise()) {
         return false;
     }
@@ -194,7 +192,37 @@ bool CPlantMgr::ReloadConfig() {
     std::ranges::fill(m_CloseLocTriListHead, nullptr);
     m_UnusedLocTriListHead = m_LocTrisTab;
 
-    // todo: while
+    CPlantLocTri* prevTri = nullptr;
+    for (auto& tab : m_LocTrisTab) {
+        tab.m_V1 = tab.m_V2 = tab.m_V3 = CVector{0.0f, 0.0f, 0.0f};
+        tab.m_SurfaceId = 0u;
+        rng::fill(tab.m_nMaxNumPlants, 0u);
+
+        tab.m_PrevTri = prevTri;
+        if (prevTri) {
+            prevTri->m_NextTri = &tab;
+        }
+
+        prevTri = &tab;
+    }
+    m_LocTrisTab[255].m_NextTri = nullptr;
+    m_CloseColEntListHead = nullptr;
+    m_UnusedColEntListHead = m_ColEntCacheTab;
+
+    CPlantColEntEntry* prevEntry = nullptr;
+    for (auto& tab : m_ColEntCacheTab) {
+        tab.m_Entity = nullptr;
+        tab.m_Objects = nullptr;
+        tab.m_numTriangles = 0u;
+
+        tab.m_PrevEntry = prevEntry;
+        if (prevEntry) {
+            prevEntry->m_NextEntry = &tab;
+        }
+
+        prevEntry = &tab;
+    }
+    m_ColEntCacheTab[255].m_NextEntry = nullptr;
 
     return true;
 }

@@ -15,7 +15,7 @@ void CPlantSurfPropMgr::InjectHooks() {
 // 0x5DD6C0
 bool CPlantSurfPropMgr::Initialise() {
     m_countSurfPropsAllocated = 0;
-    std::ranges::fill(m_SurfPropPtrTab, nullptr);
+    rng::fill(m_SurfPropPtrTab, nullptr);
     for (auto& props : m_SurfPropTab) {
         rng::fill(props.m_Plants, Plant{});
     }
@@ -77,7 +77,7 @@ bool CPlantSurfPropMgr::LoadPlantsDat(const char* filename) {
                 surfaceId = g_surfaceInfos->GetSurfaceIdFromName(surfaceName);
                 if (surfaceId != SURFACE_DEFAULT) {
                     surfProperties = GetSurfProperties(surfaceId);
-                    if (surfProperties || AllocSurfProperties(surfaceId, false)) {
+                    if (surfProperties || (surfProperties = AllocSurfProperties(surfaceId, false))) {
                         field = ePlantField::NAME;
                         break;
                     }
