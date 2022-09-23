@@ -22,7 +22,7 @@ CPlantColEntEntry* CPlantColEntEntry::AddEntry(CEntity* entity) {
         return nullptr;
     }
     m_numTriangles = colData->m_nNumTriangles;
-    m_Objects = CMemoryMgr::Calloc<CPlantLocTri**>(m_numTriangles, sizeof(CPlantLocTri*)); // originally Malloc zeroed afterwards
+    m_Objects = (CPlantLocTri**)CMemoryMgr::Calloc(m_numTriangles, sizeof(CPlantLocTri*)); // originally Malloc zeroed afterwards
 
     if (m_NextEntry) {
         if (m_PrevEntry) {
