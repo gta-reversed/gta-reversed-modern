@@ -9,7 +9,6 @@ void CPPTriPlantBuffer::InjectHooks() {
     RH_ScopedClass(CPPTriPlantBuffer);
     RH_ScopedCategoryGlobal();
 
-    return;
     RH_ScopedInstall(Flush, 0x5DB0C0);
     RH_ScopedInstall(GetPPTriPlantPtr, 0x5DB140);
     RH_ScopedInstall(ChangeCurrentPlantModelsSet, 0x5DB170);
