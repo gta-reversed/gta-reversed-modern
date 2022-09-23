@@ -8,15 +8,8 @@ class CPlantLocTri;
 
 class CPlantMgr {
 public:
-    static RwTexture* (&PC_PlantTextureTab0)[4];
-    static RwTexture* (&PC_PlantTextureTab1)[4];
-    static RwTexture* (&PC_PlantTextureTab2)[4];
-    static RwTexture* (&PC_PlantTextureTab3)[4];
-
-    static RpAtomic* (&PC_PlantModelsTab0)[4];
-    static RpAtomic* (&PC_PlantModelsTab1)[4];
-    static RpAtomic* (&PC_PlantModelsTab2)[4];
-    static RpAtomic* (&PC_PlantModelsTab3)[4];
+    static inline RwTexture* (&PC_PlantTextureTab)[4][4] = *(RwTexture * (*)[4][4])0xC039A0;
+    static inline RpAtomic* (&PC_PlantModelsTab)[4][4] = *(RpAtomic * (*)[4][4])0xC039A0;
 
     static inline int16& m_scanCode = *(int16*)0xC03980;
     static inline CPlantLocTri* m_UnusedLocTriListHead = *(CPlantLocTri**)0xC03984;
@@ -64,3 +57,7 @@ private:
 
     static void IncrementScanCode() { ++m_scanCode; } // 0x5DB2D0
 };
+
+static inline RwTexture* (&grassTexturesPtr)[4] = *(RwTexture * (*)[4])0xC039E0;
+static inline RpAtomic* (&grassModelsPtr)[4] = *(RpAtomic * (*)[4])0xC03A30;
+static inline RwTexture*& tex_gras07Si = *(RwTexture**)0xC09174;

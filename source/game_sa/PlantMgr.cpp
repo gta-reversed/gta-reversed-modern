@@ -6,30 +6,69 @@
 #include "PlantSurfPropMgr.h"
 #include <extensions/enumerate.hpp>
 
-RwTexture* (&CPlantMgr::PC_PlantTextureTab0)[4] = *(RwTexture * (*)[4])0xC039A0;
-RwTexture* (&CPlantMgr::PC_PlantTextureTab1)[4] = *(RwTexture * (*)[4])0xC039B0;
-RwTexture* (&CPlantMgr::PC_PlantTextureTab2)[4] = *(RwTexture * (*)[4])0xC039C0;
-RwTexture* (&CPlantMgr::PC_PlantTextureTab3)[4] = *(RwTexture * (*)[4])0xC039D0;
+// 0x5DD100 (todo: move)
+static void AtomicCreatePrelitIfNeeded(RpAtomic* atomic) {
+    plugin::Call<0x5DD100, RpAtomic*>(atomic);
+}
 
-RpAtomic* (&CPlantMgr::PC_PlantModelsTab0)[4] = *(RpAtomic * (*)[4])0xC039F0;
-RpAtomic* (&CPlantMgr::PC_PlantModelsTab1)[4] = *(RpAtomic * (*)[4])0xC03A00;
-RpAtomic* (&CPlantMgr::PC_PlantModelsTab2)[4] = *(RpAtomic * (*)[4])0xC03A10;
-RpAtomic* (&CPlantMgr::PC_PlantModelsTab3)[4] = *(RpAtomic * (*)[4])0xC03A20;
+// 0x5DD1E0 (do not hook! it has retarded calling conv)
+static bool GeometrySetPrelitConstantColor(RpGeometry* geometry, uint32 color) {
+    if ((geometry->flags & rpGEOMETRYPRELIT) == 0) {
+        return false;
+    }
 
-RwTexture* (&grassTexturesPtr)[4] = *(RwTexture * (*)[4])0xC039E0;
-RpAtomic* (&grassModelsPtr)[4] = *(RpAtomic * (*)[4])0xC03A30;
-RwTexture*& tex_gras07Si = *(RwTexture**)0xC09174;
+    RpGeometryLock(geometry, 4095);
+    if (geometry->preLitLum) {
+        std::memset(geometry->preLitLum, CRGBA(255, 255, 255, 255).ToInt(), geometry->numVertices);
+    }
+    RpGeometryUnlock(geometry);
+
+    return true;
+}
 
 // 0x5DD220
 static bool LoadModels(std::initializer_list<const char*> models, RpAtomic* (&atomics)[4]) {
-    return plugin::CallAndReturn<bool, 0x5DD220, std::initializer_list<const char*>, RpAtomic*(&)[4]>(models, atomics);
+    for (auto& model : models) {
+        auto stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, std::format("models\\grass\\{}", model).c_str());
+        RpClump* clump = nullptr;
+
+        if (stream && RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr)) {
+            clump = RpClumpStreamRead(stream);
+        }
+        RwStreamClose(stream, nullptr);
+        assert(clump);
+
+        auto firstAtomic = GetFirstAtomic(clump);
+        SetFilterModeOnAtomicsTextures(firstAtomic, rwFILTERMIPLINEAR);
+        AtomicCreatePrelitIfNeeded(firstAtomic);
+
+        auto geometry = firstAtomic->geometry;
+        RpGeometryLock(geometry, 4095); // todo: enum?
+        geometry->flags = (geometry->flags & 0xFFFFFF8F) | rpGEOMETRYMODULATEMATERIALCOLOR;
+        RpGeometryUnlock(geometry);
+        GeometrySetPrelitConstantColor(geometry, CRGBA(255, 255, 255, 255).ToInt());
+
+        auto data = 0x32000000;
+        RpGeometryForAllMaterials(geometry, [](RpMaterial* material, void* data) {
+            material->color = *(RwRGBA*)data;
+            RpMaterialSetTexture(material, tex_gras07Si);
+            return material;
+        }, &data);
+
+        auto atomicCopy = RpAtomicClone(firstAtomic);
+        RpClumpDestroy(clump);
+        SetFilterModeOnAtomicsTextures(atomicCopy, rwFILTERLINEAR);
+        RpAtomicSetFrame(atomicCopy, RwFrameCreate());
+    }
+
+    return true;
 }
 
 void CPlantMgr::InjectHooks() {
     RH_ScopedClass(CPlantMgr);
     RH_ScopedCategory("Plant");
 
-    RH_ScopedInstall(Initialise, 0x5DD910, {.reversed = false});
+    RH_ScopedInstall(Initialise, 0x5DD910, {.reversed = true});
     RH_ScopedInstall(Shutdown, 0x5DB940);
     RH_ScopedInstall(ReloadConfig, 0x5DD780, {.reversed = false});
     RH_ScopedInstall(MoveLocTriToList, 0x5DB590, {.reversed = false});
@@ -44,7 +83,7 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedInstall(_ProcessEntryCollisionDataSections, 0x5DCD80, {.reversed = false});
     RH_ScopedInstall(_UpdateLocTris, 0x5DCF00, {.reversed = false});
 
-    RH_ScopedGlobalInstall(LoadModels, 0x5DD220, {.reversed = false});
+    RH_ScopedGlobalInstall(LoadModels, 0x5DD220, {.reversed = true});
 
     // debug shit, all of them just return true.
     // addresses (probably not in order): 0x5DB550 - 0x5DB580
@@ -57,8 +96,6 @@ void CPlantMgr::InjectHooks() {
 
 // 0x5DD910
 bool CPlantMgr::Initialise() {
-    return plugin::CallAndReturn<bool, 0x5DD910>();
-
     if (!ReloadConfig())
         return false;
 
@@ -74,36 +111,30 @@ bool CPlantMgr::Initialise() {
         auto texture = RwTextureRead(name, nullptr);
         RwTextureSetAddressing(texture, rwTEXTUREADDRESSWRAP);
         RwTextureSetFilterMode(texture, rwFILTERLINEAR);
-        return  texture;
+        return texture;
     };
 
-    for (auto&& [i, tex] : notsa::enumerate(PC_PlantTextureTab0)) {
-        tex = ReadTexture(std::format("txgrass0_{}", i).c_str());
+    for (auto&& [i, tab] : notsa::enumerate(PC_PlantTextureTab | rng::views::take(2))) {
+        for (auto&& [j, tex] : notsa::enumerate(tab)) {
+            tex = ReadTexture(std::format("txgrass{}_{}", i, j).c_str());
+        }
     }
-
-    for (auto&& [i, tex] : notsa::enumerate(PC_PlantTextureTab1)) {
-        tex = ReadTexture(std::format("txgrass1_{}", i).c_str());
-    }
-
     tex_gras07Si = ReadTexture("gras07Si");
     CTxdStore::PopCurrentTxd();
     CStreaming::IHaveUsedStreamingMemory();
 
-    grassTexturesPtr[0] = grassTexturesPtr[2] = * PC_PlantTextureTab0;
-    grassTexturesPtr[1] = grassTexturesPtr[3] = * PC_PlantTextureTab1;
+    grassTexturesPtr[0] = grassTexturesPtr[2] = *PC_PlantTextureTab[0];
+    grassTexturesPtr[1] = grassTexturesPtr[3] = *PC_PlantTextureTab[1];
 
     const auto models1 = { "grass0_1.dff", "grass0_2.dff", "grass0_3.dff", "grass0_4.dff" };
     const auto models2 = { "grass1_1.dff", "grass1_2.dff", "grass1_3.dff", "grass1_4.dff" };
-    if (LoadModels(models1, PC_PlantModelsTab0) && LoadModels(models2, PC_PlantModelsTab1)) {
-        grassModelsPtr[0] = *PC_PlantModelsTab0;
-        grassModelsPtr[1] = *PC_PlantModelsTab1;
-        grassModelsPtr[2] = *PC_PlantModelsTab0;
-        grassModelsPtr[3] = *PC_PlantModelsTab1;
+    if (LoadModels(models1, PC_PlantModelsTab[0]) && LoadModels(models2, PC_PlantModelsTab[1])) {
+        grassModelsPtr[0] = grassModelsPtr[2] = *PC_PlantModelsTab[0];
+        grassModelsPtr[1] = grassModelsPtr[3] = *PC_PlantModelsTab[1];
 
-        CGrassRenderer::SetPlantModelsTab(0, PC_PlantModelsTab0);
-        CGrassRenderer::SetPlantModelsTab(1, PC_PlantModelsTab0); // grassModelsPtr[0] ?
-        CGrassRenderer::SetPlantModelsTab(2, PC_PlantModelsTab0); // grassModelsPtr[0] ?
-        CGrassRenderer::SetPlantModelsTab(3, PC_PlantModelsTab0); // grassModelsPtr[0] ?
+        for (auto i = 0u; i < 4u; i++) {
+            CGrassRenderer::SetPlantModelsTab(i, PC_PlantModelsTab[0]); // grassModelsPtr[0]
+        }
 
         CGrassRenderer::SetCloseFarAlphaDist(3.0f, 60.0f);
         return true;
@@ -130,10 +161,6 @@ void CPlantMgr::Shutdown() {
             }
         }
     };
-    DestroyAtomics(PC_PlantModelsTab0);
-    DestroyAtomics(PC_PlantModelsTab1);
-    DestroyAtomics(PC_PlantModelsTab2);
-    DestroyAtomics(PC_PlantModelsTab3);
 
     const auto DestroyTextures = [](auto& textures) {
         for (auto texture : textures) {
@@ -143,10 +170,11 @@ void CPlantMgr::Shutdown() {
             }
         }
     };
-    DestroyTextures(PC_PlantTextureTab0);
-    DestroyTextures(PC_PlantTextureTab1);
-    DestroyTextures(PC_PlantTextureTab2);
-    DestroyTextures(PC_PlantTextureTab3);
+
+    for (auto i = 0u; i < 4u; i++) {
+        DestroyAtomics(PC_PlantModelsTab[i]);
+        DestroyTextures(PC_PlantTextureTab[i]);
+    }
 
     CTxdStore::SafeRemoveTxdSlot("grass_pc");
 }
@@ -200,9 +228,9 @@ void CPlantMgr::Update(const CVector& cameraPosition) {
 
 // 0x5DB310
 void CPlantMgr::UpdateAmbientColor() {
-    auto r = 64 - (uint32)(CTimeCycle::GetAmbientRed()   * 2.5f * -255.0f);
-    auto g = 64 - (uint32)(CTimeCycle::GetAmbientGreen() * 2.5f * -255.0f);
-    auto b = 64 - (uint32)(CTimeCycle::GetAmbientBlue()  * 2.5f * -255.0f);
+    auto r = 64 + (uint32)(CTimeCycle::GetAmbientRed()   * 2.5f * 255.0f);
+    auto g = 64 + (uint32)(CTimeCycle::GetAmbientGreen() * 2.5f * 255.0f);
+    auto b = 64 + (uint32)(CTimeCycle::GetAmbientBlue()  * 2.5f * 255.0f);
     m_AmbientColor.r = (uint8)std::max(r, 255u);
     m_AmbientColor.g = (uint8)std::max(g, 255u);
     m_AmbientColor.b = (uint8)std::max(b, 255u);
