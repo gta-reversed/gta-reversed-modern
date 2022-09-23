@@ -33,7 +33,7 @@ public:
 
     static void Update(const CVector& cameraPosition);
     static void UpdateAmbientColor();
-    static void PreUpdateOnceForNewCameraPos(const CVector&);
+    static void PreUpdateOnceForNewCameraPos(const CVector& posn);
     static float CalculateWindBending();
 
     static void Render();
