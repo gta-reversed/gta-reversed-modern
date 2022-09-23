@@ -15,7 +15,7 @@ void ProcObjectMan_c::InjectHooks() {
     RH_ScopedInstall(LoadDataFile, 0x5A3140);
     RH_ScopedInstall(GetEntityFromPool, 0x5A3120);
     RH_ScopedInstall(ReturnEntityToPool, 0x5A3130);
-    RH_ScopedInstall(ProcessTriangleAdded, 0x5A3F20, {.reversed = false});
+    RH_ScopedInstall(ProcessTriangleAdded, 0x5A3F20);
     RH_ScopedInstall(ProcessTriangleRemoved, 0x5A3F70, {.reversed = false});
 }
 
@@ -102,11 +102,9 @@ void ProcObjectMan_c::ReturnEntityToPool(ListItem_c* item) { // todo: EntityItem
 
 // 0x5A3F20
 int32 ProcObjectMan_c::ProcessTriangleAdded(CPlantLocTri* plant) {
-    // return plugin::CallMethodAndReturn<int32, 0x5A3F20, ProcObjectMan_c*, CPlantLocTri*>(this, plant);
-
-    uint8 count = 0;
+    auto count = 0;
     for (auto& info : std::span{ m_ProcObjSurfaceInfos, (size_t)m_numProcSurfaceInfos}) {
-        if (m_ProcObjSurfaceInfos->m_SurfaceId == plant->m_SurfaceId) {
+        if (info.m_SurfaceId == plant->m_SurfaceId) {
             count += info.AddObjects(plant);
         }
     }
