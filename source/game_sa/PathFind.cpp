@@ -68,7 +68,7 @@ void CPathFind::InjectHooks() {
     //RH_ScopedInstall(SwitchRoadsOffInAreaForOneRegion, 0x452820);
     //RH_ScopedInstall(ComputeRoute, 0x452760);
     //RH_ScopedInstall(CompleteNewInterior, 0x452270);
-    //RH_ScopedInstall(SwitchOffNodeAndNeighbours, 0x452160);
+    RH_ScopedInstall(SwitchOffNodeAndNeighbours, 0x452160);
     //RH_ScopedInstall(Find2NodesForCarCreation, 0x452090);
     //RH_ScopedInstall(TestCoorsCloseness, 0x452000);
     //RH_ScopedInstall(FindNextNodeWandering, 0x451B70);
@@ -826,8 +826,54 @@ bool CPathFind::ThisNodeHasToBeSwitchedOff(CPathNode* node) {
 }
 
 // 0x4504F0
+// This function is only called from `SwitchOffNodeAndNeighbours` but when unhooked
+// it doesn't spoil `eax` which makes the former crash
+// so hopefully the `__asm mov eax, this` fixes it
+// If not just lock both :D
 size_t CPathFind::CountNeighboursToBeSwitchedOff(const CPathNode& node) {
-    return (size_t)rng::count_if(GetNodeLinkedNodes(node), &CPathNode::DoesThisNodeHasToBeSwitchedOff);
+    const auto ret = (size_t)rng::count_if(GetNodeLinkedNodes(node), &CPathNode::HasToBeSwitchedOff);
+    __asm mov eax, this // It has to be `this`
+    return ret;
+}
+
+// 0x452160
+void CPathFind::SwitchOffNodeAndNeighbours(CPathNode* node, CPathNode*& outNext1, CPathNode** outNext2, bool isOnDeadEnd, bool setIsDeadEndToOriginal) {
+    const auto isNodeOnDeadEnd = setIsDeadEndToOriginal
+        ? node->m_isOriginallyOnDeadEnd
+        : isOnDeadEnd;
+    node->m_onDeadEnd = isNodeOnDeadEnd;
+   
+    outNext1 = nullptr;
+    if (outNext2) {
+        *outNext2 = nullptr;
+    }
+
+    if (CountNeighboursToBeSwitchedOff(*node) > 2) {
+        return;
+    }
+
+    for (auto& linked : GetNodeLinkedNodes(*node)) {
+        if (!linked.HasToBeSwitchedOff()) {
+            continue;
+        }
+        if (linked.m_onDeadEnd == isNodeOnDeadEnd) {
+            continue;
+        }
+        if (CountNeighboursToBeSwitchedOff(*node) > 2) {
+            continue;
+        }
+        if (!outNext1) {
+            outNext1 = &linked;
+        }
+#ifdef FIX_BUGS // Above it was checked whenever it's set so I assume this was a bug
+        else if (outNext2) // Don't get confused, `outNext2` is a ptr to a ptr
+#else
+        else
+#endif
+        {
+            *outNext2 = &linked;
+        }
+    }
 }
 
 // 0x44DF30
