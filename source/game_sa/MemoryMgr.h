@@ -199,6 +199,20 @@ public:
     static void* MoveMemory(void* memory);
     static void* MoveMemory(void* memory, void** a2, int32 a3);
 
+    // NOTSA
+    template<typename T>
+    static T Malloc(size_t size) {
+        return static_cast<T>(Malloc(size));
+    }
+    template<typename T>
+    static T MallocAlign(size_t size, uint32 align) {
+        return static_cast<T>(MallocAlign(size, align));
+    }
+    template<typename T>
+    static T Calloc(size_t num, size_t size) {
+        return static_cast<T>(Calloc(num, size));
+    }
+
 protected:
     /**
      * debug stuff

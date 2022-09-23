@@ -171,16 +171,11 @@ void CGrassRenderer::SetGlobalWindBending(float bending) {
     m_windBending = bending;
 }
 
-void CGrassRenderer::sub_5DAB00(CVector& outPosn, const CVector& v1, const CVector& v2, const CVector& v3, float randA, float randB) {
-    float f1 = randA;
-    float f2 = randB;
-    if (randA + randB > 1.0f) {
-        f1 = 1.0f - f1;
-        f2 = 1.0f - f2;
+// Chooses a point inside the triangle (v1,v2,v3) with specific step values
+void CGrassRenderer::sub_5DAB00(CVector& outPosn, const CVector& v1, const CVector& v2, const CVector& v3, float stepA, float stepB) {
+    if (stepA + stepB > 1.0f) {
+        stepA = 1.0f - stepA;
+        stepB = 1.0f - stepB;
     }
-    float inv = 1.0f - f1 - f2;
-
-    outPosn = inv *
-                  v1 + f1 *
-                  v2 + f2 * v3;
+    outPosn = (1.0f - stepA - stepB) * v1 + stepA * v2 + stepB * v3;
 }

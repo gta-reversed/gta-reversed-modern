@@ -1,4 +1,5 @@
 #pragma once
+#include "StdInc.h"
 
 class CEntity;
 class CPlantLocTri;
@@ -12,6 +13,8 @@ public:
     CPlantColEntEntry* m_PrevEntry;
 
 public:
+    static void InjectHooks();
+
     CPlantColEntEntry* AddEntry(CEntity* entity);
     void ReleaseEntry();
 };

@@ -119,6 +119,7 @@
 #include "PPTriPlantBuffer.h"
 #include "ProcObjectMan.h"
 #include "ProcSurfaceInfo.h"
+#include "PlantColEntEntry.h"
 
 // Tasks
 #include "EntitySeekPosCalculator.h"
@@ -538,6 +539,7 @@ void InjectHooksMain() {
     CSprite::InjectHooks();
     CPlaneTrail::InjectHooks();
     CPlaneTrails::InjectHooks();
+    CPlantColEntEntry::InjectHooks();
 
     CCustomBuildingPipeline::InjectHooks();
     CCustomBuildingRenderer::InjectHooks();

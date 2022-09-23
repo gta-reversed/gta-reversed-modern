@@ -189,6 +189,7 @@ public:
 
     // NOTSA
     CBaseModelInfo* GetModelInfo() const;
+    CCollisionData* GetColData() { return GetColModel()->m_pColData; }
 
     // Wrapper around the mess called `CleanUpOldReference`
     // Takes in `ref` (which is usually a member variable),
