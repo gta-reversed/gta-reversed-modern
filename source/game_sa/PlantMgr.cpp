@@ -84,7 +84,7 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedInstall(_ColEntityCache_Remove, 0x5DBEF0, {.reversed = false});
     RH_ScopedInstall(_ColEntityCache_Update, 0x5DC510, {.reversed = false});
     RH_ScopedInstall(_ProcessEntryCollisionDataSections, 0x5DCD80, {.reversed = false});
-    RH_ScopedInstall(_UpdateLocTris, 0x5DCF00, {.reversed = false});
+    RH_ScopedInstall(_UpdateLocTris, 0x5DCF00, {.reversed = true});
 
     RH_ScopedGlobalInstall(LoadModels, 0x5DD220);
 
@@ -304,8 +304,19 @@ void CPlantMgr::Render() {
 }
 
 // 0x5DBEB0
-void CPlantMgr::_ColEntityCache_Add(CEntity* entity, bool a2) {
-    plugin::Call<0x5DBEB0, CEntity*>(entity, a2);
+void CPlantMgr::_ColEntityCache_Add(CEntity* entity, bool checkAlreadyExists) {
+    //plugin::Call<0x5DBEB0, CEntity*>(entity, checkAlreadyExists);
+    if (checkAlreadyExists && CPlantMgr::m_CloseColEntListHead) {
+        for (auto i = CPlantMgr ::m_CloseColEntListHead; i; i = i->m_NextEntry) {
+            if (i->m_Entity == entity) {
+                return;
+            }
+        }
+    }
+
+    if (auto head = CPlantMgr::m_UnusedColEntListHead) {
+        head->AddEntry(entity);
+    }
 }
 
 // 0x5DB530
