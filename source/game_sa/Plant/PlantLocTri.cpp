@@ -40,7 +40,7 @@ void CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, 
 
     m_SphereRadius = DistanceBetweenPoints(m_Center, m_V1) * 1.75f;
     if (m_createsObjects && !m_createsPlants) {
-        CPlantMgr::MoveLocTriToList(&CPlantMgr::m_UnusedLocTriListHead, &CPlantMgr::m_CloseLocTriListHead[3], this);
+        CPlantMgr::MoveLocTriToList(CPlantMgr::m_UnusedLocTriListHead, CPlantMgr::m_CloseLocTriListHead[3], this);
         return;
     }
 
@@ -54,7 +54,7 @@ void CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, 
         m_nMaxNumPlants[0] = density1;
         m_nMaxNumPlants[1] = density2;
         m_nMaxNumPlants[2] = density3;
-        CPlantMgr::MoveLocTriToList(&CPlantMgr::m_UnusedLocTriListHead, &CPlantMgr::m_CloseLocTriListHead[properties->m_SlotId], this);
+        CPlantMgr::MoveLocTriToList(CPlantMgr::m_UnusedLocTriListHead, CPlantMgr::m_CloseLocTriListHead[properties->m_SlotId], this);
         return;
     }
 
@@ -62,7 +62,7 @@ void CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, 
         // m_nFlags = m_nFlags & 0xFE;
         m_createsObjects = false;
 
-        CPlantMgr::MoveLocTriToList(&CPlantMgr::m_UnusedLocTriListHead, &CPlantMgr::m_CloseLocTriListHead[3], this);
+        CPlantMgr::MoveLocTriToList(CPlantMgr::m_UnusedLocTriListHead, CPlantMgr::m_CloseLocTriListHead[3], this);
     }
 }
 

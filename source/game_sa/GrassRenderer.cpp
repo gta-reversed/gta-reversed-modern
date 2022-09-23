@@ -80,7 +80,7 @@ void CGrassRenderer::DrawTriPlants(PPTriPlant* triPlants, int32 numTriPlants, Rp
 
         const auto atomic = plantModelsTab[plant.model_id];
         auto frame = RpAtomicGetFrame(atomic);
-        srand(plant.seed);
+        srand((uint32)plant.seed);
 
         RwRGBA newColorIntensity{};
         if (nearDist >= farDist) {

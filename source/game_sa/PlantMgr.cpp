@@ -3,6 +3,7 @@
 #include "PlantMgr.h"
 #include "GrassRenderer.h"
 #include "PlantColEntEntry.h"
+#include "PlantLocTri.h"
 #include "PlantSurfPropMgr.h"
 #include <extensions/enumerate.hpp>
 
@@ -68,10 +69,10 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedClass(CPlantMgr);
     RH_ScopedCategory("Plant");
 
-    RH_ScopedInstall(Initialise, 0x5DD910, {.reversed = true});
+    RH_ScopedInstall(Initialise, 0x5DD910);
     RH_ScopedInstall(Shutdown, 0x5DB940);
     RH_ScopedInstall(ReloadConfig, 0x5DD780, {.reversed = false});
-    RH_ScopedInstall(MoveLocTriToList, 0x5DB590, {.reversed = false});
+    RH_ScopedInstall(MoveLocTriToList, 0x5DB590);
     RH_ScopedInstall(SetPlantFriendlyFlagInAtomicMI, 0x5DB650, {.reversed = false});
     RH_ScopedInstall(Update, 0x5DCFA0, {.reversed = false});
     RH_ScopedInstall(UpdateAmbientColor, 0x5DB310);
@@ -196,8 +197,26 @@ bool CPlantMgr::ReloadConfig() {
 }
 
 // 0x5DB590
-void CPlantMgr::MoveLocTriToList(CPlantLocTri** a1, CPlantLocTri** a2, CPlantLocTri* a3) {
-    plugin::Call<0x5DB590, CPlantLocTri**, CPlantLocTri**, CPlantLocTri*>(a1, a2, a3);
+void CPlantMgr::MoveLocTriToList(CPlantLocTri*& oldList, CPlantLocTri*& newList, CPlantLocTri* triangle) {
+    if (auto next = triangle->m_NextTri) {
+        if (auto prev = triangle->m_PrevTri) {
+            prev->m_NextTri = next;
+            next->m_PrevTri = prev;
+        } else {
+            next->m_PrevTri = nullptr;
+        }
+    } else {
+        if (oldList = triangle->m_PrevTri) {
+            oldList->m_NextTri = nullptr;
+        }
+    }
+    triangle->m_PrevTri = newList;
+    triangle->m_NextTri = nullptr;
+    newList = triangle;
+
+    if (auto prev = triangle->m_PrevTri) {
+        prev->m_NextTri = triangle;
+    }
 }
 
 // 0x5DB650
