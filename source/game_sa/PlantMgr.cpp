@@ -150,7 +150,7 @@ void CPlantMgr::Shutdown() {
     }
 
     const auto DestroyAtomics = [](auto& atomics) {
-        for (auto atomic : atomics) {
+        for (auto& atomic : atomics) {
             if (atomic) {
                 if (auto frame = RpAtomicGetFrame(atomic)) {
                     RpAtomicSetFrame(atomic, nullptr);
@@ -163,7 +163,7 @@ void CPlantMgr::Shutdown() {
     };
 
     const auto DestroyTextures = [](auto& textures) {
-        for (auto texture : textures) {
+        for (auto& texture : textures) {
             if (texture) {
                 RwTextureDestroy(texture);
                 texture = nullptr;
