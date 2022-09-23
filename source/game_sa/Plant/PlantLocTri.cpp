@@ -50,7 +50,7 @@ void CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, 
     auto density2 = (uint16)(densityMult * properties->m_Plants[1].density);
     auto density3 = (uint16)(densityMult * properties->m_Plants[2].density);
     if (density1 + density2 + density3 > 0) {
-        m_Seed = CVector::Random(0.0f, 1.0f);
+        rng::generate(m_Seed, [] { return CGeneral::GetRandomNumberInRange(0.0f, 1.0f); });
         m_nMaxNumPlants[0] = density1;
         m_nMaxNumPlants[1] = density2;
         m_nMaxNumPlants[2] = density3;

@@ -9,7 +9,7 @@ public:
     CVector m_V3;
     CVector m_Center;
     float m_SphereRadius;
-    CVector m_Seed; // todo: float m_Seed[3];
+    std::array<float, 3> m_Seed;
     uint16 m_nMaxNumPlants[3];
     uint8 m_SurfaceId;
     uint8 m_nLighting;

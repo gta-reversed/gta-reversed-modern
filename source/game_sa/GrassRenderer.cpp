@@ -121,15 +121,15 @@ void CGrassRenderer::DrawTriPlants(PPTriPlant* triPlants, int32 numTriPlants, Rp
             RwFrameTranslate(frame, &posn, rwCOMBINEREPLACE);
 
             const auto xy = (float)rand() * RAND_MAX_FLOAT_RECIPROCAL * plant.scale_var_xy + plant.scale.x;
-            frame->modelling.right.x *= xy;
-            frame->modelling.up.y *= xy;
+            RwFrameGetMatrix(frame)->right.x *= xy;
+            RwFrameGetMatrix(frame)->up.y *= xy;
 
             const auto xy1 = ((float)rand() * RAND_MAX_FLOAT_RECIPROCAL * plant.wind_bend_var + 1.0f) * (m_windBending * plant.wind_bend_scale);
-            frame->modelling.at.x = xy1;
-            frame->modelling.at.y = xy1;
-            frame->modelling.at.z = ((float)rand() * RAND_MAX_FLOAT_RECIPROCAL * plant.scale_var_z + plant.scale.y) * frame->modelling.at.z;
+            RwFrameGetMatrix(frame)->at.x = xy1;
+            RwFrameGetMatrix(frame)->at.y = xy1;
+            RwFrameGetMatrix(frame)->at.z = ((float)rand() * RAND_MAX_FLOAT_RECIPROCAL * plant.scale_var_z + plant.scale.y) * RwFrameGetMatrix(frame)->at.z;
 
-            RwMatrixUpdate(&frame->modelling);
+            RwMatrixUpdate(RwFrameGetMatrix(frame));
             atomic->renderCallBack(atomic);
         }
     }
