@@ -18,18 +18,21 @@ RxObjSpace3DVertex* CBoat::aRenderVertices = (RxObjSpace3DVertex*)0xC278F8;
 RxVertexIndex* CBoat::auRenderIndices = (RxVertexIndex*)0xC27988;
 
 void CBoat::InjectHooks() {
-    RH_ScopedClass(CBoat);
+    RH_ScopedVirtualClass(CBoat, 0x8721a0, 66);
     RH_ScopedCategory("Vehicle");
 
-    RH_ScopedVirtualInstall(SetModelIndex, 0x6F1140);
-    RH_ScopedVirtualInstall(ProcessControl, 0x6F1770);
-    RH_ScopedVirtualInstall(Teleport, 0x6F20E0);
-    RH_ScopedVirtualInstall(PreRender, 0x6F1180);
-    RH_ScopedVirtualInstall(Render, 0x6F0210);
-    RH_ScopedVirtualInstall(ProcessControlInputs, 0x6F0A10);
-    RH_ScopedVirtualInstall(GetComponentWorldPosition, 0x6F01D0);
-    RH_ScopedVirtualInstall(ProcessOpenDoor, 0x6F0190);
-    RH_ScopedVirtualInstall(BlowUpCar, 0x6F21B0);
+    RH_ScopedInstall(Constructor, 0x6F2940);
+    RH_ScopedInstall(Destructor, 0x6F00F0);
+
+    RH_ScopedVMTInstall(SetModelIndex, 0x6F1140);
+    RH_ScopedVMTInstall(ProcessControl, 0x6F1770);
+    RH_ScopedVMTInstall(Teleport, 0x6F20E0);
+    RH_ScopedVMTInstall(PreRender, 0x6F1180);
+    RH_ScopedVMTInstall(Render, 0x6F0210);
+    RH_ScopedVMTInstall(ProcessControlInputs, 0x6F0A10);
+    RH_ScopedVMTInstall(GetComponentWorldPosition, 0x6F01D0);
+    RH_ScopedVMTInstall(ProcessOpenDoor, 0x6F0190);
+    RH_ScopedVMTInstall(BlowUpCar, 0x6F21B0);
     RH_ScopedInstall(PruneWakeTrail, 0x6F0E20);
     RH_ScopedInstall(AddWakePoint, 0x6F2550);
     RH_ScopedInstall(SetupModelNodes, 0x6F01A0);

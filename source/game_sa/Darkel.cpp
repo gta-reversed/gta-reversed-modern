@@ -17,22 +17,22 @@ void CDarkel::InjectHooks() {
 
     RH_ScopedInstall(FrenzyOnGoing, 0x43D1F0);
     RH_ScopedInstall(Init, 0x43CEB0);
-//    RH_ScopedInstall(DrawMessages, 0x43CEC0);
+    RH_ScopedInstall(DrawMessages, 0x43CEC0, { .reversed = false });
     RH_ScopedInstall(ReadStatus, 0x43D1E0);
-//    RH_ScopedInstall(RegisterKillNotByPlayer, 0x43D210);
-//    RH_ScopedInstall(ThisPedShouldBeKilledForFrenzy, 0x43D2F0);
-//    RH_ScopedInstall(ThisVehicleShouldBeKilledForFrenzy, 0x0);
-//    RH_ScopedInstall(StartFrenzy, 0x43D3B0);
-//    RH_ScopedInstall(ResetModelsKilledByPlayer, 0x43D6A0);
-//    RH_ScopedInstall(QueryModelsKilledByPlayer, 0x0);
-//    RH_ScopedInstall(FindTotalPedsKilledByPlayer, 0x0);
-//    RH_ScopedInstall(DealWithWeaponChangeAtEndOfFrenzy, 0x43D7A0);
+    RH_ScopedInstall(RegisterKillNotByPlayer, 0x43D210, { .reversed = false });
+    RH_ScopedInstall(ThisPedShouldBeKilledForFrenzy, 0x43D2F0, { .reversed = false });
+    //RH_ScopedInstall(ThisVehicleShouldBeKilledForFrenzy, 0x0, { .reversed = false });
+    RH_ScopedInstall(StartFrenzy, 0x43D3B0, { .reversed = false });
+    RH_ScopedInstall(ResetModelsKilledByPlayer, 0x43D6A0, { .reversed = false });
+    //RH_ScopedInstall(QueryModelsKilledByPlayer, 0x0, { .reversed = false });
+    //RH_ScopedInstall(FindTotalPedsKilledByPlayer, 0x0, { .reversed = false });
+    RH_ScopedInstall(DealWithWeaponChangeAtEndOfFrenzy, 0x43D7A0, { .reversed = false });
     RH_ScopedInstall(CheckDamagedWeaponType, 0x43D9E0);
-//    RH_ScopedInstall(Update, 0x43DAC0);
+    RH_ScopedInstall(Update, 0x43DAC0, { .reversed = false });
     RH_ScopedInstall(ResetOnPlayerDeath, 0x43DC10);
     RH_ScopedInstall(FailKillFrenzy, 0x43DC60);
-//    RH_ScopedInstall(RegisterKillByPlayer, 0x43DCD0);
-//    RH_ScopedInstall(RegisterCarBlownUpByPlayer, 0x43DF20);
+    RH_ScopedInstall(RegisterKillByPlayer, 0x43DCD0, { .reversed = false });
+    RH_ScopedInstall(RegisterCarBlownUpByPlayer, 0x43DF20, { .reversed = false });
 }
 
 // 0x43CEB0

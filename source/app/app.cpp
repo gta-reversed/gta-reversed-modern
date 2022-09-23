@@ -2,6 +2,10 @@
 
 #include "app.h"
 #include "platform.h"
+#include "Shadows.h"
+#include "PlantMgr.h"
+#include "MovingThings.h"
+#include "BreakManager_c.h"
 #include "RealTimeShadowManager.h"
 #include "Credits.h"
 #include "Clouds.h"
@@ -46,6 +50,92 @@ bool DoRWStuffStartOfFrame_Horizon(int16 TopRed, int16 TopGreen, int16 TopBlue, 
 void RenderEffects() {
     plugin::Call<0x53E170>();
 }
+
+
+// 0x53DF40
+void RenderScene() {
+    bool underWater = CWeather::UnderWaterness <= 0.0f;
+
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
+
+    if (CMirrors::TypeOfMirror == MIRROR_TYPE_0) {
+        CMovingThings::Render_BeforeClouds();
+        CClouds::Render();
+    }
+
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE, RWRSTATE(rwSHADEMODEGOURAUD));
+
+    CCarFXRenderer::PreRenderUpdate();
+    CRenderer::RenderRoads();
+    CCoronas::RenderReflections();
+    CRenderer::RenderEverythingBarRoads();
+    g_breakMan.Render(false);
+
+    CRenderer::RenderFadingInUnderwaterEntities();
+
+    // If under water render this immediately, otherwise 
+    // only after rendering the stuff below.
+    if (underWater) {
+        RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
+        CWaterLevel::RenderWater();
+        RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLBACK));
+    }
+
+    CRenderer::RenderFadingInEntities();
+    if (!CMirrors::bRenderingReflection) {
+        float nearClipPlaneOld = RwCameraGetNearClipPlane(Scene.m_pRwCamera);
+        float farPlane = RwCameraGetFarClipPlane(Scene.m_pRwCamera);
+
+        float v3;
+        float z = CCamera::GetActiveCamera().m_vecFront.z;
+        if (z <= 0.0f)
+            v3 = -z;
+        else
+            v3 = 0.0f;
+
+        constexpr float flt_8CD4F0 = 2.0f;
+        constexpr float flt_8CD4EC = 5.9604645e-8f; // Same as 1 / (float)(1 << 24) => 1 / 16777216.f ; Not sure if that means anything..
+
+        float unknown = ((flt_8CD4F0 * flt_8CD4EC * 0.25f - flt_8CD4F0 * flt_8CD4EC) * v3 + flt_8CD4F0 * flt_8CD4EC) * (farPlane - nearClipPlaneOld);
+
+        RwCameraEndUpdate(Scene.m_pRwCamera);
+
+        RwCameraSetNearClipPlane(Scene.m_pRwCamera, unknown + nearClipPlaneOld);
+        RwCameraBeginUpdate(Scene.m_pRwCamera);
+        CShadows::UpdateStaticShadows();
+        CShadows::RenderStaticShadows();
+        CShadows::RenderStoredShadows();
+        RwCameraEndUpdate(Scene.m_pRwCamera);
+        RwCameraSetNearClipPlane(Scene.m_pRwCamera, nearClipPlaneOld);
+
+        RwCameraBeginUpdate(Scene.m_pRwCamera);
+    }
+
+    g_breakMan.Render(true);
+    CPlantMgr::Render();
+
+    RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
+
+    if (CMirrors::TypeOfMirror == MIRROR_TYPE_0) {
+        CClouds::RenderBottomFromHeight();
+        CWeather::RenderRainStreaks();
+        CCoronas::RenderSunReflection();
+    }
+
+    if (!underWater) {
+        RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
+        CWaterLevel::RenderWater();
+        RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLBACK));
+    }
+
+    gRenderStencil();
+}
+
 
 // 0x53E920
 void Idle(void* param) {

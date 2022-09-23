@@ -11,7 +11,7 @@ public:
     bool   m_affectsDeadPeds;
 
 public:
-    CEventScriptCommand(int32 primaryTaskIndex, CTask* task, bool affectsDeadPeds);
+    CEventScriptCommand(int32 primaryTaskIndex, CTask* task, bool affectsDeadPeds = false);
     ~CEventScriptCommand() override;
 
     eEventType GetEventType() const override { return EVENT_SCRIPT_COMMAND; }

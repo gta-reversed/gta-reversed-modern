@@ -14,82 +14,79 @@ void CBike::InjectHooks() {
     RH_ScopedClass(CBike);
     RH_ScopedCategory("Vehicle");
 
-    // RH_ScopedInstall(Constructor, 0x6BF430);
+    RH_ScopedInstall(Constructor, 0x6BF430);
     RH_ScopedInstall(Destructor, 0x6B57A0);
     RH_ScopedInstall(dmgDrawCarCollidingParticles, 0x6B5A00);
-    // RH_ScopedInstall(DamageKnockOffRider, 0x6B5A10);
+    RH_ScopedInstall(DamageKnockOffRider, 0x6B5A10, { .reversed = false });
     RH_ScopedInstall(KnockOffRider, 0x6B5F40);
-    // RH_ScopedInstall(SetRemoveAnimFlags, 0x6B5F50);
+    RH_ScopedInstall(SetRemoveAnimFlags, 0x6B5F50, { .reversed = false });
     RH_ScopedInstall(ReduceHornCounter, 0x6B5F90);
-    // RH_ScopedInstall(ProcessAI, 0x6BC930);
+    RH_ScopedInstall(ProcessAI, 0x6BC930, { .reversed = false });
     RH_ScopedInstall(ProcessBuoyancy, 0x6B5FB0);
-    // RH_ScopedInstall(ResetSuspension, 0x6B6740);
+    RH_ScopedInstall(ResetSuspension, 0x6B6740, { .reversed = false });
     RH_ScopedInstall(GetAllWheelsOffGround, 0x6B6790);
     RH_ScopedInstall(DebugCode, 0x6B67A0);
-    // RH_ScopedInstall(DoSoftGroundResistance, 0x6B6D40);
+    RH_ScopedInstall(DoSoftGroundResistance, 0x6B6D40, { .reversed = false });
     RH_ScopedInstall(PlayHornIfNecessary, 0x6B7130);
     RH_ScopedInstall(CalculateLeanMatrix, 0x6B7150);
-    // RH_ScopedInstall(ProcessRiderAnims, 0x6B7280);
-    // RH_ScopedInstall(FixHandsToBars, 0x6B7F90);
-    // RH_ScopedInstall(PlaceOnRoadProperly, 0x6BEEB0);
-    // RH_ScopedInstall(GetCorrectedWorldDoorPosition, 0x6BF230);
+    RH_ScopedInstall(ProcessRiderAnims, 0x6B7280, { .reversed = false });
+    RH_ScopedInstall(FixHandsToBars, 0x6B7F90, { .reversed = false });
+    RH_ScopedInstall(PlaceOnRoadProperly, 0x6BEEB0, { .reversed = false });
+    RH_ScopedInstall(GetCorrectedWorldDoorPosition, 0x6BF230, { .reversed = false });
     RH_ScopedVirtualInstall(Fix, 0x6B7050);
-    // RH_ScopedVirtualInstall(BlowUpCar, 0x6BEA10);
+    RH_ScopedVirtualInstall(BlowUpCar, 0x6BEA10, { .reversed = false });
     RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6BF400);
-    // RH_ScopedVirtualInstall(BurstTyre, 0x6BEB20);
-    // RH_ScopedVirtualInstall(ProcessControlInputs, 0x6BE310);
-    // RH_ScopedVirtualInstall(ProcessEntityCollision, 0x6BDEA0);
+    RH_ScopedVirtualInstall(BurstTyre, 0x6BEB20, { .reversed = false });
+    RH_ScopedVirtualInstall(ProcessControlInputs, 0x6BE310, { .reversed = false });
+    RH_ScopedVirtualInstall(ProcessEntityCollision, 0x6BDEA0, { .reversed = false });
     RH_ScopedVirtualInstall(Render, 0x6BDE20);
-    // RH_ScopedVirtualInstall(PreRender, 0x6BD090);
+    RH_ScopedVirtualInstall(PreRender, 0x6BD090, { .reversed = false });
     RH_ScopedVirtualInstall(Teleport, 0x6BCFC0);
-    // RH_ScopedVirtualInstall(ProcessControl, 0x6B9250);
-    // RH_ScopedVirtualInstall(VehicleDamage, 0x6B8EC0);
-    // RH_ScopedVirtualInstall(SetupSuspensionLines, 0x6B89B0);
+    RH_ScopedVirtualInstall(ProcessControl, 0x6B9250, { .reversed = false });
+    RH_ScopedVirtualInstall(VehicleDamage, 0x6B8EC0, { .reversed = false });
+    RH_ScopedVirtualInstall(SetupSuspensionLines, 0x6B89B0, { .reversed = false });
     RH_ScopedVirtualInstall(SetModelIndex, 0x6B8970);
-    // RH_ScopedVirtualInstall(PlayCarHorn, 0x6B7080);
+    RH_ScopedVirtualInstall(PlayCarHorn, 0x6B7080, { .reversed = false });
     RH_ScopedVirtualInstall(SetupDamageAfterLoad, 0x6B7070);
-    // RH_ScopedVirtualInstall(DoBurstAndSoftGroundRatios, 0x6B6950);
-    // RH_ScopedVirtualInstall(SetUpWheelColModel, 0x6B67E0);
+    RH_ScopedVirtualInstall(DoBurstAndSoftGroundRatios, 0x6B6950, { .reversed = false });
+    RH_ScopedVirtualInstall(SetUpWheelColModel, 0x6B67E0, { .reversed = false });
     RH_ScopedVirtualInstall(RemoveRefsToVehicle, 0x6B67B0);
-    // RH_ScopedVirtualInstall(ProcessControlCollisionCheck, 0x6B6620);
+    RH_ScopedVirtualInstall(ProcessControlCollisionCheck, 0x6B6620, { .reversed = false });
     RH_ScopedVirtualInstall(GetComponentWorldPosition, 0x6B5990);
     RH_ScopedVirtualInstall(ProcessOpenDoor, 0x6B58D0);
 }
 
 // 0x6BF430
-CBike::CBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(plugin::dummy) {
-    plugin::CallMethod<0x6BF430, CBike*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
-    return;
-
+CBike::CBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy) {
     auto mi = CModelInfo::GetModelInfo(modelIndex)->AsVehicleModelInfoPtr();
     if (mi->m_nVehicleType == VEHICLE_TYPE_BIKE) {
-        auto animationStyle = CAnimManager::ms_aAnimBlocks[mi->GetAnimFileIndex()].animationStyle;
-        m_rideAnimData.m_nAnimGroup = animationStyle;
+        const auto& animationStyle = CAnimManager::ms_aAnimBlocks[mi->GetAnimFileIndex()].animationStyle;
+        m_RideAnimData.m_nAnimGroup = animationStyle;
         if (animationStyle < ANIM_GROUP_BIKES || animationStyle > ANIM_GROUP_WAYFARER) {
-            m_rideAnimData.m_nAnimGroup = ANIM_GROUP_BIKES;
+            m_RideAnimData.m_nAnimGroup = ANIM_GROUP_BIKES;
         }
     }
 
     m_nVehicleSubType = VEHICLE_TYPE_BIKE;
     m_nVehicleType = VEHICLE_TYPE_BIKE;
 
-    m_fFireBlowUpTimer = 0.0f;
-    m_bDoingBurnout = false;
+    m_BlowUpTimer = 0.0f;
+    m_nBrakesOn = false;
     nBikeFlags = 0;
     SetModelIndex(modelIndex);
 
     m_pHandlingData = gHandlingDataMgr.GetVehiclePointer(mi->m_nHandlingId);
-    m_pBikeHandlingData = gHandlingDataMgr.GetBikeHandlingPointer(mi->m_nHandlingId - MODEL_CWMYHB1); // hardcode
+    m_BikeHandling = gHandlingDataMgr.GetBikeHandlingPointer(mi->m_nHandlingId);
     m_nHandlingFlagsIntValue = m_pHandlingData->m_nHandlingFlags;
     m_pFlyingHandlingData = gHandlingDataMgr.GetFlyingPointer(mi->m_nHandlingId);
-    field_740 = 20.0f;
+    m_fBrakeCount = 20.0f;
     mi->ChooseVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor, 1);
-    m_fRearForkLength = 0.0f;
-    m_fFrontForkY = 0.0f;
-    m_fFrontForkZ = 0.0f;
-    m_bPedLeftHandFixed = false;
-    m_bPedRightHandFixed = false;
-    m_fFrontForkSlope = std::tan(DegreesToRadians(mi->m_fBikeSteerAngle));
+    m_fSwingArmLength = 0.0f;
+    m_fForkYOffset = 0.0f;
+    m_fForkZOffset = 0.0f;
+    m_nFixLeftHand = false;
+    m_nFixRightHand = false;
+    m_fSteerAngleTan = std::tan(DegreesToRadians(mi->m_fBikeSteerAngle));
     m_fMass = m_pHandlingData->m_fMass;
     m_fTurnMass = m_pHandlingData->m_fTurnMass;
     m_vecCentreOfMass = m_pHandlingData->m_vecCentreOfMass;
@@ -100,54 +97,64 @@ CBike::CBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(plugin::d
     m_fSteerAngle = 0.0f;
     m_fGasPedal = 0.0f;
     m_fBreakPedal = 0.0f;
-    m_pDamager = nullptr;
+    m_Damager = nullptr;
     m_pWhoInstalledBombOnMe = nullptr;
-    m_fGasPedalAudio = 0.0f;
-    m_fTireTemperature = 1.0f;
-    m_fBrakeDestabilization = 0.0f;
-    field_7B8 = nullptr;
+    m_fGasPedalAudioRevs = 0.0f;
+    m_fTyreTemp = 1.0f;
+    m_fBrakingSlide = 0.0f;
+    m_fPrevSpeed = 0.0f;
 
     for (auto i = 0; i < 2; ++i) {
-        m_afWheelRotationX[i] = 0;
-        m_fWheelSpeed[i] = 0;
-        m_anWheelState[i] = WHEEL_STATE_NORMAL;
-        m_anWheelSurfaceType[i] = 0;
-        m_abBloodState[i] = false;
-        m_aWheelSkidmarkUnk[i] = false;
-        m_anWheelDamageState[i] = 0;
+        m_nWheelStatus[i] = 0;
+        m_aWheelSkidmarkType[i] = eSkidmarkType::DEFAULT;
+        m_bWheelBloody[i] = false;
+        m_bMoreSkidMarks[i] = false;
+        m_aWheelPitchAngles[i] = 0.0f;
+        m_aWheelAngularVelocity[i] = 0.0f;
+        m_aWheelSuspensionHeights[i] = 0.0f;
+        m_aWheelOrigHeights[i] = 0.0f;
+        m_aWheelState[i] = WHEEL_STATE_NORMAL;
     }
 
     for (auto i = 0; i < 4; ++i) {
-        m_avTouchPointsLocalSpace[i] = CVector{};
-        m_fWheelsSuspensionCompression[i] = 1.0f;
-        m_fWheelsSuspensionCompressionPrev[i] = 1.0f;
-        m_aWheelTimer[i] = 0.0f;
+        m_aWheelColPoints[i] = {};
+        m_aWheelRatios[i] = 1.0f;
+        m_aRatioHistory[i] = 0.0f;
+        m_aWheelCounts[i] = 0.0f;
+        m_fSuspensionLength[i] = 0.0f;
+        m_fLineLength[i] = 0.0f;
+        m_aGroundPhysicalPtrs[i] = nullptr;
+        m_aGroundOffsets[i] = CVector{};
     }
 
-    m_nNumContactWheels = 0;
-    m_nNumWheelsOnGround = 0;
+    m_nNoOfContactWheels = 0;
     m_nDriveWheelsOnGround = 0;
+    m_nDriveWheelsOnGroundLastFrame = 0;
     m_fHeightAboveRoad = 0.0f;
-    m_fTraction = 1.0f;
+    m_fExtraTractionMult = 1.0f;
 
     if (!mi->m_pColModel->m_pColData->m_pLines) {
         mi->m_pColModel->m_pColData->m_nNumLines = 4;
-        mi->m_pColModel->m_pColData->m_pLines = static_cast<CColLine*>(CMemoryMgr::Malloc(128));
-        mi->m_pColModel->m_pColData->m_pLines[1].m_vecStart.x = 10'0000.0f;
+        mi->m_pColModel->m_pColData->m_pLines = static_cast<CColLine*>(CMemoryMgr::Malloc(4 * sizeof(CColLine)));
+        mi->m_pColModel->m_pColData->m_pLines[1].m_vecStart.x = 99'999.99f; // todo: explain this
     }
-    mi->m_pColModel->m_pColData->m_pLines[0].m_vecStart.z = 10'0000.0f;
+    mi->m_pColModel->m_pColData->m_pLines[0].m_vecStart.z = 99'999.99f;
     CBike::SetupSuspensionLines();
 
     m_autoPilot.m_nCarMission = MISSION_NONE;
     m_autoPilot.m_nTempAction = 0;
-    m_autoPilot.m_nCarCtrlFlags = m_autoPilot.m_nCarCtrlFlags & 0xFB;
+    m_autoPilot.m_nTimeToStartMission = CTimer::GetTimeInMS();
+    m_autoPilot.carCtrlFlags.bAvoidLevelTransitions = false;
 
     m_nStatus = STATUS_SIMPLE;
-    m_autoPilot.m_nTimeToStartMission = CTimer::GetTimeInMS();
     m_nNumPassengers = 0;
+    vehicleFlags.bLowVehicle = false;
+    vehicleFlags.bIsBig = false;
+    vehicleFlags.bIsVan = false;
+
     m_bLeanMatrixCalculated = false;
     m_mLeanMatrix = *m_matrix;
-    m_vecAvgSurfaceRight = CVector{};
+    m_vecOldSpeedForPlayback = CVector{};
     m_vehicleAudio.Initialise(this);
 }
 
@@ -209,21 +216,19 @@ void CBike::ProcessBuoyancy() {
         fBuoyancyForceZ *= 1.5F;
 
     auto fBuoyancyForceMult = std::max(0.5F, 1.0F - fBuoyancyForceZ / 20.0F);
-    auto fSpeedMult = pow(fBuoyancyForceMult, CTimer::GetTimeStep());
+    auto fSpeedMult = std::pow(fBuoyancyForceMult, CTimer::GetTimeStep());
     m_vecMoveSpeed *= fSpeedMult;
     m_vecTurnSpeed *= fSpeedMult;
 
-    if (fBuoyancyForceZ > 0.8F
-        || (fBuoyancyForceZ > 0.4F && IsAnyWheelNotMakingContactWithGround())) {
-
+    // 0x6B6443
+    if (fBuoyancyForceZ > 0.8F || (fBuoyancyForceZ > 0.4F && IsAnyWheelNotMakingContactWithGround())) {
         vehicleFlags.bIsDrowning = true;
         physicalFlags.bSubmergedInWater = true;
 
         m_vecMoveSpeed.z = std::max(-0.1F, m_vecMoveSpeed.z);
 
-        auto driver = m_pDriver->AsPed();
-        if (driver) {
-            ProcessPedInVehicleBuoyancy(driver, true);
+        if (m_pDriver) {
+            ProcessPedInVehicleBuoyancy(m_pDriver->AsPed(), true);
         }
         else {
             vehicleFlags.bEngineOn = false;
@@ -239,13 +244,12 @@ void CBike::ProcessBuoyancy() {
     }
 }
 
-inline void CBike::ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver)
-{
+inline void CBike::ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver) {
     if (!ped)
         return;
 
     ped->physicalFlags.bTouchingWater = true;
-    if (!ped->IsPlayer() && bikeFlags.bIgnoreWater)
+    if (!ped->IsPlayer() && bikeFlags.bWaterTight)
         return;
 
     if (ped->IsPlayer())
@@ -262,25 +266,12 @@ inline void CBike::ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver)
 
             ped->GetEventGroup().Add(&damageEvent, false);
         }
-    }
-    else {
-        auto knockOffBikeEvent = CEventKnockOffBike(
-            this,
-            &m_vecMoveSpeed,
-            &m_vecLastCollisionImpactVelocity,
-            m_fDamageIntensity,
-            0.0F,
-            KNOCK_OFF_TYPE_FALL,
-            0,
-            0,
-            nullptr,
-            bIsDriver,
-            false
-        );
-
-        ped->GetEventGroup().Add(&knockOffBikeEvent, false);
-        if (bIsDriver)
+    } else {
+        auto knockOffBikeEvent = CEventKnockOffBike(this, &m_vecMoveSpeed, &m_vecLastCollisionImpactVelocity, m_fDamageIntensity, 0.0F, KNOCK_OFF_TYPE_FALL, 0, 0, nullptr, bIsDriver, false);
+        ped->GetEventGroup().Add(&knockOffBikeEvent);
+        if (bIsDriver) {
             vehicleFlags.bEngineOn = false;
+        }
     }
 }
 
@@ -294,7 +285,7 @@ void CBike::ProcessDrivingAnims(CPed* driver, bool blend) {
     if (m_bOffscreen && m_nStatus == STATUS_PLAYER)
         return;
 
-    ProcessRiderAnims(driver, this, &m_rideAnimData, m_pBikeHandlingData, 0);
+    ProcessRiderAnims(driver, this, &m_RideAnimData, m_BikeHandling, 0);
 }
 
 // 0x6B7280
@@ -329,7 +320,7 @@ void CBike::ResetSuspension() {
 
 // 0x6B6790
 bool CBike::GetAllWheelsOffGround() const {
-    return m_nNumWheelsOnGround == 0;
+    return m_nNoOfContactWheels == 0;
 }
 
 // 0x6B67A0
@@ -354,12 +345,12 @@ void CBike::CalculateLeanMatrix() {
         return;
 
     CMatrix mat;
-    mat.SetRotateX(fabs(m_rideAnimData.m_fAnimLean) * -0.05f);
-    mat.RotateY(m_rideAnimData.m_fAnimLean);
+    mat.SetRotateX(fabs(m_RideAnimData.m_fAnimLean) * -0.05f);
+    mat.RotateY(m_RideAnimData.m_fAnimLean);
     m_mLeanMatrix = GetMatrix();
     m_mLeanMatrix = m_mLeanMatrix * mat;
     // place wheel back on ground
-    m_mLeanMatrix.GetPosition() += GetUp() * (1.0f - cos(m_rideAnimData.m_fAnimLean)) * GetColModel()->GetBoundingBox().m_vecMin.z;
+    m_mLeanMatrix.GetPosition() += GetUp() * (1.0f - cos(m_RideAnimData.m_fAnimLean)) * GetColModel()->GetBoundingBox().m_vecMin.z;
     m_bLeanMatrixCalculated = true;
 }
 
@@ -386,9 +377,9 @@ void CBike::BlowUpCar(CEntity* damager, bool bHideExplosion) {
 // 0x6B7050
 void CBike::Fix() {
     vehicleFlags.bIsDamaged = false;
-    bikeFlags.bIsOnFire = false;
-    m_anWheelDamageState[0] = 0;
-    m_anWheelDamageState[1] = 0;
+    bikeFlags.bEngineOnFire = false;
+    m_nWheelStatus[0] = 0;
+    m_nWheelStatus[1] = 0;
 }
 
 // 0x6BD090
@@ -472,7 +463,7 @@ bool CBike::SetUpWheelColModel(CColModel* wheelCol) {
 
 // 0x6B67B0
 void CBike::RemoveRefsToVehicle(CEntity* entityToRemove) {
-    for (auto& entity: m_apWheelCollisionEntity) {
+    for (auto& entity: m_aGroundPhysicalPtrs) {
         if (entity == entityToRemove)
             entity = nullptr;
     }

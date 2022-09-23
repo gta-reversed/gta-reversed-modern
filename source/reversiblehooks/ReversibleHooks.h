@@ -3,6 +3,9 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <filesystem>
+
+#include "ReversibleHook/Base.h"
 
 //
 // Helper macros - For help regarding usage see how they're used (`Find all references` and take a look)
@@ -12,13 +15,18 @@
 //
 
 // Set scoped namespace name (This only works if you only use `ScopedGlobal` macros)
-#define RH_ScopedNamespaceName(name) \
-    ReversibleHooks::ScopeName RHCurrentScopeName {name};
+#define RH_ScopedNamespaceName(ns) \
+    ReversibleHooks::ScopeName RHCurrentScopeName {ns};
 
 // Use when `name` is a class
-#define RH_ScopedClass(name) \
-    using RHCurrentNS = name; \
-    ReversibleHooks::ScopeName RHCurrentScopeName {#name};
+#define RH_ScopedClass(cls) \
+    using RHCurrentNS = cls; \
+    ReversibleHooks::ScopeName RHCurrentScopeName {#cls};
+
+// Use when `name` is a class
+#define RH_ScopedNamedClass(cls, name) \
+    using RHCurrentNS = cls; \
+    ReversibleHooks::ScopeName RHCurrentScopeName {name};
 
 #define RH_ScopedVirtualClass(cls, addrGTAVtbl, nVirtFns_) \
     using RHCurrentNS = cls; \
@@ -26,7 +34,6 @@
     const auto pGTAVTbl = (void**)addrGTAVtbl; \
     const auto pOurVTbl = ReversibleHooks::detail::GetVTableAddress(#cls); \
     const auto nVirtFns = nVirtFns_; \
-    // std::cout << std::format("{}: VMT: Our: {} | GTA: {}\n", RHCurrentScopeName.name, (void*)pOurVTbl, (void*)pGTAVTbl); \
 
 // Use when `name` is a namespace
 #define RH_ScopedNamespace(name) \
@@ -77,7 +84,7 @@
     ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, fnName, fnAddr, &RHCurrentNS::fn __VA_OPT__(,) __VA_ARGS__)
 
 // Install a hook on a virtual function. To use it, `RH_ScopedVirtualClass` must be used instead of `RH_ScopedClass`
-#define RH_ScopedVMTlInstall(fn, fnGTAAddr, ...) \
+#define RH_ScopedVMTInstall(fn, fnGTAAddr, ...) \
     ReversibleHooks::InstallVirtual(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn, pGTAVTbl, pOurVTbl, (void*)fnGTAAddr, nVirtFns __VA_OPT__(,) __VA_ARGS__)
 
 namespace ReversibleHooks {
@@ -86,7 +93,7 @@ namespace ReversibleHooks {
     struct ScopeName {
         std::string name{};
     };
-    
+
     struct ScopeCategory {
         std::string name{};
     };
@@ -108,24 +115,24 @@ namespace ReversibleHooks {
                 m_addr{ address },
                 m_sz{ sz }
             {
-                if (VirtualProtect(address, sz, newProtect, &m_oldProtect) == 0) {
+                if (VirtualProtect(address, sz, newProtect, &m_initialProtect) == 0) {
                     assert(0); // Failed
                 }
             }
 
             ~ScopedVirtualProtectModify() {
                 DWORD oldProtect{};
-                if (VirtualProtect(m_addr, m_sz, m_oldProtect, &oldProtect) == 0) {
+                if (VirtualProtect(m_addr, m_sz, m_initialProtect, &oldProtect) == 0) {
                     assert(0); // Failed
                 }
             }
 
         private:
-            DWORD  m_oldProtect{};
+            DWORD  m_initialProtect{};
             LPVOID m_addr{};
             DWORD  m_sz{};
         };
-    
+
 
         void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, HookInstallOptions&& opt);
 
@@ -145,6 +152,12 @@ namespace ReversibleHooks {
 
     void InstallVirtual(std::string_view category, std::string fnName, void** vtblGTA, void** vtblOur, void* fnGTAAddr, size_t nVirtFns, const HookInstallOptions& opt = {});
 
+    /*!
+    * @param category Category's path, eg.: "Global/"
+    * @param item     Item to add
+    */
+    void AddItemToCategory(std::string_view category, std::shared_ptr<ReversibleHook::Base> item);
+
     /*static void Switch(std::shared_ptr<SReversibleHook> pHook) {
         detail::HookSwitch(pHook);
     }*/
@@ -156,4 +169,6 @@ namespace ReversibleHooks {
 
     void OnInjectionBegin(HMODULE hModule);
     void OnInjectionEnd();
+
+    void WriteHooksToFile(const std::filesystem::path&);
 };

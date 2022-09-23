@@ -47,6 +47,7 @@
 #include "VehicleRecording.h"
 #include "ColAccel.h"
 #include "app.h"
+#include "Garages.h"
 #include "TaskSimpleClimb.h"
 #include "PedAttractor.h"
 #include "MBlur.h"
@@ -73,18 +74,18 @@ void CGame::InjectHooks() {
     RH_ScopedInstall(CanSeeWaterFromCurrArea, 0x53C4B0);
     RH_ScopedInstall(Init1, 0x5BF840);
     RH_ScopedInstall(Init2, 0x5BA1A0);
-    // RH_ScopedInstall(Init3, 0x5BA400);
+    RH_ScopedInstall(Init3, 0x5BA400, { .reversed = false });
     RH_ScopedInstall(Initialise, 0x53BC80);
-    // RH_ScopedInstall(InitialiseCoreDataAfterRW, 0x5BFA90);
-    // RH_ScopedInstall(InitialiseEssentialsAfterRW, 0x5BA160);
+    RH_ScopedInstall(InitialiseCoreDataAfterRW, 0x5BFA90, { .reversed = false });
+    RH_ScopedInstall(InitialiseEssentialsAfterRW, 0x5BA160, { .reversed = false });
     RH_ScopedInstall(InitialiseOnceBeforeRW, 0x53BB50);
-    // RH_ScopedInstall(InitialiseRenderWare, 0x5BD600);
+    RH_ScopedInstall(InitialiseRenderWare, 0x5BD600, { .reversed = false });
     RH_ScopedInstall(InitialiseWhenRestarting, 0x53C680);
-    // RH_ScopedInstall(Process, 0x53BEE0);
-    // RH_ScopedInstall(ReInitGameObjectVariables, 0x53BCF0);
+    RH_ScopedInstall(Process, 0x53BEE0, { .reversed = false });
+    RH_ScopedInstall(ReInitGameObjectVariables, 0x53BCF0, { .reversed = false });
     RH_ScopedInstall(ReloadIPLs, 0x53BED0);
-    // RH_ScopedInstall(ShutDownForRestart, 0x53C550);
-    // RH_ScopedInstall(Shutdown, 0x53C900);
+    RH_ScopedInstall(ShutDownForRestart, 0x53C550, { .reversed = false });
+    RH_ScopedInstall(Shutdown, 0x53C900, { .reversed = false });
     RH_ScopedInstall(ShutdownRenderWare, 0x53BB80);
     RH_ScopedInstall(DrasticTidyUpMemory, 0x53C810);
     RH_ScopedInstall(FinalShutdown, 0x53BC30);

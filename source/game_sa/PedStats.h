@@ -14,7 +14,7 @@ public:
     uint8  m_nSexiness;
     float  m_fAttackStrength;
     float  m_fDefendWeakness;
-    int16  m_wShootingRate;
+    uint16 m_flags;
     char   m_nDefaultDecisionMaker;
 };
 

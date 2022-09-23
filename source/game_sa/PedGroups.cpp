@@ -57,8 +57,8 @@ bool CPedGroups::IsGroupLeader(CPed* ped) {
 }
 
 // 0x5F7E80
-CPedGroup* CPedGroups::GetPedsGroup(CPed* ped) {
-    return plugin::CallAndReturn<CPedGroup*, 0x5F7E80, CPed*>(ped);
+CPedGroup* CPedGroups::GetPedsGroup(const CPed* ped) {
+    return plugin::CallAndReturn<CPedGroup*, 0x5F7E80>(ped);
 }
 
 // 0x5F7EE0

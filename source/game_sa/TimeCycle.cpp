@@ -12,16 +12,16 @@ void CTimeCycle::InjectHooks() {
     RH_ScopedClass(CTimeCycle);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Initialise, 0x5BBAC0);
+    RH_ScopedInstall(Initialise, 0x5BBAC0, { .reversed = false });
     RH_ScopedInstall(InitForRestart, 0x5601F0);
     RH_ScopedInstall(Shutdown, 0x5601E0);
     RH_ScopedInstall(Update, 0x561760);
     RH_ScopedInstall(StartExtraColour, 0x55FEC0);
     RH_ScopedInstall(StopExtraColour, 0x55FF20);
     RH_ScopedInstall(AddOne, 0x55FF40);
-    // RH_ScopedInstall(CalcColoursForPoint, 0x5603D0);
+    RH_ScopedInstall(CalcColoursForPoint, 0x5603D0, { .reversed = false });
     RH_ScopedInstall(FindFarClipForCoors, 0x5616E0);
-    // RH_ScopedInstall(FindTimeCycleBox, 0x55FFD0);
+    RH_ScopedInstall(FindTimeCycleBox, 0x55FFD0, { .reversed = false });
     RH_ScopedInstall(SetConstantParametersForPostFX, 0x560210);
     RH_ScopedInstall(GetAmbientRed, 0x560330);
     RH_ScopedInstall(GetAmbientGreen, 0x560340);

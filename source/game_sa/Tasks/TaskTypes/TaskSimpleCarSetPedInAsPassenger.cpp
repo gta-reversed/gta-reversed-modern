@@ -3,18 +3,16 @@
 #include "TaskSimpleCarSetPedInAsPassenger.h"
 #include "TaskUtilityLineUpPedWithCar.h"
 
-// 0x646FE0
-CTaskSimpleCarSetPedInAsPassenger::CTaskSimpleCarSetPedInAsPassenger(CVehicle* targetVehicle, int32 nTargetDoor, CTaskUtilityLineUpPedWithCar* utility) : CTaskSimple() {
-    m_nTargetDoor = nTargetDoor;
-    m_bIsFinished = 0;
-    m_pAnim = 0;
-    m_pTargetVehicle = targetVehicle;
-    m_pUtility = utility;
-    m_bWarpingInToCar = 0;
-    m_nDoorFlagsToClear = 0;
-    m_nNumGettingInToClear = 0;
+// OG constructor was at 0x646FE0
+CTaskSimpleCarSetPedInAsPassenger::CTaskSimpleCarSetPedInAsPassenger(CVehicle* targetVehicle, eTargetDoor nTargetDoor, bool warpingInToCar, CTaskUtilityLineUpPedWithCar* utility) :
+    m_nTargetDoor{ nTargetDoor },
+    m_pTargetVehicle{ targetVehicle },
+    m_pUtility{ utility },
+    m_bWarpingInToCar{warpingInToCar}
+{
     CEntity::SafeRegisterRef(m_pTargetVehicle);
 }
+
 
 // 0x647080
 CTaskSimpleCarSetPedInAsPassenger::~CTaskSimpleCarSetPedInAsPassenger() {
