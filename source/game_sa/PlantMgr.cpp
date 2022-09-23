@@ -75,7 +75,7 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedInstall(MoveLocTriToList, 0x5DB590);
     RH_ScopedInstall(MoveColEntToList, 0x5DB5F0);
     RH_ScopedInstall(SetPlantFriendlyFlagInAtomicMI, 0x5DB650, {.reversed = false});
-    RH_ScopedInstall(Update, 0x5DCFA0, {.reversed = false});
+    RH_ScopedInstall(Update, 0x5DCFA0);
     RH_ScopedInstall(PreUpdateOnceForNewCameraPos, 0x5DCF30);
     RH_ScopedInstall(UpdateAmbientColor, 0x5DB310);
     RH_ScopedInstall(CalculateWindBending, 0x5DB3D0, {.reversed = false});
@@ -252,8 +252,6 @@ void CPlantMgr::SetPlantFriendlyFlagInAtomicMI(CAtomicModelInfo* ami) {
 
 // 0x5DCFA0
 void CPlantMgr::Update(const CVector& cameraPosition) {
-    return plugin::Call<0x5DCFA0, const CVector&>(cameraPosition);
-
     static int8& cache = *(int8*)0xC09171;
     static int8& section = *(int8*)0xC09170;
 
@@ -264,11 +262,12 @@ void CPlantMgr::Update(const CVector& cameraPosition) {
     UpdateAmbientColor();
     CGrassRenderer::SetGlobalWindBending(CalculateWindBending());
 
-    _ColEntityCache_Update(cameraPosition, (++cache % MAX_PLANTS) != 0 ? true : false);
+    _ColEntityCache_Update(cameraPosition, (++cache % MAX_PLANTS) != 0);
 
     auto prev = m_CloseColEntListHead;
-    for (auto i = section++ % 8; m_CloseColEntListHead; prev = m_CloseColEntListHead->m_NextEntry)
+    for (auto i = section++ % 8; m_CloseColEntListHead; prev = m_CloseColEntListHead->m_NextEntry) {
         _ProcessEntryCollisionDataSections(prev, cameraPosition, i);
+    }
 }
 
 // 0x5DCF30
