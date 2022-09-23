@@ -4,6 +4,7 @@
 #include "GrassRenderer.h"
 #include "PlantColEntEntry.h"
 #include "PlantSurfPropMgr.h"
+#include <extensions/enumerate.hpp>
 
 RwTexture* (&CPlantMgr::PC_PlantTextureTab0)[4] = *(RwTexture * (*)[4])0xC039A0;
 RwTexture* (&CPlantMgr::PC_PlantTextureTab1)[4] = *(RwTexture * (*)[4])0xC039B0;
@@ -76,24 +77,20 @@ bool CPlantMgr::Initialise() {
         return  texture;
     };
 
-    PC_PlantTextureTab0[0] = ReadTexture("txgrass0_0");
-    PC_PlantTextureTab0[1] = ReadTexture("txgrass0_1");
-    PC_PlantTextureTab0[2] = ReadTexture("txgrass0_2");
-    PC_PlantTextureTab0[3] = ReadTexture("txgrass0_3");
+    for (auto&& [i, tex] : notsa::enumerate(PC_PlantTextureTab0)) {
+        tex = ReadTexture(std::format("txgrass0_{}", i).c_str());
+    }
 
-    PC_PlantTextureTab1[0] = ReadTexture("txgrass1_0");
-    PC_PlantTextureTab1[1] = ReadTexture("txgrass1_1");
-    PC_PlantTextureTab1[2] = ReadTexture("txgrass1_2");
-    PC_PlantTextureTab1[3] = ReadTexture("txgrass1_3");
+    for (auto&& [i, tex] : notsa::enumerate(PC_PlantTextureTab1)) {
+        tex = ReadTexture(std::format("txgrass1_{}", i).c_str());
+    }
 
     tex_gras07Si = ReadTexture("gras07Si");
     CTxdStore::PopCurrentTxd();
     CStreaming::IHaveUsedStreamingMemory();
 
-    grassTexturesPtr[0] = *PC_PlantTextureTab0;
-    grassTexturesPtr[1] = *PC_PlantTextureTab1;
-    grassTexturesPtr[2] = *PC_PlantTextureTab0;
-    grassTexturesPtr[3] = *PC_PlantTextureTab1;
+    grassTexturesPtr[0] = grassTexturesPtr[2] = * PC_PlantTextureTab0;
+    grassTexturesPtr[1] = grassTexturesPtr[3] = * PC_PlantTextureTab1;
 
     const auto models1 = { "grass0_1.dff", "grass0_2.dff", "grass0_3.dff", "grass0_4.dff" };
     const auto models2 = { "grass1_1.dff", "grass1_2.dff", "grass1_3.dff", "grass1_4.dff" };
