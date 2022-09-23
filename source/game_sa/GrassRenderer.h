@@ -32,5 +32,5 @@ public:
     static void SetGlobalCameraPos(const CVector& cameraPosn);
     static void SetGlobalWindBending(float bending);
 
-    static void sub_5DAB00(CVector& outPosn, const CVector& v1, const CVector& v2, const CVector& v3, float randA, float randB);
+    static CVector& InterpolateTriangle(CVector& outPosn, const CVector& v1, const CVector& v2, const CVector& v3, float randA, float randB);
 };

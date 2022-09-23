@@ -27,7 +27,7 @@ void CGrassRenderer::InjectHooks() {
     RH_ScopedInstall(SetGlobalCameraPos, 0x5DABC0);
     RH_ScopedInstall(SetGlobalWindBending, 0x5DAC00);
 
-    RH_ScopedInstall(sub_5DAB00, 0x5DAB00);
+    RH_ScopedInstall(InterpolateTriangle, 0x5DAB00);
 }
 
 // 0x5DD6B0
@@ -101,8 +101,7 @@ void CGrassRenderer::DrawTriPlants(PPTriPlant* triPlants, int32 numTriPlants, Rp
         RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), CPPTriPlantBuffer::SetGrassMaterialCB, &newColorIntensity);
 
         for (auto j = 0; j < plant.num_plants; j++) {
-            CVector posn;
-            sub_5DAB00(
+            CVector posn = InterpolateTriangle(
                 posn,
                 &plant.V1,
                 &plant.V2,
@@ -171,11 +170,14 @@ void CGrassRenderer::SetGlobalWindBending(float bending) {
     m_windBending = bending;
 }
 
-// Chooses a point inside the triangle (v1,v2,v3) with specific step values
-void CGrassRenderer::sub_5DAB00(CVector& outPosn, const CVector& v1, const CVector& v2, const CVector& v3, float stepA, float stepB) {
+// Interpolates inside the triangle (v1,v2,v3) with specific step values
+// Original name unknown
+// 0x5DAB00 (inlined)
+CVector& CGrassRenderer::InterpolateTriangle(CVector& outPosn, const CVector& v1, const CVector& v2, const CVector& v3, float stepA, float stepB) {
     if (stepA + stepB > 1.0f) {
         stepA = 1.0f - stepA;
         stepB = 1.0f - stepB;
     }
     outPosn = (1.0f - stepA - stepB) * v1 + stepA * v2 + stepB * v3;
+    return outPosn;
 }
