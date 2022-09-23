@@ -35,6 +35,7 @@ void CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, 
     m_SurfaceId = surface;
     m_createsObjects = createsObjects;
     m_createsPlants = createsPlants;
+    m_createdObjects = false;
 
     m_Center = (p1 + p2 + p3) / 3.0f;
 
