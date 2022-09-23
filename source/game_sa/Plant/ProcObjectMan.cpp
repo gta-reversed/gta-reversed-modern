@@ -7,16 +7,16 @@
 
 void ProcObjectMan_c::InjectHooks() {
     RH_ScopedClass(ProcObjectMan_c);
-    RH_ScopedCategoryGlobal();
+    RH_ScopedCategory("Plant");
 
     RH_ScopedInstall(Init, 0x5A3EA0);
     RH_ScopedInstall(Update, 0x5A3110);
     RH_ScopedInstall(Exit, 0x5A3EE0);
-    // RH_ScopedInstall(LoadDataFile, 0x5A3140);
+    RH_ScopedInstall(LoadDataFile, 0x5A3140, {.reversed = false});
     RH_ScopedInstall(GetEntityFromPool, 0x5A3120);
     RH_ScopedInstall(ReturnEntityToPool, 0x5A3130);
-    // RH_ScopedInstall(ProcessTriangleAdded, 0x5A3F20);
-    // RH_ScopedInstall(ProcessTriangleRemoved, 0x5A3F70);
+    RH_ScopedInstall(ProcessTriangleAdded, 0x5A3F20, {.reversed = false});
+    RH_ScopedInstall(ProcessTriangleRemoved, 0x5A3F70, {.reversed = false});
 }
 
 // 0x5A3EA0

@@ -4,7 +4,7 @@
 
 void CPlantSurfPropMgr::InjectHooks() {
     RH_ScopedClass(CPlantSurfPropMgr);
-    RH_ScopedCategoryGlobal();
+    RH_ScopedCategory("Plant");
 
     RH_ScopedInstall(Initialise, 0x5DD6C0);
     RH_ScopedInstall(AllocSurfProperties, 0x5DD370);
@@ -92,6 +92,8 @@ bool CPlantSurfPropMgr::LoadPlantsDat(const char* filename) {
                 if (pcdId > 2) {
                     pcdId = 0;
                 }
+                assert(surfProperties);
+
                 plant = &surfProperties->m_Plants[pcdId];
                 break;
             case ePlantField::SLOT_ID:

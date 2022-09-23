@@ -6,7 +6,7 @@
 
 void CPlantColEntEntry::InjectHooks() {
     RH_ScopedClass(CPlantColEntEntry);
-    RH_ScopedCategoryGlobal();
+    RH_ScopedCategory("Plant");
 
     RH_ScopedInstall(AddEntry, 0x5DB7D0);
     RH_ScopedInstall(ReleaseEntry, 0x5DB8A0);

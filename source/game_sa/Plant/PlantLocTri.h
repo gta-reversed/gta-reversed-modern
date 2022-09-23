@@ -23,6 +23,8 @@ public:
     CPlantLocTri* m_PrevTri;
 
 public:
+    static void InjectHooks();
+
     void Add(const CVector& p1, const CVector& p2, const CVector& p3, uint8 surface, uint8 lightning, bool createsPlants, bool createsObjects);
     void Release();
 };

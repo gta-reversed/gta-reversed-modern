@@ -19,17 +19,39 @@ RwTexture* (&grassTexturesPtr)[4] = *(RwTexture * (*)[4])0xC039E0;
 RpAtomic* (&grassModelsPtr)[4] = *(RpAtomic * (*)[4])0xC03A30;
 RwTexture*& tex_gras07Si = *(RwTexture**)0xC09174;
 
-void CPlantMgr::InjectHooks() {
-    RH_ScopedClass(CPlantMgr);
-    RH_ScopedCategoryGlobal();
-
-    // RH_ScopedInstall(Initialise, 0x5DD910);
-    // RH_ScopedInstall(Shutdown, 0x5DB940);
-}
-
 // 0x5DD220
 static bool LoadModels(std::initializer_list<const char*> models, RpAtomic* (&atomics)[4]) {
     return plugin::CallAndReturn<bool, 0x5DD220, std::initializer_list<const char*>, RpAtomic*(&)[4]>(models, atomics);
+}
+
+void CPlantMgr::InjectHooks() {
+    RH_ScopedClass(CPlantMgr);
+    RH_ScopedCategory("Plant");
+
+    RH_ScopedInstall(Initialise, 0x5DD910, {.reversed = false});
+    RH_ScopedInstall(Shutdown, 0x5DB940, {.reversed = false});
+    RH_ScopedInstall(ReloadConfig, 0x5DD780, {.reversed = false});
+    RH_ScopedInstall(MoveLocTriToList, 0x5DB590, {.reversed = false});
+    RH_ScopedInstall(SetPlantFriendlyFlagInAtomicMI, 0x5DB650, {.reversed = false});
+    RH_ScopedInstall(Update, 0x5DCFA0, {.reversed = false});
+    RH_ScopedInstall(UpdateAmbientColor, 0x5DB310, {.reversed = false});
+    RH_ScopedInstall(CalculateWindBending, 0x5DB3D0, {.reversed = false});
+    RH_ScopedInstall(_ColEntityCache_Add, 0x5DBEB0, {.reversed = false});
+    RH_ScopedInstall(_ColEntityCache_FindInCache, 0x5DB530, {.reversed = false});
+    RH_ScopedInstall(_ColEntityCache_Remove, 0x5DBEF0, {.reversed = false});
+    RH_ScopedInstall(_ColEntityCache_Update, 0x5DC510, {.reversed = false});
+    RH_ScopedInstall(_ProcessEntryCollisionDataSections, 0x5DCD80, {.reversed = false});
+    RH_ScopedInstall(_UpdateLocTris, 0x5DCF00, {.reversed = false});
+
+    RH_ScopedGlobalInstall(LoadModels, 0x5DD220, {.reversed = false});
+
+    // debug shit, all of them just return true.
+    // addresses (probably not in order): 0x5DB550 - 0x5DB580
+
+    // RH_ScopedInstall(DbgCountCachedEntities, 0x0, {.reversed = false});
+    // RH_ScopedInstall(DbgCountLocTrisAndPlants, 0x0, {.reversed = false});
+    // RH_ScopedInstall(DbgRenderCachedEntities, 0x0, {.reversed = false});
+    // RH_ScopedInstall(DbgRenderLocTris, 0x0, {.reversed = false});
 }
 
 // 0x5DD910
@@ -155,6 +177,7 @@ void CPlantMgr::MoveLocTriToList(CPlantLocTri** a1, CPlantLocTri** a2, CPlantLoc
     plugin::Call<0x5DB590, CPlantLocTri**, CPlantLocTri**, CPlantLocTri*>(a1, a2, a3);
 }
 
+// 0x5DB650
 void CPlantMgr::SetPlantFriendlyFlagInAtomicMI(CAtomicModelInfo* ami) {
     plugin::Call<0x5DB650, CAtomicModelInfo*>(ami);
 }
@@ -202,17 +225,17 @@ void CPlantMgr::Render() {
 
 // 0x5DBEB0
 void CPlantMgr::_ColEntityCache_Add(CEntity* entity, bool a2) {
-
+    plugin::Call<0x5DBEB0, CEntity*>(entity, a2);
 }
 
-// 0x5DB530 maybe wrong
+// 0x5DB530
 void CPlantMgr::_ColEntityCache_FindInCache(CEntity* entity) {
-
+    plugin::Call<0x5DB530, CEntity*>(entity);
 }
 
-//
+// 0x5DBEF0
 void CPlantMgr::_ColEntityCache_Remove(CEntity* entity) {
-
+    plugin::Call<0x5DBEF0, CEntity*>(entity);
 }
 
 // 0x5DC510
@@ -242,18 +265,18 @@ void CPlantMgr::_UpdateLocTris(const CVector& center, int32 a2) {
     }
 }
 
-void CPlantMgr::DbgCountCachedEntities(uint32*) {
-
+bool CPlantMgr::DbgCountCachedEntities(uint32*) {
+    return true;
 }
 
-void CPlantMgr::DbgCountLocTrisAndPlants(uint32, uint32*, uint32*) {
-
+bool CPlantMgr::DbgCountLocTrisAndPlants(uint32, uint32*, uint32*) {
+    return true;
 }
 
-void CPlantMgr::DbgRenderCachedEntities(uint32*) {
-
+bool CPlantMgr::DbgRenderCachedEntities(uint32*) {
+    return true;
 }
 
-void CPlantMgr::DbgRenderLocTris() {
-
+bool CPlantMgr::DbgRenderLocTris() {
+    return true;
 }

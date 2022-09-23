@@ -15,6 +15,16 @@ float GetPlantDensity(CPlantLocTri* plant) {
     return out.Magnitude() / 2.0f;
 }
 
+void CPlantLocTri::InjectHooks() {
+    RH_ScopedClass(CPlantLocTri);
+    RH_ScopedCategory("Plant");
+
+    RH_ScopedInstall(Add, 0x5DC290, {.reversed = false});
+    RH_ScopedInstall(Release, 0x5DB6D0, {.reversed = false});
+
+    RH_ScopedGlobalInstall(GetPlantDensity, 0x5D8A0);
+}
+
 // 0x5DC290
 void CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, uint8 surface, uint8 lightning, bool createsPlants, bool createsObjects) {
     return plugin::CallMethod<0x5DC290, CPlantLocTri*, const CVector&, const CVector&, const CVector&, uint8, uint8, bool, bool>(this, p1, p2, p3, surface, lightning, createsPlants, createsObjects);

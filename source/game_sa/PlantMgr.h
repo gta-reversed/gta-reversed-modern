@@ -57,10 +57,10 @@ private:
 
     static void _UpdateLocTris(const CVector& center, int32);
 
-    static void DbgCountCachedEntities(uint32*);
-    static void DbgCountLocTrisAndPlants(uint32, uint32*, uint32*);
-    static void DbgRenderCachedEntities(uint32*);
-    static void DbgRenderLocTris();
+    static bool DbgCountCachedEntities(uint32*);
+    static bool DbgCountLocTrisAndPlants(uint32, uint32*, uint32*);
+    static bool DbgRenderCachedEntities(uint32*);
+    static bool DbgRenderLocTris();
 
     static void IncrementScanCode() { ++m_scanCode; } // 0x5DB2D0
 };

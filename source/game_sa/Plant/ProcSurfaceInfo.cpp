@@ -5,7 +5,12 @@
 
 void ProcSurfaceInfo_c::InjectHooks() {
     RH_ScopedClass(ProcSurfaceInfo_c);
-    RH_ScopedCategoryGlobal();
+    RH_ScopedCategory("Plant");
+
+    RH_ScopedInstall(Init, 0x5A2EB0);
+    RH_ScopedInstall(Exit, 0x5A3270, {.reversed = false});
+    RH_ScopedInstall(AddObject, 0x5A32D0, {.reversed = false});
+    RH_ScopedInstall(AddObjects, 0x5A3850, {.reversed = false});
 }
 
 // 0x5A2EB0
