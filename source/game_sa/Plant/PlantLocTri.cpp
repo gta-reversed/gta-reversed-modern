@@ -20,7 +20,7 @@ void CPlantLocTri::InjectHooks() {
     RH_ScopedCategory("Plant");
 
     RH_ScopedInstall(Add, 0x5DC290);
-    RH_ScopedInstall(Release, 0x5DB6D0, {.reversed = false});
+    RH_ScopedInstall(Release, 0x5DB6D0, {.reversed = true});
 
     RH_ScopedGlobalInstall(GetPlantDensity, 0x5DC210);
 }
@@ -69,9 +69,7 @@ void CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, 
 
 // 0x5DB6D0
 void CPlantLocTri::Release() {
-    m_nMaxNumPlants[0] = 0;
-    m_nMaxNumPlants[1] = 0;
-    m_nMaxNumPlants[2] = 0;
+    rng::fill(m_nMaxNumPlants, 0u);
     if (m_createdObjects)
         g_procObjMan.ProcessTriangleRemoved(this);
 
@@ -119,7 +117,7 @@ void CPlantLocTri::Release() {
             next->m_PrevTri = this;
         }
 
-        m_SurfaceId = 254;
+        m_SurfaceId = -2;
     }
 
     // m_nFlags = m_nFlags & 0xF8;
