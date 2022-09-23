@@ -3,7 +3,7 @@
 #include "ProcObjectMan.h"
 #include "PlantLocTri.h"
 
-#define EntityItem_c void*
+using EntityItem_c = void*;
 
 void ProcObjectMan_c::InjectHooks() {
     RH_ScopedClass(ProcObjectMan_c);
@@ -12,7 +12,7 @@ void ProcObjectMan_c::InjectHooks() {
     RH_ScopedInstall(Init, 0x5A3EA0);
     RH_ScopedInstall(Update, 0x5A3110);
     RH_ScopedInstall(Exit, 0x5A3EE0);
-    RH_ScopedInstall(LoadDataFile, 0x5A3140, {.reversed = false});
+    RH_ScopedInstall(LoadDataFile, 0x5A3140);
     RH_ScopedInstall(GetEntityFromPool, 0x5A3120);
     RH_ScopedInstall(ReturnEntityToPool, 0x5A3130);
     RH_ScopedInstall(ProcessTriangleAdded, 0x5A3F20, {.reversed = false});
@@ -44,16 +44,15 @@ void ProcObjectMan_c::Exit() {
 
 // 0x5A3140
 void ProcObjectMan_c::LoadDataFile() {
-    return plugin::CallMethod<0x5A3140, ProcObjectMan_c*>(this);
-
-    // todo: fix stack corruption
     auto file = CFileMgr::OpenFile("data\\procobj.dat", "r");
+    assert(file);
+
     for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
-        if (!*line || line[0] == '#')
+        if (line[0] == '\0' || line[0] == '#')
             continue;
 
-        char surfaceType[16]{};
-        char objectName[16]{};
+        char surfaceType[64]{};
+        char objectName[64]{};
         float spacing;
         float minDist;
         int32 minRot, maxRot;
@@ -63,7 +62,7 @@ void ProcObjectMan_c::LoadDataFile() {
         int32 align;
         int32 useGrid;
 
-        (void)sscanf(
+        RET_IGNORED(sscanf(
             line, "%s %s %f %f %d %d %f %f %f %f %f %f %d %d",
             surfaceType,
             objectName,
@@ -74,7 +73,7 @@ void ProcObjectMan_c::LoadDataFile() {
             &minScaleZ, &maxScaleZ,
             &zOffsetMin, &zOffsetMax,
             &align, &useGrid
-        );
+        ));
         m_ProcObjSurfaceInfos[m_numProcSurfaceInfos].Init(
             surfaceType,
             objectName,

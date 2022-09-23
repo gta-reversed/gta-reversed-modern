@@ -38,10 +38,9 @@ void CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, 
 
     // todo: m_nFlags = bIsProcPlant | LOBYTE(m_nFlags) & 0xF8 | (2 * bIsProcObj);
 
-    m_Center = p1 + p2 + p3;
-    m_Center.x *= 0.33f;
+    m_Center = (p1 + p2 + p3) / 3.0f;
 
-    m_SphereRadius = m_Center.Magnitude() * 1.75f;
+    m_SphereRadius = DistanceBetweenPoints(m_Center, m_V1) * 1.75f;
     if (m_createsObjects && !m_createsPlants) {
         CPlantMgr::MoveLocTriToList(&CPlantMgr::m_UnusedLocTriListHead, &CPlantMgr::m_CloseLocTriListHead[3], this);
         return;

@@ -29,12 +29,12 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedCategory("Plant");
 
     RH_ScopedInstall(Initialise, 0x5DD910, {.reversed = false});
-    RH_ScopedInstall(Shutdown, 0x5DB940, {.reversed = false});
+    RH_ScopedInstall(Shutdown, 0x5DB940);
     RH_ScopedInstall(ReloadConfig, 0x5DD780, {.reversed = false});
     RH_ScopedInstall(MoveLocTriToList, 0x5DB590, {.reversed = false});
     RH_ScopedInstall(SetPlantFriendlyFlagInAtomicMI, 0x5DB650, {.reversed = false});
     RH_ScopedInstall(Update, 0x5DCFA0, {.reversed = false});
-    RH_ScopedInstall(UpdateAmbientColor, 0x5DB310, {.reversed = false});
+    RH_ScopedInstall(UpdateAmbientColor, 0x5DB310);
     RH_ScopedInstall(CalculateWindBending, 0x5DB3D0, {.reversed = false});
     RH_ScopedInstall(_ColEntityCache_Add, 0x5DBEB0, {.reversed = false});
     RH_ScopedInstall(_ColEntityCache_FindInCache, 0x5DB530, {.reversed = false});
@@ -117,8 +117,6 @@ bool CPlantMgr::Initialise() {
 
 // 0x5DB940
 void CPlantMgr::Shutdown() {
-    // return plugin::Call<0x5DB940>();
-
     for (auto it = m_CloseColEntListHead; it; it = it->m_NextEntry) {
         it->ReleaseEntry();
     }

@@ -14,10 +14,15 @@ public:
     uint8 m_SurfaceId;
     uint8 m_nLighting;
 
-    uint8 m_createsPlants : 1;
-    uint8 m_createsObjects : 1;
-    uint8 m_createdObjects : 1;
-    uint8 m_pad : 5;
+    union {
+        struct {
+            uint8 m_createsPlants : 1;
+            uint8 m_createsObjects : 1;
+            uint8 m_createdObjects : 1;
+            uint8 m_pad : 5;
+        };
+        uint8_t m_Flags;
+    };
 
     CPlantLocTri* m_NextTri;
     CPlantLocTri* m_PrevTri;
