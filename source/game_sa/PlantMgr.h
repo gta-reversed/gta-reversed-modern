@@ -27,8 +27,8 @@ public:
     static void Shutdown();
     static bool ReloadConfig();
 
-    static void MoveColEntToList(CPlantColEntEntry** a1, CPlantColEntEntry** a2, CPlantColEntEntry* a3);
     static void MoveLocTriToList(CPlantLocTri*& oldList, CPlantLocTri*& newList, CPlantLocTri* triangle);
+    static void MoveColEntToList(CPlantColEntEntry*& oldList, CPlantColEntEntry*& newList, CPlantColEntEntry* entry);
     static void SetPlantFriendlyFlagInAtomicMI(CAtomicModelInfo*);
 
     static void Update(const CVector& cameraPosition);

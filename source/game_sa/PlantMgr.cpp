@@ -73,6 +73,7 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedInstall(Shutdown, 0x5DB940);
     RH_ScopedInstall(ReloadConfig, 0x5DD780, {.reversed = false});
     RH_ScopedInstall(MoveLocTriToList, 0x5DB590);
+    RH_ScopedInstall(MoveColEntToList, 0x5DB5F0);
     RH_ScopedInstall(SetPlantFriendlyFlagInAtomicMI, 0x5DB650, {.reversed = false});
     RH_ScopedInstall(Update, 0x5DCFA0, {.reversed = false});
     RH_ScopedInstall(UpdateAmbientColor, 0x5DB310);
@@ -216,6 +217,30 @@ void CPlantMgr::MoveLocTriToList(CPlantLocTri*& oldList, CPlantLocTri*& newList,
 
     if (auto prev = triangle->m_PrevTri) {
         prev->m_NextTri = triangle;
+    }
+}
+
+// 0x5DB5F0
+// unused/inlined
+void CPlantMgr::MoveColEntToList(CPlantColEntEntry*& oldList, CPlantColEntEntry*& newList, CPlantColEntEntry* entry) {
+    if (auto next = entry->m_NextEntry) {
+        if (auto prev = entry->m_PrevEntry) {
+            prev->m_NextEntry = next;
+            next->m_PrevEntry = prev;
+        } else {
+            next->m_PrevEntry = nullptr;
+        }
+    } else {
+        if (oldList = entry->m_PrevEntry) {
+            oldList->m_NextEntry = nullptr;
+        }
+    }
+    entry->m_PrevEntry = newList;
+    entry->m_NextEntry = nullptr;
+    newList = entry;
+
+    if (auto prev = entry->m_PrevEntry) {
+        prev->m_NextEntry = entry;
     }
 }
 
