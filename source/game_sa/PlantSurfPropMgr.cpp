@@ -17,9 +17,7 @@ bool CPlantSurfPropMgr::Initialise() {
     m_countSurfPropsAllocated = 0;
     std::ranges::fill(m_SurfPropPtrTab, nullptr);
     for (auto& props : m_SurfPropTab) {
-        for (auto& plant : props.m_Plants) {
-            plant = {};
-        }
+        rng::fill(props.m_Plants, Plant{});
     }
 
     return LoadPlantsDat("PLANTS.DAT");
