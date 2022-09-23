@@ -200,48 +200,48 @@ bool CPlantMgr::ReloadConfig() {
 
 // 0x5DB590
 void CPlantMgr::MoveLocTriToList(CPlantLocTri*& oldList, CPlantLocTri*& newList, CPlantLocTri* triangle) {
-    if (auto next = triangle->m_NextTri) {
-        if (auto prev = triangle->m_PrevTri) {
-            prev->m_NextTri = next;
+    if (auto prev = triangle->m_PrevTri) {
+        if (auto next = triangle->m_NextTri) {
             next->m_PrevTri = prev;
+            prev->m_NextTri = next;
         } else {
-            next->m_PrevTri = nullptr;
+            prev->m_NextTri = nullptr;
         }
     } else {
-        if (oldList = triangle->m_PrevTri) {
-            oldList->m_NextTri = nullptr;
+        if (oldList = triangle->m_NextTri) {
+            oldList->m_PrevTri = nullptr;
         }
     }
-    triangle->m_PrevTri = newList;
-    triangle->m_NextTri = nullptr;
+    triangle->m_NextTri = newList;
+    triangle->m_PrevTri = nullptr;
     newList = triangle;
 
-    if (auto prev = triangle->m_PrevTri) {
-        prev->m_NextTri = triangle;
+    if (auto next = triangle->m_NextTri) {
+        next->m_PrevTri = triangle;
     }
 }
 
 // 0x5DB5F0
 // unused/inlined
 void CPlantMgr::MoveColEntToList(CPlantColEntEntry*& oldList, CPlantColEntEntry*& newList, CPlantColEntEntry* entry) {
-    if (auto next = entry->m_NextEntry) {
-        if (auto prev = entry->m_PrevEntry) {
-            prev->m_NextEntry = next;
+    if (auto prev = entry->m_PrevEntry) {
+        if (auto next = entry->m_NextEntry) {
             next->m_PrevEntry = prev;
+            prev->m_NextEntry = next;
         } else {
-            next->m_PrevEntry = nullptr;
+            prev->m_NextEntry = nullptr;
         }
     } else {
-        if (oldList = entry->m_PrevEntry) {
-            oldList->m_NextEntry = nullptr;
+        if (oldList = entry->m_NextEntry) {
+            oldList->m_PrevEntry = nullptr;
         }
     }
-    entry->m_PrevEntry = newList;
-    entry->m_NextEntry = nullptr;
+    entry->m_NextEntry = newList;
+    entry->m_PrevEntry = nullptr;
     newList = entry;
 
-    if (auto prev = entry->m_PrevEntry) {
-        prev->m_NextEntry = entry;
+    if (auto next = entry->m_NextEntry) {
+        next->m_PrevEntry = entry;
     }
 }
 
