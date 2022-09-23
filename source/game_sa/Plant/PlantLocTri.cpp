@@ -19,24 +19,22 @@ void CPlantLocTri::InjectHooks() {
     RH_ScopedClass(CPlantLocTri);
     RH_ScopedCategory("Plant");
 
-    RH_ScopedInstall(Add, 0x5DC290, {.reversed = false});
-    RH_ScopedInstall(Release, 0x5DB6D0, {.reversed = false});
+    RH_ScopedInstall(Add, 0x5DC290);
+    RH_ScopedInstall(Release, 0x5DB6D0);
 
-    RH_ScopedGlobalInstall(GetPlantDensity, 0x5D8A0);
+    RH_ScopedGlobalInstall(GetPlantDensity, 0x5DC210);
 }
 
 // 0x5DC290
 void CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, uint8 surface, uint8 lightning, bool createsPlants, bool createsObjects) {
-    return plugin::CallMethod<0x5DC290, CPlantLocTri*, const CVector&, const CVector&, const CVector&, uint8, uint8, bool, bool>(this, p1, p2, p3, surface, lightning, createsPlants, createsObjects);
-
     m_V1 = p1;
     m_V2 = p2;
     m_V3 = p3;
 
     m_nLighting = lightning;
     m_SurfaceId = surface;
-
-    // todo: m_nFlags = bIsProcPlant | LOBYTE(m_nFlags) & 0xF8 | (2 * bIsProcObj);
+    m_createsObjects = createsObjects;
+    m_createsPlants = createsPlants;
 
     m_Center = (p1 + p2 + p3) / 3.0f;
 
@@ -61,15 +59,15 @@ void CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, 
     }
 
     if (m_createsObjects) {
-        // todo: m_nFlags = m_nFlags & 0xFE;
+        // m_nFlags = m_nFlags & 0xFE;
+        m_createsObjects = false;
+
         CPlantMgr::MoveLocTriToList(&CPlantMgr::m_UnusedLocTriListHead, &CPlantMgr::m_CloseLocTriListHead[3], this);
     }
 }
 
 // 0x5DB6D0
 void CPlantLocTri::Release() {
-    return plugin::CallMethod<0x5DB6D0, CPlantLocTri*>(this);
-
     m_nMaxNumPlants[0] = 0;
     m_nMaxNumPlants[1] = 0;
     m_nMaxNumPlants[2] = 0;
@@ -97,7 +95,6 @@ void CPlantLocTri::Release() {
         if (m_NextTri)
             m_NextTri->m_PrevTri = this;
         m_SurfaceId = -1;
-        // todo: m_nFlags = m_nFlags & 0xF8;
     } else {
         if (m_PrevTri) {
             if (m_NextTri) {
@@ -117,6 +114,10 @@ void CPlantLocTri::Release() {
         if (m_NextTri)
             m_NextTri->m_PrevTri = this;
         m_SurfaceId = 254;
-        // todo: m_nFlags = m_nFlags & 0xF8;
     }
+
+    // m_nFlags = m_nFlags & 0xF8;
+    m_createsPlants = false;
+    m_createsObjects = false;
+    m_createdObjects = false;
 }

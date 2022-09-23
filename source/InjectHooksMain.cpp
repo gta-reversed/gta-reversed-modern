@@ -122,6 +122,7 @@
 #include "ProcObjectMan.h"
 #include "ProcSurfaceInfo.h"
 #include "PlantColEntEntry.h"
+#include "PlantLocTri.h"
 
 // Tasks
 #include "TaskComplexSitDownThenIdleThenStandUp.h"
@@ -638,6 +639,7 @@ void InjectHooksMain() {
     CPlaneTrail::InjectHooks();
     CPlaneTrails::InjectHooks();
     CPlantColEntEntry::InjectHooks();
+    CPlantLocTri::InjectHooks();
 
     CCustomBuildingPipeline::InjectHooks();
     CCustomBuildingRenderer::InjectHooks();
