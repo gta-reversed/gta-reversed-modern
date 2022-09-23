@@ -84,7 +84,7 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedInstall(_ProcessEntryCollisionDataSections, 0x5DCD80, {.reversed = false});
     RH_ScopedInstall(_UpdateLocTris, 0x5DCF00, {.reversed = false});
 
-    RH_ScopedGlobalInstall(LoadModels, 0x5DD220, {.reversed = true});
+    RH_ScopedGlobalInstall(LoadModels, 0x5DD220);
 
     // debug shit, all of them just return true.
     // addresses (probably not in order): 0x5DB550 - 0x5DB580

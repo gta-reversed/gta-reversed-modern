@@ -75,33 +75,36 @@ void CPlantLocTri::Release() {
         g_procObjMan.ProcessTriangleRemoved(this);
 
     if (!m_createsObjects || m_createsPlants) {
-        auto v9 = &CPlantMgr::m_CloseLocTriListHead[CPlantSurfPropMgr::GetSurfProperties(m_SurfaceId)->m_SlotId];
-        if (m_PrevTri) {
-            if (m_NextTri) {
-                m_NextTri->m_PrevTri = m_PrevTri;
-                m_PrevTri->m_NextTri = m_NextTri;
+        auto head = &CPlantMgr::m_CloseLocTriListHead[CPlantSurfPropMgr::GetSurfProperties(m_SurfaceId)->m_SlotId];
+
+        if (auto prev = m_PrevTri) {
+            if (auto next = m_NextTri) {
+                next->m_PrevTri = prev;
+                prev->m_NextTri = next;
             } else {
-                m_PrevTri->m_NextTri = nullptr;
+                prev->m_NextTri = nullptr;
             }
         } else {
-            auto v10 = m_NextTri;
-            *v9 = v10;
-            if (v10)
-                v10->m_PrevTri = nullptr;
+            auto next = m_NextTri;
+            *head = next;
+            if (next)
+                next->m_PrevTri = nullptr;
         }
         m_NextTri = CPlantMgr::m_UnusedLocTriListHead;
         m_PrevTri = nullptr;
         CPlantMgr::m_UnusedLocTriListHead = this;
-        if (m_NextTri)
-            m_NextTri->m_PrevTri = this;
+        if (auto next = m_NextTri) {
+            next->m_PrevTri = this;
+        }
+
         m_SurfaceId = -1;
     } else {
-        if (m_PrevTri) {
-            if (m_NextTri) {
-                m_NextTri->m_PrevTri = m_PrevTri;
-                m_PrevTri->m_NextTri = m_NextTri;
+        if (auto prev = m_PrevTri) {
+            if (auto next = m_NextTri) {
+                next->m_PrevTri = prev;
+                prev->m_NextTri = next;
             } else {
-                m_PrevTri->m_NextTri = nullptr;
+                prev->m_NextTri = nullptr;
             }
         } else {
             CPlantMgr::m_CloseLocTriListHead[3] = m_NextTri;
@@ -111,8 +114,10 @@ void CPlantLocTri::Release() {
         m_NextTri = CPlantMgr::m_UnusedLocTriListHead;
         m_PrevTri = nullptr;
         CPlantMgr::m_UnusedLocTriListHead = this;
-        if (m_NextTri)
-            m_NextTri->m_PrevTri = this;
+        if (auto next = m_NextTri) {
+            next->m_PrevTri = this;
+        }
+
         m_SurfaceId = 254;
     }
 
