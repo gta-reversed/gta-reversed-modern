@@ -782,22 +782,17 @@ bool CWorld::GetIsLineOfSightSectorListClear(CPtrList& ptrList, const CColLine& 
 
 // 0x564A20
 void CWorld::FindObjectsInRange(const CVector& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
-    const int32 startSectorX = GetSectorX(point.x - radius);
-    const int32 startSectorY = GetSectorY(point.y - radius);
-    const int32 endSectorX = GetSectorX(point.x + radius);
-    const int32 endSectorY = GetSectorY(point.y + radius);
-
     IncrementCurrentScanCode();
-
     *outCount = 0;
-    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
-        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+    IterateSectorsOverlappedByRect(
+        { point, radius },
+        [&](int32 x, int32 y) {
             const auto ProcessSector = [&](CPtrList& list) {
                 FindObjectsInRangeSectorList(list, point, radius, b2D, outCount, maxCount, outEntities);
             };
 
-            auto sector = GetSector(sectorX, sectorY);
-            auto repeatSector = GetRepeatSector(sectorX, sectorY);
+            auto sector = GetSector(x, y);
+            auto repeatSector = GetRepeatSector(x, y);
 
             if (buildings)
                 ProcessSector(sector->m_buildings);
@@ -809,8 +804,10 @@ void CWorld::FindObjectsInRange(const CVector& point, float radius, bool b2D, in
                 ProcessSector(repeatSector->GetList(REPEATSECTOR_OBJECTS));
             if (dummies)
                 ProcessSector(sector->m_dummies);
+
+            return true;
         }
-    }
+    );
 }
 
 // 0x564C70
