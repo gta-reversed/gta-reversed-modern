@@ -29,7 +29,7 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedInstall(DestroySkinArrays, 0x5A56C0, { .reversed = false });
     RH_ScopedInstall(BuildBoneIndexConversionTable, 0x5A56E0, { .reversed = false });
     RH_ScopedInstall(CopyTexture, 0x5A5730);
-    RH_ScopedInstall(PlaceTextureOnTopOfTexture, 0x5A57B0, { .reversed = false });
+    RH_ScopedInstall(PlaceTextureOnTopOfTexture, 0x5A57B0);
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A5820, void (*)(RwTexture*, RwTexture*, float, float, int32));
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A59C0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32));
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A5BC0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32, RwTexture*));
@@ -130,31 +130,47 @@ void CClothesBuilder::BuildBoneIndexConversionTable(uint8* a1, RpHAnimHierarchy*
 // 0x5A5730
 RwTexture* CClothesBuilder::CopyTexture(RwTexture* texture) {
     RwRaster* raster = RwRasterCreate(
-        texture->raster->width,
-        texture->raster->height,
-        texture->raster->depth,
-        ((texture->raster->cFormat << 8) & (rwRASTERFORMAT1555 | rwRASTERFORMAT565 | rwRASTERFORMAT4444 | rwRASTERFORMATLUM8 | rwRASTERFORMAT8888 | rwRASTERFORMAT888 | rwRASTERFORMAT16 |
+        RwRasterGetWidth(RwTextureGetRaster(texture)),
+        RwRasterGetHeight(RwTextureGetRaster(texture)),
+        RwRasterGetDepth(RwTextureGetRaster(texture)),
+        (RwRasterGetHeight(RwTextureGetRaster(texture)) & (rwRASTERFORMAT1555 | rwRASTERFORMAT565 | rwRASTERFORMAT4444 | rwRASTERFORMATLUM8 | rwRASTERFORMAT8888 | rwRASTERFORMAT888 |
+                                                        rwRASTERFORMAT16 |
                     rwRASTERFORMAT24 | rwRASTERFORMAT32 | rwRASTERFORMAT555 | rwRASTERFORMATPAL8 | rwRASTERFORMATPAL4)) | 4
     );
 
-    const auto lockedRasterPixelsOld = RwRasterLock(texture->raster, 0, rwRASTERLOCKREAD);
+    const auto lockedRasterPixelsOld = RwRasterLock(RwTextureGetRaster(texture), 0, rwRASTERLOCKREAD);
     const auto lockedRasterPixelsNew = RwRasterLock(raster, 0, rwRASTERLOCKWRITE);
 
-    memcpy(lockedRasterPixelsNew, lockedRasterPixelsOld, texture->raster->height * texture->raster->stride);
+    memcpy(lockedRasterPixelsNew, lockedRasterPixelsOld, RwRasterGetHeight(RwTextureGetRaster(texture)) * RwRasterGetStride(RwTextureGetRaster(texture)));
 
-    RwRasterUnlock(texture->raster);
+    RwRasterUnlock(RwTextureGetRaster(texture));
     RwRasterUnlock(raster);
 
     RwTexture* newTexture = RwTextureCreate(raster);
-    RwTextureSetFilterModeMacro(newTexture, 2);
+    RwTextureSetFilterModeMacro(newTexture, rwFILTERLINEAR);
 
     return newTexture;
-    //return plugin::CallAndReturn<RwTexture*, 0x5A5730, RwTexture*>(texture);
 }
 
 // 0x5A57B0
 void CClothesBuilder::PlaceTextureOnTopOfTexture(RwTexture* texture1, RwTexture* texture2) {
-    plugin::Call<0x5A57B0, RwTexture*, RwTexture*>(texture1, texture2);
+    RwUInt8* pPixelsTo = RwRasterLock(RwTextureGetRaster(texture1), 0, rwRASTERLOCKREADWRITE);
+    RwUInt8* pPixelsFrom = RwRasterLock(RwTextureGetRaster(texture2), 0, rwRASTERLOCKREADWRITE);
+
+    for (int y = 0; y < RwRasterGetHeight(RwTextureGetRaster(texture2)); ++y) {
+        for (int x = 0; x < RwRasterGetWidth(RwTextureGetRaster(texture2)); ++x) {
+            float percentAlpha = (float)pPixelsFrom[x * 4 + 3] / 255.0f;
+            pPixelsTo[x * 4 + 0] = std::min(pPixelsTo[x * 4 + 0] * (1.0f - percentAlpha) + pPixelsFrom[x * 4 + 0] * percentAlpha, 255.0f);
+            pPixelsTo[x * 4 + 1] = std::min(pPixelsTo[x * 4 + 1] * (1.0f - percentAlpha) + pPixelsFrom[x * 4 + 1] * percentAlpha, 255.0f);
+            pPixelsTo[x * 4 + 2] = std::min(pPixelsTo[x * 4 + 2] * (1.0f - percentAlpha) + pPixelsFrom[x * 4 + 2] * percentAlpha, 255.0f);
+        }
+
+        pPixelsTo += RwRasterGetStride(RwTextureGetRaster(texture1));
+        pPixelsFrom += RwRasterGetStride(RwTextureGetRaster(texture2));
+    }
+
+    RwRasterUnlock(RwTextureGetRaster(texture1));
+    RwRasterUnlock(RwTextureGetRaster(texture2));
 }
 
 // 0x5A5820
