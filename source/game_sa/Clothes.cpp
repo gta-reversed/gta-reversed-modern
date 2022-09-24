@@ -287,9 +287,3 @@ AssocGroupId CClothes::GetDefaultPlayerMotionGroup() {
 
     return group;
 }
-
-// NOTSA
-void CClothes::AddRule(uint32 rule) {
-    CClothes::ms_clothesRules[CClothes::ms_numRuleTags] = rule;
-    CClothes::ms_numRuleTags += 1;
-}

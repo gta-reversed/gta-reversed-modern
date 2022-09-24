@@ -36,5 +36,8 @@ public:
     static AssocGroupId GetDefaultPlayerMotionGroup();
 
     // NOTSA
-    static void AddRule(uint32 rule);
+    static void AddRule(uint32 rule) {
+        ms_clothesRules[ms_numRuleTags] = rule;
+        ms_numRuleTags += 1;
+    }
 };
