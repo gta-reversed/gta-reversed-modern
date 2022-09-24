@@ -72,12 +72,10 @@ void CClothes::LoadClothesFile() {
         if (!line[0] || line[0] == '#') {
             continue;
         }
-
         if (!isRuleStarted) {
             isRuleStarted = !strcmp("rule", line);
             continue;
         }
-
         if (!strcmp("end", line)) {
             isRuleStarted = false;
             continue;
@@ -88,65 +86,65 @@ void CClothes::LoadClothesFile() {
             continue;
         }
 
-        eClothesFileRuleTags ruleTag;
-
-        if (!strcmp(strTag, "cuts")) {
-            ruleTag = eClothesFileRuleTags::RULE_TAG_CUTS;
-        } else if (!strcmp(strTag, "setc")) {
-            ruleTag = eClothesFileRuleTags::RULE_TAG_SETC;
-        } else if (!strcmp(strTag, "tex")) {
-            ruleTag = eClothesFileRuleTags::RULE_TAG_TEX;
-        } else if (!strcmp(strTag, "hide")) {
-            ruleTag = eClothesFileRuleTags::RULE_TAG_HIDE;
-        } else if (!strcmp(strTag, "endignore")) {
-            ruleTag = eClothesFileRuleTags::RULE_TAG_END_IGNORE;
-        } else if (!strcmp(strTag, "ignore")) {
-            ruleTag = eClothesFileRuleTags::RULE_TAG_IGNORE;
-        } else if (!strcmp(strTag, "endexclusive")) {
-            ruleTag = eClothesFileRuleTags::RULE_TAG_END_EXCLUSIVE;
-        } else if (!strcmp(strTag, "exclusive")) {
-            ruleTag = eClothesFileRuleTags::RULE_TAG_EXCLUSIVE;
-        }
-
-        CClothes::AddRule(ruleTag);
-
-        char** args = new char*[4];
-
-        for (size_t i = 0; i < 4; i++) { // max 4 arguments are checked
-            args[i] = strtok(NULL, " \t,");
-        }
-
+        enum class eClothRule : uint8_t {
+            TAG_CUTS,
+            TAG_SETC,
+            TAG_TEX,
+            TAG_HIDE,
+            TAG_END_IGNORE,
+            TAG_IGNORE,
+            TAG_END_EXCLUSIVE,
+            TAG_EXCLUSIVE
+        };
+        const eClothRule ruleTag = [&](){
+            constexpr struct {const char* name; eClothRule rule;} map[]{
+                {"cuts", eClothRule::TAG_CUTS},
+                {"setc", eClothRule::TAG_SETC},
+                {"tex", eClothRule::TAG_TEX},
+                {"hide", eClothRule::TAG_HIDE},
+                {"endignore", eClothRule::TAG_END_IGNORE},
+                {"ignore", eClothRule::TAG_IGNORE},
+                {"endexclusive", eClothRule::TAG_END_EXCLUSIVE},
+                {"exclusive", eClothRule::TAG_EXCLUSIVE}
+            };
+            for (const auto& [name, rule] : map) {
+                if (!strcmp(strTag, name)) {
+                    return rule;
+                }
+            }
+            NOTSA_UNREACHABLE("Invalid rule tag: {}", strTag);
+        }();
+        AddRule(static_cast<uint32_t>(ruleTag));
+        const auto GetNextArg = []{
+            return strtok(NULL, " \t,");
+        };
         switch (ruleTag) {
-        case eClothesFileRuleTags::RULE_TAG_CUTS:
-        case eClothesFileRuleTags::RULE_TAG_TEX:
-            CClothes::AddRule(CKeyGen::GetUppercaseKey(args[0]));
-            CClothes::AddRule(CKeyGen::GetUppercaseKey(args[1]));
-            break;
-        case eClothesFileRuleTags::RULE_TAG_SETC:
-            CClothes::AddRule(CKeyGen::GetUppercaseKey(args[0]));
-            CClothes::AddRule(GetClothesModelFromName(args[1]));
-
-            if (!strcmp("-", args[2])) {
-                CClothes::AddRule(NULL);
-            } else {
-                CClothes::AddRule(CKeyGen::GetUppercaseKey(args[2]));
-            }
-
-            if (!strcmp("-", args[3])) {
-                CClothes::AddRule(NULL);
-            } else {
-                CClothes::AddRule(CKeyGen::GetUppercaseKey(args[3]));
+        case eClothRule::TAG_CUTS:
+        case eClothRule::TAG_TEX: {
+            for (auto i = 0u; i < 2u; i++) {
+                CClothes::AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
             }
             break;
-        case eClothesFileRuleTags::RULE_TAG_HIDE:
-            CClothes::AddRule(CKeyGen::GetUppercaseKey(args[0]));
-            CClothes::AddRule(GetClothesModelFromName(args[1]));
+        }
+        case eClothRule::TAG_SETC: {
+            CClothes::AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
+            CClothes::AddRule(GetClothesModelFromName(GetNextArg()));
+            for (auto i = 0u; i < 2u; i++) {
+                const auto rule = GetNextArg();
+                AddRule(!strcmp("-", rule) ? 0 : CKeyGen::GetUppercaseKey(rule));
+            }
             break;
-        case eClothesFileRuleTags::RULE_TAG_END_IGNORE:
-        case eClothesFileRuleTags::RULE_TAG_IGNORE:
-        case eClothesFileRuleTags::RULE_TAG_END_EXCLUSIVE:
-        case eClothesFileRuleTags::RULE_TAG_EXCLUSIVE:
-            CClothes::AddRule(CKeyGen::GetUppercaseKey(args[0]));
+        }
+        case eClothRule::TAG_HIDE: {
+            CClothes::AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
+            CClothes::AddRule(GetClothesModelFromName(GetNextArg()));
+            break;
+        }
+        case eClothRule::TAG_END_IGNORE:
+        case eClothRule::TAG_IGNORE:
+        case eClothRule::TAG_END_EXCLUSIVE:
+        case eClothRule::TAG_EXCLUSIVE: 
+            CClothes::AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
             break;
         }
     }

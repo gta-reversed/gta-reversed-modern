@@ -13,17 +13,6 @@
 class CPedClothesDesc;
 class CPlayerPed;
 
-enum eClothesFileRuleTags : uint8_t {
-    RULE_TAG_CUTS,
-    RULE_TAG_SETC,
-    RULE_TAG_TEX,
-    RULE_TAG_HIDE,
-    RULE_TAG_END_IGNORE,
-    RULE_TAG_IGNORE,
-    RULE_TAG_END_EXCLUSIVE,
-    RULE_TAG_EXCLUSIVE
-};
-
 class CClothes {
 public:
     static int32& ms_clothesImageId;
