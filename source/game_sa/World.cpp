@@ -1433,20 +1433,17 @@ void CWorld::ExtinguishAllCarFiresInArea(CVector point, float radius) {
 
 // 0x566A60
 void CWorld::CallOffChaseForArea(float minX, float minY, float maxX, float maxY) {
-    const int32 startSectorX = GetSectorX(minX - 10.f);
-    const int32 startSectorY = GetSectorY(minY - 10.f);
-    const int32 endSectorX = GetSectorX(maxX + 10.f);
-    const int32 endSectorY = GetSectorY(maxY + 10.f);
-
     IncrementCurrentScanCode();
 
-    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
-        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
-            CRepeatSector* sector = GetRepeatSector(sectorX, sectorY);
+    IterateSectorsOverlappedByRect(
+        { minX - 10.f, minY - 10.f, maxX + 10.f, maxY - 10.f },
+        [&](int32 x, int32 y) {
+            CRepeatSector* sector = GetRepeatSector(x, y);
             CallOffChaseForAreaSectorListVehicles(sector->GetList(REPEATSECTOR_VEHICLES), minX, minY, maxX, maxY, minX, minY, maxX, maxY);
             CallOffChaseForAreaSectorListPeds(sector->GetList(REPEATSECTOR_PEDS), minX, minY, maxX, maxY, minX, minY, maxX, maxY);
+            return true;
         }
-    }
+    );
 }
 
 // 0x566C10
