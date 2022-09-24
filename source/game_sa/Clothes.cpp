@@ -69,7 +69,7 @@ void CClothes::LoadClothesFile() {
     auto* file = CFileMgr::OpenFile("DATA\\CLOTHES.DAT", "r");
 
     for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
-        if (!line[0] || line[0] == '#') {
+        if (line[0] == '\0' || line[0] == '#') {
             continue;
         }
         if (!isRuleStarted) {
@@ -82,7 +82,7 @@ void CClothes::LoadClothesFile() {
         }
 
         char* strTag = strtok(line, " \t,");
-        if (!strTag) {
+        if (strTag == nullptr) {
             continue;
         }
 
