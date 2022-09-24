@@ -398,7 +398,7 @@ void CPlantMgr::_ColEntityCache_Update(const CVector& cameraPos, bool fast) {
 
     // prune ones that have no entity, too far or not in the same area.
     for (auto i = CPlantMgr::m_CloseColEntListHead; i; i = i->m_NextEntry) {
-        if (!i->m_Entity || _CalcDistanceSqrToEntity(i->m_Entity, cameraPos) > 115600.0f || !i->m_Entity->IsInCurrentAreaOrBarberShopInterior()) {
+        if (!i->m_Entity || _CalcDistanceSqrToEntity(i->m_Entity, cameraPos) > sq(340.0f) || !i->m_Entity->IsInCurrentAreaOrBarberShopInterior()) {
             i->ReleaseEntry();
         }
     }
@@ -407,28 +407,33 @@ void CPlantMgr::_ColEntityCache_Update(const CVector& cameraPos, bool fast) {
         return;
 
     CWorld::IncrementCurrentScanCode();
-    auto start = (int32)CWorld::GetSectorfY(cameraPos.y - 340.0f), end = (int32)CWorld::GetSectorfY(cameraPos.y + 340.0f);
+    const int32 startSectorX = CWorld::GetSectorX(cameraPos.x - 340.f);
+    const int32 startSectorY = CWorld::GetSectorY(cameraPos.y - 340.f);
+    const int32 endSectorX = CWorld::GetSectorX(cameraPos.x + 340.f);
+    const int32 endSectorY = CWorld::GetSectorY(cameraPos.y + 340.f);
 
-    for (auto i = start; i <= end; i++) {
-        auto& sector = CWorld::ms_aSectors[std::clamp(i, 0, 119)][std::clamp(start, 0, 119)];
+    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+            auto& sector = *GetSector(sectorX, sectorY);
 
-        for (auto i = sector.m_buildings.GetNode(); i; i = i->m_next) {
-            auto item = static_cast<CEntity*>(i->m_item);
+            for (auto i = sector.m_buildings.GetNode(); i; i = i->m_next) {
+                auto item = static_cast<CEntity*>(i->m_item);
 
-            if (item->m_bIsProcObject || item->IsScanCodeCurrent() || !item->IsInCurrentAreaOrBarberShopInterior())
-                continue;
+                if (item->m_bIsProcObject || item->IsScanCodeCurrent() || !item->IsInCurrentAreaOrBarberShopInterior())
+                    continue;
 
-            if (auto mi = item->GetModelInfo(); mi->GetModelType() == MODEL_INFO_ATOMIC && mi->bAtomicFlag0x200) {
-                for (auto j = m_CloseColEntListHead; j; j = j->m_NextEntry) {
-                    if (j->m_Entity == item) {
-                        // found the stuff, continue
-                        continue;
+                if (auto mi = item->GetModelInfo(); mi->GetModelType() == MODEL_INFO_ATOMIC && mi->bAtomicFlag0x200) {
+                    for (auto j = m_CloseColEntListHead; j; j = j->m_NextEntry) {
+                        if (j->m_Entity == item) {
+                            // found the stuff, continue
+                            continue;
+                        }
                     }
-                }
 
-                if (_CalcDistanceSqrToEntity(item, cameraPos) <= 115600.0f) {
-                    if (!m_UnusedColEntListHead || !m_UnusedColEntListHead->AddEntry(item)) {
-                        return;
+                    if (_CalcDistanceSqrToEntity(item, cameraPos) <= sq(340.0f)) {
+                        if (!m_UnusedColEntListHead || !m_UnusedColEntListHead->AddEntry(item)) {
+                            return;
+                        }
                     }
                 }
             }
