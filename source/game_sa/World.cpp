@@ -865,6 +865,11 @@ void CWorld::FindObjectsKindaCollidingSectorList(CPtrList& ptrList, const CVecto
     for (CPtrNode* it = ptrList.m_node, *next{}; it; it = next) {
         next = it->GetNext();
 
+        // NOTSA: If we can't store more entities there's no point in trying
+        if (*outCount >= maxCount) {
+            return;
+        }
+
         auto entity = static_cast<CEntity*>(it->m_item);
         if (entity->IsScanCodeCurrent())
             continue;
@@ -880,11 +885,10 @@ void CWorld::FindObjectsKindaCollidingSectorList(CPtrList& ptrList, const CVecto
                 continue;
         }
 
-        if (*outCount < maxCount) {
-            if (outEntities)
-                outEntities[*outCount] = entity;
-            ++*outCount;
-        }
+        // NOTSA: `outCount` checked above already
+        if (outEntities)
+            outEntities[*outCount] = entity;
+        ++*outCount;
     }
 }
 
@@ -1224,7 +1228,7 @@ void CWorld::RemoveFallenCars() {
 
         if (ShouldWeKeepIt()) {
             CNodeAddress pathNodeAddress = ThePaths.FindNodeClosestToCoors(vecPos, 1, 1000000.0f, 0, 0, 0, 0, 0);
-            if (pathNodeAddress.IsValid()) {
+            if (pathNodeAddress.IsAreaValid()) {
                 const auto pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
                 vehicle->Teleport(pathNodePos + CVector(0, 0, 3), true);
             } else
@@ -1436,7 +1440,7 @@ void CWorld::CallOffChaseForArea(float minX, float minY, float maxX, float maxY)
     IncrementCurrentScanCode();
 
     IterateSectorsOverlappedByRect(
-        { minX - 10.f, minY - 10.f, maxX + 10.f, maxY - 10.f },
+        { minX - 10.f, minY - 10.f, maxX + 10.f, maxY + 10.f },
         [&](int32 x, int32 y) {
             CRepeatSector* sector = GetRepeatSector(x, y);
             CallOffChaseForAreaSectorListVehicles(sector->GetList(REPEATSECTOR_VEHICLES), minX, minY, maxX, maxY, minX, minY, maxX, maxY);
@@ -2173,7 +2177,7 @@ bool CWorld::GetIsLineOfSightSectorClear(CSector& sector, CRepeatSector& repeatS
 // 0x568B80
 void CWorld::FindObjectsKindaColliding(const CVector& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
     IncrementCurrentScanCode();
-
+    *outCount = 0;
     IterateSectorsOverlappedByRect(
         { point, radius },
         [&](int32 x, int32 y) {
@@ -2184,9 +2188,6 @@ void CWorld::FindObjectsKindaColliding(const CVector& point, float radius, bool 
             const auto sector = GetSector(x, y);
             const auto repeatSector = GetRepeatSector(x, y);
 
-            // TODO: Could add `&& maxCount >= *outCount` to all but the first `if`
-            //       Reason being that once `outEntities` is filled up there's no
-            //       no need to keep scanning for entities.
             if (buildings)
                 ProcessSector(sector->m_buildings);
             if (vehicles)
