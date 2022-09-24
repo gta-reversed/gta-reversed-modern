@@ -13,11 +13,22 @@
 class CPedClothesDesc;
 class CPlayerPed;
 
+enum eClothesFileRuleTags : uint8_t {
+    RULE_TAG_CUTS,
+    RULE_TAG_SETC,
+    RULE_TAG_TEX,
+    RULE_TAG_HIDE,
+    RULE_TAG_END_IGNORE,
+    RULE_TAG_IGNORE,
+    RULE_TAG_END_EXCLUSIVE,
+    RULE_TAG_EXCLUSIVE
+};
+
 class CClothes {
 public:
     static int32& ms_clothesImageId;
-    static int32& ms_numRuleTags;
-    static int32 (&ms_clothesRules)[600];
+    static uint32_t& ms_numRuleTags;
+    static uint32_t (&ms_clothesRules)[600];
 
 public:
     static void InjectHooks();
@@ -34,4 +45,7 @@ public:
     static eClothesTexturePart GetDependentTexture(eClothesModelPart eClothesModelPart);
     static AssocGroupId GetPlayerMotionGroupToLoad();
     static AssocGroupId GetDefaultPlayerMotionGroup();
+
+    // NOTSA
+    static void AddRule(uint32_t rule);
 };

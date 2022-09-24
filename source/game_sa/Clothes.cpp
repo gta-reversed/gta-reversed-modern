@@ -12,8 +12,8 @@
 #include "PedClothesDesc.h"
 
 int32& CClothes::ms_clothesImageId = *(int32*)0xBC12F8;
-int32& CClothes::ms_numRuleTags = *(int32*)0xBC12FC;
-int32 (&CClothes::ms_clothesRules)[600] = *(int32(*)[600])0xBC1300;
+uint32_t& CClothes::ms_numRuleTags = *(uint32_t*)0xBC12FC;
+uint32_t (&CClothes::ms_clothesRules)[600] = *(uint32_t(*)[600])0xBC1300;
 
 CPedClothesDesc& PlayerClothes = *(CPedClothesDesc*)0xBC1C78;
 
@@ -22,7 +22,7 @@ void CClothes::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x5A80D0);
-    RH_ScopedInstall(LoadClothesFile, 0x5A7B30, { .reversed = false });
+    RH_ScopedInstall(LoadClothesFile, 0x5A7B30);
     RH_ScopedInstall(ConstructPedModel, 0x5A81E0);
     RH_ScopedInstall(RequestMotionGroupAnims, 0x5A8120);
     RH_ScopedInstall(RebuildPlayerIfNeeded, 0x5A8390);
@@ -67,7 +67,87 @@ int32 GetClothesModelFromName(const char* name) {
 
 // 0x5A7B30
 void CClothes::LoadClothesFile() {
-    plugin::Call<0x5A7B30>();
+    bool isRuleStarted = false;
+    auto* file = CFileMgr::OpenFile("DATA\\CLOTHES.DAT", "r");
+
+    for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
+        if (line[0] && line[0] != '#') {
+            if (isRuleStarted) {
+                if (!strcmp("end", line)) {
+                    isRuleStarted = false;
+                }else{
+                    char* lineExp = strtok(line, " \t,");
+                    eClothesFileRuleTags ruleTag;
+
+                    if (lineExp) {
+                        if (!strcmp(lineExp, "cuts")) {
+                            ruleTag = eClothesFileRuleTags::RULE_TAG_CUTS;
+                        } else if (!strcmp(lineExp, "setc")) {
+                            ruleTag = eClothesFileRuleTags::RULE_TAG_SETC;
+                        } else if (!strcmp(lineExp, "tex")) {
+                            ruleTag = eClothesFileRuleTags::RULE_TAG_TEX;
+                        } else if (!strcmp(lineExp, "hide")) {
+                            ruleTag = eClothesFileRuleTags::RULE_TAG_HIDE;
+                        } else if (!strcmp(lineExp, "endignore")) {
+                            ruleTag = eClothesFileRuleTags::RULE_TAG_END_IGNORE;
+                        } else if (!strcmp(lineExp, "ignore")) {
+                            ruleTag = eClothesFileRuleTags::RULE_TAG_IGNORE;
+                        } else if (!strcmp(lineExp, "endexclusive")) {
+                            ruleTag = eClothesFileRuleTags::RULE_TAG_END_EXCLUSIVE;
+                        } else if (!strcmp(lineExp, "exclusive")) {
+                            ruleTag = eClothesFileRuleTags::RULE_TAG_EXCLUSIVE;
+                        }
+
+                        CClothes::AddRule(ruleTag);
+
+                        char** args = new char*[4];
+
+                        for (size_t i = 0; i < 4; i++) { // max 4 arguments are checked
+                            args[i] = strtok(NULL, " \t,");
+                        }
+
+                        switch (ruleTag) {
+                        case eClothesFileRuleTags::RULE_TAG_CUTS:
+                        case eClothesFileRuleTags::RULE_TAG_TEX:
+                            CClothes::AddRule(CKeyGen::GetUppercaseKey(args[0]));
+                            CClothes::AddRule(CKeyGen::GetUppercaseKey(args[1]));
+                            break;
+                        case eClothesFileRuleTags::RULE_TAG_SETC:
+                            CClothes::AddRule(CKeyGen::GetUppercaseKey(args[0]));
+                            CClothes::AddRule(GetClothesModelFromName(args[1]));
+
+                            if (!strcmp("-", args[2])) {
+                                CClothes::AddRule(NULL);
+                            } else {
+                                CClothes::AddRule(CKeyGen::GetUppercaseKey(args[2]));
+                            }
+
+                            if (!strcmp("-", args[3])) {
+                                CClothes::AddRule(NULL);
+                            } else {
+                                CClothes::AddRule(CKeyGen::GetUppercaseKey(args[3]));
+                            }
+                            break;
+                        case eClothesFileRuleTags::RULE_TAG_HIDE:
+                            CClothes::AddRule(CKeyGen::GetUppercaseKey(args[0]));
+                            CClothes::AddRule(GetClothesModelFromName(args[1]));
+                            break;
+                        case eClothesFileRuleTags::RULE_TAG_END_IGNORE:
+                        case eClothesFileRuleTags::RULE_TAG_IGNORE:
+                        case eClothesFileRuleTags::RULE_TAG_END_EXCLUSIVE:
+                        case eClothesFileRuleTags::RULE_TAG_EXCLUSIVE:
+                            CClothes::AddRule(CKeyGen::GetUppercaseKey(args[0]));
+                            break;
+                        }
+                        }
+                    }
+                }
+        } else {
+            isRuleStarted = !strcmp("rule", line);
+        }
+    }
+
+    CFileMgr::CloseFile(file);
 }
 
 // 0x5A81E0
@@ -204,4 +284,10 @@ AssocGroupId CClothes::GetDefaultPlayerMotionGroup() {
         return ANIM_GROUP_PLAYER;
 
     return group;
+}
+
+// NOTSA
+void CClothes::AddRule(uint32_t rule) {
+    CClothes::ms_clothesRules[CClothes::ms_numRuleTags] = rule;
+    CClothes::ms_numRuleTags += 1;
 }
