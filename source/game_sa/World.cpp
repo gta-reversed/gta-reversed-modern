@@ -1224,7 +1224,7 @@ void CWorld::RemoveFallenCars() {
 
         if (ShouldWeKeepIt()) {
             CNodeAddress pathNodeAddress = ThePaths.FindNodeClosestToCoors(vecPos, 1, 1000000.0f, 0, 0, 0, 0, 0);
-            if (pathNodeAddress.IsAreaValid()) {
+            if (pathNodeAddress.IsValid()) {
                 const auto pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
                 vehicle->Teleport(pathNodePos + CVector(0, 0, 3), true);
             } else
@@ -1305,12 +1305,12 @@ CEntity* CWorld::TestSphereAgainstSectorList(CPtrList& ptrList, CVector sphereCe
             continue; // Bound spheres not colliding
 
         if (CCollision::ProcessColModels(sphereMatrix, sphereColModel, entity->GetMatrix(), entityColModel, gaTempSphereColPoints, nullptr, nullptr, false)) {
-            sphereColModel.m_pColData = nullptr; // Make sure CColModel destructor doesn't try our local variable
+            sphereColModel.m_pColData = nullptr; // Make sure CColModel destructor doesn't try to delete our local variable
             return entity;
         }
     }
 
-    sphereColModel.m_pColData = nullptr; // Make sure CColModel destructor doesn't try our local variable
+    sphereColModel.m_pColData = nullptr; // Make sure CColModel destructor doesn't try to delete our local variable
     return nullptr;
 }
 
@@ -1727,7 +1727,7 @@ bool CWorld::ProcessVerticalLine_FillGlobeColPoints(const CVector& origin, float
     CColLine colLine{ origin, CVector{origin.x, origin.y, distance} };
     return ProcessVerticalLineSector_FillGlobeColPoints(
         *GetSector(secX, secY),
-        *GetRepeatSector(secX % MAX_REPEAT_SECTORS_X, secY % MAX_REPEAT_SECTORS_Y),
+        *GetRepeatSector(secX, secY),
         colLine,
         outEntity, buildings, vehicles, peds, objects, dummies, doSeeThroughCheck, outCollPoly
     );
@@ -2222,6 +2222,9 @@ void CWorld::FindObjectsIntersectingCube(const CVector& cornerA, const CVector& 
             auto sector = GetSector(sectorX, sectorY);
             auto repeatSector = GetRepeatSector(sectorX, sectorY);
 
+            // TODO: Could add `&& maxCount >= *outCount` to all but the first `if`
+            //       Reason being that once `outEntities` is filled up there's no
+            //       no need to keep scanning for entities.
             if (buildings)
                 ProcessSector(sector->m_buildings);
             if (vehicles)
