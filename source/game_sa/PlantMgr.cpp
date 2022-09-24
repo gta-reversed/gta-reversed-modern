@@ -5,6 +5,7 @@
 #include "PlantColEntEntry.h"
 #include "PlantLocTri.h"
 #include "PlantSurfPropMgr.h"
+#include "ColHelpers.h"
 #include <extensions/enumerate.hpp>
 
 // 0x5DD100 (todo: move)
@@ -437,6 +438,7 @@ void CPlantMgr::_ColEntityCache_Update(const CVector& cameraPos, bool fast) {
 void CPlantMgr::_ProcessEntryCollisionDataSections(CPlantColEntEntry* entry, const CVector& center, int32 a3) {
     return plugin::Call<0x5DCD80, CPlantColEntEntry*, const CVector&, int32>(entry, center, a3);
 
+    auto entity = entry->m_Entity;
     auto colData = entry->m_Entity->GetColData();
     if (!colData)
         return;
@@ -451,6 +453,21 @@ void CPlantMgr::_ProcessEntryCollisionDataSections(CPlantColEntEntry* entry, con
         return _ProcessEntryCollisionDataSections_AddLocTris(entry, center, a3, 0, numTriangles - 1);
     }
 
+    auto faceGroupsNum = colData->GetNumFaceGroups();
+    auto faceGroups = colData->GetFaceGroups();
+    for (auto i = faceGroupsNum; i != 0; i--) {
+        auto& pos = entity->GetPosition();
+        auto& box = faceGroups[i].bb;
+
+        CVector out[2]{};
+        TransformPoints(out, 2, (RwMatrix&)entity->GetMatrix(), (RwV3d*)&box);
+        box.Set(out[0], out[1]);
+        box.Recalc();
+
+        if (CCollision::TestSphereBox({100.0f, center}, box)) {
+            // _ProcessEntryCollisionDataSections_AddLocTris(entry, center, a3, faceGroups[i].);
+        }
+    }
     // ...
 }
 
