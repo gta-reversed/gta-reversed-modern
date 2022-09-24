@@ -73,82 +73,81 @@ void CClothes::LoadClothesFile() {
             continue;
         }
 
-        if (isRuleStarted) {
-            if (!strcmp("end", line)) {
-                isRuleStarted = false;
-                continue;
-            }
-
-            char* strTag = strtok(line, " \t,");
-
-            if (!strTag) {
-                continue;
-            }
-
-            eClothesFileRuleTags ruleTag;
-
-            if (!strcmp(strTag, "cuts")) {
-                ruleTag = eClothesFileRuleTags::RULE_TAG_CUTS;
-            } else if (!strcmp(strTag, "setc")) {
-                ruleTag = eClothesFileRuleTags::RULE_TAG_SETC;
-            } else if (!strcmp(strTag, "tex")) {
-                ruleTag = eClothesFileRuleTags::RULE_TAG_TEX;
-            } else if (!strcmp(strTag, "hide")) {
-                ruleTag = eClothesFileRuleTags::RULE_TAG_HIDE;
-            } else if (!strcmp(strTag, "endignore")) {
-                ruleTag = eClothesFileRuleTags::RULE_TAG_END_IGNORE;
-            } else if (!strcmp(strTag, "ignore")) {
-                ruleTag = eClothesFileRuleTags::RULE_TAG_IGNORE;
-            } else if (!strcmp(strTag, "endexclusive")) {
-                ruleTag = eClothesFileRuleTags::RULE_TAG_END_EXCLUSIVE;
-            } else if (!strcmp(strTag, "exclusive")) {
-                ruleTag = eClothesFileRuleTags::RULE_TAG_EXCLUSIVE;
-            }
-
-            CClothes::AddRule(ruleTag);
-
-            char** args = new char*[4];
-
-            for (size_t i = 0; i < 4; i++) { // max 4 arguments are checked
-                args[i] = strtok(NULL, " \t,");
-            }
-
-            switch (ruleTag) {
-            case eClothesFileRuleTags::RULE_TAG_CUTS:
-            case eClothesFileRuleTags::RULE_TAG_TEX:
-                CClothes::AddRule(CKeyGen::GetUppercaseKey(args[0]));
-                CClothes::AddRule(CKeyGen::GetUppercaseKey(args[1]));
-                break;
-            case eClothesFileRuleTags::RULE_TAG_SETC:
-                CClothes::AddRule(CKeyGen::GetUppercaseKey(args[0]));
-                CClothes::AddRule(GetClothesModelFromName(args[1]));
-
-                if (!strcmp("-", args[2])) {
-                    CClothes::AddRule(NULL);
-                } else {
-                    CClothes::AddRule(CKeyGen::GetUppercaseKey(args[2]));
-                }
-
-                if (!strcmp("-", args[3])) {
-                    CClothes::AddRule(NULL);
-                } else {
-                    CClothes::AddRule(CKeyGen::GetUppercaseKey(args[3]));
-                }
-                break;
-            case eClothesFileRuleTags::RULE_TAG_HIDE:
-                CClothes::AddRule(CKeyGen::GetUppercaseKey(args[0]));
-                CClothes::AddRule(GetClothesModelFromName(args[1]));
-                break;
-            case eClothesFileRuleTags::RULE_TAG_END_IGNORE:
-            case eClothesFileRuleTags::RULE_TAG_IGNORE:
-            case eClothesFileRuleTags::RULE_TAG_END_EXCLUSIVE:
-            case eClothesFileRuleTags::RULE_TAG_EXCLUSIVE:
-                CClothes::AddRule(CKeyGen::GetUppercaseKey(args[0]));
-                break;
-            }
-
-        } else {
+        if (!isRuleStarted) {
             isRuleStarted = !strcmp("rule", line);
+            continue;
+        }
+
+        if (!strcmp("end", line)) {
+            isRuleStarted = false;
+            continue;
+        }
+
+        char* strTag = strtok(line, " \t,");
+        if (!strTag) {
+            continue;
+        }
+
+        eClothesFileRuleTags ruleTag;
+
+        if (!strcmp(strTag, "cuts")) {
+            ruleTag = eClothesFileRuleTags::RULE_TAG_CUTS;
+        } else if (!strcmp(strTag, "setc")) {
+            ruleTag = eClothesFileRuleTags::RULE_TAG_SETC;
+        } else if (!strcmp(strTag, "tex")) {
+            ruleTag = eClothesFileRuleTags::RULE_TAG_TEX;
+        } else if (!strcmp(strTag, "hide")) {
+            ruleTag = eClothesFileRuleTags::RULE_TAG_HIDE;
+        } else if (!strcmp(strTag, "endignore")) {
+            ruleTag = eClothesFileRuleTags::RULE_TAG_END_IGNORE;
+        } else if (!strcmp(strTag, "ignore")) {
+            ruleTag = eClothesFileRuleTags::RULE_TAG_IGNORE;
+        } else if (!strcmp(strTag, "endexclusive")) {
+            ruleTag = eClothesFileRuleTags::RULE_TAG_END_EXCLUSIVE;
+        } else if (!strcmp(strTag, "exclusive")) {
+            ruleTag = eClothesFileRuleTags::RULE_TAG_EXCLUSIVE;
+        }
+
+        CClothes::AddRule(ruleTag);
+
+        char** args = new char*[4];
+
+        for (size_t i = 0; i < 4; i++) { // max 4 arguments are checked
+            args[i] = strtok(NULL, " \t,");
+        }
+
+        switch (ruleTag) {
+        case eClothesFileRuleTags::RULE_TAG_CUTS:
+        case eClothesFileRuleTags::RULE_TAG_TEX:
+            CClothes::AddRule(CKeyGen::GetUppercaseKey(args[0]));
+            CClothes::AddRule(CKeyGen::GetUppercaseKey(args[1]));
+            break;
+        case eClothesFileRuleTags::RULE_TAG_SETC:
+            CClothes::AddRule(CKeyGen::GetUppercaseKey(args[0]));
+            CClothes::AddRule(GetClothesModelFromName(args[1]));
+
+            if (!strcmp("-", args[2])) {
+                CClothes::AddRule(NULL);
+            } else {
+                CClothes::AddRule(CKeyGen::GetUppercaseKey(args[2]));
+            }
+
+            if (!strcmp("-", args[3])) {
+                CClothes::AddRule(NULL);
+            } else {
+                CClothes::AddRule(CKeyGen::GetUppercaseKey(args[3]));
+            }
+            break;
+        case eClothesFileRuleTags::RULE_TAG_HIDE:
+            CClothes::AddRule(CKeyGen::GetUppercaseKey(args[0]));
+            CClothes::AddRule(GetClothesModelFromName(args[1]));
+            break;
+        case eClothesFileRuleTags::RULE_TAG_END_IGNORE:
+        case eClothesFileRuleTags::RULE_TAG_IGNORE:
+        case eClothesFileRuleTags::RULE_TAG_END_EXCLUSIVE:
+        case eClothesFileRuleTags::RULE_TAG_EXCLUSIVE:
+            CClothes::AddRule(CKeyGen::GetUppercaseKey(args[0]));
+            break;
         }
     }
 
