@@ -28,7 +28,7 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedInstall(ConstructGeometryArray, 0x5A55A0, { .reversed = false });
     RH_ScopedInstall(DestroySkinArrays, 0x5A56C0, { .reversed = false });
     RH_ScopedInstall(BuildBoneIndexConversionTable, 0x5A56E0, { .reversed = false });
-    RH_ScopedInstall(CopyTexture, 0x5A5730, { .reversed = false });
+    RH_ScopedInstall(CopyTexture, 0x5A5730);
     RH_ScopedInstall(PlaceTextureOnTopOfTexture, 0x5A57B0, { .reversed = false });
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A5820, void (*)(RwTexture*, RwTexture*, float, float, int32));
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A59C0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32));
@@ -129,7 +129,27 @@ void CClothesBuilder::BuildBoneIndexConversionTable(uint8* a1, RpHAnimHierarchy*
 
 // 0x5A5730
 RwTexture* CClothesBuilder::CopyTexture(RwTexture* texture) {
-    return plugin::CallAndReturn<RwTexture*, 0x5A5730, RwTexture*>(texture);
+    RwRaster* raster = RwRasterCreate(
+        texture->raster->width,
+        texture->raster->height,
+        texture->raster->depth,
+        ((texture->raster->cFormat << 8) & (rwRASTERFORMAT1555 | rwRASTERFORMAT565 | rwRASTERFORMAT4444 | rwRASTERFORMATLUM8 | rwRASTERFORMAT8888 | rwRASTERFORMAT888 | rwRASTERFORMAT16 |
+                    rwRASTERFORMAT24 | rwRASTERFORMAT32 | rwRASTERFORMAT555 | rwRASTERFORMATPAL8 | rwRASTERFORMATPAL4)) | 4
+    );
+
+    const auto lockedRasterPixelsOld = RwRasterLock(texture->raster, 0, rwRASTERLOCKREAD);
+    const auto lockedRasterPixelsNew = RwRasterLock(raster, 0, rwRASTERLOCKWRITE);
+
+    memcpy(lockedRasterPixelsNew, lockedRasterPixelsOld, texture->raster->height * texture->raster->stride);
+
+    RwRasterUnlock(texture->raster);
+    RwRasterUnlock(raster);
+
+    RwTexture* newTexture = RwTextureCreate(raster);
+    RwTextureSetFilterModeMacro(newTexture, 2);
+
+    return newTexture;
+    //return plugin::CallAndReturn<RwTexture*, 0x5A5730, RwTexture*>(texture);
 }
 
 // 0x5A57B0
