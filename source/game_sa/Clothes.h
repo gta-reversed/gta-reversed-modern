@@ -16,8 +16,8 @@ class CPlayerPed;
 class CClothes {
 public:
     static int32& ms_clothesImageId;
-    static uint32_t& ms_numRuleTags;
-    static uint32_t (&ms_clothesRules)[600];
+    static uint32& ms_numRuleTags;
+    static uint32 (&ms_clothesRules)[600];
 
 public:
     static void InjectHooks();
@@ -36,5 +36,5 @@ public:
     static AssocGroupId GetDefaultPlayerMotionGroup();
 
     // NOTSA
-    static void AddRule(uint32_t rule);
+    static void AddRule(uint32 rule);
 };

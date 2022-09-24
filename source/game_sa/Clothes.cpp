@@ -12,8 +12,8 @@
 #include "PedClothesDesc.h"
 
 int32& CClothes::ms_clothesImageId = *(int32*)0xBC12F8;
-uint32_t& CClothes::ms_numRuleTags = *(uint32_t*)0xBC12FC;
-uint32_t (&CClothes::ms_clothesRules)[600] = *(uint32_t(*)[600])0xBC1300;
+uint32& CClothes::ms_numRuleTags = *(uint32*)0xBC12FC;
+uint32 (&CClothes::ms_clothesRules)[600] = *(uint32(*)[600])0xBC1300;
 
 CPedClothesDesc& PlayerClothes = *(CPedClothesDesc*)0xBC1C78;
 
@@ -114,7 +114,7 @@ void CClothes::LoadClothesFile() {
             }
             NOTSA_UNREACHABLE("Invalid rule tag: {}", strTag);
         }();
-        AddRule(static_cast<uint32_t>(ruleTag));
+        AddRule(static_cast<uint32>(ruleTag));
         const auto GetNextArg = []{
             return strtok(NULL, " \t,");
         };
@@ -122,13 +122,13 @@ void CClothes::LoadClothesFile() {
         case eClothRule::TAG_CUTS:
         case eClothRule::TAG_TEX: {
             for (auto i = 0u; i < 2u; i++) {
-                CClothes::AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
+                AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
             }
             break;
         }
         case eClothRule::TAG_SETC: {
-            CClothes::AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
-            CClothes::AddRule(GetClothesModelFromName(GetNextArg()));
+            AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
+            AddRule(GetClothesModelFromName(GetNextArg()));
             for (auto i = 0u; i < 2u; i++) {
                 const auto rule = GetNextArg();
                 AddRule(!strcmp("-", rule) ? 0 : CKeyGen::GetUppercaseKey(rule));
@@ -136,15 +136,15 @@ void CClothes::LoadClothesFile() {
             break;
         }
         case eClothRule::TAG_HIDE: {
-            CClothes::AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
-            CClothes::AddRule(GetClothesModelFromName(GetNextArg()));
+            AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
+            AddRule(GetClothesModelFromName(GetNextArg()));
             break;
         }
         case eClothRule::TAG_END_IGNORE:
         case eClothRule::TAG_IGNORE:
         case eClothRule::TAG_END_EXCLUSIVE:
         case eClothRule::TAG_EXCLUSIVE: 
-            CClothes::AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
+            AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
             break;
         }
     }
@@ -289,7 +289,7 @@ AssocGroupId CClothes::GetDefaultPlayerMotionGroup() {
 }
 
 // NOTSA
-void CClothes::AddRule(uint32_t rule) {
+void CClothes::AddRule(uint32 rule) {
     CClothes::ms_clothesRules[CClothes::ms_numRuleTags] = rule;
     CClothes::ms_numRuleTags += 1;
 }
