@@ -80,7 +80,7 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedInstall(Update, 0x5DCFA0);
     RH_ScopedInstall(PreUpdateOnceForNewCameraPos, 0x5DCF30);
     RH_ScopedInstall(UpdateAmbientColor, 0x5DB310);
-    RH_ScopedInstall(CalculateWindBending, 0x5DB3D0, {.reversed = false});
+    RH_ScopedInstall(CalculateWindBending, 0x5DB3D0); // <-- probably incorrect?
     RH_ScopedInstall(_ColEntityCache_Add, 0x5DBEB0);
     RH_ScopedInstall(_ColEntityCache_FindInCache, 0x5DB530);
     RH_ScopedInstall(_ColEntityCache_Remove, 0x5DBEF0);
@@ -346,7 +346,34 @@ void CPlantMgr::UpdateAmbientColor() {
 
 // 0x5DB3D0
 float CPlantMgr::CalculateWindBending() {
-    return plugin::CallAndReturn<float, 0x5DB3D0>();
+    static uint32& calculateTimer = *(uint32*)0xC0916C;
+    static uint16& seed = *(uint16*)0xC09168;
+
+    if ((calculateTimer % 2) == 0) {
+        calculateTimer++;
+        seed = CGeneral::GetRandomNumber();
+    }
+
+    // 36 times the earth's radius, in AU.
+    constexpr float radius_x36 = 0.0015332f;
+    constexpr float unk_table[] = { // 0x8CCF30
+        1.0f, 0.5f, 0.2f, 0.7f, 0.4f, 1.0f, 0.5f, 0.3f, 0.2f, 0.1f, 0.7f, 0.6f, 0.3f, 1.0f, 0.5f, 0.2f
+    };
+
+    if (CWeather::Wind >= 0.5f) {
+        auto idx = ((uint8)((uint16)(seed + 8 * CTimer::GetTimeInMS()) >> 8) >> 4) + 1;
+
+        // return AIDS;
+        return ((1.0f - (float)((seed + 8 * (uint16)CTimer::GetTimeInMS()) % 4096) / 4096.0f)
+            * *(float*)&CClock::daysInMonth[4 * idx + 8]
+            + (float)((seed + 8 * (uint16)CTimer::GetTimeInMS()) % 4096) / 4096.0f
+            * unk_table[idx % 16]
+            + 1.0f)
+            * CWeather::Wind
+            * 0.015f;
+    } else {
+        return std::sinf(radius_x36 * (float)(CTimer::GetTimeInMS() % 4096)) / (CWeather::Wind >= 0.2f ? 125.0f : 200.0f);
+    }
 }
 
 // 0x5DBAE0
