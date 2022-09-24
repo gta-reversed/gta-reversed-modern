@@ -9,7 +9,7 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedClass(CClothesBuilder);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(LoadCdDirectory, 0x5A4190, { .reversed = false });
+    RH_ScopedInstall(LoadCdDirectory, 0x5A4190);
     RH_ScopedInstall(RequestGeometry, 0x5A41C0, { .reversed = false });
     RH_ScopedInstall(RequestTexture, 0x5A4220, { .reversed = false }); 
     //RH_ScopedInstall(nullptr, 0x5A42B0, { .reversed = false }); 
