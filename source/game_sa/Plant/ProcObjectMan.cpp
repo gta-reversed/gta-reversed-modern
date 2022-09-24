@@ -112,6 +112,37 @@ int32 ProcObjectMan_c::ProcessTriangleAdded(CPlantLocTri* plant) {
 }
 
 // 0x5A3F70
-void ProcObjectMan_c::ProcessTriangleRemoved(CPlantLocTri* plant) {
-    plugin::CallMethod<0x5A3F70, ProcObjectMan_c*, CPlantLocTri*>(this, plant);
+void ProcObjectMan_c::ProcessTriangleRemoved(CPlantLocTri* triangle) {
+    return plugin::CallMethod<0x5A3F70, ProcObjectMan_c*, CPlantLocTri*>(this, triangle);
+    // todo: fix the fucking list loop
+    /*
+    if (m_numProcSurfaceInfos <= 0)
+        return;
+
+    for (auto& info : std::span{m_ProcObjSurfaceInfos, (size_t)m_numProcSurfaceInfos}) {
+        if (info.m_SurfaceId != triangle->m_SurfaceId)
+            continue;
+
+        for (auto i = info.m_Objects.GetHead(); i; i = info.m_Objects.GetNext(i)) {
+            auto& obj = *(ProcObjectListItem*)i;
+            if (obj.m_LocTri == triangle) {
+                if (obj.m_Obj->m_nType == ENTITY_TYPE_OBJECT) {
+                    CObject::nNoTempObjects--;
+                }
+
+                info.m_Objects.RemoveItem(&obj);
+                g_procObjMan.m_ObjectsList.AddItem(&obj);
+                obj.m_Obj->DeleteRwObject();
+                CWorld::Remove(obj.m_Obj);
+                if (obj.m_Obj) {
+                    delete obj.m_Obj;
+                }
+
+                if (obj.m_bAllocatedMatrix) {
+                    m_numAllocatedMatrices--;
+                    obj.m_bAllocatedMatrix = false;
+                }
+            }
+        }
+    }*/
 }
