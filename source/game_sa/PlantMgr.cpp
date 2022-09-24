@@ -82,7 +82,7 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedInstall(_ColEntityCache_Add, 0x5DBEB0);
     RH_ScopedInstall(_ColEntityCache_FindInCache, 0x5DB530);
     RH_ScopedInstall(_ColEntityCache_Remove, 0x5DBEF0);
-    RH_ScopedInstall(_ColEntityCache_Update, 0x5DC510, {.reversed = false});
+    RH_ScopedInstall(_ColEntityCache_Update, 0x5DC510);
     RH_ScopedInstall(_ProcessEntryCollisionDataSections, 0x5DCD80, {.reversed = false});
     RH_ScopedInstall(_UpdateLocTris, 0x5DCF00);
     RH_ScopedInstall(_CalcDistanceSqrToEntity, 0x5DBE40, {.reversed = false}); // bad call conv.
@@ -276,7 +276,7 @@ void CPlantMgr::MoveColEntToList(CPlantColEntEntry*& oldList, CPlantColEntEntry*
 
 // 0x5DB650
 void CPlantMgr::SetPlantFriendlyFlagInAtomicMI(CAtomicModelInfo* ami) {
-    ami->m_nFlags &= ~0x200u;
+    ami->bAtomicFlag0x200 = false;
 
     auto colData = ami->GetColModel()->GetData();
     if (!colData)
@@ -289,7 +289,7 @@ void CPlantMgr::SetPlantFriendlyFlagInAtomicMI(CAtomicModelInfo* ami) {
     for (auto& triangle : std::span{colData->m_pTriangles, numTriangles}) {
         if (g_surfaceInfos->CreatesPlants(triangle.m_nMaterial)
             || g_surfaceInfos->CreatesObjects(triangle.m_nMaterial)) {
-            ami->m_nFlags |= 0x200u;
+            ami->bAtomicFlag0x200 = true;
 
             return;
         }
@@ -381,10 +381,8 @@ void CPlantMgr::_ColEntityCache_Remove(CEntity* entity) {
 
 // 0x5DC510
 void CPlantMgr::_ColEntityCache_Update(const CVector& cameraPos, bool fast) {
-    return plugin::Call<0x5DC510, const CVector&, bool>(cameraPos, fast);
-
     if (fast) {
-        // prune ones that has no entity.
+        // doing a fast update, prune only ones that have no entity.
         for (auto i = CPlantMgr::m_CloseColEntListHead; i; i = i->m_NextEntry) {
             if (!i->m_Entity) {
                 i->ReleaseEntry();
@@ -393,6 +391,8 @@ void CPlantMgr::_ColEntityCache_Update(const CVector& cameraPos, bool fast) {
 
         return;
     }
+
+    // prune ones that have no entity, too far or not in the same area.
     for (auto i = CPlantMgr::m_CloseColEntListHead; i; i = i->m_NextEntry) {
         if (!i->m_Entity || _CalcDistanceSqrToEntity(i->m_Entity, cameraPos) > 115600.0f || !i->m_Entity->IsInCurrentAreaOrBarberShopInterior()) {
             i->ReleaseEntry();
@@ -402,7 +402,34 @@ void CPlantMgr::_ColEntityCache_Update(const CVector& cameraPos, bool fast) {
     if (!CPlantMgr::m_UnusedColEntListHead)
         return;
 
+    CWorld::IncrementCurrentScanCode();
+    auto start = (int32)CWorld::GetSectorfY(cameraPos.y - 340.0f), end = (int32)CWorld::GetSectorfY(cameraPos.y + 340.0f);
 
+    for (auto i = start; i <= end; i++) {
+        auto& sector = CWorld::ms_aSectors[std::clamp(i, 0, 119)][std::clamp(start, 0, 119)];
+
+        for (auto i = sector.m_buildings.GetNode(); i; i = i->m_next) {
+            auto item = static_cast<CEntity*>(i->m_item);
+
+            if (item->m_bIsProcObject || item->IsScanCodeCurrent() || !item->IsInCurrentAreaOrBarberShopInterior())
+                continue;
+
+            if (auto mi = item->GetModelInfo(); mi->GetModelType() == MODEL_INFO_ATOMIC && mi->bAtomicFlag0x200) {
+                for (auto j = m_CloseColEntListHead; j; j = j->m_NextEntry) {
+                    if (j->m_Entity == item) {
+                        // found the stuff, continue
+                        continue;
+                    }
+                }
+
+                if (_CalcDistanceSqrToEntity(item, cameraPos) <= 115600.0f) {
+                    if (!m_UnusedColEntListHead || !m_UnusedColEntListHead->AddEntry(item)) {
+                        return;
+                    }
+                }
+            }
+        }
+    }
     // ...
 }
 
