@@ -467,8 +467,8 @@ void CPlantMgr::_ProcessEntryCollisionDataSections(const CPlantColEntEntry& entr
 
 // 0x5DC8B0
 void CPlantMgr::_ProcessEntryCollisionDataSections_AddLocTris(const CPlantColEntEntry& entry, const CVector& center, int32 a3, int32 start, int32 end) {
-    const auto& entity = entry.m_Entity;
-    const auto& colData = entity->GetColData();
+    const auto entity = entry.m_Entity;
+    const auto colData = entity->GetColData();
     if (!colData)
         return;
 
@@ -513,7 +513,6 @@ void CPlantMgr::_ProcessEntryCollisionDataSections_AddLocTris(const CPlantColEnt
                 tri.m_nLight,
                 createsPlants,
                 createsObjects)) {
-
                 entry.m_Objects[i] = unusedHead;
 
                 if (unusedHead->m_createsObjects) {
@@ -532,7 +531,36 @@ void CPlantMgr::_ProcessEntryCollisionDataSections_AddLocTris(const CPlantColEnt
 
 // 0x5DBF20
 void CPlantMgr::_ProcessEntryCollisionDataSections_RemoveLocTris(const CPlantColEntEntry& entry, const CVector& center, int32 a3, int32 start, int32 end) {
-    plugin::Call<0x5DBF20, const CPlantColEntEntry&, const CVector&, int32, int32, int32>(entry, center, a3, start, end);
+    const auto entity = entry.m_Entity;
+    const auto colModel = entity->GetColModel();
+
+    for (auto i = start; i <= end; i++) {
+        if (auto object = entry.m_Objects[i]; object) {
+            if (object->m_createsObjects && !object->m_createdObjects && g_procObjMan.ProcessTriangleAdded(object)) {
+                object->m_createdObjects = true;
+            }
+        }
+
+        if (a3 != 0xFAFAFAFA && a3 != (i % 8))
+            continue;
+
+        if (auto& object = entry.m_Objects[i]; object) {
+            CVector cmp[] = {
+                object->m_V1,
+                object->m_V2,
+                object->m_V3,
+                (object->m_V1 + object->m_V2) / 2.0f,
+                (object->m_V2 + object->m_V3) / 2.0f,
+                (object->m_V1 + object->m_V3) / 2.0f
+            };
+
+            if (rng::none_of(cmp, [center](auto v) { return DistanceBetweenPoints(v, center) < 10000.0f; }))
+                continue;
+
+            object->Release();
+            object = nullptr;
+        }
+    }
 }
 
 // 0x5DCF00
