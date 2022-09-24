@@ -44,9 +44,9 @@ private:
     static void _ColEntityCache_Remove(CEntity* entity);
     static void _ColEntityCache_Update(const CVector& cameraPos, bool fast);
 
-    static void _ProcessEntryCollisionDataSections(CPlantColEntEntry* entry, const CVector& center, int32 a3);
-    static void _ProcessEntryCollisionDataSections_AddLocTris(CPlantColEntEntry*, const CVector&, int32, int32, int32);
-    static void _ProcessEntryCollisionDataSections_RemoveLocTris(CPlantColEntEntry*, const CVector&, int32, int32, int32);
+    static void _ProcessEntryCollisionDataSections(const CPlantColEntEntry& entry, const CVector& center, int32 a3);
+    static void _ProcessEntryCollisionDataSections_AddLocTris(const CPlantColEntEntry& entry, const CVector& center, int32 a3, int32 start, int32 end);
+    static void _ProcessEntryCollisionDataSections_RemoveLocTris(const CPlantColEntEntry& entry, const CVector& center, int32 a3, int32 start, int32 end);
 
     static void _UpdateLocTris(const CVector& center, int32);
 

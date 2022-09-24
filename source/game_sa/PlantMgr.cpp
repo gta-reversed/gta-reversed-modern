@@ -6,6 +6,7 @@
 #include "PlantLocTri.h"
 #include "PlantSurfPropMgr.h"
 #include "ColHelpers.h"
+#include "ProcObjectMan.h"
 #include <extensions/enumerate.hpp>
 
 // 0x5DD100 (todo: move)
@@ -84,7 +85,9 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedInstall(_ColEntityCache_FindInCache, 0x5DB530);
     RH_ScopedInstall(_ColEntityCache_Remove, 0x5DBEF0);
     RH_ScopedInstall(_ColEntityCache_Update, 0x5DC510);
-    RH_ScopedInstall(_ProcessEntryCollisionDataSections, 0x5DCD80, {.reversed = false});
+    RH_ScopedInstall(_ProcessEntryCollisionDataSections, 0x5DCD80);
+    RH_ScopedInstall(_ProcessEntryCollisionDataSections_AddLocTris, 0x5DC8B0);
+    // RH_ScopedInstall(_ProcessEntryCollisionDataSections_RemoveLocTris, 0x5DBF20, {.reversed = false}); <-- crashes when hooking even with reversed=false
     RH_ScopedInstall(_UpdateLocTris, 0x5DCF00);
     RH_ScopedInstall(_CalcDistanceSqrToEntity, 0x5DBE40, {.reversed = false}); // bad call conv.
 
@@ -311,9 +314,9 @@ void CPlantMgr::Update(const CVector& cameraPosition) {
 
     _ColEntityCache_Update(cameraPosition, (++cache % MAX_PLANTS) != 0);
 
-    auto prev = m_CloseColEntListHead;
-    for (auto i = section++ % 8; m_CloseColEntListHead; prev = m_CloseColEntListHead->m_NextEntry) {
-        _ProcessEntryCollisionDataSections(prev, cameraPosition, i);
+    auto head = m_CloseColEntListHead;
+    for (auto i = section++ % 8; m_CloseColEntListHead; head = m_CloseColEntListHead->m_NextEntry) {
+        _ProcessEntryCollisionDataSections(*head, cameraPosition, i);
     }
 }
 
@@ -326,7 +329,7 @@ void CPlantMgr::PreUpdateOnceForNewCameraPos(const CVector& posn) {
     _ColEntityCache_Update(posn, false);
 
     for (auto i = m_CloseColEntListHead; i; i = i->m_NextEntry) {
-        _ProcessEntryCollisionDataSections(i, posn, 0xFAFAFAFA);
+        _ProcessEntryCollisionDataSections(*i, posn, 0xFAFAFAFA);
     }
 }
 
@@ -431,20 +434,14 @@ void CPlantMgr::_ColEntityCache_Update(const CVector& cameraPos, bool fast) {
             }
         }
     }
-    // ...
 }
 
 // 0x5DCD80
-void CPlantMgr::_ProcessEntryCollisionDataSections(CPlantColEntEntry* entry, const CVector& center, int32 a3) {
-    return plugin::Call<0x5DCD80, CPlantColEntEntry*, const CVector&, int32>(entry, center, a3);
+void CPlantMgr::_ProcessEntryCollisionDataSections(const CPlantColEntEntry& entry, const CVector& center, int32 a3) {
+    const auto colData = entry.m_Entity->GetColData();
+    const auto numTriangles = entry.m_numTriangles;
 
-    auto entity = entry->m_Entity;
-    auto colData = entry->m_Entity->GetColData();
-    if (!colData)
-        return;
-
-    auto numTriangles = entry->m_numTriangles;
-    if (numTriangles != colData->m_nNumTriangles)
+    if (!colData || numTriangles != colData->m_nNumTriangles)
         return;
 
     _ProcessEntryCollisionDataSections_RemoveLocTris(entry, center, a3, 0, numTriangles - 1);
@@ -453,38 +450,95 @@ void CPlantMgr::_ProcessEntryCollisionDataSections(CPlantColEntEntry* entry, con
         return _ProcessEntryCollisionDataSections_AddLocTris(entry, center, a3, 0, numTriangles - 1);
     }
 
-    auto faceGroupsNum = colData->GetNumFaceGroups();
-    auto faceGroups = colData->GetFaceGroups();
-    for (auto i = faceGroupsNum; i != 0; i--) {
-        auto& pos = entity->GetPosition();
-        auto& box = faceGroups[i].bb;
+    for (auto i = colData->GetNumFaceGroups(); i != 0; i--) {
+        auto& faceGroup = colData->GetFaceGroups()[i];
+        auto& box = faceGroup.bb;
 
         CVector out[2]{};
-        TransformPoints(out, 2, (RwMatrix&)entity->GetMatrix(), (RwV3d*)&box);
+        TransformPoints(out, 2, (RwMatrix&)entry.m_Entity->GetMatrix(), (CVector*)&box);
         box.Set(out[0], out[1]);
         box.Recalc();
 
-        if (CCollision::TestSphereBox({100.0f, center}, box)) {
-            // _ProcessEntryCollisionDataSections_AddLocTris(entry, center, a3, faceGroups[i].);
+        if (CCollision::TestSphereBox({ center, 100.0f }, box)) {
+            _ProcessEntryCollisionDataSections_AddLocTris(entry, center, a3, faceGroup.first, faceGroup.last);
         }
     }
-    // ...
 }
 
 // 0x5DC8B0
-void CPlantMgr::_ProcessEntryCollisionDataSections_AddLocTris(CPlantColEntEntry*, const CVector&, int32, int32, int32) {
-    assert(0);
+void CPlantMgr::_ProcessEntryCollisionDataSections_AddLocTris(const CPlantColEntEntry& entry, const CVector& center, int32 a3, int32 start, int32 end) {
+    const auto& entity = entry.m_Entity;
+    const auto& colData = entity->GetColData();
+    if (!colData)
+        return;
+
+    for (auto i = start; i <= end; i++) {
+        if ((a3 != 0xFAFAFAFA && a3 != (i % 8)) || !entry.m_Objects[i])
+            continue;
+
+        if (m_UnusedLocTriListHead) {
+            const auto& tri = colData->m_pTriangles[i];
+
+            CVector vertices[3];
+            colData->GetTrianglePoint(vertices[0], tri.m_nVertA);
+            colData->GetTrianglePoint(vertices[1], tri.m_nVertB);
+            colData->GetTrianglePoint(vertices[2], tri.m_nVertC);
+
+            TransformPoints(vertices, 3, (RwMatrix&)entity->GetMatrix(), vertices);
+
+            CVector cmp[] = {
+                vertices[1],
+                vertices[2],
+                CVector::AverageN(vertices, 3),
+                (vertices[0] + vertices[1]) / 2.0f,
+                (vertices[0] + vertices[2]) / 2.0f,
+                (vertices[1] + vertices[2]) / 2.0f
+            };
+
+            if (rng::none_of(cmp, [center](auto v) { return DistanceBetweenPoints(v, center) < 10000.0f; }))
+                continue;
+
+            auto createsPlants = g_surfaceInfos->CreatesPlants(tri.m_nMaterial);
+            auto createsObjects = g_surfaceInfos->CreatesPlants(tri.m_nMaterial);
+
+            if (!createsPlants || !createsObjects)
+                continue;
+
+            auto unusedHead = m_UnusedLocTriListHead;
+            if (unusedHead->Add(
+                vertices[0],
+                vertices[1],
+                vertices[2],
+                tri.m_nMaterial,
+                tri.m_nLight,
+                createsPlants,
+                createsObjects)) {
+
+                entry.m_Objects[i] = unusedHead;
+
+                if (unusedHead->m_createsObjects) {
+                    if (g_procObjMan.ProcessTriangleAdded(unusedHead)) {
+                        if (!unusedHead->m_createsPlants) {
+                            unusedHead->Release();
+                        }
+                    } else {
+                        unusedHead->m_createdObjects = true;
+                    }
+                }
+            }
+        }
+    }
 }
 
 // 0x5DBF20
-void CPlantMgr::_ProcessEntryCollisionDataSections_RemoveLocTris(CPlantColEntEntry*, const CVector&, int32, int32, int32) {
-    assert(0);
+void CPlantMgr::_ProcessEntryCollisionDataSections_RemoveLocTris(const CPlantColEntEntry& entry, const CVector& center, int32 a3, int32 start, int32 end) {
+    plugin::Call<0x5DBF20, const CPlantColEntEntry&, const CVector&, int32, int32, int32>(entry, center, a3, start, end);
 }
 
 // 0x5DCF00
 void CPlantMgr::_UpdateLocTris(const CVector& center, int32 a2) {
     for (auto i = m_CloseColEntListHead; i; i = i->m_NextEntry) {
-        _ProcessEntryCollisionDataSections(i, center, a2);
+        _ProcessEntryCollisionDataSections(*i, center, a2);
     }
 }
 

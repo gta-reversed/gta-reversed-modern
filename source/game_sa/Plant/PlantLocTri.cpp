@@ -26,7 +26,7 @@ void CPlantLocTri::InjectHooks() {
 }
 
 // 0x5DC290
-void CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, uint8 surface, uint8 lightning, bool createsPlants, bool createsObjects) {
+CPlantLocTri* CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, uint8 surface, uint8 lightning, bool createsPlants, bool createsObjects) {
     m_V1 = p1;
     m_V2 = p2;
     m_V3 = p3;
@@ -42,7 +42,7 @@ void CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, 
     m_SphereRadius = DistanceBetweenPoints(m_Center, m_V1) * 1.75f;
     if (m_createsObjects && !m_createsPlants) {
         CPlantMgr::MoveLocTriToList(CPlantMgr::m_UnusedLocTriListHead, CPlantMgr::m_CloseLocTriListHead[3], this);
-        return;
+        return nullptr;
     }
 
     auto properties = CPlantSurfPropMgr::GetSurfProperties(surface);
@@ -56,7 +56,7 @@ void CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, 
         m_nMaxNumPlants[1] = density2;
         m_nMaxNumPlants[2] = density3;
         CPlantMgr::MoveLocTriToList(CPlantMgr::m_UnusedLocTriListHead, CPlantMgr::m_CloseLocTriListHead[properties->m_SlotId], this);
-        return;
+        return this;
     }
 
     if (m_createsObjects) {
@@ -64,7 +64,10 @@ void CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, 
         m_createsObjects = false;
 
         CPlantMgr::MoveLocTriToList(CPlantMgr::m_UnusedLocTriListHead, CPlantMgr::m_CloseLocTriListHead[3], this);
+        return this;
     }
+
+    return nullptr;
 }
 
 // 0x5DB6D0
