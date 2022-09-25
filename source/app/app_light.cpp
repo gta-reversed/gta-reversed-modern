@@ -159,7 +159,6 @@ void SetLightsWithTimeOfDayColour(RpWorld* world) {
         RpLightSetColor(pDirect, &DirectionalLightColourForFrame);
 
         const auto& dir  = CTimeCycle::m_vecDirnLightToSun;
-``
         const auto right = CVector::ZAxisVector().Cross(dir).Normalized(); // NOTE: I don't normalization is needed here
         const auto up    = right.Cross(dir);
 
