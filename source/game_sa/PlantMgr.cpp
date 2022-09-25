@@ -430,12 +430,7 @@ void CPlantMgr::_ColEntityCache_Update(const CVector& cameraPos, bool fast) {
         return;
 
     CWorld::IncrementCurrentScanCode();
-    const int32 startSectorX = CWorld::GetSectorX(cameraPos.x - 340.f);
-    const int32 startSectorY = CWorld::GetSectorY(cameraPos.y - 340.f);
-    const int32 endSectorX = CWorld::GetSectorX(cameraPos.x + 340.f);
-    const int32 endSectorY = CWorld::GetSectorY(cameraPos.y + 340.f);
-
-    CWorld::IterateSectors(startSectorX, startSectorY, endSectorX, endSectorY, [cameraPos](int32 x, int32 y) {
+    CWorld::IterateSectorsOverlappedByRect({ cameraPos, 340.0f }, [cameraPos](int32 x, int32 y) {
         for (auto i = GetSector(x, y)->m_buildings.GetNode(); i; i = i->m_next) {
             const auto item = static_cast<CEntity*>(i->m_item);
 
