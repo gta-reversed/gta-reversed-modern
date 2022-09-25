@@ -121,7 +121,7 @@ void CClothesBuilder::ConstructGeometryArray(RpGeometry** geometry, uint32* a2, 
 // 0x5A56C0
 void CClothesBuilder::DestroySkinArrays(RwMatrixWeights* weights, uint32* pBones) {
     delete[] weights;
-    delete[] a2;
+    delete[] pBones;
 }
 
 // 0x5A56E0
