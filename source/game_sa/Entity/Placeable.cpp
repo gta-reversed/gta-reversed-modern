@@ -89,11 +89,9 @@ void CPlaceable::SetHeading(float heading) {
 }
 
 float CPlaceable::GetHeading() {
-    if (!m_matrix)
-        return m_placement.m_fHeading;
-
-    const auto& vecForward = m_matrix->GetForward();
-    return std::atan2(-vecForward.x, vecForward.y);
+    return m_matrix
+        ? m_matrix->GetForward().Heading()
+        : m_placement.m_fHeading;
 }
 
 bool CPlaceable::IsWithinArea(float x1, float y1, float x2, float y2) const {
