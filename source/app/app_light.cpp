@@ -127,23 +127,27 @@ void LightsEnable(int32 enable) {
 // 0x7354E0
 void SetLightsWithTimeOfDayColour(RpWorld* world) {
     assert(world);
-    if (pAmbient) {
-        AmbientLightColourForFrame.red   = CTimeCycle::GetAmbientRed()   * CCoronas::LightsMult;
-        AmbientLightColourForFrame.green = CTimeCycle::GetAmbientGreen() * CCoronas::LightsMult;
-        AmbientLightColourForFrame.blue  = CTimeCycle::GetAmbientBlue()  * CCoronas::LightsMult;
 
-        AmbientLightColourForFrame_PedsCarsAndObjects.red   = CTimeCycle::GetAmbientRed_Obj()   * CCoronas::LightsMult;
-        AmbientLightColourForFrame_PedsCarsAndObjects.green = CTimeCycle::GetAmbientGreen_Obj() * CCoronas::LightsMult;
-        AmbientLightColourForFrame_PedsCarsAndObjects.blue  = CTimeCycle::GetAmbientBlue_Obj()  * CCoronas::LightsMult;
+    if (pAmbient) {
+        AmbientLightColourForFrame = {
+            CTimeCycle::GetAmbientRed()   * CCoronas::LightsMult,
+            CTimeCycle::GetAmbientGreen() * CCoronas::LightsMult,
+            CTimeCycle::GetAmbientBlue()  * CCoronas::LightsMult,
+            AmbientLightColourForFrame.alpha
+        };
+        
+        AmbientLightColourForFrame_PedsCarsAndObjects = {
+            CTimeCycle::GetAmbientRed_Obj()   * CCoronas::LightsMult, 
+            CTimeCycle::GetAmbientGreen_Obj() * CCoronas::LightsMult, 
+            CTimeCycle::GetAmbientBlue_Obj()  * CCoronas::LightsMult,
+            AmbientLightColourForFrame_PedsCarsAndObjects.alpha
+        };
 
         if (CWeather::LightningFlash) {
-            AmbientLightColourForFrame.blue  = 1.0f;
-            AmbientLightColourForFrame.green = 1.0f;
-            AmbientLightColourForFrame.red   = 1.0f;
-            AmbientLightColourForFrame_PedsCarsAndObjects.blue  = 1.0f;
-            AmbientLightColourForFrame_PedsCarsAndObjects.green = 1.0f;
-            AmbientLightColourForFrame_PedsCarsAndObjects.red   = 1.0f;
+            AmbientLightColourForFrame_PedsCarsAndObjects = { 1.f, 1.f, 1.f, AmbientLightColourForFrame_PedsCarsAndObjects.alpha };
+            AmbientLightColourForFrame                    = { 1.f, 1.f, 1.f, AmbientLightColourForFrame.alpha };
         }
+
         RpLightSetColor(pAmbient, &AmbientLightColourForFrame);
     }
 
@@ -154,16 +158,16 @@ void SetLightsWithTimeOfDayColour(RpWorld* world) {
         DirectionalLightColourForFrame.blue  = color;
         RpLightSetColor(pDirect, &DirectionalLightColourForFrame);
 
-        CVector vecDir   = CTimeCycle::m_vecDirnLightToSun;
-        CVector vecUp    = CrossProduct(CVector(0, 0, 1), vecDir);
-        vecUp.Normalise();
-        CVector vecRight = CrossProduct(vecUp, vecDir);
+        const auto& dir  = CTimeCycle::m_vecDirnLightToSun;
+        const auto right = CVector::ZAxisVector().Cross(dir).Normalized(); // NOTE: I don't normalization is needed here
+        const auto up    = right.Cross(dir);
 
-        RwMatrix mxTransform;
-        mxTransform.right = vecRight;
-        mxTransform.up    = vecUp;
-        mxTransform.at    = -vecDir;
-        RwFrameTransform(RpLightGetFrame(pDirect), &mxTransform, rwCOMBINEREPLACE);
+        RwMatrix transform{ // RW has y and z swapped, so don't get confused
+            .right = up,
+            .up    = right,
+            .at    = -dir
+        };
+        RwFrameTransform(RpLightGetFrame(pDirect), &transform, rwCOMBINEREPLACE);
     }
 }
 
