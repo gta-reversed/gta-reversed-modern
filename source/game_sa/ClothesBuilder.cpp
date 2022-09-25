@@ -27,7 +27,7 @@ void CClothesBuilder::InjectHooks() {
     // RH_ScopedOverloadedInstall(BlendGeometry, "", 0x5A4F10, RpGeometry* (*)(RpClump*, const char*, const char*, float, float));
     RH_ScopedInstall(CopyGeometry, 0x5A5340, { .reversed = false });
     RH_ScopedInstall(ConstructGeometryArray, 0x5A55A0, { .reversed = false });
-    RH_ScopedInstall(DestroySkinArrays, 0x5A56C0, { .reversed = false });
+    RH_ScopedInstall(DestroySkinArrays, 0x5A56C0);
     RH_ScopedInstall(BuildBoneIndexConversionTable, 0x5A56E0, { .reversed = false });
     RH_ScopedInstall(CopyTexture, 0x5A5730);
     RH_ScopedInstall(PlaceTextureOnTopOfTexture, 0x5A57B0);
@@ -116,11 +116,12 @@ void CClothesBuilder::ConstructGeometryArray(RpGeometry** geometry, uint32* a2, 
     plugin::Call<0x5A55A0, RpGeometry**, uint32*, float, float, float>(geometry, a2, a3, a4, a5);
 }
 
+// unused
 // inlined, see 0x5A6CE1
 // 0x5A56C0
-void CClothesBuilder::DestroySkinArrays(RwMatrixWeights* weights, uint32* a2) {
-    operator delete(weights);
-    operator delete(a2);
+void CClothesBuilder::DestroySkinArrays(RwMatrixWeights* weights, uint32* pBones) {
+    delete[] weights;
+    delete[] a2;
 }
 
 // 0x5A56E0

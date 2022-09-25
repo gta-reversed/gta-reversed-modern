@@ -26,7 +26,7 @@ public:
     static RpGeometry* BlendGeometry(RpClump* clump, const char* a2, const char* a3, float a4, float a5);
     static RpGeometry* CopyGeometry(RpClump* clump, const char* a2, const char* a3);
     static void ConstructGeometryArray(RpGeometry** geometry, uint32* a2, float a3, float a4, float a5);
-    static void DestroySkinArrays(RwMatrixWeights* weights, uint32* a2);
+    static void DestroySkinArrays(RwMatrixWeights* weights, uint32* pBones);
     static void BuildBoneIndexConversionTable(uint8* a1, RpHAnimHierarchy* a2, int32 a3);
     static RwTexture* CopyTexture(RwTexture* texture);
     static void PlaceTextureOnTopOfTexture(RwTexture* textureTo, RwTexture* textureFrom);
