@@ -2,38 +2,39 @@
 
 #include "TaskSimpleFight.h"
 
+// 0x61C470
 CTaskSimpleFight::CTaskSimpleFight(CEntity* entity, int32 nCommand, uint32 nIdlePeriod) : CTaskSimple() {
     plugin::CallMethod<0x61C470, CTaskSimpleFight*, CEntity*, int32, uint32>(this, entity, nCommand, nIdlePeriod);
 }
 
-// 0x6239D0
+// 0x61C530
 CTaskSimpleFight::~CTaskSimpleFight() {
-    plugin::CallMethod<0x6239D0, CTaskSimpleFight*>(this);
+    plugin::CallMethod<0x61C530, CTaskSimpleFight*>(this);
 }
 
+// 0x61C5E0
 bool CTaskSimpleFight::ControlFight(CEntity* entity, uint8 command) {
     return plugin::CallMethodAndReturn<bool, 0x61C5E0, CTaskSimpleFight*, CEntity*, uint8>(this, entity, command);
 }
 
+// 0x4ABDC0
 bool CTaskSimpleFight::IsComboSet() {
     return plugin::CallMethodAndReturn<bool, 0x4ABDC0, CTaskSimpleFight*>(this);
 }
 
+// 0x4ABDF0
 bool CTaskSimpleFight::IsHitComboSet() {
     return plugin::CallMethodAndReturn<bool, 0x4ABDF0, CTaskSimpleFight*>(this);
 }
 
+// 0x4ABDA0
 int32 CTaskSimpleFight::GetComboAnimGroupID() {
     return plugin::CallMethodAndReturn<int32, 0x4ABDA0, CTaskSimpleFight*>(this);
 }
 
+// 0x5BEDC0
 void CTaskSimpleFight::LoadMeleeData() {
     plugin::Call<0x5BEDC0>();
-}
-
-// 0x622E40
-CTask* CTaskSimpleFight::Clone() {
-    return new CTaskSimpleFight(m_pTargetEntity, m_nLastCommand, m_nIdlePeriod);
 }
 
 // 0x6239F0

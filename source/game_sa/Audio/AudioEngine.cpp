@@ -16,7 +16,7 @@ void CAudioEngine::InjectHooks() {
     RH_ScopedClass(CAudioEngine);
     RH_ScopedCategory("Audio");
 
-    // RH_ScopedInstall(CAudioEngine, 0x507670);   default
+    //RH_ScopedInstall(CAudioEngine, 0x507670, { .reversed = false });   // default
     // Install("CAudioEngine", "~CAudioEngine", 0x506CD0, &CAudioEngine::~CAudioEngine); default
     RH_ScopedInstall(Initialise, 0x5B9C60);
     RH_ScopedInstall(Shutdown, 0x507CB0);
@@ -105,29 +105,29 @@ bool CAudioEngine::Initialise() {
     CLoadingScreen::Pause();
 
     if (!AEAudioHardware.Initialise()) {
-        DEV_LOG("[AudioEngine] Failed to initialise Audio Hardware")
+        DEV_LOG("[AudioEngine] Failed to initialise Audio Hardware");
         return false;
     }
 
     m_nBackgroundAudioChannel = AEAudioHardware.AllocateChannels(1);
 
     if (!AERadioTrackManager.Initialise(m_nBackgroundAudioChannel)) {
-        DEV_LOG("[AudioEngine] Failed to initialise Radio Track Manager")
+        DEV_LOG("[AudioEngine] Failed to initialise Radio Track Manager");
         return false;
     }
 
     if (!AECutsceneTrackManager.Initialise(m_nBackgroundAudioChannel)) {
-        DEV_LOG("[AudioEngine] Failed to initialise Cutscene Track Manager")
+        DEV_LOG("[AudioEngine] Failed to initialise Cutscene Track Manager");
         return false;
     }
 
     if (!AEAmbienceTrackManager.Initialise(m_nBackgroundAudioChannel)) {
-        DEV_LOG("[AudioEngine] Failed to initialise Ambience Track Manager")
+        DEV_LOG("[AudioEngine] Failed to initialise Ambience Track Manager");
         return false;
     }
 
     if (!AESoundManager.Initialise()) {
-        DEV_LOG("[AudioEngine] Failed to initialise Sound Manager")
+        DEV_LOG("[AudioEngine] Failed to initialise Sound Manager");
         return false;
     }
 

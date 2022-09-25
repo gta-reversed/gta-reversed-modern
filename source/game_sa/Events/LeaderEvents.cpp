@@ -144,7 +144,7 @@ bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup(CPedGroup* pedGroup)
 bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
 {
     auto oldEventGroupEvent = pedGroup->GetIntelligence().m_pOldEventGroupEvent;
-    if (oldEventGroupEvent) 
+    if (oldEventGroupEvent)
         return oldEventGroupEvent->m_event->GetEventType() == EVENT_LEADER_ENTERED_CAR_AS_DRIVER;
     return false;
 }
@@ -188,7 +188,7 @@ bool CEventAreaCodes::AffectsPed_Reversed(CPed* ped)
         targetPed = killPedOnFoot->m_target;
         if (targetPed != m_ped) {
             if (const auto arrestPed = ped->GetTaskManager().Find<CTaskComplexArrestPed>()) {
-                targetPed = arrestPed->m_pedToArrest;
+                targetPed = arrestPed->m_PedToArrest;
             }
         }
     }
@@ -215,7 +215,7 @@ bool CEventAreaCodes::TakesPriorityOver_Reversed(const CEvent& refEvent)
 {
     if (CEventHandler::IsTemporaryEvent(refEvent))
         return true;
-    return CEvent::TakesPriorityOver(refEvent); 
+    return CEvent::TakesPriorityOver(refEvent);
 }
 
 CEventLeaderEntryExit* CEventLeaderEntryExit::Constructor(CPed* ped)

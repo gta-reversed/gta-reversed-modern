@@ -193,7 +193,7 @@ float cTransmission::CalculateDriveAcceleration(const float& gasPedal, uint8& cu
                         inertiaMultiplier *= TRANSMISSION_NITROS_INERTIA_MULT;
                     }
                     float acceleration = 1.0f - inertiaMultiplier * m_fEngineInertia;
-                    acceleration = clamp<float>(acceleration, 0.1f, 1.0f);
+                    acceleration = std::clamp(acceleration, 0.1f, 1.0f);
                     *a6 = velocityDiffRatio;
                     *a7 = acceleration * (1.0f - TRANSMISSION_SMOOTHER_FRAC) + TRANSMISSION_SMOOTHER_FRAC * *a7;
                     driveAcceleration *= *a7;

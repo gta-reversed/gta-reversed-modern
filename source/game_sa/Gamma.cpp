@@ -8,8 +8,8 @@ void CGamma::InjectHooks() {
     RH_ScopedClass(CGamma);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Init, 0x747180);
-    // RH_ScopedInstall(SetGamma, 0x747200);
+    RH_ScopedInstall(Init, 0x747180, { .reversed = false });
+    RH_ScopedInstall(SetGamma, 0x747200, { .reversed = false });
 }
 
 // 0x747180

@@ -10,13 +10,13 @@
 
 class CPed;
 
-class CTaskComplex : public CTask {
+class NOTSA_EXPORT_VTABLE CTaskComplex : public CTask {
 public:
     CTask* m_pSubTask;
 
 public:
     CTaskComplex();
-    ~CTaskComplex();
+    ~CTaskComplex() override;
 
     CTask* GetSubTask() override;
     bool IsSimple() override;
@@ -26,13 +26,5 @@ public:
     virtual CTask* CreateNextSubTask(CPed* ped) = 0;
     virtual CTask* CreateFirstSubTask(CPed* ped) = 0;
     virtual CTask* ControlSubTask(CPed* ped) = 0;
-
-private:
-    CTaskComplex* Constructor();
-
-    CTask* GetSubTask_Reversed() { return m_pSubTask; }
-    bool IsSimple_Reversed() { return false; }
-    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event);
 };
-
 VALIDATE_SIZE(CTaskComplex, 0xC);

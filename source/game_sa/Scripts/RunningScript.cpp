@@ -4,42 +4,45 @@
 #include "TheScripts.h"
 #include "CarGenerator.h"
 #include "Hud.h"
+#include "ReversibleHooks/ReversibleHook/ScriptCommand.h"
+
+// Commands stuff
+#include "CommandParser/Parser.hpp"
+
+/*!
+* Make sure to include the command headers here, otherwise they won't be registered,
+* and the default GTA handler will be called.
+* 
+* Currently we don't include the Commands/CLEO headers at all.
+*
+* Eventually we'll get rid of this header based approach, and switch to using cpp files instead,
+* currently it's not possible because of the way it's set up.
+* (Once all old functions are reworked to use the parser)
+*/
+
+#include "Commands/Basic.hpp"
+#include "Commands/Car.hpp"
+#include "Commands/Comparasion.hpp"
+#include "Commands/Generic.hpp"
+#include "Commands/Mission.hpp"
+#include "Commands/Player.hpp"
+#include "Commands/Sequence.hpp"
+#include "Commands/Utility.hpp"
+#include "Commands/Camera.hpp"
+#include "Commands/Char.hpp"
+#include "Commands/Clock.hpp"
+#include "Commands/Game.hpp"
+#include "Commands/Math.hpp"
+#include "Commands/Pad.hpp"
+#include "Commands/Script.hpp"
+#include "Commands/Text.hpp"
+
+// Must be included after the commands
+#include "CommandParser/LUTGenerator.hpp"
 
 // https://library.sannybuilder.com/#/sa
 
-//! @NOTSA - Our reversed command handler table. See \r ProcessOneCommand
-CRunningScript::CommandHandlerTable_t CRunningScript::reSA_CommandHandlerTable = {
-    &CRunningScript::ProcessCommands0To99,
-    &CRunningScript::ProcessCommands100To199,
-    &CRunningScript::ProcessCommands200To299,
-    &CRunningScript::ProcessCommands300To399,
-    &CRunningScript::ProcessCommands400To499,
-    &CRunningScript::ProcessCommands500To599,
-    &CRunningScript::ProcessCommands600To699,
-    &CRunningScript::ProcessCommands700To799,
-    &CRunningScript::ProcessCommands800To899,
-    &CRunningScript::ProcessCommands900To999,
-    &CRunningScript::ProcessCommands1000To1099,
-    &CRunningScript::ProcessCommands1100To1199,
-    &CRunningScript::ProcessCommands1200To1299,
-    &CRunningScript::ProcessCommands1300To1399,
-    &CRunningScript::ProcessCommands1400To1499,
-    &CRunningScript::ProcessCommands1500To1599,
-    &CRunningScript::ProcessCommands1600To1699,
-    &CRunningScript::ProcessCommands1700To1799,
-    &CRunningScript::ProcessCommands1800To1899,
-    &CRunningScript::ProcessCommands1900To1999,
-    &CRunningScript::ProcessCommands2000To2099,
-    &CRunningScript::ProcessCommands2100To2199,
-    &CRunningScript::ProcessCommands2200To2299,
-    &CRunningScript::ProcessCommands2300To2399,
-    &CRunningScript::ProcessCommands2400To2499,
-    &CRunningScript::ProcessCommands2500To2599,
-    &CRunningScript::ProcessCommands2600To2699
-};
-
-constexpr auto SHORT_STRING_SIZE = 8;
-constexpr auto LONG_STRING_SIZE  = 16;
+static auto s_CommandHandlerLUT = notsa::script::GenerateLUT();
 
 void CRunningScript::InjectHooks() {
     RH_ScopedClass(CRunningScript);
@@ -48,43 +51,55 @@ void CRunningScript::InjectHooks() {
     RH_ScopedInstall(Init, 0x4648E0);
     RH_ScopedInstall(GetCorrectPedModelIndexForEmergencyServiceType, 0x464F50);
 
-    // RH_ScopedInstall(PlayAnimScriptCommand, 0x470150);
-    // RH_ScopedInstall(LocateCarCommand, 0x487A20);
-    // RH_ScopedInstall(LocateCharCommand, 0x486D80);
-    // RH_ScopedInstall(LocateObjectCommand, 0x487D10);
-    // RH_ScopedInstall(LocateCharCarCommand, 0x487420);
-    // RH_ScopedInstall(LocateCharCharCommand, 0x4870F0);
-    // RH_ScopedInstall(LocateCharObjectCommand, 0x487720);
-    // RH_ScopedInstall(CarInAreaCheckCommand, 0x488EC0);
-    // RH_ScopedInstall(CharInAreaCheckCommand, 0x488B50);
-    // RH_ScopedInstall(ObjectInAreaCheckCommand, 0x489150);
-    // RH_ScopedInstall(CharInAngledAreaCheckCommand, 0x487F60);
-    // RH_ScopedInstall(FlameInAngledAreaCheckCommand, 0x488780);
-    // RH_ScopedInstall(ObjectInAngledAreaCheckCommand, 0x4883F0);
-    RH_ScopedInstall(CollectParameters, 0x464080, false, 5, 1);
-    RH_ScopedInstall(CollectNextParameterWithoutIncreasingPC, 0x464250, false, 5, 0);
-    RH_ScopedInstall(StoreParameters, 0x464370, false, 5, 1);
-    RH_ScopedInstall(ReadArrayInformation, 0x463CF0, false, 5, 3);
-    RH_ScopedInstall(ReadParametersForNewlyStartedScript, 0x464500, false, 5, 1);
-    RH_ScopedInstall(ReadTextLabelFromScript, 0x463D50, false, 5, 2);
-    RH_ScopedInstall(GetIndexOfGlobalVariable, 0x464700, false, 5, 0);
+    RH_ScopedInstall(PlayAnimScriptCommand, 0x470150, { .reversed = false });
+    RH_ScopedInstall(LocateCarCommand, 0x487A20, { .reversed = false });
+    RH_ScopedInstall(LocateCharCommand, 0x486D80, { .reversed = false });
+    RH_ScopedInstall(LocateObjectCommand, 0x487D10, { .reversed = false });
+    RH_ScopedInstall(LocateCharCarCommand, 0x487420, { .reversed = false });
+    RH_ScopedInstall(LocateCharCharCommand, 0x4870F0, { .reversed = false });
+    RH_ScopedInstall(LocateCharObjectCommand, 0x487720, { .reversed = false });
+    RH_ScopedInstall(CarInAreaCheckCommand, 0x488EC0, { .reversed = false });
+    RH_ScopedInstall(CharInAreaCheckCommand, 0x488B50, { .reversed = false });
+    RH_ScopedInstall(ObjectInAreaCheckCommand, 0x489150, { .reversed = false });
+    RH_ScopedInstall(CharInAngledAreaCheckCommand, 0x487F60, { .reversed = false });
+    RH_ScopedInstall(FlameInAngledAreaCheckCommand, 0x488780, { .reversed = false });
+    RH_ScopedInstall(ObjectInAngledAreaCheckCommand, 0x4883F0, { .reversed = false });
+    RH_ScopedInstall(CollectParameters, 0x464080, { .stackArguments = 1 });
+    RH_ScopedInstall(CollectNextParameterWithoutIncreasingPC, 0x464250, { .stackArguments = 0 });
+    RH_ScopedInstall(StoreParameters, 0x464370, { .stackArguments = 1 });
+    RH_ScopedInstall(ReadArrayInformation, 0x463CF0, { .stackArguments = 3 });
+    RH_ScopedInstall(ReadParametersForNewlyStartedScript, 0x464500, { .stackArguments = 1 });
+    RH_ScopedInstall(ReadTextLabelFromScript, 0x463D50, { .stackArguments = 2 });
+    RH_ScopedInstall(GetIndexOfGlobalVariable, 0x464700, { .stackArguments = 0 });
     RH_ScopedInstall(GetPadState, 0x485B10);
-    RH_ScopedInstall(GetPointerToLocalVariable, 0x463CA0, false, 5, 1);
-    RH_ScopedInstall(GetPointerToLocalArrayElement, 0x463CC0, false, 5, 3);
-    RH_ScopedInstall(GetPointerToScriptVariable, 0x464790, false, 5, 1);
+    RH_ScopedInstall(GetPointerToLocalVariable, 0x463CA0, { .stackArguments = 1 });
+    RH_ScopedInstall(GetPointerToLocalArrayElement, 0x463CC0, { .stackArguments = 3 });
+    RH_ScopedInstall(GetPointerToScriptVariable, 0x464790, { .stackArguments = 1 });
     RH_ScopedInstall(DoDeathArrestCheck, 0x485A50);
     RH_ScopedInstall(SetCharCoordinates, 0x464DC0);
     RH_ScopedInstall(GivePedScriptedTask, 0x465C20);
-    RH_ScopedInstall(AddScriptToList, 0x464C00, false, 5, 1);
-    RH_ScopedInstall(RemoveScriptFromList, 0x464BD0, false, 5, 1);
-    // RH_ScopedInstall(ShutdownThisScript, 0x465AA0);
+    RH_ScopedInstall(AddScriptToList, 0x464C00, { .stackArguments = 1 });
+    RH_ScopedInstall(RemoveScriptFromList, 0x464BD0, { .stackArguments = 1 });
+    RH_ScopedInstall(ShutdownThisScript, 0x465AA0, { .reversed = false });
     RH_ScopedInstall(IsPedDead, 0x464D70);
     RH_ScopedInstall(ThisIsAValidRandomPed, 0x489490);
-    // RH_ScopedInstall(ScriptTaskPickUpObject, 0x46AF50);
-    RH_ScopedInstall(UpdateCompareFlag, 0x4859D0, false, 5, 1);
-    RH_ScopedInstall(UpdatePC, 0x464DA0, false, 5, 1);
+    RH_ScopedInstall(ScriptTaskPickUpObject, 0x46AF50, { .reversed = false });
+    RH_ScopedInstall(UpdateCompareFlag, 0x4859D0, { .stackArguments = 1 });
+    RH_ScopedInstall(UpdatePC, 0x464DA0, { .stackArguments = 1 });
     RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
     RH_ScopedInstall(Process, 0x469F00);
+
+    // Enable in `StdInc.h` if needed (Don't forget to disabled it when committing)
+#ifdef ENABLE_SCRIPT_COMMAND_HOOKS
+    const auto HookCommand = []<size_t Idx>() {
+        using namespace ReversibleHooks::ReversibleHook;
+        ReversibleHooks::AddItemToCategory(
+            "Scripts/Commands",
+            std::make_shared<ScriptCommand<(eScriptCommands)Idx>>()
+        );
+    };
+    notsa::script::IterateCommandIDs(HookCommand);
+#endif
 }
 
 // 0x4648E0
@@ -464,7 +479,7 @@ tScriptParam* CRunningScript::GetPointerToScriptVariable(eScriptVariableType var
         return GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, arrElemSize);
 
     default:
-        return nullptr;
+        NOTSA_UNREACHABLE();
     }
 }
 
@@ -798,28 +813,27 @@ void CRunningScript::UpdatePC(int32 newIP) {
     else
         m_pCurrentIP = &m_pBaseIP[-newIP];
 }
+static std::array<size_t, COMMAND_HIGHEST_ID> counter{};
 
 // 0x469EB0, inlined
 OpcodeResult CRunningScript::ProcessOneCommand() {
     ++CTheScripts::CommandsExecuted;
 
-    int32 command = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+    union {
+        int16 op;
+        struct {
+            uint16 command : 15;
+            uint16 notFlag : 1;
+        };
+    } op = { CTheScripts::Read2BytesFromScript(m_pCurrentIP) };
 
-    m_bNotFlag = (command & 0x8000) != 0;
-    command &= 0x7FFF;
+    counter[op.command]++;
 
-    const auto InvokeHandlerFromTable = [this, idx = command / 100, command](auto&& tbl) {
-        return std::invoke(tbl[idx], this, command);
-    };
+    m_bNotFlag = op.notFlag;
 
-    // NOTSA: First we try to call our (reversed) implementation for the current command
-    if (const auto ret = InvokeHandlerFromTable(reSA_CommandHandlerTable); ret != OR_IMPLEMENTED_YET) {
-        // printf("Command %d\n", command);
-        return ret; // Implemented, don't call original handler.
-    }
+    //return std::invoke(CommandHandlerTable[(size_t)op.command / 100], this, (eScriptCommands)op.command);
 
-    // Not implemented -> invoke the original opcode
-    return InvokeHandlerFromTable(CommandHandlerTable);
+    return std::invoke(s_CommandHandlerLUT[(size_t)op.command], this);
 }
 
 // 0x469F00
@@ -849,4 +863,8 @@ OpcodeResult CRunningScript::Process() {
     }
 
     return OR_CONTINUE;
+}
+
+void CRunningScript::SetCommandHandler(eScriptCommands cmd, OpcodeResult(*handler)(CRunningScript*)) {
+    s_CommandHandlerLUT[(size_t)cmd] = handler;
 }

@@ -37,8 +37,16 @@ public:
     void Flush(bool bAvoidFlushingTaskComplexBeInGroup);
     CEvent* GetEventOfType(eEventType type) const noexcept;
 
+    // NOTSA
+
     auto GetEvents()       { return std::span{ m_events, (size_t)m_count }; }
     auto GetEvents() const { return std::span{ m_events, (size_t)m_count }; }
+
+    // Helper so events can be directly passed in without having to put them into a variable
+    template<typename T>
+    CEvent* Add(T event, bool valid = false) requires std::is_base_of_v<CEvent, T> {
+        return Add(&event, valid);
+    }
 };
 
 VALIDATE_SIZE(CEventGroup, 0x4C);

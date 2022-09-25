@@ -127,7 +127,7 @@ public:
 };
 VALIDATE_SIZE(UpgradePosnDesc, 0x20);
 
-class CVehicleModelInfo : public CClumpModelInfo {
+class NOTSA_EXPORT_VTABLE CVehicleModelInfo : public CClumpModelInfo {
 public:
     RpMaterial*        m_pPlateMaterial;
     char               m_szPlateText[8];
@@ -252,8 +252,8 @@ public:
     // extras ids for next-spawned car
     // static char ms_compsUsed[2];
     static constexpr int32 NUM_COMPS_USAGE = 2;
-    static uint8 (&ms_compsUsed)[NUM_COMPS_USAGE];
-    static uint8 (&ms_compsToUse)[NUM_COMPS_USAGE];
+    static inline int8(&ms_compsUsed)[NUM_COMPS_USAGE] = *(int8(*)[NUM_COMPS_USAGE])0xB4E478;
+    static inline int8(&ms_compsToUse)[NUM_COMPS_USAGE] = *(int8(*)[NUM_COMPS_USAGE])0x8A6458;
 
     // vehicle colours from carcols.dat
     // static CRGBA ms_vehicleColourTable[128];

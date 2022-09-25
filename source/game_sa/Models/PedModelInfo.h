@@ -17,7 +17,7 @@ struct tPedColNodeInfo {
     float   m_fRadius;
 };
 
-class CPedModelInfo : public CClumpModelInfo {
+class NOTSA_EXPORT_VTABLE CPedModelInfo : public CClumpModelInfo {
 public:
     AssocGroupId m_nAnimType;
     ePedType     m_nPedType;

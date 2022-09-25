@@ -57,3 +57,7 @@ void CPedGroup::RemoveAllFollowers() {
 void CPedGroup::Teleport(const CVector* pos) {
     plugin::CallMethod<0x5F7AD0, CPedGroup*, const CVector*>(this, pos);
 }
+
+int32 CPedGroup::GetId() {
+    return CPedGroups::GetGroupId(this);
+}

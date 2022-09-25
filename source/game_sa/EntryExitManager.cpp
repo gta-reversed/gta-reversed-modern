@@ -19,12 +19,12 @@ void CEntryExitManager::InjectHooks() {
     RH_ScopedClass(CEntryExitManager);
     RH_ScopedCategoryGlobal();
 
-//    RH_ScopedInstall(Init, 0x43F880);
-//    RH_ScopedInstall(Load, 0x5D55C0);
-//    RH_ScopedInstall(Save, 0x5D5970);
-//    RH_ScopedInstall(Update, 0x440D10);
-//    RH_ScopedInstall(Shutdown, 0x440B90);
-//    RH_ScopedInstall(ShutdownForRestart, 0x440C40);
+RH_ScopedInstall(Init, 0x43F880, { .reversed = false });
+RH_ScopedInstall(Load, 0x5D55C0, { .reversed = false });
+RH_ScopedInstall(Save, 0x5D5970, { .reversed = false });
+RH_ScopedInstall(Update, 0x440D10, { .reversed = false });
+RH_ScopedInstall(Shutdown, 0x440B90, { .reversed = false });
+RH_ScopedInstall(ShutdownForRestart, 0x440C40, { .reversed = false });
 }
 
 // 0x43F880
@@ -121,4 +121,8 @@ void CEntryExitManager::GotoEntryExitVC(const char* name) {
 // 0x43F050
 void CEntryExitManager::LinkEntryExit(CEntryExit* entryExit) {
     plugin::Call<0x43F050, CEntryExit*>(entryExit);
+}
+
+bool CEntryExitManager::WeAreInInteriorTransition() {
+    return plugin::CallAndReturn<bool, 0x43E400>();
 }

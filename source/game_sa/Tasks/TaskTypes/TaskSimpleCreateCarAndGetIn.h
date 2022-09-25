@@ -17,7 +17,7 @@ public:
     static constexpr auto Type = TASK_SIMPLE_CREATE_CAR_AND_GET_IN;
 
     CTaskSimpleCreateCarAndGetIn(CVector const& pos, int32 model);
-    ~CTaskSimpleCreateCarAndGetIn();
+    ~CTaskSimpleCreateCarAndGetIn() override;
 
     CTask* Clone() override { return new CTaskSimpleCreateCarAndGetIn{ *this }; }
     eTaskType GetTaskType() override { return Type; };

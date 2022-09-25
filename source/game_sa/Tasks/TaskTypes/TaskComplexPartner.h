@@ -31,9 +31,9 @@ public:
     static constexpr auto Type = TASK_COMPLEX_PARTNER;
 
     CTaskComplexPartner(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, bool makePedAlwaysFacePartner, int8 updateDirectionCount, CVector point);
-    ~CTaskComplexPartner();
+    ~CTaskComplexPartner() override;
 
-    eTaskType GetTaskType() override { return TASK_COMPLEX_PARTNER; }
+    eTaskType GetTaskType() override { return Type; }
     CTask*       CreateNextSubTask(CPed* ped) override;
     CTask*       CreateFirstSubTask(CPed* ped) override;
     CTask*       ControlSubTask(CPed* ped) override;

@@ -40,8 +40,9 @@ CTaskSimpleDie::CTaskSimpleDie(CAnimBlendHierarchy* animHierarchy, eAnimationFla
 
 // 0x62FB40
 CTaskSimpleDie::~CTaskSimpleDie() {
-    if (m_animAssociation)
+    if (m_animAssociation) {
         m_animAssociation->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
+    }
 }
 
 // 0x637520
@@ -134,17 +135,15 @@ void CTaskSimpleDie::FinishAnimDieCB(CAnimBlendAssociation* association, void* d
     task->m_animAssociation = nullptr;
 }
 
-void CTaskSimpleDie::InjectHooks() {
+void CTaskSimpleDie__InjectHooks() {
     RH_ScopedClass(CTaskSimpleDie);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedOverloadedInstall(Constructor, "1", 0x62FA00, CTaskSimpleDie*(CTaskSimpleDie::*)(AssocGroupId, AnimationId, float, float));
     RH_ScopedOverloadedInstall(Constructor, "2", 0x62FA60, CTaskSimpleDie*(CTaskSimpleDie::*)(const char*, const char*, eAnimationFlags, float, float));
     RH_ScopedOverloadedInstall(Constructor, "3", 0x62FAF0, CTaskSimpleDie*(CTaskSimpleDie::*)(CAnimBlendHierarchy *, eAnimationFlags, float, float));
-    RH_ScopedInstall(Destructor, 0x62FB40);
     RH_ScopedInstall(FinishAnimDieCB, 0x62FC10);
     RH_ScopedInstall(StartAnim, 0x637520);
     // clang moment: RH_ScopedVirtualOverloadedInstall(Clone, "", 0x635DA0,  CTask *(CTaskSimpleDie::*)());
-    RH_ScopedVirtualInstall(GetTaskType, 0x62FA50);
     RH_ScopedVirtualInstall(MakeAbortable, 0x62FBA0);
     RH_ScopedVirtualInstall(ProcessPed, 0x6397E0);
 }
@@ -164,21 +163,6 @@ CTaskSimpleDie* CTaskSimpleDie::Constructor(const char* animName, const char* an
 CTaskSimpleDie* CTaskSimpleDie::Constructor(CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags, float blendDelta, float animSpeed) {
     this->CTaskSimpleDie::CTaskSimpleDie(animHierarchy, animFlags, blendDelta, animSpeed);
     return this;
-}
-
-CTaskSimpleDie* CTaskSimpleDie::Destructor() {
-    CTaskSimpleDie::~CTaskSimpleDie();
-    return this;
-}
-
-// 0x635DA0
-CTask* CTaskSimpleDie::Clone_Reversed() {
-    return CTaskSimpleDie::Clone();
-}
-
-// 0x62FA50
-eTaskType CTaskSimpleDie::GetTaskType_Reversed() {
-    return CTaskSimpleDie::GetTaskType();
 }
 
 // 0x62FBA0

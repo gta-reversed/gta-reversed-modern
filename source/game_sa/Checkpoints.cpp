@@ -10,9 +10,9 @@ void CCheckpoints::InjectHooks() {
 
     RH_ScopedInstall(Init, 0x722880);
     RH_ScopedInstall(Shutdown, 0x7228F0);
-    // RH_ScopedInstall(Update, 0x7229C0);
+    RH_ScopedInstall(Update, 0x7229C0, { .reversed = false });
     RH_ScopedInstall(Render, 0x726060);
-    // RH_ScopedInstall(PlaceMarker, 0x722C40);
+    RH_ScopedInstall(PlaceMarker, 0x722C40, { .reversed = false });
     RH_ScopedInstall(DeleteCP, 0x722FC0);
     RH_ScopedInstall(SetHeading, 0x722970);
     RH_ScopedInstall(UpdatePos, 0x722900);

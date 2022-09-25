@@ -18,12 +18,12 @@ void CSpecialFX::InjectHooks() {
     RH_ScopedClass(CSpecialFX);
     RH_ScopedCategoryGlobal();
 
-//    RH_ScopedInstall(Init, 0x7268F0);
-//    RH_ScopedInstall(Update, 0x726AA0);
+    RH_ScopedInstall(Init, 0x7268F0, { .reversed = false });
+    RH_ScopedInstall(Update, 0x726AA0, { .reversed = false });
     RH_ScopedInstall(Shutdown, 0x723390);
-//    RH_ScopedInstall(AddWeaponStreak, 0x0);
-//    RH_ScopedInstall(Render, 0x726AD0);
-//    RH_ScopedInstall(Render2DFXs, 0x721660);
+    //RH_ScopedInstall(AddWeaponStreak, 0x0, { .reversed = false });
+    RH_ScopedInstall(Render, 0x726AD0, { .reversed = false });
+    RH_ScopedInstall(Render2DFXs, 0x721660, { .reversed = false });
     RH_ScopedInstall(ReplayStarted, 0x721D30);
 }
 

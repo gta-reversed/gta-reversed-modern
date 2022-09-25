@@ -9,6 +9,9 @@ CTaskComplexEnterCarAsPassenger::CTaskComplexEnterCarAsPassenger(CVehicle* targe
     m_nTargetSeat = nTargetSeat;
 }
 
+// 0x6437F0
 CTask* CTaskComplexEnterCarAsPassenger::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x6437F0, CTask*>(this);
+    auto task = new CTaskComplexEnterCarAsPassenger(m_pTargetVehicle, m_nTargetSeat, m_bCarryOnAfterFallingOff);
+    task->m_nMoveState = m_nMoveState;
+    return task;
 }

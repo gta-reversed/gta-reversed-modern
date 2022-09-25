@@ -21,10 +21,10 @@ public:
 public:
     static constexpr auto Type = TASK_COMPLEX_JUMP;
 
-    CTaskComplexJump(eComplexJumpType type);
-    ~CTaskComplexJump() override {}
+    explicit CTaskComplexJump(eComplexJumpType type);
+    ~CTaskComplexJump() override = default;
 
-    eTaskType GetTaskType() override { return TASK_COMPLEX_JUMP; }
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override;
     CTask* ControlSubTask(CPed* ped) override { return m_pSubTask; }
     CTask* CreateFirstSubTask(CPed* ped) override;

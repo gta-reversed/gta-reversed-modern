@@ -5,27 +5,27 @@ void CWaterLevel::InjectHooks() {
     RH_ScopedClass(CWaterLevel);
     RH_ScopedCategoryGlobal();
 
-    //RH_ScopedGlobalInstall(Shutdown, 0x6E59E0);
-    //RH_ScopedGlobalInstall(RenderWaterTriangle, 0x6EE240);
-    //RH_ScopedGlobalInstall(RenderFlatWaterTriangle, 0x6EE080);
-    //RH_ScopedGlobalInstall(RenderBoatWakes, 0x6ED9A0);
-    //RH_ScopedGlobalInstall(SplitWaterTriangleAlongXLine, 0x6ECF00);
-    //RH_ScopedGlobalInstall(RenderWaterRectangle, 0x6EC5D0);
-    //RH_ScopedGlobalInstall(RenderFlatWaterRectangle, 0x6EBEC0);
-    //RH_ScopedGlobalInstall(SplitWaterRectangleAlongXLine, 0x6EB810);
-    //RH_ScopedGlobalInstall(PreRenderWater, 0x6EB710);
+    RH_ScopedGlobalInstall(Shutdown, 0x6E59E0, { .reversed = false });
+    RH_ScopedGlobalInstall(RenderWaterTriangle, 0x6EE240, { .reversed = false });
+    RH_ScopedGlobalInstall(RenderFlatWaterTriangle, 0x6EE080, { .reversed = false });
+    RH_ScopedGlobalInstall(RenderBoatWakes, 0x6ED9A0, { .reversed = false });
+    RH_ScopedGlobalInstall(SplitWaterTriangleAlongXLine, 0x6ECF00, { .reversed = false });
+    RH_ScopedGlobalInstall(RenderWaterRectangle, 0x6EC5D0, { .reversed = false });
+    RH_ScopedGlobalInstall(RenderFlatWaterRectangle, 0x6EBEC0, { .reversed = false });
+    RH_ScopedGlobalInstall(SplitWaterRectangleAlongXLine, 0x6EB810, { .reversed = false });
+    RH_ScopedGlobalInstall(PreRenderWater, 0x6EB710, { .reversed = false });
     RH_ScopedOverloadedInstall(GetWaterLevel, "", 0x6EB690, bool(*)(float, float, float, float*, uint8, CVector*));
-    //RH_ScopedGlobalInstall(WaterLevelInitialise, 0x6EAE80);
-    //RH_ScopedGlobalInstall(SetUpWaterFog, 0x6EA9F0);
-    //RH_ScopedGlobalInstall(RenderWakeSegment, 0x6EA260);
-    //RH_ScopedGlobalInstall(FindNearestWaterAndItsFlow, 0x6E9D70);
-    //RH_ScopedGlobalInstall(GetWaterLevelNoWaves, 0x6E8580);
-    //RH_ScopedGlobalInstall(RenderWaterFog, 0x6E7760);
+    RH_ScopedGlobalInstall(WaterLevelInitialise, 0x6EAE80, { .reversed = false });
+    RH_ScopedGlobalInstall(SetUpWaterFog, 0x6EA9F0, { .reversed = false });
+    RH_ScopedGlobalInstall(RenderWakeSegment, 0x6EA260, { .reversed = false });
+    RH_ScopedGlobalInstall(FindNearestWaterAndItsFlow, 0x6E9D70, { .reversed = false });
+    RH_ScopedGlobalInstall(GetWaterLevelNoWaves, 0x6E8580, { .reversed = false });
+    RH_ScopedGlobalInstall(RenderWaterFog, 0x6E7760, { .reversed = false });
     RH_ScopedGlobalInstall(CalculateWavesOnlyForCoordinate, 0x6E6EF0);
-    //RH_ScopedGlobalInstall(ScanThroughBlocks, 0x6E6D10);
-    //RH_ScopedGlobalInstall(SplitWaterTriangleAlongYLine, 0x6EE5A0);
-    //RH_ScopedGlobalInstall(RenderWater, 0x6EF650);
-    //RH_ScopedGlobalInstall(AddWaveToResult, 0x6E81E0);
+    RH_ScopedGlobalInstall(ScanThroughBlocks, 0x6E6D10, { .reversed = false });
+    RH_ScopedGlobalInstall(SplitWaterTriangleAlongYLine, 0x6EE5A0, { .reversed = false });
+    RH_ScopedGlobalInstall(RenderWater, 0x6EF650, { .reversed = false });
+    RH_ScopedGlobalInstall(AddWaveToResult, 0x6E81E0, { .reversed = false });
 }
 
 // 0x6E59E0
@@ -187,7 +187,7 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float lowFre
     auto v17 = (vecNormal.x + vecNormal.y + vecNormal.z) * 0.57700002f;
 
     colorMult = std::max(v17, 0.0f) * 0.65f + 0.27f;
-    glare = clamp(8.0f * v17 - 5.0f, 0.0f, 0.99f) * CWeather::SunGlare;
+    glare = std::clamp(8.0f * v17 - 5.0f, 0.0f, 0.99f) * CWeather::SunGlare;
 }
 
 // 0x6E6D10

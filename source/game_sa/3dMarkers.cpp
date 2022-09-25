@@ -15,10 +15,10 @@ void C3dMarkers::InjectHooks() {
     RH_ScopedInstall(Render, 0x725040);
     RH_ScopedInstall(DirectionArrowFindFirstFreeSlot, 0x721120);
     RH_ScopedInstall(DirectionArrowSet, 0x721140);
-    // RH_ScopedInstall(DirectionArrowsDraw, 0x7211F0);
+    RH_ScopedInstall(DirectionArrowsDraw, 0x7211F0, {.reversed = false});
     RH_ScopedInstall(DirectionArrowsInit, 0x721100);
     RH_ScopedInstall(ForceRender, 0x722870);
-    // RH_ScopedInstall(PlaceMarker, 0x725120);
+    RH_ScopedInstall(PlaceMarker, 0x725120, {.reversed = false});
     RH_ScopedInstall(PlaceMarkerCone, 0x726D40);
     RH_ScopedInstall(PlaceMarkerSet, 0x725BA0);
     RH_ScopedInstall(User3dMarkerAtomicCB, 0x7210D0);

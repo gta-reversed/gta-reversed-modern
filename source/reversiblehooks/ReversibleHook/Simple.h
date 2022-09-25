@@ -34,9 +34,12 @@ struct Simple : Base {
     bool CheckLibFnForChangesAndStore(void* expected);
     void ApplyJumpToGTACode();
     void GenerateECXPreservationThunk(int stackArguments);
+    auto GetHookGTAAddress() const { return (void*)m_iRealHookedAddress; }
+    auto GetHookOurAddress() const { return (void*)m_iLibFunctionAddress; }
 
-    virtual void Switch() override;
-    virtual void Check() override;
+    void        Switch() override;
+    void        Check() override;
+    const char* Symbol() const override { return "S"; }
 };
 
 };

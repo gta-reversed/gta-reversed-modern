@@ -46,7 +46,7 @@ void CBaseModelInfo::InjectHooks() {
     RH_ScopedInstall(IsBreakableStatuePart, 0x59F090);
     RH_ScopedInstall(IsTagModel, 0x49CC20);
     // Hooking SwaysInWind function causes side effects
-    // RH_ScopedInstall(SwaysInWind, 0x4212C0);
+    RH_ScopedInstall(SwaysInWind, 0x4212C0, { .reversed = false });
 
     RH_ScopedInstall(SetBaseModelInfoFlags, 0x5B3AD0);
 }
@@ -135,9 +135,7 @@ int32 CBaseModelInfo::GetAnimFileIndex_Reversed() {
 }
 
 void CBaseModelInfo::SetTexDictionary(const char* txdName) {
-    m_nTxdIndex = CTxdStore::FindTxdSlot(txdName);
-    if (m_nTxdIndex == -1)
-        m_nTxdIndex = CTxdStore::AddTxdSlot(txdName);
+    m_nTxdIndex = CTxdStore::FindOrAddTxdSlot(txdName);
 }
 
 void CBaseModelInfo::ClearTexDictionary() {

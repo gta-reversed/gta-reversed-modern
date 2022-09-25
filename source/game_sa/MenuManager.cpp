@@ -18,6 +18,7 @@
 #include "C_PcSave.h"
 #include "platform.h"
 #include "Hud.h"
+#include "ControllerConfigManager.h"
 
 CMenuManager& FrontEndMenuManager = *(CMenuManager*)0xBA6748;
 
@@ -37,7 +38,7 @@ void CMenuManager::InjectHooks() {
     RH_ScopedInstall(HasLanguageChanged, 0x573CD0);
     RH_ScopedInstall(DoSettingsBeforeStartingAGame, 0x573330);
     RH_ScopedInstall(StretchX, 0x5733E0);
-    // bad registers RH_ScopedInstall(StretchY, 0x573410, true);
+    RH_ScopedInstall(StretchY, 0x573410, { .reversed = false });
     RH_ScopedInstall(SwitchToNewScreen, 0x573680);
     RH_ScopedInstall(ScrollRadioStations, 0x573A00);
     RH_ScopedInstall(SetFrontEndRenderStates, 0x573A60);
@@ -47,13 +48,13 @@ void CMenuManager::InjectHooks() {
 
     RH_ScopedInstall(DrawFrontEnd, 0x57C290);
     RH_ScopedInstall(DrawBackground, 0x57B750);
-    // RH_ScopedInstall(DrawStandardMenus, 0x5794A0);
+    RH_ScopedInstall(DrawStandardMenus, 0x5794A0, { .reversed = false });
     RH_ScopedInstall(DrawWindow, 0x573EE0);
     RH_ScopedInstall(DrawWindowedText, 0x578F50);
     RH_ScopedInstall(DrawQuitGameScreen, 0x57D860);
-    // RH_ScopedInstall(DrawControllerScreenExtraText, 0x57D8D0);
-    // RH_ScopedInstall(DrawControllerBound, 0x57E6E0);
-    // RH_ScopedInstall(DrawControllerSetupScreen, 0x57F300);
+    RH_ScopedInstall(DrawControllerScreenExtraText, 0x57D8D0, { .reversed = false });
+    RH_ScopedInstall(DrawControllerBound, 0x57E6E0, { .reversed = false });
+    RH_ScopedInstall(DrawControllerSetupScreen, 0x57F300, { .reversed = false });
 
     RH_ScopedInstall(CentreMousePointer, 0x57C520);
     RH_ScopedInstall(LoadSettings, 0x57C8F0);
@@ -69,7 +70,7 @@ void CMenuManager::InjectHooks() {
     RH_ScopedInstall(CheckForMenuClosing, 0x576B70);
     RH_ScopedInstall(CheckHover, 0x57C4F0);
     RH_ScopedInstall(CheckMissionPackValidMenu, 0x57D720);
-    // RH_ScopedInstall(CheckCodesForControls, 0x57DB20);
+    RH_ScopedInstall(CheckCodesForControls, 0x57DB20, { .reversed = false });
 
     RH_ScopedInstall(DisplaySlider, 0x576860);
     RH_ScopedInstall(DisplayHelperText, 0x57E240);
@@ -78,20 +79,20 @@ void CMenuManager::InjectHooks() {
     RH_ScopedInstall(MessageScreen, 0x579330);
     RH_ScopedInstall(SmallMessageScreen, 0x574010);
 
-    // RH_ScopedInstall(PrintMap, 0x575130);
-    // RH_ScopedInstall(PrintStats, 0x574900);
+    RH_ScopedInstall(PrintMap, 0x575130, { .reversed = false });
+    RH_ScopedInstall(PrintStats, 0x574900, { .reversed = false });
     RH_ScopedInstall(PrintBriefs, 0x576320);
     RH_ScopedInstall(PrintRadioStationList, 0x5746F0);
 
-    // RH_ScopedInstall(UserInput, 0x57FD70);
-    // RH_ScopedInstall(AdditionalOptionInput, 0x5773D0);
+    RH_ScopedInstall(UserInput, 0x57FD70, { .reversed = false });
+    RH_ScopedInstall(AdditionalOptionInput, 0x5773D0, { .reversed = false });
     RH_ScopedInstall(CheckRedefineControlInput, 0x57E4D0);
-    // RH_ScopedInstall(RedefineScreenUserInput, 0x57EF50);
+    RH_ScopedInstall(RedefineScreenUserInput, 0x57EF50, { .reversed = false });
 
     RH_ScopedInstall(Process, 0x57B440);
     RH_ScopedInstall(ProcessStreaming, 0x573CF0);
     RH_ScopedInstall(ProcessFileActions, 0x578D60);
-    // RH_ScopedInstall(ProcessUserInput, 0x57B480);
+    RH_ScopedInstall(ProcessUserInput, 0x57B480, { .reversed = false });
     RH_ScopedInstall(ProcessMenuOptions, 0x576FE0);
     RH_ScopedInstall(ProcessPCMenuOptions, 0x57CD50);
     RH_ScopedInstall(ProcessMissionPackNewGame, 0x57D520);
@@ -169,9 +170,7 @@ void CMenuManager::LoadAllTextures() {
         CStreaming::ImGonnaUseStreamingMemory();
         CGame::TidyUpMemory(false, true);
         CTxdStore::PushCurrentTxd();
-        auto slot = CTxdStore::FindTxdSlot(slotName);
-        if (slot == -1)
-            slot = CTxdStore::AddTxdSlot(slotName);
+        auto slot = CTxdStore::FindOrAddTxdSlot(slotName);
         CTxdStore::LoadTxd(slot, txdName);
         CTxdStore::AddRef(slot);
         CTxdStore::SetCurrentTxd(slot);
@@ -205,9 +204,7 @@ void CMenuManager::SwapTexturesRound(bool round) {
         CStreaming::MakeSpaceFor(size);
         CStreaming::ImGonnaUseStreamingMemory();
         CTxdStore::PushCurrentTxd();
-        auto slot = CTxdStore::FindTxdSlot(slotName);
-        if (slot == -1)
-            slot = CTxdStore::AddTxdSlot(slotName);
+        auto slot = CTxdStore::FindOrAddTxdSlot(slotName);
         CTxdStore::LoadTxd(slot, txdName);
         CTxdStore::AddRef(slot);
         CTxdStore::SetCurrentTxd(slot);
@@ -480,7 +477,7 @@ void CMenuManager::SetDefaultPreferences(eMenuScreen screen) {
         break;
     case SCREEN_DISPLAY_SETTINGS:
     case SCREEN_DISPLAY_ADVANCED:
-        g_fx.SetFxQuality(FXQUALITY_HIGH);
+        g_fx.SetFxQuality(FX_QUALITY_HIGH);
         SetBrightness(256.0f, true);
         m_PrefsBrightness                = 256;
         m_fDrawDistance                  = 1.2f;
@@ -620,7 +617,7 @@ void CMenuManager::LoadSettings() {
 
     uint32 version = 0u;
     struct { uint8 m_unk; uint8 m_separator; uint8 m_underscore; uint8 _align; } constants;
-    FxQuality_e fxQuality = FXQUALITY_HIGH;
+    FxQuality_e fxQuality = FX_QUALITY_HIGH;
     auto previousLang = m_nPrefsLanguage;
 
     ReadFromFile(version);
@@ -1070,4 +1067,13 @@ void CMenuManager::SmallMessageScreen(const char* key) {
 // NOTSA
 void CMenuManager::SetBrightness(float brightness, bool arg2) {
     gamma.SetGamma(brightness / 512.0f, arg2);
+}
+
+// NOTSA 0x748BDD
+const char* CMenuManager::GetMovieFileName() const {
+    if (m_nTitleLanguage == 12 || m_nTitleLanguage == 7) {
+        return "movies\\GTAtitlesGER.mpg";
+    } else {
+        return "movies\\GTAtitles.mpg";
+    }
 }

@@ -17,11 +17,11 @@ void CAudioZones::InjectHooks() {
     RH_ScopedClass(CAudioZones);
     RH_ScopedCategory("Audio");
 
-    // RH_ScopedInstall(Init, 0x5081A0);
-    // RH_ScopedInstall(RegisterAudioSphere, 0x5081C0);
-    // RH_ScopedInstall(RegisterAudioBox, 0x508240);
-    // RH_ScopedInstall(SwitchAudioZone, 0x508320);
-    // RH_ScopedInstall(Update, 0x5083C0);
+    RH_ScopedInstall(Init, 0x5081A0, { .reversed = false });
+    RH_ScopedInstall(RegisterAudioSphere, 0x5081C0, { .reversed = false });
+    RH_ScopedInstall(RegisterAudioBox, 0x508240, { .reversed = false });
+    RH_ScopedInstall(SwitchAudioZone, 0x508320, { .reversed = false });
+    RH_ScopedInstall(Update, 0x5083C0, { .reversed = false });
 }
 
 // 0x5081A0

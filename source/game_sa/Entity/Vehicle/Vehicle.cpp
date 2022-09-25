@@ -74,7 +74,12 @@ void CVehicle::InjectHooks() {
     RH_ScopedVirtualInstall(PreRender, 0x6D6480);
     RH_ScopedVirtualInstall(Render, 0x6D0E60);
     RH_ScopedVirtualInstall(ProcessOpenDoor, 0x6D56C0);
-    RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6DF4A0);
+
+    // It can't be properly unhooked, original function assumes that CVehicle::GetVehicleAppearance doesn't spoil ECX register, and calls
+    // it without making sure that the pointer in it still points to current instance. While it worked for original function, we can't
+    // force the compiler to keep ECX unchanged through function execution
+    RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6DF4A0, {.enabled = true, .locked = true});
+
     RH_ScopedVirtualInstall(GetHeightAboveRoad, 0x6D63F0);
     RH_ScopedVirtualInstall(CanPedStepOutCar, 0x6D1F30);
     RH_ScopedVirtualInstall(CanPedJumpOutCar, 0x6D2030);
@@ -99,141 +104,130 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(ChangeLawEnforcerState, 0x6D2330);
     RH_ScopedInstall(GetVehicleAppearance, 0x6D1080);
     RH_ScopedInstall(DoHeadLightBeam, 0x6E0E20);
-    // RH_ScopedInstall(GetPlaneNumGuns, 0x6D3F30); register problem?
+    RH_ScopedInstall(GetPlaneNumGuns, 0x6D3F30, { .reversed = false }); // register problem?
 
-    // RH_ScopedInstall(CustomCarPlate_TextureCreate, 0x6D10E0);
-    // RH_ScopedInstall(CustomCarPlate_TextureDestroy, 0x6D1150);
+    RH_ScopedInstall(CustomCarPlate_TextureCreate, 0x6D10E0, { .reversed = false });
+    RH_ScopedInstall(CustomCarPlate_TextureDestroy, 0x6D1150, { .reversed = false });
     RH_ScopedInstall(CanBeDeleted, 0x6D1180);
     RH_ScopedInstall(ProcessWheelRotation, 0x6D1230);
-    // RH_ScopedInstall(CanVehicleBeDamaged, 0x6D1280);
-    // RH_ScopedInstall(ProcessDelayedExplosion, 0x6D1340);
-    // RH_ScopedInstall(AddPassenger, 0x6D13A0);
-    // RH_ScopedInstall(AddPassenger, 0x6D14D0);
-    // RH_ScopedInstall(RemovePassenger, 0x6D1610);
-    // RH_ScopedInstall(SetDriver, 0x6D16A0);
-    // RH_ScopedInstall(RemoveDriver, 0x6D1950);
-    // RH_ScopedInstall(SetUpDriver, 0x6D1A50);
-    // RH_ScopedInstall(SetupPassenger, 0x6D1AA0);
-    // RH_ScopedInstall(KillPedsInVehicle, 0x6D1C80);
+    RH_ScopedInstall(CanVehicleBeDamaged, 0x6D1280, { .reversed = false });
+    RH_ScopedInstall(ProcessDelayedExplosion, 0x6D1340, { .reversed = false });
+    RH_ScopedOverloadedInstall(AddPassenger, "any-seat", 0x6D13A0, bool(CVehicle::*)(CPed*), { .reversed = false });
+    RH_ScopedOverloadedInstall(AddPassenger, "at-set", 0x6D14D0, bool(CVehicle::*)(CPed*, uint8), { .reversed = false });
+    RH_ScopedInstall(RemovePassenger, 0x6D1610, { .reversed = false });
+    RH_ScopedInstall(SetDriver, 0x6D16A0, { .reversed = false });
+    RH_ScopedInstall(RemoveDriver, 0x6D1950, { .reversed = false });
+    RH_ScopedInstall(SetUpDriver, 0x6D1A50, { .reversed = false });
+    RH_ScopedInstall(SetupPassenger, 0x6D1AA0, { .reversed = false });
+    RH_ScopedInstall(KillPedsInVehicle, 0x6D1C80, { .reversed = false });
     RH_ScopedInstall(IsUpsideDown, 0x6D1D90);
     RH_ScopedInstall(IsOnItsSide, 0x6D1DD0);
-    // RH_ScopedInstall(CanPedOpenLocks, 0x6D1E20);
-    // RH_ScopedInstall(CanDoorsBeDamaged, 0x6D1E60);
-    // RH_ScopedInstall(CanPedEnterCar, 0x6D1E80);
-    // RH_ScopedInstall(ProcessCarAlarm, 0x6D21F0);
-    // RH_ScopedInstall(DestroyVehicleAndDriverAndPassengers, 0x6D2250);
+    RH_ScopedInstall(CanPedOpenLocks, 0x6D1E20, { .reversed = false });
+    RH_ScopedInstall(CanDoorsBeDamaged, 0x6D1E60, { .reversed = false });
+    RH_ScopedInstall(CanPedEnterCar, 0x6D1E80, { .reversed = false });
+    RH_ScopedInstall(ProcessCarAlarm, 0x6D21F0, { .reversed = false });
+    RH_ScopedGlobalInstall(DestroyVehicleAndDriverAndPassengers, 0x6D2250, { .reversed = false });
     RH_ScopedInstall(IsVehicleNormal, 0x6D22F0);
     RH_ScopedInstall(IsLawEnforcementVehicle, 0x6D2370);
     RH_ScopedInstall(ExtinguishCarFire, 0x6D2460);
-    // RH_ScopedInstall(ActivateBomb, 0x6D24F0);
-    // RH_ScopedInstall(ActivateBombWhenEntered, 0x6D2570);
-    // RH_ScopedInstall(CarHasRoof, 0x6D25D0);
-    // RH_ScopedInstall(HeightAboveCeiling, 0x6D2600);
-    // RH_ScopedInstall(SetComponentVisibility, 0x6D2700);
-    // RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
+    RH_ScopedInstall(ActivateBomb, 0x6D24F0, { .reversed = false });
+    RH_ScopedInstall(ActivateBombWhenEntered, 0x6D2570, { .reversed = false });
+    RH_ScopedInstall(CarHasRoof, 0x6D25D0, { .reversed = false });
+    RH_ScopedInstall(HeightAboveCeiling, 0x6D2600, { .reversed = false });
+    RH_ScopedInstall(SetComponentVisibility, 0x6D2700, { .reversed = false });
+    RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740, { .reversed = false });
     RH_ScopedInstall(SetComponentAtomicAlpha, 0x6D2960);
-    // RH_ScopedInstall(UpdateClumpAlpha, 0x6D2980);
-    // RH_ScopedInstall(UpdatePassengerList, 0x6D29E0);
-    // RH_ScopedInstall(PickRandomPassenger, 0x6D2A10);
+    RH_ScopedInstall(UpdateClumpAlpha, 0x6D2980, { .reversed = false });
+    RH_ScopedInstall(UpdatePassengerList, 0x6D29E0, { .reversed = false });
+    RH_ScopedInstall(PickRandomPassenger, 0x6D2A10, { .reversed = false });
     RH_ScopedInstall(AddDamagedVehicleParticles, 0x6D2A80);
     RH_ScopedInstall(MakeDirty, 0x6D2BF0);
-    // RH_ScopedInstall(AddWheelDirtAndWater, 0x6D2D50);
+    RH_ScopedInstall(AddWheelDirtAndWater, 0x6D2D50, { .reversed = false });
     RH_ScopedInstall(SetGettingInFlags, 0x6D3000);
     RH_ScopedInstall(SetGettingOutFlags, 0x6D3020);
     RH_ScopedInstall(ClearGettingInFlags, 0x6D3040);
     RH_ScopedInstall(ClearGettingOutFlags, 0x6D3060);
     RH_ScopedInstall(SetWindowOpenFlag, 0x6D3080);
     RH_ScopedInstall(ClearWindowOpenFlag, 0x6D30B0);
-    // RH_ScopedInstall(SetVehicleUpgradeFlags, 0x6D30E0);
-    // RH_ScopedInstall(ClearVehicleUpgradeFlags, 0x6D3210);
-    // RH_ScopedInstall(CreateUpgradeAtomic, 0x6D3510);
+    RH_ScopedInstall(SetVehicleUpgradeFlags, 0x6D30E0, { .reversed = false });
+    RH_ScopedInstall(ClearVehicleUpgradeFlags, 0x6D3210, { .reversed = false });
+    RH_ScopedInstall(CreateUpgradeAtomic, 0x6D3510, { .reversed = false });
     RH_ScopedInstall(RemoveUpgrade, 0x6D3630);
     RH_ScopedInstall(GetUpgrade, 0x6D3650);
-    // RH_ScopedInstall(CreateReplacementAtomic, 0x6D3700);
-    // RH_ScopedInstall(AddReplacementUpgrade, 0x6D3830);
-    // RH_ScopedInstall(RemoveReplacementUpgrade, 0x6D39E0);
+    RH_ScopedInstall(CreateReplacementAtomic, 0x6D3700, { .reversed = false });
+    RH_ScopedInstall(AddReplacementUpgrade, 0x6D3830, { .reversed = false });
+    RH_ScopedInstall(RemoveReplacementUpgrade, 0x6D39E0, { .reversed = false });
     RH_ScopedInstall(GetReplacementUpgrade, 0x6D3A50);
     RH_ScopedInstall(RemoveAllUpgrades, 0x6D3AB0);
-    // RH_ScopedInstall(GetSpareHasslePosId, 0x6D3AE0);
-    // RH_ScopedInstall(SetHasslePosId, 0x6D3B30);
-    // RH_ScopedInstall(InitWinch, 0x6D3B60);
-    // RH_ScopedInstall(UpdateWinch, 0x6D3B80);
-    // RH_ScopedInstall(RemoveWinch, 0x6D3C70);
+    RH_ScopedInstall(GetSpareHasslePosId, 0x6D3AE0, { .reversed = false });
+    RH_ScopedInstall(SetHasslePosId, 0x6D3B30, { .reversed = false });
+    RH_ScopedInstall(InitWinch, 0x6D3B60, { .reversed = false });
+    RH_ScopedInstall(UpdateWinch, 0x6D3B80, { .reversed = false });
+    RH_ScopedInstall(RemoveWinch, 0x6D3C70, { .reversed = false });
     RH_ScopedInstall(RenderDriverAndPassengers, 0x6D3D60);
     RH_ScopedInstall(PreRenderDriverAndPassengers, 0x6D3DB0);
     RH_ScopedInstall(GetPlaneGunsAutoAimAngle, 0x6D3E00);
     RH_ScopedInstall(SetFiringRateMultiplier, 0x6D4010);
     RH_ScopedInstall(GetFiringRateMultiplier, 0x6D4090);
     RH_ScopedInstall(GetPlaneGunsRateOfFire, 0x6D40E0);
-    // RH_ScopedInstall(GetPlaneGunsPosition, 0x6D4290);
-    // RH_ScopedInstall(GetPlaneOrdnanceRateOfFire, 0x6D4590);
+    RH_ScopedInstall(GetPlaneGunsPosition, 0x6D4290, { .reversed = false });
+    RH_ScopedInstall(GetPlaneOrdnanceRateOfFire, 0x6D4590, { .reversed = false });
     RH_ScopedInstall(GetPlaneOrdnancePosition, 0x6D46E0);
-    // RH_ScopedInstall(SelectPlaneWeapon, 0x6D4900);
-    // RH_ScopedInstall(DoPlaneGunFireFX, 0x6D4AD0);
-    // RH_ScopedInstall(FirePlaneGuns, 0x6D4D30);
-    // RH_ScopedInstall(FireUnguidedMissile, 0x6D5110);
+    RH_ScopedInstall(SelectPlaneWeapon, 0x6D4900, { .reversed = false });
+    RH_ScopedInstall(DoPlaneGunFireFX, 0x6D4AD0, { .reversed = false });
+    RH_ScopedInstall(FirePlaneGuns, 0x6D4D30, { .reversed = false });
+    RH_ScopedInstall(FireUnguidedMissile, 0x6D5110, { .reversed = false });
     RH_ScopedInstall(CanBeDriven, 0x6D5400);
-    // + RH_ScopedInstall(ReactToVehicleDamage, 0x6D5490);
-    // RH_ScopedInstall(GetVehicleLightsStatus, 0x6D55C0);
-    // RH_ScopedInstall(CanPedLeanOut, 0x6D5CF0);
-    // RH_ScopedInstall(SetVehicleCreatedBy, 0x6D5D70);
-    // RH_ScopedInstall(SetupRender, 0x6D64F0);
-    // RH_ScopedInstall(ProcessBikeWheel, 0x6D73B0);
-    // RH_ScopedInstall(FindTyreNearestPoint, 0x6D7BC0);
-    // RH_ScopedInstall(InflictDamage, 0x6D7C90);
-    // RH_ScopedInstall(KillPedsGettingInVehicle, 0x6D82F0);
+    RH_ScopedInstall(ReactToVehicleDamage, 0x6D5490, { .reversed = false });
+    RH_ScopedInstall(GetVehicleLightsStatus, 0x6D55C0, { .reversed = false });
+    RH_ScopedInstall(CanPedLeanOut, 0x6D5CF0, { .reversed = false });
+    RH_ScopedInstall(SetVehicleCreatedBy, 0x6D5D70, { .reversed = false });
+    RH_ScopedInstall(SetupRender, 0x6D64F0, { .reversed = false });
+    RH_ScopedInstall(ProcessBikeWheel, 0x6D73B0, { .reversed = false });
+    RH_ScopedInstall(FindTyreNearestPoint, 0x6D7BC0, { .reversed = false });
+    RH_ScopedInstall(InflictDamage, 0x6D7C90, { .reversed = false });
+    RH_ScopedInstall(KillPedsGettingInVehicle, 0x6D82F0, { .reversed = false });
     RH_ScopedInstall(UsesSiren, 0x6D8470);
     RH_ScopedInstall(IsSphereTouchingVehicle, 0x6D84D0);
-    // RH_ScopedInstall(FlyingControl, 0x6D85F0);
-    // RH_ScopedInstall(BladeColSectorList, 0x6DAF00);
-    // RH_ScopedInstall(SetComponentRotation, 0x6DBA30);
+    RH_ScopedInstall(FlyingControl, 0x6D85F0, { .reversed = false });
+    RH_ScopedInstall(BladeColSectorList, 0x6DAF00, { .reversed = false });
+    RH_ScopedInstall(SetComponentRotation, 0x6DBA30, { .reversed = false });
     RH_ScopedInstall(SetTransmissionRotation, 0x6DBBB0);
-    // RH_ScopedInstall(DoBoatSplashes, 0x6DD130);
-    // RH_ScopedInstall(DoSunGlare, 0x6DD6F0);
-    // RH_ScopedInstall(AddWaterSplashParticles, 0x6DDF60);
-    // RH_ScopedInstall(AddExhaustParticles, 0x6DE240);
-    // RH_ScopedInstall(AddSingleWheelParticles, 0x6DE880);
-    // RH_ScopedInstall(GetSpecialColModel, 0x6DF3D0);
-    // RH_ScopedInstall(RemoveVehicleUpgrade, 0x6DF930);
-    // RH_ScopedInstall(AddUpgrade, 0x6DFA20);
-    // RH_ScopedInstall(UpdateTrailerLink, 0x6DFC50);
-    // RH_ScopedInstall(UpdateTractorLink, 0x6E0050);
-    // RH_ScopedInstall(ScanAndMarkTargetForHeatSeekingMissile, 0x6E0400);
-    // RH_ScopedInstall(FireHeatSeakingMissile, 0x6E05C0);
-    // RH_ScopedInstall(PossiblyDropFreeFallBombForPlayer, 0x6E07E0);
-    // RH_ScopedInstall(ProcessSirenAndHorn, 0x6E0950);
-    // RH_ScopedInstall(DoHeadLightEffect, 0x6E0A50);
-    // RH_ScopedInstall(DoHeadLightReflectionSingle, 0x6E1440);
-    // RH_ScopedInstall(DoHeadLightReflectionTwin, 0x6E1600);
-    // RH_ScopedInstall(DoHeadLightReflection, 0x6E1720);
-    // RH_ScopedInstall(DoTailLightEffect, 0x6E1780);
-    // RH_ScopedInstall(DoVehicleLights, 0x6E1A60);
-    // RH_ScopedInstall(FillVehicleWithPeds, 0x6E2900);
-    // RH_ScopedInstall(DoBladeCollision, 0x6E2E50);
-    // RH_ScopedInstall(AddVehicleUpgrade, 0x6E3290);
-    // RH_ScopedInstall(SetupUpgradesAfterLoad, 0x6E3400);
-    // RH_ScopedInstall(GetPlaneWeaponFiringStatus, 0x6E3440);
-    // RH_ScopedInstall(ProcessWeapons, 0x6E3950);
-    // RH_ScopedInstall(DoFixedMachineGuns, 0x73F400);
-    // RH_ScopedInstall(FireFixedMachineGuns, 0x73DF00);
-    // RH_ScopedInstall(DoDriveByShootings, 0x741FD0);
+    RH_ScopedInstall(DoBoatSplashes, 0x6DD130, { .reversed = false });
+    RH_ScopedInstall(DoSunGlare, 0x6DD6F0, { .reversed = false });
+    RH_ScopedInstall(AddWaterSplashParticles, 0x6DDF60, { .reversed = false });
+    RH_ScopedInstall(AddExhaustParticles, 0x6DE240, { .reversed = false });
+    RH_ScopedInstall(AddSingleWheelParticles, 0x6DE880, { .reversed = false });
+    RH_ScopedInstall(GetSpecialColModel, 0x6DF3D0, { .reversed = false });
+    RH_ScopedInstall(RemoveVehicleUpgrade, 0x6DF930, { .reversed = false });
+    RH_ScopedInstall(AddUpgrade, 0x6DFA20, { .reversed = false });
+    RH_ScopedInstall(UpdateTrailerLink, 0x6DFC50, { .reversed = false });
+    RH_ScopedInstall(UpdateTractorLink, 0x6E0050, { .reversed = false });
+    RH_ScopedInstall(ScanAndMarkTargetForHeatSeekingMissile, 0x6E0400, { .reversed = false });
+    RH_ScopedInstall(FireHeatSeakingMissile, 0x6E05C0, { .reversed = false });
+    RH_ScopedInstall(PossiblyDropFreeFallBombForPlayer, 0x6E07E0, { .reversed = false });
+    RH_ScopedInstall(ProcessSirenAndHorn, 0x6E0950, { .reversed = false });
+    RH_ScopedInstall(DoHeadLightEffect, 0x6E0A50, { .reversed = false });
+    RH_ScopedInstall(DoHeadLightReflectionSingle, 0x6E1440, { .reversed = false });
+    RH_ScopedInstall(DoHeadLightReflectionTwin, 0x6E1600, { .reversed = false });
+    RH_ScopedInstall(DoHeadLightReflection, 0x6E1720, { .reversed = false });
+    RH_ScopedInstall(DoTailLightEffect, 0x6E1780, { .reversed = false });
+    RH_ScopedInstall(DoVehicleLights, 0x6E1A60, { .reversed = false });
+    RH_ScopedInstall(FillVehicleWithPeds, 0x6E2900, { .reversed = false });
+    RH_ScopedInstall(DoBladeCollision, 0x6E2E50, { .reversed = false });
+    RH_ScopedInstall(AddVehicleUpgrade, 0x6E3290, { .reversed = false });
+    RH_ScopedInstall(SetupUpgradesAfterLoad, 0x6E3400, { .reversed = false });
+    RH_ScopedInstall(GetPlaneWeaponFiringStatus, 0x6E3440, { .reversed = false });
+    RH_ScopedInstall(ProcessWeapons, 0x6E3950, { .reversed = false });
+    RH_ScopedInstall(DoFixedMachineGuns, 0x73F400, { .reversed = false });
+    RH_ScopedInstall(FireFixedMachineGuns, 0x73DF00, { .reversed = false });
+    RH_ScopedInstall(DoDriveByShootings, 0x741FD0, { .reversed = false });
     RH_ScopedInstall(ReleasePickedUpEntityWithWinch, 0x6D3CB0);
     RH_ScopedInstall(PickUpEntityWithWinch, 0x6D3CD0);
     RH_ScopedInstall(QueryPickedUpEntityWithWinch, 0x6D3CF0);
     RH_ScopedInstall(GetRopeHeightForHeli, 0x6D3D10);
     RH_ScopedInstall(SetRopeHeightForHeli, 0x6D3D30);
 
-    // RH_ScopedGlobalInstall(SetVehicleAtomicVisibilityCB, 0x6D2690);
-    // RH_ScopedGlobalInstall(SetVehicleAtomicVisibilityCB, 0x6D26D0);
-    // RH_ScopedGlobalInstall(SetCompAlphaCB, 0x6D2950);
-    // RH_ScopedGlobalInstall(IsVehiclePointerValid, 0x6E38F0);
-    // RH_ScopedGlobalInstall(RemoveUpgradeCB, 0x6D3300);
-    // RH_ScopedGlobalInstall(FindUpgradeCB, 0x6D3370);
-    // RH_ScopedGlobalInstall(RemoveObjectsCB, 0x6D33B0);
-    // RH_ScopedGlobalInstall(RemoveObjectsCB, 0x6D3420);
-    // RH_ScopedGlobalInstall(CopyObjectsCB, 0x6D3450);
-    // RH_ScopedGlobalInstall(FindReplacementUpgradeCB, 0x6D3490);
-    RH_ScopedGlobalInstall(RemoveAllUpgradesCB, 0x6D34D0);
 }
 
 // 0x6D5F10
@@ -245,7 +239,6 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     m_nType = ENTITY_TYPE_VEHICLE;
 
     m_fRawSteerAngle = 0.0f;
-    m_fSteerAngle = 0.0f;
     m_f2ndSteerAngle = 0.0f;
     m_nCurrentGear = 1;
     m_fGearChangeCount = 0.0f;
@@ -286,8 +279,6 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     m_nNumGettingIn = 0;
     m_nGettingInFlags = 0;
     m_nGettingOutFlags = 0;
-
-    std::ranges::fill(GetPassengers(), nullptr);
 
     m_nBombOnBoard = 0;
     m_nOverrideLights = eVehicleOverrideLightsState::NO_CAR_LIGHT_OVERRIDE;
@@ -491,7 +482,7 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
 
     if (physicalFlags.bSubmergedInWater
         && m_nStatus != eEntityStatus::STATUS_PLAYER
-        && (m_nStatus != eEntityStatus::STATUS_HELI && colPhysical->DoesNotCollideWithFlyers())) //Bug? Seems like it should check for it being heli
+        && (m_nStatus != eEntityStatus::STATUS_REMOTE_CONTROLLED && colPhysical->DoesNotCollideWithFlyers())) //Bug? Seems like it should check for it being heli
     {
         bCollisionDisabled = true;
         return;
@@ -1057,10 +1048,10 @@ float CVehicle::GetHeightAboveRoad_Reversed() {
 }
 
 // 0x6D1F30
-bool CVehicle::CanPedStepOutCar(bool bIgnoreSpeedUpright) {
+bool CVehicle::CanPedStepOutCar(bool bIgnoreSpeedUpright) const {
     return CVehicle::CanPedStepOutCar_Reversed(bIgnoreSpeedUpright);
 }
-bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright) {
+bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright) const {
     auto const fUpZ = m_matrix->GetUp().z;
     if (std::fabs(fUpZ) <= 0.1F) {
         if (std::fabs(m_vecMoveSpeed.z) > 0.05F || m_vecMoveSpeed.Magnitude2D() > 0.01F || m_vecTurnSpeed.SquaredMagnitude() > 0.0004F) { // 0.02F / 50.0f
@@ -1439,18 +1430,22 @@ bool CVehicle::IsDriver(int32 modelIndex) const {
     return m_pDriver && m_pDriver->m_nModelIndex == modelIndex;
 }
 
+bool CVehicle::IsDriverAPlayer() const {
+    return m_pDriver && m_pDriver->IsPlayer();
+}
+
 // 0x6D1C80
 void CVehicle::KillPedsInVehicle() {
     ((void(__thiscall*)(CVehicle*))0x6D1C80)(this);
 }
 
 // 0x6D1D90
-bool CVehicle::IsUpsideDown() {
+bool CVehicle::IsUpsideDown() const {
     return m_matrix->GetUp().z <= -0.9f;
 }
 
 // 0x6D1DD0
-bool CVehicle::IsOnItsSide() {
+bool CVehicle::IsOnItsSide() const {
     return m_matrix->GetRight().z >= 0.8f || m_matrix->GetRight().z <= -0.8f;
 }
 
@@ -1506,7 +1501,7 @@ void CVehicle::ChangeLawEnforcerState(bool bIsEnforcer) {
 }
 
 // 0x6D2370
-bool CVehicle::IsLawEnforcementVehicle() {
+bool CVehicle::IsLawEnforcementVehicle() const {
     switch (m_nModelIndex) {
     case MODEL_ENFORCER:
     case MODEL_PREDATOR:
@@ -1633,7 +1628,7 @@ void CVehicle::SetComponentAtomicAlpha(RpAtomic* atomic, int32 alpha) {
     RpGeometryForAllMaterials(geometry, SetCompAlphaCB, reinterpret_cast<void*>(alpha));
 }
 
-CVehicleModelInfo* CVehicle::GetVehicleModelInfo() {
+CVehicleModelInfo* CVehicle::GetVehicleModelInfo() const {
     return CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
 }
 
@@ -2253,7 +2248,7 @@ void CVehicle::FirePlaneGuns() {
         // DoPlaneGunFireFX(this, &weapon, &planeGunsPos, &posn, m_nGunsFlags & 3);
     }
 
-    if (m_nStatus == STATUS_PLANE) {
+    if (m_nStatus == STATUS_FORCED_STOP) {
         CPad::GetPad(0)->StartShake(240, frequency, 0);
     } else if (m_pDriver && m_pDriver->IsPlayer()) {
         switch (m_pDriver->m_nPedType) {
@@ -2281,7 +2276,7 @@ void CVehicle::FireUnguidedMissile(eOrdnanceType type, bool bCheckTime) {
 }
 
 // 0x6D5400
-bool CVehicle::CanBeDriven() {
+bool CVehicle::CanBeDriven() const {
     if (IsSubTrailer() || IsSubTrain() && AsTrain()->m_nTrackId || vehicleFlags.bIsRCVehicle) {
         return false;
     }
@@ -2363,7 +2358,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
         bAlreadySkidding = true;
         adhesion *= m_pHandlingData->m_fTractionLoss;
         if (*wheelState == WHEEL_STATE_SPINNING) {
-            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_HELI)
+            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_REMOTE_CONTROLLED)
                 adhesion *= (1.0f - fabs(m_fGasPedal) * WS_ALREADY_SPINNING_LOSS);
         }
     }
@@ -2380,7 +2375,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
 
     if (bDriving) {
         fwd = thrust;
-        right = clamp<float>(right, -adhesion, adhesion);
+        right = std::clamp(right, -adhesion, adhesion);
     }
     else if (contactSpeedFwd != 0.0f) {
         fwd = -contactSpeedFwd / wheelsOnGround;
@@ -2403,7 +2398,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
                 *wheelState = WHEEL_STATE_FIXED;
             }
         } else {
-            fwd = clamp<float>(fwd, -brake, brake);
+            fwd = std::clamp(fwd, -brake, brake);
         }
     }
 
@@ -2423,7 +2418,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
         if (bAlreadySkidding) {
             tractionLoss = 1.0f;
         } else if (*wheelState == WHEEL_STATE_SPINNING) {
-            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_HELI) {
+            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_REMOTE_CONTROLLED) {
                 tractionLoss = tractionLoss * (1.0f - std::fabs(m_fGasPedal) * WS_ALREADY_SPINNING_LOSS);
             }
         }
@@ -2931,7 +2926,7 @@ void CVehicle::DoBoatSplashes(float fWaterDamping) {
     FxPrtMult_c particleData(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f);
 
     auto alpha = alpha0 / 255.0f;
-    particleData.m_color.alpha = alpha >= 1.0f ? 1.0f : alpha;
+    particleData.m_Color.alpha = alpha >= 1.0f ? 1.0f : alpha;
 
     auto v12 = v48 * 10.0f;
     auto size = v12 + 0.75f * 0.1f;
@@ -2958,7 +2953,7 @@ void CVehicle::DoBoatSplashes(float fWaterDamping) {
     vel0 -= GetRight() * CGeneral::GetRandomNumberInRange(0.3f, 0.7f); // minus
     vel0 += GetUp() * CGeneral::GetRandomNumberInRange(0.8f, 1.2f);
     vel0 *= v12;
-    g_fx.m_pPrtBoatsplash->AddParticle(&p0, &vel0, 0.0f, &particleData, -1.0f, 1.2f, 0.6f, 0);
+    g_fx.m_BoatSplash->AddParticle(&p0, &vel0, 0.0f, &particleData, -1.0f, 1.2f, 0.6f, false);
 
     CVector p1 = { colMax.x * X_MULT, colMax.y / 2.0f, colMin.z * Z_MULT };
     p1 = MultiplyMatrixWithVector(*m_matrix, &p1);
@@ -2966,7 +2961,7 @@ void CVehicle::DoBoatSplashes(float fWaterDamping) {
     vel1 += GetRight() * CGeneral::GetRandomNumberInRange(0.3f, 0.7f);  // plus
     vel1 += GetUp() * CGeneral::GetRandomNumberInRange(0.8f, 1.2f);
     vel1 *= v12;
-    g_fx.m_pPrtBoatsplash->AddParticle(&p1, &vel1, 0.0f, &particleData, -1.0f, 1.2f, 0.6f, 0);
+    g_fx.m_BoatSplash->AddParticle(&p1, &vel1, 0.0f, &particleData, -1.0f, 1.2f, 0.6f, false);
 }
 
 // 0x6DD6F0
@@ -3055,39 +3050,39 @@ void CVehicle::AddExhaustParticles() {
     float fLife = std::max(0.2f - fMoveSpeed, 0.0f);
     FxPrtMult_c fxPrt(0.9f, 0.9f, 1.0f, particleAlpha, 0.2f, 1.0f, fLife);
 
-    for (int32 i = 0; i < 2; i++) {
-        FxSystem_c* firstExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
+    for (auto i = 0; i < 2; i++) {
+        FxSystem_c* firstExhaustFxSystem = g_fx.m_SmokeII3expand;
         if (bFirstExhaustSubmergedInWater) {
-            fxPrt.m_color.alpha = particleAlpha * 0.5f;
+            fxPrt.m_Color.alpha = particleAlpha * 0.5f;
             fxPrt.m_fSize = 0.6f;
-            firstExhaustFxSystem = g_fx.m_pPrtBubble;
+            firstExhaustFxSystem = g_fx.m_Bubble;
         }
         firstExhaustFxSystem->AddParticle(&firstExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
         if (bHasDoubleExhaust) {
-            FxSystem_c* secondExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
+            FxSystem_c* secondExhaustFxSystem = g_fx.m_SmokeII3expand;
             if (bSecondExhaustSubmergedInWater) {
-                fxPrt.m_color.alpha = particleAlpha * 0.5f;
+                fxPrt.m_Color.alpha = particleAlpha * 0.5f;
                 fxPrt.m_fSize = 0.6f;
-                secondExhaustFxSystem = g_fx.m_pPrtBubble;
+                secondExhaustFxSystem = g_fx.m_Bubble;
             }
             secondExhaustFxSystem->AddParticle(&secondExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
         }
 
         if (m_fGasPedal > 0.5f && m_nCurrentGear < 3) {
             if (CGeneral::GetRandomNumber() % 2) {
-                FxSystem_c* secondaryExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
+                FxSystem_c* secondaryExhaustFxSystem = g_fx.m_SmokeII3expand;
                 if (bFirstExhaustSubmergedInWater) {
-                    fxPrt.m_color.alpha = particleAlpha * 0.5f;
+                    fxPrt.m_Color.alpha = particleAlpha * 0.5f;
                     fxPrt.m_fSize = 0.6f;
-                    secondaryExhaustFxSystem = g_fx.m_pPrtBubble;
+                    secondaryExhaustFxSystem = g_fx.m_Bubble;
                 }
                 secondaryExhaustFxSystem->AddParticle(&firstExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
             } else if (bHasDoubleExhaust) {
-                FxSystem_c* secondaryExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
+                FxSystem_c* secondaryExhaustFxSystem = g_fx.m_SmokeII3expand;
                 if (bSecondExhaustSubmergedInWater) {
-                    fxPrt.m_color.alpha = particleAlpha * 0.5f;
+                    fxPrt.m_Color.alpha = particleAlpha * 0.5f;
                     fxPrt.m_fSize = 0.6f;
-                    secondaryExhaustFxSystem = g_fx.m_pPrtBubble;
+                    secondaryExhaustFxSystem = g_fx.m_Bubble;
                 }
                 secondaryExhaustFxSystem->AddParticle(&secondExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
             }
@@ -3256,6 +3251,9 @@ void CVehicle::AddVehicleUpgrade(int32 modelId) {
 // 0x6E3400
 void CVehicle::SetupUpgradesAfterLoad() {
     for (auto& upgrade : m_anUpgrades) {
+        if (upgrade == -1)
+            continue;
+
         auto savedUpgrade = upgrade;
         upgrade = -1;
         AddVehicleUpgrade(savedUpgrade);
@@ -3265,6 +3263,10 @@ void CVehicle::SetupUpgradesAfterLoad() {
 // 0x6E3440
 void CVehicle::GetPlaneWeaponFiringStatus(bool& status, eOrdnanceType& ordnanceType) {
     ((void(__thiscall*)(CVehicle*, bool&, eOrdnanceType&))0x6E3440)(this, status, ordnanceType);
+}
+
+bool IsValidModForVehicle(uint32 modelId, CVehicle* vehicle) {
+    return plugin::CallAndReturn<bool, 0x49B010, uint32, CVehicle*>(modelId, vehicle);
 }
 
 // 0x6E38F0
@@ -3308,3 +3310,17 @@ bool CVehicle::AreAnyOfPassengersFollowerOfGroup(const CPedGroup& group) {
         return group.GetMembership().IsFollower(passenger);
     }) != end;
 }
+
+/*!
+* @notsa
+* @return The index of a passenger, or `std::nullopt` if the given ped isn't a passenger.
+*/
+auto CVehicle::GetPassengerIndex(const CPed* passenger) const -> std::optional<size_t> {
+    const auto passengers = GetPassengers();
+    const auto it = rng::find(passengers, passenger);
+    if (it == passengers.end()) {
+        return std::nullopt;
+    }
+    return (size_t)rng::distance(passengers.begin(), it);
+}
+

@@ -16,11 +16,24 @@ public:
     uint32   m_nReferenceCount; // count of how many CTaskComplexUseSequence instances are using this sequence
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_SEQUENCE;
+
+    /*!
+    * Construct using multiple tasks, same as constructing
+    * and then calling `AddTask` for every task passed in.
+    */
+    template<Task... T>
+    CTaskComplexSequence(T*... tasks)
+        : CTaskComplexSequence{}
+    {
+        (AddTask(tasks), ...);
+    }
+
     CTaskComplexSequence();
     ~CTaskComplexSequence() override;
 
+    eTaskType GetTaskType() override { return Type; } // 0x632C60
     CTask* Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_SEQUENCE; } // 0x632C60
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
@@ -46,5 +59,4 @@ private:
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* ControlSubTask_Reversed(CPed* ped);
 };
-
 VALIDATE_SIZE(CTaskComplexSequence, 0x40);

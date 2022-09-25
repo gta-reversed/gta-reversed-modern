@@ -5,20 +5,36 @@
 #include <vector>
 #include <string>
 #include "Base.h"
+#include <reversiblehooks/ReversibleHook/Simple.h>
 
 namespace ReversibleHooks{
 namespace ReversibleHook{
+struct Virtual : public Base {
+    Virtual(std::string fnName, void** vtblGTA, void** vtblOur, size_t fnIdx);
+    ~Virtual() override = default;
 
-struct Virtual : Base {
-    Virtual(std::string fnName, void* libFuncAddress, std::vector<uint32> vecAddressesToHook);
-    virtual ~Virtual() override = default;
+    void        Switch() override;
+    void        Check() override { m_simpleHook.Check(); }
+    const char* Symbol() const override { return "V"; }
 
-    virtual void Switch() override;
-    virtual void Check() override {} // Nothing to do 
+    auto GetHookGTAAddress() const { return m_pfns[GTA]; }
+    auto GetHookOurAddress() const { return m_pfns[OUR]; }
+
 private:
-    std::vector<uint32> m_vecHookedAddresses;
-    uint32              m_OriginalFunctionAddress;
-    uint32              m_LibFunctionAddress;
+    // Use these values for indexing below arrays
+    constexpr static auto GTA = 0u;
+    constexpr static auto OUR = 1u;
+
+    // Original function pointers
+    void* m_pfns[2]{};
+
+    // vtables
+    void** m_vtbls[2]{};
+
+    // Function index in vtable
+    size_t m_fnIdx{};
+
+    Simple m_simpleHook;
 };
 
 };

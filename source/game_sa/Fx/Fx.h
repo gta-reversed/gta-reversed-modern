@@ -9,11 +9,13 @@
 #include "RenderWare.h"
 #include "FxManager.h"
 
+class CVehicle;
+
 enum FxQuality_e : uint32 {
-    FXQUALITY_LOW,
-    FXQUALITY_MEDIUM,
-    FXQUALITY_HIGH,
-    FXQUALITY_VERY_HIGH
+    FX_QUALITY_LOW,
+    FX_QUALITY_MEDIUM,
+    FX_QUALITY_HIGH,
+    FX_QUALITY_VERY_HIGH
 };
 
 enum eSparkType : uint8 {
@@ -21,45 +23,48 @@ enum eSparkType : uint8 {
     SPARK_PARTICLE_SPARK  = 1
 };
 
-class CVehicle;
+// original name unknown
+struct FxEntitySystem : public ListItem_c {
+    FxSystem_c* m_System;
+    CEntity*    m_Entity;
+};
 
 class Fx_c {
 public:
-    FxSystem_c*         m_pPrtBlood;
-    FxSystem_c*         m_pPrtBoatsplash;
-    FxSystem_c*         m_pPrtBubble;
-    FxSystem_c*         m_pPrtCardebris;
-    FxSystem_c*         m_pPrtCollisionsmoke;
-    FxSystem_c*         m_pPrtGunshell;
-    FxSystem_c*         m_pPrtSand;
-    FxSystem_c*         m_pPrtSand2;
-    FxSystem_c*         m_pPrtSmoke_huge;
-    FxSystem_c*         m_pPrtSmokeII3expand;
-    FxSystem_c*         m_pPrtSpark;
-    FxSystem_c*         m_pPrtSpark2;
-    FxSystem_c*         m_pPrtSplash;
-    FxSystem_c*         m_pPrtWake;
-    FxSystem_c*         m_pPrtWatersplash;
-    FxSystem_c*         m_pPrtWheeldirt;
-    FxSystem_c*         m_pPrtGlass;
-    TList_c<ListItem_c> m_entityFxList;
-    uint32_t            m_nBloodPoolsCount;
-    FxQuality_e         m_fxQuality;
-    uint32_t            m_nVerticesCount2;
-    uint32_t            m_nVerticesCount;
-    uint32_t            m_nTransformRenderFlags;
-    RwRaster*           m_pRasterToRender;
-    RwMatrix*           m_pTransformLTM;
-    RxObjSpace3DVertex* m_pVerts;
+    FxSystem_c*             m_Blood;
+    FxSystem_c*             m_BoatSplash;
+    FxSystem_c*             m_Bubble;
+    FxSystem_c*             m_Cardebris;
+    FxSystem_c*             m_CollisionSmoke;
+    FxSystem_c*             m_GunShell;
+    FxSystem_c*             m_Sand;
+    FxSystem_c*             m_Sand2;
+    FxSystem_c*             m_SmokeHuge;
+    FxSystem_c*             m_SmokeII3expand;
+    FxSystem_c*             m_Spark;
+    FxSystem_c*             m_Spark2;
+    FxSystem_c*             m_Splash;
+    FxSystem_c*             m_Wake;
+    FxSystem_c*             m_WaterSplash;
+    FxSystem_c*             m_WheelDirt;
+    FxSystem_c*             m_Glass;
+    TList_c<FxEntitySystem> m_FxEntities;
+    uint32                  m_nBloodPoolsCount;
+    FxQuality_e             m_FxQuality;
+    uint32                  m_nVerticesCount2;
+    uint32                  m_nVerticesCount;
+    uint32                  m_nTransformRenderFlags;
+    RwRaster*               m_pRasterToRender;
+    RwMatrix*               m_pTransformLTM;
+    RxObjSpace3DVertex*     m_pVerts;
 
 public:
     static void InjectHooks();
-
-    Fx_c();
     Fx_c* Constructor();
-
-    ~Fx_c();
     Fx_c* Destructor();
+
+    Fx_c() = default; // 0x49E620
+    ~Fx_c() = default; // 0x49E630
 
     void InitStaticSystems();
     void ExitStaticSystems();
@@ -71,14 +76,14 @@ public:
     void Exit();
     void Reset();
 
-    void CreateEntityFx(CEntity* entity, char* fxName, RwV3d* posn, RwMatrix* transform);
+    void CreateEntityFx(CEntity* entity, char* fxName, CVector* posn, RwMatrix* transform);
     void DestroyEntityFx(CEntity* entity);
 
     void Update(RwCamera* camera, float timeDelta);
     void Render(RwCamera* camera, bool heatHaze);
     void CreateMatFromVec(RwMatrix* out, CVector* origin, CVector* direction);
     void SetFxQuality(FxQuality_e quality);
-    FxQuality_e GetFxQuality() const;
+    [[nodiscard]] FxQuality_e GetFxQuality() const;
 
     void AddBlood(CVector& origin, CVector& direction, int32 amount, float arg3);
     void AddWood(CVector& origin, CVector& direction, int32 amount, float arg3);
@@ -89,11 +94,11 @@ public:
     void AddDebris(CVector& posn, RwRGBA& color, float scale, int32 amount);
     void AddGlass(CVector& posn, RwRGBA& color, float scale, int32 amount);
     void AddWheelSpray(CVehicle* vehicle, CVector posn, uint8 arg2, uint8 arg3, float arg4);
-    void AddWheelGrass(CVehicle* vehicle, CVector posn, uint8 arg2, float arg3);
-    void AddWheelGravel(CVehicle* vehicle, CVector posn, uint8 arg2, float arg3);
-    void AddWheelMud(CVehicle* vehicle, CVector posn, uint8 arg2, float arg3);
-    void AddWheelSand(CVehicle* vehicle, CVector posn, uint8 arg2, float arg3);
-    void AddWheelDust(CVehicle* vehicle, CVector posn, uint8 arg2, float arg3);
+    void AddWheelGrass(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness);
+    void AddWheelGravel(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness);
+    void AddWheelMud(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness);
+    void AddWheelSand(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness);
+    void AddWheelDust(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness);
     void TriggerWaterHydrant(CVector& posn);
     void TriggerGunshot(CEntity* entity, CVector& origin, CVector& target, bool doGunflash);
     void TriggerTankFire(CVector& origin, CVector& target);

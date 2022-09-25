@@ -52,7 +52,7 @@ void CWeapon::InjectHooks() {
     RH_ScopedInstall(FireSniper, 0x73AAC0);
     RH_ScopedInstall(TakePhotograph, 0x73C1F0);
     RH_ScopedInstall(DoDoomAiming, 0x73CDC0);
-    // untested RH_ScopedInstall(FireInstantHitFromCar2, 0x73CBA0);
+    RH_ScopedInstall(FireInstantHitFromCar2, 0x73CBA0, { .reversed = false });
 }
 
 // 0x73B430
@@ -159,7 +159,7 @@ void CWeapon::AddGunshell(CEntity* creator, CVector& position, const CVector2D& 
         fxprt.SetColor(0.6f, 0.1f, 0.1f);
     }
 
-    g_fx.m_pPrtGunshell->AddParticle(&position, &velocity, 0.0f, &fxprt, -1.0f, 1.2f, 0.6f, 0);
+    g_fx.m_GunShell->AddParticle(&position, &velocity, 0.0f, &fxprt, -1.0f, 1.2f, 0.6f, 0);
 }
 
 // 0x73A530
@@ -700,11 +700,11 @@ bool CWeapon::Fire(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, 
                                                                                                                              target, originForDriveBy);
 }
 
-CWeaponInfo& CWeapon::GetWeaponInfo(CPed* owner) {
+CWeaponInfo& CWeapon::GetWeaponInfo(CPed* owner) const {
     return GetWeaponInfo(owner ? owner->GetWeaponSkill(m_nType) : eWeaponSkill::STD);
 }
 
-CWeaponInfo& CWeapon::GetWeaponInfo(eWeaponSkill skill) {
+CWeaponInfo& CWeapon::GetWeaponInfo(eWeaponSkill skill) const {
     return *CWeaponInfo::GetWeaponInfo(m_nType, skill);
 }
 

@@ -7,17 +7,17 @@
 
 // 0x634F40
 CTask* CTaskComplexUseGoggles::CreateNextSubTask(CPed* ped) {
-    int32 enabled = m_pSubTask->GetTaskType() - TASK_SIMPLE_GOGGLES_ON;
-    if (enabled) {
-        if (enabled == 1) {
-            ped->TakeOffGoggles();
-            return nullptr;
-        }
-    } else {
+    switch (m_pSubTask->GetTaskType()) {
+    case TASK_SIMPLE_GOGGLES_OFF:
+        ped->TakeOffGoggles();
+        return nullptr;
+    case TASK_SIMPLE_GOGGLES_ON:
         ped->PutOnGoggles();
         ped->m_weaponAudio.AddAudioEvent(AE_WEAPON_FIRE);
+        return nullptr;
+    default:
+        return nullptr;
     }
-    return nullptr;
 }
 
 // 0x634F90

@@ -96,19 +96,19 @@ public:
     static bool& m_bHeatHazeFX;
     static int32& m_HeatHazeFXSpeedMin;
     static int32& m_HeatHazeFXSpeedMax;
-    static uint32& m_HeatHazeFXIntensity;
-    static uint32& m_HeatHazeFXType;
-    static uint32& m_HeatHazeFXTypeLast;
-    static uint32& m_HeatHazeFXRandomShift;
+    static int32& m_HeatHazeFXIntensity;
+    static int32& m_HeatHazeFXType;
+    static int32& m_HeatHazeFXTypeLast;
+    static int32& m_HeatHazeFXRandomShift;
     static bool& m_bHeatHazeMaskModeTest;
     static float& m_fHeatHazeFXFadeSpeed;
     static float& m_fHeatHazeFXInsideBuildingFadeSpeed;
     static float& m_HeatHazeFXHourOfDayEnd;
     static float& m_HeatHazeFXHourOfDayStart;
-    static uint32& m_HeatHazeFXRenderSizeX;
-    static uint32& m_HeatHazeFXRenderSizeY;
-    static uint32& m_HeatHazeFXScanSizeX;
-    static uint32& m_HeatHazeFXScanSizeY;
+    static int32& m_HeatHazeFXRenderSizeX;
+    static int32& m_HeatHazeFXRenderSizeY;
+    static int32& m_HeatHazeFXScanSizeX;
+    static int32& m_HeatHazeFXScanSizeY;
 
     static bool& m_bInfraredVision;
     static float& m_fInfraredVisionFilterRadius;
@@ -165,11 +165,11 @@ public:
     static void ScriptNightVisionSwitch(bool enable);
     static void ScriptResetForEffects();
 
-    static void UnderWaterRipple(RwRGBA a1, float a2, float a3, int32 a4, float a5, float a6);
+    static void UnderWaterRipple(RwRGBA col, float xoffset, float yoffset, int32 strength, float speed, float freq);
     static void UnderWaterRippleFadeToFX();
 
     static void HeatHazeFXInit();
-    static void HeatHazeFX(float a1, bool a2);
+    static void HeatHazeFX(float fIntensity, bool bAlphaMaskMode);
 
     static bool IsVisionFXActive();
 
@@ -185,11 +185,11 @@ public:
 
     static void Fog();
     static void CCTV();
-    static void Grain(int32 strength, bool a2);
+    static void Grain(int32 strengthMask, bool update);
     static void SpeedFX(float speed);
-    static void DarknessFilter(int32 a1);
+    static void DarknessFilter(int32 alpha);
     static void ColourFilter(RwRGBA pass1, RwRGBA pass2);
-    static void Radiosity(int32 a1, int32 a2, int32 a3, int32 a4);
+    static void Radiosity(int32 intensityLimit, int32 filterPasses, int32 renderPasses, int32 intensity);
 
     static void Render();
 };
@@ -207,15 +207,3 @@ m_smokeyEnable
 m_smokeyStrength
 */
 
-bool RsCameraBeginUpdate(RwCamera* camera);
-
-static inline RwBlendFunction& gStoredRenderStateSrcBlend = *(RwBlendFunction*)(0xC40280);
-static inline RwBlendFunction& gStoredRenderStateDestBlend = *(RwBlendFunction*)(0xC40284);
-static inline bool& gStoredRenderStateFogEnable = *(bool*)(0xC40288);
-static inline RwCullMode& gStoredRenderStateCullMode = *(RwCullMode*)(0xC4028C);
-static inline bool& gStoredRenderStateZTestEnable = *(bool*)(0xC40290);
-static inline bool& gStoredRenderStateZWriteEnable = *(bool*)(0xC40294);
-static inline RwShadeMode& gStoredRenderStateShadeMode = *(RwShadeMode*)(0xC40298);
-static inline bool& gStoredRenderStateVertexAlphaEnable = *(bool*)(0xC4029C);
-static inline RwTextureAddressMode& gStoredRenderStateTextureAddress = *(RwTextureAddressMode*)(0xC402A0);
-static inline RwTextureFilterMode& gStoredRenderStateTextureFilter = *(RwTextureFilterMode*)(0xC402A4);

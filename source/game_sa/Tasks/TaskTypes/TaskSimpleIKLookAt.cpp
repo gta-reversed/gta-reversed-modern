@@ -80,7 +80,7 @@ bool CTaskSimpleIKLookAt::CreateIKChain(CPed* ped) {
     m_nPivotBoneTag = BONE_NECK;
     m_pIKChain = g_ikChainMan.AddIKChain("", BONE_NORMAL, ped, m_nEffectorBoneTag, m_vecEffectorVec, BONE_NECK, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, m_fSpeed, m_nPriority);
     if (m_pIKChain) {
-        m_pIKChain->ClampLimits(5, false, true, false, true); // todo: 5 -> BONE_HEAD?
+        m_pIKChain->ClampLimits(BONE_HEAD, false, true, false, true);
         return true;
     }
     return false;

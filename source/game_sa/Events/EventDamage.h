@@ -8,7 +8,7 @@
 
 enum ePedPieceTypes;
 
-class CEventDamage : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventDamage : public CEventEditableResponse {
 public:
     CEntity*       m_pSourceEntity;
     uint32         m_nStartTime;

@@ -109,7 +109,7 @@ CTask* CTaskComplexDriveFireTruck::ControlSubTask_Reversed(CPed* ped) {
 
             if (newFire != m_pFire) {
                 m_pFire = newFire;
-                reinterpret_cast<CTaskComplexDriveToPoint*>(m_pSubTask)->point = m_pFire->m_vecPosition;
+                reinterpret_cast<CTaskComplexDriveToPoint*>(m_pSubTask)->m_Point = m_pFire->m_vecPosition;
             }
         }
     }
@@ -128,7 +128,7 @@ CTask* CTaskComplexDriveFireTruck::CreateSubTask(eTaskType taskType, CPed* ped) 
     case TASK_COMPLEX_CAR_DRIVE_WANDER:
         return new CTaskComplexCarDriveWander(m_pVehicle, DRIVING_STYLE_STOP_FOR_CARS, 10.0F);
     case TASK_COMPLEX_CAR_DRIVE_TO_POINT:
-        return new CTaskComplexDriveToPoint(m_pVehicle, m_pFire->m_vecPosition, 30.0F, 0, -1, 25.0F, 2);
+        return new CTaskComplexDriveToPoint(m_pVehicle, m_pFire->m_vecPosition, 30.0F, 0, -1, 25.0F, DRIVING_STYLE_AVOID_CARS);
     case TASK_COMPLEX_USE_WATER_CANNON:
         return new CTaskComplexUseWaterCannon(m_pFire);
     case TASK_SIMPLE_CAR_DRIVE:

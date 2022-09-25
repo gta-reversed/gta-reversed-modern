@@ -186,7 +186,7 @@ bool CTimer::GetIsSlowMotionActive()
 }
 
 // 0x5618D0
-void CTimer::UpdateVariables(float timeStep)
+void CTimer::UpdateVariables(float timeElapsed)
 {
     /* Izzotop: from IDA directly to here (tested)
     float step = timeStep / float(m_snTimerDivider);
@@ -217,18 +217,19 @@ void CTimer::UpdateVariables(float timeStep)
     */
 
     // Pirulax: Shorter code, same functionality.
-    const float realStep = (float)timeStep / (float)m_snTimerDivider;
-    m_snTimeInMillisecondsNonClipped += (uint32)realStep;
-    ms_fTimeStepNonClipped = 0.05f * realStep; // step / 20.0f;
+    const float frameDelta = (float)timeElapsed / (float)m_snTimerDivider;
+    m_snTimeInMillisecondsNonClipped += (uint32)frameDelta;
+    ms_fTimeStepNonClipped = frameDelta / TIMESTEP_LEN_IN_MS;
 
-    const auto timeToAdd = (uint32)std::min<float>(realStep, 300.0f); // Clamp to max 300
-    m_snTimeInMilliseconds += timeToAdd;
-    if (ms_fTimeStepNonClipped < 0.01f && !m_UserPause && !m_CodePause && !CSpecialFX::bSnapShotActive) {
-        ms_fTimeStepNonClipped = 0.01f;
+    m_snTimeInMilliseconds += (uint32)std::min<float>(frameDelta, 300.0f);
+
+    if (!m_UserPause && !m_CodePause && !CSpecialFX::bSnapShotActive) {
+        // Make it be something at least, to avoid division by 0
+        ms_fTimeStepNonClipped = std::max(ms_fTimeStepNonClipped, 0.01f); 
     }
 
     ms_fOldTimeStep = ms_fTimeStep;
-    ms_fTimeStep = clamp<float>(ms_fTimeStepNonClipped, 0.00001f, 3.0f);
+    SetTimeStep(std::clamp(ms_fTimeStepNonClipped, 0.00001f, 3.0f));
 }
 
 // 0x561B10
@@ -245,6 +246,7 @@ void CTimer::Update()
     m_snPPPreviousTimeInMilliseconds = m_snPPreviousTimeInMilliseconds;
     m_snPPreviousTimeInMilliseconds = m_snPreviousTimeInMilliseconds;
     m_snPreviousTimeInMilliseconds = m_snTimeInMilliseconds;
+
     m_snPreviousTimeInMillisecondsNonClipped = m_snTimeInMillisecondsNonClipped;
 
     const uint64 nRenderTimeBefore = m_snRenderStartTime;

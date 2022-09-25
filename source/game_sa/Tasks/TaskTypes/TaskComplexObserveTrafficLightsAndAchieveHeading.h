@@ -13,7 +13,7 @@ public:
     CTaskComplexObserveTrafficLightsAndAchieveHeading(int32 durationInMs, float targetHeading);
     ~CTaskComplexObserveTrafficLightsAndAchieveHeading() override = default; // 0x631980
 
-    eTaskType GetTaskType() override { return TASK_COMPLEX_OBSERVE_TRAFFIC_LIGHTS_AND_ACHIEVE_HEADING; } // 0x631940
+    eTaskType GetTaskType() override { return Type; } // 0x631940
     CTask* Clone() override;
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
@@ -45,7 +45,6 @@ private:
     CTask* CreateFirstSubTask_Reversed(CPed* ped) { return CreateFirstSubTask(ped); }
     CTask* CreateNextSubTask_Reversed(CPed* ped) { return CreateNextSubTask(ped); }
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable(ped, priority, event); }
-
 };
 
 VALIDATE_SIZE(CTaskComplexObserveTrafficLightsAndAchieveHeading, 0x14);

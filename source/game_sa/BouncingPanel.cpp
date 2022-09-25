@@ -28,7 +28,7 @@ void CBouncingPanel::SetPanel(int16 frameId, int16 axis, float angleLimit) {
 }
 
 float CBouncingPanel::GetAngleChange(float velocity) const {
-    return clamp(velocity, -BOUNCE_VEL_CHANGE_LIMIT, BOUNCE_VEL_CHANGE_LIMIT) * m_fAngleLimit;
+    return std::clamp(velocity, -BOUNCE_VEL_CHANGE_LIMIT, BOUNCE_VEL_CHANGE_LIMIT) * m_fAngleLimit;
 }
 
 // 0x6F49A0

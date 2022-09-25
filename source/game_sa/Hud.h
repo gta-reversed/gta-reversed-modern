@@ -11,6 +11,7 @@
 
 class CSprite2d;
 class CPed;
+class CPlayerInfo;
 
 class CHud {
 public:
