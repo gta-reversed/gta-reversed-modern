@@ -21,6 +21,7 @@
 
 class CRect {
 public:
+    // Init in flipped state
     float left      =  1000000.0F; // x1
     float top       = -1000000.0F; // y2
     float right     = -1000000.0F; // x2
@@ -30,15 +31,22 @@ public:
     static void InjectHooks();
 
     CRect() = default; // 0x4041C0
-    constexpr CRect(float fLeft, float fTop, float fRight, float fBottom) { // 0x4041C0
-       left   = fLeft;
-       bottom    = fTop;
-       right  = fRight;
-       top = fBottom;
+    constexpr CRect(float left, float bottom, float right, float top) { // 0x4041C0
+       this->left   = left;
+       this->bottom = bottom;
+       this->right  = right;
+       this->top    = top;
        assert(!IsFlipped());
     }
+
     constexpr CRect(const CVector2D& top, const CVector2D& bottom) :
         CRect{top.x, top.y, bottom.x, bottom.y}
+    {
+    }
+
+    /// A rect that can fit a circle of `radius` inside with `pos` being the center
+    constexpr CRect(const CVector2D& pos, float radius) :
+        CRect{ pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius }
     {
     }
 
