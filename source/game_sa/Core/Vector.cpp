@@ -19,7 +19,7 @@ void CVector::InjectHooks()
     RH_ScopedInstall(Magnitude2D, 0x406D50);
     RH_ScopedInstall(Normalise, 0x59C910);
     RH_ScopedInstall(NormaliseAndMag, 0x59C970);
-    RH_ScopedInstall(Cross, 0x70F890);
+    RH_ScopedInstall(Cross_OG, 0x70F890);
     RH_ScopedInstall(Sum, 0x40FDD0);
     RH_ScopedInstall(Difference, 0x40FE00);
     RH_ScopedInstall(FromMultiply, 0x59C670);
@@ -83,12 +83,18 @@ auto CVector::Dot(const CVector& o) const -> float{
     return DotProduct(*this, o);
 }
 
-// Performs cross calculation
-void CVector::Cross(const CVector& left, const CVector &right)
-{
-    x = left.y * right.z - left.z * right.y;
-    y = left.z * right.x - left.x * right.z;
-    z = left.x * right.y - left.y * right.x;
+// notsa
+CVector CVector::Cross(const CVector& o) const {
+    return {
+        y * o.z - z * o.y,
+        z * o.x - x * o.z,
+        x * o.y - y * o.x
+    };
+}
+
+// 0x70F890
+void CVector::Cross_OG(const CVector& a, const CVector& b) {
+    *this = a.Cross(b);
 }
 
 // Adds left + right and stores result
@@ -174,15 +180,13 @@ float CVector::Heading(bool limitAngle) const {
 
 CVector* CrossProduct(CVector* out, CVector* a, CVector* b)
 {
-    out->Cross(*a, *b);
+    *out = a->Cross(b);
     return out;
 }
 
 CVector CrossProduct(const CVector& a, const CVector& b)
 {
-    CVector result;
-    result.Cross(a, b);
-    return result;
+    return a.Cross(b);
 }
 
 float DotProduct(CVector* v1, CVector* v2)

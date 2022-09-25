@@ -2801,16 +2801,21 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
     }
 
     if (m_pHandlingData->m_fSuspensionBiasBetweenFrontAndRear != 0.0F) {
-        auto vecCross = CVector();
-        vecCross.Cross(GetForward(), CVector(0.0F, 0.0F, 1.0F));
+        auto right = GetForward().Cross(CVector::ZAxisVector());
 
-        auto fMult = DotProduct(vecCross, m_vecMoveSpeed) * m_pHandlingData->m_fSuspensionBiasBetweenFrontAndRear * CTimer::GetTimeStep() * fImmersionDepth * m_fMass * -0.1F;
-        float fXTemp = vecCross.x * 0.3F;
-        vecCross.x -= vecCross.y * 0.3F;
-        vecCross.y += fXTemp;
+        const auto mult =
+              DotProduct(right, m_vecMoveSpeed)
+            * m_pHandlingData->m_fSuspensionBiasBetweenFrontAndRear
+            * CTimer::GetTimeStep()
+            * fImmersionDepth
+            * m_fMass
+            * -0.1F;
 
-        auto vecMoveForce = vecCross * fMult;
-        CPhysical::ApplyMoveForce(vecMoveForce);
+        const auto x = right.x * 0.3F;
+        right.x -= right.y * 0.3F;
+        right.y += x;
+
+        CPhysical::ApplyMoveForce(right * mult);
     }
 
     if (m_nStatus == eEntityStatus::STATUS_PLAYER && pad->GetHandBrake()) {

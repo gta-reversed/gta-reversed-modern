@@ -47,8 +47,23 @@ public:
     /// Perform a dot product with this and `o`, returning the result
     auto Dot(const CVector& o) const -> float;
 
-    // Performs cross calculation
-    void Cross(const CVector& left, const CVector& right);
+    /*!
+    * @notsa
+    *
+    * There's an SA function with the same name,
+    * but don't get confused, that one stores the
+    * result in-place.
+    * 
+    * @return The cross product of `*this` and `o`
+    */
+    auto Cross(const CVector& other) const -> CVector;
+
+    /*!
+    * @addr 0x70F890
+    *
+    * The original Cross function that stores the result in-place
+    */
+    void Cross_OG(const CVector& a, const CVector& b);
 
     // Adds left + right and stores result
     void Sum(const CVector& left, const CVector& right);
