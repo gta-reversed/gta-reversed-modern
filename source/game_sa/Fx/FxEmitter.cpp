@@ -246,7 +246,7 @@ FxEmitterPrt_c* FxEmitter_c::CreateParticle(EmissionInfo_t* emissionInfo, RwMatr
         auto minAngle = DegreesToRadians(emissionInfo->m_fAngleMin);
         auto maxAngle = DegreesToRadians(emissionInfo->m_fAngleMax);
 
-        auto sinY = ((float)(CGeneral::GetRandomNumber() % 10'000) / 10'000.0f * (maxAngle - minAngle) + minAngle) * 40.743664;
+        auto sinY = ((float)(CGeneral::GetRandomNumber() % 10'000) / 10'000.0f * (maxAngle - minAngle) + minAngle) * 40.743664f;
 
         CVector v37;
         v37.x = CMaths::ms_SinTable[(uint8)((index * 40.743664f) + 64.0f) + 1] * CMaths::ms_SinTable[(uint8)sinY + 1];

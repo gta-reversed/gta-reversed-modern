@@ -151,8 +151,8 @@ bool FxManager_c::LoadFxProject(const char* path) {
     while (true) {
         ReadField<void>(file);
         ReadLine(file, line, sizeof(line));
-        sscanf(line, "%s", buffer);
-        if (strcmp(buffer, "FX_SYSTEM_DATA:"))
+        RET_IGNORED(sscanf(line, "%s", buffer));
+        if (strncmp(buffer, "FX_SYSTEM_DATA:", 16u))
             break;
 
         LoadFxSystemBP(path, file);

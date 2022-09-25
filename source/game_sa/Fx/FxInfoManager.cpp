@@ -151,7 +151,7 @@ void FxInfoManager_c::Load(FILESTREAM file, int32 version) {
     char line[256], field[128];
     for (auto& info : GetInfos()) {
         ReadLine(file, line, sizeof(line));
-        sscanf(line, "%s", field);
+        RET_IGNORED(sscanf(line, "%s", field));
 
         const auto GetType = [=]() -> int32 {
             for (auto& [type, name] : FXINFOMANAGER_C_LOAD_MAPPING) {

@@ -85,7 +85,7 @@ void FxSystemBP_c::Load(Const char* filename, FILESTREAM file, int32 version) {
         CVector vecCenter;
         float   fRadius;
         ReadLine(file, line, sizeof(line));
-        sscanf(line, "%s %f %f %f %f", field, &vecCenter.x, &vecCenter.y, &vecCenter.z, &fRadius);
+        RET_IGNORED(sscanf(line, "%s %f %f %f %f", field, &vecCenter.x, &vecCenter.y, &vecCenter.z, &fRadius));
         m_BoundingSphere = nullptr;
         SetBoundingSphere(&vecCenter, fRadius);
     }
@@ -98,7 +98,7 @@ void FxSystemBP_c::Load(Const char* filename, FILESTREAM file, int32 version) {
 
     for (auto i = 0; i < m_nNumPrims; i++) {
         ReadLine(file, line, sizeof(line));
-        sscanf(line, "%s", field);
+        RET_IGNORED(sscanf(line, "%s", field));
         if (strcmp(field, "FX_PRIM_EMITTER_DATA:") != 0)
             continue;
 

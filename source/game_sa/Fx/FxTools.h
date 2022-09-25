@@ -43,7 +43,7 @@ inline void ReadFieldImpl(FILESTREAM file, Type& refValue, const char* fieldName
     if (fieldName == nullptr) {
         // todo: ASSERT(!strncmp(line, fieldName, strlen(fieldName)), "Line: %s\nRequested field: %s", line, fieldName);
     }
-    sscanf(line, traits::fx_field_scanf_format<Type>::value(), field, &refValue);
+    RET_IGNORED(sscanf(line, traits::fx_field_scanf_format<Type>::value(), field, &refValue));
 }
 
 template <typename Type>
@@ -60,7 +60,7 @@ template <>
 inline void ReadField<void>(FILESTREAM file, const char* fieldName) {
     char line[256], field[128];
     ReadLine(file, line, sizeof(line));
-    sscanf(line, "%s", field);
+    RET_IGNORED(sscanf(line, "%s", field));
 }
 
 template <>
