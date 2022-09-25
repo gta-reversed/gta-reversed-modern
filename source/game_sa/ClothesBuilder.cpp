@@ -38,7 +38,7 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedInstall(ShutdownPaletteOctTree, 0x5A5EE0, { .reversed = false });
     RH_ScopedInstall(ReducePaletteOctTree, 0x5A5EF0, { .reversed = false });
     RH_ScopedInstall(AddColour, 0x5A5F00);
-    RH_ScopedInstall(FillPalette, 0x5A5F30, { .reversed = false });
+    RH_ScopedInstall(FillPalette, 0x5A5F30);
     RH_ScopedInstall(FindNearestColour, 0x5A5F40, { .reversed = false });
     RH_ScopedGlobalInstall(GetTextureFromTxdAndLoadNextTxd, 0x5A5F70, { .reversed = false });
     RH_ScopedInstall(ConstructTextures, 0x5A6040, { .reversed = false });
@@ -238,9 +238,10 @@ bool CClothesBuilder::AddColour(CRGBA* color) {
     return gOctTreeBase.Insert(color->r, color->g, color->b);
 }
 
+// unused
 // 0x5A5F30
-void CClothesBuilder::FillPalette(RwRGBA* color) {
-    // gOctTreeBase.FillPalette(color);
+void CClothesBuilder::FillPalette(CRGBA* color) {
+    gOctTreeBase.FillPalette(reinterpret_cast<uint8*>(color));
 }
 
 // unused

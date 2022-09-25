@@ -37,7 +37,7 @@ public:
     static void ShutdownPaletteOctTree();
     static void ReducePaletteOctTree(int32 numColorsToReduce);
     static bool AddColour(CRGBA* color);
-    static void FillPalette(RwRGBA* color);
+    static void FillPalette(CRGBA* color);
     static int32 FindNearestColour(RwRGBA* color);
     static void ConstructTextures(RwTexDictionary* dict, uint32* hashes, float factorA, float factorB, float factorC);
     static void ConstructGeometryAndSkinArrays(RpHAnimHierarchy* animHierarchy, RpGeometry** geometry1, RwMatrixWeights** weights, uint32** a4, uint32 a5, RpGeometry** geometry2, RpMaterial** material);
