@@ -452,7 +452,7 @@ void CPlantMgr::_ColEntityCache_Update(const CVector& cameraPos, bool fast) {
 
                 if (_CalcDistanceSqrToEntity(item, cameraPos) <= sq(340.0f)) {
                     if (!m_UnusedColEntListHead || !m_UnusedColEntListHead->AddEntry(item)) {
-                        break;
+                        return false;
                     }
                 }
             }
