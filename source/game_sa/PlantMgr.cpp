@@ -283,15 +283,15 @@ void CPlantMgr::MoveColEntToList(CPlantColEntEntry*& oldList, CPlantColEntEntry*
 void CPlantMgr::SetPlantFriendlyFlagInAtomicMI(CAtomicModelInfo* ami) {
     ami->bAtomicFlag0x200 = false;
 
-    auto colData = ami->GetColModel()->GetData();
-    if (!colData)
+    auto cd = ami->GetColModel()->GetData();
+    if (!cd)
         return;
 
-    auto numTriangles = colData->m_nNumTriangles;
+    auto numTriangles = cd->m_nNumTriangles;
     if (numTriangles <= 0)
         return;
 
-    for (auto& triangle : std::span{colData->m_pTriangles, numTriangles}) {
+    for (auto& triangle : std::span{cd->m_pTriangles, numTriangles}) {
         if (g_surfaceInfos->CreatesPlants(triangle.m_nMaterial)
             || g_surfaceInfos->CreatesObjects(triangle.m_nMaterial)) {
             ami->bAtomicFlag0x200 = true;
@@ -356,20 +356,15 @@ float CPlantMgr::CalculateWindBending() {
 
     // 36 times the earth's radius, in AU.
     constexpr float radius_x36 = 0.0015332f;
-    constexpr float unk_table[] = { // 0x8CCF30
-        1.0f, 0.5f, 0.2f, 0.7f, 0.4f, 1.0f, 0.5f, 0.3f, 0.2f, 0.1f, 0.7f, 0.6f, 0.3f, 1.0f, 0.5f, 0.2f
-    };
 
+    // TODO: Look CEntity::ModifyMatrixForTreeInWind; it's definitely inlined somewhere.
     if (CWeather::Wind >= 0.5f) {
-        auto idx = ((uint8)((uint16)(seed + 8 * CTimer::GetTimeInMS()) >> 8) >> 4) + 1;
+        uint32 v4 = 8 * CTimer::GetTimeInMS() + seed;
 
         // return AIDS;
-        return ((1.0f - (float)((seed + 8 * (uint16)CTimer::GetTimeInMS()) % 4096) / 4096.0f)
-            * *(float*)&CClock::daysInMonth[4 * idx + 8]
-            + (float)((seed + 8 * (uint16)CTimer::GetTimeInMS()) % 4096) / 4096.0f
-            * unk_table[idx % 16]
-            + 1.0f)
-            * CWeather::Wind
+        return CWeather::Wind
+            * (CWeather::saTreeWindOffsets[v4 >> 12] * (1.0f - (float)(v4 % 4096) / 4096.0f) + 1.0f)
+            + CWeather::saTreeWindOffsets[((v4 >> 12) + 1) % 16] * ((float)(v4 % 4096) / 4096.0f)
             * 0.015f;
     } else {
         return std::sinf(radius_x36 * (float)(CTimer::GetTimeInMS() % 4096)) / (CWeather::Wind >= 0.2f ? 125.0f : 200.0f);
@@ -471,20 +466,20 @@ void CPlantMgr::_ColEntityCache_Update(const CVector& cameraPos, bool fast) {
 
 // 0x5DCD80
 void CPlantMgr::_ProcessEntryCollisionDataSections(const CPlantColEntEntry& entry, const CVector& center, int32 a3) {
-    const auto colData = entry.m_Entity->GetColData();
+    const auto cd = entry.m_Entity->GetColData();
     const auto numTriangles = entry.m_numTriangles;
 
-    if (!colData || numTriangles != colData->m_nNumTriangles)
+    if (!cd || numTriangles != cd->m_nNumTriangles)
         return;
 
     _ProcessEntryCollisionDataSections_RemoveLocTris(entry, center, a3, 0, numTriangles - 1);
 
-    if (!colData->bHasFaceGroups) {
+    if (!cd->bHasFaceGroups) {
         return _ProcessEntryCollisionDataSections_AddLocTris(entry, center, a3, 0, numTriangles - 1);
     }
 
-    for (auto i = colData->GetNumFaceGroups(); i != 0; i--) {
-        auto& faceGroup = colData->GetFaceGroups()[i];
+    for (auto i = cd->GetNumFaceGroups(); i != 0; i--) {
+        auto& faceGroup = cd->GetFaceGroups()[i];
         auto& box = faceGroup.bb;
 
         CVector out[2]{};
@@ -501,8 +496,8 @@ void CPlantMgr::_ProcessEntryCollisionDataSections(const CPlantColEntEntry& entr
 // 0x5DC8B0
 void CPlantMgr::_ProcessEntryCollisionDataSections_AddLocTris(const CPlantColEntEntry& entry, const CVector& center, int32 a3, int32 start, int32 end) {
     const auto entity = entry.m_Entity;
-    const auto colData = entity->GetColData();
-    if (!colData)
+    const auto cd = entity->GetColData();
+    if (!cd)
         return;
 
     for (auto i = start; i <= end; i++) {
@@ -510,12 +505,12 @@ void CPlantMgr::_ProcessEntryCollisionDataSections_AddLocTris(const CPlantColEnt
             continue;
 
         if (m_UnusedLocTriListHead) {
-            const auto& tri = colData->m_pTriangles[i];
+            const auto& tri = cd->m_pTriangles[i];
 
             CVector vertices[3];
-            colData->GetTrianglePoint(vertices[0], tri.m_nVertA);
-            colData->GetTrianglePoint(vertices[1], tri.m_nVertB);
-            colData->GetTrianglePoint(vertices[2], tri.m_nVertC);
+            cd->GetTrianglePoint(vertices[0], tri.m_nVertA);
+            cd->GetTrianglePoint(vertices[1], tri.m_nVertB);
+            cd->GetTrianglePoint(vertices[2], tri.m_nVertC);
 
             TransformPoints(vertices, 3, (RwMatrix&)entity->GetMatrix(), vertices);
 
@@ -537,7 +532,7 @@ void CPlantMgr::_ProcessEntryCollisionDataSections_AddLocTris(const CPlantColEnt
             if (!createsPlants || !createsObjects)
                 continue;
 
-            auto unusedHead = m_UnusedLocTriListHead;
+            const auto unusedHead = m_UnusedLocTriListHead;
             if (unusedHead->Add(
                 vertices[0],
                 vertices[1],

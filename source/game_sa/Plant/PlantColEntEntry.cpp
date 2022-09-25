@@ -17,11 +17,11 @@ CPlantColEntEntry* CPlantColEntEntry::AddEntry(CEntity* entity) {
     m_Entity = entity;
     entity->RegisterReference(&m_Entity);
 
-    auto colData = entity->GetColData();
-    if (!colData || colData->m_nNumTriangles < 1u) {
+    auto cd = entity->GetColData();
+    if (!cd || cd->m_nNumTriangles < 1u) {
         return nullptr;
     }
-    m_numTriangles = colData->m_nNumTriangles;
+    m_numTriangles = cd->m_nNumTriangles;
     m_Objects = (CPlantLocTri**)CMemoryMgr::Calloc(m_numTriangles, sizeof(CPlantLocTri*)); // originally Malloc zeroed afterwards
 
     if (auto prev = m_PrevEntry) {
