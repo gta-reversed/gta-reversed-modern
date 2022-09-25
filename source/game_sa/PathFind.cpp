@@ -126,7 +126,7 @@ void CPathFind::Init() {
         m_aUnused[i] = nullptr;    // BUG: Out of array bounds write, same as in original code
     }
 
-    memset(m_interiorIDs, 0xFF, sizeof(m_interiorIDs));
+    rng::fill(m_interiorIDs, 0xFF);
 }
 
 // 0x44E4E0
