@@ -436,29 +436,29 @@ void CPlantMgr::_ColEntityCache_Update(const CVector& cameraPos, bool fast) {
     const int32 endSectorY = CWorld::GetSectorY(cameraPos.y + 340.f);
 
     CWorld::IterateSectors(startSectorX, startSectorY, endSectorX, endSectorY, [cameraPos](int32 x, int32 y) {
-        auto& sector = *GetSector(x, y);
-
-        for (auto i = sector.m_buildings.GetNode(); i; i = i->m_next) {
+        for (auto i = GetSector(x, y)->m_buildings.GetNode(); i; i = i->m_next) {
             const auto item = static_cast<CEntity*>(i->m_item);
 
             if (item->m_bIsProcObject || item->IsScanCodeCurrent() || !item->IsInCurrentAreaOrBarberShopInterior())
-                return true;
+                continue;
 
             if (auto mi = item->GetModelInfo(); mi->GetModelType() == MODEL_INFO_ATOMIC && mi->bAtomicFlag0x200) {
                 for (auto j = m_CloseColEntListHead; j; j = j->m_NextEntry) {
                     if (j->m_Entity == item) {
                         // found the stuff, continue
-                        return true;
+                        continue;
                     }
                 }
 
                 if (_CalcDistanceSqrToEntity(item, cameraPos) <= sq(340.0f)) {
                     if (!m_UnusedColEntListHead || !m_UnusedColEntListHead->AddEntry(item)) {
-                        return false;
+                        break;
                     }
                 }
             }
         }
+
+        return true;
     });
 }
 
