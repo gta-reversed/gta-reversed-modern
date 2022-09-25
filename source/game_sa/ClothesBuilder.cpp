@@ -133,7 +133,7 @@ RwTexture* CClothesBuilder::CopyTexture(RwTexture* texture) {
         RwRasterGetWidth(RwTextureGetRaster(texture)),
         RwRasterGetHeight(RwTextureGetRaster(texture)),
         RwRasterGetDepth(RwTextureGetRaster(texture)),
-        (RwRasterGetHeight(RwTextureGetRaster(texture)) & (rwRASTERFORMAT1555 | rwRASTERFORMAT565 | rwRASTERFORMAT4444 | rwRASTERFORMATLUM8 | rwRASTERFORMAT8888 | rwRASTERFORMAT888 |
+        (RwRasterGetFormat(RwTextureGetRaster(texture)) & (rwRASTERFORMAT1555 | rwRASTERFORMAT565 | rwRASTERFORMAT4444 | rwRASTERFORMATLUM8 | rwRASTERFORMAT8888 | rwRASTERFORMAT888 |
                                                         rwRASTERFORMAT16 |
                     rwRASTERFORMAT24 | rwRASTERFORMAT32 | rwRASTERFORMAT555 | rwRASTERFORMATPAL8 | rwRASTERFORMATPAL4)) | 4
     );
@@ -153,24 +153,44 @@ RwTexture* CClothesBuilder::CopyTexture(RwTexture* texture) {
 }
 
 // 0x5A57B0
-void CClothesBuilder::PlaceTextureOnTopOfTexture(RwTexture* texture1, RwTexture* texture2) {
-    RwUInt8* pPixelsTo = RwRasterLock(RwTextureGetRaster(texture1), 0, rwRASTERLOCKREADWRITE);
-    RwUInt8* pPixelsFrom = RwRasterLock(RwTextureGetRaster(texture2), 0, rwRASTERLOCKREADWRITE);
+void CClothesBuilder::PlaceTextureOnTopOfTexture(RwTexture* textureTo, RwTexture* textureFrom) {
+#if ANDROID
+    RwUInt8* pPixelsTo = RwRasterLock(RwTextureGetRaster(textureTo), 0, rwRASTERLOCKREADWRITE);
+    RwUInt8* pPixelsFrom = RwRasterLock(RwTextureGetRaster(textureFrom), 0, rwRASTERLOCKREADWRITE);
 
-    for (int y = 0; y < RwRasterGetHeight(RwTextureGetRaster(texture2)); ++y) {
-        for (int x = 0; x < RwRasterGetWidth(RwTextureGetRaster(texture2)); ++x) {
+    for (int y = 0; y < RwRasterGetHeight(RwTextureGetRaster(textureFrom)); ++y) {
+        for (int x = 0; x < RwRasterGetWidth(RwTextureGetRaster(textureFrom)); ++x) {
             float percentAlpha = (float)pPixelsFrom[x * 4 + 3] / 255.0f;
             pPixelsTo[x * 4 + 0] = std::min(pPixelsTo[x * 4 + 0] * (1.0f - percentAlpha) + pPixelsFrom[x * 4 + 0] * percentAlpha, 255.0f);
             pPixelsTo[x * 4 + 1] = std::min(pPixelsTo[x * 4 + 1] * (1.0f - percentAlpha) + pPixelsFrom[x * 4 + 1] * percentAlpha, 255.0f);
             pPixelsTo[x * 4 + 2] = std::min(pPixelsTo[x * 4 + 2] * (1.0f - percentAlpha) + pPixelsFrom[x * 4 + 2] * percentAlpha, 255.0f);
         }
 
-        pPixelsTo += RwRasterGetStride(RwTextureGetRaster(texture1));
-        pPixelsFrom += RwRasterGetStride(RwTextureGetRaster(texture2));
+        pPixelsTo += RwRasterGetStride(RwTextureGetRaster(textureTo));
+        pPixelsFrom += RwRasterGetStride(RwTextureGetRaster(textureFrom));
     }
 
-    RwRasterUnlock(RwTextureGetRaster(texture1));
-    RwRasterUnlock(RwTextureGetRaster(texture2));
+    RwRasterUnlock(RwTextureGetRaster(textureTo));
+    RwRasterUnlock(RwTextureGetRaster(textureFrom));
+
+#else
+    RwUInt8* pPixelsTo = RwRasterLock(RwTextureGetRaster(textureTo), 0, rwRASTERLOCKREADWRITE);
+    RwUInt8* pPixelsFrom = RwRasterLock(RwTextureGetRaster(textureFrom), 0, rwRASTERLOCKREADWRITE);
+
+    uint32 countPixels = std::min(RwRasterGetHeight(RwTextureGetRaster(textureTo)) * RwRasterGetWidth(RwTextureGetRaster(textureTo)),
+                                  RwRasterGetHeight(RwTextureGetRaster(textureFrom)) * RwRasterGetWidth(RwTextureGetRaster(textureFrom)));
+
+    for (int i = 0; i < countPixels; ++i) {
+        if (pPixelsFrom[i * 4 + 3] == 0) { // alpha channel
+            continue;
+        }
+
+        memcpy(&pPixelsTo[i * 4], &pPixelsFrom[i * 4], 4);
+    }
+
+    RwRasterUnlock(RwTextureGetRaster(textureTo));
+    RwRasterUnlock(RwTextureGetRaster(textureFrom));
+#endif
 }
 
 // 0x5A5820

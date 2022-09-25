@@ -29,7 +29,7 @@ public:
     static void DestroySkinArrays(RwMatrixWeights* weights, uint32* a2);
     static void BuildBoneIndexConversionTable(uint8* a1, RpHAnimHierarchy* a2, int32 a3);
     static RwTexture* CopyTexture(RwTexture* texture);
-    static void PlaceTextureOnTopOfTexture(RwTexture* texture1, RwTexture* texture2);
+    static void PlaceTextureOnTopOfTexture(RwTexture* textureTo, RwTexture* textureFrom);
     static void BlendTextures(RwTexture* t1, RwTexture* t2, float a3, float a4, int32 a5);
     static void BlendTextures(RwTexture* t1, RwTexture* t2, RwTexture* t3, float factorA, float factorB, float factorC, int32 a7);
     static void BlendTextures(RwTexture* t1, RwTexture* t2, RwTexture* t3, float factorA, float factorB, float factorC, int32 a7, RwTexture* t4);
