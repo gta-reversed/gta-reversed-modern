@@ -91,7 +91,7 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedGlobalInstall(LoadModels, 0x5DD220);
 
     // Do not uncomment!
-    // RH_ScopedInstall(_ProcessEntryCollisionDataSections_RemoveLocTris, 0x5DBF20, {.reversed = false}); <-- crashes when hooking even with reversed=false
+    RH_ScopedInstall(_ProcessEntryCollisionDataSections_RemoveLocTris, 0x5DBF20, {.reversed = true}); //<-- crashes when hooking even with reversed=false
     // RH_ScopedInstall(_CalcDistanceSqrToEntity, 0x5DBE40, {.reversed = false}); <-- bad call conv.
 
     // debug shit, all of them just return true.

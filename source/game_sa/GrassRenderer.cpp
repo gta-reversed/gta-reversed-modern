@@ -3,17 +3,12 @@
 #include "GrassRenderer.h"
 #include "PPTriPlantBuffer.h"
 
-float& CGrassRenderer::m_windBending = *(float*)0xC02DB8;
-float& CGrassRenderer::m_closeDist = *(float*)0xC02DBC;
-CVector& CGrassRenderer::m_vecCameraPos = *(CVector*)0xC02DDC;
-float& CGrassRenderer::m_farDist = *(float*)0x8D132C; // 10.0f
-
 CPPTriPlantBuffer& gTriPlantBuf = *(CPPTriPlantBuffer*)0xC02DE8;
 uint16& g_GrassCurrentScanCode = *(uint16*)0x8D1330; // -1
 
 void CGrassRenderer::InjectHooks() {
     RH_ScopedClass(CGrassRenderer);
-    RH_ScopedCategoryGlobal();
+    RH_ScopedCategory("Plant");
 
     RH_ScopedInstall(Initialise, 0x5DD6B0);
     RH_ScopedInstall(Shutdown, 0x5DABA0);

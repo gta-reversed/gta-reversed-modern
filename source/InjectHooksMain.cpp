@@ -48,7 +48,6 @@
 #include "CustomBuildingDNPipeline.h"
 #include "CustomCarEnvMapPipeline.h"
 #include "CustomBuildingRenderer.h"
-#include "PlantMgr.h"
 #include "PedType.h"
 #include "Occlusion.h"
 #include "Occluder.h"
@@ -117,12 +116,16 @@
 #include "Birds.h"
 #include "Hud.h"
 #include "CarFXRenderer.h"
-#include "GrassRenderer.h"
-#include "PPTriPlantBuffer.h"
 #include "ProcObjectMan.h"
 #include "ProcSurfaceInfo.h"
+
+// Plant
+#include "PlantMgr.h"
 #include "PlantColEntEntry.h"
 #include "PlantLocTri.h"
+#include "GrassRenderer.h"
+#include "PPTriPlantBuffer.h"
+#include "PlantSurfPropMgr.h"
 
 // Tasks
 #include "TaskComplexSitDownThenIdleThenStandUp.h"
@@ -398,8 +401,6 @@ void InjectHooksMain() {
 
     ProcObjectMan_c::InjectHooks();
     ProcSurfaceInfo_c::InjectHooks();
-    CGrassRenderer::InjectHooks();
-    CPPTriPlantBuffer::InjectHooks();
     RwHelperInjectHooks();
     CPad::InjectHooks();
     InjectCommonHooks();
@@ -608,7 +609,6 @@ void InjectHooksMain() {
     CPathNode::InjectHooks();
     CNodeRoute::InjectHooks();
     CLoadMonitor::InjectHooks();
-    CPlantMgr::InjectHooks();
     CDecisionMakerTypes::InjectHooks();
     CDecisionMakerTypesFileLoader::InjectHooks();
     CPedStats::InjectHooks();
@@ -638,8 +638,6 @@ void InjectHooksMain() {
     CSprite::InjectHooks();
     CPlaneTrail::InjectHooks();
     CPlaneTrails::InjectHooks();
-    CPlantColEntEntry::InjectHooks();
-    CPlantLocTri::InjectHooks();
 
     CCustomBuildingPipeline::InjectHooks();
     CCustomBuildingRenderer::InjectHooks();
@@ -706,6 +704,16 @@ void InjectHooksMain() {
         CAEFireAudioEntity::InjectHooks();
         CAEExplosionAudioEntity::InjectHooks();
     };
+
+    const auto Plant = []() {
+        CPlantColEntEntry::InjectHooks();
+        CPlantMgr::InjectHooks();
+        CPlantLocTri::InjectHooks();
+        CGrassRenderer::InjectHooks();
+        CPPTriPlantBuffer::InjectHooks();
+        CPlantSurfPropMgr::InjectHooks();
+    };
+    Plant();
 
     const auto Tasks = []() {
         CTaskSimpleLeaveGroup::InjectHooks();
