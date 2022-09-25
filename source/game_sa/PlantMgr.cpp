@@ -87,11 +87,11 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedInstall(_ColEntityCache_Update, 0x5DC510);
     RH_ScopedInstall(_ProcessEntryCollisionDataSections, 0x5DCD80);
     RH_ScopedInstall(_ProcessEntryCollisionDataSections_AddLocTris, 0x5DC8B0);
+    RH_ScopedInstall(_ProcessEntryCollisionDataSections_RemoveLocTris, 0x5DBF20);
     RH_ScopedInstall(_UpdateLocTris, 0x5DCF00);
     RH_ScopedGlobalInstall(LoadModels, 0x5DD220);
 
     // Do not uncomment!
-    RH_ScopedInstall(_ProcessEntryCollisionDataSections_RemoveLocTris, 0x5DBF20, {.reversed = true}); //<-- crashes when hooking even with reversed=false
     // RH_ScopedInstall(_CalcDistanceSqrToEntity, 0x5DBE40, {.reversed = false}); <-- bad call conv.
 
     // debug shit, all of them just return true.
