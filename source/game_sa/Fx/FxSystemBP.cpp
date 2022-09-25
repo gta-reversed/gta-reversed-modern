@@ -14,7 +14,7 @@ void FxSystemBP_c::InjectHooks() {
     RH_ScopedInstall(operator new, 0x4AA100);
     RH_ScopedInstall(Constructor, 0x4AA0D0);
     RH_ScopedInstall(Destructor, 0x4AA0F0);
-    // RH_ScopedInstall(Load, 0x5C05F0);
+    RH_ScopedInstall(Load, 0x5C05F0, { .reversed = false });
     RH_ScopedInstall(Unload, 0x4AA120);
     RH_ScopedInstall(Update, 0x4AA130);
     RH_ScopedInstall(Render, 0x4AA160);

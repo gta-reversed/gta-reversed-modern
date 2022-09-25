@@ -1,5 +1,6 @@
 #include "StdInc.h"
 
+#include <functional>
 #include "PedGroupMembership.h"
 
 // 0x5F6930
@@ -39,12 +40,15 @@ void CPedGroupMembership::AppointNewLeader() {
     plugin::CallMethod<0x5FB240, CPedGroupMembership*>(this);
 }
 
-int32 CPedGroupMembership::CountMembers() {
-    return plugin::CallMethodAndReturn<int32, 0x5F6A50, CPedGroupMembership*>(this);
+// 0x5F6A50
+size_t CPedGroupMembership::CountMembers() {
+    return rng::count_if(m_apMembers, notsa::NotIsNull{});
 }
 
+// 0x5F6AA0
 int32 CPedGroupMembership::CountMembersExcludingLeader() {
-    return plugin::CallMethodAndReturn<int32, 0x5F6AA0, CPedGroupMembership*>(this);
+    // Last member is the leader
+    return rng::count_if(m_apMembers | rng::views::drop(1), notsa::NotIsNull{});
 }
 
 // 0x5FB160
@@ -106,4 +110,12 @@ void CPedGroupMembership::SetLeader(CPed* ped) {
 // 0x5F6950
 int32 CPedGroupMembership::GetObjectForPedToHold() {
     return plugin::CallAndReturn<int32, 0x5F6950>();
+}
+
+bool CPedGroupMembership::CanAddFollower() {
+    return std::size(m_apMembers) > CountMembers();
+}
+
+CPed* CPedGroupMembership::GetRandom() {
+    return CGeneral::RandomChoice(m_apMembers | rng::views::take(CountMembers()));
 }

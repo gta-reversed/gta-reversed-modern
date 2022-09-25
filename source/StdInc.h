@@ -23,6 +23,7 @@
 #include <cstring>
 #include <tuple>
 #include <initializer_list>
+#include <format>
 
 #include <ranges>
 namespace rng = std::ranges;
@@ -140,6 +141,7 @@ namespace rng = std::ranges;
 #include "game_sa\Enums\eWeaponType.h"
 #include "game_sa\Enums\eWinchType.h"
 #include "game_sa\Enums\eItemDefinitionFlags.h"
+#include "game_sa\Enums\eMeleeCombo.h"
 
 #include "game_sa\constants.h"
 #include "game_sa\ModelIndices.h"
@@ -255,8 +257,6 @@ namespace rng = std::ranges;
 #include "game_sa\GangInfo.h"
 #include "game_sa\Gangs.h"
 #include "game_sa\GangWars.h"
-#include "game_sa\Garage.h"
-#include "game_sa\Garages.h"
 #include "game_sa\General.h"
 #include "game_sa\GenericGameStorage.h"
 #include "game_sa\cHandlingDataMgr.h"

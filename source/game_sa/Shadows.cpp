@@ -15,34 +15,34 @@ void CShadows::InjectHooks() {
     RH_ScopedInstall(Init, 0x706CD0);
     RH_ScopedInstall(Shutdown, 0x706ED0);
     RH_ScopedInstall(TidyUpShadows, 0x707770);
-    // RH_ScopedInstall(AddPermanentShadow, 0x706F60);
-    // RH_ScopedInstall(UpdatePermanentShadows, 0x70C950);
-    // + RH_ScopedInstall(StoreShadowToBeRendered, 0x707930);
-    // + RH_ScopedInstall(StoreShadowToBeRendered, 0x707390);
+    RH_ScopedInstall(AddPermanentShadow, 0x706F60, { .reversed = false });
+    RH_ScopedInstall(UpdatePermanentShadows, 0x70C950, { .reversed = false });
+    //RH_ScopedInstall(StoreShadowToBeRendered, 0x707930, { .reversed = false }); // TODO: Fix overload install
+    //RH_ScopedInstall(StoreShadowToBeRendered, 0x707390, { .reversed = false });
     RH_ScopedInstall(SetRenderModeForShadowType, 0x707460);
     RH_ScopedInstall(RemoveOilInArea, 0x7074F0);
-    // RH_ScopedInstall(GunShotSetsOilOnFire, 0x707550);
+    RH_ScopedInstall(GunShotSetsOilOnFire, 0x707550, { .reversed = false });
     RH_ScopedInstall(PrintDebugPoly, 0x7076B0);
     RH_ScopedInstall(CalcPedShadowValues, 0x7076C0);
-    // RH_ScopedInstall(AffectColourWithLighting, 0x707850);
-    // RH_ScopedInstall(StoreShadowForPedObject, 0x707B40);
-    // RH_ScopedInstall(StoreRealTimeShadow, 0x707CA0);
-    // RH_ScopedInstall(UpdateStaticShadows, 0x707F40);
-    // RH_ScopedInstall(RenderExtraPlayerShadows, 0x707FA0);
-    // RH_ScopedInstall(RenderStaticShadows, 0x708300);
-    // RH_ScopedInstall(CastShadowEntityXY, 0x7086B0);
-    // RH_ScopedInstall(CastShadowEntityXYZ, 0x70A040);
-    // RH_ScopedInstall(CastPlayerShadowSectorList, 0x70A470);
-    // RH_ScopedInstall(CastShadowSectorList, 0x70A630);
-    // RH_ScopedInstall(CastRealTimeShadowSectorList, 0x70A7E0);
-    // RH_ScopedInstall(RenderStoredShadows, 0x70A960);
-    // RH_ScopedInstall(GeneratePolysForStaticShadow, 0x70B730);
-    // RH_ScopedInstall(StoreStaticShadow, 0x70BA00);
-    // RH_ScopedInstall(StoreShadowForVehicle, 0x70BDA0);
-    // RH_ScopedInstall(StoreCarLightShadow, 0x70C500);
-    // RH_ScopedInstall(StoreShadowForPole, 0x70C750);
-    // RH_ScopedInstall(RenderIndicatorShadow, 0x70CCB0);
-    // RH_ScopedGlobalInstall(ShadowRenderTriangleCB, 0x709CF0);
+    RH_ScopedInstall(AffectColourWithLighting, 0x707850, { .reversed = false });
+    RH_ScopedInstall(StoreShadowForPedObject, 0x707B40, { .reversed = false });
+    RH_ScopedInstall(StoreRealTimeShadow, 0x707CA0, { .reversed = false });
+    RH_ScopedInstall(UpdateStaticShadows, 0x707F40, { .reversed = false });
+    RH_ScopedInstall(RenderExtraPlayerShadows, 0x707FA0, { .reversed = false });
+    RH_ScopedInstall(RenderStaticShadows, 0x708300, { .reversed = false });
+    RH_ScopedInstall(CastShadowEntityXY, 0x7086B0, { .reversed = false });
+    RH_ScopedInstall(CastShadowEntityXYZ, 0x70A040, { .reversed = false });
+    RH_ScopedInstall(CastPlayerShadowSectorList, 0x70A470, { .reversed = false });
+    RH_ScopedInstall(CastShadowSectorList, 0x70A630, { .reversed = false });
+    RH_ScopedInstall(CastRealTimeShadowSectorList, 0x70A7E0, { .reversed = false });
+    RH_ScopedInstall(RenderStoredShadows, 0x70A960, { .reversed = false });
+    RH_ScopedInstall(GeneratePolysForStaticShadow, 0x70B730, { .reversed = false });
+    RH_ScopedInstall(StoreStaticShadow, 0x70BA00, { .reversed = false });
+    RH_ScopedInstall(StoreShadowForVehicle, 0x70BDA0, { .reversed = false });
+    RH_ScopedInstall(StoreCarLightShadow, 0x70C500, { .reversed = false });
+    RH_ScopedInstall(StoreShadowForPole, 0x70C750, { .reversed = false });
+    RH_ScopedInstall(RenderIndicatorShadow, 0x70CCB0, { .reversed = false });
+    RH_ScopedGlobalInstall(ShadowRenderTriangleCB, 0x709CF0, { .reversed = false });
 }
 
 // 0x707670

@@ -79,8 +79,8 @@ public:
     int16    m_moveState;
     float    m_damageIntensity;
     CObject* m_object;
-    CVector  m_collisionImpactVelocity;
-    CVector  m_collisionPos;
+    CVector  m_impactNormal;
+    CVector  m_impactPos;
 
 public:
     static void InjectHooks();
@@ -92,7 +92,7 @@ public:
     bool TakesPriorityOver(const CEvent& refEvent) override { return true; }
     int32 GetEventPriority() const override { return 57; }
     int32 GetLifeTime() override { return 0; }
-    CEventObjectCollision* Clone() override { return new CEventObjectCollision(m_pieceType, m_damageIntensity, m_object, &m_collisionImpactVelocity, &m_collisionPos, m_moveState); }
+    CEventObjectCollision* Clone() override { return new CEventObjectCollision(m_pieceType, m_damageIntensity, m_object, &m_impactNormal, &m_impactPos, m_moveState); }
     bool AffectsPed(CPed* ped) override;
 
 private:
@@ -110,8 +110,8 @@ public:
     int16      m_moveState;
     float      m_damageIntensity;
     CBuilding* m_building;
-    CVector    m_collisionImpactVelocity;
-    CVector    m_collisionPos;
+    CVector    m_impactNormal;
+    CVector    m_impactPos;
 
 public:
     CEventBuildingCollision(int16 pieceType, float damageIntensity, CBuilding* building, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState);
@@ -122,7 +122,7 @@ public:
     bool CanBeInterruptedBySameEvent() override { return true; }
     int32 GetEventPriority() const override { return 59; }
     int32 GetLifeTime() override { return 0; }
-    CEventBuildingCollision* Clone() override { return new CEventBuildingCollision(m_pieceType, m_damageIntensity, m_building, &m_collisionImpactVelocity, &m_collisionPos, m_moveState); }
+    CEventBuildingCollision* Clone() override { return new CEventBuildingCollision(m_pieceType, m_damageIntensity, m_building, &m_impactNormal, &m_impactPos, m_moveState); }
     bool AffectsPed(CPed* ped) override;
 
 private:

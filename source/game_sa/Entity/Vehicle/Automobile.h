@@ -15,7 +15,7 @@
 #include "eSurfaceType.h"
 #include "eCarWheel.h"
 #include "eCarNodes.h"
-enum class eSkidMarkType : uint32;
+enum class eSkidmarkType : uint32;
 
 class CVehicleModelInfo;
 
@@ -48,7 +48,7 @@ public:
     float m_fIntertiaValue1; //  m_anWheelSurfaceType[2]
     float m_fIntertiaValue2;
 
-    std::array<eSkidMarkType, 4> m_wheelSkidmarkType;       // 0x810
+    std::array<eSkidmarkType, 4> m_wheelSkidmarkType;       // 0x810
     std::array<bool,          4> m_wheelSkidmarkBloodState; // 0x820
     std::array<bool,          4> m_wheelSkidmarkMuddy;      // 0x824
     std::array<float,         4> m_wheelRotation;           // 0x828
@@ -225,7 +225,7 @@ public:
     // Repair vehicle's door. "nodeIndex" is an index of component in m_modelNodes array
     void FixDoor(int32 nodeIndex, eDoors door);
     // Repair vehicle's panel. "nodeIndex" is an index of component in m_modelNodes array
-    void FixPanel(int32 nodeIndex, ePanels panel);
+    void FixPanel(eCarNodes nodeIndex, ePanels panel);
     // Enable/disable taxi light for taxi
     void SetTaxiLight(bool enable);
     // Enable taxi light for all taxis (CAutomobile::m_sAllTaxiLights = true;)

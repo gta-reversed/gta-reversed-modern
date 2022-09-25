@@ -30,7 +30,7 @@ public:
     static void InjectHooks() {
         RH_ScopedClass(CCheckpoint);
         RH_ScopedCategoryGlobal();
-        //RH_ScopedInstall(Render, 0x725C00);
+        RH_ScopedInstall(Render, 0x725C00, { .reversed = false });
     }
 
     void Init() {

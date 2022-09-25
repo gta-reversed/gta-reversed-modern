@@ -133,6 +133,19 @@ public:
         }
     }
 
+    /*!
+    * @brief Iterate over all sub-categories recursively
+    *
+    * @param fn A functor taking a `HookCategory&` as it's first argument
+    */
+    template<typename Fn>
+    void ForEachCategory(Fn&& fn) {
+        std::invoke(fn, *this);
+        for (auto& cat : m_subCategories) {
+            cat.ForEachCategory(fn);
+        }
+    }
+
     // Called when `InjectHooksMain` has finished - That is, all hooks have been injected.
     // From this point on no items/categories should be added/removed.
     void OnInjectionEnd() {

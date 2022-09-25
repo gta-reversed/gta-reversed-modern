@@ -23,7 +23,8 @@ public:
 public:
     static constexpr auto Type = TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER;
 
-    CTaskSimpleCarSetPedInAsDriver(CVehicle *targetVehicle, CTaskUtilityLineUpPedWithCar *utility);
+    CTaskSimpleCarSetPedInAsDriver(CVehicle *targetVehicle, CTaskUtilityLineUpPedWithCar *utility = nullptr);
+    CTaskSimpleCarSetPedInAsDriver(CVehicle *targetVehicle, bool warpingInToCar, CTaskUtilityLineUpPedWithCar *utility = nullptr);
     ~CTaskSimpleCarSetPedInAsDriver() override;
 
     eTaskType GetTaskType() override { return Type; }

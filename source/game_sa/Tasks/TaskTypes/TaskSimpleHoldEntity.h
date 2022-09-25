@@ -43,7 +43,15 @@ public:
         AssocGroupId groupId = AssocGroupId::ANIM_GROUP_DEFAULT,
         bool bDisAllowDroppingOnAnimEnd = true
     );
-
+    CTaskSimpleHoldEntity(  // NOTSA
+        CEntity* entityToHold,
+        const CVector& posn,
+        uint8 boneFrameId,
+        uint8 boneFlags = HOLD_ENTITY_UPDATE_TRANSLATION_ONLY,
+        AnimationId animId = AnimationId::ANIM_ID_NO_ANIMATION_SET,
+        AssocGroupId groupId = AssocGroupId::ANIM_GROUP_DEFAULT,
+        bool bDisAllowDroppingOnAnimEnd = true
+    );
     CTaskSimpleHoldEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, const char* animName, const char* animBlockName, eAnimationFlags animFlags);
     CTaskSimpleHoldEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* animBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags);
     ~CTaskSimpleHoldEntity() override;
@@ -56,7 +64,7 @@ public:
 
     void ReleaseEntity();
     bool CanThrowEntity() const;
-    void PlayAnim(AnimationId groupId, AssocGroupId animId);
+    void PlayAnim(AnimationId animId, AssocGroupId grpId);
     static void FinishAnimHoldEntityCB(CAnimBlendAssociation* pAnimAssoc, void* data);
     void StartAnim(CPed* ped);
     void DropEntity(CPed* ped, bool bAddEventSoundQuiet);

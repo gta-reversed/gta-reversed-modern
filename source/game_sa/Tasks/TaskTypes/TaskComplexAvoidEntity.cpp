@@ -8,23 +8,24 @@ void CTaskComplexAvoidEntity::InjectHooks() {
     RH_ScopedClass(CTaskComplexAvoidEntity);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    // RH_ScopedInstall(Constructor, 0x66AA20);
-    // RH_ScopedInstall(ComputeDetourTarget, 0x66FD30);
-    // RH_ScopedInstall(ComputeDetourTarget, 0x66ADB0);
-    // RH_ScopedInstall(ComputeAvoidSphere, 0x672080);
-    // RH_ScopedInstall(ComputeSphere, 0x66F6C0);
-    // RH_ScopedInstall(ControlSubTask_Reversed, 0x66ADE0);
-    // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x672530);
-    // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x66AD70);
-    // RH_ScopedInstall(MakeAbortable, 0x66AD40);
-    // RH_ScopedInstall(QuitIK, 0x66AD10);
-    // RH_ScopedInstall(SetUpIK, 0x66AB40);
-    // RH_ScopedInstall(NearbyEntitiesInSphere, 0x66ADA0);
+    RH_ScopedInstall(Constructor, 0x66AA20, { .reversed = false });
+    RH_ScopedInstall(ComputeAvoidSphere, 0x672080, { .reversed = false });
+    RH_ScopedInstall(ComputeSphere, 0x66F6C0, { .reversed = false });
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x66ADE0, { .reversed = false });
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x672530, { .reversed = false });
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x66AD70, { .reversed = false });
+    RH_ScopedInstall(MakeAbortable, 0x66AD40, { .reversed = false });
+    RH_ScopedInstall(QuitIK, 0x66AD10, { .reversed = false });
+    RH_ScopedInstall(SetUpIK, 0x66AB40, { .reversed = false });
+    RH_ScopedInstall(NearbyEntitiesInSphere, 0x66ADA0, { .reversed = false });
+
+    RH_ScopedOverloadedInstall(ComputeDetourTarget, "0", 0x66FD30, bool(CTaskComplexAvoidEntity::*)(const CPed&), { .reversed = false });
+    RH_ScopedOverloadedInstall(ComputeDetourTarget, "1", 0x66ADB0, bool(CTaskComplexAvoidEntity::*)(const CPed&, const CColSphere&), { .reversed = false });
 }
 
 // 0x66AA20
-CTaskComplexAvoidEntity::CTaskComplexAvoidEntity(int32 a2, CEntity* entity, const CVector& pos) : CTaskComplex() {
-    field_10 = a2;
+CTaskComplexAvoidEntity::CTaskComplexAvoidEntity(eMoveState moveState, CEntity* entity, const CVector& pos) : CTaskComplex() {
+    m_moveState = moveState;
     m_Entity = entity;
     f20 = pos;
     f2C = pos;
@@ -75,7 +76,7 @@ CTask* CTaskComplexAvoidEntity::CreateFirstSubTask(CPed* ped) {
         return CreateNextSubTask(ped);
     }
 
-    return new CTaskSimpleGoToPoint(field_10, &f2C, 0.5f, false, false);
+    return new CTaskSimpleGoToPoint(m_moveState, &f2C, 0.5f, false, false);
 }
 
 // 0x66AD70

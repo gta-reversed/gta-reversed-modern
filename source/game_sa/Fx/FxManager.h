@@ -67,11 +67,11 @@ public:
     RwMatrix* FxRwMatrixCreate();
     void FxRwMatrixDestroy(RwMatrix* matrix);
 
-    bool ShouldCreate(FxSystemBP_c* system, RwMatrix* transform, RwMatrix* objectMatrix, bool ignoreBoundingChecks);
-    FxSystem_c* CreateFxSystem(Const char* name, RwMatrix* transform, RwMatrix* objectMatrix, bool ignoreBoundingChecks);
-    FxSystem_c* CreateFxSystem(Const char* name, CVector* point, RwMatrix* objectMatrix, bool ignoreBoundingChecks);
-    FxSystem_c* CreateFxSystem(FxSystemBP_c* systemBP, CVector* point, RwMatrix* objectMatrix, bool ignoreBoundingChecks);
-    FxSystem_c* CreateFxSystem(FxSystemBP_c* systemBP, RwMatrix* transform, RwMatrix* objectMatrix, bool ignoreBoundingChecks);
+    bool ShouldCreate(FxSystemBP_c* system, RwMatrix* transform, RwMatrix* objectMatrix, bool ignoreBoundingChecks = false);
+    FxSystem_c* CreateFxSystem(Const char* name, RwMatrix* transform, RwMatrix* objectMatrix, bool ignoreBoundingChecks = false);
+    FxSystem_c* CreateFxSystem(Const char* name, CVector* point, RwMatrix* objectMatrix, bool ignoreBoundingChecks = false);
+    FxSystem_c* CreateFxSystem(FxSystemBP_c* systemBP, CVector* point, RwMatrix* objectMatrix, bool ignoreBoundingChecks = false);
+    FxSystem_c* CreateFxSystem(FxSystemBP_c* systemBP, RwMatrix* transform, RwMatrix* objectMatrix, bool ignoreBoundingChecks = false);
 
     FxMemoryPool_c& GetMemPool() { return m_Pool; }
 
