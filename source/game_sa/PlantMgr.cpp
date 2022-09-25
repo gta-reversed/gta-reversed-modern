@@ -435,33 +435,31 @@ void CPlantMgr::_ColEntityCache_Update(const CVector& cameraPos, bool fast) {
     const int32 endSectorX = CWorld::GetSectorX(cameraPos.x + 340.f);
     const int32 endSectorY = CWorld::GetSectorY(cameraPos.y + 340.f);
 
-    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
-        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
-            auto& sector = *GetSector(sectorX, sectorY);
+    CWorld::IterateSectors(startSectorX, startSectorY, endSectorX, endSectorY, [cameraPos](int32 x, int32 y) {
+        auto& sector = *GetSector(x, y);
 
-            for (auto i = sector.m_buildings.GetNode(); i; i = i->m_next) {
-                auto item = static_cast<CEntity*>(i->m_item);
+        for (auto i = sector.m_buildings.GetNode(); i; i = i->m_next) {
+            const auto item = static_cast<CEntity*>(i->m_item);
 
-                if (item->m_bIsProcObject || item->IsScanCodeCurrent() || !item->IsInCurrentAreaOrBarberShopInterior())
-                    continue;
+            if (item->m_bIsProcObject || item->IsScanCodeCurrent() || !item->IsInCurrentAreaOrBarberShopInterior())
+                return true;
 
-                if (auto mi = item->GetModelInfo(); mi->GetModelType() == MODEL_INFO_ATOMIC && mi->bAtomicFlag0x200) {
-                    for (auto j = m_CloseColEntListHead; j; j = j->m_NextEntry) {
-                        if (j->m_Entity == item) {
-                            // found the stuff, continue
-                            continue;
-                        }
+            if (auto mi = item->GetModelInfo(); mi->GetModelType() == MODEL_INFO_ATOMIC && mi->bAtomicFlag0x200) {
+                for (auto j = m_CloseColEntListHead; j; j = j->m_NextEntry) {
+                    if (j->m_Entity == item) {
+                        // found the stuff, continue
+                        return true;
                     }
+                }
 
-                    if (_CalcDistanceSqrToEntity(item, cameraPos) <= sq(340.0f)) {
-                        if (!m_UnusedColEntListHead || !m_UnusedColEntListHead->AddEntry(item)) {
-                            return;
-                        }
+                if (_CalcDistanceSqrToEntity(item, cameraPos) <= sq(340.0f)) {
+                    if (!m_UnusedColEntListHead || !m_UnusedColEntListHead->AddEntry(item)) {
+                        return false;
                     }
                 }
             }
         }
-    }
+    });
 }
 
 // 0x5DCD80
@@ -600,13 +598,13 @@ void CPlantMgr::_UpdateLocTris(const CVector& center, int32 a2) {
 
 // 0x5DBE40
 float CPlantMgr::_CalcDistanceSqrToEntity(CEntity* entity, const CVector& posn) {
-    auto colModel = entity->GetColModel();
+    const auto colModel = entity->GetColModel();
     CVector dst;
     entity->TransformFromObjectSpace(dst, colModel->m_boundSphere.m_vecCenter);
 
     auto d = DistanceBetweenPoints(dst, posn);
-    if (d > colModel->m_boundSphere.m_fRadius) {
-        d -= colModel->m_boundSphere.m_fRadius;
+    if (auto r = colModel->m_boundSphere.m_fRadius; d > r) {
+        d -= r;
     }
 
     return sq(d);

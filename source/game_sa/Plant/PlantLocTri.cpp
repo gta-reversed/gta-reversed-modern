@@ -7,12 +7,8 @@
 
 // 0x5DC210
 float GetPlantDensity(CPlantLocTri* plant) {
-    CVector a = plant->m_V2 - plant->m_V1;
-    CVector b = plant->m_V3 - plant->m_V1;
-
-    CVector out;
-    CrossProduct(&out, &a, &b);
-    return out.Magnitude() / 2.0f;
+    // The magnitude of the cross product of 2 vectors give the area of a paralellogram they span.
+    return (plant->m_V2 - plant->m_V1).Cross(plant->m_V3 - plant->m_V1).Magnitude() / 2.f;
 }
 
 void CPlantLocTri::InjectHooks() {
