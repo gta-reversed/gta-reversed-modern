@@ -36,7 +36,7 @@ public:
     static void InitPaletteOctTree(int32 numColors);
     static void ShutdownPaletteOctTree();
     static void ReducePaletteOctTree(int32 numColorsToReduce);
-    static bool AddColour(RwRGBA* color);
+    static bool AddColour(CRGBA* color);
     static void FillPalette(RwRGBA* color);
     static int32 FindNearestColour(RwRGBA* color);
     static void ConstructTextures(RwTexDictionary* dict, uint32* hashes, float factorA, float factorB, float factorC);

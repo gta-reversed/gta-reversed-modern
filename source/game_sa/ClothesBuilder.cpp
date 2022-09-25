@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "ClothesBuilder.h"
+#include "OctTreeBase.h"
 
 CDirectory& playerImg = *(CDirectory*)0xBC12C0;
 CDirectory::DirectoryInfo& playerImgEntries = *(CDirectory::DirectoryInfo*)0xBBCDC8;
@@ -36,7 +37,7 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedInstall(InitPaletteOctTree, 0x5A5EB0, { .reversed = false });
     RH_ScopedInstall(ShutdownPaletteOctTree, 0x5A5EE0, { .reversed = false });
     RH_ScopedInstall(ReducePaletteOctTree, 0x5A5EF0, { .reversed = false });
-    RH_ScopedInstall(AddColour, 0x5A5F00, { .reversed = false });
+    RH_ScopedInstall(AddColour, 0x5A5F00);
     RH_ScopedInstall(FillPalette, 0x5A5F30, { .reversed = false });
     RH_ScopedInstall(FindNearestColour, 0x5A5F40, { .reversed = false });
     RH_ScopedGlobalInstall(GetTextureFromTxdAndLoadNextTxd, 0x5A5F70, { .reversed = false });
@@ -227,15 +228,14 @@ void CClothesBuilder::ReducePaletteOctTree(int32 numColorsToReduce) {
     // gOctTreeBase.ReduceBranches(newBranchesCount);
 }
 
+// unused
 // 0x5A5F00
-bool CClothesBuilder::AddColour(RwRGBA* color) {
-    return plugin::CallAndReturn<bool, 0x5A5F00, RwRGBA*>(color);
-    /*
-    if (!color->alpha)
-        gOctTreeBase.m_bHasTransparentPixels = 1;
+bool CClothesBuilder::AddColour(CRGBA* color) {
+    if (color->a == 0) {
+        gOctTreeBase.m_bHasTransparentPixels = true;
+    }
 
-    return gOctTreeBase.Insert(color);
-    */
+    return gOctTreeBase.Insert(color->r, color->g, color->b);
 }
 
 // 0x5A5F30
