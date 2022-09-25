@@ -9,6 +9,7 @@
 #include "RealTimeShadowManager.h"
 #include "Credits.h"
 #include "Clouds.h"
+#include "CarFXRenderer.h"
 
 bool DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha) {
     RwRGBA TopColor{ (uint8)TopRed, (uint8)TopGreen, (uint8)TopBlue, (uint8)Alpha };
