@@ -55,7 +55,6 @@
 #include "Lines.h"
 #include "Escalators.h"
 #include "MovingThings.h"
-#include "MovingThings.h"
 #include "PlaneTrail.h"
 #include "PlaneTrails.h"
 #include "Gamma.h"
@@ -63,7 +62,6 @@
 #include "CustomBuildingDNPipeline.h"
 #include "CustomCarEnvMapPipeline.h"
 #include "CustomBuildingRenderer.h"
-#include "PlantMgr.h"
 #include "PedType.h"
 #include "Occlusion.h"
 #include "Occluder.h"
@@ -132,6 +130,16 @@
 #include "Birds.h"
 #include "Hud.h"
 #include "CarFXRenderer.h"
+#include "ProcObjectMan.h"
+#include "ProcSurfaceInfo.h"
+
+// Plant
+#include "PlantMgr.h"
+#include "PlantColEntEntry.h"
+#include "PlantLocTri.h"
+#include "GrassRenderer.h"
+#include "PPTriPlantBuffer.h"
+#include "PlantSurfPropMgr.h"
 
 // Tasks
 #include "TaskComplexSitDownThenIdleThenStandUp.h"
@@ -390,7 +398,7 @@
 #include "EventCopCarBeingStolen.h"
 #include "EventDanger.h"
 
-#include "Plugins\BreakablePlugin\BreakablePlugin.h"
+#include "Plugins/BreakablePlugin/BreakablePlugin.h"
 
 #include "platform/win/VideoPlayer/VideoPlayer.h"
 #include "platform/win/VideoMode.h"
@@ -405,6 +413,8 @@ void InjectHooksMain() {
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
     CFileMgr::InjectHooks();
 
+    ProcObjectMan_c::InjectHooks();
+    ProcSurfaceInfo_c::InjectHooks();
     RwHelperInjectHooks();
     CPad::InjectHooks();
     InjectCommonHooks();
@@ -612,7 +622,6 @@ void InjectHooksMain() {
     CPathNode::InjectHooks();
     CNodeRoute::InjectHooks();
     CLoadMonitor::InjectHooks();
-    CPlantMgr::InjectHooks();
     CDecisionMakerTypes::InjectHooks();
     CDecisionMakerTypesFileLoader::InjectHooks();
     CPedStats::InjectHooks();
@@ -708,6 +717,16 @@ void InjectHooksMain() {
         CAEFireAudioEntity::InjectHooks();
         CAEExplosionAudioEntity::InjectHooks();
     };
+
+    const auto Plant = []() {
+        CPlantColEntEntry::InjectHooks();
+        CPlantMgr::InjectHooks();
+        CPlantLocTri::InjectHooks();
+        CGrassRenderer::InjectHooks();
+        CPPTriPlantBuffer::InjectHooks();
+        CPlantSurfPropMgr::InjectHooks();
+    };
+    Plant();
 
     const auto Tasks = []() {
         CTaskSimpleLeaveGroup::InjectHooks();

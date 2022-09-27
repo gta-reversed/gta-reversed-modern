@@ -59,6 +59,11 @@ void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CSimpleTransform& 
     plugin::Call<0x54EE30, RwV3d*, int32, const CSimpleTransform&, const RwV3d*>(vecsOut, numVectors, transform, vecsin);
 }
 
+// 0x54EEF0
+void TransformPoints(RwV3d* pointOut, int count, const RwMatrix& transformMatrix, RwV3d* pointIn) {
+    plugin::Call<0x54EEF0, RwV3d*, int, const RwMatrix&, RwV3d*>(pointOut, count, transformMatrix, pointIn);
+}
+
 // 0x7186E0
 char* MakeUpperCase(char* dest, const char* src) {
     for (; *src; src++, dest++)
