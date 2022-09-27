@@ -4,7 +4,7 @@ labels: ["bug"]
 body:
   - type: markdown
     attributes:
-      value: "Before opening a new issue, please search existing issues:  https://github.com/Updated-Classic/gta-reversed-modern/issues"
+      value: "Before opening a new issue, please search existing issues:  https://github.com/gta-reversed/gta-reversed-modern/issues"
   - type: textarea
     id: description
     attributes:
