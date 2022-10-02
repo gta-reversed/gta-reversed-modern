@@ -598,6 +598,7 @@ void InjectHooksMain() {
     CDarkel::InjectHooks();
     CGeneral::InjectHooks();
     CGamma::InjectHooks();
+    CHud::InjectHooks();
     CHudColours::InjectHooks();
     CTxdStore::InjectHooks();
     CCarEnterExit::InjectHooks();

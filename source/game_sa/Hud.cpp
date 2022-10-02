@@ -49,7 +49,7 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(DrawSubtitles, 0x58C250, { .reversed = false });
     RH_ScopedInstall(DrawSuccessFailedMessage, 0x58C6A0, { .reversed = false });
     RH_ScopedInstall(DrawVehicleName, 0x58AEA0);
-    RH_ScopedInstall(DrawVitalStats, 0x589650, { .reversed = false });
+    RH_ScopedInstall(DrawVitalStats, 0x589650);
     RH_ScopedInstall(DrawAmmo, 0x5893B0);
     RH_ScopedInstall(DrawPlayerInfo, 0x58EAF0, { .reversed = false });
     RH_ScopedInstall(DrawTripSkip, 0x58A160);
@@ -1331,7 +1331,89 @@ void CHud::DrawVehicleName() {
 
 // 0x589650
 void CHud::DrawVitalStats() {
-    plugin::Call<0x589650>();
+
+    if (CReplay::Mode == MODE_PLAYBACK || TheCamera.m_bWideScreenOn)
+        return;
+
+    auto player = FindPlayerPed();
+    auto& weaponType = player->GetActiveWeapon().m_nType;
+
+    if (weaponType == WEAPON_TEC9) {
+        weaponType = WEAPON_MICRO_UZI;
+    }
+
+    CRGBA c1(0, 0, 0, 0);
+    CRGBA c2(200, 200, 200, 255);
+    CRGBA c3(225, 225, 225, 255);
+
+    float y = SCREEN_STRETCH_FROM_BOTTOM(110.0f);
+
+    CFont::SetBackground(false, false);
+    CFont::SetColor(c3);
+    CFont::SetWrapx(SCREEN_STRETCH_X(640.0f));
+    CFont::SetRightJustifyWrap(0.0f);
+    CFont::SetProportional(true);
+
+    CRect rect;
+
+    rect.top = SCREEN_STRETCH_FROM_BOTTOM(125.0f);
+    if (player->GetIntelligence()->GetTaskSwim() || (weaponType >= WEAPON_PISTOL && weaponType <= WEAPON_TEC9)) {
+        rect.top -= SCREEN_STRETCH_Y(15.0f);
+        y -= SCREEN_STRETCH_Y(15.0f);
+    }
+    rect.left   = 40.0f;
+    rect.right  = SCREEN_STRETCH_X(170.0f) + 40.0f;
+    rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(13.0f);
+    FrontEndMenuManager.DrawWindow(rect, "FEH_STA", 0, CRGBA(0, 0, 0, 190), false, true);
+
+    const auto BAR_X = (uint8)SCREEN_STRETCH_X(70.0f);
+    const auto BAR_Y = (uint8)SCREEN_STRETCH_Y(10.0f);
+    const auto x10p40 = SCREEN_STRETCH_X(10.0f) + 40.0f;
+    const auto x90p40 = SCREEN_STRETCH_X(90.0f) + 40.0f;
+
+    CFont::SetFontStyle(FONT_SUBTITLES);
+    CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
+    CFont::SetScale(SCREEN_STRETCH_X(0.35f), SCREEN_STRETCH_Y(0.9f));
+    CFont::SetColor(c3);
+    CFont::SetEdge(0);
+
+    auto DrawStat = [&](float value, const char* text) {
+        CFont::PrintString(x10p40, y, text);
+        CSprite2d::DrawBarChart(x90p40, y + SCREEN_STRETCH_Y(5.0f), BAR_X, BAR_Y, value, false, false, true, c2, c1);
+        y += SCREEN_STRETCH_Y(15.0f);
+    };
+
+    DrawStat(CStats::GetStatValue(STAT_TOTAL_RESPECT) / 10.0f,  TheText.Get("STAT068")); // Respect
+
+    if (player->GetIntelligence()->GetTaskSwim()) {
+        DrawStat(CStats::GetStatValue(STAT_LUNG_CAPACITY) / 10, TheText.Get("STAT225")); // Lung capacity
+    } else if (weaponType >= WEAPON_PISTOL && weaponType <= WEAPON_TEC9) {
+        float val = 100.0f;
+        auto SkillStatIndex = (int)CWeaponInfo::GetSkillStatIndex(weaponType);
+        auto pedsKilled = (float)CStats::PedsKilledOfThisType[weaponType];
+        SkillStatIndex -= STAT_PISTOL_SKILL;
+        auto statReactionValue = CStats::StatReactionValue[SkillStatIndex + STAT_INC_PISTOL_SKILL];
+        auto StatValue = CStats::GetStatValue((eStats)(SkillStatIndex + STAT_PISTOL_SKILL));
+        if (StatValue <= 999.0f) {
+            val = (statReactionValue / 10.0f + StatValue) / (pedsKilled * statReactionValue);
+            val = std::floor(val) * pedsKilled * statReactionValue / 10.0f;
+        }
+        DrawStat(val, TheText.Get("CURWSKL")); // Weapon skill
+    }
+
+    DrawStat(CStats::GetStatValue(STAT_STAMINA) / 10.0f,    TheText.Get("STAT022"));    // Stamina
+    DrawStat(CStats::GetStatValue(STAT_MUSCLE) / 10.0f,     TheText.Get("STAT023"));     // Muscle
+    DrawStat(CStats::GetStatValue(STAT_FAT) / 10.0f,        TheText.Get("STAT021"));        // Fat
+    DrawStat(CStats::GetStatValue(STAT_SEX_APPEAL) / 10.0f, TheText.Get("STAT025")); // Sex appeal
+
+    CFont::SetFontStyle(FONT_PRICEDOWN);
+    CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
+    CFont::SetScale(SCREEN_STRETCH_X(0.7f), SCREEN_STRETCH_Y(0.7f));
+    CFont::SetEdge(1);
+    CFont::SetColor(c2);
+    CFont::SetDropColor(CRGBA(0, 0, 0, 255));
+    sprintf(gString, "DAY_%d", CClock::CurrentDay);
+    CFont::PrintString(SCREEN_STRETCH_X(160.0f) + 40.0f, SCREEN_STRETCH_Y(3.0f) + y, TheText.Get(gString));
 }
 
 // 0x588A50
