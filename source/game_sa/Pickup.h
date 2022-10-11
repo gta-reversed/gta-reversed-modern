@@ -39,7 +39,7 @@ enum ePickupType : uint8 {
     PICKUP_ONCE_FOR_MISSION = 22
 };
 
-enum ePickupPropertyText {
+enum ePickupPropertyText : int32 {
     PICKUP_PROPERTY_TEXT_CANCEL   = 0, // "Cancel"
     PICKUP_PROPERTY_TEXT_CANT_BUY = 1, // "You can't by..."
     PICKUP_PROPERTY_TEXT_CAN_BUY  = 2  // "Press TAB to buy ..."
@@ -67,8 +67,9 @@ public:
 public:
     static void InjectHooks();
 
-    void SetPosn(float x, float y, float z);
+    void SetPosn(CVector posn);
     [[nodiscard]] CVector GetPosn() const;
+    [[nodiscard]] CVector2D GetPosn2D() const { return GetPosn(); }; // NOTSA
     [[nodiscard]] float GetXCoord() const { return m_vecPos.x / 8.0f; } // 0x4549F0
     [[nodiscard]] float GetYCoord() const { return m_vecPos.y / 8.0f; } // 0x454A10
     [[nodiscard]] float GetZCoord() const { return m_vecPos.z / 8.0f; } // 0x454A30
@@ -85,7 +86,7 @@ public:
     void Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId);
     void ProcessGunShot(CVector* origin, CVector* target);
 
-    static int32 FindTextIndexForString(char* message);
-    static const char* FindStringForTextIndex(int32 index);
+    static ePickupPropertyText FindTextIndexForString(char* message);
+    static const char* FindStringForTextIndex(ePickupPropertyText index);
 };
 VALIDATE_SIZE(CPickup, 0x20);

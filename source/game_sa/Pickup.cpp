@@ -23,23 +23,68 @@ void CPickup::InjectHooks() {
 // Give player an ammo from weapon pickup
 // 0x454BE0
 void CPickup::ExtractAmmoFromPickup(CPlayerPed* player) {
-    plugin::CallMethod<0x454BE0, CPickup*, CPlayerPed*>(this, player);
+    return plugin::CallMethod<0x454BE0, CPickup*, CPlayerPed*>(this, player);
+    const auto weapon = CPickups::WeaponForModel(m_pObject->m_nModelIndex);
+    const auto slot = CWeaponInfo::GetWeaponInfo(weapon)->m_nSlot;
+
+    if (m_nPickupType != PICKUP_IN_SHOP) {
+        switch (slot) {
+        case PICKUP_ONCE:
+        case PICKUP_ONCE_TIMEOUT:
+        case PICKUP_ONCE_TIMEOUT_SLOW:
+            break;
+
+        default:
+            return;
+        }
+
+        const auto EmptyAmmo = [this] {
+            m_nFlags.bEmpty = true;
+            m_nAmmo = 0;
+        };
+
+        if (m_nAmmo) {
+            player->GrantAmmo(weapon, m_nAmmo);
+        } else {
+            if (m_nFlags.bEmpty) {
+                return EmptyAmmo();
+            }
+
+            player->GrantAmmo(weapon, AmmoForWeapon_OnStreet[weapon]);
+        }
+
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_WEAPON);
+        EmptyAmmo();
+    }
 }
 
 // 0x455540
-const char* CPickup::FindStringForTextIndex(int32 index) {
-    if (index == 1) return "PROP_3";
-    if (index == 2) return "PROP_4";
-    return "FESZ_CA";
+const char* CPickup::FindStringForTextIndex(ePickupPropertyText index) {
+    switch (index) {
+    case PICKUP_PROPERTY_TEXT_CAN_BUY:
+        return "PROP_3"; // Press ~k~~PED_ANSWER_PHONE~ to buy this property.
+
+    case PICKUP_PROPERTY_TEXT_CANT_BUY:
+        return "PROP_4"; // You cannot buy this property yet.
+
+    case PICKUP_PROPERTY_TEXT_CANCEL:
+    default:
+        return "FESZ_CA"; // Cancel
+    }
 }
 
-// message = GXT key
 // 0x455500
-int32 CPickup::FindTextIndexForString(char* message) {
-    if (!message) return 0;
-    if (!_stricmp("PROP_3", message)) return 1;
-    if (!_stricmp("PROP_4", message)) return 2;
-    return 0;
+ePickupPropertyText CPickup::FindTextIndexForString(char* message) {
+    if (!message)
+        return PICKUP_PROPERTY_TEXT_CANCEL;
+
+    if (!_stricmp("PROP_3", message)) {
+        return PICKUP_PROPERTY_TEXT_CAN_BUY;
+    } else if (!_stricmp("PROP_4", message)) {
+        return PICKUP_PROPERTY_TEXT_CANT_BUY;
+    }
+
+    return PICKUP_PROPERTY_TEXT_CANCEL;
 }
 
 // 0x4549A0
@@ -66,7 +111,7 @@ void CPickup::GiveUsAPickUpObject(CObject** obj, int32 slotIndex) {
 // Is pickup visible (checks if distance between pickup and camera is shorter than 100 units)
 // 0x454C70
 bool CPickup::IsVisible() {
-    return DistanceBetweenPoints2D({ GetXCoord(), GetYCoord() }, TheCamera.GetPosition()) < 100.0f;
+    return DistanceBetweenPoints2D(GetPosn2D(), TheCamera.GetPosition()) < 100.0f;
 }
 
 // 0x454D20
@@ -80,8 +125,7 @@ void CPickup::ProcessGunShot(CVector* start, CVector* end) {
     if (!m_pObject)
         return;
 
-    if (CCollision::TestLineSphere({ start, end }, { 4.0f, m_pObject->GetPosition() })) {
-        const auto posn = m_pObject->GetPosition();
+    if (const auto posn = m_pObject->GetPosition(); CCollision::TestLineSphere({start, end}, {4.0f, posn})) {
         CExplosion::AddExplosion(nullptr, nullptr, EXPLOSION_MINE, posn, 0, true, -1.0f, false);
         Remove();
     }
@@ -89,19 +133,17 @@ void CPickup::ProcessGunShot(CVector* start, CVector* end) {
 
 // 0x4556C0
 void CPickup::Remove() {
-    plugin::CallMethod<0x4556C0, CPickup*>(this);
-    /*
-    auto handle = (this - CPickups::aPickUps) | (CPickups::aPickUps[this - CPickups::aPickUps].m_nReferenceIndex << 16);
-    CRadar::ClearBlipForEntity(static_cast<eBlipType>(BLIP_CONTACT_POINT | BLIP_CHAR), handle);
+    return plugin::CallMethod<0x4556C0, CPickup*>(this);
+
+    CRadar::ClearBlipForEntity(static_cast<eBlipType>(BLIP_CONTACT_POINT | BLIP_CHAR), m_nReferenceIndex);
     GetRidOfObjects();
     m_nPickupType = PICKUP_NONE;
     m_nFlags.bDisabled = true;
-    */
 }
 
 // 0x454960
-void CPickup::SetPosn(float x, float y, float z) {
-    m_vecPos = CompressLargeVector({x, y, z});
+void CPickup::SetPosn(CVector posn) {
+    m_vecPos = CompressLargeVector(posn);
 }
 
 // Updates the pickup. Returns TRUE if pickup was removed/disabled

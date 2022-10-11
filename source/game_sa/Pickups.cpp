@@ -467,8 +467,8 @@ void CPickups::UpdateMoneyPerDay(int32 pickupHandle, uint16 money) {
 }
 
 // 0x454AE0
-int32 CPickups::WeaponForModel(int32 modelId) {
-    return plugin::CallAndReturn<int32, 0x454AE0, int32>(modelId);
+eWeaponType CPickups::WeaponForModel(int32 modelId) {
+    return plugin::CallAndReturn<eWeaponType, 0x454AE0, int32>(modelId);
 }
 
 // 0x5D35A0

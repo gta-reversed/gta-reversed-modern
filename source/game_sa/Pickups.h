@@ -76,7 +76,7 @@ public:
     static void Update();
     static void UpdateMoneyPerDay(int32 pickupHandle, uint16 money);
     // returns weapon type (see eWeaponType)
-    static int32 WeaponForModel(int32 modelId);
+    static eWeaponType WeaponForModel(int32 modelId);
     static bool Load();
     static bool Save();
 
