@@ -101,7 +101,7 @@ public:
     ~CObject() override;
 
     static void* operator new(size_t size);
-    static void* operator new(size_t size, int32 poolRef);
+    static void* operator new(unsigned size, int32 poolRef);
     static void operator delete(void* obj);
     static void operator delete(void* obj, int32 poolRef);
 

@@ -640,7 +640,7 @@ void InjectHooksMain() {
     CSprite::InjectHooks();
     CPlaneTrail::InjectHooks();
     CPlaneTrails::InjectHooks();
-    //CPickup::InjectHooks();
+    CPickup::InjectHooks();
     CPickups::InjectHooks();
 
     CCustomBuildingPipeline::InjectHooks();

@@ -23,7 +23,7 @@ void CPickups::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x454A70);
-    RH_ScopedInstall(ReInit, 0x456E60);
+    RH_ScopedInstall(ReInit, 0x456E60, {.reversed = false});
     RH_ScopedInstall(AddToCollectedPickupsArray, 0x455240);
     //RH_ScopedInstall(CreatePickupCoorsCloseToCoors, 0x458A80, { .reversed = false });
     RH_ScopedInstall(CreateSomeMoney, 0x458970);

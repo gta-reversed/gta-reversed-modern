@@ -69,7 +69,7 @@ public:
 
     void SetPosn(CVector posn);
     [[nodiscard]] CVector GetPosn() const;
-    [[nodiscard]] CVector2D GetPosn2D() const { return GetPosn(); }; // NOTSA
+    [[nodiscard]] CVector2D GetPosn2D() const { return GetPosn(); };    // NOTSA
     [[nodiscard]] float GetXCoord() const { return m_vecPos.x / 8.0f; } // 0x4549F0
     [[nodiscard]] float GetYCoord() const { return m_vecPos.y / 8.0f; } // 0x454A10
     [[nodiscard]] float GetZCoord() const { return m_vecPos.z / 8.0f; } // 0x454A30
@@ -83,7 +83,7 @@ public:
     bool PickUpShouldBeInvisible();
     void Remove();
     void GiveUsAPickUpObject(CObject** obj, int32 slotIndex);
-    void Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId);
+    bool Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId);
     void ProcessGunShot(CVector* origin, CVector* target);
 
     static ePickupPropertyText FindTextIndexForString(const char* message);

@@ -2500,9 +2500,9 @@ bool CVehicle::UsesSiren() {
 }
 
 // 0x6D84D0
-bool CVehicle::IsSphereTouchingVehicle(float x, float y, float z, float radius) {
+bool CVehicle::IsSphereTouchingVehicle(CVector posn, float radius) {
     const auto cm = GetColModel();
-    const auto dist = CVector{ x, y, z } - GetPosition();
+    const auto dist = posn - GetPosition();
 
     const auto dotRight = DotProduct(dist, GetRight());
     if (dotRight < cm->m_boundBox.m_vecMin.x - radius ||
