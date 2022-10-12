@@ -23,8 +23,8 @@ void CPickups::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x454A70);
-    RH_ScopedInstall(ReInit, 0x456E60, { .reversed = false });
-    RH_ScopedInstall(AddToCollectedPickupsArray, 0x455240, { .reversed = false });
+    RH_ScopedInstall(ReInit, 0x456E60);
+    RH_ScopedInstall(AddToCollectedPickupsArray, 0x455240);
     //RH_ScopedInstall(CreatePickupCoorsCloseToCoors, 0x458A80, { .reversed = false });
     RH_ScopedInstall(CreateSomeMoney, 0x458970);
     RH_ScopedInstall(DetonateMinesHitByGunShot, 0x4590C0, { .reversed = false });
@@ -32,9 +32,9 @@ void CPickups::InjectHooks() {
     RH_ScopedInstall(DoMineEffects, 0x4560E0, { .reversed = false });
     RH_ScopedInstall(DoMoneyEffects, 0x454E80);
     RH_ScopedInstall(DoPickUpEffects, 0x455720, { .reversed = false });
-    RH_ScopedInstall(FindPickUpForThisObject, 0x4551C0, { .reversed = false });
+    RH_ScopedInstall(FindPickUpForThisObject, 0x4551C0);
     RH_ScopedInstall(GenerateNewOne, 0x456F20, { .reversed = false });
-    RH_ScopedInstall(GenerateNewOne_WeaponType, 0x457380, { .reversed = false });
+    RH_ScopedInstall(GenerateNewOne_WeaponType, 0x457380);
     RH_ScopedInstall(GetActualPickupIndex, 0x4552A0);
     RH_ScopedInstall(GetNewUniquePickupIndex, 0x456A30);
     RH_ScopedInstall(GetUniquePickupIndex, 0x455280);
@@ -78,12 +78,19 @@ void CPickups::Init() {
 
 // 0x456E60
 void CPickups::ReInit() {
-    plugin::Call<0x456E60>();
+    for (auto& pickup : aPickUps) {
+        if (pickup.m_nPickupType != PICKUP_NONE) {
+            pickup.Remove();
+        }
+    }
+    Init();
 }
 
 // 0x455240
 void CPickups::AddToCollectedPickupsArray(int32 handle) {
-    plugin::Call<0x455240, int32>(handle);
+    aPickUpsCollected[CollectedPickUpIndex++] = GetActualPickupIndex(handle);
+
+    CollectedPickUpIndex %= std::size(aPickUpsCollected);
 }
 
 /*!
@@ -98,7 +105,7 @@ void CPickups::CreatePickupCoorsCloseToCoors(float inX, float inY, float inZ, fl
 
 /*!
  * @addr 0x458970
- * @brief Creates wads of money that worths of `amount` to the position `coors`.
+ * @brief Creates wads of money that worth `amount` to the position `coors`.
  */
 void CPickups::CreateSomeMoney(CVector coors, int32 amount) {
     const auto wads = std::min(amount / 20 + 1, 7);
@@ -198,7 +205,13 @@ void CPickups::DoPickUpEffects(CEntity* entity) {
 
 // 0x4551C0
 CPickup* CPickups::FindPickUpForThisObject(CObject* object) {
-    return plugin::CallAndReturn<CPickup*, 0x4551C0, CObject*>(object);
+    for (auto& pickup : aPickUps) {
+        if (pickup.m_nPickupType == PICKUP_NONE || pickup.m_pObject != object)
+            continue;
+
+        return &pickup;
+    }
+    return aPickUps.data();
 }
 
 // returns pickup handle
@@ -218,8 +231,8 @@ int32 CPickups::GenerateNewOne(CVector coors, uint32 modelId, ePickupType pickup
  * @return Pickup handle
  * @addr 0x457380
  */
-int32 CPickups::GenerateNewOne_WeaponType(CVector coors, eWeaponType weaponType, uint8 pickupType, uint32 ammo, bool isEmpty, char* message) {
-    return plugin::CallAndReturn<int32, 0x457380, CVector, eWeaponType, uint8, uint32, bool, char*>(coors, weaponType, pickupType, ammo, isEmpty, message);
+int32 CPickups::GenerateNewOne_WeaponType(CVector coors, eWeaponType weaponType, ePickupType pickupType, uint32 ammo, bool isEmpty, char* message) {
+    return GenerateNewOne(coors, CWeaponInfo::GetWeaponInfo(weaponType)->GetModels()[0], pickupType, ammo, 0u, isEmpty, message);
 }
 
 /*!
@@ -409,9 +422,8 @@ void CPickups::PictureTaken() {
         if (pickup.m_nPickupType != PICKUP_SNAPSHOT)
             continue;
 
-        const auto camPos = TheCamera.GetPosition();
         const auto pupPos = pickup.GetPosn();
-        const auto dist = DistanceBetweenPoints(camPos, pupPos);
+        const auto dist = DistanceBetweenPoints(TheCamera.GetPosition(), pupPos);
 
         if (90.0f / TheCamera.FindCamFOV() * 20.0f > dist && dist < lastFoundDist) {
             CVector origin = pupPos;
@@ -425,9 +437,7 @@ void CPickups::PictureTaken() {
     if (!capturedPickup.has_value())
         return;
 
-    auto& pickup = aPickUps[*capturedPickup];
-    CRadar::ClearBlipForEntity(BLIP_PICKUP, GetUniquePickupIndex(*capturedPickup));
-    pickup.Remove();
+    aPickUps[*capturedPickup].Remove();
 
     FindPlayerInfo().m_nMoney += 100'000; // originally rewarded to the player 1.
 
@@ -560,9 +570,9 @@ bool CPickups::TestForPickupsInBubble(const CVector posn, float radius) {
 
 // search for pickup in area (radius = 5.5 units) with this weapon model and pickup type and add ammo to this pickup; returns TRUE if merged
 // 0x4555A0
-bool CPickups::TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, uint8 pickupType, uint32 ammo, bool arg4) {
+bool CPickups::TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, ePickupType pickupType, uint32 ammo, bool arg4) {
     UNUSED(arg4);
-    return plugin::CallAndReturn<bool, 0x4555A0, CVector, eWeaponType, uint8, uint32, bool>(posn, weaponType, pickupType, ammo, arg4);
+    return plugin::CallAndReturn<bool, 0x4555A0, CVector, eWeaponType, ePickupType, uint32, bool>(posn, weaponType, pickupType, ammo, arg4);
 }
 
 // 0x458DE0

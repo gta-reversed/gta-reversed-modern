@@ -156,9 +156,7 @@ void CPickup::ProcessGunShot(CVector* start, CVector* end) {
 
 // 0x4556C0
 void CPickup::Remove() {
-    return plugin::CallMethod<0x4556C0, CPickup*>(this);
-
-    CRadar::ClearBlipForEntity(static_cast<eBlipType>(BLIP_CONTACT_POINT | BLIP_CHAR), m_nReferenceIndex);
+    CRadar::ClearBlipForEntity(BLIP_PICKUP, m_nReferenceIndex);
     GetRidOfObjects();
     m_nPickupType = PICKUP_NONE;
     m_nFlags.bDisabled = true;
