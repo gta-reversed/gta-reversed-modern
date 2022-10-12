@@ -52,7 +52,7 @@ public:
     static void DoPickUpEffects(CEntity* entity);
 
     static CPickup* FindPickUpForThisObject(CObject* object);
-    static int32 GenerateNewOne(CVector coors, uint32 modelId, uint8 pickupType, uint32 ammo, uint32 moneyPerDay, bool isEmpty, char* message);
+    static int32 GenerateNewOne(CVector coors, uint32 modelId, ePickupType pickupType, uint32 ammo, uint32 moneyPerDay = 0u, bool isEmpty = false, char* message = nullptr);
     static int32 GenerateNewOne_WeaponType(CVector coors, eWeaponType weaponType, uint8 pickupType, uint32 ammo, bool isEmpty, char* message);
     static int32 GetActualPickupIndex(int32 pickupIndex);
     static int32 GetNewUniquePickupIndex(int32 pickupIndex);
@@ -75,10 +75,9 @@ public:
     static bool TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, uint8 pickupType, uint32 ammo, bool arg4);
     static void Update();
     static void UpdateMoneyPerDay(int32 pickupHandle, uint16 money);
-    // returns weapon type (see eWeaponType)
     static eWeaponType WeaponForModel(int32 modelId);
-    static bool Load();
-    static bool Save();
+    static void Load();
+    static void Save();
 
     // Helpers NOTSA
     static void CreatePickupCoorsCloseToCoors(const CVector& pos, CVector& createdAtPos);

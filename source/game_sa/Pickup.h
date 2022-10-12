@@ -86,7 +86,7 @@ public:
     void Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId);
     void ProcessGunShot(CVector* origin, CVector* target);
 
-    static ePickupPropertyText FindTextIndexForString(char* message);
+    static ePickupPropertyText FindTextIndexForString(const char* message);
     static const char* FindStringForTextIndex(ePickupPropertyText index);
 };
 VALIDATE_SIZE(CPickup, 0x20);

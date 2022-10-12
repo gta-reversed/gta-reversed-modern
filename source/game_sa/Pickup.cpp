@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "Pickup.h"
+#include "ModelIndices.h"
 
 void CPickup::InjectHooks() {
     RH_ScopedClass(CPickup);
@@ -74,7 +75,7 @@ const char* CPickup::FindStringForTextIndex(ePickupPropertyText index) {
 }
 
 // 0x455500
-ePickupPropertyText CPickup::FindTextIndexForString(char* message) {
+ePickupPropertyText CPickup::FindTextIndexForString(const char* message) {
     if (!message)
         return PICKUP_PROPERTY_TEXT_CANCEL;
 
@@ -117,6 +118,28 @@ bool CPickup::IsVisible() {
 // 0x454D20
 bool CPickup::PickUpShouldBeInvisible() {
     return plugin::CallMethodAndReturn<bool, 0x454D20, CPickup*>(this);
+
+    const auto IsKillFrenzy = [this] {
+        return CLocalisation::KillFrenzy() && m_nModelIndex == ModelIndices::MI_PICKUP_KILLFRENZY && CTheScripts::IsPlayerOnAMission() && CDarkel::FrenzyOnGoing();
+    };
+
+    if (CCutsceneMgr::ms_running || IsKillFrenzy() || (m_nPickupType == PICKUP_2P && FindPlayerPed(PED_TYPE_PLAYER2))) {
+        return true;
+    }
+
+    const CVector2D somewhere{+1479.0f, -1658.0f};
+    if (m_nModelIndex == ModelIndices::MI_PICKUP_2P_KILLFRENZY && CLocalisation::GermanGame()
+      && (DistanceBetweenPoints2D(GetPosn2D(), somewhere) < 10.0f || DistanceBetweenPoints2D(GetPosn2D(), {}) < 10.0f)) {
+        return true;
+    }
+
+    if (TheCamera.m_bWideScreenOn && m_nPickupType != PICKUP_ASSET_REVENUE && m_nModelIndex != MODEL_FIRE_EX) {
+        return true;
+    }
+
+    if (!CGameLogic::IsCoopGameGoingOn() || CWeapon::CanBeUsedFor2Player(CPickups::WeaponForModel(m_nModelIndex))) {
+        return false;
+    }
 }
 
 // Checks if pickup collides with line (origin;target), removes pickup and creates an explosion. Used in previous GTA games for mine pickup

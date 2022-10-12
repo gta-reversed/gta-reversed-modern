@@ -8,10 +8,12 @@
 
 #include "extensions/enumerate.hpp"
 
-#include "Garages.h"
 #include "Pickups.h"
+#include "Garages.h"
 #include "tPickupMessage.h"
 #include "Radar.h"
+#include "Shadows.h"
+#include "Coronas.h"
 #include "TaskSimpleJetPack.h"
 
 int32& CollectPickupBuffer = *(int32*)0x97D644;
@@ -24,39 +26,41 @@ void CPickups::InjectHooks() {
     RH_ScopedInstall(ReInit, 0x456E60, { .reversed = false });
     RH_ScopedInstall(AddToCollectedPickupsArray, 0x455240, { .reversed = false });
     //RH_ScopedInstall(CreatePickupCoorsCloseToCoors, 0x458A80, { .reversed = false });
-    RH_ScopedInstall(CreateSomeMoney, 0x458970, { .reversed = false });
+    RH_ScopedInstall(CreateSomeMoney, 0x458970);
     RH_ScopedInstall(DetonateMinesHitByGunShot, 0x4590C0, { .reversed = false });
-    RH_ScopedInstall(DoCollectableEffects, 0x455E20, { .reversed = false });
+    RH_ScopedInstall(DoCollectableEffects, 0x455E20);
     RH_ScopedInstall(DoMineEffects, 0x4560E0, { .reversed = false });
-    RH_ScopedInstall(DoMoneyEffects, 0x454E80, { .reversed = false });
+    RH_ScopedInstall(DoMoneyEffects, 0x454E80);
     RH_ScopedInstall(DoPickUpEffects, 0x455720, { .reversed = false });
     RH_ScopedInstall(FindPickUpForThisObject, 0x4551C0, { .reversed = false });
     RH_ScopedInstall(GenerateNewOne, 0x456F20, { .reversed = false });
     RH_ScopedInstall(GenerateNewOne_WeaponType, 0x457380, { .reversed = false });
-    RH_ScopedInstall(GetActualPickupIndex, 0x4552A0, { .reversed = false });
-    RH_ScopedInstall(GetNewUniquePickupIndex, 0x456A30, { .reversed = false });
-    RH_ScopedInstall(GetUniquePickupIndex, 0x455280, { .reversed = false });
+    RH_ScopedInstall(GetActualPickupIndex, 0x4552A0);
+    RH_ScopedInstall(GetNewUniquePickupIndex, 0x456A30);
+    RH_ScopedInstall(GetUniquePickupIndex, 0x455280);
     RH_ScopedInstall(GivePlayerGoodiesWithPickUpMI, 0x4564F0);
     RH_ScopedInstall(IsPickUpPickedUp, 0x454B40);
     RH_ScopedInstall(ModelForWeapon, 0x454AC0);
     RH_ScopedInstall(PassTime, 0x455200);
     RH_ScopedInstall(PickedUpHorseShoe, 0x455390);
     RH_ScopedInstall(PickedUpOyster, 0x4552D0);
-    RH_ScopedInstall(PictureTaken, 0x456A70, { .reversed = false });
+    RH_ScopedInstall(PictureTaken, 0x456A70);
     RH_ScopedInstall(PlayerCanPickUpThisWeaponTypeAtThisMoment, 0x4554C0);
     RH_ScopedInstall(RemoveMissionPickUps, 0x456DE0);
     RH_ScopedInstall(RemovePickUp, 0x4573D0);
     RH_ScopedInstall(RemovePickUpsInArea, 0x456D30, { .reversed = false });
     RH_ScopedInstall(RemovePickupObjects, 0x455470);
     RH_ScopedInstall(RemoveUnnecessaryPickups, 0x4563A0);
-    RH_ScopedInstall(RenderPickUpText, 0x455000, { .reversed = false });
+    RH_ScopedInstall(RenderPickUpText, 0x455000);
     RH_ScopedInstall(TestForPickupsInBubble, 0x456450);
     RH_ScopedInstall(TryToMerge_WeaponType, 0x4555A0, { .reversed = false });
     RH_ScopedInstall(Update, 0x458DE0, { .reversed = false });
-    RH_ScopedInstall(UpdateMoneyPerDay, 0x455680, { .reversed = false });
-    RH_ScopedInstall(WeaponForModel, 0x454AE0, { .reversed = false });
+    RH_ScopedInstall(UpdateMoneyPerDay, 0x455680);
+    RH_ScopedInstall(WeaponForModel, 0x454AE0);
     RH_ScopedInstall(Load, 0x5D35A0, { .reversed = false });
     RH_ScopedInstall(Save, 0x5D3540, { .reversed = false });
+
+    RH_ScopedGlobalInstall(ModifyStringLabelForControlSetting, 0x454B70);
 }
 
 // 0x454A70
@@ -68,8 +72,8 @@ void CPickups::Init() {
         pickup.m_pObject = nullptr;
     }
     aPickUpsCollected.fill(0);
-    CollectedPickUpIndex = 0;
-    DisplayHelpMessage = 10;
+    CollectedPickUpIndex = 0u;
+    DisplayHelpMessage = 10u;
 }
 
 // 0x456E60
@@ -92,19 +96,89 @@ void CPickups::CreatePickupCoorsCloseToCoors(float inX, float inY, float inZ, fl
     plugin::Call<0x458A80, float, float, float, float*, float*, float*>(inX, inY, inZ, outX, outY, outZ);
 }
 
-// 0x458970
+/*!
+ * @addr 0x458970
+ * @brief Creates wads of money that worths of `amount` to the position `coors`.
+ */
 void CPickups::CreateSomeMoney(CVector coors, int32 amount) {
-    plugin::Call<0x458970, CVector, int32>(coors, amount);
+    const auto wads = std::min(amount / 20 + 1, 7);
+    const auto perWad = amount / wads;
+
+    for (auto i = 0; i < wads; i++) {
+        bool result;
+        coors.x += std::sinf((float)(uint8)rand() * 0.024543693f) * 1.5f;
+        coors.y += std::cosf((float)(uint8)rand() * 0.024543693f) * 1.5f;
+        coors.z = CWorld::FindGroundZFor3DCoord(coors, &result, nullptr) + 0.5f;
+
+        if (result) {
+            GenerateNewOne(coors, ModelIndices::MI_MONEY, PICKUP_MONEY, perWad + (CGeneral::GetRandomNumber() % 4));
+        }
+    }
 }
 
 // 0x4590C0
 void CPickups::DetonateMinesHitByGunShot(CVector* shotOrigin, CVector* shotTarget) {
-    plugin::Call<0x4590C0, CVector*, CVector*>(shotOrigin, shotTarget);
+    for (auto& pickup : aPickUps) {
+        if (pickup.m_nPickupType != PICKUP_NAUTICAL_MINE_ARMED)
+            continue;
+
+        pickup.ProcessGunShot(shotOrigin, shotTarget);
+    }
 }
 
 // 0x455E20
 void CPickups::DoCollectableEffects(CEntity* entity) {
-    plugin::Call<0x455E20, CEntity*>(entity);
+    const auto& entityPos = entity->GetPosition();
+
+    if (const auto d = DistanceBetweenPoints(TheCamera.GetPosition(), entityPos); d < 14.0f) {
+        // shade of gray
+        const auto t = (uint8)((std::sinf((float)(((uint16)entity + (uint16)CTimer::GetTimeInMS()) % 2048)) + 1.0f) / 2.0f * ((14.0f - d) / 14.0f) * 255.0f);
+
+        CShadows::StoreStaticShadow(
+            (uint32)entity,
+            SHADOW_ADDITIVE,
+            gpShadowExplosionTex,
+            entityPos,
+            2.0f,
+            0.0f,
+            0.0f,
+            -2.0f,
+            0,
+            t,
+            t,
+            t,
+            4.0f,
+            1.0f,
+            40.0f,
+            false,
+            0.0f
+        );
+        CCoronas::RegisterCorona(
+            (uint32)entity,
+            nullptr,
+            t,
+            t,
+            t,
+            255,
+            entityPos,
+            0.6f,
+            40.0f,
+            CORONATYPE_TORUS,
+            FLARETYPE_NONE,
+            false,
+            false,
+            0,
+            0.0f,
+            false,
+            1.5f,
+            0,
+            15.0f,
+            false,
+            false
+        );
+    }
+
+    entity->GetMatrix().SetRotateZOnly(static_cast<float>(CTimer::GetTimeInMS() % 4096) * 0.0015283204f);
 }
 
 // 0x4560E0
@@ -114,7 +188,7 @@ void CPickups::DoMineEffects(CEntity* entity) {
 
 // 0x454E80
 void CPickups::DoMoneyEffects(CEntity* entity) {
-    plugin::Call<0x454E80, CEntity*>(entity);
+    entity->GetMatrix().SetRotateZOnly(static_cast<float>(CTimer::GetTimeInMS() % 2048) * 0.0030566407f);
 }
 
 // 0x455720
@@ -129,8 +203,8 @@ CPickup* CPickups::FindPickUpForThisObject(CObject* object) {
 
 // returns pickup handle
 // 0x456F20
-int32 CPickups::GenerateNewOne(CVector coors, uint32 modelId, uint8 pickupType, uint32 ammo, uint32 moneyPerDay, bool isEmpty, char* message) {
-    return plugin::CallAndReturn<int32, 0x456F20, CVector, uint32, uint8, uint32, uint32, bool, char*>(coors, modelId, pickupType, ammo, moneyPerDay, isEmpty, message);
+int32 CPickups::GenerateNewOne(CVector coors, uint32 modelId, ePickupType pickupType, uint32 ammo, uint32 moneyPerDay, bool isEmpty, char* message) {
+    return plugin::CallAndReturn<int32, 0x456F20, CVector, uint32, ePickupType, uint32, uint32, bool, char*>(coors, modelId, pickupType, ammo, moneyPerDay, isEmpty, message);
 }
 
 /*!
@@ -154,18 +228,29 @@ int32 CPickups::GenerateNewOne_WeaponType(CVector coors, eWeaponType weaponType,
  * @addr 0x4552A0
  */
 int32 CPickups::GetActualPickupIndex(int32 pickupIndex) {
-    return plugin::CallAndReturn<int32, 0x4552A0, int32>(pickupIndex);
+    //return plugin::CallAndReturn<int32, 0x4552A0, int32>(pickupIndex);
+
+    if (pickupIndex == -1)
+        return -1;
+
+    if (HIWORD(pickupIndex) != aPickUps[(uint16)pickupIndex].m_nReferenceIndex)
+        return -1;
+
+    return (uint16)pickupIndex;
 }
 
 // 0x456A30
 int32 CPickups::GetNewUniquePickupIndex(int32 pickupIndex) {
-    return plugin::CallAndReturn<int32, 0x456A30, int32>(pickupIndex);
+    auto& refIdx = aPickUps[pickupIndex].m_nReferenceIndex;
+    refIdx = (refIdx == -1) ? 1 : refIdx + 1;
+
+    return GetUniquePickupIndex(pickupIndex);
 }
 
 // returns pickup handle
 // 0x455280
 int32 CPickups::GetUniquePickupIndex(int32 pickupIndex) {
-    return plugin::CallAndReturn<int32, 0x455280, int32>(pickupIndex);
+    return pickupIndex | ((uint16)aPickUps[pickupIndex].m_nReferenceIndex << 16);
 }
 
 // returns TRUE if player got goodies
@@ -286,13 +371,15 @@ void CPickups::PickedUpHorseShoe() {
     CStats::IncrementStat(STAT_HORSESHOES_COLLECTED);
     CStats::IncrementStat(STAT_LUCK, 1000.f / CStats::GetStatValue(STAT_TOTAL_HORSESHOES)); // TODO: Is this some inlined stuff? (The division part)
 
-    FindPlayerInfo(0).m_nMoney += 100;
+    FindPlayerInfo().m_nMoney += 100; // originally rewarded to the player 1.
 
-    if (CStats::GetStatValue(STAT_TOTAL_HORSESHOES) == CStats::GetStatValue(STAT_HORSESHOES_COLLECTED)) { // Check if there's more to collect or not
+    const auto collected = CStats::GetStatValue(STAT_HORSESHOES_COLLECTED);
+    const auto total = CStats::GetStatValue(STAT_TOTAL_HORSESHOES);
+    if (collected == total) {
         CGarages::TriggerMessage("HO_ALL");
-        FindPlayerInfo(0).m_nMoney += 1000;
+        FindPlayerInfo().m_nMoney += 100'000; // originally rewarded to the player 1.
     } else {
-        CGarages::TriggerMessage("HO_ONE", (int16)CStats::GetStatValue(STAT_TOTAL_HORSESHOES), 5000u, (int16)CStats::GetStatValue(STAT_HORSESHOES_COLLECTED));
+        CGarages::TriggerMessage("HO_ONE", static_cast<int16>(collected), 5000u, static_cast<int16>(total));
     }
 }
 
@@ -301,20 +388,60 @@ void CPickups::PickedUpOyster() {
     AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_COLLECTABLE1);
 
     CStats::IncrementStat(STAT_OYSTERS_COLLECTED);
+    FindPlayerInfo().m_nMoney += 100; // originally rewarded to the player 1.
 
-    FindPlayerInfo(0).m_nMoney += 100;
-
-    if (CStats::GetStatValue(STAT_TOTAL_OYSTERS) == CStats::GetStatValue(STAT_OYSTERS_COLLECTED)) { // Check if there's more to collect or not
+    const auto collected = CStats::GetStatValue(STAT_OYSTERS_COLLECTED);
+    const auto total = CStats::GetStatValue(STAT_TOTAL_OYSTERS);
+    if (collected == total) {
         CGarages::TriggerMessage("OY_ALL");
-        FindPlayerInfo(0).m_nMoney += 100'000;
+        FindPlayerInfo().m_nMoney += 100'000; // originally rewarded to the player 1.
     } else {
-        CGarages::TriggerMessage("OY_ONE", (int16)CStats::GetStatValue(STAT_TOTAL_OYSTERS), 5000u, (int16)CStats::GetStatValue(STAT_OYSTERS_COLLECTED));
+        CGarages::TriggerMessage("OY_ONE", static_cast<int16>(collected), 5000u, static_cast<int16>(total));
     }
 }
 
 // 0x456A70
 void CPickups::PictureTaken() {
-    plugin::Call<0x456A70>();
+    std::optional<size_t> capturedPickup{};
+    auto lastFoundDist = 999'999.88f; // maybe FLT_MAX
+
+    for (auto&& [i, pickup] : notsa::enumerate(aPickUps)) {
+        if (pickup.m_nPickupType != PICKUP_SNAPSHOT)
+            continue;
+
+        const auto camPos = TheCamera.GetPosition();
+        const auto pupPos = pickup.GetPosn();
+        const auto dist = DistanceBetweenPoints(camPos, pupPos);
+
+        if (90.0f / TheCamera.FindCamFOV() * 20.0f > dist && dist < lastFoundDist) {
+            CVector origin = pupPos;
+            if (TheCamera.IsSphereVisible(pupPos, 0.2f) || TheCamera.IsSphereVisibleInMirror(pupPos, 0.2f)) {
+                capturedPickup = i;
+                lastFoundDist = dist;
+            }
+        }
+    }
+
+    if (!capturedPickup.has_value())
+        return;
+
+    auto& pickup = aPickUps[*capturedPickup];
+    CRadar::ClearBlipForEntity(BLIP_PICKUP, GetUniquePickupIndex(*capturedPickup));
+    pickup.Remove();
+
+    FindPlayerInfo().m_nMoney += 100'000; // originally rewarded to the player 1.
+
+    AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_COLLECTABLE1);
+    CStats::IncrementStat(STAT_SNAPSHOTS_TAKEN, 1.0f);
+
+    const auto taken = CStats::GetStatValue(STAT_SNAPSHOTS_TAKEN);
+    const auto total = CStats::GetStatValue(STAT_TOTAL_SNAPSHOTS);
+    if (taken == total) {
+        CGarages::TriggerMessage("SN_ALL");
+        FindPlayerInfo().m_nMoney += 100'000;
+    } else {
+        CGarages::TriggerMessage("SN_ONE", static_cast<int16>(taken), 5000u, static_cast<int16>(total));
+    }
 }
 
 // 0x4554C0
@@ -333,10 +460,7 @@ void CPickups::RemoveMissionPickUps() {
         switch (pickup.m_nPickupType) {
         case PICKUP_ONCE_FOR_MISSION: {
             CRadar::ClearBlipForEntity(BLIP_PICKUP, GetUniquePickupIndex(i));
-
-            if (pickup.m_pObject) {
-                pickup.GetRidOfObjects();
-            }
+            pickup.GetRidOfObjects();
 
             pickup.m_nFlags.bDisabled = true;
             pickup.m_nPickupType = PICKUP_NONE;
@@ -396,37 +520,22 @@ void CPickups::RemoveUnnecessaryPickups(const CVector& posn, float radius) {
 
 // 0x455000
 void CPickups::RenderPickUpText() {
-    return plugin::Call<0x455000>();
-
     for (auto& message : std::span{ aMessages.data(), NumMessages }) {
-        if (!message.price) {
-            continue;
+        if (message.price == 0u) {
+            if (!message.text)
+                continue;
+
+            if (message.flags & 2) {
+                CMessages::InsertNumberInString(message.text, 0, 0, 0, 0, 0, 0, gString);
+            }
+        } else {
+            sprintf(gString, "$%d", message.price);
+            AsciiToGxtChar(gString, gGxtString);
         }
 
-        if (!message.text) {
-            continue;
-        }
-
-        if (message.flags & 2) {
-            CMessages::InsertNumberInString(message.text, 0, 0, 0, 0, 0, 0, gString);
-        }
-
-        sprintf(gString, "$%d", message.price);
-        AsciiToGxtChar(gString, message.text);
-
-        float scaleX, scaleY;
-
-        const auto width = message.width / 30.0f;
-        if (SCREEN_WIDTH_UNIT >= width)
-            scaleX = width;
-        else
-            scaleX = SCREEN_WIDTH_UNIT;
-
-        const auto height = message.height / 30.0f;
-        if (SCREEN_WIDTH_UNIT >= height)
-            scaleY = height;
-        else
-            scaleY = SCREEN_WIDTH_UNIT;
+        // TODO: scaled wrong in windowed mode, but it's fine in fullscreen.
+        auto scaleX = std::min(SCREEN_WIDTH_UNIT, message.width / 30.0f);
+        auto scaleY = std::min(SCREEN_WIDTH_UNIT, message.height / 30.0f);
 
         CFont::SetProportional(true);
         CFont::SetBackground(false, false);
@@ -435,7 +544,7 @@ void CPickups::RenderPickUpText() {
         CFont::SetCentreSize(SCREEN_WIDTH);
         CFont::SetColor(message.color);
         CFont::SetFontStyle(eFontStyle::FONT_PRICEDOWN);
-        CFont::PrintString(message.pos.x, message.pos.y, message.text);
+        CFont::PrintString(message.pos.x, message.pos.y, gGxtString);
     }
     NumMessages = 0;
 }
@@ -463,21 +572,70 @@ void CPickups::Update() {
 
 // 0x455680
 void CPickups::UpdateMoneyPerDay(int32 pickupHandle, uint16 money) {
-    plugin::Call<0x455680, int32, uint16>(pickupHandle, money);
+    //plugin::Call<0x455680, int32, uint16>(pickupHandle, money);
+    if (auto idx = GetActualPickupIndex(pickupHandle); idx != -1) {
+        aPickUps[idx].m_nMoneyPerDay = money;
+    }
 }
 
 // 0x454AE0
 eWeaponType CPickups::WeaponForModel(int32 modelId) {
-    return plugin::CallAndReturn<eWeaponType, 0x454AE0, int32>(modelId);
+    //return plugin::CallAndReturn<eWeaponType, 0x454AE0, int32>(modelId);
+    if (modelId == ModelIndices::MI_PICKUP_BODYARMOUR) {
+        return WEAPON_ARMOUR;
+    } else if (modelId == ModelIndices::MI_PICKUP_HEALTH) {
+        return WEAPON_LAST_WEAPON;
+    } else if (modelId == ModelIndices::MI_PICKUP_ADRENALINE) {
+        return WEAPON_ARMOUR;
+    }
+
+    switch (modelId) {
+    case MODEL_JETPACK:
+        return WEAPON_LAST_WEAPON;
+
+    case MODEL_INVALID:
+        return WEAPON_UNARMED;
+    }
+
+    if (auto mi = CModelInfo::GetModelInfo(modelId); mi->GetModelType() == MODEL_INFO_WEAPON) {
+        return mi->AsWeaponModelInfoPtr()->m_weaponInfo;
+    }
+
+    return WEAPON_UNARMED;
 }
 
 // 0x5D35A0
-bool CPickups::Load() {
-    return plugin::CallAndReturn<bool, 0x5D35A0>();
+void CPickups::Load() {
+    return plugin::Call<0x5D35A0>();
+
+    for (auto& pickup : aPickUps) {
+        CGenericGameStorage::LoadDataFromWorkBuffer(&pickup, sizeof(CPickup));
+        if (pickup.m_nPickupType && pickup.m_pObject) {
+            pickup.m_pObject = nullptr;
+            pickup.m_nFlags.bVisible = false;
+        }
+    }
+    NumMessages = 0u;
+    CGenericGameStorage::LoadDataFromWorkBuffer(&CPickups::CollectedPickUpIndex, sizeof(uint16));
+    CGenericGameStorage::LoadDataFromWorkBuffer(&CPickups::DisplayHelpMessage, sizeof(uint8));
+
+    for (auto& collected : aPickUpsCollected) {
+        CGenericGameStorage::LoadDataFromWorkBuffer(&collected, sizeof(int32));
+    }
 }
 // 0x5D3540
-bool CPickups::Save() {
-    return plugin::CallAndReturn<bool, 0x5D3540>();
+void CPickups::Save() {
+    return plugin::Call<0x5D3540>();
+
+    for (auto& pickup : aPickUps) {
+        CGenericGameStorage::SaveDataToWorkBuffer(&pickup, sizeof(CPickup));
+    }
+    CGenericGameStorage::SaveDataToWorkBuffer(&CPickups::CollectedPickUpIndex, sizeof(uint16));
+    CGenericGameStorage::SaveDataToWorkBuffer(&CPickups::DisplayHelpMessage, sizeof(uint8));
+
+    for (auto& collected : aPickUpsCollected) {
+        CGenericGameStorage::SaveDataToWorkBuffer(&collected, sizeof(int32));
+    }
 }
 
 /*!
@@ -498,5 +656,22 @@ void CPickups::CreatePickupCoorsCloseToCoors(const CVector& pos, float& outX, fl
 
 // 0x454B70
 void ModifyStringLabelForControlSetting(char* stringLabel) {
-    plugin::Call<0x454B70, char*>(stringLabel);
+//    return plugin::Call<0x454B70, char*>(stringLabel);
+    const auto len = strlen(stringLabel);
+
+    if (len < 2 || stringLabel[len - 2] != '_')
+        return;
+
+    switch (CPad::GetPad(0)->Mode) {
+    case 0:
+    case 1:
+        stringLabel[len - 1] = 'L';
+        break;
+    case 2:
+        stringLabel[len - 1] = 'T';
+        break;
+    case 3:
+        stringLabel[len - 1] = 'C';
+        break;
+    }
 }

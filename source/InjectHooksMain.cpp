@@ -118,6 +118,8 @@
 #include "CarFXRenderer.h"
 #include "ProcObjectMan.h"
 #include "ProcSurfaceInfo.h"
+#include "Pickup.h"
+#include "Pickups.h"
 
 // Plant
 #include "PlantMgr.h"
@@ -638,6 +640,8 @@ void InjectHooksMain() {
     CSprite::InjectHooks();
     CPlaneTrail::InjectHooks();
     CPlaneTrails::InjectHooks();
+    //CPickup::InjectHooks();
+    CPickups::InjectHooks();
 
     CCustomBuildingPipeline::InjectHooks();
     CCustomBuildingRenderer::InjectHooks();
