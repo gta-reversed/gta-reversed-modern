@@ -571,8 +571,17 @@ bool CPickups::TestForPickupsInBubble(const CVector posn, float radius) {
 // search for pickup in area (radius = 5.5 units) with this weapon model and pickup type and add ammo to this pickup; returns TRUE if merged
 // 0x4555A0
 bool CPickups::TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, ePickupType pickupType, uint32 ammo, bool arg4) {
-    UNUSED(arg4);
-    return plugin::CallAndReturn<bool, 0x4555A0, CVector, eWeaponType, ePickupType, uint32, bool>(posn, weaponType, pickupType, ammo, arg4);
+    const auto mi = CWeaponInfo::GetWeaponInfo(weaponType)->GetModels()[0];
+    const CSphere sp{posn, 5.5f};
+
+    for (auto& pickup : aPickUps) {
+        if (mi == pickup.m_nModelIndex && sp.IsPointWithin(pickup.GetPosn())) {
+            pickup.m_nAmmo += ammo;
+
+            return true;
+        }
+    }
+    return false;
 }
 
 // 0x458DE0
