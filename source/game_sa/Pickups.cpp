@@ -16,8 +16,7 @@
 #include "Coronas.h"
 #include "TaskSimpleJetPack.h"
 
-int32& CollectPickupBuffer = *(int32*)0x97D644;
-
+using namespace ModelIndices;
 void CPickups::InjectHooks() {
     RH_ScopedClass(CPickups);
     RH_ScopedCategoryGlobal();
@@ -27,9 +26,9 @@ void CPickups::InjectHooks() {
     RH_ScopedInstall(AddToCollectedPickupsArray, 0x455240);
     //RH_ScopedInstall(CreatePickupCoorsCloseToCoors, 0x458A80, { .reversed = false });
     RH_ScopedInstall(CreateSomeMoney, 0x458970);
-    RH_ScopedInstall(DetonateMinesHitByGunShot, 0x4590C0, { .reversed = false });
+    RH_ScopedInstall(DetonateMinesHitByGunShot, 0x4590C0);
     RH_ScopedInstall(DoCollectableEffects, 0x455E20);
-    RH_ScopedInstall(DoMineEffects, 0x4560E0, { .reversed = false });
+    RH_ScopedInstall(DoMineEffects, 0x4560E0);
     RH_ScopedInstall(DoMoneyEffects, 0x454E80);
     RH_ScopedInstall(DoPickUpEffects, 0x455720, { .reversed = false });
     RH_ScopedInstall(FindPickUpForThisObject, 0x4551C0);
@@ -48,12 +47,12 @@ void CPickups::InjectHooks() {
     RH_ScopedInstall(PlayerCanPickUpThisWeaponTypeAtThisMoment, 0x4554C0);
     RH_ScopedInstall(RemoveMissionPickUps, 0x456DE0);
     RH_ScopedInstall(RemovePickUp, 0x4573D0);
-    RH_ScopedInstall(RemovePickUpsInArea, 0x456D30, { .reversed = false });
+    RH_ScopedInstall(RemovePickUpsInArea, 0x456D30, { .reversed = true });
     RH_ScopedInstall(RemovePickupObjects, 0x455470);
     RH_ScopedInstall(RemoveUnnecessaryPickups, 0x4563A0);
     RH_ScopedInstall(RenderPickUpText, 0x455000);
     RH_ScopedInstall(TestForPickupsInBubble, 0x456450);
-    RH_ScopedInstall(TryToMerge_WeaponType, 0x4555A0, { .reversed = false });
+    RH_ScopedInstall(TryToMerge_WeaponType, 0x4555A0);
     RH_ScopedInstall(Update, 0x458DE0, { .reversed = false });
     RH_ScopedInstall(UpdateMoneyPerDay, 0x455680);
     RH_ScopedInstall(WeaponForModel, 0x454AE0);
@@ -78,11 +77,7 @@ void CPickups::Init() {
 
 // 0x456E60
 void CPickups::ReInit() {
-    for (auto& pickup : aPickUps) {
-        if (pickup.m_nPickupType != PICKUP_NONE) {
-            pickup.Remove();
-        }
-    }
+    rng::for_each(GetAllActivePickups(), [](auto& pickup) { pickup.Remove(); });
     Init();
 }
 
@@ -118,7 +113,7 @@ void CPickups::CreateSomeMoney(CVector coors, int32 amount) {
         coors.z = CWorld::FindGroundZFor3DCoord(coors, &result, nullptr) + 0.5f;
 
         if (result) {
-            GenerateNewOne(coors, ModelIndices::MI_MONEY, PICKUP_MONEY, perWad + (CGeneral::GetRandomNumber() % 4));
+            GenerateNewOne(coors, MI_MONEY, PICKUP_MONEY, perWad + (CGeneral::GetRandomNumber() % 4));
         }
     }
 }
@@ -126,10 +121,9 @@ void CPickups::CreateSomeMoney(CVector coors, int32 amount) {
 // 0x4590C0
 void CPickups::DetonateMinesHitByGunShot(CVector* shotOrigin, CVector* shotTarget) {
     for (auto& pickup : aPickUps) {
-        if (pickup.m_nPickupType != PICKUP_NAUTICAL_MINE_ARMED)
-            continue;
-
-        pickup.ProcessGunShot(shotOrigin, shotTarget);
+        if (pickup.m_nPickupType == PICKUP_NAUTICAL_MINE_ARMED) {
+            pickup.ProcessGunShot(shotOrigin, shotTarget);
+        }
     }
 }
 
@@ -139,7 +133,7 @@ void CPickups::DoCollectableEffects(CEntity* entity) {
 
     if (const auto d = DistanceBetweenPoints(TheCamera.GetPosition(), entityPos); d < 14.0f) {
         // shade of gray
-        const auto t = (uint8)((std::sinf((float)(((uint16)entity + (uint16)CTimer::GetTimeInMS()) % 2048)) + 1.0f) / 2.0f * ((14.0f - d) / 14.0f) * 255.0f);
+        const auto t = (uint8)((std::sinf((float)(((uint16)entity + (uint16)CTimer::GetTimeInMS()) % 2048) * 0.0030664064f) + 1.0f) / 2.0f * ((14.0f - d) / 14.0f) * 255.0f);
 
         CShadows::StoreStaticShadow(
             (uint32)entity,
@@ -190,7 +184,57 @@ void CPickups::DoCollectableEffects(CEntity* entity) {
 
 // 0x4560E0
 void CPickups::DoMineEffects(CEntity* entity) {
-    plugin::Call<0x4560E0, CEntity*>(entity);
+    const auto& entityPos = entity->GetPosition();
+
+    if (const auto d = DistanceBetweenPoints(TheCamera.GetPosition(), entityPos); d < 20.0f) {
+        // shade of red
+        const auto t = (uint8)((std::sinf((float)(((uint16)entity + (uint16)CTimer::GetTimeInMS()) % 512) * 0.012265625f) + 1.0f) / 2.0f * ((20.0f - d) / 20.0f) * 64.0f);
+
+        CShadows::StoreStaticShadow(
+            (uint32)entity,
+            SHADOW_ADDITIVE,
+            gpShadowExplosionTex,
+            entityPos,
+            2.0f,
+            0.0f,
+            0.0f,
+            -2.0f,
+            0,
+            t,
+            0,
+            0,
+            4.0f,
+            1.0f,
+            40.0f,
+            false,
+            0.0f
+        );
+        CCoronas::RegisterCorona(
+            (uint32)entity,
+            nullptr,
+            t,
+            0,
+            0,
+            255,
+            entityPos,
+            0.6f,
+            40.0f,
+            CORONATYPE_TORUS,
+            FLARETYPE_NONE,
+            false,
+            false,
+            0,
+            0.0f,
+            false,
+            1.5f,
+            0,
+            15.0f,
+            false,
+            false
+        );
+    }
+
+    entity->GetMatrix().SetRotateZOnly(static_cast<float>(CTimer::GetTimeInMS() % 1024) * 0.0061132815f);
 }
 
 // 0x454E80
@@ -205,11 +249,10 @@ void CPickups::DoPickUpEffects(CEntity* entity) {
 
 // 0x4551C0
 CPickup* CPickups::FindPickUpForThisObject(CObject* object) {
-    for (auto& pickup : aPickUps) {
-        if (pickup.m_nPickupType == PICKUP_NONE || pickup.m_pObject != object)
-            continue;
-
-        return &pickup;
+    for (auto& pickup : GetAllActivePickups()) {
+        if (pickup.m_pObject == object) {
+            return &pickup;
+        }
     }
     return aPickUps.data();
 }
@@ -232,7 +275,7 @@ int32 CPickups::GenerateNewOne(CVector coors, uint32 modelId, ePickupType pickup
  * @addr 0x457380
  */
 int32 CPickups::GenerateNewOne_WeaponType(CVector coors, eWeaponType weaponType, ePickupType pickupType, uint32 ammo, bool isEmpty, char* message) {
-    return GenerateNewOne(coors, CWeaponInfo::GetWeaponInfo(weaponType)->GetModels()[0], pickupType, ammo, 0u, isEmpty, message);
+    return GenerateNewOne(coors, CWeaponInfo::GetWeaponInfo(weaponType)->m_nModelId1, pickupType, ammo, 0u, isEmpty, message);
 }
 
 /*!
@@ -271,7 +314,7 @@ int32 CPickups::GetUniquePickupIndex(int32 pickupIndex) {
 bool CPickups::GivePlayerGoodiesWithPickUpMI(uint16 modelId, int32 playerId) {
     auto* ped = FindPlayerPed(playerId);
 
-    if (modelId == ModelIndices::MI_PICKUP_ADRENALINE) {
+    if (modelId == MI_PICKUP_ADRENALINE) {
         ped->m_pPlayerData->m_bAdrenaline = true;
         ped->m_pPlayerData->m_nAdrenalineEndTime = CTimer::GetTimeInMS() + 20'000;
         ped->ResetSprintEnergy();
@@ -279,18 +322,18 @@ bool CPickups::GivePlayerGoodiesWithPickUpMI(uint16 modelId, int32 playerId) {
         return true;
     }
 
-    if (modelId == ModelIndices::MI_PICKUP_BODYARMOUR) {
+    if (modelId == MI_PICKUP_BODYARMOUR) {
         ped->m_fArmour = (float)FindPlayerInfo(playerId).m_nMaxArmour;
         AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_BODY_ARMOUR);
         return true;
     }
 
-    if (modelId == ModelIndices::MI_PICKUP_INFO) {
+    if (modelId == MI_PICKUP_INFO) {
         AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_INFO);
         return true;
     }
 
-    if (modelId == ModelIndices::MI_PICKUP_HEALTH) {
+    if (modelId == MI_PICKUP_HEALTH) {
         auto maxHealth = FindPlayerInfo(playerId).m_nMaxHealth;
         CStats::UpdateStatsAddToHealth((uint32)((float)maxHealth - ped->m_fHealth));
         ped->m_fHealth = (float)maxHealth;
@@ -298,12 +341,12 @@ bool CPickups::GivePlayerGoodiesWithPickUpMI(uint16 modelId, int32 playerId) {
         return true;
     }
 
-    if (modelId == ModelIndices::MI_PICKUP_BONUS) {
+    if (modelId == MI_PICKUP_BONUS) {
         AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_INFO);
         return true;
     }
 
-    if (modelId == ModelIndices::MI_PICKUP_BRIBE) {
+    if (modelId == MI_PICKUP_BRIBE) {
         auto wantedLevel = std::max(0u, FindPlayerPed()->GetWantedLevel() - 1);
         FindPlayerPed(0)->SetWantedLevel(wantedLevel);
         CStats::IncrementStat(STAT_NUMBER_OF_POLICE_BRIBES, 1.0f);
@@ -311,7 +354,7 @@ bool CPickups::GivePlayerGoodiesWithPickUpMI(uint16 modelId, int32 playerId) {
         return true;
     }
 
-    if (modelId == ModelIndices::MI_PICKUP_KILLFRENZY) {
+    if (modelId == MI_PICKUP_KILLFRENZY) {
         AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_INFO);
         return true;
     }
@@ -324,12 +367,12 @@ bool CPickups::GivePlayerGoodiesWithPickUpMI(uint16 modelId, int32 playerId) {
         return true;
     }
 
-    if (modelId == ModelIndices::MI_OYSTER) {
+    if (modelId == MI_OYSTER) {
         PickedUpOyster();
         return true;
     }
 
-    if (modelId == ModelIndices::MI_HORSESHOE) {
+    if (modelId == MI_HORSESHOE) {
         PickedUpHorseShoe();
         return true;
     }
@@ -490,12 +533,8 @@ void CPickups::RemovePickUp(int32 pickupHandle) {
 // 0x456D30
 void CPickups::RemovePickUpsInArea(float minX, float maxX, float minY, float maxY, float minZ, float maxZ) {
     CBoundingBox bb{ { minX, minY, minZ }, { maxX, maxY, maxZ } }; // They didn't use a bounding box, but it's nicer to do so.
-    for (auto& pickup : aPickUps) {
-        switch (pickup.m_nPickupType) {
-        case PICKUP_NONE:
-            continue;
-        }
 
+    for (auto& pickup : GetAllActivePickups()) {
         if (bb.IsPointWithin(pickup.GetPosn())) {
             pickup.Remove();
         }
@@ -571,11 +610,11 @@ bool CPickups::TestForPickupsInBubble(const CVector posn, float radius) {
 // search for pickup in area (radius = 5.5 units) with this weapon model and pickup type and add ammo to this pickup; returns TRUE if merged
 // 0x4555A0
 bool CPickups::TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, ePickupType pickupType, uint32 ammo, bool arg4) {
-    const auto mi = CWeaponInfo::GetWeaponInfo(weaponType)->GetModels()[0];
     const CSphere sp{posn, 5.5f};
+    const auto mi = CWeaponInfo::GetWeaponInfo(weaponType)->m_nModelId1;
 
     for (auto& pickup : aPickUps) {
-        if (mi == pickup.m_nModelIndex && sp.IsPointWithin(pickup.GetPosn())) {
+        if (mi == pickup.m_nModelIndex && pickup.m_nPickupType == pickupType && sp.IsPointWithin(pickup.GetPosn())) {
             pickup.m_nAmmo += ammo;
 
             return true;
@@ -591,7 +630,6 @@ void CPickups::Update() {
 
 // 0x455680
 void CPickups::UpdateMoneyPerDay(int32 pickupHandle, uint16 money) {
-    //plugin::Call<0x455680, int32, uint16>(pickupHandle, money);
     if (auto idx = GetActualPickupIndex(pickupHandle); idx != -1) {
         aPickUps[idx].m_nMoneyPerDay = money;
     }
@@ -599,12 +637,13 @@ void CPickups::UpdateMoneyPerDay(int32 pickupHandle, uint16 money) {
 
 // 0x454AE0
 eWeaponType CPickups::WeaponForModel(int32 modelId) {
-    //return plugin::CallAndReturn<eWeaponType, 0x454AE0, int32>(modelId);
-    if (modelId == ModelIndices::MI_PICKUP_BODYARMOUR) {
+    if (modelId == MI_PICKUP_BODYARMOUR) {
         return WEAPON_ARMOUR;
-    } else if (modelId == ModelIndices::MI_PICKUP_HEALTH) {
+    }
+    if (modelId == MI_PICKUP_HEALTH) {
         return WEAPON_LAST_WEAPON;
-    } else if (modelId == ModelIndices::MI_PICKUP_ADRENALINE) {
+    }
+    if (modelId == MI_PICKUP_ADRENALINE) {
         return WEAPON_ARMOUR;
     }
 
@@ -675,7 +714,6 @@ void CPickups::CreatePickupCoorsCloseToCoors(const CVector& pos, float& outX, fl
 
 // 0x454B70
 void ModifyStringLabelForControlSetting(char* stringLabel) {
-//    return plugin::Call<0x454B70, char*>(stringLabel);
     const auto len = strlen(stringLabel);
 
     if (len < 2 || stringLabel[len - 2] != '_')

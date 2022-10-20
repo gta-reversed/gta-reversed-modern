@@ -85,6 +85,6 @@ public:
     static auto GetAllActivePickups() { return aPickUps | std::views::filter([](auto&& p) { return p.m_nPickupType != PICKUP_NONE; }); }
 };
 
-extern int32 &CollectPickupBuffer;
+inline static int32& CollectPickupBuffer = *(int32*)0x97D644;
 
 void ModifyStringLabelForControlSetting(char* stringLabel);
