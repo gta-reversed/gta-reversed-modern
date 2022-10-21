@@ -177,8 +177,8 @@ bool CPickup::PickUpShouldBeInvisible() {
     if (CCutsceneMgr::IsRunning() && !IsKillFrenzy())
         return true;
 
-    CVector2D somewhere{+1479.0f, -1658.0f};
-    if (m_nModelIndex == MI_PICKUP_2P_KILLFRENZY && CLocalisation::GermanGame() && DistanceBetweenPoints2D(GetPosn2D(), somewhere) < 10.0f)
+    CVector2D lspdPark{+1479.0f, -1658.0f}; // Pershing Square Park
+    if (m_nModelIndex == MI_PICKUP_2P_KILLFRENZY && CLocalisation::GermanGame() && DistanceBetweenPoints2D(GetPosn2D(), lspdPark) < 10.0f)
         return true;
 
     if (TheCamera.m_bWideScreenOn && m_nPickupType != PICKUP_ASSET_REVENUE && m_nModelIndex != MODEL_FIRE_EX)
@@ -346,7 +346,7 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
             }
             break;
         default: {
-            bool isPicked = false; // v187
+            bool isPicked = false;
             const auto CheckObjectAndProcess = [&] {
                 if (m_pObject->objectFlags.bDoNotRender) {
                     isPicked = false;
@@ -626,27 +626,25 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
                 }
             };
 
-            const auto distXY = DistanceBetweenPoints2D(player->GetPosition2D(), m_pObject->GetPosition2D()),
-                       diffZ = std::abs(player->GetPosition().z - m_pObject->GetPosition().z);
-
-            if (mi == MI_PICKUP_BRIBE) {
-                // bribes can be picked in vehicle.
-                if (vehicle && vehicle->IsSphereTouchingVehicle(m_pObject->GetPosition(), 2.0f)) {
-                    isPicked = true;
-                } else if (diffZ < 2.0f && distXY < sqrt(1.8f)) {
-                    // close enough to pick it.
-                    isPicked = true;
-                }
-            } else if (mi == MI_PICKUP_CAMERA) {
+            if (mi == MI_PICKUP_CAMERA) {
                 isPicked = false;
             } else {
-                // these can not be picked on missions
-                bool nonMissionPickup = mi == MI_PICKUP_SAVEGAME || mi == MI_PICKUP_2P_KILLFRENZY || mi == MI_PICKUP_2P_COOP;
+                const auto distXY = DistanceBetweenPoints2D(player->GetPosition2D(), m_pObject->GetPosition2D());
+                const auto diffZ = std::abs(player->GetPosition().z - m_pObject->GetPosition().z);
 
-                if ((!nonMissionPickup || player->CanPlayerStartMission()) && (!vehicle && player->IsAlive())) {
-                    if (diffZ < 2.0f && distXY < sqrt(1.8f)) {
-                        // close enough to pick it.
+                if (mi == MI_PICKUP_BRIBE) {
+                    // bribes can be picked in vehicle.
+                    if ((vehicle && vehicle->IsSphereTouchingVehicle(m_pObject->GetPosition(), 2.0f)) || (diffZ < 2.0f && distXY < sqrt(1.8f))) {
                         isPicked = true;
+                    }
+                } else {
+                    // these can not be picked on missions
+                    bool nonMissionPickup = mi == MI_PICKUP_SAVEGAME || mi == MI_PICKUP_2P_KILLFRENZY || mi == MI_PICKUP_2P_COOP;
+
+                    if ((!nonMissionPickup || player->CanPlayerStartMission()) && (!vehicle && player->IsAlive())) {
+                        if (diffZ < 2.0f && distXY < sqrt(1.8f)) {
+                            isPicked = true;
+                        }
                     }
                 }
             }

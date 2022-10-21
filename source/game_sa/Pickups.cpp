@@ -626,7 +626,6 @@ void CPickups::Update() {
 
     auto start = 620 * (CTimer::GetFrameCounter() % 32) / 32;
     auto end   = 620 * (CTimer::GetFrameCounter() % 32 + 1) / 32;
-
     for (auto i = start; i < end; i++) {
         auto& pickup = aPickUps[i];
         if (pickup.m_nPickupType == PICKUP_NONE)
