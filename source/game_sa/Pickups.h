@@ -55,7 +55,7 @@ public:
     static void ReInit();
 
     static void AddToCollectedPickupsArray(int32 pickupIndex);
-    static void CreatePickupCoorsCloseToCoors(float inX, float inY, float inZ, float* outX, float* outY, float* outZ);
+    static void CreatePickupCoorsCloseToCoors(float inX, float inY, float inZ, float& outX, float& outY, float& outZ);
     static void CreateSomeMoney(CVector coors, int32 amount);
     static void DetonateMinesHitByGunShot(CVector* shotOrigin, CVector* shotTarget);
 
@@ -93,8 +93,22 @@ public:
     static void Save();
 
     // Helpers NOTSA
-    static void CreatePickupCoorsCloseToCoors(const CVector& pos, CVector& createdAtPos);
-    static void CreatePickupCoorsCloseToCoors(const CVector& pos, float& outX, float& outY, float& outZ);
+
+    /*!
+     * @brief Our custom Vector based overload
+     * @copydocs CPickups::CreatePickupCoorsCloseToCoors
+     */
+    static void CreatePickupCoorsCloseToCoors(const CVector& pos, CVector& createdAtPos) {
+        return CreatePickupCoorsCloseToCoors(pos.x, pos.y, pos.z, createdAtPos.x, createdAtPos.y, createdAtPos.z);
+    }
+    /*!
+     * @brief Our custom Vector based overload
+     * @copydocs CPickups::CreatePickupCoorsCloseToCoors
+     */
+    static void CreatePickupCoorsCloseToCoors(const CVector& pos, float& x, float& y, float& z) {
+        return CreatePickupCoorsCloseToCoors(pos.x, pos.y, pos.z, x, y, z);
+    }
+
     static auto GetAllActivePickups() { return aPickUps | std::views::filter([](auto&& p) { return p.m_nPickupType != PICKUP_NONE; }); }
 };
 

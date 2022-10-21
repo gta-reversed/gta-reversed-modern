@@ -67,8 +67,8 @@ public:
 public:
     static void InjectHooks();
 
-    void SetPosn(CVector posn);
-    [[nodiscard]] CVector GetPosn() const;
+    void SetPosn(CVector posn) { m_vecPos = CompressLargeVector(posn); } // 0x454960
+    [[nodiscard]] CVector GetPosn() const { return UncompressLargeVector(m_vecPos); } // 0x4549A0
     [[nodiscard]] CVector2D GetPosn2D() const { return GetPosn(); };    // NOTSA
     [[nodiscard]] float GetXCoord() const { return m_vecPos.x / 8.0f; } // 0x4549F0
     [[nodiscard]] float GetYCoord() const { return m_vecPos.y / 8.0f; } // 0x454A10
@@ -78,7 +78,7 @@ public:
     void SetZCoord(float coord) { m_vecPos.z = static_cast<int16>(coord * 8.0f); }
 
     void ExtractAmmoFromPickup(CPlayerPed* player);
-    bool IsVisible();
+    [[nodiscard]] bool IsVisible();
     void GetRidOfObjects();
     bool PickUpShouldBeInvisible();
     void Remove();

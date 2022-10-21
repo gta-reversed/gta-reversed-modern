@@ -15,7 +15,7 @@ void CPickup::InjectHooks() {
     RH_ScopedInstall(GetPosn, 0x4549A0);
     RH_ScopedInstall(GetRidOfObjects, 0x454CF0);
     RH_ScopedInstall(GiveUsAPickUpObject, 0x4567E0, {.reversed = false}); // <-- broken for now
-    //RH_ScopedInstall(IsVisible, 0x454C70); // <-- something broken about this one
+    RH_ScopedInstall(IsVisible, 0x454C70); // <-- something broken about this one
     RH_ScopedInstall(PickUpShouldBeInvisible, 0x454D20);
     RH_ScopedInstall(ProcessGunShot, 0x4588B0);
     RH_ScopedInstall(Remove, 0x4556C0);
@@ -34,7 +34,6 @@ void CPickup::ExtractAmmoFromPickup(CPlayerPed* player) {
         case PICKUP_ONCE_TIMEOUT:
         case PICKUP_ONCE_TIMEOUT_SLOW:
             break;
-
         default:
             return;
         }
@@ -163,16 +162,6 @@ void CPickup::GiveUsAPickUpObject(CObject** obj, int32 slotIndex) {
     }
 }
 
-// 0x4549A0
-CVector CPickup::GetPosn() const {
-    return UncompressLargeVector(m_vecPos);
-}
-
-// 0x454960
-void CPickup::SetPosn(CVector posn) {
-    m_vecPos = CompressLargeVector(posn);
-}
-
 // Is pickup visible (checks if distance between pickup and camera is shorter than 100 units)
 // 0x454C70
 bool CPickup::IsVisible() {
@@ -212,7 +201,7 @@ void CPickup::ProcessGunShot(CVector* start, CVector* end) {
 
 // 0x4556C0
 void CPickup::Remove() {
-    CRadar::ClearBlipForEntity(BLIP_PICKUP, m_nReferenceIndex);
+    CRadar::ClearBlipForEntity(BLIP_PICKUP, CPickups::GetUniquePickupIndex(this - CPickups::aPickUps.data()).num);
     GetRidOfObjects();
     m_nPickupType = PICKUP_NONE;
     m_nFlags.bDisabled = true;

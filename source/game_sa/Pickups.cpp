@@ -22,9 +22,9 @@ void CPickups::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x454A70);
-    RH_ScopedInstall(ReInit, 0x456E60, {.reversed = false});
+    RH_ScopedInstall(ReInit, 0x456E60);
     RH_ScopedInstall(AddToCollectedPickupsArray, 0x455240);
-    //RH_ScopedInstall(CreatePickupCoorsCloseToCoors, 0x458A80, { .reversed = false });
+    RH_ScopedOverloadedInstall(CreatePickupCoorsCloseToCoors, "", 0x458A80, void(*)(float, float, float, float&, float&, float&), {.reversed = false});
     RH_ScopedInstall(CreateSomeMoney, 0x458970);
     RH_ScopedInstall(DetonateMinesHitByGunShot, 0x4590C0);
     RH_ScopedInstall(DoCollectableEffects, 0x455E20);
@@ -47,7 +47,7 @@ void CPickups::InjectHooks() {
     RH_ScopedInstall(PlayerCanPickUpThisWeaponTypeAtThisMoment, 0x4554C0);
     RH_ScopedInstall(RemoveMissionPickUps, 0x456DE0);
     RH_ScopedInstall(RemovePickUp, 0x4573D0);
-    RH_ScopedInstall(RemovePickUpsInArea, 0x456D30, { .reversed = true });
+    RH_ScopedInstall(RemovePickUpsInArea, 0x456D30);
     RH_ScopedInstall(RemovePickupObjects, 0x455470);
     RH_ScopedInstall(RemoveUnnecessaryPickups, 0x4563A0);
     RH_ScopedInstall(RenderPickUpText, 0x455000);
@@ -56,8 +56,8 @@ void CPickups::InjectHooks() {
     RH_ScopedInstall(Update, 0x458DE0);
     RH_ScopedInstall(UpdateMoneyPerDay, 0x455680);
     RH_ScopedInstall(WeaponForModel, 0x454AE0);
-    RH_ScopedInstall(Load, 0x5D35A0, { .reversed = false });
-    RH_ScopedInstall(Save, 0x5D3540, { .reversed = false });
+    RH_ScopedInstall(Load, 0x5D35A0);
+    RH_ScopedInstall(Save, 0x5D3540);
 
     RH_ScopedGlobalInstall(ModifyStringLabelForControlSetting, 0x454B70);
 }
@@ -93,8 +93,8 @@ void CPickups::AddToCollectedPickupsArray(int32 pickupIndex) {
  *
  * @param [out] outX, outY, outZ Created pickup's position
  */
-void CPickups::CreatePickupCoorsCloseToCoors(float inX, float inY, float inZ, float* outX, float* outY, float* outZ) {
-    plugin::Call<0x458A80, float, float, float, float*, float*, float*>(inX, inY, inZ, outX, outY, outZ);
+void CPickups::CreatePickupCoorsCloseToCoors(float inX, float inY, float inZ, float& outX, float& outY, float& outZ) {
+    plugin::Call<0x458A80, float, float, float, float&, float&, float&>(inX, inY, inZ, outX, outY, outZ);
 }
 
 /*!
@@ -607,11 +607,10 @@ bool CPickups::TestForPickupsInBubble(const CVector posn, float radius) {
 // search for pickup in area (radius = 5.5 units) with this weapon model and pickup type and add ammo to this pickup; returns TRUE if merged
 // 0x4555A0
 bool CPickups::TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, ePickupType pickupType, uint32 ammo, bool arg4) {
-    const CSphere sp{posn, 5.5f};
     const auto mi = CWeaponInfo::GetWeaponInfo(weaponType)->m_nModelId1;
 
     for (auto& pickup : aPickUps) {
-        if (mi == pickup.m_nModelIndex && pickup.m_nPickupType == pickupType && sp.IsPointWithin(pickup.GetPosn())) {
+        if (mi == pickup.m_nModelIndex && pickup.m_nPickupType == pickupType && IsPointInSphere(pickup.GetPosn(), posn, 5.0f)) {
             pickup.m_nAmmo += ammo;
 
             return true;
@@ -720,8 +719,6 @@ eWeaponType CPickups::WeaponForModel(int32 modelId) {
 
 // 0x5D35A0
 void CPickups::Load() {
-    return plugin::Call<0x5D35A0>();
-
     for (auto& pickup : aPickUps) {
         CGenericGameStorage::LoadDataFromWorkBuffer(&pickup, sizeof(CPickup));
         if (pickup.m_nPickupType && pickup.m_pObject) {
@@ -739,8 +736,6 @@ void CPickups::Load() {
 }
 // 0x5D3540
 void CPickups::Save() {
-    return plugin::Call<0x5D3540>();
-
     for (auto& pickup : aPickUps) {
         CGenericGameStorage::SaveDataToWorkBuffer(&pickup, sizeof(CPickup));
     }
@@ -750,22 +745,6 @@ void CPickups::Save() {
     for (auto& collected : aPickUpsCollected) {
         CGenericGameStorage::SaveDataToWorkBuffer(&collected, sizeof(int32));
     }
-}
-
-/*!
- * @brief Our custom Vector based overload
- * @copydocs CPickups::CreatePickupCoorsCloseToCoors
- */
-void CPickups::CreatePickupCoorsCloseToCoors(const CVector& pos, CVector& createdAtPos) {
-    return CreatePickupCoorsCloseToCoors(pos.x, pos.y, pos.z, &createdAtPos.x, &createdAtPos.y, &createdAtPos.z);
-}
-
-/*!
- * @brief Our custom Vector based overload
- * @copydocs CPickups::CreatePickupCoorsCloseToCoors
- */
-void CPickups::CreatePickupCoorsCloseToCoors(const CVector& pos, float& outX, float& outY, float& outZ) {
-    return CreatePickupCoorsCloseToCoors(pos.x, pos.y, pos.z, &outX, &outY, &outZ);
 }
 
 // 0x454B70
