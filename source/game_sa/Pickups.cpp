@@ -53,7 +53,7 @@ void CPickups::InjectHooks() {
     RH_ScopedInstall(RenderPickUpText, 0x455000);
     RH_ScopedInstall(TestForPickupsInBubble, 0x456450);
     RH_ScopedInstall(TryToMerge_WeaponType, 0x4555A0);
-    RH_ScopedInstall(Update, 0x458DE0, { .reversed = false });
+    RH_ScopedInstall(Update, 0x458DE0);
     RH_ScopedInstall(UpdateMoneyPerDay, 0x455680);
     RH_ScopedInstall(WeaponForModel, 0x454AE0);
     RH_ScopedInstall(Load, 0x5D35A0, { .reversed = false });
@@ -82,9 +82,8 @@ void CPickups::ReInit() {
 }
 
 // 0x455240
-void CPickups::AddToCollectedPickupsArray(tPickupReference pickupRef) {
-    aPickUpsCollected[CollectedPickUpIndex++] = GetActualPickupIndex(pickupRef);
-
+void CPickups::AddToCollectedPickupsArray(int32 pickupIndex) {
+    aPickUpsCollected[CollectedPickUpIndex++] = GetUniquePickupIndex(pickupIndex).num;
     CollectedPickUpIndex %= std::size(aPickUpsCollected);
 }
 
@@ -284,8 +283,6 @@ int32 CPickups::GenerateNewOne_WeaponType(CVector coors, eWeaponType weaponType,
  * @addr 0x4552A0
  */
 int32 CPickups::GetActualPickupIndex(tPickupReference pickupRef) {
-    //return plugin::CallAndReturn<int32, 0x4552A0, int32>(pickupRef);
-
     if (pickupRef.num == -1)
         return -1;
 
@@ -306,7 +303,7 @@ tPickupReference CPickups::GetNewUniquePickupIndex(int32 pickupIndex) {
 // returns pickup handle
 // 0x455280
 tPickupReference CPickups::GetUniquePickupIndex(int32 pickupIndex) {
-    return tPickupReference{{.index = (int16)pickupIndex, .refIndex = aPickUps.at(pickupIndex).m_nReferenceIndex}};
+    return tPickupReference(pickupIndex, aPickUps.at(pickupIndex).m_nReferenceIndex);
 }
 
 // returns TRUE if player got goodies
@@ -384,8 +381,8 @@ bool CPickups::GivePlayerGoodiesWithPickUpMI(uint16 modelId, int32 playerId) {
  * @brief Check if pickup was picked up, and then mark it as not picked up.
  * @addr 0x454B40
  */
-bool CPickups::IsPickUpPickedUp(int32 pickupHandle) {
-    if (const auto it = rng::find(aPickUpsCollected, pickupHandle); it != aPickUpsCollected.end()) {
+bool CPickups::IsPickUpPickedUp(tPickupReference pickupRef) {
+    if (const auto it = rng::find(aPickUpsCollected, pickupRef.num); it != aPickUpsCollected.end()) {
         *it = 0; // Reset
         return true;
     }
@@ -625,7 +622,66 @@ bool CPickups::TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, ePick
 
 // 0x458DE0
 void CPickups::Update() {
-    plugin::Call<0x458DE0>();
+    if (CReplay::Mode == MODE_PLAYBACK)
+        return;
+
+    auto start = 620 * (CTimer::GetFrameCounter() % 32) / 32;
+    auto end   = 620 * (CTimer::GetFrameCounter() % 32 + 1) / 32;
+
+    for (auto i = start; i < end; i++) {
+        auto& pickup = aPickUps[i];
+        if (pickup.m_nPickupType == PICKUP_NONE)
+            continue;
+
+        if (pickup.m_nFlags.bVisible = pickup.IsVisible()) {
+            if (!pickup.m_nFlags.bDisabled && !pickup.m_pObject) {
+                pickup.GiveUsAPickUpObject(&pickup.m_pObject, -1);
+
+                if (auto& obj = pickup.m_pObject; obj) {
+                    CWorld::Add(obj);
+                }
+            }
+        } else {
+            pickup.GetRidOfObjects();
+        }
+    }
+
+    const auto pad = CPad::GetPad();
+    if (pad->CollectPickupJustDown()) {
+        CollectPickupBuffer = 6;
+    } else if (CollectPickupBuffer) {
+        CollectPickupBuffer--;
+    }
+
+    if (PlayerOnWeaponPickup) {
+        PlayerOnWeaponPickup--;
+    }
+
+    if (pad->GetTarget()) {
+        CollectPickupBuffer = 0;
+    }
+
+    const auto player1 = FindPlayerPed(PED_TYPE_PLAYER1);
+    const auto p1Busy = player1->GetIntelligence()->FindTaskByType(TASK_COMPLEX_ENTER_CAR_AS_DRIVER) || player1->GetIntelligence()->FindTaskByType(TASK_COMPLEX_USE_MOBILE_PHONE);
+
+    start = 620 * (CTimer::GetFrameCounter() % 6) / 6;
+    end   = 620 * (CTimer::GetFrameCounter() % 6 + 1) / 6;
+    for (auto i = start; i < end; i++) {
+        auto& pickup = aPickUps[i];
+
+        if (pickup.m_nPickupType == PICKUP_NONE || !pickup.m_nFlags.bVisible)
+            continue;
+
+        if (!p1Busy) {
+            if (pickup.Update(FindPlayerPed(), FindPlayerVehicle(), CWorld::PlayerInFocus)) {
+                AddToCollectedPickupsArray(i);
+            }
+        } else if (FindPlayerPed(PED_TYPE_PLAYER2)) {
+            if (pickup.Update(FindPlayerPed(1), FindPlayerVehicle(1), PED_TYPE_PLAYER2)) {
+                AddToCollectedPickupsArray(i);
+            }
+        }
+    }
 }
 
 // 0x455680

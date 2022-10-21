@@ -28,6 +28,10 @@ union tPickupReference {
         int16 refIndex;
     };
     int32 num;
+
+    tPickupReference() : num(-1){}
+    tPickupReference(int32 value) : num(value){}
+    tPickupReference(int16 idx, int16 refIdx) : index(idx), refIndex(refIdx){}
 };
 
 class CPickups {
@@ -50,7 +54,7 @@ public:
     static void Init();
     static void ReInit();
 
-    static void AddToCollectedPickupsArray(tPickupReference pickupRef);
+    static void AddToCollectedPickupsArray(int32 pickupIndex);
     static void CreatePickupCoorsCloseToCoors(float inX, float inY, float inZ, float* outX, float* outY, float* outZ);
     static void CreateSomeMoney(CVector coors, int32 amount);
     static void DetonateMinesHitByGunShot(CVector* shotOrigin, CVector* shotTarget);
@@ -67,7 +71,7 @@ public:
     static tPickupReference GetNewUniquePickupIndex(int32 pickupIndex);
     static tPickupReference GetUniquePickupIndex(int32 pickupIndex);
     static bool GivePlayerGoodiesWithPickUpMI(uint16 modelId, int32 playerId);
-    static bool IsPickUpPickedUp(int32 pickupHandle);
+    static bool IsPickUpPickedUp(tPickupReference pickupRef);
     static int32 ModelForWeapon(eWeaponType weaponType);
     static void PassTime(uint32 time);
     static void PickedUpHorseShoe();
