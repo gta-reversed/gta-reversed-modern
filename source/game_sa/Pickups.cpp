@@ -82,8 +82,8 @@ void CPickups::ReInit() {
 }
 
 // 0x455240
-void CPickups::AddToCollectedPickupsArray(int32 handle) {
-    aPickUpsCollected[CollectedPickUpIndex++] = GetActualPickupIndex(handle);
+void CPickups::AddToCollectedPickupsArray(tPickupReference pickupRef) {
+    aPickUpsCollected[CollectedPickUpIndex++] = GetActualPickupIndex(pickupRef);
 
     CollectedPickUpIndex %= std::size(aPickUpsCollected);
 }
@@ -283,20 +283,20 @@ int32 CPickups::GenerateNewOne_WeaponType(CVector coors, eWeaponType weaponType,
  * @return -1 if this index is not actual
  * @addr 0x4552A0
  */
-int32 CPickups::GetActualPickupIndex(int32 pickupIndex) {
-    //return plugin::CallAndReturn<int32, 0x4552A0, int32>(pickupIndex);
+int32 CPickups::GetActualPickupIndex(tPickupReference pickupRef) {
+    //return plugin::CallAndReturn<int32, 0x4552A0, int32>(pickupRef);
 
-    if (pickupIndex == -1)
+    if (pickupRef.num == -1)
         return -1;
 
-    if (HIWORD(pickupIndex) != aPickUps[(uint16)pickupIndex].m_nReferenceIndex)
+    if (pickupRef.refIndex != aPickUps.at(pickupRef.index).m_nReferenceIndex)
         return -1;
 
-    return (uint16)pickupIndex;
+    return pickupRef.index;
 }
 
 // 0x456A30
-int32 CPickups::GetNewUniquePickupIndex(int32 pickupIndex) {
+tPickupReference CPickups::GetNewUniquePickupIndex(int32 pickupIndex) {
     auto& refIdx = aPickUps[pickupIndex].m_nReferenceIndex;
     refIdx = (refIdx == -1) ? 1 : refIdx + 1;
 
@@ -305,8 +305,8 @@ int32 CPickups::GetNewUniquePickupIndex(int32 pickupIndex) {
 
 // returns pickup handle
 // 0x455280
-int32 CPickups::GetUniquePickupIndex(int32 pickupIndex) {
-    return pickupIndex | ((uint16)aPickUps[pickupIndex].m_nReferenceIndex << 16);
+tPickupReference CPickups::GetUniquePickupIndex(int32 pickupIndex) {
+    return tPickupReference{{.index = (int16)pickupIndex, .refIndex = aPickUps.at(pickupIndex).m_nReferenceIndex}};
 }
 
 // returns TRUE if player got goodies
@@ -512,7 +512,7 @@ void CPickups::RemoveMissionPickUps() {
     for (auto&& [i, pickup] : notsa::enumerate(aPickUps)) {
         switch (pickup.m_nPickupType) {
         case PICKUP_ONCE_FOR_MISSION: {
-            CRadar::ClearBlipForEntity(BLIP_PICKUP, GetUniquePickupIndex(i));
+            CRadar::ClearBlipForEntity(BLIP_PICKUP, GetUniquePickupIndex(i).num);
             pickup.GetRidOfObjects();
 
             pickup.m_nFlags.bDisabled = true;
@@ -524,8 +524,8 @@ void CPickups::RemoveMissionPickUps() {
 }
 
 // 0x4573D0
-void CPickups::RemovePickUp(int32 pickupHandle) {
-    if (const auto i = GetActualPickupIndex(pickupHandle); i != -1) {
+void CPickups::RemovePickUp(tPickupReference pickupRef) {
+    if (const auto i = GetActualPickupIndex(pickupRef); i != -1) {
         aPickUps[i].Remove();
     }
 }
@@ -629,8 +629,8 @@ void CPickups::Update() {
 }
 
 // 0x455680
-void CPickups::UpdateMoneyPerDay(int32 pickupHandle, uint16 money) {
-    if (auto idx = GetActualPickupIndex(pickupHandle); idx != -1) {
+void CPickups::UpdateMoneyPerDay(tPickupReference pickupRef, uint16 money) {
+    if (auto idx = GetActualPickupIndex(pickupRef); idx != -1) {
         aPickUps[idx].m_nMoneyPerDay = money;
     }
 }
