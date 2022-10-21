@@ -101,11 +101,12 @@ void CPickup::GetRidOfObjects() {
 // Creates an object (CObject) for pickup. slotIndex - object to replace; use -1 (or any negative value) to create a new object
 // 0x4567E0
 void CPickup::GiveUsAPickUpObject(CObject** obj, int32 slotIndex) {
-    if (CCutsceneMgr::ms_cutsceneLoadStatus == 2)
-        return;
-
     const auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
     auto& object = *obj;
+    object = nullptr;
+
+    if (CCutsceneMgr::ms_cutsceneLoadStatus == 2)
+        return;
 
     if (mi->GetModelType() == MODEL_INFO_WEAPON) {
         CWeaponInfo::GetWeaponInfo(mi->AsWeaponModelInfoPtr()->m_weaponInfo);
@@ -254,11 +255,11 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
             }
         }
 
-		return false;
+        return false;
     }
 
-	bool isRemoved = false;
-	const auto SetRemoved = [&] {
+    bool isRemoved = false;
+    const auto SetRemoved = [&] {
         isRemoved = true;
         Remove();
     };
@@ -482,8 +483,8 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
                             if (mi == MI_PICKUP_KILLFRENZY && (CTheScripts::IsPlayerOnAMission() || CDarkel::FrenzyOnGoing() || !CLocalisation::KillFrenzy()))
                                 return false;
 
-							// todo: check again, i found || instead of && when solving de morgan but it's bullshit, that should be
-							//       the correct expression.
+                            // todo: check again, i found || instead of && when solving de morgan but it's bullshit, that should be
+                            //       the correct expression.
                             if (m_pObject->m_nModelIndex == MODEL_JETPACK && player->GetIntelligence()->GetTaskJetPack())
                                 return false;
 
@@ -518,37 +519,33 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
                                     m_nFlags.bDisabled = true;
                                 };
 
-                                if (CPickups::GivePlayerGoodiesWithPickUpMI(mi, playerId)) {
-                                    SetPickupRegenTimeAndDisable(CTimer::GetTimeInMS());
-                                    break;
-                                }
-
-                                if (!player->DoesPlayerWantNewWeapon(weapon, false)) {
-                                    break;
-                                }
-
-                                if (weapon != WEAPON_UNARMED) {
-                                    if (m_nAmmo) {
-                                        player->GiveDelayedWeapon(weapon, m_nAmmo);
-                                    } else {
-                                        player->GiveDelayedWeapon(weapon, (!m_nFlags.bEmpty) ? AmmoForWeapon_OnStreet[weapon] : 0);
+                                if (!CPickups::GivePlayerGoodiesWithPickUpMI(mi, playerId)) {
+                                    if (!player->DoesPlayerWantNewWeapon(weapon, false)) {
+                                        break;
                                     }
 
-                                    if (player->m_pPlayerData->m_nChosenWeapon == player->GetWeaponSlot(WEAPON_UNARMED)) {
-                                        player->m_pPlayerData->m_nChosenWeapon = player->GetWeaponSlot(weapon);
+                                    if (weapon != WEAPON_UNARMED) {
+                                        if (m_nAmmo) {
+                                            player->GiveDelayedWeapon(weapon, m_nAmmo);
+                                        } else {
+                                            player->GiveDelayedWeapon(weapon, (!m_nFlags.bEmpty) ? AmmoForWeapon_OnStreet[weapon] : 0);
+                                        }
+
+                                        if (auto& chosen = player->m_pPlayerData->m_nChosenWeapon; chosen == player->GetWeaponSlot(WEAPON_UNARMED)) {
+                                            chosen = player->GetWeaponSlot(weapon);
+                                        }
+                                        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_WEAPON);
+                                    } else if (mi == MI_PICKUP_CAMERA && vehicle) {
+                                        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_INFO);
+                                        CPickups::bPickUpcamActivated = true;
+                                        CPickups::pPlayerVehicle = FindPlayerVehicle();
+                                        CPickups::StaticCamCoors = &m_pObject->GetPosition();
+                                        CPickups::StaticCamStartTime = CTimer::GetTimeInMS();
+
+                                        SetPickupRegenTimeAndDisable(CPickups::StaticCamStartTime);
+                                        break;
                                     }
-                                    AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_WEAPON);
-                                } else if (mi == MI_PICKUP_CAMERA && vehicle) {
-                                    AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_INFO);
-                                    CPickups::bPickUpcamActivated = true;
-                                    CPickups::pPlayerVehicle = FindPlayerVehicle();
-                                    CPickups::StaticCamCoors = &m_pObject->GetPosition();
-                                    CPickups::StaticCamStartTime = CTimer::GetTimeInMS();
-
-                                    SetPickupRegenTimeAndDisable(CPickups::StaticCamStartTime);
-                                    break;
                                 }
-
                                 SetPickupRegenTimeAndDisable(CTimer::GetTimeInMS());
                                 break;
                             }
@@ -633,7 +630,6 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
                                     CGameLogic::vec2PlayerStartLocation = FindPlayerCoors();
                                     CGameLogic::f2PlayerStartHeading = FindPlayerPed()->GetHeading();
                                 }
-
                                 break;
                             }
                         }
@@ -641,29 +637,31 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
                 }
             };
 
+            const auto distXY = DistanceBetweenPoints2D(player->GetPosition2D(), m_pObject->GetPosition2D()),
+                       diffZ = std::abs(player->GetPosition().z - m_pObject->GetPosition().z);
+
             if (mi == MI_PICKUP_BRIBE) {
+                // bribes can be picked in vehicle.
                 if (vehicle && vehicle->IsSphereTouchingVehicle(m_pObject->GetPosition(), 2.0f)) {
                     isPicked = true;
-                }
-
-                CheckObjectAndProcess();
-            } else if (mi == MI_PICKUP_CAMERA) {
-                isPicked = false;
-                CheckObjectAndProcess();
-            } else if ((mi == MI_PICKUP_SAVEGAME || mi == MI_PICKUP_2P_KILLFRENZY || mi == MI_PICKUP_2P_COOP) && !player->CanPlayerStartMission()) {
-                CheckObjectAndProcess();
-            } else if (vehicle || !player->IsAlive()) {
-                CheckObjectAndProcess();
-            } else {
-                const auto distXY = DistanceBetweenPoints2D(player->GetPosition2D(), m_pObject->GetPosition2D()),
-                           distZ = std::abs(player->GetPosition().z - m_pObject->GetPosition().z);
-                if (distZ < 2.0f && sq(distXY) < 1.8f) {
+                } else if (diffZ < 2.0f && distXY < sqrt(1.8f)) {
                     // close enough to pick it.
                     isPicked = true;
                 }
+            } else if (mi == MI_PICKUP_CAMERA) {
+                isPicked = false;
+            } else {
+                // these can not be picked on missions
+                bool nonMissionPickup = mi == MI_PICKUP_SAVEGAME || mi == MI_PICKUP_2P_KILLFRENZY || mi == MI_PICKUP_2P_COOP;
 
-                CheckObjectAndProcess();
+                if ((!nonMissionPickup || player->CanPlayerStartMission()) && (!vehicle && player->IsAlive())) {
+                    if (diffZ < 2.0f && distXY < sqrt(1.8f)) {
+                        // close enough to pick it.
+                        isPicked = true;
+                    }
+                }
             }
+            CheckObjectAndProcess();
         }
         }
 
