@@ -15,7 +15,7 @@ void CDarkel::InjectHooks() {
     RH_ScopedInstall(ThisPedShouldBeKilledForFrenzy, 0x43D2F0);
     RH_ScopedInstall(ThisVehicleShouldBeKilledForFrenzy, 0x43D350);
     RH_ScopedInstall(StartFrenzy, 0x43D3B0, { .reversed = false });
-    RH_ScopedInstall(ResetModelsKilledByPlayer, 0x43D6A0, { .reversed = false });
+    RH_ScopedInstall(ResetModelsKilledByPlayer, 0x43D6A0);
     //RH_ScopedInstall(QueryModelsKilledByPlayer, 0x0, { .reversed = false });
     //RH_ScopedInstall(FindTotalPedsKilledByPlayer, 0x0, { .reversed = false });
     RH_ScopedInstall(DealWithWeaponChangeAtEndOfFrenzy, 0x43D7A0);
@@ -150,7 +150,9 @@ void CDarkel::StartFrenzy(eWeaponType weaponType, int32 timeLimit, uint16 killsN
 
 // 0x43D6A0
 void CDarkel::ResetModelsKilledByPlayer(int32 playerId) {
-    plugin::Call<0x43D6A0, int32>(playerId);
+    for (auto i = playerId; i < 800; i++) {
+        destroyedModelCounters[i++] = 0;
+    }
 }
 
 // 0x
