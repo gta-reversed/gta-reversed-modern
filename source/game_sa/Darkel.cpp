@@ -23,7 +23,7 @@ void CDarkel::InjectHooks() {
     RH_ScopedInstall(Update, 0x43DAC0);
     RH_ScopedInstall(ResetOnPlayerDeath, 0x43DC10);
     RH_ScopedInstall(FailKillFrenzy, 0x43DC60);
-    RH_ScopedInstall(RegisterKillByPlayer, 0x43DCD0, { .reversed = false });
+    RH_ScopedInstall(RegisterKillByPlayer, 0x43DCD0);
     RH_ScopedInstall(RegisterCarBlownUpByPlayer, 0x43DF20);
 }
 
@@ -115,8 +115,8 @@ void CDarkel::RegisterKillNotByPlayer(const CPed* killedPed) {
     }
     CStats::IncrementStat(STAT_PEOPLE_WASTED_BY_OTHERS);
 
-    if (auto type = killedPed->m_nPedType == PED_TYPE_GANG2; killedPed->IsGangster()) {
-        CStats::IncrementStat(type == PED_TYPE_GANG2 ? STAT_FRIENDLY_GANG_MEMBERS_KILLED : STAT_ENEMY_GANG_MEMBERS_KILLED);
+    if (const auto friendly = killedPed->m_nPedType == PED_TYPE_GANG2; killedPed->IsGangster()) {
+        CStats::IncrementStat(friendly ? STAT_FRIENDLY_GANG_MEMBERS_KILLED : STAT_ENEMY_GANG_MEMBERS_KILLED);
     }
 }
 
@@ -325,8 +325,100 @@ void CDarkel::FailKillFrenzy() {
 }
 
 // 0x43DCD0
-void CDarkel::RegisterKillByPlayer(const CPed* killedPed, eWeaponType damageWeaponID, bool bHeadShotted, int32 arg4) {
-    plugin::Call<0x43DCD0, const CPed*, eWeaponType, bool, int32>(killedPed, damageWeaponID, bHeadShotted, arg4);
+void CDarkel::RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeaponId, bool bHeadShotted, int32 arg4) {
+    switch (killedPed.m_nPedType) {
+    case PED_TYPE_COP:
+    case PED_TYPE_DEALER:
+        CStats::IncrementStat(STAT_RESPECT, 1.5f);
+        break;
+    default:
+        break;
+    }
+
+    if (const auto friendly = killedPed.m_nPedType == PED_TYPE_GANG2; killedPed.IsGangster()) {
+        if (friendly) {
+            CStats::IncrementStat(STAT_FRIENDLY_GANG_MEMBERS_KILLED);
+            CStats::DecrementStat(STAT_RESPECT, 5.0f);
+
+            if (auto player = FindPlayerPed(); &killedPed != player->AsPed()) {
+                if (player->GetPlayerGroup().m_groupMembership.IsMember(&killedPed)) {
+                    CStats::IncrementStat(STAT_RECRUITED_GANG_MEMBERS_KILLED);
+                    CStats::DisplayScriptStatUpdateMessage(STAT_UPDATE_DECREASE, STAT_GANG_STRENGTH, 1.0f);
+                }
+            }
+        } else {
+            CStats::IncrementStat(STAT_ENEMY_GANG_MEMBERS_KILLED);
+            CStats::IncrementStat(STAT_RESPECT, 0.75);
+        }
+    }
+
+    if (FrenzyOnGoing()) {
+        const auto CountFrenzyKill = [&] {
+            if (ThisPedShouldBeKilledForFrenzy(killedPed) && (!bHeadShotRequired || bHeadShotted)) {
+                KillsNeeded--;
+                AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE);
+            }
+
+            if (killedPed.IsCop()) {
+                CStats::IncrementStat(STAT_HIGHEST_POLICE_PEDS_KILLED_ON_RAMPAGE);
+            } else {
+                CStats::IncrementStat(STAT_HIGHEST_CIVILIAN_PEDS_KILLED_ON_RAMPAGE);
+            }
+        };
+
+        if (damageWeaponId == WeaponType || (WeaponType == WEAPON_ANYMELEE || WeaponType == WEAPON_ANYWEAPON) && CheckDamagedWeaponType(damageWeaponId, WeaponType)) {
+            CountFrenzyKill();
+        }
+
+        switch (damageWeaponId) {
+        case WEAPON_EXPLOSION:
+            CountFrenzyKill();
+            break;
+        case WEAPON_UZI_DRIVEBY:
+            if (WeaponType == WEAPON_MICRO_UZI) {
+                CountFrenzyKill();
+            }
+            break;
+        case WEAPON_RAMMEDBYCAR:
+            if (WeaponType == WEAPON_RUNOVERBYCAR) { // wrong?
+                CountFrenzyKill();
+            }
+            break;
+        case WEAPON_RUNOVERBYCAR:
+            if (WeaponType == WEAPON_RAMMEDBYCAR) { // wrong?
+                CountFrenzyKill();
+            }
+            break;
+        case WEAPON_FLAMETHROWER:
+            if (WeaponType == WEAPON_MOLOTOV) {
+                CountFrenzyKill();
+            }
+            break;
+        default:
+            break;
+        }
+
+        destroyedModelCounters[arg4 + 2 * killedPed.m_nModelIndex]++;
+        CStats::IncrementStat(STAT_PEOPLE_YOUVE_WASTED);
+        if (killedPed.bChrisCriminal) {
+            CStats::PedsKilledOfThisType[PED_TYPE_CRIMINAL]++;
+        } else {
+            CStats::PedsKilledOfThisType[killedPed.m_nPedType]++;
+        }
+
+        if (bHeadShotted) {
+            CStats::IncrementStat(STAT_NUMBER_OF_HEADSHOTS);
+        }
+        CStats::IncrementStat(STAT_KILLS_SINCE_LAST_CHECKPOINT);
+
+        if (!arg4 && !FindPlayerPed(PED_TYPE_PLAYER1)->bInVehicle) {
+            CGangWars::AddKillToProvocation(killedPed.m_nPedType);
+        }
+
+        if (killedPed.m_nPedType >= PED_TYPE_DEALER) { // BUG?
+            CPopCycle::PlayerKilledADealer();
+        }
+    }
 }
 
 // 0x43DF20

@@ -33,6 +33,7 @@ public:
     inline static eWeaponType& WeaponType = *reinterpret_cast<eWeaponType*>(0x96A700);
     inline static eDarkelStatus& Status = *reinterpret_cast<eDarkelStatus*>(0x96A704);
 
+    inline static bool& bHeadShotRequired = *(bool*)0x969A49;
     inline static bool& byte_969A4A = *(bool*)0x969A4A;
     inline static bool& bProperKillFrenzy = *(bool*)0x969A48;
 
@@ -55,7 +56,7 @@ public:
     static void Update();
     static void ResetOnPlayerDeath();
     static void FailKillFrenzy();
-    static void RegisterKillByPlayer(const CPed* killedPed, eWeaponType damageWeaponID, bool bHeadShotted, int32 arg4);
+    static void RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeaponId, bool bHeadShotted, int32 arg4);
     static void RegisterCarBlownUpByPlayer(CVehicle& vehicle, int32 arg2);
 };
 

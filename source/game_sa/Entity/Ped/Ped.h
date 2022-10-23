@@ -564,7 +564,7 @@ public:
     bool IsStateDying() const noexcept { return m_nPedState == PEDSTATE_DEAD || m_nPedState == PEDSTATE_DIE; }
     bool IsInVehicleAsPassenger() const noexcept;
 
-    bool IsCop()      const noexcept { return m_nPedType ==  PED_TYPE_COP; }
+    bool IsCop()      const noexcept { return m_nPedType == PED_TYPE_COP; }
     bool IsGangster() const noexcept { return IsPedTypeGang(m_nPedType); }
     bool IsCivilian() const noexcept { return m_nPedType == PED_TYPE_CIVMALE || m_nPedType == PED_TYPE_CIVFEMALE; }
 
