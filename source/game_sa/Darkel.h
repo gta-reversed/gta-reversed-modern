@@ -21,17 +21,16 @@ enum eDarkelStatus {
 class CDarkel {
 public:
     static int16** RegisteredKills; // int16 RegisteredKills[800][2];
-    static char*& pStartMessage;
-    static uint32& AmmoInterruptedWeapon;
-    static eWeaponType& InterruptedWeaponType;
-    static eWeaponType& InterruptedWeaponTypeSelected;
-    static uint32& TimeOfFrenzyStart;
-    static int32& TimeLimit;
-    static int32& KillsNeeded;
-    static int32* ModelToKill; // int32 CDarkel::ModelToKill[4];
+    inline static char*& pStartMessage = *reinterpret_cast<char**>(0x96A6D0);
+    inline static uint32& AmmoInterruptedWeapon = *reinterpret_cast<uint32*>(0x96A6D4);
+    inline static eWeaponType& InterruptedWeaponType = *reinterpret_cast<eWeaponType*>(0x96A6D8);
+    inline static eWeaponType& InterruptedWeaponTypeSelected = *reinterpret_cast<eWeaponType*>(0x96A6DC);
+    inline static uint32& TimeOfFrenzyStart = *reinterpret_cast<uint32*>(0x96A6E0);
+    inline static int32& TimeLimit = *reinterpret_cast<int32*>(0x96A6E8);
+    inline static int32& KillsNeeded = *reinterpret_cast<int32*>(0x96A6EC);
     inline static std::array<int32, 4>& ModelToKill = *reinterpret_cast<std::array<int32, 4>*>(0x96A6F0);
-    static eWeaponType& WeaponType;
-    static eDarkelStatus& Status;
+    inline static eWeaponType& WeaponType = *reinterpret_cast<eWeaponType*>(0x96A700);
+    inline static eDarkelStatus& Status = *reinterpret_cast<eDarkelStatus*>(0x96A704);
 
     inline static bool& byte_969A4A = *(bool*)0x969A4A;
 
@@ -42,9 +41,9 @@ public:
     static void Init();
     static void DrawMessages();
     static eDarkelStatus ReadStatus();
-    static void RegisterKillNotByPlayer(const CPed* killedPed);
+    static void RegisterKillNotByPlayer(const CPed& killedPed);
     static bool ThisPedShouldBeKilledForFrenzy(const CPed& ped);
-    static bool ThisVehicleShouldBeKilledForFrenzy(const CVehicle* vehicle);
+    static bool ThisVehicleShouldBeKilledForFrenzy(const CVehicle& vehicle);
     static void StartFrenzy(eWeaponType weaponType, int32 timeLimit, uint16 killsNeeded, int32 modelToKill, uint16* pStartMessage, int32 modelToKill2, int32 modelToKill3, int32 modelToKill4, bool bStandardSoundAndMessages, bool bNeedHeadShot);
     static void ResetModelsKilledByPlayer(int32 playerId);
     static int32 QueryModelsKilledByPlayer(int32 player, int32 modelId);
