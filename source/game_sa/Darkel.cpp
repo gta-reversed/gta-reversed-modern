@@ -47,9 +47,7 @@ void CDarkel::DrawMessages() {
 
     const auto duration = CTimer::GetTimeInMS() - CDarkel::TimeOfFrenzyStart;
 
-    switch (Status) {
-    case DARKEL_STATUS_1:
-    case DARKEL_STATUS_4: {
+    if (FrenzyOnGoing()) {
         if (bStandardSoundAndMessages) {
             if (duration >= 3000 && duration < 11'000 && pStartMessage) {
                 CMessages::AddBigMessage(pStartMessage, 3000, STYLE_MIDDLE);
@@ -92,13 +90,10 @@ void CDarkel::DrawMessages() {
         sprintf(gString, "%d", KillsNeeded < 0 ? 0 : KillsNeeded);
         AsciiToGxtChar(gString, gGxtString);
         CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f), remainingKillsY, gGxtString);
-        break;
     }
-    case DARKEL_STATUS_2:
-        if (bStandardSoundAndMessages && duration < 5000) {
-            CMessages::AddBigMessage(TheText.Get("KILLPA"), 3000, STYLE_MIDDLE);
-        }
-        break;
+
+    if (Status == DARKEL_STATUS_2 && bStandardSoundAndMessages && duration < 5000) {
+        CMessages::AddBigMessage(TheText.Get("KILLPA"), 3000, STYLE_MIDDLE);
     }
 }
 
