@@ -11,7 +11,7 @@ void CDarkel::InjectHooks() {
     RH_ScopedInstall(Init, 0x43CEB0);
     RH_ScopedInstall(DrawMessages, 0x43CEC0);
     RH_ScopedInstall(ReadStatus, 0x43D1E0);
-    RH_ScopedInstall(RegisterKillNotByPlayer, 0x43D210, { .reversed = false });
+    RH_ScopedInstall(RegisterKillNotByPlayer, 0x43D210);
     RH_ScopedInstall(ThisPedShouldBeKilledForFrenzy, 0x43D2F0);
     RH_ScopedInstall(ThisVehicleShouldBeKilledForFrenzy, 0x43D350);
     RH_ScopedInstall(StartFrenzy, 0x43D3B0, { .reversed = false });
@@ -105,8 +105,19 @@ eDarkelStatus CDarkel::ReadStatus() {
 }
 
 // 0x43D210
-void CDarkel::RegisterKillNotByPlayer(const CPed& killedPed) {
-    plugin::Call<0x43D210, const CPed&>(killedPed);
+void CDarkel::RegisterKillNotByPlayer(const CPed* killedPed) {
+    if (auto player = FindPlayerPed(); killedPed != player->AsPed()) {
+        if (player->GetPlayerGroup().m_groupMembership.IsMember(killedPed)) {
+            CStats::DecrementStat(STAT_RESPECT, 2.0);
+            CStats::IncrementStat(STAT_RECRUITED_GANG_MEMBERS_KILLED);
+            CStats::DisplayScriptStatUpdateMessage(STAT_UPDATE_DECREASE, STAT_GANG_STRENGTH, 1.0f);
+        }
+    }
+    CStats::IncrementStat(STAT_PEOPLE_WASTED_BY_OTHERS);
+
+    if (auto type = killedPed->m_nPedType == PED_TYPE_GANG2; killedPed->IsGangster()) {
+        CStats::IncrementStat(type == PED_TYPE_GANG2 ? STAT_FRIENDLY_GANG_MEMBERS_KILLED : STAT_ENEMY_GANG_MEMBERS_KILLED);
+    }
 }
 
 // 0x43D2F0
@@ -270,7 +281,7 @@ void CDarkel::Update() {
                 CPopulation::m_AllRandomPedsThisType = -1;
 
                 if (bProperKillFrenzy) {
-                    CStats::IncrementStat(STAT_RAMPAGES_PASSED, 1.0);
+                    CStats::IncrementStat(STAT_RAMPAGES_PASSED);
                 }
                 TimeOfFrenzyStart = CTimer::GetTimeInMS();
                 FindPlayerPed()->SetWantedLevel(0);
