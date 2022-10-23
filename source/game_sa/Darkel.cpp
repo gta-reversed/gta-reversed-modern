@@ -3,6 +3,12 @@
 #include "Darkel.h"
 #include "Hud.h"
 
+// Rampages are against to some specific 'model', using these below
+// does mean all peds/vehicles/bikes can be destroyed.
+constexpr eModelID MODELTK_ANY_PED = eModelID(-1);
+constexpr eModelID MODELTK_ANY_VEHICLE = eModelID(-2);
+constexpr eModelID MODELTK_ANY_BIKE = eModelID(-3);
+
 void CDarkel::InjectHooks() {
     RH_ScopedClass(CDarkel);
     RH_ScopedCategoryGlobal();
@@ -123,7 +129,7 @@ bool CDarkel::ThisPedShouldBeKilledForFrenzy(const CPed& ped) {
     if (!FrenzyOnGoing())
         return false;
 
-    if (ModelToKill[3] == -1 || rng::find(ModelToKill, ped.m_nModelIndex) != ModelToKill.end()) {
+    if (ModelToKill[3] == MODELTK_ANY_PED || rng::find(ModelToKill, ped.m_nModelIndex) != ModelToKill.end()) {
         return !ped.IsPlayer();
     }
 
@@ -135,10 +141,10 @@ bool CDarkel::ThisVehicleShouldBeKilledForFrenzy(const CVehicle& vehicle) {
     if (!FrenzyOnGoing())
         return false;
 
-    if (ModelToKill[3] == -2 || rng::find(ModelToKill, vehicle.m_nModelIndex) != ModelToKill.end())
+    if (ModelToKill[3] == MODELTK_ANY_VEHICLE || rng::find(ModelToKill, vehicle.m_nModelIndex) != ModelToKill.end())
         return true;
 
-    return ModelToKill[3] == -3 && vehicle.IsSubBike();
+    return ModelToKill[3] == MODELTK_ANY_BIKE && vehicle.IsSubBike();
 }
 
 // 0x43D3B0
@@ -459,7 +465,7 @@ void CDarkel::RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeap
                 AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE);
             }
 
-CStats::IncrementStat(killedPed.IsCop() ? STAT_HIGHEST_POLICE_PEDS_KILLED_ON_RAMPAGE : STAT_HIGHEST_CIVILIAN_PEDS_KILLED_ON_RAMPAGE);
+            CStats::IncrementStat(killedPed.IsCop() ? STAT_HIGHEST_POLICE_PEDS_KILLED_ON_RAMPAGE : STAT_HIGHEST_CIVILIAN_PEDS_KILLED_ON_RAMPAGE);
         };
 
         if (damageWeaponId == WeaponType || (WeaponType == WEAPON_ANYMELEE || WeaponType == WEAPON_ANYWEAPON) && CheckDamagedWeaponType(damageWeaponId, WeaponType)) {
