@@ -9,6 +9,8 @@ eWeaponType& CDarkel::InterruptedWeaponType = *reinterpret_cast<eWeaponType*>(0x
 eWeaponType& CDarkel::InterruptedWeaponTypeSelected = *reinterpret_cast<eWeaponType*>(0x96A6DC);
 eDarkelStatus& CDarkel::Status = *(eDarkelStatus*)0x96A704;
 uint32& CDarkel::TimeOfFrenzyStart = *reinterpret_cast<uint32*>(0x96A6E0);
+int32& CDarkel::TimeLimit = *reinterpret_cast<int32*>(0x96A6E8);
+int32& CDarkel::KillsNeeded = *reinterpret_cast<int32*>(0x96A6EC);
 eWeaponType& CDarkel::WeaponType = *reinterpret_cast<eWeaponType*>(0x96A700);
 
 void CDarkel::InjectHooks() {
@@ -17,7 +19,7 @@ void CDarkel::InjectHooks() {
 
     RH_ScopedInstall(FrenzyOnGoing, 0x43D1F0);
     RH_ScopedInstall(Init, 0x43CEB0);
-    RH_ScopedInstall(DrawMessages, 0x43CEC0, { .reversed = false });
+    RH_ScopedInstall(DrawMessages, 0x43CEC0);
     RH_ScopedInstall(ReadStatus, 0x43D1E0);
     RH_ScopedInstall(RegisterKillNotByPlayer, 0x43D210, { .reversed = false });
     RH_ScopedInstall(ThisPedShouldBeKilledForFrenzy, 0x43D2F0, { .reversed = false });
@@ -47,7 +49,65 @@ bool CDarkel::FrenzyOnGoing() {
 
 // 0x43CEC0
 void CDarkel::DrawMessages() {
-    plugin::Call<0x43CEC0>();
+    return plugin::Call<0x43CEC0>();
+    if (CReplay::Mode == MODE_PLAYBACK)
+        return;
+
+    const auto duration = CTimer::GetTimeInMS() - CDarkel::TimeOfFrenzyStart;
+
+    switch (Status) {
+    case DARKEL_STATUS_1:
+    case DARKEL_STATUS_4: {
+        if (byte_969A4A) {
+            if (duration >= 3000 && duration < 11'000 && pStartMessage) {
+                CMessages::AddBigMessage(pStartMessage, 3000, STYLE_MIDDLE);
+            }
+        } else if (duration < 8000 && pStartMessage) {
+            CMessages::AddBigMessage(pStartMessage, 3000, STYLE_MIDDLE);
+        }
+
+        CFont::SetProportional(true);
+        CFont::SetBackground(false, false);
+        CFont::SetScale(SCREEN_SCALE_X(0.5f), SCREEN_SCALE_Y(1.0f));
+        CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
+        CFont::SetRightJustifyWrap(0.0f);
+        CFont::SetFontStyle(FONT_MENU);
+        CFont::SetWrapx(SCREEN_SCALE_X(640.0f));
+        CFont::SetEdge(2);
+        CFont::SetDropColor({0, 0, 0, 255});
+        CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_LIGHT_GRAY));
+
+        const auto y1 = CHud::GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_SCALE_Y(148.0f), 12);
+        auto remainingTimerY = CHud::GetYPosBasedOnHealth(PED_TYPE_PLAYER2, y1, 12);
+
+        const auto y2 = CHud::GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_SCALE_Y(168.0f), 12);
+        auto remainingKillsY = CHud::GetYPosBasedOnHealth(PED_TYPE_PLAYER2, y2, 12);
+        if (FindPlayerPed(PED_TYPE_PLAYER2)) {
+            remainingTimerY += SCREEN_SCALE_Y(72.0f);
+            remainingKillsY += SCREEN_SCALE_Y(72.0f);
+        }
+
+        if (TimeLimit >= 0) {
+            const auto remaining = TimeOfFrenzyStart + TimeLimit - CTimer::GetTimeInMS();
+            sprintf(gString, "%d:%02d", remaining / 60'000, remaining % 60'000 / 1000);
+            AsciiToGxtChar(gString, gGxtString);
+
+            // blink in last 4 second
+            if (remaining > 4000 || CTimer::m_FrameCounter % 2) {
+                CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f), remainingTimerY, gGxtString);
+            }
+        }
+        sprintf(gString, "%d", KillsNeeded < 0 ? 0 : KillsNeeded);
+        AsciiToGxtChar(gString, gGxtString);
+        CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f), remainingKillsY, gGxtString);
+        break;
+    }
+    case DARKEL_STATUS_2:
+        if (byte_969A4A && duration < 5000) {
+            CMessages::AddBigMessage(TheText.Get("KILLPA"), 3000, STYLE_MIDDLE);
+        }
+        break;
+    }
 }
 
 // 0x43D1E0

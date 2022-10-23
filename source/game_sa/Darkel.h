@@ -26,9 +26,13 @@ public:
     static eWeaponType& InterruptedWeaponType;
     static eWeaponType& InterruptedWeaponTypeSelected;
     static uint32& TimeOfFrenzyStart;
+    static int32& TimeLimit;
+    static int32& KillsNeeded;
     static int32* ModelToKill; // int32 CDarkel::ModelToKill[4];
     static eWeaponType& WeaponType;
     static eDarkelStatus& Status;
+
+    inline static bool& byte_969A4A = *(bool*)0x969A4A;
 
 public:
     static void InjectHooks();
