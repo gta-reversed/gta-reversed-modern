@@ -55,7 +55,7 @@ void ProcessImGui() {
     PopItemWidth();
 
     PushItemWidth(120.0f);
-    InputInt4("Models to kill (-1 for any)", modelsToKill, 0);
+    InputInt4("Models to kill (-1/-2/-3: for any ped/vehicle/bike)", modelsToKill, 0);
     PopItemWidth();
 
     SameLine(); Checkbox("Standard sound/msg", &standardSoundAndMsg);

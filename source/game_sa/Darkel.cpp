@@ -4,7 +4,7 @@
 #include "Hud.h"
 
 // Rampages are against to some specific 'model', using these below
-// does mean all peds/vehicles/bikes can be destroyed.
+// as enemies mean all peds/vehicles/bikes can be destroyed.
 constexpr eModelID MODELTK_ANY_PED = eModelID(-1);
 constexpr eModelID MODELTK_ANY_VEHICLE = eModelID(-2);
 constexpr eModelID MODELTK_ANY_BIKE = eModelID(-3);
@@ -51,15 +51,17 @@ void CDarkel::DrawMessages() {
     if (CReplay::Mode == MODE_PLAYBACK)
         return;
 
-    const auto duration = CTimer::GetTimeInMS() - CDarkel::TimeOfFrenzyStart;
+    const auto elapsed = CTimer::GetTimeInMS() - CDarkel::TimeOfFrenzyStart;
 
     if (FrenzyOnGoing()) {
-        if (bStandardSoundAndMessages) {
-            if (duration >= 3000 && duration < 11'000 && pStartMessage) {
+        if (pStartMessage) {
+            if (bStandardSoundAndMessages) {
+                if (elapsed >= 3000 && elapsed < 11'000) {
+                    CMessages::AddBigMessage(pStartMessage, 3000, STYLE_MIDDLE);
+                }
+            } else if (elapsed < 8000) {
                 CMessages::AddBigMessage(pStartMessage, 3000, STYLE_MIDDLE);
             }
-        } else if (duration < 8000 && pStartMessage) {
-            CMessages::AddBigMessage(pStartMessage, 3000, STYLE_MIDDLE);
         }
 
         CFont::SetProportional(true);
@@ -89,7 +91,7 @@ void CDarkel::DrawMessages() {
             AsciiToGxtChar(gString, gGxtString);
 
             // blink in last 4 second
-            if (remaining > 4000 || CTimer::m_FrameCounter % 2) {
+            if (remaining > 4000 || CTimer::GetFrameCounter() % 2) {
                 CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f), remainingTimerY, gGxtString);
             }
         }
@@ -98,7 +100,7 @@ void CDarkel::DrawMessages() {
         CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f), remainingKillsY, gGxtString);
     }
 
-    if (Status == DARKEL_STATUS_2 && bStandardSoundAndMessages && duration < 5000) {
+    if (Status == DARKEL_STATUS_2 && bStandardSoundAndMessages && elapsed < 5000) {
         CMessages::AddBigMessage(TheText.Get("KILLPA"), 3000, STYLE_MIDDLE);
     }
 }
