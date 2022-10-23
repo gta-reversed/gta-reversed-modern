@@ -28,34 +28,35 @@ void CPickup::InjectHooks() {
 void CPickup::ExtractAmmoFromPickup(CPlayerPed* player) {
     const auto weapon = CPickups::WeaponForModel(m_pObject->m_nModelIndex);
 
-    if (m_nPickupType != PICKUP_IN_SHOP) {
-        switch (CWeaponInfo::GetWeaponInfo(weapon)->m_nSlot) {
-        case PICKUP_ONCE:
-        case PICKUP_ONCE_TIMEOUT:
-        case PICKUP_ONCE_TIMEOUT_SLOW:
-            break;
-        default:
-            return;
-        }
+    if (m_nPickupType == PICKUP_IN_SHOP)
+        return;
 
-        const auto EmptyAmmo = [this] {
-            m_nFlags.bEmpty = true;
-            m_nAmmo = 0;
-        };
-
-        if (m_nAmmo) {
-            player->GrantAmmo(weapon, m_nAmmo);
-        } else {
-            if (m_nFlags.bEmpty) {
-                return EmptyAmmo();
-            }
-
-            player->GrantAmmo(weapon, AmmoForWeapon_OnStreet[weapon]);
-        }
-
-        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_WEAPON);
-        EmptyAmmo();
+    switch (CWeaponInfo::GetWeaponInfo(weapon)->m_nSlot) {
+    case PICKUP_ONCE:
+    case PICKUP_ONCE_TIMEOUT:
+    case PICKUP_ONCE_TIMEOUT_SLOW:
+        break;
+    default:
+        return;
     }
+
+    const auto EmptyAmmo = [this] {
+        m_nFlags.bEmpty = true;
+        m_nAmmo = 0;
+    };
+
+    if (m_nAmmo) {
+        player->GrantAmmo(weapon, m_nAmmo);
+    } else {
+        if (m_nFlags.bEmpty) {
+            return EmptyAmmo();
+        }
+
+        player->GrantAmmo(weapon, AmmoForWeapon_OnStreet[weapon]);
+    }
+
+    AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_WEAPON);
+    EmptyAmmo();
 }
 
 // 0x455540
@@ -137,9 +138,9 @@ void CPickup::GiveUsAPickUpObject(CObject** obj, int32 slotIndex) {
     object->physicalFlags.bExplosionProof = true;
     object->m_bUsesCollision = false;
     object->objectFlags.bIsPickup = true;
-    object->m_nObjectFlags ^= (object->m_nObjectFlags ^ object->m_nFlags) & 2; // TODO: flags
+    object->objectFlags.b0x02 = object->m_bCollisionProcessed;
+    object->objectFlags.bDoNotRender = PickUpShouldBeInvisible();
     object->m_bHasPreRenderEffects = true;
-    object->m_nObjectFlags ^= (object->m_nObjectFlags ^ (PickUpShouldBeInvisible() << 25)) & 0x2000000; // TODO: flags
     object->m_bTunnelTransition = true;
     object->RegisterReference((CEntity**)obj);
 

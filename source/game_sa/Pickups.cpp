@@ -99,7 +99,7 @@ void CPickups::CreatePickupCoorsCloseToCoors(float inX, float inY, float inZ, fl
 
 /*!
  * @addr 0x458970
- * @brief Creates wads of money that worth `amount` to the position `coors`.
+ * @brief Creates wads of money that is worth amount of money at the position coors.
  */
 void CPickups::CreateSomeMoney(CVector coors, int32 amount) {
     const auto wads = std::min(amount / 20 + 1, 7);
