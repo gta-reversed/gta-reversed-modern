@@ -34,7 +34,7 @@ public:
     inline static eDarkelStatus& Status = *reinterpret_cast<eDarkelStatus*>(0x96A704);
 
     inline static bool& bHeadShotRequired = *(bool*)0x969A49;
-    inline static bool& byte_969A4A = *(bool*)0x969A4A;
+    inline static bool& bStandardSoundAndMessages = *(bool*)0x969A4A;
     inline static bool& bProperKillFrenzy = *(bool*)0x969A48;
 
 public:
@@ -47,7 +47,7 @@ public:
     static void RegisterKillNotByPlayer(const CPed* killedPed);
     static bool ThisPedShouldBeKilledForFrenzy(const CPed& ped);
     static bool ThisVehicleShouldBeKilledForFrenzy(const CVehicle& vehicle);
-    static void StartFrenzy(eWeaponType weaponType, int32 timeLimit, uint16 killsNeeded, int32 modelToKill, uint16* pStartMessage, int32 modelToKill2, int32 modelToKill3, int32 modelToKill4, bool bStandardSoundAndMessages, bool bNeedHeadShot);
+    static void StartFrenzy(eWeaponType weaponType, int32 timeLimit, uint16 killsNeeded, int32 modelToKill, char* startMessage, int32 modelToKill2, int32 modelToKill3, int32 modelToKill4, bool standardSoundAndMessages, bool needHeadShot);
     static void ResetModelsKilledByPlayer(int32 playerId);
     static int32 QueryModelsKilledByPlayer(int32 player, int32 modelId);
     static int32 FindTotalPedsKilledByPlayer(int32 player);
@@ -56,7 +56,7 @@ public:
     static void Update();
     static void ResetOnPlayerDeath();
     static void FailKillFrenzy();
-    static void RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeaponId, bool bHeadShotted, int32 arg4);
+    static void RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeaponId, bool headShotted, int32 arg4);
     static void RegisterCarBlownUpByPlayer(CVehicle& vehicle, int32 arg2);
 };
 

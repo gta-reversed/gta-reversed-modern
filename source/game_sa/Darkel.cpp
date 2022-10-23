@@ -14,7 +14,7 @@ void CDarkel::InjectHooks() {
     RH_ScopedInstall(RegisterKillNotByPlayer, 0x43D210);
     RH_ScopedInstall(ThisPedShouldBeKilledForFrenzy, 0x43D2F0);
     RH_ScopedInstall(ThisVehicleShouldBeKilledForFrenzy, 0x43D350);
-    RH_ScopedInstall(StartFrenzy, 0x43D3B0, { .reversed = false });
+    RH_ScopedInstall(StartFrenzy, 0x43D3B0);
     RH_ScopedInstall(ResetModelsKilledByPlayer, 0x43D6A0);
     //RH_ScopedInstall(QueryModelsKilledByPlayer, 0x0, { .reversed = false });
     //RH_ScopedInstall(FindTotalPedsKilledByPlayer, 0x0, { .reversed = false });
@@ -47,7 +47,7 @@ void CDarkel::DrawMessages() {
     switch (Status) {
     case DARKEL_STATUS_1:
     case DARKEL_STATUS_4: {
-        if (byte_969A4A) {
+        if (bStandardSoundAndMessages) {
             if (duration >= 3000 && duration < 11'000 && pStartMessage) {
                 CMessages::AddBigMessage(pStartMessage, 3000, STYLE_MIDDLE);
             }
@@ -92,7 +92,7 @@ void CDarkel::DrawMessages() {
         break;
     }
     case DARKEL_STATUS_2:
-        if (byte_969A4A && duration < 5000) {
+        if (bStandardSoundAndMessages && duration < 5000) {
             CMessages::AddBigMessage(TheText.Get("KILLPA"), 3000, STYLE_MIDDLE);
         }
         break;
@@ -144,8 +144,69 @@ bool CDarkel::ThisVehicleShouldBeKilledForFrenzy(const CVehicle& vehicle) {
 }
 
 // 0x43D3B0
-void CDarkel::StartFrenzy(eWeaponType weaponType, int32 timeLimit, uint16 killsNeeded, int32 modelToKill, uint16* pStartMessage, int32 modelToKill2, int32 modelToKill3, int32 modelToKill4, bool bStandardSoundAndMessages, bool bNeedHeadShot) {
-    plugin::Call<0x43D3B0, eWeaponType, int32, uint16, int32, uint16*, int32, int32, int32, bool, bool>(weaponType, timeLimit, killsNeeded, modelToKill, pStartMessage, modelToKill2, modelToKill3, modelToKill4, bStandardSoundAndMessages, bNeedHeadShot);
+void CDarkel::StartFrenzy(eWeaponType weaponType, int32 timeLimit, uint16 killsNeeded, int32 modelToKill, char* startMessage, int32 modelToKill2, int32 modelToKill3, int32 modelToKill4, bool standardSoundAndMessages, bool needHeadShot) {
+    CGameLogic::ClearSkip(false);
+    const eWeaponType weapon = (WeaponType != WEAPON_UZI_DRIVEBY) ? WeaponType : WEAPON_MICRO_UZI;
+
+    if (CGameLogic::IsCoopGameGoingOn()) {
+        Status = DARKEL_STATUS_4;
+        CGameLogic::DoWeaponStuffAtStartOf2PlayerGame(false);
+    } else {
+        Status = DARKEL_STATUS_1;
+    }
+
+    ModelToKill[3] = modelToKill;
+    ModelToKill[2] = modelToKill2;
+    ModelToKill[1] = modelToKill3;
+    ModelToKill[0] = modelToKill4;
+
+    KillsNeeded = killsNeeded;
+    WeaponType = weaponType;
+    pStartMessage = startMessage;
+    if (bProperKillFrenzy = (startMessage == TheText.Get("PAGE_00"))) {
+        pStartMessage = nullptr;
+    }
+    bStandardSoundAndMessages = standardSoundAndMessages;
+    bHeadShotRequired = needHeadShot;
+    TimeOfFrenzyStart = CTimer::GetTimeInMS();
+    TimeLimit = timeLimit;
+    PreviousTime = timeLimit / 1000;
+
+    auto playerPed = FindPlayerPed();
+    if (weapon < WEAPON_LAST_WEAPON) {
+        InterruptedWeaponTypeSelected = playerPed->GetActiveWeapon().m_nType;
+        playerPed->RemoveWeaponAnims(InterruptedWeaponTypeSelected, -1000.0f);
+
+        const auto frenzyWeaponSlot = CWeaponInfo::GetWeaponInfo(weapon)->m_nSlot;
+        InterruptedWeaponType = playerPed->GetWeaponInSlot(frenzyWeaponSlot).m_nType;
+        AmmoInterruptedWeapon = playerPed->GetWeaponInSlot(frenzyWeaponSlot).m_nTotalAmmo;
+
+        if (InterruptedWeaponType != WEAPON_UNARMED) {
+            const auto weaponInfo = CWeaponInfo::GetWeaponInfo(InterruptedWeaponType);
+            CModelInfo::GetModelInfo(weaponInfo->m_nModelId1)->AddRef();
+        }
+
+        for (auto i = 0; i < 2; i++) {
+            if (auto player = FindPlayerPed(i)) {
+                player->GiveWeapon(weapon, 30'000, true);
+                player->SetCurrentWeapon(weapon);
+                player->MakeChangesForNewWeapon(weapon);
+            }
+        }
+
+        if (FindPlayerVehicle()) {
+            auto chosenWeapon = playerPed->m_pPlayerData->m_nChosenWeapon;
+            playerPed->SetCurrentWeapon(chosenWeapon);
+
+            if (auto& activeWeapon = playerPed->GetActiveWeapon(); activeWeapon.m_nTotalAmmo >= activeWeapon.GetWeaponInfo().m_nAmmoClip) {
+                activeWeapon.m_nAmmoInClip = activeWeapon.GetWeaponInfo().m_nAmmoClip;
+            } else {
+                activeWeapon.m_nAmmoInClip = activeWeapon.m_nTotalAmmo;
+            }
+
+            playerPed->ClearWeaponTarget();
+        }
+    }
 }
 
 // 0x43D6A0
@@ -362,7 +423,7 @@ void CDarkel::FailKillFrenzy() {
 }
 
 // 0x43DCD0
-void CDarkel::RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeaponId, bool bHeadShotted, int32 arg4) {
+void CDarkel::RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeaponId, bool headShotted, int32 arg4) {
     switch (killedPed.m_nPedType) {
     case PED_TYPE_COP:
     case PED_TYPE_DEALER:
@@ -391,7 +452,7 @@ void CDarkel::RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeap
 
     if (FrenzyOnGoing()) {
         const auto CountFrenzyKill = [&] {
-            if (ThisPedShouldBeKilledForFrenzy(killedPed) && (!bHeadShotRequired || bHeadShotted)) {
+            if (ThisPedShouldBeKilledForFrenzy(killedPed) && (!bHeadShotRequired || headShotted)) {
                 KillsNeeded--;
                 AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE);
             }
@@ -443,7 +504,7 @@ void CDarkel::RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeap
             CStats::PedsKilledOfThisType[killedPed.m_nPedType]++;
         }
 
-        if (bHeadShotted) {
+        if (headShotted) {
             CStats::IncrementStat(STAT_NUMBER_OF_HEADSHOTS);
         }
         CStats::IncrementStat(STAT_KILLS_SINCE_LAST_CHECKPOINT);
