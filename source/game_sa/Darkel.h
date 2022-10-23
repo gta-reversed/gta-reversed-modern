@@ -26,6 +26,7 @@ public:
     inline static eWeaponType& InterruptedWeaponType = *reinterpret_cast<eWeaponType*>(0x96A6D8);
     inline static eWeaponType& InterruptedWeaponTypeSelected = *reinterpret_cast<eWeaponType*>(0x96A6DC);
     inline static uint32& TimeOfFrenzyStart = *reinterpret_cast<uint32*>(0x96A6E0);
+    inline static int32& PreviousTime = *reinterpret_cast<int32*>(0x96A6E4);
     inline static int32& TimeLimit = *reinterpret_cast<int32*>(0x96A6E8);
     inline static int32& KillsNeeded = *reinterpret_cast<int32*>(0x96A6EC);
     inline static std::array<int32, 4>& ModelToKill = *reinterpret_cast<std::array<int32, 4>*>(0x96A6F0);
@@ -33,6 +34,7 @@ public:
     inline static eDarkelStatus& Status = *reinterpret_cast<eDarkelStatus*>(0x96A704);
 
     inline static bool& byte_969A4A = *(bool*)0x969A4A;
+    inline static bool& bProperKillFrenzy = *(bool*)0x969A48;
 
 public:
     static void InjectHooks();

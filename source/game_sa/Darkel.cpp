@@ -20,7 +20,7 @@ void CDarkel::InjectHooks() {
     //RH_ScopedInstall(FindTotalPedsKilledByPlayer, 0x0, { .reversed = false });
     RH_ScopedInstall(DealWithWeaponChangeAtEndOfFrenzy, 0x43D7A0, { .reversed = false });
     RH_ScopedInstall(CheckDamagedWeaponType, 0x43D9E0);
-    RH_ScopedInstall(Update, 0x43DAC0, { .reversed = false });
+    RH_ScopedInstall(Update, 0x43DAC0);
     RH_ScopedInstall(ResetOnPlayerDeath, 0x43DC10);
     RH_ScopedInstall(FailKillFrenzy, 0x43DC60);
     RH_ScopedInstall(RegisterKillByPlayer, 0x43DCD0, { .reversed = false });
@@ -247,7 +247,50 @@ bool CDarkel::CheckDamagedWeaponType(eWeaponType damageWeaponId, eWeaponType exp
 
 // 0x43DAC0
 void CDarkel::Update() {
-    plugin::Call<0x43DAC0>();
+    if (!FrenzyOnGoing())
+        return;
+
+    const auto remaining = TimeOfFrenzyStart + TimeLimit - CTimer::GetTimeInMS();
+    if (remaining <= 0 && TimeLimit >= 0) {
+        if (Status != DARKEL_STATUS_4) {
+            label_19:
+            Status = DARKEL_STATUS_3;
+            CPopulation::m_AllRandomPedsThisType = -1;
+            TimeOfFrenzyStart = CTimer::GetTimeInMS();
+            DealWithWeaponChangeAtEndOfFrenzy();
+
+            label_11:
+            if (KillsNeeded <= 0) {
+                if (Status == DARKEL_STATUS_4) {
+                    CGameLogic::GameState = GAME_STATE_PLAYING_INTRO;
+                    CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS();
+                }
+
+                Status = DARKEL_STATUS_2;
+                CPopulation::m_AllRandomPedsThisType = -1;
+
+                if (bProperKillFrenzy) {
+                    CStats::IncrementStat(STAT_RAMPAGES_PASSED, 1.0);
+                }
+                TimeOfFrenzyStart = CTimer::GetTimeInMS();
+                FindPlayerPed()->SetWantedLevel(0);
+
+                DealWithWeaponChangeAtEndOfFrenzy();
+            }
+            return;
+        }
+    } else if (Status != 4 || FindPlayerPed(PED_TYPE_PLAYER2)) {
+        if (remaining / 1000 != PreviousTime) {
+            if (PreviousTime < 12) {
+                AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_TIMER_COUNT);
+            }
+            PreviousTime = remaining / 1000;
+        }
+        goto label_11;
+    }
+    CGameLogic::GameState = GAME_STATE_TITLE;
+    CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS();
+    goto label_19;
 }
 
 // 0x43DC10
