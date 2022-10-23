@@ -49,7 +49,6 @@ bool CDarkel::FrenzyOnGoing() {
 
 // 0x43CEC0
 void CDarkel::DrawMessages() {
-    return plugin::Call<0x43CEC0>();
     if (CReplay::Mode == MODE_PLAYBACK)
         return;
 
@@ -121,8 +120,20 @@ void CDarkel::RegisterKillNotByPlayer(const CPed* killedPed) {
 }
 
 // 0x43D2F0
-bool CDarkel::ThisPedShouldBeKilledForFrenzy(const CPed* ped) {
-    return plugin::CallAndReturn<bool, 0x43D2F0, const CPed*>(ped);
+bool CDarkel::ThisPedShouldBeKilledForFrenzy(const CPed& ped) {
+    switch (Status) {
+    case DARKEL_STATUS_1:
+    case DARKEL_STATUS_4:
+        break;
+    default:
+        return;
+    }
+
+    if (ModelToKill[3] == -1 || rng::find(ModelToKill, ped.m_nModelIndex) != ModelToKill.end()) {
+        return !ped.IsPlayer();
+    }
+
+    return false;
 }
 
 // 0x

@@ -29,6 +29,7 @@ public:
     static int32& TimeLimit;
     static int32& KillsNeeded;
     static int32* ModelToKill; // int32 CDarkel::ModelToKill[4];
+    inline static std::array<int32, 4>& ModelToKill = *reinterpret_cast<std::array<int32, 4>*>(0x96A6F0);
     static eWeaponType& WeaponType;
     static eDarkelStatus& Status;
 
@@ -42,7 +43,7 @@ public:
     static void DrawMessages();
     static eDarkelStatus ReadStatus();
     static void RegisterKillNotByPlayer(const CPed* killedPed);
-    static bool ThisPedShouldBeKilledForFrenzy(const CPed* ped);
+    static bool ThisPedShouldBeKilledForFrenzy(const CPed& ped);
     static bool ThisVehicleShouldBeKilledForFrenzy(const CVehicle* vehicle);
     static void StartFrenzy(eWeaponType weaponType, int32 timeLimit, uint16 killsNeeded, int32 modelToKill, uint16* pStartMessage, int32 modelToKill2, int32 modelToKill3, int32 modelToKill4, bool bStandardSoundAndMessages, bool bNeedHeadShot);
     static void ResetModelsKilledByPlayer(int32 playerId);
