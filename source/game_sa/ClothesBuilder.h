@@ -22,7 +22,7 @@ public:
     static void PreprocessClothesDesc(CPedClothesDesc& desc, bool a2);
     static void ReleaseGeometry(int32 numToRelease);
     static void sub_5A4840();
-    static void StoreBoneArray(RpClump* clump, int32 a2);
+    static void StoreBoneArray(RpClump* clump, int32 num);
     static RpGeometry* BlendGeometry(RpClump* clump, const char* a2, const char* a3, const char* a4, float a5, float a6, float a7);
     static RpGeometry* BlendGeometry(RpClump* clump, const char* a2, const char* a3, float a4, float a5);
     static RpGeometry* CopyGeometry(RpClump* clump, const char* a2, const char* a3);
@@ -48,6 +48,6 @@ public:
 
 extern int16 (&gBoneIndices)[10][64];
 
-void FindAtomicFromNameCB(RpAtomic* atomic, void* data);
+RpAtomic* FindAtomicFromNameCB(RpAtomic* atomic, void* data);
 void GetAtomicWithName(RpClump* clump, const char* name);
 RwTexture* GetTextureFromTxdAndLoadNextTxd(RwTexture* destTexture, int32 txdId_withTexture, int32 CRC_nextTxd, int32* nextTxdId);

@@ -7,6 +7,11 @@ CDirectory& playerImg = *(CDirectory*)0xBC12C0;
 CDirectory::DirectoryInfo& playerImgEntries = *(CDirectory::DirectoryInfo*)0xBBCDC8;
 int16 (&gBoneIndices)[10][64] = *(int16(*)[10][64])0xBBC8C8;
 
+struct sDataFindAtomicFromName {
+    const char* inputData;
+    RpAtomic* outputData;
+};
+
 void CClothesBuilder::InjectHooks() {
     RH_ScopedClass(CClothesBuilder);
     RH_ScopedCategoryGlobal();
@@ -20,10 +25,10 @@ void CClothesBuilder::InjectHooks() {
     //RH_ScopedInstall(nullptr, 0x5A44A0, { .reversed = false }); DestroyTextureCB
     RH_ScopedInstall(PreprocessClothesDesc, 0x5A44C0, { .reversed = false });
     RH_ScopedInstall(ReleaseGeometry, 0x5A47B0, { .reversed = false });
-    RH_ScopedGlobalInstall(FindAtomicFromNameCB, 0x5A47E0, { .reversed = false });
+    RH_ScopedGlobalInstall(FindAtomicFromNameCB, 0x5A47E0);
     RH_ScopedGlobalInstall(GetAtomicWithName, 0x5A4810, { .reversed = false });
     RH_ScopedInstall(sub_5A4840, 0x5A4840, { .reversed = false });
-    RH_ScopedInstall(StoreBoneArray, 0x5A48B0, { .reversed = false });
+    RH_ScopedInstall(StoreBoneArray, 0x5A48B0);
     // RH_ScopedOverloadedInstall(BlendGeometry, "", 0x5A4940, RpGeometry* (*)(RpClump*, const char*, const char*, const char*, float, float, float));
     // RH_ScopedOverloadedInstall(BlendGeometry, "", 0x5A4F10, RpGeometry* (*)(RpClump*, const char*, const char*, float, float));
     RH_ScopedInstall(CopyGeometry, 0x5A5340, { .reversed = false });
@@ -78,8 +83,14 @@ void CClothesBuilder::ReleaseGeometry(int32 numToRelease) {
 }
 
 // 0x5A47E0
-void FindAtomicFromNameCB(RpAtomic* atomic, void* data) {
-    plugin::Call<0x5A47E0, RpAtomic*, void*>(atomic, data);
+RpAtomic* FindAtomicFromNameCB(RpAtomic* atomic, void* data) {
+    sDataFindAtomicFromName* dataStruct = reinterpret_cast<sDataFindAtomicFromName*>(data);
+    if (strcmp(GetFrameNodeName(RpAtomicGetFrame(atomic)), dataStruct->inputData)) {
+        return atomic;
+    }
+
+    dataStruct->outputData = atomic;
+    return atomic;
 }
 
 // 0x5A4810
@@ -93,8 +104,24 @@ void CClothesBuilder::sub_5A4840() {
 }
 
 // 0x5A48B0
-void CClothesBuilder::StoreBoneArray(RpClump* clump, int32 a2) {
-    plugin::Call<0x5A48B0, RpClump*, int32>(clump, a2);
+void CClothesBuilder::StoreBoneArray(RpClump* clump, int32 num) {
+    sDataFindAtomicFromName pData;
+    pData.inputData = "normal";
+    RpClumpForAllAtomics(clump, FindAtomicFromNameCB, &pData);
+    auto result = RpSkinAtomicGetHAnimHierarchy(pData.outputData);
+
+    if (result->numNodes < 1) {
+        gBoneIndices[num][0] = -1;
+        return;
+    }
+
+    for (uint32 i = 0; i < result->numNodes; i++) {
+        gBoneIndices[num][i] = result->pNodeInfo[i].nodeID;
+    }
+
+    if (result->numNodes < 64) {
+        gBoneIndices[num][result->numNodes - 1] = -1;
+    }
 }
 
 // 0x5A4940
