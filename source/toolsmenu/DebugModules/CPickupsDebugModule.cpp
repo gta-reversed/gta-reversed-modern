@@ -105,12 +105,12 @@ void ProcessImGui() {
         static bool markSelectedPickup = true;
         Checkbox("Mark selected pickup", &markSelectedPickup);
 
-        auto& pickup = CPickups::aPickUps.at(selectedPickup);
-        Text("Id: %d", selectedPickup);
+        const auto& pickup = CPickups::aPickUps.at(selectedPickup);
 
-        auto posn = pickup.GetPosn();
-        InputFloat3("Coords", reinterpret_cast<float(&)[3]>(posn));
-        pickup.SetPosn(posn);
+        Text("ID: %d", selectedPickup);
+
+        const auto posn = pickup.GetPosn();
+        Text("Coords: %.2f %.2f %.2f", posn.x, posn.y, posn.z);
 
         if (Button("Teleport Player")) {
             TeleportDebugModule::TeleportTo(posn);
@@ -124,6 +124,7 @@ void ProcessImGui() {
         }
     }
 
+    Separator();
     static bool filterInactive = true, filterInvisible = false;
     Checkbox("Hide inactive (i.e. type=NONE)", &filterInactive);
     SameLine(); Checkbox("Hide invisible", &filterInvisible);
