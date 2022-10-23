@@ -401,7 +401,7 @@ CVehicle::~CVehicle() {
     }
 
     if (!physicalFlags.bDestroyed && m_fHealth < 250.0F) {
-        CDarkel::RegisterCarBlownUpByPlayer(this, 0);
+        CDarkel::RegisterCarBlownUpByPlayer(*this, 0);
     }
 }
 
