@@ -56,5 +56,7 @@ public:
     static void ResetOnPlayerDeath();
     static void FailKillFrenzy();
     static void RegisterKillByPlayer(const CPed* killedPed, eWeaponType damageWeaponID, bool bHeadShotted, int32 arg4);
-    static void RegisterCarBlownUpByPlayer(CVehicle* vehicle, int32 arg2);
+    static void RegisterCarBlownUpByPlayer(CVehicle& vehicle, int32 arg2);
 };
+
+inline static std::array<int16, 1600>& destroyedModelCounters = *reinterpret_cast<std::array<int16, 1600>*>(0x969A50);

@@ -24,7 +24,7 @@ void CDarkel::InjectHooks() {
     RH_ScopedInstall(ResetOnPlayerDeath, 0x43DC10);
     RH_ScopedInstall(FailKillFrenzy, 0x43DC60);
     RH_ScopedInstall(RegisterKillByPlayer, 0x43DCD0, { .reversed = false });
-    RH_ScopedInstall(RegisterCarBlownUpByPlayer, 0x43DF20, { .reversed = false });
+    RH_ScopedInstall(RegisterCarBlownUpByPlayer, 0x43DF20);
 }
 
 // 0x43CEB0
@@ -330,6 +330,36 @@ void CDarkel::RegisterKillByPlayer(const CPed* killedPed, eWeaponType damageWeap
 }
 
 // 0x43DF20
-void CDarkel::RegisterCarBlownUpByPlayer(CVehicle* vehicle, int32 arg2) {
-    plugin::Call<0x43DF20, CVehicle*, int32>(vehicle, arg2);
+void CDarkel::RegisterCarBlownUpByPlayer(CVehicle& vehicle, int32 arg2) {
+    if (ThisVehicleShouldBeKilledForFrenzy(vehicle)) {
+        KillsNeeded--;
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE);
+    }
+    destroyedModelCounters[arg2 + 2 * vehicle.m_nModelIndex]++;
+
+    switch (vehicle.GetVehicleAppearance()) {
+    case VEHICLE_APPEARANCE_AUTOMOBILE:
+    case VEHICLE_APPEARANCE_BIKE:
+        CStats::IncrementStat(STAT_ROAD_VEHICLES_DESTROYED);
+        break;
+    case VEHICLE_APPEARANCE_HELI:
+    case VEHICLE_APPEARANCE_PLANE:
+        CStats::IncrementStat(STAT_PLANES_HELICOPTERS_DESTROYED);
+        break;
+    case VEHICLE_APPEARANCE_BOAT:
+        CStats::IncrementStat(STAT_BOATS_DESTROYED);
+        break;
+    default:
+        break;
+    }
+
+    if (FrenzyOnGoing()) {
+        if (vehicle.m_nModelIndex == MODEL_RHINO) {
+            CStats::IncrementStat(STAT_HIGHEST_NUMBER_OF_TANKS_DESTROYED_ON_RAMPAGE);
+        } else if (vehicle.IsLawEnforcementVehicle()) {
+            CStats::IncrementStat(STAT_HIGHEST_POLICE_VEHICLES_DESTROYED_ON_RAMPAGE);
+        } else {
+            CStats::IncrementStat(STAT_HIGHEST_CIVILIAN_VEHICLES_DESTROYED_ON_RAMPAGE);
+        }
+    }
 }
