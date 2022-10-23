@@ -451,7 +451,7 @@ void CFireManager::Update() {
                 const CRGBA shdwColor = baseColor * fColorMult;
                 CShadows::StoreStaticShadow(
                     reinterpret_cast<uint32>(strongest),
-                    2,
+                    SHADOW_ADDITIVE,
                     gpShadowExplosionTex,
                     &shdwPos,
                     fDir * -1.2f,
