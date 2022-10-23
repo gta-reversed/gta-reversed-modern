@@ -106,7 +106,7 @@ eDarkelStatus CDarkel::ReadStatus() {
 void CDarkel::RegisterKillNotByPlayer(const CPed* killedPed) {
     if (auto player = FindPlayerPed(); killedPed != player->AsPed()) {
         if (player->GetPlayerGroup().m_groupMembership.IsMember(killedPed)) {
-            CStats::DecrementStat(STAT_RESPECT, 2.0);
+            CStats::DecrementStat(STAT_RESPECT, 2.0f);
             CStats::IncrementStat(STAT_RECRUITED_GANG_MEMBERS_KILLED);
             CStats::DisplayScriptStatUpdateMessage(STAT_UPDATE_DECREASE, STAT_GANG_STRENGTH, 1.0f);
         }
@@ -448,7 +448,7 @@ void CDarkel::RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeap
             }
         } else {
             CStats::IncrementStat(STAT_ENEMY_GANG_MEMBERS_KILLED);
-            CStats::IncrementStat(STAT_RESPECT, 0.75);
+            CStats::IncrementStat(STAT_RESPECT, 0.75f);
         }
     }
 
@@ -459,11 +459,7 @@ void CDarkel::RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeap
                 AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE);
             }
 
-            if (killedPed.IsCop()) {
-                CStats::IncrementStat(STAT_HIGHEST_POLICE_PEDS_KILLED_ON_RAMPAGE);
-            } else {
-                CStats::IncrementStat(STAT_HIGHEST_CIVILIAN_PEDS_KILLED_ON_RAMPAGE);
-            }
+CStats::IncrementStat(killedPed.IsCop() ? STAT_HIGHEST_POLICE_PEDS_KILLED_ON_RAMPAGE : STAT_HIGHEST_CIVILIAN_PEDS_KILLED_ON_RAMPAGE);
         };
 
         if (damageWeaponId == WeaponType || (WeaponType == WEAPON_ANYMELEE || WeaponType == WEAPON_ANYWEAPON) && CheckDamagedWeaponType(damageWeaponId, WeaponType)) {
@@ -500,11 +496,7 @@ void CDarkel::RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeap
 
         RegisteredKills[killedPed.m_nModelIndex][playerId]++;
         CStats::IncrementStat(STAT_PEOPLE_YOUVE_WASTED);
-        if (killedPed.bChrisCriminal) {
-            CStats::PedsKilledOfThisType[PED_TYPE_CRIMINAL]++;
-        } else {
-            CStats::PedsKilledOfThisType[killedPed.m_nPedType]++;
-        }
+        CStats::PedsKilledOfThisType[killedPed.bChrisCriminal ? PED_TYPE_CRIMINAL : killedPed.m_nPedType]++;
 
         if (headShotted) {
             CStats::IncrementStat(STAT_NUMBER_OF_HEADSHOTS);
