@@ -5,6 +5,7 @@
 
 CDirectory& playerImg = *(CDirectory*)0xBC12C0;
 CDirectory::DirectoryInfo& playerImgEntries = *(CDirectory::DirectoryInfo*)0xBBCDC8;
+int16 (&gBoneIndices)[10][64] = *(int16(*)[10][64])0xBBC8C8;
 
 void CClothesBuilder::InjectHooks() {
     RH_ScopedClass(CClothesBuilder);
@@ -116,7 +117,6 @@ void CClothesBuilder::ConstructGeometryArray(RpGeometry** geometry, uint32* a2, 
     plugin::Call<0x5A55A0, RpGeometry**, uint32*, float, float, float>(geometry, a2, a3, a4, a5);
 }
 
-// unused
 // inlined, see 0x5A6CE1
 // 0x5A56C0
 void CClothesBuilder::DestroySkinArrays(RwMatrixWeights* weights, uint32* pBones) {
@@ -125,8 +125,17 @@ void CClothesBuilder::DestroySkinArrays(RwMatrixWeights* weights, uint32* pBones
 }
 
 // 0x5A56E0
-void CClothesBuilder::BuildBoneIndexConversionTable(uint8* a1, RpHAnimHierarchy* a2, int32 a3) {
-    plugin::Call<0x5A56E0, uint8*, RpHAnimHierarchy*, int32>(a1, a2, a3);
+void CClothesBuilder::BuildBoneIndexConversionTable(uint8* pTable, RpHAnimHierarchy* pSkinHier, int32 index) {
+    for (size_t i = 0; i < 64; i++) {
+        int16 boneIndex = gBoneIndices[index][i];
+
+        if (boneIndex == -1) {
+            break;
+        }
+
+        const auto index = RpHAnimIDGetIndex(pSkinHier, boneIndex);
+        pTable[i] = index != -1 ? index : 0;
+    }
 }
 
 // 0x5A5730

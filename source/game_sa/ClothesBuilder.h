@@ -8,6 +8,7 @@
 #pragma once
 
 #include "RenderWare.h" // important
+#include "Base.h"
 
 class PedClothesDesc;
 
@@ -44,6 +45,8 @@ public:
     static void ReducePaletteSize(RwTexture* texture, int32 numColorsToReduce);
     static RpClump* CreateSkinnedClump(RpClump* clump, RwTexDictionary* dict, CPedClothesDesc& newClothes, const CPedClothesDesc* oldClothes, bool CutscenePlayer);
 };
+
+extern int16 (&gBoneIndices)[10][64];
 
 void FindAtomicFromNameCB(RpAtomic* atomic, void* data);
 void GetAtomicWithName(RpClump* clump, const char* name);
