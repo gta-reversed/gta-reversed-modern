@@ -18,7 +18,7 @@ void CDarkel::InjectHooks() {
     RH_ScopedInstall(ResetModelsKilledByPlayer, 0x43D6A0, { .reversed = false });
     //RH_ScopedInstall(QueryModelsKilledByPlayer, 0x0, { .reversed = false });
     //RH_ScopedInstall(FindTotalPedsKilledByPlayer, 0x0, { .reversed = false });
-    RH_ScopedInstall(DealWithWeaponChangeAtEndOfFrenzy, 0x43D7A0, { .reversed = false });
+    RH_ScopedInstall(DealWithWeaponChangeAtEndOfFrenzy, 0x43D7A0);
     RH_ScopedInstall(CheckDamagedWeaponType, 0x43D9E0);
     RH_ScopedInstall(Update, 0x43DAC0);
     RH_ScopedInstall(ResetOnPlayerDeath, 0x43DC10);
@@ -165,7 +165,42 @@ int32 CDarkel::FindTotalPedsKilledByPlayer(int32 player) {
 
 // 0x43D7A0
 void CDarkel::DealWithWeaponChangeAtEndOfFrenzy() {
-    plugin::Call<0x43D7A0>();
+    auto playerPed = FindPlayerPed();
+    const eWeaponType weapon = (WeaponType != WEAPON_UZI_DRIVEBY) ? WeaponType : WEAPON_MICRO_UZI;
+    if (WeaponType < WEAPON_LAST_WEAPON) {
+        if (InterruptedWeaponType != WEAPON_UNARMED) {
+            const auto modelId = CWeaponInfo::GetWeaponInfo(InterruptedWeaponType)->m_nModelId1;
+            CModelInfo::GetModelInfo(modelId)->RemoveRef();
+        }
+
+        const auto weaponInfo = CWeaponInfo::GetWeaponInfo(weapon);
+        playerPed->RemoveWeaponModel(playerPed->GetWeaponInSlot(weaponInfo->m_nSlot).GetWeaponInfo().m_nModelId1);
+
+        playerPed->GetWeaponInSlot(weaponInfo->m_nSlot).m_nType = WEAPON_UNARMED;
+        playerPed->GetWeaponInSlot(weaponInfo->m_nSlot).m_nTotalAmmo = 0;
+        playerPed->GetWeaponInSlot(weaponInfo->m_nSlot).m_nAmmoInClip = 0;
+        playerPed->GetWeaponInSlot(weaponInfo->m_nSlot).m_nState = WEAPONSTATE_READY;
+        playerPed->RemoveWeaponAnims(weapon, -1000.0f);
+
+        if (auto mi = CModelInfo::GetModelInfo(weaponInfo->m_nModelId1); mi->m_nRefCount > 0) {
+            mi->RemoveRef();
+        }
+        playerPed->GiveWeapon(InterruptedWeaponType, AmmoInterruptedWeapon, true);
+    }
+
+    if (FindPlayerVehicle()) {
+        playerPed->RemoveWeaponModel(playerPed->GetActiveWeapon().GetWeaponInfo().m_nModelId1);
+
+        auto& chosenWeaponSlot = playerPed->m_pPlayerData->m_nChosenWeapon;
+        if (playerPed->GetWeaponInSlot(eWeaponSlot::SMG).m_nType != WEAPON_UNARMED) {
+            chosenWeaponSlot = (uint8)eWeaponSlot::SMG;
+        } else {
+            chosenWeaponSlot = (uint8)eWeaponSlot::UNARMED;
+        }
+
+        playerPed->SetCurrentWeapon(chosenWeaponSlot);
+        playerPed->MakeChangesForNewWeapon(chosenWeaponSlot);
+    }
 }
 
 // 0x43D9E0
