@@ -26,7 +26,7 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedInstall(PreprocessClothesDesc, 0x5A44C0, { .reversed = false });
     RH_ScopedInstall(ReleaseGeometry, 0x5A47B0, { .reversed = false });
     RH_ScopedGlobalInstall(FindAtomicFromNameCB, 0x5A47E0);
-    RH_ScopedGlobalInstall(GetAtomicWithName, 0x5A4810, { .reversed = false });
+    RH_ScopedGlobalInstall(GetAtomicWithName, 0x5A4810);
     RH_ScopedInstall(sub_5A4840, 0x5A4840, { .reversed = false });
     RH_ScopedInstall(StoreBoneArray, 0x5A48B0);
     // RH_ScopedOverloadedInstall(BlendGeometry, "", 0x5A4940, RpGeometry* (*)(RpClump*, const char*, const char*, const char*, float, float, float));
@@ -94,8 +94,12 @@ RpAtomic* FindAtomicFromNameCB(RpAtomic* atomic, void* data) {
 }
 
 // 0x5A4810
-void GetAtomicWithName(RpClump* clump, const char* name) {
-    plugin::Call<0x5A4810, RpClump*, const char*>(clump, name);
+RpAtomic* GetAtomicWithName(RpClump* clump, const char* name) {
+    sDataFindAtomicFromName pData;
+    pData.inputData = name;
+    RpClumpForAllAtomics(clump, FindAtomicFromNameCB, &pData);
+
+    return pData.outputData;
 }
 
 // 0x5A4840
@@ -105,10 +109,7 @@ void CClothesBuilder::sub_5A4840() {
 
 // 0x5A48B0
 void CClothesBuilder::StoreBoneArray(RpClump* clump, int32 num) {
-    sDataFindAtomicFromName pData;
-    pData.inputData = "normal";
-    RpClumpForAllAtomics(clump, FindAtomicFromNameCB, &pData);
-    auto result = RpSkinAtomicGetHAnimHierarchy(pData.outputData);
+    auto result = RpSkinAtomicGetHAnimHierarchy(GetAtomicWithName(clump, "normal"));
 
     if (result->numNodes < 1) {
         gBoneIndices[num][0] = -1;

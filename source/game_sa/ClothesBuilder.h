@@ -49,5 +49,5 @@ public:
 extern int16 (&gBoneIndices)[10][64];
 
 RpAtomic* FindAtomicFromNameCB(RpAtomic* atomic, void* data);
-void GetAtomicWithName(RpClump* clump, const char* name);
+RpAtomic* GetAtomicWithName(RpClump* clump, const char* name);
 RwTexture* GetTextureFromTxdAndLoadNextTxd(RwTexture* destTexture, int32 txdId_withTexture, int32 CRC_nextTxd, int32* nextTxdId);
