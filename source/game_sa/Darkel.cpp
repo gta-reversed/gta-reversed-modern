@@ -16,8 +16,8 @@ void CDarkel::InjectHooks() {
     RH_ScopedInstall(ThisVehicleShouldBeKilledForFrenzy, 0x43D350);
     RH_ScopedInstall(StartFrenzy, 0x43D3B0);
     RH_ScopedInstall(ResetModelsKilledByPlayer, 0x43D6A0);
-    //RH_ScopedInstall(QueryModelsKilledByPlayer, 0x0, { .reversed = false });
-    //RH_ScopedInstall(FindTotalPedsKilledByPlayer, 0x0, { .reversed = false });
+    RH_ScopedInstall(QueryModelsKilledByPlayer, 0x43D6C0);
+    RH_ScopedInstall(FindTotalPedsKilledByPlayer, 0x43D6E0);
     RH_ScopedInstall(DealWithWeaponChangeAtEndOfFrenzy, 0x43D7A0);
     RH_ScopedInstall(CheckDamagedWeaponType, 0x43D9E0);
     RH_ScopedInstall(Update, 0x43DAC0);
@@ -25,6 +25,9 @@ void CDarkel::InjectHooks() {
     RH_ScopedInstall(FailKillFrenzy, 0x43DC60);
     RH_ScopedInstall(RegisterKillByPlayer, 0x43DCD0);
     RH_ScopedInstall(RegisterCarBlownUpByPlayer, 0x43DF20);
+
+    // unused
+    RH_ScopedInstall(CalcFade, 0x43D740);
 }
 
 // 0x43CEB0
@@ -146,7 +149,7 @@ bool CDarkel::ThisVehicleShouldBeKilledForFrenzy(const CVehicle& vehicle) {
 // 0x43D3B0
 void CDarkel::StartFrenzy(eWeaponType weaponType, int32 timeLimit, uint16 killsNeeded, int32 modelToKill, char* startMessage, int32 modelToKill2, int32 modelToKill3, int32 modelToKill4, bool standardSoundAndMessages, bool needHeadShot) {
     CGameLogic::ClearSkip(false);
-    const eWeaponType weapon = (WeaponType != WEAPON_UZI_DRIVEBY) ? WeaponType : WEAPON_MICRO_UZI;
+    const eWeaponType weapon = (WeaponType != WEAPON_UZI_DRIVEBY) ? weaponType : WEAPON_MICRO_UZI;
 
     if (CGameLogic::IsCoopGameGoingOn()) {
         Status = DARKEL_STATUS_4;
@@ -211,19 +214,23 @@ void CDarkel::StartFrenzy(eWeaponType weaponType, int32 timeLimit, uint16 killsN
 
 // 0x43D6A0
 void CDarkel::ResetModelsKilledByPlayer(int32 playerId) {
-    for (auto i = playerId; i < 800; i++) {
-        destroyedModelCounters[i++] = 0;
+    for (auto& model : RegisteredKills) {
+        model[playerId] = 0;
     }
 }
 
-// 0x
-int32 CDarkel::QueryModelsKilledByPlayer(int32 player, int32 modelId) {
-    return plugin::CallAndReturn<int32, 0x0, int32, int32>(player, modelId);
+// 0x43D6C0
+int16 CDarkel::QueryModelsKilledByPlayer(int32 modelId, int32 playerId) {
+    return RegisteredKills[modelId][playerId];
 }
 
-// 0x
-int32 CDarkel::FindTotalPedsKilledByPlayer(int32 player) {
-    return plugin::CallAndReturn<int32, 0x0, int32>(player);
+// 0x43D6E0
+int32 CDarkel::FindTotalPedsKilledByPlayer(int32 playerId) {
+    int32 sum = 0;
+    for (auto& model : RegisteredKills) {
+        sum += model[playerId];
+    }
+    return sum;
 }
 
 // 0x43D7A0
@@ -423,7 +430,7 @@ void CDarkel::FailKillFrenzy() {
 }
 
 // 0x43DCD0
-void CDarkel::RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeaponId, bool headShotted, int32 arg4) {
+void CDarkel::RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeaponId, bool headShotted, int32 playerId) {
     switch (killedPed.m_nPedType) {
     case PED_TYPE_COP:
     case PED_TYPE_DEALER:
@@ -496,7 +503,7 @@ void CDarkel::RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeap
             break;
         }
 
-        destroyedModelCounters[arg4 + 2 * killedPed.m_nModelIndex]++;
+        RegisteredKills[killedPed.m_nModelIndex][playerId]++;
         CStats::IncrementStat(STAT_PEOPLE_YOUVE_WASTED);
         if (killedPed.bChrisCriminal) {
             CStats::PedsKilledOfThisType[PED_TYPE_CRIMINAL]++;
@@ -509,7 +516,7 @@ void CDarkel::RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeap
         }
         CStats::IncrementStat(STAT_KILLS_SINCE_LAST_CHECKPOINT);
 
-        if (!arg4 && !FindPlayerPed(PED_TYPE_PLAYER1)->bInVehicle) {
+        if (playerId == PED_TYPE_PLAYER1 && !FindPlayerPed(PED_TYPE_PLAYER1)->bInVehicle) {
             CGangWars::AddKillToProvocation(killedPed.m_nPedType);
         }
 
@@ -520,12 +527,12 @@ void CDarkel::RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeap
 }
 
 // 0x43DF20
-void CDarkel::RegisterCarBlownUpByPlayer(CVehicle& vehicle, int32 arg2) {
+void CDarkel::RegisterCarBlownUpByPlayer(CVehicle& vehicle, int32 playerId) {
     if (ThisVehicleShouldBeKilledForFrenzy(vehicle)) {
         KillsNeeded--;
         AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE);
     }
-    destroyedModelCounters[arg2 + 2 * vehicle.m_nModelIndex]++;
+    RegisteredKills[vehicle.m_nModelIndex][playerId]++;
 
     switch (vehicle.GetVehicleAppearance()) {
     case VEHICLE_APPEARANCE_AUTOMOBILE:
@@ -552,4 +559,22 @@ void CDarkel::RegisterCarBlownUpByPlayer(CVehicle& vehicle, int32 arg2) {
             CStats::IncrementStat(STAT_HIGHEST_CIVILIAN_VEHICLES_DESTROYED_ON_RAMPAGE);
         }
     }
+}
+
+// unused
+// 0x43D740
+uint8 CDarkel::CalcFade(uint32 t, uint32 begin, uint32 end) {
+    if (t < begin || t > end) {
+        return 0;
+    }
+
+    if (t >= begin + 500) {
+        if (t <= end - 500) {
+            return 255;
+        }
+
+        return 255 * (end - t) / 500;
+    }
+
+    return 255 * (t - begin) / 500;
 }

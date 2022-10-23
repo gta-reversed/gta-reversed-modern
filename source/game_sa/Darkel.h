@@ -20,7 +20,7 @@ enum eDarkelStatus {
 
 class CDarkel {
 public:
-    static int16** RegisteredKills; // int16 RegisteredKills[800][2];
+    inline static std::array<int16[2], 800>& RegisteredKills = *reinterpret_cast<std::array<int16[2], 800>*>(0x969A50);
     inline static char*& pStartMessage = *reinterpret_cast<char**>(0x96A6D0);
     inline static uint32& AmmoInterruptedWeapon = *reinterpret_cast<uint32*>(0x96A6D4);
     inline static eWeaponType& InterruptedWeaponType = *reinterpret_cast<eWeaponType*>(0x96A6D8);
@@ -49,15 +49,15 @@ public:
     static bool ThisVehicleShouldBeKilledForFrenzy(const CVehicle& vehicle);
     static void StartFrenzy(eWeaponType weaponType, int32 timeLimit, uint16 killsNeeded, int32 modelToKill, char* startMessage, int32 modelToKill2, int32 modelToKill3, int32 modelToKill4, bool standardSoundAndMessages, bool needHeadShot);
     static void ResetModelsKilledByPlayer(int32 playerId);
-    static int32 QueryModelsKilledByPlayer(int32 player, int32 modelId);
-    static int32 FindTotalPedsKilledByPlayer(int32 player);
+    static int16 QueryModelsKilledByPlayer(int32 modelId, int32 playerId);
+    static int32 FindTotalPedsKilledByPlayer(int32 playerId);
     static void DealWithWeaponChangeAtEndOfFrenzy();
     static bool CheckDamagedWeaponType(eWeaponType damageWeaponId, eWeaponType expectedDamageWeaponId);
     static void Update();
     static void ResetOnPlayerDeath();
     static void FailKillFrenzy();
-    static void RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeaponId, bool headShotted, int32 arg4);
-    static void RegisterCarBlownUpByPlayer(CVehicle& vehicle, int32 arg2);
-};
+    static void RegisterKillByPlayer(const CPed& killedPed, eWeaponType damageWeaponId, bool headShotted, int32 playerId);
+    static void RegisterCarBlownUpByPlayer(CVehicle& vehicle, int32 playerId);
 
-inline static std::array<int16, 1600>& destroyedModelCounters = *reinterpret_cast<std::array<int16, 1600>*>(0x969A50);
+    static uint8 CalcFade(uint32 t, uint32 begin, uint32 end);
+};
