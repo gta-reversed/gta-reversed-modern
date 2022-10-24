@@ -145,7 +145,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
     }
     PSGLOBAL(instance) = instance;
 
-    0x7487, { .reversed = false }CF
+    // 0x7487CF
     WinInput::Initialise();
 
     // todo: CInputEvents::MapMouseButtons && See ASM
@@ -208,7 +208,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
         gamma.Init();
 
         while (!RsGlobal.quit) {
-            if (FrontEndMenuManager.m_bLoadingSavedGame) {
+            if (FrontEndMenuManager.m_bStartGameLoading) {
                 break;
             }
 
@@ -220,108 +220,100 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
                 DispatchMessageA(&Msg);
             } else if (ForegroundApp) {
                 switch (gGameState) {
-                    case GAME_STATE_INITIAL:
-                        CLoadingScreen::LoadSplashes(true, false);
-                        CLoadingScreen::Init(true, true);
-                        CLoadingScreen::DoPCTitleFadeOut();
-                        CLoadingScreen::DoPCTitleFadeIn();
-                        CLoadingScreen::Shutdown();
+                case GAME_STATE_INITIAL:
+                    CLoadingScreen::LoadSplashes(true, false);
+                    CLoadingScreen::Init(true, true);
+                    CLoadingScreen::DoPCTitleFadeOut();
+                    CLoadingScreen::DoPCTitleFadeIn();
+                    CLoadingScreen::Shutdown();
 
-                        CLoadingScreen::LoadSplashes(true, true);
-                        CLoadingScreen::Init(true, true);
-                        CLoadingScreen::DoPCTitleFadeOut();
-                        CLoadingScreen::DoPCTitleFadeIn();
-                        CLoadingScreen::Shutdown();
-                        gGameState = GAME_STATE_LOGO;
-                        break;
-                    case GAME_STATE_LOGO:
-                        if (!Windowed) {
-                            VideoPlayer::Play(nCmdShow, "movies\\Logo.mpg");
-                        }
-                        gGameState = GAME_STATE_PLAYING_LOGO;
-                        break;
-                    case GAME_STATE_PLAYING_LOGO:
-                    case GAME_STATE_PLAYING_INTRO: // 0x748B17
-                    {
-                        CPad::UpdatePads();
-                        auto* pad = CPad::GetPad();
-                        if (Windowed
-                        || ControlsManager.GetJoyButtonJustDown()
-                        || pad->NewState.CheckForInput()
-                        || CPad::IsMouseLButtonPressed()
-                        || CPad::IsEnterJustPressed()
-                        || pad->IsStandardKeyJustPressed(VK_SPACE)
-                        || CPad::IsMenuKeyJustPressed()
-                        || CPad::IsTabJustPressed()
-                        ) {
-                            gGameState = eGameState(gGameState + 1);
-                        }
-                        break;
+                    CLoadingScreen::LoadSplashes(true, true);
+                    CLoadingScreen::Init(true, true);
+                    CLoadingScreen::DoPCTitleFadeOut();
+                    CLoadingScreen::DoPCTitleFadeIn();
+                    CLoadingScreen::Shutdown();
+                    gGameState = GAME_STATE_LOGO;
+                    break;
+                case GAME_STATE_LOGO:
+                    if (!Windowed) {
+                        VideoPlayer::Play(nCmdShow, "movies\\Logo.mpg");
                     }
-                    case GAME_STATE_TITLE:
-                        VideoPlayer::Shutdown();
-                        VideoPlayer::Play(nCmdShow, FrontEndMenuManager.GetMovieFileName());
-                        gGameState = GAME_STATE_PLAYING_INTRO;
-                        break;
-                    case GAME_STATE_FRONTEND_LOADING:
-                        VideoPlayer::Shutdown();
-                        CLoadingScreen::Init(true, false);
-                        CLoadingScreen::DoPCTitleFadeOut();
-                        if (!CGame::InitialiseEssentialsAfterRW()) {
-                            RsGlobal.quit = true;
-                        }
-                        CGame::InitialiseCoreDataAfterRW();
-                        gGameState = GAME_STATE_FRONTEND_LOADED;
-                        anisotropySupportedByGFX = (RwD3D9GetCaps()->RasterCaps & D3DPRASTERCAPS_ANISOTROPY) != 0; // todo: func
-                        break;
-                    case GAME_STATE_FRONTEND_LOADED:
-                        FrontEndMenuManager.m_bMenuActive = true;
-                        FrontEndMenuManager.m_bMainMenuSwitch = true;
-                        if (VideoModeNotSelected) {
-                            FrontEndMenuManager.m_nAppliedResolution = gCurrentVideoMode;
-                            FrontEndMenuManager.m_nResolution = gCurrentVideoMode;
-                            VideoModeNotSelected = false;
-                        }
-                        gGameState = GAME_STATE_FRONTEND_IDLE;
-                        CLoadingScreen::DoPCTitleFadeIn();
-                        break;
-                    case GAME_STATE_FRONTEND_IDLE: // 0x748CB2
-                    {
-                        WINDOWPLACEMENT windowPlacement { .length = 44 };
-                        GetWindowPlacement(PSGLOBAL(window), &windowPlacement);
-                        if (windowPlacement.showCmd != SW_SHOWMINIMIZED) {
-                            RsEventHandler(rsRENDER, nullptr);
-                        }
+                    gGameState = GAME_STATE_PLAYING_LOGO;
+                    break;
+                case GAME_STATE_PLAYING_LOGO:
+                case GAME_STATE_PLAYING_INTRO: // 0x748B17
+                {
+                    CPad::UpdatePads();
+                    auto* pad = CPad::GetPad();
+                    if (Windowed || ControlsManager.GetJoyButtonJustDown() || pad->NewState.CheckForInput() || CPad::IsMouseLButtonPressed() || CPad::IsEnterJustPressed() ||
+                        pad->IsStandardKeyJustPressed(VK_SPACE) || CPad::IsMenuKeyJustPressed() || CPad::IsTabJustPressed()) {
+                        gGameState = eGameState(gGameState + 1);
+                    }
+                    break;
+                }
+                case GAME_STATE_TITLE:
+                    VideoPlayer::Shutdown();
+                    VideoPlayer::Play(nCmdShow, FrontEndMenuManager.GetMovieFileName());
+                    gGameState = GAME_STATE_PLAYING_INTRO;
+                    break;
+                case GAME_STATE_FRONTEND_LOADING:
+                    VideoPlayer::Shutdown();
+                    CLoadingScreen::Init(true, false);
+                    CLoadingScreen::DoPCTitleFadeOut();
+                    if (!CGame::InitialiseEssentialsAfterRW()) {
+                        RsGlobal.quit = true;
+                    }
+                    CGame::InitialiseCoreDataAfterRW();
+                    gGameState = GAME_STATE_FRONTEND_LOADED;
+                    anisotropySupportedByGFX = (RwD3D9GetCaps()->RasterCaps & D3DPRASTERCAPS_ANISOTROPY) != 0; // todo: func
+                    break;
+                case GAME_STATE_FRONTEND_LOADED:
+                    FrontEndMenuManager.m_bMenuActive = true;
+                    FrontEndMenuManager.m_bMainMenuSwitch = true;
+                    if (VideoModeNotSelected) {
+                        FrontEndMenuManager.m_nPrefsVideoMode = gCurrentVideoMode;
+                        FrontEndMenuManager.m_nDisplayVideoMode = gCurrentVideoMode;
+                        VideoModeNotSelected = false;
+                    }
+                    gGameState = GAME_STATE_FRONTEND_IDLE;
+                    CLoadingScreen::DoPCTitleFadeIn();
+                    break;
+                case GAME_STATE_FRONTEND_IDLE: // 0x748CB2
+                {
+                    WINDOWPLACEMENT windowPlacement{.length = 44};
+                    GetWindowPlacement(PSGLOBAL(window), &windowPlacement);
+                    if (windowPlacement.showCmd != SW_SHOWMINIMIZED) {
+                        RsEventHandler(rsFRONTENDIDLE, nullptr);
+                    }
 
-                        if (!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bLoadingData) {
+                    if (!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bLoadingData) {
+                        gGameState = GAME_STATE_LOADING_STARTED;
+                        if (FrontEndMenuManager.m_bLoadingData) {
                             gGameState = GAME_STATE_LOADING_STARTED;
-                            if (FrontEndMenuManager.m_bLoadingData) {
-                                gGameState = GAME_STATE_LOADING_STARTED;
-                            }
                         }
-                        break;
                     }
-                    case GAME_STATE_LOADING_STARTED:
-                        AudioEngine.StartLoadingTune();
-                        InitialiseGame();
-                        gGameState = GAME_STATE_IDLE;
-                        FrontEndMenuManager.m_bMainMenuSwitch = false;
-                        AudioEngine.InitialisePostLoading();
+                    break;
+                }
+                case GAME_STATE_LOADING_STARTED:
+                    AudioEngine.StartLoadingTune();
+                    InitialiseGame();
+                    gGameState = GAME_STATE_IDLE;
+                    FrontEndMenuManager.m_bMainMenuSwitch = false;
+                    AudioEngine.InitialisePostLoading();
+                    break;
+                case GAME_STATE_IDLE: {
+                    if (!RwInitialized)
                         break;
-                    case GAME_STATE_IDLE:
-                    {
-                        if (!RwInitialized)
-                            break;
 
-                        auto v9_1 = 1000.0f / (float)RsGlobal.frameLimit;
-                        auto v9_2 = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
-                        if (!FrontEndMenuManager.m_bFrameLimiterOn && CReplay::Mode != REPLAY_MODE_1 && !AudioEngine.IsBeatInfoPresent() || v9_1 < v9_2) {
-                            RsEventHandler(rsIDLE, (void*)true);
-                        }
-                        break;
+                    auto v9_1 = 1000.0f / (float)RsGlobal.frameLimit;
+                    auto v9_2 = (float)CTimer::GetCurrentTimeInCycles() / (float)CTimer::GetCyclesPerMillisecond();
+                    if (!FrontEndMenuManager.m_bPrefsFrameLimiter && CReplay::Mode != eReplayMode::MODE_PLAYBACK && !AudioEngine.IsBeatInfoPresent() || v9_1 < v9_2) {
+                        RsEventHandler(rsIDLE, (void*)true);
                     }
-                    default:
-                        break;
+                    break;
+                }
+                default:
+                    break;
                 }
                 if (!isForeground) {
                     isForeground = true;
@@ -337,20 +329,27 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
         // 0x748DDA
         RwInitialized = false;
         FrontEndMenuManager.UnloadTextures();
-        if (!FrontEndMenuManager.m_bLoadingSavedGame) {
+        if (!FrontEndMenuManager.m_bStartGameLoading) {
             break;
         }
 
+        // load game
         CCheat::ResetCheats();
         CTimer::Stop();
 
-        if (FrontEndMenuManager.m_bLoadingSavedGame) {
+        if (FrontEndMenuManager.m_bStartGameLoading) {
             CGame::ShutDownForRestart();
             CGame::InitialiseWhenRestarting();
-            FrontEndMenuManager.m_bLoadingSavedGame = false;
+            FrontEndMenuManager.m_bStartGameLoading = false;
         } else if (bNewGameFirstTime) {
             CTimer::Stop();
-            gGameState = eGameState(2 * (FrontEndMenuManager.field_5E != 1) + 6);
+            gGameState = [&] {
+                if (FrontEndMenuManager.m_nGameState != 1) {
+                    return GAME_STATE_LOADING_STARTED;
+                } else {
+                    return GAME_STATE_FRONTEND_LOADED;
+                }
+            }();
         } else {
             CCheat::ResetCheats();
             CGame::ShutDownForRestart();
@@ -358,8 +357,8 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
             CGame::InitialiseWhenRestarting();
         }
         bNewGameFirstTime = false;
-        FrontEndMenuManager.field_5E = 0;
-        FrontEndMenuManager.m_bLoadingSavedGame = false;
+        FrontEndMenuManager.m_nGameState = 0;
+        FrontEndMenuManager.m_bStartGameLoading = false;
     }
 
     // if game is loaded, shutdown it

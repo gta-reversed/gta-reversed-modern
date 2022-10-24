@@ -1068,12 +1068,3 @@ void CMenuManager::SmallMessageScreen(const char* key) {
 void CMenuManager::SetBrightness(float brightness, bool arg2) {
     gamma.SetGamma(brightness / 512.0f, arg2);
 }
-
-// NOTSA 0x748BDD
-const char* CMenuManager::GetMovieFileName() const {
-    if (m_nTitleLanguage == 12 || m_nTitleLanguage == 7) {
-        return "movies\\GTAtitlesGER.mpg";
-    } else {
-        return "movies\\GTAtitles.mpg";
-    }
-}

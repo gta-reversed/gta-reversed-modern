@@ -5,6 +5,7 @@
 #define GAME_LIMIT_FPS 30
 #define GAME_LEVEL_FILE "DATA//GTA.DAT"
 
+static inline int32& gGameState = *(int32*)0xC8D4C0;
 static inline bool ForegroundApp = *(bool*)0x8D621C;
 
 static inline RwRGBA& gColourTop    = *(RwRGBA*)0xB72CA0;
