@@ -54,6 +54,9 @@
 #include "CustomBuildingRenderer.h"
 #include "Hud.h"
 #include "CarFXRenderer.h"
+#include <ProcObjectMan.h>
+#include <InterestingEvents.h>
+#include <WindModifiers.h>
 #include "GrassRenderer.h"
 
 char (&CGame::aDatFile)[32] = *reinterpret_cast<char (*)[32]>(0xB728EC);
@@ -151,7 +154,7 @@ bool CGame::CanSeeOutSideFromCurrArea() {
 
 // 0x53C4B0
 bool CGame::CanSeeWaterFromCurrArea() {
-    return !CanSeeOutSideFromCurrArea() || currArea == AREA_CODE_5;
+    return CanSeeOutSideFromCurrArea() || currArea == AREA_CODE_5;
 }
 
 // 0x53C500
@@ -172,8 +175,8 @@ bool CGame::Shutdown() {
     return plugin::CallAndReturn<bool, 0x53C900>();
 
     g_breakMan.Exit();
-    // g_interiorMan.Exit();
-    // g_procObjMan.Exit();
+    g_interiorMan.Exit();
+    g_procObjMan.Exit();
     g_waterCreatureMan.Exit();
     D3DResourceSystem::SetUseD3DResourceBuffering(false);
     CStencilShadowObject::Shutdown();
@@ -271,8 +274,8 @@ void CGame::ShutDownForRestart() {
     memset(CTheZones::ZonesVisited, 0, sizeof(CTheZones::ZonesVisited));
     CTheScripts::UndoBuildingSwaps();
     CTheScripts::UndoEntityInvisibilitySettings();
-    // todo: g_interiorMan.Exit();
-    // todo: g_procObjMan.Exit();
+    g_interiorMan.Exit();
+    g_procObjMan.Exit();
     g_waterCreatureMan.Exit();
     CRopes::Shutdown();
     CWorld::ClearForRestart();
@@ -291,13 +294,13 @@ void CGame::ShutDownForRestart() {
     g_breakMan.ResetAll();
     g_boneNodeMan.Reset();
     g_ikChainMan.Reset();
-    // todo: g_realTimeShadowMan.Shutdown();
+    g_realTimeShadowMan.Exit();
     CTheZones::ResetZonesRevealed();
     CEntryExitManager::ShutdownForRestart();
     CShopping::ShutdownForRestart();
     CTagManager::ShutdownForRestart();
     CStuntJumpManager::ShutdownForRestart();
-    FindPlayerPed(0);
+    FindPlayerPed(PED_TYPE_PLAYER1);
     CVehicle::ms_forceVehicleLightsOff = false;
 }
 
@@ -460,7 +463,7 @@ bool CGame::Init2(const char* datFile) {
     CPopulation::Initialise();
 
     LoadingScreen(nullptr, nullptr);
-    CWorld::PlayerInFocus = 0;
+    CWorld::PlayerInFocus = PED_TYPE_PLAYER1;
     CCoronas::Init();
     CShadows::Init();
 
@@ -511,12 +514,12 @@ bool CGame::Init3(const char* datFile) {
     return plugin::CallAndReturn<bool, 0x5BA400, const char*>(datFile);
 
     LoadingScreen("Loading the Game", "Load scene");
-    CPad::GetPad(0)->Clear(true, true);
-    CPad::GetPad(1)->Clear(true, true);
+    CPad::GetPad(PED_TYPE_PLAYER1)->Clear(true, true);
+    CPad::GetPad(PED_TYPE_PLAYER2)->Clear(true, true);
     D3DResourceSystem::SetUseD3DResourceBuffering(true);
     LoadingScreen("Loading the Game", "Procedural Interiors");
-    // g_interiorMan.Init();
-    // g_procObjMan.Init();
+    g_interiorMan.Init();
+    g_procObjMan.Init();
     g_waterCreatureMan.Init();
     g_realTimeShadowMan.Init();
     return true;
@@ -632,7 +635,128 @@ void CGame::InitialiseWhenRestarting() {
 
 // 0x53BEE0
 void CGame::Process() {
-    plugin::Call<0x53BEE0>();
+    return plugin::Call<0x53BEE0>();
+    CPad::UpdatePads();
+    g_LoadMonitor.BeginFrame();
+
+    const auto GetTime = [] { return CTimer::GetCurrentTimeInCycles() / CTimer::GetCyclesPerMillisecond(); };
+
+    const auto timeBeforeStreamingUpdate = GetTime();
+    CStreaming::Update();
+    auto updateTimeDelta = GetTime() - timeBeforeStreamingUpdate;
+
+    CCutsceneMgr::Update();
+
+    if (!CCutsceneMgr::IsCutsceneProcessing() && !CTimer::GetIsCodePaused()) {
+        FrontEndMenuManager.Process();
+    }
+
+    CTheZones::Update();
+    CCover::Update();
+    CAudioZones::Update(false, TheCamera.GetPosition());
+    CWindModifiers::Number = 0;
+
+    if (!CTimer::GetIsUserPaused() && !CTimer::GetIsCodePaused()) {
+        CSprite2d::SetRecipNearClip();
+        CSprite2d::InitPerFrame();
+        CFont::InitPerFrame();
+        CCheat::DoCheats();
+        CClock::Update();
+        CWeather::Update();
+        CTheScripts::Process();
+        CCollision::Update();
+        ThePaths.UpdateStreaming(false);
+        CTrain::UpdateTrains();
+        CHeli::UpdateHelis();
+        CDarkel::Update();
+        CSkidmarks::Update();
+        CGlass::Update();
+        CWanted::UpdateEachFrame();
+        CCreepingFire::Update();
+        CSetPieces::Update();
+        gFireManager.Update();
+
+        if (updateTimeDelta >= 4) {
+            CPopulation::Update(false);
+        } else {
+            const auto timeBeforePopulationUpdate = GetTime();
+            CPopulation::Update(true);
+            updateTimeDelta = GetTime() - timeBeforePopulationUpdate;
+        }
+        CWeapon::UpdateWeapons();
+
+        if (!CCutsceneMgr::IsRunning()) {
+            CTheCarGenerators::Process();
+        }
+
+        if (CReplay::Mode != MODE_PLAYBACK) {
+            CCranes::UpdateCranes();
+        }
+
+        CClouds::Update();
+        CMovingThings::Update();
+        CWaterCannons::Update();
+        CUserDisplay::Process();
+        CReplay::Update();
+        CWorld::Process();
+
+        g_LoadMonitor.EndFrame();
+
+        if (!CTimer::bSkipProcessThisFrame) {
+            CPickups::Update();
+            CCarCtrl::PruneVehiclesOfInterest();
+            CGarages::Update();
+            CEntryExitManager::Update();
+            CStuntJumpManager::Update();
+            CBirds::Update();
+            CSpecialFX::Update();
+            CRopes::Update();
+        }
+        CPostEffects::Update();
+        CTimeCycle::Update();
+        CPopCycle::Update();
+
+        if (g_InterestingEvents.m_b1) {
+            g_InterestingEvents.ScanForNearbyEntities();
+        }
+
+        if (CReplay::ShouldStandardCameraBeProcessed()) {
+            TheCamera.Process();
+        } else {
+            TheCamera.CCamera::ProcessFade();
+        }
+
+        CCullZones::Update();
+        if (CReplay::Mode != MODE_PLAYBACK) {
+            CGameLogic::Update();
+            CGangWars::Update();
+        }
+        CConversations::Update();
+        CPedToPlayerConversations::Update();
+        CBridge::Update();
+        CCoronas::DoSunAndMoon();
+        CCoronas::Update();
+        CShadows::UpdatePermanentShadows();
+
+        CPlantMgr::Update(TheCamera.GetPosition());
+        CCustomBuildingRenderer::Update();
+
+        CStencilShadows::Process(TheCamera.GetPosition());
+        if (CReplay::Mode != MODE_PLAYBACK) {
+            if (updateTimeDelta < 4) {
+                CCarCtrl::GenerateRandomCars();
+            }
+            CRoadBlocks::GenerateRoadBlocks();
+            CCarCtrl::RemoveDistantCars();
+            CCarCtrl::RemoveCarsIfThePoolGetsFull();
+        }
+
+        g_fx.Update(TheCamera.m_pRwCamera, CTimer::GetTimeStepInSeconds());
+        g_breakMan.Update(CTimer::GetTimeStep());
+        g_interiorMan.Update();
+        g_procObjMan.Update();
+        g_waterCreatureMan.Update(CTimer::GetTimeStepInSeconds());
+    }
 }
 
 // 0x53BCF0
@@ -686,11 +810,11 @@ void CGame::ReInitGameObjectVariables() {
     CSpecialFX::Init();
     CRopes::Init();
     CWaterCannons::Init();
-    // todo: CDecisionMakerTypesFileLoader::ReStart();
+    CDecisionMakerTypesFileLoader::ReStart();
     CVehicleRecording::Init();
     gFireManager.Init();
-    // todo: g_interiorMan.Init();
-    // todo: g_procObjMan.Init();
+    g_interiorMan.Init();
+    g_procObjMan.Init();
     g_waterCreatureMan.Init();
     g_realTimeShadowMan.Init();
     CStreaming::RemoveInappropriatePedModels();
