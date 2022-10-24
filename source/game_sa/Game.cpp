@@ -78,14 +78,14 @@ void CGame::InjectHooks() {
     RH_ScopedInstall(CanSeeWaterFromCurrArea, 0x53C4B0);
     RH_ScopedInstall(Init1, 0x5BF840);
     RH_ScopedInstall(Init2, 0x5BA1A0);
-    RH_ScopedInstall(Init3, 0x5BA400, { .reversed = false });
+    RH_ScopedInstall(Init3, 0x5BA400);
     RH_ScopedInstall(Initialise, 0x53BC80);
-    RH_ScopedInstall(InitialiseCoreDataAfterRW, 0x5BFA90, { .reversed = false });
-    RH_ScopedInstall(InitialiseEssentialsAfterRW, 0x5BA160, { .reversed = false });
+    RH_ScopedInstall(InitialiseCoreDataAfterRW, 0x5BFA90);
+    RH_ScopedInstall(InitialiseEssentialsAfterRW, 0x5BA160);
     RH_ScopedInstall(InitialiseOnceBeforeRW, 0x53BB50);
     RH_ScopedInstall(InitialiseRenderWare, 0x5BD600, { .reversed = false });
     RH_ScopedInstall(InitialiseWhenRestarting, 0x53C680);
-    RH_ScopedInstall(Process, 0x53BEE0, { .reversed = false });
+    RH_ScopedInstall(Process, 0x53BEE0);
     RH_ScopedInstall(ReInitGameObjectVariables, 0x53BCF0, { .reversed = false });
     RH_ScopedInstall(ReloadIPLs, 0x53BED0);
     RH_ScopedInstall(ShutDownForRestart, 0x53C550, { .reversed = false });
@@ -511,8 +511,6 @@ bool CGame::Init2(const char* datFile) {
 
 // 0x5BA400
 bool CGame::Init3(const char* datFile) {
-    return plugin::CallAndReturn<bool, 0x5BA400, const char*>(datFile);
-
     LoadingScreen("Loading the Game", "Load scene");
     CPad::GetPad(PED_TYPE_PLAYER1)->Clear(true, true);
     CPad::GetPad(PED_TYPE_PLAYER2)->Clear(true, true);
@@ -542,14 +540,26 @@ void CGame::Initialise(const char* datFile) {
 }
 
 // 0x5BFA90
-void CGame::InitialiseCoreDataAfterRW() {
-    plugin::Call<0x5BFA90>();
+bool CGame::InitialiseCoreDataAfterRW() {
+    CTempColModels::Initialise();
+    gHandlingDataMgr.LoadHandlingData();
+    gHandlingDataMgr.field_0 = 0.1f;
+    gHandlingDataMgr.fWheelFriction = 0.9f;
+    gHandlingDataMgr.field_8 = 1.0f;
+    gHandlingDataMgr.field_C = 0.8f;
+    gHandlingDataMgr.field_10 = 0.98f;
+
+    g_surfaceInfos.Init();
+    CPedStats::Initialise();
+    CTimeCycle::Initialise();
+    CPopCycle::Initialise();
+    CVehicleRecording::InitAtStartOfGame();
+
+    return AudioEngine.Initialise() && g_breakMan.Init() && g_boneNodeMan.Init() && !g_ikChainMan.Init();
 }
 
 // 0x5BA160
 bool CGame::InitialiseEssentialsAfterRW() {
-    return plugin::CallAndReturn<bool, 0x5BA160>();
-
     CMemoryMgr::PushMemId(MEM_30);
     TheText.Load(false);
     if (!CCarFXRenderer::Initialise() || !CGrassRenderer::Initialise() || !CCustomBuildingRenderer::Initialise()) {
@@ -635,7 +645,7 @@ void CGame::InitialiseWhenRestarting() {
 
 // 0x53BEE0
 void CGame::Process() {
-    return plugin::Call<0x53BEE0>();
+    //return plugin::Call<0x53BEE0>();
     CPad::UpdatePads();
     g_LoadMonitor.BeginFrame();
 

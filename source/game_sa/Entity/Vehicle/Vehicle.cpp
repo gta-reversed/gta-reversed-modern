@@ -1689,7 +1689,7 @@ void CVehicle::AddDamagedVehicleParticles() {
 
 // 0x6D2BF0
 void CVehicle::MakeDirty(CColPoint& colPoint) {
-    if (g_surfaceInfos->IsWater(colPoint.m_nSurfaceTypeB) || CWeather::IsRainy()) {
+    if (g_surfaceInfos.IsWater(colPoint.m_nSurfaceTypeB) || CWeather::IsRainy()) {
         if (m_fDirtLevel <= 1.0f) {
             return;
         }
@@ -1697,7 +1697,7 @@ void CVehicle::MakeDirty(CColPoint& colPoint) {
         return;
     }
 
-    if (g_surfaceInfos->MakesCarDirty(colPoint.m_nSurfaceTypeB)) {
+    if (g_surfaceInfos.MakesCarDirty(colPoint.m_nSurfaceTypeB)) {
         if (m_vecMoveSpeed.Magnitude2D() <= 0.06f) {
             return;
         }
@@ -1705,7 +1705,7 @@ void CVehicle::MakeDirty(CColPoint& colPoint) {
         return;
     }
 
-    if (g_surfaceInfos->MakesCarClean(colPoint.m_nSurfaceTypeB)) {
+    if (g_surfaceInfos.MakesCarClean(colPoint.m_nSurfaceTypeB)) {
         if (m_vecMoveSpeed.Magnitude2D() <= 0.04f || m_fDirtLevel <= 4.0f) {
             return;
         }

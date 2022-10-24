@@ -73,4 +73,4 @@ public:
 };
 VALIDATE_SIZE(SurfaceInfos_c, 0x8F4);
 
-extern SurfaceInfos_c* g_surfaceInfos;
+inline static SurfaceInfos_c& g_surfaceInfos = *reinterpret_cast<SurfaceInfos_c*>(0xB79538);

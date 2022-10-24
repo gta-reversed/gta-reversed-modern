@@ -981,7 +981,7 @@ int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPlayerPed* player, bool bAvoi
                 CAnimBlendHierarchy* animHierarchy = nullptr;
                 CAnimBlendAssocGroup* animGroup = &CAnimManager::ms_aAnimAssocGroups[player->m_nAnimGroup];
 
-                if (player->m_pPlayerData->m_bPlayerSprintDisabled || g_surfaceInfos->CantSprintOn(player->m_nContactSurface) ||
+                if (player->m_pPlayerData->m_bPlayerSprintDisabled || g_surfaceInfos.CantSprintOn(player->m_nContactSurface) ||
                     (animHierarchy = animGroup->GetAnimation(ANIM_ID_RUN)->m_pHierarchy, animHierarchy == animGroup->GetAnimation(ANIM_ID_SPRINT)->m_pHierarchy)) {
                     if (pad->GetSprint()) {
                         player->m_nMoveState = PEDMOVE_RUN;

@@ -74,7 +74,7 @@ bool CPlantSurfPropMgr::LoadPlantsDat(const char* filename) {
         do {
             switch (field) {
             case ePlantField::NAME:
-                surfaceId = g_surfaceInfos->GetSurfaceIdFromName(surfaceName);
+                surfaceId = g_surfaceInfos.GetSurfaceIdFromName(surfaceName);
                 if (surfaceId != SURFACE_DEFAULT) {
                     surfProperties = GetSurfProperties(surfaceId);
                     if (surfProperties || (surfProperties = AllocSurfProperties(surfaceId, false))) {

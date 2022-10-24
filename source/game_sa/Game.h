@@ -33,7 +33,7 @@ public:
     static bool Init2(const char* datFile);
     static bool Init3(const char* datFile);
     static void Initialise(char const *datFile);
-    static void InitialiseCoreDataAfterRW();
+    static bool InitialiseCoreDataAfterRW();
     static bool InitialiseEssentialsAfterRW();
     static void InitialiseOnceBeforeRW();
     static bool InitialiseRenderWare();

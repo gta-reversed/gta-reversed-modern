@@ -2234,7 +2234,7 @@ void CPed::PlayFootSteps() {
         const float animTimeMult = walkAssoc->m_nAnimId != AnimationId::ANIM_ID_WALK ? 8.f / 15.f : 5.f / 15.f;
 
         float adhesionMult{ 1.f };
-        switch (g_surfaceInfos->GetAdhesionGroup(m_nContactSurface)) {
+        switch (g_surfaceInfos.GetAdhesionGroup(m_nContactSurface)) {
         case eAdhesionGroup::ADHESION_GROUP_SAND: { // 0X5E599F
             if (CGeneral::GetRandomNumber() % 64) {
                 m_vecAnimMovingShiftLocal *= 0.2f;
