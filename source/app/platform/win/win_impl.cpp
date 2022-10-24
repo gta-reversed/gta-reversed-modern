@@ -32,15 +32,11 @@ void psWarningMessage(const char* str) {
 
 // 0x745210
 bool psCameraBeginUpdate(RwCamera* camera) {
-    return plugin::CallAndReturn<bool, 0x745210, RwCamera*>(camera);
-
-    /*
     if (RwCameraBeginUpdate(Scene.m_pRwCamera)) {
         return true;
     }
     RsEventHandler(rsACTIVATE, nullptr);
     return false;
-    */
 }
 
 // 0x745240

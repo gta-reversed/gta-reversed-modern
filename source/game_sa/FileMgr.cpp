@@ -39,7 +39,7 @@ inline void createDirectory(const wchar_t* path)
 }
 
 // 0x744FB0
-static char* InitUserDirectories()
+char* InitUserDirectories()
 {
     if (gta_user_dir_path[0] != '\0')
         return gta_user_dir_path;
