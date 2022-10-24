@@ -90,11 +90,35 @@ void CGame::InjectHooks() {
     RH_ScopedInstall(DrasticTidyUpMemory, 0x53C810);
     RH_ScopedInstall(FinalShutdown, 0x53BC30);
     RH_ScopedInstall(TidyUpMemory, 0x53C500);
+
+    RH_ScopedGlobalInstall(CameraDestroy, 0x72FD90);
 }
 
 // 0x72FD90
-static void CameraDestroy(RwCamera *pRwCamera) {
-    plugin::Call<0x72FD90, RwCamera *>(pRwCamera);
+static void CameraDestroy(RwCamera *rwCamera) {
+    if (!rwCamera)
+        return;
+
+    if (auto obj = rwCamera->object.object; obj.parent) {
+        rwObjectHasFrameSetFrame(&obj, NULL);
+        RwFrameDestroy((RwFrame*)obj.parent);
+    }
+
+    if (auto frameBuffer = rwCamera->frameBuffer; frameBuffer) {
+        RwRasterDestroy(frameBuffer);
+        if (auto parent = frameBuffer->parent; parent && parent != frameBuffer) {
+            RwRasterDestroy(parent);
+        }
+    }
+
+    if (auto zBuffer = rwCamera->zBuffer; zBuffer) {
+        RwRasterDestroy(zBuffer);
+        if (auto parent = zBuffer->parent; parent && parent != zBuffer) {
+            RwRasterDestroy(parent);
+        }
+    }
+
+    RwCameraDestroy(rwCamera);
 }
 
 // 0x53BB80
