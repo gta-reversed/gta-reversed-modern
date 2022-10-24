@@ -54,6 +54,7 @@
 #include "CustomBuildingRenderer.h"
 #include "Hud.h"
 #include "CarFXRenderer.h"
+#include "GrassRenderer.h"
 
 char (&CGame::aDatFile)[32] = *reinterpret_cast<char (*)[32]>(0xB728EC);
 int32& CGame::currLevel = *reinterpret_cast<int32*>(0xB7290C);
@@ -124,12 +125,12 @@ static void CameraDestroy(RwCamera *rwCamera) {
 // 0x53BB80
 void CGame::ShutdownRenderWare() {
     CDebugMenu::Shutdown();
-    RwMatrixDestroy(CGame::m_pWorkingMatrix1);
-    RwMatrixDestroy(CGame::m_pWorkingMatrix2);
+    RwMatrixDestroy(m_pWorkingMatrix1);
+    RwMatrixDestroy(m_pWorkingMatrix2);
     CLoadingScreen::Shutdown();
     CHud::Shutdown();
     CFont::Shutdown();
-    std::ranges::for_each(CWorld::Players, [](auto& info) { info.DeletePlayerSkin(); });
+    rng::for_each(CWorld::Players, [](auto& info) { info.DeletePlayerSkin(); });
     CPlayerSkin::Shutdown();
     DestroyDebugFont();
     LightsDestroy(Scene.m_pRpWorld);
@@ -150,14 +151,13 @@ bool CGame::CanSeeOutSideFromCurrArea() {
 
 // 0x53C4B0
 bool CGame::CanSeeWaterFromCurrArea() {
-    return !currArea || currArea == AREA_CODE_5;
+    return !CanSeeOutSideFromCurrArea() || currArea == AREA_CODE_5;
 }
 
 // 0x53C500
 void CGame::TidyUpMemory(bool a1, bool clearD3Dmem) {
-    if (FindPlayerPed(0) && clearD3Dmem) {
-        D3DResourceSystem::TidyUpD3DTextures(100);
-        D3DResourceSystem::TidyUpD3DIndexBuffers(200);
+    if (FindPlayerPed(PED_TYPE_PLAYER1) && clearD3Dmem) {
+        DrasticTidyUpMemory(a1);
     }
 }
 
@@ -177,8 +177,8 @@ bool CGame::Shutdown() {
     g_waterCreatureMan.Exit();
     D3DResourceSystem::SetUseD3DResourceBuffering(false);
     CStencilShadowObject::Shutdown();
-    // CPlantMgr::Shutdown();
-    // CGrassRenderer::Shutdown();
+    CPlantMgr::Shutdown();
+    CGrassRenderer::Shutdown();
     CRopes::Shutdown();
     CVehicleRecording::ShutDown();
     CReplay::FinishPlayback();
@@ -186,7 +186,7 @@ bool CGame::Shutdown() {
     CTrain::Shutdown();
     CBirds::Shutdown();
     CSpecialFX::Shutdown();
-    // CGarages::Shutdown();
+    CGarages::Shutdown();
     CStuntJumpManager::Shutdown();
     CMovingThings::Shutdown();
     CWeapon::ShutdownWeapons();
@@ -224,7 +224,7 @@ bool CGame::Shutdown() {
     CSkidmarks::Shutdown();
     CWeaponEffects::Shutdown();
     CTimeCycle::Shutdown();
-    // CCover::m_ListOfProcessedBuildings.Flush();
+    CCover::m_ListOfProcessedBuildings.Flush();
     CPedGroups::CleanUpForShutDown();
     CTaskSequences::CleanUpForShutdown();
     CInformGroupEventQueue::Flush();
@@ -267,7 +267,7 @@ void CGame::ShutDownForRestart() {
     CReplay::FinishPlayback();
     CReplay::EmptyReplayBuffer();
     CMovingThings::Shutdown();
-    std::ranges::for_each(CWorld::Players, [](auto& info) { info.Clear(); });
+    rng::for_each(CWorld::Players, [](auto& info) { info.Clear(); });
     memset(CTheZones::ZonesVisited, 0, sizeof(CTheZones::ZonesVisited));
     CTheScripts::UndoBuildingSwaps();
     CTheScripts::UndoEntityInvisibilitySettings();
@@ -319,13 +319,13 @@ void CGame::GenerateTempPedAtStartOfNetworkGame() {
 // 0x5BF840
 bool CGame::Init1(char const *datFile) {
     CMaths::InitMathsTables();
-    strcpy(CGame::aDatFile, datFile);
+    strcpy(aDatFile, datFile);
     CPools::Initialise();
     CPlaceable::InitMatrixArray();
     CIniFile::LoadIniFile();
     D3DResourceSystem::SetUseD3DResourceBuffering(false);
-    CGame::currLevel = LEVEL_NAME_COUNTRY_SIDE;
-    CGame::currArea = AREA_CODE_NORMAL_WORLD;
+    currLevel = LEVEL_NAME_COUNTRY_SIDE;
+    currArea = AREA_CODE_NORMAL_WORLD;
 
     CMemoryMgr::PushMemId(MEM_TEXTURES);
     gameTxdSlot = CTxdStore::AddTxdSlot("generic");
@@ -415,7 +415,7 @@ bool CGame::Init2(const char* datFile) {
     LoadingScreen("Loading the Game", "Setup paths");
     CPathFind::PreparePathData();
 
-    std::ranges::for_each(CWorld::Players, [](auto& info) {
+    rng::for_each(CWorld::Players, [](auto& info) {
         info.Clear();
         info.LoadPlayerSkin();
     });
@@ -524,18 +524,18 @@ bool CGame::Init3(const char* datFile) {
 
 // 0x53BC80
 void CGame::Initialise(const char* datFile) {
-    CGame::Init1(datFile);
+    Init1(datFile);
     CColAccel::startCache();
     CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
     CFileLoader::LoadLevel(datFile);
     CColAccel::endCache();
-    CGame::Init2(datFile);
+    Init2(datFile);
     CStencilShadows::Init();
     LoadingScreen("Loading the Game", "Start script");
     CTheScripts::StartTestScript();
     CTheScripts::Process();
     TheCamera.Process();
-    CGame::Init3(datFile);
+    Init3(datFile);
 }
 
 // 0x5BFA90
@@ -549,7 +549,7 @@ bool CGame::InitialiseEssentialsAfterRW() {
 
     CMemoryMgr::PushMemId(MEM_30);
     TheText.Load(false);
-    if (!CCarFXRenderer::Initialise() || /* !CGrassRenderer::Initialise() ||*/ !CCustomBuildingRenderer::Initialise()) {
+    if (!CCarFXRenderer::Initialise() || !CGrassRenderer::Initialise() || !CCustomBuildingRenderer::Initialise()) {
         return false;
     }
     CMemoryMgr::PopMemId();
@@ -587,7 +587,7 @@ void CGame::InitialiseWhenRestarting() {
         }
     }
 
-    CGame::ReInitGameObjectVariables();
+    ReInitGameObjectVariables();
     CTimeCycle::InitForRestart();
     CWeaponEffects::Init();
     CPlane::InitPlaneGenerationAndRemoval();
@@ -608,13 +608,13 @@ void CGame::InitialiseWhenRestarting() {
                 }
             }
             TheCamera.SetFadeColour(0, 0, 0);
-            CGame::ShutDownForRestart();
+            ShutDownForRestart();
             CTimer::Stop();
             CTimer::Initialise();
             FrontEndMenuManager.m_bLoadingData = false;
-            CGame::ReInitGameObjectVariables();
-            CGame::currLevel = 0;
-            CGame::bMissionPackGame = 0;
+            ReInitGameObjectVariables();
+            currLevel = 0;
+            bMissionPackGame = 0;
             CCollision::SortOutCollisionAfterLoad();
         }
     }
@@ -661,12 +661,12 @@ void CGame::ReInitGameObjectVariables() {
     CPopCycle::Initialise();
     CDraw::SetFOV(120.0f);
     CDraw::ms_fLODDistance = 500.0f;
-    CGame::currArea = AREA_CODE_NORMAL_WORLD;
+    currArea = AREA_CODE_NORMAL_WORLD;
     CPed::Initialise();
     CWeapon::InitialiseWeapons();
     CPopulation::Initialise();
-    std::ranges::for_each(CWorld::Players, [](auto& info) { info.Clear(); });
-    CWorld::PlayerInFocus = 0;
+    rng::for_each(CWorld::Players, [](auto& info) { info.Clear(); });
+    CWorld::PlayerInFocus = PED_TYPE_PLAYER1;
     CGlass::Init();
     gbLARiots_NoPoliceCars = false;
     gbLARiots = false;
@@ -702,8 +702,8 @@ void CGame::ReInitGameObjectVariables() {
         TheCamera.Process();
         CTrain::InitTrains();
     }
-    CPad::GetPad(0)->Clear(true, true);
-    CPad::GetPad(1)->Clear(true, true);
+    CPad::GetPad(PED_TYPE_PLAYER1)->Clear(true, true);
+    CPad::GetPad(PED_TYPE_PLAYER2)->Clear(true, true);
 }
 
 // 0x53BED0
