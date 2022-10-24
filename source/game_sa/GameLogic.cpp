@@ -42,22 +42,22 @@ void CGameLogic::InjectHooks() {
     RH_ScopedInstall(InitAtStartOfGame, 0x441210);
     RH_ScopedInstall(IsCoopGameGoingOn, 0x441390);
     RH_ScopedInstall(IsPlayerAllowedToGoInThisDirection, 0x441E10, { .reversed = false });
-    RH_ScopedInstall(IsPlayerUse2PlayerControls, 0x442020, { .reversed = false });
+    RH_ScopedInstall(IsPlayerUse2PlayerControls, 0x442020);
     RH_ScopedInstall(IsPointWithinLineArea, 0x4416E0, { .reversed = false });
     RH_ScopedInstall(IsSkipWaitingForScriptToFadeIn, 0x4416C0);
-    RH_ScopedInstall(LaRiotsActiveHere, 0x441C10, { .reversed = false });
+    RH_ScopedInstall(LaRiotsActiveHere, 0x441C10);
     RH_ScopedInstall(Save, 0x5D33C0, { .reversed = false });
     RH_ScopedInstall(Load, 0x5D3440, { .reversed = false });
-    RH_ScopedInstall(PassTime, 0x4414C0, { .reversed = false });
-    RH_ScopedInstall(Remove2ndPlayerIfPresent, 0x4413C0, { .reversed = false });
-    RH_ScopedInstall(ResetStuffUponResurrection, 0x442980, { .reversed = false });
-    RH_ScopedInstall(RestorePedsWeapons, 0x441D30, { .reversed = false });
+    RH_ScopedInstall(PassTime, 0x4414C0);
+    RH_ScopedInstall(Remove2ndPlayerIfPresent, 0x4413C0);
+    RH_ScopedInstall(ResetStuffUponResurrection, 0x442980, { .reversed = true });
+    RH_ScopedInstall(RestorePedsWeapons, 0x441D30);
     RH_ScopedInstall(RestorePlayerStuffDuringResurrection, 0x442060, { .reversed = false });
     RH_ScopedInstall(SetPlayerWantedLevelForForbiddenTerritories, 0x441770, { .reversed = false });
-    RH_ScopedInstall(SetUpSkip, 0x4423C0, { .reversed = false });
-    RH_ScopedInstall(SkipCanBeActivated, 0x4415C0, { .reversed = false });
+    RH_ScopedInstall(SetUpSkip, 0x4423C0);
+    RH_ScopedInstall(SkipCanBeActivated, 0x4415C0);
     RH_ScopedInstall(SortOutStreamingAndMemory, 0x441440);
-    RH_ScopedInstall(StopPlayerMovingFromDirection, 0x441290, { .reversed = false });
+    RH_ScopedInstall(StopPlayerMovingFromDirection, 0x441290);
     RH_ScopedInstall(Update, 0x442AD0, { .reversed = false });
     RH_ScopedInstall(UpdateSkip, 0x442480, { .reversed = false });
 }
@@ -122,7 +122,6 @@ bool CGameLogic::IsPlayerAllowedToGoInThisDirection(CPed* ped, float moveDirecti
 
 // 0x442020
 bool CGameLogic::IsPlayerUse2PlayerControls(CPed* ped) {
-    return plugin::CallAndReturn<bool, 0x442020, CPed*>(ped);
     if (!IsCoopGameGoingOn())
         return false;
 
@@ -148,7 +147,6 @@ bool CGameLogic::IsSkipWaitingForScriptToFadeIn() {
 
 // 0x441C10
 bool CGameLogic::LaRiotsActiveHere() {
-    return plugin::CallAndReturn<bool, 0x441C10>();
     const auto coors = FindPlayerCoors();
     if (coors.z > 950.0f)
         return false;
@@ -197,7 +195,6 @@ void CGameLogic::Load() {
 
 // 0x4414C0
 void CGameLogic::PassTime(uint32 minutes) {
-    return plugin::Call<0x4414C0, uint32>(minutes);
     auto weekDay = CClock::GetGameWeekDay();
     auto hours = CClock::GetGameClockHours();
     auto mins = minutes + CClock::GetGameClockMinutes();
@@ -212,7 +209,10 @@ void CGameLogic::PassTime(uint32 minutes) {
         hours %= 24;
 
         CStats::IncrementStat(STAT_DAYS_PASSED_IN_GAME, (float)days);
-        weekDay = (CClock::GetGameWeekDay() + days) % 8 + 1;
+        weekDay += days;
+        if (weekDay > 7) {
+            weekDay = 1;
+        }
     }
 
     CClock::SetGameClock(hours, mins, weekDay);
@@ -221,7 +221,6 @@ void CGameLogic::PassTime(uint32 minutes) {
 
 // 0x4413C0
 void CGameLogic::Remove2ndPlayerIfPresent() {
-    return plugin::Call<0x4413C0>();
     if (auto ped = FindPlayerPed(PED_TYPE_PLAYER2)) {
         CWorld::Remove(ped);
         delete ped;
@@ -236,14 +235,13 @@ void CGameLogic::Remove2ndPlayerIfPresent() {
 
 // 0x442980
 void CGameLogic::ResetStuffUponResurrection() {
-    return plugin::Call<0x442980>();
     auto& player = CWorld::Players[CWorld::PlayerInFocus];
     auto playerPed = player.m_pPed;
 
     CMessages::ClearMessages(false);
     CCarCtrl::ClearInterestingVehicleList();
     CWorld::ClearExcitingStuffFromArea(player.GetPos(), 4000.0f, true);
-    PassTime(720);
+    PassTime(12 * 60);
     RestorePlayerStuffDuringResurrection(playerPed, playerPed->GetPosition(), playerPed->m_fCurrentRotation * RadiansToDegrees(1.0f));
     SortOutStreamingAndMemory(playerPed->GetPosition(), playerPed->GetHeading());
     TheCamera.m_fCamShakeForce = 0.0;
@@ -261,8 +259,6 @@ void CGameLogic::ResetStuffUponResurrection() {
 
 // 0x441D30
 void CGameLogic::RestorePedsWeapons(CPed* ped) {
-    return plugin::Call<0x441D30, CPed*>(ped);
-
     static CWeapon (&s_SavedWeapons)[13] = *(CWeapon(*)[13])0x96A9B8;
 
     ped->ClearWeapons();
@@ -290,7 +286,6 @@ void CGameLogic::SetPlayerWantedLevelForForbiddenTerritories(uint16 townNumber) 
 
 // 0x4423C0
 void CGameLogic::SetUpSkip(CVector coors, float angle, bool afterMission, CEntity* vehicle, bool finishedByScript) {
-    return plugin::Call<0x4423C0, CVector, float, bool, CEntity*, bool>(coors, angle, afterMission, vehicle, finishedByScript);
     if (SkipState == SKIP_STATE_2) {
         TheCamera.SetFadeColour(0, 0, 0);
         TheCamera.Fade(0.5f, eFadeFlag::FADE_OUT);
@@ -308,7 +303,6 @@ void CGameLogic::SetUpSkip(CVector coors, float angle, bool afterMission, CEntit
 
 // 0x4415C0
 bool CGameLogic::SkipCanBeActivated() {
-    return plugin::CallAndReturn<bool, 0x4415C0>();
     if (!CGame::CanSeeOutSideFromCurrArea() || TheCamera.m_bFading || (SkipState != 1 && SkipState != 4))
         return false;
 
@@ -332,8 +326,7 @@ bool CGameLogic::SkipCanBeActivated() {
 // 0x441440
 void CGameLogic::SortOutStreamingAndMemory(const CVector& translation, float angle) {
     CTimer::Stop();
-    float farClip = CTimeCycle::FindFarClipForCoors(translation);
-    RwCameraSetFarClipPlane(TheCamera.m_pRwCamera, farClip);
+    RwCameraSetFarClipPlane(TheCamera.m_pRwCamera, CTimeCycle::FindFarClipForCoors(translation));
     CStreaming::FlushRequestList();
     CStreaming::DeleteRwObjectsAfterDeath(translation);
     CStreaming::RemoveUnusedModelsInLoadedList();
@@ -346,7 +339,21 @@ void CGameLogic::SortOutStreamingAndMemory(const CVector& translation, float ang
 
 // 0x441290
 void CGameLogic::StopPlayerMovingFromDirection(int32 playerId, CVector direction) {
-    plugin::Call<0x441290, int32, CVector>(playerId, direction);
+    if (auto obj = [ped = FindPlayerPed(playerId)]() -> CPhysical* {
+        if (ped->IsInVehicle()) {
+            return ped->GetVehicleIfInOne();
+        } else if (ped->bIsStanding || ped->m_pIntelligence->GetTaskJetPack()) {
+            return ped;
+        }
+
+        return nullptr;
+    }()) {
+        direction.z = std::max(0.0f, direction.z);
+
+        if (const auto mul = direction * obj->m_vecMoveSpeed; mul.ComponentwiseSum() < 0.0f) {
+            obj->m_vecMoveSpeed -= mul * direction;
+        }
+    }
 }
 
 // 0x442AD0

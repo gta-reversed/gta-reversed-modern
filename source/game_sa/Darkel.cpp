@@ -376,8 +376,12 @@ void CDarkel::Update() {
         DealWithWeaponChangeAtEndOfFrenzy();
     };
 
-    const auto remaining = TimeOfFrenzyStart + TimeLimit - CTimer::GetTimeInMS();
-    if (remaining <= 0 && TimeLimit >= 0 && Status != DARKEL_STATUS_4) {
+    const int32 remaining = TimeOfFrenzyStart + TimeLimit - CTimer::GetTimeInMS();
+    if (remaining <= 0 && TimeLimit >= 0) {
+        if (Status == DARKEL_STATUS_4) {
+            CGameLogic::GameState = GAME_STATE_TITLE;
+            CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS();
+        }
         StartFrenzy();
     } else if (Status != DARKEL_STATUS_4 || FindPlayerPed(PED_TYPE_PLAYER2)) {
         if (remaining / 1000 != PreviousTime) {
@@ -392,7 +396,6 @@ void CDarkel::Update() {
         StartFrenzy();
     }
 
-    // end if no kills needed
     if (KillsNeeded <= 0) {
         if (Status == DARKEL_STATUS_4) {
             CGameLogic::GameState = GAME_STATE_PLAYING_INTRO;
