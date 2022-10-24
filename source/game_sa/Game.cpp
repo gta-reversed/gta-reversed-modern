@@ -83,12 +83,12 @@ void CGame::InjectHooks() {
     RH_ScopedInstall(InitialiseCoreDataAfterRW, 0x5BFA90);
     RH_ScopedInstall(InitialiseEssentialsAfterRW, 0x5BA160);
     RH_ScopedInstall(InitialiseOnceBeforeRW, 0x53BB50);
-    RH_ScopedInstall(InitialiseRenderWare, 0x5BD600, { .reversed = false });
+    RH_ScopedInstall(InitialiseRenderWare, 0x5BD600);
     RH_ScopedInstall(InitialiseWhenRestarting, 0x53C680);
     RH_ScopedInstall(Process, 0x53BEE0);
-    RH_ScopedInstall(ReInitGameObjectVariables, 0x53BCF0, { .reversed = false });
+    RH_ScopedInstall(ReInitGameObjectVariables, 0x53BCF0);
     RH_ScopedInstall(ReloadIPLs, 0x53BED0);
-    RH_ScopedInstall(ShutDownForRestart, 0x53C550, { .reversed = false });
+    RH_ScopedInstall(ShutDownForRestart, 0x53C550);
     RH_ScopedInstall(Shutdown, 0x53C900, { .reversed = false });
     RH_ScopedInstall(ShutdownRenderWare, 0x53BB80);
     RH_ScopedInstall(DrasticTidyUpMemory, 0x53C810);
@@ -96,6 +96,7 @@ void CGame::InjectHooks() {
     RH_ScopedInstall(TidyUpMemory, 0x53C500);
 
     RH_ScopedGlobalInstall(CameraDestroy, 0x72FD90);
+    RH_ScopedGlobalInstall(ValidateVersion, 0x5BA0BC);
 }
 
 // 0x72FD90
@@ -123,6 +124,43 @@ static void CameraDestroy(RwCamera *rwCamera) {
     }
 
     RwCameraDestroy(rwCamera);
+}
+
+// 0x5BA0BC
+void ValidateVersion() {
+    const auto Fail = [] {
+        NOTSA_UNREACHABLE("Invalid version");
+        LoadingScreen("Invalid version", 0, 0);
+        while (true)
+            ;
+    };
+
+    auto file = CFileMgr::OpenFile("models\\coll\\peds.col", "rb");
+    if (!file) {
+        Fail();
+    }
+    CFileMgr::Seek(file, 100, 0);
+
+    // FORMAT: grandtheftauto3Version <mj>.<mn>, encoded into the file.
+    char buf[128];
+    for (auto i = 0; i < 128; i++) {
+        CFileMgr::Read(file, &buf[i], 1u);
+        buf[i] -= 23;
+
+        if (buf[i] == '\0') {
+            break;
+        }
+        CFileMgr::Seek(file, 99, 1);
+    }
+
+    if (strncmp(buf, "grandtheftauto3", 15u) != 0) {
+        Fail();
+    }
+
+    static char(&version_name)[64] = *reinterpret_cast<char(*)[64]>(0xB72C28);
+
+    strncpy(version_name, &buf[15], 64u);
+    CFileMgr::CloseFile(file);
 }
 
 // 0x53BB80
@@ -263,8 +301,6 @@ bool CGame::Shutdown() {
 
 // 0x53C550
 void CGame::ShutDownForRestart() {
-    return plugin::Call<0x53C550>();
-
     D3DResourceSystem::SetUseD3DResourceBuffering(false);
     CVehicleRecording::ShutDown();
     CReplay::FinishPlayback();
@@ -582,7 +618,59 @@ void CGame::InitialiseOnceBeforeRW() {
 
 // 0x5BD600
 bool CGame::InitialiseRenderWare() {
-    return plugin::CallAndReturn<bool, 0x5BD600>();
+    ValidateVersion();
+    D3DResourceSystem::Init();
+    CTxdStore::Initialise();
+    CVisibilityPlugins::Initialise();
+
+    const auto camera = RwCameraCreate();
+    if (!camera) {
+        CameraDestroy(camera);
+        return false;
+    }
+
+    const auto frame = RwFrameCreate();
+    rwObjectHasFrameSetFrame(&camera->object.object, frame);
+    camera->frameBuffer = RwRasterCreate(RsGlobal.maximumWidth, RsGlobal.maximumHeight, 0, rwRASTERTYPECAMERA);
+    camera->zBuffer = RwRasterCreate(RsGlobal.maximumWidth, RsGlobal.maximumHeight, 0, rwRASTERTYPEZBUFFER);
+    if (!camera->object.object.parent) {
+        CameraDestroy(camera);
+        return false;
+    }
+
+    Scene.m_pRwCamera = camera;
+    TheCamera.Init();
+    TheCamera.SetRwCamera(Scene.m_pRwCamera);
+    RwCameraSetFarClipPlane(Scene.m_pRwCamera, 2000.0f);
+    RwCameraSetNearClipPlane(Scene.m_pRwCamera, 0.9f);
+    CameraSize(Scene.m_pRwCamera, nullptr, 0.7f, DEFAULT_ASPECT_RATIO);
+
+    RwBBox bb;
+    bb.sup.z = 10000.0;
+    bb.sup.y = 10000.0;
+    bb.sup.x = 10000.0;
+    bb.inf.z = -10000.0;
+    bb.inf.y = -10000.0;
+    bb.inf.x = -10000.0;
+
+    if (Scene.m_pRpWorld = RpWorldCreate(&bb); !Scene.m_pRpWorld) {
+        CameraDestroy(Scene.m_pRwCamera);
+        Scene.m_pRwCamera = nullptr;
+
+        return false;
+    }
+    RpWorldAddCamera(Scene.m_pRpWorld, Scene.m_pRwCamera);
+    LightsCreate(Scene.m_pRpWorld);
+    CreateDebugFont();
+    CFont::Initialise();
+    CHud::Initialise();
+    CPlayerSkin::Initialise();
+    CPostEffects::Initialise();
+    CGame::m_pWorkingMatrix1 = RwMatrixCreate();
+    CGame::m_pWorkingMatrix2 = RwMatrixCreate();
+
+    _rwD3D9DeviceSetRestoreCallback(_rwD3D9DeviceGetRestoreCallback());
+    return true;
 }
 
 // 0x53C680
@@ -645,7 +733,6 @@ void CGame::InitialiseWhenRestarting() {
 
 // 0x53BEE0
 void CGame::Process() {
-    //return plugin::Call<0x53BEE0>();
     CPad::UpdatePads();
     g_LoadMonitor.BeginFrame();
 
@@ -771,8 +858,6 @@ void CGame::Process() {
 
 // 0x53BCF0
 void CGame::ReInitGameObjectVariables() {
-    return plugin::Call<0x53BCF0>();
-
     TheCamera.Init();
     CGameLogic::InitAtStartOfGame();
     CGangWars::InitAtStartOfGame();
