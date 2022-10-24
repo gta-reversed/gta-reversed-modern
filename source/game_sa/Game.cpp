@@ -89,7 +89,7 @@ void CGame::InjectHooks() {
     RH_ScopedInstall(ReInitGameObjectVariables, 0x53BCF0);
     RH_ScopedInstall(ReloadIPLs, 0x53BED0);
     RH_ScopedInstall(ShutDownForRestart, 0x53C550);
-    RH_ScopedInstall(Shutdown, 0x53C900, { .reversed = false });
+    RH_ScopedInstall(Shutdown, 0x53C900);
     RH_ScopedInstall(ShutdownRenderWare, 0x53BB80);
     RH_ScopedInstall(DrasticTidyUpMemory, 0x53C810);
     RH_ScopedInstall(FinalShutdown, 0x53BC30);
@@ -210,8 +210,6 @@ void CGame::DrasticTidyUpMemory(bool a1) {
 
 // 0x53C900
 bool CGame::Shutdown() {
-    return plugin::CallAndReturn<bool, 0x53C900>();
-
     g_breakMan.Exit();
     g_interiorMan.Exit();
     g_procObjMan.Exit();
@@ -281,15 +279,16 @@ bool CGame::Shutdown() {
     CHud::ReInitialise();
     CTxdStore::RemoveTxdSlot(gameTxdSlot);
     CTxdStore::RemoveTxdSlot(CTxdStore::FindTxdSlot("particle"));
-    // col1[1].m_boundBox.m_vecMin.z = 0.0;
-    // col1[0].m_pColData = 0;
+    col1[1].m_boundBox.m_vecMin.z = 0.0;
+    col1[0].m_pColData = 0;
     CTaskSimpleClimb::Shutdown();
 
     { // todo: move to CPedAttractor::Shutdown() or something
-    // delete CPedAttractor::ms_tasks.First;
-    // CPedAttractor::ms_tasks.First = 0;
-    // CPedAttractor::ms_tasks.Last = 0;
-    // CPedAttractor::ms_tasks.End = 0;
+        // delete CPedAttractor::ms_tasks.First;
+        // CPedAttractor::ms_tasks.First = 0;
+        // CPedAttractor::ms_tasks.Last = 0;
+        // CPedAttractor::ms_tasks.End = 0;
+        CPedAttractor::ms_tasks = {};
     }
 
     CTheScripts::RemoveScriptTextureDictionary();

@@ -54,6 +54,8 @@ extern int32 &gameTxdSlot;
 extern bool& gbLARiots;
 extern bool& gbLARiots_NoPoliceCars;
 
+static inline std::array<CColModel, 2>& col1 = *reinterpret_cast<std::array<CColModel, 2>*>(0xC17824);
+
 bool MoveMem(void **pMem);
 bool MoveColModelMemory(CColModel &colModel, bool a2);
 RpGeometry *MoveGeometryMemory(RpGeometry *geometry);
