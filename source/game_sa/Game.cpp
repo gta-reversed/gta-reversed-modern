@@ -54,21 +54,10 @@
 #include "CustomBuildingRenderer.h"
 #include "Hud.h"
 #include "CarFXRenderer.h"
-#include <ProcObjectMan.h>
-#include <InterestingEvents.h>
-#include <WindModifiers.h>
+#include "ProcObjectMan.h"
+#include "InterestingEvents.h"
+#include "WindModifiers.h"
 #include "GrassRenderer.h"
-
-char (&CGame::aDatFile)[32] = *reinterpret_cast<char (*)[32]>(0xB728EC);
-int32& CGame::currLevel = *reinterpret_cast<int32*>(0xB7290C);
-uint8& CGame::bMissionPackGame = *reinterpret_cast<uint8*>(0xB72910);
-int32& CGame::currArea = *reinterpret_cast<int32*>(0xB72914);
-RwMatrix*& CGame::m_pWorkingMatrix1 = *reinterpret_cast<RwMatrix**>(0xB72920);
-RwMatrix*& CGame::m_pWorkingMatrix2 = *reinterpret_cast<RwMatrix**>(0xB72924);
-int32& gameTxdSlot = *reinterpret_cast<int32*>(0xB728E8);
-
-bool& gbLARiots = *(bool*)0xB72958;
-bool& gbLARiots_NoPoliceCars = *(bool*)0xB72959;
 
 void CGame::InjectHooks() {
     RH_ScopedClass(CGame);
@@ -141,7 +130,7 @@ void ValidateVersion() {
     }
     CFileMgr::Seek(file, 100, 0);
 
-    // FORMAT: grandtheftauto3Version <mj>.<mn>, encoded into the file.
+    // FORMAT: grandtheftauto3Version <mj>.<mn>, encoded and spreaded into the file.
     char buf[128];
     for (auto i = 0; i < 128; i++) {
         CFileMgr::Read(file, &buf[i], 1u);
