@@ -9,7 +9,6 @@ bool& CGameLogic::bPlayersCanBeInSeparateCars = *reinterpret_cast<bool*>(0x96A8B
 bool& CGameLogic::bPlayersCannotTargetEachOther = *reinterpret_cast<bool*>(0x96A8B2);
 
 //CGameLogic::AfterDeathStartPointOrientations[16] = 0x96A850;
-//CVector& CGameLogic::AfterDeathStartPoints[16] = *reinterpret_cast<CVector*>(0x96A8D4);
 int32& CGameLogic::NumAfterDeathStartPoints = *reinterpret_cast<int32*>(0x96A890);
 
 bool& CGameLogic::SkipToBeFinishedByScript = *reinterpret_cast<bool*>(0x96A894);
@@ -113,7 +112,7 @@ void CGameLogic::InitAtStartOfGame() {
 // 2 players are playing
 // 0x441390
 bool CGameLogic::IsCoopGameGoingOn() {
-    return CWorld::Players[0].m_pPed && CWorld::Players[1].m_pPed;
+    return FindPlayerPed(PED_TYPE_PLAYER1) && FindPlayerPed(PED_TYPE_PLAYER2);
 }
 
 // 0x441E10
@@ -124,6 +123,13 @@ bool CGameLogic::IsPlayerAllowedToGoInThisDirection(CPed* ped, float moveDirecti
 // 0x442020
 bool CGameLogic::IsPlayerUse2PlayerControls(CPed* ped) {
     return plugin::CallAndReturn<bool, 0x442020, CPed*>(ped);
+    if (!IsCoopGameGoingOn())
+        return false;
+
+    if (n2PlayerPedInFocus == PED_TYPE_PLAYER2)
+        return true;
+
+    return ped != CWorld::Players[n2PlayerPedInFocus].m_pPed;
 }
 
 // 0x4416E0
@@ -143,6 +149,20 @@ bool CGameLogic::IsSkipWaitingForScriptToFadeIn() {
 // 0x441C10
 bool CGameLogic::LaRiotsActiveHere() {
     return plugin::CallAndReturn<bool, 0x441C10>();
+    const auto coors = FindPlayerCoors();
+    if (coors.z > 950.0f)
+        return false;
+
+    if (CCheat::IsActive(CHEAT_RIOT_MODE))
+        return true;
+
+    CRect rt1(1620.0f, -2178.0f, 2824.0f, -1067.0f),
+          rt2(157.0f, -1950.0f, 1630.0f, -1192.0f);
+
+    if (gbLARiots && (rt1.IsPointInside(coors) || rt2.IsPointInside(coors)))
+        return true;
+
+    return false;
 }
 
 // 0x5D33C0
@@ -176,18 +196,67 @@ void CGameLogic::Load() {
 }
 
 // 0x4414C0
-void CGameLogic::PassTime(uint32 time) {
-    plugin::Call<0x4414C0, uint32>(time);
+void CGameLogic::PassTime(uint32 minutes) {
+    return plugin::Call<0x4414C0, uint32>(minutes);
+    auto weekDay = CClock::GetGameWeekDay();
+    auto hours = CClock::GetGameClockHours();
+    auto mins = minutes + CClock::GetGameClockMinutes();
+
+    if (mins >= 60) {
+        hours += mins / 60;
+        mins %= 60;
+    }
+
+    if (hours >= 24) {
+        auto days = hours / 24;
+        hours %= 24;
+
+        CStats::IncrementStat(STAT_DAYS_PASSED_IN_GAME, (float)days);
+        weekDay = (CClock::GetGameWeekDay() + days) % 8 + 1;
+    }
+
+    CClock::SetGameClock(hours, mins, weekDay);
+    CPickups::PassTime(minutes * 1000);
 }
 
 // 0x4413C0
 void CGameLogic::Remove2ndPlayerIfPresent() {
-    plugin::Call<0x4413C0>();
+    return plugin::Call<0x4413C0>();
+    if (auto ped = FindPlayerPed(PED_TYPE_PLAYER2)) {
+        CWorld::Remove(ped);
+        delete ped;
+        CWorld::Players[PED_TYPE_PLAYER2].m_pPed = nullptr;
+
+        auto player1 = FindPlayerPed(PED_TYPE_PLAYER1);
+        CClothes::RebuildPlayer(player1, false);
+        player1->CantBeKnockedOffBike = false;
+    }
+    n2PlayerPedInFocus = 2;
 }
 
 // 0x442980
 void CGameLogic::ResetStuffUponResurrection() {
-    plugin::Call<0x442980>();
+    return plugin::Call<0x442980>();
+    auto& player = CWorld::Players[CWorld::PlayerInFocus];
+    auto playerPed = player.m_pPed;
+
+    CMessages::ClearMessages(false);
+    CCarCtrl::ClearInterestingVehicleList();
+    CWorld::ClearExcitingStuffFromArea(player.GetPos(), 4000.0f, true);
+    PassTime(720);
+    RestorePlayerStuffDuringResurrection(playerPed, playerPed->GetPosition(), playerPed->m_fCurrentRotation * RadiansToDegrees(1.0f));
+    SortOutStreamingAndMemory(playerPed->GetPosition(), playerPed->GetHeading());
+    TheCamera.m_fCamShakeForce = 0.0;
+    TheCamera.SetMotionBlur(0, 0, 0, 0, 0);
+    CPad::GetPad(0)->StopShaking(0);
+    CReferences::RemoveReferencesToPlayer();
+    CCarCtrl::CountDownToCarsAtStart = 10;
+    CPopulation::m_CountDownToPedsAtStart = 10;
+    CPad::GetPad(CWorld::PlayerInFocus)->DisablePlayerControls = 0;
+
+    playerPed->ClearWeapons();
+    GameState = GAME_STATE_INITIAL;
+    TimeOfLastEvent = 0;
 }
 
 // 0x441D30
@@ -209,8 +278,8 @@ void CGameLogic::RestorePedsWeapons(CPed* ped) {
 }
 
 // 0x442060
-void CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed* player, float x, float y, float z, float playerStartHeading) {
-    plugin::Call<0x442060, CPlayerPed*, float, float, float, float>(player, x, y, z, playerStartHeading);
+void CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed* player, CVector posn, float playerStartHeading) {
+    plugin::Call<0x442060, CPlayerPed*, CVector, float>(player, posn, playerStartHeading);
 }
 
 // townNumber ∈ [0, 1]
@@ -220,13 +289,44 @@ void CGameLogic::SetPlayerWantedLevelForForbiddenTerritories(uint16 townNumber) 
 }
 
 // 0x4423C0
-void CGameLogic::SetUpSkip(int32 fX, int32 fY, int32 fZ, float fAngle, bool bAfterMission, CEntity* vehicle, bool bFinishedByScript) {
-    plugin::Call<0x4423C0, int32, int32, int32, float, bool, CEntity*, bool>(fX, fY, fZ, fAngle, bAfterMission, vehicle, bFinishedByScript);
+void CGameLogic::SetUpSkip(CVector coors, float angle, bool afterMission, CEntity* vehicle, bool finishedByScript) {
+    return plugin::Call<0x4423C0, CVector, float, bool, CEntity*, bool>(coors, angle, afterMission, vehicle, finishedByScript);
+    if (SkipState == SKIP_STATE_2) {
+        TheCamera.SetFadeColour(0, 0, 0);
+        TheCamera.Fade(0.5f, eFadeFlag::FADE_OUT);
+    }
+    SkipState = SKIP_STATE_0;
+    CPad::GetPad(0)->bCamera = false;
+    AfterDeathStartPoints[0] = coors;
+
+    SkipTimer = CTimer::GetTimeInMS();
+    if (vehicle) {
+        vehicle->RegisterReference(SkipVehicle);
+    }
+    SkipToBeFinishedByScript = finishedByScript;
 }
 
 // 0x4415C0
 bool CGameLogic::SkipCanBeActivated() {
     return plugin::CallAndReturn<bool, 0x4415C0>();
+    if (!CGame::CanSeeOutSideFromCurrArea() || TheCamera.m_bFading || (SkipState != 1 && SkipState != 4))
+        return false;
+
+    if (auto vehicle = FindPlayerVehicle()) {
+        switch (vehicle->m_nVehicleSubType) {
+        case VEHICLE_TYPE_BIKE:
+        case VEHICLE_TYPE_AUTOMOBILE:
+        case VEHICLE_TYPE_MTRUCK:
+        case VEHICLE_TYPE_QUAD:
+        case VEHICLE_TYPE_BMX:
+            if (!SkipVehicle || SkipVehicle == vehicle) {
+                return true;
+            }
+            break;
+        }
+    }
+
+    return SkipState == 4 && FindPlayerPed()->GetIntelligence()->GetTaskSwim();
 }
 
 // 0x441440

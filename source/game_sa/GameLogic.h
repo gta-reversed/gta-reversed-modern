@@ -23,6 +23,8 @@ public:
     static CVector& vec2PlayerStartLocation;
     static bool& bPlayersCanBeInSeparateCars;
 
+    inline static std::array<CVector, 16>& AfterDeathStartPoints = *reinterpret_cast<std::array<CVector, 16>*>(0x96A8D4);
+
     static int32& TimeOfLastEvent;
     static eGameState& GameState;
     static bool& bPlayersCannotTargetEachOther;
@@ -65,13 +67,13 @@ public:
     static bool LaRiotsActiveHere();
     static void Save();
     static void Load();
-    static void PassTime(uint32 time);
+    static void PassTime(uint32 minutes);
     static void Remove2ndPlayerIfPresent();
     static void ResetStuffUponResurrection();
     static void RestorePedsWeapons(CPed* ped);
-    static void RestorePlayerStuffDuringResurrection(CPlayerPed* player, float x, float y, float z, float playerStartHeading);
+    static void RestorePlayerStuffDuringResurrection(CPlayerPed* player, CVector posn, float playerStartHeading);
     static void SetPlayerWantedLevelForForbiddenTerritories(uint16 townNumber);
-    static void SetUpSkip(int32 fX, int32 fY, int32 fZ, float fAngle, bool bAfterMission, CEntity* vehicle, bool bFinishedByScript);
+    static void SetUpSkip(CVector coors, float angle, bool afterMission, CEntity* vehicle, bool finishedByScript);
     static bool SkipCanBeActivated();
     static void SortOutStreamingAndMemory(const CVector& translation, float angle);
     static void StopPlayerMovingFromDirection(int32 playerId, CVector direction);
