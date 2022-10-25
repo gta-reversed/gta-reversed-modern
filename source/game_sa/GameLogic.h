@@ -62,7 +62,7 @@ public:
     static bool IsCoopGameGoingOn();
     static bool IsPlayerAllowedToGoInThisDirection(CPed* ped, float moveDirectionX, float moveDirectionY, float moveDirectionZ, float distanceLimit);
     static bool IsPlayerUse2PlayerControls(CPed* ped);
-    static bool IsPointWithinLineArea(CVector* points, uint32 numPoints, float x, float y);
+    static bool IsPointWithinLineArea(const CVector* points, uint32 numPoints, float x, float y);
     static bool IsSkipWaitingForScriptToFadeIn();
     static bool LaRiotsActiveHere();
     static void Save();
@@ -72,7 +72,7 @@ public:
     static void ResetStuffUponResurrection();
     static void RestorePedsWeapons(CPed* ped);
     static void RestorePlayerStuffDuringResurrection(CPlayerPed* player, CVector posn, float playerStartHeading);
-    static void SetPlayerWantedLevelForForbiddenTerritories(uint16 townNumber);
+    static void SetPlayerWantedLevelForForbiddenTerritories(bool immediately);
     static void SetUpSkip(CVector coors, float angle, bool afterMission, CEntity* vehicle, bool finishedByScript);
     static bool SkipCanBeActivated();
     static void SortOutStreamingAndMemory(const CVector& translation, float angle);

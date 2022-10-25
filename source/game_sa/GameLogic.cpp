@@ -1,5 +1,10 @@
 #include "StdInc.h"
 #include <enumerate.hpp>
+#include <MBlur.h>
+#include <EntryExitManager.h>
+#include <Garages.h>
+#include "PedClothesDesc.h"
+#include "PostEffects.h"
 
 //CGameLogic::SavedWeaponSlots
 int32& CGameLogic::nPrintFocusHelpCounter = *reinterpret_cast<int32*>(0x96A8B8);
@@ -32,12 +37,39 @@ int32& CGameLogic::n2PlayerPedInFocus = *reinterpret_cast<int32*>(0x8A5E50); // 
 
 static std::array<CWeapon, NUM_WEAPON_SLOTS>& s_SavedWeapons = *(std::array<CWeapon, NUM_WEAPON_SLOTS>*)0x96A9B8;
 
+// 0x8A5E58; San Fierro
+static const CVector town2ShapeVertices[] = {
+    {28.0, -3000.0, 0.0},
+    {-30.0, -1280.0, 0.0},
+    {-148.0, -911.0, 0.0},
+    {-487.0, -372.0, 0.0},
+    {-1028.0, -424.0, 0.0},
+    {-1145.0, 479.0, 0.0},
+    {-1461.0, 1488.0, 0.0},
+    {-3000.0, 1668.0, 0.0},
+    {-3000.0, -3000.0, 0.0}
+};
+
+// 0x8A5EC8; Las Venturas
+static const CVector town1ShapeVertices[] = {
+    {3000.0f, 535.0f, 0.0f},
+    {1759.0f, 576.0f, 0.0f},
+    {989.0f, 693.0f, 0.0f},
+    {-128.0f, 490.0f, 0.0f},
+    {-845.0f, 707.0f, 0.0f},
+    {-1477.0f, 1677.0f, 0.0f},
+    {-2154.0f, 2497.0f, 0.0f},
+    {-2971.0f, 2180.0f, 0.0f},
+    {-3000.0f, 3000.0f, 0.0f},
+    {3000.0f, 3000.0f, 0.0f}
+};
+
 void CGameLogic::InjectHooks() {
     RH_ScopedClass(CGameLogic);
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(CalcDistanceToForbiddenTrainCrossing, 0x4418E0, { .reversed = false });
-    RH_ScopedInstall(ClearSkip, 0x441560, { .reversed = false });
+    RH_ScopedInstall(ClearSkip, 0x441560);
     RH_ScopedInstall(DoWeaponStuffAtStartOf2PlayerGame, 0x4428B0);
     RH_ScopedInstall(FindCityClosestToPoint, 0x441B70);
     RH_ScopedInstall(ForceDeathRestart, 0x441240);
@@ -55,8 +87,8 @@ void CGameLogic::InjectHooks() {
     RH_ScopedInstall(ResetStuffUponResurrection, 0x442980);
     RH_ScopedInstall(StorePedsWeapons, 0x441D00);
     RH_ScopedInstall(RestorePedsWeapons, 0x441D30);
-    RH_ScopedInstall(RestorePlayerStuffDuringResurrection, 0x442060, { .reversed = false });
-    RH_ScopedInstall(SetPlayerWantedLevelForForbiddenTerritories, 0x441770, { .reversed = false });
+    RH_ScopedInstall(RestorePlayerStuffDuringResurrection, 0x442060);
+    RH_ScopedInstall(SetPlayerWantedLevelForForbiddenTerritories, 0x441770);
     RH_ScopedInstall(SetUpSkip, 0x4423C0);
     RH_ScopedInstall(SkipCanBeActivated, 0x4415C0);
     RH_ScopedInstall(SortOutStreamingAndMemory, 0x441440);
@@ -72,7 +104,15 @@ float CGameLogic::CalcDistanceToForbiddenTrainCrossing(CVector vecPoint, CVector
 
 // 0x441560
 void CGameLogic::ClearSkip(bool a1) {
-    plugin::Call<0x441560, bool>(a1);
+    if (a1 && SkipState == SKIP_STATE_4)
+        return;
+
+    if (SkipState == SKIP_STATE_2) {
+        TheCamera.SetFadeColour(0, 0, 0);
+        TheCamera.Fade(0.5f, eFadeFlag::FADE_OUT);
+    }
+    SkipState = SKIP_STATE_0;
+    CPad::GetPad(0)->bCamera = false;
 }
 
 // 0x4428B0
@@ -159,7 +199,7 @@ bool CGameLogic::IsPlayerUse2PlayerControls(CPed* ped) {
 }
 
 // 0x4416E0
-bool CGameLogic::IsPointWithinLineArea(CVector* points, uint32 numPoints, float x, float y) {
+bool CGameLogic::IsPointWithinLineArea(const CVector* points, uint32 numPoints, float x, float y) {
     for (auto&& [i, point] : notsa::enumerate(std::span{points, numPoints})) {
         const auto nextPoint = (i != numPoints - 1) ? points[i + 1] : points[0];
         if (CCollision::Test2DLineAgainst2DLine(x, y, 1'000'000.0f, 0.0f, point.x, point.y, nextPoint.x - point.x, nextPoint.y - point.y))
@@ -310,13 +350,116 @@ void CGameLogic::RestorePedsWeapons(CPed* ped) {
 
 // 0x442060
 void CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed* player, CVector posn, float playerStartHeading) {
-    plugin::Call<0x442060, CPlayerPed*, CVector, float>(player, posn, playerStartHeading);
+    ClearSkip(false);
+
+    if (player->m_fHealth <= 0.0f) {
+        CStats::UpdateStatsOnRespawn();
+    }
+    auto playerData = player->m_pPlayerData;
+    auto playerInfo = player->GetPlayerInfoForThisPlayerPed();
+
+    player->physicalFlags.bDestroyed = false;
+    player->m_fArmour = 0.0f;
+    player->m_fHealth = static_cast<float>(playerInfo->m_nMaxHealth);
+    player->m_bIsVisible = true;
+    player->m_nDeathTime = 0;
+    player->bDoBloodyFootprints = false;
+    playerData->m_nDrunkenness = 0;
+    playerData->m_nFadeDrunkenness = 0;
+    CMBlur::ClearDrunkBlur();
+    playerData->m_nDrugLevel = 0;
+    player->ClearAdrenaline();
+    player->ResetSprintEnergy();
+    if (auto& fire = player->m_pFire) {
+        fire->createdByScript = false;
+        fire->Extinguish();
+        fire = nullptr;
+    }
+    player->m_pedAudio.TurnOffJetPack();
+    player->bInVehicle = false;
+    if (auto vehicle = player->m_pVehicle) {
+        vehicle->CleanUpOldReference((CEntity**)&vehicle);
+    }
+    player->m_pVehicle = nullptr;
+    player->GetWanted()->Reset();
+    player->RestartNonPartialAnims();
+    playerInfo->MakePlayerSafe(false, 10'000.0f);
+    player->m_bRemoveFromWorld = false;
+    player->ClearWeaponTarget();
+    player->SetInitialState(false);
+    player->GetAcquaintance() = CPedType::GetPedTypeAcquaintances(player->m_nPedType);
+    CCarCtrl::ClearInterestingVehicleList();
+
+    player->Teleport(posn + CVector{0.0f, 0.0f, 1.0f}, false);
+    player->m_fCurrentRotation = player->m_fAimingRotation = DegreesToRadians(playerStartHeading);
+    player->SetHeading(player->m_fCurrentRotation);
+
+    CTheScripts::ClearSpaceForMissionEntity(posn, player);
+    CWorld::ClearExcitingStuffFromArea(posn, 4000.0, 1);
+    player->RestoreHeadingRate();
+    player->m_nAreaCode = AREA_CODE_NORMAL_WORLD;
+    player->m_pEnex = 0;
+    CEntryExitManager::ms_entryExitStackPosn = 0;
+    CGame::currArea = AREA_CODE_NORMAL_WORLD;
+    CPopulation::bInPoliceStation = 0;
+    CStreaming::RemoveBuildingsNotInArea(AREA_CODE_NORMAL_WORLD);
+    TheCamera.SetCameraDirectlyBehindForFollowPed_CamOnAString();
+    TheCamera.RestoreWithJumpCut();
+    CReferences::RemoveReferencesToPlayer();
+    CGarages::PlayerArrestedOrDied();
+    CStats::SetStatValue(STAT_KILLS_SINCE_LAST_CHECKPOINT, 0.0);
+    CShopping::RemoveLoadedShop();
+    CWorld::Remove(player);
+    CWorld::Add(player);
+    CHud::ResetWastedText();
+    CStreaming::StreamZoneModels(posn);
+    CPostEffects::m_smokeyEnable = false;
+    CTimeCycle::StopExtraColour(0);
+    CPostEffects::ScriptResetForEffects();
+
+    if (auto clothesDesc = playerData->m_pPedClothesDesc; clothesDesc->m_anModelKeys[9]) {
+        clothesDesc->SetTextureAndModel(nullptr, nullptr, CLOTHES_TEXTURE_SPECIAL);
+        CClothes::RebuildPlayer(player, false);
+    } else {
+        CClothes::RebuildPlayerIfNeeded(player);
+    }
+    CAudioZones::Update(true, posn);
+    AudioEngine.StopPoliceScanner(true);
+    CWaterLevel::FindNearestWaterAndItsFlow();
+    TheCamera.m_fDistanceToWater = 99999.898f;
 }
 
-// townNumber ∈ [0, 1]
-// 0x441770
-void CGameLogic::SetPlayerWantedLevelForForbiddenTerritories(uint16 townNumber) {
-    plugin::Call<0x441770, uint16>(townNumber);
+// @brief Set wanted level to 4 if player is in a forbidden territory.
+// @param immediately   Do position check without waiting for the frame counter.
+// @addr 0x441770
+void CGameLogic::SetPlayerWantedLevelForForbiddenTerritories(bool immediately) {
+    const auto ped = FindPlayerPed();
+    const auto coords = ped->GetPosition();
+
+    if ((!immediately && (CTimer::GetFrameCounter() % 32) != 18) || coords.z > 950.0f)
+        return;
+
+    if (ped->m_pIntelligence->GetTaskSwim() || ped->GetWantedLevel() >= 4)
+        return;
+
+    const auto SetWantedIfInArea = [&](auto* vertices, size_t size) {
+        if (IsPointWithinLineArea(vertices, size, coords.x, coords.y)) {
+            ped->SetWantedLevel(4);
+            if (immediately) {
+                ped->GetWanted()->m_nLastTimeWantedLevelChanged = 0;
+            }
+        }
+    };
+
+    // LV
+    if (CStats::GetStatValue(STAT_CITY_UNLOCKED) <= 1.0f) {
+        SetWantedIfInArea(town1ShapeVertices, std::size(town1ShapeVertices));
+    }
+
+    // SF
+    if (CStats::GetStatValue(STAT_CITY_UNLOCKED) <= 0.0f) {
+        SetWantedIfInArea(town2ShapeVertices, std::size(town2ShapeVertices));
+    }
 }
 
 // 0x4423C0
