@@ -43,12 +43,10 @@ void CCover::RemoveCoverPointsForThisEntity(CEntity* entity) {
 
 // 0x699230
 bool CCover::ShouldThisBuildingHaveItsCoverPointsCreated(CBuilding* building) {
-    const auto vecPos = FindPlayerCoors();
     CVector vecCenter;
     building->GetBoundCentre(vecCenter);
-    auto distance = vecCenter - vecPos;
     auto* mi = CModelInfo::GetModelInfo(building->m_nModelIndex);
-    return distance.Magnitude() <= mi->GetColModel()->GetBoundRadius() + 30.0F;
+    return IsPointInSphere(FindPlayerCoors(), vecCenter, mi->GetColModel()->GetBoundRadius() + 30.0f);
 }
 
 // 0x6997E0

@@ -98,7 +98,7 @@ void CAECollisionAudioEntity::PlayBulletHitCollisionSound(eSurfaceType surface, 
     }
     else if (g_surfaceInfos.IsAudioMetal(surface))
     {
-        float probability = (90.0f - angleWithColPointNorm) * 0.0055555557f; // see BoneNode_c::EulerToQuat
+        float probability = (90.0f - angleWithColPointNorm) / 180.0f; // see BoneNode_c::EulerToQuat
         if (CAEAudioUtility::ResolveProbability(probability))
         {
             do
@@ -111,11 +111,7 @@ void CAECollisionAudioEntity::PlayBulletHitCollisionSound(eSurfaceType surface, 
                 iRand = CAEAudioUtility::GetRandomNumberInRange(4, 6);
             while (iRand == m_nRandom);
         }
-    }
-    else if (g_surfaceInfos.IsAudioConcrete(surface) ||
-             g_surfaceInfos.IsAudioGravel(surface) ||
-             g_surfaceInfos.IsAudioTile(surface)
-    )
+    } else if (g_surfaceInfos.IsAudioGravelConcreteOrTile(surface))
     {
         do
             iRand = CAEAudioUtility::GetRandomNumberInRange(13, 15);

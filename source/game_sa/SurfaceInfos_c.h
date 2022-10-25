@@ -70,6 +70,10 @@ public:
     bool IsAudioLongGrass(SurfaceId id);
     bool IsAudioTile(SurfaceId id);
     float GetAdhesiveLimit(CColPoint* colPoint);
+
+    bool IsAudioGravelConcreteOrTile(SurfaceId id) {
+        return IsAudioGravel(id) || IsAudioConcrete(id) || IsAudioTile(id);
+    }
 };
 VALIDATE_SIZE(SurfaceInfos_c, 0x8F4);
 

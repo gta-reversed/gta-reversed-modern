@@ -62,7 +62,7 @@ public:
     static bool IsCoopGameGoingOn();
     static bool IsPlayerAllowedToGoInThisDirection(CPed* ped, float moveDirectionX, float moveDirectionY, float moveDirectionZ, float distanceLimit);
     static bool IsPlayerUse2PlayerControls(CPed* ped);
-    static bool IsPointWithinLineArea(int32 a1, float x, float y);
+    static bool IsPointWithinLineArea(CVector* points, uint32 numPoints, float x, float y);
     static bool IsSkipWaitingForScriptToFadeIn();
     static bool LaRiotsActiveHere();
     static void Save();

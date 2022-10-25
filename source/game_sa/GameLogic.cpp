@@ -1,4 +1,5 @@
 #include "StdInc.h"
+#include <enumerate.hpp>
 
 //CGameLogic::SavedWeaponSlots
 int32& CGameLogic::nPrintFocusHelpCounter = *reinterpret_cast<int32*>(0x96A8B8);
@@ -43,14 +44,14 @@ void CGameLogic::InjectHooks() {
     RH_ScopedInstall(IsCoopGameGoingOn, 0x441390);
     RH_ScopedInstall(IsPlayerAllowedToGoInThisDirection, 0x441E10, { .reversed = false });
     RH_ScopedInstall(IsPlayerUse2PlayerControls, 0x442020);
-    RH_ScopedInstall(IsPointWithinLineArea, 0x4416E0, { .reversed = false });
+    RH_ScopedInstall(IsPointWithinLineArea, 0x4416E0);
     RH_ScopedInstall(IsSkipWaitingForScriptToFadeIn, 0x4416C0);
     RH_ScopedInstall(LaRiotsActiveHere, 0x441C10);
     RH_ScopedInstall(Save, 0x5D33C0, { .reversed = false });
     RH_ScopedInstall(Load, 0x5D3440, { .reversed = false });
     RH_ScopedInstall(PassTime, 0x4414C0);
     RH_ScopedInstall(Remove2ndPlayerIfPresent, 0x4413C0);
-    RH_ScopedInstall(ResetStuffUponResurrection, 0x442980, { .reversed = true });
+    RH_ScopedInstall(ResetStuffUponResurrection, 0x442980);
     RH_ScopedInstall(RestorePedsWeapons, 0x441D30);
     RH_ScopedInstall(RestorePlayerStuffDuringResurrection, 0x442060, { .reversed = false });
     RH_ScopedInstall(SetPlayerWantedLevelForForbiddenTerritories, 0x441770, { .reversed = false });
@@ -132,8 +133,14 @@ bool CGameLogic::IsPlayerUse2PlayerControls(CPed* ped) {
 }
 
 // 0x4416E0
-bool CGameLogic::IsPointWithinLineArea(int32 a1, float x, float y) {
-    return plugin::CallAndReturn<bool, 0x4416E0, int32, float, float>(a1, x, y);
+bool CGameLogic::IsPointWithinLineArea(CVector* points, uint32 numPoints, float x, float y) {
+    for (auto&& [i, point] : notsa::enumerate(std::span{points, numPoints})) {
+        const auto nextPoint = (i != numPoints - 1) ? points[i + 1] : points[0];
+        if (CCollision::Test2DLineAgainst2DLine(x, y, 1'000'000.0f, 0.0f, point.x, point.y, nextPoint.x - point.x, nextPoint.y - point.y))
+            return true;
+    }
+
+    return false;
 }
 
 // 0x4416C0
