@@ -84,9 +84,7 @@ void CLoadingScreen::RenderSplash() {
         } else {
             color.a = 255 - m_FadeAlpha;
 
-            auto prev = &GetCurrentDisplayedSplash();
-            prev--;
-            prev->Draw(rect, color);
+            m_aSplashes[m_currDisplayedSplash - 1].Draw(rect, color);
         }
     } else if (!m_bReadyToDelete) {
         GetCurrentDisplayedSplash().Draw(rect, color);
