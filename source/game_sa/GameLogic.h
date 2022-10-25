@@ -54,9 +54,9 @@ public:
 
     static float CalcDistanceToForbiddenTrainCrossing(CVector vecPoint, CVector vecMoveSpeed, bool someBool, CVector* pOutDistance);
     static void ClearSkip(bool a1);
-    static void DoWeaponStuffAtStartOf2PlayerGame(bool a1);
+    static void DoWeaponStuffAtStartOf2PlayerGame(bool shareWeapons);
     static void StorePedsWeapons(CPed* ped);
-    static void FindCityClosestToPoint(float x, float y);
+    static uint32 FindCityClosestToPoint(CVector2D point);
     static void ForceDeathRestart();
     static void InitAtStartOfGame();
     static bool IsCoopGameGoingOn();

@@ -30,15 +30,16 @@ bool& CGameLogic::bLimitPlayerDistance = *reinterpret_cast<bool*>(0x8A5E4A);
 float& CGameLogic::MaxPlayerDistance = *reinterpret_cast<float*>(0x8A5E4C); // default 20.0
 int32& CGameLogic::n2PlayerPedInFocus = *reinterpret_cast<int32*>(0x8A5E50); // default 2
 
+static std::array<CWeapon, NUM_WEAPON_SLOTS>& s_SavedWeapons = *(std::array<CWeapon, NUM_WEAPON_SLOTS>*)0x96A9B8;
+
 void CGameLogic::InjectHooks() {
     RH_ScopedClass(CGameLogic);
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(CalcDistanceToForbiddenTrainCrossing, 0x4418E0, { .reversed = false });
     RH_ScopedInstall(ClearSkip, 0x441560, { .reversed = false });
-    RH_ScopedInstall(DoWeaponStuffAtStartOf2PlayerGame, 0x4428B0, { .reversed = false });
-    //RH_ScopedInstall(StorePedsWeapons, 0x0, { .reversed = false });
-    RH_ScopedInstall(FindCityClosestToPoint, 0x441B70, { .reversed = false });
+    RH_ScopedInstall(DoWeaponStuffAtStartOf2PlayerGame, 0x4428B0);
+    RH_ScopedInstall(FindCityClosestToPoint, 0x441B70);
     RH_ScopedInstall(ForceDeathRestart, 0x441240);
     RH_ScopedInstall(InitAtStartOfGame, 0x441210);
     RH_ScopedInstall(IsCoopGameGoingOn, 0x441390);
@@ -52,6 +53,7 @@ void CGameLogic::InjectHooks() {
     RH_ScopedInstall(PassTime, 0x4414C0);
     RH_ScopedInstall(Remove2ndPlayerIfPresent, 0x4413C0);
     RH_ScopedInstall(ResetStuffUponResurrection, 0x442980);
+    RH_ScopedInstall(StorePedsWeapons, 0x441D00);
     RH_ScopedInstall(RestorePedsWeapons, 0x441D30);
     RH_ScopedInstall(RestorePlayerStuffDuringResurrection, 0x442060, { .reversed = false });
     RH_ScopedInstall(SetPlayerWantedLevelForForbiddenTerritories, 0x441770, { .reversed = false });
@@ -74,19 +76,43 @@ void CGameLogic::ClearSkip(bool a1) {
 }
 
 // 0x4428B0
-void CGameLogic::DoWeaponStuffAtStartOf2PlayerGame(bool a1) {
-    plugin::Call<0x4428B0, bool>(a1);
-}
+void CGameLogic::DoWeaponStuffAtStartOf2PlayerGame(bool shareWeapons) {
+    auto player1 = FindPlayerPed(PED_TYPE_PLAYER1);
+    auto player2 = FindPlayerPed(PED_TYPE_PLAYER2);
+    RestorePedsWeapons(player1);
 
-// used in CGameLogic::DoWeaponStuffAtStartOf2PlayerGame
-// 0x
-void CGameLogic::StorePedsWeapons(CPed* ped) {
-    plugin::Call<0x0, CPed*>(ped);
+    if (shareWeapons) {
+        for (auto& weapon : player1->m_aWeapons) {
+            if (weapon.m_nType == WEAPON_UNARMED)
+                continue;
+
+            player2->GiveWeapon(weapon, true);
+        }
+        player1->PickWeaponAllowedFor2Player();
+        player1->m_pPlayerData->m_nChosenWeapon = player1->m_pPlayerData->m_nChosenWeapon;
+    }
 }
 
 // 0x441B70
-void CGameLogic::FindCityClosestToPoint(float x, float y) {
-    plugin::Call<0x441B70, float, float>(x, y);
+// 1 - Los Santos, 2 - San Fierro, 3 - Las Venturas
+uint32 CGameLogic::FindCityClosestToPoint(CVector2D point) {
+    constexpr CVector2D cityCoords[] = {
+        { 1670.0f, -1137.0f}, // LS
+        {-1810.0f,   884.0f}, // SF
+        { 2161.0f,  2140.0f}, // Lv
+    };
+    std::pair<float, size_t> closest{FLT_MAX, 3};
+    for (auto&& [i, d] : notsa::enumerate(cityCoords)) {
+        if (const auto d = DistanceBetweenPoints2D(cityCoords[i], point); d < closest.first) {
+            closest = {d, i};
+        }
+    }
+
+    if (closest.second == 3) {
+        NOTSA_UNREACHABLE();
+    }
+
+    return closest.second + 1;
 }
 
 // 0x441240
@@ -264,17 +290,19 @@ void CGameLogic::ResetStuffUponResurrection() {
     TimeOfLastEvent = 0;
 }
 
+// used in CGameLogic::DoWeaponStuffAtStartOf2PlayerGame
+// 0x441D00
+void CGameLogic::StorePedsWeapons(CPed* ped) {
+    rng::copy(ped->m_aWeapons, s_SavedWeapons.begin());
+}
+
 // 0x441D30
 void CGameLogic::RestorePedsWeapons(CPed* ped) {
-    static CWeapon (&s_SavedWeapons)[13] = *(CWeapon(*)[13])0x96A9B8;
-
     ped->ClearWeapons();
     for (auto& weapon : s_SavedWeapons) {
-        auto modelId1 = CWeaponInfo::GetWeaponInfo(weapon.m_nType, eWeaponSkill::STD)->m_nModelId1;
-        auto modelId2 = CWeaponInfo::GetWeaponInfo(weapon.m_nType, eWeaponSkill::STD)->m_nModelId2;
-        if (   (modelId1 == MODEL_INVALID || CStreaming::GetInfo(modelId1).IsLoaded())
-            && (modelId2 == MODEL_INVALID || CStreaming::GetInfo(modelId2).IsLoaded()) // FIX_BUGS: They checked modelId1 twice
-        ) {
+        const auto IsModelLoaded = [](int id) { return id == MODEL_INVALID || CStreaming::GetInfo(id).IsLoaded(); };
+
+        if (rng::all_of(weapon.GetWeaponInfo().GetModels(), IsModelLoaded)) { // FIX_BUGS: They checked modelId1 twice
             ped->GiveWeapon(weapon.m_nType, weapon.m_nTotalAmmo, true);
         }
     }
