@@ -85,7 +85,7 @@ void CClothesBuilder::ReleaseGeometry(int32 numToRelease) {
 // 0x5A47E0
 RpAtomic* FindAtomicFromNameCB(RpAtomic* atomic, void* data) {
     sDataFindAtomicFromName* dataStruct = reinterpret_cast<sDataFindAtomicFromName*>(data);
-    if (strcmp(GetFrameNodeName(RpAtomicGetFrame(atomic)), dataStruct->inputData)) {
+    if (stricmp(GetFrameNodeName(RpAtomicGetFrame(atomic)), dataStruct->inputData)) {
         return atomic;
     }
 
