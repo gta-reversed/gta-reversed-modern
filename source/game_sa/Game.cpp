@@ -89,13 +89,13 @@ void CGame::InjectHooks() {
 }
 
 // 0x72FD90
-static void CameraDestroy(RwCamera *rwCamera) {
+static void CameraDestroy(RwCamera* rwCamera) {
     if (!rwCamera)
         return;
 
-    if (auto obj = rwCamera->object.object; obj.parent) {
-        rwObjectHasFrameSetFrame(&obj, NULL);
-        RwFrameDestroy((RwFrame*)obj.parent);
+    if (auto parent = rwObjectGetParent(&rwCamera->object.object); parent) {
+        rwObjectHasFrameSetFrame(rwCamera, NULL);
+        RwFrameDestroy((RwFrame*)parent);
     }
 
     const auto DestroyIncludingParent = [](auto* buffer) {
