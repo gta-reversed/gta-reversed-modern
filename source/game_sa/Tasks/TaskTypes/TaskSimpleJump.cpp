@@ -243,7 +243,7 @@ bool CTaskSimpleJump::StartLaunchAnim(CPed* ped)
         return false;
 
     if (g_surfaceInfos.IsSteepSlope(ped->m_nContactSurface) && DotProduct(ped->GetForward(), ped->field_578) < 0.0F
-        || ped->IsPlayer() && !CGameLogic::IsPlayerAllowedToGoInThisDirection(ped, ped->GetForward().x, ped->GetForward().y, ped->GetForward().z, 5.0F))
+        || ped->IsPlayer() && !CGameLogic::IsPlayerAllowedToGoInThisDirection(ped, ped->GetForward(), 5.0F))
     {
         ped->m_pedIK.bSlopePitch = true;
         return false;

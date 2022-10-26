@@ -14,7 +14,7 @@ CVector& CGameLogic::vec2PlayerStartLocation = *reinterpret_cast<CVector*>(0x96A
 bool& CGameLogic::bPlayersCanBeInSeparateCars = *reinterpret_cast<bool*>(0x96A8B3);
 bool& CGameLogic::bPlayersCannotTargetEachOther = *reinterpret_cast<bool*>(0x96A8B2);
 
-//CGameLogic::AfterDeathStartPointOrientations[16] = 0x96A850;
+//CGameLogic::SkipPositionOrientations[16] = 0x96A850;
 int32& CGameLogic::NumAfterDeathStartPoints = *reinterpret_cast<int32*>(0x96A890);
 
 bool& CGameLogic::SkipToBeFinishedByScript = *reinterpret_cast<bool*>(0x96A894);
@@ -37,45 +37,18 @@ int32& CGameLogic::n2PlayerPedInFocus = *reinterpret_cast<int32*>(0x8A5E50); // 
 
 static std::array<CWeapon, NUM_WEAPON_SLOTS>& s_SavedWeapons = *(std::array<CWeapon, NUM_WEAPON_SLOTS>*)0x96A9B8;
 
-// 0x8A5E58; San Fierro
-static const CVector town2ShapeVertices[] = {
-    {28.0, -3000.0, 0.0},
-    {-30.0, -1280.0, 0.0},
-    {-148.0, -911.0, 0.0},
-    {-487.0, -372.0, 0.0},
-    {-1028.0, -424.0, 0.0},
-    {-1145.0, 479.0, 0.0},
-    {-1461.0, 1488.0, 0.0},
-    {-3000.0, 1668.0, 0.0},
-    {-3000.0, -3000.0, 0.0}
-};
-
-// 0x8A5EC8; Las Venturas
-static const CVector town1ShapeVertices[] = {
-    {3000.0f, 535.0f, 0.0f},
-    {1759.0f, 576.0f, 0.0f},
-    {989.0f, 693.0f, 0.0f},
-    {-128.0f, 490.0f, 0.0f},
-    {-845.0f, 707.0f, 0.0f},
-    {-1477.0f, 1677.0f, 0.0f},
-    {-2154.0f, 2497.0f, 0.0f},
-    {-2971.0f, 2180.0f, 0.0f},
-    {-3000.0f, 3000.0f, 0.0f},
-    {3000.0f, 3000.0f, 0.0f}
-};
-
 void CGameLogic::InjectHooks() {
     RH_ScopedClass(CGameLogic);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(CalcDistanceToForbiddenTrainCrossing, 0x4418E0, { .reversed = false });
+    RH_ScopedInstall(CalcDistanceToForbiddenTrainCrossing, 0x4418E0);
     RH_ScopedInstall(ClearSkip, 0x441560);
     RH_ScopedInstall(DoWeaponStuffAtStartOf2PlayerGame, 0x4428B0);
     RH_ScopedInstall(FindCityClosestToPoint, 0x441B70);
     RH_ScopedInstall(ForceDeathRestart, 0x441240);
     RH_ScopedInstall(InitAtStartOfGame, 0x441210);
     RH_ScopedInstall(IsCoopGameGoingOn, 0x441390);
-    RH_ScopedInstall(IsPlayerAllowedToGoInThisDirection, 0x441E10, { .reversed = false });
+    RH_ScopedInstall(IsPlayerAllowedToGoInThisDirection, 0x441E10);
     RH_ScopedInstall(IsPlayerUse2PlayerControls, 0x442020);
     RH_ScopedInstall(IsPointWithinLineArea, 0x4416E0);
     RH_ScopedInstall(IsSkipWaitingForScriptToFadeIn, 0x4416C0);
@@ -94,24 +67,45 @@ void CGameLogic::InjectHooks() {
     RH_ScopedInstall(SortOutStreamingAndMemory, 0x441440);
     RH_ScopedInstall(StopPlayerMovingFromDirection, 0x441290);
     RH_ScopedInstall(Update, 0x442AD0, { .reversed = false });
-    RH_ScopedInstall(UpdateSkip, 0x442480, { .reversed = false });
+    RH_ScopedInstall(UpdateSkip, 0x442480);
 }
 
 // 0x4418E0
-float CGameLogic::CalcDistanceToForbiddenTrainCrossing(CVector vecPoint, CVector vecMoveSpeed, bool someBool, CVector* pOutDistance) {
-    return plugin::CallAndReturn<float, 0x4418E0, CVector, CVector, bool, CVector*>(vecPoint, vecMoveSpeed, someBool, pOutDistance);
+float CGameLogic::CalcDistanceToForbiddenTrainCrossing(CVector vecPoint, CVector vecMoveSpeed, bool ignoreMoveSpeed, CVector& outDistance) {
+    auto closest = 100'000.0f; // FLT_MAX
+
+    const auto Calculate = [&closest, &vecPoint, &vecMoveSpeed, &outDistance, ignoreMoveSpeed](CVector2D posn) {
+        const auto diff = posn - vecPoint;
+        const auto dist = diff.Magnitude();
+
+        if (((vecPoint * vecMoveSpeed).ComponentwiseSum() > 0.0f || ignoreMoveSpeed) && dist < closest) {
+            outDistance = vecPoint;
+            closest = dist;
+        }
+    };
+
+    const auto cityUnlocked = CStats::GetStatValue(STAT_CITY_UNLOCKED);
+    if (cityUnlocked == 0.0f) {
+        Calculate(CVector2D{82.0f, -1021.0f});  // LS-SF; Flint Country
+    } else if (cityUnlocked == 1.0f) {
+        Calculate(CVector2D{-1568.0f, 537.0f}); // SF-LV; Downtown
+    } else if (cityUnlocked < 1.0f) {
+        Calculate(CVector2D{2270.0f,  277.0f}); // Not a train crossing; top left side of Palomino Creek, LS
+    }
+
+    return closest;
 }
 
 // 0x441560
-void CGameLogic::ClearSkip(bool a1) {
-    if (a1 && SkipState == SKIP_STATE_4)
+void CGameLogic::ClearSkip(bool afterMission) {
+    if (afterMission && SkipState == SKIP_AFTER_MISSION)
         return;
 
-    if (SkipState == SKIP_STATE_2) {
+    if (SkipState == SKIP_IN_PROGRESS) {
         TheCamera.SetFadeColour(0, 0, 0);
         TheCamera.Fade(0.5f, eFadeFlag::FADE_OUT);
     }
-    SkipState = SKIP_STATE_0;
+    SkipState = SKIP_NONE;
     CPad::GetPad(0)->bCamera = false;
 }
 
@@ -141,7 +135,7 @@ uint32 CGameLogic::FindCityClosestToPoint(CVector2D point) {
         {-1810.0f,   884.0f}, // SF
         { 2161.0f,  2140.0f}, // Lv
     };
-    std::pair<float, size_t> closest{FLT_MAX, 3};
+    std::pair<float, size_t> closest{FLT_MAX, 3}; // NOTSA
     for (auto&& [i, d] : notsa::enumerate(cityCoords)) {
         if (const auto d = DistanceBetweenPoints2D(cityCoords[i], point); d < closest.first) {
             closest = {d, i};
@@ -167,7 +161,7 @@ void CGameLogic::ForceDeathRestart() {
 // 0x441210
 void CGameLogic::InitAtStartOfGame() {
     ActivePlayers            = true;
-    SkipState                = SKIP_STATE_0;
+    SkipState                = SKIP_NONE;
     NumAfterDeathStartPoints = 0;
     GameState                = GAME_STATE_INITIAL;
     TimeOfLastEvent          = 0;
@@ -183,8 +177,40 @@ bool CGameLogic::IsCoopGameGoingOn() {
 }
 
 // 0x441E10
-bool CGameLogic::IsPlayerAllowedToGoInThisDirection(CPed* ped, float moveDirectionX, float moveDirectionY, float moveDirectionZ, float distanceLimit) {
-    return plugin::CallAndReturn<bool, 0x441E10, CPed*, float, float, float, float>(ped, moveDirectionX, moveDirectionY, moveDirectionZ, distanceLimit);
+bool CGameLogic::IsPlayerAllowedToGoInThisDirection(CPed* ped, CVector moveDirection, float distanceLimit) {
+    const auto player1 = FindPlayerPed(PED_TYPE_PLAYER1);
+    const auto player2 = FindPlayerPed(PED_TYPE_PLAYER2);
+
+    if (!player1 || !player2 || !bLimitPlayerDistance)
+        return true;
+
+    if (IsAPlayerInFocusOn2PlayerGame()) {
+        if (ped == FindPlayerPed(n2PlayerPedInFocus)) {
+            return true;
+        }
+
+        CVector headPos{0.0f, 0.0f, 0.2f};
+        ped->GetTransformedBonePosition(headPos, BONE_HEAD, false);
+
+        if (!ped->GetIsOnScreen()) {
+            return false;
+        }
+
+        if (!CWorld::GetIsLineOfSightClear(TheCamera.GetGameCamPosition(), headPos, true, false, false, false, false, true, false)) {
+            return false;
+        }
+    }
+
+    if (DistanceBetweenPoints2D(player1->GetPosition(), player2->GetPosition()) < MaxPlayerDistance + distanceLimit) {
+        return true;
+    }
+
+    const auto dirDist = ((player1->GetPosition() - player2->GetPosition()) * moveDirection).ComponentwiseSum();
+    if (ped == player1 && dirDist >= 0.0f || dirDist <= 0.0f) {
+        return false;
+    }
+    
+    return true;
 }
 
 // 0x442020
@@ -211,10 +237,10 @@ bool CGameLogic::IsPointWithinLineArea(const CVector* points, uint32 numPoints, 
 
 // 0x4416C0
 bool CGameLogic::IsSkipWaitingForScriptToFadeIn() {
-    if (CGameLogic::SkipState != SKIP_STATE_5) {
+    if (CGameLogic::SkipState != SKIP_WAITING_SCRIPT) {
         return false;
     }
-    CGameLogic::SkipState = SKIP_STATE_0;
+    CGameLogic::SkipState = SKIP_NONE;
     return true;
 }
 
@@ -240,14 +266,14 @@ bool CGameLogic::LaRiotsActiveHere() {
 void CGameLogic::Save() {
     plugin::Call<0x5D33C0>();
 
-//    CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::NumAfterDeathStartPoints, sizeof(int32));
+//    CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::NumSkipPositions, sizeof(int32));
 //    CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::bPenaltyForDeathApplies,  sizeof(bool));
 //    CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::bPenaltyForArrestApplies, sizeof(bool));
 //    CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::GameState,                sizeof(eGameState));
 //    CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::TimeOfLastEvent,          sizeof(uint32));
-//    for (int32 i = 0; i < NumAfterDeathStartPoints; ++i) {
-//        CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::AfterDeathStartPoints[i],            sizeof(CVector));
-//        CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::AfterDeathStartPointOrientations[i], sizeof(float));
+//    for (int32 i = 0; i < NumSkipPositions; ++i) {
+//        CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::SkipPositions[i],            sizeof(CVector));
+//        CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::SkipPositionOrientations[i], sizeof(float));
 //    }
 }
 
@@ -255,14 +281,14 @@ void CGameLogic::Save() {
 void CGameLogic::Load() {
     plugin::Call<0x5D3440>();
 
-//    CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::NumAfterDeathStartPoints, sizeof(int32));
+//    CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::NumSkipPositions, sizeof(int32));
 //    CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::bPenaltyForDeathApplies,  sizeof(bool));
 //    CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::bPenaltyForArrestApplies, sizeof(bool));
 //    CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::GameState,                sizeof(eGameState));
 //    CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::TimeOfLastEvent,          sizeof(uint32));
-//    for (int32 i = 0; i < NumAfterDeathStartPoints; ++i) {
-//        CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::AfterDeathStartPoints[i],            sizeof(CVector));
-//        CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::AfterDeathStartPointOrientations[i], sizeof(float));
+//    for (int32 i = 0; i < NumSkipPositions; ++i) {
+//        CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::SkipPositions[i],            sizeof(CVector));
+//        CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::SkipPositionOrientations[i], sizeof(float));
 //    }
 }
 
@@ -451,6 +477,33 @@ void CGameLogic::SetPlayerWantedLevelForForbiddenTerritories(bool immediately) {
         }
     };
 
+    // 0x8A5EC8; Las Venturas
+    constexpr CVector town1ShapeVertices[] = {
+        {3000.0f, 535.0f, 0.0f},
+        {1759.0f, 576.0f, 0.0f},
+        {989.0f, 693.0f, 0.0f},
+        {-128.0f, 490.0f, 0.0f},
+        {-845.0f, 707.0f, 0.0f},
+        {-1477.0f, 1677.0f, 0.0f},
+        {-2154.0f, 2497.0f, 0.0f},
+        {-2971.0f, 2180.0f, 0.0f},
+        {-3000.0f, 3000.0f, 0.0f},
+        {3000.0f, 3000.0f, 0.0f}
+    };
+
+    // 0x8A5E58; San Fierro
+    constexpr CVector town2ShapeVertices[] = {
+        {28.0f, -3000.0f, 0.0f},
+        {-30.0f, -1280.0f, 0.0f},
+        {-148.0f, -911.0f, 0.0f},
+        {-487.0f, -372.0f, 0.0f},
+        {-1028.0f, -424.0f, 0.0f},
+        {-1145.0f, 479.0f, 0.0f},
+        {-1461.0f, 1488.0f, 0.0f},
+        {-3000.0f, 1668.0f, 0.0f},
+        {-3000.0f, -3000.0f, 0.0f}
+    };
+
     // LV
     if (CStats::GetStatValue(STAT_CITY_UNLOCKED) <= 1.0f) {
         SetWantedIfInArea(town1ShapeVertices, std::size(town1ShapeVertices));
@@ -464,24 +517,24 @@ void CGameLogic::SetPlayerWantedLevelForForbiddenTerritories(bool immediately) {
 
 // 0x4423C0
 void CGameLogic::SetUpSkip(CVector coors, float angle, bool afterMission, CEntity* vehicle, bool finishedByScript) {
-    if (SkipState == SKIP_STATE_2) {
+    if (SkipState == SKIP_IN_PROGRESS) {
         TheCamera.SetFadeColour(0, 0, 0);
         TheCamera.Fade(0.5f, eFadeFlag::FADE_OUT);
     }
-    SkipState = SKIP_STATE_0;
+    SkipState = SKIP_NONE;
     CPad::GetPad(0)->bCamera = false;
-    AfterDeathStartPoints[0] = coors;
-
+    SkipPosition = coors;
+    SkipState = afterMission ? SKIP_AFTER_MISSION : SKIP_AVAILABLE;
     SkipTimer = CTimer::GetTimeInMS();
     if (vehicle) {
-        vehicle->RegisterReference(SkipVehicle);
+        vehicle->RegisterReference((CEntity**)&SkipVehicle);
     }
     SkipToBeFinishedByScript = finishedByScript;
 }
 
 // 0x4415C0
 bool CGameLogic::SkipCanBeActivated() {
-    if (!CGame::CanSeeOutSideFromCurrArea() || TheCamera.m_bFading || (SkipState != 1 && SkipState != 4))
+    if (!CGame::CanSeeOutSideFromCurrArea() || TheCamera.m_bFading || (SkipState != SKIP_AVAILABLE && SkipState != SKIP_AFTER_MISSION))
         return false;
 
     if (auto vehicle = FindPlayerVehicle()) {
@@ -498,7 +551,7 @@ bool CGameLogic::SkipCanBeActivated() {
         }
     }
 
-    return SkipState == 4 && FindPlayerPed()->GetIntelligence()->GetTaskSwim();
+    return SkipState == SKIP_AFTER_MISSION && FindPlayerPed()->GetIntelligence()->GetTaskSwim();
 }
 
 // 0x441440
@@ -541,5 +594,86 @@ void CGameLogic::Update() {
 
 // 0x442480
 void CGameLogic::UpdateSkip() {
-    plugin::Call<0x442480>();
+    if (SkipState == SKIP_AVAILABLE && DistanceBetweenPoints2D(FindPlayerCoors(), SkipPosition) < 25.0f) {
+        SkipState = SKIP_NONE;
+    }
+
+    if (CanPlayerTripSkip() && CTimer::GetTimeInMS() > SkipTimer + 35'000) {
+        SkipState = SKIP_NONE;
+    }
+
+    auto player = FindPlayerPed();
+    switch (SkipState) {
+    case SKIP_AVAILABLE:
+    case SKIP_AFTER_MISSION:
+        if (!SkipCanBeActivated() || player->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_LEAVE_CAR)) {
+            return;
+        }
+
+        // TRIP SKIP
+        if (auto pad = CPad::GetPad(0); pad->IsDPadRightPressed()) {
+            SkipState = SKIP_IN_PROGRESS;
+            pad->bCamera = true;
+
+            TheCamera.SetFadeColour(0, 0, 0);
+            TheCamera.Fade(2.5f, eFadeFlag::FADE_IN);
+            SkipTimer = CTimer::m_snTimeInMilliseconds + 3000;
+            CMessages::AddBigMessage(TheText.Get("SKIP"), 4500, STYLE_BOTTOM_RIGHT);
+        }
+        break;
+
+    case SKIP_IN_PROGRESS: {
+        if (CTimer::GetTimeInMS() < SkipTimer)
+            return;
+
+        CTimer::Suspend();
+        CStreaming::LoadSceneCollision(SkipPosition);
+        CStreaming::LoadScene(SkipPosition);
+        auto playerDistToSkipPos = DistanceBetweenPoints2D(FindPlayerCoors(), SkipPosition);
+
+        if (auto vehicle = FindPlayerVehicle()) {
+            CTheScripts::ClearSpaceForMissionEntity(SkipPosition, vehicle);
+
+            vehicle->Teleport(SkipPosition, false);
+            vehicle->SetHeading(DegreesToRadians(SkipHeading));
+
+            if (vehicle->IsBike()) {
+                vehicle->AsBike()->PlaceOnRoadProperly();
+            } else if (vehicle->IsAutomobile()) {
+                vehicle->AsAutomobile()->PlaceOnRoadProperly();
+            }
+
+            vehicle->m_vecMoveSpeed = vehicle->GetMatrix().GetForward() / 2.5f; // Make the vehicle appear as it's driving to the point.
+            CCamera::GetActiveCamera().m_fHorizontalAngle = vehicle->GetHeading() - FRAC_PI_2;
+        } else {
+            CTheScripts::ClearSpaceForMissionEntity(SkipPosition, player);
+            player->Teleport(SkipPosition, false);
+            player->GetPosition().z = CWorld::FindGroundZForCoord(SkipPosition.x, SkipPosition.y) + 1.0f;
+        }
+        SkipTimer = CTimer::GetTimeInMS() + 1500;
+        CHud::SetMessage(nullptr);
+        CTimer::Resume();
+        PassTime((uint32)(playerDistToSkipPos / 20.0f + 23.0f));
+
+        if (SkipToBeFinishedByScript) {
+            SkipState = SKIP_WAITING_SCRIPT;
+            CPad::GetPad(0)->bCamera = false;
+        } else {
+            TheCamera.SetFadeColour(0, 0, 0);
+            TheCamera.Fade(1.5f, eFadeFlag::FADE_OUT);
+            SkipState = SKIP_FADING_OUT;
+        }
+        break;
+    }
+    case SKIP_FADING_OUT:
+        if (CTimer::GetTimeInMS() > SkipTimer) {
+            SkipState = SKIP_NONE;
+            CPad::GetPad(0)->bCamera = false;
+        }
+        break;
+
+    case SKIP_WAITING_SCRIPT:
+    default:
+        return;
+    }
 }

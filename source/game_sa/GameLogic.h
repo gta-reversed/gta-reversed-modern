@@ -7,12 +7,12 @@ class CPed;
 class CVehicle;
 
 enum eSkipState {
-    SKIP_STATE_0,
-    SKIP_STATE_1,
-    SKIP_STATE_2,
-    SKIP_STATE_3,
-    SKIP_STATE_4,
-    SKIP_STATE_5,
+    SKIP_NONE,
+    SKIP_AVAILABLE,
+    SKIP_IN_PROGRESS,
+    SKIP_FADING_OUT,
+    SKIP_AFTER_MISSION,
+    SKIP_WAITING_SCRIPT
 };
 
 class CPed;
@@ -23,7 +23,8 @@ public:
     static CVector& vec2PlayerStartLocation;
     static bool& bPlayersCanBeInSeparateCars;
 
-    inline static std::array<CVector, 16>& AfterDeathStartPoints = *reinterpret_cast<std::array<CVector, 16>*>(0x96A8D4);
+    inline static CVector& SkipPosition = *reinterpret_cast<CVector*>(0x96A8D4);
+    inline static float& SkipHeading = *reinterpret_cast<float*>(0x96A8A4);
 
     static int32& TimeOfLastEvent;
     static eGameState& GameState;
@@ -52,15 +53,15 @@ public:
 public:
     static void InjectHooks();
 
-    static float CalcDistanceToForbiddenTrainCrossing(CVector vecPoint, CVector vecMoveSpeed, bool someBool, CVector* pOutDistance);
-    static void ClearSkip(bool a1);
+    static float CalcDistanceToForbiddenTrainCrossing(CVector vecPoint, CVector vecMoveSpeed, bool ignoreMoveSpeed, CVector& outDistance);
+    static void ClearSkip(bool afterMission);
     static void DoWeaponStuffAtStartOf2PlayerGame(bool shareWeapons);
     static void StorePedsWeapons(CPed* ped);
     static uint32 FindCityClosestToPoint(CVector2D point);
     static void ForceDeathRestart();
     static void InitAtStartOfGame();
     static bool IsCoopGameGoingOn();
-    static bool IsPlayerAllowedToGoInThisDirection(CPed* ped, float moveDirectionX, float moveDirectionY, float moveDirectionZ, float distanceLimit);
+    static bool IsPlayerAllowedToGoInThisDirection(CPed* ped, CVector moveDirection, float distanceLimit);
     static bool IsPlayerUse2PlayerControls(CPed* ped);
     static bool IsPointWithinLineArea(const CVector* points, uint32 numPoints, float x, float y);
     static bool IsSkipWaitingForScriptToFadeIn();
@@ -79,4 +80,14 @@ public:
     static void StopPlayerMovingFromDirection(int32 playerId, CVector direction);
     static void Update();
     static void UpdateSkip();
+
+    // @notsa
+    static bool IsAPlayerInFocusOn2PlayerGame() {
+        return n2PlayerPedInFocus < 2;
+    }
+
+    // @notsa
+    static bool CanPlayerTripSkip() {
+        return SkipState == SKIP_AVAILABLE || SkipState == SKIP_AFTER_MISSION;
+    }
 };
