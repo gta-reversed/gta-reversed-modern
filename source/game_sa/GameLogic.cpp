@@ -6,37 +6,6 @@
 #include "PedClothesDesc.h"
 #include "PostEffects.h"
 
-//CGameLogic::SavedWeaponSlots
-int32& CGameLogic::nPrintFocusHelpCounter = *reinterpret_cast<int32*>(0x96A8B8);
-int32& CGameLogic::nPrintFocusHelpTimer = *reinterpret_cast<int32*>(0x96A8B4);
-float& CGameLogic::f2PlayerStartHeading = *reinterpret_cast<float*>(0x96A840);
-CVector& CGameLogic::vec2PlayerStartLocation = *reinterpret_cast<CVector*>(0x96A9AC);
-bool& CGameLogic::bPlayersCanBeInSeparateCars = *reinterpret_cast<bool*>(0x96A8B3);
-bool& CGameLogic::bPlayersCannotTargetEachOther = *reinterpret_cast<bool*>(0x96A8B2);
-
-//CGameLogic::SkipPositionOrientations[16] = 0x96A850;
-int32& CGameLogic::NumAfterDeathStartPoints = *reinterpret_cast<int32*>(0x96A890);
-
-bool& CGameLogic::SkipToBeFinishedByScript = *reinterpret_cast<bool*>(0x96A894);
-CVehicle*& CGameLogic::SkipVehicle = *reinterpret_cast<CVehicle**>(0x96A898);
-uint32& CGameLogic::SkipTimer = *reinterpret_cast<uint32*>(0x96A89C);
-eSkipState& CGameLogic::SkipState = *reinterpret_cast<eSkipState*>(0x96A8A0);
-//CGameLogic::SkipDestinationOrientation
-//CGameLogic::SkipDestination
-
-bool& CGameLogic::bScriptCoopGameGoingOn = *reinterpret_cast<bool*>(0x96A8A8);
-int32& CGameLogic::TimeOfLastEvent = *reinterpret_cast<int32*>(0x96A8AC);
-eGameState& CGameLogic::GameState = *reinterpret_cast<eGameState*>(0x96A8B0);
-int32& CGameLogic::ActivePlayers = *reinterpret_cast<int32*>(0x96A8B1);
-
-bool& CGameLogic::bPenaltyForDeathApplies = *reinterpret_cast<bool*>(0x8A5E48);
-bool& CGameLogic::bPenaltyForArrestApplies = *reinterpret_cast<bool*>(0x8A5E49);
-bool& CGameLogic::bLimitPlayerDistance = *reinterpret_cast<bool*>(0x8A5E4A);
-float& CGameLogic::MaxPlayerDistance = *reinterpret_cast<float*>(0x8A5E4C); // default 20.0
-int32& CGameLogic::n2PlayerPedInFocus = *reinterpret_cast<int32*>(0x8A5E50); // default 2
-
-static std::array<CWeapon, NUM_WEAPON_SLOTS>& s_SavedWeapons = *(std::array<CWeapon, NUM_WEAPON_SLOTS>*)0x96A9B8;
-
 void CGameLogic::InjectHooks() {
     RH_ScopedClass(CGameLogic);
     RH_ScopedCategoryGlobal();
@@ -53,8 +22,8 @@ void CGameLogic::InjectHooks() {
     RH_ScopedInstall(IsPointWithinLineArea, 0x4416E0);
     RH_ScopedInstall(IsSkipWaitingForScriptToFadeIn, 0x4416C0);
     RH_ScopedInstall(LaRiotsActiveHere, 0x441C10);
-    RH_ScopedInstall(Save, 0x5D33C0, { .reversed = false });
-    RH_ScopedInstall(Load, 0x5D3440, { .reversed = false });
+    RH_ScopedInstall(Save, 0x5D33C0);
+    RH_ScopedInstall(Load, 0x5D3440);
     RH_ScopedInstall(PassTime, 0x4414C0);
     RH_ScopedInstall(Remove2ndPlayerIfPresent, 0x4413C0);
     RH_ScopedInstall(ResetStuffUponResurrection, 0x442980);
@@ -264,32 +233,29 @@ bool CGameLogic::LaRiotsActiveHere() {
 
 // 0x5D33C0
 void CGameLogic::Save() {
-    plugin::Call<0x5D33C0>();
+    CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::NumAfterDeathStartPoints,                sizeof(int32));
+    CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::bPenaltyForDeathApplies,                 sizeof(bool));
+    CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::bPenaltyForArrestApplies,                sizeof(bool));
+    CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::GameState,                               sizeof(eGameState));
+    CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::TimeOfLastEvent,                         sizeof(uint32));
 
-//    CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::NumSkipPositions, sizeof(int32));
-//    CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::bPenaltyForDeathApplies,  sizeof(bool));
-//    CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::bPenaltyForArrestApplies, sizeof(bool));
-//    CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::GameState,                sizeof(eGameState));
-//    CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::TimeOfLastEvent,          sizeof(uint32));
-//    for (int32 i = 0; i < NumSkipPositions; ++i) {
-//        CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::SkipPositions[i],            sizeof(CVector));
-//        CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::SkipPositionOrientations[i], sizeof(float));
-//    }
+    for (int32 i = 0; i < NumAfterDeathStartPoints; i++) {
+        CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::AfterDeathStartPoints[i],            sizeof(CVector));
+        CGenericGameStorage::SaveDataToWorkBuffer(&CGameLogic::AfterDeathStartPointOrientations[i], sizeof(float));
+    }
 }
 
 // 0x5D3440
 void CGameLogic::Load() {
-    plugin::Call<0x5D3440>();
-
-//    CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::NumSkipPositions, sizeof(int32));
-//    CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::bPenaltyForDeathApplies,  sizeof(bool));
-//    CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::bPenaltyForArrestApplies, sizeof(bool));
-//    CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::GameState,                sizeof(eGameState));
-//    CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::TimeOfLastEvent,          sizeof(uint32));
-//    for (int32 i = 0; i < NumSkipPositions; ++i) {
-//        CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::SkipPositions[i],            sizeof(CVector));
-//        CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::SkipPositionOrientations[i], sizeof(float));
-//    }
+    CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::NumAfterDeathStartPoints,                sizeof(int32));
+    CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::bPenaltyForDeathApplies,                 sizeof(bool));
+    CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::bPenaltyForArrestApplies,                sizeof(bool));
+    CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::GameState,                               sizeof(eGameState));
+    CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::TimeOfLastEvent,                         sizeof(uint32));
+    for (int32 i = 0; i < NumAfterDeathStartPoints; ++i) {
+        CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::AfterDeathStartPoints[i],            sizeof(CVector));
+        CGenericGameStorage::LoadDataFromWorkBuffer(&CGameLogic::AfterDeathStartPointOrientations[i], sizeof(float));
+    }
 }
 
 // 0x4414C0
@@ -359,13 +325,13 @@ void CGameLogic::ResetStuffUponResurrection() {
 // used in CGameLogic::DoWeaponStuffAtStartOf2PlayerGame
 // 0x441D00
 void CGameLogic::StorePedsWeapons(CPed* ped) {
-    rng::copy(ped->m_aWeapons, s_SavedWeapons.begin());
+    rng::copy(ped->m_aWeapons, SavedWeapons.begin());
 }
 
 // 0x441D30
 void CGameLogic::RestorePedsWeapons(CPed* ped) {
     ped->ClearWeapons();
-    for (auto& weapon : s_SavedWeapons) {
+    for (auto& weapon : SavedWeapons) {
         const auto IsModelLoaded = [](int id) { return id == MODEL_INVALID || CStreaming::GetInfo(id).IsLoaded(); };
 
         if (rng::all_of(weapon.GetWeaponInfo().GetModels(), IsModelLoaded)) { // FIX_BUGS: They checked modelId1 twice
@@ -594,12 +560,10 @@ void CGameLogic::Update() {
 
 // 0x442480
 void CGameLogic::UpdateSkip() {
-    if (SkipState == SKIP_AVAILABLE && DistanceBetweenPoints2D(FindPlayerCoors(), SkipPosition) < 25.0f) {
+    if (SkipState == SKIP_AVAILABLE && DistanceBetweenPoints2D(FindPlayerCoors(), SkipPosition) < 25.0f ||
+        CanPlayerTripSkip() && CTimer::GetTimeInMS() > SkipTimer + 35'000) {
         SkipState = SKIP_NONE;
-    }
-
-    if (CanPlayerTripSkip() && CTimer::GetTimeInMS() > SkipTimer + 35'000) {
-        SkipState = SKIP_NONE;
+        return;
     }
 
     auto player = FindPlayerPed();

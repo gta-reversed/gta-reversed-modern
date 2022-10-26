@@ -19,36 +19,38 @@ class CPed;
 
 class CGameLogic {
 public:
-    static float& f2PlayerStartHeading;
-    static CVector& vec2PlayerStartLocation;
-    static bool& bPlayersCanBeInSeparateCars;
+    inline static std::array<CWeapon, NUM_WEAPON_SLOTS>& SavedWeapons = *reinterpret_cast<std::array<CWeapon, NUM_WEAPON_SLOTS>*>(0x96A9B8);
+
+    inline static std::array<float, 16>& AfterDeathStartPointOrientations = *reinterpret_cast<std::array<float, 16>*>(0x96A850);
+    inline static std::array<CVector, 16>& AfterDeathStartPoints = *reinterpret_cast<std::array<CVector, 16>*>(0x96A8E0);
 
     inline static CVector& SkipPosition = *reinterpret_cast<CVector*>(0x96A8D4);
     inline static float& SkipHeading = *reinterpret_cast<float*>(0x96A8A4);
 
-    static int32& TimeOfLastEvent;
-    static eGameState& GameState;
-    static bool& bPlayersCannotTargetEachOther;
-    static int32& ActivePlayers; // unused
-    static float& m_96A890;
-    static int32& nPrintFocusHelpTimer;
-    static int32& nPrintFocusHelpCounter;
-    static bool& bScriptCoopGameGoingOn;
+    static inline int32& nPrintFocusHelpCounter = *reinterpret_cast<int32*>(0x96A8B8);
+    static inline int32& nPrintFocusHelpTimer = *reinterpret_cast<int32*>(0x96A8B4);
+    static inline float& f2PlayerStartHeading = *reinterpret_cast<float*>(0x96A840);
+    static inline CVector& vec2PlayerStartLocation = *reinterpret_cast<CVector*>(0x96A9AC);
+    static inline bool& bPlayersCanBeInSeparateCars = *reinterpret_cast<bool*>(0x96A8B3);
+    static inline bool& bPlayersCannotTargetEachOther = *reinterpret_cast<bool*>(0x96A8B2);
 
-    static bool& SkipToBeFinishedByScript;
-    static CVehicle*& SkipVehicle;
-    static uint32& SkipTimer;
-    static eSkipState& SkipState;
-    static int32& SkipDestinationOrientation;
-    static int32& SkipDestination;
+    static inline int32& NumAfterDeathStartPoints = *reinterpret_cast<int32*>(0x96A890);
 
-    static int32& NumAfterDeathStartPoints;
+    static inline bool& SkipToBeFinishedByScript = *reinterpret_cast<bool*>(0x96A894);
+    static inline CVehicle*& SkipVehicle = *reinterpret_cast<CVehicle**>(0x96A898);
+    static inline uint32& SkipTimer = *reinterpret_cast<uint32*>(0x96A89C);
+    static inline eSkipState& SkipState = *reinterpret_cast<eSkipState*>(0x96A8A0);
 
-    static bool& bPenaltyForDeathApplies;
-    static bool& bPenaltyForArrestApplies;
-    static bool& bLimitPlayerDistance;
-    static float& MaxPlayerDistance;
-    static int32& n2PlayerPedInFocus;
+    static inline bool& bScriptCoopGameGoingOn = *reinterpret_cast<bool*>(0x96A8A8);
+    static inline int32& TimeOfLastEvent = *reinterpret_cast<int32*>(0x96A8AC);
+    static inline eGameState& GameState = *reinterpret_cast<eGameState*>(0x96A8B0);
+    static inline int32& ActivePlayers = *reinterpret_cast<int32*>(0x96A8B1);
+
+    static inline bool& bPenaltyForDeathApplies = *reinterpret_cast<bool*>(0x8A5E48);
+    static inline bool& bPenaltyForArrestApplies = *reinterpret_cast<bool*>(0x8A5E49);
+    static inline bool& bLimitPlayerDistance = *reinterpret_cast<bool*>(0x8A5E4A);
+    static inline float& MaxPlayerDistance = *reinterpret_cast<float*>(0x8A5E4C);  // default 20.0
+    static inline int32& n2PlayerPedInFocus = *reinterpret_cast<int32*>(0x8A5E50); // default 2
 
 public:
     static void InjectHooks();
