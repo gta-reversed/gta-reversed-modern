@@ -2,7 +2,7 @@
 
 enum eGameState : uint8 {
     GAME_STATE_INITIAL          = 0, // EAX / NVIDIA splashes
-    GAME_STATE_LOGO             = 1, // Playing Logo.mpg
+    GAME_STATE_LOGO             = 1, // Playing Logo.mpg (possibly incorrect)
     GAME_STATE_PLAYING_LOGO     = 2, // Init pads
     GAME_STATE_TITLE            = 3, // STATE_INIT_INTRO Playing GTAtitles.mpg
     GAME_STATE_PLAYING_INTRO    = 4, // Init pads (same state as 2)

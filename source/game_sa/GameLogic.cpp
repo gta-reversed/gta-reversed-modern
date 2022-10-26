@@ -1,10 +1,10 @@
 #include "StdInc.h"
-#include <enumerate.hpp>
-#include <MBlur.h>
-#include <EntryExitManager.h>
-#include <Garages.h>
+#include "MBlur.h"
+#include "EntryExitManager.h"
+#include "Garages.h"
 #include "PedClothesDesc.h"
 #include "PostEffects.h"
+#include <extensions/enumerate.hpp>
 
 void CGameLogic::InjectHooks() {
     RH_ScopedClass(CGameLogic);
@@ -555,7 +555,306 @@ void CGameLogic::StopPlayerMovingFromDirection(int32 playerId, CVector direction
 
 // 0x442AD0
 void CGameLogic::Update() {
-    plugin::Call<0x442AD0>();
+    return plugin::Call<0x442AD0>();
+    CStats::UpdateRespectStat(0);
+    CStats::UpdateSexAppealStat();
+    SetPlayerWantedLevelForForbiddenTerritories(false);
+
+    if (CCutsceneMgr::ms_cutsceneProcessing)
+        return;
+
+    auto& player1 = FindPlayerInfo(PED_TYPE_PLAYER1);
+    auto player1Ped = player1.m_pPed;
+
+    const auto PunishPlayer = [&player1, player1Ped](int32 fee) {
+        player1.m_nMoney = std::max(player1.m_nMoney - fee, 0);
+        player1Ped->ClearWeapons();
+    };
+
+    if (!IsCoopGameGoingOn()) {
+        UpdateSkip();
+        for (auto& player : CWorld::Players) {
+            auto ped = player.m_pPed;
+            if (!ped || player.m_nPlayerState != PLAYERSTATE_PLAYING)
+                continue;
+
+            switch (ped->m_nPedState) {
+            case PEDSTATE_DEAD:
+            case PEDSTATE_DIE:
+                if (ped->bIsDyingStuck) {
+                    ped->ClearAdrenaline();
+                    player.KillPlayer();
+                    GameState = GAME_STATE_LOGO;
+                    TimeOfLastEvent = CTimer::GetTimeInMS();
+                }
+                break;
+            case PEDSTATE_ARRESTED:
+                ped->ClearAdrenaline();
+                player.ArrestPlayer();
+                ped->Say(15, 2300, 1.0f, 1u, 1u);
+
+                if (ped == FindPlayerPed(PED_TYPE_PLAYER2) && CHud::m_BigMessage[2][0] == '\0') {
+                    CMessages::AddBigMessage(TheText.Get("BUSTED"), 5000, STYLE_WHITE_MIDDLE);
+                }
+                break;
+            }
+        }
+
+        switch (GameState) {
+        case GAME_STATE_LOGO: {
+            CWeaponEffects::ClearCrossHairs();
+            if (CTimer::GetTimeInMS() - TimeOfLastEvent <= 3000)
+                break;
+
+            if (CTimer::GetPreviousTimeInMS() - TimeOfLastEvent <= 3000) {
+                TheCamera.SetFadeColour(0, 0, 0);
+                TheCamera.Fade(2.0f, eFadeFlag::FADE_IN);
+            }
+
+            if (TheCamera.m_bFading)
+                break;
+
+            if (bPenaltyForDeathApplies) {
+                if (!player1.m_bFreeHealthCare) {
+                    PunishPlayer(100);
+                } else {
+                    player1.m_bFreeHealthCare = false;
+                }
+            }
+            player1.m_nPlayerState = PLAYERSTATE_PLAYING;
+            GameState = GAME_STATE_INITIAL;
+
+            if (auto vehicle = player1Ped->GetVehicleIfInOne()) {
+                if (auto& driver = vehicle->m_pDriver; player1Ped == driver) {
+                    driver->CleanUpOldReference((CEntity**)&vehicle->m_pDriver);
+                    driver = nullptr;
+
+                    if (vehicle->m_nStatus != STATUS_WRECKED) {
+                        vehicle->m_nStatus = STATUS_ABANDONED;
+                    }
+                } else {
+                    vehicle->RemovePassenger(player1Ped);
+                }
+            }
+
+            CMessages::ClearMessages(false);
+            CHud::SetHelpMessage(nullptr, true, false, false);
+            CCarCtrl::ClearInterestingVehicleList();
+            CGarages::CloseHideOutGaragesBeforeSave();
+            CWorld::ClearExcitingStuffFromArea(player1.GetPos(), 4000.0f, true);
+
+            auto posn = player1.GetPos();
+            if (auto enEx = player1Ped->m_pEnex) {
+                enEx->GetPositionRelativeToOutsideWorld(posn);
+            }
+
+            CVector restartPoint;
+            float restartAngle;
+            CRestart::FindClosestHospitalRestartPoint(posn, restartPoint, restartAngle);
+
+            if (player1Ped && FindPlayerPed(PED_TYPE_PLAYER2)) {
+                restartPoint = vec2PlayerStartLocation;
+                restartAngle = DegreesToRadians(f2PlayerStartHeading);
+                RestorePedsWeapons(player1Ped);
+            }
+            Remove2ndPlayerIfPresent();
+            PassTime(12 * 60);
+            FindPlayerInfo().m_nNumHoursDidntEat = 0;
+            RestorePlayerStuffDuringResurrection(player1Ped, restartPoint, restartAngle);
+            SortOutStreamingAndMemory(player1Ped->GetPosition(), player1Ped->GetHeading());
+
+            TheCamera.m_fCamShakeForce = 0.0f;
+            TheCamera.SetMotionBlur(0, 0, 0, 0, 0); // todo: eBlurType enum
+            CPad::GetPad(0)->StopShaking(0);
+            CReferences::RemoveReferencesToPlayer();
+            CCarCtrl::CountDownToCarsAtStart = 10;
+            CPopulation::m_CountDownToPedsAtStart = 10;
+            CPad::GetPad(CWorld::PlayerInFocus)->DisablePlayerControls = false;
+            if (CRestart::bFadeInAfterNextDeath) {
+                //goto LABEL_154;
+            }
+            CRestart::bFadeInAfterNextDeath = 1;
+            break;
+        }
+        case GAME_STATE_PLAYING_LOGO: {
+            CWeaponEffects::ClearCrossHairs();
+            auto delta = CTimer::GetTimeInMS() - TimeOfLastEvent;
+            if (delta <= 3000)
+                break;
+
+            if (CTimer::GetPreviousTimeInMS() - TimeOfLastEvent <= 3000) {
+                TheCamera.SetFadeColour(0, 0, 0);
+                TheCamera.Fade(2.0f, eFadeFlag::FADE_IN);
+            }
+
+            if (!CTheScripts::IsPlayerOnAMission() && !CWorld::Players[0].m_nBustedAudioStatus) {
+                if (CGeneral::GetRandomNumberInRange(0, 4)) {
+                    player1.m_nBustedAudioStatus = 2;
+                } else {
+                    player1.m_nBustedAudioStatus = 1;
+                    player1.m_nLastBustMessageNumber = player1.m_nLastBustMessageNumber % 28 + 1;
+                }
+            }
+
+            if (delta < 4000 || TheCamera.m_bFading)
+                break;
+
+            player1.m_nPlayerState = PLAYERSTATE_PLAYING;
+            GameState = GAME_STATE_INITIAL;
+
+            if (bPenaltyForArrestApplies) {
+                if (!player1.m_bGetOutOfJailFree) {
+                    auto fee = [&] {
+                        switch (player1Ped->GetWantedLevel()) {
+                        case 1:
+                            return 100;
+                        case 2:
+                            return 200;
+                        case 3:
+                            return 400;
+                        case 4:
+                            return 600;
+                        case 5:
+                            return 900;
+                        case 6:
+                            return 1500;
+                        default:
+                            NOTSA_UNREACHABLE(); // NOTSA, SA returns 100.
+                        }
+                    }();
+                    PunishPlayer(fee);
+                } else {
+                    player1.m_bGetOutOfJailFree = false;
+                }
+            }
+
+            if (auto vehicle = player1Ped->GetVehicleIfInOne()) {
+                if (auto& driver = vehicle->m_pDriver; player1Ped == driver) {
+                    driver->CleanUpOldReference((CEntity**)&vehicle->m_pDriver);
+                    driver = nullptr;
+
+                    if (vehicle->m_nStatus != STATUS_WRECKED) {
+                        vehicle->m_nStatus = STATUS_ABANDONED;
+                    }
+                } else {
+                    vehicle->RemovePassenger(player1Ped);
+                }
+            }
+
+            CMessages::ClearMessages(false);
+            CHud::SetHelpMessage(nullptr, true, false, false);
+            CCarCtrl::ClearInterestingVehicleList();
+            CGarages::CloseHideOutGaragesBeforeSave();
+            CWorld::ClearExcitingStuffFromArea(player1.GetPos(), 4000.0f, true);
+
+            auto posn = player1.GetPos();
+            if (auto enEx = player1Ped->m_pEnex) {
+                enEx->GetPositionRelativeToOutsideWorld(posn);
+            }
+
+            CVector restartPoint;
+            float restartAngle;
+            CRestart::FindClosestPoliceRestartPoint(posn, restartPoint, restartAngle);
+
+            if (player1Ped && FindPlayerPed(PED_TYPE_PLAYER2)) {
+                restartPoint = vec2PlayerStartLocation;
+                restartAngle = DegreesToRadians(f2PlayerStartHeading);
+                RestorePedsWeapons(player1Ped);
+            }
+            Remove2ndPlayerIfPresent();
+            PassTime(12 * 60);
+            FindPlayerInfo().m_nNumHoursDidntEat = 0;
+            RestorePlayerStuffDuringResurrection(player1Ped, restartPoint, restartAngle);
+            SortOutStreamingAndMemory(player1Ped->GetPosition(), player1Ped->GetHeading());
+
+            TheCamera.m_fCamShakeForce = 0.0f;
+            TheCamera.SetMotionBlur(0, 0, 0, 0, 0); // todo: eBlurType enum
+            CPad::GetPad(0)->StopShaking(0);
+            CReferences::RemoveReferencesToPlayer();
+            CCarCtrl::CountDownToCarsAtStart = 10;
+            CPopulation::m_CountDownToPedsAtStart = 10;
+            CPad::GetPad(CWorld::PlayerInFocus)->DisablePlayerControls = false;
+            if (CRestart::bFadeInAfterNextArrest) {
+                // goto LABEL_154;
+            }
+            CRestart::bFadeInAfterNextArrest = true;
+            break;
+        }
+        case GAME_STATE_TITLE:
+        case GAME_STATE_PLAYING_INTRO: {
+            if (CTimer::GetTimeInMS() - TimeOfLastEvent <= 3000)
+                break;
+
+            if (CTimer::GetPreviousTimeInMS() - TimeOfLastEvent <= 3000) {
+                TheCamera.SetFadeColour(0, 0, 0);
+                TheCamera.Fade(2.0f, eFadeFlag::FADE_IN);
+            }
+
+            if (TheCamera.m_bFading)
+                break;
+
+            player1.m_nPlayerState = PLAYERSTATE_PLAYING;
+            GameState = GAME_STATE_INITIAL;
+
+            if (auto vehicle = player1Ped->GetVehicleIfInOne()) {
+                if (auto& driver = vehicle->m_pDriver; player1Ped == driver) {
+                    driver->CleanUpOldReference((CEntity**)&vehicle->m_pDriver);
+                    driver = nullptr;
+
+                    if (vehicle->m_nStatus != STATUS_WRECKED) {
+                        vehicle->m_nStatus = STATUS_ABANDONED;
+                    }
+                } else {
+                    vehicle->RemovePassenger(player1Ped);
+                }
+            }
+            CMessages::ClearMessages(false);
+            CHud::SetHelpMessage(nullptr, true, false, false);
+            CCarCtrl::ClearInterestingVehicleList();
+            CGarages::CloseHideOutGaragesBeforeSave();
+            CWorld::ClearExcitingStuffFromArea(player1.GetPos(), 4000.0f, true);
+
+            auto posn = player1.GetPos();
+            if (auto enEx = player1Ped->m_pEnex) {
+                enEx->GetPositionRelativeToOutsideWorld(posn);
+            }
+
+            CVector restartPoint;
+            float restartAngle;
+            CRestart::FindClosestPoliceRestartPoint(posn, restartPoint, restartAngle);
+
+            if (player1Ped && FindPlayerPed(PED_TYPE_PLAYER2)) {
+                restartPoint = vec2PlayerStartLocation;
+                restartAngle = DegreesToRadians(f2PlayerStartHeading);
+                RestorePedsWeapons(player1Ped);
+            }
+            Remove2ndPlayerIfPresent();
+            PassTime(12 * 60);
+            FindPlayerInfo().m_nNumHoursDidntEat = 0;
+            RestorePlayerStuffDuringResurrection(player1Ped, restartPoint, restartAngle);
+            SortOutStreamingAndMemory(player1Ped->GetPosition(), player1Ped->GetHeading());
+
+            TheCamera.m_fCamShakeForce = 0.0f;
+            TheCamera.SetMotionBlur(0, 0, 0, 0, 0); // todo: eBlurType enum
+            CPad::GetPad(0)->StopShaking(0);
+            CReferences::RemoveReferencesToPlayer();
+            CCarCtrl::CountDownToCarsAtStart = 10;
+            CPopulation::m_CountDownToPedsAtStart = 10;
+
+            // label_154:
+            TheCamera.SetFadeColour(0, 0, 0);
+            TheCamera.Fade(3.0f, eFadeFlag::FADE_OUT);
+            break;
+        }
+        default:
+            break;
+        }
+
+        if (bLimitPlayerDistance && IsCoopGameGoingOn()) {
+            // ...
+        }
+        // ...
+    }
 }
 
 // 0x442480
