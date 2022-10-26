@@ -26,7 +26,7 @@ void AsciiToGxtChar(const char* src, GxtChar* dst);
  * @param   start     start position
  * @return  pointer to static var containing null-terminated ASCII string
  */
-const char* GxtCharToAscii(GxtChar* src, uint8 start);
+const char* GxtCharToAscii(const GxtChar* src, uint8 start);
 
 /**
  * Concatenate null terminated GXT strings
@@ -34,7 +34,7 @@ const char* GxtCharToAscii(GxtChar* src, uint8 start);
  * @param   dst    pointer to destination buffer containing null-terminated string
  * @param   src    pointer to null-terminated string you wanna add to destination
  */
-GxtChar* GxtCharStrcat(GxtChar* dst, GxtChar* src);
+GxtChar* GxtCharStrcat(GxtChar* dst, const GxtChar* src);
 
 /**
  * Get GXT null terminated string length

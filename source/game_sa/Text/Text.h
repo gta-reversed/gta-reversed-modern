@@ -41,7 +41,7 @@ public:
      *
      * @return The text identified by the given key or the GXT error string.
      */
-    [[nodiscard]] char* Get(const char* key);
+    [[nodiscard]] const char* Get(const char* key);
     void GetNameOfLoadedMissionText(char* outStr);
 
     void LoadMissionText(const char* mission);
@@ -65,7 +65,7 @@ public:
 
 private:
     bool ReadChunkHeader(ChunkHeader* header, FILESTREAM file, uint32* offset, uint8 unknown);
-    [[nodiscard]] char GetUpperCase(char c) const;
+    [[nodiscard]] char GetUpperCase(const char c) const;
 
 public:
     auto GetKeys() { return std::span{ m_MainKeyArray.m_data, m_MainKeyArray.m_size }; }

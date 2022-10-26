@@ -241,7 +241,7 @@ int32 CRadar::GetActualBlipArrayIndex(int32 blipIndex)
 // 0x5828A0
 void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType)
 {
-    char* blipName{};
+    const char* blipName{};
 
     switch (blipType) {
     case (eRadarSprite)-5:

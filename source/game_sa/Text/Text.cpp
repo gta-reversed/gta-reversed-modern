@@ -368,10 +368,10 @@ void CText::LoadMissionPackText() {
 }
 
 // 0x6A0050
-char* CText::Get(const char* key) {
+const char* CText::Get(const char* key) {
     if (key[0] && key[0] != ' ') {
         bool found = false;
-        char* str = m_MainKeyArray.Search(key, found);
+        auto str = m_MainKeyArray.Search(key, found);
         if (found) {
             return str;
         }
@@ -408,7 +408,7 @@ bool CText::ReadChunkHeader(ChunkHeader* header, FILESTREAM file, uint32* offset
 }
 
 // 0x69F750
-char CText::GetUpperCase(char c) const {
+char CText::GetUpperCase(const char c) const {
     switch (m_nLangCode) {
     case eTextLangCode::ENGLISH:
         if (c >= 'a' && c <= 'z')
