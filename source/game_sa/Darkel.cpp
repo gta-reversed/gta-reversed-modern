@@ -379,8 +379,7 @@ void CDarkel::Update() {
     const int32 remaining = TimeOfFrenzyStart + TimeLimit - CTimer::GetTimeInMS();
     if (remaining <= 0 && TimeLimit >= 0) {
         if (Status == DARKEL_STATUS_4) {
-            CGameLogic::GameState = GAME_STATE_TITLE;
-            CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS();
+            CGameLogic::SetMissionFailed();
         }
         StartFrenzy();
     } else if (Status != DARKEL_STATUS_4 || FindPlayerPed(PED_TYPE_PLAYER2)) {
@@ -391,14 +390,13 @@ void CDarkel::Update() {
             PreviousTime = remaining / 1000;
         }
     } else {
-        CGameLogic::GameState = GAME_STATE_TITLE;
-        CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS();
+        CGameLogic::SetMissionFailed();
         StartFrenzy();
     }
 
     if (KillsNeeded <= 0) {
         if (Status == DARKEL_STATUS_4) {
-            CGameLogic::GameState = GAME_STATE_PLAYING_INTRO;
+            CGameLogic::GameState = GAMELOGIC_STATE_MISSION_PASSED;
             CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS();
         }
 
@@ -429,8 +427,7 @@ void CDarkel::ResetOnPlayerDeath() {
 // 0x43DC60
 void CDarkel::FailKillFrenzy() {
     if (Status == DARKEL_STATUS_4) {
-        CGameLogic::GameState = GAME_STATE_TITLE;
-        CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS();
+        CGameLogic::SetMissionFailed();
     }
     ResetOnPlayerDeath();
 }

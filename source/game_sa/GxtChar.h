@@ -4,10 +4,9 @@
 
 #pragma once
 
-
-typedef char GxtChar;            // 8-bit GXT character
-typedef GxtChar* PGxtStr;        // 8-bit null terminated GXT string
-typedef GxtChar const* PCGxtStr; // 8-bit null terminated constant GXT string
+using GxtChar = char;    // 8-bit GXT character.
+using PGxtStr = GxtChar*;
+using PCGxtStr = GxtChar const*;
 
 /**
  * Convert ANSI string to GXT-supported null-terminated string

@@ -35,7 +35,7 @@ void CGameLogic::InjectHooks() {
     RH_ScopedInstall(SkipCanBeActivated, 0x4415C0);
     RH_ScopedInstall(SortOutStreamingAndMemory, 0x441440);
     RH_ScopedInstall(StopPlayerMovingFromDirection, 0x441290);
-    RH_ScopedInstall(Update, 0x442AD0, { .reversed = false });
+    RH_ScopedInstall(Update, 0x442AD0, { .reversed = true });
     RH_ScopedInstall(UpdateSkip, 0x442480);
 }
 
@@ -121,7 +121,7 @@ uint32 CGameLogic::FindCityClosestToPoint(CVector2D point) {
 // 0x441240
 void CGameLogic::ForceDeathRestart() {
     CWorld::Players[CWorld::PlayerInFocus].m_nPlayerState = PLAYERSTATE_HAS_DIED;
-    GameState = GAME_STATE_LOGO;
+    GameState = GAMELOGIC_STATE_WASTED;
     TimeOfLastEvent = CTimer::GetTimeInMS() - 3001;
     TheCamera.SetFadeColour(0, 0, 0);
     TheCamera.Fade(4.0f, eFadeFlag::FADE_IN);
@@ -132,7 +132,7 @@ void CGameLogic::InitAtStartOfGame() {
     ActivePlayers            = true;
     SkipState                = SKIP_NONE;
     NumAfterDeathStartPoints = 0;
-    GameState                = GAME_STATE_INITIAL;
+    GameState                = GAMELOGIC_STATE_PLAYING;
     TimeOfLastEvent          = 0;
     nPrintFocusHelpTimer     = 0;
     nPrintFocusHelpCounter   = 0;
@@ -318,7 +318,7 @@ void CGameLogic::ResetStuffUponResurrection() {
     CPad::GetPad(CWorld::PlayerInFocus)->DisablePlayerControls = 0;
 
     playerPed->ClearWeapons();
-    GameState = GAME_STATE_INITIAL;
+    GameState = GAMELOGIC_STATE_PLAYING;
     TimeOfLastEvent = 0;
 }
 
@@ -555,7 +555,6 @@ void CGameLogic::StopPlayerMovingFromDirection(int32 playerId, CVector direction
 
 // 0x442AD0
 void CGameLogic::Update() {
-    return plugin::Call<0x442AD0>();
     CStats::UpdateRespectStat(0);
     CStats::UpdateSexAppealStat();
     SetPlayerWantedLevelForForbiddenTerritories(false);
@@ -566,63 +565,15 @@ void CGameLogic::Update() {
     auto& player1 = FindPlayerInfo(PED_TYPE_PLAYER1);
     auto player1Ped = player1.m_pPed;
 
-    const auto PunishPlayer = [&player1, player1Ped](int32 fee) {
-        player1.m_nMoney = std::max(player1.m_nMoney - fee, 0);
-        player1Ped->ClearWeapons();
-    };
+    const auto Process = [&] {
+        const auto PunishPlayer = [&player1, player1Ped](int32 fee) {
+            player1.m_nMoney = std::max(player1.m_nMoney - fee, 0);
+            player1Ped->ClearWeapons();
+        };
 
-    if (!IsCoopGameGoingOn()) {
-        UpdateSkip();
-        for (auto& player : CWorld::Players) {
-            auto ped = player.m_pPed;
-            if (!ped || player.m_nPlayerState != PLAYERSTATE_PLAYING)
-                continue;
-
-            switch (ped->m_nPedState) {
-            case PEDSTATE_DEAD:
-            case PEDSTATE_DIE:
-                if (ped->bIsDyingStuck) {
-                    ped->ClearAdrenaline();
-                    player.KillPlayer();
-                    GameState = GAME_STATE_LOGO;
-                    TimeOfLastEvent = CTimer::GetTimeInMS();
-                }
-                break;
-            case PEDSTATE_ARRESTED:
-                ped->ClearAdrenaline();
-                player.ArrestPlayer();
-                ped->Say(15, 2300, 1.0f, 1u, 1u);
-
-                if (ped == FindPlayerPed(PED_TYPE_PLAYER2) && CHud::m_BigMessage[2][0] == '\0') {
-                    CMessages::AddBigMessage(TheText.Get("BUSTED"), 5000, STYLE_WHITE_MIDDLE);
-                }
-                break;
-            }
-        }
-
-        switch (GameState) {
-        case GAME_STATE_LOGO: {
-            CWeaponEffects::ClearCrossHairs();
-            if (CTimer::GetTimeInMS() - TimeOfLastEvent <= 3000)
-                break;
-
-            if (CTimer::GetPreviousTimeInMS() - TimeOfLastEvent <= 3000) {
-                TheCamera.SetFadeColour(0, 0, 0);
-                TheCamera.Fade(2.0f, eFadeFlag::FADE_IN);
-            }
-
-            if (TheCamera.m_bFading)
-                break;
-
-            if (bPenaltyForDeathApplies) {
-                if (!player1.m_bFreeHealthCare) {
-                    PunishPlayer(100);
-                } else {
-                    player1.m_bFreeHealthCare = false;
-                }
-            }
+        const auto ResetForResurrectionAndFadeOut = [&player1, &player1Ped](CVector& restartPoint, float restartAngle, bool fadeOutNow) {
             player1.m_nPlayerState = PLAYERSTATE_PLAYING;
-            GameState = GAME_STATE_INITIAL;
+            GameState = GAMELOGIC_STATE_PLAYING;
 
             if (auto vehicle = player1Ped->GetVehicleIfInOne()) {
                 if (auto& driver = vehicle->m_pDriver; player1Ped == driver) {
@@ -643,16 +594,7 @@ void CGameLogic::Update() {
             CGarages::CloseHideOutGaragesBeforeSave();
             CWorld::ClearExcitingStuffFromArea(player1.GetPos(), 4000.0f, true);
 
-            auto posn = player1.GetPos();
-            if (auto enEx = player1Ped->m_pEnex) {
-                enEx->GetPositionRelativeToOutsideWorld(posn);
-            }
-
-            CVector restartPoint;
-            float restartAngle;
-            CRestart::FindClosestHospitalRestartPoint(posn, restartPoint, restartAngle);
-
-            if (player1Ped && FindPlayerPed(PED_TYPE_PLAYER2)) {
+            if (IsCoopGameGoingOn()) {
                 restartPoint = vec2PlayerStartLocation;
                 restartAngle = DegreesToRadians(f2PlayerStartHeading);
                 RestorePedsWeapons(player1Ped);
@@ -670,21 +612,82 @@ void CGameLogic::Update() {
             CCarCtrl::CountDownToCarsAtStart = 10;
             CPopulation::m_CountDownToPedsAtStart = 10;
             CPad::GetPad(CWorld::PlayerInFocus)->DisablePlayerControls = false;
-            if (CRestart::bFadeInAfterNextDeath) {
-                //goto LABEL_154;
-            }
-            CRestart::bFadeInAfterNextDeath = 1;
-            break;
-        }
-        case GAME_STATE_PLAYING_LOGO: {
-            CWeaponEffects::ClearCrossHairs();
-            auto delta = CTimer::GetTimeInMS() - TimeOfLastEvent;
-            if (delta <= 3000)
-                break;
 
+            if (fadeOutNow) {
+                TheCamera.SetFadeColour(0, 0, 0);
+                TheCamera.Fade(3.0f, eFadeFlag::FADE_OUT);
+            } else {
+                fadeOutNow = true;
+            }
+        };
+
+        const auto FadeInIfNewEvent = [&] {
             if (CTimer::GetPreviousTimeInMS() - TimeOfLastEvent <= 3000) {
                 TheCamera.SetFadeColour(0, 0, 0);
                 TheCamera.Fade(2.0f, eFadeFlag::FADE_IN);
+            }
+        };
+
+        for (auto& player : CWorld::Players) {
+            auto ped = player.m_pPed;
+            if (!ped || player.m_nPlayerState != PLAYERSTATE_PLAYING)
+                continue;
+
+            ped->GetTaskManager().GetSimplestActiveTask();
+            if (ped->m_nPedState == PEDSTATE_DEAD || ped->m_nPedState == PEDSTATE_DIE && ped->bIsDyingStuck) {
+                ped->ClearAdrenaline();
+                player.KillPlayer();
+                GameState = GAMELOGIC_STATE_WASTED;
+                TimeOfLastEvent = CTimer::GetTimeInMS();
+            } else if (ped->m_nPedState == PEDSTATE_ARRESTED) {
+                ped->ClearAdrenaline();
+                player.ArrestPlayer();
+                ped->Say(15, 2300, 1.0f, 1u, 1u);
+                GameState = GAMELOGIC_STATE_BUSTED;
+                TimeOfLastEvent = CTimer::GetTimeInMS();
+
+                if (ped == FindPlayerPed(PED_TYPE_PLAYER2) && CHud::m_BigMessage[2][0] == '\0') {
+                    CMessages::AddBigMessage(TheText.Get("BUSTED"), 5000, STYLE_WHITE_MIDDLE);
+                }
+            }
+        }
+
+        switch (GameState) {
+        case GAMELOGIC_STATE_WASTED: {
+            CWeaponEffects::ClearCrossHairs();
+            if (CTimer::GetTimeInMS() - TimeOfLastEvent <= 3000)
+                break;
+
+            FadeInIfNewEvent();
+
+            if (TheCamera.m_bFading)
+                break;
+
+            if (!IsCoopGameGoingOn() && bPenaltyForDeathApplies) {
+                if (!player1.m_bFreeHealthCare) {
+                    PunishPlayer(100);
+                } else {
+                    player1.m_bFreeHealthCare = false;
+                }
+            }
+
+            auto posn = player1.GetPos();
+            if (auto enEx = player1Ped->m_pEnex) {
+                enEx->GetPositionRelativeToOutsideWorld(posn);
+            }
+
+            CVector restartPoint;
+            float restartAngle;
+            CRestart::FindClosestHospitalRestartPoint(posn, restartPoint, restartAngle);
+
+            ResetForResurrectionAndFadeOut(restartPoint, restartAngle, CRestart::bFadeInAfterNextDeath);
+            break;
+        }
+        case GAMELOGIC_STATE_BUSTED: {
+            CWeaponEffects::ClearCrossHairs();
+            auto delta = CTimer::GetTimeInMS() - TimeOfLastEvent;
+            if (delta > 3000) {
+                FadeInIfNewEvent();
             }
 
             if (!CTheScripts::IsPlayerOnAMission() && !CWorld::Players[0].m_nBustedAudioStatus) {
@@ -699,12 +702,9 @@ void CGameLogic::Update() {
             if (delta < 4000 || TheCamera.m_bFading)
                 break;
 
-            player1.m_nPlayerState = PLAYERSTATE_PLAYING;
-            GameState = GAME_STATE_INITIAL;
-
-            if (bPenaltyForArrestApplies) {
+            if (!IsCoopGameGoingOn() && bPenaltyForArrestApplies) {
                 if (!player1.m_bGetOutOfJailFree) {
-                    auto fee = [&] {
+                    const auto fee = [&] {
                         switch (player1Ped->GetWantedLevel()) {
                         case 1:
                             return 100;
@@ -728,25 +728,6 @@ void CGameLogic::Update() {
                 }
             }
 
-            if (auto vehicle = player1Ped->GetVehicleIfInOne()) {
-                if (auto& driver = vehicle->m_pDriver; player1Ped == driver) {
-                    driver->CleanUpOldReference((CEntity**)&vehicle->m_pDriver);
-                    driver = nullptr;
-
-                    if (vehicle->m_nStatus != STATUS_WRECKED) {
-                        vehicle->m_nStatus = STATUS_ABANDONED;
-                    }
-                } else {
-                    vehicle->RemovePassenger(player1Ped);
-                }
-            }
-
-            CMessages::ClearMessages(false);
-            CHud::SetHelpMessage(nullptr, true, false, false);
-            CCarCtrl::ClearInterestingVehicleList();
-            CGarages::CloseHideOutGaragesBeforeSave();
-            CWorld::ClearExcitingStuffFromArea(player1.GetPos(), 4000.0f, true);
-
             auto posn = player1.GetPos();
             if (auto enEx = player1Ped->m_pEnex) {
                 enEx->GetPositionRelativeToOutsideWorld(posn);
@@ -755,65 +736,19 @@ void CGameLogic::Update() {
             CVector restartPoint;
             float restartAngle;
             CRestart::FindClosestPoliceRestartPoint(posn, restartPoint, restartAngle);
-
-            if (player1Ped && FindPlayerPed(PED_TYPE_PLAYER2)) {
-                restartPoint = vec2PlayerStartLocation;
-                restartAngle = DegreesToRadians(f2PlayerStartHeading);
-                RestorePedsWeapons(player1Ped);
-            }
-            Remove2ndPlayerIfPresent();
-            PassTime(12 * 60);
-            FindPlayerInfo().m_nNumHoursDidntEat = 0;
-            RestorePlayerStuffDuringResurrection(player1Ped, restartPoint, restartAngle);
-            SortOutStreamingAndMemory(player1Ped->GetPosition(), player1Ped->GetHeading());
-
-            TheCamera.m_fCamShakeForce = 0.0f;
-            TheCamera.SetMotionBlur(0, 0, 0, 0, 0); // todo: eBlurType enum
-            CPad::GetPad(0)->StopShaking(0);
-            CReferences::RemoveReferencesToPlayer();
-            CCarCtrl::CountDownToCarsAtStart = 10;
-            CPopulation::m_CountDownToPedsAtStart = 10;
-            CPad::GetPad(CWorld::PlayerInFocus)->DisablePlayerControls = false;
-            if (CRestart::bFadeInAfterNextArrest) {
-                // goto LABEL_154;
-            }
-            CRestart::bFadeInAfterNextArrest = true;
+            ResetForResurrectionAndFadeOut(restartPoint, restartAngle, CRestart::bFadeInAfterNextArrest);
             break;
         }
-        case GAME_STATE_TITLE:
-        case GAME_STATE_PLAYING_INTRO: {
+        case GAMELOGIC_STATE_MISSION_FAILED: // really have no idea
+        case GAMELOGIC_STATE_MISSION_PASSED: {
             if (CTimer::GetTimeInMS() - TimeOfLastEvent <= 3000)
                 break;
 
-            if (CTimer::GetPreviousTimeInMS() - TimeOfLastEvent <= 3000) {
-                TheCamera.SetFadeColour(0, 0, 0);
-                TheCamera.Fade(2.0f, eFadeFlag::FADE_IN);
-            }
+            FadeInIfNewEvent();
 
             if (TheCamera.m_bFading)
                 break;
 
-            player1.m_nPlayerState = PLAYERSTATE_PLAYING;
-            GameState = GAME_STATE_INITIAL;
-
-            if (auto vehicle = player1Ped->GetVehicleIfInOne()) {
-                if (auto& driver = vehicle->m_pDriver; player1Ped == driver) {
-                    driver->CleanUpOldReference((CEntity**)&vehicle->m_pDriver);
-                    driver = nullptr;
-
-                    if (vehicle->m_nStatus != STATUS_WRECKED) {
-                        vehicle->m_nStatus = STATUS_ABANDONED;
-                    }
-                } else {
-                    vehicle->RemovePassenger(player1Ped);
-                }
-            }
-            CMessages::ClearMessages(false);
-            CHud::SetHelpMessage(nullptr, true, false, false);
-            CCarCtrl::ClearInterestingVehicleList();
-            CGarages::CloseHideOutGaragesBeforeSave();
-            CWorld::ClearExcitingStuffFromArea(player1.GetPos(), 4000.0f, true);
-
             auto posn = player1.GetPos();
             if (auto enEx = player1Ped->m_pEnex) {
                 enEx->GetPositionRelativeToOutsideWorld(posn);
@@ -822,38 +757,54 @@ void CGameLogic::Update() {
             CVector restartPoint;
             float restartAngle;
             CRestart::FindClosestPoliceRestartPoint(posn, restartPoint, restartAngle);
-
-            if (player1Ped && FindPlayerPed(PED_TYPE_PLAYER2)) {
-                restartPoint = vec2PlayerStartLocation;
-                restartAngle = DegreesToRadians(f2PlayerStartHeading);
-                RestorePedsWeapons(player1Ped);
-            }
-            Remove2ndPlayerIfPresent();
-            PassTime(12 * 60);
-            FindPlayerInfo().m_nNumHoursDidntEat = 0;
-            RestorePlayerStuffDuringResurrection(player1Ped, restartPoint, restartAngle);
-            SortOutStreamingAndMemory(player1Ped->GetPosition(), player1Ped->GetHeading());
-
-            TheCamera.m_fCamShakeForce = 0.0f;
-            TheCamera.SetMotionBlur(0, 0, 0, 0, 0); // todo: eBlurType enum
-            CPad::GetPad(0)->StopShaking(0);
-            CReferences::RemoveReferencesToPlayer();
-            CCarCtrl::CountDownToCarsAtStart = 10;
-            CPopulation::m_CountDownToPedsAtStart = 10;
-
-            // label_154:
-            TheCamera.SetFadeColour(0, 0, 0);
-            TheCamera.Fade(3.0f, eFadeFlag::FADE_OUT);
+            ResetForResurrectionAndFadeOut(restartPoint, restartAngle, true);
             break;
         }
-        default:
-            break;
         }
 
         if (bLimitPlayerDistance && IsCoopGameGoingOn()) {
-            // ...
+            if (auto diff = FindPlayerCoors(1) - FindPlayerCoors(0); diff.Magnitude2D() > MaxPlayerDistance) {
+                StopPlayerMovingFromDirection(PED_TYPE_PLAYER1,  diff.Normalized());
+                StopPlayerMovingFromDirection(PED_TYPE_PLAYER2, -diff.Normalized());
+            }
         }
-        // ...
+    };
+
+    if (!IsCoopGameGoingOn()) {
+        UpdateSkip();
+        Process();
+    } else {
+        static float& lastPlayerDistance = *(float*)(0x96AB24);
+        const auto dist = DistanceBetweenPoints2D(FindPlayerCoors(0), FindPlayerCoors(1));
+
+        const auto UpdateTimerAndLastDistance = [&dist] {
+            if (IsAPlayerInFocusOn2PlayerGame() && nPrintFocusHelpTimer != 0) {
+                nPrintFocusHelpTimer = CTimer::GetTimeInMS() + 30'000;
+            }
+
+            lastPlayerDistance = dist;
+        };
+
+        if (dist > 100.0f) {
+            if (GameState != GAMELOGIC_STATE_MISSION_FAILED) {
+                SetMissionFailed();
+            }
+        } else if (dist > 85.0f && lastPlayerDistance <= 85.0f) {
+            CHud::SetHelpMessage(TheText.Get("WRN_2P"), false, false, false); // any further and 2P game will end.
+        } else if (dist > MaxPlayerDistance && nPrintFocusHelpCounter < 5) {
+            if (lastPlayerDistance > MaxPlayerDistance && (uint32)nPrintFocusHelpTimer < CTimer::GetTimeInMS()) {
+                CHud::SetHelpMessage(TheText.Get("WRN2_2P"), false, false, false); // press SELECT to toggle focus to individual player
+            }
+            else if ((uint32)nPrintFocusHelpTimer < CTimer::GetTimeInMS()) {
+                CHud::SetHelpMessage(TheText.Get("WRN1_2P"), false, false, false); // distance limit reached
+            }
+
+            nPrintFocusHelpTimer = CTimer::GetTimeInMS() + 60'000;
+            nPrintFocusHelpCounter++;
+        }
+
+        UpdateTimerAndLastDistance();
+        Process();
     }
 }
 

@@ -15,6 +15,14 @@ enum eSkipState {
     SKIP_WAITING_SCRIPT
 };
 
+enum eGameLogicState {
+    GAMELOGIC_STATE_PLAYING,
+    GAMELOGIC_STATE_WASTED,
+    GAMELOGIC_STATE_BUSTED,
+    GAMELOGIC_STATE_MISSION_FAILED,
+    GAMELOGIC_STATE_MISSION_PASSED
+};
+
 class CPed;
 
 class CGameLogic {
@@ -43,7 +51,7 @@ public:
 
     static inline bool& bScriptCoopGameGoingOn = *reinterpret_cast<bool*>(0x96A8A8);
     static inline int32& TimeOfLastEvent = *reinterpret_cast<int32*>(0x96A8AC);
-    static inline eGameState& GameState = *reinterpret_cast<eGameState*>(0x96A8B0);
+    static inline eGameLogicState& GameState = *reinterpret_cast<eGameLogicState*>(0x96A8B0);
     static inline int32& ActivePlayers = *reinterpret_cast<int32*>(0x96A8B1);
 
     static inline bool& bPenaltyForDeathApplies = *reinterpret_cast<bool*>(0x8A5E48);
@@ -91,5 +99,11 @@ public:
     // @notsa
     static bool CanPlayerTripSkip() {
         return SkipState == SKIP_AVAILABLE || SkipState == SKIP_AFTER_MISSION;
+    }
+
+    // @notsa
+    static void SetMissionFailed() {
+        GameState = GAMELOGIC_STATE_MISSION_FAILED;
+        TimeOfLastEvent = CTimer::GetTimeInMS();
     }
 };

@@ -314,8 +314,7 @@ void CPlayerInfo::MakePlayerSafe(bool enable, float radius) {
 void CPlayerInfo::PlayerFailedCriticalMission() {
     if (m_nPlayerState == PLAYERSTATE_PLAYING) {
         m_nPlayerState = PLAYERSTATE_FAILED_MISSION;
-        CGameLogic::GameState = GAME_STATE_TITLE;
-        CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS();
+        CGameLogic::SetMissionFailed();
         CDarkel::ResetOnPlayerDeath();
     }
 }

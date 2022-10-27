@@ -6,6 +6,7 @@
 */
 #pragma once
 
+#include "GxtChar.h"
 #include "Data.h"
 #include "KeyArray.h"
 #include "MissionTextOffsets.h"
