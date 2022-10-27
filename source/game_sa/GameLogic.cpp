@@ -425,8 +425,8 @@ void CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed* player, CVecto
 // @param immediately   Do position check without waiting for the frame counter.
 // @addr 0x441770
 void CGameLogic::SetPlayerWantedLevelForForbiddenTerritories(bool immediately) {
-    const auto ped = FindPlayerPed();
-    const auto coords = ped->GetPosition();
+    const auto  ped = FindPlayerPed();
+    const auto& coords = ped->GetPosition();
 
     if ((!immediately && (CTimer::GetFrameCounter() % 32) != 18) || coords.z > 950.0f)
         return;
