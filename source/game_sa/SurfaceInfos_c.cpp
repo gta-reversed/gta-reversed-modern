@@ -362,7 +362,7 @@ void SurfaceInfos_c::LoadSurfaceAudioInfos()
     if (!file) {
         DEV_LOG("[SurfaceInfos_c] Failed to open surfaud.dat");
         CFileMgr::CloseFile(file);
-        return;;
+        return;
     }
 #endif
     for (const char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {

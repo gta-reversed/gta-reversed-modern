@@ -58,7 +58,7 @@ namespace fs = std::filesystem;
 static const fs::path SOURCE_PATH = fs::path(__FILE__).parent_path();
 
 template<typename... Ts>
-[[noreturn]] static void unreachable(const char* method, const char* file, unsigned line, std::string_view fmt = "", Ts&&... fmtArgs) {
+[[noreturn]] static void unreachable(std::string_view method, std::string_view file, unsigned line, std::string_view fmt = "", Ts&&... fmtArgs) {
     const auto userDetails = std::vformat(fmt, std::make_format_args(std::forward<Ts>(fmtArgs)...));
     const auto mbMsg = std::format("File: {}\nIn: {}:{}\n\nDetails:\n{}", fs::relative(file, SOURCE_PATH).string(), method, line, userDetails.empty() ? "<None provided>" : userDetails.c_str());
         

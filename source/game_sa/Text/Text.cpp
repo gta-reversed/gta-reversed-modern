@@ -150,7 +150,7 @@ void CheckFileEncoding(const char* file, uint16 version, uint16 encoding) {
     };
     auto fileEncoding = GetEncodingName(encoding);
 
-    DEV_LOG("[CText]: Loading '%s' version=%02d (%s)\n", file, version, fileEncoding.c_str());
+    DEV_LOG("[CText]: Loading '{}' version={:02d} ({})\n", file, version, fileEncoding.c_str());
     if (encoding != GAME_ENCODING) {
         NOTSA_UNREACHABLE("File {} was compiled with {} encoding but {} is required.", file, fileEncoding, GetEncodingName(GAME_ENCODING));
     }
@@ -263,7 +263,7 @@ void CText::LoadMissionText(const char* mission) {
 
     char tablName[8]{0};
     CFileMgr::Read(file, tablName, sizeof(tablName));
-    // DEV_LOG("[CText]: Loaded a text table for mission: '%s'", tablName);
+    // DEV_LOG("[CText]: Loaded a text table for mission: '{}'", tablName);
     // RET_IGNORED(strncmp(tablName, mission, sizeof(tablName))); // ?
 
     uint32 offset = sizeof(uint16) * 2; // skip version and encoding

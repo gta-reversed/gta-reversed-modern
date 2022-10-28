@@ -46,18 +46,18 @@ bool Initialise() {
 void InitialiseMouse(bool exclusive) {
     HRESULT hr;
     if (FAILED(hr = PSGLOBAL(diInterface)->CreateDevice(GUID_SysMouse, &PSGLOBAL(diMouse), 0))) {
-        DEV_LOG("FAILED(hr=0x%x) in input->CreateDevice\n", hr);
+        DEV_LOG("FAILED(hr=0x{:x}) in input->CreateDevice\n", hr);
         return;
     }
 
     if (FAILED(hr = PSGLOBAL(diMouse)->SetDataFormat(&c_dfDIMouse2))) {
-        DEV_LOG("FAILED(hr=0x%x) in mouse->SetDataFormat\n", hr);
+        DEV_LOG("FAILED(hr=0x{:x}) in mouse->SetDataFormat\n", hr);
         return;
     }
 
     DWORD dwFlags = DISCL_FOREGROUND | (exclusive ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE);
     if (FAILED(hr = PSGLOBAL(diMouse)->SetCooperativeLevel(PSGLOBAL(window), dwFlags))) {
-        DEV_LOG("FAILED(hr=0x%x) in mouse->SetCooperativeLevel\n", hr);
+        DEV_LOG("FAILED(hr=0x{:x}) in mouse->SetCooperativeLevel\n", hr);
         return;
     }
 
