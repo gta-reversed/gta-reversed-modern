@@ -720,7 +720,7 @@ eWeaponType CPickups::WeaponForModel(int32 modelId) {
 void CPickups::Load() {
     for (auto& pickup : aPickUps) {
         CGenericGameStorage::LoadDataFromWorkBuffer(&pickup, sizeof(CPickup));
-        if (pickup.m_nPickupType && pickup.m_pObject) {
+        if (pickup.m_nPickupType != PICKUP_NONE && pickup.m_pObject) {
             pickup.m_pObject = nullptr;
             pickup.m_nFlags.bVisible = false;
         }

@@ -16,66 +16,31 @@
 #include "LoadingScreen.h"
 #include "VideoMode.h"
 #include "ControllerConfigManager.h"
-#include "app.h" // todo: remove
-// #include "Input.h"
+#include "Input.h"
 
-static LPSTR AppClassName = LPSTR("Grand theft auto San Andreas");
+extern void WinPsInjectHooks();
+
+static LPSTR AppClassName = LPSTR(APP_CLASS);
+
+// forward declarations
+bool IsAlreadyRunning();
+char** CommandLineToArgv(char* cmdLine, int* argCount);
+LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, INT nCmdShow);
 
 void Win32InjectHooks() {
-    {
-        RH_ScopedNamespaceName("Win32");
-        RH_ScopedCategoryGlobal();
+    RH_ScopedCategory("Win");
+    RH_ScopedNamespaceName("Win");
 
-        RH_ScopedGlobalInstall(Idle, 0x53E920);
-        RH_ScopedGlobalInstall(RenderScene, 0x53DF40);
-    }
-    {
-        RH_ScopedNamespaceName("Ps");
-        RH_ScopedCategoryGlobal();
+    RH_ScopedGlobalInstall(IsAlreadyRunning, 0x7468E0);
+    RH_ScopedGlobalInstall(CommandLineToArgv, 0x746480, {.reversed = false});
 
-        RH_ScopedGlobalInstall(psWindowSetText, 0x7451B0);
-        RH_ScopedGlobalInstall(psErrorMessage, 0x7451D0);
-        RH_ScopedGlobalInstall(psWarningMessage, 0x7451F0);
-        RH_ScopedGlobalInstall(psCameraBeginUpdate, 0x745210);
-        RH_ScopedGlobalInstall(psCameraShowRaster, 0x745240);
-        RH_ScopedGlobalInstall(psTimer, 0x745270, { .reversed = false });
-        RH_ScopedGlobalInstall(psGrabScreen, 0x7452B0);
-        RH_ScopedGlobalInstall(psMouseSetVisibility, 0x7453E0);
-        RH_ScopedGlobalInstall(psMouseSetPos, 0x7453F0);
-        RH_ScopedGlobalInstall(psPathnameCreate, 0x745470, { .reversed = false });
-        RH_ScopedGlobalInstall(psPathnameDestroy, 0x7454E0);
-        RH_ScopedGlobalInstall(psPathGetSeparator, 0x745500);
-        RH_ScopedGlobalInstall(psInstallFileSystem, 0x745520, { .reversed = false });
-        RH_ScopedGlobalInstall(psNativeTextureSupport, 0x745530);
-        RH_ScopedGlobalInstall(psDebugMessageHandler, 0x745540, { .reversed = false });
-        RH_ScopedGlobalInstall(psTerminate, 0x7458A0);
-        RH_ScopedGlobalInstall(psAlwaysOnTop, 0x7458B0);
-        RH_ScopedGlobalInstall(psSelectDevice, 0x746190, { .reversed = false });
-        RH_ScopedGlobalInstall(psInitialize, 0x747420, { .reversed = false });
-    }
+    RH_ScopedGlobalInstall(MainWndProc, 0x747EB0, {.reversed = false});
+    // RH_ScopedGlobalInstall(WinMain, 0x745560);
+
+    WinPsInjectHooks();
+    WinInput::InjectHooks();
 }
-
-// 0x7468E0
-bool IsAlreadyRunning() {
-    CreateEventA(nullptr, 0, 1, AppClassName);
-    if (GetLastError() != ERROR_ALREADY_EXISTS) {
-        return false;
-    }
-
-    HWND window = FindWindowA(AppClassName, RsGlobal.appName);
-    if (window)
-        SetForegroundWindow(window);
-    else
-        SetForegroundWindow(PSGLOBAL(window));
-
-    return true;
-};
-
-// 0x747EB0
-LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    return plugin::CallAndReturn<LRESULT, 0x747EB0, HWND, UINT, WPARAM, LPARAM>(hwnd, uMsg, wParam, lParam);
-}
-
 
 // 0x7486A0
 bool InitApplication(HINSTANCE hInstance) {
@@ -90,7 +55,7 @@ bool InitApplication(HINSTANCE hInstance) {
 }
 
 // 0x745560
-static HWND InitInstance(HINSTANCE hInstance) {
+HWND InitInstance(HINSTANCE hInstance) {
     RECT rect = { 0, 0, RsGlobal.maximumWidth, RsGlobal.maximumHeight };
     AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
 
@@ -110,9 +75,30 @@ static HWND InitInstance(HINSTANCE hInstance) {
     );
 }
 
+// 0x7468E0
+bool IsAlreadyRunning() {
+    CreateEventA(nullptr, false, true, AppClassName);
+    if (GetLastError() != ERROR_ALREADY_EXISTS) {
+        return false;
+    }
+
+    HWND window = FindWindowA(AppClassName, RsGlobal.appName);
+    if (window)
+        SetForegroundWindow(window);
+    else
+        SetForegroundWindow(PSGLOBAL(window));
+
+    return true;
+};
+
 // 0x746480
 char** CommandLineToArgv(char* cmdLine, int* argCount) {
     return plugin::CallAndReturn<char**, 0x746480, char*, int*>(cmdLine, argCount);
+}
+
+// 0x747EB0
+LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    return plugin::CallAndReturn<LRESULT, 0x747EB0, HWND, UINT, WPARAM, LPARAM>(hwnd, uMsg, wParam, lParam);
 }
 
 /*

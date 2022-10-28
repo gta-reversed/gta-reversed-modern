@@ -4,8 +4,6 @@
 #include "VideoMode.h"
 #include "app/app.h"
 
-#define RSEVENT_SUCCEED(x) ((x) ? rsEVENTPROCESSED : rsEVENTERROR)
-
 void RsInjectHooks() {
     RH_ScopedNamespaceName("Rs");
     RH_ScopedCategoryGlobal();

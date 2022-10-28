@@ -393,6 +393,8 @@
 #include "platform/win/win.h"
 #include "platform/platform.h"
 
+#include "app/app.h"
+
 #include "extensions/utility.hpp"
 
 void InjectHooksMain() {
@@ -1175,6 +1177,7 @@ void InjectHooksMain() {
     const auto App = []() {
         VideoPlayer::InjectHooks();
         Securom::InjectHooks();
+        AppInjectHooks();
         Win32InjectHooks();
         RsInjectHooks();
         VideoModeInjectHooks();

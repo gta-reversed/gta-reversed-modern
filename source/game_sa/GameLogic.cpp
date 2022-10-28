@@ -35,7 +35,7 @@ void CGameLogic::InjectHooks() {
     RH_ScopedInstall(SkipCanBeActivated, 0x4415C0);
     RH_ScopedInstall(SortOutStreamingAndMemory, 0x441440);
     RH_ScopedInstall(StopPlayerMovingFromDirection, 0x441290);
-    RH_ScopedInstall(Update, 0x442AD0, { .reversed = true });
+    RH_ScopedInstall(Update, 0x442AD0);
     RH_ScopedInstall(UpdateSkip, 0x442480);
 }
 
