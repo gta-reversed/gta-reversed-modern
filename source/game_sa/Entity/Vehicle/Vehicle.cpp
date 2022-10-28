@@ -98,8 +98,6 @@ void CVehicle::InjectHooks() {
     RH_ScopedOverloadedInstall(IsPassenger, "Int", 0x6D1C00, bool(CVehicle::*)(int32) const);
     RH_ScopedOverloadedInstall(IsDriver, "Ped", 0x6D1C40, bool(CVehicle::*)(CPed*) const);
     RH_ScopedOverloadedInstall(IsDriver, "Int", 0x6D1C60, bool(CVehicle::*)(int32) const);
-    RH_ScopedInstall(AddExhaustParticles, 0x6DE240);
-    RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
     RH_ScopedInstall(ProcessBoatControl, 0x6DBCE0);
     RH_ScopedInstall(ChangeLawEnforcerState, 0x6D2330);
     RH_ScopedInstall(GetVehicleAppearance, 0x6D1080);
@@ -135,7 +133,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(CarHasRoof, 0x6D25D0, { .reversed = false });
     RH_ScopedInstall(HeightAboveCeiling, 0x6D2600, { .reversed = false });
     RH_ScopedInstall(SetComponentVisibility, 0x6D2700, { .reversed = false });
-    RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740, { .reversed = false });
+    RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
     RH_ScopedInstall(SetComponentAtomicAlpha, 0x6D2960);
     RH_ScopedInstall(UpdateClumpAlpha, 0x6D2980, { .reversed = false });
     RH_ScopedInstall(UpdatePassengerList, 0x6D29E0, { .reversed = false });
@@ -196,7 +194,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(DoBoatSplashes, 0x6DD130, { .reversed = false });
     RH_ScopedInstall(DoSunGlare, 0x6DD6F0, { .reversed = false });
     RH_ScopedInstall(AddWaterSplashParticles, 0x6DDF60, { .reversed = false });
-    RH_ScopedInstall(AddExhaustParticles, 0x6DE240, { .reversed = false });
+    RH_ScopedInstall(AddExhaustParticles, 0x6DE240);
     RH_ScopedInstall(AddSingleWheelParticles, 0x6DE880, { .reversed = false });
     RH_ScopedInstall(GetSpecialColModel, 0x6DF3D0, { .reversed = false });
     RH_ScopedInstall(RemoveVehicleUpgrade, 0x6DF930, { .reversed = false });

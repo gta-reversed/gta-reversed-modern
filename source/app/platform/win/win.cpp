@@ -36,7 +36,7 @@ void Win32InjectHooks() {
     RH_ScopedGlobalInstall(CommandLineToArgv, 0x746480, {.reversed = false});
 
     RH_ScopedGlobalInstall(MainWndProc, 0x747EB0, {.reversed = false});
-    // RH_ScopedGlobalInstall(WinMain, 0x745560);
+    RH_ScopedGlobalInstall(WinMain, 0x745560, {.reversed = false});
 
     WinPsInjectHooks();
     WinInput::InjectHooks();
@@ -101,7 +101,6 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return plugin::CallAndReturn<LRESULT, 0x747EB0, HWND, UINT, WPARAM, LPARAM>(hwnd, uMsg, wParam, lParam);
 }
 
-/*
 // 0x748710
 INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, INT nCmdShow) {
     SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0u, nullptr, 2);
@@ -370,4 +369,3 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
 
     return Msg.wParam;
 }
-*/
