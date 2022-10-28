@@ -6,8 +6,9 @@
 #include "platform.h"
 
 #include "Clouds.h"
-#include "BreakablePlugin.h"
-#include "CustomBuildingRenderer.h"
+
+#include "Plugins/BreakablePlugin/BreakablePlugin.h"
+#include "Pipelines/CustomBuilding/CustomBuildingRenderer.h"
 
 #include "win/win.h"
 
