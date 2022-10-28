@@ -9,6 +9,8 @@ void WinPsInjectHooks() {
     RH_ScopedCategory("Win");
     RH_ScopedNamespaceName("Ps");
 
+    RH_ScopedGlobalInstall(psInitialize, 0x747420, {.reversed = false});
+    RH_ScopedGlobalInstall(psTerminate, 0x7458A0);
     RH_ScopedGlobalInstall(psWindowSetText, 0x7451B0);
     RH_ScopedGlobalInstall(psErrorMessage, 0x7451D0);
     RH_ScopedGlobalInstall(psWarningMessage, 0x7451F0);
@@ -24,10 +26,8 @@ void WinPsInjectHooks() {
     RH_ScopedGlobalInstall(psInstallFileSystem, 0x745520);
     RH_ScopedGlobalInstall(psNativeTextureSupport, 0x745530);
     RH_ScopedGlobalInstall(psDebugMessageHandler, 0x745540);
-    RH_ScopedGlobalInstall(psTerminate, 0x7458A0);
     RH_ScopedGlobalInstall(psAlwaysOnTop, 0x7458B0);
     RH_ScopedGlobalInstall(psSelectDevice, 0x746190, {.reversed = false});
-    RH_ScopedGlobalInstall(psInitialize, 0x747420, {.reversed = false});
 }
 
 // 0x747420
@@ -52,7 +52,7 @@ void psErrorMessage(const char* str) {
 
 // 0x7451F0
 void psWarningMessage(const char* str) {
-    MessageBox(nullptr, str, RsGlobal.appName, MB_ICONWARNING | MB_TASKMODAL | MB_TOPMOST);
+    MessageBoxA(nullptr, str, RsGlobal.appName, MB_ICONWARNING | MB_TASKMODAL | MB_TOPMOST);
 }
 
 // 0x745210
