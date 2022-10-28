@@ -11,4 +11,6 @@ void InitialiseMouse(bool exclusive);
 void InitialiseJoys();
 BOOL CALLBACK EnumDevicesCallback(LPCDIDEVICEINSTANCEA pInst, LPVOID);
 
+const CMouseControllerState& GetMouseButtonMask();
+
 }; // namespace WinInput

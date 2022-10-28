@@ -26,7 +26,7 @@ static LPSTR AppClassName = LPSTR(APP_CLASS);
 bool IsAlreadyRunning();
 char** CommandLineToArgv(char* cmdLine, int* argCount);
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, INT nCmdShow);
+INT WINAPI __WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, INT nCmdShow);
 
 void Win32InjectHooks() {
     RH_ScopedCategory("Win");
@@ -36,7 +36,7 @@ void Win32InjectHooks() {
     RH_ScopedGlobalInstall(CommandLineToArgv, 0x746480, {.reversed = false});
 
     RH_ScopedGlobalInstall(MainWndProc, 0x747EB0, {.reversed = false});
-    RH_ScopedGlobalInstall(WinMain, 0x745560, {.reversed = false});
+    RH_ScopedNamedGlobalInstall(__WinMain, "WinMain", 0x745560, {.reversed = false});
 
     WinPsInjectHooks();
     WinInput::InjectHooks();
@@ -102,7 +102,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 // 0x748710
-INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, INT nCmdShow) {
+INT WINAPI __WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, INT nCmdShow) {
     SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0u, nullptr, 2);
     if (IsAlreadyRunning()) {
         return false;
@@ -136,6 +136,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
     // todo: CInputEvents::MapMouseButtons && See ASM
     // const auto state = GetMouseButtonMask();
     // ControlsManager.InitDefaultControlConfigMouse(state, FrontEndMenuManager.m_nController == 0);
+    ControlsManager.InitDefaultControlConfigMouse(WinInput::GetMouseButtonMask(), !FrontEndMenuManager.m_nController);
 
     // 0x748847
     if (RsEventHandler(rsRWINITIALIZE, PSGLOBAL(window)) == rsEVENTERROR) {

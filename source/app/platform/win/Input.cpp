@@ -103,4 +103,7 @@ BOOL CALLBACK EnumDevicesCallback(LPCDIDEVICEINSTANCEA inst, LPVOID) {
     return snJoyCount != 2; // todo: CJoySticks, JOYPAD_COUNT
 }
 
+const CMouseControllerState& GetMouseButtonMask() {
+    return plugin::CallAndReturn<const CMouseControllerState&, 0x53F2D0>();
+}
 } // namespace WinInput
