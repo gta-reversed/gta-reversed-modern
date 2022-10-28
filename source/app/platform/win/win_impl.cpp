@@ -14,7 +14,7 @@ void WinPsInjectHooks() {
     RH_ScopedGlobalInstall(psWarningMessage, 0x7451F0);
     RH_ScopedGlobalInstall(psCameraBeginUpdate, 0x745210);
     RH_ScopedGlobalInstall(psCameraShowRaster, 0x745240);
-    RH_ScopedGlobalInstall(psTimer, 0x745270, {.reversed = false});
+    RH_ScopedGlobalInstall(psTimer, 0x745270);
     RH_ScopedGlobalInstall(psGrabScreen, 0x7452B0);
     RH_ScopedGlobalInstall(psMouseSetVisibility, 0x7453E0);
     RH_ScopedGlobalInstall(psMouseSetPos, 0x7453F0);
@@ -70,10 +70,8 @@ RwCamera* psCameraShowRaster(RwCamera* camera) {
     return RwCameraShowRaster(camera, PSGLOBAL(window), flags);
 }
 
-// our bug: Loading screens not displaying correctly when loading a game for the first time
 // 0x745270
 uint32 psTimer() {
-    return plugin::CallAndReturn<uint32, 0x745270>();
     return OS_TimeMS();
 }
 

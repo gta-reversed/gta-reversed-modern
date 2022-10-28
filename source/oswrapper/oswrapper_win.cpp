@@ -208,7 +208,7 @@ double OS_TimeAccurate() {
 }
 
 uint32 OS_TimeMS() {
-    return uint32(OS_TimeAccurate() * 1000.f);
+    return uint32(GetOSWPerformanceTime() / GetOSWPerformanceFrequency());
 }
 
 bool IsWin7OrGreater() {
