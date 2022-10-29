@@ -100,12 +100,15 @@ public:
 
     // @notsa
     static bool IsAPlayerInFocusOn2PlayerGame() {
-        return n2PlayerPedInFocus != eFocusedPlayer::NONE;
+        return n2PlayerPedInFocus == eFocusedPlayer::PLAYER1 || n2PlayerPedInFocus == eFocusedPlayer::PLAYER2;
     }
     // @notsa
-    static auto GetFocusedPlayerPed() {
-        assert(IsAPlayerInFocusOn2PlayerGame());
-        return FindPlayerPed((int32)n2PlayerPedInFocus);
+    static CPlayerPed* GetFocusedPlayerPed() {
+        if (!IsAPlayerInFocusOn2PlayerGame()) {
+            return nullptr;
+        } else {
+            return FindPlayerPed((int32)n2PlayerPedInFocus);
+        }
     }
 
     // @notsa
