@@ -150,7 +150,7 @@ bool CDarkel::ThisVehicleShouldBeKilledForFrenzy(const CVehicle& vehicle) {
 }
 
 // 0x43D3B0
-void CDarkel::StartFrenzy(eWeaponType weaponType, int32 timeLimit, uint16 killsNeeded, int32 modelToKill, char* startMessage, int32 modelToKill2, int32 modelToKill3, int32 modelToKill4, bool standardSoundAndMessages, bool needHeadShot) {
+void CDarkel::StartFrenzy(eWeaponType weaponType, int32 timeLimit, uint16 killsNeeded, int32 modelToKill, const char* startMessage, int32 modelToKill2, int32 modelToKill3, int32 modelToKill4, bool standardSoundAndMessages, bool needHeadShot) {
     CGameLogic::ClearSkip(false);
     const eWeaponType weapon = (WeaponType != WEAPON_UZI_DRIVEBY) ? weaponType : WEAPON_MICRO_UZI;
 
@@ -376,8 +376,11 @@ void CDarkel::Update() {
         DealWithWeaponChangeAtEndOfFrenzy();
     };
 
-    const auto remaining = TimeOfFrenzyStart + TimeLimit - CTimer::GetTimeInMS();
-    if (remaining <= 0 && TimeLimit >= 0 && Status != DARKEL_STATUS_4) {
+    const int32 remaining = TimeOfFrenzyStart + TimeLimit - CTimer::GetTimeInMS();
+    if (remaining <= 0 && TimeLimit >= 0) {
+        if (Status == DARKEL_STATUS_4) {
+            CGameLogic::SetMissionFailed();
+        }
         StartFrenzy();
     } else if (Status != DARKEL_STATUS_4 || FindPlayerPed(PED_TYPE_PLAYER2)) {
         if (remaining / 1000 != PreviousTime) {
@@ -387,15 +390,13 @@ void CDarkel::Update() {
             PreviousTime = remaining / 1000;
         }
     } else {
-        CGameLogic::GameState = GAME_STATE_TITLE;
-        CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS();
+        CGameLogic::SetMissionFailed();
         StartFrenzy();
     }
 
-    // end if no kills needed
     if (KillsNeeded <= 0) {
         if (Status == DARKEL_STATUS_4) {
-            CGameLogic::GameState = GAME_STATE_PLAYING_INTRO;
+            CGameLogic::GameState = GAMELOGIC_STATE_MISSION_PASSED;
             CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS();
         }
 
@@ -426,8 +427,7 @@ void CDarkel::ResetOnPlayerDeath() {
 // 0x43DC60
 void CDarkel::FailKillFrenzy() {
     if (Status == DARKEL_STATUS_4) {
-        CGameLogic::GameState = GAME_STATE_TITLE;
-        CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS();
+        CGameLogic::SetMissionFailed();
     }
     ResetOnPlayerDeath();
 }

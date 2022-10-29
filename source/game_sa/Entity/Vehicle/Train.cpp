@@ -593,14 +593,14 @@ void CTrain::ProcessControl() {
             if (trainFlags.bForceSlowDown) {
                 const CVector& vecPoint = GetPosition();
                 CVector vecDistance{};
-                if (CGameLogic::CalcDistanceToForbiddenTrainCrossing(vecPoint, m_vecMoveSpeed, true, &vecDistance) < 230.0f) {
+                if (CGameLogic::CalcDistanceToForbiddenTrainCrossing(vecPoint, m_vecMoveSpeed, true, vecDistance) < 230.0f) {
                     if (DotProduct(GetForwardVector(), vecDistance) <= 0.0f) {
                         m_fTrainGas = std::max(0.0f, m_fTrainGas);
                     } else {
                         m_fTrainGas = std::min(0.0f, m_fTrainGas);
                     }
 
-                    if (CGameLogic::CalcDistanceToForbiddenTrainCrossing(vecPoint, m_vecMoveSpeed, false, &vecDistance) < 230.0f) {
+                    if (CGameLogic::CalcDistanceToForbiddenTrainCrossing(vecPoint, m_vecMoveSpeed, false, vecDistance) < 230.0f) {
                         m_fTrainBrake = 512.0f;
                     }
                 }

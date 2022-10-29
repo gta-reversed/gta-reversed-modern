@@ -292,8 +292,8 @@ void CPlantMgr::SetPlantFriendlyFlagInAtomicMI(CAtomicModelInfo* ami) {
         return;
 
     for (auto& triangle : std::span{cd->m_pTriangles, numTriangles}) {
-        if (g_surfaceInfos->CreatesPlants(triangle.m_nMaterial)
-            || g_surfaceInfos->CreatesObjects(triangle.m_nMaterial)) {
+        if (g_surfaceInfos.CreatesPlants(triangle.m_nMaterial)
+            || g_surfaceInfos.CreatesObjects(triangle.m_nMaterial)) {
             ami->bAtomicFlag0x200 = true;
 
             return;
@@ -519,8 +519,8 @@ void CPlantMgr::_ProcessEntryCollisionDataSections_AddLocTris(const CPlantColEnt
             if (rng::none_of(cmp, [center](auto v) { return DistanceBetweenPoints(v, center) < 10000.0f; }))
                 continue;
 
-            auto createsPlants = g_surfaceInfos->CreatesPlants(tri.m_nMaterial);
-            auto createsObjects = g_surfaceInfos->CreatesPlants(tri.m_nMaterial);
+            auto createsPlants = g_surfaceInfos.CreatesPlants(tri.m_nMaterial);
+            auto createsObjects = g_surfaceInfos.CreatesPlants(tri.m_nMaterial);
 
             if (!createsPlants || !createsObjects)
                 continue;

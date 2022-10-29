@@ -314,7 +314,7 @@ public:
     int32               field_594;
     ePedType            m_nPedType;
     CPedStat*           m_pStats;
-    std::array<CWeapon, 13> m_aWeapons;
+    std::array<CWeapon, NUM_WEAPON_SLOTS> m_aWeapons;
     eWeaponType         m_nSavedWeapon;   // when we need to hide ped weapon, we save it temporary here
     eWeaponType         m_nDelayedWeapon; // 'delayed' weapon is like an additional weapon, f.e., simple cop has a nitestick as current and pistol as delayed weapons
     uint32              m_nDelayedWeaponAmmo;
@@ -601,6 +601,14 @@ public:
      * @brief Is the ped's right arm blocked right now
      */
     bool IsRightArmBlockedNow() const;
+
+    /*!
+     * @notsa
+     * @brief Give weapon according to given CWeapon struct.
+     */
+    eWeaponSlot GiveWeapon(const CWeapon& weapon, bool likeUnused) {
+        return GiveWeapon(weapon.m_nType, weapon.m_nTotalAmmo, likeUnused);
+    }
 private:
     void RenderThinBody() const;
     void RenderBigHead() const;

@@ -39,3 +39,5 @@ public:
 
     static void CalculateAspectRatio();
 };
+
+extern void DoFade();

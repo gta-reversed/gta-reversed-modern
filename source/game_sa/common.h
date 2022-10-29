@@ -203,9 +203,6 @@ extern constexpr uint32 make_fourcc4(const char fourcc[4]) {
 char* MakeUpperCase(char *dest, const char *src);
 bool EndsWith(const char* str, const char* with, bool caseSensitive = true);
 
-void Render2dStuff();
-void DefinedState();
-void DefinedState2d();
 RpAtomic* RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data);
 void RemoveRefsForAtomic(RpClump* clump);
 
