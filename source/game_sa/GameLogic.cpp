@@ -488,12 +488,12 @@ void CGameLogic::SetUpSkip(CVector coors, float angle, bool afterMission, CEntit
         TheCamera.Fade(0.5f, eFadeFlag::FADE_OUT);
     }
     SkipState = SKIP_NONE;
-    CPad::GetPad(0)->bCamera = false;
+    CPad::GetPad(PED_TYPE_PLAYER1)->bCamera = false;
     SkipPosition = coors;
     SkipState = afterMission ? SKIP_AFTER_MISSION : SKIP_AVAILABLE;
     SkipTimer = CTimer::GetTimeInMS();
     if (vehicle) {
-        vehicle->RegisterReference((CEntity**)&SkipVehicle);
+        CEntity::RegisterReference(SkipVehicle);
     }
     SkipToBeFinishedByScript = finishedByScript;
 }
@@ -577,7 +577,7 @@ void CGameLogic::Update() {
 
             if (auto vehicle = player1Ped->GetVehicleIfInOne()) {
                 if (auto& driver = vehicle->m_pDriver; player1Ped == driver) {
-                    driver->CleanUpOldReference((CEntity**)&vehicle->m_pDriver);
+                    CEntity::CleanUpOldReference(driver);
                     driver = nullptr;
 
                     if (vehicle->m_nStatus != STATUS_WRECKED) {
