@@ -34,8 +34,6 @@ void AppGameInjectHooks() {
 
     RH_ScopedGlobalInstall(Idle, 0x53E920);
     RH_ScopedGlobalInstall(FrontendIdle, 0x53E770);
-
-    RH_ScopedGlobalInstall(IsForegroundApp, 0x746060);
 }
 
 // 0x5BF3B0
@@ -381,9 +379,4 @@ void FrontendIdle() {
         RwCameraEndUpdate(Scene.m_pRwCamera);
         RsCameraShowRaster(Scene.m_pRwCamera);
     }
-}
-
-// 0x746060
-bool IsForegroundApp() {
-    return ForegroundApp;
 }

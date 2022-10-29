@@ -32,6 +32,7 @@ void Win32InjectHooks() {
     RH_ScopedCategory("Win");
     RH_ScopedNamespaceName("Win");
 
+    RH_ScopedGlobalInstall(IsForegroundApp, 0x746060);
     RH_ScopedGlobalInstall(IsAlreadyRunning, 0x7468E0);
     RH_ScopedGlobalInstall(CommandLineToArgv, 0x746480, {.reversed = false});
 
@@ -90,6 +91,11 @@ bool IsAlreadyRunning() {
 
     return true;
 };
+
+// 0x746060
+bool IsForegroundApp() {
+    return ForegroundApp;
+}
 
 // 0x746480
 char** CommandLineToArgv(char* cmdLine, int* argCount) {
