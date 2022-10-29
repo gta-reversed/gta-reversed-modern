@@ -72,14 +72,7 @@ bool RwInitialize(void* param) {
 // 0x53D910
 void RwTerminate() {
     CGame::ShutdownRenderWare();
-
-    // TODO: move/make func of this win32 shit.
-    if (gammaChanged) {
-        if (auto d3dDevice = (IDirect3DDevice9*)RwD3D9GetCurrentD3DDevice()) {
-            d3dDevice->SetGammaRamp(0u, D3DSGR_CALIBRATE, savedGamma);
-        }
-        gammaChanged = false;
-    }
+    ResetGammaWhenExiting();
     RsRwTerminate();
 }
 

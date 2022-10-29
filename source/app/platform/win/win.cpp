@@ -43,6 +43,30 @@ void Win32InjectHooks() {
     WinInput::InjectHooks();
 }
 
+// @notsa
+// @brief Resets the screen gamma if ever changed.
+void ResetGammaWhenExiting() {
+    if (gammaChanged) {
+        if (auto d3dDevice = (IDirect3DDevice9*)RwD3D9GetCurrentD3DDevice()) {
+            d3dDevice->SetGammaRamp(0u, D3DSGR_CALIBRATE, savedGamma);
+        }
+        gammaChanged = false;
+    }
+}
+
+// 0x746870
+void MessageLoop() {
+    tagMSG msg;
+    while (PeekMessageA(&msg, nullptr, 0, 0, PM_REMOVE | PM_NOYIELD)) {
+        if (msg.message == WM_QUIT) {
+            RsGlobal.quit = true;
+        } else {
+            TranslateMessage(&msg);
+            DispatchMessageA(&msg);
+        }
+    }
+}
+
 // 0x7486A0
 bool InitApplication(HINSTANCE hInstance) {
     WNDCLASS windowClass      = { 0 };

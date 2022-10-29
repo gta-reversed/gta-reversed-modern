@@ -52,6 +52,9 @@ extern bool IsForegroundApp();
 extern void CheckAniso();
 extern void RenderEffects();
 
+// NOTSA
+extern void ResetGammaWhenExiting();
+
 /**
  * Camera
  */

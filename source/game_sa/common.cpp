@@ -31,19 +31,6 @@ void InjectCommonHooks() {
     RH_ScopedGlobalInstall(LittleTest, 0x541330);
 }
 
-// WINDOWS
-void MessageLoop() {
-    tagMSG msg;
-    while (PeekMessageA(&msg, nullptr, 0, 0, PM_REMOVE | PM_NOYIELD)) {
-        if (msg.message == WM_QUIT) {
-            RsGlobal.quit = true;
-        } else {
-            TranslateMessage(&msg);
-            DispatchMessageA(&msg);
-        }
-    }
-}
-
 // 0x54ECE0
 void TransformPoint(RwV3d& point, const CSimpleTransform& placement, const RwV3d& vecPos) {
     plugin::Call<0x54ECE0, RwV3d&, const CSimpleTransform&, const RwV3d&>(point, placement, vecPos);
