@@ -1320,7 +1320,7 @@ DRAW_RADAR:
         return;
     }
 
-    if (CGameLogic::n2PlayerPedInFocus == 1) {
+    if (CGameLogic::n2PlayerPedInFocus == eFocusedPlayer::PLAYER2) {
         CVector playerPos = FindPlayerCentreOfWorld_NoInteriorShift(1);
         vec2DRadarOrigin.x = playerPos.x;
         vec2DRadarOrigin.y = playerPos.y;

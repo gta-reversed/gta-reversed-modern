@@ -259,8 +259,8 @@ bool CGame::Shutdown() {
     CHud::ReInitialise();
     CTxdStore::RemoveTxdSlot(gameTxdSlot);
     CTxdStore::RemoveTxdSlot(CTxdStore::FindTxdSlot("particle"));
-    col1[1].m_boundBox.m_vecMin.z = 0.0;
-    col1[0].m_pColData = 0;
+    col1[1].m_boundBox.m_vecMin.z = 0.0f;
+    col1[0].m_pColData = nullptr;
     CTaskSimpleClimb::Shutdown();
 
     { // todo: move to CPedAttractor::Shutdown() or something
@@ -625,12 +625,8 @@ bool CGame::InitialiseRenderWare() {
     CameraSize(Scene.m_pRwCamera, nullptr, 0.7f, DEFAULT_ASPECT_RATIO);
 
     RwBBox bb;
-    bb.sup.z = 10000.0;
-    bb.sup.y = 10000.0;
-    bb.sup.x = 10000.0;
-    bb.inf.z = -10000.0;
-    bb.inf.y = -10000.0;
-    bb.inf.x = -10000.0;
+    bb.sup = { 10'000.0f,  10'000.0f,  10'000.0f};
+    bb.inf = {-10'000.0f, -10'000.0f, -10'000.0f};
 
     if (Scene.m_pRpWorld = RpWorldCreate(&bb); !Scene.m_pRpWorld) {
         CameraDestroy(Scene.m_pRwCamera);

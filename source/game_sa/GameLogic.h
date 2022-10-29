@@ -23,6 +23,13 @@ enum eGameLogicState {
     GAMELOGIC_STATE_MISSION_PASSED
 };
 
+// Used in CGameLogic::n2PlayerPedInFocus
+enum class eFocusedPlayer : int32 {
+    PLAYER1,
+    PLAYER2,
+    NONE
+};
+
 class CPed;
 
 class CGameLogic {
@@ -58,7 +65,7 @@ public:
     static inline bool& bPenaltyForArrestApplies = *reinterpret_cast<bool*>(0x8A5E49);
     static inline bool& bLimitPlayerDistance = *reinterpret_cast<bool*>(0x8A5E4A);
     static inline float& MaxPlayerDistance = *reinterpret_cast<float*>(0x8A5E4C);  // default 20.0
-    static inline int32& n2PlayerPedInFocus = *reinterpret_cast<int32*>(0x8A5E50); // default 2
+    static inline eFocusedPlayer& n2PlayerPedInFocus = *reinterpret_cast<eFocusedPlayer*>(0x8A5E50); // default eFocusedPlayer::NONE
 
 public:
     static void InjectHooks();
@@ -93,7 +100,12 @@ public:
 
     // @notsa
     static bool IsAPlayerInFocusOn2PlayerGame() {
-        return n2PlayerPedInFocus < 2;
+        return n2PlayerPedInFocus != eFocusedPlayer::NONE;
+    }
+    // @notsa
+    static auto GetFocusedPlayerPed() {
+        assert(IsAPlayerInFocusOn2PlayerGame());
+        return FindPlayerPed((int32)n2PlayerPedInFocus);
     }
 
     // @notsa

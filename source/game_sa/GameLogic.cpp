@@ -75,7 +75,7 @@ void CGameLogic::ClearSkip(bool afterMission) {
         TheCamera.Fade(0.5f, eFadeFlag::FADE_OUT);
     }
     SkipState = SKIP_NONE;
-    CPad::GetPad(0)->bCamera = false;
+    CPad::GetPad(PED_TYPE_PLAYER1)->bCamera = false;
 }
 
 // 0x4428B0
@@ -102,7 +102,7 @@ uint32 CGameLogic::FindCityClosestToPoint(CVector2D point) {
     constexpr CVector2D cityCoords[] = {
         { 1670.0f, -1137.0f}, // LS
         {-1810.0f,   884.0f}, // SF
-        { 2161.0f,  2140.0f}, // Lv
+        { 2161.0f,  2140.0f}, // LV
     };
     std::pair<float, size_t> closest{FLT_MAX, 3}; // NOTSA
     for (auto&& [i, d] : notsa::enumerate(cityCoords)) {
@@ -154,7 +154,7 @@ bool CGameLogic::IsPlayerAllowedToGoInThisDirection(CPed* ped, CVector moveDirec
         return true;
 
     if (IsAPlayerInFocusOn2PlayerGame()) {
-        if (ped == FindPlayerPed(n2PlayerPedInFocus)) {
+        if (ped == GetFocusedPlayerPed()) {
             return true;
         }
 
@@ -187,10 +187,10 @@ bool CGameLogic::IsPlayerUse2PlayerControls(CPed* ped) {
     if (!IsCoopGameGoingOn())
         return false;
 
-    if (n2PlayerPedInFocus == PED_TYPE_PLAYER2)
+    if (n2PlayerPedInFocus == eFocusedPlayer::PLAYER2)
         return true;
 
-    return ped != CWorld::Players[n2PlayerPedInFocus].m_pPed;
+    return ped != GetFocusedPlayerPed();
 }
 
 // 0x4416E0
@@ -295,7 +295,7 @@ void CGameLogic::Remove2ndPlayerIfPresent() {
         CClothes::RebuildPlayer(player1, false);
         player1->CantBeKnockedOffBike = false;
     }
-    n2PlayerPedInFocus = 2;
+    n2PlayerPedInFocus = eFocusedPlayer::NONE;
 }
 
 // 0x442980
@@ -309,9 +309,9 @@ void CGameLogic::ResetStuffUponResurrection() {
     PassTime(12 * 60);
     RestorePlayerStuffDuringResurrection(playerPed, playerPed->GetPosition(), playerPed->m_fCurrentRotation * RadiansToDegrees(1.0f));
     SortOutStreamingAndMemory(playerPed->GetPosition(), playerPed->GetHeading());
-    TheCamera.m_fCamShakeForce = 0.0;
+    TheCamera.m_fCamShakeForce = 0.0f;
     TheCamera.SetMotionBlur(0, 0, 0, 0, 0);
-    CPad::GetPad(0)->StopShaking(0);
+    CPad::GetPad(PED_TYPE_PLAYER1)->StopShaking(0);
     CReferences::RemoveReferencesToPlayer();
     CCarCtrl::CountDownToCarsAtStart = 10;
     CPopulation::m_CountDownToPedsAtStart = 10;
@@ -370,7 +370,7 @@ void CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed* player, CVecto
     player->m_pedAudio.TurnOffJetPack();
     player->bInVehicle = false;
     if (auto vehicle = player->m_pVehicle) {
-        vehicle->CleanUpOldReference((CEntity**)&vehicle);
+        CEntity::CleanUpOldReference(vehicle);
     }
     player->m_pVehicle = nullptr;
     player->GetWanted()->Reset();
@@ -418,7 +418,7 @@ void CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed* player, CVecto
     CAudioZones::Update(true, posn);
     AudioEngine.StopPoliceScanner(true);
     CWaterLevel::FindNearestWaterAndItsFlow();
-    TheCamera.m_fDistanceToWater = 99999.898f;
+    TheCamera.m_fDistanceToWater = 100'000.0f;
 }
 
 // @brief Set wanted level to 4 if player is in a forbidden territory.
@@ -607,7 +607,7 @@ void CGameLogic::Update() {
 
             TheCamera.m_fCamShakeForce = 0.0f;
             TheCamera.SetMotionBlur(0, 0, 0, 0, 0); // todo: eBlurType enum
-            CPad::GetPad(0)->StopShaking(0);
+            CPad::GetPad(PED_TYPE_PLAYER1)->StopShaking(0);
             CReferences::RemoveReferencesToPlayer();
             CCarCtrl::CountDownToCarsAtStart = 10;
             CPopulation::m_CountDownToPedsAtStart = 10;
@@ -763,7 +763,7 @@ void CGameLogic::Update() {
         }
 
         if (bLimitPlayerDistance && IsCoopGameGoingOn()) {
-            if (auto diff = FindPlayerCoors(1) - FindPlayerCoors(0); diff.Magnitude2D() > MaxPlayerDistance) {
+            if (auto diff = FindPlayerCoors(PED_TYPE_PLAYER2) - FindPlayerCoors(PED_TYPE_PLAYER1); diff.Magnitude2D() > MaxPlayerDistance) {
                 StopPlayerMovingFromDirection(PED_TYPE_PLAYER1,  diff.Normalized());
                 StopPlayerMovingFromDirection(PED_TYPE_PLAYER2, -diff.Normalized());
             }
@@ -775,7 +775,7 @@ void CGameLogic::Update() {
         Process();
     } else {
         static float& lastPlayerDistance = *(float*)(0x96AB24);
-        const auto dist = DistanceBetweenPoints2D(FindPlayerCoors(0), FindPlayerCoors(1));
+        const auto dist = DistanceBetweenPoints2D(FindPlayerCoors(PED_TYPE_PLAYER1), FindPlayerCoors(PED_TYPE_PLAYER2));
 
         const auto UpdateTimerAndLastDistance = [&dist] {
             if (IsAPlayerInFocusOn2PlayerGame() && nPrintFocusHelpTimer != 0) {
@@ -825,7 +825,7 @@ void CGameLogic::UpdateSkip() {
         }
 
         // TRIP SKIP
-        if (auto pad = CPad::GetPad(0); pad->IsDPadRightPressed()) {
+        if (auto pad = CPad::GetPad(PED_TYPE_PLAYER1); pad->IsDPadRightPressed()) {
             SkipState = SKIP_IN_PROGRESS;
             pad->bCamera = true;
 
@@ -871,7 +871,7 @@ void CGameLogic::UpdateSkip() {
 
         if (SkipToBeFinishedByScript) {
             SkipState = SKIP_WAITING_SCRIPT;
-            CPad::GetPad(0)->bCamera = false;
+            CPad::GetPad(PED_TYPE_PLAYER1)->bCamera = false;
         } else {
             TheCamera.SetFadeColour(0, 0, 0);
             TheCamera.Fade(1.5f, eFadeFlag::FADE_OUT);
@@ -882,7 +882,7 @@ void CGameLogic::UpdateSkip() {
     case SKIP_FADING_OUT:
         if (CTimer::GetTimeInMS() > SkipTimer) {
             SkipState = SKIP_NONE;
-            CPad::GetPad(0)->bCamera = false;
+            CPad::GetPad(PED_TYPE_PLAYER1)->bCamera = false;
         }
         break;
 
