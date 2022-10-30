@@ -605,7 +605,7 @@ void CWanted::Update() {
                 m_nChaosLevel = std::max(chaosLevel, 0);
 
                 UpdateWantedLevel();
-                CGameLogic::SetPlayerWantedLevelForForbiddenTerritories(1);
+                CGameLogic::SetPlayerWantedLevelForForbiddenTerritories(true);
             }
         }
 

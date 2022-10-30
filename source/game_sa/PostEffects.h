@@ -68,6 +68,8 @@ public:
 
     static bool& m_bRainEnable;
 
+    inline static bool& m_smokeyEnable = *(bool*)(0xC402D3);
+
     static bool& m_bSavePhotoFromScript;
 
     static bool& m_bSeamRemover;
@@ -201,8 +203,6 @@ m_hilightScale
 m_hilightStrength
 
 m_pDmaPkt
-
 m_smokeyDistance
-m_smokeyEnable
 m_smokeyStrength
 */

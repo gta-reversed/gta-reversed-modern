@@ -46,6 +46,7 @@ public:
     static uint8  GetGameClockHours()     { return ms_nGameClockHours; }   // 0x43A690
     static uint8  GetGameClockDays()      { return ms_nGameClockDays; }    // 0x4E7EF0
     static uint8  GetGameClockMonth()     { return ms_nGameClockMonth; }   // 0x4E7EE0
+    static uint8  GetGameWeekDay()        { return CurrentDay; }           // NOTSA, maybe
 
     static float GetMinutesToday() { return float(ms_nGameClockMinutes) + 60.0f * (float)ms_nGameClockHours + (float)ms_nGameClockSeconds / 60.0f; } // 0x55F470
 

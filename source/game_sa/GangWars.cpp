@@ -317,7 +317,7 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
         pickupModel = ModelIndices::MI_PICKUP_HEALTH;
     }
 
-    CPickups::GenerateNewOne(pickupCoors, pickupModel, 5, 0, 0, false, nullptr);
+    CPickups::GenerateNewOne(pickupCoors, pickupModel, PICKUP_ONCE_TIMEOUT_SLOW, 0, 0, false, nullptr);
     return true;
 }
 

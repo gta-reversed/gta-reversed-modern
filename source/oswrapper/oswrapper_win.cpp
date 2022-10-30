@@ -184,7 +184,7 @@ void* OS_ThreadLaunch(OS_ThreadRoutine pfnStart, void* param, uint32 nFlags, con
         break;
     }
 
-    DEV_LOG("OS: Thread %d (%s) created", dwThreadID, name);
+    DEV_LOG("OS: Thread {} ({}) created", dwThreadID, name);
 
     return hThread;
 }
@@ -208,7 +208,7 @@ double OS_TimeAccurate() {
 }
 
 uint32 OS_TimeMS() {
-    return uint32(OS_TimeAccurate() * 1000.f);
+    return uint32(GetOSWPerformanceTime() / GetOSWPerformanceFrequency());
 }
 
 bool IsWin7OrGreater() {

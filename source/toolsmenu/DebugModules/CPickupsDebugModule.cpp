@@ -4,6 +4,7 @@
 #include "CTeleportDebugModule.h"
 
 #include "imgui.h"
+#include "Pickup.h"
 #include "Pickups.h"
 #include "extensions/enumerate.hpp"
 
@@ -35,82 +36,102 @@ const std::unordered_map<ePickupType, std::string> PICKUP_TYPES_NAME_MAP = {
     { PICKUP_ONCE_FOR_MISSION,         "ONCE_FOR_MISSION",         }
 };
 
+using namespace ImGui;
+
 namespace CPickupsDebugModule {
 
-void DrawTable(auto& pickups) {
-    if (ImGui::BeginTable("Pickups", 6, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_Borders | ImGuiTableFlags_Sortable)) {
-        ImGui::TableNextColumn(); ImGui::TableHeader("Id");
-        ImGui::TableNextColumn(); ImGui::TableHeader("Type");
-        ImGui::TableNextColumn(); ImGui::TableHeader("Model Id");
-        ImGui::TableNextColumn(); ImGui::TableHeader("Visible");
-        ImGui::TableNextColumn(); ImGui::TableHeader("Revenue Value");
-        ImGui::TableNextColumn(); ImGui::TableHeader("Ammo");
+int16 DrawTable(bool filterInvisible, bool filterInactive) {
+    if (BeginTable("Pickups", 6, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_ScrollY)) {
+        TableSetupColumn("Id", ImGuiTableColumnFlags_WidthFixed);
+        TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed);
+        TableSetupColumn("Model Id", ImGuiTableColumnFlags_WidthFixed);
+        TableSetupColumn("Is visible?", ImGuiTableColumnFlags_WidthFixed);
+        TableSetupColumn("Revenue Value", ImGuiTableColumnFlags_WidthFixed);
+        TableSetupColumn("Ammo", ImGuiTableColumnFlags_WidthFixed);
+        TableHeadersRow();
 
-        for (const auto& [i, pickup] : notsa::enumerate(pickups)) {
-            ImGui::PushID(i);
+        static int16 selectedPickupId{-1};
 
-            ImGui::TableNextColumn(); Text("%d", i);
-            ImGui::TableNextColumn(); Text("%s", PICKUP_TYPES_NAME_MAP.at(pickup.m_nPickupType).c_str());
-            ImGui::TableNextColumn(); Text("%d", pickup.m_nModelIndex);
-            ImGui::TableNextColumn(); Text("%d", pickup.m_nFlags.bVisible);
-            ImGui::TableNextColumn(); Text("%.2f", pickup.m_fRevenueValue);
-            ImGui::TableNextColumn(); Text("%d", pickup.m_nAmmo);
+        for (const auto& [i, pickup] : notsa::enumerate(CPickups::aPickUps)) {
+            if (filterInvisible && !pickup.IsVisible() || filterInactive && pickup.m_nPickupType == PICKUP_NONE)
+                continue;
 
-            ImGui::PopID();
+            PushID(i);
+            BeginGroup();
+            TableNextRow();
+            TableNextColumn(); Text("%d", i);
+
+            if (TableNextColumn(); Selectable(PICKUP_TYPES_NAME_MAP.at(pickup.m_nPickupType).c_str(), selectedPickupId == i, ImGuiSelectableFlags_SpanAllColumns)) {
+                selectedPickupId = i;
+            }
+
+            // Teleport on double click
+            if (IsItemHovered() && IsMouseDoubleClicked(0)) {
+                TeleportDebugModule::TeleportTo(pickup.GetPosn(), FindPlayerPed()->m_nAreaCode);
+            }
+
+            TableNextColumn(); Text("%d", pickup.m_nModelIndex);
+            TableNextColumn(); Text("%s", pickup.m_nFlags.bVisible ? "Yes" : "No");
+
+            TableNextColumn();
+            if (pickup.m_fRevenueValue != 0.0f) {
+                Text("%.2f", pickup.m_fRevenueValue);
+            } else {
+                Text("-");
+            }
+
+            TableNextColumn();
+            if (pickup.m_nAmmo != 0u) {
+                Text("%u", pickup.m_nAmmo);
+            } else {
+                Text("-");
+            }
+
+            EndGroup();
+            PopID();
         }
-    ImGui::EndTable();
+        EndTable();
+
+        return selectedPickupId;
     }
+    return -1;
 }
 
 void ProcessImGui() {
-    if (Button("Hide All")) {
-        for (auto& pickup : CPickups::aPickUps) {
-            pickup.m_nFlags.bVisible = false;
-        }
-    }
-    SameLine();
-    if (Button("Show All")) {
-        for (auto& pickup : CPickups::aPickUps) {
-            pickup.m_nFlags.bVisible = true;
-            // pickup.m_nFlags.bDisabled = false;
-        }
-    }
+    BeginGroup();
 
-    {
-        BeginGroup();
-        CPickup* pickup = &CPickups::aPickUps[12];
+    static int16 selectedPickup = -1;
+    if (selectedPickup != -1) {
+        static bool markSelectedPickup = true;
+        Checkbox("Mark selected pickup", &markSelectedPickup);
 
-        std::ptrdiff_t index = pickup - CPickups::aPickUps.data(); // !sue
-        Text("Id %d", index);
+        const auto& pickup = CPickups::aPickUps.at(selectedPickup);
 
-        const auto posn = UncompressLargeVector(pickup->m_vecPos);
-        Text("Position %.2f %.2f %.2f", posn.x, posn.y, posn.z);
-        if (Button("Teleport")) TeleportDebugModule::TeleportTo(posn);
+        Text("ID: %d", selectedPickup);
 
-        SameLine(); if (Button("Change Visibility")) pickup->m_nFlags.bVisible ^= true;
+        const auto posn = pickup.GetPosn();
+        Text("Coords: %.2f %.2f %.2f", posn.x, posn.y, posn.z);
 
-        EndGroup();
-    }
-
-    if (ImGui::BeginTabBar("Pickups")) {
-        if (ImGui::BeginTabItem("All")) {
-            DrawTable(CPickups::aPickUps);
-            ImGui::EndTabItem();
+        if (Button("Teleport Player")) {
+            TeleportDebugModule::TeleportTo(posn);
         }
 
-        auto IsVisible = [](CPickup& pickup) { return pickup.m_pObject; };
-        auto filteredPickups = CPickups::aPickUps | std::views::filter(IsVisible);
-
-        if (ImGui::BeginTabItem("Near Player")) {
-            DrawTable(filteredPickups);
-            ImGui::EndTabItem();
+        if (markSelectedPickup) {
+            CVector screenCoors{};
+            if (CalcScreenCoors(posn, &screenCoors)) {
+                CSprite2d::DrawRect({screenCoors, 5.0f}, pickup.m_nFlags.bDisabled ? CRGBA{255, 0, 0, 255} : CRGBA{0, 255, 0, 255});
+            }
         }
-        ImGui::EndTabBar();
     }
+
+    Separator();
+    static bool filterInactive = true, filterInvisible = false;
+    Checkbox("Hide inactive (i.e. type=NONE)", &filterInactive);
+    SameLine(); Checkbox("Hide invisible", &filterInvisible);
+    EndGroup();
+
+    selectedPickup = DrawTable(filterInvisible, filterInactive);
 }
 
-void ProcessRender() {
-
-}
-
+void ProcessRender() {}
 };

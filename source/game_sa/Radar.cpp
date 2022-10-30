@@ -241,7 +241,7 @@ int32 CRadar::GetActualBlipArrayIndex(int32 blipIndex)
 // 0x5828A0
 void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType)
 {
-    char* blipName{};
+    const char* blipName{};
 
     switch (blipType) {
     case (eRadarSprite)-5:
@@ -1320,7 +1320,7 @@ DRAW_RADAR:
         return;
     }
 
-    if (CGameLogic::n2PlayerPedInFocus == 1) {
+    if (CGameLogic::n2PlayerPedInFocus == eFocusedPlayer::PLAYER2) {
         CVector playerPos = FindPlayerCentreOfWorld_NoInteriorShift(1);
         vec2DRadarOrigin.x = playerPos.x;
         vec2DRadarOrigin.y = playerPos.y;

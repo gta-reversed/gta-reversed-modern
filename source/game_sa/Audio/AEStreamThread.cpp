@@ -1,12 +1,7 @@
 #include "StdInc.h"
 
 #include "AEStreamThread.h"
-
 #include "AEAudioUtility.h"
-
-bool IsForeground() {
-    return plugin::CallAndReturn<bool, 0x746060>();
-}
 
 void CAEStreamThread::InjectHooks() {
     RH_ScopedClass(CAEStreamThread);
@@ -131,7 +126,7 @@ uint32 CAEStreamThread::MainLoop(void* param) {
     bool play = false;
 
     while (stream->m_bThreadActive) {
-        bool isForeground = IsForeground();
+        bool isForeground = IsForegroundApp();
         if (isForeground) {
             if (!wasForeground && play){
                 stream->m_pStreamingChannel->Play(0, 0, 1.0f);

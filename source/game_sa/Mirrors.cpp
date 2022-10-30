@@ -69,7 +69,7 @@ void CMirrors::ShutDown() {
         RwRasterDestroy(pZBuffer);
         pZBuffer = nullptr;
     }
-    TypeOfMirror = MIRROR_TYPE_0;
+    TypeOfMirror = MIRROR_TYPE_NONE;
     MirrorFlags = 0;
 }
 
@@ -115,7 +115,7 @@ void CMirrors::BuildCamMatrix(CMatrix& mat, CVector pointA, CVector pointB) {
 
 // 0x726090
 void CMirrors::RenderMirrorBuffer() {
-    if (TypeOfMirror == MIRROR_TYPE_0)
+    if (TypeOfMirror == MIRROR_TYPE_NONE)
         return;
 
     RwRaster* raster = RwCameraGetRaster(Scene.m_pRwCamera);
@@ -288,7 +288,7 @@ void CMirrors::BuildCameraMatrixForScreens(CMatrix & mat) {
 
 // NOTSA
 bool CMirrors::ShouldRenderPeds() {
-    return bRenderingReflection && TypeOfMirror != MIRROR_TYPE_2;
+    return bRenderingReflection && TypeOfMirror != MIRROR_TYPE_FLOOR;
 }
 
 // 0x726DF0
@@ -333,7 +333,7 @@ void CMirrors::BeforeConstructRenderList() {
         MirrorNormal = CVector{ (float)mirrorAttrs->vx, (float)mirrorAttrs->vy, (float)mirrorAttrs->vz } / 100.0f;
         MirrorFlags = mirrorAttrs->flags;
 
-        TypeOfMirror = std::fabs(MirrorNormal.z) <= 0.7f ? MIRROR_TYPE_1 : MIRROR_TYPE_2;
+        TypeOfMirror = std::fabs(MirrorNormal.z) <= 0.7f ? MIRROR_TYPE_WALL : MIRROR_TYPE_FLOOR;
         CreateBuffer();
     } else {
         ShutDown();
@@ -345,14 +345,12 @@ void CMirrors::BeforeConstructRenderList() {
         TheCamera.DealWithMirrorBeforeConstructRenderList(mirrorActive, MirrorNormal, MirrorV, &mat);
     } else {
         TheCamera.DealWithMirrorBeforeConstructRenderList(mirrorActive, MirrorNormal, MirrorV, nullptr);
-    }    
+    }
 }
-
-void RenderScene();
 
 // 0x727140
 void CMirrors::BeforeMainRender() {
-    if (TypeOfMirror == MIRROR_TYPE_0)
+    if (TypeOfMirror == MIRROR_TYPE_NONE)
         return;
 
     RwRaster* prevCamRaster  = RwCameraGetRaster(Scene.m_pRwCamera);

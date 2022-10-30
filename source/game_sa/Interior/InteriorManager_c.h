@@ -61,3 +61,5 @@ public:
     void inlined_prune_visible_effects(bool prune) { m_pruneVisibleEffects = prune; } // 0x598070
 };
 VALIDATE_SIZE(InteriorManager_c, 0x4758);
+
+static inline InteriorManager_c& g_interiorMan = *reinterpret_cast<InteriorManager_c*>(0xBAF670);

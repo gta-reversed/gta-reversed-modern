@@ -4,8 +4,8 @@
 #include "PostEffects.h"
 
 void AppLightInjectHooks() {
+    RH_ScopedCategory("App");
     RH_ScopedNamespaceName("Light");
-    RH_ScopedCategory("app");
 
     RH_ScopedGlobalInstall(ActivateDirectional, 0x735C80);
     RH_ScopedGlobalInstall(DeActivateDirectional, 0x735C70);
@@ -15,7 +15,7 @@ void AppLightInjectHooks() {
     RH_ScopedGlobalInstall(SetLightsWithTimeOfDayColour, 0x7354E0);
     RH_ScopedGlobalInstall(WorldReplaceNormalLightsWithScorched, 0x7357E0);
     RH_ScopedGlobalInstall(WorldReplaceScorchedLightsWithNormal, 0x735820);
-    // RH_ScopedGlobalInstall(AddAnExtraDirectionalLight, 0x735840);
+    RH_ScopedGlobalInstall(AddAnExtraDirectionalLight, 0x735840, {.reversed = false});
     RH_ScopedGlobalInstall(RemoveExtraDirectionalLights, 0x7359E0);
     RH_ScopedGlobalInstall(SetAmbientAndDirectionalColours, 0x735A20);
     RH_ScopedGlobalInstall(ReSetAmbientAndDirectionalColours, 0x735C40);

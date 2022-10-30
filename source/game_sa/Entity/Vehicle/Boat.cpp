@@ -879,7 +879,7 @@ void CBoat::BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) {
     vehicleFlags.bLightsOn = false;
     CVehicle::ChangeLawEnforcerState(false);
     CExplosion::AddExplosion(this, damager, eExplosionType::EXPLOSION_BOAT, vecPos, 0, 1, -1.0F, bHideExplosion);
-    CDarkel::RegisterCarBlownUpByPlayer(this, 0);
+    CDarkel::RegisterCarBlownUpByPlayer(*this, 0);
 
     auto movingComponent = m_aBoatNodes[BOAT_MOVING];
     if (!movingComponent)

@@ -1639,7 +1639,7 @@ void CFileLoader::LoadPickup(const char* line) {
     };
 
     if (const auto model = GetModel(); model != -1) {
-        CPickups::GenerateNewOne(pos, model, 2, 0, 0, false, nullptr);
+        CPickups::GenerateNewOne(pos, model, PICKUP_ON_STREET, 0, 0, false, nullptr);
     }
 }
 

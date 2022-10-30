@@ -132,6 +132,8 @@
 #include "CarFXRenderer.h"
 #include "ProcObjectMan.h"
 #include "ProcSurfaceInfo.h"
+#include "Pickup.h"
+#include "Pickups.h"
 
 // Plant
 #include "PlantMgr.h"
@@ -405,6 +407,8 @@
 #include "platform/win/win.h"
 #include "platform/platform.h"
 
+#include "app/app.h"
+
 #include "extensions/utility.hpp"
 
 void InjectHooksMain() {
@@ -651,6 +655,8 @@ void InjectHooksMain() {
     CSprite::InjectHooks();
     CPlaneTrail::InjectHooks();
     CPlaneTrails::InjectHooks();
+    CPickup::InjectHooks();
+    CPickups::InjectHooks();
 
     CCustomBuildingPipeline::InjectHooks();
     CCustomBuildingRenderer::InjectHooks();
@@ -1192,6 +1198,7 @@ void InjectHooksMain() {
     const auto App = []() {
         VideoPlayer::InjectHooks();
         Securom::InjectHooks();
+        AppInjectHooks();
         Win32InjectHooks();
         RsInjectHooks();
         VideoModeInjectHooks();

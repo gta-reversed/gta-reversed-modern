@@ -398,7 +398,7 @@ void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CV
 
                 auto relPosn = CWorld::m_aTempColPts->m_vecPoint - targetPos;
                 if (nColSphereIndex == 16 || CWorld::m_aTempColPts->m_vecPoint.z <= targetPos.z && DotProduct(relPosn, ped->GetForward()) >= 0.0f ||
-                    !g_surfaceInfos->CanClimb(CWorld::m_aTempColPts->m_nSurfaceTypeB)) {
+                    !g_surfaceInfos.CanClimb(CWorld::m_aTempColPts->m_nSurfaceTypeB)) {
                     if (entity->IsVehicle() && numSpheres > -1)
                         entity->GetColModel()->m_pColData->m_nNumSpheres = numSpheres;
                     continue;

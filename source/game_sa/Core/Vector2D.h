@@ -38,7 +38,7 @@ public:
     }
 
     // Returns length of vector
-    [[nodiscard]] inline float Magnitude() {
+    [[nodiscard]] inline float Magnitude() const {
         return std::sqrt(x * x + y * y);
     }
 
