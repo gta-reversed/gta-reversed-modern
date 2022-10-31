@@ -69,12 +69,12 @@ void CReplay::Update() {
 
 // 0x45B150
 void CReplay::DisableReplays() {
-    CReplay::bReplayEnabled = false;
+    bReplayEnabled = false;
 }
 
 // 0x45B160
 void CReplay::EnableReplays() {
-    CReplay::bReplayEnabled = true;
+    bReplayEnabled = true;
 }
 
 // 0x
@@ -96,25 +96,23 @@ void CReplay::RetrievePedAnimation() {
 void CReplay::Display() {
     static uint32& g_nReplayTimer = *(uint32*)0xA43240;
 
-    if (!CReplay::Mode)
+    assert(Mode == eReplayMode::MODE_RECORD || Mode == eReplayMode::MODE_PLAYBACK);
+
+    if (ShouldStandardCameraBeProcessed()) // originally == MODE_RECORD
         return;
 
-    g_nReplayTimer += 1;
+    g_nReplayTimer++;
     if ((g_nReplayTimer & 32) == 0)
         return;
 
     CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
     CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
     CFont::SetBackground(false, false);
-    auto v8 = (RsGlobal.maximumWidth - 20); // what?
     CFont::SetCentreSize(float(RsGlobal.maximumWidth - 20));
     CFont::SetProportional(true);
     CFont::SetColor({ 255u, 255u, 200u, 200u });
     CFont::SetFontStyle(eFontStyle::FONT_SUBTITLES);
-    if (CReplay::Mode == MODE_PLAYBACK) {
-        v8 = (RsGlobal.maximumWidth / 10); // ok
-        CFont::PrintString(float(RsGlobal.maximumWidth / 10), float(RsGlobal.maximumHeight / 15), TheText.Get("REPLAY"));
-    }
+    CFont::PrintString(float(RsGlobal.maximumWidth / 10), float(RsGlobal.maximumHeight / 15), TheText.Get("REPLAY"));
 }
 
 // 0x45D430
@@ -164,7 +162,7 @@ void CReplay::SaveReplayToHD() {
 
 // 0x45C440
 bool CReplay::ShouldStandardCameraBeProcessed() {
-    return CReplay::Mode != MODE_PLAYBACK;
+    return Mode != MODE_PLAYBACK;
 }
 
 // 0x
@@ -299,5 +297,83 @@ CPed* CReplay::CreatePlayerPed() {
 
 // 0x4600F0
 void CReplay::TriggerPlayback(bool a1, float a2, float a3, float a4, bool a5) {
-    plugin::Call<0x4600F0, bool, float, float, float, bool>(a1, a2, a3, a4, a5);
+    return plugin::Call<0x4600F0, bool, float, float, float, bool>(a1, a2, a3, a4, a5);
+
+    if (!ShouldStandardCameraBeProcessed())
+        return;
+
+    CSpecialFX::ReplayStarted();
+    CameraMode = cameraMomde;
+    Mode = MODE_PLAYBACK;
+
+    CameraFixedX = x;
+    CameraFixedY = y;
+    CameraFixedZ = z;
+
+    bPlayingBackFromFile = 0;
+    bAllowLookAroundCam = 1;
+    FramesActiveLookAroundCam = 0;
+    if (FindPlayerVehicle(-1, 0)) {
+        OldRadioStation = CAERadioTrackManager::GetCurrentRadioStationID(&AERadioTrackManager);
+        CAudioEngine::StopRadio(0, 0);
+    } else {
+        OldRadioStation = 0;
+    }
+    CurrArea = CGame::currArea;
+    for (i = 0; i < 8; ++i) {
+        if (BufferStatus[i] == 2)
+            break;
+    }
+    v6 = (i + 1) % 8;
+    for (j = BufferStatus[v6]; j != 2; j = BufferStatus[v6]) {
+        if (j == 1)
+            break;
+        v6 = (v6 + 1) % 8;
+    }
+    Playback.m_bSlot = v6;
+    memset(&point, 0, sizeof(point));
+    Playback.m_pBase = (uint8*)Buffers[(unsigned __int8)v6];
+    Playback.m_nOffset = 0;
+    CObject::DeleteAllTempObjectsInArea(0.0, 0.0, 0.0, 999999.88);
+    StoreStuffInMem();
+
+    InitialisePedPoolConversionTable(); // InitialisePoolConversionTables
+    InitialiseVehiclePoolConversionTable();
+
+    EmptyPedsAndVehiclePools_NoDestructors();
+    CSkidmarks::Clear();
+    StreamAllNecessaryCarsAndPeds();
+    CWorld::Players[0].m_pPed = CreatePlayerPed();
+    if (bLoadScene) {
+        bDoLoadSceneWhenDone = 0;
+    } else {
+        bDoLoadSceneWhenDone = 1;
+        p_m_pos = &TheCamera.m_matrix->m_pos;
+        if (!TheCamera.m_matrix)
+            p_m_pos = &TheCamera.m_placement.m_vPosn;
+        LoadSceneX = p_m_pos->x;
+        p_m_vPosn = &TheCamera.m_matrix->m_pos;
+        if (!TheCamera.m_matrix)
+            p_m_vPosn = &TheCamera.m_placement.m_vPosn;
+        LoadSceneY = p_m_vPosn->y;
+        if (TheCamera.m_matrix)
+            v10 = &TheCamera.m_matrix->m_pos;
+        else
+            v10 = &TheCamera.m_placement.m_vPosn;
+        LoadSceneZ = v10->z;
+        FindFirstFocusCoordinate(&point);
+        CGame::currLevel = CTheZones::GetLevelFromPosition(&point);
+        CCollision::SortOutCollisionAfterLoad();
+        CStreaming::LoadScene(&point);
+    }
+    CWeaponEffects::ClearCrossHairs();
+    CExplosion::ClearAllExplosions();
+    CPlaneBanners::Init();
+    gFireManager.DestroyAllFxSystems();
+    TheCamera.Restore();
+    CDraw::SetFOV(70.0);
+    TheCamera.SetFadeColour(0, 0, 0);
+    TheCamera.Fade(0.0f, eFadeFlag::FADE_IN);
+    TheCamera.ProcessFade();
+    TheCamera.Fade(1.5f, eFadeFlag::FADE_OUT);
 }
