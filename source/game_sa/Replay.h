@@ -5,33 +5,10 @@
 
 struct CAddressInReplayBuffer {
     uint32 m_nOffset;
-    void* m_pBase;
+    uint8* m_pBase;
     uint8 m_bSlot;
 };
 VALIDATE_SIZE(CAddressInReplayBuffer, 0xC);
-
-enum eReplayPacket : uint8 {
-    REPLAY_PACKET_END,
-    REPLAY_PACKET_VEHICLE,
-    REPLAY_PACKET_BIKE,
-    REPLAY_PACKET_PED_HEADER,
-    REPLAY_PACKET_PED_UPDATE,
-    REPLAY_PACKET_GENERAL,
-    REPLAY_PACKET_CLOCK,
-    REPLAY_PACKET_WEATHER,
-    REPLAY_PACKET_END_OF_FRAME,
-    REPLAY_PACKET_TIMER,
-    REPLAY_PACKET_BULLET_TRACES,
-    REPLAY_PACKET_PARTICLE,
-    REPLAY_PACKET_MISC,
-    REPLAY_PACKET_13,
-    REPLAY_PACKET_14,
-    REPLAY_PACKET_BMX,
-    REPLAY_PACKET_HELI,
-    REPLAY_PACKET_PLANE,
-    REPLAY_PACKET_TRAIN,
-    REPLAY_PACKET_CLOTHES
-};
 
 class CReplay {
 public:
@@ -134,18 +111,6 @@ public:
     static void StreamAllNecessaryCarsAndPeds();
     static CPlayerPed* CreatePlayerPed();
     static void TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loadScene);
-
-    // @notsa
-    template<typename T>
-    static T ReadFromReplayBuffer(uint32 bufferIdx, uint32 offset) {
-        return *(T*)(Buffers.at(bufferIdx).data() + offset);
-    }
-
-    // @notsa
-    template<typename T>
-    static T ReadFromReplayBuffer(std::array<char, 100'000>& buffer, uint32 offset) {
-        return *(T*)(buffer.data() + offset);
-    }
 };
 
 /*

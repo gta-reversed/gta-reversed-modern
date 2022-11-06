@@ -359,7 +359,7 @@ void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loa
     }
 
     Playback.m_bSlot = slot;
-    Playback.m_pBase = (uint8*)Buffers.at(slot).data();
+    Playback.m_pBase = (uint8*)&Buffers.at(slot);
     Playback.m_nOffset = 0u;
 
     CObject::DeleteAllTempObjectsInArea(CVector{0.0f}, 1'000'000.0f);
