@@ -39,10 +39,10 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(FinishPlayback, 0x45F050, { .reversed = false });
     // RH_ScopedInstall(StoreClothesDesc, 0x0, { .reversed = false });
     RH_ScopedInstall(RecordThisFrame, 0x45E300, { .reversed = false });
-    RH_ScopedInstall(RestoreClothesDesc, 0x45C7D0, { .reversed = false });
+    RH_ScopedInstall(RestoreClothesDesc, 0x45C7D0, { .reversed = true });
     RH_ScopedInstall(DealWithNewPedPacket, 0x45CEA0, { .reversed = false });
     RH_ScopedInstall(PlayBackThisFrameInterpolation, 0x45F380, { .reversed = false });
-    RH_ScopedInstall(FastForwardToTime, 0x460350, { .reversed = false });
+    RH_ScopedInstall(FastForwardToTime, 0x460350, { .reversed = true });
     RH_ScopedInstall(PlayBackThisFrame, 0x4604A0, { .reversed = false });
     RH_ScopedInstall(FindSizeOfPacket, 0x45C850, { .reversed = false });
     // RH_ScopedInstall(IsThisVehicleUsedInRecording, 0x0, { .reversed = false });
@@ -50,11 +50,11 @@ void CReplay::InjectHooks() {
     // RH_ScopedInstall(InitialiseVehiclePoolConversionTable, 0x0, { .reversed = false });
     // RH_ScopedInstall(InitialisePedPoolConversionTable, 0x0, { .reversed = false });
     // RH_ScopedInstall(InitialisePoolConversionTables, 0x0, { .reversed = false });
-    RH_ScopedInstall(FindFirstFocusCoordinate, 0x45D6C0, { .reversed = false });
+    RH_ScopedInstall(FindFirstFocusCoordinate, 0x45D6C0, { .reversed = true });
     // RH_ScopedInstall(NumberFramesAvailableToPlay, 0x0, { .reversed = false });
     RH_ScopedInstall(StreamAllNecessaryCarsAndPeds, 0x45D4B0, { .reversed = false });
     RH_ScopedInstall(CreatePlayerPed, 0x45D540, { .reversed = false });
-    RH_ScopedInstall(TriggerPlayback, 0x4600F0, { .reversed = false });
+    RH_ScopedInstall(TriggerPlayback, 0x4600F0, { .reversed = true });
     RH_ScopedInstall(Update, 0x460500, { .reversed = false });
 }
 
@@ -296,8 +296,16 @@ bool CReplay::IsThisPedUsedInRecording(int32 a1) {
 }
 
 // 0x45D6C0
-void CReplay::FindFirstFocusCoordinate(CVector* a1) {
-    plugin::Call<0x45D6C0, CVector*>(a1);
+void CReplay::FindFirstFocusCoordinate(CVector& outPos) {
+    for (auto& buffer : GetAllActiveBuffers()) {
+        for (const auto& packet : buffer) {
+            if (packet.packetType != REPLAY_PACKET_GENERAL)
+                continue;
+
+            outPos = packet.camera.firstFocusPosn;
+            break;
+        }
+    }
 }
 
 // 0x0
@@ -307,10 +315,7 @@ void CReplay::NumberFramesAvailableToPlay() {
 
 // 0x45D4B0
 void CReplay::StreamAllNecessaryCarsAndPeds() {
-    for (auto& buffer : Buffers) {
-        if (BufferStatus[buffer.GetIndex()] == REPLAY_PACKET_END)
-            continue;
-
+    for (auto& buffer : GetAllActiveBuffers()) {
         for (auto offset = 0; auto packetId = buffer.Read<eReplayPacket>(offset); offset += FindSizeOfPacket(buffer.Read<eReplayPacket>(offset + 26))) {
             switch (packetId) {
             case REPLAY_PACKET_VEHICLE:
@@ -390,7 +395,7 @@ void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loa
         if (!loadScene) {
             LoadScene = TheCamera.GetPosition();
             CVector point{};
-            FindFirstFocusCoordinate(&point);
+            FindFirstFocusCoordinate(point);
             CGame::currLevel = CTheZones::GetLevelFromPosition(&point);
             CCollision::SortOutCollisionAfterLoad();
             CStreaming::LoadScene(&point);

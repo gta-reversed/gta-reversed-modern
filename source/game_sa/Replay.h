@@ -20,6 +20,56 @@ public:
     uint16 m_fMuscleStat; // compressed float
 };
 
+enum eReplayBufferStatus : uint8 {
+    REPLAYBUFFER_STATUS_0 = 0
+};
+
+struct tReplayBlockData {
+    eReplayPacket packetType;
+    union {
+        struct { /* nil */ } end;
+        struct VehicleBlock { uint8 unk[51]; } vehicle;
+        struct BikeBlock { uint8 unk[55]; } bike;
+        struct PlayerDataBlock {
+            uint8 index; // handle?
+            uint16 modelId;
+            uint8 pedType;
+        } playerData;
+        struct PedBlock { uint8 unk[51]; } ped;
+        struct CameraBlock {
+            uint8 unk[75];
+            CVector firstFocusPosn;
+        } camera;
+        struct DayTimeBlock {
+            uint8 currentHour;
+            uint8 currentMinute;
+        } dayTime;
+        struct WeatherBlock { uint8 unk[7]; } weather;
+        struct { /* nil */ } eof; // end of frame
+        struct TimerBlock {
+            uint8 align[2];
+            uint32 timer;
+        } timer;
+        struct UnkBlock10 { uint8 unk[27]; } unkBlock10;
+        struct UnkBlock11 { uint8 unk[19]; } unkBlock11;
+        struct UnkBlock12 { uint8 unk[15]; } unkBlock12;
+        struct UnkBlock13 { uint8 unk[3];  } unkBlock13;
+        struct UnkBlock14 { uint8 unk[3];  } unkBlock14;
+        struct BmxBlock { uint8 unk[55]; } bmx;
+        struct HeliBlock { uint8 unk[55]; } heli;
+        struct PlaneBlock { uint8 unk[59]; } plane;
+        struct TrainBlock { uint8 unk[75]; } train;
+        struct ClothesBlock {
+            std::array<uint32, 10> m_anModelKeys;
+            std::array<uint32, 18> m_anTextureKeys;
+            uint16 m_fFatStat;    // compressed float
+            uint16 m_fMuscleStat; // compressed float
+        } clothes;
+
+        // unk sizes are -1 because we don't include the `type` value in the beginning.
+    };
+};
+
 class CReplay {
 public:
     // @notsa
@@ -39,18 +89,73 @@ public:
     VALIDATE_SIZE(CVector_Reversed, sizeof(CVector));
 
     // @notsa
-    struct tReplayBuffer {
-        std::array<char, 100'000> buffer;
+    class tReplayBuffer {
+        std::array<uint8, 100'000> buffer;
 
-        // Returns its index from CReplay::Buffers array.
-        size_t GetIndex() {
-            return (this - Buffers.data()) / sizeof(tReplayBuffer);
-        }
-
-        template<typename T>
-        T Read(uint32 offset) {
+    public:
+        template <typename T>
+        T Read(uint32 offset) const {
             return *(T*)(buffer.data() + offset);
         }
+
+        uint8& at(size_t index)             { return buffer.at(index); }
+        const uint8& at(size_t index) const { return buffer.at(index); }
+
+        // Returns its index from CReplay::Buffers array.
+        size_t GetIndex() const  { return (this - Buffers.data()) / sizeof(tReplayBuffer); }
+        bool IsAvailable() const { return BufferStatus[GetIndex()] != REPLAYBUFFER_STATUS_0; }
+
+        struct Iterator {
+            const tReplayBuffer& m_buffer;
+            uint32 m_offset{0};
+            bool m_end{false};
+
+            Iterator(const tReplayBuffer& buffer, bool end) : m_buffer(buffer), m_end(end) {}
+
+            auto operator++() { // pre-increment
+                const auto type = m_buffer.Read<eReplayPacket>(m_offset);
+                m_end = type == REPLAY_PACKET_END;
+                m_offset += CReplay::FindSizeOfPacket(type);
+                return *this;
+            }
+
+            auto operator++(int) { // post-increment
+                auto ret = *this;
+                ++*this;
+                return ret;
+            }
+
+            auto operator*() const {
+                const auto type = m_buffer.Read<eReplayPacket>(m_offset);
+
+                if (m_end || type == REPLAY_PACKET_END) {
+                    NOTSA_UNREACHABLE("EOF packet can not be read!");
+                }
+                if (type >= NUM_REPLAY_PACKETS) {
+                    NOTSA_UNREACHABLE("Invalid replay packet type! ID={}", (uint8)type);
+                }
+
+                // it won't be funny if user reads the union incorrectly but hey.
+                return *(tReplayBlockData*)&m_buffer.at(m_offset);
+            }
+
+            bool operator==(const Iterator& rhs) {
+                if (&m_buffer != &rhs.m_buffer)
+                    return false;
+
+                // we don't care about their offsets if they both ended anyways.
+                if (m_end == rhs.m_end == true) {
+                    return true;
+                }
+
+                return m_offset == rhs.m_offset;
+            }
+
+            bool operator!=(const Iterator& rhs) { return !(*this == rhs); }
+        };
+
+        auto begin() const { return Iterator{*this, false}; }
+        auto end() const   { return Iterator{*this, true}; }
     };
 
     inline static eReplayMode& Mode = *reinterpret_cast<eReplayMode*>(0xA43088);
@@ -65,7 +170,7 @@ public:
     inline static int32& FramesActiveLookAroundCam = *reinterpret_cast<int32*>(0x97FAD0);
     inline static int8& OldRadioStation = *reinterpret_cast<int8*>(0x97FABC);
     inline static int8& CurrArea = *reinterpret_cast<int8*>(0x97FAB8);
-    inline static std::array<uint8, 8u>& BufferStatus = *reinterpret_cast<std::array<uint8, 8u>*>(0x97FB7C);
+    inline static std::array<eReplayBufferStatus, 8u>& BufferStatus = *reinterpret_cast<std::array<eReplayBufferStatus, 8u>*>(0x97FB7C);
 
     inline static std::array<tReplayBuffer, 8>& Buffers = *reinterpret_cast<std::array<tReplayBuffer, 8>*>(0x97FB88);
 
@@ -113,14 +218,20 @@ public:
     static bool PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, float interpolation, uint32& outTimer);
     static bool FastForwardToTime(uint32 start);
     static void PlayBackThisFrame();
+
+    // Returns size of the specified packed id
     static uint32 FindSizeOfPacket(uint16 id);
     static bool IsThisVehicleUsedInRecording(int32 a1);
     static bool IsThisPedUsedInRecording(int32 a1);
-    static void FindFirstFocusCoordinate(CVector* a1);
+    static void FindFirstFocusCoordinate(CVector& outPos);
     static void NumberFramesAvailableToPlay();
     static void StreamAllNecessaryCarsAndPeds();
     static CPlayerPed* CreatePlayerPed();
     static void TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loadScene);
+
+    // @notsa
+    // @brief Returns all non-empty and non-EOF buffers
+    static auto GetAllActiveBuffers() { return Buffers | std::views::filter([](auto&& buffer) { return !buffer.IsAvailable(); }); }
 };
 
 /*

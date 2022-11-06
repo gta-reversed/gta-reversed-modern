@@ -17,7 +17,7 @@ enum eReplayPacket : uint8 {
     REPLAY_PACKET_BIKE          = 2,
     REPLAY_PACKET_PED_HEADER    = 3,
     REPLAY_PACKET_PED_UPDATE    = 4,
-    REPLAY_PACKET_GENERAL       = 5,
+    REPLAY_PACKET_GENERAL       = 5, // also called 'camera'.
     REPLAY_PACKET_CLOCK         = 6,
     REPLAY_PACKET_WEATHER       = 7,
     REPLAY_PACKET_END_OF_FRAME  = 8,
