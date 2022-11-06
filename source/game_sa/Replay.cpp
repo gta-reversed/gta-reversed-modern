@@ -281,8 +281,42 @@ void CReplay::PlayBackThisFrame() {
 }
 
 // 0x45C850
-uint32 CReplay::FindSizeOfPacket(uint16 id) {
-    return plugin::CallAndReturn<uint32, 0x45C850, uint16>(id);
+uint32 CReplay::FindSizeOfPacket(eReplayPacket type) {
+    switch (type) {
+    case REPLAY_PACKET_END: // it is actually 1 but we shouldn't call this func with this anyways so it's no problem.
+    case REPLAY_PACKET_CLOCK:
+    case REPLAY_PACKET_END_OF_FRAME:
+    case REPLAY_PACKET_13:
+    case REPLAY_PACKET_14:
+        return 4;
+    case REPLAY_PACKET_VEHICLE:
+    case REPLAY_PACKET_PED_UPDATE:
+        return 52;
+    case REPLAY_PACKET_BIKE:
+    case REPLAY_PACKET_BMX:
+    case REPLAY_PACKET_HELI:
+        return 56;
+    case REPLAY_PACKET_PED_HEADER:
+    case REPLAY_PACKET_WEATHER:
+    case REPLAY_PACKET_TIMER:
+        return 8;
+    case REPLAY_PACKET_GENERAL:
+        return 88;
+    case REPLAY_PACKET_BULLET_TRACES:
+        return 28;
+    case REPLAY_PACKET_PARTICLE:
+        return 20;
+    case REPLAY_PACKET_MISC:
+        return 16;
+    case REPLAY_PACKET_PLANE:
+        return 60;
+    case REPLAY_PACKET_TRAIN:
+        return 76;
+    case REPLAY_PACKET_CLOTHES:
+        return 120;
+    default:
+        return 0;
+    }
 }
 
 // 0x
@@ -298,11 +332,9 @@ bool CReplay::IsThisPedUsedInRecording(int32 a1) {
 // 0x45D6C0
 void CReplay::FindFirstFocusCoordinate(CVector& outPos) {
     for (auto& buffer : GetAllActiveBuffers()) {
-        for (const auto& packet : buffer) {
-            if (packet.packetType != REPLAY_PACKET_GENERAL)
-                continue;
-
-            outPos = packet.camera.firstFocusPosn;
+        const auto packet = rng::find_if(buffer, [](auto&& p) { return p.packetType == REPLAY_PACKET_GENERAL; });
+        if (packet != buffer.end()) {
+            outPos = packet->camera.firstFocusPosn;
             break;
         }
     }

@@ -27,6 +27,7 @@ enum eReplayBufferStatus : uint8 {
 struct tReplayBlockData {
     eReplayPacket packetType;
     union {
+        // unk/align sizes are -1 because we don't include the `type` value in the beginning.
         struct { /* nil */ } end;
         struct VehicleBlock { uint8 unk[51]; } vehicle;
         struct BikeBlock { uint8 unk[55]; } bike;
@@ -34,6 +35,7 @@ struct tReplayBlockData {
             uint8 index; // handle?
             uint16 modelId;
             uint8 pedType;
+            uint8 align[2];
         } playerData;
         struct PedBlock { uint8 unk[51]; } ped;
         struct CameraBlock {
@@ -43,6 +45,7 @@ struct tReplayBlockData {
         struct DayTimeBlock {
             uint8 currentHour;
             uint8 currentMinute;
+            uint8 align;
         } dayTime;
         struct WeatherBlock { uint8 unk[7]; } weather;
         struct { /* nil */ } eof; // end of frame
@@ -65,10 +68,10 @@ struct tReplayBlockData {
             uint16 m_fFatStat;    // compressed float
             uint16 m_fMuscleStat; // compressed float
         } clothes;
-
-        // unk sizes are -1 because we don't include the `type` value in the beginning.
     };
 };
+
+constexpr auto REPLAY_BUFFER_SIZE = 100'000u;
 
 class CReplay {
 public:
@@ -89,10 +92,9 @@ public:
     VALIDATE_SIZE(CVector_Reversed, sizeof(CVector));
 
     // @notsa
-    class tReplayBuffer {
-        std::array<uint8, 100'000> buffer;
+    struct tReplayBuffer {
+        std::array<uint8, REPLAY_BUFFER_SIZE> buffer;
 
-    public:
         template <typename T>
         T Read(uint32 offset) const {
             return *(T*)(buffer.data() + offset);
@@ -106,56 +108,75 @@ public:
         bool IsAvailable() const { return BufferStatus[GetIndex()] != REPLAYBUFFER_STATUS_0; }
 
         struct Iterator {
-            const tReplayBuffer& m_buffer;
-            uint32 m_offset{0};
-            bool m_end{false};
+            using value_type = tReplayBlockData;
+            using reference = value_type&;
+            using pointer = value_type*;
+            using iter_difference = int;
+            using iterator_category = std::forward_iterator_tag;
 
-            Iterator(const tReplayBuffer& buffer, bool end) : m_buffer(buffer), m_end(end) {}
+            const tReplayBuffer* m_buffer{nullptr};
+            uint32 m_offset{REPLAY_BUFFER_SIZE};
 
-            auto operator++() { // pre-increment
-                const auto type = m_buffer.Read<eReplayPacket>(m_offset);
-                m_end = type == REPLAY_PACKET_END;
-                m_offset += CReplay::FindSizeOfPacket(type);
+            Iterator() = default;
+            Iterator(const Iterator&) = default;
+            Iterator(const tReplayBuffer* buffer, uint32 offset) : m_buffer(buffer), m_offset(offset) {}
+
+            Iterator& operator++() {
+                if (!IsOffsetValid()) {
+                    NOTSA_UNREACHABLE("Increment after end()!");
+                }
+                m_offset++;
                 return *this;
             }
 
-            auto operator++(int) { // post-increment
-                auto ret = *this;
+            Iterator operator++(int) {
+                auto a = *this;
                 ++*this;
-                return ret;
+                return a;
             }
 
-            auto operator*() const {
-                const auto type = m_buffer.Read<eReplayPacket>(m_offset);
-
-                if (m_end || type == REPLAY_PACKET_END) {
-                    NOTSA_UNREACHABLE("EOF packet can not be read!");
-                }
-                if (type >= NUM_REPLAY_PACKETS) {
-                    NOTSA_UNREACHABLE("Invalid replay packet type! ID={}", (uint8)type);
+            tReplayBlockData& operator*() const {
+                if (!IsOffsetValid()) {
+                    NOTSA_UNREACHABLE("Dereferencing of end()!");
                 }
 
-                // it won't be funny if user reads the union incorrectly but hey.
-                return *(tReplayBlockData*)&m_buffer.at(m_offset);
+                return *(tReplayBlockData*)&m_buffer->at(m_offset);
             }
 
-            bool operator==(const Iterator& rhs) {
-                if (&m_buffer != &rhs.m_buffer)
-                    return false;
+            tReplayBlockData* operator->() const {
+                if (!IsOffsetValid()) {
+                    NOTSA_UNREACHABLE("Dereferencing of end()!");
+                }
 
-                // we don't care about their offsets if they both ended anyways.
-                if (m_end == rhs.m_end == true) {
+                return (tReplayBlockData*)&m_buffer->at(m_offset);
+            }
+
+            bool operator==(const Iterator& rhs) const {
+                if (IsOffsetValid() == rhs.IsOffsetValid() == false)
                     return true;
-                }
 
-                return m_offset == rhs.m_offset;
+                return m_offset == rhs.m_offset && m_buffer == m_buffer;
             }
 
-            bool operator!=(const Iterator& rhs) { return !(*this == rhs); }
-        };
+            bool operator!=(const Iterator& rhs) const {
+                return !(*this == rhs);
+            }
 
-        auto begin() const { return Iterator{*this, false}; }
-        auto end() const   { return Iterator{*this, true}; }
+            ptrdiff_t operator-(const Iterator& rhs) const {
+                assert(*this == rhs);
+                return m_offset - rhs.m_offset;
+            }
+
+        private:
+            bool IsOffsetValid() const {
+                return m_offset < REPLAY_BUFFER_SIZE && m_buffer;
+            }
+        };
+        std::iter_difference_t<Iterator> a;
+        static_assert(std::_Signed_integer_like<std::iter_difference_t<Iterator>>);
+        auto begin() const { return Iterator{this, 0}; }
+        auto end() const   { return Iterator{this, REPLAY_BUFFER_SIZE}; }
+
     };
 
     inline static eReplayMode& Mode = *reinterpret_cast<eReplayMode*>(0xA43088);
@@ -220,7 +241,7 @@ public:
     static void PlayBackThisFrame();
 
     // Returns size of the specified packed id
-    static uint32 FindSizeOfPacket(uint16 id);
+    static uint32 FindSizeOfPacket(eReplayPacket type);
     static bool IsThisVehicleUsedInRecording(int32 a1);
     static bool IsThisPedUsedInRecording(int32 a1);
     static void FindFirstFocusCoordinate(CVector& outPos);
