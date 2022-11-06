@@ -4,6 +4,7 @@
 #include "Skidmarks.h"
 #include "PlaneBanners.h"
 #include "FireManager.h"
+#include "PedClothesDesc.h"
 #include "extensions/enumerate.hpp"
 
 void CReplay::InjectHooks() {
@@ -242,8 +243,11 @@ void CReplay::RecordThisFrame() {
 }
 
 // 0x45C7D0
-void CReplay::RestoreClothesDesc() {
-    plugin::Call<0x45C7D0>();
+void CReplay::RestoreClothesDesc(CPedClothesDesc& desc, CPacketPlayerClothes& packet) {
+    rng::copy(packet.m_anModelKeys, desc.m_anModelKeys.begin());
+    rng::copy(packet.m_anTextureKeys, desc.m_anTextureKeys.begin());
+    desc.m_fFatStat = (float)packet.m_fFatStat;
+    desc.m_fMuscleStat = (float)packet.m_fMuscleStat;
 }
 
 // 0x45CEA0
@@ -262,7 +266,7 @@ bool CReplay::FastForwardToTime(uint32 start) {
         return true;
 
     uint32 timer = 0;
-    while (!PlayBackThisFrameInterpolation(Playback, 1.0f, &timer)) {
+    while (!PlayBackThisFrameInterpolation(Playback, 1.0f, timer)) {
         if (timer >= start) {
             return true;
         }

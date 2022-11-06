@@ -3,12 +3,22 @@
 #include "eReplay.h"
 #include "Vector.h"
 
-struct CAddressInReplayBuffer {
+class CAddressInReplayBuffer {
+public:
     uint32 m_nOffset;
     uint8* m_pBase;
     uint8 m_bSlot;
 };
 VALIDATE_SIZE(CAddressInReplayBuffer, 0xC);
+
+class CPacketPlayerClothes {
+public:
+    uint8 m_nType;
+    std::array<uint32, 10> m_anModelKeys;
+    std::array<uint32, 18> m_anTextureKeys;
+    uint16 m_fFatStat;    // compressed float
+    uint16 m_fMuscleStat; // compressed float
+};
 
 class CReplay {
 public:
@@ -98,7 +108,7 @@ public:
     static void FinishPlayback();
     static void StoreClothesDesc();
     static void RecordThisFrame();
-    static void RestoreClothesDesc();
+    static void RestoreClothesDesc(CPedClothesDesc& desc, CPacketPlayerClothes& packet);
     static void DealWithNewPedPacket();
     static bool PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, float interpolation, uint32& outTimer);
     static bool FastForwardToTime(uint32 start);
