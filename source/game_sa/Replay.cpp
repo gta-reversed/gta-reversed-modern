@@ -1,9 +1,10 @@
 #include "StdInc.h"
 
 #include "Replay.h"
-
-eReplayMode &CReplay::Mode = *reinterpret_cast<eReplayMode*>(0xA43088);
-bool& CReplay::bReplayEnabled = *reinterpret_cast<bool*>(0x8A6160);
+#include "Skidmarks.h"
+#include "PlaneBanners.h"
+#include "FireManager.h"
+#include "extensions/enumerate.hpp"
 
 void CReplay::InjectHooks() {
     RH_ScopedClass(CReplay);
@@ -123,6 +124,11 @@ void CReplay::MarkEverythingAsNew() {
 // 0x45EC90
 void CReplay::EmptyReplayBuffer() {
     plugin::Call<0x45EC90>();
+}
+
+// 0x45D390
+void CReplay::EmptyPedsAndVehiclePools_NoDestructors() {
+    plugin::Call<0x45D390>();
 }
 
 // 0x
@@ -291,87 +297,83 @@ void CReplay::StreamAllNecessaryCarsAndPeds() {
 }
 
 // 0x45D540
-CPed* CReplay::CreatePlayerPed() {
-    return plugin::CallAndReturn<CPed*, 0x45D4B0>();
+CPlayerPed* CReplay::CreatePlayerPed() {
+    return plugin::CallAndReturn<CPlayerPed*, 0x45D4B0>();
 }
 
 // 0x4600F0
-void CReplay::TriggerPlayback(bool a1, float a2, float a3, float a4, bool a5) {
-    return plugin::Call<0x4600F0, bool, float, float, float, bool>(a1, a2, a3, a4, a5);
-
+void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loadScene) {
     if (!ShouldStandardCameraBeProcessed())
         return;
 
     CSpecialFX::ReplayStarted();
-    CameraMode = cameraMomde;
+    CameraMode = mode;
     Mode = MODE_PLAYBACK;
+    CameraFixed = fixedCamPos;
 
-    CameraFixedX = x;
-    CameraFixedY = y;
-    CameraFixedZ = z;
-
-    bPlayingBackFromFile = 0;
-    bAllowLookAroundCam = 1;
+    bPlayingBackFromFile = false;
+    bAllowLookAroundCam = true;
     FramesActiveLookAroundCam = 0;
-    if (FindPlayerVehicle(-1, 0)) {
-        OldRadioStation = CAERadioTrackManager::GetCurrentRadioStationID(&AERadioTrackManager);
-        CAudioEngine::StopRadio(0, 0);
-    } else {
-        OldRadioStation = 0;
-    }
-    CurrArea = CGame::currArea;
-    for (i = 0; i < 8; ++i) {
-        if (BufferStatus[i] == 2)
-            break;
-    }
-    v6 = (i + 1) % 8;
-    for (j = BufferStatus[v6]; j != 2; j = BufferStatus[v6]) {
-        if (j == 1)
-            break;
-        v6 = (v6 + 1) % 8;
-    }
-    Playback.m_bSlot = v6;
-    memset(&point, 0, sizeof(point));
-    Playback.m_pBase = (uint8*)Buffers[(unsigned __int8)v6];
-    Playback.m_nOffset = 0;
-    CObject::DeleteAllTempObjectsInArea(0.0, 0.0, 0.0, 999999.88);
-    StoreStuffInMem();
 
+    OldRadioStation = [&]() -> int8 {
+        if (FindPlayerVehicle()) {
+            AudioEngine.StopRadio(nullptr, false);
+            return AERadioTrackManager.GetCurrentRadioStationID();
+        }
+
+        return 0;
+    }();
+
+    CurrArea = CGame::currArea;
+
+    // TODO: refactor
+    auto idx = 7;
+    for (auto&& [i, status] : notsa::enumerate(BufferStatus)) {
+        if (status == 2) {
+            idx = i;
+            break;
+        }
+    }
+
+    auto slot = (idx + 1) % 8;
+    for (auto j = BufferStatus[slot]; j != 2 && j != 1; j = BufferStatus[slot]) {
+        slot = (slot + 1) % 8;
+    }
+
+    Playback.m_bSlot = slot;
+    Playback.m_pBase = (uint8*)Buffers.at(slot).data();
+    Playback.m_nOffset = 0u;
+
+    CObject::DeleteAllTempObjectsInArea(CVector{0.0f}, 1'000'000.0f);
+    StoreStuffInMem();
     InitialisePedPoolConversionTable(); // InitialisePoolConversionTables
     InitialiseVehiclePoolConversionTable();
-
     EmptyPedsAndVehiclePools_NoDestructors();
     CSkidmarks::Clear();
     StreamAllNecessaryCarsAndPeds();
+
     CWorld::Players[0].m_pPed = CreatePlayerPed();
-    if (bLoadScene) {
-        bDoLoadSceneWhenDone = 0;
-    } else {
-        bDoLoadSceneWhenDone = 1;
-        p_m_pos = &TheCamera.m_matrix->m_pos;
-        if (!TheCamera.m_matrix)
-            p_m_pos = &TheCamera.m_placement.m_vPosn;
-        LoadSceneX = p_m_pos->x;
-        p_m_vPosn = &TheCamera.m_matrix->m_pos;
-        if (!TheCamera.m_matrix)
-            p_m_vPosn = &TheCamera.m_placement.m_vPosn;
-        LoadSceneY = p_m_vPosn->y;
-        if (TheCamera.m_matrix)
-            v10 = &TheCamera.m_matrix->m_pos;
-        else
-            v10 = &TheCamera.m_placement.m_vPosn;
-        LoadSceneZ = v10->z;
-        FindFirstFocusCoordinate(&point);
-        CGame::currLevel = CTheZones::GetLevelFromPosition(&point);
-        CCollision::SortOutCollisionAfterLoad();
-        CStreaming::LoadScene(&point);
-    }
+
+    bDoLoadSceneWhenDone = [&] {
+        if (!loadScene) {
+            LoadScene = TheCamera.GetPosition();
+            CVector point{};
+            FindFirstFocusCoordinate(&point);
+            CGame::currLevel = CTheZones::GetLevelFromPosition(&point);
+            CCollision::SortOutCollisionAfterLoad();
+            CStreaming::LoadScene(&point);
+
+            return true;
+        }
+        return false;
+    }();
+
     CWeaponEffects::ClearCrossHairs();
     CExplosion::ClearAllExplosions();
     CPlaneBanners::Init();
     gFireManager.DestroyAllFxSystems();
     TheCamera.Restore();
-    CDraw::SetFOV(70.0);
+    CDraw::SetFOV(70.0f);
     TheCamera.SetFadeColour(0, 0, 0);
     TheCamera.Fade(0.0f, eFadeFlag::FADE_IN);
     TheCamera.ProcessFade();

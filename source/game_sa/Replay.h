@@ -1,11 +1,51 @@
 #pragma once
 
 #include "eReplay.h"
+#include "Vector.h"
+
+struct CAddressInReplayBuffer {
+    uint32 m_nOffset;
+    void* m_pBase;
+    uint8 m_bSlot;
+};
+VALIDATE_SIZE(CAddressInReplayBuffer, 0xC);
 
 class CReplay {
 public:
-    static eReplayMode& Mode;
-    static bool& bReplayEnabled;
+    // extremely NOTSA
+    struct CVector_Reversed {
+        float z, y, x;
+
+        CVector_Reversed(const CVector& vec) {
+            z = vec.z;
+            y = vec.y;
+            x = vec.x;
+        }
+
+        operator CVector() {
+            return {x, y, z};
+        }
+    };
+    VALIDATE_SIZE(CVector_Reversed, sizeof(CVector));
+
+    inline static eReplayMode& Mode = *reinterpret_cast<eReplayMode*>(0xA43088);
+    inline static bool& bReplayEnabled = *reinterpret_cast<bool*>(0x8A6160);
+    inline static bool& bPlayingBackFromFile = *reinterpret_cast<bool*>(0x97FAE1);
+    inline static bool& bAllowLookAroundCam = *reinterpret_cast<bool*>(0x97FAE0);
+    inline static bool& bDoLoadSceneWhenDone = *reinterpret_cast<bool*>(0x97FACC);
+
+    inline static CVector_Reversed& CameraFixed = *reinterpret_cast<CVector_Reversed*>(0x97FB24);
+    inline static CVector_Reversed& LoadScene = *reinterpret_cast<CVector_Reversed*>(0x97FAC0);
+    inline static eReplayCamMode& CameraMode = *reinterpret_cast<eReplayCamMode*>(0x97FB30);
+    inline static int32& FramesActiveLookAroundCam = *reinterpret_cast<int32*>(0x97FAD0);
+    inline static int8& OldRadioStation = *reinterpret_cast<int8*>(0x97FABC);
+    inline static int8& CurrArea = *reinterpret_cast<int8*>(0x97FAB8);
+    inline static std::array<uint8, 8u>& BufferStatus = *reinterpret_cast<std::array<uint8, 8u>*>(0x97FB7C);
+
+    inline static std::array<std::array<char, 100'000>, 8>& Buffers = *reinterpret_cast<std::array<std::array<char, 100'000>, 8>*>(0x97FB88);
+
+    inline static CAddressInReplayBuffer& Playback = *reinterpret_cast<CAddressInReplayBuffer*>(0x97FB64);
+    inline static CAddressInReplayBuffer& Record = *reinterpret_cast<CAddressInReplayBuffer*>(0x97FB70);
 
 public:
     static void InjectHooks();
@@ -20,6 +60,7 @@ public:
     static void Display();
     static void MarkEverythingAsNew();
     static void EmptyReplayBuffer();
+    static void EmptyPedsAndVehiclePools_NoDestructors();
     static void GoToNextBlock();
     static void RecordVehicleDeleted(CVehicle* vehicle);
     static void RecordPedDeleted(CPed* ped);
@@ -53,8 +94,8 @@ public:
     static void FindFirstFocusCoordinate(CVector* a1);
     static void NumberFramesAvailableToPlay();
     static void StreamAllNecessaryCarsAndPeds();
-    static CPed* CreatePlayerPed();
-    static void TriggerPlayback(bool a1, float a2, float a3, float a4, bool a5);
+    static CPlayerPed* CreatePlayerPed();
+    static void TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loadScene);
 };
 
 /*
