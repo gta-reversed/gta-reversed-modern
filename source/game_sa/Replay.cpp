@@ -252,13 +252,23 @@ void CReplay::DealWithNewPedPacket() {
 }
 
 // 0x45F380
-void CReplay::PlayBackThisFrameInterpolation() {
-    plugin::Call<0x45F380>();
+bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, float interpolation, uint32& outTimer) {
+    return plugin::CallAndReturn<bool, 0x45F380, CAddressInReplayBuffer, float, uint32&>(buffer, interpolation, outTimer);
 }
 
 // 0x460350
-void CReplay::FastForwardToTime(uint32 a1) {
-    return plugin::Call<0x460350, uint32>(a1);
+bool CReplay::FastForwardToTime(uint32 start) {
+    if (!start)
+        return true;
+
+    uint32 timer = 0;
+    while (!PlayBackThisFrameInterpolation(Playback, 1.0f, &timer)) {
+        if (timer >= start) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // 0x4604A0
@@ -294,7 +304,7 @@ void CReplay::NumberFramesAvailableToPlay() {
 // 0x45D4B0
 void CReplay::StreamAllNecessaryCarsAndPeds() {
     for (auto& buffer : Buffers) {
-        if (BufferStatus[buffer.GetIndex()] == 0)
+        if (BufferStatus[buffer.GetIndex()] == REPLAY_PACKET_END)
             continue;
 
         for (auto offset = 0; auto packetId = buffer.Read<eReplayPacket>(offset); offset += FindSizeOfPacket(buffer.Read<eReplayPacket>(offset + 26))) {
@@ -316,7 +326,7 @@ void CReplay::StreamAllNecessaryCarsAndPeds() {
 
 // 0x45D540
 CPlayerPed* CReplay::CreatePlayerPed() {
-    return plugin::CallAndReturn<CPlayerPed*, 0x45D4B0>();
+    return plugin::CallAndReturn<CPlayerPed*, 0x45D540>();
 }
 
 // 0x4600F0

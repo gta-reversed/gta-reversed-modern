@@ -100,8 +100,8 @@ public:
     static void RecordThisFrame();
     static void RestoreClothesDesc();
     static void DealWithNewPedPacket();
-    static void PlayBackThisFrameInterpolation();
-    static void FastForwardToTime(uint32 a1);
+    static bool PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, float interpolation, uint32& outTimer);
+    static bool FastForwardToTime(uint32 start);
     static void PlayBackThisFrame();
     static uint32 FindSizeOfPacket(uint16 id);
     static bool IsThisVehicleUsedInRecording(int32 a1);
