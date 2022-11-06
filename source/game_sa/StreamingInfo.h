@@ -7,6 +7,7 @@
 #pragma once
 
 enum eStreamingFlags {
+    STREAMING_DEFAULT = 0x0,
     STREAMING_UNKNOWN_1 = 0x1,
     STREAMING_GAME_REQUIRED = 0x2,
     STREAMING_MISSION_REQUIRED = 0x4,

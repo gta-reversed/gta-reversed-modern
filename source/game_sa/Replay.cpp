@@ -258,7 +258,7 @@ void CReplay::PlayBackThisFrameInterpolation() {
 
 // 0x460350
 void CReplay::FastForwardToTime(uint32 a1) {
-    plugin::Call<0x460350, uint32>(a1);
+    return plugin::Call<0x460350, uint32>(a1);
 }
 
 // 0x4604A0
@@ -267,8 +267,8 @@ void CReplay::PlayBackThisFrame() {
 }
 
 // 0x45C850
-void CReplay::FindSizeOfPacket(uint16 id) {
-    plugin::Call<0x45C850, uint16>(id);
+uint32 CReplay::FindSizeOfPacket(uint16 id) {
+    return plugin::CallAndReturn<uint32, 0x45C850, uint16>(id);
 }
 
 // 0x
@@ -293,7 +293,25 @@ void CReplay::NumberFramesAvailableToPlay() {
 
 // 0x45D4B0
 void CReplay::StreamAllNecessaryCarsAndPeds() {
-    plugin::Call<0x45D4B0>();
+    for (auto& buffer : Buffers) {
+        if (BufferStatus[buffer.GetIndex()] == 0)
+            continue;
+
+        for (auto offset = 0; auto packetId = buffer.Read<eReplayPacket>(offset); offset += FindSizeOfPacket(buffer.Read<eReplayPacket>(offset + 26))) {
+            switch (packetId) {
+            case REPLAY_PACKET_VEHICLE:
+            case REPLAY_PACKET_BIKE:
+                CStreaming::RequestModel(buffer.Read<eModelID>(offset + 26), STREAMING_DEFAULT);
+                break;
+            case REPLAY_PACKET_PED_HEADER:
+                CStreaming::RequestModel(buffer.Read<eModelID>(offset + 2), STREAMING_DEFAULT);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+    CStreaming::LoadAllRequestedModels(false);
 }
 
 // 0x45D540

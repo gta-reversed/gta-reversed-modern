@@ -10,9 +10,32 @@ struct CAddressInReplayBuffer {
 };
 VALIDATE_SIZE(CAddressInReplayBuffer, 0xC);
 
+enum eReplayPacket : uint8 {
+    REPLAY_PACKET_END,
+    REPLAY_PACKET_VEHICLE,
+    REPLAY_PACKET_BIKE,
+    REPLAY_PACKET_PED_HEADER,
+    REPLAY_PACKET_PED_UPDATE,
+    REPLAY_PACKET_GENERAL,
+    REPLAY_PACKET_CLOCK,
+    REPLAY_PACKET_WEATHER,
+    REPLAY_PACKET_END_OF_FRAME,
+    REPLAY_PACKET_TIMER,
+    REPLAY_PACKET_BULLET_TRACES,
+    REPLAY_PACKET_PARTICLE,
+    REPLAY_PACKET_MISC,
+    REPLAY_PACKET_13,
+    REPLAY_PACKET_14,
+    REPLAY_PACKET_BMX,
+    REPLAY_PACKET_HELI,
+    REPLAY_PACKET_PLANE,
+    REPLAY_PACKET_TRAIN,
+    REPLAY_PACKET_CLOTHES
+};
+
 class CReplay {
 public:
-    // extremely NOTSA
+    // @notsa
     struct CVector_Reversed {
         float z, y, x;
 
@@ -28,6 +51,21 @@ public:
     };
     VALIDATE_SIZE(CVector_Reversed, sizeof(CVector));
 
+    // @notsa
+    struct tReplayBuffer {
+        std::array<char, 100'000> buffer;
+
+        // Returns its index from CReplay::Buffers array.
+        size_t GetIndex() {
+            return (this - Buffers.data()) / sizeof(tReplayBuffer);
+        }
+
+        template<typename T>
+        T Read(uint32 offset) {
+            return *(T*)(buffer.data() + offset);
+        }
+    };
+
     inline static eReplayMode& Mode = *reinterpret_cast<eReplayMode*>(0xA43088);
     inline static bool& bReplayEnabled = *reinterpret_cast<bool*>(0x8A6160);
     inline static bool& bPlayingBackFromFile = *reinterpret_cast<bool*>(0x97FAE1);
@@ -42,7 +80,7 @@ public:
     inline static int8& CurrArea = *reinterpret_cast<int8*>(0x97FAB8);
     inline static std::array<uint8, 8u>& BufferStatus = *reinterpret_cast<std::array<uint8, 8u>*>(0x97FB7C);
 
-    inline static std::array<std::array<char, 100'000>, 8>& Buffers = *reinterpret_cast<std::array<std::array<char, 100'000>, 8>*>(0x97FB88);
+    inline static std::array<tReplayBuffer, 8>& Buffers = *reinterpret_cast<std::array<tReplayBuffer, 8>*>(0x97FB88);
 
     inline static CAddressInReplayBuffer& Playback = *reinterpret_cast<CAddressInReplayBuffer*>(0x97FB64);
     inline static CAddressInReplayBuffer& Record = *reinterpret_cast<CAddressInReplayBuffer*>(0x97FB70);
@@ -88,7 +126,7 @@ public:
     static void PlayBackThisFrameInterpolation();
     static void FastForwardToTime(uint32 a1);
     static void PlayBackThisFrame();
-    static void FindSizeOfPacket(uint16 id);
+    static uint32 FindSizeOfPacket(uint16 id);
     static bool IsThisVehicleUsedInRecording(int32 a1);
     static bool IsThisPedUsedInRecording(int32 a1);
     static void FindFirstFocusCoordinate(CVector* a1);
@@ -96,6 +134,18 @@ public:
     static void StreamAllNecessaryCarsAndPeds();
     static CPlayerPed* CreatePlayerPed();
     static void TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loadScene);
+
+    // @notsa
+    template<typename T>
+    static T ReadFromReplayBuffer(uint32 bufferIdx, uint32 offset) {
+        return *(T*)(Buffers.at(bufferIdx).data() + offset);
+    }
+
+    // @notsa
+    template<typename T>
+    static T ReadFromReplayBuffer(std::array<char, 100'000>& buffer, uint32 offset) {
+        return *(T*)(buffer.data() + offset);
+    }
 };
 
 /*
