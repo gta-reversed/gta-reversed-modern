@@ -4,8 +4,33 @@
 
 CRealTimeShadowManager& g_realTimeShadowMan = *(CRealTimeShadowManager*)0xC40350;
 
+void CRealTimeShadowManager::InjectHooks() {
+    RH_ScopedClass(CRealTimeShadowManager);
+    RH_ScopedCategoryGlobal(); // TODO: Change this to the appropriate category!
+
+    RH_ScopedInstall(Init, 0x7067C0);
+    RH_ScopedInstall(ReturnRealTimeShadow, 0x705B30, { .reversed = false });
+    RH_ScopedInstall(GetRealTimeShadow, 0x706970, { .reversed = false });
+    RH_ScopedInstall(Update, 0x706AB0, { .reversed = false });
+    RH_ScopedInstall(DoShadowThisFrame, 0x706BA0, { .reversed = false });
+}
+
 void CRealTimeShadowManager::Init() {
-    plugin::CallMethod<0x7067C0, CRealTimeShadowManager*>(this);
+    if (m_bInitialised) {
+        return;
+    }
+
+    for (auto& shdw : m_apShadows) {
+        shdw = new CRealTimeShadow();
+        shdw->Create(true, 4, true);
+    }
+
+    m_BlurCamera.Create(6);
+
+    m_GradientCamera[0].Create(6);
+    m_GradientCamera[0].MakeGradientRaster();
+
+    m_bInitialised = true;
 }
 
 void CRealTimeShadowManager::Exit() {

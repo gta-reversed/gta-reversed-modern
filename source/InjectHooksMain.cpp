@@ -394,6 +394,7 @@
 #include "platform/platform.h"
 
 #include "app/app.h"
+#include <RealTimeShadowManager.h>
 
 #include "extensions/utility.hpp"
 
@@ -403,6 +404,8 @@ void InjectHooksMain() {
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
     CFileMgr::InjectHooks();
 
+    CRealTimeShadowManager::InjectHooks();
+    CShadowCamera::InjectHooks();
     ProcObjectMan_c::InjectHooks();
     ProcSurfaceInfo_c::InjectHooks();
     RwHelperInjectHooks();
