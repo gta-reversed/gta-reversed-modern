@@ -2,36 +2,23 @@
 
 #include "eReplay.h"
 #include "Vector.h"
-
-class CAddressInReplayBuffer {
-public:
-    uint32 m_nOffset;
-    uint8* m_pBase;
-    uint8 m_bSlot;
-};
-VALIDATE_SIZE(CAddressInReplayBuffer, 0xC);
-
-class CPacketPlayerClothes {
-public:
-    uint8 m_nType;
-    std::array<uint32, 10> m_anModelKeys;
-    std::array<uint32, 18> m_anTextureKeys;
-    uint16 m_fFatStat;    // compressed float
-    uint16 m_fMuscleStat; // compressed float
-};
+#include "PlayerInfo.h"
 
 enum eReplayBufferStatus : uint8 {
-    REPLAYBUFFER_STATUS_0 = 0
+    REPLAYBUFFER_STATUS_0 = 0,
+    REPLAYBUFFER_STATUS_1 = 1, // full?
+    REPLAYBUFFER_STATUS_2 = 2  // in use?
 };
 
 // NOTSA
+// TODO: maybe spread all struct inside union and use std::variant?
 #pragma pack(push, 1)
 struct tReplayBlockData {
     eReplayPacket type;
 #pragma pack(push, 1)
     union {
         // unk sizes are -1 because we don't include the `type` value in the beginning.
-        struct { /* nil */ } end;
+        struct ENDBlock { /* nil */ } end;
         struct VehicleBlock {
             uint8 unk[25];
             uint16 modelId;
@@ -59,7 +46,7 @@ struct tReplayBlockData {
             uint8 align;
         } dayTime;
         struct WeatherBlock { uint8 unk[7]; } weather;
-        struct { /* nil */ } eof; // end of frame
+        struct EOFBlock { /* nil */ } eof; // end of frame
         struct TimerBlock {
             uint8 align[3];
             uint32 timer;
@@ -67,8 +54,14 @@ struct tReplayBlockData {
         struct BulletTraceBlock { uint8 unk[27]; } bulletTraces;
         struct ParticleBlock { uint8 unk[19]; } particle;
         struct MiscBlock { uint8 unk[15]; } misc;
-        struct UnkBlock13 { uint8 unk[3];  } unkBlock13;
-        struct UnkBlock14 { uint8 unk[3];  } unkBlock14;
+        struct UnkBlock13 {
+            uint8 unk;
+            uint16 unk1;
+        } deletedVehicle;
+        struct UnkBlock14 {
+            uint8 unk;
+            uint16 unk1;
+        } deletedPed;
         struct BmxBlock { uint8 unk[55]; } bmx;
         struct HeliBlock { uint8 unk[55]; } heli;
         struct PlaneBlock { uint8 unk[59]; } plane;
@@ -112,6 +105,17 @@ public:
         template <typename T>
         T Read(uint32 offset) const {
             return *(T*)(buffer.data() + offset);
+        }
+
+        // Returns total bytes written
+        uint32 Write(uint32 offset, const tReplayBlockData& data) {
+            if (data.type == REPLAY_PACKET_END || data.type == REPLAY_PACKET_END_OF_FRAME) {
+                *(eReplayPacket*)(buffer.data() + offset) = data.type;
+                return 1;
+            }
+            std::memcpy(buffer.data() + offset, &data, FindSizeOfPacket(data.type));
+
+            return FindSizeOfPacket(data.type);
         }
 
         uint8& at(size_t index)             { return buffer.at(index); }
@@ -180,12 +184,44 @@ public:
 
     };
 
+    class CAddressInReplayBuffer {
+    public:
+        uint32 m_nOffset;
+        tReplayBuffer* m_pBase;
+        uint8 m_bSlot;
+
+        // Read helper
+        template <typename T>
+        T Read() const {
+            return m_pBase->Read<T>(m_nOffset);
+        }
+
+        // Write helper
+        void Write(const tReplayBlockData& data) {
+            m_nOffset += m_pBase->Write(m_nOffset, data);
+        }
+    };
+    VALIDATE_SIZE(CAddressInReplayBuffer, 0xC);
+
     inline static eReplayMode& Mode = *reinterpret_cast<eReplayMode*>(0xA43088);
     inline static bool& bReplayEnabled = *reinterpret_cast<bool*>(0x8A6160);
     inline static bool& bPlayingBackFromFile = *reinterpret_cast<bool*>(0x97FAE1);
     inline static bool& bAllowLookAroundCam = *reinterpret_cast<bool*>(0x97FAE0);
     inline static bool& bDoLoadSceneWhenDone = *reinterpret_cast<bool*>(0x97FACC);
 
+    inline static void*& pReferences = *reinterpret_cast<void**>(0x97FB0C);
+    inline static void*& pPickups = *reinterpret_cast<void**>(0x97FB08);
+    inline static void*& pEmptyReferences = *reinterpret_cast<void**>(0x97FB04);
+    inline static void*& pWorld1 = *reinterpret_cast<void**>(0x97FB00);
+    inline static void*& pStoredCam = *reinterpret_cast<void**>(0x97FAF8);
+    inline static void*& pRadarBlips = *reinterpret_cast<void**>(0x97FAF4);
+
+    inline static CPlayerInfo& PlayerInfo = *reinterpret_cast<CPlayerInfo*>(0xA430B0);
+
+    inline static std::array<int32, 140>& m_PedPoolConversion = *reinterpret_cast<std::array<int32, 140>*>(0x97F838);
+    inline static std::array<int32, 110>& m_VehiclePoolConversion = *reinterpret_cast<std::array<int32, 110>*>(0x97F680);
+
+    inline static CVector_Reversed& CameraFocus = *reinterpret_cast<CVector_Reversed*>(0x97F670);
     inline static CVector_Reversed& CameraFixed = *reinterpret_cast<CVector_Reversed*>(0x97FB24);
     inline static CVector_Reversed& LoadScene = *reinterpret_cast<CVector_Reversed*>(0x97FAC0);
     inline static eReplayCamMode& CameraMode = *reinterpret_cast<eReplayCamMode*>(0x97FB30);
@@ -224,18 +260,18 @@ public:
     static void ProcessPedUpdate();
     static void ProcessReplayCamera();
     static void ProcessLookAroundCam();
-    static void FindPoolIndexForPed(int32 a1);
-    static void FindPoolIndexForVehicle(int32 a1);
-    static void CanWeFindPoolIndexForPed(int32 a1);
-    static void CanWeFindPoolIndexForVehicle(int32 a1);
+    static int32 FindPoolIndexForPed(int32 index);
+    static int32 FindPoolIndexForVehicle(int32 index);
+    static bool CanWeFindPoolIndexForPed(int32 index);
+    static bool CanWeFindPoolIndexForVehicle(int32 index);
     static void StorePlayerInfoVariables();
     static void StoreStuffInMem();
     static void RestorePlayerInfoVariables();
     static void RestoreStuffFromMem();
     static void FinishPlayback();
-    static void StoreClothesDesc();
+    static void StoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet);
     static void RecordThisFrame();
-    static void RestoreClothesDesc(CPedClothesDesc& desc, CPacketPlayerClothes& packet);
+    static void RestoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet);
     static void DealWithNewPedPacket();
     static bool PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, float interpolation, uint32& outTimer);
     static bool FastForwardToTime(uint32 start);

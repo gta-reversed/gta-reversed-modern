@@ -11,57 +11,69 @@ void CReplay::InjectHooks() {
     RH_ScopedClass(CReplay);
     RH_ScopedCategoryGlobal();
 
+    RH_ScopedInstall(Init, 0x45E220);
     RH_ScopedInstall(DisableReplays, 0x45B150);
     RH_ScopedInstall(EnableReplays, 0x45B160);
     // RH_ScopedInstall(StorePedAnimation, 0x0, { .reversed = false });
     // RH_ScopedInstall(StorePedUpdate, 0x0, { .reversed = false });
     RH_ScopedInstall(RetrievePedAnimation, 0x45B4D0, { .reversed = false });
-    RH_ScopedInstall(ProcessReplayCamera, 0x45D060, { .reversed = false });
-    RH_ScopedInstall(Display, 0x45C210, { .reversed = false });
-    RH_ScopedInstall(MarkEverythingAsNew, 0x45D430, { .reversed = false });
-    RH_ScopedInstall(EmptyReplayBuffer, 0x45EC90, { .reversed = false });
-    // RH_ScopedInstall(GoToNextBlock, 0x0, { .reversed = false });
-    RH_ScopedInstall(RecordVehicleDeleted, 0x45EBB0, { .reversed = false });
-    // RH_ScopedInstall(RecordPedDeleted, 0x0, { .reversed = false });
-    RH_ScopedInstall(Init, 0x45E220, { .reversed = false });
-    RH_ScopedInstall(SaveReplayToHD, 0x45C340, { .reversed = false });
-        RH_ScopedInstall(ShouldStandardCameraBeProcessed, 0x45C440);
+    RH_ScopedInstall(ProcessReplayCamera, 0x45D060, {.reversed = false});
+    RH_ScopedInstall(Display, 0x45C210);
+    RH_ScopedInstall(MarkEverythingAsNew, 0x45D430);
+    RH_ScopedInstall(EmptyReplayBuffer, 0x45EC90);
+    RH_ScopedInstall(GoToNextBlock, 0x45E2A0);
+    RH_ScopedInstall(RecordVehicleDeleted, 0x45EBB0);
+    RH_ScopedInstall(RecordPedDeleted, 0x45EC20);
+    RH_ScopedInstall(SaveReplayToHD, 0x45C340);
+    RH_ScopedInstall(ShouldStandardCameraBeProcessed, 0x45C440);
     RH_ScopedInstall(ProcessLookAroundCam, 0x45D760, { .reversed = false });
-    // RH_ScopedInstall(FindPoolIndexForPed, 0x0, { .reversed = false });
-    // RH_ScopedInstall(FindPoolIndexForVehicle, 0x0, { .reversed = false });
+    RH_ScopedInstall(FindPoolIndexForPed, 0x45C450);
+    RH_ScopedInstall(FindPoolIndexForVehicle, 0x45C460);
     RH_ScopedInstall(ProcessPedUpdate, 0x45CA70, { .reversed = false });
     // RH_ScopedInstall(CanWeFindPoolIndexForPed, 0x0, { .reversed = false });
     // RH_ScopedInstall(CanWeFindPoolIndexForVehicle, 0x0, { .reversed = false });
-    // RH_ScopedInstall(StorePlayerInfoVariables, 0x0, { .reversed = false });
-    RH_ScopedInstall(StoreStuffInMem, 0x45F180, { .reversed = false });
-    RH_ScopedInstall(RestorePlayerInfoVariables, 0x45E1F0, { .reversed = false });
+    RH_ScopedInstall(StorePlayerInfoVariables, 0x45F020);
+    RH_ScopedInstall(RestorePlayerInfoVariables, 0x45E1F0);
+    RH_ScopedInstall(StoreStuffInMem, 0x45F180, {.reversed = false});
     RH_ScopedInstall(RestoreStuffFromMem, 0x45ECD0, { .reversed = false });
-    RH_ScopedInstall(FinishPlayback, 0x45F050, { .reversed = false });
-    // RH_ScopedInstall(StoreClothesDesc, 0x0, { .reversed = false });
+    RH_ScopedInstall(FinishPlayback, 0x45F050);
     RH_ScopedInstall(RecordThisFrame, 0x45E300, { .reversed = false });
-    RH_ScopedInstall(RestoreClothesDesc, 0x45C7D0, { .reversed = true });
+    RH_ScopedInstall(StoreClothesDesc, 0x45C750);
+    RH_ScopedInstall(RestoreClothesDesc, 0x45C7D0, {.reversed = false}); // broken
     RH_ScopedInstall(DealWithNewPedPacket, 0x45CEA0, { .reversed = false });
     RH_ScopedInstall(PlayBackThisFrameInterpolation, 0x45F380, { .reversed = false });
-    RH_ScopedInstall(FastForwardToTime, 0x460350, { .reversed = true });
+    RH_ScopedInstall(FastForwardToTime, 0x460350);
     RH_ScopedInstall(PlayBackThisFrame, 0x4604A0, { .reversed = false });
-    RH_ScopedInstall(FindSizeOfPacket, 0x45C850, { .reversed = false });
+    RH_ScopedInstall(FindSizeOfPacket, 0x45C850);
     // RH_ScopedInstall(IsThisVehicleUsedInRecording, 0x0, { .reversed = false });
     // RH_ScopedInstall(IsThisPedUsedInRecording, 0x0, { .reversed = false });
     // RH_ScopedInstall(InitialiseVehiclePoolConversionTable, 0x0, { .reversed = false });
     // RH_ScopedInstall(InitialisePedPoolConversionTable, 0x0, { .reversed = false });
     // RH_ScopedInstall(InitialisePoolConversionTables, 0x0, { .reversed = false });
-    RH_ScopedInstall(FindFirstFocusCoordinate, 0x45D6C0, { .reversed = true });
+    RH_ScopedInstall(FindFirstFocusCoordinate, 0x45D6C0);
     // RH_ScopedInstall(NumberFramesAvailableToPlay, 0x0, { .reversed = false });
-    RH_ScopedInstall(StreamAllNecessaryCarsAndPeds, 0x45D4B0, { .reversed = true });
+    RH_ScopedInstall(StreamAllNecessaryCarsAndPeds, 0x45D4B0);
     RH_ScopedInstall(CreatePlayerPed, 0x45D540, { .reversed = false });
-    RH_ScopedInstall(TriggerPlayback, 0x4600F0, { .reversed = true });
+    RH_ScopedInstall(TriggerPlayback, 0x4600F0);
     RH_ScopedInstall(Update, 0x460500, { .reversed = false });
 }
 
 // 0x460625 thunk
 // 0x45E220
 void CReplay::Init() {
-    plugin::Call<0x45E220>();
+    Mode = MODE_RECORD;
+    Playback = {.m_nOffset = 0, .m_pBase = nullptr, .m_bSlot = 0};
+    EmptyReplayBuffer();
+    pReferences = nullptr;
+    pPickups = nullptr;
+    pEmptyReferences = nullptr;
+    pWorld1 = nullptr;
+    pStoredCam = nullptr;
+    pRadarBlips = nullptr;
+    bPlayingBackFromFile = false;
+    bDoLoadSceneWhenDone = false;
+    FramesActiveLookAroundCam = 0;
+    bReplayEnabled = true;
 }
 
 // 0x460500
@@ -96,15 +108,15 @@ void CReplay::RetrievePedAnimation() {
 
 // 0x45C210
 void CReplay::Display() {
-    static uint32& g_nReplayTimer = *(uint32*)0xA43240;
+    static uint32& g_ReplayTextTimer = *(uint32*)0xA43240;
 
     assert(Mode == eReplayMode::MODE_RECORD || Mode == eReplayMode::MODE_PLAYBACK);
 
     if (ShouldStandardCameraBeProcessed()) // originally == MODE_RECORD
         return;
 
-    g_nReplayTimer++;
-    if ((g_nReplayTimer & 32) == 0)
+    g_ReplayTextTimer++;
+    if ((g_ReplayTextTimer & 32) == 0)
         return;
 
     CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
@@ -119,12 +131,29 @@ void CReplay::Display() {
 
 // 0x45D430
 void CReplay::MarkEverythingAsNew() {
-    plugin::Call<0x45D430>();
+    for (auto i = 0; i < GetPedPool()->GetSize(); i++) {
+        if (auto ped = GetPedPool()->GetAt(i)) {
+            ped->bUsedForReplay = false;
+        }
+    }
+
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        if (auto vehicle = GetVehiclePool()->GetAt(i)) {
+            vehicle->vehicleFlags.bUsedForReplay = false;
+        }
+    }
 }
 
 // 0x45EC90
 void CReplay::EmptyReplayBuffer() {
-    plugin::Call<0x45EC90>();
+    if (Mode == MODE_PLAYBACK)
+        return;
+
+    rng::fill(BufferStatus, REPLAYBUFFER_STATUS_0);
+    BufferStatus[0] = REPLAYBUFFER_STATUS_2;
+    Buffers.at(0).Write(0, {REPLAY_PACKET_END});
+    Record = {.m_nOffset = 0, .m_pBase = &Buffers.at(0), .m_bSlot = 0};
+    MarkEverythingAsNew();
 }
 
 // 0x45D390
@@ -132,19 +161,44 @@ void CReplay::EmptyPedsAndVehiclePools_NoDestructors() {
     plugin::Call<0x45D390>();
 }
 
-// 0x
+// 0x45E2A0
 void CReplay::GoToNextBlock() {
-    plugin::Call<0x0>();
+    Record.Write({REPLAY_PACKET_END});
+    BufferStatus[Record.m_bSlot] = REPLAYBUFFER_STATUS_1;
+
+    Record.m_bSlot = (Record.m_bSlot + 1) % 8;
+    Record.m_pBase = &Buffers.at(Record.m_bSlot);
+    Record.m_nOffset = 0;
+
+    Record.Write({REPLAY_PACKET_END});
+    BufferStatus[Record.m_bSlot] = REPLAYBUFFER_STATUS_2;
+    MarkEverythingAsNew();
 }
 
 // 0x45EBB0
 void CReplay::RecordVehicleDeleted(CVehicle* vehicle) {
-    plugin::Call<0x45EBB0, CVehicle*>(vehicle);
+    if (Mode != MODE_RECORD)
+        return;
+
+    if (Record.m_nOffset + FindSizeOfPacket(REPLAY_PACKET_UNK_13) > 99984) {
+        GoToNextBlock();
+    }
+
+    Record.Write({.type = REPLAY_PACKET_UNK_13, .deletedVehicle = {.unk1 = (uint16)(GetVehiclePool()->GetIndex(vehicle) / 2584)}});
+    Record.Write({REPLAY_PACKET_END});
 }
 
 // 0x45EC20
 void CReplay::RecordPedDeleted(CPed* ped) {
-    plugin::Call<0x45EC20, CPed*>(ped);
+    if (Mode != MODE_RECORD)
+        return;
+
+    if (Record.m_nOffset + FindSizeOfPacket(REPLAY_PACKET_UNK_14) > 99984) {
+        GoToNextBlock();
+    }
+
+    Record.Write({.type = REPLAY_PACKET_UNK_14, .deletedPed = {.unk1 = (uint16)(GetPedPool()->GetIndex(ped) / 1988)}});
+    Record.Write({REPLAY_PACKET_END});
 }
 
 // 0x45EFA0
@@ -164,7 +218,32 @@ void CReplay::InitialisePoolConversionTables() {
 
 // 0x45C340
 void CReplay::SaveReplayToHD() {
-    plugin::Call<0x45C340>();
+    CFileMgr::SetDirMyDocuments();
+
+    if (const auto file = CFileMgr::OpenFileForWriting("replay.rep")) {
+        CFileMgr::Write(file, "GtaSA29", 8u);
+
+        // TODO: refactor
+        auto idx = 7;
+        for (auto&& [i, status] : notsa::enumerate(BufferStatus)) {
+            if (status == 2) {
+                idx = i;
+                break;
+            }
+        }
+
+        auto slot = (idx + 1) % 8;
+        for (auto j = BufferStatus[slot]; j != REPLAYBUFFER_STATUS_2 && j != REPLAYBUFFER_STATUS_1; j = BufferStatus[slot]) {
+            slot = (slot + 1) % 8;
+        }
+        CFileMgr::Write(file, &Buffers.at(slot), sizeof(tReplayBuffer));
+
+        for (slot = (slot + 1) % 8; BufferStatus[slot] != REPLAYBUFFER_STATUS_2; slot = (slot + 1) % 8) {
+            CFileMgr::Write(file, &Buffers.at(slot), sizeof(tReplayBuffer));
+        }
+
+        CFileMgr::CloseFile(file);
+    }
 }
 
 // 0x45C440
@@ -172,14 +251,16 @@ bool CReplay::ShouldStandardCameraBeProcessed() {
     return Mode != MODE_PLAYBACK;
 }
 
-// 0x
-void CReplay::FindPoolIndexForPed(int32 a1) {
-    plugin::Call<0x0, int32>(a1);
+// unused
+// 0x45C450
+int32 CReplay::FindPoolIndexForPed(int32 index) {
+    return m_PedPoolConversion.at(index);
 }
 
-// 0x
-void CReplay::FindPoolIndexForVehicle(int32 a1) {
-    plugin::Call<0x0, int32>(a1);
+// unused
+// 0x45C460
+int32 CReplay::FindPoolIndexForVehicle(int32 index) {
+    return m_VehiclePoolConversion.at(index);
 }
 
 // 0x45CA70
@@ -189,7 +270,43 @@ void CReplay::ProcessPedUpdate() {
 
 // 0x45D060
 void CReplay::ProcessReplayCamera() {
-    plugin::Call<0x45D060>();
+    assert(TheCamera.m_pRwCamera);
+
+    auto parent = (RwFrame*)rwObjectGetParent(&TheCamera.m_pRwCamera->object.object);
+    switch (CameraMode) {
+    case REPLAY_CAM_MODE_TOPDOWN:
+        TheCamera.GetPosition() = CVector{CameraFocus.x, CameraFocus.y, CameraFocus.z + 15.0f};
+        TheCamera.GetRight()    = CVector{1.0f, 0.0f,  0.0f};
+        TheCamera.GetUp()       = CVector{0.0f, 1.0f,  0.0f};
+        TheCamera.GetForward()  = CVector{0.0f, 0.0f, -1.0f};
+
+        parent->modelling.pos   = CameraFocus;
+        parent->modelling.at    = TheCamera.GetForward();
+        parent->modelling.up    = TheCamera.GetUp();
+        parent->modelling.right = TheCamera.GetRight();
+        break;
+    case REPLAY_CAM_MODE_FIXED:
+        const auto direction = (CameraFocus - CameraFixed).Normalized();
+        const auto right = direction.Cross({0.0f, 0.0f, 1.0f}).Normalized();
+
+        TheCamera.GetPosition() = CameraFixed;
+        TheCamera.GetForward()  = direction;
+        TheCamera.GetUp()       = direction.Cross(right);
+        TheCamera.GetRight()    = right;
+
+        parent->modelling.pos   = CameraFocus;
+        parent->modelling.at    = TheCamera.GetForward();
+        parent->modelling.up    = TheCamera.GetUp();
+        parent->modelling.right = TheCamera.GetRight();
+        break;
+    default:
+        break;
+    }
+    TheCamera.m_vecGameCamPos = TheCamera.GetPosition();
+    TheCamera.CalculateDerivedValues(false, true);
+    RwMatrixUpdate(&parent->modelling);
+    RwFrameUpdateObjects(parent);
+    RwFrameOrthoNormalize(parent);
 }
 
 // 0x45D760
@@ -198,28 +315,40 @@ void CReplay::ProcessLookAroundCam() {
 }
 
 // 0x
-void CReplay::CanWeFindPoolIndexForPed(int32 a1) {
-    plugin::Call<0x0, int32>(a1);
+bool CReplay::CanWeFindPoolIndexForPed(int32 index) {
+    return plugin::CallAndReturn<bool, 0x0, int32>(index);
 }
 
 // 0x
-void CReplay::CanWeFindPoolIndexForVehicle(int32 a1) {
-    plugin::Call<0x0, int32>(a1);
+bool CReplay::CanWeFindPoolIndexForVehicle(int32 index) {
+    return plugin::CallAndReturn<bool, 0x0, int32>(index);
 }
 
-// 0x0
+// 0x45F020
 void CReplay::StorePlayerInfoVariables() {
-    plugin::Call<0x0>();
+    auto& playerInfo = FindPlayerInfo(PED_TYPE_PLAYER1);
+
+    PlayerInfo = playerInfo;
+    playerInfo.m_PlayerData.m_pWanted = nullptr;
+    playerInfo.m_PlayerData.m_pPedClothesDesc = nullptr;
+    playerInfo.m_PlayerData.m_pArrestingCop = nullptr;
+    playerInfo.m_PlayerData.m_nMeleeWeaponAnimReferenced = 0;
+    playerInfo.m_PlayerData.m_nMeleeWeaponAnimReferencedExtra = 0;
+    playerInfo.m_pSkinTexture = nullptr;
+}
+
+// 0x45E1F0
+void CReplay::RestorePlayerInfoVariables() {
+    FindPlayerInfo(PED_TYPE_PLAYER1) = PlayerInfo;
+    PlayerInfo.m_PlayerData.m_pWanted = nullptr;
+    PlayerInfo.m_PlayerData.m_pPedClothesDesc = nullptr;
+    PlayerInfo.m_PlayerData.m_pArrestingCop = nullptr;
+    PlayerInfo.m_pSkinTexture = nullptr;
 }
 
 // 0x45F180
 void CReplay::StoreStuffInMem() {
     plugin::Call<0x45F180>();
-}
-
-// 0x45E1F0
-void CReplay::RestorePlayerInfoVariables() {
-    plugin::Call<0x45E1F0>();
 }
 
 // 0x45ECD0
@@ -229,12 +358,37 @@ void CReplay::RestoreStuffFromMem() {
 
 // 0x45F050
 void CReplay::FinishPlayback() {
-    plugin::Call<0x45F050>();
-}
+    if (ShouldStandardCameraBeProcessed())
+        return;
 
-// 0x
-void CReplay::StoreClothesDesc() {
-    plugin::Call<0x0>();
+    RestoreStuffFromMem();
+    Mode = MODE_RECORD;
+
+    if (bDoLoadSceneWhenDone) {
+        CGame::currLevel = CTheZones::GetLevelFromPosition(LoadScene);
+        CCollision::SortOutCollisionAfterLoad();
+        CStreaming::LoadScene(LoadScene);
+    }
+
+    bDoLoadSceneWhenDone = false;
+    if (bPlayingBackFromFile) {
+        Init();
+        MarkEverythingAsNew();
+    }
+
+    TheCamera.SetFadeColour(0, 0, 0);
+    TheCamera.Fade(0.0f, eFadeFlag::FADE_IN);
+    TheCamera.ProcessFade();
+    TheCamera.Fade(1.0f, eFadeFlag::FADE_OUT);
+
+    gFireManager.CreateAllFxSystems();
+    AudioEngine.SetEffectsMasterVolume(FrontEndMenuManager.m_nSfxVolume);
+    AudioEngine.SetMusicMasterVolume(FrontEndMenuManager.m_nRadioVolume);
+
+    if (auto vehicle = FindPlayerVehicle(-1, 0)) {
+        vehicle->m_vehicleAudio.TurnOnRadioForVehicle();
+        AudioEngine.RetuneRadio(OldRadioStation );
+    }
 }
 
 // 0x45E300
@@ -242,12 +396,22 @@ void CReplay::RecordThisFrame() {
     plugin::Call<0x45E300>();
 }
 
-// 0x45C7D0
-void CReplay::RestoreClothesDesc(CPedClothesDesc& desc, CPacketPlayerClothes& packet) {
-    rng::copy(packet.m_anModelKeys, desc.m_anModelKeys.begin());
-    rng::copy(packet.m_anTextureKeys, desc.m_anTextureKeys.begin());
-    desc.m_fFatStat = (float)packet.m_fFatStat;
-    desc.m_fMuscleStat = (float)packet.m_fMuscleStat;
+// 0x45C750
+void CReplay::StoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet) {
+    packet.type = REPLAY_PACKET_CLOTHES;
+    rng::copy(desc.m_anModelKeys, packet.clothes.m_anModelKeys.begin());
+    rng::copy(desc.m_anTextureKeys, packet.clothes.m_anTextureKeys.begin());
+    packet.clothes.m_fFatStat = (int16)desc.m_fFatStat;
+    packet.clothes.m_fMuscleStat = (int16)desc.m_fMuscleStat;
+}
+
+// 0x45C7D0, broken
+void CReplay::RestoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet) {
+    assert(packet.type == REPLAY_PACKET_CLOTHES);
+    rng::copy(packet.clothes.m_anModelKeys, desc.m_anModelKeys.begin());
+    rng::copy(packet.clothes.m_anTextureKeys, desc.m_anTextureKeys.begin());
+    desc.m_fFatStat = (float)packet.clothes.m_fFatStat;
+    desc.m_fMuscleStat = (float)packet.clothes.m_fMuscleStat;
 }
 
 // 0x45CEA0
@@ -410,7 +574,7 @@ void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loa
     }
 
     Playback.m_bSlot = slot;
-    Playback.m_pBase = (uint8*)&Buffers.at(slot);
+    Playback.m_pBase = &Buffers.at(slot);
     Playback.m_nOffset = 0u;
 
     CObject::DeleteAllTempObjectsInArea(CVector{0.0f}, 1'000'000.0f);
@@ -451,22 +615,22 @@ void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loa
 
 // tReplayBlockData checks
 #define CHECK_SIZE(_struct, _enum) static_assert(sizeof(tReplayBlockData::_struct) + sizeof(eReplayPacket) == CReplay::FindSizeOfPacket(REPLAY_PACKET_##_enum))
-CHECK_SIZE(vehicle,      VEHICLE);
-CHECK_SIZE(bike,         BIKE);
-CHECK_SIZE(playerData,   PED_HEADER);
-CHECK_SIZE(ped,          PED_UPDATE);
-CHECK_SIZE(camera,       GENERAL);
-CHECK_SIZE(dayTime,      CLOCK);
-CHECK_SIZE(weather,      WEATHER);
-CHECK_SIZE(timer,        TIMER);
-CHECK_SIZE(bulletTraces, BULLET_TRACES);
-CHECK_SIZE(particle,     PARTICLE);
-CHECK_SIZE(misc,         MISC);
-CHECK_SIZE(unkBlock13,   UNK_13);
-CHECK_SIZE(unkBlock14,   UNK_14);
-CHECK_SIZE(bmx,          BMX);
-CHECK_SIZE(heli,         HELI);
-CHECK_SIZE(plane,        PLANE);
-CHECK_SIZE(train,        TRAIN);
-CHECK_SIZE(clothes,      CLOTHES);
+CHECK_SIZE(vehicle,        VEHICLE);
+CHECK_SIZE(bike,           BIKE);
+CHECK_SIZE(playerData,     PED_HEADER);
+CHECK_SIZE(ped,            PED_UPDATE);
+CHECK_SIZE(camera,         GENERAL);
+CHECK_SIZE(dayTime,        CLOCK);
+CHECK_SIZE(weather,        WEATHER);
+CHECK_SIZE(timer,          TIMER);
+CHECK_SIZE(bulletTraces,   BULLET_TRACES);
+CHECK_SIZE(particle,       PARTICLE);
+CHECK_SIZE(misc,           MISC);
+CHECK_SIZE(deletedVehicle, UNK_13);
+CHECK_SIZE(deletedPed,     UNK_14);
+CHECK_SIZE(bmx,            BMX);
+CHECK_SIZE(heli,           HELI);
+CHECK_SIZE(plane,          PLANE);
+CHECK_SIZE(train,          TRAIN);
+CHECK_SIZE(clothes,        CLOTHES);
 #undef CHECK_SIZE
