@@ -9,12 +9,13 @@ void CRealTimeShadowManager::InjectHooks() {
     RH_ScopedCategoryGlobal(); // TODO: Change this to the appropriate category!
 
     RH_ScopedInstall(Init, 0x7067C0);
-    RH_ScopedInstall(ReturnRealTimeShadow, 0x705B30, { .reversed = false });
+    RH_ScopedInstall(ReturnRealTimeShadow, 0x705B30);
     RH_ScopedInstall(GetRealTimeShadow, 0x706970, { .reversed = false });
     RH_ScopedInstall(Update, 0x706AB0, { .reversed = false });
     RH_ScopedInstall(DoShadowThisFrame, 0x706BA0, { .reversed = false });
 }
 
+// 0x7067C0
 void CRealTimeShadowManager::Init() {
     if (m_bInitialised) {
         return;
@@ -33,8 +34,11 @@ void CRealTimeShadowManager::Init() {
     m_bInitialised = true;
 }
 
-void CRealTimeShadowManager::Exit() {
-    plugin::CallMethod<0x706A60, CRealTimeShadowManager*>(this);
+void CRealTimeShadowManager::ReturnRealTimeShadow(CRealTimeShadow* shdw) {
+    if (m_bInitialised) {
+        shdw->m_pOwner->m_pShadowData = nullptr;
+        shdw->m_pOwner = nullptr;
+    }
 }
 
 void CRealTimeShadowManager::ReInit() {
@@ -46,13 +50,23 @@ void CRealTimeShadowManager::Update() {
 }
 
 CRealTimeShadow& CRealTimeShadowManager::GetRealTimeShadow(CPhysical* physical) {
-    return plugin::CallMethodAndReturn<CRealTimeShadow&, 0x706970, CRealTimeShadowManager*, CPhysical*>(this, physical);
+    if (m_bInitialised) {
+        return;
+    }
+
+    bool isFirstPlayer{};
+
+    if (!physical->IsPed() || physical->AsPed()->IsPlayer()) {
+        if (FindPlayerPed()->IsInVehicle()) { // Maybe wrong?
+            if (FindPlayerPed()->m_pVehicle->GetMoveSpeed().SquaredMagnitude() < sq(0.3f)) {
+                return;
+            }
+        }
+    }
+
+
 }
 
 void CRealTimeShadowManager::DoShadowThisFrame(CPhysical* physical) {
     plugin::CallMethod<0x706BA0, CRealTimeShadowManager*, CPhysical*>(this, physical);
-}
-
-void CRealTimeShadowManager::ReturnRealTimeShadow(CRealTimeShadow* pShadow) {
-    plugin::CallMethod<0x705B30, CRealTimeShadowManager*, CRealTimeShadow*>(this, pShadow);
 }
