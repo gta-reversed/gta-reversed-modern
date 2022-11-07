@@ -24,18 +24,29 @@ enum eReplayBufferStatus : uint8 {
     REPLAYBUFFER_STATUS_0 = 0
 };
 
+// NOTSA
+#pragma pack(push, 1)
 struct tReplayBlockData {
-    eReplayPacket packetType;
+    eReplayPacket type;
+#pragma pack(push, 1)
     union {
-        // unk/align sizes are -1 because we don't include the `type` value in the beginning.
+        // unk sizes are -1 because we don't include the `type` value in the beginning.
         struct { /* nil */ } end;
-        struct VehicleBlock { uint8 unk[51]; } vehicle;
-        struct BikeBlock { uint8 unk[55]; } bike;
+        struct VehicleBlock {
+            uint8 unk[25];
+            uint16 modelId;
+            uint8 unk2[24];
+        } vehicle;
+        struct BikeBlock {
+            uint8 unk[25];
+            uint16 modelId;
+            uint8 unk2[28];
+        } bike;
         struct PlayerDataBlock {
             uint8 index; // handle?
             uint16 modelId;
             uint8 pedType;
-            uint8 align[2];
+            uint8 align[3];
         } playerData;
         struct PedBlock { uint8 unk[51]; } ped;
         struct CameraBlock {
@@ -50,12 +61,12 @@ struct tReplayBlockData {
         struct WeatherBlock { uint8 unk[7]; } weather;
         struct { /* nil */ } eof; // end of frame
         struct TimerBlock {
-            uint8 align[2];
+            uint8 align[3];
             uint32 timer;
         } timer;
-        struct UnkBlock10 { uint8 unk[27]; } unkBlock10;
-        struct UnkBlock11 { uint8 unk[19]; } unkBlock11;
-        struct UnkBlock12 { uint8 unk[15]; } unkBlock12;
+        struct BulletTraceBlock { uint8 unk[27]; } bulletTraces;
+        struct ParticleBlock { uint8 unk[19]; } particle;
+        struct MiscBlock { uint8 unk[15]; } misc;
         struct UnkBlock13 { uint8 unk[3];  } unkBlock13;
         struct UnkBlock14 { uint8 unk[3];  } unkBlock14;
         struct BmxBlock { uint8 unk[55]; } bmx;
@@ -67,9 +78,12 @@ struct tReplayBlockData {
             std::array<uint32, 18> m_anTextureKeys;
             uint16 m_fFatStat;    // compressed float
             uint16 m_fMuscleStat; // compressed float
+            uint8 align[3];
         } clothes;
     };
+#pragma pack(pop)
 };
+#pragma pack(pop)
 
 constexpr auto REPLAY_BUFFER_SIZE = 100'000u;
 
@@ -111,21 +125,22 @@ public:
             using value_type = tReplayBlockData;
             using reference = value_type&;
             using pointer = value_type*;
-            using iter_difference = int;
+            using iter_difference = ptrdiff_t;
             using iterator_category = std::forward_iterator_tag;
 
             const tReplayBuffer* m_buffer{nullptr};
             uint32 m_offset{REPLAY_BUFFER_SIZE};
 
             Iterator() = default;
-            Iterator(const Iterator&) = default;
             Iterator(const tReplayBuffer* buffer, uint32 offset) : m_buffer(buffer), m_offset(offset) {}
 
             Iterator& operator++() {
-                if (!IsOffsetValid()) {
+                if (m_offset >= REPLAY_BUFFER_SIZE || !m_buffer) {
                     NOTSA_UNREACHABLE("Increment after end()!");
                 }
-                m_offset++;
+
+                const auto type = m_buffer->Read<eReplayPacket>(m_offset);
+                m_offset = (type != REPLAY_PACKET_END) ? m_offset + CReplay::FindSizeOfPacket(type) : REPLAY_BUFFER_SIZE;
                 return *this;
             }
 
@@ -136,7 +151,7 @@ public:
             }
 
             tReplayBlockData& operator*() const {
-                if (!IsOffsetValid()) {
+                if (m_offset >= REPLAY_BUFFER_SIZE || !m_buffer) {
                     NOTSA_UNREACHABLE("Dereferencing of end()!");
                 }
 
@@ -144,36 +159,22 @@ public:
             }
 
             tReplayBlockData* operator->() const {
-                if (!IsOffsetValid()) {
+                if (m_offset >= REPLAY_BUFFER_SIZE || !m_buffer) {
                     NOTSA_UNREACHABLE("Dereferencing of end()!");
                 }
 
                 return (tReplayBlockData*)&m_buffer->at(m_offset);
             }
 
-            bool operator==(const Iterator& rhs) const {
-                if (IsOffsetValid() == rhs.IsOffsetValid() == false)
-                    return true;
-
-                return m_offset == rhs.m_offset && m_buffer == m_buffer;
-            }
-
-            bool operator!=(const Iterator& rhs) const {
-                return !(*this == rhs);
-            }
+            bool operator==(const Iterator& rhs) const = default;
+            bool operator!=(const Iterator& rhs) const = default;
 
             ptrdiff_t operator-(const Iterator& rhs) const {
-                assert(*this == rhs);
+                assert(m_buffer == rhs.m_buffer);
                 return m_offset - rhs.m_offset;
             }
-
-        private:
-            bool IsOffsetValid() const {
-                return m_offset < REPLAY_BUFFER_SIZE && m_buffer;
-            }
         };
-        std::iter_difference_t<Iterator> a;
-        static_assert(std::_Signed_integer_like<std::iter_difference_t<Iterator>>);
+
         auto begin() const { return Iterator{this, 0}; }
         auto end() const   { return Iterator{this, REPLAY_BUFFER_SIZE}; }
 
@@ -241,7 +242,7 @@ public:
     static void PlayBackThisFrame();
 
     // Returns size of the specified packed id
-    static uint32 FindSizeOfPacket(eReplayPacket type);
+    static constexpr uint32 FindSizeOfPacket(eReplayPacket type); // constexpr cuz look tReplayBlockData
     static bool IsThisVehicleUsedInRecording(int32 a1);
     static bool IsThisPedUsedInRecording(int32 a1);
     static void FindFirstFocusCoordinate(CVector& outPos);
@@ -252,7 +253,7 @@ public:
 
     // @notsa
     // @brief Returns all non-empty and non-EOF buffers
-    static auto GetAllActiveBuffers() { return Buffers | std::views::filter([](auto&& buffer) { return !buffer.IsAvailable(); }); }
+    static auto GetAllActiveBuffers() { return Buffers | std::views::filter([](auto&& buffer) { return buffer.IsAvailable(); }); }
 };
 
 /*

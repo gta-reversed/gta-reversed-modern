@@ -1,3 +1,4 @@
+#include "StdInc.h"
 #include "PlaneBanners.h"
 
 // 0x717820

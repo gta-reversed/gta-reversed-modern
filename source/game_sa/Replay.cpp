@@ -52,7 +52,7 @@ void CReplay::InjectHooks() {
     // RH_ScopedInstall(InitialisePoolConversionTables, 0x0, { .reversed = false });
     RH_ScopedInstall(FindFirstFocusCoordinate, 0x45D6C0, { .reversed = true });
     // RH_ScopedInstall(NumberFramesAvailableToPlay, 0x0, { .reversed = false });
-    RH_ScopedInstall(StreamAllNecessaryCarsAndPeds, 0x45D4B0, { .reversed = false });
+    RH_ScopedInstall(StreamAllNecessaryCarsAndPeds, 0x45D4B0, { .reversed = true });
     RH_ScopedInstall(CreatePlayerPed, 0x45D540, { .reversed = false });
     RH_ScopedInstall(TriggerPlayback, 0x4600F0, { .reversed = true });
     RH_ScopedInstall(Update, 0x460500, { .reversed = false });
@@ -281,13 +281,13 @@ void CReplay::PlayBackThisFrame() {
 }
 
 // 0x45C850
-uint32 CReplay::FindSizeOfPacket(eReplayPacket type) {
+constexpr uint32 CReplay::FindSizeOfPacket(eReplayPacket type) {
     switch (type) {
     case REPLAY_PACKET_END: // it is actually 1 but we shouldn't call this func with this anyways so it's no problem.
     case REPLAY_PACKET_CLOCK:
     case REPLAY_PACKET_END_OF_FRAME:
-    case REPLAY_PACKET_13:
-    case REPLAY_PACKET_14:
+    case REPLAY_PACKET_UNK_13:
+    case REPLAY_PACKET_UNK_14:
         return 4;
     case REPLAY_PACKET_VEHICLE:
     case REPLAY_PACKET_PED_UPDATE:
@@ -332,7 +332,7 @@ bool CReplay::IsThisPedUsedInRecording(int32 a1) {
 // 0x45D6C0
 void CReplay::FindFirstFocusCoordinate(CVector& outPos) {
     for (auto& buffer : GetAllActiveBuffers()) {
-        const auto packet = rng::find_if(buffer, [](auto&& p) { return p.packetType == REPLAY_PACKET_GENERAL; });
+        const auto packet = rng::find_if(buffer, [](auto&& p) { return p.type == REPLAY_PACKET_GENERAL; });
         if (packet != buffer.end()) {
             outPos = packet->camera.firstFocusPosn;
             break;
@@ -348,14 +348,14 @@ void CReplay::NumberFramesAvailableToPlay() {
 // 0x45D4B0
 void CReplay::StreamAllNecessaryCarsAndPeds() {
     for (auto& buffer : GetAllActiveBuffers()) {
-        for (auto offset = 0; auto packetId = buffer.Read<eReplayPacket>(offset); offset += FindSizeOfPacket(buffer.Read<eReplayPacket>(offset + 26))) {
-            switch (packetId) {
+        for (auto& packet : buffer) {
+            switch (packet.type) {
             case REPLAY_PACKET_VEHICLE:
             case REPLAY_PACKET_BIKE:
-                CStreaming::RequestModel(buffer.Read<eModelID>(offset + 26), STREAMING_DEFAULT);
+                CStreaming::RequestModel(packet.vehicle.modelId, STREAMING_DEFAULT);
                 break;
             case REPLAY_PACKET_PED_HEADER:
-                CStreaming::RequestModel(buffer.Read<eModelID>(offset + 2), STREAMING_DEFAULT);
+                CStreaming::RequestModel(packet.playerData.modelId, STREAMING_DEFAULT);
                 break;
             default:
                 break;
@@ -448,3 +448,25 @@ void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loa
     TheCamera.ProcessFade();
     TheCamera.Fade(1.5f, eFadeFlag::FADE_OUT);
 }
+
+// tReplayBlockData checks
+#define CHECK_SIZE(_struct, _enum) static_assert(sizeof(tReplayBlockData::_struct) + sizeof(eReplayPacket) == CReplay::FindSizeOfPacket(REPLAY_PACKET_##_enum))
+CHECK_SIZE(vehicle,      VEHICLE);
+CHECK_SIZE(bike,         BIKE);
+CHECK_SIZE(playerData,   PED_HEADER);
+CHECK_SIZE(ped,          PED_UPDATE);
+CHECK_SIZE(camera,       GENERAL);
+CHECK_SIZE(dayTime,      CLOCK);
+CHECK_SIZE(weather,      WEATHER);
+CHECK_SIZE(timer,        TIMER);
+CHECK_SIZE(bulletTraces, BULLET_TRACES);
+CHECK_SIZE(particle,     PARTICLE);
+CHECK_SIZE(misc,         MISC);
+CHECK_SIZE(unkBlock13,   UNK_13);
+CHECK_SIZE(unkBlock14,   UNK_14);
+CHECK_SIZE(bmx,          BMX);
+CHECK_SIZE(heli,         HELI);
+CHECK_SIZE(plane,        PLANE);
+CHECK_SIZE(train,        TRAIN);
+CHECK_SIZE(clothes,      CLOTHES);
+#undef CHECK_SIZE

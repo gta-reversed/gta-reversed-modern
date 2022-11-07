@@ -26,8 +26,8 @@ enum eReplayPacket : uint8 {
     REPLAY_PACKET_PARTICLE      = 11,
     REPLAY_PACKET_MISC          = 12,
 
-    REPLAY_PACKET_13            = 13,
-    REPLAY_PACKET_14            = 14,
+    REPLAY_PACKET_UNK_13        = 13,
+    REPLAY_PACKET_UNK_14        = 14,
     REPLAY_PACKET_BMX           = 15,
     REPLAY_PACKET_HELI          = 16,
     REPLAY_PACKET_PLANE         = 17,
