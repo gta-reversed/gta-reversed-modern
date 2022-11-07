@@ -20,22 +20,29 @@ struct tReplayBlockData {
         // unk sizes are -1 because we don't include the `type` value in the beginning.
         struct ENDBlock { /* nil */ } end;
         struct VehicleBlock {
-            uint8 unk[25];
+            uint8 index; // handle?
+            uint8 unk[24];
             uint16 modelId;
             uint8 unk2[24];
         } vehicle;
         struct BikeBlock {
-            uint8 unk[25];
+            uint8 index;
+            uint8 unk[24];
             uint16 modelId;
             uint8 unk2[28];
         } bike;
         struct PlayerDataBlock {
-            uint8 index; // handle?
+            uint8 index;
             uint16 modelId;
             uint8 pedType;
             uint8 align[3];
         } playerData;
-        struct PedBlock { uint8 unk[51]; } ped;
+        struct PedBlock {
+            uint8 pedIndexInPool;
+            uint8 unk;
+            uint8 vehicleIndex; // current vehicle handle?
+            uint8 unk2[48];
+        } ped;
         struct CameraBlock {
             uint8 unk[75];
             CVector firstFocusPosn;
@@ -62,10 +69,22 @@ struct tReplayBlockData {
             uint8 unk;
             uint16 unk1;
         } deletedPed;
-        struct BmxBlock { uint8 unk[55]; } bmx;
-        struct HeliBlock { uint8 unk[55]; } heli;
-        struct PlaneBlock { uint8 unk[59]; } plane;
-        struct TrainBlock { uint8 unk[75]; } train;
+        struct BmxBlock {
+            uint8 index;
+            uint8 unk[54];
+        } bmx;
+        struct HeliBlock {
+            uint8 index;
+            uint8 unk[54];
+        } heli;
+        struct PlaneBlock {
+            uint8 index;
+            uint8 unk[58];
+        } plane;
+        struct TrainBlock {
+            uint8 index;
+            uint8 unk[74];
+        } train;
         struct ClothesBlock {
             std::array<uint32, 10> m_anModelKeys;
             std::array<uint32, 18> m_anTextureKeys;
@@ -257,7 +276,7 @@ public:
     static void InitialisePoolConversionTables();
     static void SaveReplayToHD();
     static bool ShouldStandardCameraBeProcessed();
-    static void ProcessPedUpdate();
+    static void ProcessPedUpdate(CPed* ped, float a2, const CAddressInReplayBuffer& address);
     static void ProcessReplayCamera();
     static void ProcessLookAroundCam();
     static int32 FindPoolIndexForPed(int32 index);
@@ -272,7 +291,7 @@ public:
     static void StoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet);
     static void RecordThisFrame();
     static void RestoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet);
-    static void DealWithNewPedPacket();
+    static CPlayerPed* DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel, tReplayBlockData& clothesPacket);
     static bool PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, float interpolation, uint32& outTimer);
     static bool FastForwardToTime(uint32 start);
     static void PlayBackThisFrame();

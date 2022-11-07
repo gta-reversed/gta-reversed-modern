@@ -45,15 +45,15 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(FastForwardToTime, 0x460350);
     RH_ScopedInstall(PlayBackThisFrame, 0x4604A0, { .reversed = false });
     RH_ScopedInstall(FindSizeOfPacket, 0x45C850);
-    // RH_ScopedInstall(IsThisVehicleUsedInRecording, 0x0, { .reversed = false });
-    // RH_ScopedInstall(IsThisPedUsedInRecording, 0x0, { .reversed = false });
+    RH_ScopedInstall(IsThisVehicleUsedInRecording, 0x45DE40, { .reversed = true });
+    RH_ScopedInstall(IsThisPedUsedInRecording, 0x45DDE0, {.reversed = true});
     // RH_ScopedInstall(InitialiseVehiclePoolConversionTable, 0x0, { .reversed = false });
     // RH_ScopedInstall(InitialisePedPoolConversionTable, 0x0, { .reversed = false });
     // RH_ScopedInstall(InitialisePoolConversionTables, 0x0, { .reversed = false });
     RH_ScopedInstall(FindFirstFocusCoordinate, 0x45D6C0);
     // RH_ScopedInstall(NumberFramesAvailableToPlay, 0x0, { .reversed = false });
     RH_ScopedInstall(StreamAllNecessaryCarsAndPeds, 0x45D4B0);
-    RH_ScopedInstall(CreatePlayerPed, 0x45D540, { .reversed = false });
+    RH_ScopedInstall(CreatePlayerPed, 0x45D540, { .reversed = true });
     RH_ScopedInstall(TriggerPlayback, 0x4600F0);
     RH_ScopedInstall(Update, 0x460500, { .reversed = false });
 }
@@ -264,8 +264,8 @@ int32 CReplay::FindPoolIndexForVehicle(int32 index) {
 }
 
 // 0x45CA70
-void CReplay::ProcessPedUpdate() {
-    plugin::Call<0x45CA70>();
+void CReplay::ProcessPedUpdate(CPed* ped, float a2, const CAddressInReplayBuffer& buffer) {
+    plugin::Call<0x45CA70, CPed*, float, const CAddressInReplayBuffer&>(ped, a2, buffer);
 }
 
 // 0x45D060
@@ -415,8 +415,10 @@ void CReplay::RestoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet
 }
 
 // 0x45CEA0
-void CReplay::DealWithNewPedPacket() {
-    plugin::Call<0x45CEA0>();
+CPlayerPed* CReplay::DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel, tReplayBlockData& clothesPacket) {
+    assert(pedPacket.type == REPLAY_PACKET_PED_HEADER);
+    assert(clothesPacket.type == REPLAY_PACKET_CLOTHES);
+    return plugin::CallAndReturn<CPlayerPed*, 0x45CEA0, tReplayBlockData&, bool, tReplayBlockData&>(pedPacket, loadModel, clothesPacket);
 }
 
 // 0x45F380
@@ -483,14 +485,42 @@ constexpr uint32 CReplay::FindSizeOfPacket(eReplayPacket type) {
     }
 }
 
-// 0x
-bool CReplay::IsThisVehicleUsedInRecording(int32 a1) {
-    return plugin::CallAndReturn<bool, 0x0, int32>(a1);
+// 0x45DE40
+bool CReplay::IsThisVehicleUsedInRecording(int32 index) {
+    for (auto& buffer : Buffers) {
+        for (auto& packet : buffer) {
+            switch (packet.type) {
+            case REPLAY_PACKET_VEHICLE:
+            case REPLAY_PACKET_BIKE:
+            case REPLAY_PACKET_BMX:
+            case REPLAY_PACKET_HELI:
+            case REPLAY_PACKET_PLANE:
+            case REPLAY_PACKET_TRAIN:
+                if (packet.vehicle.index == index) {
+                    return true;
+                }
+                break;
+            case REPLAY_PACKET_PED_UPDATE:
+                if (auto pedIdx = packet.ped.vehicleIndex; pedIdx && pedIdx - 1 == index) {
+                    return true;
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    }
 }
 
-// 0x
-bool CReplay::IsThisPedUsedInRecording(int32 a1) {
-    return plugin::CallAndReturn<bool, 0x0, int32>(a1);
+// 0x45DDE0
+bool CReplay::IsThisPedUsedInRecording(int32 index) {
+    for (auto& buffer : Buffers) {
+        for (auto& packet : buffer) {
+            if (packet.type == REPLAY_PACKET_PED_HEADER && packet.playerData.index == index) {
+                return true;
+            }
+        }
+    }
 }
 
 // 0x45D6C0
@@ -531,7 +561,34 @@ void CReplay::StreamAllNecessaryCarsAndPeds() {
 
 // 0x45D540
 CPlayerPed* CReplay::CreatePlayerPed() {
-    return plugin::CallAndReturn<CPlayerPed*, 0x45D540>();
+    CPlayerPed* player = nullptr;
+    // SA does with module slots and whatever fuck that is, trying normal loop
+    for (auto&& [i, status] : notsa::enumerate(BufferStatus)) {
+        if (status == REPLAYBUFFER_STATUS_0 || Buffers.at(i).Read<eReplayPacket>(0) == REPLAY_PACKET_END)
+            continue;
+
+        for (auto& packet : Buffers.at(i)) {
+            const auto offset = (size_t)((uint8*)&packet - (uint8*)&Buffers.at(i));
+            switch (packet.type) {
+            case REPLAY_PACKET_PED_HEADER:
+                if (!player) {
+                    // get the next packet
+                    auto next = Buffers.at(i).Read<tReplayBlockData>(offset + FindSizeOfPacket(REPLAY_PACKET_PED_HEADER));
+                    assert(next.type == REPLAY_PACKET_CLOTHES);
+
+                    player = DealWithNewPedPacket(packet, true, next);
+                }
+                break;
+            case REPLAY_PACKET_PED_UPDATE:
+                if (player && player == GetPedPool()->GetAt(m_PedPoolConversion[packet.ped.pedIndexInPool])) {
+                    ProcessPedUpdate(player, 1.0f, {.m_nOffset = offset, .m_pBase = &Buffers.at(i), .m_bSlot = (uint8)i}); // m_bSlot def is NOTSA
+                    return player;
+                }
+            }
+        }
+        break;
+    }
+    return nullptr;
 }
 
 // 0x4600F0
