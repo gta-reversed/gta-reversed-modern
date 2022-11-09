@@ -388,6 +388,7 @@ public:
     static void* operator new(unsigned size);
     static void* operator new(unsigned size, int32 poolRef);
     static void operator delete(void* data);
+    static void operator delete(void* data, int poolRef);
 
     CPed(ePedType pedType);
     ~CPed();
