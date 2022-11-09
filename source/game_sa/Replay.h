@@ -86,11 +86,11 @@ struct tReplayBlockData {
             uint8 unk[74];
         } train;
         struct ClothesBlock {
+            uint8 align[3];
             std::array<uint32, 10> m_anModelKeys;
             std::array<uint32, 18> m_anTextureKeys;
             uint16 m_fFatStat;    // compressed float
             uint16 m_fMuscleStat; // compressed float
-            uint8 align[3];
         } clothes;
     };
 #pragma pack(pop)

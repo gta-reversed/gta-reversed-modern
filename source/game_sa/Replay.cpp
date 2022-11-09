@@ -40,9 +40,9 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(RestoreStuffFromMem, 0x45ECD0, { .reversed = false });
     RH_ScopedInstall(FinishPlayback, 0x45F050);
     RH_ScopedInstall(RecordThisFrame, 0x45E300, { .reversed = false });
-    RH_ScopedInstall(StoreClothesDesc, 0x45C750, {.reversed = false});    // both hangs up the game
-    RH_ScopedInstall(RestoreClothesDesc, 0x45C7D0, {.reversed = false});  // <-
-    RH_ScopedInstall(DealWithNewPedPacket, 0x45CEA0, { .reversed = true });
+    RH_ScopedInstall(StoreClothesDesc, 0x45C750);
+    RH_ScopedInstall(RestoreClothesDesc, 0x45C7D0);
+    RH_ScopedInstall(DealWithNewPedPacket, 0x45CEA0);
     RH_ScopedInstall(PlayBackThisFrameInterpolation, 0x45F380, { .reversed = false });
     RH_ScopedInstall(FastForwardToTime, 0x460350);
     RH_ScopedInstall(PlayBackThisFrame, 0x4604A0, { .reversed = false });
