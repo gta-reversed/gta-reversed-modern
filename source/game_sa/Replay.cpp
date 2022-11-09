@@ -29,7 +29,7 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(RecordPedDeleted, 0x45EC20);
     RH_ScopedInstall(SaveReplayToHD, 0x45C340);
     RH_ScopedInstall(ShouldStandardCameraBeProcessed, 0x45C440);
-    RH_ScopedInstall(ProcessLookAroundCam, 0x45D760, { .reversed = false });
+    RH_ScopedInstall(ProcessLookAroundCam, 0x45D760);
     RH_ScopedInstall(FindPoolIndexForPed, 0x45C450);
     RH_ScopedInstall(FindPoolIndexForVehicle, 0x45C460);
     RH_ScopedInstall(ProcessPedUpdate, 0x45CA70, { .reversed = false });
@@ -327,17 +327,107 @@ void CReplay::ProcessReplayCamera() {
 
 // 0x45D760
 void CReplay::ProcessLookAroundCam() {
-    plugin::Call<0x45D760>();
+    //return plugin::Call<0x45D760>();
+    if (bAllowLookAroundCam) {
+        static float& playerCameraDistance = *(float*)0x97FAD4;
+        static float& playerCameraDirAngle = *(float*)0x97FADC;
+        static float& viewAngle = *(float*)0x97FAD8;
+
+        const auto& pad = CPad::GetPad();
+        const auto steer = CVector2D{pad->NewMouseControllerState.X / 200.0f, pad->NewMouseControllerState.Y / 200.0f};
+        // steerX2 = steer.x;
+        // steerY2 = steer.y;
+        // if (v2 | v2)             <-- replays does not care about inverted-y, maybe they are
+        //     steerX2 = -steerX2;      undefined because of that?
+        // if (steerX2 > 0.01f)
+        //     goto LABEL_8
+        // if (v6 | v7)
+        //     steerY2 = -steerY2;
+        // if (steerY2 > 0.01f)
+        //     goto LABEL_8
+        //
+        if (steer.y > 0.01f) {
+            // label_8:
+            if (!FramesActiveLookAroundCam) {
+                const auto& camPos    = TheCamera.GetPosition();
+                const auto& playerPos = FindPlayerCoors();
+                playerCameraDistance = std::clamp(DistanceBetweenPoints(playerPos, camPos), 3.0f, 15.0f);
+                playerCameraDirAngle = std::atan2(camPos.x - playerPos.x, camPos.y - playerPos.y);
+            }
+            FramesActiveLookAroundCam = 60;
+        }
+
+        static bool& byte_97f66d = *(bool*)0x97f66d;
+        if (byte_97f66d) {
+            FramesActiveLookAroundCam = 0;
+        } else if (FramesActiveLookAroundCam) {
+            playerCameraDirAngle += steer.x;
+            FramesActiveLookAroundCam--;
+
+            if (pad->NewMouseControllerState.lmb && pad->NewMouseControllerState.rmb) {
+                playerCameraDistance = std::clamp(playerCameraDistance + 2.0f * steer.y, 3.0f, 15.0f);
+            } else {
+                viewAngle = std::clamp(viewAngle + steer.y, 0.1f, 1.5f); // probably some kind of cheap clamping between [0, pi/2].
+            }
+
+            auto target = CVector{
+                    std::sinf(playerCameraDirAngle) * std::cosf(viewAngle) * playerCameraDistance,
+                    std::cosf(playerCameraDirAngle) * std::cosf(viewAngle) * playerCameraDistance,
+                    std::sinf(viewAngle) * playerCameraDistance
+            } + CameraFocus;
+
+            CColPoint colPoint;
+            CEntity* outEntity{};
+            if (CWorld::ProcessLineOfSight(CameraFocus, target, colPoint, outEntity, true, false, false, false, false, true, true, false)) {
+                target = colPoint.m_vecPoint;
+                const auto focusCollisionDir = (CameraFocus - colPoint.m_vecPoint).Normalized();
+                target.x += focusCollisionDir.x / 4.0f;
+                target.y += focusCollisionDir.y / 4.0f;
+                target.z += focusCollisionDir.z;
+            }
+
+            const auto forward = (CameraFocus - target).Normalized();
+            const auto right   = CVector{0.0f, 0.0f, 1.0f}.Cross(forward);
+            const auto up      = forward.Cross(right);
+
+            TheCamera.GetForward()  = forward;
+            TheCamera.GetUp()       = up;
+            TheCamera.GetRight()    = right;
+            TheCamera.GetPosition() = target;
+
+            auto modelling = TheCamera.GetRwMatrix();
+            modelling->pos   = target;
+            modelling->at    = forward;
+            modelling->up    = up;
+            modelling->right = right;
+            TheCamera.CalculateDerivedValues(false, true);
+            RwMatrixUpdate(modelling);
+            RwFrameUpdateObjects(RwCameraGetFrame(TheCamera.m_pRwCamera));
+            RwFrameOrthoNormalize(RwCameraGetFrame(TheCamera.m_pRwCamera));
+        }
+    }
+
+    RwCameraSetNearClipPlane(Scene.m_pRwCamera, 0.5f);
+    if (FramesActiveLookAroundCam) {
+        const auto MakeVisible = [](auto* entity) {
+            if (entity) {
+                entity->m_bIsVisible = true;
+            }
+        };
+
+        MakeVisible(FindPlayerPed());
+        MakeVisible(FindPlayerVehicle());
+    }
 }
 
-// 0x
+// 0x45C470
 bool CReplay::CanWeFindPoolIndexForPed(int32 index) {
-    return plugin::CallAndReturn<bool, 0x0, int32>(index);
+    return m_PedPoolConversion.at(index) >= 0;
 }
 
-// 0x
+// 0x45C490
 bool CReplay::CanWeFindPoolIndexForVehicle(int32 index) {
-    return plugin::CallAndReturn<bool, 0x0, int32>(index);
+    return m_VehiclePoolConversion.at(index) >= 0;
 }
 
 // 0x45F020
