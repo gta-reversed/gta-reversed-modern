@@ -3,11 +3,14 @@
 #include "eReplay.h"
 #include "Vector.h"
 #include "PlayerInfo.h"
+#include "ePedType.h"
+
+class CCamera;
 
 enum eReplayBufferStatus : uint8 {
-    REPLAYBUFFER_STATUS_0 = 0,
-    REPLAYBUFFER_STATUS_1 = 1, // full?
-    REPLAYBUFFER_STATUS_2 = 2  // in use?
+    REPLAYBUFFER_NOT_AVAILABLE = 0,
+    REPLAYBUFFER_FULL = 1,
+    REPLAYBUFFER_IN_USE = 2
 };
 
 // NOTSA
@@ -53,7 +56,7 @@ struct tReplayBlockData {
             uint8 align;
         } dayTime;
         struct WeatherBlock { uint8 unk[7]; } weather;
-        struct EOFBlock { /* nil */ } eof; // end of frame
+        struct EOFBlock { uint8 do_not_access[3]; } eof; // end of frame
         struct TimerBlock {
             uint8 align[3];
             uint32 timer;
@@ -143,7 +146,7 @@ public:
 
         // Returns its index from CReplay::Buffers array.
         size_t GetIndex() const  { return (this - Buffers.data()) / sizeof(tReplayBuffer); }
-        bool IsAvailable() const { return BufferStatus[GetIndex()] != REPLAYBUFFER_STATUS_0; }
+        bool IsAvailable() const { return BufferStatus[GetIndex()] != REPLAYBUFFER_NOT_AVAILABLE; }
 
         struct Iterator {
             using value_type = tReplayBlockData;
@@ -240,8 +243,38 @@ public:
     inline static void*& pPickups = *reinterpret_cast<void**>(0x97FB08);
     inline static void*& pEmptyReferences = *reinterpret_cast<void**>(0x97FB04);
     inline static void*& pWorld1 = *reinterpret_cast<void**>(0x97FB00);
-    inline static void*& pStoredCam = *reinterpret_cast<void**>(0x97FAF8);
+    inline static CCamera*& pStoredCam = *reinterpret_cast<CCamera**>(0x97FAF8);
     inline static void*& pRadarBlips = *reinterpret_cast<void**>(0x97FAF4);
+
+    inline static uint32& Time1 = *reinterpret_cast<uint32*>(0x97FB60);
+    inline static uint32& Time2 = *reinterpret_cast<uint32*>(0x97FB5C);
+    inline static uint32& Time3 = *reinterpret_cast<uint32*>(0x97FB58);
+    inline static uint32& Time4 = *reinterpret_cast<uint32*>(0x97FB54);
+    inline static uint32& Time5 = *reinterpret_cast<uint32*>(0x97FB50);
+    inline static uint32& Time6 = *reinterpret_cast<uint32*>(0x97FB4C);
+    inline static uint32& Time7 = *reinterpret_cast<uint32*>(0x97FB48);
+    inline static uint32& Frame = *reinterpret_cast<uint32*>(0x97FB44);
+    inline static float& TimeStepNonClipped = *reinterpret_cast<float*>(0x97FB34);
+    inline static float& TimeStep = *reinterpret_cast<float*>(0x97FB38);
+    inline static float& TimeScale = *reinterpret_cast<float*>(0x97FB3C);
+    inline static uint8& ClockHours = *reinterpret_cast<uint8*>(0x97FAEF);
+    inline static uint8& ClockMinutes = *reinterpret_cast<uint8*>(0x97FAEE);
+
+    inline static int16& OldWeatherType = *reinterpret_cast<int16*>(0x97FAEC);
+    inline static int16& NewWeatherType = *reinterpret_cast<int16*>(0x97FAE8);
+    inline static float& WeatherInterpolationValue = *reinterpret_cast<float*>(0x97FAE4);
+
+    inline static uint32& ms_nNumCivMale_Stored = *reinterpret_cast<uint32*>(0x97FAB4);
+    inline static uint32& ms_nNumCivFemale_Stored = *reinterpret_cast<uint32*>(0x97FAB0);
+    inline static uint32& ms_nNumCop_Stored = *reinterpret_cast<uint32*>(0x97FAAC);
+    inline static uint32& ms_nNumEmergency_Stored = *reinterpret_cast<uint32*>(0x97FAA8);
+    inline static uint32& ms_nNumDealers_Stored = *reinterpret_cast<uint32*>(0x97FA7C);
+    inline static uint32& ms_nTotalCarPassengerPeds_Stored = *reinterpret_cast<uint32*>(0x97FA78);
+    inline static uint32& ms_nTotalCivPeds_Stored = *reinterpret_cast<uint32*>(0x97FA74);
+    inline static uint32& ms_nTotalGangPeds_Stored = *reinterpret_cast<uint32*>(0x97FA70);
+    inline static uint32& ms_nTotalPeds_Stored = *reinterpret_cast<uint32*>(0x97FA6C);
+    inline static uint32& ms_nTotalMissionPeds_Stored = *reinterpret_cast<uint32*>(0x97FA68);
+    inline static std::array<uint32, TOTAL_GANGS>& ms_nNumGang_Stored = *reinterpret_cast<std::array<uint32, TOTAL_GANGS>*>(0x97FA80);
 
     inline static CPlayerInfo& PlayerInfo = *reinterpret_cast<CPlayerInfo*>(0xA430B0);
 
@@ -300,7 +333,7 @@ public:
     static void RecordThisFrame();
     static void RestoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet);
     static CPed* DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel, tReplayBlockData& clothesPacket);
-    static bool PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, float interpolation, uint32& outTimer);
+    static bool PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, float interpolation, uint32* outTimer);
     static bool FastForwardToTime(uint32 start);
     static void PlayBackThisFrame();
 
