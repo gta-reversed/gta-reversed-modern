@@ -2920,7 +2920,7 @@ bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& t
                 }
                 else
                 {
-                    if (!thisPed->bPedThirdFlags32) // Hmm?? Is this a bug?
+                    if (!thisPed->bPushOtherPeds) // Hmm?? Is this a bug?
                     {
                         if (fEntitySpeedDotProduct >= 0.0f) {
                             fMoveSpeed = 0.0f;

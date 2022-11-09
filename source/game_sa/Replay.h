@@ -97,6 +97,7 @@ struct tReplayBlockData {
 };
 #pragma pack(pop)
 
+constexpr auto NUM_REPLAY_BUFFERS = 8u;
 constexpr auto REPLAY_BUFFER_SIZE = 100'000u;
 
 class CReplay {
@@ -207,7 +208,7 @@ public:
     public:
         uint32 m_nOffset;
         tReplayBuffer* m_pBase;
-        uint8 m_bSlot;
+        uint8 m_bSlot; // first slot to contain data
 
         // Read helper
         template <typename T>
@@ -218,6 +219,10 @@ public:
         // Write helper
         void Write(const tReplayBlockData& data) {
             m_nOffset += m_pBase->Write(m_nOffset, data);
+        }
+
+        uint8 GetNextSlot(uint8 stride) {
+            return (stride + m_bSlot) % NUM_REPLAY_BUFFERS;
         }
     };
     VALIDATE_SIZE(CAddressInReplayBuffer, 0xC);
@@ -247,9 +252,9 @@ public:
     inline static int32& FramesActiveLookAroundCam = *reinterpret_cast<int32*>(0x97FAD0);
     inline static int8& OldRadioStation = *reinterpret_cast<int8*>(0x97FABC);
     inline static int8& CurrArea = *reinterpret_cast<int8*>(0x97FAB8);
-    inline static std::array<eReplayBufferStatus, 8u>& BufferStatus = *reinterpret_cast<std::array<eReplayBufferStatus, 8u>*>(0x97FB7C);
+    inline static std::array<eReplayBufferStatus, NUM_REPLAY_BUFFERS>& BufferStatus = *reinterpret_cast<std::array<eReplayBufferStatus, NUM_REPLAY_BUFFERS>*>(0x97FB7C);
 
-    inline static std::array<tReplayBuffer, 8>& Buffers = *reinterpret_cast<std::array<tReplayBuffer, 8>*>(0x97FB88);
+    inline static std::array<tReplayBuffer, NUM_REPLAY_BUFFERS>& Buffers = *reinterpret_cast<std::array<tReplayBuffer, NUM_REPLAY_BUFFERS>*>(0x97FB88);
 
     inline static CAddressInReplayBuffer& Playback = *reinterpret_cast<CAddressInReplayBuffer*>(0x97FB64);
     inline static CAddressInReplayBuffer& Record = *reinterpret_cast<CAddressInReplayBuffer*>(0x97FB70);
@@ -291,7 +296,7 @@ public:
     static void StoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet);
     static void RecordThisFrame();
     static void RestoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet);
-    static CPlayerPed* DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel, tReplayBlockData& clothesPacket);
+    static CPed* DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel, tReplayBlockData& clothesPacket);
     static bool PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, float interpolation, uint32& outTimer);
     static bool FastForwardToTime(uint32 start);
     static void PlayBackThisFrame();

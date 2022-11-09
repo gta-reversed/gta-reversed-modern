@@ -7,6 +7,8 @@
 #include "PedClothesDesc.h"
 #include "extensions/enumerate.hpp"
 
+// player desc: PED_HEADER -> CLOTHES -> PED_UPDATE
+
 void CReplay::InjectHooks() {
     RH_ScopedClass(CReplay);
     RH_ScopedCategoryGlobal();
@@ -38,22 +40,22 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(RestoreStuffFromMem, 0x45ECD0, { .reversed = false });
     RH_ScopedInstall(FinishPlayback, 0x45F050);
     RH_ScopedInstall(RecordThisFrame, 0x45E300, { .reversed = false });
-    RH_ScopedInstall(StoreClothesDesc, 0x45C750);
-    RH_ScopedInstall(RestoreClothesDesc, 0x45C7D0, {.reversed = false}); // broken
-    RH_ScopedInstall(DealWithNewPedPacket, 0x45CEA0, { .reversed = false });
+    RH_ScopedInstall(StoreClothesDesc, 0x45C750, {.reversed = false});    // both hangs up the game
+    RH_ScopedInstall(RestoreClothesDesc, 0x45C7D0, {.reversed = false});  // <-
+    RH_ScopedInstall(DealWithNewPedPacket, 0x45CEA0, { .reversed = true });
     RH_ScopedInstall(PlayBackThisFrameInterpolation, 0x45F380, { .reversed = false });
     RH_ScopedInstall(FastForwardToTime, 0x460350);
     RH_ScopedInstall(PlayBackThisFrame, 0x4604A0, { .reversed = false });
     RH_ScopedInstall(FindSizeOfPacket, 0x45C850);
-    RH_ScopedInstall(IsThisVehicleUsedInRecording, 0x45DE40, { .reversed = true });
-    RH_ScopedInstall(IsThisPedUsedInRecording, 0x45DDE0, {.reversed = true});
+    RH_ScopedInstall(IsThisVehicleUsedInRecording, 0x45DE40);
+    RH_ScopedInstall(IsThisPedUsedInRecording, 0x45DDE0);
     // RH_ScopedInstall(InitialiseVehiclePoolConversionTable, 0x0, { .reversed = false });
     // RH_ScopedInstall(InitialisePedPoolConversionTable, 0x0, { .reversed = false });
     // RH_ScopedInstall(InitialisePoolConversionTables, 0x0, { .reversed = false });
     RH_ScopedInstall(FindFirstFocusCoordinate, 0x45D6C0);
     // RH_ScopedInstall(NumberFramesAvailableToPlay, 0x0, { .reversed = false });
     RH_ScopedInstall(StreamAllNecessaryCarsAndPeds, 0x45D4B0);
-    RH_ScopedInstall(CreatePlayerPed, 0x45D540, { .reversed = true });
+    RH_ScopedInstall(CreatePlayerPed, 0x45D540);
     RH_ScopedInstall(TriggerPlayback, 0x4600F0);
     RH_ScopedInstall(Update, 0x460500, { .reversed = false });
 }
@@ -133,13 +135,13 @@ void CReplay::Display() {
 void CReplay::MarkEverythingAsNew() {
     for (auto i = 0; i < GetPedPool()->GetSize(); i++) {
         if (auto ped = GetPedPool()->GetAt(i)) {
-            ped->bUsedForReplay = false;
+            ped->bHasAlreadyBeenRecorded = false;
         }
     }
 
     for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
         if (auto vehicle = GetVehiclePool()->GetAt(i)) {
-            vehicle->vehicleFlags.bUsedForReplay = false;
+            vehicle->vehicleFlags.bHasAlreadyBeenRecorded = false;
         }
     }
 }
@@ -180,11 +182,11 @@ void CReplay::RecordVehicleDeleted(CVehicle* vehicle) {
     if (Mode != MODE_RECORD)
         return;
 
-    if (Record.m_nOffset + FindSizeOfPacket(REPLAY_PACKET_UNK_13) > 99984) {
+    if (Record.m_nOffset + FindSizeOfPacket(REPLAY_PACKET_DELETED_VEH) > 99984) {
         GoToNextBlock();
     }
 
-    Record.Write({.type = REPLAY_PACKET_UNK_13, .deletedVehicle = {.unk1 = (uint16)(GetVehiclePool()->GetIndex(vehicle) / 2584)}});
+    Record.Write({.type = REPLAY_PACKET_DELETED_VEH, .deletedVehicle = {.unk1 = (uint16)(GetVehiclePool()->GetIndex(vehicle) / 2584)}});
     Record.Write({REPLAY_PACKET_END});
 }
 
@@ -193,11 +195,11 @@ void CReplay::RecordPedDeleted(CPed* ped) {
     if (Mode != MODE_RECORD)
         return;
 
-    if (Record.m_nOffset + FindSizeOfPacket(REPLAY_PACKET_UNK_14) > 99984) {
+    if (Record.m_nOffset + FindSizeOfPacket(REPLAY_PACKET_DELETED_PED) > 99984) {
         GoToNextBlock();
     }
 
-    Record.Write({.type = REPLAY_PACKET_UNK_14, .deletedPed = {.unk1 = (uint16)(GetPedPool()->GetIndex(ped) / 1988)}});
+    Record.Write({.type = REPLAY_PACKET_DELETED_PED, .deletedPed = {.unk1 = (uint16)(GetPedPool()->GetIndex(ped) / 1988)}});
     Record.Write({REPLAY_PACKET_END});
 }
 
@@ -369,8 +371,8 @@ void CReplay::FinishPlayback() {
         CCollision::SortOutCollisionAfterLoad();
         CStreaming::LoadScene(LoadScene);
     }
-
     bDoLoadSceneWhenDone = false;
+
     if (bPlayingBackFromFile) {
         Init();
         MarkEverythingAsNew();
@@ -385,9 +387,9 @@ void CReplay::FinishPlayback() {
     AudioEngine.SetEffectsMasterVolume(FrontEndMenuManager.m_nSfxVolume);
     AudioEngine.SetMusicMasterVolume(FrontEndMenuManager.m_nRadioVolume);
 
-    if (auto vehicle = FindPlayerVehicle(-1, 0)) {
+    if (auto vehicle = FindPlayerVehicle()) {
         vehicle->m_vehicleAudio.TurnOnRadioForVehicle();
-        AudioEngine.RetuneRadio(OldRadioStation );
+        AudioEngine.RetuneRadio(OldRadioStation);
     }
 }
 
@@ -415,10 +417,42 @@ void CReplay::RestoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet
 }
 
 // 0x45CEA0
-CPlayerPed* CReplay::DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel, tReplayBlockData& clothesPacket) {
+CPed* CReplay::DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel, tReplayBlockData& clothesPacket) {
     assert(pedPacket.type == REPLAY_PACKET_PED_HEADER);
-    assert(clothesPacket.type == REPLAY_PACKET_CLOTHES);
-    return plugin::CallAndReturn<CPlayerPed*, 0x45CEA0, tReplayBlockData&, bool, tReplayBlockData&>(pedPacket, loadModel, clothesPacket);
+
+    if (GetPedPool()->GetAt(m_PedPoolConversion[pedPacket.playerData.index]))
+        return nullptr;
+
+    if (pedPacket.playerData.pedType == PED_TYPE_PLAYER1 && loadModel) {
+        CStreaming::RequestModel(pedPacket.playerData.modelId, STREAMING_DEFAULT);
+        CStreaming::LoadAllRequestedModels(false);
+    }
+
+    if (CStreaming::GetInfo(pedPacket.playerData.modelId).IsLoaded()) {
+        CPed* ped = nullptr;
+        if (pedPacket.playerData.pedType == PED_TYPE_PLAYER1) {
+            assert(clothesPacket.type == REPLAY_PACKET_CLOTHES);
+
+            ped = new (m_PedPoolConversion[pedPacket.playerData.index] << 8) CPlayerPed(PED_TYPE_PLAYER1, true);
+            RestoreClothesDesc(*ped->GetClothesDesc(), clothesPacket);
+            CClothes::RebuildPlayer(static_cast<CPlayerPed*>(ped), true);
+        } else if (!loadModel) {
+            ped = new (m_PedPoolConversion[pedPacket.playerData.index] << 8) CCivilianPed((ePedType)pedPacket.playerData.pedType, pedPacket.playerData.modelId);
+        } else {
+            return nullptr;
+        }
+
+        ped->m_nStatus = STATUS_PLAYER_PLAYBACK_FROM_BUFFER;
+        ped->bUsedForReplay = true;
+        ped->GetMatrix().SetUnity();
+        ped->SetCharCreatedBy(PED_GAME_MISSION);
+        CWorld::Remove(ped);
+        CWorld::Add(ped);
+        return ped;
+    } else {
+        CStreaming::RequestModel(pedPacket.playerData.modelId, STREAMING_DEFAULT);
+    }
+    return nullptr;
 }
 
 // 0x45F380
@@ -449,11 +483,11 @@ void CReplay::PlayBackThisFrame() {
 // 0x45C850
 constexpr uint32 CReplay::FindSizeOfPacket(eReplayPacket type) {
     switch (type) {
-    case REPLAY_PACKET_END: // it is actually 1 but we shouldn't call this func with this anyways so it's no problem.
+    case REPLAY_PACKET_END:          // <- actually 1 but we shouldn't call this func with this anyways so it's no problem.
+    case REPLAY_PACKET_END_OF_FRAME: // <|
     case REPLAY_PACKET_CLOCK:
-    case REPLAY_PACKET_END_OF_FRAME:
-    case REPLAY_PACKET_UNK_13:
-    case REPLAY_PACKET_UNK_14:
+    case REPLAY_PACKET_DELETED_VEH:
+    case REPLAY_PACKET_DELETED_PED:
         return 4;
     case REPLAY_PACKET_VEHICLE:
     case REPLAY_PACKET_PED_UPDATE:
@@ -561,32 +595,35 @@ void CReplay::StreamAllNecessaryCarsAndPeds() {
 
 // 0x45D540
 CPlayerPed* CReplay::CreatePlayerPed() {
-    CPlayerPed* player = nullptr;
     // SA does with module slots and whatever fuck that is, trying normal loop
-    for (auto&& [i, status] : notsa::enumerate(BufferStatus)) {
-        if (status == REPLAYBUFFER_STATUS_0 || Buffers.at(i).Read<eReplayPacket>(0) == REPLAY_PACKET_END)
-            continue;
+    CPlayerPed* player = nullptr;
 
-        for (auto& packet : Buffers.at(i)) {
-            const auto offset = (size_t)((uint8*)&packet - (uint8*)&Buffers.at(i));
+    auto i = 0;
+    for (auto slot = Playback.GetNextSlot(i); i < NUM_REPLAY_BUFFERS && BufferStatus[slot]; slot = Playback.GetNextSlot(++i)) {
+        auto& buffer = Buffers.at(slot);
+        if (buffer.Read<eReplayPacket>(0) == REPLAY_PACKET_END)
+            break;
+
+        for (auto& packet : buffer) {
+            const auto offset = (size_t)((uint8*)&packet - (uint8*)&buffer);
+
             switch (packet.type) {
             case REPLAY_PACKET_PED_HEADER:
                 if (!player) {
                     // get the next packet
-                    auto next = Buffers.at(i).Read<tReplayBlockData>(offset + FindSizeOfPacket(REPLAY_PACKET_PED_HEADER));
+                    auto next = buffer.Read<tReplayBlockData>(offset + FindSizeOfPacket(REPLAY_PACKET_PED_HEADER));
                     assert(next.type == REPLAY_PACKET_CLOTHES);
 
-                    player = DealWithNewPedPacket(packet, true, next);
+                    player = static_cast<CPlayerPed*>(DealWithNewPedPacket(packet, true, next));
                 }
                 break;
             case REPLAY_PACKET_PED_UPDATE:
                 if (player && player == GetPedPool()->GetAt(m_PedPoolConversion[packet.ped.pedIndexInPool])) {
-                    ProcessPedUpdate(player, 1.0f, {.m_nOffset = offset, .m_pBase = &Buffers.at(i), .m_bSlot = (uint8)i}); // m_bSlot def is NOTSA
+                    ProcessPedUpdate(player, 1.0f, {.m_nOffset = offset, .m_pBase = &buffer, .m_bSlot = (uint8)i}); // m_bSlot def is NOTSA
                     return player;
                 }
             }
         }
-        break;
     }
     return nullptr;
 }
@@ -683,8 +720,8 @@ CHECK_SIZE(timer,          TIMER);
 CHECK_SIZE(bulletTraces,   BULLET_TRACES);
 CHECK_SIZE(particle,       PARTICLE);
 CHECK_SIZE(misc,           MISC);
-CHECK_SIZE(deletedVehicle, UNK_13);
-CHECK_SIZE(deletedPed,     UNK_14);
+CHECK_SIZE(deletedVehicle, DELETED_VEH);
+CHECK_SIZE(deletedPed,     DELETED_PED);
 CHECK_SIZE(bmx,            BMX);
 CHECK_SIZE(heli,           HELI);
 CHECK_SIZE(plane,          PLANE);
