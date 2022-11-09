@@ -37,8 +37,8 @@ void CReplay::InjectHooks() {
     // RH_ScopedInstall(CanWeFindPoolIndexForVehicle, 0x0, { .reversed = false });
     RH_ScopedInstall(StorePlayerInfoVariables, 0x45F020);
     RH_ScopedInstall(RestorePlayerInfoVariables, 0x45E1F0);
-    RH_ScopedInstall(StoreStuffInMem, 0x45F180, {.reversed = true});
-    RH_ScopedInstall(RestoreStuffFromMem, 0x45ECD0, { .reversed = false });
+    RH_ScopedInstall(StoreStuffInMem, 0x45F180);
+    RH_ScopedInstall(RestoreStuffFromMem, 0x45ECD0);
     RH_ScopedInstall(FinishPlayback, 0x45F050);
     RH_ScopedInstall(RecordThisFrame, 0x45E300, { .reversed = false });
     RH_ScopedInstall(StoreClothesDesc, 0x45C750);
@@ -288,7 +288,7 @@ void CReplay::ProcessPedUpdate(CPed* ped, float a2, const CAddressInReplayBuffer
 void CReplay::ProcessReplayCamera() {
     assert(TheCamera.m_pRwCamera);
 
-    auto parent = (RwFrame*)rwObjectGetParent(&TheCamera.m_pRwCamera->object.object);
+    auto modelling = TheCamera.GetRwMatrix();
     switch (CameraMode) {
     case REPLAY_CAM_MODE_TOPDOWN:
         TheCamera.GetPosition() = CVector{CameraFocus.x, CameraFocus.y, CameraFocus.z + 15.0f};
@@ -296,33 +296,33 @@ void CReplay::ProcessReplayCamera() {
         TheCamera.GetUp()       = CVector{0.0f, 1.0f,  0.0f};
         TheCamera.GetForward()  = CVector{0.0f, 0.0f, -1.0f};
 
-        parent->modelling.pos   = CameraFocus;
-        parent->modelling.at    = TheCamera.GetForward();
-        parent->modelling.up    = TheCamera.GetUp();
-        parent->modelling.right = TheCamera.GetRight();
+        modelling->pos = CameraFocus;
+        modelling->at = TheCamera.GetForward();
+        modelling->up = TheCamera.GetUp();
+        modelling->right = TheCamera.GetRight();
         break;
     case REPLAY_CAM_MODE_FIXED:
         const auto direction = (CameraFocus - CameraFixed).Normalized();
         const auto right = direction.Cross({0.0f, 0.0f, 1.0f}).Normalized();
 
         TheCamera.GetPosition() = CameraFixed;
-        TheCamera.GetForward()  = direction;
-        TheCamera.GetUp()       = direction.Cross(right);
-        TheCamera.GetRight()    = right;
+        TheCamera.GetForward() = direction;
+        TheCamera.GetUp() = direction.Cross(right);
+        TheCamera.GetRight() = right;
 
-        parent->modelling.pos   = CameraFocus;
-        parent->modelling.at    = TheCamera.GetForward();
-        parent->modelling.up    = TheCamera.GetUp();
-        parent->modelling.right = TheCamera.GetRight();
+        modelling->pos = CameraFocus;
+        modelling->at = TheCamera.GetForward();
+        modelling->up = TheCamera.GetUp();
+        modelling->right = TheCamera.GetRight();
         break;
     default:
         break;
     }
     TheCamera.m_vecGameCamPos = TheCamera.GetPosition();
     TheCamera.CalculateDerivedValues(false, true);
-    RwMatrixUpdate(&parent->modelling);
-    RwFrameUpdateObjects(parent);
-    RwFrameOrthoNormalize(parent);
+    RwMatrixUpdate(modelling);
+    RwFrameUpdateObjects(RwCameraGetFrame(TheCamera.m_pRwCamera));
+    RwFrameOrthoNormalize(RwCameraGetFrame(TheCamera.m_pRwCamera));
 }
 
 // 0x45D760
@@ -366,7 +366,6 @@ void CReplay::RestorePlayerInfoVariables() {
 void CReplay::StoreStuffInMem() {
     pStoredCam = new CCamera;
     memcpy(pStoredCam, &TheCamera, sizeof(CCamera));
-    //*pStoredCam = TheCamera;
 
     StorePlayerInfoVariables();
     Time1 = CTimer::GetTimeInMS();
@@ -403,7 +402,67 @@ void CReplay::StoreStuffInMem() {
 
 // 0x45ECD0
 void CReplay::RestoreStuffFromMem() {
-    plugin::Call<0x45ECD0>();
+    for (auto poolIdx = 0; poolIdx < GetPedPool()->GetSize(); poolIdx++) {
+        if (auto ped = GetPedPool()->GetAt(poolIdx)) {
+            if (ped->bUsedForReplay) {
+                if (auto playerData = ped->m_pPlayerData) {
+                    playerData->DeAllocateData();
+                }
+                CWorld::Remove(ped);
+                delete ped;
+            } else { // if not, restore it
+                CWorld::Add(ped);
+            }
+        }
+    }
+
+    for (auto poolIdx = 0; poolIdx < GetVehiclePool()->GetSize(); poolIdx++) {
+        if (auto veh = GetVehiclePool()->GetAt(poolIdx)) {
+            if (veh->vehicleFlags.bUsedForReplay) {
+                CWorld::Remove(veh);
+                delete veh;
+            } else { // if not, restore it
+                CWorld::Add(veh);
+            }
+        }
+    }
+
+    memcpy(&TheCamera, pStoredCam, sizeof(TheCamera));
+    delete pStoredCam;
+    pStoredCam = nullptr;
+
+    CTimer::SetTimeInMS(Time1);
+    CTimer::SetTimeInMSNonClipped(Time2);
+    CTimer::SetPreviousTimeInMS(Time3);
+    CTimer::m_snPreviousTimeInMilliseconds = Time3;
+    CTimer::m_snPPreviousTimeInMilliseconds = Time4;
+    CTimer::m_snPPPreviousTimeInMilliseconds = Time5;
+    CTimer::m_snPPPPreviousTimeInMilliseconds = Time6;
+    CTimer::SetTimeInMSPauseMode(Time7);
+    CTimer::SetTimeStep(TimeStep);
+    CTimer::SetTimeStepNonClipped(TimeStepNonClipped);
+    CTimer::SetTimeScale(TimeScale);
+    CTimer::SetFrameCounter(Frame);
+    CClock::SetGameClock(ClockHours, ++ClockMinutes, 0);
+
+    RestorePlayerInfoVariables();
+    CWeather::OldWeatherType = OldWeatherType;
+    CWeather::NewWeatherType = NewWeatherType;
+    CWeather::InterpolationValue = WeatherInterpolationValue;
+
+    CGame::currArea = static_cast<int8>(CurrArea);
+    CPopulation::ms_nNumCivMale = ms_nNumCivMale_Stored;
+    CPopulation::ms_nNumCivFemale = ms_nNumCivFemale_Stored;
+    CPopulation::ms_nNumCop = ms_nNumCop_Stored;
+    CPopulation::ms_nNumEmergency = ms_nNumEmergency_Stored;
+    CPopulation::ms_nTotalCarPassengerPeds = ms_nTotalCarPassengerPeds_Stored;
+    CPopulation::ms_nTotalCivPeds = ms_nTotalCivPeds_Stored;
+    CPopulation::ms_nTotalGangPeds = ms_nTotalGangPeds_Stored;
+    CPopulation::ms_nTotalPeds = ms_nTotalPeds_Stored;
+    CPopulation::ms_nTotalMissionPeds = ms_nTotalMissionPeds_Stored;
+
+    // FIX_BUGS? ms_nNumGang not restored
+    // rng::copy(ms_nNumGang_Stored, CPopulation::ms_nNumGang.begin());
 }
 
 // 0x45F050
@@ -599,6 +658,7 @@ bool CReplay::IsThisVehicleUsedInRecording(int32 index) {
             }
         }
     }
+    return false;
 }
 
 // 0x45DDE0
@@ -610,6 +670,7 @@ bool CReplay::IsThisPedUsedInRecording(int32 index) {
             }
         }
     }
+    return false;
 }
 
 // 0x45D6C0

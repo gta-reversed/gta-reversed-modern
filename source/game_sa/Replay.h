@@ -6,6 +6,7 @@
 #include "ePedType.h"
 
 class CCamera;
+enum eWeatherType;
 
 enum eReplayBufferStatus : uint8 {
     REPLAYBUFFER_NOT_AVAILABLE = 0,
@@ -257,11 +258,16 @@ public:
     inline static float& TimeStepNonClipped = *reinterpret_cast<float*>(0x97FB34);
     inline static float& TimeStep = *reinterpret_cast<float*>(0x97FB38);
     inline static float& TimeScale = *reinterpret_cast<float*>(0x97FB3C);
-    inline static uint8& ClockHours = *reinterpret_cast<uint8*>(0x97FAEF);
-    inline static uint8& ClockMinutes = *reinterpret_cast<uint8*>(0x97FAEE);
 
-    inline static int16& OldWeatherType = *reinterpret_cast<int16*>(0x97FAEC);
-    inline static int16& NewWeatherType = *reinterpret_cast<int16*>(0x97FAE8);
+    // these are overwritten when OldWeatherType changes for some reason
+    // they have no unreversed xref anyways so it's fine.
+    // inline static uint8& ClockHours = *reinterpret_cast<uint8*>(0x97FAEF);
+    // inline static uint8& ClockMinutes = *reinterpret_cast<uint8*>(0x97FAEE);
+    inline static uint8 ClockHours{};
+    inline static uint8 ClockMinutes{};
+
+    inline static eWeatherType& OldWeatherType = *reinterpret_cast<eWeatherType*>(0x97FAEC);
+    inline static eWeatherType& NewWeatherType = *reinterpret_cast<eWeatherType*>(0x97FAE8);
     inline static float& WeatherInterpolationValue = *reinterpret_cast<float*>(0x97FAE4);
 
     inline static uint32& ms_nNumCivMale_Stored = *reinterpret_cast<uint32*>(0x97FAB4);
