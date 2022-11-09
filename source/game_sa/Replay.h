@@ -217,8 +217,11 @@ public:
         }
 
         // Write helper
-        void Write(const tReplayBlockData& data) {
-            m_nOffset += m_pBase->Write(m_nOffset, data);
+        void Write(const tReplayBlockData& data, bool seek = false) {
+            const auto written = m_pBase->Write(m_nOffset, data);
+            if (seek) {
+                m_nOffset += written;
+            }
         }
 
         uint8 GetNextSlot(uint8 stride) {

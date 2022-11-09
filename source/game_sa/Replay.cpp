@@ -186,7 +186,7 @@ void CReplay::RecordVehicleDeleted(CVehicle* vehicle) {
         GoToNextBlock();
     }
 
-    Record.Write({.type = REPLAY_PACKET_DELETED_VEH, .deletedVehicle = {.unk1 = (uint16)(GetVehiclePool()->GetIndex(vehicle) / 2584)}});
+    Record.Write({.type = REPLAY_PACKET_DELETED_VEH, .deletedVehicle = {.unk1 = (uint16)(GetVehiclePool()->GetIndex(vehicle) / 2584)}}, true);
     Record.Write({REPLAY_PACKET_END});
 }
 
@@ -199,7 +199,7 @@ void CReplay::RecordPedDeleted(CPed* ped) {
         GoToNextBlock();
     }
 
-    Record.Write({.type = REPLAY_PACKET_DELETED_PED, .deletedPed = {.unk1 = (uint16)(GetPedPool()->GetIndex(ped) / 1988)}});
+    Record.Write({.type = REPLAY_PACKET_DELETED_PED, .deletedPed = {.unk1 = (uint16)(GetPedPool()->GetIndex(ped) / 1988)}}, true);
     Record.Write({REPLAY_PACKET_END});
 }
 
