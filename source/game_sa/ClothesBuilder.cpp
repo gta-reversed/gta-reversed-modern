@@ -17,7 +17,7 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(LoadCdDirectory, 0x5A4190);
-    RH_ScopedInstall(RequestGeometry, 0x5A41C0, { .reversed = false });
+    RH_ScopedInstall(RequestGeometry, 0x5A41C0);
     RH_ScopedInstall(RequestTexture, 0x5A4220); 
     //RH_ScopedInstall(nullptr, 0x5A42B0, { .reversed = false }); 
     //RH_ScopedInstall(nullptr, 0x5A4380, { .reversed = false }); AtomicInstanceCB
@@ -62,7 +62,12 @@ void CClothesBuilder::LoadCdDirectory() {
 
 // 0x5A41C0
 void CClothesBuilder::RequestGeometry(int32 modelId, uint32 crc) {
-    plugin::Call<0x5A41C0, int32, uint32>(modelId, crc);
+    uint32 outOffset;
+    uint32 outStreamingSize;
+
+    CModelInfo::ms_modelInfoPtrs[modelId]->m_nFlagsLowerByte |= 0x2; // TODO: I couldn't find which flag this line refers to :)
+    playerImg.FindItem(CKeyGen::AppendStringToKey(crc, ".DFF"), outOffset, outStreamingSize);
+    CStreaming::RequestFile(modelId, outOffset, outStreamingSize, CClothes::ms_clothesImageId, STREAMING_GAME_REQUIRED | STREAMING_PRIORITY_REQUEST);
 }
 
 // 0x5A4220
