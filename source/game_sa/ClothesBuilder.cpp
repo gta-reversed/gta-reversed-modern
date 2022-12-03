@@ -40,7 +40,7 @@ void CClothesBuilder::InjectHooks() {
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A5820, void (*)(RwTexture*, RwTexture*, float, float, int32));
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A59C0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32));
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A5BC0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32, RwTexture*));
-    RH_ScopedInstall(InitPaletteOctTree, 0x5A5EB0, { .reversed = false });
+    RH_ScopedInstall(InitPaletteOctTree, 0x5A5EB0);
     RH_ScopedInstall(ShutdownPaletteOctTree, 0x5A5EE0, { .reversed = false });
     RH_ScopedInstall(ReducePaletteOctTree, 0x5A5EF0, { .reversed = false });
     RH_ScopedInstall(AddColour, 0x5A5F00);
@@ -252,10 +252,8 @@ void CClothesBuilder::BlendTextures(RwTexture* t1, RwTexture* t2, RwTexture* t3,
 // unused or inlined
 // 0x5A5EB0
 void CClothesBuilder::InitPaletteOctTree(int32 numColors) {
-    /*
     COctTree::InitPool(&PC_Scratch[1024], 15360u);
-    COctTreeBase::Init(&gOctTreeBase, numColors);
-    */
+    gOctTreeBase.Init(numColors);
 }
 
 // 0x5A5EE0
