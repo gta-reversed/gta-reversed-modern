@@ -42,7 +42,7 @@ void CClothesBuilder::InjectHooks() {
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A5BC0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32, RwTexture*));
     RH_ScopedInstall(InitPaletteOctTree, 0x5A5EB0);
     RH_ScopedInstall(ShutdownPaletteOctTree, 0x5A5EE0, { .reversed = false });
-    RH_ScopedInstall(ReducePaletteOctTree, 0x5A5EF0, { .reversed = false });
+    RH_ScopedInstall(ReducePaletteOctTree, 0x5A5EF0);
     RH_ScopedInstall(AddColour, 0x5A5F00);
     RH_ScopedInstall(FillPalette, 0x5A5F30);
     RH_ScopedInstall(FindNearestColour, 0x5A5F40);
@@ -263,7 +263,7 @@ void CClothesBuilder::ShutdownPaletteOctTree() {
 
 // 0x5A5EF0
 void CClothesBuilder::ReducePaletteOctTree(int32 numColorsToReduce) {
-    // gOctTreeBase.ReduceBranches(newBranchesCount);
+    gOctTreeBase.ReduceBranches(numColorsToReduce);
 }
 
 // unused
