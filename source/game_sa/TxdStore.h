@@ -30,7 +30,8 @@ public:
     static int32&            ms_lastSlotFound;
     // variables list is not finished. Need to make CPools before.
 
-    static int16 (&defaultTxds)[4];
+    static int16    (&ms_defaultTxds)[4];
+    static int32&   ms_cursorDefaultTxd;
 
 public:
     static void InjectHooks();
@@ -81,6 +82,15 @@ public:
     static void SafeRemoveTxdSlot(const char* name) {
         auto slot = CTxdStore::FindTxdSlot(name);
         if (slot != -1) CTxdStore::RemoveTxdSlot(slot);
+    }
+
+    // NOTSA
+
+    static inline int16& GetDefaultTxd() {
+        int16& result = ms_defaultTxds[ms_cursorDefaultTxd];
+        ms_cursorDefaultTxd = (ms_cursorDefaultTxd + 1) % 4;
+
+        return result;
     }
 };
 

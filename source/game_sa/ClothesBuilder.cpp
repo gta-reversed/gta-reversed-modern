@@ -18,7 +18,7 @@ void CClothesBuilder::InjectHooks() {
 
     RH_ScopedInstall(LoadCdDirectory, 0x5A4190);
     RH_ScopedInstall(RequestGeometry, 0x5A41C0, { .reversed = false });
-    RH_ScopedInstall(RequestTexture, 0x5A4220, { .reversed = false }); 
+    RH_ScopedInstall(RequestTexture, 0x5A4220); 
     //RH_ScopedInstall(nullptr, 0x5A42B0, { .reversed = false }); 
     //RH_ScopedInstall(nullptr, 0x5A4380, { .reversed = false }); AtomicInstanceCB
     //RH_ScopedInstall(nullptr, 0x5A43A0, { .reversed = false });
@@ -46,7 +46,7 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedInstall(AddColour, 0x5A5F00);
     RH_ScopedInstall(FillPalette, 0x5A5F30);
     RH_ScopedInstall(FindNearestColour, 0x5A5F40);
-    RH_ScopedGlobalInstall(GetTextureFromTxdAndLoadNextTxd, 0x5A5F70, { .reversed = false });
+    RH_ScopedGlobalInstall(GetTextureFromTxdAndLoadNextTxd, 0x5A5F70);
     RH_ScopedInstall(ConstructTextures, 0x5A6040, { .reversed = false });
     RH_ScopedInstall(ConstructGeometryAndSkinArrays, 0x5A6530, { .reversed = false });
     RH_ScopedInstall(ReducePaletteSize, 0x5A6870, { .reversed = false });
@@ -67,7 +67,21 @@ void CClothesBuilder::RequestGeometry(int32 modelId, uint32 crc) {
 
 // 0x5A4220
 int32 CClothesBuilder::RequestTexture(uint32 crc) {
-    return plugin::CallAndReturn<int32, 0x5A4220, uint32>(crc);
+    if (!crc) {
+        return -1;
+    }
+
+    uint32 outOffset;
+    uint32 outStreamingSize;
+
+    int16 defaultTxd = CTxdStore::GetDefaultTxd();
+
+    CKeyGen::AppendStringToKey(crc, ".TXD");
+    playerImg.FindItem(CKeyGen::AppendStringToKey(crc, ".TXD"), outOffset, outStreamingSize);
+    CStreaming::RequestFile(TXDToModelId(defaultTxd), outOffset, outStreamingSize, CClothes::ms_clothesImageId,
+                            STREAMING_GAME_REQUIRED | STREAMING_PRIORITY_REQUEST);
+
+    return defaultTxd;
 }
 
 // 0x5A44C0
@@ -272,8 +286,41 @@ int32 CClothesBuilder::FindNearestColour(CRGBA* color) {
 }
 
 // 0x5A5F70
-RwTexture* GetTextureFromTxdAndLoadNextTxd(RwTexture* destTexture, int32 txdId_withTexture, int32 CRC_nextTxd, int32* nextTxdId) {
-    return plugin::CallAndReturn<RwTexture*, 0x5A5F70, RwTexture*, int32, int32, int32*>(destTexture, txdId_withTexture, CRC_nextTxd, nextTxdId);
+RwTexture* GetTextureFromTxdAndLoadNextTxd(RwTexture* destTexture, int32 txdId_withTexture, int32 CRC_nextTxd, int32* pNextTxdId) {
+
+    RwTexture* result = destTexture;
+    RwTexture* firstDictTexture;
+
+    if (txdId_withTexture != -1) {
+        CStreaming::LoadAllRequestedModels(true);
+    }
+
+    if (CRC_nextTxd) {
+        *pNextTxdId = CClothesBuilder::RequestTexture(CRC_nextTxd);
+        CStreaming::LoadRequestedModels();
+    } else {
+        *pNextTxdId = -1;
+    }
+
+    if (txdId_withTexture == -1) {
+        return result;
+    }
+
+    if (CTxdStore::ms_pTxdPool->m_byteMap[txdId_withTexture].bEmpty == 0) {
+        firstDictTexture = GetFirstTexture(CTxdStore::ms_pTxdPool->m_pObjects[txdId_withTexture].m_pRwDictionary);
+    } else {
+        firstDictTexture = nullptr;
+    }
+
+    if (destTexture) {
+        CClothesBuilder::PlaceTextureOnTopOfTexture(destTexture, firstDictTexture);
+    } else {
+        result = CClothesBuilder::CopyTexture(firstDictTexture);
+    }
+
+    CStreaming::RemoveModel(TXDToModelId(txdId_withTexture));
+
+    return result;
 }
 
 // 0x5A6040

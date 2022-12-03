@@ -12,7 +12,8 @@ CTxdPool*& CTxdStore::ms_pTxdPool = *reinterpret_cast<CTxdPool**>(0xC8800C);
 RwTexDictionary*& CTxdStore::ms_pStoredTxd = *reinterpret_cast<RwTexDictionary**>(0xC88010);
 int32& CTxdStore::ms_lastSlotFound = *reinterpret_cast<int32*>(0xC88014);
 
-int16 (&CTxdStore::defaultTxds)[4] = *reinterpret_cast<int16 (*)[4]>(0xC88004);
+int16 (&CTxdStore::ms_defaultTxds)[4] = *reinterpret_cast<int16 (*)[4]>(0xC88004);
+int32& CTxdStore::ms_cursorDefaultTxd = *reinterpret_cast<int32*>(0xBC12D0);
 
 // variables list is not finished. Need to make CPools before.
 
@@ -56,7 +57,7 @@ void CTxdStore::Initialise() {
     if (!ms_pTxdPool)
         ms_pTxdPool = new CTxdPool(TOTAL_TXD_MODEL_IDS, "TexDictionary");
 
-    for (auto& txd : defaultTxds)
+    for (auto& txd : ms_defaultTxds)
         txd = static_cast<int16>(AddTxdSlot("*"));
 
     RwTextureSetFindCallBack(TxdStoreFindCB);
