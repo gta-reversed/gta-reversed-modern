@@ -24,9 +24,13 @@ public:
     CByteCompressedVector m_vecRight;
     CByteCompressedVector m_vecForward;
 
+private:
+    uint16                align;
+
 public:
     static void InjectHooks();
 
-    void DecompressIntoFullMatrix(CMatrix& matrix);
+    void DecompressIntoFullMatrix(CMatrix& matrix) const;
     void CompressFromFullMatrix(CMatrix& matrix);
 };
+VALIDATE_SIZE(CCompressedMatrixNotAligned, 20);

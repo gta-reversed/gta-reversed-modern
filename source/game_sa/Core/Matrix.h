@@ -115,6 +115,13 @@ public:
         m_pos = pos;
     }
 
+    // Similar to ::Scale but this also scales the position vector.
+    // 0x45AF40
+    void ScaleAll(float mult) {
+        Scale(mult);
+        GetPosition() *= mult;
+    }
+
     // operators and classes that aren't defined as part of class, but it's much easier to get them working with access to class private fields
 private:
     friend class CVector; // So Vector methods have access to private fields of matrix whitout accessor methods, for more readable code

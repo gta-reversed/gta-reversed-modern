@@ -19,14 +19,14 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(EnableReplays, 0x45B160);
     // RH_ScopedInstall(StorePedAnimation, 0x0, { .reversed = false });
     // RH_ScopedInstall(StorePedUpdate, 0x0, { .reversed = false });
-    RH_ScopedInstall(RetrievePedAnimation, 0x45B4D0, { .reversed = false });
+    RH_ScopedInstall(RetrievePedAnimation, 0x45B4D0);
     RH_ScopedInstall(ProcessReplayCamera, 0x45D060);
     RH_ScopedInstall(Display, 0x45C210);
     RH_ScopedInstall(MarkEverythingAsNew, 0x45D430);
     RH_ScopedInstall(EmptyReplayBuffer, 0x45EC90);
     RH_ScopedInstall(GoToNextBlock, 0x45E2A0);
     RH_ScopedInstall(RecordVehicleDeleted, 0x45EBB0);
-    RH_ScopedInstall(RecordPedDeleted, 0x45EC20);
+    RH_ScopedInstall(RecordPedDeleted, 0x45EC20, { .reversed = false }); // <-- broken
     RH_ScopedInstall(SaveReplayToHD, 0x45C340);
     RH_ScopedInstall(ShouldStandardCameraBeProcessed, 0x45C440);
     RH_ScopedInstall(ProcessLookAroundCam, 0x45D760);
@@ -54,7 +54,7 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(InitialisePedPoolConversionTable, 0x45EF20, {.reversed = false});     //
     RH_ScopedInstall(InitialisePoolConversionTables, 0x45F370);
     RH_ScopedInstall(FindFirstFocusCoordinate, 0x45D6C0);
-    // RH_ScopedInstall(NumberFramesAvailableToPlay, 0x0, { .reversed = false });
+    RH_ScopedInstall(NumberFramesAvailableToPlay, 0x45D670);
     RH_ScopedInstall(StreamAllNecessaryCarsAndPeds, 0x45D4B0);
     RH_ScopedInstall(CreatePlayerPed, 0x45D540);
     RH_ScopedInstall(TriggerPlayback, 0x4600F0);
@@ -99,14 +99,61 @@ void CReplay::StorePedAnimation() {
     plugin::Call<0x0>();
 }
 
-// 0x
-void CReplay::StorePedUpdate(CPed* ped, int32 a2) {
-    plugin::Call<0x0, CPed*, int32>(ped, a2);
+// 0x45C940
+void CReplay::StorePedUpdate(CPed* ped, uint8 index) {
+    plugin::Call<0x45C940, CPed*, uint8>(ped, index);
 }
 
 // 0x45B4D0
-void CReplay::RetrievePedAnimation() {
-    plugin::Call<0x45B4D0>();
+void CReplay::RetrievePedAnimation(CPed* ped, CStoredAnimationState* state) {
+    // todo: refactor
+
+    CAnimBlendAssociation* anim = nullptr;
+    if (state->first.m_nAnimId > 3u) {
+        auto animBlock = CAnimManager::ms_aAnimAssocGroups[state->first.m_nGroupId1].m_pAnimBlock;
+        if (animBlock && animBlock->bLoaded) {
+            anim = CAnimManager::BlendAnimation(ped->m_pRwClump, (AssocGroupId)state->first.m_nGroupId1, (AnimationId)state->first.m_nAnimId, 100.0f);
+        } else {
+            anim = CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_WALK, 100.0f);
+        }
+    } else {
+        anim = CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, (AnimationId)state->first.m_nAnimId, 100.0f);
+    }
+    anim->SetCurrentTime(state->first.m_nTime * 0.015686275f);
+    anim->SetSpeed(state->first.m_nSpeed * 0.011764706f);
+    anim->SetBlend(1.0f, 1.0f);
+    anim->m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
+
+    anim = nullptr;
+    if (state->second.m_nGroupId1 && state->second.m_nAnimId && CAnimManager::ms_aAnimAssocGroups[state->second.m_nGroupId2].m_nNumAnimations > 0) {
+        if (state->second.m_nAnimId > 3u) {
+            anim = CAnimManager::BlendAnimation(ped->m_pRwClump, (AssocGroupId)state->second.m_nGroupId2, (AnimationId)state->second.m_nAnimId, 100.0f);
+        } else {
+            anim = CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, (AnimationId)state->second.m_nAnimId, 100.0f);
+        }
+
+        if (anim) {
+            anim->SetCurrentTime(state->second.m_nTime * 0.015686275f);
+            anim->SetSpeed(state->second.m_nSpeed * 0.011764706f);
+            anim->SetBlend(state->second.m_nGroupId1 * 0.0078431377f, 1.0f); // wtf?
+            anim->m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
+        }
+    }
+
+    RpAnimBlendClumpRemoveAssociations(ped->m_pRwClump, 16u); // todo: flags
+    if (state->third.m_nGroupId1 && state->third.m_nAnimId) {
+        if (/*state->third.m_nGroupId1 >= 0 &&*/ state->third.m_nAnimId != 3u) {
+            if (auto animBlock = CAnimManager::ms_aAnimAssocGroups[state->third.m_nGroupId2].m_pAnimBlock; animBlock && animBlock->bLoaded) {
+                anim = CAnimManager::BlendAnimation(ped->m_pRwClump, (AssocGroupId)state->third.m_nGroupId2, (AnimationId)state->third.m_nAnimId, 1000.0f);
+
+                anim->SetCurrentTime(state->third.m_nTime * 0.015686275f);
+                anim->SetSpeed(state->third.m_nSpeed * 0.011764706f);
+                anim->SetBlend(state->third.m_nGroupId1 * 0.0078431377f, 0.0f);
+                anim->m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
+            }
+        }
+    }
+
 }
 
 // 0x45C210
@@ -154,8 +201,8 @@ void CReplay::EmptyReplayBuffer() {
 
     rng::fill(BufferStatus, REPLAYBUFFER_NOT_AVAILABLE);
     BufferStatus[0] = REPLAYBUFFER_IN_USE;
-    Buffers.at(0).Write(0, {REPLAY_PACKET_END});
-    Record = {.m_nOffset = 0, .m_pBase = &Buffers.at(0), .m_bSlot = 0};
+    Buffers[0].Write(0, {REPLAY_PACKET_END});
+    Record = {.m_nOffset = 0, .m_pBase = &Buffers[0], .m_bSlot = 0};
     MarkEverythingAsNew();
 }
 
@@ -169,12 +216,10 @@ void CReplay::GoToNextBlock() {
     Record.Write({REPLAY_PACKET_END});
     BufferStatus[Record.m_bSlot] = REPLAYBUFFER_FULL;
 
-    Record.m_bSlot = (Record.m_bSlot + 1) % 8;
-    Record.m_pBase = &Buffers.at(Record.m_bSlot);
-    Record.m_nOffset = 0;
-
+    Record.Next();
     Record.Write({REPLAY_PACKET_END});
     BufferStatus[Record.m_bSlot] = REPLAYBUFFER_IN_USE;
+
     MarkEverythingAsNew();
 }
 
@@ -183,11 +228,11 @@ void CReplay::RecordVehicleDeleted(CVehicle* vehicle) {
     if (Mode != MODE_RECORD)
         return;
 
-    if (Record.m_nOffset + FindSizeOfPacket(REPLAY_PACKET_DELETED_VEH) > 99984) {
+    if (Record.m_nOffset + FindSizeOfPacket(REPLAY_PACKET_DELETED_VEH) > 99'984) {
         GoToNextBlock();
     }
 
-    Record.Write({.type = REPLAY_PACKET_DELETED_VEH, .deletedVehicle = {.unk1 = (uint16)(GetVehiclePool()->GetIndex(vehicle) / 2584)}}, true);
+    Record.Write({.type = REPLAY_PACKET_DELETED_VEH, .deletedVehicle = {.poolRef = (int16)(GetVehiclePool()->GetIndex(vehicle) / 2584)}}, true);
     Record.Write({REPLAY_PACKET_END});
 }
 
@@ -196,11 +241,11 @@ void CReplay::RecordPedDeleted(CPed* ped) {
     if (Mode != MODE_RECORD)
         return;
 
-    if (Record.m_nOffset + FindSizeOfPacket(REPLAY_PACKET_DELETED_PED) > 99984) {
+    if (Record.m_nOffset + FindSizeOfPacket(REPLAY_PACKET_DELETED_PED) > 99'984) {
         GoToNextBlock();
     }
 
-    Record.Write({.type = REPLAY_PACKET_DELETED_PED, .deletedPed = {.unk1 = (uint16)(GetPedPool()->GetIndex(ped) / 1988)}}, true);
+    Record.Write({.type = REPLAY_PACKET_DELETED_PED, .deletedPed = {.poolRef = (int16)(GetPedPool()->GetIndex(ped) / 1988)}}, true);
     Record.Write({REPLAY_PACKET_END});
 }
 
@@ -210,7 +255,7 @@ void CReplay::InitialiseVehiclePoolConversionTable() {
     auto convIdx = 0u;
     for (auto poolIdx = 0; poolIdx < GetVehiclePool()->GetSize() && convIdx < std::size(m_VehiclePoolConversion); poolIdx++, convIdx++) {
         if (GetVehiclePool()->GetAt(poolIdx) && IsThisVehicleUsedInRecording(convIdx)) {
-            m_VehiclePoolConversion.at(convIdx) = poolIdx;
+            m_VehiclePoolConversion[convIdx] = poolIdx;
         }
     }
 }
@@ -221,7 +266,7 @@ void CReplay::InitialisePedPoolConversionTable() {
     auto convIdx = 0u;
     for (auto poolIdx = 0; poolIdx < GetPedPool()->GetSize() && convIdx < std::size(m_PedPoolConversion); poolIdx++, convIdx++) {
         if (GetPedPool()->GetAt(poolIdx) && IsThisVehicleUsedInRecording(convIdx)) {
-            m_PedPoolConversion.at(convIdx) = poolIdx;
+            m_PedPoolConversion[convIdx] = poolIdx;
         }
     }
 }
@@ -240,7 +285,7 @@ void CReplay::SaveReplayToHD() {
         CFileMgr::Write(file, "GtaSA29", 8u);
 
         // TODO: refactor
-        auto idx = 7;
+        auto idx = 7u;
         for (auto&& [i, status] : notsa::enumerate(BufferStatus)) {
             if (status == 2) {
                 idx = i;
@@ -270,18 +315,76 @@ bool CReplay::ShouldStandardCameraBeProcessed() {
 // unused
 // 0x45C450
 int32 CReplay::FindPoolIndexForPed(int32 index) {
-    return m_PedPoolConversion.at(index);
+    return m_PedPoolConversion[index];
 }
 
 // unused
 // 0x45C460
 int32 CReplay::FindPoolIndexForVehicle(int32 index) {
-    return m_VehiclePoolConversion.at(index);
+    return m_VehiclePoolConversion[index];
 }
 
 // 0x45CA70
-void CReplay::ProcessPedUpdate(CPed* ped, float a2, const CAddressInReplayBuffer& buffer) {
-    plugin::Call<0x45CA70, CPed*, float, const CAddressInReplayBuffer&>(ped, a2, buffer);
+void CReplay::ProcessPedUpdate(CPed* ped, float interpValue, CAddressInReplayBuffer& address) {
+    assert(address.Read<eReplayPacket>() == REPLAY_PACKET_PED_UPDATE);
+    const auto packet = address.Read<tReplayBlockData>();
+    address.m_nOffset += FindSizeOfPacket(REPLAY_PACKET_PED_UPDATE); // count packet read beforehand.
+
+    auto isplaya = ped == FindPlayerPed();
+    if (!ped)
+        return;
+
+    ped->m_fCurrentRotation = (float)packet.ped.heading * 0.024531251f;
+    ped->m_fAimingRotation  = (float)packet.ped.heading * 0.024531251f;
+
+    CMatrix decompressed;
+    packet.ped.matrix.DecompressIntoFullMatrix(decompressed);
+    decompressed.ScaleAll(interpValue);
+    ped->GetMatrix().ScaleAll(1.0f - interpValue);
+    ped->GetMatrix() += decompressed;
+
+    if (const auto vehIdx = packet.ped.vehicleIndex) {
+        auto& vehicle = ped->m_pVehicle;
+        if (vehicle)
+            vehicle->CleanUpOldReference(ped->m_pVehicle);
+        vehicle = nullptr;
+
+        if (auto poolRef = m_VehiclePoolConversion[vehIdx - 1]; !GetVehiclePool()->IsFreeSlotAtIndex(poolRef)) {
+            vehicle = GetVehiclePool()->GetAt(poolRef);
+            vehicle->RegisterReference(vehicle);
+            ped->bInVehicle = true;
+        }
+    } else {
+        if (auto vehicle = ped->m_pVehicle)
+            CEntity::CleanUpOldReference(vehicle);
+
+        ped->m_pVehicle = nullptr;
+        ped->bInVehicle = false;
+    }
+    if (const auto ag = packet.ped.animGroup; ag != ped->m_nAnimGroup) {
+        ped->m_nAnimGroup = static_cast<AssocGroupId>(ag);
+        if (ped == FindPlayerPed()) {
+            ped->AsPlayer()->ReApplyMoveAnims();
+        }
+    }
+
+    auto v10 = ((uint8)ped->m_nFlags ^ (uint8)(packet.ped.flags << 7)) & 0x80 ^ ped->m_nFlags;
+    auto v11 = v10 ^ (v10 ^ ((uint8)packet.ped.flags << 29)) & 0x40000000;
+    ped->m_nFlags = ((uint8)packet.ped.flags << 29) ^ (v11 ^ ((uint8)packet.ped.flags << 29)) & 0x7FFFFFFF;
+
+    ped->m_fContactSurfaceBrightness = static_cast<float>(packet.ped.contactSurfaceBrightness);
+    ped->RemoveWeaponModel();
+    if (const auto wm = packet.ped.weaponModel; wm != -1) {
+        if (CStreaming::ms_aInfoForModel[wm].m_nLoadState == 1) {
+            ped->AddWeaponModel(wm);
+        } else {
+            CStreaming::RequestModel((eModelID)wm, STREAMING_DEFAULT);
+        }
+    }
+
+    ped->m_nAreaCode = static_cast<eAreaCodes>(CGame::currArea);
+    CWorld::Remove(ped);
+    CWorld::Add(ped);
 }
 
 // 0x45D060
@@ -422,12 +525,12 @@ void CReplay::ProcessLookAroundCam() {
 
 // 0x45C470
 bool CReplay::CanWeFindPoolIndexForPed(int32 index) {
-    return m_PedPoolConversion.at(index) >= 0;
+    return m_PedPoolConversion[index] >= 0;
 }
 
 // 0x45C490
 bool CReplay::CanWeFindPoolIndexForVehicle(int32 index) {
-    return m_VehiclePoolConversion.at(index) >= 0;
+    return m_VehiclePoolConversion[index] >= 0;
 }
 
 // 0x45F020
@@ -655,6 +758,62 @@ CPed* CReplay::DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel,
 // 0x45F380
 bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, float interpolation, uint32* outTimer) {
     return plugin::CallAndReturn<bool, 0x45F380, CAddressInReplayBuffer, float, uint32*>(buffer, interpolation, outTimer);
+
+    CBulletTraces::Init();
+    for (auto it = &buffer.m_pBase[buffer.m_nOffset]; it->Read<eReplayPacket>(buffer.m_nOffset) != REPLAY_PACKET_END_OF_FRAME;) {
+        auto packet = it->Read<tReplayBlockData>(buffer.m_nOffset);
+
+        switch (packet.type) {
+        case REPLAY_PACKET_END:
+            if (buffer.GetStatus() == REPLAYBUFFER_IN_USE) {
+                FinishPlayback();
+                return true;
+            }
+            buffer.Next();
+            break;
+        case REPLAY_PACKET_VEHICLE: {
+            const auto mi = packet.vehicle.modelId;
+            const auto poolIdx = m_VehiclePoolConversion[packet.vehicle.index];
+
+            if (CStreaming::IsModelLoaded(mi)) {
+                auto created = [&]() -> CVehicle* {
+                    switch (packet.vehicle.vehicleSubType) {
+                    case VEHICLE_TYPE_AUTOMOBILE:
+                        return new (poolIdx << 8) CAutomobile(mi, MISSION_VEHICLE, true);
+                    case VEHICLE_TYPE_MTRUCK:
+                        return new (poolIdx << 8) CMonsterTruck(mi, MISSION_VEHICLE);
+                    case VEHICLE_TYPE_QUAD:
+                        return new (poolIdx << 8) CQuadBike(mi, MISSION_VEHICLE);
+                    case VEHICLE_TYPE_BOAT:
+                        return new (poolIdx << 8) CBoat(mi, MISSION_VEHICLE);
+                    case VEHICLE_TYPE_TRAIN:
+                        return new (poolIdx << 8) CTrain(mi, MISSION_VEHICLE);
+                    case VEHICLE_TYPE_TRAILER:
+                        return new (poolIdx << 8) CTrailer(mi, MISSION_VEHICLE);
+                    default:
+                        NOTSA_UNREACHABLE("Unknown vehicle subtype ={}", (int)packet.vehicle.vehicleSubType);
+                    }
+                }();
+                created->m_nStatus = STATUS_PLAYER_PLAYBACK_FROM_BUFFER;
+                created->vehicleFlags.bUsedForReplay = true;
+                packet.vehicle.matrix.DecompressIntoFullMatrix(*created->m_matrix);
+                created->m_nPrimaryColor = packet.vehicle.primaryColor;
+                created->m_nSecondaryColor = packet.vehicle.secondaryColor;
+                if (created->IsSubBoat()) {
+                    created->AsBoat()->m_nBoatFlags.bAnchored = false;
+                }
+
+                CWorld::Add(created);
+            } else {
+                CStreaming::RequestModel(mi, STREAMING_DEFAULT);
+            }
+        }
+        }
+
+        if (packet.type != REPLAY_PACKET_END) {
+            buffer.m_nOffset += FindSizeOfPacket(packet.type);
+        }
+    }
 }
 
 // 0x460350
@@ -774,9 +933,17 @@ void CReplay::FindFirstFocusCoordinate(CVector& outPos) {
     }
 }
 
-// 0x0
-void CReplay::NumberFramesAvailableToPlay() {
-    plugin::Call<0x0>();
+// 0x45D670
+uint32 CReplay::NumberFramesAvailableToPlay() {
+    auto frames = 0u;
+    for (auto& buffer : GetAllActiveBuffers()) {
+        for (auto it = buffer.begin(); it != buffer.end();) {
+            it = std::find_if(it, buffer.end(), [](auto&& p) { return p.type == REPLAY_PACKET_END_OF_FRAME; });
+            if (it != buffer.end())
+                frames++;
+        }
+    }
+    return frames;
 }
 
 // 0x45D4B0
@@ -805,7 +972,7 @@ CPlayerPed* CReplay::CreatePlayerPed() {
 
     auto i = 0;
     for (auto slot = Playback.GetNextSlot(i); i < NUM_REPLAY_BUFFERS && BufferStatus[slot]; slot = Playback.GetNextSlot(++i)) {
-        auto& buffer = Buffers.at(slot);
+        auto& buffer = Buffers[slot];
         if (buffer.Read<eReplayPacket>(0) == REPLAY_PACKET_END)
             break;
 
@@ -823,8 +990,9 @@ CPlayerPed* CReplay::CreatePlayerPed() {
                 }
                 break;
             case REPLAY_PACKET_PED_UPDATE:
-                if (player && player == GetPedPool()->GetAt(m_PedPoolConversion[packet.ped.pedIndexInPool])) {
-                    ProcessPedUpdate(player, 1.0f, {.m_nOffset = offset, .m_pBase = &buffer, .m_bSlot = (uint8)i}); // m_bSlot def is NOTSA
+                if (player && player == GetPedPool()->GetAt(m_PedPoolConversion[packet.ped.index])) {
+                    CAddressInReplayBuffer address = {.m_nOffset = offset, .m_pBase = &buffer, .m_bSlot = (uint8)i}; // m_bSlot definition is NOTSA
+                    ProcessPedUpdate(player, 1.0f, address);
                     return player;
                 }
             }
@@ -873,7 +1041,7 @@ void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loa
     }
 
     Playback.m_bSlot = slot;
-    Playback.m_pBase = &Buffers.at(slot);
+    Playback.m_pBase = &Buffers[slot];
     Playback.m_nOffset = 0u;
 
     CObject::DeleteAllTempObjectsInArea(CVector{0.0f}, 1'000'000.0f);
@@ -909,6 +1077,7 @@ void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loa
     TheCamera.Fade(0.0f, eFadeFlag::FADE_IN);
     TheCamera.ProcessFade();
     TheCamera.Fade(1.5f, eFadeFlag::FADE_OUT);
+    constexpr auto s = sizeof(tReplayBlockData::ped);
 }
 
 // tReplayBlockData checks

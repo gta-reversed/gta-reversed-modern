@@ -11,7 +11,7 @@ void CCompressedMatrixNotAligned::InjectHooks()
     RH_ScopedInstall(CompressFromFullMatrix, 0x59BAD0);
 }
 
-void CCompressedMatrixNotAligned::DecompressIntoFullMatrix(CMatrix& matrix)
+void CCompressedMatrixNotAligned::DecompressIntoFullMatrix(CMatrix& matrix) const
 {
     matrix.GetRight() = m_vecRight.Decompress();
     matrix.GetForward() = m_vecForward.Decompress();

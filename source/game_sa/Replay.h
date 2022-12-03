@@ -1,18 +1,36 @@
 #pragma once
 
-#include "eReplay.h"
 #include "Vector.h"
 #include "PlayerInfo.h"
+#include "CompressedMatrixNotAligned.h"
+#include "eReplay.h"
 #include "ePedType.h"
+#include "eWeatherType.h"
 
 class CCamera;
-enum eWeatherType;
 
 enum eReplayBufferStatus : uint8 {
     REPLAYBUFFER_NOT_AVAILABLE = 0,
     REPLAYBUFFER_FULL = 1,
     REPLAYBUFFER_IN_USE = 2
 };
+
+#pragma pack(push, 1)
+struct AnimationState {
+    uint16 m_nAnimId;
+    uint8 m_nTime;
+    uint8 m_nSpeed;
+    uint8 m_nGroupId1;
+    uint8 m_nGroupId2;
+};
+#pragma pack(pop)
+
+struct CStoredAnimationState {
+    AnimationState first;
+    AnimationState second;
+    AnimationState third;
+};
+VALIDATE_SIZE(CStoredAnimationState, 18);
 
 // NOTSA
 // TODO: maybe spread all struct inside union and use std::variant?
@@ -24,10 +42,25 @@ struct tReplayBlockData {
         // unk sizes are -1 because we don't include the `type` value in the beginning.
         struct ENDBlock { /* nil */ } end;
         struct VehicleBlock {
-            uint8 index; // handle?
-            uint8 unk[24];
+            uint8 index;
+            uint8 health;
+            uint8 gasPedal;
+            CCompressedMatrixNotAligned matrix;
+            uint8 angleDoorLF;
+            uint8 angleDoorRF;
             uint16 modelId;
-            uint8 unk2[24];
+            uint32 panels;
+            struct { uint8 x, y, z; } vecMoveSpeed;
+            uint8 steerAngle_or_doomVerticalRot;
+            uint8 wheelsSuspensionCompression[4];
+            uint8 wheelRotation[4];
+            uint8 doorStatus;
+            uint8 primaryColor;
+            uint8 secondaryColor;
+            uint8 physicalFlags;
+            uint8 vehicleSubType;
+            uint8 vehicleType;
+            uint8 pad[2];
         } vehicle;
         struct BikeBlock {
             uint8 index;
@@ -42,10 +75,17 @@ struct tReplayBlockData {
             uint8 align[3];
         } playerData;
         struct PedBlock {
-            uint8 pedIndexInPool;
-            uint8 unk;
-            uint8 vehicleIndex; // current vehicle handle?
-            uint8 unk2[48];
+            uint8 index;
+            uint8 heading;
+            uint8 vehicleIndex; // 0: not in a vehicle
+            CStoredAnimationState animState;
+            uint8 __pad[2];
+            CCompressedMatrixNotAligned matrix;
+            int16 weaponModel;
+            uint16 animGroup;
+            uint8 contactSurfaceBrightness;
+            uint8 flags;
+            uint8 __unk[2];
         } ped;
         struct CameraBlock {
             uint8 unk[75];
@@ -67,11 +107,11 @@ struct tReplayBlockData {
         struct MiscBlock { uint8 unk[15]; } misc;
         struct UnkBlock13 {
             uint8 unk;
-            uint16 unk1;
+            int16 poolRef;
         } deletedVehicle;
         struct UnkBlock14 {
             uint8 unk;
-            uint16 unk1;
+            int16 poolRef;
         } deletedPed;
         struct BmxBlock {
             uint8 index;
@@ -228,8 +268,22 @@ public:
             }
         }
 
-        uint8 GetNextSlot(uint8 stride) {
+        uint8 GetNextSlot(uint8 stride = 1u) {
             return (stride + m_bSlot) % NUM_REPLAY_BUFFERS;
+        }
+
+        void Next() {
+            m_bSlot = GetNextSlot();
+            m_pBase = &Buffers[m_bSlot];
+            m_nOffset = 0u;
+        }
+
+        auto GetIterator() {
+            return tReplayBuffer::Iterator{m_pBase, m_nOffset};
+        }
+
+        eReplayBufferStatus GetStatus() {
+            return BufferStatus[m_bSlot];
         }
     };
     VALIDATE_SIZE(CAddressInReplayBuffer, 0xC);
@@ -309,8 +363,8 @@ public:
     static void DisableReplays();
     static void EnableReplays();
     static void StorePedAnimation();
-    static void StorePedUpdate(CPed* ped, int32 a2);
-    static void RetrievePedAnimation();
+    static void StorePedUpdate(CPed* ped, uint8 index);
+    static void RetrievePedAnimation(CPed* ped, CStoredAnimationState* state);
     static void Display();
     static void MarkEverythingAsNew();
     static void EmptyReplayBuffer();
@@ -323,7 +377,7 @@ public:
     static void InitialisePoolConversionTables();
     static void SaveReplayToHD();
     static bool ShouldStandardCameraBeProcessed();
-    static void ProcessPedUpdate(CPed* ped, float a2, const CAddressInReplayBuffer& address);
+    static void ProcessPedUpdate(CPed* ped, float a2, CAddressInReplayBuffer& address);
     static void ProcessReplayCamera();
     static void ProcessLookAroundCam();
     static int32 FindPoolIndexForPed(int32 index);
@@ -348,7 +402,7 @@ public:
     static bool IsThisVehicleUsedInRecording(int32 a1);
     static bool IsThisPedUsedInRecording(int32 a1);
     static void FindFirstFocusCoordinate(CVector& outPos);
-    static void NumberFramesAvailableToPlay();
+    static uint32 NumberFramesAvailableToPlay();
     static void StreamAllNecessaryCarsAndPeds();
     static CPlayerPed* CreatePlayerPed();
     static void TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loadScene);
