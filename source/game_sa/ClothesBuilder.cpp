@@ -41,7 +41,7 @@ void CClothesBuilder::InjectHooks() {
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A59C0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32));
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A5BC0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32, RwTexture*));
     RH_ScopedInstall(InitPaletteOctTree, 0x5A5EB0);
-    RH_ScopedInstall(ShutdownPaletteOctTree, 0x5A5EE0, { .reversed = false });
+    RH_ScopedInstall(ShutdownPaletteOctTree, 0x5A5EE0);
     RH_ScopedInstall(ReducePaletteOctTree, 0x5A5EF0);
     RH_ScopedInstall(AddColour, 0x5A5F00);
     RH_ScopedInstall(FillPalette, 0x5A5F30);
@@ -155,8 +155,27 @@ RpGeometry* CClothesBuilder::BlendGeometry(RpClump* clump, const char* a2, const
 }
 
 // 0x5A5340
-RpGeometry* CClothesBuilder::CopyGeometry(RpClump* clump, const char* a2, const char* a3) {
-    return plugin::CallAndReturn<RpGeometry*, 0x5A5340, RpClump*, const char*, const char*>(clump, a2, a3);
+RpGeometry* CClothesBuilder::CopyGeometry(RpClump* clump, const char* name1, const char* name2) {
+    /* -- coming soon -- :)
+    sDataFindAtomicFromName data[2];
+    data[0].inputData = name1;
+    sDataFindAtomicFromName data2;
+    data[1].inputData = name2;
+
+    for (int i = 0; i < 2; i++) {
+        RpAtomic* atomic = data[i].outputData;
+        RpSkinGeometryGetSkin(atomic->geometry);
+        // ...
+    }
+    RpGeometry* currentGeometry = data[0].outputData->geometry;
+    RpGeometryLock(currentGeometry, rpGEOMETRYLOCKALL);
+
+    if (currentGeometry->numVertices > 0) {
+        for (int i = 0; i < currentGeometry->numVertices; i++) {
+        }
+    }
+    */
+    return plugin::CallAndReturn<RpGeometry*, 0x5A5340, RpClump*, const char*, const char*>(clump, name1, name2);
 }
 
 // 0x5A55A0
@@ -258,7 +277,7 @@ void CClothesBuilder::InitPaletteOctTree(int32 numColors) {
 
 // 0x5A5EE0
 void CClothesBuilder::ShutdownPaletteOctTree() {
-    // COctTree::ShutdownPool();
+    COctTree::ShutdownPool();
 }
 
 // 0x5A5EF0

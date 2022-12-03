@@ -25,7 +25,7 @@ public:
     static void StoreBoneArray(RpClump* clump, int32 num);
     static RpGeometry* BlendGeometry(RpClump* clump, const char* a2, const char* a3, const char* a4, float a5, float a6, float a7);
     static RpGeometry* BlendGeometry(RpClump* clump, const char* a2, const char* a3, float a4, float a5);
-    static RpGeometry* CopyGeometry(RpClump* clump, const char* a2, const char* a3);
+    static RpGeometry* CopyGeometry(RpClump* clump, const char* name1, const char* name2);
     static void ConstructGeometryArray(RpGeometry** geometry, uint32* a2, float a3, float a4, float a5);
     static void DestroySkinArrays(RwMatrixWeights* weights, uint32* pBones);
     static void BuildBoneIndexConversionTable(uint8* a1, RpHAnimHierarchy* a2, int32 a3);
