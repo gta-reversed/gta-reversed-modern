@@ -20,7 +20,7 @@ void CCompressedMatrixNotAligned::DecompressIntoFullMatrix(CMatrix& matrix) cons
     matrix.Reorthogonalise();
 }
 
-void CCompressedMatrixNotAligned::CompressFromFullMatrix(CMatrix& matrix)
+void CCompressedMatrixNotAligned::CompressFromFullMatrix(const CMatrix& matrix)
 {
     m_vecRight = matrix.GetRight();
     m_vecForward = matrix.GetForward();

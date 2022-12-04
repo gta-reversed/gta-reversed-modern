@@ -36,14 +36,14 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(FindPoolIndexForPed, 0x45C450);
     RH_ScopedInstall(FindPoolIndexForVehicle, 0x45C460);
     RH_ScopedInstall(ProcessPedUpdate, 0x45CA70);
-    // RH_ScopedInstall(CanWeFindPoolIndexForPed, 0x0, { .reversed = false });
-    // RH_ScopedInstall(CanWeFindPoolIndexForVehicle, 0x0, { .reversed = false });
+    RH_ScopedInstall(CanWeFindPoolIndexForPed, 0x45C470);
+    RH_ScopedInstall(CanWeFindPoolIndexForVehicle, 0x45C490);
     RH_ScopedInstall(StorePlayerInfoVariables, 0x45F020);
     RH_ScopedInstall(RestorePlayerInfoVariables, 0x45E1F0);
     RH_ScopedInstall(StoreStuffInMem, 0x45F180);
     RH_ScopedInstall(RestoreStuffFromMem, 0x45ECD0);
     RH_ScopedInstall(FinishPlayback, 0x45F050);
-    RH_ScopedInstall(RecordThisFrame, 0x45E300, { .reversed = true });
+    RH_ScopedInstall(RecordThisFrame, 0x45E300);
     RH_ScopedInstall(StoreClothesDesc, 0x45C750);
     RH_ScopedInstall(RestoreClothesDesc, 0x45C7D0);
     RH_ScopedInstall(DealWithNewPedPacket, 0x45CEA0);
@@ -53,8 +53,8 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(FindSizeOfPacket, 0x45C850);
     RH_ScopedInstall(IsThisVehicleUsedInRecording, 0x45DE40);
     RH_ScopedInstall(IsThisPedUsedInRecording, 0x45DDE0);
-    RH_ScopedInstall(InitialiseVehiclePoolConversionTable, 0x45EFA0, {.reversed = false}); // <-- broken for now
-    RH_ScopedInstall(InitialisePedPoolConversionTable, 0x45EF20, {.reversed = false});     //
+    RH_ScopedInstall(InitialiseVehiclePoolConversionTable, 0x45EFA0);
+    RH_ScopedInstall(InitialisePedPoolConversionTable, 0x45EF20);
     RH_ScopedInstall(InitialisePoolConversionTables, 0x45F370);
     RH_ScopedInstall(FindFirstFocusCoordinate, 0x45D6C0);
     RH_ScopedInstall(NumberFramesAvailableToPlay, 0x45D670);
@@ -191,9 +191,6 @@ void CReplay::StorePedAnimation(CPed* ped, CStoredAnimationState& state) {
 
 // 0x45C940
 void CReplay::StorePedUpdate(CPed* ped, uint8 index) {
-    CCompressedMatrixNotAligned compMatrix{};
-    compMatrix.CompressFromFullMatrix(ped->GetMatrix());
-
     // TODO: refactor
     uint8 flags = 0u;
     auto v3 = (flags ^ ((uint32)ped->m_nFlags >> 7)) & 1 ^ flags;
@@ -220,7 +217,7 @@ void CReplay::StorePedUpdate(CPed* ped, uint8 index) {
         .heading                  = (int8)(ped->m_fCurrentRotation * HEADING_COMPRESS_VALUE),
         .vehicleIndex             = (uint8)vehicleIdx,
         .animState                = animState,
-        .matrix                   = compMatrix,
+        .matrix                   = CCompressedMatrixNotAligned::Compress(ped->GetMatrix()),
         .weaponModel              = (int16)ped->m_nWeaponModelId,
         .animGroup                = (uint16)ped->m_nAnimGroup,
         .contactSurfaceBrightness = (uint8)(ped->m_fContactSurfaceBrightness * 100.0f),
@@ -387,10 +384,19 @@ void CReplay::RecordPedDeleted(CPed* ped) {
 void CReplay::InitialiseVehiclePoolConversionTable() {
     rng::fill(m_VehiclePoolConversion, -1);
     auto convIdx = 0u;
-    for (auto poolIdx = 0; poolIdx < GetVehiclePool()->GetSize() && convIdx < std::size(m_VehiclePoolConversion); poolIdx++, convIdx++) {
-        if (GetVehiclePool()->GetAt(poolIdx) && IsThisVehicleUsedInRecording(convIdx)) {
-            m_VehiclePoolConversion[convIdx] = poolIdx;
+    for (auto poolIdx = 0; poolIdx < GetVehiclePool()->GetSize(); poolIdx++) {
+        if (GetVehiclePool()->GetAt(poolIdx))
+            continue;
+
+        if (!IsThisVehicleUsedInRecording(convIdx)) {
+            while (++convIdx != std::size(m_VehiclePoolConversion) && !IsThisVehicleUsedInRecording(convIdx))
+                ;
+
+            if (convIdx >= std::size(m_VehiclePoolConversion))
+                break;
         }
+
+        m_VehiclePoolConversion[convIdx++] = poolIdx;
     }
 }
 
@@ -398,10 +404,19 @@ void CReplay::InitialiseVehiclePoolConversionTable() {
 void CReplay::InitialisePedPoolConversionTable() {
     rng::fill(m_PedPoolConversion, -1);
     auto convIdx = 0u;
-    for (auto poolIdx = 0; poolIdx < GetPedPool()->GetSize() && convIdx < std::size(m_PedPoolConversion); poolIdx++, convIdx++) {
-        if (GetPedPool()->GetAt(poolIdx) && IsThisVehicleUsedInRecording(convIdx)) {
-            m_PedPoolConversion[convIdx] = poolIdx;
+    for (auto poolIdx = 0; poolIdx < GetPedPool()->GetSize(); poolIdx++) {
+        if (GetPedPool()->GetAt(poolIdx))
+            continue;
+
+        if (!IsThisPedUsedInRecording(convIdx)) {
+            while (++convIdx != std::size(m_PedPoolConversion) && !IsThisPedUsedInRecording(convIdx))
+                ;
+
+            if (convIdx >= std::size(m_PedPoolConversion))
+                break;
         }
+
+        m_PedPoolConversion[convIdx++] = poolIdx;
     }
 }
 
@@ -501,8 +516,7 @@ void CReplay::ProcessPedUpdate(CPed* ped, float interpValue, CAddressInReplayBuf
     ped->m_fCurrentRotation = (float)packet.ped.heading / HEADING_COMPRESS_VALUE;
     ped->m_fAimingRotation  = (float)packet.ped.heading / HEADING_COMPRESS_VALUE;
 
-    CMatrix decompressed;
-    packet.ped.matrix.DecompressIntoFullMatrix(decompressed);
+    auto decompressed = CCompressedMatrixNotAligned::Decompress(packet.ped.matrix);
     decompressed.ScaleAll(interpValue);
     ped->GetMatrix().ScaleAll(1.0f - interpValue);
     ped->GetMatrix() += decompressed;
@@ -1414,6 +1428,7 @@ tReplayBlockData tReplayBlockData::MakeVehicleUpdateData(CVehicle* vehicle, int3
     ret.vehicle.poolRef  = (uint8)poolIdx;
     ret.vehicle.health   = (uint8)(std::min(vehicle->m_fHealth, 1000.0f) / 4.0f);
     ret.vehicle.gasPedal = (uint8)(vehicle->m_fGasPedal * 100.0f);
+    ret.vehicle.matrix   = CCompressedMatrixNotAligned::Compress(vehicle->GetMatrix());
     ret.vehicle.modelId  = vehicle->m_nModelIndex;
     ret.vehicle.panels   = (vehicle->IsAutomobile()) ? vehicle->AsAutomobile()->m_damageManager.m_nPanelsStatus : 0;
     ret.vehicle.vecMoveSpeed = {

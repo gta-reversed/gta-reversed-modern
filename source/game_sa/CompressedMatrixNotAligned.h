@@ -31,6 +31,19 @@ public:
     static void InjectHooks();
 
     void DecompressIntoFullMatrix(CMatrix& matrix) const;
-    void CompressFromFullMatrix(CMatrix& matrix);
+    void CompressFromFullMatrix(const CMatrix& matrix);
+
+    // @notsa
+    static auto Compress(const CMatrix& matrix) {
+        CCompressedMatrixNotAligned compMatrix{};
+        compMatrix.CompressFromFullMatrix(matrix);
+        return compMatrix;
+    }
+
+    static auto Decompress(const CCompressedMatrixNotAligned& compMatrix) {
+        CMatrix matrix{};
+        compMatrix.DecompressIntoFullMatrix(matrix);
+        return matrix;
+    }
 };
 VALIDATE_SIZE(CCompressedMatrixNotAligned, 20);
