@@ -74,7 +74,7 @@ struct tReplayBlockData {
             uint16 modelId;
             uint8 pedType;
             uint8 align[3];
-        } playerData;
+        } playerData; // also called `ped header`
         struct PedBlock {
             uint8 index;
             int8 heading;
@@ -87,7 +87,7 @@ struct tReplayBlockData {
             uint8 contactSurfaceBrightness;
             uint8 flags;
             uint8 __unk[2];
-        } ped;
+        } ped; // also called `ped update`
         struct CameraBlock {
             uint8 unk[75];
             CVector firstFocusPosn;

@@ -11,6 +11,8 @@
 #include "Skidmarks.h"
 #include "extensions/enumerate.hpp"
 
+constexpr float HEADING_COMPRESS_VALUE = 40.764328f;
+
 void CReplay::InjectHooks() {
     RH_ScopedClass(CReplay);
     RH_ScopedCategoryGlobal();
@@ -20,7 +22,7 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(DisableReplays, 0x45B150);
     RH_ScopedInstall(EnableReplays, 0x45B160);
     RH_ScopedInstall(StorePedAnimation, 0x45B170);
-    // RH_ScopedInstall(StorePedUpdate, 0x0, { .reversed = false });
+    RH_ScopedInstall(StorePedUpdate, 0x45C940, {.reversed = true});
     RH_ScopedInstall(RetrievePedAnimation, 0x45B4D0);
     RH_ScopedInstall(ProcessReplayCamera, 0x45D060);
     RH_ScopedInstall(Display, 0x45C210);
@@ -192,7 +194,41 @@ void CReplay::StorePedAnimation(CPed* ped, CStoredAnimationState& state) {
 
 // 0x45C940
 void CReplay::StorePedUpdate(CPed* ped, uint8 index) {
-    plugin::Call<0x45C940, CPed*, uint8>(ped, index);
+    CCompressedMatrixNotAligned compMatrix{};
+    compMatrix.CompressFromFullMatrix(ped->GetMatrix());
+
+    // TODO: refactor
+    uint8 flags = 0u;
+    auto v3 = (flags ^ ((uint32)ped->m_nFlags >> 7)) & 1 ^ flags;
+    auto v4 = v3 ^ (v3 ^ (uint8)(2 * ((uint32)ped->m_nFlags >> 30))) & 2;
+    flags = v4 ^ (v4 ^ (4 * (ped->m_nFlags < 0))) & 4;
+
+    if (ped == FindPlayerPed() && gbFirstPersonRunThisFrame) {
+        flags &= ~1u;
+    }
+
+    auto vehicleIdx = [ped]() {
+        if (ped->IsInVehicle()) {
+            return GetVehiclePool()->GetIndex(ped->GetVehicleIfInOne()) + 1;
+        } else {
+            return 0;
+        }
+    }();
+
+    CStoredAnimationState animState{};
+    StorePedAnimation(ped, animState);
+
+    Record.Write({.type = REPLAY_PACKET_PED_UPDATE, .ped = {
+        .index                    = index,
+        .heading                  = (int8)(ped->m_fCurrentRotation * HEADING_COMPRESS_VALUE),
+        .vehicleIndex             = (uint8)vehicleIdx,
+        .animState                = animState,
+        .matrix                   = compMatrix,
+        .weaponModel              = (int16)ped->m_nWeaponModelId,
+        .animGroup                = (uint16)ped->m_nAnimGroup,
+        .contactSurfaceBrightness = (uint8)(ped->m_fContactSurfaceBrightness * 100.0f),
+        .flags                    = flags,
+    }}, true);
 }
 
 // 0x45B4D0
@@ -465,8 +501,8 @@ void CReplay::ProcessPedUpdate(CPed* ped, float interpValue, CAddressInReplayBuf
     if (!ped)
         return;
 
-    ped->m_fCurrentRotation = (float)packet.ped.heading * 0.024531251f;
-    ped->m_fAimingRotation  = (float)packet.ped.heading * 0.024531251f;
+    ped->m_fCurrentRotation = (float)packet.ped.heading / HEADING_COMPRESS_VALUE;
+    ped->m_fAimingRotation  = (float)packet.ped.heading / HEADING_COMPRESS_VALUE;
 
     CMatrix decompressed;
     packet.ped.matrix.DecompressIntoFullMatrix(decompressed);
