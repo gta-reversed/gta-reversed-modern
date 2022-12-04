@@ -28,7 +28,7 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(EmptyPedsAndVehiclePools_NoDestructors, 0x45D390);
     RH_ScopedInstall(GoToNextBlock, 0x45E2A0);
     RH_ScopedInstall(RecordVehicleDeleted, 0x45EBB0);
-    RH_ScopedInstall(RecordPedDeleted, 0x45EC20, { .reversed = false }); // <-- broken
+    RH_ScopedInstall(RecordPedDeleted, 0x45EC20);
     RH_ScopedInstall(SaveReplayToHD, 0x45C340);
     RH_ScopedInstall(PlayReplayFromHD, 0x460390);
     RH_ScopedInstall(ShouldStandardCameraBeProcessed, 0x45C440);
@@ -366,11 +366,11 @@ void CReplay::RecordVehicleDeleted(CVehicle* vehicle) {
         GoToNextBlock();
     }
 
-    Record.Write({.type = REPLAY_PACKET_DELETED_VEH, .deletedVehicle = {.poolRef = (int16)(GetVehiclePool()->GetIndex(vehicle) / 2584)}}, true);
+    Record.Write({.type = REPLAY_PACKET_DELETED_VEH, .deletedVehicle = {.poolRef = (int16)GetVehiclePool()->GetIndex(vehicle)}}, true);
     Record.Write({REPLAY_PACKET_END});
 }
 
-// 0x45EC20; broken for some reason
+// 0x45EC20
 void CReplay::RecordPedDeleted(CPed* ped) {
     if (Mode != MODE_RECORD)
         return;
@@ -379,7 +379,7 @@ void CReplay::RecordPedDeleted(CPed* ped) {
         GoToNextBlock();
     }
 
-    Record.Write({.type = REPLAY_PACKET_DELETED_PED, .deletedPed = {.poolRef = (int16)(GetPedPool()->GetIndex(ped) / 1988)}}, true);
+    Record.Write({.type = REPLAY_PACKET_DELETED_PED, .deletedPed = {.poolRef = (int16)GetPedPool()->GetIndex(ped)}}, true);
     Record.Write({REPLAY_PACKET_END});
 }
 
