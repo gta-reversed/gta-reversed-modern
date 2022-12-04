@@ -6,6 +6,7 @@
 #include "FireManager.h"
 #include "PedClothesDesc.h"
 #include "PlaneBanners.h"
+#include "RealTimeShadowManager.h"
 #include "Replay.h"
 #include "Skidmarks.h"
 #include "extensions/enumerate.hpp"
@@ -25,6 +26,7 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(Display, 0x45C210);
     RH_ScopedInstall(MarkEverythingAsNew, 0x45D430);
     RH_ScopedInstall(EmptyReplayBuffer, 0x45EC90);
+    RH_ScopedInstall(EmptyPedsAndVehiclePools_NoDestructors, 0x45D390);
     RH_ScopedInstall(GoToNextBlock, 0x45E2A0);
     RH_ScopedInstall(RecordVehicleDeleted, 0x45EBB0);
     RH_ScopedInstall(RecordPedDeleted, 0x45EC20, { .reversed = false }); // <-- broken
@@ -90,7 +92,6 @@ void CReplay::Update() {
 
     if (CTimer::GetIsCodePaused() || CTimer::GetIsUserPaused())
         return;
-
 
     static uint32& s_FrameRecordCounter = *reinterpret_cast<uint32*>(0x97FB40);
     if (Mode == MODE_PLAYBACK) {
@@ -248,15 +249,11 @@ void CReplay::RetrievePedAnimation(CPed* ped, const CStoredAnimationState& state
 
 // 0x45C210
 void CReplay::Display() {
-    static uint32& g_ReplayTextTimer = *(uint32*)0xA43240;
-
-    assert(Mode == eReplayMode::MODE_RECORD || Mode == eReplayMode::MODE_PLAYBACK);
-
-    if (ShouldStandardCameraBeProcessed()) // originally == MODE_RECORD
+    if (ShouldStandardCameraBeProcessed())
         return;
 
-    g_ReplayTextTimer++;
-    if ((g_ReplayTextTimer & 32) == 0)
+    static uint32& g_ReplayTextTimer = *(uint32*)0xA43240;
+    if ((++g_ReplayTextTimer & 32) == 0)
         return;
 
     CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
@@ -298,7 +295,21 @@ void CReplay::EmptyReplayBuffer() {
 
 // 0x45D390
 void CReplay::EmptyPedsAndVehiclePools_NoDestructors() {
-    plugin::Call<0x45D390>();
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        if (auto vehicle = GetVehiclePool()->GetAt(i)) {
+            CWorld::Remove(vehicle);
+        }
+    }
+
+    for (auto i = 0; i < GetPedPool()->GetSize(); i++) {
+        if (auto ped = GetPedPool()->GetAt(i)) {
+            CWorld::Remove(ped);
+
+            if (auto shadow = ped->m_pShadowData) {
+                g_realTimeShadowMan.ReturnRealTimeShadow(shadow);
+            }
+        }
+    }
 }
 
 // 0x45E2A0
