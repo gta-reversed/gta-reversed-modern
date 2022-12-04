@@ -477,13 +477,13 @@ bool CReplay::ShouldStandardCameraBeProcessed() {
     return Mode != MODE_PLAYBACK;
 }
 
-// unused
+// inlined
 // 0x45C450
 int32 CReplay::FindPoolIndexForPed(int32 index) {
     return m_PedPoolConversion[index];
 }
 
-// unused
+// inlined
 // 0x45C460
 int32 CReplay::FindPoolIndexForVehicle(int32 index) {
     return m_VehiclePoolConversion[index];
@@ -513,7 +513,7 @@ void CReplay::ProcessPedUpdate(CPed* ped, float interpValue, CAddressInReplayBuf
             vehicle->CleanUpOldReference(ped->m_pVehicle);
         vehicle = nullptr;
 
-        if (auto poolRef = m_VehiclePoolConversion[vehIdx - 1]; !GetVehiclePool()->IsFreeSlotAtIndex(poolRef)) {
+        if (auto poolRef = FindPoolIndexForVehicle(vehIdx - 1); !GetVehiclePool()->IsFreeSlotAtIndex(poolRef)) {
             vehicle = GetVehiclePool()->GetAt(poolRef);
             vehicle->RegisterReference(vehicle);
             ped->bInVehicle = true;
@@ -689,12 +689,12 @@ void CReplay::ProcessLookAroundCam() {
 
 // 0x45C470
 bool CReplay::CanWeFindPoolIndexForPed(int32 index) {
-    return m_PedPoolConversion[index] >= 0;
+    return FindPoolIndexForPed(index) >= 0;
 }
 
 // 0x45C490
 bool CReplay::CanWeFindPoolIndexForVehicle(int32 index) {
-    return m_VehiclePoolConversion[index] >= 0;
+    return FindPoolIndexForVehicle(index) >= 0;
 }
 
 // 0x45F020
@@ -1043,7 +1043,7 @@ void CReplay::RestoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet
 CPed* CReplay::DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel, tReplayBlockData& clothesPacket) {
     assert(pedPacket.type == REPLAY_PACKET_PED_HEADER);
 
-    if (GetPedPool()->GetAt(m_PedPoolConversion[pedPacket.pedHeader.poolRef]))
+    if (GetPedPool()->GetAt(FindPoolIndexForPed(pedPacket.pedHeader.poolRef)))
         return nullptr;
 
     if (pedPacket.pedHeader.pedType == PED_TYPE_PLAYER1 && loadModel) {
@@ -1056,11 +1056,11 @@ CPed* CReplay::DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel,
         if (pedPacket.pedHeader.pedType == PED_TYPE_PLAYER1) {
             assert(clothesPacket.type == REPLAY_PACKET_CLOTHES);
 
-            ped = new (m_PedPoolConversion[pedPacket.pedHeader.poolRef] << 8) CPlayerPed(PED_TYPE_PLAYER1, true);
+            ped = new (FindPoolIndexForPed(pedPacket.pedHeader.poolRef) << 8) CPlayerPed(PED_TYPE_PLAYER1, true);
             RestoreClothesDesc(*ped->GetClothesDesc(), clothesPacket);
             CClothes::RebuildPlayer(static_cast<CPlayerPed*>(ped), true);
         } else if (!loadModel) {
-            ped = new (m_PedPoolConversion[pedPacket.pedHeader.poolRef] << 8) CCivilianPed((ePedType)pedPacket.pedHeader.pedType, pedPacket.pedHeader.modelId);
+            ped = new (FindPoolIndexForPed(pedPacket.pedHeader.poolRef) << 8) CCivilianPed((ePedType)pedPacket.pedHeader.pedType, pedPacket.pedHeader.modelId);
         } else {
             return nullptr;
         }
@@ -1096,7 +1096,7 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
             break;
         case REPLAY_PACKET_VEHICLE: {
             const auto mi = packet.vehicle.modelId;
-            const auto poolIdx = m_VehiclePoolConversion[packet.vehicle.poolRef];
+            const auto poolIdx = FindPoolIndexForVehicle(packet.vehicle.poolRef);
 
             if (CStreaming::IsModelLoaded(mi)) {
                 auto created = [&]() -> CVehicle* {
@@ -1315,7 +1315,7 @@ CPlayerPed* CReplay::CreatePlayerPed() {
                 }
                 break;
             case REPLAY_PACKET_PED_UPDATE:
-                if (player && player == GetPedPool()->GetAt(m_PedPoolConversion[packet.ped.poolRef])) {
+                if (player && player == GetPedPool()->GetAt(FindPoolIndexForPed(packet.ped.poolRef))) {
                     CAddressInReplayBuffer address = {.m_nOffset = offset, .m_pBase = &buffer, .m_bSlot = (uint8)i}; // m_bSlot definition is NOTSA
                     ProcessPedUpdate(player, 1.0f, address);
                     return player;
