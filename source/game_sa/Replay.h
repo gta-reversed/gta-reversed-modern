@@ -377,6 +377,7 @@ public:
     static void InitialisePedPoolConversionTable();
     static void InitialisePoolConversionTables();
     static void SaveReplayToHD();
+    static void PlayReplayFromHD();
     static bool ShouldStandardCameraBeProcessed();
     static void ProcessPedUpdate(CPed* ped, float a2, CAddressInReplayBuffer& address);
     static void ProcessReplayCamera();

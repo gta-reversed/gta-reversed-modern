@@ -1,20 +1,21 @@
 #include "StdInc.h"
 
-#include "Replay.h"
-#include "Skidmarks.h"
-#include "PlaneBanners.h"
+#include "Camera.h"
+#include "ControllerConfigManager.h"
+#include "EntryExitManager.h"
 #include "FireManager.h"
 #include "PedClothesDesc.h"
-#include "Camera.h"
+#include "PlaneBanners.h"
+#include "Replay.h"
+#include "Skidmarks.h"
 #include "extensions/enumerate.hpp"
-
-// player desc: PED_HEADER -> CLOTHES -> PED_UPDATE
 
 void CReplay::InjectHooks() {
     RH_ScopedClass(CReplay);
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x45E220);
+    RH_ScopedInstall(Update, 0x460500);
     RH_ScopedInstall(DisableReplays, 0x45B150);
     RH_ScopedInstall(EnableReplays, 0x45B160);
     RH_ScopedInstall(StorePedAnimation, 0x45B170);
@@ -28,6 +29,7 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(RecordVehicleDeleted, 0x45EBB0);
     RH_ScopedInstall(RecordPedDeleted, 0x45EC20, { .reversed = false }); // <-- broken
     RH_ScopedInstall(SaveReplayToHD, 0x45C340);
+    RH_ScopedInstall(PlayReplayFromHD, 0x460390);
     RH_ScopedInstall(ShouldStandardCameraBeProcessed, 0x45C440);
     RH_ScopedInstall(ProcessLookAroundCam, 0x45D760);
     RH_ScopedInstall(FindPoolIndexForPed, 0x45C450);
@@ -58,7 +60,6 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(StreamAllNecessaryCarsAndPeds, 0x45D4B0);
     RH_ScopedInstall(CreatePlayerPed, 0x45D540, { .locked = true });
     RH_ScopedInstall(TriggerPlayback, 0x4600F0);
-    RH_ScopedInstall(Update, 0x460500, { .reversed = false });
 }
 
 // 0x460625 thunk
@@ -81,7 +82,42 @@ void CReplay::Init() {
 
 // 0x460500
 void CReplay::Update() {
-    plugin::Call<0x460500>();
+    if (CCutsceneMgr::IsCutsceneProcessing() || CPad::GetPad()->ArePlayerControlsDisabled()
+        || FrontEndMenuManager.m_bMenuActive || CEntryExitManager::ms_exitEnterState) {
+        Init();
+        return;
+    }
+
+    if (CTimer::GetIsCodePaused() || CTimer::GetIsUserPaused())
+        return;
+
+
+    static uint32& s_FrameRecordCounter = *reinterpret_cast<uint32*>(0x97FB40);
+    if (Mode == MODE_PLAYBACK) {
+        PlayBackThisFrame();
+    } else if (CTimer::GetTimeInMS() - s_FrameRecordCounter > 26) {
+        s_FrameRecordCounter = CTimer::GetTimeInMS();
+        RecordThisFrame();
+    }
+
+    if (CDraw::FadeValue == 0 && bReplayEnabled) {
+        if (Mode == MODE_PLAYBACK) {
+            if (ControlsManager.GetIsKeyboardKeyDown(rsF1) || ControlsManager.GetIsKeyboardKeyDown(rsF3)) {
+                FinishPlayback();
+            }
+        } else {
+            if (ControlsManager.GetIsKeyboardKeyDown(rsF1)) {
+                // Play stored replay
+                TriggerPlayback(REPLAY_CAM_MODE_AS_STORED, CVector{}, false);
+            } else if (ControlsManager.GetIsKeyboardKeyDown(rsF2)) {
+                // Save to hard disk
+                SaveReplayToHD();
+            } else if (ControlsManager.GetIsKeyboardKeyDown(rsF3)) {
+                // Play from hard disk
+                PlayReplayFromHD();
+            }
+        }
+    }
 }
 
 // 0x45B150
@@ -354,11 +390,42 @@ void CReplay::SaveReplayToHD() {
         CFileMgr::Write(file, &Buffers.at(slot), sizeof(tReplayBuffer));
 
         for (slot = (slot + 1) % 8; BufferStatus[slot] != REPLAYBUFFER_IN_USE; slot = (slot + 1) % 8) {
-            CFileMgr::Write(file, &Buffers.at(slot), sizeof(tReplayBuffer));
+            CFileMgr::Write(file, &Buffers[slot], sizeof(tReplayBuffer));
         }
 
         CFileMgr::CloseFile(file);
     }
+    CFileMgr::SetDir("");
+}
+
+// 0x460390
+void CReplay::PlayReplayFromHD() {
+    CFileMgr::SetDirMyDocuments();
+    if (auto file = CFileMgr::OpenFile("replay.rep", "rb")) {
+        CFileMgr::Read(file, gString, 8u);
+
+        if (strncmp(gString, "GtaSA29", 8u) != 0) {
+            DEV_LOG("Invalid replay file data, header unmatch (='{}')", std::string_view{gString, 8u});
+        } else {
+            auto bufferIdx = 0u;
+            for (; bufferIdx < 8u && CFileMgr::Read(file, &Buffers[bufferIdx], sizeof(tReplayBuffer)); bufferIdx++) {
+                BufferStatus[bufferIdx] = REPLAYBUFFER_FULL;
+            }
+            BufferStatus[bufferIdx - 1] = REPLAYBUFFER_IN_USE; // Mark last used buffer as in-use.
+
+            for (auto i = bufferIdx; i < 8; i++) { // Mark unfilled buffer as n/a.
+                BufferStatus[i] = REPLAYBUFFER_NOT_AVAILABLE;
+            }
+
+            CFileMgr::SetDir(""); // FileMgr dir should be resetted to root before the TriggerPlayback call.
+            TriggerPlayback(REPLAY_CAM_MODE_AS_STORED, CVector{}, false);
+            bPlayingBackFromFile = true;
+            bAllowLookAroundCam = true;
+            StreamAllNecessaryCarsAndPeds();
+        }
+        CFileMgr::CloseFile(file);
+    }
+    CFileMgr::SetDir("");
 }
 
 // 0x45C440
