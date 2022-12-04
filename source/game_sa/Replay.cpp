@@ -17,7 +17,7 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(Init, 0x45E220);
     RH_ScopedInstall(DisableReplays, 0x45B150);
     RH_ScopedInstall(EnableReplays, 0x45B160);
-    // RH_ScopedInstall(StorePedAnimation, 0x0, { .reversed = false });
+    RH_ScopedInstall(StorePedAnimation, 0x45B170);
     // RH_ScopedInstall(StorePedUpdate, 0x0, { .reversed = false });
     RH_ScopedInstall(RetrievePedAnimation, 0x45B4D0);
     RH_ScopedInstall(ProcessReplayCamera, 0x45D060);
@@ -32,7 +32,7 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(ProcessLookAroundCam, 0x45D760);
     RH_ScopedInstall(FindPoolIndexForPed, 0x45C450);
     RH_ScopedInstall(FindPoolIndexForVehicle, 0x45C460);
-    RH_ScopedInstall(ProcessPedUpdate, 0x45CA70, { .reversed = false });
+    RH_ScopedInstall(ProcessPedUpdate, 0x45CA70);
     // RH_ScopedInstall(CanWeFindPoolIndexForPed, 0x0, { .reversed = false });
     // RH_ScopedInstall(CanWeFindPoolIndexForVehicle, 0x0, { .reversed = false });
     RH_ScopedInstall(StorePlayerInfoVariables, 0x45F020);
@@ -56,7 +56,7 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(FindFirstFocusCoordinate, 0x45D6C0);
     RH_ScopedInstall(NumberFramesAvailableToPlay, 0x45D670);
     RH_ScopedInstall(StreamAllNecessaryCarsAndPeds, 0x45D4B0);
-    RH_ScopedInstall(CreatePlayerPed, 0x45D540);
+    RH_ScopedInstall(CreatePlayerPed, 0x45D540, { .locked = true });
     RH_ScopedInstall(TriggerPlayback, 0x4600F0);
     RH_ScopedInstall(Update, 0x460500, { .reversed = false });
 }
@@ -94,9 +94,63 @@ void CReplay::EnableReplays() {
     bReplayEnabled = true;
 }
 
-// 0x
-void CReplay::StorePedAnimation() {
-    plugin::Call<0x0>();
+// 0x45B170
+void CReplay::StorePedAnimation(CPed* ped, CStoredAnimationState& state) {
+    float blendValue{};
+    CAnimBlendAssociation* secondAnim{};
+    const auto assocMain = RpAnimBlendClumpGetMainAssociation(ped->m_pRwClump, &secondAnim, &blendValue);
+    if (assocMain) {
+        state.first = {
+            .m_nAnimId   = assocMain->m_nAnimId,
+            .m_nTime     = (uint8)(std::clamp(assocMain->m_fCurrentTime, 0.0f, 4.0f) * 63.75f),
+            .m_nSpeed    = (uint8)(std::clamp(assocMain->m_fSpeed, 0.0f, 3.0f) * 85.0f),
+            .m_nGroupId1 = (uint8)assocMain->m_nAnimGroup
+        };
+    } else {
+        state.first = {
+            .m_nAnimId   = ANIM_ID_IDLE,
+            .m_nTime     = 0,
+            .m_nSpeed    = 85,
+            .m_nGroupId1 = 0
+        };
+    }
+
+    if (secondAnim) {
+        state.second = {
+            .m_nAnimId   = secondAnim->m_nAnimId,
+            .m_nTime     = (uint8)(std::clamp(secondAnim->m_fCurrentTime, 0.0f, 4.0f) * 63.75f),
+            .m_nSpeed    = (uint8)(std::clamp(secondAnim->m_fSpeed, 0.0f, 3.0f) * 85.0f),
+            .m_nGroupId1 = (uint8)(std::clamp(blendValue, 0.0f, 2.0f) * 127.5f),
+            .m_nGroupId2 = (uint8)secondAnim->m_nAnimGroup
+        };
+    } else {
+        state.second = {
+            .m_nAnimId   = ANIM_ID_WALK,
+            .m_nTime     = 0,
+            .m_nSpeed    = 0,
+            .m_nGroupId1 = 0,
+            .m_nGroupId2 = 0
+        };
+    }
+
+    const auto assocPartial = RpAnimBlendClumpGetMainPartialAssociation(ped->m_pRwClump);
+    if (assocPartial && assocPartial->m_nAnimId >= ANIM_ID_WALK) {
+        state.third = {
+            .m_nAnimId   = assocPartial->m_nAnimId,
+            .m_nTime     = (uint8)(std::clamp(assocPartial->m_fCurrentTime, 0.0f, 4.0f) * 63.75f),
+            .m_nSpeed    = (uint8)(std::clamp(assocPartial->m_fSpeed, 0.0f, 3.0f) * 85.0f),
+            .m_nGroupId1 = (uint8)(std::clamp(assocPartial->m_fBlendAmount, 0.0f, 2.0f) * 127.5f),
+            .m_nGroupId2 = (uint8)assocPartial->m_nAnimGroup
+        };
+    } else {
+        state.third = {
+            .m_nAnimId   = ANIM_ID_WALK,
+            .m_nTime     = 0,
+            .m_nSpeed    = 0,
+            .m_nGroupId1 = 0,
+            .m_nGroupId2 = 0
+        };
+    }
 }
 
 // 0x45C940
@@ -105,50 +159,50 @@ void CReplay::StorePedUpdate(CPed* ped, uint8 index) {
 }
 
 // 0x45B4D0
-void CReplay::RetrievePedAnimation(CPed* ped, CStoredAnimationState* state) {
+void CReplay::RetrievePedAnimation(CPed* ped, const CStoredAnimationState& state) {
     // todo: refactor
 
     CAnimBlendAssociation* anim = nullptr;
-    if (state->first.m_nAnimId > 3u) {
-        auto animBlock = CAnimManager::ms_aAnimAssocGroups[state->first.m_nGroupId1].m_pAnimBlock;
+    if (state.first.m_nAnimId > 3u) {
+        auto animBlock = CAnimManager::ms_aAnimAssocGroups[state.first.m_nGroupId1].m_pAnimBlock;
         if (animBlock && animBlock->bLoaded) {
-            anim = CAnimManager::BlendAnimation(ped->m_pRwClump, (AssocGroupId)state->first.m_nGroupId1, (AnimationId)state->first.m_nAnimId, 100.0f);
+            anim = CAnimManager::BlendAnimation(ped->m_pRwClump, (AssocGroupId)state.first.m_nGroupId1, (AnimationId)state.first.m_nAnimId, 100.0f);
         } else {
             anim = CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_WALK, 100.0f);
         }
     } else {
-        anim = CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, (AnimationId)state->first.m_nAnimId, 100.0f);
+        anim = CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, (AnimationId)state.first.m_nAnimId, 100.0f);
     }
-    anim->SetCurrentTime(state->first.m_nTime * 0.015686275f);
-    anim->SetSpeed(state->first.m_nSpeed * 0.011764706f);
+    anim->SetCurrentTime(state.first.m_nTime * 0.015686275f);
+    anim->SetSpeed(state.first.m_nSpeed * 0.011764706f);
     anim->SetBlend(1.0f, 1.0f);
     anim->m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
 
     anim = nullptr;
-    if (state->second.m_nGroupId1 && state->second.m_nAnimId && CAnimManager::ms_aAnimAssocGroups[state->second.m_nGroupId2].m_nNumAnimations > 0) {
-        if (state->second.m_nAnimId > 3u) {
-            anim = CAnimManager::BlendAnimation(ped->m_pRwClump, (AssocGroupId)state->second.m_nGroupId2, (AnimationId)state->second.m_nAnimId, 100.0f);
+    if (state.second.m_nGroupId1 && state.second.m_nAnimId && CAnimManager::ms_aAnimAssocGroups[state.second.m_nGroupId2].m_nNumAnimations > 0) {
+        if (state.second.m_nAnimId > 3u) {
+            anim = CAnimManager::BlendAnimation(ped->m_pRwClump, (AssocGroupId)state.second.m_nGroupId2, (AnimationId)state.second.m_nAnimId, 100.0f);
         } else {
-            anim = CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, (AnimationId)state->second.m_nAnimId, 100.0f);
+            anim = CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, (AnimationId)state.second.m_nAnimId, 100.0f);
         }
 
         if (anim) {
-            anim->SetCurrentTime(state->second.m_nTime * 0.015686275f);
-            anim->SetSpeed(state->second.m_nSpeed * 0.011764706f);
-            anim->SetBlend(state->second.m_nGroupId1 * 0.0078431377f, 1.0f); // wtf?
+            anim->SetCurrentTime(state.second.m_nTime * 0.015686275f);
+            anim->SetSpeed(state.second.m_nSpeed * 0.011764706f);
+            anim->SetBlend(state.second.m_nGroupId1 * 0.0078431377f, 1.0f); // wtf?
             anim->m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
         }
     }
 
     RpAnimBlendClumpRemoveAssociations(ped->m_pRwClump, 16u); // todo: flags
-    if (state->third.m_nGroupId1 && state->third.m_nAnimId) {
-        if (/*state->third.m_nGroupId1 >= 0 &&*/ state->third.m_nAnimId != 3u) {
-            if (auto animBlock = CAnimManager::ms_aAnimAssocGroups[state->third.m_nGroupId2].m_pAnimBlock; animBlock && animBlock->bLoaded) {
-                anim = CAnimManager::BlendAnimation(ped->m_pRwClump, (AssocGroupId)state->third.m_nGroupId2, (AnimationId)state->third.m_nAnimId, 1000.0f);
+    if (state.third.m_nGroupId1 && state.third.m_nAnimId) {
+        if (/*state.third.m_nGroupId1 >= 0 &&*/ state.third.m_nAnimId != 3u) {
+            if (auto animBlock = CAnimManager::ms_aAnimAssocGroups[state.third.m_nGroupId2].m_pAnimBlock; animBlock && animBlock->bLoaded) {
+                anim = CAnimManager::BlendAnimation(ped->m_pRwClump, (AssocGroupId)state.third.m_nGroupId2, (AnimationId)state.third.m_nAnimId, 1000.0f);
 
-                anim->SetCurrentTime(state->third.m_nTime * 0.015686275f);
-                anim->SetSpeed(state->third.m_nSpeed * 0.011764706f);
-                anim->SetBlend(state->third.m_nGroupId1 * 0.0078431377f, 0.0f);
+                anim->SetCurrentTime(state.third.m_nTime * 0.015686275f);
+                anim->SetSpeed(state.third.m_nSpeed * 0.011764706f);
+                anim->SetBlend(state.third.m_nGroupId1 * 0.0078431377f, 0.0f);
                 anim->m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
             }
         }
@@ -236,7 +290,7 @@ void CReplay::RecordVehicleDeleted(CVehicle* vehicle) {
     Record.Write({REPLAY_PACKET_END});
 }
 
-// 0x45EC20
+// 0x45EC20; broken for some reason
 void CReplay::RecordPedDeleted(CPed* ped) {
     if (Mode != MODE_RECORD)
         return;
@@ -328,9 +382,8 @@ int32 CReplay::FindPoolIndexForVehicle(int32 index) {
 void CReplay::ProcessPedUpdate(CPed* ped, float interpValue, CAddressInReplayBuffer& address) {
     assert(address.Read<eReplayPacket>() == REPLAY_PACKET_PED_UPDATE);
     const auto packet = address.Read<tReplayBlockData>();
-    address.m_nOffset += FindSizeOfPacket(REPLAY_PACKET_PED_UPDATE); // count packet read beforehand.
 
-    auto isplaya = ped == FindPlayerPed();
+    address.m_nOffset += FindSizeOfPacket(REPLAY_PACKET_PED_UPDATE); // count packet read beforehand.
     if (!ped)
         return;
 
@@ -371,14 +424,15 @@ void CReplay::ProcessPedUpdate(CPed* ped, float interpValue, CAddressInReplayBuf
     auto v10 = ((uint8)ped->m_nFlags ^ (uint8)(packet.ped.flags << 7)) & 0x80 ^ ped->m_nFlags;
     auto v11 = v10 ^ (v10 ^ ((uint8)packet.ped.flags << 29)) & 0x40000000;
     ped->m_nFlags = ((uint8)packet.ped.flags << 29) ^ (v11 ^ ((uint8)packet.ped.flags << 29)) & 0x7FFFFFFF;
+    ped->m_fContactSurfaceBrightness = static_cast<float>(packet.ped.contactSurfaceBrightness) / 100.0f;
+    RetrievePedAnimation(ped, packet.ped.animState);
 
-    ped->m_fContactSurfaceBrightness = static_cast<float>(packet.ped.contactSurfaceBrightness);
     ped->RemoveWeaponModel();
     if (const auto wm = packet.ped.weaponModel; wm != -1) {
-        if (CStreaming::ms_aInfoForModel[wm].m_nLoadState == 1) {
+        if (CStreaming::ms_aInfoForModel[wm].IsLoaded()) {
             ped->AddWeaponModel(wm);
         } else {
-            CStreaming::RequestModel((eModelID)wm, STREAMING_DEFAULT);
+            CStreaming::RequestModel(static_cast<eModelID>(wm), STREAMING_DEFAULT);
         }
     }
 
@@ -394,14 +448,14 @@ void CReplay::ProcessReplayCamera() {
     auto modelling = TheCamera.GetRwMatrix();
     switch (CameraMode) {
     case REPLAY_CAM_MODE_TOPDOWN:
-        TheCamera.GetPosition() = CVector{CameraFocus.x, CameraFocus.y, CameraFocus.z + 15.0f};
         TheCamera.GetRight()    = CVector{1.0f, 0.0f,  0.0f};
         TheCamera.GetUp()       = CVector{0.0f, 1.0f,  0.0f};
         TheCamera.GetForward()  = CVector{0.0f, 0.0f, -1.0f};
+        TheCamera.GetPosition() = CVector{CameraFocus.x, CameraFocus.y, CameraFocus.z + 15.0f};
 
-        modelling->pos = CameraFocus;
-        modelling->at = TheCamera.GetForward();
-        modelling->up = TheCamera.GetUp();
+        modelling->pos   = CameraFocus;
+        modelling->at    = TheCamera.GetForward();
+        modelling->up    = TheCamera.GetUp();
         modelling->right = TheCamera.GetRight();
         break;
     case REPLAY_CAM_MODE_FIXED:
@@ -409,13 +463,13 @@ void CReplay::ProcessReplayCamera() {
         const auto right = direction.Cross({0.0f, 0.0f, 1.0f}).Normalized();
 
         TheCamera.GetPosition() = CameraFixed;
-        TheCamera.GetForward() = direction;
-        TheCamera.GetUp() = direction.Cross(right);
-        TheCamera.GetRight() = right;
+        TheCamera.GetForward()  = direction;
+        TheCamera.GetUp()       = direction.Cross(right);
+        TheCamera.GetRight()    = right;
 
-        modelling->pos = CameraFocus;
-        modelling->at = TheCamera.GetForward();
-        modelling->up = TheCamera.GetUp();
+        modelling->pos   = CameraFocus;
+        modelling->at    = TheCamera.GetForward();
+        modelling->up    = TheCamera.GetUp();
         modelling->right = TheCamera.GetRight();
         break;
     default:
@@ -440,9 +494,8 @@ void CReplay::ProcessLookAroundCam() {
         const auto steer = CVector2D{pad->NewMouseControllerState.X / 200.0f, pad->NewMouseControllerState.Y / 200.0f};
         // steerX2 = steer.x;
         // steerY2 = steer.y;
-        // if (v2 | v2)             <-- replays does not care about inverted-y, maybe they are
-        //     steerX2 = -steerX2;      undefined because of that?
-        // if (steerX2 > 0.01f)
+        // if (v2 | v2)             <-- replays does not care about inverted-y, maybe is it
+        // if (steerX2 > 0.01f)         because of these are undefined?
         //     goto LABEL_8
         // if (v6 | v7)
         //     steerY2 = -steerY2;
@@ -913,10 +966,12 @@ bool CReplay::IsThisVehicleUsedInRecording(int32 index) {
 // 0x45DDE0
 bool CReplay::IsThisPedUsedInRecording(int32 index) {
     for (auto& buffer : Buffers) {
-        for (auto& packet : buffer) {
-            if (packet.type == REPLAY_PACKET_PED_HEADER && packet.playerData.index == index) {
-                return true;
-            }
+        const auto packet = rng::find_if(buffer, [index](auto&& p) {
+            return p.type == REPLAY_PACKET_PED_HEADER && p.playerData.index == index;
+        });
+
+        if (packet != buffer.end()) {
+            return true;
         }
     }
     return false;
@@ -1035,10 +1090,12 @@ void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loa
         }
     }
 
+    // TODO: refactor
     auto slot = (idx + 1) % 8;
     for (auto j = BufferStatus[slot]; j != 2 && j != 1; j = BufferStatus[slot]) {
         slot = (slot + 1) % 8;
     }
+    slot %= 8;
 
     Playback.m_bSlot = slot;
     Playback.m_pBase = &Buffers[slot];
@@ -1077,7 +1134,6 @@ void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loa
     TheCamera.Fade(0.0f, eFadeFlag::FADE_IN);
     TheCamera.ProcessFade();
     TheCamera.Fade(1.5f, eFadeFlag::FADE_OUT);
-    constexpr auto s = sizeof(tReplayBlockData::ped);
 }
 
 // tReplayBlockData checks

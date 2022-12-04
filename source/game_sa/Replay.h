@@ -17,13 +17,14 @@ enum eReplayBufferStatus : uint8 {
 
 #pragma pack(push, 1)
 struct AnimationState {
-    uint16 m_nAnimId;
+    int16 m_nAnimId;
     uint8 m_nTime;
     uint8 m_nSpeed;
     uint8 m_nGroupId1;
     uint8 m_nGroupId2;
 };
 #pragma pack(pop)
+VALIDATE_SIZE(AnimationState, 6);
 
 struct CStoredAnimationState {
     AnimationState first;
@@ -76,7 +77,7 @@ struct tReplayBlockData {
         } playerData;
         struct PedBlock {
             uint8 index;
-            uint8 heading;
+            int8 heading;
             uint8 vehicleIndex; // 0: not in a vehicle
             CStoredAnimationState animState;
             uint8 __pad[2];
@@ -362,9 +363,9 @@ public:
     static void Update();
     static void DisableReplays();
     static void EnableReplays();
-    static void StorePedAnimation();
+    static void StorePedAnimation(CPed* ped, CStoredAnimationState& state);
     static void StorePedUpdate(CPed* ped, uint8 index);
-    static void RetrievePedAnimation(CPed* ped, CStoredAnimationState* state);
+    static void RetrievePedAnimation(CPed* ped, const CStoredAnimationState& state);
     static void Display();
     static void MarkEverythingAsNew();
     static void EmptyReplayBuffer();
