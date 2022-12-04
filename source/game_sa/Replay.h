@@ -216,7 +216,7 @@ public:
 
         // Returns total bytes written
         uint32 Write(uint32 offset, const tReplayBlockData& data) {
-            if (data.type == REPLAY_PACKET_END || data.type == REPLAY_PACKET_END_OF_FRAME) {
+            if (data.type == REPLAY_PACKET_END) {
                 *(eReplayPacket*)(buffer.data() + offset) = data.type;
                 return 1;
             }
