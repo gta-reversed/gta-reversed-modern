@@ -1,11 +1,14 @@
 #pragma once
 
-#include "Vector.h"
-#include "PlayerInfo.h"
 #include "CompressedMatrixNotAligned.h"
+#include "PlayerInfo.h"
+#include "Vector.h"
+#include "Vehicle.h"
+#include "Bmx.h"
 #include "eReplay.h"
 #include "ePedType.h"
 #include "eWeatherType.h"
+#include "extensions/enumerate.hpp"
 
 class CCamera;
 
@@ -33,8 +36,10 @@ struct CStoredAnimationState {
 };
 VALIDATE_SIZE(CStoredAnimationState, 18);
 
+// Used for compressing angle values while recording replays.
+constexpr float HEADING_COMPRESS_VALUE = 40.764328f;
+
 // NOTSA
-// TODO: maybe spread all struct inside union and use std::variant?
 #pragma pack(push, 1)
 struct tReplayBlockData {
     eReplayPacket type;
@@ -43,7 +48,7 @@ struct tReplayBlockData {
         // unk sizes are -1 because we don't include the `type` value in the beginning.
         struct ENDBlock { /* nil */ } end;
         struct VehicleBlock {
-            uint8 index;
+            uint8 poolRef;
             uint8 health;
             uint8 gasPedal;
             CCompressedMatrixNotAligned matrix;
@@ -51,7 +56,9 @@ struct tReplayBlockData {
             uint8 angleDoorRF;
             uint16 modelId;
             uint32 panels;
-            struct { uint8 x, y, z; } vecMoveSpeed;
+            struct {
+                int8 x, y, z;
+            } vecMoveSpeed;
             uint8 steerAngle_or_doomVerticalRot;
             uint8 wheelsSuspensionCompression[4];
             uint8 wheelRotation[4];
@@ -64,19 +71,20 @@ struct tReplayBlockData {
             uint8 pad[2];
         } vehicle;
         struct BikeBlock {
-            uint8 index;
-            uint8 unk[24];
-            uint16 modelId;
-            uint8 unk2[28];
+            VehicleBlock vehicle;
+            uint8 animLean;
+            uint8 dword10; // possibly wrong? look ::MakeBikeUpdateData
+            uint8 animLean2;
+            uint8 steerAngle;
         } bike;
-        struct PlayerDataBlock {
-            uint8 index;
-            uint16 modelId;
+        struct PedHeaderBlock {
+            uint8 poolRef;
+            int16 modelId;
             uint8 pedType;
             uint8 align[3];
-        } playerData; // also called `ped header`
+        } pedHeader;
         struct PedBlock {
-            uint8 index;
+            uint8 poolRef;
             int8 heading;
             uint8 vehicleIndex; // 0: not in a vehicle
             CStoredAnimationState animState;
@@ -89,23 +97,42 @@ struct tReplayBlockData {
             uint8 __unk[2];
         } ped; // also called `ped update`
         struct CameraBlock {
-            uint8 unk[75];
+            bool isUsingRemoteVehicle;
+            uint8 __pad[2];
+            uint8 matrix[sizeof(CMatrix)]; // cast to CMatrix until i found a solution to make it CMatrix cleanly.
             CVector firstFocusPosn;
         } camera;
-        struct DayTimeBlock {
+        struct ClockBlock {
             uint8 currentHour;
             uint8 currentMinute;
             uint8 align;
-        } dayTime;
-        struct WeatherBlock { uint8 unk[7]; } weather;
+        } clock;
+        struct WeatherBlock {
+            uint8 oldWeather;
+            uint8 newWeather;
+            uint8 __pad;
+            float interpValue;
+        } weather;
         struct EOFBlock { uint8 do_not_access[3]; } eof; // end of frame
         struct TimerBlock {
             uint8 align[3];
-            uint32 timer;
+            uint32 timeInMS;
         } timer;
-        struct BulletTraceBlock { uint8 unk[27]; } bulletTraces;
+        struct BulletTraceBlock {
+            uint8 __pad[2];
+            uint8 index;
+            CVector start;
+            CVector end;
+        } bulletTrace;
         struct ParticleBlock { uint8 unk[19]; } particle;
-        struct MiscBlock { uint8 unk[15]; } misc;
+        struct MiscBlock {
+            uint8 __pad[3];
+            uint32 camShakeStart;
+            float camShakeForce;
+            uint8 currArea;
+            uint8 liftCam;
+            uint8 __pad2[2];
+        } misc;
         struct UnkBlock13 {
             uint8 unk;
             int16 poolRef;
@@ -115,20 +142,30 @@ struct tReplayBlockData {
             int16 poolRef;
         } deletedPed;
         struct BmxBlock {
-            uint8 index;
-            uint8 unk[54];
-        } bmx;
+            VehicleBlock vehicle;
+            uint8 animLean;
+            uint8 dword10; // possibly wrong? look ::MakeBikeUpdateData
+            uint8 animLean2;
+            uint8 steerAngle;
+        } bmx; // same as BikeBlock
         struct HeliBlock {
-            uint8 index;
-            uint8 unk[54];
+            VehicleBlock vehicle;
+            float rotorSpeed;
         } heli;
         struct PlaneBlock {
-            uint8 index;
-            uint8 unk[58];
+            VehicleBlock vehicle;
+            float propSpeed;
+            float field_9C8;
         } plane;
         struct TrainBlock {
-            uint8 index;
-            uint8 unk[74];
+            VehicleBlock vehicle;
+            float trainSpeed;
+            float currentRailDistance;
+            float length;
+            uint32 prevCarriageRef;
+            uint32 nextCarriageRef;
+            uint8 trackId;
+            uint8 align[3];
         } train;
         struct ClothesBlock {
             uint8 align[3];
@@ -139,6 +176,11 @@ struct tReplayBlockData {
         } clothes;
     };
 #pragma pack(pop)
+
+    static tReplayBlockData MakeVehicleUpdateData(CVehicle* vehicle, int32 poolIdx);
+    static tReplayBlockData MakeTrainUpdateData(CTrain* train, int32 poolIdx);
+    static tReplayBlockData MakeBikeUpdateData(CBike* bike, int32 poolIdx);
+    static tReplayBlockData MakeBmxUpdateData(CBmx* bmx, int32 poolIdx);
 };
 #pragma pack(pop)
 
@@ -391,7 +433,7 @@ public:
     static void RestorePlayerInfoVariables();
     static void RestoreStuffFromMem();
     static void FinishPlayback();
-    static void StoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet);
+    static void StoreClothesDesc(const CPedClothesDesc& desc, tReplayBlockData& packet);
     static void RecordThisFrame();
     static void RestoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet);
     static CPed* DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel, tReplayBlockData& clothesPacket);

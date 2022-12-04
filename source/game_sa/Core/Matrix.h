@@ -49,6 +49,7 @@ private:
 public:
     RwMatrix* m_pAttachMatrix;       // 0x40
     bool      m_bOwnsAttachedMatrix; // 0x44 - Do we need to delete attached matrix at detaching
+    uint8     pad[3];                // 0x45
 
 public:
     static void InjectHooks();
