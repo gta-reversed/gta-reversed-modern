@@ -1793,6 +1793,7 @@ void tReplayBlockData::ExtractBikeUpdateData(tReplayBlockData& packet, CBike* bi
 
     bike->GetRideAnimData()->m_fSteerAngle = (float)packet.bike.steerAngle / 50.0f;
     bike->GetRideAnimData()->m_fAnimLean   = (float)packet.bike.animLean / 50.0f;
+    bike->m_bLeanMatrixCalculated = false;
     bike->CalculateLeanMatrix();
 }
 

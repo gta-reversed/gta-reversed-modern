@@ -70,8 +70,7 @@ struct tReplayBlockData {
             uint8 vehicleType;
             uint8 __pad[2];
         } vehicle;
-        struct BikeBlock {
-            VehicleBlock vehicle;
+        struct BikeBlock : VehicleBlock {
             uint8 animLean;
             uint8 steerAngle;
             uint8 __pad[2];
@@ -143,23 +142,19 @@ struct tReplayBlockData {
             uint8 __pad;
             int16 poolRef;
         } deletedPed;
-        struct BmxBlock {
-            VehicleBlock vehicle;
+        struct BmxBlock : VehicleBlock {
             uint8 animLean;
             uint8 steerAngle;
             uint8 __pad[2];
         } bmx; // same as BikeBlock
-        struct HeliBlock {
-            VehicleBlock vehicle;
+        struct HeliBlock : VehicleBlock {
             float rotorSpeed;
         } heli;
-        struct PlaneBlock {
-            VehicleBlock vehicle;
+        struct PlaneBlock : VehicleBlock {
             float propSpeed;
             float field_9C8;
         } plane;
-        struct TrainBlock {
-            VehicleBlock vehicle;
+        struct TrainBlock : VehicleBlock {
             float trainSpeed;
             float currentRailDistance;
             float length;
