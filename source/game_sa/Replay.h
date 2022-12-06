@@ -130,7 +130,10 @@ struct tReplayBlockData {
             uint32 camShakeStart;
             float camShakeForce;
             uint8 currArea;
-            uint8 liftCam;
+            struct {
+                bool bVideoCam : 1;
+                bool bLiftCam : 1;
+            } camConfig;
             uint8 __pad2[2];
         } misc;
         struct UnkBlock13 {
@@ -181,6 +184,8 @@ struct tReplayBlockData {
     static tReplayBlockData MakeTrainUpdateData(CTrain* train, int32 poolIdx);
     static tReplayBlockData MakeBikeUpdateData(CBike* bike, int32 poolIdx);
     static tReplayBlockData MakeBmxUpdateData(CBmx* bmx, int32 poolIdx);
+
+    static void ExtractVehicleUpdateData(tReplayBlockData& packet, CVehicle* vehicle, float interpolation);
 };
 #pragma pack(pop)
 
@@ -336,6 +341,7 @@ public:
     inline static bool& bPlayingBackFromFile = *reinterpret_cast<bool*>(0x97FAE1);
     inline static bool& bAllowLookAroundCam = *reinterpret_cast<bool*>(0x97FAE0);
     inline static bool& bDoLoadSceneWhenDone = *reinterpret_cast<bool*>(0x97FACC);
+    inline static bool& bIsUsingRemoteCar = *reinterpret_cast<bool*>(0x97F66D);
 
     inline static void*& pReferences = *reinterpret_cast<void**>(0x97FB0C);
     inline static void*& pPickups = *reinterpret_cast<void**>(0x97FB08);
@@ -436,13 +442,14 @@ public:
     static void StoreClothesDesc(const CPedClothesDesc& desc, tReplayBlockData& packet);
     static void RecordThisFrame();
     static void RestoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet);
-    static CPed* DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel, tReplayBlockData& clothesPacket);
+    static CPed* DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel, tReplayBlockData* clothesPacket);
     static bool PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, float interpolation, uint32* outTimer);
     static bool FastForwardToTime(uint32 start);
     static void PlayBackThisFrame();
 
     // Returns size of the specified packed id
-    static constexpr uint32 FindSizeOfPacket(eReplayPacket type); // constexpr cuz look tReplayBlockData
+    // NOTSA: Marked as constexpr because we're using this to validate tReplayBlockData block sizes.
+    static constexpr uint32 FindSizeOfPacket(eReplayPacket type);
     static bool IsThisVehicleUsedInRecording(int32 a1);
     static bool IsThisPedUsedInRecording(int32 a1);
     static void FindFirstFocusCoordinate(CVector& outPos);

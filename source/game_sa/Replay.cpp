@@ -436,7 +436,7 @@ void CReplay::SaveReplayToHD() {
         // TODO: refactor
         auto idx = 7u;
         for (auto&& [i, status] : notsa::enumerate(BufferStatus)) {
-            if (status == 2) {
+            if (status == REPLAYBUFFER_IN_USE) {
                 idx = i;
                 break;
             }
@@ -1022,13 +1022,18 @@ void CReplay::RecordThisFrame() {
         packet.bulletTrace.index = i;
         packet.bulletTrace.start = trace.m_vecStart;
         packet.bulletTrace.end = trace.m_vecEnd;
+
+        Record.Write(packet, true);
     }
 
     Record.Write({.type = REPLAY_PACKET_MISC, .misc = {
         .camShakeStart = TheCamera.m_nCamShakeStart,
         .camShakeForce = TheCamera.m_fCamShakeForce,
         .currArea      = (uint8)CGame::currArea,
-        .liftCam       = CSpecialFX::bLiftCam
+        .camConfig     = {
+            .bVideoCam = CSpecialFX::bVideoCam,
+            .bLiftCam = CSpecialFX::bLiftCam
+        }
     }}, true);
 
     Record.Write({.type = REPLAY_PACKET_END_OF_FRAME}, true);
@@ -1054,7 +1059,7 @@ void CReplay::RestoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet
 }
 
 // 0x45CEA0
-CPed* CReplay::DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel, tReplayBlockData& clothesPacket) {
+CPed* CReplay::DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel, tReplayBlockData* clothesPacket) {
     assert(pedPacket.type == REPLAY_PACKET_PED_HEADER);
 
     if (GetPedPool()->GetAt(FindPoolIndexForPed(pedPacket.pedHeader.poolRef)))
@@ -1068,10 +1073,10 @@ CPed* CReplay::DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel,
     if (CStreaming::GetInfo(pedPacket.pedHeader.modelId).IsLoaded()) {
         CPed* ped = nullptr;
         if (pedPacket.pedHeader.pedType == PED_TYPE_PLAYER1) {
-            assert(clothesPacket.type == REPLAY_PACKET_CLOTHES);
+            assert(clothesPacket->type == REPLAY_PACKET_CLOTHES);
 
             ped = new (FindPoolIndexForPed(pedPacket.pedHeader.poolRef) << 8) CPlayerPed(PED_TYPE_PLAYER1, true);
-            RestoreClothesDesc(*ped->GetClothesDesc(), clothesPacket);
+            RestoreClothesDesc(*ped->GetClothesDesc(), *clothesPacket);
             CClothes::RebuildPlayer(static_cast<CPlayerPed*>(ped), true);
         } else if (!loadModel) {
             ped = new (FindPoolIndexForPed(pedPacket.pedHeader.poolRef) << 8) CCivilianPed((ePedType)pedPacket.pedHeader.pedType, pedPacket.pedHeader.modelId);
@@ -1095,6 +1100,19 @@ CPed* CReplay::DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel,
 // 0x45F380
 bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, float interpolation, uint32* outTimer) {
     return plugin::CallAndReturn<bool, 0x45F380, CAddressInReplayBuffer, float, uint32*>(buffer, interpolation, outTimer);
+
+    const auto SetupVehicle = [](tReplayBlockData& packet, CVehicle* vehicle) {
+        vehicle->m_nStatus = STATUS_PLAYER_PLAYBACK_FROM_BUFFER;
+        vehicle->vehicleFlags.bUsedForReplay = true;
+        packet.vehicle.matrix.DecompressIntoFullMatrix(vehicle->GetMatrix());
+        vehicle->m_nPrimaryColor = packet.vehicle.primaryColor;
+        vehicle->m_nSecondaryColor = packet.vehicle.secondaryColor;
+        if (vehicle->IsSubBoat()) {
+            vehicle->AsBoat()->m_nBoatFlags.bAnchored = false;
+        }
+
+        CWorld::Add(vehicle);
+    };
 
     CBulletTraces::Init();
     for (auto it = &buffer.m_pBase[buffer.m_nOffset]; it->Read<eReplayPacket>(buffer.m_nOffset) != REPLAY_PACKET_END_OF_FRAME;) {
@@ -1131,20 +1149,100 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
                         NOTSA_UNREACHABLE("Unknown vehicle subtype ={}", (int)packet.vehicle.vehicleSubType);
                     }
                 }();
-                created->m_nStatus = STATUS_PLAYER_PLAYBACK_FROM_BUFFER;
-                created->vehicleFlags.bUsedForReplay = true;
-                packet.vehicle.matrix.DecompressIntoFullMatrix(*created->m_matrix);
-                created->m_nPrimaryColor = packet.vehicle.primaryColor;
-                created->m_nSecondaryColor = packet.vehicle.secondaryColor;
-                if (created->IsSubBoat()) {
-                    created->AsBoat()->m_nBoatFlags.bAnchored = false;
-                }
 
-                CWorld::Add(created);
+                SetupVehicle(packet, created);
             } else {
                 CStreaming::RequestModel(mi, STREAMING_DEFAULT);
             }
+
+            /* EXTRACT */
+            break;
         }
+        case REPLAY_PACKET_PED_HEADER:
+            DealWithNewPedPacket(packet, false, nullptr);
+            break;
+        case REPLAY_PACKET_PED_UPDATE:
+            ProcessPedUpdate(GetPedPool()->GetAt(packet.ped.poolRef), interpolation, buffer);
+            break;
+        case REPLAY_PACKET_GENERAL: {
+            TheCamera.GetMatrix().ScaleAll(1.0f - interpolation);
+            CMatrix packetMatrix(*(const CMatrix*)&packet.camera.matrix);
+            packetMatrix.ScaleAll(interpolation);
+            TheCamera.GetMatrix() += packetMatrix;
+            auto modelling = TheCamera.GetRwMatrix();
+            modelling->pos = TheCamera.GetMatrix().GetPosition();
+            modelling->at = TheCamera.GetMatrix().GetForward();
+            modelling->up = TheCamera.GetMatrix().GetUp();
+            modelling->right = TheCamera.GetMatrix().GetRight();
+
+            CameraFocus = packet.camera.firstFocusPosn * interpolation + CameraFocus * (1.0f - interpolation);
+            bIsUsingRemoteCar = packet.camera.isUsingRemoteVehicle;
+            break;
+        }
+        case REPLAY_PACKET_CLOCK:
+            CClock::SetGameClock(packet.clock.currentHour, packet.clock.currentMinute, 0);
+            break;
+        case REPLAY_PACKET_WEATHER:
+            CWeather::OldWeatherType = (eWeatherType)packet.weather.oldWeather;
+            CWeather::NewWeatherType = (eWeatherType)packet.weather.newWeather;
+            CWeather::InterpolationValue = packet.weather.interpValue;
+            break;
+        case REPLAY_PACKET_END_OF_FRAME:
+            break;
+        case REPLAY_PACKET_TIMER:
+            CTimer::SetTimeInMS(packet.timer.timeInMS);
+            break;
+        case REPLAY_PACKET_BULLET_TRACES: {
+            auto& trace = CBulletTraces::aTraces[packet.bulletTrace.index];
+            trace.m_bExists = true;
+            trace.m_vecStart = packet.bulletTrace.start;
+            trace.m_vecEnd = packet.bulletTrace.end;
+            break;
+        }
+        case REPLAY_PACKET_MISC:
+            TheCamera.m_nCamShakeStart = packet.misc.camShakeStart;
+            TheCamera.m_fCamShakeForce = packet.misc.camShakeForce;
+            CSpecialFX::bVideoCam = packet.misc.camConfig.bVideoCam;
+            CSpecialFX::bLiftCam = packet.misc.camConfig.bLiftCam;
+            CGame::currArea = packet.misc.currArea;
+            break;
+        case REPLAY_PACKET_DELETED_VEH: {
+            const auto idx = m_VehiclePoolConversion[packet.deletedVehicle.poolRef];
+            if (idx >= 0 && !GetVehiclePool()->IsFreeSlotAtIndex(idx)) {
+                if (auto vehicle = GetVehiclePool()->GetAt(idx)) {
+                    CWorld::Remove(vehicle);
+                    delete vehicle;
+                }
+            }
+            break;
+        }
+        case REPLAY_PACKET_DELETED_PED: {
+            const auto idx = m_PedPoolConversion[packet.deletedPed.poolRef];
+            if (idx >= 0 && !GetPedPool()->IsFreeSlotAtIndex(idx)) {
+                if (auto ped = GetPedPool()->GetAt(idx)) {
+                    CWorld::Remove(ped);
+                    delete ped;
+                }
+            }
+            break;
+        }
+        case REPLAY_PACKET_BMX: {
+            const auto poolIdx = m_VehiclePoolConversion[packet.bmx.vehicle.poolRef];
+
+            const auto mi = packet.bmx.vehicle.modelId;
+            if (CStreaming::IsModelLoaded(mi)) {
+                auto bmx = new (poolIdx << 8) CBmx(mi, MISSION_VEHICLE);
+                SetupVehicle(packet, bmx);
+            } else {
+                CStreaming::RequestModel(mi, STREAMING_DEFAULT);
+            }
+
+            /* EXTRACT */
+
+            break;
+        }
+        case REPLAY_PACKET_HELI:
+
         }
 
         if (packet.type != REPLAY_PACKET_END) {
@@ -1325,7 +1423,7 @@ CPlayerPed* CReplay::CreatePlayerPed() {
                     auto next = buffer.Read<tReplayBlockData>(offset + FindSizeOfPacket(REPLAY_PACKET_PED_HEADER));
                     assert(next.type == REPLAY_PACKET_CLOTHES);
 
-                    player = static_cast<CPlayerPed*>(DealWithNewPedPacket(packet, true, next));
+                    player = static_cast<CPlayerPed*>(DealWithNewPedPacket(packet, true, &next));
                 }
                 break;
             case REPLAY_PACKET_PED_UPDATE:
@@ -1511,6 +1609,27 @@ tReplayBlockData tReplayBlockData::MakeBmxUpdateData(CBmx* bmx, int32 poolIdx) {
     tReplayBlockData ret = MakeBikeUpdateData(bmx->AsBike(), poolIdx);
     ret.type = REPLAY_PACKET_BMX;
     return ret;
+}
+
+void tReplayBlockData::ExtractVehicleUpdateData(tReplayBlockData& packet, CVehicle* vehicle, float interpolation) {
+    if (!vehicle)
+        return;
+
+    auto packetMatrix = CCompressedMatrixNotAligned::Decompress(packet.vehicle.matrix);
+    packetMatrix.ScaleAll(interpolation);
+    vehicle->GetMatrix().ScaleAll(1.0f - interpolation);
+    vehicle->GetMatrix() += packetMatrix;
+    vehicle->GetTurnSpeed() = CVector{0.0f};
+    vehicle->m_fHealth = (float)(packet.vehicle.health * 4);
+    vehicle->m_fGasPedal = (float)packet.vehicle.gasPedal / 100.0f;
+    if (vehicle->IsAutomobile())
+        ; // TODO: ApplyPanelDamageToCar();
+
+    vehicle->GetMoveSpeed().x = (float)packet.vehicle.vecMoveSpeed.x / 8000.0f;
+    vehicle->GetMoveSpeed().y = (float)packet.vehicle.vecMoveSpeed.y / 8000.0f;
+    vehicle->GetMoveSpeed().z = (float)packet.vehicle.vecMoveSpeed.z / 8000.0f;
+
+    
 }
 
 // tReplayBlockData checks
