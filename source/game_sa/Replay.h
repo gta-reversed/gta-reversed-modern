@@ -1,10 +1,10 @@
 #pragma once
 
+#include "Bmx.h"
 #include "CompressedMatrixNotAligned.h"
 #include "PlayerInfo.h"
 #include "Vector.h"
 #include "Vehicle.h"
-#include "Bmx.h"
 #include "eReplay.h"
 #include "ePedType.h"
 #include "eWeatherType.h"
@@ -68,7 +68,7 @@ struct tReplayBlockData {
             uint8 physicalFlags;
             uint8 vehicleSubType;
             uint8 vehicleType;
-            uint8 pad[2];
+            uint8 __pad[2];
         } vehicle;
         struct BikeBlock {
             VehicleBlock vehicle;
@@ -80,20 +80,20 @@ struct tReplayBlockData {
             uint8 poolRef;
             int16 modelId;
             uint8 pedType;
-            uint8 align[3];
+            uint8 __pad[3];
         } pedHeader;
         struct PedBlock {
             uint8 poolRef;
             int8 heading;
             uint8 vehicleIndex; // 0: not in a vehicle
             CStoredAnimationState animState;
-            uint8 __pad[2];
+            uint8 __pad1[2];
             CCompressedMatrixNotAligned matrix;
             int16 weaponModel;
             uint16 animGroup;
             uint8 contactSurfaceBrightness;
             uint8 flags;
-            uint8 __unk[2];
+            uint8 __pad2[2];
         } ped; // also called `ped update`
         struct CameraBlock {
             bool isUsingRemoteVehicle;
@@ -104,7 +104,7 @@ struct tReplayBlockData {
         struct ClockBlock {
             uint8 currentHour;
             uint8 currentMinute;
-            uint8 align;
+            uint8 __pad;
         } clock;
         struct WeatherBlock {
             uint8 oldWeather;
@@ -114,7 +114,7 @@ struct tReplayBlockData {
         } weather;
         struct EOFBlock { uint8 do_not_access[3]; } eof; // end of frame
         struct TimerBlock {
-            uint8 align[3];
+            uint8 __pad[3];
             uint32 timeInMS;
         } timer;
         struct BulletTraceBlock {
@@ -123,24 +123,24 @@ struct tReplayBlockData {
             CVector start;
             CVector end;
         } bulletTrace;
-        struct ParticleBlock { uint8 unk[19]; } particle;
+        struct ParticleBlock { uint8 unk[19]; } particle; // Unused
         struct MiscBlock {
-            uint8 __pad[3];
+            uint8 __pad1[3];
             uint32 camShakeStart;
             float camShakeForce;
             uint8 currArea;
             struct {
-                bool bVideoCam : 1;
-                bool bLiftCam : 1;
+                bool videoCam : 1;
+                bool liftCam : 1;
             } camConfig;
             uint8 __pad2[2];
         } misc;
-        struct UnkBlock13 {
-            uint8 unk;
+        struct DeletedVehicle {
+            uint8 __pad;
             int16 poolRef;
         } deletedVehicle;
-        struct UnkBlock14 {
-            uint8 unk;
+        struct DeletedPed {
+            uint8 __pad;
             int16 poolRef;
         } deletedPed;
         struct BmxBlock {
@@ -166,10 +166,10 @@ struct tReplayBlockData {
             uint32 prevCarriageRef;
             uint32 nextCarriageRef;
             uint8 trackId;
-            uint8 align[3];
+            uint8 __pad[3];
         } train;
         struct ClothesBlock {
-            uint8 align[3];
+            uint8 __pad[3];
             std::array<uint32, 10> m_anModelKeys;
             std::array<uint32, 18> m_anTextureKeys;
             uint16 m_fFatStat;    // compressed float

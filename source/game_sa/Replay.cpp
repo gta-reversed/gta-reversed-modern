@@ -634,16 +634,6 @@ void CReplay::ProcessLookAroundCam() {
         //     goto LABEL_8
         //
 
-        // NOTSA: Player wants to change the distance instead of the view angle.
-        const bool changingDistance = pad->NewMouseControllerState.lmb && pad->NewMouseControllerState.rmb;
-
-#ifdef FIX_BUGS
-        // Replays does not respect Invert-Y setting, treating it always enabled.
-        if (!FrontEndMenuManager.bInvertMouseY && !changingDistance) {
-            steer.y *= -1.0f;
-        }
-#endif
-
         if (steer.y > 0.01f) {
             if (!FramesActiveLookAroundCam) {
                 const auto& camPos    = TheCamera.GetPosition();
@@ -661,7 +651,7 @@ void CReplay::ProcessLookAroundCam() {
             playerCameraDirAngle += steer.x;
             FramesActiveLookAroundCam--;
 
-            if (changingDistance) {
+            if (pad->NewMouseControllerState.lmb && pad->NewMouseControllerState.rmb) {
                 playerCameraDistance = std::clamp(playerCameraDistance + 2.0f * steer.y, 3.0f, 15.0f);
             } else {
                 viewAngle = std::clamp(viewAngle + steer.y, 0.1f, 1.5f); // probably some kind of cheap clamping between [0, pi/2].
@@ -850,8 +840,8 @@ void CReplay::RestoreStuffFromMem() {
     CPopulation::ms_nTotalPeds = ms_nTotalPeds_Stored;
     CPopulation::ms_nTotalMissionPeds = ms_nTotalMissionPeds_Stored;
 
-    // FIX_BUGS? ms_nNumGang not restored
-    // rng::copy(ms_nNumGang_Stored, CPopulation::ms_nNumGang.begin());
+    // FIX_BUGS: ms_nNumGang not restored
+    rng::copy(ms_nNumGang_Stored, CPopulation::ms_nNumGang.begin());
 }
 
 // 0x45F050
@@ -1040,6 +1030,8 @@ void CReplay::RecordThisFrame() {
         packet.bulletTrace.index = i;
         packet.bulletTrace.start = trace.m_vecStart;
         packet.bulletTrace.end = trace.m_vecEnd;
+
+        Record.Write(packet);
     }
 
     Record.Write({.type = REPLAY_PACKET_MISC, .misc = {
@@ -1047,8 +1039,8 @@ void CReplay::RecordThisFrame() {
         .camShakeForce = TheCamera.m_fCamShakeForce,
         .currArea      = (uint8)CGame::currArea,
         .camConfig     = {
-            .bVideoCam = CSpecialFX::bVideoCam,
-            .bLiftCam = CSpecialFX::bLiftCam
+            .videoCam = CSpecialFX::bVideoCam,
+            .liftCam = CSpecialFX::bLiftCam
         }
     }}, true);
 
@@ -1242,8 +1234,8 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
         case REPLAY_PACKET_MISC:
             TheCamera.m_nCamShakeStart = packet.misc.camShakeStart;
             TheCamera.m_fCamShakeForce = packet.misc.camShakeForce;
-            CSpecialFX::bVideoCam = packet.misc.camConfig.bVideoCam;
-            CSpecialFX::bLiftCam = packet.misc.camConfig.bLiftCam;
+            CSpecialFX::bVideoCam = packet.misc.camConfig.videoCam;
+            CSpecialFX::bLiftCam = packet.misc.camConfig.liftCam;
             CGame::currArea = packet.misc.currArea;
             break;
         case REPLAY_PACKET_DELETED_VEH: {
@@ -1251,11 +1243,9 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
                 break;
 
             const auto idx = FindPoolIndexForVehicle(packet.deletedVehicle.poolRef);
-            if (!GetVehiclePool()->IsFreeSlotAtIndex(idx)) {
-                if (auto vehicle = GetVehiclePool()->GetAt(idx)) {
-                    CWorld::Remove(vehicle);
-                    delete vehicle;
-                }
+            if (auto vehicle = GetVehiclePool()->GetAt(idx)) {
+                CWorld::Remove(vehicle);
+                delete vehicle;
             }
             break;
         }
@@ -1264,11 +1254,9 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
                 break;
 
             const auto idx = FindPoolIndexForPed(packet.deletedPed.poolRef);
-            if (!GetPedPool()->IsFreeSlotAtIndex(idx)) {
-                if (auto ped = GetPedPool()->GetAt(idx)) {
-                    CWorld::Remove(ped);
-                    delete ped;
-                }
+            if (auto ped = GetPedPool()->GetAt(idx)) {
+                CWorld::Remove(ped);
+                delete ped;
             }
             break;
         }
@@ -1750,12 +1738,14 @@ void tReplayBlockData::ExtractVehicleUpdateData(tReplayBlockData& packet, CVehic
     auto v6 = v5 ^ (v5 ^ (packet.vehicle.physicalFlags << 28)) & 0x40000000;
     vehicle->m_nFlags = (packet.vehicle.physicalFlags << 28) ^ (v6 ^ (packet.vehicle.physicalFlags << 28)) & 0x7FFFFFFF;
 
-    if (vehicle->m_nModelIndex == MODEL_RHINO) {
-        vehicle->m_fSteerAngle = 0.0f;
-        vehicle->AsAutomobile()->m_fDoomVerticalRotation = (float)packet.vehicle.steerAngle_or_doomVerticalRot / HEADING_COMPRESS_VALUE;
-    } else {
-        vehicle->m_fSteerAngle = (float)packet.vehicle.steerAngle_or_doomVerticalRot / 50.0f;
-    }
+    vehicle->m_fSteerAngle = [&] {
+        if (vehicle->m_nModelIndex == MODEL_RHINO) {
+            vehicle->AsAutomobile()->m_fDoomVerticalRotation = (float)packet.vehicle.steerAngle_or_doomVerticalRot / HEADING_COMPRESS_VALUE;
+            return 0.0f;
+        } else {
+            return (float)packet.vehicle.steerAngle_or_doomVerticalRot / 50.0f;
+        }
+    }();
 
     if (vehicle->IsAutomobile()) {
         auto automobile = vehicle->AsAutomobile();
