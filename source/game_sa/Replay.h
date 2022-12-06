@@ -316,22 +316,18 @@ public:
             }
         }
 
-        uint8 GetNextSlot(uint8 stride = 1u) {
-            return (stride + m_bSlot) % NUM_REPLAY_BUFFERS;
-        }
-
         void Next() {
             m_bSlot = GetNextSlot();
             m_pBase = &Buffers[m_bSlot];
             m_nOffset = 0u;
         }
 
-        auto GetIterator() {
-            return tReplayBuffer::Iterator{m_pBase, m_nOffset};
-        }
-
         eReplayBufferStatus GetStatus() {
             return BufferStatus[m_bSlot];
+        }
+
+        uint8 GetNextSlot(uint8 stride = 1u) {
+            return (stride + m_bSlot) % NUM_REPLAY_BUFFERS;
         }
     };
     VALIDATE_SIZE(CAddressInReplayBuffer, 0xC);
@@ -459,126 +455,6 @@ public:
     static void TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loadScene);
 
     // @notsa
-    // @brief Returns all non-empty and non-EOF buffers
+    // @brief Returns all available buffers
     static auto GetAllActiveBuffers() { return Buffers | std::views::filter([](auto&& buffer) { return buffer.IsAvailable(); }); }
 };
-
-/*
-CReplay(69 variables, 46 functions)
-Variables list :
-*ActiveSequences
-* BufferStatus
-* Buffers
-* CameraFixedX
-* CameraFixedY
-* CameraFixedZ
-* CameraMode
-* ClockHours
-* ClockMinutes
-* CurrArea
-* FireArray
-* Frame
-* FramesActiveLookAroundCam
-* LastRecordedFrameTime
-* LoadSceneX
-* LoadSceneY
-* LoadSceneZ
-* Mode
-* NewWeatherType
-* OldRadioStation
-* OldWeatherType
-* PedGroup_NumKills
-* PedGroup_OnMission
-* Playback
-* PlayerInfo
-* Record
-* Time1
-* Time2
-* Time3
-* Time4
-* Time5
-* Time6
-* Time7
-* TimeScale
-* TimeStep
-* TimeStepNonClipped
-* WeatherInterpolationValue
-* WorldPtrList
-* bAllowLookAroundCam
-* bDoLoadSceneWhenDone
-* bPlayingBackFromFile
-* bReplayEnabled
-* fAlphaAngleLookAroundCam
-* fBetaAngleLookAroundCam
-* fDistanceLookAroundCam
-* m_PedPoolConversion
-* m_VehiclePoolConversion
-* ms_nNumCivFemale_Stored
-* ms_nNumCivMale_Stored
-* ms_nNumCop_Stored
-* ms_nNumDealers_Stored
-* ms_nNumEmergency_Stored
-* ms_nNumGang_Stored
-* ms_nTotalCarPassengerPeds_Stored
-* ms_nTotalCivPeds_Stored
-* ms_nTotalGangPeds_Stored
-* ms_nTotalMissionPeds_Stored
-* ms_nTotalPeds_Stored
-* pBufSeq0
-* pBufSeq1
-* pEmptyReferences
-* pGarages
-* pPickups
-* pRadarBlips
-* pReferences
-* pStoredCam
-* pWorld1
-* paProjectileInfo
-* paProjectiles
-
-Functions list :
-*CanWeFindPoolIndexForPed(int32)
-* CanWeFindPoolIndexForVehicle(int32)
-* CreatePlayerPed()
-* DealWithNewPedPacket(CPacketNewPed*, bool, CPacketPlayerClothes*)
-* DisableReplays()
-* EmptyPedsAndVehiclePools_NoDestructors()
-* EmptyReplayBuffer()
-* EnableReplays()
-* FastForwardToTime(uint32)
-* FindFirstFocusCoordinate(CVector*)
-* FindPoolIndexForPed(int32)
-* FindPoolIndexForVehicle(int32)
-* FindSizeOfPacket(uint8)
-* FinishPlayback()
-* GoToNextBlock()
-* Init()
-* InitialisePedPoolConversionTable()
-* InitialisePoolConversionTables()
-* InitialiseVehiclePoolConversionTable()
-* IsThisPedUsedInRecording(int32)
-* IsThisVehicleUsedInRecording(int32)
-* MarkEverythingAsNew()
-* NumberFramesAvailableToPlay()
-* PlayBackThisFrame()
-* PlayBackThisFrameInterpolation(CAddressInReplayBuffer*, float, uint32*)
-* ProcessLookAroundCam()
-* ProcessPedUpdate(CPed*, float, CAddressInReplayBuffer*)
-* ProcessReplayCamera()
-* RecordPedDeleted(CPed*)
-* RecordThisFrame()
-* RecordVehicleDeleted(CVehicle*)
-* RestoreClothesDesc(CPedClothesDesc*, CPacketPlayerClothes*)
-* RestorePlayerInfoVariables()
-* RestoreStuffFromMem()
-* RetrievePedAnimation(CPed*, CStoredAnimationState*)
-* SaveReplayToHD()
-* ShouldStandardCameraBeProcessed()
-* StoreClothesDesc(CPedClothesDesc*, CPacketPlayerClothes*)
-* StorePedAnimation(CPed*, CStoredAnimationState*)
-* StorePedUpdate(CPed*, int32)
-* StorePlayerInfoVariables()
-* StoreStuffInMem()
-* StreamAllNecessaryCarsAndPeds()
-* TriggerPlayback(uint8, float, float, float, bool)
-* Update()*/

@@ -47,7 +47,7 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(StoreClothesDesc, 0x45C750);
     RH_ScopedInstall(RestoreClothesDesc, 0x45C7D0);
     RH_ScopedInstall(DealWithNewPedPacket, 0x45CEA0);
-    RH_ScopedInstall(PlayBackThisFrameInterpolation, 0x45F380, { .reversed = true });
+    RH_ScopedInstall(PlayBackThisFrameInterpolation, 0x45F380);
     RH_ScopedInstall(FastForwardToTime, 0x460350);
     RH_ScopedInstall(PlayBackThisFrame, 0x4604A0);
     RH_ScopedInstall(FindSizeOfPacket, 0x45C850);
@@ -59,7 +59,7 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(FindFirstFocusCoordinate, 0x45D6C0);
     RH_ScopedInstall(NumberFramesAvailableToPlay, 0x45D670);
     RH_ScopedInstall(StreamAllNecessaryCarsAndPeds, 0x45D4B0);
-    RH_ScopedInstall(CreatePlayerPed, 0x45D540, { .locked = true });
+    RH_ScopedInstall(CreatePlayerPed, 0x45D540);
     RH_ScopedInstall(TriggerPlayback, 0x4600F0);
 }
 
@@ -396,7 +396,7 @@ void CReplay::InitialiseVehiclePoolConversionTable() {
             continue;
 
         if (!IsThisVehicleUsedInRecording(convIdx)) {
-            while (++convIdx != std::size(m_VehiclePoolConversion) && !IsThisVehicleUsedInRecording(convIdx))
+            while (++convIdx <= std::size(m_VehiclePoolConversion) && !IsThisVehicleUsedInRecording(convIdx))
                 ;
 
             if (convIdx >= std::size(m_VehiclePoolConversion))
@@ -416,7 +416,7 @@ void CReplay::InitialisePedPoolConversionTable() {
             continue;
 
         if (!IsThisPedUsedInRecording(convIdx)) {
-            while (++convIdx != std::size(m_PedPoolConversion) && !IsThisPedUsedInRecording(convIdx))
+            while (++convIdx <= std::size(m_PedPoolConversion) && !IsThisPedUsedInRecording(convIdx))
                 ;
 
             if (convIdx >= std::size(m_PedPoolConversion))
@@ -616,26 +616,35 @@ void CReplay::ProcessReplayCamera() {
 
 // 0x45D760
 void CReplay::ProcessLookAroundCam() {
-    //return plugin::Call<0x45D760>();
     if (bAllowLookAroundCam) {
         static float& playerCameraDistance = *(float*)0x97FAD4;
         static float& playerCameraDirAngle = *(float*)0x97FADC;
         static float& viewAngle = *(float*)0x97FAD8;
 
         const auto& pad = CPad::GetPad();
-        const auto steer = CVector2D{pad->NewMouseControllerState.X / 200.0f, pad->NewMouseControllerState.Y / 200.0f};
+        auto steer = CVector2D{pad->NewMouseControllerState.X / 200.0f, pad->NewMouseControllerState.Y / 200.0f};
         // steerX2 = steer.x;
         // steerY2 = steer.y;
-        // if (v2 | v2)             <-- replays does not care about inverted-y, maybe is it
-        // if (steerX2 > 0.01f)         because of these are undefined?
+        // if (v2 | v2)
+        // if (steerX2 > 0.01f)
         //     goto LABEL_8
         // if (v6 | v7)
         //     steerY2 = -steerY2;
         // if (steerY2 > 0.01f)
         //     goto LABEL_8
         //
+
+        // NOTSA: Player wants to change the distance instead of the view angle.
+        const bool changingDistance = pad->NewMouseControllerState.lmb && pad->NewMouseControllerState.rmb;
+
+#ifdef FIX_BUGS
+        // Replays does not respect Invert-Y setting, treating it always enabled.
+        if (!FrontEndMenuManager.bInvertMouseY && !changingDistance) {
+            steer.y *= -1.0f;
+        }
+#endif
+
         if (steer.y > 0.01f) {
-            // label_8:
             if (!FramesActiveLookAroundCam) {
                 const auto& camPos    = TheCamera.GetPosition();
                 const auto& playerPos = FindPlayerCoors();
@@ -645,14 +654,14 @@ void CReplay::ProcessLookAroundCam() {
             FramesActiveLookAroundCam = 60;
         }
 
-        static bool& byte_97f66d = *(bool*)0x97f66d;
-        if (byte_97f66d) {
+        static bool& s_FrameActiveLookAroundCamReset = *(bool*)0x97f66d;
+        if (s_FrameActiveLookAroundCamReset) {
             FramesActiveLookAroundCam = 0;
         } else if (FramesActiveLookAroundCam) {
             playerCameraDirAngle += steer.x;
             FramesActiveLookAroundCam--;
 
-            if (pad->NewMouseControllerState.lmb && pad->NewMouseControllerState.rmb) {
+            if (changingDistance) {
                 playerCameraDistance = std::clamp(playerCameraDistance + 2.0f * steer.y, 3.0f, 15.0f);
             } else {
                 viewAngle = std::clamp(viewAngle + steer.y, 0.1f, 1.5f); // probably some kind of cheap clamping between [0, pi/2].
@@ -708,11 +717,13 @@ void CReplay::ProcessLookAroundCam() {
     }
 }
 
+// inlined
 // 0x45C470
 bool CReplay::CanWeFindPoolIndexForPed(int32 index) {
     return FindPoolIndexForPed(index) >= 0;
 }
 
+// inlined
 // 0x45C490
 bool CReplay::CanWeFindPoolIndexForVehicle(int32 index) {
     return FindPoolIndexForVehicle(index) >= 0;
@@ -1054,7 +1065,7 @@ void CReplay::StoreClothesDesc(const CPedClothesDesc& desc, tReplayBlockData& pa
     packet.clothes.m_fMuscleStat = (int16)desc.m_fMuscleStat;
 }
 
-// 0x45C7D0, broken
+// 0x45C7D0
 void CReplay::RestoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet) {
     assert(packet.type == REPLAY_PACKET_CLOTHES);
     rng::copy(packet.clothes.m_anModelKeys, desc.m_anModelKeys.begin());
@@ -1236,8 +1247,11 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
             CGame::currArea = packet.misc.currArea;
             break;
         case REPLAY_PACKET_DELETED_VEH: {
+            if (!CanWeFindPoolIndexForVehicle(packet.deletedVehicle.poolRef))
+                break;
+
             const auto idx = FindPoolIndexForVehicle(packet.deletedVehicle.poolRef);
-            if (idx >= 0 && !GetVehiclePool()->IsFreeSlotAtIndex(idx)) {
+            if (!GetVehiclePool()->IsFreeSlotAtIndex(idx)) {
                 if (auto vehicle = GetVehiclePool()->GetAt(idx)) {
                     CWorld::Remove(vehicle);
                     delete vehicle;
@@ -1246,8 +1260,11 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
             break;
         }
         case REPLAY_PACKET_DELETED_PED: {
+            if (!CanWeFindPoolIndexForPed(packet.deletedPed.poolRef))
+                break;
+
             const auto idx = FindPoolIndexForPed(packet.deletedPed.poolRef);
-            if (idx >= 0 && !GetPedPool()->IsFreeSlotAtIndex(idx)) {
+            if (!GetPedPool()->IsFreeSlotAtIndex(idx)) {
                 if (auto ped = GetPedPool()->GetAt(idx)) {
                     CWorld::Remove(ped);
                     delete ped;
@@ -1330,7 +1347,7 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
 
         buffer.m_nOffset += FindSizeOfPacket(packet.type);
     }
-    buffer.m_nOffset += 4;
+    buffer.m_nOffset += 4u;
     ProcessReplayCamera();
 
     return false;
@@ -1551,7 +1568,7 @@ void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loa
     // TODO: refactor
     auto idx = 7;
     for (auto&& [i, status] : notsa::enumerate(BufferStatus)) {
-        if (status == 2) {
+        if (status == REPLAYBUFFER_IN_USE) {
             idx = i;
             break;
         }
@@ -1559,7 +1576,7 @@ void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loa
 
     // TODO: refactor
     auto slot = (idx + 1) % 8;
-    for (auto j = BufferStatus[slot]; j != 2 && j != 1; j = BufferStatus[slot]) {
+    for (auto j = BufferStatus[slot]; j != REPLAYBUFFER_IN_USE && j != REPLAYBUFFER_FULL; j = BufferStatus[slot]) {
         slot = (slot + 1) % 8;
     }
     slot %= 8;
