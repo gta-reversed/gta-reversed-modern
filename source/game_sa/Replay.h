@@ -59,7 +59,7 @@ struct tReplayBlockData {
             struct {
                 int8 x, y, z;
             } vecMoveSpeed;
-            uint8 steerAngle_or_doomVerticalRot;
+            uint8 steerAngle_or_doomVerticalRot; // m_fDoomVerticalRotation if modelId == RHINO, steerAngle if not.
             uint8 wheelsSuspensionCompression[4];
             uint8 wheelRotation[4];
             uint8 doorStatus;
@@ -73,9 +73,8 @@ struct tReplayBlockData {
         struct BikeBlock {
             VehicleBlock vehicle;
             uint8 animLean;
-            uint8 dword10; // possibly wrong? look ::MakeBikeUpdateData
-            uint8 animLean2;
             uint8 steerAngle;
+            uint8 __pad[2];
         } bike;
         struct PedHeaderBlock {
             uint8 poolRef;
@@ -147,9 +146,8 @@ struct tReplayBlockData {
         struct BmxBlock {
             VehicleBlock vehicle;
             uint8 animLean;
-            uint8 dword10; // possibly wrong? look ::MakeBikeUpdateData
-            uint8 animLean2;
             uint8 steerAngle;
+            uint8 __pad[2];
         } bmx; // same as BikeBlock
         struct HeliBlock {
             VehicleBlock vehicle;
@@ -186,6 +184,8 @@ struct tReplayBlockData {
     static tReplayBlockData MakeBmxUpdateData(CBmx* bmx, int32 poolIdx);
 
     static void ExtractVehicleUpdateData(tReplayBlockData& packet, CVehicle* vehicle, float interpolation);
+    static void ExtractBikeUpdateData(tReplayBlockData& packet, CBike* bike, float interpolation);
+    static void ExtractTrainUpdateData(tReplayBlockData& packet, CTrain* train, float interpolation);
 };
 #pragma pack(pop)
 

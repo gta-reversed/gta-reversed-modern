@@ -47,7 +47,7 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(StoreClothesDesc, 0x45C750);
     RH_ScopedInstall(RestoreClothesDesc, 0x45C7D0);
     RH_ScopedInstall(DealWithNewPedPacket, 0x45CEA0);
-    RH_ScopedInstall(PlayBackThisFrameInterpolation, 0x45F380, { .reversed = false });
+    RH_ScopedInstall(PlayBackThisFrameInterpolation, 0x45F380, { .reversed = true });
     RH_ScopedInstall(FastForwardToTime, 0x460350);
     RH_ScopedInstall(PlayBackThisFrame, 0x4604A0);
     RH_ScopedInstall(FindSizeOfPacket, 0x45C850);
@@ -282,8 +282,15 @@ void CReplay::Display() {
     if (ShouldStandardCameraBeProcessed())
         return;
 
-    static uint32& g_ReplayTextTimer = *(uint32*)0xA43240;
-    if ((++g_ReplayTextTimer & 32) == 0)
+    // NOTSA: FPS-independent 'REPLAY' text counter.
+    static uint32 s_ReplayTextCounter = CTimer::GetTimeInMS();
+    static bool s_ShowReplayText = true;
+    if (CTimer::GetTimeInMS() - s_ReplayTextCounter >= 1000) {
+        s_ReplayTextCounter = CTimer::GetTimeInMS();
+        s_ShowReplayText = !s_ShowReplayText;
+    }
+
+    if (!s_ShowReplayText)
         return;
 
     CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
@@ -1022,8 +1029,6 @@ void CReplay::RecordThisFrame() {
         packet.bulletTrace.index = i;
         packet.bulletTrace.start = trace.m_vecStart;
         packet.bulletTrace.end = trace.m_vecEnd;
-
-        Record.Write(packet, true);
     }
 
     Record.Write({.type = REPLAY_PACKET_MISC, .misc = {
@@ -1097,13 +1102,13 @@ CPed* CReplay::DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel,
     return nullptr;
 }
 
+// Returns true if the playback has ended.
 // 0x45F380
 bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, float interpolation, uint32* outTimer) {
-    return plugin::CallAndReturn<bool, 0x45F380, CAddressInReplayBuffer, float, uint32*>(buffer, interpolation, outTimer);
-
     const auto SetupVehicle = [](tReplayBlockData& packet, CVehicle* vehicle) {
         vehicle->m_nStatus = STATUS_PLAYER_PLAYBACK_FROM_BUFFER;
         vehicle->vehicleFlags.bUsedForReplay = true;
+        vehicle->m_bUsesCollision = false;
         packet.vehicle.matrix.DecompressIntoFullMatrix(vehicle->GetMatrix());
         vehicle->m_nPrimaryColor = packet.vehicle.primaryColor;
         vehicle->m_nSecondaryColor = packet.vehicle.secondaryColor;
@@ -1115,8 +1120,9 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
     };
 
     CBulletTraces::Init();
-    for (auto it = &buffer.m_pBase[buffer.m_nOffset]; it->Read<eReplayPacket>(buffer.m_nOffset) != REPLAY_PACKET_END_OF_FRAME;) {
-        auto packet = it->Read<tReplayBlockData>(buffer.m_nOffset);
+
+    while (buffer.Read<eReplayPacket>() != REPLAY_PACKET_END_OF_FRAME) {
+        auto packet = buffer.Read<tReplayBlockData>();
 
         switch (packet.type) {
         case REPLAY_PACKET_END:
@@ -1125,45 +1131,64 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
                 return true;
             }
             buffer.Next();
-            break;
+            continue; // We do not increment when we read end packet.
         case REPLAY_PACKET_VEHICLE: {
             const auto mi = packet.vehicle.modelId;
             const auto poolIdx = FindPoolIndexForVehicle(packet.vehicle.poolRef);
 
-            if (CStreaming::IsModelLoaded(mi)) {
-                auto created = [&]() -> CVehicle* {
-                    switch (packet.vehicle.vehicleSubType) {
-                    case VEHICLE_TYPE_AUTOMOBILE:
-                        return new (poolIdx << 8) CAutomobile(mi, MISSION_VEHICLE, true);
-                    case VEHICLE_TYPE_MTRUCK:
-                        return new (poolIdx << 8) CMonsterTruck(mi, MISSION_VEHICLE);
-                    case VEHICLE_TYPE_QUAD:
-                        return new (poolIdx << 8) CQuadBike(mi, MISSION_VEHICLE);
-                    case VEHICLE_TYPE_BOAT:
-                        return new (poolIdx << 8) CBoat(mi, MISSION_VEHICLE);
-                    case VEHICLE_TYPE_TRAIN:
-                        return new (poolIdx << 8) CTrain(mi, MISSION_VEHICLE);
-                    case VEHICLE_TYPE_TRAILER:
-                        return new (poolIdx << 8) CTrailer(mi, MISSION_VEHICLE);
-                    default:
-                        NOTSA_UNREACHABLE("Unknown vehicle subtype ={}", (int)packet.vehicle.vehicleSubType);
-                    }
-                }();
+            if (!GetVehiclePool()->GetAt(poolIdx)) {
+                if (CStreaming::IsModelLoaded(mi)) {
+                    auto created = [&]() -> CVehicle* {
+                        switch (packet.vehicle.vehicleSubType) {
+                        case VEHICLE_TYPE_AUTOMOBILE:
+                            return new (poolIdx << 8) CAutomobile(mi, MISSION_VEHICLE, true);
+                        case VEHICLE_TYPE_MTRUCK:
+                            return new (poolIdx << 8) CMonsterTruck(mi, MISSION_VEHICLE);
+                        case VEHICLE_TYPE_QUAD:
+                            return new (poolIdx << 8) CQuadBike(mi, MISSION_VEHICLE);
+                        case VEHICLE_TYPE_BOAT:
+                            return new (poolIdx << 8) CBoat(mi, MISSION_VEHICLE);
+                        case VEHICLE_TYPE_TRAIN:
+                            return new (poolIdx << 8) CTrain(mi, MISSION_VEHICLE);
+                        case VEHICLE_TYPE_TRAILER:
+                            return new (poolIdx << 8) CTrailer(mi, MISSION_VEHICLE);
+                        default:
+                            NOTSA_UNREACHABLE("Unknown vehicle subtype ={}", (int)packet.vehicle.vehicleSubType);
+                        }
+                    }();
 
-                SetupVehicle(packet, created);
+                    SetupVehicle(packet, created);
+                } else {
+                    CStreaming::RequestModel(mi, STREAMING_DEFAULT);
+                }
             } else {
-                CStreaming::RequestModel(mi, STREAMING_DEFAULT);
+                tReplayBlockData::ExtractVehicleUpdateData(packet, GetVehiclePool()->GetAt(poolIdx), interpolation);
             }
+            break;
+        }
+        case REPLAY_PACKET_BIKE: {
+            const auto mi = packet.vehicle.modelId;
+            const auto poolIdx = FindPoolIndexForVehicle(packet.vehicle.poolRef);
 
-            /* EXTRACT */
+            if (!GetVehiclePool()->GetAt(poolIdx)) {
+                if (CStreaming::IsModelLoaded(mi)) {
+                    SetupVehicle(packet, new (poolIdx << 8) CBike(mi, MISSION_VEHICLE));
+                } else {
+                    CStreaming::RequestModel(mi, STREAMING_DEFAULT);
+                }
+            } else {
+                tReplayBlockData::ExtractBikeUpdateData(packet, GetVehiclePool()->GetAt(poolIdx)->AsBike(), interpolation);
+            }
             break;
         }
         case REPLAY_PACKET_PED_HEADER:
             DealWithNewPedPacket(packet, false, nullptr);
             break;
-        case REPLAY_PACKET_PED_UPDATE:
-            ProcessPedUpdate(GetPedPool()->GetAt(packet.ped.poolRef), interpolation, buffer);
-            break;
+        case REPLAY_PACKET_PED_UPDATE: {
+            const auto poolIdx = FindPoolIndexForPed(packet.ped.poolRef);
+            ProcessPedUpdate(GetPedPool()->GetAt(poolIdx), interpolation, buffer);
+            continue; // ProcessPedUpdate increments the offset by itself already.
+        }
         case REPLAY_PACKET_GENERAL: {
             TheCamera.GetMatrix().ScaleAll(1.0f - interpolation);
             CMatrix packetMatrix(*(const CMatrix*)&packet.camera.matrix);
@@ -1190,6 +1215,10 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
         case REPLAY_PACKET_END_OF_FRAME:
             break;
         case REPLAY_PACKET_TIMER:
+            if (outTimer) {
+                *outTimer = packet.timer.timeInMS;
+            }
+
             CTimer::SetTimeInMS(packet.timer.timeInMS);
             break;
         case REPLAY_PACKET_BULLET_TRACES: {
@@ -1207,7 +1236,7 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
             CGame::currArea = packet.misc.currArea;
             break;
         case REPLAY_PACKET_DELETED_VEH: {
-            const auto idx = m_VehiclePoolConversion[packet.deletedVehicle.poolRef];
+            const auto idx = FindPoolIndexForVehicle(packet.deletedVehicle.poolRef);
             if (idx >= 0 && !GetVehiclePool()->IsFreeSlotAtIndex(idx)) {
                 if (auto vehicle = GetVehiclePool()->GetAt(idx)) {
                     CWorld::Remove(vehicle);
@@ -1217,7 +1246,7 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
             break;
         }
         case REPLAY_PACKET_DELETED_PED: {
-            const auto idx = m_PedPoolConversion[packet.deletedPed.poolRef];
+            const auto idx = FindPoolIndexForPed(packet.deletedPed.poolRef);
             if (idx >= 0 && !GetPedPool()->IsFreeSlotAtIndex(idx)) {
                 if (auto ped = GetPedPool()->GetAt(idx)) {
                     CWorld::Remove(ped);
@@ -1227,28 +1256,84 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
             break;
         }
         case REPLAY_PACKET_BMX: {
-            const auto poolIdx = m_VehiclePoolConversion[packet.bmx.vehicle.poolRef];
+            const auto mi = packet.vehicle.modelId;
+            const auto poolIdx = FindPoolIndexForVehicle(packet.vehicle.poolRef);
 
-            const auto mi = packet.bmx.vehicle.modelId;
-            if (CStreaming::IsModelLoaded(mi)) {
-                auto bmx = new (poolIdx << 8) CBmx(mi, MISSION_VEHICLE);
-                SetupVehicle(packet, bmx);
+            if (!GetVehiclePool()->GetAt(poolIdx)) {
+                if (CStreaming::IsModelLoaded(mi)) {
+                    SetupVehicle(packet, new (poolIdx << 8) CBmx(mi, MISSION_VEHICLE));
+                } else {
+                    CStreaming::RequestModel(mi, STREAMING_DEFAULT);
+                }
             } else {
-                CStreaming::RequestModel(mi, STREAMING_DEFAULT);
+                // Originally BMX has an exclusive extractor for itself but it's exactly the
+                // same with bike extractor, so it's fine to use bike one here.
+                tReplayBlockData::ExtractBikeUpdateData(packet, GetVehiclePool()->GetAt(poolIdx)->AsBike(), interpolation);
             }
-
-            /* EXTRACT */
-
             break;
         }
-        case REPLAY_PACKET_HELI:
+        case REPLAY_PACKET_HELI: {
+            const auto mi = packet.vehicle.modelId;
+            const auto poolIdx = FindPoolIndexForVehicle(packet.vehicle.poolRef);
 
+            if (!GetVehiclePool()->GetAt(poolIdx)) {
+                if (CStreaming::IsModelLoaded(mi)) {
+                    SetupVehicle(packet, new (poolIdx << 8) CHeli(mi, MISSION_VEHICLE));
+                } else {
+                    CStreaming::RequestModel(mi, STREAMING_DEFAULT);
+                }
+            } else {
+                auto vehicle = GetVehiclePool()->GetAt(poolIdx);
+                tReplayBlockData::ExtractVehicleUpdateData(packet, vehicle, interpolation);
+                vehicle->AsHeli()->m_fHeliRotorSpeed = packet.heli.rotorSpeed;
+            }
+            break;
+        }
+        case REPLAY_PACKET_PLANE: {
+            const auto mi = packet.vehicle.modelId;
+            const auto poolIdx = FindPoolIndexForVehicle(packet.vehicle.poolRef);
+
+            if (!GetVehiclePool()->GetAt(poolIdx)) {
+                if (CStreaming::IsModelLoaded(mi)) {
+                    SetupVehicle(packet, new (poolIdx << 8) CPlane(mi, MISSION_VEHICLE));
+                } else {
+                    CStreaming::RequestModel(mi, STREAMING_DEFAULT);
+                }
+            } else {
+                auto vehicle = GetVehiclePool()->GetAt(poolIdx);
+                tReplayBlockData::ExtractVehicleUpdateData(packet, vehicle, interpolation);
+                vehicle->AsPlane()->field_9C8 = packet.plane.field_9C8;
+                vehicle->AsPlane()->m_fPropSpeed = packet.plane.propSpeed;
+            }
+            break;
+        }
+        case REPLAY_PACKET_TRAIN: {
+            const auto mi = packet.vehicle.modelId;
+            const auto poolIdx = FindPoolIndexForVehicle(packet.vehicle.poolRef);
+
+            if (!GetVehiclePool()->GetAt(poolIdx)) {
+                if (CStreaming::IsModelLoaded(mi)) {
+                    SetupVehicle(packet, new (poolIdx << 8) CTrain(mi, MISSION_VEHICLE));
+                } else {
+                    CStreaming::RequestModel(mi, STREAMING_DEFAULT);
+                }
+            } else {
+                tReplayBlockData::ExtractTrainUpdateData(packet, GetVehiclePool()->GetAt(poolIdx)->AsTrain(), interpolation);
+            }
+            break;
+        }
+        case REPLAY_PACKET_CLOTHES:
+            break;
+        default:
+            NOTSA_UNREACHABLE("Invalid packet read (type ID={})", (int32)packet.type);
         }
 
-        if (packet.type != REPLAY_PACKET_END) {
-            buffer.m_nOffset += FindSizeOfPacket(packet.type);
-        }
+        buffer.m_nOffset += FindSizeOfPacket(packet.type);
     }
+    buffer.m_nOffset += 4;
+    ProcessReplayCamera();
+
+    return false;
 }
 
 // 0x460350
@@ -1587,11 +1672,11 @@ tReplayBlockData tReplayBlockData::MakeTrainUpdateData(CTrain* train, int32 pool
     ret.train.prevCarriageRef = ret.train.nextCarriageRef = 0;
 
     if (auto carriage = train->m_pPrevCarriage) {
-        ret.train.prevCarriageRef = GetVehiclePool()->GetIndex(carriage->AsVehicle());
+        ret.train.prevCarriageRef = GetVehiclePool()->GetIndex(carriage->AsVehicle()) + 1;
     }
 
     if (auto carriage = train->m_pNextCarriage) {
-        ret.train.nextCarriageRef = GetVehiclePool()->GetIndex(carriage->AsVehicle());
+        ret.train.nextCarriageRef = GetVehiclePool()->GetIndex(carriage->AsVehicle()) + 1;
     }
     return ret;
 }
@@ -1600,7 +1685,7 @@ tReplayBlockData tReplayBlockData::MakeBikeUpdateData(CBike* bike, int32 poolIdx
     tReplayBlockData ret = MakeVehicleUpdateData(bike->AsVehicle(), poolIdx);
     ret.type = REPLAY_PACKET_BIKE;
     ret.bike.animLean = (uint8)(bike->GetRideAnimData()->m_fAnimLean * 50.0f);
-    ret.bike.dword10 = (uint8)(bike->GetRideAnimData()->dword10 * 50.0f);
+    ret.bike.steerAngle = (uint8)(bike->GetRideAnimData()->m_fSteerAngle * 50.0f);
     return ret;
 }
 
@@ -1622,14 +1707,111 @@ void tReplayBlockData::ExtractVehicleUpdateData(tReplayBlockData& packet, CVehic
     vehicle->GetTurnSpeed() = CVector{0.0f};
     vehicle->m_fHealth = (float)(packet.vehicle.health * 4);
     vehicle->m_fGasPedal = (float)packet.vehicle.gasPedal / 100.0f;
-    if (vehicle->IsAutomobile())
-        ; // TODO: ApplyPanelDamageToCar();
+    if (vehicle->IsAutomobile()) {
+        // inlined ApplyPanelDamageToCar() @ 0x59CA10
+        auto automobile = vehicle->AsAutomobile();
+        const auto& damageManager = automobile->m_damageManager;
+
+        for (auto i = 0; i < MAX_PANELS; i++) {
+            const auto bitIdx = 0xF << (0x4 * i);
+            const auto panel = (ePanels)i;
+            const auto provided = (ePanelDamageState)(packet.vehicle.panels & bitIdx);
+            const auto current = (ePanelDamageState)(damageManager.m_nPanelsStatus & bitIdx);
+
+            if (provided != current) {
+                automobile->m_damageManager.SetPanelStatus(panel, provided);
+                automobile->SetPanelDamage(panel, true);
+            }
+        }
+    }
 
     vehicle->GetMoveSpeed().x = (float)packet.vehicle.vecMoveSpeed.x / 8000.0f;
     vehicle->GetMoveSpeed().y = (float)packet.vehicle.vecMoveSpeed.y / 8000.0f;
     vehicle->GetMoveSpeed().z = (float)packet.vehicle.vecMoveSpeed.z / 8000.0f;
 
-    
+    auto v5 = ((uint8)vehicle->m_nFlags ^ (uint8)(packet.vehicle.physicalFlags << 6)) & 0x80 ^ vehicle->m_nFlags;
+    auto v6 = v5 ^ (v5 ^ (packet.vehicle.physicalFlags << 28)) & 0x40000000;
+    vehicle->m_nFlags = (packet.vehicle.physicalFlags << 28) ^ (v6 ^ (packet.vehicle.physicalFlags << 28)) & 0x7FFFFFFF;
+
+    if (vehicle->m_nModelIndex == MODEL_RHINO) {
+        vehicle->m_fSteerAngle = 0.0f;
+        vehicle->AsAutomobile()->m_fDoomVerticalRotation = (float)packet.vehicle.steerAngle_or_doomVerticalRot / HEADING_COMPRESS_VALUE;
+    } else {
+        vehicle->m_fSteerAngle = (float)packet.vehicle.steerAngle_or_doomVerticalRot / 50.0f;
+    }
+
+    if (vehicle->IsAutomobile()) {
+        auto automobile = vehicle->AsAutomobile();
+
+        for (auto i = 0; i < 4; i++) { // for each wheel
+            automobile->m_fWheelsSuspensionCompression[i] = (float)packet.vehicle.wheelsSuspensionCompression[i] / 50.0f;
+            automobile->m_wheelRotation[i] = (float)packet.vehicle.wheelRotation[i] / HEADING_COMPRESS_VALUE;
+
+        }
+        automobile->m_doors[DOOR_LEFT_FRONT].m_fAngle = (float)packet.vehicle.angleDoorLF / 20.222929f;
+        automobile->m_doors[DOOR_LEFT_FRONT].m_fPrevAngle = automobile->m_doors[DOOR_LEFT_FRONT].m_fAngle;
+
+        automobile->m_doors[DOOR_RIGHT_FRONT].m_fAngle = (float)packet.vehicle.angleDoorRF / 20.222929f;
+        automobile->m_doors[DOOR_RIGHT_FRONT].m_fPrevAngle = automobile->m_doors[DOOR_RIGHT_FRONT].m_fAngle;
+
+        auto& damageManager = automobile->m_damageManager;
+        if (packet.vehicle.angleDoorLF != 0) {
+            damageManager.SetDoorOpen(DOOR_LEFT_FRONT);
+        }
+
+        if (packet.vehicle.angleDoorRF != 0) {
+            damageManager.SetDoorOpen(DOOR_RIGHT_FRONT);
+        }
+
+        for (auto i = 0; i < MAX_DOORS; i++) {
+            const auto bitIdx = (uint32)std::pow(2, i);
+            const auto door = (eDoors)i;
+            if (packet.vehicle.doorStatus & bitIdx && damageManager.IsDoorPresent(door)) {
+                damageManager.SetDoorStatus(door, DAMSTATE_NOTPRESENT);
+                automobile->SetDoorDamage(door, true);
+            }
+        }
+
+        automobile->m_nWheelsOnGround = 4;
+    }
+
+    vehicle->vehicleFlags.bEngineOn = vehicle->vehicleFlags.bEngineBroken != true;
+    vehicle->m_nAreaCode = static_cast<eAreaCodes>(CGame::currArea); // FIXME
+
+    CWorld::Remove(vehicle);
+    CWorld::Add(vehicle);
+    vehicle->m_nPhysicalFlags ^= (vehicle->m_nPhysicalFlags ^ (packet.vehicle.physicalFlags << 29)) & 0x20000000;
+}
+
+void tReplayBlockData::ExtractBikeUpdateData(tReplayBlockData& packet, CBike* bike, float interpolation) {
+    ExtractVehicleUpdateData(packet, bike->AsVehicle(), interpolation);
+
+    bike->GetRideAnimData()->m_fSteerAngle = (float)packet.bike.steerAngle / 50.0f;
+    bike->GetRideAnimData()->m_fAnimLean   = (float)packet.bike.animLean / 50.0f;
+    bike->CalculateLeanMatrix();
+}
+
+void tReplayBlockData::ExtractTrainUpdateData(tReplayBlockData& packet, CTrain* train, float interpolation) {
+    ExtractVehicleUpdateData(packet, train->AsVehicle(), interpolation);
+
+    train->m_fTrainSpeed = packet.train.trainSpeed;
+    train->m_fCurrentRailDistance = packet.train.currentRailDistance;
+    train->m_fLength = packet.train.length;
+    train->m_nTrackId = packet.train.trackId;
+
+    if (auto prevCarriage = packet.train.prevCarriageRef) {
+        CEntity::SafeCleanUpRef(train->m_pPrevCarriage);
+
+        train->m_pPrevCarriage = GetVehiclePool()->GetAt(CReplay::FindPoolIndexForVehicle(prevCarriage - 1))->AsTrain();
+        CEntity::SafeRegisterRef(train->m_pPrevCarriage);
+    }
+
+    if (auto nextCarriage = packet.train.nextCarriageRef) {
+        CEntity::SafeCleanUpRef(train->m_pNextCarriage);
+
+        train->m_pNextCarriage = GetVehiclePool()->GetAt(CReplay::FindPoolIndexForVehicle(nextCarriage - 1))->AsTrain();
+        CEntity::SafeRegisterRef(train->m_pNextCarriage);
+    }
 }
 
 // tReplayBlockData checks
