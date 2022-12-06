@@ -1606,8 +1606,6 @@ void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loa
     TheCamera.Fade(0.0f, eFadeFlag::FADE_IN);
     TheCamera.ProcessFade();
     TheCamera.Fade(1.5f, eFadeFlag::FADE_OUT);
-
-    constexpr auto s = sizeof(tReplayBlockData::misc);
 }
 
 tReplayBlockData tReplayBlockData::MakeVehicleUpdateData(CVehicle* vehicle, int32 poolIdx) {
