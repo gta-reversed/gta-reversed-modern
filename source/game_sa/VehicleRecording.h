@@ -5,20 +5,17 @@
 
 class CVehicleStateEachFrame {
 public:
-    float   m_fTime;
-    int16   m_sVelocityX;
-    int16   m_sVelocityY;
-    int16   m_sVelocityZ;
-    uint8   m_bRightX;
-    uint8   m_bRightY;
-    uint8   m_bRightZ;
-    uint8   m_bTopX;
-    uint8   m_bTopY;
-    uint8   m_bTopZ;
-    uint8   m_bSteeringAngle;
-    uint8   m_bGasPedalPower;
-    uint8   m_bBreakPedalPower;
-    uint8   m_bHandbrakeUsed;
+    int32   m_nTime;
+    struct { // divide by 16383.5
+        int16 x, y, z;
+    }       m_sVelocity;
+    struct { // divide by 127.0
+        int8 x, y, z;
+    }       m_bRight, m_bTop;
+    uint8   m_bSteeringAngle;   // divide by 20.0
+    uint8   m_bGasPedalPower;   // divide by 100.0
+    uint8   m_bBreakPedalPower; // divide by 100.0
+    bool    m_bHandbrakeUsed;
     CVector m_vecPosn;
 };
 
@@ -89,8 +86,8 @@ public:
      * SetRecordingToPointClosestToCoors(int32, CVector)
      * SkipForwardInRecording(CVehicle*, float)
      * SkipToEndAndStopPlaybackRecordedCar(CVehicle*)
-     * StopPlaybackWithIndex(int32)
      */
+    static void StopPlaybackWithIndex(int32 playbackId);
     static void StartPlaybackRecordedCar(CVehicle* vehicle, int32 pathNumber, bool useCarAI, bool bLooped);
     static void StopPlaybackRecordedCar(CVehicle* vehicle);
     static void PausePlaybackRecordedCar(CVehicle* vehicle);
@@ -98,4 +95,13 @@ public:
 
     static bool IsPlaybackGoingOnForCar(CVehicle* vehicle);
     static bool IsPlaybackPausedForCar(CVehicle* vehicle);
+
+    // @notsa
+    static auto GetPlaybackFiles() {
+        return std::span{StreamingArray.data(), NumPlayBackFiles};
+    }
+
+    static auto GetActivePlaybackIndices() {
+        return rng::views::iota(TOTAL_VEHICLE_RECORDS) | std::views::filter([](auto&& i) { return bPlaybackGoingOn[i]; });
+    }
 };

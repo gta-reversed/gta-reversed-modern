@@ -5,6 +5,7 @@
 #include "toolsmenu\DebugModules\CStreamingDebugModule.h"
 #include "TimecycEditor.h"
 #include "toolsmenu\DebugModules\CullZonesDebugModule.h"
+#include <enumerate.hpp>
 
 
 void CVehicleRecording::InjectHooks() {
@@ -60,17 +61,30 @@ void CVehicleRecording::Render() {
 }
 
 // 0x45A060
-bool CVehicleRecording::HasRecordingFileBeenLoaded(int32 rrrNumber) {
-    return plugin::CallAndReturn<bool, 0x45A060, int32>(rrrNumber);
+bool CVehicleRecording::HasRecordingFileBeenLoaded(int32 recordId) {
+    return plugin::CallAndReturn<bool, 0x45A060, int32>(recordId);
 }
 
 // 0x45A8F0
-void CVehicleRecording::Load(RwStream* stream, int32 resourceId, int32 totalSize) {
-    return plugin::Call<0x45A8F0, RwStream*, int32, int32>(stream, resourceId, totalSize);
+void CVehicleRecording::Load(RwStream* stream, int32 recordId, int32 totalSize) {
+    return plugin::Call<0x45A8F0, RwStream*, int32, int32>(stream, recordId, totalSize);
+
+    auto allocated = CMemoryMgr::Malloc(totalSize);
+    StreamingArray[recordId].m_pData = static_cast<CVehicleStateEachFrame*>(allocated);
+    const auto size = RwStreamRead(stream, allocated, 9'999'999u);
+    StreamingArray[recordId].m_nSize = size;
+    RwStreamClose(stream, nullptr);
+
+    for (auto&& [i, path] : notsa::enumerate(std::span{StreamingArray.data() + recordId, size})) {
+        if (!path.m_pData->m_nTime && i != 0) {
+            StreamingArray[recordId].m_nSize = i * sizeof(CVehicleStateEachFrame);
+        }
+    }
+    SmoothRecording(recordId);
 }
 
 // 0x45A0F0
-void CVehicleRecording::SmoothRecording(int32 resourceId) {
+void CVehicleRecording::SmoothRecording(int32 recordId) {
     assert(0);
 }
 
@@ -88,38 +102,80 @@ int32 CVehicleRecording::RegisterRecordingFile(const char* name) {
     return NumPlayBackFiles++;
 }
 
-void CVehicleRecording::RemoveRecordingFile(int32) {
+// 0x45A0A0
+void CVehicleRecording::RemoveRecordingFile(int32 recordId) {
     assert(0);
+    for (auto&& [i, recording] : notsa::enumerate(GetPlaybackFiles())) {
+        if (recording.m_nNumber == recordId && recording.m_pData && !recording.m_nRefCount) {
+            CMemoryMgr::Free(recording.m_pData);
+            recording.m_pData = nullptr;
+            CStreaming::RemoveModel(RRRToModelId(i));
+        }
+    }
 }
 
-
-void CVehicleRecording::RequestRecordingFile(int32) {
+// 0x45A020
+void CVehicleRecording::RequestRecordingFile(int32 recordId) {
     assert(0);
+    for (auto&& [i, recording] : notsa::enumerate(GetPlaybackFiles())) {
+        if (recording.m_nNumber == recordId && recording.m_pData && !recording.m_nRefCount) {
+            CMemoryMgr::Free(recording.m_pData);
+            recording.m_pData = nullptr;
+            CStreaming::RemoveModel(RRRToModelId(i));
+        }
+    }
 }
+
+void CVehicleRecording::StopPlaybackWithIndex(int32 playbackId) {}
 
 // 0x45A980
 void CVehicleRecording::StartPlaybackRecordedCar(CVehicle* vehicle, int32 pathNumber, bool useCarAI, bool bLooped) {
-    plugin::Call<0x45A980, CVehicle*, int32, bool, bool>(vehicle, pathNumber, useCarAI, bLooped);
+    return plugin::Call<0x45A980, CVehicle*, int32, bool, bool>(vehicle, pathNumber, useCarAI, bLooped);
+
 }
 
 // 0x45A280
 void CVehicleRecording::StopPlaybackRecordedCar(CVehicle* vehicle) {
-    plugin::Call<0x45A280, CVehicle*>(vehicle);
+    return plugin::Call<0x45A280, CVehicle*>(vehicle);
+    for (auto i : GetActivePlaybackIndices()) {
+        if (pVehicleForPlayback[i] == vehicle) {
+            StopPlaybackWithIndex(i);
+            return;
+        }
+    }
 }
 
 // 0x459740
 void CVehicleRecording::PausePlaybackRecordedCar(CVehicle* vehicle) {
     assert(0);
+    for (auto i : GetActivePlaybackIndices()) {
+        if (pVehicleForPlayback[i] == vehicle) {
+            bPlaybackPaused[i] = true;
+            return;
+        }
+    }
 }
 
 // 0x459850
 void CVehicleRecording::UnpausePlaybackRecordedCar(CVehicle* vehicle) {
     assert(0);
+    for (auto i : GetActivePlaybackIndices()) {
+        if (pVehicleForPlayback[i] == vehicle) {
+            bPlaybackPaused[i] = false;
+            return;
+        }
+    }
 }
 
 // 0x459660
 void CVehicleRecording::SetPlaybackSpeed(CVehicle* vehicle, float speed) {
-    plugin::Call<0x459660, CVehicle*, float>(vehicle, speed);
+    return plugin::Call<0x459660, CVehicle*, float>(vehicle, speed);
+    for (auto i : GetActivePlaybackIndices()) {
+        if (pVehicleForPlayback[i] == vehicle) {
+            PlaybackSpeed[i] = speed;
+            return;
+        }
+    }
 }
 
 // [debug]
@@ -146,9 +202,17 @@ void CVehicleRecording::SaveOrRetrieveDataForThisFrame() {
 // 0x4594C0
 bool CVehicleRecording::IsPlaybackGoingOnForCar(CVehicle* vehicle) {
     return plugin::CallAndReturn<bool, 0x4594C0, CVehicle*>(vehicle);
+    for (auto i : GetActivePlaybackIndices()) {
+        if (pVehicleForPlayback[i] == vehicle) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // 0x4595A0
 bool CVehicleRecording::IsPlaybackPausedForCar(CVehicle* vehicle) {
     return plugin::CallAndReturn<bool, 0x4595A0, CVehicle*>(vehicle);
+    // SA code loops through all playbacks but always returns false.
+    return false;
 }
