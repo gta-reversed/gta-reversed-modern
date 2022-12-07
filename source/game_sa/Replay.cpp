@@ -440,21 +440,22 @@ void CReplay::SaveReplayToHD() {
     if (auto file = CFileMgr::OpenFileForWriting("replay.rep")) {
         CFileMgr::Write(file, "GtaSA29", 8u);
 
-        // TODO: refactor
-        auto i = 0;
-        for (; i < 8; ++i) {
-            if (BufferStatus[i] == REPLAYBUFFER_IN_USE)
+        // TODO: Refactor
+        const auto NextSlot = [](uint8 slot) { return (slot + 1) % NUM_REPLAY_BUFFERS; };
+
+        // TODO: Refactor
+        auto inUse = std::distance(BufferStatus.begin(), rng::find(BufferStatus, REPLAYBUFFER_IN_USE));
+        auto slot = NextSlot(inUse);
+
+        for (auto status = BufferStatus[slot]; status != REPLAYBUFFER_IN_USE; status = BufferStatus[slot]) {
+            if (status == REPLAYBUFFER_FULL)
                 break;
-        }
-        auto slot = (i + 1) % 8;
-        for (auto j = BufferStatus[slot]; j != REPLAYBUFFER_IN_USE; j = BufferStatus[slot]) {
-            if (j == REPLAYBUFFER_FULL)
-                break;
-            slot = (slot + 1) % 8;
+            slot = NextSlot(slot);
         }
         CFileMgr::Write(file, Buffers[slot].buffer.data(), 100000u);
+
         while (BufferStatus[slot] != REPLAYBUFFER_IN_USE) {
-            slot = (slot + 1) % 8;
+            slot = NextSlot(slot);
             CFileMgr::Write(file, Buffers[slot].buffer.data(), 100000u);
         }
         CFileMgr::CloseFile(file);

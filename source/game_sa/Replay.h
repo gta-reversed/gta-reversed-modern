@@ -175,7 +175,6 @@ public:
             return (stride + m_bSlot) % NUM_REPLAY_BUFFERS;
         }
     };
-    VALIDATE_SIZE(CAddressInReplayBuffer, 0xC);
 
     inline static eReplayMode& Mode = *reinterpret_cast<eReplayMode*>(0xA43088);
     inline static bool& bReplayEnabled = *reinterpret_cast<bool*>(0x8A6160);
