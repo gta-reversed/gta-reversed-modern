@@ -1441,12 +1441,12 @@ bool CReplay::IsThisVehicleUsedInRecording(int32 index) {
             case REPLAY_PACKET_HELI:
             case REPLAY_PACKET_PLANE:
             case REPLAY_PACKET_TRAIN:
-                if (packet.Get<tReplayVehicleBlock>().poolRef == index) {
+                if (packet.As<tReplayVehicleBlock>()->poolRef == index) {
                     return true;
                 }
                 break;
             case REPLAY_PACKET_PED_UPDATE:
-                if (auto pedIdx = packet.Get<tReplayPedUpdateBlock>().vehicleIndex; pedIdx && pedIdx - 1 == index) {
+                if (auto pedIdx = packet.As<tReplayPedUpdateBlock>()->vehicleIndex; pedIdx && pedIdx - 1 == index) {
                     return true;
                 }
                 break;
@@ -1462,7 +1462,7 @@ bool CReplay::IsThisVehicleUsedInRecording(int32 index) {
 bool CReplay::IsThisPedUsedInRecording(int32 index) {
     for (auto& buffer : Buffers) {
         const auto packet = rng::find_if(buffer, [index](auto&& p) {
-            return p.type == REPLAY_PACKET_PED_HEADER && p.Get<tReplayPedHeaderBlock>().poolRef == index;
+            return p.type == REPLAY_PACKET_PED_HEADER && p.As<tReplayPedHeaderBlock>()->poolRef == index;
         });
 
         if (packet != buffer.end()) {
@@ -1477,7 +1477,7 @@ void CReplay::FindFirstFocusCoordinate(CVector& outPos) {
     for (auto& buffer : GetAllActiveBuffers()) {
         const auto packet = rng::find_if(buffer, [](auto&& p) { return p.type == REPLAY_PACKET_GENERAL; });
         if (packet != buffer.end()) {
-            outPos = packet->Get<tReplayCameraBlock>().firstFocusPosn;
+            outPos = packet->As<tReplayCameraBlock>()->firstFocusPosn;
             break;
         }
     }
@@ -1503,10 +1503,10 @@ void CReplay::StreamAllNecessaryCarsAndPeds() {
             switch (packet.type) {
             case REPLAY_PACKET_VEHICLE:
             case REPLAY_PACKET_BIKE:
-                CStreaming::RequestModel(packet.Get<tReplayVehicleBlock>().modelId, STREAMING_DEFAULT);
+                CStreaming::RequestModel(packet.As<tReplayVehicleBlock>()->modelId, STREAMING_DEFAULT);
                 break;
             case REPLAY_PACKET_PED_HEADER:
-                CStreaming::RequestModel(packet.Get<tReplayPedHeaderBlock>().modelId, STREAMING_DEFAULT);
+                CStreaming::RequestModel(packet.As<tReplayPedHeaderBlock>()->modelId, STREAMING_DEFAULT);
                 break;
             default:
                 break;
@@ -1536,11 +1536,11 @@ CPlayerPed* CReplay::CreatePlayerPed() {
                     auto next = buffer.Read<tReplayClothesBlock>(offset + FindSizeOfPacket(REPLAY_PACKET_PED_HEADER));
                     assert(next.type == REPLAY_PACKET_CLOTHES);
 
-                    player = static_cast<CPlayerPed*>(DealWithNewPedPacket(packet.Get<tReplayPedHeaderBlock>(), true, &next));
+                    player = static_cast<CPlayerPed*>(DealWithNewPedPacket(*packet.As<tReplayPedHeaderBlock>(), true, &next));
                 }
                 break;
             case REPLAY_PACKET_PED_UPDATE:
-                if (player && player == GetPedPool()->GetAt(FindPoolIndexForPed(packet.Get<tReplayPedUpdateBlock>().poolRef))) {
+                if (player && player == GetPedPool()->GetAt(FindPoolIndexForPed(packet.As<tReplayPedUpdateBlock>()->poolRef))) {
                     CAddressInReplayBuffer address = {.m_nOffset = offset, .m_pBase = &buffer, .m_bSlot = (uint8)i}; // m_bSlot definition is NOTSA
                     ProcessPedUpdate(player, 1.0f, address);
                     return player;

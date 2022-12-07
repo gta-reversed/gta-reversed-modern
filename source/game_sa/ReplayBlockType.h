@@ -32,22 +32,18 @@ struct CStoredAnimationState {
 };
 VALIDATE_SIZE(CStoredAnimationState, 0x12);
 
+struct tReplayBlockBase;
+template<typename T>
+concept replay_packet_block = std::derived_from<T, tReplayBlockBase>;
+
 #pragma pack(push, 1)
 struct tReplayBlockBase {
     eReplayPacket type;
 
     template <class T>
-        requires std::is_base_of_v<tReplayBlockBase, T>
+        requires replay_packet_block<T>
     T* As() {
-        //assert(type == T::Type);
         return reinterpret_cast<T*>(this);
-    }
-
-    template <class T>
-        requires std::is_base_of_v<tReplayBlockBase, T>
-    T Get() {
-        T copied = *reinterpret_cast<T*>(this);
-        return copied;
     }
 };
 VALIDATE_SIZE(tReplayBlockBase, 0x1);

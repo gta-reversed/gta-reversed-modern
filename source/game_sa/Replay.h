@@ -48,7 +48,7 @@ public:
         std::array<uint8, REPLAY_BUFFER_SIZE> buffer;
 
         template <typename T>
-            requires std::is_base_of_v<tReplayBlockBase, T>
+            requires replay_packet_block<T>
         T& Read(uint32 offset) const {
             auto* data = (T*)(buffer.data() + offset);
             if constexpr (!std::same_as<T, tReplayBlockBase>) {
@@ -59,7 +59,7 @@ public:
 
         // Returns total bytes written
         template <typename T>
-            requires std::is_base_of_v<tReplayBlockBase, T> && (!std::same_as<tReplayBlockBase, T>)
+            requires replay_packet_block<T> && (!std::same_as<tReplayBlockBase, T>)
         uint32 Write(uint32 offset, const T& data = {}) {
             if (T::Type == REPLAY_PACKET_END) {
                 *(eReplayPacket*)(buffer.data() + offset) = REPLAY_PACKET_END;
@@ -147,13 +147,13 @@ public:
 
         // Read helper
         template <typename T>
-            requires std::is_base_of_v<tReplayBlockBase, T>
+            requires replay_packet_block<T>
         T& Read() const {
             return m_pBase->Read<T>(m_nOffset);
         }
 
         template <class T>
-            requires std::is_base_of_v<tReplayBlockBase, T>
+            requires replay_packet_block<T>
         void Write(const T& data = {}) {
             const auto written = m_pBase->Write<T>(m_nOffset, data);
             if constexpr (T::Type != REPLAY_PACKET_END) {
