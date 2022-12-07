@@ -3,6 +3,7 @@
 #include "Bmx.h"
 #include "CompressedMatrixNotAligned.h"
 #include "PlayerInfo.h"
+#include "ReplayBlockType.h"
 #include "Vector.h"
 #include "Vehicle.h"
 #include "eReplay.h"
@@ -18,27 +19,10 @@ enum eReplayBufferStatus : uint8 {
     REPLAYBUFFER_IN_USE = 2
 };
 
-#pragma pack(push, 1)
-struct AnimationState {
-    int16 m_nAnimId;
-    uint8 m_nTime;
-    uint8 m_nSpeed;
-    uint8 m_nGroupId1;
-    uint8 m_nGroupId2;
-};
-#pragma pack(pop)
-VALIDATE_SIZE(AnimationState, 6);
-
-struct CStoredAnimationState {
-    AnimationState first;
-    AnimationState second;
-    AnimationState third;
-};
-VALIDATE_SIZE(CStoredAnimationState, 18);
-
 // Used for compressing angle values while recording replays.
 constexpr float HEADING_COMPRESS_VALUE = 40.764328f;
 
+#if 0
 // NOTSA
 #pragma pack(push, 1)
 struct tReplayBlockData {
@@ -56,8 +40,14 @@ struct tReplayBlockData {
             uint8 angleDoorRF;
             uint16 modelId;
             uint32 panels;
-            struct {
+            struct U8Vector {
                 int8 x, y, z;
+
+                U8Vector(const CVector& v) : x(v.x), y(v.y), z(v.z) {}
+
+                operator CVector() const {
+                    return CVector{(float)x, (float)y, (float)z} / 8000.0f;
+                }
             } vecMoveSpeed;
             uint8 steerAngle_or_doomVerticalRot; // m_fDoomVerticalRotation if modelId == RHINO, steerAngle if not.
             uint8 wheelsSuspensionCompression[4];
@@ -183,7 +173,7 @@ struct tReplayBlockData {
     static void ExtractTrainUpdateData(tReplayBlockData& packet, CTrain* train, float interpolation);
 };
 #pragma pack(pop)
-
+#endif
 constexpr auto NUM_REPLAY_BUFFERS = 8u;
 constexpr auto REPLAY_BUFFER_SIZE = 100'000u;
 
@@ -210,19 +200,29 @@ public:
         std::array<uint8, REPLAY_BUFFER_SIZE> buffer;
 
         template <typename T>
-        T Read(uint32 offset) const {
-            return *(T*)(buffer.data() + offset);
+            requires std::is_base_of_v<tReplayBlockBase, T>
+        T& Read(uint32 offset) const {
+            auto* data = (T*)(buffer.data() + offset);
+            if constexpr (!std::same_as<T, tReplayBlockBase>) {
+                assert(data->type == T::Type);
+            }
+            return *data;
         }
 
         // Returns total bytes written
-        uint32 Write(uint32 offset, const tReplayBlockData& data) {
-            if (data.type == REPLAY_PACKET_END) {
-                *(eReplayPacket*)(buffer.data() + offset) = data.type;
+        template <typename T>
+            requires std::is_base_of_v<tReplayBlockBase, T> && (!std::same_as<tReplayBlockBase, T>)
+        uint32 Write(uint32 offset, const T& data = {}) {
+            if (T::Type == REPLAY_PACKET_END) {
+                *(eReplayPacket*)(buffer.data() + offset) = REPLAY_PACKET_END;
                 return 1;
             }
-            std::memcpy(buffer.data() + offset, &data, FindSizeOfPacket(data.type));
+            const auto size = FindSizeOfPacket(T::Type);
 
-            return FindSizeOfPacket(data.type);
+            T wr = data;
+            wr.type = T::Type;
+            std::memcpy(buffer.data() + offset, &wr, size);
+            return size;
         }
 
         uint8& at(size_t index)             { return buffer.at(index); }
@@ -233,7 +233,7 @@ public:
         bool IsAvailable() const { return BufferStatus[GetIndex()] != REPLAYBUFFER_NOT_AVAILABLE; }
 
         struct Iterator {
-            using value_type = tReplayBlockData;
+            using value_type = tReplayBlockBase;
             using reference = value_type&;
             using pointer = value_type*;
             using iter_difference = ptrdiff_t;
@@ -250,7 +250,7 @@ public:
                     NOTSA_UNREACHABLE("Increment after end()!");
                 }
 
-                const auto type = m_buffer->Read<eReplayPacket>(m_offset);
+                const auto type = m_buffer->Read<tReplayBlockBase>(m_offset).type;
                 m_offset = (type != REPLAY_PACKET_END) ? m_offset + CReplay::FindSizeOfPacket(type) : REPLAY_BUFFER_SIZE;
                 return *this;
             }
@@ -261,20 +261,20 @@ public:
                 return a;
             }
 
-            tReplayBlockData& operator*() const {
+            value_type& operator*() const {
                 if (m_offset >= REPLAY_BUFFER_SIZE || !m_buffer) {
                     NOTSA_UNREACHABLE("Dereferencing of end()!");
                 }
 
-                return *(tReplayBlockData*)&m_buffer->at(m_offset);
+                return *(value_type*)&m_buffer->at(m_offset);
             }
 
-            tReplayBlockData* operator->() const {
+            value_type* operator->() const {
                 if (m_offset >= REPLAY_BUFFER_SIZE || !m_buffer) {
                     NOTSA_UNREACHABLE("Dereferencing of end()!");
                 }
 
-                return (tReplayBlockData*)&m_buffer->at(m_offset);
+                return (value_type*)&m_buffer->at(m_offset);
             }
 
             bool operator==(const Iterator& rhs) const = default;
@@ -299,13 +299,15 @@ public:
 
         // Read helper
         template <typename T>
-        T Read() const {
+            requires std::is_base_of_v<tReplayBlockBase, T>
+        T& Read() const {
             return m_pBase->Read<T>(m_nOffset);
         }
 
-        // Write helper
-        void Write(const tReplayBlockData& data, bool seek = false) {
-            const auto written = m_pBase->Write(m_nOffset, data);
+        template <class T>
+            requires std::is_base_of_v<tReplayBlockBase, T>
+        void Write(const T& data = {}, bool seek = false) {
+            const auto written = m_pBase->Write<T>(m_nOffset, data);
             if (seek) {
                 m_nOffset += written;
             }
@@ -430,10 +432,10 @@ public:
     static void RestorePlayerInfoVariables();
     static void RestoreStuffFromMem();
     static void FinishPlayback();
-    static void StoreClothesDesc(const CPedClothesDesc& desc, tReplayBlockData& packet);
+    static void StoreClothesDesc(const CPedClothesDesc& desc, tReplayClothesBlock& packet);
     static void RecordThisFrame();
-    static void RestoreClothesDesc(CPedClothesDesc& desc, tReplayBlockData& packet);
-    static CPed* DealWithNewPedPacket(tReplayBlockData& pedPacket, bool loadModel, tReplayBlockData* clothesPacket);
+    static void RestoreClothesDesc(CPedClothesDesc& desc, tReplayClothesBlock& packet);
+    static CPed* DealWithNewPedPacket(const tReplayPedHeaderBlock& pedPacket, bool loadModel, tReplayClothesBlock* clothesPacket);
     static bool PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, float interpolation, uint32* outTimer);
     static bool FastForwardToTime(uint32 start);
     static void PlayBackThisFrame();
@@ -453,3 +455,4 @@ public:
     // @brief Returns all available buffers
     static auto GetAllActiveBuffers() { return Buffers | std::views::filter([](auto&& buffer) { return buffer.IsAvailable(); }); }
 };
+
