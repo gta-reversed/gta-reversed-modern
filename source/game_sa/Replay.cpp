@@ -437,28 +437,26 @@ void CReplay::InitialisePoolConversionTables() {
 void CReplay::SaveReplayToHD() {
     CFileMgr::SetDirMyDocuments();
 
-    if (const auto file = CFileMgr::OpenFileForWriting("replay.rep")) {
+    if (auto file = CFileMgr::OpenFileForWriting("replay.rep")) {
         CFileMgr::Write(file, "GtaSA29", 8u);
 
         // TODO: refactor
-        auto idx = 7u;
-        for (auto&& [i, status] : notsa::enumerate(BufferStatus)) {
-            if (status == REPLAYBUFFER_IN_USE) {
-                idx = i;
+        auto i = 0;
+        for (; i < 8; ++i) {
+            if (BufferStatus[i] == REPLAYBUFFER_IN_USE)
                 break;
-            }
         }
-
-        auto slot = (idx + 1) % 8;
-        for (auto j = BufferStatus[slot]; j != REPLAYBUFFER_IN_USE && j != REPLAYBUFFER_FULL; j = BufferStatus[slot]) {
+        auto slot = (i + 1) % 8;
+        for (auto j = BufferStatus[slot]; j != REPLAYBUFFER_IN_USE; j = BufferStatus[slot]) {
+            if (j == REPLAYBUFFER_FULL)
+                break;
             slot = (slot + 1) % 8;
         }
-        CFileMgr::Write(file, &Buffers.at(slot), sizeof(tReplayBuffer));
-
-        for (slot = (slot + 1) % 8; BufferStatus[slot] != REPLAYBUFFER_IN_USE; slot = (slot + 1) % 8) {
-            CFileMgr::Write(file, &Buffers[slot], sizeof(tReplayBuffer));
+        CFileMgr::Write(file, Buffers[slot].buffer.data(), 100000u);
+        while (BufferStatus[slot] != REPLAYBUFFER_IN_USE) {
+            slot = (slot + 1) % 8;
+            CFileMgr::Write(file, Buffers[slot].buffer.data(), 100000u);
         }
-
         CFileMgr::CloseFile(file);
     }
     CFileMgr::SetDir("");
@@ -474,7 +472,7 @@ void CReplay::PlayReplayFromHD() {
             DEV_LOG("Invalid replay file data, header unmatch (='{}')", std::string_view{gString, 8u});
         } else {
             auto bufferIdx = 0u;
-            for (; bufferIdx < 8u && CFileMgr::Read(file, &Buffers[bufferIdx], sizeof(tReplayBuffer)); bufferIdx++) {
+            for (; bufferIdx < 8u && CFileMgr::Read(file, Buffers[bufferIdx].buffer.data(), sizeof(tReplayBuffer)); bufferIdx++) {
                 BufferStatus[bufferIdx] = REPLAYBUFFER_FULL;
             }
             BufferStatus[bufferIdx - 1] = REPLAYBUFFER_IN_USE; // Mark last used buffer as in-use.
