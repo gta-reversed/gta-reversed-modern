@@ -43,7 +43,7 @@ void CReplay::InjectHooks() {
     RH_ScopedInstall(StoreStuffInMem, 0x45F180);
     RH_ScopedInstall(RestoreStuffFromMem, 0x45ECD0);
     RH_ScopedInstall(FinishPlayback, 0x45F050);
-    RH_ScopedInstall(RecordThisFrame, 0x45E300, {.reversed = false});
+    RH_ScopedInstall(RecordThisFrame, 0x45E300);
     RH_ScopedInstall(StoreClothesDesc, 0x45C750);
     RH_ScopedInstall(RestoreClothesDesc, 0x45C7D0);
     RH_ScopedInstall(DealWithNewPedPacket, 0x45CEA0);
@@ -222,7 +222,7 @@ void CReplay::StorePedUpdate(CPed* ped, uint8 index) {
         .animGroup                = (uint16)ped->m_nAnimGroup,
         .contactSurfaceBrightness = (uint8)(ped->m_fContactSurfaceBrightness * 100.0f),
         .flags                    = flags,
-    }, true);
+    });
 }
 
 // 0x45B4D0
@@ -370,7 +370,7 @@ void CReplay::RecordVehicleDeleted(CVehicle* vehicle) {
         GoToNextBlock();
     }
 
-    Record.Write<tReplayDeletedVehicleBlock>({.poolRef = (int16)GetVehiclePool()->GetIndex(vehicle)}, true);
+    Record.Write<tReplayDeletedVehicleBlock>({.poolRef = (int16)GetVehiclePool()->GetIndex(vehicle)});
     Record.Write<tReplayEndBlock>();
 }
 
@@ -383,7 +383,7 @@ void CReplay::RecordPedDeleted(CPed* ped) {
         GoToNextBlock();
     }
 
-    Record.Write<tReplayDeletedPedBlock>({.poolRef = (int16)GetPedPool()->GetIndex(ped)}, true);
+    Record.Write<tReplayDeletedPedBlock>({.poolRef = (int16)GetPedPool()->GetIndex(ped)});
     Record.Write<tReplayEndBlock>();
 }
 
@@ -941,19 +941,19 @@ void CReplay::RecordThisFrame() {
         .firstFocusPosn       = FindPlayerCoors()
     };
     memcpy(cameraPacket.matrix, &cameraMatrix, sizeof(CMatrix));
-    Record.Write(cameraPacket, true);
+    Record.Write(cameraPacket);
 
     Record.Write<tReplayClockBlock>({
         .currentHour = CClock::GetGameClockHours(), .currentMinute = CClock::GetGameClockMinutes()
-    }, true);
+    });
 
     Record.Write<tReplayWeatherBlock>({
         .oldWeather  = (uint8)CWeather::OldWeatherType,
         .newWeather  = (uint8)CWeather::NewWeatherType,
         .interpValue = CWeather::InterpolationValue
-    }, true);
+    });
 
-    Record.Write<tReplayTimerBlock>({.timeInMS = CTimer::GetTimeInMS()}, true);
+    Record.Write<tReplayTimerBlock>({.timeInMS = CTimer::GetTimeInMS()});
 
     for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
         if (auto vehicle = GetVehiclePool()->GetAt(i); vehicle && vehicle->m_pRwObject) {
@@ -963,38 +963,37 @@ void CReplay::RecordThisFrame() {
             case VEHICLE_TYPE_QUAD:
             case VEHICLE_TYPE_BOAT:
             case VEHICLE_TYPE_TRAILER:
-                Record.Write(tReplayVehicleBlock::MakeVehicleUpdateData(vehicle, i), true);
+                Record.Write(tReplayVehicleBlock::MakeVehicleUpdateData(vehicle, i));
                 break;
             case VEHICLE_TYPE_HELI: {
                 tReplayHeliBlock packet{};
-                packet.Get<tReplayVehicleBlock>() = tReplayVehicleBlock::MakeVehicleUpdateData(vehicle, i);
+                *packet.As<tReplayVehicleBlock>() = tReplayVehicleBlock::MakeVehicleUpdateData(vehicle, i);
 
                 packet.type = REPLAY_PACKET_HELI;
                 packet.rotorSpeed = vehicle->AsHeli()->m_fHeliRotorSpeed;
-                Record.Write(packet, true);
+                Record.Write(packet);
                 break;
             }
             case VEHICLE_TYPE_PLANE: {
                 tReplayPlaneBlock packet{};
-                packet.Get<tReplayVehicleBlock>() = tReplayVehicleBlock::MakeVehicleUpdateData(vehicle, i);
+                *packet.As<tReplayVehicleBlock>() = tReplayVehicleBlock::MakeVehicleUpdateData(vehicle, i);
 
                 packet.type = REPLAY_PACKET_PLANE;
                 packet.field_9C8 = vehicle->AsPlane()->field_9C8;
                 packet.propSpeed = vehicle->AsPlane()->m_fPropSpeed;
-                Record.Write(packet, true);
-                Record.m_nOffset += FindSizeOfPacket(REPLAY_PACKET_PLANE);
+                Record.Write(packet);
                 break;
             }
             case VEHICLE_TYPE_TRAIN:
-                Record.Write(tReplayTrainBlock::MakeTrainUpdateData(vehicle->AsTrain(), i), true);
+                Record.Write(tReplayTrainBlock::MakeTrainUpdateData(vehicle->AsTrain(), i));
                 break;
 
             case VEHICLE_TYPE_BIKE:
-                Record.Write(tReplayBikeBlock::MakeBikeUpdateData(vehicle->AsBike(), i), true);
+                Record.Write(tReplayBikeBlock::MakeBikeUpdateData(vehicle->AsBike(), i));
                 break;
 
             case VEHICLE_TYPE_BMX:
-                Record.Write(tReplayBmxBlock::MakeBmxUpdateData(vehicle->AsBmx(), i), true);
+                Record.Write(tReplayBmxBlock::MakeBmxUpdateData(vehicle->AsBmx(), i));
                 break;
             default:
                 break;
@@ -1012,12 +1011,12 @@ void CReplay::RecordThisFrame() {
                     .poolRef = (uint8)i,
                     .modelId = (int16)((mi >= 290 && mi <= 300) ? 7 : mi),
                     .pedType = (uint8)ped->m_nPedType
-                }, true);
+                });
 
                 if (ped->IsPlayer()) {
                     tReplayClothesBlock clothesData{};
                     StoreClothesDesc(*ped->AsPlayer()->GetClothesDesc(), clothesData);
-                    Record.Write(clothesData, true);
+                    Record.Write(clothesData);
                 }
 
                 ped->bHasAlreadyBeenRecorded = true;
@@ -1047,9 +1046,9 @@ void CReplay::RecordThisFrame() {
             .videoCam = CSpecialFX::bVideoCam,
             .liftCam = CSpecialFX::bLiftCam
         }
-    }, true);
+    });
 
-    Record.Write<tReplayEOFBlock>({}, true);
+    Record.Write<tReplayEOFBlock>();
     Record.Write<tReplayEndBlock>();
 }
 
@@ -1651,8 +1650,8 @@ VALIDATE_BLOCK(tReplayTimerBlock);
 VALIDATE_BLOCK(tReplayBulletTraceBlock);
 VALIDATE_BLOCK(tReplayParticleBlock);
 VALIDATE_BLOCK(tReplayMiscBlock);
-//VALIDATE_BLOCK(tReplayDeletedVehicleBlock);
-//VALIDATE_BLOCK(tReplayDeletedPedBlock);
+VALIDATE_BLOCK(tReplayDeletedVehicleBlock);
+VALIDATE_BLOCK(tReplayDeletedPedBlock);
 VALIDATE_BLOCK(tReplayBmxBlock);
 VALIDATE_BLOCK(tReplayHeliBlock);
 VALIDATE_BLOCK(tReplayPlaneBlock);

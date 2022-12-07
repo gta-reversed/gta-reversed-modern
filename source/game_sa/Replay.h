@@ -65,7 +65,7 @@ public:
                 *(eReplayPacket*)(buffer.data() + offset) = REPLAY_PACKET_END;
                 return 1;
             }
-            const auto size = FindSizeOfPacket(T::Type);
+            constexpr auto size = FindSizeOfPacket(T::Type);
 
             T wr = data;
             wr.type = T::Type;
@@ -154,9 +154,9 @@ public:
 
         template <class T>
             requires std::is_base_of_v<tReplayBlockBase, T>
-        void Write(const T& data = {}, bool seek = false) {
+        void Write(const T& data = {}) {
             const auto written = m_pBase->Write<T>(m_nOffset, data);
-            if (seek) {
+            if constexpr (T::Type != REPLAY_PACKET_END) {
                 m_nOffset += written;
             }
         }

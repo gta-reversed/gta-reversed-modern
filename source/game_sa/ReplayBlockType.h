@@ -196,14 +196,14 @@ struct tReplayMiscBlock : tReplayBlockBase {
 struct tReplayDeletedVehicleBlock : tReplayBlockBase {
     static constexpr auto Type = REPLAY_PACKET_DELETED_VEH;
 
-    /*uint8 __pad;*/
+    uint8 __pad;
     int16 poolRef;
 };
 
 struct tReplayDeletedPedBlock : tReplayBlockBase {
     static constexpr auto Type = REPLAY_PACKET_DELETED_PED;
 
-    /*uint8 __pad;*/
+    uint8 __pad;
     int16 poolRef;
 };
 
