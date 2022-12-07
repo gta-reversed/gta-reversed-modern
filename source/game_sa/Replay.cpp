@@ -513,7 +513,7 @@ int32 CReplay::FindPoolIndexForVehicle(int32 index) {
 // 0x45CA70
 void CReplay::ProcessPedUpdate(CPed* ped, float interpValue, CAddressInReplayBuffer& address) {
     assert(address.Read<tReplayBlockBase>().type == REPLAY_PACKET_PED_UPDATE);
-    const auto packet = address.Read<tReplayPedUpdateBlock>();
+    const auto& packet = address.Read<tReplayPedUpdateBlock>();
 
     address.m_nOffset += FindSizeOfPacket(REPLAY_PACKET_PED_UPDATE); // count packet read beforehand.
     if (!ped)
@@ -529,8 +529,7 @@ void CReplay::ProcessPedUpdate(CPed* ped, float interpValue, CAddressInReplayBuf
 
     if (const auto vehIdx = packet.vehicleIndex) {
         auto& vehicle = ped->m_pVehicle;
-        if (vehicle)
-            vehicle->CleanUpOldReference(ped->m_pVehicle);
+        CEntity::SafeCleanUpRef(ped->m_pVehicle);
         vehicle = nullptr;
 
         if (auto poolRef = FindPoolIndexForVehicle(vehIdx - 1); !GetVehiclePool()->IsFreeSlotAtIndex(poolRef)) {
@@ -539,9 +538,7 @@ void CReplay::ProcessPedUpdate(CPed* ped, float interpValue, CAddressInReplayBuf
             ped->bInVehicle = true;
         }
     } else {
-        if (auto vehicle = ped->m_pVehicle)
-            CEntity::CleanUpOldReference(vehicle);
-
+        CEntity::SafeCleanUpRef(ped->m_pVehicle);
         ped->m_pVehicle = nullptr;
         ped->bInVehicle = false;
     }
