@@ -49,7 +49,6 @@ private:
 public:
     RwMatrix* m_pAttachMatrix;       // 0x40
     bool      m_bOwnsAttachedMatrix; // 0x44 - Do we need to delete attached matrix at detaching
-    uint8     pad[3];                // 0x45
 
 public:
     static void InjectHooks();
@@ -136,6 +135,7 @@ private:
     friend CMatrix operator+(const CMatrix& a, const CMatrix& b);
     // static CMatrix* impl_operatorAdd(CMatrix* out, const CMatrix& a, const CMatrix& b);
 };
+VALIDATE_SIZE(CMatrix, 0x48);
 
 CMatrix operator*(const CMatrix& a, const CMatrix& b);
 CVector operator*(const CMatrix& a, const CVector& b);
@@ -143,8 +143,6 @@ CMatrix operator+(const CMatrix& a, const CMatrix& b);
 
 CMatrix& Invert(CMatrix& in, CMatrix& out);
 CMatrix  Invert(const CMatrix& in);
-
-VALIDATE_SIZE(CMatrix, 0x48);
 
 extern int32& numMatrices;
 extern CMatrix& gDummyMatrix;
