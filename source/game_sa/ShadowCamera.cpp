@@ -39,6 +39,7 @@ CShadowCamera::~CShadowCamera() {
 void CShadowCamera::Destroy() {
     return plugin::CallMethod<0x705400, CShadowCamera*>(this);
 
+    /*
     if (!m_pRwCamera)
         return;
 
@@ -48,7 +49,7 @@ void CShadowCamera::Destroy() {
     }
 
     if (auto* frameBuffer = GetRwRenderRaster()) {
-        frameBuffer = nullptr;
+        frameBuffer = nullptr; // TODO: BUG
         RwRasterDestroy(frameBuffer);
     }
 
@@ -60,13 +61,15 @@ void CShadowCamera::Destroy() {
 
     RwCameraDestroy(m_pRwCamera);
     m_pRwCamera = nullptr;
+    */
 }
 
 // 0x7054C0
-void CShadowCamera::SetFrustum(float viewWindow) {
-    const CVector2D window(viewWindow, viewWindow);
-    RwCameraSetFarClipPlane(m_pRwCamera, viewWindow + viewWindow);
-    RwCameraSetNearClipPlane(m_pRwCamera, viewWindow / 1000.0f);
+void CShadowCamera::SetFrustum(float radius) {
+    RwCameraSetFarClipPlane(m_pRwCamera, radius + radius);
+    RwCameraSetNearClipPlane(m_pRwCamera, radius / 1000.0f);
+
+    const CVector2D window(radius, radius);
     RwCameraSetViewWindow(m_pRwCamera, &window);
 }
 
@@ -86,7 +89,8 @@ void CShadowCamera::SetLight(RpLight* light) {
 // 0x705590
 void CShadowCamera::SetCenter(const CVector& center) {
     auto frame = RwCameraGetFrame(m_pRwCamera);
-    frame->modelling.pos = m_pRwCamera->farPlane / -2.0f * frame->modelling.at + center;
+    auto mat = RwFrameGetMatrix(frame);
+    *RwMatrixGetPos(mat) = m_pRwCamera->farPlane / -2.0f * mat->at + center;
     RwMatrixUpdate(&frame->modelling);
     RwFrameUpdateObjects(frame);
     RwFrameOrthoNormalize(frame);
@@ -99,7 +103,7 @@ void CShadowCamera::InvertRaster() {
 
 // 0x705770
 RwRaster* CShadowCamera::GetRwRenderRaster() const {
-    return m_pRwCamera->frameBuffer;
+    return RwCameraGetRaster(m_pRwCamera);
 }
 
 // 0x705780
