@@ -12,7 +12,7 @@ void CRealTimeShadowManager::InjectHooks() {
     RH_ScopedInstall(ReturnRealTimeShadow, 0x705B30);
     RH_ScopedInstall(GetRealTimeShadow, 0x706970, { .reversed = false });
     RH_ScopedInstall(Update, 0x706AB0, { .reversed = false });
-    RH_ScopedInstall(DoShadowThisFrame, 0x706BA0, { .reversed = false });
+    RH_ScopedInstall(DoShadowThisFrame, 0x706BA0);
 }
 
 // 0x7067C0
@@ -64,9 +64,25 @@ CRealTimeShadow& CRealTimeShadowManager::GetRealTimeShadow(CPhysical* physical) 
         }
     }
 
-
-}
-
 void CRealTimeShadowManager::DoShadowThisFrame(CPhysical* physical) {
-    plugin::CallMethod<0x706BA0, CRealTimeShadowManager*, CPhysical*>(this, physical);
+    switch (g_fx.GetFxQuality()) {
+    case 3: // Always render
+        break;
+    case 2: { // Only draw for main player
+        if (physical->IsPed()) {
+            if (physical->AsPed()->m_nPedType == PED_TYPE_PLAYER1) {
+                break;
+            }
+        }
+        return;
+    }
+    default: // For any other quality: skip
+        return;
+    }
+
+    if (const auto shdw = physical->m_pShadowData) {
+        shdw->m_bCreated = true;
+    } else {
+        (void)GetRealTimeShadow(physical); // ???
+    }
 }
