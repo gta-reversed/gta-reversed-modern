@@ -37,7 +37,7 @@ void CRealTimeShadowManager::Init() {
 }
 
 // 0x706A60
-void CRealTimeShadowManager::Exit() {
+void CRealTimeShadowManager::Exit() { // AKA `Shutdown`
     if (!m_bInitialised) {
         return;
     }
@@ -79,15 +79,11 @@ void CRealTimeShadowManager::Update() {
         }
 
         // 0x305eed - 0x305f0f: Update intensity
-        constexpr auto INTENSITY_STEP = 3;
+        constexpr auto INTENSITY_STEP = 3u;
         if (shdw->m_bKeepAlive) {
-            shdw->m_nIntensity = std::min(100, shdw->m_nIntensity + INTENSITY_STEP);
+            shdw->m_nIntensity = std::min<uint8>(100u, shdw->m_nIntensity + INTENSITY_STEP);
         } else { // Fade out
-            if (shdw->m_nIntensity >= INTENSITY_STEP) {
-                shdw->m_nIntensity -= INTENSITY_STEP;
-            } else {
-                shdw->m_nIntensity = 0; // Avoid underflow
-            }
+            shdw->m_nIntensity = std::max<uint8>(shdw->m_nIntensity, INTENSITY_STEP) - INTENSITY_STEP; // Avoids underflow
         }
 
         if (shdw->m_nIntensity) {
