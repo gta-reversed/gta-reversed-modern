@@ -48,7 +48,7 @@ public:
         std::array<uint8, REPLAY_BUFFER_SIZE> buffer;
 
         template <typename T>
-            requires replay_packet_block<T>
+            requires std::derived_from<T, tReplayBlockBase>
         T& Read(uint32 offset) const {
             auto* data = (T*)(buffer.data() + offset);
             if constexpr (!std::same_as<T, tReplayBlockBase>) {
@@ -59,7 +59,7 @@ public:
 
         // Returns total bytes written
         template <typename T>
-            requires replay_packet_block<T> && (!std::same_as<tReplayBlockBase, T>)
+            requires std::derived_from<T, tReplayBlockBase> && (!std::same_as<tReplayBlockBase, T>)
         uint32 Write(uint32 offset, const T& data = {}) {
             if (T::Type == REPLAY_PACKET_END) {
                 *(eReplayPacket*)(buffer.data() + offset) = REPLAY_PACKET_END;
@@ -94,9 +94,11 @@ public:
             Iterator(const tReplayBuffer* buffer, uint32 offset) : m_buffer(buffer), m_offset(offset) {}
 
             Iterator& operator++() {
+                #ifdef NOTSA_DEBUG
                 if (m_offset >= REPLAY_BUFFER_SIZE || !m_buffer) {
                     NOTSA_UNREACHABLE("Increment after end()!");
                 }
+                #endif
 
                 const auto type = m_buffer->Read<tReplayBlockBase>(m_offset).type;
                 m_offset = (type != REPLAY_PACKET_END) ? m_offset + CReplay::FindSizeOfPacket(type) : REPLAY_BUFFER_SIZE;
@@ -110,17 +112,21 @@ public:
             }
 
             value_type& operator*() const {
+                #ifdef NOTSA_DEBUG
                 if (m_offset >= REPLAY_BUFFER_SIZE || !m_buffer) {
                     NOTSA_UNREACHABLE("Dereferencing of end()!");
                 }
+                #endif
 
                 return *(value_type*)&m_buffer->at(m_offset);
             }
 
             value_type* operator->() const {
+                #ifdef NOTSA_DEBUG
                 if (m_offset >= REPLAY_BUFFER_SIZE || !m_buffer) {
                     NOTSA_UNREACHABLE("Dereferencing of end()!");
                 }
+                #endif
 
                 return (value_type*)&m_buffer->at(m_offset);
             }
@@ -141,19 +147,24 @@ public:
 
     class CAddressInReplayBuffer {
     public:
-        uint32 m_nOffset;
-        tReplayBuffer* m_pBase;
-        uint8 m_bSlot; // first slot to contain data
+        uint32 m_nOffset{0};
+        tReplayBuffer* m_pBase{nullptr};
+        uint8 m_bSlot{0}; // first slot to contain data
+
+        CAddressInReplayBuffer() = default;
+        CAddressInReplayBuffer(tReplayBuffer& buffer, uint8 slot = 0u, uint32 offset = 0u)
+            : m_pBase(&buffer), m_bSlot(slot), m_nOffset(offset)
+        {}
 
         // Read helper
         template <typename T>
-            requires replay_packet_block<T>
+            requires std::derived_from<T, tReplayBlockBase>
         T& Read() const {
             return m_pBase->Read<T>(m_nOffset);
         }
 
         template <class T>
-            requires replay_packet_block<T>
+            requires std::derived_from<T, tReplayBlockBase>
         void Write(const T& data = {}) {
             const auto written = m_pBase->Write<T>(m_nOffset, data);
             if constexpr (T::Type != REPLAY_PACKET_END) {

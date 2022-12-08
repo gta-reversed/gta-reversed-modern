@@ -21,27 +21,47 @@ struct AnimationState {
     uint8 m_nSpeed;
     uint8 m_nGroupId1;
     uint8 m_nGroupId2;
+
+    static AnimationState Make(int16 animId, float time, float speed, uint8 groupId) {
+        AnimationState ret{};
+        ret.m_nAnimId   = animId;
+        ret.m_nTime     = static_cast<uint8>(std::clamp(time, 0.0f, 4.0f)  * 63.75f);
+        ret.m_nSpeed    = static_cast<uint8>(std::clamp(speed, 0.0f, 3.0f) * 85.0f);
+        ret.m_nGroupId1 = groupId;
+
+        return ret;
+    }
+
+    static AnimationState MakeBlend(int16 animId, float time, float speed, uint8 groupId, float blend) {
+        AnimationState ret{};
+        ret.m_nAnimId   = animId;
+        ret.m_nTime     = static_cast<uint8>(std::clamp(time, 0.0f, 4.0f)  * 63.75f);
+        ret.m_nSpeed    = static_cast<uint8>(std::clamp(speed, 0.0f, 3.0f) * 85.0f);
+        ret.m_nGroupId1 = static_cast<uint8>(std::clamp(blend, 0.0f, 2.0f) * 127.5f);
+        ret.m_nGroupId2 = groupId;
+
+        return ret;
+    }
 };
 #pragma pack(pop)
 VALIDATE_SIZE(AnimationState, 0x6);
 
+/*
 struct CStoredAnimationState {
     AnimationState first;
     AnimationState second;
     AnimationState third;
 };
+*/
+using CStoredAnimationState = std::array<AnimationState, 3>;
 VALIDATE_SIZE(CStoredAnimationState, 0x12);
-
-struct tReplayBlockBase;
-template<typename T>
-concept replay_packet_block = std::derived_from<T, tReplayBlockBase>;
 
 #pragma pack(push, 1)
 struct tReplayBlockBase {
     eReplayPacket type;
 
     template <class T>
-        requires replay_packet_block<T>
+        requires std::derived_from<T, tReplayBlockBase>
     T* As() {
         return reinterpret_cast<T*>(this);
     }
