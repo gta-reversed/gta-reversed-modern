@@ -18,7 +18,7 @@ public:
     static void InjectHooks();
 
     CRealTimeShadow() = default;
-    ~CRealTimeShadow() = default;
+    ~CRealTimeShadow();
 
     struct RwFrame*   SetLightProperties(float angle, float _unused_param, bool setLight);
     struct RwTexture* GetShadowRwTexture();
@@ -37,8 +37,8 @@ public:
     RwTexture* Update();
 
 public: // Eventually make this private
-    CPhysical*    m_pOwner{};
-    bool          m_bCreated{};
+    CPhysical*    m_pOwner{};       /// If `nullptr` the shadow isn't in use
+    bool          m_bKeepAlive{};   /// If false it starts to fade out and eventually gets destroyed.
     uint8         m_nIntensity{};
     CShadowCamera m_camera{};
     bool          m_bBlurred{};

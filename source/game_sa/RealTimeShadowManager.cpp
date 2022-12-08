@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "RealTimeShadowManager.h"
+#include "Shadows.h"
 
 CRealTimeShadowManager& g_realTimeShadowMan = *(CRealTimeShadowManager*)0xC40350;
 
@@ -11,8 +12,9 @@ void CRealTimeShadowManager::InjectHooks() {
     RH_ScopedInstall(Init, 0x7067C0);
     RH_ScopedInstall(ReturnRealTimeShadow, 0x705B30);
     RH_ScopedInstall(GetRealTimeShadow, 0x706970, { .reversed = false });
-    RH_ScopedInstall(Update, 0x706AB0);
+    RH_ScopedInstall(Update, 0x706AB0, { .reversed = false });
     RH_ScopedInstall(DoShadowThisFrame, 0x706BA0);
+    RH_ScopedInstall(Exit, 0x706A60);
 }
 
 // 0x7067C0
@@ -28,10 +30,30 @@ void CRealTimeShadowManager::Init() {
 
     m_BlurCamera.Create(6);
 
-    m_GradientCamera[0].Create(6);
-    m_GradientCamera[0].MakeGradientRaster();
+    m_GradientCamera.Create(6);
+    m_GradientCamera.MakeGradientRaster();
 
     m_bInitialised = true;
+}
+
+// 0x706A60
+void CRealTimeShadowManager::Exit() {
+    if (!m_bInitialised) {
+        return;
+    }
+
+    for (auto& shdw : m_apShadows) {
+        if (const auto owner = shdw->m_pOwner) {
+            delete shdw; // `shdw->m_pOwner` nulled out by this
+            delete owner; // Why?
+        }
+    }
+
+    // Nice hack
+    m_BlurCamera.~CShadowCamera();
+    m_GradientCamera.~CShadowCamera();
+
+    m_bInitialised = false;
 }
 
 void CRealTimeShadowManager::ReturnRealTimeShadow(CRealTimeShadow* shdw) {
@@ -128,7 +150,7 @@ void CRealTimeShadowManager::DoShadowThisFrame(CPhysical* physical) {
     }
 
     if (const auto shdw = physical->m_pShadowData) {
-        shdw->m_bCreated = true;
+        shdw->m_bKeepAlive = true;
     } else {
         (void)GetRealTimeShadow(physical); // ???
     }

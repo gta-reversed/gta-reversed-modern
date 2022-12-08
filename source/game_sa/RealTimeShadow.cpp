@@ -12,7 +12,12 @@ void CRealTimeShadow::InjectHooks() {
     RH_ScopedInstall(GetShadowRwTexture, 0x7059F0, {.reversed = false});
     RH_ScopedInstall(DrawBorderAroundTexture, 0x705A00, {.reversed = false});
     RH_ScopedInstall(Create, 0x706460, {.reversed = false});
-    RH_ScopedInstall(Update, 0x706600, {.reversed = false});
+    RH_ScopedInstall(Update, 0x706600, { .reversed = false });
+    RH_ScopedInstall(Destroy, 0x705990);
+}
+
+CRealTimeShadow::~CRealTimeShadow() {
+    Destroy();
 }
 
 // 0x705900
@@ -23,6 +28,22 @@ RwFrame* CRealTimeShadow::SetLightProperties(float angle, float unused, bool set
 // 0x7059F0
 RwTexture* CRealTimeShadow::GetShadowRwTexture() {
     return plugin::CallMethodAndReturn<RwTexture*, 0x7059F0, CRealTimeShadow*>(this);
+}
+
+// 0x705990
+void CRealTimeShadow::Destroy() {
+    m_pOwner = nullptr;
+    m_nRwObjectType = (uint32)-1;
+    if (m_pLight) {
+        // This is so convoluted... Do we actually have to do it like this? Wouldnt a simple `RwFrameDestroy(RpLightGetFrame(m_pLight))` work?
+        const auto frame = RpLightGetFrame(m_pLight);
+        rwObjectHasFrameSetFrame(m_pLight, nullptr);
+        RwFrameDestroy(frame);
+
+        RpLightDestroy(m_pLight);
+
+        m_pLight = nullptr;
+    }
 }
 
 // 0x705A00
