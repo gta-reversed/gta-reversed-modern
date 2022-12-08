@@ -12,7 +12,7 @@ void CShadowCamera::InjectHooks() {
     RH_ScopedInstall(SetFrustum, 0x7054C0);
     RH_ScopedInstall(SetLight, 0x705520);
     RH_ScopedInstall(SetCenter, 0x705590);
-    RH_ScopedInstall(InvertRaster, 0x705660, { .reversed = false });
+    RH_ScopedInstall(InvertRaster, 0x705660);
     RH_ScopedInstall(GetRwRenderRaster, 0x705770);
     RH_ScopedInstall(GetRwRenderTexture, 0x705780);
     RH_ScopedInstall(DrawOutlineBorder, 0x705790, { .reversed = false });
@@ -96,9 +96,44 @@ void CShadowCamera::SetCenter(const CVector& center) {
     RwFrameOrthoNormalize(frame);
 }
 
-// 0x705660
+/*!
+* @addr 0x705660
+* @brief Render an inverted color version of the camera's raster
+*/
 void CShadowCamera::InvertRaster() {
-    plugin::CallMethod<0x705660, CShadowCamera*>(this);
+    const auto& raster = GetRwRenderRaster();
+    const auto  width = RwRasterGetWidth(raster), height = RwRasterGetHeight(raster);
+
+    // Helper to construct vertices used here
+    const auto MkVert = [rhw = 1.f / RwCameraGetNearClipPlane(m_pRwCamera)](float x, float y) {
+        return RwIm2DVertex{
+            .x = x,
+            .y = y,
+            .z = RwIm2DGetNearScreenZ(),
+
+            .rhw = rhw,
+
+            .emissiveColor = 0xFFFFFFFF
+        };
+    };
+
+    RwIm2DVertex vertices[]{
+        MkVert(0.0,   0.0),    // Top left
+        MkVert(0.0,   height), // Bottom left
+        MkVert(width, 0.0),    // Top right
+        MkVert(width, height), // Bottom right
+    };
+
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND, RWRSTATE(rwBLENDINVDESTCOLOR));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDZERO));
+
+    RwIm2DRenderPrimitive(rwPRIMTYPETRISTRIP, vertices, std::size(vertices));
+
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND, RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
 }
 
 // 0x705770
