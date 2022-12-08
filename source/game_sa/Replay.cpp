@@ -158,16 +158,6 @@ void CReplay::StorePedAnimation(CPed* ped, CStoredAnimationState& state) {
 
 // 0x45C940
 void CReplay::StorePedUpdate(CPed* ped, uint8 index) {
-    // TODO: refactor
-    uint8 flags = 0u;
-    auto v3 = (flags ^ ((uint32)ped->m_nFlags >> 7)) & 1 ^ flags;
-    auto v4 = v3 ^ (v3 ^ (uint8)(2 * ((uint32)ped->m_nFlags >> 30))) & 2;
-    flags = v4 ^ (v4 ^ (4 * (ped->m_nFlags < 0))) & 4;
-
-    if (ped == FindPlayerPed() && gbFirstPersonRunThisFrame) {
-        flags &= ~1u;
-    }
-
     auto vehicleIdx = [ped]() {
         if (ped->IsInVehicle()) {
             return GetVehiclePool()->GetIndex(ped->GetVehicleIfInOne()) + 1;
@@ -188,7 +178,11 @@ void CReplay::StorePedUpdate(CPed* ped, uint8 index) {
         .weaponModel              = (int16)ped->m_nWeaponModelId,
         .animGroup                = (uint16)ped->m_nAnimGroup,
         .contactSurfaceBrightness = (uint8)(ped->m_fContactSurfaceBrightness * 100.0f),
-        .flags                    = flags,
+        .flags = {
+            .isTalking            = (bool)(ped == FindPlayerPed() && gbFirstPersonRunThisFrame && ped->bIsTalking),
+            .stillOnValidPoly     = (bool)ped->bStillOnValidPoly,
+            .usesCollision        = (bool)ped->m_bUsesCollision
+        }
     });
 }
 
@@ -516,9 +510,9 @@ void CReplay::ProcessPedUpdate(CPed* ped, float interpValue, CAddressInReplayBuf
         }
     }
 
-    auto v10 = ((uint8)ped->m_nFlags ^ (uint8)(packet.flags << 7)) & 0x80 ^ ped->m_nFlags;
-    auto v11 = v10 ^ (v10 ^ ((uint8)packet.flags << 29)) & 0x40000000;
-    ped->m_nFlags = ((uint8)packet.flags << 29) ^ (v11 ^ ((uint8)packet.flags << 29)) & 0x7FFFFFFF;
+    ped->bIsTalking = packet.flags.isTalking;
+    ped->bStillOnValidPoly = packet.flags.stillOnValidPoly;
+    ped->m_bUsesCollision = packet.flags.usesCollision;
     ped->m_fContactSurfaceBrightness = static_cast<float>(packet.contactSurfaceBrightness) / 100.0f;
     RetrievePedAnimation(ped, packet.animState);
 

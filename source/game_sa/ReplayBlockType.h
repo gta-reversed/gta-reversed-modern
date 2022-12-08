@@ -84,7 +84,7 @@ struct tReplayVehicleBlock : tReplayBlockBase {
     uint8 angleDoorRF;
     uint16 modelId;
     uint32 panels;
-    struct U8Vector {
+    struct {
         int8 x, y, z;
     } vecMoveSpeed;
     uint8 steerAngle_or_doomVerticalRot; // m_fDoomVerticalRotation if modelId == RHINO, steerAngle if not.
@@ -134,7 +134,11 @@ struct tReplayPedUpdateBlock : tReplayBlockBase {
     int16 weaponModel;
     uint16 animGroup;
     uint8 contactSurfaceBrightness;
-    uint8 flags;
+    struct {
+        bool isTalking : 1;
+        bool stillOnValidPoly : 1;
+        bool usesCollision : 1;
+    } flags;
     uint8 __pad2[2];
 };
 
