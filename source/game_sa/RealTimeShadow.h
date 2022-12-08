@@ -45,7 +45,7 @@ public: // Eventually make this private
     CShadowCamera m_blurCamera{};
     uint32        m_nBlurPasses{};
     bool          m_bDrawMoreBlur;
-    uint32        m_nRwObjectType{-1};
+    uint32        m_nRwObjectType{(uint32)-1};
     RpLight*      m_pLight{};
     CSphere       m_boundingSphere{};
     CSphere       m_baseSphere{};

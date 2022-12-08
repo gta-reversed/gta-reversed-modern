@@ -215,7 +215,7 @@ C2dEffect* CBaseModelInfo::Get2dEffect(int32 index) {
         return RpGeometryGet2dFxAtIndex(geometry, index - uiStoredEffectsCount);
 }
 
-// 0x4C4D20
+// 0x4C4D20 
 void CBaseModelInfo::Add2dEffect(C2dEffect* effect) {
     if (m_n2dEffectIndex >= 0)
         ++m_n2dfxCount;

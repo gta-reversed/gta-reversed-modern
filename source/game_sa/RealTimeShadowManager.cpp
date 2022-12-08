@@ -50,6 +50,9 @@ void CRealTimeShadowManager::Update() {
 }
 
 CRealTimeShadow& CRealTimeShadowManager::GetRealTimeShadow(CPhysical* physical) {
+    return plugin::CallMethodAndReturn<CRealTimeShadow&, 0x706970, CRealTimeShadowManager*, CPhysical*>(this, physical);
+    /*
+    * Unfinished
     if (m_bInitialised) {
         return;
     }
@@ -63,6 +66,8 @@ CRealTimeShadow& CRealTimeShadowManager::GetRealTimeShadow(CPhysical* physical) 
             }
         }
     }
+    */
+}
 
 void CRealTimeShadowManager::DoShadowThisFrame(CPhysical* physical) {
     switch (g_fx.GetFxQuality()) {

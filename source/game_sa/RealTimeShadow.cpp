@@ -15,16 +15,6 @@ void CRealTimeShadow::InjectHooks() {
     RH_ScopedInstall(Update, 0x706600, {.reversed = false});
 }
 
-// 0x706410
-CRealTimeShadow::CRealTimeShadow() {
-    assert(false && "Constructor not reversed"); // TODO: Reverse constructor}
-}
-
-// 0x706440
-CRealTimeShadow::~CRealTimeShadow() {
-    assert(false && "Destructor not reversed"); // TODO: Reverse destructor}
-}
-
 // 0x705900
 RwFrame* CRealTimeShadow::SetLightProperties(float angle, float unused, bool setLight) {
     return plugin::CallMethodAndReturn<RwFrame*, 0x705900, CRealTimeShadow*, float, float, bool>(this, angle, unused, setLight);
