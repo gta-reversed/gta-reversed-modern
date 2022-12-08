@@ -11,7 +11,7 @@ void CRealTimeShadowManager::InjectHooks() {
     RH_ScopedInstall(Init, 0x7067C0);
     RH_ScopedInstall(ReturnRealTimeShadow, 0x705B30);
     RH_ScopedInstall(GetRealTimeShadow, 0x706970, { .reversed = false });
-    RH_ScopedInstall(Update, 0x706AB0, { .reversed = false });
+    RH_ScopedInstall(Update, 0x706AB0);
     RH_ScopedInstall(DoShadowThisFrame, 0x706BA0);
 }
 
@@ -46,7 +46,49 @@ void CRealTimeShadowManager::ReInit() {
 }
 
 void CRealTimeShadowManager::Update() {
-    plugin::CallMethod<0x706AB0, CRealTimeShadowManager*>(this);
+    if (m_bInitialised && m_bNeedsReinit) {
+        ReInit();
+        m_bNeedsReinit = false;
+    }
+
+    for (auto& shdw : m_apShadows) {
+        if (!shdw->m_pOwner) {
+            continue;
+        }
+
+        // 0x305eed - 0x305f0f: Update intensity
+        constexpr auto INTENSITY_STEP = 3;
+        if (shdw->m_bKeepAlive) {
+            shdw->m_nIntensity = std::min(100, shdw->m_nIntensity + INTENSITY_STEP);
+        } else { // Fade out
+            if (shdw->m_nIntensity >= INTENSITY_STEP) {
+                shdw->m_nIntensity -= INTENSITY_STEP;
+            } else {
+                shdw->m_nIntensity = 0; // Avoid underflow
+            }
+        }
+
+        if (shdw->m_nIntensity) {
+            shdw->Update();
+            CShadows::StoreRealTimeShadow(
+                shdw->m_pOwner,
+                CTimeCycle::m_fShadowDisplacementX[CTimeCycle::m_CurrentStoredValue],
+                CTimeCycle::m_fShadowDisplacementY[CTimeCycle::m_CurrentStoredValue],
+                CTimeCycle::m_fShadowFrontX[CTimeCycle::m_CurrentStoredValue],
+                CTimeCycle::m_fShadowFrontY[CTimeCycle::m_CurrentStoredValue],
+                CTimeCycle::m_fShadowSideX[CTimeCycle::m_CurrentStoredValue],
+                CTimeCycle::m_fShadowSideY[CTimeCycle::m_CurrentStoredValue]
+            );
+        } else if (m_bInitialised) {
+            shdw->m_pOwner->m_pShadowData = nullptr;
+            shdw->m_pOwner = nullptr;
+        }
+    }
+
+    // TODO: ??? - Perhaps debug code left accidentally in?
+    for (auto& shdw : m_apShadows) {
+        shdw->m_bKeepAlive = false;
+    }
 }
 
 CRealTimeShadow& CRealTimeShadowManager::GetRealTimeShadow(CPhysical* physical) {
