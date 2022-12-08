@@ -92,7 +92,7 @@ void CReplay::Update() {
     if (CTimer::GetIsCodePaused() || CTimer::GetIsUserPaused())
         return;
 
-    static uint32& s_FrameRecordCounter = *reinterpret_cast<uint32*>(0x97FB40);
+    static uint32& s_FrameRecordCounter = *reinterpret_cast<uint32*>(0x97FB40); // STATICREF
     if (Mode == MODE_PLAYBACK) {
         PlayBackThisFrame();
     } else if (CTimer::GetTimeInMS() - s_FrameRecordCounter > 26) {
@@ -261,7 +261,7 @@ void CReplay::RetrievePedAnimation(CPed* ped, const CStoredAnimationState& state
         }
     }
 
-    RpAnimBlendClumpRemoveAssociations(ped->m_pRwClump, 16u); // todo: flags
+    RpAnimBlendClumpRemoveAssociations(ped->m_pRwClump, ANIMATION_PARTIAL);
     if (state.third.m_nGroupId1 && state.third.m_nAnimId) {
         if (/*state.third.m_nGroupId1 >= 0 &&*/ state.third.m_nAnimId != 3u) {
             if (auto animBlock = CAnimManager::ms_aAnimAssocGroups[state.third.m_nGroupId2].m_pAnimBlock; animBlock && animBlock->bLoaded) {
