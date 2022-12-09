@@ -41,6 +41,9 @@ public:
     /// this updates texture and gives it to us
     RwTexture* Update();
 
+private:
+    CShadowCamera& GetCurrentCamera() { return m_bBlurred ? m_blurCamera : m_camera; }
+
 public: // Eventually make this private
     CPhysical*    m_pOwner{};       /// If `nullptr` the shadow isn't in use
     bool          m_bKeepAlive{};   /// If false it starts to fade out and eventually gets destroyed.
