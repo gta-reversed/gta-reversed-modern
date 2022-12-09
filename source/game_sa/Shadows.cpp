@@ -22,7 +22,7 @@ void CShadows::InjectHooks() {
     RH_ScopedOverloadedInstall(StoreShadowToBeRendered, "Type", 0x707930, void(*)(uint8, CVector*, float, float, float, float, int16, uint8, uint8, uint8));
     RH_ScopedInstall(SetRenderModeForShadowType, 0x707460);
     RH_ScopedInstall(RemoveOilInArea, 0x7074F0);
-    RH_ScopedInstall(GunShotSetsOilOnFire, 0x707550, { .reversed = false });
+    RH_ScopedInstall(GunShotSetsOilOnFire, 0x707550);
     RH_ScopedInstall(PrintDebugPoly, 0x7076B0);
     RH_ScopedInstall(CalcPedShadowValues, 0x7076C0);
     RH_ScopedInstall(AffectColourWithLighting, 0x707850, { .reversed = false });
@@ -124,7 +124,10 @@ void CShadows::Shutdown() {
 
 // 0x707770
 void CShadows::TidyUpShadows() {
-    std::ranges::for_each(aPermanentShadows, [&](auto& shadow) { shadow.m_nType = 0; });
+    std::ranges::for_each(
+        aPermanentShadows,
+        [&](auto& shadow) { shadow.m_nType = SHADOW_NONE; }
+    );
 }
 
 // 0x706F60
@@ -221,7 +224,16 @@ void CShadows::SetRenderModeForShadowType(eShadowType type) {
 
 // 0x7074F0
 void CShadows::RemoveOilInArea(float x1, float x2, float y1, float y2) {
+    CRect rect{ {x1, y1}, {x2, y2} };
     for (auto& shadow : aPermanentShadows) {
+        switch (shadow.m_nType) {
+        case SHADOW_OIL_1:
+        case SHADOW_OIL_5:
+            break;
+        default:
+            continue;
+        }
+        if (rect.IsPointInside(shadow.m_vecPosn)) {
             shadow.m_nType = SHADOW_NONE;
         }
     }
