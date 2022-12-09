@@ -20,7 +20,7 @@ void CShadowCamera::InjectHooks() {
     RH_ScopedOverloadedInstall(Update, "Clump", 0x705BF0, RwCamera*(CShadowCamera::*)(RpClump*));
     RH_ScopedOverloadedInstall(Update, "Atomic", 0x705C80, RwCamera * (CShadowCamera::*)(RpAtomic*));
     RH_ScopedInstall(MakeGradientRaster, 0x705D20);
-    RH_ScopedInstall(RasterResample, 0x706070, { .reversed = false });
+    RH_ScopedInstall(RasterResample, 0x706070);
     RH_ScopedInstall(RasterBlur, 0x706170, { .reversed = false });
 
     RH_ScopedGlobalInstall(atomicQuickRender, 0x705620);
@@ -400,9 +400,45 @@ RwCamera* CShadowCamera::MakeGradientRaster() {
     return m_pRwCamera;
 }
 
+bool Im2DRenderQuad(RwReal x1, RwReal y1, RwReal x2, RwReal y2, RwReal z, RwReal recipCamZ, RwReal uvOffset) {
+    // Maybe: https://github.com/Dante383/sa-render/blob/1cdf1bb34c761dbe45f28f060343efe94c225314/Render/CGame.cpp#L63
+    return plugin::CallAndReturn<bool, 0x705A20>(x1, y1, x2, y2, z, recipCamZ, uvOffset);
+}
+
 // 0x706070
-RwRaster* CShadowCamera::RasterResample(RwRaster* raster) {
-    return plugin::CallMethodAndReturn<RwRaster*, 0x706070, CShadowCamera*, RwRaster*>(this, raster);
+RwRaster* CShadowCamera::RasterResample(RwRaster* sourceRaster) {
+    if (!m_pRwCamera) {
+        return nullptr;
+    }
+
+    const auto raster = RwCameraGetRaster(m_pRwCamera);
+    const auto size = RwRasterGetWidth(sourceRaster);
+
+    if (!RwCameraBeginUpdate(m_pRwCamera)) {
+        return nullptr;
+    }
+
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,      RWRSTATE(rwBLENDONE));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,     RWRSTATE(rwBLENDZERO));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,   RWRSTATE(0));
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(sourceRaster));
+
+    Im2DRenderQuad(
+        0.f,          0.f,
+        (RwReal)size, (RwReal)size,
+        RwIm2DGetNearScreenZ(),
+        1.f / RwCameraGetNearClipPlane(m_pRwCamera),
+        0.5f / size
+    );
+
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(1u));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,    RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,   RWRSTATE(rwBLENDINVSRCALPHA));
+
+    RwCameraEndUpdate(m_pRwCamera);
+
+    return raster;
 }
 
 // 0x706170
