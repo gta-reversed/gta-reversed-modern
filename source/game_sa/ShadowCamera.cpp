@@ -15,7 +15,7 @@ void CShadowCamera::InjectHooks() {
     RH_ScopedInstall(InvertRaster, 0x705660);
     RH_ScopedInstall(GetRwRenderRaster, 0x705770);
     RH_ScopedInstall(GetRwRenderTexture, 0x705780);
-    RH_ScopedInstall(DrawOutlineBorder, 0x705790, { .reversed = false });
+    RH_ScopedInstall(DrawOutlineBorder, 0x705790);
     RH_ScopedInstall(Create, 0x705B60, { .reversed = false });
     RH_ScopedOverloadedInstall(Update, "Clump", 0x705BF0, RwCamera*(CShadowCamera::*)(RpClump*), { .reversed = false });
     RH_ScopedOverloadedInstall(Update, "Atomic", 0x705C80, RwCamera * (CShadowCamera::*)(RpAtomic*), { .reversed = false });
@@ -102,7 +102,7 @@ void CShadowCamera::SetCenter(const CVector& center) {
 */
 void CShadowCamera::InvertRaster() {
     const auto& raster = GetRwRenderRaster();
-    const auto  width = RwRasterGetWidth(raster), height = RwRasterGetHeight(raster);
+    const auto  width = (float)RwRasterGetWidth(raster), height = (float)RwRasterGetHeight(raster);
 
     // Helper to construct vertices used here
     const auto MkVert = [rhw = 1.f / RwCameraGetNearClipPlane(m_pRwCamera)](float x, float y) {
@@ -118,9 +118,9 @@ void CShadowCamera::InvertRaster() {
     };
 
     RwIm2DVertex vertices[]{
-        MkVert(0.0,   0.0),    // Top left
-        MkVert(0.0,   height), // Bottom left
-        MkVert(width, 0.0),    // Top right
+        MkVert(0.f,   0.f),    // Top left
+        MkVert(0.f,   height), // Bottom left
+        MkVert(width, 0.f),    // Top right
         MkVert(width, height), // Bottom right
     };
 
@@ -146,9 +146,52 @@ RwTexture* CShadowCamera::GetRwRenderTexture() const {
     return m_pRwRenderTexture;
 }
 
-// 0x705790
+/*!
+* @addr 0x705790
+* @brief Draw a 1px wide outline on the edges of the camera's rastrer
+* @return The raster the outline was rendered to
+*/
 RwRaster* CShadowCamera::DrawOutlineBorder(const RwRGBA& color) {
-    return plugin::CallMethodAndReturn<RwRaster*, 0x705790, CShadowCamera*, const RwRGBA&>(this, color);
+    // Helper to construct vertices used here
+    const auto MkVert = [
+        rhw   = 1.f / RwCameraGetNearClipPlane(m_pRwCamera),
+        color = CRGBA(color).ToIntARGB() // Same shit, different packaging
+    ](float x, float y) {
+        return RwIm2DVertex{
+            .x = x,
+            .y = y,
+            .z = RwIm2DGetNearScreenZ(),
+
+            .rhw = rhw,
+
+            .emissiveColor = color
+        };
+    };
+
+    // NOTE: Code seemingly assumes the aspect ratio of the image is 1:1
+    const auto w = RwRasterGetWidth(GetRwRenderRaster()) - 1.f;
+    RwIm2DVertex vertices[]{
+        MkVert(0.f, 0.f),
+        MkVert(w,   0.f),
+        MkVert(w,   w),
+        MkVert(0.f, w),
+    };
+
+    if (RwCameraBeginUpdate(m_pRwCamera)) {
+        RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(0));
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(0));
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(0));
+
+        RwImVertexIndex indices[]{0, 1, 2, 3, 0};
+        RwIm2DRenderIndexedPrimitive(rwPRIMTYPEPOLYLINE, vertices, std::size(vertices), indices, std::size(indices));
+
+        RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(1u));
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(1u));
+
+        RwCameraEndUpdate(m_pRwCamera);
+    }
+
+    return GetRwRenderRaster();
 }
 
 // 0x705B60

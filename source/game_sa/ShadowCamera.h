@@ -8,7 +8,7 @@
 
 #include "RenderWare.h"
 
-class CShadowCamera {
+class CShadowCamera { // AKA CShadowImage
 public:
     RwCamera*  m_pRwCamera;
     RwTexture* m_pRwRenderTexture;
