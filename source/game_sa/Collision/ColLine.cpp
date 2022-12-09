@@ -22,3 +22,8 @@ void CColLine::Set(const CVector& start, const CVector& end)
     m_vecStart = start;
     m_vecEnd = end;
 }
+
+// notsa
+float CColLine::DistTo(CVector pt) const {
+    return CCollision::DistToLine(m_vecStart, m_vecEnd, pt);
+}

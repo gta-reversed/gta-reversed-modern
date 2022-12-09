@@ -22,6 +22,12 @@ public:
     CColLine(const CVector& start, const CVector& end);
 
     void Set(const CVector& start, const CVector& end);
+
+    /*!
+    * @notsa
+    * @brief Distance to a point from this line (Uses `CCollision::DistToLine`)
+    */
+    float DistTo(CVector pos) const;
 };
 
 VALIDATE_SIZE(CColLine, 0x20);
