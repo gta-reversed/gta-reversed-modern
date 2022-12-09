@@ -10,6 +10,7 @@ void CRealTimeShadowManager::InjectHooks() {
     RH_ScopedCategoryGlobal(); // TODO: Change this to the appropriate category!
 
     RH_ScopedInstall(Init, 0x7067C0);
+    RH_ScopedInstall(ReInit, 0x706870, {.reversed = false});
     RH_ScopedInstall(ReturnRealTimeShadow, 0x705B30);
     RH_ScopedInstall(GetRealTimeShadow, 0x706970, { .reversed = false });
     RH_ScopedInstall(Update, 0x706AB0);
@@ -50,12 +51,13 @@ void CRealTimeShadowManager::Exit() { // AKA `Shutdown`
     }
 
     // Nice hack
-    m_BlurCamera.~CShadowCamera();
-    m_GradientCamera.~CShadowCamera();
+    m_BlurCamera.Destroy();
+    m_GradientCamera.Destroy();
 
     m_bInitialised = false;
 }
 
+// 0x705B30
 void CRealTimeShadowManager::ReturnRealTimeShadow(CRealTimeShadow* shdw) {
     if (m_bInitialised) {
         shdw->m_pOwner->m_pShadowData = nullptr;
@@ -63,20 +65,24 @@ void CRealTimeShadowManager::ReturnRealTimeShadow(CRealTimeShadow* shdw) {
     }
 }
 
+// 0x706870
 void CRealTimeShadowManager::ReInit() {
     plugin::CallMethod<0x706870, CRealTimeShadowManager*>(this);
 }
 
+// 0x706AB0
 void CRealTimeShadowManager::Update() {
     if (m_bInitialised && m_bNeedsReinit) {
         ReInit();
         m_bNeedsReinit = false;
     }
 
-    for (auto& shdw : m_apShadows) {
+    for (const auto shdw : m_apShadows) {
         if (!shdw->m_pOwner) {
             continue;
         }
+
+        assert(shdw->m_pOwner->m_pShadowData == shdw);
 
         // 0x305eed - 0x305f0f: Update intensity
         constexpr auto INTENSITY_STEP = 3u;
@@ -90,10 +96,13 @@ void CRealTimeShadowManager::Update() {
             shdw->Update();
             CShadows::StoreRealTimeShadow(
                 shdw->m_pOwner,
+
                 CTimeCycle::m_fShadowDisplacementX[CTimeCycle::m_CurrentStoredValue],
                 CTimeCycle::m_fShadowDisplacementY[CTimeCycle::m_CurrentStoredValue],
+
                 CTimeCycle::m_fShadowFrontX[CTimeCycle::m_CurrentStoredValue],
                 CTimeCycle::m_fShadowFrontY[CTimeCycle::m_CurrentStoredValue],
+
                 CTimeCycle::m_fShadowSideX[CTimeCycle::m_CurrentStoredValue],
                 CTimeCycle::m_fShadowSideY[CTimeCycle::m_CurrentStoredValue]
             );
@@ -104,7 +113,7 @@ void CRealTimeShadowManager::Update() {
     }
 
     // TODO: ??? - Perhaps debug code left accidentally in?
-    for (auto& shdw : m_apShadows) {
+    for (const auto shdw : m_apShadows) {
         shdw->m_bKeepAlive = false;
     }
 }
@@ -129,6 +138,7 @@ CRealTimeShadow& CRealTimeShadowManager::GetRealTimeShadow(CPhysical* physical) 
     */
 }
 
+// 0x706BA0
 void CRealTimeShadowManager::DoShadowThisFrame(CPhysical* physical) {
     switch (g_fx.GetFxQuality()) {
     case 3: // Always render
