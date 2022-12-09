@@ -16,8 +16,8 @@ void CShadowCamera::Destroy() {
     }
 
     if (auto frameBuffer = GetRwRenderRaster()) {
-        frameBuffer = nullptr;
         RwRasterDestroy(frameBuffer);
+        RwCameraSetRaster(m_pRwCamera, nullptr);
     }
 
     if (m_pRwRenderTexture) {
@@ -171,10 +171,20 @@ RwCamera* CShadowCamera::Create(int32 rasterSizePower) {
 
                         // Success
                         return m_pRwCamera;
+                    } else {
+                        DEV_LOG("`RwTextureCreate()` failed");
                     }
+                } else {
+                    DEV_LOG("`RwRasterCreate()` failed");
                 }
+            } else {
+                DEV_LOG("`rwObjectHasFrameSetFrame()` failed");
             }
+        } else {
+            DEV_LOG("`RwFrameCreate()` failed");
         }
+    } else {
+        DEV_LOG("`RwCameraCreate()` failed");
     }
 
     // Fail
