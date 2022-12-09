@@ -1,5 +1,6 @@
 #include "StdInc.h"
 #include "RealTimeShadow.h"
+#include "RealTimeShadowManager.h"
 
 void CRealTimeShadow::InjectHooks() {
     RH_ScopedClass(CRealTimeShadow);
@@ -12,7 +13,7 @@ void CRealTimeShadow::InjectHooks() {
     RH_ScopedInstall(GetShadowRwTexture, 0x7059F0);
     RH_ScopedInstall(DrawBorderAroundTexture, 0x705A00);
     RH_ScopedInstall(Create, 0x706460);
-    RH_ScopedInstall(Update, 0x706600, { .reversed = false });
+    RH_ScopedInstall(Update, 0x706600);
     RH_ScopedInstall(Destroy, 0x705990);
 }
 
@@ -92,5 +93,45 @@ bool CRealTimeShadow::Create(bool isBlurred, int32 blurPasses, bool drawMoreBlur
 
 // 0x706600
 RwTexture* CRealTimeShadow::Update() {
-    return plugin::CallMethodAndReturn<RwTexture*, 0x706600, CRealTimeShadow*>(this);
+    // Update BaseSphere's center in the world
+    switch (m_nRwObjectType) {
+    case rpATOMIC:
+    case rpCLUMP: {
+        RwV3dTransformPoints(
+            &m_baseSphere.m_vecCenter,
+            &m_boundingSphere.m_vecCenter,
+            1,
+            RwFrameGetMatrix(RpClumpGetFrame(m_pOwner->m_pRwClump))
+        );
+        break;
+    }
+    }
+
+    // Render object onto the camera's raster
+    switch (m_nRwObjectType) {
+    case rpATOMIC:
+        m_camera.Update(m_pOwner->m_pRwAtomic);
+        break;
+    case rpCLUMP:
+        m_camera.Update(m_pOwner->m_pRwClump);
+        break;
+    }
+
+    // Do blur
+    auto raster = m_camera.GetRwRenderRaster();
+
+    if (m_bBlurred) {
+        raster = m_blurCamera.RasterResample(raster);
+    }
+
+    if (m_nBlurPasses) {
+        raster = g_realTimeShadowMan.m_BlurCamera.RasterBlur(raster, m_nBlurPasses);
+    }
+
+    if (m_bDrawMoreBlur) {
+        g_realTimeShadowMan.m_GradientCamera.DrawBlurryRaster2(raster);
+    }
+
+    // Finish
+    return GetShadowRwTexture();
 }
