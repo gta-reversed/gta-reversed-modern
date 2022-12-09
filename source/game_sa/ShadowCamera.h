@@ -109,6 +109,14 @@ public:
     */
     RwRaster* RasterBlur(RwRaster* blurRaster, int32 numPasses);
 
+    /*!
+    * @addr 0x706330
+    *
+    * @param srcRaster The raster to render to
+    * 
+    * @return The raster we've rendered to (`srcRaster`)
+    */
+    RwRaster* DrawBlurryRaster2(RwRaster* srcRaster);
 private:
     /*!
     * @notsa

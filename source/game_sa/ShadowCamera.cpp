@@ -473,6 +473,40 @@ RwRaster* CShadowCamera::RasterBlur(RwRaster* blurRaster, int32 numPasses) {
     return blurRaster;
 }
 
+// 0x706330
+RwRaster* CShadowCamera::DrawBlurryRaster2(RwRaster* srcRaster) {
+    const auto camRaster = GetRwRenderRaster(); // Save original
+
+    RwCameraSetRaster(m_pRwCamera, srcRaster);
+
+    if (RwCameraBeginUpdate(m_pRwCamera)) {
+        RwRenderStateSet(rwRENDERSTATESRCBLEND, RWRSTATE(rwBLENDZERO));
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDSRCCOLOR));
+        RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(FALSE));
+        RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(camRaster));
+
+        const auto size = RwRasterGetWidth(srcRaster); // Assumes 1:1 aspect ratio
+        Im2DRenderQuad(
+            0.f, 0.f,
+            (RwReal)size, (RwReal)size,
+            RwIm2DGetNearScreenZ(),
+            1.f / RwCameraGetNearClipPlane(m_pRwCamera),
+            0.f
+        );
+
+        RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATESRCBLEND, RWRSTATE(rwBLENDSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
+
+        RwCameraEndUpdate(m_pRwCamera);
+    }
+
+    RwCameraSetRaster(m_pRwCamera, camRaster); // Restore to original
+
+    return srcRaster;
+}
+
 void CShadowCamera::InjectHooks() {
     RH_ScopedClass(CShadowCamera);
     RH_ScopedCategoryGlobal();
@@ -493,6 +527,7 @@ void CShadowCamera::InjectHooks() {
     RH_ScopedInstall(MakeGradientRaster, 0x705D20);
     RH_ScopedInstall(RasterResample, 0x706070);
     RH_ScopedInstall(RasterBlur, 0x706170);
+    RH_ScopedInstall(DrawBlurryRaster2, 0x706330);
 
     RH_ScopedGlobalInstall(atomicQuickRender, 0x705620);
     RH_ScopedGlobalInstall(Im2DRenderQuad, 0x705A20);
