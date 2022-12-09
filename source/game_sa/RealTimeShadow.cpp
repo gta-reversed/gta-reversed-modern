@@ -11,7 +11,7 @@ void CRealTimeShadow::InjectHooks() {
     RH_ScopedInstall(SetLightProperties, 0x705900);
     RH_ScopedInstall(GetShadowRwTexture, 0x7059F0);
     RH_ScopedInstall(DrawBorderAroundTexture, 0x705A00);
-    RH_ScopedInstall(Create, 0x706460, {.reversed = false});
+    RH_ScopedInstall(Create, 0x706460);
     RH_ScopedInstall(Update, 0x706600, { .reversed = false });
     RH_ScopedInstall(Destroy, 0x705990);
 }
@@ -66,7 +66,28 @@ void CRealTimeShadow::DrawBorderAroundTexture(RwRGBA const& color) {
 
 // 0x706460
 bool CRealTimeShadow::Create(bool isBlurred, int32 blurPasses, bool drawMoreBlur) {
-    return plugin::CallMethodAndReturn<bool, 0x706460, CRealTimeShadow*, bool, int32, bool>(this, isBlurred, blurPasses, drawMoreBlur);
+    m_pLight = RpLightCreate(rpLIGHTDIRECTIONAL);
+    if (!m_pLight) {
+        return false;
+    }
+
+    const RwRGBAReal lightColor{ 0.8f, 0.8f, 0.8f, 0.f };
+    RpLightSetColor(m_pLight, &lightColor);
+
+    rwObjectHasFrameSetFrame(m_pLight, RwFrameCreate());
+
+    if (m_camera.Create(7)) {
+        m_nBlurPasses = blurPasses;
+        m_bBlurred = isBlurred;
+        m_bDrawMoreBlur = drawMoreBlur;
+        if (!isBlurred || m_blurCamera.Create(6)) {
+            m_camera.SetLight(m_pLight);
+            return true;
+        }
+    }
+
+    Destroy();
+    return false;
 }
 
 // 0x706600
