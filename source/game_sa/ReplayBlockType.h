@@ -83,7 +83,21 @@ struct tReplayVehicleBlock : tReplayBlockBase {
     uint8 angleDoorLF;
     uint8 angleDoorRF;
     uint16 modelId;
-    uint32 panels;
+    union {
+        uint32 panels; // Index with ePanels
+        struct {
+            uint32 frontLeft : 4;
+            uint32 frontRight : 4;
+            uint32 rearLeft : 4;
+            uint32 rearRight : 4;
+            uint32 windscreen : 4;
+            uint32 frontBumper : 4;
+            uint32 rearBumper : 4;
+        } panelStates;
+        struct {
+            /* unknown, bitfields of 2 */
+        } aeroplanePanelStates;
+    };
     struct {
         int8 x, y, z;
     } vecMoveSpeed;
