@@ -43,7 +43,13 @@ public:
     RwImage*   CreateRwImage();
     RwRaster*  DrawBlurInRect(RwRect* rect);
     RwRaster*  RasterResample(RwRaster* raster);
-    RwRaster*  RasterBlur(RwRaster* raster, int32 numPasses);
+
+    /*!
+    * @addr 0x706170
+    * @brief Render a blurry version of the camera's raster onto `blurRaster`
+    * @return The camera's raster
+    */
+    RwRaster*  RasterBlur(RwRaster* blurRaster, int32 numPasses);
 
 private:
     // NOTSA
@@ -51,5 +57,3 @@ private:
     void Update_Internal(RpAtomic* atomic, uint32 geoFlagsToClear, RenderFnT&& Render);
 };
 VALIDATE_SIZE(CShadowCamera, 0x8);
-
-RpAtomic* atomicQuickRender(RpAtomic* atomic, void* data);

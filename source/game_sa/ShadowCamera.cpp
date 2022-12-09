@@ -2,30 +2,6 @@
 
 #include "ShadowCamera.h"
 
-void CShadowCamera::InjectHooks() {
-    RH_ScopedClass(CShadowCamera);
-    RH_ScopedCategoryGlobal();
-
-    // RH_ScopedInstall(CShadowCamera, 0x7053F0, { .reversed = false }); // TODO: Constructor
-    // RH_ScopedInstall(~CShadowCamera, 0x705B50);
-    RH_ScopedInstall(Destroy, 0x705400, { .reversed = false });
-    RH_ScopedInstall(SetFrustum, 0x7054C0);
-    RH_ScopedInstall(SetLight, 0x705520);
-    RH_ScopedInstall(SetCenter, 0x705590);
-    RH_ScopedInstall(InvertRaster, 0x705660);
-    RH_ScopedInstall(GetRwRenderRaster, 0x705770);
-    RH_ScopedInstall(GetRwRenderTexture, 0x705780);
-    RH_ScopedInstall(DrawOutlineBorder, 0x705790);
-    RH_ScopedInstall(Create, 0x705B60);
-    RH_ScopedOverloadedInstall(Update, "Clump", 0x705BF0, RwCamera*(CShadowCamera::*)(RpClump*));
-    RH_ScopedOverloadedInstall(Update, "Atomic", 0x705C80, RwCamera * (CShadowCamera::*)(RpAtomic*));
-    RH_ScopedInstall(MakeGradientRaster, 0x705D20);
-    RH_ScopedInstall(RasterResample, 0x706070);
-    RH_ScopedInstall(RasterBlur, 0x706170);
-
-    RH_ScopedGlobalInstall(atomicQuickRender, 0x705620);
-}
-
 // 0x7053F0
 CShadowCamera::CShadowCamera() {
     m_pRwCamera = nullptr;
@@ -401,8 +377,31 @@ RwCamera* CShadowCamera::MakeGradientRaster() {
 }
 
 bool Im2DRenderQuad(RwReal x1, RwReal y1, RwReal x2, RwReal y2, RwReal z, RwReal recipCamZ, RwReal uvOffset) {
-    // Maybe: https://github.com/Dante383/sa-render/blob/1cdf1bb34c761dbe45f28f060343efe94c225314/Render/CGame.cpp#L63
-    return plugin::CallAndReturn<bool, 0x705A20>(x1, y1, x2, y2, z, recipCamZ, uvOffset);
+    const auto MkVert = [=] (float x, float y, float u, float v) {
+        return RwIm2DVertex{
+            .x = x,
+            .y = y,
+            .z = z,
+
+            .rhw = recipCamZ,
+
+            .emissiveColor = 0xFFFFFFFF,
+
+            .u = u,
+            .v = v
+        };
+    };
+
+    RwIm2DVertex vertices[]{
+        MkVert(x1, y1, uvOffset,       uvOffset      ),
+        MkVert(x1, y2, uvOffset,       uvOffset + 1.0),
+        MkVert(x2, y1, uvOffset + 1.0, uvOffset      ),
+        MkVert(x2, y2, uvOffset + 1.0, uvOffset + 1.0),
+    };
+
+    RwIm2DRenderPrimitive(rwPRIMTYPETRISTRIP, vertices, std::size(vertices));
+
+    return true;
 }
 
 // 0x706070
@@ -410,9 +409,6 @@ RwRaster* CShadowCamera::RasterResample(RwRaster* sourceRaster) {
     if (!m_pRwCamera) {
         return nullptr;
     }
-
-    const auto raster = RwCameraGetRaster(m_pRwCamera);
-    const auto size = RwRasterGetWidth(sourceRaster);
 
     if (!RwCameraBeginUpdate(m_pRwCamera)) {
         return nullptr;
@@ -424,6 +420,7 @@ RwRaster* CShadowCamera::RasterResample(RwRaster* sourceRaster) {
     RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(sourceRaster));
 
+    const auto size = RwRasterGetWidth(sourceRaster);
     Im2DRenderQuad(
         0.f,          0.f,
         (RwReal)size, (RwReal)size,
@@ -438,7 +435,7 @@ RwRaster* CShadowCamera::RasterResample(RwRaster* sourceRaster) {
 
     RwCameraEndUpdate(m_pRwCamera);
 
-    return raster;
+    return GetRwRenderRaster();
 }
 
 // 0x706170
@@ -503,4 +500,29 @@ RwRaster* CShadowCamera::RasterBlur(RwRaster* blurRaster, int32 numPasses) {
     }
 
     return camRaster;
+}
+
+void CShadowCamera::InjectHooks() {
+    RH_ScopedClass(CShadowCamera);
+    RH_ScopedCategoryGlobal();
+
+    // RH_ScopedInstall(CShadowCamera, 0x7053F0, { .reversed = false }); // TODO: Constructor
+    // RH_ScopedInstall(~CShadowCamera, 0x705B50);
+    RH_ScopedInstall(Destroy, 0x705400, { .reversed = false });
+    RH_ScopedInstall(SetFrustum, 0x7054C0);
+    RH_ScopedInstall(SetLight, 0x705520);
+    RH_ScopedInstall(SetCenter, 0x705590);
+    RH_ScopedInstall(InvertRaster, 0x705660);
+    RH_ScopedInstall(GetRwRenderRaster, 0x705770);
+    RH_ScopedInstall(GetRwRenderTexture, 0x705780);
+    RH_ScopedInstall(DrawOutlineBorder, 0x705790);
+    RH_ScopedInstall(Create, 0x705B60);
+    RH_ScopedOverloadedInstall(Update, "Clump", 0x705BF0, RwCamera * (CShadowCamera::*)(RpClump*));
+    RH_ScopedOverloadedInstall(Update, "Atomic", 0x705C80, RwCamera * (CShadowCamera::*)(RpAtomic*));
+    RH_ScopedInstall(MakeGradientRaster, 0x705D20);
+    RH_ScopedInstall(RasterResample, 0x706070);
+    RH_ScopedInstall(RasterBlur, 0x706170);
+
+    RH_ScopedGlobalInstall(atomicQuickRender, 0x705620);
+    RH_ScopedGlobalInstall(Im2DRenderQuad, 0x705A20);
 }
