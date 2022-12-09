@@ -372,9 +372,9 @@ bool Im2DRenderQuad(RwReal x1, RwReal y1, RwReal x2, RwReal y2, RwReal z, RwReal
 
     RwIm2DVertex vertices[]{
         MkVert(x1, y1, uvOffset,       uvOffset      ),
-        MkVert(x1, y2, uvOffset,       uvOffset + 1.0),
-        MkVert(x2, y1, uvOffset + 1.0, uvOffset      ),
-        MkVert(x2, y2, uvOffset + 1.0, uvOffset + 1.0),
+        MkVert(x1, y2, uvOffset,       uvOffset + 1.f),
+        MkVert(x2, y1, uvOffset + 1.f, uvOffset      ),
+        MkVert(x2, y2, uvOffset + 1.f, uvOffset + 1.f),
     };
 
     RwIm2DRenderPrimitive(rwPRIMTYPETRISTRIP, vertices, std::size(vertices));
