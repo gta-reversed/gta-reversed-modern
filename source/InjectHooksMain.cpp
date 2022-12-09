@@ -405,6 +405,7 @@ void InjectHooksMain() {
     CFileMgr::InjectHooks();
 
     CRealTimeShadowManager::InjectHooks();
+    CRealTimeShadow::InjectHooks();
     ProcObjectMan_c::InjectHooks();
     ProcSurfaceInfo_c::InjectHooks();
     RwHelperInjectHooks();
