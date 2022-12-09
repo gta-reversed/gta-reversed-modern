@@ -45,9 +45,30 @@ void CShadows::InjectHooks() {
     RH_ScopedGlobalInstall(ShadowRenderTriangleCB, 0x709CF0, { .reversed = false });
 }
 
-// 0x707670
+void CStaticShadow::InjectHooks() {
+    RH_ScopedClass(CStaticShadow);
+    RH_ScopedCategory("Shadows");
+
+    RH_ScopedInstall(Free, 0x70CCB0);
+    //RH_ScopedInstall(Init, 0x0);
+}
+
+// 0x707670 
 void CStaticShadow::Free() {
-    ((void(__thiscall*)(CStaticShadow*))0x707670)(this);
+    if (m_pPolyBunch) {
+        const auto prevHead = CShadows::pEmptyBunchList;
+        CShadows::pEmptyBunchList = m_pPolyBunch;
+
+        // Set all bunches we own to point to the previous head
+        // this is kinda retarded imo, because this won't be a proper linked list now,
+        // but there's surely a reason it's done like this...
+        for (auto it = m_pPolyBunch; it->m_pNext; it = static_cast<CPolyBunch*>(it->m_pNext)) {
+            it->m_pNext = prevHead;
+        }
+
+        m_pPolyBunch = nullptr;
+        m_nId = 0;
+    }
 }
 
 // 0x706CD0

@@ -144,6 +144,8 @@ public:
     };
 
 public:
+    static void InjectHooks();
+
     void Init() {
         m_nId = 0;
         m_pPolyBunch = nullptr;
