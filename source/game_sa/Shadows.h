@@ -199,6 +199,9 @@ public:
     static void AffectColourWithLighting(uint8 shadowType, uint8 dayNightIntensity, uint8 red, uint8 green, uint8 blue, uint8* outRed, uint8* outGreen, uint8* outBlue);
     static void StoreShadowForPedObject(CPed* ped, float displacementX, float displacementY, float frontX, float frontY, float sideX, float sideY);
     static void StoreRealTimeShadow(CPhysical* physical, float displacementX, float displacementY, float frontX, float frontY, float sideX, float sideY);
+    /*!
+    * @addr 0x707F40
+    */
     static void UpdateStaticShadows();
     static void RenderExtraPlayerShadows();
     static void RenderStaticShadows();

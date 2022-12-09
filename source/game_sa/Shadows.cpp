@@ -8,6 +8,7 @@
 
 #include "Shadows.h"
 #include "FireManager.h"
+#include <utility.hpp>
 
 void CShadows::InjectHooks() {
     RH_ScopedClass(CShadows);
@@ -28,7 +29,7 @@ void CShadows::InjectHooks() {
     RH_ScopedInstall(AffectColourWithLighting, 0x707850, { .reversed = false });
     RH_ScopedInstall(StoreShadowForPedObject, 0x707B40);
     RH_ScopedInstall(StoreRealTimeShadow, 0x707CA0);
-    RH_ScopedInstall(UpdateStaticShadows, 0x707F40, { .reversed = false });
+    RH_ScopedInstall(UpdateStaticShadows, 0x707F40);
     RH_ScopedInstall(RenderExtraPlayerShadows, 0x707FA0, { .reversed = false });
     RH_ScopedInstall(RenderStaticShadows, 0x708300, { .reversed = false });
     RH_ScopedInstall(CastShadowEntityXY, 0x7086B0, { .reversed = false });
@@ -404,7 +405,21 @@ void CShadows::StoreRealTimeShadow(CPhysical* physical, float displacementX, flo
 
 // 0x707F40
 void CShadows::UpdateStaticShadows() {
-    ((void(__cdecl*)())0x707F40)();
+    // Remove shadows that have no polies/are temporary and have expired
+    for (auto& sshdw : aStaticShadows) {
+        if (!sshdw.m_pPolyBunch || sshdw.m_bJustCreated) {
+            goto skip; // Not even created fully
+        }
+
+        if (sshdw.m_bTemporaryShadow && CTimer::GetTimeInMS() <= sshdw.m_nTimeCreated + 5000u) {
+            goto skip; // Not expired yet
+        }
+
+        sshdw.Free();
+
+    skip:
+        sshdw.m_bJustCreated = false;
+    }
 }
 
 // 0x707FA0
