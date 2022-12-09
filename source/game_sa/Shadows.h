@@ -197,7 +197,7 @@ public:
     static void PrintDebugPoly(CVector* a, CVector* b, CVector* c);
     static void CalcPedShadowValues(CVector sunPosn, float& displacementX, float& displacementY, float& frontX, float& frontY, float& sideX, float& sideY);
     static void AffectColourWithLighting(uint8 shadowType, uint8 dayNightIntensity, uint8 red, uint8 green, uint8 blue, uint8* outRed, uint8* outGreen, uint8* outBlue);
-    static void StoreShadowForPedObject(CEntity* ped, float displacementX, float displacementY, float frontX, float frontY, float sideX, float sideY);
+    static void StoreShadowForPedObject(CPed* ped, float displacementX, float displacementY, float frontX, float frontY, float sideX, float sideY);
     static void StoreRealTimeShadow(CPhysical* physical, float displacementX, float displacementY, float frontX, float frontY, float sideX, float sideY);
     static void UpdateStaticShadows();
     static void RenderExtraPlayerShadows();

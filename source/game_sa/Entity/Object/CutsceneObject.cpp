@@ -123,7 +123,7 @@ void CCutsceneObject::PreRender_Reversed() {
     g_realTimeShadowMan.DoShadowThisFrame(this);
     if (!m_pShadowData) {
         CShadows::StoreShadowForPedObject(
-            this,
+            this->AsPed(),
             CTimeCycle::m_fShadowDisplacementX[CTimeCycle::m_CurrentStoredValue],
             CTimeCycle::m_fShadowDisplacementY[CTimeCycle::m_CurrentStoredValue],
             CTimeCycle::m_fShadowFrontX[CTimeCycle::m_CurrentStoredValue],

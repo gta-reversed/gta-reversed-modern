@@ -26,7 +26,7 @@ void CShadows::InjectHooks() {
     RH_ScopedInstall(PrintDebugPoly, 0x7076B0);
     RH_ScopedInstall(CalcPedShadowValues, 0x7076C0);
     RH_ScopedInstall(AffectColourWithLighting, 0x707850, { .reversed = false });
-    RH_ScopedInstall(StoreShadowForPedObject, 0x707B40, { .reversed = false });
+    RH_ScopedInstall(StoreShadowForPedObject, 0x707B40);
     RH_ScopedInstall(StoreRealTimeShadow, 0x707CA0, { .reversed = false });
     RH_ScopedInstall(UpdateStaticShadows, 0x707F40, { .reversed = false });
     RH_ScopedInstall(RenderExtraPlayerShadows, 0x707FA0, { .reversed = false });
@@ -299,9 +299,47 @@ void CShadows::AffectColourWithLighting(uint8 shadowType, uint8 dayNightIntensit
 }
 
 // 0x707B40
-void CShadows::StoreShadowForPedObject(CEntity* ped, float displacementX, float displacementY, float frontX, float frontY, float sideX, float sideY) {
-    plugin::Call<0x707B40, CEntity*, float, float, float, float, float, float>
-        (ped, displacementX, displacementY, frontX, frontY, sideX, sideY);
+void CShadows::StoreShadowForPedObject(CPed* ped, float displacementX, float displacementY, float frontX, float frontY, float sideX, float sideY) {
+    assert(ped->IsPed());
+
+          auto bonePos = ped->GetBonePosition(BONE_NORMAL);
+    const auto camPos  = TheCamera.GetPosition();
+    const auto pedToCamDist2DSq{ (bonePos - camPos).SquaredMagnitude2D() };
+
+    // Check if ped is close enough
+    if (pedToCamDist2DSq >= MAX_DISTANCE_PED_SHADOWS_SQR) {
+        return;
+    }
+
+    const auto isPlayerPed = FindPlayerPed() == ped;
+
+    // Check if ped is visible to the camera
+    if (!isPlayerPed) {  // Optimization: Assume player ped is always visible
+        if (!TheCamera.IsSphereVisible(ped->GetPosition(), 2.f)) {
+            return;
+        }
+    }
+
+    // Now store a shadow to be rendered
+    const auto pedToCamDist2D = std::sqrt(pedToCamDist2DSq);
+    const auto halfMaxDist = MAX_DISTANCE_PED_SHADOWS / 2.f;
+    const auto strength = pedToCamDist2D >= halfMaxDist
+        ? (uint8)((1.f - (pedToCamDist2D - halfMaxDist) / halfMaxDist) * (float)CTimeCycle::m_CurrentColours.m_nShadowStrength) // Anything further than half the distance is faded out
+        : (uint8)CTimeCycle::m_CurrentColours.m_nShadowStrength; // Anything closer than half the max distance is full strength
+    StoreShadowToBeRendered(
+        SHADOW_DEFAULT,
+        gpShadowPedTex,
+        &bonePos,
+        frontX, frontY,
+        sideX, sideY,
+        strength,
+        strength, strength, strength,
+        4.f,
+        false,
+        1.f,
+        nullptr,
+        isPlayerPed || g_fx.GetFxQuality() >= FX_QUALITY_VERY_HIGH // NOTSA: At higher FX quality draw all ped's shadows
+    );
 }
 
 // 0x707CA0
