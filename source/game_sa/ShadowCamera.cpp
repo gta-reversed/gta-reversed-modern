@@ -2,6 +2,8 @@
 
 #include "ShadowCamera.h"
 
+/*! InjectHooks at the bottom !*/
+
 // 0x7053F0
 CShadowCamera::CShadowCamera() {
     m_pRwCamera = nullptr;
@@ -74,10 +76,7 @@ void CShadowCamera::SetCenter(const CVector& center) {
     RwFrameOrthoNormalize(frame);
 }
 
-/*!
-* @addr 0x705660
-* @brief Render an inverted color version of the camera's raster onto itself
-*/
+// 0x705660
 void CShadowCamera::InvertRaster() {
     const auto& raster = GetRwRenderRaster();
     const auto  width = (float)RwRasterGetWidth(raster), height = (float)RwRasterGetHeight(raster);
@@ -124,11 +123,7 @@ RwTexture* CShadowCamera::GetRwRenderTexture() const {
     return m_pRwRenderTexture;
 }
 
-/*!
-* @addr 0x705790
-* @brief Draw a 1px wide outline on the edges of the camera's rastrer
-* @return The raster the outline was rendered to
-*/
+// 0x705790
 RwRaster* CShadowCamera::DrawOutlineBorder(const RwRGBA& color) {
     // Helper to construct vertices used here
     const auto MkVert = [
@@ -172,12 +167,7 @@ RwRaster* CShadowCamera::DrawOutlineBorder(const RwRGBA& color) {
     return GetRwRenderRaster();
 }
 
-/*!
-* @addr 0x705B60
-* @brief Create camera and render texture
-* @param rasterSizePower Size of the raster, final size in pixels will be `pow(2, rasterSizePower)`
-* @return The camera created
-*/
+// 0x705B60
 RwCamera* CShadowCamera::Create(int32 rasterSizePower) {
     const auto rasterSizeInPx = 1 << rasterSizePower; // Size of raster in pixels. Same as `pow(2, rasterSize)`
 
@@ -237,14 +227,7 @@ RpAtomic* atomicQuickRender(RpAtomic* atomic, void* data) {
     return atomic;
 }
 
-/*!
-* @notsa
-* @brief Internal function to render to reduce copy-paste code
-*
-* @param geo             The geometry to be rendered
-* @param geoFlagsToClear Flags to clear from geometry for rendering this time (all flags will be restored afterwards)
-* @param Render          The function that should render everything necessary
-*/
+// notsa
 template<typename RenderFnT>
 void CShadowCamera::Update_Internal(RpAtomic* atomic, uint32 geoFlagsToClear, RenderFnT&& Render) {
     // Clear camera raster to be transparent
@@ -276,10 +259,7 @@ void CShadowCamera::Update_Internal(RpAtomic* atomic, uint32 geoFlagsToClear, Re
     }
 }
 
-/*!
-* @addr  0x705BF0
-* @brief Render a clump and all its atomics
-*/
+// 0x705BF0
 RwCamera* CShadowCamera::Update(RpClump* clump) {
     Update_Internal(
         GetFirstAtomic(clump), // Not quite sure... They render all atomics, but only modify the first atomics geometry's flags? Why not render all atomics separately?
@@ -290,10 +270,7 @@ RwCamera* CShadowCamera::Update(RpClump* clump) {
     return m_pRwCamera;
 }
 
-/*!
-* @addr 0x705C80
-* @brief Render an atomic
-*/
+// 0x705C80
 RwCamera* CShadowCamera::Update(RpAtomic* atomic) {
     Update_Internal(
         atomic,
@@ -376,6 +353,7 @@ RwCamera* CShadowCamera::MakeGradientRaster() {
     return m_pRwCamera;
 }
 
+// 0x705A20
 bool Im2DRenderQuad(RwReal x1, RwReal y1, RwReal x2, RwReal y2, RwReal z, RwReal recipCamZ, RwReal uvOffset) {
     const auto MkVert = [=] (float x, float y, float u, float v) {
         return RwIm2DVertex{
