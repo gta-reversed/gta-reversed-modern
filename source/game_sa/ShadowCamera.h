@@ -11,21 +11,19 @@
 
 class CShadowCamera { // AKA CShadowImage
 public:
-    RwCamera*  m_pRwCamera;
-    RwTexture* m_pRwRenderTexture;
+    RwCamera*  m_pRwCamera{};
+    RwTexture* m_pRwRenderTexture{};
 
 public:
     static void InjectHooks();
 
-    CShadowCamera();
-    ~CShadowCamera();
+    CShadowCamera() = default;
+    ~CShadowCamera() { Destroy(); }
 
     /*!
     * @addr 0x705400
     */
     void Destroy();
-
-    void CreateTexture();
 
     /*!
     * @addr 0x7054C0
@@ -70,7 +68,9 @@ public:
     /*!
     * @addr 0x705B60
     * @brief Create camera and render texture
+    * 
     * @param rasterSizePower Size of the raster, final size in pixels will be `pow(2, rasterSizePower)`
+    * 
     * @return The camera created
     */
     RwCamera* Create(int32 rasterSize);

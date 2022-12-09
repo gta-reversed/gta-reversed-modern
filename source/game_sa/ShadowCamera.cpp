@@ -4,32 +4,21 @@
 
 /*! InjectHooks at the bottom !*/
 
-// 0x7053F0
-CShadowCamera::CShadowCamera() {
-    m_pRwCamera = nullptr;
-    m_pRwRenderTexture = nullptr;
-}
-
-// 0x705B50
-CShadowCamera::~CShadowCamera() {
-    Destroy();
-}
-
 // 0x705400
 void CShadowCamera::Destroy() {
     return plugin::CallMethod<0x705400, CShadowCamera*>(this);
 
-    /*
-    if (!m_pRwCamera)
+    if (!m_pRwCamera) {
         return;
+    }
 
     if (auto frame = RwCameraGetFrame(m_pRwCamera)) {
-        rwObjectHasFrameSetFrame(&frame, nullptr); // bad
+        rwObjectHasFrameSetFrame(frame, nullptr);
         RwFrameDestroy(frame);
     }
 
-    if (auto* frameBuffer = GetRwRenderRaster()) {
-        frameBuffer = nullptr; // TODO: BUG
+    if (auto frameBuffer = GetRwRenderRaster()) {
+        frameBuffer = nullptr;
         RwRasterDestroy(frameBuffer);
     }
 
@@ -41,7 +30,6 @@ void CShadowCamera::Destroy() {
 
     RwCameraDestroy(m_pRwCamera);
     m_pRwCamera = nullptr;
-    */
 }
 
 // 0x7054C0
@@ -388,17 +376,19 @@ RwRaster* CShadowCamera::RasterResample(RwRaster* sourceRaster) {
         return nullptr;
     }
 
+    const auto camRaster = GetRwRenderRaster();
+
     if (!RwCameraBeginUpdate(m_pRwCamera)) {
         return nullptr;
     }
 
     RwRenderStateSet(rwRENDERSTATESRCBLEND,      RWRSTATE(rwBLENDONE));
     RwRenderStateSet(rwRENDERSTATEDESTBLEND,     RWRSTATE(rwBLENDZERO));
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,   RWRSTATE(0));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,   RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(sourceRaster));
 
-    const auto size = RwRasterGetWidth(sourceRaster);
+    const auto size = RwRasterGetWidth(camRaster);
     Im2DRenderQuad(
         0.f,          0.f,
         (RwReal)size, (RwReal)size,
@@ -413,7 +403,7 @@ RwRaster* CShadowCamera::RasterResample(RwRaster* sourceRaster) {
 
     RwCameraEndUpdate(m_pRwCamera);
 
-    return GetRwRenderRaster();
+    return camRaster;
 }
 
 // 0x706170
@@ -429,24 +419,27 @@ RwRaster* CShadowCamera::RasterBlur(RwRaster* blurRaster, int32 numPasses) {
     }
 
     const auto DoRenderQuad2D = [
-        size = RwRasterGetWidth(blurRaster),
+        brwidth = RwRasterGetWidth(blurRaster),
         rhw = 1.f / RwCameraGetNearClipPlane(m_pRwCamera)
     ] (float uv) {
         Im2DRenderQuad(
             0.f, 0.f,
-            (RwReal)size, (RwReal)size,
+            (RwReal)brwidth, (RwReal)brwidth,
             RwIm2DGetNearScreenZ(),
             rhw,
-            uv / size
+            uv / brwidth
         );
     };
 
     for (auto i{ 0 }; i < numPasses; i++) {
+        // Set original raster
+        RwCameraSetRaster(m_pRwCamera, camRaster);
+
         if (RwCameraBeginUpdate(m_pRwCamera)) {
             if (i == 0) { // First pass
-                RwRenderStateSet(rwRENDERSTATESRCBLEND, RWRSTATE(rwBLENDONE));
-                RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDZERO));
-                RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(FALSE));
+                RwRenderStateSet(rwRENDERSTATESRCBLEND,      RWRSTATE(rwBLENDONE));
+                RwRenderStateSet(rwRENDERSTATEDESTBLEND,     RWRSTATE(rwBLENDZERO));
+                RwRenderStateSet(rwRENDERSTATEZTESTENABLE,   RWRSTATE(FALSE));
                 RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
             }
             RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(blurRaster));
@@ -456,7 +449,7 @@ RwRaster* CShadowCamera::RasterBlur(RwRaster* blurRaster, int32 numPasses) {
             RwCameraEndUpdate(m_pRwCamera);
         }
 
-        // Swap raster
+        // Swap raster to other one
         RwCameraSetRaster(m_pRwCamera, blurRaster);
 
         if (RwCameraBeginUpdate(m_pRwCamera)) {
@@ -466,18 +459,18 @@ RwRaster* CShadowCamera::RasterBlur(RwRaster* blurRaster, int32 numPasses) {
 
             if (i == numPasses - 1) { // LastPass (pun intended)
                 RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(TRUE));
-                RwRenderStateSet(rwRENDERSTATESRCBLEND, RWRSTATE(rwBLENDSRCALPHA));
-                RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
+                RwRenderStateSet(rwRENDERSTATESRCBLEND,    RWRSTATE(rwBLENDSRCALPHA));
+                RwRenderStateSet(rwRENDERSTATEDESTBLEND,   RWRSTATE(rwBLENDINVSRCALPHA));
             }
 
             RwCameraEndUpdate(m_pRwCamera);
         }
-
-        // Swap raster back to original
-        RwCameraSetRaster(m_pRwCamera, camRaster);
     }
 
-    return camRaster;
+    // Use original raster
+    RwCameraSetRaster(m_pRwCamera, camRaster);
+
+    return blurRaster;
 }
 
 void CShadowCamera::InjectHooks() {
@@ -486,7 +479,7 @@ void CShadowCamera::InjectHooks() {
 
     // RH_ScopedInstall(CShadowCamera, 0x7053F0, { .reversed = false }); // TODO: Constructor
     // RH_ScopedInstall(~CShadowCamera, 0x705B50);
-    RH_ScopedInstall(Destroy, 0x705400, { .reversed = false });
+    RH_ScopedInstall(Destroy, 0x705400);
     RH_ScopedInstall(SetFrustum, 0x7054C0);
     RH_ScopedInstall(SetLight, 0x705520);
     RH_ScopedInstall(SetCenter, 0x705590);
