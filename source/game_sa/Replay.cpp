@@ -139,7 +139,7 @@ void CReplay::StorePedAnimation(CPed* ped, CStoredAnimationState& state) {
     if (main) {
         state[0] = AnimationState::Make(main->m_nAnimId, main->m_fCurrentTime, main->m_fSpeed, main->m_nAnimGroup);
     } else {
-        state[0] = AnimationState::Make(ANIM_ID_IDLE, 0.0f, 85.0f, 0);
+        state[0] = AnimationState::Make(ANIM_ID_IDLE, 0.0f, 1.0f, 0);
     }
 
     if (second) {
@@ -150,7 +150,7 @@ void CReplay::StorePedAnimation(CPed* ped, CStoredAnimationState& state) {
 
     const auto partial = RpAnimBlendClumpGetMainPartialAssociation(ped->m_pRwClump);
     if (partial && partial->m_nAnimId >= ANIM_ID_WALK) {
-        state[2] = AnimationState::MakeBlend(partial->m_nAnimId, partial->m_fCurrentTime, partial->m_fSpeed, partial->m_nAnimGroup, blendValue);
+        state[2] = AnimationState::MakeBlend(partial->m_nAnimId, partial->m_fCurrentTime, partial->m_fSpeed, partial->m_nAnimGroup, partial->m_fBlendAmount);
     } else {
         state[2] = AnimationState::MakeBlend(ANIM_ID_WALK, 0.0f, 0.0f, 0, 0.0f);
     }
