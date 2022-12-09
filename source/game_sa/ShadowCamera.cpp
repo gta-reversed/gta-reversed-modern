@@ -6,8 +6,6 @@
 
 // 0x705400
 void CShadowCamera::Destroy() {
-    return plugin::CallMethod<0x705400, CShadowCamera*>(this);
-
     if (!m_pRwCamera) {
         return;
     }
