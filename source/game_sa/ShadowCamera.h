@@ -32,7 +32,14 @@ public:
     RwCamera*  Create(int32 rasterSize);
     RwCamera*  Update(RpClump* clump);
     RwCamera*  Update(RpAtomic* atomic);
-    void       MakeGradientRaster();
+
+    /*!
+    * @addr 0x705D20
+    * @brief Make a monocolor intensity gardient
+    * @return The camera the gardient was rendered on if successful, `nullptr` otherwise.
+    */
+    RwCamera*  MakeGradientRaster();
+
     RwImage*   CreateRwImage();
     RwRaster*  DrawBlurInRect(RwRect* rect);
     RwRaster*  RasterResample(RwRaster* raster);
