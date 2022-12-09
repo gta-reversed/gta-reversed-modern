@@ -7,6 +7,7 @@
 #include "StdInc.h"
 
 #include "Shadows.h"
+#include "FireManager.h"
 
 void CShadows::InjectHooks() {
     RH_ScopedClass(CShadows);
@@ -221,21 +222,42 @@ void CShadows::SetRenderModeForShadowType(eShadowType type) {
 // 0x7074F0
 void CShadows::RemoveOilInArea(float x1, float x2, float y1, float y2) {
     for (auto& shadow : aPermanentShadows) {
-        if (shadow.m_nType == 8 || shadow.m_nType == 4) {
-            if (shadow.m_vecPosn.x > x1 &&
-                shadow.m_vecPosn.x < x2 &&
-                shadow.m_vecPosn.y > y1 &&
-                shadow.m_vecPosn.y < y2
-            ) {
-                shadow.m_nType = 0;
-            }
+            shadow.m_nType = SHADOW_NONE;
         }
     }
 }
 
 // 0x707550
-void CShadows::GunShotSetsOilOnFire(const CVector* shotOrigin, const CVector* shotTarget) {
-    ((void(__cdecl*)(const CVector*, const CVector*))0x707550)(shotOrigin, shotTarget);
+void CShadows::GunShotSetsOilOnFire(const CVector& shotOrigin, const CVector& shotTarget) {
+    const auto V3DChangeZ = [] (const CVector& pos) {
+        return CVector{ pos.x, pos.y, pos.z * 0.27f };
+    };
+
+    const CColLine line{V3DChangeZ(shotOrigin), V3DChangeZ(shotTarget)};
+
+    // Find closest shadow (but not further than 1 unit)
+    CPermanentShadow* closest{};
+    auto              closestDist{1.f};
+    for (auto& shdw : aPermanentShadows) {
+        switch (shdw.m_nType) {
+        case SHADOW_OIL_1:
+        case SHADOW_OIL_5:
+            break;
+        default:
+            continue;
+        }
+
+        const auto dist = line.DistTo(V3DChangeZ(shdw.m_vecPosn));
+        if (dist < closestDist) {
+            closestDist = dist;
+            closest     = &shdw;
+        }
+    }
+
+    if (closest) {
+        closest->m_nType = SHADOW_OIL_2;
+        gFireManager.StartFire(closest->m_vecPosn, 1.8f, 0, nullptr, 2000u, 0, 1);
+    }
 }
 
 // 0x7076B0

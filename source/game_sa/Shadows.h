@@ -36,11 +36,12 @@ class CVehicle;
 */
 
 enum eShadowType : uint8 {
+    SHADOW_NONE     = 0,
     SHADOW_DEFAULT  = 1,
     SHADOW_ADDITIVE = 2,
     SHADOW_INVCOLOR = 3,
     SHADOW_OIL_1    = 4,
-    SHADOW_OIL_2    = 5,
+    SHADOW_OIL_2    = 5, // Oil on fire
     SHADOW_OIL_3    = 6,
     SHADOW_OIL_4    = 7,
     SHADOW_OIL_5    = 8
@@ -99,7 +100,7 @@ public:
     uint32     m_nTimeDuration;
     RwTexture* m_pTexture;
     uint16     m_nIntensity;
-    uint8      m_nType;
+    eShadowType m_nType;
     uint8      m_nRed;
     uint8      m_nGreen;
     uint8      m_nBlue;
@@ -109,7 +110,7 @@ public:
     uint8 m_bDrawOnBuildings : 1;
 
     void Init() {
-        m_nType = 0;
+        m_nType = SHADOW_NONE;
     }
 };
 VALIDATE_SIZE(CPermanentShadow, 0x38);
@@ -192,7 +193,7 @@ public:
     static void StoreShadowToBeRendered(uint8 type, RwTexture* texture, CVector* posn, float topX, float topY, float rightX, float rightY, int16 intensity, uint8 red, uint8 green, uint8 blue, float zDistance, bool drawOnWater, float scale, CRealTimeShadow* realTimeShadow, bool drawOnBuildings);
     static void SetRenderModeForShadowType(eShadowType type);
     static void RemoveOilInArea(float x1, float x2, float y1, float y2);
-    static void GunShotSetsOilOnFire(const CVector*shotOrigin, const CVector*shotTarget);
+    static void GunShotSetsOilOnFire(const CVector& shotOrigin, const CVector& shotTarget);
     static void PrintDebugPoly(CVector* a, CVector* b, CVector* c);
     static void CalcPedShadowValues(CVector sunPosn, float& displacementX, float& displacementY, float& frontX, float& frontY, float& sideX, float& sideY);
     static void AffectColourWithLighting(uint8 shadowType, uint8 dayNightIntensity, uint8 red, uint8 green, uint8 blue, uint8* outRed, uint8* outGreen, uint8* outBlue);
