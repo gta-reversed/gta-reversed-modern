@@ -18,7 +18,7 @@ void CShadows::InjectHooks() {
     RH_ScopedInstall(TidyUpShadows, 0x707770);
     RH_ScopedInstall(AddPermanentShadow, 0x706F60, { .reversed = false });
     RH_ScopedInstall(UpdatePermanentShadows, 0x70C950, { .reversed = false });
-    RH_ScopedOverloadedInstall(StoreShadowToBeRendered, "Texture", 0x707390, void(*)(uint8, RwTexture*, CVector*, float, float, float, float, int16, uint8, uint8, uint8, float, bool, float, CRealTimeShadow*, bool));
+    RH_ScopedOverloadedInstall(StoreShadowToBeRendered, "Texture", 0x707390, void(*)(uint8, RwTexture*, const CVector&, float, float, float, float, int16, uint8, uint8, uint8, float, bool, float, CRealTimeShadow*, bool));
     RH_ScopedOverloadedInstall(StoreShadowToBeRendered, "Type", 0x707930, void(*)(uint8, CVector*, float, float, float, float, int16, uint8, uint8, uint8));
     RH_ScopedInstall(SetRenderModeForShadowType, 0x707460);
     RH_ScopedInstall(RemoveOilInArea, 0x7074F0);
@@ -27,7 +27,7 @@ void CShadows::InjectHooks() {
     RH_ScopedInstall(CalcPedShadowValues, 0x7076C0);
     RH_ScopedInstall(AffectColourWithLighting, 0x707850, { .reversed = false });
     RH_ScopedInstall(StoreShadowForPedObject, 0x707B40);
-    RH_ScopedInstall(StoreRealTimeShadow, 0x707CA0, { .reversed = false });
+    RH_ScopedInstall(StoreRealTimeShadow, 0x707CA0);
     RH_ScopedInstall(UpdateStaticShadows, 0x707F40, { .reversed = false });
     RH_ScopedInstall(RenderExtraPlayerShadows, 0x707FA0, { .reversed = false });
     RH_ScopedInstall(RenderStaticShadows, 0x708300, { .reversed = false });
@@ -171,7 +171,7 @@ void CShadows::StoreShadowToBeRendered(uint8 type, CVector* posn, float frontX, 
 }
 
 // 0x707390
-void CShadows::StoreShadowToBeRendered(uint8 type, RwTexture* texture, CVector* posn, float topX, float topY, float rightX, float rightY, int16 intensity, uint8 red, uint8 green, uint8 blue, float zDistance, bool drawOnWater, float scale, CRealTimeShadow* realTimeShadow, bool drawOnBuildings) {
+void CShadows::StoreShadowToBeRendered(uint8 type, RwTexture* texture, const CVector& posn, float topX, float topY, float rightX, float rightY, int16 intensity, uint8 red, uint8 green, uint8 blue, float zDistance, bool drawOnWater, float scale, CRealTimeShadow* realTimeShadow, bool drawOnBuildings) {
     if (ShadowsStoredToBeRendered >= asShadowsStored.size())
         return;
 
@@ -179,7 +179,7 @@ void CShadows::StoreShadowToBeRendered(uint8 type, RwTexture* texture, CVector* 
 
     shadow.m_nType      = type;
     shadow.m_pTexture   = texture;
-    shadow.m_vecPosn    = *posn;
+    shadow.m_vecPosn    = posn;
     shadow.m_Front.x    = topX;
     shadow.m_Front.y    = topY;
     shadow.m_Side.x     = rightX;
@@ -298,6 +298,15 @@ void CShadows::AffectColourWithLighting(uint8 shadowType, uint8 dayNightIntensit
     ((void(__cdecl*)(uint8, uint8, uint8, uint8, uint8, uint8*, uint8*, uint8*))0x707850)(shadowType, dayNightIntensity, red, green, blue, outRed, outGreen, outBlue);
 }
 
+uint16 CalculateShadowStrength(float distToCam2DSq) {
+    const auto halfMaxDist = MAX_DISTANCE_PED_SHADOWS / 2.f;
+    if (distToCam2DSq >= halfMaxDist) { // Anything further than half the distance is faded out
+        return (uint16)((1.f - (distToCam2DSq - halfMaxDist) / halfMaxDist) * (float)CTimeCycle::m_CurrentColours.m_nShadowStrength);
+    } else { // Anything closer than half the max distance is full strength
+        return (uint16)CTimeCycle::m_CurrentColours.m_nShadowStrength;
+    }
+}
+
 // 0x707B40
 void CShadows::StoreShadowForPedObject(CPed* ped, float displacementX, float displacementY, float frontX, float frontY, float sideX, float sideY) {
     assert(ped->IsPed());
@@ -322,10 +331,7 @@ void CShadows::StoreShadowForPedObject(CPed* ped, float displacementX, float dis
 
     // Now store a shadow to be rendered
     const auto pedToCamDist2D = std::sqrt(pedToCamDist2DSq);
-    const auto halfMaxDist = MAX_DISTANCE_PED_SHADOWS / 2.f;
-    const auto strength = pedToCamDist2D >= halfMaxDist
-        ? (uint8)((1.f - (pedToCamDist2D - halfMaxDist) / halfMaxDist) * (float)CTimeCycle::m_CurrentColours.m_nShadowStrength) // Anything further than half the distance is faded out
-        : (uint8)CTimeCycle::m_CurrentColours.m_nShadowStrength; // Anything closer than half the max distance is full strength
+    const auto strength = (uint8)CalculateShadowStrength(pedToCamDist2D);
     StoreShadowToBeRendered(
         SHADOW_DEFAULT,
         gpShadowPedTex,
@@ -344,7 +350,56 @@ void CShadows::StoreShadowForPedObject(CPed* ped, float displacementX, float dis
 
 // 0x707CA0
 void CShadows::StoreRealTimeShadow(CPhysical* physical, float displacementX, float displacementY, float frontX, float frontY, float sideX, float sideY) {
-    ((void(__cdecl*)(CPhysical*, float, float, float, float, float, float))0x707CA0)(physical, displacementX, displacementY, frontX, frontY, sideX, sideY);
+    const auto rtshdw = physical->m_pShadowData;
+    if (!rtshdw) {
+        return;
+    }
+    const auto camPos = TheCamera.GetPosition();
+    const auto shdwPos = physical->IsPed()
+        ? physical->AsPed()->GetBonePosition(BONE_NORMAL)
+        : physical->GetPosition();
+    const auto shdwToCamDist2DSq = (shdwPos - camPos).SquaredMagnitude2D();
+
+    // Check distance to camera
+    if (shdwToCamDist2DSq > MAX_DISTANCE_PED_SHADOWS_SQR) {
+        return;
+    }
+
+    // Check if the object is visible to the camera
+    if (FindPlayerPed() != physical) {  // Optimization: Assume player ped is always visible
+        if (!TheCamera.IsSphereVisible(shdwPos, 2.f)) {
+            return;
+        }
+    }
+
+    const auto cc = (uint8)((float)rtshdw->m_nIntensity / 100.f * (float)CalculateShadowStrength(shdwToCamDist2DSq));
+
+    const auto& vecToSun = CTimeCycle::m_VectorToSun[CTimeCycle::m_CurrentStoredValue];
+    const auto lightFrame = rtshdw->SetLightProperties(
+        RWRAD2DEG(+std::atan2(-vecToSun.x, -vecToSun.y)),
+        RWRAD2DEG(-std::atan2(+vecToSun.x, -vecToSun.z)),
+        true
+    );
+    CalcPedShadowValues(
+        *RwMatrixGetAt(RwFrameGetMatrix(lightFrame)),
+        displacementX, displacementY,
+        frontX, frontY,
+        sideX, sideY
+    );
+    StoreShadowToBeRendered(
+        SHADOW_INVCOLOR,
+        rtshdw->GetShadowRwTexture(),
+        shdwPos - CVector{ displacementX, displacementY, 0.f } * 2.5f,
+        frontX * 1.5f, frontY * 1.5f,
+        sideX * 1.5f, sideY * 1.5f,
+        cc,
+        cc, cc, cc,
+        4.f,
+        false,
+        1.f,
+        rtshdw,
+        g_fx.GetFxQuality() >= FX_QUALITY_VERY_HIGH // NOTSA: At higher FX quality draw all shadows on buildings too
+    );
 }
 
 // 0x707F40

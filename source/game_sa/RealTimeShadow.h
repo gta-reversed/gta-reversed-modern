@@ -20,7 +20,15 @@ public:
     CRealTimeShadow() = default;
     ~CRealTimeShadow();
 
-    struct RwFrame*   SetLightProperties(float angle, float _unused_param, bool setLight);
+    /*!
+    * @addr 0x705900
+    * @brief Set the properties of the light used for this shadow
+    *
+    * @param azimuth             In degrees              
+    * @param elevation  [unused] In degrees
+    * @param setLight            Whenever to set the light to be used
+    */
+    struct RwFrame*   SetLightProperties(float azimuth, float elevation, bool doSetCamLight);
 
     /*!
     * @addr 0x7059F0

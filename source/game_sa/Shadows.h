@@ -190,7 +190,7 @@ public:
     static void UpdatePermanentShadows();
 
     static void StoreShadowToBeRendered(uint8 type, CVector* posn, float frontX, float frontY, float sideX, float sideY, int16 intensity, uint8 red, uint8 green, uint8 blue);
-    static void StoreShadowToBeRendered(uint8 type, RwTexture* texture, CVector* posn, float topX, float topY, float rightX, float rightY, int16 intensity, uint8 red, uint8 green, uint8 blue, float zDistance, bool drawOnWater, float scale, CRealTimeShadow* realTimeShadow, bool drawOnBuildings);
+    static void StoreShadowToBeRendered(uint8 type, RwTexture* texture, const CVector& posn, float topX, float topY, float rightX, float rightY, int16 intensity, uint8 red, uint8 green, uint8 blue, float zDistance, bool drawOnWater, float scale, CRealTimeShadow* realTimeShadow, bool drawOnBuildings);
     static void SetRenderModeForShadowType(eShadowType type);
     static void RemoveOilInArea(float x1, float x2, float y1, float y2);
     static void GunShotSetsOilOnFire(const CVector& shotOrigin, const CVector& shotTarget);
@@ -220,8 +220,8 @@ public:
 CVector* ShadowRenderTriangleCB(CVector* normal, CVector* trianglePos, _ProjectionParam* param);
 #endif
 
-constexpr float MAX_DISTANCE_PED_SHADOWS = 15.0f; // 0x8D5240
-constexpr float MAX_DISTANCE_PED_SHADOWS_SQR = MAX_DISTANCE_PED_SHADOWS * MAX_DISTANCE_PED_SHADOWS; // 0xC4B6B0
+constexpr float MAX_DISTANCE_PED_SHADOWS = 15.0f; // 0x8D5240 - TODO: Rename to `MAX_DISTANCE_SHADOWS`
+constexpr float MAX_DISTANCE_PED_SHADOWS_SQR = MAX_DISTANCE_PED_SHADOWS * MAX_DISTANCE_PED_SHADOWS; // 0xC4B6B0 - TODO: Rename to `MAX_DISTANCE_PED_SHADOWS_SQ`
 
 static inline RwTexture*& gpShadowCarTex = *(RwTexture**)0xC403E0;
 static inline RwTexture*& gpShadowPedTex = *(RwTexture**)0xC403E4;

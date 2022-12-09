@@ -22,13 +22,13 @@ CRealTimeShadow::~CRealTimeShadow() {
 }
 
 // 0x705900
-RwFrame* CRealTimeShadow::SetLightProperties(float angle, float, bool doSetCamLight) {
+RwFrame* CRealTimeShadow::SetLightProperties(float angle, float unused, bool doSetCamLight) {
     if (const auto frame = RpLightGetFrame(m_pLight)) {
-        const RwV3d xaxis{ 0.f, 1.f, 0.f };
-        RwFrameRotate(frame, &xaxis, angle, rwCOMBINEREPLACE);
+        const RwV3d yaxis{ 0.f, 1.f, 0.f };
+        RwFrameRotate(frame, &yaxis, angle, rwCOMBINEREPLACE);
 
-        const RwV3d yaxis{ 1.f, 0.f, 0.f };
-        RwFrameRotate(frame, &yaxis, angle, rwCOMBINEPOSTCONCAT);
+        const RwV3d xaxis{ 1.f, 0.f, 0.f };
+        RwFrameRotate(frame, &xaxis, angle, rwCOMBINEPOSTCONCAT);
 
         if (doSetCamLight) {
             m_camera.SetLight(m_pLight);
