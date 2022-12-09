@@ -16,7 +16,7 @@ void CShadowCamera::InjectHooks() {
     RH_ScopedInstall(GetRwRenderRaster, 0x705770);
     RH_ScopedInstall(GetRwRenderTexture, 0x705780);
     RH_ScopedInstall(DrawOutlineBorder, 0x705790);
-    RH_ScopedInstall(Create, 0x705B60, { .reversed = false });
+    RH_ScopedInstall(Create, 0x705B60);
     RH_ScopedOverloadedInstall(Update, "Clump", 0x705BF0, RwCamera*(CShadowCamera::*)(RpClump*), { .reversed = false });
     RH_ScopedOverloadedInstall(Update, "Atomic", 0x705C80, RwCamera * (CShadowCamera::*)(RpAtomic*), { .reversed = false });
     RH_ScopedInstall(MakeGradientRaster, 0x705D20, { .reversed = false });
@@ -194,9 +194,38 @@ RwRaster* CShadowCamera::DrawOutlineBorder(const RwRGBA& color) {
     return GetRwRenderRaster();
 }
 
-// 0x705B60
-RwCamera* CShadowCamera::Create(int32 rasterSize) {
-    return plugin::CallMethodAndReturn<RwCamera*, 0x705B60, CShadowCamera*, int32>(this, rasterSize);
+/*!
+* @addr 0x705B60
+* @brief Create camera and render texture
+* @param rasterSizePower Size of the raster, final size in pixels will be `pow(2, rasterSizePower)`
+* @return The camera created
+*/
+RwCamera* CShadowCamera::Create(int32 rasterSizePower) {
+    const auto rasterSizeInPx = 1 << rasterSizePower; // Size of raster in pixels. Same as `pow(2, rasterSize)`
+
+    if (m_pRwCamera = RwCameraCreate()) {
+        if (const auto frame = RwFrameCreate()) {
+            rwObjectHasFrameSetFrame(m_pRwCamera, frame);
+            if (RwCameraGetFrame(m_pRwCamera)) {
+                if (const auto raster = RwRasterCreate(rasterSizeInPx, rasterSizeInPx, 0, rwRASTERTYPECAMERATEXTURE)) {
+                    RwCameraSetRaster(m_pRwCamera, raster);
+                    if (m_pRwRenderTexture = RwTextureCreate(raster)) {
+                        RwTextureSetAddressing(m_pRwRenderTexture, rwFILTERMIPNEAREST | rwFILTERMIPNEAREST);
+                        RwTextureSetFilterMode(m_pRwRenderTexture, rwFILTERLINEAR);
+
+                        RwCameraSetProjection(m_pRwCamera, rwPARALLEL);
+
+                        // Success
+                        return m_pRwCamera;
+                    }
+                }
+            }
+        }
+    }
+
+    // Fail
+    Destroy();
+    return nullptr;
 }
 
 // 0x705BF0
