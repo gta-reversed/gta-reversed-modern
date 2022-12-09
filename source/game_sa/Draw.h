@@ -38,6 +38,9 @@ public:
     static void SetAspectRatio(float ratio) { ms_fAspectRatio = ratio; }
 
     static void CalculateAspectRatio();
+
+    // @notsa
+    static bool IsFading() { return FadeValue != 0u; }
 };
 
 extern void DoFade();

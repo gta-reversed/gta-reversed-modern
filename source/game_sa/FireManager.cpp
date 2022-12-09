@@ -4,8 +4,6 @@
 #include "TheScripts.h"
 #include "Shadows.h"
 
-CFireManager& gFireManager = *reinterpret_cast<CFireManager*>(0xB71F80);
-
 void CFireManager::InjectHooks() {
     RH_ScopedClass(CFireManager);
     RH_ScopedCategoryGlobal();
