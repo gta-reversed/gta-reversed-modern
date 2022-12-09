@@ -21,7 +21,7 @@ void CShadowCamera::InjectHooks() {
     RH_ScopedOverloadedInstall(Update, "Atomic", 0x705C80, RwCamera * (CShadowCamera::*)(RpAtomic*));
     RH_ScopedInstall(MakeGradientRaster, 0x705D20);
     RH_ScopedInstall(RasterResample, 0x706070);
-    RH_ScopedInstall(RasterBlur, 0x706170, { .reversed = false });
+    RH_ScopedInstall(RasterBlur, 0x706170);
 
     RH_ScopedGlobalInstall(atomicQuickRender, 0x705620);
 }
@@ -442,6 +442,65 @@ RwRaster* CShadowCamera::RasterResample(RwRaster* sourceRaster) {
 }
 
 // 0x706170
-RwRaster* CShadowCamera::RasterBlur(RwRaster* raster, int32 numPasses) {
-    return plugin::CallMethodAndReturn<RwRaster*, 0x706170, CShadowCamera*, RwRaster*, int32>(this, raster, numPasses);
+RwRaster* CShadowCamera::RasterBlur(RwRaster* blurRaster, int32 numPasses) {
+    if (!m_pRwCamera) {
+        return nullptr;
+    }
+
+    const auto camRaster = RwCameraGetRaster(m_pRwCamera);
+
+    if (!numPasses) { // NOTSA
+        return camRaster;
+    }
+
+    const auto DoRenderQuad2D = [
+        size = RwRasterGetWidth(blurRaster),
+        rhw = 1.f / RwCameraGetNearClipPlane(m_pRwCamera)
+    ] (float uv) {
+        Im2DRenderQuad(
+            0.f, 0.f,
+            (RwReal)size, (RwReal)size,
+            RwIm2DGetNearScreenZ(),
+            rhw,
+            uv / size
+        );
+    };
+
+    for (auto i{ 0 }; i < numPasses; i++) {
+        if (RwCameraBeginUpdate(m_pRwCamera)) {
+            if (i == 0) { // First pass
+                RwRenderStateSet(rwRENDERSTATESRCBLEND, RWRSTATE(rwBLENDONE));
+                RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDZERO));
+                RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(FALSE));
+                RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
+            }
+            RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(blurRaster));
+
+            DoRenderQuad2D(0.5f + 0.5f);
+
+            RwCameraEndUpdate(m_pRwCamera);
+        }
+
+        // Swap raster
+        RwCameraSetRaster(m_pRwCamera, blurRaster);
+
+        if (RwCameraBeginUpdate(m_pRwCamera)) {
+            RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(camRaster));
+
+            DoRenderQuad2D(0.5f - 0.5f);
+
+            if (i == numPasses - 1) { // LastPass (pun intended)
+                RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(TRUE));
+                RwRenderStateSet(rwRENDERSTATESRCBLEND, RWRSTATE(rwBLENDSRCALPHA));
+                RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
+            }
+
+            RwCameraEndUpdate(m_pRwCamera);
+        }
+
+        // Swap raster back to original
+        RwCameraSetRaster(m_pRwCamera, camRaster);
+    }
+
+    return camRaster;
 }
