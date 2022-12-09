@@ -21,6 +21,11 @@ public:
     ~CRealTimeShadow();
 
     struct RwFrame*   SetLightProperties(float angle, float _unused_param, bool setLight);
+
+    /*!
+    * @addr 0x7059F0
+    * @return The texture of the currently used camera
+    */
     struct RwTexture* GetShadowRwTexture();
 
     void              Destroy();

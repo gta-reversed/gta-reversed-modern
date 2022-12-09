@@ -9,7 +9,7 @@ void CRealTimeShadow::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x706440);
 
     RH_ScopedInstall(SetLightProperties, 0x705900);
-    RH_ScopedInstall(GetShadowRwTexture, 0x7059F0, {.reversed = false});
+    RH_ScopedInstall(GetShadowRwTexture, 0x7059F0);
     RH_ScopedInstall(DrawBorderAroundTexture, 0x705A00, {.reversed = false});
     RH_ScopedInstall(Create, 0x706460, {.reversed = false});
     RH_ScopedInstall(Update, 0x706600, { .reversed = false });
@@ -40,7 +40,7 @@ RwFrame* CRealTimeShadow::SetLightProperties(float angle, float, bool doSetCamLi
 
 // 0x7059F0
 RwTexture* CRealTimeShadow::GetShadowRwTexture() {
-    return plugin::CallMethodAndReturn<RwTexture*, 0x7059F0, CRealTimeShadow*>(this);
+    return (m_bBlurred ? m_blurCamera : m_camera).GetRwRenderTexture();
 }
 
 // 0x705990
