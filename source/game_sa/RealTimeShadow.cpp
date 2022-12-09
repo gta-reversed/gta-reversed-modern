@@ -107,6 +107,9 @@ RwTexture* CRealTimeShadow::Update() {
     }
     }
 
+    // Update camera position
+    m_camera.SetCenter(m_baseSphere.m_vecCenter);
+
     // Render object onto the camera's raster
     switch (m_nRwObjectType) {
     case rpATOMIC:
