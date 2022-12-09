@@ -18,7 +18,7 @@ void CShadowCamera::InjectHooks() {
     RH_ScopedInstall(DrawOutlineBorder, 0x705790);
     RH_ScopedInstall(Create, 0x705B60);
     RH_ScopedOverloadedInstall(Update, "Clump", 0x705BF0, RwCamera*(CShadowCamera::*)(RpClump*));
-    RH_ScopedOverloadedInstall(Update, "Atomic", 0x705C80, RwCamera * (CShadowCamera::*)(RpAtomic*), { .reversed = false });
+    RH_ScopedOverloadedInstall(Update, "Atomic", 0x705C80, RwCamera * (CShadowCamera::*)(RpAtomic*));
     RH_ScopedInstall(MakeGradientRaster, 0x705D20, { .reversed = false });
     RH_ScopedInstall(RasterResample, 0x706070, { .reversed = false });
     RH_ScopedInstall(RasterBlur, 0x706170, { .reversed = false });
@@ -261,24 +261,32 @@ RpAtomic* atomicQuickRender(RpAtomic* atomic, void* data) {
     return atomic;
 }
 
-// 0x705BF0
-RwCamera* CShadowCamera::Update(RpClump* clump) {
+/*!
+* @notsa
+* @brief Internal function to render to reduce copy-paste code
+*
+* @param geo             The geometry to be rendered
+* @param geoFlagsToClear Flags to clear from geometry for rendering this time (all flags will be restored afterwards)
+* @param Render          The function that should render everything necessary
+*/
+template<typename RenderFnT>
+void CShadowCamera::Update_Internal(RpAtomic* atomic, uint32 geoFlagsToClear, RenderFnT&& Render) {
     // Clear camera raster to be transparent
     RwRGBA color(0xFF, 0xFF, 0xFF, 0);
     RwCameraClear(m_pRwCamera, &color, rwCAMERACLEARZ | rwCAMERACLEARIMAGE);
 
     // Now update camera
     if (RwCameraBeginUpdate(m_pRwCamera)) {
-        const auto geo = RpAtomicGetGeometry(GetFirstAtomic(clump));
+        const auto geo = RpAtomicGetGeometry(atomic);
 
         // Save original flags
         const auto ogflags = RpGeometryGetFlags(geo);
 
         // Clear some for this render pass (optimization)
-        RpGeometrySetFlags(geo, ogflags & ~(rpGEOMETRYTEXTURED | rpGEOMETRYPRELIT | rpGEOMETRYLIGHT | rpGEOMETRYMODULATEMATERIALCOLOR | rpGEOMETRYTEXTURED2));
+        RpGeometrySetFlags(geo, ogflags & ~geoFlagsToClear);
 
-        // Render atomic quickly
-        RpClumpForAllAtomics(clump, &atomicQuickRender, nullptr);
+        // Render
+        Render();
 
         // Restore flags
         RpGeometrySetFlags(geo, ogflags);
@@ -290,13 +298,34 @@ RwCamera* CShadowCamera::Update(RpClump* clump) {
         // Finish update
         RwCameraEndUpdate(m_pRwCamera);
     }
+}
+
+/*!
+* @addr  0x705BF0
+* @brief Render a clump and all its atomics
+*/
+RwCamera* CShadowCamera::Update(RpClump* clump) {
+    Update_Internal(
+        GetFirstAtomic(clump), // Not quite sure... They render all atomics, but only modify the first atomics geometry's flags? Why not render all atomics separately?
+        rpGEOMETRYTEXTURED | rpGEOMETRYPRELIT | rpGEOMETRYLIGHT | rpGEOMETRYMODULATEMATERIALCOLOR | rpGEOMETRYTEXTURED2,
+        [&] { RpClumpForAllAtomics(clump, &atomicQuickRender, nullptr); }
+    );
 
     return m_pRwCamera;
 }
 
-// 0x705C80
+/*!
+* @addr 0x705C80
+* @brief Render an atomic
+*/
 RwCamera* CShadowCamera::Update(RpAtomic* atomic) {
-    return plugin::CallMethodAndReturn<RwCamera*, 0x705C80, CShadowCamera*, RpAtomic*>(this, atomic);
+    Update_Internal(
+        atomic,
+        rpGEOMETRYTEXTURED | rpGEOMETRYPRELIT | rpGEOMETRYNORMALS | rpGEOMETRYLIGHT | rpGEOMETRYMODULATEMATERIALCOLOR | rpGEOMETRYTEXTURED2,
+        [&] { atomicQuickRender(atomic, nullptr); }
+    );
+
+    return m_pRwCamera;
 }
 
 // 0x705D20

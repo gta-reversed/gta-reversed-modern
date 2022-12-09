@@ -6,6 +6,7 @@
 */
 #pragma once
 
+#include <Base.h>
 #include "RenderWare.h"
 
 class CShadowCamera { // AKA CShadowImage
@@ -36,6 +37,11 @@ public:
     RwRaster*  DrawBlurInRect(RwRect* rect);
     RwRaster*  RasterResample(RwRaster* raster);
     RwRaster*  RasterBlur(RwRaster* raster, int32 numPasses);
+
+private:
+    // NOTSA
+    template<typename RenderFnT>
+    void Update_Internal(RpAtomic* atomic, uint32 geoFlagsToClear, RenderFnT&& Render);
 };
 VALIDATE_SIZE(CShadowCamera, 0x8);
 
