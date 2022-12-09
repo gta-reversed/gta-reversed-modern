@@ -17,11 +17,13 @@ void CShadowCamera::InjectHooks() {
     RH_ScopedInstall(GetRwRenderTexture, 0x705780);
     RH_ScopedInstall(DrawOutlineBorder, 0x705790);
     RH_ScopedInstall(Create, 0x705B60);
-    RH_ScopedOverloadedInstall(Update, "Clump", 0x705BF0, RwCamera*(CShadowCamera::*)(RpClump*), { .reversed = false });
+    RH_ScopedOverloadedInstall(Update, "Clump", 0x705BF0, RwCamera*(CShadowCamera::*)(RpClump*));
     RH_ScopedOverloadedInstall(Update, "Atomic", 0x705C80, RwCamera * (CShadowCamera::*)(RpAtomic*), { .reversed = false });
     RH_ScopedInstall(MakeGradientRaster, 0x705D20, { .reversed = false });
     RH_ScopedInstall(RasterResample, 0x706070, { .reversed = false });
     RH_ScopedInstall(RasterBlur, 0x706170, { .reversed = false });
+
+    RH_ScopedGlobalInstall(atomicQuickRender, 0x705620);
 }
 
 // 0x7053F0
@@ -98,7 +100,7 @@ void CShadowCamera::SetCenter(const CVector& center) {
 
 /*!
 * @addr 0x705660
-* @brief Render an inverted color version of the camera's raster
+* @brief Render an inverted color version of the camera's raster onto itself
 */
 void CShadowCamera::InvertRaster() {
     const auto& raster = GetRwRenderRaster();
@@ -228,9 +230,68 @@ RwCamera* CShadowCamera::Create(int32 rasterSizePower) {
     return nullptr;
 }
 
+/*!
+* @addr 0x705620
+* @brief Render the atomic using the default render callback
+*
+* @param          atomic The atomic to render
+* @param [unused] data
+*
+* @return The `atomic`
+*
+* Used in 3-4 places, but (mostly) inlined in the final exe
+*/
+RpAtomic* atomicQuickRender(RpAtomic* atomic, void* data) {
+    UNUSED(data);
+
+    // Save original callback
+    const auto origcb = RpAtomicGetRenderCallBack(atomic);
+
+    // Set default callback
+    RpAtomicSetRenderCallBack(atomic, &AtomicDefaultRenderCallBack);
+
+    // NOTSA: Omitting useless `if` - It's condition always evals to `false` - Perhaps BUG?
+
+    // Render using default
+    AtomicDefaultRenderCallBack(atomic);
+
+    // Set original (if not null) or use default
+    RpAtomicSetRenderCallBack(atomic, origcb ? origcb : &AtomicDefaultRenderCallBack);
+
+    return atomic;
+}
+
 // 0x705BF0
 RwCamera* CShadowCamera::Update(RpClump* clump) {
-    return plugin::CallMethodAndReturn<RwCamera*, 0x705BF0, CShadowCamera*, RpClump*>(this, clump);
+    // Clear camera raster to be transparent
+    RwRGBA color(0xFF, 0xFF, 0xFF, 0);
+    RwCameraClear(m_pRwCamera, &color, rwCAMERACLEARZ | rwCAMERACLEARIMAGE);
+
+    // Now update camera
+    if (RwCameraBeginUpdate(m_pRwCamera)) {
+        const auto geo = RpAtomicGetGeometry(GetFirstAtomic(clump));
+
+        // Save original flags
+        const auto ogflags = RpGeometryGetFlags(geo);
+
+        // Clear some for this render pass (optimization)
+        RpGeometrySetFlags(geo, ogflags & ~(rpGEOMETRYTEXTURED | rpGEOMETRYPRELIT | rpGEOMETRYLIGHT | rpGEOMETRYMODULATEMATERIALCOLOR | rpGEOMETRYTEXTURED2));
+
+        // Render atomic quickly
+        RpClumpForAllAtomics(clump, &atomicQuickRender, nullptr);
+
+        // Restore flags
+        RpGeometrySetFlags(geo, ogflags);
+
+        // Render the camera's current raster, but inverted
+        // This is basically the shadow (I think)
+        InvertRaster();
+
+        // Finish update
+        RwCameraEndUpdate(m_pRwCamera);
+    }
+
+    return m_pRwCamera;
 }
 
 // 0x705C80

@@ -38,3 +38,5 @@ public:
     RwRaster*  RasterBlur(RwRaster* raster, int32 numPasses);
 };
 VALIDATE_SIZE(CShadowCamera, 0x8);
+
+RpAtomic* atomicQuickRender(RpAtomic* atomic, void* data);
