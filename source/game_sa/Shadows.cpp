@@ -17,8 +17,8 @@ void CShadows::InjectHooks() {
     RH_ScopedInstall(TidyUpShadows, 0x707770);
     RH_ScopedInstall(AddPermanentShadow, 0x706F60, { .reversed = false });
     RH_ScopedInstall(UpdatePermanentShadows, 0x70C950, { .reversed = false });
-    //RH_ScopedInstall(StoreShadowToBeRendered, 0x707930, { .reversed = false }); // TODO: Fix overload install
-    //RH_ScopedInstall(StoreShadowToBeRendered, 0x707390, { .reversed = false });
+    RH_ScopedOverloadedInstall(StoreShadowToBeRendered, "Texture", 0x707390, void(*)(uint8, RwTexture*, CVector*, float, float, float, float, int16, uint8, uint8, uint8, float, bool, float, CRealTimeShadow*, bool));
+    RH_ScopedOverloadedInstall(StoreShadowToBeRendered, "Type", 0x707930, void(*)(uint8, CVector*, float, float, float, float, int16, uint8, uint8, uint8));
     RH_ScopedInstall(SetRenderModeForShadowType, 0x707460);
     RH_ScopedInstall(RemoveOilInArea, 0x7074F0);
     RH_ScopedInstall(GunShotSetsOilOnFire, 0x707550, { .reversed = false });
