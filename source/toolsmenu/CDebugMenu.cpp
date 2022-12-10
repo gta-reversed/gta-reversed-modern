@@ -149,7 +149,25 @@ static void DebugCode() {
     }
 
     if (pad->IsStandardKeyJustPressed('0')) {
-
+        const auto plyrPos = FindPlayerCoors();
+        for (auto r = 0.f; r < PI * 2; r += PI / 4) {
+            const auto pos = plyrPos + CVector{ std::sinf(r), std::cosf(r), 0.f } * 5.f;
+            const auto AddLight = [&](auto type) {
+                CPointLights::AddLight(
+                    type,
+                    pos,
+                    pos - plyrPos,
+                    10.f,
+                    255, 0, 0,
+                    0,
+                    true,
+                    FindPlayerVehicle()
+                );
+            };
+            AddLight(PLTYPE_POINTLIGHT);
+            AddLight(PLTYPE_SPOTLIGHT);
+        }
+        DEV_LOG("Created lights!");
     }
 
     if (pad->IsStandardKeyJustPressed('9')) {
