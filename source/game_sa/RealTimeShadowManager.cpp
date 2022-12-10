@@ -7,7 +7,7 @@ CRealTimeShadowManager& g_realTimeShadowMan = *(CRealTimeShadowManager*)0xC40350
 
 void CRealTimeShadowManager::InjectHooks() {
     RH_ScopedClass(CRealTimeShadowManager);
-    RH_ScopedCategoryGlobal(); // TODO: Change this to the appropriate category!
+    RH_ScopedCategory("Shadows");
 
     RH_ScopedInstall(Init, 0x7067C0);
     RH_ScopedInstall(ReInit, 0x706870, {.reversed = false});

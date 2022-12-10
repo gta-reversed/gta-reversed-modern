@@ -4,7 +4,7 @@
 
 void CRealTimeShadow::InjectHooks() {
     RH_ScopedClass(CRealTimeShadow);
-    RH_ScopedCategoryGlobal();
+    RH_ScopedCategory("Shadows");
 
     RH_ScopedInstall(Constructor, 0x706410);
     RH_ScopedInstall(Destructor, 0x706440);
