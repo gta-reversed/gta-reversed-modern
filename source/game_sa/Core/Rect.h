@@ -16,7 +16,6 @@
     |                               |
     |_________________B(right;bottom)
     ↓
-
 */
 
 class CRect {
@@ -63,6 +62,11 @@ public:
     [[nodiscard]] inline CVector2D GetCenter() const { return { (right + left) * 0.5F, (bottom + top) * 0.5F }; }
     void StretchToPoint(float x, float y);
 
+    /*!
+    * @notsa
+    * @brief Check if this rect collides with another
+    */
+    bool OverlapsWith(const CRect& o) const;
 };
 
 VALIDATE_SIZE(CRect, 0x10);
