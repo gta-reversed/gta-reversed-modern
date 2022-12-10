@@ -517,10 +517,11 @@ RwRaster* CShadowCamera::DrawBlurryRaster2(RwRaster* srcRaster) {
 
 void CShadowCamera::InjectHooks() {
     RH_ScopedClass(CShadowCamera);
-    RH_ScopedCategoryGlobal();
+    RH_ScopedCategory("Shadows");
 
-    // RH_ScopedInstall(CShadowCamera, 0x7053F0, { .reversed = false }); // TODO: Constructor
-    // RH_ScopedInstall(~CShadowCamera, 0x705B50);
+    RH_ScopedInstall(Constructor, 0x7053F0);
+    RH_ScopedInstall(Destructor, 0x705B50);
+
     RH_ScopedInstall(Destroy, 0x705400);
     RH_ScopedInstall(SetFrustum, 0x7054C0);
     RH_ScopedInstall(SetLight, 0x705520);

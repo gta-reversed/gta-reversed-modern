@@ -128,5 +128,16 @@ private:
     */
     template<typename RenderFnT>
     void Update_Internal(RpAtomic* atomic, uint32 geoFlagsToClear, RenderFnT&& Render);
+
+private:
+    CShadowCamera* Constructor() {
+        this->CShadowCamera::CShadowCamera();
+        return this;
+    }
+
+    CShadowCamera* Destructor() {
+        this->CShadowCamera::~CShadowCamera();
+        return this;
+    }
 };
 VALIDATE_SIZE(CShadowCamera, 0x8);
