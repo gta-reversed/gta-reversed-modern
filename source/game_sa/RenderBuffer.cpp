@@ -22,7 +22,7 @@ void StartStoring(
     RwImVertexIndex*& outPtrFirstIndex,
     RwIm3DVertex*& outPtrFirstVertex
 ) {
-    assert(nIndicesNeeded > 0 && nIndicesNeeded <= (int32)std::size(aTempBufferIndices));
+    assert(nIndicesNeeded  > 0 && nIndicesNeeded  <= (int32)std::size(aTempBufferIndices));
     assert(nVerticesNeeded > 0 && nVerticesNeeded <= (int32)std::size(aTempBufferVertices));
 
     if (uiTempBufferIndicesStored + nIndicesNeeded >= (int32)std::size(aTempBufferIndices)) {
