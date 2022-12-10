@@ -105,6 +105,17 @@ template<typename... Ts>
 // Eventually could instead verify the returned value? In case of `sscanf` etc...
 #define RET_IGNORED(x) (void)(x);
 
+/*!
+* @brief Used for static variable references
+*
+* @tparam T    The type of the variable
+* @tparam Addr The address of it
+*/
+template<typename T, uintptr Addr>
+T& StaticRef() {
+    return *reinterpret_cast<T*>(Addr);
+}
+
 #define _IGNORED_
 #define _CAN_BE_NULL_
 

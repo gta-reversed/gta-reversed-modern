@@ -397,6 +397,7 @@
 #include <RealTimeShadowManager.h>
 
 #include "extensions/utility.hpp"
+#include <RenderBuffer.hpp>
 
 void InjectHooksMain() {
     HookInstall(0x53E230, &Render2dStuff);   // [ImGui] This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without
@@ -404,6 +405,7 @@ void InjectHooksMain() {
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
     CFileMgr::InjectHooks();
 
+    RenderBuffer::InjectHooks();
     CStaticShadow::InjectHooks();
     CRealTimeShadowManager::InjectHooks();
     CRealTimeShadow::InjectHooks();
