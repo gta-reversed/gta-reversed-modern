@@ -92,6 +92,7 @@ enum ePedCreatedBy : uint8 {
     PED_UNKNOWN = 0,
     PED_GAME = 1,
     PED_MISSION = 2,
+    PED_GAME_MISSION = 3, // used for the playbacked peds on replay
 };
 
 enum eMoveState : uint32 {
@@ -243,7 +244,6 @@ public:
         uint32 bHasBeenRendered : 1 = false;
         uint32 bIsCached : 1 = false;
         uint32 bPushOtherPeds : 1 = false;   // GETS RESET EVERY FRAME - SET IN TASK: want to push other peds around (eg. leader of a group or ped trying to get in a car)
-        uint32 bPedThirdFlags32 : 1 = false; // unknown
 
         // 13th byte starts here (m_nFourthPedFlags)
         uint32 bHasBulletProofVest : 1 = false;
@@ -386,7 +386,9 @@ public:
     static void InjectHooks();
 
     static void* operator new(unsigned size);
+    static void* operator new(unsigned size, int32 poolRef);
     static void operator delete(void* data);
+    static void operator delete(void* data, int poolRef);
 
     CPed(ePedType pedType);
     ~CPed();

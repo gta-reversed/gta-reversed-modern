@@ -115,6 +115,13 @@ public:
         m_pos = pos;
     }
 
+    // Similar to ::Scale but this also scales the position vector.
+    // 0x45AF40
+    void ScaleAll(float mult) {
+        Scale(mult);
+        GetPosition() *= mult;
+    }
+
     // operators and classes that aren't defined as part of class, but it's much easier to get them working with access to class private fields
 private:
     friend class CVector; // So Vector methods have access to private fields of matrix whitout accessor methods, for more readable code
@@ -128,6 +135,7 @@ private:
     friend CMatrix operator+(const CMatrix& a, const CMatrix& b);
     // static CMatrix* impl_operatorAdd(CMatrix* out, const CMatrix& a, const CMatrix& b);
 };
+VALIDATE_SIZE(CMatrix, 0x48);
 
 CMatrix operator*(const CMatrix& a, const CMatrix& b);
 CVector operator*(const CMatrix& a, const CVector& b);
@@ -135,8 +143,6 @@ CMatrix operator+(const CMatrix& a, const CMatrix& b);
 
 CMatrix& Invert(CMatrix& in, CMatrix& out);
 CMatrix  Invert(const CMatrix& in);
-
-VALIDATE_SIZE(CMatrix, 0x48);
 
 extern int32& numMatrices;
 extern CMatrix& gDummyMatrix;

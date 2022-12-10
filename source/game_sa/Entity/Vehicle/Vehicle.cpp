@@ -411,6 +411,14 @@ void CVehicle::operator delete(void* data) {
     GetVehiclePool()->Delete(static_cast<CVehicle*>(data));
 }
 
+void* CVehicle::operator new(unsigned size, int32 poolRef) {
+    return GetVehiclePool()->NewAt(poolRef);
+}
+
+void CVehicle::operator delete(void* data, int32 poolRef) {
+    GetVehiclePool()->Delete(static_cast<CVehicle*>(data));
+}
+
 // 0x6D6A40
 void CVehicle::SetModelIndex(uint32 index) {
     return CVehicle::SetModelIndex_Reversed(index);

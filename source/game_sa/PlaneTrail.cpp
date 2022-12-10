@@ -65,8 +65,8 @@ void CPlaneTrail::RegisterPoint(CVector pos) {
     if (bDoShift) {
         // Shift right
 #if __cpp_lib_shift >= 202202L 
-        rng::shift_right(m_Timepoints);
-        rng::shift_right(m_Positions);
+        rng::shift_right(m_Timepoints, 1);
+        rng::shift_right(m_Positions, 1);
 #else
         for (auto i = PLANE_TRAIL_BUF_SIZE - 1; i; i--) {
             m_Timepoints[i] = m_Timepoints[i - 1];
