@@ -9,6 +9,7 @@
 #include "Shadows.h"
 #include "FireManager.h"
 #include <utility.hpp>
+#include <CustomBuildingDNPipeline.h>
 
 void CShadows::InjectHooks() {
     RH_ScopedClass(CShadows);
@@ -26,12 +27,12 @@ void CShadows::InjectHooks() {
     RH_ScopedInstall(GunShotSetsOilOnFire, 0x707550);
     RH_ScopedInstall(PrintDebugPoly, 0x7076B0);
     RH_ScopedInstall(CalcPedShadowValues, 0x7076C0);
-    RH_ScopedInstall(AffectColourWithLighting, 0x707850, { .reversed = false });
+    RH_ScopedInstall(AffectColourWithLighting, 0x707850);
     RH_ScopedInstall(StoreShadowForPedObject, 0x707B40);
     RH_ScopedInstall(StoreRealTimeShadow, 0x707CA0);
     RH_ScopedInstall(UpdateStaticShadows, 0x707F40);
-    RH_ScopedInstall(RenderExtraPlayerShadows, 0x707FA0, { .reversed = false });
-    RH_ScopedInstall(RenderStaticShadows, 0x708300, { .reversed = false });
+    RH_ScopedInstall(RenderExtraPlayerShadows, 0x707FA0);
+    RH_ScopedInstall(RenderStaticShadows, 0x708300);
     RH_ScopedInstall(CastShadowEntityXY, 0x7086B0, { .reversed = false });
     RH_ScopedInstall(CastShadowEntityXYZ, 0x70A040, { .reversed = false });
     RH_ScopedInstall(CastPlayerShadowSectorList, 0x70A470, { .reversed = false });
@@ -61,12 +62,12 @@ void CStaticShadow::Free() {
         const auto prevHead = CShadows::pEmptyBunchList;
         CShadows::pEmptyBunchList = m_pPolyBunch;
 
-        // Set all bunches we own to point to the previous head
-        // this is kinda retarded imo, because this won't be a proper linked list now,
-        // but there's surely a reason it's done like this...
-        for (auto it = m_pPolyBunch; it->m_pNext; it = static_cast<CPolyBunch*>(it->m_pNext)) {
-            it->m_pNext = prevHead;
+        // Find last in the list and make it point to the previous head
+        auto it{ m_pPolyBunch };
+        while (it->m_pNext) {
+            it = static_cast<CPolyBunch*>(it->m_pNext);
         }
+        it->m_pNext = prevHead;
 
         m_pPolyBunch = nullptr;
         m_nId = 0;
@@ -198,6 +199,23 @@ void CShadows::StoreShadowToBeRendered(uint8 type, RwTexture* texture, const CVe
     ShadowsStoredToBeRendered++;
 }
 
+void CShadows::StoreShadowToBeRendered(eShadowType type, RwTexture* tex, const CVector& posn, CVector2D top, CVector2D right, int16 intensity, uint8 red, uint8 green, uint8 blue, float zDistance, bool drawOnWater, float scale, CRealTimeShadow* realTimeShadow, bool drawOnBuildings) {
+    StoreShadowToBeRendered(
+        type,
+        tex,
+        posn,
+        top.x, top.y,
+        right.x, right.y,
+        intensity,
+        red, green, blue,
+        zDistance,
+        drawOnWater,
+        scale,
+        realTimeShadow,
+        drawOnBuildings
+    );
+}
+
 // 0x707460
 void CShadows::SetRenderModeForShadowType(eShadowType type) {
     switch (type) {
@@ -295,16 +313,40 @@ void CShadows::CalcPedShadowValues(CVector sunPosn, float& displacementX, float&
 }
 
 // 0x707850
-void CShadows::AffectColourWithLighting(uint8 shadowType, uint8 dayNightIntensity, uint8 red, uint8 green, uint8 blue, uint8* outRed, uint8* outGreen, uint8* outBlue) {
-    ((void(__cdecl*)(uint8, uint8, uint8, uint8, uint8, uint8*, uint8*, uint8*))0x707850)(shadowType, dayNightIntensity, red, green, blue, outRed, outGreen, outBlue);
+void CShadows::AffectColourWithLighting(
+    eShadowType shadowType,
+    uint8 dayNightIntensity, // packed 2x4 bits for day/night
+    uint8 r, uint8 g, uint8 b,
+    uint8& outR, uint8& outG, uint8& outB
+) {
+    if (shadowType != SHADOW_ADDITIVE) {
+        const auto mult = std::min(
+            0.4f + 0.6f * (1.f - CCustomBuildingDNPipeline::m_fDNBalanceParam),
+            0.3f + 0.7f * lerp(
+                (float)(dayNightIntensity >> 0 & 0b1111) / 30.f,
+                (float)(dayNightIntensity >> 4 & 0b1111) / 30.f,
+                CCustomBuildingDNPipeline::m_fDNBalanceParam
+            )
+        );
+        outR = (uint8)((float)r * mult);
+        outG = (uint8)((float)g * mult);
+        outB = (uint8)((float)b * mult);
+    } else {
+        outR = r;
+        outG = g;
+        outB = b;
+    }
 }
 
-uint16 CalculateShadowStrength(float distToCam2DSq) {
-    const auto halfMaxDist = MAX_DISTANCE_PED_SHADOWS / 2.f;
-    if (distToCam2DSq >= halfMaxDist) { // Anything further than half the distance is faded out
-        return (uint16)((1.f - (distToCam2DSq - halfMaxDist) / halfMaxDist) * (float)CTimeCycle::m_CurrentColours.m_nShadowStrength);
+// NOTSA
+uint16 CalculateShadowStrength(float currDist, float maxDist, uint16 maxStrength) {
+    assert(maxDist >= currDist); // Otherwise integer underflow will occur
+
+    const auto halfMaxDist = maxDist / 2.f;
+    if (currDist >= halfMaxDist) { // Anything further than half the distance is faded out
+        return (uint16)((1.f - (currDist - halfMaxDist) / halfMaxDist) * maxStrength);
     } else { // Anything closer than half the max distance is full strength
-        return (uint16)CTimeCycle::m_CurrentColours.m_nShadowStrength;
+        return (uint16)maxStrength;
     }
 }
 
@@ -312,9 +354,9 @@ uint16 CalculateShadowStrength(float distToCam2DSq) {
 void CShadows::StoreShadowForPedObject(CPed* ped, float displacementX, float displacementY, float frontX, float frontY, float sideX, float sideY) {
     assert(ped->IsPed());
 
-          auto bonePos = ped->GetBonePosition(BONE_NORMAL);
-    const auto camPos  = TheCamera.GetPosition();
-    const auto pedToCamDist2DSq{ (bonePos - camPos).SquaredMagnitude2D() };
+    const auto  bonePos          = ped->GetBonePosition(BONE_NORMAL);
+    const auto& camPos           = TheCamera.GetPosition();
+    const auto  pedToCamDist2DSq = (bonePos - camPos).SquaredMagnitude2D();
 
     // Check if ped is close enough
     if (pedToCamDist2DSq >= MAX_DISTANCE_PED_SHADOWS_SQR) {
@@ -331,12 +373,11 @@ void CShadows::StoreShadowForPedObject(CPed* ped, float displacementX, float dis
     }
 
     // Now store a shadow to be rendered
-    const auto pedToCamDist2D = std::sqrt(pedToCamDist2DSq);
-    const auto strength = (uint8)CalculateShadowStrength(pedToCamDist2D);
+    const auto strength = (uint8)CalculateShadowStrength(std::sqrt(pedToCamDist2DSq), MAX_DISTANCE_PED_SHADOWS, CTimeCycle::m_CurrentColours.m_nShadowStrength);
     StoreShadowToBeRendered(
         SHADOW_DEFAULT,
         gpShadowPedTex,
-        &bonePos,
+        bonePos + CVector{displacementX, displacementY, 0.f},
         frontX, frontY,
         sideX, sideY,
         strength,
@@ -373,7 +414,8 @@ void CShadows::StoreRealTimeShadow(CPhysical* physical, float displacementX, flo
         }
     }
 
-    const auto cc = (uint8)((float)rtshdw->m_nIntensity / 100.f * (float)CalculateShadowStrength(shdwToCamDist2DSq));
+    const auto strength = (float)CalculateShadowStrength(std::sqrt(shdwToCamDist2DSq), MAX_DISTANCE_PED_SHADOWS, CTimeCycle::m_CurrentColours.m_nShadowStrength);
+    const auto cc       = (uint8)((float)rtshdw->m_nIntensity / 100.f * strength);
 
     const auto& vecToSun = CTimeCycle::m_VectorToSun[CTimeCycle::m_CurrentStoredValue];
     const auto lightFrame = rtshdw->SetLightProperties(
@@ -424,12 +466,169 @@ void CShadows::UpdateStaticShadows() {
 
 // 0x707FA0
 void CShadows::RenderExtraPlayerShadows() {
-    ((void(__cdecl*)())0x707FA0)();
+    if (!CTimeCycle::m_CurrentColours.m_nShadowStrength) {
+        return;
+    }
+
+    const auto plyrVeh = FindPlayerVehicle();
+    if (!plyrVeh) {
+        return;
+    }
+
+    if (plyrVeh->m_nModelIndex == eModelID::MODEL_RCBANDIT) {
+        return;
+    }
+
+    if (plyrVeh->GetVehicleAppearance() == VEHICLE_APPEARANCE_BIKE) {
+        return;
+    }
+
+    switch (plyrVeh->m_nVehicleType) {
+    case VEHICLE_TYPE_BIKE:
+    case VEHICLE_TYPE_FPLANE:
+    case VEHICLE_TYPE_BOAT:
+        return;
+    }
+
+    const auto plyrPos    = FindPlayerCoors();
+    const auto plyrVehPos = plyrVeh->GetPosition();
+    const auto plyVehMat  = plyrVeh->GetMatrix();
+    for (auto& ptl : CPointLights::GetActiveLights()) {
+        if (ptl.m_nType != ePointLightType::PLTYPE_POINTLIGHT) {
+            continue;
+        }
+        if (!ptl.m_bGenerateShadows) {
+            continue;
+        }
+        if (ptl.m_fColorRed == 0.f && ptl.m_fColorGreen == 0.f && ptl.m_fColorBlue == 0.f) { // If it's black => ignore
+            continue;
+        }
+
+        const auto lightToPlyr{ ptl.m_vecPosn - plyrPos };
+        const auto lightToPlyrDist = lightToPlyr.Magnitude();
+        if (lightToPlyrDist >= ptl.m_fRadius || lightToPlyrDist == 0.f) { // NOTSA: Zero check to prevent (possible) division-by-zero
+            continue;
+        }
+
+        const auto lightToPlyrDir  = lightToPlyr / lightToPlyrDist; // Normalize vector
+
+        const auto plyrVehBB = plyrVeh->GetColModel()->GetBoundingBox();
+        const auto shdwSize  = CVector2D{ plyrVehBB.GetSize() } / 2.f;
+
+        StoreShadowToBeRendered(
+            SHADOW_DEFAULT,
+            gpShadowCarTex,
+            plyrVehPos - CVector{
+                  CVector2D{ lightToPlyr / lightToPlyrDist } * 1.2f // Compensate for elvation of the light
+                - CVector2D{ plyVehMat.GetForward() } * (shdwSize.y - plyrVehBB.m_vecMax.y) // Move point to center (as the shadow's position is it's center)
+            , 0.f},
+            CVector2D{ plyVehMat.GetForward() } * shdwSize.y,
+            CVector2D{ plyVehMat.GetRight() } * (plyVehMat.GetUp().z >= 0.f ? shdwSize.x : -shdwSize.x), // If vehicle is flipped, we gotta flip the `right` vector back
+            CalculateShadowStrength( // 0x70809A
+                lightToPlyrDist,
+                ptl.m_fRadius,
+                5 * CTimeCycle::m_CurrentColours.m_nShadowStrength / 8u // Same as mult by `0.625` and then casting to int
+            ),
+            0, 0, 0,
+            4.5f,
+            false,
+            1.f,
+            nullptr,
+            false
+        );
+    }
 }
 
 // 0x708300
 void CShadows::RenderStaticShadows() {
-    ((void(__cdecl*)())0x708300)();
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,    RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,            RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,        RWRSTATE(rwFILTERLINEAR));
+
+    RenderBuffer::ClearRenderBuffer();
+
+    // Mark all as not-yet-rendered
+    for (auto& shdw : aStaticShadows) {
+        shdw.m_bRendered = false;
+    }
+
+    // Render all in batches
+    for (auto& oshdw : aStaticShadows) {
+        if (!oshdw.m_pPolyBunch || oshdw.m_bRendered) {
+            continue;
+        }
+
+        // Setup additional render states for this shadow
+        SetRenderModeForShadowType(oshdw.m_nType);
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(oshdw.m_pTexture)));
+         
+        // Batch all other shadows with the same texture and type into the buffer
+        for (auto& ishdw : aStaticShadows) {
+            if (!ishdw.m_pPolyBunch) {
+                continue;
+            }
+            if (ishdw.m_nType != oshdw.m_nType) {
+                continue;
+            }
+            if (ishdw.m_pTexture != oshdw.m_pTexture) {
+                continue;
+            }
+            // No need to check if this one was rendered (because of the batching)
+            
+            // Render polies of this shadow
+            for (auto poly = ishdw.m_pPolyBunch; poly; poly = poly->m_pNext) {
+                // 0x70841F: Calculate color
+                uint8 r, g, b;
+                CShadows::AffectColourWithLighting(
+                    ishdw.m_nType,
+                    ishdw.m_nDayNightIntensity,
+                    ishdw.m_nRed, ishdw.m_nGreen, ishdw.m_nBlue,
+                    r, g, b
+                );
+
+                const auto totalNoIdx = 3 * (poly->m_wNumVerts - 2); // Total no. of indices we'll use
+
+                // 0x708432
+                RwIm3DVertex*    vtxIt{};
+                RwImVertexIndex* vtxIdxIt{};
+                RenderBuffer::StartStoring(
+                    totalNoIdx,
+                    poly->m_wNumVerts,
+                    vtxIdxIt, vtxIt
+                );
+
+                // 0x70851D: Write vertices (`if` not necessary, it's part of the loop condition)
+                const auto a = (uint8)((float)ishdw.m_nIntensity * (1.f - CWeather::Foggyness * 0.5f));
+                for (auto i{ 0 }; i < poly->m_wNumVerts; i++, vtxIt++) {
+                    const auto& pos = poly->m_avecPosn[i];
+                    RwIm3DVertexSetPos(vtxIt, pos.x, pos.y, pos.z + 0.06f);
+                    RwIm3DVertexSetRGBA(vtxIt, r, g, b, a);
+                    RwIm3DVertexSetU(vtxIt, (float)poly->m_aU[i] / 200.f);
+                    RwIm3DVertexSetV(vtxIt, (float)poly->m_aV[i] / 200.f);
+                }
+
+                // 0x7085BC: Write indices  (`if` not necessary, it's part of the loop condition)
+                for (auto i = 0; i < totalNoIdx; i++) {
+                    *vtxIdxIt++ = g_ShadowVertices[i];
+                }
+                
+                // Finish storing 
+                RenderBuffer::StopStoring();
+
+                // Mark this as rendered
+                ishdw.m_bRendered = true;
+            }
+        }
+
+        // Render out this batch
+        RenderBuffer::RenderStuffInBuffer();
+    }
+
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
 }
 
 // 0x7086B0

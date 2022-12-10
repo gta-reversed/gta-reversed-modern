@@ -129,7 +129,7 @@ public:
     float       m_fScale;
     RwTexture*  m_pTexture;
     uint16      m_nIntensity;
-    uint8       m_nType;
+    eShadowType m_nType;
     uint8       m_nRed;
     uint8       m_nGreen;
     uint8       m_nBlue;
@@ -191,12 +191,18 @@ public:
 
     static void StoreShadowToBeRendered(uint8 type, CVector* posn, float frontX, float frontY, float sideX, float sideY, int16 intensity, uint8 red, uint8 green, uint8 blue);
     static void StoreShadowToBeRendered(uint8 type, RwTexture* texture, const CVector& posn, float topX, float topY, float rightX, float rightY, int16 intensity, uint8 red, uint8 green, uint8 blue, float zDistance, bool drawOnWater, float scale, CRealTimeShadow* realTimeShadow, bool drawOnBuildings);
+    // NOTSA
+    static void StoreShadowToBeRendered(eShadowType type, RwTexture* tex, const CVector& posn, CVector2D top, CVector2D right, int16 intensity, uint8 red, uint8 green, uint8 blue, float zDistance, bool drawOnWater, float scale, CRealTimeShadow* realTimeShadow, bool drawOnBuildings);
     static void SetRenderModeForShadowType(eShadowType type);
     static void RemoveOilInArea(float x1, float x2, float y1, float y2);
     static void GunShotSetsOilOnFire(const CVector& shotOrigin, const CVector& shotTarget);
     static void PrintDebugPoly(CVector* a, CVector* b, CVector* c);
     static void CalcPedShadowValues(CVector sunPosn, float& displacementX, float& displacementY, float& frontX, float& frontY, float& sideX, float& sideY);
-    static void AffectColourWithLighting(uint8 shadowType, uint8 dayNightIntensity, uint8 red, uint8 green, uint8 blue, uint8* outRed, uint8* outGreen, uint8* outBlue);
+    static void AffectColourWithLighting(eShadowType shadowType,
+        uint8 dayNightIntensity,
+        uint8 red, uint8 green, uint8 blue,
+        uint8& outRed, uint8& outGreen, uint8& outBlue
+    );
     static void StoreShadowForPedObject(CPed* ped, float displacementX, float displacementY, float frontX, float frontY, float sideX, float sideY);
     static void StoreRealTimeShadow(CPhysical* physical, float displacementX, float displacementY, float frontX, float frontY, float sideX, float sideY);
     /*!
@@ -204,7 +210,13 @@ public:
     */
     static void UpdateStaticShadows();
     static void RenderExtraPlayerShadows();
+
+    /*!
+    * @addr 0x708300
+    * @brief Render all active static shadows
+    */
     static void RenderStaticShadows();
+
     static void CastShadowEntityXY(CEntity* entity, float conrerAX, float cornerAY, float cornerBX, float cornerBY, CVector* posn, float frontX, float frontY, float sideX, float sideY, int16 intensity, uint8 red, uint8 green, uint8 blue, float zDistance, float scale, CPolyBunch** ppPolyBunch, uint8* pDayNightIntensity, int32 shadowType);
     static void CastShadowEntityXYZ(CEntity* entity, CVector* posn, float frontX, float frontY, float sideX, float sideY, int16 intensity, uint8 red, uint8 green, uint8 blue, float zDistance, float scale, CPolyBunch** ppPolyBunch, CRealTimeShadow* realTimeShadow);
     static void CastPlayerShadowSectorList(CPtrList& ptrList, float conrerAX, float cornerAY, float cornerBX, float cornerBY, CVector* posn, float frontX, float frontY, float sideX, float sideY, int16 intensity, uint8 red, uint8 green, uint8 blue, float zDistance, float scale, CPolyBunch** ppPolyBunch, uint8* pDayNightIntensity, int32 shadowType);
@@ -239,4 +251,4 @@ static inline RwTexture*& gpHandManTex = *(RwTexture**)0xC40404;
 static inline RwTexture*& gpCrackedGlassTex = *(RwTexture**)0xC40408;
 static inline RwTexture*& gpPostShadowTex = *(RwTexture**)0xC4040C;
 
-static inline std::array<int16, 24>& g_ShadowVertices = *(std::array<int16, 24>*)0xC403A8;
+static inline std::array<RwImVertexIndex, 24>& g_ShadowVertices = *(std::array<RwImVertexIndex, 24>*)0xC403A8;
