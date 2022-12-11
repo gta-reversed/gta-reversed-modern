@@ -43,7 +43,7 @@ void CShadows::InjectHooks() {
     RH_ScopedInstall(StoreStaticShadow, 0x70BA00, { .reversed = false });
     RH_ScopedInstall(StoreShadowForVehicle, 0x70BDA0, { .reversed = false });
     RH_ScopedInstall(StoreCarLightShadow, 0x70C500, { .reversed = false });
-    RH_ScopedInstall(StoreShadowForPole, 0x70C750, { .reversed = false });
+    RH_ScopedInstall(StoreShadowForPole, 0x70C750);
     RH_ScopedInstall(RenderIndicatorShadow, 0x70CCB0);
     RH_ScopedGlobalInstall(ShadowRenderTriangleCB, 0x709CF0, { .reversed = false });
 }
@@ -767,7 +767,40 @@ void CShadows::StoreCarLightShadow(CVehicle* vehicle, int32 id, RwTexture* textu
 
 // 0x70C750
 void CShadows::StoreShadowForPole(CEntity* entity, float offsetX, float offsetY, float offsetZ, float poleHeight, float poleWidth, uint32 localId) {
-    ((void(__cdecl*)(CEntity*, float, float, float, float, float, uint32))0x70C750)(entity, offsetX, offsetY, offsetZ, poleHeight, poleWidth, localId);
+    if (GraphicsLowQuality() || !CTimeCycle::m_CurrentColours.m_nPoleShadowStrength) {
+        return;
+    }
+
+    const auto& mat = entity->GetMatrix();
+
+    if (mat.GetUp().z < .5f) { // More than 45 deg tilted
+        return;
+    }
+
+    const auto intensity = 2.f * (mat.GetUp().z - 0.5f) * (float)(CTimeCycle::m_CurrentColours.m_nPoleShadowStrength);
+
+    const auto front     = CVector2D{ CTimeCycle::GetVectorToSun() } * (-poleHeight / 2.f);
+    const auto right     = CVector2D{ CTimeCycle::GetShadowSide() } * poleWidth;
+
+    StoreStaticShadow(
+        reinterpret_cast<uint32>(&entity->m_pLod) + localId + 3,
+        SHADOW_DEFAULT,
+        gpPostShadowTex,
+        mat.GetPosition() + CVector{ front, 0.f } + CVector{
+            offsetX * mat.GetRight().x + offsetY * mat.GetForward().x, // Simplified matrix transform (Ignoring the Z axis)
+            offsetX * mat.GetRight().y + offsetY * mat.GetForward().y, // >^^^
+            offsetZ
+        },
+        front.x, front.y,
+        right.x, right.y,
+        2 * (int16)intensity / 3,
+        0, 0, 0,
+        9.f,
+        1.f,
+        40.f,
+        false,
+        0.f
+    );
 }
 
 // 0x70CCB0
