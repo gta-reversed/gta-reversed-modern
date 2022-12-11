@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-
+#include <imgui.h>
 #include "Shadows.h"
 #include "FireManager.h"
 #include <utility.hpp>
@@ -21,7 +21,7 @@ void CShadows::InjectHooks() {
     RH_ScopedInstall(AddPermanentShadow, 0x706F60, { .reversed = false });
     RH_ScopedInstall(UpdatePermanentShadows, 0x70C950, { .reversed = false });
     RH_ScopedOverloadedInstall(StoreShadowToBeRendered, "Texture", 0x707390, void(*)(uint8, RwTexture*, const CVector&, float, float, float, float, int16, uint8, uint8, uint8, float, bool, float, CRealTimeShadow*, bool));
-    RH_ScopedOverloadedInstall(StoreShadowToBeRendered, "Type", 0x707930, void(*)(uint8, CVector*, float, float, float, float, int16, uint8, uint8, uint8));
+    RH_ScopedOverloadedInstall(StoreShadowToBeRendered, "Type", 0x707930, void(*)(uint8, const CVector&, float, float, float, float, int16, uint8, uint8, uint8));
     RH_ScopedInstall(SetRenderModeForShadowType, 0x707460);
     RH_ScopedInstall(RemoveOilInArea, 0x7074F0);
     RH_ScopedInstall(GunShotSetsOilOnFire, 0x707550);
@@ -42,7 +42,7 @@ void CShadows::InjectHooks() {
     RH_ScopedInstall(GeneratePolysForStaticShadow, 0x70B730, { .reversed = false });
     RH_ScopedInstall(StoreStaticShadow, 0x70BA00, { .reversed = false });
     RH_ScopedInstall(StoreShadowForVehicle, 0x70BDA0, { .reversed = false });
-    RH_ScopedInstall(StoreCarLightShadow, 0x70C500, { .reversed = false });
+    RH_ScopedInstall(StoreCarLightShadow, 0x70C500);
     RH_ScopedInstall(StoreShadowForPole, 0x70C750);
     RH_ScopedInstall(RenderIndicatorShadow, 0x70CCB0);
     RH_ScopedGlobalInstall(ShadowRenderTriangleCB, 0x709CF0, { .reversed = false });
@@ -143,7 +143,7 @@ void CShadows::UpdatePermanentShadows() {
 }
 
 // 0x707930
-void CShadows::StoreShadowToBeRendered(uint8 type, CVector* posn, float frontX, float frontY, float sideX, float sideY, int16 intensity, uint8 red, uint8 green, uint8 blue) {
+void CShadows::StoreShadowToBeRendered(uint8 type, const CVector& posn, float frontX, float frontY, float sideX, float sideY, int16 intensity, uint8 red, uint8 green, uint8 blue) {
     const auto Store = [=](auto mtype, auto texture) {
         StoreShadowToBeRendered(mtype, texture, posn, frontX, frontY, sideX, sideY, intensity, red, green, blue, 15.0f, 0, 1.0f, nullptr, 0);
     };
@@ -761,8 +761,73 @@ void CShadows::StoreShadowForVehicle(CVehicle* vehicle, VEH_SHD_TYPE vehShadowTy
 }
 
 // 0x70C500
-void CShadows::StoreCarLightShadow(CVehicle* vehicle, int32 id, RwTexture* texture, CVector* posn, float frontX, float frontY, float sideX, float sideY, uint8 red, uint8 green, uint8 blue, float maxViewAngle) {
-    ((void(__cdecl*)(CVehicle*, int32, RwTexture*, CVector*, float, float, float, float, uint8, uint8, uint8, float))0x70C500)(vehicle, id, texture, posn, frontX, frontY, sideX, sideY, red, green, blue, maxViewAngle);
+void CShadows::StoreCarLightShadow(CVehicle* vehicle, int32 id, RwTexture* texture, const CVector& posn, float frontX, float frontY, float sideX, float sideY, uint8 red, uint8 green, uint8 blue, float maxViewAngleCosine) {
+    // Maximum distance (from camera to `posn`) after which shadows aren't stored (and rendered)
+    constexpr auto MAX_CAM_TO_LIGHT_DIST = 27.f;
+
+    if ([] { // Maybe ignore camera distance?
+        switch (CCamera::GetActiveCamera().m_nMode) {
+        case MODE_TOPDOWN:
+        case MODE_TOP_DOWN_PED:
+            return false;
+        }
+
+        return !CCutsceneMgr::IsRunning();
+    }()) {
+        const auto shdwToCam2D       = CVector2D{ TheCamera.GetPosition() - posn };
+        const auto shdwToCamDist2DSq = shdwToCam2D.SquaredMagnitude();
+
+        if (shdwToCamDist2DSq >= sq(MAX_CAM_TO_LIGHT_DIST)) {
+            return;
+        }
+
+        // Check if the camera is facing the lights closely (in which case the camera can't see the shadow)
+        if (shdwToCam2D.Dot(TheCamera.GetFrontNormal2D()) > maxViewAngleCosine) {
+            return;
+        }
+
+        // If far enough from the camera, start fading out
+        if (const auto dist = std::sqrt(shdwToCamDist2DSq); dist >= MAX_CAM_TO_LIGHT_DIST * 0.75f) {
+            const auto t = 1.f - invLerp(MAX_CAM_TO_LIGHT_DIST * (2.f / 3.f), MAX_CAM_TO_LIGHT_DIST, dist);
+            red   = (uint8)((float)red * t);
+            green = (uint8)((float)green * t);
+            blue  = (uint8)((float)blue * t);
+        }
+    }
+
+    const auto isPlyrVeh = FindPlayerVehicle() == vehicle;
+    if (isPlyrVeh || vehicle->GetMoveSpeed().Magnitude() * CTimer::GetTimeStep() >= 0.4f) {
+        StoreShadowToBeRendered(
+            SHADOW_ADDITIVE,
+            texture,
+            posn,
+            frontX, frontY,
+            sideX, sideY,
+            128,
+            red, green, blue,
+            6.f,
+            false,
+            1.f,
+            nullptr,
+            isPlyrVeh || g_fx.GetFxQuality() >= FX_QUALITY_VERY_HIGH // NOTSA: At higher FX quality draw all vehicles's shadows on buildings too
+        );
+    } else {
+        StoreStaticShadow(
+            reinterpret_cast<uint32>(vehicle) + id,
+            SHADOW_ADDITIVE,
+            texture,
+            posn,
+            frontX, frontY,
+            sideX, sideY,
+            128,
+            red, green, blue,
+            6.f,
+            1.f,
+            0.f,
+            false,
+            0.4f
+        );
+    }
 }
 
 // 0x70C750
