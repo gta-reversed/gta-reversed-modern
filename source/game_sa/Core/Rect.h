@@ -67,6 +67,12 @@ public:
     * @brief Check if this rect collides with another
     */
     bool OverlapsWith(const CRect& o) const;
+
+    /*!
+    * @notsa
+    * @brief Check if this rectangle is inside another one
+    */
+    bool Contains(const CRect& o) const;
 };
 
 VALIDATE_SIZE(CRect, 0x10);

@@ -35,7 +35,7 @@ void CShadows::InjectHooks() {
     RH_ScopedInstall(RenderStaticShadows, 0x708300);
     RH_ScopedInstall(CastShadowEntityXY, 0x7086B0, { .reversed = false });
     RH_ScopedInstall(CastShadowEntityXYZ, 0x70A040, { .reversed = false });
-    RH_ScopedInstall(CastPlayerShadowSectorList, 0x70A470, { .reversed = false });
+    RH_ScopedInstall(CastPlayerShadowSectorList, 0x70A470);
     RH_ScopedInstall(CastShadowSectorList, 0x70A630, { .reversed = false });
     RH_ScopedInstall(CastRealTimeShadowSectorList, 0x70A7E0, { .reversed = false });
     RH_ScopedInstall(RenderStoredShadows, 0x70A960, { .reversed = false });
@@ -591,7 +591,7 @@ void CShadows::RenderStaticShadows() {
 
                 const auto totalNoIdx = 3 * (poly->m_wNumVerts - 2); // Total no. of indices we'll use
 
-                // 0x708432
+                // 0x708432: Begin render buffer store
                 RwIm3DVertex*    vtxIt{};
                 RwImVertexIndex* vtxIdxIt{};
                 RenderBuffer::StartStoring(
@@ -642,8 +642,91 @@ void CShadows::CastShadowEntityXYZ(CEntity* entity, CVector* posn, float frontX,
 }
 
 // 0x70A470
-void CShadows::CastPlayerShadowSectorList(CPtrList& ptrList, float conrerAX, float cornerAY, float cornerBX, float cornerBY, CVector* posn, float frontX, float frontY, float sideX, float sideY, int16 intensity, uint8 red, uint8 green, uint8 blue, float zDistance, float scale, CPolyBunch** ppPolyBunch, uint8* pDayNightIntensity, int32 shadowType) {
-    ((void(__cdecl*)(CPtrList&, float, float, float, float, CVector*, float, float, float, float, int16, uint8, uint8, uint8, float, float, CPolyBunch**, uint8*, int32))0x70A470)(ptrList, conrerAX, cornerAY, cornerBX, cornerBY, posn, frontX, frontY, sideX, sideY, intensity, red, green, blue, zDistance, scale, ppPolyBunch, pDayNightIntensity, shadowType);
+void CShadows::CastPlayerShadowSectorList(
+    CPtrList& ptrList,
+    float cornerAX,
+    float cornerAY,
+    float cornerBX,
+    float cornerBY,
+    CVector* posn,
+    float frontX,
+    float frontY,
+    float sideX,
+    float sideY,
+    int16 intensity,
+    uint8 red,
+    uint8 green,
+    uint8 blue,
+    float zDistance,
+    float scale,
+    CPolyBunch** ppPolyBunch,
+    uint8* pDayNightIntensity,
+    int32 shadowType
+) {
+    const CRect shadowRect{
+        {cornerAX, cornerAY},
+        {cornerBX, cornerBY}
+    };
+    for (CPtrNode* it = ptrList.m_node, *next{}; it; it = next) {
+        next = it->GetNext();
+
+        auto* entity = reinterpret_cast<CEntity*>(it->m_item);
+
+        if (entity->IsScanCodeCurrent()) {
+            continue;
+        }
+        entity->SetCurrentScanCode();
+
+        if (!entity->m_bUsesCollision || entity->m_bDontCastShadowsOn) {
+            continue;
+        }
+
+        if (!entity->IsInCurrentAreaOrBarberShopInterior()) {
+            continue;
+        }
+
+        // If slightly tilted, ignore
+        if (entity->GetMatrix().GetUp().z <= 0.97f) {
+            continue;
+        }
+
+        // 0x70A526
+        if (!entity->GetBoundRect().Contains(shadowRect)) {
+            continue;
+        }
+
+        // Quick Z height check of the bounding box
+        const auto& cm         = entity->GetColModel();
+        const auto  entityPosZ = entity->GetPosition().z;
+        if (cm->m_boundBox.m_vecMax.z + entityPosZ <= posn->z - zDistance) {
+            continue;
+        }
+        if (cm->m_boundBox.m_vecMin.z + entityPosZ >= posn->z) {
+            continue;
+        }
+
+        CastShadowEntityXY(
+            entity,
+            cornerAX,
+            cornerAY,
+            cornerBX,
+            cornerBY,
+            posn,
+            frontX,
+            frontY,
+            sideX,
+            sideY,
+            intensity,
+            red,
+            green,
+            blue,
+            zDistance,
+            scale,
+            ppPolyBunch,
+            pDayNightIntensity,
+            shadowType
+        );
+    }
 }
 
 // 0x70A630
