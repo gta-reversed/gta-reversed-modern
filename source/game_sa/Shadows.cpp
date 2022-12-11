@@ -44,7 +44,7 @@ void CShadows::InjectHooks() {
     RH_ScopedInstall(StoreShadowForVehicle, 0x70BDA0, { .reversed = false });
     RH_ScopedInstall(StoreCarLightShadow, 0x70C500, { .reversed = false });
     RH_ScopedInstall(StoreShadowForPole, 0x70C750, { .reversed = false });
-    RH_ScopedInstall(RenderIndicatorShadow, 0x70CCB0, { .reversed = false });
+    RH_ScopedInstall(RenderIndicatorShadow, 0x70CCB0);
     RH_ScopedGlobalInstall(ShadowRenderTriangleCB, 0x709CF0, { .reversed = false });
 }
 
@@ -771,17 +771,19 @@ void CShadows::StoreShadowForPole(CEntity* entity, float offsetX, float offsetY,
 }
 
 // 0x70CCB0
-void CShadows::RenderIndicatorShadow(uint32 id, uint8 shadowType, RwTexture* texture, CVector* posn, float frontX, float frontY, float sideX, float sideY, int16 intensity) {
-    ((void(__cdecl*)(uint32, uint8, RwTexture*, CVector*, float, float, float, float, int16))0x70CCB0)(id, shadowType, texture, posn, frontX, frontY, sideX, sideY, intensity);
-
-    /*
-    CVector out = posn;
-    float size  = frontX <= (float)(-sideY) ? -sideY : frontX;
-
-    C3dMarkers::PlaceMarkerSet(id, 1u, out, size * 0.8f, 255, 0, 0, 255u, 2048, 0.2f, 0);
-    C3dMarkers::PlaceMarkerSet(id, 1u, out, size * 0.9f, 255, 0, 0, 255u, 2048, 0.2f, 0);
-    C3dMarkers::PlaceMarkerSet(id, 1u, out, size,        255, 0, 0, 255u, 2048, 0.2f, 0);
-    */
+void CShadows::RenderIndicatorShadow(
+    uint32 id,
+    eShadowType,
+    RwTexture*,
+    const CVector& posn,
+    float frontX, float frontY,
+    float sideX, float sideY,
+    int16 /*intensity*/
+) {
+    const auto size = std::max(frontX, -sideX);
+    for (auto mult : { 0.8f, 0.9f, 1.0f }) {
+        C3dMarkers::PlaceMarkerSet(id, 1u, posn, size * mult, 255, 0, 0, 255u, 2048, 0.2f, 0);
+    }
 }
 
 // 0x709CF0

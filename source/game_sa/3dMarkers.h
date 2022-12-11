@@ -68,7 +68,7 @@ public:
 
     static C3dMarker* PlaceMarker(uint32 id, uint16 type, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate, float nrm_x, float nrm_y, float nrm_z, bool zCheck);
     static void PlaceMarkerCone(uint32 id, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate, uint8 bEnableCollision);
-    static void PlaceMarkerSet(uint32 id, uint16 type, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
+    static void PlaceMarkerSet(uint32 id, uint16 type, const CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
     static void Render();
 
     // load user 3d markers from save file; always return true

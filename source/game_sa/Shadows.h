@@ -228,7 +228,7 @@ public:
     static void StoreShadowForVehicle(CVehicle* vehicle, VEH_SHD_TYPE vehShadowType);
     static void StoreCarLightShadow(CVehicle* vehicle, int32 id, RwTexture* texture, CVector* posn, float frontX, float frontY, float sideX, float sideY, uint8 red, uint8 green, uint8 blue, float maxViewAngle);
     static void StoreShadowForPole(CEntity* entity, float offsetX, float offsetY, float offsetZ, float poleHeight, float poleWidth, uint32 localId);
-    static void RenderIndicatorShadow(uint32 id, uint8 shadowType, RwTexture* texture, CVector* posn, float frontX, float frontY, float sideX, float sideY, int16 intensity);
+    static void RenderIndicatorShadow(uint32 id, eShadowType, RwTexture* texture, const CVector& posn, float frontX, float frontY, float sideX, float sideY, int16 intensity);
 };
 
 #ifdef _MSC_VER

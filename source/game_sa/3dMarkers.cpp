@@ -43,3 +43,8 @@ bool C3dMarkers::LoadUser3dMarkers() {
 bool C3dMarkers::SaveUser3dMarkers() {
     return plugin::CallAndReturn<bool, 0x5D4300>();
 }
+
+// 0x725BA0
+void C3dMarkers::PlaceMarkerSet(uint32 id, uint16 type, const CVector& posn, float size, uint8 r, uint8 g, uint8 b, uint8 a, uint16 pulsePeriod, float pulseFraction, int16 rotateRate) {
+    return plugin::CallAndReturn<void, 0x725BA0>(id, type, &posn, size, r, g, b, a, pulsePeriod, pulseFraction, rotateRate);
+}
