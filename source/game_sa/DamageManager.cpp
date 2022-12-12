@@ -420,6 +420,17 @@ auto CDamageManager::GetAllLightsState() const->std::array<eLightsState, 4> {
     };
 }
 
+auto CDamageManager::GetAllDoorsStatus() const -> std::array<eDoorStatus, MAX_DOORS> {
+    return {
+        GetDoorStatus(eDoors::DOOR_BONNET),
+        GetDoorStatus(eDoors::DOOR_BOOT),
+        GetDoorStatus(eDoors::DOOR_LEFT_FRONT),
+        GetDoorStatus(eDoors::DOOR_RIGHT_FRONT),
+        GetDoorStatus(eDoors::DOOR_LEFT_REAR),
+        GetDoorStatus(eDoors::DOOR_RIGHT_REAR)
+    };
+}
+
 /*!
 * @notsa
 * @brief Should only be called if the door is present (asserts in debug)

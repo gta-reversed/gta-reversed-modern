@@ -21,6 +21,7 @@ class CObject;
 class CVehicle;
 class CTrain;
 class CBike;
+class CBmx;
 class CBoat;
 class CAutomobile;
 class CBike;
@@ -260,6 +261,8 @@ public:
     auto AsAutomobile() const { return reinterpret_cast<const CAutomobile*>(this); }
     auto AsBike()             { return reinterpret_cast<CBike*>(this); }
     auto AsBike()       const { return reinterpret_cast<const CBike*>(this); }
+    auto AsBmx()              { return reinterpret_cast<CBmx*>(this); }
+    auto AsBmx()        const { return reinterpret_cast<const CBmx*>(this); }
     auto AsBoat()             { return reinterpret_cast<CBoat*>(this); }
     auto AsBoat()       const { return reinterpret_cast<const CBoat*>(this); }
     auto AsTrain()            { return reinterpret_cast<CTrain*>(this); }

@@ -143,6 +143,10 @@ public:
         return (CAnimBlendAssociation*)((byte*)link - offsetof(CAnimBlendAssociation, m_Link));
     }
 
+    void SetSpeed(float speed) {
+        m_fSpeed = speed;
+    }
+
     auto GetNodes() { return std::span{ &m_pNodeArray, m_nNumBlendNodes }; }
     void SetDefaultFinishCallback() { SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); }
 private:

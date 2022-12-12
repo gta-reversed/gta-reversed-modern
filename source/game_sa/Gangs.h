@@ -11,21 +11,6 @@
 class CPed;
 class GangInfo;
 
-enum eGangID {
-    GANG_BALLAS = 0,
-    GANG_GROVE = 1,
-    GANG_VAGOS = 2,
-    GANG_RIFA = 3,
-    GANG_DANANGBOYS = 4,
-    GANG_MAFIA = 5,
-    GANG_TRIAD = 6,
-    GANG_AZTECAS = 7,
-    GANG_UNUSED1 = 8, // RUSSIAN_MAFIA
-    GANG_UNUSED2 = 9, // BIKERS
-
-    TOTAL_GANGS
-};
-
 class CGangs {
 public:
     inline static std::array<bool, TOTAL_GANGS>& GangAttackWithCops = *reinterpret_cast<std::array<bool, 10>*>(0xC091D9);
