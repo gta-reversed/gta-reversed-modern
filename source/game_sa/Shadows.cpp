@@ -38,7 +38,7 @@ void CShadows::InjectHooks() {
     RH_ScopedInstall(CastPlayerShadowSectorList, 0x70A470);
     RH_ScopedInstall(CastShadowSectorList, 0x70A630, { .reversed = false });
     RH_ScopedInstall(CastRealTimeShadowSectorList, 0x70A7E0, { .reversed = false });
-    RH_ScopedInstall(RenderStoredShadows, 0x70A960, { .reversed = false });
+    RH_ScopedInstall(RenderStoredShadows, 0x70A960);
     RH_ScopedInstall(GeneratePolysForStaticShadow, 0x70B730, { .reversed = false });
     RH_ScopedInstall(StoreStaticShadow, 0x70BA00, { .reversed = false });
     RH_ScopedInstall(StoreShadowForVehicle, 0x70BDA0, { .reversed = false });
@@ -179,7 +179,7 @@ void CShadows::StoreShadowToBeRendered(uint8 type, RwTexture* texture, const CVe
 
     auto& shadow = asShadowsStored[ShadowsStoredToBeRendered];
 
-    shadow.m_nType      = type;
+    shadow.m_nType      = (eShadowType)type;
     shadow.m_pTexture   = texture;
     shadow.m_vecPosn    = posn;
     shadow.m_Front.x    = topX;
@@ -664,8 +664,8 @@ void CShadows::CastPlayerShadowSectorList(
     int32 shadowType
 ) {
     const CRect shadowRect{
-        {cornerAX, cornerAY},
-        {cornerBX, cornerBY}
+        cornerAX, cornerAY,
+        cornerBX, cornerBY
     };
     for (CPtrNode* it = ptrList.m_node, *next{}; it; it = next) {
         next = it->GetNext();
@@ -691,7 +691,7 @@ void CShadows::CastPlayerShadowSectorList(
         }
 
         // 0x70A526
-        if (!entity->GetBoundRect().Contains(shadowRect)) {
+        if (!entity->GetBoundRect().OverlapsWith(shadowRect)) {
             continue;
         }
 
@@ -741,7 +741,228 @@ void CShadows::CastRealTimeShadowSectorList(CPtrList& ptrList, float conrerAX, f
 
 // 0x70A960
 void CShadows::RenderStoredShadows() {
-    ((void(__cdecl*)())0x70A960)();
+    // Originally renderstates are still set even though there are no shadows to be rendered
+    // I don't think this is necessary, so we early-out here
+    if (!CShadows::ShadowsStoredToBeRendered) {
+        return;
+    }
+
+    RenderBuffer::ClearRenderBuffer();
+
+    for (auto i = 0; i < ShadowsStoredToBeRendered; i++) {
+        asShadowsStored[i].m_bAlreadyRenderedInBatch = false;
+    }
+
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         RWRSTATE(rwRENDERSTATENARENDERSTATE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,    RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,            RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,       RWRSTATE(rwTEXTUREADDRESSCLAMP));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,             RWRSTATE(rwCULLMODECULLNONE));
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,        RWRSTATE(rwFILTERLINEAR));
+
+    const auto GetShadowRect = [](CRegisteredShadow& shdw) {
+        return CRect{
+            shdw.m_vecPosn,
+            shdw.m_vecPosn + abs(shdw.m_Side) + abs(shdw.m_Front)
+        };
+    };
+
+    for (auto o = 0; o < ShadowsStoredToBeRendered; o++) {
+        auto& oshdw = asShadowsStored[o];
+
+        // Setup additional render states for this shadow (and others in the batch below)
+        SetRenderModeForShadowType(oshdw.m_nType);
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(oshdw.m_pTexture)));
+
+        //
+        // Render onto ground (If not already)
+        //
+        if (!oshdw.m_bAlreadyRenderedInBatch) {
+            // We do a batched rendering here:
+            // All shadows of the same type and texture are rendered together to save on drawcalls
+
+            for (auto i = o; i < ShadowsStoredToBeRendered; i++) {
+                auto& ishdw = asShadowsStored[i];
+
+                if (&ishdw != &oshdw) {
+                    if (ishdw.m_nType != oshdw.m_nType) {
+                        continue;
+                    }
+                    if (ishdw.m_pTexture != oshdw.m_pTexture) {
+                        continue;
+                    }
+                }
+
+                CWorld::IncrementCurrentScanCode();
+
+                const auto ishdwRect = GetShadowRect(ishdw);
+
+                // Do shadow casting
+                CWorld::IterateSectorsOverlappedByRect(
+                    ishdwRect,
+                    [&] (int32 x, int32 y) -> bool {
+                        const auto sector = GetSector(x, y);
+
+                        if (const auto rtshdw = ishdw.m_pRTShadow) {
+                            CastRealTimeShadowSectorList(
+                                sector->m_buildings,
+                                ishdwRect.left, ishdwRect.bottom,
+                                ishdwRect.right, ishdwRect.top,
+                                &ishdw.m_vecPosn,
+                                ishdw.m_Front.x, ishdw.m_Front.y,
+                                ishdw.m_Side.x, ishdw.m_Side.y,
+                                ishdw.m_nIntensity,
+                                ishdw.m_nRed, ishdw.m_nGreen, ishdw.m_nBlue,
+                                ishdw.m_fZDistance,
+                                ishdw.m_fScale,
+                                nullptr,
+                                rtshdw,
+                                nullptr // Unused
+                            );
+                        } else {
+                            uint8 unused{};
+                            if (ishdw.m_bDrawOnBuildings) {
+                                CastShadowSectorList(
+                                    sector->m_buildings,
+                                    ishdwRect.left, ishdwRect.bottom,
+                                    ishdwRect.right, ishdwRect.top,
+                                    &ishdw.m_vecPosn,
+                                    ishdw.m_Front.x, ishdw.m_Front.y,
+                                    ishdw.m_Side.x, ishdw.m_Side.y,
+                                    ishdw.m_nIntensity,
+                                    ishdw.m_nRed, ishdw.m_nGreen, ishdw.m_nBlue,
+                                    ishdw.m_fZDistance,
+                                    ishdw.m_fScale,
+                                    nullptr,
+                                    &unused,
+                                    ishdw.m_nType
+                                );
+                            } else {
+                                CastPlayerShadowSectorList(
+                                    sector->m_buildings,
+                                    ishdwRect.left, ishdwRect.bottom,
+                                    ishdwRect.right, ishdwRect.top,
+                                    &ishdw.m_vecPosn,
+                                    ishdw.m_Front.x, ishdw.m_Front.y,
+                                    ishdw.m_Side.x, ishdw.m_Side.y,
+                                    ishdw.m_nIntensity,
+                                    ishdw.m_nRed, ishdw.m_nGreen, ishdw.m_nBlue,
+                                    ishdw.m_fZDistance,
+                                    ishdw.m_fScale,
+                                    nullptr,
+                                    &unused,
+                                    ishdw.m_nType
+                                );
+                            }
+                        }
+                        return true; // Inisde lambda -> Continue sector loop
+                    }
+                );
+
+                // Mark this as rendered
+                ishdw.m_bAlreadyRenderedInBatch = true;
+            }
+
+            // Render out shadows (Can't batch together with next iteration, as renderstates change)
+            RenderBuffer::RenderStuffInBuffer();
+        }
+        
+        // Render onto water (If needed)
+        if (oshdw.m_bDrawOnWater) {  
+            float waterLevelZ{}, bigWavesZ{}, smallWavesZ{};
+            if (!CWaterLevel::GetWaterLevelNoWaves(oshdw.m_vecPosn, &waterLevelZ, &bigWavesZ, &smallWavesZ)) {
+                continue;
+            }
+
+            // Shadow under water?
+            if (waterLevelZ >= oshdw.m_vecPosn.z) {
+                continue;
+            }
+
+            // Clear the buffer as this is a new render pass (separate from the other)
+            RenderBuffer::ClearRenderBuffer();
+
+            // The smaller this value the detailed the shadows, but also (exponentially?) slower
+            // This value basically represents the side of a square that is projected onto the 
+            const auto STEP_SIZE = 2;
+
+            const auto shdwSideMagSq = oshdw.m_Side.SquaredMagnitude();
+            const auto shdwFrontMagSq = oshdw.m_Front.SquaredMagnitude();
+
+            const auto oshdwRect = GetShadowRect(oshdw);
+
+            // Iterate shadow sectors (Using `CWorld::IterateSectors` for convenience)
+            CWorld::IterateSectors(
+                (int32)(std::floor(oshdwRect.left / (float)STEP_SIZE)),
+                (int32)(std::floor(oshdwRect.top / (float)STEP_SIZE)),
+                (int32)(std::ceil(oshdwRect.right / (float)STEP_SIZE)),
+                (int32)(std::ceil(oshdwRect.bottom / (float)STEP_SIZE)),
+                [&](int32 ox, int32 oy) {
+                    // 0x70B000 - 0x70B0DA: Start storing 
+                    RwIm3DVertex* vtxIt{};
+                    RwImVertexIndex* vtxIdxIt{};
+                    RenderBuffer::StartStoring(6, 4, vtxIdxIt, vtxIt);
+
+                    // Function to process 1 vertex (out of the 4)
+                    const auto ProcessOneVertex = [&] (int32 x, int32 y) {
+                        // The x, y passed in are sector coords, so make them into world coords
+                        x *= STEP_SIZE;
+                        y *= STEP_SIZE;
+
+                        const auto currPos = CVector2D{ (float)x, (float)y };
+
+                        // Set color
+                        RwIm3DVertexSetRGBA(vtxIt, oshdw.m_nRed, oshdw.m_nGreen, oshdw.m_nBlue, (uint8)((float)oshdw.m_nIntensity * 0.6f));
+
+                        // Set texture coords (UV)
+                        const auto CalcTexCoord  = [
+                            currPosToShdw = CVector2D{ currPos - oshdw.m_vecPosn }
+                        ](CVector2D v, float vmagsq) {
+                            return (currPosToShdw.Dot(v) / vmagsq + 1.f) * 0.5f;
+                        };
+                        RwIm3DVertexSetU(vtxIt, CalcTexCoord(oshdw.m_Side, shdwSideMagSq));
+                        RwIm3DVertexSetV(vtxIt, CalcTexCoord(oshdw.m_Front, shdwFrontMagSq));
+
+                        // Set position
+                        RwIm3DVertexSetPos(
+                            vtxIt,
+                            currPos.x,
+                            currPos.y,
+                            CWaterLevel::CalculateWavesOnlyForCoordinate2_Direct(x, y, waterLevelZ, bigWavesZ, smallWavesZ) + 0.06f // Z pos of the wave at the given coord
+                        );
+                    };
+
+                    // Process 4 vertices of this square
+                    ProcessOneVertex(ox,     oy    ); // top left
+                    ProcessOneVertex(ox + 1, oy    ); // top right
+                    ProcessOneVertex(ox,     oy + 1); // bottom left
+                    ProcessOneVertex(ox + 1, oy + 1); // bottom right
+
+                    // Copy vertices into index buffer
+                    rng::copy(std::to_array({ 0, 1, 2, 1, 3, 2 }), vtxIdxIt);
+
+                    // And we're done with this one... onto the next!
+                    RenderBuffer::StopStoring();
+
+                    // Continue iteration...
+                    return true;
+                }
+            );
+
+            // Render it all
+            RenderBuffer::RenderStuffInBuffer();
+        }
+    }
+
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,    RWRSTATE(rwTEXTUREADDRESSWRAP));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          RWRSTATE(rwCULLMODECULLBACK));
+
+    ShadowsStoredToBeRendered = 0;
 }
 
 // 0x70B730
@@ -758,6 +979,135 @@ bool CShadows::StoreStaticShadow(uint32 id, eShadowType type, RwTexture* texture
 // 0x70BDA0
 void CShadows::StoreShadowForVehicle(CVehicle* vehicle, VEH_SHD_TYPE vehShadowType) {
     ((void(__cdecl*)(CVehicle*, VEH_SHD_TYPE))0x70BDA0)(vehicle, vehShadowType);
+    // So far so good (most likely), I'm just lazy to finish it
+    /*
+    const auto shdwStrength = CTimeCycle::m_CurrentColours.m_nShadowStrength;
+
+    if (GraphicsLowQuality() || !shdwStrength) {
+        return;
+    }
+
+    const auto isPlyrVeh = FindPlayerVehicle() == vehicle;
+
+    const auto& camPos = TheCamera.GetPosition();
+    const auto& vehPos = vehicle->GetPosition();
+
+    auto camToVehDist2DSq = (camPos - vehPos).SquaredMagnitude2D();
+    if (CCutsceneMgr::IsRunning()) {
+        camToVehDist2DSq /= sq(TheCamera.m_fLODDistMultiplier) * 4.f;
+    }
+    const auto camToVehDist2D = std::sqrt(camToVehDist2DSq);
+
+    const auto maxDist = [&] {
+        switch (vehShadowType) {
+        case VEH_SHD_HELI:
+        case VEH_SHD_PLANE:
+        case VEH_SHD_RC:
+            return 144.f;
+        case VEH_SHD_BIG_PLANE:
+            return 288.f;
+        default:
+            return 18.f;
+        }
+    }();
+
+    if (camToVehDist2DSq >= sq(maxDist)) {
+        return;
+    }
+
+    const auto vehBB = vehicle->GetColModel()->GetBoundingBox();
+
+    auto shdwSize = CVector2D{ vehBB.GetSize() };
+
+    float sizeMultY = 1.f;
+    switch ((eModelID)vehicle->m_nModelIndex) {
+    case MODEL_VORTEX:
+        return;
+    case UNLOAD_MODEL:
+        shdwSize.x *= 0.4f;
+        shdwSize.y *= 0.9f;
+        sizeMultY = 1.f;
+        break;
+    case MODEL_FREEWAY:
+    case MODEL_SANCHEZ:
+    case MODEL_COPBIKE:
+        shdwSize.x *= 1.f;
+        shdwSize.y *= 1.f;
+        sizeMultY = 0.03f;
+        break;
+    case MODEL_LEVIATHN:
+    case MODEL_HUNTER:
+    case MODEL_SEASPAR:
+    case MODEL_SPARROW:
+    case MODEL_MAVERICK:
+    case MODEL_POLMAV:
+        shdwSize.x *= 0.4f;
+        shdwSize.y *= 3.0f;
+        sizeMultY = 0.5f;
+        break;
+    case MODEL_RCRAIDER:
+    case MODEL_RCGOBLIN:
+        shdwSize.x *= 2.0f;
+        shdwSize.y *= 1.5f;
+        sizeMultY = 0.2f;
+        break;
+    case MODEL_BIKE:
+    case MODEL_MTBIKE:
+    case MODEL_BMX:
+    case MODEL_PIZZABOY:
+    case MODEL_PCJ600:
+    case MODEL_FAGGIO:
+        shdwSize.x *= 1.f;
+        shdwSize.y *= 1.2f;
+        sizeMultY = 0.05f;
+        break;
+    }
+
+    auto cc = CTimeCycle::m_CurrentColours.m_nShadowStrength;
+    if (camToVehDist2D >= maxDist * 0.75f) {
+        auto cc = (uint16)(1.f - (camToVehDist2D - maxDist * 0.75f) / (camToVehDist2D * 0.25f)) * (float)CTimeCycle::m_CurrentColours.m_nShadowStrength;
+    }
+
+    const auto pos = vehPos - CVector{CVector2D{ vehicle->GetMatrix().GetForward() } * ((shdwSize.y * 0.5f - vehBB.m_vecMax.y) * sizeMultY)};
+
+    auto zDistance = 4.5;
+
+    const auto texture = [&] {
+        switch (vehShadowType) {
+        case VEH_SHD_CAR:
+            return gpShadowCarTex;
+        case VEH_SHD_BIKE: {
+            auto mult = vehicle->AsBike()->m_RideAnimData.m_fAnimLean * 5.092958f + 1.f; // TODO: Magic number
+            if (vehicle->GetStatus() == STATUS_ABANDONED) {
+                if (const auto tilt = std::abs(vehicle->GetMatrix().GetRight().z); tilt >= 0.6f) {
+                    mult += tilt * 4.f;
+                }
+            }
+            shdwSize.x *= mult;
+
+            return gpShadowBikeTex;
+        }
+        case VEH_SHD_HELI:
+            if (isPlyrVeh) {
+                zDistance = 50.f;
+            }
+            return gpShadowHeliTex;
+        case VEH_SHD_BIG_PLANE:
+        case VEH_SHD_PLANE:
+            cc = CTimeCycle::m_CurrentColours.m_nShadowStrength;
+            if (isPlyrVeh) {
+                zDistance = 50.f;
+            }
+            return gpShadowBaronTex;
+        case VEH_SHD_RC:
+            shdwSize.x *= 2.2f;
+            shdwSize.y *= 1.5f;
+            return gpShadowBaronTex;
+        }
+    }();
+
+    // 0x70C143...
+    */
 }
 
 // 0x70C500

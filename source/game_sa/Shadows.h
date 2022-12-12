@@ -76,13 +76,13 @@ public:
     RwTexture*       m_pTexture;
     CRealTimeShadow* m_pRTShadow;
     uint16           m_nIntensity;
-    uint8            m_nType;
+    eShadowType      m_nType; // TODO: Check if this is the correct type...
     uint8            m_nRed;
     uint8            m_nGreen;
     uint8            m_nBlue;
 
     uint8 m_bDrawOnWater : 1;
-    uint8 m_bIgnoreMapObjects : 1;
+    uint8 m_bAlreadyRenderedInBatch : 1;          /// Whenever it has been rendered. Reset each frame, used for batching
     uint8 m_bDrawOnBuildings : 1;
 };
 VALIDATE_SIZE(CRegisteredShadow, 0x34);

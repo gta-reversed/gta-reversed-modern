@@ -29,13 +29,15 @@ public:
 public:
     static void InjectHooks();
 
-    CRect() = default; // 0x4041C0
-    constexpr CRect(float left, float bottom, float right, float top) { // 0x4041C0
-       this->left   = left;
-       this->bottom = bottom;
-       this->right  = right;
-       this->top    = top;
-       assert(!IsFlipped());
+    CRect() = default; // 0x4041C0 - TODO: Fix retarded argument order to be: left, top, right, bottom
+
+    constexpr CRect(float left, float bottom, float right, float top) :
+        left{ left },
+        bottom{ bottom },
+        right{ right },
+        top{ top }
+    {
+        assert(!IsFlipped());
     }
 
     constexpr CRect(const CVector2D& top, const CVector2D& bottom) :
