@@ -50,6 +50,22 @@ public:
         return mat;
     }
 
+    static CMatrix WithUp(const CVector& up, const CVector& pos = {}) {
+        const auto zaxis = CVector::ZAxisVector();
+
+        if (up == zaxis) {
+            return Unity();
+        }
+
+        const auto right = zaxis.Cross(up);
+        return {
+            pos,
+            right,
+            up.Cross(right),
+            up
+        };
+    }
+
 private:
     // RwV3d-like:
     CVector m_right;        // 0x0
