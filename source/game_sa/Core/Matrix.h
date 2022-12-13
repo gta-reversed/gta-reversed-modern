@@ -27,6 +27,14 @@ enum eMatrixEulerFlags : uint32 {
 
 class CMatrix {
 public:
+    CMatrix(const CVector& pos, const CVector& right, const CVector& fwd, const CVector& up) :
+        m_right{right},
+        m_forward{fwd},
+        m_up{up},
+        m_pos{pos}
+    {
+        // TODO: Add some kind of `assert` to check validity
+    }
     CMatrix(const CMatrix& matrix);
     CMatrix(RwMatrix* matrix, bool temporary = false); // like previous + attach
     CMatrix() {
