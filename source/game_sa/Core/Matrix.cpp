@@ -329,9 +329,13 @@ void CMatrix::SetRotate(CQuaternion& quat)
 }
 
 void CMatrix::Scale(float scale) {
-    m_right *= scale;
-    m_forward *= scale;
-    m_up *= scale;
+    ScaleXYZ(scale, scale, scale);
+}
+
+void CMatrix::ScaleXYZ(float x, float y, float z) {
+    m_right   *= x;
+    m_forward *= y;
+    m_up      *= z;
 }
 
 void CMatrix::ForceUpVector(CVector vecUp) {
