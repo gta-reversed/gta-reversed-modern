@@ -120,8 +120,7 @@ static void DebugCode() {
 
     const auto player = FindPlayerPed();
 
-    if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
-        return;
+
 
     if (pad->IsStandardKeyJustPressed('8')) {
 
@@ -149,27 +148,69 @@ static void DebugCode() {
     }
 
     if (pad->IsStandardKeyJustPressed('0')) {
-
+        
     }
 
+    static bool toggle{ false };
+    static CVector basePos{player->GetPosition()};
+    static CVector originalFwd{ player->GetForward() };
+   
     if (pad->IsStandardKeyJustPressed('9')) {
-    
+        toggle = !toggle;
+        basePos = player->GetPosition();
+        originalFwd = player->GetForward();
     }
 
+    if (toggle) {
+        //const auto r = 10.f;
+        //const auto totalAngle = PI * 2.f;
+        //for (auto a = 0.f; a < totalAngle; a += totalAngle / 8.f) {
+        //    const auto point = player->GetPosition() + CVector{ std::cosf(a), std::sinf(a), 0.f } * r;
+        //
+        //
+        //}
+
+        const auto& fwd = originalFwd;
+
+        auto posNextMarker = basePos + fwd * 2.f;
+
+        const e3dMarkerType types[]{
+            MARKER3D_ARROW,
+            MARKER3D_CYLINDER,
+            MARKER3D_TUBE,
+            MARKER3D_ARROW2,
+            MARKER3D_TORUS,
+            MARKER3D_CONE,
+            MARKER3D_CONE_NO_COLLISION,
+        };
+
+
+        for (auto [i, type] : notsa::enumerate(types)) {
+            C3dMarkers::PlaceMarkerSet(i, type, posNextMarker, 2.f, 255, 128, 0, 128, 1024, 0.5f, 128);
+            posNextMarker += fwd;
+        }
+
+        C3dMarkers::DirectionArrowSet(posNextMarker, 10.f, 255, 0, 0, 128, -fwd.x, -fwd.y, -fwd.z);
+        posNextMarker += fwd;
+    }
+    if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
+        return;
     if (pad->IsStandardKeyJustPressed('1')) {
         CCheat::JetpackCheat();
     }
     if (pad->IsStandardKeyJustPressed('2')) {
         CCheat::MoneyArmourHealthCheat();
     }
-    if (pad->IsStandardKeyJustPressed('3')) {
-        CCheat::VehicleCheat(MODEL_INFERNUS);
-    }
+    //if (pad->IsStandardKeyJustPressed('3')) {
+    //    CCheat::VehicleCheat(MODEL_INFERNUS);
+    //}
     if (pad->IsStandardKeyJustPressed('4')) {
-        CTimer::Suspend();
+        const auto& pos = player->GetPosition();
+        C3dMarkers::User3dMarkerSet(pos.x, pos.y, pos.z, HUD_COLOUR_BLUE);
+        CMessages::AddBigMessage("Placed!", 1000, STYLE_MIDDLE);
     }
     if (pad->IsStandardKeyJustPressed('5')) {
-        CTimer::Resume();
+    //    CTimer::Resume();
     }
     if (pad->IsStandardKeyJustPressed('6')) {
         AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_FRONT);
