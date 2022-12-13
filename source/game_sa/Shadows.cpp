@@ -8,7 +8,6 @@
 #include <imgui.h>
 #include "Shadows.h"
 #include "FireManager.h"
-#include <utility.hpp>
 #include <CustomBuildingDNPipeline.h>
 
 void CShadows::InjectHooks() {
