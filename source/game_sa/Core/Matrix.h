@@ -35,6 +35,13 @@ public:
     }
     ~CMatrix();                                        // destructor detaches matrix if attached
 
+    //! Returns an identity matrix
+    static auto Unity() {
+        CMatrix mat{};
+        mat.SetUnity();
+        return mat;
+    }
+
 private:
     // RwV3d-like:
     CVector m_right;        // 0x0
