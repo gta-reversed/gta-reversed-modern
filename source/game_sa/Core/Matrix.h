@@ -27,6 +27,8 @@ enum eMatrixEulerFlags : uint32 {
 
 class CMatrix {
 public:
+    CMatrix() = default;
+
     CMatrix(const CVector& pos, const CVector& right, const CVector& fwd, const CVector& up) :
         m_right{right},
         m_forward{fwd},
@@ -37,10 +39,7 @@ public:
     }
     CMatrix(const CMatrix& matrix);
     CMatrix(RwMatrix* matrix, bool temporary = false); // like previous + attach
-    CMatrix() {
-        m_pAttachMatrix = nullptr;
-        m_bOwnsAttachedMatrix = false;
-    }
+
     ~CMatrix();                                        // destructor detaches matrix if attached
 
     //! Returns an identity matrix
@@ -78,8 +77,8 @@ private:
     uint32  pad3;           // 0x3C
 
 public:
-    RwMatrix* m_pAttachMatrix;       // 0x40
-    bool      m_bOwnsAttachedMatrix; // 0x44 - Do we need to delete attached matrix at detaching
+    RwMatrix* m_pAttachMatrix{};       // 0x40
+    bool      m_bOwnsAttachedMatrix{}; // 0x44 - Do we need to delete attached matrix at detaching
 
 public:
     static void InjectHooks();

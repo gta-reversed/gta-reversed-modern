@@ -61,17 +61,12 @@ void CMatrix::InjectHooks()
     RH_ScopedGlobalOverloadedInstall(Invert, "2", 0x59BDD0, CMatrix(*)(const CMatrix&));
 }
 
-CMatrix::CMatrix(const CMatrix& matrix)
-{
-    m_pAttachMatrix = nullptr;
-    m_bOwnsAttachedMatrix = false;
+CMatrix::CMatrix(const CMatrix& matrix) {
     CMatrix::CopyOnlyMatrix(matrix);
 }
 
 // like previous + attach
-CMatrix::CMatrix(RwMatrix* matrix, bool temporary)
-{
-    m_pAttachMatrix = nullptr;
+CMatrix::CMatrix(RwMatrix* matrix, bool temporary) {
     CMatrix::Attach(matrix, temporary);
 }
 
