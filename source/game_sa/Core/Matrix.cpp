@@ -339,12 +339,9 @@ void CMatrix::ScaleXYZ(float x, float y, float z) {
 }
 
 void CMatrix::ForceUpVector(CVector vecUp) {
-    auto vecCross = CrossProduct(m_forward, vecUp);
-    auto vecCross2 = CrossProduct(vecUp, vecCross);
-
-    m_right = vecCross;
-    m_forward = vecCross2;
-    m_up = vecUp;
+    m_right   = CrossProduct(m_forward, vecUp);
+    m_forward = CrossProduct(vecUp, m_right);
+    m_up      = vecUp;
 }
 
 void CMatrix::ConvertToEulerAngles(float* pX, float* pY, float* pZ, uint32 uiFlags)
