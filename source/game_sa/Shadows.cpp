@@ -395,8 +395,8 @@ void CShadows::StoreRealTimeShadow(CPhysical* physical, float displacementX, flo
     if (!rtshdw) {
         return;
     }
-    const auto camPos = TheCamera.GetPosition();
-    const auto shdwPos = physical->IsPed()
+    const auto& camPos = TheCamera.GetPosition();
+    const auto  shdwPos = physical->IsPed()
         ? physical->AsPed()->GetBonePosition(BONE_NORMAL)
         : physical->GetPosition();
     const auto shdwToCamDist2DSq = (shdwPos - camPos).SquaredMagnitude2D();
@@ -489,9 +489,9 @@ void CShadows::RenderExtraPlayerShadows() {
         return;
     }
 
-    const auto plyrPos    = FindPlayerCoors();
-    const auto plyrVehPos = plyrVeh->GetPosition();
-    const auto plyVehMat  = plyrVeh->GetMatrix();
+    const auto  plyrPos    = FindPlayerCoors();
+    const auto& plyrVehPos = plyrVeh->GetPosition();
+    const auto& plyVehMat  = plyrVeh->GetMatrix();
     for (auto& ptl : CPointLights::GetActiveLights()) {
         if (ptl.m_nType != ePointLightType::PLTYPE_POINTLIGHT) {
             continue;
@@ -511,8 +511,8 @@ void CShadows::RenderExtraPlayerShadows() {
 
         const auto lightToPlyrDir  = lightToPlyr / lightToPlyrDist; // Normalize vector
 
-        const auto plyrVehBB = plyrVeh->GetColModel()->GetBoundingBox();
-        const auto shdwSize  = CVector2D{ plyrVehBB.GetSize() } / 2.f;
+        const auto& plyrVehBB = plyrVeh->GetColModel()->GetBoundingBox();
+        const auto  shdwSize  = CVector2D{ plyrVehBB.GetSize() } / 2.f;
 
         StoreShadowToBeRendered(
             SHADOW_DEFAULT,
@@ -520,7 +520,7 @@ void CShadows::RenderExtraPlayerShadows() {
             plyrVehPos - CVector{
                   CVector2D{ lightToPlyr / lightToPlyrDist } * 1.2f // Compensate for elvation of the light
                 - CVector2D{ plyVehMat.GetForward() } * (shdwSize.y - plyrVehBB.m_vecMax.y) // Move point to center (as the shadow's position is it's center)
-            , 0.f},
+            },
             CVector2D{ plyVehMat.GetForward() } * shdwSize.y,
             CVector2D{ plyVehMat.GetRight() } * (plyVehMat.GetUp().z >= 0.f ? shdwSize.x : -shdwSize.x), // If vehicle is flipped, we gotta flip the `right` vector back
             CalculateShadowStrength( // 0x70809A
