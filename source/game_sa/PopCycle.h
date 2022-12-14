@@ -172,6 +172,33 @@ enum ePopcycleCarGroup {
 
 class CPopCycle {
 public:
+    // Based on `popcycle.dat`
+    enum class ZoneType {
+        BUSINESS,
+        DESERT,
+        ENTERTAINMENT,
+        COUNTRYSIDE,
+        RESIDENTIAL_RICH,
+        RESIDENTIAL_AVERAGE,
+        RESIDENTIAL_POOR,
+        GANGLAND,
+        BEACH,
+        SHOPPING,
+        PARK,
+        INDUSTRY,
+        ENTERTAINMENT_BUSY,
+        SHOPPING_BUSY,
+        SHOPPING_POSH,
+        RESIDENTIAL_RICH_SECLUDED,
+        AIRPORT,
+        GOLF_CLUB,
+        OUT_OF_TOWN_FACTORY,
+        AIRPORT_RUNWAY,
+
+        // Add above this
+        COUNT,
+    };
+public:
     static float&      m_NumOther_Cars;
     static float&      m_NumCops_Cars;
     static float&      m_NumGangs_Cars;
@@ -190,14 +217,22 @@ public:
     static int32&      m_nCurrentZoneType;
     static int32&      m_nCurrentTimeOfWeek;
     static int32&      m_nCurrentTimeIndex;
-    static inline ePopcycleGroupPerc (&m_nPercTypeGroup)[12][2][20][POPCYCLE_TOTAL_GROUP_PERCS] = *(ePopcycleGroupPerc(*)[12][2][20][18])0xC0BC78;
-    static uint8*      m_nPercOther;     // uint8 m_nPercOther[480];
-    static uint8*      m_nPercCops;      // uint8 m_nPercCops[480];
-    static uint8*      m_nPercGang;      // uint8 m_nPercGang[480];
-    static uint8*      m_nPercDealers;   // uint8 m_nPercDealers[480];
-    static uint8*      m_nMaxNumCars;    // uint8 m_nMaxNumCars[480];
-    static uint8*      m_nMaxNumPeds;    // uint8 m_nMaxNumPeds[480];
     static float&      m_NumDealers_Peds;
+
+    static constexpr auto PERC_DATA_TIME_RESOLUTION_HR = 2;
+
+    // TODO: Eventually use an array of structs instead of 7x 4 dimensional arrays....
+    using PercDataArray = uint8[24 / PERC_DATA_TIME_RESOLUTION_HR /*time resolution (hr)*/][2 /*weekday and weekend*/][(uint32)(ZoneType::COUNT)];
+    static inline PercDataArray& m_nPercOther = *(PercDataArray*)0xC0DE38;
+    static inline PercDataArray& m_nPercCops = *(PercDataArray*)0xC0E018;
+    static inline PercDataArray& m_nPercGang = *(PercDataArray*)0xC0E1F8;
+    static inline PercDataArray& m_nPercDealers = *(PercDataArray*)0xC0E3D8;
+    static inline PercDataArray& m_nMaxNumCars = *(PercDataArray*)0xC0E5B8;
+    static inline PercDataArray& m_nMaxNumPeds = *(PercDataArray*)0xC0E798;
+
+    static inline uint8 (&m_nPercTypeGroup)[24 / PERC_DATA_TIME_RESOLUTION_HR][2 /*weekday or weekend*/][(uint32)(ZoneType::COUNT)][POPCYCLE_TOTAL_GROUP_PERCS] = *(uint8(*)[12][2][20][18])0xC0BC78;
+
+    static void InjectHooks();
 
     static void  Initialise();
     static bool  FindNewPedType(ePedType* arg1, int32* modelIndex, bool arg3, bool arg4);
@@ -212,7 +247,8 @@ public:
     static void  UpdateAreaDodgyness();
     static void  UpdateDealerStrengths();
     static void  UpdatePercentages();
-    static ePopcycleGroupPerc GetCurrentPercTypeGroup(int32 groupId) {
+
+    static uint8 GetCurrentPercTypeGroup(int32 groupId) {
         return m_nPercTypeGroup[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_pCurrZoneInfo->zonePopulationType][groupId];
     }
 

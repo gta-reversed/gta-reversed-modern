@@ -26,17 +26,81 @@ CZoneInfo*& CPopCycle::m_pCurrZoneInfo = *(CZoneInfo**)0xC0BC68;
 int32& CPopCycle::m_nCurrentZoneType = *(int32*)0xC0BC6C;
 int32& CPopCycle::m_nCurrentTimeOfWeek = *(int32*)0xC0BC70;
 int32& CPopCycle::m_nCurrentTimeIndex = *(int32*)0xC0BC74;
-uint8* CPopCycle::m_nPercOther = (uint8*)0xC0DE38;
-uint8* CPopCycle::m_nPercCops = (uint8*)0xC0E018;
-uint8* CPopCycle::m_nPercGang = (uint8*)0xC0E1F8;
-uint8* CPopCycle::m_nPercDealers = (uint8*)0xC0E3D8;
-uint8* CPopCycle::m_nMaxNumCars = (uint8*)0xC0E5B8;
-uint8* CPopCycle::m_nMaxNumPeds = (uint8*)0xC0E798;
 float& CPopCycle::m_NumDealers_Peds = *(float*)0xC0E978;
+
+
+void CPopCycle::InjectHooks() {
+    RH_ScopedClass(CPopCycle);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedGlobalInstall(Initialise, 0x5BC090);
+    //RH_ScopedGlobalInstall(PickGangToCreateMembersOf, 0x60F8D0, { .reversed = false });
+    RH_ScopedGlobalInstall(FindNewPedType, 0x60FBD0, { .reversed = false });
+    RH_ScopedGlobalInstall(PickPedMIToStreamInForCurrentZone, 0x60FFD0, { .reversed = false });
+    RH_ScopedGlobalInstall(IsPedAppropriateForCurrentZone, 0x610150, { .reversed = false });
+    RH_ScopedGlobalInstall(IsPedInGroup, 0x610210, { .reversed = false });
+    RH_ScopedGlobalInstall(PickARandomGroupOfOtherPeds, 0x610420, { .reversed = false });
+    RH_ScopedGlobalInstall(PlayerKilledADealer, 0x610490, { .reversed = false });
+    RH_ScopedGlobalInstall(UpdateDealerStrengths, 0x6104B0, { .reversed = false });
+    RH_ScopedGlobalInstall(UpdateAreaDodgyness, 0x610560, { .reversed = false });
+    //RH_ScopedGlobalInstall(UpdateIsGangArea, 0x6106D0, { .reversed = false });
+    RH_ScopedGlobalInstall(PedIsAcceptableInCurrentZone, 0x610720, { .reversed = false });
+    RH_ScopedGlobalInstall(UpdatePercentages, 0x610770, { .reversed = false });
+    RH_ScopedGlobalInstall(Update, 0x610BF0, { .reversed = false });
+}
 
 // 0x5BC090
 void CPopCycle::Initialise() {
-    plugin::Call<0x5BC090>();
+    CFileMgr::SetDir("DATA");
+    const auto file = CFileMgr::OpenFile("POPCYCLE.DAT", "r");
+    CFileMgr::SetDir("");
+
+    const notsa::AutoCallOnDestruct autoCloser{ [&] { CFileMgr::CloseFile(file); } };
+
+    auto nline{ 1u };
+    for (auto zone = 0; zone < (uint32)ZoneType::COUNT; zone++) {
+        for (auto wktime = 0; wktime < 2; wktime++) { // weekday (0) / weekend(1)
+            for (auto daytime = 0; daytime < 24 / PERC_DATA_TIME_RESOLUTION_HR; daytime++) {
+                // Find next suitable data line
+                const char* l{};
+                while (true) {
+                    l = CFileLoader::LoadLine(file);
+                    if (!l) {
+                        NOTSA_UNREACHABLE("Expected more data, got EOF!");
+                    }
+                    nline++;
+                    if (l[0] != '/' && l[0]) {
+                        break;
+                    }
+                }
+
+                // Ideall we could/would use a file pointer here (instead of `LoadLine`)
+                // and read each number one-by-one.
+                // But until then we're stuck with this hardcoded version.
+
+                auto& curr = m_nPercTypeGroup[daytime][wktime][zone];
+                const auto nread = sscanf(
+                    l,
+                    "%hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu",
+
+                    &m_nMaxNumPeds[daytime][wktime][zone],
+                    &m_nMaxNumCars[daytime][wktime][zone],
+
+                    &m_nPercDealers[daytime][wktime][zone],
+                    &m_nPercGang[daytime][wktime][zone],
+                    &m_nPercCops[daytime][wktime][zone],
+                    &m_nPercOther[daytime][wktime][zone],
+
+                    &curr[0], &curr[1], &curr[2], &curr[3], &curr[4], &curr[5],
+                    &curr[6], &curr[7], &curr[8], &curr[9], &curr[10], &curr[11],
+                    &curr[12], &curr[13], &curr[14], &curr[15], &curr[16], &curr[17]
+                );
+                if (nread != 6 + 18) {
+                    NOTSA_UNREACHABLE("Failed reading all data!");
+                }
+            }
+        }
+    }
 }
 
 // 0x60FBD0

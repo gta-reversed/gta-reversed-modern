@@ -99,6 +99,9 @@ void DebugModules::DisplayMainWindow() {
             if (ImGui::Button("Streamer: ReInit")) {
                 CStreaming::ReInit();
             }
+            if (ImGui::Button("PopCycle: ReInit")) {
+                CPopCycle::Initialise();
+            }
             ImGui::EndTabItem();
         }
 
