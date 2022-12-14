@@ -129,6 +129,8 @@ struct tHandlingData {
     uint8              m_nAnimGroup;
 
     cTransmission& GetTransmission() { return m_transmissionData; }
+
+    int32 InitFromData(int32 id, const char* line);
 };
 
 VALIDATE_SIZE(tHandlingData, 0xE0);

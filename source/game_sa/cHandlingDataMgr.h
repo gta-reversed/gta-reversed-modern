@@ -33,7 +33,7 @@ public:
     // process handling.cfg
     void LoadHandlingData();
     // get vehicle number id in names table
-    int32 FindExactWord(char* line, char* nameTable, int32 entrySize, int32 entryCount);
+    int32 FindExactWord(const char* line, const char* nameTable, uint32 entrySize, uint32 entryCount);
     bool HasFrontWheelDrive(uint8 handlingId);
     bool HasRearWheelDrive(uint8 handlingId);
     int32 GetHandlingId(const char* name);
