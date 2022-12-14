@@ -30,23 +30,27 @@ public:
     cHandlingDataMgr();
 
     void Initialise();
-    // process handling.cfg
+
+    /// Process handling.cfg
     void LoadHandlingData();
-    // get vehicle number id in names table
+
+    /// Get vehicle number id in names table
     int32 FindExactWord(const char* line, const char* nameTable, uint32 entrySize, uint32 entryCount);
+
     bool HasFrontWheelDrive(uint8 handlingId);
     bool HasRearWheelDrive(uint8 handlingId);
     int32 GetHandlingId(const char* name);
+
     void ConvertDataToWorldUnits(tHandlingData* handling);
     void ConvertDataToGameUnits(tHandlingData* handling);
+
     void ConvertBikeDataToWorldUnits(tBikeHandlingData* bikeHandling);
     void ConvertBikeDataToGameUnits(tBikeHandlingData* bikeHandling);
-    // get flying handling by id
+
     tFlyingHandlingData* GetFlyingPointer(uint8 handlingId);
-    // get boat handling by id
-    tBoatHandlingData* GetBoatPointer(uint8 handlingId);
-    tHandlingData* GetVehiclePointer(uint32 handlingId) { return &m_aVehicleHandling[handlingId]; };
-    tBikeHandlingData* GetBikeHandlingPointer(uint32 handlingId) { return &m_aBikeHandling[handlingId >= 162 ? handlingId - 162 : handlingId]; } // NOTE: 162 = VT_BIKE
+    tBoatHandlingData*   GetBoatPointer(uint8 handlingId);
+    tHandlingData*       GetVehiclePointer(uint32 handlingId);
+    tBikeHandlingData*   GetBikeHandlingPointer(uint32 handlingId);
 };
 
 VALIDATE_SIZE(cHandlingDataMgr, 0xC624);

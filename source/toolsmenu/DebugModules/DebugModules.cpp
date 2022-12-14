@@ -99,6 +99,9 @@ void DebugModules::DisplayMainWindow() {
             if (ImGui::Button("Streamer: ReInit")) {
                 CStreaming::ReInit();
             }
+            if (ImGui::Button("HandlingMgr: ReInit")) {
+                gHandlingDataMgr.LoadHandlingData();
+            }
             ImGui::EndTabItem();
         }
 
