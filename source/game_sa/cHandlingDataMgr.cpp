@@ -58,6 +58,7 @@ int32 tHandlingData::InitFromData(int32 id, const char* line) {
         &m_fSuspensionLowerLimit,
         &m_fSuspensionBiasBetweenFrontAndRear,
         &m_fSuspensionAntiDiveMultiplier,
+
         &m_fSeatOffsetDistance,
         &m_fCollisionDamageMultiplier,
 
@@ -69,6 +70,8 @@ int32 tHandlingData::InitFromData(int32 id, const char* line) {
         &m_nAnimGroup
     );
     m_transmissionData.m_handlingFlags = m_nHandlingFlags;
+    m_transmissionData.m_fEngineAcceleration *= 0.4f;
+    gHandlingDataMgr.ConvertDataToGameUnits(this);
     return n == 35 ? -1 : n;
 }
 
@@ -100,6 +103,8 @@ int32 tBoatHandlingData::InitFromData(int32 id, const char* line) {
 }
 
 int32 tFlyingHandlingData::InitFromData(int32 id, const char* line) {
+    m_nVehicleId = id;
+
     const auto n = sscanf(
         line,
         "%*s\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f%*c\t%f\t%f\t%f\t%f\t%f\t%f\t%f", // Skips name(first token)
@@ -131,6 +136,8 @@ int32 tFlyingHandlingData::InitFromData(int32 id, const char* line) {
 }
 
 int32 tBikeHandlingData::InitFromData(int32 id, const char* line) {
+    m_nVehicleId = id;
+
     const auto n = sscanf(
         line,
         "%*s\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f", // Skips name (first token)
@@ -150,6 +157,7 @@ int32 tBikeHandlingData::InitFromData(int32 id, const char* line) {
         &m_fWheelieStabMult,
         &m_fStoppieStabMult
     );
+    gHandlingDataMgr.ConvertBikeDataToGameUnits(this);
     return n == 15 ? -1 : n;
 }
 
@@ -161,7 +169,7 @@ void cHandlingDataMgr::LoadHandlingData() {
     // Automatically closes file on function return
     const notsa::AutoCallOnDestruct closeFile{ [&] { CFileMgr::CloseFile(file); } };
 
-    auto nLoadedHandlings{ 1u };
+    auto nLoadedHandlings{ 0u };
 
     // Get handling by scanning name from `line` using `scanNameFormat`, then calls `GetHandlingFn` to get the handling ptr
     const auto DoLoadHandling = [&, this](const char* line, auto GetHandlingFn) -> int32 {
@@ -180,7 +188,7 @@ void cHandlingDataMgr::LoadHandlingData() {
         return ret;
     };
 
-    auto nline{1u}, nLoadedVehHandlings{1u};
+    auto nline{1u}, nLoadedVehHandlings{0u};
     for (auto l = CFileLoader::LoadLine(file); l; l = CFileLoader::LoadLine(file), nline++) {
         if (!strcmp(l, ";the end")) { // End of data
             return;
