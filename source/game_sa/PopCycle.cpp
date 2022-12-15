@@ -39,7 +39,7 @@ void CPopCycle::InjectHooks() {
     RH_ScopedGlobalInstall(PickPedMIToStreamInForCurrentZone, 0x60FFD0, { .reversed = false });
     RH_ScopedGlobalInstall(IsPedAppropriateForCurrentZone, 0x610150, { .reversed = false });
     RH_ScopedGlobalInstall(IsPedInGroup, 0x610210);
-    RH_ScopedGlobalInstall(PickARandomGroupOfOtherPeds, 0x610420, { .reversed = false });
+    RH_ScopedGlobalInstall(PickARandomGroupOfOtherPeds, 0x610420);
     RH_ScopedGlobalInstall(PlayerKilledADealer, 0x610490, { .reversed = false });
     RH_ScopedGlobalInstall(UpdateDealerStrengths, 0x6104B0, { .reversed = false });
     RH_ScopedGlobalInstall(UpdateAreaDodgyness, 0x610560, { .reversed = false });
@@ -281,7 +281,14 @@ bool CPopCycle::PedIsAcceptableInCurrentZone(int32 modelIndex) {
 
 // 0x610420
 int32 CPopCycle::PickARandomGroupOfOtherPeds() {
-    return plugin::CallAndReturn<int32, 0x610420>();
+    auto rndPerc = (uint8)CGeneral::GetRandomNumberInRange(0.f, 100.f);
+    for (auto [grpIdx, grpPerc] : notsa::enumerate(m_nPercTypeGroup[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_pCurrZoneInfo->zonePopulationType])) {
+        if (rndPerc >= grpPerc) {
+            return (ePopcycleGroupPerc)grpIdx;
+        }
+        rndPerc -= grpPerc;
+    }
+    NOTSA_UNREACHABLE(); // In reality this would return an invalid (index eqv. of `.end()` of the array) => UB
 }
 
 // 0x60FFD0
