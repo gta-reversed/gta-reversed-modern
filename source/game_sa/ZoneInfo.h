@@ -18,7 +18,7 @@ public:
             uint8 zonePopulationType : 5;
             uint8 radarMode : 2;
             uint8 noCops : 1;
-            uint8 zonePopulationRace : 4; // bitfield for races, see `ePedRace`. Default value (RACE_DEFAULT) isn't counted. See `IsPedAppropriateForCurrentZone` for usage example.
+            uint8 zonePopulationRace : 4; // Bitfield for race allowed in the zone. See `ePedRace`. Default value (RACE_DEFAULT) isn't counted. See `IsPedAppropriateForCurrentZone` for usage example.
         };
         struct {
             uint8 Flags1, Flags2;

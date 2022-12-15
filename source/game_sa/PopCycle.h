@@ -250,8 +250,8 @@ public:
     */
     static bool IsPedInGroup(int32 modelIndex, ePopcycleGroup PopCycle_Group);
     static bool  PedIsAcceptableInCurrentZone(int32 modelIndex);
-    static int32 PickARandomGroupOfOtherPeds();
-    static int32 PickPedMIToStreamInForCurrentZone();
+    static ePopcycleGroup PickARandomGroupOfOtherPeds();
+    static eModelID PickPedMIToStreamInForCurrentZone();
     static void  PlayerKilledADealer();
     static void  Update();
     static void  UpdateAreaDodgyness();
@@ -264,6 +264,12 @@ public:
     * @brief Check if a race is allowed in the current zone
     */
     static bool IsRaceAllowedInCurrentZone(ePedRace race);
+
+    /*!
+    * @notsa
+    * @brief Check if the race of the given ped's model is allowed in the current zone
+    */
+    static bool IsRaceAllowedInCurrentZone(eModelID pedModelId);
 
 
     static uint8 GetCurrentPercTypeGroup(int32 groupId) {

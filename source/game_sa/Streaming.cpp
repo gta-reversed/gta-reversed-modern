@@ -41,8 +41,6 @@ uint16& CStreaming::ms_loadedGangCars = *reinterpret_cast<uint16*>(0x8E4BA8);
 uint16& CStreaming::ms_loadedGangs = *reinterpret_cast<uint16*>(0x8E4BAC);
 
 int32& CStreaming::ms_numPedsLoaded = *reinterpret_cast<int32*>(0x8E4BB0);
-int32(&CStreaming::ms_pedsLoaded)[8] = *(int32(*)[8])0x8E4C00;
-int32 (&CStreaming::ms_NextPedToLoadFromGroup)[18] = *reinterpret_cast<int32(*)[18]>(0x8E4BB8);
 int32& CStreaming::ms_currentZoneType = *reinterpret_cast<int32*>(0x8E4C20);
 CLoadedCarGroup& CStreaming::ms_vehiclesLoaded = *reinterpret_cast<CLoadedCarGroup*>(0x8E4C24);
 CStreamingInfo*& CStreaming::ms_pEndRequestedList = *reinterpret_cast<CStreamingInfo**>(0x8E4C54);

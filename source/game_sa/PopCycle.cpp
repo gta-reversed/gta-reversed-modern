@@ -36,7 +36,7 @@ void CPopCycle::InjectHooks() {
     RH_ScopedGlobalInstall(Initialise, 0x5BC090);
     RH_ScopedGlobalInstall(PickGangToCreateMembersOf, 0x60F8D0, { .reversed = false });
     RH_ScopedGlobalInstall(FindNewPedType, 0x60FBD0);
-    RH_ScopedGlobalInstall(PickPedMIToStreamInForCurrentZone, 0x60FFD0, { .reversed = false });
+    RH_ScopedGlobalInstall(PickPedMIToStreamInForCurrentZone, 0x60FFD0);
     RH_ScopedGlobalInstall(IsPedAppropriateForCurrentZone, 0x610150, { .reversed = false });
     RH_ScopedGlobalInstall(IsPedInGroup, 0x610210);
     RH_ScopedGlobalInstall(PickARandomGroupOfOtherPeds, 0x610420);
@@ -227,7 +227,7 @@ float CPopCycle::GetCurrentPercOther_Peds() {
 // 0x610150
 bool CPopCycle::IsPedAppropriateForCurrentZone(int32 modelIndex) {
     // Check if the model's race is allowed
-    if (IsRaceAllowedInCurrentZone(CModelInfo::GetPedModelInfo(modelIndex)->GetRace())) {
+    if (IsRaceAllowedInCurrentZone((eModelID)modelIndex)) {
         return false;
     }
 
@@ -272,7 +272,7 @@ bool CPopCycle::PedIsAcceptableInCurrentZone(int32 modelIndex) {
         return true;
     }
 
-    if (IsRaceAllowedInCurrentZone(CModelInfo::GetPedModelInfo(modelIndex)->GetRace())) {
+    if (IsRaceAllowedInCurrentZone((eModelID)modelIndex)) {
         return true;
     }
 
@@ -280,20 +280,35 @@ bool CPopCycle::PedIsAcceptableInCurrentZone(int32 modelIndex) {
 }
 
 // 0x610420
-int32 CPopCycle::PickARandomGroupOfOtherPeds() {
+ePopcycleGroup CPopCycle::PickARandomGroupOfOtherPeds() {
     auto rndPerc = (uint8)CGeneral::GetRandomNumberInRange(0.f, 100.f);
     for (auto [grpIdx, grpPerc] : notsa::enumerate(m_nPercTypeGroup[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_pCurrZoneInfo->zonePopulationType])) {
         if (rndPerc >= grpPerc) {
-            return (ePopcycleGroupPerc)grpIdx;
+            return (ePopcycleGroup)grpIdx;
         }
         rndPerc -= grpPerc;
     }
-    NOTSA_UNREACHABLE(); // In reality this would return an invalid (index eqv. of `.end()` of the array) => UB
+    NOTSA_UNREACHABLE(); // In reality this would return an invalid (index eqv. of `array.end()`) => UB
 }
 
 // 0x60FFD0
-int32 CPopCycle::PickPedMIToStreamInForCurrentZone() {
-    return plugin::CallAndReturn<int32, 0x60FFD0>();
+eModelID CPopCycle::PickPedMIToStreamInForCurrentZone() {
+    for (auto tr = 0; tr < 10; tr++) { // 10 tries
+        const auto pedGrpId      = CPopulation::GetPedGroupId(PickARandomGroupOfOtherPeds(), CPopulation::CurrentWorldZone);
+        const auto npeds         = CPopulation::GetNumPedsInGroup(pedGrpId);
+        auto&      nextPedToLoad = CStreaming::ms_NextPedToLoadFromGroup[pedGrpId];
+        for (auto p = 0; p < npeds; p++) {
+            const auto modelId = (eModelID)CPopulation::GetPedGroupModelId(pedGrpId, nextPedToLoad);
+            nextPedToLoad      = (nextPedToLoad + 1) % npeds;
+
+            if (notsa::contains(CStreaming::ms_pedsLoaded, modelId)) {
+                if (IsRaceAllowedInCurrentZone(modelId)) {
+                    return modelId;
+                }
+            }
+        }
+    }
+    return MODEL_INVALID;
 }
 
 // 0x610490
@@ -341,4 +356,9 @@ ePedType CPopCycle::PickGangToCreateMembersOf() {
 // notsa
 bool CPopCycle::IsRaceAllowedInCurrentZone(ePedRace race) {
     return race != RACE_DEFAULT && m_pCurrZoneInfo->zonePopulationRace & (1 << (race - 1));
+}
+
+// notsa
+bool CPopCycle::IsRaceAllowedInCurrentZone(eModelID pedModelId) {
+    return IsRaceAllowedInCurrentZone(CModelInfo::GetPedModelInfo((int32)pedModelId)->GetRace());
 }

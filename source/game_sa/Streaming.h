@@ -207,13 +207,22 @@ public:
     static bool& m_bHarvesterModelsRequested;
     static bool& m_bStreamHarvesterModelsThisFrame;
     static uint32& ms_numPriorityRequests;
-    //! // initialized to -1 and never used
+    //! Initialized to -1 and never used
     static int32& ms_lastCullZone;
     static uint16& ms_loadedGangCars;
     static uint16& ms_loadedGangs;
     static int32& ms_numPedsLoaded;
-    static int32(&ms_pedsLoaded)[8];
-    static int32 (&ms_NextPedToLoadFromGroup)[18];
+
+    //! Currently loaded peds (For/from ped groups)
+    static inline eModelID(&ms_pedsLoaded)[8] = *(eModelID(*)[8])0x8E4C00;
+
+    /*!
+    * Contains the next slot, that is, index at which the next model to load of a group is.
+    * This is used by `PickPedMIToStreamInForCurrentZone`
+    * And the modelId to load can be accessed by `CPopulation::GetPedGroupModelId` for a given group
+    */
+    static inline int32 (&ms_NextPedToLoadFromGroup)[18] = *reinterpret_cast<int32(*)[18]>(0x8E4BB8);
+
     static int32& ms_currentZoneType;
     static CLoadedCarGroup& ms_vehiclesLoaded;
     static CStreamingInfo*& ms_pEndRequestedList;
