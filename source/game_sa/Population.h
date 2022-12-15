@@ -181,4 +181,6 @@ public:
     static int32 GetNumPedsInGroup(ePopcycleGroup popcycleGroup, int32 worldZone) { return m_nNumPedsInGroup[GetPedGroupId(popcycleGroup, worldZone)]; }
     static int32 GetNumPedsInGroup(ePopcyclePedGroup pedGroup) { return m_nNumPedsInGroup[pedGroup]; }
     static int32 GetPedGroupModelId(ePopcyclePedGroup pedGroup, int32 slot) { return m_PedGroups[pedGroup][slot]; }
+
+    static auto GetModelsInPedGroup(ePopcyclePedGroup pedGroup) { return m_PedGroups[pedGroup] | rng::views::take((size_t)GetNumPedsInGroup(pedGroup)); }
 };
