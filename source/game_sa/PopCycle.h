@@ -239,11 +239,16 @@ public:
     static float GetCurrentPercOther_Peds();
 
     /*
-    * @addr
-    * @brief Check if any currently active group in the current zone contains the given model
+    * @addr 0x610150
+    * @brief Check if any currently active group in the current world zone contains the given model
     */
-    static bool  IsPedAppropriateForCurrentZone(int32 modelIndex);
-    static bool  IsPedInGroup(int32 modelIndex, int32 PopCycle_Group);
+    static bool IsPedAppropriateForCurrentZone(int32 modelIndex);
+
+    /*!
+    * @addr 0x610210
+    * @brief Check if group contains the specified model (In any world zone)
+    */
+    static bool IsPedInGroup(int32 modelIndex, ePopcycleGroup PopCycle_Group);
     static bool  PedIsAcceptableInCurrentZone(int32 modelIndex);
     static int32 PickARandomGroupOfOtherPeds();
     static int32 PickPedMIToStreamInForCurrentZone();

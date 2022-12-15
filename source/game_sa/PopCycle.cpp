@@ -38,7 +38,7 @@ void CPopCycle::InjectHooks() {
     RH_ScopedGlobalInstall(FindNewPedType, 0x60FBD0);
     RH_ScopedGlobalInstall(PickPedMIToStreamInForCurrentZone, 0x60FFD0, { .reversed = false });
     RH_ScopedGlobalInstall(IsPedAppropriateForCurrentZone, 0x610150, { .reversed = false });
-    RH_ScopedGlobalInstall(IsPedInGroup, 0x610210, { .reversed = false });
+    RH_ScopedGlobalInstall(IsPedInGroup, 0x610210);
     RH_ScopedGlobalInstall(PickARandomGroupOfOtherPeds, 0x610420, { .reversed = false });
     RH_ScopedGlobalInstall(PlayerKilledADealer, 0x610490, { .reversed = false });
     RH_ScopedGlobalInstall(UpdateDealerStrengths, 0x6104B0, { .reversed = false });
@@ -239,8 +239,9 @@ bool CPopCycle::IsPedAppropriateForCurrentZone(int32 modelIndex) {
         if (!m_nPercTypeGroup[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_pCurrZoneInfo->zonePopulationType]) {
             continue;
         }
+
         // Check if group contains this model
-        for (auto mdlId : CPopulation::GetModelsInPedGroup(CPopulation::GetPedGroupId((ePopcycleGroup)grpId))) {
+        for (auto mdlId : CPopulation::GetModelsInPedGroup(CPopulation::GetPedGroupId((ePopcycleGroup)grpId, CPopulation::CurrentWorldZone))) {
             if (mdlId == modelIndex) {
                 return true;
             }
@@ -252,8 +253,15 @@ bool CPopCycle::IsPedAppropriateForCurrentZone(int32 modelIndex) {
 }
 
 // 0x610210
-bool CPopCycle::IsPedInGroup(int32 modelIndex, int32 PopCycle_Group) {
-    return plugin::CallAndReturn<bool, 0x610210, int32, int32>(modelIndex, PopCycle_Group);
+bool CPopCycle::IsPedInGroup(int32 modelIndex, ePopcycleGroup group) {
+    for (auto pedGroup : CPopulation::GetPedGroupsOfGroup(group)) {
+        for (auto mdlId : CPopulation::GetModelsInPedGroup(pedGroup)) {
+            if (mdlId == modelIndex) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 // 0x610720
