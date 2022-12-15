@@ -34,8 +34,8 @@ void CPopCycle::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedGlobalInstall(Initialise, 0x5BC090);
-    //RH_ScopedGlobalInstall(PickGangToCreateMembersOf, 0x60F8D0, { .reversed = false });
-    RH_ScopedGlobalInstall(FindNewPedType, 0x60FBD0, { .reversed = false });
+    RH_ScopedGlobalInstall(PickGangToCreateMembersOf, 0x60F8D0, { .reversed = false });
+    RH_ScopedGlobalInstall(FindNewPedType, 0x60FBD0);
     RH_ScopedGlobalInstall(PickPedMIToStreamInForCurrentZone, 0x60FFD0, { .reversed = false });
     RH_ScopedGlobalInstall(IsPedAppropriateForCurrentZone, 0x610150, { .reversed = false });
     RH_ScopedGlobalInstall(IsPedInGroup, 0x610210, { .reversed = false });
@@ -47,6 +47,8 @@ void CPopCycle::InjectHooks() {
     RH_ScopedGlobalInstall(PedIsAcceptableInCurrentZone, 0x610720, { .reversed = false });
     RH_ScopedGlobalInstall(UpdatePercentages, 0x610770, { .reversed = false });
     RH_ScopedGlobalInstall(Update, 0x610BF0, { .reversed = false });
+    RH_ScopedGlobalInstall(GetCurrentPercOther_Peds, 0x610310);
+    RH_ScopedGlobalInstall(IsPedAppropriateForCurrentZone, 0x610150);
 }
 
 // 0x5BC090
@@ -104,18 +106,149 @@ void CPopCycle::Initialise() {
 }
 
 // 0x60FBD0
-bool CPopCycle::FindNewPedType(ePedType* arg1, int32* modelIndex, bool arg3, bool arg4) {
-    return plugin::CallAndReturn<bool, 0x60FBD0, ePedType*, int32*, bool, bool>(arg1, modelIndex, arg3, arg4);
+bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGangs, bool noCops) {
+    // NOTSA: Bug prevention
+    outPedMI = MODEL_INVALID;
+
+    if (!m_pCurrZoneInfo) {
+        return false;
+    }
+
+    if (CPopulation::bInPoliceStation && CGeneral::RandomBool(70)) {
+        outPedType = PED_TYPE_COP;
+        outPedMI = CPopulation::ChoosePolicePedOccupation();
+        return true;
+    }
+
+    auto dealersChance = m_NumDealers_Peds - (float)CPopulation::ms_nNumDealers;
+
+    auto gangChance = m_NumGangs_Peds - (float)CPopulation::GetTotalNumGang();
+    if (CPopulation::m_bOnlyCreateRandomGangMembers) {
+        gangChance = 50.f;
+    }
+    if (CPopulation::m_bDontCreateRandomGangMembers || noGangs) {
+        gangChance = -10.f;
+    }
+
+    auto copChance = m_NumCops_Peds - (float)CPopulation::ms_nNumCop;
+    if (CGangWars::GangWarFightingGoingOn() || CPopulation::m_bDontCreateRandomCops || noCops || m_pCurrZoneInfo->noCops) {
+        copChance = -10.f;
+    }
+
+    auto civPedsChance = CPopCycle::m_NumOther_Peds - (float)(CPopulation::ms_nNumCivMale + CPopulation::ms_nNumCivFemale);
+
+    for (auto chance : { &civPedsChance, &copChance, &dealersChance, &gangChance }) {
+        if (*chance < 2.f) {
+            *chance *= CGeneral::GetRandomNumber();
+        }
+    }
+
+    if (!CGame::CanSeeOutSideFromCurrArea()) {
+        dealersChance = -10.f;
+    }
+
+    // Pirulax: I had to refactor the code to be acceptable and bugless - sorry}
+    while (true) {
+        const auto highestChance = std::max({ civPedsChance, copChance, dealersChance, gangChance });
+
+        if (highestChance <= 0.f) {
+            return false;
+        }
+
+        if (highestChance == dealersChance) {
+            // 0x60FEF2:
+            // Because originally there was no `return` inside the loop itself it always returned at the last viable ID.
+            // we reverse the loop and just return at the first viable ID.
+            // It seems intentional, but I'm unsure what the purpose was.
+            for (auto modelId : CPopulation::GetModelsInPedGroup(CPopulation::GetPedGroupId(POPCYCLE_GROUP_DEALERS)) | rng::views::reverse) {
+                if (CStreaming::IsModelLoaded(modelId)) {
+                    outPedMI = modelId;
+                    return true;
+                }
+            }
+            dealersChance = 0.f;
+            outPedType = PED_TYPE_DEALER;
+            continue;
+        } else if (highestChance == gangChance) { // 0x60FBD0
+            outPedType = PickGangToCreateMembersOf();
+            if (outPedType) {
+                outPedMI = CPopulation::ChooseGangOccupation(outPedType - ePedType::PED_TYPE_GANG1);
+                if (outPedMI >= 0) {
+                    return true;
+                }
+            } else {
+                outPedMI = -1;
+            }
+            if (CPopulation::m_bOnlyCreateRandomGangMembers) {
+                return false;
+            }
+            gangChance = 0.f;
+            continue;
+        } else if (highestChance == copChance) { // 0x60FF62
+            outPedMI = CPopulation::ChoosePolicePedOccupation();
+            outPedType = PED_TYPE_COP;
+            return true;
+        } else if (highestChance == civPedsChance) { // 0x60FF8F
+            outPedMI = CPopulation::ChooseCivilianOccupation(0, 0, -1, -1, -1, 0, 1, 0, 0);
+            if (outPedMI <= MODEL_INVALID || outPedMI == MODEL_MALE01) {
+                return false;
+            }
+            outPedType = CModelInfo::GetPedModelInfo(outPedMI)->m_nPedType;
+            return true;
+        } else {
+            NOTSA_UNREACHABLE();
+        }
+    }
 }
 
 // 0x610310
 float CPopCycle::GetCurrentPercOther_Peds() {
-    return plugin::CallAndReturn<float, 0x610310>();
+    const auto percOther = (float)m_nPercOther[CPopCycle::m_nCurrentTimeIndex][CPopCycle::m_nCurrentTimeOfWeek][CPopCycle::m_nCurrentZoneType];
+
+    if (CDarkel::FrenzyOnGoing()) {
+        return percOther;
+    }
+
+    if (CTheScripts::IsPlayerOnAMission()) {
+        if (const auto plyr = FindPlayerPed()) {
+            if (plyr->IsInVehicle()) {
+                switch (plyr->m_pVehicle->m_nModelIndex) {
+                case MODEL_TAXI:
+                case MODEL_CABBIE:
+                    return percOther;
+                }
+            }
+        }
+    }
+
+    return percOther * (1.f - std::sqrt(CWeather::Rain) * 0.8f);
 }
 
 // 0x610150
 bool CPopCycle::IsPedAppropriateForCurrentZone(int32 modelIndex) {
-    return plugin::CallAndReturn<bool, 0x610150, int32>(modelIndex);
+    // Check if the model's race is allowed
+    if (const auto race = CModelInfo::GetPedModelInfo(modelIndex)->m_nRace; race != RACE_DEFAULT) {
+        if ((m_pCurrZoneInfo->zonePopulationRace & (1 << (race - 1))) == 0) {
+            return false;
+        }
+    }
+
+    // Check if any group active in this zone contains the given model
+    for (auto grpId = 0; grpId < POPCYCLE_TOTAL_GROUPS; grpId++) {
+        // Check if this group is active now
+        if (!m_nPercTypeGroup[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_pCurrZoneInfo->zonePopulationType]) {
+            continue;
+        }
+        // Check if group contains this model
+        for (auto mdlId : CPopulation::GetModelsInPedGroup(CPopulation::GetPedGroupId((ePopcycleGroup)grpId))) {
+            if (mdlId == modelIndex) {
+                return true;
+            }
+        }
+    }
+
+    // No group currently active contains the given model
+    return false;
 }
 
 // 0x610210
@@ -173,4 +306,9 @@ void CPopCycle::UpdateDealerStrengths() {
 // 0x610770
 void CPopCycle::UpdatePercentages() {
     plugin::Call<0x610770>();
+}
+
+// 0x60F8D0
+ePedType CPopCycle::PickGangToCreateMembersOf() {
+    return plugin::CallAndReturn<ePedType, 0x60F8D0>();
 }

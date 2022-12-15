@@ -235,8 +235,13 @@ public:
     static void InjectHooks();
 
     static void  Initialise();
-    static bool  FindNewPedType(ePedType* arg1, int32* modelIndex, bool arg3, bool arg4);
+    static bool  FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGangs, bool noCops);
     static float GetCurrentPercOther_Peds();
+
+    /*
+    * @addr
+    * @brief Check if any currently active group in the current zone contains the given model
+    */
     static bool  IsPedAppropriateForCurrentZone(int32 modelIndex);
     static bool  IsPedInGroup(int32 modelIndex, int32 PopCycle_Group);
     static bool  PedIsAcceptableInCurrentZone(int32 modelIndex);
@@ -247,6 +252,8 @@ public:
     static void  UpdateAreaDodgyness();
     static void  UpdateDealerStrengths();
     static void  UpdatePercentages();
+    static ePedType PickGangToCreateMembersOf();
+
 
     static uint8 GetCurrentPercTypeGroup(int32 groupId) {
         return m_nPercTypeGroup[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_pCurrZoneInfo->zonePopulationType][groupId];
