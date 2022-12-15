@@ -16,10 +16,14 @@ public:
     union {
         struct {
             uint8 zonePopulationType : 5;
+            uint8 radarMode : 2;
+            uint8 noCops : 1;
+            uint8 zonePopulationRace : 4; // bitfield for races, see `ePedRace`. Default value (RACE_DEFAULT) isn't counted. See `IsPedAppropriateForCurrentZone` for usage example.
         };
-        uint8 Flags1;
+        struct {
+            uint8 Flags1, Flags2;
+        };
     };
-    uint8 Flags2;
 };
 
 VALIDATE_SIZE(CZoneInfo, 0x11);
