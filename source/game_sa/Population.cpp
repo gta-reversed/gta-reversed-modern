@@ -33,7 +33,6 @@ uint32& CPopulation::ms_nNumCivMale = *(uint32*)0xC0EC70;
 uint16* CPopulation::m_nNumCarsInGroup = (uint16*)0xC0EC78;
 uint16* CPopulation::m_nNumPedsInGroup = (uint16*)0xC0ECC0;
 int16(*CPopulation::m_CarGroups)[23] = (int16(*)[23])0xC0ED38;
-int16(*CPopulation::m_PedGroups)[21] = (int16(*)[21])0xC0F358;
 bool& CPopulation::m_bDontCreateRandomGangMembers = *(bool*)0xC0FCB2;
 bool& CPopulation::m_bOnlyCreateRandomGangMembers = *(bool*)0xC0FCB3;
 bool& CPopulation::m_bDontCreateRandomCops = *(bool*)0xC0FCB4;
@@ -95,7 +94,7 @@ void CPopulation::RemovePed(CPed* ped) {
 
 // 0x610F40
 int32 CPopulation::ChoosePolicePedOccupation() {
-    return ((int32(__cdecl*)())0x610F40)();
+    return 0;
 }
 
 // 0x610F50
@@ -139,8 +138,8 @@ bool CPopulation::IsSkateable(const CVector& point) {
 }
 
 // 0x611550
-void CPopulation::ChooseGangOccupation(int32 arg0) {
-    ((void(__cdecl*)(int32))0x611550)(arg0);
+int32 CPopulation::ChooseGangOccupation(int32 arg0) {
+    return ((int32(__cdecl*)(int32))0x611550)(arg0);
 }
 
 // 0x611560
