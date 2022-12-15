@@ -49,6 +49,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedInstall(ConvertToRealObject, 0x614580);
     RH_ScopedInstall(ConvertToDummyObject, 0x614670);
     RH_ScopedInstall(RemovePed, 0x610F20);
+    RH_ScopedInstall(Update, 0x616650);
 }
 
 // 0x5B6D40
@@ -430,7 +431,61 @@ void CPopulation::PopulateInterior(int32 numPeds, CVector posn) {
 
 // 0x616650
 void CPopulation::Update(bool generatePeds) {
-    ((void(__cdecl*)(bool))0x616650)(generatePeds);
+    CurrentWorldZone = [] {
+        switch (CWeather::WeatherRegion) {
+        case WEATHER_REGION_DEFAULT:
+        case WEATHER_REGION_LA:
+        case WEATHER_REGION_DESERT:
+            return 0;
+        case WEATHER_REGION_SF:
+            return 1;
+        case WEATHER_REGION_LV:
+            return 2;
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
+
+    if (CReplay::Mode == 1) {
+        return;
+    }
+
+    ManagePopulation();
+    RemovePedsIfThePoolGetsFull();
+
+    if (m_CountDownToPedsAtStart) {
+        if (--m_CountDownToPedsAtStart == 0) {
+            GeneratePedsAtStartOfGame();
+        }
+        return;
+    }
+
+    ms_nTotalGangPeds = GetTotalNumGang();
+    ms_nTotalCivPeds  = ms_nNumCivMale + ms_nNumCivFemale;
+    ms_nTotalPeds     = ms_nTotalPeds + ms_nTotalGangPeds + ms_nNumCop + ms_nNumEmergency;
+
+    if (CCutsceneMgr::IsCutsceneProcessing() || !generatePeds) {
+        return;
+    }
+
+    const auto pcdm = PedCreationDistMultiplier();
+    const auto gdm  = TheCamera.m_fGenerationDistMultiplier;
+    const float dists[]{
+        pcdm * gdm * 42.5f,
+        pcdm * gdm * 50.5f,
+        pcdm * 25.f - 10.f,
+        pcdm * 25.f
+    };
+
+    if (AddToPopulation(dists[0], dists[1], dists[2], dists[3])) {
+        GeneratePedsAtAttractors(
+            FindPlayerCentreOfWorld(),
+            dists[0], dists[1],
+            dists[2], dists[3],
+            CGame::CanSeeOutSideFromCurrArea() ? -1 : 7,
+            true
+        );
+    }
 }
 
 bool CPopulation::DoesCarGroupHaveModelId(int32 carGroupId, int32 modelId)
