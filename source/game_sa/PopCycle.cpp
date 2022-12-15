@@ -44,7 +44,7 @@ void CPopCycle::InjectHooks() {
     RH_ScopedGlobalInstall(UpdateDealerStrengths, 0x6104B0, { .reversed = false });
     RH_ScopedGlobalInstall(UpdateAreaDodgyness, 0x610560, { .reversed = false });
     //RH_ScopedGlobalInstall(UpdateIsGangArea, 0x6106D0, { .reversed = false });
-    RH_ScopedGlobalInstall(PedIsAcceptableInCurrentZone, 0x610720, { .reversed = false });
+    RH_ScopedGlobalInstall(PedIsAcceptableInCurrentZone, 0x610720);
     RH_ScopedGlobalInstall(UpdatePercentages, 0x610770, { .reversed = false });
     RH_ScopedGlobalInstall(Update, 0x610BF0, { .reversed = false });
     RH_ScopedGlobalInstall(GetCurrentPercOther_Peds, 0x610310);
@@ -227,10 +227,8 @@ float CPopCycle::GetCurrentPercOther_Peds() {
 // 0x610150
 bool CPopCycle::IsPedAppropriateForCurrentZone(int32 modelIndex) {
     // Check if the model's race is allowed
-    if (const auto race = CModelInfo::GetPedModelInfo(modelIndex)->m_nRace; race != RACE_DEFAULT) {
-        if ((m_pCurrZoneInfo->zonePopulationRace & (1 << (race - 1))) == 0) {
-            return false;
-        }
+    if (IsRaceAllowedInCurrentZone(CModelInfo::GetPedModelInfo(modelIndex)->GetRace())) {
+        return false;
     }
 
     // Check if any group active in this zone contains the given model
@@ -266,7 +264,19 @@ bool CPopCycle::IsPedInGroup(int32 modelIndex, ePopcycleGroup group) {
 
 // 0x610720
 bool CPopCycle::PedIsAcceptableInCurrentZone(int32 modelIndex) {
-    return plugin::CallAndReturn<bool, 0x610720, int32>(modelIndex);
+    if (!m_pCurrZoneInfo) {
+        return false;
+    }
+
+    if (CCheat::IsZoneStreamingAllowed()) {
+        return true;
+    }
+
+    if (IsRaceAllowedInCurrentZone(CModelInfo::GetPedModelInfo(modelIndex)->GetRace())) {
+        return true;
+    }
+
+    return false;
 }
 
 // 0x610420
@@ -319,4 +329,9 @@ void CPopCycle::UpdatePercentages() {
 // 0x60F8D0
 ePedType CPopCycle::PickGangToCreateMembersOf() {
     return plugin::CallAndReturn<ePedType, 0x60F8D0>();
+}
+
+// notsa
+bool CPopCycle::IsRaceAllowedInCurrentZone(ePedRace race) {
+    return race != RACE_DEFAULT && m_pCurrZoneInfo->zonePopulationRace & (1 << (race - 1));
 }

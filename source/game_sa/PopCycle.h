@@ -259,6 +259,12 @@ public:
     static void  UpdatePercentages();
     static ePedType PickGangToCreateMembersOf();
 
+    /*!
+    * @notsa
+    * @brief Check if a race is allowed in the current zone
+    */
+    static bool IsRaceAllowedInCurrentZone(ePedRace race);
+
 
     static uint8 GetCurrentPercTypeGroup(int32 groupId) {
         return m_nPercTypeGroup[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_pCurrZoneInfo->zonePopulationType][groupId];
