@@ -492,3 +492,11 @@ bool CPopulation::DoesCarGroupHaveModelId(int32 carGroupId, int32 modelId)
 {
     return plugin::CallAndReturn<bool, 0x406F50, int32, int32>(carGroupId, modelId);
 }
+
+uint32 CPopulation::GetTotalNumGang() {
+    return std::accumulate(
+        ms_nNumGang.begin(),
+        ms_nNumGang.end(),
+        0
+    );
+}

@@ -174,6 +174,7 @@ public:
     static void PopulateInterior(int32 numPeds, CVector posn);
     static void Update(bool generatePeds);
     static bool DoesCarGroupHaveModelId(int32 carGroupId, int32 modelId);
+    static uint32 GetTotalNumGang();
 
     static ePopcyclePedGroup GetPedGroupId(ePopcycleGroup popcycleGroup, size_t worldZone = 0) { return static_cast<ePopcyclePedGroup>(m_TranslationArray[popcycleGroup].pedGroupIds[worldZone]); }
     static ePopcyclePedGroup GetGangGroupId(eGangID gang, int32 worldZone = 0) { return static_cast<ePopcyclePedGroup>(m_TranslationArray[gang + POPCYCLE_GROUP_BALLAS].pedGroupIds[worldZone]); }
