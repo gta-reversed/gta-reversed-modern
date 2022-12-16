@@ -270,6 +270,7 @@ public:
     /// NOTSA
     static auto GetMaxCarsCurrently() { return m_nMaxNumCars[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_nCurrentZoneType]; }
     
+    static void UpdateIsGangArea();
 
     /*!
     * @notsa

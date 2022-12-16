@@ -7,6 +7,7 @@
 #include "StdInc.h"
 
 #include "PopCycle.h"
+#include <CustomBuildingDNPipeline.h>
 
 float& CPopCycle::m_NumOther_Cars = *(float*)0xC0BC30;
 float& CPopCycle::m_NumCops_Cars = *(float*)0xC0BC34;
@@ -40,13 +41,13 @@ void CPopCycle::InjectHooks() {
     RH_ScopedGlobalInstall(IsPedAppropriateForCurrentZone, 0x610150);
     RH_ScopedGlobalInstall(IsPedInGroup, 0x610210);
     RH_ScopedGlobalInstall(PickARandomGroupOfOtherPeds, 0x610420);
-    RH_ScopedGlobalInstall(PlayerKilledADealer, 0x610490, { .reversed = false });
+    RH_ScopedGlobalInstall(PlayerKilledADealer, 0x610490);
     RH_ScopedGlobalInstall(UpdateDealerStrengths, 0x6104B0);
-    RH_ScopedGlobalInstall(UpdateAreaDodgyness, 0x610560, { .reversed = false });
-    //RH_ScopedGlobalInstall(UpdateIsGangArea, 0x6106D0, { .reversed = false });
+    RH_ScopedGlobalInstall(UpdateAreaDodgyness, 0x610560);
+    RH_ScopedGlobalInstall(UpdateIsGangArea, 0x6106D0);
     RH_ScopedGlobalInstall(PedIsAcceptableInCurrentZone, 0x610720);
     RH_ScopedGlobalInstall(UpdatePercentages, 0x610770);
-    RH_ScopedGlobalInstall(Update, 0x610BF0, { .reversed = false });
+    RH_ScopedGlobalInstall(Update, 0x610BF0);
     RH_ScopedGlobalInstall(GetCurrentPercOther_Peds, 0x610310);
 }
 
@@ -319,22 +320,40 @@ void CPopCycle::PlayerKilledADealer() {
 
 // 0x610BF0
 void CPopCycle::Update() {
-    plugin::Call<0x610BF0>();
+    m_nCurrentTimeOfWeek = [] {
+        switch (CClock::GetGameWeekDay()) {
+        case 0: // Not sure (Maybe Sunday)
+        case 7: // Sunday
+            return 1;
+        case 1:  // Monday
+            return CClock::GetGameClockHours() >= 20 ? 0 : 1;
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+            return 0;
+        case 6: // Saturday
+            return CClock::GetGameClockHours() >= 20 ? 1 : 0;
+        }
+        NOTSA_UNREACHABLE();
+    }();
+
+    m_nCurrentTimeIndex = CClock::GetGameClockHours() / 2;
+
+    if (const auto pos = FindPlayerCentreOfWorld(); pos.z < 950.f || !m_pCurrZoneInfo) {
+        m_pCurrZoneInfo = CTheZones::GetZoneInfo(pos, &m_pCurrZone);
+        m_nCurrentZoneType = m_pCurrZoneInfo->zonePopulationType;
+    }
+
+    UpdatePercentages();
+    UpdateDealerStrengths();
+    UpdateAreaDodgyness();
+    UpdateIsGangArea();
 }
 
 // 0x610560
 void CPopCycle::UpdateAreaDodgyness() {
-    return plugin::Call<0x610560>();
-
-    m_fCurrentZoneDodgyness = 0.0f;
-    m_fCurrentZoneDodgyness = (float)m_pCurrZoneInfo->DrugDealerCounter * 0.07f;
-    m_fCurrentZoneDodgyness = std::accumulate(
-        std::begin(m_pCurrZoneInfo->GangDensity),
-        std::end(m_pCurrZoneInfo->GangDensity),
-        m_fCurrentZoneDodgyness,
-        [](const auto& a, const auto& b) { return a + float(b) / 100.0f; }
-    );
-    m_fCurrentZoneDodgyness = std::min(m_fCurrentZoneDodgyness, 1.0f);
+    m_fCurrentZoneDodgyness = std::min((float)m_pCurrZoneInfo->DrugDealerCounter * 0.07f + (float)m_pCurrZoneInfo->GetSumOfGangDensity() / 100.f, 1.0f);
 }
 
 // 0x6104B0
@@ -445,7 +464,7 @@ ePedType CPopCycle::PickGangToCreateMembersOf() {
     const auto dominatingGangId = rng::max(
         rng::iota_view{0u, std::size(m_pCurrZoneInfo->GangDensity)},
         rng::less{},
-        [sumGangDensity = m_pCurrZoneInfo->GetSumOfGangDensity()](auto gangId) {
+        [sumGangDensity = (float)m_pCurrZoneInfo->GetSumOfGangDensity()](auto gangId) {
             return (float)m_pCurrZoneInfo->GangDensity[gangId] / sumGangDensity - (float)CPopulation::ms_nNumGang[gangId] / m_NumGangs_Peds;
         }
     );
@@ -460,4 +479,8 @@ bool CPopCycle::IsRaceAllowedInCurrentZone(ePedRace race) {
 // notsa
 bool CPopCycle::IsRaceAllowedInCurrentZone(eModelID pedModelId) {
     return IsRaceAllowedInCurrentZone(CModelInfo::GetPedModelInfo((int32)pedModelId)->GetRace());
+}
+
+void CPopCycle::UpdateIsGangArea() {
+    m_bCurrentZoneIsGangArea = m_pCurrZoneInfo->GetSumOfGangDensity() > 20;
 }
