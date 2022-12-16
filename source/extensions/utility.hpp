@@ -74,8 +74,8 @@ T accumulate(R&& r, T init, Proj proj = {}, FnOp op = {}) {
 template<typename O>
 struct cast_to {
     template<typename I>
-    O&& operator()(I&& input) {
-        return static_cast<O&&>(input);
+    O operator()(I&& input) {
+        return static_cast<O>(input);
     }
 };
 

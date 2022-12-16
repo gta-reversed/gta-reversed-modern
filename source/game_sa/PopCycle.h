@@ -216,7 +216,10 @@ public:
     static float&      m_fCurrentZoneDodgyness;
     static CZone*&     m_pCurrZone;
     static CZoneInfo*& m_pCurrZoneInfo;
+
+    //! Same as `m_pCurrZoneInfo->zonePopulationType`
     static int32&      m_nCurrentZoneType;
+
     static int32&      m_nCurrentTimeOfWeek;
     static int32&      m_nCurrentTimeIndex;
     static float&      m_NumDealers_Peds;
@@ -260,6 +263,13 @@ public:
     static void  UpdateDealerStrengths();
     static void  UpdatePercentages();
     static ePedType PickGangToCreateMembersOf();
+
+    /// NOTSA
+    static auto GetMaxPedsCurrently() { return m_nMaxNumPeds[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_nCurrentZoneType]; }
+
+    /// NOTSA
+    static auto GetMaxCarsCurrently() { return m_nMaxNumCars[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_nCurrentZoneType]; }
+    
 
     /*!
     * @notsa

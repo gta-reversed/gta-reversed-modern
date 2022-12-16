@@ -45,7 +45,7 @@ void CPopCycle::InjectHooks() {
     RH_ScopedGlobalInstall(UpdateAreaDodgyness, 0x610560, { .reversed = false });
     //RH_ScopedGlobalInstall(UpdateIsGangArea, 0x6106D0, { .reversed = false });
     RH_ScopedGlobalInstall(PedIsAcceptableInCurrentZone, 0x610720);
-    RH_ScopedGlobalInstall(UpdatePercentages, 0x610770, { .reversed = false });
+    RH_ScopedGlobalInstall(UpdatePercentages, 0x610770);
     RH_ScopedGlobalInstall(Update, 0x610BF0, { .reversed = false });
     RH_ScopedGlobalInstall(GetCurrentPercOther_Peds, 0x610310);
 }
@@ -372,7 +372,69 @@ void CPopCycle::UpdateDealerStrengths() {
 
 // 0x610770
 void CPopCycle::UpdatePercentages() {
-    plugin::Call<0x610770>();
+    m_fPercDealers = std::max(0.1f, (float)m_pCurrZoneInfo->DrugDealerCounter / 100.f);
+
+    m_fPercGangs = std::min(0.5f, (float)m_pCurrZoneInfo->GetSumOfGangDensity() / 100.f);
+    m_fPercCops = m_fPercGangs >= 0.15f
+        ? std::max(0.03f, 0.3f - m_fPercGangs)
+        : std::max(0.02f, m_fPercGangs);
+
+    // 0x610881
+    m_fPercCops = [] {
+        switch (m_pCurrZoneInfo->zonePopulationType) {
+        case POPCYCLE_PEDGROUP_BUSINESS_SF:
+        case POPCYCLE_PEDGROUP_CASUAL_RICH_LA:
+        case POPCYCLE_PEDGROUP_CASUAL_RICH_VG:
+            return m_fPercCops <= 0.1f ? 0.1f : m_fPercCops;
+        case POPCYCLE_PEDGROUP_BUSINESS_VG:
+            return m_fPercCops <= 0.05f ? 0.05f : m_fPercCops;
+        case POPCYCLE_PEDGROUP_CLUBBERS_VG:
+        case POPCYCLE_PEDGROUP_CASUAL_AVERAGE_LA:
+            return 0.f;
+        }
+        return m_fPercCops;
+    }();
+
+    // 0x610922:
+    if (const auto sum = m_fPercDealers + m_fPercGangs + m_fPercCops; sum <= 1.f) {
+        m_fPercOther = 1.f - sum;
+    } else { // Otherwise normalize all values by the sum (This will make their new sum be `1.f`)
+        m_fPercOther    = 0.f;
+        m_fPercDealers /= sum;
+        m_fPercGangs   /= sum;
+        m_fPercCops    /= sum;
+    }
+
+    // 0x610A7D
+    gfLaRiotsLightMult = (CGameLogic::LaRiotsActiveHere() && (1.f - CCustomBuildingDNPipeline::m_fDNBalanceParam) > 0.5f)
+        ? std::max(0.6f, gfLaRiotsLightMult - 0.01f) // Decrease
+        : std::min(1.f, gfLaRiotsLightMult + 0.01f); // Increase
+
+    // 0x610A41 + 0x610A57
+    const auto maxNumPeds = (float)(
+        CGameLogic::LaRiotsActiveHere()
+            ? std::min<uint8>(20u, GetMaxPedsCurrently())
+            : GetMaxPedsCurrently()
+    );
+
+    // From all the data above, calculate the actual ped/car numbers for this zone
+    const auto Process = [
+        maxNumPeds,
+        maxNumCars = GetMaxCarsCurrently()
+    ](PercDataArray& maxPercLUT, float percPeds, float percCars, float& nOutPeds, float& nOutCars) {
+        const auto maxPercOfType = (float)maxPercLUT[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_nCurrentZoneType] / 100.f;
+
+        nOutPeds = maxNumPeds * (maxPercOfType * percPeds);
+        nOutCars = maxNumCars * (maxPercOfType * percCars);
+
+        if (CGameLogic::LaRiotsActiveHere()) {
+            nOutCars *= 0.75f;
+        }
+    };
+    Process(m_nPercDealers, m_fPercDealers,                                    m_fPercDealers, m_NumDealers_Peds, m_NumDealers_Cars);
+    Process(m_nPercGang,    m_fPercGangs,                                      m_fPercGangs,   m_NumGangs_Peds,   m_NumGangs_Cars  );
+    Process(m_nPercCops,    m_fPercCops,                                       m_fPercCops,    m_NumCops_Peds,    m_NumCops_Cars   );
+    Process(m_nPercOther,   m_fPercOther * GetCurrentPercOther_Peds() / 100.f, m_fPercOther,   m_NumOther_Peds,   m_NumOther_Cars  );
 }
 
 // 0x60F8D0

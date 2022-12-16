@@ -13,7 +13,7 @@
 class CZoneInfo {
 public:
     uint8  GangDensity[10];
-    uint8  DrugDealerCounter; /// Counter updated in `UpdateDealerStrengths`. Only used durning gang wars. Max value is the size of the array in the beforementioned function.
+    uint8  DrugDealerCounter; /// Counter updated in `UpdateDealerStrengths`. Only used durning gang wars. Max value is the size of the array in the beforementioned function (15 currently)
     CRGBA  ZoneColor;
     union {
         struct {
@@ -30,8 +30,7 @@ public:
     auto GetSumOfGangDensity() const {
         return notsa::accumulate(
             GangDensity,  
-            0.f,
-            notsa::cast_to<float>{}
+            (size_t)0u // Making sure no overflow occurs (because uint8 is used instead of casting to a wider type)
         );
     }
 };
