@@ -46,6 +46,24 @@ T_Ret FirstNonNull(R&& range) {
         : nullptr;
 }
 
+// https://stackoverflow.com/a/52667105
+template <typename T, std::size_t... Ds>
+struct mdarray_impl;
+
+template <typename T, std::size_t D>
+struct mdarray_impl<T, D> {
+    using type = std::array<T, D>;
+};
+
+template <typename T, std::size_t D, std::size_t... Ds>
+struct mdarray_impl<T, D, Ds...> {
+    using type = std::array<typename mdarray_impl<T, Ds...>::type, D>;
+};
+
+//! Multidimensional array - Represents a C array of with dimensions in the same order as specified here
+template <typename T, std::size_t... Ds>
+using mdarray = typename mdarray_impl<T, Ds...>::type;
+
 /*!
 * @tparam Start     The number at which to start the iteration
 * @tparam Stop      The number at which to stop the iteration
