@@ -46,6 +46,21 @@ T_Ret FirstNonNull(R&& range) {
         : nullptr;
 }
 
+
+/*!
+* @brief Helper functor - to be used as projection to `ranges` functions - to cast a value into another type.
+*
+* @tparam O - Type to cast to
+*/
+template<typename O>
+struct cast_to {
+    template<typename I>
+    O&& operator()(I&& input) {
+        return static_cast<O&&>(input);
+    }
+};
+
+
 /*!
 * @tparam Start     The number at which to start the iteration
 * @tparam Stop      The number at which to stop the iteration
