@@ -41,7 +41,7 @@ void CPopCycle::InjectHooks() {
     RH_ScopedGlobalInstall(IsPedInGroup, 0x610210);
     RH_ScopedGlobalInstall(PickARandomGroupOfOtherPeds, 0x610420);
     RH_ScopedGlobalInstall(PlayerKilledADealer, 0x610490, { .reversed = false });
-    RH_ScopedGlobalInstall(UpdateDealerStrengths, 0x6104B0, { .reversed = false });
+    RH_ScopedGlobalInstall(UpdateDealerStrengths, 0x6104B0);
     RH_ScopedGlobalInstall(UpdateAreaDodgyness, 0x610560, { .reversed = false });
     //RH_ScopedGlobalInstall(UpdateIsGangArea, 0x6106D0, { .reversed = false });
     RH_ScopedGlobalInstall(PedIsAcceptableInCurrentZone, 0x610720);
@@ -339,7 +339,35 @@ void CPopCycle::UpdateAreaDodgyness() {
 
 // 0x6104B0
 void CPopCycle::UpdateDealerStrengths() {
-    plugin::Call<0x6104B0>();
+    if (!CGangWars::bGangWarsActive) {
+        return;
+    }
+
+    if (CTimer::m_snTimeInMilliseconds / 60000 != CTimer::m_snPreviousTimeInMilliseconds / 60000) {
+        return;
+    }
+
+    if (!CTheZones::TotalNumberOfMapZones) {
+        return;
+    }
+
+    for (auto& zone : CTheZones::ZoneInfoArray) {
+        const auto Chk = [&](eGangID gangId) { return zone.GangDensity[gangId] > 10u; };
+        if (!Chk(GANG_BALLAS) && !Chk(GANG_GROVE) && !Chk(GANG_VAGOS)) {
+            continue;
+        }
+
+        constexpr float chances[]{ 0.05f, 0.2f, 0.3f, 0.35f, 0.4f, 0.5f, 0.55f, 0.6f, 0.65f, 0.7f, 0.7f, 0.7f, 0.7f, 0.7f, 0.7f }; // 0x8D24F0
+        if (zone.DrugDealerCounter >= std::size(chances)) {
+            continue;
+        }
+
+        if (CGeneral::GetRandomNumber() >= chances[zone.DrugDealerCounter]) {
+            continue;
+        }
+
+        zone.DrugDealerCounter++;
+    }
 }
 
 // 0x610770

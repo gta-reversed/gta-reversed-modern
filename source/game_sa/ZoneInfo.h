@@ -13,7 +13,7 @@
 class CZoneInfo {
 public:
     uint8  GangDensity[10];
-    uint8  DrugDealerCounter;
+    uint8  DrugDealerCounter; /// Counter updated in `UpdateDealerStrengths`. Only used durning gang wars. Max value is the size of the array in the beforementioned function.
     CRGBA  ZoneColor;
     union {
         struct {
