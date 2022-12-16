@@ -34,10 +34,10 @@ void CPopCycle::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedGlobalInstall(Initialise, 0x5BC090);
-    RH_ScopedGlobalInstall(PickGangToCreateMembersOf, 0x60F8D0, { .reversed = false });
+    RH_ScopedGlobalInstall(PickGangToCreateMembersOf, 0x60F8D0);
     RH_ScopedGlobalInstall(FindNewPedType, 0x60FBD0);
     RH_ScopedGlobalInstall(PickPedMIToStreamInForCurrentZone, 0x60FFD0);
-    RH_ScopedGlobalInstall(IsPedAppropriateForCurrentZone, 0x610150, { .reversed = false });
+    RH_ScopedGlobalInstall(IsPedAppropriateForCurrentZone, 0x610150);
     RH_ScopedGlobalInstall(IsPedInGroup, 0x610210);
     RH_ScopedGlobalInstall(PickARandomGroupOfOtherPeds, 0x610420);
     RH_ScopedGlobalInstall(PlayerKilledADealer, 0x610490, { .reversed = false });
@@ -48,7 +48,6 @@ void CPopCycle::InjectHooks() {
     RH_ScopedGlobalInstall(UpdatePercentages, 0x610770, { .reversed = false });
     RH_ScopedGlobalInstall(Update, 0x610BF0, { .reversed = false });
     RH_ScopedGlobalInstall(GetCurrentPercOther_Peds, 0x610310);
-    RH_ScopedGlobalInstall(IsPedAppropriateForCurrentZone, 0x610150);
 }
 
 // 0x5BC090
@@ -350,7 +349,17 @@ void CPopCycle::UpdatePercentages() {
 
 // 0x60F8D0
 ePedType CPopCycle::PickGangToCreateMembersOf() {
-    return plugin::CallAndReturn<ePedType, 0x60F8D0>();
+    if (CCheat::IsActive(CHEAT_GANGS_CONTROLS_THE_STREETS)) {
+        return CGeneral::RandomChoice(GetAllGangPedTypes());
+    }
+    const auto dominatingGangId = rng::max(
+        rng::iota_view{0u, std::size(m_pCurrZoneInfo->GangDensity)},
+        rng::less{},
+        [sumGangDensity = m_pCurrZoneInfo->GetSumOfGangDensity()](auto gangId) {
+            return (float)m_pCurrZoneInfo->GangDensity[gangId] / sumGangDensity - (float)CPopulation::ms_nNumGang[gangId] / m_NumGangs_Peds;
+        }
+    );
+    return (ePedType)((size_t)PED_TYPE_GANG1 + dominatingGangId);
 }
 
 // notsa

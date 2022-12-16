@@ -6,7 +6,9 @@
 */
 #pragma once
 
-#include "RenderWare.h"
+#include <Base.h>
+#include <RenderWare.h>
+#include <utility.hpp>
 
 class CZoneInfo {
 public:
@@ -24,6 +26,14 @@ public:
             uint8 Flags1, Flags2;
         };
     };
+
+    auto GetSumOfGangDensity() const {
+        return notsa::accumulate(
+            GangDensity,  
+            0.f,
+            notsa::cast_to<float>{}
+        );
+    }
 };
 
 VALIDATE_SIZE(CZoneInfo, 0x11);
