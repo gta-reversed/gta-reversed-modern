@@ -7,6 +7,8 @@
 #pragma once
 
 #include "ZoneInfo.h"
+#include "ePedRace.h"
+
 class CZone;
 
 enum ePedType : uint32;
