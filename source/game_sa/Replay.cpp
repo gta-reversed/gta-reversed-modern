@@ -190,6 +190,10 @@ void CReplay::StorePedUpdate(CPed* ped, uint8 index) {
 void CReplay::RetrievePedAnimation(CPed* ped, const CStoredAnimationState& state) {
     // todo: refactor
 
+    constexpr auto ANIM_TIME_COMPRESS_VALUE  = 63.75f;
+    constexpr auto ANIM_SPEED_COMPRESS_VALUE = 85.0f;
+    constexpr auto ANIM_BLEND_COMPRESS_VALUE = 127.5f;
+
     CAnimBlendAssociation* anim = nullptr;
     if (auto first = state[0]; first.m_nAnimId > 3u) {
         auto animBlock = CAnimManager::ms_aAnimAssocGroups[first.m_nGroupId1].m_pAnimBlock;
@@ -201,8 +205,8 @@ void CReplay::RetrievePedAnimation(CPed* ped, const CStoredAnimationState& state
     } else {
         anim = CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, (AnimationId)first.m_nAnimId, 100.0f);
     }
-    anim->SetCurrentTime(state[0].m_nTime * 0.015686275f);
-    anim->SetSpeed(state[0].m_nSpeed * 0.011764706f);
+    anim->SetCurrentTime(state[0].m_nTime / ANIM_TIME_COMPRESS_VALUE);
+    anim->SetSpeed(state[0].m_nSpeed / ANIM_SPEED_COMPRESS_VALUE);
     anim->SetBlend(1.0f, 1.0f);
     anim->m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
 
@@ -215,9 +219,9 @@ void CReplay::RetrievePedAnimation(CPed* ped, const CStoredAnimationState& state
         }
 
         if (anim) {
-            anim->SetCurrentTime(second.m_nTime * 0.015686275f);
-            anim->SetSpeed(second.m_nSpeed * 0.011764706f);
-            anim->SetBlend(second.m_nGroupId1 * 0.0078431377f, 1.0f); // wtf?
+            anim->SetCurrentTime(second.m_nTime / ANIM_TIME_COMPRESS_VALUE);
+            anim->SetSpeed(second.m_nSpeed / ANIM_SPEED_COMPRESS_VALUE);
+            anim->SetBlend(second.m_nGroupId1 / ANIM_BLEND_COMPRESS_VALUE, 1.0f);
             anim->m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
         }
     }
@@ -228,9 +232,9 @@ void CReplay::RetrievePedAnimation(CPed* ped, const CStoredAnimationState& state
             if (auto animBlock = CAnimManager::ms_aAnimAssocGroups[third.m_nGroupId2].m_pAnimBlock; animBlock && animBlock->bLoaded) {
                 anim = CAnimManager::BlendAnimation(ped->m_pRwClump, (AssocGroupId)third.m_nGroupId2, (AnimationId)third.m_nAnimId, 1000.0f);
 
-                anim->SetCurrentTime(third.m_nTime * 0.015686275f);
-                anim->SetSpeed(third.m_nSpeed * 0.011764706f);
-                anim->SetBlend(third.m_nGroupId1 * 0.0078431377f, 0.0f);
+                anim->SetCurrentTime(third.m_nTime / ANIM_TIME_COMPRESS_VALUE);
+                anim->SetSpeed(third.m_nSpeed / ANIM_SPEED_COMPRESS_VALUE);
+                anim->SetBlend(third.m_nGroupId1 / ANIM_BLEND_COMPRESS_VALUE, 0.0f);
                 anim->m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
             }
         }
@@ -413,11 +417,11 @@ void CReplay::SaveReplayToHD() {
                 break;
             slot = NextSlot(slot);
         }
-        CFileMgr::Write(file, Buffers[slot].buffer.data(), 100000u);
+        CFileMgr::Write(file, Buffers[slot].buffer.data(), sizeof(tReplayBuffer));
 
         while (BufferStatus[slot] != REPLAYBUFFER_IN_USE) {
             slot = NextSlot(slot);
-            CFileMgr::Write(file, Buffers[slot].buffer.data(), 100000u);
+            CFileMgr::Write(file, Buffers[slot].buffer.data(), sizeof(tReplayBuffer));
         }
         CFileMgr::CloseFile(file);
     }
@@ -434,12 +438,12 @@ void CReplay::PlayReplayFromHD() {
             DEV_LOG("Invalid replay file data, header unmatch (='{}')", std::string_view{gString, 8u});
         } else {
             auto bufferIdx = 0u;
-            for (; bufferIdx < 8u && CFileMgr::Read(file, Buffers[bufferIdx].buffer.data(), sizeof(tReplayBuffer)); bufferIdx++) {
+            for (; bufferIdx < NUM_REPLAY_BUFFERS && CFileMgr::Read(file, Buffers[bufferIdx].buffer.data(), sizeof(tReplayBuffer)); bufferIdx++) {
                 BufferStatus[bufferIdx] = REPLAYBUFFER_FULL;
             }
             BufferStatus[bufferIdx - 1] = REPLAYBUFFER_IN_USE; // Mark last used buffer as in-use.
 
-            for (auto i = bufferIdx; i < 8; i++) { // Mark unfilled buffer as n/a.
+            for (auto i = bufferIdx; i < NUM_REPLAY_BUFFERS; i++) { // Mark unfilled buffer as n/a.
                 BufferStatus[i] = REPLAYBUFFER_NOT_AVAILABLE;
             }
 
@@ -966,7 +970,7 @@ void CReplay::RecordThisFrame() {
 
                 Record.Write<tReplayPedHeaderBlock>({
                     .poolRef = (uint8)i,
-                    .modelId = (int16)((modelId >= 290 && modelId <= 300) ? MODEL_MALE01 : modelId),
+                    .modelId = (int16)((modelId >= MODEL_SPECIAL01 && modelId <= MODEL_CUTOBJ01) ? MODEL_MALE01 : modelId),
                     .pedType = (uint8)ped->m_nPedType
                 });
 

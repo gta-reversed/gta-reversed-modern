@@ -15,7 +15,6 @@
 #include "CStreamingDebugModule.h"
 #include "CPickupsDebugModule.h"
 #include "CDarkelDebugModule.h"
-#include "CVehicleRecordingDebugModule.h"
 #include "HooksDebugModule.h"
 #include "CTeleportDebugModule.h"
 #include "FXDebugModule.h"
@@ -200,11 +199,6 @@ void DebugModules::ProcessExtraDebugFeatures() {
 
         if (ImGui::BeginTabItem("Rampage")) {
             CDarkelDebugModule::ProcessImGui();
-            ImGui::EndTabItem();
-        }
-
-        if (ImGui::BeginTabItem("Vehicle Recordings")) {
-            CVehicleRecordingDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 
