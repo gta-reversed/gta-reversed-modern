@@ -201,28 +201,28 @@ public:
         COUNT,
     };
 public:
-    static float&      m_NumOther_Cars;
-    static float&      m_NumCops_Cars;
-    static float&      m_NumGangs_Cars;
-    static float&      m_NumDealers_Cars;
-    static float&      m_NumOther_Peds;
-    static float&      m_NumCops_Peds;
-    static float&      m_NumGangs_Peds;
-    static float&      m_fPercOther;
-    static float&      m_fPercCops;
-    static float&      m_fPercGangs;
-    static float&      m_fPercDealers;
-    static bool&       m_bCurrentZoneIsGangArea;
-    static float&      m_fCurrentZoneDodgyness;
-    static CZone*&     m_pCurrZone;
-    static CZoneInfo*& m_pCurrZoneInfo;
+    static inline float& m_NumOther_Cars = *(float*)0xC0BC30;
+    static inline float& m_NumCops_Cars = *(float*)0xC0BC34;
+    static inline float& m_NumGangs_Cars = *(float*)0xC0BC38;
+    static inline float& m_NumDealers_Cars = *(float*)0xC0BC3C;
+    static inline float& m_NumOther_Peds = *(float*)0xC0BC40;
+    static inline float& m_NumCops_Peds = *(float*)0xC0BC44;
+    static inline float& m_NumGangs_Peds = *(float*)0xC0BC48;
+    static inline float& m_fPercOther = *(float*)0xC0BC4C;
+    static inline float& m_fPercCops = *(float*)0xC0BC50;
+    static inline float& m_fPercGangs = *(float*)0xC0BC54;
+    static inline float& m_fPercDealers = *(float*)0xC0BC58;
+    static inline bool& m_bCurrentZoneIsGangArea = *(bool*)0xC0BC5C;
+    static inline float& m_fCurrentZoneDodgyness = *(float*)0xC0BC60;
+    static inline CZone*& m_pCurrZone = *(CZone**)0xC0BC64;
+    static inline CZoneInfo*& m_pCurrZoneInfo = *(CZoneInfo**)0xC0BC68;
 
     //! Same as `m_pCurrZoneInfo->zonePopulationType`
-    static int32&      m_nCurrentZoneType;
+    static inline int32& m_nCurrentZoneType = *(int32*)0xC0BC6C;
 
-    static int32&      m_nCurrentTimeOfWeek;
-    static int32&      m_nCurrentTimeIndex;
-    static float&      m_NumDealers_Peds;
+    static inline int32& m_nCurrentTimeOfWeek = *(int32*)0xC0BC70;
+    static inline int32& m_nCurrentTimeIndex = *(int32*)0xC0BC74;
+    static inline float& m_NumDealers_Peds = *(float*)0xC0E978;
 
     static constexpr auto PERC_DATA_TIME_RESOLUTION_HR = 2;
 

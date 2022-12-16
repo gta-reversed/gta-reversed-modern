@@ -9,27 +9,6 @@
 #include "PopCycle.h"
 #include <CustomBuildingDNPipeline.h>
 
-float& CPopCycle::m_NumOther_Cars = *(float*)0xC0BC30;
-float& CPopCycle::m_NumCops_Cars = *(float*)0xC0BC34;
-float& CPopCycle::m_NumGangs_Cars = *(float*)0xC0BC38;
-float& CPopCycle::m_NumDealers_Cars = *(float*)0xC0BC3C;
-float& CPopCycle::m_NumOther_Peds = *(float*)0xC0BC40;
-float& CPopCycle::m_NumCops_Peds = *(float*)0xC0BC44;
-float& CPopCycle::m_NumGangs_Peds = *(float*)0xC0BC48;
-float& CPopCycle::m_fPercOther = *(float*)0xC0BC4C;
-float& CPopCycle::m_fPercCops = *(float*)0xC0BC50;
-float& CPopCycle::m_fPercGangs = *(float*)0xC0BC54;
-float& CPopCycle::m_fPercDealers = *(float*)0xC0BC58;
-bool& CPopCycle::m_bCurrentZoneIsGangArea = *(bool*)0xC0BC5C;
-float& CPopCycle::m_fCurrentZoneDodgyness = *(float*)0xC0BC60;
-CZone*& CPopCycle::m_pCurrZone = *(CZone**)0xC0BC64;
-CZoneInfo*& CPopCycle::m_pCurrZoneInfo = *(CZoneInfo**)0xC0BC68;
-int32& CPopCycle::m_nCurrentZoneType = *(int32*)0xC0BC6C;
-int32& CPopCycle::m_nCurrentTimeOfWeek = *(int32*)0xC0BC70;
-int32& CPopCycle::m_nCurrentTimeIndex = *(int32*)0xC0BC74;
-float& CPopCycle::m_NumDealers_Peds = *(float*)0xC0E978;
-
-
 void CPopCycle::InjectHooks() {
     RH_ScopedClass(CPopCycle);
     RH_ScopedCategoryGlobal();
