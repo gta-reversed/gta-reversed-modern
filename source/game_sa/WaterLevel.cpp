@@ -1,10 +1,12 @@
 #include "StdInc.h"
 #include "WaterLevel.h"
+#include <sstream>
 
 void CWaterLevel::InjectHooks() {
     RH_ScopedClass(CWaterLevel);
     RH_ScopedCategoryGlobal();
 
+    RH_ScopedGlobalInstall(WaterLevelInitialise, 0x6EAE80);
     RH_ScopedGlobalInstall(Shutdown, 0x6E59E0, { .reversed = false });
     RH_ScopedGlobalInstall(RenderWaterTriangle, 0x6EE240, { .reversed = false });
     RH_ScopedGlobalInstall(RenderFlatWaterTriangle, 0x6EE080, { .reversed = false });
@@ -15,7 +17,6 @@ void CWaterLevel::InjectHooks() {
     RH_ScopedGlobalInstall(SplitWaterRectangleAlongXLine, 0x6EB810, { .reversed = false });
     RH_ScopedGlobalInstall(PreRenderWater, 0x6EB710, { .reversed = false });
     RH_ScopedOverloadedInstall(GetWaterLevel, "", 0x6EB690, bool(*)(float, float, float, float*, uint8, CVector*));
-    RH_ScopedGlobalInstall(WaterLevelInitialise, 0x6EAE80, { .reversed = false });
     RH_ScopedGlobalInstall(SetUpWaterFog, 0x6EA9F0, { .reversed = false });
     RH_ScopedGlobalInstall(RenderWakeSegment, 0x6EA260, { .reversed = false });
     RH_ScopedGlobalInstall(FindNearestWaterAndItsFlow, 0x6E9D70, { .reversed = false });
@@ -26,6 +27,128 @@ void CWaterLevel::InjectHooks() {
     RH_ScopedGlobalInstall(SplitWaterTriangleAlongYLine, 0x6EE5A0, { .reversed = false });
     RH_ScopedGlobalInstall(RenderWater, 0x6EF650, { .reversed = false });
     RH_ScopedGlobalInstall(AddWaveToResult, 0x6E81E0, { .reversed = false });
+}
+
+// NOTSA
+bool CWaterLevel::LoadDataFile() {
+    const auto file = CFileMgr::OpenFile(m_nWaterConfiguration == 1 ? "DATA//water1.dat" : "DATA//water.dat", "r");
+
+    const notsa::AutoCallOnDestruct autoCloser{ [&] { CFileMgr::CloseFile(file); } };
+
+    uint32 nline{}, ntri{}, nquad{};
+    for (;; nline++) {
+        const auto line = CFileLoader::LoadLine(file);
+        if (!line) {
+            break;
+        }
+        std::stringstream liness{ line };
+
+        auto nvertices{0u};
+
+        struct {
+            CVector   pos{};
+            CVector2D flow{};
+            float     bigWaves{}, smallWaves{};
+        } vertices[4]{};
+
+        // Helper function to read a vertex from the stream
+        const auto ReadNextVertex = [&]() {
+            auto& vtx = vertices[nvertices];
+            liness
+                >> vtx.pos.x
+                >> vtx.pos.y
+                >> vtx.pos.z
+                >> vtx.flow.x
+                >> vtx.flow.y
+                >> vtx.bigWaves
+                >> vtx.smallWaves;
+
+            if (liness.good()) {
+                nvertices++;
+                return true;
+            }
+
+            return false;
+        };
+
+        // If can't read first vertex just ignore line
+        if (!ReadNextVertex()) {
+            continue;
+        }
+
+        // Read 2/3 more vertices
+        while (ReadNextVertex() && nvertices < 4);
+
+        // Check if we have enough vertices
+        if (nvertices < 3) {
+            DEV_LOG("[Warning]: Not enough vertices, got {}, expected 3 or 4. [Line: {}]", nvertices, nline);
+            continue;
+            //return false; // Just stop here, this parser is way too primitive to be able to recover from errors
+        }
+
+        // Optional flag after vertices
+        uint32 flags{};
+        liness >> flags;
+
+        // I'm sorry, but don't blame me I HAD NO OTHER CHOICE!
+        #define VertexUnpack(n) \
+            (int32)vertices[n].pos.x, (int32)vertices[n].pos.y, \
+            CRenPar{vertices[n].pos.z, vertices[n].bigWaves, vertices[n].smallWaves, (int8)(vertices[n].flow.x * 64.f), (int8)(vertices[n].flow.y * 64.f)}
+
+        // Add quad/triangle
+        if (nvertices == 4) {
+            CWaterLevel::AddWaterLevelQuad(
+                VertexUnpack(0),
+                VertexUnpack(1),
+                VertexUnpack(2),
+                VertexUnpack(3),
+                flags
+            );
+            nquad++;
+        } else {
+            CWaterLevel::AddWaterLevelTriangle(
+                VertexUnpack(0),
+                VertexUnpack(1),
+                VertexUnpack(2),
+                flags
+            );
+            ntri++;
+        }
+        #undef ArgUnpack
+    }
+    DEV_LOG("Successfully loaded! [Quads: {}; Tris: {}]", nquad, ntri);
+    return true;
+}
+
+// NOTSA: Code @ 0x6EB5F4
+void CWaterLevel::LoadTextures() {
+    CTxdStore::PushCurrentTxd();    
+    CTxdStore::SetCurrentTxd(CTxdStore::FindTxdSlot("particle"));
+
+    const auto DoTex = [](auto& inOutTex, auto& outRaster, const char* name) {
+        if (!inOutTex) {
+            inOutTex = RwTextureRead(name, nullptr);
+        }
+        outRaster = RwTextureGetRaster(inOutTex);
+    };
+    DoTex(texWaterclear256, waterclear256Raster, "waterclear256");
+    DoTex(texSeabd32,       seabd32Raster,       "seabd32"      );
+    DoTex(texWaterwake,     waterwakeRaster,     "waterwake"    );
+
+    CTxdStore::PopCurrentTxd();
+}
+
+// 0x6EAE80
+void CWaterLevel::WaterLevelInitialise() {
+    NumWaterTriangles = 0;
+    NumWaterQuads = 0;
+    NumWaterVertices = 0;
+    NumWaterZonePolys = 0;
+    
+    (void)LoadDataFile();
+    FillQuadsAndTrianglesList();
+
+    LoadTextures();
 }
 
 // 0x6E59E0
@@ -92,11 +215,6 @@ bool CWaterLevel::GetWaterLevel(float x, float y, float z, float* pOutWaterLevel
 
     AddWaveToResult(x, y, pOutWaterLevel, fUnkn1, fUnkn2, pVecNormals);
     return true;
-}
-
-// 0x6EAE80
-void CWaterLevel::WaterLevelInitialise() {
-    plugin::Call<0x6EAE80>();
 }
 
 // 0x6EA9F0
@@ -219,4 +337,18 @@ bool CWaterLevel::IsPointUnderwaterNoWaves(const CVector& point) {
 
 bool CWaterLevel::GetWaterLevel(const CVector& pos, float& outWaterLevel, bool touchingWater, CVector* normals) {
     return GetWaterLevel(pos.x, pos.y, pos.z, &outWaterLevel, touchingWater, normals);
+}
+
+// 0x6E7EF0
+void CWaterLevel::AddWaterLevelQuad(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3, int32 X4, int32 Y4, CRenPar P4, uint32 Flags) {
+    return plugin::CallAndReturn<void, 0x6E7EF0, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar, uint32>(X1, Y1, P1, X2, Y2, P2, X3, Y3, P3, X4, Y4, P4, Flags);
+}
+
+// 0x6E7D40
+void CWaterLevel::AddWaterLevelTriangle(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3, uint32 Flags) {
+    return plugin::CallAndReturn<void, 0x6E7D40, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar, uint32>(X1, Y1, P1, X2, Y2, P2, X3, Y3, P3, Flags);
+}
+
+void CWaterLevel::FillQuadsAndTrianglesList() {
+    plugin::Call<0x6E7B30>();
 }

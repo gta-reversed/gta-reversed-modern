@@ -36,6 +36,9 @@ public:
     static int32 Tell(FILESTREAM file);
     static bool GetErrorReadWrite(FILESTREAM file);
 
+    //! Increment the file's seek pointer until after the next new line (`\n`) (make sure file is open in non-binary mode!)
+    static void SeekNextLine(FILESTREAM file);
+
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

@@ -99,6 +99,10 @@ void DebugModules::DisplayMainWindow() {
             if (ImGui::Button("Streamer: ReInit")) {
                 CStreaming::ReInit();
             }
+            if (ImGui::Button("WaterLevel: ReInit")) {
+                CWaterLevel::Shutdown();
+                CWaterLevel::WaterLevelInitialise();
+            }
             ImGui::EndTabItem();
         }
 

@@ -2,12 +2,12 @@
 
 #include "Base.h"
 #include "Vector.h"
+#include <extensions/utility.hpp>
 
 struct CRenPar {
-    float z;
-    float u;
-    float waveHeight;
-    float velocity;
+    float z;                        // Z pos of this thing. x, y can be found in the containing vertex, see `CWaterVertex`.
+    float bigWaves, smallWaves;     // Height of waves
+    int8  flowX, flowY;         // Fixed-point float. Divide by 64
 };
 
 struct CWaterVertex {
@@ -54,12 +54,21 @@ class CWaterLevel {
 
     static inline RwRaster*&   waterclear256Raster = *(RwRaster**)0xC228A8;
     static inline RwTexture*&  texWaterclear256 = *(RwTexture**)0xC228AC;
-    
+
     static inline RwRaster*&   seabd32Raster = *(RwRaster**)0xC228B0;
     static inline RwTexture*&  texSeabd32 = *(RwTexture**)0xC228B4;
 
     static inline RwRaster*&   waterwakeRaster = *(RwRaster**)0xC228B8;
     static inline RwTexture*&  texWaterwake = *(RwTexture**)0xC228BC;
+
+    static inline int32& NumWaterTriangles = *(int32*)0xC22884;
+    static inline int32& NumWaterQuads = *(int32*)0xC22888;
+    static inline int32& NumWaterVertices = *(int32*)0xC2288C;
+    static inline int32& NumWaterZonePolys = *(int32*)0xC215F0;
+
+    static inline auto& WaterZones = *(notsa::mdarray<int32, 12, 12>*)0xC21B70;
+
+    //static inline std::array<std::array<
 
 public:
     static void InjectHooks();
@@ -76,6 +85,8 @@ public:
     static void PreRenderWater();
     static bool GetWaterDepth(const CVector& vecPos, float* pOutWaterDepth, float* pOutWaterLevel, float* pOutGroundLevel);
     static bool GetWaterLevel(float x, float y, float z, float* pOutWaterLevel, uint8 bTouchingWater, CVector* pVecNormals);
+    static bool LoadDataFile();
+    static void LoadTextures();
     static void WaterLevelInitialise();
     static void SetUpWaterFog(int32 a1, int32 a2, int32 a3, int32 a4);
     static int32 RenderWakeSegment(CVector2D & a1, CVector2D & a2, CVector2D & a3, CVector2D & a4, float & a5, float & a6, float & alphaMult1, float & alphaMult2, float & a9);
@@ -91,6 +102,11 @@ public:
     static bool IsPointUnderwaterNoWaves(const CVector& point);
     static bool GetWaterLevel(const CVector& pos, float& outWaterLevel, bool touchingWater, CVector* normals = nullptr);
 
+    static void AddWaterLevelQuad(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3, int32 X4, int32 Y4, CRenPar P4, uint32 Flags);
+    static void AddWaterLevelTriangle(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3, uint32 Flags);
+
+    static void FillQuadsAndTrianglesList();
+
     /* Missing (In no particular order):
     static void AddWaveToResult(float x, float y, float z, float* pLevel, uint8 bTouchingWater, CVector* normalVec);
     AddWaveToResult(int32, int32, float*, float, float)
@@ -98,7 +114,6 @@ public:
     CalculateWavesForCoordinate(int32, int32, float, float, float*, float*, float*, CVector*)
     ChangeWaterConfiguration(int32)
     CreateBeachToy(const CVector&, eBeachToy)
-    FillQuadsAndTrianglesList()
     FindNearestWaterAndItsFlow()
     FixVertexOnToLine(CWaterVertex*, CWaterVertex*, CWaterVertex*, float*)
     GetGroundLevel(const CVector&, float*, ColData*, float)
