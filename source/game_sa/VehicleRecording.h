@@ -34,6 +34,7 @@ public:
     bool    m_bHandbrakeUsed;
     CVector m_vecPosn;
 };
+VALIDATE_SIZE(CVehicleStateEachFrame, 0x20);
 
 constexpr auto TOTAL_VEHICLE_RECORDS = 16;
 
@@ -41,10 +42,17 @@ class CPath {
 public:
     int32                   m_nNumber;
     CVehicleStateEachFrame* m_pData;
-    int32                   m_nSize;
+    int32                   m_nSize; // Byte size, use ::Size() for getting element size!
     int8                    m_nRefCount;
 
     uint32 GetIndex() const;
+    size_t Size() const {
+        return m_nSize / sizeof(CVehicleStateEachFrame);
+    }
+
+    auto GetFrames() {
+        return std::span{m_pData, Size()};
+    }
 
     void Remove() {
         if (m_pData) {
@@ -54,14 +62,18 @@ public:
         }
     }
 
+    void AddRef() {
+        DEV_LOG("Ref added for some path (number= {}, size= {}, ptr= {})", m_nNumber, m_nSize, LOG_PTR(m_pData));
+        m_nRefCount++;
+    }
+
     void RemoveRef() {
+        DEV_LOG("Ref removed for some path (number= {}, size= {}, ptr= {})", m_nNumber, m_nSize, LOG_PTR(m_pData));
         if (!--m_nRefCount) {
             Remove();
         }
     }
 };
-
-VALIDATE_SIZE(CVehicleStateEachFrame, 0x20);
 VALIDATE_SIZE(CPath, 0x10);
 
 struct RwStream;
@@ -92,30 +104,30 @@ public:
     static void Render();
 
     static void ChangeCarPlaybackToUseAI(CVehicle* vehicle);
-    static uint32 FindIndexWithFileNameNumber(int32 number);
-    static void InterpolateInfoForCar(CVehicle*, CVehicleStateEachFrame*, float);
+    static uint32 FindIndexWithFileNameNumber(int32 fileNumber);
+    static void InterpolateInfoForCar(CVehicle* vehicle, const CVehicleStateEachFrame& frame, float interpValue);
 
-    static bool HasRecordingFileBeenLoaded(int32 rrrNumber);
-    static void Load(RwStream* stream, int32 resourceId, int32 totalSize);
-    static void SmoothRecording(int32 resourceId);
+    static bool HasRecordingFileBeenLoaded(int32 fileNumber);
+    static void Load(RwStream* stream, int32 recordId, int32 totalSize);
+    static void SmoothRecording(int32 recordId);
 
     static int32 RegisterRecordingFile(const char* name);
-    static void RemoveRecordingFile(int32);
-    static void RequestRecordingFile(int32);
+    static void RemoveRecordingFile(int32 fileNumber);
+    static void RequestRecordingFile(int32 fileNumber);
 
     static void SetPlaybackSpeed(CVehicle* vehicle, float speed);
     static void RenderLineSegment(int32& numVertices);
 
     static void RemoveAllRecordingsThatArentUsed();
-    static void RestoreInfoForCar(CVehicle*, CVehicleStateEachFrame*, bool);
-    static void RestoreInfoForMatrix(CMatrix&, CVehicleStateEachFrame*);
+    static void RestoreInfoForCar(CVehicle* vehicle, const CVehicleStateEachFrame& frame, bool pause);
+    static void RestoreInfoForMatrix(CMatrix& matrix, const CVehicleStateEachFrame& frame);
     static void SaveOrRetrieveDataForThisFrame();
-    static void SetRecordingToPointClosestToCoors(int32, CVector);
-    static void SkipForwardInRecording(CVehicle*, float);
-    static void SkipToEndAndStopPlaybackRecordedCar(CVehicle*);
+    static void SetRecordingToPointClosestToCoors(int32 playbackId, CVector posn);
+    static void SkipForwardInRecording(CVehicle* vehicle, float a1);
+    static void SkipToEndAndStopPlaybackRecordedCar(CVehicle* vehicle);
 
     static void StopPlaybackWithIndex(int32 playbackId);
-    static void StartPlaybackRecordedCar(CVehicle* vehicle, int32 pathNumber, bool useCarAI, bool bLooped);
+    static void StartPlaybackRecordedCar(CVehicle* vehicle, int32 fileNumber, bool useCarAI, bool looped);
     static void StopPlaybackRecordedCar(CVehicle* vehicle);
     static void PausePlaybackRecordedCar(CVehicle* vehicle);
     static void UnpausePlaybackRecordedCar(CVehicle* vehicle);
@@ -155,22 +167,16 @@ public:
         return {};
     }
 
-    static auto GetCurrentFrameForBuffer(size_t buffer) {
-        // NOTE: PlaybackIndex does not increase by one, increases by
-        // sizeof(CVehicleStateEachFrame) -32- instead.
-        return (CVehicleStateEachFrame*)((uint8*)&pPlaybackBuffer[buffer] + PlaybackIndex[buffer]);
-    }
-
     static auto GetFrameCountFromBuffer(size_t bufferIdx) {
         return PlaybackBufferSize[bufferIdx] / sizeof(CVehicleStateEachFrame);
     }
 
-    static auto& GetFrameFromBuffer(size_t bufferIdx, int32 idx = -1) {
+    static auto* GetFrameFromBuffer(size_t bufferIdx, int32 idx = -1) {
         if (idx < 0) {
             // Get current frame from PlaybackIndex[bufferIdx] and use it's index instead.
             idx = PlaybackIndex[bufferIdx] / sizeof(CVehicleStateEachFrame);
         }
-        return *(pPlaybackBuffer[bufferIdx] + idx);
+        return pPlaybackBuffer[bufferIdx] + idx;
     }
 
     static void SetFrameIndexForPlaybackBuffer(size_t bufferIdx, size_t idx) {
@@ -179,5 +185,9 @@ public:
 
     static auto GetFramesFromPlaybackBuffer(size_t bufferIdx) {
         return std::span{pPlaybackBuffer[bufferIdx], PlaybackBufferSize[bufferIdx] / sizeof(CVehicleStateEachFrame)};
+    }
+
+    static auto GetCurrentFrameIndex(size_t bufferIdx) {
+        return PlaybackIndex[bufferIdx] / sizeof(CVehicleStateEachFrame);
     }
 };

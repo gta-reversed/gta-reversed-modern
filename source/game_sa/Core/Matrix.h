@@ -122,6 +122,13 @@ public:
         GetPosition() *= mult;
     }
 
+    // NOTSA
+    void Lerp(CMatrix to, float interp) {
+        ScaleAll(1.0f - interp);
+        to.ScaleAll(interp);
+        *this += to;
+    }
+
     // operators and classes that aren't defined as part of class, but it's much easier to get them working with access to class private fields
 private:
     friend class CVector; // So Vector methods have access to private fields of matrix whitout accessor methods, for more readable code

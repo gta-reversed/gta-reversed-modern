@@ -15,6 +15,18 @@ uint32 CPath::GetIndex() const {
     return index;
 }
 
+// VehicleRecording naming convention:
+//
+// `StreamingArray` contains 'recordings' that are typed CPath.
+// It's indices are named `recordId`
+// 
+// CPath contains variable-sized frame array.
+// It's 'number' is taken from the loaded file hence named `fileNumber`
+// 
+// `pPlaybackBuffer` contains 16 'recordings' that can be played
+// simultaneously.
+// It's incides are named `playbackId`
+
 void CVehicleRecording::InjectHooks() {
     RH_ScopedClass(CVehicleRecording);
     RH_ScopedCategoryGlobal();
@@ -42,7 +54,7 @@ void CVehicleRecording::InjectHooks() {
     RH_ScopedInstall(RemoveAllRecordingsThatArentUsed, 0x45A160);
     RH_ScopedInstall(RestoreInfoForCar, 0x459A30);
     RH_ScopedInstall(RestoreInfoForMatrix, 0x459960);
-    RH_ScopedInstall(SaveOrRetrieveDataForThisFrame, 0x45A610, {.reversed = false});
+    RH_ScopedInstall(SaveOrRetrieveDataForThisFrame, 0x45A610, {.reversed = true});
     RH_ScopedInstall(SetRecordingToPointClosestToCoors, 0x45A1E0);
     RH_ScopedInstall(IsPlaybackGoingOnForCar, 0x4594C0);
     RH_ScopedInstall(IsPlaybackPausedForCar, 0x4595A0);
@@ -103,9 +115,9 @@ void CVehicleRecording::ChangeCarPlaybackToUseAI(CVehicle* vehicle) {
 
 // inlined
 // 0x459FF0
-uint32 CVehicleRecording::FindIndexWithFileNameNumber(int32 number) {
+uint32 CVehicleRecording::FindIndexWithFileNameNumber(int32 fileNumber) {
     for (auto&& [i, recording] : notsa::enumerate(GetRecordings())) {
-        if (recording.m_nNumber == number) {
+        if (recording.m_nNumber == fileNumber) {
             return i;
         }
     }
@@ -113,21 +125,18 @@ uint32 CVehicleRecording::FindIndexWithFileNameNumber(int32 number) {
 }
 
 // 0x459B30
-void CVehicleRecording::InterpolateInfoForCar(CVehicle* vehicle, CVehicleStateEachFrame* frame, float interpValue) {
+void CVehicleRecording::InterpolateInfoForCar(CVehicle* vehicle, const CVehicleStateEachFrame& frame, float interpValue) {
     auto& vehicleMatrix = vehicle->GetMatrix();
     CMatrix transition;
     RestoreInfoForMatrix(transition, frame);
-    // maybe make a lerp function for matrices
-    transition.ScaleAll(interpValue);
-    vehicleMatrix.ScaleAll(1.0f - interpValue);
-    vehicleMatrix += transition;
+    vehicleMatrix.Lerp(transition, interpValue);
 
-    vehicle->GetMoveSpeed() = Lerp(vehicle->GetMoveSpeed(), frame->m_sVelocity, interpValue);
+    vehicle->GetMoveSpeed() = Lerp(vehicle->GetMoveSpeed(), frame.m_sVelocity, interpValue);
 }
 
 // 0x45A060
-bool CVehicleRecording::HasRecordingFileBeenLoaded(int32 recordId) {
-    const auto recording = FindRecording(recordId);
+bool CVehicleRecording::HasRecordingFileBeenLoaded(int32 fileNumber) {
+    const auto recording = FindRecording(fileNumber);
     return recording.has_value() && recording.value()->m_pData;
 }
 
@@ -139,7 +148,7 @@ void CVehicleRecording::Load(RwStream* stream, int32 recordId, int32 totalSize) 
     StreamingArray[recordId].m_nSize = size;
     RwStreamClose(stream, nullptr);
 
-    for (auto&& [i, frame] : notsa::enumerate(std::span{ StreamingArray[recordId].m_pData, size })) {
+    for (auto&& [i, frame] : notsa::enumerate(StreamingArray[recordId].GetFrames())) {
         if (i != 0 && frame.m_nTime == 0) {
             // no valid frame that is not zeroth can have zero as a time.
             // so we count them as invalid and prune the following including itself.
@@ -152,24 +161,35 @@ void CVehicleRecording::Load(RwStream* stream, int32 recordId, int32 totalSize) 
 
 // 0x45A0F0
 void CVehicleRecording::SmoothRecording(int32 recordId) {
-    plugin::Call<0x45A0F0, int32>(recordId);
+    return plugin::Call<0x45A0F0, int32>(recordId);
+    auto recording = StreamingArray[recordId];
+    auto frames = recording.GetFrames();
+
+    if (recording.Size() <= 2)
+        return;
+
+    for (auto it = frames.begin() + 4; auto idx = std::distance(frames.begin(), it); it++) {
+        if (idx < 2)
+            break;
+        frames[idx - 1].m_nTime = (it->m_nTime + frames[idx - 2].m_nTime) / 2;
+    }
 }
 
 // 0x459F80
 int32 CVehicleRecording::RegisterRecordingFile(const char* name) {
-    auto recordId = 850;
-    if (sscanf(name, "carrec%d", &recordId) == 0) {
-        RET_IGNORED(sscanf(name, "CARREC%d", &recordId));
+    auto fileNumber = 850;
+    if (sscanf(name, "carrec%d", &fileNumber) == 0) {
+        RET_IGNORED(sscanf(name, "CARREC%d", &fileNumber));
     }
 
-    StreamingArray[NumPlayBackFiles].m_nNumber = recordId;
+    StreamingArray[NumPlayBackFiles].m_nNumber = fileNumber;
     StreamingArray[NumPlayBackFiles].m_pData = nullptr;
     return NumPlayBackFiles++;
 }
 
 // 0x45A0A0
-void CVehicleRecording::RemoveRecordingFile(int32 recordId) {
-    FindRecording(recordId).and_then([](CPath* recording) -> std::optional<uint32> {
+void CVehicleRecording::RemoveRecordingFile(int32 fileNumber) {
+    FindRecording(fileNumber).and_then([](CPath* recording) -> std::optional<uint32> {
         if (recording->m_pData && !recording->m_nRefCount) {
             recording->Remove();
         }
@@ -178,9 +198,9 @@ void CVehicleRecording::RemoveRecordingFile(int32 recordId) {
 }
 
 // 0x45A020
-void CVehicleRecording::RequestRecordingFile(int32 recordId) {
+void CVehicleRecording::RequestRecordingFile(int32 fileNumber) {
     auto index = 0;
-    FindRecording(recordId).and_then([&index, recordId](CPath* recording) -> std::optional<uint32> {
+    FindRecording(fileNumber).and_then([&index](CPath* recording) -> std::optional<uint32> {
         index = recording->GetIndex();
         recording->Remove();
         return {};
@@ -190,33 +210,47 @@ void CVehicleRecording::RequestRecordingFile(int32 recordId) {
 }
 
 // 0x459440
-void CVehicleRecording::StopPlaybackWithIndex(int32 index) {
-    if (auto vehicle = pVehicleForPlayback[index]) {
+void CVehicleRecording::StopPlaybackWithIndex(int32 playbackId) {
+    if (auto vehicle = pVehicleForPlayback[playbackId]) {
         vehicle->m_autoPilot.m_vehicleRecordingId = -1;
-        pVehicleForPlayback[index]->physicalFlags.bDisableCollisionForce = false;
+        pVehicleForPlayback[playbackId]->physicalFlags.bDisableCollisionForce = false;
     }
-    pVehicleForPlayback[index] = nullptr;
-    pPlaybackBuffer[index] = nullptr;
-    PlaybackBufferSize[index] = 0;
-    bPlaybackGoingOn[index] = false;
+    pVehicleForPlayback[playbackId] = nullptr;
+    pPlaybackBuffer[playbackId] = nullptr;
+    PlaybackBufferSize[playbackId] = 0;
+    bPlaybackGoingOn[playbackId] = false;
 
-    StreamingArray[PlayBackStreamingIndex[index]].RemoveRef();
+    StreamingArray[PlayBackStreamingIndex[playbackId]].RemoveRef();
 }
 
 // 0x45A980
-void CVehicleRecording::StartPlaybackRecordedCar(CVehicle* vehicle, int32 pathNumber, bool useCarAI, bool bLooped) {
-    const auto [freeIdx, streamId] = [pathNumber]() -> std::pair<uint32, uint32> {
-        auto idx = 0;
-        for (auto i : GetActivePlaybackIndices()) {
-            if (!bPlaybackGoingOn[i]) {
-                idx = i;
-                break;
-            }
-        }
-
-        return { idx, FindIndexWithFileNameNumber(pathNumber)};
-    }();
+void CVehicleRecording::StartPlaybackRecordedCar(CVehicle* vehicle, int32 fileNumber, bool useCarAI, bool looped) {
+    const auto GetInactivePlaybackIndices = [] {
+        return rng::views::iota(0, TOTAL_VEHICLE_RECORDS) | std::views::filter([](auto&& i) { return !bPlaybackGoingOn[i]; });
+    };
+    const auto playbackId = *GetInactivePlaybackIndices().begin();
+    const auto recordId = FindIndexWithFileNameNumber(fileNumber);
     // ...
+    CEntity::RegisterReference(vehicle);
+    bPlaybackLooped[playbackId] = looped;
+    PlayBackStreamingIndex[playbackId] = 0;
+    pPlaybackBuffer[playbackId] = StreamingArray[recordId].m_pData;
+    PlaybackBufferSize[playbackId] = StreamingArray[recordId].m_nSize;
+    bUseCarAI[playbackId] = useCarAI;
+    PlaybackIndex[playbackId] = 0;
+    PlaybackRunningTime[playbackId] = 0.0f;
+    PlaybackSpeed[playbackId] = 1.0f;
+    bPlaybackGoingOn[playbackId] = true;
+    bPlaybackPaused[playbackId] = false;
+    StreamingArray[recordId].AddRef();
+
+    if (useCarAI) {
+        ChangeCarPlaybackToUseAI(vehicle);
+    } else {
+        vehicle->physicalFlags.bDisableCollisionForce = true;
+        vehicle->physicalFlags.bCollidable = false;
+    }
+    vehicle->m_autoPilot.m_vehicleRecordingId = playbackId;
 }
 
 // 0x45A280
@@ -265,13 +299,13 @@ void CVehicleRecording::RemoveAllRecordingsThatArentUsed() {
 }
 
 // 0x459A30
-void CVehicleRecording::RestoreInfoForCar(CVehicle* vehicle, CVehicleStateEachFrame* frame, bool pause) {
+void CVehicleRecording::RestoreInfoForCar(CVehicle* vehicle, const CVehicleStateEachFrame& frame, bool pause) {
     RestoreInfoForMatrix(vehicle->GetMatrix(), frame);
     vehicle->ResetTurnSpeed();
-    vehicle->m_fSteerAngle = frame->m_bSteeringAngle;
-    vehicle->m_fGasPedal   = frame->m_bGasPedalPower;
-    vehicle->m_fBreakPedal = frame->m_bBreakPedalPower;
-    vehicle->vehicleFlags.bIsHandbrakeOn = !pause && frame->m_bHandbrakeUsed;
+    vehicle->m_fSteerAngle = frame.m_bSteeringAngle;
+    vehicle->m_fGasPedal   = frame.m_bGasPedalPower;
+    vehicle->m_fBreakPedal = frame.m_bBreakPedalPower;
+    vehicle->vehicleFlags.bIsHandbrakeOn = !pause && frame.m_bHandbrakeUsed;
 
     if (pause) {
         vehicle->m_fSteerAngle = vehicle->m_fGasPedal = vehicle->m_fBreakPedal = 0.0f;
@@ -280,11 +314,11 @@ void CVehicleRecording::RestoreInfoForCar(CVehicle* vehicle, CVehicleStateEachFr
 }
 
 // 0x459960
-void CVehicleRecording::RestoreInfoForMatrix(CMatrix& matrix, CVehicleStateEachFrame* frame) {
-    matrix.GetRight()    = frame->m_bRight;
-    matrix.GetForward()  = frame->m_bTop;
+void CVehicleRecording::RestoreInfoForMatrix(CMatrix& matrix, const CVehicleStateEachFrame& frame) {
+    matrix.GetRight()    = frame.m_bRight;
+    matrix.GetForward()  = frame.m_bTop;
     matrix.GetUp()       = matrix.GetRight().Cross(matrix.GetForward());
-    matrix.GetPosition() = frame->m_vecPosn;
+    matrix.GetPosition() = frame.m_vecPosn;
 }
 
 // 0x45A610
@@ -294,36 +328,41 @@ void CVehicleRecording::SaveOrRetrieveDataForThisFrame() {
 
     for (auto i : GetActivePlaybackIndices()) {
         auto vehicle = pVehicleForPlayback[i];
+        DEV_LOG("Start processing car recordings for vehicle (={})...", LOG_PTR(vehicle));
         if (!vehicle || vehicle->physicalFlags.bDestroyed) {
             StopPlaybackWithIndex(i);
             continue;
         }
-        if (bUseCarAI[i])
+        if (bUseCarAI[i]) {
+            DEV_LOG("\tUses AI. skipping...");
             continue;
+        }
 
         const auto delta = static_cast<float>(CTimer::GetTimeInMS() - CTimer::m_snPPPPreviousTimeInMilliseconds);
-        if (delta * PlaybackSpeed[i] / 4.0f > 500.0f) {
-            printf("That's a really big step\n");
+        const auto step = delta * PlaybackSpeed[i] / 4.0f;
+        if (step > 500.0f) {
+            DEV_LOG("That's a really big step (={:2f})\n", step);
         }
-        PlaybackRunningTime[i] += delta * PlaybackSpeed[i] / 4.0f;
+        PlaybackRunningTime[i] += step;
 
-        auto current = GetCurrentFrameForBuffer(i);
-        auto next = current + 1;
-        if (next->m_nTime < PlaybackRunningTime[i]) {
-            for (; next < current + PlaybackBufferSize[i] && next->m_nTime < PlaybackRunningTime[i]; ++next) {
-                ++current;
-                PlaybackIndex[i] += sizeof(CVehicleStateEachFrame);
-            }
-        }
-        for (; current > pPlaybackBuffer[i] && current->m_nTime > PlaybackRunningTime[i]; --next) {
-            --current;
-            PlaybackIndex[i] -= sizeof(CVehicleStateEachFrame);
-        }
+        const auto frames = GetFramesFromPlaybackBuffer(i);
+        auto current = GetCurrentFrameIndex(i);
 
-        if (next < GetCurrentFrameForBuffer(i)) {
-            RestoreInfoForCar(vehicle, current, 0);
-            const auto interp = PlaybackRunningTime[i] - (float)current->m_nTime / (float)(next->m_nTime - current->m_nTime);
-            InterpolateInfoForCar(vehicle, next, interp);
+        // find the exact frame that matches the playback time.
+        for (auto next = frames[current + 1]; current < frames.size() && next.m_nTime < PlaybackRunningTime[i]; current++)
+            ;
+        for (; current > 0 && frames[current].m_nTime > PlaybackRunningTime[i]; current--)
+            ;
+        SetFrameIndexForPlaybackBuffer(i, current);
+
+        if (current < frames.size() + 1) {
+            // current is not the last frame, so we interpolate with the next.
+            const auto frameCurrent = frames[current];
+            const auto frameNext = frames[current + 1];
+
+            RestoreInfoForCar(vehicle, frameCurrent, false);
+            const auto interp = PlaybackRunningTime[i] - (float)frameCurrent.m_nTime / (float)(frameNext.m_nTime - frameCurrent.m_nTime);
+            InterpolateInfoForCar(vehicle, frameNext, interp);
 
             if (vehicle->IsSubTrain()) {
                 vehicle->AsTrain()->FindPositionOnTrackFromCoors();
@@ -334,9 +373,11 @@ void CVehicleRecording::SaveOrRetrieveDataForThisFrame() {
             vehicle->UpdateRwFrame();
             MarkSurroundingEntitiesForCollisionWithTrain(vehicle->GetPosition(), 5.0f, vehicle, true);
         } else if (bPlaybackLooped[i]) {
+            // current is the last frame, set next frame to be processed to first frame cuz we're looping.
             PlaybackRunningTime[i] = 0.0f;
-            PlaybackIndex[i] = 0;
+            SetFrameIndexForPlaybackBuffer(i, 0);
         } else {
+            // current is the last frame, farewell.
             StopPlaybackRecordedCar(vehicle);
         }
     }
@@ -344,7 +385,6 @@ void CVehicleRecording::SaveOrRetrieveDataForThisFrame() {
 
 // 0x45A1E0
 void CVehicleRecording::SetRecordingToPointClosestToCoors(int32 playbackId, CVector posn) {
-    assert(0);
     auto minDist = 1'000'000.0f; // FLT_MAX
     for (auto&& [i, frame] : notsa::enumerate(GetFramesFromPlaybackBuffer(playbackId))) {
         if (const auto d = DistanceBetweenPoints(frame.m_vecPosn, posn); d < minDist) {
@@ -353,6 +393,12 @@ void CVehicleRecording::SetRecordingToPointClosestToCoors(int32 playbackId, CVec
         }
     }
 }
+
+// 0x459D10
+void CVehicleRecording::SkipForwardInRecording(CVehicle* vehicle, float a1) {}
+
+// 0x45A4A0
+void CVehicleRecording::SkipToEndAndStopPlaybackRecordedCar(CVehicle* vehicle) {}
 
 // 0x4594C0
 bool CVehicleRecording::IsPlaybackGoingOnForCar(CVehicle* vehicle) {

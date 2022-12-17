@@ -487,10 +487,7 @@ void CReplay::ProcessPedUpdate(CPed* ped, float interpValue, CAddressInReplayBuf
     ped->m_fCurrentRotation = (float)packet.heading / HEADING_COMPRESS_VALUE;
     ped->m_fAimingRotation  = (float)packet.heading / HEADING_COMPRESS_VALUE;
 
-    auto decompressed = CCompressedMatrixNotAligned::Decompress(packet.matrix);
-    decompressed.ScaleAll(interpValue);
-    ped->GetMatrix().ScaleAll(1.0f - interpValue);
-    ped->GetMatrix() += decompressed;
+    ped->GetMatrix().Lerp(CCompressedMatrixNotAligned::Decompress(packet.matrix), interpValue);
 
     if (const auto vehIdx = packet.vehicleIndex) {
         auto& vehicle = ped->m_pVehicle;
@@ -895,13 +892,12 @@ void CReplay::RecordThisFrame() {
         GoToNextBlock();
     }
 
-    CMatrix cameraMatrix = TheCamera.GetMatrix();
     auto cameraPacket = tReplayCameraBlock{
         .isUsingRemoteVehicle = FindPlayerInfo().m_pRemoteVehicle != nullptr,
         .matrix               = 0 /* to be filled */,
         .firstFocusPosn       = FindPlayerCoors()
     };
-    memcpy(cameraPacket.matrix, &cameraMatrix, sizeof(CMatrix));
+    cameraPacket.GetMatrix() = TheCamera.GetMatrix();
     Record.Write(cameraPacket);
 
     Record.Write<tReplayClockBlock>({
@@ -1162,10 +1158,7 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
         case REPLAY_PACKET_GENERAL: {
             auto cameraPacket = buffer.Read<tReplayCameraBlock>();
 
-            TheCamera.GetMatrix().ScaleAll(1.0f - interpolation);
-            CMatrix packetMatrix(*(const CMatrix*)&cameraPacket.matrix);
-            packetMatrix.ScaleAll(interpolation);
-            TheCamera.GetMatrix() += packetMatrix;
+            TheCamera.GetMatrix().Lerp(cameraPacket.GetMatrix(), interpolation);
             auto modelling = TheCamera.GetRwMatrix();
             modelling->pos = TheCamera.GetMatrix().GetPosition();
             modelling->at = TheCamera.GetMatrix().GetForward();
