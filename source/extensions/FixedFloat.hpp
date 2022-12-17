@@ -9,11 +9,6 @@ public:
     constexpr FixedFloat(float X) : value(X * CompressValue) {}
     constexpr FixedFloat(T X) : value(X) {}
 
-    constexpr auto operator=(float rhs) {
-        value = rhs * CompressValue;
-        return *this;
-    }
-
     constexpr operator float() const {
         return value / CompressValue;
     }
