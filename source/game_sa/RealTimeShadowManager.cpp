@@ -141,9 +141,9 @@ CRealTimeShadow& CRealTimeShadowManager::GetRealTimeShadow(CPhysical* physical) 
 // 0x706BA0
 void CRealTimeShadowManager::DoShadowThisFrame(CPhysical* physical) {
     switch (g_fx.GetFxQuality()) {
-    case 3: // Always render
+    case FX_QUALITY_VERY_HIGH: // Always render
         break;
-    case 2: { // Only draw for main player
+    case FX_QUALITY_HIGH: { // Only draw for main player
         if (physical->IsPed()) {
             if (physical->AsPed()->m_nPedType == PED_TYPE_PLAYER1) {
                 break;

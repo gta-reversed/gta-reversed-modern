@@ -32,7 +32,7 @@ void CShadowCamera::Destroy() {
 
 // 0x7054C0
 void CShadowCamera::SetFrustum(float radius) {
-    RwCameraSetFarClipPlane(m_pRwCamera, radius + radius);
+    RwCameraSetFarClipPlane(m_pRwCamera, 2 * radius);
     RwCameraSetNearClipPlane(m_pRwCamera, radius / 1000.0f);
 
     const CVector2D window(radius, radius);
