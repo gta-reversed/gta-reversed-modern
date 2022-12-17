@@ -2,6 +2,8 @@
 #include "WaterLevel.h"
 #include <sstream>
 
+constexpr auto DETAILEDWATERDIST = 48; // 0x8D37D0
+
 void CWaterLevel::InjectHooks() {
     RH_ScopedClass(CWaterLevel);
     RH_ScopedCategoryGlobal();
@@ -27,6 +29,7 @@ void CWaterLevel::InjectHooks() {
     RH_ScopedGlobalInstall(SplitWaterTriangleAlongYLine, 0x6EE5A0, { .reversed = false });
     RH_ScopedGlobalInstall(RenderWater, 0x6EF650, { .reversed = false });
     RH_ScopedGlobalInstall(AddWaveToResult, 0x6E81E0, { .reversed = false });
+    RH_ScopedGlobalInstall(SetCameraRange, 0x6E9C80);
 }
 
 // NOTSA
@@ -357,4 +360,17 @@ void CWaterLevel::AddWaterLevelTriangle(int32 X1, int32 Y1, CRenPar P1, int32 X2
 
 void CWaterLevel::FillQuadsAndTrianglesList() {
     plugin::Call<0x6E7B30>();
+}
+
+void CWaterLevel::SetCameraRange() {
+    const auto& cmpos = TheCamera.GetPosition();
+
+    const auto CalcMin = [](float p) { return 2 * (int32)std::floor(p - (float)DETAILEDWATERDIST / 2.f); };
+    const auto CalcMax = [](float p) { return 2 * (int32)std::ceil(p + (float)DETAILEDWATERDIST / 2.f); };
+
+    CameraRangeMinX = CalcMin(cmpos.x);
+    CameraRangeMaxX = CalcMax(cmpos.x);
+
+    CameraRangeMinY = CalcMin(cmpos.y);
+    CameraRangeMaxY = CalcMax(cmpos.y);
 }

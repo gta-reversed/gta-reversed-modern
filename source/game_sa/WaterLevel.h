@@ -7,7 +7,7 @@
 struct CRenPar {
     float z;                        // Z pos of this thing. x, y can be found in the containing vertex, see `CWaterVertex`.
     float bigWaves, smallWaves;     // Height of waves
-    int8  flowX, flowY;         // Fixed-point float. Divide by 64
+    int8  flowX, flowY;             // Fixed-point float. Divide by 64
 };
 
 struct CWaterVertex {
@@ -66,6 +66,12 @@ class CWaterLevel {
     static inline int32& NumWaterVertices = *(int32*)0xC2288C;
     static inline int32& NumWaterZonePolys = *(int32*)0xC215F0;
 
+    static inline int32& CameraRangeMaxY = *(int32*)0xC1F950;
+    static inline int32& CameraRangeMinY = *(int32*)0xC1F954;
+
+    static inline int32& CameraRangeMaxX = *(int32*)0xC1F958;
+    static inline int32& CameraRangeMinX = *(int32*)0xC1F95C;
+
     static inline auto& WaterZones = *(notsa::mdarray<int32, 12, 12>*)0xC21B70;
 
     //static inline std::array<std::array<
@@ -107,6 +113,8 @@ public:
 
     static void FillQuadsAndTrianglesList();
 
+    static void SetCameraRange();
+
     /* Missing (In no particular order):
     static void AddWaveToResult(float x, float y, float z, float* pLevel, uint8 bTouchingWater, CVector* normalVec);
     AddWaveToResult(int32, int32, float*, float, float)
@@ -146,7 +154,6 @@ public:
     RenderWaterRectangle(int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar)
     RenderWaterTriangle(int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar)
     ScanThroughBlocks()
-    SetCameraRange()
     SetUpWaterFog(int32, int32, int32, int32)
     SplitWaterRectangleAlongXLine(int32, int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar)
     SplitWaterRectangleAlongYLine(int32, int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar)
