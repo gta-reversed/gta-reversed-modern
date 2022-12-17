@@ -11,8 +11,8 @@ struct CRenPar {
 };
 
 struct CWaterVertex {
-    uint16  x;
-    uint16  y;
+    int16  x;
+    int16  y;
     CRenPar renPar;
 };
 
@@ -102,6 +102,7 @@ public:
     static void CalculateWavesOnlyForCoordinate(int32 x, int32 y, float lowFreqMult, float midHighFreqMult, float& outWave, float& colorMult, float& glare, CVector& vecNormal);
     static void ScanThroughBlocks();
     static void SplitWaterTriangleAlongYLine(int32 a0, int32 a1, int32 a2, CRenPar a3, int32 a4, int32 a5, CRenPar a6, int32 a7, int32 a8, CRenPar a9);
+    static void RenderHighDetailWaterTriangle(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3);
     static void RenderWater();
     static void SyncWater();
 

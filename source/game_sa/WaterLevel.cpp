@@ -2,7 +2,7 @@
 #include "WaterLevel.h"
 #include <sstream>
 
-constexpr auto DETAILEDWATERDIST = 48; // 0x8D37D0
+#define TRIANGLE_ARGS_OUT X1, Y1, P1, X2, Y2, P2, X3, Y3, P3
 
 void CWaterLevel::InjectHooks() {
     RH_ScopedClass(CWaterLevel);
@@ -10,7 +10,7 @@ void CWaterLevel::InjectHooks() {
 
     RH_ScopedGlobalInstall(WaterLevelInitialise, 0x6EAE80);
     RH_ScopedGlobalInstall(Shutdown, 0x6E59E0);
-    RH_ScopedGlobalInstall(RenderWaterTriangle, 0x6EE240, { .reversed = false });
+    RH_ScopedGlobalInstall(RenderWaterTriangle, 0x6EE240);
     RH_ScopedGlobalInstall(RenderFlatWaterTriangle, 0x6EE080, { .reversed = false });
     RH_ScopedGlobalInstall(RenderBoatWakes, 0x6ED9A0, { .reversed = false });
     RH_ScopedGlobalInstall(SplitWaterTriangleAlongXLine, 0x6ECF00, { .reversed = false });
@@ -56,6 +56,8 @@ bool CWaterLevel::LoadDataFile() {
 
         // Helper function to read a vertex from the stream
         const auto ReadNextVertex = [&]() {
+            const auto orgpos = liness.tellg();
+
             auto& vtx = vertices[nvertices];
             liness
                 >> vtx.pos.x
@@ -69,9 +71,12 @@ bool CWaterLevel::LoadDataFile() {
             if (liness.good()) {
                 nvertices++;
                 return true;
+            } else {
+                liness.clear(); // reset error flags
+                liness.seekg(orgpos); // go back to before
+                return false;
             }
 
-            return false;
         };
 
         // If can't read first vertex just ignore line
@@ -172,8 +177,18 @@ void CWaterLevel::AddWaveToResult(float x, float y, float* pfWaterLevel, float f
 }
 
 // 0x6EE240
-void CWaterLevel::RenderWaterTriangle(int32 a1, int32 a2, CRenPar a3, int32 a4, int32 a5, CRenPar a6, int32 a7, int32 a8, CRenPar a9) {
-    plugin::Call<0x6EE240, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar>(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+void CWaterLevel::RenderWaterTriangle(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3) {
+    const auto [minX, maxX] = std::make_pair(X1, X2); // Assumes: Starting in top left vertex with clockwise order
+    const auto [minY, maxY] = std::minmax(Y1, Y3);
+    if (minX >= CameraRangeMaxX || maxX <= CameraRangeMinX || minY >= CameraRangeMaxY || maxY <= CameraRangeMinY) { // Lies outside (of camera) fully
+        RenderFlatWaterTriangle(TRIANGLE_ARGS_OUT);
+    } else if (minX < CameraRangeMinX || maxX > CameraRangeMaxX) { // Lies outside on X (But inside on Y)
+        SplitWaterTriangleAlongXLine(minX < CameraRangeMinX ? CameraRangeMinX : CameraRangeMaxX, TRIANGLE_ARGS_OUT);
+    } else if (minY < CameraRangeMinY || maxY > CameraRangeMaxY) { // Lies outside on Y (But inside on X)
+        SplitWaterTriangleAlongYLine(minY < CameraRangeMinY ? CameraRangeMinY : CameraRangeMaxY, TRIANGLE_ARGS_OUT);
+    } else { // Lies inside of camera fully
+        RenderHighDetailWaterTriangle(TRIANGLE_ARGS_OUT);
+    }
 }
 
 // 0x6EE080
@@ -216,7 +231,7 @@ bool CWaterLevel::GetWaterLevel(float x, float y, float z, float* pOutWaterLevel
     float fUnkn1, fUnkn2;
     if (!GetWaterLevelNoWaves(x, y, z, pOutWaterLevel, &fUnkn1, &fUnkn2))
         return false;
-
+     
     if ((*pOutWaterLevel - z > 3.0F) && !bTouchingWater) {
         *pOutWaterLevel = 0.0F;
         return false;
@@ -327,6 +342,10 @@ void CWaterLevel::SplitWaterTriangleAlongYLine(int32 a0, int32 a1, int32 a2, CRe
     plugin::Call<0x6EE5A0, int32, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar>(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
 }
 
+void CWaterLevel::RenderHighDetailWaterTriangle(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3) {
+    plugin::CallAndReturn<void, 0x6EDDC0, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar>(X1, Y1, P1, X2, Y2, P2, X3, Y3, P3);
+}
+
 // 0x6EF650
 void CWaterLevel::RenderWater() {
     plugin::Call<0x6EF650>();
@@ -362,11 +381,12 @@ void CWaterLevel::FillQuadsAndTrianglesList() {
     plugin::Call<0x6E7B30>();
 }
 
+// 0x6E9C80
 void CWaterLevel::SetCameraRange() {
     const auto& cmpos = TheCamera.GetPosition();
 
-    const auto CalcMin = [](float p) { return 2 * (int32)std::floor(p - (float)DETAILEDWATERDIST / 2.f); };
-    const auto CalcMax = [](float p) { return 2 * (int32)std::ceil(p + (float)DETAILEDWATERDIST / 2.f); };
+    const auto CalcMin = [](float p) { return 2 * (int32)std::floor((p - (float)DETAILEDWATERDIST) / 2.f); };
+    const auto CalcMax = [](float p) { return 2 * (int32)std::ceil((p + (float)DETAILEDWATERDIST) / 2.f); };
 
     CameraRangeMinX = CalcMin(cmpos.x);
     CameraRangeMaxX = CalcMax(cmpos.x);
