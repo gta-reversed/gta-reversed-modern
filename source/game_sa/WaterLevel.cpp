@@ -7,7 +7,7 @@ void CWaterLevel::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedGlobalInstall(WaterLevelInitialise, 0x6EAE80);
-    RH_ScopedGlobalInstall(Shutdown, 0x6E59E0, { .reversed = false });
+    RH_ScopedGlobalInstall(Shutdown, 0x6E59E0);
     RH_ScopedGlobalInstall(RenderWaterTriangle, 0x6EE240, { .reversed = false });
     RH_ScopedGlobalInstall(RenderFlatWaterTriangle, 0x6EE080, { .reversed = false });
     RH_ScopedGlobalInstall(RenderBoatWakes, 0x6ED9A0, { .reversed = false });
@@ -153,7 +153,13 @@ void CWaterLevel::WaterLevelInitialise() {
 
 // 0x6E59E0
 void CWaterLevel::Shutdown() {
-    plugin::Call<0x6E59E0>();
+    // Unload Textures
+    for (auto tex : { &texWaterclear256, &texSeabd32, &texWaterwake }) {
+        if (*tex) {
+            RwTextureDestroy(*tex);
+            *tex = nullptr;
+        }
+    }
 }
 
 // 0x6E81E0
