@@ -128,6 +128,10 @@ constexpr inline CVector2D operator*(const CVector2D& vecOne, const CVector2D& v
     return { vecOne.x * vecTwo.x, vecOne.y * vecTwo.y };
 }
 
+constexpr inline CVector2D operator/(const CVector2D& vecOne, const CVector2D& vecTwo) {
+    return { vecOne.x / vecTwo.x, vecOne.y / vecTwo.y };
+}
+
 constexpr inline CVector2D operator/(const CVector2D& vec, float dividend) {
     return { vec.x / dividend, vec.y / dividend };
 }
