@@ -215,7 +215,12 @@ void ProcessImGui() {
         ImGui::NewLine();
     }
 
-    ImGui::SliderInt("Selected Hour", &timeId, 0, CTimeCycle::NUM_HOURS); // todo: Calc this from the current time
+    //if (ImGui::SliderInt("Selected Hour", &timeId, 0, CTimeCycle::NUM_HOURS)) {
+    //    Hours = timeId * (24 / CTimeCycle::NUM_HOURS);
+    //} else {
+    //  timeId = Hours / (24 / CTimeCycle::NUM_HOURS);
+    //}
+
     if (ImGui::Combo("Current Weather", &OldWeatherTypeId, WEATHER_NAMES, std::size(WEATHER_NAMES))) {
         CWeather::OldWeatherType = static_cast<eWeatherType>(OldWeatherTypeId);
     }
@@ -229,6 +234,8 @@ void ProcessImGui() {
     if (ImGui::SliderInt("Minutes", &Minutes, 0, 59, "%.0f")) {
         CClock::ms_nGameClockMinutes = static_cast<uint8>(Minutes);
     }
+
+    timeId = Hours / (24 / CTimeCycle::NUM_HOURS);
 
     ImGui::NewLine();
     if (ImGui::ColorEdit3("Current RGB 1", (float*)&CurrentRGB1)) {
