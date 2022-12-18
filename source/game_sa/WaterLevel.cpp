@@ -11,9 +11,10 @@ void CWaterLevel::InjectHooks() {
     RH_ScopedGlobalInstall(WaterLevelInitialise, 0x6EAE80);
     RH_ScopedGlobalInstall(Shutdown, 0x6E59E0);
     RH_ScopedGlobalInstall(RenderWaterTriangle, 0x6EE240);
-    RH_ScopedGlobalInstall(RenderFlatWaterTriangle, 0x6EE080, { .reversed = false });
+    RH_ScopedGlobalInstall(RenderFlatWaterTriangle_OneLayer, 0x6E8ED0);
+    RH_ScopedGlobalInstall(RenderFlatWaterTriangle, 0x6EE080);
     RH_ScopedGlobalInstall(RenderBoatWakes, 0x6ED9A0, { .reversed = false });
-    RH_ScopedGlobalInstall(SplitWaterTriangleAlongXLine, 0x6ECF00, { .reversed = false });
+    RH_ScopedGlobalInstall(SplitWaterTriangleAlongXLine, 0x6ECF00);
     RH_ScopedGlobalInstall(RenderWaterRectangle, 0x6EC5D0, { .reversed = false });
     RH_ScopedGlobalInstall(RenderFlatWaterRectangle, 0x6EBEC0, { .reversed = false });
     RH_ScopedGlobalInstall(SplitWaterRectangleAlongXLine, 0x6EB810, { .reversed = false });
@@ -191,9 +192,72 @@ void CWaterLevel::RenderWaterTriangle(int32 X1, int32 Y1, CRenPar P1, int32 X2, 
     }
 }
 
+// NOTSA
+auto CWaterLevel::GetWaterLayerTexInfo(int32 layer) -> WaterLayerTexInfo {
+    switch (layer) {
+    case 0: return { { TextureShiftFirstU,  TextureShiftFirstV  }, 25.0f };
+    case 1: return { { TextureShiftSecondU, TextureShiftSecondV }, 12.5f };
+    default: NOTSA_UNREACHABLE();
+    }
+}
+
+// notsa
+auto CWaterLevel::GetTriTexUV(int32 X1, int32 Y1, int32 Y3, int32 WaterLayer) -> TriTexUVInfo {
+    const auto txinfo = GetWaterLayerTexInfo(WaterLayer);
+    const auto posUV  = CVector2D{ (float)X1, (float)Y1 } / txinfo.size + txinfo.shift;
+
+    const auto CalcShift = [](float p, bool dir) {
+        return p - std::floor(p) + (dir ? 7.f : -7.f);
+    };
+
+    return {
+        .size      = txinfo.size,
+        .pos       = posUV,
+        .baseShift = CVector2D{
+            CalcShift(posUV.x, false),
+            CalcShift(posUV.y, Y3 - Y1 <= 0)
+        }
+    };
+}
+
+// 0x6E8ED0
+void CWaterLevel::RenderFlatWaterTriangle_OneLayer(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3, int32 WaterLayer) {
+    RenderBuffer::RenderIfDoesntFit(5, 3);
+
+    // First(!) push indices
+    RenderBuffer::PushIndices({0, 1, 2}, true);
+
+    // Calculate color
+    auto color = WaterColorTriangle * 0.577f;
+    color.a    = WaterLayerAlpha[WaterLayer];
+
+    // And push vertices into the buffer
+    const auto PushVertex = [
+        &,
+        tex       = GetTriTexUV(X1, Y1, Y3, WaterLayer),
+        pos2DVtx1 = CVector2D{ (float)X1, (float)Y2 }
+    ](int32 x, int32 y, CRenPar p) {
+        const auto pos2DThis = CVector2D{ (float)x, (float)y };
+        RenderBuffer::PushVertex(
+            CVector{ pos2DThis, p.z },
+            (pos2DThis - pos2DVtx1) / tex.size + tex.baseShift,
+            color
+        );
+    };
+
+    PushVertex(X1, Y1, P1);
+    PushVertex(X2, Y2, P2);
+    PushVertex(X3, Y3, P3);
+}
+
 // 0x6EE080
-void CWaterLevel::RenderFlatWaterTriangle(int32 a1, int32 a2, CRenPar a3, int32 a4, int32 a5, CRenPar a6, int32 a7, int32 a8, CRenPar a9) {
-    plugin::Call<0x6EE080, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar>(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+void CWaterLevel::RenderFlatWaterTriangle(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3) {
+    if (bSplitBigPolys && X2 - X1 > BigPolySize) {
+        SplitWaterTriangleAlongXLine((X1 + X2) / 2, X1, Y1, P1, X2, Y2, P2, X3, Y3, P3);
+    } else {
+        RenderFlatWaterTriangle_OneLayer(X1, Y1, P1, X2, Y2, P2, X3, Y3, P3, 0);
+        RenderFlatWaterTriangle_OneLayer(X1, Y1, P1, X2, Y2, P2, X3, Y3, P3, 1);
+    }
 }
 
 // 0x6ED9A0
@@ -202,8 +266,82 @@ void CWaterLevel::RenderBoatWakes() {
 }
 
 // 0x6ECF00
-void CWaterLevel::SplitWaterTriangleAlongXLine(int32 a7, int32 a1, int32 a2, CRenPar a4, int32 a5, int32 a6, CRenPar arg18, int32 a8, int32 a9, CRenPar a10) {
-    plugin::Call<0x6ECF00, int32, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar>(a7, a1, a2, a4, a5, a6, arg18, a8, a9, a10);
+void CWaterLevel::SplitWaterTriangleAlongXLine(int32 splitAtX, int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3) {
+    assert(Y1 == Y2); 
+
+    // Ease of life
+    const auto XS = splitAtX;
+
+    const auto splitWidth = XS - X1;
+    const auto triWidth   = X2 - X1;
+
+    // Calculate position of split along Y axis
+    const auto CalcSplitPosY = [&](int32 fromY, int32 toY) {
+        return fromY + (toY - fromY) * splitWidth / triWidth;
+    };
+
+    const auto volatile ys1 = CalcSplitPosY(Y3, Y1), ys2 = CalcSplitPosY(Y1, Y3);
+
+    // Interpolation value
+    const auto t = (float)splitWidth / (float)triWidth;
+
+    // New interpolations of RenPar's along a few segments
+    const auto P12 = lerp(P1, P2, t);
+    const auto P13 = lerp(P1, P3, t);
+    const auto P23 = lerp(P2, P3, t);
+
+    // Vertex 1 and 2 are always (top left), (top right)
+    // Also the triangles always contain a 90deg corner at either the left or right side.
+
+    if (X1 == X3) { // Vertex 3 => (bottom left)
+        const auto YS = CalcSplitPosY(Y3, Y1);
+
+        // Bottom
+        RenderWaterTriangle(
+            X1, YS, P12,
+            XS, YS, P13,
+            X3, Y3, P3
+        );
+
+        // Left
+        RenderWaterRectangle(
+            X1, XS,
+            Y1, YS,
+            P1, P12, P23, P13
+        );
+
+        // Right
+        RenderWaterTriangle(
+            XS, Y1, P12,
+            X2, Y1, P2,
+            XS, YS, P23
+        );
+    } else if (X2 == X3) { // Vertex 3 => (bottom right)
+        const auto YS = CalcSplitPosY(Y1, Y3);
+
+        // Left
+        RenderWaterTriangle(
+            X1, Y1, P1,
+            XS, Y1, P12,
+            XS, YS, P13
+        );
+
+        // Right
+        RenderWaterRectangle(
+            XS, X2,
+            Y1, YS,
+            P12, P2, P23, P12
+        );
+
+        // Bottom
+        RenderWaterTriangle(
+            XS, YS, P13,
+            X2, YS, P23,
+            X3, Y3, P3
+        );
+    } else {
+        NOTSA_UNREACHABLE("Triangle has no 90deg corner => Very bad");
+    }
 }
 
 // 0x6EC5D0
@@ -383,6 +521,10 @@ void CWaterLevel::FillQuadsAndTrianglesList() {
 
 // 0x6E9C80
 void CWaterLevel::SetCameraRange() {
+    if (DontUpdateCameraRange) {
+        return;
+    }
+
     const auto& cmpos = TheCamera.GetPosition();
 
     const auto CalcMin = [](float p) { return 2 * (int32)std::floor((p - (float)DETAILEDWATERDIST) / 2.f); };

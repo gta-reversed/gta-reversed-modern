@@ -2,6 +2,10 @@
 
 #include "Base.h"
 #include "Vector.h"
+#include "RGBA.h"
+#include "Vector.h"
+#include "Vector2D.h"
+
 #include <extensions/utility.hpp>
 
 struct CRenPar {
@@ -9,6 +13,16 @@ struct CRenPar {
     float bigWaves, smallWaves;     // Height of waves
     int8  flowX, flowY;             // Fixed-point float. Divide by 64
 };
+
+// 0x6E5280
+static CRenPar lerp(CRenPar rp1, CRenPar rp2, float t) {
+    return {
+        lerp(rp1.z, rp2.z, t),
+        lerp(rp1.bigWaves, rp2.bigWaves, t),
+        lerp(rp1.smallWaves, rp2.smallWaves, t),
+        0, 0
+    };
+}
 
 struct CWaterVertex {
     int16  x;
@@ -74,6 +88,25 @@ class CWaterLevel {
 
     static inline auto& WaterZones = *(notsa::mdarray<int32, 12, 12>*)0xC21B70;
 
+    static inline auto& DETAILEDWATERDIST = *(int32*)0x8D37D0; // Default: 48
+    static inline auto& bSplitBigPolys = *(bool*)0x8D37F4;     // Default: true
+    static inline auto  BigPolySize = 168; // NOTSA
+
+    static inline auto& TextureShiftFirstV = *(float*)0xC21178;
+    static inline auto& TextureShiftFirstU = *(float*)0xC2117C;
+
+    static inline auto& TextureShiftSecondV = *(float*)0xC21180;
+    static inline auto& TextureShiftSecondU = *(float*)0xC21184;
+
+    // In reality the alpha component isn't used and instead `WaterLayerAlpha` is used
+    static inline auto& WaterColorTriangle = *(CRGBA*)0xC21168;
+    static inline auto& WaterColor      = *(CRGBA*)0xC2116C;
+
+    static inline auto& WaterLayerAlpha = *(std::array<uint32, 2>*)0x8D3808;
+
+    //! NOTSA: Stop `SetCameraRange()` from running
+    static inline bool DontUpdateCameraRange = false;
+
     //static inline std::array<std::array<
 
 public:
@@ -82,6 +115,23 @@ public:
     static void Shutdown();
     static void AddWaveToResult(float x, float y, float* pfWaterLevel, float fUnkn1, float fUnkn2, CVector* pVecNormal);
     static void RenderWaterTriangle(int32 a1, int32 a2, CRenPar a3, int32 a4, int32 a5, CRenPar a6, int32 a7, int32 a8, CRenPar a9);
+
+    // NOTSA
+    struct WaterLayerTexInfo {
+        CVector2D shift;
+        float     size;
+    };
+    static auto GetWaterLayerTexInfo(int32 layer) -> WaterLayerTexInfo;
+
+    // NOTSA
+    struct TriTexUVInfo {
+        float     size;      // Texture size
+        CVector2D pos;       // Pos of the first vertex on the texture
+        CVector2D baseShift; // Shift from the 0th vertex
+    };
+    static auto GetTriTexUV(int32 X1, int32 Y1, int32 Y3, int32 WaterLayer) -> TriTexUVInfo;
+
+    static void RenderFlatWaterTriangle_OneLayer(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3, int32 WaterLayer);
     static void RenderFlatWaterTriangle(int32 a1, int32 a2, CRenPar a3, int32 a4, int32 a5, CRenPar a6, int32 a7, int32 a8, CRenPar a9);
     static void RenderBoatWakes();
     static void SplitWaterTriangleAlongXLine(int32 a7, int32 a1, int32 a2, CRenPar a4, int32 a5, int32 a6, CRenPar arg18, int32 a8, int32 a9, CRenPar a10);
@@ -136,14 +186,18 @@ public:
     MarkQuadsAndPolysToBeRendered(int32, int32, bool)
     RenderBoatWakes()
     RenderDetailedSeaBedSegment(int32, int32, float, float, float, float)
+
+    RenderFlatWaterTriangle(int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar)
+
     RenderFlatWaterRectangle(int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar)
     RenderFlatWaterRectangle_OneLayer(int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar, int32)
-    RenderFlatWaterTriangle(int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar)
-    RenderFlatWaterTriangle_OneLayer(int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar, int32)
+
     RenderHighDetailWaterRectangle(int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar)
     RenderHighDetailWaterRectangle_OneLayer(int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar, int32, int32, int32, int32, int32)
+
     RenderHighDetailWaterTriangle(int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar)
     RenderHighDetailWaterTriangle_OneLayer(int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, int32, int32)
+
     RenderSeaBedSegment(int32, int32, float, float, float, float)
     RenderShipsOnHorizon()
     RenderTransparentWater()
@@ -158,11 +212,8 @@ public:
     SetUpWaterFog(int32, int32, int32, int32)
     SplitWaterRectangleAlongXLine(int32, int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar)
     SplitWaterRectangleAlongYLine(int32, int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar)
-    SplitWaterTriangleAlongXLine(int32, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar)
-    SplitWaterTriangleAlongYLine(int32, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar)
     TestLineAgainstWater(CVector, CVector, CVector*)
     TestQuadToGetWaterLevel(CWaterQuad*, float, float, float, float*, float*, float*)
     TestTriangleToGetWaterLevel(CWaterTriangle*, float, float, float, float*, float*, float*)
-    WaterLevelInitialise()
     */
 };
