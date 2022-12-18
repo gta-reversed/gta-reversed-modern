@@ -22,6 +22,7 @@
 #include "TimecycEditor.h"
 #include "CullZonesDebugModule.h"
 #include "Text/TextDebugModule.h"
+#include "WaterLevelDebugModule.hpp"
 
 bool DebugModules::m_ShowFPS = false;
 bool DebugModules::m_ShowExtraDebugFeatures = false;
@@ -203,6 +204,11 @@ void DebugModules::ProcessExtraDebugFeatures() {
 
         if (ImGui::BeginTabItem("Rampage")) {
             CDarkelDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Water Level")) {
+            WaterLevelDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 
