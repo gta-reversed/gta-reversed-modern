@@ -44,4 +44,29 @@ void RenderStuffInBuffer();
 * Frequently inlined!
 */
 void ClearRenderBuffer();
+
+/*!
+* @addr 0x6E7680
+* @brief Render out buffer if the specified number of vertices/indices doesn't fit
+*/
+void RenderIfDoesntFit(int32 nIdx, int32 nVtx);
+
+/*
+* @addr notsa
+* @brief Push a vertex to the buffer. Not to be used with `StartStoring`!
+*/
+void PushVertex(CVector pos, CVector2D uv, CRGBA color);
+
+/*!
+* @addr notsa
+* @brief Push an index into the buffer. Not to be used with `StartStoring`!
+*/
+void PushIndex(RwImVertexIndex idx, bool useCurrentVtxAsBase);
+
+
+/*!
+* @addr notsa
+* @brief Push multiple indices into the buffer. Not to be used with `StartStoring`!
+*/
+void PushIndices(std::initializer_list<RwImVertexIndex> idxs, bool useCurrentVtxAsBase);
 }; // namespace RenderBuffer
