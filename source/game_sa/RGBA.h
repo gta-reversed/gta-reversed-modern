@@ -20,6 +20,7 @@ public:
     CRGBA(const CRGBA& rhs);
     CRGBA(uint32 intValue);
     CRGBA(const RwRGBA& rhs);
+    explicit CRGBA(RwRGBAReal rgba);
     CRGBA() = default;
 
     void Set(uint8 red, uint8 green, uint8 blue);
@@ -61,4 +62,7 @@ public:
         *this = *this * mult;
         return *this;
     }
+
+    operator RwRGBAReal() { return { (RwReal)r, (RwReal)g, (RwReal)b, (RwReal)a }; }
+    operator RwRGBA()     { return { r, g, b, a }; }
 };
