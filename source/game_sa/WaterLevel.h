@@ -90,7 +90,7 @@ class CWaterLevel {
 
     static inline auto& DETAILEDWATERDIST = *(int32*)0x8D37D0; // Default: 48
     static inline auto& bSplitBigPolys = *(bool*)0x8D37F4;     // Default: true
-    static inline auto  BigPolySize = 168; // NOTSA
+    static inline auto  BigPolySize = 168; // NOTSA variable, but value is OG.
 
     static inline auto& TextureShiftFirstV = *(float*)0xC21178;
     static inline auto& TextureShiftFirstU = *(float*)0xC2117C;
@@ -100,7 +100,7 @@ class CWaterLevel {
 
     // In reality the alpha component isn't used and instead `WaterLayerAlpha` is used
     static inline auto& WaterColorTriangle = *(CRGBA*)0xC21168;
-    static inline auto& WaterColor      = *(CRGBA*)0xC2116C;
+    static inline auto& WaterColor         = *(CRGBA*)0xC2116C;
 
     static inline auto& WaterLayerAlpha = *(std::array<uint32, 2>*)0x8D3808;
 
@@ -109,9 +109,18 @@ class CWaterLevel {
 
     //static inline std::array<std::array<
 
-    // NOTSA: Used for debugging //
-    static inline CRGBA DebugWaterColorTriangle{CRGBA::Null()};
-    static inline bool  DontRenderYSplitTri = false;
+    // NOTSA Section - Used for debugging //
+    static inline struct DebugWaterColor {
+        enum {
+            TRI,
+            RECT
+        };
+
+        bool  active{};
+        CRGBA color{};
+    } DebugWaterColors[2];
+
+    static inline bool DontRenderYSplitTri = false;
 
 public:
     static void InjectHooks();
@@ -125,23 +134,48 @@ public:
         CVector2D shift;
         float     size;
     };
-    static auto GetWaterLayerTexInfo(int32 layer) -> WaterLayerTexInfo;
+    /*!
+    * @addr notsa
+    * @brief Get texture info for a given layer
+    */
+    static auto GetWaterLayerTexInfo(int32 WaterLayer) -> WaterLayerTexInfo;
 
     // NOTSA
-    struct TriTexUVInfo {
+    struct TexUV {
         float     size;      // Texture size
-        CVector2D pos;       // Pos of the first vertex on the texture
+        CVector2D pos;       // Pos of the 0th vertex (top left) on the texture 
         CVector2D baseShift; // Shift from the 0th vertex
     };
-    static auto GetTriTexUV(int32 X1, int32 Y1, int32 Y3, int32 WaterLayer) -> TriTexUVInfo;
+    /*!
+    * @addr notsa
+    * @brief Calculate texture UV mapping coords at a given position for a given layer
+    */
+    static auto GetTextureUV(int32 X1, int32 Y1, int32 Y3, int32 WaterLayer) -> TexUV;
+
+    /*!
+    * @addr notsa
+    * @brief Choose color to use for rendering
+    *
+    * @param real       The real color (As it should be originally)
+    * @param debug      Debug color
+    * @param WaterLayer The water layer for which this color is. If the choosen color is the `real` the associated alpha will be applied.
+    *
+    * @return The color that should be used for rendering
+    */
+    static CRGBA GetWaterColorForRendering(CRGBA real, DebugWaterColor debug, int32 WaterLayer);
 
     static void RenderFlatWaterTriangle_OneLayer(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3, int32 WaterLayer);
     static void RenderFlatWaterTriangle(int32 a1, int32 a2, CRenPar a3, int32 a4, int32 a5, CRenPar a6, int32 a7, int32 a8, CRenPar a9);
     static void RenderBoatWakes();
     static void SplitWaterTriangleAlongXLine(int32 a7, int32 a1, int32 a2, CRenPar a4, int32 a5, int32 a6, CRenPar arg18, int32 a8, int32 a9, CRenPar a10);
-    static void RenderWaterRectangle(int32 a1, int32 a2, int32 a3, int32 a4, CRenPar a5, CRenPar a6, CRenPar a7, CRenPar a8);
-    static int32 RenderFlatWaterRectangle(int32 a1, int32 a2, int32 a3, int32 a4, CRenPar a5, CRenPar a6, CRenPar a7, CRenPar a8);
+
+    static void RenderWaterRectangle(int32 minX, int32 maxX, int32 Y1, int32 Y2, CRenPar P1, CRenPar P2, CRenPar P3, CRenPar P4);
+    static void RenderFlatWaterRectangle(int32 minX, int32 maxX, int32 Y1, int32 Y2, CRenPar P1, CRenPar P2, CRenPar P3, CRenPar P4);
+    static void RenderFlatWaterRectangle_OneLayer(int32 minX, int32 maxX, int32 Y1, int32 Y2, CRenPar P1, CRenPar P2, CRenPar P3, CRenPar P4, int32 WaterLayer);
+    static void RenderHighDetailWaterRectangle(int32 minX, int32 maxX, int32 Y1, int32 Y2, CRenPar P1, CRenPar P2, CRenPar P3, CRenPar P4);
     static void SplitWaterRectangleAlongXLine(int32 a1, int32 a2, int32 a3, int32 a4, int32 a5, CRenPar a6, CRenPar a7, CRenPar a8, CRenPar a9);
+    static void SplitWaterRectangleAlongYLine(int32 splitAtY, int32 minX, int32 maxX, int32 Y1, int32 Y2, CRenPar P1, CRenPar P2, CRenPar P3, CRenPar P4);
+
     static void PreRenderWater();
     static bool GetWaterDepth(const CVector& vecPos, float* pOutWaterDepth, float* pOutWaterLevel, float* pOutGroundLevel);
     static bool GetWaterLevel(float x, float y, float z, float* pOutWaterLevel, uint8 bTouchingWater, CVector* pVecNormals);
@@ -196,7 +230,6 @@ public:
     RenderFlatWaterRectangle(int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar)
     RenderFlatWaterRectangle_OneLayer(int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar, int32)
 
-    RenderHighDetailWaterRectangle(int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar)
     RenderHighDetailWaterRectangle_OneLayer(int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar, int32, int32, int32, int32, int32)
 
     RenderHighDetailWaterTriangle(int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar)

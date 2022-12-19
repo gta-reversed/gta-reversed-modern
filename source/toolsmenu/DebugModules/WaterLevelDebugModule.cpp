@@ -11,14 +11,31 @@ void ProcessImGui() {
     Checkbox("Skip Camera Range Update", &CWaterLevel::DontUpdateCameraRange);
     Checkbox("Don't render Y split tri", &CWaterLevel::DontRenderYSplitTri);
 
-    const auto ColorEditRGBA = [](const char* name, CRGBA& inOutColor) {
+    const auto TogglableColorEditRGBA = [](bool& toggleState, const char* label, CRGBA& inOutColor) {
+        PushID(label);
+        Checkbox("Enable", &toggleState);
+        SameLine();
+        BeginDisabled(!toggleState);
         RwRGBAReal colorToEdit = inOutColor;
-        if (ColorEdit4(name, (float*)&colorToEdit)) {
+        if (ColorEdit4(label, (float*)&colorToEdit)) {
             inOutColor = CRGBA{ colorToEdit };
         }
+        EndDisabled();
+        PopID();
     };
 
-    ColorEditRGBA("Triangle Water Color", CWaterLevel::DebugWaterColorTriangle);
+    const auto DoWaterColor = [&](auto idx, const char* label) {
+        auto& debugColor = CWaterLevel::DebugWaterColors[idx];
+        TogglableColorEditRGBA(debugColor.active, label, debugColor.color);
+    };
+    DoWaterColor(CWaterLevel::DebugWaterColor::TRI, "Triangle Water Color");
+    DoWaterColor(CWaterLevel::DebugWaterColor::RECT, "Rectangle Water Color");
+
+    Checkbox("Enable", &CWaterLevel::bSplitBigPolys);
+    SameLine();
+    BeginDisabled(!CWaterLevel::bSplitBigPolys);
+    SliderInt("Split Poly At Size", &CWaterLevel::BigPolySize, 1, 2048, "%d", ImGuiSliderFlags_Logarithmic); // 0 crashes the game (stack overflow)
+    EndDisabled();
 
     // Doesn't work (Color is always set to be the same as TimeCyc's water color -> Edit that instead)
     //DoWaterColorEdit("Triangle Water Color", CWaterLevel::WaterColorTriangle);

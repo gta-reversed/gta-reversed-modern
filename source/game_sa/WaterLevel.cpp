@@ -16,9 +16,14 @@ void CWaterLevel::InjectHooks() {
     RH_ScopedGlobalInstall(RenderBoatWakes, 0x6ED9A0, { .reversed = false });
     RH_ScopedGlobalInstall(SplitWaterTriangleAlongXLine, 0x6ECF00);
     RH_ScopedGlobalInstall(SplitWaterTriangleAlongYLine, 0x6EE5A0);
-    RH_ScopedGlobalInstall(RenderWaterRectangle, 0x6EC5D0, { .reversed = false });
-    RH_ScopedGlobalInstall(RenderFlatWaterRectangle, 0x6EBEC0, { .reversed = false });
-    RH_ScopedGlobalInstall(SplitWaterRectangleAlongXLine, 0x6EB810, { .reversed = false });
+
+    RH_ScopedGlobalInstall(RenderWaterRectangle, 0x6EC5D0);
+    RH_ScopedGlobalInstall(RenderFlatWaterRectangle_OneLayer, 0x6E9940);
+    RH_ScopedGlobalInstall(RenderFlatWaterRectangle, 0x6EBEC0);
+
+    RH_ScopedGlobalInstall(SplitWaterRectangleAlongXLine, 0x6E73A0);
+    RH_ScopedGlobalInstall(SplitWaterRectangleAlongYLine, 0x6ED6D0);
+
     RH_ScopedGlobalInstall(PreRenderWater, 0x6EB710, { .reversed = false });
     RH_ScopedOverloadedInstall(GetWaterLevel, "", 0x6EB690, bool(*)(float, float, float, float*, uint8, CVector*));
     RH_ScopedGlobalInstall(SetUpWaterFog, 0x6EA9F0, { .reversed = false });
@@ -201,8 +206,19 @@ auto CWaterLevel::GetWaterLayerTexInfo(int32 layer) -> WaterLayerTexInfo {
     }
 }
 
+// NOTSA
+CRGBA CWaterLevel::GetWaterColorForRendering(CRGBA real, DebugWaterColor debug, int32 WaterLayer) {
+    if (debug.active) {
+        return debug.color;
+    } else {
+        real *= 0.577f; // AKA 1/sqrt3 OR E_CONST OR neither, but just a coincidence?
+        real.a = WaterLayerAlpha[WaterLayer];
+        return real;
+    }
+}
+
 // notsa
-auto CWaterLevel::GetTriTexUV(int32 X1, int32 Y1, int32 Y3, int32 WaterLayer) -> TriTexUVInfo {
+auto CWaterLevel::GetTextureUV(int32 X1, int32 Y1, int32 Y3, int32 WaterLayer) -> TexUV {
     const auto txinfo = GetWaterLayerTexInfo(WaterLayer);
     const auto posUV  = CVector2D{ (float)X1, (float)Y1 } / txinfo.size + txinfo.shift;
 
@@ -227,22 +243,12 @@ void CWaterLevel::RenderFlatWaterTriangle_OneLayer(int32 X1, int32 Y1, CRenPar P
     // First(!) push indices
     RenderBuffer::PushIndices({ 0, 1, 2 }, true);
 
-    // Calculate color
-    const auto color = [&] {
-        if (DebugWaterColorTriangle != CRGBA::Null()) { // NOTSA:
-            return DebugWaterColorTriangle;
-        } else { // SA:
-            auto color = WaterColorTriangle * 0.577f;
-            color.a = WaterLayerAlpha[WaterLayer];
-            return color;
-        }
-    }();
-
     // And push vertices into the buffer
     const auto PushVertex = [
         &,
-        tex       = GetTriTexUV(X1, Y1, Y3, WaterLayer),
-        pos2DVtx1 = CVector2D{ (float)X1, (float)Y2 }
+        tex       = GetTextureUV(X1, Y1, Y3, WaterLayer),
+        pos2DVtx1 = CVector2D{ (float)X1, (float)Y2 },
+        color     = GetWaterColorForRendering(WaterColorTriangle, DebugWaterColors[DebugWaterColor::TRI], WaterLayer)
     ](int32 x, int32 y, CRenPar p) {
         const auto pos2DThis = CVector2D{ (float)x, (float)y };
         RenderBuffer::PushVertex(
@@ -372,18 +378,110 @@ void CWaterLevel::SplitWaterTriangleAlongYLine(int32 splitAtY, int32 X1, int32 Y
 }
 
 // 0x6EC5D0
-void CWaterLevel::RenderWaterRectangle(int32 a1, int32 a2, int32 a3, int32 a4, CRenPar a5, CRenPar a6, CRenPar a7, CRenPar a8) {
-    plugin::Call<0x6EC5D0, int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar>(a1, a2, a3, a4, a5, a6, a7, a8);
+void CWaterLevel::RenderWaterRectangle(int32 minX, int32 maxX, int32 Y1, int32 Y2, CRenPar P1, CRenPar P2, CRenPar P3, CRenPar P4) {
+    const auto [minY, maxY] = std::minmax(Y1, Y2);
+    if (minX >= CameraRangeMaxX || maxX <= CameraRangeMinX || minY >= CameraRangeMaxY || maxY <= CameraRangeMinY) { // Lies outside (of camera) fully
+        RenderFlatWaterRectangle(minX, maxX, Y1, Y2, P1, P2, P3, P4);
+    } else if (minX < CameraRangeMinX || maxX > CameraRangeMaxX) { // Lies inside on X
+        SplitWaterRectangleAlongXLine(minX < CameraRangeMinX ? CameraRangeMinX : CameraRangeMaxX, minX, maxX, Y1, Y2, P1, P2, P3, P4);
+    } else if (minY < CameraRangeMinY || maxY > CameraRangeMaxY) { // Lies inside of Y
+        SplitWaterRectangleAlongYLine(minY < CameraRangeMinY ? CameraRangeMinY : CameraRangeMaxY, minX, maxX, Y1, Y2, P1, P2, P3, P4);
+    } else { // Lies inside of camera fully
+        RenderHighDetailWaterRectangle(minX, maxX, Y1, Y2, P1, P2, P3, P4);
+    }
 }
 
 // 0x6EBEC0
-int32 CWaterLevel::RenderFlatWaterRectangle(int32 a1, int32 a2, int32 a3, int32 a4, CRenPar a5, CRenPar a6, CRenPar a7, CRenPar a8) {
-    return plugin::CallAndReturn<int32, 0x6EBEC0, int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar>(a1, a2, a3, a4, a5, a6, a7, a8);
+void CWaterLevel::RenderFlatWaterRectangle(int32 minX, int32 maxX, int32 Y1, int32 Y2, CRenPar P1, CRenPar P2, CRenPar P3, CRenPar P4) {
+    if (bSplitBigPolys && maxX - minX > BigPolySize) {
+        SplitWaterRectangleAlongXLine((minX + maxX) / 2,  minX, maxX, Y1, Y2, P1, P2, P3, P4);
+#ifdef FIX_BUGS
+    } else if (const auto [minY, maxY] = std::minmax(Y1, Y2); bSplitBigPolys && (maxY - minY) > BigPolySize) {
+#else
+    } else if (bSplitBigPolys && Y2 - Y1 > BigPolySize) {
+#endif
+        SplitWaterRectangleAlongYLine((Y2 + Y1) / 2, minX, maxX, Y1, Y2, P1, P2, P3, P4);
+    } else {
+        for (int32 lyr = 0; lyr < 2; lyr++) {
+            RenderFlatWaterRectangle_OneLayer(minX, maxX, Y1, Y2, P1, P2, P3, P4, lyr);
+        }
+    }
 }
 
-// 0x6EB810
-void CWaterLevel::SplitWaterRectangleAlongXLine(int32 a1, int32 a2, int32 a3, int32 a4, int32 a5, CRenPar a6, CRenPar a7, CRenPar a8, CRenPar a9) {
-    plugin::Call<0x6EB810, int32, int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar>(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+// 0x6E9940
+void CWaterLevel::RenderFlatWaterRectangle_OneLayer(int32 minX, int32 maxX, int32 Y1, int32 Y2, CRenPar P1, CRenPar P2, CRenPar P3, CRenPar P4, int32 WaterLayer) {
+    RenderBuffer::RenderIfDoesntFit(6, 4);
+
+    // First(!) push indices
+    RenderBuffer::PushIndices({ 0, 1, 2, 2, 3, 0 }, true);
+
+    // Get texture UV stuff
+    const auto texuv = GetTextureUV(minX, Y1, Y2, WaterLayer);
+
+    const auto PushVertex = [
+        &,
+        color = GetWaterColorForRendering(WaterColor, DebugWaterColors[DebugWaterColor::RECT], WaterLayer)
+    ](int32 x, int32 y, const CRenPar& p, CVector2D vtxUVOffset) {
+        RenderBuffer::PushVertex({ (float)x, (float)y, p.z }, texuv.baseShift + vtxUVOffset, color);
+    };
+
+    // Bottom right corner position on texture (In UV coords)
+    const auto bruv{ CVector2D{ (float)(maxX - minX), (float)(Y2 - Y1) } / texuv.size };
+
+    PushVertex(minX, Y1, P1, { 0.f,    0.f }); // Top Left
+    PushVertex(maxX, Y1, P2, { bruv.x, 0.f    }); // Top Right
+    PushVertex(maxX, Y2, P3, { bruv.x, bruv.y }); // Bottom Right
+    PushVertex(minX, Y2, P4, { 0.f,    bruv.y }); // Bottom Left
+} 
+
+void CWaterLevel::RenderHighDetailWaterRectangle(int32 minX, int32 maxX, int32 Y1, int32 Y2, CRenPar P1, CRenPar P2, CRenPar P3, CRenPar P4) {
+    plugin::Call<0x6EB810>(minX, maxX, Y1, Y2, P1, P2, P3, P4);
+}
+
+// 0x6E73A0
+void CWaterLevel::SplitWaterRectangleAlongXLine(int32 splitAtX, int32 minX, int32 maxX, int32 Y1, int32 Y2, CRenPar P1, CRenPar P2, CRenPar P3, CRenPar P4) {
+    const auto t = (float)(splitAtX - minX) / (float)(maxX - minX);
+
+    const auto P12 = lerp(P1, P2, t);
+    const auto P34 = lerp(P3, P4, t);
+
+    // Left
+    RenderWaterRectangle(
+        minX, splitAtX,
+        Y1, Y2,
+        P1, P12, P34, P4
+    );
+
+    // Right
+    RenderWaterRectangle(
+        splitAtX, maxX,
+        Y1, Y2,
+        P12, P2, P3, P34
+    );
+}
+
+// 0x6ED6D0 - Though fully inlined into `RenderWaterRectangle`
+void CWaterLevel::SplitWaterRectangleAlongYLine(int32 splitAtY, int32 minX, int32 maxX, int32 Y1, int32 Y2, CRenPar P1, CRenPar P2, CRenPar P3, CRenPar P4) {
+    const auto [minY, maxY] = std::minmax(Y1, Y2);
+
+    const auto t = (float)(splitAtY - minY) / (float)(maxY - minY);
+
+    const auto P13 = lerp(P1, P3, t);
+    const auto P24 = lerp(P2, P4, t);
+
+    // Top
+    RenderWaterRectangle(
+        minX, maxX,
+        Y1, splitAtY,
+        P1, P2, P13, P24
+    );
+
+    // Bottom
+    RenderWaterRectangle(
+        minX,     maxX,
+        splitAtY, Y2,
+        P13, P24, P3, P4
+    );
 }
 
 // 0x6EB710
