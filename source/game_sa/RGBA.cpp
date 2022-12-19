@@ -29,7 +29,12 @@ CRGBA::CRGBA(const RwRGBA& rhs) {
 }
 
 CRGBA::CRGBA(RwRGBAReal rgba) :
-    CRGBA{ (uint8)rgba.red, (uint8)rgba.green, (uint8)rgba.blue, (uint8)rgba.alpha }
+    CRGBA{
+        (uint8)(rgba.red * 255.f),
+        (uint8)(rgba.green * 255.f),
+        (uint8)(rgba.blue * 255.f),
+        (uint8)(rgba.alpha * 255.f)
+    }
 {
 }
 

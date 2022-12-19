@@ -63,6 +63,9 @@ public:
         return *this;
     }
 
-    operator RwRGBAReal() { return { (RwReal)r, (RwReal)g, (RwReal)b, (RwReal)a }; }
+    operator RwRGBAReal() { return { (RwReal)r / 255.f, (RwReal)g / 255.f, (RwReal)b / 255.f, (RwReal)a / 255.f }; }
     operator RwRGBA()     { return { r, g, b, a }; }
+
+    // Colors
+    static CRGBA Null() { return { 0, 0, 0, 0 }; }
 };
