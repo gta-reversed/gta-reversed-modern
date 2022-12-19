@@ -466,21 +466,21 @@ void CWaterLevel::SplitWaterRectangleAlongYLine(int32 splitAtY, int32 minX, int3
 
     const auto t = (float)(splitAtY - minY) / (float)(maxY - minY);
 
-    const auto P13 = lerp(P1, P3, t);
-    const auto P24 = lerp(P2, P4, t);
+    const auto P14 = lerp(P1, P4, t);
+    const auto P23 = lerp(P2, P3, t);
 
     // Top
     RenderWaterRectangle(
         minX, maxX,
         Y1, splitAtY,
-        P1, P2, P13, P24
+        P1, P2, P23, P14
     );
 
     // Bottom
     RenderWaterRectangle(
         minX,     maxX,
         splitAtY, Y2,
-        P13, P24, P3, P4
+        P14, P23, P3, P4
     );
 }
 
