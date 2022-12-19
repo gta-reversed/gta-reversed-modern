@@ -15,6 +15,7 @@ void CWaterLevel::InjectHooks() {
     RH_ScopedGlobalInstall(RenderFlatWaterTriangle, 0x6EE080);
     RH_ScopedGlobalInstall(RenderBoatWakes, 0x6ED9A0, { .reversed = false });
     RH_ScopedGlobalInstall(SplitWaterTriangleAlongXLine, 0x6ECF00);
+    RH_ScopedGlobalInstall(SplitWaterTriangleAlongYLine, 0x6EE5A0);
     RH_ScopedGlobalInstall(RenderWaterRectangle, 0x6EC5D0, { .reversed = false });
     RH_ScopedGlobalInstall(RenderFlatWaterRectangle, 0x6EBEC0, { .reversed = false });
     RH_ScopedGlobalInstall(SplitWaterRectangleAlongXLine, 0x6EB810, { .reversed = false });
@@ -27,7 +28,6 @@ void CWaterLevel::InjectHooks() {
     RH_ScopedGlobalInstall(RenderWaterFog, 0x6E7760, { .reversed = false });
     RH_ScopedGlobalInstall(CalculateWavesOnlyForCoordinate, 0x6E6EF0);
     RH_ScopedGlobalInstall(ScanThroughBlocks, 0x6E6D10, { .reversed = false });
-    RH_ScopedGlobalInstall(SplitWaterTriangleAlongYLine, 0x6EE5A0, { .reversed = false });
     RH_ScopedGlobalInstall(RenderWater, 0x6EF650, { .reversed = false });
     RH_ScopedGlobalInstall(AddWaveToResult, 0x6E81E0, { .reversed = false });
     RH_ScopedGlobalInstall(SetCameraRange, 0x6E9C80);
@@ -183,9 +183,9 @@ void CWaterLevel::RenderWaterTriangle(int32 X1, int32 Y1, CRenPar P1, int32 X2, 
     const auto [minY, maxY] = std::minmax(Y1, Y3);
     if (minX >= CameraRangeMaxX || maxX <= CameraRangeMinX || minY >= CameraRangeMaxY || maxY <= CameraRangeMinY) { // Lies outside (of camera) fully
         RenderFlatWaterTriangle(TRIANGLE_ARGS_OUT);
-    } else if (minX < CameraRangeMinX || maxX > CameraRangeMaxX) { // Lies outside on X (But inside on Y)
+    } else if (minX < CameraRangeMinX || maxX > CameraRangeMaxX) { // Lies inside on X 
         SplitWaterTriangleAlongXLine(minX < CameraRangeMinX ? CameraRangeMinX : CameraRangeMaxX, TRIANGLE_ARGS_OUT);
-    } else if (minY < CameraRangeMinY || maxY > CameraRangeMaxY) { // Lies outside on Y (But inside on X)
+    } else if (minY < CameraRangeMinY || maxY > CameraRangeMaxY) { // Lies inside of Y
         SplitWaterTriangleAlongYLine(minY < CameraRangeMinY ? CameraRangeMinY : CameraRangeMaxY, TRIANGLE_ARGS_OUT);
     } else { // Lies inside of camera fully
         RenderHighDetailWaterTriangle(TRIANGLE_ARGS_OUT);
@@ -225,11 +225,18 @@ void CWaterLevel::RenderFlatWaterTriangle_OneLayer(int32 X1, int32 Y1, CRenPar P
     RenderBuffer::RenderIfDoesntFit(5, 3);
 
     // First(!) push indices
-    RenderBuffer::PushIndices({0, 1, 2}, true);
+    RenderBuffer::PushIndices({ 0, 1, 2 }, true);
 
     // Calculate color
-    auto color = WaterColorTriangle * 0.577f;
-    color.a    = WaterLayerAlpha[WaterLayer];
+    const auto color = [&] {
+        if (DebugWaterColorTriangle != CRGBA::Null()) { // NOTSA:
+            return DebugWaterColorTriangle;
+        } else { // SA:
+            auto color = WaterColorTriangle * 0.577f;
+            color.a = WaterLayerAlpha[WaterLayer];
+            return color;
+        }
+    }();
 
     // And push vertices into the buffer
     const auto PushVertex = [
@@ -279,8 +286,6 @@ void CWaterLevel::SplitWaterTriangleAlongXLine(int32 splitAtX, int32 X1, int32 Y
     const auto CalcSplitPosY = [&](int32 fromY, int32 toY) {
         return fromY + (toY - fromY) * splitWidth / triWidth;
     };
-
-    const auto volatile ys1 = CalcSplitPosY(Y3, Y1), ys2 = CalcSplitPosY(Y1, Y3);
 
     // Interpolation value
     const auto t = (float)splitWidth / (float)triWidth;
@@ -342,6 +347,28 @@ void CWaterLevel::SplitWaterTriangleAlongXLine(int32 splitAtX, int32 X1, int32 Y
     } else {
         NOTSA_UNREACHABLE("Triangle has no 90deg corner => Very bad");
     }
+}
+
+// 0x6EE5A0
+void CWaterLevel::SplitWaterTriangleAlongYLine(int32 splitAtY, int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3) {
+    if (DontRenderYSplitTri) { // NOTSA
+        return;
+    }
+
+    const auto [minY, maxY] = std::minmax(Y1, Y3);
+    const auto height = maxY - minY;
+    const auto width  = X2 - X1;
+    
+    // Calulcate the X position where the Y line intersects the hypot
+    // and using that we split the triangle. 
+    // Same result as original code, but much easier.
+
+    SplitWaterTriangleAlongXLine(
+        X1 + (maxY - splitAtY) * width / height,
+        X1, Y1, P1,
+        X2, Y2, P2,
+        X3, Y3, P3
+    );
 }
 
 // 0x6EC5D0
@@ -473,11 +500,6 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float lowFre
 // 0x6E6D10
 void CWaterLevel::ScanThroughBlocks() {
     plugin::Call<0x6E6D10>();
-}
-
-// 0x6EE5A0
-void CWaterLevel::SplitWaterTriangleAlongYLine(int32 a0, int32 a1, int32 a2, CRenPar a3, int32 a4, int32 a5, CRenPar a6, int32 a7, int32 a8, CRenPar a9) {
-    plugin::Call<0x6EE5A0, int32, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar>(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
 }
 
 void CWaterLevel::RenderHighDetailWaterTriangle(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3) {

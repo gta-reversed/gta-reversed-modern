@@ -9,12 +9,16 @@ void ProcessImGui() {
     using namespace ImGui;
 
     Checkbox("Skip Camera Range Update", &CWaterLevel::DontUpdateCameraRange);
+    Checkbox("Don't render Y split tri", &CWaterLevel::DontRenderYSplitTri);
 
-    //const auto DoWaterColorEdit = [](const char* name, auto& inOutColorRGB) {
-    //    RwRGBAReal colorToEdit = inOutColorRGB;
-    //    ColorEdit3(name, (float*)&colorToEdit); // Ignoring alpha
-    //    inOutColorRGB = CRGBA{ colorToEdit };
-    //};
+    const auto ColorEditRGBA = [](const char* name, CRGBA& inOutColor) {
+        RwRGBAReal colorToEdit = inOutColor;
+        if (ColorEdit4(name, (float*)&colorToEdit)) {
+            inOutColor = CRGBA{ colorToEdit };
+        }
+    };
+
+    ColorEditRGBA("Triangle Water Color", CWaterLevel::DebugWaterColorTriangle);
 
     // Doesn't work (Color is always set to be the same as TimeCyc's water color -> Edit that instead)
     //DoWaterColorEdit("Triangle Water Color", CWaterLevel::WaterColorTriangle);

@@ -109,6 +109,10 @@ class CWaterLevel {
 
     //static inline std::array<std::array<
 
+    // NOTSA: Used for debugging //
+    static inline CRGBA DebugWaterColorTriangle{CRGBA::Null()};
+    static inline bool  DontRenderYSplitTri = false;
+
 public:
     static void InjectHooks();
 
