@@ -104,6 +104,9 @@ class CWaterLevel {
 
     static inline auto& WaterLayerAlpha = *(std::array<uint32, 2>*)0x8D3808;
 
+    static inline auto& m_CurrentFlow        = *(CVector2D*)0xC22890;
+    static inline auto& m_CurrentDesiredFlow = *(CVector2D*)0xC22898;
+
     //! NOTSA: Stop `SetCameraRange()` from running
     static inline bool DontUpdateCameraRange = false;
 
@@ -203,6 +206,8 @@ public:
     static void FillQuadsAndTrianglesList();
 
     static void SetCameraRange();
+    static void HandleBeachToysStuff();
+    static void UpdateFlow();
 
     /* Missing (In no particular order):
     static void AddWaveToResult(float x, float y, float z, float* pLevel, uint8 bTouchingWater, CVector* normalVec);
@@ -219,7 +224,6 @@ public:
     AddToQuadsAndTrianglesList(int32, int32, int32, uint32)
     AddWaterLevelQuad(int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar, uint32)
     AddWaterLevelTriangle(int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar, uint32)
-    HandleBeachToysStuff()
     IsLocationOutOfWorldBounds_WS(const CVector&, int32)
     MarkQuadsAndPolysToBeRendered(int32, int32, bool)
     RenderBoatWakes()

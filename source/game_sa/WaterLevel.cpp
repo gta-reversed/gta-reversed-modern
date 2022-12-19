@@ -24,7 +24,7 @@ void CWaterLevel::InjectHooks() {
     RH_ScopedGlobalInstall(SplitWaterRectangleAlongXLine, 0x6E73A0);
     RH_ScopedGlobalInstall(SplitWaterRectangleAlongYLine, 0x6ED6D0);
 
-    RH_ScopedGlobalInstall(PreRenderWater, 0x6EB710, { .reversed = false });
+    RH_ScopedGlobalInstall(PreRenderWater, 0x6EB710);
     RH_ScopedOverloadedInstall(GetWaterLevel, "", 0x6EB690, bool(*)(float, float, float, float*, uint8, CVector*));
     RH_ScopedGlobalInstall(SetUpWaterFog, 0x6EA9F0, { .reversed = false });
     RH_ScopedGlobalInstall(RenderWakeSegment, 0x6EA260, { .reversed = false });
@@ -486,7 +486,32 @@ void CWaterLevel::SplitWaterRectangleAlongYLine(int32 splitAtY, int32 minX, int3
 
 // 0x6EB710
 void CWaterLevel::PreRenderWater() {
-    plugin::Call<0x6EB710>();
+    if (CGame::CanSeeWaterFromCurrArea()) {
+        ScanThroughBlocks();
+        UpdateFlow();
+        HandleBeachToysStuff();
+    }
+}
+
+// NOTSA: From PreRenderWater()
+void CWaterLevel::UpdateFlow() {
+    if (CTimer::m_FrameCounter % 32 == 29) {
+        CWaterLevel::FindNearestWaterAndItsFlow();
+    }
+
+    const auto CalculateFlowOnAxis = [
+        step = CTimer::GetTimeStep() / 1000.f
+    ](float desired, float curr) {
+        const auto delta = desired - curr;
+        return std::abs(delta) < step
+            ? desired
+            : curr + std::copysign(step, delta);
+    };
+
+    m_CurrentFlow = {
+        CalculateFlowOnAxis(m_CurrentDesiredFlow.x, m_CurrentFlow.x),
+        CalculateFlowOnAxis(m_CurrentDesiredFlow.y, m_CurrentFlow.y)
+    };
 }
 
 // 0x6EB690
@@ -655,4 +680,9 @@ void CWaterLevel::SetCameraRange() {
 
     CameraRangeMinY = CalcMin(cmpos.y);
     CameraRangeMaxY = CalcMax(cmpos.y);
+}
+
+// 0x6EAB50
+void CWaterLevel::HandleBeachToysStuff() {
+    /* nothing special (10 lines), but it uses 3 static variables, and they aren't used anywhere else, so I won't bother */
 }
