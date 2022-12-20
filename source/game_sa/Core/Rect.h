@@ -39,8 +39,8 @@ public:
        assert(!IsFlipped());
     }
 
-    constexpr CRect(const CVector2D& top, const CVector2D& bottom) :
-        CRect{top.x, top.y, bottom.x, bottom.y}
+    constexpr CRect(const CVector2D& bottomLeft, const CVector2D& topRight) :
+        CRect{bottomLeft.x, bottomLeft.y, topRight.x, topRight.y}
     {
     }
 
@@ -63,6 +63,30 @@ public:
     [[nodiscard]] inline CVector2D GetCenter() const { return { (right + left) * 0.5F, (bottom + top) * 0.5F }; }
     void StretchToPoint(float x, float y);
 
+    /*!
+    * @addr notsa
+    * @brief Constrain a point into the rectangle.
+    *
+    * @param pt The point to constrain
+    *
+    * @return Whenever the point was constrained
+    */
+    bool DoConstrainPoint(CVector2D& pt) const;
+
+    /*!
+    * @addr notsa
+    * @brief Get corners of this rect (Order: top left, top right, bottom right, bottom left)
+    * 
+    * @param z The Z position to be used for all corners
+    */
+    auto GetCorners3D(float z) const -> std::array<CVector, 4> {
+        return {
+            CVector{ left,  top, z},
+            CVector{ right, top, z},
+            CVector{ right, bottom, z},
+            CVector{ left,  bottom, z}
+        };
+    }
 };
 
 VALIDATE_SIZE(CRect, 0x10);
