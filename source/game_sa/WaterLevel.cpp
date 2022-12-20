@@ -25,14 +25,22 @@ void CWaterLevel::InjectHooks() {
     RH_ScopedGlobalInstall(SplitWaterRectangleAlongYLine, 0x6ED6D0);
 
     RH_ScopedGlobalInstall(PreRenderWater, 0x6EB710);
-    RH_ScopedOverloadedInstall(GetWaterLevel, "", 0x6EB690, bool(*)(float, float, float, float*, uint8, CVector*));
+    RH_ScopedGlobalInstall(MarkQuadsAndPolysToBeRendered, 0x6E5810);
+    RH_ScopedGlobalInstall(ScanThroughBlocks, 0x6E6D10);
+    RH_ScopedGlobalInstall(BlockHit, 0x6E6CA0);
+
+    // For now it doesn't work as expected because of `DoVtxSortAndGetRange` (it seems to be buggy lol)
+    // So either drop it (and write OG code) or fix it.
+    RH_ScopedGlobalInstall(AddWaterLevelQuad, 0x6E7EF0, {.reversed = false });
+    RH_ScopedGlobalInstall(AddWaterLevelTriangle, 0x6E7D40, {.reversed = false });
+
+    RH_ScopedOverloadedInstall(GetWaterLevel, "", 0x6EB690, bool(*)(float, float, float, float&, uint8, CVector*));
     RH_ScopedGlobalInstall(SetUpWaterFog, 0x6EA9F0, { .reversed = false });
     RH_ScopedGlobalInstall(RenderWakeSegment, 0x6EA260, { .reversed = false });
     RH_ScopedGlobalInstall(FindNearestWaterAndItsFlow, 0x6E9D70, { .reversed = false });
     RH_ScopedGlobalInstall(GetWaterLevelNoWaves, 0x6E8580, { .reversed = false });
     RH_ScopedGlobalInstall(RenderWaterFog, 0x6E7760, { .reversed = false });
     RH_ScopedGlobalInstall(CalculateWavesOnlyForCoordinate, 0x6E6EF0);
-    RH_ScopedGlobalInstall(ScanThroughBlocks, 0x6E6D10, { .reversed = false });
     RH_ScopedGlobalInstall(RenderWater, 0x6EF650, { .reversed = false });
     RH_ScopedGlobalInstall(AddWaveToResult, 0x6E81E0, { .reversed = false });
     RH_ScopedGlobalInstall(SetCameraRange, 0x6E9C80);
@@ -515,17 +523,19 @@ void CWaterLevel::UpdateFlow() {
 }
 
 // 0x6EB690
-bool CWaterLevel::GetWaterLevel(float x, float y, float z, float* pOutWaterLevel, uint8 bTouchingWater, CVector* pVecNormals) {
-    float fUnkn1, fUnkn2;
-    if (!GetWaterLevelNoWaves(x, y, z, pOutWaterLevel, &fUnkn1, &fUnkn2))
+bool CWaterLevel::GetWaterLevel(float x, float y, float z, float& pOutWaterLevel, uint8 bTouchingWater, CVector* pVecNormals) {
+    float smallWaves, bigWaves;
+    if (!GetWaterLevelNoWaves(x, y, z, &pOutWaterLevel, &smallWaves, &bigWaves)) {
         return false;
+    }
      
-    if ((*pOutWaterLevel - z > 3.0F) && !bTouchingWater) {
-        *pOutWaterLevel = 0.0F;
+    if ((pOutWaterLevel - z > 3.0F) && !bTouchingWater) {
+        pOutWaterLevel = 0.0F;
         return false;
     }
 
-    AddWaveToResult(x, y, pOutWaterLevel, fUnkn1, fUnkn2, pVecNormals);
+    AddWaveToResult(x, y, &pOutWaterLevel, smallWaves, bigWaves, pVecNormals);
+
     return true;
 }
 
@@ -545,8 +555,8 @@ void CWaterLevel::FindNearestWaterAndItsFlow() {
 }
 
 // 0x6E8580
-bool CWaterLevel::GetWaterLevelNoWaves(float x, float y, float z, float * pOutWaterLevel, float * fUnkn1, float * fUnkn2) {
-    return plugin::CallAndReturn<bool, 0x6E8580, float, float, float, float *, float *, float *>(x, y, z, pOutWaterLevel, fUnkn1, fUnkn2);
+bool CWaterLevel::GetWaterLevelNoWaves(float x, float y, float z, float * pOutWaterLevel, float * pOutSmallWaves, float * pOutBigWaves) {
+    return plugin::CallAndReturn<bool, 0x6E8580, float, float, float, float *, float *, float *>(x, y, z, pOutWaterLevel, pOutSmallWaves, pOutBigWaves);
 }
 
 bool CWaterLevel::GetWaterDepth(const CVector& vecPos, float* pOutWaterDepth, float* pOutWaterLevel, float* pOutGroundLevel)
@@ -620,9 +630,63 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float lowFre
     glare = std::clamp(8.0f * v17 - 5.0f, 0.0f, 0.99f) * CWeather::SunGlare;
 }
 
+// 0x6E5810
+void CWaterLevel::MarkQuadsAndPolysToBeRendered(int32 blockX, int32 blockY, bool isInInterior) {
+    using PType = PolyInfo::PType;
+
+    // Horrible naming, sorry.
+    const auto ProcessPoly = [&](PolyInfo data) {
+        switch (data.Type()) {
+        case PType::SINGLE_QUAD:
+            WaterQuads[data.Id()].DoMarkToBeRendered(isInInterior);
+            break;
+        case PType::SINGLE_TRI:
+            WaterTriangles[data.Id()].DoMarkToBeRendered(isInInterior);
+            break;
+        }
+    };
+
+    auto& blockPolyInfo = m_BlockPolyInfo[blockX][blockY];
+    switch (blockPolyInfo.Type()) {
+    case PType::SINGLE_QUAD:
+    case PType::SINGLE_TRI:
+        ProcessPoly(blockPolyInfo);
+        break;
+    case PType::COMBO: {
+        for (auto& comboPoly : m_PolyCombos | rng::views::drop(blockPolyInfo.Id())) {
+            if (comboPoly.Type() == PType::NONE) {
+                break; // End of sequence
+            }
+            ProcessPoly(comboPoly);
+        }
+        break;
+    }
+    }
+}
+
+// 0x6E6CA0
+void CWaterLevel::BlockHit(int32 blockX, int32 blockY) {
+    if (blockX >= 0 && blockX < NUM_WATER_BLOCKS_ROWCOL && blockY >= 0 && blockY < NUM_WATER_BLOCKS_ROWCOL) {
+        MarkQuadsAndPolysToBeRendered(blockX, blockY, CGame::currArea != AREA_CODE_NORMAL_WORLD);
+    } else { // Original check was: `blockX <= 0 || blockX >= 11 || blockY <= 0 || blockY >= 11`, but that's erronous (because of `<= 0`)
+        if (m_NumBlocksOutsideWorldToBeRendered < (uint32)m_MaxNumBlocksOutsideWorldToBeRendered) {
+            const auto idx = m_NumBlocksOutsideWorldToBeRendered++;
+            m_BlocksToBeRenderedOutsideWorldX[idx] = blockX;
+            m_BlocksToBeRenderedOutsideWorldY[idx] = blockY;
+        }
+    }
+}
+
 // 0x6E6D10
 void CWaterLevel::ScanThroughBlocks() {
-    plugin::Call<0x6E6D10>();
+    m_NumBlocksOutsideWorldToBeRendered = 0;
+
+    const auto frustumPts = TheCamera.GetFrustumPoints();
+    CVector2D scanPts[5]{};
+    for (auto i = 0; i < 5; i++) {
+        scanPts[i] = CVector2D{ frustumPts[i] } / (float)WATER_BLOCK_SIZE + CVector2D{6.f, 6.f};
+    }
+    CWorldScan::ScanWorld(scanPts, 5, BlockHit);
 }
 
 void CWaterLevel::RenderHighDetailWaterTriangle(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3) {
@@ -647,17 +711,124 @@ bool CWaterLevel::IsPointUnderwaterNoWaves(const CVector& point) {
 }
 
 bool CWaterLevel::GetWaterLevel(const CVector& pos, float& outWaterLevel, bool touchingWater, CVector* normals) {
-    return GetWaterLevel(pos.x, pos.y, pos.z, &outWaterLevel, touchingWater, normals);
+    return GetWaterLevel(pos.x, pos.y, pos.z, outWaterLevel, touchingWater, normals);
+}
+
+// 0x6E5A40
+uint16 CWaterLevel::AddWaterLevelVertex(int32 X, int32 Y, CRenPar P) {
+    // Make sure point is inside world bounds
+    if (CVector2D pt{ (float)X, (float)Y }; WORLD_BOUNDS.DoConstrainPoint(pt)) {
+        X = (int32)pt.x;
+        Y = (int32)pt.y;
+
+        P = {};
+    }
+
+    // Try finding a vertex with the same coords, and use that
+    for (auto&& [id, vtx] : notsa::enumerate(m_aVertices | rng::views::take(NumWaterVertices))) {
+        if (vtx.x == X && vtx.y == Y && vtx.rp.z == P.z) {
+            return id;
+        }
+    }
+
+    // Couldn't find such, so make a new one
+    m_aVertices[NumWaterVertices] = { (int16)X, (int16)Y, P };
+
+    // Return index, and post-increment count
+    return NumWaterVertices++;
+}
+
+struct SortableVtx {
+    SortableVtx(int32 x, int32 y, const CRenPar& rp) :
+        x{ x }, y{ y }, idx{ CWaterLevel::AddWaterLevelVertex(x, y, rp) }
+    {
+    }
+
+    int32  x, y;
+    uint16 idx;
+};
+
+//! NOTSA
+//! Sort vertices in clockwise order (With a few assumptions)
+template<size_t N>
+auto DoVtxSortAndGetRange(SortableVtx (&verts)[N]) {
+    // Center point
+    int32 cx{}, cy{};
+    for (auto& v : verts) {
+        cx += v.x; cy += v.y;
+    }
+    cx /= N; cy /= N;
+
+    // https://stackoverflow.com/a/6989383
+    const auto CCWCompare = [cx, cy](SortableVtx& a, SortableVtx& b) {
+        // Computes the quadrant for a and b (0-3):
+        //     
+        //   1 | 0
+        //  ---+-->
+        //   2 | 3
+        //
+        const auto QuadrantOf = [cx, cy](int32 x, int32 y) {
+            const int dx = ((x - cx) > 0) ? 1 : 0;
+            const int dy = ((y - cy) > 0) ? 1 : 0;
+            return (1 - dx) + (1 - dy) + ((dx & (1 - dy)) << 1);
+        };
+
+        const auto qa = QuadrantOf(a.x, a.y), qb = QuadrantOf(a.x, a.y);
+
+        if (qa == qb) {
+            return (b.x - cx) * (a.y - cy) < (b.y - cy) * (a.x - cx);
+        } else {
+            return qa < qb;
+        }
+    };
+
+    // Sort array to be clockwise
+    rng::sort(verts, CCWCompare);
+    rng::reverse(verts);
+
+    // Return a range of vertex indices that can be passed to the constructor of `CWaterPolygon`
+    return verts | rng::views::transform([](auto& vtx) { return vtx.idx; });
 }
 
 // 0x6E7EF0
 void CWaterLevel::AddWaterLevelQuad(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3, int32 X4, int32 Y4, CRenPar P4, uint32 Flags) {
-    return plugin::CallAndReturn<void, 0x6E7EF0, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar, uint32>(X1, Y1, P1, X2, Y2, P2, X3, Y3, P3, X4, Y4, P4, Flags);
+    if ((X1 == X2 && X1 == X3 && X1 == X4) && (Y1 == Y2 && Y1 == Y3 && Y1 == Y4)) {
+        return;
+    }
+    
+    SortableVtx verts[]{
+        {X1, Y1, P1},
+        {X2, Y2, P2},
+        {X3, Y3, P3},
+        {X4, Y4, P4},
+    };
+
+    // Now actually create the quad
+    WaterQuads[NumWaterQuads++] = CWaterQuad{
+        (Flags & 1) == 0,
+        (Flags & 2) != 0,
+        DoVtxSortAndGetRange(verts)
+    };
 }
 
 // 0x6E7D40
 void CWaterLevel::AddWaterLevelTriangle(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3, uint32 Flags) {
-    return plugin::CallAndReturn<void, 0x6E7D40, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar, uint32>(X1, Y1, P1, X2, Y2, P2, X3, Y3, P3, Flags);
+    if ((X1 == X2 && X1 == X3) && (Y1 == Y2 && Y1 == Y3)) {
+        return;
+    }
+
+    SortableVtx verts[]{
+        {X1, Y1, P1},
+        {X2, Y2, P2},
+        {X3, Y3, P3},
+    };
+
+    // Now actually create the triangle
+    WaterTriangles[NumWaterTriangles++] = CWaterTriangle{
+        (Flags & 1) == 0,
+        (Flags & 2) != 0,
+        DoVtxSortAndGetRange(verts)
+    };
 }
 
 void CWaterLevel::FillQuadsAndTrianglesList() {
@@ -685,4 +856,9 @@ void CWaterLevel::SetCameraRange() {
 // 0x6EAB50
 void CWaterLevel::HandleBeachToysStuff() {
     /* nothing special (10 lines), but it uses 3 static variables, and they aren't used anywhere else, so I won't bother */
+}
+
+template<size_t NumVerts>
+CWaterVertex CWaterPolygon<NumVerts>::GetVertex(uint16 idx) const {
+    return CWaterLevel::m_aVertices[verts[idx]];
 }

@@ -9,9 +9,9 @@
 #include <extensions/utility.hpp>
 
 struct CRenPar {
-    float z;                        // Z pos of this thing. x, y can be found in the containing vertex, see `CWaterVertex`.
-    float bigWaves, smallWaves;     // Height of waves
-    int8  flowX, flowY;             // Fixed-point float. Divide by 64
+    float z{};                        // Z pos of this thing. x, y can be found in the containing vertex, see `CWaterVertex`.
+    float bigWaves{}, smallWaves{};   // Height of waves
+    int8  flowX{}, flowY{};           // Fixed-point float. Divide by 64
 };
 
 // 0x6E5280
@@ -27,34 +27,54 @@ static CRenPar lerp(CRenPar rp1, CRenPar rp2, float t) {
 struct CWaterVertex {
     int16  x;
     int16  y;
-    CRenPar renPar;
+    CRenPar rp;
 };
+
+template<size_t NumVerts>
+struct CWaterPolygon { // NOTSA - I hate duplicate code
+    CWaterPolygon(bool isInvisible, bool isLimitedDepth, auto vertIdxs) :
+        bInvisible{isInvisible},
+        bLimitedDepth{isLimitedDepth}
+    {
+        rng::copy(vertIdxs, verts);
+    }
+
+    uint16 verts[NumVerts];
+
+    bool bToBeRendered : 1{};
+    bool bInvisible : 1{};
+    bool bLimitedDepth : 1{};
+
+    auto GetVertex(uint16 idx) const -> CWaterVertex;
+    auto IsInInterior()        const { return GetVertex(0).rp.z > 950.f; }
+
+    auto DoMarkToBeRendered(bool isInInterior) {
+        if (!bInvisible && isInInterior == IsInInterior()) {
+            bToBeRendered = true;
+        }
+    }
+};
+using CWaterTriangle = CWaterPolygon<3>;
+VALIDATE_SIZE(CWaterTriangle, 0x8);
+
+using CWaterQuad = CWaterPolygon<4>;
+VALIDATE_SIZE(CWaterQuad, 0xA);
 
 class CWaterLevel {
  public:
     /* Missing (in no particular order):
-    m_BlocksToBeRenderedOutsideWorldX
-    m_BlocksToBeRenderedOutsideWorldY
-    m_CurrentDesiredFlowX
-    m_CurrentDesiredFlowY
-    m_CurrentFlowX
-    m_CurrentFlowY
     m_ElementsOnQuadsAndTrianglesList
     m_NumBlocksOutsideWorldToBeRendered
     m_QuadsAndTrianglesInEachBlock
-    m_QuadsAndTrianglesList
     m_WaterFogCol
     m_WaterFogDensity
     m_WaterFogHourOfDayEnd
     m_WaterFogHourOfDayStart
     m_WaterFogInsideCol
-    m_aQuads
-    m_aTriangles
     m_fWaterFogHeight
     m_fWaterFogInsideFadeSpeed
     m_nNumOfWaterQuads
     m_nNumOfWaterTriangles
-    m_aVertices
     */
     static inline uint32& m_nWaterConfiguration = *(uint32*)0xC228A0;
     static inline uint32& m_nWaterTimeOffset = *(uint32*)0xC228A4;
@@ -75,18 +95,18 @@ class CWaterLevel {
     static inline RwRaster*&   waterwakeRaster = *(RwRaster**)0xC228B8;
     static inline RwTexture*&  texWaterwake = *(RwTexture**)0xC228BC;
 
-    static inline int32& NumWaterTriangles = *(int32*)0xC22884;
-    static inline int32& NumWaterQuads = *(int32*)0xC22888;
-    static inline int32& NumWaterVertices = *(int32*)0xC2288C;
-    static inline int32& NumWaterZonePolys = *(int32*)0xC215F0;
+    static inline uint32& NumWaterTriangles = *(uint32*)0xC22884;
+    static inline uint32& NumWaterQuads = *(uint32*)0xC22888;
+    static inline uint32& NumWaterVertices = *(uint32*)0xC2288C;
+    static inline uint32& NumWaterZonePolys = *(uint32*)0xC215F0;
+
+    static inline auto& m_aVertices             = *(std::array<CWaterVertex, 1021>*)0xC22910;
 
     static inline int32& CameraRangeMaxY = *(int32*)0xC1F950;
     static inline int32& CameraRangeMinY = *(int32*)0xC1F954;
 
     static inline int32& CameraRangeMaxX = *(int32*)0xC1F958;
     static inline int32& CameraRangeMinX = *(int32*)0xC1F95C;
-
-    static inline auto& WaterZones = *(notsa::mdarray<int32, 12, 12>*)0xC21B70;
 
     static inline auto& DETAILEDWATERDIST = *(int32*)0x8D37D0; // Default: 48
     static inline auto& bSplitBigPolys = *(bool*)0x8D37F4;     // Default: true
@@ -107,12 +127,51 @@ class CWaterLevel {
     static inline auto& m_CurrentFlow        = *(CVector2D*)0xC22890;
     static inline auto& m_CurrentDesiredFlow = *(CVector2D*)0xC22898;
 
-    //! NOTSA: Stop `SetCameraRange()` from running
-    static inline bool DontUpdateCameraRange = false;
+    static constexpr uint32 WATER_BLOCK_SIZE                       = 500u;
+    static constexpr uint32 NUM_WATER_BLOCKS_ROWCOL                = 6000 / WATER_BLOCK_SIZE; // 6000 => map size
+    static inline    int32  m_MaxNumBlocksOutsideWorldToBeRendered = 70; // NOTSA: We just want a variable for the debug tool. Value may never be higher than the below array's size.
+    static inline    auto&  m_NumBlocksOutsideWorldToBeRendered    = *(uint32*)0xC215EC;
+    static inline    auto&  m_BlocksToBeRenderedOutsideWorldX      = *(std::array<int32, 70>*)0xC21560;
+    static inline    auto&  m_BlocksToBeRenderedOutsideWorldY      = *(std::array<int32, 70>*)0xC214D0;
 
-    //static inline std::array<std::array<
+    //! Used to describe a block/combo's content
+    struct PolyInfo {
+    public:
+        enum class PType {
+            NONE,        //< Nothingness
+            SINGLE_QUAD, //< A single quad (ID => Index into `WaterQuads`)
+            SINGLE_TRI,  //< A single tri (ID => Index into `WaterTriangles`)
+            COMBO        //< A combination of both (ID => Index of first entry in `m_PolyCombos`)
+        };
+
+    public:
+        auto Id()   const { return m_id; }
+        auto Type() const { return (PType)(m_type); }
+
+    private:
+        uint16 m_id   : 14{};
+        uint16 m_type : 2{};  //< See PType
+    };
+
+    //! A block might have a simple shape (tri/quad) or a combo (That is just a combination of quads and triangles)
+    //! AKA `m_QuadsAndTrianglesInEachBlock`
+    static inline auto& m_BlockPolyInfo = *(notsa::mdarray<PolyInfo, NUM_WATER_BLOCKS_ROWCOL, NUM_WATER_BLOCKS_ROWCOL>*)0xC21B70;
+
+    //! Triangles used for blocks (Or poly combos)
+    static inline auto& WaterTriangles = *(std::array<CWaterTriangle, 6>*)0xC22854;
+
+    //! Quads used for blocks (Or poly combos)
+    static inline auto& WaterQuads = *(std::array<CWaterQuad, 301>*)0xC21C90;
+
+    //! Contains sequences of poly's, each seq. is used for a block. The end of a sequence is indicated by a `PolyInfo` with it's type set to `NONE`.
+    //! AKA `m_QuadsAndTrianglesList`
+    static inline auto& m_PolyCombos = *(std::array<PolyInfo, 700>*)0xC215F8;
 
     // NOTSA Section - Used for debugging //
+    
+    //! Stop `SetCameraRange()` from running
+    static inline bool DontUpdateCameraRange = false;
+
     static inline struct DebugWaterColor {
         enum {
             TRI,
@@ -181,7 +240,7 @@ public:
 
     static void PreRenderWater();
     static bool GetWaterDepth(const CVector& vecPos, float* pOutWaterDepth, float* pOutWaterLevel, float* pOutGroundLevel);
-    static bool GetWaterLevel(float x, float y, float z, float* pOutWaterLevel, uint8 bTouchingWater, CVector* pVecNormals);
+    static bool GetWaterLevel(float x, float y, float z, float& pOutWaterLevel, uint8 bTouchingWater, CVector* pVecNormals);
     static bool LoadDataFile();
     static void LoadTextures();
     static void WaterLevelInitialise();
@@ -191,6 +250,8 @@ public:
     static bool GetWaterLevelNoWaves(float x, float y, float z, float * pOutWaterLevel, float * fUnkn1, float * fUnkn2);
     static void RenderWaterFog();
     static void CalculateWavesOnlyForCoordinate(int32 x, int32 y, float lowFreqMult, float midHighFreqMult, float& outWave, float& colorMult, float& glare, CVector& vecNormal);
+    static void MarkQuadsAndPolysToBeRendered(int32 blockX, int32 blockY, bool isInInterior);
+    static void BlockHit(int32 X, int32 Y);
     static void ScanThroughBlocks();
     static void SplitWaterTriangleAlongYLine(int32 a0, int32 a1, int32 a2, CRenPar a3, int32 a4, int32 a5, CRenPar a6, int32 a7, int32 a8, CRenPar a9);
     static void RenderHighDetailWaterTriangle(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3);
@@ -199,6 +260,8 @@ public:
 
     static bool IsPointUnderwaterNoWaves(const CVector& point);
     static bool GetWaterLevel(const CVector& pos, float& outWaterLevel, bool touchingWater, CVector* normals = nullptr);
+
+    static uint16 AddWaterLevelVertex(int32 X, int32 Y, CRenPar P);
 
     static void AddWaterLevelQuad(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3, int32 X4, int32 Y4, CRenPar P4, uint32 Flags);
     static void AddWaterLevelTriangle(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3, uint32 Flags);

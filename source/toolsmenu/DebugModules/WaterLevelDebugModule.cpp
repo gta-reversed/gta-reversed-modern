@@ -36,6 +36,8 @@ void ProcessImGui() {
     BeginDisabled(!CWaterLevel::bSplitBigPolys);
     SliderInt("Split Poly At Size", &CWaterLevel::BigPolySize, 1, 2048, "%d", ImGuiSliderFlags_Logarithmic); // 0 crashes the game (stack overflow)
     EndDisabled();
+    
+    SliderInt("m_MaxNumBlocksOutsideWorldToBeRendered", &CWaterLevel::m_MaxNumBlocksOutsideWorldToBeRendered, 0, (int)CWaterLevel::m_BlocksToBeRenderedOutsideWorldX.size());
 
     // Doesn't work (Color is always set to be the same as TimeCyc's water color -> Edit that instead)
     //DoWaterColorEdit("Triangle Water Color", CWaterLevel::WaterColorTriangle);
