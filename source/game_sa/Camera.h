@@ -488,6 +488,12 @@ public:
     float GetCutsceneBarHeight();
     int32 GetCamDirectlyBehind();
 
+    /*!
+    * @addr notsa
+    * @brief Get frustum points of the camera in world space: top left, top right, bottom right, bottom left + the center (0, 0, 0)
+    */
+    auto GetFrustumPoints() -> std::array<CVector, 5>;
+
 public:
     static CCam& GetActiveCamera();
 
