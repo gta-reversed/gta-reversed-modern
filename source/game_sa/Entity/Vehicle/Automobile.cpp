@@ -1522,7 +1522,7 @@ void CAutomobile::DoHoverSuspensionRatios()
                 colPointZ = m_wheelColPoint[i].m_vecPoint.z;
             }
             float waterLevel = 0.0f;
-            if (CWaterLevel::GetWaterLevel(end.x, end.y, end.z, &waterLevel, false, nullptr)
+            if (CWaterLevel::GetWaterLevel(end.x, end.y, end.z, waterLevel, false, nullptr)
                 && waterLevel > colPointZ && end.z - 1.0f < waterLevel)
             {
                 if (waterLevel <= end.z)
@@ -3635,7 +3635,7 @@ void CAutomobile::DoNitroEffect(float power) {
     float level = 0.0f;
     if (physicalFlags.bTouchingWater) {
         CVector point = *m_matrix * exhaustPosition;
-        if (CWaterLevel::GetWaterLevel(point.x, point.y, point.z, &level, true, nullptr)) {
+        if (CWaterLevel::GetWaterLevel(point.x, point.y, point.z, level, true, nullptr)) {
             if (level >= point.z)
                 firstExhaustSubmergedInWater = true;
         }

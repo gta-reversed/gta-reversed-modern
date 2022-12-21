@@ -118,6 +118,19 @@ class CWaterLevel {
     static inline auto& TextureShiftSecondV = *(float*)0xC21180;
     static inline auto& TextureShiftSecondU = *(float*)0xC21184;
 
+    struct WaterFog {
+        std::array<int16, 70> minX;
+        std::array<int16, 70> minY;
+        std::array<int16, 70> maxX;
+        std::array<int16, 70> maxY;
+        std::array<float, 70> z;
+    };
+    static inline auto& ms_WaterFog              = *(WaterFog*)0xC21188;
+    static inline auto& gWaterFogIndex           = *(uint32*)0xC228E4;
+    static inline auto& m_fWaterFogHeight        = *(float*)0x8D37E4;
+    static inline auto& gbPlayerIsInsideWaterFog = *(bool*)0xC228E8;
+
+
     // In reality the alpha component isn't used and instead `WaterLayerAlpha` is used
     static inline auto& WaterColorTriangle = *(CRGBA*)0xC21168;
     static inline auto& WaterColor         = *(CRGBA*)0xC2116C;
@@ -261,7 +274,7 @@ public:
     static bool IsPointUnderwaterNoWaves(const CVector& point);
     static bool GetWaterLevel(const CVector& pos, float& outWaterLevel, bool touchingWater, CVector* normals = nullptr);
 
-    static uint16 AddWaterLevelVertex(int32 X, int32 Y, CRenPar P);
+    static uint32 AddWaterLevelVertex(int32 X, int32 Y, CRenPar P);
 
     static void AddWaterLevelQuad(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3, int32 X4, int32 Y4, CRenPar P4, uint32 Flags);
     static void AddWaterLevelTriangle(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3, uint32 Flags);

@@ -29,13 +29,17 @@ void CWaterLevel::InjectHooks() {
     RH_ScopedGlobalInstall(ScanThroughBlocks, 0x6E6D10);
     RH_ScopedGlobalInstall(BlockHit, 0x6E6CA0);
 
-    // For now it doesn't work as expected because of `DoVtxSortAndGetRange` (it seems to be buggy lol)
-    // So either drop it (and write OG code) or fix it.
-    RH_ScopedGlobalInstall(AddWaterLevelQuad, 0x6E7EF0, {.reversed = false });
-    RH_ScopedGlobalInstall(AddWaterLevelTriangle, 0x6E7D40, {.reversed = false });
+    // This one doesn't seem to work properly for whatever reason
+    // It works for some quads, not for others... But then it works for that one too if only it's loaded from the file (eg.: you delete all others)
+    // no clue what is the issue
+    // one quad that doesn't load can be seen from -1610, 168
+    // it's at water.dat:252
+    RH_ScopedGlobalInstall(AddWaterLevelQuad, 0x6E7EF0, {.reversed = false});
+    RH_ScopedGlobalInstall(AddWaterLevelTriangle, 0x6E7D40);
+    RH_ScopedGlobalInstall(AddWaterLevelVertex, 0x6E5A40);
 
     RH_ScopedOverloadedInstall(GetWaterLevel, "", 0x6EB690, bool(*)(float, float, float, float&, uint8, CVector*));
-    RH_ScopedGlobalInstall(SetUpWaterFog, 0x6EA9F0, { .reversed = false });
+    RH_ScopedGlobalInstall(SetUpWaterFog, 0x6EA9F0);
     RH_ScopedGlobalInstall(RenderWakeSegment, 0x6EA260, { .reversed = false });
     RH_ScopedGlobalInstall(FindNearestWaterAndItsFlow, 0x6E9D70, { .reversed = false });
     RH_ScopedGlobalInstall(GetWaterLevelNoWaves, 0x6E8580, { .reversed = false });
@@ -540,8 +544,29 @@ bool CWaterLevel::GetWaterLevel(float x, float y, float z, float& pOutWaterLevel
 }
 
 // 0x6EA9F0
-void CWaterLevel::SetUpWaterFog(int32 a1, int32 a2, int32 a3, int32 a4) {
-    plugin::Call<0x6EA9F0, int32, int32, int32, int32>(a1, a2, a3, a4);
+void CWaterLevel::SetUpWaterFog(int32 minX, int32 minY, int32 maxX, int32 maxY) {
+    if (!CWaterLevel::m_bWaterFog || gWaterFogIndex >= 70) {
+        return;
+    }
+
+    const auto fogZ = [&] {
+        if (float waterLvl, bigWaves, smallWaves; GetWaterLevelNoWaves((float)minX, (float)minY, 0.f, &waterLvl, &bigWaves, &smallWaves)) {
+            if (bigWaves != 0.f || smallWaves != 0.f) {
+                return waterLvl;
+            }
+        }
+        return 0.f;
+    }();
+
+    const auto plyrPos = FindPlayerCoors();
+    gbPlayerIsInsideWaterFog = m_fWaterFogHeight + fogZ > plyrPos.z && CRect{ (float)minX, (float)minY, (float)maxX, (float)maxY }.IsPointInside(plyrPos);
+
+    const auto idx = gWaterFogIndex++;
+    ms_WaterFog.minX[idx] = minX;
+    ms_WaterFog.minY[idx] = minY;
+    ms_WaterFog.maxX[idx] = maxX;
+    ms_WaterFog.maxY[idx] = maxY;
+    ms_WaterFog.z[idx]    = fogZ;
 }
 
 // 0x6EA260
@@ -715,7 +740,7 @@ bool CWaterLevel::GetWaterLevel(const CVector& pos, float& outWaterLevel, bool t
 }
 
 // 0x6E5A40
-uint16 CWaterLevel::AddWaterLevelVertex(int32 X, int32 Y, CRenPar P) {
+uint32 CWaterLevel::AddWaterLevelVertex(int32 X, int32 Y, CRenPar P) {
     // Make sure point is inside world bounds
     if (CVector2D pt{ (float)X, (float)Y }; WORLD_BOUNDS.DoConstrainPoint(pt)) {
         X = (int32)pt.x;
@@ -731,21 +756,21 @@ uint16 CWaterLevel::AddWaterLevelVertex(int32 X, int32 Y, CRenPar P) {
         }
     }
 
-    // Couldn't find such, so make a new one
-    m_aVertices[NumWaterVertices] = { (int16)X, (int16)Y, P };
-
-    // Return index, and post-increment count
-    return NumWaterVertices++;
+    const auto idx = NumWaterVertices++;
+    m_aVertices[idx] = { (int16)X, (int16)Y, P };
+    return idx;
 }
 
 struct SortableVtx {
     SortableVtx(int32 x, int32 y, const CRenPar& rp) :
-        x{ x }, y{ y }, idx{ CWaterLevel::AddWaterLevelVertex(x, y, rp) }
+        idx{ CWaterLevel::AddWaterLevelVertex(x, y, rp) },
+        x{ CWaterLevel::m_aVertices[idx].x },
+        y{ CWaterLevel::m_aVertices[idx].y }
     {
     }
 
+    uint32 idx;
     int32  x, y;
-    uint16 idx;
 };
 
 //! NOTSA
@@ -757,34 +782,33 @@ auto DoVtxSortAndGetRange(SortableVtx (&verts)[N]) {
     for (auto& v : verts) {
         cx += v.x; cy += v.y;
     }
-    cx /= N; cy /= N;
+    cx /= (int32)N; cy /= (int32)N;
 
-    // https://stackoverflow.com/a/6989383
-    const auto CCWCompare = [cx, cy](SortableVtx& a, SortableVtx& b) {
+    // Based on https://stackoverflow.com/a/6989383
+    const auto CWCompare = [&](SortableVtx& a, SortableVtx& b) {
         // Computes the quadrant for a and b (0-3):
         //     
-        //   1 | 0
+        //   0 | 1
         //  ---+-->
-        //   2 | 3
+        //   3 | 2
         //
-        const auto QuadrantOf = [cx, cy](int32 x, int32 y) {
-            const int dx = ((x - cx) > 0) ? 1 : 0;
-            const int dy = ((y - cy) > 0) ? 1 : 0;
-            return (1 - dx) + (1 - dy) + ((dx & (1 - dy)) << 1);
+        const auto QuadrantOf = [&](int32 x, int32 y) {
+            const uint8 dx = x < cx; // 1 = left, 0 = right
+            const uint8 dy = y > cy; // 1 = top,  0 = bottom
+            return ((!dy) << 1) | ((dy & !dx) | (dx & !dy));
         };
 
-        const auto qa = QuadrantOf(a.x, a.y), qb = QuadrantOf(a.x, a.y);
+        const auto qa = QuadrantOf(a.x, a.y), qb = QuadrantOf(b.x, b.y);
 
         if (qa == qb) {
-            return (b.x - cx) * (a.y - cy) < (b.y - cy) * (a.x - cx);
+            return (b.x - cx) * (a.y - cy) > (b.y - cy) * (a.x - cx);
         } else {
             return qa < qb;
         }
     };
-
+    
     // Sort array to be clockwise
-    rng::sort(verts, CCWCompare);
-    rng::reverse(verts);
+    rng::sort(verts, CWCompare);
 
     // Return a range of vertex indices that can be passed to the constructor of `CWaterPolygon`
     return verts | rng::views::transform([](auto& vtx) { return vtx.idx; });

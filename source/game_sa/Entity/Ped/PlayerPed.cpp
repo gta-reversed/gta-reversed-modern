@@ -1217,7 +1217,7 @@ void CPlayerPed::ProcessControl() {
     if (physicalFlags.bSubmergedInWater) {
         CVector pos = GetPosition();
         pos.z += 1.5f;
-        if (CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &m_pPlayerData->m_fWaterHeight, true, nullptr)) {
+        if (CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, m_pPlayerData->m_fWaterHeight, true, nullptr)) {
             auto& box = CEntity::GetColModel()->GetBoundingBox();
             float playerMinZ = pos.z + box.m_vecMin.z;
             float playerMaxZ = pos.z + box.m_vecMax.z;
