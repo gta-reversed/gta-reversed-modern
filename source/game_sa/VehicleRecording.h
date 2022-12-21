@@ -44,7 +44,7 @@ public:
         if (m_pData) {
             CMemoryMgr::Free(m_pData);
             m_pData = nullptr;
-            CStreaming::RemoveModel(RRRToModelId(m_nNumber));
+            CStreaming::RemoveModel(RRRToModelId(GetIndex()));
         }
     }
 
@@ -109,7 +109,7 @@ public:
     static void RestoreInfoForMatrix(CMatrix& matrix, const CVehicleStateEachFrame& frame);
     static void SaveOrRetrieveDataForThisFrame();
     static void SetRecordingToPointClosestToCoors(int32 playbackId, CVector posn);
-    static void SkipForwardInRecording(CVehicle* vehicle, float a1);
+    static void SkipForwardInRecording(CVehicle* vehicle, float distance);
     static void SkipToEndAndStopPlaybackRecordedCar(CVehicle* vehicle);
 
     static void StopPlaybackWithIndex(int32 playbackId);
@@ -126,6 +126,10 @@ public:
         return std::span{StreamingArray.data(), static_cast<size_t>(NumPlayBackFiles)};
     }
 
+    static auto GetActivePlaybackIndices() {
+        return rng::views::iota(0, TOTAL_VEHICLE_RECORDS) | std::views::filter([](auto&& i) { return bPlaybackGoingOn[i]; });
+    }
+
     static std::optional<CPath*> FindRecording(int32 number) {
         if (!NumPlayBackFiles)
             return {};
@@ -140,10 +144,6 @@ public:
         return {};
     }
 
-    static auto GetActivePlaybackIndices() {
-        return rng::views::iota(0, TOTAL_VEHICLE_RECORDS) | std::views::filter([](auto&& i) { return bPlaybackGoingOn[i]; });
-    }
-
     static std::optional<uint32> FindVehicleRecordingIndex(CVehicle* vehicle) {
         for (auto i : GetActivePlaybackIndices()) {
             if (pVehicleForPlayback[i] == vehicle) {
@@ -151,22 +151,6 @@ public:
             }
         }
         return {};
-    }
-
-    static auto GetFrameCountFromBuffer(size_t bufferIdx) {
-        return PlaybackBufferSize[bufferIdx] / sizeof(CVehicleStateEachFrame);
-    }
-
-    static auto* GetFrameFromBuffer(size_t bufferIdx, int32 idx = -1) {
-        if (idx < 0) {
-            // Get current frame from PlaybackIndex[bufferIdx] and use it's index instead.
-            idx = PlaybackIndex[bufferIdx] / sizeof(CVehicleStateEachFrame);
-        }
-        return pPlaybackBuffer[bufferIdx] + idx;
-    }
-
-    static void SetFrameIndexForPlaybackBuffer(size_t bufferIdx, size_t idx) {
-        PlaybackIndex[bufferIdx] = idx * sizeof(CVehicleStateEachFrame);
     }
 
     static auto GetFramesFromPlaybackBuffer(size_t bufferIdx) {
