@@ -10,28 +10,14 @@
 
 class CVehicleStateEachFrame {
 public:
-    int32   m_nTime;
-    /*
-    struct { // divide by 16383.5
-        int16 x, y, z;
-    }       m_sVelocity;
-    */
+    uint32 m_nTime;
     FixedVector<int16, 16383.5f> m_sVelocity;
-    /*
-    struct { // divide by 127.0
-        int8 x, y, z;
-    }       m_bRight, m_bTop;
-    */
-    FixedVector<int8, 127.0f> m_bRight, m_bTop;
-    /*
-    uint8   m_bSteeringAngle;   // divide by 20.0
-    uint8   m_bGasPedalPower;   // divide by 100.0
-    uint8   m_bBreakPedalPower; // divide by 100.0
-    */
+    FixedVector<int8, 127.0f> m_bRight;
+    FixedVector<int8, 127.0f> m_bTop;
     FixedFloat<uint8, 20.0f> m_bSteeringAngle;
     FixedFloat<uint8, 100.0f> m_bGasPedalPower;
     FixedFloat<uint8, 100.0f> m_bBreakPedalPower;
-    bool    m_bHandbrakeUsed;
+    bool m_bHandbrakeUsed;
     CVector m_vecPosn;
 };
 VALIDATE_SIZE(CVehicleStateEachFrame, 0x20);

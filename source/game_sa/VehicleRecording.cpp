@@ -39,8 +39,6 @@ void CVehicleRecording::InjectHooks() {
     RH_ScopedInstall(FindIndexWithFileNameNumber, 0x459FF0, {.reversed = false});
     RH_ScopedInstall(InterpolateInfoForCar, 0x459B30, {.reversed = false});
     RH_ScopedInstall(HasRecordingFileBeenLoaded, 0x45A060, {.reversed = false});
-    // ^ fine
-
     RH_ScopedInstall(Load, 0x45A8F0, {.reversed = false});
     RH_ScopedInstall(SmoothRecording, 0x45A0F0, {.reversed = false}); // not reversed
     RH_ScopedInstall(RegisterRecordingFile, 0x459F80, {.reversed = false});
@@ -48,20 +46,15 @@ void CVehicleRecording::InjectHooks() {
     RH_ScopedInstall(RequestRecordingFile, 0x45A020, {.reversed = false});
     RH_ScopedInstall(StopPlaybackWithIndex, 0x459440, {.reversed = false});
     RH_ScopedInstall(StartPlaybackRecordedCar, 0x45A980, {.reversed = false});
-    // ^ bad
-
     RH_ScopedInstall(StopPlaybackRecordedCar, 0x45A280, {.reversed = false});
     RH_ScopedInstall(PausePlaybackRecordedCar, 0x459740, {.reversed = false});
     RH_ScopedInstall(UnpausePlaybackRecordedCar, 0x459850, {.reversed = false});
     RH_ScopedInstall(SetPlaybackSpeed, 0x459660, {.reversed = false});
     RH_ScopedInstall(RenderLineSegment, 0x459F00, {.reversed = false});
     RH_ScopedInstall(RemoveAllRecordingsThatArentUsed, 0x45A160, {.reversed = false});
-    // ^ good
-
     RH_ScopedInstall(RestoreInfoForCar, 0x459A30, {.reversed = false});
     RH_ScopedInstall(RestoreInfoForMatrix, 0x459960, {.reversed = false});
-    RH_ScopedInstall(SaveOrRetrieveDataForThisFrame, 0x45A610, {.reversed = true}); // bad
-
+    RH_ScopedInstall(SaveOrRetrieveDataForThisFrame, 0x45A610);
     RH_ScopedInstall(SetRecordingToPointClosestToCoors, 0x45A1E0, {.reversed = false});
     RH_ScopedInstall(IsPlaybackGoingOnForCar, 0x4594C0, {.reversed = false});
     RH_ScopedInstall(IsPlaybackPausedForCar, 0x4595A0, {.reversed = false});
@@ -341,15 +334,13 @@ void CVehicleRecording::SaveOrRetrieveDataForThisFrame() {
 
     for (auto i : GetActivePlaybackIndices()) {
         auto vehicle = pVehicleForPlayback[i];
-        DEV_LOG("Start processing car recordings for vehicle (={})...", LOG_PTR(vehicle));
+
         if (!vehicle || vehicle->physicalFlags.bDestroyed) {
             StopPlaybackWithIndex(i);
             continue;
         }
-        if (bUseCarAI[i]) {
-            DEV_LOG("\tUses AI. skipping...");
+        if (bUseCarAI[i])
             continue;
-        }
 
         const auto delta = static_cast<float>(CTimer::GetTimeInMS() - CTimer::m_snPPPPreviousTimeInMilliseconds);
         const auto step = delta * PlaybackSpeed[i] / 4.0f;
@@ -362,19 +353,20 @@ void CVehicleRecording::SaveOrRetrieveDataForThisFrame() {
         auto current = GetCurrentFrameIndex(i);
 
         // find the exact frame that matches the playback time.
-        for (auto& next = frames[current + 1]; current < frames.size() && next.m_nTime < PlaybackRunningTime[i]; current++)
+        for (auto& next = frames[current + 1]; current + 1 < frames.size() && next.m_nTime < PlaybackRunningTime[i]; current++)
             ;
-        for (; current > 0 && frames[current].m_nTime > PlaybackRunningTime[i]; current--)
+        // current can not be back from the current frame index.
+        for (; current > GetCurrentFrameIndex(i) && frames[current].m_nTime > PlaybackRunningTime[i]; current--)
             ;
         SetFrameIndexForPlaybackBuffer(i, current);
 
-        if (current < frames.size() + 1) {
+        if (current + 1 < frames.size()) {
             // current is not the last frame, so we interpolate with the next.
             const auto& frameCurrent = frames[current];
             const auto& frameNext = frames[current + 1];
 
             RestoreInfoForCar(vehicle, frameCurrent, false);
-            const auto interp = PlaybackRunningTime[i] - (float)frameCurrent.m_nTime / (float)(frameNext.m_nTime - frameCurrent.m_nTime);
+            const auto interp = (PlaybackRunningTime[i] - (float)frameCurrent.m_nTime) / (float)(frameNext.m_nTime - frameCurrent.m_nTime);
             InterpolateInfoForCar(vehicle, frameNext, interp);
 
             if (vehicle->IsSubTrain()) {
