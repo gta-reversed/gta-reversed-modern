@@ -31,33 +31,40 @@ void CVehicleRecording::InjectHooks() {
     RH_ScopedClass(CVehicleRecording);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(Init, 0x459390);
-    RH_ScopedInstall(InitAtStartOfGame, 0x45A1B0);
-    RH_ScopedInstall(ShutDown, 0x459400);
-    RH_ScopedInstall(Render, 0x459F70, {.locked = true});
-    RH_ScopedInstall(ChangeCarPlaybackToUseAI, 0x45A360);
-    RH_ScopedInstall(FindIndexWithFileNameNumber, 0x459FF0);
-    RH_ScopedInstall(InterpolateInfoForCar, 0x459B30);
-    RH_ScopedInstall(HasRecordingFileBeenLoaded, 0x45A060);
-    RH_ScopedInstall(Load, 0x45A8F0);
-    RH_ScopedInstall(SmoothRecording, 0x45A0F0, {.reversed = false});
-    RH_ScopedInstall(RegisterRecordingFile, 0x459F80);
-    RH_ScopedInstall(RemoveRecordingFile, 0x45A0A0);
-    RH_ScopedInstall(RequestRecordingFile, 0x45A020);
-    RH_ScopedInstall(StopPlaybackWithIndex, 0x459440);
+    RH_ScopedInstall(Init, 0x459390, {.reversed = false});
+    RH_ScopedInstall(InitAtStartOfGame, 0x45A1B0, {.reversed = false});
+    RH_ScopedInstall(ShutDown, 0x459400, {.reversed = false});
+    RH_ScopedInstall(Render, 0x459F70, {.locked = false});
+    RH_ScopedInstall(ChangeCarPlaybackToUseAI, 0x45A360, {.reversed = false});
+    RH_ScopedInstall(FindIndexWithFileNameNumber, 0x459FF0, {.reversed = false});
+    RH_ScopedInstall(InterpolateInfoForCar, 0x459B30, {.reversed = false});
+    RH_ScopedInstall(HasRecordingFileBeenLoaded, 0x45A060, {.reversed = false});
+    // ^ fine
+
+    RH_ScopedInstall(Load, 0x45A8F0, {.reversed = false});
+    RH_ScopedInstall(SmoothRecording, 0x45A0F0, {.reversed = false}); // not reversed
+    RH_ScopedInstall(RegisterRecordingFile, 0x459F80, {.reversed = false});
+    RH_ScopedInstall(RemoveRecordingFile, 0x45A0A0, {.reversed = false});
+    RH_ScopedInstall(RequestRecordingFile, 0x45A020, {.reversed = false});
+    RH_ScopedInstall(StopPlaybackWithIndex, 0x459440, {.reversed = false});
     RH_ScopedInstall(StartPlaybackRecordedCar, 0x45A980, {.reversed = false});
-    RH_ScopedInstall(StopPlaybackRecordedCar, 0x45A280);
-    RH_ScopedInstall(PausePlaybackRecordedCar, 0x459740);
-    RH_ScopedInstall(UnpausePlaybackRecordedCar, 0x459850);
-    RH_ScopedInstall(SetPlaybackSpeed, 0x459660);
-    RH_ScopedInstall(RenderLineSegment, 0x459F00);
-    RH_ScopedInstall(RemoveAllRecordingsThatArentUsed, 0x45A160);
-    RH_ScopedInstall(RestoreInfoForCar, 0x459A30);
-    RH_ScopedInstall(RestoreInfoForMatrix, 0x459960);
-    RH_ScopedInstall(SaveOrRetrieveDataForThisFrame, 0x45A610, {.reversed = true});
-    RH_ScopedInstall(SetRecordingToPointClosestToCoors, 0x45A1E0);
-    RH_ScopedInstall(IsPlaybackGoingOnForCar, 0x4594C0);
-    RH_ScopedInstall(IsPlaybackPausedForCar, 0x4595A0);
+    // ^ bad
+
+    RH_ScopedInstall(StopPlaybackRecordedCar, 0x45A280, {.reversed = false});
+    RH_ScopedInstall(PausePlaybackRecordedCar, 0x459740, {.reversed = false});
+    RH_ScopedInstall(UnpausePlaybackRecordedCar, 0x459850, {.reversed = false});
+    RH_ScopedInstall(SetPlaybackSpeed, 0x459660, {.reversed = false});
+    RH_ScopedInstall(RenderLineSegment, 0x459F00, {.reversed = false});
+    RH_ScopedInstall(RemoveAllRecordingsThatArentUsed, 0x45A160, {.reversed = false});
+    // ^ good
+
+    RH_ScopedInstall(RestoreInfoForCar, 0x459A30, {.reversed = false});
+    RH_ScopedInstall(RestoreInfoForMatrix, 0x459960, {.reversed = false});
+    RH_ScopedInstall(SaveOrRetrieveDataForThisFrame, 0x45A610, {.reversed = true}); // bad
+
+    RH_ScopedInstall(SetRecordingToPointClosestToCoors, 0x45A1E0, {.reversed = false});
+    RH_ScopedInstall(IsPlaybackGoingOnForCar, 0x4594C0, {.reversed = false});
+    RH_ScopedInstall(IsPlaybackPausedForCar, 0x4595A0, {.reversed = false});
 }
 
 // 0x459390
@@ -148,10 +155,14 @@ void CVehicleRecording::Load(RwStream* stream, int32 recordId, int32 totalSize) 
     StreamingArray[recordId].m_nSize = size;
     RwStreamClose(stream, nullptr);
 
+    DEV_LOG("Load carrec to streaming slot idx:{} (size={})", recordId, totalSize);
+
     for (auto&& [i, frame] : notsa::enumerate(StreamingArray[recordId].GetFrames())) {
         if (i != 0 && frame.m_nTime == 0) {
             // no valid frame that is not zeroth can have zero as a time.
             // so we count them as invalid and prune the following including itself.
+            DEV_LOG("\tRecording pruned at index {}", i);
+
             StreamingArray[recordId].m_nSize = i * sizeof(CVehicleStateEachFrame);
             break;
         }
@@ -181,6 +192,8 @@ int32 CVehicleRecording::RegisterRecordingFile(const char* name) {
     if (sscanf(name, "carrec%d", &fileNumber) == 0) {
         RET_IGNORED(sscanf(name, "CARREC%d", &fileNumber));
     }
+
+    DEV_LOG("Registering carrec file '{}', (streamIdx={})", name, NumPlayBackFiles);
 
     StreamingArray[NumPlayBackFiles].m_nNumber = fileNumber;
     StreamingArray[NumPlayBackFiles].m_pData = nullptr;
@@ -243,7 +256,7 @@ void CVehicleRecording::StartPlaybackRecordedCar(CVehicle* vehicle, int32 fileNu
     bPlaybackGoingOn[playbackId] = true;
     bPlaybackPaused[playbackId] = false;
     StreamingArray[recordId].AddRef();
-
+    
     if (useCarAI) {
         ChangeCarPlaybackToUseAI(vehicle);
     } else {
@@ -349,7 +362,7 @@ void CVehicleRecording::SaveOrRetrieveDataForThisFrame() {
         auto current = GetCurrentFrameIndex(i);
 
         // find the exact frame that matches the playback time.
-        for (auto next = frames[current + 1]; current < frames.size() && next.m_nTime < PlaybackRunningTime[i]; current++)
+        for (auto& next = frames[current + 1]; current < frames.size() && next.m_nTime < PlaybackRunningTime[i]; current++)
             ;
         for (; current > 0 && frames[current].m_nTime > PlaybackRunningTime[i]; current--)
             ;
@@ -357,8 +370,8 @@ void CVehicleRecording::SaveOrRetrieveDataForThisFrame() {
 
         if (current < frames.size() + 1) {
             // current is not the last frame, so we interpolate with the next.
-            const auto frameCurrent = frames[current];
-            const auto frameNext = frames[current + 1];
+            const auto& frameCurrent = frames[current];
+            const auto& frameNext = frames[current + 1];
 
             RestoreInfoForCar(vehicle, frameCurrent, false);
             const auto interp = PlaybackRunningTime[i] - (float)frameCurrent.m_nTime / (float)(frameNext.m_nTime - frameCurrent.m_nTime);
@@ -395,10 +408,14 @@ void CVehicleRecording::SetRecordingToPointClosestToCoors(int32 playbackId, CVec
 }
 
 // 0x459D10
-void CVehicleRecording::SkipForwardInRecording(CVehicle* vehicle, float a1) {}
+void CVehicleRecording::SkipForwardInRecording(CVehicle* vehicle, float a1) {
+    assert(0);
+}
 
 // 0x45A4A0
-void CVehicleRecording::SkipToEndAndStopPlaybackRecordedCar(CVehicle* vehicle) {}
+void CVehicleRecording::SkipToEndAndStopPlaybackRecordedCar(CVehicle* vehicle) {
+    assert(0);
+}
 
 // 0x4594C0
 bool CVehicleRecording::IsPlaybackGoingOnForCar(CVehicle* vehicle) {
