@@ -24,6 +24,12 @@ VALIDATE_SIZE(CVehicleStateEachFrame, 0x20);
 
 constexpr auto TOTAL_VEHICLE_RECORDS = 16;
 
+#ifdef EXTRA_CARREC_LOGS
+#define CARREC_DEV_LOG(...) DEV_LOG(__VA_ARGS__)
+#else
+#define CARREC_DEV_LOG(...)
+#endif
+
 class CPath {
 public:
     int32                   m_nNumber;
@@ -50,16 +56,12 @@ public:
     }
 
     void AddRef() {
-#ifdef EXTRA_CARREC_LOGS
-        DEV_LOG("Ref added for path {} (number= {}, size= {}, ptr= {})", GetIndex(), m_nNumber, m_nSize, LOG_PTR(m_pData));
-#endif
+        CARREC_DEV_LOG("Ref added for path {} (number= {}, size= {}, ptr= {})", GetIndex(), m_nNumber, m_nSize, LOG_PTR(m_pData));
         m_nRefCount++;
     }
 
     void RemoveRef() {
-#ifdef EXTRA_CARREC_LOGS
-        DEV_LOG("Ref removed for path {} (number= {}, size= {}, ptr= {})", GetIndex(), m_nNumber, m_nSize, LOG_PTR(m_pData));
-#endif
+        CARREC_DEV_LOG("Ref removed for path {} (number= {}, size= {}, ptr= {})", GetIndex(), m_nNumber, m_nSize, LOG_PTR(m_pData));
         if (!--m_nRefCount) {
             Remove();
         }
@@ -135,27 +137,26 @@ public:
         return rng::views::iota(0, TOTAL_VEHICLE_RECORDS) | std::views::filter([](auto&& i) { return bPlaybackGoingOn[i]; });
     }
 
-    static std::optional<CPath*> FindRecording(int32 number) {
+    static CPath* FindRecording(int32 number) {
         if (!NumPlayBackFiles)
-            return {};
+            return nullptr;
 
-        auto idx = FindIndexWithFileNameNumber(number);
-
+        const auto idx = FindIndexWithFileNameNumber(number);
         // FindIndexWithFileNameNumber returns zero if not found, but
         // can also return zero if the found path is at the first index.
         if (idx != 0 || StreamingArray[idx].m_nNumber == number) {
             return &StreamingArray[idx];
         }
-        return {};
+        return nullptr;
     }
 
-    static std::optional<uint32> FindVehicleRecordingIndex(CVehicle* vehicle) {
+    static int32 FindVehicleRecordingIndex(CVehicle* vehicle) {
         for (auto i : GetActivePlaybackIndices()) {
             if (pVehicleForPlayback[i] == vehicle) {
                 return i;
             }
         }
-        return {};
+        return -1;
     }
 
     static auto GetFramesFromPlaybackBuffer(size_t bufferIdx) {

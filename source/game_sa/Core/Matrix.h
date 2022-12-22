@@ -123,6 +123,7 @@ public:
     }
 
     // NOTSA
+    // This is wrong! make this static!!!!
     void Lerp(CMatrix to, float interp) {
         ScaleAll(1.0f - interp);
         to.ScaleAll(interp);
