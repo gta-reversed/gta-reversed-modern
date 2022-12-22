@@ -573,3 +573,9 @@ CMatrix Invert(const CMatrix& in)
     Invert(const_cast<CMatrix&>(in), result); // const cast necessary because it's fucked - but it wont be modified.
     return result;
 }
+
+CMatrix Lerp(CMatrix from, CMatrix to, float t) {
+    from.ScaleAll(1.0f - t);
+    to.ScaleAll(t);
+    return from + to;
+}
