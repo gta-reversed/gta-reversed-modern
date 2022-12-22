@@ -122,14 +122,6 @@ public:
         GetPosition() *= mult;
     }
 
-    // NOTSA
-    // This is wrong! make this static!!!!
-    void Lerp(CMatrix to, float interp) {
-        ScaleAll(1.0f - interp);
-        to.ScaleAll(interp);
-        *this += to;
-    }
-
     // operators and classes that aren't defined as part of class, but it's much easier to get them working with access to class private fields
 private:
     friend class CVector; // So Vector methods have access to private fields of matrix whitout accessor methods, for more readable code
@@ -151,6 +143,8 @@ CMatrix operator+(const CMatrix& a, const CMatrix& b);
 
 CMatrix& Invert(CMatrix& in, CMatrix& out);
 CMatrix  Invert(const CMatrix& in);
+
+CMatrix  Lerp(CMatrix from, CMatrix to, float t);
 
 extern int32& numMatrices;
 extern CMatrix& gDummyMatrix;

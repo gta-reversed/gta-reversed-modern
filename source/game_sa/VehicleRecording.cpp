@@ -128,7 +128,7 @@ void CVehicleRecording::InterpolateInfoForCar(CVehicle* vehicle, const CVehicleS
     CMatrix transition;
     RestoreInfoForMatrix(transition, frame);
 
-    vehicle->GetMatrix().Lerp(transition, interpValue);
+    vehicle->GetMatrix() = Lerp(vehicle->GetMatrix(), transition, interpValue);
     vehicle->GetMoveSpeed() = Lerp(vehicle->GetMoveSpeed(), frame.m_sVelocity, interpValue);
 }
 

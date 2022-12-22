@@ -102,7 +102,7 @@ void tReplayVehicleBlock::ExtractVehicleUpdateData(CVehicle* vehicle, float inte
     if (!vehicle)
         return;
 
-    vehicle->GetMatrix().Lerp(CCompressedMatrixNotAligned::Decompress(matrix), interpolation);
+    vehicle->GetMatrix() = Lerp(vehicle->GetMatrix(), CCompressedMatrixNotAligned::Decompress(matrix), interpolation);
     vehicle->GetTurnSpeed() = CVector{0.0f};
     vehicle->m_fHealth = (float)(health * 4);
     vehicle->m_fGasPedal = (float)gasPedal / 100.0f;

@@ -487,7 +487,7 @@ void CReplay::ProcessPedUpdate(CPed* ped, float interpValue, CAddressInReplayBuf
     ped->m_fCurrentRotation = (float)packet.heading / HEADING_COMPRESS_VALUE;
     ped->m_fAimingRotation  = (float)packet.heading / HEADING_COMPRESS_VALUE;
 
-    ped->GetMatrix().Lerp(CCompressedMatrixNotAligned::Decompress(packet.matrix), interpValue);
+    ped->GetMatrix() = Lerp(ped->GetMatrix(), CCompressedMatrixNotAligned::Decompress(packet.matrix), interpValue);
 
     if (const auto vehIdx = packet.vehicleIndex) {
         auto& vehicle = ped->m_pVehicle;
@@ -1158,7 +1158,7 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
         case REPLAY_PACKET_GENERAL: {
             auto cameraPacket = buffer.Read<tReplayCameraBlock>();
 
-            TheCamera.GetMatrix().Lerp(cameraPacket.GetMatrix(), interpolation);
+            TheCamera.GetMatrix() = Lerp(TheCamera.GetMatrix(), cameraPacket.GetMatrix(), interpolation);
             auto modelling = TheCamera.GetRwMatrix();
             modelling->pos = TheCamera.GetMatrix().GetPosition();
             modelling->at = TheCamera.GetMatrix().GetForward();
