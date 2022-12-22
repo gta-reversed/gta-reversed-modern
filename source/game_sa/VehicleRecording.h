@@ -50,12 +50,16 @@ public:
     }
 
     void AddRef() {
+#ifdef EXTRA_CARREC_LOGS
         DEV_LOG("Ref added for path {} (number= {}, size= {}, ptr= {})", GetIndex(), m_nNumber, m_nSize, LOG_PTR(m_pData));
+#endif
         m_nRefCount++;
     }
 
     void RemoveRef() {
+#ifdef EXTRA_CARREC_LOGS
         DEV_LOG("Ref removed for path {} (number= {}, size= {}, ptr= {})", GetIndex(), m_nNumber, m_nSize, LOG_PTR(m_pData));
+#endif
         if (!--m_nRefCount) {
             Remove();
         }
