@@ -375,7 +375,7 @@ void CVehicleRecording::SaveOrRetrieveDataForThisFrame() {
                 vehicle->AsTrain()->FindPositionOnTrackFromCoors();
             }
 
-            vehicle->ProcessControlCollisionCheck(false); // FIXME: crashes in car school - 'alley-oop'
+            vehicle->ProcessControlCollisionCheck(false);
             vehicle->RemoveAndAdd();
             vehicle->UpdateRW();
             vehicle->UpdateRwFrame();
