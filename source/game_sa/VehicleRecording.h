@@ -28,10 +28,11 @@ class CPath {
 public:
     int32                   m_nNumber;
     CVehicleStateEachFrame* m_pData;
-    int32                   m_nSize; // Byte size, use ::Size() for getting element size!
+    int32                   m_nSize; // Byte size, use ::Size() for getting the element size!
     int8                    m_nRefCount;
 
     uint32 GetIndex() const;
+
     size_t Size() const {
         return m_nSize / sizeof(CVehicleStateEachFrame);
     }
@@ -49,12 +50,12 @@ public:
     }
 
     void AddRef() {
-        DEV_LOG("Ref added for some path (number= {}, size= {}, ptr= {})", m_nNumber, m_nSize, LOG_PTR(m_pData));
+        DEV_LOG("Ref added for path {} (number= {}, size= {}, ptr= {})", GetIndex(), m_nNumber, m_nSize, LOG_PTR(m_pData));
         m_nRefCount++;
     }
 
     void RemoveRef() {
-        DEV_LOG("Ref removed for some path (number= {}, size= {}, ptr= {})", m_nNumber, m_nSize, LOG_PTR(m_pData));
+        DEV_LOG("Ref removed for path {} (number= {}, size= {}, ptr= {})", GetIndex(), m_nNumber, m_nSize, LOG_PTR(m_pData));
         if (!--m_nRefCount) {
             Remove();
         }
