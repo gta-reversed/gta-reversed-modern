@@ -1,7 +1,12 @@
 #pragma once
 
-namespace FXDebugModule {
-    void Initialise();
-    void ProcessImgui();
-    void ProcessRender();
+#include <DebugModule.h>
+
+class FXDebugModule : public SingleWindowDebugModule {
+public:
+    FXDebugModule();
+
+    void RenderMainWindow() override final;
+    void RenderMenuEntry() override final;
 };
+

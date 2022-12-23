@@ -51,8 +51,7 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
     Add<SpawnerDebugModule>();
     Add<HooksDebugModule>();
     Add<MissionDebugModule>();
-    
-    FXDebugModule::Initialise();
+    Add<FXDebugModule>();
 }
 
 static bool m_showMenu;
@@ -120,9 +119,6 @@ void DebugModules::DisplayExtraDebugFeatures() {
 }
 
 void DebugModules::ProcessRenderTool() {
-    if (ImGui::CollapsingHeader("Post Processing")) {
-        FXDebugModule::ProcessImgui();
-    }
     if (ImGui::CollapsingHeader("Collision")) {
         CollisionDebugModule::ProcessImgui();
     }
