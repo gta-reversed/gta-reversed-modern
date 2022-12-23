@@ -50,8 +50,8 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
     Add<TeleportDebugModule>();
     Add<SpawnerDebugModule>();
     Add<HooksDebugModule>();
-
-    MissionDebugModule::Initialise();
+    Add<MissionDebugModule>();
+    
     FXDebugModule::Initialise();
 }
 
@@ -73,10 +73,6 @@ void DebugModules::DisplayMainWindow() {
     if (ImGui::BeginTabBar("Debug Tabs")) {
         if (ImGui::BeginTabItem("Cheats")) {
             CheatDebugModule::ProcessImgui();
-            ImGui::EndTabItem();
-        }
-        if (ImGui::BeginTabItem("Missions")) {
-            MissionDebugModule::ProcessImgui();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Rendering")) {

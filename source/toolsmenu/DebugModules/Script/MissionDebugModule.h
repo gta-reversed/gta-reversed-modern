@@ -1,9 +1,12 @@
 #pragma once
 
-namespace MissionDebugModule {
+#include <DebugModule.h>
 
-void Initialise();
-void ProcessImgui();
-void ProcessRender();
+class MissionDebugModule : public SingleWindowDebugModule {
+public:
+    MissionDebugModule();
 
-} // namespace MissionDebugModule
+    void RenderMainWindow() override final;
+    void RenderMenuEntry() override final;
+};
+

@@ -11,8 +11,6 @@
 #include "TheScripts.h"
 #include "Hud.h"
 
-namespace MissionDebugModule {
-
 CDebugMenuToolInput m_missionToolInput;
 bool  m_bStartMission = false;
 int32 m_missionToStartId = 0;
@@ -155,10 +153,6 @@ CDebugMenuToolInput::ToolMap m_missionsMap{
     { 134, "Buy Properties Mission" }
 };
 
-void Initialise() {
-    m_missionToolInput.Initialise(256, &m_missionsMap);
-}
-
 void InitializeAndStartNewScript() {
     CTheScripts::WipeLocalVariableMemoryForMissionScript();
     CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::MissionBlock[0]);
@@ -294,6 +288,21 @@ void ProcessImgui() {
     }
 }
 
-void ProcessRender() {}
+MissionDebugModule::MissionDebugModule() :
+    SingleWindowDebugModule("Missions Starter", { 485.f, 400.f })
+{
+    m_missionToolInput.Initialise(256, &m_missionsMap);
+}
 
-} // namespace MissionDebugModule
+void MissionDebugModule::RenderMainWindow() {
+    ProcessImgui();
+}
+
+void MissionDebugModule::RenderMenuEntry() {
+    if (ImGui::BeginMenu("Tools")) {
+        if (ImGui::MenuItem("Mission Starter")) {
+            SetMainWindowOpen(true);
+        }
+        ImGui::EndMenu();
+    }
+}
