@@ -1,38 +1,34 @@
 #pragma once
 
+#include "Vehicle.h"
+#include "CommandParser/Parser.hpp"
+
 /*!
 * Various CLEO car commands
 */
 
-
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_GET_CAR_NUMBER_OF_GEARS>() { // 0x0AB7 (Car self)
-    CollectParameters(1);
-    return OR_CONTINUE;
+uint8 GetCarNumberOfGears(CVehicle& vehicle) {
+    return vehicle.m_pHandlingData->m_transmissionData.m_nNumberOfGears;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_GET_CAR_NUMBER_OF_GEARS, GetCarNumberOfGears);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_GET_CAR_CURRENT_GEAR>() { // 0x0AB8 (Car self)
-    CollectParameters(1);
-    return OR_CONTINUE;
+uint8 GetCarCurrentGear(CVehicle& vehicle) {
+    return vehicle.m_nCurrentGear;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_GET_CAR_CURRENT_GEAR, GetCarNumberOfGears);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_CAR_SIREN_ON>() { // 0x0ABD (Car self)
-    CollectParameters(1);
-    return OR_CONTINUE;
+bool IsCarSirenOn(CVehicle& vehicle) {
+    return vehicle.vehicleFlags.bSirenOrAlarm;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_IS_CAR_SIREN_ON, IsCarSirenOn);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_CAR_ENGINE_ON>() { // 0x0ABE (Car self)
-    CollectParameters(1);
-    return OR_CONTINUE;
+bool IsCarEngineOn(CVehicle& vehicle) {
+    return vehicle.vehicleFlags.bEngineOn;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_IS_CAR_ENGINE_ON, IsCarEngineOn);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_CLEO_SET_CAR_ENGINE_ON>() { // 0x0ABF (Car self, bool state)
-    CollectParameters(2);
-    return OR_CONTINUE;
+void SetCarEngineOn(CVehicle& vehicle, bool state) {
+    vehicle.vehicleFlags.bEngineOn = state;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_CLEO_SET_CAR_ENGINE_ON, SetCarEngineOn);
 
