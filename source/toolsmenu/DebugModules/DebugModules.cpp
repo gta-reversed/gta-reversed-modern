@@ -5,8 +5,6 @@
 
 #include "Collision/CollisionDebugModule.h"
 #include "Cheat/CheatDebugModule.h"
-#include "Vehicle/VehicleDebugModule.h"
-#include "Ped/PedSpawnerModule.h"
 #include "Ped/PedDebugModule.h"
 #include "Script/MissionDebugModule.h"
 #include "Audio/CutsceneTrackManagerDebugModule.h"
@@ -22,6 +20,9 @@
 #include "TimecycEditor.h"
 #include "CullZonesDebugModule.h"
 #include "Text/TextDebugModule.h"
+
+#include "Spawner/Spawner.hpp"
+
 
 bool DebugModules::m_ShowFPS = false;
 bool DebugModules::m_ShowExtraDebugFeatures = false;
@@ -47,26 +48,10 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
     m_imctx = ctx;
 
     Add<TeleportDebugModule>();
+    Add<SpawnerDebugModule>();
 
-    VehicleDebugModule::Initialise();
-    PedSpawnerModule::Initialise();
     MissionDebugModule::Initialise();
     FXDebugModule::Initialise();
-}
-
-void SpawnTab() {
-    if (ImGui::BeginTabBar("")) {
-        if (ImGui::BeginTabItem("Ped")) {
-            PedSpawnerModule::ProcessImGui();
-            ImGui::EndTabItem();
-        }
-
-        if (ImGui::BeginTabItem("Vehicle")) {
-            VehicleDebugModule::ProcessImGui();
-            ImGui::EndTabItem();
-        }
-    }
-    ImGui::EndTabBar();
 }
 
 static bool m_showMenu;
@@ -85,10 +70,6 @@ void DebugModules::DisplayMainWindow() {
     }
 
     if (ImGui::BeginTabBar("Debug Tabs")) {
-        if (ImGui::BeginTabItem("Spawn")) {
-            SpawnTab();
-            ImGui::EndTabItem();
-        }
         if (ImGui::BeginTabItem("Cheats")) {
             CheatDebugModule::ProcessImgui();
             ImGui::EndTabItem();

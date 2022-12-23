@@ -16,6 +16,33 @@
 
 using namespace ImGui;
 
+void TeleportDebugModule::RenderMenuEntry() {
+    if (BeginMenu("Tools")) {
+        if (MenuItem("Teleporter")) {
+            m_isOpen = true;
+        }
+        ImGui::EndMenu();
+    }
+}
+
+void TeleportDebugModule::RenderWindow() {
+    if (m_isOpen) {
+        if (Begin("Teleporter", &m_isOpen)) {
+            SetNextWindowSize({ 415.f, 240.f }, ImGuiCond_FirstUseEver);
+            RenderTeleporterWindow();
+        }
+        End();
+    }
+}
+
+void TeleportDebugModule::Update() {
+    ProcessShortcuts();
+}
+
+void TeleportDebugModule::OnImGuiInitialised(ImGuiContext* ctx) {
+    AddSettingsHandler(ctx);
+}
+
 static CVector GetPositionWithGroundHeight(const CVector2D& pos) {
     return { pos.x, pos.y, CWorld::FindGroundZForCoord(pos.x, pos.y) + 2.f };
 }
@@ -220,33 +247,6 @@ void TeleportDebugModule::RenderTeleporterWindow() {
         // Finally, render saved positions
         RenderSavedPositions();
     }
-}
-
-void TeleportDebugModule::RenderMenuEntry() {
-    if (BeginMenu("Tools")) {
-        if (MenuItem("Teleporter")) {
-            m_isOpen = true;
-        }
-        ImGui::EndMenu();
-    }
-}
-
-void TeleportDebugModule::RenderWindow() {
-    if (m_isOpen) {
-        if (Begin("Teleporter", &m_isOpen)) {
-            SetNextWindowSize({ 415.f, 240.f }, ImGuiCond_FirstUseEver);
-            RenderTeleporterWindow();
-        }
-        End();
-    }
-}
-
-void TeleportDebugModule::Update() {
-    ProcessShortcuts();
-}
-
-void TeleportDebugModule::OnImGuiInitialised(ImGuiContext* ctx) {
-    AddSettingsHandler(ctx);
 }
 
 //

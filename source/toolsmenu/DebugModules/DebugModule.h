@@ -4,6 +4,8 @@
 
 class DebugModule {
 public:
+    virtual ~DebugModule() = default;
+
     //! Called once on imgui initalisation
     virtual void OnImGuiInitialised(ImGuiContext* ctx) { /*nothing*/ }
     
