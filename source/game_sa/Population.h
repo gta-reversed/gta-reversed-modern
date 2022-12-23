@@ -53,8 +53,7 @@ public:
     static uint32&                   ms_nTotalCivPeds;
     static uint32&                   ms_nTotalCarPassengerPeds;
     static uint32&                   ms_nNumDealers;
-    // static uint32 ms_nNumGang[10]
-    static uint32* ms_nNumGang;
+    static std::array<uint32, TOTAL_GANGS>& ms_nNumGang;
     static uint32& ms_nNumEmergency;
     static uint32& ms_nNumCop;
     static uint32& ms_nNumCivFemale;
