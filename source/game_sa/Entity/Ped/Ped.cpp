@@ -3547,8 +3547,9 @@ void CPed::Render() {
 // https://github.com/gennariarmando/bobble-heads
 // NOTSA
 void CPed::RenderBigHead() const {
-    if (!G_CHEAT_BIG_HEAD) // todo: !CCheat::IsActive(CHEAT_BIG_HEAD)
+    if (!CCheat::IsActive(CHEAT_BIG_HEAD)) {
         return;
+    }
 
     auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump);
     auto* matrices = RpHAnimHierarchyGetMatrixArray(hier);
@@ -3577,9 +3578,9 @@ void CPed::RenderBigHead() const {
 
 // NOTSA
 void CPed::RenderThinBody() const {
-    if (!G_CHEAT_THIN_BODY) // todo: !CCheat::IsActive(CHEAT_THIN_BODY)
+    if (!CCheat::IsActive(CHEAT_THIN_BODY)) {
         return;
-
+    }
 }
 
 /*!

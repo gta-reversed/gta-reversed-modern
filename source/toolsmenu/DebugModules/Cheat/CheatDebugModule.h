@@ -1,8 +1,11 @@
 #pragma once
 
-namespace CheatDebugModule {
+#include <DebugModule.h>
 
-void ProcessImgui();
-void ProcessRender();
+class CheatDebugModule : public DebugModuleSingleWindow {
+public:
+    CheatDebugModule();
 
-} // namespace CheatDebugModule
+    void RenderMainWindow() override final;
+    void RenderMenuEntry() override final;
+};

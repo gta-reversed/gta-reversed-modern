@@ -23,7 +23,6 @@
 
 #include "Spawner/Spawner.hpp"
 
-
 bool DebugModules::m_ShowFPS = false;
 bool DebugModules::m_ShowExtraDebugFeatures = false;
 static PedDebugModule::Module s_PedDebugModule{};
@@ -47,11 +46,15 @@ void DebugModules::Update(bool cursorVisible) {
 void DebugModules::Initialise(ImGuiContext* ctx) {
     m_imctx = ctx;
 
+    // "Tools" menu
     Add<TeleportDebugModule>();
     Add<SpawnerDebugModule>();
-    Add<HooksDebugModule>();
     Add<MissionDebugModule>();
+
+    // "Settings" menu
+    Add<HooksDebugModule>();
     Add<FXDebugModule>();
+    Add<CheatDebugModule>();
 }
 
 static bool m_showMenu;
@@ -70,10 +73,6 @@ void DebugModules::DisplayMainWindow() {
     }
 
     if (ImGui::BeginTabBar("Debug Tabs")) {
-        if (ImGui::BeginTabItem("Cheats")) {
-            CheatDebugModule::ProcessImgui();
-            ImGui::EndTabItem();
-        }
         if (ImGui::BeginTabItem("Rendering")) {
             ProcessRenderTool();
             ImGui::EndTabItem();

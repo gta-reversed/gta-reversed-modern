@@ -4,9 +4,29 @@
 
 #include "CheatDebugModule.h"
 
-namespace CheatDebugModule {
 
-void ProcessImgui() {
+CheatDebugModule::CheatDebugModule() :
+    SingleWindowDebugModule("Cheats", { 500.f, 700.f })
+{
+}
+
+void CheatDebugModule::RenderMenuEntry() {
+    if (ImGui::BeginMenu("Settings")) {
+        if (ImGui::MenuItem("Cheats")) {
+            SetMainWindowOpen(true);
+        }
+        ImGui::EndMenu();
+    }
+}
+
+void CheatDebugModule::RenderMainWindow() {
+    // TODO: Use this instead of the below copy pasted code (So the radio buttons actually have a state)..
+    const auto DoCheat = [](eCheats cheat, const char* name) {
+        if (ImGui::RadioButton(name, CCheat::IsActive(cheat))) {
+            CCheat::ApplyCheat(cheat);
+        }
+    };
+
     if (ImGui::CollapsingHeader("Player")) {
         if (ImGui::RadioButton("Adrenaline", false)) {
             CCheat::AdrenalineCheat();
@@ -236,7 +256,3 @@ void ProcessImgui() {
         CCheat::ResetCheats();
     }
 }
-
-void ProcessRender() {}
-
-} // namespace CheatDebugModule
