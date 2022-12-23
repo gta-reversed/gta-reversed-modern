@@ -6,11 +6,11 @@ using namespace notsa::script;
 * Various camera commands
 */
 
-CompareFlagUpdate IsPointOnScreen(CVector pos, float radius) {
+bool IsPointOnScreen(CVector pos, float radius) {
     if (pos.z <= MAP_Z_LOW_LIMIT) {
         pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
     }
-    return { TheCamera.IsSphereVisible(&pos, radius) };
+    return TheCamera.IsSphereVisible(&pos, radius);
 }
 REGISTER_COMMAND_HANDLER(COMMAND_IS_POINT_ON_SCREEN, IsPointOnScreen);
 

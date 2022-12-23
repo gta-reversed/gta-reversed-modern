@@ -10,26 +10,19 @@
 * Various Script commands
 */
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_TERMINATE_ALL_SCRIPTS_WITH_THIS_NAME>() {
-    char str[8];
-    ReadTextLabelFromScript(str, 8);
+void TerminateAllScriptsWithThisName(const char* name) {
+    std::string scriptName{name};
+    rng::transform(scriptName, scriptName.begin(), [](char c) { return std::tolower(c); });
 
-    for (int i = 0; i < 8; i++)
-        str[i] = tolower(str[i]);
-
-    CRunningScript* script = CTheScripts::pActiveScripts;
-    while (script) {
-        CRunningScript* next = script->m_pNext;
-        if (!strcmp(script->m_szName, str)) {
+    for (auto* script = CTheScripts::pActiveScripts; script; script = script->m_pNext) {
+        if (!strcmp(scriptName.c_str(), script->m_szName)) {
             script->RemoveScriptFromList(&CTheScripts::pActiveScripts);
             script->AddScriptToList(&CTheScripts::pIdleScripts);
             script->ShutdownThisScript();
         }
-        script = next;
     }
-    return OR_CONTINUE;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_TERMINATE_ALL_SCRIPTS_WITH_THIS_NAME, TerminateAllScriptsWithThisName);
 
 void RemoveAllScriptFires() {
     gFireManager.RemoveAllScriptFires();
@@ -82,11 +75,7 @@ void DisplayNonMinigameHelpMessages(bool enable) {
 REGISTER_COMMAND_HANDLER(COMMAND_DISPLAY_NON_MINIGAME_HELP_MESSAGES, DisplayNonMinigameHelpMessages);
 
 void SetPhotoCameraEffect(bool enable) {
-    if (enable) {
-        CTheScripts::bDrawCrossHair = eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON;
-    } else {
-        CTheScripts::bDrawCrossHair = eCrossHairType::NONE;
-    }
+    CTheScripts::bDrawCrossHair = enable ? eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON : eCrossHairType::NONE;
 }
 REGISTER_COMMAND_HANDLER(COMMAND_SET_PHOTO_CAMERA_EFFECT, SetPhotoCameraEffect);
 

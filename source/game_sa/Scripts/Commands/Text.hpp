@@ -22,47 +22,35 @@ void FlashHudObject(eHudItem item) {
 }
 REGISTER_COMMAND_HANDLER(COMMAND_FLASH_HUD_OBJECT, FlashHudObject);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_PRINT_BIG>() { // 0x0BA
-    char label[8];
-    ReadTextLabelFromScript(label, 8);
-    auto text = TheText.Get(label);
-    CollectParameters(2);
-    CMessages::AddBigMessage(text, ScriptParams[0].iParam, (eMessageStyle)(ScriptParams[1].iParam - 1));
-    return OR_CONTINUE;
+// NOTSA: time: int32 -> uint32
+void PrintBig(const char* key, uint32 time, uint32 flags) {
+    const auto text = TheText.Get(key);
+    CMessages::AddBigMessage(text, time, static_cast<eMessageStyle>(ScriptParams[1].iParam - 1));
 }
+REGISTER_COMMAND_HANDLER(COMMAND_PRINT_BIG, PrintBig);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_PRINT>() { // 0x0BB
-    char label[8];
-    ReadTextLabelFromScript(label, 8);
-    auto text = TheText.Get(label);
-    CollectParameters(2);
-    if (!text || text[0] != '~' || text[1] != 'z' || text[2] != '~' || FrontEndMenuManager.m_bShowSubtitles)
-        CMessages::AddMessage(text, ScriptParams[0].iParam, ScriptParams[1].iParam, CTheScripts::bAddNextMessageToPreviousBriefs);
+void Print(const char* key, uint32 time, uint32 flags) {
+    const auto text = TheText.Get(key);
+    if (!text || strncmp(text, "~z~", 3u) != 0 || FrontEndMenuManager.m_bShowSubtitles)
+        CMessages::AddMessage(text, time, flags, CTheScripts::bAddNextMessageToPreviousBriefs);
     CTheScripts::bAddNextMessageToPreviousBriefs = true;
-    return OR_CONTINUE;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_PRINT, Print);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_PRINT_NOW>() { // 0x0BC
-    char label[8];
-    ReadTextLabelFromScript(label, 8);
-    auto text = TheText.Get(label);
-    CollectParameters(2);
-    if (!text || text[0] != '~' || text[1] != 'z' || text[2] != '~' || FrontEndMenuManager.m_bShowSubtitles)
-        CMessages::AddMessageJumpQ(text, ScriptParams[0].iParam, ScriptParams[1].iParam, CTheScripts::bAddNextMessageToPreviousBriefs);
+void PrintNow(const char* key, uint32 time, uint32 flags) {
+    const auto text = TheText.Get(key);
+    if (!text || strncmp(text, "~z~", 3u) != 0 || FrontEndMenuManager.m_bShowSubtitles)
+        CMessages::AddMessageJumpQ(text, time, flags, CTheScripts::bAddNextMessageToPreviousBriefs);
     CTheScripts::bAddNextMessageToPreviousBriefs = true;
-    return OR_CONTINUE;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_PRINT_NOW, PrintNow);
 
-void ClearThisPrintBigNow(int16 item) {
-    CMessages::ClearThisPrintBigNow(static_cast<eMessageStyle>(ScriptParams[0].u16Param - 1));
+void ClearThisPrintBigNow(uint16 item) {
+    CMessages::ClearThisPrintBigNow(static_cast<eMessageStyle>(item - 1));
 }
 REGISTER_COMMAND_HANDLER(COMMAND_CLEAR_THIS_PRINT_BIG_NOW, ClearThisPrintBigNow);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_CLEAR_PRINTS>() { // 0x0BE
+void ClearPrints() {
     CMessages::ClearMessages(false);
-    return OR_CONTINUE;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_CLEAR_PRINTS, ClearPrints);
