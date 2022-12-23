@@ -18,13 +18,13 @@
 
 bool CDebugMenu::m_Initialised = false;
 bool CDebugMenu::m_ShowMenu = false;
+static DebugModules s_DebugModules{};
 ImGuiIO* io;
 
 void CDebugMenu::ImGuiInitialise() {
     if (m_Initialised) {
         return;
     }
-
     IMGUI_CHECKVERSION();
     ImGuiContext* ctx = ImGui::CreateContext();
     io = &ImGui::GetIO();
@@ -38,7 +38,7 @@ void CDebugMenu::ImGuiInitialise() {
     ImGui_ImplWin32_Init(PSGLOBAL(window));
     ImGui_ImplDX9_Init(GetD3DDevice());
 
-    DebugModules::Initialise(ctx);
+    s_DebugModules.Initialise(ctx);
 
     m_Initialised = true;
     printf("ImGui initialized\n");
@@ -196,6 +196,7 @@ void CDebugMenu::ImGuiDrawLoop() {
     ImGui_ImplDX9_NewFrame();
     ImGui::NewFrame();
 
+    s_DebugModules.Update(m_ShowMenu);
     DebugModules::ProcessRender(m_ShowMenu);
 
     ImGui::EndFrame();

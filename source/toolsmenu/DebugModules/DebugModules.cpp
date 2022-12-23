@@ -27,8 +27,27 @@ bool DebugModules::m_ShowFPS = false;
 bool DebugModules::m_ShowExtraDebugFeatures = false;
 static PedDebugModule::Module s_PedDebugModule{};
 
+void DebugModules::Update(bool cursorVisible) {
+    for (auto& module : m_modules) {
+        module->Update();
+    }
+
+    ImGui::BeginMainMenuBar();
+    for (auto& module : m_modules) {
+        module->RenderMenuEntry();
+    }
+    ImGui::EndMainMenuBar();
+
+    for (auto& module : m_modules) {
+        module->RenderWindow();
+    }
+}
+
 void DebugModules::Initialise(ImGuiContext* ctx) {
-    TeleportDebugModule::Initialise(*ctx);
+    m_imctx = ctx;
+
+    Add<TeleportDebugModule>();
+
     VehicleDebugModule::Initialise();
     PedSpawnerModule::Initialise();
     MissionDebugModule::Initialise();
@@ -68,10 +87,6 @@ void DebugModules::DisplayMainWindow() {
     if (ImGui::BeginTabBar("Debug Tabs")) {
         if (ImGui::BeginTabItem("Spawn")) {
             SpawnTab();
-            ImGui::EndTabItem();
-        }
-        if (ImGui::BeginTabItem("Teleport")) {
-            TeleportDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Cheats")) {
@@ -212,6 +227,5 @@ void DebugModules::ProcessRender(bool showMenu) {
     }
     DisplayFramePerSecond();
     DisplayExtraDebugFeatures();
-    TeleportDebugModule::ProcessInput();
     s_PedDebugModule.ProcessRender();
 }
