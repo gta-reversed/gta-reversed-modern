@@ -37,3 +37,15 @@ void CVector2D::Normalise() {
 uint32 CVector2D::NodeHeading() const {
     return CGeneral::GetNodeHeadingFromVector(x, y);
 }
+
+CVector2D CVector2D::RotatedBy(float deg) const {
+    const auto s = std::sin(deg), c = std::cos(deg);
+    return {
+        x * c - y * s,
+        x * s - y * c,
+    };
+}
+
+CVector2D CVector2D::GetPerp() const {
+    return { y, -x }; // `RotatedBy(-PI / 2)` done manually, rotate by +PI/2 would be `{-y, x}`
+}
