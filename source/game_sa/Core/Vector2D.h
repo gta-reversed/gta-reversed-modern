@@ -105,15 +105,20 @@ public:
         return x * lhs.x + y * lhs.y;
     }
 
-    /*!
-    * @return A copy of this vector projected onto the input vector, which is assumed to be unit length.
-    */
+    //! Get a copy of `*this` vector projected onto `projectOnTo` (which is assumed to be unit length)
     CVector2D ProjectOnToNormal(const CVector2D& projectOnTo) const {
         return projectOnTo * Dot(projectOnTo);
     }
 
-    /// Wrapper around `CGeneral::GetNodeHeadingFromVector`
+    //! Wrapper around `CGeneral::GetNodeHeadingFromVector`
     uint32 NodeHeading() const;
+
+    //! Get a vector with the same magnitude as `*this` but rotated by `radians` (Interval: [0, 2PI])
+    CVector2D RotatedBy(float radians) const;
+
+    //! Get vector perpendicular to `*this` (Same as `*this` rotated by -90)
+    //! This sometimes is also called a 2D cross product (https://stackoverflow.com/questions/243945)
+    CVector2D GetPerp() const;
 };
 
 constexpr inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {
