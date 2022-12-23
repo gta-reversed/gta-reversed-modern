@@ -31,6 +31,17 @@ void ProcessImGui() {
     DoWaterColor(CWaterLevel::DebugWaterColor::TRI, "Triangle Water Color");
     DoWaterColor(CWaterLevel::DebugWaterColor::RECT, "Rectangle Water Color");
 
+    if (TreeNode("Water Wake Segment Part Colors")) {
+        for (auto i = 0; i < 4; i++) {
+            PushID(i);
+            Text("Part %d", i);
+            SameLine();
+            ColorEdit3("Part", (float*)(&CWaterLevel::WakeSegmentPartColors[i]));
+            PopID();
+        }
+        TreePop();
+    }
+
     Checkbox("Enable", &CWaterLevel::bSplitBigPolys);
     SameLine();
     BeginDisabled(!CWaterLevel::bSplitBigPolys);

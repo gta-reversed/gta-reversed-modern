@@ -1,10 +1,7 @@
 #include "StdInc.h"
 
 #include "CDebugMenu.h"
-#include "TaskComplexFollowPointRoute.h"
-#include "TaskComplexExtinguishFires.h"
-#include "TaskComplexStealCar.h"
-#include "TaskComplexFleeAnyMeans.h"
+#include "TaskComplexDriveToPoint.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -120,11 +117,45 @@ static void DebugCode() {
 
     const auto player = FindPlayerPed();
 
+    static bool goToPointActive = false;
+
+    if (goToPointActive) {
+        if (!player->GetTaskManager().Has<CTaskComplexDriveToPoint>()) {
+            player->GetTaskManager().SetTask(
+                new CTaskComplexDriveToPoint{
+                    FindPlayerVehicle(),
+                    player->GetPosition() + player->GetForward() * 10.f,
+                    10.f,
+                    0,
+                    MODEL_INVALID,
+                    1.f,
+                    eCarDrivingStyle::DRIVING_STYLE_AVOID_CARS
+                },
+                TASK_PRIMARY_PRIMARY
+            );
+        }
+    }
+
     if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
         return;
 
-    if (pad->IsStandardKeyJustPressed('8')) {
 
+    if (pad->IsStandardKeyJustPressed('8')) {
+        if (goToPointActive) {
+            player->GetTaskManager().SetTask(nullptr, TASK_PRIMARY_PRIMARY);
+        }
+
+        goToPointActive = !goToPointActive;
+        CMessages::AddMessage(
+            goToPointActive
+                ? "Going to point: Activated!"
+                : "Going to point: Disabled!",
+            1000,
+            0,
+            STYLE_MIDDLE
+        );
+
+        /*
         CPointRoute route{};
 
         const auto r = 10.f;
@@ -132,7 +163,7 @@ static void DebugCode() {
         for (auto a = 0.f; a < totalAngle; a += totalAngle / 8.f) {
             route.AddPoints(player->GetPosition() + CVector{std::cosf(a), std::sinf(a), 0.f} *r);
         }
-
+        
         player->GetTaskManager().SetTask(
             new CTaskComplexFollowPointRoute{
                 PEDMOVE_SPRINT,
@@ -146,6 +177,7 @@ static void DebugCode() {
             },
             TASK_PRIMARY_PRIMARY
         );
+        */
     }
 
     if (pad->IsStandardKeyJustPressed('0')) {

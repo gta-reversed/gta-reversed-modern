@@ -13,7 +13,6 @@ void CWaterLevel::InjectHooks() {
     RH_ScopedGlobalInstall(RenderWaterTriangle, 0x6EE240);
     RH_ScopedGlobalInstall(RenderFlatWaterTriangle_OneLayer, 0x6E8ED0);
     RH_ScopedGlobalInstall(RenderFlatWaterTriangle, 0x6EE080);
-    RH_ScopedGlobalInstall(RenderBoatWakes, 0x6ED9A0, { .reversed = false });
     RH_ScopedGlobalInstall(SplitWaterTriangleAlongXLine, 0x6ECF00);
     RH_ScopedGlobalInstall(SplitWaterTriangleAlongYLine, 0x6EE5A0);
 
@@ -38,9 +37,11 @@ void CWaterLevel::InjectHooks() {
     RH_ScopedGlobalInstall(AddWaterLevelTriangle, 0x6E7D40);
     RH_ScopedGlobalInstall(AddWaterLevelVertex, 0x6E5A40);
 
+    RH_ScopedGlobalInstall(RenderBoatWakes, 0x6ED9A0);
+    RH_ScopedGlobalInstall(RenderWakeSegment, 0x6EA260);
+
     RH_ScopedOverloadedInstall(GetWaterLevel, "", 0x6EB690, bool(*)(float, float, float, float&, uint8, CVector*));
     RH_ScopedGlobalInstall(SetUpWaterFog, 0x6EA9F0);
-    RH_ScopedGlobalInstall(RenderWakeSegment, 0x6EA260, { .reversed = false });
     RH_ScopedGlobalInstall(FindNearestWaterAndItsFlow, 0x6E9D70, { .reversed = false });
     RH_ScopedGlobalInstall(GetWaterLevelNoWaves, 0x6E8580, { .reversed = false });
     RH_ScopedGlobalInstall(RenderWaterFog, 0x6E7760, { .reversed = false });
@@ -285,9 +286,74 @@ void CWaterLevel::RenderFlatWaterTriangle(int32 X1, int32 Y1, CRenPar P1, int32 
     }
 }
 
+// 0x6EA260
+void CWaterLevel::RenderWakeSegment(
+    const CVector2D& vecA, const CVector2D& vecB,
+    const CVector2D& vecC, const CVector2D& vecD,
+    const float& widthA, const float& widthB,
+    const float& alphaA, const float& alphaB,
+    const float& wakeZ
+) {
+    constexpr auto  NUM_PARTS = 4;
+    constexpr float ALPHA_MULTS[]{ 0.4f, 1.f, 0.2f, 1.f, 0.4f }; // 0x8D390C
+
+    const auto angle      = (float)(CTimer::GetTimeInMS() % 4096) / (4096.f / (2.f * PI));
+    const auto windRadius = CWeather::WindClipped * 0.4f + 0.2f;
+
+    for (auto partIdx = 0; partIdx < NUM_PARTS; partIdx++) {
+        RenderBuffer::RenderIfDoesntFit(6, 4);
+
+        RenderBuffer::PushIndices({ 0, 2, 1, 0, 3, 2 }, true);
+
+        const CVector2D corners[]{
+            lerp(vecB, vecA, (float)(partIdx + 0) / (float)(NUM_PARTS)),
+            lerp(vecB, vecA, (float)(partIdx + 1) / (float)(NUM_PARTS)),
+            lerp(vecC, vecD, (float)(partIdx + 1) / (float)(NUM_PARTS)),
+            lerp(vecC, vecD, (float)(partIdx + 0) / (float)(NUM_PARTS)),
+        };
+
+        CVector2D uvs[4]{};
+        rng::transform(corners, uvs, [](const CVector2D& pos) -> CVector2D {
+            return { pos.x / (float)(NUM_PARTS), pos.y / (float)(NUM_PARTS) };
+        });
+        rng::transform(uvs, uvs, // Isn't it beautiful?
+            [
+                minUV = CVector2D{
+                    std::floor(rng::min(uvs, {}, &CVector2D::x).x),
+                    std::floor(rng::min(uvs, {}, &CVector2D::y).y)
+                }
+            ](auto& uv) {
+                return uv - minUV;
+            }
+        );
+
+        const float alphas[]{
+            alphaA * ALPHA_MULTS[partIdx + 0],
+            alphaA * ALPHA_MULTS[partIdx + 1],
+            alphaB * ALPHA_MULTS[partIdx + 1],
+            alphaB * ALPHA_MULTS[partIdx + 0],
+        };
+
+        for (auto i = 0; i < 4; i++) {
+            const auto CalcAngleOfPos = [&](float p) {
+                p += 3072.f; // TODO: Magic number, but I think it's meaningless (as the integer part is discarded below)
+                p /= 32.f;   // TODO: Magic number (maybe meaningful this time) 
+                return p - std::floor(p); // Extract fractional part
+            };
+            const auto  z   = wakeZ + std::sin((CalcAngleOfPos(corners[i].x) + CalcAngleOfPos(corners[i].y)) * PI * 2.f + angle) * windRadius;
+            const auto& rgb = WakeSegmentPartColors[i];
+            RenderBuffer::PushVertex(
+                CVector{ corners[i], z },
+                uvs[i],
+                { (uint8)(rgb.r * 255.f), (uint8)(rgb.g * 255.f), (uint8)(rgb.b * 255.f), (uint8)(alphas[i]) }
+            );
+        }
+    }
+}
+
 // 0x6ED9A0
 void CWaterLevel::RenderBoatWakes() {
-    plugin::Call<0x6ED9A0>();
+    CBoat::RenderAllWakePointBoats();
 }
 
 // 0x6ECF00
@@ -567,11 +633,6 @@ void CWaterLevel::SetUpWaterFog(int32 minX, int32 minY, int32 maxX, int32 maxY) 
     ms_WaterFog.maxX[idx] = maxX;
     ms_WaterFog.maxY[idx] = maxY;
     ms_WaterFog.z[idx]    = fogZ;
-}
-
-// 0x6EA260
-int32 CWaterLevel::RenderWakeSegment(CVector2D & a1, CVector2D & a2, CVector2D & a3, CVector2D & a4, float & a5, float & a6, float & alphaMult1, float & alphaMult2, float & a9) {
-    return plugin::CallAndReturn<int32, 0x6EA260, CVector2D &, CVector2D &, CVector2D &, CVector2D &, float &, float &, float &, float &, float &>(a1, a2, a3, a4, a5, a6, alphaMult1, alphaMult2, a9);
 }
 
 // 0x6E9D70

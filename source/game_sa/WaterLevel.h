@@ -147,6 +147,11 @@ class CWaterLevel {
     static inline    auto&  m_BlocksToBeRenderedOutsideWorldX      = *(std::array<int32, 70>*)0xC21560;
     static inline    auto&  m_BlocksToBeRenderedOutsideWorldY      = *(std::array<int32, 70>*)0xC214D0;
 
+    // NOTSA: Color of wake segment parts (So we can make rainbows)
+    static inline struct {
+        float r{ 1.f }, g{ 1.f }, b{ 1.f };
+    } WakeSegmentPartColors[4]{};
+
     //! Used to describe a block/combo's content
     struct PolyInfo {
     public:
@@ -258,7 +263,7 @@ public:
     static void LoadTextures();
     static void WaterLevelInitialise();
     static void SetUpWaterFog(int32 a1, int32 a2, int32 a3, int32 a4);
-    static int32 RenderWakeSegment(CVector2D & a1, CVector2D & a2, CVector2D & a3, CVector2D & a4, float & a5, float & a6, float & alphaMult1, float & alphaMult2, float & a9);
+    static void RenderWakeSegment(const CVector2D& a1, const CVector2D& a2, const CVector2D& a3, const CVector2D& a4, const float& widthA, const float& widthB, const float& alphaA, const float& alphaB, const float& wakeZ);
     static void FindNearestWaterAndItsFlow();
     static bool GetWaterLevelNoWaves(float x, float y, float z, float * pOutWaterLevel, float * fUnkn1, float * fUnkn2);
     static void RenderWaterFog();
