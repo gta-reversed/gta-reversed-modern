@@ -1,12 +1,12 @@
 #pragma once
 
 #include "CommandParser/Parser.hpp"
-
+using namespace notsa::script;
 /*!
 * Various camera commands
 */
 
-notsa::script::CompareFlagUpdate IsPointOnScreen(CVector pos, float radius) {
+CompareFlagUpdate IsPointOnScreen(CVector pos, float radius) {
     if (pos.z <= MAP_Z_LOW_LIMIT) {
         pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
     }

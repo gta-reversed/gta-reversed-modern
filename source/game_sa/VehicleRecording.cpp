@@ -10,7 +10,7 @@
 
 uint32 CPath::GetIndex() const {
     const auto index = this - CVehicleRecording::StreamingArray.data();
-    assert(index >= 0 && index < TOTAL_VEHICLE_RECORDS);
+    assert(index >= 0 && index < CVehicleRecording::StreamingArray.size());
 
     return index;
 }

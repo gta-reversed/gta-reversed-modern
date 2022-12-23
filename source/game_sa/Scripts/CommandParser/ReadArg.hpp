@@ -165,5 +165,10 @@ std::string_view Read<std::string_view>(CRunningScript* S) {
     }
 }
 
+template<>
+const char* Read<const char*>(CRunningScript* S) {
+    return Read<std::string_view>(S).data();
+}
+
 }; // namespace script
 }; // namespace notsa

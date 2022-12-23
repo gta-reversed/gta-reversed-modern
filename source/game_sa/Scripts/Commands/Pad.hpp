@@ -1,20 +1,34 @@
 #pragma once
-
+#include "MenuManager.h"
+#include "Pad.h"
+#include "CommandParser/Parser.hpp"
+using namespace notsa::script;
 /*!
 * Various player pad commands
 */
 
-/**/
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_BUTTON_PRESSED>() { // 0x00E1 (Pad touch, TouchPoints touchPoints)
-    CollectParameters(2);
-    return OR_CONTINUE;
+bool IsButtonPressed(CRunningScript* S, int16 playerIndex, eButtonId button) {
+    return S->GetPadState(playerIndex, button) && !CPad::GetPad(0)->JustOutOfFrontEnd;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_IS_BUTTON_PRESSED, IsButtonPressed);
 
-/*
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_KEY_PRESSED>() { // 0x0AB0 (KeyCode keyCode)
-    CollectParameters(1);
-    return OR_CONTINUE;
+MultiRet<float, float> GetPCMouseMovement() {
+    // TODO(izzotop): check ASM
+    return {CPad::NewMouseControllerState.X, CPad::NewMouseControllerState.Y};
 }
-*/
+REGISTER_COMMAND_HANDLER(COMMAND_GET_PC_MOUSE_MOVEMENT, GetPCMouseMovement);
+
+bool IsPCUsingJoyPad() {
+    return FrontEndMenuManager.m_nController != 0;
+}
+REGISTER_COMMAND_HANDLER(COMMAND_IS_PC_USING_JOYPAD, IsPCUsingJoyPad);
+
+bool IsMouseUsingVerticalInversion() {
+    return CMenuManager::bInvertMouseY != 0;
+}
+REGISTER_COMMAND_HANDLER(COMMAND_IS_MOUSE_USING_VERTICAL_INVERSION, IsMouseUsingVerticalInversion);
+
+bool HasGameJustReturnedFromFrontend() {
+    return CPad::GetPad(0)->JustOutOfFrontEnd;
+}
+REGISTER_COMMAND_HANDLER(COMMAND_HAS_GAME_JUST_RETURNED_FROM_FRONTEND, HasGameJustReturnedFromFrontend);

@@ -77,8 +77,15 @@ void StoreArg(CRunningScript* S, const CVector2D& v2) {
 void StoreArg(CRunningScript* S, CompareFlagUpdate flag) {
     S->UpdateCompareFlag(flag.state);
 }
-
 // Below must be after the basic overloads, otherwise won't compile
+
+/*!
+ * @brief Overload for enum types. They're casted to their underlying type.
+ */
+template <typename T> requires std::is_enum_v<T>
+void StoreArg(CRunningScript* S, T ev) {
+    StoreArg(static_cast<std::underlying_type_t<T>>(ev));
+}
 
 /*!
 * @brief Overload for types that have a pool (thus we store a reference)

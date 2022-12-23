@@ -21,7 +21,7 @@
 */
 
 #include "Commands/Basic.hpp"
-#include "Commands/Car.hpp"
+#include "Commands/Vehicle.hpp"
 #include "Commands/Comparasion.hpp"
 #include "Commands/Generic.hpp"
 #include "Commands/Mission.hpp"

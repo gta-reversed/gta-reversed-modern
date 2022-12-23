@@ -1,5 +1,6 @@
 #pragma once
 
+#include "TaskSimpleSwim.h"
 #include "RunningScript.h"
 #include "CommandParser/Parser.hpp"
 
@@ -81,3 +82,23 @@ auto IsPlayerPlaying(int32 playerId) -> notsa::script::CompareFlagUpdate {
     return { FindPlayerInfo(playerId).m_nPlayerState == PLAYERSTATE_PLAYING };
 }
 REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_PLAYING, IsPlayerPlaying);
+
+bool IsPlayerClimbing(int32 playerId) {
+    assert(FindPlayerPed(playerId));
+    return FindPlayerPed(playerId)->GetIntelligence()->GetTaskClimb();
+}
+REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_CLIMBING, IsPlayerClimbing);
+
+void SetSwimSpeed(int32 playerId, float speed) {
+    if (!FindPlayerPed(playerId))
+        return;
+
+    if (auto swim = FindPlayerPed(playerId)->GetIntelligence()->GetTaskSwim())
+        swim->m_fAnimSpeed = speed;
+}
+REGISTER_COMMAND_HANDLER(COMMAND_SET_SWIM_SPEED, SetSwimSpeed);
+
+void SetPlayerGroupToFollowAlways(int32 playerId, bool enable) {
+    FindPlayerPed(playerId)->ForceGroupToAlwaysFollow(enable);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_SET_PLAYER_GROUP_TO_FOLLOW_ALWAYS, SetPlayerGroupToFollowAlways);
