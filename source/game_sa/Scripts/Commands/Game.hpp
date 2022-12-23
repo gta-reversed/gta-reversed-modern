@@ -117,8 +117,8 @@ void SetRespawnPointForDurationOfMission(CVector point) {
 }
 REGISTER_COMMAND_HANDLER(COMMAND_SET_RESPAWN_POINT_FOR_DURATION_OF_MISSION, SetRespawnPointForDurationOfMission);
 
-auto GetCurrentLanguage() {
-    return static_cast<std::underlying_type_t<eLanguage>>(FrontEndMenuManager.m_nPrefsLanguage);
+eLanguage GetCurrentLanguage() {
+    return FrontEndMenuManager.m_nPrefsLanguage;
 }
 REGISTER_COMMAND_HANDLER(COMMAND_GET_CURRENT_LANGUAGE, GetCurrentLanguage);
 

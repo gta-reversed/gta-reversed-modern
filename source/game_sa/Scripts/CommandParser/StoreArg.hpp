@@ -84,7 +84,7 @@ void StoreArg(CRunningScript* S, CompareFlagUpdate flag) {
  */
 template <typename T> requires std::is_enum_v<T>
 void StoreArg(CRunningScript* S, T ev) {
-    StoreArg(static_cast<std::underlying_type_t<T>>(ev));
+    StoreArg(S, static_cast<std::underlying_type_t<T>>(ev));
 }
 
 /*!
