@@ -8,31 +8,23 @@
 
 using namespace ImGui;
 
-SpawnerDebugModule::SpawnerDebugModule() {
+SpawnerDebugModule::SpawnerDebugModule() :
+    SingleWindowDebugModule{"Spawner", {500.f, 400.f}}
+{
     VehicleDebugModule::Initialise();
     PedSpawnerModule::Initialise();
-}
-
-void SpawnerDebugModule::RenderWindow() {
-    if (m_wndIsOpen) {
-        SetNextWindowSize({ 500.f, 400.f }, ImGuiCond_FirstUseEver);
-        if (Begin("Spawner", &m_wndIsOpen)) {
-            RenderSpawnerWindow();
-        }
-        End();
-    }
 }
 
 void SpawnerDebugModule::RenderMenuEntry() {
     if (BeginMenu("Tools")) {
         if (MenuItem("Spawner")) {
-            m_wndIsOpen = true;
+            SetMainWindowOpen(true);
         }
         ImGui::EndMenu();
     }
 }
 
-void SpawnerDebugModule::RenderSpawnerWindow() {
+void SpawnerDebugModule::RenderMainWindow() {
     if (ImGui::BeginTabBar("spawner")) {
         if (ImGui::BeginTabItem("Ped")) {
             PedSpawnerModule::ProcessImGui();

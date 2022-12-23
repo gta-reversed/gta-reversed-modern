@@ -1,7 +1,14 @@
 #pragma once
 
+#include <DebugModule.h>
 
-namespace HooksDebugModule {
-    void ProcessImGui();
-    void ProcessRender();
+class HooksDebugModule : public SingleWindowDebugModule {
+public:
+    HooksDebugModule();
+
+    void RenderMainWindow() override final;
+    void RenderMenuEntry() override final;
+
+private:
+
 };

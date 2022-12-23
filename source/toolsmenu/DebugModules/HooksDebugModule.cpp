@@ -129,8 +129,9 @@ namespace HookFilter {
             return std::make_pair(anyVisible, anyOpen);
         };
 
-        // If `doFilter` argument is `false` all items are set visible, and either true (if we have hooks) or false (if `cat.Items().empty()`) is returned.
-        // otherwise items are filtered and true if returned if at least 1 item is visible.
+        // If `doFilter` argument is `false` all items are set visible,
+        // and either true (if we have hooks) or false (if `cat.Items().empty()`) is returned.
+        // Otherwise items are filtered and true if returned if at least 1 item is visible.
         const auto ProcessItems = [&](bool allowFilter) {
             if (allowFilter && IsHookFilterActive()) {
                 cat.m_anyItemsVisible = false;
@@ -228,12 +229,12 @@ namespace HookFilter {
                     return true;
                 };
 
-                const auto byFilterVisible = ProcessFilter();
-                const auto itemsVisible = ProcessItems(true); // Filter items
+                const auto byFilterVisible           = ProcessFilter();
+                const auto itemsVisible              = ProcessItems(true); // Filter items
                 const auto [anySCVisible, anySCOpen] = ProcessSubCategories();
 
-                const bool open    = anySCOpen || anySCVisible || hasSubCategories && (byFilterVisible) || IsHookFilterPresent() && itemsVisible;
-                const bool visible = byFilterVisible && itemsVisible || anySCVisible;
+                const bool open    = anySCOpen || anySCVisible || (hasSubCategories && byFilterVisible) || (IsHookFilterPresent() && itemsVisible);
+                const bool visible = (byFilterVisible && itemsVisible) || anySCVisible;
 
                 cat.Visible(visible);
                 cat.Open(open);
@@ -247,16 +248,15 @@ namespace HookFilter {
             // - Or it has visible sub-categories
 
             const auto itemsVisible = ProcessItems(true); // Filter items
-            const auto [anySCVisible, anySCOpen] = ProcessSubCategories();
+            const auto [anySubCatVisible, anySubCatOpen] = ProcessSubCategories();
 
-            const auto open = itemsVisible || anySCOpen;
-
-            const bool visible = open || anySCVisible;
+            const auto open    = itemsVisible || anySubCatOpen;
+            const bool visible = open || anySubCatVisible;
 
             cat.Visible(visible);
             cat.Open(open);
 
-            return {visible, open};
+            return { visible, open };
         }
     }
 
@@ -312,7 +312,7 @@ namespace HookFilter {
         }
     }
 
-    void ProcessImGui() {
+    void Render() {
         PushItemWidth(GetWindowContentRegionMax().x - 10.f);
         if (InputText(" ", &m_input)) {
             OnInputUpdate();
@@ -382,8 +382,6 @@ void RenderCategoryItems(RH::HookCategory& cat) {
             continue;
         }
 
-        
-
         const auto ProcessToolTip = [](const auto& i) {
             const auto DrawToolTip = [](void* gta, void* our, bool locked) {
                 const auto AddrToClipboard = [](void* addr) {
@@ -433,8 +431,7 @@ void RenderCategory(RH::HookCategory& cat) {
 
     const auto& name = cat.Name();
 
-
-    // @returns tuple<bool open, bool cbStateChanged, bool cbState>
+    //! returns tuple<bool open, bool cbStateChanged, bool cbState>
     const auto TreeNodeWithCheckbox = [](auto label, ImTristate triState, bool disabled) {
         // TODO/NOTE: The Tree's label is a workaround for when the label is shorter than the visual checkbox (otherwise the checkbox can't be clic
         const auto open = TreeNodeEx("##         ", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth);
@@ -458,10 +455,6 @@ void RenderCategory(RH::HookCategory& cat) {
         const auto [open, stateChanged, cbState] = TreeNodeWithCheckbox(cat.Name().c_str(), cat.OverallState(), cat.Disabled());
         if (stateChanged) {
             cat.ToggleAllItemsState();
-            //if (cat.OverallState() == RH::HookCategory::HooksState::MIXED) {
-            //} else {
-            //    cat.SetAllItemsEnabled(cbState);
-            //}
         }
         cat.Open(open);
     }
@@ -470,7 +463,9 @@ void RenderCategory(RH::HookCategory& cat) {
         return;
     }
 
+    //
     // Draw hooks, and subcategories
+    //
 
     // Draw hooks (items) (if any)
     if (!cat.Items().empty() && cat.m_anyItemsVisible) {
@@ -499,16 +494,21 @@ void RenderCategory(RH::HookCategory& cat) {
     TreePop();
 }
 
-namespace HooksDebugModule {
-void ProcessImGui() {
-    HookFilter::ProcessImGui();
+HooksDebugModule::HooksDebugModule() :
+    SingleWindowDebugModule{ "ReversibleHooks (TM) (R)", {500.f, 700.f} }
+{
+}
 
-    if (BeginChild("##hookstool")) {
-        RenderCategory(RH::GetRootCategory());
-        EndChild();
+void HooksDebugModule::RenderMainWindow() {
+    HookFilter::Render();
+    RenderCategory(RH::GetRootCategory());
+}
+
+void HooksDebugModule::RenderMenuEntry() {
+    if (BeginMenu("Settings")) {
+        if (MenuItem("Hooks")) {
+            SetMainWindowOpen(true);
+        }
+        ImGui::EndMenu();
     }
 }
-
-void ProcessRender() {
-}
-};

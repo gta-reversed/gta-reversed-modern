@@ -49,6 +49,7 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
 
     Add<TeleportDebugModule>();
     Add<SpawnerDebugModule>();
+    Add<HooksDebugModule>();
 
     MissionDebugModule::Initialise();
     FXDebugModule::Initialise();
@@ -80,10 +81,6 @@ void DebugModules::DisplayMainWindow() {
         }
         if (ImGui::BeginTabItem("Rendering")) {
             ProcessRenderTool();
-            ImGui::EndTabItem();
-        }
-        if (ImGui::BeginTabItem("Hooks")) {
-            HooksDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Other")) {
