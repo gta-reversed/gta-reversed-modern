@@ -8,13 +8,15 @@
 * Various CLEO world commands
 */
 
-CVector GetCheckpointBlipCoords() {
-    // TODO: original CLEO library also sets the result flag, do it.
+CVector GetCheckpointBlipCoords(CRunningScript* S) {
+    S->m_bCondResult = false;
+
     const auto blipIdx = CRadar::GetActualBlipArrayIndex(FrontEndMenuManager.m_nTargetBlipIndex);
     if (blipIdx == -1)
         return {};
 
     if (const auto& trace = CRadar::ms_RadarTrace[blipIdx]; trace.m_nBlipDisplayFlag != BLIP_DISPLAY_NEITHER) {
+        S->m_bCondResult = true;
         return trace.m_vPosition;
     }
 

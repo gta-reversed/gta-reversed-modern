@@ -1,5 +1,5 @@
 #pragma once
-
+#include "CommandParser/Parser.hpp"
 /*!
 * Generic CLEO commands
 */

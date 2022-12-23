@@ -1,12 +1,11 @@
 #pragma once
+#include "CommandParser/Parser.hpp"
 
 /*!
 * Various CLEO game commands
 */
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_GAME_VERSION_ORIGINAL>() { // 0x0AA9
-    CollectParameters(0);
-    return OR_CONTINUE;
+bool IsGameVersionOriginal() {
+    return false;
 }
-
+REGISTER_COMMAND_HANDLER(COMMAND_IS_GAME_VERSION_ORIGINAL, IsGameVersionOriginal);

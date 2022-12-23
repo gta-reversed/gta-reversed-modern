@@ -1,73 +1,87 @@
 #pragma once
 
+#include "app_debug.h"
+#include "CommandParser/Parser.hpp"
 /*!
 * Various CLEO memory commands
 */
 
+void WriteMemory(uint32 address, uint32 size, uint32 value, bool virtualProtect) {
+    UNUSED(virtualProtect);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_WRITE_MEMORY>() { // 0x0A8C (int32 address, int32 size, any value, bool vp)
-    CollectParameters(4);
-    return OR_CONTINUE;
+    DEV_LOG("write_memory addr {} size {} value {} virtual_protect {}", address, size, value, virtualProtect);
+    memset(reinterpret_cast<void*>(address), value, size);
 }
+REGISTER_COMMAND_HANDLER(COMMAND_WRITE_MEMORY, WriteMemory);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_READ_MEMORY>() { // 0x0A8D (int32 address, int32 size, bool vp)
-    CollectParameters(3);
-    return OR_CONTINUE;
-}
+uint32 ReadMemory(uint32 address, uint32 size, bool virtualProtect) {
+    UNUSED(virtualProtect);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_GET_PED_POINTER>() { // 0x0A96 (Char char)
-    CollectParameters(1);
-    return OR_CONTINUE;
+    DEV_LOG("read_memory addr {} size {} virtual_protect {}", address, size, virtualProtect);
+    switch (size) {
+    case 4:
+        return *reinterpret_cast<uint32*>(address);
+    case 2:
+        return *reinterpret_cast<uint16*>(address);
+    case 1:
+    default:
+        return *reinterpret_cast<uint8*>(address);
+    }
 }
+REGISTER_COMMAND_HANDLER(COMMAND_READ_MEMORY, ReadMemory);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_GET_VEHICLE_POINTER>() { // 0x0A97 (Car vehicle)
-    CollectParameters(1);
-    return OR_CONTINUE;
+CPed* GetPedPointer(CPed& ped) {
+    return &ped;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_GET_PED_POINTER, GetPedPointer);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_GET_OBJECT_POINTER>() { // 0x0A98 (Object object)
-    CollectParameters(1);
-    return OR_CONTINUE;
+CVehicle* GetVehiclePointer(CVehicle& vehicle) {
+    return &vehicle;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_GET_VEHICLE_POINTER, GetVehiclePointer);
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_GET_THIS_SCRIPT_STRUCT>() { // 0x0A9F
-    CollectParameters(0);
-    return OR_CONTINUE;
+CObject* GetObjectPointer(CObject& object) {
+    return &object;
 }
+REGISTER_COMMAND_HANDLER(COMMAND_GET_OBJECT_POINTER, GetObjectPointer);
+
+CRunningScript* GetThisScriptStruct(CRunningScript* S) {
+    return S;
+}
+REGISTER_COMMAND_HANDLER(COMMAND_GET_THIS_SCRIPT_STRUCT, GetThisScriptStruct);
 
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_CALL_FUNCTION>() { // 0x0AA5 (int32 address, int32 numParams, int32 pop, arguments funcParams)
+    // perhaps this can't be ported to new-form?
     CollectParameters(4);
     return OR_CONTINUE;
 }
 
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_CALL_METHOD>() { // 0x0AA6 (int32 address, int32 struct, int32 numParams, int32 pop, arguments funcParams)
+    // perhaps this can't be ported to new-form?
     CollectParameters(5);
     return OR_CONTINUE;
 }
 
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_CALL_FUNCTION_RETURN>() { // 0x0AA7 (int32 address, int32 numParams, int32 pop, arguments funcParams)
+    // perhaps this can't be ported to new-form?
     CollectParameters(4);
     return OR_CONTINUE;
 }
 
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_CALL_METHOD_RETURN>() { // 0x0AA8 (int32 address, int32 struct, int32 numParams, int32 pop, arguments funcParams)
+    // perhaps this can't be ported to new-form?
     CollectParameters(5);
     return OR_CONTINUE;
 }
 
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_GET_SCRIPT_STRUCT_NAMED>() { // 0x0AAA (string scriptName)
-    CollectParameters(1);
-    return OR_CONTINUE;
-}
+const char* GetScriptStructNamed(CRunningScript* S) {
+    NOTSA_UNREACHABLE("Not implemented!");
+    S->m_bCondResult = false;
 
+    return nullptr;
+}
+REGISTER_COMMAND_HANDLER(COMMAND_GET_THIS_SCRIPT_STRUCT, GetScriptStructNamed);

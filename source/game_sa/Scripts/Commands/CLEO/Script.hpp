@@ -1,5 +1,8 @@
 #pragma once
 
+#include "TheScripts.h"
+#include "CommandParser/Parser.hpp"
+
 /*!
 * Various CLEO script related commands
 */
