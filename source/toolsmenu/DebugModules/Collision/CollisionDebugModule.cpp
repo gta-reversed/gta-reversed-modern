@@ -36,7 +36,7 @@ void CollisionDebugModule::RenderMainWindow() {
 }
 
 void CollisionDebugModule::RenderMenuEntry() {
-    if (ImGui::BeginMenu("Tools")) {
+    if (ImGui::BeginMenu("Visualize")) {
         if (ImGui::MenuItem("Collision")) {
             SetMainWindowOpen(true);
         }

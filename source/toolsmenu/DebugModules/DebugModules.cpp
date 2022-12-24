@@ -56,13 +56,17 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
     Add<TeleportDebugModule>();
     Add<SpawnerDebugModule>();
     Add<MissionDebugModule>();
-    Add<CollisionDebugModule>();
+    Add<CheatDebugModule>();
 
     // "Settings" menu
     Add<HooksDebugModule>();
     Add<FXDebugModule>();
-    Add<CheatDebugModule>();
 
+    // "Visualize" menu
+    Add<CollisionDebugModule>();
+
+    // "Extra" menu (Put your extra debug modules here, unless they might be useful in general)
+    Add<DarkelDebugModule>();
 }
 
 static bool m_showMenu;
@@ -81,10 +85,6 @@ void DebugModules::DisplayMainWindow() {
     }
 
     if (ImGui::BeginTabBar("Debug Tabs")) {
-        if (ImGui::BeginTabItem("Rendering")) {
-            ProcessRenderTool();
-            ImGui::EndTabItem();
-        }
         if (ImGui::BeginTabItem("Other")) {
             ImGui::Checkbox("Debug Scripts", &CTheScripts::DbgFlag);
             if (ImGui::Button("[CTheScripts] Print List Sizes")) { CTheScripts::PrintListSizes(); }
@@ -183,11 +183,6 @@ void DebugModules::ProcessExtraDebugFeatures() {
 
         if (ImGui::BeginTabItem("Text")) {
             TextDebugModule::ProcessImGui();
-            ImGui::EndTabItem();
-        }
-
-        if (ImGui::BeginTabItem("Rampage")) {
-            CDarkelDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 
