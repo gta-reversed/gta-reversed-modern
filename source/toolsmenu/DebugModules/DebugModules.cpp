@@ -68,6 +68,9 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
     // "Extra" menu (Put your extra debug modules here, unless they might be useful in general)
     Add<DarkelDebugModule>();
 
+    // "Stats" menu
+    Add<PoolsDebugModule>();
+
     // Stuff that is present in multiple menus
     Add<TimeCycleDebugModule>();
 }
@@ -166,11 +169,6 @@ void DebugModules::ProcessExtraDebugFeatures() {
 
         if (ImGui::BeginTabItem("Pickups")) {
             CPickupsDebugModule::ProcessImGui();
-            ImGui::EndTabItem();
-        }
-
-        if (ImGui::BeginTabItem("Pools")) {
-            PoolsDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 

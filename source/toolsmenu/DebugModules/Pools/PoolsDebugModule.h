@@ -1,8 +1,11 @@
 #pragma once
 
-namespace PoolsDebugModule {
+#include <DebugModule.h>
 
-void ProcessImGui();
-void ProcessRender();
+class PoolsDebugModule : public DebugModuleSingleWindow {
+public:
+    PoolsDebugModule();
 
-}
+    void RenderMainWindow() override final;
+    void RenderMenuEntry() override final;
+};
