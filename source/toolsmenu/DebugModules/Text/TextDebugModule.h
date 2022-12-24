@@ -1,7 +1,11 @@
 #pragma once
 
-namespace TextDebugModule {
+#include <DebugModule.h>
 
-void ProcessImGui();
+class TextDebugModule : public DebugModuleSingleWindow {
+public:
+    TextDebugModule();
 
-}
+    void RenderMainWindow() override final;
+    void RenderMenuEntry() override final;
+};

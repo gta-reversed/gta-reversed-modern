@@ -181,11 +181,6 @@ void DebugModules::ProcessExtraDebugFeatures() {
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Text")) {
-            TextDebugModule::ProcessImGui();
-            ImGui::EndTabItem();
-        }
-
         ImGui::EndTabBar();
     }
 }
