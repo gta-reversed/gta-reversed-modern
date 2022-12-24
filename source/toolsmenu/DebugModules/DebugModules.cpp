@@ -61,12 +61,15 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
     Add<HooksDebugModule>();
     Add<FXDebugModule>();
 
-    // "Visualize" menu
+    // "Visualization" menu
     Add<CollisionDebugModule>();
     Add<PedDebugModule>();
 
     // "Extra" menu (Put your extra debug modules here, unless they might be useful in general)
     Add<DarkelDebugModule>();
+
+    // Stuff that is present in multiple menus
+    Add<TimeCycleDebugModule>();
 }
 
 static bool m_showMenu;
@@ -170,12 +173,6 @@ void DebugModules::ProcessExtraDebugFeatures() {
             PoolsDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
-
-        if (ImGui::BeginTabItem("Timecyc")) {
-            TimeCycleDebugModule::ProcessImGui();
-            ImGui::EndTabItem();
-        }
-
 
         ImGui::EndTabBar();
     }
