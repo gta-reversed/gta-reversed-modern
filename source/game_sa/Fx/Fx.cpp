@@ -258,8 +258,8 @@ void Fx_c::TriggerWaterHydrant(CVector& posn) {
 }
 
 // 0x4A0DE0
-void Fx_c::TriggerGunshot(CEntity* entity, CVector& origin, CVector& target, bool doGunflash) {
-    ((void(__thiscall*)(Fx_c*, CEntity*, CVector&, CVector&, bool))0x4A0DE0)(this, entity, origin, target, doGunflash);
+void Fx_c::TriggerGunshot(CEntity* entity, const CVector& origin, const CVector& target, bool doGunflash) {
+    ((void(__thiscall*)(Fx_c*, CEntity*, const CVector&, const CVector&, bool))0x4A0DE0)(this, entity, origin, target, doGunflash);
 }
 
 // 0x4A0FA0

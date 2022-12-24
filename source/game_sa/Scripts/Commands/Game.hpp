@@ -9,6 +9,7 @@
 #include "PostEffects.h"
 #include "Restart.h"
 #include "Garages.h"
+#include "MenuSystem.h"
 #include "CommandParser/Parser.hpp"
 
 /*!
@@ -74,11 +75,6 @@ void ActivatePimpCheat(bool activate) {
 }
 REGISTER_COMMAND_HANDLER(COMMAND_ACTIVATE_PIMP_CHEAT, ActivatePimpCheat);
 
-void SetDeathWeaponPersist(CPed& ped, bool enable) {
-    ped.bDeathPickupsPersist = enable;
-}
-REGISTER_COMMAND_HANDLER(COMMAND_SET_DEATH_WEAPONS_PERSIST, SetDeathWeaponPersist);
-
 void SetAreaName(const char* key) {
     CHud::SetZoneName(TheText.Get(key), true);
 }
@@ -121,6 +117,29 @@ eLanguage GetCurrentLanguage() {
     return FrontEndMenuManager.m_nPrefsLanguage;
 }
 REGISTER_COMMAND_HANDLER(COMMAND_GET_CURRENT_LANGUAGE, GetCurrentLanguage);
+
+void DoWeaponStuffAtStartOf2PlayerGame() {
+    CGameLogic::DoWeaponStuffAtStartOf2PlayerGame(true);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_DO_WEAPON_STUFF_AT_START_OF_2P_GAME, DoWeaponStuffAtStartOf2PlayerGame);
+
+void DisplayRadar(bool enable) {
+    // izzotop: CTheScripts::HideAllFrontEndMapBlips = enable;
+    CHud::bScriptDontDisplayRadar = !enable;
+}
+REGISTER_COMMAND_HANDLER(COMMAND_DISPLAY_RADAR, DisplayRadar);
+
+void RegisterBestPosition(uint8 stat, int32 position) {
+    CStats::RegisterBestPosition(static_cast<eStats>(stat), position);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_REGISTER_BEST_POSITION, RegisterBestPosition);
+
+void SetMenuHeaderOrientation() {
+    // NOP
+
+    // CMenuSystem::SetHeaderOrientation();
+}
+REGISTER_COMMAND_HANDLER(COMMAND_SET_MENU_HEADER_ORIENTATION, SetMenuHeaderOrientation);
 
 #ifdef IMPLEMENT_UNSUPPORTED_OPCODES
 void RegisterJumpDistance(float distance) {

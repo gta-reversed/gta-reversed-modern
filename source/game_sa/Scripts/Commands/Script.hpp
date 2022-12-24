@@ -4,6 +4,7 @@
 #include "Timer.h"
 #include "Streaming.h"
 #include "TheScripts.h"
+#include "Conversations.h"
 #include "CommandParser/Parser.hpp"
 
 /*!
@@ -64,6 +65,17 @@ void AttachMissionAudioToCar(uint32 slotId, CVehicle& veh) {
 }
 REGISTER_COMMAND_HANDLER(COMMAND_ATTACH_MISSION_AUDIO_TO_CAR, AttachMissionAudioToCar);
 
+void ReportMissionAudioEventAtChar(CPlayerPed& player, int32 eventId) {
+    AudioEngine.ReportMissionAudioEvent(eventId, &player);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_REPORT_MISSION_AUDIO_EVENT_AT_CHAR, ReportMissionAudioEventAtChar);
+
+void ReportMissionAudioEventAtCar(CVehicle& vehicle, int eventId) {
+    AudioEngine.ReportMissionAudioEvent(eventId, &vehicle);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_REPORT_MISSION_AUDIO_EVENT_AT_CAR, ReportMissionAudioEventAtCar);
+
+
 void PlayMissionAudio(uint32 slotId) {
     AudioEngine.PlayLoadedMissionAudio(slotId - 1);
 }
@@ -88,3 +100,19 @@ void DrawSubtitlesBeforeFade(bool enable) {
     CTheScripts::bDrawSubtitlesBeforeFade = enable;
 }
 REGISTER_COMMAND_HANDLER(COMMAND_DRAW_SUBTITLES_BEFORE_FADE, DrawSubtitlesBeforeFade);
+
+void SetPlayerInStadium(bool enable) {
+    CTheScripts::bPlayerIsOffTheMap = enable;
+}
+REGISTER_COMMAND_HANDLER(COMMAND_SET_PLAYER_IS_IN_STADIUM, SetPlayerInStadium);
+
+void SetUpConversationNodeWithScriptedSpeech(
+    const char* questionKey,
+    const char* answerYesKey,
+    const char* answerNoKey,
+    int32 questionWAV,
+    int32 answerYesWAV,
+    int32 answerNoWAV) {
+    CConversations::SetUpConversationNode(questionKey, answerYesKey, answerNoKey, questionWAV, answerYesWAV, answerNoWAV);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_SET_UP_CONVERSATION_NODE_WITH_SCRIPTED_SPEECH, SetUpConversationNodeWithScriptedSpeech);

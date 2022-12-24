@@ -86,6 +86,12 @@ void ImproveCarByCheating(CVehicle& vehicle, bool enable) {
 }
 REGISTER_COMMAND_HANDLER(COMMAND_IMPROVE_CAR_BY_CHEATING, ImproveCarByCheating);
 
+void PopCarBootUsingPhysics(CVehicle& vehicle) {
+    assert(vehicle.IsAutomobile());
+    vehicle.AsAutomobile()->PopBootUsingPhysics();
+}
+REGISTER_COMMAND_HANDLER(COMMAND_POP_CAR_BOOT_USING_PHYSICS, PopCarBootUsingPhysics);
+
 void SkipToNextAllowedStation(CVehicle& vehicle) {
     assert(vehicle.IsTrain());
     CTrain::SkipToNextAllowedStation(vehicle.AsTrain());
@@ -97,3 +103,12 @@ void SetRailTrackResistanceMult(float value) {
     CVehicle::ms_fRailTrackResistance = CVehicle::ms_fRailTrackResistanceDefault * (value > 0.0f ? value : 1.0f);
 }
 REGISTER_COMMAND_HANDLER(COMMAND_SET_RAILTRACK_RESISTANCE_MULT, SetRailTrackResistanceMult);
+
+void DisableHeliAudio(CVehicle& vehicle, bool enable) {
+    if (enable) {
+        vehicle.m_vehicleAudio.EnableHelicoptor();
+    } else {
+        vehicle.m_vehicleAudio.DisableHelicoptor();
+    }
+}
+REGISTER_COMMAND_HANDLER(COMMAND_DISABLE_HELI_AUDIO, DisableHeliAudio);

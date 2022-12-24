@@ -153,7 +153,7 @@ public:
 
     /*!
     * @param reMapRangeTo0To2Pi Return value will be in interval [0, 2pi] instead of [-pi, pi]
-    * @returning The heading of the vector in radians.
+    * @return The heading of the vector in radians.
     */
     [[nodiscard]] float Heading(bool reMapRangeTo0To2Pi = false) const;
 };
