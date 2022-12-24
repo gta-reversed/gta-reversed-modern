@@ -1,5 +1,9 @@
 #pragma once
 
+#define IM_VEC2_CLASS_EXTRA \
+    operator CVector2D() const { return {x, y}; } \
+    ImVec2(const CVector2D& v) : x{v.x}, y{v.y} {} \
+
 #include <imgui.h>
 
 class DebugModule {

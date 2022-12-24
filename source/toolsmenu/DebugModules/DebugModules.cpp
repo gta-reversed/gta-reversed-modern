@@ -25,7 +25,6 @@
 
 bool DebugModules::m_ShowFPS = false;
 bool DebugModules::m_ShowExtraDebugFeatures = false;
-static PedDebugModule::Module s_PedDebugModule{};
 
 void DebugModules::Update(bool cursorVisible) {
     for (auto& module : m_modules) {
@@ -64,6 +63,7 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
 
     // "Visualize" menu
     Add<CollisionDebugModule>();
+    Add<PedDebugModule>();
 
     // "Extra" menu (Put your extra debug modules here, unless they might be useful in general)
     Add<DarkelDebugModule>();
@@ -176,10 +176,6 @@ void DebugModules::ProcessExtraDebugFeatures() {
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Peds")) {
-            s_PedDebugModule.ProcessImGui();
-            ImGui::EndTabItem();
-        }
 
         ImGui::EndTabBar();
     }
@@ -191,5 +187,4 @@ void DebugModules::ProcessRender(bool showMenu) {
     }
     DisplayFramePerSecond();
     DisplayExtraDebugFeatures();
-    s_PedDebugModule.ProcessRender();
 }

@@ -1,24 +1,22 @@
 #include "StdInc.h"
+
+#include <list>
+#include <vector>
+#include <optional>
+#include <format>
+
 #include "extensions/enumerate.hpp"
 #include "PedDebugModule.h"
 #include "Pools.h"
 #include "TaskManager.h"
 #include "Hud.h"
-#include <vector>
-#include <list>
-#include <optional>
-#include <format>
 
 // Define extra conversion function from our vector type to imgui's vec2d
-#define IM_VEC2_CLASS_EXTRA \
-    operator CVector2D() const { return {x, y}; } \
-    ImVec2(const CVector2D& v) : x{v.x}, y{v.y} {} \
-
 #include <imgui.h>
 
 using namespace ImGui;
 
-namespace PedDebugModule {
+namespace PedDebugModuleDetail {
 
 void General::ProcessPed(CPed& ped) {
     if (BeginTabItem("General")) {
@@ -184,16 +182,25 @@ void PerPedDebug::ProcessPed(PedInfo& pi) {
             EndTabBar();
         }
     }
-
     End();
 }
+};
 
-// Called from inside a tab item
-void Module::ProcessImGui() {
-    m_perPedDebug.ProcessImGui();
+PedDebugModule::PedDebugModule() :
+    DebugModuleSingleWindow{ "Peds Debug", {400.f, 300.f} }
+{
 }
 
-void Module::ProcessRender() {
+void PedDebugModule::RenderMainWindow() {
+    m_perPedDebug.ProcessImGui();
     m_perPedDebug.ProcessRender();
 }
-};
+
+void PedDebugModule::RenderMenuEntry() {
+    if (ImGui::BeginMenu("Visualize")) {
+        if (ImGui::MenuItem("Peds")) {
+            SetMainWindowOpen(true);
+        }
+        ImGui::EndMenu();
+    }
+}

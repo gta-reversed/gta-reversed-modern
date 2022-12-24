@@ -1,6 +1,8 @@
 #pragma once
 
-namespace PedDebugModule {
+#include <DebugModule.h>
+
+namespace PedDebugModuleDetail {
 // TODO: move to detail
 struct PedInfo {
     CPed* ped{};
@@ -37,16 +39,15 @@ private:
     Tasks   m_tasksDebug{};
     General m_generalDebug{};
 };
-
-class Module {
-public:
-    void ProcessImGui();
-    void ProcessRender();
-
-private:
-    void ProcessPed(CPed&);
-
-private:
-    PerPedDebug m_perPedDebug{};
 };
+
+class PedDebugModule : public DebugModuleSingleWindow {
+public:
+    PedDebugModule();
+
+    void RenderMainWindow() override final;
+    void RenderMenuEntry() override final;
+
+private:
+    PedDebugModuleDetail::PerPedDebug m_perPedDebug{};
 };
