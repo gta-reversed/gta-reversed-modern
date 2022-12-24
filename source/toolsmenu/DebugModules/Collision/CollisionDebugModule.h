@@ -1,18 +1,25 @@
 #pragma once
 
-namespace CollisionDebugModule {
+#include <DebugModule.h>
 
-struct CollisionModule {
-    bool enabled = false;
-    bool draw_box = true;
-    bool draw_line = true;
-    bool draw_sphere = true;
-    bool draw_triangle = true;
-    bool draw_bounding_box = true;
-    bool draw_shadow_triangles = true;
+
+class CollisionDebugModule : public DebugModuleSingleWindow {
+public:
+    CollisionDebugModule();
+
+    void RenderMainWindow() override final;
+    void RenderMenuEntry() override final;
+    void Render3D() override final;
+
+private:
+    void DrawColModel(const CMatrix& matrix, const CColModel& cm);
+    void RenderVisibleColModels();
+private:
+    bool m_visualizationEnabled{ false };
+    bool m_drawBoxes{ true };
+    bool m_drawLines{ true };
+    bool m_drawSpheres{ true };
+    bool m_drawTris{ true };
+    bool m_drawBBs{ true };
+    bool m_drawShdwTris{ true };
 };
-
-void ProcessImgui();
-void ProcessRender();
-
-}
