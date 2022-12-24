@@ -36,7 +36,7 @@ void CollisionDebugModule::RenderMainWindow() {
 }
 
 void CollisionDebugModule::RenderMenuEntry() {
-    if (ImGui::BeginMenu("Visualize")) {
+    if (ImGui::BeginMenu("Visualization")) {
         if (ImGui::MenuItem("Collision")) {
             SetMainWindowOpen(true);
         }
@@ -129,53 +129,6 @@ void DrawSphere(const CMatrix& matrix, const CColSphere& sphere) {
     CLines::RenderLineWithClipping(v21, v61, SPHERE_COLOR, SPHERE_COLOR);
 }
 
-void DrawBox(const CMatrix& matrix, const CColBox& box) {
-    auto workVec = box.m_vecMin;
-    CVector v11  = matrix * workVec;
-
-    workVec.z   = box.m_vecMax.z;
-    CVector v23 = matrix * workVec;
-
-    workVec     = box.m_vecMin;
-    workVec.x   = box.m_vecMax.x;
-    CVector v31 = matrix * workVec;
-
-    workVec     = box.m_vecMin;
-    workVec.y   = box.m_vecMax.y;
-    CVector v42 = matrix * workVec;
-
-    workVec     = box.m_vecMin;
-    workVec.y   = box.m_vecMax.y;
-    workVec.z   = box.m_vecMax.z;
-    CVector v51 = matrix * workVec;
-
-    workVec     = box.m_vecMin;
-    workVec.x   = box.m_vecMax.x;
-    workVec.z   = box.m_vecMax.z;
-    CVector v62 = matrix * workVec;
-
-    workVec     = box.m_vecMin;
-    workVec.x   = box.m_vecMax.x;
-    workVec.y   = box.m_vecMax.y;
-    CVector v71 = matrix * workVec;
-
-    workVec     = box.m_vecMax;
-    CVector v81 = matrix * workVec;
-
-    CLines::RenderLineWithClipping(v11, v23, BOX_COLOR, BOX_COLOR);
-    CLines::RenderLineWithClipping(v11, v31, BOX_COLOR, BOX_COLOR);
-    CLines::RenderLineWithClipping(v11, v42, BOX_COLOR, BOX_COLOR);
-    CLines::RenderLineWithClipping(v51, v23, BOX_COLOR, BOX_COLOR);
-    CLines::RenderLineWithClipping(v51, v81, BOX_COLOR, BOX_COLOR);
-    CLines::RenderLineWithClipping(v51, v42, BOX_COLOR, BOX_COLOR);
-    CLines::RenderLineWithClipping(v62, v23, BOX_COLOR, BOX_COLOR);
-    CLines::RenderLineWithClipping(v62, v81, BOX_COLOR, BOX_COLOR);
-    CLines::RenderLineWithClipping(v62, v31, BOX_COLOR, BOX_COLOR);
-    CLines::RenderLineWithClipping(v71, v81, BOX_COLOR, BOX_COLOR);
-    CLines::RenderLineWithClipping(v71, v31, BOX_COLOR, BOX_COLOR);
-    CLines::RenderLineWithClipping(v71, v42, BOX_COLOR, BOX_COLOR);
-}
-
 void DrawTriangles(const CMatrix& matrix, const CColTriangle* triangles, const CompressedVector* vertices, const uint32& count, const uint32& startColor, const uint32& endColor) {
     for (const auto& triangle : std::span{ triangles, count }) {
         const CVector vA = matrix * UncompressVector(vertices[triangle.m_nVertA]);
@@ -193,28 +146,19 @@ void DrawLine(const CMatrix& matrix, const CColLine& line) {
 }
 
 void CollisionDebugModule::DrawColModel(const CMatrix& matrix, const CColModel& cm) {
-    const auto SetState = []() {
-        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
-        RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
-    };
-
-    const auto ResetState = []() {
-        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
-    };
-
     if (!cm.m_pColData) {
         return;
     }
 
-    SetState();
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
 
     if (m_drawBoxes) {
-        for (auto& boxes : cm.m_pColData->GetBoxes()) {
-            DrawBox(matrix, boxes);
+        for (auto& box : cm.m_pColData->GetBoxes()) {
+            box.Draw(matrix, {BB_COLOR});
         }
     }
 
@@ -235,7 +179,7 @@ void CollisionDebugModule::DrawColModel(const CMatrix& matrix, const CColModel& 
     }
 
     if (m_drawBBs) {
-        DrawBoundingBox(matrix, cm.m_boundBox);
+        cm.m_boundBox.Draw(matrix, {BB_COLOR});
     }
 
     if (cm.m_pColData->bHasShadowInfo) {
@@ -244,11 +188,11 @@ void CollisionDebugModule::DrawColModel(const CMatrix& matrix, const CColModel& 
         }
     }
 
-    ResetState();
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
 }
 
 void CollisionDebugModule::RenderVisibleColModels() {
-    assert(CRenderer::ms_nNoOfVisibleEntities >= 0);
     for (auto& entity : std::span{ CRenderer::ms_aVisibleEntityPtrs, (size_t)CRenderer::ms_nNoOfVisibleEntities }) {
         if (!entity || !entity->m_matrix)
             continue;

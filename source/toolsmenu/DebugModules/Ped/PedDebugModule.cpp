@@ -197,7 +197,7 @@ void PedDebugModule::RenderMainWindow() {
 }
 
 void PedDebugModule::RenderMenuEntry() {
-    if (ImGui::BeginMenu("Visualize")) {
+    if (ImGui::BeginMenu("Visualization")) {
         if (ImGui::MenuItem("Peds")) {
             SetMainWindowOpen(true);
         }
