@@ -43,18 +43,21 @@ enum class eChannelState
 
 enum eResourceFirstID : int32 {
     // First ID of the resource
-    RESOURCE_ID_DFF = 0,                                            // default: 0
-    RESOURCE_ID_TXD = RESOURCE_ID_DFF + TOTAL_DFF_MODEL_IDS,        // default: 20000
-    RESOURCE_ID_COL = RESOURCE_ID_TXD + TOTAL_TXD_MODEL_IDS,        // default: 25000
-    RESOURCE_ID_IPL = RESOURCE_ID_COL + TOTAL_COL_MODEL_IDS,        // default: 25255
-    RESOURCE_ID_DAT = RESOURCE_ID_IPL + TOTAL_IPL_MODEL_IDS,        // default: 25511
-    RESOURCE_ID_IFP = RESOURCE_ID_DAT + TOTAL_DAT_MODEL_IDS,        // default: 25575
-    RESOURCE_ID_RRR = RESOURCE_ID_IFP + TOTAL_IFP_MODEL_IDS,        // default: 25755   (vehicle recordings)
-    RESOURCE_ID_SCM = RESOURCE_ID_RRR + TOTAL_RRR_MODEL_IDS,        // default: 26230   (streamed scripts)
-    RESOURCE_ID_INTERNAL_1 = RESOURCE_ID_SCM + TOTAL_SCM_MODEL_IDS, // default: 26312
-    RESOURCE_ID_INTERNAL_2 = RESOURCE_ID_INTERNAL_1 + 1,            // default: 26313
-    RESOURCE_ID_INTERNAL_3 = RESOURCE_ID_INTERNAL_2 + 1,            // default: 26314
-    RESOURCE_ID_INTERNAL_4 = RESOURCE_ID_INTERNAL_3 + 1,            // default: 26315
+    RESOURCE_ID_DFF                = 0,                                     // default: 0
+    RESOURCE_ID_TXD                = RESOURCE_ID_DFF + TOTAL_DFF_MODEL_IDS, // default: 20000
+    RESOURCE_ID_COL                = RESOURCE_ID_TXD + TOTAL_TXD_MODEL_IDS, // default: 25000
+    RESOURCE_ID_IPL                = RESOURCE_ID_COL + TOTAL_COL_MODEL_IDS, // default: 25255
+    RESOURCE_ID_DAT                = RESOURCE_ID_IPL + TOTAL_IPL_MODEL_IDS, // default: 25511
+    RESOURCE_ID_IFP                = RESOURCE_ID_DAT + TOTAL_DAT_MODEL_IDS, // default: 25575
+    RESOURCE_ID_RRR                = RESOURCE_ID_IFP + TOTAL_IFP_MODEL_IDS, // default: 25755   (vehicle recordings)
+    RESOURCE_ID_SCM                = RESOURCE_ID_RRR + TOTAL_RRR_MODEL_IDS, // default: 26230   (streamed scripts)
+
+    // Used for CStreaming lists, just search for xrefs (VS: shift f12)
+    RESOURCE_ID_LOADED_LIST_START  = RESOURCE_ID_SCM + TOTAL_SCM_MODEL_IDS, // default: 26312
+    RESOURCE_ID_LOADED_LIST_END    = RESOURCE_ID_LOADED_LIST_START + 1,     // default: 26313
+
+    RESOURCE_ID_REQUEST_LIST_START = RESOURCE_ID_LOADED_LIST_END + 1,       // default: 26314
+    RESOURCE_ID_REQUEST_LIST_END   = RESOURCE_ID_REQUEST_LIST_START + 1,    // default: 26315
     RESOURCE_ID_TOTAL                                               // default: 26316
 };
 
@@ -84,7 +87,7 @@ inline bool IsModelIPL(int32 model) { return RESOURCE_ID_IPL <= model && model <
 inline bool IsModelDAT(int32 model) { return RESOURCE_ID_DAT <= model && model < RESOURCE_ID_IFP; }
 inline bool IsModelIFP(int32 model) { return RESOURCE_ID_IFP <= model && model < RESOURCE_ID_RRR; }
 inline bool IsModelRRR(int32 model) { return RESOURCE_ID_RRR <= model && model < RESOURCE_ID_SCM; }
-inline bool IsModelSCM(int32 model) { return RESOURCE_ID_SCM <= model && model < RESOURCE_ID_INTERNAL_1; }
+inline bool IsModelSCM(int32 model) { return RESOURCE_ID_SCM <= model && model < RESOURCE_ID_LOADED_LIST_START; }
 
 inline eModelType GetModelType(int32 model) {
     if (IsModelDFF(model))
@@ -227,7 +230,7 @@ public:
     static bool& ms_bEnableRequestListPurge;
     static uint32& ms_streamingBufferSize;
     static uint8* (&ms_pStreamingBuffer)[2];
-    static uint32& ms_memoryUsed;
+    static uint32& ms_memoryUsedBytes;
     static int32& ms_numModelsRequested;
     static CStreamingInfo(&ms_aInfoForModel)[RESOURCE_ID_TOTAL];
     static bool& ms_disableStreaming;
@@ -264,7 +267,14 @@ public:
     static bool DeleteRwObjectsBehindCameraInSectorList(CPtrList& list, size_t memoryToCleanInBytes);
     static void DeleteRwObjectsInSectorList(CPtrList& list, int32 sectorX = -1, int32 sectorY = -1);
     static bool DeleteRwObjectsNotInFrustumInSectorList(CPtrList& list, size_t memoryToCleanInBytes);
-    static bool RemoveReferencedTxds(size_t memoryToCleanInBytes);
+
+    /*!
+    * @addr 0x40D2F0
+    * @brief Removes (some) unreferenced TXDs in order to reduce memory usage to be below goalMemoryUsageBytes
+    * @return If the memory usage is below `goalMemoryUsageBytes`
+    */
+    static bool RemoveReferencedTxds(size_t goalMemoryUsageBytes);
+
     static void DisableCopBikes(bool bDisable);
     static int32 FindMIPedSlotForInterior(int32 randFactor);
     static void FinishLoadingLargeFile(uint8* pFileBuffer, int32 modelId);
