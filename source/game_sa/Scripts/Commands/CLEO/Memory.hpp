@@ -10,7 +10,7 @@ void WriteMemory(uint32 address, uint32 size, uint32 value, bool virtualProtect)
     UNUSED(virtualProtect);
 
     DEV_LOG("write_memory addr {} size {} value {} virtual_protect {}", address, size, value, virtualProtect);
-    memset(reinterpret_cast<void*>(address), value, size);
+    memcpy(reinterpret_cast<void*>(address), &value, size);
 }
 REGISTER_COMMAND_HANDLER(COMMAND_WRITE_MEMORY, WriteMemory);
 

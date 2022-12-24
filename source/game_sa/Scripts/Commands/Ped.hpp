@@ -16,11 +16,7 @@ void IgnoreHeightDifferenceFollowingNodes(CPed& ped, bool ignore) {
 REGISTER_COMMAND_HANDLER(COMMAND_IGNORE_HEIGHT_DIFFERENCE_FOLLOWING_NODES, IgnoreHeightDifferenceFollowingNodes);
 
 void ShutAllCharsUp(bool disable) {
-    if (disable) {
-        CAEPedSpeechAudioEntity::DisableAllPedSpeech();
-    } else {
-        CAEPedSpeechAudioEntity::EnableAllPedSpeech();
-    }
+    (disable ? CAEPedSpeechAudioEntity::DisableAllPedSpeech : CAEPedSpeechAudioEntity::EnableAllPedSpeech)();
 }
 REGISTER_COMMAND_HANDLER(COMMAND_SHUT_ALL_CHARS_UP, ShutAllCharsUp);
 

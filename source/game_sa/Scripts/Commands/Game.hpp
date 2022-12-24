@@ -21,6 +21,11 @@ void SetAllTaxisHaveNitro(bool enabled) {
 }
 REGISTER_COMMAND_HANDLER(COMMAND_SET_ALL_TAXIS_HAVE_NITRO, SetAllTaxisHaveNitro);
 
+void ActivatePimpCheat(bool enabled) {
+    (enabled ? CCheat::ApplyCheat : CCheat::Disable)(CHEAT_PROSTITUTES_PAY_YOU);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_ACTIVATE_PIMP_CHEAT, ActivatePimpCheat);
+
 bool AreAnyCarCheatsActivated() {
     return rng::any_of(std::array{CHEAT_PERFECT_HANDLING, CHEAT_CARS_ON_WATER, CHEAT_BOATS_FLY}, CCheat::IsActive);
 }
@@ -65,15 +70,6 @@ void GetRidOfPlayerProstitute() {
     CTaskComplexProstituteSolicit::GetRidOfPlayerProstitute();
 }
 REGISTER_COMMAND_HANDLER(COMMAND_GET_RID_OF_PLAYER_PROSTITUTE, GetRidOfPlayerProstitute);
-
-void ActivatePimpCheat(bool activate) {
-    if (activate) {
-        CCheat::ApplyCheat(CHEAT_PROSTITUTES_PAY_YOU);
-    } else {
-        CCheat::Disable(CHEAT_PROSTITUTES_PAY_YOU);
-    }
-}
-REGISTER_COMMAND_HANDLER(COMMAND_ACTIVATE_PIMP_CHEAT, ActivatePimpCheat);
 
 void SetAreaName(const char* key) {
     CHud::SetZoneName(TheText.Get(key), true);
