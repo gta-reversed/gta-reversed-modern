@@ -65,14 +65,15 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
     Add<CollisionDebugModule>();
     Add<PedDebugModule>();
 
-    // "Extra" menu (Put your extra debug modules here, unless they might be useful in general)
-    Add<DarkelDebugModule>();
-
     // "Stats" menu
     Add<PoolsDebugModule>();
 
+    // "Extra" menu (Put your extra debug modules here, unless they might be useful in general)
+    Add<DarkelDebugModule>();
+    Add<CPickupsDebugModule>();
+
     // Stuff that is present in multiple menus
-    Add<TimeCycleDebugModule>();
+    Add<TimeCycleDebugModule>(); // Visualization + Extra
 }
 
 static bool m_showMenu;
@@ -164,11 +165,6 @@ void DebugModules::ProcessExtraDebugFeatures() {
 
         if (ImGui::BeginTabItem("Streaming")) {
             CStreamingDebugModule::ProcessImGui();
-            ImGui::EndTabItem();
-        }
-
-        if (ImGui::BeginTabItem("Pickups")) {
-            CPickupsDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 

@@ -1,6 +1,11 @@
 #pragma once
 
-namespace CPickupsDebugModule {
-    void ProcessImGui();
-    void ProcessRender();
+#include <DebugModule.h>
+
+class CPickupsDebugModule : public DebugModuleSingleWindow {
+public:
+    CPickupsDebugModule();
+
+    void RenderMainWindow() override final;
+    void RenderMenuEntry() override final;
 };
