@@ -48,3 +48,33 @@ private:
     const char* m_wndName{};
     bool        m_wndIsOpen{};
 };
+
+namespace notsa {
+namespace ui {
+struct ScopedWindow {
+    ScopedWindow(const char* name, ImVec2 defaultSize, bool& open) :
+        m_needsEnd{open}
+    {
+        if (open) {
+            ImGui::SetNextWindowSize(defaultSize, ImGuiCond_FirstUseEver);
+            ImGui::Begin(name, &open);
+        }
+    }
+
+    ~ScopedWindow() {
+        if (m_needsEnd) {
+            ImGui::End();
+        }
+    }
+
+private:
+    bool m_needsEnd{};
+};
+
+template<typename T>
+struct ScopedID {
+    ScopedID(T id) { ImGui::PushID(id); }
+    ~ScopedID() { ImGui::PopID(); }
+};
+}; // namespace ui
+}; // namespace notsa

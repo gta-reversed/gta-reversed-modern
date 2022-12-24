@@ -8,7 +8,4 @@ public:
 
     void RenderMainWindow() override final;
     void RenderMenuEntry() override final;
-
-private:
-
 };

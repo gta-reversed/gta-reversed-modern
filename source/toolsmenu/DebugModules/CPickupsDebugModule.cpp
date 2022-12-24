@@ -60,7 +60,9 @@ int16 DrawTable(bool filterInvisible, bool filterInactive) {
         PushID(i);
         BeginGroup();
         TableNextRow();
-        TableNextColumn(); Text("%d", i);
+
+        TableNextColumn();
+        Text("%d", i);
 
         if (TableNextColumn(); Selectable(PICKUP_TYPES_NAME_MAP.at(pickup.m_nPickupType).c_str(), selectedPickupId == i, ImGuiSelectableFlags_SpanAllColumns)) {
             selectedPickupId = i;

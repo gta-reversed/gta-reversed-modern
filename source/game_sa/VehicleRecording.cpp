@@ -53,7 +53,6 @@ void CVehicleRecording::Render() {
 // NOTSA: Originally an empty function, called late in rendering pipeline, used for debug stuff
 #ifdef EXTRA_DEBUG_FEATURES
     COcclusionDebugModule::ProcessRender();
-    CStreamingDebugModule::ProcessRender();
     CullZonesDebugModule::ProcessRender();
 #endif
 }

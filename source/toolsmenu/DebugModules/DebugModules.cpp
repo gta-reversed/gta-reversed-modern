@@ -67,6 +67,7 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
 
     // "Stats" menu
     Add<PoolsDebugModule>();
+    Add<CStreamingDebugModule>();
 
     // "Extra" menu (Put your extra debug modules here, unless they might be useful in general)
     Add<DarkelDebugModule>();
@@ -160,11 +161,6 @@ void DebugModules::ProcessExtraDebugFeatures() {
                 PoliceScannerAudioEntityDebugModule::ProcessImGui();
             }
 
-            ImGui::EndTabItem();
-        }
-
-        if (ImGui::BeginTabItem("Streaming")) {
-            CStreamingDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 
