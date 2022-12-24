@@ -28,7 +28,7 @@ void TeleportDebugModule::RenderMenuEntry() {
 void TeleportDebugModule::RenderWindow() {
     if (m_isOpen) {
         if (Begin("Teleporter", &m_isOpen)) {
-            SetNextWindowSize({ 415.f, 240.f }, ImGuiCond_FirstUseEver);
+            SetNextWindowSize({ 415.f, 290.f }, ImGuiCond_FirstUseEver);
             RenderTeleporterWindow();
         }
         End();

@@ -65,7 +65,7 @@ private:
     };
 
 private:
-    bool                       m_isOpen{true};
+    bool                       m_isOpen{false};
     bool                       m_isVisible{};
     std::vector<SavedLocation> s_SavedLocations{};
     bool                       s_findZGround{ true };
