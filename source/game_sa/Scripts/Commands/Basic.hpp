@@ -5,6 +5,19 @@
 /*
 * Basic language feature commands (Comparasions, assingments, etc...)
 */
+
+void GoTo(CRunningScript& S, int32 address) {
+    S.UpdatePC(address);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_GOTO, GoTo);
+
+template<typename T>
+void SetVar(T& var, T value) {
+    var = value;
+}
+REGISTER_COMMAND_HANDLER(COMMAND_SET_VAR_INT, SetVar<uint32>);
+REGISTER_COMMAND_HANDLER(COMMAND_SET_VAR_FLOAT, SetVar<float>);
+
 /*
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_WAIT>() { // 0x001 
@@ -12,14 +25,6 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_WAIT>() { // 0x001
     m_nWakeTime = ScriptParams[0].uParam + CTimer::GetTimeInMS();
     return OR_WAIT;
 }
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_GOTO>() { // 0x002 
-    CollectParameters(1);
-    UpdatePC(ScriptParams[0].iParam);
-    return OR_CONTINUE;
-}
-
 
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_VAR_INT>() { // 0x004

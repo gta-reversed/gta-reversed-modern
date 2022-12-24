@@ -45,6 +45,8 @@ public:
     float     m_fTrailerTowedRatio;
     float     m_fTrailerTowedRatio2;
 
+    static constexpr auto Type = VEHICLE_TYPE_TRAILER;
+
 public:
     CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CTrailer() override = default; // 0x6CED10

@@ -43,6 +43,8 @@ public:
 
     static float& DUMPER_COL_ANGLEMULT; // 0.0002f
 
+    static constexpr auto Type = VEHICLE_TYPE_MTRUCK;
+
 public:
     CMonsterTruck(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CMonsterTruck() override = default; // 0x6C7D10, 0x6C7F90

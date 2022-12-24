@@ -25,7 +25,7 @@ REGISTER_COMMAND_HANDLER(COMMAND_FLASH_HUD_OBJECT, FlashHudObject);
 // NOTSA: time: int32 -> uint32
 void PrintBig(const char* key, uint32 time, uint32 flags) {
     const auto text = TheText.Get(key);
-    CMessages::AddBigMessage(text, time, static_cast<eMessageStyle>(ScriptParams[1].iParam - 1));
+    CMessages::AddBigMessage(text, time, static_cast<eMessageStyle>(flags - 1));
 }
 REGISTER_COMMAND_HANDLER(COMMAND_PRINT_BIG, PrintBig);
 

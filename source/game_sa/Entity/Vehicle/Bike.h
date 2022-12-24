@@ -87,6 +87,8 @@ public:
     float m_fGasPedalAudioRevs;
     tWheelState m_aWheelState[2];
 
+    static constexpr auto Type = VEHICLE_TYPE_BIKE;
+
 public:
     CBike(int32 modelIndex, eVehicleCreatedBy createdBy); // 0x6BF430
     ~CBike() override;

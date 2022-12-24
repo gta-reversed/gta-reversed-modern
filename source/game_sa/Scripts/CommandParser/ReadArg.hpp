@@ -58,6 +58,31 @@ T Read(CRunningScript* S) requires(std::is_arithmetic_v<T> || std::is_enum_v<T>)
 }
 
 /*!
+* @brief Read variable as T&. Useful when to modify local/global variables.
+*/
+template <typename T, typename Y = std::decay_t<T>> requires(std::is_reference_v<T> && std::is_arithmetic_v<Y>)
+T Read(CRunningScript* S) {
+    auto& ip = S->m_pCurrentIP;
+
+    switch (auto t = CTheScripts::Read1ByteFromScript(ip)) {
+    case SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE:
+        return *reinterpret_cast<Y*>(&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(ip)]);
+    case SCRIPT_PARAM_LOCAL_NUMBER_VARIABLE:
+        return *reinterpret_cast<Y*>(S->GetPointerToLocalVariable(CTheScripts::Read2BytesFromScript(ip)));
+    case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY: {
+        const auto [offset, idx] = ReadArrayInfo(S);
+        return *reinterpret_cast<Y*>(&CTheScripts::ScriptSpace[offset + 4 * idx]);
+    }
+    case SCRIPT_PARAM_LOCAL_NUMBER_ARRAY: {
+        const auto [offset, idx] = ReadArrayInfo(S);
+        return *reinterpret_cast<Y*>(S->GetPointerToLocalArrayElement(offset, idx, 1));
+    }
+    default:
+        NOTSA_UNREACHABLE("Bad reference value read! type: {}", t);
+    }
+}
+
+/*!
 * @brief  Special overload for stuff in pools.
 * @return Always a reference to the object `T`
 */
@@ -69,6 +94,17 @@ concept PooledType = requires {
 template<PooledType T, typename Y = std::decay_t<T>>
 Y& Read(CRunningScript* S) {
     return *detail::PoolOf<Y>().GetAtRef(Read<int32>(S));
+}
+
+/*!
+ * @brief Read a vehicle as specialized type.
+ */
+template<typename T, typename Y = std::decay_t<T>> requires(!std::is_same_v<CVehicle, Y> && std::is_base_of_v<CVehicle, Y>)
+Y& Read(CRunningScript* S) {
+    DEV_LOG("hello :333");
+    auto& vehicle = Read<CVehicle&>(S);
+    assert(Y::Type == vehicle.m_nVehicleType);
+    return *reinterpret_cast<Y*>(&vehicle);
 }
 
 /*!

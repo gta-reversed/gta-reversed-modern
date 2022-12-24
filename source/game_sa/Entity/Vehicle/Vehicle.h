@@ -410,6 +410,8 @@ public:
     static CColModel (&m_aSpecialColModel)[4];
     static inline tHydraulicData(&m_aSpecialHydraulicData)[4] = *(tHydraulicData(*)[4])0xC1CB60;
 
+    static constexpr auto Type = VEHICLE_TYPE_IGNORE;
+
 public:
     CVehicle(eVehicleCreatedBy createdBy);
     ~CVehicle() override;

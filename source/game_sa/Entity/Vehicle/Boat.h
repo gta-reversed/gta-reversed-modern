@@ -75,6 +75,8 @@ public:
     static const constexpr auto uiNumIndices{ 6u };
     static RxVertexIndex* auRenderIndices;
 
+    static constexpr auto Type = VEHICLE_TYPE_BOAT;
+
 public:
     CBoat(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CBoat() override;

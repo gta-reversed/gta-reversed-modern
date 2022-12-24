@@ -11,9 +11,8 @@ using namespace notsa::script;
 * Various vehicle commands
 */
 
-void ClearHeliOrientation(CVehicle& vehicle) {
-    assert(vehicle.IsRealHeli());
-    vehicle.AsHeli()->ClearHeliOrientation();
+void ClearHeliOrientation(CHeli& heli) {
+    heli.ClearHeliOrientation();
 }
 REGISTER_COMMAND_HANDLER(COMMAND_CLEAR_HELI_ORIENTATION, ClearHeliOrientation);
 
@@ -86,15 +85,13 @@ void ImproveCarByCheating(CVehicle& vehicle, bool enable) {
 }
 REGISTER_COMMAND_HANDLER(COMMAND_IMPROVE_CAR_BY_CHEATING, ImproveCarByCheating);
 
-void PopCarBootUsingPhysics(CVehicle& vehicle) {
-    assert(vehicle.IsAutomobile());
-    vehicle.AsAutomobile()->PopBootUsingPhysics();
+void PopCarBootUsingPhysics(CAutomobile& automobile) {
+    automobile.PopBootUsingPhysics();
 }
 REGISTER_COMMAND_HANDLER(COMMAND_POP_CAR_BOOT_USING_PHYSICS, PopCarBootUsingPhysics);
 
-void SkipToNextAllowedStation(CVehicle& vehicle) {
-    assert(vehicle.IsTrain());
-    CTrain::SkipToNextAllowedStation(vehicle.AsTrain());
+void SkipToNextAllowedStation(CTrain& train) {
+    CTrain::SkipToNextAllowedStation(&train);
 }
 REGISTER_COMMAND_HANDLER(COMMAND_SKIP_TO_NEXT_ALLOWED_STATION, SkipToNextAllowedStation);
 
