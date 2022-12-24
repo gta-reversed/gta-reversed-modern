@@ -2,7 +2,7 @@
 
 #include <DebugModule.h>
 
-class MissionDebugModule : public SingleWindowDebugModule {
+class MissionDebugModule : public DebugModuleSingleWindow {
 public:
     MissionDebugModule();
 

@@ -12,7 +12,10 @@ public:
     //! Called once every frame
     virtual void Update() { /*nothing*/ }
 
-    //! Module's main window should be rendered here
+    //! Render 3D stuff here (lines, etc...). If rendered elsewhere they (probably) won't be visible.
+    virtual void Render3D() { /*nothing*/ };
+
+    //! Module's window should be rendered here
     virtual void RenderWindow() = 0;
 
     //! Module's entry in the main menu should be rendered here
@@ -20,9 +23,9 @@ public:
 };
 
 //! Class representing a debug module with a single window
-class SingleWindowDebugModule : public DebugModule {
+class DebugModuleSingleWindow : public DebugModule {
 public:
-    SingleWindowDebugModule(const char* wndName, ImVec2 wndDefaultSize) :
+    DebugModuleSingleWindow(const char* wndName, ImVec2 wndDefaultSize) :
         m_wndName{ wndName },
         m_wndDefaultSize{ wndDefaultSize }
     {

@@ -2,7 +2,7 @@
 
 #include <DebugModule.h>
 
-class HooksDebugModule : public SingleWindowDebugModule {
+class HooksDebugModule : public DebugModuleSingleWindow {
 public:
     HooksDebugModule();
 

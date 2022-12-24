@@ -2,7 +2,7 @@
 
 #include <DebugModule.h>
 
-class SpawnerDebugModule : public SingleWindowDebugModule {
+class SpawnerDebugModule : public DebugModuleSingleWindow {
 public:
     SpawnerDebugModule();
 

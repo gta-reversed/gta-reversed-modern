@@ -289,7 +289,7 @@ void ProcessImgui() {
 }
 
 MissionDebugModule::MissionDebugModule() :
-    SingleWindowDebugModule("Missions Starter", { 485.f, 400.f })
+    DebugModuleSingleWindow("Missions Starter", { 485.f, 400.f })
 {
     m_missionToolInput.Initialise(256, &m_missionsMap);
 }

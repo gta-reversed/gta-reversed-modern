@@ -204,3 +204,7 @@ void CDebugMenu::ImGuiDrawLoop() {
     ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
     ImGui_ImplDX9_InvalidateDeviceObjects();
 }
+
+void CDebugMenu::Render3D() {
+    s_DebugModules.Render3D();
+}

@@ -5,7 +5,7 @@
 
 using namespace ImGui;
 
-void SingleWindowDebugModule::RenderWindow() {
+void DebugModuleSingleWindow::RenderWindow() {
     if (m_wndIsOpen) {
         SetNextWindowSize(m_wndDefaultSize, ImGuiCond_FirstUseEver);
         if (Begin(m_wndName, &m_wndIsOpen)) {

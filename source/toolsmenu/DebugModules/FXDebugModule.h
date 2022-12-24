@@ -2,7 +2,7 @@
 
 #include <DebugModule.h>
 
-class FXDebugModule : public SingleWindowDebugModule {
+class FXDebugModule : public DebugModuleSingleWindow {
 public:
     FXDebugModule();
 

@@ -7,7 +7,7 @@
 #include <imgui.h>
 
 FXDebugModule::FXDebugModule() :
-    SingleWindowDebugModule("PostFX Settings", {500.f, 400.f})
+    DebugModuleSingleWindow("PostFX Settings", {500.f, 400.f})
 {
 }
 

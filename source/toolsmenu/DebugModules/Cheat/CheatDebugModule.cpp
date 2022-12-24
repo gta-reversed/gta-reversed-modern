@@ -6,7 +6,7 @@
 
 
 CheatDebugModule::CheatDebugModule() :
-    SingleWindowDebugModule("Cheats", { 500.f, 700.f })
+    DebugModuleSingleWindow("Cheats", { 500.f, 700.f })
 {
 }
 

@@ -13,9 +13,7 @@
 #include "Shadows.h"
 #include "CarFXRenderer.h"
 
-#ifdef EXTRA_DEBUG_FEATURES
-#include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
-#endif
+#include "toolsmenu/CDebugMenu.h"
 
 bool& CRenderer::ms_bRenderTunnels = *(bool*)0xB745C0;
 bool& CRenderer::ms_bRenderOutsideTunnels = *(bool*)0xB745C1;
@@ -438,9 +436,7 @@ void CRenderer::RenderFirstPersonVehicle() {
             RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(NULL));
     }
 
-#ifdef EXTRA_DEBUG_FEATURES
-    CollisionDebugModule::ProcessRender();
-#endif
+    CDebugMenu::Render3D();
 }
 
 // 0x553E40

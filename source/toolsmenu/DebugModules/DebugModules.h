@@ -9,6 +9,9 @@ public:
     //! Process stuff (Including rendering)
     void Update(bool cursorVisible);
 
+    //! Process 3D rendering
+    void Render3D();
+
     //! Add a new module
     template<std::derived_from<DebugModule> T>
     void Add() {

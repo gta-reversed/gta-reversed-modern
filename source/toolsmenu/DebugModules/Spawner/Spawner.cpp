@@ -9,7 +9,7 @@
 using namespace ImGui;
 
 SpawnerDebugModule::SpawnerDebugModule() :
-    SingleWindowDebugModule{"Spawner", {485.f, 400.f}}
+    DebugModuleSingleWindow{"Spawner", {485.f, 400.f}}
 {
     VehicleDebugModule::Initialise();
     PedSpawnerModule::Initialise();

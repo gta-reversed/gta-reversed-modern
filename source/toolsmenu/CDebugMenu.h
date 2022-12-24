@@ -8,6 +8,7 @@ public:
     static void ImGuiInputUpdate();
     static void ImGuiDrawLoop();
     static void Shutdown();
+    static void Render3D();
 
     static bool Visible() { return m_ShowMenu; }
 

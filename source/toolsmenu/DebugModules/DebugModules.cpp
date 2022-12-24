@@ -43,6 +43,12 @@ void DebugModules::Update(bool cursorVisible) {
     }
 }
 
+void DebugModules::Render3D() {
+    for (auto& module : m_modules) {
+        module->Render3D();
+    }
+}
+
 void DebugModules::Initialise(ImGuiContext* ctx) {
     m_imctx = ctx;
 
@@ -50,11 +56,13 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
     Add<TeleportDebugModule>();
     Add<SpawnerDebugModule>();
     Add<MissionDebugModule>();
+    Add<CollisionDebugModule>();
 
     // "Settings" menu
     Add<HooksDebugModule>();
     Add<FXDebugModule>();
     Add<CheatDebugModule>();
+
 }
 
 static bool m_showMenu;
@@ -118,9 +126,6 @@ void DebugModules::DisplayExtraDebugFeatures() {
 }
 
 void DebugModules::ProcessRenderTool() {
-    if (ImGui::CollapsingHeader("Collision")) {
-        CollisionDebugModule::ProcessImgui();
-    }
 }
 
 void DebugModules::ProcessExtraDebugFeatures() {

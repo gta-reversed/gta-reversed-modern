@@ -495,7 +495,7 @@ void RenderCategory(RH::HookCategory& cat) {
 }
 
 HooksDebugModule::HooksDebugModule() :
-    SingleWindowDebugModule{ "ReversibleHooks (TM) (R)", {500.f, 700.f} }
+    DebugModuleSingleWindow{ "ReversibleHooks (TM) (R)", {500.f, 700.f} }
 {
 }
 
