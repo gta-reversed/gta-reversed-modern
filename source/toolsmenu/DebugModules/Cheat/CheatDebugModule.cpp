@@ -1,31 +1,28 @@
 #include "StdInc.h"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 #include "CheatDebugModule.h"
 
-
-CheatDebugModule::CheatDebugModule() :
-    DebugModuleSingleWindow("Cheats", { 500.f, 700.f })
-{
-}
-
 void CheatDebugModule::RenderMenuEntry() {
-    if (ImGui::BeginMenu("Settings")) {
-        if (ImGui::MenuItem("Cheats")) {
-            SetMainWindowOpen(true);
-        }
-        ImGui::EndMenu();
-    }
+    notsa::ui::DoNestedMenuIL({ "Settings" }, [&] {
+        ImGui::MenuItem("Cheats", nullptr, &m_IsOpen);
+    });
 }
 
-void CheatDebugModule::RenderMainWindow() {
+void CheatDebugModule::RenderWindow() {
+    const notsa::ui::ScopedWindow window{ "Cheats", { 500.f, 700.f }, m_IsOpen };
+    if (!m_IsOpen) {
+        return;
+    }
+
     // TODO: Use this instead of the below copy pasted code (So the radio buttons actually have a state)..
-    const auto DoCheat = [](eCheats cheat, const char* name) {
-        if (ImGui::RadioButton(name, CCheat::IsActive(cheat))) {
-            CCheat::ApplyCheat(cheat);
-        }
-    };
+    //const auto DoCheat = [](eCheats cheat, const char* name) {
+    //    if (ImGui::RadioButton(name, CCheat::IsActive(cheat))) {
+    //        CCheat::ApplyCheat(cheat);
+    //    }
+    //};
 
     if (ImGui::CollapsingHeader("Player")) {
         if (ImGui::RadioButton("Adrenaline", false)) {
