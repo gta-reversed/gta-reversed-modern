@@ -52,12 +52,12 @@ private:
 namespace notsa {
 namespace ui {
 struct ScopedWindow {
-    ScopedWindow(const char* name, ImVec2 defaultSize, bool& open) :
+    ScopedWindow(const char* name, ImVec2 defaultSize, bool& open, ImGuiWindowFlags flags = 0) :
         m_needsEnd{open}
     {
         if (open) {
             ImGui::SetNextWindowSize(defaultSize, ImGuiCond_FirstUseEver);
-            ImGui::Begin(name, &open);
+            ImGui::Begin(name, &open, flags);
         }
     }
 
