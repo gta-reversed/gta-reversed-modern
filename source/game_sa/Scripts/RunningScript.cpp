@@ -4,7 +4,6 @@
 #include "TheScripts.h"
 #include "CarGenerator.h"
 #include "Hud.h"
-#include "ReversibleHooks/ReversibleHook/ScriptCommand.h"
 
 // Commands stuff
 #include "CommandParser/Parser.hpp"
@@ -36,10 +35,29 @@
 #include "Commands/Pad.hpp"
 #include "Commands/Script.hpp"
 #include "Commands/Text.hpp"
+/*
+#include "Commands/CLEO/AudioStream.hpp"
+#include "Commands/CLEO/Char.hpp"
+#include "Commands/CLEO/DynamicLibrary.hpp"
+#include "Commands/CLEO/Fs.hpp"
+#include "Commands/CLEO/Game.hpp"
+#include "Commands/CLEO/Generic.hpp"
+#include "Commands/CLEO/Memory.hpp"
+#include "Commands/CLEO/Pad.hpp"
+#include "Commands/CLEO/Script.hpp"
+#include "Commands/CLEO/Vehicle.hpp"
+#include "Commands/CLEO/World.hpp"
 
+#include "Commands/CLEO/Extensions/CleoPlus.hpp"
+#include "Commands/CLEO/Extensions/Clipboard.hpp"
+#include "Commands/CLEO/Extensions/Fs.hpp"
+#include "Commands/CLEO/Extensions/Imgui.hpp"
+#include "Commands/CLEO/Extensions/IntOperations.hpp"
+*/
 // Must be included after the commands
 #include "CommandParser/LUTGenerator.hpp"
 
+#include "ReversibleHooks/ReversibleHook/ScriptCommand.h"
 // https://library.sannybuilder.com/#/sa
 
 static auto s_CommandHandlerLUT = notsa::script::GenerateLUT();

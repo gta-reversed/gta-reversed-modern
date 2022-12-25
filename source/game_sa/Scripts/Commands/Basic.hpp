@@ -1,191 +1,64 @@
 #pragma once
-
+#include <functional>
 #include "CommandParser/Parser.hpp"
 
 /*
 * Basic language feature commands (Comparasions, assingments, etc...)
 */
 
-void GoTo(CRunningScript& S, int32 address) {
-    S.UpdatePC(address);
+OpcodeResult Wait(CRunningScript& S, uint32 duration) {
+    S.m_nWakeTime = CTimer::GetTimeInMS() + duration;
+    return OR_WAIT;
 }
-REGISTER_COMMAND_HANDLER(COMMAND_GOTO, GoTo);
+REGISTER_COMMAND_HANDLER(COMMAND_WAIT, Wait);
 
-template<typename T>
-void SetVar(T& var, T value) {
+REGISTER_COMMAND_HANDLER(COMMAND_GOTO, [](CRunningScript& S, int32 address) -> void { S.UpdatePC(address); });
+/*
+template <typename T> void SetVar(T& var, T value) {
     var = value;
 }
 REGISTER_COMMAND_HANDLER(COMMAND_SET_VAR_INT, SetVar<uint32>);
 REGISTER_COMMAND_HANDLER(COMMAND_SET_VAR_FLOAT, SetVar<float>);
+REGISTER_COMMAND_HANDLER(COMMAND_SET_LVAR_INT, SetVar<uint32>);
+REGISTER_COMMAND_HANDLER(COMMAND_SET_LVAR_FLOAT, SetVar<float>);
 
+template<typename T>
+void AssignAdd(T& var, T value) {
+    var += value;
+}
+REGISTER_COMMAND_HANDLER(COMMAND_ADD_VAL_TO_INT_VAR, AssignAdd<uint32>);
+REGISTER_COMMAND_HANDLER(COMMAND_ADD_VAL_TO_FLOAT_VAR, AssignAdd<float>);
+REGISTER_COMMAND_HANDLER(COMMAND_ADD_VAL_TO_INT_LVAR, AssignAdd<uint32>);
+REGISTER_COMMAND_HANDLER(COMMAND_ADD_VAL_TO_FLOAT_LVAR, AssignAdd<float>);
+
+template<typename T>
+void AssignSub(T& var, T value) {
+    var -= value;
+}
+REGISTER_COMMAND_HANDLER(COMMAND_SUB_VAL_FROM_INT_VAR, AssignSub<uint32>);
+REGISTER_COMMAND_HANDLER(COMMAND_SUB_VAL_FROM_FLOAT_VAR, AssignSub<float>);
+REGISTER_COMMAND_HANDLER(COMMAND_SUB_VAL_FROM_INT_LVAR, AssignSub<uint32>);
+REGISTER_COMMAND_HANDLER(COMMAND_SUB_VAL_FROM_FLOAT_LVAR, AssignSub<float>);
+
+template<typename T>
+void AssignMul(T& var, T value) {
+    var *= value;
+}
+REGISTER_COMMAND_HANDLER(COMMAND_MULT_INT_VAR_BY_VAL, AssignMul<uint32>);
+REGISTER_COMMAND_HANDLER(COMMAND_MULT_FLOAT_VAR_BY_VAL, AssignMul<float>);
+REGISTER_COMMAND_HANDLER(COMMAND_MULT_INT_LVAR_BY_VAL, AssignMul<uint32>);
+REGISTER_COMMAND_HANDLER(COMMAND_MULT_FLOAT_LVAR_BY_VAL, AssignMul<float>);
+
+template<typename T>
+void AssignDiv(T& var, T value) {
+    var /= value;
+}
+REGISTER_COMMAND_HANDLER(COMMAND_DIV_INT_VAR_BY_VAL, AssignDiv<uint32>);
+REGISTER_COMMAND_HANDLER(COMMAND_DIV_FLOAT_VAR_BY_VAL, AssignDiv<float>);
+REGISTER_COMMAND_HANDLER(COMMAND_DIV_INT_LVAR_BY_VAL, AssignDiv<uint32>);
+REGISTER_COMMAND_HANDLER(COMMAND_DIV_FLOAT_LVAR_BY_VAL, AssignDiv<float>);
+*/
 /*
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_WAIT>() { // 0x001 
-    CollectParameters(1);
-    m_nWakeTime = ScriptParams[0].uParam + CTimer::GetTimeInMS();
-    return OR_WAIT;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_VAR_INT>() { // 0x004
-    tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
-    CollectParameters(1);
-    *var = ScriptParams[0];
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_VAR_FLOAT>() { // 0x005
-    tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
-    CollectParameters(1);
-    *var = ScriptParams[0];
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_LVAR_INT>() { // 0x006
-    tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
-    CollectParameters(1);
-    *var = ScriptParams[0];
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_SET_LVAR_FLOAT>() { // 0x007
-    tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
-    CollectParameters(1);
-    *var = ScriptParams[0];
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_VAL_TO_INT_VAR>() { // 0x008
-    tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
-    CollectParameters(1);
-    var->iParam += ScriptParams[0].iParam;
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_VAL_TO_FLOAT_VAR>() { // 0x009
-    tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
-    CollectParameters(1);
-    var->fParam += ScriptParams[0].fParam;
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_VAL_TO_INT_LVAR>() { // 0x00A
-    tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
-    CollectParameters(1);
-    var->iParam += ScriptParams[0].iParam;
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_ADD_VAL_TO_FLOAT_LVAR>() { // 0x00B
-    tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
-    CollectParameters(1);
-    var->fParam += ScriptParams[0].fParam;
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_VAL_FROM_INT_VAR>() { // 0x00C
-    tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
-    CollectParameters(1);
-    var->iParam -= ScriptParams[0].iParam;
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_VAL_FROM_FLOAT_VAR>() { // 0x00D
-    tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
-    CollectParameters(1);
-    var->fParam -= ScriptParams[0].fParam;
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_VAL_FROM_INT_LVAR>() { // 0x00E
-    tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
-    CollectParameters(1);
-    var->iParam -= ScriptParams[0].iParam;
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_SUB_VAL_FROM_FLOAT_LVAR>() { // 0x00F
-    tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
-    CollectParameters(1);
-    var->fParam -= ScriptParams[0].fParam;
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_MULT_INT_VAR_BY_VAL>() { // 0x010
-    tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
-    CollectParameters(1);
-    var->iParam *= ScriptParams[0].iParam;
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_MULT_FLOAT_VAR_BY_VAL>() { // 0x011
-    tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
-    CollectParameters(1);
-    var->fParam *= ScriptParams[0].fParam;
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_MULT_INT_LVAR_BY_VAL>() { // 0x012
-    tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
-    CollectParameters(1);
-    var->iParam *= ScriptParams[0].iParam;
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_MULT_FLOAT_LVAR_BY_VAL>() { // 0x013
-    tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
-    CollectParameters(1);
-    var->fParam *= ScriptParams[0].fParam;
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_DIV_INT_VAR_BY_VAL>() { // 0x014
-    tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
-    CollectParameters(1);
-    var->iParam /= ScriptParams[0].iParam;
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_DIV_FLOAT_VAR_BY_VAL>() { // 0x015
-    tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
-    CollectParameters(1);
-    var->fParam /= ScriptParams[0].fParam;
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_DIV_INT_LVAR_BY_VAL>() { // 0x016
-    tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
-    CollectParameters(1);
-    var->iParam /= ScriptParams[0].iParam;
-    return OR_CONTINUE;
-}
-
-template<>
-OpcodeResult CRunningScript::ProcessCommand<COMMAND_DIV_FLOAT_LVAR_BY_VAL>() { // 0x017
-    tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
-    CollectParameters(1);
-    var->fParam /= ScriptParams[0].fParam;
-    return OR_CONTINUE;
-}
-
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER>() { // 0x018
     tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);

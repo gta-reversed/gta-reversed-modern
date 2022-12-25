@@ -50,6 +50,11 @@ OpcodeResult CommandParser(CRunningScript* S) {
 template<eScriptCommands Command>
 struct CommandHandler : std::false_type {};
 
+// In case of `constexpr static auto Function = +(fn);`:
+// `Function` expects a raw function ptr. Since we may also use lambdas, we need to use
+// +(<lambda>) hack to get lambda's function pointer, not pointer of the lambda object.
+// https://stackoverflow.com/questions/18889028
+
 /*!
 * Use this macro to register a parsed function
 */
@@ -57,6 +62,6 @@ struct CommandHandler : std::false_type {};
     template<> \
     struct CommandHandler<cmd> : std::true_type { \
         constexpr static auto Command  = cmd; \
-        constexpr static auto Function = fn; \
+        constexpr static auto Function = +(fn); \
     } \
 
