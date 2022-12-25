@@ -74,6 +74,7 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
     Add<CPickupsDebugModule>();
     Add<PoliceScannerAudioEntityDebugModule>();
     Add<AmbienceTrackManagerDebugModule>();
+    Add<CutsceneTrackManagerDebugModule>();
 
     // Stuff that is present in multiple menus
     Add<TimeCycleDebugModule>(); // Visualization + Extra
@@ -146,13 +147,6 @@ void DebugModules::ProcessExtraDebugFeatures() {
             }
             if (ImGui::CollapsingHeader("Cull Zones")) {
                 CullZonesDebugModule::ProcessImGui();
-            }
-            ImGui::EndTabItem();
-        }
-
-        if (ImGui::BeginTabItem("Audio")) {
-            if (ImGui::CollapsingHeader("Cutscene Track Manager")) {
-                CutsceneTrackManagerDebugModule::ProcessImGui();
             }
             ImGui::EndTabItem();
         }

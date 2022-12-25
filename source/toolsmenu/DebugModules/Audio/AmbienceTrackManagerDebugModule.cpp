@@ -6,7 +6,7 @@
 #include "AEAmbienceTrackManager.h"
 
 void AmbienceTrackManagerDebugModule::RenderWindow() {
-    const notsa::ui::ScopedWindow window{ "Police Scanner Audio Entity", {400.f, 600.f}, m_IsOpen, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize };
+    const notsa::ui::ScopedWindow window{ "Ambience Track Manager", {400.f, 600.f}, m_IsOpen, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize };
     if (!m_IsOpen) {
         return;
     }

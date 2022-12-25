@@ -1,8 +1,12 @@
 #pragma once
 
-namespace CutsceneTrackManagerDebugModule {
+#include <DebugModule.h>
 
-void ProcessImGui();
-void ProcessRender();
+class CutsceneTrackManagerDebugModule : public DebugModule {
+public:
+    void RenderWindow() override final;
+    void RenderMenuEntry() override final;
 
-}
+private:
+    bool m_IsOpen{};
+};
