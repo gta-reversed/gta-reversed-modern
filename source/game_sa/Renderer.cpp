@@ -594,9 +594,6 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
             }
 
             if (!entity->GetIsOnScreen() || entity->IsEntityOccluded()) {
-#ifdef EXTRA_DEBUG_FEATURES
-                ++COcclusionDebugModule::NumEntitiesSkipped;
-#endif
                 return RENDERER_CULLED;
             }
 
@@ -641,9 +638,6 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
 
                 if (!entity->GetIsOnScreen() || entity->IsEntityOccluded())
                 {
-#ifdef EXTRA_DEBUG_FEATURES
-                    ++COcclusionDebugModule::NumEntitiesSkipped;
-#endif
                     return RENDERER_CULLED;
                 }
 

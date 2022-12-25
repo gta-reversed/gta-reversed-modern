@@ -50,10 +50,6 @@ void CVehicleRecording::ShutDown() {
 
 // 0x459F70 hook not needed
 void CVehicleRecording::Render() {
-// NOTSA: Originally an empty function, called late in rendering pipeline, used for debug stuff
-#ifdef EXTRA_DEBUG_FEATURES
-    COcclusionDebugModule::ProcessRender();
-#endif
 }
 
 // 0x45A060
