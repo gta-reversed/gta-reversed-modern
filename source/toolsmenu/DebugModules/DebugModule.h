@@ -76,5 +76,31 @@ struct ScopedID {
     ScopedID(T id) { ImGui::PushID(id); }
     ~ScopedID() { ImGui::PopID(); }
 };
+
+//! Render a nested menu (A series of `BeginMenu` calls). If all `BeginMenu` calls return `true` the provided `OnAllVisibleFn` is called.
+template<rng::input_range R, typename T>
+void DoNestedMenu(R&& menuPath, T OnAllVisibleFn) {
+    assert(menuPath.size() > 0); // Empty makes no sense
+
+    int32 nopen{};
+    for (auto name : menuPath) {
+        if (!ImGui::BeginMenu(name)) {
+            break;
+        }
+        nopen++;
+    }
+    if (nopen == rng::size(menuPath)) {
+        std::invoke(OnAllVisibleFn);
+    }
+    while (nopen--) {
+        ImGui::EndMenu();
+    }
+}
+
+//! Initializer list version of `DoNestedMenu` (So no ugly `std::to_array` has to be used)
+template<typename T>
+void DoNestedMenuIL(std::initializer_list<const char*> menuPath, T OnAllVisibleFn) {
+    DoNestedMenu(menuPath, OnAllVisibleFn);
+}
 }; // namespace ui
 }; // namespace notsa
