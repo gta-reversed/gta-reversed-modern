@@ -113,7 +113,7 @@ void RenderEffects() {
     CRenderer::RenderFirstPersonVehicle();
     CPostEffects::Render();
 
-    CDebugMenu::Render3D();
+    CDebugMenu::GetSingleton().Render3D();
 }
 
 // 0x53DF40
@@ -260,7 +260,7 @@ void Render2dStuff() {
     CFont::DrawFonts();
 
     // NOTSA: ImGui menu draw loop
-    CDebugMenu::ImGuiDrawLoop();
+    CDebugMenu::GetSingleton().DrawLoop();
 }
 
 // 0x53E160

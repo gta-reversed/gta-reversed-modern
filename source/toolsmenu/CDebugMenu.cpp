@@ -16,106 +16,139 @@
 #include <extensions/ScriptCommands.h>
 #include "DebugModules/DebugModules.h"
 
-bool CDebugMenu::m_Initialised = false;
-bool CDebugMenu::m_ShowMenu = false;
-static DebugModules s_DebugModules{};
-ImGuiIO* io;
-
-void CDebugMenu::ImGuiInitialise() {
-    if (m_Initialised) {
-        return;
-    }
+CDebugMenu::CDebugMenu() :
+    m_ImCtx{ ImGui::CreateContext() },
+    m_ImIO{ &m_ImCtx->IO }
+{
     IMGUI_CHECKVERSION();
-    ImGuiContext* ctx = ImGui::CreateContext();
-    io = &ImGui::GetIO();
-    io->WantCaptureMouse = true;
-    io->WantCaptureKeyboard = true;
-    io->WantSetMousePos = true;
-    io->MouseDrawCursor = false;
-    io->ConfigFlags = ImGuiConfigFlags_NavEnableSetMousePos;
-    io->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    m_ImIO->WantCaptureMouse    = true;
+    m_ImIO->WantCaptureKeyboard = true;
+    m_ImIO->WantSetMousePos     = true;
+    m_ImIO->MouseDrawCursor     = false;
+    m_ImIO->ConfigFlags         = ImGuiConfigFlags_NavEnableSetMousePos;
+    m_ImIO->DisplaySize         = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     ImGui_ImplWin32_Init(PSGLOBAL(window));
     ImGui_ImplDX9_Init(GetD3DDevice());
 
-    s_DebugModules.Initialise(ctx);
-
-    m_Initialised = true;
-    printf("ImGui initialized\n");
+    DEV_LOG("Dear ImGui initialized!");
 }
 
-void CDebugMenu::Shutdown() {
-    printf("CDebugMenu::Shutdown\n");
-
+CDebugMenu::~CDebugMenu() {
     ImGui_ImplDX9_Shutdown();
     ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
+    ImGui::DestroyContext(m_ImCtx);
+
+    DEV_LOG("Dear ImGui shutdown!");
 }
 
-void UpdateKeyboard() {
-    static BYTE KeyStates[256];
 
-    //VERIFY(SUCCEEDED());
-    GetKeyboardState(KeyStates);
-
-    for (auto i = 0; i < 256; i++) {
-        if (KeyStates[i] & 0x80 && !io->KeysDown[i]) {
-            io->KeysDown[i] = true;
-
-            char res[2] = {0};
-            if (ToAscii(i, MapVirtualKey(i, 0), (const BYTE*)KeyStates, (LPWORD)res, 0) == 1) {
-                io->AddInputCharactersUTF8(res);
-            }
-        } else if (!(KeyStates[i] & 0x80) && io->KeysDown[i]) {
-            io->KeysDown[i] = false;
-        }
+void CDebugMenu::UpdateInput() {
+    if (!Visible()) {
+        return;
     }
 
-    io->KeyCtrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
-    io->KeyShift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
-    io->KeyAlt = (GetKeyState(VK_MENU) & 0x8000) != 0;
-    io->KeySuper = false;
-};
+    // Update mouse
+    {
+        const auto WHEEL_SPEED = 20.0f;
 
-void UpdateMouse() {
-    static ImVec2 m_MousePos;
+        CPad::GetPad()->DisablePlayerControls = true;
 
-    const auto WHEEL_SPEED = 20.0f;
+        // Update position
+        auto& MousePos = m_ImIO->MousePos;
+        MousePos.x += CPad::NewMouseControllerState.X;
+        MousePos.y -= CPad::NewMouseControllerState.Y;
 
-    CPad::GetPad()->DisablePlayerControls = true;
+        MousePos.x = std::clamp(MousePos.x, 0.0f, SCREEN_WIDTH);
+        MousePos.y = std::clamp(MousePos.y, 0.0f, SCREEN_HEIGHT);
 
-    m_MousePos.x += CPad::NewMouseControllerState.X;
-    m_MousePos.y -= CPad::NewMouseControllerState.Y;
+        if (CPad::NewMouseControllerState.wheelDown)
+            m_ImIO->MouseWheel -= (WHEEL_SPEED * m_ImIO->DeltaTime);
 
-    m_MousePos.x = std::clamp(m_MousePos.x, 0.0f, SCREEN_WIDTH);
-    m_MousePos.y = std::clamp(m_MousePos.y, 0.0f, SCREEN_HEIGHT);
+        if (CPad::NewMouseControllerState.wheelUp)
+            m_ImIO->MouseWheel += (WHEEL_SPEED * m_ImIO->DeltaTime);
 
-    io->MousePos = ImVec2(m_MousePos.x, m_MousePos.y);
+        m_ImIO->MouseDown[ImGuiMouseButton_Left]   = CPad::NewMouseControllerState.lmb;
+        m_ImIO->MouseDown[ImGuiMouseButton_Right]  = CPad::NewMouseControllerState.mmb;
+        m_ImIO->MouseDown[ImGuiMouseButton_Middle] = CPad::NewMouseControllerState.rmb;
 
-    if (CPad::NewMouseControllerState.wheelDown)
-        io->MouseWheel -= (WHEEL_SPEED * io->DeltaTime);
+        CPad::NewMouseControllerState.X = 0.0f;
+        CPad::NewMouseControllerState.Y = 0.0f;
+    }
 
-    if (CPad::NewMouseControllerState.wheelUp)
-        io->MouseWheel += (WHEEL_SPEED * io->DeltaTime);
+    // Update keyboard
+    {
+        BYTE KeyStates[256];
 
-    io->MouseDown[ImGuiMouseButton_Left]   = CPad::NewMouseControllerState.lmb;
-    io->MouseDown[ImGuiMouseButton_Right]  = CPad::NewMouseControllerState.mmb;
-    io->MouseDown[ImGuiMouseButton_Middle] = CPad::NewMouseControllerState.rmb;
+        VERIFY(SUCCEEDED(GetKeyboardState(KeyStates)));
 
-    CPad::NewMouseControllerState.X = 0.0f;
-    CPad::NewMouseControllerState.Y = 0.0f;
-};
+        const auto IsKeyDown = [&](auto key) { return (KeyStates[key] & 0x80) != 0; };
 
-// Partially taken from https://github.com/GTAModding/re3/blob/f1a7aeaa0f574813ed3cec8a085e2f310aa3a366/src/imgui/ImGuiIII.cpp
-void CDebugMenu::ImGuiInputUpdate() {
-    if (!m_ShowMenu)
-        return;
+        for (auto key = 0; key < 256; key++) {
+            // Check if there was a state change
+            if (IsKeyDown(key) == m_ImIO->KeysDown[key]) {
+                continue;
+            }
 
-    UpdateKeyboard();
-    UpdateMouse();
+            // There was!
+            if (IsKeyDown(key)) { // Key is now down
+                m_ImIO->KeysDown[key] = true;
+
+                char ResultUTF8[16] = {0};
+                if (ToAscii(key, MapVirtualKey(key, 0), KeyStates, (LPWORD)ResultUTF8, 0)) {
+                    m_ImIO->AddInputCharactersUTF8(ResultUTF8);
+                }
+            } else { // Key is now released
+                m_ImIO->KeysDown[key] = false;
+            }
+        }
+
+        m_ImIO->KeyCtrl  = IsKeyDown(VK_CONTROL);
+        m_ImIO->KeyShift = IsKeyDown(VK_SHIFT);
+        m_ImIO->KeyAlt   = IsKeyDown(VK_MENU);
+        m_ImIO->KeySuper = false;
+    }
 }
 
-static void DebugCode() {
+void CDebugMenu::PreRenderUpdate() {
+    m_ImIO->DeltaTime   = CTimer::GetTimeStepInSeconds();
+    m_ImIO->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT); // Update display size, in case of window resize after imgui was already initialized
+
+    m_DebugModules.PreRenderUpdate();
+    DebugCode();
+    ReversibleHooks::CheckAll();
+
+    if (const auto pad = CPad::GetPad(); pad->DebugMenuJustPressed()) {
+        m_ShowMenu              = !m_ShowMenu;
+        m_ImIO->MouseDrawCursor = m_ShowMenu;
+        pad->bPlayerSafe        = m_ShowMenu;
+    }
+}
+
+void CDebugMenu::DrawLoop() {
+    PreRenderUpdate();
+
+    ImGui_ImplDX9_NewFrame();
+    ImGui::NewFrame();
+
+    Render2D();
+
+    ImGui::EndFrame();
+    ImGui::Render();
+    ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
+    ImGui_ImplDX9_InvalidateDeviceObjects();
+}
+
+void CDebugMenu::Render2D() {
+    m_DebugModules.Render2D();
+}
+
+void CDebugMenu::Render3D() {
+    m_DebugModules.Render3D();
+}
+
+void CDebugMenu::DebugCode() {
     CPad* pad = CPad::GetPad();
 
     const auto player = FindPlayerPed();
@@ -177,34 +210,4 @@ static void DebugCode() {
     if (pad->IsStandardKeyJustPressed('7')) {
         AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_REAR);
     }
-}
-
-void CDebugMenu::ImGuiDrawLoop() {
-    CPad* pad = CPad::GetPad();
-    if (pad->DebugMenuJustPressed()) {
-        m_ShowMenu = !m_ShowMenu;
-        io->MouseDrawCursor = m_ShowMenu;
-        pad->bPlayerSafe = m_ShowMenu;
-    }
-
-    DebugCode();
-    ReversibleHooks::CheckAll(); // Hot Code Reloading
-
-    io->DeltaTime = CTimer::GetTimeStepInSeconds();
-    io->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT); // Update display size, in case of window resize after imgui was already initialized
-
-    ImGui_ImplDX9_NewFrame();
-    ImGui::NewFrame();
-
-    s_DebugModules.Update(m_ShowMenu);
-    DebugModules::ProcessRender(m_ShowMenu);
-
-    ImGui::EndFrame();
-    ImGui::Render();
-    ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
-    ImGui_ImplDX9_InvalidateDeviceObjects();
-}
-
-void CDebugMenu::Render3D() {
-    s_DebugModules.Render3D();
 }

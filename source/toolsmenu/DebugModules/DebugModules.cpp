@@ -23,51 +23,38 @@
 
 #include "Spawner/Spawner.hpp"
 
-bool DebugModules::m_ShowFPS = false;
-bool DebugModules::m_ShowExtraDebugFeatures = false;
-
-void DrawMenuBarInfo() {
-    const auto& io = ImGui::GetIO();
-    
-    ImGui::SameLine(ImGui::GetWindowWidth() - 280.f);
-
-    // TODO: V-Sync (Use IsVSyncActive()) - How to get VSync target FPS?
-    //       Can't use `RsGlobal.frameLimit`, because there's an active vsync limit (coming from somewhere lol)
-    const auto MaxFrameRate  = FrontEndMenuManager.m_bPrefsFrameLimiter ? (float)RsGlobal.frameLimit : 60.f; 
-    const auto FrameRateProg = std::max(invLerp(MaxFrameRate * 0.30f, MaxFrameRate, io.Framerate), 0.f);
-    ImGui::PushStyleColor(ImGuiCol_Text, { std::max(0.f, 1.f - FrameRateProg), std::min(1.f, FrameRateProg), 0.f, 1.f});
-    ImGui::Text("FPS: %.1f [%.2f ms]", io.Framerate, io.DeltaTime);
-    ImGui::PopStyleColor();
-
-    ImGui::Text("[F7 / Ctrl + M]");
+DebugModules::DebugModules(ImGuiContext* ctx) :
+    m_ImCtx(ctx)
+{
+    CreateModules();
 }
 
-void DebugModules::Update(bool cursorVisible) {
-    for (auto& module : m_modules) {
+void DebugModules::PreRenderUpdate() {
+    for (auto& module : m_Modules) {
         module->Update();
     }
+}
 
+void DebugModules::Render2D() {
     ImGui::BeginMainMenuBar();
-    for (auto& module : m_modules) {
+    for (auto& module : m_Modules) {
         module->RenderMenuEntry();
     }
-    DrawMenuBarInfo();
+    RenderMenuBarInfo();
     ImGui::EndMainMenuBar();
 
-    for (auto& module : m_modules) {
+    for (auto& module : m_Modules) {
         module->RenderWindow();
     }
 }
 
 void DebugModules::Render3D() {
-    for (auto& module : m_modules) {
+    for (auto& module : m_Modules) {
         module->Render3D();
     }
 }
 
-void DebugModules::Initialise(ImGuiContext* ctx) {
-    m_imctx = ctx;
-
+void DebugModules::CreateModules() {
     // "Tools" menu
     Add<TeleportDebugModule>();
     Add<SpawnerDebugModule>();
@@ -99,54 +86,19 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
     Add<COcclusionDebugModule>(); // Visualization + Extra
 }
 
-static bool m_showMenu;
-void DebugModules::DisplayMainWindow() {
-    if (CTimer::GetIsPaused()) {
-        return;
-    }
+void DebugModules::RenderMenuBarInfo() {
+    const auto& io = ImGui::GetIO();
 
-    ImGui::SetNextWindowSize(ImVec2(484, 420), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Debug Window", &m_showMenu);
-    if (ImGui::BeginMenuBar()) {
-        if (ImGui::BeginMenu("File")) {
-            ImGui::EndMenu();
-        }
-        ImGui::EndMenuBar();
-    }
+    ImGui::SameLine(ImGui::GetWindowWidth() - 280.f);
 
-    if (ImGui::BeginTabBar("Debug Tabs")) {
-        if (ImGui::BeginTabItem("Other")) {
-            ImGui::Checkbox("Debug Scripts", &CTheScripts::DbgFlag);
-            if (ImGui::Button("[CTheScripts] Print List Sizes")) { CTheScripts::PrintListSizes(); }
-            ImGui::Checkbox("Display FPS window", &m_ShowFPS);
-            ImGui::SliderInt("Max FPS", &RsGlobal.frameLimit, 0, 360);
-            ImGui::Checkbox("Display Debug modules window", &m_ShowExtraDebugFeatures);
-            if (ImGui::Button("Streamer: ReInit")) {
-                CStreaming::ReInit();
-            }
-            ImGui::EndTabItem();
-        }
+    // Draw this first, cause FPS fluctuates (and would move this text)
+    ImGui::Text("[F7 / Ctrl + M]");
 
-        ImGui::EndTabBar();
-    }
-    ImGui::End();
-}
-
-void DebugModules::DisplayFramePerSecond() {
-    if (!m_ShowFPS)
-        return;
-
-    // Top-left framerate display overlay window.
-    ImGui::SetNextWindowPos(ImVec2(10, 10));
-    ImGui::SetNextWindowSize({ 265, 20 });
-    ImGui::Begin("FPS", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
-    ImGui::Text("FPS: %.2f [RsGlobal.frameLimit=%i]", ImGui::GetIO().Framerate, RsGlobal.frameLimit);
-    ImGui::End();
-}
-
-void DebugModules::ProcessRender(bool showMenu) {
-    if (showMenu) {
-        DisplayMainWindow();
-    }
-    DisplayFramePerSecond();
+    // TODO: V-Sync (Use IsVSyncActive()) - How to get VSync target FPS?
+    //       Can't use `RsGlobal.frameLimit`, because there's an active vsync limit (coming from somewhere lol)
+    const auto MaxFrameRate = FrontEndMenuManager.m_bPrefsFrameLimiter ? (float)RsGlobal.frameLimit : 60.f;
+    const auto FrameRateProg = std::max(invLerp(MaxFrameRate * 0.30f, MaxFrameRate, io.Framerate), 0.f);
+    ImGui::PushStyleColor(ImGuiCol_Text, { std::max(0.f, 1.f - FrameRateProg), std::min(1.f, FrameRateProg), 0.f, 1.f });
+    ImGui::Text("FPS: %.1f [%.2f ms]", io.Framerate, io.DeltaTime * 1000.f);
+    ImGui::PopStyleColor();
 }

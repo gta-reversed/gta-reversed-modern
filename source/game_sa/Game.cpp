@@ -145,7 +145,6 @@ void ValidateVersion() {
 
 // 0x53BB80
 void CGame::ShutdownRenderWare() {
-    CDebugMenu::Shutdown();
     RwMatrixDestroy(m_pWorkingMatrix1);
     RwMatrixDestroy(m_pWorkingMatrix2);
     CLoadingScreen::Shutdown();

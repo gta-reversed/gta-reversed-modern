@@ -4,38 +4,33 @@
 #include "DebugModule.h"
 
 class DebugModules {
-    using ModulePtr = std::unique_ptr<DebugModule>;
 public:
+    DebugModules(ImGuiContext* ctx);
+
+    //! Pre-Render updates
+    void PreRenderUpdate();
+
     //! Process stuff (Including rendering)
-    void Update(bool cursorVisible);
+    void Render2D();
 
     //! Process 3D rendering
     void Render3D();
 
+private:
+    //! Creates all modules
+    void CreateModules();
+
+    //! Render menu bar stuff (FPS, etc)
+    void RenderMenuBarInfo();
+
     //! Add a new module
     template<std::derived_from<DebugModule> T>
     void Add() {
-        auto& module = m_modules.emplace_back(std::make_unique<T>());
-        module->OnImGuiInitialised(m_imctx);
+        auto& module = m_Modules.emplace_back(std::make_unique<T>());
+        module->OnImGuiInitialised(m_ImCtx);
     }
 
 private:
-    std::vector<ModulePtr> m_modules{};
-    ImGuiContext*          m_imctx{};
-    bool                   m_menuOpen{};
-
-public:
-
-    static bool m_ShowFPS;
-    static bool m_ShowExtraDebugFeatures;
-    static bool m_ShowPlayerInfo;
-
-    void Initialise(ImGuiContext* ctx);
-    static void DisplayMainWindow();
-    static void DisplayFramePerSecond();
-    static void DisplayExtraDebugFeatures();
-    static void ProcessRenderTool();
-    static void ProcessExtraDebugFeatures();
-
-    static void ProcessRender(bool showMenu);
+    std::vector<std::unique_ptr<DebugModule>> m_Modules{};
+    ImGuiContext*                             m_ImCtx{};
 };

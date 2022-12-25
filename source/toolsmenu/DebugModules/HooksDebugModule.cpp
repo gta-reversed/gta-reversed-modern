@@ -322,8 +322,8 @@ namespace HookFilter {
             SetTooltip(
                 "`::function`         - Filters only functions \n"
                 "`cpy`                - Filter namespace - Will only show namespace with name containing \"cphy\"\n"
-                "`player/ped`         - Should only show Ped/CPlayerPed\n"
-                "`player/ped::busted` - Should only show `Ped/CPlayerPed` with the `busted` function visible only\n"
+                "`ped/player`         - Should only show Ped/CPlayerPed\n"
+                "`ped/player::busted` - Should only show `Ped/CPlayerPed` with the `busted` function visible only\n"
                 "`/entity`            - Should only show the top level `Entity` namespace in Root\n"
                 "For more tips see gta-reversed-modern/discussions/190\n"
             );
