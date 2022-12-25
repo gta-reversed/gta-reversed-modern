@@ -58,7 +58,7 @@ T Read(CRunningScript* S) requires(std::is_arithmetic_v<T> || std::is_enum_v<T>)
 }
 
 /*!
-* @brief Read variable as T&. Useful when to modify local/global variables.
+* @brief Read variable as T&. Used for writing to local/global variables.
 */
 template <typename T, typename Y = std::decay_t<T>> requires(std::is_reference_v<T> && std::is_arithmetic_v<Y>)
 T Read(CRunningScript* S) {
@@ -97,14 +97,13 @@ Y& Read(CRunningScript* S) {
 }
 
 /*!
- * @brief Read a vehicle as specialized type.
+ * @brief Read classes derived from `CVehicle` separately here, so we can do debug checks on them.
  */
 template<typename T, typename Y = std::decay_t<T>> requires(!std::is_same_v<CVehicle, Y> && std::is_base_of_v<CVehicle, Y>)
 Y& Read(CRunningScript* S) {
-    DEV_LOG("hello :333");
     auto& vehicle = Read<CVehicle&>(S);
     assert(Y::Type == vehicle.m_nVehicleType);
-    return *reinterpret_cast<Y*>(&vehicle);
+    return static_cast<Y&>(vehicle);
 }
 
 /*!
@@ -201,6 +200,7 @@ std::string_view Read<std::string_view>(CRunningScript* S) {
     }
 }
 
+//! Read a `const char*` - This is hacky, but we know all strings are null-terminated, so it's fine
 template<>
 const char* Read<const char*>(CRunningScript* S) {
     return Read<std::string_view>(S).data();

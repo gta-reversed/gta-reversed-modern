@@ -9,7 +9,7 @@
 void WriteMemory(uint32 address, uint32 size, uint32 value, bool virtualProtect) {
     UNUSED(virtualProtect);
 
-    DEV_LOG("write_memory addr {} size {} value {} virtual_protect {}", address, size, value, virtualProtect);
+    DEV_LOG("WriteMemory(addr={}, size={}, value={} ,virtual_protect={})", address, size, value, virtualProtect);
     memcpy(reinterpret_cast<void*>(address), &value, size);
 }
 REGISTER_COMMAND_HANDLER(COMMAND_WRITE_MEMORY, WriteMemory);
@@ -17,38 +17,20 @@ REGISTER_COMMAND_HANDLER(COMMAND_WRITE_MEMORY, WriteMemory);
 uint32 ReadMemory(uint32 address, uint32 size, bool virtualProtect) {
     UNUSED(virtualProtect);
 
-    DEV_LOG("read_memory addr {} size {} virtual_protect {}", address, size, virtualProtect);
-    switch (size) {
-    case 4:
-        return *reinterpret_cast<uint32*>(address);
-    case 2:
-        return *reinterpret_cast<uint16*>(address);
-    case 1:
-    default:
-        return *reinterpret_cast<uint8*>(address);
+    DEV_LOG("ReadMemory(addr={}, size={}, virtual_protect={})", address, size, virtualProtect);
+    if (size != 4 && size != 2) {
+        size = 1; // just to be sure not to write anything stupid.
     }
+    uint32 ret;
+    memcpy(&ret, reinterpret_cast<void*>(address), size);
+    return ret;
 }
 REGISTER_COMMAND_HANDLER(COMMAND_READ_MEMORY, ReadMemory);
 
-CPed* GetPedPointer(CPed& ped) {
-    return &ped;
-}
-REGISTER_COMMAND_HANDLER(COMMAND_GET_PED_POINTER, GetPedPointer);
-
-CVehicle* GetVehiclePointer(CVehicle& vehicle) {
-    return &vehicle;
-}
-REGISTER_COMMAND_HANDLER(COMMAND_GET_VEHICLE_POINTER, GetVehiclePointer);
-
-CObject* GetObjectPointer(CObject& object) {
-    return &object;
-}
-REGISTER_COMMAND_HANDLER(COMMAND_GET_OBJECT_POINTER, GetObjectPointer);
-
-CRunningScript* GetThisScriptStruct(CRunningScript* S) {
-    return S;
-}
-REGISTER_COMMAND_HANDLER(COMMAND_GET_THIS_SCRIPT_STRUCT, GetThisScriptStruct);
+REGISTER_COMMAND_HANDLER(COMMAND_GET_PED_POINTER, [](CPed& ped) { return &ped; });
+REGISTER_COMMAND_HANDLER(COMMAND_GET_VEHICLE_POINTER, [](CVehicle& vehicle) { return &vehicle; });
+REGISTER_COMMAND_HANDLER(COMMAND_GET_OBJECT_POINTER, [](CObject& object) { return &object; });
+REGISTER_COMMAND_HANDLER(COMMAND_GET_THIS_SCRIPT_STRUCT, [](CRunningScript* S) { return S; });
 
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_CALL_FUNCTION>() { // 0x0AA5 (int32 address, int32 numParams, int32 pop, arguments funcParams)

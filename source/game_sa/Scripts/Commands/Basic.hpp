@@ -14,29 +14,29 @@ REGISTER_COMMAND_HANDLER(COMMAND_WAIT, Wait);
 
 REGISTER_COMMAND_HANDLER(COMMAND_GOTO, [](CRunningScript& S, int32 address) -> void { S.UpdatePC(address); });
 
-REGISTER_COMMAND_HANDLER(COMMAND_SET_VAR_INT,  [](uint32& var, uint32 value) { var = value; });
-REGISTER_COMMAND_HANDLER(COMMAND_SET_VAR_FLOAT,  [](float& var, float value) { var = value; });
-REGISTER_COMMAND_HANDLER(COMMAND_SET_LVAR_INT, [](uint32& var, uint32 value) { var = value; });
+REGISTER_COMMAND_HANDLER(COMMAND_SET_VAR_INT, [](int32& var, int32 value) { var = value; });
+REGISTER_COMMAND_HANDLER(COMMAND_SET_VAR_FLOAT, [](float& var, float value) { var = value; });
+REGISTER_COMMAND_HANDLER(COMMAND_SET_LVAR_INT, [](int32& var, int32 value) { var = value; });
 REGISTER_COMMAND_HANDLER(COMMAND_SET_LVAR_FLOAT, [](float& var, float value) { var = value; });
 
-REGISTER_COMMAND_HANDLER(COMMAND_ADD_VAL_TO_INT_VAR,  [](uint32& var, uint32 value) { var += value; });
-REGISTER_COMMAND_HANDLER(COMMAND_ADD_VAL_TO_FLOAT_VAR,  [](float& var, float value) { var += value; });
-REGISTER_COMMAND_HANDLER(COMMAND_ADD_VAL_TO_INT_LVAR, [](uint32& var, uint32 value) { var += value; });
+REGISTER_COMMAND_HANDLER(COMMAND_ADD_VAL_TO_INT_VAR, [](int32& var, int32 value) { var += value; });
+REGISTER_COMMAND_HANDLER(COMMAND_ADD_VAL_TO_FLOAT_VAR, [](float& var, float value) { var += value; });
+REGISTER_COMMAND_HANDLER(COMMAND_ADD_VAL_TO_INT_LVAR, [](int32& var, int32 value) { var += value; });
 REGISTER_COMMAND_HANDLER(COMMAND_ADD_VAL_TO_FLOAT_LVAR, [](float& var, float value) { var += value; });
 
-REGISTER_COMMAND_HANDLER(COMMAND_SUB_VAL_FROM_INT_VAR,  [](uint32& var, uint32 value) { var -= value; });
-REGISTER_COMMAND_HANDLER(COMMAND_SUB_VAL_FROM_FLOAT_VAR,  [](float& var, float value) { var -= value; });
-REGISTER_COMMAND_HANDLER(COMMAND_SUB_VAL_FROM_INT_LVAR, [](uint32& var, uint32 value) { var -= value; });
+REGISTER_COMMAND_HANDLER(COMMAND_SUB_VAL_FROM_INT_VAR, [](int32& var, int32 value) { var -= value; });
+REGISTER_COMMAND_HANDLER(COMMAND_SUB_VAL_FROM_FLOAT_VAR, [](float& var, float value) { var -= value; });
+REGISTER_COMMAND_HANDLER(COMMAND_SUB_VAL_FROM_INT_LVAR, [](int32& var, int32 value) { var -= value; });
 REGISTER_COMMAND_HANDLER(COMMAND_SUB_VAL_FROM_FLOAT_LVAR, [](float& var, float value) { var -= value; });
 
-REGISTER_COMMAND_HANDLER(COMMAND_MULT_INT_VAR_BY_VAL,  [](uint32& var, uint32 value) { var *= value; });
-REGISTER_COMMAND_HANDLER(COMMAND_MULT_FLOAT_VAR_BY_VAL,  [](float& var, float value) { var *= value; });
-REGISTER_COMMAND_HANDLER(COMMAND_MULT_INT_LVAR_BY_VAL, [](uint32& var, uint32 value) { var *= value; });
+REGISTER_COMMAND_HANDLER(COMMAND_MULT_INT_VAR_BY_VAL, [](int32& var, int32 value) { var *= value; });
+REGISTER_COMMAND_HANDLER(COMMAND_MULT_FLOAT_VAR_BY_VAL, [](float& var, float value) { var *= value; });
+REGISTER_COMMAND_HANDLER(COMMAND_MULT_INT_LVAR_BY_VAL, [](int32& var, int32 value) { var *= value; });
 REGISTER_COMMAND_HANDLER(COMMAND_MULT_FLOAT_LVAR_BY_VAL, [](float& var, float value) { var *= value; });
 
-REGISTER_COMMAND_HANDLER(COMMAND_DIV_INT_VAR_BY_VAL,  [](uint32& var, uint32 value) { var /= value; });
-REGISTER_COMMAND_HANDLER(COMMAND_DIV_FLOAT_VAR_BY_VAL,  [](float& var, float value) { var /= value; });
-REGISTER_COMMAND_HANDLER(COMMAND_DIV_INT_LVAR_BY_VAL, [](uint32& var, uint32 value) { var /= value; });
+REGISTER_COMMAND_HANDLER(COMMAND_DIV_INT_VAR_BY_VAL, [](int32& var, int32 value) { var /= value; });
+REGISTER_COMMAND_HANDLER(COMMAND_DIV_FLOAT_VAR_BY_VAL, [](float& var, float value) { var /= value; });
+REGISTER_COMMAND_HANDLER(COMMAND_DIV_INT_LVAR_BY_VAL, [](int32& var, int32 value) { var /= value; });
 REGISTER_COMMAND_HANDLER(COMMAND_DIV_FLOAT_LVAR_BY_VAL, [](float& var, float value) { var /= value; });
 
 
