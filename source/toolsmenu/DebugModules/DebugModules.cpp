@@ -26,6 +26,22 @@
 bool DebugModules::m_ShowFPS = false;
 bool DebugModules::m_ShowExtraDebugFeatures = false;
 
+void DrawMenuBarInfo() {
+    const auto& io = ImGui::GetIO();
+    
+    ImGui::SameLine(ImGui::GetWindowWidth() - 280.f);
+
+    // TODO: V-Sync (Use IsVSyncActive()) - How to get VSync target FPS?
+    //       Can't use `RsGlobal.frameLimit`, because there's an active vsync limit (coming from somewhere lol)
+    const auto MaxFrameRate  = FrontEndMenuManager.m_bPrefsFrameLimiter ? (float)RsGlobal.frameLimit : 60.f; 
+    const auto FrameRateProg = std::max(invLerp(MaxFrameRate * 0.30f, MaxFrameRate, io.Framerate), 0.f);
+    ImGui::PushStyleColor(ImGuiCol_Text, { std::max(0.f, 1.f - FrameRateProg), std::min(1.f, FrameRateProg), 0.f, 1.f});
+    ImGui::Text("FPS: %.1f [%.2f ms]", io.Framerate, io.DeltaTime);
+    ImGui::PopStyleColor();
+
+    ImGui::Text("[F7 / Ctrl + M]");
+}
+
 void DebugModules::Update(bool cursorVisible) {
     for (auto& module : m_modules) {
         module->Update();
@@ -35,6 +51,7 @@ void DebugModules::Update(bool cursorVisible) {
     for (auto& module : m_modules) {
         module->RenderMenuEntry();
     }
+    DrawMenuBarInfo();
     ImGui::EndMainMenuBar();
 
     for (auto& module : m_modules) {
@@ -79,6 +96,7 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
     // Stuff that is present in multiple menus
     Add<TimeCycleDebugModule>(); // Visualization + Extra
     Add<CullZonesDebugModule>(); // Visualization + Extra
+    Add<COcclusionDebugModule>(); // Visualization + Extra
 }
 
 static bool m_showMenu;
@@ -126,37 +144,9 @@ void DebugModules::DisplayFramePerSecond() {
     ImGui::End();
 }
 
-void DebugModules::DisplayExtraDebugFeatures() {
-    if (!m_ShowExtraDebugFeatures)
-        return;
-
-    ImGui::SetNextWindowCollapsed(true, ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(484, 420), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Extra debug", nullptr);
-    ProcessExtraDebugFeatures();
-    ImGui::End();
-}
-
-void DebugModules::ProcessRenderTool() {
-}
-
-void DebugModules::ProcessExtraDebugFeatures() {
-    if (ImGui::BeginTabBar("Modules")) {
-        if (ImGui::BeginTabItem("OCCL/CULL")) {
-            if (ImGui::CollapsingHeader("Occlusion")) {
-                COcclusionDebugModule::ProcessImGui();
-            }
-            ImGui::EndTabItem();
-        }
-
-        ImGui::EndTabBar();
-    }
-}
-
 void DebugModules::ProcessRender(bool showMenu) {
     if (showMenu) {
         DisplayMainWindow();
     }
     DisplayFramePerSecond();
-    DisplayExtraDebugFeatures();
 }
