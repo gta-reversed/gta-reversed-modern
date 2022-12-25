@@ -2,10 +2,17 @@
 
 #include <DebugModule.h>
 
-class CPickupsDebugModule : public DebugModuleSingleWindow {
+class CPickupsDebugModule : public DebugModule {
 public:
-    CPickupsDebugModule();
-
-    void RenderMainWindow() override final;
+    void RenderWindow() override final;
     void RenderMenuEntry() override final;
+
+private:
+    void DrawTable();
+
+private:
+    bool  m_IsOpen{};
+    bool  m_FilterInactive{true};
+    bool  m_FilterInvisible{};
+    int32 m_SelectedPickupIdx{};
 };
