@@ -20,7 +20,7 @@ public:
     virtual void Render3D() { /*nothing*/ };
 
     //! Module's window should be rendered here
-    virtual void RenderWindow() = 0;
+    virtual void RenderWindow() { /*nothing*/ }
 
     //! Module's entry in the main menu should be rendered here
     virtual void RenderMenuEntry() = 0;
@@ -75,6 +75,11 @@ template<typename T>
 struct ScopedID {
     ScopedID(T id) { ImGui::PushID(id); }
     ~ScopedID() { ImGui::PopID(); }
+};
+
+struct ScopedDisable {
+    ScopedDisable(bool disable) { ImGui::BeginDisabled(disable); }
+    ~ScopedDisable()            { ImGui::EndDisabled(); }
 };
 
 //! Render a nested menu (A series of `BeginMenu` calls). If all `BeginMenu` calls return `true` the provided `OnAllVisibleFn` is called.
