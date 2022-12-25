@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CDebugMenu.h"
+#include "UIRenderer.h"
 #include "TaskComplexFollowPointRoute.h"
 #include "TaskComplexExtinguishFires.h"
 #include "TaskComplexStealCar.h"
@@ -16,7 +16,9 @@
 #include <extensions/ScriptCommands.h>
 #include "DebugModules/DebugModules.h"
 
-CDebugMenu::CDebugMenu() :
+namespace notsa {
+namespace ui {
+UIRenderer::UIRenderer() :
     m_ImCtx{ ImGui::CreateContext() },
     m_ImIO{ &m_ImCtx->IO }
 {
@@ -35,7 +37,7 @@ CDebugMenu::CDebugMenu() :
     DEV_LOG("Dear ImGui initialized!");
 }
 
-CDebugMenu::~CDebugMenu() {
+UIRenderer::~UIRenderer() {
     ImGui_ImplDX9_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext(m_ImCtx);
@@ -43,8 +45,7 @@ CDebugMenu::~CDebugMenu() {
     DEV_LOG("Dear ImGui shutdown!");
 }
 
-
-void CDebugMenu::UpdateInput() {
+void UIRenderer::UpdateInput() {
     if (!Visible()) {
         return;
     }
@@ -111,7 +112,7 @@ void CDebugMenu::UpdateInput() {
     }
 }
 
-void CDebugMenu::PreRenderUpdate() {
+void UIRenderer::PreRenderUpdate() {
     m_ImIO->DeltaTime   = CTimer::GetTimeStepInSeconds();
     m_ImIO->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT); // Update display size, in case of window resize after imgui was already initialized
 
@@ -126,7 +127,7 @@ void CDebugMenu::PreRenderUpdate() {
     }
 }
 
-void CDebugMenu::DrawLoop() {
+void UIRenderer::DrawLoop() {
     PreRenderUpdate();
 
     ImGui_ImplDX9_NewFrame();
@@ -140,20 +141,20 @@ void CDebugMenu::DrawLoop() {
     ImGui_ImplDX9_InvalidateDeviceObjects();
 }
 
-void CDebugMenu::Render2D() {
+void UIRenderer::Render2D() {
     m_DebugModules.Render2D();
 }
 
-void CDebugMenu::Render3D() {
+void UIRenderer::Render3D() {
     m_DebugModules.Render3D();
 }
 
-void CDebugMenu::DebugCode() {
+void UIRenderer::DebugCode() {
     CPad* pad = CPad::GetPad();
 
     const auto player = FindPlayerPed();
 
-    if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
+    if (UIRenderer::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
         return;
 
     if (pad->IsStandardKeyJustPressed('8')) {
@@ -211,3 +212,5 @@ void CDebugMenu::DebugCode() {
         AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_REAR);
     }
 }
+}; // namespace ui
+}; // namespace notsa

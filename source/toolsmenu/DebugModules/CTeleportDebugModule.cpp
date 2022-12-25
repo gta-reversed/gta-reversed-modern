@@ -2,7 +2,7 @@
 
 #include "CTeleportDebugModule.h"
 #include "Utility.h"
-#include "CDebugMenu.h"
+#include "UIRenderer.h"
 #include "DebugModule.h"
 
 #include <imgui.h>

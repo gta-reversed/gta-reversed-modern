@@ -4,10 +4,12 @@
 
 #include "extensions/utility.hpp"
 
-class CDebugMenu : public notsa::Singleton<CDebugMenu> {
+namespace notsa {
+namespace ui {
+class UIRenderer : public notsa::Singleton<UIRenderer> {
 public:
-    CDebugMenu();
-    ~CDebugMenu();
+    UIRenderer();
+    ~UIRenderer();
 
     bool Visible() { return m_ShowMenu; }
 
@@ -31,9 +33,9 @@ private:
     void DebugCode();
 
 private:
-    friend void RenderEffects(); // For `Render3D()`
-    friend void Render2dStuff(); // For `DrawLoop()`
-    friend void CPad::UpdatePads();
+    friend void ::RenderEffects(); // For `Render3D()`
+    friend void ::Render2dStuff(); // For `DrawLoop()`
+    friend void ::CPad::UpdatePads();
 
 private:
     bool          m_Initialised{};
@@ -42,3 +44,5 @@ private:
     ImGuiIO*      m_ImIO{};
     DebugModules  m_DebugModules{ m_ImCtx };
 };
+}; // namespace ui
+}; // namespace notsa

@@ -12,7 +12,7 @@
 #include "Securom.h"
 #include "UserDisplay.h"
 #include "Garages.h"
-#include "CDebugMenu.h"
+#include "UIRenderer.h"
 #include "Gamma.h"
 #include <Birds.h>
 #include <Skidmarks.h>
@@ -113,7 +113,7 @@ void RenderEffects() {
     CRenderer::RenderFirstPersonVehicle();
     CPostEffects::Render();
 
-    CDebugMenu::GetSingleton().Render3D();
+    notsa::ui::UIRenderer::GetSingleton().Render3D();
 }
 
 // 0x53DF40
@@ -260,7 +260,7 @@ void Render2dStuff() {
     CFont::DrawFonts();
 
     // NOTSA: ImGui menu draw loop
-    CDebugMenu::GetSingleton().DrawLoop();
+    notsa::ui::UIRenderer::GetSingleton().DrawLoop();
 }
 
 // 0x53E160

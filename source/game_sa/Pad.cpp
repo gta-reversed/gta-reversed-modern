@@ -8,7 +8,7 @@
 
 #include "Pad.h"
 
-#include "CDebugMenu.h"
+#include "UIRenderer.h"
 #include "ControllerConfigManager.h"
 #include "app.h"
 
@@ -216,7 +216,7 @@ void CPad::UpdatePads() {
     ProcessPad(false);
 
     ControlsManager.ClearSimButtonPressCheckers();
-    if (!CDebugMenu::GetSingleton().Visible()) { // NOTSA: Don't handle updates if the menu is open, so we don't affect gameplay inputting text
+    if (!notsa::ui::UIRenderer::GetSingleton().Visible()) { // NOTSA: Don't handle updates if the menu is open, so we don't affect gameplay inputting text
         ControlsManager.AffectPadFromKeyBoard();
         ControlsManager.AffectPadFromMouse();
         GetPad(0)->Update(0);
@@ -226,7 +226,7 @@ void CPad::UpdatePads() {
     OldKeyState = NewKeyState;
     NewKeyState = TempKeyState;
 
-    CDebugMenu::GetSingleton().UpdateInput();
+    notsa::ui::UIRenderer::GetSingleton().UpdateInput();
 }
 
 // 0x53F3C0

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CDebugMenu.h"
+#include "UIRenderer.h"
 
 #include "WaterCannons.h"
 #include "TheCarGenerators.h"

@@ -13,7 +13,7 @@
 #include "Shadows.h"
 #include "CarFXRenderer.h"
 
-#include "toolsmenu/CDebugMenu.h"
+#include "toolsmenu/UIRenderer.h"
 
 bool& CRenderer::ms_bRenderTunnels = *(bool*)0xB745C0;
 bool& CRenderer::ms_bRenderOutsideTunnels = *(bool*)0xB745C1;
