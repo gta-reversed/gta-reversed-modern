@@ -85,4 +85,18 @@ static constexpr void IterateFunction(auto&& functor) {
     }
 }
 
+//! Simple, thread safe singleton pattern. Instance created on first call to `GetSingleton()`.
+template<typename T>
+class Singleton {
+public:
+    static T& GetSingleton() {
+        static T instance{};
+        return instance;
+    }
+
+    Singleton()                            = default;
+    Singleton(const Singleton&)            = delete;
+    Singleton& operator=(const Singleton&) = delete;
+};
+
 };
