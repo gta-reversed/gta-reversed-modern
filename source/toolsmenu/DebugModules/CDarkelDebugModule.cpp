@@ -18,67 +18,78 @@ constexpr const char* WEAPON_TYPE_STRING[] = {
     "PARACHUTE", "LAST_WEAPON", "ARMOUR", "RAMMEDBYCAR", "RUNOVERBYCAR", "EXPLOSION", "UZI_DRIVEBY", "DROWNING", "FALL", "UNIDENTIFIED", "ANYMELEE", "ANYWEAPON", "FLARE"
 };
 
-void DumpCDarkel() {
-    Text(
-         "pStartMessage                 = '%s'\n"
-         "AmmoInterruptedWeapon         = %u\n"
-         "InterruptedWeaponType         = %s\n"
-         "InterruptedWeaponTypeSelected = %s\n"
-         "TimeOfFrenzyStart             = %u\n"
-         "PreviousTime                  = %d\n"
-         "TimeLimit                     = %d\n"
-         "KillsNeeded                   = %d\n"
-         "ModelToKill                   = { %d, %d, %d, %d }\n"
-         "WeaponType                    = %s\n"
-         "Status                        = %d\n"
-         "bHeadShotRequired             = %d\n"
-         "bStandardSoundAndMessages     = %d\n"
-         "bProperKillFrenzy             = %d",
-         CDarkel::pStartMessage ? CDarkel::pStartMessage : "<nullptr>", CDarkel::AmmoInterruptedWeapon, WEAPON_TYPE_STRING[CDarkel::InterruptedWeaponType],
-         WEAPON_TYPE_STRING[CDarkel::InterruptedWeaponTypeSelected], CDarkel::TimeOfFrenzyStart, CDarkel::PreviousTime, CDarkel::TimeLimit, CDarkel::KillsNeeded,
-         CDarkel::ModelToKill[0], CDarkel::ModelToKill[1], CDarkel::ModelToKill[2], CDarkel::ModelToKill[3], WEAPON_TYPE_STRING[CDarkel::WeaponType], CDarkel::Status,
-         CDarkel::bHeadShotRequired, CDarkel::bStandardSoundAndMessages, CDarkel::bProperKillFrenzy
-    );
-}
+void DarkelDebugModule::RenderWindow() {
+    const notsa::ui::ScopedWindow window{ "Darkel Debug", {860.f, 290.f}, m_IsOpen };
+    if (!m_IsOpen) {
+        return;
+    }
 
-DarkelDebugModule::DarkelDebugModule() :
-    DebugModuleSingleWindow{ "Darkel Debug", {860.f, 290.f} }
-{
-}
-
-void DarkelDebugModule::RenderMainWindow() {
     BeginGroup();
-    DumpCDarkel();
+    Text(
+        "pStartMessage                 = '%s'\n"
+        "AmmoInterruptedWeapon         = %u\n"
+        "InterruptedWeaponType         = %s\n"
+        "InterruptedWeaponTypeSelected = %s\n"
+        "TimeOfFrenzyStart             = %u\n"
+        "PreviousTime                  = %d\n"
+        "TimeLimit                     = %d\n"
+        "KillsNeeded                   = %d\n"
+        "ModelToKill                   = { %d, %d, %d, %d }\n"
+        "WeaponType                    = %s\n"
+        "Status                        = %d\n"
+        "bHeadShotRequired             = %d\n"
+        "bStandardSoundAndMessages     = %d\n"
+        "bProperKillFrenzy             = %d",
+        CDarkel::pStartMessage ? CDarkel::pStartMessage : "<nullptr>", CDarkel::AmmoInterruptedWeapon, WEAPON_TYPE_STRING[CDarkel::InterruptedWeaponType],
+        WEAPON_TYPE_STRING[CDarkel::InterruptedWeaponTypeSelected], CDarkel::TimeOfFrenzyStart, CDarkel::PreviousTime, CDarkel::TimeLimit, CDarkel::KillsNeeded,
+        CDarkel::ModelToKill[0], CDarkel::ModelToKill[1], CDarkel::ModelToKill[2], CDarkel::ModelToKill[3], WEAPON_TYPE_STRING[CDarkel::WeaponType], CDarkel::Status,
+        CDarkel::bHeadShotRequired, CDarkel::bStandardSoundAndMessages, CDarkel::bProperKillFrenzy
+    );
     Separator();
 
-    static int weaponType{30}, timeLimit{120}, killsNeeded{10}, modelsToKill[4]{-1, -1, -1, -1};
-    static bool standardSoundAndMsg{true}, hsRequired{false};
+    SetNextItemWidth(80.f);
+    if (InputInt("ID", &m_WeaponType)) {
+        m_WeaponType = std::clamp(m_WeaponType, 0, (int32)(std::size(WEAPON_TYPE_STRING) - 1));
+    }
+    SameLine();
+    if (BeginCombo("Weapon Type", WEAPON_TYPE_STRING[m_WeaponType])) {
+        for (auto&& [typeId, wepName] : notsa::enumerate(WEAPON_TYPE_STRING)) {
+            const notsa::ui::ScopedID id{ typeId };
+            if (Selectable(wepName, m_WeaponType == typeId)) {
+                m_WeaponType = typeId;
+            }
+            if (m_WeaponType == typeId) {
+                SetItemDefaultFocus();
+            }
+        }
+        EndCombo();
+    }
+    
+    InputInt("Time Limit [Seconds]", &m_TimeLimit, 0);
+    InputInt("Kills Needed", &m_NumKillsNeeded, 0);
 
-    PushItemWidth(30.0f);
-    InputInt("Weapon type", &weaponType, 0);
-    SameLine(); InputInt("Time limit (in seconds)", &timeLimit, 0);
-    SameLine(); InputInt("Kills needed", &killsNeeded, 0);
-    PopItemWidth();
+    SetNextItemWidth(120.0f);
+    InputInt4("Models To Kill (Use -1/-2/-3 for any ped/vehicle/bike)", m_ModelsToKill, 0);
 
-    PushItemWidth(120.0f);
-    InputInt4("Models to kill (-1/-2/-3: for any ped/vehicle/bike)", modelsToKill, 0);
-    PopItemWidth();
-
-    SameLine(); Checkbox("Standard sound and msg", &standardSoundAndMsg);
-    SameLine(); Checkbox("Headshot required", &hsRequired);
+    Checkbox("Standard Sound And Msg", &m_StandardSoundAndMsg);
+    Checkbox("Headshot Required", &m_IsHeadshotRequired);
 
     if (Button("Start Frenzy")) {
+        // Make sure model is loaded (otherwise bad things happen)
+        CWeaponInfo::GetWeaponInfo((eWeaponType)(m_WeaponType))->StreamModelsForWeapon(STREAMING_GAME_REQUIRED);
+
+        // Now start it
         CDarkel::StartFrenzy(
-            (eWeaponType)weaponType,
-            timeLimit * 1000,
-            killsNeeded,
-            modelsToKill[0],
+            (eWeaponType)m_WeaponType,
+            m_TimeLimit * 1000,
+            m_NumKillsNeeded,
+            m_ModelsToKill[0],
             TheText.Get("PAGE_00"),
-            modelsToKill[1],
-            modelsToKill[2],
-            modelsToKill[3],
-            standardSoundAndMsg,
-            hsRequired
+            m_ModelsToKill[1],
+            m_ModelsToKill[2],
+            m_ModelsToKill[3],
+            m_StandardSoundAndMsg,
+            m_IsHeadshotRequired
         );
     }
 
@@ -86,10 +97,7 @@ void DarkelDebugModule::RenderMainWindow() {
 }
 
 void DarkelDebugModule::RenderMenuEntry() {
-    if (ImGui::BeginMenu("Extra")) {
-        if (ImGui::MenuItem("Darkel")) {
-            SetMainWindowOpen(true);
-        }
-        ImGui::EndMenu();
-    }
+    notsa::ui::DoNestedMenuIL({ "Extra" }, [&] {
+        ImGui::MenuItem("Darkel", nullptr, &m_IsOpen);
+    });
 }
