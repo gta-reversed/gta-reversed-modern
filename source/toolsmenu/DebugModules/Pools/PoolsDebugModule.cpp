@@ -6,12 +6,12 @@
 #include "StuntJumpManager.h"
 #include "CustomCarEnvMapPipeline.h"
 
-PoolsDebugModule::PoolsDebugModule() :
-    DebugModuleSingleWindow("Pools Stats", {446.f, 512.f})
-{
-}
+void PoolsDebugModule::RenderWindow() {
+    const notsa::ui::ScopedWindow window{ "Pools Stats", {446.f, 512.f}, m_IsOpen };
+    if (!m_IsOpen) {
+        return;
+    }
 
-void PoolsDebugModule::RenderMainWindow() {
     if (!ImGui::BeginTable("PoolsDebugModule", 5, ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ContextMenuInBody)) {
         return;
     }
@@ -36,7 +36,7 @@ void PoolsDebugModule::RenderMainWindow() {
         const auto used = pool->GetNoOfUsedSpaces();
         const auto percentage = static_cast<float>(used / static_cast<float>(pool->GetSize()));
         ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f * percentage, 1.0f - percentage, 0.0f, 1.0f });
-
+        
         ImGui::TableNextColumn();
         ImGui::Text("%d", used);
 
@@ -87,10 +87,7 @@ void PoolsDebugModule::RenderMainWindow() {
 }
 
 void PoolsDebugModule::RenderMenuEntry() {
-    if (ImGui::BeginMenu("Stats")) {
-        if (ImGui::MenuItem("Pools")) {
-            SetMainWindowOpen(true);
-        }
-        ImGui::EndMenu();
-    }
+    notsa::ui::DoNestedMenuIL({ "Stats" }, [&] {
+        ImGui::MenuItem("Pools", nullptr, &m_IsOpen);
+    });
 }

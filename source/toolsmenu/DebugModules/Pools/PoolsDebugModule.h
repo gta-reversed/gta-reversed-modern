@@ -2,10 +2,11 @@
 
 #include <DebugModule.h>
 
-class PoolsDebugModule : public DebugModuleSingleWindow {
+class PoolsDebugModule : public DebugModule {
 public:
-    PoolsDebugModule();
-
-    void RenderMainWindow() override final;
+    void RenderWindow() override final;
     void RenderMenuEntry() override final;
+
+private:
+    bool m_IsOpen{};
 };
