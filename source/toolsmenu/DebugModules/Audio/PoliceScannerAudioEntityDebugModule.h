@@ -1,7 +1,12 @@
 #pragma once
 
-namespace PoliceScannerAudioEntityDebugModule {
+#include <DebugModule.h>
 
-void ProcessImGui();
+class PoliceScannerAudioEntityDebugModule : public DebugModule {
+public:
+    void RenderWindow() override final;
+    void RenderMenuEntry() override final;
 
-}
+private:
+    bool m_IsOpen{};
+};
