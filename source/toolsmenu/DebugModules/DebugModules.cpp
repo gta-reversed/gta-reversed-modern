@@ -73,6 +73,7 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
     Add<DarkelDebugModule>();
     Add<CPickupsDebugModule>();
     Add<PoliceScannerAudioEntityDebugModule>();
+    Add<AmbienceTrackManagerDebugModule>();
 
     // Stuff that is present in multiple menus
     Add<TimeCycleDebugModule>(); // Visualization + Extra
@@ -152,10 +153,6 @@ void DebugModules::ProcessExtraDebugFeatures() {
         if (ImGui::BeginTabItem("Audio")) {
             if (ImGui::CollapsingHeader("Cutscene Track Manager")) {
                 CutsceneTrackManagerDebugModule::ProcessImGui();
-            }
-
-            if (ImGui::CollapsingHeader("Ambience Track Manager")) {
-                AmbienceTrackManagerDebugModule::ProcessImGui();
             }
             ImGui::EndTabItem();
         }
