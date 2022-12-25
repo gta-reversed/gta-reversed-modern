@@ -435,8 +435,6 @@ void CRenderer::RenderFirstPersonVehicle() {
         if (bRestoreAlphaTest)
             RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(NULL));
     }
-
-    CDebugMenu::Render3D();
 }
 
 // 0x553E40

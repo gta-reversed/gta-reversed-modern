@@ -78,6 +78,7 @@ void DebugModules::Initialise(ImGuiContext* ctx) {
 
     // Stuff that is present in multiple menus
     Add<TimeCycleDebugModule>(); // Visualization + Extra
+    Add<CullZonesDebugModule>(); // Visualization + Extra
 }
 
 static bool m_showMenu;
@@ -144,9 +145,6 @@ void DebugModules::ProcessExtraDebugFeatures() {
         if (ImGui::BeginTabItem("OCCL/CULL")) {
             if (ImGui::CollapsingHeader("Occlusion")) {
                 COcclusionDebugModule::ProcessImGui();
-            }
-            if (ImGui::CollapsingHeader("Cull Zones")) {
-                CullZonesDebugModule::ProcessImGui();
             }
             ImGui::EndTabItem();
         }

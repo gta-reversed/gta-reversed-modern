@@ -112,6 +112,8 @@ void RenderEffects() {
     CPointLights::RenderFogEffect();
     CRenderer::RenderFirstPersonVehicle();
     CPostEffects::Render();
+
+    CDebugMenu::Render3D();
 }
 
 // 0x53DF40

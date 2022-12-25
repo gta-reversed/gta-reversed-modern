@@ -1,12 +1,26 @@
 #pragma once
 
-#ifdef EXTRA_DEBUG_FEATURES
+#include <DebugModule.h>
 
-namespace CullZonesDebugModule {
+class CullZonesDebugModule : public DebugModule {
+public:
+    void RenderWindow() override final;
+    void Render3D() override final;
+    void RenderMenuEntry() override final;
 
-void ProcessImGui();
-void ProcessRender();
+private:
+    bool m_IsOpen{};
+    float m_ZOffset{};
 
-}; // namespace CullZonesDebugModule
+    bool                 m_DrawMirrors{};
+    CCullZoneReflection* m_MirrorCurrent{};
+    uint32               m_MirrorCurrentIdx{};
 
-#endif
+    bool       m_DrawTunnels{};
+    CCullZone* m_TunnelCurrent{};
+    uint32     m_TunnelCurrentIdx{};
+
+    bool       m_DrawCulls{};
+    CCullZone* m_CullCurrent{};
+    uint32     m_CullCurrentIdx{};
+};
