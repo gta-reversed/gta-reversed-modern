@@ -211,8 +211,7 @@ void CPickup::Remove() {
 // Updates the pickup. Returns TRUE if pickup was removed/disabled
 // 0x457410
 bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
-    const auto& mi = m_pObject->m_nModelIndex;
-          auto& pt = m_nPickupType;
+    auto& pt = m_nPickupType;
 
     if (m_pObject) {
         m_pObject->SetPosn(GetPosn());
@@ -262,6 +261,8 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
     }
 
     if (m_pObject) {
+        const auto& mi = m_pObject->m_nModelIndex;
+
         const auto ObjectWaterLevelCheck = [this](float extra = 0.0f) {
             float level;
             if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition(), level, true)) {

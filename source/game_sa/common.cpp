@@ -10,7 +10,7 @@
 #include "Garages.h"
 #include "common.h"
 #include "GxtChar.h"
-#include "CDebugMenu.h"
+#include "UIRenderer.h"
 #include "CarCtrl.h"
 #include "UserDisplay.h"
 #include "PostEffects.h"

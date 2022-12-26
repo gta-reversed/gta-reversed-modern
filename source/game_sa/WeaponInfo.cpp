@@ -106,9 +106,18 @@ uint32 CWeaponInfo::GetWeaponInfoIndex(eWeaponType weaponType, eWeaponSkill skil
     case eWeaponSkill::STD:  return (uint32)weaponType;
     case eWeaponSkill::PRO:  return (uint32)weaponType + 25u + 1 * numWeaponsWithSkill;
     case eWeaponSkill::COP:  return (uint32)weaponType + 25u + 2 * numWeaponsWithSkill;
+    default:                 NOTSA_UNREACHABLE("Invalid weapon skill");
     }
-    NOTSA_UNREACHABLE("GetWeaponInfoIndex: Something went wrong");
-    return WEAPON_LAST_WEAPON;
+}
+
+// NOTSA
+void CWeaponInfo::StreamModelsForWeapon(eStreamingFlags streamingFlags) {
+    for (auto modelId : GetModels()) {
+        if (modelId != MODEL_INVALID) {
+            CStreaming::RequestModel(modelId, streamingFlags | STREAMING_PRIORITY_REQUEST);
+        }
+    }
+    CStreaming::LoadAllRequestedModels(true);
 }
 
 // NOTSA
@@ -131,7 +140,7 @@ auto GetBaseComboByName(const char* name) {
 
 // 0x5BE670
 void CWeaponInfo::LoadWeaponData() {
-    auto f = CFileMgr::OpenFile("DATA\\WEAPON.DAT", "rb"); // I wonder why they open it in binary mode
+    auto f = CFileMgr::OpenFile("DATA\\WEAPON.DAT", "rb");
     for (auto line = CFileLoader::LoadLine(f); line; line = CFileLoader::LoadLine(f)) {
         if (std::string_view{line}.find("ENDWEAPONDATA") != std::string_view::npos) // Not quite the way they did it, but it's fine.
             break;

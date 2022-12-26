@@ -5,7 +5,7 @@
 #include <imgui_internal.h>
 #include <extensions/random.hpp>
 
-#include "PedSpawnerModule.h"
+#include "PedSpawner.h"
 
 #include "CDebugMenuToolInput.h"
 

@@ -55,10 +55,8 @@ void CTaskSimpleCarOpenLockedDoorFromOutside::StartAnim(CPed* ped) {
         switch ((eTargetDoor)m_door) {
         case TARGET_DOOR_DRIVER:
             return ANIM_ID_CAR_DOORLOCKED_LHS;
-        case TARGET_DOOR_REAR_LEFT:
+        default: // TODO: Perhaps add more cases so R/L handside anims are used properly?
             return ANIM_ID_CAR_DOORLOCKED_RHS;
-        default:
-            NOTSA_UNREACHABLE();
         }
     }();
     m_anim = CAnimManager::BlendAnimation(ped->m_pRwClump, (AssocGroupId)m_veh->GetAnimGroup().GetGroup(animationId), animationId, 4.f);
