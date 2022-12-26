@@ -110,21 +110,23 @@ RwTexture* CShadowCamera::GetRwRenderTexture() const {
 }
 
 // 0x705790
-RwRaster* CShadowCamera::DrawOutlineBorder(const RwRGBA& color) {
+RwRaster* CShadowCamera::DrawOutlineBorder(const CRGBA& color) {
     // Helper to construct vertices used here
     const auto MkVert = [
-        rhw   = 1.f / RwCameraGetNearClipPlane(m_pRwCamera),
-        color = CRGBA(color).ToIntARGB() // Same shit, different packaging
+        &color,
+        rhw = 1.f / RwCameraGetNearClipPlane(m_pRwCamera)
     ](float x, float y) {
-        return RwIm2DVertex{
-            .x = x,
-            .y = y,
-            .z = RwIm2DGetNearScreenZ(),
+        RwIm2DVertex vtx;
 
-            .rhw = rhw,
+        RwIm2DVertexSetScreenX(&vtx, x);
+        RwIm2DVertexSetScreenY(&vtx, y);
+        RwIm2DVertexSetScreenZ(&vtx, RwIm2DGetNearScreenZ());
 
-            .emissiveColor = color
-        };
+        RwIm2DVertexSetRecipCameraZ(&vtx, rhw);
+
+        RwIm2DVertexSetIntRGBA(&vtx, color.r, color.g, color.b, color.a);
+
+        return vtx;
     };
 
     // NOTE: Code seemingly assumes the aspect ratio of the image is 1:1
@@ -137,15 +139,15 @@ RwRaster* CShadowCamera::DrawOutlineBorder(const RwRGBA& color) {
     };
 
     if (RwCameraBeginUpdate(m_pRwCamera)) {
-        RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(0));
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(0));
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(0));
+        RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(FALSE));
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
 
         RwImVertexIndex indices[]{0, 1, 2, 3, 0};
-        RwIm2DRenderIndexedPrimitive(rwPRIMTYPEPOLYLINE, vertices, std::size(vertices), indices, std::size(indices));
+        VERIFY(RwIm2DRenderIndexedPrimitive(rwPRIMTYPEPOLYLINE, vertices, std::size(vertices), indices, std::size(indices)));
 
-        RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(1u));
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(1u));
+        RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
 
         RwCameraEndUpdate(m_pRwCamera);
     }
@@ -310,6 +312,7 @@ RwCamera* CShadowCamera::MakeGradientRaster() {
 
     // Draw lines along the X axis while moving along the Y axis from top to bottom.
     // Each line is less and less intense in color
+    // TODO: Maybe just replace this abnomination with 2 triangles with the top vertices being max intensity, and the other (bottom) 2 being min intensity?
     {
         const auto cistep = (MIN_COLOR_INTENSITY - MAX_COLOR_INTENSITY) / (float)height; // Color intensity step each iteration
         float      cicurr = MAX_COLOR_INTENSITY; // Current color intensity
@@ -320,24 +323,27 @@ RwCamera* CShadowCamera::MakeGradientRaster() {
             const auto MkVert = [
                 &,
                 rhw = 1.f / RwCameraGetNearClipPlane(m_pRwCamera),
-                cc  = (uint8)cicurr
+                cc  = (uint8)(cicurr)
             ] (float x) {
-                return RwIm2DVertex{
-                    .x = x,
-                    .y = (float)y,
-                    .z = nscrz,
+                RwIm2DVertex vtx;
 
-                    .rhw = rhw,
+                RwIm2DVertexSetScreenX(&vtx, x);
+                RwIm2DVertexSetScreenY(&vtx, (float)(y));
+                RwIm2DVertexSetScreenZ(&vtx, nscrz);
 
-                    .emissiveColor = RWRGBALONG(cc, cc, cc, cc)
-                };
+                RwIm2DVertexSetRecipCameraZ(&vtx, rhw);
+
+                RwIm2DVertexSetIntRGBA(&vtx, cc, cc, cc, cc);
+
+                return vtx;
             };
 
             RwIm2DVertex vertices[2]{
                 MkVert(0.f),
                 MkVert((float)(width - 1)),
             };
-        
+
+            // TODO/NOTE: Horrible efficiency (should batch these calls)
             RwIm2DRenderLine(vertices, std::size(vertices), 0, 1);
         }
     }

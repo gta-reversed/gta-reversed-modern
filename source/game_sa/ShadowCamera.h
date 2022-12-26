@@ -63,7 +63,7 @@ public:
     * @brief Draw a 1px wide outline on the edges of the camera's rastrer
     * @return The raster the outline was rendered to
     */
-    RwRaster* DrawOutlineBorder(const RwRGBA& color);
+    RwRaster* DrawOutlineBorder(const CRGBA& color);
 
     /*!
     * @addr 0x705B60
