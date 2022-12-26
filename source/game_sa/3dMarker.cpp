@@ -90,8 +90,6 @@ bool C3dMarker::IsZCoordinateUpToDate() {
 
 // 0x7223D0
 void C3dMarker::Render() {
-    static uint8& s_SavedAlpha = *(uint8*)0x8D5E44; // STATICREF
-
     if (!m_pAtomic) {
         return;
     }
@@ -125,8 +123,10 @@ void C3dMarker::Render() {
         break;
     }
 
+    // TODO: What the fuck? I dont' think this does what they intended it to.
+    static uint8& s_SavedAlpha = *(uint8*)0x8D5E44; // STATICREF
     if (m_colour.a == s_SavedAlpha) {
-        m_colour.a += m_colour.a < 128u ? 1 : -1
+        m_colour.a += m_colour.a < 128u ? 1 : -1; // But then again, this doesn't make a lot more sense either
     }
     s_SavedAlpha = m_colour.a;
 
