@@ -1,6 +1,6 @@
 #pragma once
 
-#include <DebugModule.h>
+#include "DebugModule.h"
 
 class CutsceneTrackManagerDebugModule : public DebugModule {
 public:
