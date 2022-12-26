@@ -494,21 +494,18 @@ void RenderCategory(RH::HookCategory& cat) {
     TreePop();
 }
 
-HooksDebugModule::HooksDebugModule() :
-    DebugModuleSingleWindow{ "ReversibleHooks (TM) (R)", {500.f, 700.f} }
-{
-}
+void HooksDebugModule::RenderWindow() {
+    const notsa::ui::ScopedWindow window{ "ReversibleHooks (TM) (R)", {500.f, 700.f}, m_IsOpen };
+    if (!m_IsOpen) {
+        return;
+    }
 
-void HooksDebugModule::RenderMainWindow() {
     HookFilter::Render();
     RenderCategory(RH::GetRootCategory());
 }
 
 void HooksDebugModule::RenderMenuEntry() {
-    if (BeginMenu("Settings")) {
-        if (MenuItem("Hooks")) {
-            SetMainWindowOpen(true);
-        }
-        ImGui::EndMenu();
-    }
+    notsa::ui::DoNestedMenuIL({ "Settings" }, [&] {
+        ImGui::MenuItem("Hooks", nullptr, &m_IsOpen);
+    });
 }

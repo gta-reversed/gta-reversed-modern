@@ -2,10 +2,11 @@
 
 #include <DebugModule.h>
 
-class HooksDebugModule : public DebugModuleSingleWindow {
+class HooksDebugModule : public DebugModule {
 public:
-    HooksDebugModule();
-
-    void RenderMainWindow() override final;
+    void RenderWindow() override final;
     void RenderMenuEntry() override final;
+
+private:
+    bool m_IsOpen{};
 };
