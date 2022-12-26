@@ -26,29 +26,22 @@ constexpr const char* WEATHER_NAMES[] = {
     "EXTRACOLOURS_1",    "EXTRACOLOURS_2"
 };
 
-TimeCycleDebugModule::TimeCycleDebugModule() :
-    DebugModuleSingleWindow{ "TimeCyc", {500.f, 700.f} }
-{
-}
-
 void TimeCycleDebugModule::RenderMenuEntry() {
-    if (ImGui::BeginMenu("Extra")) {
-        if (ImGui::MenuItem("TimeCyc")) {
-            SetMainWindowOpen(true);
-        }
-        ImGui::EndMenu();
-    }
+    notsa::ui::DoNestedMenuIL({ "Extra" }, [&] {
+        ImGui::MenuItem("TimeCyc", nullptr, &m_IsOpen);
+    });
 
-    if (ImGui::BeginMenu("Visualization")) {
-        if (ImGui::BeginMenu("TimeCyc")) {
-            ImGui::MenuItem("Show Boxes", NULL, &m_ShowBoxes);
-            ImGui::EndMenu();
-        }
-        ImGui::EndMenu();
-    }
+    notsa::ui::DoNestedMenuIL({ "Visualization", "TimeCyc" }, [&] {
+        ImGui::Checkbox("Show Boxes", &m_ShowBoxes);
+    });
 }
 
-void TimeCycleDebugModule::RenderMainWindow() {
+void TimeCycleDebugModule::RenderWindow() {
+    const notsa::ui::ScopedWindow wnd{ "TimeCyc", {500.f, 700.f}, m_IsOpen };
+    if (!m_IsOpen) {
+        return;
+    }
+
     SyncFromGame();
 
     ImGui::Checkbox("Stop Time", &CClock::gbFreezeTime);

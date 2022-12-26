@@ -34,7 +34,7 @@ UIRenderer::UIRenderer() :
     ImGui_ImplWin32_Init(PSGLOBAL(window));
     ImGui_ImplDX9_Init(GetD3DDevice());
 
-    DEV_LOG("Dear ImGui initialized!");
+    DEV_LOG("I say hello!");
 }
 
 UIRenderer::~UIRenderer() {
@@ -42,7 +42,7 @@ UIRenderer::~UIRenderer() {
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext(m_ImCtx);
 
-    DEV_LOG("Dear ImGui shutdown!");
+    DEV_LOG("Good bye!");
 }
 
 void UIRenderer::UpdateInput() {
@@ -128,6 +128,11 @@ void UIRenderer::PreRenderUpdate() {
 }
 
 void UIRenderer::DrawLoop() {
+    if (m_ReInitRequested) {
+        ResetSingleton(); // This will destruct the current object so we gotta stop here.
+        return;
+    }
+
     PreRenderUpdate();
 
     ImGui_ImplDX9_NewFrame();

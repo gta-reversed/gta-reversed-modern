@@ -22,6 +22,7 @@
 #include "Text/TextDebugModule.h"
 
 #include "Spawner/Spawner.hpp"
+#include "ImGuiDebugModule.hpp"
 
 DebugModules::DebugModules(ImGuiContext* ctx) :
     m_ImCtx(ctx)
@@ -84,6 +85,7 @@ void DebugModules::CreateModules() {
     Add<TimeCycleDebugModule>(); // Visualization + Extra
     Add<CullZonesDebugModule>(); // Visualization + Extra
     Add<COcclusionDebugModule>(); // Visualization + Extra
+    Add<notsa::debugmodules::ImGui>(); // Stats + Extra
 }
 
 void DebugModules::RenderMenuBarInfo() {
@@ -99,6 +101,6 @@ void DebugModules::RenderMenuBarInfo() {
     const auto MaxFrameRate = FrontEndMenuManager.m_bPrefsFrameLimiter ? (float)RsGlobal.frameLimit : 60.f;
     const auto FrameRateProg = std::max(invLerp(MaxFrameRate * 0.30f, MaxFrameRate, io.Framerate), 0.f);
     ImGui::PushStyleColor(ImGuiCol_Text, { std::max(0.f, 1.f - FrameRateProg), std::min(1.f, FrameRateProg), 0.f, 1.f });
-    ImGui::Text("FPS: %.1f [%.2f ms]", io.Framerate, io.DeltaTime * 1000.f);
+    ImGui::Text("FPS: %.1f [%.2f ms]", io.Framerate, io.Framerate ? 1000.f / io.Framerate : 0.f); // Calculate frametime from framerate (to make the next less wobbly as the io.DeltaTime varies a lot otherwise)
     ImGui::PopStyleColor();
 }

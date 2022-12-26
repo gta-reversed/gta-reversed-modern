@@ -2,18 +2,15 @@
 
 #include "DebugModule.h"
 
-class TimeCycleDebugModule : public DebugModuleSingleWindow {
+class TimeCycleDebugModule : public DebugModule {
 public:
-    TimeCycleDebugModule();
-
-    void RenderMainWindow() override final;
+    void RenderWindow() override final;
     void Render3D() override final;
     void RenderMenuEntry() override final;
 
 private:
     void SyncFromGame();
     void RenderBoxesGUI();
-
 
 private:
     struct Color3 {
@@ -60,4 +57,5 @@ private:
      int32  m_TimeId{};
      int32  m_WeatherId{};
      bool   m_ShowBoxes{};
+     bool   m_IsOpen{};
 };
