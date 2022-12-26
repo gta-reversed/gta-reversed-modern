@@ -156,7 +156,7 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
                     return true;
                 }
             } else {
-                outPedMI = -1;
+                outPedMI = MODEL_INVALID;
             }
             if (CPopulation::m_bOnlyCreateRandomGangMembers) {
                 return false;
@@ -319,7 +319,7 @@ void CPopCycle::Update() {
 
     m_nCurrentTimeIndex = CClock::GetGameClockHours() / 2;
 
-    if (const auto pos = FindPlayerCentreOfWorld(); pos.z < 950.f || !m_pCurrZoneInfo) {
+    if (const auto& pos = FindPlayerCentreOfWorld(); pos.z < 950.f || !m_pCurrZoneInfo) {
         m_pCurrZoneInfo = CTheZones::GetZoneInfo(pos, &m_pCurrZone);
         m_nCurrentZoneType = m_pCurrZoneInfo->zonePopulationType;
     }
