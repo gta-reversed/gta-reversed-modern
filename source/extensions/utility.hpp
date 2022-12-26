@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 namespace notsa {
 
 /*!
@@ -118,5 +120,40 @@ static constexpr void IterateFunction(auto&& functor) {
         IterateFunction<Start + ChunkSize, Stop>(functor);
     }
 }
+
+//! Simple (not thread safe) singleton class. Instance created on first call to `GetSingleton()`.
+template<typename T>
+class Singleton {
+    static inline std::unique_ptr<T> s_instance{};
+public:
+    Singleton() = default;
+    Singleton(const Singleton&) = delete;
+    Singleton& operator=(const Singleton&) = delete;
+
+public:
+    //! Get current singleton instance (Create it if none)
+    static T& GetSingleton() {
+        if (!s_instance) {
+            CreateSingleton();
+        }
+        return *s_instance;
+    }
+
+    //! Destroy current instance and create new
+    static void ResetSingleton() {
+        DestroySingleton();
+        CreateSingleton();
+    }
+
+private:
+    static void CreateSingleton() {
+        assert(!s_instance);
+        s_instance = std::make_unique<T>();
+    }
+
+    static void DestroySingleton() {
+        s_instance.reset();
+    }
+};
 
 };

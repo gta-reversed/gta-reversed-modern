@@ -32,7 +32,7 @@
 #include "Garage.h"
 #include "Garages.h"
 
-#include "CDebugMenu.h"
+#include "UIRenderer.h"
 
 #include "CarGenerator.h"
 #include "TheCarGenerators.h"
