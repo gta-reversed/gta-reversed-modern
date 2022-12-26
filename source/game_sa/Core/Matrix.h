@@ -175,5 +175,7 @@ CMatrix operator+(const CMatrix& a, const CMatrix& b);
 CMatrix& Invert(CMatrix& in, CMatrix& out);
 CMatrix  Invert(const CMatrix& in);
 
+CMatrix  Lerp(CMatrix from, CMatrix to, float t);
+
 extern int32& numMatrices;
 extern CMatrix& gDummyMatrix;
