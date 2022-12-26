@@ -445,7 +445,7 @@ void CPopulation::Update(bool generatePeds) {
         }
     }();
 
-    if (CReplay::Mode == 1) {
+    if (CReplay::Mode == MODE_PLAYBACK) {
         return;
     }
 
