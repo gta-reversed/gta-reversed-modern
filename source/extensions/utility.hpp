@@ -87,7 +87,7 @@ static constexpr void IterateFunction(auto&& functor) {
     }
 }
 
-//! Simple, thread safe singleton pattern. Instance created on first call to `GetSingleton()`.
+//! Simple (not thread safe) singleton class. Instance created on first call to `GetSingleton()`.
 template<typename T>
 class Singleton {
     static inline std::unique_ptr<T> s_instance{};
