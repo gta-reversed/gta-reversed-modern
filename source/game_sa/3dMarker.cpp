@@ -126,10 +126,7 @@ void C3dMarker::Render() {
     }
 
     if (m_colour.a == s_SavedAlpha) {
-        if (m_colour.a < 128u)
-            m_colour.a += 1;
-        else
-            m_colour.a -= 1;
+        m_colour.a += m_colour.a < 128u ? 1 : -1
     }
     s_SavedAlpha = m_colour.a;
 

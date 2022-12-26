@@ -286,20 +286,18 @@ int32 C3dMarkers::User3dMarkerFindFirstFreeSlot() {
 // 0x720FD0
 int32 C3dMarkers::User3dMarkerSet(float x, float y, float z, eHudColours color) {
     const auto markerIndex = User3dMarkerFindFirstFreeSlot();
-    if (markerIndex == -1) {
-        return -1;
+    if (markerIndex != -1) {
+        auto& marker = ms_user3dMarkers[markerIndex];
+
+        marker.m_vecPosition.Set(x, y, z);
+    
+        const auto colour = HudColour.GetRGB(color);
+        marker.m_nRed = colour.r;
+        marker.m_nGreen = colour.g;
+        marker.m_nBlue = colour.b;
+
+        marker.m_bIsUsed = true;
     }
-
-    auto& marker = ms_user3dMarkers[markerIndex];
-
-    marker.m_vecPosition.Set(x, y, z);
-
-    const auto colour = HudColour.GetRGB(color);
-    marker.m_nRed = colour.r;
-    marker.m_nGreen = colour.g;
-    marker.m_nBlue = colour.b;
-
-    marker.m_bIsUsed = true;
 
     return markerIndex;
 }
