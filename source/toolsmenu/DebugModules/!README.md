@@ -1,3 +1,9 @@
+# How to add a new debug module
+- 1. Create a file in this directory (.hpp and .cpp), the name being the name of your module (Ex.: "YourModule.cpp")
+- 2. Write code for the module (See templates below)
+- 3. Go to "DebugModules::CreateModules" and add your module to there
+- 4. Profit
+
 # How to structure code
 
 Header file (.hpp):
