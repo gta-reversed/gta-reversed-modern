@@ -41,7 +41,7 @@ void PoolsDebugModule::RenderWindow() {
         ImGui::Text("%d", used);
 
         ImGui::TableNextColumn();
-        ImGui::Text("%.1f %%", percentage * 100.f);
+        ImGui::Text("%.1f %%", (double)(percentage) * 100.0); // Avoid MSVC warning
 
         ImGui::PopStyleColor();
 
