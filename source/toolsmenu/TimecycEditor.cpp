@@ -313,7 +313,7 @@ void TimeCycleDebugModule::Render3D() {
     }
 
     for (auto& box : CTimeCycle::GetBoxes()) {
-        box.m_Box.Draw(CMatrix::Unity(), { 0xFF, 0, 0, 0xFF });
+        box.m_Box.DrawWireFrame({ 255, 0, 0, 255 }, CMatrix::Unity());
     }
 }
 

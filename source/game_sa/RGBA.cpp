@@ -58,7 +58,7 @@ void CRGBA::Set(const RwRGBA& rwcolor) {
     Set(rwcolor.red, rwcolor.green, rwcolor.blue, rwcolor.alpha);
 }
 
-uint32 CRGBA::ToInt() const {
+uint32 CRGBA::ToInt() const { // RGBA (msb(r) -> lsb(a))
     return a | (b << 8) | (g << 16) | (r << 24);
 }
 

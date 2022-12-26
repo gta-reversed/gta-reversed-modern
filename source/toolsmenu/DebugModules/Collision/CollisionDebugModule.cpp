@@ -15,138 +15,30 @@ constexpr auto LINE_COLOR     = 0x00FFFFFF; // light blue
 constexpr auto TRI_COLOR      = 0x00FF00FF; // green
 constexpr auto SHDW_TRI_COLOR = 0xFFFFFFFF; // white
 
-CollisionDebugModule::CollisionDebugModule() :
-    DebugModuleSingleWindow{ "Collision", {400.f, 400.f} }
-{
-}
-
-void CollisionDebugModule::RenderMainWindow() {
-    if (ImGui::TreeNode("Visualize Entity Collision Models")) {
-        ImGui::Checkbox("Draw Collision", &m_visualizationEnabled);
-        if (m_visualizationEnabled) {
-            ImGui::Checkbox("Boxes",            &m_drawBoxes);
-            ImGui::Checkbox("Lines",            &m_drawLines);
-            ImGui::Checkbox("Spheres",          &m_drawSpheres);
-            ImGui::Checkbox("Triangles",        &m_drawTris);
-            ImGui::Checkbox("Bounding Boxes",   &m_drawBBs);
-            ImGui::Checkbox("Shadow Triangles", &m_drawShdwTris);
-        }
-        ImGui::TreePop();
-    }
-}
-
 void CollisionDebugModule::RenderMenuEntry() {
-    if (ImGui::BeginMenu("Visualization")) {
-        if (ImGui::MenuItem("Collision")) {
-            SetMainWindowOpen(true);
-        }
-        ImGui::EndMenu();
-    }
+    notsa::ui::DoNestedMenuIL({ "Visualization", "Collision" }, [&] {
+        ImGui::Checkbox("Enabled", &m_Enabled);
+
+        notsa::ui::ScopedDisable disabledScope{ !m_Enabled };
+
+        ImGui::Checkbox("Boxes",            &m_DrawBoxes);
+        ImGui::Checkbox("Lines",            &m_DrawLines);
+        ImGui::Checkbox("Spheres",          &m_DrawSpheres);
+        ImGui::Checkbox("Triangles",        &m_DrawTris);
+        ImGui::Checkbox("Bounding Boxes",   &m_DrawBBs);
+        ImGui::Checkbox("Shadow Triangles", &m_DrawShdwTris);
+    });
 }
 
 void CollisionDebugModule::Render3D() {
-    if (m_visualizationEnabled) {
+    if (m_Enabled) {
         RenderVisibleColModels();
     }
 }
 
-void DrawBoundingBox(const CMatrix& matrix, const CBoundingBox& boundBox) {
-    auto workVec = boundBox.m_vecMin;
-    CVector v1   = matrix * workVec;
-
-    workVec.z    = boundBox.m_vecMax.z;
-    CVector v2   = matrix * workVec;
-
-    workVec      = boundBox.m_vecMin;
-    workVec.x    = boundBox.m_vecMax.x;
-    CVector v3   = matrix * workVec;
-
-    workVec      = boundBox.m_vecMin;
-    workVec.y    = boundBox.m_vecMax.y;
-    CVector v4   = matrix * workVec;
-
-    workVec      = boundBox.m_vecMin;
-    workVec.y    = boundBox.m_vecMax.y;
-    workVec.z    = boundBox.m_vecMax.z;
-    CVector v5   = matrix * workVec;
-
-    workVec      = boundBox.m_vecMin;
-    workVec.x    = boundBox.m_vecMax.x;
-    workVec.z    = boundBox.m_vecMax.z;
-    CVector v6   = matrix * workVec;
-
-    workVec      = boundBox.m_vecMin;
-    workVec.x    = boundBox.m_vecMax.x;
-    workVec.y    = boundBox.m_vecMax.y;
-    CVector v7   = matrix * workVec;
-
-    workVec      = boundBox.m_vecMax;
-    CVector v8   = matrix * workVec;
-
-    CLines::RenderLineWithClipping(v1, v2, BB_COLOR, BB_COLOR);
-    CLines::RenderLineWithClipping(v1, v3, BB_COLOR, BB_COLOR);
-    CLines::RenderLineWithClipping(v1, v4, BB_COLOR, BB_COLOR);
-    CLines::RenderLineWithClipping(v5, v2, BB_COLOR, BB_COLOR);
-    CLines::RenderLineWithClipping(v5, v8, BB_COLOR, BB_COLOR);
-    CLines::RenderLineWithClipping(v5, v4, BB_COLOR, BB_COLOR);
-    CLines::RenderLineWithClipping(v6, v2, BB_COLOR, BB_COLOR);
-    CLines::RenderLineWithClipping(v6, v8, BB_COLOR, BB_COLOR);
-    CLines::RenderLineWithClipping(v6, v3, BB_COLOR, BB_COLOR);
-    CLines::RenderLineWithClipping(v7, v8, BB_COLOR, BB_COLOR);
-    CLines::RenderLineWithClipping(v7, v3, BB_COLOR, BB_COLOR);
-    CLines::RenderLineWithClipping(v7, v4, BB_COLOR, BB_COLOR);
-}
-
-void DrawSphere(const CMatrix& matrix, const CColSphere& sphere) {
-    const CVector center = matrix * sphere.m_vecCenter;
-    const float radius = sphere.m_fRadius;
-
-    CVector v13 = center;
-    v13.z       += radius;
-
-    CVector v21 = center;
-    v21.z       -= radius;
-
-    CVector v32 = center;
-    v32.x       += radius;
-
-    CVector v41 = center;
-    v41.x       -= radius;
-
-    CVector v52 = center;
-    v52.y       += radius;
-
-    CVector v61 = center;
-    v61.y       -= radius;
-
-    CLines::RenderLineWithClipping(v13, v32, SPHERE_COLOR, SPHERE_COLOR);
-    CLines::RenderLineWithClipping(v13, v41, SPHERE_COLOR, SPHERE_COLOR);
-    CLines::RenderLineWithClipping(v21, v32, SPHERE_COLOR, SPHERE_COLOR);
-    CLines::RenderLineWithClipping(v21, v41, SPHERE_COLOR, SPHERE_COLOR);
-    CLines::RenderLineWithClipping(v13, v52, SPHERE_COLOR, SPHERE_COLOR);
-    CLines::RenderLineWithClipping(v13, v61, SPHERE_COLOR, SPHERE_COLOR);
-    CLines::RenderLineWithClipping(v21, v52, SPHERE_COLOR, SPHERE_COLOR);
-    CLines::RenderLineWithClipping(v21, v61, SPHERE_COLOR, SPHERE_COLOR);
-}
-
-void DrawTriangles(const CMatrix& matrix, const CColTriangle* triangles, const CompressedVector* vertices, const uint32& count, const uint32& startColor, const uint32& endColor) {
-    for (const auto& triangle : std::span{ triangles, count }) {
-        const CVector vA = matrix * UncompressVector(vertices[triangle.m_nVertA]);
-        const CVector vB = matrix * UncompressVector(vertices[triangle.m_nVertB]);
-        const CVector vC = matrix * UncompressVector(vertices[triangle.m_nVertC]);
-
-        CLines::RenderLineWithClipping(vA, vB, startColor, endColor);
-        CLines::RenderLineWithClipping(vA, vC, startColor, endColor);
-        CLines::RenderLineWithClipping(vB, vC, startColor, endColor);
-    }
-}
-
-void DrawLine(const CMatrix& matrix, const CColLine& line) {
-    CLines::RenderLineWithClipping(matrix * line.m_vecStart, matrix * line.m_vecEnd, LINE_COLOR, LINE_COLOR);
-}
-
-void CollisionDebugModule::DrawColModel(const CMatrix& matrix, const CColModel& cm) {
-    if (!cm.m_pColData) {
+void CollisionDebugModule::DrawColModel(const CMatrix& transform, const CColModel& cm) {
+    const auto cd = cm.GetData();
+    if (!cd) {
         return;
     }
 
@@ -156,35 +48,39 @@ void CollisionDebugModule::DrawColModel(const CMatrix& matrix, const CColModel& 
     RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
 
-    if (m_drawBoxes) {
+    if (m_DrawBoxes) {
         for (auto& box : cm.m_pColData->GetBoxes()) {
-            box.Draw(matrix, {BB_COLOR});
+            box.DrawWireFrame({BB_COLOR}, transform);
         }
     }
 
-    if (m_drawLines) {
+    if (m_DrawLines) {
         for (auto& lines : cm.m_pColData->GetLines()) {
-            DrawLine(matrix, lines);
+            lines.DrawWireFrame({ LINE_COLOR }, transform);
         }
     }
 
-    if (m_drawSpheres) {
+    if (m_DrawSpheres) {
         for (auto& spheres : cm.m_pColData->GetSpheres()) {
-            DrawSphere(matrix, spheres);
+            spheres.DrawWireFrame({ SPHERE_COLOR }, transform );
         }
     }
 
-    if (m_drawTris) {
-        DrawTriangles(matrix, cm.m_pColData->m_pTriangles, cm.m_pColData->m_pVertices, cm.m_pColData->m_nNumTriangles, TRI_COLOR, TRI_COLOR);
+    if (m_DrawTris) {
+        for (const auto& triangle : cd->GetTris()) {
+            triangle.DrawWireFrame({ TRI_COLOR }, cd->GetTriVerts(), transform);
+        }
     }
 
-    if (m_drawBBs) {
-        cm.m_boundBox.Draw(matrix, {BB_COLOR});
+    if (m_DrawBBs) {
+        cm.m_boundBox.DrawWireFrame({ BB_COLOR }, transform);
     }
 
     if (cm.m_pColData->bHasShadowInfo) {
-        if (m_drawShdwTris) {
-            DrawTriangles(matrix, cm.m_pColData->m_pShadowTriangles, cm.m_pColData->m_pShadowVertices, cm.m_pColData->m_nNumShadowTriangles, SHDW_TRI_COLOR, SHDW_TRI_COLOR);
+        if (m_DrawShdwTris) {
+            for (const auto& triangle : cd->GetTris()) {
+                triangle.DrawWireFrame({ SHDW_TRI_COLOR }, cd->m_pShadowVertices, transform);
+            }
         }
     }
 
