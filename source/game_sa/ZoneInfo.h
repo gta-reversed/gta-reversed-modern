@@ -8,7 +8,7 @@
 
 #include <Base.h>
 #include <RenderWare.h>
-#include <utility.hpp>
+#include <extensions/utility.hpp>
 
 class CZoneInfo {
 public:
@@ -30,9 +30,8 @@ public:
     auto GetSumOfGangDensity() const {
         return notsa::accumulate(
             GangDensity,  
-            (size_t)0u // Making sure no overflow occurs (because uint8 is used instead of casting to a wider type)
+            (size_t)(0u) // Making sure no overflow occurs (because uint8 is used instead of casting to a wider type)
         );
     }
 };
-
 VALIDATE_SIZE(CZoneInfo, 0x11);
