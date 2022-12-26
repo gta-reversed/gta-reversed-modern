@@ -34,7 +34,7 @@ void PoolsDebugModule::RenderWindow() {
         ImGui::Text("%d", pool->GetSize());
 
         const auto used = pool->GetNoOfUsedSpaces();
-        const auto percentage = static_cast<float>(used / static_cast<float>(pool->GetSize()));
+        const auto percentage = (float)(used) / (float)(pool->GetSize());
         ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f * percentage, 1.0f - percentage, 0.0f, 1.0f });
         
         ImGui::TableNextColumn();
