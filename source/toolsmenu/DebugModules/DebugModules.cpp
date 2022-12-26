@@ -94,13 +94,13 @@ void DebugModules::RenderMenuBarInfo() {
     ImGui::SameLine(ImGui::GetWindowWidth() - 280.f);
 
     // Draw this first, cause FPS fluctuates (and would move this text)
-    ImGui::Text("[F7 / Ctrl + M]");
+    ImGui::Text("F7 / Ctrl + M |");
 
     // TODO: V-Sync (Use IsVSyncActive()) - How to get VSync target FPS?
     //       Can't use `RsGlobal.frameLimit`, because there's an active vsync limit (coming from somewhere lol)
     const auto MaxFrameRate = FrontEndMenuManager.m_bPrefsFrameLimiter ? (float)RsGlobal.frameLimit : 60.f;
     const auto FrameRateProg = std::max(invLerp(MaxFrameRate * 0.30f, MaxFrameRate, io.Framerate), 0.f);
     ImGui::PushStyleColor(ImGuiCol_Text, { std::max(0.f, 1.f - FrameRateProg), std::min(1.f, FrameRateProg), 0.f, 1.f });
-    ImGui::Text("FPS: %.1f [%.2f ms]", io.Framerate, io.Framerate ? 1000.f / io.Framerate : 0.f); // Calculate frametime from framerate (to make the next less wobbly as the io.DeltaTime varies a lot otherwise)
+    ImGui::Text("%.1f FPS [%.2f ms]", io.Framerate, io.Framerate ? 1000.f / io.Framerate : 0.f); // Calculate frametime from framerate (to make the next less wobbly as the io.DeltaTime varies a lot otherwise)
     ImGui::PopStyleColor();
 }
