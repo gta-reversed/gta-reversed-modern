@@ -28,7 +28,7 @@ UIRenderer::UIRenderer() :
     m_ImIO->WantCaptureKeyboard = true;
     m_ImIO->WantSetMousePos     = true;
     m_ImIO->MouseDrawCursor     = false;
-    m_ImIO->ConfigFlags         = ImGuiConfigFlags_NavEnableSetMousePos;
+    m_ImIO->ConfigFlags         = ImGuiConfigFlags_NavEnableSetMousePos | ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
     m_ImIO->DisplaySize         = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     ImGui_ImplWin32_Init(PSGLOBAL(window));
