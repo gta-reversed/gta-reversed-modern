@@ -156,7 +156,7 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
                     return true;
                 }
             } else {
-                outPedMI = -1;
+                outPedMI = MODEL_INVALID;
             }
             if (CPopulation::m_bOnlyCreateRandomGangMembers) {
                 return false;
