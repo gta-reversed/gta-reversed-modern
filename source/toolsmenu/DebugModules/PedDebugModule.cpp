@@ -1,26 +1,30 @@
 #include "StdInc.h"
+
+#include <list>
+#include <vector>
+#include <optional>
+#include <format>
+
 #include "extensions/enumerate.hpp"
 #include "PedDebugModule.h"
 #include "Pools.h"
 #include "TaskManager.h"
 #include "Hud.h"
-#include <vector>
-#include <list>
-#include <optional>
-#include <format>
 
 // Define extra conversion function from our vector type to imgui's vec2d
-#define IM_VEC2_CLASS_EXTRA \
-    operator CVector2D() const { return {x, y}; } \
-    ImVec2(const CVector2D& v) : x{v.x}, y{v.y} {} \
-
 #include <imgui.h>
 
 using namespace ImGui;
 
-namespace PedDebugModule {
+struct PedInfo {
+    CPed*   ped{};
+    CVector posWorld{};
+    CVector posScreen{};
+};
 
-void General::ProcessPed(CPed& ped) {
+//! General tab
+namespace GeneralTab {
+void ProcessPed(CPed& ped) {
     if (BeginTabItem("General")) {
         // Don't allow CJ to be removed kekw
         if (FindPlayerPed() != &ped) {
@@ -43,9 +47,13 @@ void General::ProcessPed(CPed& ped) {
         EndTabItem();
     }
 }
+};
 
+//! Tasks tab
+namespace TasksTab {
 
-void Tasks::ProcessTask(CTask* task, std::optional<size_t> idx) {
+//! Process a single task
+void ProcessTask(CTask* task, std::optional<size_t> idx) {
     const auto taskType = task->GetTaskType();
 
     const auto DoTreeNode = [&] {
@@ -64,10 +72,8 @@ void Tasks::ProcessTask(CTask* task, std::optional<size_t> idx) {
     PopID();
 }
 
-/*!
-* @brief Process category, eg.: secondary or primary
-*/
-void Tasks::ProcessTaskCategory(const char* label, const auto& tasks) {
+//! Process category, eg.: secondary or primary
+void ProcessTaskCategory(const char* label, const auto& tasks) {
     if (TreeNodeEx(label, ImGuiTreeNodeFlags_DefaultOpen)) {
         for (const auto& [idx, task] : notsa::enumerate(tasks)) {
             if (task) {
@@ -78,10 +84,8 @@ void Tasks::ProcessTaskCategory(const char* label, const auto& tasks) {
     }
 }
 
-/*!
-* @brief Process a single ped. This call is done within an imgui tab 
-*/
-void Tasks::ProcessPed(CPed& ped) {
+//! Process a single ped. This call is done within an imgui tab 
+void ProcessPed(CPed& ped) {
     if (BeginTabItem("Tasks")) {
         auto& taskMgr = ped.GetTaskManager();
         ProcessTaskCategory("Primary", taskMgr.GetPrimaryTasks());
@@ -89,65 +93,9 @@ void Tasks::ProcessPed(CPed& ped) {
         EndTabItem();
     }
 }
+};
 
-void PerPedDebug::ProcessImGui() {
-    if (TreeNode("Per-ped debug")) {
-        Checkbox("Enabled", &m_visible);
-        SliderFloat("Draw distance", &m_drawDist, 4.f, 300.f); // Realistically GTA won't generate peds even at 200 units
-        if (TreeNode("Auto-collapse")) {
-            Checkbox("Enabled", &m_autoCollapse);
-            SliderFloat("Distance", &m_collapseToggleDist, 4.f, 300.f);
-            TreePop();
-        }
-        TreePop();
-    }
-}
-
-// https://stackoverflow.com/a/60971856
-template<rng::range R>
-constexpr auto to_vector(R&& r) {
-    using elem_t = std::decay_t<rng::range_value_t<R>>;
-    return std::vector<elem_t>{r.begin(), r.end()};
-}
-
-void PerPedDebug::ProcessRender() {
-    if (m_visible) {
-        auto peds = to_vector(
-              GetPedPool()->GetAllValid()
-            | rng::views::transform([this](CPed& ped) -> std::optional<PedInfo> {
-                if (!ped.GetIsOnScreen()) {
-                    return std::nullopt;
-                }
-
-                PedInfo pi{
-                    .ped = &ped,
-                    .posWorld = ped.GetPosition()
-                };
-
-                if (!CalcScreenCoors(ped.GetBonePosition(BONE_HEAD) + ped.GetRightVector() * 0.5f, &pi.posScreen)) {
-                    DEV_LOG("Failed to calculate on-screen coords of ped");
-                    return std::nullopt;
-                }
-               
-                if (pi.posScreen.z >= m_drawDist) { // posScreen.z == depth == distance from camera
-                    return std::nullopt;
-                }
-
-                return pi;
-            })
-            | rng::views::filter([](auto&& optPI) { return optPI.has_value(); })
-            | rng::views::transform([](auto&& optPI) { return *optPI; })
-        );
-        // Sort by depth (furthest away first, this way when windows are rendered the closest ped's will be drawn last => on top of everythign else)
-        rng::sort(peds, std::greater<>{}, [](const PedInfo& pi) -> float { return pi.posScreen.z; });
-
-        for (PedInfo& pi : peds) {
-            ProcessPed(pi);
-        }
-    }
-}
-
-void PerPedDebug::ProcessPed(PedInfo& pi) {
+void PedDebugModule::ProcessPed(PedInfo& pi) {
     if (!pi.ped->GetIsOnScreen()) {
         return;
     }
@@ -177,23 +125,71 @@ void PerPedDebug::ProcessPed(PedInfo& pi) {
     }
 
     if (Begin(title, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing)) {
-        if (BeginTabBar("##tabbar")) {
-            m_tasksDebug.ProcessPed(*pi.ped);
-            m_generalDebug.ProcessPed(*pi.ped);
-
+        if (BeginTabBar("##PedBar")) {
+            TasksTab::ProcessPed(*pi.ped);
+            GeneralTab::ProcessPed(*pi.ped);
             EndTabBar();
         }
     }
-
     End();
 }
 
-// Called from inside a tab item
-void Module::ProcessImGui() {
-    m_perPedDebug.ProcessImGui();
+// Gotta use this function because `Update` is outside a frame context
+void PedDebugModule::RenderWindow() {
+    if (!m_visible) {
+        return;
+    }
+
+    // https://stackoverflow.com/a/60971856
+    const auto to_vector = []<rng::range R>(R&& r) {
+        using elem_t = std::decay_t<rng::range_value_t<R>>;
+        return std::vector<elem_t>{r.begin(), r.end()};
+    };
+
+    auto peds = to_vector(
+            GetPedPool()->GetAllValid()
+        | rng::views::transform([this](CPed& ped) -> std::optional<PedInfo> {
+            if (!ped.GetIsOnScreen()) {
+                return std::nullopt;
+            }
+
+            PedInfo pi{
+                .ped = &ped,
+                .posWorld = ped.GetPosition()
+            };
+
+            if (!CalcScreenCoors(ped.GetBonePosition(BONE_HEAD) + ped.GetRightVector() * 0.5f, &pi.posScreen)) {
+                DEV_LOG("Failed to calculate on-screen coords of ped");
+                return std::nullopt;
+            }
+               
+            if (pi.posScreen.z >= m_drawDist) { // posScreen.z == depth == distance from camera
+                return std::nullopt;
+            }
+
+            return pi;
+        })
+        | rng::views::filter([](auto&& optPI) { return optPI.has_value(); })
+        | rng::views::transform([](auto&& optPI) { return *optPI; })
+    );
+    // Sort by depth (furthest away first, this way when windows are rendered the closest ped's will be drawn last => on top of everythign else)
+    rng::sort(peds, std::greater<>{}, [](const PedInfo& pi) -> float { return pi.posScreen.z; });
+
+    for (PedInfo& pi : peds) {
+        ProcessPed(pi);
+    }
 }
 
-void Module::ProcessRender() {
-    m_perPedDebug.ProcessRender();
+void PedDebugModule::RenderMenuEntry() {
+    notsa::ui::DoNestedMenuIL({ "Visualization", "Peds" }, [&] {
+        Checkbox("Enable", &m_visible);
+
+        const notsa::ui::ScopedDisable disable1{ !m_visible };
+        SliderFloat("Draw distance", &m_drawDist, 4.f, 300.f); // Realistically GTA won't generate peds even at 200 units
+
+        Checkbox("Auto-Collapse", &m_autoCollapse);
+        SameLine();
+        const notsa::ui::ScopedDisable disable2{ !m_autoCollapse };
+        SliderFloat("Distance", &m_collapseToggleDist, 4.f, 300.f);
+    });
 }
-};
