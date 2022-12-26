@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "Spawner.hpp"
+#include "SpawnerDebugModule.hpp"
 #include "PedSpawner.h"
 #include "VehicleSpawner.h"
 

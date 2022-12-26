@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "TimeCyc.h"
+#include "TimeCycleDebugModule.h"
 
 #include "CTeleportDebugModule.h"
 #include "Lines.h"

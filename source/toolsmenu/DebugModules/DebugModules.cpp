@@ -17,10 +17,10 @@
 #include "./CTeleportDebugModule.h"
 #include "./FXDebugModule.h"
 #include "./PoolsDebugModule.h"
-#include "./TimeCyc.h"
+#include "./TimeCycleDebugModule.h"
 #include "./CullZonesDebugModule.h"
 #include "./TextDebugModule.h"
-#include "./Spawner/Spawner.hpp"
+#include "./Spawner/SpawnerDebugModule.hpp"
 #include "./ImGuiDebugModule.hpp"
 
 DebugModules::DebugModules(ImGuiContext* ctx) :
