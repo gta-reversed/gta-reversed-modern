@@ -1,11 +1,10 @@
 #include "StdInc.h"
 
-#include "TimecycEditor.h"
+#include "TimeCyc.h"
 
-#include <imgui.h>
+#include "CTeleportDebugModule.h"
 #include "Lines.h"
 #include "PedPlacement.h"
-#include "DebugModules/CTeleportDebugModule.h"
 
 uint8 ColorU8(float color) {
     return (uint8)(color * 255.0f);

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "DebugModule.h"
-#include "CDebugMenuToolInput.h"
+#include "../DebugModule.h"
+#include "toolsmenu/CDebugMenuToolInput.h"
 
 class MissionDebugModule : public DebugModule {
 public:
