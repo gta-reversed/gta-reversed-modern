@@ -8,24 +8,17 @@
 
 using namespace ImGui;
 
-SpawnerDebugModule::SpawnerDebugModule() :
-    DebugModuleSingleWindow{"Spawner", {485.f, 400.f}}
-{
+SpawnerDebugModule::SpawnerDebugModule()  {
     VehicleDebugModule::Initialise();
     PedSpawnerModule::Initialise();
 }
-
-void SpawnerDebugModule::RenderMenuEntry() {
-    if (BeginMenu("Tools")) {
-        if (MenuItem("Spawner")) {
-            SetMainWindowOpen(true);
-        }
-        ImGui::EndMenu();
+void SpawnerDebugModule::RenderWindow() {
+    const notsa::ui::ScopedWindow window{ "Spawner", { 485.f, 400.f }, m_IsOpen };
+    if (!m_IsOpen) {
+        return;
     }
-}
 
-void SpawnerDebugModule::RenderMainWindow() {
-    if (ImGui::BeginTabBar("spawner")) {
+    if (ImGui::BeginTabBar("Spawner")) {
         if (ImGui::BeginTabItem("Ped")) {
             PedSpawnerModule::ProcessImGui();
             ImGui::EndTabItem();
@@ -35,6 +28,12 @@ void SpawnerDebugModule::RenderMainWindow() {
             VehicleDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
+        ImGui::EndTabBar();
     }
-    ImGui::EndTabBar();
+}
+
+void SpawnerDebugModule::RenderMenuEntry() {
+    notsa::ui::DoNestedMenuIL({ "Tools" }, [&] {
+        ImGui::MenuItem("Spawner", nullptr, &m_IsOpen);
+    });
 }

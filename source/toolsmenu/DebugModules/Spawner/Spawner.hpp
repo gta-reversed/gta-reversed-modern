@@ -2,10 +2,13 @@
 
 #include <DebugModule.h>
 
-class SpawnerDebugModule : public DebugModuleSingleWindow {
+class SpawnerDebugModule : public DebugModule{
 public:
     SpawnerDebugModule();
 
-    void RenderMainWindow() override final;
+    void RenderWindow() override final;
     void RenderMenuEntry() override final;
+
+private:
+    bool m_IsOpen{};
 };
