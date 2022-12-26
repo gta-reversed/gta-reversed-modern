@@ -104,7 +104,7 @@ void RenderEffects() {
         CHeli::Post_SearchLightCone();
     }
     CWeaponEffects::Render();
-    if (CReplay::Mode != 1 && !CPad::GetPad(0)->DisablePlayerControls) {
+    if (CReplay::Mode != MODE_PLAYBACK && !CPad::GetPad(0)->DisablePlayerControls) {
         FindPlayerPed()->DrawTriangleForMouseRecruitPed();
     }
     CSpecialFX::Render();
