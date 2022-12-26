@@ -157,39 +157,42 @@ RwRaster* CShadowCamera::DrawOutlineBorder(const RwRGBA& color) {
 RwCamera* CShadowCamera::Create(int32 rasterSizePower) {
     const auto rasterSizeInPx = 1 << rasterSizePower; // Size of raster in pixels. Same as `pow(2, rasterSize)`
 
-    if (m_pRwCamera = RwCameraCreate()) {
-        if (const auto frame = RwFrameCreate()) {
-            rwObjectHasFrameSetFrame(m_pRwCamera, frame);
-            if (RwCameraGetFrame(m_pRwCamera)) {
-                if (const auto raster = RwRasterCreate(rasterSizeInPx, rasterSizeInPx, 0, rwRASTERTYPECAMERATEXTURE)) {
-                    RwCameraSetRaster(m_pRwCamera, raster);
-                    if (m_pRwRenderTexture = RwTextureCreate(raster)) {
-                        RwTextureSetAddressing(m_pRwRenderTexture, rwFILTERMIPNEAREST | rwFILTERMIPNEAREST);
-                        RwTextureSetFilterMode(m_pRwRenderTexture, rwFILTERLINEAR);
-
-                        RwCameraSetProjection(m_pRwCamera, rwPARALLEL);
-
-                        // Success
-                        return m_pRwCamera;
-                    } else {
-                        DEV_LOG("`RwTextureCreate()` failed");
-                    }
-                } else {
-                    DEV_LOG("`RwRasterCreate()` failed");
-                }
-            } else {
-                DEV_LOG("`rwObjectHasFrameSetFrame()` failed");
-            }
-        } else {
-            DEV_LOG("`RwFrameCreate()` failed");
-        }
-    } else {
-        DEV_LOG("`RwCameraCreate()` failed");
+    m_pRwCamera = RwCameraCreate();
+    if (!m_pRwCamera) {
+    fail:
+        Destroy();
+        return nullptr;
     }
 
-    // Fail
-    Destroy();
-    return nullptr;
+    const auto frame = RwFrameCreate();
+    if (!frame) {
+        goto fail;
+    }
+
+    rwObjectHasFrameSetFrame(m_pRwCamera, frame);
+
+    if (!RwCameraGetFrame(m_pRwCamera)) {
+        goto fail;
+    }
+
+    const auto raster = RwRasterCreate(rasterSizeInPx, rasterSizeInPx, 0, rwRASTERTYPECAMERATEXTURE);
+    if (!raster) {
+        goto fail;
+    }
+
+    RwCameraSetRaster(m_pRwCamera, raster);
+
+    m_pRwRenderTexture = RwTextureCreate(raster);
+    if (!m_pRwRenderTexture) {
+        goto fail;
+    }
+
+    RwTextureSetAddressing(m_pRwRenderTexture, rwFILTERMIPNEAREST | rwFILTERMIPNEAREST);
+    RwTextureSetFilterMode(m_pRwRenderTexture, rwFILTERLINEAR);
+
+    RwCameraSetProjection(m_pRwCamera, rwPARALLEL);
+
+    return m_pRwCamera;
 }
 
 /*!
