@@ -1,5 +1,5 @@
 # How to add a new debug module
-- 1. Create a file in this directory (.hpp and .cpp), the name being the name of your module (Ex.: "YourModule.cpp")
+- 1. Create a file in this directory (.hpp and .cpp), the name being the name of your module (Ex.: `YourModuleNameDebugModule.cpp`, gotta have the `DebugModule` suffix for now)
 - 2. Write code for the module (See templates below)
 - 3. Go to "DebugModules::CreateModules" and add your module to there
 - 4. Profit
@@ -66,7 +66,7 @@ void Rendering::Render3D() {
 
 ## Template (To copy for new modules)
 
-Header file (YourModuleName.hpp):
+Header file (`YourModuleNameDebugModule.hpp`):
 ```cpp
 #pragma once
 
@@ -86,7 +86,7 @@ private:
 }; // namespace notsa
 ```
 
-Source file (YourModuleName.cpp):
+Source file (`YourModuleNameDebugModule.cpp`):
 ```cpp
 #include <StdInc.h>
 #include "YourModuleName.hpp"
