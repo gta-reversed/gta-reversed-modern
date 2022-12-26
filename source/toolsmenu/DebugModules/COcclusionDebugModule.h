@@ -12,4 +12,3 @@ private:
     bool m_IsOpen{};
     bool m_DrawActiveOcclusions;
 };
-

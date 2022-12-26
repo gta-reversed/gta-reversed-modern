@@ -52,6 +52,7 @@ private:
         {
         }
 
+        //! Size of serialized text data [in bytes]
         size_t GetTextSerializedSize() {
             return name.size() + sizeof(pos) * 3 * 8 + sizeof(areaCode) * 4 + sizeof(findGround) * 4;
         }
