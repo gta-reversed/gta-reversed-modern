@@ -1,7 +1,6 @@
 #pragma once
 
-#include "DebugModules.h"
-
+#include "DebugModules/DebugModules.h"
 #include "extensions/utility.hpp"
 
 namespace notsa {
