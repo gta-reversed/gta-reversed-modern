@@ -2,11 +2,12 @@
 
 #include <DebugModule.h>
 
-class FXDebugModule : public DebugModuleSingleWindow {
+class FXDebugModule : public DebugModule {
 public:
-    FXDebugModule();
-
-    void RenderMainWindow() override final;
+    void RenderWindow() override final;
     void RenderMenuEntry() override final;
+
+private:
+    bool m_IsOpen{};
 };
 

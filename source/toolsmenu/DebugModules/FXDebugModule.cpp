@@ -6,20 +6,18 @@
 
 #include <imgui.h>
 
-FXDebugModule::FXDebugModule() :
-    DebugModuleSingleWindow("PostFX Settings", {500.f, 400.f})
-{
-}
+void FXDebugModule::RenderWindow() {
+    const notsa::ui::ScopedWindow window{ "PostFX Settings", {500.f, 400.f}, m_IsOpen };
+    if (!m_IsOpen) {
+        return;
+    }
 
-void FXDebugModule::RenderMainWindow() {
     ImGui::Checkbox("In Cutscene",            &CPostEffects::m_bInCutscene          );
     ImGui::Checkbox("Skip Post Process",      &CPostEffects::m_bDisableAllPostEffect);
     ImGui::Checkbox("Save Photo From Script", &CPostEffects::m_bSavePhotoFromScript );
     ImGui::Checkbox("Radiosity",              &CPostEffects::m_bRadiosity           );
     ImGui::Checkbox("Night Vision",           &CPostEffects::m_bNightVision         );
-    ImGui::Checkbox("Infrared Vision",        &CPostEffects::m_bInfraredVision      );
     ImGui::Checkbox("Grain",                  &CPostEffects::m_bGrainEnable         );
-    ImGui::Checkbox("Heat Haze FX",           &CPostEffects::m_bHeatHazeFX          );
     ImGui::Checkbox("Darkness Filter",        &CPostEffects::m_bDarknessFilter      );
     ImGui::Checkbox("CCTV",                   &CPostEffects::m_bCCTV                );
     ImGui::Checkbox("SpeedFX Test Mode",      &CPostEffects::m_bSpeedFXTestMode     );
@@ -29,18 +27,28 @@ void FXDebugModule::RenderMainWindow() {
 
     const auto u8_zero = 0, u8_max = 255;
 
-    if (ImGui::CollapsingHeader("Infrared Vision")) {
+    ImGui::Checkbox("##Enable Infrared", &CPostEffects::m_bInfraredVision);
+    ImGui::SameLine();
+    if (ImGui::TreeNodeEx("Infrared Vision", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding)) {
+        const notsa::ui::ScopedDisable disabledScope{ !CPostEffects::m_bInfraredVision };
+
         ImGui::DragScalar("Grain Strength",    ImGuiDataType_S32, &CPostEffects::m_InfraredVisionGrainStrength, 0.5f, &u8_zero, &u8_max);
         ImGui::DragFloat("Filter Radius",      &CPostEffects::m_fInfraredVisionFilterRadius, 0.001f);
         ImGui::DragScalarN("Color",            ImGuiDataType_U8, &CPostEffects::m_InfraredVisionCol, 4);
         ImGui::DragScalarN("Main Color",       ImGuiDataType_U8, &CPostEffects::m_InfraredVisionMainCol, 4);
         ImGui::DragFloat4("Heat Object Color", *reinterpret_cast<float(*)[4]>(&CPostEffects::m_fInfraredVisionHeatObjectCol), 0.01f, 0.0, 1.0f);
+
+        ImGui::TreePop();
     }
 
-    if (ImGui::CollapsingHeader("Heat Haze FX")) {
+    ImGui::Checkbox("##Enable Heat Haze", &CPostEffects::m_bHeatHazeFX);
+    ImGui::SameLine();
+    if (ImGui::TreeNodeEx("Heat Haze FX", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding)) {
+        const notsa::ui::ScopedDisable disabledScope{ !CPostEffects::m_bHeatHazeFX };
+
         const auto min = HEAT_HAZE_0;
         const auto max = (MAX_HEAT_HAZE_TYPES - 1);
-
+        
         ImGui::DragScalar("Type",          ImGuiDataType_U32, &CPostEffects::m_HeatHazeFXType, 0.05f, &min, &max);
         ImGui::DragScalar("Intensity",     ImGuiDataType_U32, &CPostEffects::m_HeatHazeFXIntensity, 0.5f, &u8_zero, &u8_max);
         ImGui::DragScalar("Random Shift",  ImGuiDataType_U32, &CPostEffects::m_HeatHazeFXRandomShift);
@@ -50,14 +58,13 @@ void FXDebugModule::RenderMainWindow() {
         ImGui::DragScalar("Scan Size Y",   ImGuiDataType_U32, &CPostEffects::m_HeatHazeFXScanSizeY);
         ImGui::DragScalar("Render Size X", ImGuiDataType_U32, &CPostEffects::m_HeatHazeFXRenderSizeX);
         ImGui::DragScalar("Render Size Y", ImGuiDataType_U32, &CPostEffects::m_HeatHazeFXRenderSizeY);
+
+        ImGui::TreePop();
     };
 }
 
 void FXDebugModule::RenderMenuEntry() {
-    if (ImGui::BeginMenu("Settings")) {
-        if (ImGui::MenuItem("Post FX")) {
-            SetMainWindowOpen(true);
-        }
-        ImGui::EndMenu();
-    }
+    notsa::ui::DoNestedMenuIL({ "Settings" }, [&] {
+        ImGui::MenuItem("Post FX", nullptr, &m_IsOpen);
+    });
 }
