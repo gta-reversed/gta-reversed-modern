@@ -30,7 +30,7 @@ void CBox::Recalc()
 }
 
 // NOTSA - TODO(OPT): Refactor code (meaningful names, etc) and possibly use std::optional for `CMatrix` (In cases where a unity matrix would be used otherwise)
-void CBox::Draw(const CMatrix& transform, CRGBA color) const {
+void CBox::DrawWireFrame(CRGBA color, const CMatrix& transform) const {
     auto workVec = m_vecMin;
     CVector v1 = transform * workVec;
 
@@ -63,17 +63,17 @@ void CBox::Draw(const CMatrix& transform, CRGBA color) const {
     workVec = m_vecMax;
     CVector v8 = transform * workVec;
 
-    const auto colorARGB = color.ToIntARGB();
-    CLines::RenderLineWithClipping(v1, v2, colorARGB, colorARGB);
-    CLines::RenderLineWithClipping(v1, v3, colorARGB, colorARGB);
-    CLines::RenderLineWithClipping(v1, v4, colorARGB, colorARGB);
-    CLines::RenderLineWithClipping(v5, v2, colorARGB, colorARGB);
-    CLines::RenderLineWithClipping(v5, v8, colorARGB, colorARGB);
-    CLines::RenderLineWithClipping(v5, v4, colorARGB, colorARGB);
-    CLines::RenderLineWithClipping(v6, v2, colorARGB, colorARGB);
-    CLines::RenderLineWithClipping(v6, v8, colorARGB, colorARGB);
-    CLines::RenderLineWithClipping(v6, v3, colorARGB, colorARGB);
-    CLines::RenderLineWithClipping(v7, v8, colorARGB, colorARGB);
-    CLines::RenderLineWithClipping(v7, v3, colorARGB, colorARGB);
-    CLines::RenderLineWithClipping(v7, v4, colorARGB, colorARGB);
+    const auto colorARGB = color.ToInt();
+    CLines::RenderLineNoClipping(v1, v2, colorARGB, colorARGB);
+    CLines::RenderLineNoClipping(v1, v3, colorARGB, colorARGB);
+    CLines::RenderLineNoClipping(v1, v4, colorARGB, colorARGB);
+    CLines::RenderLineNoClipping(v5, v2, colorARGB, colorARGB);
+    CLines::RenderLineNoClipping(v5, v8, colorARGB, colorARGB);
+    CLines::RenderLineNoClipping(v5, v4, colorARGB, colorARGB);
+    CLines::RenderLineNoClipping(v6, v2, colorARGB, colorARGB);
+    CLines::RenderLineNoClipping(v6, v8, colorARGB, colorARGB);
+    CLines::RenderLineNoClipping(v6, v3, colorARGB, colorARGB);
+    CLines::RenderLineNoClipping(v7, v8, colorARGB, colorARGB);
+    CLines::RenderLineNoClipping(v7, v3, colorARGB, colorARGB);
+    CLines::RenderLineNoClipping(v7, v4, colorARGB, colorARGB);
 }

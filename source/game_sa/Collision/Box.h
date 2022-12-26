@@ -26,12 +26,13 @@ public:
     CVector GetCenter() const { return (m_vecMax + m_vecMin) / 2.f; }
 
     /*!
+    * @addr notsa
     * @brief Render the box in the 3D world (Be sure to call from a place where 3D stuff is rendered, if called from elsewhere you won't see the lines!)
     *
-    * @param transform The transformation matrix of the box (Use `CMatrix::Unity()` if there's none)
-    * @param color     Color of the lines representing the box
+    * @param transform Transformation matrix to be used
+    * @param color     Color of the lines used
     */
-    void Draw(const CMatrix& transform, CRGBA color) const;
+    void DrawWireFrame(CRGBA color, const CMatrix& transform = CMatrix::Unity()) const;
 
 public:
     CVector m_vecMin, m_vecMax;
