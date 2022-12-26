@@ -357,7 +357,7 @@ void* ReadOpen(ImGuiContext* ctx, ImGuiSettingsHandler* handler, const char* nam
     UNUSED(handler);
 
     int version{2};
-    std::sscanf(name, "Version %d", &version);
+    VERIFY(std::sscanf(name, "Version %d", &version) == 1);
     return (void*)version; // Has to return a non-null value, otherwise `ReadLine` won't be called
 }
 
