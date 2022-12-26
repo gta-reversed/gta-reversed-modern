@@ -71,6 +71,15 @@ private:
     bool m_needsEnd{};
 };
 
+struct ScopedChild {
+    template<typename... Ts>
+    ScopedChild(Ts&&... args) {
+        ImGui::BeginChild(std::forward<Ts>(args)...);
+    }
+
+    ~ScopedChild() { ImGui::EndChild(); }
+};
+
 template<typename T>
 struct ScopedID {
     ScopedID(T id) { ImGui::PushID(id); }

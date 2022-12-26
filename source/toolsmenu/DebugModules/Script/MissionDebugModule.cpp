@@ -11,11 +11,7 @@
 #include "TheScripts.h"
 #include "Hud.h"
 
-CDebugMenuToolInput m_missionToolInput;
-bool  m_bStartMission = false;
-int32 m_missionToStartId = 0;
-
-CDebugMenuToolInput::ToolMap m_missionsMap{
+CDebugMenuToolInput::ToolMap s_MissionsMap{
     { 0, "Initial 1" },
     { 1, "Initial 2" },
     { 2, "Intro" },
@@ -153,6 +149,10 @@ CDebugMenuToolInput::ToolMap m_missionsMap{
     { 134, "Buy Properties Mission" }
 };
 
+MissionDebugModule::MissionDebugModule() {
+    m_missionToolInput.Initialise(256, &s_MissionsMap);
+}
+
 void InitializeAndStartNewScript() {
     CTheScripts::WipeLocalVariableMemoryForMissionScript();
     CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::MissionBlock[0]);
@@ -163,7 +163,7 @@ void InitializeAndStartNewScript() {
     CGameLogic::ClearSkip(false);
 }
 
-bool StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
+bool MissionDebugModule::StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
     if (!m_bStartMission && CTheScripts::IsPlayerOnAMission()) {
         if (CCutsceneMgr::ms_cutsceneLoadStatus == 2) {
             CCutsceneMgr::DeleteCutsceneData();
@@ -228,81 +228,55 @@ bool StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
     return true;
 }
 
-void ProcessImgui() {
+void MissionDebugModule::RenderWindow() {
+    const notsa::ui::ScopedWindow window{ "Missions Starter", { 485.f, 400.f }, m_IsOpen };
+    if (!m_IsOpen) {
+        return;
+    }
+
     if (m_bStartMission) {
         StartMission(m_missionToStartId);
     }
-    ImGui::PushItemWidth(465.0f);
-    bool reclaim_focus = false;
-    ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
-    if (ImGui::InputText(" ", &m_missionToolInput.GetInputBuffer(), input_text_flags)) {
-        reclaim_focus = true;
-    }
-    ImGui::PopItemWidth();
-
-    // Auto-focus on window apparition
-    ImGui::SetItemDefaultFocus();
-    if (reclaim_focus)
-        ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+    
+    ImGui::SetNextItemWidth(ImGui::GetWindowWidth() - 10.f);
+    ImGui::InputText(" ", &m_missionToolInput.GetInputBuffer());
 
     m_missionToolInput.Process();
 
-    ImGui::BeginChild("##missionstool", ImVec2(0, 310));
-    const auto w = ImGui::GetWindowWidth();
-    static bool widthSet = false;
-    ImGui::Columns(2);
-    if (!widthSet) {
-        widthSet = true;
-        ImGui::SetColumnWidth(0, w * 0.2f);
-        ImGui::SetColumnWidth(1, w * 0.8f);
-    }
-    ImGui::TextUnformatted("ID");
-    ImGui::NextColumn();
-    ImGui::TextUnformatted("Name");
-    ImGui::NextColumn();
-    ImGui::Separator();
-    static int32 selectedId = -1;
-    for (const auto& [id, name] : m_missionToolInput.GetGridListMap()) {
-        ImGui::PushID(id);
+    ImGui::BeginChild("##missionstool", ImVec2(0.f, 310.f));
+    if (ImGui::BeginTable("Missions", 2, ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Borders)) { 
+        ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed);
+        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed);
 
-        ImGui::Text("%i", id);
-        ImGui::NextColumn();
-        if (ImGui::Selectable(name.c_str(), selectedId == id, ImGuiSelectableFlags_SpanAllColumns)) {
-            selectedId = id;
+        ImGui::TableHeadersRow();
+
+        for (auto&& [idx, name] : m_missionToolInput.GetGridListMap()) {
+            const notsa::ui::ScopedID tableID{ idx };
+            //ImGui::BeginGroup();
+            ImGui::TableNextRow();
+
+            ImGui::TableNextColumn();
+            ImGui::Text("%i", idx);
+
+            ImGui::TableNextColumn();
+            if (ImGui::Selectable(name.c_str(), m_SelectedMissionIdx == idx, ImGuiSelectableFlags_SpanAllColumns)) {
+                m_SelectedMissionIdx = idx;
+            }
+
+            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && m_SelectedMissionIdx != -1) {
+                CHud::SetHelpMessage("Starting Mission!", true, false, false);
+                StartMission(m_SelectedMissionIdx);
+            }
+            //ImGui::EndGroup();
         }
-        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && selectedId != -1) {
-            CHud::SetHelpMessage("Starting Mission!", true, false, false);
-            StartMission(selectedId);
-        }
-        ImGui::NextColumn();
-        ImGui::PopID();
+
+        ImGui::EndTable();
     }
-    ImGui::EndColumns();
     ImGui::EndChild();
-    ImGui::Separator();
-
-    ImGui::SetCursorPosX(117);
-    if (ImGui::Button("START MISSION", ImVec2(250, 0)) && selectedId != -1) {
-        CHud::SetHelpMessage("Starting Mission!", true, false, false);
-        StartMission(selectedId);
-    }
-}
-
-MissionDebugModule::MissionDebugModule() :
-    DebugModuleSingleWindow("Missions Starter", { 485.f, 400.f })
-{
-    m_missionToolInput.Initialise(256, &m_missionsMap);
-}
-
-void MissionDebugModule::RenderMainWindow() {
-    ProcessImgui();
 }
 
 void MissionDebugModule::RenderMenuEntry() {
-    if (ImGui::BeginMenu("Tools")) {
-        if (ImGui::MenuItem("Mission Starter")) {
-            SetMainWindowOpen(true);
-        }
-        ImGui::EndMenu();
-    }
+    notsa::ui::DoNestedMenuIL({ "Tools" }, [&] {
+        ImGui::MenuItem("Mission Starter", nullptr, &m_IsOpen);
+    });
 }
