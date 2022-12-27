@@ -50,10 +50,18 @@ OpcodeResult CommandParser(CRunningScript* S) {
 template<eScriptCommands Command>
 struct CommandHandler : std::false_type {};
 
-// In case of `constexpr static auto Function = +(fn);`:
-// `Function` expects a raw function ptr. Since we may also use lambdas, we need to use
-// +(<lambda>) hack to get lambda's function pointer, not pointer of the lambda object.
-// https://stackoverflow.com/questions/18889028
+namespace notsa {
+namespace detail {
+//! Returns raw function pointer of a function or lambda.
+//! The `+` operator is a hack to get lambda's function pointer.
+//! The `+` is a no-op in this case (As in, it won't increment the value, or anything like that, is just merely forces a decay to a pointer [from a lambda object instance])
+//! See: https://stackoverflow.com/questions/18889028
+template<typename T>
+constexpr inline auto AddressOfFunction(T fn) {
+    return +(fn);
+}
+};
+};
 
 /*!
 * Use this macro to register a parsed function
@@ -62,6 +70,5 @@ struct CommandHandler : std::false_type {};
     template<> \
     struct CommandHandler<cmd> : std::true_type { \
         constexpr static auto Command  = cmd; \
-        constexpr static auto Function = +(fn); \
+        constexpr static auto Function = notsa::detail::AddressOfFunction(fn); \
     } \
-
