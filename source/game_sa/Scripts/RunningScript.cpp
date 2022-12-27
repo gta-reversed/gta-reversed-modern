@@ -36,6 +36,7 @@
 #include "Commands/Pad.hpp"
 #include "Commands/Script.hpp"
 #include "Commands/Text.hpp"
+#include "Commands/Ped.hpp"
 /*
 #include "Commands/CLEO/AudioStream.hpp"
 #include "Commands/CLEO/Char.hpp"
