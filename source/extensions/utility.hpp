@@ -83,7 +83,7 @@ static constexpr void IterateFunction(auto&& functor) {
 
     // Continue recursing if there's anything left
     if constexpr (Stop - Start > ChunkSize) {
-        IterateFunction<Start + ChunkSize, Stop>(functor);
+        IterateFunction<Start + ChunkSize, Stop, ChunkSize>(functor);
     }
 }
 
