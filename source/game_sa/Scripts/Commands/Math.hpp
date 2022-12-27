@@ -5,38 +5,18 @@
 * Various utility commands
 */
 
-float GetDistanceBetweenCoords2D(CVector2D a, CVector2D b) {
-    return DistanceBetweenPoints2D(a, b);
-}
-REGISTER_COMMAND_HANDLER(COMMAND_GET_DISTANCE_BETWEEN_COORDS_2D, GetDistanceBetweenCoords2D);
+REGISTER_COMMAND_HANDLER(COMMAND_GET_DISTANCE_BETWEEN_COORDS_2D, DistanceBetweenPoints2D);
 
-float GetDistanceBetweenCoords3D(CVector a, CVector b) {
-    return DistanceBetweenPoints(a, b);
-}
-REGISTER_COMMAND_HANDLER(COMMAND_GET_DISTANCE_BETWEEN_COORDS_3D, GetDistanceBetweenCoords3D);
+REGISTER_COMMAND_HANDLER(COMMAND_GET_DISTANCE_BETWEEN_COORDS_3D, DistanceBetweenPoints);
 
-void GenerateRandomInt(CRunningScript* S) {
-    S->GetPointerToScriptVariable(VAR_GLOBAL)->iParam = CGeneral::GetRandomNumber();
-}
-REGISTER_COMMAND_HANDLER(COMMAND_GENERATE_RANDOM_INT, GenerateRandomInt);
+REGISTER_COMMAND_HANDLER(COMMAND_GENERATE_RANDOM_INT, [](int32& var) { var = CGeneral::GetRandomNumber(); });
 
-// NOTSA: Originally returns uint32
-int32 GenerateRandomIntInRange(int32 min, int32 max) {
-    return CGeneral::GetRandomNumberInRange(min, max);
-}
-REGISTER_COMMAND_HANDLER(COMMAND_GENERATE_RANDOM_INT_IN_RANGE, GenerateRandomIntInRange);
+REGISTER_COMMAND_HANDLER(COMMAND_GENERATE_RANDOM_INT_IN_RANGE, [](int32 a, int32 b) { return CGeneral::GetRandomNumberInRange(a, b); });
 
-float GenerateRandomFloatInRange(float min, float max) {
-    return CGeneral::GetRandomNumberInRange(min, max);
-}
-REGISTER_COMMAND_HANDLER(COMMAND_GENERATE_RANDOM_FLOAT_IN_RANGE, GenerateRandomFloatInRange);
+REGISTER_COMMAND_HANDLER(COMMAND_GENERATE_RANDOM_INT_IN_RANGE, [](uint32 a, uint32 b) { return CGeneral::GetRandomNumberInRange(a, b); });
 
-float Sin(float deg) {
-    return std::sinf(DegreesToRadians(deg));
-}
-REGISTER_COMMAND_HANDLER(COMMAND_SIN, Sin);
+REGISTER_COMMAND_HANDLER(COMMAND_GENERATE_RANDOM_FLOAT_IN_RANGE, [](float a, float b) { return CGeneral::GetRandomNumberInRange(a, b); });
 
-float Cos(float deg) {
-    return std::cosf(DegreesToRadians(deg));
-}
-REGISTER_COMMAND_HANDLER(COMMAND_COS, Cos);
+REGISTER_COMMAND_HANDLER(COMMAND_SIN, [](float deg) { return std::sinf(DegreesToRadians(deg)); });
+
+REGISTER_COMMAND_HANDLER(COMMAND_COS, [](float deg) { return std::cosf(DegreesToRadians(deg)); });
