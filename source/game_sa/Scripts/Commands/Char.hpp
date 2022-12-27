@@ -10,7 +10,7 @@ auto IsCharInArea2D(CRunningScript& S, CPed& ped, CVector2D a, CVector2D b, bool
     const auto Check = [&](const auto& e) { return e.IsWithinArea(a.x, a.y, b.x, b.y); };
 
     if (drawSphere) {
-        CTheScripts::HighlightImportantArea(reinterpret_cast<int32>(&S) + reinterpret_cast<int32>(S.m_pCurrentIP), a.x, a.y, b.x, b.y, -100.f);
+        CTheScripts::HighlightImportantArea(reinterpret_cast<int32>(&S) + reinterpret_cast<int32>(S.m_IP), a.x, a.y, b.x, b.y, -100.f);
     }
 
     return { ped.IsInVehicle() ? Check(*ped.m_pVehicle) : Check(ped) };

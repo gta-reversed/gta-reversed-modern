@@ -127,7 +127,7 @@ public:
      * result and the ANDOR state is decremented until it reaches the lower bound,
      * meaning that all conditions were tested.
      */
-    enum {
+    enum LogicalOpType {
         ANDOR_NONE = 0,
         ANDS_1 = 1,
         ANDS_2,
@@ -148,29 +148,29 @@ public:
     };
 
 public:
-    CRunningScript* m_pNext;
-    CRunningScript* m_pPrev;
-    char            m_szName[8];
-    uint8*          m_pBaseIP;    // base instruction pointer
-    uint8*          m_pCurrentIP; // current instruction pointer
-    uint8*          m_apStack[MAX_STACK_DEPTH];
-    uint16          m_nSP;        // Stack Pointer
-    tScriptParam    m_aLocalVars[NUM_LOCAL_VARS];
-    int32           m_anTimers[NUM_TIMERS];
-    bool            m_bIsActive;
-    bool            m_bCondResult; ///< Used for `COMMAND_GOTO_IF_FALSE`
-    bool            m_bUseMissionCleanup;
+    CRunningScript *m_pNext, *m_pPrev;              //< Linked list shit
+    char            m_szName[8];                    //< Name of the script
+    uint8*          m_pBaseIP;                      //< Base instruction pointer
+    uint8*          m_IP;                           //< current instruction pointer
+    uint8*          m_IPStack[MAX_STACK_DEPTH];     //< Stack of instruction pointers (Usually saved on function call, then popped on return)
+    uint16          m_StackDepth;                   //< Depth (size) of the stack 
+    tScriptParam    m_aLocalVars[NUM_LOCAL_VARS];   //< This script's local variables (Also see `GetPointerToLocalVariable`)
+    int32           m_anTimers[NUM_TIMERS];         //< Active timers (Unsure) 
+    bool            m_bIsActive;                    //< Is the script active (Unsure)
+    bool            m_bCondResult;                  //< (See `COMMAND_GOTO_IF_FALSE`) (Unsure)
+    bool            m_bUseMissionCleanup;           //< If mission cleanup is needed after this script has finished
     bool            m_bIsExternal;
     bool            m_bTextBlockOverride;
     int8            m_nExternalType;
-    int32           m_nWakeTime;
-    uint16          m_nLogicalOp;
-    bool            m_bNotFlag;
+    int32           m_nWakeTime;                    //< Used for sleep-like comamands (like `COMMAND_WAIT`) - The script halts execution until the time is reached
+    uint16          m_nLogicalOp;                   //< Next logical OP type (See `COMMAND_ANDOR`)
+    bool            m_bNotFlag;                     //< Condition result is to be negated (Unsure)
     bool            m_bDeathArrestEnabled;
     bool            m_bDeathArrestExecuted;
-    uint8*          m_pSceneSkipIP; // scene skip instruction pointer
-    bool            m_bIsMission;
+    uint8*          m_pSceneSkipIP;                 //< Scene skip instruction pointer (Unsure)
+    bool            m_bIsMission;                   //< Is (this script) a mission script
 
+public:
     using CommandHandlerFn_t    = OpcodeResult(__thiscall CRunningScript::*)(int32);
     using CommandHandlerTable_t = std::array<CommandHandlerFn_t, 27>;
 
@@ -235,15 +235,15 @@ public:
     void SetName(const char* name)      { strcpy_s(m_szName, name); }
     void SetName(std::string_view name) { assert(name.size() < sizeof(m_szName)); strncpy(m_szName, name.data(), name.size()); }
     void SetBaseIp(uint8* ip)           { m_pBaseIP = ip; }
-    void SetCurrentIp(uint8* ip)        { m_pCurrentIP = ip; }
+    void SetCurrentIp(uint8* ip)        { m_IP = ip; }
     void SetActive(bool active)         { m_bIsActive = active; }
     void SetExternal(bool external)     { m_bIsExternal = external; }
 
     //! Read a value from at the current IP then increase IP by the number of bytes read.
     template<typename T>
     T ReadAtIPAs() {
-        const auto ret = *reinterpret_cast<T*>(m_pCurrentIP);
-        m_pCurrentIP += sizeof(T);
+        const auto ret = *reinterpret_cast<T*>(m_IP);
+        m_IP += sizeof(T);
         return ret;
     }
 

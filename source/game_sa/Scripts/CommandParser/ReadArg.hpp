@@ -37,7 +37,7 @@ template<typename T>
 T Read(CRunningScript* S)
     requires(!std::is_reference_v<T> && (std::is_arithmetic_v<T> || std::is_enum_v<T>))
 {
-    auto& ip = S->m_pCurrentIP;
+    auto& ip = S->m_IP;
 
     switch (const auto type = S->ReadAtIPAs<eScriptParameterType>()) {
     case SCRIPT_PARAM_STATIC_INT_32BITS:
@@ -75,7 +75,7 @@ T Read(CRunningScript* S)
 template <typename T, typename Y = std::remove_reference_t<T>>
     requires std::is_reference_v<T> && std::is_arithmetic_v<Y>
 T Read(CRunningScript* S) {
-    auto& ip = S->m_pCurrentIP;
+    auto& ip = S->m_IP;
 
     switch (const auto type = S->ReadAtIPAs<eScriptParameterType>()) {
     case SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE:
@@ -161,7 +161,7 @@ CPlayerPed& Read<CPlayerPed&>(CRunningScript* S) {
 
 template<>
 std::string_view Read<std::string_view>(CRunningScript* S) {
-    auto& IP = S->m_pCurrentIP;
+    auto& IP = S->m_IP;
 
     const auto FromScriptSpace = [](const auto offset) -> std::string_view {
         return { (const char*)&CTheScripts::ScriptSpace[offset] };

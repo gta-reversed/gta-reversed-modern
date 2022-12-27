@@ -50,7 +50,7 @@ REGISTER_COMMAND_HANDLER(COMMAND_GET_PLAYER_COORDINATES, GetPlayerCoordinates);
 
 bool IsPlyerInArea2D(CRunningScript* S, CPlayerPed& player, CRect area, bool highlightArea) {
     if (highlightArea) {
-        CTheScripts::HighlightImportantArea((uint32)S + (uint32)S->m_pCurrentIP, area, MAP_Z_LOW_LIMIT);
+        CTheScripts::HighlightImportantArea((uint32)S + (uint32)S->m_IP, area, MAP_Z_LOW_LIMIT);
     }
 
     if (CTheScripts::DbgFlag) {
@@ -65,7 +65,7 @@ REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_IN_AREA_2D, IsPlyerInArea2D);
 
 bool IsPlyerInArea3D(CRunningScript* S, CPlayerPed& player, CVector p1, CVector p2, bool highlightArea) {
     if (highlightArea) {
-        CTheScripts::HighlightImportantArea((uint32)S + (uint32)S->m_pCurrentIP, p1.x, p1.y, p2.x, p2.y, (p1.z + p2.z) / 2.0f);
+        CTheScripts::HighlightImportantArea((uint32)S + (uint32)S->m_IP, p1.x, p1.y, p2.x, p2.y, (p1.z + p2.z) / 2.0f);
     }
 
     if (CTheScripts::DbgFlag) {

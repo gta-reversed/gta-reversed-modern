@@ -26,7 +26,7 @@ void StoreArg(CRunningScript* S, bool arg) {
 template<typename T>
 void StoreArg(CRunningScript* S, const T& arg) requires (std::is_arithmetic_v<T>) { // Add requirements to filter out possible mistakes (Like returning an unsupported type)
     tScriptParam* dest = [&] {
-        auto& ip = S->m_pCurrentIP;
+        auto& ip = S->m_IP;
 
         // Helper
         const auto ReadArrayInfo = [S] {
