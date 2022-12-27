@@ -325,6 +325,8 @@ void CRunningScript::DoDeathArrestCheck() {
     if (!playerInfo.IsRestartingAfterDeath() && !playerInfo.IsRestartingAfterArrest())
         return;
 
+    // TODO/NOTE: This is buggy, it will decrease SP to 0, and then `--m_nSP` will underflow :D
+    NOTSA_UNREACHABLE(); // Prevent random bugs
     if (m_nSP > 1u) { // todo: refactor
         do
             --m_nSP;

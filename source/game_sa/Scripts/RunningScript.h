@@ -105,6 +105,7 @@ constexpr auto SHORT_STRING_SIZE = 8;
 constexpr auto LONG_STRING_SIZE = 16;
 
 class CRunningScript {
+public:
     /*!
      * Needed for compound if statements.
      * Basically, an `if` translates to:
