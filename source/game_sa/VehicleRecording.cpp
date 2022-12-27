@@ -1,11 +1,8 @@
 #include "StdInc.h"
 #include <span>
 
-#include "TimecycEditor.h"
 #include "VehicleRecording.h"
 
-#include "toolsmenu\DebugModules\CStreamingDebugModule.h"
-#include "toolsmenu\DebugModules\CullZonesDebugModule.h"
 #include "extensions\enumerate.hpp"
 
 uint32 CPath::GetIndex() const {
@@ -90,13 +87,6 @@ void CVehicleRecording::ShutDown() {
 
 // 0x459F70 hook not needed
 void CVehicleRecording::Render() {
-// NOTSA: Originally an empty function, called late in rendering pipeline, used for debug stuff
-#ifdef EXTRA_DEBUG_FEATURES
-    TimeCycleDebugModule::ProcessRender();
-    COcclusionDebugModule::ProcessRender();
-    CStreamingDebugModule::ProcessRender();
-    CullZonesDebugModule::ProcessRender();
-#endif
 }
 
 // 0x45A360

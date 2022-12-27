@@ -11,8 +11,6 @@
 #include "KeyArray.h"
 #include "MissionTextOffsets.h"
 
-namespace TextDebugModule { void ProcessImGui(); };
-
 struct ChunkHeader {
     char  magic[4];
     int32 size;
@@ -76,13 +74,13 @@ public:
     auto& GetMissionName() const { return m_szMissionName; }
 
 private:
+    friend class TextDebugModule;
     friend void InjectHooksMain();
     static void InjectHooks();
 
     CText* Constructor();
     CText* Destructor();
 
-    friend void TextDebugModule::ProcessImGui();
 };
 VALIDATE_SIZE(CText, 0xA90);
 

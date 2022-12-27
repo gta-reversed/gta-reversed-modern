@@ -136,5 +136,3 @@ public:
     static void Enable(eCheats cheat)  { m_aCheatsActive[cheat] = true; }
     static void Disable(eCheats cheat) { m_aCheatsActive[cheat] = false; }
 };
-extern bool G_CHEAT_BIG_HEAD;
-extern bool G_CHEAT_THIN_BODY;

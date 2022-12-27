@@ -628,11 +628,11 @@ void CWanted::Update() {
         }
 
         if (cops != m_nCopsInPursuit) {
-            printf("CopPursuit total messed up: re-setting\n"); // leftover debug shit
+            DEV_LOG("CopPursuit total messed up: re-setting!"); // leftover debug shit
             m_nCopsInPursuit = cops;
         }
         if (listMessedUp) {
-            printf("CopPursuit pointer list messed up: re-sorting\n");
+            DEV_LOG("CopPursuit pointer list messed up: re-sorting!");
             bool notFixed = true;
 
             for (auto i = 0u; i < MAX_COPS_IN_PURSUIT; i++) {
