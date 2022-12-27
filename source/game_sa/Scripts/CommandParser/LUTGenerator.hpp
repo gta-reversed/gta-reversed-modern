@@ -46,12 +46,12 @@ static constexpr auto GetHandlerOfCommand() {
 }
 
 constexpr void IterateCommandIDs(auto&& functor) {
-    ::notsa::IterateFunction<0, (int)COMMAND_HIGHEST_ID>(functor);
+    ::notsa::IterateFunction<0, (int)COMMAND_HIGHEST_ID_TO_HOOK>(functor);
 }
 
 /// Generate the script command handler look-up-table (LUT)
 static constexpr auto GenerateLUT() {
-    std::array<T_LUTFunction, (size_t)COMMAND_HIGHEST_ID> lut{};
+    std::array<T_LUTFunction, (size_t)COMMAND_HIGHEST_ID_TO_HOOK> lut{};
 
     IterateCommandIDs([&]<size_t Idx>() {
         lut[Idx] = GetHandlerOfCommand<(eScriptCommands)Idx>();

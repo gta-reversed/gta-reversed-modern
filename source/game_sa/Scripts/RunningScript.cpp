@@ -834,7 +834,7 @@ void CRunningScript::UpdatePC(int32 newIP) {
     else
         m_pCurrentIP = m_pBaseIP + std::abs(newIP);
 }
-static std::array<size_t, COMMAND_HIGHEST_ID> counter{};
+static std::array<size_t, COMMAND_HIGHEST_ID_TO_HOOK> counter{};
 
 // 0x469EB0, inlined
 OpcodeResult CRunningScript::ProcessOneCommand() {
