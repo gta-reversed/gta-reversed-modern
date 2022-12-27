@@ -6,11 +6,11 @@
 * Basic language feature commands (Comparasions, assingments, etc...)
 */
 
-OpcodeResult Wait(CRunningScript& S, uint32 duration) {
+
+REGISTER_COMMAND_HANDLER(COMMAND_WAIT, [](CRunningScript& S, uint32 duration) {
     S.m_nWakeTime = CTimer::GetTimeInMS() + duration;
     return OR_WAIT;
-}
-REGISTER_COMMAND_HANDLER(COMMAND_WAIT, Wait);
+});
 
 REGISTER_COMMAND_HANDLER(COMMAND_GOTO, [](CRunningScript& S, int32 address) -> void { S.UpdatePC(address); });
 
