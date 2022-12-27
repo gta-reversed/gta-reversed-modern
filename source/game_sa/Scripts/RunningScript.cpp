@@ -439,19 +439,22 @@ tScriptParam* CRunningScript::GetPointerToLocalVariable(int32 varIndex) {
 }
 
 /*!
- * Returns pointer to local variable pointed by offset and array index as well as multiplier.
  * @addr 0x463CC0
+ * @brief Returns pointer to a local script variable.
+ *
+ * @param arrayBaseOffset  The offset of the array (In terms of the number of `tScriptParam`s before it)
+ * @param index            Index of the variable inside the array
+ * @param arrayEntriesSize Size of 1 variable in the array (In terms of `tScriptParam`'s - So for a regular `int` (or float, etc) variable this will be `1`, for long strings it's `4` and for short one's it's `2`)
  */
-tScriptParam* CRunningScript::GetPointerToLocalArrayElement(int32 arrVarOffset, uint16 arrElemIdx, uint8 arrElemSize) {
-    int32 index = arrVarOffset + arrElemSize * arrElemIdx;
-    return GetPointerToLocalVariable(index);
+tScriptParam* CRunningScript::GetPointerToLocalArrayElement(int32 arrayBaseOffset, uint16 index, uint8 arrayEntriesSize) {
+    return GetPointerToLocalVariable(arrayBaseOffset + arrayEntriesSize * index);
 }
 
 /*!
  * Returns pointer to script variable of any type.
  * @addr 0x464790
  */
-tScriptParam* CRunningScript::GetPointerToScriptVariable(eScriptVariableType variableType) {
+tScriptParam* CRunningScript::GetPointerToScriptVariable(eScriptVariableType) {
     uint8  arrElemSize;
     uint16 arrVarOffset;
     int32  arrElemIdx;
@@ -481,7 +484,7 @@ tScriptParam* CRunningScript::GetPointerToScriptVariable(eScriptVariableType var
             return reinterpret_cast<tScriptParam*>(&CTheScripts::ScriptSpace[LONG_STRING_SIZE * arrElemIdx + arrVarOffset]);
         else if (type == SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY)
             return reinterpret_cast<tScriptParam*>(&CTheScripts::ScriptSpace[SHORT_STRING_SIZE * arrElemIdx + arrVarOffset]);
-        else
+        else // SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY
             return reinterpret_cast<tScriptParam*>(&CTheScripts::ScriptSpace[4 * arrElemIdx + arrVarOffset]);
 
     case SCRIPT_PARAM_LOCAL_NUMBER_ARRAY:
@@ -492,7 +495,7 @@ tScriptParam* CRunningScript::GetPointerToScriptVariable(eScriptVariableType var
             arrElemSize = 4;
         else if (type == SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY)
             arrElemSize = 2;
-        else
+        else // SCRIPT_PARAM_LOCAL_NUMBER_ARRAY
             arrElemSize = 1;
         return GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, arrElemSize);
 
@@ -829,7 +832,7 @@ void CRunningScript::UpdatePC(int32 newIP) {
     if (newIP >= 0)
         m_pCurrentIP = &CTheScripts::ScriptSpace[newIP];
     else
-        m_pCurrentIP = &m_pBaseIP[-newIP];
+        m_pCurrentIP = m_pBaseIP + std::abs(newIP);
 }
 static std::array<size_t, COMMAND_HIGHEST_ID> counter{};
 
