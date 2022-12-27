@@ -42,7 +42,7 @@ REGISTER_COMMAND_HANDLER(COMMAND_IS_JAPANESE_VERSION, []() {
     return false; // TODO: make this configurable perhaps?
 });
 
-REGISTER_COMMAND_HANDLER(COMMAND_IS_WIDESCREEN_ON_IN_OPTIONS, []() { return FrontEndMenuManager.m_bWidescreenOn; });
+REGISTER_COMMAND_HANDLER(COMMAND_IS_WIDESCREEN_ON_IN_OPTIONS, []() -> bool { return FrontEndMenuManager.m_bWidescreenOn; });
 
 REGISTER_COMMAND_HANDLER(COMMAND_GET_RID_OF_PLAYER_PROSTITUTE, CTaskComplexProstituteSolicit::GetRidOfPlayerProstitute);
 
