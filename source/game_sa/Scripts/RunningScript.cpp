@@ -24,6 +24,7 @@
 #include "Commands/Comparasion.hpp"
 #include "Commands/Generic.hpp"
 #include "Commands/Mission.hpp"
+#include "Commands/Object.hpp"
 #include "Commands/Player.hpp"
 #include "Commands/Sequence.hpp"
 #include "Commands/Utility.hpp"
