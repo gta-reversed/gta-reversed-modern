@@ -6,7 +6,7 @@
 * Various mission commands
 */
 
-void LoadAndLaunchMissionInternal(int32 missionId) {
+REGISTER_COMMAND_HANDLER(COMMAND_LOAD_AND_LAUNCH_MISSION_INTERNAL, [](int32 missionId) {
     // Mostly CP from StartMission @ MissionDebugModule
     if (CTheScripts::NumberOfExclusiveMissionScripts > 0) {
         if (missionId <= (0xFFFF - 3)) {
@@ -16,7 +16,6 @@ void LoadAndLaunchMissionInternal(int32 missionId) {
     }
 
     CTimer::Suspend();
-
 
     const auto StartScriptFromFile = [missionId](const char* filePath) {
         if (auto* file = CFileMgr::OpenFile(filePath, "rb")) {
@@ -55,22 +54,16 @@ void LoadAndLaunchMissionInternal(int32 missionId) {
     }
 
     CTimer::Resume();
-}
-REGISTER_COMMAND_HANDLER(COMMAND_LOAD_AND_LAUNCH_MISSION_INTERNAL, LoadAndLaunchMissionInternal);
+});
 
-void ScriptName(CRunningScript* S, std::string_view name) {
+REGISTER_COMMAND_HANDLER(COMMAND_SCRIPT_NAME, [](CRunningScript* S, std::string_view name) {
     char lowered[8]{0};
     rng::transform(name, lowered, [](char c) { return (char)std::tolower(c); });
     S->SetName(name);
-}
-REGISTER_COMMAND_HANDLER(COMMAND_SCRIPT_NAME, ScriptName);
+});
 
-int32 StartScriptFire(CVector pos, int8 propagation, int32 size) {
+REGISTER_COMMAND_HANDLER(COMMAND_START_SCRIPT_FIRE, [](CVector pos, int8 propagation, int32 size) {
     return gFireManager.StartScriptFire(pos, nullptr, 0.8f, 1, propagation, size);
-}
-REGISTER_COMMAND_HANDLER(COMMAND_START_SCRIPT_FIRE, StartScriptFire);
+});
 
-void LaunchMission(uint32 label) {
-    CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[label]);
-}
-REGISTER_COMMAND_HANDLER(COMMAND_LAUNCH_MISSION, LaunchMission);
+REGISTER_COMMAND_HANDLER(COMMAND_LAUNCH_MISSION, [](uint32 label) { CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[label]); });
