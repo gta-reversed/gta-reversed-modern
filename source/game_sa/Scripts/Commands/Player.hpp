@@ -13,7 +13,7 @@
 * @param playerId Player's id (0 or 1)
 * @param pos      World position
 */
-int32 CreatePlayer(int32 playerId, CVector pos) {
+REGISTER_COMMAND_HANDLER(COMMAND_CREATE_PLAYER, [](int32 playerId, CVector pos) {
     if (!CStreaming::IsModelLoaded(0 /*MI_PLAYER*/)) // todo (Izzotop): rename MODEL_NULL -> MI_PLAYER
     {
         CStreaming::RequestSpecialModel(0, "player", STREAMING_GAME_REQUIRED | STREAMING_KEEP_IN_MEMORY | STREAMING_PRIORITY_REQUEST);
@@ -39,16 +39,12 @@ int32 CreatePlayer(int32 playerId, CVector pos) {
     player->GetTaskManager().SetTask(new CTaskSimplePlayerOnFoot(), TASK_PRIMARY_DEFAULT);
 
     return playerId;
-}
-REGISTER_COMMAND_HANDLER(COMMAND_CREATE_PLAYER, CreatePlayer);
+});
 
 /// Get the position of a player
-CVector GetPlayerCoordinates(CPlayerInfo& pinfo) {
-    return pinfo.GetPos();
-}
-REGISTER_COMMAND_HANDLER(COMMAND_GET_PLAYER_COORDINATES, GetPlayerCoordinates);
+REGISTER_COMMAND_HANDLER(COMMAND_GET_PLAYER_COORDINATES, [](CPlayerInfo& pinfo) { return pinfo.GetPos(); });
 
-bool IsPlyerInArea2D(CRunningScript* S, CPlayerPed& player, CRect area, bool highlightArea) {
+REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_IN_AREA_2D, [](CRunningScript* S, CPlayerPed& player, CRect area, bool highlightArea) {
     if (highlightArea) {
         CTheScripts::HighlightImportantArea((uint32)S + (uint32)S->m_IP, area, MAP_Z_LOW_LIMIT);
     }
@@ -60,10 +56,9 @@ bool IsPlyerInArea2D(CRunningScript* S, CPlayerPed& player, CRect area, bool hig
     return player.bInVehicle
         ? player.m_pVehicle->IsWithinArea(area.left, area.top, area.right, area.bottom)
         : player.IsWithinArea(area.left, area.top, area.right, area.bottom);
-}
-REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_IN_AREA_2D, IsPlyerInArea2D);
+});
 
-bool IsPlyerInArea3D(CRunningScript* S, CPlayerPed& player, CVector p1, CVector p2, bool highlightArea) {
+REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_IN_AREA_3D, [](CRunningScript* S, CPlayerPed& player, CVector p1, CVector p2, bool highlightArea) {
     if (highlightArea) {
         CTheScripts::HighlightImportantArea((uint32)S + (uint32)S->m_IP, p1.x, p1.y, p2.x, p2.y, (p1.z + p2.z) / 2.0f);
     }
@@ -75,26 +70,15 @@ bool IsPlyerInArea3D(CRunningScript* S, CPlayerPed& player, CVector p1, CVector 
     return player.bInVehicle
         ? player.m_pVehicle->IsWithinArea(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z)
         : player.IsWithinArea(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
-}
-REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_IN_AREA_3D, IsPlyerInArea3D);
+});
 
-auto IsPlayerPlaying(CPlayerInfo& player) -> notsa::script::CompareFlagUpdate {
-    return { player.m_nPlayerState == PLAYERSTATE_PLAYING };
-}
-REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_PLAYING, IsPlayerPlaying);
+REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_PLAYING, [](CPlayerInfo& player) { return player.m_nPlayerState == PLAYERSTATE_PLAYING; });
 
-bool IsPlayerClimbing(CPlayerPed& player) {
-    return player.GetIntelligence()->GetTaskClimb();
-}
-REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_CLIMBING, IsPlayerClimbing);
+REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_CLIMBING, [](CPlayerPed& player) { return player.GetIntelligence()->GetTaskClimb() != nullptr; });
 
-void SetSwimSpeed(CPlayerPed& player, float speed) {
+REGISTER_COMMAND_HANDLER(COMMAND_SET_SWIM_SPEED, [](CPlayerPed& player, float speed) {
     if (auto swim = player.GetIntelligence()->GetTaskSwim())
         swim->m_fAnimSpeed = speed;
-}
-REGISTER_COMMAND_HANDLER(COMMAND_SET_SWIM_SPEED, SetSwimSpeed);
+});
 
-void SetPlayerGroupToFollowAlways(CPlayerPed& player, bool enable) {
-    player.ForceGroupToAlwaysFollow(enable);
-}
-REGISTER_COMMAND_HANDLER(COMMAND_SET_PLAYER_GROUP_TO_FOLLOW_ALWAYS, SetPlayerGroupToFollowAlways);
+REGISTER_COMMAND_HANDLER(COMMAND_SET_PLAYER_GROUP_TO_FOLLOW_ALWAYS, [](CPlayerPed& player, bool enable) { player.ForceGroupToAlwaysFollow(enable); });

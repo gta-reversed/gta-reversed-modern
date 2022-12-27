@@ -24,6 +24,7 @@
 #include "Commands/Comparasion.hpp"
 #include "Commands/Generic.hpp"
 #include "Commands/Mission.hpp"
+#include "Commands/Object.hpp"
 #include "Commands/Player.hpp"
 #include "Commands/Sequence.hpp"
 #include "Commands/Utility.hpp"
@@ -35,6 +36,7 @@
 #include "Commands/Pad.hpp"
 #include "Commands/Script.hpp"
 #include "Commands/Text.hpp"
+#include "Commands/Ped.hpp"
 /*
 #include "Commands/CLEO/AudioStream.hpp"
 #include "Commands/CLEO/Char.hpp"
