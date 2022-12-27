@@ -58,7 +58,7 @@ T Read(CRunningScript* S)
     }
     case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY: {
         const auto [offset, idx] = ReadArrayInfo(S);
-        return *reinterpret_cast<T*>(CTheScripts::ScriptSpace[offset + sizeof(tScriptParam) * idx]);
+        return *reinterpret_cast<T*>(&CTheScripts::ScriptSpace[offset + sizeof(tScriptParam) * idx]);
     }
     case SCRIPT_PARAM_LOCAL_NUMBER_ARRAY: {
         const auto [offset, idx] = ReadArrayInfo(S);
@@ -217,7 +217,7 @@ std::string_view Read<std::string_view>(CRunningScript* S) {
 template<>
 const char* Read<const char*>(CRunningScript* S) {
     const auto str = Read<std::string_view>(S);
-    assert(str.data()[str.size() + 1] == 0); // Check is 0 terminated - Not using `str[]` here as it would assert.
+    assert(str.data()[str.size()] == 0); // Check if str is 0 terminated - Not using `str[]` here as it would assert.
     return str.data();
 }
 
