@@ -18,9 +18,8 @@
 #include "StuckCarCheck.h"
 #include "UpsideDownCarCheck.h"
 #include "ScriptsForBrains.h"
-class CCheckpoint;
 
-enum eScriptParameterType;
+class CCheckpoint;
 
 enum class eCrossHairType : uint32 {
     NONE,

@@ -1,7 +1,8 @@
 #pragma once
 
 #include <type_traits>
-
+#include <assert.h>
+#include <app_debug.h>
 #include "RunningScript.h"
 #include "TheScripts.h"
 #include "Utility.hpp"
@@ -10,8 +11,9 @@
 namespace notsa {
 namespace script {
 
-template<typename T, typename Y = T>
-Y Read(CRunningScript* S);
+//! Check if `Derived` is derived from `Base` but isn't `Base`
+template<typename Base, typename Derived>
+constexpr auto is_derived_from_but_not_v = std::is_base_of_v<Base, Derived> && !std::is_same_v<Base, Derived>;
 
 auto ReadArrayInfo(CRunningScript* S) {
     uint16 offset{};
@@ -20,65 +22,76 @@ auto ReadArrayInfo(CRunningScript* S) {
     return std::make_tuple(offset, idx);
 }
 
+
+template<typename T, typename Y = T>
+Y Read(CRunningScript* S);
+
 /*!
 * @notsa
-* @brief Read one POD parameter from the script at the current IP and increment the IP. Non-POD parameters can be read using `notsa::script::ReadParam`
-* @return The value read casted to the required type. The value will be read correctly,
+* @brief Read one POD parameter's value from the script at the current IP and increment the IP.
+* @return The value read casted to `T`. The value will be read correctly,
 *         even if the original type was wider or narrower then the
-*         requested one (eg.: originally it was `int8`, but `T = int32`)
+*         requested one (ex.: originally it was `int8`, but `T = int32`)
 */
 template<typename T>
-T Read(CRunningScript* S) requires(std::is_arithmetic_v<T> || std::is_enum_v<T>) {
+T Read(CRunningScript* S)
+    requires(!std::is_reference_v<T> && (std::is_arithmetic_v<T> || std::is_enum_v<T>))
+{
     auto& ip = S->m_pCurrentIP;
 
-    switch (CTheScripts::Read1ByteFromScript(ip)) {
+    switch (const auto type = S->ReadAtIPAs<eScriptParameterType>()) {
     case SCRIPT_PARAM_STATIC_INT_32BITS:
-        return static_cast<T>(CTheScripts::Read4BytesFromScript(ip));
+        return static_cast<T>(S->ReadAtIPAs<int32>());
     case SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE:
-        return *reinterpret_cast<T*>(&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(ip)]);
+        return *reinterpret_cast<T*>(&CTheScripts::ScriptSpace[S->ReadAtIPAs<int16>()]);
     case SCRIPT_PARAM_LOCAL_NUMBER_VARIABLE:
-        return *reinterpret_cast<T*>(S->GetPointerToLocalVariable(CTheScripts::Read2BytesFromScript(ip)));
+        return *reinterpret_cast<T*>(S->GetPointerToLocalVariable(S->ReadAtIPAs<int16>()));
     case SCRIPT_PARAM_STATIC_INT_8BITS:
-        return static_cast<T>(CTheScripts::Read1ByteFromScript(ip));
+        return static_cast<T>(S->ReadAtIPAs<int8>());
     case SCRIPT_PARAM_STATIC_INT_16BITS:
-        return static_cast<T>(CTheScripts::Read2BytesFromScript(ip));
-    case SCRIPT_PARAM_STATIC_FLOAT:
-        return static_cast<T>(CTheScripts::ReadFloatFromScript(ip));
+        return static_cast<T>(S->ReadAtIPAs<int16>());
+    case SCRIPT_PARAM_STATIC_FLOAT: {
+        if constexpr (!std::is_floating_point_v<T>) {
+            DebugBreak(); // Possibly unintended truncation of `float` to integeral type! Check your call stack and change the function argument type to a float.
+        }
+        return static_cast<T>(S->ReadAtIPAs<float>());
+    }
     case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY: {
         const auto [offset, idx] = ReadArrayInfo(S);
-        return *reinterpret_cast<T*>(CTheScripts::ScriptSpace[offset + 4 * idx]);
+        return *reinterpret_cast<T*>(CTheScripts::ScriptSpace[offset + sizeof(tScriptParam) * idx]);
     }
     case SCRIPT_PARAM_LOCAL_NUMBER_ARRAY: {
         const auto [offset, idx] = ReadArrayInfo(S);
         return *reinterpret_cast<T*>(S->GetPointerToLocalArrayElement(offset, idx, 1));
     }
     default:
-        NOTSA_UNREACHABLE();
+        NOTSA_UNREACHABLE("Unknown type: {}", (int32)(type));
     }
 }
 
 /*!
 * @brief Read variable as T&. Used for writing to local/global variables.
 */
-template <typename T, typename Y = std::decay_t<T>> requires(std::is_reference_v<T> && std::is_arithmetic_v<Y>)
+template <typename T, typename Y = std::remove_reference_t<T>>
+    requires std::is_reference_v<T> && std::is_arithmetic_v<Y>
 T Read(CRunningScript* S) {
     auto& ip = S->m_pCurrentIP;
 
-    switch (auto t = CTheScripts::Read1ByteFromScript(ip)) {
+    switch (const auto type = S->ReadAtIPAs<eScriptParameterType>()) {
     case SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE:
-        return *reinterpret_cast<Y*>(&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(ip)]);
+        return *reinterpret_cast<Y*>(&CTheScripts::ScriptSpace[S->ReadAtIPAs<int16>()]);
     case SCRIPT_PARAM_LOCAL_NUMBER_VARIABLE:
-        return *reinterpret_cast<Y*>(S->GetPointerToLocalVariable(CTheScripts::Read2BytesFromScript(ip)));
+        return *reinterpret_cast<Y*>(S->GetPointerToLocalVariable(S->ReadAtIPAs<int16>()));
     case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY: {
         const auto [offset, idx] = ReadArrayInfo(S);
-        return *reinterpret_cast<Y*>(&CTheScripts::ScriptSpace[offset + 4 * idx]);
+        return *reinterpret_cast<Y*>(&CTheScripts::ScriptSpace[offset + sizeof(tScriptParam) * idx]);
     }
     case SCRIPT_PARAM_LOCAL_NUMBER_ARRAY: {
         const auto [offset, idx] = ReadArrayInfo(S);
         return *reinterpret_cast<Y*>(S->GetPointerToLocalArrayElement(offset, idx, 1));
     }
     default:
-        NOTSA_UNREACHABLE("Bad reference value read! type: {}", t);
+        NOTSA_UNREACHABLE("Bad reference value read: {}", (int32)(type));
     }
 }
 
@@ -88,22 +101,22 @@ T Read(CRunningScript* S) {
 */
 template<typename T>
 concept PooledType = requires {
-    detail::PoolOf<std::decay_t<T>>();
+    detail::PoolOf<std::remove_reference_t<T>>();
 };
 
-template<PooledType T, typename Y = std::decay_t<T>>
-Y& Read(CRunningScript* S) {
-    return *detail::PoolOf<Y>().GetAtRef(Read<int32>(S));
-}
+template<PooledType RefT, typename T = std::remove_reference_t<RefT>>
+    requires std::is_class_v<T> // Make sure RefT is something like `CVehicle&` and not some abnomination like `CVehicle*&` (or `CVehicle` in which case a copy would be made)
+T& Read(CRunningScript* S) {
+    T& obj = *static_cast<T*>(detail::PoolOf<T>().GetAtRef(Read<int32>(S)));
 
-/*!
- * @brief Read classes derived from `CVehicle` separately here, so we can do debug checks on them.
- */
-template<typename T, typename Y = std::decay_t<T>> requires(!std::is_same_v<CVehicle, Y> && std::is_base_of_v<CVehicle, Y>)
-Y& Read(CRunningScript* S) {
-    auto& vehicle = Read<CVehicle&>(S);
-    assert(Y::Type == vehicle.m_nVehicleType);
-    return static_cast<Y&>(vehicle);
+    // Special debug type checks
+    if constexpr (is_derived_from_but_not_v<CVehicle, T>) {
+        assert(T::Type == obj.m_nVehicleType);
+    } else if constexpr (is_derived_from_but_not_v<CTask, T>) {
+        assert(T::Type == obj.GetTaskType());
+    } // TODO: Eventually add this for `CEvent` too
+
+    return obj;
 }
 
 /*!
@@ -169,7 +182,7 @@ std::string_view Read<std::string_view>(CRunningScript* S) {
         return { (const char*)(IP - buffsz) };
     };
 
-    const auto type = (eScriptParameterType)CTheScripts::Read1ByteFromScript(IP); // As a variable so can inspect it in debugger
+    const auto type = (eScriptParameterType)S->ReadAtIPAs<int8>(); // As a variable so can inspect it in debugger
     switch (type) {
     case SCRIPT_PARAM_LOCAL_LONG_STRING_VARIABLE:
     case SCRIPT_PARAM_STATIC_SHORT_STRING:
@@ -178,9 +191,9 @@ std::string_view Read<std::string_view>(CRunningScript* S) {
     case SCRIPT_PARAM_GLOBAL_LONG_STRING_VARIABLE:
         return FromStaticString(LONG_STRING_SIZE);
     case SCRIPT_PARAM_GLOBAL_SHORT_STRING_VARIABLE:
-        return FromScriptSpace(CTheScripts::Read2BytesFromScript(IP));
+        return FromScriptSpace(S->ReadAtIPAs<int16>());
     case SCRIPT_PARAM_LOCAL_SHORT_STRING_VARIABLE:
-        return { (const char*)S->GetPointerToLocalVariable(CTheScripts::Read2BytesFromScript(IP)) };
+        return { (const char*)S->GetPointerToLocalVariable(S->ReadAtIPAs<int16>()) };
     case SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY:
         return FromGlobalArray(SHORT_STRING_SIZE);
     case SCRIPT_PARAM_GLOBAL_LONG_STRING_ARRAY:
@@ -190,10 +203,10 @@ std::string_view Read<std::string_view>(CRunningScript* S) {
     case SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY:
         return FromLocalArray(4);
     case SCRIPT_PARAM_STATIC_PASCAL_STRING: {
-        const auto sz = CTheScripts::Read1ByteFromScript(IP); // sign extension. max size = 127, not 255
+        const auto sz = S->ReadAtIPAs<int8>(); // sign extension. max size = 127, not 255
         assert(sz >= 0);
         IP += sz;
-        return { (const char*)(IP - sz), (size_t)sz };
+        return { (const char*)(IP - sz), (size_t)(sz) };
     }
     default:
         NOTSA_UNREACHABLE();
@@ -203,7 +216,9 @@ std::string_view Read<std::string_view>(CRunningScript* S) {
 //! Read a `const char*` - This is hacky, but we know all strings are null-terminated, so it's fine
 template<>
 const char* Read<const char*>(CRunningScript* S) {
-    return Read<std::string_view>(S).data();
+    const auto str = Read<std::string_view>(S);
+    assert(str.data()[str.size() + 1] == 0); // Check is 0 terminated - Not using `str[]` here as it would assert.
+    return str.data();
 }
 
 }; // namespace script

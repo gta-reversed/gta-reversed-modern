@@ -11,39 +11,65 @@ template<typename T>
 auto& PoolOf();
 
 template<>
-auto& PoolOf<CPed>() { return *GetPedPool(); }
-template<>
-auto& PoolOf<CVehicle>() { return *GetVehiclePool(); }
-template<>
-auto& PoolOf<CBuilding>() { return *GetBuildingPool(); }
-template<>
-auto& PoolOf<CObject>() { return *GetObjectPool(); }
-template<>
-auto& PoolOf<CDummy>() { return *GetDummyPool(); }
-template<>
 auto& PoolOf<CColModel>() { return *GetColModelPool(); }
-template<>
-auto& PoolOf<CTask>() { return *GetTaskPool(); }
+
 template<>
 auto& PoolOf<CPedIntelligence>() { return *GetPedIntelligencePool(); }
+
 template<>
 auto& PoolOf<CPtrNodeSingleLink>() { return *GetPtrNodeSingleLinkPool(); }
+
 template<>
 auto& PoolOf<CPtrNodeDoubleLink>() { return *GetPtrNodeDoubleLinkPool(); }
+
 template<>
 auto& PoolOf<CEntryInfoNode>() { return *GetEntryInfoNodePool(); }
+
 template<>
 auto& PoolOf<CPointRoute>() { return *GetPointRoutePool(); }
+
 template<>
 auto& PoolOf<CPatrolRoute>() { return *GetPatrolRoutePool(); }
-template<>
-auto& PoolOf<CEvent>() { return *GetEventPool(); }
+
 template<>
 auto& PoolOf<CNodeRoute>() { return *GetNodeRoutePool(); }
+
 template<>
 auto& PoolOf<CTaskAllocator>() { return *GetTaskAllocatorPool(); }
+
 template<>
 auto& PoolOf<CPedAttractor>() { return *GetPedAttractorPool(); }
+
+/*
+* Pools of derived types
+*/
+template<typename T>
+    requires std::is_base_of_v<CPed, T>
+auto& PoolOf() { return *GetPedPool(); }
+
+template<typename T>
+    requires std::is_base_of_v<CVehicle, T>
+auto& PoolOf() { return *GetVehiclePool(); }
+
+template<typename T>
+    requires std::is_base_of_v<CBuilding, T>
+auto& PoolOf() { return *GetBuildingPool(); }
+
+template<typename T>
+    requires std::is_base_of_v<CObject, T>
+auto& PoolOf() { return *GetObjectPool(); }
+
+template<typename T>
+    requires std::is_base_of_v<CDummy, T>
+auto& PoolOf() { return *GetDummyPool(); }
+
+template<typename T>
+    requires std::is_base_of_v<CTask, T>
+auto& PoolOf() { return *GetTaskPool(); }
+
+template<typename T>
+    requires std::is_base_of_v<CEvent, T>
+auto& PoolOf() { return *GetEventPool(); }
 }; // detail
 
 /*!
