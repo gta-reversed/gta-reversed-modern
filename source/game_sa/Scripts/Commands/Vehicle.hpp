@@ -7,6 +7,7 @@
 #include "TheCarGenerators.h"
 #include "CommandParser/Parser.hpp"
 using namespace notsa::script;
+
 /*!
 * Various vehicle commands
 */
@@ -22,12 +23,12 @@ void RemoveRCBuggy() {
 REGISTER_COMMAND_HANDLER(COMMAND_REMOVE_RC_BUGGY, RemoveRCBuggy);
 
 void SetCarProofs(CVehicle& veh, bool bullet, bool fire, bool explosion, bool collision, bool melee) {
-    auto& flags = veh.physicalFlags;
-    flags.bBulletProof = bullet;
-    flags.bFireProof = fire;
+    auto& flags           = veh.physicalFlags;
+    flags.bBulletProof    = bullet;
+    flags.bFireProof      = fire;
     flags.bExplosionProof = explosion;
     flags.bCollisionProof = collision;
-    flags.bMeleeProof = melee;
+    flags.bMeleeProof     = melee;
 }
 REGISTER_COMMAND_HANDLER(COMMAND_SET_CAR_PROOFS, SetCarProofs);
 
@@ -70,7 +71,7 @@ bool IsSecondCarColor(CVehicle& veh, int32 color) {
 REGISTER_COMMAND_HANDLER(COMMAND_IS_SECOND_CAR_COLOUR, IsSecondCarColor);
 
 MultiRet<uint8, uint8> GetExtraCarColors(CVehicle& veh) {
-    return {veh.m_nTertiaryColor, veh.m_nQuaternaryColor}; // todo(izzotop): u8 or u32 output?
+    return {veh.m_nTertiaryColor, veh.m_nQuaternaryColor};
 }
 REGISTER_COMMAND_HANDLER(COMMAND_GET_EXTRA_CAR_COLOURS, GetExtraCarColors);
 
