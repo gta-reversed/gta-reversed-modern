@@ -258,9 +258,6 @@ void Render2dStuff() {
     CDarkel::DrawMessages();
     CGarages::PrintMessages();
     CFont::DrawFonts();
-
-    // NOTSA: ImGui menu draw loop
-    notsa::ui::UIRenderer::GetSingleton().DrawLoop();
 }
 
 // 0x53E160
@@ -357,6 +354,10 @@ void Idle(void* param) {
     CCredits::Render();
     CDebug::DebugDisplayTextBuffer();
     FlushObrsPrintfs();
+
+    // NOTSA: ImGui menu draw loop
+    notsa::ui::UIRenderer::GetSingleton().DrawLoop();
+
     RwCameraEndUpdate(Scene.m_pRwCamera);
     RsCameraShowRaster(Scene.m_pRwCamera);
 }
@@ -403,6 +404,9 @@ void FrontendIdle() {
         CFont::DrawFonts();
         CDebug::DebugDisplayTextBuffer();
         FlushObrsPrintfs();
+
+        // NOTSA: ImGui menu draw loop
+        notsa::ui::UIRenderer::GetSingleton().DrawLoop();
 
         RwCameraEndUpdate(Scene.m_pRwCamera);
         RsCameraShowRaster(Scene.m_pRwCamera);
