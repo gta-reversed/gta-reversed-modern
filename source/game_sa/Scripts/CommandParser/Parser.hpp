@@ -16,6 +16,7 @@ OpcodeResult CollectArgsAndCall(CRunningScript* S, T_FnRet(*CommandFn)(T_FnArgs.
         const auto CallCommandFn = [&] {
             return std::invoke(CommandFn, std::forward<T_CollectedArgs>(args)...);
         };
+
         if constexpr (std::is_same_v<T_FnRet, void>) {
             CallCommandFn(); // Returns void, nothing to push
         } else {
@@ -29,12 +30,20 @@ OpcodeResult CollectArgsAndCall(CRunningScript* S, T_FnRet(*CommandFn)(T_FnArgs.
         return OR_CONTINUE;
     } else {
         // Not enough args, collect more.
-        return CollectArgsAndCall(
-            S,
-            CommandFn,
-            std::forward<T_CollectedArgs>(args)..., // Forward read ones
-            notsa::script::Read<nth_element_t<sizeof...(T_CollectedArgs), T_FnArgs...>>(S) // Read next parameter
-        ); 
+        try {
+            return CollectArgsAndCall(
+                S,
+                CommandFn,
+                std::forward<T_CollectedArgs>(args)..., // Forward read ones
+                notsa::script::Read<nth_element_t<sizeof...(T_CollectedArgs), T_FnArgs...>>(S) // Read next parameter
+            ); 
+        } catch (const notsa::script::detail::ArgReaderIgnorableException&) {
+            // In cases the argument parser has errored out we still
+            // have to read all values before returning.
+            // Reason: The IP has to be increased
+            ((void)(notsa::script::Read<T_FnArgs>(S)), ...);
+            return OR_CONTINUE;
+        }
     }
 }
 }; // namespace detail

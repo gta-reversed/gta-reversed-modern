@@ -78,6 +78,9 @@ struct tScriptCheckpoint {
         m_nId        = 1;
         m_Checkpoint = nullptr;
     }
+
+    //! Script thing ID
+    auto GetId() { return m_nId; }
 };
 VALIDATE_SIZE(tScriptCheckpoint, 0x8);
 
@@ -91,6 +94,9 @@ struct tScriptEffectSystem {
         m_nId       = 1;
         m_pFxSystem = nullptr;
     }
+
+    // Script thing ID
+    auto GetId() { return m_nId; }
 };
 VALIDATE_SIZE(tScriptEffectSystem, 0x8);
 
@@ -102,6 +108,9 @@ struct tScriptSequence {
         m_bUsed = false;
         m_nId   = 1;
     }
+
+    //! Script thing ID
+    auto GetId() { return m_nId; }
 };
 VALIDATE_SIZE(tScriptSequence, 0x4);
 
@@ -215,6 +224,9 @@ struct tScriptSearchlight {
     CVector  m_TargetSpot{};
     CVector  vf64{};
     CVector  vf70{};
+
+    //! Script thing ID
+    auto GetId() { return m_nId; }
 };
 VALIDATE_SIZE(tScriptSearchlight, 0x7C);
 
@@ -241,6 +253,9 @@ struct tScriptSphere {
         m_nId       = 0;
         m_fRadius   = 0.0f;
     }
+
+    // Script thing ID
+    auto GetId() { return m_nUniqueId; }
 };
 VALIDATE_SIZE(tScriptSphere, 0x18);
 
@@ -319,11 +334,7 @@ public:
     static inline uint16& NumberOfEntriesInSwitchTable = *reinterpret_cast<uint16*>(0xA43F50);
     static inline uint16& NumberOfEntriesStillToReadForSwitch = *reinterpret_cast<uint16*>(0xA43F60);
 
-    static inline std::array<tScriptCheckpoint, MAX_NUM_SCRIPT_CHECKPOINTS>&                     ScriptCheckpointArray          = *(std::array<tScriptCheckpoint, MAX_NUM_SCRIPT_CHECKPOINTS>*)0xA44070;
-    static inline uint16& NumberOfScriptCheckpoints = *reinterpret_cast<uint16*>(0xA44068);
 
-    static inline std::array<tScriptEffectSystem, MAX_NUM_SCRIPT_EFFECT_SYSTEMS>&                ScriptEffectSystemArray        = *(std::array<tScriptEffectSystem, MAX_NUM_SCRIPT_EFFECT_SYSTEMS>*)0xA44110;
-    static inline std::array<tScriptSequence, MAX_NUM_SCRIPT_SEQUENCE_TASKS>&                    ScriptSequenceTaskArray        = *(std::array<tScriptSequence, MAX_NUM_SCRIPT_SEQUENCE_TASKS>*)0xA43F68;
     static inline std::array<int16, MAX_NUM_CARDS>&                                              CardStack                      = *(std::array<int16, MAX_NUM_CARDS>*)0xA44218;
     static inline std::array<int32, MAX_NUM_MISSION_SCRIPTS>&                                    MultiScriptArray               = *(std::array<int32, MAX_NUM_MISSION_SCRIPTS>*)0xA444C8;
     static inline std::array<tScriptConnectLodsObject, MAX_NUM_SCRIPT_CONNECT_LODS_OBJECTS>&     ScriptConnectLodsObjects       = *(std::array<tScriptConnectLodsObject, MAX_NUM_SCRIPT_CONNECT_LODS_OBJECTS>*)0xA44800;
@@ -342,8 +353,6 @@ public:
 
     static inline std::array<tScriptBrainWaitEntity, MAX_NUM_ENTITIES_WAITING_FOR_SCRIPT_BRAIN>& EntitiesWaitingForScriptBrain  = *(std::array<tScriptBrainWaitEntity, MAX_NUM_ENTITIES_WAITING_FOR_SCRIPT_BRAIN>*)0xA476B0;
     static inline std::array<CRunningScript, MAX_NUM_SCRIPTS>&                                   ScriptsArray                   = *(std::array<CRunningScript, MAX_NUM_SCRIPTS>*)0xA8B430;
-    static inline std::array<tScriptSphere, MAX_NUM_SCRIPT_SPHERES>&                             ScriptSphereArray              = *(std::array<tScriptSphere, MAX_NUM_SCRIPT_SPHERES>*)0xA91268;
-
     static inline std::array<tScriptText, MAX_NUM_INTRO_TEXT_LINES>&                             IntroTextLines                 = *(std::array<tScriptText, MAX_NUM_INTRO_TEXT_LINES>*)0xA913E8;
     static inline uint16& NumberOfIntroTextLinesThisFrame = *reinterpret_cast<uint16*>(0xA44B68);
 
@@ -352,11 +361,22 @@ public:
 
     static inline std::array<CSprite2d, MAX_NUM_SCRIPT_SPRITES>&                                 ScriptSprites                  = *(std::array<CSprite2d, MAX_NUM_SCRIPT_SPRITES>*)0xA94B68;
 
-    static inline std::array<tScriptSearchlight, MAX_NUM_SCRIPT_SEARCH_LIGHT>&                   ScriptSearchLightArray         = *(std::array<tScriptSearchlight, MAX_NUM_SCRIPT_SEARCH_LIGHT>*)0xA94D68;
-    static inline uint16& NumberOfScriptSearchLights = *reinterpret_cast<uint16*>(0xA90830);
-
     static inline uint16& NumberOfExclusiveMissionScripts = *reinterpret_cast<uint16*>(0xA444B8);
     static inline uint16& NumberOfMissionScripts = *reinterpret_cast<uint16*>(0xA444BC);
+
+    //
+    // Script things
+    //
+
+    static inline std::array<tScriptSphere, MAX_NUM_SCRIPT_SPHERES>&                             ScriptSphereArray              = *(std::array<tScriptSphere, MAX_NUM_SCRIPT_SPHERES>*)0xA91268;
+    static inline std::array<tScriptEffectSystem, MAX_NUM_SCRIPT_EFFECT_SYSTEMS>&                ScriptEffectSystemArray        = *(std::array<tScriptEffectSystem, MAX_NUM_SCRIPT_EFFECT_SYSTEMS>*)0xA44110;
+    static inline std::array<tScriptSearchlight, MAX_NUM_SCRIPT_SEARCH_LIGHT>&                   ScriptSearchLightArray         = *(std::array<tScriptSearchlight, MAX_NUM_SCRIPT_SEARCH_LIGHT>*)0xA94D68;
+
+    static inline std::array<tScriptSequence, MAX_NUM_SCRIPT_SEQUENCE_TASKS>&                    ScriptSequenceTaskArray        = *(std::array<tScriptSequence, MAX_NUM_SCRIPT_SEQUENCE_TASKS>*)0xA43F68;
+    static inline uint16&                                                                        NumberOfScriptSearchLights     = *reinterpret_cast<uint16*>(0xA90830);
+
+    static inline std::array<tScriptCheckpoint, MAX_NUM_SCRIPT_CHECKPOINTS>&                     ScriptCheckpointArray          = *(std::array<tScriptCheckpoint, MAX_NUM_SCRIPT_CHECKPOINTS>*)0xA44070;
+    static inline uint16&                                                                        NumberOfScriptCheckpoints      = *reinterpret_cast<uint16*>(0xA44068);
 
     static inline bool& DbgFlag = *reinterpret_cast<bool*>(0x859CF8);
     static inline void*& SwitchDefaultAddress = *reinterpret_cast<void**>(0xA43F54);

@@ -10,6 +10,22 @@
 
 namespace notsa {
 namespace script {
+namespace detail {
+//! Base exception for argument reader stuff
+class ArgReaderException : public std::exception {
+    /* nothing */
+};
+
+//! Exception that can be ignored by the command parser
+class ArgReaderIgnorableException : public ArgReaderException {
+    /* nothing */
+};
+
+//! Exception for when a script thing is invalid (dead) - This is completely normal
+class ArgReaderInvalidScriptThingException : public ArgReaderIgnorableException {
+    /* nothing */
+};
+};
 
 //! Check if `Derived` is derived from `Base` but isn't `Base`
 template<typename Base, typename Derived>
@@ -219,6 +235,50 @@ const char* Read<const char*>(CRunningScript* S) {
     const auto str = Read<std::string_view>(S);
     assert(str.data()[str.size()] == 0); // Check if str is 0 terminated - Not using `str[]` here as it would assert.
     return str.data();
+}
+
+//
+// SCRIPT THING
+//
+
+namespace detail {
+struct ScriptThingInfo {
+    uint16 arrayIdx; // Index in the array of script things
+    uint16 id;       // Array of the script thing 
+};
+
+auto ReadScriptThingInfo(CRunningScript* S) {
+    const auto info = Read<uint32>(S);
+    if (info == (uint32)(-1)) {
+        throw ::notsa::script::detail::ArgReaderInvalidScriptThingException{};
+    }
+    return detail::ScriptThingInfo{ (uint16)(HIWORD(info)), (uint16)(LOWORD(info)) };
+}
+
+template<typename T>
+auto GetScriptThingAtIndex(uint32 index);
+
+template<>
+auto GetScriptThingAtIndex<tScriptSphere>(uint32 index) {
+    return &CTheScripts::ScriptSphereArray[index];
+}
+
+template<>
+auto GetScriptThingAtIndex<tScriptEffectSystem>(uint32 index) {
+    return &CTheScripts::ScriptEffectSystemArray[index];
+}
+};
+
+//! Generic implementation of reading a script thing
+template<typename T>
+    requires (detail::GetScriptThingAtIndex<T>())
+T Read(CRunningScript* S) {
+    const auto [index, id] = detail::ReadScriptThingInfo(S);
+    T* thing = detail::GetScriptThingAtIndex<T>(index);
+    if (!thing || thing->GetId() != id) {
+        throw detail::ArgReaderInvalidScriptThingException{};
+    }
+    return *thing;
 }
 
 }; // namespace script
