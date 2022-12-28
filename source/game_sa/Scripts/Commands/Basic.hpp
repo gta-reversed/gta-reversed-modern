@@ -242,7 +242,7 @@ REGISTER_COMMAND_HANDLER(COMMAND_GOTO, [](CRunningScript& S, int32 address) {
 });
 
 REGISTER_COMMAND_HANDLER(COMMAND_GOTO_IF_FALSE, [](CRunningScript& S, int32 goToAddress) {
-    if (S.m_bCondResult) {
+    if (!S.m_bCondResult) {
         S.UpdatePC(goToAddress);
     }
 });
