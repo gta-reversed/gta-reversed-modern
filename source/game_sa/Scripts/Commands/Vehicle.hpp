@@ -69,21 +69,12 @@ bool IsSecondCarColor(CVehicle& veh, int32 color) {
     return veh.m_nSecondaryColor == color;
 }
 REGISTER_COMMAND_HANDLER(COMMAND_IS_SECOND_CAR_COLOUR, IsSecondCarColor);
-
 MultiRet<uint8, uint8> GetExtraCarColors(CVehicle& veh) {
     return {veh.m_nTertiaryColor, veh.m_nQuaternaryColor};
 }
 REGISTER_COMMAND_HANDLER(COMMAND_GET_EXTRA_CAR_COLOURS, GetExtraCarColors);
 
 void FixCar(CVehicle& vehicle) {
-    vehicle.Fix();
-    vehicle.m_fHealth = 1000.0f;
-}
-REGISTER_COMMAND_HANDLER(COMMAND_FIX_CAR, FixCar);
-
-void ImproveCarByCheating(CVehicle& vehicle, bool enable) {
-    vehicle.vehicleFlags.bUseCarCheats = enable;
-}
 REGISTER_COMMAND_HANDLER(COMMAND_IMPROVE_CAR_BY_CHEATING, ImproveCarByCheating);
 
 void PopCarBootUsingPhysics(CAutomobile& automobile) {
