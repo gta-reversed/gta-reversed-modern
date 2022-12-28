@@ -281,7 +281,6 @@ REGISTER_COMMAND_HANDLER(COMMAND_ANDOR, [](CRunningScript& S, int32 logicalOp) {
     return OR_CONTINUE;
 });
 
-
 //
 // Script loading, stopping
 //
