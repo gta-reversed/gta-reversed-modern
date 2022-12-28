@@ -5,16 +5,37 @@
 * Various utility commands
 */
 
-REGISTER_COMMAND_HANDLER(COMMAND_GET_DISTANCE_BETWEEN_COORDS_2D, [](CVector2D a, CVector2D b) { return DistanceBetweenPoints2D(a, b); });
+auto GetDistanceBetweenCoords2d(CVector2D a, CVector2D b) {
+    return DistanceBetweenPoints2D(a, b);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_GET_DISTANCE_BETWEEN_COORDS_2D, GetDistanceBetweenCoords2d);
 
-REGISTER_COMMAND_HANDLER(COMMAND_GET_DISTANCE_BETWEEN_COORDS_3D, [](CVector a, CVector b) { return DistanceBetweenPoints(a, b); });
+auto GetDistanceBetweenCoords3d(CVector a, CVector b) {
+    return DistanceBetweenPoints(a, b);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_GET_DISTANCE_BETWEEN_COORDS_3D, GetDistanceBetweenCoords3d);
 
-REGISTER_COMMAND_HANDLER(COMMAND_GENERATE_RANDOM_INT, [](int32& var) { var = CGeneral::GetRandomNumber(); });
+auto GenerateRandomInt(int32& var) {
+    var = CGeneral::GetRandomNumber();
+}
+REGISTER_COMMAND_HANDLER(COMMAND_GENERATE_RANDOM_INT, GenerateRandomInt);
 
-REGISTER_COMMAND_HANDLER(COMMAND_GENERATE_RANDOM_INT_IN_RANGE, [](int32 a, int32 b) { return CGeneral::GetRandomNumberInRange(a, b); });
+auto GenerateRandomIntInRange(int32 a, int32 b) {
+    return CGeneral::GetRandomNumberInRange(a, b);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_GENERATE_RANDOM_INT_IN_RANGE, GenerateRandomIntInRange);
 
-REGISTER_COMMAND_HANDLER(COMMAND_GENERATE_RANDOM_FLOAT_IN_RANGE, [](float a, float b) { return CGeneral::GetRandomNumberInRange(a, b); });
+auto GenerateRandomFloatInRange(float a, float b) {
+    return CGeneral::GetRandomNumberInRange(a, b);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_GENERATE_RANDOM_FLOAT_IN_RANGE, GenerateRandomFloatInRange);
 
-REGISTER_COMMAND_HANDLER(COMMAND_SIN, [](float deg) { return std::sinf(DegreesToRadians(deg)); });
+auto Sin(float deg) {
+    return std::sinf(DegreesToRadians(deg));
+}
+REGISTER_COMMAND_HANDLER(COMMAND_SIN, Sin);
 
-REGISTER_COMMAND_HANDLER(COMMAND_COS, [](float deg) { return std::cosf(DegreesToRadians(deg)); });
+auto Cos(float deg) {
+    return std::cosf(DegreesToRadians(deg));
+}
+REGISTER_COMMAND_HANDLER(COMMAND_COS, Cos);
