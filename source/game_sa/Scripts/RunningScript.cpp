@@ -5,6 +5,10 @@
 #include "CarGenerator.h"
 #include "Hud.h"
 
+//! Define it to dump out all commands that don't have a custom handler (that is, they aren't reversed)
+//! Makes compilation slow, so don't enable unless necessary!
+//#define DUMP_NOT_REVERSED_COMMANDS
+
 // Commands stuff
 #include "CommandParser/Parser.hpp"
 
@@ -35,6 +39,7 @@
 #include "Commands/Pad.hpp"
 #include "Commands/Script.hpp"
 #include "Commands/Text.hpp"
+#include "Commands/Unused.hpp"
 /*
 #include "Commands/CLEO/AudioStream.hpp"
 #include "Commands/CLEO/Char.hpp"
@@ -56,8 +61,8 @@
 */
 // Must be included after the commands
 #include "CommandParser/LUTGenerator.hpp"
-
 #include "ReversibleHooks/ReversibleHook/ScriptCommand.h"
+
 // https://library.sannybuilder.com/#/sa
 
 static auto s_CommandHandlerLUT = notsa::script::GenerateLUT();
@@ -107,7 +112,7 @@ void CRunningScript::InjectHooks() {
     RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
     RH_ScopedInstall(Process, 0x469F00);
 
-    // Enable in `StdInc.h` if needed (Don't forget to disabled it when committing)
+    // To enable use premake: `./premake5.exe vs2022 --allow-script-cmd-hooks`
 #ifdef ENABLE_SCRIPT_COMMAND_HOOKS
     const auto HookCommand = []<size_t Idx>() {
         using namespace ReversibleHooks::ReversibleHook;
@@ -118,6 +123,22 @@ void CRunningScript::InjectHooks() {
     };
     notsa::script::IterateCommandIDs(HookCommand);
 #endif
+
+#ifdef DUMP_NOT_REVERSED_COMMANDS
+    CFileMgr::SetDir("");
+    const auto f = CFileMgr::OpenFile("not_reversed_script_cmds.txt", "w"); // Output usually in `<main gta dir>/scripts`
+    const auto DumpHookCommands = [&]<size_t Idx>() {
+        using namespace ReversibleHooks::ReversibleHook;
+        if constexpr (!notsa::script::CommandHasCustomHandler<(eScriptCommands)Idx>()) {
+            const auto name = ::notsa::script::GetScriptCommandName((eScriptCommands)Idx);
+            fprintf(f, "%.*s\n", (int)(name.size()), name.data());
+        }
+    };
+    notsa::script::IterateCommandIDs(DumpHookCommands);
+    CFileMgr::CloseFile(f);
+    DEV_LOG("Script cmds dumped!");
+#endif
+
 }
 
 // 0x4648E0

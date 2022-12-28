@@ -14,6 +14,13 @@ namespace script {
 /// Type of the function used in the LUT
 using T_LUTFunction = OpcodeResult(*)(CRunningScript*);
 
+
+//! Whenever command has a handler made by us (or uses the default GTA one)
+template<eScriptCommands Command>
+static constexpr auto CommandHasCustomHandler() {
+    return CommandHandler<Command>::value;
+}
+
 namespace detail {
 
 /// Wrap `CRunningScript::ProcessCommand` into a type function with type `T_LUTFunction`
