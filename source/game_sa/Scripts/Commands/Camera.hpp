@@ -32,3 +32,8 @@ void AttachCameraToVehicleLookAtVehicle(CVehicle& attachTo, CVector offset, CVeh
     );
 }
 REGISTER_COMMAND_HANDLER(COMMAND_ATTACH_CAMERA_TO_VEHICLE_LOOK_AT_VEHICLE, AttachCameraToVehicleLookAtVehicle);
+
+void DoCameraBump(float horizontal, float vetical) {
+    CCamera::GetActiveCamera().DoCamBump(horizontal, vetical);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_DO_CAMERA_BUMP, DoCameraBump);
