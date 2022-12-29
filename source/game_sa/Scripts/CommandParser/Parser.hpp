@@ -22,7 +22,7 @@ OpcodeResult CollectArgsAndCall(CRunningScript* S, eScriptCommands command, T_Fn
         } else {
             T_FnRet ret = CallCommandFn();
             if constexpr (std::is_same_v<T_FnRet, OpcodeResult>) { 
-                return CallCommandFn();
+                return ret;
             } else {
                 StoreArg(S, std::forward<T_FnRet>(ret)); // Store result to script
             }
