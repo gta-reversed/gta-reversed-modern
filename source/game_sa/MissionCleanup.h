@@ -62,6 +62,11 @@ public:
 
     // Checks if collision has loaded for mission objects
     void CheckIfCollisionHasLoadedForMissionObjects();
+
+
+    // QoL (NOTSA)
+    void AddEntityToList(CPed& ped);
+    void AddEntityToList(CVehicle& veh);
 };
 
 VALIDATE_SIZE(CMissionCleanup, 0x25C);

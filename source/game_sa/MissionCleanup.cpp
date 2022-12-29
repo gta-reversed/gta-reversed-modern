@@ -54,3 +54,13 @@ void CMissionCleanup::RemoveEntityFromList(int32 handle, MissionCleanUpEntityTyp
 void CMissionCleanup::CheckIfCollisionHasLoadedForMissionObjects() {
     ((void(__thiscall*)(CMissionCleanup*))0x4652D0)(this);
 }
+
+// NOTSA
+void CMissionCleanup::AddEntityToList(CPed& ped) {
+    return AddEntityToList(GetPedPool()->GetRef(&ped), MISSION_CLEANUP_ENTITY_TYPE_PED);
+}
+
+// NOTSA
+void CMissionCleanup::AddEntityToList(CVehicle& veh) {
+    return AddEntityToList(GetVehiclePool()->GetRef(&veh), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
+}
