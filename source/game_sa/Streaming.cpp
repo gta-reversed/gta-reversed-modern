@@ -41,8 +41,6 @@ uint16& CStreaming::ms_loadedGangCars = *reinterpret_cast<uint16*>(0x8E4BA8);
 uint16& CStreaming::ms_loadedGangs = *reinterpret_cast<uint16*>(0x8E4BAC);
 
 int32& CStreaming::ms_numPedsLoaded = *reinterpret_cast<int32*>(0x8E4BB0);
-int32(&CStreaming::ms_pedsLoaded)[8] = *(int32(*)[8])0x8E4C00;
-int32 (&CStreaming::ms_NextPedToLoadFromGroup)[18] = *reinterpret_cast<int32(*)[18]>(0x8E4BB8);
 int32& CStreaming::ms_currentZoneType = *reinterpret_cast<int32*>(0x8E4C20);
 CLoadedCarGroup& CStreaming::ms_vehiclesLoaded = *reinterpret_cast<CLoadedCarGroup*>(0x8E4C24);
 CStreamingInfo*& CStreaming::ms_pEndRequestedList = *reinterpret_cast<CStreamingInfo**>(0x8E4C54);
@@ -3339,14 +3337,14 @@ void CStreaming::StreamPedsForInterior(int32 interiorType) {
         ePopcyclePedGroup husbandGroupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_HUSBANDS, CPopulation::CurrentWorldZone);
         int32 husbandModelId = CPopulation::GetPedGroupModelId(husbandGroupId, rndHusband);
         RequestModel(husbandModelId, STREAMING_KEEP_IN_MEMORY);
-        ms_pedsLoaded[0] = husbandModelId;
+        ms_pedsLoaded[0] = (eModelID)husbandModelId;
         ms_numPedsLoaded++;
 
         // Load wife
         ePopcyclePedGroup wifeGroupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_WIVES, CPopulation::CurrentWorldZone);
         int32 wifeModelId = CPopulation::GetPedGroupModelId(wifeGroupId, randomWife);
         RequestModel(wifeModelId, STREAMING_KEEP_IN_MEMORY);
-        ms_pedsLoaded[1] = wifeModelId;
+        ms_pedsLoaded[1] = (eModelID)wifeModelId;
         ms_numPedsLoaded++;
 
         break;
@@ -3356,7 +3354,7 @@ void CStreaming::StreamPedsForInterior(int32 interiorType) {
         int32 modelId = CPopulation::GetPedGroupModelId(groupId, CGeneral::GetRandomNumber() % CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_SHOPKEEPERS, 0));
         ClearSlots(1);
         RequestModel(modelId, STREAMING_KEEP_IN_MEMORY);
-        ms_pedsLoaded[0] = modelId;
+        ms_pedsLoaded[0] = (eModelID)modelId;
         ms_numPedsLoaded++;
         break;
     }
@@ -3369,7 +3367,7 @@ void CStreaming::StreamPedsForInterior(int32 interiorType) {
         for (int32 i = 0; i < TOTAL_LOADED_PEDS; i++) {
             int32 modelId = CPopulation::GetPedGroupModelId(groupId, (i + random) % numPeds);
             RequestModel(modelId, STREAMING_KEEP_IN_MEMORY);
-            ms_pedsLoaded[i] = modelId;
+            ms_pedsLoaded[i] = (eModelID)modelId;
             ms_numPedsLoaded++;
         }
         break;
@@ -3397,7 +3395,7 @@ void CStreaming::StreamPedsIntoRandomSlots(int32 modelArray[TOTAL_LOADED_PEDS]) 
             }
             // Load model into slot
             RequestModel(modelArray[i], STREAMING_KEEP_IN_MEMORY);
-            ms_pedsLoaded[i] = modelArray[i];
+            ms_pedsLoaded[i] = (eModelID)modelArray[i];
             ms_numPedsLoaded++;
         } else if (modelArray[i] == UNLOAD_MODEL) { // Unload model from slot
             if (ms_pedsLoaded[i] >= 0) {
@@ -3569,7 +3567,7 @@ void CStreaming::StreamZoneModels(const CVector& unused) {
 
                    int32 freeSlot = 0;
                    for (; ms_pedsLoaded[freeSlot] >= 0; freeSlot++); // Find free slot
-                   ms_pedsLoaded[freeSlot] = pedModelId;
+                   ms_pedsLoaded[freeSlot] = (eModelID)pedModelId;
 
                    timeBeforeNextLoad = 300;
                }
@@ -3597,7 +3595,7 @@ void CStreaming::StreamZoneModels(const CVector& unused) {
             } else {
                 RequestModel(pedModelId, STREAMING_KEEP_IN_MEMORY | STREAMING_GAME_REQUIRED);
                 GetInfo(pedModelId).ClearFlags(STREAMING_GAME_REQUIRED);
-                ms_pedsLoaded[i] = pedModelId;
+                ms_pedsLoaded[i] = (eModelID)pedModelId;
                 ms_numPedsLoaded++;
             }
         }
