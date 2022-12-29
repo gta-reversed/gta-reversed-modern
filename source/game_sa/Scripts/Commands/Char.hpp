@@ -34,14 +34,15 @@ auto GetCharVelocity(CPed& ped) {
 }
 REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_VELOCITY, GetCharVelocity);
 
-auto SetCharRotation(CPed& ped) {
-
+auto SetCharRotation(CPed& ped, CVector angles) {
+    ped.SetOrientation(angles * DegreesToRadians(1.0f)); // make euler angles from degrees
+    CWorld::Add(&ped);
 }
 REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_ROTATION, SetCharRotation);
 
 auto SetCharAllowedToDuck(CPed& ped, CVector rotdeg) {
     CWorld::Remove(&ped);
-    ped.SetOrientation(rotdeg * RWDEG2RAD(1.f)); // degrees => radians
+    ped.SetOrientation(rotdeg * DegreesToRadians(1.f)); // degrees => radians
     CWorld::Add(&ped);
 }
 REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_ALLOWED_TO_DUCK, SetCharAllowedToDuck);
