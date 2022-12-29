@@ -5,10 +5,13 @@
 #include <TimeCycle.h>
 #include <ePedBones.h>
 
+#include <Commands/Utility.hpp>
+
 #include "CommandParser/Parser.hpp"
+#include <TaskSimpleCarSetPedInAsDriver.h>
 
 /*!
-* Various utility commands
+* Various character (ped) commands
 */
 
 void SetCharProofs(CPed& ped, bool bullet, bool fire, bool explosion, bool collision, bool melee) {
@@ -96,7 +99,7 @@ auto SetCharCoordinates(CPed& ped, CVector coords) {
 REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_COORDINATES, SetCharCoordinates);
 
 auto IsCharStillAlive(CPed& ped) {
-    NOTSA_UNREACHABLE(); // I can't find the code
+    return ::notsa::script::detail::NotImplemented(); // I can't find the code
 }
 REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_STILL_ALIVE, IsCharStillAlive);
 
@@ -112,7 +115,7 @@ auto IsCharInArea2D(CRunningScript& S, CPed& ped, CVector2D a, CVector2D b, bool
 }
 REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_AREA_2D, IsCharInArea2D);
 
-auto IsCharInArea3d(CRunningScript& S, CPed& ped, CVector a, CVector b, bool highlightArea) {
+auto IsCharInArea3D(CRunningScript& S, CPed& ped, CVector a, CVector b, bool highlightArea) {
     if (highlightArea) {
         CTheScripts::HighlightImportantArea(reinterpret_cast<int32>(&S) + reinterpret_cast<int32>(S.m_IP), a.x, a.y, b.x, b.y, (a.z + b.z) / 2.f);
     }
@@ -122,7 +125,7 @@ auto IsCharInArea3d(CRunningScript& S, CPed& ped, CVector a, CVector b, bool hig
         ? Check(*ped.m_pVehicle)
         : Check(ped);
 }
-REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_AREA_3D, IsCharInArea3d);
+REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_AREA_3D, IsCharInArea3D);
 
 auto StoreCarCharIsIn(CRunningScript& S, CPed& ped) { // 0x469481
     const auto veh = ped.GetVehicleIfInOne();
@@ -174,3 +177,266 @@ auto IsCharInAnyCar(CPed& ped) {
     return ped.IsInVehicle();
 }
 REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANY_CAR, IsCharInAnyCar);
+
+auto LocatePlayerAnyMeansChar2D() {
+    return ::notsa::script::detail::NotImplemented(); // Can't find code
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_PLAYER_ANY_MEANS_CHAR_2D, LocatePlayerAnyMeansChar2D);
+
+auto LocatePlayerOnFootChar2D(CPed& ped) {
+    return ::notsa::script::detail::NotImplemented(); // Can't find code
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_PLAYER_ON_FOOT_CHAR_2D, LocatePlayerOnFootChar2D);
+
+auto LocatePlayerInCarChar2D(CPed& ped) {
+    return ::notsa::script::detail::NotImplemented(); // Can't find code
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_PLAYER_IN_CAR_CHAR_2D, LocatePlayerInCarChar2D);
+
+//
+// Locate[Stopped]Character(Any Means/On Foot/In Car)
+//
+
+//! Does the usual checks
+bool DoLocateCharChecks(CPed& ped, bool mustBeInCar, bool mustBeOnFoot, bool mustBeStopped) {
+    if (mustBeInCar && !ped.IsInVehicle()) {
+        return false;
+    }
+    if (mustBeOnFoot && ped.IsInVehicle()) {
+        return false;
+    }
+    if (mustBeStopped && !CTheScripts::IsPedStopped(&ped)) {
+        return false;
+    }
+    return true;
+}
+
+//! Check is char within 3D area (with some restrictions)
+bool LocateChar3D(CRunningScript& S, CPed& ped, CVector pos, CVector radius, bool highlightArea, bool mustBeInCar, bool mustBeOnFoot, bool mustBeStopped) {
+    const CBox bb{ pos - radius, pos + radius };
+    if (highlightArea) { // Highlight area every time
+        HighlightImportantArea(S, bb.m_vecMin, bb.m_vecMax);
+    }
+    if (!DoLocateCharChecks(ped, mustBeOnFoot, highlightArea, mustBeStopped)) {
+        return false;
+    }
+    return bb.IsPointInside(GetCharCoordinates(ped));
+}
+
+bool LocateChar2D(CRunningScript& S, CPed& ped, CVector2D pos, CVector2D radius, bool highlightArea, bool mustBeInCar, bool mustBeOnFoot, bool mustBeStopped) {
+    const CRect rect{ pos - radius, pos + radius };
+    if (highlightArea) { // Highlight area every time
+        HighlightImportantArea(S, rect.GetTopLeft(), rect.GetBottomRight());
+    }
+    if (!DoLocateCharChecks(ped, mustBeOnFoot, highlightArea, mustBeStopped)) {
+        return false;
+    }
+    if (CTheScripts::DbgFlag) {
+        CTheScripts::DrawDebugSquare(rect);
+    }
+    return rect.IsPointInside(GetCharCoordinates(ped));
+}
+
+auto LocateCharAnyMeans2D(CRunningScript& S, CPed& ped, CVector2D pos, CVector2D radius, bool highlightArea) {
+    return LocateChar2D(S, ped, pos, radius, highlightArea, false, false, false);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ANY_MEANS_2D, LocateCharAnyMeans2D);
+
+auto LocateCharOnFoot2D(CRunningScript& S, CPed& ped, CVector2D pos, CVector2D radius, bool highlightArea) {
+    return LocateChar2D(S, ped, pos, radius, highlightArea, false, true, false);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ON_FOOT_2D, LocateCharOnFoot2D);
+
+auto LocateCharInCar2D(CRunningScript& S, CPed& ped, CVector2D pos, CVector2D radius, bool highlightArea) {
+    return LocateChar2D(S, ped, pos, radius, highlightArea, true, false, false);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_IN_CAR_2D, LocateCharInCar2D);
+
+auto LocateStoppedCharAnyMeans2D(CRunningScript& S, CPed& ped, CVector2D pos, CVector2D radius, bool highlightArea) {
+    return LocateChar2D(S, ped, pos, radius, highlightArea, false, false, true);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_STOPPED_CHAR_ANY_MEANS_2D, LocateStoppedCharAnyMeans2D);
+
+auto LocateStoppedCharOnFoot2D(CRunningScript& S, CPed& ped, CVector2D pos, CVector2D radius, bool highlightArea) {
+    return LocateChar2D(S, ped, pos, radius, highlightArea, false, true, true);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_STOPPED_CHAR_ON_FOOT_2D, LocateStoppedCharOnFoot2D);
+
+auto LocateStoppedCharInCar2D(CRunningScript& S, CPed& ped, CVector2D pos, CVector2D radius, bool highlightArea) {
+    return LocateChar2D(S, ped, pos, radius, highlightArea, true, false, true);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_STOPPED_CHAR_IN_CAR_2D, LocateStoppedCharInCar2D);
+
+auto LocateCharAnyMeans3D(CRunningScript& S, CPed& ped, CVector pos, CVector radius, bool highlightArea) {
+    return LocateChar3D(S, ped, pos, radius, highlightArea, false, false, false);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ANY_MEANS_3D, LocateCharAnyMeans3D);
+
+auto LocateCharOnFoot3D(CRunningScript& S, CPed& ped, CVector pos, CVector radius, bool highlightArea) {
+    return LocateChar3D(S, ped, pos, radius, highlightArea, false, true, false);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ON_FOOT_3D, LocateCharOnFoot3D);
+
+auto LocateCharInCar3D(CRunningScript& S, CPed& ped, CVector pos, CVector radius, bool highlightArea) {
+    return LocateChar3D(S, ped, pos, radius, highlightArea, true, false, false);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_IN_CAR_3D, LocateCharInCar3D);
+
+auto LocateStoppedCharAnyMeans3D(CRunningScript& S, CPed& ped, CVector pos, CVector radius, bool highlightArea) {
+    return LocateChar3D(S, ped, pos, radius, highlightArea, false, false, true);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_STOPPED_CHAR_ANY_MEANS_3D, LocateStoppedCharAnyMeans3D);
+
+auto LocateStoppedCharOnFoot3D(CRunningScript& S, CPed& ped, CVector pos, CVector radius, bool highlightArea) {
+    return LocateChar3D(S, ped, pos, radius, highlightArea, false, true, true);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_STOPPED_CHAR_ON_FOOT_3D, LocateStoppedCharOnFoot3D);
+
+auto LocateStoppedCharInCar3D(CRunningScript& S, CPed& ped, CVector pos, CVector radius, bool highlightArea) {
+    return LocateChar3D(S, ped, pos, radius, highlightArea, true, false, true);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_STOPPED_CHAR_IN_CAR_3D, LocateStoppedCharInCar3D);
+
+auto LocatePlayerAnyMeansChar3D(CRunningScript& S, CPed& ped, CVector pos, CVector radius, bool highlightArea) {
+    return ::notsa::script::detail::NotImplemented(); // Can't find code
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_PLAYER_ANY_MEANS_CHAR_3D, LocatePlayerAnyMeansChar3D);
+
+auto LocatePlayerOnFootChar3D(CPed& ped, CVector pos, CVector radius, bool highlightArea) {
+    return ::notsa::script::detail::NotImplemented(); // Can't find code
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_PLAYER_ON_FOOT_CHAR_3D, LocatePlayerOnFootChar3D);
+
+auto LocatePlayerInCarChar3D(CRunningScript& S, CPed& ped, CVector pos, CVector radius, bool highlightArea) {
+    return ::notsa::script::detail::NotImplemented(); // Can't find code
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_PLAYER_IN_CAR_CHAR_3D, LocatePlayerInCarChar3D);
+
+bool LocateCharChar2D(CRunningScript& S, CPed& ped1, CPed& ped2, CVector2D radius, bool highlightArea, bool mustBeInCar, bool mustBeOnFoot) {
+    return LocateChar2D(S, ped1, ped2.GetPosition2D(), radius, highlightArea, mustBeInCar, mustBeOnFoot, false);
+}
+
+auto LocateCharAnyMeansChar2D(CRunningScript& S, CPed& ped1, CPed& ped2, CVector2D radius, bool highlightArea) {
+    return LocateCharChar2D(S, ped1, ped2, radius, highlightArea, false, false);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ANY_MEANS_CHAR_2D, LocateCharAnyMeansChar2D);
+
+auto LocateCharOnFootChar2D(CRunningScript& S, CPed& ped1, CPed& ped2, CVector2D radius, bool highlightArea) {
+    return LocateCharChar2D(S, ped1, ped2, radius, highlightArea, false, true);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ON_FOOT_CHAR_2D, LocateCharOnFootChar2D);
+
+auto LocateCharInCarChar2D(CRunningScript& S, CPed& ped1, CPed& ped2, CVector2D radius, bool highlightArea) {
+    return LocateCharChar2D(S, ped1, ped2, radius, highlightArea, true, false);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_IN_CAR_CHAR_2D, LocateCharInCarChar2D);
+
+bool LocateCharChar3D(CRunningScript& S, CPed& ped1, CPed& ped2, CVector radius, bool highlightArea, bool mustBeInCar, bool mustBeOnFoot) {
+    return LocateChar3D(S, ped1, ped2.GetPosition(), radius, highlightArea, mustBeInCar, mustBeOnFoot, false);
+}
+
+auto LocateCharAnyMeansChar3D(CRunningScript& S, CPed& ped1, CPed& ped2, CVector radius, bool highlightArea) {
+    return LocateCharChar3D(S, ped1, ped2, radius, highlightArea, false, false);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ANY_MEANS_CHAR_3D, LocateCharAnyMeansChar3D);
+
+auto LocateCharOnFootChar3D(CRunningScript& S, CPed& ped1, CPed& ped2, CVector radius, bool highlightArea) {
+    return LocateCharChar3D(S, ped1, ped2, radius, highlightArea, false, true);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ON_FOOT_CHAR_3D, LocateCharOnFootChar3D);
+
+auto LocateCharInCarChar3D(CRunningScript& S, CPed& ped1, CPed& ped2, CVector radius, bool highlightArea) {
+    return LocateCharChar3D(S, ped1, ped2, radius, highlightArea, true, false);
+}
+REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_IN_CAR_CHAR_3D, LocateCharInCarChar3D);
+
+auto IsCharDead(CPed* ped) {
+    return !ped || ped->IsStateDeadForScript();
+}
+REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_DEAD, IsCharDead);
+
+auto SetCharThreatSearch(CPed& ped) {
+
+}
+REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_THREAT_SEARCH, SetCharThreatSearch);
+
+auto SetCharThreatReaction(CPed& ped) {
+    return ::notsa::script::detail::NotImplemented();
+}
+REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_THREAT_REACTION, SetCharThreatReaction);
+
+auto SetCharObjNoObj(CPed& ped) {
+    return ::notsa::script::detail::NotImplemented();
+}
+REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_OBJ_NO_OBJ, SetCharObjNoObj);
+
+auto OrderCharToDriveCar(CPed& ped) {
+    return ::notsa::script::detail::NotImplemented();
+}
+REGISTER_COMMAND_HANDLER(COMMAND_ORDER_CHAR_TO_DRIVE_CAR, OrderCharToDriveCar);
+
+auto HasCharSpottedPlayer(CPed& ped) {
+    return ::notsa::script::detail::NotImplemented();
+}
+REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_SPOTTED_PLAYER, HasCharSpottedPlayer);
+
+auto OrderCharToBackdoor(CPed& ped) {
+    return ::notsa::script::detail::NotImplemented();
+}
+REGISTER_COMMAND_HANDLER(COMMAND_ORDER_CHAR_TO_BACKDOOR, OrderCharToBackdoor);
+
+auto AddCharToGang(CPed& ped) {
+    return ::notsa::script::detail::NotImplemented();
+}
+REGISTER_COMMAND_HANDLER(COMMAND_ADD_CHAR_TO_GANG, AddCharToGang);
+
+auto IsCharObjectivePassed(CPed& ped) {
+    return ::notsa::script::detail::NotImplemented();
+}
+REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_OBJECTIVE_PASSED, IsCharObjectivePassed);
+
+auto SetCharDriveAggression(CPed& ped) {
+    return ::notsa::script::detail::NotImplemented();
+}
+REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_DRIVE_AGGRESSION, SetCharDriveAggression);
+
+auto SetCharMaxDrivespeed(CPed& ped) {
+    return ::notsa::script::detail::NotImplemented();
+}
+REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_MAX_DRIVESPEED, SetCharMaxDrivespeed);
+
+//! Creates a character in the driver's seat of the vehicle
+CPed& CreateCharInsideCar(CRunningScript& S, CVehicle& veh, ePedType pedType, eModelID pedModel) {
+    const auto ped = [&]() -> CPed* {
+        uint32 typeSpecificModelId = (uint32)(pedModel);
+        S.GetCorrectPedModelIndexForEmergencyServiceType(pedType, &typeSpecificModelId);
+        switch (pedType) {
+        case PED_TYPE_COP:      return new CCopPed{ typeSpecificModelId };
+        case PED_TYPE_MEDIC:
+        case PED_TYPE_FIREMAN:  return new CEmergencyPed{ pedType, typeSpecificModelId };
+        default:                return new CCivilianPed{ pedType, typeSpecificModelId };
+        }
+    }();
+
+    ped->SetCharCreatedBy(PED_MISSION);
+    ped->bAllowMedicsToReviveMe = false;
+    CTaskSimpleCarSetPedInAsDriver{ &veh, false }.ProcessPed(ped); // Make ped get into da car
+    CPopulation::ms_nTotalMissionPeds++;
+
+    if (S.m_bUseMissionCleanup) {
+        CTheScripts::MissionCleanUp.AddEntityToList(*ped);
+    }
+
+    return *ped;
+}
+REGISTER_COMMAND_HANDLER(COMMAND_CREATE_CHAR_INSIDE_CAR, CreateCharInsideCar);
+
+//auto MakeCharDoNothing(CPed& ped) {
+//
+//}
+//REGISTER_COMMAND_HANDLER(COMMAND_MAKE_CHAR_DO_NOTHING, MakeCharDoNothing);
+
++//auto SetCharInvincible(CPed& ped) {
++//
++//}
++//REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_INVINCIBLE, SetCharInvincible);
