@@ -7,10 +7,11 @@
 */
 
 
-REGISTER_COMMAND_HANDLER(COMMAND_WAIT, [](CRunningScript& S, uint32 duration) {
+auto Wait(CRunningScript& S, uint32 duration) {
     S.m_nWakeTime = CTimer::GetTimeInMS() + duration;
     return OR_WAIT;
-});
+}
+REGISTER_COMMAND_HANDLER(COMMAND_WAIT, Wait);
 
 //
 // GREATER_OR_EQUAL
@@ -237,34 +238,48 @@ REGISTER_COMMAND_HANDLER(COMMAND_ABS_LVAR_FLOAT, AbsStore<float>);
 //
 // GOTO
 //
-REGISTER_COMMAND_HANDLER(COMMAND_GOTO, [](CRunningScript& S, int32 address) {
+auto GoTo(CRunningScript& S, int32 address) {
     S.UpdatePC(address);
-});
+}
+REGISTER_COMMAND_HANDLER(COMMAND_GOTO, GoTo);
 
-REGISTER_COMMAND_HANDLER(COMMAND_GOTO_IF_FALSE, [](CRunningScript& S, int32 goToAddress) {
+auto GoToIfFalse(CRunningScript& S, int32 goToAddress) {
     if (!S.m_bCondResult) {
         S.UpdatePC(goToAddress);
     }
-});
+}
+REGISTER_COMMAND_HANDLER(COMMAND_GOTO_IF_FALSE, GoToIfFalse);
 
-REGISTER_COMMAND_HANDLER(COMMAND_GOSUB,  [](CRunningScript& S, int32 goToAddress) { // 0x050 
+auto GoToSub(CRunningScript& S, int32 goToAddress) { // 0x050 
     S.m_IPStack[S.m_StackDepth++] = S.m_IP;
     S.UpdatePC(goToAddress);
-});
+}
+REGISTER_COMMAND_HANDLER(COMMAND_GOSUB,  GoToSub);
 
 //
 // RETURN
 //
-REGISTER_COMMAND_HANDLER(COMMAND_RETURN_TRUE, []() { return true; });
-REGISTER_COMMAND_HANDLER(COMMAND_RETURN_FALSE, []() { return false; });
-REGISTER_COMMAND_HANDLER(COMMAND_RETURN,  [](CRunningScript& S) { S.m_IP = S.m_IPStack[--S.m_StackDepth]; }); // Jumps back to the callee
+auto ReturnTrue() { 
+    return true; 
+}
+REGISTER_COMMAND_HANDLER(COMMAND_RETURN_TRUE, ReturnTrue);
+
+auto ReturnFalse() { 
+    return false; 
+}
+REGISTER_COMMAND_HANDLER(COMMAND_RETURN_FALSE, ReturnFalse);
+
+auto Return(CRunningScript& S) { 
+    S.m_IP = S.m_IPStack[--S.m_StackDepth]; 
+}
+REGISTER_COMMAND_HANDLER(COMMAND_RETURN, Return);   // Jumps back to the calle
 
 //
 // LOGICAL OPS
 //
 
 // OR, AND
-REGISTER_COMMAND_HANDLER(COMMAND_ANDOR, [](CRunningScript& S, int32 logicalOp) { // 0x0D6
+auto AndOr(CRunningScript& S, int32 logicalOp) { // 0x0D6
     // Read comment above `CRunningScript::LogicalOpType` for a little more insight!
     S.m_nLogicalOp = logicalOp;
     if (S.m_nLogicalOp == CRunningScript::ANDOR_NONE) {
@@ -279,13 +294,14 @@ REGISTER_COMMAND_HANDLER(COMMAND_ANDOR, [](CRunningScript& S, int32 logicalOp) {
         NOTSA_UNREACHABLE("Unknown LogicalOp: {}", logicalOp);
     }
     return OR_CONTINUE;
-});
+}
+REGISTER_COMMAND_HANDLER(COMMAND_ANDOR, AndOr);
 
 //
 // Script loading, stopping
 //
 
-REGISTER_COMMAND_HANDLER(COMMAND_TERMINATE_THIS_SCRIPT,  [](CRunningScript& S) { // 0x04E 
+auto TerminateThisScript(CRunningScript& S) { // 0x04E 
     if (S.m_bIsMission) {
         CTheScripts::bAlreadyRunningAMissionScript = false;
     }
@@ -293,9 +309,10 @@ REGISTER_COMMAND_HANDLER(COMMAND_TERMINATE_THIS_SCRIPT,  [](CRunningScript& S) {
     S.AddScriptToList(&CTheScripts::pIdleScripts);
     S.ShutdownThisScript();
     return OR_WAIT;
-});
+}
+REGISTER_COMMAND_HANDLER(COMMAND_TERMINATE_THIS_SCRIPT,  TerminateThisScript);
 
-REGISTER_COMMAND_HANDLER(COMMAND_START_NEW_SCRIPT, [](CRunningScript& S, int32 offset) { // 0x04F
+auto StartNewScript(CRunningScript& S, int32 offset) { // 0x04F
     assert(offset >= 0);
     /* Weird code that would probably just make the game crash
     if (offset < 0) {// This doesn't make sense
@@ -306,7 +323,8 @@ REGISTER_COMMAND_HANDLER(COMMAND_START_NEW_SCRIPT, [](CRunningScript& S, int32 o
     CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[offset]);
     S.ReadParametersForNewlyStartedScript(script);
     return OR_CONTINUE;
-});
+}
+REGISTER_COMMAND_HANDLER(COMMAND_START_NEW_SCRIPT, StartNewScript);
 
 //
 // Other misc stuff (todo: move to appropriate categories)
