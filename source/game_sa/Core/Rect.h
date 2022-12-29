@@ -39,8 +39,8 @@ public:
        assert(!IsFlipped());
     }
 
-    constexpr CRect(const CVector2D& top, const CVector2D& bottom) :
-        CRect{top.x, top.y, bottom.x, bottom.y}
+    constexpr CRect(const CVector2D& left, const CVector2D& right) :
+        CRect{left.x, left.y, right.x, right.y}
     {
     }
 
@@ -62,6 +62,9 @@ public:
     void GetCenter(float* x, float* y) const;
     [[nodiscard]] inline CVector2D GetCenter() const { return { (right + left) * 0.5F, (bottom + top) * 0.5F }; }
     void StretchToPoint(float x, float y);
+
+    CVector2D GetTopLeft() const { return { left, top }; }
+    CVector2D GetBottomRight() const { return { right, bottom }; }
 
 };
 
