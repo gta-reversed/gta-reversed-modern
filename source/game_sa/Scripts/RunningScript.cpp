@@ -362,34 +362,34 @@ void CRunningScript::DoDeathArrestCheck() {
 }
 
 // 0x464F50
-void CRunningScript::GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, int32* outModelId) {
-    switch (*outModelId) {
+void CRunningScript::GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, uint32* typeSpecificModelId) {
+    switch (*typeSpecificModelId) {
     case MODEL_LAPD1:
     case MODEL_SFPD1:
     case MODEL_LVPD1:
     case MODEL_LAPDM1:
         if (pedType == PED_TYPE_COP) {
-            *outModelId = COP_TYPE_CITYCOP;
+            *typeSpecificModelId = COP_TYPE_CITYCOP;
         }
         break;
     case MODEL_CSHER:
         if (pedType == PED_TYPE_COP) {
-            *outModelId = COP_TYPE_CSHER;
+            *typeSpecificModelId = COP_TYPE_CSHER;
         }
         break;
     case MODEL_SWAT:
         if (pedType == PED_TYPE_COP) {
-            *outModelId = COP_TYPE_SWAT1;
+            *typeSpecificModelId = COP_TYPE_SWAT1;
         }
         break;
     case MODEL_FBI:
         if (pedType == PED_TYPE_COP) {
-            *outModelId = COP_TYPE_FBI;
+            *typeSpecificModelId = COP_TYPE_FBI;
         }
         break;
     case MODEL_ARMY:
         if (pedType == PED_TYPE_COP) {
-            *outModelId = COP_TYPE_ARMY;
+            *typeSpecificModelId = COP_TYPE_ARMY;
         }
         break;
     default:

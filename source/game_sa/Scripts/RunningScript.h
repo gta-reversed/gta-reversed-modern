@@ -205,7 +205,7 @@ public:
     void ReadArrayInformation(int32 updateIp, uint16* outArrVarOffset, int32* outArrElemIdx);
     void ReadParametersForNewlyStartedScript(CRunningScript* newScript);
     void ReadTextLabelFromScript(char* buffer, uint8 nBufferLength);
-    void GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, int32* outModelId);
+    void GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, uint32* typeSpecificModelId);
     int16 GetPadState(uint16 playerIndex, eButtonId buttonId);
 
     tScriptParam* GetPointerToLocalVariable(int32 varId);
