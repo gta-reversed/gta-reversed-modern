@@ -8,7 +8,7 @@ namespace notsa {
 namespace script {
 namespace detail {
 template<typename T>
-auto& PoolOf();
+auto& PoolOf() = delete;
 
 template<>
 auto& PoolOf<CColModel>() { return *GetColModelPool(); }
