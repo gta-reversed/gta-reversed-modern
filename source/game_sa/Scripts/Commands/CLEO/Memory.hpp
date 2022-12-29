@@ -27,10 +27,25 @@ uint32 ReadMemory(uint32 address, uint32 size, bool virtualProtect) {
 }
 REGISTER_COMMAND_HANDLER(COMMAND_READ_MEMORY, ReadMemory);
 
-REGISTER_COMMAND_HANDLER(COMMAND_GET_PED_POINTER, [](CPed& ped) { return &ped; });
-REGISTER_COMMAND_HANDLER(COMMAND_GET_VEHICLE_POINTER, [](CVehicle& vehicle) { return &vehicle; });
-REGISTER_COMMAND_HANDLER(COMMAND_GET_OBJECT_POINTER, [](CObject& object) { return &object; });
-REGISTER_COMMAND_HANDLER(COMMAND_GET_THIS_SCRIPT_STRUCT, [](CRunningScript* S) { return S; });
+auto GetPedPointer(CPed& ped) { 
+    return &ped; 
+}
+REGISTER_COMMAND_HANDLER(COMMAND_GET_PED_POINTER, GetPedPointer);
+
+auto GetVehiclePointer(CVehicle& vehicle) { 
+    return &vehicle; 
+}
+REGISTER_COMMAND_HANDLER(COMMAND_GET_VEHICLE_POINTER, GetVehiclePointer);
+
+auto GetObjectPointer(CObject& object) { 
+    return &object; 
+}
+REGISTER_COMMAND_HANDLER(COMMAND_GET_OBJECT_POINTER, GetObjectPointer);
+
+auto GetThisScriptStruct(CRunningScript* S) { 
+    return S; 
+}
+REGISTER_COMMAND_HANDLER(COMMAND_GET_THIS_SCRIPT_STRUCT, GetThisScriptStruct);
 
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_CALL_FUNCTION>() { // 0x0AA5 (int32 address, int32 numParams, int32 pop, arguments funcParams)
