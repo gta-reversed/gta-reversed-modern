@@ -15,15 +15,15 @@ namespace script {
 // Script thing stuff
 namespace detail {
 template<typename T>
-auto GetScriptThing(uint32 index) -> T& = delete;
+inline auto GetScriptThing(uint32 index) -> T& = delete;
 
 template<>
-auto GetScriptThing(uint32 index) -> tScriptSphere& {
+inline auto GetScriptThing(uint32 index) -> tScriptSphere& {
     return CTheScripts::ScriptSphereArray[index];
 }
 
 template<>
-auto GetScriptThing(uint32 index) -> tScriptEffectSystem& {
+inline auto GetScriptThing(uint32 index) -> tScriptEffectSystem& {
     return CTheScripts::ScriptEffectSystemArray[index];
 }
 
@@ -33,13 +33,13 @@ concept ScriptThing = requires(uint32 index) {
 };
 
 template<typename T>
-uint16 GetScriptThingID(T& thing) {
+inline uint16 GetScriptThingID(T& thing) {
     return thing.GetId();
 }
 };
 
 namespace detail {
-auto ReadArrayInfo(CRunningScript* S) {
+inline auto ReadArrayInfo(CRunningScript* S) {
     uint16 offset{};
     int32 idx{};
     S->ReadArrayInformation(true, &offset, &idx);
@@ -54,7 +54,7 @@ concept PooledType =
 namespace detail {
 //! Safely cast one arithmetic type to another (Checks for under/overflow in debug mode only), then casts to `T`
 template<typename T, typename F>
-T safe_arithmetic_cast(F value) {
+inline T safe_arithmetic_cast(F value) {
 #ifdef NOTSA_DEBUG
     if constexpr (std::numeric_limits<F>::lowest() < std::numeric_limits<T>::lowest()) { // Underflow
         assert(value >= static_cast<F>(std::numeric_limits<T>::lowest())); 
@@ -73,7 +73,7 @@ constexpr auto is_derived_from_but_not_v = std::is_base_of_v<Base, Derived> && !
 
 //! Read a value (Possibly from script => increases IP, or return a value (w/o increasing IP)
 template<typename T>
-T Read(CRunningScript* S) {
+inline T Read(CRunningScript* S) {
     using Y = std::remove_pointer_t<std::remove_cvref_t<T>>;
 
     // First of all, deal with references

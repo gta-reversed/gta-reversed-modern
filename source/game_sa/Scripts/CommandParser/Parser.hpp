@@ -11,7 +11,7 @@ namespace notsa {
 namespace script {
 namespace detail {
 template<typename T_FnRet, typename... T_FnArgs, typename... T_CollectedArgs>
-OpcodeResult CollectArgsAndCall(CRunningScript* S, eScriptCommands command, T_FnRet(*CommandFn)(T_FnArgs...), T_CollectedArgs&&... args) {
+inline OpcodeResult CollectArgsAndCall(CRunningScript* S, eScriptCommands command, T_FnRet(*CommandFn)(T_FnArgs...), T_CollectedArgs&&... args) {
     if constexpr (sizeof...(T_CollectedArgs) == sizeof...(T_FnArgs)) { // Has it collected enough args?
         const auto CallCommandFn = [&]() -> T_FnRet {
             return std::invoke(CommandFn, std::forward<T_CollectedArgs>(args)...);
@@ -61,16 +61,21 @@ OpcodeResult CollectArgsAndCall(CRunningScript* S, eScriptCommands command, T_Fn
 
 //! Called from unimplemented commands
 //! This originally returned `OR_INTERRUPT`, but it isn't handled specially at all, so I'd just pass our debug checks
-auto NotImplemented() { NOTSA_UNREACHABLE(); return OR_INTERRUPT; }
-}; // namespace detail
-
+inline auto NotImplemented() { NOTSA_UNREACHABLE(); return OR_INTERRUPT; }
 template<eScriptCommands Command, auto* CommandFn>
-OpcodeResult CommandParser(CRunningScript* S) {
+inline OpcodeResult CommandParser(CRunningScript* S) {
     return detail::CollectArgsAndCall(S, Command, CommandFn);
 }
 
-};
-};
+template<eScriptCommands Command, auto* CommandFn>
+inline void AddCommandHandler() {
+    auto& entry = CRunningScript::CustomCommandHandlerOf(Command);
+    assert(!entry); // Make sure it doesn't already have a handler
+    entry = &CommandParser<Command, CommandFn>; // Register handler
+}
+}; // namespace detail
+}; // namespace script
+}; // namespace notsa
 
 template<eScriptCommands Command>
 struct CommandHandler : std::false_type {};
@@ -92,8 +97,4 @@ constexpr inline auto AddressOfFunction(T fn) {
 * Use this macro to register a parsed function
 */
 #define REGISTER_COMMAND_HANDLER(cmd, fn) \
-    template<> \
-    struct CommandHandler<cmd> : std::true_type { \
-        constexpr static auto Command  = cmd; \
-        constexpr static auto Function = notsa::detail::AddressOfFunction(fn); \
-    } \
+    ::notsa::script::detail::AddCommandHandler<cmd, ::notsa::detail::AddressOfFunction(fn)>()

@@ -10,6 +10,7 @@
 #include "OpcodeResult.h"
 #include "eWeaponType.h"
 #include "Ped.h"
+#include "CommandParser/Utility.hpp"
 
 enum ePedType : uint32;
 
@@ -174,10 +175,10 @@ public:
     using CommandHandlerFn_t    = OpcodeResult(__thiscall CRunningScript::*)(int32);
     using CommandHandlerTable_t = std::array<CommandHandlerFn_t, 27>;
 
-    static inline CommandHandlerTable_t& CommandHandlerTable = *(CommandHandlerTable_t*)0x8A6168;
-
+    static inline CommandHandlerTable_t& s_OriginalCommandHandlerTable = *(CommandHandlerTable_t*)0x8A6168;
 public:
     static void InjectHooks();
+    static void InjectCustomCommandHooks();
 
     void Init();
 
@@ -239,6 +240,12 @@ public:
     void SetActive(bool active)         { m_bIsActive = active; }
     void SetExternal(bool external)     { m_bIsExternal = external; }
 
+    //! Highlight an important area (Specified by 2D coordinates + an optional Z coordinate)
+    void HighlightImportantArea(CVector2D from, CVector2D to, float z = -100.f);
+
+    //! Highlight an important area (Specified by 3D coordinates)
+    void HighlightImportantArea(CVector from, CVector to);
+
     //! Read a value from at the current IP then increase IP by the number of bytes read.
     template<typename T>
     T ReadAtIPAs() {
@@ -247,13 +254,8 @@ public:
         return ret;
     }
 
-    template<eScriptCommands Command>
-    OpcodeResult ProcessCommand() {
-        // By default call original GTA handler
-        return std::invoke(CommandHandlerTable[(size_t)Command / 100], this, Command);
-    }
-
-    static void SetCommandHandler(eScriptCommands cmd, OpcodeResult(*handler)(CRunningScript*));
+    //! Return the custom command handler of a function (or null) as a reference
+    static notsa::script::CommandHandlerFunction& CustomCommandHandlerOf(eScriptCommands command); // Returning a ref here for convinience (instead of having to make a `Set` function too)
 };
 
 VALIDATE_SIZE(CRunningScript, 0xE0);

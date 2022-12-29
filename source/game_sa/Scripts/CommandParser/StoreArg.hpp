@@ -1,7 +1,5 @@
 #pragma once
 
-//#include <array>
-
 #include "Base.h"
 #include "Utility.hpp"
 #include "ReadArg.hpp" // TODO: We only use `PooledType` from here, so move that out to somewhere common between the 2 headers (because including this here is ugly)
@@ -15,7 +13,7 @@ namespace script {
 * Bool is a sepcial case, it isn't stored, but rather updates the compare flag.
 * TODO: Actually verify this theory.
 */
-void StoreArg(CRunningScript* S, bool arg) {
+inline void StoreArg(CRunningScript* S, bool arg) {
     S->UpdateCompareFlag(arg);
 }
 /*!
@@ -26,7 +24,7 @@ void StoreArg(CRunningScript* S, bool arg) {
 */
 template<typename T>
     requires (std::is_arithmetic_v<T>)
-void StoreArg(CRunningScript* S, const T& arg) { // Add requirements to filter out possible mistakes (Like returning an unsupported type)
+inline void StoreArg(CRunningScript* S, const T& arg) { // Add requirements to filter out possible mistakes (Like returning an unsupported type)
     tScriptParam* dest = [&] {
         auto& ip = S->m_IP;
 
@@ -64,19 +62,19 @@ void StoreArg(CRunningScript* S, const T& arg) { // Add requirements to filter o
 
 // Vector overloads
 
-void StoreArg(CRunningScript* script, const CVector& v3) {
+inline void StoreArg(CRunningScript* script, const CVector& v3) {
     for (auto&& c : v3.GetComponents()) {
         StoreArg(script, c);
     }
 }
 
-void StoreArg(CRunningScript* S, const CVector2D& v2) {
+inline void StoreArg(CRunningScript* S, const CVector2D& v2) {
     for (auto&& c : v2.GetComponents()) {
         StoreArg(S, c);
     }
 }
 
-void StoreArg(CRunningScript* S, CompareFlagUpdate flag) {
+inline void StoreArg(CRunningScript* S, CompareFlagUpdate flag) {
     S->UpdateCompareFlag(flag.state);
 }
 
@@ -84,7 +82,7 @@ void StoreArg(CRunningScript* S, CompareFlagUpdate flag) {
 
 //! Store a pooled type (CPed, CVehicle, etc) - It pushes a handle of the entity to the script
 template<detail::PooledType T>
-void StoreArg(CRunningScript* S, const T& value) {
+inline void StoreArg(CRunningScript* S, const T& value) {
     const auto Store = [&](auto ptr) { StoreArg(S, detail::PoolOf<std::remove_cvref_t<T>>().GetRef(ptr)); };
     if constexpr (std::is_pointer_v<T>) {
         if (value) { // As always, pointers might be null, so we have to check.
@@ -101,7 +99,7 @@ void StoreArg(CRunningScript* S, const T& value) {
  */
 template <typename T>
     requires std::is_enum_v<T>
-void StoreArg(CRunningScript* S, T value) {
+inline void StoreArg(CRunningScript* S, T value) {
     StoreArg(S, static_cast<std::underlying_type_t<T>>(value));
 }
 
@@ -109,7 +107,7 @@ void StoreArg(CRunningScript* S, T value) {
 * @brief Overload for MultiReturn => Stores each arg separately, in same order as they appear in the multireturn
 */
 template<typename... Ts>
-void StoreArg(CRunningScript* S, const MultiRet<Ts...>& arg) {
+inline void StoreArg(CRunningScript* S, const MultiRet<Ts...>& arg) {
     std::apply([S](const Ts&... args) { (StoreArg(S, args), ...); }, arg);
 }
 

@@ -9,65 +9,25 @@
 //! Makes compilation slow, so don't enable unless necessary!
 //#define DUMP_NOT_REVERSED_COMMANDS
 
-// Commands stuff
+
 #include "CommandParser/Parser.hpp"
-
-/*!
-* Make sure to include the command headers here, otherwise they won't be registered,
-* and the default GTA handler will be called.
-* 
-* Currently we don't include the Commands/CLEO headers at all.
-*
-* Eventually we'll get rid of this header based approach, and switch to using cpp files instead,
-* currently it's not possible because of the way it's set up.
-* (Once all old functions are reworked to use the parser)
-*/
-
-#include "Commands/Basic.hpp"
-#include "Commands/Vehicle.hpp"
-#include "Commands/Comparasion.hpp"
-#include "Commands/Generic.hpp"
-#include "Commands/Mission.hpp"
-#include "Commands/Player.hpp"
-#include "Commands/Sequence.hpp"
-#include "Commands/Utility.hpp"
-#include "Commands/Camera.hpp"
-#include "Commands/Character.hpp"
-#include "Commands/Clock.hpp"
-#include "Commands/Game.hpp"
-#include "Commands/Math.hpp"
-#include "Commands/Pad.hpp"
-#include "Commands/Script.hpp"
-#include "Commands/Text.hpp"
-#include "Commands/Unused.hpp"
-/*
-#include "Commands/CLEO/AudioStream.hpp"
-#include "Commands/CLEO/Character.hpp"
-#include "Commands/CLEO/DynamicLibrary.hpp"
-#include "Commands/CLEO/Fs.hpp"
-#include "Commands/CLEO/Game.hpp"
-#include "Commands/CLEO/Generic.hpp"
-#include "Commands/CLEO/Memory.hpp"
-#include "Commands/CLEO/Pad.hpp"
-#include "Commands/CLEO/Script.hpp"
-#include "Commands/CLEO/Vehicle.hpp"
-#include "Commands/CLEO/World.hpp"
-
-#include "Commands/CLEO/Extensions/CleoPlus.hpp"
-#include "Commands/CLEO/Extensions/Clipboard.hpp"
-#include "Commands/CLEO/Extensions/Fs.hpp"
-#include "Commands/CLEO/Extensions/Imgui.hpp"
-#include "Commands/CLEO/Extensions/IntOperations.hpp"
-*/
-// Must be included after the commands
 #include "CommandParser/LUTGenerator.hpp"
 #include "ReversibleHooks/ReversibleHook/ScriptCommand.h"
 
+#include "Commands/Commands.hpp"
+#ifdef NOTSA_USE_CLEO_COMMANDS // TODO: Add premake/cmake option for this define
+#include "Commands/CLEO/Commands.hpp"
+#include "Commands/CLEO/Extensions/Commands.hpp"
+#endif
+
 // https://library.sannybuilder.com/#/sa
 
-static auto s_CommandHandlerLUT = notsa::script::GenerateLUT();
+//! Holds all custom command handlers (or null of entries with no custom handler)
+static inline std::array<notsa::script::CommandHandlerFunction, (size_t)(COMMAND_HIGHEST_ID_TO_HOOK)> s_CustomCommandHandlerTable{};
 
 void CRunningScript::InjectHooks() {
+    InjectCustomCommandHooks();
+
     RH_ScopedClass(CRunningScript);
     RH_ScopedCategory("Scripts");
 
@@ -112,18 +72,6 @@ void CRunningScript::InjectHooks() {
     RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
     RH_ScopedInstall(Process, 0x469F00);
 
-    // To enable use premake: `./premake5.exe vs2022 --allow-script-cmd-hooks`
-#ifdef ENABLE_SCRIPT_COMMAND_HOOKS
-    const auto HookCommand = []<size_t Idx>() {
-        using namespace ReversibleHooks::ReversibleHook;
-        ReversibleHooks::AddItemToCategory(
-            "Scripts/Commands",
-            std::make_shared<ScriptCommand<(eScriptCommands)Idx>>()
-        );
-    };
-    notsa::script::IterateCommandIDs(HookCommand);
-#endif
-
 #ifdef DUMP_NOT_REVERSED_COMMANDS
     CFileMgr::SetDir("");
     const auto f = CFileMgr::OpenFile("not_reversed_script_cmds.txt", "w"); // Output usually in `<main gta dir>/scripts`
@@ -139,6 +87,67 @@ void CRunningScript::InjectHooks() {
     DEV_LOG("Script cmds dumped!");
 #endif
 
+}
+
+//! Register our custom script command handlers
+void CRunningScript::InjectCustomCommandHooks() {
+    // Uncommenting any call will prevent it from being hooked, so
+    // feel free to do so when debugging (Just don't forget to undo the changes!)
+
+    using namespace notsa::script::commands;
+
+    basic::RegisterHandlers();
+    camera::RegisterHandlers();
+    character::RegisterHandlers();
+    clock::RegisterHandlers();
+    comparasion::RegisterHandlers();
+    game::RegisterHandlers();
+    generic::RegisterHandlers();
+    math::RegisterHandlers();
+    mission::RegisterHandlers();
+    object::RegisterHandlers();
+    pad::RegisterHandlers();
+    ped::RegisterHandlers();
+    player::RegisterHandlers();
+    script::RegisterHandlers();
+    sequence::RegisterHandlers();
+    text::RegisterHandlers();
+    unused::RegisterHandlers();
+    utility::RegisterHandlers();
+    vehicle::RegisterHandlers();
+
+#ifdef NOTSA_USE_CLEO_COMMANDS
+    cleo::audiostream::RegisterHandlers();
+    cleo::character::RegisterHandlers();
+    cleo::dynamiclibrary::RegisterHandlers();
+    cleo::fs::RegisterHandlers();
+    cleo::game::RegisterHandlers();
+    cleo::generic::RegisterHandlers();
+    cleo::memory::RegisterHandlers();
+    cleo::pad::RegisterHandlers();
+    cleo::script::RegisterHandlers();
+    cleo::vehicle::RegisterHandlers();
+    cleo::world::RegisterHandlers();
+
+    cleo::extensions::cleoplus::RegisterHandlers();
+    cleo::extensions::clipboard::RegisterHandlers();
+    cleo::extensions::fs::RegisterHandlers();
+    cleo::extensions::imgui::RegisterHandlers();
+    cleo::extensions::intoperations::RegisterHandlers();
+#endif
+
+    // To enable use premake: `./premake5.exe vs2022 --allow-script-cmd-hooks`
+#ifdef ENABLE_SCRIPT_COMMAND_HOOKS
+    // After injecting all hooks, we can create their reversible hook
+    for (auto&& [idx, cmd] : notsa::enumerate(s_CustomCommandHandlerTable)) {
+        const auto id = (eScriptCommands)(idx);
+
+        ReversibleHooks::AddItemToCategory(
+            "Scripts/Commands",
+            std::make_shared<ReversibleHooks::ReversibleHook::ScriptCommand>(id)
+        );
+    }
+#endif
 }
 
 // 0x4648E0
@@ -875,9 +884,11 @@ OpcodeResult CRunningScript::ProcessOneCommand() {
 
     m_bNotFlag = op.notFlag;
 
-    //return std::invoke(CommandHandlerTable[(size_t)op.command / 100], this, (eScriptCommands)op.command);
-
-    return std::invoke(s_CommandHandlerLUT[(size_t)op.command], this);
+    if (const auto handler = CustomCommandHandlerOf((eScriptCommands)(op.command))) {
+        return std::invoke(handler, this);
+    } else {
+        return std::invoke(s_OriginalCommandHandlerTable[(size_t)op.command / 100], this, (eScriptCommands)(op.command));
+    }
 }
 
 // 0x469F00
@@ -909,6 +920,14 @@ OpcodeResult CRunningScript::Process() {
     return OR_CONTINUE;
 }
 
-void CRunningScript::SetCommandHandler(eScriptCommands cmd, OpcodeResult(*handler)(CRunningScript*)) {
-    s_CommandHandlerLUT[(size_t)cmd] = handler;
+void CRunningScript::HighlightImportantArea(CVector2D from, CVector2D to, float z) {
+    CTheScripts::HighlightImportantArea(reinterpret_cast<int32>(this) + reinterpret_cast<int32>(m_IP), from.x, from.y, to.x, to.y, z);
+}
+
+void CRunningScript::HighlightImportantArea(CVector from, CVector to) {
+    HighlightImportantArea(CVector2D{ from }, CVector2D{ to }, (from.z + to.z) / 2.f);
+}
+
+notsa::script::CommandHandlerFunction& CRunningScript::CustomCommandHandlerOf(eScriptCommands command) {
+    return s_CustomCommandHandlerTable[(size_t)(command)];
 }

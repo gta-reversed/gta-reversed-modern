@@ -9,6 +9,7 @@
 #include "eScriptCommands.h"
 #include "RunningScript.h"
 
+#if 0
 namespace notsa {
 namespace script {
 /// Type of the function used in the LUT
@@ -69,3 +70,4 @@ static constexpr auto GenerateLUT() {
 
 }; // namespace script
 }; // namespace notsa 
+#endif

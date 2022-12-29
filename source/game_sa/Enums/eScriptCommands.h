@@ -2909,16 +2909,14 @@ enum eScriptCommands {
     COMMAND_READ_STRING_FROM_INI_FILE                     = 0x0AF4,
     COMMAND_WRITE_STRING_TO_INI_FILE                      = 0x0AF5, // 2805
 
-    // Make sure this is always up to date!
+    //! Make sure this is always up to date!
     COMMAND_HIGHEST_ID = COMMAND_PERLIN_NOISE_FRACTAL_3D,
 
-    // Highest vanilla SA ID
+    //! Highest vanilla SA ID
     COMMAND_HIGHEST_VANILLA_ID = COMMAND_DO_DEBUG_STUFF,
 
-    // Highest command ID that should be hooked (Command Parser thing)
-    // We try to keep this as low as possible (hence using SA IDs only)
-    // because it's kinda slow to compile (Due to the sheer amount of template code)
-    COMMAND_HIGHEST_ID_TO_HOOK = COMMAND_HIGHEST_VANILLA_ID
+    //! Highest command ID that may be hooked
+    COMMAND_HIGHEST_ID_TO_HOOK = COMMAND_HIGHEST_ID
 };
 
 #define CASE(c) \

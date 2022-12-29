@@ -89,6 +89,7 @@ struct CompareFlagUpdate {
     bool state{};
 };
 
+using CommandHandlerFunction = OpcodeResult(*)(CRunningScript*);
 }; // script
 
 
