@@ -564,6 +564,7 @@ public:
     bool IsStateDriving() const noexcept { return m_nPedState == PEDSTATE_DRIVING; }
     bool IsStateDead() const noexcept { return m_nPedState == PEDSTATE_DEAD; }
     bool IsStateDying() const noexcept { return m_nPedState == PEDSTATE_DEAD || m_nPedState == PEDSTATE_DIE; }
+    bool IsStateDeadForScript()  const noexcept { return m_nPedState == PEDSTATE_DEAD || m_nPedState == PEDSTATE_DIE || m_nPedState == PEDSTATE_DIE_BY_STEALTH; }
     bool IsInVehicleAsPassenger() const noexcept;
 
     bool IsCop()      const noexcept { return m_nPedType == PED_TYPE_COP; }
@@ -597,6 +598,12 @@ public:
      * @brief Is the ped running or sprinting
      */
     bool IsRunningOrSprinting() const;
+
+    /*!
+     * @notsa
+     * @brief Is the ped standing in place (might still be moving, but in place)
+     */
+    bool IsPedStandingInPlace() const;
 
     /*!
      * @notsa
