@@ -59,9 +59,9 @@ OpcodeResult CollectArgsAndCall(CRunningScript* S, eScriptCommands command, T_Fn
     }
 }
 
-//! Called for unimplemented commands
+//! Called from unimplemented commands
 //! This originally returned `OR_INTERRUPT`, but it isn't handled specially at all, so I'd just pass our debug checks
-void NotImplemented() { NOTSA_UNREACHABLE(); }
+auto NotImplemented() { NOTSA_UNREACHABLE(); return OR_INTERRUPT; }
 }; // namespace detail
 
 template<eScriptCommands Command, auto* CommandFn>

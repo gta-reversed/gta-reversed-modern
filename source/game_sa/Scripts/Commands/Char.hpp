@@ -431,12 +431,12 @@ CPed& CreateCharInsideCar(CRunningScript& S, CVehicle& veh, ePedType pedType, eM
 }
 REGISTER_COMMAND_HANDLER(COMMAND_CREATE_CHAR_INSIDE_CAR, CreateCharInsideCar);
 
-//auto MakeCharDoNothing(CPed& ped) {
-//
-//}
-//REGISTER_COMMAND_HANDLER(COMMAND_MAKE_CHAR_DO_NOTHING, MakeCharDoNothing);
+auto MakeCharDoNothing(CPed& ped) {
+    return ::notsa::script::detail::NotImplemented();
+}
+REGISTER_COMMAND_HANDLER(COMMAND_MAKE_CHAR_DO_NOTHING, MakeCharDoNothing);
 
-+//auto SetCharInvincible(CPed& ped) {
-+//
-+//}
-+//REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_INVINCIBLE, SetCharInvincible);
+auto SetCharInvincible(CPed& ped) {
+    return ::notsa::script::detail::NotImplemented();
+}
+REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_INVINCIBLE, SetCharInvincible);
