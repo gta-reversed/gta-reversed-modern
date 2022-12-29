@@ -436,7 +436,7 @@ REGISTER_COMMAND_HANDLER(COMMAND_CREATE_CHAR_INSIDE_CAR, CreateCharInsideCar);
 //}
 //REGISTER_COMMAND_HANDLER(COMMAND_MAKE_CHAR_DO_NOTHING, MakeCharDoNothing);
 
-+//auto SetCharInvincible(CPed& ped) {
-+//
-+//}
-+//REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_INVINCIBLE, SetCharInvincible);
+//auto SetCharInvincible(CPed& ped) {
+//
+//}
+//REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_INVINCIBLE, SetCharInvincible);
