@@ -32,7 +32,7 @@
 #include "Commands/Sequence.hpp"
 #include "Commands/Utility.hpp"
 #include "Commands/Camera.hpp"
-#include "Commands/Char.hpp"
+#include "Commands/Character.hpp"
 #include "Commands/Clock.hpp"
 #include "Commands/Game.hpp"
 #include "Commands/Math.hpp"
@@ -42,7 +42,7 @@
 #include "Commands/Unused.hpp"
 /*
 #include "Commands/CLEO/AudioStream.hpp"
-#include "Commands/CLEO/Char.hpp"
+#include "Commands/CLEO/Character.hpp"
 #include "Commands/CLEO/DynamicLibrary.hpp"
 #include "Commands/CLEO/Fs.hpp"
 #include "Commands/CLEO/Game.hpp"
