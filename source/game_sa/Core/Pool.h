@@ -127,9 +127,9 @@ public:
     }
 
     // Returns slot index for this object
-    int32 GetIndex(A* obj) {
+    int32 GetIndex(const A* obj) {
         assert(IsFromObjectArray(obj));
-        return reinterpret_cast<B*>(obj) - m_pObjects;
+        return reinterpret_cast<const B*>(obj) - m_pObjects;
     }
 
     // Returns pointer to object by slot index
@@ -210,7 +210,7 @@ public:
     }
 
     // Returns SCM handle (ref) for object (0x424160)
-    int32 GetRef(A* obj) {
+    int32 GetRef(const A* obj) {
         const auto idx = GetIndex(obj);
         return (idx << 8) + m_byteMap[idx].IntValue();
     }
