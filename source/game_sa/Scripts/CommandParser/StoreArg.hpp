@@ -4,6 +4,7 @@
 
 #include "Base.h"
 #include "Utility.hpp"
+#include "ReadArg.hpp" // TODO: We only use `PooledType` from here, so move that out to somewhere common between the 2 headers (because including this here is ugly)
 #include "TheScripts.h"
 #include "RunningScript.h" // ScriptParams
 #include "Pools.h"
@@ -24,7 +25,8 @@ void StoreArg(CRunningScript* S, bool arg) {
 * @param arg    The argument to store
 */
 template<typename T>
-void StoreArg(CRunningScript* S, const T& arg) requires (std::is_arithmetic_v<T>) { // Add requirements to filter out possible mistakes (Like returning an unsupported type)
+    requires (std::is_arithmetic_v<T>)
+void StoreArg(CRunningScript* S, const T& arg) { // Add requirements to filter out possible mistakes (Like returning an unsupported type)
     tScriptParam* dest = [&] {
         auto& ip = S->m_IP;
 
@@ -77,22 +79,30 @@ void StoreArg(CRunningScript* S, const CVector2D& v2) {
 void StoreArg(CRunningScript* S, CompareFlagUpdate flag) {
     S->UpdateCompareFlag(flag.state);
 }
+
 // Below must be after the basic overloads, otherwise won't compile
+
+//! Store a pooled type (CPed, CVehicle, etc) - It pushes a handle of the entity to the script
+template<detail::PooledType T>
+void StoreArg(CRunningScript* S, const T& value) {
+    const auto Store = [&](auto ptr) { StoreArg(S, detail::PoolOf<std::remove_cvref_t<T>>().GetRef(ptr)); };
+    if constexpr (std::is_pointer_v<T>) {
+        if (value) { // As always, pointers might be null, so we have to check.
+            Store(value);
+        }
+    } else { // References are never invalid
+        Store(&value);
+    }
+}
+
 
 /*!
  * @brief Overload for enum types. They're casted to their underlying type.
  */
-template <typename T> requires std::is_enum_v<T>
-void StoreArg(CRunningScript* S, T ev) {
-    StoreArg(S, static_cast<std::underlying_type_t<T>>(ev));
-}
-
-/*!
-* @brief Overload for types that have a pool (thus we store a reference)
-*/
-template<typename T, typename Y = std::decay_t<T>>
-void StoreArg(CRunningScript* S, T* arg) requires(detail::PoolOf<Y>()) {
-    StoreArg(S, detail::PoolOf<Y>().GetRef(arg));
+template <typename T>
+    requires std::is_enum_v<T>
+void StoreArg(CRunningScript* S, T value) {
+    StoreArg(S, static_cast<std::underlying_type_t<T>>(value));
 }
 
 /*!
@@ -102,7 +112,6 @@ template<typename... Ts>
 void StoreArg(CRunningScript* S, const MultiRet<Ts...>& arg) {
     std::apply([S](const Ts&... args) { (StoreArg(S, args), ...); }, arg);
 }
-
 
 }; // namespace script
 }; // namespace notsa
