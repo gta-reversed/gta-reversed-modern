@@ -74,8 +74,10 @@ MultiRet<uint8, uint8> GetExtraCarColors(CVehicle& veh) {
 }
 REGISTER_COMMAND_HANDLER(COMMAND_GET_EXTRA_CAR_COLOURS, GetExtraCarColors);
 
-void FixCar(CVehicle& vehicle) {
-REGISTER_COMMAND_HANDLER(COMMAND_IMPROVE_CAR_BY_CHEATING, ImproveCarByCheating);
+//void FixCar(CVehicle& vehicle) {
+//
+//}
+//REGISTER_COMMAND_HANDLER(COMMAND_IMPROVE_CAR_BY_CHEATING, ImproveCarByCheating);
 
 void PopCarBootUsingPhysics(CAutomobile& automobile) {
     automobile.PopBootUsingPhysics();
