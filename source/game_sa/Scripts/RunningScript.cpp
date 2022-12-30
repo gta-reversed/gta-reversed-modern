@@ -910,7 +910,7 @@ OpcodeResult CRunningScript::Process() {
     }
     CTheScripts::ReinitialiseSwitchStatementData();
     if (CTimer::GetTimeInMS() >= (uint32)m_nWakeTime) {
-        while (!ProcessOneCommand()); // Process commands
+        while (ProcessOneCommand() == OR_CONTINUE); // Process commands
     }
 
     return OR_CONTINUE;
