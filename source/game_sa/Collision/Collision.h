@@ -19,12 +19,18 @@ public:
     static inline CLinkList<CCollisionData*> &ms_colModelCache = *(CLinkList<CCollisionData*>*)0x96592C;
     static inline uint32& ms_iProcessLineNumCrossings = *(uint32*)0x9655D0;
     static inline uint32& ms_collisionInMemory = *(uint32*)0x9655D4;
+
+    static inline bool& bCamCollideWithVehicles = *(bool*)0x8A5B14;         // = true
+    static inline bool& bCamCollideWithObjects = *(bool*)0x8A5B15;          // = true
+    static inline bool& bCamCollideWithPeds = *(bool*)0x8A5B17;             // = true
+    static inline float& relVelCamCollisionVehiclesSqr = *(float*)0x8A5B18; // = 0.01f
 public:
     static void InjectHooks();
     static void Tests();
 
     // dummy function
     static void Init();
+    static void Shutdown();
     static void Update();
     static void SortOutCollisionAfterLoad();
     static bool TestSphereSphere(CColSphere const& sphere1, CColSphere const& sphere2);

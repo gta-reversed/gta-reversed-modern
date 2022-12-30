@@ -11,8 +11,6 @@
 #include "ColHelpers.h"
 #include "extensions/enumerate.hpp"
 
-namespace rng = std::ranges;
-
 void CalculateColPointInsideBox(CBox const& box, CVector const& point, CColPoint& colPoint); // Forward declaration needed for `InjectHooks`
 
 void CCollision::InjectHooks()
@@ -64,7 +62,6 @@ void CCollision::InjectHooks()
     //RH_ScopedInstall(ClosestSquaredDistanceBetweenFiniteLines, 0x415A40);
     //RH_ScopedInstall(SphereCastVersusVsPoly, 0x415CF0);
     //RH_ScopedInstall(Init, 0x416260);
-    //RH_ScopedInstall(Shutdown, 0x4162E0);
     //RH_ScopedInstall(ProcessSphereSphere, 0x416450);
     //RH_ScopedInstall(TestSphereTriangle, 0x4165B0);
     //RH_ScopedInstall(ProcessSphereTriangle, 0x416BA0);
@@ -302,6 +299,11 @@ void CCollision::Init() {
     CColStore::Initialise();
 }
 
+// 0x4162E0
+void CCollision::Shutdown() {
+    plugin::Call<0x4162E0>();
+}
+
 // 0x411E20
 void CCollision::Update() {
     // empty
@@ -493,11 +495,11 @@ bool CCollision::ProcessSphereBox(CColSphere const& sph, CColBox const& box, CCo
             colp.m_vecNormal = dir / sqrt(distSq); // Normalize direction
 			colp.m_vecPoint = sph.m_vecCenter - colp.m_vecNormal;
 
-            colp.m_nSurfaceTypeA = sph.m_nMaterial;
-            colp.m_nLightingA = sph.m_nLighting;
+            colp.m_nSurfaceTypeA = sph.m_Surface.m_nMaterial;
+            colp.m_nLightingA = sph.m_Surface.m_nLighting;
 
-            colp.m_nSurfaceTypeB = box.m_nMaterial;
-            colp.m_nLightingB = box.m_nLighting;
+            colp.m_nSurfaceTypeB = box.m_Surface.m_nMaterial;
+            colp.m_nLightingB = box.m_Surface.m_nLighting;
 
 			// find absolute distance to the closer side in each dimension
 			const float dx = dir.x > 0.0f ?
@@ -540,11 +542,11 @@ bool CCollision::ProcessSphereBox(CColSphere const& sph, CColBox const& box, CCo
             colp.m_vecNormal = dir / sqrt(distSq); // Normalize vector
             colp.m_vecPoint = p;
 
-            colp.m_nSurfaceTypeA = sph.m_nMaterial;
-            colp.m_nLightingA = sph.m_nLighting;
+            colp.m_nSurfaceTypeA = sph.m_Surface.m_nMaterial;
+            colp.m_nLightingA = sph.m_Surface.m_nLighting;
 
-            colp.m_nSurfaceTypeB = box.m_nMaterial;
-            colp.m_nLightingB = box.m_nLighting;
+            colp.m_nSurfaceTypeB = box.m_Surface.m_nMaterial;
+            colp.m_nLightingB = box.m_Surface.m_nLighting;
 
 			minDistSq = distSq;
 
@@ -701,11 +703,11 @@ bool CCollision::ProcessLineSphere(CColLine const& line, CColSphere const& spher
     colPoint.m_vecPoint = line.m_vecStart + l * t;
     colPoint.m_vecNormal = Normalized(colPoint.m_vecPoint - sphere.m_vecCenter); // A little different from the original, but same effect
 
-    colPoint.m_nSurfaceTypeB = sphere.m_nMaterial;
-    colPoint.m_nLightingB = sphere.m_nLighting;
+    colPoint.m_nSurfaceTypeB = sphere.m_Surface.m_nMaterial;
+    colPoint.m_nLightingB = sphere.m_Surface.m_nLighting;
 
     colPoint.m_nSurfaceTypeA = eSurfaceType::SURFACE_DEFAULT;
-    colPoint.m_nLightingA = 0;
+    colPoint.m_nLightingA = tColLighting(0);
 
     depth = t;
 
@@ -938,10 +940,10 @@ bool CCollision::ProcessLineBox(CColLine const& line, CColBox const& box, CColPo
     colPoint.m_vecNormal = normal;
 
     colPoint.m_nSurfaceTypeA = eSurfaceType::SURFACE_DEFAULT;
-    colPoint.m_nLightingA = 0;
+    colPoint.m_nLightingA = tColLighting(0);
 
-    colPoint.m_nSurfaceTypeB = box.m_nMaterial;
-    colPoint.m_nLightingB = box.m_nLighting;
+    colPoint.m_nSurfaceTypeB = box.m_Surface.m_nMaterial;
+    colPoint.m_nLightingB = box.m_Surface.m_nLighting;
 
     maxTouchDistance = mint;
 

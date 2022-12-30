@@ -15,20 +15,9 @@ public:
     CColSurface m_Surface;
 
 public:
-    CColBox() = default;
-
-    CColBox(const CVector& min, const CVector& max) :
-        CBox(min, max)
-    {
-    }
-
-    CColBox(const CBox& box) :
-        CBox(box)
-    {
-    }
-
+    constexpr CColBox() = default;
+    constexpr CColBox(const CVector& min, const CVector& max) : CBox(min, max) {}
     constexpr CColBox(const CBox& box) : CBox(box) {}
-
     constexpr CColBox(const CBox& box, eSurfaceType material, uint8 pieceType, tColLighting lightning) : CBox(box) {
         m_Surface.m_nMaterial = material;
         m_Surface.m_nPiece = pieceType;
