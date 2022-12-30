@@ -7,8 +7,11 @@
 
 //! Define it to dump out all commands that don't have a custom handler (that is, they aren't reversed)
 //! Makes compilation slow, so don't enable unless necessary!
-//#define DUMP_NOT_REVERSED_COMMANDS
+#define DUMP_CUSTOM_COMMAND_HANDLERS_TO_FILE
 
+#ifdef DUMP_CUSTOM_COMMAND_HANDLERS_TO_FILE
+#include <fstream>
+#endif
 
 #include "CommandParser/Parser.hpp"
 #include "CommandParser/LUTGenerator.hpp"
@@ -71,22 +74,6 @@ void CRunningScript::InjectHooks() {
     RH_ScopedInstall(UpdatePC, 0x464DA0, { .stackArguments = 1 });
     RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
     RH_ScopedInstall(Process, 0x469F00);
-
-#ifdef DUMP_NOT_REVERSED_COMMANDS
-    CFileMgr::SetDir("");
-    const auto f = CFileMgr::OpenFile("not_reversed_script_cmds.txt", "w"); // Output usually in `<main gta dir>/scripts`
-    const auto DumpHookCommands = [&]<size_t Idx>() {
-        using namespace ReversibleHooks::ReversibleHook;
-        if constexpr (!notsa::script::CommandHasCustomHandler<(eScriptCommands)Idx>()) {
-            const auto name = ::notsa::script::GetScriptCommandName((eScriptCommands)Idx);
-            fprintf(f, "%.*s\n", (int)(name.size()), name.data());
-        }
-    };
-    notsa::script::IterateCommandIDs(DumpHookCommands);
-    CFileMgr::CloseFile(f);
-    DEV_LOG("Script cmds dumped!");
-#endif
-
 }
 
 //! Register our custom script command handlers
@@ -147,6 +134,15 @@ void CRunningScript::InjectCustomCommandHooks() {
             std::make_shared<ReversibleHooks::ReversibleHook::ScriptCommand>(id)
         );
     }
+#endif
+
+#ifdef DUMP_CUSTOM_COMMAND_HANDLERS_TO_FILE
+    std::ofstream ofsrev{ "reversed_script_command_handlers.txt" }, ofsnotrev{ "NOT_reversed_script_command_handlers.txt" };
+    for (auto&& [idx, handler] : notsa::enumerate(s_CustomCommandHandlerTable)) {
+        const auto id = (eScriptCommands)(idx);
+        (handler ? ofsrev : ofsnotrev) << ::notsa::script::GetScriptCommandName(id) << '\n';
+    }
+    DEV_LOG("Script cmds dumped! Find them in `<GTA Directory>/Scripts`!");
 #endif
 }
 
