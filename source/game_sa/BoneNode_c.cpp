@@ -60,11 +60,11 @@ void BoneNode_c::InitLimits() {
 }
 
 // 0x6171F0
-void BoneNode_c::EulerToQuat(CVector* angles, CQuaternion* quat) {
+void BoneNode_c::EulerToQuat(const CVector& angles, CQuaternion& quat) {
     CVector radAngles = {
-        DegreesToRadians(angles->x),
-        DegreesToRadians(angles->y),
-        DegreesToRadians(angles->z)
+        DegreesToRadians(angles.x),
+        DegreesToRadians(angles.y),
+        DegreesToRadians(angles.z)
     };
 
     float cr = std::cos(radAngles.x / 2.0f);
@@ -74,25 +74,26 @@ void BoneNode_c::EulerToQuat(CVector* angles, CQuaternion* quat) {
     float cy = std::cos(radAngles.z / 2.0f);
     float sy = std::sin(radAngles.z / 2.0f);
 
-    quat->w = cr * cp * cy + sr * sp * sy;
-    quat->x = sr * cp * cy - cr * sp * sy;
-    quat->y = cr * sp * cy + sr * cp * sy;
-    quat->z = cr * cp * sy - sr * sp * cy;
+    quat.w = cr * cp * cy + sr * sp * sy;
+    quat.x = sr * cp * cy - cr * sp * sy;
+    quat.y = cr * sp * cy + sr * cp * sy;
+    quat.z = cr * cp * sy - sr * sp * cy;
 }
 
 // 0x617080
-void BoneNode_c::QuatToEuler(CQuaternion* quat, CVector* angles) {
-    angles->x = std::atan2f(2.0f * (quat->w * quat->x + quat->y * quat->z), 1.0f - 2.0f * (sq(quat->x) + sq(quat->y)));
+void BoneNode_c::QuatToEuler(const CQuaternion& quat, CVector& angles) {
+    // refactor this fuck
+    const auto v9 = 2.0f * (quat.x * quat.z - quat.y * quat.w);
+    const auto v10 = std::sqrt(1.0f - sq(v9));
 
-    float sinp = 2.0f * (quat->w * quat->y - quat->z * quat->x);
-
-    if (std::abs(sinp) >= 1.0f) {
-        angles->y = std::copysignf(FRAC_TAU_2, sinp);
+    angles.y = RadiansToDegrees(std::atan2(2.0f * (quat.y * quat.w - quat.x * quat.z), v10));
+    if (std::abs(v9) == 1.0f) {
+        angles.x = RadiansToDegrees(std::atan2(-2.0f * (quat.y * quat.z - quat.x * quat.w), 1.0f - 2.0f * (sq(quat.x) + sq(quat.z))));
+        angles.z = RadiansToDegrees(0.0f);
     } else {
-        angles->y = std::asinf(sinp);
+        angles.x = RadiansToDegrees(std::atan2(2.0f * (quat.x * quat.w + quat.y * quat.z) / v10, (1.0f - 2.0f * (sq(quat.x) + sq(quat.y))) / v10));
+        angles.z = RadiansToDegrees(std::atan2(2.0f * (quat.z * quat.w + quat.x * quat.y) / v10, (1.0f - 2.0f * (sq(quat.y) + sq(quat.z))) / v10));
     }
-
-    angles->z = std::atan2f(2.0f * (quat->w * quat->z + quat->x * quat->y), 1.0f - 2.0f * (sq(quat->y) + sq(quat->z)));
 }
 
 // 0x617050
@@ -112,7 +113,7 @@ void BoneNode_c::ClampLimitsCurrent(bool LimitX, bool LimitY, bool LimitZ) {
         return;
 
     CVector angles;
-    BoneNode_c::QuatToEuler(&m_Orientation, &angles);
+    BoneNode_c::QuatToEuler(m_Orientation, angles);
     if (LimitX) {
         m_LimitMax.x = angles.x;
         m_LimitMin.x = angles.x;
@@ -155,7 +156,7 @@ void BoneNode_c::ClampLimitsDefault(bool LimitX, bool LimitY, bool LimitZ) {
 void BoneNode_c::Limit(float blend) {
     CVector eulerOrientation{};
 
-    BoneNode_c::QuatToEuler(&m_Orientation, &eulerOrientation);
+    BoneNode_c::QuatToEuler(m_Orientation, eulerOrientation);
 
     eulerOrientation.x = std::clamp(eulerOrientation.x, m_LimitMin.x, m_LimitMax.x);
     eulerOrientation.y = std::clamp(eulerOrientation.y, m_LimitMin.y, m_LimitMax.y);
@@ -173,7 +174,7 @@ void BoneNode_c::Limit(float blend) {
 
     eulerOrientation.z = std::clamp(eulerOrientation.z, clampZMin, clampZMax);
 
-    BoneNode_c::EulerToQuat(&eulerOrientation, &m_Orientation);
+    BoneNode_c::EulerToQuat(eulerOrientation, m_Orientation);
 }
 
 // 0x616E30
