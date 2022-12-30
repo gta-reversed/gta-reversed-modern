@@ -88,10 +88,6 @@ auto SetCharCoordinates(CPed& ped, CVector coords) {
     CRunningScript::SetCharCoordinates(&ped, coords.x, coords.y, coords.z, true, true);
 }
 
-auto IsCharStillAlive(CPed& ped) {
-    return ::notsa::script::detail::NotImplemented(); // I can't find the code
-}
-
 auto IsCharInArea2D(CRunningScript& S, CPed& ped, CVector2D a, CVector2D b, bool highlightArea) {
     if (highlightArea) {
         S.HighlightImportantArea(a, b);
@@ -159,18 +155,6 @@ auto IsCharInModel(CPed& ped, eModelID model) {
 
 auto IsCharInAnyCar(CPed& ped) {
     return ped.IsInVehicle();
-}
-
-auto LocatePlayerAnyMeansChar2D() {
-    return ::notsa::script::detail::NotImplemented(); // Can't find code
-}
-
-auto LocatePlayerOnFootChar2D(CPed& ped) {
-    return ::notsa::script::detail::NotImplemented(); // Can't find code
-}
-
-auto LocatePlayerInCarChar2D(CPed& ped) {
-    return ::notsa::script::detail::NotImplemented(); // Can't find code
 }
 
 //
@@ -265,18 +249,6 @@ auto LocateStoppedCharInCar3D(CRunningScript& S, CPed& ped, CVector pos, CVector
     return LocateChar3D(S, ped, pos, radius, highlightArea, true, false, true);
 }
 
-auto LocatePlayerAnyMeansChar3D(CRunningScript& S, CPed& ped, CVector pos, CVector radius, bool highlightArea) {
-    return ::notsa::script::detail::NotImplemented(); // Can't find code
-}
-
-auto LocatePlayerOnFootChar3D(CPed& ped, CVector pos, CVector radius, bool highlightArea) {
-    return ::notsa::script::detail::NotImplemented(); // Can't find code
-}
-
-auto LocatePlayerInCarChar3D(CRunningScript& S, CPed& ped, CVector pos, CVector radius, bool highlightArea) {
-    return ::notsa::script::detail::NotImplemented(); // Can't find code
-}
-
 bool LocateCharChar2D(CRunningScript& S, CPed& ped1, CPed& ped2, CVector2D radius, bool highlightArea, bool mustBeInCar, bool mustBeOnFoot) {
     return LocateChar2D(S, ped1, ped2.GetPosition2D(), radius, highlightArea, mustBeInCar, mustBeOnFoot, false);
 }
@@ -313,46 +285,6 @@ auto IsCharDead(CPed* ped) {
     return !ped || ped->IsStateDeadForScript();
 }
 
-auto SetCharThreatSearch(CPed& ped) {
-
-}
-
-auto SetCharThreatReaction(CPed& ped) {
-    return ::notsa::script::detail::NotImplemented();
-}
-
-auto SetCharObjNoObj(CPed& ped) {
-    return ::notsa::script::detail::NotImplemented();
-}
-
-auto OrderCharToDriveCar(CPed& ped) {
-    return ::notsa::script::detail::NotImplemented();
-}
-
-auto HasCharSpottedPlayer(CPed& ped) {
-    return ::notsa::script::detail::NotImplemented();
-}
-
-auto OrderCharToBackdoor(CPed& ped) {
-    return ::notsa::script::detail::NotImplemented();
-}
-
-auto AddCharToGang(CPed& ped) {
-    return ::notsa::script::detail::NotImplemented();
-}
-
-auto IsCharObjectivePassed(CPed& ped) {
-    return ::notsa::script::detail::NotImplemented();
-}
-
-auto SetCharDriveAggression(CPed& ped) {
-    return ::notsa::script::detail::NotImplemented();
-}
-
-auto SetCharMaxDrivespeed(CPed& ped) {
-    return ::notsa::script::detail::NotImplemented();
-}
-
 //! Creates a character in the driver's seat of the vehicle
 CPed& CreateCharInsideCar(CRunningScript& S, CVehicle& veh, ePedType pedType, eModelID pedModel) {
     const auto ped = [&]() -> CPed* {
@@ -378,14 +310,6 @@ CPed& CreateCharInsideCar(CRunningScript& S, CVehicle& veh, ePedType pedType, eM
     return *ped;
 }
 
-auto MakeCharDoNothing(CPed& ped) {
-    return ::notsa::script::detail::NotImplemented();
-}
-
-auto SetCharInvincible(CPed& ped) {
-    return ::notsa::script::detail::NotImplemented();
-}
-
 void notsa::script::commands::character::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_PROOFS, SetCharProofs);
     REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_VELOCITY, SetCharVelocity);
@@ -399,16 +323,12 @@ void notsa::script::commands::character::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_GET_DEAD_CHAR_COORDINATES, GetDeadCharCoordinates);
     REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_COORDINATES, GetCharCoordinates);
     REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_COORDINATES, SetCharCoordinates);
-    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_STILL_ALIVE, IsCharStillAlive);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_AREA_2D, IsCharInArea2D);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_AREA_3D, IsCharInArea3D);
     REGISTER_COMMAND_HANDLER(COMMAND_STORE_CAR_CHAR_IS_IN, StoreCarCharIsIn);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_CAR, IsCharInCar);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_MODEL, IsCharInModel);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANY_CAR, IsCharInAnyCar);
-    REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_PLAYER_ANY_MEANS_CHAR_2D, LocatePlayerAnyMeansChar2D);
-    REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_PLAYER_ON_FOOT_CHAR_2D, LocatePlayerOnFootChar2D);
-    REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_PLAYER_IN_CAR_CHAR_2D, LocatePlayerInCarChar2D);
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ANY_MEANS_2D, LocateCharAnyMeans2D);
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ON_FOOT_2D, LocateCharOnFoot2D);
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_IN_CAR_2D, LocateCharInCar2D);
@@ -421,9 +341,6 @@ void notsa::script::commands::character::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_STOPPED_CHAR_ANY_MEANS_3D, LocateStoppedCharAnyMeans3D);
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_STOPPED_CHAR_ON_FOOT_3D, LocateStoppedCharOnFoot3D);
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_STOPPED_CHAR_IN_CAR_3D, LocateStoppedCharInCar3D);
-    REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_PLAYER_ANY_MEANS_CHAR_3D, LocatePlayerAnyMeansChar3D);
-    REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_PLAYER_ON_FOOT_CHAR_3D, LocatePlayerOnFootChar3D);
-    REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_PLAYER_IN_CAR_CHAR_3D, LocatePlayerInCarChar3D);
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ANY_MEANS_CHAR_2D, LocateCharAnyMeansChar2D);
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ON_FOOT_CHAR_2D, LocateCharOnFootChar2D);
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_IN_CAR_CHAR_2D, LocateCharInCarChar2D);
@@ -431,17 +348,25 @@ void notsa::script::commands::character::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ON_FOOT_CHAR_3D, LocateCharOnFootChar3D);
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_IN_CAR_CHAR_3D, LocateCharInCarChar3D);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_DEAD, IsCharDead);
-    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_THREAT_SEARCH, SetCharThreatSearch);
-    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_THREAT_REACTION, SetCharThreatReaction);
-    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_OBJ_NO_OBJ, SetCharObjNoObj);
-    REGISTER_COMMAND_HANDLER(COMMAND_ORDER_CHAR_TO_DRIVE_CAR, OrderCharToDriveCar);
-    REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_SPOTTED_PLAYER, HasCharSpottedPlayer);
-    REGISTER_COMMAND_HANDLER(COMMAND_ORDER_CHAR_TO_BACKDOOR, OrderCharToBackdoor);
-    REGISTER_COMMAND_HANDLER(COMMAND_ADD_CHAR_TO_GANG, AddCharToGang);
-    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_OBJECTIVE_PASSED, IsCharObjectivePassed);
-    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_DRIVE_AGGRESSION, SetCharDriveAggression);
-    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_MAX_DRIVESPEED, SetCharMaxDrivespeed);
     REGISTER_COMMAND_HANDLER(COMMAND_CREATE_CHAR_INSIDE_CAR, CreateCharInsideCar);
-    REGISTER_COMMAND_HANDLER(COMMAND_MAKE_CHAR_DO_NOTHING, MakeCharDoNothing);
-    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_INVINCIBLE, SetCharInvincible);
+
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_LOCATE_PLAYER_ANY_MEANS_CHAR_2D);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_IS_CHAR_STILL_ALIVE);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_LOCATE_PLAYER_ON_FOOT_CHAR_2D);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_LOCATE_PLAYER_IN_CAR_CHAR_2D);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_LOCATE_PLAYER_ANY_MEANS_CHAR_3D);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_LOCATE_PLAYER_ON_FOOT_CHAR_3D);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_LOCATE_PLAYER_IN_CAR_CHAR_3D);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_SET_CHAR_THREAT_SEARCH);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_SET_CHAR_THREAT_REACTION);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_SET_CHAR_OBJ_NO_OBJ);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_ORDER_CHAR_TO_DRIVE_CAR);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_HAS_CHAR_SPOTTED_PLAYER);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_ORDER_CHAR_TO_BACKDOOR);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_ADD_CHAR_TO_GANG);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_IS_CHAR_OBJECTIVE_PASSED);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_SET_CHAR_DRIVE_AGGRESSION);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_SET_CHAR_MAX_DRIVESPEED);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_MAKE_CHAR_DO_NOTHING);
+    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_SET_CHAR_INVINCIBLE);
 }

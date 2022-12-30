@@ -46,7 +46,7 @@ inline OpcodeResult CollectArgsAndCall(CRunningScript* S, eScriptCommands comman
         } else {
             return ContinueWithArg(notsa::script::Read<T_ToRead>(S)); // Read next parameter and continue
         }
-
+    
         // Don't remove this, we might need it!
         //try {
         //} catch (const std::exception&) {
@@ -93,8 +93,10 @@ constexpr inline auto AddressOfFunction(T fn) {
 };
 };
 
-/*!
-* Use this macro to register a parsed function
-*/
+//! Register a custom command handler
 #define REGISTER_COMMAND_HANDLER(cmd, fn) \
     ::notsa::script::detail::AddCommandHandler<cmd, ::notsa::detail::AddressOfFunction(fn)>()
+
+//! Register a command handler for an unimplemented command (That is, a command that wasn't implemented in the game either)
+#define REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(cmd) \
+    REGISTER_COMMAND_HANDLER(cmd, ::notsa::script::detail::NotImplemented)
