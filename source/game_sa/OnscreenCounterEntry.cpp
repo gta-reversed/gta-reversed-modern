@@ -1,5 +1,6 @@
 #include "StdInc.h"
 #include "OnscreenCounterEntry.h"
+#include "TheScripts.h"
 
 void COnscreenCounterEntry::InjectHooks() {
     RH_ScopedClass(COnscreenCounterEntry);

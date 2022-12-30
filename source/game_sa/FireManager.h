@@ -25,7 +25,7 @@ public:
     void Shutdown();
 
     uint32 GetNumOfNonScriptFires();
-    CFire* FindNearestFire(const CVector& point, bool bCheckWasExtinguished, bool bCheckWasCreatedByScript);
+    CFire* FindNearestFire(const CVector& point, bool bCheckWasExtinguished = false, bool bCheckWasCreatedByScript = false);
     bool PlentyFiresAvailable();
 
     void ExtinguishPoint(CVector point, float fRadiusSq);
@@ -71,4 +71,4 @@ private:
 
 VALIDATE_SIZE(CFireManager, 0x964);
 
-extern CFireManager& gFireManager;
+inline static CFireManager& gFireManager = *reinterpret_cast<CFireManager*>(0xB71F80);

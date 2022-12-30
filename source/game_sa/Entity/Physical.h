@@ -43,7 +43,7 @@ enum ePhysicalFlags {
     PHYSICAL_INVULNERABLE            = 0x400000,
     PHYSICAL_EXPLOSIONPROOF          = 0x800000,
 
-    PHYSICAL_25                      = 0x1000000,
+    PHYSICAL_DONTCOLLIDEWITHFLYERS   = 0x1000000,
     PHYSICAL_ATTACHEDTOENTITY        = 0x2000000,
     PHYSICAL_27                      = 0x4000000,
     PHYSICAL_TOUCHINGWATER           = 0x8000000,
@@ -61,10 +61,7 @@ enum eEntityAltCollision : uint16 {
     ALT_ENITY_COL_BOAT,
 };
 
-class CPhysical : public CEntity {
-public:
-    CPhysical();
-    ~CPhysical() override;
+class NOTSA_EXPORT_VTABLE CPhysical : public CEntity {
 public:
     float  field_38;
     uint32 m_nLastCollisionTime;
@@ -93,7 +90,7 @@ public:
             uint32 bBulletProof : 1;
             uint32 bFireProof : 1;
             uint32 bCollisionProof : 1;
-            uint32 bMeeleProof : 1;
+            uint32 bMeleeProof : 1;
             uint32 bInvulnerable : 1;
             uint32 bExplosionProof : 1;
 
@@ -125,8 +122,7 @@ public:
     CPtrNodeDoubleLink* m_pMovingList;
     uint8               m_nFakePhysics;
     uint8               m_nNumEntitiesCollided;
-    uint8               m_nContactSurface;
-    char                field_BB;
+    eSurfaceType        m_nContactSurface;
     CEntity*            m_apCollidedEntities[6];
     float               m_fMovingSpeed; // ref @ CTheScripts::IsVehicleStopped
     float               m_fDamageIntensity;
@@ -134,7 +130,6 @@ public:
     CVector             m_vecLastCollisionImpactVelocity;
     CVector             m_vecLastCollisionPosn;
     uint16              m_nPieceType;
-    int16               field_FA;
     CPhysical*          m_pAttachedTo;
     CVector             m_vecAttachOffset;
     CVector             m_vecAttachedEntityRotation;
@@ -157,6 +152,9 @@ public:
     static CVector& fxDirection;
 
 public:
+    CPhysical();
+    ~CPhysical() override;
+
     // originally virtual functions
     void Add() override;
     void Remove() override;
@@ -165,7 +163,7 @@ public:
     void ProcessCollision() override;
     void ProcessShift() override;
     bool TestCollision(bool bApplySpeed) override;
-    virtual int32 ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint);
+    virtual int32 ProcessEntityCollision(CEntity* entity, CColPoint* colPoint);
 
 public:
     void RemoveAndAdd();
@@ -228,31 +226,40 @@ public:
     bool CheckCollision();
     bool CheckCollision_SimpleCar();
 
+    CVector& GetMoveSpeed() { return m_vecMoveSpeed; }
     void ResetMoveSpeed() { m_vecMoveSpeed = CVector(); }
+
+    CVector& GetTurnSpeed() { return m_vecTurnSpeed; }
     void ResetTurnSpeed() { m_vecTurnSpeed = CVector(); }
+
     void ResetFrictionMoveSpeed() { m_vecFrictionMoveSpeed = CVector(); }
     void ResetFrictionTurnSpeed() { m_vecFrictionTurnSpeed = CVector(); }
 
-    float GetMass(const CVector& pos, const CVector& dir) {
+    [[nodiscard]] float GetMass(const CVector& pos, const CVector& dir) const {
         return 1.0f / (CrossProduct(pos, dir).SquaredMagnitude() / m_fTurnMass + 1.0f / m_fMass);
     }
 
 // HELPERS
-public:
-    bool IsImmovable()const { return physicalFlags.bDisableZ || physicalFlags.bInfiniteMass || physicalFlags.bDisableMoveForce; }
+    [[nodiscard]] bool IsImmovable() const { return physicalFlags.bDisableZ || physicalFlags.bInfiniteMass || physicalFlags.bDisableMoveForce; }
 
+    auto GetCollidingEntities() const { return std::span{ m_apCollidedEntities, m_nNumEntitiesCollided }; }
+
+    const auto& GetBoundingBox() { return GetColModel()->m_boundBox; }
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    void Add_Reversed();
-    void Remove_Reversed();
-    CRect* GetBoundRect_Reversed(CRect* rect);
-    void ProcessControl_Reversed();
-    void ProcessCollision_Reversed();
-    void ProcessShift_Reversed();
-    bool TestCollision_Reversed(bool bApplySpeed);
-    int32 ProcessEntityCollision_Reversed(CPhysical* entity, CColPoint* colpoint);
+    CPhysical* Constructor() { this->CPhysical::CPhysical(); return this; }
+    CPhysical* Destructor() { this->CPhysical::~CPhysical(); return this; }
+
+    void Add_Reversed() { CPhysical::Add(); }
+    void Remove_Reversed() { CPhysical::Remove(); }
+    CRect* GetBoundRect_Reversed(CRect* rect) { return CPhysical::GetBoundRect(rect); }
+    void ProcessControl_Reversed() { CPhysical::ProcessControl(); }
+    int32 ProcessEntityCollision_Reversed(CEntity* entity, CColPoint* colPoint) { return CPhysical::ProcessEntityCollision(entity, colPoint); }
+    void ProcessCollision_Reversed() { CPhysical::ProcessCollision(); }
+    void ProcessShift_Reversed() { CPhysical::ProcessShift(); }
+    bool TestCollision_Reversed(bool bApplySpeed) { return CPhysical::TestCollision(bApplySpeed); }
 };
 
 VALIDATE_SIZE(CPhysical, 0x138);

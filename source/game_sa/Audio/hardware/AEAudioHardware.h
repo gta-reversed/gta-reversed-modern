@@ -40,7 +40,7 @@ class CAEAudioHardware {
 public:
     bool                    m_bInitialised; // maybe
     bool                    m_bDisableEffectsLoading;
-    uint8                   field_2;
+    uint8                   m_prev;
     uint8                   field_3;
     uint8                   field_4;
     uint8                   m_nReverbEnvironment;

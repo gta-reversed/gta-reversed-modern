@@ -8,59 +8,95 @@
 
 #include "WeaponEffects.h"
 
-uint32 MAX_NUM_WEAPON_CROSSHAIRS = 2;
-CWeaponEffects* gCrossHair = (CWeaponEffects*)0xC8A838;
-RwTexture*& gpCrossHairTex = *(RwTexture * *)0xC8A818;
-RwTexture** gpCrossHairTexFlight = (RwTexture * *)0xC8A810;
+void CWeaponEffects::InjectHooks() {
+    RH_ScopedClass(CWeaponEffects);
+    RH_ScopedCategoryGlobal();
 
-// 0x742A90
-CWeaponEffects::CWeaponEffects() {
-    plugin::CallMethod<0x742A90, CWeaponEffects*>(this);
-}
-
-// 0x742AA0
-CWeaponEffects::~CWeaponEffects() {
-    plugin::CallMethod<0x742AA0, CWeaponEffects*>(this);
+    RH_ScopedInstall(Init, 0x742AB0);
+    RH_ScopedInstall(Shutdown, 0x742B80);
+    RH_ScopedInstall(IsLockedOn, 0x742BD0);
+    RH_ScopedInstall(MarkTarget, 0x742BF0);
+    RH_ScopedInstall(ClearCrossHair, 0x742C60);
+    RH_ScopedInstall(ClearCrossHairs, 0x742C80);
+    RH_ScopedInstall(ClearCrossHairImmediately, 0x742CA0);
+    RH_ScopedInstall(ClearCrossHairsImmediately, 0x742CC0);
+    RH_ScopedInstall(Render, 0x742CF0, { .reversed = false });
 }
 
 // 0x742AB0
 void CWeaponEffects::Init() {
-    plugin::Call<0x742AB0>();
+    for (auto& crossHair : gCrossHair) {
+        crossHair.m_vecPosn = CVector();
+        crossHair.m_bActive = false;
+        crossHair.m_color = CRGBA(255, 0, 0, 127);
+        crossHair.m_fSize = 1.0f;
+        crossHair.field_1C = 0;
+        crossHair.m_nTimeWhenToDeactivate = 0;
+        crossHair.m_bClearImmediately = false;
+        crossHair.m_fRotation = 0.0f;
+    }
+
+    CTxdStore::PushCurrentTxd();
+    CTxdStore::SetCurrentTxd(CTxdStore::FindTxdSlot("particle"));
+    gpCrossHairTex          = RwTextureRead("target256",  "target256m");
+    gpCrossHairTexFlight[0] = RwTextureRead("lockon",     "lockonA");
+    gpCrossHairTexFlight[1] = RwTextureRead("lockonFire", "lockonFireA");
+    CTxdStore::PopCurrentTxd();
 }
 
 // 0x742B80
 void CWeaponEffects::Shutdown() {
-    plugin::Call<0x742B80>();
+    for (auto& crossHair : gpCrossHairTexFlight) {
+        RwTextureDestroy(crossHair);
+        crossHair = nullptr;
+    }
+
+    RwTextureDestroy(gpCrossHairTex);
+    gpCrossHairTex = nullptr;
 }
 
 // 0x742BD0
-bool CWeaponEffects::IsLockedOn(int32 crosshairId) {
-    return plugin::CallAndReturn<bool, 0x742BD0, int32>(crosshairId);
+bool CWeaponEffects::IsLockedOn(CrossHairId id) {
+    return gCrossHair[id].m_fRotation;
 }
 
 // 0x742BF0
-void CWeaponEffects::MarkTarget(int32 crosshairId, CVector posn, uint8 red, uint8 green, uint8 blue, uint8 alpha, float size, uint8 arg7) {
-    plugin::Call<0x742BF0, int32, CVector, uint8, uint8, uint8, uint8, float, uint8>(crosshairId, posn, red, green, blue, alpha, size, arg7);
+void CWeaponEffects::MarkTarget(CrossHairId id, CVector posn, uint8 red, uint8 green, uint8 blue, uint8 alpha, float size, bool bClearImmediately) {
+    auto& crossHair = gCrossHair[id];
+    crossHair.m_vecPosn               = posn;
+    crossHair.m_color.r               = red;
+    crossHair.m_color.g               = green;
+    crossHair.m_color.b               = blue;
+    crossHair.m_color.a               = alpha;
+    crossHair.m_bActive               = true;
+    crossHair.m_fSize                 = size;
+    crossHair.m_nTimeWhenToDeactivate = -1;
+    crossHair.m_bClearImmediately     = bClearImmediately;
 }
 
 // 0x742C60
-void CWeaponEffects::ClearCrossHair(int32 crosshairId) {
-    plugin::Call<0x742C60, int32>(crosshairId);
+void CWeaponEffects::ClearCrossHair(CrossHairId id) {
+    gCrossHair[id].m_nTimeWhenToDeactivate = static_cast<int32>(CTimer::GetTimeInMS() + 400);
 }
 
 // 0x742C80
 void CWeaponEffects::ClearCrossHairs() {
-    plugin::Call<0x742C80>();
+    for (auto& crossHair : gCrossHair) {
+        crossHair.m_bActive = false;
+    }
 }
 
 // 0x742CA0
-void CWeaponEffects::ClearCrossHairImmediately(int32 crosshairId) {
-    plugin::Call<0x742CA0, int32>(crosshairId);
+void CWeaponEffects::ClearCrossHairImmediately(CrossHairId id) {
+    gCrossHair[id].m_nTimeWhenToDeactivate = static_cast<int32>(CTimer::GetTimeInMS() - 100);
+    gCrossHair[id].m_bActive = false;
 }
 
 // 0x742CC0
 void CWeaponEffects::ClearCrossHairsImmediately() {
-    plugin::Call<0x742CC0>();
+    for (auto i = 0u; i < gCrossHair.size(); i++) {
+        ClearCrossHair(i);
+    }
 }
 
 // 0x742CF0

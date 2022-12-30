@@ -116,6 +116,7 @@ struct tHandlingData {
             uint32 m_bHalogenLights : 1;
             uint32 m_bProcRearwheelFirst : 1;
             uint32 m_bUseMaxspLimit : 1;
+
             uint32 m_bLowRider : 1;
             uint32 m_bStreetRacer : 1;
             uint32 m_bSwingingChassis : 1;

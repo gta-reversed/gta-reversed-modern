@@ -9,48 +9,71 @@
 #include "Automobile.h"
 
 enum eMonsterTruckNodes {
-    MONSTER_NODE_NONE = 0,
-    MONSTER_CHASSIS = 1,
-    MONSTER_WHEEL_RF = 2,
-    MONSTER_WHEEL_RM = 3,
-    MONSTER_WHEEL_RB = 4,
-    MONSTER_WHEEL_LF = 5,
-    MONSTER_WHEEL_LM = 6,
-    MONSTER_WHEEL_LB = 7,
-    MONSTER_DOOR_RF = 8,
-    MONSTER_DOOR_RR = 9,
-    MONSTER_DOOR_LF = 10,
-    MONSTER_DOOR_LR = 11,
-    MONSTER_BUMP_FRONT = 12,
-    MONSTER_BUMP_REAR = 13,
-    MONSTER_WING_RF = 14,
-    MONSTER_WING_LF = 15,
-    MONSTER_BONNET = 16,
-    MONSTER_BOOT = 17,
-    MONSTER_WINDSCREEN = 18,
+    MONSTER_NODE_NONE      = 0,
+    MONSTER_CHASSIS        = 1,
+    MONSTER_WHEEL_RF       = 2,
+    MONSTER_WHEEL_RM       = 3,
+    MONSTER_WHEEL_RB       = 4,
+    MONSTER_WHEEL_LF       = 5,
+    MONSTER_WHEEL_LM       = 6,
+    MONSTER_WHEEL_LB       = 7,
+    MONSTER_DOOR_RF        = 8,
+    MONSTER_DOOR_RR        = 9,
+    MONSTER_DOOR_LF        = 10,
+    MONSTER_DOOR_LR        = 11,
+    MONSTER_BUMP_FRONT     = 12,
+    MONSTER_BUMP_REAR      = 13,
+    MONSTER_WING_RF        = 14,
+    MONSTER_WING_LF        = 15,
+    MONSTER_BONNET         = 16,
+    MONSTER_BOOT           = 17,
+    MONSTER_WINDSCREEN     = 18,
     MONSTER_TRANSMISSION_F = 19,
     MONSTER_TRANSMISSION_R = 20,
-    MONSTER_LOADBAY = 21,
-    MONSTER_MISC_A = 22,
+    MONSTER_LOADBAY        = 21,
+    MONSTER_MISC_A         = 22,
+
     MONSTER_NUM_NODES
 };
 
 class CMonsterTruck : public CAutomobile {
-protected:
-    CMonsterTruck(plugin::dummy_func_t) : CAutomobile(plugin::dummy) {}
 public:
-    float field_988;
-    float field_98C;
-    float field_990;
-    float field_994;
-    float field_998;
+    float field_988[4]; // unused
+    float m_fSuspensionRadius;
 
     static float& DUMPER_COL_ANGLEMULT; // 0.0002f
 
 public:
     CMonsterTruck(int32 modelIndex, eVehicleCreatedBy createdBy);
+    ~CMonsterTruck() override = default; // 0x6C7D10, 0x6C7F90
 
+    int32 ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) override;
+    void ProcessSuspension() override;
+    void ProcessControlCollisionCheck(bool applySpeed) override;
+    void ProcessControl() override;
+    void SetupSuspensionLines() override;
+    void PreRender() override;
+    bool BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) override;
+    bool SetUpWheelColModel(CColModel* colModel) override;
+    void ResetSuspension() override;
     void ExtendSuspension();
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CMonsterTruck* Constructor(int32 modelIndex, eVehicleCreatedBy createdBy) { this->CMonsterTruck::CMonsterTruck(modelIndex, createdBy); return this; };
+    CMonsterTruck* Destructor() { this->CMonsterTruck::~CMonsterTruck(); return this; };
+
+    int32 ProcessEntityCollision_Reversed(CEntity* entity, CColPoint* colPoint) { return CMonsterTruck::ProcessEntityCollision(entity, colPoint); }
+    void ProcessSuspension_Reversed() { CMonsterTruck::ProcessSuspension(); }
+    void ProcessControlCollisionCheck_Reversed(bool applySpeed) { CMonsterTruck::ProcessControlCollisionCheck(applySpeed); }
+    void ProcessControl_Reversed() { CMonsterTruck::ProcessControl(); }
+    void SetupSuspensionLines_Reversed() { CMonsterTruck::SetupSuspensionLines(); }
+    void PreRender_Reversed() { CMonsterTruck::PreRender(); }
+    bool BurstTyre_Reversed(uint8 tyreComponentId, bool bPhysicalEffect) { return CMonsterTruck::BurstTyre(tyreComponentId, bPhysicalEffect); }
+    bool SetUpWheelColModel_Reversed(CColModel* colModel) { return CMonsterTruck::SetUpWheelColModel(colModel); }
+    void ResetSuspension_Reversed() { CMonsterTruck::ResetSuspension(); }
 };
 
 VALIDATE_SIZE(CMonsterTruck, 0x99C);

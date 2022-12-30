@@ -7,26 +7,27 @@
 #pragma once
 
 #include "TaskSimple.h"
-#include "AnimBlendAssociation.h"
-#include "Entity.h"
+class CAnimBlendAssociation;
+class CEntity;
 
-class CTaskSimpleThrowProjectile : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleThrowProjectile : public CTaskSimple {
 public:
     bool                   m_bIsAborting;
     bool                   m_bFinished;
     bool                   m_bStarted;
-    char                   _pad;
     CAnimBlendAssociation* m_pAnim;
     CEntity*               m_pTarget;
     CVector                m_vecPosition;
     uint32                 m_nStartTime;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_THROW_PROJECTILE;
+
     CTaskSimpleThrowProjectile(CEntity* target, CVector posn);
     ~CTaskSimpleThrowProjectile() override;
 
-    CTask* Clone() override { return new CTaskSimpleThrowProjectile(m_pTarget, m_vecPosition); }; // 0x623030
-    eTaskType GetTaskType() { return TASK_SIMPLE_THROW; }; // 0x61F6F0
+    eTaskType GetTaskType() override { return Type; } // 0x61F6F0
+    CTask* Clone() override { return new CTaskSimpleThrowProjectile(m_pTarget, m_vecPosition); } // 0x623030
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 
@@ -34,11 +35,7 @@ public:
     void FinishAnimThrowProjectileCB(CAnimBlendAssociation* anim, void* data);
     void StartAnim(CPed* ped);
 
-private:
-    friend void InjectHooksMain();
     static void InjectHooks();
-
     CTaskSimpleThrowProjectile* Constructor(CEntity* target, CVector posn);
 };
-
 VALIDATE_SIZE(CTaskSimpleThrowProjectile, 0x24);

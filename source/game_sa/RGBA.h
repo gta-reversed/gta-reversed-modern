@@ -20,7 +20,7 @@ public:
     CRGBA(const CRGBA& rhs);
     CRGBA(uint32 intValue);
     CRGBA(const RwRGBA& rhs);
-    CRGBA();
+    CRGBA() = default;
 
     void Set(uint8 red, uint8 green, uint8 blue);
     void Set(uint8 red, uint8 green, uint8 blue, uint8 alpha);
@@ -44,15 +44,6 @@ public:
     bool   operator==(const CRGBA& rhs) const;
     CRGBA& operator=(const CRGBA& rhs);
 
-    CRGBA operator*(float mult) {
-        return {
-            (uint8)((float)r * mult),
-            (uint8)((float)g * mult),
-            (uint8)((float)b * mult),
-            (uint8)((float)a * mult)
-        };
-    }
-
     CRGBA operator*(float mult) const {
         return {
             (uint8)((float)r * mult),
@@ -64,5 +55,10 @@ public:
 
     CRGBA operator/(float divisor) {
         return *this * (1 / divisor);
+    }
+
+    CRGBA& operator*=(float mult) {
+        *this = *this * mult;
+        return *this;
     }
 };

@@ -38,8 +38,6 @@ enum ePlaneNodes {
 };
 
 class CPlane : public CAutomobile {
-protected:
-    CPlane(plugin::dummy_func_t) : CAutomobile(plugin::dummy) {}
 public:
     float        m_fLeftRightSkid;
     float        m_fSteeringUpDown;
@@ -56,7 +54,7 @@ public:
     float        m_planeHeadingPrev;
     float        m_forwardZ;
     uint32       m_nStartedFlyingTime;
-    float        m_propSpeed;
+    float        m_fPropSpeed;
     float        field_9C8;
     float        m_fLandingGearStatus;
     int32        m_planeDamageWave;
@@ -65,56 +63,74 @@ public:
     int32        field_9DC;
     int32        field_9E0;
     int32        field_9E4;
-    FxSystem_c*  m_apJettrusParticles[4];
+    std::array<FxSystem_c*, 4> m_apJettrusParticles;
     FxSystem_c*  m_pSmokeParticle;
     uint32       m_nSmokeTimer;
     bool         m_bSmokeEjectorEnabled;
-    char         _pad[3];
 
 public:
     static int32& GenPlane_ModelIndex;
     static uint32& GenPlane_Status;
     static uint32& GenPlane_LastTimeGenerated;
 
-    static bool& GenPlane_Active;               // true
-    static float& ANDROM_COL_ANGLE_MULT;        // 0.00015
-    static float& HARRIER_NOZZLE_ROTATE_LIMIT;  // 5000.0
-    static float& HARRIER_NOZZLE_SWITCH_LIMIT;  // 3000.0
-    static float& PLANE_MIN_PROP_SPEED;         // 0.05
-    static float& PLANE_STD_PROP_SPEED;         // 0.18
-    static float& PLANE_MAX_PROP_SPEED;         // 0.34
-    static float& PLANE_ROC_PROP_SPEED;         // 0.01
+    static bool& GenPlane_Active;
+    static float& ANDROM_COL_ANGLE_MULT;
+    static uint16& HARRIER_NOZZLE_ROTATE_LIMIT;
+    static uint16& HARRIER_NOZZLE_SWITCH_LIMIT;
+    static float& PLANE_MIN_PROP_SPEED;
+    static float& PLANE_STD_PROP_SPEED;
+    static float& PLANE_MAX_PROP_SPEED;
+    static float& PLANE_ROC_PROP_SPEED;
 
 public:
-    static void InjectHooks();
-
     CPlane(int32 modelIndex, eVehicleCreatedBy createdBy);
+    ~CPlane() override;
 
-    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
+    bool SetUpWheelColModel(CColModel* wheelCol) override;
+    bool BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) override;
+    void ProcessControl() override;
+    void ProcessControlInputs(uint8 playerNum) override;
+    void ProcessFlyingCarStuff() override;
+    void PreRender() override;
+    void Render() override;
+    void BlowUpCar(CEntity* damager, bool bHideExplosion) override;
     void Fix() override;
+    void OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) override;
+    void SetupDamageAfterLoad() override;
+    void VehicleDamage(float damageIntensity, eVehicleCollisionComponent component, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) override;
+
+    static void InitPlaneGenerationAndRemoval();
 
     void IsAlreadyFlying();
     void SetGearUp();
     void SetGearDown();
 
-    static void InitPlaneGenerationAndRemoval();
     static uint32 CountPlanesAndHelis();
     static bool AreWeInNoPlaneZone();
     static bool AreWeInNoBigPlaneZone();
     static void SwitchAmbientPlanes(bool enable);
-    static void FindPlaneCreationCoors(CVector* arg0, CVector* arg1, float* arg2, float* arg3, bool arg4);
+    static void FindPlaneCreationCoors(CVector* center, CVector* playerCoords, float* outHeading, float* outHeight, bool arg4);
     static void DoPlaneGenerationAndRemoval();
 
 private:
-    void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion);
-    void Fix_Reversed();
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CPlane* Constructor(int32 modelIndex, eVehicleCreatedBy createdBy) { this->CPlane::CPlane(modelIndex, createdBy); return this; }
+    CPlane* Destroy() { this->CPlane::~CPlane(); return this; }
+
+    bool SetUpWheelColModel_Reversed(CColModel* wheelCol) { return CPlane::SetUpWheelColModel(wheelCol); };
+    bool BurstTyre_Reversed(uint8 tyreComponentId, bool bPhysicalEffect) { return CPlane::BurstTyre(tyreComponentId, bPhysicalEffect); };
+    void ProcessControl_Reversed() { CPlane::ProcessControl(); };
+    void ProcessControlInputs_Reversed(uint8 playerNum) { CPlane::ProcessControlInputs(playerNum); };
+    void ProcessFlyingCarStuff_Reversed() { CPlane::ProcessFlyingCarStuff(); };
+    void PreRender_Reversed() { CPlane::PreRender(); };
+    void Render_Reversed() { CPlane::Render(); };
+    void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) { CPlane::BlowUpCar(damager, bHideExplosion); };
+    void Fix_Reversed() { CPlane::Fix(); };
+    void OpenDoor_Reversed(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) { CPlane::OpenDoor(ped, componentId, door, doorOpenRatio, playSound); };
+    void SetupDamageAfterLoad_Reversed() { CPlane::SetupDamageAfterLoad(); };
+    void VehicleDamage_Reversed(float damageIntensity, eVehicleCollisionComponent component, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { CPlane::VehicleDamage(damageIntensity, component, damager, vecCollisionCoors, vecCollisionDirection, weapon); };
 };
 
 VALIDATE_SIZE(CPlane, 0xA04);
-
-extern float &HARRIER_NOZZLE_ROTATERATE;        // 25.0
-extern float& PLANE_DAMAGE_WAVE_COUNTER_VAR;    // 0.75
-extern float& PLANE_DAMAGE_THRESHHOLD;          // 500.0
-extern float& PLANE_DAMAGE_SCALE_MASS;          // 10000.0
-extern float& PLANE_DAMAGE_DESTROY_THRESHHOLD;  // 5000.0
-extern CVector& vecRCBaronGunPos;               // <0.0f, 0.45, 0.0>

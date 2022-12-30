@@ -12,31 +12,29 @@
 
 class CColModel {
 public:
-    CColModel();
-    ~CColModel();
-    static void* operator new(uint32 size);
-    static void operator delete(void* data);
-    CColModel& operator=(const CColModel& colModel);
-
-public:
     CBoundingBox m_boundBox;
-    CSphere m_boundSphere;
-    uint8 m_nColSlot;
+    CSphere      m_boundSphere;
+    uint8        m_nColSlot;
     union {
         struct {
             uint8 m_bNotEmpty : 1;
             uint8 m_bIsSingleColDataAlloc : 1;
             uint8 m_bIsActive : 1;
         };
-        uint8 m_nFlags{};
+        uint8 m_nFlags;
     };
-    CCollisionData *m_pColData;
+    CCollisionData* m_pColData;
 
 public:
     static void InjectHooks();
 
-private:
-    void AllocateData(int32 size);
+    CColModel();
+    ~CColModel();
+
+    static void* operator new(unsigned size);
+    static void operator delete(void* data);
+    CColModel& operator=(const CColModel& colModel);
+
 public:
     void AllocateData();
     void AllocateData(int32 numSpheres, int32 numBoxes, int32 numLines, int32 numVertices, int32 numTriangles, bool bUsesDisks);
@@ -45,10 +43,16 @@ public:
     void CalculateTrianglePlanes();
     void RemoveTrianglePlanes();
 
-// HELPERS
-    inline float GetBoundRadius() const { return m_boundSphere.m_fRadius; }
-    inline CVector& GetBoundCenter() { return m_boundSphere.m_vecCenter; }
-    inline CBoundingBox& GetBoundingBox() { return m_boundBox; }
+private:
+    void AllocateData(int32 size);
+
+public:
+    // HELPERS
+    [[nodiscard]] auto GetTriCount() const noexcept     { return m_pColData ? m_pColData->m_nNumTriangles : 0u; }
+    [[nodiscard]] float GetBoundRadius() const noexcept { return m_boundSphere.m_fRadius; }
+    CVector& GetBoundCenter() { return m_boundSphere.m_vecCenter; }
+    CBoundingBox& GetBoundingBox() { return m_boundBox; }
+    CCollisionData* GetData() const { return m_pColData; }
 };
 
 VALIDATE_SIZE(CColModel, 0x30);

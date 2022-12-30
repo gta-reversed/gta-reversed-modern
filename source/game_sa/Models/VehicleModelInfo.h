@@ -16,25 +16,29 @@
 
 #include "eVehicleClass.h"
 #include "eVehicleType.h"
+#include "eCarWheel.h"
 
 class CAnimBlock;
 
 // enum by forkerer (https://github.com/forkerer/)
-enum eVehicleDummies {
+enum eVehicleDummy {
     DUMMY_LIGHT_FRONT_MAIN      = 0,
     DUMMY_LIGHT_REAR_MAIN       = 1,
+
     DUMMY_LIGHT_FRONT_SECONDARY = 2,
     DUMMY_LIGHT_REAR_SECONDARY  = 3,
+
     DUMMY_SEAT_FRONT            = 4,
     DUMMY_SEAT_REAR             = 5,
+
     DUMMY_EXHAUST               = 6,
     DUMMY_ENGINE                = 7,
     DUMMY_GAS_CAP               = 8,
     DUMMY_TRAILER_ATTACH        = 9,
     DUMMY_HAND_REST             = 10,
     DUMMY_EXHAUST_SECONDARY     = 11,
-    DUMMY_WING_AIRTRAIL         = 12,
-    DUMMY_VEH_GUN               = 13,
+    DUMMY_WING_AIR_TRAIL        = 12,
+    DUMMY_VEHICLE_GUN           = 13,
 };
 
 enum eVehicleUpgradePosn {
@@ -123,20 +127,18 @@ public:
 };
 VALIDATE_SIZE(UpgradePosnDesc, 0x20);
 
-class CVehicleModelInfo : public CClumpModelInfo {
+class NOTSA_EXPORT_VTABLE CVehicleModelInfo : public CClumpModelInfo {
 public:
     RpMaterial*        m_pPlateMaterial;
     char               m_szPlateText[8];
     char               field_30;
     uint8              m_nPlateType;
     char               m_szGameName[8];
-    char               _pad3A[2];
     eVehicleType       m_nVehicleType;
     float              m_fWheelSizeFront;
     float              m_fWheelSizeRear;
     int16              m_nWheelModelIndex;
-    uint8              m_nHandlingId;
-    int8               field_4B;
+    uint16             m_nHandlingId;
     uint8              m_nNumDoors;
     eVehicleClass      m_nVehicleClass;
     uint8              m_nFlags;
@@ -151,7 +153,7 @@ public:
     public:
         CVehicleStructure();
         ~CVehicleStructure();
-        static void* operator new(uint32 size);
+        static void* operator new(unsigned size);
         static void  operator delete(void* data);
 
     public:
@@ -167,11 +169,15 @@ public:
         uint32          m_nMaskComponentsDamagable;
 
     public:
-        static CPool<CVehicleModelInfo::CVehicleStructure>*& m_pInfoPool;
+        static inline CPool<CVehicleStructure>*& m_pInfoPool = *(CPool<CVehicleStructure>**)0xB4E680;
 
     public: // Helpers
-        inline bool IsDummyActive(eVehicleDummies dummy) const {
+        [[nodiscard]] bool IsDummyActive(eVehicleDummy dummy) const {
             return m_avDummyPos[dummy] != 0.0F;
+        }
+
+        [[nodiscard]] bool IsComponentDamageable(int32 nodeIndex) const {
+            return m_nMaskComponentsDamagable & (1 << nodeIndex);
         }
 
     } * m_pVehicleStruct;
@@ -190,7 +196,6 @@ public:
     uint8       m_nCurrentQuaternaryColor;
     int16       m_anUpgrades[18];
     int16       m_anRemapTxds[4];
-    char        _pad302[2];
 
     union {
         CAnimBlock* m_pAnimBlock;
@@ -199,12 +204,12 @@ public:
     };
 
     static class CLinkedUpgradeList {
-      public:
+    public:
         int16 m_anUpgrade1[30];
         int16 m_anUpgrade2[30];
         uint32 m_nLinksCount;
 
-      public:
+    public:
         // add upgrade with components upgrade1 and upgrade2
         void AddUpgradeLink(int16 upgrade1, int16 upgrade2);
         // find linked upgrade for this upgrade. In this case upgrade param could be upgrade1 or upgrade2
@@ -247,8 +252,8 @@ public:
     // extras ids for next-spawned car
     // static char ms_compsUsed[2];
     static constexpr int32 NUM_COMPS_USAGE = 2;
-    static char (&ms_compsUsed)[NUM_COMPS_USAGE];
-    static char (&ms_compsToUse)[NUM_COMPS_USAGE];
+    static inline int8(&ms_compsUsed)[NUM_COMPS_USAGE] = *(int8(*)[NUM_COMPS_USAGE])0xB4E478;
+    static inline int8(&ms_compsToUse)[NUM_COMPS_USAGE] = *(int8(*)[NUM_COMPS_USAGE])0x8A6458;
 
     // vehicle colours from carcols.dat
     // static CRGBA ms_vehicleColourTable[128];
@@ -261,8 +266,8 @@ public:
     static void InjectHooks();
 
     CVehicleModelInfo();
+    ~CVehicleModelInfo() override = default; // 0x4C5920;
 
-    // VTable
     ModelInfoType GetModelType() override;
     void Init() override;
     void DeleteRwObject() override;
@@ -288,7 +293,7 @@ public:
     // set component flags
     void SetVehicleComponentFlags(RwFrame* component, uint32 flags);
     // get wheel position. Wheel is wheel id [0-3]. Local - get local offset (if false it will get world position)
-    void GetWheelPosn(int32 wheel, CVector& outVec, bool local);
+    void GetWheelPosn(int32 wheel, CVector& outVec, bool local) const;
     // get component local offset. Component is a frame hierarchy id. Returns true if component present
     bool GetOriginalCompPosition(CVector& outVec, int32 component);
     // get vehicle extra with rules. Returns extra id.
@@ -324,8 +329,8 @@ public:
     void SetEnvMapCoeff(float coeff);
     // get num doors in this model
     int32 GetNumDoors();
-    // get position of dummy in model-space 
-    [[nodiscard]] CVector GetModelDummyPosition(eVehicleDummies dummy) const { return m_pVehicleStruct->m_avDummyPos[dummy]; } // NOTSA
+    // get position of dummy in model-space
+    CVector* GetModelDummyPosition(eVehicleDummy dummy) const { return &m_pVehicleStruct->m_avDummyPos[dummy]; } // NOTSA
 
     // Static method's
     // setup lights states for currently rendered vehicle
@@ -434,6 +439,30 @@ public:
         strcpy_s(m_szGameName, name);
     }
     void SetHandlingId(const char* handlingName);
+
+    // These two should probably be moved to a better place..
+    [[nodiscard]] bool IsFrontWheel(eCarWheel wheel) const {
+        switch (wheel) {
+        case eCarWheel::CAR_WHEEL_FRONT_LEFT:
+        case eCarWheel::CAR_WHEEL_FRONT_RIGHT:
+            return true;
+        }
+        return false;
+    }
+
+    [[nodiscard]] bool IsRearWheel(eCarWheel door) const {
+        return !IsFrontWheel(door);
+    }
+
+    // Return size of give wheel. If it's a front wheel `m_fWheelSizeFront` is returned, otherwise `m_fWheelSizeRear`
+    [[nodiscard]] float GetSizeOfWheel(eCarWheel wheel) const {
+        return IsFrontWheel(wheel) ? m_fWheelSizeFront : m_fWheelSizeRear;
+    }
+
+    float GetWheelSize(bool front) { return front ? m_fWheelSizeFront : m_fWheelSizeRear; } // 0x6A06F0
+
+    tHandlingData& GetHandlingData() const;
+    tFlyingHandlingData& GetFlyingHandlingData() const;
 };
 VALIDATE_SIZE(CVehicleModelInfo::CVehicleStructure, 0x314);
 VALIDATE_SIZE(CVehicleModelInfo, 0x308);

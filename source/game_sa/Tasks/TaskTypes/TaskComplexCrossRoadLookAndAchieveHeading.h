@@ -8,6 +8,8 @@ public:
     float m_fTargetHeading;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_CROSS_ROAD_LOOK_AND_ACHIEVE_HEADING;
+
     CTaskComplexCrossRoadLookAndAchieveHeading(int32 durationInMs, float fTargetHeading);
     ~CTaskComplexCrossRoadLookAndAchieveHeading() override;
 
@@ -16,7 +18,7 @@ public:
     CTask* CreateFirstSubTask(CPed* ped) override { return CreateSubTask(TASK_SIMPLE_ACHIEVE_HEADING, ped); } // 0x631C90
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateSubTask(eTaskType taskType, CPed* ped);
-    eTaskType GetTaskType() override { return TASK_COMPLEX_CROSS_ROAD_LOOK_AND_ACHIEVE_HEADING; } // 0x631B10
+    eTaskType GetTaskType() override { return Type; } // 0x631B10
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
 
 #if ANDROID

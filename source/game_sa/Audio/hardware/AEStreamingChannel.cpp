@@ -121,30 +121,30 @@ void CAEStreamingChannel::InjectHooks() {
     RH_ScopedClass(CAEStreamingChannel);
     RH_ScopedCategory("Audio/Hardware");
 
-    // RH_ScopedInstall(Constructor, 0x4F1800);
+    RH_ScopedInstall(Constructor, 0x4F1800, { .reversed = false });
     // Install("CAEStreamingChannel", "~CAEStreamingChannel", 0x4F2200, static_cast<CAEStreamingChannel*(CAEStreamingChannel::*)()>(&CAEStreamingChannel::Destructor));
-    // RH_ScopedInstall(SynchPlayback, 0x4F1870);
-    // RH_ScopedInstall(PrepareStream, 0x4F23D0);
-    // RH_ScopedInstall(Initialise, 0x4F22F0);
-    // RH_ScopedInstall(Pause, 0x4F2170);
-    // RH_ScopedInstall(SetReady, 0x4F1FF0);
-    // RH_ScopedInstall(SetBassEQ, 0x4F1F30);
-    // RH_ScopedInstall(FillBuffer, 0x4F1E20);
-    // RH_ScopedInstall(InitialiseSilence, 0x4F1C70);
-    // RH_ScopedInstall(SetNextStream, 0x4F1DE0);
-    // RH_ScopedInstall(AddFX, 0x4F1AE0);
+    RH_ScopedInstall(SynchPlayback, 0x4F1870, { .reversed = false });
+    RH_ScopedInstall(PrepareStream, 0x4F23D0, { .reversed = false });
+    RH_ScopedInstall(Initialise, 0x4F22F0, { .reversed = false });
+    RH_ScopedInstall(Pause, 0x4F2170, { .reversed = false });
+    RH_ScopedInstall(SetReady, 0x4F1FF0, { .reversed = false });
+    RH_ScopedInstall(SetBassEQ, 0x4F1F30, { .reversed = false });
+    RH_ScopedInstall(FillBuffer, 0x4F1E20, { .reversed = false });
+    RH_ScopedInstall(InitialiseSilence, 0x4F1C70, { .reversed = false });
+    RH_ScopedInstall(SetNextStream, 0x4F1DE0, { .reversed = false });
+    RH_ScopedInstall(AddFX, 0x4F1AE0, { .reversed = false });
     // RH_ScopedOverloadedInstall(Stop, "", 0x4F1A90, int8(CAEStreamingChannel::*)(bool));
-    // RH_ScopedInstall(GetPlayingTrackID, 0x4F1A60);
-    // RH_ScopedInstall(GetActiveTrackID, 0x4F1A40);
-    // RH_ScopedInstall(UpdatePlayTime, 0x4F18A0);
-    // RH_ScopedInstall(RemoveFX, 0x4F1C20);
-    // RH_ScopedInstall(Service_Reversed, 0x4F2550);
-    // RH_ScopedInstall(IsSoundPlaying_Reversed, 0x4F2040);
-    // RH_ScopedInstall(GetPlayTime_Reversed, 0x4F19E0);
-    // RH_ScopedInstall(GetLength_Reversed, 0x4F1880);
-    // RH_ScopedInstall(Play_Reversed, 0x4F1D40);
-    // RH_ScopedOverloadedInstall(Stop_Reversed, "", 0x4F21C0, int8(CAEStreamingChannel::*)());
-    // RH_ScopedInstall(SetFrequencyScalingFactor_Reversed, 0x4F2060);
+    RH_ScopedInstall(GetPlayingTrackID, 0x4F1A60, { .reversed = false });
+    RH_ScopedInstall(GetActiveTrackID, 0x4F1A40, { .reversed = false });
+    RH_ScopedInstall(UpdatePlayTime, 0x4F18A0, { .reversed = false });
+    RH_ScopedInstall(RemoveFX, 0x4F1C20, { .reversed = false });
+    RH_ScopedVirtualInstall(Service, 0x4F2550, { .reversed = false });
+    RH_ScopedVirtualInstall(IsSoundPlaying, 0x4F2040, { .reversed = false });
+    RH_ScopedVirtualInstall(GetPlayTime, 0x4F19E0, { .reversed = false });
+    RH_ScopedVirtualInstall(GetLength, 0x4F1880, { .reversed = false });
+    RH_ScopedVirtualInstall(Play, 0x4F1D40, { .reversed = false });
+    // RH_ScopedVirtualOverloadedInstall(Stop, "", 0x4F21C0, int8(CAEStreamingChannel::*)());
+    RH_ScopedVirtualInstall(SetFrequencyScalingFactor, 0x4F2060, { .reversed = false });
 }
 
 // 0x4F1800

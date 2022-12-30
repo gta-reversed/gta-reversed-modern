@@ -1,9 +1,7 @@
 #include "StdInc.h"
 
 #include "SurfaceInfos_c.h"
-
-SurfaceInfos_c* g_surfaceInfos = reinterpret_cast<SurfaceInfos_c*>(0xB79538);
-char* SurfaceInfos_c::cDefaultName = reinterpret_cast<char*>(0x85C658); // "DEFAULT/0"
+#include "Skidmark.h"
 
 void SurfaceInfos_c::InjectHooks()
 {
@@ -60,612 +58,610 @@ void SurfaceInfos_c::InjectHooks()
     RH_ScopedInstall(GetAdhesiveLimit, 0x55EB50);
 }
 
-void SurfaceInfos_c::LoadAdhesiveLimits()
+// 0x55D220
+SurfaceId SurfaceInfos_c::GetSurfaceIdFromName(Const char* cName)
 {
-    return plugin::CallMethod<0x55D0E0, SurfaceInfos_c*>(this);
-}
-
-uint32 SurfaceInfos_c::GetSurfaceIdFromName(char* cName)
-{
-    if (!strcmp(cName, cDefaultName))
-        return SURFACE_DEFAULT;
-    if (!strcmp(cName, "TARMAC"))
-        return SURFACE_TARMAC;
-    if (!strcmp(cName, "TARMAC_FUCKED"))
-        return SURFACE_TARMAC_FUCKED;
-    if (!strcmp(cName, "TARMAC_REALLYFUCKED"))
-        return SURFACE_TARMAC_REALLYFUCKED;
-    if (!strcmp(cName, "PAVEMENT"))
-        return SURFACE_PAVEMENT;
-    if (!strcmp(cName, "PAVEMENT_FUCKED"))
-        return SURFACE_PAVEMENT_FUCKED;
-    if (!strcmp(cName, "GRAVEL"))
-        return SURFACE_GRAVEL;
-    if (!strcmp(cName, "FUCKED_CONCRETE"))
-        return SURFACE_FUCKED_CONCRETE;
-    if (!strcmp(cName, "PAINTED_GROUND"))
-        return SURFACE_PAINTED_GROUND;
-    if (!strcmp(cName, "GRASS_SHORT_LUSH"))
-        return SURFACE_GRASS_SHORT_LUSH;
-    if (!strcmp(cName, "GRASS_MEDIUM_LUSH"))
-        return SURFACE_GRASS_MEDIUM_LUSH;
-    if (!strcmp(cName, "GRASS_LONG_LUSH"))
-        return SURFACE_GRASS_LONG_LUSH;
-    if (!strcmp(cName, "GRASS_SHORT_DRY"))
-        return SURFACE_GRASS_SHORT_DRY;
-    if (!strcmp(cName, "GRASS_MEDIUM_DRY"))
-        return SURFACE_GRASS_MEDIUM_DRY;
-    if (!strcmp(cName, "GRASS_LONG_DRY"))
-        return SURFACE_GRASS_LONG_DRY;
-    if (!strcmp(cName, "GOLFGRASS_ROUGH"))
-        return SURFACE_GOLFGRASS_ROUGH;
-    if (!strcmp(cName, "GOLFGRASS_SMOOTH"))
-        return SURFACE_GOLFGRASS_SMOOTH;
-    if (!strcmp(cName, "STEEP_SLIDYGRASS"))
-        return SURFACE_STEEP_SLIDYGRASS;
-    if (!strcmp(cName, "STEEP_CLIFF"))
-        return SURFACE_STEEP_CLIFF;
-    if (!strcmp(cName, "FLOWERBED"))
-        return SURFACE_FLOWERBED;
-    if (!strcmp(cName, "MEADOW"))
-        return SURFACE_MEADOW;
-    if (!strcmp(cName, "WASTEGROUND"))
-        return SURFACE_WASTEGROUND;
-    if (!strcmp(cName, "WOODLANDGROUND"))
-        return SURFACE_WOODLANDGROUND;
-    if (!strcmp(cName, "VEGETATION"))
-        return SURFACE_VEGETATION;
-    if (!strcmp(cName, "MUD_WET"))
-        return SURFACE_MUD_WET;
-    if (!strcmp(cName, "MUD_DRY"))
-        return SURFACE_MUD_DRY;
-    if (!strcmp(cName, "DIRT"))
-        return SURFACE_DIRT;
-    if (!strcmp(cName, "DIRTTRACK"))
-        return SURFACE_DIRTTRACK;
-    if (!strcmp(cName, "SAND_DEEP"))
-        return SURFACE_SAND_DEEP;
-    if (!strcmp(cName, "SAND_MEDIUM"))
-        return SURFACE_SAND_MEDIUM;
-    if (!strcmp(cName, "SAND_COMPACT"))
-        return SURFACE_SAND_COMPACT;
-    if (!strcmp(cName, "SAND_ARID"))
-        return SURFACE_SAND_ARID;
-    if (!strcmp(cName, "SAND_MORE"))
-        return SURFACE_SAND_MORE;
-    if (!strcmp(cName, "SAND_BEACH"))
-        return SURFACE_SAND_BEACH;
-    if (!strcmp(cName, "CONCRETE_BEACH"))
-        return SURFACE_CONCRETE_BEACH;
-    if (!strcmp(cName, "ROCK_DRY"))
-        return SURFACE_ROCK_DRY;
-    if (!strcmp(cName, "ROCK_WET"))
-        return SURFACE_ROCK_WET;
-    if (!strcmp(cName, "ROCK_CLIFF"))
-        return SURFACE_ROCK_CLIFF;
-    if (!strcmp(cName, "WATER_RIVERBED"))
-        return SURFACE_WATER_RIVERBED;
-    if (!strcmp(cName, "WATER_SHALLOW"))
-        return SURFACE_WATER_SHALLOW;
-    if (!strcmp(cName, "CORNFIELD"))
-        return SURFACE_CORNFIELD;
-    if (!strcmp(cName, "HEDGE"))
-        return SURFACE_HEDGE;
-    if (!strcmp(cName, "WOOD_CRATES"))
-        return SURFACE_WOOD_CRATES;
-    if (!strcmp(cName, "WOOD_SOLID"))
-        return SURFACE_WOOD_SOLID;
-    if (!strcmp(cName, "WOOD_THIN"))
-        return SURFACE_WOOD_THIN;
-    if (!strcmp(cName, "GLASS"))
-        return SURFACE_GLASS;
-    if (!strcmp(cName, "GLASS_WINDOWS_LARGE"))
-        return SURFACE_GLASS_WINDOWS_LARGE;
-    if (!strcmp(cName, "GLASS_WINDOWS_SMALL"))
-        return SURFACE_GLASS_WINDOWS_SMALL;
-    if (!strcmp(cName, "EMPTY1"))
-        return SURFACE_EMPTY1;
-    if (!strcmp(cName, "EMPTY2"))
-        return SURFACE_EMPTY2;
-    if (!strcmp(cName, "GARAGE_DOOR"))
-        return SURFACE_GARAGE_DOOR;
-    if (!strcmp(cName, "THICK_METAL_PLATE"))
-        return SURFACE_THICK_METAL_PLATE;
-    if (!strcmp(cName, "SCAFFOLD_POLE"))
-        return SURFACE_SCAFFOLD_POLE;
-    if (!strcmp(cName, "LAMP_POST"))
-        return SURFACE_LAMP_POST;
-    if (!strcmp(cName, "METAL_GATE"))
-        return SURFACE_METAL_GATE;
-    if (!strcmp(cName, "METAL_CHAIN_FENCE"))
-        return SURFACE_METAL_CHAIN_FENCE;
-    if (!strcmp(cName, "GIRDER"))
-        return SURFACE_GIRDER;
-    if (!strcmp(cName, "FIRE_HYDRANT"))
-        return SURFACE_FIRE_HYDRANT;
-    if (!strcmp(cName, "CONTAINER"))
-        return SURFACE_CONTAINER;
-    if (!strcmp(cName, "NEWS_VENDOR"))
-        return SURFACE_NEWS_VENDOR;
-    if (!strcmp(cName, "WHEELBASE"))
-        return SURFACE_WHEELBASE;
-    if (!strcmp(cName, "CARDBOARDBOX"))
-        return SURFACE_CARDBOARDBOX;
-    if (!strcmp(cName, "PED"))
-        return SURFACE_PED;
-    if (!strcmp(cName, "CAR"))
-        return SURFACE_CAR;
-    if (!strcmp(cName, "CAR_PANEL"))
-        return SURFACE_CAR_PANEL;
-    if (!strcmp(cName, "CAR_MOVINGCOMPONENT"))
-        return SURFACE_CAR_MOVINGCOMPONENT;
-    if (!strcmp(cName, "TRANSPARENT_CLOTH"))
-        return SURFACE_TRANSPARENT_CLOTH;
-    if (!strcmp(cName, "RUBBER"))
-        return SURFACE_RUBBER;
-    if (!strcmp(cName, "PLASTIC"))
-        return SURFACE_PLASTIC;
-    if (!strcmp(cName, "TRANSPARENT_STONE"))
-        return SURFACE_TRANSPARENT_STONE;
-    if (!strcmp(cName, "WOOD_BENCH"))
-        return SURFACE_WOOD_BENCH;
-    if (!strcmp(cName, "CARPET"))
-        return SURFACE_CARPET;
-    if (!strcmp(cName, "FLOORBOARD"))
-        return SURFACE_FLOORBOARD;
-    if (!strcmp(cName, "STAIRSWOOD"))
-        return SURFACE_STAIRSWOOD;
-    if (!strcmp(cName, "P_SAND"))
-        return SURFACE_P_SAND;
-    if (!strcmp(cName, "P_SAND_DENSE"))
-        return SURFACE_P_SAND_DENSE;
-    if (!strcmp(cName, "P_SAND_ARID"))
-        return SURFACE_P_SAND_ARID;
-    if (!strcmp(cName, "P_SAND_COMPACT"))
-        return SURFACE_P_SAND_COMPACT;
-    if (!strcmp(cName, "P_SAND_ROCKY"))
-        return SURFACE_P_SAND_ROCKY;
-    if (!strcmp(cName, "P_SANDBEACH"))
-        return SURFACE_P_SANDBEACH;
-    if (!strcmp(cName, "P_GRASS_SHORT"))
-        return SURFACE_P_GRASS_SHORT;
-    if (!strcmp(cName, "P_GRASS_MEADOW"))
-        return SURFACE_P_GRASS_MEADOW;
-    if (!strcmp(cName, "P_GRASS_DRY"))
-        return SURFACE_P_GRASS_DRY;
-    if (!strcmp(cName, "P_WOODLAND"))
-        return SURFACE_P_WOODLAND;
-    if (!strcmp(cName, "P_WOODDENSE"))
-        return SURFACE_P_WOODDENSE;
-    if (!strcmp(cName, "P_ROADSIDE"))
-        return SURFACE_P_ROADSIDE;
-    if (!strcmp(cName, "P_ROADSIDEDES"))
-        return SURFACE_P_ROADSIDEDES;
-    if (!strcmp(cName, "P_FLOWERBED"))
-        return SURFACE_P_FLOWERBED;
-    if (!strcmp(cName, "P_WASTEGROUND"))
-        return SURFACE_P_WASTEGROUND;
-    if (!strcmp(cName, "P_CONCRETE"))
-        return SURFACE_P_CONCRETE;
-    if (!strcmp(cName, "P_OFFICEDESK"))
-        return SURFACE_P_OFFICEDESK;
-    if (!strcmp(cName, "P_711SHELF1"))
-        return SURFACE_P_711SHELF1;
-    if (!strcmp(cName, "P_711SHELF2"))
-        return SURFACE_P_711SHELF2;
-    if (!strcmp(cName, "P_711SHELF3"))
-        return SURFACE_P_711SHELF3;
-    if (!strcmp(cName, "P_RESTUARANTTABLE"))
-        return SURFACE_P_RESTUARANTTABLE;
-    if (!strcmp(cName, "P_BARTABLE"))
-        return SURFACE_P_BARTABLE;
-    if (!strcmp(cName, "P_UNDERWATERLUSH"))
-        return SURFACE_P_UNDERWATERLUSH;
-    if (!strcmp(cName, "P_UNDERWATERBARREN"))
-        return SURFACE_P_UNDERWATERBARREN;
-    if (!strcmp(cName, "P_UNDERWATERCORAL"))
-        return SURFACE_P_UNDERWATERCORAL;
-    if (!strcmp(cName, "P_UNDERWATERDEEP"))
-        return SURFACE_P_UNDERWATERDEEP;
-    if (!strcmp(cName, "P_RIVERBED"))
-        return SURFACE_P_RIVERBED;
-    if (!strcmp(cName, "P_RUBBLE"))
-        return SURFACE_P_RUBBLE;
-    if (!strcmp(cName, "P_BEDROOMFLOOR"))
-        return SURFACE_P_BEDROOMFLOOR;
-    if (!strcmp(cName, "P_KIRCHENFLOOR"))
-        return SURFACE_P_KIRCHENFLOOR;
-    if (!strcmp(cName, "P_LIVINGRMFLOOR"))
-        return SURFACE_P_LIVINGRMFLOOR;
-    if (!strcmp(cName, "P_CORRIDORFLOOR"))
-        return SURFACE_P_CORRIDORFLOOR;
-    if (!strcmp(cName, "P_711FLOOR"))
-        return SURFACE_P_711FLOOR;
-    if (!strcmp(cName, "P_FASTFOODFLOOR"))
-        return SURFACE_P_FASTFOODFLOOR;
-    if (!strcmp(cName, "P_SKANKYFLOOR"))
-        return SURFACE_P_SKANKYFLOOR;
-    if (!strcmp(cName, "P_MOUNTAIN"))
-        return SURFACE_P_MOUNTAIN;
-    if (!strcmp(cName, "P_MARSH"))
-        return SURFACE_P_MARSH;
-    if (!strcmp(cName, "P_BUSHY"))
-        return SURFACE_P_BUSHY;
-    if (!strcmp(cName, "P_BUSHYMIX"))
-        return SURFACE_P_BUSHYMIX;
-    if (!strcmp(cName, "P_BUSHYDRY"))
-        return SURFACE_P_BUSHYDRY;
-    if (!strcmp(cName, "P_BUSHYMID"))
-        return SURFACE_P_BUSHYMID;
-    if (!strcmp(cName, "P_GRASSWEEFLOWERS"))
-        return SURFACE_P_GRASSWEEFLOWERS;
-    if (!strcmp(cName, "P_GRASSDRYTALL"))
-        return SURFACE_P_GRASSDRYTALL;
-    if (!strcmp(cName, "P_GRASSLUSHTALL"))
-        return SURFACE_P_GRASSLUSHTALL;
-    if (!strcmp(cName, "P_GRASSGRNMIX"))
-        return SURFACE_P_GRASSGRNMIX;
-    if (!strcmp(cName, "P_GRASSBRNMIX"))
-        return SURFACE_P_GRASSBRNMIX;
-    if (!strcmp(cName, "P_GRASSLOW"))
-        return SURFACE_P_GRASSLOW;
-    if (!strcmp(cName, "P_GRASSROCKY"))
-        return SURFACE_P_GRASSROCKY;
-    if (!strcmp(cName, "P_GRASSSMALLTREES"))
-        return SURFACE_P_GRASSSMALLTREES;
-    if (!strcmp(cName, "P_DIRTROCKY"))
-        return SURFACE_P_DIRTROCKY;
-    if (!strcmp(cName, "P_DIRTWEEDS"))
-        return SURFACE_P_DIRTWEEDS;
-    if (!strcmp(cName, "P_GRASSWEEDS"))
-        return SURFACE_P_GRASSWEEDS;
-    if (!strcmp(cName, "P_RIVEREDGE"))
-        return SURFACE_P_RIVEREDGE;
-    if (!strcmp(cName, "P_POOLSIDE"))
-        return SURFACE_P_POOLSIDE;
-    if (!strcmp(cName, "P_FORESTSTUMPS"))
-        return SURFACE_P_FORESTSTUMPS;
-    if (!strcmp(cName, "P_FORESTSTICKS"))
-        return SURFACE_P_FORESTSTICKS;
-    if (!strcmp(cName, "P_FORRESTLEAVES"))
-        return SURFACE_P_FORRESTLEAVES;
-    if (!strcmp(cName, "P_DESERTROCKS"))
-        return SURFACE_P_DESERTROCKS;
-    if (!strcmp(cName, "P_FORRESTDRY"))
-        return SURFACE_P_FORRESTDRY;
-    if (!strcmp(cName, "P_SPARSEFLOWERS"))
-        return SURFACE_P_SPARSEFLOWERS;
-    if (!strcmp(cName, "P_BUILDINGSITE"))
-        return SURFACE_P_BUILDINGSITE;
-    if (!strcmp(cName, "P_DOCKLANDS"))
-        return SURFACE_P_DOCKLANDS;
-    if (!strcmp(cName, "P_INDUSTRIAL"))
-        return SURFACE_P_INDUSTRIAL;
-    if (!strcmp(cName, "P_INDUSTJETTY"))
-        return SURFACE_P_INDUSTJETTY;
-    if (!strcmp(cName, "P_CONCRETELITTER"))
-        return SURFACE_P_CONCRETELITTER;
-    if (!strcmp(cName, "P_ALLEYRUBISH"))
-        return SURFACE_P_ALLEYRUBISH;
-    if (!strcmp(cName, "P_JUNKYARDPILES"))
-        return SURFACE_P_JUNKYARDPILES;
-    if (!strcmp(cName, "P_JUNKYARDGRND"))
-        return SURFACE_P_JUNKYARDGRND;
-    if (!strcmp(cName, "P_DUMP"))
-        return SURFACE_P_DUMP;
-    if (!strcmp(cName, "P_CACTUSDENSE"))
-        return SURFACE_P_CACTUSDENSE;
-    if (!strcmp(cName, "P_AIRPORTGRND"))
-        return SURFACE_P_AIRPORTGRND;
-    if (!strcmp(cName, "P_CORNFIELD"))
-        return SURFACE_P_CORNFIELD;
-    if (!strcmp(cName, "P_GRASSLIGHT"))
-        return SURFACE_P_GRASSLIGHT;
-    if (!strcmp(cName, "P_GRASSLIGHTER"))
-        return SURFACE_P_GRASSLIGHTER;
-    if (!strcmp(cName, "P_GRASSLIGHTER2"))
-        return SURFACE_P_GRASSLIGHTER2;
-    if (!strcmp(cName, "P_GRASSMID1"))
-        return SURFACE_P_GRASSMID1;
-    if (!strcmp(cName, "P_GRASSMID2"))
-        return SURFACE_P_GRASSMID2;
-    if (!strcmp(cName, "P_GRASSDARK"))
-        return SURFACE_P_GRASSDARK;
-    if (!strcmp(cName, "P_GRASSDARK2"))
-        return SURFACE_P_GRASSDARK2;
-    if (!strcmp(cName, "P_GRASSDIRTMIX"))
-        return SURFACE_P_GRASSDIRTMIX;
-    if (!strcmp(cName, "P_RIVERBEDSTONE"))
-        return SURFACE_P_RIVERBEDSTONE;
-    if (!strcmp(cName, "P_RIVERBEDSHALLOW"))
-        return SURFACE_P_RIVERBEDSHALLOW;
-    if (!strcmp(cName, "P_RIVERBEDWEEDS"))
-        return SURFACE_P_RIVERBEDWEEDS;
-    if (!strcmp(cName, "P_SEAWEED"))
-        return SURFACE_P_SEAWEED;
-    if (!strcmp(cName, "DOOR"))
-        return SURFACE_DOOR;
-    if (!strcmp(cName, "PLASTICBARRIER"))
-        return SURFACE_PLASTICBARRIER;
-    if (!strcmp(cName, "PARKGRASS"))
-        return SURFACE_PARKGRASS;
-    if (!strcmp(cName, "STAIRSSTONE"))
-        return SURFACE_STAIRSSTONE;
-    if (!strcmp(cName, "STAIRSMETAL"))
-        return SURFACE_STAIRSMETAL;
-    if (!strcmp(cName, "STAIRSCARPET"))
-        return SURFACE_STAIRSCARPET;
-    if (!strcmp(cName, "FLOORMETAL"))
-        return SURFACE_FLOORMETAL;
-    if (!strcmp(cName, "FLOORCONCRETE"))
-        return SURFACE_FLOORCONCRETE;
-    if (!strcmp(cName, "BIN_BAG"))
-        return SURFACE_BIN_BAG;
-    if (!strcmp(cName, "THIN_METAL_SHEET"))
-        return SURFACE_THIN_METAL_SHEET;
-    if (!strcmp(cName, "METAL_BARREL"))
-        return SURFACE_METAL_BARREL;
-    if (!strcmp(cName, "PLASTIC_CONE"))
-        return SURFACE_PLASTIC_CONE;
-    if (!strcmp(cName, "PLASTIC_DUMPSTER"))
-        return SURFACE_PLASTIC_DUMPSTER;
-    if (!strcmp(cName, "METAL_DUMPSTER"))
-        return SURFACE_METAL_DUMPSTER;
-    if (!strcmp(cName, "WOOD_PICKET_FENCE"))
-        return SURFACE_WOOD_PICKET_FENCE;
-    if (!strcmp(cName, "WOOD_SLATTED_FENCE"))
-        return SURFACE_WOOD_SLATTED_FENCE;
-    if (!strcmp(cName, "WOOD_RANCH_FENCE"))
-        return SURFACE_WOOD_RANCH_FENCE;
-    if (!strcmp(cName, "UNBREAKABLE_GLASS"))
-        return SURFACE_UNBREAKABLE_GLASS;
-    if (!strcmp(cName, "HAY_BALE"))
-        return SURFACE_HAY_BALE;
-    if (!strcmp(cName, "GORE"))
-        return SURFACE_GORE;
-    if (!strcmp(cName, "RAILTRACK"))
-        return SURFACE_RAILTRACK;
-
+    static constexpr struct { const char* name; const eSurfaceType type; } mapping[] = {
+        { cDefaultName,             SURFACE_DEFAULT                },
+        { "TARMAC",                 SURFACE_TARMAC                 },
+        { "TARMAC_FUCKED",          SURFACE_TARMAC_FUCKED          },
+        { "TARMAC_REALLYFUCKED",    SURFACE_TARMAC_REALLYFUCKED    },
+        { "PAVEMENT",               SURFACE_PAVEMENT               },
+        { "PAVEMENT_FUCKED",        SURFACE_PAVEMENT_FUCKED        },
+        { "GRAVEL",                 SURFACE_GRAVEL                 },
+        { "FUCKED_CONCRETE",        SURFACE_FUCKED_CONCRETE        },
+        { "PAINTED_GROUND",         SURFACE_PAINTED_GROUND         },
+        { "GRASS_SHORT_LUSH",       SURFACE_GRASS_SHORT_LUSH       },
+        { "GRASS_MEDIUM_LUSH",      SURFACE_GRASS_MEDIUM_LUSH      },
+        { "GRASS_LONG_LUSH",        SURFACE_GRASS_LONG_LUSH        },
+        { "GRASS_SHORT_DRY",        SURFACE_GRASS_SHORT_DRY        },
+        { "GRASS_MEDIUM_DRY",       SURFACE_GRASS_MEDIUM_DRY       },
+        { "GRASS_LONG_DRY",         SURFACE_GRASS_LONG_DRY         },
+        { "GOLFGRASS_ROUGH",        SURFACE_GOLFGRASS_ROUGH        },
+        { "GOLFGRASS_SMOOTH",       SURFACE_GOLFGRASS_SMOOTH       },
+        { "STEEP_SLIDYGRASS",       SURFACE_STEEP_SLIDYGRASS       },
+        { "STEEP_CLIFF",            SURFACE_STEEP_CLIFF            },
+        { "FLOWERBED",              SURFACE_FLOWERBED              },
+        { "MEADOW",                 SURFACE_MEADOW                 },
+        { "WASTEGROUND",            SURFACE_WASTEGROUND            },
+        { "WOODLANDGROUND",         SURFACE_WOODLANDGROUND         },
+        { "VEGETATION",             SURFACE_VEGETATION             },
+        { "MUD_WET",                SURFACE_MUD_WET                },
+        { "MUD_DRY",                SURFACE_MUD_DRY                },
+        { "DIRT",                   SURFACE_DIRT                   },
+        { "DIRTTRACK",              SURFACE_DIRTTRACK              },
+        { "SAND_DEEP",              SURFACE_SAND_DEEP              },
+        { "SAND_MEDIUM",            SURFACE_SAND_MEDIUM            },
+        { "SAND_COMPACT",           SURFACE_SAND_COMPACT           },
+        { "SAND_ARID",              SURFACE_SAND_ARID              },
+        { "SAND_MORE",              SURFACE_SAND_MORE              },
+        { "SAND_BEACH",             SURFACE_SAND_BEACH             },
+        { "CONCRETE_BEACH",         SURFACE_CONCRETE_BEACH         },
+        { "ROCK_DRY",               SURFACE_ROCK_DRY               },
+        { "ROCK_WET",               SURFACE_ROCK_WET               },
+        { "ROCK_CLIFF",             SURFACE_ROCK_CLIFF             },
+        { "WATER_RIVERBED",         SURFACE_WATER_RIVERBED         },
+        { "WATER_SHALLOW",          SURFACE_WATER_SHALLOW          },
+        { "CORNFIELD",              SURFACE_CORNFIELD              },
+        { "HEDGE",                  SURFACE_HEDGE                  },
+        { "WOOD_CRATES",            SURFACE_WOOD_CRATES            },
+        { "WOOD_SOLID",             SURFACE_WOOD_SOLID             },
+        { "WOOD_THIN",              SURFACE_WOOD_THIN              },
+        { "GLASS",                  SURFACE_GLASS                  },
+        { "GLASS_WINDOWS_LARGE",    SURFACE_GLASS_WINDOWS_LARGE    },
+        { "GLASS_WINDOWS_SMALL",    SURFACE_GLASS_WINDOWS_SMALL    },
+        { "EMPTY1",                 SURFACE_EMPTY1                 },
+        { "EMPTY2",                 SURFACE_EMPTY2                 },
+        { "GARAGE_DOOR",            SURFACE_GARAGE_DOOR            },
+        { "THICK_METAL_PLATE",      SURFACE_THICK_METAL_PLATE      },
+        { "SCAFFOLD_POLE",          SURFACE_SCAFFOLD_POLE          },
+        { "LAMP_POST",              SURFACE_LAMP_POST              },
+        { "METAL_GATE",             SURFACE_METAL_GATE             },
+        { "METAL_CHAIN_FENCE",      SURFACE_METAL_CHAIN_FENCE      },
+        { "GIRDER",                 SURFACE_GIRDER                 },
+        { "FIRE_HYDRANT",           SURFACE_FIRE_HYDRANT           },
+        { "CONTAINER",              SURFACE_CONTAINER              },
+        { "NEWS_VENDOR",            SURFACE_NEWS_VENDOR            },
+        { "WHEELBASE",              SURFACE_WHEELBASE              },
+        { "CARDBOARDBOX",           SURFACE_CARDBOARDBOX           },
+        { "PED",                    SURFACE_PED                    },
+        { "CAR",                    SURFACE_CAR                    },
+        { "CAR_PANEL",              SURFACE_CAR_PANEL              },
+        { "CAR_MOVINGCOMPONENT",    SURFACE_CAR_MOVINGCOMPONENT    },
+        { "TRANSPARENT_CLOTH",      SURFACE_TRANSPARENT_CLOTH      },
+        { "RUBBER",                 SURFACE_RUBBER                 },
+        { "PLASTIC",                SURFACE_PLASTIC                },
+        { "TRANSPARENT_STONE",      SURFACE_TRANSPARENT_STONE      },
+        { "WOOD_BENCH",             SURFACE_WOOD_BENCH             },
+        { "CARPET",                 SURFACE_CARPET                 },
+        { "FLOORBOARD",             SURFACE_FLOORBOARD             },
+        { "STAIRSWOOD",             SURFACE_STAIRSWOOD             },
+        { "P_SAND",                 SURFACE_P_SAND                 },
+        { "P_SAND_DENSE",           SURFACE_P_SAND_DENSE           },
+        { "P_SAND_ARID",            SURFACE_P_SAND_ARID            },
+        { "P_SAND_COMPACT",         SURFACE_P_SAND_COMPACT         },
+        { "P_SAND_ROCKY",           SURFACE_P_SAND_ROCKY           },
+        { "P_SANDBEACH",            SURFACE_P_SANDBEACH            },
+        { "P_GRASS_SHORT",          SURFACE_P_GRASS_SHORT          },
+        { "P_GRASS_MEADOW",         SURFACE_P_GRASS_MEADOW         },
+        { "P_GRASS_DRY",            SURFACE_P_GRASS_DRY            },
+        { "P_WOODLAND",             SURFACE_P_WOODLAND             },
+        { "P_WOODDENSE",            SURFACE_P_WOODDENSE            },
+        { "P_ROADSIDE",             SURFACE_P_ROADSIDE             },
+        { "P_ROADSIDEDES",          SURFACE_P_ROADSIDEDES          },
+        { "P_FLOWERBED",            SURFACE_P_FLOWERBED            },
+        { "P_WASTEGROUND",          SURFACE_P_WASTEGROUND          },
+        { "P_CONCRETE",             SURFACE_P_CONCRETE             },
+        { "P_OFFICEDESK",           SURFACE_P_OFFICEDESK           },
+        { "P_711SHELF1",            SURFACE_P_711SHELF1            },
+        { "P_711SHELF2",            SURFACE_P_711SHELF2            },
+        { "P_711SHELF3",            SURFACE_P_711SHELF3            },
+        { "P_RESTUARANTTABLE",      SURFACE_P_RESTUARANTTABLE      },
+        { "P_BARTABLE",             SURFACE_P_BARTABLE             },
+        { "P_UNDERWATERLUSH",       SURFACE_P_UNDERWATERLUSH       },
+        { "P_UNDERWATERBARREN",     SURFACE_P_UNDERWATERBARREN     },
+        { "P_UNDERWATERCORAL",      SURFACE_P_UNDERWATERCORAL      },
+        { "P_UNDERWATERDEEP",       SURFACE_P_UNDERWATERDEEP       },
+        { "P_RIVERBED",             SURFACE_P_RIVERBED             },
+        { "P_RUBBLE",               SURFACE_P_RUBBLE               },
+        { "P_BEDROOMFLOOR",         SURFACE_P_BEDROOMFLOOR         },
+        { "P_KIRCHENFLOOR",         SURFACE_P_KIRCHENFLOOR         },
+        { "P_LIVINGRMFLOOR",        SURFACE_P_LIVINGRMFLOOR        },
+        { "P_CORRIDORFLOOR",        SURFACE_P_CORRIDORFLOOR        },
+        { "P_711FLOOR",             SURFACE_P_711FLOOR             },
+        { "P_FASTFOODFLOOR",        SURFACE_P_FASTFOODFLOOR        },
+        { "P_SKANKYFLOOR",          SURFACE_P_SKANKYFLOOR          },
+        { "P_MOUNTAIN",             SURFACE_P_MOUNTAIN             },
+        { "P_MARSH",                SURFACE_P_MARSH                },
+        { "P_BUSHY",                SURFACE_P_BUSHY                },
+        { "P_BUSHYMIX",             SURFACE_P_BUSHYMIX             },
+        { "P_BUSHYDRY",             SURFACE_P_BUSHYDRY             },
+        { "P_BUSHYMID",             SURFACE_P_BUSHYMID             },
+        { "P_GRASSWEEFLOWERS",      SURFACE_P_GRASSWEEFLOWERS      },
+        { "P_GRASSDRYTALL",         SURFACE_P_GRASSDRYTALL         },
+        { "P_GRASSLUSHTALL",        SURFACE_P_GRASSLUSHTALL        },
+        { "P_GRASSGRNMIX",          SURFACE_P_GRASSGRNMIX          },
+        { "P_GRASSBRNMIX",          SURFACE_P_GRASSBRNMIX          },
+        { "P_GRASSLOW",             SURFACE_P_GRASSLOW             },
+        { "P_GRASSROCKY",           SURFACE_P_GRASSROCKY           },
+        { "P_GRASSSMALLTREES",      SURFACE_P_GRASSSMALLTREES      },
+        { "P_DIRTROCKY",            SURFACE_P_DIRTROCKY            },
+        { "P_DIRTWEEDS",            SURFACE_P_DIRTWEEDS            },
+        { "P_GRASSWEEDS",           SURFACE_P_GRASSWEEDS           },
+        { "P_RIVEREDGE",            SURFACE_P_RIVEREDGE            },
+        { "P_POOLSIDE",             SURFACE_P_POOLSIDE             },
+        { "P_FORESTSTUMPS",         SURFACE_P_FORESTSTUMPS         },
+        { "P_FORESTSTICKS",         SURFACE_P_FORESTSTICKS         },
+        { "P_FORRESTLEAVES",        SURFACE_P_FORRESTLEAVES        },
+        { "P_DESERTROCKS",          SURFACE_P_DESERTROCKS          },
+        { "P_FORRESTDRY",           SURFACE_P_FORRESTDRY           },
+        { "P_SPARSEFLOWERS",        SURFACE_P_SPARSEFLOWERS        },
+        { "P_BUILDINGSITE",         SURFACE_P_BUILDINGSITE         },
+        { "P_DOCKLANDS",            SURFACE_P_DOCKLANDS            },
+        { "P_INDUSTRIAL",           SURFACE_P_INDUSTRIAL           },
+        { "P_INDUSTJETTY",          SURFACE_P_INDUSTJETTY          },
+        { "P_CONCRETELITTER",       SURFACE_P_CONCRETELITTER       },
+        { "P_ALLEYRUBISH",          SURFACE_P_ALLEYRUBISH          },
+        { "P_JUNKYARDPILES",        SURFACE_P_JUNKYARDPILES        },
+        { "P_JUNKYARDGRND",         SURFACE_P_JUNKYARDGRND         },
+        { "P_DUMP",                 SURFACE_P_DUMP                 },
+        { "P_CACTUSDENSE",          SURFACE_P_CACTUSDENSE          },
+        { "P_AIRPORTGRND",          SURFACE_P_AIRPORTGRND          },
+        { "P_CORNFIELD",            SURFACE_P_CORNFIELD            },
+        { "P_GRASSLIGHT",           SURFACE_P_GRASSLIGHT           },
+        { "P_GRASSLIGHTER",         SURFACE_P_GRASSLIGHTER         },
+        { "P_GRASSLIGHTER2",        SURFACE_P_GRASSLIGHTER2        },
+        { "P_GRASSMID1",            SURFACE_P_GRASSMID1            },
+        { "P_GRASSMID2",            SURFACE_P_GRASSMID2            },
+        { "P_GRASSDARK",            SURFACE_P_GRASSDARK            },
+        { "P_GRASSDARK2",           SURFACE_P_GRASSDARK2           },
+        { "P_GRASSDIRTMIX",         SURFACE_P_GRASSDIRTMIX         },
+        { "P_RIVERBEDSTONE",        SURFACE_P_RIVERBEDSTONE        },
+        { "P_RIVERBEDSHALLOW",      SURFACE_P_RIVERBEDSHALLOW      },
+        { "P_RIVERBEDWEEDS",        SURFACE_P_RIVERBEDWEEDS        },
+        { "P_SEAWEED",              SURFACE_P_SEAWEED              },
+        { "DOOR",                   SURFACE_DOOR                   },
+        { "PLASTICBARRIER",         SURFACE_PLASTICBARRIER         },
+        { "PARKGRASS",              SURFACE_PARKGRASS              },
+        { "STAIRSSTONE",            SURFACE_STAIRSSTONE            },
+        { "STAIRSMETAL",            SURFACE_STAIRSMETAL            },
+        { "STAIRSCARPET",           SURFACE_STAIRSCARPET           },
+        { "FLOORMETAL",             SURFACE_FLOORMETAL             },
+        { "FLOORCONCRETE",          SURFACE_FLOORCONCRETE          },
+        { "BIN_BAG",                SURFACE_BIN_BAG                },
+        { "THIN_METAL_SHEET",       SURFACE_THIN_METAL_SHEET       },
+        { "METAL_BARREL",           SURFACE_METAL_BARREL           },
+        { "PLASTIC_CONE",           SURFACE_PLASTIC_CONE           },
+        { "PLASTIC_DUMPSTER",       SURFACE_PLASTIC_DUMPSTER       },
+        { "METAL_DUMPSTER",         SURFACE_METAL_DUMPSTER         },
+        { "WOOD_PICKET_FENCE",      SURFACE_WOOD_PICKET_FENCE      },
+        { "WOOD_SLATTED_FENCE",     SURFACE_WOOD_SLATTED_FENCE     },
+        { "WOOD_RANCH_FENCE",       SURFACE_WOOD_RANCH_FENCE       },
+        { "UNBREAKABLE_GLASS",      SURFACE_UNBREAKABLE_GLASS      },
+        { "HAY_BALE",               SURFACE_HAY_BALE               },
+        { "GORE",                   SURFACE_GORE                   },
+        { "RAILTRACK",              SURFACE_RAILTRACK              }
+    };
+    for (const auto& [name, type] : mapping) {
+        if (strcmp(cName, name) == 0)
+            return type;
+    }
     return SURFACE_DEFAULT;
 }
 
-void SurfaceInfos_c::LoadSurfaceInfos()
+// 0x55D0E0
+void SurfaceInfos_c::LoadAdhesiveLimits()
 {
-    return plugin::CallMethod<0x55EB90, SurfaceInfos_c*>(this);
+    return plugin::CallMethod<0x55D0E0, SurfaceInfos_c*>(this);
+
+    CFileMgr::SetDir("");
+    auto* file = CFileMgr::OpenFile("data\\surface.dat", "rb");
+#if FIX_BUGS
+    if (!file) {
+        DEV_LOG("[SurfaceInfos_c] Failed to open surface.dat");
+        CFileMgr::CloseFile(file);
+        return;
+    }
+#endif
+    for (const char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
+        if (*line == ';' || !*line)
+            continue;
+
+        char value[4];
+        sscanf(line, "%3s", value); // FIX_BUGS: buffer overflow
+        for (auto i = *line; i != ' '; i = *++line) {
+            if (i == '\t')
+                break;
+        }
+    }
+    CFileMgr::CloseFile(file);
 }
 
+// 0x55EB90
+void SurfaceInfos_c::LoadSurfaceInfos()
+{
+    auto* file = CFileMgr::OpenFile("data\\surfinfo.dat", "r");
+#if FIX_BUGS
+    if (!file) {
+        DEV_LOG("[SurfaceInfos_c] Failed to open surfinfo.dat");
+        CFileMgr::CloseFile(file);
+        return;
+    }
+#endif
+    for (const char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
+        if (*line == '#' || !*line)
+            continue;
+
+        SurfaceInfo si{};
+        si.Read(line);
+
+        auto id = SurfaceInfos_c::GetSurfaceIdFromName(si.SurfaceName);
+        auto& surface = m_surfaces[id];
+
+        if      (!strcmp(si.AdhesionGroup, "RUBBER")) surface.ucAdhesionGroup = ADHESION_GROUP_RUBBER;
+        else if (!strcmp(si.AdhesionGroup, "HARD"))   surface.ucAdhesionGroup = ADHESION_GROUP_HARD;
+        else if (!strcmp(si.AdhesionGroup, "ROAD"))   surface.ucAdhesionGroup = ADHESION_GROUP_ROAD;
+        else if (!strcmp(si.AdhesionGroup, "LOOSE"))  surface.ucAdhesionGroup = ADHESION_GROUP_LOOSE;
+        else if (!strcmp(si.AdhesionGroup, "SAND"))   surface.ucAdhesionGroup = ADHESION_GROUP_SAND;
+        else if (!strcmp(si.AdhesionGroup, "WET"))    surface.ucAdhesionGroup = ADHESION_GROUP_WET;
+
+        surface.tyreGrip = uint32(si.TyreGrip * 10.0f);
+        surface.wetGrip  = uint32(si.WetGrip  * 100.0f); // BUG:? Data has negative values, with *original* conversion we loose sign
+
+        if (!strcmp(si.SkidMark, "DEFAULT")) surface.ucSkidmarkType = static_cast<uint32>(eSkidmarkType::DEFAULT);
+        if (!strcmp(si.SkidMark, "SANDY"))   surface.ucSkidmarkType = static_cast<uint32>(eSkidmarkType::SANDY);
+        if (!strcmp(si.SkidMark, "MUDDY"))   surface.ucSkidmarkType = static_cast<uint32>(eSkidmarkType::MUDDY);
+
+        if      (!strcmp(si.FrictionEffect, "NONE"))   surface.ucFrictionEffect = FRICTION_EFFECT_NONE;
+        else if (!strcmp(si.FrictionEffect, "SPARKS")) surface.ucFrictionEffect = FRICTION_EFFECT_SPARKS;
+
+        if      (!strcmp(si.BulletFx, "NONE"))   surface.ucBulletFX = BULLET_FX_NONE;
+        else if (!strcmp(si.BulletFx, "SPARKS")) surface.ucBulletFX = BULLET_FX_SPARKS;
+        else if (!strcmp(si.BulletFx, "SAND"))   surface.ucBulletFX = BULLET_FX_SAND;
+        else if (!strcmp(si.BulletFx, "WOOD"))   surface.ucBulletFX = BULLET_FX_WOOD;
+        else if (!strcmp(si.BulletFx, "DUST"))   surface.ucBulletFX = BULLET_FX_DUST;
+
+        surface.bIsSoftLand         = (bool)si.SoftLand;
+        surface.bIsSeeThrough       = (bool)si.SeeThrough;
+        surface.bIsShootThrough     = (bool)si.ShootThrough;
+        surface.bIsSand             = (bool)si.Sand;
+        surface.bIsWater            = (bool)si.Water;
+        surface.bIsShallowWater     = (bool)si.ShallowWater;
+        surface.bIsBeach            = (bool)si.Beach;
+        surface.bIsSteepSlope       = (bool)si.SteepSlope;
+        surface.bIsGlass            = (bool)si.Glass;
+        surface.bIsStairs           = (bool)si.Stairs;
+        surface.bIsSkateable        = (bool)si.Skateable;
+        surface.bIsPavement         = (bool)si.Pavement;
+        surface.ucRoughness         = (uint32)si.Roughness;
+        surface.ucFlammability      = (uint32)si.Flame;
+        surface.bCreatesSparks      = (bool)si.Sparks;
+        surface.bCantSprintOn       = (bool)si.Sprint;
+        surface.bLeavesFootsteps    = (bool)si.Footsteps;
+        surface.bProducesFootDust   = (bool)si.FootDust;
+        surface.bMakesCarDirty      = (bool)si.CarDirt;
+        surface.bMakesCarClean      = (bool)si.CarClean;
+        surface.bCreatesWheelGrass  = (bool)si.WheelGrass;
+        surface.bCreatesWheelGravel = (bool)si.WheelGravel;
+        surface.bCreatesWheelMud    = (bool)si.WheelMud;
+        surface.bCreatesWheelDust   = (bool)si.WheelDust;
+        surface.bCreatesWheelSand   = (bool)si.WheelSand;
+        surface.bCreatesWheelSpray  = (bool)si.WheelSpray;
+        surface.bCreatesPlants      = (bool)si.ProcPlant;
+        surface.bCreatesObjects     = (bool)si.ProcObj;
+        surface.bCanClimb           = (bool)si.Climbable;
+    }
+    CFileMgr::CloseFile(file);
+}
+
+// 0x55F2B0
 void SurfaceInfos_c::LoadSurfaceAudioInfos()
 {
-    return plugin::CallMethod<0x55F2B0, SurfaceInfos_c*>(this);
+    auto* file = CFileMgr::OpenFile("data\\surfaud.dat", "r");
+#if FIX_BUGS
+    if (!file) {
+        DEV_LOG("[SurfaceInfos_c] Failed to open surfaud.dat");
+        CFileMgr::CloseFile(file);
+        return;
+    }
+#endif
+    for (const char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
+        if (*line == '#' || !*line)
+            continue;
+
+        char  name[64];
+        int32 concrete, grass, sand, gravel, wood, water, metal, longGrass, tile;
+        (void)sscanf(line, "%31s %d %d %d %d %d %d %d %d %d", name, &concrete, &grass, &sand, &gravel, &wood, &water, &metal, &longGrass, &tile); // FIX_BUGS: buffer overflow
+
+        auto id = GetSurfaceIdFromName(name);
+        auto& surface = m_surfaces[id];
+
+        surface.bIsAudioConcrete  = (bool)concrete;
+        surface.bIsAudioGrass     = (bool)grass;
+        surface.bIsAudioSand      = (bool)sand;
+        surface.bIsAudioGravel    = (bool)gravel;
+        surface.bIsAudioWood      = (bool)wood;
+        surface.bIsAudioWater     = (bool)water;
+        surface.bIsAudioMetal     = (bool)metal;
+        surface.bIsAudioLongGrass = (bool)longGrass;
+        surface.bIsAudioTile      = (bool)tile;
+    }
+    CFileMgr::CloseFile(file);
 }
 
 void SurfaceInfos_c::Init()
 {
+    // They call CFileMgr::SetDir("") only once in LoadAdhesiveLimits
     LoadAdhesiveLimits();
     LoadSurfaceInfos();
     LoadSurfaceAudioInfos();
 }
 
-eAdhesionGroup SurfaceInfos_c::GetAdhesionGroup(uint32 surfaceId)
+// 0x55E5C0
+eAdhesionGroup SurfaceInfos_c::GetAdhesionGroup(SurfaceId id)
 {
-    return static_cast<eAdhesionGroup>(m_surfaces[surfaceId].ucAdhesionGroup);
+    return static_cast<eAdhesionGroup>(m_surfaces[id].ucAdhesionGroup);
 }
 
-float SurfaceInfos_c::GetTyreGrip(uint32 surfaceId)
+// 0x55E5E0
+float SurfaceInfos_c::GetTyreGrip(SurfaceId id)
 {
-    return static_cast<float>(m_surfaces[surfaceId].tyreGrip) * 0.1F;
+    return static_cast<float>(m_surfaces[id].tyreGrip) * 0.1F;
 }
 
-float SurfaceInfos_c::GetWetMultiplier(uint32 surfaceId)
+// 0x55E600
+float SurfaceInfos_c::GetWetMultiplier(SurfaceId id)
 {
-    return static_cast<float>(m_surfaces[surfaceId].wetGrip) * 0.01F * CWeather::WetRoads + 1.0F;
+    return static_cast<float>(m_surfaces[id].wetGrip) * 0.01F * CWeather::WetRoads + 1.0F;
 }
 
-uint32 SurfaceInfos_c::GetSkidmarkType(uint32 surfaceId)
+// 0x55E630
+uint32 SurfaceInfos_c::GetSkidmarkType(SurfaceId id)
 {
-    return m_surfaces[surfaceId].ucSkidmarkType;
+    return m_surfaces[id].ucSkidmarkType;
 }
 
-eFrictionEffect SurfaceInfos_c::GetFrictionEffect(uint32 surfaceId)
+// 0x55E650
+eFrictionEffect SurfaceInfos_c::GetFrictionEffect(SurfaceId id)
 {
-    return static_cast<eFrictionEffect>(m_surfaces[surfaceId].ucFrictionEffect);
+    return static_cast<eFrictionEffect>(m_surfaces[id].ucFrictionEffect);
 }
 
-uint32 SurfaceInfos_c::GetBulletFx(uint32 surfaceId)
+// 0x55E670
+uint32 SurfaceInfos_c::GetBulletFx(SurfaceId id)
 {
-    return m_surfaces[surfaceId].ucBulletFX;
+    return m_surfaces[id].ucBulletFX;
 }
 
-bool SurfaceInfos_c::IsSoftLanding(uint32 surfaceId)
+// 0x55E690
+bool SurfaceInfos_c::IsSoftLanding(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsSoftLand;
+    return m_surfaces[id].bIsSoftLand;
 }
 
-bool SurfaceInfos_c::IsSeeThrough(uint32 surfaceId)
+// 0x55E6B0
+bool SurfaceInfos_c::IsSeeThrough(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsSeeThrough;
+    return m_surfaces[id].bIsSeeThrough;
 }
 
-bool SurfaceInfos_c::IsShootThrough(uint32 surfaceId)
+// 0x55E6D0
+bool SurfaceInfos_c::IsShootThrough(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsShootThrough;
+    return m_surfaces[id].bIsShootThrough;
 }
 
-bool SurfaceInfos_c::IsSand(uint32 surfaceId)
+// 0x55E6F0
+bool SurfaceInfos_c::IsSand(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsSand;
+    return m_surfaces[id].bIsSand;
 }
 
-bool SurfaceInfos_c::IsWater(uint32 surfaceID)
+// 0x55E710
+bool SurfaceInfos_c::IsWater(SurfaceId id)
 {
-    return m_surfaces[surfaceID].bIsWater;
+    return m_surfaces[id].bIsWater;
 }
 
-bool SurfaceInfos_c::IsShallowWater(uint32 surfaceId)
+// 0x55E730
+bool SurfaceInfos_c::IsShallowWater(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsShallowWater;
+    return m_surfaces[id].bIsShallowWater;
 }
 
-bool SurfaceInfos_c::IsBeach(uint32 surfaceId)
+// 0x55E750
+bool SurfaceInfos_c::IsBeach(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsBeach;
+    return m_surfaces[id].bIsBeach;
 }
 
-bool SurfaceInfos_c::IsSteepSlope(uint32 surfaceId)
+// 0x55E770
+bool SurfaceInfos_c::IsSteepSlope(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsSteepSlope;
+    return m_surfaces[id].bIsSteepSlope;
 }
 
-bool SurfaceInfos_c::IsGlass(uint32 surfaceId)
+// 0x55E790
+bool SurfaceInfos_c::IsGlass(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsGlass;
+    return m_surfaces[id].bIsGlass;
 }
 
-bool SurfaceInfos_c::IsStairs(uint32 surfaceId)
+// 0x55E7B0
+bool SurfaceInfos_c::IsStairs(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsStairs;
+    return m_surfaces[id].bIsStairs;
 }
 
-bool SurfaceInfos_c::IsSkateable(uint32 surfaceId)
+// 0x55E7D0
+bool SurfaceInfos_c::IsSkateable(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsSkateable;
+    return m_surfaces[id].bIsSkateable;
 }
 
-bool SurfaceInfos_c::IsPavement(uint32 surfaceId)
+// 0x55E7F0
+bool SurfaceInfos_c::IsPavement(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsPavement;
+    return m_surfaces[id].bIsPavement;
 }
 
-uint32 SurfaceInfos_c::GetRoughness(uint32 surfaceId)
+// 0x55E810
+uint32 SurfaceInfos_c::GetRoughness(SurfaceId id)
 {
-    return m_surfaces[surfaceId].ucRoughness;
+    return m_surfaces[id].ucRoughness;
 }
 
-uint32 SurfaceInfos_c::GetFlammability(uint32 surfaceId)
+// 0x55E830
+uint32 SurfaceInfos_c::GetFlammability(SurfaceId id)
 {
-    return m_surfaces[surfaceId].ucFlammability;
+    return m_surfaces[id].ucFlammability;
 }
 
-bool SurfaceInfos_c::CreatesSparks(uint32 surfaceId)
+// 0x55E850
+bool SurfaceInfos_c::CreatesSparks(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bCreatesSparks;
+    return m_surfaces[id].bCreatesSparks;
 }
 
-bool SurfaceInfos_c::CantSprintOn(uint32 surfaceId)
+// 0x55E870
+bool SurfaceInfos_c::CantSprintOn(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bCantSprintOn;
+    return m_surfaces[id].bCantSprintOn;
 }
 
-bool SurfaceInfos_c::LeavesFootsteps(uint32 surfaceId)
+// 0x55E890
+bool SurfaceInfos_c::LeavesFootsteps(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bLeavesFootsteps;
+    return m_surfaces[id].bLeavesFootsteps;
 }
 
-bool SurfaceInfos_c::ProducesFootDust(uint32 surfaceId)
+// 0x55E8B0
+bool SurfaceInfos_c::ProducesFootDust(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bProducesFootDust;
+    return m_surfaces[id].bProducesFootDust;
 }
 
-bool SurfaceInfos_c::MakesCarDirty(uint32 surfaceId)
+// 0x55E8D0
+bool SurfaceInfos_c::MakesCarDirty(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bMakesCarDirty;
+    return m_surfaces[id].bMakesCarDirty;
 }
 
-bool SurfaceInfos_c::MakesCarClean(uint32 surfaceId)
+// 0x55E8F0
+bool SurfaceInfos_c::MakesCarClean(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bMakesCarClean;
+    return m_surfaces[id].bMakesCarClean;
 }
 
-bool SurfaceInfos_c::CreatesWheelGrass(uint32 surfaceId)
+// 0x55E910
+bool SurfaceInfos_c::CreatesWheelGrass(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bCreatesWheelGrass;
+    return m_surfaces[id].bCreatesWheelGrass;
 }
 
-bool SurfaceInfos_c::CreatesWheelGravel(uint32 surfaceId)
+// 0x55E930
+bool SurfaceInfos_c::CreatesWheelGravel(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bCreatesWheelGravel;
+    return m_surfaces[id].bCreatesWheelGravel;
 }
 
-bool SurfaceInfos_c::CreatesWheelMud(uint32 surfaceId)
+// 0x55E950
+bool SurfaceInfos_c::CreatesWheelMud(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bCreatesWheelMud;
+    return m_surfaces[id].bCreatesWheelMud;
 }
 
-bool SurfaceInfos_c::CreatesWheelDust(uint32 surfaceId)
+// 0x55E970
+bool SurfaceInfos_c::CreatesWheelDust(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bCreatesWheelDust;
+    return m_surfaces[id].bCreatesWheelDust;
 }
 
-bool SurfaceInfos_c::CreatesWheelSand(uint32 surfaceId)
+// 0x55E990
+bool SurfaceInfos_c::CreatesWheelSand(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bCreatesWheelSand;
+    return m_surfaces[id].bCreatesWheelSand;
 }
 
-bool SurfaceInfos_c::CreatesWheelSpray(uint32 surfaceId)
+// 0x55E9B0
+bool SurfaceInfos_c::CreatesWheelSpray(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bCreatesWheelSpray;
+    return m_surfaces[id].bCreatesWheelSpray;
 }
 
-bool SurfaceInfos_c::CreatesPlants(uint32 surfaceId)
+// 0x55E9D0
+bool SurfaceInfos_c::CreatesPlants(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bCreatesPlants;
+    return m_surfaces[id].bCreatesPlants;
 }
 
-bool SurfaceInfos_c::CreatesObjects(uint32 surfaceId)
+// 0x55E9F0
+bool SurfaceInfos_c::CreatesObjects(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bCreatesObjects;
+    return m_surfaces[id].bCreatesObjects;
 }
 
-bool SurfaceInfos_c::CanClimb(uint32 surfaceId)
+// 0x55EA10
+bool SurfaceInfos_c::CanClimb(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bCanClimb;
+    return m_surfaces[id].bCanClimb;
 }
 
-bool SurfaceInfos_c::IsAudioConcrete(uint32 surfaceId)
+// 0x55EA30
+bool SurfaceInfos_c::IsAudioConcrete(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsAudioConcrete;
+    return m_surfaces[id].bIsAudioConcrete;
 }
 
-bool SurfaceInfos_c::IsAudioGrass(uint32 surfaceId)
+// 0x55EA50
+bool SurfaceInfos_c::IsAudioGrass(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsAudioGrass;
+    return m_surfaces[id].bIsAudioGrass;
 }
 
-bool SurfaceInfos_c::IsAudioSand(uint32 surfaceId)
+// 0x55EA70
+bool SurfaceInfos_c::IsAudioSand(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsAudioSand;
+    return m_surfaces[id].bIsAudioSand;
 }
 
-bool SurfaceInfos_c::IsAudioGravel(uint32 surfaceId)
+// 0x55EA90
+bool SurfaceInfos_c::IsAudioGravel(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsAudioGravel;
+    return m_surfaces[id].bIsAudioGravel;
 }
 
-bool SurfaceInfos_c::IsAudioWood(uint32 surfaceId)
+// 0x55EAB0
+bool SurfaceInfos_c::IsAudioWood(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsAudioWood;
+    return m_surfaces[id].bIsAudioWood;
 }
 
-bool SurfaceInfos_c::IsAudioWater(uint32 surfaceId)
+// 0x55EAD0
+bool SurfaceInfos_c::IsAudioWater(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsAudioWater;
+    return m_surfaces[id].bIsAudioWater;
 }
 
-bool SurfaceInfos_c::IsAudioMetal(uint32 surfaceId)
+// 0x55EAF0
+bool SurfaceInfos_c::IsAudioMetal(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsAudioMetal;
+    return m_surfaces[id].bIsAudioMetal;
 }
 
-bool SurfaceInfos_c::IsAudioLongGrass(uint32 surfaceId)
+// 0x55EB10
+bool SurfaceInfos_c::IsAudioLongGrass(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsAudioLongGrass;
+    return m_surfaces[id].bIsAudioLongGrass;
 }
 
-bool SurfaceInfos_c::IsAudioTile(uint32 surfaceId)
+// 0x55EB30
+bool SurfaceInfos_c::IsAudioTile(SurfaceId id)
 {
-    return m_surfaces[surfaceId].bIsAudioTile;
+    return m_surfaces[id].bIsAudioTile;
 }
 
+// 0x55EB50
 float SurfaceInfos_c::GetAdhesiveLimit(CColPoint* colPoint)
 {
     auto& surfaceA = m_surfaces[colPoint->m_nSurfaceTypeA];

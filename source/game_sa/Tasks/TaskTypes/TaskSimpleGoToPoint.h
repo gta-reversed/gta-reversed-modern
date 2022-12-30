@@ -2,12 +2,10 @@
 
 #include "TaskSimpleGoTo.h"
 
-class CTaskSimpleGoToPoint : public CTaskSimpleGoTo
-{
+class CTaskSimpleGoToPoint : public CTaskSimpleGoTo {
 public:
     union {
-        struct
-        {
+        struct {
             uint8 m_bMoveTowardsTargetPoint : 1;
             uint8 m_b02 : 1;
             uint8 m_b03 : 1;
@@ -16,29 +14,25 @@ public:
         } gotoPointFlags;
         uint8 m_GoToPointFlags;
     };
-private:
-    uint8 field_21[3]; // padding
-public:
     CVector m_vecLastPedPos;
 
-    static void InjectHooks();
-
-    CTaskSimpleGoToPoint(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6);
-    ~CTaskSimpleGoToPoint();
-private:
-    CTaskSimpleGoToPoint* Constructor(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6);
 public:
-    CTask* Clone();
-    eTaskType GetTaskType() override { return TASK_SIMPLE_GO_TO_POINT; }
+    static constexpr auto Type = TASK_SIMPLE_GO_TO_POINT;
+
+    CTaskSimpleGoToPoint(eMoveState moveState, const CVector& targetPoint, float fRadius = 0.5f, bool bMoveTowardsTargetPoint = false, bool a6 = false);
+    ~CTaskSimpleGoToPoint() override = default;
+
+    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override { return new CTaskSimpleGoToPoint(m_moveState, m_vecTargetPoint, m_fRadius, gotoPointFlags.m_bMoveTowardsTargetPoint, gotoPointFlags.m_b04); } // 0x66CC60
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
-private:
-    CTask* Clone_Reversed();
+
+    // bDontCheckRadius is always false
+    void UpdatePoint(const CVector& targetPosition, float fRadius = 0.5f, bool bDontCheckRadius = false);
+
+    static void InjectHooks();
+    auto Constructor(eMoveState moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6) { this->CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(moveState, targetPoint, fRadius, bMoveTowardsTargetPoint, a6); return this; }
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed_Reversed(CPed* ped);
-public:
-    // bDontCheckRadius is always false
-    void UpdatePoint(const CVector& targetPosition, float fRadius, bool bDontCheckRadius);
 };
-
 VALIDATE_SIZE(CTaskSimpleGoToPoint, 0x30);

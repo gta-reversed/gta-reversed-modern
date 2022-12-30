@@ -6,6 +6,8 @@ class CEntity;
 
 class CTaskComplexGoPickUpEntity : public CTaskComplex {
 public:
+    static constexpr auto Type = TASK_COMPLEX_GO_PICKUP_ENTITY;
+
     CEntity* m_pEntity;
     CVector  m_vecPosition;
     CVector  m_vecPickupPosition;

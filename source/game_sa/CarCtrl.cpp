@@ -9,6 +9,7 @@
 
 #include "CarCtrl.h"
 #include "TrafficLights.h"
+#include "TheScripts.h"
 
 uint32& CCarCtrl::NumLawEnforcerCars = *(uint32*)0x969098;
 uint32& CCarCtrl::NumParkedCars = *(uint32*)0x9690A0;
@@ -42,12 +43,12 @@ void CCarCtrl::InjectHooks()
     RH_ScopedInstall(Init, 0x4212E0);
     RH_ScopedInstall(ReInit, 0x4213B0);
     RH_ScopedInstall(InitSequence, 0x421740);
-    Install("CCarCtrl", "ChooseGangCarModel", 0x421A40, &CCarCtrl::ChooseGangCarModel, false, 7);
-    Install("CCarCtrl", "ChoosePoliceCarModel", 0x421980, &CCarCtrl::ChoosePoliceCarModel, false, 7);
+    Install("CCarCtrl", "ChooseGangCarModel", 0x421A40, &CCarCtrl::ChooseGangCarModel, { .jmpCodeSize = 7 });
+    Install("CCarCtrl", "ChoosePoliceCarModel", 0x421980, &CCarCtrl::ChoosePoliceCarModel, { .jmpCodeSize = 7 });
     RH_ScopedInstall(CreateCarForScript, 0x431F80);
     RH_ScopedInstall(ChooseBoatModel, 0x421970);
     RH_ScopedInstall(ChooseCarModelToLoad, 0x421900);
-    // RH_ScopedInstall(GetNewVehicleDependingOnCarModel, 0x421440);
+    RH_ScopedInstall(GetNewVehicleDependingOnCarModel, 0x421440, { .reversed = false });
     RH_ScopedInstall(IsAnyoneParking, 0x42C250);
     RH_ScopedInstall(IsThisVehicleInteresting, 0x423EA0);
     RH_ScopedInstall(JoinCarWithRoadAccordingToMission, 0x432CB0);
@@ -140,25 +141,25 @@ int32 CCarCtrl::ChooseModel(int32* arg1) {
 
 int32 CCarCtrl::ChoosePoliceCarModel(uint32 ignoreLvpd1Model) {
     CWanted* playerWanted = FindPlayerWanted();
-    if (playerWanted->AreSwatRequired() 
-        && CStreaming::IsModelLoaded(MODEL_ENFORCER) 
+    if (playerWanted->AreSwatRequired()
+        && CStreaming::IsModelLoaded(MODEL_ENFORCER)
         && CStreaming::IsModelLoaded(MODEL_SWAT)
     ) {
         if (CGeneral::GetRandomNumberInRange(0, 3) == 2)
-            return MODEL_ENFORCER; 
+            return MODEL_ENFORCER;
     }
     else
     {
-        if (playerWanted->AreFbiRequired() 
+        if (playerWanted->AreFbiRequired()
             && CStreaming::IsModelLoaded(MODEL_FBIRANCH)
             && CStreaming::IsModelLoaded(MODEL_FBI))
-            return MODEL_FBIRANCH; 
+            return MODEL_FBIRANCH;
 
-        if (playerWanted->AreArmyRequired() 
+        if (playerWanted->AreArmyRequired()
             && CStreaming::IsModelLoaded(MODEL_RHINO)
             && CStreaming::IsModelLoaded(MODEL_BARRACKS)
             && CStreaming::IsModelLoaded(MODEL_ARMY))
-            return (rand() < 0x3FFF) + MODEL_RHINO;
+            return (CGeneral::GetRandomNumber() < 0x3FFF) + MODEL_RHINO;
     }
     return CStreaming::GetDefaultCopCarModel(ignoreLvpd1Model);
 }
@@ -178,7 +179,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
     if (CModelInfo::IsBoatModel(modelid))
     {
         auto* boat = new CBoat(modelid, eVehicleCreatedBy::MISSION_VEHICLE);
-        if (posn.z <= -100.0F)
+        if (posn.z <= MAP_Z_LOW_LIMIT)
             posn.z = CWorld::FindGroundZForCoord(posn.x, posn.y);
 
         posn.z += boat->GetDistanceFromCentreOfMassToBaseOfModel();
@@ -202,13 +203,13 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
         CWorld::Add(boat);
 
         if (doMissionCleanup)
-            CTheScripts::MissionCleanUp.AddEntityToList(CPools::ms_pVehiclePool->GetRef(boat), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
+            CTheScripts::MissionCleanUp.AddEntityToList(GetVehiclePool()->GetRef(boat), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
 
         return boat;
     }
 
     auto* vehicle = GetNewVehicleDependingOnCarModel(modelid, eVehicleCreatedBy::MISSION_VEHICLE);
-    if (posn.z <= -100.0F)
+    if (posn.z <= MAP_Z_LOW_LIMIT)
         posn.z = CWorld::FindGroundZForCoord(posn.x, posn.y);
 
     posn.z += vehicle->GetDistanceFromCentreOfMassToBaseOfModel();
@@ -234,7 +235,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
 
     vehicle->m_autoPilot.m_nCarMission = eCarMission::MISSION_NONE;
     vehicle->m_autoPilot.m_nTempAction = 0;
-    vehicle->m_autoPilot.m_nCarDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
+    vehicle->m_autoPilot.m_nCarDrivingStyle = DRIVING_STYLE_STOP_FOR_CARS;
     vehicle->m_autoPilot.m_speed = 13.0F;
     vehicle->m_autoPilot.m_nCruiseSpeed = 13;
     vehicle->m_autoPilot.m_nCurrentLane = 0;
@@ -245,7 +246,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
 
     CWorld::Add(vehicle);
     if (doMissionCleanup)
-        CTheScripts::MissionCleanUp.AddEntityToList(CPools::ms_pVehiclePool->GetRef(vehicle), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
+        CTheScripts::MissionCleanUp.AddEntityToList(GetVehiclePool()->GetRef(vehicle), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
 
     if (vehicle->IsSubRoadVehicle())
         vehicle->m_autoPilot.movementFlags.bIsStopped = true;
@@ -429,8 +430,8 @@ CVehicle* CCarCtrl::GetNewVehicleDependingOnCarModel(int32 modelId, uint8 create
 
 // 0x42C250
 bool CCarCtrl::IsAnyoneParking() {
-    for (auto i = 0; i < CPools::ms_pVehiclePool->GetSize(); i++) {
-        if (auto vehicle = CPools::ms_pVehiclePool->GetAt(i)) {
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        if (auto vehicle = GetVehiclePool()->GetAt(i)) {
             switch (vehicle->m_autoPilot.m_nCarMission) {
             case eCarMission::MISSION_PARK_PARALLEL_0:
             case eCarMission::MISSION_PARK_PARALLEL_1:
@@ -541,8 +542,8 @@ bool CCarCtrl::PickNextNodeAccordingStrategy(CVehicle* vehicle) {
 // 0x421740
 void CCarCtrl::InitSequence(int32 numSequenceElements) {
     SequenceElements = numSequenceElements;
-    SequenceRandomOffset = rand() % numSequenceElements;
-    bSequenceOtherWay = (rand() / 4) % 2;
+    SequenceRandomOffset = CGeneral::GetRandomNumber() % numSequenceElements;
+    bSequenceOtherWay = (CGeneral::GetRandomNumber() / 4) % 2;
 }
 
 // 0x42DE80
@@ -596,7 +597,7 @@ void CCarCtrl::PossiblyRemoveVehicle(CVehicle* vehicle) {
 
 // 0x423F10
 void CCarCtrl::PruneVehiclesOfInterest() {
-    if ((CTimer::GetFrameCounter() & 63) == 19 && FindPlayerCoors(-1).z < 950.0f) {
+    if ((CTimer::GetFrameCounter() % 64) == 19 && FindPlayerCoors(-1).z < 950.0f) {
         for (size_t i = 0; i < std::size(apCarsToKeep); i++) {
             if (apCarsToKeep[i]) {
                 if (CTimer::GetTimeInMS() > aCarsToKeepTime[i] + 180000) {
@@ -622,15 +623,15 @@ void CCarCtrl::RemoveCarsIfThePoolGetsFull() {
     if (CTimer::GetFrameCounter() % 8 != 3)
         return;
 
-    if (CPools::ms_pVehiclePool->GetNoOfFreeSpaces() >= 8)
+    if (GetVehiclePool()->GetNoOfFreeSpaces() >= 8)
         return;
 
     // Find closest deletable vehicle
     const CVector camPos = TheCamera.GetPosition();
     float fClosestDist = std::numeric_limits<float>::max();
     CVehicle* closestVeh = nullptr;
-    for (auto i = 0; i < CPools::ms_pVehiclePool->GetSize(); i++) {
-        if (auto vehicle = CPools::ms_pVehiclePool->GetAt(i)) {
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        if (auto vehicle = GetVehiclePool()->GetAt(i)) {
             if (IsThisVehicleInteresting(vehicle))
                 continue;
             if (vehicle->vehicleFlags.bIsLocked)
@@ -655,8 +656,8 @@ void CCarCtrl::RemoveCarsIfThePoolGetsFull() {
 
 // 0x42CD10
 void CCarCtrl::RemoveDistantCars() {
-    for (auto i = 0; i < CPools::ms_pVehiclePool->GetSize(); i++) {
-        if (auto vehicle = CPools::ms_pVehiclePool->GetAt(i)) {
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        if (auto vehicle = GetVehiclePool()->GetAt(i)) {
             PossiblyRemoveVehicle(vehicle);
             if (!vehicle->vehicleFlags.bCreateRoadBlockPeds)
                 continue;
@@ -668,6 +669,8 @@ void CCarCtrl::RemoveDistantCars() {
                     vehicle->m_nPedsPositionForRoadBlock,
                     vehicle->IsLawEnforcementVehicle() ? PED_TYPE_COP : PED_TYPE_GANG1
                 );
+
+                vehicle->vehicleFlags.bCreateRoadBlockPeds = false;
             }
         }
     }

@@ -10,57 +10,68 @@
 
 // 0x6F5370
 CTrainNode::CTrainNode() {
-    ((void(__thiscall*)(CTrainNode*))0x6F5370)(this);
+    m_bSurfLightingFound = false;
 }
 
 // 0x6F5380
 void CTrainNode::SetX(float X) {
-    ((void(__thiscall*)(CTrainNode*, float))0x6F5380)(this, X);
+    x = int16(X * 8.0f);
 }
 
 // 0x6F53A0
 void CTrainNode::SetY(float Y) {
-    ((void(__thiscall*)(CTrainNode*, float))0x6F53A0)(this, Y);
+    y = int16(Y * 8.0f);
 }
 
 // 0x6F53C0
 void CTrainNode::SetZ(float Z) {
-    ((void(__thiscall*)(CTrainNode*, float))0x6F53C0)(this, Z);
+    z = int16(Z * 8.0f);
 }
 
 // 0x6F53E0
-float CTrainNode::GetX() {
-    return ((float(__thiscall*)(CTrainNode*))0x6F53E0)(this);
+float CTrainNode::GetX() const {
+    return (float)x * 0.125f;
 }
 
 // 0x6F5400
-float CTrainNode::GetY() {
-    return ((float(__thiscall*)(CTrainNode*))0x6F5400)(this);
+float CTrainNode::GetY() const {
+    return (float)y * 0.125f;
 }
 
 // 0x6F5420
-float CTrainNode::GetZ() {
-    return ((float(__thiscall*)(CTrainNode*))0x6F5420)(this);
+float CTrainNode::GetZ() const {
+    return (float)z * 0.125f;
 }
 
 // 0x6F5440
-CVector CTrainNode::GetPosn() {
-    CVector result;
-    ((void(__thiscall*)(CTrainNode*, CVector*))0x6F5440)(this, &result);
-    return result;
+CVector CTrainNode::GetPosn() const {
+    return { GetX(), GetY(), GetZ() };
 }
 
 // 0x6F5490
 void CTrainNode::SetDistanceFromStart(float dist) {
-    ((void(__thiscall*)(CTrainNode*, float))0x6F5490)(this, dist);
+    m_nDistanceFromStart = int16(dist * 3.0f);
 }
 
 // 0x6F54B0
-float CTrainNode::GetDistanceFromStart() {
-    return ((float(__thiscall*)(CTrainNode*))0x6F54B0)(this);
+float CTrainNode::GetDistanceFromStart() const {
+    return (float)m_nDistanceFromStart / 3.0f;
 }
 
 // 0x6F5F80
-uint8 CTrainNode::GetLightingFromCollision() {
-    return ((uint8(__thiscall*)(CTrainNode*))0x6F5F80)(this);
+tColLighting CTrainNode::GetLightingFromCollision() {
+    if ( m_bSurfLightingFound ) {
+        return m_nSurfaceLighting;
+    }
+
+    CColPoint cp{};
+    CEntity* entity{};
+    auto pos = GetPosn();
+    pos.z += 1.0f;
+    if (!CWorld::ProcessVerticalLine(pos, -1000.0f, cp, entity, true)) {
+        return tColLighting{ 0x48 };
+    }
+    m_nSurfaceLighting = {};
+    m_bSurfLightingFound = true;
+    return {};
 }

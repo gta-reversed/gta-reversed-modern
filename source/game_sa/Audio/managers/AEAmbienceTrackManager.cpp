@@ -13,8 +13,9 @@ void CAEAmbienceTrackManager::InjectHooks() {
     RH_ScopedInstall(Reset, 0x4D6CA0);
     RH_ScopedInstall(IsAmbienceTrackActive, 0x4D6CF0);
     RH_ScopedInstall(IsAmbienceRadioActive, 0x4D6D40);
+    RH_ScopedInstall(PlaySpecialMissionAmbienceTrack, 0x4D6D50);
     RH_ScopedInstall(StopSpecialMissionAmbienceTrack, 0x4D6D60);
-    // RH_ScopedInstall(UpdateAmbienceTrackAndVolume, 0x4D6E60);
+    RH_ScopedInstall(UpdateAmbienceTrackAndVolume, 0x4D6E60, { .reversed = false });
     RH_ScopedInstall(Service, 0x4D76C0);
 }
 
@@ -49,6 +50,11 @@ bool CAEAmbienceTrackManager::IsAmbienceTrackActive() const {
 // 0x4D6D40
 bool CAEAmbienceTrackManager::IsAmbienceRadioActive() const {
     return m_IsAmbienceRadioActive >= 0;
+}
+
+// 0x4D6D50
+void CAEAmbienceTrackManager::PlaySpecialMissionAmbienceTrack(eAudioEvents event) {
+    m_nSpecialMissionAmbienceTrack = event;
 }
 
 // 0x4D6D60

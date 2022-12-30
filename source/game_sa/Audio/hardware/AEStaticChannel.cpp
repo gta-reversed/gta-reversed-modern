@@ -8,11 +8,11 @@ void CAEStaticChannel::InjectHooks() {
     RH_ScopedClass(CAEStaticChannel);
     RH_ScopedCategory("Audio/Hardware");
 
-    RH_ScopedInstall(IsSoundPlaying_Reversed, 0x4F0F40);
-    RH_ScopedInstall(GetPlayTime_Reversed, 0x4F0F70);
-    RH_ScopedInstall(GetLength_Reversed, 0x4F0FA0);
-    RH_ScopedInstall(SynchPlayback_Reversed, 0x4F1040);
-    RH_ScopedInstall(Stop_Reversed, 0x4F0FB0);
+    RH_ScopedVirtualInstall(IsSoundPlaying, 0x4F0F40);
+    RH_ScopedVirtualInstall(GetPlayTime, 0x4F0F70);
+    RH_ScopedVirtualInstall(GetLength, 0x4F0FA0);
+    RH_ScopedVirtualInstall(SynchPlayback, 0x4F1040);
+    RH_ScopedVirtualInstall(Stop, 0x4F0FB0);
 }
 
 CAEStaticChannel::CAEStaticChannel(IDirectSound* pDirectSound, uint16 channelId, bool arg3, uint32 samplesPerSec, uint16 bitsPerSample)

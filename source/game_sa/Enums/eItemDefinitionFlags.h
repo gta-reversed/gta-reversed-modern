@@ -3,10 +3,10 @@
 // https://gtamods.com/wiki/Item_Definition#IDE_Flags
 enum eItemDefinitionFlags {
     IS_ROAD                     = 0x1,
-    PAD1                        = 0x2,
+    PAD1_                       = 0x2,
     DRAW_LAST                   = 0x4,
     ADDITIVE                    = 0x8,
-    PAD2                        = 0x10,
+    PAD2_                       = 0x10,
     ANIM_SOMETHING              = 0x20,
     NO_ZBUFFER_WRITE            = 0x40,
     DONT_RECEIVE_SHADOWS        = 0x80,

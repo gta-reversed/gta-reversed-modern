@@ -8,24 +8,26 @@
 #include "StdInc.h"
 
 #include "ClumpModelInfo.h"
+#include "CustomBuildingRenderer.h"
+#include "CarFXRenderer.h"
 
 void CClumpModelInfo::InjectHooks()
 {
     RH_ScopedClass(CClumpModelInfo);
     RH_ScopedCategory("Models");
 
-    RH_ScopedInstall(GetModelType_Reversed, 0x4C5720);
-    RH_ScopedInstall(Init_Reversed, 0x4C4E40);
-    RH_ScopedInstall(Shutdown_Reversed, 0x4C4E60);
-    RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C4E70);
-    RH_ScopedInstall(GetRwModelType_Reversed, 0x4C5730);
-    RH_ScopedOverloadedInstall(CreateInstance_Reversed, "void", 0x4C5140, RwObject * (CClumpModelInfo::*)());
-    RH_ScopedOverloadedInstall(CreateInstance_Reversed, "mat", 0x4C5110, RwObject * (CClumpModelInfo::*)(RwMatrix*));
-    RH_ScopedInstall(SetAnimFile_Reversed, 0x4C5200);
-    RH_ScopedInstall(ConvertAnimFileIndex_Reversed, 0x4C5250);
-    RH_ScopedInstall(GetAnimFileIndex_Reversed, 0x4C5740);
-    RH_ScopedInstall(GetBoundingBox_Reversed, 0x4C5710);
-    RH_ScopedInstall(SetClump_Reversed, 0x4C4F70);
+    RH_ScopedVirtualInstall(GetModelType, 0x4C5720);
+    RH_ScopedVirtualInstall(Init, 0x4C4E40);
+    RH_ScopedVirtualInstall(Shutdown, 0x4C4E60);
+    RH_ScopedVirtualInstall(DeleteRwObject, 0x4C4E70);
+    RH_ScopedVirtualInstall(GetRwModelType, 0x4C5730);
+    // clang moment: RH_ScopedVirtualOverloadedInstall(CreateInstance, "void", 0x4C5140, RwObject * (CClumpModelInfo::*)());
+    // clang moment: RH_ScopedVirtualOverloadedInstall(CreateInstance, "mat", 0x4C5110, RwObject * (CClumpModelInfo::*)(RwMatrix*));
+    RH_ScopedVirtualInstall(SetAnimFile, 0x4C5200);
+    RH_ScopedVirtualInstall(ConvertAnimFileIndex, 0x4C5250);
+    RH_ScopedVirtualInstall(GetAnimFileIndex, 0x4C5740);
+    RH_ScopedVirtualInstall(GetBoundingBox, 0x4C5710);
+    RH_ScopedVirtualInstall(SetClump, 0x4C4F70);
     RH_ScopedInstall(SetFrameIds, 0x4C5460);
     RH_ScopedInstall(SetHierarchyForSkinAtomic, 0x4C4EF0);
     RH_ScopedInstall(AtomicSetupLightingCB, 0x4C4F30);
@@ -126,8 +128,9 @@ RwObject* CClumpModelInfo::CreateInstance_Reversed()
     if (bHasAnimBlend) {
         RpAnimBlendClumpInit(clonedClump);
         auto animBlend = CAnimManager::GetAnimation(m_nKey, &CAnimManager::ms_aAnimBlocks[m_nAnimFileIndex]);
-        if (animBlend)
-            CAnimManager::BlendAnimation(clonedClump, animBlend, ANIM_FLAG_LOOPED, 1.0F);
+        if (animBlend) {
+            CAnimManager::BlendAnimation(clonedClump, animBlend, ANIMATION_LOOPED, 1.0F);
+        }
     }
 
     CBaseModelInfo::RemoveRef();
@@ -194,6 +197,7 @@ CBox* CClumpModelInfo::GetBoundingBox_Reversed()
     return &GetColModel()->GetBoundingBox();
 }
 
+// 0x4C4F70
 void CClumpModelInfo::SetClump(RpClump* clump)
 {
     CClumpModelInfo::SetClump_Reversed(clump);
@@ -234,7 +238,7 @@ void CClumpModelInfo::SetClump_Reversed(RpClump* clump)
             auto geometry = RpAtomicGetGeometry(firstAtomic);
             auto skin = RpSkinGeometryGetSkin(geometry);
             for (int32 i = 0; i < RpGeometryGetNumVertices(geometry); ++i) {
-                auto& weight = RpSkinGetVertexBoneWeights(skin)[i];
+                auto& weight = RpSkinGetVertexBoneWeights(skin)[i]; // todoL: originally RpSkinGetVertexBoneWeights returns const obj*
                 auto fRecip = 1.0F / (weight.w0 + weight.w1 + weight.w2 + weight.w3);
                 weight.w0 *= fRecip;
                 weight.w1 *= fRecip;
@@ -278,9 +282,13 @@ RpAtomic* CClumpModelInfo::SetAtomicRendererCB(RpAtomic* atomic, void* renderFun
 RpAtomic* CClumpModelInfo::AtomicSetupLightingCB(RpAtomic* atomic, void* data)
 {
     if (CCustomBuildingRenderer::IsCBPCPipelineAttached(atomic))
+    {
         CCustomBuildingRenderer::AtomicSetup(atomic);
+    }
     else if (CCarFXRenderer::IsCCPCPipelineAttached(atomic))
+    {
         CCarFXRenderer::CustomCarPipeAtomicSetup(atomic);
+    }
 
     return atomic;
 }

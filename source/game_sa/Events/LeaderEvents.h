@@ -7,13 +7,12 @@ class CEventLeaderEnteredCarAsDriver : public CEventEditableResponse {
 public:
     CVehicle* m_vehicle;
 
+public:
     static void InjectHooks();
 
     CEventLeaderEnteredCarAsDriver(CVehicle* vehicle);
-    ~CEventLeaderEnteredCarAsDriver();
-private:
-    CEventLeaderEnteredCarAsDriver* Constructor(CVehicle* vehicle);
-public:
+    ~CEventLeaderEnteredCarAsDriver() override;
+
     eEventType GetEventType() const override { return EVENT_LEADER_ENTERED_CAR_AS_DRIVER; }
     int32 GetEventPriority() const override  { return 46; }
     int32 GetLifeTime() override  { return 0; }
@@ -24,8 +23,8 @@ public:
     CEventLeaderEnteredCarAsDriver* CloneEditable() override  { return new CEventLeaderEnteredCarAsDriver(m_vehicle); }
 
 private:
+    CEventLeaderEnteredCarAsDriver* Constructor(CVehicle* vehicle);
     bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
-public:
 
 };
 
@@ -35,11 +34,9 @@ class CEventLeaderExitedCarAsDriver : public CEventEditableResponse {
 public:
     static void InjectHooks();
 
-    CEventLeaderExitedCarAsDriver() {}
-    ~CEventLeaderExitedCarAsDriver() {}
-private:
-    CEventLeaderExitedCarAsDriver* Constructor();
-public:
+    CEventLeaderExitedCarAsDriver() = default;
+    ~CEventLeaderExitedCarAsDriver() override = default;
+
     eEventType GetEventType() const override { return EVENT_LEADER_EXITED_CAR_AS_DRIVER; }
     int32 GetEventPriority() const override { return 47; }
     int32 GetLifeTime() override { return 0; }
@@ -47,7 +44,9 @@ public:
     bool AffectsPedGroup(CPedGroup* pedGroup) override;
     bool TakesPriorityOver(const CEvent& refEvent) override { return true; }
     CEventLeaderExitedCarAsDriver* CloneEditable() override { return new CEventLeaderExitedCarAsDriver(); }
+
 private:
+    CEventLeaderExitedCarAsDriver* Constructor();
     bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
 };
 
@@ -57,11 +56,9 @@ class CEventLeaderQuitEnteringCarAsDriver : public CEvent {
 public:
     static void InjectHooks();
 
-    CEventLeaderQuitEnteringCarAsDriver() {}
-    ~CEventLeaderQuitEnteringCarAsDriver() {}
-private:
-    CEventLeaderQuitEnteringCarAsDriver* Constructor();
-public:
+    CEventLeaderQuitEnteringCarAsDriver() = default;
+    ~CEventLeaderQuitEnteringCarAsDriver() override = default;
+
     eEventType GetEventType() const override { return EVENT_LEADER_QUIT_ENTERING_CAR_AS_DRIVER; }
     int32 GetEventPriority() const override { return 48; }
     int32 GetLifeTime() override { return 0; }
@@ -71,6 +68,7 @@ public:
     bool TakesPriorityOver(const CEvent& refEvent) override { return true; }
 
 private:
+    CEventLeaderQuitEnteringCarAsDriver* Constructor();
     bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
 };
 
@@ -83,17 +81,17 @@ public:
     static void InjectHooks();
 
     CEventAreaCodes(CPed* ped);
-    ~CEventAreaCodes();
-private:
-    CEventAreaCodes* Constructor(CPed* ped);
-public:
+    ~CEventAreaCodes() override;
+
     eEventType GetEventType() const override { return EVENT_AREA_CODES; }
     int32 GetEventPriority() const override { return 55; }
     int32 GetLifeTime() override { return 0; }
     CEventAreaCodes* Clone() override { return new CEventAreaCodes(m_ped); }
     bool AffectsPed(CPed* ped) override;
     bool TakesPriorityOver(const CEvent& refEvent) override;
+
 private:
+    CEventAreaCodes* Constructor(CPed* ped);
     bool AffectsPed_Reversed(CPed* ped);
     bool TakesPriorityOver_Reversed(const CEvent& refEvent);
 };
@@ -103,12 +101,11 @@ VALIDATE_SIZE(CEventAreaCodes, 0x10);
 class CEventLeaderEntryExit : public CEventAreaCodes {
 public:
     static void InjectHooks();
+    CEventLeaderEntryExit* Constructor(CPed* ped);
 
     CEventLeaderEntryExit(CPed* ped) : CEventAreaCodes(ped) {}
-    ~CEventLeaderEntryExit() {}
-private:
-    CEventLeaderEntryExit* Constructor(CPed* ped);
-public:
+    ~CEventLeaderEntryExit() override = default;
+
     eEventType GetEventType() const override { return EVENT_LEADER_ENTRY_EXIT; }
     int32 GetLifeTime() override { return 0; }
     CEventLeaderEntryExit* Clone() override { return new CEventLeaderEntryExit(m_ped); }

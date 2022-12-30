@@ -68,7 +68,7 @@ class CAERadioTrackManager {
 public:
     bool           m_bInitialised;
     bool           m_bDisplayStationName;
-    char           field_2;
+    char           m_prev;
     bool           m_bEnabledInPauseMode;
     bool           m_bBassEnhance;
     bool           m_bPauseMode;
@@ -159,7 +159,7 @@ public:
     void   RetuneRadio(int8 radioId);
 
     void  DisplayRadioStationName();
-    char* GetRadioStationName(RadioStationId id);
+    const char* GetRadioStationName(RadioStationId id);
     void  GetRadioStationNameKey(RadioStationId id, char* outStr);
     static bool IsVehicleRadioActive();
 

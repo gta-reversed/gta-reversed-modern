@@ -28,6 +28,7 @@ void CCollision::InjectHooks()
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x416260);
+    RH_ScopedInstall(Shutdown, 0x4162E0, { .reversed = false });
     RH_ScopedInstall(Update, 0x411E20);
     RH_ScopedInstall(SortOutCollisionAfterLoad, 0x411E30);
     RH_ScopedInstall(TestSphereSphere, 0x411E70);
@@ -86,8 +87,10 @@ void CCollision::InjectHooks()
     //RH_ScopedInstall(BuildCacheOfCameraCollision, 0x41AC40);
     //RH_ScopedInstall(CameraConeCastVsWorldCollision, 0x41B000);
 
-    RH_ScopedOverloadedInstall(CalculateTrianglePlanes, "colData", 0x416330, void(*)(CCollisionData*));
-    RH_ScopedOverloadedInstall(RemoveTrianglePlanes, "colData", 0x416400, void(*)(CCollisionData*));
+    RH_ScopedOverloadedInstall(CalculateTrianglePlanes, "colData", 0x416330, void (*)(CCollisionData*));
+    RH_ScopedOverloadedInstall(RemoveTrianglePlanes, "colData", 0x416400, void (*)(CCollisionData*));
+    RH_ScopedInstall(ProcessLineOfSight, 0x417950);
+    RH_ScopedInstall(ProcessColModels, 0x4185C0, { .reversed = false });
 }
 
 void CCollision::Tests() {
@@ -964,7 +967,8 @@ bool CCollision::Test2DLineAgainst2DLine(float line1StartX, float line1StartY, f
 */
 // 0x413960
 bool ProcessDiscCollision(CColPoint& colPoint1, const CMatrix& mat, const CColDisk& disk, CColPoint& colPoint2, bool& arg4, float& arg5, CColPoint& colPoint3) {
-    return plugin::CallAndReturn<bool, 0x413960, CColPoint&, const CMatrix&, const CColDisk&, CColPoint&, bool&, float&, CColPoint&>(colPoint1, mat, disk, colPoint2, arg4, arg5, colPoint3);
+    return plugin::CallAndReturn<bool, 0x413960, CColPoint&, const CMatrix&, const CColDisk&, CColPoint&, bool&, float&, CColPoint&>(colPoint1, mat, disk, colPoint2, arg4, arg5,
+                                                                                                                                     colPoint3);
 }
 
 // 0x413AC0
@@ -990,8 +994,10 @@ bool CCollision::ProcessLineTriangle(const CColLine& line, const CompressedVecto
 }
 
 // 0x4147E0
-bool CCollision::ProcessVerticalLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane, CColPoint& colPoint, float& maxTouchDistance, CStoredCollPoly* collPoly) {
-    return plugin::CallAndReturn<bool, 0x4147E0, const CColLine&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&, CColPoint&, float&, CStoredCollPoly*>(line, verts, tri, triPlane, colPoint, maxTouchDistance, collPoly);
+bool CCollision::ProcessVerticalLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane, CColPoint& colPoint,
+                                             float& maxTouchDistance, CStoredCollPoly* collPoly) {
+    return plugin::CallAndReturn<bool, 0x4147E0, const CColLine&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&, CColPoint&, float&, CStoredCollPoly*>(
+        line, verts, tri, triPlane, colPoint, maxTouchDistance, collPoly);
 }
 
 // 0x414D70
@@ -1064,17 +1070,13 @@ void CCollision::CalculateTrianglePlanes(CCollisionData* colData) {
     if (!colData->m_nNumTriangles)
         return;
 
-    if (colData->m_pTrianglePlanes)
-    {
+    if (colData->m_pTrianglePlanes) {
         auto* link = colData->GetLinkPtr();
         link->Remove();
         ms_colModelCache.usedListHead.Insert(link);
-    }
-    else
-    {
+    } else {
         auto* link = ms_colModelCache.Insert(colData);
-        if (!link)
-        {
+        if (!link) {
             auto* toRemove = ms_colModelCache.usedListTail.prev;
             toRemove->data->RemoveTrianglePlanes();
             ms_colModelCache.Remove(toRemove);
@@ -1107,8 +1109,10 @@ bool CCollision::TestSphereTriangle(const CColSphere& sphere, const CompressedVe
 }
 
 // 0x416BA0
-bool CCollision::ProcessSphereTriangle(const CColSphere& sphere, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane, CColPoint& colPoint, float& maxTouchDistance) {
-    return plugin::CallAndReturn<bool, 0x416BA0, const CColSphere&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&, CColPoint&, float&>(sphere, verts, tri, triPlane, colPoint, maxTouchDistance);
+bool CCollision::ProcessSphereTriangle(const CColSphere& sphere, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane, CColPoint& colPoint,
+                                       float& maxTouchDistance) {
+    return plugin::CallAndReturn<bool, 0x416BA0, const CColSphere&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&, CColPoint&, float&>(
+        sphere, verts, tri, triPlane, colPoint, maxTouchDistance);
 }
 
 // 0x417470
@@ -1127,7 +1131,8 @@ bool CCollision::TestLineOfSight(const CColLine& line, const CMatrix& transform,
 }
 
 // 0x417950
-bool CCollision::ProcessLineOfSight(const CColLine& line, const CMatrix& transform, CColModel& colModel, CColPoint& colPoint, float& maxTouchDistance, bool doSeeThroughCheck, bool doShootThroughCheck) {
+bool CCollision::ProcessLineOfSight(const CColLine& line, const CMatrix& transform, CColModel& colModel, CColPoint& colPoint, float& maxTouchDistance, bool doSeeThroughCheck,
+                                    bool doShootThroughCheck) {
     assert(colModel.m_pColData);
 
     const auto colData = colModel.m_pColData;
@@ -1146,21 +1151,20 @@ bool CCollision::ProcessLineOfSight(const CColLine& line, const CMatrix& transfo
         return false;
 
     const auto CheckSeeAndShootThrough = [=](auto material) {
-        return (!doSeeThroughCheck || !g_surfaceInfos->IsSeeThrough(material))
-            && (!doShootThroughCheck || !g_surfaceInfos->IsShootThrough(material));
+        return (!doSeeThroughCheck || !g_surfaceInfos.IsSeeThrough(material)) && (!doShootThroughCheck || !g_surfaceInfos.IsShootThrough(material));
     };
 
     float localMinTouchDist = maxTouchDistance;
 
     bool results{};
     for (auto i = 0; i < colData->m_nNumSpheres; i++) {
-        if (const auto& sphere = colData->m_pSpheres[i]; CheckSeeAndShootThrough(sphere.m_nMaterial)) {
+        if (const auto& sphere = colData->m_pSpheres[i]; CheckSeeAndShootThrough(sphere.m_Surface.m_nMaterial)) {
             results |= ProcessLineSphere(line_OS, sphere, colPoint, localMinTouchDist);
         }
     }
 
     for (auto i = 0; i < colData->m_nNumBoxes; i++) {
-        if (const auto& box = colData->m_pBoxes[i]; CheckSeeAndShootThrough(box.m_nMaterial)) {
+        if (const auto& box = colData->m_pBoxes[i]; CheckSeeAndShootThrough(box.m_Surface.m_nMaterial)) {
             results |= ProcessLineBox(line_OS, box, colPoint, localMinTouchDist);
         }
     }
@@ -1174,7 +1178,6 @@ bool CCollision::ProcessLineOfSight(const CColLine& line, const CMatrix& transfo
         }
     }
 
-    //localMinTouchDist = maxTouchDistance;
     if (localMinTouchDist < maxTouchDistance) {
         colPoint.m_vecPoint = MultiplyMatrixWithVector(transform, colPoint.m_vecPoint);
         colPoint.m_vecNormal = Multiply3x3(transform, colPoint.m_vecNormal);
@@ -1185,8 +1188,10 @@ bool CCollision::ProcessLineOfSight(const CColLine& line, const CMatrix& transfo
 }
 
 // 0x417BF0
-bool CCollision::ProcessVerticalLine(const CColLine& line, const CMatrix& transform, CColModel& colModel, CColPoint& colPoint, float& maxTouchDistance, bool doSeeThroughCheck, bool doShootThroughCheck, CStoredCollPoly* collPoly) {
-    return plugin::CallAndReturn<bool, 0x417BF0, const CColLine&, const CMatrix&, CColModel&, CColPoint&, float&, bool, bool, CStoredCollPoly*>(line, transform, colModel, colPoint, maxTouchDistance, doSeeThroughCheck, doShootThroughCheck, collPoly);
+bool CCollision::ProcessVerticalLine(const CColLine& line, const CMatrix& transform, CColModel& colModel, CColPoint& colPoint, float& maxTouchDistance, bool doSeeThroughCheck,
+                                     bool doShootThroughCheck, CStoredCollPoly* collPoly) {
+    return plugin::CallAndReturn<bool, 0x417BF0, const CColLine&, const CMatrix&, CColModel&, CColPoint&, float&, bool, bool, CStoredCollPoly*>(
+        line, transform, colModel, colPoint, maxTouchDistance, doSeeThroughCheck, doShootThroughCheck, collPoly);
 }
 
 // 0x417F20
@@ -1229,30 +1234,34 @@ void CCollision::RemoveTrianglePlanes(CColModel* colModel) {
 
 // TODO: This function could be refactored to use ranges instead of these ugly static variables :D
 /*!
-* @brief 0x4185C0 Calculate collisions between \a cmA and \a cmB.
-*
-* Collisions calculated:
-*  A\B  Tri Sp  Box Lines
-* Tri       +
-* Sp    +   +   +
-* Box       +
-* Lines +   +   +
-*
-* Note: Originally the game calculated some disk stuff as well, but SA doesn't use disks (they're disabled when loadedin CFileLoader)
-* thus I omitted the code for it (it would've made the already messy code even worse)
-* 
-* @param         transformA       Transformation matrix of model A - Usually owning entity's matrix.
-* @param         cmA              Col model A
-* @param         transformB       Transformation matrix of model B - Usually owning entity's matrix.
-* @param         cmA              Col model B
-* @param[out]    lineCPs          Line collision points (At most 16 - It can be null if you're sure the model has no lines)
-* @param[out]    sphereCPs        Sphere collision points (At most 32)
-* @param[in,out] maxTouchDistance Only used if model has lines - If you're sure it has none it can be null.
-* @param         arg7             Not 100% sure how to explain what this does. TODO.
-* 
-* @returns Number of sphere collision points found (At most ~~32~~ 31 - Original function is buggy)
-*/
-int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, const CMatrix& transformB, CColModel& cmB, CColPoint(&sphereCPs)[32], CColPoint* lineCPs, float* maxTouchDistance, bool arg7) {
+ * @brief 0x4185C0 Calculate collisions between \a cmA and \a cmB.
+ *
+ * Collisions calculated:
+ *  A\B  Tri Sp  Box Lines
+ * Tri       +
+ * Sp    +   +   +
+ * Box       +
+ * Lines +   +   +
+ *
+ * Note: Originally the game calculated some disk stuff as well, but SA doesn't use disks (they're disabled when loadedin CFileLoader)
+ * thus I omitted the code for it (it would've made the already messy code even worse)
+ *
+ * @param         transformA       Transformation matrix of model A - Usually owning entity's matrix.
+ * @param         cmA              Col model A
+ * @param         transformB       Transformation matrix of model B - Usually owning entity's matrix.
+ * @param         cmA              Col model B
+ * @param[out]    lineCPs          Line collision points (At most 16 - It can be null if you're sure the model has no lines)
+ * @param[out]    sphereCPs        Sphere collision points (At most 32)
+ * @param[in,out] maxTouchDistance Only used if model has lines - If you're sure it has none it can be null.
+ * @param         arg7             Not 100% sure how to explain what this does. TODO.
+ *
+ * @returns Number of sphere collision points found (At most ~~32~~ 31 - Original function is buggy)
+ */
+int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, const CMatrix& transformB, CColModel& cmB, CColPoint (&sphereCPs)[32], CColPoint* lineCPs,
+                                   float* maxTouchDistance, bool arg7) {
+    return plugin::CallAndReturn<int32, 0x4185C0, const CMatrix&, CColModel&, const CMatrix&, CColModel&, CColPoint(&)[32], CColPoint*, float*, bool>(
+        transformA, cmA, transformB, cmB, sphereCPs, lineCPs, maxTouchDistance, arg7);
+
     // Don't these this should ever happen, but okay?
     if (!cmA.m_pColData) {
         return 0;
@@ -1266,13 +1275,10 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
     const auto& cdB = *cmB.m_pColData;
 
     // Transform matrix from A's space to B's
-    const auto transformAtoB = Invert(transformB) * transformA; 
+    const auto transformAtoB = Invert(transformB) * transformA;
 
     // A's bounding box in B's space
-    const CColSphere colABoundSphereSpaceB{
-        MultiplyMatrixWithVector(transformAtoB, cmA.m_boundSphere.m_vecCenter),
-        cmA.m_boundSphere.m_fRadius
-    };
+    const CColSphere colABoundSphereSpaceB{MultiplyMatrixWithVector(transformAtoB, cmA.m_boundSphere.m_vecCenter), cmA.m_boundSphere.m_fRadius};
 
     if (!TestSphereBox(colABoundSphereSpaceB, cmB.m_boundBox)) {
         return 0;
@@ -1290,17 +1296,17 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
     constexpr auto MAX_LINES{ 16u };    // Game didn't originally check for this, so I assume no models ever have more than 16 lines.
 
     // Transform `spheres` center position using `transform` and store them in `outSpheres`
-    const auto TransformSpheres = []<size_t N>(auto&& spheres, const CMatrix& transform, CColSphere (&outSpheres)[N]) {
+    const auto TransformSpheres = []<size_t N>(auto&& spheres, const CMatrix& transform, CColSphere(&outSpheres)[N]) {
         std::ranges::transform(spheres, outSpheres, [&](const auto& sp) {
-            CColSphere transformed = sp; // Copy sphere
+            CColSphere transformed = sp;                                                   // Copy sphere
             transformed.m_vecCenter = MultiplyMatrixWithVector(transform, sp.m_vecCenter); // Set copy's center as the transformed point
             return transformed;
         });
     };
 
     // Test `spheres` against bounding box `bb` and store all colliding sphere's indices in `collidedIdxs`
-    const auto TestSpheresAgainstBB = []<size_t N>(auto&& spheres, const auto& bb, uint32& numCollided, uint32 (&collidedIdxs)[N]) {
-        for (const auto& [i, sp] : enumerate(spheres)) {
+    const auto TestSpheresAgainstBB = []<size_t N>(auto&& spheres, const auto& bb, uint32& numCollided, uint32(&collidedIdxs)[N]) {
+        for (const auto& [i, sp] : notsa::enumerate(spheres)) {
             if (TestSphereBox(sp, bb)) {
                 assert(numCollided < N); // Avoid out-of-bounds (Game originally didn't check)
                 collidedIdxs[numCollided++] = (uint32)i;
@@ -1313,31 +1319,31 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
 
     // Process A
 
-    // 0x418722 
+    // 0x418722
     static CColSphere sphA[MAX_SPHERES];
     TransformSpheres(cdA.GetSpheres(), transformAtoB, sphA);
 
     // 0x4187A1
     static uint32 collSphA[MAX_SPHERES];
     uint32 numCollSphA{};
-    TestSpheresAgainstBB(std::span{ sphA, cdA.m_nNumSpheres }, cmB.GetBoundingBox(), numCollSphA, collSphA);
+    TestSpheresAgainstBB(std::span{sphA, cdA.m_nNumSpheres}, cmB.GetBoundingBox(), numCollSphA, collSphA);
 
     // Process B
 
     // 0x4187ED
     static CColSphere sphB[MAX_SPHERES];
     TransformSpheres(cdB.GetSpheres(), transformBtoA, sphB);
-   
+
     // 0x418862
     static uint32 collSphB[MAX_SPHERES];
     uint32 numCollSphB{};
-    TestSpheresAgainstBB(std::span{ sphB, cdB.m_nNumSpheres }, cmA.GetBoundingBox(), numCollSphB, collSphB);
+    TestSpheresAgainstBB(std::span{sphB, cdB.m_nNumSpheres}, cmA.GetBoundingBox(), numCollSphB, collSphB);
 
     if (!numCollSphA && !cdA.m_nNumLines && !numCollSphB) {
         return 0;
     }
 
-    // 0x418902 
+    // 0x418902
     // Here the game tests collision of disks, but SA doesn't use disks, so I won't bother with it.
     assert(!cdB.bUsesDisks); // If this asserts then I was wrong and this part has to be reversed as well :D
 
@@ -1345,7 +1351,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
     // Test B's boxes against A's bounding sphere
     static uint32 collBoxB[MAX_BOXES]; // Indices of B's boxes colliding with A's bounding sphere
     uint32 numCollBoxB{};
-    for (auto&& [i, box] : enumerate(cdB.GetBoxes())) {
+    for (auto&& [i, box] : notsa::enumerate(cdB.GetBoxes())) {
         if (TestSphereBox(colABoundSphereSpaceB, box)) {
             collBoxB[numCollBoxB++] = i;
             if (numCollBoxB >= MAX_BOXES) {
@@ -1365,12 +1371,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
 
         // Process a single triangle
         const auto ProcessOneTri = [&](uint32 triIdx) {
-            if (TestSphereTriangle(
-                colABoundSphereSpaceB,
-                cdB.m_pVertices,
-                cdB.m_pTriangles[triIdx],
-                cdB.m_pTrianglePlanes[triIdx]
-            )) {
+            if (TestSphereTriangle(colABoundSphereSpaceB, cdB.m_pVertices, cdB.m_pTriangles[triIdx], cdB.m_pTrianglePlanes[triIdx])) {
                 collTrisB[numCollTrisB++] = triIdx;
             }
         };
@@ -1379,7 +1380,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
             // 0x418B23
             for (auto&& group : cdB.GetFaceGroups()) {
                 if (TestSphereBox(colABoundSphereSpaceB, group.bb)) { // Quick BB check
-                    for (auto i{ group.first }; i <= group.last; i++) { // Check all triangles in this group
+                    for (auto i{group.first}; i <= group.last; i++) { // Check all triangles in this group
                         ProcessOneTri(i);
                     }
                 }
@@ -1400,28 +1401,23 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
     // Process all of A's colliding spheres against all of B's colliding spheres, boxes and triangles
     sphereCPs[0].m_fDepth = -1.f;
     uint32 nNumSphereCPs{};
-    if (numCollSphA) { 
-        for (auto sphereAIdx : std::span{ collSphA, numCollSphA }) {
+    if (numCollSphA) {
+        for (auto sphereAIdx : std::span{collSphA, numCollSphA}) {
             assert(cdA.m_pSpheres);
             assert(sphereAIdx < cdA.m_nNumSpheres);
-            const auto& sphereA{ sphA[sphereAIdx] }; // Sphere in B's space
+            const auto& sphereA{sphA[sphereAIdx]}; // Sphere in B's space
 
             bool advanceColPointIdx{};
-            float minTouchDist{ 1e24f };
+            float minTouchDist{1e24f};
 
             // 0x418CF9
             // Spheres
-            for (auto sphereBIdx : std::span{ collSphB , numCollSphB }) {
+            for (auto sphereBIdx : std::span{collSphB, numCollSphB}) {
                 assert(cdB.m_pSpheres);
                 assert(sphereBIdx < cdB.m_nNumSpheres);
-                const auto& sphereB{ cdB.m_pSpheres[sphereBIdx] };
+                const auto& sphereB{cdB.m_pSpheres[sphereBIdx]};
 
-                if (ProcessSphereSphere(
-                    sphereA,
-                    sphereB,
-                    sphereCPs[nNumSphereCPs],
-                    minTouchDist)
-                ) {
+                if (ProcessSphereSphere(sphereA, sphereB, sphereCPs[nNumSphereCPs], minTouchDist)) {
                     advanceColPointIdx = true;
                     // These tests are cheap, so continue processing
                 }
@@ -1432,21 +1428,16 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
 
             // 0x418D86
             // Boxes
-            for (auto boxIdx : std::span{ collBoxB , numCollBoxB }) {
-                const auto& box{ cdB.m_pBoxes[boxIdx] };
+            for (auto boxIdx : std::span{collBoxB, numCollBoxB}) {
+                const auto& box{cdB.m_pBoxes[boxIdx]};
                 auto& cp = sphereCPs[nNumSphereCPs];
 
-                if (ProcessSphereBox(
-                    sphereA,
-                    box,
-                    cp,
-                    minTouchDist)
-                ) {
-                    cp.m_nSurfaceTypeA = box.m_nMaterial;
-                    cp.m_nPieceTypeA = box.m_nFlags;
-                    cp.m_nLightingA = box.m_nLighting;
+                if (ProcessSphereBox(sphereA, box, cp, minTouchDist)) {
+                    cp.m_nSurfaceTypeA = box.m_Surface.m_nMaterial;
+                    cp.m_nPieceTypeA = box.m_Surface.m_nPiece;
+                    cp.m_nLightingA = box.m_Surface.m_nLighting;
 
-                    if (arg7 && sphereA.m_nFlags <= 2 && nNumSphereCPs < std::size(sphereCPs)) {
+                    if (arg7 && sphereA.m_Surface.m_nPiece <= 2 && nNumSphereCPs < std::size(sphereCPs)) {
                         advanceColPointIdx = false;
                         minTouchDist = 1e24f;
                         sphereCPs[nNumSphereCPs + 1].m_fDepth = -1.f;
@@ -1459,19 +1450,12 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
 
             // 0x418E44
             // Triangles
-            for (auto triIdx : std::span{ collTrisB, numCollTrisB }) {
+            for (auto triIdx : std::span{collTrisB, numCollTrisB}) {
                 auto& cp = sphereCPs[nNumSphereCPs];
 
-                if (ProcessSphereTriangle(
-                    sphereA,
-                    cdB.m_pVertices,
-                    cdB.m_pTriangles[triIdx],
-                    cdB.m_pTrianglePlanes[triIdx],
-                    cp,
-                    minTouchDist)
-                ) {
+                if (ProcessSphereTriangle(sphereA, cdB.m_pVertices, cdB.m_pTriangles[triIdx], cdB.m_pTrianglePlanes[triIdx], cp, minTouchDist)) {
                     // Same code as above in boxes
-                    if (arg7 && sphereA.m_nFlags <= 2 && nNumSphereCPs < std::size(sphereCPs)) {
+                    if (arg7 && sphereA.m_Surface.m_nPiece <= 2 && nNumSphereCPs < std::size(sphereCPs)) {
                         advanceColPointIdx = false;
                         minTouchDist = 1e24f;
                         sphereCPs[nNumSphereCPs + 1].m_fDepth = -1.f;
@@ -1485,7 +1469,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
             // 0x418EFC
             if (advanceColPointIdx) {
                 if (nNumSphereCPs + 1 >= std::size(sphereCPs)) { // BUG: Should preincrement here instead of + 1
-                    break; 
+                    break;
                 }
                 sphereCPs[nNumSphereCPs++].m_fDepth = -1.f; // Set next's depth
             }
@@ -1493,7 +1477,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
 
         // 0x41996E
         // Transform all colpoints into world space (Originally not here)
-        for (auto&& cp : std::span{ sphereCPs, nNumSphereCPs }) {
+        for (auto&& cp : std::span{sphereCPs, nNumSphereCPs}) {
             cp.m_vecPoint = MultiplyMatrixWithVector(transformB, cp.m_vecPoint);
             cp.m_vecNormal = Multiply3x3(transformB, cp.m_vecNormal);
         }
@@ -1518,44 +1502,37 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
         // 0x419752 - Skipped this, as it just filled an array with 1:1 index mapping - Useless - They probably had some BB checking logic here?
 
         for (auto lineIdx = 0u; lineIdx < cdA.m_nNumLines; lineIdx++) {
-            const CColLine lineA { // A's line in B's space
+            const CColLine lineA{
+                // A's line in B's space
                 MultiplyMatrixWithVector(transformAtoB, cdA.m_pLines[lineIdx].m_vecStart),
                 MultiplyMatrixWithVector(transformAtoB, cdA.m_pLines[lineIdx].m_vecEnd),
             };
 
-            //if (!TestLineSphere(line, CColSphere{ cmB.m_boundSphere })) { // NOTSA: Quick check to (possibly) speed things up
-            //    continue;
-            //}
+            // if (!TestLineSphere(line, CColSphere{ cmB.m_boundSphere })) { // NOTSA: Quick check to (possibly) speed things up
+            //     continue;
+            // }
 
-            auto& thisLineCP{ lineCPs[lineIdx] };
-            auto& thisLineTochDist{ maxTouchDistance[lineIdx] };
+            auto& thisLineCP{lineCPs[lineIdx]};
+            auto& thisLineTochDist{maxTouchDistance[lineIdx]};
 
             bool hasCollided{}; // Instead of the static array we just use a variable (Same functionality)
-            
+
             // 0x419799
             // Spheres
-            for (auto&& spIdx : std::span{ collSphB, numCollSphB }) {
+            for (auto&& spIdx : std::span{collSphB, numCollSphB}) {
                 hasCollided |= ProcessLineSphere(lineA, cdB.m_pSpheres[spIdx], thisLineCP, thisLineTochDist);
             }
 
             // 0x419803
             // Boxes
-            for (auto&& boxIdx : std::span{ collBoxB, numCollBoxB }) {
+            for (auto&& boxIdx : std::span{collBoxB, numCollBoxB}) {
                 hasCollided |= ProcessLineBox(lineA, cdB.m_pBoxes[boxIdx], thisLineCP, thisLineTochDist);
             }
 
             // 0x419865
             // Triangles
-            for (auto&& triIdx : std::span{ collTrisB, numCollTrisB }) {
-                hasCollided |= ProcessLineTriangle(
-                    lineA,
-                    cdB.m_pVertices,
-                    cdB.m_pTriangles[triIdx],
-                    cdB.m_pTrianglePlanes[triIdx],
-                    thisLineCP,
-                    thisLineTochDist,
-                    nullptr
-                );
+            for (auto&& triIdx : std::span{collTrisB, numCollTrisB}) {
+                hasCollided |= ProcessLineTriangle(lineA, cdB.m_pVertices, cdB.m_pTriangles[triIdx], cdB.m_pTrianglePlanes[triIdx], thisLineCP, thisLineTochDist, nullptr);
             }
 
             // 0x4198DA
@@ -1574,12 +1551,9 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
     // Find all A's triangles and boxes colliding with B's b.sphere
     // Then process them all against B's colliding spheres
     if (numCollSphB && (cdA.m_nNumTriangles || cdA.m_nNumBoxes)) {
-        const CColSphere colBSphereInASpace{
-            MultiplyMatrixWithVector(transformBtoA, cmB.m_boundSphere.m_vecCenter),
-            cmB.m_boundSphere.m_fRadius
-        };
+        const CColSphere colBSphereInASpace{MultiplyMatrixWithVector(transformBtoA, cmB.m_boundSphere.m_vecCenter), cmB.m_boundSphere.m_fRadius};
 
-        const auto numCPsPrev{ nNumSphereCPs };
+        const auto numCPsPrev{nNumSphereCPs};
 
         // Process all of A's triangles against B's b.sphere
         static uint32 collTriA[MAX_TRIS];
@@ -1591,12 +1565,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
             // NOTE/TODO: Weird how they didn't use the facegroup stuff here as well.
             //            Should probably implement it here some day too, as it speeds up the process quite a bit.
             for (auto i = 0; i < cdA.m_nNumTriangles; i++) {
-                if (TestSphereTriangle(
-                    colBSphereInASpace,
-                    cdA.m_pVertices,
-                    cdA.m_pTriangles[i],
-                    cdA.m_pTrianglePlanes[i])
-                ) {
+                if (TestSphereTriangle(colBSphereInASpace, cdA.m_pVertices, cdA.m_pTriangles[i], cdA.m_pTrianglePlanes[i])) {
                     collTriA[numCollTriA++] = i;
                 }
             }
@@ -1614,25 +1583,19 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
 
         // 0x419B76
         // Process all of B's colliding spheres against all of A's colliding triangles
-        for (auto sphereIdx : std::span{ collSphB, numCollSphB }) {
-            auto minTouchDist{ 1e24f };
+        for (auto sphereIdx : std::span{collSphB, numCollSphB}) {
+            auto minTouchDist{1e24f};
             bool anyCollided{};
-            for (auto triIdx : std::span{ collTriA , numCollTriA }) {
-                if (ProcessSphereTriangle(
-                    sphB[sphereIdx], // B's sph in A's space
-                    cdA.m_pVertices,
-                    cdA.m_pTriangles[triIdx],
-                    cdA.m_pTrianglePlanes[triIdx],
-                    sphereCPs[nNumSphereCPs],
-                    minTouchDist
-                )) {
+            for (auto triIdx : std::span{collTriA, numCollTriA}) {
+                if (ProcessSphereTriangle(sphB[sphereIdx], // B's sph in A's space
+                                          cdA.m_pVertices, cdA.m_pTriangles[triIdx], cdA.m_pTrianglePlanes[triIdx], sphereCPs[nNumSphereCPs], minTouchDist)) {
                     anyCollided = true;
                 }
             }
 
             if (anyCollided) {
                 sphereCPs[nNumSphereCPs].m_vecNormal *= -1.f;
-                if (nNumSphereCPs +1 >= std::size(sphereCPs)) { // BUG: Should preincrement here instead of + 1
+                if (nNumSphereCPs + 1 >= std::size(sphereCPs)) { // BUG: Should preincrement here instead of + 1
                     break;
                 }
                 sphereCPs[nNumSphereCPs++].m_fDepth = -1.f; // Set next CP's depth
@@ -1641,26 +1604,21 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
 
         // 0x419CC4
         // Process all of B's colliding spheres against all of A's colliding boxes
-        for (auto sphereIdx : std::span{ collSphB, numCollSphB }) {
-            const auto& sphere{ sphB[sphereIdx] }; // B's sphere in A's space
+        for (auto sphereIdx : std::span{collSphB, numCollSphB}) {
+            const auto& sphere{sphB[sphereIdx]}; // B's sphere in A's space
 
-            float minTouchDist{ 1e24f };
-            for (auto boxIdx : std::span{ collBoxA, numCollBoxA }) {
-                const auto& box{ cdA.m_pBoxes[boxIdx] };
+            float minTouchDist{1e24f};
+            for (auto boxIdx : std::span{collBoxA, numCollBoxA}) {
+                const auto& box{cdA.m_pBoxes[boxIdx]};
                 auto& cp = sphereCPs[nNumSphereCPs];
-                if (ProcessSphereBox(
-                    sphere,
-                    box,
-                    cp,
-                    minTouchDist)
-                ) {
-                    cp.m_nSurfaceTypeA = box.m_nMaterial;
-                    cp.m_nPieceTypeA = box.m_nFlags; // Presumably box.m_nFlags aren't actually flags.
-                    cp.m_nLightingA = box.m_nLighting;
+                if (ProcessSphereBox(sphere, box, cp, minTouchDist)) {
+                    cp.m_nSurfaceTypeA = box.m_Surface.m_nMaterial;
+                    cp.m_nPieceTypeA = box.m_Surface.m_nPiece;
+                    cp.m_nLightingA = box.m_Surface.m_nLighting;
 
-                    cp.m_nSurfaceTypeB = sphere.m_nMaterial;
-                    cp.m_nPieceTypeB = sphere.m_nFlags;
-                    cp.m_nLightingB = sphere.m_nLighting;
+                    cp.m_nSurfaceTypeB = sphere.m_Surface.m_nMaterial;
+                    cp.m_nPieceTypeB = sphere.m_Surface.m_nPiece;
+                    cp.m_nLightingB = sphere.m_Surface.m_nLighting;
 
                     cp.m_vecNormal *= -1.f; // Invert direction
 
@@ -1674,15 +1632,15 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
 
         // 0x419E56
         // Transform added colpoints into world space
-        if (numCPsPrev != nNumSphereCPs) { // If we've processed any items..
-            for (auto& cp : std::span{ sphereCPs + numCPsPrev, nNumSphereCPs - numCPsPrev }) { // Transform all newly added colpoints
+        if (numCPsPrev != nNumSphereCPs) {                                                   // If we've processed any items..
+            for (auto& cp : std::span{sphereCPs + numCPsPrev, nNumSphereCPs - numCPsPrev}) { // Transform all newly added colpoints
                 cp.m_vecPoint = MultiplyMatrixWithVector(transformA, cp.m_vecPoint);
                 cp.m_vecNormal = Multiply3x3(transformA, cp.m_vecNormal);
 
                 // Weird stuff, idk why they do this
                 cp.m_nSurfaceTypeB = cp.m_nSurfaceTypeA;
-                cp.m_nPieceTypeB =cp.m_nPieceTypeA;
-                cp.m_nLightingB =cp.m_nLightingA;
+                cp.m_nPieceTypeB = cp.m_nPieceTypeA;
+                cp.m_nLightingB = cp.m_nLightingA;
             }
         }
     }

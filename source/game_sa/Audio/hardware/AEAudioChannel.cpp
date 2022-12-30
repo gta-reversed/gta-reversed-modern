@@ -19,10 +19,11 @@ void CAEAudioChannel::InjectHooks() {
     RH_ScopedInstall(SetFrequency, 0x4D7A50);
     RH_ScopedInstall(SetVolume, 0x4D7C60);
     RH_ScopedInstall(SetOriginalFrequency, 0x4D7A70);
-    RH_ScopedInstall(SetFrequencyScalingFactor_Reversed, 0x4D7D00);
+    RH_ScopedVirtualInstall(SetFrequencyScalingFactor, 0x4D7D00);
     RH_ScopedInstall(GetCurrentPlaybackPosition, 0x4D79A0);
 }
 
+// 0x4D7890
 CAEAudioChannel::CAEAudioChannel(IDirectSound* directSound, uint16 channelId, uint32 samplesPerSec, uint16 bitsPerSample) {
     m_wBitsPerSample      = bitsPerSample;
     m_pDirectSound        = directSound;
@@ -45,6 +46,7 @@ CAEAudioChannel::CAEAudioChannel(IDirectSound* directSound, uint16 channelId, ui
     field_45              = 0;
 }
 
+// 0x4D7910
 CAEAudioChannel::~CAEAudioChannel() {
     if (m_pDirectSoundBuffer) {
         --g_numSoundChannelsUsed;
@@ -58,6 +60,7 @@ CAEAudioChannel::~CAEAudioChannel() {
     }
 }
 
+// 0x4D7D00
 void CAEAudioChannel::SetFrequencyScalingFactor(float factor) {
     if (factor == 0.0F) {
         if (m_pDirectSoundBuffer &&
@@ -72,22 +75,23 @@ void CAEAudioChannel::SetFrequencyScalingFactor(float factor) {
         return;
     }
 
-    const auto newFreq = static_cast<uint32>(m_nOriginalFrequency * factor);
+    const auto newFreq = static_cast<uint32>(float(m_nOriginalFrequency) * factor);
     SetFrequency(newFreq);
 
     if (m_bNoScalingFactor) {
-        const auto curPos = GetCurrentPlaybackPosition();
-        if (curPos != 0)
-            m_pDirectSoundBuffer->SetVolume(-10000);
+        if (m_pDirectSoundBuffer) {
+            const auto curPos = GetCurrentPlaybackPosition();
+            if (curPos != 0) {
+                m_pDirectSoundBuffer->SetVolume(-10000);
+            }
 
-        if (m_pDirectSoundBuffer)
             m_pDirectSoundBuffer->Play(0, 0, m_bLooped);
 
-        if (curPos != 0 && !AESmoothFadeThread.RequestFade(m_pDirectSoundBuffer, m_fVolume, -2, false)) {
-            const auto volume = static_cast<LONG>(m_fVolume * 100.0F);
-            m_pDirectSoundBuffer->SetVolume(volume);
+            if (curPos != 0 && !AESmoothFadeThread.RequestFade(m_pDirectSoundBuffer, m_fVolume, -2, false)) {
+                const auto volume = static_cast<LONG>(m_fVolume * 100.0F);
+                m_pDirectSoundBuffer->SetVolume(volume);
+            }
         }
-
         m_bNoScalingFactor = false;
     }
 }
@@ -103,7 +107,9 @@ void CAEAudioChannel::SetPosition(CVector* vecPos) const {
     if (!m_pDirectSound3DBuffer)
         return;
 
+#ifdef USE_DSOUND
     m_pDirectSound3DBuffer->SetPosition(vecPos->x, vecPos->y, vecPos->z, DS3D_DEFERRED);
+#endif
 }
 
 // 0x4D7C60
@@ -128,11 +134,11 @@ void CAEAudioChannel::SetVolume(float volume) {
 }
 
 // 0x4D79A0
-int32 CAEAudioChannel::GetCurrentPlaybackPosition() const {
+uint32 CAEAudioChannel::GetCurrentPlaybackPosition() const {
     if (!m_pDirectSoundBuffer)
         return 0;
 
-    uint32 outPos;
+    uint32 outPos = 0;
     m_pDirectSoundBuffer->GetCurrentPosition(reinterpret_cast<LPDWORD>(&outPos), nullptr);
     return outPos;
 }
@@ -153,8 +159,12 @@ void CAEAudioChannel::SetFrequency(uint32 freq) {
         return;
 
     m_nFrequency = freq;
-    if (m_pDirectSoundBuffer)
-        m_pDirectSoundBuffer->SetFrequency(freq);
+
+    #ifdef USE_DSOUND
+    if (m_pDirectSoundBuffer) {
+        VERIFY(SUCCEEDED(m_pDirectSoundBuffer->SetFrequency(freq)));
+    }
+    #endif
 }
 
 // 0x4D7A70
@@ -165,15 +175,21 @@ void CAEAudioChannel::SetOriginalFrequency(uint32 freq) {
 
 // 0x4D7BD0
 void CAEAudioChannel::UpdateStatus() {
+#ifdef USE_DSOUND
     m_pDirectSoundBuffer->GetStatus(reinterpret_cast<LPDWORD>(&m_nBufferStatus));
-    if (m_nBufferStatus & DSBSTATUS_BUFFERLOST)
+    if (m_nBufferStatus & DSBSTATUS_BUFFERLOST) {
         Lost();
+    }
+#endif
 }
 
 // 0x4D7A10
 bool CAEAudioChannel::Lost() const {
-    while (m_pDirectSoundBuffer->Restore() == DSERR_BUFFERLOST) // BUG: Infinite loop if we don't restore
-        Sleep(10);
+#ifdef USE_DSOUND
+    while (m_pDirectSoundBuffer->Restore() == DSERR_BUFFERLOST) { // BUG: Infinite loop if we don't restore
+        OS_ThreadSleep(10);
+    }
+#endif
 
     return true;
 }

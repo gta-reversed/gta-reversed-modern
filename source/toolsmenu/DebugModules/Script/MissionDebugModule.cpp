@@ -8,14 +8,10 @@
 
 #include "CDebugMenuToolInput.h"
 #include "EntryExitManager.h"
+#include "TheScripts.h"
+#include "Hud.h"
 
-namespace MissionDebugModule {
-
-CDebugMenuToolInput m_missionToolInput;
-bool  m_bStartMission = false;
-int32 m_missionToStartId = 0;
-
-CDebugMenuToolInput::ToolMap m_missionsMap{
+CDebugMenuToolInput::ToolMap s_MissionsMap{
     { 0, "Initial 1" },
     { 1, "Initial 2" },
     { 2, "Intro" },
@@ -153,21 +149,21 @@ CDebugMenuToolInput::ToolMap m_missionsMap{
     { 134, "Buy Properties Mission" }
 };
 
-void Initialise() {
-    m_missionToolInput.Initialise(256, &m_missionsMap);
+MissionDebugModule::MissionDebugModule() {
+    m_missionToolInput.Initialise(256, &s_MissionsMap);
 }
 
 void InitializeAndStartNewScript() {
     CTheScripts::WipeLocalVariableMemoryForMissionScript();
-    CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[200000]);
+    CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::MissionBlock[0]);
     script->m_bUseMissionCleanup = true;
     script->m_bIsMission = true;
-    script->m_pBaseIP = &CTheScripts::ScriptSpace[200000];
+    script->m_pBaseIP = &CTheScripts::MissionBlock[0];
     CTheScripts::bAlreadyRunningAMissionScript = true;
     CGameLogic::ClearSkip(false);
 }
 
-bool StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
+bool MissionDebugModule::StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
     if (!m_bStartMission && CTheScripts::IsPlayerOnAMission()) {
         if (CCutsceneMgr::ms_cutsceneLoadStatus == 2) {
             CCutsceneMgr::DeleteCutsceneData();
@@ -183,7 +179,7 @@ bool StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
     CTheScripts::bPlayerIsOffTheMap = false;
     CGame::currArea = 0;
     CPlayerPed* player = FindPlayerPed();
-    FindPlayerPed()->m_nAreaCode = AREA_CODE_NORMAL_WORLD;
+    player->m_nAreaCode = AREA_CODE_NORMAL_WORLD;
     if (!CGame::currArea) {
         player->m_pEnex = nullptr;
         CEntryExitManager::ms_entryExitStackPosn = 0;
@@ -199,17 +195,17 @@ bool StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
         missionId = 0xFFFF - missionId;
     }
     CTimer::Suspend();
-    int offsetToMission = CTheScripts::MultiScriptArray[missionId];
+    int32 offsetToMission = CTheScripts::MultiScriptArray[missionId];
     CFileMgr::ChangeDir("\\");
     if (CGame::bMissionPackGame) {
         size_t bytesRead = 0;
         while (FrontEndMenuManager.CheckMissionPackValidMenu()) {
             CFileMgr::SetDirMyDocuments();
             sprintf(gString, "MPACK//MPACK%d//SCR.SCM", CGame::bMissionPackGame);
-            FILE* file = CFileMgr::OpenFile(gString, "rb");
+            auto* file = CFileMgr::OpenFile(gString, "rb");
             if (file) {
                 CFileMgr::Seek(file, offsetToMission, 0);
-                bytesRead = CFileMgr::Read(file, &CTheScripts::ScriptSpace[200000], 69000);
+                bytesRead = CFileMgr::Read(file, &CTheScripts::MissionBlock[0], MISSION_SCRIPT_SIZE);
                 CFileMgr::CloseFile(file);
                 if (bytesRead >= 1) {
                     InitializeAndStartNewScript();
@@ -220,11 +216,11 @@ bool StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
             }
         }
     }
-    CFileMgr::SetDir(gta_empty_string);
+    CFileMgr::SetDir("");
     if (!CGame::bMissionPackGame) {
-        FILE* file = CFileMgr::OpenFile("data\\script\\main.scm", "rb");
+        auto* file = CFileMgr::OpenFile("data\\script\\main.scm", "rb");
         CFileMgr::Seek(file, offsetToMission, 0);
-        CFileMgr::Read(file, &CTheScripts::ScriptSpace[200000], 69000);
+        CFileMgr::Read(file, &CTheScripts::MissionBlock[0], MISSION_SCRIPT_SIZE);
         CFileMgr::CloseFile(file);
         InitializeAndStartNewScript();
     }
@@ -232,68 +228,55 @@ bool StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
     return true;
 }
 
-void ProcessImgui() {
+void MissionDebugModule::RenderWindow() {
+    const notsa::ui::ScopedWindow window{ "Missions Starter", { 485.f, 400.f }, m_IsOpen };
+    if (!m_IsOpen) {
+        return;
+    }
+
     if (m_bStartMission) {
         StartMission(m_missionToStartId);
     }
-    ImGui::PushItemWidth(465.0f);
-    bool reclaim_focus = false;
-    ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
-    if (ImGui::InputText(" ", &m_missionToolInput.GetInputBuffer(), input_text_flags)) {
-        reclaim_focus = true;
-    }
-    ImGui::PopItemWidth();
-
-    // Auto-focus on window apparition
-    ImGui::SetItemDefaultFocus();
-    if (reclaim_focus)
-        ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+    
+    ImGui::SetNextItemWidth(ImGui::GetWindowWidth() - 10.f);
+    ImGui::InputText(" ", &m_missionToolInput.GetInputBuffer());
 
     m_missionToolInput.Process();
 
-    ImGui::BeginChild("##missionstool", ImVec2(0, 310));
-    const auto w = ImGui::GetWindowWidth();
-    static bool widthSet = false;
-    ImGui::Columns(2);
-    if (!widthSet) {
-        widthSet = true;
-        ImGui::SetColumnWidth(0, w * 0.2f);
-        ImGui::SetColumnWidth(1, w * 0.8f);
-    }
-    ImGui::TextUnformatted("ID");
-    ImGui::NextColumn();
-    ImGui::TextUnformatted("Name");
-    ImGui::NextColumn();
-    ImGui::Separator();
-    static int32 selectedId = -1;
-    for (const auto& x : m_missionToolInput.GetGridListMap()) {
-        const int32 id = x.first;
-        const std::string& name = x.second;
-        ImGui::PushID(id);
+    ImGui::BeginChild("##missionstool", ImVec2(0.f, 310.f));
+    if (ImGui::BeginTable("Missions", 2, ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Borders)) { 
+        ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed);
+        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed);
 
-        ImGui::Text("%i", id);
-        ImGui::NextColumn();
-        if (ImGui::Selectable(name.c_str(), selectedId == id, ImGuiSelectableFlags_SpanAllColumns)) {
-            selectedId = id;
+        ImGui::TableHeadersRow();
+
+        for (auto&& [idx, name] : m_missionToolInput.GetGridListMap()) {
+            const notsa::ui::ScopedID tableID{ idx };
+            //ImGui::BeginGroup();
+            ImGui::TableNextRow();
+
+            ImGui::TableNextColumn();
+            ImGui::Text("%i", idx);
+
+            ImGui::TableNextColumn();
+            if (ImGui::Selectable(name.c_str(), m_SelectedMissionIdx == idx, ImGuiSelectableFlags_SpanAllColumns)) {
+                m_SelectedMissionIdx = idx;
+            }
+
+            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && m_SelectedMissionIdx != -1) {
+                CHud::SetHelpMessage("Starting Mission!", true, false, false);
+                StartMission(m_SelectedMissionIdx);
+            }
+            //ImGui::EndGroup();
         }
-        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && selectedId != -1) {
-            CHud::SetHelpMessage("Starting Mission!", true, false, false);
-            StartMission(selectedId);
-        }
-        ImGui::NextColumn();
-        ImGui::PopID();
+
+        ImGui::EndTable();
     }
-    ImGui::EndColumns();
     ImGui::EndChild();
-    ImGui::Separator();
-
-    ImGui::SetCursorPosX(117);
-    if (ImGui::Button("START MISSION", ImVec2(250, 0)) && selectedId != -1) {
-        CHud::SetHelpMessage("Starting Mission!", true, false, false);
-        StartMission(selectedId);
-    }
 }
 
-void ProcessRender() {}
-
-} // namespace MissionDebugModule
+void MissionDebugModule::RenderMenuEntry() {
+    notsa::ui::DoNestedMenuIL({ "Tools" }, [&] {
+        ImGui::MenuItem("Mission Starter", nullptr, &m_IsOpen);
+    });
+}

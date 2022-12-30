@@ -8,6 +8,7 @@
 
 #include "eWeaponType.h"
 #include "Vector2D.h"
+#include "eWeaponSkill.h"
 
 class FxSystem_c;
 class CColPoint;
@@ -22,6 +23,24 @@ enum eWeaponState : uint32 {
     WEAPONSTATE_MELEE_MADECONTACT
 };
 
+/* Source: https://wiki.multitheftauto.com/wiki/GetPedWeaponSlot */
+enum class eWeaponSlot : uint32 {
+    UNARMED,
+    MELEE,
+    HANDGUN,
+    SHOTGUN,
+    SMG,        // Used for drive-by's
+    RIFLE,
+    SNIPER,
+    HEAVY,
+    THROWN,
+    SPECIAL,
+    GIFT,
+    PARACHUTE,
+    DETONATOR,
+};
+constexpr auto NUM_WEAPON_SLOTS = static_cast<size_t>(eWeaponSlot::DETONATOR) + 1u;
+
 class CPed;
 class CVehicle;
 class CColModel;
@@ -35,7 +54,7 @@ public:
     uint32       m_nTotalAmmo;
     uint32       m_nTimeForNextShot;
     uint8        field_14;
-    uint8        m_bNoModel;
+    bool         m_bNoModel; // Used in case of goggles (infrared/nightvision) : When they're put on the weapon model isn't and shouldn't be loaded.
     uint8        field_16;
     uint8        field_17;
     FxSystem_c*  m_pFxSystem; // flamethrower, spraycan, extinguisher particle
@@ -46,8 +65,13 @@ public:
     static CColModel& ms_PelletTestCol;
 
 public:
-    CWeapon(plugin::dummy_func_t) {}
+    CWeapon() { // 0x441E00
+        field_14    = 0;
+        m_bNoModel  = false;
+        m_pFxSystem = nullptr;
+    };
     CWeapon(eWeaponType weaponType, int32 ammo);
+    CWeapon(const CWeapon&) = delete;
 
     void Initialise(eWeaponType weaponType, int32 ammo, CPed* owner);
     static void InitialiseWeapons();
@@ -97,7 +121,8 @@ public:
     static CEntity* PickTargetForHeatSeekingMissile(CVector origin, CVector direction, float distanceMultiplier, CEntity* ignoreEntity, bool fromVehicle, CEntity* lastEntity);
     static bool ProcessLineOfSight(const CVector& startPoint, const CVector& endPoint, CColPoint& outColPoint, CEntity*& outEntity, eWeaponType weaponType, CEntity* arg5, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool arg11, bool doIgnoreCameraCheck);
 
-    CWeaponInfo& GetWeaponInfo(CPed* owner = nullptr);
+    CWeaponInfo& GetWeaponInfo(CPed* owner = nullptr) const;
+    CWeaponInfo& GetWeaponInfo(eWeaponSkill skill) const;
 
 private:
     friend void InjectHooksMain();

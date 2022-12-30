@@ -6,37 +6,38 @@ void CPedAttractor::InjectHooks() {
     RH_ScopedClass(CPedAttractor);
     RH_ScopedCategory("Attractors");
 
-    // RH_ScopedInstall(Constructor, 0x5EDFB0);
-    // RH_ScopedInstall(Destructor, 0x5EC410);
-    // RH_ScopedInstall(SetTaskForPed, 0x5EECA0);
-    // RH_ScopedInstall(RegisterPed, 0x5EEE30);
-    // RH_ScopedInstall(DeRegisterPed, 0x5EC5B0);
-    // RH_ScopedInstall(IsRegisteredWithPed, 0x5EB4C0);
-    // RH_ScopedInstall(IsAtHeadOfQueue, 0x5EB530);
-    // RH_ScopedInstall(GetTaskForPed, 0x5EC500);
-    // RH_ScopedInstall(GetTailOfQueue, 0x5EB5B0);
-    // RH_ScopedInstall(GetQueueSlot, 0x5EB550);
-    // RH_ScopedInstall(GetNoOfRegisteredPeds, 0x5EAF10);
-    // RH_ScopedInstall(GetHeadOfQueue, 0x5EB590);
-    // RH_ScopedInstall(ComputeFreeSlot, 0x0);
+    //RH_ScopedInstall(Constructor, 0x5EDFB0, { .reversed = false });
+    //RH_ScopedInstall(Destructor, 0x5EC410, { .reversed = false });
+
+    RH_ScopedInstall(SetTaskForPed, 0x5EECA0, { .reversed = false });
+    RH_ScopedInstall(RegisterPed, 0x5EEE30, { .reversed = false });
+    RH_ScopedInstall(DeRegisterPed, 0x5EC5B0, { .reversed = false });
+    RH_ScopedInstall(IsRegisteredWithPed, 0x5EB4C0, { .reversed = false });
+    RH_ScopedInstall(IsAtHeadOfQueue, 0x5EB530, { .reversed = false });
+    RH_ScopedInstall(GetTaskForPed, 0x5EC500, { .reversed = false });
+    RH_ScopedInstall(GetTailOfQueue, 0x5EB5B0, { .reversed = false });
+    RH_ScopedInstall(GetQueueSlot, 0x5EB550, { .reversed = false });
+    RH_ScopedInstall(GetNoOfRegisteredPeds, 0x5EAF10, { .reversed = false });
+    RH_ScopedInstall(GetHeadOfQueue, 0x5EB590, { .reversed = false });
+    RH_ScopedInstall(ComputeFreeSlot, 0x0, { .reversed = false });
     RH_ScopedInstall(ComputeDeltaPos, 0x5E9600);
     RH_ScopedInstall(ComputeDeltaHeading, 0x5E9640);
     RH_ScopedInstall(ComputeAttractTime, 0x5E95E0);
     RH_ScopedInstall(ComputeAttractPos, 0x5EA110);
     RH_ScopedInstall(ComputeAttractHeading, 0x5EA1C0);
-    // RH_ScopedInstall(BroadcastDeparture, 0x5EF160);
-    // RH_ScopedInstall(BroadcastArrival, 0x5EEF80);
-    // RH_ScopedInstall(AbortPedTasks, 0x5EAF60);
+    RH_ScopedInstall(BroadcastDeparture, 0x5EF160, { .reversed = false });
+    RH_ScopedInstall(BroadcastArrival, 0x5EEF80, { .reversed = false });
+    RH_ScopedInstall(AbortPedTasks, 0x5EAF60, { .reversed = false });
 }
 
 // 0x5EAFD0
-void* CPedAttractor::operator new(uint32 size) {
-    return plugin::CallAndReturn<void*, 0x5EAFD0, uint32>(size);
+void* CPedAttractor::operator new(unsigned size) {
+    return GetPedAttractorPool()->New();
 }
 
 // 0x5EAFE0
 void CPedAttractor::operator delete(void* object) {
-    plugin::Call<0x5EAFE0>(object);
+    GetPedAttractorPool()->Delete(static_cast<CPedAttractor*>(object));
 }
 
 // 0x5EDFB0

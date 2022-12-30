@@ -6,19 +6,18 @@ class CEntity;
 class CVehicle;
 enum eWeaponType : uint32;
 
-class CEventVehicleDamage : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventVehicleDamage : public CEventEditableResponse {
 public:
     CVehicle*   m_vehicle;
     CEntity*    m_attacker;
     eWeaponType m_weaponType;
 
+public:
     static void InjectHooks();
 
     CEventVehicleDamage(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType);
-    ~CEventVehicleDamage();
-private:
-    CEventVehicleDamage* Constructor(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType);
-public:
+    ~CEventVehicleDamage() override;
+
     int32 GetEventPriority() const override { return 49; }
     int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
@@ -27,6 +26,8 @@ public:
     CEntity* GetSourceEntity() const override;
     float GetLocalSoundLevel() override { return 55.0f; }
 
+private:
+    CEventVehicleDamage* Constructor(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType);
     bool AffectsPed_Reversed(CPed* ped);
     bool IsCriminalEvent_Reversed();
     void ReportCriminalEvent_Reversed(CPed* ped);

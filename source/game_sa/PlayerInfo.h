@@ -93,6 +93,8 @@ public:
     CPlayerInfo(CPlayerInfo&&) = delete;
     ~CPlayerInfo() = default; // 0x45B110
 
+    CPlayerInfo& operator=(const CPlayerInfo& rhs);
+
     static void CancelPlayerEnteringCars(CVehicle* vehicle);
     static CEntity* FindObjectToSteal(CPed* ped);
 
@@ -100,10 +102,10 @@ public:
     void FindClosestCarSectorList(CPtrList& ptrList, CPed* ped, float minX, float minY, float maxX, float maxY, float* outVehDist, CVehicle** outVehicle);
     void EvaluateCarPosition(CEntity* car, CPed* ped, float pedToVehDist, float* outDistance, CVehicle** outVehicle);
     void Clear();
-    void GivePlayerParachute();
+    void GivePlayerParachute() const;
     void StreamParachuteWeapon(bool a2);
-    void AddHealth(int32 amount);
-    void BlowUpRCBuggy(bool bExplode);
+    void AddHealth(int32 amount) const;
+    void BlowUpRCBuggy(bool bExplode) const;
     void MakePlayerSafe(bool canMove, float radius);
     void PlayerFailedCriticalMission();
     void WorkOutEnergyFromHunger();
@@ -113,14 +115,14 @@ public:
     void DeletePlayerSkin();
     void SetPlayerSkin(const char* name);
     void SetLastTargetVehicle(CVehicle* vehicle);
-    bool IsRestartingAfterMissionFailed();
-    bool IsRestartingAfterArrest();
-    bool IsRestartingAfterDeath();
-    bool IsPlayerInRemoteMode();
+    [[nodiscard]] bool IsRestartingAfterMissionFailed() const;
+    [[nodiscard]] bool IsRestartingAfterArrest() const;
+    [[nodiscard]] bool IsRestartingAfterDeath() const;
+    [[nodiscard]] bool IsPlayerInRemoteMode() const;
 
-    CVector GetPos();
-    CVector GetSpeed();
-    
+    CVector GetPos() const;
+    CVector GetSpeed() const;
+
     bool Load();
     bool Save();
 
@@ -182,7 +184,7 @@ public:
         info->m_nMoney =                    m_nMoney;
         info->m_nCarDensityForCurrentZone = m_nCarDensityForCurrentZone;
         info->m_nPlayerState =              m_nPlayerState;
-        info->m_nCarDensityForCurrentZone = m_nCarDensityForCurrentZone;
+        // info->m_nCarDensityForCurrentZone = m_nCarDensityForCurrentZone; redundant
         info->m_fRoadDensityAroundPlayer =  m_fRoadDensityAroundPlayer;
         info->m_nDisplayMoney =             m_nDisplayMoney;
         info->m_nNumHoursDidntEat =         m_nNumHoursDidntEat;

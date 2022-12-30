@@ -1,13 +1,16 @@
 #include "StdInc.h"
 
 #include "TaskComplexFollowPedFootsteps.h"
+// #include "PointRoute.h"
 
 void CTaskComplexFollowPedFootsteps::InjectHooks() {
     RH_ScopedClass(CTaskComplexFollowPedFootsteps);
     RH_ScopedCategory("Tasks/TaskTypes");
+
     RH_ScopedInstall(Constructor, 0x694E20);
 }
 
+// 0x694E20
 CTaskComplexFollowPedFootsteps::CTaskComplexFollowPedFootsteps(CPed* ped) : CTaskComplex() {
     m_targetPed               = ped;
     m_updateGoToPoint         = false;
@@ -16,12 +19,9 @@ CTaskComplexFollowPedFootsteps::CTaskComplexFollowPedFootsteps(CPed* ped) : CTas
     m_pointRoute              = nullptr;
     m_moveState               = PEDMOVE_WALK;
 
-    if (ped)
-        ped->RegisterReference(reinterpret_cast<CEntity**>(&m_targetPed));
+    CEntity::SafeRegisterRef(m_targetPed);
 
-    m_pointRoute = CPools::ms_pPointRoutePool->New();
-    if (m_pointRoute)
-        m_pointRoute->field_0 = 0;
+    m_pointRoute = new CPointRoute();
 }
 
 CTaskComplexFollowPedFootsteps* CTaskComplexFollowPedFootsteps::Constructor(CPed* ped) {
@@ -30,13 +30,10 @@ CTaskComplexFollowPedFootsteps* CTaskComplexFollowPedFootsteps::Constructor(CPed
 }
 
 CTaskComplexFollowPedFootsteps::~CTaskComplexFollowPedFootsteps() {
-    if (m_targetPed)
-        m_targetPed->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_targetPed));
+    CEntity::SafeCleanUpRef(m_targetPed);
 
-    if (m_pointRoute) {
-        CPools::ms_pPointRoutePool->Delete(m_pointRoute);
-        m_pointRoute = nullptr;
-    }
+    delete m_pointRoute;
+    m_pointRoute = nullptr;
 }
 
 bool CTaskComplexFollowPedFootsteps::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {

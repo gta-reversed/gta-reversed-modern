@@ -16,7 +16,7 @@
 class List_c {
 public:
     List_c() : m_pHead(nullptr), m_pTail(nullptr), m_nCount(0) {}
-    ~List_c() {}
+    ~List_c() = default;
 
 public:
     ListItem_c* m_pHead;
@@ -42,7 +42,7 @@ public:
     void RemoveAll();
 
     // Get number of items in the list
-    uint32 GetNumItems();
+    uint32 GetNumItems() const;
 
     // Append item to the list
     void AppendItem(ListItem_c* item);

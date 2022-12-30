@@ -24,3 +24,9 @@ bool CBoundingBox::IsPointWithin(const CVector& point) const {
         && point.y <= m_vecMax.y
         && point.z <= m_vecMax.z;
 }
+
+// 0x470100
+void CBoundingBox::SetMinMax(CVector min, CVector max) {
+    m_vecMin = min;
+    m_vecMax = max;
+}

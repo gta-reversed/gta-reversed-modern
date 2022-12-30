@@ -11,11 +11,11 @@ class CPedGroup;
 
 class CPedGroups {
 public:
-    static int16 (&ScriptReferenceIndex)[8]; // static int16 ScriptReferenceIndex[8]
-    static char (&ms_activeGroups)[8];       // static char ms_activeGroups[8]
-    static bool& ms_bIsPlayerOnAMission;
-    static uint32& ms_iNoOfPlayerKills;
-    static CPedGroup (&ms_groups)[8]; // static CPedGroup ms_groups[8]
+    static inline std::array<uint16, 8>& ScriptReferenceIndex = *reinterpret_cast<std::array<uint16, 8>*>(0xC098D0);
+    static inline std::array<char, 8>& ms_activeGroups = *reinterpret_cast<std::array<char, 8>*>(0xC098E0);
+    static inline bool& ms_bIsPlayerOnAMission = *reinterpret_cast<bool*>(0xC098E8);
+    static inline uint32& ms_iNoOfPlayerKills = *reinterpret_cast<uint32*>(0xC098EC);
+    static inline std::array<CPedGroup, 8>& ms_groups = *reinterpret_cast<std::array<CPedGroup, 8>*>(0xC09920);
 
 public:
     static void InjectHooks();
@@ -32,7 +32,7 @@ public:
 
     static bool IsGroupLeader(CPed* ped);
 
-    static CPedGroup* GetPedsGroup(CPed* ped);
+    static CPedGroup* GetPedsGroup(const CPed* ped);
     static int32 GetGroupId(CPedGroup* pedGroup);
 
     static void Process();

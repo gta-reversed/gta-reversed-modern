@@ -6,13 +6,13 @@ void CCopPed::InjectHooks() {
     RH_ScopedClass(CCopPed);
     RH_ScopedCategory("Entity/Ped");
 
-    // RH_ScopedInstall(Constructor, 0x5DDC60); todo: unhook and test when core components of Ped will be reversed
+    RH_ScopedInstall(Constructor, 0x5DDC60);
     RH_ScopedInstall(Destructor, 0x5DE0D0);
     RH_ScopedInstall(SetPartner, 0x5DDE80);
     RH_ScopedInstall(AddCriminalToKill, 0x5DDEB0);
     RH_ScopedInstall(RemoveCriminalToKill, 0x5DE040);
     RH_ScopedInstall(ClearCriminalsToKill, 0x5DE070);
-    RH_ScopedInstall(ProcessControl_Reversed, 0x5DE160);
+    RH_ScopedVirtualInstall(ProcessControl, 0x5DE160);
 }
 
 /* Horrible design, but R* also allowed to pass in a ModelID */
@@ -37,7 +37,11 @@ eModelID ResolveModelForCopType(uint32_t typeOrModelID) {
 }
 
 // 0x5DDC60
-CCopPed::CCopPed(uint32_t copTypeOrModelID) : CPed(PED_TYPE_COP), m_nCopTypeOrModelID(copTypeOrModelID) {
+CCopPed::CCopPed(uint32_t copTypeOrModelID) :
+    CPed{ PED_TYPE_COP },
+    m_nCopTypeOrModelID{ copTypeOrModelID }
+{
+    // V1053 Calling the 'SetModelIndex' virtual function in the constructor may lead to unexpected result at runtime
     SetModelIndex(ResolveModelForCopType(copTypeOrModelID)); /* R* originally seem to have used this switch to set the model as well, but this is nicer */
 
     switch (copTypeOrModelID) {
@@ -87,9 +91,7 @@ CCopPed::CCopPed(uint32_t copTypeOrModelID) : CPed(PED_TYPE_COP), m_nCopTypeOrMo
     field_79D = 0;
     field_7A4 = 0;
 
-    if (m_pTargetedObject)
-        m_pTargetedObject->CleanUpOldReference(&m_pTargetedObject);
-    m_pTargetedObject = 0;
+    CEntity::ClearReference(m_pTargetedObject); // Oookay?
 
     m_pIntelligence->SetDmRadius(60.0f);
     m_pIntelligence->SetNumPedsToScan(8);
@@ -121,20 +123,16 @@ CCopPed* CCopPed::Destructor() {
 
 // 0x5DDE80
 void CCopPed::SetPartner(CCopPed* partner) {
-    if (m_pCopPartner)
-        m_pCopPartner->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pCopPartner));
-
+    CEntity::SafeCleanUpRef(m_pCopPartner);
     m_pCopPartner = partner;
-    if (partner)
-        partner->RegisterReference(reinterpret_cast<CEntity**>(&m_pCopPartner));
+    CEntity::SafeRegisterRef(m_pCopPartner);
 }
 
 // NOTSA
 void CCopPed::ClearCriminalListFromDeadPeds() {
     for (CPed*& ped : m_apCriminalsToKill) {
         if (ped && ped->m_fHealth <= 0.0f) {
-            ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&ped));
-            ped = nullptr;
+            CEntity::ClearReference(ped);
         }
     }
 }
@@ -213,6 +211,7 @@ void CCopPed::AddCriminalToKill(CPed* criminal) {
 // 0x5DE040
 void CCopPed::RemoveCriminalToKill(int32 unk, int32 nCriminalLocalIdx) {
     CPed*& criminal = m_apCriminalsToKill[nCriminalLocalIdx];
+    assert(criminal);
     criminal->RegisterReference(reinterpret_cast<CEntity**>(&criminal));
     m_apCriminalsToKill[nCriminalLocalIdx] = nullptr;
 }
@@ -224,8 +223,7 @@ void CCopPed::ClearCriminalsToKill() {
             ped->m_nTimeTillWeNeedThisPed = CTimer::GetTimeInMS();
             ped->bCullExtraFarAway = false;
             ped->m_fRemovalDistMultiplier = 1.0f;
-            ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&ped));
-            ped = nullptr;
+            CEntity::ClearReference(ped);
         }
     }
 }
@@ -258,7 +256,7 @@ void CCopPed::ProcessControl_Reversed() {
         return;
 
     if (m_pTargetedObject)
-        Say(220, 0, 1.0f, 0, 0, 0);
+        Say(220);
 
     if (!field_79D)
         return;

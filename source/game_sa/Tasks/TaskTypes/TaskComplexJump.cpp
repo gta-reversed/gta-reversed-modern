@@ -12,10 +12,10 @@ void CTaskComplexJump::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x67A030);
     RH_ScopedInstall(CreateSubTask, 0x67D980);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x67FD10);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x67FC00);
-    RH_ScopedInstall(Clone_Reversed, 0x67C5A0);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x67A070);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x67FD10);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x67FC00);
+    RH_ScopedVirtualInstall(Clone, 0x67C5A0);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x67A070);
 }
 
 CTaskComplexJump* CTaskComplexJump::Constructor(eComplexJumpType jumpType) {

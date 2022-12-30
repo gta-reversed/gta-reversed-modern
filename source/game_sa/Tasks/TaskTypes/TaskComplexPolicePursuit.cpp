@@ -60,17 +60,17 @@ void CTaskComplexPolicePursuit::SetWeapon(CPed* ped) {
 void CTaskComplexPolicePursuit::InjectHooks() {
     RH_ScopedClass(CTaskComplexPolicePursuit);
     RH_ScopedCategory("Tasks/TaskTypes");
-    // RH_ScopedInstall(Constructor, 0x68BA70);
-    // RH_ScopedInstall(SetWeapon, 0x68BAD0);
-    // RH_ScopedInstall(ClearPursuit, 0x68BD90);
-    // RH_ScopedInstall(SetPursuit, 0x68BBD0);
-    // RH_ScopedInstall(PersistPursuit, 0x68BDC0);
-    // RH_ScopedInstall(CreateSubTask, 0x68D910);
-    // RH_ScopedInstall(Clone_Reversed, 0x68CDD0);
-    // RH_ScopedInstall(MakeAbortable_Reversed, 0x68BAB0);
-    // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x68BAC0);
-    // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6908E0);
-    // RH_ScopedInstall(ControlSubTask_Reversed, 0x690920);
+    RH_ScopedInstall(Constructor, 0x68BA70, { .reversed = false });
+    RH_ScopedInstall(SetWeapon, 0x68BAD0, { .reversed = false });
+    RH_ScopedInstall(ClearPursuit, 0x68BD90, { .reversed = false });
+    RH_ScopedInstall(SetPursuit, 0x68BBD0, { .reversed = false });
+    RH_ScopedInstall(PersistPursuit, 0x68BDC0, { .reversed = false });
+    RH_ScopedInstall(CreateSubTask, 0x68D910, { .reversed = false });
+    RH_ScopedVirtualInstall(Clone, 0x68CDD0, { .reversed = false });
+    RH_ScopedVirtualInstall(MakeAbortable, 0x68BAB0, { .reversed = false });
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x68BAC0, { .reversed = false });
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x6908E0, { .reversed = false });
+    RH_ScopedVirtualInstall(ControlSubTask, 0x690920, { .reversed = false });
 }
 
 CTaskComplexPolicePursuit* CTaskComplexPolicePursuit::Constructor() {

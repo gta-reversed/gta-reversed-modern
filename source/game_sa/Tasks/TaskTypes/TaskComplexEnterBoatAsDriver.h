@@ -14,6 +14,8 @@ public:
     CVehicle* m_pTargetVehicle;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_ENTER_BOAT_AS_DRIVER;
+
     CTaskComplexEnterBoatAsDriver(CVehicle* targetVehicle);
 
 private:

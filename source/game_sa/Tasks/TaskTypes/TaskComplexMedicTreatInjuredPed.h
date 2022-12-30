@@ -9,18 +9,18 @@ public:
     CVehicle*  m_pVehicle;
     CPed*      m_pPartnerMedic;
     uint8      m_bIsDriver;
-    char       _pad[3];
     CAccident* m_pAccident;
     CVector    m_vecAccidentPosition;
     uint8      m_bLeftCarOnce;
-    char       _pad2[3];
 
 public:
-    CTaskComplexMedicTreatInjuredPed(CVehicle* vehicle, CPed* ped, bool isDriver);
-    ~CTaskComplexMedicTreatInjuredPed();
+    static constexpr auto Type = TASK_COMPLEX_MEDIC_TREAT_INJURED_PED;
 
-    CTask*    Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_MEDIC_TREAT_INJURED_PED; };
+    CTaskComplexMedicTreatInjuredPed(CVehicle* vehicle, CPed* ped, bool isDriver);
+    ~CTaskComplexMedicTreatInjuredPed() override;
+
+    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

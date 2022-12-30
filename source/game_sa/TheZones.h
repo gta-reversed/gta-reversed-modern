@@ -9,9 +9,7 @@
 #include "Vector.h"
 #include "eLevelName.h"
 #include "Zone.h"
-
-class CZoneInfo;
-class CZoneExtraInfo;
+#include "ZoneInfo.h"
 
 class CTheZones {
 public:
@@ -19,11 +17,12 @@ public:
     static char*       ZonesVisited;                 // Explored territories. Count: 100
     static int32&      ZonesRevealed;                // Number of explored territories
     static int16&      TotalNumberOfNavigationZones; // Info zones
-    static CZone*      NavigationZoneArray;          // Count: 380
+    static CZone       (&NavigationZoneArray)[380];
     static int16&      TotalNumberOfMapZones;        // Map zones
-    static CZone*      MapZoneArray;                 // Count: 39
+    static CZone       (&MapZoneArray)[39];
     static int16&      TotalNumberOfZoneInfos;
-    static CZoneInfo*  ZoneInfoArray;
+    
+    static inline std::array<CZoneInfo, 380>& ZoneInfoArray = *(std::array<CZoneInfo, 380>*)0xBA1DF0;
 
 public:
     static void InjectHooks();
@@ -39,7 +38,7 @@ public:
     static eLevelName GetLevelFromPosition(const CVector& point);
     // Returns pointer to zone by a point
     static CZone* FindSmallestZoneForPosition(const CVector& point, bool FindOnlyZonesType0);
-    static CZoneExtraInfo* GetZoneInfo(const CVector& point, CZone** outZone);
+    static CZoneInfo* GetZoneInfo(const CVector& point, CZone** outZone);
     static void FillZonesWithGangColours(bool disableRadarGangColors);
     // Returns pointer to zone by index
     static CZone* GetNavigationZone(uint16 index);
@@ -61,4 +60,13 @@ public:
 
     // NOTSA
     static const char* GetZoneName(const CVector& point);
+
+    static CZoneInfo* GetZoneInfo(const CZone* zone) {
+        auto idx = zone->m_nZoneExtraIndexInfo;
+
+        if (!idx)
+            return nullptr;
+
+        return &ZoneInfoArray[idx];
+    }
 };

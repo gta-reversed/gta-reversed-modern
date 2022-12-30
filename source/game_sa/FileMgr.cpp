@@ -12,23 +12,16 @@
 
 #include "HookSystem.h"
 
-char *CFileMgr::ms_dirName = (char *) 0xb71a60;
-char *CFileMgr::ms_rootDirName = (char *) 0xb71ae0;
+char (&CFileMgr::ms_dirName)[128] = *(char (*)[128])0xb71a60;
+char (&CFileMgr::ms_rootDirName)[128] = *(char (*)[128])0xb71ae0;
 
-/*
-static char
-    user_tracks_dir_path[256],
-    user_gallery_dir_path[256],
-    gta_user_dir_path[256];
-*/
-char
-    *user_tracks_dir_path = (char *) 0xc92168,
-    *user_gallery_dir_path = (char *) 0xc92268,
-    *gta_user_dir_path = (char *) 0xc92368;
+char (&user_tracks_dir_path)[256] = *(char (*)[256])0xc92168;
+char (&user_gallery_dir_path)[256] = *(char (*)[256])0xc92268;
+char (&gta_user_dir_path)[256] = *(char (*)[256])0xc92368;
 
 constexpr size_t PATH_SIZE = 256;
 
-inline void createDirectory(const wchar_t *path)
+inline void createDirectory(const wchar_t* path)
 {
     HANDLE folderHandle = CreateFileW(
         path,
@@ -46,69 +39,69 @@ inline void createDirectory(const wchar_t *path)
 }
 
 // 0x744FB0
-static char *InitUserDirectories()
+char* InitUserDirectories()
 {
-    if (*gta_user_dir_path == 0)
-    {
-        // MikuAuahDark: Let's improve the function
-        // to use wide char
+    if (gta_user_dir_path[0] != '\0')
+        return gta_user_dir_path;
 
-        static std::array<wchar_t, MAX_PATH> gtaUserDirWide;
+    // MikuAuahDark: Let's improve the function
+    // to use wide char
 
-        if (SHGetFolderPathW(nullptr, CSIDL_PERSONAL, nullptr, SHGFP_TYPE_CURRENT, gtaUserDirWide.data()) == S_OK)
-        {
-            constexpr const wchar_t *USERFILES = L"\\GTA San Andreas User Files";
-            constexpr const wchar_t *GALLERY = L".\\Gallery";
-            constexpr const wchar_t *USERTRACKS = L".\\User Tracks";
-            static std::array<wchar_t, MAX_PATH> userGalleryDirWide;
-            static std::array<wchar_t, MAX_PATH> userTracksDirWide;
+    static std::array<wchar_t, MAX_PATH> gtaUserDirWide;
 
-            // Base GTASA User Files
-            if ((wcslen(gtaUserDirWide.data()) + wcslen(USERFILES)) >= MAX_PATH)
-                wcscpy(gtaUserDirWide.data(), L".");
-            else
-                wcscat(gtaUserDirWide.data(), USERFILES);
-            createDirectory(gtaUserDirWide.data());
-
-            size_t userDirLen = wcslen(gtaUserDirWide.data());
-            wcscpy(userGalleryDirWide.data(), gtaUserDirWide.data());
-            wcscpy(userTracksDirWide.data(), gtaUserDirWide.data());
-
-            // Gallery
-            if ((userDirLen + wcslen(GALLERY + 1)) >= PATH_SIZE)
-                wcscpy(userGalleryDirWide.data(), GALLERY);
-            else
-                wcscat(userGalleryDirWide.data(), GALLERY + 1);
-            createDirectory(userGalleryDirWide.data());
-
-            // User Tracks
-            if ((userDirLen + wcslen(USERTRACKS + 1)) >= PATH_SIZE)
-                wcscpy(userTracksDirWide.data(), USERTRACKS);
-            else
-                wcscat(userTracksDirWide.data(), USERTRACKS + 1);
-            createDirectory(userTracksDirWide.data());
-
-            std::string temp = UnicodeToUTF8(gtaUserDirWide.data());
-            if (temp.length() >= PATH_SIZE)
-                strcpy(gta_user_dir_path, ".");
-            else
-                strcpy(gta_user_dir_path, temp.c_str());
-
-            temp = UnicodeToUTF8(userGalleryDirWide.data());
-            if (temp.length() >= PATH_SIZE)
-                strcpy(user_gallery_dir_path, ".\\Gallery");
-            else
-                strcpy(user_gallery_dir_path, temp.c_str());
-
-            temp = UnicodeToUTF8(userTracksDirWide.data());
-            if (temp.length() >= PATH_SIZE)
-                strcpy(user_tracks_dir_path, ".\\User Tracks");
-            else
-                strcpy(user_tracks_dir_path, temp.c_str());
-        }
-        else
-            strcpy(gta_user_dir_path, "data");
+    if (SHGetFolderPathW(nullptr, CSIDL_PERSONAL, nullptr, SHGFP_TYPE_CURRENT, gtaUserDirWide.data()) != S_OK) {
+        strcpy(gta_user_dir_path, "data");
+        return gta_user_dir_path;
     }
+
+    constexpr const wchar_t* USERFILES = L"\\GTA San Andreas User Files";
+    constexpr const wchar_t* GALLERY = L".\\Gallery";
+    constexpr const wchar_t* USERTRACKS = L".\\User Tracks";
+    static std::array<wchar_t, MAX_PATH> userGalleryDirWide;
+    static std::array<wchar_t, MAX_PATH> userTracksDirWide;
+
+    // Base GTASA User Files
+    if ((wcslen(gtaUserDirWide.data()) + wcslen(USERFILES)) >= MAX_PATH)
+        wcscpy(gtaUserDirWide.data(), L".");
+    else
+        wcscat(gtaUserDirWide.data(), USERFILES);
+    createDirectory(gtaUserDirWide.data());
+
+    size_t userDirLen = wcslen(gtaUserDirWide.data());
+    wcscpy(userGalleryDirWide.data(), gtaUserDirWide.data());
+    wcscpy(userTracksDirWide.data(), gtaUserDirWide.data());
+
+    // Gallery
+    if ((userDirLen + wcslen(GALLERY + 1)) >= PATH_SIZE)
+        wcscpy(userGalleryDirWide.data(), GALLERY);
+    else
+        wcscat(userGalleryDirWide.data(), GALLERY + 1);
+    createDirectory(userGalleryDirWide.data());
+
+    // User Tracks
+    if ((userDirLen + wcslen(USERTRACKS + 1)) >= PATH_SIZE)
+        wcscpy(userTracksDirWide.data(), USERTRACKS);
+    else
+        wcscat(userTracksDirWide.data(), USERTRACKS + 1);
+    createDirectory(userTracksDirWide.data());
+
+    std::string temp = UnicodeToUTF8(gtaUserDirWide.data());
+    if (temp.length() >= PATH_SIZE)
+        strcpy(gta_user_dir_path, ".");
+    else
+        strcpy(gta_user_dir_path, temp.c_str());
+
+    temp = UnicodeToUTF8(userGalleryDirWide.data());
+    if (temp.length() >= PATH_SIZE)
+        strcpy(user_gallery_dir_path, ".\\Gallery");
+    else
+        strcpy(user_gallery_dir_path, temp.c_str());
+
+    temp = UnicodeToUTF8(userTracksDirWide.data());
+    if (temp.length() >= PATH_SIZE)
+        strcpy(user_tracks_dir_path, ".\\User Tracks");
+    else
+        strcpy(user_tracks_dir_path, temp.c_str());
 
     return gta_user_dir_path;
 }
@@ -308,7 +301,7 @@ int32 CFileMgr::CloseFile(FILESTREAM file)
 }
 
 // 0x5389e0
-int32 CFileMgr::GetFileLength(FILESTREAM file)
+int32 CFileMgr::GetTotalSize(FILESTREAM file)
 {
     int32 currentPos, size;
     // MikuAuahDark: The actual implementation uses RwOsGetFileInterface
@@ -352,21 +345,23 @@ void CFileMgr::InjectHooks()
     RH_ScopedClass(CFileMgr);
     RH_ScopedCategoryGlobal();
 
+    // File related functions locked to prevent crashes
+
     RH_ScopedInstall(Initialise, 0x5386f0);
     RH_ScopedInstall(ChangeDir, 0x538730);
     RH_ScopedInstall(SetDir, 0x5387D0);
-    RH_ScopedInstall(SetDirMyDocuments, 0x538860);
-    RH_ScopedInstall(LoadFile, 0x538890);
-    RH_ScopedInstall(OpenFile, 0x538900);
-    RH_ScopedInstall(OpenFileForWriting, 0x538910);
-    RH_ScopedInstall(OpenFileForAppending, 0x538930);
-    RH_ScopedInstall(Read, 0x538950);
-    RH_ScopedInstall(Write, 0x538970);
-    RH_ScopedInstall(Seek, 0x538990);
-    RH_ScopedInstall(ReadLine, 0x5389b0);
-    RH_ScopedInstall(CloseFile, 0x5389d0);
-    RH_ScopedInstall(GetFileLength, 0x5389e0);
-    RH_ScopedInstall(Tell, 0x538a20);
-    RH_ScopedInstall(GetErrorReadWrite, 0x538a50);
+    RH_ScopedInstall(SetDirMyDocuments, 0x538860, { .locked = true });
+    RH_ScopedInstall(LoadFile, 0x538890, { .locked = true });
+    RH_ScopedInstall(OpenFile, 0x538900, { .locked = true });
+    RH_ScopedInstall(OpenFileForWriting, 0x538910, { .locked = true });
+    RH_ScopedInstall(OpenFileForAppending, 0x538930, { .locked = true });
+    RH_ScopedInstall(Read, 0x538950, { .locked = true });
+    RH_ScopedInstall(Write, 0x538970, { .locked = true });
+    RH_ScopedInstall(Seek, 0x538990, { .locked = true });
+    RH_ScopedInstall(ReadLine, 0x5389b0, { .locked = true });
+    RH_ScopedInstall(CloseFile, 0x5389d0, { .locked = true });
+    RH_ScopedInstall(GetTotalSize, 0x5389e0, { .locked = true });
+    RH_ScopedInstall(Tell, 0x538a20, { .locked = true });
+    RH_ScopedInstall(GetErrorReadWrite, 0x538a50, { .locked = true });
     RH_ScopedGlobalInstall(InitUserDirectories, 0x744fb0);
 }

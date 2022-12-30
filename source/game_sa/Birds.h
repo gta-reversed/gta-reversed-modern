@@ -6,9 +6,10 @@
 */
 #pragma once
 
+#include <rwplcore.h>
+
 #include "Vector.h"
 #include "eBirdsBiome.h"
-#include <rwplcore.h>
 
 /*
     researched by LINK/2012
@@ -17,7 +18,6 @@
 
 class CBirds;
 
-#pragma pack(push, 1)
 struct CBirdColor {
 public:
     RwUInt8 cRed;
@@ -41,9 +41,7 @@ public:
         cGreen = static_cast<RwUInt8>(static_cast<RwReal>(cGreen) * fScale);
         cBlue = static_cast<RwUInt8>(static_cast<RwReal>(cBlue) * fScale);
     }
-
 };
-#pragma pack(pop)
 VALIDATE_SIZE(CBirdColor, 0x3);
 
 enum class eBirdMode : uint8 {
@@ -51,7 +49,6 @@ enum class eBirdMode : uint8 {
     BIRD_DRAW_NOUPDATE = 0x2, // Bird is drawn and updates position
 };
 
-#pragma pack(push, 1)
 class CBird {
 public:
     CVector         m_vecPosn;            // Bird position
@@ -68,31 +65,29 @@ public:
     CBirdColor      m_WingsColor;         // Wing tips color
     bool            m_bCreated;           // This flags indicates if in this index there's a bird created
     bool            m_bMustDoCurves;      // If this flag is true the bird will fly in circles
-    char            _pad41[3];
 };
-#pragma pack(pop)
-
 VALIDATE_SIZE(CBird, 0x44);
 
 class CBirds {
 public:
     static bool& bHasBirdBeenShot;
     static uint32& uiNumberOfBirds;
-    static CBird* aBirds;
+    static inline std::array<CBird, 6>& aBirds = *(std::array<CBird, 6>*)0xC6A8B0;
     static CVector& vecBirdShotAt;
 
-    static float* faCreationCoorsX; // { 0.0f, -1.0f, 2.0f, -3.0f, 1.0f, -2.0f }                     These spawn in a formation like this:
-    static float* faCreationCoorsY; // { 0.0f, -1.0f, -2.0f, 1.0f, 1.0f, -2.0f }                                                      4           5
-    static float* faCreationCoorsZ; // { 0.0f, 0.5f, 1.0f, 0.7f, 2.0f, 1.2f }                                                                  1
-                                    //                                                                                                      2
-    static float* faRenderCoorsU;   // { 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.5f }                                                6           3
-    static float* faRenderCoorsV;   // { 0.5f, 0.5f, 0.75f, 0.75f, 1.0f, 1.0f, 1.0f, 0.5f }
-    static float* faRenderPosY;             // Size: 8
-    static uint32* auRenderIndices; // Size: 30
+    static float faCreationCoorsX[6];
+    static float faCreationCoorsY[6];
+    static float faCreationCoorsZ[6];
 
+    static float faRenderCoorsU[8];
+    static float faRenderCoorsV[8];
+    static float faRenderPosY[8];
 
+    static uint32 auRenderIndices[30];
+
+public:
     static void Init();
-    static void CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int32 iBirdCount, eBirdsBiome eBiome, bool bCheckObstacles);
+    static void CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int32 iBirdCount, eBirdsBiome biome, bool bCheckObstacles);
     static void Shutdown();
     static void Update();
     static void Render();
@@ -101,4 +96,3 @@ public:
     static void InjectHooks();
 };
 
-constexpr int32 MAX_BIRDS = 6; // default: 6

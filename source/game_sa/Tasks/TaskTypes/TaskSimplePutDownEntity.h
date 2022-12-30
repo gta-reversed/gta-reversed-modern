@@ -14,6 +14,8 @@ public:
     ~CTaskSimplePutDownEntity() override = default;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_PUTDOWN_ENTITY;
+
     CTask*    Clone() override;
     eTaskType GetTaskType() override;
 

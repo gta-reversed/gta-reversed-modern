@@ -23,6 +23,8 @@ public:
     int8     m_nPriority;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_TRIGGER_LOOK_AT;
+
     CTaskSimpleTriggerLookAt(CEntity* entity,
                              int32 time,
                              int32 offsetBoneTag,

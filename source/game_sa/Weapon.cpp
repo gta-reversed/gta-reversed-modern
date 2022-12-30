@@ -11,6 +11,9 @@
 #include "WeaponInfo.h"
 #include "CreepingFire.h"
 #include "BulletInfo.h"
+#include "InterestingEvents.h"
+#include "Shadows.h"
+#include "Birds.h"
 
 float& CWeapon::ms_fExtinguisherAimAngle = *(float*)0x8D610C;
 bool& CWeapon::bPhotographHasBeenTaken = *(bool*)0xC8A7C0;
@@ -47,6 +50,9 @@ void CWeapon::InjectHooks() {
     RH_ScopedInstall(Initialise, 0x73B4A0);
     RH_ScopedInstall(DoWeaponEffect, 0x73E690);
     RH_ScopedInstall(FireSniper, 0x73AAC0);
+    RH_ScopedInstall(TakePhotograph, 0x73C1F0);
+    RH_ScopedInstall(DoDoomAiming, 0x73CDC0);
+    RH_ScopedInstall(FireInstantHitFromCar2, 0x73CBA0, { .reversed = false });
 }
 
 // 0x73B430
@@ -66,7 +72,6 @@ CWeapon::CWeapon(eWeaponType weaponType, int32 ammo) {
 
 CWeapon* CWeapon::Constructor(eWeaponType weaponType, int32 ammo) {
     this->CWeapon::CWeapon(weaponType, ammo);
-
     return this;
 }
 
@@ -81,8 +86,8 @@ void CWeapon::Initialise(eWeaponType weaponType, int32 ammo, CPed* owner) {
 
     m_nTimeForNextShot = 0;
 
-    int32 model1 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId1;
-    int32 model2 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId2;
+    int32 model1 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD)->m_nModelId1;
+    int32 model2 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD)->m_nModelId2;
 
     if (model1 != -1)
         CModelInfo::GetModelInfo(model1)->AddRef();
@@ -118,14 +123,13 @@ void CWeapon::ShutdownWeapons() {
 }
 
 // 0x73A380
-void CWeapon::Shutdown() 
-{
-    int32 weaponModelID1 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId1;
-    int32 weaponModelID2 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId2;
+void CWeapon::Shutdown() {
+    int32 weaponModelID1 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD)->m_nModelId1;
+    int32 weaponModelID2 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD)->m_nModelId2;
 
     if (weaponModelID1 != -1)
         CModelInfo::GetModelInfo(weaponModelID1)->RemoveRef();
-    
+
     if (weaponModelID2 != -1)
         CModelInfo::GetModelInfo(weaponModelID2)->RemoveRef();
 
@@ -142,7 +146,7 @@ void CWeapon::AddGunshell(CEntity* creator, CVector& position, const CVector2D& 
         return;
 
     // originally squared
-    if (DistanceBetweenPoints(TheCamera.GetPosition(), creator->GetPosition()) > 10.0f)
+    if (DistanceBetweenPoints(creator->GetPosition(), TheCamera.GetPosition()) > 10.0f)
         return;
 
     CVector velocity(direction.x, direction.y, CGeneral::GetRandomNumberInRange(0.4f, 1.6f));
@@ -155,7 +159,7 @@ void CWeapon::AddGunshell(CEntity* creator, CVector& position, const CVector2D& 
         fxprt.SetColor(0.6f, 0.1f, 0.1f);
     }
 
-    g_fx.m_pPrtGunshell->AddParticle(&position, &velocity, 0.0f, &fxprt, -1.0f, 1.2f, 0.6f, 0);
+    g_fx.m_GunShell->AddParticle(&position, &velocity, 0.0f, &fxprt, -1.0f, 1.2f, 0.6f, 0);
 }
 
 // 0x73A530
@@ -170,7 +174,7 @@ bool CWeapon::LaserScopeDot(CVector* outCoord, float* outSize) {
 
 // 0x73AAC0
 bool CWeapon::FireSniper(CPed* shooter, CEntity* victim, CVector* target) {
-    CCam& activeCam = TheCamera.GetActiveCamera();
+    const CCam& activeCam = CCamera::GetActiveCamera();
 
     if (FindPlayerPed() == shooter) {
         switch (activeCam.m_nMode) {
@@ -206,14 +210,15 @@ bool CWeapon::FireSniper(CPed* shooter, CEntity* victim, CVector* target) {
         CVector creatorPos = FindPlayerCoors();
         CPad* creatorPad = CPad::GetPad(shooter->m_nPedType);
 
-        creatorPad->StartShake_Distance(240, 128, creatorPos.x, creatorPos.y, creatorPos.z);
+        creatorPad->StartShake_Distance(240, 128, creatorPos);
         CamShakeNoPos(&TheCamera, 0.2f);
     }
 
-    if (shooter->m_nType == PED_TYPE_PLAYER_UNUSED) // todo: Comparison of different enumeration types ('eEntityType' and 'ePedType') is deprecated
+    if (shooter->m_nType == ENTITY_TYPE_PED) {
         CCrime::ReportCrime(CRIME_FIRE_WEAPON, shooter, shooter);
-    else if (shooter->m_nType == PED_TYPE_PLAYER_NETWORK && shooter->field_460) // todo: Comparison of different enumeration types ('eEntityType' and 'ePedType') is deprecated
+    } else if (shooter->m_nType == ENTITY_TYPE_VEHICLE && shooter->field_460) {
         CCrime::ReportCrime(CRIME_FIRE_WEAPON, shooter, shooter->field_460);
+    }
 
     CVector targetPoint = velocity * 40.0f + activeCam.m_vecSource;
     bool hasNoSound = m_nType == eWeaponType::WEAPON_PISTOL_SILENCED || m_nType == eWeaponType::WEAPON_TEARGAS;
@@ -225,7 +230,7 @@ bool CWeapon::FireSniper(CPed* shooter, CEntity* victim, CVector* target) {
     CEventGunShotWhizzedBy gsw(shooter, activeCam.m_vecSource, targetPoint, hasNoSound);
     eventGroup->Add(static_cast<CEvent*>(&gsw), false);
 
-    g_InterestingEvents.Add((CInterestingEvents::EType)22, shooter); // todo: enum
+    g_InterestingEvents.Add(CInterestingEvents::EType::INTERESTING_EVENT_22, shooter);
 
     return true;
 }
@@ -241,7 +246,7 @@ void CWeapon::Reload(CPed* owner) {
 
 // 0x73B1C0
 bool CWeapon::IsTypeMelee() {
-    auto weaponInfo = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::WEAPSKILL_STD);
+    auto weaponInfo = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD);
     return weaponInfo->m_nWeaponFire == eWeaponFire::WEAPON_FIRE_MELEE;
 }
 
@@ -373,9 +378,110 @@ void CWeapon::DoBulletImpact(CEntity* owner, CEntity* victim, CVector* startPoin
     plugin::CallMethod<0x73B550, CWeapon*, CEntity*, CEntity*, CVector*, CVector*, CColPoint*, int32>(this, owner, victim, startPoint, endPoint, colPoint, arg5);
 }
 
-// 0x73C1F0
+/*!
+* @addr 0x73C1F0
+* @brief Marks all peds and objects that are in range (125 units) and in frame (on the screen - 0.1 relative border) as photographed.
+*
+* @param owner Camera owner - unused.
+* @param point Pos of the camflash effect
+*/
 bool CWeapon::TakePhotograph(CEntity* owner, CVector* point) {
-    return plugin::CallMethodAndReturn<bool, 0x73C1F0, CWeapon*, CEntity*, CVector*>(this, owner, point);
+    UNUSED(owner);
+
+    if (point) {
+        if (const auto fx = g_fxMan.CreateFxSystem("camflash", point, nullptr, false)) {
+            fx->PlayAndKill();
+        }
+    }
+
+    if (CCamera::GetActiveCamera().m_nMode != MODE_CAMERA) {
+        return false;
+    }
+
+    CPickups::PictureTaken();
+    bPhotographHasBeenTaken = true;
+    ms_bTakePhoto = true;
+    CStats::IncrementStat(STAT_PHOTOGRAPHS_TAKEN, 1.0f);
+
+    // NOTSA - Optimization
+    const auto& camMat = TheCamera.GetMatrix();
+    const auto& camPos = camMat.GetPosition();
+
+    const auto IsPosInRange = [&](const CVector& worldPos) {
+        return (camPos - worldPos).SquaredMagnitude() >= sq(125.f); // NOTSA: Using squared mag.
+    };
+
+    // Check is in position in camera's frame
+    const auto IsPosInCamFrame = [](const CVector& worldPos) {
+        CVector pedHeadPos_Screen;
+        if (float _w, _h; !CSprite::CalcScreenCoors(worldPos, &pedHeadPos_Screen, &_w, &_h, false, true)) {
+            return false;
+        }
+
+        // TODO/BUG: Possibly buggy on bigger screens, because the border becomes too big (because of the relative multiplier) maybe?
+        if (   (SCREEN_WIDTH * 0.1f >= pedHeadPos_Screen.x || pedHeadPos_Screen.x >= SCREEN_WIDTH * 0.9f)
+            || (SCREEN_HEIGHT * 0.1f >= pedHeadPos_Screen.y || pedHeadPos_Screen.y >= SCREEN_HEIGHT * 0.9f)
+        ) {
+            return false;
+        }
+
+        return true;
+    };
+
+    const auto CheckIsLOSBlocked = [&, camFwd = camMat.GetForward()](const CVector& target, CEntity* ignore) {
+        CColPoint _cp; // Unused
+        CEntity* hitEntity{};
+        if (!CWorld::ProcessLineOfSight(
+            camPos + camFwd * 2.f,
+            target,
+            _cp,
+            hitEntity,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            false
+        ) || hitEntity == ignore) { // TODO: Here we could set CWorld::pIgnoreEntity to `&ped`, instead of this check.
+            return false;
+        }
+        return true;
+    };
+
+    for (auto& ped : GetPedPool()->GetAllValid()) {
+        if (IsPosInRange(ped.GetPosition())) {
+            continue;
+        }
+
+        const auto pedHeadPos = ped.GetBonePosition(BONE_HEAD);
+
+        if (!IsPosInCamFrame(pedHeadPos)) {
+            continue;
+        }
+
+        if (!CheckIsLOSBlocked(
+            pedHeadPos + Normalized(camPos - pedHeadPos) * 1.5f, // Point from ped's head towards camera
+            &ped
+        )) {
+            ped.bHasBeenPhotographed = true;
+        }
+    }
+
+    for (auto& obj : GetObjectPool()->GetAllValid()) {
+        const auto& objPos = obj.GetPosition();
+
+        if (!IsPosInRange(objPos) || !IsPosInCamFrame(objPos)) {
+            continue;
+        }
+
+        if (!CheckIsLOSBlocked(objPos, &obj)) {
+            obj.objectFlags.bIsPhotographed = true;
+        }
+    }
+
+    return true;
 }
 
 // 0x73C710
@@ -385,12 +491,89 @@ void CWeapon::SetUpPelletCol(int32 numPellets, CEntity* owner, CEntity* victim, 
 
 // 0x73CBA0
 void CWeapon::FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehicle* vehicle, CEntity* owner) {
-    plugin::CallMethod<0x73CBA0, CWeapon*, CVector, CVector, CVehicle*, CEntity*>(this, startPoint, endPoint, vehicle, owner);
+    return plugin::CallMethod<0x73CBA0, CWeapon*, CVector, CVector, CVehicle*, CEntity*>(this, startPoint, endPoint, vehicle, owner);
+
+    const auto player = FindPlayerPed();
+    CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD);
+    CCrime::ReportCrime(CRIME_FIRE_WEAPON, player, player);
+
+    CEntity* entity;
+    if (owner) {
+        entity = owner;
+    } else {
+        entity = vehicle;
+    }
+    CEventGunShot event(entity, startPoint, endPoint, m_nType == WEAPON_PISTOL_SILENCED || m_nType == WEAPON_TEARGAS);
+    GetEventGlobalGroup()->Add(&event);
+    g_InterestingEvents.Add(CInterestingEvents::EType::INTERESTING_EVENT_22, owner);
+
+    CVector direction{};
+    CPointLights::AddLight(PLTYPE_POINTLIGHT, startPoint, direction, 3.0f, 0.25f, 0.22f, 0.0f, 0, false, nullptr);
+    CWorld::bIncludeBikers = true;
+    CWorld::pIgnoreEntity = vehicle;
+    CBirds::HandleGunShot(&startPoint, &endPoint);
+    CShadows::GunShotSetsOilOnFire(&startPoint, &endPoint);
+
+    CEntity* victim{};
+    CColPoint outColPoint{};
+    CWorld::ProcessLineOfSight(&startPoint, &endPoint, outColPoint, victim, true, true, true, true, true, false, false, true);
+    CWorld::ResetLineTestOptions();
+    DoBulletImpact(owner, victim, &startPoint, &endPoint, &outColPoint, 0);
 }
 
-// 0x73CDC0
+/*!
+* @addr 0x73CDC0
+* @brief Find closest entity in range that is visible to `owner` (Eg.: Is in [-PI/8, PI/8] angle) and modify `end->z` to be pointing at it. idk..
+*
+* @param end out Z axis is modified
+*/
 void CWeapon::DoDoomAiming(CEntity* owner, CVector* start, CVector* end) {
-    plugin::Call<0x73CDC0, CEntity*, CVector*, CVector*>(owner, start, end);
+    int16 inRangeCount{};
+    std::array<CEntity*, 16> objInRange{};
+    CWorld::FindObjectsInRange(*start, (*start - *end).Magnitude(), true, &inRangeCount, (int16)objInRange.size(), objInRange.data(), false, true, true, false, false);
+
+    CEntity* closestEntity{};
+    float    closestDist{ 10'000 };
+    for (auto entity : std::span{ objInRange.begin(), (size_t)inRangeCount }) {
+        if (entity == owner || owner->AsPed()->CanSeeEntity(entity, PI / 8.f)) { // todo: add check owner->IsPed() NOTSA
+            continue;
+        }
+
+        switch (entity->GetStatus()) {
+        case STATUS_TRAIN_MOVING:
+        case STATUS_TRAIN_NOT_MOVING:
+        case STATUS_WRECKED:
+            continue;
+        }
+
+        const auto dir = entity->GetPosition() - owner->GetPosition();
+        if (const auto dist2D = dir.Magnitude2D(); std::abs(dir.z) * 1.5f < dist2D) {
+            const auto dist3D = std::hypot(dist2D, dir.z);
+            if (dist3D < closestDist) {
+                closestEntity = entity;
+                closestDist = dist3D;
+            }
+        }
+    }
+
+    if (closestDist < 9000.f) {
+        // assert(closestEntity); // We should have one, because by default `closestDist` is FLT_MAX (originally 10 000)
+
+        {
+            CEntity*  _hitEntity{}; // Unused
+            CColPoint _cp;          // Unused
+            if (CWorld::ProcessLineOfSight(*start, closestEntity->GetPosition(), _cp, _hitEntity, true, false, false, false, false, false, false, true)) {
+                return;
+            }
+        }
+
+        float targetZ = closestEntity->GetPosition().z + 0.3f;
+        if (closestEntity->IsPed() && closestEntity->AsPed()->bIsDucking) {
+            targetZ -= 0.8f; // Effectively only -0.5 relative to the original Z
+        }
+        const auto t = (*start - *end).Magnitude2D() / (*start - closestEntity->GetPosition()).Magnitude2D();
+        end->z = start->z + (targetZ - start->z) * t; // Re-ordered a little
+    }
 }
 
 // 0x73D1E0
@@ -433,8 +616,7 @@ float CWeapon::EvaluateTargetForHeatSeekingMissile(CEntity* entity, CVector& pos
 
 // 0x73E690
 void CWeapon::DoWeaponEffect(CVector origin, CVector target) {
-    char fxName[32];
-
+    char fxName[32]{};
     switch (m_nType) {
     case eWeaponType::WEAPON_FLAMETHROWER:
         strcpy(fxName, "flamethrower");
@@ -518,9 +700,11 @@ bool CWeapon::Fire(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, 
                                                                                                                              target, originForDriveBy);
 }
 
-CWeaponInfo& CWeapon::GetWeaponInfo(CPed* owner) {
-    const eWeaponSkill skill = owner ? owner->GetWeaponSkill(m_nType) : eWeaponSkill::WEAPSKILL_STD;
+CWeaponInfo& CWeapon::GetWeaponInfo(CPed* owner) const {
+    return GetWeaponInfo(owner ? owner->GetWeaponSkill(m_nType) : eWeaponSkill::STD);
+}
 
+CWeaponInfo& CWeapon::GetWeaponInfo(eWeaponSkill skill) const {
     return *CWeaponInfo::GetWeaponInfo(m_nType, skill);
 }
 

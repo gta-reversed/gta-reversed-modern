@@ -1,12 +1,13 @@
 #include "StdInc.h"
 
 #include "ColStore.h"
+#include "TheScripts.h"
 
 CVector& CColStore::ms_vecCollisionNeeded = *(CVector*)0x965580;
 bool& CColStore::ms_bCollisionNeeded = *(bool*)0x965558;
 int32 CColStore::ms_nRequiredCollisionArea = *(int32*)0x965554;
 
-CPool<ColDef>* &CColStore::ms_pColPool = *(CPool<ColDef>**)0x965560;
+CColPool* &CColStore::ms_pColPool = *(CColPool**)0x965560;
 CQuadTreeNode* &CColStore::ms_pQuadTree = *(CQuadTreeNode**)0x96555C;
 
 void CColStore::InjectHooks()
@@ -14,7 +15,6 @@ void CColStore::InjectHooks()
     RH_ScopedClass(CColStore);
     RH_ScopedCategory("Collision");
 
-// CLASS
     RH_ScopedInstall(Initialise, 0x4113F0);
     RH_ScopedInstall(Shutdown, 0x4114D0);
     RH_ScopedInstall(AddCollisionNeededAtPosn, 0x4103A0);
@@ -37,12 +37,11 @@ void CColStore::InjectHooks()
     RH_ScopedInstall(HasCollisionLoaded, 0x410CE0);
     RH_ScopedInstall(LoadCollision, 0x410860);
 
-// OTHER
     RH_ScopedGlobalInstall(SetIfCollisionIsRequired, 0x4103D0);
     RH_ScopedGlobalInstall(SetIfCollisionIsRequiredReducedBB, 0x410470);
 }
 
-void* ColDef::operator new(uint32 size)
+void* ColDef::operator new(unsigned size)
 {
     return CColStore::ms_pColPool->New();
 }
@@ -58,7 +57,7 @@ void CColStore::Initialise()
     const auto rect = CRect(-3000.0F, -3000.0F, 3000.0F, 3000.0F);
     ms_bCollisionNeeded = false;
     if (!ms_pColPool)
-        ms_pColPool = new CPool<ColDef>(TOTAL_COL_MODEL_IDS, "CollisionFiles");
+        ms_pColPool = new CColPool(TOTAL_COL_MODEL_IDS, "CollisionFiles");
 
     AddColSlot("generic");
     ms_pQuadTree = new CQuadTreeNode(rect, 3);
@@ -67,9 +66,11 @@ void CColStore::Initialise()
 // 0x4114D0
 void CColStore::Shutdown()
 {
-    for (int32 i = 0; i < TOTAL_COL_MODEL_IDS; ++i)
-        if (ms_pColPool->GetAt(i))
+    for (auto i = 0; i < ms_pColPool->GetSize(); i++) {
+        if (ms_pColPool->GetAt(i)) {
             RemoveColSlot(i);
+        }
+    }
 
     delete ms_pColPool;
     ms_pColPool = nullptr;
@@ -138,8 +139,7 @@ int32 CColStore::FindColSlot()
 // 0x410EC0
 void CColStore::BoundingBoxesPostProcess()
 {
-    for (auto i = 1; i < TOTAL_COL_MODEL_IDS; ++i)
-    {
+    for (auto i = 1; i < ms_pColPool->GetSize(); i++) {
         auto* def = ms_pColPool->GetAt(i);
         if (!def)
             continue;
@@ -169,9 +169,8 @@ void CColStore::EnsureCollisionIsInMemory(const CVector& pos)
     if (area != CGame::currArea)
         return;
 
-    CColStore::SetCollisionRequired(pos, area);
-    for (auto i = 1; i < TOTAL_COL_MODEL_IDS; ++i)
-    {
+    SetCollisionRequired(pos, area);
+    for (auto i = 1; i < ms_pColPool->GetSize(); i++) {
         auto* def = ms_pColPool->GetAt(i);
         if (!def || !def->m_bCollisionIsRequired)
             continue;
@@ -213,8 +212,7 @@ bool CColStore::HasCollisionLoaded(const CVector& pos, int32 areaCode)
 {
     SetCollisionRequired(pos, areaCode);
     auto foundInd = -1;
-    for (auto i = 1; i < TOTAL_COL_MODEL_IDS; ++i)
-    {
+    for (auto i = 1; i < ms_pColPool->GetSize(); i++) {
         auto* def = ms_pColPool->GetAt(i);
         if (!def || !def->m_bCollisionIsRequired)
             continue;
@@ -230,8 +228,7 @@ bool CColStore::HasCollisionLoaded(const CVector& pos, int32 areaCode)
     if (foundInd == -1)
         return true;
 
-    for (auto i = foundInd; i < TOTAL_COL_MODEL_IDS; ++i)
-    {
+    for (auto i = foundInd; i < ms_pColPool->GetSize(); i++) {
         auto* innerDef = ms_pColPool->GetAt(i);
         if (!innerDef)
             continue;
@@ -254,15 +251,14 @@ void CColStore::LoadAllBoundingBoxes()
 // 0x410E60
 void CColStore::LoadAllCollision()
 {
-    for (auto i = 1; i < TOTAL_COL_MODEL_IDS; ++i)
-    {
+    for (auto i = 1; i < ms_pColPool->GetSize(); i++) {
         auto* def = ms_pColPool->GetAt(i);
         if (!def)
             continue;
 
-        CStreaming::RequestModel(RESOURCE_ID_COL + i, 0);
+        CStreaming::RequestModel(COLToModelId(i), 0);
         CStreaming::LoadAllRequestedModels(false);
-        CStreaming::RemoveModel(RESOURCE_ID_COL + i);
+        CStreaming::RemoveModel(COLToModelId(i));
     }
 }
 
@@ -303,9 +299,7 @@ void CColStore::LoadCollision(CVector pos, bool bIgnorePlayerVeh)
     auto* player = FindPlayerPed();
     if (player && !bIgnorePlayerVeh)
     {
-        auto* vehicle = FindPlayerVehicle();
-        if (vehicle)
-        {
+        if (auto* vehicle = FindPlayerVehicle()) {
             pos += vehicle->m_vecMoveSpeed * CVector(20.0F, 20.0F, 0.0F);
         }
     }
@@ -319,13 +313,13 @@ void CColStore::LoadCollision(CVector pos, bool bIgnorePlayerVeh)
         CEntity* entity = nullptr;
         if (obj.type == MissionCleanUpEntityType::MISSION_CLEANUP_ENTITY_TYPE_VEHICLE)
         {
-            entity = CPools::ms_pVehiclePool->GetAtRef(obj.handle);
+            entity = GetVehiclePool()->GetAtRef(obj.handle);
             if (!entity || entity->m_nStatus == eEntityStatus::STATUS_WRECKED)
                 continue;
         }
         else if (obj.type == MissionCleanUpEntityType::MISSION_CLEANUP_ENTITY_TYPE_PED)
         {
-            entity = CPools::ms_pPedPool->GetAtRef(obj.handle);
+            entity = GetPedPool()->GetAtRef(obj.handle);
             if (!entity || entity->AsPed()->m_nPedState == PEDSTATE_DIE || entity->AsPed()->m_nPedState == PEDSTATE_DEAD)
                 continue;
         }
@@ -337,8 +331,7 @@ void CColStore::LoadCollision(CVector pos, bool bIgnorePlayerVeh)
         ms_pQuadTree->ForAllMatching(entity->GetPosition(), SetIfCollisionIsRequiredReducedBB);
     }
 
-    for (auto i = 1; i < TOTAL_COL_MODEL_IDS; ++i)
-    {
+    for (auto i = 1; i < ms_pColPool->GetSize(); i++) {
         auto* def = ms_pColPool->GetAt(i);
         if (!def)
             continue;
@@ -361,14 +354,13 @@ void CColStore::LoadCollision(CVector pos, bool bIgnorePlayerVeh)
 // 0x410E00
 void CColStore::RemoveAllCollision()
 {
-    for (auto i = 1; i < TOTAL_COL_MODEL_IDS; ++i)
-    {
+    for (auto i = 1; i < ms_pColPool->GetSize(); i++) {
         auto* def = ms_pColPool->GetAt(i);
         if (!def)
             continue;
 
         if (!CStreaming::GetInfo(COLToModelId(i)).IsMissionOrGameRequired())
-            CStreaming::RemoveModel(RESOURCE_ID_COL + i);
+            CStreaming::RemoveModel(COLToModelId(i));
     }
 }
 
@@ -377,8 +369,7 @@ void CColStore::RemoveCol(int32 colSlot)
 {
     auto* def = ms_pColPool->GetAt(colSlot);
     def->m_bActive = false;
-    for (auto i = def->m_nModelIdStart; i <= def->m_nModelIdEnd; ++i)
-    {
+    for (auto i = def->m_nModelIdStart; i <= def->m_nModelIdEnd; ++i) {
         auto* mi = CModelInfo::GetModelInfo(i);
         if (!mi)
             continue;
@@ -414,8 +405,7 @@ void CColStore::RemoveRef(int32 colNum)
 void CColStore::RequestCollision(const CVector& pos, int32 areaCode)
 {
     SetCollisionRequired(pos, areaCode);
-    for (auto i = 1; i < TOTAL_COL_MODEL_IDS; ++i)
-    {
+    for (auto i = 1; i < ms_pColPool->GetSize(); i++) {
         auto* def = ms_pColPool->GetAt(i);
         if (!def || !def->m_bCollisionIsRequired)
             continue;
@@ -431,8 +421,7 @@ void CColStore::RequestCollision(const CVector& pos, int32 areaCode)
 void CColStore::SetCollisionRequired(const CVector& pos, int32 areaCode)
 {
     auto usedArea = areaCode;
-    if (areaCode == -1)
-    {
+    if (areaCode == -1) {
         auto* player = FindPlayerPed();
         usedArea = player ? player->m_nAreaCode : CGame::currArea;
     }

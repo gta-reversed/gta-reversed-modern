@@ -6,30 +6,36 @@ class CVehicle;
 
 class CTaskComplexArrestPed : public CTaskComplex {
 public:
-    bool      m_subTaskNeedsToBeCreated;
-    CPed*     m_pedToArrest;
+    bool      m_bSubTaskNeedsToBeCreated;
+    CPed*     m_PedToArrest;
     int32     field_14;
     int32     field_18;
     int32     field_1C;
-    CVehicle* m_vehicle;
+    CVehicle* m_Vehicle;
 
 public:
-    CTaskComplexArrestPed(CPed* ped);
-    ~CTaskComplexArrestPed();
+    static constexpr auto Type = TASK_COMPLEX_ARREST_PED;
 
-    CTask* Clone() override { return new CTaskComplexArrestPed(m_pedToArrest); }
-    eTaskType GetTaskType() override { return TASK_COMPLEX_ARREST_PED; }
+    explicit CTaskComplexArrestPed(CPed* ped);
+    ~CTaskComplexArrestPed() override;
+
+    CTask* Clone() override { return new CTaskComplexArrestPed(m_PedToArrest); }
+    eTaskType GetTaskType() override { return Type; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
-    CTask* CreateSubTask(int32 taskId, CPed* ped);
+    CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskComplexArrestPed* Constructor(CPed* ped);
+    CTaskComplexArrestPed* Constructor(CPed* ped) { this->CTaskComplexArrestPed::CTaskComplexArrestPed(ped); return this; }
+    CTaskComplexArrestPed* Destructor() { this->CTaskComplexArrestPed::~CTaskComplexArrestPed(); return this; }
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
+    CTask* CreateNextSubTask_Reversed(CPed* ped);
+    CTask* CreateFirstSubTask_Reversed(CPed* ped);
+    CTask* ControlSubTask_Reversed(CPed* ped);
 };
-
 VALIDATE_SIZE(CTaskComplexArrestPed, 0x24);

@@ -1,15 +1,22 @@
 #pragma once
 
+class CPed;
+
 class CPedToPlayerConversations {
 public:
+    static inline CPed*& m_pPed = *(CPed**)0x9691C0;
+
     static void Clear();
+    static void Update();
 };
 
 class CConversations {
 public:
     static void Clear();
-    /* Check the signatures before starting work
+    static void RemoveConversationForPed(CPed* ped);
+
     static void Update();
+    /* Check the signatures before starting work
     static bool IsPlayerInPositionForConversation(CPed* ped, bool);
     static bool IsConversationGoingOn();
     static bool IsConversationAtNode(char*, CPed* ped);
@@ -19,7 +26,6 @@ public:
     static void FindFreeNodeSlot();
     static void FindConversationForPed(CPed* ped);
     static void FindFreeConversationSlot();
-    static void RemoveConversationForPed(CPed* ped);
     static void SetUpConversationNode(char*, char*, char*, int32, int32, int32);
     static void StartSettingUpConversation(CPed* ped);
     static void AwkwardSay(int32, CPed* ped);

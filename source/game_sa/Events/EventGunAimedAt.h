@@ -5,17 +5,14 @@
 
 class CPed;
 
-class CEventGunAimedAt : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventGunAimedAt : public CEventEditableResponse {
 public:
     CPed* m_ped;
 
-    static void InjectHooks();
-
-    CEventGunAimedAt(CPed* ped);
-    ~CEventGunAimedAt();
-private:
-    CEventGunAimedAt* Constructor(CPed* ped);
 public:
+    explicit CEventGunAimedAt(CPed* ped);
+    ~CEventGunAimedAt() override;
+
     eEventType GetEventType() const override { return EVENT_GUN_AIMED_AT; }
     int32 GetEventPriority() const override { return 50; }
     int32 GetLifeTime() override { return 0; }
@@ -25,11 +22,5 @@ public:
     CEntity* GetSourceEntity() const override { return m_ped; }
     bool TakesPriorityOver(const CEvent& refEvent) override;
     CEventEditableResponse* CloneEditable() override;
-
-    bool AffectsPed_Reversed(CPed* ped);
-    void ReportCriminalEvent_Reversed(CPed* ped);
-    bool TakesPriorityOver_Reversed(const CEvent& refEvent);
-    CEventEditableResponse* CloneEditable_Reversed();
 };
-
 VALIDATE_SIZE(CEventGunAimedAt, 0x18);

@@ -16,7 +16,7 @@ public:
     CLink<T>  freeListTail;
     CLink<T>* links;
 
-    void* operator new(uint32 size) {
+    void* operator new(unsigned size) {
         return ((void*(__cdecl*)(uint32))0x821195)(size);
     }
 

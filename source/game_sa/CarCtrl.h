@@ -16,8 +16,14 @@ class CAutomobile;
 class CHeli;
 class CPlane;
 
+constexpr auto GAME_SPEED_TO_METERS_PER_SECOND = 50.0f;
+constexpr auto METERS_PER_SECOND_TO_GAME_SPEED = 1.0f / GAME_SPEED_TO_METERS_PER_SECOND;
+constexpr auto GAME_SPEED_TO_CAR_AI_SPEED = 60.0f;
+constexpr auto TIME_COPS_WAIT_TO_EXIT_AFTER_STOPPING = 2500;
+
 class CCarCtrl {
 public:
+    static inline bool& bCarIsBeingCreated = *(bool*)0x9690CC;
     static uint32& NumLawEnforcerCars;
     static uint32& NumParkedCars;
     static uint32& NumAmbulancesOnDuty;

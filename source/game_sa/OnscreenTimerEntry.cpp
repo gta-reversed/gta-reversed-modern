@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "OnscreenTimerEntry.h"
+#include "TheScripts.h"
 
 void COnscreenTimerEntry::Init() {
     m_nVarId = 0;
@@ -18,7 +19,7 @@ void COnscreenTimerEntry::Process() {
         return;
 
     auto& timerPtr  = *CTheScripts::GetPointerToScriptVariable(m_nVarId);
-    auto  deltaTime = CTimer::GetTimeStepInMS();
+    auto deltaTime = (uint32)CTimer::GetTimeStepInMS();
 
     switch (m_nTimerDirection) {
     case eTimerDirection::INCREASE:
@@ -30,7 +31,7 @@ void COnscreenTimerEntry::Process() {
         if (timerPtr >= 0) {
             uint32 seconds = timerPtr / 1000;
             if (seconds < m_nClockBeepCountdownSecs && !TheCamera.m_bWideScreenOn) {
-                AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_TIMER_COUNT, 0.0f, 1.0f);
+                AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_TIMER_COUNT);
             }
         } else {
             timerPtr = 0;

@@ -45,8 +45,8 @@ public:
     int16     AreSoundsOfThisEventPlayingForThisEntityAndPhysical(int16 eventId, CAEAudioEntity* audioEntity, CPhysical* physical);
     void      CancelSoundsOfThisEventPlayingForThisEntity(int16 eventId, CAEAudioEntity* audioEntity);
     void      CancelSoundsOfThisEventPlayingForThisEntityAndPhysical(int16 eventId, CAEAudioEntity* audioEntity, CPhysical* physical);
-    void      CancelSoundsInBankSlot(int16 bankSlot, uint8 bFullStop);
-    void      CancelSoundsOwnedByAudioEntity(CAEAudioEntity* audioEntity, uint8 bFullStop);
+    void      CancelSoundsInBankSlot(int16 bankSlot, bool bFullStop);
+    void      CancelSoundsOwnedByAudioEntity(CAEAudioEntity* audioEntity, bool bFullStop);
     int16     GetVirtualChannelForPhysicalChannel(int16 physicalChannel);
 
 public:

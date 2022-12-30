@@ -17,8 +17,10 @@ public:
 
     CBoundingBox();
     CBoundingBox(CVector vecMin, CVector vecMax);
+    explicit CBoundingBox(const CBox& box) : CBox(box) { }
 
-    bool IsPointWithin(const CVector& point) const;
+    [[nodiscard]] bool IsPointWithin(const CVector& point) const;
+    inline void SetMinMax(CVector min, CVector max);
 };
 
 VALIDATE_SIZE(CBoundingBox, 0x18);

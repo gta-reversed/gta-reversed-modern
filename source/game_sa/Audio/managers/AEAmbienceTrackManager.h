@@ -38,11 +38,14 @@ public:
     void CheckForPause() const;
 
     void StopAmbienceTrack();
-    bool IsAmbienceRadioActive() const;
+    [[nodiscard]] bool IsAmbienceRadioActive() const;
     void UpdateAmbienceTrackAndVolume();
 
-    bool IsAmbienceTrackActive() const;
+    [[nodiscard]] bool IsAmbienceTrackActive() const;
+
+    void PlaySpecialMissionAmbienceTrack(eAudioEvents event);
     void StopSpecialMissionAmbienceTrack();
+
     void Service(int32 trackPlayTime);
     void StartTrackPlayback() const;
 };

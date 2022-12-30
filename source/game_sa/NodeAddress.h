@@ -8,13 +8,20 @@
 
 class CNodeAddress {
 public:
-    int16 m_wAreaId{-1};
-    int16 m_wNodeId{-1};
+    uint16 m_wAreaId{ UINT16_MAX };
+    uint16 m_wNodeId{ UINT16_MAX };
 
     constexpr CNodeAddress() = default;
+    constexpr CNodeAddress(uint16 areaId, uint16 nodeId) : m_wAreaId(areaId), m_wNodeId(nodeId) {}
 
     bool operator==(CNodeAddress const&) const = default;
     bool operator!=(CNodeAddress const&) const = default;
+
+    void ResetAreaId() { m_wAreaId = UINT16_MAX; }
+    void ResetNodeId() { m_wNodeId = UINT16_MAX; }
+
+    [[nodiscard]] bool IsAreaValid() const { return m_wAreaId != (uint16)-1; }
+    [[nodiscard]] bool IsValid() const { return m_wAreaId != (uint16)-1 || m_wNodeId != (uint16)-1; }
 };
 
 VALIDATE_SIZE(CNodeAddress, 0x4);

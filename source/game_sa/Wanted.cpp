@@ -29,7 +29,7 @@ void CWanted::InjectHooks() {
     RH_ScopedInstall(ResetPolicePursuit, 0x561FD0);
     RH_ScopedInstall(UpdateCrimesQ, 0x562760);
     RH_ScopedInstall(ClearQdCrimes, 0x561FE0);
-    // RH_ScopedInstall(AddCrimesToQ, 0x562000);
+    //RH_ScopedInstall(AddCrimesToQ, 0x562000, { .reversed = false });
     RH_ScopedInstall(ReportCrimeNow, 0x562120);
     RH_ScopedInstall(IsInPursuit, 0x562330);
     RH_ScopedInstall(UpdateEachFrame, 0x562360);
@@ -40,7 +40,7 @@ void CWanted::InjectHooks() {
     RH_ScopedInstall(SetWantedLevelNoDrop, 0x562570);
     RH_ScopedInstall(ClearWantedLevelAndGoOnParole, 0x5625A0);
     RH_ScopedInstall(WorkOutPolicePresence, 0x5625F0);
-    // RH_ScopedInstall(IsClosestCop, 0x5627D0);
+    RH_ScopedInstall(IsClosestCop, 0x5627D0, { .reversed = false });
     RH_ScopedInstall(ComputePursuitCopToDisplace, 0x562B00);
     RH_ScopedOverloadedInstall(RemovePursuitCop, "func", 0x562300, void (*)(CCopPed*, CCopPed**, uint8&));
     RH_ScopedOverloadedInstall(RemovePursuitCop, "method", 0x562C10, void(CWanted::*)(CCopPed*));
@@ -273,7 +273,7 @@ bool CWanted::AddCrimeToQ(eCrimeType crimeType, int32 crimeId, const CVector& po
 
 // 0x562120
 void CWanted::ReportCrimeNow(eCrimeType crimeType, const CVector& posn, bool bPoliceDontReallyCare) {
-    if (CCheat::m_aCheatsActive[CHEAT_I_DO_AS_I_PLEASE])
+    if (CCheat::IsActive(CHEAT_I_DO_AS_I_PLEASE))
         return;
 
     auto wantedLevel = m_nWantedLevel;
@@ -390,7 +390,7 @@ void CWanted::RegisterCrime_Immediately(eCrimeType crimeType, const CVector& pos
 
 // 0x562470
 void CWanted::SetWantedLevel(uint32 level) {
-    if (CCheat::m_aCheatsActive[CHEAT_I_DO_AS_I_PLEASE])
+    if (CCheat::IsActive(CHEAT_I_DO_AS_I_PLEASE))
         return;
 
     uint32 newLevel = std::min(level, MaximumWantedLevel);
@@ -456,18 +456,18 @@ void CWanted::ClearWantedLevelAndGoOnParole() {
 int32 CWanted::WorkOutPolicePresence(CVector posn, float radius) {
     auto numCops = 0;
 
-    auto pedPool = CPools::GetPedPool();
+    auto pedPool = GetPedPool();
     for (auto i = pedPool->GetSize(); i; i--) {
         if (auto ped = pedPool->GetAt(i - 1)) {
             if (ped->m_nPedType != PED_TYPE_COP || !ped->IsAlive())
                 continue;
 
-            if (DistanceBetweenPoints(posn, ped->GetPosition()) < radius)
+            if (DistanceBetweenPoints(ped->GetPosition(), posn) < radius)
                 numCops++;
         }
     }
 
-    auto vehPool = CPools::GetVehiclePool();
+    auto vehPool = GetVehiclePool();
     for (auto i = vehPool->GetSize(); i; i--) {
         if (auto veh = vehPool->GetAt(i - 1)) {
             bool isCopVehicle = veh->vehicleFlags.bIsLawEnforcer || veh->m_nModelIndex == MODEL_POLMAV;
@@ -478,7 +478,7 @@ int32 CWanted::WorkOutPolicePresence(CVector posn, float radius) {
             if (veh->m_nStatus == STATUS_ABANDONED || veh->m_nStatus == STATUS_WRECKED)
                 continue;
 
-            if (DistanceBetweenPoints(posn, veh->GetPosition()) < radius)
+            if (DistanceBetweenPoints(veh->GetPosition(), posn) < radius)
                 numCops++;
         }
     }
@@ -605,7 +605,7 @@ void CWanted::Update() {
                 m_nChaosLevel = std::max(chaosLevel, 0);
 
                 UpdateWantedLevel();
-                CGameLogic::SetPlayerWantedLevelForForbiddenTerritories(1);
+                CGameLogic::SetPlayerWantedLevelForForbiddenTerritories(true);
             }
         }
 
@@ -628,11 +628,11 @@ void CWanted::Update() {
         }
 
         if (cops != m_nCopsInPursuit) {
-            printf("CopPursuit total messed up: re-setting\n"); // leftover debug shit
+            DEV_LOG("CopPursuit total messed up: re-setting!"); // leftover debug shit
             m_nCopsInPursuit = cops;
         }
         if (listMessedUp) {
-            printf("CopPursuit pointer list messed up: re-sorting\n");
+            DEV_LOG("CopPursuit pointer list messed up: re-sorting!");
             bool notFixed = true;
 
             for (auto i = 0u; i < MAX_COPS_IN_PURSUIT; i++) {

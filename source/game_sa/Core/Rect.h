@@ -10,37 +10,59 @@
 
 /* CRect class describes a rectangle.
 
-        A(left;top)_____________________→
-        |                               |
-        |                               |
-        |                               |
-        |_________________B(right;bottom)
-        ↓
+    A(left;top)_____________________→
+    |                               |
+    |                               |
+    |                               |
+    |_________________B(right;bottom)
+    ↓
+
 */
 
 class CRect {
 public:
-    float left;   // x1
-    float bottom; // y2
-    float right;  // x2
-    float top;    // y1
+    // Init in flipped state
+    float left      =  1000000.0F; // x1
+    float top       = -1000000.0F; // y2
+    float right     = -1000000.0F; // x2
+    float bottom    =  1000000.0F; // y1
 
 public:
     static void InjectHooks();
 
-    CRect();
-    CRect(float fLeft, float fTop, float fRight, float fBottom);
+    CRect() = default; // 0x4041C0
+    constexpr CRect(float left, float bottom, float right, float top) { // 0x4041C0
+       this->left   = left;
+       this->bottom = bottom;
+       this->right  = right;
+       this->top    = top;
+       assert(!IsFlipped());
+    }
 
-    bool IsFlipped() const;
+    constexpr CRect(const CVector2D& top, const CVector2D& bottom) :
+        CRect{top.x, top.y, bottom.x, bottom.y}
+    {
+    }
+
+    /// A rect that can fit a circle of `radius` inside with `pos` being the center
+    constexpr CRect(const CVector2D& pos, float radius) :
+        CRect{ pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius }
+    {
+    }
+
+    [[nodiscard]] constexpr inline bool IsFlipped() const { // 0x404190
+        return left > right || bottom > top;
+    }
+
     void Restrict(const CRect& restriction);
     void Resize(float resizeX, float resizeY);
-    bool IsPointInside(const CVector2D& point) const;
-    bool IsPointInside(const CVector2D& point, float tolerance) const;
+    [[nodiscard]] bool IsPointInside(const CVector2D& point) const;
+    [[nodiscard]] bool IsPointInside(const CVector2D& point, float tolerance) const;
     void SetFromCenter(float x, float y, float size);
     void GetCenter(float* x, float* y) const;
+    [[nodiscard]] inline CVector2D GetCenter() const { return { (right + left) * 0.5F, (bottom + top) * 0.5F }; }
     void StretchToPoint(float x, float y);
 
-    inline CVector2D GetCenter() const { return CVector2D((right + left) * 0.5F, (top + bottom) * 0.5F); }
 };
 
 VALIDATE_SIZE(CRect, 0x10);

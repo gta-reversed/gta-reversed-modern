@@ -18,6 +18,11 @@ public:
     ePedStuckState m_state;
 
 public:
+    CPedStuckChecker() { // inlined 0x607292
+        m_radius = 0;
+        m_state = PED_STUCK_STATE_NONE;
+    }
+
     bool TestPedStuck(CPed* ped, CEventGroup* eventGroup);
 };
 

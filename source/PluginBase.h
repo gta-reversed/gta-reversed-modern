@@ -16,11 +16,6 @@ int GetBaseAddress();
 
 int GetGlobalAddress(int address);
 
-// helpers for constructor overloading (deprecated)
-
-struct dummy_func_t {};          // Dummy func tag type
-static const dummy_func_t dummy; // Dummy func tag object
-
 // meta template for functions
 #if (defined(__GNUC__) || defined(__GNUG__) || defined(__clang__))
 template <auto Func> struct meta;
@@ -30,17 +25,9 @@ template <typename FuncType, FuncType Func> struct meta;
 
 #endif
 
-// vtable description
-template <typename ClassType> struct vtable_meta;
-
 // Gets the virtual method table from the object @self
 inline void** GetVMT(const void* self) {
     return *(void***)(self);
-}
-
-// Gets the virtual method from @self in the table index @index
-inline void* GetVMT(const void* self, size_t index) {
-    return GetVMT(self)[index];
 }
 
 template <unsigned int address, typename... Args> void Call(Args... args) {
@@ -72,29 +59,3 @@ Ret CallVirtualMethodAndReturn(C _this, Args... args) requires std::is_class_v<s
 }
 
 } // namespace plugin
-
-// vtable description - macro
-
-#define VTABLE_DESC(className, vtAddr, vtSize)                                                                                                                                     \
-    namespace plugin {                                                                                                                                                             \
-    template <> struct vtable_meta<className> {                                                                                                                                    \
-        static const unsigned int address = vtAddr;                                                                                                                                \
-        static const unsigned int size = vtSize;                                                                                                                                   \
-    };                                                                                                                                                                             \
-    }
-
-// custom object construction
-
-#define PLUGIN_NO_DEFAULT_CONSTRUCTION(className)                                                                                                                                  \
-    className() = delete;                                                                                                                                                          \
-    className(className const&) = delete;                                                                                                                                          \
-    className(className&&) = delete;                                                                                                                                               \
-    ~className() = delete;                                                                                                                                                         \
-    className& operator=(className&&) = delete;
-
-#define PLUGIN_NO_DEFAULT_CONSTRUCTION_VIRTUALBASE(className)                                                                                                                      \
-    className() = delete;                                                                                                                                                          \
-    className(className const&) = delete;                                                                                                                                          \
-    className(className&&) = delete;                                                                                                                                               \
-    virtual ~className() = delete;                                                                                                                                                 \
-    className& operator=(className&&) = delete;

@@ -27,37 +27,50 @@ enum eMatrixEulerFlags : uint32 {
 
 class CMatrix {
 public:
-    CMatrix(plugin::dummy_func_t) {}
     CMatrix(const CMatrix& matrix);
-    CMatrix(RwMatrix* matrix, bool temporary); // like previous + attach
-    ~CMatrix();                                // destructor detaches matrix if attached
+    CMatrix(RwMatrix* matrix, bool temporary = false); // like previous + attach
     CMatrix() {
         m_pAttachMatrix = nullptr;
         m_bOwnsAttachedMatrix = false;
     }
+    ~CMatrix();                                        // destructor detaches matrix if attached
+
+    //! Returns an identity matrix
+    static auto Unity() {
+        CMatrix mat{};
+        mat.SetUnity();
+        return mat;
+    }
 
 private:
     // RwV3d-like:
-    CVector m_right;
-    uint32  flags;
-    CVector m_forward;
-    uint32  pad1;
-    CVector m_up;
-    uint32  pad2;
-    CVector m_pos;
-    uint32  pad3;
+    CVector m_right;        // 0x0
+    uint32  flags;          // 0xC
+    CVector m_forward;      // 0x10
+    uint32  pad1;           // 0x1C
+    CVector m_up;           // 0x20
+    uint32  pad2;           // 0x2C
+    CVector m_pos;          // 0x30
+    uint32  pad3;           // 0x3C
 
 public:
-    RwMatrix* m_pAttachMatrix;
-    bool      m_bOwnsAttachedMatrix; // do we need to delete attaching matrix at detaching
+    RwMatrix* m_pAttachMatrix;       // 0x40
+    bool      m_bOwnsAttachedMatrix; // 0x44 - Do we need to delete attached matrix at detaching
 
 public:
     static void InjectHooks();
 
-    inline CVector& GetRight() { return m_right; }
-    inline CVector& GetForward() { return m_forward; }
-    inline CVector& GetUp() { return m_up; }
-    inline CVector& GetPosition() { return m_pos; }
+    CVector& GetRight() { return m_right; }
+    const CVector& GetRight() const { return m_right; }
+
+    CVector& GetForward() { return m_forward; }
+    const CVector& GetForward() const { return m_forward; }
+
+    CVector& GetUp() { return m_up; }
+    const CVector& GetUp() const { return m_up; }
+
+    CVector& GetPosition() { return m_pos; }
+    const CVector& GetPosition() const { return m_pos; }
 
     void Attach(RwMatrix* matrix, bool bOwnsMatrix);
     void Detach();
@@ -99,6 +112,23 @@ public:
     static uint8* EulerIndices1;
     static uint8* EulerIndices2;
 
+    void SetRotate(const CVector& rot) {
+        SetRotate(rot.x, rot.y, rot.z);
+    }
+
+    void SetRotateKeepPos(const CVector& rot) {
+        auto pos{ m_pos };
+        SetRotate(rot.x, rot.y, rot.z);
+        m_pos = pos;
+    }
+
+    // Similar to ::Scale but this also scales the position vector.
+    // 0x45AF40
+    void ScaleAll(float mult) {
+        Scale(mult);
+        GetPosition() *= mult;
+    }
+
     // operators and classes that aren't defined as part of class, but it's much easier to get them working with access to class private fields
 private:
     friend class CVector; // So Vector methods have access to private fields of matrix whitout accessor methods, for more readable code
@@ -112,6 +142,7 @@ private:
     friend CMatrix operator+(const CMatrix& a, const CMatrix& b);
     // static CMatrix* impl_operatorAdd(CMatrix* out, const CMatrix& a, const CMatrix& b);
 };
+VALIDATE_SIZE(CMatrix, 0x48);
 
 CMatrix operator*(const CMatrix& a, const CMatrix& b);
 CVector operator*(const CMatrix& a, const CVector& b);
@@ -120,7 +151,7 @@ CMatrix operator+(const CMatrix& a, const CMatrix& b);
 CMatrix& Invert(CMatrix& in, CMatrix& out);
 CMatrix  Invert(const CMatrix& in);
 
-VALIDATE_SIZE(CMatrix, 0x48);
+CMatrix  Lerp(CMatrix from, CMatrix to, float t);
 
 extern int32& numMatrices;
 extern CMatrix& gDummyMatrix;

@@ -4,71 +4,26 @@
 
 #include "PedType.h"
 
-void CEventGunAimedAt::InjectHooks()
-{
-    RH_ScopedClass(CEventGunAimedAt);
-    RH_ScopedCategory("Events");
-
-    RH_ScopedInstall(Constructor, 0x4B0700);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B4EE0);
-    RH_ScopedInstall(ReportCriminalEvent_Reversed, 0x4B09E0);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4B0810);
-    RH_ScopedInstall(CloneEditable_Reversed, 0x4B7630);
-}
-
 // 0x4B0700
-CEventGunAimedAt::CEventGunAimedAt(CPed* ped)
-{
+CEventGunAimedAt::CEventGunAimedAt(CPed* ped) : CEventEditableResponse() {
     m_ped = ped;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
-CEventGunAimedAt::~CEventGunAimedAt()
-{
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
-}
-
-
-CEventGunAimedAt* CEventGunAimedAt::Constructor(CPed* ped)
-{
-    this->CEventGunAimedAt::CEventGunAimedAt(ped);
-    return this;
+// 0x4B07B0
+CEventGunAimedAt::~CEventGunAimedAt() {
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 // 0x4B4EE0
-bool CEventGunAimedAt::AffectsPed(CPed* ped)
-{
-    return CEventGunAimedAt::AffectsPed_Reversed(ped);
-}
-
-// 0x4B09E0
-void CEventGunAimedAt::ReportCriminalEvent(CPed* ped)
-{
-    return CEventGunAimedAt::ReportCriminalEvent_Reversed(ped);
-}
-
-// 0x4B0810
-bool CEventGunAimedAt::TakesPriorityOver(const CEvent& refEvent)
-{
-    return CEventGunAimedAt::TakesPriorityOver_Reversed(refEvent);
-}
-
-// 0x4B7630
-CEventEditableResponse* CEventGunAimedAt::CloneEditable()
-{
-    return CEventGunAimedAt::CloneEditable_Reversed();
-}
-
-bool CEventGunAimedAt::AffectsPed_Reversed(CPed* ped)
-{
+bool CEventGunAimedAt::AffectsPed(CPed* ped) {
     if (ped->IsPlayer())
         return false;
 
     CTask* activeTask = ped->GetTaskManager().GetActiveTask();
     if (activeTask && activeTask->GetTaskType() == TASK_COMPLEX_REACT_TO_GUN_AIMED_AT)
         return false;
+
     if (m_ped && ped->GetIntelligence()->IsInSeeingRange(m_ped->GetPosition()) && ped->IsAlive()) {
         if (CPedGroups::AreInSameGroup(ped, m_ped))
             return false;
@@ -81,20 +36,19 @@ bool CEventGunAimedAt::AffectsPed_Reversed(CPed* ped)
     return false;
 }
 
-void CEventGunAimedAt::ReportCriminalEvent_Reversed(CPed* ped)
-{
+// 0x4B09E0
+void CEventGunAimedAt::ReportCriminalEvent(CPed* ped) {
     if (IsCriminalEvent())
         CPedType::PoliceDontCareAboutCrimesAgainstPedType(ped->m_nPedType);
 }
 
-bool CEventGunAimedAt::TakesPriorityOver_Reversed(const CEvent& refEvent)
-{
+// 0x4B0810
+bool CEventGunAimedAt::TakesPriorityOver(const CEvent& refEvent) {
     if (m_ped && m_ped->IsPlayer()) {
         if (refEvent.GetSourceEntity() == m_ped)
             return GetEventPriority() >= refEvent.GetEventPriority();
 
-        switch (refEvent.GetEventType())
-        {
+        switch (refEvent.GetEventType()) {
         case EVENT_DAMAGE:
         case EVENT_ACQUAINTANCE_PED_HATE:
         case EVENT_ACQUAINTANCE_PED_RESPECT:
@@ -105,7 +59,7 @@ bool CEventGunAimedAt::TakesPriorityOver_Reversed(const CEvent& refEvent)
     return GetEventPriority() >= refEvent.GetEventPriority();
 }
 
-CEventEditableResponse* CEventGunAimedAt::CloneEditable_Reversed()
-{
+// 0x4B7630
+CEventEditableResponse* CEventGunAimedAt::CloneEditable() {
     return new CEventGunAimedAt(m_ped);
 }

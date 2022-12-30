@@ -1,18 +1,13 @@
 #include "StdInc.h"
 
 #include "AEStreamThread.h"
-
 #include "AEAudioUtility.h"
-
-bool IsForeground() {
-    return plugin::CallAndReturn<bool, 0x746060>();
-}
 
 void CAEStreamThread::InjectHooks() {
     RH_ScopedClass(CAEStreamThread);
     RH_ScopedCategory("Audio");
 
-    // RH_ScopedInstall(Initialise, 0x4F1680);
+    RH_ScopedInstall(Initialise, 0x4F1680, { .reversed = false });
     RH_ScopedInstall(Start, 0x4F11F0);
     RH_ScopedInstall(Pause, 0x4F1200);
     RH_ScopedInstall(Resume, 0x4F1210);
@@ -28,14 +23,13 @@ void CAEStreamThread::InjectHooks() {
 
 // 0x4F11E0
 CAEStreamThread::~CAEStreamThread() {
-    DeleteCriticalSection(&m_criticalSection);
+    OS_MutexRelease(&m_criticalSection);
 }
 
 // 0x4F1680
 void CAEStreamThread::Initialise(CAEStreamingChannel* streamingChannel) {
-    plugin::Call<0x4F1680, CAEStreamingChannel*>(streamingChannel);
+    return plugin::Call<0x4F1680, CAEStreamingChannel*>(streamingChannel);
 
-    /*
     m_bActive          = true;
     m_bThreadActive    = false;
     field_12           = 0;
@@ -49,12 +43,11 @@ void CAEStreamThread::Initialise(CAEStreamingChannel* streamingChannel) {
     m_nHandle = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)(&CAEStreamThread::MainLoop), this, CREATE_SUSPENDED, (LPDWORD)(&m_lpThreadId));
     SetThreadPriority(m_nHandle, 0);
 
-    InitializeCriticalSection(&m_criticalSection);
+    OS_MutexObtain(&m_criticalSection);
     m_pStreamingChannel = streamingChannel;
 
-    m_pMp3TrackLoader = new CAEMP3TrackLoader();
-    m_pMp3TrackLoader->Initialise();
-    */
+    // m_pMp3TrackLoader = new CAEMP3TrackLoader();
+    // m_pMp3TrackLoader->Initialise();
 }
 
 // 0x4F11F0
@@ -103,10 +96,11 @@ int32 CAEStreamThread::GetPlayingTrackID() const {
 
 // 0x4F1230
 void CAEStreamThread::PlayTrack(uint32 iTrackId, int32 iNextTrackId, uint32 a3, int32 a4, bool bIsUserTrack, bool bNextIsUserTrack) {
-    EnterCriticalSection(&m_criticalSection);
+    OS_MutexObtain(&m_criticalSection);
 
-    if (m_pStreamingChannel->GetPlayTime() == -2)
+    if (m_pStreamingChannel->GetPlayTime() == -2) {
         m_pStreamingChannel->Stop();
+    }
 
     m_iTrackId         = iTrackId;
     m_iNextTrackId     = iNextTrackId;
@@ -116,7 +110,7 @@ void CAEStreamThread::PlayTrack(uint32 iTrackId, int32 iNextTrackId, uint32 a3, 
     m_bNextIsUserTrack = bNextIsUserTrack;
     field_12           = 1;
 
-    LeaveCriticalSection(&m_criticalSection);
+    OS_MutexRelease(&m_criticalSection);
 }
 
 // 0x4F1580
@@ -132,21 +126,19 @@ uint32 CAEStreamThread::MainLoop(void* param) {
     bool play = false;
 
     while (stream->m_bThreadActive) {
-        bool isForeground = IsForeground();
+        bool isForeground = IsForegroundApp();
         if (isForeground) {
             if (!wasForeground && play){
                 stream->m_pStreamingChannel->Play(0, 0, 1.0f);
             }
 
             auto start = CAEAudioUtility::GetCurrentTimeInMilliseconds();
-
             stream->Service();
             stream->m_pStreamingChannel->Service();
-
             auto end = CAEAudioUtility::GetCurrentTimeInMilliseconds();
-            if (end - start < 5)
-                ::Sleep(start - end + 5);
-
+            if (end - start < 5) {
+                OS_ThreadSleep(uint32(start - end + 5));
+            }
         } else if (wasForeground) {
             if (stream->m_pStreamingChannel->IsBufferPlaying()) {
                 stream->m_pStreamingChannel->Pause();
@@ -156,7 +148,7 @@ uint32 CAEStreamThread::MainLoop(void* param) {
             }
         }
         wasForeground = isForeground;
-        ::Sleep(100);
+        OS_ThreadSleep(100);
     }
 
     return 0;

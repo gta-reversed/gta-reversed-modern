@@ -41,7 +41,7 @@ public:
     CColPoint m_aTrailerColPoints[2];
     float     m_fTrailerColPointValue1;
     float     m_fTrailerColPointValue2;
-    uint8     field_9E8[4];
+    float     m_fHeight; // 0x6CF3DC, 0x6CFC11
     float     m_fTrailerTowedRatio;
     float     m_fTrailerTowedRatio2;
 
@@ -49,14 +49,14 @@ public:
     CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CTrailer() override = default; // 0x6CED10
 
-    bool SetTowLink(CVehicle* targetVehicle, bool arg1) override;
+    bool SetTowLink(CVehicle* tractor, bool setMyPosToTowBar) override;
     void ScanForTowLink();
 
     void SetupSuspensionLines() override;
     void ResetSuspension() override;
     void ProcessSuspension() override;
 
-    int32 ProcessEntityCollision(CEntity* entity, CColPoint* colPoint);
+    int32 ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) override;
     void  ProcessControl() override;
     bool  ProcessAI(uint32& extraHandlingFlags) override;
 
@@ -70,18 +70,18 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTrailer* Constructor(int32 modelIndex, eVehicleCreatedBy createdBy);
+    CTrailer* Constructor(int32 modelIndex, eVehicleCreatedBy createdBy) { this->CTrailer::CTrailer(modelIndex, createdBy); return this; }
+    bool SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1) { return CTrailer::SetTowLink(targetVehicle, arg1); }
+    void SetupSuspensionLines_Reversed() { CTrailer::SetupSuspensionLines(); }
+    void ResetSuspension_Reversed() { CTrailer::ResetSuspension(); }
+    void ProcessSuspension_Reversed() { CTrailer::ProcessSuspension(); }
+    void ProcessControl_Reversed() { CTrailer::ProcessControl(); }
+    bool ProcessAI_Reversed(uint32& extraHandlingFlags) { return CTrailer::ProcessAI(extraHandlingFlags); }
+    void PreRender_Reversed() { CTrailer::PreRender(); }
+    bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) { return CTrailer::GetTowHitchPos(outPos, bCheckModelInfo, vehicle); }
+    bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) { return CTrailer::GetTowBarPos(outPos, bCheckModelInfo, vehicle); }
+    bool BreakTowLink_Reversed() { return CTrailer::BreakTowLink(); }
 
-    bool SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1);
-    void SetupSuspensionLines_Reversed();
-    void ResetSuspension_Reversed();
-    void ProcessSuspension_Reversed();
-    void ProcessControl_Reversed();
-    bool ProcessAI_Reversed(uint32& extraHandlingFlags);
-    void PreRender_Reversed();
-    bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
-    bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
-    bool BreakTowLink_Reversed();
 };
 
 VALIDATE_SIZE(CTrailer, 0x9F4);

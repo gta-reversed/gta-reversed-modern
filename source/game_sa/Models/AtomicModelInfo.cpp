@@ -9,20 +9,22 @@
 
 #include "AtomicModelInfo.h"
 #include "TagManager.h"
+#include "CustomBuildingRenderer.h"
+#include "CarFXRenderer.h"
 
 void CAtomicModelInfo::InjectHooks()
 {
     RH_ScopedClass(CAtomicModelInfo);
     RH_ScopedCategory("Models");
 
-    RH_ScopedInstall(AsAtomicModelInfoPtr_Reversed, 0x4C5560);
-    RH_ScopedInstall(GetModelType_Reversed, 0x4C5570);
-    RH_ScopedInstall(Init_Reversed, 0x4C4430);
-    RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C4440);
-    RH_ScopedInstall(GetRwModelType_Reversed, 0x4C5580);
-    RH_ScopedOverloadedInstall(CreateInstance_Reversed, "void", 0x4C4530, RwObject * (CAtomicModelInfo::*)());
-    RH_ScopedOverloadedInstall(CreateInstance_Reversed, "rwmat", 0x4C44D0, RwObject * (CAtomicModelInfo::*)(RwMatrix*));
-    RH_ScopedInstall(SetAtomic_Reversed, 0x4C4360);
+    RH_ScopedVirtualInstall(AsAtomicModelInfoPtr, 0x4C5560);
+    RH_ScopedVirtualInstall(GetModelType, 0x4C5570);
+    RH_ScopedVirtualInstall(Init, 0x4C4430);
+    RH_ScopedVirtualInstall(DeleteRwObject, 0x4C4440);
+    RH_ScopedVirtualInstall(GetRwModelType, 0x4C5580);
+    // clang moment: RH_ScopedVirtualOverloadedInstall(CreateInstance, "void", 0x4C4530, RwObject * (CAtomicModelInfo::*)());
+    // clang moment: RH_ScopedVirtualOverloadedInstall(CreateInstance, "rwmat", 0x4C44D0, RwObject * (CAtomicModelInfo::*)(RwMatrix*));
+    RH_ScopedVirtualInstall(SetAtomic, 0x4C4360);
 
     RH_ScopedInstall(GetAtomicFromDistance, 0x4C44B0);
     RH_ScopedInstall(SetupVehicleUpgradeFlags, 0x4C4570);

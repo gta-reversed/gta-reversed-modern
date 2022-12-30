@@ -16,7 +16,7 @@
 void CAESound::InjectHooks() {
     RH_ScopedClass(CAESound);
     RH_ScopedCategory("Audio");
-    
+
     RH_ScopedInstall(operator=, 0x4EF680);
     RH_ScopedInstall(UnregisterWithPhysicalEntity, 0x4EF1A0);
     RH_ScopedInstall(StopSound, 0x4EF1C0);
@@ -81,7 +81,7 @@ CAESound::CAESound(int16 bankSlotId, int16 sfxId, CAEAudioEntity* baseAudio, CVe
     m_vecPrevPosn = CVector(0.0f, 0.0f, 0.0f);
     m_pPhysicalEntity = nullptr;
     m_fMaxVolume = -1.0F;
-    m_nEvent = -1;
+    m_nEvent = AE_UNDEFINED;
     m_nLastFrameUpdate = 0;
 
     SetPosition(posn);
@@ -145,11 +145,7 @@ CAESound& CAESound::operator=(const CAESound& sound) {
 }
 
 void CAESound::UnregisterWithPhysicalEntity() {
-    if (!m_pPhysicalEntity)
-        return;
-
-    m_pPhysicalEntity->CleanUpOldReference(&m_pPhysicalEntity);
-    m_pPhysicalEntity = nullptr;
+    CEntity::ClearReference(m_pPhysicalEntity);
 }
 
 void CAESound::StopSound() {
@@ -297,7 +293,7 @@ void CAESound::Initialise(int16 bankSlotId, int16 sfxId, CAEAudioEntity* baseAud
     m_fSpeed                = speed;
     m_fSpeedVariability     = speedVariability;
     m_vecPrevPosn           .Set(0.0F, 0.0F, 0.0F);
-    m_nEvent                = -1;
+    m_nEvent                = AE_UNDEFINED;
     m_fMaxVolume            = -1.0F;
     m_nLastFrameUpdate      = 0;
 

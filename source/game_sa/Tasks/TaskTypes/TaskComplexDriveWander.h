@@ -2,9 +2,19 @@
 
 #include "TaskComplexCarDrive.h"
 
+// todo: rename -> TaskComplexCarDriveWander.h
+
 class CTaskComplexCarDriveWander : public CTaskComplexCarDrive {
 public:
-    CTaskComplexCarDriveWander(CVehicle* vehicle, int32 arg2, float fSpeed);
+    static constexpr auto Type = TASK_COMPLEX_CAR_DRIVE_WANDER;
+
+    CTaskComplexCarDriveWander(CVehicle* vehicle, eCarDrivingStyle carDrivingStyle, float fSpeed);
+    ~CTaskComplexCarDriveWander() override = default;
+
+    CTask* Clone() override { return new CTaskComplexCarDrive(m_pVehicle, m_fSpeed, -1, static_cast<eCarDrivingStyle>(m_nCarDrivingStyle)); };
+    eTaskType GetTaskType() override { return Type; }
+    void SetUpCar() override;
+    CTask* CreateSubTaskCannotGetInCar(CPed* ped) override;
 };
 
 VALIDATE_SIZE(CTaskComplexCarDrive, 0x24);

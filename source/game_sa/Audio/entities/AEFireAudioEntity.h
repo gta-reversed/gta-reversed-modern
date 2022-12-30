@@ -10,7 +10,7 @@
 
 class FxSystem_c;
 
-class CAEFireAudioEntity : public CAEAudioEntity {
+class NOTSA_EXPORT_VTABLE CAEFireAudioEntity : public CAEAudioEntity {
 public:
     CAESound*   m_SoundLeft;
     CAESound*   m_SoundRight;

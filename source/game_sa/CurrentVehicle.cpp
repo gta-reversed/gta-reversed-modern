@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "CurrentVehicle.h"
+#include "Hud.h"
 
 void CCurrentVehicle::InjectHooks() {
     RH_ScopedClass(CCurrentVehicle);
@@ -22,7 +23,7 @@ void CCurrentVehicle::Init() {
 // 0x571EA0
 void CCurrentVehicle::Display() const {
     if (m_pVehicle) {
-        auto mi = CModelInfo::GetModelInfo(m_pVehicle->m_nModelIndex)->AsVehicleModelInfoPtr();
+        auto* mi = m_pVehicle->GetVehicleModelInfo();
         CHud::SetVehicleName(TheText.Get(mi->m_szGameName));
     } else {
         CHud::SetVehicleName(nullptr);

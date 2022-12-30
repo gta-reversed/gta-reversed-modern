@@ -7,28 +7,29 @@ class CTaskSimpleGoToPoint;
 
 class CTaskComplexGoToPointAndStandStill : public CTaskComplex {
 public:
-    int32   m_moveState;
-    CVector m_vecTargetPoint;
-    float   m_fRadius;          // ped stops moving after it is within the radius of the point.
-    float   m_fMoveStateRadius; // The ped will either sprint, run, or walk depending on far it is from the radius
+    eMoveState m_moveState;
+    CVector    m_vecTargetPoint;
+    float      m_fRadius;          ///< Ped stops moving after it is within the radius of the point.
+    float      m_fMoveStateRadius; ///< The ped will either sprint, run, or walk depending on far it is from the radius
     union {
         struct {
-            uint8 m_b01 : 1;
-            uint8 m_bGoToPoint : 1;
-            uint8 m_bTargetPointUpdated : 1;
-            uint8 m_b04 : 1;
-            uint8 m_b05 : 1;
+            uint8 m_b01 : 1;                    // 0x1
+            uint8 m_bGoToPoint : 1;             // 0x2
+            uint8 m_bTargetPointUpdated : 1;    // 0x4
+            uint8 m_b04 : 1;                    // 0x8
+            uint8 m_b05 : 1;                    // 0x10
         };
         uint8 m_nFlags;
     };
-    char _pad_25[3];
 
 public:
-    CTaskComplexGoToPointAndStandStill(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint);
+    static constexpr auto Type = TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL;
+
+    CTaskComplexGoToPointAndStandStill(eMoveState moveState, const CVector& targetPoint, float fRadius = 1.5f, float fMoveStateRadius = 2.f, bool bUnknown = false, bool bGoToPoint = false);
     ~CTaskComplexGoToPointAndStandStill() override;
 
+    eTaskType GetTaskType() override { return Type; }
     CTask*    Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL; };
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
@@ -38,7 +39,7 @@ public:
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* ControlSubTask_Reversed(CPed* ped);
 
-    void   GoToPoint(const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUpdateTargetEvenIfItsTheSame);
+    void   GoToPoint(const CVector& targetPoint, float fRadius = 1.5f, float fMoveStateRadius = 2.f, bool bUpdateTargetEvenIfItsTheSame = false);
     void   SelectMoveState(CTaskSimpleGoToPoint* pGotoPointTask, CPed* ped, float fMoveStateRadius, float fRunOrSprintRadius);
     CTask* CreateFirstSubTask(int32 taskId, CPed* ped);
 
@@ -46,7 +47,10 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskComplexGoToPointAndStandStill* Constructor(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint);
+    // 0x668120
+    CTaskComplexGoToPointAndStandStill* Constructor(eMoveState moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint) {
+        this->CTaskComplexGoToPointAndStandStill::CTaskComplexGoToPointAndStandStill(moveState, targetPoint, fRadius, fMoveStateRadius, bUnknown, bGoToPoint);
+        return this;
+    }
 };
-
 VALIDATE_SIZE(CTaskComplexGoToPointAndStandStill, 0x28);

@@ -39,7 +39,7 @@ void CAEFireAudioEntity::AddAudioEvent(eAudioEvents audioId, CVector& posn) {
 // 0x4DD0D0
 void CAEFireAudioEntity::PlayFireSounds(eAudioEvents audioId, CVector& posn) {
     m_snLastFireFrequencyIndex = (m_snLastFireFrequencyIndex + 1) % 5;
-    const float volume = static_cast<float>(CAEAudioEntity::m_pAudioEventVolumes[audioId]);
+    const float volume = GetDefaultVolume(audioId);
 
     CAESound sound;
     sound.Initialise(
@@ -49,7 +49,7 @@ void CAEFireAudioEntity::PlayFireSounds(eAudioEvents audioId, CVector& posn) {
         posn,
         volume,
         2.0f,
-        gfFireFrequencyVariations[CAEFireAudioEntity::m_snLastFireFrequencyIndex],
+        gfFireFrequencyVariations[m_snLastFireFrequencyIndex],
         1.0f,
         0,
         SOUND_REQUEST_UPDATES,
@@ -85,38 +85,12 @@ void CAEFireAudioEntity::PlayFireSounds(eAudioEvents audioId, CVector& posn) {
 // 0x4DD270
 void CAEFireAudioEntity::PlayWaterSounds(eAudioEvents audioId, CVector& posn) {
     CAESound sound;
-    sound.Initialise(
-        2,
-        3,
-        this,
-        posn,
-        CAEAudioEntity::m_pAudioEventVolumes[audioId],
-        2.0f,
-        0.75f,
-        0.6f,
-        0,
-        SOUND_REQUEST_UPDATES,
-        0.0f,
-        0
-    );
+    sound.Initialise(2, 3, this, posn, GetDefaultVolume(audioId), 2.0f, 0.75f, 0.6f, 0, SOUND_REQUEST_UPDATES, 0.0f, 0);
     sound.m_nEvent = AE_FRONTEND_HIGHLIGHT;
     sound.m_fSpeedVariability = 0.06f;
     m_SoundLeft = AESoundManager.RequestNewSound(&sound);
 
-    sound.Initialise(
-        0,
-        0,
-        this,
-        posn,
-        static_cast<float>(CAEAudioEntity::m_pAudioEventVolumes[audioId]) + 20.0f,
-        2.0f,
-        1.78f,
-        0.6f,
-        0,
-        SOUND_REQUEST_UPDATES,
-        0.0f,
-        0
-    );
+    sound.Initialise(0, 0, this, posn, GetDefaultVolume(audioId) + 20.0f, 2.0f, 1.78f, 0.6f, 0, SOUND_REQUEST_UPDATES, 0.0f, 0);
     sound.m_fSpeedVariability = 0.06f;
     sound.m_nEvent = AE_FRONTEND_ERROR;
     m_SoundRight = AESoundManager.RequestNewSound(&sound);
@@ -180,7 +154,7 @@ void CAEFireAudioEntity::InjectHooks() {
     RH_ScopedInstall(AddAudioEvent, 0x4DD3C0);
     RH_ScopedInstall(PlayFireSounds, 0x4DD0D0);
     RH_ScopedInstall(PlayWaterSounds, 0x4DD270);
-    RH_ScopedInstall(UpdateParameters_Reversed, 0x4DCF60);
+    RH_ScopedVirtualInstall(UpdateParameters, 0x4DCF60);
 }
 
 void CAEFireAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {

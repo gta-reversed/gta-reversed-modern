@@ -49,7 +49,7 @@ public:
     void ResetStatistics();
     void ResetSoundEffects();
 
-    static void Restart();
+    void Restart();
 
     bool IsLoadingTuneActive();
     static bool IsRadioOn();
@@ -72,10 +72,10 @@ public:
     static void EnableEffectsLoading();
     static void DisableEffectsLoading();
 
-    void ReportCollision(CEntity* entity1, CEntity* entity2, uint8 surface1, uint8 surface2, CVector& point, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, bool playOnlyOneShotCollisionSound, bool unknown);
-    void ReportBulletHit(CEntity* entity, uint8 a3, CVector& posn, float angleWithColPointNorm);
+    void ReportCollision(CEntity* entity1, CEntity* entity2, eSurfaceType surf1, eSurfaceType surf2, CVector& point, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, bool playOnlyOneShotCollisionSound, bool unknown);
+    void ReportBulletHit(CEntity* entity, eSurfaceType surface, CVector& posn, float angleWithColPointNorm);
     void ReportObjectDestruction(CEntity* entity);
-    void ReportGlassCollisionEvent(eAudioEvents, CVector&);
+    void ReportGlassCollisionEvent(eAudioEvents glassSoundType, Const CVector& posn);
     void ReportWaterSplash(CVector posn, float volume);
     void ReportWaterSplash(CPhysical* physical, float volume, bool forcePlaySplashSound);
     void ReportWeaponEvent(int32_t audioEvent, eWeaponType weaponType, CPhysical* physical);
@@ -85,7 +85,7 @@ public:
     void ReportMissionAudioEvent(uint16 eventId, CPed* ped);
     void ReportMissionAudioEvent(uint16 eventId, CVehicle* vehicle);
     void ReportMissionAudioEvent(uint16 eventId, CPhysical* physical, float a3, float a4);
-    void ReportFrontendAudioEvent(eAudioEvents eventId, float volumeChange, float speed);
+    void ReportFrontendAudioEvent(eAudioEvents eventId, float volumeChange = 0.0f, float speed = 1.0f);
 
     void InitialiseRadioStationID(RadioStationId id);
     void StartRadio(tVehicleAudioSettings* settings);
@@ -95,7 +95,7 @@ public:
     void SetBassEnhanceOnOff(bool enable);
     void SetRadioBassSetting(int8);
     bool HasRadioRetuneJustStarted();
-    char* GetRadioStationName(RadioStationId id);
+    const char* GetRadioStationName(RadioStationId id);
     void GetRadioStationNameKey(RadioStationId id, char* outStr);
     int32* GetRadioStationListenTimes();
     void DisplayRadioStationName();
@@ -117,9 +117,9 @@ public:
     void PreloadBeatTrack(int16 trackId);
     void StopAmbienceTrack(bool a1);
     static bool DoesAmbienceTrackOverrideRadio();
-    void PreloadMissionAudio(uint8 sampleId, int32 a3);
+    void PreloadMissionAudio(uint8 slotId, int32 sampleId);
     int8 GetMissionAudioLoadingStatus(uint8 sampleId);
-    void PlayLoadedMissionAudio(uint8 sampleId);
+    void PlayLoadedMissionAudio(uint8 slotId);
     int32 GetMissionAudioEvent(uint8 sampleId);
     CVector* GetMissionAudioPosition(uint8 sampleId);
     void ClearMissionAudio(uint8 sampleId);

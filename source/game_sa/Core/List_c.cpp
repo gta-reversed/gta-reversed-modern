@@ -98,7 +98,7 @@ void List_c::RemoveAll() {
     m_nCount = 0;
 }
 
-uint32 List_c::GetNumItems() {
+uint32 List_c::GetNumItems() const {
     return m_nCount;
 }
 

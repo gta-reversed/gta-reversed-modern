@@ -6,26 +6,14 @@
 */
 #pragma once
 
-enum eMessageStyle : uint16 {
-    STYLE_MIDDLE,                // InTheMiddle
-    STYLE_BOTTOM_RIGHT,          // AtTheBottomRight
-    STYLE_WHITE_MIDDLE,          // WhiteText_InTheMiddle
-    STYLE_MIDDLE_SMALLER,        // InTheMiddle_Smaller
-    STYLE_MIDDLE_SMALLER_HIGHER, // InTheMiddle_Smaller_ABitHigherOnTheScreen
-    STYLE_WHITE_MIDDLE_SMALLER,  // SmallWhiteText_InTheMiddleOfTheScreen
-    STYLE_LIGHTBLUE_TOP          // LightBlueText_OnTopOfTheScreen
-};
-
 struct tMessage {
     char*  m_pText;
-    uint16 m_wFlag;
-    char   _pad1[2];
-    uint32 m_dwTime;
-    uint32 m_dwStartTime;
-    int32  m_dwNumber[6];
+    uint16 m_nFlags;
+    uint32 m_nTime;
+    uint32 m_nStartTime;
+    int32  m_nNumber[6];
     char*  m_pString;
     uint8  m_bPreviousBrief;
-    char   _pad2[3];
 };
 
 struct tBigMessage {
@@ -41,42 +29,51 @@ struct tPreviousBrief {
 
 class CMessages {
 public:
-    // count: 20
-    static tPreviousBrief* PreviousBriefs;
-    // count: 8
-    static tMessage* BriefMessages;
-    // count: 7 (for each text style)
-    static tBigMessage* BIGMessages;
+    static inline std::array<tPreviousBrief, 20>& PreviousBriefs = *(std::array<tPreviousBrief, 20>*)0xC1A570;
+    static inline std::array<tMessage, 8>& BriefMessages = *(std::array<tMessage, 8>*)0xC1A7F0;
+    static inline std::array<tBigMessage, 7>& BIGMessages = *(std::array<tBigMessage, 7>*)0xC1A970; // (for each text style)
 
 public:
     static void InjectHooks();
 
-    static uint32 GetStringLength(char* string);
-    static void StringCopy(char* dest, char* src, uint16 len);
-    static uint8 StringCompare(char* str1, char* str2, uint16 len);
-    static void CutString(int32 count, char* str, char** dest);
+    static void Init();
+    static void AddMessage(const char* text, uint32 time, uint16 flag, bool bPreviousBrief);
+    static void AddMessageJumpQ(const char* text, uint32 time, uint16 flag, bool bPreviousBrief);
+    static void AddMessageWithString(const char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief);
+    static void AddMessageWithNumber(const char* text, uint32 time, uint16 flag, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1, bool bPreviousBrief = false);
+    static void AddMessageJumpQWithNumber(const char* text, uint32 time, uint16 flag, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1, bool bPreviousBrief = false);
+    static void AddMessageJumpQWithString(const char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief);
+
+    static void AddBigMessage(const char* text, uint32 time, eMessageStyle style);
+    static void AddBigMessageQ(const char* text, uint32 time, eMessageStyle style);
+    static void AddBigMessageWithNumber(const char* text, uint32 time, eMessageStyle style, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1);
+    static void AddBigMessageWithNumberQ(const char* text, uint32 time, eMessageStyle style, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1);
+
+    static void AddToPreviousBriefArray(const char* text, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1, char* string = nullptr);
+
     static void ClearMessages(bool flag);
     static void ClearSmallMessagesOnly();
-    static void AddToPreviousBriefArray(char* text, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, char* string);
     static void ClearPreviousBriefArray();
-    static void InsertNumberInString(char* src, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, char* dst);
-    static void InsertStringInString(char* src, char* string);
-    static void InsertPlayerControlKeysInString(char* string);
-    static void AddMessageWithNumber(char* text, uint32 time, uint16 flag, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, bool bPreviousBrief);
-    static void AddMessageJumpQWithNumber(char* text, uint32 time, uint16 flag, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, bool bPreviousBrief);
-    static void AddBigMessageWithNumber(char* text, uint32 time, eMessageStyle style, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6);
-    static void AddBigMessageWithNumberQ(char* text, uint32 time, eMessageStyle style, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6);
-    static void AddMessageWithString(char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief);
-    static void AddMessageJumpQWithString(char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief);
-    static void ClearThisPrint(char* text);
-    static void ClearThisBigPrint(char* text);
+    static void ClearThisPrint(const char* text);
+    static void ClearThisBigPrint(const char* text);
     static void ClearThisPrintBigNow(eMessageStyle style);
-    static void Init();
-    static void ClearAllMessagesDisplayedByGame(uint8 unk);
+    static void ClearAllMessagesDisplayedByGame(bool unk);
+
+    static uint32 GetStringLength(const char* string);
+
+    static void StringCopy(const char* dest, const char* src, uint16 len);
+    static uint8 StringCompare(const char* str1, const char* str2, uint16 len);
+    static void CutString(int32 count, const char* str, char** dest);
+
+    static void InsertNumberInString(const char* src, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1, char* dst = nullptr);
+    static void InsertStringInString(const char* src, char* string);
+    static void InsertPlayerControlKeysInString(const char* string);
+
     static void Process();
     static void Display(bool flag);
-    static void AddMessage(char* text, uint32 time, uint16 flag, bool bPreviousBrief);
-    static void AddMessageJumpQ(char* text, uint32 time, uint16 flag, bool bPreviousBrief);
-    static void AddBigMessage(char* text, uint32 time, eMessageStyle style);
-    static void AddBigMessageQ(char* text, uint32 time, eMessageStyle style);
+
+    // NOTSA helpers
+    static void InsertNumberInString(char* text, int32* n, char* dst) {
+        InsertNumberInString(text, n[0], n[1], n[2], n[3], n[4], n[5], dst);
+    }
 };

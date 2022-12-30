@@ -7,39 +7,57 @@
 #pragma once
 
 #include "TaskSimple.h"
-#include "AnimBlendAssociation.h"
 #include "Vector2D.h"
+class CAnimBlendAssociation;
 
-enum eDuckControlTypes : uint8
-{
-    DUCK_STANDALONE = 0,	// duck anim removed when task removed
-    DUCK_STANDALONE_WEAPON_CROUCH,// duck anim removed when task removed
-    DUCK_TASK_CONTROLLED,	// duck directly linked to a controlling task
-    DUCK_ANIM_CONTROLLED,	// duck linked to duck anim (make duck partial?)
+enum eDuckControlTypes : uint8 {
+    DUCK_STANDALONE = 0,           // duck anim removed when task removed
+    DUCK_STANDALONE_WEAPON_CROUCH, // duck anim removed when task removed
+    DUCK_TASK_CONTROLLED,          // duck directly linked to a controlling task
+    DUCK_ANIM_CONTROLLED,          // duck linked to duck anim (make duck partial?)
     DUCK_SCRIPT_CONTROLLED,
 };
 
 class CTaskSimpleDuck : public CTaskSimple {
 public:
-    uint32 m_nStartTime;
-    uint16 m_nLengthOfDuck;
-    int16 m_nShotWhizzingCounter;
-    CAnimBlendAssociation *m_pDuckAnim; 
-    CAnimBlendAssociation *m_pMoveAnim;
+    uint32                 m_nStartTime;
+    uint16                 m_nLengthOfDuck;
+    int16                  m_nShotWhizzingCounter;
+    CAnimBlendAssociation* m_pDuckAnim;
+    CAnimBlendAssociation* m_pMoveAnim;
 
     bool m_bIsFinished;
     bool m_bIsAborting;
     bool m_bNeedToSetDuckFlag;  // in case bIsDucking flag gets cleared elsewhere, so we know to stop duck task
     bool m_bIsInControl;        // if duck task is being controlled by another task then it requires continuous control
-  
-    CVector2D m_vecMoveCommand; 
-    uint8 m_nDuckControlType;
-    uint8 m_nCountDownFrames;
 
-    CTaskSimpleDuck * Constructor (eDuckControlTypes DuckControlType, uint16 nLengthOfDuck, int16 nUseShotsWhizzingEvents = -1);
+    CVector2D         m_vecMoveCommand;
+    eDuckControlTypes m_nDuckControlType;
+    uint8             m_nCountDownFrames;
+
+public:
+    static constexpr auto Type = TASK_SIMPLE_DUCK;
+
+    CTaskSimpleDuck(eDuckControlTypes DuckControlType, uint16 nLengthOfDuck, int16 nUseShotsWhizzingEvents = -1);
+    ~CTaskSimpleDuck() override;
+
+    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override { return new CTaskSimpleDuck(m_nDuckControlType, m_nLengthOfDuck, m_nShotWhizzingCounter); }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool ProcessPed(CPed* ped) override;
+
     static bool CanPedDuck(CPed* ped);
     bool ControlDuckMove(float moveSpeedX, float moveSpeedY);
-    bool IsTaskInUseByOtherTasks(); 
-};
+    bool IsTaskInUseByOtherTasks();
+    void ForceStopMove();
 
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskSimpleDuck* Constructor(eDuckControlTypes DuckControlType, uint16 nLengthOfDuck, int16 nUseShotsWhizzingEvents = -1);
+    CTaskSimpleDuck* Destructor();
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
+    bool ProcessPed_Reversed(CPed* ped);
+};
 VALIDATE_SIZE(CTaskSimpleDuck, 0x28);

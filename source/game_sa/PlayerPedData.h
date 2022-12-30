@@ -27,7 +27,6 @@ public:
     float            m_fMoveSpeed;
     uint8            m_nChosenWeapon;
     uint8            m_nCarDangerCounter;
-    char             _pad0[2];
     uint32           m_nStandStillTimer;
     uint32           m_nHitAnimDelayTimer;
     float            m_fAttackButtonCounter;
@@ -36,11 +35,11 @@ public:
         struct {
             uint32 m_bStoppedMoving : 1;
             uint32 m_bAdrenaline : 1;
-            uint32 m_bHaveTargetSelected : 1; // Needed to work out whether we lost target this frame
+            uint32 m_bHaveTargetSelected : 1;             // Needed to work out whether we lost target this frame
             uint32 m_bFreeAiming : 1;
             uint32 m_bCanBeDamaged : 1;
-            uint32 m_bAllMeleeAttackPtsBlocked : 1; // if all of m_pMeleeAttackers[] is blocked by collision, just attack straight ahead
-            uint32 m_bJustBeenSnacking : 1;         // If this bit is true we have just bought something from a vending machine
+            uint32 m_bAllMeleeAttackPtsBlocked : 1;       // if all of m_pMeleeAttackers[] is blocked by collision, just attack straight ahead
+            uint32 m_bJustBeenSnacking : 1;               // If this bit is true we have just bought something from a vending machine
             uint32 m_bRequireHandleBreath : 1;
 
             uint32 m_bGroupStuffDisabled : 1;             // if this is true the player can't recrout or give his group commands.
@@ -81,13 +80,11 @@ public:
     bool      m_bPlayerSprintDisabled;
     bool      m_bDontAllowWeaponChange;
     bool      m_bForceInteriorLighting;
-    char      _pad1;
     uint16    m_nPadDownPressedInMilliseconds;
     uint16    m_nPadUpPressedInMilliseconds;
     uint8     m_nWetness;
     bool      m_bPlayersGangActive;
     uint8     m_nWaterCoverPerc;
-    char      _pad2;
     float     m_fWaterHeight;
     uint32    m_nFireHSMissilePressedTime;
     CEntity*  m_LastHSMissileTarget;

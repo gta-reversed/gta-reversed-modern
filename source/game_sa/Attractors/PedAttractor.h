@@ -9,28 +9,30 @@ class CTask;
 
 class CPedAttractor {
 public:
-    tEffectPedAttractor* m_pEffect;
-    CEntity*             m_pEntity;
-    SArray<CPed>         field_C;
-    SArray<CPed>         m_pedQueue;
-    SArray<CTask>        m_pedTasks;
-    int32                field_3C;
-    float                queueMp;
-    float                time1;
-    float                time2;
-    char                 field_4C[8];
-    float                m_fRange;
-    float                m_fDeltaHeading;
-    CVector              m_vecAttractorPosn;
-    CVector              m_vecQueueDir;
-    CVector              m_vecUseDir;
-    int32                field_80;
-    char                 m_szScriptName[8];
+    C2dEffect*    m_pEffect;
+    CEntity*      m_pEntity;
+    SArray<CPed>  field_C;
+    SArray<CPed>  m_pedQueue;
+    SArray<CTask> m_pedTasks;
+    int32         field_3C;
+    float         queueMp;
+    float         time1;
+    float         time2;
+    char          field_4C[8];
+    float         m_fRange;
+    float         m_fDeltaHeading;
+    CVector       m_vecAttractorPosn;
+    CVector       m_vecQueueDir;
+    CVector       m_vecUseDir;
+    int32         field_80;
+    char          m_szScriptName[8];
+
+    inline static SArray<CTask>& ms_tasks = *reinterpret_cast<SArray<CTask>*>(0xC0985C);
 
 public:
     static void InjectHooks();
 
-    void* operator new(uint32 size);
+    void* operator new(unsigned size);
     void  operator delete(void* object);
 
     CPedAttractor(C2dEffect* effect, CEntity* entity, int32 a3, int32 a4, float a5, float time2, float time1, float a8, float a9, float range, float a11, float a12);

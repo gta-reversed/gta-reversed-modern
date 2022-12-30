@@ -4,6 +4,7 @@
 
 #include "FireManager.h"
 #include "AudioEngine.h"
+#include "Glass.h"
 
 // Note: This class is only used by CWeapon::FireSniper
 
@@ -54,7 +55,7 @@ void CBulletInfo::AddBullet(CEntity* creator, eWeaponType weaponType, CVector po
     if (auto info = GetFree()) {
         info->m_pCreator     = creator;
         info->m_nWeaponType  = weaponType;
-        info->m_nDamage      = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nDamage;
+        info->m_nDamage      = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD)->m_nDamage;
         info->m_vecPosition  = posn;
         info->m_vecVelocity  = velocity;
         info->m_nDestroyTime = (float)(CTimer::GetTimeInMS() + 1000);
@@ -91,19 +92,14 @@ void CBulletInfo::Update() {
                 auto hitPed = hitEntity->AsPed();
 
                 if (hitEntity != info.m_pCreator) {
-                    switch (hitPed->m_nPedState) {
-                    case PEDSTATE_DIE:
-                    case PEDSTATE_DEAD:
-                        break;
-                    default: { // Not DIE or DEAD
-                        // std::cout << "Hit ped\n";
+                    if (hitPed->IsAlive()) {
                         CWeapon::GenerateDamageEvent(
                             hitPed,
                             info.m_pCreator,
                             info.m_nWeaponType,
                             info.m_nDamage,
                             (ePedPieceTypes)colPoint.m_nPieceTypeB,
-                            hitPed->GetLocalDirection(hitPed->GetPosition() - colPoint.m_vecPoint)
+                            hitPed->GetLocalDirection(hitPed->GetPosition2D() - CVector2D{ colPoint.m_vecPoint })
                         );
                         CCrime::ReportCrime(
                             (hitPed->m_nPedType == PED_TYPE_COP) ? eCrimeType::CRIME_DAMAGE_COP_CAR : eCrimeType::CRIME_DAMAGE_CAR,
@@ -111,8 +107,6 @@ void CBulletInfo::Update() {
                             info.m_pCreator->AsPed()
                         );
                         newPosition = colPoint.m_vecPoint;
-                        break;
-                    }
                     }
                 }
 
@@ -120,11 +114,11 @@ void CBulletInfo::Update() {
                     g_fx.AddBlood(colPoint.m_vecPoint, colPoint.m_vecNormal, 8, hitPed->m_fContactSurfaceBrightness);
                     // std::cout << "Create blood\n";
                     if (hitPed->m_nPedState == PEDSTATE_DEAD) {
-                        const auto anim = RpAnimBlendClumpGetFirstAssociation(hitPed->m_pRwClump, ANIM_FLAG_800) ? ANIM_ID_FLOOR_HIT_F : ANIM_ID_FLOOR_HIT;
+                        const auto anim = RpAnimBlendClumpGetFirstAssociation(hitPed->m_pRwClump, ANIMATION_800) ? ANIM_ID_FLOOR_HIT_F : ANIM_ID_FLOOR_HIT;
 
-                        if (CAnimBlendAssociation* assoc = CAnimManager::BlendAnimation(hitPed->m_pRwClump, 0, anim, 8.0f)) {
-                            assoc->Start(0.0f);
-                            assoc->SetFlag(ANIM_FLAG_UNLOCK_LAST_FRAME, false);
+                        if (auto assoc = CAnimManager::BlendAnimation(hitPed->m_pRwClump, ANIM_GROUP_DEFAULT, anim, 8.0f)) {
+                            assoc->SetCurrentTime(0.0f);
+                            assoc->SetFlag(ANIMATION_UNLOCK_LAST_FRAME, false);
                             // std::cout << "Blood anim\n";
                         }
                     }
@@ -227,7 +221,7 @@ void CBulletInfo::Update() {
                 dir.Normalise();
                 const float dirDotColPointNorm = DotProduct(dir, colPoint.m_vecNormal);
                 if (dirDotColPointNorm < 0.0f) {
-                    AudioEngine.ReportBulletHit(hitEntity, colPoint.m_nSurfaceTypeB, colPoint.m_vecPoint, RWRAD2DEG(asin(-dirDotColPointNorm)));
+                    AudioEngine.ReportBulletHit(hitEntity, colPoint.m_nSurfaceTypeB, colPoint.m_vecPoint, RadiansToDegrees(asin(-dirDotColPointNorm)));
                 }
             }
             CGlass::WasGlassHitByBullet(hitEntity, colPoint.m_vecPoint);

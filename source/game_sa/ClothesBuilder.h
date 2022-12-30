@@ -7,7 +7,7 @@
 */
 #pragma once
 
-#include "renderware.h"  // important
+#include "RenderWare.h" // important
 
 class PedClothesDesc;
 

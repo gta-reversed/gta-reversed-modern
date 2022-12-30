@@ -12,37 +12,47 @@ class CEntity;
 class CObject;
 
 struct tScriptForBrains {
-    int16  m_nIMGindex;
-    char   m_nAttachType;
-    char   m_nType;
-    char   m_ucStatus;
-    char   __pad[3];
-    float  m_fRadius;
-    uint16 m_nModelID;
-    uint16 m_nPriority;
-    int32  field_10;
+    int16  m_nIMGindex{-1};     /// SCM ID for `CStreaming` (Translated using SCMToModelId)
+    int8   m_nAttachType{-1};
+    int8   m_nType{-1};
+    int8   m_ucStatus{1};
+    float  m_fRadius{5.f};
+    union {
+        struct {
+            int16  m_pedModelOrPedGeneratorIndex;
+            uint16 m_percentageChance;
+            uint32 m_pad;
+        };
+        char m_scriptName[8]{};
+    };
 };
 
 class CScriptsForBrains {
-    PLUGIN_NO_DEFAULT_CONSTRUCTION(CScriptsForBrains)
 public:
-    static constexpr int32 NUM_SCRIPTS = 70;
-public:
-    tScriptForBrains m_aScriptForBrains[NUM_SCRIPTS];
+    std::array<tScriptForBrains, 70> m_aScriptForBrains;
 
 public:
-     void AddNewScriptBrain(int16 ImgIndex, int16 Model, uint16 Priority, int8 attachType, int8 Type, float Radius);
-     void AddNewStreamedScriptBrainForCodeUse(int16 a2, char *a3, int8 attachtype);
-     void CheckIfNewEntityNeedsScript(CEntity *entity, int8 attachType, void *unused);
-     int16 GetIndexOfScriptBrainWithThisName(char const *name, int8 Attachtype);
-     bool HasAttractorScriptBrainWithThisNameLoaded(char const *name);
-     void Init();
-     bool IsObjectWithinBrainActivationRange(CObject *entity, CVector const *point);
-     void MarkAttractorScriptBrainWithThisNameAsNoLongerNeeded(char const *name);
-     void RequestAttractorScriptBrainWithThisName(char const *name);
-     void StartAttractorScriptBrainWithThisName(char const *name, CEntity *entity, uint8 bHasAScriptBrain);
-     void StartNewStreamedScriptBrain(uint8 index, CEntity *entity, uint8 bHasAScriptBrain);
-     void StartOrRequestNewStreamedScriptBrain(uint8 index, CEntity *entity, int8 attachType, uint8 bAddToWaitingArray);
-     void StartOrRequestNewStreamedScriptBrainWithThisName(char const *name, CEntity *entity, int8 attachType);
-     void SwitchAllObjectBrainsWithThisID(int8 ID, bool bStatus);
+    static void InjectHooks();
+
+    void Init();
+
+    void AddNewScriptBrain(int16 ImgIndex, int16 Model, uint16 priority, int8 attachType, int8 Type, float Radius);
+    void AddNewStreamedScriptBrainForCodeUse(int16 a2, char* a3, int8 attachtype);
+
+    void CheckIfNewEntityNeedsScript(CEntity* entity, int8 attachType, void* unused);
+
+    int16 GetIndexOfScriptBrainWithThisName(const char* name, int8 attachType);
+
+    bool HasAttractorScriptBrainWithThisNameLoaded(const char* name);
+    bool IsObjectWithinBrainActivationRange(CObject* entity, CVector const* point);
+
+    void MarkAttractorScriptBrainWithThisNameAsNoLongerNeeded(const char* name);
+    void RequestAttractorScriptBrainWithThisName(const char* name);
+
+    void StartAttractorScriptBrainWithThisName(const char* name, CPed* ped, bool bHasAScriptBrain);
+    void StartNewStreamedScriptBrain(uint8 index, CEntity* entity, bool bHasAScriptBrain);
+    void StartOrRequestNewStreamedScriptBrain(uint8 index, CEntity* entity, int8 attachType, bool bAddToWaitingArray);
+    void StartOrRequestNewStreamedScriptBrainWithThisName(const char* name, CEntity* entity, int8 attachType);
+
+    void SwitchAllObjectBrainsWithThisID(int8 ID, bool bStatus);
 };

@@ -10,8 +10,8 @@ void CEventAttractor::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AF350);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AF4B0);
-    RH_ScopedInstall(CloneEditable_Reversed, 0x4B7440);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AF4B0);
+    RH_ScopedVirtualInstall(CloneEditable, 0x4B7440);
     RH_ScopedInstall(IsEffectActive, 0x4AF460);
 }
 
@@ -26,16 +26,14 @@ void CEventScriptedAttractor::InjectHooks()
 CEventAttractor::CEventAttractor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor)
 {
     m_2dEffect = effect;
-    m_entity = entity;
+    m_entity   = entity;
     m_bAvoidLookingAtAttractor = bAvoidLookingAtAttractor;
-    if (m_entity)
-        m_entity->RegisterReference(&m_entity);
+    CEntity::SafeRegisterRef(m_entity);
 }
 
 CEventAttractor::~CEventAttractor()
 {
-    if (m_entity)
-        m_entity->CleanUpOldReference(&m_entity);
+    CEntity::SafeCleanUpRef(m_entity);
 }
 
 // 0x4AF350

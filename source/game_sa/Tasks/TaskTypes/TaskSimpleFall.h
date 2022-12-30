@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TaskSimple.h"
-#include "AnimBlendAssociation.h"
+class CAnimBlendAssociation;
 
 class CTaskSimpleFall : public CTaskSimple {
 public:
@@ -15,10 +15,12 @@ public:
     static uint32& m_nMaxPlayerDownTime;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_FALL;
+
     CTaskSimpleFall(AnimationId nAnimId, AssocGroupId nAnimGroup, int32 nDownTime);
     ~CTaskSimpleFall() override;
 
-    eTaskType GetTaskType() override { return TASK_SIMPLE_FALL; }
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override { return new CTaskSimpleFall(m_nAnimId, m_nAnimGroup, m_nTotalDownTime); }
     bool ProcessPed(CPed* ped) override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
@@ -36,5 +38,4 @@ private:
 
     CTaskSimpleFall* Constructor(AnimationId nAnimId, AssocGroupId nAnimGroup, int32 nDownTime);
 };
-
 VALIDATE_SIZE(CTaskSimpleFall, 0x20);

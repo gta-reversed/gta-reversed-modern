@@ -6,7 +6,8 @@
 */
 #pragma once
 
-#include "RGBA.h"
+class CRGBA;
+class CVector;
 
 struct tPickupMessage {
 public:
@@ -16,9 +17,8 @@ public:
     CRGBA   color;
     uint8   flags;
     char    field_19;
-    char    _pad1A[2];
     uint32  price;
-    char*   messageText;
+    char*   text;
 };
 
 VALIDATE_SIZE(tPickupMessage, 0x24);

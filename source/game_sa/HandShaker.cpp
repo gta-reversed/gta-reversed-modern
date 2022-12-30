@@ -10,7 +10,7 @@ void CHandShaker::InjectHooks() {
 
     RH_ScopedInstall(SetDefaults, 0x517330);
     RH_ScopedInstall(Reset, 0x50D860);
-    // RH_ScopedInstall(Process, 0x50D930);
+    RH_ScopedInstall(Process, 0x50D930, { .reversed = false });
 }
 
 // 0x517330
@@ -31,9 +31,9 @@ void CHandShaker::SetDefaults() {
 void CHandShaker::Reset() {
     vec = CVector();
     vec3 = CVector{
-        (float)rand() * RAND_MAX_FLOAT_RECIPROCAL * vec2.x,
-        (float)rand() * RAND_MAX_FLOAT_RECIPROCAL * vec2.y,
-        (float)rand() * RAND_MAX_FLOAT_RECIPROCAL * vec2.z,
+        CGeneral::GetRandomNumberInRange(0.0f, vec2.x),
+        CGeneral::GetRandomNumberInRange(0.0f, vec2.y),
+        CGeneral::GetRandomNumberInRange(0.0f, vec2.z),
     };
 }
 

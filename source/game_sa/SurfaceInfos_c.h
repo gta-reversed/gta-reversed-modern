@@ -4,65 +4,77 @@
 
 class CColPoint;
 
+typedef uint32 SurfaceId;
+
 class SurfaceInfos_c {
 public:
-    float         m_adhesiveLimits[6][6];
-    SurfaceInfo_c m_surfaces[179];
+    float m_adhesiveLimits[6][6];
+    // fuck c*, they did shit
+    // sizeof of this class exactly 0x8F4, but then they enable *magic*
+    // and do m_surfaces[id < 195]
+    // todo: std::array<SurfaceInfo_c, TOTAL_NUM_SURFACE_TYPES> m_surfaces;
+    SurfaceInfo_c m_surfaces[TOTAL_NUM_SURFACE_TYPES];
 
-    static char* cDefaultName;
+    static constexpr const char* cDefaultName = "DEFAULT"; // 0x85C658 😏
+
+public:
     static void InjectHooks();
 
+    SurfaceId GetSurfaceIdFromName(const char* cName);
     void LoadAdhesiveLimits();
-    uint32 GetSurfaceIdFromName(char* cName);
     void LoadSurfaceAudioInfos();
     void LoadSurfaceInfos();
     void Init();
-    eAdhesionGroup GetAdhesionGroup(uint32 surfaceId);
-    float GetTyreGrip(uint32 surfaceId);
-    float GetWetMultiplier(uint32 surfaceId);
-    uint32 GetSkidmarkType(uint32 surfaceId);
-    eFrictionEffect GetFrictionEffect(uint32 surfaceId);
-    uint32 GetBulletFx(uint32 surfaceId);
-    bool IsSoftLanding(uint32 surfaceId);
-    bool IsSeeThrough(uint32 surfaceId);
-    bool IsShootThrough(uint32 surfaceId);
-    bool IsSand(uint32 surfaceId);
-    bool IsWater(uint32 surfaceId);
-    bool IsShallowWater(uint32 surfaceId);
-    bool IsBeach(uint32 surfaceId);
-    bool IsSteepSlope(uint32 surfaceId);
-    bool IsGlass(uint32 surfaceId);
-    bool IsStairs(uint32 surfaceId);
-    bool IsSkateable(uint32 surfaceId);
-    bool IsPavement(uint32 surfaceId);
-    uint32 GetRoughness(uint32 surfaceId);
-    uint32 GetFlammability(uint32 surfaceId);
-    bool CreatesSparks(uint32 surfaceId);
-    bool CantSprintOn(uint32 surfaceId);
-    bool LeavesFootsteps(uint32 surfaceId);
-    bool ProducesFootDust(uint32 surfaceId);
-    bool MakesCarDirty(uint32 surfaceId);
-    bool MakesCarClean(uint32 surfaceId);
-    bool CreatesWheelGrass(uint32 surfaceId);
-    bool CreatesWheelGravel(uint32 surfaceId);
-    bool CreatesWheelMud(uint32 surfaceId);
-    bool CreatesWheelDust(uint32 surfaceId);
-    bool CreatesWheelSand(uint32 surfaceId);
-    bool CreatesWheelSpray(uint32 surfaceId);
-    bool CreatesPlants(uint32 surfaceId);
-    bool CreatesObjects(uint32 surfaceId);
-    bool CanClimb(uint32 surfaceId);
-    bool IsAudioConcrete(uint32 surfaceId);
-    bool IsAudioGrass(uint32 surfaceId);
-    bool IsAudioSand(uint32 surfaceId);
-    bool IsAudioGravel(uint32 surfaceId);
-    bool IsAudioWood(uint32 surfaceId);
-    bool IsAudioWater(uint32 surfaceId);
-    bool IsAudioMetal(uint32 surfaceId);
-    bool IsAudioLongGrass(uint32 surfaceId);
-    bool IsAudioTile(uint32 surfaceId);
+    eAdhesionGroup GetAdhesionGroup(SurfaceId id);
+    float GetTyreGrip(SurfaceId id);
+    float GetWetMultiplier(SurfaceId id);
+    uint32 GetSkidmarkType(SurfaceId id);
+    eFrictionEffect GetFrictionEffect(SurfaceId id);
+    uint32 GetBulletFx(SurfaceId id);
+    bool IsSoftLanding(SurfaceId id);
+    bool IsSeeThrough(SurfaceId id);
+    bool IsShootThrough(SurfaceId id);
+    bool IsSand(SurfaceId id);
+    bool IsWater(SurfaceId id);
+    bool IsShallowWater(SurfaceId id);
+    bool IsBeach(SurfaceId id);
+    bool IsSteepSlope(SurfaceId id);
+    bool IsGlass(SurfaceId id);
+    bool IsStairs(SurfaceId id);
+    bool IsSkateable(SurfaceId id);
+    bool IsPavement(SurfaceId id);
+    uint32 GetRoughness(SurfaceId id);
+    uint32 GetFlammability(SurfaceId id);
+    bool CreatesSparks(SurfaceId id);
+    bool CantSprintOn(SurfaceId id);
+    bool LeavesFootsteps(SurfaceId id);
+    bool ProducesFootDust(SurfaceId id);
+    bool MakesCarDirty(SurfaceId id);
+    bool MakesCarClean(SurfaceId id);
+    bool CreatesWheelGrass(SurfaceId id);
+    bool CreatesWheelGravel(SurfaceId id);
+    bool CreatesWheelMud(SurfaceId id);
+    bool CreatesWheelDust(SurfaceId id);
+    bool CreatesWheelSand(SurfaceId id);
+    bool CreatesWheelSpray(SurfaceId id);
+    bool CreatesPlants(SurfaceId id);
+    bool CreatesObjects(SurfaceId id);
+    bool CanClimb(SurfaceId id);
+    bool IsAudioConcrete(SurfaceId id);
+    bool IsAudioGrass(SurfaceId id);
+    bool IsAudioSand(SurfaceId id);
+    bool IsAudioGravel(SurfaceId id);
+    bool IsAudioWood(SurfaceId id);
+    bool IsAudioWater(SurfaceId id);
+    bool IsAudioMetal(SurfaceId id);
+    bool IsAudioLongGrass(SurfaceId id);
+    bool IsAudioTile(SurfaceId id);
     float GetAdhesiveLimit(CColPoint* colPoint);
+
+    bool IsAudioGravelConcreteOrTile(SurfaceId id) {
+        return IsAudioGravel(id) || IsAudioConcrete(id) || IsAudioTile(id);
+    }
 };
 VALIDATE_SIZE(SurfaceInfos_c, 0x8F4);
 
-extern SurfaceInfos_c* g_surfaceInfos;
+inline static SurfaceInfos_c& g_surfaceInfos = *reinterpret_cast<SurfaceInfos_c*>(0xB79538);

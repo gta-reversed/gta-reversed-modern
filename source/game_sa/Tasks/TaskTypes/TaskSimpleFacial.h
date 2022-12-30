@@ -6,27 +6,37 @@
 */
 #pragma once
 
-
 #include "TaskSimple.h"
 #include "TaskTimer.h"
 
-enum eFacialExpression
-{
-    ANIM_FACSURP  = 0,
-    ANIM_FACSURPM = 1,
-    ANIM_FACURIOS = 2, // can be 2 or 4
-    ANIM_FACANGER = 3, // can be 3 or 5
-    ANIM_FACTALK  = 7,
-    ANIM_FACGUM   = 8,
+enum class eFacialExpression {
+    NONE    = -1,
+    SURP    =  0,
+    SURPM   =  1,
+    URIOS   =  2, // can be 2 or 4
+    ANGER   =  3, // can be 3 or 5
+    URIOS_1 =  4,
+    ANGER_1 =  5,
+    TALK    =  7,
+    GUM     =  8,
 };
 
 class CTaskSimpleFacial : public CTaskSimple {
 public:
-    CTaskTimer m_Timer;
+    CTaskTimer        m_Timer;
     eFacialExpression m_nFacialExpression;
-    int32 m_nDuration;
+    int32             m_nDuration;
 
-    CTaskSimpleFacial(eFacialExpression nFacialExpress,int32 nDuration);
+public:
+    static constexpr auto Type = TASK_SIMPLE_FACIAL;
+
+    CTaskSimpleFacial(eFacialExpression nFacialExpress, int32 nDuration);
+    ~CTaskSimpleFacial() override = default; // 0x690CB0
+
+    eTaskType GetTaskType() override { return Type; } // 0x690CA0
+    CTask* Clone() override { return new CTaskSimpleFacial(m_nFacialExpression, m_nDuration); } // 0x692820
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool ProcessPed(CPed* ped) override;
+    static AnimationId GetAnimId(eFacialExpression expression);
 };
-
 VALIDATE_SIZE(CTaskSimpleFacial, 0x1C);

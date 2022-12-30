@@ -10,7 +10,7 @@
     https://gtamods.com/wiki/Decision_Maker
 */
 
-enum eTaskType;
+enum eTaskType : int32;
 
 enum eDecisionTypes {
     DECISION_ON_FOOT = 0,

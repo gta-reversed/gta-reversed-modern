@@ -6,119 +6,171 @@
 */
 #pragma once
 
-class CVector2D {
+#include <span>
+
+#include "RenderWare.h"
+
+class CVector;
+
+class CVector2D : public RwV2d {
 public:
-    float x, y;
+    constexpr CVector2D() = default;
+    constexpr CVector2D(float X, float Y) : RwV2d{ X, Y } {}
+    constexpr CVector2D(const RwV2d& vec2d)     { x = vec2d.x; y = vec2d.y; }
+    constexpr CVector2D(const CVector2D& vec2d) { x = vec2d.x; y = vec2d.y; }
 
-    constexpr CVector2D() :
-        x(0.0f),
-        y(0.0f)
-    {
-    }
-
-    constexpr CVector2D(float X, float Y) :
-        x(X),
-        y(Y)
-    {
-    }
-
-    CVector2D(const class CVector& vec3d);
+    CVector2D(const CVector& vec3d);
 
     static void InjectHooks();
 
-    // Returns length of vector
-    float Magnitude();
-
+    /// Normalize this vector in-place
     void  Normalise();
 
-    inline float SquaredMagnitude() {
+    /// Get a normalized copy of this vector
+    auto Normalized() const {
+        CVector2D cpy = *this;
+        cpy.Normalise();
+        return cpy;
+    }
+
+    [[nodiscard]] constexpr inline float SquaredMagnitude() const {
         return x * x + y * y;
     }
 
-    void operator=(const CVector2D& right);
+    // Returns length of vector
+    [[nodiscard]] inline float Magnitude() const {
+        return std::sqrt(x * x + y * y);
+    }
 
-    inline CVector2D(const CVector2D& src) {
-        x = src.x;
-        y = src.y;
+    [[nodiscard]] inline bool IsZero() const {
+        return x == 0.0F && y == 0.0F;
+    }
+
+    CVector2D& operator=(const CVector2D& right) {
+        x = right.x;
+        y = right.y;
+        return *this;
     }
 
     inline void Sum(CVector2D& a, CVector2D& b) {
-        this->x = a.x + b.x;
-        this->y = a.y + b.y;
+        x = a.x + b.x;
+        y = a.y + b.y;
     }
 
     inline void Difference(CVector2D& a, CVector2D& b) {
-        this->x = a.x - b.x;
-        this->y = a.y - b.y;
+        x = a.x - b.x;
+        y = a.y - b.y;
     }
 
     inline void operator+=(const CVector2D& right) {
-        this->x += right.x;
-        this->y += right.y;
+        x += right.x;
+        y += right.y;
     }
 
     inline void operator-=(const CVector2D& right) {
-        this->x -= right.x;
-        this->y -= right.y;
+        x -= right.x;
+        y -= right.y;
     }
 
     inline void operator*=(float multiplier) {
-        this->x *= multiplier;
-        this->y *= multiplier;
+        x *= multiplier;
+        y *= multiplier;
     }
 
     inline void operator/=(float divisor) {
-        this->x /= divisor;
-        this->y /= divisor;
+        x /= divisor;
+        y /= divisor;
     }
 
     inline void Set(float X, float Y) {
         x = X;
         y = Y;
     }
+     
+    [[nodiscard]] float Heading() const {
+        return std::atan2(-x, y);
+    }
+
+
+    auto GetComponents() const {
+        return std::span{ reinterpret_cast<const float*>(this), 2 };
+    }
+
+    constexpr friend CVector2D operator*(const CVector2D& vec, float multiplier) {
+        return { vec.x * multiplier, vec.y * multiplier };
+    }
+
+    /// Calculate the dot product with another vector
+    float Dot(const CVector2D& lhs) const {
+        return x * lhs.x + y * lhs.y;
+    }
+
+    /*!
+    * @return A copy of this vector projected onto the input vector, which is assumed to be unit length.
+    */
+    CVector2D ProjectOnToNormal(const CVector2D& projectOnTo) const {
+        return projectOnTo * Dot(projectOnTo);
+    }
+
+    /// Wrapper around `CGeneral::GetNodeHeadingFromVector`
+    uint32 NodeHeading() const;
 };
 
-inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {
-    return CVector2D(vecOne.x - vecTwo.x, vecOne.y - vecTwo.y);
+constexpr inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {
+    return { vecOne.x - vecTwo.x, vecOne.y - vecTwo.y };
 }
 
-inline CVector2D operator+(const CVector2D& vecOne, const CVector2D& vecTwo) {
-    return CVector2D(vecOne.x + vecTwo.x, vecOne.y + vecTwo.y);
+constexpr inline CVector2D operator+(const CVector2D& vecOne, const CVector2D& vecTwo) {
+    return { vecOne.x + vecTwo.x, vecOne.y + vecTwo.y };
 }
 
-inline CVector2D operator*(const CVector2D& vecOne, const CVector2D& vecTwo) {
-    return CVector2D(vecOne.x * vecTwo.x, vecOne.y * vecTwo.y);
+constexpr inline CVector2D operator*(const CVector2D& vecOne, const CVector2D& vecTwo) {
+    return { vecOne.x * vecTwo.x, vecOne.y * vecTwo.y };
 }
 
-inline CVector2D operator*(const CVector2D& vec, float multiplier) {
-    return CVector2D(vec.x * multiplier, vec.y * multiplier);
+constexpr inline CVector2D operator/(const CVector2D& vec, float dividend) {
+    return { vec.x / dividend, vec.y / dividend };
 }
 
-inline CVector2D operator/(const CVector2D& vec, float dividend) {
-    return CVector2D(vec.x / dividend, vec.y / dividend);
+constexpr inline CVector2D operator*(float multiplier, const CVector2D& vec) {
+    return { vec.x * multiplier, vec.y * multiplier };
 }
 
-inline CVector2D operator*(float multiplier, const CVector2D& vec) {
-    return CVector2D(vec.x * multiplier, vec.y * multiplier);
+constexpr inline bool operator!=(const CVector2D& vecOne, const CVector2D& vecTwo) {
+    return vecOne.x != vecTwo.x || vecOne.y != vecTwo.y;
+}
+
+constexpr inline bool operator!=(const CVector2D& vec, float notEqualTo) {
+    return vec.x != notEqualTo || vec.y != notEqualTo;
+}
+
+constexpr inline bool operator==(const CVector2D& vec, float equalTo) {
+    return vec.x == equalTo && vec.y == equalTo;
+}
+
+constexpr inline bool operator==(const CVector2D& vecLeft, const CVector2D& vecRight) {
+    return vecLeft.x == vecRight.x && vecLeft.y == vecRight.y;
 }
 
 inline float DistanceBetweenPoints2D(const CVector2D& pointOne, const CVector2D& pointTwo) {
     return (pointTwo - pointOne).Magnitude();
 }
 
-inline float DistanceBetweenPointsSquared2D(const CVector2D& pointOne, const CVector2D& pointTwo) {
+constexpr inline float DistanceBetweenPointsSquared2D(const CVector2D& pointOne, const CVector2D& pointTwo) {
     return (pointTwo - pointOne).SquaredMagnitude();
 }
 
-inline float DotProduct2D(const CVector2D& v1, const CVector2D& v2) {
+constexpr inline float DotProduct2D(const CVector2D& v1, const CVector2D& v2) {
     return v1.y * v2.y + v1.x * v2.x;
 }
 
-static bool IsPointWithinBounds2D(CVector2D min, CVector2D max, CVector2D point) {
+constexpr static bool IsPointWithinBounds2D(CVector2D min, CVector2D max, CVector2D point) {
     return (point.x >= min.x && point.x <= max.x) &&
            (point.y >= min.y && point.y <= max.y);
 }
 
-static bool IsPointInRectangle2D(CVector2D rectTopLeft, CVector2D rectSize, CVector2D point) {
+constexpr static bool IsPointInRectangle2D(CVector2D rectTopLeft, CVector2D rectSize, CVector2D point) {
     return IsPointWithinBounds2D(rectTopLeft + rectSize, rectTopLeft, point);
 }
+
+static CVector2D Normalized2D(CVector2D v) { v.Normalise(); return v; }

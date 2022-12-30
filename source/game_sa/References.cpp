@@ -47,27 +47,24 @@ void CReferences::RemoveReferencesToPlayer() {
     if (player) {
         player->ResolveReferences();
         auto& group = CPedGroups::GetGroup(player->m_pPlayerData->m_nPlayerGroup);
-        group.m_groupMembership.SetLeader(player);
+        group.GetMembership().SetLeader(player);
         group.Process();
     }
 }
 
 void CReferences::PruneAllReferencesInWorld() {
-    auto iPedsSize = CPools::ms_pPedPool->GetSize();
-    for (int32 i = 0; i < iPedsSize; ++i) {
-        if (auto ped = CPools::ms_pPedPool->GetAt(i))
+    for (int32 i = 0; i < GetPedPool()->GetSize(); ++i) {
+        if (auto ped = GetPedPool()->GetAt(i))
             ped->PruneReferences();
     }
 
-    auto iVehsSize = CPools::ms_pVehiclePool->GetSize();
-    for (int32 i = 0; i < iVehsSize; ++i) {
-        if (auto vehicle = CPools::ms_pVehiclePool->GetAt(i))
+    for (int32 i = 0; i < GetVehiclePool()->GetSize(); ++i) {
+        if (auto vehicle = GetVehiclePool()->GetAt(i))
             vehicle->PruneReferences();
     }
 
-    auto iObjectsSize = CPools::ms_pObjectPool->GetSize();
-    for (int32 i = 0; i < iObjectsSize; ++i) {
-        if (auto obj = CPools::ms_pObjectPool->GetAt(i))
+    for (int32 i = 0; i < GetObjectPool()->GetSize(); ++i) {
+        if (auto obj = GetObjectPool()->GetAt(i))
             obj->PruneReferences();
     }
 }

@@ -2,16 +2,20 @@
 
 #include "AEWeaponAudioEntity.h"
 
-class CAEGlobalWeaponAudioEntity : public CAEWeaponAudioEntity {
+class NOTSA_EXPORT_VTABLE CAEGlobalWeaponAudioEntity : public CAEWeaponAudioEntity {
 public:
     CAEGlobalWeaponAudioEntity();
-    ~CAEGlobalWeaponAudioEntity() = default; // 0x506C50
+    ~CAEGlobalWeaponAudioEntity();
 
     void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
 
     void AddAudioEvent(eAudioEvents audioId, eWeaponType weaponType, CPhysical* entity);
-    void ProjectileFire(eWeaponType weaponType, CPhysical* physical, int32 audioId);
+    void ProjectileFire(eWeaponType weaponType, CPhysical* physical, eAudioEvents event);
     void ServiceAmbientGunFire();
+
+private:
+    CPhysical* m_Physical;
+    int8       m_FrequencyVariation;
 
 private:
     friend void InjectHooksMain();
@@ -20,5 +24,4 @@ private:
     CAEGlobalWeaponAudioEntity* Constructor();
     CAEGlobalWeaponAudioEntity* Destructor();
 };
-
 VALIDATE_SIZE(CAEGlobalWeaponAudioEntity, 0xA8);

@@ -1,32 +1,57 @@
 #pragma once
 
+#include "Vector2D.h"
 #include "Vector.h"
 
-class CEntity;
 class CVehicle;
+class CEntity;
 class CObject;
 class CPtrList;
+class CFallingGlassPane;
+
+enum class ePaneType : uint32 {
+    DEFAULT = 0,
+    DELAYED = 1,
+    CAR     = 2
+};
 
 class CGlass {
+public:
+    static CVector2D (&PanePolyPositions)[4][3];
+    static int32& ReflectionPolyVertexBaseIdx;
+    static int32& ReflectionPolyIndexBaseIdx;
+    static RxObjSpace3DLitVertex(&ReflectionPolyVertexBuffer)[1706];
+    static RxObjSpace3DLitVertex(&ShatteredPolyVertexBuffer)[512];
+    static int32& ShatteredVerticesBaseIdx;
+    static int32& ShatteredIndicesBaseIdx;
+    static uint32& H1iLightPolyVerticesIdx;
+    static int32& HiLightPolyIndicesIdx;
+    static CVector2D (&PanePolyCenterPositions)[5];
+    static CEntity*(&apEntitiesToBeRendered)[32];
+    static inline uint32& NumGlassEntities = *(uint32*)0xC71BD8;
+    static CFallingGlassPane (&aGlassPanes)[44];
+    static uint32& LastColCheckMS;
+
 public:
     static void InjectHooks();
 
     static void Init();
+    static bool HasGlassBeenShatteredAtCoors(CVector point);
+    static void CarWindscreenShatters(CVehicle* vehicle);
+    static void WasGlassHitByBullet(CEntity* entity, CVector hitPos);
+    static void WindowRespondsToCollision(CEntity* entity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, bool max1PaneSection);
+    static void GeneratePanesForWindow(ePaneType type, CVector pos, CVector fwd, CVector right, CVector velocity, CVector center, float velocityCenterDragCoeff,
+                                       bool bShatter, bool numSectionsMax1, int32 numSections, bool unk);
     static void Update();
-    static void AskForObjectToBeRenderedInGlass(CEntity* entity);
-    static void BreakGlassPhysically(CVector a1, float a2);
-    static void CalcAlphaWithNormal(CVector* a1);
-    static void CarWindscreenShatters(CVehicle* a1);
-    static void FindFreePane();
-    static void FindWindowSectorList(CPtrList& a1, float* a2, CEntity** a3, float a4, float a5, float a6);
-    static void GeneratePanesForWindow(uint32 a1, CVector a2, CVector a3, CVector a4, CVector a5, CVector a6, float a7, bool a8, bool a9, int32 a10, bool a11);
-    static void HasGlassBeenShatteredAtCoors(CVector a1);
     static void Render();
-    static void RenderHiLightPolys();
+    static void FindWindowSectorList(CPtrList& objList, float& outDist, CEntity*& outEntity, CVector point);
     static void RenderReflectionPolys();
     static void RenderShatteredPolys();
-    static void WasGlassHitByBullet(CEntity* a1, CVector a2);
-    static void WindowRespondsToExplosion(CEntity* a1, const CVector& a2);
-    static void WindowRespondsToCollision(CEntity* entity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, int32 bUnknown);
-    static void WindowRespondsToSoftCollision(CObject* entity, float fDamageIntensity);
+    static void RenderHiLightPolys();
+    static uint8 CalcAlphaWithNormal(const CVector& normal);
+    static void AskForObjectToBeRenderedInGlass(CEntity* entity);
+    static CFallingGlassPane* FindFreePane();
+    static void WindowRespondsToSoftCollision(CEntity* entity, float fDamageIntensity);
+    static void BreakGlassPhysically(CVector pos, float radius);
+    static void WindowRespondsToExplosion(CEntity* entity, Const CVector point);
 };

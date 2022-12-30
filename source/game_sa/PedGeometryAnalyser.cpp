@@ -6,45 +6,45 @@ void CPedGeometryAnalyser::InjectHooks() {
     RH_ScopedClass(CPedGeometryAnalyser);
     RH_ScopedCategoryGlobal();
 
-//    RH_ScopedInstall(CanPedJumpObstacle, 0x0);
-//    RH_ScopedInstall(CanPedJumpObstacle, 0x0);
-//    RH_ScopedInstall(CanPedTargetPed, 0x5F1C40);
-//    RH_ScopedInstall(CanPedTargetPoint, 0x5F1B70);
-//    RH_ScopedInstall(ComputeBuildingHitPoints, 0x5F1E30);
-//    RH_ScopedInstall(ComputeClearTarget, 0x0);
+    //RH_ScopedInstall(CanPedJumpObstacle, 0x0, { .reversed = false });
+    //RH_ScopedInstall(CanPedJumpObstacle, 0x0, { .reversed = false });
+    RH_ScopedInstall(CanPedTargetPed, 0x5F1C40, { .reversed = false });
+    RH_ScopedInstall(CanPedTargetPoint, 0x5F1B70, { .reversed = false });
+    RH_ScopedInstall(ComputeBuildingHitPoints, 0x5F1E30, { .reversed = false });
+    //RH_ScopedInstall(ComputeClearTarget, 0x0, { .reversed = false });
     RH_ScopedOverloadedInstall(ComputeClosestSurfacePoint, "", 0x5F3B70, bool (*)(const CPed& ped, CEntity& entity, CVector& point));
-//    RH_ScopedInstall(ComputeClosestSurfacePoint, 0x0);
-//    RH_ScopedInstall(ComputeClosestSurfacePoint, 0x0);
-//    RH_ScopedInstall(ComputeEntityBoundingBoxCentre, 0x0);
+    //RH_ScopedInstall(ComputeClosestSurfacePoint, 0x0, { .reversed = false });
+    //RH_ScopedInstall(ComputeClosestSurfacePoint, 0x0, { .reversed = false });
+    //RH_ScopedInstall(ComputeEntityBoundingBoxCentre, 0x0, { .reversed = false });
     RH_ScopedInstall(ComputeEntityBoundingBoxCentreUncached, 0x5F1600);
     RH_ScopedInstall(ComputeEntityBoundingBoxCentreUncachedAll, 0x5F3B40);
-//    RH_ScopedInstall(ComputeEntityBoundingBoxCorners, 0x0);
-//    RH_ScopedInstall(ComputeEntityBoundingBoxCornersUncached, 0x5F1FA0);
-//    RH_ScopedInstall(ComputeEntityBoundingBoxPlanes, 0x5F3660);
+    //RH_ScopedInstall(ComputeEntityBoundingBoxCorners, 0x0, { .reversed = false });
+    RH_ScopedInstall(ComputeEntityBoundingBoxCornersUncached, 0x5F1FA0, { .reversed = false });
+    RH_ScopedInstall(ComputeEntityBoundingBoxPlanes, 0x5F3660, { .reversed = false });
     RH_ScopedInstall(ComputeEntityBoundingBoxPlanesUncached, 0x5F1670);
-//    RH_ScopedInstall(ComputeEntityBoundingBoxPlanesUncachedAll, 0x0);
-//    RH_ScopedInstall(ComputeEntityBoundingBoxSegmentPlanes, 0x0);
-//    RH_ScopedInstall(ComputeEntityBoundingBoxSegmentPlanesUncached, 0x5F1750);
+    //RH_ScopedInstall(ComputeEntityBoundingBoxPlanesUncachedAll, 0x0, { .reversed = false });
+    //RH_ScopedInstall(ComputeEntityBoundingBoxSegmentPlanes, 0x0, { .reversed = false });
+    RH_ScopedInstall(ComputeEntityBoundingBoxSegmentPlanesUncached, 0x5F1750, { .reversed = false });
     RH_ScopedInstall(ComputeEntityBoundingBoxSegmentPlanesUncachedAll, 0x5F2BC0);
-//    RH_ScopedInstall(ComputeEntityBoundingSphere, 0x5F3C20);
-//    RH_ScopedInstall(ComputeMoveDirToAvoidEntity, 0x0);
-//    RH_ScopedInstall(ComputeEntityDirs, 0x5F1500);
-//    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
-//    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
-//    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
-//    RH_ScopedInstall(ComputePedHitSide, 0x0);
-//    RH_ScopedInstall(ComputePedHitSide, 0x0);
-//    RH_ScopedInstall(ComputePedShotSide, 0x5F13F0);
-//    RH_ScopedInstall(ComputeRouteRoundEntityBoundingBox, 0x0);
-//    RH_ScopedInstall(ComputeRouteRoundEntityBoundingBox, 0x0);
-//    RH_ScopedInstall(ComputeRouteRoundSphere, 0x5F1890);
-//    RH_ScopedInstall(GetIsLineOfSightClear, 0x0);
-//    RH_ScopedInstall(GetIsLineOfSightClear, 0x0);
-//    RH_ScopedInstall(GetNearestPed, 0x5F3590);
-//    RH_ScopedInstall(IsEntityBlockingTarget, 0x5F3970);
-//    RH_ScopedInstall(IsInAir, 0x5F1CB0);
-//    RH_ScopedInstall(IsWanderPathClear, 0x5F2F70);
-//    RH_ScopedInstall(LiesInsideBoundingBox, 0x5F3880);
+    RH_ScopedInstall(ComputeEntityBoundingSphere, 0x5F3C20, { .reversed = false });
+    //RH_ScopedInstall(ComputeMoveDirToAvoidEntity, 0x0, { .reversed = false });
+    RH_ScopedInstall(ComputeEntityDirs, 0x5F1500, { .reversed = false });
+    //    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
+    //    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
+    //    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
+    //RH_ScopedInstall(ComputePedHitSide, 0x0, { .reversed = false });
+    //RH_ScopedInstall(ComputePedHitSide, 0x0, { .reversed = false });
+    RH_ScopedInstall(ComputePedShotSide, 0x5F13F0, { .reversed = false });
+    //RH_ScopedInstall(ComputeRouteRoundEntityBoundingBox, 0x0, { .reversed = false });
+    //RH_ScopedInstall(ComputeRouteRoundEntityBoundingBox, 0x0, { .reversed = false });
+    RH_ScopedInstall(ComputeRouteRoundSphere, 0x5F1890, { .reversed = false });
+    //RH_ScopedInstall(GetIsLineOfSightClear, 0x0, { .reversed = false });
+    //RH_ScopedInstall(GetIsLineOfSightClear, 0x0, { .reversed = false });
+    RH_ScopedInstall(GetNearestPed, 0x5F3590, { .reversed = false });
+    RH_ScopedInstall(IsEntityBlockingTarget, 0x5F3970, { .reversed = false });
+    RH_ScopedInstall(IsInAir, 0x5F1CB0, { .reversed = false });
+    RH_ScopedInstall(IsWanderPathClear, 0x5F2F70, { .reversed = false });
+    RH_ScopedInstall(LiesInsideBoundingBox, 0x5F3880, { .reversed = false });
 }
 
 // 0x5F1B00
@@ -144,18 +144,18 @@ void CPedGeometryAnalyser::ComputeEntityBoundingBoxCornersUncached(float zPos, C
 }
 
 // 0x5F3660
-void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanes(float zPos, CEntity& entity, CVector* planes, float* planes_D) {
+void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanes(float zPos, CEntity& entity, CVector(*outPlanes)[4], float* outPlanesDot) {
     CVector corners[4];
     ComputeEntityBoundingBoxCornersUncached(zPos, entity, corners);
-    ComputeEntityBoundingBoxPlanesUncached(zPos, corners, planes, planes_D);
+    ComputeEntityBoundingBoxPlanesUncached(zPos, corners, outPlanes, outPlanesDot);
 }
 
 // 0x5F1670
-void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncached(float zPos, const CVector* corners, CVector* planes, float* planes_D) {
+void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncached(float zPos, const CVector* corners, CVector(*outPlanes)[4], float* outPlanesDot) {
     const CVector* corner2 = &corners[3];
     for (auto i = 0; i < 4; i++) {
         const CVector& corner = corners[i];
-        CVector& plane = planes[i];
+        CVector& plane = (*outPlanes)[i];
         CVector direction = corner - *corner2;
         direction.Normalise();
         plane.x = direction.y;
@@ -164,13 +164,16 @@ void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncached(float zPos, co
         // point-normal plane equation:
         // ax + by + cz + d = 0
         // d = - n . P
-        planes_D[i] = -DotProduct(plane, *corner2);
+        outPlanesDot[i] = -DotProduct(plane, *corner2);
+
         corner2 = &corner;
     }
 }
 
-void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncachedAll(float zPos, CEntity& entity, CVector* posn, float* a4) {
-    assert(false);
+void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncachedAll(float zPos, CEntity& entity, CVector (*outPlanes)[4], float* outPlanesDot) {
+    CVector corners[4];
+    CPedGeometryAnalyser::ComputeEntityBoundingBoxCornersUncached(zPos, entity, corners);
+    CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncached(zPos, corners, outPlanes, outPlanesDot);
 }
 
 void CPedGeometryAnalyser::ComputeEntityBoundingBoxSegmentPlanes(float zPos, CEntity& entity, CVector*, float*) {
@@ -286,4 +289,14 @@ bool CPedGeometryAnalyser::IsWanderPathClear(const CVector& a1, const CVector& a
 // 0x5F3880
 bool CPedGeometryAnalyser::LiesInsideBoundingBox(const CPed& ped, const CVector& posn, CEntity& entity) {
     return plugin::CallAndReturn<bool, 0x5F3880, const CPed&, const CVector&, CEntity&>(ped, posn, entity);
+}
+
+// 0x41B7C0
+void* CPointRoute::operator new(uint32 size) {
+    return CPools::ms_pPointRoutePool->New();
+}
+
+// 0x41B7D0
+void CPointRoute::operator delete(void* ptr, size_t sz) {
+    CPools::ms_pPointRoutePool->Delete(reinterpret_cast<CPointRoute*>(ptr));
 }

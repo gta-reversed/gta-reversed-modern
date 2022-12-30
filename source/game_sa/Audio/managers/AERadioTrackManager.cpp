@@ -48,49 +48,49 @@ void CAERadioTrackManager::InjectHooks() {
     RH_ScopedClass(CAERadioTrackManager);
     RH_ScopedCategory("Audio/Managers");
 
-    // RH_ScopedInstall(Load, 0x5D40E0);
-    // RH_ScopedInstall(Save, 0x5D3EE0);
-    // RH_ScopedInstall(Initialise, 0x5B9390);
-    // RH_ScopedInstall(Service, 0x4EB9A0);
+    RH_ScopedInstall(Load, 0x5D40E0, { .reversed = false });
+    RH_ScopedInstall(Save, 0x5D3EE0, { .reversed = false });
+    RH_ScopedInstall(Initialise, 0x5B9390, { .reversed = false });
+    RH_ScopedInstall(Service, 0x4EB9A0, { .reversed = false });
     RH_ScopedInstall(DisplayRadioStationName, 0x4E9E50);
-    // RH_ScopedInstall(CheckForStationRetune, 0x4EB660);
+    RH_ScopedInstall(CheckForStationRetune, 0x4EB660, { .reversed = false });
     RH_ScopedInstall(CheckForPause, 0x4EA590);
-    // RH_ScopedInstall(IsVehicleRadioActive, 0x4E9800);
-    // RH_ScopedInstall(AddDJBanterIndexToHistory, 0x4E97B0);
-    // RH_ScopedInstall(AddAdvertIndexToHistory, 0x4E9760);
-    // RH_ScopedInstall(AddIdentIndexToHistory, 0x4E9720);
+    RH_ScopedInstall(IsVehicleRadioActive, 0x4E9800, { .reversed = false });
+    RH_ScopedInstall(AddDJBanterIndexToHistory, 0x4E97B0, { .reversed = false });
+    RH_ScopedInstall(AddAdvertIndexToHistory, 0x4E9760, { .reversed = false });
+    RH_ScopedInstall(AddIdentIndexToHistory, 0x4E9720, { .reversed = false });
     // RH_ScopedOverloadedInstall(StartRadio, "", 0x4EB3C0, void (CAERadioTrackManager::*)(int8, int8, float, uint8));
     // RH_ScopedOverloadedInstall(StartRadio, "", 0x4EB550, void (CAERadioTrackManager::*)(tVehicleAudioSettings*));
-    // RH_ScopedInstall(CheckForStationRetuneDuringPause, 0x4EB890);
-    // RH_ScopedInstall(TrackRadioStation, 0x4EAC30);
+    RH_ScopedInstall(CheckForStationRetuneDuringPause, 0x4EB890, { .reversed = false });
+    RH_ScopedInstall(TrackRadioStation, 0x4EAC30, { .reversed = false });
     RH_ScopedInstall(ChooseTracksForStation, 0x4EB180);
-    // RH_ScopedInstall(AddMusicTrackIndexToHistory, 0x4E96C0);
-    // RH_ScopedInstall(CheckForTrackConcatenation, 0x4EA930);
-    // RH_ScopedInstall(QueueUpTracksForStation, 0x4EA670);
-    // RH_ScopedInstall(ChooseDJBanterIndex, 0x4EA2D0);
-    // RH_ScopedInstall(ChooseDJBanterIndexFromList, 0x4E95E0);
-    // RH_ScopedInstall(ChooseAdvertIndex, 0x4E9570);
-    // RH_ScopedInstall(ChooseIdentIndex, 0x4E94C0);
-    // RH_ScopedInstall(ChooseMusicTrackIndex, 0x4EA270);
-    // RH_ScopedInstall(ChooseTalkRadioShow, 0x4E8E40);
+    RH_ScopedInstall(AddMusicTrackIndexToHistory, 0x4E96C0, { .reversed = false });
+    RH_ScopedInstall(CheckForTrackConcatenation, 0x4EA930, { .reversed = false });
+    RH_ScopedInstall(QueueUpTracksForStation, 0x4EA670, { .reversed = false });
+    RH_ScopedInstall(ChooseDJBanterIndex, 0x4EA2D0, { .reversed = false });
+    RH_ScopedInstall(ChooseDJBanterIndexFromList, 0x4E95E0, { .reversed = false });
+    RH_ScopedInstall(ChooseAdvertIndex, 0x4E9570, { .reversed = false });
+    RH_ScopedInstall(ChooseIdentIndex, 0x4E94C0, { .reversed = false });
+    RH_ScopedInstall(ChooseMusicTrackIndex, 0x4EA270, { .reversed = false });
+    RH_ScopedInstall(ChooseTalkRadioShow, 0x4E8E40, { .reversed = false });
     RH_ScopedInstall(CheckForMissionStatsChanges, 0x4E8410);
     RH_ScopedInstall(StartTrackPlayback, 0x4EA640);
-    // RH_ScopedInstall(UpdateRadioVolumes, 0x4EA010);
-    // RH_ScopedInstall(PlayRadioAnnouncement, 0x4E8400);
+    RH_ScopedInstall(UpdateRadioVolumes, 0x4EA010, { .reversed = false });
+    RH_ScopedInstall(PlayRadioAnnouncement, 0x4E8400, { .reversed = false });
     RH_ScopedInstall(GetCurrentRadioStationID, 0x4E83F0);
     RH_ScopedInstall(GetRadioStationListenTimes, 0x4E83E0);
     RH_ScopedInstall(GetRadioStationName, 0x4E9E10);
     RH_ScopedInstall(GetRadioStationNameKey, 0x4E8380);
     RH_ScopedInstall(HasRadioRetuneJustStarted, 0x4E8370);
-    // RH_ScopedInstall(StopRadio, 0x4E9820);
-    // RH_ScopedInstall(IsRadioOn, 0x4E8350);
+    RH_ScopedInstall(StopRadio, 0x4E9820, { .reversed = false });
+    RH_ScopedInstall(IsRadioOn, 0x4E8350, { .reversed = false });
     RH_ScopedInstall(InitialiseRadioStationID, 0x4E8330);
     RH_ScopedInstall(SetBassEnhanceOnOff, 0x4E9DB0);
     RH_ScopedInstall(SetBassSetting, 0x4E82F0);
     RH_ScopedInstall(SetRadioAutoRetuneOnOff, 0x4E82E0);
-    // RH_ScopedInstall(RetuneRadio, 0x4E8290);
+    RH_ScopedInstall(RetuneRadio, 0x4E8290, { .reversed = false });
     RH_ScopedInstall(ResetStatistics, 0x4E8200);
-    // RH_ScopedInstall(Reset, 0x4E7F80);
+    RH_ScopedInstall(Reset, 0x4E7F80, { .reversed = false });
 }
 
 // 0x5B9390
@@ -206,10 +206,10 @@ void CAERadioTrackManager::DisplayRadioStationName() {
     if (TheCamera.m_bWideScreenOn)
         return;
 
-    if (!FindPlayerVehicle(-1, false))
+    if (!FindPlayerVehicle())
         return;
 
-    if (CReplay::Mode == 1)
+    if (CReplay::Mode == MODE_PLAYBACK)
         return;
 
     if (m_bDisplayStationName && IsVehicleRadioActive()) {
@@ -244,7 +244,7 @@ void CAERadioTrackManager::DisplayRadioStationName() {
 }
 
 // 0x4E9E10
-char* CAERadioTrackManager::GetRadioStationName(RadioStationId id) {
+const char* CAERadioTrackManager::GetRadioStationName(RadioStationId id) {
     if (id <= 0)
         return nullptr;
 
@@ -285,22 +285,22 @@ void CAERadioTrackManager::CheckForMissionStatsChanges() {
         }
     }
 
-    auto nStatsCitiesPassed = (uint32)CStats::GetStatValue(STAT_CITY_UNLOCKED);
-    if (m_nStatsCitiesPassed < nStatsCitiesPassed) {
-        m_nStatsCitiesPassed = nStatsCitiesPassed;
-        if (nStatsCitiesPassed == 1 || nStatsCitiesPassed == 2) {
+    float statsCitiesPassed = CStats::GetStatValue(STAT_CITY_UNLOCKED);
+    if ((float)m_nStatsCitiesPassed < statsCitiesPassed) {
+        m_nStatsCitiesPassed = (uint8)statsCitiesPassed;
+        if (statsCitiesPassed == 1 || statsCitiesPassed == 2) {
             m_nStatsLastHitGameClockDays  = CClock::GetGameClockDays();
             m_nStatsLastHitGameClockHours = CClock::GetGameClockHours();
             m_nStatsLastHitTimeOutHours   = 24;
             m_nSpecialDJBanterPending     = 1;
-            m_nSpecialDJBanterIndex       = nStatsCitiesPassed - 1;
+            m_nSpecialDJBanterIndex       = m_nStatsCitiesPassed - 1;
         }
     }
 
-    const auto Update = [](auto& inputStat, const eStats stat, const auto specialDJBanterIndex) {
-        auto statValue = CStats::GetStatValue(stat);
-        if (inputStat < statValue) {
-            inputStat = statValue;
+    const auto Update = [](uint8& inputStat, const eStats stat, const auto specialDJBanterIndex) {
+        float statValue = CStats::GetStatValue(stat);
+        if ((float)inputStat < statValue) {
+            inputStat = (uint8)statValue;
             if (inputStat == 1) {
                 m_nStatsLastHitGameClockDays  = CClock::GetGameClockDays();
                 m_nStatsLastHitGameClockHours = CClock::GetGameClockHours();
@@ -601,7 +601,7 @@ void CAERadioTrackManager::CheckForPause() {
             AEAudioHardware.SetChannelFrequencyScalingFactor(m_nChannel, 0, 1.0f);
         } else {
             StopRadio(nullptr, false);
-            AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP, 0.0f, 1.0f);
+            AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
             m_bPauseMode = false;
         }
     }

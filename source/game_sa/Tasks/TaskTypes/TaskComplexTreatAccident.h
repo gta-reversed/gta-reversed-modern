@@ -8,14 +8,16 @@ public:
     CAccident* m_pAccident;
 
 public:
-    CTaskComplexTreatAccident(CAccident* accident);
+    static constexpr auto Type = TASK_COMPLEX_TREAT_ACCIDENT;
+
+    explicit CTaskComplexTreatAccident(CAccident* accident);
     ~CTaskComplexTreatAccident() override = default; // 0x658AE0
 
-    eTaskType GetTaskType() override { return TASK_COMPLEX_TREAT_ACCIDENT; }
+    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
-    CTask* Clone() override;
 
     CTask* CreateSubTask(eTaskType taskType, CPed* ped);
     float ComputeHeading(CPed* ped);
@@ -31,5 +33,4 @@ private:
     CTask* ControlSubTask_Reversed(CPed* ped);
     CTask* Clone_Reversed();
 };
-
 VALIDATE_SIZE(CTaskComplexTreatAccident, 0x10);

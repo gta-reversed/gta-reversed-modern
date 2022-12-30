@@ -45,6 +45,8 @@ class CLodTimeModelInfo;
 class CPedModelInfo;
 class CTimeModelInfo;
 class CVehicleModelInfo;
+class CWeaponModelInfo;
+struct RwObject;
 
 // originally an abstract class
 class CBaseModelInfo {
@@ -76,7 +78,7 @@ public:
             union {
                 struct { // Atomic flags
                     uint8 bIsRoad : 1;
-                    uint8 : 1;
+                    uint8 bAtomicFlag0x200: 1;
                     uint8 bDontCollideWithFlyer : 1;
                     uint8 nSpecialType : 4;
                     uint8 bWetRoadReflection : 1;
@@ -101,9 +103,9 @@ public:
     CColModel* m_pColModel;     // 20
     float      m_fDrawDistance; // 24
     union {
-        struct RwObject* m_pRwObject;
-        struct RpClump*  m_pRwClump;
-        struct RpAtomic* m_pRwAtomic;
+        RwObject* m_pRwObject;
+        RpClump*  m_pRwClump;
+        RpAtomic* m_pRwAtomic;
     };
 
 public:
@@ -119,8 +121,8 @@ public:
     virtual void Shutdown();
     virtual void DeleteRwObject() = 0;
     virtual uint32 GetRwModelType() = 0;
-    virtual struct RwObject* CreateInstance() = 0;
-    virtual struct RwObject* CreateInstance(RwMatrix* matrix) = 0;
+    virtual RwObject* CreateInstance() = 0;                 // todo: check order
+    virtual RwObject* CreateInstance(RwMatrix* matrix) = 0; // todo: check order
     virtual void SetAnimFile(const char* filename);
     virtual void ConvertAnimFileIndex();
     virtual int32 GetAnimFileIndex();
@@ -142,6 +144,7 @@ public:
     // Those further ones are completely inlined in final version, not present at all in android version;
     CVehicleModelInfo* AsVehicleModelInfoPtr() { return reinterpret_cast<CVehicleModelInfo*>(this); }
     CPedModelInfo*     AsPedModelInfoPtr()     { return reinterpret_cast<CPedModelInfo*>(this); }
+    CWeaponModelInfo*  AsWeaponModelInfoPtr()  { return reinterpret_cast<CWeaponModelInfo*>(this); }
 
     [[nodiscard]] CColModel* GetColModel() const { return m_pColModel; }
 
@@ -175,6 +178,13 @@ public:
     [[nodiscard]] bool IsCrane()               const { return nSpecialType == eModelInfoSpecialType::CRANE; }              // 0x4800
 
     void SetBaseModelInfoFlags(uint32 flags); // Wrapper for the static function. I honestly think this is how they did it..
+
+    // NOTSA helpers
+    auto CreateInstanceAddRef() {
+        auto* inst = CreateInstance();
+        AddRef();
+        return inst;
+    }
 
 private:
     friend void InjectHooksMain();

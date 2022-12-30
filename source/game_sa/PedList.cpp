@@ -1,1 +1,69 @@
 #include "StdInc.h"
+#include "PedList.h"
+
+void CPedList::InjectHooks() {
+    RH_ScopedClass(CPedList);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Empty, 0x699DB0);
+    RH_ScopedInstall(BuildListFromGroup_NoLeader, 0x699DD0);
+    RH_ScopedInstall(ExtractPedsWithGuns, 0x69A4C0);
+}
+
+// 0x699DB0
+void CPedList::Empty() {
+    *this = {};
+}
+
+// 0x699DD0
+void CPedList::BuildListFromGroup_NoLeader(CPedGroupMembership& groupMembership) {
+    m_count = 0;
+
+    for (auto i = 0; i < TOTAL_PED_GROUP_MEMBERS - 1; i++) { // last member is the leader, ignore him
+        if (CPed* ped = groupMembership.GetMember(i)) {
+            AddMember(ped);
+        }
+    }
+    ClearUnused();
+}
+
+// 0x69A4C0
+void CPedList::ExtractPedsWithGuns(CPedList& from) {
+    for (auto i = 0u; i < from.m_count; i++) {
+        if (!from.Get(i)->GetActiveWeapon().IsTypeMelee()) {
+            AddMember(from.Get(i));
+            from.RemoveMemberNoFill(i);
+        }
+    }
+    from.FillUpHoles();
+}
+
+
+// After nulling out a field in the
+// array there might be a hole, so it has to be filled
+void CPedList::FillUpHoles() {
+    rng::fill(rng::remove(m_peds, nullptr), nullptr);
+}
+
+//
+// NOTSA section
+//
+
+// nulls out everything after the first `m_count` elements
+void CPedList::ClearUnused() {
+    rng::fill(m_peds | std::views::drop(m_count), nullptr);
+}
+
+void CPedList::AddMember(CPed* ped) {
+    m_peds[m_count++] = ped;
+}
+
+// Must call FillUpHoles afterwards!
+void CPedList::RemoveMemberNoFill(int32 i) {
+    m_peds[i] = nullptr;
+    m_count--;
+}
+
+CPed* CPedList::Get(int32 i) {
+    return m_peds[i];
+}

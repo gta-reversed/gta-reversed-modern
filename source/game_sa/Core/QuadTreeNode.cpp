@@ -2,7 +2,7 @@
 
 #include "QuadTreeNode.h"
 
-CPool<CQuadTreeNode>*& CQuadTreeNode::ms_pQuadTreeNodePool = *(CPool<CQuadTreeNode>**)0xB745BC;
+CQuadTreeNodePool*& CQuadTreeNode::ms_pQuadTreeNodePool = *(CQuadTreeNodePool**)0xB745BC;
 
 void CQuadTreeNode::InjectHooks()
 {
@@ -23,7 +23,7 @@ void CQuadTreeNode::InjectHooks()
     RH_ScopedOverloadedInstall(ForAllMatching, "vec", 0x5529F0, void(CQuadTreeNode::*)(const CVector2D&, CQuadTreeNodeVec2DCallBack));
 }
 
-void* CQuadTreeNode::operator new(uint32 size)
+void* CQuadTreeNode::operator new(unsigned size)
 {
     return CQuadTreeNode::ms_pQuadTreeNodePool->New();
 }
@@ -58,12 +58,12 @@ void CQuadTreeNode::AddItem(void* item, const CRect& rect)
 
     for (auto sector = 0; sector < 4; ++sector)
     {
-        if (!CQuadTreeNode::InSector(rect, sector))
+        if (!InSector(rect, sector))
             continue;
 
         if (!m_apChildren[sector])
         {
-            const CRect sectorRect = CQuadTreeNode::GetSectorRect(sector);
+            const CRect sectorRect = GetSectorRect(sector);
             m_apChildren[sector] = new CQuadTreeNode(sectorRect, m_nLevel - 1);
         }
 
@@ -87,7 +87,7 @@ void CQuadTreeNode::DeleteItem(void* item, const CRect& rect)
     m_ItemList.DeleteItem(item);
 
     for (auto sector = 0; sector < 4; ++sector)
-        if (m_apChildren[sector] && CQuadTreeNode::InSector(rect, sector))
+        if (m_apChildren[sector] && InSector(rect, sector))
             m_apChildren[sector]->DeleteItem(item);
 }
 
@@ -100,7 +100,7 @@ int32 CQuadTreeNode::FindSector(const CRect& rect)
         return -1;
 
     // This stuff for sure can be simplified, but my attempts break the logic
-    if (center.y > rect.bottom)
+    if (center.y > rect.top)
     {
         if (center.x > rect.right)
             return 2;
@@ -108,7 +108,7 @@ int32 CQuadTreeNode::FindSector(const CRect& rect)
             return -1;
         return 3;
     }
-    if (center.y >= rect.top)
+    if (center.y >= rect.bottom)
         return -1;
     if (center.x > rect.right)
         return 0;
@@ -147,7 +147,7 @@ void CQuadTreeNode::ForAllMatching(const CRect& rect, CQuadTreeNodeRectCallBack 
         callback(rect, node->m_item);
 
     for (auto sector = 0; sector < 4; ++sector)
-        if (m_apChildren[sector] && CQuadTreeNode::InSector(rect, sector))
+        if (m_apChildren[sector] && InSector(rect, sector))
             m_apChildren[sector]->ForAllMatching(rect, callback);
 }
 
@@ -156,7 +156,7 @@ void CQuadTreeNode::ForAllMatching(const CVector2D& posn, CQuadTreeNodeVec2DCall
     for (auto* node = m_ItemList.GetNode(); node; node = node->m_next)
         callback(posn, node->m_item);
 
-    const auto sector = CQuadTreeNode::FindSector(posn);
+    const auto sector = FindSector(posn);
     if (sector == -1 || !m_apChildren[sector])
         return;
 
@@ -180,7 +180,7 @@ void CQuadTreeNode::GetAllMatching(const CRect& rect, CPtrListSingleLink& list)
         list.AddItem(node->m_item);
 
     for (auto sector = 0; sector < 4; ++sector)
-        if (m_apChildren[sector] && CQuadTreeNode::InSector(rect, sector))
+        if (m_apChildren[sector] && InSector(rect, sector))
             m_apChildren[sector]->GetAllMatching(rect, list);
 }
 
@@ -189,7 +189,7 @@ void CQuadTreeNode::GetAllMatching(const CVector2D& posn, CPtrListSingleLink& li
     for (auto* node = m_ItemList.GetNode(); node; node = node->m_next)
         list.AddItem(node->m_item);
 
-    const auto sector = CQuadTreeNode::FindSector(posn);
+    const auto sector = FindSector(posn);
     if (sector == -1 || !m_apChildren[sector])
         return;
 
@@ -202,12 +202,12 @@ bool CQuadTreeNode::InSector(const CRect& rect, int32 sector) const
     if (!m_nLevel)
         return false;
 
-    const CRect sectorRect = CQuadTreeNode::GetSectorRect(sector);
+    const CRect sectorRect = GetSectorRect(sector);
 
     if (   sectorRect.left <= rect.right // LinesInside???
         && sectorRect.right >= rect.left
-        && sectorRect.top <= rect.bottom
-        && sectorRect.bottom >= rect.top
+        && sectorRect.bottom <= rect.top
+        && sectorRect.top >= rect.bottom
     )
     {
         return true;
@@ -218,10 +218,10 @@ bool CQuadTreeNode::InSector(const CRect& rect, int32 sector) const
 
 // 0x552C00
 void CQuadTreeNode::InitPool() {
-    if (CQuadTreeNode::ms_pQuadTreeNodePool)
+    if (ms_pQuadTreeNodePool)
         return;
 
-    CQuadTreeNode::ms_pQuadTreeNodePool = new CPool<CQuadTreeNode>(400, "QuadTreeNodes");
+    ms_pQuadTreeNodePool = new CQuadTreeNodePool(400, "QuadTreeNodes");
 }
 
 CRect CQuadTreeNode::GetSectorRect(int32 sector) const
@@ -232,19 +232,19 @@ CRect CQuadTreeNode::GetSectorRect(int32 sector) const
     {
     case 0:
         sectorRect.right = center.x;
-        sectorRect.top = center.y;
+        sectorRect.bottom = center.y;
         break;
     case 1:
         sectorRect.left = center.x;
-        sectorRect.top = center.y;
+        sectorRect.bottom = center.y;
         break;
     case 2:
         sectorRect.right = center.x;
-        sectorRect.bottom = center.y;
+        sectorRect.top = center.y;
         break;
     case 3:
         sectorRect.left = center.x;
-        sectorRect.bottom = center.y;
+        sectorRect.top = center.y;
         break;
     default:
         assert(false); // Shouldn't ever get here

@@ -6,12 +6,12 @@ class CEntity;
 class CPed;
 class CPedGroup;
 
-class CEventGlobalGroup : public CEventGroup {
+class NOTSA_EXPORT_VTABLE CEventGlobalGroup : public CEventGroup {
 public:
     static void InjectHooks();
 
     CEventGlobalGroup(CPed* ped) : CEventGroup(ped) {};
-    ~CEventGlobalGroup() {}
+    ~CEventGlobalGroup() override = default;
 
     float GetSoundLevel(CEntity* entity, CVector& position);
     void AddEventsToPed(CPed* ped);

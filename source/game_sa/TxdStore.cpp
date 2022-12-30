@@ -8,13 +8,11 @@
 
 #include "TxdStore.h"
 
-CPool<TxdDef>*& CTxdStore::ms_pTxdPool = *reinterpret_cast<CPool<TxdDef>**>(0xC8800C);
+CTxdPool*& CTxdStore::ms_pTxdPool = *reinterpret_cast<CTxdPool**>(0xC8800C);
 RwTexDictionary*& CTxdStore::ms_pStoredTxd = *reinterpret_cast<RwTexDictionary**>(0xC88010);
 int32& CTxdStore::ms_lastSlotFound = *reinterpret_cast<int32*>(0xC88014);
 
 int16 (&CTxdStore::defaultTxds)[4] = *reinterpret_cast<int16 (*)[4]>(0xC88004);
-
-int32& TexDictionaryLinkPluginOffset = *reinterpret_cast<int32*>(0xC88018);
 
 // variables list is not finished. Need to make CPools before.
 
@@ -56,10 +54,10 @@ void CTxdStore::InjectHooks() {
 // 0x731F20
 void CTxdStore::Initialise() {
     if (!ms_pTxdPool)
-        ms_pTxdPool = new CPool<TxdDef>(TOTAL_TXD_MODEL_IDS, "TexDictionary");
+        ms_pTxdPool = new CTxdPool(TOTAL_TXD_MODEL_IDS, "TexDictionary");
 
-    for (int32 i = 0; i < 4; i++)
-        defaultTxds[i] = static_cast<int16>(AddTxdSlot("*"));
+    for (auto& txd : defaultTxds)
+        txd = static_cast<int16>(AddTxdSlot("*"));
 
     RwTextureSetFindCallBack(TxdStoreFindCB);
     RwTextureSetReadCallBack(TxdStoreLoadCB);
@@ -285,14 +283,6 @@ void CTxdStore::RemoveRefWithoutDelete(int32 index) {
 int32 CTxdStore::GetNumRefs(int32 index) {
     TxdDef* txd = ms_pTxdPool->GetAt(index);
     return txd ? txd->m_wRefsCount : 0;
-}
-
-RwTexDictionary* CTxdStore::GetTxdParent(RwTexDictionary* txd) {
-    return *PLUGINOFFSET(RwTexDictionary*, txd, TexDictionaryLinkPluginOffset);
-}
-
-void CTxdStore::SetTxdParent(RwTexDictionary* txd, RwTexDictionary* parent) {
-    *PLUGINOFFSET(RwTexDictionary*, txd, TexDictionaryLinkPluginOffset) = parent;
 }
 
 // 0x731D50

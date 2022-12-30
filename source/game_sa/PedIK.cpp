@@ -11,6 +11,16 @@ RwV3d& CPedIK::XaxisIK = *(RwV3d*)0x8D232C;
 RwV3d& CPedIK::YaxisIK = *(RwV3d*)0x8D2338;
 RwV3d& CPedIK::ZaxisIK = *(RwV3d*)0x8D2344;
 
+// 0x5FD8C0
+CPedIK::CPedIK(CPed* ped) {
+    m_pPed                 = ped;
+    m_nFlags               = 0;
+    m_fSlopePitch          = 0.0f;
+    m_fSlopePitchLimitMult = 0.0f;
+    m_fSlopeRoll           = 0.0f;
+    m_fBodyRoll            = 0.0f;
+}
+
 // 0x5FDDB0 
 void CPedIK::RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation, bool flag) {
     plugin::CallMethod<0x5FDDB0, CPedIK*, AnimBlendFrameData*, LimbOrientation&, bool>(this, bone, orientation, flag);
@@ -43,4 +53,3 @@ MoveLimbResult CPedIK::MoveLimb(LimbOrientation& TorsoOrien, float yaw, float pi
     return plugin::CallAndReturn<MoveLimbResult, 0x5FDB60, LimbOrientation&, float, float, LimbMovementInfo&, float>
         (TorsoOrien, yaw, pitch, LimbMoveInfo, fNormalize);
 }
-

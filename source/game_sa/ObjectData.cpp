@@ -45,7 +45,7 @@ void CObjectData::Initialise(const char* fileName)
     default4 = default0;
     default4.m_nSpecialColResponseCase = COL_SPECIAL_RESPONSE_GRENADE;
 
-    CFileMgr::SetDir(gta_empty_string);
+    CFileMgr::SetDir("");
     auto* file = CFileMgr::OpenFile(fileName, "rb");
     char* line;
     auto iFirstFreeInd = 5;

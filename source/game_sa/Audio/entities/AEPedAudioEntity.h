@@ -14,27 +14,61 @@ class CPed;
 
 class CAEPedAudioEntity : public CAEAudioEntity {
 public:
-    char                   field_7C;
+    bool                   m_bCanAddEvent;
     char                   field_7D;
-    int16                  field_7E;
-    int32                  field_80;
-    float                  field_84;
-    float                  field_88;
-    char                   field_8C[8];
+    int16                  m_nSfxId;
+    uint32                 m_nTimeInMS;
+
+    float                  m_fVolume1;
+    float                  m_fVolume2;
+    float                  m_fVolume3;
+    float                  m_JetPackSoundSpeedMult;
     CPed*                  m_pPed;
-    char                   field_98;
-    char                   field_99[3];
-    CAESound*              field_9C;
-    int32                  field_A0;
-    CAESound*              field_A4;
+
+    bool                   m_bJetPackPlaying;
+    CAESound*              m_JetPackSound0;
+    CAESound*              m_JetPackSound1;
+    CAESound*              m_JetPackSound2;
+
     CAETwinLoopSoundEntity m_sTwinLoopSoundEntity;
     CAESound*              field_150;
     float                  field_154;
     float                  field_158;
 
 public:
-    void AddAudioEvent(int32 audioEventVolumeIndex, float arg2, float arg3, CPhysical* physical, uint8 arg5, int32 arg7, uint32 arg8);
+    CAEPedAudioEntity();
+    ~CAEPedAudioEntity() = default; // 0x5DE920
+
+    void Initialise(CPed* ped);
     static void StaticInitialise();
+    void Terminate();
+
+    void AddAudioEvent(eAudioEvents event, float volume = 0.0f, float speed = 1.0f, CPhysical* ped = nullptr, uint8 surfaceId = 0, int32 a7 = 0, uint32 maxVol = 0);
+
+    void TurnOnJetPack();
+    void TurnOffJetPack();
+    void StopJetPackSound();
+    void UpdateJetPack(float thrustFwd, float thrustAngle);
+    void PlayWindRush(float, float);
+    void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
+
+    void HandleFootstepEvent(eAudioEvents event, float volume, float speed, uint8 surfaceId);
+    void HandleSkateEvent(eAudioEvents event, float volume, float speed);
+    void HandleLandingEvent(eAudioEvents event);
+    void HandlePedSwing(eAudioEvents event, int32 a3, uint32 volume);
+    void HandlePedHit(eAudioEvents event, CPhysical* physical, uint8 surfaceId, float volume, uint32 maxVol);
+    void HandlePedJacked(eAudioEvents event) ;
+    void HandleSwimSplash(eAudioEvents event);
+    void HandleSwimWake(eAudioEvents event);
+
+    void PlayShirtFlap(float volume, float speed);
+    void Service();
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    void UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) { UpdateParameters(sound, curPlayPos); }
 };
 
 VALIDATE_SIZE(CAEPedAudioEntity, 0x15C);

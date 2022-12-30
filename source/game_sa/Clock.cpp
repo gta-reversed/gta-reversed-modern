@@ -58,13 +58,16 @@ void CClock::Initialise(uint32 millisecondsPerGameMinute) {
  * @addr  0x52CF10
  */
 void CClock::Update() {
-    if (ms_nMillisecondsPerGameMinute < (CTimer::GetTimeInMS() - ms_nLastClockTick) || CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK]) {
-        if (!CCheat::m_aCheatsActive[CHEAT_ALWAYS_MIDNIGHT] && !CCheat::m_aCheatsActive[CHEAT_STOP_GAME_CLOCK_ORANGE_SKY]) {
+    if (gbFreezeTime) { // NOTSA
+        ms_nLastClockTick = CTimer::GetTimeInMS();
+    }
+    else if (ms_nMillisecondsPerGameMinute < (CTimer::GetTimeInMS() - ms_nLastClockTick) || CCheat::IsActive(CHEAT_FASTER_CLOCK)) {
+        if (!CCheat::IsActive(CHEAT_ALWAYS_MIDNIGHT) && !CCheat::IsActive(CHEAT_STOP_GAME_CLOCK_ORANGE_SKY)) {
             // next minute
             ms_nGameClockMinutes++;
             ms_nLastClockTick += ms_nMillisecondsPerGameMinute;
 
-            if (CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK])
+            if (CCheat::IsActive(CHEAT_FASTER_CLOCK))
                 ms_nLastClockTick = CTimer::GetTimeInMS();
 
             // next hour
@@ -85,10 +88,10 @@ void CClock::Update() {
                     CStats::IncrementStat(STAT_DAYS_PASSED_IN_GAME, 1.0f);
 
                     // next month
-                    if (ms_nGameClockDays >= daysInMonth[ms_nGameClockMonth]) {
+                    if (ms_nGameClockDays >= daysInMonth[ms_nGameClockMonth - 1]) {
                         ms_nGameClockDays = 1;
                         if (++ms_nGameClockMonth > 12u)
-                                ms_nGameClockMonth = 1;
+                            ms_nGameClockMonth = 1;
                     }
                 }
             }
@@ -189,7 +192,7 @@ void CClock::OffsetClockByADay(uint32 timeDirection) {
             if (ms_nGameClockMonth == 0)
                 ms_nGameClockMonth = 12;
 
-            ms_nGameClockDays = daysInMonth[ms_nGameClockMonth];
+            ms_nGameClockDays = daysInMonth[ms_nGameClockMonth - 1];
         }
         CurrentDay--;
 
@@ -198,7 +201,7 @@ void CClock::OffsetClockByADay(uint32 timeDirection) {
     } else {
         ms_nGameClockDays++;
 
-        if (daysInMonth[ms_nGameClockMonth] < ms_nGameClockDays) {
+        if (daysInMonth[ms_nGameClockMonth - 1] < ms_nGameClockDays) {
             ms_nGameClockMonth++;
             ms_nGameClockDays = 1;
 

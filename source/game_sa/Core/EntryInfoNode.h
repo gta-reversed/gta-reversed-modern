@@ -15,7 +15,7 @@ public:
 public:
     static void InjectHooks();
 
-    static void* operator new(uint32 size);
+    static void* operator new(unsigned size);
     static void  operator delete(void* ptr, size_t sz);
 
     void         AddToList(CEntryInfoNode* pNext); // Fully inlined in final game

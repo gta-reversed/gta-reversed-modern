@@ -1,118 +1,113 @@
 #include "StdInc.h"
 
-void CTaskComplexSequence::InjectHooks()
-{
+#include "TaskComplexSequence.h"
+
+void CTaskComplexSequence::InjectHooks() {
     RH_ScopedClass(CTaskComplexSequence);
     RH_ScopedCategory("Tasks");
 
     RH_ScopedInstall(Constructor, 0x632BD0);
-    RH_ScopedInstall(Clone_Reversed, 0x5F6710);
-    RH_ScopedInstall(GetId_Reversed, 0x632C60);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x632C00);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x638A40);
+    RH_ScopedVirtualInstall(Clone, 0x5F6710);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x632C00);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x638A40);
     RH_ScopedOverloadedInstall(CreateNextSubTask, "ped", 0x632C70, CTask*(CTaskComplexSequence::*)(CPed*, int32&, int32&));
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x638A60);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x632D00);
-    RH_ScopedInstall(AddTask, 0x632D10);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x638A60);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x632D00);
+    RH_ScopedOverloadedInstall(AddTask, "0", 0x632D10, void(CTaskComplexSequence::*)(CTask*));
+    RH_ScopedOverloadedInstall(AddTask, "1", 0x632D50, void(CTaskComplexSequence::*)(int32, CTask*));
     RH_ScopedInstall(Flush, 0x632C10);
+    RH_ScopedInstall(Contains, 0x41BF10);
+    RH_ScopedInstall(f0x463610, 0x463610);
+    RH_ScopedInstall(f0x636BC0, 0x636BC0);
 }
 
 // 0x632BD0
-CTaskComplexSequence::CTaskComplexSequence() {
+CTaskComplexSequence::CTaskComplexSequence() : CTaskComplex() {
     m_nCurrentTaskIndex = 0;
-    m_bRepeatSequence = 0;
+    m_bRepeatSequence = false;
     m_nSequenceRepeatedCount = 0;
     m_bFlushTasks = false;
     m_nReferenceCount = 0;
-    memset(m_aTasks, 0, sizeof(CTaskComplexSequence::m_aTasks));
+    std::ranges::fill(m_aTasks, nullptr);
 }
 
+// 0x6389F0
 CTaskComplexSequence::~CTaskComplexSequence() {
     Flush();
 }
 
-CTaskComplexSequence* CTaskComplexSequence::Constructor()
-{
+// 0x632C10
+void CTaskComplexSequence::Flush() {
+    for (auto& task : m_aTasks) {
+        delete task;
+        task = nullptr;
+    }
+
+    m_nCurrentTaskIndex = 0;
+    m_bRepeatSequence = false;
+    m_nSequenceRepeatedCount = 0;
+}
+
+CTaskComplexSequence* CTaskComplexSequence::Constructor() {
     this->CTaskComplexSequence::CTaskComplexSequence();
     return this;
 }
 
 // 0x5F6710
-CTask* CTaskComplexSequence::Clone()
-{
+CTask* CTaskComplexSequence::Clone() {
     return Clone_Reversed();
 }
 
-// 0x632C60
-eTaskType CTaskComplexSequence::GetTaskType()
-{
-    return GetId_Reversed();
-}
-
 // 0x632C00
-bool CTaskComplexSequence::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
+bool CTaskComplexSequence::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return MakeAbortable_Reversed(ped, priority, event);
 }
 
 // 0x638A40
-CTask* CTaskComplexSequence::CreateNextSubTask(CPed* ped)
-{
+CTask* CTaskComplexSequence::CreateNextSubTask(CPed* ped) {
     return CreateNextSubTask_Reversed(ped);
 }
 
 // 0x638A60
-CTask* CTaskComplexSequence::CreateFirstSubTask(CPed* ped)
-{
+CTask* CTaskComplexSequence::CreateFirstSubTask(CPed* ped) {
     return CreateFirstSubTask_Reversed(ped);
 }
 
 // 0x632D00
-CTask* CTaskComplexSequence::ControlSubTask(CPed* ped)
-{
+CTask* CTaskComplexSequence::ControlSubTask(CPed* ped) {
     return ControlSubTask_Reversed(ped);
 }
 
-CTask* CTaskComplexSequence::Clone_Reversed()
-{
-    auto* clonedComplexSequence = new CTaskComplexSequence();
-    for (uint32 taskIndex = 0; taskIndex < 8; taskIndex++) {
+CTask* CTaskComplexSequence::Clone_Reversed() {
+    auto* sequence = new CTaskComplexSequence();
+    for (auto taskIndex = 0u; taskIndex < std::size(m_aTasks); taskIndex++) {
         CTask* task = m_aTasks[taskIndex];
-        if (task) {
-            clonedComplexSequence->m_aTasks[taskIndex] = task->Clone();
-        } else {
-            clonedComplexSequence->m_aTasks[taskIndex] = nullptr;
-        }
+        sequence->m_aTasks[taskIndex] = task ? task->Clone() : nullptr;
     }
-    clonedComplexSequence->m_bRepeatSequence = m_bRepeatSequence;
-    clonedComplexSequence->m_nCurrentTaskIndex = m_nCurrentTaskIndex;
-    return clonedComplexSequence;
+    sequence->m_bRepeatSequence   = m_bRepeatSequence;
+    sequence->m_nCurrentTaskIndex = m_nCurrentTaskIndex;
+    return sequence;
 }
 
-bool CTaskComplexSequence::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
+bool CTaskComplexSequence::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return m_pSubTask->MakeAbortable(ped, priority, event);
 }
 
-CTask* CTaskComplexSequence::CreateNextSubTask_Reversed(CPed* ped)
-{
+CTask* CTaskComplexSequence::CreateNextSubTask_Reversed(CPed* ped) {
     return CreateNextSubTask(ped, m_nCurrentTaskIndex, m_nSequenceRepeatedCount);
 }
 
-CTask* CTaskComplexSequence::CreateFirstSubTask_Reversed(CPed* ped)
-{
+CTask* CTaskComplexSequence::CreateFirstSubTask_Reversed(CPed* ped) {
     CTask* currentTask = m_aTasks[m_nCurrentTaskIndex];
     return currentTask ? currentTask->Clone() : nullptr;
 }
 
-CTask* CTaskComplexSequence::ControlSubTask_Reversed(CPed* ped)
-{
+CTask* CTaskComplexSequence::ControlSubTask_Reversed(CPed* ped) {
     return m_pSubTask;
 }
 
 // 0x632D10
-void CTaskComplexSequence::AddTask(CTask* task)
-{
+void CTaskComplexSequence::AddTask(CTask* task) {
     for (auto& m_aTask : m_aTasks) {
         if (!m_aTask) {
             m_aTask = task;
@@ -121,47 +116,69 @@ void CTaskComplexSequence::AddTask(CTask* task)
     }
 
     delete task;
+    DEV_LOG("Failed to add task to sequence");
+}
+
+// 0x632D50
+void CTaskComplexSequence::AddTask(int32 sequenceIdx, CTask* task) {
+    if (sequenceIdx >= (int32)std::size(m_aTasks)) {
+        delete task;
+        DEV_LOG("Failed to add task to sequence");
+    } else {
+        delete m_aTasks[sequenceIdx];
+        m_aTasks[sequenceIdx] = task;
+    }
 }
 
 // 0x632C70
-CTask* CTaskComplexSequence::CreateNextSubTask(CPed* ped, int32& taskIndex, int32& repeatCount)
-{
+CTask* CTaskComplexSequence::CreateNextSubTask(CPed* ped, int32& taskIndex, int32& repeatCount) {
+    UNUSED(ped);
+
     CTask* nextSubTask = nullptr;
     int32 incrementedTaskIndex = taskIndex + 1;
     taskIndex = incrementedTaskIndex;
 
     if (m_bRepeatSequence) {
-        if (incrementedTaskIndex == 8 || !m_aTasks[incrementedTaskIndex]) {
+        if (incrementedTaskIndex == std::size(m_aTasks) || !m_aTasks[incrementedTaskIndex]) {
             taskIndex = 0;
             repeatCount = repeatCount + 1;
         }
 
-        // Value of bRepeatSequence can be 0 or 1, this means that if we are
-        // within this code block, then `pNextSubTask = m_aTasks[*pTaskIndex]->Clone()`
-        // will always execute.
-        int32 bRepeatSequence = m_bRepeatSequence;
-        if (bRepeatSequence == 1 || repeatCount != bRepeatSequence) {
+        if (m_bRepeatSequence || (bool)repeatCount != m_bRepeatSequence) {
             nextSubTask = m_aTasks[taskIndex]->Clone();
         }
-    } else if (incrementedTaskIndex != 8) {
-        CTask* task = m_aTasks[incrementedTaskIndex];
-        if (task) {
+    } else if (incrementedTaskIndex != std::size(m_aTasks)) {
+        if (CTask* task = m_aTasks[incrementedTaskIndex]) {
             nextSubTask = task->Clone();
         }
     }
     return nextSubTask;
 }
 
-// 0x632C10
-void CTaskComplexSequence::Flush()
-{
-    for (auto& m_aTask : m_aTasks) {
-        CTask* task = m_aTask;
-        delete task;
-        m_aTask = nullptr;
+// 0x41BF10
+bool CTaskComplexSequence::Contains(eTaskType taskType) {
+    for (auto& task : m_aTasks) {
+        if (task->GetTaskType() == taskType) {
+            return true;
+        }
     }
+    return false;
+}
 
-    m_nCurrentTaskIndex = 0;
-    m_bRepeatSequence = 0;
-    m_nSequenceRepeatedCount = 0;
+// 0x463610
+void CTaskComplexSequence::f0x463610(bool flush) {
+    if (m_nReferenceCount || !flush) {
+        m_bFlushTasks = flush;
+    } else {
+        m_bFlushTasks = false;
+        Flush();
+    }
+}
+
+// 0x636BC0
+void CTaskComplexSequence::f0x636BC0() {
+    if (m_nReferenceCount-- == 1 && m_bFlushTasks) {
+        m_bFlushTasks = false;
+        Flush();
+    }
 }

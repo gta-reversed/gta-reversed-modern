@@ -8,10 +8,10 @@ int32& CEntryExitManager::ms_oldAreaCode = *reinterpret_cast<int32*>(0x96A734);
 CEntity* (&CEntryExitManager::ms_visibleEntityList)[32] = *reinterpret_cast<CEntity * (*)[32]>(0x96A738);
 int32& CEntryExitManager::ms_entryExitStackPosn = *reinterpret_cast<int32*>(0x96A7C4);
 bool& CEntryExitManager::ms_bDisabled = *reinterpret_cast<bool*>(0x96A7C8);
-int32& CEntryExitManager::ms_exitEnterState = *reinterpret_cast<int32*>(0x96A7CC);
+ExitEnterState& CEntryExitManager::ms_exitEnterState = *reinterpret_cast<ExitEnterState*>(0x96A7CC);
 CQuadTreeNode*& CEntryExitManager::mp_QuadTree = *reinterpret_cast<CQuadTreeNode**>(0x96A7D0);
 CEntryExit*& CEntryExitManager::mp_Active = *reinterpret_cast<CEntryExit**>(0x96A7D4);
-CPool<CEntryExit>*& CEntryExitManager::mp_poolEntryExits = *reinterpret_cast<CPool<CEntryExit>**>(0x96A7D8);
+CEntryExitsPool*& CEntryExitManager::mp_poolEntryExits = *reinterpret_cast<CEntryExitsPool**>(0x96A7D8);
 uint32& CEntryExitManager::ms_numVisibleEntities = *reinterpret_cast<uint32*>(0x96A7DC);
 // ms_entryExitStack? 0x96A718 = a * 10.0f; float a = 1.0f / (50.0f * 50.0f);
 
@@ -19,12 +19,12 @@ void CEntryExitManager::InjectHooks() {
     RH_ScopedClass(CEntryExitManager);
     RH_ScopedCategoryGlobal();
 
-//    RH_ScopedInstall(Init, 0x43F880);
-//    RH_ScopedInstall(Load, 0x5D55C0);
-//    RH_ScopedInstall(Save, 0x5D5970);
-//    RH_ScopedInstall(Update, 0x440D10);
-//    RH_ScopedInstall(Shutdown, 0x440B90);
-//    RH_ScopedInstall(ShutdownForRestart, 0x440C40);
+RH_ScopedInstall(Init, 0x43F880, { .reversed = false });
+RH_ScopedInstall(Load, 0x5D55C0, { .reversed = false });
+RH_ScopedInstall(Save, 0x5D5970, { .reversed = false });
+RH_ScopedInstall(Update, 0x440D10, { .reversed = false });
+RH_ScopedInstall(Shutdown, 0x440B90, { .reversed = false });
+RH_ScopedInstall(ShutdownForRestart, 0x440C40, { .reversed = false });
 }
 
 // 0x43F880
@@ -121,4 +121,8 @@ void CEntryExitManager::GotoEntryExitVC(const char* name) {
 // 0x43F050
 void CEntryExitManager::LinkEntryExit(CEntryExit* entryExit) {
     plugin::Call<0x43F050, CEntryExit*>(entryExit);
+}
+
+bool CEntryExitManager::WeAreInInteriorTransition() {
+    return plugin::CallAndReturn<bool, 0x43E400>();
 }

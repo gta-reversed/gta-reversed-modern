@@ -10,6 +10,8 @@
 #include "PtrListSingleLink.h"
 #include "Pool.h"
 
+class CQuadTreeNode;
+
 /*
 node level 2
  +----------------------+--
@@ -31,6 +33,7 @@ node level 2
 
 typedef void(*CQuadTreeNodeRectCallBack) (const CRect& rect, void* item);
 typedef void(*CQuadTreeNodeVec2DCallBack) (const CVector2D& rect, void* item);
+typedef CPool<CQuadTreeNode> CQuadTreeNodePool;
 
 class CQuadTreeNode {
 public:
@@ -39,12 +42,13 @@ public:
     CQuadTreeNode*     m_apChildren[4];
     uint32             m_nLevel; // 0 - last level
 
-    static CPool<CQuadTreeNode> *&ms_pQuadTreeNodePool;
+    static CQuadTreeNodePool*& ms_pQuadTreeNodePool;
 
+public:
     CQuadTreeNode(const CRect& size, int32 startLevel);
     ~CQuadTreeNode();
 
-    static void* operator new(uint32 size);
+    static void* operator new(unsigned size);
     static void operator delete(void* data);
 
 public:
@@ -70,8 +74,8 @@ public:
     bool LiesInside(const CRect& rect) const {
         return    m_Rect.left <= rect.right
                && m_Rect.right >= rect.left
-               && m_Rect.top <= rect.bottom
-               && m_Rect.bottom >= rect.top;
+               && m_Rect.bottom <= rect.top
+               && m_Rect.top >= rect.bottom;
     };
 };
 

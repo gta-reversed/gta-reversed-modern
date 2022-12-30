@@ -6,12 +6,10 @@
 */
 #pragma once
 
-
 #include "TaskComplex.h"
 #include "NodeAddress.h"
 
-enum eWanderType
-{
+enum eWanderType : int32 {
     WANDER_TYPE_STANDARD = 0,
     WANDER_TYPE_COP,
     WANDER_TYPE_MEDIC,
@@ -27,16 +25,13 @@ class CNodeAddress;
 class CVector;
 
 class CTaskComplexWander : public CTaskComplex {
-protected:
-    CTaskComplexWander(plugin::dummy_func_t) : CTaskComplex() {}
-
 public:
-    int32        m_nMoveState; // see eMoveState
+    eMoveState   m_nMoveState;
     uint8        m_nDir;
     float        m_fTargetRadius;
     CNodeAddress m_LastNode;
     CNodeAddress m_NextNode;
-    int32        m_nLastUpdateDirFrameCount;
+    uint32       m_nLastUpdateDirFrameCount;
     union
     {
         uint8 m_nFlags;
@@ -49,39 +44,40 @@ public:
     };
 
 public:
-    static void InjectHooks();
+    static constexpr auto Type = TASK_COMPLEX_WANDER;
 
     CTaskComplexWander(int32 moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
-    ~CTaskComplexWander();
-    CTaskComplexWander* Constructor(int32 moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
+    ~CTaskComplexWander() override = default;
 
-    // original virtual functions
-    eTaskType GetTaskType() override;
+    eTaskType GetTaskType() override { return Type; } // 0x460CD0
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
-    virtual int32 GetWanderType() = 0;
+    virtual eWanderType GetWanderType() = 0;
     virtual void ScanForStuff(CPed* ped) = 0;
     virtual void UpdateDir(CPed* ped);
-    virtual void UpdatePathNodes(CPed* ped, int8 dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8* outDir);
+    virtual void UpdatePathNodes(const CPed* ped, uint8 dir, CNodeAddress& originNode, CNodeAddress& targetNode, uint8& outDir);
 
-    // reversed virtual functions
-    eTaskType GetId_Reversed() { return TASK_COMPLEX_WANDER; };
+    CTask* CreateSubTask(CPed* ped, eTaskType taskType);
+    void ComputeTargetPos(const CPed* ped, CVector& outTargetPos, const CNodeAddress& targetNodeAddress);
+    float ComputeTargetHeading(CPed* ped);
+    [[nodiscard]] bool ValidNodes() const;
+    void ScanForBlockedNodes(CPed* ped);
+    bool ScanForBlockedNode(CPed* ped, const CNodeAddress& targetNodeAddress);
+    bool ScanForBlockedNode(const CVector& position, class CEntity* entity);
+
+    /// Get sq. distance of the path node (either `m_LastNode` or `m_NextNode`) closest to the ped
+    float GetDistSqOfClosestPathNodeToPed(CPed* ped);
+
+    static CTaskComplexWander* GetWanderTaskByPedType(CPed* ped);
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+    CTaskComplexWander* Constructor(int32 moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* ControlSubTask_Reversed(CPed* ped);
     void UpdateDir_Reversed(CPed* ped);
-    void UpdatePathNodes_Reversed(CPed* ped, int8 dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8* outDir);
-
-    CTask* CreateSubTask(CPed* ped, int32 taskId);
-    void ComputeTargetPos(CPed* ped, CVector* pOutTargetPos, CNodeAddress* pTargetNodeAddress);
-    float ComputeTargetHeading(CPed* ped);
-    bool ValidNodes();
-    void ScanForBlockedNodes(CPed* ped);
-    bool ScanForBlockedNode(CPed* ped, CNodeAddress* targetNodeAddress);
-    bool ScanForBlockedNode(CVector* position, class CEntity* entity);
-
-    static CTaskComplexWander* GetWanderTaskByPedType(CPed* ped);
+    void UpdatePathNodes_Reversed(const CPed* ped, uint8 dir, CNodeAddress& originNode, CNodeAddress& targetNode, uint8& outDir);
 };
-
 VALIDATE_SIZE(CTaskComplexWander, 0x28);

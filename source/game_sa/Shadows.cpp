@@ -8,31 +8,42 @@
 
 #include "Shadows.h"
 
-uint32 MAX_STORED_SHADOWS = 48;
-uint32 MAX_PERMANENT_SHADOWS = 48;
-uint32 MAX_STATIC_SHADOWS = 48;
-uint32 MAX_SHADOW_POLY_BUNCHES = 360;
+void CShadows::InjectHooks() {
+    RH_ScopedClass(CShadows);
+    RH_ScopedCategory("Shadows");
 
-float& MAX_DISTANCE_PED_SHADOWS = *(float*)0x8D5240;
-float& MAX_DISTANCE_PED_SHADOWS_SQR = *(float*)0xC4B6B0;
-RwTexture*& gpShadowCarTex = *(RwTexture**)0xC403E0;
-RwTexture*& gpShadowPedTex = *(RwTexture**)0xC403E4;
-RwTexture*& gpShadowHeliTex = *(RwTexture**)0xC403E8;
-RwTexture*& gpShadowBikeTex = *(RwTexture**)0xC403EC;
-RwTexture*& gpShadowBaronTex = *(RwTexture**)0xC403F0;
-RwTexture*& gpShadowExplosionTex = *(RwTexture**)0xC403F4;
-RwTexture*& gpShadowHeadLightsTex = *(RwTexture**)0xC403F8;
-RwTexture*& gpShadowHeadLightsTex2 = *(RwTexture**)0xC403FC;
-RwTexture*& gpBloodPoolTex = *(RwTexture**)0xC40400;
-RwTexture*& gpHandManTex = *(RwTexture**)0xC40404;
-RwTexture*& gpCrackedGlassTex = *(RwTexture**)0xC40408;
-RwTexture*& gpPostShadowTex = *(RwTexture**)0xC4040C;
-CPolyBunch*& CShadows::pEmptyBunchList = *(CPolyBunch**)0xC403D8;
-uint16& CShadows::ShadowsStoredToBeRendered = *(uint16*)0xC403DC;
-CRegisteredShadow* CShadows::asShadowsStored = (CRegisteredShadow*)0xC40430;
-CPolyBunch* CShadows::aPolyBunches = (CPolyBunch*)0xC40DF0;
-CStaticShadow* CShadows::aStaticShadows = (CStaticShadow*)0xC4A030;
-CPermanentShadow* CShadows::aPermanentShadows = (CPermanentShadow*)0xC4AC30;
+    RH_ScopedInstall(Init, 0x706CD0);
+    RH_ScopedInstall(Shutdown, 0x706ED0);
+    RH_ScopedInstall(TidyUpShadows, 0x707770);
+    RH_ScopedInstall(AddPermanentShadow, 0x706F60, { .reversed = false });
+    RH_ScopedInstall(UpdatePermanentShadows, 0x70C950, { .reversed = false });
+    //RH_ScopedInstall(StoreShadowToBeRendered, 0x707930, { .reversed = false }); // TODO: Fix overload install
+    //RH_ScopedInstall(StoreShadowToBeRendered, 0x707390, { .reversed = false });
+    RH_ScopedInstall(SetRenderModeForShadowType, 0x707460);
+    RH_ScopedInstall(RemoveOilInArea, 0x7074F0);
+    RH_ScopedInstall(GunShotSetsOilOnFire, 0x707550, { .reversed = false });
+    RH_ScopedInstall(PrintDebugPoly, 0x7076B0);
+    RH_ScopedInstall(CalcPedShadowValues, 0x7076C0);
+    RH_ScopedInstall(AffectColourWithLighting, 0x707850, { .reversed = false });
+    RH_ScopedInstall(StoreShadowForPedObject, 0x707B40, { .reversed = false });
+    RH_ScopedInstall(StoreRealTimeShadow, 0x707CA0, { .reversed = false });
+    RH_ScopedInstall(UpdateStaticShadows, 0x707F40, { .reversed = false });
+    RH_ScopedInstall(RenderExtraPlayerShadows, 0x707FA0, { .reversed = false });
+    RH_ScopedInstall(RenderStaticShadows, 0x708300, { .reversed = false });
+    RH_ScopedInstall(CastShadowEntityXY, 0x7086B0, { .reversed = false });
+    RH_ScopedInstall(CastShadowEntityXYZ, 0x70A040, { .reversed = false });
+    RH_ScopedInstall(CastPlayerShadowSectorList, 0x70A470, { .reversed = false });
+    RH_ScopedInstall(CastShadowSectorList, 0x70A630, { .reversed = false });
+    RH_ScopedInstall(CastRealTimeShadowSectorList, 0x70A7E0, { .reversed = false });
+    RH_ScopedInstall(RenderStoredShadows, 0x70A960, { .reversed = false });
+    RH_ScopedInstall(GeneratePolysForStaticShadow, 0x70B730, { .reversed = false });
+    RH_ScopedInstall(StoreStaticShadow, 0x70BA00, { .reversed = false });
+    RH_ScopedInstall(StoreShadowForVehicle, 0x70BDA0, { .reversed = false });
+    RH_ScopedInstall(StoreCarLightShadow, 0x70C500, { .reversed = false });
+    RH_ScopedInstall(StoreShadowForPole, 0x70C750, { .reversed = false });
+    RH_ScopedInstall(RenderIndicatorShadow, 0x70CCB0, { .reversed = false });
+    RH_ScopedGlobalInstall(ShadowRenderTriangleCB, 0x709CF0, { .reversed = false });
+}
 
 // 0x707670
 void CStaticShadow::Free() {
@@ -41,12 +52,57 @@ void CStaticShadow::Free() {
 
 // 0x706CD0
 void CShadows::Init() {
-    ((void(__cdecl*)())0x706CD0)();
+    CTxdStore::PushCurrentTxd();
+    CTxdStore::SetCurrentTxd(CTxdStore::FindTxdSlot("particle"));
+
+    gpShadowCarTex         = RwTextureRead("shad_car",     nullptr);
+    gpShadowPedTex         = RwTextureRead("shad_ped",     nullptr);
+    gpShadowHeliTex        = RwTextureRead("shad_heli",    nullptr);
+    gpShadowBikeTex        = RwTextureRead("shad_bike",    nullptr);
+    gpShadowBaronTex       = RwTextureRead("shad_rcbaron", nullptr);
+    gpShadowExplosionTex   = RwTextureRead("shad_exp",     nullptr);
+    gpShadowHeadLightsTex  = RwTextureRead("headlight",    nullptr);
+    gpShadowHeadLightsTex2 = RwTextureRead("headlight1",   nullptr);
+    gpBloodPoolTex         = RwTextureRead("bloodpool_64", nullptr);
+    gpHandManTex           = RwTextureRead("handman",      nullptr);
+    gpCrackedGlassTex      = RwTextureRead("wincrack_32",  nullptr);
+    gpPostShadowTex        = RwTextureRead("lamp_shad_64", nullptr);
+
+    CTxdStore::PopCurrentTxd();
+
+    g_ShadowVertices = { 0, 2, 1, 0, 3, 2, 0, 4, 3, 0, 5, 4, 0, 6, 5, 0, 7, 6, 0, 8, 7, 0, 9, 8 };
+
+    std::ranges::for_each(aStaticShadows, [&](auto& shadow) { shadow.Init(); });
+
+    pEmptyBunchList = aPolyBunches.data();
+
+    for (auto i = 0u; i < aPolyBunches.size() - 1; i++) {
+        aPolyBunches[i].m_pNext = &aPolyBunches[i + 1];
+    }
+    aPolyBunches.back().m_pNext = nullptr;
+
+    std::ranges::for_each(aPermanentShadows, [&](auto& shadow) { shadow.Init(); });
 }
 
 // 0x706ED0
 void CShadows::Shutdown() {
-    ((void(__cdecl*)())0x706ED0)();
+    RwTextureDestroy(gpShadowCarTex);
+    RwTextureDestroy(gpShadowPedTex);
+    RwTextureDestroy(gpShadowHeliTex);
+    RwTextureDestroy(gpShadowBikeTex);
+    RwTextureDestroy(gpShadowBaronTex);
+    RwTextureDestroy(gpShadowExplosionTex);
+    RwTextureDestroy(gpShadowHeadLightsTex);
+    RwTextureDestroy(gpShadowHeadLightsTex2);
+    RwTextureDestroy(gpBloodPoolTex);
+    RwTextureDestroy(gpHandManTex);
+    RwTextureDestroy(gpCrackedGlassTex);
+    RwTextureDestroy(gpPostShadowTex);
+}
+
+// 0x707770
+void CShadows::TidyUpShadows() {
+    std::ranges::for_each(aPermanentShadows, [&](auto& shadow) { shadow.m_nType = 0; });
 }
 
 // 0x706F60
@@ -54,19 +110,106 @@ void CShadows::AddPermanentShadow(uint8 type, RwTexture* texture, CVector* posn,
     ((void(__cdecl*)(uint8, RwTexture*, CVector*, float, float, float, float, int16, uint8, uint8, uint8, float, uint32, float))0x706F60)(type, texture, posn, topX, topY, rightX, rightY, intensity, red, greeb, blue, drawDistance, time, upDistance);
 }
 
+// 0x70C950
+void CShadows::UpdatePermanentShadows() {
+    ((void(__cdecl*)())0x70C950)();
+}
+
+// 0x707930
+void CShadows::StoreShadowToBeRendered(uint8 type, CVector* posn, float frontX, float frontY, float sideX, float sideY, int16 intensity, uint8 red, uint8 green, uint8 blue) {
+    const auto Store = [=](auto mtype, auto texture) {
+        StoreShadowToBeRendered(mtype, texture, posn, frontX, frontY, sideX, sideY, intensity, red, green, blue, 15.0f, 0, 1.0f, nullptr, 0);
+    };
+
+    switch (type) {
+    case SHADOW_DEFAULT:
+        Store(SHADOW_TEX_CAR, gpShadowCarTex);
+        break;
+    case SHADOW_ADDITIVE:
+        Store(SHADOW_TEX_CAR, gpShadowPedTex);
+        break;
+    case SHADOW_INVCOLOR:
+        Store(SHADOW_TEX_PED, gpShadowExplosionTex);
+        break;
+    case SHADOW_OIL_1:
+        Store(SHADOW_TEX_CAR, gpShadowHeliTex);
+        break;
+    case SHADOW_OIL_2:
+        Store(SHADOW_TEX_PED, gpShadowHeadLightsTex);
+        break;
+    case SHADOW_OIL_3:
+        Store(SHADOW_TEX_CAR, gpBloodPoolTex);
+        break;
+    default:
+        return;
+    }
+}
+
 // 0x707390
 void CShadows::StoreShadowToBeRendered(uint8 type, RwTexture* texture, CVector* posn, float topX, float topY, float rightX, float rightY, int16 intensity, uint8 red, uint8 green, uint8 blue, float zDistance, bool drawOnWater, float scale, CRealTimeShadow* realTimeShadow, bool drawOnBuildings) {
-    ((void(__cdecl*)(uint8, RwTexture*, CVector*, float, float, float, float, int16, uint8, uint8, uint8, float, bool, float, CRealTimeShadow*, bool))0x707390)(type, texture, posn, topX, topY, rightX, rightY, intensity, red, green, blue, zDistance, drawOnWater, scale, realTimeShadow, drawOnBuildings);
+    if (ShadowsStoredToBeRendered >= asShadowsStored.size())
+        return;
+
+    auto& shadow = asShadowsStored[ShadowsStoredToBeRendered];
+
+    shadow.m_nType      = type;
+    shadow.m_pTexture   = texture;
+    shadow.m_vecPosn    = *posn;
+    shadow.m_Front.x    = topX;
+    shadow.m_Front.y    = topY;
+    shadow.m_Side.x     = rightX;
+    shadow.m_Side.y     = rightY;
+    shadow.m_nIntensity = intensity;
+    shadow.m_nRed       = red;
+    shadow.m_nGreen     = green;
+    shadow.m_nBlue      = blue;
+    shadow.m_fZDistance = zDistance;
+    shadow.m_bDrawOnWater     = drawOnWater;
+    shadow.m_bDrawOnBuildings = drawOnBuildings;
+    shadow.m_fScale     = scale;
+    shadow.m_pRTShadow  = realTimeShadow;
+
+    ShadowsStoredToBeRendered++;
 }
 
 // 0x707460
-void CShadows::SetRenderModeForShadowType(uint8 shadowType) {
-    ((void(__cdecl*)(uint8))0x707460)(shadowType);
+void CShadows::SetRenderModeForShadowType(eShadowType type) {
+    switch (type) {
+    case SHADOW_DEFAULT:
+    case SHADOW_OIL_1:
+    case SHADOW_OIL_2:
+    case SHADOW_OIL_3:
+    /* case SHADOW_OIL_4: */ // missing
+    case SHADOW_OIL_5:
+        RwRenderStateSet(rwRENDERSTATESRCBLEND,  RWRSTATE(rwBLENDSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
+        break;
+    case SHADOW_ADDITIVE:
+        RwRenderStateSet(rwRENDERSTATESRCBLEND,  RWRSTATE(rwBLENDONE));
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDONE));
+        break;
+    case SHADOW_INVCOLOR:
+        RwRenderStateSet(rwRENDERSTATESRCBLEND,  RWRSTATE(rwBLENDZERO));
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCCOLOR));
+        break;
+    default:
+        return;
+    }
 }
 
 // 0x7074F0
-void CShadows::RemoveOilInArea(float x1, float y1, float x2, float y2) {
-    ((void(__cdecl*)(float, float, float, float))0x7074F0)(x1, y1, x2, y2);
+void CShadows::RemoveOilInArea(float x1, float x2, float y1, float y2) {
+    for (auto& shadow : aPermanentShadows) {
+        if (shadow.m_nType == 8 || shadow.m_nType == 4) {
+            if (shadow.m_vecPosn.x > x1 &&
+                shadow.m_vecPosn.x < x2 &&
+                shadow.m_vecPosn.y > y1 &&
+                shadow.m_vecPosn.y < y2
+            ) {
+                shadow.m_nType = 0;
+            }
+        }
+    }
 }
 
 // 0x707550
@@ -76,27 +219,28 @@ void CShadows::GunShotSetsOilOnFire(const CVector* shotOrigin, const CVector* sh
 
 // 0x7076B0
 void CShadows::PrintDebugPoly(CVector* a, CVector* b, CVector* c) {
-    ((void(__cdecl*)(CVector*, CVector*, CVector*))0x7076B0)(a, b, c);
+    // NOP
 }
 
 // 0x7076C0
-void CShadows::CalcPedShadowValues(CVector sunPosn, float* displacementX, float* displacementY, float* frontX, float* frontY, float* sideX, float* sideY) {
-    ((void(__cdecl*)(CVector, float*, float*, float*, float*, float*, float*))0x7076C0)(sunPosn, displacementX, displacementY, frontX, frontY, sideX, sideY);
-}
+void CShadows::CalcPedShadowValues(CVector sunPosn, float& displacementX, float& displacementY, float& frontX, float& frontY, float& sideX, float& sideY) {
+    const auto sunDist = sunPosn.Magnitude2D();
+    const auto recip = 1.0f / sunDist;
+    const auto mult = (sunDist + 1.0f) * recip;
 
-// 0x707770
-void CShadows::TidyUpShadows() {
-    ((void(__cdecl*)())0x707770)();
+    displacementX = -sunPosn.x * mult / 2.0f;
+    displacementY = -sunPosn.y * mult / 2.0f;
+
+    frontX = -sunPosn.y * recip / 2.0f;
+    frontY = +sunPosn.x * recip / 2.0f;
+
+    sideX = -sunPosn.x / 2.0f;
+    sideY = -sunPosn.y / 2.0f;
 }
 
 // 0x707850
 void CShadows::AffectColourWithLighting(uint8 shadowType, uint8 dayNightIntensity, uint8 red, uint8 green, uint8 blue, uint8* outRed, uint8* outGreen, uint8* outBlue) {
     ((void(__cdecl*)(uint8, uint8, uint8, uint8, uint8, uint8*, uint8*, uint8*))0x707850)(shadowType, dayNightIntensity, red, green, blue, outRed, outGreen, outBlue);
-}
-
-// 0x707930
-void CShadows::StoreShadowToBeRendered(uint8 shadowTextureType, CVector* posn, float frontX, float frontY, float sideX, float sideY, int16 intensity, uint8 red, uint8 green, uint8 blue) {
-    ((void(__cdecl*)(uint8, CVector*, float, float, float, float, int16, uint8, uint8, uint8))0x707930)(shadowTextureType, posn, frontX, frontY, sideX, sideY, intensity, red, green, blue);
 }
 
 // 0x707B40
@@ -161,8 +305,9 @@ void CShadows::GeneratePolysForStaticShadow(int16 staticShadowIndex) {
 }
 
 // 0x70BA00
-bool CShadows::StoreStaticShadow(uint32 id, uint8 type, RwTexture* texture, CVector* posn, float frontX, float frontY, float sideX, float sideY, int16 intensity, uint8 red, uint8 green, uint8 blue, float zDistane, float scale, float drawDistance, bool temporaryShadow, float upDistance) {
-    return ((bool(__cdecl*)(uint32, uint8, RwTexture*, CVector*, float, float, float, float, int16, uint8, uint8, uint8, float, float, float, bool, float))0x70BA00)(id, type, texture, posn, frontX, frontY, sideX, sideY, intensity, red, green, blue, zDistane, scale, drawDistance, temporaryShadow, upDistance);
+bool CShadows::StoreStaticShadow(uint32 id, eShadowType type, RwTexture* texture, const CVector& posn, float frontX, float frontY, float sideX, float sideY, int16 intensity, uint8 red, uint8 green, uint8 blue, float zDistane, float scale, float drawDistance, bool temporaryShadow, float upDistance) {
+    return ((bool(__cdecl*)(uint32, eShadowType, RwTexture*, const CVector&, float, float, float, float, int16, uint8, uint8, uint8, float, float, float, bool, float))0x70BA00)(
+        id, type, texture, posn, frontX, frontY, sideX, sideY, intensity, red, green, blue, zDistane, scale, drawDistance, temporaryShadow, upDistance);
 }
 
 // 0x70BDA0
@@ -180,21 +325,26 @@ void CShadows::StoreShadowForPole(CEntity* entity, float offsetX, float offsetY,
     ((void(__cdecl*)(CEntity*, float, float, float, float, float, uint32))0x70C750)(entity, offsetX, offsetY, offsetZ, poleHeight, poleWidth, localId);
 }
 
-// 0x70C950
-void CShadows::UpdatePermanentShadows() {
-    ((void(__cdecl*)())0x70C950)();
-}
-
 // 0x70CCB0
 void CShadows::RenderIndicatorShadow(uint32 id, uint8 shadowType, RwTexture* texture, CVector* posn, float frontX, float frontY, float sideX, float sideY, int16 intensity) {
     ((void(__cdecl*)(uint32, uint8, RwTexture*, CVector*, float, float, float, float, int16))0x70CCB0)(id, shadowType, texture, posn, frontX, frontY, sideX, sideY, intensity);
+
+    /*
+    CVector out = posn;
+    float size  = frontX <= (float)(-sideY) ? -sideY : frontX;
+
+    C3dMarkers::PlaceMarkerSet(id, 1u, out, size * 0.8f, 255, 0, 0, 255u, 2048, 0.2f, 0);
+    C3dMarkers::PlaceMarkerSet(id, 1u, out, size * 0.9f, 255, 0, 0, 255u, 2048, 0.2f, 0);
+    C3dMarkers::PlaceMarkerSet(id, 1u, out, size,        255, 0, 0, 255u, 2048, 0.2f, 0);
+    */
 }
 
+// 0x709CF0
 #ifdef _MSC_VER
-RwV3d* ShadowRenderTriangleCB(RwV3d* pNormal, RwV3d* pTrianglePos, _ProjectionParam* param) {
-    RwV3d* result = 0;
-    __asm mov eax, pNormal
-    __asm mov ebx, pTrianglePos
+CVector* ShadowRenderTriangleCB(CVector* normal, CVector* trianglePos, _ProjectionParam* param) {
+    CVector* result = nullptr;
+    __asm mov eax, normal
+    __asm mov ebx, trianglePos
     __asm mov edi, param
     __asm mov ecx, 0x709CF0
     __asm call ecx

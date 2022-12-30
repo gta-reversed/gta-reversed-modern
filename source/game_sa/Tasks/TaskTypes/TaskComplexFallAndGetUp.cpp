@@ -13,10 +13,10 @@ void CTaskComplexFallAndGetUp::InjectHooks() {
     RH_ScopedInstall(IsFalling, 0x6787D0);
     RH_ScopedInstall(SetDownTime, 0x6787A0);
     // VTABLE
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x678870);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x67CB70);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x6788F0);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x6787F0);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x678870);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x67CB70);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x6788F0);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x6787F0);
 }
 
 CTaskComplexFallAndGetUp* CTaskComplexFallAndGetUp::Constructor(AnimationId nFallAnimId, AssocGroupId nFallAnimGroup, int32 nFallDownTime) {

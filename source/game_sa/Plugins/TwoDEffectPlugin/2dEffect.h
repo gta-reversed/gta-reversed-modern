@@ -151,6 +151,11 @@ struct tEffectRoadsign {
 };
 VALIDATE_SIZE(tEffectRoadsign, 0x20);
 
+struct tEffectSlotMachineWheel {
+    int32 m_nId;
+};
+VALIDATE_SIZE(tEffectSlotMachineWheel, 0x4);
+
 struct tEffectCoverPoint {
     RwV2d m_vecDirection;
     uint8 m_nType;
@@ -171,14 +176,14 @@ class C2dEffect {
     e2dEffectType m_nType;
     char          _pad0[3];
     union {
-        tEffectLight        light;
-        tEffectParticle     particle;
-        tEffectPedAttractor pedAttractor;
-        tEffectEnEx         enEx;
-        tEffectRoadsign     roadsign;
-        int32               iSlotMachineIndex;
-        tEffectCoverPoint   coverPoint;
-        tEffectEscalator    escalator;
+        tEffectLight            light;
+        tEffectParticle         particle;
+        tEffectPedAttractor     pedAttractor;
+        tEffectEnEx             enEx;
+        tEffectRoadsign         roadsign;
+        tEffectSlotMachineWheel slotMachineIndex;
+        tEffectCoverPoint       coverPoint;
+        tEffectEscalator        escalator;
     };
 
 public:

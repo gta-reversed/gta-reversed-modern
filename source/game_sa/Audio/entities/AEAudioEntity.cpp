@@ -6,7 +6,32 @@
 */
 
 #include "StdInc.h"
+#include "AEAudioEntity.h"
 
 int8*& CAEAudioEntity::m_pAudioEventVolumes = *reinterpret_cast<int8**>(0xBD00F8);
 
-CAEAudioEntity::CAEAudioEntity() : m_tempSound() {}
+CAEAudioEntity::CAEAudioEntity() : m_pEntity(nullptr), m_tempSound() {}
+
+// NOTSA | INLINED | REFACTORED
+bool CAEAudioEntity::StaticInitialise() {
+    m_pAudioEventVolumes = new int8[45401];
+    auto file = CFileMgr::OpenFile("AUDIO\\CONFIG\\EVENTVOL.DAT", "r");
+    if (!file) {
+        DEV_LOG("[AudioEngine] Failed to open EVENTVOL.DAT");
+        CFileMgr::CloseFile(file);
+        return false;
+    }
+    if (CFileMgr::Read(file, m_pAudioEventVolumes, 45401) != 45401) {
+        DEV_LOG("[AudioEngine] Failed to read EVENTVOL.DAT");
+        CFileMgr::CloseFile(file);
+        return false;
+    }
+    CFileMgr::CloseFile(file);
+    return true;
+}
+
+// NOTSA | INLINED | REFACTORED
+void CAEAudioEntity::Shutdown() {
+    delete[] m_pAudioEventVolumes;
+    m_pAudioEventVolumes = nullptr;
+}

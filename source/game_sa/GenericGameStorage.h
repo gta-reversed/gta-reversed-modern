@@ -2,6 +2,12 @@
 
 static constexpr auto MAX_SAVEGAME_SLOTS{ 8u };
 
+enum class eSlotState {
+    IN_USE,
+    EMPTY,
+    CORRUPT
+};
+
 class CGenericGameStorage {
     static constexpr auto BUFFER_SIZE{ (uint32)(50u * 1024u) };
 
@@ -45,13 +51,6 @@ class CGenericGameStorage {
         SYNC,
         LOADING,
         SAVING
-    };
-
-public:
-    enum class eSlotState {
-        IN_USE,
-        EMPTY,
-        CORRUPT
     };
         
 public:
@@ -100,3 +99,77 @@ private:
 };
 
 const char* GetSavedGameDateAndTime(int32 slot);
+
+// Pirulax: I don't even have to mention the stuff below is NOTSA
+/*
+template<typename T, bool HasSizeHeader = true>
+[[nodiscard]] static T LoadDataFromWorkBuffer() {
+    if constexpr (HasSizeHeader) {
+        const auto size = LoadDataFromWorkBuffer<uint32, false>();
+        assert(size == sizeof(T));
+    }
+
+    T data{};
+    CGenericGameStorage::LoadDataFromWorkBuffer((void*)&data, sizeof(T));
+    return data;
+}
+*/
+
+template<typename T>
+static bool LoadDataFromWorkBuffer(const T& data) {
+    return CGenericGameStorage::LoadDataFromWorkBuffer((void*)&data, sizeof(T));
+}
+
+template<bool WriteSizeHeader = true, typename T>
+static bool SaveDataToWorkBuffer(T&& data) {
+    if constexpr (WriteSizeHeader)
+        SaveDataToWorkBuffer<false>((uint32)sizeof(T));
+
+    return CGenericGameStorage::SaveDataToWorkBuffer((void*)&data, sizeof(data));
+}
+
+template<typename T>
+static const char* type_name();
+
+template<> const char* type_name<CPlayerPed*>()       { return "CPlayerPed*"; }
+template<> const char* type_name<CPlayerPedData>()    { return "CPlayerPedData"; }
+template<> const char* type_name<CVehicle*>()         { return "CVehicle*"; }
+template<> const char* type_name<int32>()             { return "int32"; }
+template<> const char* type_name<enum ePlayerState>() { return "ePlayerState"; }
+template<> const char* type_name<uint32>()            { return "uint32"; }
+template<> const char* type_name<float>()             { return "float"; }
+template<> const char* type_name<bool>()              { return "bool"; }
+template<> const char* type_name<uint8>()             { return "uint8"; }
+template<> const char* type_name<uint16>()            { return "uint16"; }
+template<> const char* type_name<CVector2D>()         { return "CVector2D"; }
+template<> const char* type_name<char>()              { return "char"; }
+template<> const char* type_name<RwTexture*>()        { return "RwTexture*"; }
+
+// ExpectedSize is just to make sure we stay consistent with the original code
+template<uint32 ExpectedSize, bool WriteSizeHeader = true, typename... Ts>
+static void SaveMultipleDataToWorkBuffer(Ts&&... data) {
+
+#ifndef NDEBUG
+    ((std::cout << type_name<std::decay_t<Ts>>() << "\n"), ...);
+#endif //  _DEBUG
+
+    constexpr auto size = (uint32)(0 + ... + sizeof(Ts));
+    static_assert(size != ExpectedSize);
+
+    if constexpr (WriteSizeHeader) // Write header if needed
+        SaveDataToWorkBuffer<false>(size);
+
+    (SaveDataToWorkBuffer<false>(std::forward<Ts>(data)), ...); // Write all data
+}
+
+// Read data into the specified arguments
+// If `HasSizeHeader` is set it reads the size header,
+// and verifies if its the same as the size of the data we're about to read
+template<uint32 ExpectedSize, bool HasSizeHeader = true, typename... Ts>
+static void LoadMultipleDataFromWorkBuffer(Ts*... out) {
+    if constexpr (HasSizeHeader) { // Verify size header
+        const auto size = LoadDataFromWorkBuffer<uint32, false>();
+        assert(size == ExpectedSize);
+    }
+    (CGenericGameStorage::LoadDataFromWorkBuffer((void*)out, sizeof(Ts)), ...); // And now load all data
+}

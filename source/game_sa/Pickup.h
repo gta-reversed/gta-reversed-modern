@@ -39,10 +39,10 @@ enum ePickupType : uint8 {
     PICKUP_ONCE_FOR_MISSION = 22
 };
 
-enum ePickupPropertyText {
-    PICKUP_PROPERTYTEXT_CANCEL = 0,   // "Cancel"
-    PICKUP_PROPERTYTEXT_CANT_BUY = 1, // "You can't by..."
-    PICKUP_PROPERTYTEXT_CAN_BUY = 2   // "Press TAB to buy ..."
+enum ePickupPropertyText : int32 {
+    PICKUP_PROPERTY_TEXT_CANCEL   = 0, // "Cancel"
+    PICKUP_PROPERTY_TEXT_CANT_BUY = 1, // "You can't by..."
+    PICKUP_PROPERTY_TEXT_CAN_BUY  = 2  // "Press TAB to buy ..."
 };
 
 class CPickup {
@@ -63,38 +63,30 @@ public:
         uint8 bVisible : 1;
         uint8 nPropertyTextIndex : 3; // see enum ePickupPropertyText
     } m_nFlags;
-    char _pad1E[2];
 
 public:
     static void InjectHooks();
 
-    void SetPosn(float x, float y, float z);
-    CVector GetPosn();
-    float GetXCoord() { return m_vecPos.x / 8.0f; } // 0x4549F0
-    float GetYCoord() { return m_vecPos.y / 8.0f; } // 0x454A10
-    float GetZCoord() { return m_vecPos.z / 8.0f; } // 0x454A30
+    void SetPosn(CVector posn) { m_vecPos = CompressLargeVector(posn); } // 0x454960
+    [[nodiscard]] CVector GetPosn() const { return UncompressLargeVector(m_vecPos); } // 0x4549A0
+    [[nodiscard]] CVector2D GetPosn2D() const { return GetPosn(); };    // NOTSA
+    [[nodiscard]] float GetXCoord() const { return m_vecPos.x / 8.0f; } // 0x4549F0
+    [[nodiscard]] float GetYCoord() const { return m_vecPos.y / 8.0f; } // 0x454A10
+    [[nodiscard]] float GetZCoord() const { return m_vecPos.z / 8.0f; } // 0x454A30
     void SetXCoord(float coord) { m_vecPos.x = static_cast<int16>(coord * 8.0f); }
     void SetYCoord(float coord) { m_vecPos.y = static_cast<int16>(coord * 8.0f); }
     void SetZCoord(float coord) { m_vecPos.z = static_cast<int16>(coord * 8.0f); }
 
-    // Give player an ammo from weapon pickup
-    void ExtractAmmoFromPickup(CPlayerPed* playerPed);
-    // Is pickup visible (checks if distance between pickup and camera is shorter than 100 units)
-    bool IsVisible();
-    // Delete pickup's object (CObject)
+    void ExtractAmmoFromPickup(CPlayerPed* player);
+    [[nodiscard]] bool IsVisible();
     void GetRidOfObjects();
     bool PickUpShouldBeInvisible();
     void Remove();
-    // Creates an object (CObject) for pickup. slotIndex - object to replace; use -1 to create a new object
     void GiveUsAPickUpObject(CObject** obj, int32 slotIndex);
-    // Updates the pickup. Returns TRUE if pickup was removed/disabled
-    void Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId);
-    // Checks if pickup collides with line (origin;target), removes pickup and creates an explosion. Used in previous GTA games for mine pickup
+    bool Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId);
     void ProcessGunShot(CVector* origin, CVector* target);
 
-    // message = GXT key
-    static int32 FindTextIndexForString(char* message);
-    static const char* FindStringForTextIndex(int32 index);
+    static ePickupPropertyText FindTextIndexForString(const char* message);
+    static const char* FindStringForTextIndex(ePickupPropertyText index);
 };
-
 VALIDATE_SIZE(CPickup, 0x20);

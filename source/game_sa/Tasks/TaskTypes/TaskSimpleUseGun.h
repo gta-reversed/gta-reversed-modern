@@ -9,11 +9,11 @@
 #include "TaskSimple.h"
 #include "Vector.h"
 #include "Vector2D.h"
-#include "WeaponInfo.h"
-#include "AnimBlendAssociation.h"
-#include "Entity.h"
+class CWeaponInfo;
+class CAnimBlendAssociation;
+class CEntity;
 
-class CTaskSimpleUseGun : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleUseGun : public CTaskSimple {
 public:
     bool m_bIsFinished;
     bool m_bIsInControl;
@@ -47,11 +47,13 @@ public:
     bool m_bAimImmediate;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_USE_GUN;
+
     CTaskSimpleUseGun(CEntity* targetEntity, CVector vecTarget, uint8 nCommand, uint16 nBurstLength = 1, bool bAimImmediate = false);
     ~CTaskSimpleUseGun() override;
 
     CTask* Clone() override { return new CTaskSimpleUseGun(m_pTarget, m_vecTarget, m_nLastCommand, m_nBurstLength, m_bAimImmediate); }
-    eTaskType GetTaskType() override { return TASK_SIMPLE_USE_GUN; };
+    eTaskType GetTaskType() override { return Type; };
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;
@@ -63,7 +65,7 @@ public:
     int32 ClearAnim(CPed* ped);
 
     bool ControlGun(CPed* ped, CEntity* target, int8 nCount);
-    bool ControlGunMove(CVector2D* moveSpeed);
+    bool ControlGunMove(const CVector2D& moveSpeed);
 
     void FinishGunAnimCB(CAnimBlendAssociation* anim, void* data);
 
@@ -71,7 +73,7 @@ public:
     bool PlayerPassiveControlGun();
     void RemoveStanceAnims(CPed* ped, float);
     static bool RequirePistolWhip(CPed* ped, CEntity* entity);
-    void Reset(CPed* ped, CEntity* entity, CVector posn, int8, short);
+    void Reset(CPed* ped, CEntity* entity, CVector posn, int8 unused, int16 burstAmmoCnt);
 
     void SetMoveAnim(CPed* ped);
     void StartAnim(CPed* ped);

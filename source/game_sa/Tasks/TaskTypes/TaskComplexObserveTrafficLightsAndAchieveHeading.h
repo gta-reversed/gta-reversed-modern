@@ -8,10 +8,12 @@ public:
     float m_fTargetHeading;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_OBSERVE_TRAFFIC_LIGHTS_AND_ACHIEVE_HEADING;
+
     CTaskComplexObserveTrafficLightsAndAchieveHeading(int32 durationInMs, float targetHeading);
     ~CTaskComplexObserveTrafficLightsAndAchieveHeading() override = default; // 0x631980
 
-    eTaskType GetTaskType() override { return TASK_COMPLEX_OBSERVE_TRAFFIC_LIGHTS_AND_ACHIEVE_HEADING; } // 0x631940
+    eTaskType GetTaskType() override { return Type; } // 0x631940
     CTask* Clone() override;
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
@@ -26,11 +28,11 @@ private:
         RH_ScopedClass(CTaskComplexObserveTrafficLightsAndAchieveHeading);
         RH_ScopedCategory("Tasks/TaskTypes");
 
-        RH_ScopedInstall(Clone_Reversed, 0x636490);
-        RH_ScopedInstall(ControlSubTask_Reversed, 0x631AD0);
-        RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x631AC0);
-        RH_ScopedInstall(CreateNextSubTask_Reversed, 0x631A70);
-        RH_ScopedInstall(MakeAbortable_Reversed, 0x631950);
+        RH_ScopedVirtualInstall(Clone, 0x636490);
+        RH_ScopedVirtualInstall(ControlSubTask, 0x631AD0);
+        RH_ScopedVirtualInstall(CreateFirstSubTask, 0x631AC0);
+        RH_ScopedVirtualInstall(CreateNextSubTask, 0x631A70);
+        RH_ScopedVirtualInstall(MakeAbortable, 0x631950);
     }
 
     CTaskComplexObserveTrafficLightsAndAchieveHeading* Constructor(int32 durationInMs, float fTargetHeading) {
@@ -43,7 +45,6 @@ private:
     CTask* CreateFirstSubTask_Reversed(CPed* ped) { return CreateFirstSubTask(ped); }
     CTask* CreateNextSubTask_Reversed(CPed* ped) { return CreateNextSubTask(ped); }
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable(ped, priority, event); }
-
 };
 
 VALIDATE_SIZE(CTaskComplexObserveTrafficLightsAndAchieveHeading, 0x14);

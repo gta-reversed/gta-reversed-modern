@@ -94,8 +94,8 @@ void CSimpleVariablesSaveStructure::Construct() {
     m_bHasDisplayedPlayerQuitEnterCarHelpText = CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText;
 
     m_bHasPlayerCheated = CCheat::m_bHasPlayerCheated;
-    m_bAllTaxisNitro = CCheat::m_aCheatsActive[CHEAT_ALL_TAXIS_NITRO];
-    m_bProstitutesPayYou = CCheat::m_aCheatsActive[CHEAT_PROSTITUTES_PAY_YOU];
+    m_bAllTaxisNitro = CCheat::IsActive(CHEAT_ALL_TAXIS_NITRO);
+    m_bProstitutesPayYou = CCheat::IsActive(CHEAT_PROSTITUTES_PAY_YOU);
 }
 
 // 0x5D1EA0
@@ -163,20 +163,11 @@ void CSimpleVariablesSaveStructure::Extract(uint32& versionId) const {
     FrontEndMenuManager.m_nTargetBlipIndex = m_nTargetBlipIndex;
     CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText = m_bHasDisplayedPlayerQuitEnterCarHelpText;
 
-    static constexpr void (*pTaxiNitroCheat)() = nullptr;
-    static constexpr void (*pProstitutesPayYouCheat)() = nullptr;
-
     CCheat::m_bHasPlayerCheated = m_bHasPlayerCheated;
     if (m_bAllTaxisNitro) {
-        if (pTaxiNitroCheat)
-            pTaxiNitroCheat();
-        else
-            CCheat::m_aCheatsActive[CHEAT_ALL_TAXIS_NITRO] ^= true;
+        CCheat::ApplyCheat(CHEAT_ALL_TAXIS_NITRO);
     }
     if (m_bProstitutesPayYou) {
-        if (pProstitutesPayYouCheat)
-            pProstitutesPayYouCheat();
-        else
-            CCheat::m_aCheatsActive[CHEAT_PROSTITUTES_PAY_YOU] ^= true;
+        CCheat::ApplyCheat(CHEAT_PROSTITUTES_PAY_YOU);
     }
 }

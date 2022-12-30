@@ -1,13 +1,16 @@
+#pragma once
+
 #include <ranges>
 #include <iterator>
 
+namespace notsa{
 namespace detail {
 template <std::input_iterator ItType> class enumerate_iterator {
 public:
     using underlaying_iter_traits = typename std::iterator_traits<ItType>;
 
     using iterator_category = std::input_iterator_tag;
-    using value_type = std::pair<ptrdiff_t, typename underlaying_iter_traits::value_type&>;
+    using value_type = std::pair<ptrdiff_t, typename underlaying_iter_traits::reference>;
     using difference_type = ptrdiff_t;
     using pointer = value_type*;
     using reference = value_type&;
@@ -125,3 +128,4 @@ template <std::input_iterator S, std::sentinel_for<S> E> auto enumerate(S begin,
 template <std::ranges::input_range R> auto enumerate(R&& r, ptrdiff_t start = 0) {
     return detail::enumerate_object{std::ranges::begin(r), std::ranges::end(r), start};
 }
+}; // namespace notsa

@@ -26,7 +26,7 @@ void InjectHooks();
 /**
  * pipeline plugin unique rwID
  */
-#define rwID_PIPELINEPLUGIN  MAKECHUNKID(rwVENDORID_ROCKSTAR, 0xF3)
+#define rwID_PIPELINEPLUGIN  MAKECHUNKID(rwVENDORID_DEVELOPER, 0xF3)
 
 /*
 * Pipeline plugin static offset

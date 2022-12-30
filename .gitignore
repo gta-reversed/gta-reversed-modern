@@ -49,3 +49,6 @@ perf.data*
 # macOS
 .DS_Store
 *.ini
+
+# Code Analyzers
+/.PVS-Studio

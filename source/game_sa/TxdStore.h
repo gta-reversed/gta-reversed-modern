@@ -10,13 +10,24 @@
 #include "TxdDef.h"
 #include "Pool.h"
 
+struct _TxdParent {
+    RwTexDictionary* parent;
+};
+
+/**
+ * Txd Store plugin unique rwID
+ */
+#define rwID_TXDPARENTPLUGIN  MAKECHUNKID(rwVENDORID_DEVELOPER, 0xF5)
+
+static inline int32& ms_txdPluginOffset = *reinterpret_cast<int32*>(0xC88018);
+
+typedef CPool<TxdDef> CTxdPool;
+
 class CTxdStore {
 public:
-    // class variables
-
-    static CPool<TxdDef>*& ms_pTxdPool;
+    static CTxdPool*&        ms_pTxdPool;
     static RwTexDictionary*& ms_pStoredTxd;
-    static int32& ms_lastSlotFound;
+    static int32&            ms_lastSlotFound;
     // variables list is not finished. Need to make CPools before.
 
     static int16 (&defaultTxds)[4];
@@ -24,6 +35,7 @@ public:
 public:
     static void InjectHooks();
 
+    static bool PluginAttach();
     static void Initialise();
     static void Shutdown();
     static void GameShutdown();
@@ -60,6 +72,16 @@ public:
 
     static RwTexture* TxdStoreFindCB(const char* name);
     static RwTexture* TxdStoreLoadCB(const char* name, const char* mask);
+
+    static auto FindOrAddTxdSlot(const char* name) {
+        auto slot = CTxdStore::FindTxdSlot(name);
+        if (slot == -1) slot = CTxdStore::AddTxdSlot(name);
+        return slot;
+    }
+    static void SafeRemoveTxdSlot(const char* name) {
+        auto slot = CTxdStore::FindTxdSlot(name);
+        if (slot != -1) CTxdStore::RemoveTxdSlot(slot);
+    }
 };
 
 RwTexture* RemoveIfRefCountIsGreaterThanOne(RwTexture* texture, void* data);

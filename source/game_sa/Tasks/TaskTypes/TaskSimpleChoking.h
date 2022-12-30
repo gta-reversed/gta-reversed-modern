@@ -9,7 +9,7 @@
 #include "TaskSimple.h"
 #include "AnimBlendAssociation.h"
 
-class CTaskSimpleChoking : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleChoking : public CTaskSimple {
 public:
     CPed*                  m_pAttacker;
     CAnimBlendAssociation* m_pAnim;
@@ -19,6 +19,8 @@ public:
     bool                   m_bIsFinished;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_CHOKING;
+
     CTaskSimpleChoking(CPed* attacker, bool bIsTeargas);
     void UpdateChoke(CPed* victim, CPed* attacker, bool bIsTeargas);
 };

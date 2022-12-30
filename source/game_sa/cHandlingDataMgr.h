@@ -18,10 +18,11 @@ public:
     float               field_8;
     float               field_C;
     float               field_10;
-    tHandlingData       m_aVehicleHandling[210];
-    tBikeHandlingData   m_aBikeHandling[13];
-    tFlyingHandlingData m_aFlyingHandling[24];
-    tBoatHandlingData   m_aBoatHandling[12];
+
+    std::array<tHandlingData, 210>      m_aVehicleHandling;
+    std::array<tBikeHandlingData, 13>   m_aBikeHandling;
+    std::array<tFlyingHandlingData, 24> m_aFlyingHandling;
+    std::array<tBoatHandlingData, 12>   m_aBoatHandling;
 
 public:
     static void InjectHooks();
@@ -45,9 +46,10 @@ public:
     // get boat handling by id
     tBoatHandlingData* GetBoatPointer(uint8 handlingId);
     tHandlingData* GetVehiclePointer(uint32 handlingId) { return &m_aVehicleHandling[handlingId]; };
-    tBikeHandlingData* GetBikeHandlingPointer(uint32 handlingId) { return &m_aBikeHandling[handlingId]; }
+    tBikeHandlingData* GetBikeHandlingPointer(uint32 handlingId) { return &m_aBikeHandling[handlingId >= 162 ? handlingId - 162 : handlingId]; } // NOTE: 162 = VT_BIKE
 };
 
 VALIDATE_SIZE(cHandlingDataMgr, 0xC624);
 
-extern cHandlingDataMgr& gHandlingDataMgr;
+// If you're searching for `mod_HandlingManager`, you can use this:
+static inline cHandlingDataMgr& gHandlingDataMgr = *(cHandlingDataMgr*)0xC2B9C8;

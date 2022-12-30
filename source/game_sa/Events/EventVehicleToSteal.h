@@ -4,13 +4,13 @@
 
 class CVehicle;
 
-class CEventVehicleToSteal : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventVehicleToSteal : public CEvent {
 public:
     CVehicle* m_vehicle;
 
 public:
     CEventVehicleToSteal(CVehicle* vehicle);
-    ~CEventVehicleToSteal();
+    ~CEventVehicleToSteal() override;
 
     eEventType GetEventType() const override { return EVENT_VEHICLE_TO_STEAL; }
     int32 GetEventPriority() const override { return 7; }

@@ -27,7 +27,7 @@ void CAEExplosionAudioEntity::AddAudioEvent(eAudioEvents audioEvent, CVector& po
         return;
     }
 
-    float vol0 = static_cast<float>(CAEAudioEntity::m_pAudioEventVolumes[AE_EXPLOSION]) + volume;
+    float vol0 = GetDefaultVolume(AE_EXPLOSION) + volume;
     m_Speed = (m_Speed + 1) % NUM_VARIATIONS;
 
     CAESound sound;
@@ -77,7 +77,7 @@ void CAEExplosionAudioEntity::InjectHooks() {
 
     RH_ScopedInstall(StaticInitialise, 0x5B9A60);
     RH_ScopedInstall(AddAudioEvent, 0x4DCBE0);
-    RH_ScopedInstall(UpdateParameters_Reversed, 0x4DCB90);
+    RH_ScopedVirtualInstall(UpdateParameters, 0x4DCB90);
 }
 
 void CAEExplosionAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {

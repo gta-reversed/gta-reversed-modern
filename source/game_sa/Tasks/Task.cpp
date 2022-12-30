@@ -9,13 +9,13 @@
 #include "Task.h"
 
 // 0x61A5A0
-void* CTask::operator new(uint32 size) {
-    return CPools::ms_pTaskPool->New();
+void* CTask::operator new(size_t size) {
+    return GetTaskPool()->New();
 }
 
 // 0x61A5B0
 void CTask::operator delete(void* object) {
-    CPools::ms_pTaskPool->Delete(static_cast<CTask*>(object));
+    GetTaskPool()->Delete(static_cast<CTask*>(object));
 }
 
 // 0x421180
@@ -25,15 +25,16 @@ void CTask::StopTimer(const CEvent* event) {
 
 // 0x61A360
 bool CTask::IsGoToTask(CTask* task) {
-    return task->GetTaskType() == TASK_SIMPLE_GO_TO_POINT ||
-           task->GetTaskType() == TASK_SIMPLE_GO_TO_POINT_FINE;
+    switch (task->GetTaskType()) {
+    case TASK_SIMPLE_GO_TO_POINT:
+    case TASK_SIMPLE_GO_TO_POINT_FINE:
+        return true;
+    default:
+        return false;
+    }
 }
 
-void CTask::InjectHooks() {
-    RH_ScopedClass(CTask);
-    RH_ScopedCategory("Tasks");
-
-    using namespace ReversibleHooks;
-    Install("CTask", "operator new", 0x61A5A0, &CTask::operator new);
-    Install("CTask", "operator delete", 0x61A5B0, &CTask::operator delete);
+// 0x61A4B0
+bool CTask::IsTaskPtr(CTask* task) {
+    return plugin::CallAndReturn<bool, 0x61A4B0>(task);
 }

@@ -6,16 +6,17 @@ class CTaskComplexDriveFireTruck : public CTaskComplex {
 public:
     CVehicle* m_pVehicle;
     uint8     m_bIsDriver;
-    uint8     _pad_11[3];
     CPed*     m_pPartnerFireman;
     CFire*    m_pFire;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_DRIVE_FIRE_TRUCK;
+
     CTaskComplexDriveFireTruck(CVehicle* vehicle, CPed* partnerFireman, bool bIsDriver);
     ~CTaskComplexDriveFireTruck() override;
 
-    CTask*    Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_DRIVE_FIRE_TRUCK; }
+    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
@@ -33,5 +34,4 @@ private:
 
     CTaskComplexDriveFireTruck* Constructor(CVehicle* vehicle, CPed* partnerFireman, bool bIsDriver);
 };
-
 VALIDATE_SIZE(CTaskComplexDriveFireTruck, 0x1C);

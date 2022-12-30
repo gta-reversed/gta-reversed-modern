@@ -3,25 +3,43 @@
 #include "TaskComplex.h"
 
 class CTaskComplexBeInGroup : public CTaskComplex {
-    int32  m_groupId;
-    bool   m_isLeader;
-    char   _pad[3];
-    CPed*  m_ped;
-    CTask* m_mainTask;
-    int32  m_mainTaskId;
-    CTask* m_secondaryTask;
-    int32  m_secondaryTaskSlot; // used as index in CTaskManager::m_aSecondaryTasks
+    int32  m_nGroupId;
+    bool   m_bIsLeader;
+    CPed*  m_Ped;
+    CTask* m_MainTask;
+    int32  m_nMainTaskId;
+    CTask* m_SecondaryTask;
+    int32  m_nSecondaryTaskSlot; // used as index in `CTaskManager::m_aSecondaryTasks`
 
 public:
-    CTaskComplexBeInGroup(int32 groupId, bool isLeader);
-    ~CTaskComplexBeInGroup() {}
+    static constexpr auto Type = TASK_COMPLEX_BE_IN_GROUP;
 
-    CTask*    Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_BE_IN_GROUP; }
-    bool   MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
-    CTask* CreateNextSubTask(CPed* ped) override;
-    CTask* CreateFirstSubTask(CPed* ped) override;
-    CTask* ControlSubTask(CPed* ped) override;
+    explicit CTaskComplexBeInGroup(int32 groupId, bool isLeader = false);
+    ~CTaskComplexBeInGroup() override = default; // 0x632EA0
+
+    CTask* MonitorMainGroupTask(CPed* ped);
+    void MonitorSecondaryGroupTask(CPed* ped);
+
+    CTask*    Clone() override { return new CTaskComplexBeInGroup(m_nGroupId, m_bIsLeader); }
+    eTaskType GetTaskType() override { return Type; }
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    CTask*    CreateNextSubTask(CPed* ped) override;
+    CTask*    CreateFirstSubTask(CPed* ped) override;
+    CTask*    ControlSubTask(CPed* ped) override;
+
+private:
+    auto& GetGroup() const { return CPedGroups::GetGroup(m_nGroupId); }
+
+    friend void InjectHooksMain();
+    static void InjectHooks();
+    CTaskComplexBeInGroup* Constructor(int32 groupId, bool isLeader) { this->CTaskComplexBeInGroup::CTaskComplexBeInGroup(groupId, isLeader); return this; }
+    CTaskComplexBeInGroup* Destructor() { this->CTaskComplexBeInGroup::~CTaskComplexBeInGroup(); return this; }
+    CTask*    Clone_Reversed() { return CTaskComplexBeInGroup::Clone(); }
+    eTaskType GetTaskType_Reversed() { return CTaskComplexBeInGroup::GetTaskType(); }
+    bool      MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent const* event) { return CTaskComplexBeInGroup::MakeAbortable(ped, priority, event); }
+    CTask*    CreateNextSubTask_Reversed(CPed* ped) { return CTaskComplexBeInGroup::CreateNextSubTask(ped); }
+    CTask*    CreateFirstSubTask_Reversed(CPed* ped) { return CTaskComplexBeInGroup::CreateFirstSubTask(ped); }
+    CTask*    ControlSubTask_Reversed(CPed* ped) { return CTaskComplexBeInGroup::ControlSubTask(ped); }
 };
 
 VALIDATE_SIZE(CTaskComplexBeInGroup, 0x28);

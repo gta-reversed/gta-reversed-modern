@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "ShinyTexts.h"
+#include "Shadows.h"
 
 uint32& CShinyTexts::NumShinyTexts = *(uint32*)0xC7C6F8;
 CRegisteredShinyText(&CShinyTexts::aShinyTexts)[32] = *(CRegisteredShinyText(*)[32])0xC7D258;
@@ -48,7 +49,7 @@ void CShinyTexts::Render() {
     uiTempBufferVerticesStored = 0;
 
     RwTexture* texture{};
-    for (CRegisteredShinyText& text : aShinyTexts) {
+    for (CRegisteredShinyText& text : std::span{ aShinyTexts, NumShinyTexts }) {
         if (uiTempBufferIndicesStored > TOTAL_TEMP_BUFFER_INDICES - 64u ||
             uiTempBufferVerticesStored > TOTAL_TEMP_BUFFER_VERTICES - 64u
         )
@@ -64,7 +65,7 @@ void CShinyTexts::Render() {
             RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpHandManTex)));
             texture = gpHandManTex;
         }
-            
+
         const auto GetRealVertexIndex = [](unsigned i) { return (unsigned)uiTempBufferVerticesStored + i; };
 
         const RwRGBA       color  = { text.m_colorR, text.m_colorG, text.m_colorB, 12 };

@@ -13,12 +13,12 @@
  */
 class ListItem_c {
 protected:
-    ListItem_c* m_pPrev;
-    ListItem_c* m_pNext;
+    ListItem_c* m_pPrev{};
+    ListItem_c* m_pNext{};
 
 protected:
-    ListItem_c();
-    ~ListItem_c();
+    ListItem_c() = default;  // 0x4A8DB0
+    ~ListItem_c() = default; // 0x49EA70
 
     friend class List_c;
 };

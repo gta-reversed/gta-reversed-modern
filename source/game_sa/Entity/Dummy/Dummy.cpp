@@ -9,14 +9,21 @@ void CDummy::InjectHooks() {
     RH_ScopedGlobalInstall(IsDummyPointerValid, 0x532730);
 }
 
-void* CDummy::operator new(unsigned size) {
-    return CPools::ms_pDummyPool->New();
+// 0x5326E0
+void* CDummy::operator new(size_t size) {
+    return GetDummyPool()->New();
 }
 
+// 0x5326F0
 void CDummy::operator delete(void* obj) {
-    CPools::ms_pDummyPool->Delete(static_cast<CDummy*>(obj));
+    GetDummyPool()->Delete(static_cast<CDummy*>(obj));
 }
 
-bool IsDummyPointerValid(CDummy* pDummy) {
-    return CPools::ms_pDummyPool->IsObjectValid(pDummy);
+// 0x532540
+CDummy::CDummy() : CEntity() {
+    m_nType = ENTITY_TYPE_DUMMY;
+}
+
+bool IsDummyPointerValid(CDummy* dummy) {
+    return GetDummyPool()->IsObjectValid(dummy);
 }

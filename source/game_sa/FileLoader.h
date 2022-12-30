@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "renderware.h"
+#include "RenderWare.h"
 
 #include "FileMgr.h"
 
