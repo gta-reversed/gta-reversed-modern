@@ -3,42 +3,68 @@
 #include "PoliceScannerAudioEntityDebugModule.h"
 #include "AEPoliceScannerAudioEntity.h"
 
-#include <imgui.h>
+void PoliceScannerAudioEntityDebugModule::RenderWindow() {
+    const notsa::ui::ScopedWindow window{ "Police Scanner Audio Entity", {400.f, 600.f}, m_IsOpen, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize };
+    if (!m_IsOpen) {
+        return;
+    }
 
-namespace PoliceScannerAudioEntityDebugModule {
+    if (!ImGui::BeginTable("PoliceScannerAudioEntityDebugModule", 2, ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Borders)) {
+        return;
+    }
 
-void ProcessImGui() {
-    ImGui::Text("Volume Offset %f", CAEPoliceScannerAudioEntity::s_fVolumeOffset);
-    ImGui::Text("Stopping Scanner %d", CAEPoliceScannerAudioEntity::s_bStoppingScanner);
-    ImGui::Text("Play Request %p", CAEPoliceScannerAudioEntity::s_pSound);
-    ImGui::Text("Abort Playback Time %u", CAEPoliceScannerAudioEntity::s_nAbortPlaybackTime);
-    ImGui::Text("Playback Start Time %u", CAEPoliceScannerAudioEntity::s_nPlaybackStartTime);
-    ImGui::Text("Section Playing %d", CAEPoliceScannerAudioEntity::s_nSectionPlaying);
+    const auto KVRow = [](const char* label, const char* vfmt, auto v) {
+        ImGui::TableNextColumn();
+        ImGui::Text(label);
 
+        ImGui::TableNextColumn();
+        ImGui::Text(vfmt, v);
+    };
+
+    KVRow("Volume Offset",       "%f",   CAEPoliceScannerAudioEntity::s_fVolumeOffset);
+    KVRow("Stopping Scanner",    "%d",   CAEPoliceScannerAudioEntity::s_bStoppingScanner);
+    KVRow("Play Request",        "0x%p", CAEPoliceScannerAudioEntity::s_pSound);
+    KVRow("Abort Playback Time", "%u",   CAEPoliceScannerAudioEntity::s_nAbortPlaybackTime);
+    KVRow("Playback Start Time", "%u",   CAEPoliceScannerAudioEntity::s_nPlaybackStartTime);
+    KVRow("Section Playing",     "%d",   CAEPoliceScannerAudioEntity::s_nSectionPlaying);
+    KVRow("Current Slots",       "0x%p", CAEPoliceScannerAudioEntity::s_pCurrentSlots);
+
+    ImGui::TableNextColumn();
     ImGui::Text("Slot State");
+    ImGui::TableNextColumn();
     for (auto& v : CAEPoliceScannerAudioEntity::s_SlotState) {
-        ImGui::SameLine();
         ImGui::Text("%d", v);
+        ImGui::SameLine();
     }
 
-    ImGui::Text("Current Slots %p", CAEPoliceScannerAudioEntity::s_pCurrentSlots);
+    const auto PrintSlots = [](auto& slots) {
+        for (auto& v : slots) {
+            ImGui::Text("%d:%d, ", v.bankId, v.sfxId);
+            ImGui::SameLine();
+        }
+    };
 
+    ImGui::TableNextColumn();
     ImGui::Text("Scanner Slot First");
-    for (auto& v : CAEPoliceScannerAudioEntity::s_ScannerSlotFirst) {
-        ImGui::SameLine();
-        ImGui::Text("%d:%d", v.bankId, v.sfxId);
-    }
+    ImGui::TableNextColumn();
+    PrintSlots(CAEPoliceScannerAudioEntity::s_ScannerSlotFirst);
 
+    ImGui::TableNextColumn();
     ImGui::Text("Scanner Slot Second");
-    for (auto& v : CAEPoliceScannerAudioEntity::s_ScannerSlotSecond) {
-        ImGui::SameLine();
-        ImGui::Text("%d:%d", v.bankId, v.sfxId);
-    }
+    ImGui::TableNextColumn();
+    PrintSlots(CAEPoliceScannerAudioEntity::s_ScannerSlotSecond);
 
-    ImGui::Text("PS Controlling %p", CAEPoliceScannerAudioEntity::s_pPSControlling);
-    ImGui::Text("Scanner Playback State %d", CAEPoliceScannerAudioEntity::s_nScannerPlaybackState);
-    ImGui::Text("Scanner Disabled %d", CAEPoliceScannerAudioEntity::s_bScannerDisabled);
-    ImGui::Text("Next New Scanner DialogueTime %u", CAEPoliceScannerAudioEntity::s_NextNewScannerDialogueTime);
+
+    KVRow("PS Controlling",                "0x%p", CAEPoliceScannerAudioEntity::s_pPSControlling);
+    KVRow("Scanner Playback State",        "%d",   CAEPoliceScannerAudioEntity::s_nScannerPlaybackState);
+    KVRow("Scanner Disabled",              "%d",   CAEPoliceScannerAudioEntity::s_bScannerDisabled);
+    KVRow("Next New Scanner DialogueTime", "%u",   CAEPoliceScannerAudioEntity::s_NextNewScannerDialogueTime);
+
+    ImGui::EndTable();
 }
 
-} // namespace PoliceScannerAudioEntityDebugModule
+void PoliceScannerAudioEntityDebugModule::RenderMenuEntry() {
+    notsa::ui::DoNestedMenuIL({ "Extra", "Audio", "Entites" }, [&] {
+        ImGui::MenuItem("Police Scanner", nullptr, &m_IsOpen);
+    });
+}

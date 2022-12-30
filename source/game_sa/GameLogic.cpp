@@ -216,19 +216,24 @@ bool CGameLogic::IsSkipWaitingForScriptToFadeIn() {
 // 0x441C10
 bool CGameLogic::LaRiotsActiveHere() {
     const auto coors = FindPlayerCoors();
-    if (coors.z > 950.0f)
+
+    if (coors.z > 950.0f) {
         return false;
+    }
 
-    if (CCheat::IsActive(CHEAT_RIOT_MODE))
+    if (CCheat::IsActive(CHEAT_RIOT_MODE)) {
         return true;
+    }
 
-    CRect rt1(1620.0f, -2178.0f, 2824.0f, -1067.0f),
-          rt2(157.0f, -1950.0f, 1630.0f, -1192.0f);
+    if (!gbLARiots) {
+        return false;
+    }
 
-    if (gbLARiots && (rt1.IsPointInside(coors) || rt2.IsPointInside(coors)))
-        return true;
-
-    return false;
+    const CRect rects[]{
+        {1620.0f, -2178.0f, 2824.0f, -1067.0f},
+        {157.0f, -1950.0f, 1630.0f, -1192.0f},
+    };
+    return rng::any_of(rects, [&](auto rect) { return rect.IsPointInside(coors); });
 }
 
 // 0x5D33C0

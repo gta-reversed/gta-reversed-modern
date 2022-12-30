@@ -41,7 +41,7 @@ public:
     */
     template<rng::random_access_range R>
     static auto& RandomChoice(const R& range) {
-        return range[(size_t)CGeneral::GetRandomNumberInRange(0, rng::size(range))];
+        return range[(size_t)CGeneral::GetRandomNumberInRange(0, (int32)rng::size(range))];
     }
 
     /*
