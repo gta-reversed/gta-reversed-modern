@@ -13,9 +13,7 @@
 #include "Shadows.h"
 #include "CarFXRenderer.h"
 
-#ifdef EXTRA_DEBUG_FEATURES
-#include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
-#endif
+#include "toolsmenu/UIRenderer.h"
 
 bool& CRenderer::ms_bRenderTunnels = *(bool*)0xB745C0;
 bool& CRenderer::ms_bRenderOutsideTunnels = *(bool*)0xB745C1;
@@ -437,10 +435,6 @@ void CRenderer::RenderFirstPersonVehicle() {
         if (bRestoreAlphaTest)
             RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(NULL));
     }
-
-#ifdef EXTRA_DEBUG_FEATURES
-    CollisionDebugModule::ProcessRender();
-#endif
 }
 
 // 0x553E40
@@ -566,7 +560,7 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
             if (FindPlayerVehicle() == entity && gbFirstPersonRunThisFrame && CReplay::Mode != MODE_PLAYBACK) {
                 uint32 dwDirectionWasLooking = CCamera::GetActiveCamera().m_nDirectionWasLooking;
                 CVehicle* vehicle = FindPlayerVehicle();
-                if (!vehicle->IsBike() || !(vehicle->AsBike()->bikeFlags.bWheelieCam))
+                if (!vehicle->IsBike() || !(vehicle->AsBike()->bikeFlags.bWheelieForCamera))
                 {
                     if (dwDirectionWasLooking == 3)
                         return RENDERER_CULLED;
@@ -600,9 +594,6 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
             }
 
             if (!entity->GetIsOnScreen() || entity->IsEntityOccluded()) {
-#ifdef EXTRA_DEBUG_FEATURES
-                ++COcclusionDebugModule::NumEntitiesSkipped;
-#endif
                 return RENDERER_CULLED;
             }
 
@@ -647,9 +638,6 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
 
                 if (!entity->GetIsOnScreen() || entity->IsEntityOccluded())
                 {
-#ifdef EXTRA_DEBUG_FEATURES
-                    ++COcclusionDebugModule::NumEntitiesSkipped;
-#endif
                     return RENDERER_CULLED;
                 }
 

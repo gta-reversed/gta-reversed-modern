@@ -49,6 +49,7 @@ public:
     static bool CanPedDuck(CPed* ped);
     bool ControlDuckMove(float moveSpeedX, float moveSpeedY);
     bool IsTaskInUseByOtherTasks();
+    void ForceStopMove();
 
 private:
     friend void InjectHooksMain();

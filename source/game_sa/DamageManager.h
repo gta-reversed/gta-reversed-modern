@@ -11,8 +11,19 @@
 
 class CAutomobile;
 
+// Seems like there is some kind of generic damage state enum. look at gComponentDamageState
+// and CShopping::StoreVehicleMods.
+enum eDamageState : int8 {
+    DAMAGE_STATE_OK      = 0,
+    DAMAGE_STATE_NOT_OK1 = 1,
+    DAMAGE_STATE_NOT_OK2 = 2,
+    DAMAGE_STATE_NOT_OK3 = 3,
+    DAMAGE_STATE_NOT_OK4 = 4
+};
+
 // TODO: Seems like these are the damage states for doors only.
 //       Panel's seems to be different, more like: DAMSTATE_OK, DAMSTATE_DAMAGED, DAMSTATE_MISSING
+// TODO(yukani): change prefix to something else?
 enum ePanelDamageState : uint8 {
     DAMSTATE_OK             = 0, // Closed
     DAMSTATE_OPENED         = 1, // Open
@@ -159,7 +170,7 @@ public:
     void SetAeroplaneCompStatus(uint8 frame, ePanelDamageState status);
 
     uint32 GetEngineStatus();
-    void SetEngineStatus(uint8 status);
+    void SetEngineStatus(uint32 status);
 
     // There are 2 door functions, one takes `tComponent` the other `eDoors`.
     // To select the correct version to call look at the called function's address when you are REing code
@@ -190,6 +201,7 @@ public:
     void SetDoorOpen(eDoors door);
     void SetDoorClosed(eDoors door);
     [[nodiscard]] auto GetAllLightsState() const -> std::array<eLightsState, 4>;
+    [[nodiscard]] auto GetAllDoorsStatus() const -> std::array<eDoorStatus, MAX_DOORS>;
     [[nodiscard]] bool IsDoorOpen(eDoors door) const;
     [[nodiscard]] bool IsDoorClosed(eDoors door) const;
     [[nodiscard]] bool IsDoorPresent(eDoors door) const;

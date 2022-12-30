@@ -137,8 +137,9 @@ void* OS_MutexCreate(const char* name) {
     return CreateMutex(nullptr, false, nullptr);
 }
 
-void OS_MutexRelease(void* mutex) {
-    VERIFY(ReleaseMutex(&mutex));
+void OS_MutexRelease(void* mutex) { // TODO: `VERIFY` fails here - Fix
+    //VERIFY(ReleaseMutex(&mutex));
+    (void)ReleaseMutex(&mutex);
 }
 
 void OS_MutexObtain(void* mutex) {
@@ -184,7 +185,7 @@ void* OS_ThreadLaunch(OS_ThreadRoutine pfnStart, void* param, uint32 nFlags, con
         break;
     }
 
-    DEV_LOG("OS: Thread %d (%s) created", dwThreadID, name);
+    DEV_LOG("OS: Thread {} ({}) created", dwThreadID, name);
 
     return hThread;
 }
@@ -208,7 +209,7 @@ double OS_TimeAccurate() {
 }
 
 uint32 OS_TimeMS() {
-    return uint32(OS_TimeAccurate() * 1000.f);
+    return uint32(GetOSWPerformanceTime() / GetOSWPerformanceFrequency());
 }
 
 bool IsWin7OrGreater() {

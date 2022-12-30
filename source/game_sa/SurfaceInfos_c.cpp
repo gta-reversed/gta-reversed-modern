@@ -3,8 +3,6 @@
 #include "SurfaceInfos_c.h"
 #include "Skidmark.h"
 
-SurfaceInfos_c* g_surfaceInfos = reinterpret_cast<SurfaceInfos_c*>(0xB79538);
-
 void SurfaceInfos_c::InjectHooks()
 {
     RH_ScopedClass(SurfaceInfos_c);
@@ -310,9 +308,9 @@ void SurfaceInfos_c::LoadSurfaceInfos()
         surface.tyreGrip = uint32(si.TyreGrip * 10.0f);
         surface.wetGrip  = uint32(si.WetGrip  * 100.0f); // BUG:? Data has negative values, with *original* conversion we loose sign
 
-        if (!strcmp(si.SkidMark, "DEFAULT")) surface.ucSkidmarkType = static_cast<uint32>(eSkidMarkType::DEFAULT);
-        if (!strcmp(si.SkidMark, "SANDY"))   surface.ucSkidmarkType = static_cast<uint32>(eSkidMarkType::SANDY);
-        if (!strcmp(si.SkidMark, "MUDDY"))   surface.ucSkidmarkType = static_cast<uint32>(eSkidMarkType::MUDDY);
+        if (!strcmp(si.SkidMark, "DEFAULT")) surface.ucSkidmarkType = static_cast<uint32>(eSkidmarkType::DEFAULT);
+        if (!strcmp(si.SkidMark, "SANDY"))   surface.ucSkidmarkType = static_cast<uint32>(eSkidmarkType::SANDY);
+        if (!strcmp(si.SkidMark, "MUDDY"))   surface.ucSkidmarkType = static_cast<uint32>(eSkidmarkType::MUDDY);
 
         if      (!strcmp(si.FrictionEffect, "NONE"))   surface.ucFrictionEffect = FRICTION_EFFECT_NONE;
         else if (!strcmp(si.FrictionEffect, "SPARKS")) surface.ucFrictionEffect = FRICTION_EFFECT_SPARKS;
@@ -364,7 +362,7 @@ void SurfaceInfos_c::LoadSurfaceAudioInfos()
     if (!file) {
         DEV_LOG("[SurfaceInfos_c] Failed to open surfaud.dat");
         CFileMgr::CloseFile(file);
-        return;;
+        return;
     }
 #endif
     for (const char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {

@@ -48,15 +48,15 @@ void CClouds::InjectHooks() {
     RH_ScopedInstall(MovingFog_GetWind, 0x7136E0);
     RH_ScopedInstall(MovingFog_GetFirstFreeSlot, 0x713710);
     RH_ScopedInstall(MovingFogRender, 0x716C90);
-    // RH_ScopedInstall(Render, 0x713950);
+    RH_ScopedInstall(Render, 0x713950, { .reversed = false });
     RH_ScopedInstall(RenderSkyPolys, 0x714650);
-    // RH_ScopedInstall(RenderBottomFromHeight, 0x7154B0);
+    RH_ScopedInstall(RenderBottomFromHeight, 0x7154B0, { .reversed = false });
     RH_ScopedInstall(VolumetricCloudsInit, 0x7131C0);
-    // RH_ScopedInstall(VolumetricClouds_Create, 0x715F40);
+    RH_ScopedInstall(VolumetricClouds_Create, 0x715F40, { .reversed = false });
     RH_ScopedInstall(VolumetricClouds_Delete, 0x7135F0);
     RH_ScopedInstall(VolumetricClouds_GetFirstFreeSlot, 0x7135C0);
     RH_ScopedInstall(VolumetricCloudsGetMaxDistance, 0x713630);
-    // RH_ScopedInstall(VolumetricCloudsRender, 0x716380);
+    RH_ScopedInstall(VolumetricCloudsRender, 0x716380, { .reversed = false });
 }
 
 // 0x7138D0
@@ -156,7 +156,7 @@ void CClouds::MovingFog_Create(CVector* posn) {
 
 // 0x713730
 void CClouds::MovingFog_Delete(int32 fogSlotIndex) {
-    fogSlotIndex = clamp(fogSlotIndex, 0, MAX_MOVING_FOG - 1);
+    fogSlotIndex = std::clamp(fogSlotIndex, 0, MAX_MOVING_FOG - 1);
     ms_mf.m_bFogSlots[fogSlotIndex] = false;
 }
 
@@ -324,7 +324,7 @@ void CClouds::RenderSkyPolys() {
 
     CVector invNorm = -norm;
     float fBlendFactor = (pos.z - 25.0f) * (1.0f / 80.0f);
-    fBlendFactor = clamp(fBlendFactor, 0.f, 1.f);
+    fBlendFactor = std::clamp(fBlendFactor, 0.f, 1.f);
     fBlendFactor = std::max(fBlendFactor, CWeather::Foggyness);
 
     RwRGBA belowHorizonGrey = CTimeCycle::m_BelowHorizonGrey;
@@ -592,7 +592,7 @@ void CClouds::VolumetricClouds_Create(CVector* posn) {
 
 // 0x7135F0
 void CClouds::VolumetricClouds_Delete(int32 vcSlotIndex) {
-    vcSlotIndex = clamp(vcSlotIndex, 0, MAX_VOLUMETRIC_CLOUDS - 1);
+    vcSlotIndex = std::clamp(vcSlotIndex, 0, MAX_VOLUMETRIC_CLOUDS - 1);
     ms_vc.m_bSlots[vcSlotIndex] = false;
     ms_vc.m_bInsideVisibilityRange[vcSlotIndex] = false;
 }

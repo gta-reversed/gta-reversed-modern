@@ -8,12 +8,12 @@ void CCustomBuildingDNPipeline::InjectHooks() {
     RH_ScopedCategory("Pipelines");
 
     RH_ScopedInstall(ExtraVertColourPluginAttach, 0x5D72E0);
-    // RH_ScopedInstall(pluginExtraVertColourConstructorCB, 0x5D6D10);
-    // RH_ScopedInstall(pluginExtraVertColourDestructorCB, 0x5D6D30);
-    // RH_ScopedInstall(pluginExtraVertColourStreamReadCB, 0x5D6DE0);
-    // RH_ScopedInstall(pluginExtraVertColourStreamWriteCB, 0x5D6D80);
-    // RH_ScopedInstall(pluginExtraVertColourStreamGetSizeCB, 0x5D6DC0);
-    // RH_ScopedInstall(PreRenderUpdate, 0x5D7200);
+    RH_ScopedInstall(pluginExtraVertColourConstructorCB, 0x5D6D10, { .reversed = false });
+    RH_ScopedInstall(pluginExtraVertColourDestructorCB, 0x5D6D30, { .reversed = false });
+    RH_ScopedInstall(pluginExtraVertColourStreamReadCB, 0x5D6DE0, { .reversed = false });
+    RH_ScopedInstall(pluginExtraVertColourStreamWriteCB, 0x5D6D80, { .reversed = false });
+    RH_ScopedInstall(pluginExtraVertColourStreamGetSizeCB, 0x5D6DC0, { .reversed = false });
+    RH_ScopedInstall(PreRenderUpdate, 0x5D7200, { .reversed = false });
     RH_ScopedInstall(PreRenderUpdateRpAtomicCB, 0x5D72A0);
     RH_ScopedInstall(CreatePipe, 0x5D7100);
     RH_ScopedInstall(DestroyPipe, 0x5D5FA0);

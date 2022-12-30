@@ -17,7 +17,7 @@ struct tPedColNodeInfo {
     float   m_fRadius;
 };
 
-class CPedModelInfo : public CClumpModelInfo {
+class NOTSA_EXPORT_VTABLE CPedModelInfo : public CClumpModelInfo {
 public:
     AssocGroupId m_nAnimType;
     ePedType     m_nPedType;
@@ -27,7 +27,7 @@ public:
     CColModel*   m_pHitColModel;
     eRadioID     m_nRadio1;
     eRadioID     m_nRadio2;
-    uint8        m_nRace;
+    uint8        m_nRace; // See `ePedRace` - TODO: Maybe we can change this? Check if `ePedRace` can be made 1 byte.
     int16        m_nPedAudioType;
     int16        m_nVoiceMin; // Also called voice1
     int16        m_nVoiceMax; // Also called voice2
@@ -59,6 +59,7 @@ public:
     CColModel* AnimatePedColModelSkinned(RpClump* clump);
     CColModel* AnimatePedColModelSkinnedWorld(RpClump* clump);
     void IncrementVoice();
+    auto GetRace() const { return (ePedRace)m_nRace; }
 };
 
 VALIDATE_SIZE(CPedModelInfo, 0x44);

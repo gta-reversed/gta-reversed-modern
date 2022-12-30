@@ -1,6 +1,6 @@
 #pragma once
 
-enum class eSkidMarkType : uint32 {
+enum class eSkidmarkType : uint32 {
     DEFAULT = 0,
     SANDY,
     MUDDY,
@@ -25,7 +25,7 @@ struct CSkidmark {
     uint32         m_lastDisappearTimeUpdateMs; // Last time it got updated
     uint32         m_fadeBeginMs;               // Begins fading at this tick
     uint32         m_disappearAtMs;             // Should disappear by this tick
-    eSkidMarkType  m_nType;
+    eSkidmarkType  m_nType;
     uint16         m_nNumParts;                 // Number of parts. The 0th 'part' isn't actually considered a part, so this number never exeeds SKIDMARK_NUM_PARTS - 1
     eSkidmarkState m_nState;
     bool           m_bActive;
@@ -35,7 +35,7 @@ struct CSkidmark {
     CVector GetFirstPartPosn() const { return GetPartPosn(0); }
     CSphere GetBoundingSphere() const;
 
-    void Init(uint32 id, CVector posn, eSkidMarkType type, const bool* bloodState);
+    void Init(uint32 id, CVector posn, eSkidmarkType type, const bool* bloodState);
     void Update();
     void Render() const;
     void RegisterNewPart(CVector posn, CVector2D dir, float length, bool* bloodState);

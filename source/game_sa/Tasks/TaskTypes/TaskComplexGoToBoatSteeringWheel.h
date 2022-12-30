@@ -1,13 +1,14 @@
 #pragma once
 
+#include "Base.h"
 #include "TaskComplex.h"
 
-class CTaskComplexGoToBoatSteeringWheel : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexGoToBoatSteeringWheel : public CTaskComplex {
 public:
-    CVector   m_TargetPos;
-    CVehicle* m_Vehicle;
-    bool      byte1C; // useless
-    uint32    m_FirstSubTaskStartTime;
+    CVector   m_TargetPos{};
+    CVehicle* m_Vehicle{};
+    bool      m_unused{};
+    uint32    m_FirstSubTaskStartTime{};
 
 public:
     static constexpr auto Type = TASK_COMPLEX_GO_TO_BOAT_STEERING_WHEEL;
@@ -15,15 +16,14 @@ public:
     explicit CTaskComplexGoToBoatSteeringWheel(CVehicle* vehicle);
     ~CTaskComplexGoToBoatSteeringWheel() override;
 
+    CTask* CreateSubTask(eTaskType taskType);
+    void ComputeTargetPos();
+
     eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override { return new CTaskComplexGoToBoatSteeringWheel(m_Vehicle); } // 0x64A350
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
-    CTask* CreateSubTask(eTaskType taskType);
-
-    void ComputeTargetPos();
-
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

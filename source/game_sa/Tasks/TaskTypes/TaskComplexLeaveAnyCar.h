@@ -2,7 +2,7 @@
 
 #include "TaskComplex.h"
 
-class CTaskComplexLeaveAnyCar : CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexLeaveAnyCar : public CTaskComplex {
 public:
     int32 m_nDelayTime;
     bool  m_sensibleLeaveCar;

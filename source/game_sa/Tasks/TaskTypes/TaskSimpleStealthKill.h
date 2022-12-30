@@ -10,7 +10,7 @@
 #include "Ped.h"
 #include "AnimBlendAssociation.h"
 
-class CTaskSimpleStealthKill : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleStealthKill : public CTaskSimple {
 public:
     bool                   m_bKeepTargetAlive;
     CPed*                  m_pTarget;

@@ -92,6 +92,7 @@ enum ePedCreatedBy : uint8 {
     PED_UNKNOWN = 0,
     PED_GAME = 1,
     PED_MISSION = 2,
+    PED_GAME_MISSION = 3, // used for the playbacked peds on replay
 };
 
 enum eMoveState : uint32 {
@@ -120,7 +121,7 @@ class CVehicle;
 class CPedStat;
 class CPedStats;
 
-class CPed : public CPhysical {
+class NOTSA_EXPORT_VTABLE CPed : public CPhysical {
 public:
     static inline int16 m_sGunFlashBlendStart = 10'000; // 0x8D1370
 
@@ -206,7 +207,7 @@ public:
         uint32 bNeverEverTargetThisPed : 1 = false;
         uint32 bThisPedIsATargetPriority : 1 = false;
         uint32 bCrouchWhenScared : 1 = false;
-        uint32 bKnockedOffBike : 1 = false;
+        uint32 bKnockedOffBike : 1 = false; // TODO: Maybe rename to `bIsJumpingOut` or something similar, see x-refs
 
         // 9th byte starts here (m_nThirdPedFlags)
         uint32 bDonePositionOutOfCollision : 1 = false;
@@ -243,7 +244,6 @@ public:
         uint32 bHasBeenRendered : 1 = false;
         uint32 bIsCached : 1 = false;
         uint32 bPushOtherPeds : 1 = false;   // GETS RESET EVERY FRAME - SET IN TASK: want to push other peds around (eg. leader of a group or ped trying to get in a car)
-        uint32 bPedThirdFlags32 : 1 = false; // unknown
 
         // 13th byte starts here (m_nFourthPedFlags)
         uint32 bHasBulletProofVest : 1 = false;
@@ -314,7 +314,7 @@ public:
     int32               field_594;
     ePedType            m_nPedType;
     CPedStat*           m_pStats;
-    std::array<CWeapon, 13> m_aWeapons;
+    std::array<CWeapon, NUM_WEAPON_SLOTS> m_aWeapons;
     eWeaponType         m_nSavedWeapon;   // when we need to hide ped weapon, we save it temporary here
     eWeaponType         m_nDelayedWeapon; // 'delayed' weapon is like an additional weapon, f.e., simple cop has a nitestick as current and pistol as delayed weapons
     uint32              m_nDelayedWeaponAmmo;
@@ -330,7 +330,7 @@ public:
     char                m_nAllowedAttackMoves;
     uint8               field_72F; // taskId related? 0x4B5C47
     CFire*              m_pFire;
-    float               field_734;
+    float               m_fireDmgMult;
     CEntity*            m_pLookTarget;
     float               m_fLookDirection; // In RAD
     int32               m_nWeaponModelId;
@@ -386,7 +386,9 @@ public:
     static void InjectHooks();
 
     static void* operator new(unsigned size);
+    static void* operator new(unsigned size, int32 poolRef);
     static void operator delete(void* data);
+    static void operator delete(void* data, int poolRef);
 
     CPed(ePedType pedType);
     ~CPed();
@@ -542,7 +544,7 @@ public:
     bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }
 
     int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
-    CPedGroup& GetGroup() { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); } // TODO: Change this, it's misleading. Should be GetPlayerGroup
+    CPedGroup* GetGroup() const { return CPedGroups::GetPedsGroup(this); }
     CPedClothesDesc* GetClothesDesc() { return m_pPlayerData->m_pPedClothesDesc; }
 
     CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
@@ -564,8 +566,8 @@ public:
     bool IsStateDying() const noexcept { return m_nPedState == PEDSTATE_DEAD || m_nPedState == PEDSTATE_DIE; }
     bool IsInVehicleAsPassenger() const noexcept;
 
-    bool IsGangster() const noexcept { return m_nPedType >= PED_TYPE_GANG1 && m_nPedType <= PED_TYPE_GANG10; }
-    static bool IsGangster(ePedType pedType) noexcept { return pedType >= PED_TYPE_GANG1 && pedType <= PED_TYPE_GANG10; }
+    bool IsCop()      const noexcept { return m_nPedType == PED_TYPE_COP; }
+    bool IsGangster() const noexcept { return IsPedTypeGang(m_nPedType); }
     bool IsCivilian() const noexcept { return m_nPedType == PED_TYPE_CIVMALE || m_nPedType == PED_TYPE_CIVFEMALE; }
 
     CCopPed*       AsCop()       { return reinterpret_cast<CCopPed*>(this); }
@@ -574,19 +576,41 @@ public:
     CPlayerPed*    AsPlayer()    { return reinterpret_cast<CPlayerPed*>(this); }
 
     bool IsFollowerOfGroup(const CPedGroup& group) const;
-
     RwMatrix& GetBoneMatrix(ePedBones bone) const;
-
     void CreateDeadPedPickupCoors(CVector& pickupPos);
     RpHAnimHierarchy& GetAnimHierarchy() const;
     CAnimBlendClumpData& GetAnimBlendData() const;
-
     bool IsInVehicle() const { return bInVehicle && m_pVehicle; }
-
+    bool IsInVehicle(const CVehicle* veh) const { return bInVehicle && m_pVehicle == veh; }
     CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
-
     int32 GetPadNumber() const;
+    bool IsCurrentlyUnarmed() { return GetActiveWeapon().m_nType == WEAPON_UNARMED; }
 
+    /*!
+     * @notsa
+     * @brief Is the ped jogging, running or sprinting
+     */
+    bool IsJoggingOrFaster() const;
+
+    /*!
+     * @notsa
+     * @brief Is the ped running or sprinting
+     */
+    bool IsRunningOrSprinting() const;
+
+    /*!
+     * @notsa
+     * @brief Is the ped's right arm blocked right now
+     */
+    bool IsRightArmBlockedNow() const;
+
+    /*!
+     * @notsa
+     * @brief Give weapon according to given CWeapon struct.
+     */
+    eWeaponSlot GiveWeapon(const CWeapon& weapon, bool likeUnused) {
+        return GiveWeapon(weapon.m_nType, weapon.m_nTotalAmmo, likeUnused);
+    }
 private:
     void RenderThinBody() const;
     void RenderBigHead() const;

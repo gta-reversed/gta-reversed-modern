@@ -7,6 +7,8 @@
 #pragma once
 
 #include "RepeatSector.h"
+#include <extensions/utility.hpp>
+
 class CEntity;
 class CPed;
 
@@ -18,7 +20,7 @@ class CEntityScanner {
 public:
     int32    field_4;
     uint32   m_nCount;
-    CEntity* m_apEntities[16];
+    std::array<CEntity*, 16> m_apEntities; /// SEEMINGLY: The array might have "holes" in it, also it's sorted by distance (closer to further)
     CEntity* m_pClosestEntityInRange;
 
 public:
@@ -26,6 +28,17 @@ public:
 
     CEntityScanner();
     ~CEntityScanner();
+
+    /// View of all non-null entities as a view of `T&`
+    template<typename T = CEntity>
+    auto GetEntities() const {
+        using namespace rng::views;
+        using namespace notsa;
+
+        return m_apEntities
+             | filter(Not(IsNull<CEntity*>)) // Filter all null
+             | transform([](CEntity* e) -> T& { return static_cast<T&>(*e); }); // Cast to required type and dereference
+    }
 
     void Clear();
     virtual void ScanForEntitiesInRange(eRepeatSectorList sectorList, const CPed& ped);

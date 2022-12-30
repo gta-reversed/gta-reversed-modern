@@ -9,7 +9,7 @@ void CGangs::InjectHooks() {
     RH_ScopedInstall(Load, 0x5D3A90);
     RH_ScopedInstall(Save, 0x5D3A60);
     RH_ScopedInstall(SetGangWeapons, 0x5DE550);
-    // RH_ScopedInstall(ChooseGangPedModel, 0x5DE5A0);
+    RH_ScopedInstall(ChooseGangPedModel, 0x5DE5A0, { .reversed = false });
     RH_ScopedInstall(GetWillAttackPlayerWithCops, 0x5DE500);
     RH_ScopedInstall(SetWillAttackPlayerWithCops, 0x5DE4E0);
     RH_ScopedInstall(SetGangPedModelOverride, 0x5DE580);
@@ -79,13 +79,13 @@ int32 CGangs::ChooseGangPedModel(int16 gangId) {
 
 // unused (0x5DE500)
 bool CGangs::GetWillAttackPlayerWithCops(ePedType pedType) {
-    assert(CPed::IsGangster(pedType));
+    assert(IsPedTypeGang(pedType));
     return GangAttackWithCops[pedType - PED_TYPE_GANG1];
 }
 
 // unused (0x5DE4E0)
 void CGangs::SetWillAttackPlayerWithCops(ePedType pedType, bool attackPlayerWithCops) {
-    assert(CPed::IsGangster(pedType));
+    assert(IsPedTypeGang(pedType));
     GangAttackWithCops[pedType - PED_TYPE_GANG1] = attackPlayerWithCops;
 }
 

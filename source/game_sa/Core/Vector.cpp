@@ -8,6 +8,7 @@
 #include "StdInc.h"
 
 #include "Vector.h"
+#include "Vector2D.h"
 
 void CVector::InjectHooks()
 {
@@ -18,13 +19,18 @@ void CVector::InjectHooks()
     RH_ScopedInstall(Magnitude2D, 0x406D50);
     RH_ScopedInstall(Normalise, 0x59C910);
     RH_ScopedInstall(NormaliseAndMag, 0x59C970);
-    RH_ScopedInstall(Cross, 0x70F890);
+    RH_ScopedInstall(Cross_OG, 0x70F890);
     RH_ScopedInstall(Sum, 0x40FDD0);
     RH_ScopedInstall(Difference, 0x40FE00);
     RH_ScopedInstall(FromMultiply, 0x59C670);
     RH_ScopedInstall(FromMultiply3x3, 0x59C6D0);
     RH_ScopedGlobalOverloadedInstall(CrossProduct, "out", 0x59C730, CVector*(*)(CVector*, CVector*, CVector*));
-    RH_ScopedGlobalOverloadedInstall(DotProduct, "vec*vec*", 0x59C6D0, float(*)(CVector*, CVector*));
+    RH_ScopedGlobalOverloadedInstall(DotProduct, "v3d*v3d*", 0x59C6D0, float(*)(CVector*, CVector*));
+}
+
+CVector::CVector(const CVector2D& v2, float z) :
+    CVector(v2.x, v2.y, z)
+{
 }
 
 CVector CVector::Random(float min, float max) {
@@ -67,12 +73,28 @@ float CVector::NormaliseAndMag()
     return 1.0F / fRecip;
 }
 
-// Performs cross calculation
-void CVector::Cross(const CVector& left, const CVector &right)
-{
-    x = left.y * right.z - left.z * right.y;
-    y = left.z * right.x - left.x * right.z;
-    z = left.x * right.y - left.y * right.x;
+auto CVector::Normalized() const -> CVector {
+    CVector cpy = *this;
+    cpy.Normalise();
+    return cpy;
+}
+
+auto CVector::Dot(const CVector& o) const -> float{
+    return DotProduct(*this, o);
+}
+
+// notsa
+CVector CVector::Cross(const CVector& o) const {
+    return {
+        y * o.z - z * o.y,
+        z * o.x - x * o.z,
+        x * o.y - y * o.x
+    };
+}
+
+// 0x70F890
+void CVector::Cross_OG(const CVector& a, const CVector& b) {
+    *this = a.Cross(b);
 }
 
 // Adds left + right and stores result
@@ -147,17 +169,24 @@ CVector CVector::Average(const CVector* begin, const CVector* end) {
     return std::accumulate(begin, end, CVector{}) / (float)std::distance(begin, end);
 }
 
+float CVector::Heading(bool limitAngle) const {
+    const auto heading = std::atan2(-x, y);
+    if (limitAngle) {
+        return CGeneral::LimitRadianAngle(heading);
+    }
+    return heading;
+}
+
+
 CVector* CrossProduct(CVector* out, CVector* a, CVector* b)
 {
-    out->Cross(*a, *b);
+    *out = a->Cross(b);
     return out;
 }
 
 CVector CrossProduct(const CVector& a, const CVector& b)
 {
-    CVector result;
-    result.Cross(a, b);
-    return result;
+    return a.Cross(b);
 }
 
 float DotProduct(CVector* v1, CVector* v2)
@@ -173,4 +202,33 @@ float DotProduct(const CVector& v1, const CVector& v2)
 float DotProduct2D(const CVector& v1, const CVector& v2)
 {
     return v1.y * v2.y + v1.x * v2.x;
+}
+
+// NOTE: This function doesn't add m.GetPosition() like
+//       MultiplyMatrixWithVector @ 0x59C890 does.
+CVector Multiply3x3(const CMatrix& constm, const CVector& v) {
+    auto& m = const_cast<CMatrix&>(constm);
+    return {
+        m.GetRight().x * v.x + m.GetForward().x * v.y + m.GetUp().x * v.z,
+        m.GetRight().y * v.x + m.GetForward().y * v.y + m.GetUp().y * v.z,
+        m.GetRight().z * v.x + m.GetForward().z * v.y + m.GetUp().z * v.z,
+    };
+}
+
+// vector by matrix mult, resulting in a vector where each component is the dot product of the in vector and a matrix direction
+CVector Multiply3x3(const CVector& v, const CMatrix& constm) {
+    auto& m = const_cast<CMatrix&>(constm);
+    return {
+        DotProduct(m.GetRight(), v),
+        DotProduct(m.GetForward(), v),
+        DotProduct(m.GetUp(), v)
+    };
+}
+
+CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec) {
+    return const_cast<CMatrix&>(mat).GetPosition() + Multiply3x3(const_cast<CMatrix&>(mat), vec);
+}
+
+CVector MultiplyMatrixWithVector(CMatrix& m, const CVector& v) {
+    return m.GetPosition() + Multiply3x3(m, v);
 }

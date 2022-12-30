@@ -8,6 +8,7 @@
 
 #include <extensions/enumerate.hpp>
 
+#include "Garages.h"
 #include "GangWars.h"
 #include "GangWarsSaveStructure.h"
 #include "ModelIndices.h"
@@ -23,14 +24,14 @@ void CGangWars::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(InitAtStartOfGame, 0x443920);
-    // RH_ScopedInstall(AddKillToProvocation, 0x443950);                  // ?
+    RH_ScopedInstall(AddKillToProvocation, 0x443950, { .reversed = false });                  // ?
     RH_ScopedInstall(AttackWaveOvercome, 0x445B30);
     RH_ScopedInstall(CalculateTimeTillNextAttack, 0x443DB0);
     RH_ScopedInstall(CanPlayerStartAGangWarHere, 0x443F80);
     RH_ScopedInstall(CheerVictory, 0x444040);
     RH_ScopedInstall(ClearSpecificZonesToTriggerGangWar, 0x443FF0);
     RH_ScopedInstall(ClearTheStreets, 0x4444B0);
-    // RH_ScopedInstall(CreateAttackWave, 0x444810);                   //
+    RH_ScopedInstall(CreateAttackWave, 0x444810, { .reversed = false });                   //
     RH_ScopedInstall(CreateDefendingGroup, 0x4453D0);
     RH_ScopedInstall(DoesPlayerControlThisZone, 0x443AE0);
     RH_ScopedInstall(DoStuffWhenPlayerVictorious, 0x446400);
@@ -53,7 +54,7 @@ void CGangWars::InjectHooks() {
     RH_ScopedInstall(SwitchGangWarsActive, 0x4465F0);
     RH_ScopedInstall(TellGangMembersTo, 0x444530);                     // ?
     RH_ScopedInstall(TellStreamingWhichGangsAreNeeded, 0x443D50);
-    // RH_ScopedInstall(Update, 0x446610);                             //
+    RH_ScopedInstall(Update, 0x446610, { .reversed = false });                             //
     RH_ScopedInstall(UpdateTerritoryUnderControlPercentage, 0x443DE0); //
     RH_ScopedInstall(Load, 0x5D3EB0);
     RH_ScopedInstall(Save, 0x5D5530);
@@ -162,7 +163,7 @@ bool CGangWars::CanPlayerStartAGangWarHere(CZoneInfo* zoneInfo) {
 
 // 0x444040
 void CGangWars::CheerVictory() {
-    auto& playerGroup = FindPlayerPed()->GetGroup();
+    auto& playerGroup = FindPlayerPed()->GetPlayerGroup();
 
     CPed* nearestMember = nullptr;
     playerGroup.FindDistanceToNearestMember(&nearestMember);
@@ -316,7 +317,7 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
         pickupModel = ModelIndices::MI_PICKUP_HEALTH;
     }
 
-    CPickups::GenerateNewOne(pickupCoors, pickupModel, 5, 0, 0, false, nullptr);
+    CPickups::GenerateNewOne(pickupCoors, pickupModel, PICKUP_ONCE_TIMEOUT_SLOW, 0, 0, false, nullptr);
     return true;
 }
 
@@ -426,17 +427,11 @@ bool CGangWars::MakePlayerGainInfluenceInZone(float removeMult) {
 
 // 0x4439D0
 bool CGangWars::PedStreamedInForThisGang(eGangID gangId) {
-    auto groupId = CPopulation::GetGangGroupId(gangId, 0);
-    auto numPeds = CPopulation::GetNumPedsInGroup(groupId);
-    if (numPeds <= 0)
-        return false;
-
-    for (auto group : std::span{ CPopulation::m_PedGroups, (size_t)numPeds }) {
-        if (!CStreaming::GetInfo(*group).IsLoaded()) {
+    for (auto midx : CPopulation::GetModelsInPedGroup(CPopulation::GetGangGroupId(gangId))) {
+        if (CStreaming::IsModelLoaded(midx)) {
             return true;
         }
     }
-
     return false;
 }
 

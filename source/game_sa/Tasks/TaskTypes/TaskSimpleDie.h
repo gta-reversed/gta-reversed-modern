@@ -11,7 +11,7 @@ enum class SimpleDieFlags : uint8 {
     ALREADY_DEAD      = 1 << 1,
 };
 
-class CTaskSimpleDie : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleDie : public CTaskSimple {
 public:
     AssocGroupId           m_animGroupId;
     AnimationId            m_animId;

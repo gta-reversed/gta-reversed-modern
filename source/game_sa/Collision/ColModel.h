@@ -52,6 +52,7 @@ public:
     [[nodiscard]] float GetBoundRadius() const noexcept { return m_boundSphere.m_fRadius; }
     CVector& GetBoundCenter() { return m_boundSphere.m_vecCenter; }
     CBoundingBox& GetBoundingBox() { return m_boundBox; }
+    CCollisionData* GetData() const { return m_pColData; }
 };
 
 VALIDATE_SIZE(CColModel, 0x30);

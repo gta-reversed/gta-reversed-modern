@@ -3,7 +3,7 @@
 #include "EventEditableResponse.h"
 #include "Ped.h"
 
-class CEventGunShot : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventGunShot : public CEventEditableResponse {
 public:
     CEntity* m_entity;
     CVector  m_startPoint;

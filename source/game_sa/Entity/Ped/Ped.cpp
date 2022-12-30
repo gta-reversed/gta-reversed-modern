@@ -39,8 +39,9 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(AttachPedToBike, 0x5E7E60);
     RH_ScopedInstall(AttachPedToEntity, 0x5E7CB0);
     RH_ScopedInstall(OurPedCanSeeThisEntity, 0x5E1660);
-    RH_ScopedInstall(operator delete, 0x5E4760);
-    RH_ScopedInstall(operator new, 0x5E4720);
+    RH_ScopedOverloadedInstall(operator delete, "anon", 0x5E4760, void (*)(void*));
+    RH_ScopedOverloadedInstall(operator new, "anon", 0x5E4720, void* (*)(unsigned));
+    RH_ScopedOverloadedInstall(operator new, "poolIndexed", 0x5E4730, void* (*)(unsigned, int32));
     RH_ScopedInstall(SpawnFlyingComponent, 0x5F0190);
     RH_ScopedInstall(PedCanPickUpPickUp, 0x455560);
     RH_ScopedInstall(Update, 0x5DEBE0);
@@ -54,24 +55,24 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(ClearWeapon, 0x5E62B0);
     RH_ScopedOverloadedInstall(SetCurrentWeapon, "WepType", 0x5E6280, void(CPed::*)(eWeaponType));
     RH_ScopedOverloadedInstall(SetCurrentWeapon, "Slot", 0x5E61F0, void(CPed::*)(int32));
-    RH_ScopedInstall(GiveWeapon, 0x5E6080);
+    RH_ScopedOverloadedInstall(GiveWeapon, "", 0x5E6080, eWeaponSlot(CPed::*)(eWeaponType, uint32, bool));
     RH_ScopedInstall(TakeOffGoggles, 0x5E6010);
     RH_ScopedInstall(AddWeaponModel, 0x5E5ED0);
-    //RH_ScopedInstall(PlayFootSteps, 0x5E57F0);
-    // RH_ScopedInstall(DoFootLanded, 0x5E5380);
+    RH_ScopedInstall(PlayFootSteps, 0x5E57F0, { .reversed = false });
+    RH_ScopedInstall(DoFootLanded, 0x5E5380, { .reversed = false });
     RH_ScopedInstall(ClearAll, 0x5E5320);
     RH_ScopedInstall(CalculateNewOrientation, 0x5E52E0);
-    // RH_ScopedInstall(CalculateNewVelocity, 0x5E4C50);
+    RH_ScopedInstall(CalculateNewVelocity, 0x5E4C50, { .reversed = false });
     RH_ScopedInstall(SetCharCreatedBy, 0x5E47E0);
     RH_ScopedInstall(SetPedState, 0x5E4500);
     RH_ScopedInstall(GiveObjectToPedToHold, 0x5E4390);
     RH_ScopedInstall(ClearLookFlag, 0x5E1950);
     RH_ScopedInstall(WorkOutHeadingForMovingFirstPerson, 0x5E1A00);
-    // RH_ScopedInstall(UpdatePosition, 0x5E1B10);
-    // RH_ScopedInstall(MakeTyresMuddySectorList, 0x6AE0D0);
+    RH_ScopedInstall(UpdatePosition, 0x5E1B10, { .reversed = false });
+    RH_ScopedInstall(MakeTyresMuddySectorList, 0x6AE0D0, { .reversed = false });
     RH_ScopedInstall(IsPedInControl, 0x5E3960);
     RH_ScopedInstall(RemoveWeaponModel, 0x5E3990);
-    // RH_ScopedInstall(RemoveWeaponWhenEnteringVehicle, 0x5E6370);
+    RH_ScopedInstall(RemoveWeaponWhenEnteringVehicle, 0x5E6370, { .reversed = false });
     RH_ScopedInstall(AddGogglesModel, 0x5E3A90);
     RH_ScopedInstall(SetWeaponSkill, 0x5E3C10);
     RH_ScopedInstall(ClearLook, 0x5E3FF0);
@@ -80,7 +81,7 @@ void CPed::InjectHooks() {
     RH_ScopedOverloadedInstall(GetBonePosition, "", 0x5E4280, void(CPed::*)(RwV3d&, ePedBones, bool));
     RH_ScopedInstall(PutOnGoggles, 0x5E3AE0);
     RH_ScopedInstall(ReplaceWeaponWhenExitingVehicle, 0x5E6490);
-    // RH_ScopedInstall(KillPedWithCar, 0x5F0360);
+    RH_ScopedInstall(KillPedWithCar, 0x5F0360, { .reversed = false });
     RH_ScopedInstall(IsPedHeadAbovePos, 0x5F02C0);
     RH_ScopedInstall(RemoveWeaponAnims, 0x5F0250);
     RH_ScopedInstall(DoesLOSBulletHitPed, 0x5F01A0);
@@ -97,7 +98,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(GiveDelayedWeapon, 0x5E89B0);
     RH_ScopedOverloadedInstall(GetWeaponSkill, "Current", 0x5E6580, eWeaponSkill(CPed::*)());
     RH_ScopedOverloadedInstall(GetWeaponSkill, "WeaponType", 0x5E3B60, eWeaponSkill(CPed::*)(eWeaponType));
-    // RH_ScopedInstall(PreRenderAfterTest, 0x5E65A0);
+    RH_ScopedInstall(PreRenderAfterTest, 0x5E65A0, { .reversed = false });
     RH_ScopedInstall(SetIdle, 0x5E7980);
     RH_ScopedOverloadedInstall(SetLook, "Heading", 0x5E79B0, void(CPed::*)(float));
     RH_ScopedOverloadedInstall(SetLook, "Entity", 0x5E7A60, void(CPed::*)(CEntity *));
@@ -106,7 +107,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(RemoveWeaponForScriptedCutscene, 0x5E6550);
     RH_ScopedInstall(GiveWeaponAtStartOfFight, 0x5E8AB0);
     RH_ScopedInstall(ProcessBuoyancy, 0x5E1FA0);
-    // RH_ScopedInstall(PositionPedOutOfCollision, 0x5E0820);
+    RH_ScopedInstall(PositionPedOutOfCollision, 0x5E0820, { .reversed = false });
     RH_ScopedInstall(GrantAmmo, 0x5DF220);
     RH_ScopedInstall(GetWeaponSlot, 0x5DF200);
     RH_ScopedInstall(PositionAnyPedOutOfCollision, 0x5E13C0);
@@ -160,22 +161,23 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(Dress, 0x5E0130);
     RH_ScopedInstall(IsPlayer, 0x5DF8F0);
     RH_ScopedInstall(GetBikeRidingSkill, 0x5DF510);
-    //RH_ScopedInstall(SetPedPositionInCar, 0x5DF910);
+    RH_ScopedInstall(SetPedPositionInCar, 0x5DF910, { .reversed = false });
     RH_ScopedInstall(SetRadioStation, 0x5DFD90);
-    // RH_ScopedInstall(PositionAttachedPed, 0x5DFDF0);
+    RH_ScopedInstall(PositionAttachedPed, 0x5DFDF0, { .reversed = false });
     RH_ScopedInstall(ResetGunFlashAlpha, 0x5DF4E0);
+
     RH_ScopedVirtualInstall(SetModelIndex, 0x5E4880);
     RH_ScopedVirtualInstall(DeleteRwObject, 0x5DEBF0);
-    // RH_ScopedVirtualInstall(ProcessControl, 0x5E8CD0);
+    //RH_ScopedVirtualInstall(ProcessControl, 0x5E8CD0, { .reversed = false });
     RH_ScopedVirtualInstall(Teleport, 0x5E4110);
-    // RH_ScopedVirtualInstall(SpecialEntityPreCollisionStuff, 0x5E3C30);
-    // RH_ScopedVirtualInstall(SpecialEntityCalcCollisionSteps, 0x5E3E90);
+    //RH_ScopedVirtualInstall(SpecialEntityPreCollisionStuff, 0x5E3C30, { .reversed = false });
+    //RH_ScopedVirtualInstall(SpecialEntityCalcCollisionSteps, 0x5E3E90, { .reversed = false });
     RH_ScopedVirtualInstall(PreRender, 0x5E8A20);
     RH_ScopedVirtualInstall(Render, 0x5E7680);
     RH_ScopedVirtualInstall(SetupLighting, 0x553F00);
     RH_ScopedVirtualInstall(RemoveLighting, 0x5533B0);
     RH_ScopedVirtualInstall(FlagToDestroyWhenNextProcessed, 0x5E7B70);
-    // RH_ScopedVirtualInstall(ProcessEntityCollision, 0x5E2530);
+    //RH_ScopedVirtualInstall(ProcessEntityCollision, 0x5E2530, { .reversed = false });
     RH_ScopedVirtualInstall(SetMoveAnim, 0x5E4A00);
     RH_ScopedVirtualInstall(Save, 0x5D5730);
     RH_ScopedVirtualInstall(Load, 0x5D4640);
@@ -222,7 +224,7 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
     m_pEntityIgnoredCollision = nullptr;
     m_nSwimmingMoveState = 0;
     m_pFire = nullptr;
-    field_734 = 1.0f;
+    m_fireDmgMult = 1.0f;
     m_pTargetedObject = nullptr;
     m_pLookTarget = nullptr;
     m_fLookDirection = 0.0f;
@@ -359,9 +361,21 @@ void* CPed::operator new(unsigned size) {
 }
 
 /*!
+* @addr 0x5E4730
+*/
+void* CPed::operator new(unsigned size, int32 poolRef) {
+    return GetPedPool()->NewAt(poolRef);
+}
+
+/*!
 * @addr 0x5E4760
 */
 void CPed::operator delete(void* data) {
+    GetPedPool()->Delete((CPed*)data);
+}
+
+// NOTSA
+void CPed::operator delete(void* data, int poolRef) {
     GetPedPool()->Delete((CPed*)data);
 }
 
@@ -2233,7 +2247,7 @@ void CPed::PlayFootSteps() {
         const float animTimeMult = walkAssoc->m_nAnimId != AnimationId::ANIM_ID_WALK ? 8.f / 15.f : 5.f / 15.f;
 
         float adhesionMult{ 1.f };
-        switch (g_surfaceInfos->GetAdhesionGroup(m_nContactSurface)) {
+        switch (g_surfaceInfos.GetAdhesionGroup(m_nContactSurface)) {
         case eAdhesionGroup::ADHESION_GROUP_SAND: { // 0X5E599F
             if (CGeneral::GetRandomNumber() % 64) {
                 m_vecAnimMovingShiftLocal *= 0.2f;
@@ -3533,8 +3547,9 @@ void CPed::Render() {
 // https://github.com/gennariarmando/bobble-heads
 // NOTSA
 void CPed::RenderBigHead() const {
-    if (!G_CHEAT_BIG_HEAD) // todo: !CCheat::IsActive(CHEAT_BIG_HEAD)
+    if (!CCheat::IsActive(CHEAT_BIG_HEAD)) {
         return;
+    }
 
     auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump);
     auto* matrices = RpHAnimHierarchyGetMatrixArray(hier);
@@ -3563,9 +3578,9 @@ void CPed::RenderBigHead() const {
 
 // NOTSA
 void CPed::RenderThinBody() const {
-    if (!G_CHEAT_THIN_BODY) // todo: !CCheat::IsActive(CHEAT_THIN_BODY)
+    if (!CCheat::IsActive(CHEAT_THIN_BODY)) {
         return;
-
+    }
 }
 
 /*!
@@ -3639,6 +3654,25 @@ CVector CPed::GetBonePosition(ePedBones boneId, bool updateSkinBones) {
     return pos;
 }
 
+bool CPed::IsJoggingOrFaster() const {
+    switch (m_nMoveState) {
+    case PEDMOVE_JOG:
+    case PEDMOVE_RUN:
+    case PEDMOVE_SPRINT:
+        return true;
+    }
+    return false;
+}
+
+bool CPed::IsRunningOrSprinting() const {
+    switch (m_nMoveState) {
+    case PEDMOVE_RUN:
+    case PEDMOVE_SPRINT:
+        return true;
+    }
+    return false;
+}
+
 // 0x6497A0
 bool SayJacked(CPed* jacked, CVehicle* vehicle, uint32 offset) {
     if (vehicle->m_vehicleAudio.GetVehicleTypeForAudio())
@@ -3672,4 +3706,11 @@ int32 CPed::GetPadNumber() const {
         assert(true && "Inappropriate usage of GetPadNumber");
         return 0;
     }
+}
+
+bool CPed::IsRightArmBlockedNow() const {
+    if (bIsDucking) {
+        return bDuckRightArmBlocked;
+    }
+    return bRightArmBlocked;
 }

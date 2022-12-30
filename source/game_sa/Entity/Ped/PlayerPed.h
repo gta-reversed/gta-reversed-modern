@@ -15,7 +15,7 @@
 class CEventDamage;
 class CPlayerInfo;
 
-class CPlayerPed : public CPed {
+class NOTSA_EXPORT_VTABLE CPlayerPed : public CPed {
 public:
     CPed* m_p3rdPersonMouseTarget;
     int32 field_7A0;
@@ -36,10 +36,11 @@ public:
     bool Load_Reversed();
     bool Save_Reversed();
 
+    void ProcessControl() override;
     bool Load() override;
     bool Save() override;
 
-    CPad* GetPadFromPlayer();
+    CPad* GetPadFromPlayer() const;
     bool CanPlayerStartMission();
     bool IsHidden();
     void ReApplyMoveAnims();
@@ -69,7 +70,7 @@ public:
     void MakePlayerGroupDisappear();
     void MakePlayerGroupReappear();
     void ResetSprintEnergy();
-    bool HandleSprintEnergy(bool arg0, float arg1);
+    bool HandleSprintEnergy(bool sprint, float adrenalineConsumedPerTimeStep);
     float ControlButtonSprint(eSprintType sprintType);
     float GetButtonSprintResults(eSprintType sprintType);
     void ResetPlayerBreath();

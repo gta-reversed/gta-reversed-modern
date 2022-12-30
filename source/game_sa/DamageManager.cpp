@@ -224,7 +224,7 @@ uint32 CDamageManager::GetEngineStatus() {
 }
 
 // 0x6C22A0
-void CDamageManager::SetEngineStatus(uint8 status) {
+void CDamageManager::SetEngineStatus(uint32 status) {
     m_nEngineStatus = std::min<uint8>(status, 250u);
 }
 
@@ -417,6 +417,17 @@ auto CDamageManager::GetAllLightsState() const->std::array<eLightsState, 4> {
         GetLightStatus(eLights::LIGHT_FRONT_RIGHT),
         GetLightStatus(eLights::LIGHT_REAR_LEFT),
         GetLightStatus(eLights::LIGHT_REAR_RIGHT)
+    };
+}
+
+auto CDamageManager::GetAllDoorsStatus() const -> std::array<eDoorStatus, MAX_DOORS> {
+    return {
+        GetDoorStatus(eDoors::DOOR_BONNET),
+        GetDoorStatus(eDoors::DOOR_BOOT),
+        GetDoorStatus(eDoors::DOOR_LEFT_FRONT),
+        GetDoorStatus(eDoors::DOOR_RIGHT_FRONT),
+        GetDoorStatus(eDoors::DOOR_LEFT_REAR),
+        GetDoorStatus(eDoors::DOOR_RIGHT_REAR)
     };
 }
 

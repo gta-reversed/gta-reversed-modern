@@ -47,7 +47,7 @@ void CSprite2d::InjectHooks() {
     RH_ScopedInstall(DrawAnyRect, 0x727CC0);
     RH_ScopedInstall(Draw2DPolygon, 0x7285B0);
     RH_ScopedInstall(DrawBarChart, 0x728640);
-    // RH_ScopedInstall(DrawCircleAtNearClip, 0x727D60);
+    RH_ScopedInstall(DrawCircleAtNearClip, 0x727D60, { .reversed = false });
 }
 
 CSprite2d::CSprite2d()
@@ -300,7 +300,7 @@ void CSprite2d::SetVertices(RwIm2DVertex* vertices, const CRect& posn, const CRG
     float u1, float v1, float u2, float v2, float u3, float v3, float u4, float v4)
 {
     RwIm2DVertexSetScreenX(&vertices[0], posn.left);
-    RwIm2DVertexSetScreenY(&vertices[0], posn.top);
+    RwIm2DVertexSetScreenY(&vertices[0], posn.bottom);
     RwIm2DVertexSetScreenZ(&vertices[0], NearScreenZ);
     RwIm2DVertexSetRecipCameraZ(&vertices[0], RecipNearClip);
     RwIm2DVertexSetU(&vertices[0], u1, RecipNearClip);
@@ -308,7 +308,7 @@ void CSprite2d::SetVertices(RwIm2DVertex* vertices, const CRect& posn, const CRG
     RwIm2DVertexSetIntRGBA(&vertices[0], color3.r, color3.g, color3.b, color3.a);
 
     RwIm2DVertexSetScreenX(&vertices[1], posn.right);
-    RwIm2DVertexSetScreenY(&vertices[1], posn.top);
+    RwIm2DVertexSetScreenY(&vertices[1], posn.bottom);
     RwIm2DVertexSetScreenZ(&vertices[1], NearScreenZ);
     RwIm2DVertexSetRecipCameraZ(&vertices[1], RecipNearClip);
     RwIm2DVertexSetU(&vertices[1], u2, RecipNearClip);
@@ -316,7 +316,7 @@ void CSprite2d::SetVertices(RwIm2DVertex* vertices, const CRect& posn, const CRG
     RwIm2DVertexSetIntRGBA(&vertices[1], color4.r, color4.g, color4.b, color4.a);
 
     RwIm2DVertexSetScreenX(&vertices[2], posn.right);
-    RwIm2DVertexSetScreenY(&vertices[2], posn.bottom);
+    RwIm2DVertexSetScreenY(&vertices[2], posn.top);
     RwIm2DVertexSetScreenZ(&vertices[2], NearScreenZ);
     RwIm2DVertexSetRecipCameraZ(&vertices[2], RecipNearClip);
     RwIm2DVertexSetU(&vertices[2], u4, RecipNearClip);
@@ -324,7 +324,7 @@ void CSprite2d::SetVertices(RwIm2DVertex* vertices, const CRect& posn, const CRG
     RwIm2DVertexSetIntRGBA(&vertices[2], color2.r, color2.g, color2.b, color2.a);
 
     RwIm2DVertexSetScreenX(&vertices[3], posn.left);
-    RwIm2DVertexSetScreenY(&vertices[3], posn.bottom);
+    RwIm2DVertexSetScreenY(&vertices[3], posn.top);
     RwIm2DVertexSetScreenZ(&vertices[3], NearScreenZ);
     RwIm2DVertexSetRecipCameraZ(&vertices[3], RecipNearClip);
     RwIm2DVertexSetU(&vertices[3], u3, RecipNearClip);

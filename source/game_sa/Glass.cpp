@@ -90,7 +90,7 @@ void CGlass::CarWindscreenShatters(CVehicle* vehicle) {
     // They're after each other, so we just have to find the first one here
     uint32 glassTriIdx{};
     for (; glassTriIdx < colModel->GetTriCount(); glassTriIdx++) {
-        if (g_surfaceInfos->IsGlass(triangles[glassTriIdx].m_nMaterial)) {
+        if (g_surfaceInfos.IsGlass(triangles[glassTriIdx].m_nMaterial)) {
             break;
         }
     }

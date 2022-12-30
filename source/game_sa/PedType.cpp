@@ -121,11 +121,12 @@ ePedType CPedType::FindPedType(const char* pedTypeName) {
 }
 
 // 0x608830
+// TODO: Stuff related to this should use `size_t`'s
 uint32 CPedType::GetPedFlag(ePedType pedType) {
-    if (pedType >= PED_TYPE_MISSION8) {
-        return PED_TYPE_PLAYER1;
+    if ((size_t)pedType < (sizeof(uint32) * 8)) { // Make sure we aren't shifting more than 31 bits, otherwise it's U.B.
+        return 1 << (size_t)pedType;
     } else {
-        return PED_TYPE_PLAYER2 << pedType;
+        return 0;
     }
 }
 

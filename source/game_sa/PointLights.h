@@ -20,36 +20,29 @@ class CPointLight {
 public:
     CVector         m_vecPosn;
     CVector         m_vecDirection;
-    float           m_fRange;
+    float           m_fRadius;
     float           m_fColorRed;
     float           m_fColorGreen;
     float           m_fColorBlue;
     CEntity*        m_pEntityToLight;
-    ePointLightType m_nType; // see ePointLightType
+    ePointLightType m_nType;
     uint8           m_nFogType;
     bool            m_bGenerateShadows;
-
-private:
-    char _pad0;
 };
-
 VALIDATE_SIZE(CPointLight, 0x30);
+
+static constexpr auto MAX_POINT_LIGHTS = 32;
 
 class CPointLights {
 public:
-    // static variables
+    static inline uint32& NumLights = *(uint32*)0xC3F0D0; // num of registered lights in frame
+    static inline CPointLight (&aLights)[MAX_POINT_LIGHTS] = *(CPointLight(*)[MAX_POINT_LIGHTS])0xC3F0E0;
 
-    // num of registered lights in frame
-    static uint32& NumLights;
-    // lights array. Count: MAX_POINTLIGHTS (32)
-    static CPointLight* aLights;
+    static inline float (&aCachedMapReadResults)[MAX_POINT_LIGHTS] = *(float(*)[MAX_POINT_LIGHTS])0xC3F050;
+    static inline int32& NextCachedValue = *(int32*)0xC3F0D4;
+    static inline CVector (&aCachedMapReads)[MAX_POINT_LIGHTS] = *(CVector(*)[MAX_POINT_LIGHTS])0xC3F6E0;
 
-    static float*   aCachedMapReadResults; // static float aCachedMapReadResults[MAX_POINTLIGHTS];
-    static uint32&  NextCachedValue;       // static int32 NextCachedValue;
-    static CVector* aCachedMapReads;       // static CVector aCachedMapReads[MAX_POINTLIGHTS];
-
-    // static functions
-
+public:
     static void  Init();
     static float GenerateLightsAffectingObject(const CVector* point, float* totalLighting, CEntity* entity);
     static float GetLightMultiplier(const CVector* point);
@@ -57,6 +50,6 @@ public:
     static bool  ProcessVerticalLineUsingCache(CVector point, float* outZ);
     static void  AddLight(uint8 lightType, CVector point, CVector direction, float radius, float red, float green, float blue, uint8 fogType, bool generateExtraShadows, CEntity* entityAffected);
     static void  RenderFogEffect();
-};
 
-extern uint32 MAX_POINTLIGHTS; // default: 32
+    static void ResetNumLights() { NumLights = 0; }
+};

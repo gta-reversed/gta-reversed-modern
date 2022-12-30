@@ -39,6 +39,7 @@ enum class eWeaponSlot : uint32 {
     PARACHUTE,
     DETONATOR,
 };
+constexpr auto NUM_WEAPON_SLOTS = static_cast<size_t>(eWeaponSlot::DETONATOR) + 1u;
 
 class CPed;
 class CVehicle;
@@ -120,8 +121,8 @@ public:
     static CEntity* PickTargetForHeatSeekingMissile(CVector origin, CVector direction, float distanceMultiplier, CEntity* ignoreEntity, bool fromVehicle, CEntity* lastEntity);
     static bool ProcessLineOfSight(const CVector& startPoint, const CVector& endPoint, CColPoint& outColPoint, CEntity*& outEntity, eWeaponType weaponType, CEntity* arg5, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool arg11, bool doIgnoreCameraCheck);
 
-    CWeaponInfo& GetWeaponInfo(CPed* owner = nullptr);
-    CWeaponInfo& GetWeaponInfo(eWeaponSkill skill);
+    CWeaponInfo& GetWeaponInfo(CPed* owner = nullptr) const;
+    CWeaponInfo& GetWeaponInfo(eWeaponSkill skill) const;
 
 private:
     friend void InjectHooksMain();

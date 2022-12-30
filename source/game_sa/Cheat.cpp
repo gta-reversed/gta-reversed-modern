@@ -27,9 +27,6 @@ bool& CCheat::m_bHasPlayerCheated = *reinterpret_cast<bool*>(0x96918C);
 bool CCheat::m_bShowMappings;
 uint32 CCheat::m_nLastScriptBypassTime;
 
-bool G_CHEAT_BIG_HEAD = false;  // temp
-bool G_CHEAT_THIN_BODY = false; // temp
-
 // NOTSA
 struct Cheat {
     DWORD   installAddress;
@@ -507,7 +504,7 @@ void CCheat::HealthCheat() {
 
     vehicle->m_fHealth = 1000.0f;
     if (vehicle->IsBike()) {
-        vehicle->AsBike()->m_fFireBlowUpTimer = 0.0f;
+        vehicle->AsBike()->m_BlowUpTimer = 0.0f;
         vehicle->AsBike()->Fix();
     } else if (vehicle->IsAutomobile()) {
         vehicle->AsAutomobile()->m_fBurnTimer = 0.0f;
@@ -772,12 +769,12 @@ CVehicle* CCheat::VehicleCheat(eModelID modelId) {
             return new CBoat(modelId, RANDOM_VEHICLE);
         case VEHICLE_TYPE_BIKE: {
             auto* vehicle = new CBike(modelId, RANDOM_VEHICLE);
-            vehicle->bikeFlags.bIsStanding = true;
+            vehicle->bikeFlags.bOnSideStand = true;
             return vehicle;
         }
         case VEHICLE_TYPE_BMX: {
             auto* vehicle = new CBmx(modelId, RANDOM_VEHICLE);
-            vehicle->bikeFlags.bIsStanding = true;
+            vehicle->bikeFlags.bOnSideStand = true;
             return vehicle;
         }
         case VEHICLE_TYPE_TRAILER:
@@ -1112,13 +1109,12 @@ void CCheat::TheGamblerCheat() {
 }
 
 void CCheat::BigHeadCheat() {
-    G_CHEAT_BIG_HEAD ^= true; // Toggle(CHEAT_BIG_HEAD);
+    Toggle(CHEAT_BIG_HEAD);
 }
 
 void CCheat::ThinBodyCheat() {
-    G_CHEAT_THIN_BODY ^= true; // Toggle(CHEAT_THIN_BODY);
+    Toggle(CHEAT_THIN_BODY);
 }
-
 
 // **** DEBUG STUFF ****
 

@@ -6,7 +6,7 @@ class CVehicle;
 
 enum class eFallDir : uint8 { FORWARD, LEFT, BACKWARD, RIGHT };
 
-class CTaskComplexDie : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexDie : public CTaskComplex {
 public:
     eWeaponType  m_nWeaponType;
     AssocGroupId m_nAnimGroup;
@@ -31,12 +31,12 @@ public:
         eWeaponType nWeaponType,
         AssocGroupId animGroup,
         AnimationId animID,
-        float fBlendDelta,
-        float fAnimSpeed,
-        bool bBeingKilledByStealth,
-        bool bFallingToDeath,
-        eFallDir nFallToDeathDir,
-        bool bFallToDeathOverRailing
+        float fBlendDelta = 4.f,
+        float fAnimSpeed = 0.f,
+        bool bBeingKilledByStealth = false,
+        bool bFallingToDeath = false,
+        eFallDir nFallToDeathDir = eFallDir::FORWARD,
+        bool bFallToDeathOverRailing = false
     );
     ~CTaskComplexDie() override = default; // 0x6300C0 0x637910
 

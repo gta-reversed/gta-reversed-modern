@@ -3,8 +3,9 @@
 #include <reversiblehooks/RootHookCategory.h>
 #include "HooksDebugModule.h"
 #include "Utility.h"
-#include "reversiblehooks/ReversibleHook/Base.h"
-#include "reversiblehooks/ReversibleHook/Simple.h"
+#include <reversiblehooks/ReversibleHook/Base.h>
+#include <reversiblehooks/ReversibleHook/Simple.h>
+#include <reversiblehooks/ReversibleHook/Virtual.h>
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -128,8 +129,9 @@ namespace HookFilter {
             return std::make_pair(anyVisible, anyOpen);
         };
 
-        // If `doFilter` argument is `false` all items are set visible, and either true (if we have hooks) or false (if `cat.Items().empty()`) is returned.
-        // otherwise items are filtered and true if returned if at least 1 item is visible.
+        // If `doFilter` argument is `false` all items are set visible,
+        // and either true (if we have hooks) or false (if `cat.Items().empty()`) is returned.
+        // Otherwise items are filtered and true if returned if at least 1 item is visible.
         const auto ProcessItems = [&](bool allowFilter) {
             if (allowFilter && IsHookFilterActive()) {
                 cat.m_anyItemsVisible = false;
@@ -227,12 +229,12 @@ namespace HookFilter {
                     return true;
                 };
 
-                const auto byFilterVisible = ProcessFilter();
-                const auto itemsVisible = ProcessItems(true); // Filter items
+                const auto byFilterVisible           = ProcessFilter();
+                const auto itemsVisible              = ProcessItems(true); // Filter items
                 const auto [anySCVisible, anySCOpen] = ProcessSubCategories();
 
-                const bool open    = anySCOpen || anySCVisible || hasSubCategories && (byFilterVisible) || IsHookFilterPresent() && itemsVisible;
-                const bool visible = byFilterVisible && itemsVisible || anySCVisible;
+                const bool open    = anySCOpen || anySCVisible || (hasSubCategories && byFilterVisible) || (IsHookFilterPresent() && itemsVisible);
+                const bool visible = (byFilterVisible && itemsVisible) || anySCVisible;
 
                 cat.Visible(visible);
                 cat.Open(open);
@@ -246,16 +248,15 @@ namespace HookFilter {
             // - Or it has visible sub-categories
 
             const auto itemsVisible = ProcessItems(true); // Filter items
-            const auto [anySCVisible, anySCOpen] = ProcessSubCategories();
+            const auto [anySubCatVisible, anySubCatOpen] = ProcessSubCategories();
 
-            const auto open = itemsVisible || anySCOpen;
-
-            const bool visible = open || anySCVisible;
+            const auto open    = itemsVisible || anySubCatOpen;
+            const bool visible = open || anySubCatVisible;
 
             cat.Visible(visible);
             cat.Open(open);
 
-            return {visible, open};
+            return { visible, open };
         }
     }
 
@@ -311,7 +312,7 @@ namespace HookFilter {
         }
     }
 
-    void ProcessImGui() {
+    void Render() {
         PushItemWidth(GetWindowContentRegionMax().x - 10.f);
         if (InputText(" ", &m_input)) {
             OnInputUpdate();
@@ -321,8 +322,8 @@ namespace HookFilter {
             SetTooltip(
                 "`::function`         - Filters only functions \n"
                 "`cpy`                - Filter namespace - Will only show namespace with name containing \"cphy\"\n"
-                "`player/ped`         - Should only show Ped/CPlayerPed\n"
-                "`player/ped::busted` - Should only show `Ped/CPlayerPed` with the `busted` function visible only\n"
+                "`ped/player`         - Should only show Ped/CPlayerPed\n"
+                "`ped/player::busted` - Should only show `Ped/CPlayerPed` with the `busted` function visible only\n"
                 "`/entity`            - Should only show the top level `Entity` namespace in Root\n"
                 "For more tips see gta-reversed-modern/discussions/190\n"
             );
@@ -381,21 +382,34 @@ void RenderCategoryItems(RH::HookCategory& cat) {
             continue;
         }
 
+        const auto ProcessToolTip = [](const auto& i) {
+            const auto DrawToolTip = [](void* gta, void* our, bool locked) {
+                const auto AddrToClipboard = [](void* addr) {
+                    SetClipboardText(std::format("{}", addr).c_str());
+                };
+
+                std::string tooltipText = std::format("SA: {} / Our: {}", gta, our);
+                if (locked) {
+                    tooltipText += "\n(locked)";
+                }
+                SetTooltip(tooltipText.c_str());
+
+                if (IsItemClicked(ImGuiMouseButton_Right)) {
+                    AddrToClipboard(gta);
+                } else if (IsItemClicked(ImGuiMouseButton_Middle)) {
+                    AddrToClipboard(our);
+                }
+            };
+            DrawToolTip(i->GetHookGTAAddress(), i->GetHookOurAddress(), i->Locked());
+        };
+
         switch (item->Type()) {
         case RH::ReversibleHook::Base::HookType::Simple: {
-            auto s = static_cast<RH::ReversibleHook::Simple*>(item.get());
-
-            std::string tooltipText = std::format("SA: {:#x} - Our: {:#x}", s->m_iRealHookedAddress, s->m_iLibFunctionAddress);
-            if (item->Locked()) {
-                tooltipText += "\n(locked)";
-            }
-            SetTooltip(tooltipText.c_str());
-
-            if (IsItemClicked(ImGuiMouseButton_Middle)) {
-                SetClipboardText(std::format("{:#x}", s->m_iRealHookedAddress).c_str());
-            } else if (IsItemClicked(ImGuiMouseButton_Right)) {
-                SetClipboardText(std::format("{:#x}", s->m_iLibFunctionAddress).c_str());
-            }
+            ProcessToolTip(std::static_pointer_cast<RH::ReversibleHook::Simple>(item));
+            break;
+        }
+        case RH::ReversibleHook::Base::HookType::Virtual: {
+            ProcessToolTip(std::static_pointer_cast<RH::ReversibleHook::Virtual>(item));
             break;
         }
         }
@@ -417,8 +431,7 @@ void RenderCategory(RH::HookCategory& cat) {
 
     const auto& name = cat.Name();
 
-
-    // @returns tuple<bool open, bool cbStateChanged, bool cbState>
+    //! returns tuple<bool open, bool cbStateChanged, bool cbState>
     const auto TreeNodeWithCheckbox = [](auto label, ImTristate triState, bool disabled) {
         // TODO/NOTE: The Tree's label is a workaround for when the label is shorter than the visual checkbox (otherwise the checkbox can't be clic
         const auto open = TreeNodeEx("##         ", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth);
@@ -442,10 +455,6 @@ void RenderCategory(RH::HookCategory& cat) {
         const auto [open, stateChanged, cbState] = TreeNodeWithCheckbox(cat.Name().c_str(), cat.OverallState(), cat.Disabled());
         if (stateChanged) {
             cat.ToggleAllItemsState();
-            //if (cat.OverallState() == RH::HookCategory::HooksState::MIXED) {
-            //} else {
-            //    cat.SetAllItemsEnabled(cbState);
-            //}
         }
         cat.Open(open);
     }
@@ -454,7 +463,9 @@ void RenderCategory(RH::HookCategory& cat) {
         return;
     }
 
+    //
     // Draw hooks, and subcategories
+    //
 
     // Draw hooks (items) (if any)
     if (!cat.Items().empty() && cat.m_anyItemsVisible) {
@@ -483,16 +494,18 @@ void RenderCategory(RH::HookCategory& cat) {
     TreePop();
 }
 
-namespace HooksDebugModule {
-void ProcessImGui() {
-    HookFilter::ProcessImGui();
-
-    if (BeginChild("##hookstool")) {
-        RenderCategory(RH::GetRootCategory());
-        EndChild();
+void HooksDebugModule::RenderWindow() {
+    const notsa::ui::ScopedWindow window{ "ReversibleHooks (TM) (R)", {500.f, 700.f}, m_IsOpen };
+    if (!m_IsOpen) {
+        return;
     }
+
+    HookFilter::Render();
+    RenderCategory(RH::GetRootCategory());
 }
 
-void ProcessRender() {
+void HooksDebugModule::RenderMenuEntry() {
+    notsa::ui::DoNestedMenuIL({ "Settings" }, [&] {
+        ImGui::MenuItem("Hooks", nullptr, &m_IsOpen);
+    });
 }
-};

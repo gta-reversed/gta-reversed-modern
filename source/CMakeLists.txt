@@ -95,6 +95,7 @@ target_include_directories(${RE_PROJECT_LIB_NAME} PRIVATE
     game_sa/Interior/
     game_sa/Memory/
     game_sa/Models/
+    game_sa/Plant/
     game_sa/Plugins/
     game_sa/Pipelines/
     game_sa/Pipelines/CustomBuilding
@@ -104,7 +105,7 @@ target_include_directories(${RE_PROJECT_LIB_NAME} PRIVATE
     game_sa/Scripts/
     game_sa/Tasks/
     game_sa/Tasks/TaskTypes/
-    game_sa/Tasks/TaskTypes/SeekPosCalculators/
+    game_sa/Tasks/TaskTypes/SeekEntity/
 
     app/
     app/platform/

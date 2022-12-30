@@ -6,20 +6,14 @@
 
 class CVehicle;
 
-enum {
-    AS_DRIVER         = 0,
-    AS_PASSENGER      = 1,
-    ANY_CAR_AS_DRIVER = 2
-};
-
-class CTaskComplexCarDrive : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexCarDrive : public CTaskComplex {
 public:
     CVehicle* m_pVehicle;
     float     m_fSpeed;
     int32     m_carModelIndexToCreate;
     eCarDrivingStyle m_nCarDrivingStyle;
-    int8      _align[3];
-    int8      field_1C; //
+    uint8     _align[3]{};  // Must have this, as originally an 32bit int was used for the driving style 
+    bool      m_asDriver;  
     int8      m_nOldCarDrivingStyle;
     int8      m_nCarMission;
     uint8     m_nSpeed;
@@ -28,7 +22,7 @@ public:
 public:
     static constexpr auto Type = TASK_COMPLEX_CAR_DRIVE;
 
-    explicit CTaskComplexCarDrive(CVehicle* vehicle);
+    CTaskComplexCarDrive(CVehicle* vehicle, bool asDriver = true);
     CTaskComplexCarDrive(CVehicle* vehicle, float speed, int32 carModelIndexToCreate, eCarDrivingStyle carDrivingStyle);
     ~CTaskComplexCarDrive() override;
 

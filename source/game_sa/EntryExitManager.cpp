@@ -475,3 +475,7 @@ bool CEntryExitManager::Save() {
 
     return true;
 }
+
+bool CEntryExitManager::WeAreInInteriorTransition() {
+    return plugin::CallAndReturn<bool, 0x43E400>();
+}

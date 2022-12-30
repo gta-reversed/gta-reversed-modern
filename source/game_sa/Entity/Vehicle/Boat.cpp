@@ -2,6 +2,7 @@
 
 #include "Boat.h"
 #include "CarCtrl.h"
+#include "ControllerConfigManager.h"
 
 float& CBoat::MAX_WAKE_LENGTH = *(float*)0x8D3938;   // 50.0f
 float& CBoat::MIN_WAKE_INTERVAL = *(float*)0x8D393C; // 2.0f
@@ -17,18 +18,21 @@ RxObjSpace3DVertex* CBoat::aRenderVertices = (RxObjSpace3DVertex*)0xC278F8;
 RxVertexIndex* CBoat::auRenderIndices = (RxVertexIndex*)0xC27988;
 
 void CBoat::InjectHooks() {
-    RH_ScopedClass(CBoat);
+    RH_ScopedVirtualClass(CBoat, 0x8721a0, 66);
     RH_ScopedCategory("Vehicle");
 
-    RH_ScopedVirtualInstall(SetModelIndex, 0x6F1140);
-    RH_ScopedVirtualInstall(ProcessControl, 0x6F1770);
-    RH_ScopedVirtualInstall(Teleport, 0x6F20E0);
-    RH_ScopedVirtualInstall(PreRender, 0x6F1180);
-    RH_ScopedVirtualInstall(Render, 0x6F0210);
-    RH_ScopedVirtualInstall(ProcessControlInputs, 0x6F0A10);
-    RH_ScopedVirtualInstall(GetComponentWorldPosition, 0x6F01D0);
-    RH_ScopedVirtualInstall(ProcessOpenDoor, 0x6F0190);
-    RH_ScopedVirtualInstall(BlowUpCar, 0x6F21B0);
+    RH_ScopedInstall(Constructor, 0x6F2940);
+    RH_ScopedInstall(Destructor, 0x6F00F0);
+
+    RH_ScopedVMTInstall(SetModelIndex, 0x6F1140);
+    RH_ScopedVMTInstall(ProcessControl, 0x6F1770);
+    RH_ScopedVMTInstall(Teleport, 0x6F20E0);
+    RH_ScopedVMTInstall(PreRender, 0x6F1180);
+    RH_ScopedVMTInstall(Render, 0x6F0210);
+    RH_ScopedVMTInstall(ProcessControlInputs, 0x6F0A10);
+    RH_ScopedVMTInstall(GetComponentWorldPosition, 0x6F01D0);
+    RH_ScopedVMTInstall(ProcessOpenDoor, 0x6F0190);
+    RH_ScopedVMTInstall(BlowUpCar, 0x6F21B0);
     RH_ScopedInstall(PruneWakeTrail, 0x6F0E20);
     RH_ScopedInstall(AddWakePoint, 0x6F2550);
     RH_ScopedInstall(SetupModelNodes, 0x6F01A0);
@@ -809,7 +813,7 @@ void CBoat::ProcessControlInputs_Reversed(uint8 ucPadNum) {
 
     auto pad = CPad::GetPad(ucPadNum);
     float fBrakePower = (static_cast<float>(pad->GetBrake()) * (1.0F / 255.0F) - m_fBreakPedal) * 0.1F + m_fBreakPedal;
-    fBrakePower = clamp(fBrakePower, 0.0F, 1.0F);
+    fBrakePower = std::clamp(fBrakePower, 0.0F, 1.0F);
     m_fBreakPedal = fBrakePower;
 
     auto fGasPower = fBrakePower * -0.3F;
@@ -875,7 +879,7 @@ void CBoat::BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) {
     vehicleFlags.bLightsOn = false;
     CVehicle::ChangeLawEnforcerState(false);
     CExplosion::AddExplosion(this, damager, eExplosionType::EXPLOSION_BOAT, vecPos, 0, 1, -1.0F, bHideExplosion);
-    CDarkel::RegisterCarBlownUpByPlayer(this, 0);
+    CDarkel::RegisterCarBlownUpByPlayer(*this, 0);
 
     auto movingComponent = m_aBoatNodes[BOAT_MOVING];
     if (!movingComponent)

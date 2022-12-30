@@ -26,14 +26,14 @@ void CCollision::InjectHooks() {
     RH_ScopedCategory("Collision");
 
     RH_ScopedInstall(Init, 0x416260);
-    // RH_ScopedInstall(Shutdown, 0x4162E0);
+    RH_ScopedInstall(Shutdown, 0x4162E0, { .reversed = false });
     RH_ScopedInstall(Update, 0x411E20);
     RH_ScopedInstall(SortOutCollisionAfterLoad, 0x411E30);
 
     RH_ScopedOverloadedInstall(CalculateTrianglePlanes, "colData", 0x416330, void (*)(CCollisionData*));
     RH_ScopedOverloadedInstall(RemoveTrianglePlanes, "colData", 0x416400, void (*)(CCollisionData*));
     RH_ScopedInstall(ProcessLineOfSight, 0x417950);
-    // RH_ScopedInstall(ProcessColModels, 0x4185C0);
+    RH_ScopedInstall(ProcessColModels, 0x4185C0, { .reversed = false });
 }
 
 // 0x416260
@@ -312,7 +312,7 @@ bool CCollision::ProcessLineOfSight(const CColLine& line, const CMatrix& transfo
         return false;
 
     const auto CheckSeeAndShootThrough = [=](auto material) {
-        return (!doSeeThroughCheck || !g_surfaceInfos->IsSeeThrough(material)) && (!doShootThroughCheck || !g_surfaceInfos->IsShootThrough(material));
+        return (!doSeeThroughCheck || !g_surfaceInfos.IsSeeThrough(material)) && (!doShootThroughCheck || !g_surfaceInfos.IsShootThrough(material));
     };
 
     float localMinTouchDist = maxTouchDistance;

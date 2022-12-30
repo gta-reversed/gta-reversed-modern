@@ -17,9 +17,12 @@
 #include "EntryExitManager.h"
 #include "PedStats.h"
 #include "LoadingScreen.h"
+#include "Garages.h"
 
 char(&CFileLoader::ms_line)[512] = *reinterpret_cast<char(*)[512]>(0xB71848);
 uint32& gAtomicModelId = *reinterpret_cast<uint32*>(0xB71840);
+
+void LinkLods(int32 a1);
 
 void CFileLoader::InjectHooks() {
     RH_ScopedClass(CFileLoader);
@@ -73,7 +76,8 @@ void CFileLoader::InjectHooks() {
     RH_ScopedInstall(LoadLevel, 0x5B9030);
     RH_ScopedInstall(LoadScene, 0x5B8700);
     RH_ScopedInstall(LoadObjectTypes, 0x5B8400);
-    // RH_ScopedInstall(LinkLods, 0x5B51E0);
+
+    RH_ScopedGlobalInstall(LinkLods, 0x5B51E0, { .reversed = false });
 }
 
 // copy textures from dictionary to baseDictionary
@@ -1635,7 +1639,7 @@ void CFileLoader::LoadPickup(const char* line) {
     };
 
     if (const auto model = GetModel(); model != -1) {
-        CPickups::GenerateNewOne(pos, model, 2, 0, 0, false, nullptr);
+        CPickups::GenerateNewOne(pos, model, PICKUP_ON_STREET, 0, 0, false, nullptr);
     }
 }
 

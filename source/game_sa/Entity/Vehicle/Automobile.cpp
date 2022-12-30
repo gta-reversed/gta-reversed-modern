@@ -244,8 +244,8 @@ CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool set
         auto& bonnet = m_doors[DOOR_BONNET];
         bonnet.m_nAxis = 0;
         bonnet.m_fClosedAngle = 0.f;
-        bonnet.m_fOpenAngle = m_pHandlingData->m_bReverseBonnet ? PI * 0.3f : -PI * 0.3f;
-        bonnet.m_nDirn = m_pHandlingData->m_bReverseBonnet ? 33 : 36;
+        bonnet.m_fOpenAngle = m_pHandlingData->m_bReverseBonnet ? -PI * 0.3f : PI * 0.3f;
+        bonnet.m_nDirn = m_pHandlingData->m_bReverseBonnet ? 36 : 33;
     }
 
     // 0x6B0DF4
@@ -687,8 +687,8 @@ void CAutomobile::ProcessControl()
             }
             else {
                 m_wheelSkidmarkMuddy[i] = false;
-                m_wheelSkidmarkType[i] = static_cast<eSkidMarkType>(g_surfaceInfos->GetSkidmarkType(m_wheelColPoint[i].m_nSurfaceTypeB));
-                if (m_wheelSkidmarkType[i] == eSkidMarkType::MUDDY)
+                m_wheelSkidmarkType[i] = static_cast<eSkidmarkType>(g_surfaceInfos.GetSkidmarkType(m_wheelColPoint[i].m_nSurfaceTypeB));
+                if (m_wheelSkidmarkType[i] == eSkidmarkType::MUDDY)
                     m_wheelSkidmarkMuddy[i] = true;
                 contactPoints[i] = m_wheelColPoint[i].m_vecPoint - GetPosition();
             }
@@ -818,7 +818,7 @@ void CAutomobile::ProcessControl()
             colPoint.m_nSurfaceTypeA = SURFACE_WHEELBASE;
             colPoint.m_nSurfaceTypeB = SURFACE_TARMAC;
             float speedRight = DotProduct(m_vecMoveSpeed, GetRight());
-            float adhesive = g_surfaceInfos->GetAdhesiveLimit(&colPoint);
+            float adhesive = g_surfaceInfos.GetAdhesiveLimit(&colPoint);
             steerAngle = adhesive * traction * 4.0f * 4.0f / (speedForward * speedForward);
             steerAngle = std::min(steerAngle, 1.0f);
             steerAngle = std::asin(steerAngle) / DegreesToRadians(m_pHandlingData->m_fSteeringLock);
@@ -932,7 +932,7 @@ void CAutomobile::ProcessControl()
         }
 
         if (m_fWheelsSuspensionCompression[i] < 1.0f && m_nStatus == STATUS_PLAYER) {
-            float roughness = (float)g_surfaceInfos->GetRoughness(m_wheelColPoint[i].m_nSurfaceTypeB) * 0.1f;
+            float roughness = (float)g_surfaceInfos.GetRoughness(m_wheelColPoint[i].m_nSurfaceTypeB) * 0.1f;
             roughnessShake = std::max(roughnessShake, roughness);
         }
         uint32 handlingId = m_pHandlingData->m_nVehicleId;
@@ -1268,7 +1268,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags) {
         return true;
     }
     case STATUS_PHYSICS:
-    case STATUS_TRAILER:
+    case STATUS_GHOST:
     {
         CCarAI::UpdateCarAI(this);
         CCarCtrl::SteerAICarWithPhysics(this);
@@ -2180,7 +2180,7 @@ void CAutomobile::DoBurstAndSoftGroundRatios()
         }
         default: {
             if (   compression >= 1.0f
-                || g_surfaceInfos->GetAdhesionGroup(wheelCP.m_nSurfaceTypeB) != ADHESION_GROUP_SAND
+                || g_surfaceInfos.GetAdhesionGroup(wheelCP.m_nSurfaceTypeB) != ADHESION_GROUP_SAND
                 || ModelIndices::IsRhino(m_nModelIndex)
             ) {
                 if (compression < 1.0f && wheelCP.m_nSurfaceTypeB == SURFACE_RAILTRACK) {
@@ -2830,7 +2830,7 @@ bool CAutomobile::BreakTowLink() {
 
     switch (m_nStatus) {
     case eEntityStatus::STATUS_IS_TOWED:
-    case eEntityStatus::STATUS_PLAYER_DISABLED: {
+    case eEntityStatus::STATUS_IS_SIMPLE_TOWED: {
         if (m_pDriver) {
             m_nStatus = m_pDriver->IsPlayer() ? eEntityStatus::STATUS_PLAYER : eEntityStatus::STATUS_PHYSICS;
         } else {
@@ -2902,12 +2902,16 @@ void CAutomobile::SetupModelNodes()
 
 // 0x6A07A0
 void CAutomobile::HydraulicControl() {
-    if (m_nStatus != STATUS_PLAYER || m_nStatus != STATUS_PHYSICS) {
+    if (m_nStatus == STATUS_PHYSICS) {
+        if (!IsCreatedBy(MISSION_VEHICLE))
+            return;
+
+        if (m_vehicleSpecialColIndex < 0)
+            return;
+    } else if (m_nStatus != STATUS_PLAYER) {
         return;
     }
-    if (!IsCreatedBy(MISSION_VEHICLE) || m_vehicleSpecialColIndex < 0) {
-        return;
-    }
+
     if (handlingFlags.bHydraulicNone) {
         return;
     }
@@ -3525,7 +3529,7 @@ void CAutomobile::FixDoor(int32 nodeIndex, eDoors door) {
 }
 
 // 0x6A3670
-void CAutomobile::FixPanel(int32 nodeIndex, ePanels panel) {
+void CAutomobile::FixPanel(eCarNodes nodeIndex, ePanels panel) {
     m_damageManager.SetPanelStatus(panel, DAMSTATE_OK);
 
     // Remove any bouncing panels belonging to this node
@@ -4000,18 +4004,18 @@ void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel,
                 wheelFwd = tmp;
             }
             m_wheelColPoint[leftWheel].m_nSurfaceTypeA = SURFACE_WHEELBASE;
-            float adhesion = g_surfaceInfos->GetAdhesiveLimit(&m_wheelColPoint[leftWheel]) * traction;
+            float adhesion = g_surfaceInfos.GetAdhesiveLimit(&m_wheelColPoint[leftWheel]) * traction;
             if (m_nStatus == STATUS_PLAYER)
             {
-                adhesion *= g_surfaceInfos->GetWetMultiplier(m_wheelColPoint[leftWheel].m_nSurfaceTypeB);
+                adhesion *= g_surfaceInfos.GetWetMultiplier(m_wheelColPoint[leftWheel].m_nSurfaceTypeB);
                 adhesion *= std::min(suspensionBias * m_pHandlingData->m_fSuspensionForceLevel * 4.0f * (1.0f - m_fWheelsSuspensionCompression[leftWheel]), 2.0f);
-                if (handlingFlags.bOffroadAbility2 && g_surfaceInfos->GetAdhesionGroup(m_wheelColPoint[leftWheel].m_nSurfaceTypeB) > ADHESION_GROUP_ROAD)
+                if (handlingFlags.bOffroadAbility2 && g_surfaceInfos.GetAdhesionGroup(m_wheelColPoint[leftWheel].m_nSurfaceTypeB) > ADHESION_GROUP_ROAD)
                 {
                     adhesion *= 1.4f;
                 }
                 else if (handlingFlags.bOffroadAbility)
                 {
-                    if (g_surfaceInfos->GetAdhesionGroup(m_wheelColPoint[leftWheel].m_nSurfaceTypeB) > ADHESION_GROUP_ROAD)
+                    if (g_surfaceInfos.GetAdhesionGroup(m_wheelColPoint[leftWheel].m_nSurfaceTypeB) > ADHESION_GROUP_ROAD)
                         adhesion *= 1.15f;
                 }
             }
@@ -4050,18 +4054,18 @@ void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel,
                 wheelFwd = tmp;
             }
             m_wheelColPoint[rightWheel].m_nSurfaceTypeA = SURFACE_WHEELBASE;
-            float adhesion = g_surfaceInfos->GetAdhesiveLimit(&m_wheelColPoint[rightWheel]) * traction;
+            float adhesion = g_surfaceInfos.GetAdhesiveLimit(&m_wheelColPoint[rightWheel]) * traction;
             if (m_nStatus == STATUS_PLAYER)
             {
-                adhesion *= g_surfaceInfos->GetWetMultiplier(m_wheelColPoint[rightWheel].m_nSurfaceTypeB);
+                adhesion *= g_surfaceInfos.GetWetMultiplier(m_wheelColPoint[rightWheel].m_nSurfaceTypeB);
                 adhesion *= std::min(suspensionBias * m_pHandlingData->m_fSuspensionForceLevel * 4.0f * (1.0f - m_fWheelsSuspensionCompression[rightWheel]), 2.0f);
-                if (handlingFlags.bOffroadAbility2 && g_surfaceInfos->GetAdhesionGroup(m_wheelColPoint[rightWheel].m_nSurfaceTypeB) > ADHESION_GROUP_ROAD)
+                if (handlingFlags.bOffroadAbility2 && g_surfaceInfos.GetAdhesionGroup(m_wheelColPoint[rightWheel].m_nSurfaceTypeB) > ADHESION_GROUP_ROAD)
                 {
                     adhesion *= 1.4f;
                 }
                 else if (handlingFlags.bOffroadAbility)
                 {
-                    if (g_surfaceInfos->GetAdhesionGroup(m_wheelColPoint[rightWheel].m_nSurfaceTypeB) > ADHESION_GROUP_ROAD)
+                    if (g_surfaceInfos.GetAdhesionGroup(m_wheelColPoint[rightWheel].m_nSurfaceTypeB) > ADHESION_GROUP_ROAD)
                         adhesion *= 1.15f;
                 }
             }
@@ -4418,7 +4422,7 @@ void CAutomobile::ProcessBuoyancy()
         m_fBuoyancyConstant = m_pHandlingData->m_fBuoyancyConstant;
         for (int32 i = 0; i < 4; ++i) {
             auto& colPoint = m_wheelColPoint[i];
-            if (m_fWheelsSuspensionCompression[i] < 1.0F && g_surfaceInfos->IsWater(colPoint.m_nSurfaceTypeB)) {
+            if (m_fWheelsSuspensionCompression[i] < 1.0F && g_surfaceInfos.IsWater(colPoint.m_nSurfaceTypeB)) {
                 auto vecWaterImpactVelocity = (colPoint.m_vecPoint + GetUp() * 0.3F) - GetPosition();
                 CVector vecSpeed = GetSpeed(vecWaterImpactVelocity);
             }
@@ -5229,7 +5233,7 @@ void CAutomobile::DoHeliDustEffect(float timeConstMult, float fxMaxZMult) {
     CColPoint groundCP{};
     CEntity* hitEntity{}; // Unused
     CWorld::ProcessVerticalLine(myPos, -1000.f, groundCP, hitEntity, true); // TODO: Check if it returned true :D
-    const bool isGroundSand = g_surfaceInfos->IsSand(groundCP.m_nSurfaceTypeB);
+    const bool isGroundSand = g_surfaceInfos.IsSand(groundCP.m_nSurfaceTypeB);
 
     auto waterLevel{-1000.f};
     const bool isThereWaterUnderUs = CWaterLevel::GetWaterLevel(myPos, waterLevel, false);

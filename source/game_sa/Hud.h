@@ -11,6 +11,7 @@
 
 class CSprite2d;
 class CPed;
+class CPlayerInfo;
 
 class CHud {
 public:
@@ -23,12 +24,12 @@ public:
 
     static inline bool& bDrawClock = *(bool*)0xBAA400;
 
-    static inline char*& m_pVehicleNameToPrint = *(char**)0xBAA444;
+    static inline const char*& m_pVehicleNameToPrint = *(const char**)0xBAA444;
     static inline eNameState& m_VehicleState = *(eNameState*)0xBAA448;
     static inline int32& m_VehicleFadeTimer = *(int32*)0xBAA44C;
     static inline int32& m_VehicleNameTimer = *(int32*)0xBAA450;
-    static inline char*& m_pLastVehicleName = *(char**)0xBAA454;
-    static inline char*& m_pVehicleName = *(char**)0xBAA458;
+    static inline const char*& m_pLastVehicleName = *(const char**)0xBAA454;
+    static inline const char*& m_pVehicleName = *(const char**)0xBAA458;
 
     static inline bool& m_bDraw3dMarkers = *(bool*)0xBAA45C;
     static inline bool& m_Wants_To_Draw_Hud = *(bool*)0xBAA45D;
@@ -117,7 +118,7 @@ public:
     static void SetHelpMessage(char const* text, bool quickMessage, bool permanent, bool addToBrief);
     static void SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float diff, float max);
     static void SetHelpMessageWithNumber(char const* text, int32 number, bool quickMessage, bool permanent);
-    static void SetVehicleName(char* name);
+    static void SetVehicleName(const char* name);
     static void SetZoneName(char* name, bool displayImmediately);
 
     static void Draw();
