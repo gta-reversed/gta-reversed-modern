@@ -59,9 +59,15 @@ inline OpcodeResult CollectArgsAndCall(CRunningScript* S, eScriptCommands comman
     }
 }
 
-//! Called from unimplemented commands
-//! This originally returned `OR_INTERRUPT`, but it isn't handled specially at all, so I'd just pass our debug checks
-inline auto NotImplemented() { NOTSA_UNREACHABLE(); return OR_INTERRUPT; }
+//! Called for unimplemented commands
+//! These are commands that have no (special) code associated with them
+inline auto NotImplemented(eScriptCommands cmd) {
+#ifdef NOTSA_DEBUG
+    DEV_LOG("Unimplemented command has been called! [ID: {}; Name: {}]", (int)(cmd), GetScriptCommandName(cmd));
+#endif
+    return OR_INTERRUPT; // Vanilla SA behavior
+}
+
 template<eScriptCommands Command, auto* CommandFn>
 inline OpcodeResult CommandParser(CRunningScript* S) {
     return detail::CollectArgsAndCall(S, Command, CommandFn);
