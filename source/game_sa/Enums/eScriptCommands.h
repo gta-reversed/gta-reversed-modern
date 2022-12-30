@@ -2916,7 +2916,12 @@ enum eScriptCommands {
     COMMAND_HIGHEST_VANILLA_ID = COMMAND_DO_DEBUG_STUFF,
 
     //! Highest command ID that may be hooked
-    COMMAND_HIGHEST_ID_TO_HOOK = COMMAND_HIGHEST_ID
+    COMMAND_HIGHEST_ID_TO_HOOK
+#ifdef NOTSA_USE_CLEO_COMMANDS
+        = COMMAND_HIGHEST_ID
+#else
+        = COMMAND_HIGHEST_VANILLA_ID
+#endif
 };
 
 #define CASE(c) \
