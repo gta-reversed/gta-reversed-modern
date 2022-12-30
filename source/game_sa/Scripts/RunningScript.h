@@ -240,10 +240,13 @@ public:
     void SetActive(bool active)         { m_bIsActive = active; }
     void SetExternal(bool external)     { m_bIsExternal = external; }
 
-    //! Highlight an important area (Specified by 2D coordinates + an optional Z coordinate)
+    //! Highlight an important area 
     void HighlightImportantArea(CVector2D from, CVector2D to, float z = -100.f);
 
-    //! Highlight an important area (Specified by 3D coordinates)
+    //! Highlight an important area
+    void HighlightImportantArea(CRect area, float z = -100.f);
+
+    //! Highlight an important area
     void HighlightImportantArea(CVector from, CVector to);
 
     //! Read a value from at the current IP then increase IP by the number of bytes read.

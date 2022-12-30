@@ -920,6 +920,10 @@ void CRunningScript::HighlightImportantArea(CVector2D from, CVector2D to, float 
     CTheScripts::HighlightImportantArea(reinterpret_cast<int32>(this) + reinterpret_cast<int32>(m_IP), from.x, from.y, to.x, to.y, z);
 }
 
+void CRunningScript::HighlightImportantArea(CRect area, float z) {
+    HighlightImportantArea(area.GetTopLeft(), area.GetBottomRight(), z);
+}
+
 void CRunningScript::HighlightImportantArea(CVector from, CVector to) {
     HighlightImportantArea(CVector2D{ from }, CVector2D{ to }, (from.z + to.z) / 2.f);
 }
