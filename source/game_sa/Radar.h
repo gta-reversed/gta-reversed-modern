@@ -188,6 +188,8 @@ public:
     static constexpr uint32 MAX_RADAR_SPRITES = 64;
     static constexpr uint32 MAX_RADAR_TRACES = 175;
 
+    static constexpr size_t MAX_AIRSTRIP_INFOS = 4u;
+
     static inline float& m_fRadarOrientation = *(float*)0xBA8310;
 
     // original name unknown

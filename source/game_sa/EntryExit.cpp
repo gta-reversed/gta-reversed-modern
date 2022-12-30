@@ -134,3 +134,4 @@ void CEntryExit::WarpGangWithPlayer(CPed* ped) {
 // 0x43E990
 void CEntryExit::ProcessStealableObjects(CPed* ped) {
     plugin::CallMethod<0x43E990, CEntryExit*, CPed*>(this, ped);
+}

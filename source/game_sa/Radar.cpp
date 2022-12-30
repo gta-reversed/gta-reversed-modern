@@ -96,9 +96,6 @@ SpriteFileName CRadar::RadarBlipFileNames[] = {
     { "radar_spray",         nullptr }
 };
 
-eRadarTraceHeight& CRadar::legendTraceHeight = *(eRadarTraceHeight*)0xBAA350;
-uint32& CRadar::legendTraceTimer = *(uint32*)0xBAA354;
-
 constexpr float RADAR_MIN_RANGE = 180.0f;
 constexpr float RADAR_MAX_RANGE = 350.0f;
 constexpr float RADAR_MIN_SPEED = 0.3f;
