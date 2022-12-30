@@ -2,6 +2,8 @@
 #include "BoneNode_c.h"
 #include "BoneNodeManager_c.h"
 
+#include "rtslerp.h"
+
 void BoneNode_c::InjectHooks() {
     RH_ScopedClass(BoneNode_c);
     RH_ScopedCategoryGlobal(); // TODO: Change this to the appropriate category! Animation?
@@ -176,20 +178,11 @@ void BoneNode_c::Limit(float blend) {
 
 // 0x616E30
 void BoneNode_c::BlendKeyframe(float blend) {
-    if (blend <= 0.0f || blend >= 1.0f) {
-        m_InterpFrame->orientation = m_Orientation;
-        return;
-    }
-
-    RtQuatSlerpCache sCache;
-    RtQuatSetupSlerpCache(reinterpret_cast<RtQuat*>(&m_InterpFrame), reinterpret_cast<RtQuat*>(&m_Orientation), &sCache);
-
-    m_InterpFrame->orientation = CQuaternion{
-        std::lerp(sCache.raFrom.imag.x, sCache.raTo.imag.x, blend),
-        std::lerp(sCache.raFrom.imag.y, sCache.raTo.imag.y, blend),
-        std::lerp(sCache.raFrom.imag.z, sCache.raTo.imag.z, blend),
-        std::lerp(sCache.raFrom.real, sCache.raTo.real, blend)
-    };
+    auto src = m_InterpFrame->orientation;
+    auto dst = m_Orientation;
+    RtQuatSlerpCache cache;
+    RtQuatSetupSlerpCache(src.AsRtQuat(), dst.AsRtQuat(), &cache);
+    RtQuatSlerp(m_InterpFrame->orientation.AsRtQuat(), src.AsRtQuat(), dst.AsRtQuat(), blend, &cache);
 }
 
 // 0x616CB0

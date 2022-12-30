@@ -108,6 +108,9 @@ public:
     CQuaternion operator-() const {
         return { -x, -y, -z, -w };
     }
+
+    // NOTSA
+    RtQuat* AsRtQuat() { return (RtQuat*)this; }
 };
 
 VALIDATE_SIZE(CQuaternion, 0x10);
