@@ -111,8 +111,7 @@ void CCutsceneObject::PreRender_Reversed() {
                     auto* animData = RpClumpGetAnimBlendClumpData(m_pRwClump);
                     auto* morphTarget = RpGeometryGetMorphTarget(RpAtomicGetGeometry(firstAtomic), 0);
                     auto* sphere = RpMorphTargetGetBoundingSphere(morphTarget);
-                    sphere->center = animData->m_Frames->m_pIFrame->translation;
-                }
+                    sphere->center = animData->m_Frames->m_pIFrame->translation;                }
             }
         }
     }

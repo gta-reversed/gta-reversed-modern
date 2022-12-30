@@ -39,12 +39,12 @@ VALIDATE_SIZE(LimbMovementInfo, 0x18);
 
 class CPedIK {
 public:
-    CPed*           m_pPed;
-    LimbOrientation m_TorsoOrien;
-    float           m_fSlopePitch;
-    float           m_fSlopePitchLimitMult;
-    float           m_fSlopeRoll;
-    float           m_fBodyRoll;
+    CPed* m_pPed;
+    LimbOrientation m_TorsoOrient;
+    float m_fSlopePitch;
+    float m_fSlopePitchLimitMult;
+    float m_fSlopeRoll;
+    float m_fBodyRoll;
 
     union {
         uint32 m_nFlags;
@@ -57,20 +57,29 @@ public:
         };
     };
 
-    static RwV3d& XaxisIK;
-    static RwV3d& YaxisIK;
-    static RwV3d& ZaxisIK;
+    static inline CVector XaxisIK = CVector(1.0f, 0.0f, 0.0f); // 0x8D232C
+    static inline CVector YaxisIK = CVector(0.0f, 1.0f, 0.0f); // 0x8D2338
+    static inline CVector ZaxisIK = CVector(0.0f, 0.0f, 1.0f); // 0x8D2344
 
-public:
+    static inline LimbMovementInfo& ms_torsoInfo = *(LimbMovementInfo*)0x8D22E4;
+
+    CPedIK() = default;
     explicit CPedIK(CPed* ped);
 
-    void                RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation, bool flag);
-    bool                PointGunInDirection(float Z_angle, float arg2, bool flag, float arg4);
-    void                PointGunAtPosition(const CVector& posn, float arg2);
-    static RwMatrix*    GetWorldMatrix(RwFrame* frame, RwMatrix* transformMat);
+    CPedIK* Constructor(CPed* ped);
 
-    static MoveLimbResult MoveLimb(LimbOrientation& TorsoOrien, float yaw, float pitch, LimbMovementInfo& LimbMoveInfo);
-    static MoveLimbResult MoveLimb(LimbOrientation& TorsoOrien, float yaw, float pitch, LimbMovementInfo& LimbMoveInfo, float fNormalize);
+    // funcs
+    void RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation, bool flag);
+    void RotateTorsoForArm(CVector const& vec);
+    bool PointGunInDirection(float Z_angle, float arg2, bool flag, float arg4);
+    void PointGunAtPosition(CVector const& posn, float arg2);
+    void PitchForSlope();
+    static RwMatrixTag* GetWorldMatrix(RwFrame* frame, RwMatrixTag* transformMat);
+
+    MoveLimbResult MoveLimb(LimbOrientation& TorsoOrien, float yaw, float pitch, LimbMovementInfo& LimbMoveInfo);
+    MoveLimbResult MoveLimb(LimbOrientation& TorsoOrien, float yaw, float pitch, LimbMovementInfo& LimbMoveInfo, float fNormalize);
+
+    static void InjectHooks();
 };
 
 VALIDATE_SIZE(CPedIK, 0x20);
