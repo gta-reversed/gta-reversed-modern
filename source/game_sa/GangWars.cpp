@@ -177,7 +177,7 @@ void CGangWars::CheerVictory() {
     };
 
     for (auto i = 0u; i < std::size(zoneNames); i++) {
-        if (!_stricmp(pZoneToFightOver->m_szTextKey, zoneNames[i])) {
+        if (!_stricmp(pZoneToFightOver->m_TextLabel, zoneNames[i])) {
             nearestMember->Say(208 + i);
             break;
         }
