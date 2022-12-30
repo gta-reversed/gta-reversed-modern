@@ -229,8 +229,8 @@ public:
     uint32 FindYRegionForCoors(float y);
     float FindXCoorsForRegion(uint32 regionX);
     float FindYCoorsForRegion(uint32 regionY);
-    CNodeAddress FindNodeClosestToCoors(CVector pos, int32 nodeType, float maxDistance, uint16 unk2, int32 unk3, uint16 unk4,
-                                         uint16 bBoatsOnly, int32 unk6);
+    CNodeAddress FindNodeClosestToCoors(CVector pos, int32 nodeType = 1, float maxDistance = 999999.88f, uint16 unk2 = 1, int32 unk3 = 0, uint16 unk4 = 0,
+                                         uint16 bBoatsOnly = 0, int32 unk6 = 0);
     void MarkRoadNodeAsDontWander(float x, float y, float z);
     void RecordNodesClosestToCoors(CVector pos, uint8 nodeType, int count, CNodeAddress* outAddresses, float maxDist, bool, bool, bool, bool);
     void Find2NodesForCarCreation(CVector pos, CNodeAddress* outAddress1, CNodeAddress* outAddress2, bool bLowTraffic);
