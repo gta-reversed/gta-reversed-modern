@@ -49,6 +49,7 @@ public:
         return mat;
     }
 
+    //! Get a matrix calculated that has it's `up` vector set to `up` (all other directions are calculated based on it)
     static CMatrix WithUp(const CVector& up, const CVector& pos = {}) {
         const auto zaxis = CVector::ZAxisVector();
 
@@ -64,7 +65,6 @@ public:
             up
         };
     }
-
 private:
     // RwV3d-like:
     CVector m_right;        // 0x0

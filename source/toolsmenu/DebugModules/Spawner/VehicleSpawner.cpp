@@ -4,7 +4,7 @@
 #include <imgui_stdlib.h>
 #include <imgui_internal.h>
 
-#include "VehicleDebugModule.h"
+#include "VehicleSpawner.h"
 
 #include "CDebugMenuToolInput.h"
 

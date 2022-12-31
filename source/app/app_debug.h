@@ -1,8 +1,15 @@
 #pragma once
 #include "common.h"
 
-#define VERIFY_IMPL(expr, ...) expr
-#define VERIFY VERIFY_IMPL
+namespace notsa {
+namespace detail {
+static void VerifyMacroImpl(bool result) {
+    assert(result); // In release mode this won't do anything
+}
+};
+};
+
+#define VERIFY notsa::detail::VerifyMacroImpl
 
 #ifdef _DEBUG
 namespace notsa {

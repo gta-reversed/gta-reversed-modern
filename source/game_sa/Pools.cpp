@@ -100,7 +100,7 @@ void CPools::CheckPoolsEmpty() {
         const auto& objPos = obj->GetPosition();
         printf("Offending object: MI:%d Coors:%f %f %f\n", obj->m_nModelIndex, objPos.x, objPos.y, objPos.z);
     }
-    printf("pools have been cleared \n");
+    DEV_LOG("Pools have been cleared!");
 }
 
 // 0x550050
