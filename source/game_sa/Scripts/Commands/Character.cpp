@@ -2,6 +2,7 @@
 
 #include "./Commands.hpp"
 #include <CommandParser/Parser.hpp>
+#include <extensions/Shapes/AngledRect.hpp>
 
 #include <TaskTypes/TaskComplexDie.h>
 #include <TaskTypes/TaskSimpleCarSetPedInAsDriver.h>
@@ -42,6 +43,13 @@ auto GetPedOrItsVehicle(CPed& ped) -> CPhysical& {
         return *ped.m_pVehicle;
     }
     return ped;
+}
+
+template<typename T>
+void HandleEntityMissionCleanup(CRunningScript& S, T& entity) {
+    if (S.m_bUseMissionCleanup) {
+        CTheScripts::MissionCleanUp.AddEntityToList(entity);
+    }
 }
 
 void SetCharProofs(CPed& ped, bool bullet, bool fire, bool explosion, bool collision, bool melee) {
@@ -212,7 +220,7 @@ bool LocateChar3D(CRunningScript& S, CPed& ped, CVector pos, CVector radius, boo
     if (highlightArea) { // Highlight area every time
         S.HighlightImportantArea(bb.m_vecMin, bb.m_vecMax);
     }
-    if (!DoLocateCharChecks(ped, mustBeOnFoot, highlightArea, mustBeStopped)) {
+    if (!DoLocateCharChecks(ped, mustBeInCar, mustBeOnFoot, mustBeStopped)) {
         return false;
     }
     return bb.IsPointInside(GetCharCoordinates(ped));
@@ -227,7 +235,7 @@ bool LocateChar2D(CRunningScript& S, CPed& ped, CVector2D pos, CVector2D radius,
     if (highlightArea) { // Highlight area every time
         S.HighlightImportantArea(rect.GetTopLeft(), rect.GetBottomRight());
     }
-    if (!DoLocateCharChecks(ped, mustBeOnFoot, highlightArea, mustBeStopped)) {
+    if (!DoLocateCharChecks(ped, mustBeInCar, mustBeOnFoot, mustBeStopped)) {
         return false;
     }
     if (CTheScripts::DbgFlag) {
@@ -366,30 +374,134 @@ auto LocateCharInCarCar3D(CRunningScript& S, CPed& ped, CVehicle& veh, CVector r
 
 // => 2D
 
-auto LocateCharAnyMeansObject2d(CRunningScript& S, CPed& ped, CObject& obj, CVector2D radius, bool highlightArea) {
+auto LocateCharAnyMeansObject2D(CRunningScript& S, CPed& ped, CObject& obj, CVector2D radius, bool highlightArea) {
     return LocateCharEntity2D(S, ped, obj, radius, highlightArea, false, false);
 }
 
-auto LocateCharOnFootObject2d(CRunningScript& S, CPed& ped, CVehicle& obj, CVector2D radius, bool highlightArea) {
+auto LocateCharOnFootObject2D(CRunningScript& S, CPed& ped, CVehicle& obj, CVector2D radius, bool highlightArea) {
     return LocateCharEntity2D(S, ped, obj, radius, highlightArea, false, true);
 }
 
-auto LocateCharInCarObject2d(CRunningScript& S, CPed& ped, CVehicle& obj, CVector2D radius, bool highlightArea) {
+auto LocateCharInCarObject2D(CRunningScript& S, CPed& ped, CVehicle& obj, CVector2D radius, bool highlightArea) {
     return LocateCharEntity2D(S, ped, obj, radius, highlightArea, true, false);
 }
 
 // => 3D
 
-auto LocateCharAnyMeansObject3d(CRunningScript& S, CPed& ped, CObject& obj, CVector radius, bool highlightArea) {
+auto LocateCharAnyMeansObject3D(CRunningScript& S, CPed& ped, CObject& obj, CVector radius, bool highlightArea) {
     return LocateCharEntity3D(S, ped, obj, radius, highlightArea, false, false);
 }
 
-auto LocateCharOnFootObject3d(CRunningScript& S, CPed& ped, CObject& obj, CVector radius, bool highlightArea) {
+auto LocateCharOnFootObject3D(CRunningScript& S, CPed& ped, CObject& obj, CVector radius, bool highlightArea) {
     return LocateCharEntity3D(S, ped, obj, radius, highlightArea, false, true);
 }
 
-auto LocateCharInCarObject3d(CRunningScript& S, CPed& ped, CObject& obj, CVector radius, bool highlightArea) {
+auto LocateCharInCarObject3D(CRunningScript& S, CPed& ped, CObject& obj, CVector radius, bool highlightArea) {
     return LocateCharEntity3D(S, ped, obj, radius, highlightArea, true, false);
+}
+
+//
+// Char, Angled Area
+//
+
+// => 2D
+
+bool IsPositionWitihinAngledArea2D_Impl(CVector2D pos, CVector2D a, CVector2D b, float widthAndDir, bool highlightArea, bool otherChecksFailed) {
+    if (otherChecksFailed) {
+        if (highlightArea) {
+            notsa::shapes::AngledRect{ a, b, widthAndDir }.HighlightWithMarkers();
+        }
+        return false;
+    }
+    else {
+        notsa::shapes::AngledRect area{ a, b, widthAndDir };
+        if (highlightArea) {
+            area.HighlightWithMarkers();
+        }
+        return area.IsPointWithin(pos);
+    }
+}
+
+bool IsPedInAngledArea2D(CPed& ped, CVector2D a, CVector2D b, float widthAndDir, bool highlightArea, bool mustBeInCar, bool mustBeOnFoot, bool mustBeStopped) {
+    return IsPositionWitihinAngledArea2D_Impl(
+        ped.GetPosition2D(),
+        a, b, widthAndDir,
+        highlightArea,
+        !DoLocateCharChecks(ped, mustBeInCar, mustBeOnFoot, mustBeStopped)
+    );
+}
+
+// IS_CHAR_IN_ANGLED_AREA_2D
+auto IsCharInAngledArea2D(CPed& ped, CVector2D a, CVector2D b, float widthAndDir, bool highlightArea) {
+    return IsPedInAngledArea2D(ped, a, b, widthAndDir, highlightArea, false, false, false);
+}
+
+// IS_CHAR_IN_ANGLED_AREA_ON_FOOT_2D
+auto IsCharInAngledAreaOnFoot2D(CPed& ped, CVector2D a, CVector2D b, float widthAndDir, bool highlightArea) {
+    return IsPedInAngledArea2D(ped, a, b, widthAndDir, highlightArea, false, true, false);
+}
+
+// IS_CHAR_IN_ANGLED_AREA_IN_CAR_2D
+auto IsCharInAngledAreaInCar2D(CPed& ped, CVector2D a, CVector2D b, float widthAndDir, bool highlightArea) {
+    return IsPedInAngledArea2D(ped, a, b, widthAndDir, highlightArea, true, false, false);
+}
+
+// IS_CHAR_STOPPED_IN_ANGLED_AREA_2D
+auto IsCharStoppedInAngledArea2D(CPed& ped, CVector2D a, CVector2D b, float widthAndDir, bool highlightArea) {
+    return IsPedInAngledArea2D(ped, a, b, widthAndDir, highlightArea, false, false, true);
+}
+
+// IS_CHAR_STOPPED_IN_ANGLED_AREA_ON_FOOT_2D
+auto IsCharStoppedInAngledAreaOnFoot2D(CPed& ped, CVector2D a, CVector2D b, float widthAndDir, bool highlightArea) {
+    return IsPedInAngledArea2D(ped, a, b, widthAndDir, highlightArea, false, true, true);
+}
+
+// IS_CHAR_STOPPED_IN_ANGLED_AREA_IN_CAR_2D
+auto IsCharStoppedInAngledAreaInCar2D(CPed& ped, CVector2D a, CVector2D b, float widthAndDir, bool highlightArea) {
+    return IsPedInAngledArea2D(ped, a, b, widthAndDir, highlightArea, true, false, true);
+}
+
+// => 3D
+
+bool IsPedInAngledArea3D(CPed& ped, CVector a, CVector b, float widthAndDir, bool highlightArea, bool mustBeInCar, bool mustBeOnFoot, bool mustBeStopped) {
+    const auto& pos = ped.GetPosition();
+    const auto [minZ, maxZ] = std::minmax(a.z, b.z);
+    return IsPositionWitihinAngledArea2D_Impl(
+        pos,
+        a, b, widthAndDir,
+        highlightArea,
+        (pos.z < minZ || pos.z > maxZ) || !DoLocateCharChecks(ped, mustBeInCar, mustBeOnFoot, mustBeStopped)
+    );
+}
+
+// IS_CHAR_IN_ANGLED_AREA_3D
+auto IsCharInAngledArea3D(CPed& ped, CVector a, CVector b, float widthAndDir, bool highlightArea) {
+    return IsPedInAngledArea3D(ped, a, b, widthAndDir, highlightArea, false, false, false);
+}
+
+// IS_CHAR_IN_ANGLED_AREA_ON_FOOT_3D
+auto IsCharInAngledAreaOnFoot3D(CPed& ped, CVector a, CVector b, float widthAndDir, bool highlightArea) {
+    return IsPedInAngledArea3D(ped, a, b, widthAndDir, highlightArea, false, true, false);
+}
+
+// IS_CHAR_IN_ANGLED_AREA_IN_CAR_3D
+auto IsCharInAngledAreaInCar3D(CPed& ped, CVector a, CVector b, float widthAndDir, bool highlightArea) {
+    return IsPedInAngledArea3D(ped, a, b, widthAndDir, highlightArea, true, false, false);
+}
+
+// IS_CHAR_STOPPED_IN_ANGLED_AREA_3D
+auto IsCharStoppedInAngledArea3D(CPed& ped, CVector a, CVector b, float widthAndDir, bool highlightArea) {
+    return IsPedInAngledArea3D(ped, a, b, widthAndDir, highlightArea, false, false, true);
+}
+
+// IS_CHAR_STOPPED_IN_ANGLED_AREA_ON_FOOT_3D
+auto IsCharStoppedInAngledAreaOnFoot3D(CPed& ped, CVector a, CVector b, float widthAndDir, bool highlightArea) {
+    return IsPedInAngledArea3D(ped, a, b, widthAndDir, highlightArea, false, true, true);
+}
+
+// IS_CHAR_STOPPED_IN_ANGLED_AREA_IN_CAR_3D
+auto IsCharStoppedInAngledAreaInCar3D(CPed& ped, CVector a, CVector b, float widthAndDir, bool highlightArea) {
+    return IsPedInAngledArea3D(ped, a, b, widthAndDir, highlightArea, true, false, true);
 }
 
 auto IsCharDead(CPed* ped) {
@@ -433,8 +545,7 @@ auto IsCharHealthGreater(CPed& ped, float health) {
     return ped.m_fHealth >= health;
 }
 
-//! Creates a character in the driver's seat of the vehicle
-CPed& CreateCharInsideCar(CRunningScript& S, CVehicle& veh, ePedType pedType, eModelID pedModel) {
+auto CreatePed(CRunningScript& S, ePedType pedType, eModelID pedModel) -> CPed& {
     const auto ped = [&]() -> CPed* {
         uint32 typeSpecificModelId = (uint32)(pedModel);
         S.GetCorrectPedModelIndexForEmergencyServiceType(pedType, &typeSpecificModelId);
@@ -445,16 +556,19 @@ CPed& CreateCharInsideCar(CRunningScript& S, CVehicle& veh, ePedType pedType, eM
         default:                return new CCivilianPed{ pedType, typeSpecificModelId };
         }
     }();
-
     ped->SetCharCreatedBy(PED_MISSION);
     ped->bAllowMedicsToReviveMe = false;
-    CTaskSimpleCarSetPedInAsDriver{ &veh, false }.ProcessPed(ped); // Make ped get into da car
     CPopulation::ms_nTotalMissionPeds++;
-
     if (S.m_bUseMissionCleanup) {
         CTheScripts::MissionCleanUp.AddEntityToList(*ped);
     }
+    return *ped;
+}
 
+//! Creates a character in the driver's seat of the vehicle
+CPed& CreateCharInsideCar(CRunningScript& S, CVehicle& veh, ePedType pedType, eModelID pedModel) {
+    const auto ped = &CreatePed(S, pedType, pedModel);
+    CTaskSimpleCarSetPedInAsDriver{ &veh, false }.ProcessPed(ped); // Make ped get into da car
     return *ped;
 }
 
@@ -1059,78 +1173,83 @@ auto TaskKillCharOnFoot(CRunningScript& S, eScriptCommands opcode, CPed& ped, CP
     );
 }
 
-// IS_CHAR_IN_ANGLED_AREA_2D
-auto IsCharInAngledArea2d(CPed& ped) {
-
-}
-
-// IS_CHAR_IN_ANGLED_AREA_IN_CAR_2D
-auto IsCharInAngledAreaInCar2d(CPed& ped) {
-
-}
-
-// IS_CHAR_IN_ANGLED_AREA_3D
-auto IsCharInAngledArea3d(CPed& ped) {
-
-}
-
-// IS_CHAR_IN_ANGLED_AREA_ON_FOOT_3D
-auto IsCharInAngledAreaOnFoot3d(CPed& ped) {
-
-}
-
-// IS_CHAR_IN_ANGLED_AREA_IN_CAR_3D
-auto IsCharInAngledAreaInCar3d(CPed& ped) {
-
-}
-
 // IS_CHAR_IN_TAXI
 auto IsCharInTaxi(CPed& ped) {
-
+    if (ped.IsInVehicle()) {
+        switch ((eModelID)(ped.m_pVehicle->m_nModelIndex)) {
+        case MODEL_CABBIE:
+        case MODEL_TAXI:
+            return true;
+        }
+    }
+    return false;
 }
 
 // LOAD_CHAR_DECISION_MAKER
-auto LoadCharDecisionMaker(CPed& ped) {
-
+auto LoadCharDecisionMaker(CRunningScript& S, CPed& ped, int32 type) { // TODO: return ScriptThing<CDecisionMaker>
+    char pedDMName[1024];
+    CDecisionMakerTypesFileLoader::GetPedDMName(type, pedDMName);
+    const auto id = CDecisionMakerTypesFileLoader::LoadDecisionMaker(pedDMName, DECISION_ON_FOOT, S.m_bUseMissionCleanup);
+    const auto handle = CTheScripts::GetNewUniqueScriptThingIndex(id, SCRIPT_THING_DECISION_MAKER);
+    if (S.m_bUseMissionCleanup) {
+        CTheScripts::MissionCleanUp.AddEntityToList(handle, MISSION_CLEANUP_ENTITY_TYPE_DECISION_MAKER);
+    }
+    return handle;
 }
 
 // SET_CHAR_DECISION_MAKER
-auto SetCharDecisionMaker(CPed& ped) {
-
+auto SetCharDecisionMaker(CPed& ped, int32 scriptHandleOfDM) { // TODO: Use `ScriptThing<CDecisionMaker>` instead of `int32` for `scriptHandleOfDM`
+    ped.GetIntelligence()->SetPedDecisionMakerType(
+        scriptHandleOfDM == -1
+            ? -1
+            : CTheScripts::GetActualScriptThingIndex(scriptHandleOfDM, SCRIPT_THING_DECISION_MAKER)
+    );
 }
 
 // IS_CHAR_PLAYING_ANIM
-auto IsCharPlayingAnim(CPed& ped) {
-
+auto IsCharPlayingAnim(CPed& ped, const char* animName) {
+    return RpAnimBlendClumpGetAssociation(ped.m_pRwClump, animName) != nullptr;
 }
 
 // SET_CHAR_ANIM_PLAYING_FLAG
-auto SetCharAnimPlayingFlag(CPed& ped) {
-
+auto SetCharAnimPlayingFlag(CPed& ped, const char* animName, bool started) {
+    if (const auto anim = RpAnimBlendClumpGetAssociation(ped.m_pRwClump, animName)) {
+        anim->SetFlag(ANIMATION_STARTED, started);
+    }
 }
 
 // GET_CHAR_ANIM_CURRENT_TIME
-auto GetCharAnimCurrentTime(CPed& ped) {
-
+auto GetCharAnimCurrentTime(CPed& ped, const char* animName) {
+    if (const auto anim = RpAnimBlendClumpGetAssociation(ped.m_pRwClump, animName)) {
+        return anim->m_fCurrentTime / anim->m_pHierarchy->m_fTotalTime;
+    }
+    return 0.f;
 }
 
 // SET_CHAR_ANIM_CURRENT_TIME
-auto SetCharAnimCurrentTime(CPed& ped) {
-
+auto SetCharAnimCurrentTime(CPed& ped, const char* animName, float progress) {
+    if (const auto anim = RpAnimBlendClumpGetAssociation(ped.m_pRwClump, animName)) {
+        anim->SetCurrentTime(progress * anim->m_pHierarchy->m_fTotalTime);
+    }
 }
 
-// SET_CHAR_COLLISION
-auto SetCharCollision(CPed& ped) {
-
+// SET_CHAR_COLLISION - flags
+auto SetCharCollision(CPed& ped, bool bUsesCollision) {
+    ped.m_bUsesCollision = bUsesCollision;
 }
 
-// GET_CHAR_ANIM_TOTAL_TIME
-auto GetCharAnimTotalTime(CPed& ped) {
-
+// GET_CHAR_ANIM_TOTAL_TIME (In seconds)
+auto GetCharAnimTotalTime(CPed& ped, const char* animName) {
+    if (const auto anim = RpAnimBlendClumpGetAssociation(ped.m_pRwClump, animName)) {
+        return anim->m_pHierarchy->m_fTotalTime * 1000.f;
+    }
+    return 0.f;
 }
 
 // CREATE_CHAR_AT_ATTRACTOR
-auto CreateCharAtAttractor(CPed& ped) {
+auto CreateCharAtAttractor(CRunningScript& S, ePedType pedType, eModelID pedModel, eTaskType taskType, C2dEffect& attractor) {
+    const auto& ped = CreatePed(S, pedType, pedModel);
+
 
 }
 
