@@ -9,33 +9,47 @@
 #include "TheScripts.h"
 #include "Utility.hpp"
 #include "Rect.h"
+#include "Scripted2dEffects.h"
 
 namespace notsa {
 namespace script {
-// Script thing stuff
 namespace detail {
-template<typename T>
-inline auto GetScriptThing(uint32 index) -> T& = delete;
 
+//! Script thing bullshittery
+namespace scriptthing {
+//! Get script thing at index
+template<typename T>
+inline auto GetAt(uint32 index) -> T& = delete;
 template<>
-inline auto GetScriptThing(uint32 index) -> tScriptSphere& {
-    return CTheScripts::ScriptSphereArray[index];
-}
-
+inline auto GetAt(uint32 idx) -> tScriptSphere& { return CTheScripts::ScriptSphereArray[idx]; }
 template<>
-inline auto GetScriptThing(uint32 index) -> tScriptEffectSystem& {
-    return CTheScripts::ScriptEffectSystemArray[index];
-}
+inline auto GetAt(uint32 idx) -> tScriptEffectSystem& { return CTheScripts::ScriptEffectSystemArray[idx]; }
+template<>
+inline auto GetAt(uint32 idx) -> tScriptSearchlight& { return CTheScripts::ScriptSearchLightArray[idx]; }
+template<>
+inline auto GetAt(uint32 idx) -> tScriptSequence&   { return CTheScripts::ScriptSequenceTaskArray[idx]; }
+template<>
+inline auto GetAt(uint32 idx) -> tScriptCheckpoint& { return CTheScripts::ScriptCheckpointArray[idx]; }
+template<>
+inline auto GetAt(uint32 idx) -> C2dEffect& { return CScripted2dEffects::ms_effects[idx]; }
 
+//! Get ID of a thing at a given index
 template<typename T>
-concept ScriptThing = requires(uint32 index) {
-    GetScriptThing<std::decay_t<T>>(index);
-};
+inline auto GetId(uint32 idx) -> uint32 { return GetAt<T>(idx).GetId(); }
+template<>
+inline auto GetId<C2dEffect>(uint32 idx) -> uint32 { return CScripted2dEffects::ScriptReferenceIndex[idx]; }
 
+//! Get if a script thing is active
 template<typename T>
-inline uint16 GetScriptThingID(T& thing) {
-    return thing.GetId();
-}
+inline auto IsActive(uint32 idx) -> bool { return GetAt<T>(idx).IsActive(); }
+template<>
+inline auto IsActive<C2dEffect>(uint32 idx) -> bool { return CScripted2dEffects::ms_activated[idx]; }
+
+
+//! Check if `T` is a script thing
+template<typename T>
+inline constexpr auto is_script_thing_v = requires(uint32 index) { GetAt<T>(index); };
+}; // namespace scriptthing
 };
 
 namespace detail {
@@ -218,23 +232,27 @@ inline T Read(CRunningScript* S) {
         return S;
     } else if constexpr (std::is_same_v<Y, CPlayerInfo>) {
         return &FindPlayerInfo(Read<int32>(S));
-    } else if constexpr (detail::ScriptThing<Y>) {
+    } else if constexpr (detail::scriptthing::is_script_thing_v<Y>) {
         // Read information (packed 2x16 int)
         const auto info = Read<uint32>(S);
-        if (info == (uint32)(-1)) {
-            return nullptr; // Not quite sure how normal this is, but okay
+        if (info == (uint32)(-1)) { // Invalid handle, may happen if a function returned it (and they didn't handle it properly)
+            return nullptr; 
         }
 
         // Extract index and (expected) ID of the object
         const auto index = (uint16)(HIWORD(info)), id = (uint16)(LOWORD(info));
 
-        // Get the object, and check if it's ID is what we expect
-        Y& thing = detail::GetScriptThing<Y>(index);
-        if (detail::GetScriptThingID(thing) != id) {
-            return nullptr; // ID changed, totally normal, object was reused
+        // Check if the object is active (If not, it has been reused/deleted)
+        if (!detail::scriptthing::IsActive<Y>(index)) {
+            return nullptr;
         }
 
-        return &thing;
+        // Check if ID is what we expect (If not, that means that the object has been reused)
+        if (detail::scriptthing::GetId<Y>(index) != id) {
+            return nullptr;
+        }
+
+        return &detail::scriptthing::GetAt<Y>(index);
     }
     // If there's an error like "function must return a value" here,
     // that means that no suitable branch was found for `T`

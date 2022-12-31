@@ -83,13 +83,15 @@ inline void StoreArg(CRunningScript* S, CompareFlagUpdate flag) {
 //! Store a pooled type (CPed, CVehicle, etc) - It pushes a handle of the entity to the script
 template<detail::PooledType T>
 inline void StoreArg(CRunningScript* S, const T& value) {
-    const auto Store = [&](auto ptr) { StoreArg(S, detail::PoolOf<std::remove_cvref_t<T>>().GetRef(ptr)); };
+    const auto StoreEntity = [&](auto ptr) { StoreArg(S, detail::PoolOf<std::remove_cvref_t<T>>().GetRef(ptr)); };
     if constexpr (std::is_pointer_v<T>) {
         if (value) { // As always, pointers might be null, so we have to check.
-            Store(value);
+            StoreEntity(value);
+        } else {
+            StoreArg(S, -1); // If null, store `-1` (indicates an invalid handle, it is handled properly!)
         }
     } else { // References are never invalid
-        Store(&value);
+        StoreEntity(&value);
     }
 }
 

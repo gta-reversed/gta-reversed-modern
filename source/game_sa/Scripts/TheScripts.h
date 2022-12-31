@@ -79,8 +79,11 @@ struct tScriptCheckpoint {
         m_Checkpoint = nullptr;
     }
 
-    //! Script thing ID
-    auto GetId() { return m_nId; }
+    //! Get script thing ID
+    auto GetId()    const { return m_nId; }
+
+    //! If `*this` is currently in use
+    auto IsActive() const { return m_bUsed; }
 };
 VALIDATE_SIZE(tScriptCheckpoint, 0x8);
 
@@ -95,8 +98,11 @@ struct tScriptEffectSystem {
         m_pFxSystem = nullptr;
     }
 
-    // Script thing ID
-    auto GetId() { return m_nId; }
+    //! Get script thing ID
+    auto GetId()    const { return m_nId; }
+
+    //! If `*this` is currently in use
+    auto IsActive() const { return m_bUsed; }
 };
 VALIDATE_SIZE(tScriptEffectSystem, 0x8);
 
@@ -109,8 +115,11 @@ struct tScriptSequence {
         m_nId   = 1;
     }
 
-    //! Script thing ID
-    auto GetId() { return m_nId; }
+    //! Get script thing ID
+    auto GetId()    const { return m_nId; }
+
+    //! If `*this` is currently in use
+    auto IsActive() const { return m_bUsed; }
 };
 VALIDATE_SIZE(tScriptSequence, 0x4);
 
@@ -227,6 +236,9 @@ struct tScriptSearchlight {
 
     //! Script thing ID
     auto GetId() { return m_nId; }
+
+    //! If `*this` is currently in use
+    auto IsActive() const { return m_bUsed; }
 };
 VALIDATE_SIZE(tScriptSearchlight, 0x7C);
 
@@ -254,8 +266,11 @@ struct tScriptSphere {
         m_fRadius   = 0.0f;
     }
 
-    // Script thing ID
-    auto GetId() { return m_nUniqueId; }
+    //! Get script thing ID
+    auto GetId()    const { return m_nUniqueId; }
+
+    //! If `*this` is currently in use
+    auto IsActive() const { return m_bUsed; }
 };
 VALIDATE_SIZE(tScriptSphere, 0x18);
 
