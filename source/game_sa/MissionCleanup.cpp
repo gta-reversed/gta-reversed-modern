@@ -64,3 +64,11 @@ void CMissionCleanup::AddEntityToList(CPed& ped) {
 void CMissionCleanup::AddEntityToList(CVehicle& veh) {
     return AddEntityToList(GetVehiclePool()->GetRef(&veh), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
 }
+
+void CMissionCleanup::RemoveEntityFromList(CPed& ped) {
+    return RemoveEntityFromList(GetPedPool()->GetRef(&ped), MISSION_CLEANUP_ENTITY_TYPE_PED);
+}
+
+void CMissionCleanup::RemoveEntityFromList(CVehicle& veh) {
+    return RemoveEntityFromList(GetVehiclePool()->GetRef(&veh), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
+}

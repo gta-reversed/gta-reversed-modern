@@ -74,10 +74,18 @@ auto& PoolOf() { return *GetEventPool(); }
 
 /*!
 * Struct used to return multiple values from a script function.
-* Eg.: MultiRet<int, int> => Push 2 ints using `StoreParameters`
+* Eg.: MultiRet<int, int> => Should push 2 ints (Using `StoreArg`)
+* Don't use this directly, use `return_multiple` instead (Unless you have to fwd. declare the function or smth)
 */
 template<typename... Ts>
 using MultiRet = std::tuple<Ts...>;
+
+//! Used to return multiple values from a script function, see `MultiReturn`
+template<typename... Ts>
+constexpr auto return_multiple(Ts&&... args) {
+    return MultiRet<Ts...>{args...};
+}
+
 //struct MultiRet : public std::tuple<Ts...> {
 //    using std::tuple::tuple;
 //};

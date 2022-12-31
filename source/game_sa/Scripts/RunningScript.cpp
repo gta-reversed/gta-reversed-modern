@@ -63,7 +63,6 @@ void CRunningScript::InjectHooks() {
     RH_ScopedInstall(GetPointerToScriptVariable, 0x464790, { .stackArguments = 1 });
     RH_ScopedInstall(DoDeathArrestCheck, 0x485A50);
     RH_ScopedInstall(SetCharCoordinates, 0x464DC0);
-    RH_ScopedInstall(GivePedScriptedTask, 0x465C20);
     RH_ScopedInstall(AddScriptToList, 0x464C00, { .stackArguments = 1 });
     RH_ScopedInstall(RemoveScriptFromList, 0x464BD0, { .stackArguments = 1 });
     RH_ScopedInstall(ShutdownThisScript, 0x465AA0, { .reversed = false });
@@ -74,6 +73,7 @@ void CRunningScript::InjectHooks() {
     RH_ScopedInstall(UpdatePC, 0x464DA0, { .stackArguments = 1 });
     RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
     RH_ScopedInstall(Process, 0x469F00);
+    RH_ScopedOverloadedInstall(GivePedScriptedTask, "OG", 0x465C20, void(CRunningScript::*)(int32, CTask*, int32));
 }
 
 //! Register our custom script command handlers
@@ -242,6 +242,10 @@ void CRunningScript::GivePedScriptedTask(int32 pedHandle, CTask* task, int32 opc
         CPedScriptedTaskRecord::ms_scriptedTasks[slot].SetAsGroupTask(ped, opcode, scriptedTask);
         delete task;
     }
+}
+
+void CRunningScript::GivePedScriptedTask(CPed* ped, CTask* task, int32 opcode) {
+    GivePedScriptedTask(GetPedPool()->GetRef(ped), task, opcode); // Must do it like this, otherwise unhooking of the original `GivePedScriptedTask` will do nothing
 }
 
 // 0x470150

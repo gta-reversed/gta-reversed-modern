@@ -54,6 +54,15 @@ static bool IsPedTypeGang(ePedType type) {
     return false;
 }
 
+inline bool IsPedTypeFemale(ePedType type) {
+    switch (type) {
+    case PED_TYPE_PROSTITUTE:
+    case PED_TYPE_CIVFEMALE:
+        return true;
+    }
+    return false;
+}
+
 enum ePedNode : int32 {
     PED_NODE_UPPER_TORSO     = 1,
     PED_NODE_HEAD            = 2,
@@ -343,7 +352,7 @@ public:
     int16               m_nMoneyCount; // Used for money pickup when ped is killed
     float               field_758;
     float               field_75C;
-    char                m_nLastWeaponDamage;
+    char                m_nLastWeaponDamage; // See eWeaponType
     CEntity*            m_pLastEntityDamage;
     int32               field_768;
 

@@ -49,7 +49,7 @@ public:
 
     CFire* StartFire(CVector pos, float size, uint8 unused, CEntity* creator, uint32 nTimeToBurn, int8 nGenerations, uint8 unused_);
     CFire* StartFire(CEntity* target, CEntity* creator, _IGNORED_ float size, _IGNORED_ uint8 arg3, uint32 time, int8 numGenerations);
-    int32 StartScriptFire(const CVector& point, CEntity* target, _IGNORED_ float arg2, _IGNORED_ uint8 arg3, int8 numGenerations, int32 size);
+    int32 StartScriptFire(const CVector& point, CEntity* target, _IGNORED_ float arg2, _IGNORED_ uint8 arg3, int8 numGenerations, int32 nStrength);
 
     void Update();
 

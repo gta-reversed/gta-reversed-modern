@@ -58,9 +58,8 @@ void CPedGeometryAnalyser::CanPedJumpObstacle(const CPed& ped, const CEntity& en
 }
 
 // 0x5F1C40
-// unused
-void CPedGeometryAnalyser::CanPedTargetPed(CPed& ped, CPed& targetPed, bool a3) {
-    assert(false);
+bool CPedGeometryAnalyser::CanPedTargetPed(CPed& ped, CPed& targetPed, bool checkDirection) {
+    return plugin::CallAndReturn<bool, 0x5F1C40>(&ped, &targetPed, checkDirection);
 }
 
 // 0x5F1B70

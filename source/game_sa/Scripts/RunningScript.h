@@ -218,6 +218,7 @@ public:
 
     static void SetCharCoordinates(CPed* ped, float x, float y, float z, bool bWarpGang, bool bOffset);
     void GivePedScriptedTask(int32 pedHandle, CTask* task, int32 opcode);
+    void GivePedScriptedTask(CPed* ped, CTask* task, int32 opcode); // NOTSA overload
 
     void AddScriptToList(CRunningScript** queueList);
     void RemoveScriptFromList(CRunningScript** queueList);

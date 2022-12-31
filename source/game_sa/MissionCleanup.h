@@ -64,9 +64,12 @@ public:
     void CheckIfCollisionHasLoadedForMissionObjects();
 
 
-    // QoL (NOTSA)
+    // QoL (NOTSA) - TODO: Use `PooledType` + some traits shit to get the `MissionCleanUpEntityType` of `T`
     void AddEntityToList(CPed& ped);
     void AddEntityToList(CVehicle& veh);
+
+    void RemoveEntityFromList(CPed& ped);
+    void RemoveEntityFromList(CVehicle& veh);
 };
 
 VALIDATE_SIZE(CMissionCleanup, 0x25C);

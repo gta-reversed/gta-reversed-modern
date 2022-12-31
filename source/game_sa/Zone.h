@@ -35,5 +35,4 @@ public:
     eZoneType  m_nType;
     eLevelName m_nLevel;
 };
-
 VALIDATE_SIZE(CZone, 0x20);
