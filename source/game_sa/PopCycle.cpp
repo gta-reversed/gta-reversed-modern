@@ -135,6 +135,7 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
         }
 
         if (highestChance == dealersChance) {
+            outPedType = PED_TYPE_DEALER;
             // 0x60FEF2:
             // Because originally there was no `return` inside the loop itself it always returned at the last viable ID.
             // we reverse the loop and just return at the first viable ID.
@@ -146,7 +147,6 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
                 }
             }
             dealersChance = 0.f;
-            outPedType = PED_TYPE_DEALER;
             continue;
         } else if (highestChance == gangChance) { // 0x60FBD0
             outPedType = PickGangToCreateMembersOf();
