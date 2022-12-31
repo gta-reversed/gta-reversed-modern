@@ -241,14 +241,17 @@ public:
     void SetActive(bool active)         { m_bIsActive = active; }
     void SetExternal(bool external)     { m_bIsExternal = external; }
 
-    //! Highlight an important area 
+    //! Highlight an important area 2D
     void HighlightImportantArea(CVector2D from, CVector2D to, float z = -100.f);
 
-    //! Highlight an important area
+    //! Highlight an important area 2D
     void HighlightImportantArea(CRect area, float z = -100.f);
 
-    //! Highlight an important area
+    //! Highlight an important area 3D
     void HighlightImportantArea(CVector from, CVector to);
+
+    //! Refer to `IsPositionWithinQuad2D` for information on how this works
+    void HighlightImportantAngledArea(uint32 id, CVector2D a, CVector2D b, CVector2D c, CVector2D d);
 
     //! Read a value from at the current IP then increase IP by the number of bytes read.
     template<typename T>

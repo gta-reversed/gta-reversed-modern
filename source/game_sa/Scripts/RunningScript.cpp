@@ -932,6 +932,10 @@ void CRunningScript::HighlightImportantArea(CVector from, CVector to) {
     HighlightImportantArea(CVector2D{ from }, CVector2D{ to }, (from.z + to.z) / 2.f);
 }
 
+void CRunningScript::HighlightImportantAngledArea(uint32 id, CVector2D a, CVector2D b, CVector2D c, CVector2D d) {
+    NOTSA_UNREACHABLE(); // Fuck this, we dont need it!
+}
+
 notsa::script::CommandHandlerFunction& CRunningScript::CustomCommandHandlerOf(eScriptCommands command) {
     return s_CustomCommandHandlerTable[(size_t)(command)];
 }
