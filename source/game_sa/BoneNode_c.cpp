@@ -244,31 +244,15 @@ void BoneNode_c::AddChild(BoneNode_c* children) {
 
 // 0x616CD0
 void BoneNode_c::CalcWldMat(const RwMatrix* boneMatrix) {
-    RwMatrix math;
+    RwMatrix rotMatrix = [this] {
+        CMatrix mat{};
+        mat.SetRotate(m_Orientation);
+        mat.GetPosition() = m_Pos;
+        return mat.ToRwMatrix();
+    }();
 
-    float dst = 2.0f / (sq(m_Orientation.x) + sq(m_Orientation.y) + sq(m_Orientation.z) + sq(m_Orientation.w));
-
-	math.right = {
-                    1.0f - ((m_Orientation.y * (m_Orientation.y * dst)) + (m_Orientation.z + (m_Orientation.z * dst))),
-                    (m_Orientation.x * (m_Orientation.y * dst)) + (m_Orientation.w * (m_Orientation.z * dst)),
-                    (m_Orientation.z * (m_Orientation.x * dst)) - (m_Orientation.w * (m_Orientation.y * dst))
-    };
-
-    math.up = {
-                    (m_Orientation.x * (m_Orientation.y * dst)) - (m_Orientation.w * (m_Orientation.z * dst)),
-                    1.0f - ((m_Orientation.z + (m_Orientation.z * dst)) + (m_Orientation.x * (m_Orientation.x * dst))),
-                    (m_Orientation.y * (m_Orientation.z * dst)) + (m_Orientation.w * (m_Orientation.x * dst))
-    };
-    math.at = {
-                    (m_Orientation.z * (m_Orientation.x * dst)) + (m_Orientation.w * (m_Orientation.y * dst)),
-                    (m_Orientation.y * (m_Orientation.z * dst)) - (m_Orientation.w * (m_Orientation.x * dst)),
-                    1.0f - ((m_Orientation.x * (m_Orientation.x * dst)) + (m_Orientation.y * (m_Orientation.y * dst)))
-    };
-
-    rwMatrixSetFlags(&math, rwMATRIXTYPEORTHONORMAL);
-    math.pos = m_Pos;
-
-    RwMatrixMultiply(&m_WorldMat, &math, boneMatrix);
+    rwMatrixSetFlags(&rotMatrix, rwMATRIXTYPEORTHONORMAL);
+    RwMatrixMultiply(&m_WorldMat, &rotMatrix, boneMatrix);
 
     for (auto bone = m_Childs.GetHead(); bone; bone = m_Childs.GetNext(bone)) {
         bone->CalcWldMat(&m_WorldMat);
