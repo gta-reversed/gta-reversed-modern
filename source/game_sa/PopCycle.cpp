@@ -262,7 +262,7 @@ bool CPopCycle::PedIsAcceptableInCurrentZone(int32 modelIndex) {
 ePopcycleGroup CPopCycle::PickARandomGroupOfOtherPeds() {
     auto rndPerc = (uint8)CGeneral::GetRandomNumberInRange(0.f, 100.f);
     for (auto [grpIdx, grpPerc] : notsa::enumerate(m_nPercTypeGroup[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_pCurrZoneInfo->zonePopulationType])) {
-        if (rndPerc >= grpPerc) {
+        if (rndPerc < grpPerc) {
             return (ePopcycleGroup)grpIdx;
         }
         rndPerc -= grpPerc;
@@ -277,13 +277,12 @@ eModelID CPopCycle::PickPedMIToStreamInForCurrentZone() {
         const auto npeds         = CPopulation::GetNumPedsInGroup(pedGrpId);
         auto&      nextPedToLoad = CStreaming::ms_NextPedToLoadFromGroup[pedGrpId];
         for (auto p = 0; p < npeds; p++) {
+            nextPedToLoad = (nextPedToLoad + 1) % npeds;
             const auto modelId = (eModelID)CPopulation::GetPedGroupModelId(pedGrpId, nextPedToLoad);
-            nextPedToLoad      = (nextPedToLoad + 1) % npeds;
 
-            if (notsa::contains(CStreaming::ms_pedsLoaded, modelId)) {
-                if (IsRaceAllowedInCurrentZone(modelId)) {
-                    return modelId;
-                }
+            if (!notsa::contains(CStreaming::ms_pedsLoaded, modelId) && IsRaceAllowedInCurrentZone(modelId)) {
+                // Return a non-loaded allowed model.
+                return modelId;
             }
         }
     }
