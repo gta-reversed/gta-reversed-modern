@@ -14,7 +14,7 @@ void CVector2D::InjectHooks() {
     RH_ScopedCategory("Core");
 
     RH_ScopedInstall(Magnitude, 0x420860);
-    RH_ScopedInstall(Normalise, 0x44E480);
+    //RH_ScopedInstall(Normalise, 0x44E480); - Added extra parameter, must unhook
     RH_ScopedInstall(operator=, 0x43E110);
 }
 
@@ -49,6 +49,10 @@ CVector2D CVector2D::RotatedBy(float deg) const {
     };
 }
 
-CVector2D CVector2D::GetPerp() const {
+CVector2D CVector2D::GetPerpRight() const {
     return { y, -x }; // `RotatedBy(-PI / 2)` done manually, rotate by +PI/2 would be `{-y, x}`
+}
+
+CVector2D CVector2D::GetPerpLeft() const {
+    return { -y, x };
 }
