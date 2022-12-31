@@ -23,13 +23,21 @@ public:
 
     static void InjectHooks();
 
-    /// Normalize this vector in-place
-    void  Normalise();
+    /*!
+    * @brief Normalize this vector in-place
+    *
+    * @param [opt, out, notsa] outMag The magnitude of the vector
+    */
+    void Normalise(float* outMag = nullptr);
 
-    /// Get a normalized copy of this vector
-    auto Normalized() const {
+    /*!
+    * @brief Get a normalized copy of this vector
+    *
+    * @param [opt, out] mag The magnitude of the vector
+    */
+    auto Normalized(float* outMag = nullptr) const {
         CVector2D cpy = *this;
-        cpy.Normalise();
+        cpy.Normalise(outMag);
         return cpy;
     }
 
