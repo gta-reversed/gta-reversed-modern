@@ -116,9 +116,14 @@ public:
     //! Get a vector with the same magnitude as `*this` but rotated by `radians` (Interval: [0, 2PI])
     CVector2D RotatedBy(float radians) const;
 
-    //! Get vector perpendicular to `*this` (Same as `*this` rotated by -90)
-    //! This sometimes is also called a 2D cross product (https://stackoverflow.com/questions/243945)
-    CVector2D GetPerp() const;
+    //! Get vector perpendicular to `*this` on the right side (Same direction `*this` rotated by -90)
+    //! Also see `GetPerpLeft` and `RotatedBy`
+    //! (This sometimes is also called a 2D cross product https://stackoverflow.com/questions/243945 )
+    CVector2D GetPerpRight() const;
+
+    //! Get vector perpendicular to `*this` on the left side (Same direction `*this` rotated by 90)
+    //! Also see `GetPerpRight` and `RotatedBy`
+    CVector2D GetPerpLeft() const;
 };
 
 constexpr inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {
