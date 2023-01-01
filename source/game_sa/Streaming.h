@@ -214,10 +214,14 @@ public:
     static int32& ms_lastCullZone;
     static uint16& ms_loadedGangCars;
     static uint16& ms_loadedGangs;
-    static int32& ms_numPedsLoaded;
 
-    //! Currently loaded peds (For/from ped groups)
+private:
+    //! Currently loaded peds (For/from ped groups) - Prefer use `GetLoadedPeds()` to access.
     static inline eModelID(&ms_pedsLoaded)[8] = *(eModelID(*)[8])0x8E4C00;
+
+    //! Number of active values in `ms_pedsLoaded`
+    static inline uint32& ms_numPedsLoaded = *reinterpret_cast<uint32*>(0x8E4BB0);
+public:
 
     /*!
     * Contains the next slot, that is, index at which the next model to load of a group is.
@@ -391,6 +395,5 @@ public:
     static CStreamingInfo& GetInfo(int32 modelId) { assert(modelId >= 0); return ms_aInfoForModel[modelId]; }
     static bool IsRequestListEmpty() { return ms_pEndRequestedList->GetPrev() == ms_pStartRequestedList; }
     static ptrdiff_t GetModelFromInfo(const CStreamingInfo* info) { return info - CStreaming::ms_aInfoForModel; }
+    static auto GetLoadedPeds() { return std::span{ ms_pedsLoaded, ms_numPedsLoaded }; }
 };
-
-extern RwStream& gRwStream;
