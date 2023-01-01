@@ -209,8 +209,8 @@ void* CPedAttractorManager::GetPedUsingEffect(const C2dEffect* effect, const CEn
 }
 
 // 0x5EBE50
-void* CPedAttractorManager::GetPedUsingEffect(const C2dEffect* effect, const CEntity* entity) {
-    return plugin::CallMethodAndReturn<void*, 0x5EBE50, CPedAttractorManager*, const C2dEffect*, const CEntity*>(this, effect, entity);
+CPed* CPedAttractorManager::GetPedUsingEffect(const C2dEffect* effect, const CEntity* entity) {
+    return plugin::CallMethodAndReturn<CPed*, 0x5EBE50, CPedAttractorManager*, const C2dEffect*, const CEntity*>(this, effect, entity);
 }
 
 // 0x5EB7B0
