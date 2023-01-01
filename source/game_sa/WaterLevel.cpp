@@ -21,7 +21,7 @@ void CWaterLevel::InjectHooks() {
     RH_ScopedGlobalInstall(RenderFlatWaterRectangle, 0x6EBEC0);
 
     RH_ScopedGlobalInstall(SplitWaterRectangleAlongXLine, 0x6E73A0);
-    RH_ScopedGlobalInstall(SplitWaterRectangleAlongYLine, 0x6ED6D0);
+    RH_ScopedGlobalInstall(SplitWaterRectangleAlongYLine, 0x6ED6D0, { .enabled = false }); // Disbled by default because in some occasions it causes a visual glitch
 
     RH_ScopedGlobalInstall(PreRenderWater, 0x6EB710);
     RH_ScopedGlobalInstall(MarkQuadsAndPolysToBeRendered, 0x6E5810);
@@ -546,6 +546,12 @@ void CWaterLevel::SplitWaterRectangleAlongYLine(int32 splitAtY, int32 minX, int3
 
     const auto P14 = lerp(P1, P4, t);
     const auto P23 = lerp(P2, P3, t);
+
+    // Pirulax:
+    // There's a visual glitch caused by (presumeably) bad interpolation of P's
+    // Original code seemingly does it a little differently (IIRC they use P13 (Instead of P14) and P24 (instead of P23))
+    // It doesn't make a lot of sense so I did it this way
+    // (And the visual glitch is presumeably because they fucked it up somewhere else too, so it looked correct)
 
     // Top
     RenderWaterRectangle(
