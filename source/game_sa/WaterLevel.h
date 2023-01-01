@@ -265,11 +265,29 @@ public:
     static void SetUpWaterFog(int32 a1, int32 a2, int32 a3, int32 a4);
     static void RenderWakeSegment(const CVector2D& a1, const CVector2D& a2, const CVector2D& a3, const CVector2D& a4, const float& widthA, const float& widthB, const float& alphaA, const float& alphaB, const float& wakeZ);
     static void FindNearestWaterAndItsFlow();
-    static bool GetWaterLevelNoWaves(float x, float y, float z, float * pOutWaterLevel, float * fUnkn1, float * fUnkn2);
+    static bool GetWaterLevelNoWaves(CVector pos, float * pOutWaterLevel, float * fUnkn1, float * fUnkn2);
     static void RenderWaterFog();
     static void CalculateWavesOnlyForCoordinate(int32 x, int32 y, float lowFreqMult, float midHighFreqMult, float& outWave, float& colorMult, float& glare, CVector& vecNormal);
     static void MarkQuadsAndPolysToBeRendered(int32 blockX, int32 blockY, bool isInInterior);
     static void BlockHit(int32 X, int32 Y);
+
+    static void CalculateWavesOnlyForCoordinate2(
+        int32 x, int32 y,
+        float* pResultHeight, // in/out variable => in is the "water level" from `GetWaterLevelNoWaves`/out is the Z coordinate of the wave
+        float bigWavesAmpl,
+        float smallWavesAmpl
+    );
+
+    static float CalculateWavesOnlyForCoordinate2_Direct( // TODO: Once the OG function is reversed, we should use this instead of it (once we've verified that the reversed version works as expected)
+        int32 x, int32 y,
+        float waterLevel, // "water level" from `GetWaterLevelNoWaves`
+        float bigWavesAmpl,
+        float smallWavesAmpl
+    ) {
+        CalculateWavesOnlyForCoordinate2(x, y, &waterLevel, bigWavesAmpl, smallWavesAmpl);
+        return waterLevel; // Result of the above function is stored in this variable.
+    }
+
     static void ScanThroughBlocks();
     static void SplitWaterTriangleAlongYLine(int32 a0, int32 a1, int32 a2, CRenPar a3, int32 a4, int32 a5, CRenPar a6, int32 a7, int32 a8, CRenPar a9);
     static void RenderHighDetailWaterTriangle(int32 X1, int32 Y1, CRenPar P1, int32 X2, int32 Y2, CRenPar P2, int32 X3, int32 Y3, CRenPar P3);

@@ -58,9 +58,6 @@ float& DIFF_SPRING_MULT_Z = *(float*)0x8D35C0;           // 0.1f
 float& DIFF_SPRING_COMPRESS_MULT = *(float*)0x8D35C4;    // 2.0f
 CVector (&VehicleGunOffset)[14] = *(CVector(*)[14])0x8D35D4; // maybe [12]
 
-char*& HandlingFilename = *(char**)0x8D3970;
-char (&VehicleNames)[100][14] = *(char(*)[100][14])0x8D3978;
-
 void CVehicle::InjectHooks() {
     RH_ScopedClass(CVehicle);
     RH_ScopedCategory("Vehicle");
@@ -740,7 +737,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId_, uint
     case ANIM_ID_CAR_OPEN_RHS:
     case ANIM_ID_CAR_OPEN_LHS_1:
     case ANIM_ID_CAR_OPEN_RHS_1: {
-        CVehicleAnimGroupData::GetInOutTimings(group, eInOutTimingMode::OPEN_OUT, &fAnimStart, &fAnimEnd);
+        CVehicleAnimGroupData::GetInOutTimings(group, eInOutTimingMode::OPEN_START, &fAnimStart, &fAnimEnd);
         if (fTime < fAnimStart) {
             OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, false);
         } else if (fTime > fAnimEnd) {
@@ -759,7 +756,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId_, uint
     case ANIM_ID_CAR_CLOSE_RHS_0:
     case ANIM_ID_CAR_CLOSE_LHS_1:
     case ANIM_ID_CAR_CLOSE_RHS_1: {
-        CVehicleAnimGroupData::GetInOutTimings(group, eInOutTimingMode::CLOSE_OUT, &fAnimStart, &fAnimEnd);
+        CVehicleAnimGroupData::GetInOutTimings(group, eInOutTimingMode::CLOSE_STOP, &fAnimStart, &fAnimEnd);
         if (fTime < fAnimStart) {
             OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
         } else if (fTime > fAnimEnd) {
@@ -777,7 +774,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId_, uint
     case ANIM_ID_CAR_CLOSEDOOR_RHS_0:
     case ANIM_ID_CAR_CLOSEDOOR_LHS_1:
     case ANIM_ID_CAR_CLOSEDOOR_RHS_1: {
-        CVehicleAnimGroupData::GetInOutTimings(group, eInOutTimingMode::CLOSE_IN, &fAnimStart, &fAnimEnd);
+        CVehicleAnimGroupData::GetInOutTimings(group, eInOutTimingMode::OPEN_STOP, &fAnimStart, &fAnimEnd);
         if (fTime < fAnimStart) {
             OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
         } else if (fTime > fAnimEnd) {
@@ -795,7 +792,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId_, uint
     case ANIM_ID_CAR_GETOUT_RHS_0:
     case ANIM_ID_CAR_GETOUT_LHS_1:
     case ANIM_ID_CAR_GETOUT_RHS_1: {
-        CVehicleAnimGroupData::GetInOutTimings(group, eInOutTimingMode::OPEN_IN, &fAnimStart, &fAnimEnd);
+        CVehicleAnimGroupData::GetInOutTimings(group, eInOutTimingMode::CLOST_START, &fAnimStart, &fAnimEnd);
         if (fTime < fAnimStart) {
             OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
         } else if (fTime > fAnimEnd) {
@@ -2301,7 +2298,7 @@ void CVehicle::ReactToVehicleDamage(CPed* ped) {
     };
 
     // FIX_BUGS ?
-    int32 t1 = 2000 - CGeneral::GetRandomNumberInRange(-3000.0f, 0.0f);
+    int32 t1 = (int32)(2000.f - CGeneral::GetRandomNumberInRange(-3000.0f, 0.0f));
     if (m_pDriver) {
         if (m_apPassengers[0]) {
             if (CGeneral::GetRandomNumber() >= 0x3FFF)
@@ -2313,7 +2310,7 @@ void CVehicle::ReactToVehicleDamage(CPed* ped) {
         }
     }
 
-    int32 t2 = 2000 - CGeneral::GetRandomNumberInRange(-3000.0f, 0.0f);
+    int32 t2 = (int32)(2000.f - CGeneral::GetRandomNumberInRange(-3000.0f, 0.0f));
     if (m_apPassengers[0]) {
         if (CGeneral::GetRandomNumber() >= 0x3FFF)
             React(m_apPassengers[0], ped, t2);

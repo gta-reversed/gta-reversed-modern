@@ -253,7 +253,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
             pos.z = fGroundPos;
 
         float fWaterLevel{};
-        if (CWaterLevel::GetWaterLevelNoWaves(pos.x, pos.y, pos.z, &fWaterLevel, nullptr, nullptr)) {
+        if (CWaterLevel::GetWaterLevelNoWaves(pos, &fWaterLevel, nullptr, nullptr)) {
             /* must be done like this because of call order */
             if (pos.z < fWaterLevel) {
                 bNoFire = true;

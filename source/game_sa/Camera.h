@@ -494,6 +494,9 @@ public:
     */
     auto GetFrustumPoints() -> std::array<CVector, 5>;
 
+    //! Get the camera's front normal (Whatever that is)
+    auto GetFrontNormal2D() const { return CVector2D{ m_fCamFrontXNorm, m_fCamFrontYNorm }; }
+
 public:
     static CCam& GetActiveCamera();
 
