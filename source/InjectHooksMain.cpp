@@ -375,7 +375,7 @@
 #include "TaskSimpleHandsUp.h"
 #include "TaskComplexEnterCar.h"
 #include "TaskComplexSmartFleePoint.h"
-
+#include "Interior/TaskInteriorBeInHouse.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -724,11 +724,8 @@ void InjectHooksMain() {
     Plant();
 
     const auto Tasks = []() {
-        CTaskSimpleLeaveGroup::InjectHooks();
-        CTaskGangHasslePed::InjectHooks();
-        CTaskGangHassleVehicle::InjectHooks();
-        CTaskGoToVehicleAndLean::InjectHooks();
-        // CTaskInteriorBeInHouse::InjectHooks();
+        const auto Interior = [] {
+        CTaskInteriorBeInHouse::InjectHooks();
         // CTaskInteriorBeInOffice::InjectHooks();
         // CTaskInteriorBeInShop::InjectHooks();
         // CTaskInteriorGoToInfo::InjectHooks();
@@ -737,6 +734,12 @@ void InjectHooksMain() {
         // CTaskInteriorSitAtDesk::InjectHooks();
         // CTaskInteriorSitInChair::InjectHooks();
         // CTaskInteriorUseInfo::InjectHooks();
+        };
+
+        CTaskSimpleLeaveGroup::InjectHooks();
+        CTaskGangHasslePed::InjectHooks();
+        CTaskGangHassleVehicle::InjectHooks();
+        CTaskGoToVehicleAndLean::InjectHooks();
         CTaskLeanOnVehicle::InjectHooks();
         CTaskComplexCarSlowBeDraggedOut::InjectHooks();
         CTaskComplexCarSlowBeDraggedOutAndStandUp::InjectHooks();
