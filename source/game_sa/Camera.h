@@ -488,6 +488,8 @@ public:
     float GetCutsceneBarHeight();
     int32 GetCamDirectlyBehind();
 
+    auto GetFrontNormal2D() const { return CVector2D{ m_fCamFrontXNorm, m_fCamFrontYNorm }; }
+
 public:
     static CCam& GetActiveCamera();
 
