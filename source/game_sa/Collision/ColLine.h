@@ -10,12 +10,6 @@
 
 class CColLine {
 public:
-    CVector m_vecStart;
-    float   m_fStartSize;
-    CVector m_vecEnd;
-    float   m_fEndSize;
-
-public:
     static void InjectHooks();
 
     CColLine() = default;
@@ -28,6 +22,22 @@ public:
     * @brief Distance to a point from this line (Uses `CCollision::DistToLine`)
     */
     float DistTo(CVector pos) const;
+
+    /*!
+    * @addr notsa
+    * @brief Render the line in the 3D world (Be sure to call from a place where 3D stuff is rendered, if called from elsewhere you won't see the lines!)
+    *
+    * @param transform Transformation matrix to be used
+    * @param color     Color of the lines used
+    */
+    void DrawWireFrame(CRGBA color, const CMatrix& transform) const;
+    
+public:
+    CVector m_vecStart;
+    float   m_fStartSize;
+    CVector m_vecEnd;
+    float   m_fEndSize;
+
 };
 
 VALIDATE_SIZE(CColLine, 0x20);

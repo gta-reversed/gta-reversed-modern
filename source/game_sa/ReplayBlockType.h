@@ -161,8 +161,13 @@ struct tReplayCameraBlock : tReplayBlockBase {
 
     bool isUsingRemoteVehicle;
     uint8 __pad[2];
-    uint8 matrix[sizeof(CMatrix)]; // cast to CMatrix until i found a solution to make it CMatrix cleanly.
+    uint8 matrix[sizeof(CMatrix)]; // Use GetMatrix() to access
     CVector firstFocusPosn;
+
+    // TODO/FIXME: Remove this func and properly handle CMatrix element
+    CMatrix& GetMatrix() {
+        return *(CMatrix*)&matrix;
+    }
 };
 
 struct tReplayClockBlock : tReplayBlockBase {

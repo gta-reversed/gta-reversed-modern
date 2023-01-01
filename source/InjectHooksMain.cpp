@@ -32,7 +32,7 @@
 #include "Garage.h"
 #include "Garages.h"
 
-#include "CDebugMenu.h"
+#include "UIRenderer.h"
 
 #include "CarGenerator.h"
 #include "TheCarGenerators.h"
@@ -409,6 +409,7 @@ void InjectHooksMain() {
     CStaticShadow::InjectHooks();
     CRealTimeShadowManager::InjectHooks();
     CRealTimeShadow::InjectHooks();
+    CPopCycle::InjectHooks();
     ProcObjectMan_c::InjectHooks();
     ProcSurfaceInfo_c::InjectHooks();
     RwHelperInjectHooks();
@@ -590,6 +591,7 @@ void InjectHooksMain() {
     CShopping::InjectHooks();
     CInformFriendsEventQueue::InjectHooks();
     C3dMarkers::InjectHooks();
+    C3dMarker::InjectHooks();
     CSpecialFX::InjectHooks();
     CFallingGlassPane::InjectHooks();
     CGlass::InjectHooks();
