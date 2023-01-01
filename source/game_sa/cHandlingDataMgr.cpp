@@ -223,9 +223,9 @@ void cHandlingDataMgr::LoadHandlingData() {
 void cHandlingDataMgr::Initialise() {
     LoadHandlingData();
 
-    field_0 = 0.1;
+    field_0 = 0.1f;
     fWheelFriction = 0.9f;
-    field_8 = 1.0;
+    field_8 = 1.0f;
     field_C = 0.8f;
     field_10 = 0.98f;
 }
@@ -276,7 +276,7 @@ int32 cHandlingDataMgr::GetHandlingId(const char* nameToFind) {
 }
 
 // 0xC2B9B4
-constexpr auto ACCEL_CONST = 1.f / (50.f * 50.f); // This number 50 seems to be coming up a lot...;
+constexpr auto ACCEL_CONST = 1.f / sq(50.f); // This number 50 seems to be coming up a lot...;
 
 // 0xC2B9BC
 constexpr auto VELOCITY_CONST = 0.277778f / 50.f;
@@ -308,7 +308,7 @@ void cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData* h) {
     while (maxVelocity > 0.f) {
         maxVelocity -= 0.01f;
 
-        const auto maxVelocitySq = maxVelocity * maxVelocity;
+        const auto maxVelocitySq = sq(maxVelocity);
         const auto v = h->m_fDragMult >= 0.01f
             ? h->m_fDragMult / 1000.f * 0.5f * maxVelocitySq
             : -((1.f / (maxVelocitySq * h->m_fDragMult + 1.f) - 1.f) * maxVelocity);
@@ -336,7 +336,7 @@ void cHandlingDataMgr::ConvertDataToGameUnits(tHandlingData* h) {
         }
     }();
 
-    t->m_fEngineAcceleration /= t->m_nDriveType == '4' ? 4.f : 2.f;
+    t->m_fEngineAcceleration /= (t->m_nDriveType == '4') ? 4.f : 2.f;
 
     t->InitGearRatios();
 }
