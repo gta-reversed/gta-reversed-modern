@@ -9,6 +9,14 @@
 #include <TaskTypes/TaskSimpleCarSetPedInAsPassenger.h>
 #include <TaskTypes/TaskSimpleCarDrive.h>
 #include <TaskTypes/TaskComplexKillPedOnFoot.h>
+#include <TaskTypes/TaskSimpleStandStill.h>
+#include <TaskTypes/TaskComplexWanderCriminal.h>
+#include <TaskTypes/TaskComplexWanderStandard.h>
+#include <TaskTypes/TaskComplexTurnToFaceEntityOrCoord.h>
+#include <TaskTypes/TaskComplexKillPedOnFoot.h>
+//#include <TaskTypes/TaskComplexUseEffect.h>
+
+#include <Attractors/PedAttractorPedPlacer.h>
 
 #include <FireManager.h>
 #include <World.h>
@@ -52,6 +60,10 @@ void HandleEntityMissionCleanup(CRunningScript& S, T& entity) {
     }
 }
 
+//
+// Flags getters/setters
+//
+
 void SetCharProofs(CPed& ped, bool bullet, bool fire, bool explosion, bool collision, bool melee) {
     auto& flags = ped.physicalFlags;
     flags.bBulletProof = bullet;
@@ -61,12 +73,85 @@ void SetCharProofs(CPed& ped, bool bullet, bool fire, bool explosion, bool colli
     flags.bMeleeProof = melee;
 }
 
-auto SetCharVelocity(CPed& ped, CVector velocity) {
-    ped.SetVelocity(velocity / 50.f);
+auto SetCharDropsWeaponsWhenDead(CPed& ped, bool dropsWepsWhenDead) {
+    ped.bDoesntDropWeaponsWhenDead = !dropsWepsWhenDead;
+}
+
+auto SetCharNeverLeavesGroup(CPed& ped, bool bNeverLeavesGroup) {
+    ped.bNeverLeavesGroup = bNeverLeavesGroup;
+}
+
+// SET_CHAR_BLEEDING
+auto SetCharBleeding(CPed& ped, bool isBleeding) {
+    ped.bPedIsBleeding = isBleeding;
+}
+
+// SET_CHAR_CANT_BE_DRAGGED_OUT
+auto SetCharCantBeDraggedOut(CPed& ped, bool bDontDrag) {
+    ped.bDontDragMeOutCar = bDontDrag;
+}
+
+// SET_CHAR_IS_CHRIS_CRIMINAL
+auto SetCharIsChrisCriminal(CPed& ped, bool value) {
+    ped.bChrisCriminal = value;
+}
+
+// SET_CHAR_SUFFERS_CRITICAL_HITS
+auto SetCharSuffersCriticalHits(CPed& ped, bool value) {
+    ped.bNoCriticalHits = !value;
+}
+
+// FREEZE_CHAR_POSITION
+auto FreezeCharPosition(CPed& ped, bool freeze) {
+    ped.physicalFlags.bDontApplySpeed = freeze;
+}
+
+// SET_CHAR_DROWNS_IN_WATER
+auto SetCharDrownsInWater(CPed& ped, bool bDrownsInWater) {
+    ped.bDrownsInWater = bDrownsInWater;
+}
+
+// SET_CHAR_STAY_IN_CAR_WHEN_JACKED
+auto SetCharStayInCarWhenJacked(CPed& ped, bool bStayInCarOnJack) {
+    ped.bStayInCarOnJack = bStayInCarOnJack;
+}
+
+// SET_CHAR_CAN_BE_SHOT_IN_VEHICLE
+auto SetCharCanBeShotInVehicle(CPed& ped, bool bCanBeShotInVehicle) {
+    ped.bCanBeShotInVehicle = bCanBeShotInVehicle;
+}
+
+// SET_CHAR_NEVER_TARGETTED
+auto SetCharNeverTargetted(CPed& ped, bool bNeverEverTargetThisPed) {
+    ped.bNeverEverTargetThisPed = bNeverEverTargetThisPed;
+}
+
+// SET_CHAR_COLLISION
+auto SetCharCollision(CPed& ped, bool bUsesCollision) {
+    ped.m_bUsesCollision = bUsesCollision;
+}
+
+// IS_CHAR_SHOOTING
+auto IsCharShooting(CPed& ped) {
+    return ped.bFiringWeapon;
+}
+
+// IS_CHAR_WAITING_FOR_WORLD_COLLISION
+auto IsCharWaitingForWorldCollision(CPed& ped) {
+    return ped.m_bIsStaticWaitingForCollision;
+}
+
+// IS_CHAR_DUCKING
+auto IsCharDucking(CPed& ped) {
+    return ped.bIsDucking;
 }
 
 auto GetCharVelocity(CPed& ped) {
     return ped.GetMoveSpeed();
+}
+
+auto SetCharVelocity(CPed& ped, CVector velocity) {
+    ped.SetVelocity(velocity / 50.f);
 }
 
 auto SetCharRotation(CPed& ped, CVector angles) {
@@ -91,16 +176,6 @@ auto SetCharAreaVisible(CPed& ped, eAreaCodes area) {
     }
     CEntryExitManager::ms_entryExitStackPosn = 0;
     CTimeCycle::StopExtraColour(0);
-}
-
-// - flags
-auto SetCharDropsWeaponsWhenDead(CPed& ped, bool dropsWepsWhenDead) {
-    ped.bDoesntDropWeaponsWhenDead = !dropsWepsWhenDead;
-}
-
-// - flags
-auto SetCharNeverLeavesGroup(CPed& ped, bool bNeverLeavesGroup) {
-    ped.bNeverLeavesGroup = bNeverLeavesGroup;
 }
 
 auto AttachFxSystemToCharBone(tScriptEffectSystem& fx, CPed& ped, ePedBones bone) {
@@ -694,11 +769,6 @@ auto GetRandomCharInZone(CRunningScript& S, std::string_view zoneName, bool civi
     return nullptr; // No suitable ped found
 }
 
-// IS_CHAR_SHOOTING - flags
-auto IsCharShooting(CPed& ped) {
-    return ped.bFiringWeapon;
-}
-
 // IS_CHAR_MODEL
 auto IsCharModel(CPed& ped, int8 accuracy) {
     ped.m_nWeaponAccuracy = accuracy;
@@ -745,11 +815,6 @@ auto ExplodeCharHead(CPed& ped) {
 // START_CHAR_FIRE
 auto StartCharFire(CPed& ped) { // TODO: return type: ScriptThing<CFire>
     return gFireManager.StartScriptFire(ped.GetPosition(), &ped, 0.8f, true, 0, 1);
-}
-
-// SET_CHAR_BLEEDING - flags
-auto SetCharBleeding(CPed& ped, bool isBleeding) {
-    ped.bPedIsBleeding = isBleeding;
 }
 
 // SET_CHAR_VISIBLE
@@ -817,11 +882,6 @@ auto SetCharAnimSpeed(CPed& ped, const char* animName, float speed) {
     }
 }
 
-// SET_CHAR_CANT_BE_DRAGGED_OUT - flags
-auto SetCharCantBeDraggedOut(CPed& ped, bool bDontDrag) {
-    ped.bDontDragMeOutCar = bDontDrag;
-}
-
 // IS_CHAR_MALE
 auto IsCharMale(CPed& ped) {
     return !IsPedTypeFemale(ped.m_nPedType);
@@ -861,16 +921,6 @@ auto WarpCharIntoCarAsPassenger(CPed& ped, CVehicle& veh, int32 psgrSeatIdx) {
 // GET_CHAR_IN_CAR_PASSENGER_SEAT - TODO: Move to `Vehicle`
 auto GetCharInCarPassengerSeat(CVehicle& veh, uint32 psgrSeatIdx) -> CPed& {
     return *veh.m_apPassengers[psgrSeatIdx];
-}
-
-// SET_CHAR_IS_CHRIS_CRIMINAL - flags
-auto SetCharIsChrisCriminal(CPed& ped, bool value) {
-    ped.bChrisCriminal = value;
-}
-
-// SET_CHAR_SUFFERS_CRITICAL_HITS - flags
-auto SetCharSuffersCriticalHits(CPed& ped, bool value) {
-    ped.bNoCriticalHits = !value;
 }
 
 bool HasPedSittingInCarTask(CPed& ped) {
@@ -1012,24 +1062,9 @@ auto IsCharInFlyingVehicle(CPed& ped) {
     return IsCharInAnyHeli(ped) || IsCharInAnyPlane(ped);
 }
 
-// FREEZE_CHAR_POSITION - flags
-auto FreezeCharPosition(CPed& ped, bool freeze) {
-    ped.physicalFlags.bDontApplySpeed = freeze;
-}
-
-// SET_CHAR_DROWNS_IN_WATER - flags
-auto SetCharDrownsInWater(CPed& ped, bool bDrownsInWater) {
-    ped.bDrownsInWater = bDrownsInWater;
-}
-
 // GET_CHAR_ARMOUR
 auto GetCharArmour(CPed& ped) {
     return ped.m_fArmour;
-}
-
-// IS_CHAR_WAITING_FOR_WORLD_COLLISION - flags
-auto IsCharWaitingForWorldCollision(CPed& ped) {
-    return ped.m_bIsStaticWaitingForCollision;
 }
 
 // ATTACH_CHAR_TO_OBJECT
@@ -1059,21 +1094,11 @@ auto HasCharBeenDamagedByCar(CPed* ped, CVehicle& veh) {
     return ped && ped->m_pLastEntityDamage == &veh;
 }
 
-// SET_CHAR_STAY_IN_CAR_WHEN_JACKED - flags
-auto SetCharStayInCarWhenJacked(CPed& ped, bool bStayInCarOnJack) {
-    ped.bStayInCarOnJack = bStayInCarOnJack;
-}
-
 // IS_CHAR_TOUCHING_VEHICLE
 auto IsCharTouchingVehicle(CPed& ped, CVehicle& withVeh) {
     return ped.bInVehicle
         ? ped.m_pVehicle->GetHasCollidedWith(&withVeh)
         : ped.GetHasCollidedWith(&withVeh);
-}
-
-// SET_CHAR_CAN_BE_SHOT_IN_VEHICLE - flags
-auto SetCharCanBeShotInVehicle(CPed& ped, bool bCanBeShotInVehicle) {
-    ped.bCanBeShotInVehicle = bCanBeShotInVehicle;
 }
 
 // CLEAR_CHAR_LAST_DAMAGE_ENTITY
@@ -1105,11 +1130,6 @@ auto CreateRandomCharAsDriver(CRunningScript& S, CVehicle& veh) -> CPed& {
 // CREATE_RANDOM_CHAR_AS_PASSENGER
 auto CreateRandomCharAsPassenger(CRunningScript& S, CVehicle& veh, int32 psgrSeatIdx) -> CPed& {
     return CreateRandomCharInVehicle(S, veh, false, psgrSeatIdx);
-}
-
-// SET_CHAR_NEVER_TARGETTED - flags
-auto SetCharNeverTargetted(CPed& ped, bool bNeverEverTargetThisPed) {
-    ped.bNeverEverTargetThisPed = bNeverEverTargetThisPed;
 }
 
 // IS_CHAR_IN_ANY_POLICE_VEHICLE
@@ -1159,11 +1179,6 @@ auto SetLoadCollisionForCharFlag(CRunningScript& S, CPed& ped, bool loadCol) {
     }
 }
 
-// IS_CHAR_DUCKING - flags
-auto IsCharDucking(CPed& ped) {
-    return ped.bIsDucking;
-}
-
 // TASK_KILL_CHAR_ON_FOOT
 auto TaskKillCharOnFoot(CRunningScript& S, eScriptCommands opcode, CPed& ped, CPed& target) {
     S.GivePedScriptedTask(
@@ -1186,7 +1201,7 @@ auto IsCharInTaxi(CPed& ped) {
 }
 
 // LOAD_CHAR_DECISION_MAKER
-auto LoadCharDecisionMaker(CRunningScript& S, CPed& ped, int32 type) { // TODO: return ScriptThing<CDecisionMaker>
+auto LoadCharDecisionMaker(CRunningScript& S, int32 type) { // TODO: return ScriptThing<CDecisionMaker>
     char pedDMName[1024];
     CDecisionMakerTypesFileLoader::GetPedDMName(type, pedDMName);
     const auto id = CDecisionMakerTypesFileLoader::LoadDecisionMaker(pedDMName, DECISION_ON_FOOT, S.m_bUseMissionCleanup);
@@ -1233,11 +1248,6 @@ auto SetCharAnimCurrentTime(CPed& ped, const char* animName, float progress) {
     }
 }
 
-// SET_CHAR_COLLISION - flags
-auto SetCharCollision(CPed& ped, bool bUsesCollision) {
-    ped.m_bUsesCollision = bUsesCollision;
-}
-
 // GET_CHAR_ANIM_TOTAL_TIME (In seconds)
 auto GetCharAnimTotalTime(CPed& ped, const char* animName) {
     if (const auto anim = RpAnimBlendClumpGetAssociation(ped.m_pRwClump, animName)) {
@@ -1247,115 +1257,75 @@ auto GetCharAnimTotalTime(CPed& ped, const char* animName) {
 }
 
 // CREATE_CHAR_AT_ATTRACTOR
-auto CreateCharAtAttractor(CRunningScript& S, ePedType pedType, eModelID pedModel, eTaskType taskType, C2dEffect& attractor) {
-    const auto& ped = CreatePed(S, pedType, pedModel);
+//auto CreateCharAtAttractor(CRunningScript& S, ePedType pedType, eModelID pedModel, int32 taskType, C2dEffectPedAttractor* attractor) -> CPed* {
+    /*
+    if (!attractor) {
+        return nullptr;
+    }
 
+    auto& ped = CreatePed(S, pedType, pedModel);
 
-}
+    CPedAttractorPedPlacer::PlacePedAtEffect(*attractor, nullptr, &ped, 0.01f);
+    CTheScripts::ClearSpaceForMissionEntity(ped.GetPosition(), &ped);
+    if (S.m_bUseMissionCleanup) {
+        ped.m_bIsStaticWaitingForCollision = true;
+    }
+    CWorld::Add(&ped);
+
+    // Set the task specified 
+    
+    if (const auto task = [&] {
+        switch ((eScriptCommands)(taskType)) { // Can't take this as an input argument, as it will always put in the current command instead of reading it off the stack
+        case COMMAND_TASK_STAND_STILL:
+            return new CTaskSimpleStandStill{}
+        }
+    }()) {
+
+    }
+
+    // TODO: Code is so far correct, but we're missing the stub for `CTaskComplexUseEffect`
+    */
+//}
 
 // TASK_KILL_CHAR_ON_FOOT_WHILE_DUCKING
-auto TaskKillCharOnFootWhileDucking(CPed& ped) {
-
+auto TaskKillCharOnFootWhileDucking(eScriptCommands command, CRunningScript& S, CPed& ped, CPed& target, int32 flags, int32 actionDelay, int32 actionChance) {
+    S.GivePedScriptedTask(
+        &ped,
+        new CTaskComplexKillPedOnFoot{
+            &target,
+            -1,
+            flags,
+            actionDelay,
+            actionChance,
+            true
+        },
+        command
+    );
 }
 
 // TASK_TURN_CHAR_TO_FACE_CHAR
-auto TaskTurnCharToFaceChar(CPed& ped) {
-
+auto TaskTurnCharToFaceChar(eScriptCommands command, CRunningScript& S, CPed& ped, CPed& target) {
+    S.GivePedScriptedTask(
+        &ped,
+        new CTaskComplexTurnToFaceEntityOrCoord{ &ped },
+        command
+    );
 }
 
 // IS_CHAR_AT_SCRIPTED_ATTRACTOR
-auto IsCharAtScriptedAttractor(CPed& ped) {
-
+auto IsCharAtScriptedAttractor(CPed* ped, C2dEffectPedAttractor* attractor) {
+    if (!attractor) {
+        return false;
+    }
+    const auto pedUsingAttractor = GetPedAttractorManager()->GetPedUsingEffect(reinterpret_cast<C2dEffect*>(attractor));
+    return ped
+        ? pedUsingAttractor == ped
+        : pedUsingAttractor != nullptr;
 }
 
 // GET_CHAR_MODEL
 auto GetCharModel(CPed& ped) {
-
-}
-
-// CREATE_FX_SYSTEM_ON_CHAR_WITH_DIRECTION
-auto CreateFxSystemOnCharWithDirection(CPed& ped) {
-
-}
-
-// ATTACH_CAMERA_TO_CHAR_LOOK_AT_CHAR
-auto AttachCameraToCharLookAtChar(CPed& ped) {
-
-}
-
-// CLEAR_CHAR_TASKS
-auto ClearCharTasks(CPed& ped) {
-
-}
-
-// ATTACH_CHAR_TO_BIKE
-auto AttachCharToBike(CPed& ped) {
-
-}
-
-// TASK_GOTO_CHAR_OFFSET
-auto TaskGotoCharOffset(CPed& ped) {
-
-}
-
-// HIDE_CHAR_WEAPON_FOR_SCRIPTED_CUTSCENE
-auto HideCharWeaponForScriptedCutscene(CPed& ped) {
-
-}
-
-// GET_CHAR_SPEED
-auto GetCharSpeed(CPed& ped) {
-
-}
-
-// IS_CHAR_IN_SEARCHLIGHT
-auto IsCharInSearchlight(CPed& ped) {
-
-}
-
-// TASK_TURN_CHAR_TO_FACE_COORD
-auto TaskTurnCharToFaceCoord(CPed& ped) {
-
-}
-
-// REMOVE_CHAR_FROM_GROUP
-auto RemoveCharFromGroup(CPed& ped) {
-
-}
-
-// TASK_CHAR_ARREST_CHAR
-auto TaskCharArrestChar(CPed& ped) {
-
-}
-
-// CLEAR_CHAR_DECISION_MAKER_EVENT_RESPONSE
-auto ClearCharDecisionMakerEventResponse(CPed& ped) {
-
-}
-
-// ADD_CHAR_DECISION_MAKER_EVENT_RESPONSE
-auto AddCharDecisionMakerEventResponse(CPed& ped) {
-
-}
-
-// TASK_WARP_CHAR_INTO_CAR_AS_DRIVER
-auto TaskWarpCharIntoCarAsDriver(CPed& ped) {
-
-}
-
-// TASK_WARP_CHAR_INTO_CAR_AS_PASSENGER
-auto TaskWarpCharIntoCarAsPassenger(CPed& ped) {
-
-}
-
-// IS_CHAR_HOLDING_OBJECT
-auto IsCharHoldingObject(CPed& ped) {
-
-}
-
-// GET_RANDOM_CHAR_IN_SPHERE
-auto GetRandomCharInSphere(CPed& ped) {
-
+    return (eModelID)(ped.m_nModelIndex);
 }
 
 void notsa::script::commands::character::RegisterHandlers() {
@@ -1424,91 +1394,90 @@ void notsa::script::commands::character::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_SHOOTING, IsCharShooting);
     REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_ACCURACY, SetCharAccuracy);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_MODEL, IsCharModel);
-
-    //REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_WEAPON, HasCharBeenDamagedByWeapon);
-    //REGISTER_COMMAND_HANDLER(COMMAND_EXPLODE_CHAR_HEAD, ExplodeCharHead);
-    //REGISTER_COMMAND_HANDLER(COMMAND_START_CHAR_FIRE, StartCharFire);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_BLEEDING, SetCharBleeding);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_VISIBLE, SetCharVisible);
-    //REGISTER_COMMAND_HANDLER(COMMAND_REMOVE_CHAR_ELEGANTLY, RemoveCharElegantly);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_STAY_IN_SAME_PLACE, SetCharStayInSamePlace);
-    //REGISTER_COMMAND_HANDLER(COMMAND_WARP_CHAR_FROM_CAR_TO_COORD, WarpCharFromCarToCoord);
-    //REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_SPOTTED_CHAR, HasCharSpottedChar);
-    //REGISTER_COMMAND_HANDLER(COMMAND_WARP_CHAR_INTO_CAR, WarpCharIntoCar);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_ANIM_SPEED, SetCharAnimSpeed);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_CANT_BE_DRAGGED_OUT, SetCharCantBeDraggedOut);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_MALE, IsCharMale);
-    //REGISTER_COMMAND_HANDLER(COMMAND_STORE_CAR_CHAR_IS_IN_NO_SAVE, StoreCarCharIsInNoSave);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_MONEY, SetCharMoney);
-    //REGISTER_COMMAND_HANDLER(COMMAND_GET_AMMO_IN_CHAR_WEAPON, GetAmmoInCharWeapon);
-    //REGISTER_COMMAND_HANDLER(COMMAND_WARP_CHAR_INTO_CAR_AS_PASSENGER, WarpCharIntoCarAsPassenger);
-    //REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_IN_CAR_PASSENGER_SEAT, GetCharInCarPassengerSeat);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_IS_CHRIS_CRIMINAL, SetCharIsChrisCriminal);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_SUFFERS_CRITICAL_HITS, SetCharSuffersCriticalHits);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_SITTING_IN_CAR, IsCharSittingInCar);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_SITTING_IN_ANY_CAR, IsCharSittingInAnyCar);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_ON_FOOT, IsCharOnFoot);
-    //REGISTER_COMMAND_HANDLER(COMMAND_ATTACH_CHAR_TO_CAR, AttachCharToCar);
-    //REGISTER_COMMAND_HANDLER(COMMAND_DETACH_CHAR_FROM_CAR, DetachCharFromCar);
-    //REGISTER_COMMAND_HANDLER(COMMAND_CLEAR_CHAR_LAST_WEAPON_DAMAGE, ClearCharLastWeaponDamage);
-    //REGISTER_COMMAND_HANDLER(COMMAND_GET_CURRENT_CHAR_WEAPON, GetCurrentCharWeapon);
-    //REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ANY_MEANS_OBJECT_2D, LocateCharAnyMeansObject2d);
-    //REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ON_FOOT_OBJECT_2D, LocateCharOnFootObject2d);
-    //REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ANY_MEANS_OBJECT_3D, LocateCharAnyMeansObject3d);
-    //REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ON_FOOT_OBJECT_3D, LocateCharOnFootObject3d);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_ON_ANY_BIKE, IsCharOnAnyBike);
-    //REGISTER_COMMAND_HANDLER(COMMAND_CAN_CHAR_SEE_DEAD_CHAR, CanCharSeeDeadChar);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SHUT_CHAR_UP, ShutCharUp);
-    //REGISTER_COMMAND_HANDLER(COMMAND_REMOVE_ALL_CHAR_WEAPONS, RemoveAllCharWeapons);
-    //REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_GOT_WEAPON, HasCharGotWeapon);
-    //REGISTER_COMMAND_HANDLER(COMMAND_GET_DEAD_CHAR_PICKUP_COORDS, GetDeadCharPickupCoords);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANY_BOAT, IsCharInAnyBoat);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANY_HELI, IsCharInAnyHeli);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANY_PLANE, IsCharInAnyPlane);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_WATER, IsCharInWater);
-    //REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_WEAPON_IN_SLOT, GetCharWeaponInSlot);
-    //REGISTER_COMMAND_HANDLER(COMMAND_GET_OFFSET_FROM_CHAR_IN_WORLD_COORDS, GetOffsetFromCharInWorldCoords);
-    //REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_BEEN_PHOTOGRAPHED, HasCharBeenPhotographed);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_FLYING_VEHICLE, IsCharInFlyingVehicle);
-    //REGISTER_COMMAND_HANDLER(COMMAND_FREEZE_CHAR_POSITION, FreezeCharPosition);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_DROWNS_IN_WATER, SetCharDrownsInWater);
-    //REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_ARMOUR, GetCharArmour);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_WAITING_FOR_WORLD_COLLISION, IsCharWaitingForWorldCollision);
-    //REGISTER_COMMAND_HANDLER(COMMAND_ATTACH_CHAR_TO_OBJECT, AttachCharToObject);
-    //REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_CHAR, HasCharBeenDamagedByChar);
-    //REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_CAR, HasCharBeenDamagedByCar);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_STAY_IN_CAR_WHEN_JACKED, SetCharStayInCarWhenJacked);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_TOUCHING_VEHICLE, IsCharTouchingVehicle);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_CAN_BE_SHOT_IN_VEHICLE, SetCharCanBeShotInVehicle);
-    //REGISTER_COMMAND_HANDLER(COMMAND_CLEAR_CHAR_LAST_DAMAGE_ENTITY, ClearCharLastDamageEntity);
-    //REGISTER_COMMAND_HANDLER(COMMAND_CREATE_RANDOM_CHAR_AS_DRIVER, CreateRandomCharAsDriver);
-    //REGISTER_COMMAND_HANDLER(COMMAND_CREATE_RANDOM_CHAR_AS_PASSENGER, CreateRandomCharAsPassenger);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_NEVER_TARGETTED, SetCharNeverTargetted);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANY_POLICE_VEHICLE, IsCharInAnyPoliceVehicle);
-    //REGISTER_COMMAND_HANDLER(COMMAND_DOES_CHAR_EXIST, DoesCharExist);
-    //REGISTER_COMMAND_HANDLER(COMMAND_FREEZE_CHAR_POSITION_AND_DONT_LOAD_COLLISION, FreezeCharPositionAndDontLoadCollision);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_LOAD_COLLISION_FOR_CHAR_FLAG, SetLoadCollisionForCharFlag);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_DUCKING, IsCharDucking);
-    //REGISTER_COMMAND_HANDLER(COMMAND_TASK_KILL_CHAR_ON_FOOT, TaskKillCharOnFoot);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANGLED_AREA_2D, IsCharInAngledArea2d);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANGLED_AREA_IN_CAR_2D, IsCharInAngledAreaInCar2d);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANGLED_AREA_3D, IsCharInAngledArea3d);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANGLED_AREA_ON_FOOT_3D, IsCharInAngledAreaOnFoot3d);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANGLED_AREA_IN_CAR_3D, IsCharInAngledAreaInCar3d);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_TAXI, IsCharInTaxi);
-    //REGISTER_COMMAND_HANDLER(COMMAND_LOAD_CHAR_DECISION_MAKER, LoadCharDecisionMaker);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_DECISION_MAKER, SetCharDecisionMaker);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_PLAYING_ANIM, IsCharPlayingAnim);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_ANIM_PLAYING_FLAG, SetCharAnimPlayingFlag);
-    //REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_ANIM_CURRENT_TIME, GetCharAnimCurrentTime);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_ANIM_CURRENT_TIME, SetCharAnimCurrentTime);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_COLLISION, SetCharCollision);
-    //REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_ANIM_TOTAL_TIME, GetCharAnimTotalTime);
+    REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_WEAPON, HasCharBeenDamagedByWeapon);
+    REGISTER_COMMAND_HANDLER(COMMAND_EXPLODE_CHAR_HEAD, ExplodeCharHead);
+    REGISTER_COMMAND_HANDLER(COMMAND_START_CHAR_FIRE, StartCharFire);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_BLEEDING, SetCharBleeding);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_VISIBLE, SetCharVisible);
+    REGISTER_COMMAND_HANDLER(COMMAND_REMOVE_CHAR_ELEGANTLY, RemoveCharElegantly);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_STAY_IN_SAME_PLACE, SetCharStayInSamePlace);
+    REGISTER_COMMAND_HANDLER(COMMAND_WARP_CHAR_FROM_CAR_TO_COORD, WarpCharFromCarToCoord);
+    REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_SPOTTED_CHAR, HasCharSpottedChar);
+    REGISTER_COMMAND_HANDLER(COMMAND_WARP_CHAR_INTO_CAR, WarpCharIntoCar);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_ANIM_SPEED, SetCharAnimSpeed);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_CANT_BE_DRAGGED_OUT, SetCharCantBeDraggedOut);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_MALE, IsCharMale);
+    REGISTER_COMMAND_HANDLER(COMMAND_STORE_CAR_CHAR_IS_IN_NO_SAVE, StoreCarCharIsInNoSave);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_MONEY, SetCharMoney);
+    REGISTER_COMMAND_HANDLER(COMMAND_GET_AMMO_IN_CHAR_WEAPON, GetAmmoInCharWeapon);
+    REGISTER_COMMAND_HANDLER(COMMAND_WARP_CHAR_INTO_CAR_AS_PASSENGER, WarpCharIntoCarAsPassenger);
+    REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_IN_CAR_PASSENGER_SEAT, GetCharInCarPassengerSeat);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_IS_CHRIS_CRIMINAL, SetCharIsChrisCriminal);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_SUFFERS_CRITICAL_HITS, SetCharSuffersCriticalHits);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_SITTING_IN_CAR, IsCharSittingInCar);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_SITTING_IN_ANY_CAR, IsCharSittingInAnyCar);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_ON_FOOT, IsCharOnFoot);
+    REGISTER_COMMAND_HANDLER(COMMAND_ATTACH_CHAR_TO_CAR, AttachCharToCar);
+    REGISTER_COMMAND_HANDLER(COMMAND_DETACH_CHAR_FROM_CAR, DetachCharFromCar);
+    REGISTER_COMMAND_HANDLER(COMMAND_CLEAR_CHAR_LAST_WEAPON_DAMAGE, ClearCharLastWeaponDamage);
+    REGISTER_COMMAND_HANDLER(COMMAND_GET_CURRENT_CHAR_WEAPON, GetCurrentCharWeapon);
+    REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ANY_MEANS_OBJECT_2D, LocateCharAnyMeansObject2D);
+    REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ON_FOOT_OBJECT_2D, LocateCharOnFootObject2D);
+    REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ANY_MEANS_OBJECT_3D, LocateCharAnyMeansObject3D);
+    REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ON_FOOT_OBJECT_3D, LocateCharOnFootObject3D);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_ON_ANY_BIKE, IsCharOnAnyBike);
+    REGISTER_COMMAND_HANDLER(COMMAND_CAN_CHAR_SEE_DEAD_CHAR, CanCharSeeDeadChar);
+    REGISTER_COMMAND_HANDLER(COMMAND_SHUT_CHAR_UP, ShutCharUp);
+    REGISTER_COMMAND_HANDLER(COMMAND_REMOVE_ALL_CHAR_WEAPONS, RemoveAllCharWeapons);
+    REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_GOT_WEAPON, HasCharGotWeapon);
+    REGISTER_COMMAND_HANDLER(COMMAND_GET_DEAD_CHAR_PICKUP_COORDS, GetDeadCharPickupCoords);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANY_BOAT, IsCharInAnyBoat);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANY_HELI, IsCharInAnyHeli);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANY_PLANE, IsCharInAnyPlane);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_WATER, IsCharInWater);
+    REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_WEAPON_IN_SLOT, GetCharWeaponInSlot);
+    REGISTER_COMMAND_HANDLER(COMMAND_GET_OFFSET_FROM_CHAR_IN_WORLD_COORDS, GetOffsetFromCharInWorldCoords);
+    REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_BEEN_PHOTOGRAPHED, HasCharBeenPhotographed);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_FLYING_VEHICLE, IsCharInFlyingVehicle);
+    REGISTER_COMMAND_HANDLER(COMMAND_FREEZE_CHAR_POSITION, FreezeCharPosition);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_DROWNS_IN_WATER, SetCharDrownsInWater);
+    REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_ARMOUR, GetCharArmour);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_WAITING_FOR_WORLD_COLLISION, IsCharWaitingForWorldCollision);
+    REGISTER_COMMAND_HANDLER(COMMAND_ATTACH_CHAR_TO_OBJECT, AttachCharToObject);
+    REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_CHAR, HasCharBeenDamagedByChar);
+    REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_CAR, HasCharBeenDamagedByCar);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_STAY_IN_CAR_WHEN_JACKED, SetCharStayInCarWhenJacked);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_TOUCHING_VEHICLE, IsCharTouchingVehicle);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_CAN_BE_SHOT_IN_VEHICLE, SetCharCanBeShotInVehicle);
+    REGISTER_COMMAND_HANDLER(COMMAND_CLEAR_CHAR_LAST_DAMAGE_ENTITY, ClearCharLastDamageEntity);
+    REGISTER_COMMAND_HANDLER(COMMAND_CREATE_RANDOM_CHAR_AS_DRIVER, CreateRandomCharAsDriver);
+    REGISTER_COMMAND_HANDLER(COMMAND_CREATE_RANDOM_CHAR_AS_PASSENGER, CreateRandomCharAsPassenger);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_NEVER_TARGETTED, SetCharNeverTargetted);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANY_POLICE_VEHICLE, IsCharInAnyPoliceVehicle);
+    REGISTER_COMMAND_HANDLER(COMMAND_DOES_CHAR_EXIST, DoesCharExist);
+    REGISTER_COMMAND_HANDLER(COMMAND_FREEZE_CHAR_POSITION_AND_DONT_LOAD_COLLISION, FreezeCharPositionAndDontLoadCollision);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_LOAD_COLLISION_FOR_CHAR_FLAG, SetLoadCollisionForCharFlag);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_DUCKING, IsCharDucking);
+    REGISTER_COMMAND_HANDLER(COMMAND_TASK_KILL_CHAR_ON_FOOT, TaskKillCharOnFoot);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANGLED_AREA_2D, IsCharInAngledArea2D);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANGLED_AREA_IN_CAR_2D, IsCharInAngledAreaInCar2D);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANGLED_AREA_3D, IsCharInAngledArea3D);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANGLED_AREA_ON_FOOT_3D, IsCharInAngledAreaOnFoot3D);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANGLED_AREA_IN_CAR_3D, IsCharInAngledAreaInCar3D);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_TAXI, IsCharInTaxi);
+    REGISTER_COMMAND_HANDLER(COMMAND_LOAD_CHAR_DECISION_MAKER, LoadCharDecisionMaker);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_DECISION_MAKER, SetCharDecisionMaker);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_PLAYING_ANIM, IsCharPlayingAnim);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_ANIM_PLAYING_FLAG, SetCharAnimPlayingFlag);
+    REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_ANIM_CURRENT_TIME, GetCharAnimCurrentTime);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_ANIM_CURRENT_TIME, SetCharAnimCurrentTime);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_COLLISION, SetCharCollision);
+    REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_ANIM_TOTAL_TIME, GetCharAnimTotalTime);
     //REGISTER_COMMAND_HANDLER(COMMAND_CREATE_CHAR_AT_ATTRACTOR, CreateCharAtAttractor);
-    //REGISTER_COMMAND_HANDLER(COMMAND_TASK_KILL_CHAR_ON_FOOT_WHILE_DUCKING, TaskKillCharOnFootWhileDucking);
-    //REGISTER_COMMAND_HANDLER(COMMAND_TASK_TURN_CHAR_TO_FACE_CHAR, TaskTurnCharToFaceChar);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_AT_SCRIPTED_ATTRACTOR, IsCharAtScriptedAttractor);
-    //REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_MODEL, GetCharModel);
+    REGISTER_COMMAND_HANDLER(COMMAND_TASK_KILL_CHAR_ON_FOOT_WHILE_DUCKING, TaskKillCharOnFootWhileDucking);
+    REGISTER_COMMAND_HANDLER(COMMAND_TASK_TURN_CHAR_TO_FACE_CHAR, TaskTurnCharToFaceChar);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_AT_SCRIPTED_ATTRACTOR, IsCharAtScriptedAttractor);
+    REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_MODEL, GetCharModel);
     //REGISTER_COMMAND_HANDLER(COMMAND_CREATE_FX_SYSTEM_ON_CHAR_WITH_DIRECTION, CreateFxSystemOnCharWithDirection);
     //REGISTER_COMMAND_HANDLER(COMMAND_ATTACH_CAMERA_TO_CHAR_LOOK_AT_CHAR, AttachCameraToCharLookAtChar);
     //REGISTER_COMMAND_HANDLER(COMMAND_CLEAR_CHAR_TASKS, ClearCharTasks);
