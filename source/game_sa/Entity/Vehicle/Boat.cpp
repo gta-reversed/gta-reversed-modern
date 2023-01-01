@@ -282,7 +282,7 @@ void CBoat::RenderWakePoints() {
 
         if (distToPrevSq <= sq(13.f)) {
             const auto GetCorners = [](auto& posOnDir, auto& dirToLieOn, float width) {
-                const auto offset = dirToLieOn.GetPerp() * width;
+                const auto offset = dirToLieOn.GetPerpRight() * width;
                 return std::make_pair(posOnDir - offset, posOnDir + offset);
             };
 
