@@ -97,18 +97,18 @@ public:
 
     void Attach(RwMatrix* matrix, bool bOwnsMatrix);
     void Detach();
-    void CopyOnlyMatrix(const CMatrix& matrix); // copy base RwMatrix to another matrix
-    void Update();                              // update RwMatrix with attaching matrix. This doesn't check if attaching matrix is present, so use it only if you know it is present.
-                                                // Using UpdateRW() is more safe since it perform this check.
-    void UpdateRW();                            // update RwMatrix with attaching matrix.
-    void UpdateRwMatrix(RwMatrix* matrix);      // update RwMatrix with this matrix
+    void CopyOnlyMatrix(const CMatrix& matrix);  // copy base RwMatrix to another matrix
+    void Update();                               // update RwMatrix with attaching matrix. This doesn't check if attaching matrix is present, so use it only if you know it is present.
+                                                 // Using UpdateRW() is more safe since it perform this check.
+    void UpdateRW();                             // update RwMatrix with attaching matrix.
+    void UpdateRwMatrix(RwMatrix* matrix) const; // update RwMatrix with this matrix
     void UpdateMatrix(RwMatrix* rwMatrix);
     void SetUnity();
     void ResetOrientation();
-    void SetScale(float scale);                 // set (scaled)
-    void SetScale(float x, float y, float z);   // set (scaled)
+    void SetScale(float scale);                  // set (scaled)
+    void SetScale(float x, float y, float z);    // set (scaled)
     void SetTranslateOnly(CVector translation);
-    void SetTranslate(CVector translation);     // like previous + reset orientation
+    void SetTranslate(CVector translation);      // like previous + reset orientation
     void SetRotateXOnly(float angle);
     void SetRotateYOnly(float angle);
     void SetRotateZOnly(float angle);
@@ -121,8 +121,8 @@ public:
     void RotateZ(float angle);
     void Rotate(CVector rotation); // rotate on 3 axes
     void Reorthogonalise();
-    void CopyToRwMatrix(RwMatrix* matrix); // similar to UpdateRW(RwMatrixTag *)
-    void SetRotate(CQuaternion& quat);
+    void CopyToRwMatrix(RwMatrix* matrix) const; // similar to UpdateRW(RwMatrixTag *)
+    void SetRotate(const CQuaternion& quat);
     void Scale(float scale);
     void ScaleXYZ(float x, float y, float z); // notsa
     void ForceUpVector(CVector vecUp);
@@ -151,6 +151,12 @@ public:
     void ScaleAll(float mult) {
         Scale(mult);
         GetPosition() *= mult;
+    }
+
+    RwMatrix ToRwMatrix() const {
+        RwMatrix ret;
+        CopyToRwMatrix(&ret);
+        return ret;
     }
 
     // operators and classes that aren't defined as part of class, but it's much easier to get them working with access to class private fields
