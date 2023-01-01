@@ -3,6 +3,7 @@
 #include "./Commands.hpp"
 #include <CommandParser/Parser.hpp>
 #include <extensions/Shapes/AngledRect.hpp>
+#include "Utility.h"
 
 #include <TaskTypes/TaskComplexDie.h>
 #include <TaskTypes/TaskSimpleCarSetPedInAsDriver.h>
@@ -23,35 +24,14 @@
 #include <EntryExitManager.h>
 #include <TimeCycle.h>
 #include <ePedBones.h>
+#include <SearchLight.h>
+#include <TaskComplexEnterCarAsDriver.h>
+#include <TaskSimpleCarSetPedOut.h>
 
+using namespace notsa::script;
 /*!
 * Various character (ped) commands
 */
-
-//! Fix angles (in degrees) - Dont ask.
-auto FixAngleDegrees(float deg) {
-    if (deg < 0.f) {
-        return deg + 360.f;
-    }
-    if (deg > 360.f) {
-        return deg - 360.f;
-    }
-    return deg;
-}
-
-void FixPosZ(CVector& pos) {
-    if (pos.z <= -100.f) {
-        pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-    }
-}
-
-//! Get the ped or it's vehicle (if in one)
-auto GetPedOrItsVehicle(CPed& ped) -> CPhysical& {
-    if (ped.IsInVehicle()) {
-        return *ped.m_pVehicle;
-    }
-    return ped;
-}
 
 template<typename T>
 void HandleEntityMissionCleanup(CRunningScript& S, T& entity) {
@@ -199,7 +179,7 @@ auto GetCharCoordinates(CPed& ped) {
 }
 
 auto SetCharCoordinates(CPed& ped, CVector coords) {
-    CRunningScript::SetCharCoordinates(&ped, coords.x, coords.y, coords.z, true, true);
+    CRunningScript::SetCharCoordinates(ped, coords, true, true);
 }
 
 auto IsCharInArea2D(CRunningScript& S, CPed& ped, CVector2D a, CVector2D b, bool highlightArea) {
@@ -590,7 +570,7 @@ auto IsCharInZone(CPed& ped, std::string_view zoneName) {
 
 // GET_CHAR_HEADING
 auto GetCharHeading(CPed& ped) {
-    return FixAngleDegrees(RWRAD2DEG(GetPedOrItsVehicle(ped).GetHeading()));
+    return FixAngleDegrees(RadiansToDegrees(GetPedOrItsVehicle(ped).GetHeading()));
 }
 
 // SET_CHAR_HEADING
@@ -599,7 +579,7 @@ auto SetCharHeading(CPed& ped, float deg) {
         return;
     }
 
-    const auto rad = RWDEG2RAD(FixAngleDegrees(deg));
+    const auto rad = DegreesToRadians(FixAngleDegrees(deg));
     ped.m_fAimingRotation = ped.m_fCurrentRotation = rad;
     ped.SetHeading(rad);
     ped.UpdateRW();
@@ -695,7 +675,7 @@ auto SetCharOnlyDamagedByPlayer(CPed& ped, bool enabled) {
 
 // GET_CLOSEST_CHAR_NODE
 auto GetClosestCharNode(CVector pos) -> CVector {
-    FixPosZ(pos);
+    CWorld::PutToGroundIfTooLow(pos);
     if (const auto node = ThePaths.FindNodeClosestToCoors(pos)) {
         return ThePaths.GetPathNode(node)->GetNodeCoors();
     }
@@ -854,7 +834,7 @@ auto SetCharStayInSamePlace(CPed& ped, bool bStay) {
 
 // WARP_CHAR_FROM_CAR_TO_COORD
 auto WarpCharFromCarToCoord(CPed& ped, CVector pos) {
-    FixPosZ(pos);
+    CWorld::PutToGroundIfTooLow(pos);
     ped.GetIntelligence()->FlushImmediately(true);
     pos.z += ped.GetDistanceFromCentreOfMassToBaseOfModel();
     ped.Teleport(
@@ -948,7 +928,7 @@ auto AttachCharToCar(CPed& ped, CVehicle& veh, CVector offset, int32 pos, float 
         &veh,
         offset,
         pos,
-        RWDEG2RAD(angleLimitDeg),
+        DegreesToRadians(angleLimitDeg),
         wtype
     );
 }
@@ -1069,7 +1049,7 @@ auto GetCharArmour(CPed& ped) {
 
 // ATTACH_CHAR_TO_OBJECT
 auto AttachCharToObject(CPed& ped, CObject& obj, CVector offset, int32 orientation, float angleLimitDeg, eWeaponType wtype) {
-    ped.AttachPedToEntity(&obj, offset, orientation, RWDEG2RAD(angleLimitDeg), wtype);
+    ped.AttachPedToEntity(&obj, offset, orientation, DegreesToRadians(angleLimitDeg), wtype);
 }
 
 // HAS_CHAR_BEEN_DAMAGED_BY_CHAR
@@ -1328,6 +1308,170 @@ auto GetCharModel(CPed& ped) {
     return (eModelID)(ped.m_nModelIndex);
 }
 
+// SET_CURRENT_CHAR_WEAPON
+void SetCurrentCharWeapon(CPed& ped, eWeaponType weaponType) {
+    for (auto&& [slot, weapon] : notsa::enumerate(ped.m_aWeapons)) {
+        if (weapon.m_nType != weaponType)
+            continue;
+
+        if (ped.IsPlayer()) {
+            ped.AsPlayer()->m_pPlayerData->m_nChosenWeapon = slot;
+        } else {
+            ped.SetCurrentWeapon(slot);
+        }
+    }
+}
+
+// MARK_CHAR_AS_NO_LONGER_NEEDED
+void MarkCharAsNoLongerNeeded(CRunningScript& S, CPed& ped) {
+    CTheScripts::CleanUpThisPed(&ped);
+
+    if (S.m_bUseMissionCleanup) {
+        CTheScripts::MissionCleanUp.RemoveEntityFromList(ped);
+    }
+}
+
+// GET_CHAR_SPEED
+float GetCharSpeed(CPed& ped) {
+    return ped.GetMoveSpeed().Magnitude() * 50.0f;
+}
+
+// IS_CHAR_IN_SEARCH_LIGHT
+bool IsCharInSearchlight(uint32 searchLightIdx, CPed& ped) {
+    return CSearchLight::IsSpottedEntity(searchLightIdx, ped);
+}
+
+// REMOVE_CHAR_FROM_GROUP
+void RemoveCharFromGroup(CPed& ped) {
+    if (auto pedGroup = ped.GetGroup(); pedGroup && !pedGroup->GetMembership().IsLeader(&ped)) {
+        pedGroup->GetMembership().RemoveMember(ped);
+        pedGroup->Process();
+    }
+}
+
+// ATTACH_CHAR_TO_BIKE
+void AttachCharToBike(CPed& ped, CVehicle& bike, CVector posn, uint16 heading, float headingLimit, float verticalLimit, eWeaponType weapon) {
+    // turret on car?
+    ped.AttachPedToBike(&bike, posn, heading, DegreesToRadians(headingLimit), DegreesToRadians(verticalLimit), weapon);
+}
+
+// GET_CAR_CHAR_IS_USING
+CVehicle* GetCarCharIsUsing(CPed& ped) {
+    if (ped.bInVehicle) {
+        return ped.m_pVehicle;
+    }
+
+    auto task = reinterpret_cast<CTaskComplexEnterCar*>([&ped]() -> CTask* {
+        if (auto driver = ped.GetIntelligence()->FindTaskByType(TASK_COMPLEX_ENTER_CAR_AS_DRIVER)) {
+            return driver;
+        }
+        if (auto passenger = ped.GetIntelligence()->FindTaskByType(TASK_COMPLEX_ENTER_CAR_AS_PASSENGER)) {
+            return passenger;
+        }
+
+        return nullptr;
+    }());
+
+    return task ? task->m_pTargetVehicle : nullptr;
+}
+
+// ENABLE_CHAR_SPEECH
+void EnableCharSpeech(CPed& ped) {
+    ped.EnablePedSpeech();
+}
+
+// DISABLE_CHAR_SPEECH
+void DisableCharSpeech(CPed& ped, bool stopCurrentSpeech) {
+    ped.DisablePedSpeech(stopCurrentSpeech);
+}
+
+// SET_CHAR_WANTED_BY_POLICE
+void SetCharWantedByPolice(CPed& ped) {
+    ped.bWantedByPolice = true;
+}
+
+// SET_CHAR_SIGNAL_AFTER_KILL
+void SetCharSignalAfterKill(CPed& ped) {
+    ped.bSignalAfterKill = true;
+}
+
+// SET_CHAR_COORDINATES_DONT_WARP_GANG_NO_OFFSET
+void SetCharCoordinatesDontWarpGangNoOffset(CPed& ped, CVector posn) {
+    CRunningScript::SetCharCoordinates(ped, posn, false, false);
+}
+
+// IS_CHAR_USING_MAP_ATTRACTOR
+bool IsCharUsingMapAttractor(CPed& ped) {
+    return GetPedAttractorManager()->IsPedRegisteredWithEffect(&ped);
+}
+
+// todo: move that to somewhere else
+eTargetDoor ComputeTargetDoorToExit(const CVehicle& vehicle, const CPed& ped) {
+    return plugin::CallAndReturn<eTargetDoor, 0x64F110, const CVehicle&, const CPed&>(vehicle, ped);
+}
+
+// REMOVE_CHAR_FROM_CAR_MAINTAIN_POSITION
+void RemoveCharFromCarMaintainPosition(CPed& ped, CVehicle& vehicle) {
+    const auto pedPos = ped.GetPosition();
+    CTaskSimpleCarSetPedOut task(&vehicle, ComputeTargetDoorToExit(vehicle, ped), false);
+    task.ProcessPed(&ped);
+    ped.SetPosn(pedPos); // ?
+}
+
+// SET_CHAR_SAY_CONTEXT_IMPORTANT
+int16 SetCharSayContextImportant(CPed& ped, uint16 phraseId, uint8 arg3, uint8 arg4, uint8 arg5) {
+    return ped.Say(phraseId, 0u, 1.0f, arg3, arg4, arg5);
+}
+
+// SET_CHAR_SAY_SCRIPT
+void SetCharSayScript(CPed& ped, uint8 arg1, uint8 arg2, uint8 arg3, uint8 arg4) {
+    ped.SayScript(arg1, arg2, arg3, arg4);
+}
+
+// IS_CHAR_GETTING_IN_INTO_A_CAR
+bool IsCharGettingInToACar(CPed& ped) {
+    return ped.GetTaskManager().FindActiveTaskFromList({TASK_COMPLEX_ENTER_CAR_AS_DRIVER, TASK_COMPLEX_ENTER_CAR_AS_PASSENGER, TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL});
+}
+
+// GET_CHAR_AREA_VISIBLE
+uint32 GetCharAreaVisible(CPed& ped) {
+    return ped.m_nAreaCode;
+}
+
+// HAS_CHAR_SPOTTED_CHAR_IN_FRONT
+bool HasCharSpottedCharInFront(CPed& ped, CPed& other) {
+    return ped.OurPedCanSeeThisEntity(&other, true);
+}
+
+// SHUT_CHAR_UP_FOR_SCRIPTED_SPEECH
+void ShutCharUpForScriptedSpeech(CPed* ped, bool disable) {
+    if (!ped)
+        return;
+
+    ped->DisablePedSpeechForScriptSpeech(disable);
+}
+
+// IS_CHAR_TOUCHING_CHAR
+bool IsCharTouchingChar(CPed& ped, CPed& other) {
+    const auto GetRelevantEntity = [](CPed& _ped) -> CPhysical* {
+        return _ped.IsInVehicle() ? _ped.m_pVehicle->AsPhysical() : _ped.AsPhysical();
+    };
+    return GetRelevantEntity(ped)->GetHasCollidedWith(GetRelevantEntity(other));
+}
+
+// IS_CHAR_ATTACHED_TO_ANY_CAR
+bool IsCharAttachedToAnyCar(CPed* ped) {
+    return ped && ped->m_nType == ENTITY_TYPE_VEHICLE;
+}
+
+// STORE_CAR_CHAR_IS_ATTACHED_TO_NO_SAVE
+CVehicle* StoreCarCharIsAttachedToNoSave(CPed* ped) {
+    if (ped->m_nType != ENTITY_TYPE_VEHICLE) {
+        return nullptr;
+    }
+    return ped->m_pAttachedTo->AsVehicle();
+}
+
 void notsa::script::commands::character::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_PROOFS, SetCharProofs);
     REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_VELOCITY, SetCharVelocity);
@@ -1347,7 +1491,6 @@ void notsa::script::commands::character::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_CAR, IsCharInCar);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_MODEL, IsCharInModel);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANY_CAR, IsCharInAnyCar);
-
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ANY_MEANS_2D, LocateCharAnyMeans2D);
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ON_FOOT_2D, LocateCharOnFoot2D);
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_IN_CAR_2D, LocateCharInCar2D);
@@ -1372,7 +1515,6 @@ void notsa::script::commands::character::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ANY_MEANS_CAR_3D, LocateCharAnyMeansCar3D);
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_ON_FOOT_CAR_3D, LocateCharOnFootCar3D);
     REGISTER_COMMAND_HANDLER(COMMAND_LOCATE_CHAR_IN_CAR_CAR_3D, LocateCharInCarCar3D);
-
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_DEAD, IsCharDead);
     REGISTER_COMMAND_HANDLER(COMMAND_CREATE_CHAR_INSIDE_CAR, CreateCharInsideCar);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ZONE, IsCharInZone);
@@ -1391,7 +1533,7 @@ void notsa::script::commands::character::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_SHOOTING_IN_AREA, IsCharShootingInArea);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CURRENT_CHAR_WEAPON, IsCurrentCharWeapon);
     REGISTER_COMMAND_HANDLER(COMMAND_GET_RANDOM_CHAR_IN_ZONE, GetRandomCharInZone);
-    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_SHOOTING, IsCharShooting);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_SHOOTING, IsCharShooting); // bad
     REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_ACCURACY, SetCharAccuracy);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_MODEL, IsCharModel);
     REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_WEAPON, HasCharBeenDamagedByWeapon);
@@ -1473,21 +1615,40 @@ void notsa::script::commands::character::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_ANIM_CURRENT_TIME, SetCharAnimCurrentTime);
     REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_COLLISION, SetCharCollision);
     REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_ANIM_TOTAL_TIME, GetCharAnimTotalTime);
-    //REGISTER_COMMAND_HANDLER(COMMAND_CREATE_CHAR_AT_ATTRACTOR, CreateCharAtAttractor);
+    // REGISTER_COMMAND_HANDLER(COMMAND_CREATE_CHAR_AT_ATTRACTOR, CreateCharAtAttractor);
     REGISTER_COMMAND_HANDLER(COMMAND_TASK_KILL_CHAR_ON_FOOT_WHILE_DUCKING, TaskKillCharOnFootWhileDucking);
     REGISTER_COMMAND_HANDLER(COMMAND_TASK_TURN_CHAR_TO_FACE_CHAR, TaskTurnCharToFaceChar);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_AT_SCRIPTED_ATTRACTOR, IsCharAtScriptedAttractor);
     REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_MODEL, GetCharModel);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CURRENT_CHAR_WEAPON, SetCurrentCharWeapon);
+    REGISTER_COMMAND_HANDLER(COMMAND_MARK_CHAR_AS_NO_LONGER_NEEDED, MarkCharAsNoLongerNeeded);
+    REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_SPEED, GetCharSpeed);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_SEARCHLIGHT, IsCharInSearchlight);
+    REGISTER_COMMAND_HANDLER(COMMAND_REMOVE_CHAR_FROM_GROUP, RemoveCharFromGroup);
+    REGISTER_COMMAND_HANDLER(COMMAND_ATTACH_CHAR_TO_BIKE, AttachCharToBike);
+    REGISTER_COMMAND_HANDLER(COMMAND_GET_CAR_CHAR_IS_USING, GetCarCharIsUsing);
+    REGISTER_COMMAND_HANDLER(COMMAND_DISABLE_CHAR_SPEECH, DisableCharSpeech);
+    REGISTER_COMMAND_HANDLER(COMMAND_ENABLE_CHAR_SPEECH, EnableCharSpeech);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_SIGNAL_AFTER_KILL, SetCharSignalAfterKill);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_WANTED_BY_POLICE, SetCharWantedByPolice);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_COORDINATES_DONT_WARP_GANG_NO_OFFSET, SetCharCoordinatesDontWarpGangNoOffset);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_USING_MAP_ATTRACTOR, IsCharUsingMapAttractor);
+    REGISTER_COMMAND_HANDLER(COMMAND_REMOVE_CHAR_FROM_CAR_MAINTAIN_POSITION, RemoveCharFromCarMaintainPosition);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_SAY_CONTEXT_IMPORTANT, SetCharSayContextImportant);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_SAY_SCRIPT, SetCharSayScript);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_GETTING_IN_TO_A_CAR, IsCharGettingInToACar);
+    REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_AREA_VISIBLE, GetCharAreaVisible);
+    REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_SPOTTED_CHAR_IN_FRONT, HasCharSpottedCharInFront);
+    REGISTER_COMMAND_HANDLER(COMMAND_SHUT_CHAR_UP_FOR_SCRIPTED_SPEECH, ShutCharUpForScriptedSpeech);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_TOUCHING_CHAR, IsCharTouchingChar);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_ATTACHED_TO_ANY_CAR, IsCharAttachedToAnyCar);
+    REGISTER_COMMAND_HANDLER(COMMAND_STORE_CAR_CHAR_IS_ATTACHED_TO_NO_SAVE, StoreCarCharIsAttachedToNoSave);
     //REGISTER_COMMAND_HANDLER(COMMAND_CREATE_FX_SYSTEM_ON_CHAR_WITH_DIRECTION, CreateFxSystemOnCharWithDirection);
     //REGISTER_COMMAND_HANDLER(COMMAND_ATTACH_CAMERA_TO_CHAR_LOOK_AT_CHAR, AttachCameraToCharLookAtChar);
     //REGISTER_COMMAND_HANDLER(COMMAND_CLEAR_CHAR_TASKS, ClearCharTasks);
-    //REGISTER_COMMAND_HANDLER(COMMAND_ATTACH_CHAR_TO_BIKE, AttachCharToBike);
     //REGISTER_COMMAND_HANDLER(COMMAND_TASK_GOTO_CHAR_OFFSET, TaskGotoCharOffset);
     //REGISTER_COMMAND_HANDLER(COMMAND_HIDE_CHAR_WEAPON_FOR_SCRIPTED_CUTSCENE, HideCharWeaponForScriptedCutscene);
-    //REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_SPEED, GetCharSpeed);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_SEARCHLIGHT, IsCharInSearchlight);
     //REGISTER_COMMAND_HANDLER(COMMAND_TASK_TURN_CHAR_TO_FACE_COORD, TaskTurnCharToFaceCoord);
-    //REGISTER_COMMAND_HANDLER(COMMAND_REMOVE_CHAR_FROM_GROUP, RemoveCharFromGroup);
     //REGISTER_COMMAND_HANDLER(COMMAND_TASK_CHAR_ARREST_CHAR, TaskCharArrestChar);
     //REGISTER_COMMAND_HANDLER(COMMAND_CLEAR_CHAR_DECISION_MAKER_EVENT_RESPONSE, ClearCharDecisionMakerEventResponse);
     //REGISTER_COMMAND_HANDLER(COMMAND_ADD_CHAR_DECISION_MAKER_EVENT_RESPONSE, AddCharDecisionMakerEventResponse);
@@ -1512,7 +1673,6 @@ void notsa::script::commands::character::RegisterHandlers() {
     //REGISTER_COMMAND_HANDLER(COMMAND_COPY_CHAR_DECISION_MAKER, CopyCharDecisionMaker);
     //REGISTER_COMMAND_HANDLER(COMMAND_TASK_CHAR_SLIDE_TO_COORD_AND_PLAY_ANIM, TaskCharSlideToCoordAndPlayAnim);
     //REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_HIGHEST_PRIORITY_EVENT, GetCharHighestPriorityEvent);
-    //REGISTER_COMMAND_HANDLER(COMMAND_GET_CAR_CHAR_IS_USING, GetCarCharIsUsing);
     //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_KINDA_STAY_IN_SAME_PLACE, SetCharKindaStayInSamePlace);
     //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_AIR, IsCharInAir);
     //REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_HEIGHT_ABOVE_GROUND, GetCharHeightAboveGround);
@@ -1530,8 +1690,6 @@ void notsa::script::commands::character::RegisterHandlers() {
     //REGISTER_COMMAND_HANDLER(COMMAND_GET_NAME_OF_ENTRY_EXIT_CHAR_USED, GetNameOfEntryExitCharUsed);
     //REGISTER_COMMAND_HANDLER(COMMAND_GET_POSITION_OF_ENTRY_EXIT_CHAR_USED, GetPositionOfEntryExitCharUsed);
     //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_TALKING, IsCharTalking);
-    //REGISTER_COMMAND_HANDLER(COMMAND_DISABLE_CHAR_SPEECH, DisableCharSpeech);
-    //REGISTER_COMMAND_HANDLER(COMMAND_ENABLE_CHAR_SPEECH, EnableCharSpeech);
     //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_STUCK_UNDER_CAR, IsCharStuckUnderCar);
     //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_KEEP_TASK, SetCharKeepTask);
     //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_SWIMMING, IsCharSwimming);
@@ -1545,20 +1703,6 @@ void notsa::script::commands::character::RegisterHandlers() {
     //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_DRUGGED_UP, SetCharDruggedUp);
     //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_HEAD_MISSING, IsCharHeadMissing);
     //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_IN_ANY_TRAIN, IsCharInAnyTrain);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_SIGNAL_AFTER_KILL, SetCharSignalAfterKill);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_WANTED_BY_POLICE, SetCharWantedByPolice);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_COORDINATES_DONT_WARP_GANG_NO_OFFSET, SetCharCoordinatesDontWarpGangNoOffset);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_USING_MAP_ATTRACTOR, IsCharUsingMapAttractor);
-    //REGISTER_COMMAND_HANDLER(COMMAND_REMOVE_CHAR_FROM_CAR_MAINTAIN_POSITION, RemoveCharFromCarMaintainPosition);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_SAY_CONTEXT_IMPORTANT, SetCharSayContextImportant);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_SAY_SCRIPT, SetCharSayScript);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_GETTING_IN_TO_A_CAR, IsCharGettingInToACar);
-    //REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_AREA_VISIBLE, GetCharAreaVisible);
-    //REGISTER_COMMAND_HANDLER(COMMAND_HAS_CHAR_SPOTTED_CHAR_IN_FRONT, HasCharSpottedCharInFront);
-    //REGISTER_COMMAND_HANDLER(COMMAND_SHUT_CHAR_UP_FOR_SCRIPTED_SPEECH, ShutCharUpForScriptedSpeech);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_TOUCHING_CHAR, IsCharTouchingChar);
-    //REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_ATTACHED_TO_ANY_CAR, IsCharAttachedToAnyCar);
-    //REGISTER_COMMAND_HANDLER(COMMAND_STORE_CAR_CHAR_IS_ATTACHED_TO_NO_SAVE, StoreCarCharIsAttachedToNoSave);
     //REGISTER_COMMAND_HANDLER(COMMAND_GET_RANDOM_CHAR_IN_AREA_OFFSET_NO_SAVE, GetRandomCharInAreaOffsetNoSave);
 
     REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_SET_CHAR_GRAPHIC_TYPE);
@@ -1600,9 +1744,7 @@ void notsa::script::commands::character::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_IS_CHAR_STOPPED_IN_AREA_3D);
     REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_IS_CHAR_STOPPED_IN_AREA_ON_FOOT_3D);
     REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_IS_CHAR_STOPPED_IN_AREA_IN_CAR_3D);
-    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_SET_CURRENT_CHAR_WEAPON);
     REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_TURN_CHAR_TO_FACE_COORD);
-    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_MARK_CHAR_AS_NO_LONGER_NEEDED);
     REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_CREATE_CHAR_AS_PASSENGER);
     REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_SET_CHAR_OBJ_KILL_CHAR_ON_FOOT);
     REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_SET_CHAR_OBJ_KILL_PLAYER_ON_FOOT);

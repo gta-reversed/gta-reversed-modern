@@ -98,6 +98,25 @@ struct CompareFlagUpdate {
 };
 
 using CommandHandlerFunction = OpcodeResult(*)(CRunningScript*);
+
+//! Fix angles (in degrees) - heaviliy used in scripts.
+inline float FixAngleDegrees(float deg) {
+    if (deg < 0.f) {
+        return deg + 360.f;
+    }
+    if (deg > 360.f) {
+        return deg - 360.f;
+    }
+    return deg;
+}
+
+//! Get the ped or it's vehicle (if in one)
+inline auto GetPedOrItsVehicle(CPed& ped) -> CPhysical& {
+    if (ped.IsInVehicle()) {
+        return *ped.m_pVehicle;
+    }
+    return ped;
+}
 }; // script
 
 

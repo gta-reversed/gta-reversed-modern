@@ -36,7 +36,7 @@ inline void StoreArg(CRunningScript* S, const T& arg) { // Add requirements to f
             return std::make_tuple(offset, idx);
         };
 
-        switch (CTheScripts::Read1ByteFromScript(ip)) {
+        switch (const auto t = CTheScripts::Read1ByteFromScript(ip)) {
         case SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE:
             return reinterpret_cast<tScriptParam*>(&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(ip)]);
         case SCRIPT_PARAM_LOCAL_NUMBER_VARIABLE: {
@@ -51,7 +51,7 @@ inline void StoreArg(CRunningScript* S, const T& arg) { // Add requirements to f
             return S->GetPointerToLocalArrayElement(offset, idx, 1);
         }
         default:
-            NOTSA_UNREACHABLE("Variable type unknown");
+            NOTSA_UNREACHABLE("Variable type unknown ={:x}", t);
         }
     }();
     static_assert(sizeof(T) <= sizeof(tScriptParam)); // Otherwise we'd be overwriting the script => bad

@@ -137,12 +137,16 @@ void CRunningScript::InjectCustomCommandHooks() {
 #endif
 
 #ifdef DUMP_CUSTOM_COMMAND_HANDLERS_TO_FILE
+    auto reversed{0}, total{0};
     std::ofstream ofsrev{ "reversed_script_command_handlers.txt" }, ofsnotrev{ "NOT_reversed_script_command_handlers.txt" };
     for (auto&& [idx, handler] : notsa::enumerate(s_CustomCommandHandlerTable)) {
         const auto id = (eScriptCommands)(idx);
+        ++total;
+        if (handler) ++reversed;
         (handler ? ofsrev : ofsnotrev) << ::notsa::script::GetScriptCommandName(id) << '\n';
     }
     DEV_LOG("Script cmds dumped! Find them in `<GTA Directory>/Scripts`!");
+    DEV_LOG("Script cmds reverse progress: {}/{} ({:.2f}% done)", reversed, total, 100.0f * ((float)reversed / (float)total));
 #endif
 }
 
@@ -441,23 +445,22 @@ void CRunningScript::ScriptTaskPickUpObject(int32 commandId) {
 }
 
 // 0x464DC0
-void CRunningScript::SetCharCoordinates(CPed* ped, float x, float y, float z, bool bWarpGang, bool bOffset) {
-    if (z <= MAP_Z_LOW_LIMIT)
-        z = CWorld::FindGroundZForCoord(x, y);
+void CRunningScript::SetCharCoordinates(CPed& ped, CVector posn, bool warpGang, bool offset) {
+    CWorld::PutToGroundIfTooLow(posn);
 
-    CVehicle* vehicle = ped->bInVehicle ? ped->m_pVehicle : nullptr;
+    CVehicle* vehicle = ped.bInVehicle ? ped.m_pVehicle : nullptr;
     if (vehicle) {
-        CVector pos = { x, y, vehicle->GetDistanceFromCentreOfMassToBaseOfModel() + z };
-        vehicle->Teleport(pos, false);
-        CTheScripts::ClearSpaceForMissionEntity(&pos, vehicle);
+        posn.z += vehicle->GetDistanceFromCentreOfMassToBaseOfModel();
+        vehicle->Teleport(posn, false);
+        CTheScripts::ClearSpaceForMissionEntity(&posn, vehicle);
     } else {
-        CVector pos = { x, y, bOffset ? ped->GetDistanceFromCentreOfMassToBaseOfModel() + z : z };
-        CTheScripts::ClearSpaceForMissionEntity(&pos, ped);
-        auto* group = CPedGroups::GetPedsGroup(ped);
-        if (group && group->GetMembership().IsLeader(ped) && bWarpGang) {
-            group->Teleport(&pos);
+        posn.z += offset ? ped.GetDistanceFromCentreOfMassToBaseOfModel() : 0.0f;
+        CTheScripts::ClearSpaceForMissionEntity(&posn, &ped);
+        auto* group = CPedGroups::GetPedsGroup(&ped);
+        if (group && group->GetMembership().IsLeader(&ped) && warpGang) {
+            group->Teleport(&posn);
         } else {
-            ped->Teleport(pos, false);
+            ped.Teleport(posn, false);
         }
     }
 }
