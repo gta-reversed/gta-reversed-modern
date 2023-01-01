@@ -30,25 +30,29 @@ template<>
 inline auto GetAt(uint32 idx) -> tScriptSequence&   { return CTheScripts::ScriptSequenceTaskArray[idx]; }
 template<>
 inline auto GetAt(uint32 idx) -> tScriptCheckpoint& { return CTheScripts::ScriptCheckpointArray[idx]; }
-template<>
-inline auto GetAt(uint32 idx) -> C2dEffect& { return CScripted2dEffects::ms_effects[idx]; }
+template<std::derived_from<C2dEffectBase> T>
+inline auto GetAt(uint32 idx) -> T& {
+    auto& effect = CScripted2dEffects::ms_effects[idx];
+    assert(T::Type == effect.m_type);
+    return reinterpret_cast<T&>(effect);
+}
 
 //! Get ID of a thing at a given index
 template<typename T>
 inline auto GetId(uint32 idx) -> uint32 { return GetAt<T>(idx).GetId(); }
-template<>
-inline auto GetId<C2dEffect>(uint32 idx) -> uint32 { return CScripted2dEffects::ScriptReferenceIndex[idx]; }
+template<std::derived_from<C2dEffectBase> T>
+inline auto GetId(uint32 idx) -> uint32 { return CScripted2dEffects::ScriptReferenceIndex[idx]; }
 
 //! Get if a script thing is active
 template<typename T>
 inline auto IsActive(uint32 idx) -> bool { return GetAt<T>(idx).IsActive(); }
-template<>
-inline auto IsActive<C2dEffect>(uint32 idx) -> bool { return CScripted2dEffects::ms_activated[idx]; }
-
+template<std::derived_from<C2dEffectBase> T>
+inline auto IsActive(uint32 idx) -> bool { return CScripted2dEffects::ms_activated[idx]; }
 
 //! Check if `T` is a script thing
 template<typename T>
 inline constexpr auto is_script_thing_v = requires(uint32 index) { GetAt<T>(index); };
+static_assert(is_script_thing_v<C2dEffect> && !is_script_thing_v<int>);
 }; // namespace scriptthing
 };
 
