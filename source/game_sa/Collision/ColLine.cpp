@@ -25,6 +25,7 @@ void CColLine::Set(const CVector& start, const CVector& end) {
 // NOTSA
 float CColLine::DistTo(CVector pt) const {
     return CCollision::DistToLine(m_vecStart, m_vecEnd, pt);
+}
 
 // NOTSA
 void CColLine::DrawWireFrame(CRGBA color, const CMatrix& transform) const {

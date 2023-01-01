@@ -1230,7 +1230,8 @@ void CShadows::RenderIndicatorShadow(
 ) {
     const auto size = std::max(frontX, -sideX);
     for (auto mult : { 0.8f, 0.9f, 1.0f }) {
-        C3dMarkers::PlaceMarkerSet(id, 1u, posn, size * mult, 255, 0, 0, 255u, 2048, 0.2f, 0);
+        CVector markerPos = posn;
+        C3dMarkers::PlaceMarkerSet(id, MARKER3D_CYLINDER, markerPos, size * mult, 255, 0, 0, 255u, 2048, 0.2f, 0);
     }
 }
 
