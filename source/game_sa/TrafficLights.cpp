@@ -188,10 +188,10 @@ void CTrafficLights::DisplayActualLight(CEntity* entity) {
     CVector vecCenter(0.0F, 0.0F, 0.0F);
     for (int32 iFxInd = 0; iFxInd < mi->m_n2dfxCount; ++iFxInd) {
         auto effect = mi->Get2dEffect(iFxInd);
-        if (effect->m_nType != e2dEffectType::EFFECT_LIGHT)
+        if (effect->m_type != e2dEffectType::EFFECT_LIGHT)
             continue;
 
-        auto vecLightPos = entity->GetMatrix() * effect->m_vecPosn;
+        auto vecLightPos = entity->GetMatrix() * effect->m_pos;
         vecCenter += vecLightPos;
         int32 iColorState = eTrafficLightsState::LIGHT_GREEN;
         if (effect->light.m_color.red > 200) {
@@ -201,7 +201,7 @@ void CTrafficLights::DisplayActualLight(CEntity* entity) {
                 iColorState = eTrafficLightsState::LIGHT_RED;
         }
 
-        if (bSameDir == effect->m_vecPosn.y > 0.0F || iColorState != iLightState)
+        if (bSameDir == effect->m_pos.y > 0.0F || iColorState != iLightState)
             continue;
 
         auto fBrightness = CTimeCycle::m_CurrentColours.m_fSpriteBrightness * 0.07F;

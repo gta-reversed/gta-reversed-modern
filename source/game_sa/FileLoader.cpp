@@ -943,8 +943,8 @@ void CFileLoader::Load2dEffect(const char* line) {
 
     auto& effect = CModelInfo::Get2dEffectStore()->AddItem();
     CModelInfo::GetModelInfo(modelId)->Add2dEffect(&effect);
-    effect.m_vecPosn = pos;
-    effect.m_nType = *reinterpret_cast<e2dEffectType*>(type);
+    effect.m_pos = pos;
+    effect.m_type = *reinterpret_cast<e2dEffectType*>(type);
 
     switch (type) {
     case EFFECT_LIGHT:

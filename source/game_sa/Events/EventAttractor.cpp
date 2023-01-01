@@ -84,7 +84,7 @@ bool CEventAttractor::AffectsPed_Reversed(CPed* ped)
                     return true;
                 if (!g_ikChainMan.IsLooking(ped)) {
                     uint32 time = CGeneral::GetRandomNumberInRange(2000, 4000);
-                    CVector point = m_entity->GetMatrix() * m_2dEffect->m_vecPosn;
+                    CVector point = m_entity->GetMatrix() * m_2dEffect->m_pos;
                     g_ikChainMan.LookAt("CEventAttractor", ped, 0, time, BONE_UNKNOWN, &point, false, 0.25f, 500, 3, false);
                 }
             }     
@@ -103,7 +103,7 @@ bool CEventAttractor::IsEffectActive(CEntity* entity, const C2dEffect* effect)
 {
     auto modelInfo = CModelInfo::GetModelInfo(entity->m_nModelIndex);
     for (int32 i = 0; i < modelInfo->m_n2dfxCount; i++) {
-        if (effect->m_nType == EFFECT_ATTRACTOR && effect == modelInfo->Get2dEffect(i))
+        if (effect->m_type == EFFECT_ATTRACTOR && effect == modelInfo->Get2dEffect(i))
             return true;
     }
     return false;
