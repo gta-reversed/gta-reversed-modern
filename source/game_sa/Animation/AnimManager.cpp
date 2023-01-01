@@ -857,3 +857,18 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* stream, bool compress, bo
         ms_numAnimations = animIndex;
     }
 }
+
+AnimationId CAnimManager::GetRandomGangTalkAnim() {
+    constexpr AnimationId gangTalkAnims[]{
+        ANIM_ID_PRTIAL_GNGTLKA,
+        ANIM_ID_PRTIAL_GNGTLKB,
+        ANIM_ID_PRTIAL_GNGTLKC,
+        ANIM_ID_PRTIAL_GNGTLKD,
+
+        ANIM_ID_PRTIAL_GNGTLKE,
+        ANIM_ID_PRTIAL_GNGTLKF,
+        ANIM_ID_PRTIAL_GNGTLKG,
+        ANIM_ID_PRTIAL_GNGTLKH,
+    };
+    return CGeneral::RandomChoice(gangTalkAnims);
+}
