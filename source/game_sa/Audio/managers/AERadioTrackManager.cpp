@@ -244,7 +244,7 @@ void CAERadioTrackManager::DisplayRadioStationName() {
 }
 
 // 0x4E9E10
-char* CAERadioTrackManager::GetRadioStationName(RadioStationId id) {
+const char* CAERadioTrackManager::GetRadioStationName(RadioStationId id) {
     if (id <= 0)
         return nullptr;
 

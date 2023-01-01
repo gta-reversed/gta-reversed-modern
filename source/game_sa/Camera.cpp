@@ -1015,13 +1015,13 @@ void CCamera::SetZoomValueCamStringScript(int16 zoomMode) {
 // 0x50C260
 void CCamera::StartCooperativeCamMode() {
     m_bCooperativeCamMode = true;
-    CGameLogic::n2PlayerPedInFocus = 2;
+    CGameLogic::n2PlayerPedInFocus = eFocusedPlayer::NONE;
 }
 
 // 0x50C270
 void CCamera::StopCooperativeCamMode() {
     m_bCooperativeCamMode = false;
-    CGameLogic::n2PlayerPedInFocus = 2;
+    CGameLogic::n2PlayerPedInFocus = eFocusedPlayer::NONE;
 }
 
 // 0x50C280

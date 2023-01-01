@@ -794,7 +794,7 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* ped) {
                 } else {
                     ped->m_fAimingRotation -= DegreesToRadians(360.0f);
                 }
-                if (CGameLogic::IsPlayerAllowedToGoInThisDirection(ped, vecPedWalkDirection.x, vecPedWalkDirection.y, vecPedWalkDirection.z, 0.0f)) {
+                if (CGameLogic::IsPlayerAllowedToGoInThisDirection(ped, vecPedWalkDirection, 0.0f)) {
                     pedWalkX = (
                         vecPedWalkDirection.x * ped->m_matrix->GetRight().x +
                         vecPedWalkDirection.y * ped->m_matrix->GetRight().y +

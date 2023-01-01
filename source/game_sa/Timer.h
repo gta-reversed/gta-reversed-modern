@@ -7,6 +7,15 @@
 #pragma once
 
 class CTimer {
+    /*!
+    * Thanks guys for figuring this out for me!
+    * 
+    * So basically, a timestep is just fraction of the frametime (timestep = frametime / TIMESTEP_PER_SECOND)
+    * this timestep is used basically everywhere to calculate physics, etc.
+    */
+    static constexpr float TIMESTEP_PER_SECOND = 50.f;                         /// Number of steps/second
+    static constexpr float TIMESTEP_LEN_IN_MS  = 1000.f / TIMESTEP_PER_SECOND; /// How long (in ms) a timestep is
+
 public:
     typedef uint64(__cdecl* TimerFunction_t)();
     static TimerFunction_t& ms_fnTimerFunction;
@@ -70,7 +79,7 @@ public:
     static float  GetTimeStep() { return ms_fTimeStep; }
     static void   SetTimeStep(float ts) { ms_fTimeStep = ts; }
     static void   UpdateTimeStep(float ts) { ms_fTimeStep = std::max(ts, 0.00001f); }
-    static float  GetTimeStepInSeconds() { return ms_fTimeStep / 50.0f; }
+    static float  GetTimeStepInSeconds() { return ms_fTimeStep / TIMESTEP_PER_SECOND; }
     static float  GetTimeStepInMS() { return GetTimeStepInSeconds() * 1000.0f; } // pattern: CTimer::ms_fTimeStep * 0.02f * 1000.0f
 
     static float  GetTimeStepNonClipped() { return ms_fTimeStepNonClipped; }

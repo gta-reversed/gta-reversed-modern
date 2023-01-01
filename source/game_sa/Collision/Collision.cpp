@@ -312,7 +312,7 @@ bool CCollision::ProcessLineOfSight(const CColLine& line, const CMatrix& transfo
         return false;
 
     const auto CheckSeeAndShootThrough = [=](auto material) {
-        return (!doSeeThroughCheck || !g_surfaceInfos->IsSeeThrough(material)) && (!doShootThroughCheck || !g_surfaceInfos->IsShootThrough(material));
+        return (!doSeeThroughCheck || !g_surfaceInfos.IsSeeThrough(material)) && (!doShootThroughCheck || !g_surfaceInfos.IsShootThrough(material));
     };
 
     float localMinTouchDist = maxTouchDistance;

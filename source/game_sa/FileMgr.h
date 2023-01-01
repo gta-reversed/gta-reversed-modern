@@ -40,3 +40,5 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 };
+
+char* InitUserDirectories();

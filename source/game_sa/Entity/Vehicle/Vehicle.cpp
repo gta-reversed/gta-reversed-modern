@@ -98,8 +98,6 @@ void CVehicle::InjectHooks() {
     RH_ScopedOverloadedInstall(IsPassenger, "Int", 0x6D1C00, bool(CVehicle::*)(int32) const);
     RH_ScopedOverloadedInstall(IsDriver, "Ped", 0x6D1C40, bool(CVehicle::*)(CPed*) const);
     RH_ScopedOverloadedInstall(IsDriver, "Int", 0x6D1C60, bool(CVehicle::*)(int32) const);
-    RH_ScopedInstall(AddExhaustParticles, 0x6DE240);
-    RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
     RH_ScopedInstall(ProcessBoatControl, 0x6DBCE0);
     RH_ScopedInstall(ChangeLawEnforcerState, 0x6D2330);
     RH_ScopedInstall(GetVehicleAppearance, 0x6D1080);
@@ -135,7 +133,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(CarHasRoof, 0x6D25D0, { .reversed = false });
     RH_ScopedInstall(HeightAboveCeiling, 0x6D2600, { .reversed = false });
     RH_ScopedInstall(SetComponentVisibility, 0x6D2700, { .reversed = false });
-    RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740, { .reversed = false });
+    RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
     RH_ScopedInstall(SetComponentAtomicAlpha, 0x6D2960);
     RH_ScopedInstall(UpdateClumpAlpha, 0x6D2980, { .reversed = false });
     RH_ScopedInstall(UpdatePassengerList, 0x6D29E0, { .reversed = false });
@@ -196,7 +194,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(DoBoatSplashes, 0x6DD130, { .reversed = false });
     RH_ScopedInstall(DoSunGlare, 0x6DD6F0, { .reversed = false });
     RH_ScopedInstall(AddWaterSplashParticles, 0x6DDF60, { .reversed = false });
-    RH_ScopedInstall(AddExhaustParticles, 0x6DE240, { .reversed = false });
+    RH_ScopedInstall(AddExhaustParticles, 0x6DE240);
     RH_ScopedInstall(AddSingleWheelParticles, 0x6DE880, { .reversed = false });
     RH_ScopedInstall(GetSpecialColModel, 0x6DF3D0, { .reversed = false });
     RH_ScopedInstall(RemoveVehicleUpgrade, 0x6DF930, { .reversed = false });
@@ -401,7 +399,7 @@ CVehicle::~CVehicle() {
     }
 
     if (!physicalFlags.bDestroyed && m_fHealth < 250.0F) {
-        CDarkel::RegisterCarBlownUpByPlayer(this, 0);
+        CDarkel::RegisterCarBlownUpByPlayer(*this, 0);
     }
 }
 
@@ -410,6 +408,14 @@ void* CVehicle::operator new(unsigned size) {
 }
 
 void CVehicle::operator delete(void* data) {
+    GetVehiclePool()->Delete(static_cast<CVehicle*>(data));
+}
+
+void* CVehicle::operator new(unsigned size, int32 poolRef) {
+    return GetVehiclePool()->NewAt(poolRef);
+}
+
+void CVehicle::operator delete(void* data, int32 poolRef) {
     GetVehiclePool()->Delete(static_cast<CVehicle*>(data));
 }
 
@@ -1689,7 +1695,7 @@ void CVehicle::AddDamagedVehicleParticles() {
 
 // 0x6D2BF0
 void CVehicle::MakeDirty(CColPoint& colPoint) {
-    if (g_surfaceInfos->IsWater(colPoint.m_nSurfaceTypeB) || CWeather::IsRainy()) {
+    if (g_surfaceInfos.IsWater(colPoint.m_nSurfaceTypeB) || CWeather::IsRainy()) {
         if (m_fDirtLevel <= 1.0f) {
             return;
         }
@@ -1697,7 +1703,7 @@ void CVehicle::MakeDirty(CColPoint& colPoint) {
         return;
     }
 
-    if (g_surfaceInfos->MakesCarDirty(colPoint.m_nSurfaceTypeB)) {
+    if (g_surfaceInfos.MakesCarDirty(colPoint.m_nSurfaceTypeB)) {
         if (m_vecMoveSpeed.Magnitude2D() <= 0.06f) {
             return;
         }
@@ -1705,7 +1711,7 @@ void CVehicle::MakeDirty(CColPoint& colPoint) {
         return;
     }
 
-    if (g_surfaceInfos->MakesCarClean(colPoint.m_nSurfaceTypeB)) {
+    if (g_surfaceInfos.MakesCarClean(colPoint.m_nSurfaceTypeB)) {
         if (m_vecMoveSpeed.Magnitude2D() <= 0.04f || m_fDirtLevel <= 4.0f) {
             return;
         }
@@ -2500,9 +2506,9 @@ bool CVehicle::UsesSiren() {
 }
 
 // 0x6D84D0
-bool CVehicle::IsSphereTouchingVehicle(float x, float y, float z, float radius) {
+bool CVehicle::IsSphereTouchingVehicle(CVector posn, float radius) {
     const auto cm = GetColModel();
-    const auto dist = CVector{ x, y, z } - GetPosition();
+    const auto dist = posn - GetPosition();
 
     const auto dotRight = DotProduct(dist, GetRight());
     if (dotRight < cm->m_boundBox.m_vecMin.x - radius ||
@@ -2801,16 +2807,21 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
     }
 
     if (m_pHandlingData->m_fSuspensionBiasBetweenFrontAndRear != 0.0F) {
-        auto vecCross = CVector();
-        vecCross.Cross(GetForward(), CVector(0.0F, 0.0F, 1.0F));
+        auto right = GetForward().Cross(CVector::ZAxisVector());
 
-        auto fMult = DotProduct(vecCross, m_vecMoveSpeed) * m_pHandlingData->m_fSuspensionBiasBetweenFrontAndRear * CTimer::GetTimeStep() * fImmersionDepth * m_fMass * -0.1F;
-        float fXTemp = vecCross.x * 0.3F;
-        vecCross.x -= vecCross.y * 0.3F;
-        vecCross.y += fXTemp;
+        const auto mult =
+              DotProduct(right, m_vecMoveSpeed)
+            * m_pHandlingData->m_fSuspensionBiasBetweenFrontAndRear
+            * CTimer::GetTimeStep()
+            * fImmersionDepth
+            * m_fMass
+            * -0.1F;
 
-        auto vecMoveForce = vecCross * fMult;
-        CPhysical::ApplyMoveForce(vecMoveForce);
+        const auto x = right.x * 0.3F;
+        right.x -= right.y * 0.3F;
+        right.y += x;
+
+        CPhysical::ApplyMoveForce(right * mult);
     }
 
     if (m_nStatus == eEntityStatus::STATUS_PLAYER && pad->GetHandBrake()) {

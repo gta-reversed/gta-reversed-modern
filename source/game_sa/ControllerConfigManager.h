@@ -136,8 +136,11 @@ public:
     void SaveSettings(FILESTREAM file);
 
     void InitDefaultControlConfiguration();
+    void InitDefaultControlConfigMouse(const CMouseControllerState& state, bool controller);
     void InitialiseControllerActionNameArray();
     void ReinitControls();
+
+    void SetMouseButtonAssociatedWithAction(eControllerAction action, RsKeyCodes button);
 
     void StoreMouseButtonState(eMouseButtons button, bool state);
     void UpdateJoyInConfigMenus_ButtonDown(ePadButton button, int32 padNumber);
