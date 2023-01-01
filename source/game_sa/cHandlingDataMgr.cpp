@@ -2,6 +2,14 @@
 
 #include "cHandlingDataMgr.h"
 
+char (&VehicleNames)[210][14] = *(char(*)[210][14])0x8D3978;
+
+//! 0xC2B9B4 - Used for acceleration conversion from file to game units
+constexpr auto ACCEL_CONST = 1.f / sq(50.f); // This number 50 seems to be coming up a lot...;
+
+// 0xC2B9BC - Used for velocity conversion from file to game units
+constexpr auto VELOCITY_CONST = 0.277778f / 50.f;
+
 void cHandlingDataMgr::InjectHooks() {
     RH_ScopedClass(cHandlingDataMgr);
     RH_ScopedCategoryGlobal();
@@ -274,12 +282,6 @@ int32 cHandlingDataMgr::GetHandlingId(const char* nameToFind) {
     }
     NOTSA_UNREACHABLE("Can't find {}", nameToFind);
 }
-
-// 0xC2B9B4
-constexpr auto ACCEL_CONST = 1.f / sq(50.f); // This number 50 seems to be coming up a lot...;
-
-// 0xC2B9BC
-constexpr auto VELOCITY_CONST = 0.277778f / 50.f;
 
 // 0x6F5010
 // update some handling variables with some world-specific multipliers

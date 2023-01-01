@@ -58,8 +58,6 @@ float& DIFF_SPRING_MULT_Z = *(float*)0x8D35C0;           // 0.1f
 float& DIFF_SPRING_COMPRESS_MULT = *(float*)0x8D35C4;    // 2.0f
 CVector (&VehicleGunOffset)[14] = *(CVector(*)[14])0x8D35D4; // maybe [12]
 
-char (&VehicleNames)[210][14] = *(char(*)[210][14])0x8D3978;
-
 void CVehicle::InjectHooks() {
     RH_ScopedClass(CVehicle);
     RH_ScopedCategory("Vehicle");
@@ -2300,7 +2298,7 @@ void CVehicle::ReactToVehicleDamage(CPed* ped) {
     };
 
     // FIX_BUGS ?
-    int32 t1 = 2000 - CGeneral::GetRandomNumberInRange(-3000.0f, 0.0f);
+    int32 t1 = (int32)(2000.f - CGeneral::GetRandomNumberInRange(-3000.0f, 0.0f));
     if (m_pDriver) {
         if (m_apPassengers[0]) {
             if (CGeneral::GetRandomNumber() >= 0x3FFF)
@@ -2312,7 +2310,7 @@ void CVehicle::ReactToVehicleDamage(CPed* ped) {
         }
     }
 
-    int32 t2 = 2000 - CGeneral::GetRandomNumberInRange(-3000.0f, 0.0f);
+    int32 t2 = (int32)(2000.f - CGeneral::GetRandomNumberInRange(-3000.0f, 0.0f));
     if (m_apPassengers[0]) {
         if (CGeneral::GetRandomNumber() >= 0x3FFF)
             React(m_apPassengers[0], ped, t2);
