@@ -174,3 +174,7 @@ constexpr static bool IsPointInRectangle2D(CVector2D rectTopLeft, CVector2D rect
 }
 
 static CVector2D Normalized2D(CVector2D v) { v.Normalise(); return v; }
+
+static auto abs(const CVector2D& v2d) {
+    return CVector2D{ std::abs(v2d.x), std::abs(v2d.y) };
+}

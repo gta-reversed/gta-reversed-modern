@@ -453,6 +453,8 @@ namespace rng = std::ranges;
 #include "game_sa\Tasks\PedScriptedTaskRecord.h"
 #include "game_sa\Tasks\ScriptedBrainTaskStore.h"
 
+#include "game_sa/RenderBuffer.hpp"
+
 #ifdef EXTRA_DEBUG_FEATURES
 #include "toolsmenu\DebugModules\COcclusionDebugModule.h"
 #endif

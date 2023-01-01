@@ -92,8 +92,13 @@ public:
     // Regular 3d markers
     //
 
+    //! This shit does modify `posn`, sadly we can't make it into a constant....
     static C3dMarker* PlaceMarker(uint32 id, e3dMarkerType type, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate, float nrm_x, float nrm_y, float nrm_z, bool zCheck);
+
+    //! This shit does modify `posn`, sadly we can't make it into a constant....
     static void PlaceMarkerCone(uint32 id, CVector& point, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate, bool bEnableCollision);
+
+    //! This shit does modify `posn`, sadly we can't make it into a constant....
     static void PlaceMarkerSet(uint32 id, e3dMarkerType type, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
 
     static void Render3dMarkers();

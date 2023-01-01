@@ -82,7 +82,7 @@ void CWaterLevel::PreRenderWater() {
 // 0x6EB690
 bool CWaterLevel::GetWaterLevel(float x, float y, float z, float* pOutWaterLevel, uint8 bTouchingWater, CVector* pVecNormals) {
     float fUnkn1, fUnkn2;
-    if (!GetWaterLevelNoWaves(x, y, z, pOutWaterLevel, &fUnkn1, &fUnkn2))
+    if (!GetWaterLevelNoWaves({x, y, z}, pOutWaterLevel, &fUnkn1, &fUnkn2))
         return false;
 
     if ((*pOutWaterLevel - z > 3.0F) && !bTouchingWater) {
@@ -115,8 +115,8 @@ void CWaterLevel::FindNearestWaterAndItsFlow() {
 }
 
 // 0x6E8580
-bool CWaterLevel::GetWaterLevelNoWaves(float x, float y, float z, float * pOutWaterLevel, float * fUnkn1, float * fUnkn2) {
-    return plugin::CallAndReturn<bool, 0x6E8580, float, float, float, float *, float *, float *>(x, y, z, pOutWaterLevel, fUnkn1, fUnkn2);
+bool CWaterLevel::GetWaterLevelNoWaves(CVector pos, float * pOutWaterLevel, float * pOutBigWaves, float * pOutSmallWaves) {
+    return plugin::CallAndReturn<bool, 0x6E8580, CVector, float *, float *, float *>(pos, pOutWaterLevel, pOutBigWaves, pOutSmallWaves);
 }
 
 bool CWaterLevel::GetWaterDepth(const CVector& vecPos, float* pOutWaterDepth, float* pOutWaterLevel, float* pOutGroundLevel)
@@ -131,8 +131,15 @@ void CWaterLevel::RenderWaterFog() {
 }
 
 // 0x6E6EF0
-void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float lowFreqMult, float midHighFreqMult, float& outWave,
-    float& colorMult, float& glare, CVector& vecNormal)
+void CWaterLevel::CalculateWavesOnlyForCoordinate(
+    int32 x, int32 y,
+    float lowFreqMult,
+    float midHighFreqMult,
+    float& outWave,
+    float& colorMult,
+    float& glare,
+    CVector& vecNormal
+)
 {
     x = std::abs(x);
     y = std::abs(y);
@@ -190,6 +197,16 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float lowFre
     glare = std::clamp(8.0f * v17 - 5.0f, 0.0f, 0.99f) * CWeather::SunGlare;
 }
 
+// 0x6E7210
+void CWaterLevel::CalculateWavesOnlyForCoordinate2( // TODO: Original name didn't have a 2 in it... I'm just lazy!
+    int32 x, int32 y,
+    float* pResultHeight,
+    float bigWavesAmpl,
+    float smallWavesAmpl
+) {
+    plugin::Call<0x6E7210>(x, y, bigWavesAmpl, smallWavesAmpl, pResultHeight);
+}
+
 // 0x6E6D10
 void CWaterLevel::ScanThroughBlocks() {
     plugin::Call<0x6E6D10>();
@@ -212,7 +229,7 @@ void CWaterLevel::SyncWater() {
 // NOTSA
 bool CWaterLevel::IsPointUnderwaterNoWaves(const CVector& point) {
     float level{};
-    if (GetWaterLevelNoWaves(point.x, point.y, point.z, &level, nullptr, nullptr))
+    if (GetWaterLevelNoWaves(point, &level, nullptr, nullptr))
         return level > point.z;
     return false;
 }
