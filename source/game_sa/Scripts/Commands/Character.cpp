@@ -3,6 +3,7 @@
 #include "./Commands.hpp"
 #include <CommandParser/Parser.hpp>
 #include <extensions/Shapes/AngledRect.hpp>
+#include "Utility.h"
 
 #include <TaskTypes/TaskComplexDie.h>
 #include <TaskTypes/TaskSimpleCarSetPedInAsDriver.h>
@@ -24,34 +25,10 @@
 #include <TimeCycle.h>
 #include <ePedBones.h>
 
+using namespace notsa::script;
 /*!
 * Various character (ped) commands
 */
-
-//! Fix angles (in degrees) - Dont ask.
-auto FixAngleDegrees(float deg) {
-    if (deg < 0.f) {
-        return deg + 360.f;
-    }
-    if (deg > 360.f) {
-        return deg - 360.f;
-    }
-    return deg;
-}
-
-void FixPosZ(CVector& pos) {
-    if (pos.z <= -100.f) {
-        pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-    }
-}
-
-//! Get the ped or it's vehicle (if in one)
-auto GetPedOrItsVehicle(CPed& ped) -> CPhysical& {
-    if (ped.IsInVehicle()) {
-        return *ped.m_pVehicle;
-    }
-    return ped;
-}
 
 template<typename T>
 void HandleEntityMissionCleanup(CRunningScript& S, T& entity) {
@@ -590,7 +567,7 @@ auto IsCharInZone(CPed& ped, std::string_view zoneName) {
 
 // GET_CHAR_HEADING
 auto GetCharHeading(CPed& ped) {
-    return FixAngleDegrees(RWRAD2DEG(GetPedOrItsVehicle(ped).GetHeading()));
+    return FixAngleDegrees(RadiansToDegrees(GetPedOrItsVehicle(ped).GetHeading()));
 }
 
 // SET_CHAR_HEADING
@@ -599,7 +576,7 @@ auto SetCharHeading(CPed& ped, float deg) {
         return;
     }
 
-    const auto rad = RWDEG2RAD(FixAngleDegrees(deg));
+    const auto rad = DegreesToRadians(FixAngleDegrees(deg));
     ped.m_fAimingRotation = ped.m_fCurrentRotation = rad;
     ped.SetHeading(rad);
     ped.UpdateRW();
@@ -948,7 +925,7 @@ auto AttachCharToCar(CPed& ped, CVehicle& veh, CVector offset, int32 pos, float 
         &veh,
         offset,
         pos,
-        RWDEG2RAD(angleLimitDeg),
+        DegreesToRadians(angleLimitDeg),
         wtype
     );
 }
@@ -1069,7 +1046,7 @@ auto GetCharArmour(CPed& ped) {
 
 // ATTACH_CHAR_TO_OBJECT
 auto AttachCharToObject(CPed& ped, CObject& obj, CVector offset, int32 orientation, float angleLimitDeg, eWeaponType wtype) {
-    ped.AttachPedToEntity(&obj, offset, orientation, RWDEG2RAD(angleLimitDeg), wtype);
+    ped.AttachPedToEntity(&obj, offset, orientation, DegreesToRadians(angleLimitDeg), wtype);
 }
 
 // HAS_CHAR_BEEN_DAMAGED_BY_CHAR

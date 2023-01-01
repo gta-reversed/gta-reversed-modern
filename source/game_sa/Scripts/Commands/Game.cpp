@@ -116,6 +116,11 @@ void SetMenuHeaderOrientation() {
     // CMenuSystem::SetHeaderOrientation();
 }
 
+void SetFloatStat(eStats stat, float value) {
+    CStats::SetStatValue(stat, value);
+    CStats::DisplayScriptStatUpdateMessage(STAT_UPDATE_INCREASE, stat, value);
+}
+
 #ifdef IMPLEMENT_UNSUPPORTED_OPCODES
 void RegisterJumpDistance(float distance) {
     CStats::SetStatValue(STAT_MAXIMUM_INSANE_JUMP_DISTANCE, std::max(
@@ -195,4 +200,6 @@ void notsa::script::commands::game::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_SET_UNIQUE_JUMPS_TOTAL, SetUniqueJumpsTotal);
     REGISTER_COMMAND_HANDLER(COMMAND_REGISTER_PASSENGER_DROPPED_OFF_TAXI, RegisterPassengerDroppedOffTaxi);
     REGISTER_COMMAND_HANDLER(COMMAND_REGISTER_MONEY_MADE_TAXI, RegisterMoneyMadeTaxi);
+
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_FLOAT_STAT, SetFloatStat);
 }

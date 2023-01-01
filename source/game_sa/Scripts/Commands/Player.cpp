@@ -6,9 +6,10 @@
 #include "TaskSimpleSwim.h"
 #include "RunningScript.h"
 #include "CommandParser/Parser.hpp"
-
+#include "Utility.hpp"
 #include <TaskTypes/TaskSimplePlayerOnFoot.h>
 
+using namespace notsa::script;
 /*!
 * Various player commands
 */
@@ -51,7 +52,7 @@ CVector GetPlayerCoordinates(CPlayerInfo& pinfo) {
     return pinfo.GetPos();
 }
 
-bool IsPlyerInArea2D(CRunningScript* S, CPlayerPed& player, CRect area, bool highlightArea) {
+bool IsPlayerInArea2D(CRunningScript* S, CPlayerPed& player, CRect area, bool highlightArea) {
     if (highlightArea) {
         CTheScripts::HighlightImportantArea((uint32)S + (uint32)S->m_IP, area, MAP_Z_LOW_LIMIT);
     }
@@ -65,7 +66,7 @@ bool IsPlyerInArea2D(CRunningScript* S, CPlayerPed& player, CRect area, bool hig
         : player.IsWithinArea(area.left, area.top, area.right, area.bottom);
 }
 
-bool IsPlyerInArea3D(CRunningScript* S, CPlayerPed& player, CVector p1, CVector p2, bool highlightArea) {
+bool IsPlayerInArea3D(CRunningScript* S, CPlayerPed& player, CVector p1, CVector p2, bool highlightArea) {
     if (highlightArea) {
         CTheScripts::HighlightImportantArea((uint32)S + (uint32)S->m_IP, p1.x, p1.y, p2.x, p2.y, (p1.z + p2.z) / 2.0f);
     }
@@ -96,13 +97,33 @@ void SetPlayerGroupToFollowAlways(CPlayerPed& player, bool enable) {
     player.ForceGroupToAlwaysFollow(enable);
 }
 
+void SetPlayerAbleToUseCrouch(uint32 playerIdx, bool enable) {
+    CPad::GetPad(playerIdx)->bDisablePlayerDuck = !enable;
+}
+
+bool IsPlayerTouchingObject(CPlayerPed& player, CObject& object) {
+#ifdef IMPLEMENT_UNSUPPORTED_OPCODES
+    return GetPedOrItsVehicle(player).GetHasCollidedWith(&object);
+#endif
+}
+
+bool IsPlayerTouchingObjectOnFoot(CPlayerPed& player, CObject& object) {
+#ifdef IMPLEMENT_UNSUPPORTED_OPCODES
+    return player.GetHasCollidedWith(&object);
+#endif
+}
+
 void notsa::script::commands::player::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_CREATE_PLAYER, CreatePlayer);
     REGISTER_COMMAND_HANDLER(COMMAND_GET_PLAYER_COORDINATES, GetPlayerCoordinates);
-    REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_IN_AREA_2D, IsPlyerInArea2D);
-    REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_IN_AREA_3D, IsPlyerInArea3D);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_IN_AREA_2D, IsPlayerInArea2D);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_IN_AREA_3D, IsPlayerInArea3D);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_PLAYING, IsPlayerPlaying);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_CLIMBING, IsPlayerClimbing);
     REGISTER_COMMAND_HANDLER(COMMAND_SET_SWIM_SPEED, SetSwimSpeed);
     REGISTER_COMMAND_HANDLER(COMMAND_SET_PLAYER_GROUP_TO_FOLLOW_ALWAYS, SetPlayerGroupToFollowAlways);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_PLAYER_DUCK_BUTTON, SetPlayerAbleToUseCrouch);
+
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_TOUCHING_OBJECT, IsPlayerTouchingObject);
+    REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_TOUCHING_OBJECT_ON_FOOT, IsPlayerTouchingObjectOnFoot);
 }

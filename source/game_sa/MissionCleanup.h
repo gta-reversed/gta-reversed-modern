@@ -65,9 +65,11 @@ public:
 
 
     // QoL (NOTSA) - TODO: Use `PooledType` + some traits shit to get the `MissionCleanUpEntityType` of `T`
+    void AddEntityToList(CObject& obj);
     void AddEntityToList(CPed& ped);
     void AddEntityToList(CVehicle& veh);
 
+    void RemoveEntityFromList(CObject& obj);
     void RemoveEntityFromList(CPed& ped);
     void RemoveEntityFromList(CVehicle& veh);
 };
