@@ -599,9 +599,9 @@ void CWaterLevel::UpdateFlow() {
 }
 
 // 0x6EB690
-bool CWaterLevel::GetWaterLevel(float x, float y, float z, float* pOutWaterLevel, uint8 bTouchingWater, CVector* pVecNormals) {
-    float fUnkn1, fUnkn2;
-    if (!GetWaterLevelNoWaves({x, y, z}, pOutWaterLevel, &fUnkn1, &fUnkn2))
+bool CWaterLevel::GetWaterLevel(float x, float y, float z, float& pOutWaterLevel, uint8 bTouchingWater, CVector* pVecNormals) {
+    float smallWaves, bigWaves;
+    if (!GetWaterLevelNoWaves({x, y, z}, &pOutWaterLevel, &smallWaves, &bigWaves)) {
         return false;
     }
      
@@ -622,7 +622,7 @@ void CWaterLevel::SetUpWaterFog(int32 minX, int32 minY, int32 maxX, int32 maxY) 
     }
 
     const auto fogZ = [&] {
-        if (float waterLvl, bigWaves, smallWaves; GetWaterLevelNoWaves((float)minX, (float)minY, 0.f, &waterLvl, &bigWaves, &smallWaves)) {
+        if (float waterLvl, bigWaves, smallWaves; GetWaterLevelNoWaves({(float)minX, (float)minY, 0.f}, & waterLvl, & bigWaves, & smallWaves)) {
             if (bigWaves != 0.f || smallWaves != 0.f) {
                 return waterLvl;
             }
@@ -761,6 +761,8 @@ void CWaterLevel::MarkQuadsAndPolysToBeRendered(int32 blockX, int32 blockY, bool
         break;
     }
     }
+}
+
 // 0x6E7210
 void CWaterLevel::CalculateWavesOnlyForCoordinate2( // TODO: Original name didn't have a 2 in it... I'm just lazy!
     int32 x, int32 y,
@@ -769,11 +771,6 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate2( // TODO: Original name didn'
     float smallWavesAmpl
 ) {
     plugin::Call<0x6E7210>(x, y, bigWavesAmpl, smallWavesAmpl, pResultHeight);
-}
-
-// 0x6E6D10
-void CWaterLevel::ScanThroughBlocks() {
-    plugin::Call<0x6E6D10>();
 }
 
 // 0x6E6CA0

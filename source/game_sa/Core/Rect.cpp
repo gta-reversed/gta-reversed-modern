@@ -119,6 +119,8 @@ bool CRect::DoConstrainPoint(CVector2D& pt) const {
     }
 
     return hasConstrained;
+}
+
 // NOTSA
 bool CRect::OverlapsWith(const CRect& o) const {
     return (right >= o.left && left <= o.right)
