@@ -1305,6 +1305,20 @@ auto GetCharModel(CPed& ped) {
     return (eModelID)(ped.m_nModelIndex);
 }
 
+// SET_CURRENT_CHAR_WEAPON
+void SetCurrentCharWeapon(CPed& ped, eWeaponType weaponType) {
+    for (auto&& [slot, weapon] : notsa::enumerate(ped.m_aWeapons)) {
+        if (weapon.m_nType != weaponType)
+            continue;
+
+        if (ped.IsPlayer()) {
+            ped.AsPlayer()->m_pPlayerData->m_nChosenWeapon = slot;
+        } else {
+            ped.SetCurrentWeapon(slot);
+        }
+    }
+}
+
 void notsa::script::commands::character::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_PROOFS, SetCharProofs);
     REGISTER_COMMAND_HANDLER(COMMAND_SET_CHAR_VELOCITY, SetCharVelocity);
@@ -1455,6 +1469,7 @@ void notsa::script::commands::character::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_TASK_TURN_CHAR_TO_FACE_CHAR, TaskTurnCharToFaceChar);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CHAR_AT_SCRIPTED_ATTRACTOR, IsCharAtScriptedAttractor);
     REGISTER_COMMAND_HANDLER(COMMAND_GET_CHAR_MODEL, GetCharModel);
+    REGISTER_COMMAND_HANDLER(COMMAND_SET_CURRENT_CHAR_WEAPON, SetCurrentCharWeapon);
     //REGISTER_COMMAND_HANDLER(COMMAND_CREATE_FX_SYSTEM_ON_CHAR_WITH_DIRECTION, CreateFxSystemOnCharWithDirection);
     //REGISTER_COMMAND_HANDLER(COMMAND_ATTACH_CAMERA_TO_CHAR_LOOK_AT_CHAR, AttachCameraToCharLookAtChar);
     //REGISTER_COMMAND_HANDLER(COMMAND_CLEAR_CHAR_TASKS, ClearCharTasks);
@@ -1577,7 +1592,7 @@ void notsa::script::commands::character::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_IS_CHAR_STOPPED_IN_AREA_3D);
     REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_IS_CHAR_STOPPED_IN_AREA_ON_FOOT_3D);
     REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_IS_CHAR_STOPPED_IN_AREA_IN_CAR_3D);
-    REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_SET_CURRENT_CHAR_WEAPON);
+    //REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_SET_CURRENT_CHAR_WEAPON);
     REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_TURN_CHAR_TO_FACE_COORD);
     REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_MARK_CHAR_AS_NO_LONGER_NEEDED);
     REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(COMMAND_CREATE_CHAR_AS_PASSENGER);

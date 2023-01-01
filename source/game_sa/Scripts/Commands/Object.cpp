@@ -52,10 +52,11 @@ bool DoesObjectExists(CObject* object) {
     return object != nullptr;
 }
 
-void MarkObjectNoLongerNeeded(CRunningScript& S, CObject& object) {
-    CTheScripts::CleanUpThisObject(&object);
-    if (S.m_bUseMissionCleanup) {
-        CTheScripts::MissionCleanUp.RemoveEntityFromList(object);
+void MarkObjectNoLongerNeeded(CRunningScript& S, CObject* object) {
+    CTheScripts::CleanUpThisObject(object);
+
+    if (object && S.m_bUseMissionCleanup) {
+        CTheScripts::MissionCleanUp.RemoveEntityFromList(*object);
     }
 }
 
