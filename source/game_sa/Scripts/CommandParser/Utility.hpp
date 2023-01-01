@@ -110,12 +110,6 @@ inline float FixAngleDegrees(float deg) {
     return deg;
 }
 
-inline void FixPosZ(CVector& pos) {
-    if (pos.z <= -100.f) {
-        pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
-    }
-}
-
 //! Get the ped or it's vehicle (if in one)
 inline auto GetPedOrItsVehicle(CPed& ped) -> CPhysical& {
     if (ped.IsInVehicle()) {

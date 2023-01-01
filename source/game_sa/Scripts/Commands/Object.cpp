@@ -19,7 +19,7 @@ namespace Object {
 CObject& CreateObject(CRunningScript& S, script::Model model, CVector posn) {
     const auto mi = CModelInfo::GetModelInfo(model);
     auto* object = CObject::Create(model, false);
-    FixPosZ(posn);
+    CWorld::PutToGroundIfTooLow(posn);
     posn.z += object->GetDistanceFromCentreOfMassToBaseOfModel();
     object->SetPosn(posn);
     object->SetOrientation(CVector{0.0f});

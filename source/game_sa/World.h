@@ -246,6 +246,12 @@ public:
             std::forward<Fn>(fn)
         );
     }
+    // @notsa
+    static void PutToGroundIfTooLow(CVector& pos) {
+        if (pos.z <= MAP_Z_LOW_LIMIT) {
+            pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+        }
+    }
 };
 
 extern uint32 &FilledColPointIndex;
