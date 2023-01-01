@@ -26,7 +26,7 @@
 // https://library.sannybuilder.com/#/sa
 
 //! Holds all custom command handlers (or null of entries with no custom handler)
-static inline std::array<notsa::script::CommandHandlerFunction, (size_t)(COMMAND_HIGHEST_ID_TO_HOOK)> s_CustomCommandHandlerTable{};
+static inline std::array<notsa::script::CommandHandlerFunction, (size_t)(COMMAND_HIGHEST_ID_TO_HOOK) + 1> s_CustomCommandHandlerTable{};
 
 void CRunningScript::InjectHooks() {
     InjectCustomCommandHooks();
