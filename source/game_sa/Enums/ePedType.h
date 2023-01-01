@@ -37,6 +37,21 @@ enum ePedType : uint32 {
     PED_TYPE_COUNT // 32
 };
 
+static constexpr auto GetAllGangPedTypes() {
+    return std::array{
+        PED_TYPE_GANG1,
+        PED_TYPE_GANG2,
+        PED_TYPE_GANG3,
+        PED_TYPE_GANG4,
+        PED_TYPE_GANG5,
+        PED_TYPE_GANG6,
+        PED_TYPE_GANG7,
+        PED_TYPE_GANG8,
+        PED_TYPE_GANG9,
+        PED_TYPE_GANG10
+    };
+}
+
 enum eGangID {
     GANG_BALLAS = 0,
     GANG_GROVE = 1,

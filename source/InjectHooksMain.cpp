@@ -403,6 +403,7 @@ void InjectHooksMain() {
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
     CFileMgr::InjectHooks();
 
+    CPopCycle::InjectHooks();
     ProcObjectMan_c::InjectHooks();
     ProcSurfaceInfo_c::InjectHooks();
     RwHelperInjectHooks();
@@ -584,6 +585,7 @@ void InjectHooksMain() {
     CShopping::InjectHooks();
     CInformFriendsEventQueue::InjectHooks();
     C3dMarkers::InjectHooks();
+    C3dMarker::InjectHooks();
     CSpecialFX::InjectHooks();
     CFallingGlassPane::InjectHooks();
     CGlass::InjectHooks();
