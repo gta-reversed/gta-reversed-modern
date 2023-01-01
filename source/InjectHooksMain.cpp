@@ -585,6 +585,7 @@ void InjectHooksMain() {
     CShopping::InjectHooks();
     CInformFriendsEventQueue::InjectHooks();
     C3dMarkers::InjectHooks();
+    C3dMarker::InjectHooks();
     CSpecialFX::InjectHooks();
     CFallingGlassPane::InjectHooks();
     CGlass::InjectHooks();

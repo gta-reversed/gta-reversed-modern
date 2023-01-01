@@ -6,6 +6,7 @@
 */
 #pragma once
 
+#include "HudColours.h"
 #include "3dMarker.h"
 #include "RGBA.h"
 #include "Vector.h"
@@ -19,6 +20,11 @@ struct tUser3dMarker {
     uint32  m_nRed;
     uint32  m_nGreen;
     uint32  m_nBlue;
+
+    auto GetColor() const { return CRGBA((uint8)m_nRed, (uint8)m_nGreen, (uint8)m_nBlue, 255u); }
+
+    auto IsInUse() const { return m_bIsUsed; }
+    void Render(RpClump* clump);
 };
 
 VALIDATE_SIZE(tUser3dMarker, 0x1C);
@@ -27,65 +33,91 @@ struct tDirectionArrow {
     bool    m_bIsUsed;
     CVector m_vecPosition;
     float   m_fSize;
-    CVector m_vecDirection;
+    CVector m_normal;       // Normal - That is, the direction it points to
     uint32  m_nRed;
     uint32  m_nGreen;
     uint32  m_nBlue;
     uint32  m_nAlpha;
+
+    auto GetColor() const { return CRGBA((uint8)m_nRed, (uint8)m_nGreen, (uint8)m_nBlue, (uint8)m_nAlpha); }
+
+    auto IsInUse() const { return m_bIsUsed; }
+    void Render(RpClump* clump);
 };
 
 VALIDATE_SIZE(tDirectionArrow, 0x30);
 
-extern uint32 MAX_NUM_3DMARKERS; // default 32
-extern uint32 MAX_NUM_USER_3DMARKERS; // default 5
-extern uint32 MAX_NUM_DIRECTION_ARROWS; // default 5
-
 class C3dMarkers {
 public:
-    static uint8 &m_colDiamond; // default 255
-    static tDirectionArrow *ms_directionArrows;
-    static CRGBA &m_user3dMarkerColor;
-    static tUser3dMarker *ms_user3dMarkers;
-    static bool &IgnoreRenderLimit;
-    static float &m_angleDiamond;
-    static uint32 &NumActiveMarkers;
-    static C3dMarker *m_aMarkerArray;
-    static RpClump **m_pRpClumpArray;
+    static inline uint8& m_colDiamond = *(uint8*)0x8D5D8B; // default 255
+    static inline CRGBA& m_user3dMarkerColor = *(CRGBA*)0xC7C620;
+    static inline bool& IgnoreRenderLimit = *(bool*)0xC7C704;
+    static inline float& m_angleDiamondDeg = *(float*)0xC7C700;
+    static inline uint32& NumActiveMarkers = *(uint32*)0xC7C6D8;
+    static inline std::array<RpClump*, (size_t)(MARKER3D_COUNT)>& m_pRpClumpArray = *(std::array<RpClump*, 7>*)0xC7C6DC;
+    static inline std::array<tDirectionArrow, 5>& ms_directionArrows = *(std::array<tDirectionArrow, 5>*)0xC802E8;
+    static inline std::array<tUser3dMarker, 5>& ms_user3dMarkers = *(std::array<tUser3dMarker, 5>*)0xC80258;
+    static inline std::array<C3dMarker, 32>& m_aMarkerArray = *(std::array<C3dMarker, 32>*)0xC7DD58;
 
 public:
     static void InjectHooks();
 
-    static void Init();
-    static void Update();
-    static void Shutdown();
-    // returns slot index; -1 if not found
-    static int32 DirectionArrowFindFirstFreeSlot();
-    static void DirectionArrowSet(CVector posn, float size, int32 red, int32 green, int32 blue, int32 alpha, float dir_x, float dir_y, float dir_z);
-    static void DirectionArrowsDraw();
-    static void DirectionArrowsInit();
-    static void ForceRender(uint8 bEnable);
-    static RpClump* LoadMarker(const char* modelName);
+    //
+    // Generic functions
+    //
 
-    static C3dMarker* PlaceMarker(uint32 id, uint16 type, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate, float nrm_x, float nrm_y, float nrm_z, bool zCheck);
-    static void PlaceMarkerCone(uint32 id, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate, uint8 bEnableCollision);
-    static void PlaceMarkerSet(uint32 id, uint16 type, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
+    static void Init();
+    static void Shutdown();
+
+    //! Main render function
     static void Render();
 
-    // load user 3d markers from save file; always return true
+    //! Periodic update stuff
+    static void Update();
+
+    static void ForceRender(bool bEnable);
+    static RpClump* LoadMarker(const char* modelName);
+
+    //
+    // Directional Arrows
+    //
+
+    //! @return slot index; -1 if not found
+    static int32 DirectionArrowFindFirstFreeSlot();
+    static void  DirectionArrowSet(CVector posn, float size, int32 red, int32 green, int32 blue, int32 alpha, float dir_x, float dir_y, float dir_z);
+    static void  DirectionArrowsInit();
+    static void  DirectionArrowsDraw();
+
+    //
+    // Regular 3d markers
+    //
+
+    static C3dMarker* PlaceMarker(uint32 id, e3dMarkerType type, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate, float nrm_x, float nrm_y, float nrm_z, bool zCheck);
+    static void PlaceMarkerCone(uint32 id, CVector& point, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate, bool bEnableCollision);
+    static void PlaceMarkerSet(uint32 id, e3dMarkerType type, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
+
+    static void Render3dMarkers();
+
+    //
+    // User markers
+    //
+
+    // WorkBuffer stuff (savefile)
     static bool LoadUser3dMarkers();
-    // save user 3d markers to save file; always return true
     static bool SaveUser3dMarkers();
 
-    // only set material color (m_user3dMarkerColor) for first material in first atomic; 'data' is unused
-    static RpAtomic* User3dMarkerAtomicCB(RpAtomic* atomic, void* _IGNORED_ data);
+    //! only set material color (m_user3dMarkerColor) for first material in first atomic
+    static RpAtomic* User3dMarkerAtomicCB(RpAtomic* atomic, void*);
+
     static void User3dMarkerDelete(int32 slotIndex);
     static void User3dMarkerDeleteAll();
-    // returns slot index; -1 if not found
+
+    //! @return slot index; -1 if none
     static int32 User3dMarkerFindFirstFreeSlot();
-    // returns slot index; -1 if not created; for 'colour', see eHudColours 
-    static int32 User3dMarkerSet(float x, float y, float z, int32 colour);
+
+    //! @return slot index; -1 if not created
+    static int32 User3dMarkerSet(float x, float y, float z, eHudColours colour);
+
+    //! Render the markers
     static void User3dMarkersDraw();
 };
-
-// 'data' is a pointer to store atomic (RpAtomic **)
-RpAtomic* MarkerAtomicCB(RpAtomic* atomic, void* data);

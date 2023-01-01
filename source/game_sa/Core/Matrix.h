@@ -27,12 +27,19 @@ enum eMatrixEulerFlags : uint32 {
 
 class CMatrix {
 public:
+    CMatrix() = default;
+
+    CMatrix(const CVector& pos, const CVector& right, const CVector& fwd, const CVector& up) :
+        m_right{right},
+        m_forward{fwd},
+        m_up{up},
+        m_pos{pos}
+    {
+        // TODO: Add some kind of `assert` to check validity
+    }
     CMatrix(const CMatrix& matrix);
     CMatrix(RwMatrix* matrix, bool temporary = false); // like previous + attach
-    CMatrix() {
-        m_pAttachMatrix = nullptr;
-        m_bOwnsAttachedMatrix = false;
-    }
+
     ~CMatrix();                                        // destructor detaches matrix if attached
 
     //! Returns an identity matrix
@@ -42,6 +49,22 @@ public:
         return mat;
     }
 
+    //! Get a matrix calculated that has it's `up` vector set to `up` (all other directions are calculated based on it)
+    static CMatrix WithUp(const CVector& up, const CVector& pos = {}) {
+        const auto zaxis = CVector::ZAxisVector();
+
+        if (up == zaxis) {
+            return Unity();
+        }
+
+        const auto right = zaxis.Cross(up);
+        return {
+            pos,
+            right,
+            up.Cross(right),
+            up
+        };
+    }
 private:
     // RwV3d-like:
     CVector m_right;        // 0x0
@@ -54,8 +77,8 @@ private:
     uint32  pad3;           // 0x3C
 
 public:
-    RwMatrix* m_pAttachMatrix;       // 0x40
-    bool      m_bOwnsAttachedMatrix; // 0x44 - Do we need to delete attached matrix at detaching
+    RwMatrix* m_pAttachMatrix{};       // 0x40
+    bool      m_bOwnsAttachedMatrix{}; // 0x44 - Do we need to delete attached matrix at detaching
 
 public:
     static void InjectHooks();
@@ -101,6 +124,7 @@ public:
     void CopyToRwMatrix(RwMatrix* matrix); // similar to UpdateRW(RwMatrixTag *)
     void SetRotate(CQuaternion& quat);
     void Scale(float scale);
+    void ScaleXYZ(float x, float y, float z); // notsa
     void ForceUpVector(CVector vecUp);
     void ConvertToEulerAngles(float* pX, float* pY, float* pZ, uint32 uiFlags);
     void ConvertFromEulerAngles(float x, float y, float z, uint32 uiFlags);
