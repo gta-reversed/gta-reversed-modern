@@ -135,6 +135,7 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
         }
 
         if (highestChance == dealersChance) {
+            outPedType = PED_TYPE_DEALER;
             // 0x60FEF2:
             // Because originally there was no `return` inside the loop itself it always returned at the last viable ID.
             // we reverse the loop and just return at the first viable ID.
@@ -146,7 +147,6 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
                 }
             }
             dealersChance = 0.f;
-            outPedType = PED_TYPE_DEALER;
             continue;
         } else if (highestChance == gangChance) { // 0x60FBD0
             outPedType = PickGangToCreateMembersOf();
@@ -262,7 +262,7 @@ bool CPopCycle::PedIsAcceptableInCurrentZone(int32 modelIndex) {
 ePopcycleGroup CPopCycle::PickARandomGroupOfOtherPeds() {
     auto rndPerc = (uint8)CGeneral::GetRandomNumberInRange(0.f, 100.f);
     for (auto [grpIdx, grpPerc] : notsa::enumerate(m_nPercTypeGroup[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_pCurrZoneInfo->zonePopulationType])) {
-        if (rndPerc >= grpPerc) {
+        if (rndPerc < grpPerc) {
             return (ePopcycleGroup)grpIdx;
         }
         rndPerc -= grpPerc;
@@ -277,13 +277,12 @@ eModelID CPopCycle::PickPedMIToStreamInForCurrentZone() {
         const auto npeds         = CPopulation::GetNumPedsInGroup(pedGrpId);
         auto&      nextPedToLoad = CStreaming::ms_NextPedToLoadFromGroup[pedGrpId];
         for (auto p = 0; p < npeds; p++) {
+            nextPedToLoad = (nextPedToLoad + 1) % npeds;
             const auto modelId = (eModelID)CPopulation::GetPedGroupModelId(pedGrpId, nextPedToLoad);
-            nextPedToLoad      = (nextPedToLoad + 1) % npeds;
 
-            if (notsa::contains(CStreaming::ms_pedsLoaded, modelId)) {
-                if (IsRaceAllowedInCurrentZone(modelId)) {
-                    return modelId;
-                }
+            if (!notsa::contains(CStreaming::ms_pedsLoaded, modelId) && IsRaceAllowedInCurrentZone(modelId)) {
+                // Return a non-loaded allowed model.
+                return modelId;
             }
         }
     }
