@@ -12,8 +12,15 @@
 #include "Securom.h"
 #include "UserDisplay.h"
 #include "Garages.h"
-#include "CDebugMenu.h"
+#include "UIRenderer.h"
 #include "Gamma.h"
+#include <Birds.h>
+#include <Skidmarks.h>
+#include <Ropes.h>
+#include <Glass.h>
+#include <WaterCannons.h>
+#include <VehicleRecording.h>
+#include <PostEffects.h>
 
 void AppGameInjectHooks() {
     RH_ScopedCategory("App");
@@ -26,7 +33,7 @@ void AppGameInjectHooks() {
     RH_ScopedGlobalInstall(RwInitialize, 0x5BF390);
     RH_ScopedGlobalInstall(RwTerminate, 0x53D910);
 
-    RH_ScopedGlobalInstall(RenderEffects, 0x53E170, {.reversed = false});
+    RH_ScopedGlobalInstall(RenderEffects, 0x53E170);
     RH_ScopedGlobalInstall(RenderScene, 0x53DF40);
     RH_ScopedGlobalInstall(RenderMenus, 0x53E530);
     RH_ScopedGlobalInstall(Render2dStuff, 0x53E230, {.locked = true});
@@ -78,12 +85,40 @@ void RwTerminate() {
 
 // 0x53E170
 void RenderEffects() {
-    plugin::Call<0x53E170>();
+    CBirds::Render();
+    CSkidmarks::Render();
+    CRopes::Render();
+    CGlass::Render();
+    CMovingThings::Render();
+    CVisibilityPlugins::RenderReallyDrawLastObjects();
+    CCoronas::Render();
+    g_fx.Render(TheCamera.m_pRwCamera, false);
+    CWaterCannons::Render();
+    CWaterLevel::RenderWaterFog();
+    CClouds::MovingFogRender();
+    CClouds::VolumetricCloudsRender();
+    if (CHeli::NumberOfSearchLights || CTheScripts::NumberOfScriptSearchLights) {
+        CHeli::Pre_SearchLightCone();
+        CHeli::RenderAllHeliSearchLights();
+        CTheScripts::RenderAllSearchLights();
+        CHeli::Post_SearchLightCone();
+    }
+    CWeaponEffects::Render();
+    if (CReplay::Mode != MODE_PLAYBACK && !CPad::GetPad(0)->DisablePlayerControls) {
+        FindPlayerPed()->DrawTriangleForMouseRecruitPed();
+    }
+    CSpecialFX::Render();
+    CVehicleRecording::Render();
+    CPointLights::RenderFogEffect();
+    CRenderer::RenderFirstPersonVehicle();
+    CPostEffects::Render();
+
+    notsa::ui::UIRenderer::GetSingleton().Render3D();
 }
 
 // 0x53DF40
 void RenderScene() {
-    bool underWater = CWeather::UnderWaterness <= 0.0f;
+    const auto underWater = CWeather::UnderWaterness <= 0.0f;
 
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(FALSE));
@@ -225,7 +260,7 @@ void Render2dStuff() {
     CFont::DrawFonts();
 
     // NOTSA: ImGui menu draw loop
-    CDebugMenu::ImGuiDrawLoop();
+    notsa::ui::UIRenderer::GetSingleton().DrawLoop();
 }
 
 // 0x53E160

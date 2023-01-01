@@ -27,6 +27,7 @@ public:
         m_Surface.m_nLighting = lighting;
     }
 
+    [[deprecated]]
     CColSphere(float radius, const CVector& center) : CSphere(radius, center){};
 
     CColSphere(const CVector& center, float radius) : CSphere(radius, center){};

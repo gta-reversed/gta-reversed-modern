@@ -50,10 +50,10 @@ void CRGBA::Set(uint8 red, uint8 green, uint8 blue, uint8 alpha) {
 }
 
 void CRGBA::Set(uint32 intValue) {
-    r = (intValue >> 24) & 0xFF;
-    g = (intValue >> 16) & 0xFF;
-    b = (intValue >> 8) & 0xFF;
-    a = intValue & 0xFF;
+    r = (uint8)(intValue >> 24);
+    g = (uint8)(intValue >> 16);
+    b = (uint8)(intValue >> 8 );
+    a = (uint8)(intValue >> 0 );
 }
 
 void CRGBA::Set(const CRGBA& rhs) {
@@ -68,7 +68,7 @@ void CRGBA::Set(const RwRGBA& rwcolor) {
     Set(rwcolor.red, rwcolor.green, rwcolor.blue, rwcolor.alpha);
 }
 
-uint32 CRGBA::ToInt() const {
+uint32 CRGBA::ToInt() const { // RGBA (msb(r) -> lsb(a))
     return a | (b << 8) | (g << 16) | (r << 24);
 }
 

@@ -232,7 +232,7 @@ public:
     * @brief Calculate the number of used slots. CAUTION: Slow, especially for large pools.
     */
     size_t GetNoOfUsedSpaces() {
-        return (size_t)std::count_if(std::execution::parallel_unsequenced_policy{}, m_byteMap, m_byteMap + m_nSize, [](auto&& v) { return !v.bEmpty; });
+        return (size_t)std::count_if(m_byteMap, m_byteMap + m_nSize, [](auto&& v) { return !v.bEmpty; });
     }
 
     auto GetNoOfFreeSpaces() {

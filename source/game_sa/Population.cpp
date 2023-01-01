@@ -33,7 +33,6 @@ uint32& CPopulation::ms_nNumCivMale = *(uint32*)0xC0EC70;
 uint16* CPopulation::m_nNumCarsInGroup = (uint16*)0xC0EC78;
 uint16* CPopulation::m_nNumPedsInGroup = (uint16*)0xC0ECC0;
 int16(*CPopulation::m_CarGroups)[23] = (int16(*)[23])0xC0ED38;
-int16(*CPopulation::m_PedGroups)[21] = (int16(*)[21])0xC0F358;
 bool& CPopulation::m_bDontCreateRandomGangMembers = *(bool*)0xC0FCB2;
 bool& CPopulation::m_bOnlyCreateRandomGangMembers = *(bool*)0xC0FCB3;
 bool& CPopulation::m_bDontCreateRandomCops = *(bool*)0xC0FCB4;
@@ -49,6 +48,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedInstall(ConvertToRealObject, 0x614580);
     RH_ScopedInstall(ConvertToDummyObject, 0x614670);
     RH_ScopedInstall(RemovePed, 0x610F20);
+    RH_ScopedInstall(Update, 0x616650);
 }
 
 // 0x5B6D40
@@ -94,7 +94,7 @@ void CPopulation::RemovePed(CPed* ped) {
 
 // 0x610F40
 int32 CPopulation::ChoosePolicePedOccupation() {
-    return ((int32(__cdecl*)())0x610F40)();
+    return 0;
 }
 
 // 0x610F50
@@ -138,8 +138,8 @@ bool CPopulation::IsSkateable(const CVector& point) {
 }
 
 // 0x611550
-void CPopulation::ChooseGangOccupation(int32 arg0) {
-    ((void(__cdecl*)(int32))0x611550)(arg0);
+int32 CPopulation::ChooseGangOccupation(int32 arg0) {
+    return ((int32(__cdecl*)(int32))0x611550)(arg0);
 }
 
 // 0x611560
@@ -430,10 +430,72 @@ void CPopulation::PopulateInterior(int32 numPeds, CVector posn) {
 
 // 0x616650
 void CPopulation::Update(bool generatePeds) {
-    ((void(__cdecl*)(bool))0x616650)(generatePeds);
+    CurrentWorldZone = [] {
+        switch (CWeather::WeatherRegion) {
+        case WEATHER_REGION_DEFAULT:
+        case WEATHER_REGION_LA:
+        case WEATHER_REGION_DESERT:
+            return 0;
+        case WEATHER_REGION_SF:
+            return 1;
+        case WEATHER_REGION_LV:
+            return 2;
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
+
+    if (CReplay::Mode == MODE_PLAYBACK) {
+        return;
+    }
+
+    ManagePopulation();
+    RemovePedsIfThePoolGetsFull();
+
+    if (m_CountDownToPedsAtStart) {
+        if (--m_CountDownToPedsAtStart == 0) {
+            GeneratePedsAtStartOfGame();
+        }
+        return;
+    }
+
+    ms_nTotalGangPeds = GetTotalNumGang();
+    ms_nTotalCivPeds  = ms_nNumCivMale + ms_nNumCivFemale;
+    ms_nTotalPeds     = ms_nTotalPeds + ms_nTotalGangPeds + ms_nNumCop + ms_nNumEmergency;
+
+    if (CCutsceneMgr::IsCutsceneProcessing() || !generatePeds) {
+        return;
+    }
+
+    const auto pcdm = PedCreationDistMultiplier();
+    const auto gdm  = TheCamera.m_fGenerationDistMultiplier;
+    const float dists[]{
+        pcdm * gdm * 42.5f,
+        pcdm * gdm * 50.5f,
+        pcdm * 25.f - 10.f,
+        pcdm * 25.f
+    };
+
+    if (AddToPopulation(dists[0], dists[1], dists[2], dists[3])) {
+        GeneratePedsAtAttractors(
+            FindPlayerCentreOfWorld(),
+            dists[0], dists[1],
+            dists[2], dists[3],
+            CGame::CanSeeOutSideFromCurrArea() ? -1 : 7,
+            true
+        );
+    }
 }
 
 bool CPopulation::DoesCarGroupHaveModelId(int32 carGroupId, int32 modelId)
 {
     return plugin::CallAndReturn<bool, 0x406F50, int32, int32>(carGroupId, modelId);
+}
+
+uint32 CPopulation::GetTotalNumGang() {
+    return std::accumulate(
+        ms_nNumGang.begin(),
+        ms_nNumGang.end(),
+        0
+    );
 }

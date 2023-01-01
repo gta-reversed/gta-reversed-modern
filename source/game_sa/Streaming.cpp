@@ -41,8 +41,6 @@ uint16& CStreaming::ms_loadedGangCars = *reinterpret_cast<uint16*>(0x8E4BA8);
 uint16& CStreaming::ms_loadedGangs = *reinterpret_cast<uint16*>(0x8E4BAC);
 
 int32& CStreaming::ms_numPedsLoaded = *reinterpret_cast<int32*>(0x8E4BB0);
-int32(&CStreaming::ms_pedsLoaded)[8] = *(int32(*)[8])0x8E4C00;
-int32 (&CStreaming::ms_NextPedToLoadFromGroup)[18] = *reinterpret_cast<int32(*)[18]>(0x8E4BB8);
 int32& CStreaming::ms_currentZoneType = *reinterpret_cast<int32*>(0x8E4C20);
 CLoadedCarGroup& CStreaming::ms_vehiclesLoaded = *reinterpret_cast<CLoadedCarGroup*>(0x8E4C24);
 CStreamingInfo*& CStreaming::ms_pEndRequestedList = *reinterpret_cast<CStreamingInfo**>(0x8E4C54);
@@ -56,7 +54,7 @@ bool& CStreaming::ms_bEnableRequestListPurge = *reinterpret_cast<bool*>(0x8E4CA4
 uint32& CStreaming::ms_streamingBufferSize = *reinterpret_cast<uint32*>(0x8E4CA8);
 uint8* (&CStreaming::ms_pStreamingBuffer)[2] = *reinterpret_cast<uint8*(*)[2]>(0x8E4CAC);
 
-uint32& CStreaming::ms_memoryUsed = *reinterpret_cast<uint32*>(0x8E4CB4);
+uint32& CStreaming::ms_memoryUsedBytes = *reinterpret_cast<uint32*>(0x8E4CB4);
 int32& CStreaming::ms_numModelsRequested = *reinterpret_cast<int32*>(0x8E4CB8);
 CStreamingInfo(&CStreaming::ms_aInfoForModel)[26316] = *(CStreamingInfo(*)[26316])0x8E4CC0;
 bool& CStreaming::ms_disableStreaming = *reinterpret_cast<bool*>(0x9654B0);
@@ -705,7 +703,7 @@ bool CStreaming::ConvertBufferToObject(uint8* fileBuffer, int32 modelId) {
 
     if (!streamingInfo.IsLoadingFinishing()) {
         streamingInfo.m_nLoadState = LOADSTATE_LOADED;
-        ms_memoryUsed += bufferSize;
+        ms_memoryUsedBytes += bufferSize;
     }
     return true;
 }
@@ -805,7 +803,7 @@ void CStreaming::DeleteRwObjectsAfterDeath(const CVector& point) {
 // 0x40D7C0
 // TODO: Decode this, no clue whats going on here..
 void CStreaming::DeleteRwObjectsBehindCamera(size_t memoryToCleanInBytes) {
-    if (ms_memoryUsed < memoryToCleanInBytes)
+    if (ms_memoryUsedBytes < memoryToCleanInBytes)
         return;
 
     const auto START_OFFSET_XY = 10;
@@ -954,7 +952,7 @@ void CStreaming::DeleteRwObjectsBehindCamera(size_t memoryToCleanInBytes) {
         }
     }
 
-    while (ms_memoryUsed >= memoryToCleanInBytes) {
+    while (ms_memoryUsedBytes >= memoryToCleanInBytes) {
         if (!RemoveLeastUsedModel(0)) {
             break;
         }
@@ -980,7 +978,7 @@ bool CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList& list, size_t 
             entity->DeleteRwObject();
             if (!CModelInfo::GetModelInfo(entity->m_nModelIndex)->m_nRefCount) {
                 RemoveModel(entity->m_nModelIndex);
-                if (ms_memoryUsed < memoryToCleanInBytes) {
+                if (ms_memoryUsedBytes < memoryToCleanInBytes) {
                     return true;
                 }
             }
@@ -1021,7 +1019,7 @@ bool CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList& list, size_t 
             entity->DeleteRwObject();
             if (!CModelInfo::GetModelInfo(entity->m_nModelIndex)->m_nRefCount) {
                 RemoveModel(entity->m_nModelIndex);
-                if (ms_memoryUsed < memoryToCleanInBytes) {
+                if (ms_memoryUsedBytes < memoryToCleanInBytes) {
                     return true;
                 }
             }
@@ -1033,16 +1031,18 @@ bool CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList& list, size_t 
 // 0x40D2F0
 // The naming seems to be incorrect.
 // In fact it only removes TXDs with `STREAMING_LOADING_SCENE` not set and no references.
-bool CStreaming::RemoveReferencedTxds(size_t memoryToCleanInBytes) {
-    for (auto info = ms_pEndLoadedList->GetPrev(); info != ms_startLoadedList; info = info->GetPrev()) {
-        const auto modelId = GetModelFromInfo(info);
-        if (IsModelTXD(modelId) && info->IsLoadingScene()) {
-            if (!CTxdStore::GetNumRefs(ModelIdToTXD(modelId))) {
-                RemoveModel(modelId);
-                if (ms_memoryUsed < memoryToCleanInBytes) {
-                    return true;
-                }
-            }
+bool CStreaming::RemoveReferencedTxds(size_t goalMemoryUsageBytes) {
+    for (CStreamingInfo *si = ms_pEndLoadedList->GetPrev(), *next{}; si != ms_startLoadedList; si = next) {
+        next = si->GetPrev();
+        assert(next);
+
+        const auto modelId = GetModelFromInfo(si);
+        if (!IsModelTXD(modelId) || si->IsLoadingScene() || CTxdStore::GetNumRefs(ModelIdToTXD(modelId))) {
+            continue;
+        }
+        RemoveModel(modelId);
+        if (ms_memoryUsedBytes < goalMemoryUsageBytes) {
+            return true;
         }
     }
     return false;
@@ -1585,7 +1585,7 @@ void CStreaming::FinishLoadingLargeFile(uint8* pFileBuffer, int32 modelId) {
         RwStreamClose(pRwStream, &pFileBuffer);
 
         streamingInfo.m_nLoadState = LOADSTATE_LOADED;
-        ms_memoryUsed += bufferSize;
+        ms_memoryUsedBytes += bufferSize;
         if (!bLoaded) {
             RemoveModel(modelId);
             RequestModel(modelId, streamingInfo.GetFlags());
@@ -2495,16 +2495,10 @@ void CStreaming::RemoveModel(int32 modelId) {
             break;
         }
         }
-        ms_memoryUsed -= STREAMING_SECTOR_SIZE * streamingInfo.GetCdSize();
+        ms_memoryUsedBytes -= STREAMING_SECTOR_SIZE * streamingInfo.GetCdSize();
     }
 
-    if (streamingInfo.m_nNextIndex == -1) {
-        if (streamingInfo.IsBeingRead()) {
-            std::ranges::for_each(ms_channel, [&](auto& ch) {
-                std::ranges::replace_if(ch.modelIds, [&](const auto& mId) { return mId == modelId; }, MODEL_INVALID);
-            });
-        }
-    } else {
+    if (streamingInfo.InList()) {
         if (streamingInfo.IsRequested()) {
             ms_numModelsRequested--;
             if (streamingInfo.IsPriorityRequest()) {
@@ -2513,6 +2507,10 @@ void CStreaming::RemoveModel(int32 modelId) {
             }
         }
         streamingInfo.RemoveFromList();
+    } else if (streamingInfo.IsBeingRead()) {
+        std::ranges::for_each(ms_channel, [&](auto& ch) {
+            std::ranges::replace_if(ch.modelIds, [&](const auto& mId) { return mId == modelId; }, MODEL_INVALID);
+        });
     }
 
     if (streamingInfo.IsLoadingFinishing()) {
@@ -2553,7 +2551,7 @@ void CStreaming::RemoveTxdModel(int32 modelId) {
 
 // 0x40E120
 void CStreaming::MakeSpaceFor(size_t memoryToCleanInBytes) {
-    while (ms_memoryUsed >= ms_memoryAvailable - memoryToCleanInBytes) {
+    while (ms_memoryUsedBytes >= ms_memoryAvailable - memoryToCleanInBytes) {
         if (!RemoveLeastUsedModel(STREAMING_LOADING_SCENE)) {
             DeleteRwObjectsBehindCamera(ms_memoryAvailable - memoryToCleanInBytes);
             return;
@@ -2857,22 +2855,23 @@ void CStreaming::Init() {
 
 // 0x5B8AD0
 void CStreaming::Init2() {
-    std::ranges::for_each(ms_aInfoForModel, [](CStreamingInfo& mi) { mi.Init(); });
+    std::ranges::for_each(ms_aInfoForModel, [](CStreamingInfo& si) { si.Init(); });
     CStreamingInfo::ms_pArrayBase = &GetInfo(0);
 
-    ms_startLoadedList = &GetInfo(RESOURCE_ID_INTERNAL_1);
-    ms_pEndLoadedList = &GetInfo(RESOURCE_ID_INTERNAL_2);
-    ms_pStartRequestedList = &GetInfo(RESOURCE_ID_INTERNAL_3);
-    ms_pEndRequestedList = &GetInfo(RESOURCE_ID_INTERNAL_4);
+    // The two ends of the list just point at each other
+    const auto InitList = [](auto& listStart, auto& listEnd, auto startId, auto endId) {
+        const auto ssi = &GetInfo(startId), esi = &GetInfo(endId);
 
-    GetInfo(RESOURCE_ID_INTERNAL_1).m_nNextIndex = RESOURCE_ID_INTERNAL_2;
-    GetInfo(RESOURCE_ID_INTERNAL_1).m_nPrevIndex = -1;
-    GetInfo(RESOURCE_ID_INTERNAL_2).m_nNextIndex = -1;
-    GetInfo(RESOURCE_ID_INTERNAL_2).m_nPrevIndex = RESOURCE_ID_INTERNAL_1;
-    GetInfo(RESOURCE_ID_INTERNAL_3).m_nNextIndex = RESOURCE_ID_INTERNAL_4;
-    GetInfo(RESOURCE_ID_INTERNAL_3).m_nPrevIndex = -1;
-    GetInfo(RESOURCE_ID_INTERNAL_4).m_nNextIndex = -1;
-    GetInfo(RESOURCE_ID_INTERNAL_4).m_nPrevIndex = RESOURCE_ID_INTERNAL_3;
+        listStart         = ssi;
+        ssi->m_nNextIndex = endId;
+        ssi->m_nPrevIndex = -1;
+
+        listEnd           = esi;
+        esi->m_nNextIndex = -1;
+        esi->m_nPrevIndex = startId;
+    };
+    InitList(ms_startLoadedList,     ms_pEndLoadedList,    RESOURCE_ID_LOADED_LIST_START,  RESOURCE_ID_LOADED_LIST_END );
+    InitList(ms_pStartRequestedList, ms_pEndRequestedList, RESOURCE_ID_REQUEST_LIST_START, RESOURCE_ID_REQUEST_LIST_END);
 
     ms_oldSectorX = 0; // *
     ms_oldSectorY = 0; // * * leftover (see III/VC DeleteFarAwayRwObjects)
@@ -2888,7 +2887,7 @@ void CStreaming::Init2() {
 
     ms_streamingBufferSize = 0;
     ms_disableStreaming = false;
-    ms_memoryUsed = 0;
+    ms_memoryUsedBytes = 0;
     ms_channelError = -1;
     ms_bLoadingBigModel = false;
     ms_bEnableRequestListPurge = true;
@@ -2902,17 +2901,18 @@ void CStreaming::Init2() {
 
     for (int32 i = 0; i < TOTAL_DFF_MODEL_IDS; i++) {
         const int32 modelId = DFFToModelId(i);
-        auto mi = CModelInfo::GetModelInfo(modelId);
-        CStreamingInfo& streamingInfo = GetInfo(modelId);
+        CONST auto mi = CModelInfo::GetModelInfo(modelId);
         if (mi && mi->m_pRwObject) {
+            CStreamingInfo& streamingInfo = GetInfo(modelId);
             streamingInfo.ClearAllFlags();
             streamingInfo.SetFlags(STREAMING_GAME_REQUIRED);
             streamingInfo.m_nLoadState = LOADSTATE_LOADED;
-            if (mi->AsAtomicModelInfoPtr()) {
-                mi->AsAtomicModelInfoPtr()->m_nAlpha = 255;
+            if (const auto ami = mi->AsAtomicModelInfoPtr()) {
+                ami->m_nAlpha = 255;
             }
         }
     }
+
     for (int32 i = 0; i < TOTAL_TXD_MODEL_IDS; i++) {
         const int32 modelId = TXDToModelId(i);
         CStreamingInfo& streamingInfo = GetInfo(modelId);
@@ -2921,6 +2921,7 @@ void CStreaming::Init2() {
             streamingInfo.m_nLoadState = LOADSTATE_LOADED;
         }
     }
+
     ms_vehiclesLoaded.Clear();
     std::ranges::fill(ms_pedsLoaded, MODEL_INVALID);
     ms_numPedsLoaded = 0;
@@ -3336,14 +3337,14 @@ void CStreaming::StreamPedsForInterior(int32 interiorType) {
         ePopcyclePedGroup husbandGroupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_HUSBANDS, CPopulation::CurrentWorldZone);
         int32 husbandModelId = CPopulation::GetPedGroupModelId(husbandGroupId, rndHusband);
         RequestModel(husbandModelId, STREAMING_KEEP_IN_MEMORY);
-        ms_pedsLoaded[0] = husbandModelId;
+        ms_pedsLoaded[0] = (eModelID)husbandModelId;
         ms_numPedsLoaded++;
 
         // Load wife
         ePopcyclePedGroup wifeGroupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_WIVES, CPopulation::CurrentWorldZone);
         int32 wifeModelId = CPopulation::GetPedGroupModelId(wifeGroupId, randomWife);
         RequestModel(wifeModelId, STREAMING_KEEP_IN_MEMORY);
-        ms_pedsLoaded[1] = wifeModelId;
+        ms_pedsLoaded[1] = (eModelID)wifeModelId;
         ms_numPedsLoaded++;
 
         break;
@@ -3353,7 +3354,7 @@ void CStreaming::StreamPedsForInterior(int32 interiorType) {
         int32 modelId = CPopulation::GetPedGroupModelId(groupId, CGeneral::GetRandomNumber() % CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_SHOPKEEPERS, 0));
         ClearSlots(1);
         RequestModel(modelId, STREAMING_KEEP_IN_MEMORY);
-        ms_pedsLoaded[0] = modelId;
+        ms_pedsLoaded[0] = (eModelID)modelId;
         ms_numPedsLoaded++;
         break;
     }
@@ -3366,7 +3367,7 @@ void CStreaming::StreamPedsForInterior(int32 interiorType) {
         for (int32 i = 0; i < TOTAL_LOADED_PEDS; i++) {
             int32 modelId = CPopulation::GetPedGroupModelId(groupId, (i + random) % numPeds);
             RequestModel(modelId, STREAMING_KEEP_IN_MEMORY);
-            ms_pedsLoaded[i] = modelId;
+            ms_pedsLoaded[i] = (eModelID)modelId;
             ms_numPedsLoaded++;
         }
         break;
@@ -3394,7 +3395,7 @@ void CStreaming::StreamPedsIntoRandomSlots(int32 modelArray[TOTAL_LOADED_PEDS]) 
             }
             // Load model into slot
             RequestModel(modelArray[i], STREAMING_KEEP_IN_MEMORY);
-            ms_pedsLoaded[i] = modelArray[i];
+            ms_pedsLoaded[i] = (eModelID)modelArray[i];
             ms_numPedsLoaded++;
         } else if (modelArray[i] == UNLOAD_MODEL) { // Unload model from slot
             if (ms_pedsLoaded[i] >= 0) {
@@ -3566,7 +3567,7 @@ void CStreaming::StreamZoneModels(const CVector& unused) {
 
                    int32 freeSlot = 0;
                    for (; ms_pedsLoaded[freeSlot] >= 0; freeSlot++); // Find free slot
-                   ms_pedsLoaded[freeSlot] = pedModelId;
+                   ms_pedsLoaded[freeSlot] = (eModelID)pedModelId;
 
                    timeBeforeNextLoad = 300;
                }
@@ -3594,7 +3595,7 @@ void CStreaming::StreamZoneModels(const CVector& unused) {
             } else {
                 RequestModel(pedModelId, STREAMING_KEEP_IN_MEMORY | STREAMING_GAME_REQUIRED);
                 GetInfo(pedModelId).ClearFlags(STREAMING_GAME_REQUIRED);
-                ms_pedsLoaded[i] = pedModelId;
+                ms_pedsLoaded[i] = (eModelID)pedModelId;
                 ms_numPedsLoaded++;
             }
         }
@@ -3818,16 +3819,13 @@ void CStreaming::UpdateForAnimViewer() {
     CVector position{};
     AddModelsToRequestList(position, 0);
     LoadRequestedModels();
-    sprintf(gString, "Requested %d, memory size %dK\n", ms_numModelsRequested, 2 * ms_memoryUsed);
+    sprintf(gString, "Requested %d, memory size %dK\n", ms_numModelsRequested, 2 * ms_memoryUsedBytes);
 }
 
 // 0x407F80
 bool CStreaming::WeAreTryingToPhaseVehicleOut(int32 modelId) {
-    const CStreamingInfo& info = GetInfo(modelId);
-    if (info.IsLoaded()) {
-        return info.m_nNextIndex >= 0 || info.m_nPrevIndex >= 0;
-    }
-    return false;
+    const auto& si = GetInfo(modelId);
+    return si.IsLoaded() && si.InList() /* <= Is actually loaded (Should be in `LoadedList`) */;
 }
 
 void CStreaming::UpdateMemoryUsed() {
