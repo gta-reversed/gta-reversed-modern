@@ -13,6 +13,15 @@
 
 namespace notsa {
 namespace script {
+
+// eModelID wrapper that is read either from a static
+// int32 value or UsedObjectArray.
+struct Model {
+    eModelID model;
+
+    operator eModelID() const { return model; }
+};
+
 namespace detail {
 
 //! Script thing bullshittery
@@ -257,6 +266,14 @@ inline T Read(CRunningScript* S) {
         }
 
         return &detail::scriptthing::GetAt<Y>(index);
+    } else if constexpr (std::is_same_v<T, script::Model>) {
+        const auto value = Read<int32>(S);
+        if (value < 0) {
+            // we get the model from UsedObjectArray.
+            return {static_cast<eModelID>(CTheScripts::UsedObjectArray[-value].nModelIndex)};
+        }
+
+        return {static_cast<eModelID>(value)};
     }
     // If there's an error like "function must return a value" here,
     // that means that no suitable branch was found for `T`
