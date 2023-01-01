@@ -280,7 +280,7 @@ eModelID CPopCycle::PickPedMIToStreamInForCurrentZone() {
             nextPedToLoad = (nextPedToLoad + 1) % npeds;
             const auto modelId = (eModelID)CPopulation::GetPedGroupModelId(pedGrpId, nextPedToLoad);
 
-            if (!notsa::contains(CStreaming::ms_pedsLoaded, modelId) && IsRaceAllowedInCurrentZone(modelId)) {
+            if (!notsa::contains(CStreaming::GetLoadedPeds(), modelId) && IsRaceAllowedInCurrentZone(modelId)) {
                 // Return a non-loaded allowed model.
                 return modelId;
             }
