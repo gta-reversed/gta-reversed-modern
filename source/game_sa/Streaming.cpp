@@ -353,8 +353,8 @@ void CStreaming::ClearFlagForAll(uint32 streamingFlag) {
 }
 
 // 0x40BAA0
-void CStreaming::ClearSlots(int32 totalSlots) {
-    for (auto& modelId : std::span{ ms_pedsLoaded, (size_t)totalSlots }) {
+void CStreaming::ClearSlots(uint32 totalSlots) {
+    for (auto& modelId : ms_pedsLoaded | rng::views::take(totalSlots)) {
         if (modelId >= 0) {
             SetModelAndItsTxdDeletable(modelId);
             modelId = MODEL_INVALID;
