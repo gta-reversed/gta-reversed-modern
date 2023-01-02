@@ -308,9 +308,9 @@ void CBoat::RenderWakePoints() {
 void CBoat::RenderAllWakePointBoats() {
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(CWaterLevel::texWaterwake)));
 
-    CBoat::FillBoatList();
+    FillBoatList();
 
-    for (const auto boat : CBoat::apFrameWakeGeneratingBoats) {
+    for (const auto boat : apFrameWakeGeneratingBoats) {
         if (!boat) {
             break;
         }
