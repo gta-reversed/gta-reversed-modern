@@ -2406,7 +2406,7 @@ bool CStreaming::RemoveLoadedVehicle() {
         return true;
     }
 
-    if (CPopulation::m_LoadedBoats.CountMembers() >= (m_bBoatsNeeded ? 2 : 0)) {
+    if (CPopulation::m_LoadedBoats.CountMembers() >= (m_bBoatsNeeded ? 2u : 0u)) {
         if (ProcessGroup(CPopulation::m_LoadedBoats)) {
             return false;
         }

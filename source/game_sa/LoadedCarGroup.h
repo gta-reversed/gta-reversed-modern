@@ -10,7 +10,9 @@ class CLoadedCarGroup {
 public:
     static void InjectHooks();
 
-    void   SortBasedOnUsage();
+    CLoadedCarGroup() { Clear(); }
+
+    void SortBasedOnUsage();
 
     /*!
     * Pick a random car model ID from the models in this group.

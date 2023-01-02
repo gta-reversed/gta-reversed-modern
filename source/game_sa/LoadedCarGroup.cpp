@@ -36,7 +36,7 @@ void CLoadedCarGroup::SortBasedOnUsage() { // TODO: Maybe this is sorted lower -
 // 0x611BD0
 void CLoadedCarGroup::RemoveMember(eModelID modelIndex) {
     const auto it = notsa::remove_first(m_models, (int16)(modelIndex));
-    *it.begin() = SENTINEL_VALUE_OF_UNUSED;
+    m_models.back() = SENTINEL_VALUE_OF_UNUSED;
 }
 
 // 0x611C50
