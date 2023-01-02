@@ -59,27 +59,31 @@ bool contains(R&& r, const T& value, Proj proj = {}) {
     return rng::find(r, value, proj) != rng::end(r);
 }
 
-//! Similar to `std::remove_if`, but only removes the first element found (Unlike the former that removes all)
+/*!
+* @brief Similar to `std::remove_if`, but only removes the first element found (Unlike the former that removes all)
+* 
+* @return Whenever an element was removed. If it was, you have to pop the last element from your container
+*/
 template <std::permutable I, std::sentinel_for<I> S, class T, class Proj = std::identity>
     requires std::indirect_binary_predicate<rng::equal_to, std::projected<I, Proj>, const T*>
-constexpr rng::subrange<I> remove_first(I first, S last, const T& value, Proj proj = {}) {
+constexpr bool remove_first(I first, S last, const T& value, Proj proj = {}) {
     first = rng::find(std::move(first), last, value, proj);
     if (first == last) {
-        return { last, last };
+        return false;
+    } else {
+        rng::move_backward(rng::next(first), last, std::prev(last)); // Shift to the left (removing the found element)
+        return true;
     }
-    rng::move_backward(rng::next(first), last, std::prev(last)); // Shift to the left (removing the found element)
-    return { std::prev(last), last };
 }
 
 // We require `bidirectional_range`, because we have to use `std::prev`.
 // if for any reason we want to use `forward_range` only, I guess we gotta figure
 // out a different way of getting the pre-end iteartor
 
-//! Similar to `std::remove_if`, but only removes the first element found (Unlike the former that removes all)
+//! @copydoc `remove_first`
 template <rng::bidirectional_range R, class T, class Proj = std::identity>
     requires std::permutable<rng::iterator_t<R>>&& std::indirect_binary_predicate<rng::equal_to, std::projected<rng::iterator_t<R>, Proj>, const T*>
-constexpr rng::borrowed_subrange_t<R> remove_first(R&& r, const T& value, Proj proj = {})
-{
+constexpr bool remove_first(R&& r, const T& value, Proj proj = {}) {
     return remove_first(rng::begin(r), rng::end(r), value, std::move(proj));
 }
 
