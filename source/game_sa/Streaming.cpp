@@ -2392,36 +2392,32 @@ bool CStreaming::CarIsCandidateForRemoval(int32 modelId) {
 // 0x40C020
 // Remove most of loaded vehicle models (the ones with neither `GAME/MISSION_REQUIRED` flags set and no references)
 bool CStreaming::RemoveLoadedVehicle() {
-    for (int32 i = 0; i < CPopulation::m_InAppropriateLoadedCars.CountMembers(); i++) {
-        const auto modelId = CPopulation::m_InAppropriateLoadedCars.GetMember(i);
-        if (CarIsCandidateForRemoval(modelId)) {
-            RemoveModel(modelId);
-            return true;
-        }
-    }
-
-    {
-        const auto numBoatsNeeded = m_bBoatsNeeded ? 2 : 0;
-        if (numBoatsNeeded < CPopulation::m_LoadedBoats.CountMembers()) {
-            for (int32 i = 0; i < CPopulation::m_LoadedBoats.CountMembers(); i++) {
-                int32 modelId = CPopulation::m_LoadedBoats.GetMember(i);
-                if (CarIsCandidateForRemoval(modelId)) {
-                    RemoveModel(modelId);
-                    return true;
-                }
+    const auto ProcessGroup = [](const CLoadedCarGroup& group) {
+        for (auto modelId : group.GetAllModels()) {
+            if (CarIsCandidateForRemoval(modelId)) {
+                RemoveModel(modelId);
+                return true;
             }
         }
+        return false;
+    };
+
+    if (ProcessGroup(CPopulation::m_InAppropriateLoadedCars)) {
+        return true;
     }
 
-    auto appropriateLoadedCars = CPopulation::m_AppropriateLoadedCars;
-    appropriateLoadedCars.SortBasedOnUsage();
-    for (int32 i = 0; i < appropriateLoadedCars.CountMembers(); i++) {
-        int32 modelId = appropriateLoadedCars.GetMember(i);
-        if (CarIsCandidateForRemoval(modelId)) {
-            RemoveModel(modelId);
-            return true;
+    if (CPopulation::m_LoadedBoats.CountMembers() >= (m_bBoatsNeeded ? 2 : 0)) {
+        if (ProcessGroup(CPopulation::m_LoadedBoats)) {
+            return false;
         }
     }
+
+    auto sortedLoadedCars{ CPopulation::m_AppropriateLoadedCars };
+    sortedLoadedCars.SortBasedOnUsage();
+    if (ProcessGroup(sortedLoadedCars)) {
+        return true;
+    }
+
     return false;
 }
 
