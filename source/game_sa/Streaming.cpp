@@ -2151,21 +2151,14 @@ void CStreaming::ReadIniFile() {
 
 // 0x40AFA0
 void CStreaming::ReclassifyLoadedCars() {
-    CLoadedCarGroup appropriateCarGroup = CPopulation::m_AppropriateLoadedCars;
-    CLoadedCarGroup inAppropriateCarGroup = CPopulation::m_InAppropriateLoadedCars;
-
-    CPopulation::m_AppropriateLoadedCars.Clear();
-    CPopulation::m_InAppropriateLoadedCars.Clear();
-
-    for (auto& group : { appropriateCarGroup, inAppropriateCarGroup }) {
-        for (auto i = 0; i < group.CountMembers(); i++) {
-            auto modelId = group.GetMember(i);
-            if (IsCarModelNeededInCurrentZone(modelId))
-                CPopulation::m_AppropriateLoadedCars.AddMember(modelId);
-            else
-                CPopulation::m_InAppropriateLoadedCars.AddMember(modelId);
+    CLoadedCarGroup appropriate{}, inAppropriate{};
+    for (const auto group : { &CPopulation::m_AppropriateLoadedCars, &CPopulation::m_InAppropriateLoadedCars }) {
+        for (auto modelId : group->GetAllModels()) {
+            (IsCarModelNeededInCurrentZone(modelId) ? appropriate : inAppropriate).AddMember((eModelID)(modelId));
         }
     }
+    CPopulation::m_AppropriateLoadedCars = appropriate;
+    CPopulation::m_InAppropriateLoadedCars = inAppropriate;
 }
 
 // 0x40CF80
