@@ -140,8 +140,7 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped) {
             case CLIMB_FINISHED_V:
                 return std::make_pair(ms_fVaultOffsetHorz, ms_fVaultOffsetVert);
             default:
-                printf("[NOTSA] Unknown m_nHeightForPos");
-                return std::make_pair(0.0f, 0.0f);
+                NOTSA_UNREACHABLE();
             }
         }();
 
