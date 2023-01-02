@@ -320,7 +320,7 @@ bool CWeapon::HasWeaponAmmoToBeUsed() {
 bool CWeapon::ProcessLineOfSight(const CVector& startPoint, const CVector& endPoint, CColPoint& outColPoint, CEntity*& outEntity, eWeaponType weaponType, CEntity* arg5,
                                  bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool arg11, bool doIgnoreCameraCheck) {
     CBirds::HandleGunShot(&startPoint, &endPoint);
-    CShadows::GunShotSetsOilOnFire(&startPoint, &endPoint);
+    CShadows::GunShotSetsOilOnFire(startPoint, endPoint);
 
     return CWorld::ProcessLineOfSight(startPoint, endPoint, outColPoint, outEntity, buildings, vehicles, peds, objects, dummies, false, doIgnoreCameraCheck, true);
 }
@@ -512,7 +512,7 @@ void CWeapon::FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehi
     CWorld::bIncludeBikers = true;
     CWorld::pIgnoreEntity = vehicle;
     CBirds::HandleGunShot(&startPoint, &endPoint);
-    CShadows::GunShotSetsOilOnFire(&startPoint, &endPoint);
+    CShadows::GunShotSetsOilOnFire(startPoint, endPoint);
 
     CEntity* victim{};
     CColPoint outColPoint{};

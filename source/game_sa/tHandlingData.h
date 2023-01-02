@@ -21,7 +21,7 @@ enum eVehicleLightsSize : uint8 {
 struct tHandlingData {
     int32         m_nVehicleId;
     float         m_fMass; // 1.0 to 50000.0
-    float         field_8;
+    float         m_fMassRecpr; // = 1.f / m_fMass
     float         m_fTurnMass;
     float         m_fDragMult;
     CVector       m_vecCentreOfMass;   // x, y, z - 1.0 to 50000.0
@@ -129,6 +129,8 @@ struct tHandlingData {
     uint8              m_nAnimGroup;
 
     cTransmission& GetTransmission() { return m_transmissionData; }
+
+    int32 InitFromData(int32 id, const char* line);
 };
 
 VALIDATE_SIZE(tHandlingData, 0xE0);
