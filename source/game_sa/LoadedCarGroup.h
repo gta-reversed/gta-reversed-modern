@@ -48,8 +48,8 @@ public:
     void  AddMember(eModelID member);
 
     //! Get all models from this group
-    auto GetAllModels() { return m_models | rng::views::take(CountMembers()); }
-
+    auto GetAllModels() const { return m_models | rng::views::take(CountMembers()); }
+    auto GetAllModels()       { return m_models | rng::views::take(CountMembers()); } // Same, but constless
 private:
     std::array<int16, 23> m_models{}; //< Model IDs. Empty slots are marked by `SENTINEL_VALUE_OF_UNUSED` (See cpp file) (NOTE: Use `GetAllModels()` when iterating, etc!)
 };
