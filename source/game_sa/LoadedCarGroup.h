@@ -32,9 +32,9 @@ public:
     eModelID PickLeastUsedModel(int32 maxTimesUsed);
 
     //! Get the `idx`-th model
-    eModelID GetMember(int32 count) const;
+    eModelID GetMember(uint32 count) const;
 
-    //! Get number of models
+    //! Get number of models (Please don't us this in a for loop's condition, it's O(N) - Use `GetAllModels` for iteration)
     uint32 CountMembers() const;
 
     //! Check if there are models at all

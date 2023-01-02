@@ -131,7 +131,8 @@ eModelID CLoadedCarGroup::PickLeastUsedModel(int32 maxTimesUsed) {
 }
 
 // 0x611C20
-eModelID CLoadedCarGroup::GetMember(int32 idx) const {
+eModelID CLoadedCarGroup::GetMember(uint32 idx) const {
+    assert(memberId < CountMembers());
     return (eModelID)(m_models[idx]);
 }
 
