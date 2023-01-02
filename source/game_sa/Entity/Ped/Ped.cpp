@@ -3179,7 +3179,7 @@ void CPed::RemoveBodyPart(ePedNode pedNode, char localDir) {
             m_nBodypartToRemove = pedNode;
         }
     } else {
-        printf("Trying to remove ped component");
+        DEV_LOG("Trying to remove ped component");
     }
 }
 
