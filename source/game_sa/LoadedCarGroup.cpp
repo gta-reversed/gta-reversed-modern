@@ -35,8 +35,8 @@ void CLoadedCarGroup::SortBasedOnUsage() {
 
 // 0x611BD0
 void CLoadedCarGroup::RemoveMember(eModelID modelIndex) {
-    const auto it = rng::find(m_models, (int16)(modelIndex));
-    m_models[m_models.size() - 1] = SENTINEL_VALUE_OF_UNUSED;
+    const auto it = notsa::remove_first(m_models, (int16)(modelIndex));
+    *it.begin() = SENTINEL_VALUE_OF_UNUSED;
 }
 
 // 0x611C50
