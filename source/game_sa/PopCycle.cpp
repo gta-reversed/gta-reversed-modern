@@ -206,7 +206,6 @@ float CPopCycle::GetCurrentPercOther_Peds() {
 
 // 0x610150
 bool CPopCycle::IsPedAppropriateForCurrentZone(int32 modelIndex) {
-    // Check if the model's race is allowed
     if (!IsRaceAllowedInCurrentZone((eModelID)modelIndex)) {
         return false;
     }
