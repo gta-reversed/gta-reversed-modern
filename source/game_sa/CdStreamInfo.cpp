@@ -234,7 +234,7 @@ void CdStreamInitThread() {
         HANDLE hSemaphore = OS_SemaphoreCreate(2, nullptr);
         stream.sync.hSemaphore = hSemaphore;
         if (!hSemaphore) {
-            DEV_LOG("%s: failed to create sync semaphore");
+            DEV_LOG("cdvd_stream: failed to create sync semaphore");
             return;
         }
     }
