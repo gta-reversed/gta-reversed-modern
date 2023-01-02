@@ -3689,54 +3689,44 @@ void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
 
         // Handle vehicle models
         CLoadedCarGroup& loadedGangCarGroup = CPopulation::m_LoadedGangCars[gangId];
-        if (loadedGangCarGroup.CountMembers() < 1) {
-            if (!(gangsNeeded & gangBit) || ms_loadedGangCars & gangBit) /*gang not needed or is loaded*/ {
+        if (loadedGangCarGroup.CountMembers() < 1) { // TODO: Bug? Probably meant to be `>= 1`
+            if (!(gangsNeeded & gangBit) || (ms_loadedGangCars & gangBit)) /*gang not needed or is loaded*/ {
                 if (!(gangsNeeded & gangBit) && (ms_loadedGangCars & gangBit)) /*gang not needed but is loaded*/ {
-
-                    // Unload all car models related to this gang which are not needed,
-                    // that is, the model isn't in `m_AppropriateLoadedCars` nor any other gang needs it.
-                    CLoadedCarGroup loadedCarGroup = loadedGangCarGroup;
-                    for (int32 i = 0; i < loadedCarGroup.CountMembers(); i++) {
-                        int32 gangCarModelId = loadedCarGroup.GetMember(i);
-
-                        bool bKeepCarModel = false;
-
-                        for (int32 j = 0; j < CPopulation::m_AppropriateLoadedCars.CountMembers(); ++j) {
-                            if (gangCarModelId == CPopulation::m_AppropriateLoadedCars.GetMember(j)) {
-                                bKeepCarModel = true;
-                                break; // R* forgot this originally
-                            }
+                    // Unload all car models related to this gang which are not needed.
+                    const auto CanDeleteModel = [&](eModelID gangCarModelId) {
+                        if (notsa::contains(CPopulation::m_AppropriateLoadedCars.GetAllModels(), gangCarModelId)) {
+                            return false;
                         }
 
-                        // Check if any other gang used this car model.
-                        //
-                        // NOTE:
-                        // I think there should be a `if (!bKeepCarModel)` check
-                        // since the above loop might already have set `bKeepCarModel` to `true`.
-                        // Also if `modelId != CPopulation::m_defaultCarGroupModelId` is `false`
-                        // this loop will never set `bKeepCarModel` to `true`.
+                        if (CPopulation::m_defaultCarGroupModelId == gangCarModelId) {
+                            return false;
+                        }
+
                         for (int32 otherGangId = 0; otherGangId < TOTAL_GANGS; otherGangId++) {
-                            if (otherGangId != gangId && (ms_loadedGangs & (1 << otherGangId))/*other gang is loaded*/) {
-                                const int32 carGroupId = otherGangId + POPCYCLE_CARGROUP_BALLAS;
-                                for (auto& modelId : CPopulation::m_CarGroups[carGroupId]) {
-                                    if (modelId != CPopulation::m_defaultCarGroupModelId && modelId == gangCarModelId) {
-                                        bKeepCarModel = true;
-                                    }
-                                }
+                            if (otherGangId == gangId || (ms_loadedGangs & (1 << otherGangId)) == 0) {
+                                continue;
+                            }
+                            if (notsa::contains(CPopulation::m_CarGroups[otherGangId + (int32)(POPCYCLE_CARGROUP_BALLAS)], gangCarModelId)) {
+                                return false;
                             }
                         }
-
-                        if (!bKeepCarModel) {
+                        
+                        return true;
+                    };
+                    const auto loadedGangCarGroupCpy{ loadedGangCarGroup }; // Make a copy here, as it might get modified (Because of us unloading models)
+                    for (auto gangCarModelId : loadedGangCarGroupCpy.GetAllModels()) {
+                        if (CanDeleteModel((eModelID)(gangCarModelId))) {
                             SetModelAndItsTxdDeletable(gangCarModelId);
                         }
                     }
                 }
-            } else /*gang is needed but not loaded*/ {
+            } else { /*gang is needed but not loaded*/
                 const int32 carGroupId = gangId + POPCYCLE_CARGROUP_BALLAS;
                 const uint16 numCars = CPopulation::m_nNumCarsInGroup[carGroupId];
                 const int32 modelId = CPopulation::m_CarGroups[carGroupId][CGeneral::GetRandomNumber() % numCars];
-                if (!GetInfo(modelId).IsLoaded())
+                if (!GetInfo(modelId).IsLoaded()) {
                     RequestModel(modelId, STREAMING_KEEP_IN_MEMORY); // Load 1 random car model
+                }
             }
         }
     }
