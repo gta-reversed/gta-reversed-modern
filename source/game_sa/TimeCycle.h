@@ -155,6 +155,9 @@ public:
     static float GetAmbientGreen_Obj()              { return m_CurrentColours.m_fAmbientGreen_Obj; }                      // 0x560370
     static float GetAmbientBlue_Obj()               { return m_CurrentColours.m_fAmbientBlue_Obj; }                       // 0x560380
 
+    static auto GetVectorToSun() { return m_VectorToSun[m_CurrentStoredValue]; }
+    static auto GetShadowSide() { return CVector2D{ m_fShadowSideX[m_CurrentStoredValue], m_fShadowSideY[m_CurrentStoredValue] }; }
+
 public: // NOTSA
     static CRGBA GetCurrentSkyBottomColor()         { return m_CurrentColours.GetSkyBottom(); }
 

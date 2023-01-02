@@ -395,8 +395,10 @@
 #include "platform/platform.h"
 
 #include "app/app.h"
+#include <RealTimeShadowManager.h>
 
 #include "extensions/utility.hpp"
+#include <RenderBuffer.hpp>
 
 void InjectHooksMain() {
     HookInstall(0x53E230, &Render2dStuff);   // [ImGui] This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without
@@ -405,6 +407,10 @@ void InjectHooksMain() {
     CFileMgr::InjectHooks();
 
     CLoadedCarGroup::InjectHooks();
+    RenderBuffer::InjectHooks();
+    CStaticShadow::InjectHooks();
+    CRealTimeShadowManager::InjectHooks();
+    CRealTimeShadow::InjectHooks();
     CPopCycle::InjectHooks();
     ProcObjectMan_c::InjectHooks();
     ProcSurfaceInfo_c::InjectHooks();

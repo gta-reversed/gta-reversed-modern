@@ -750,9 +750,6 @@ RwObject* SetVehicleAtomicVisibilityCB(RwObject* object, void* data);
 RwFrame* SetVehicleAtomicVisibilityCB(RwFrame* component, void* data);
 void DestroyVehicleAndDriverAndPassengers(CVehicle* vehicle);
 
-extern char *&HandlingFilename;
-extern char (&VehicleNames)[100][14]; // sorting is based on handling id
-
 /* Missing funcs | from Android
 
 CVehicle::ReduceVehicleDamage(float &);
