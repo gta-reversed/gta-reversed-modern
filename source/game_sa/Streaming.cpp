@@ -3642,8 +3642,9 @@ void CStreaming::StreamZoneModels(const CVector& unused) {
 
 // 0x40AA10
 void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
-    if (!CPopCycle::m_pCurrZoneInfo)
+    if (!CPopCycle::m_pCurrZoneInfo) {
         return;
+    }
 
     uint32 gangsNeeded = 0; // Bitfield of gangs to be loaded
     for (int32 i = 0; i < TOTAL_GANGS; i++) {
@@ -3652,12 +3653,13 @@ void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
         }
     }
     if (CCheat::IsActive(CHEAT_GANGS_CONTROLS_THE_STREETS)) {
-        gangsNeeded |= 0xFF; // All gangs basically
+        gangsNeeded |= 0xFF; // First 8 gangs
     }
 
     CGangWars::TellStreamingWhichGangsAreNeeded(gangsNeeded);
-    if (gangsNeeded == ms_loadedGangs && gangsNeeded == ms_loadedGangCars)
+    if (gangsNeeded == ms_loadedGangs && gangsNeeded == ms_loadedGangCars) {
         return; // Everything loaded already
+    }
 
     for (int32 gangId = 0; gangId < TOTAL_GANGS; gangId++) {
         // Unload all / load some (1 vehicle, 2 ped) models of gangs based on whenever they're in `gangsNeeded`.
@@ -3713,7 +3715,7 @@ void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
                         
                         return true;
                     };
-                    const auto loadedGangCarGroupCpy{ loadedGangCarGroup }; // Make a copy here, as it might get modified (Because of us unloading models)
+                    const CLoadedCarGroup loadedGangCarGroupCpy{ loadedGangCarGroup }; // Make a copy here, as it might get modified (Because of us unloading models)
                     for (auto gangCarModelId : loadedGangCarGroupCpy.GetAllModels()) {
                         if (CanDeleteModel((eModelID)(gangCarModelId))) {
                             SetModelAndItsTxdDeletable(gangCarModelId);
