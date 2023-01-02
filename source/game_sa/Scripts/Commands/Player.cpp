@@ -3,11 +3,10 @@
 #include "./Commands.hpp"
 #include <CommandParser/Parser.hpp>
 
-#include "TaskSimpleSwim.h"
-#include "RunningScript.h"
-#include "CommandParser/Parser.hpp"
-#include "Utility.hpp"
 #include <TaskTypes/TaskSimplePlayerOnFoot.h>
+#include <TaskTypes/TaskSimpleSwim.h>
+
+#include <RunningScript.h>
 
 using namespace notsa::script;
 /*!
@@ -20,8 +19,7 @@ using namespace notsa::script;
 * @param pos      World position
 */
 int32 CreatePlayer(int32 playerId, CVector pos) {
-    if (!CStreaming::IsModelLoaded(0 /*MI_PLAYER*/)) // todo (Izzotop): rename MODEL_NULL -> MI_PLAYER
-    {
+    if (!CStreaming::IsModelLoaded(MODEL_PLAYER)) {
         CStreaming::RequestSpecialModel(0, "player", STREAMING_GAME_REQUIRED | STREAMING_KEEP_IN_MEMORY | STREAMING_PRIORITY_REQUEST);
         CStreaming::LoadAllRequestedModels(true);
     }
