@@ -142,7 +142,7 @@ uint32 CLoadedCarGroup::CountMembers() const {
 
 // NOTSA
 bool CLoadedCarGroup::Empty() const {
-    return m_models[0] == SENTINEL_VALUE_OF_UNUSED;
+    return m_models.front() == SENTINEL_VALUE_OF_UNUSED;
 }
 
 // 0x611B90
