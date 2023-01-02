@@ -9,7 +9,7 @@
 #include "VehicleRecording.h"
 
 size_t& CStreaming::ms_memoryAvailable = *reinterpret_cast<size_t*>(0x8A5A80); // 25'600'000 == 25.6 MB
-int32& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<int32*>(0x8A5A84);
+uint32& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<uint32*>(0x8A5A84);
 bool& CStreaming::ms_bLoadVehiclesInLoadScene = *reinterpret_cast<bool*>(0x8A5A88);
 
 // Default models for each level (see eLevelNames)
@@ -2232,7 +2232,7 @@ void CStreaming::RemoveBuildingsNotInArea(eAreaCodes areaCode) {
 }
 
 // 0x4080F0
-void CStreaming::RemoveCarModel(int32 modelId) {
+void CStreaming::RemoveCarModel(eModelID modelId) {
     CPopulation::m_AppropriateLoadedCars.RemoveMember(modelId);
     CPopulation::m_InAppropriateLoadedCars.RemoveMember(modelId);
     CPopulation::m_LoadedBoats.RemoveMember(modelId);
@@ -2468,7 +2468,7 @@ void CStreaming::RemoveModel(int32 modelId) {
                 break;
             }
             case MODEL_INFO_VEHICLE: {
-                RemoveCarModel(modelId);
+                RemoveCarModel((eModelID)(modelId));
                 break;
             }
             }
@@ -2755,7 +2755,7 @@ bool CStreaming::AddToLoadedVehiclesList(int32 modelId) {
             if (!IsCarModelNeededInCurrentZone(modelId))
                 loadedCarGroup = &CPopulation::m_InAppropriateLoadedCars;
         }
-        loadedCarGroup->AddMember(modelId);
+        loadedCarGroup->AddMember((eModelID)(modelId));
     }
 
     // Add it to gang's loaded vehicles
@@ -2763,13 +2763,13 @@ bool CStreaming::AddToLoadedVehiclesList(int32 modelId) {
         const int32 groupId = gangId + POPCYCLE_CARGROUP_BALLAS;
         for (int32 i = 0; i < CPopulation::m_nNumCarsInGroup[groupId]; i++) {
             if (CPopulation::m_CarGroups[groupId][i] == modelId) {
-                CPopulation::m_LoadedGangCars[gangId].AddMember(modelId);
+                CPopulation::m_LoadedGangCars[gangId].AddMember((eModelID)(modelId));
                 break;
             }
         }
     }
 
-    ms_vehiclesLoaded.AddMember(modelId);
+    ms_vehiclesLoaded.AddMember((eModelID)(modelId));
 
     return true;
 }

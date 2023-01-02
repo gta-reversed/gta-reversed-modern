@@ -25,6 +25,8 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(StartTestScript, 0x464D40);
     RH_ScopedInstall(AddToBuildingSwapArray, 0x481140);
     RH_ScopedInstall(UndoBuildingSwaps, 0x481290);
+    RH_ScopedInstall(HasCarModelBeenSuppressed, 0x46A810);
+    RH_ScopedInstall(HasVehicleModelBeenBlockedByScript, 0x46A890);
 }
 
 // 0x468D50
@@ -328,6 +330,16 @@ bool CTheScripts::Save() {
 // 0x464BB0
 void CTheScripts::WipeLocalVariableMemoryForMissionScript() {
     memset(&LocalVariablesForCurrentMission, 0, sizeof(LocalVariablesForCurrentMission));
+}
+
+// 0x46A810
+bool CTheScripts::HasCarModelBeenSuppressed(eModelID carModelId) {
+    return notsa::contains(SuppressedVehicleModels, carModelId);
+}
+
+// 0x46A890
+bool CTheScripts::HasVehicleModelBeenBlockedByScript(eModelID carModelId) {
+    return notsa::contains(VehicleModelsBlockedByScript, carModelId);
 }
 
 // 0x464D40

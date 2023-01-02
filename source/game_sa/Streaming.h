@@ -186,7 +186,7 @@ VALIDATE_SIZE(tStreamingChannel, 0x98);
 class CStreaming {
 public:
     static size_t& ms_memoryAvailable;
-    static int32& desiredNumVehiclesLoaded;
+    static uint32& desiredNumVehiclesLoaded;
     static bool& ms_bLoadVehiclesInLoadScene;
 
     static int32(&ms_aDefaultCopCarModel)[5];
@@ -335,7 +335,7 @@ public:
     static void RemoveAllUnusedModels();
     static void RemoveBigBuildings();
     static void RemoveBuildingsNotInArea(eAreaCodes areaCode);
-    static void RemoveCarModel(int32 modelId);
+    static void RemoveCarModel(eModelID modelId);
     static void RemoveCurrentZonesModels();
     static void RemoveDodgyPedsFromRandomSlots();
     static void RemoveEntity(CLink<CEntity*>* streamingLink);
