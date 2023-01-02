@@ -599,7 +599,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
         animBlock->animationStyle = GetFirstAssocGroup(animBlock->szName);
     }
 
-    printf("Loading ANIMS %s\n", animBlock->szName);
+    DEV_LOG("Loading ANIMS {}", animBlock->szName);
     animBlock->bLoaded = true;
 
     int animIndex = animBlock->startAnimation;
