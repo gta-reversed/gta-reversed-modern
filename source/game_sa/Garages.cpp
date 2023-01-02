@@ -461,7 +461,7 @@ bool CGarages::Load() {
         }
     }
 
-    // our debug leftover std::ranges::for_each(aCarsInSafeHouse, [&](auto& car) { printf("%d\n", car->m_wModelIndex); });
+    // our debug leftover std::ranges::for_each(aCarsInSafeHouse, [&](auto& car) { DEV_LOG("%d\n", car->m_wModelIndex); });
 
     for (auto i = 0; i < NumGarages; i++) {
         CSaveGarage sg{};
