@@ -104,5 +104,5 @@ constexpr inline auto AddressOfFunction(T fn) {
     ::notsa::script::detail::AddCommandHandler<cmd, ::notsa::detail::AddressOfFunction(fn)>()
 
 //! Register a command handler for an unimplemented command (That is, a command that wasn't implemented in the game either)
-#define REGISTER_COMMAND_HANDLER_UNIMPLEMENTED(cmd) \
+#define REGISTER_COMMAND_UNIMPLEMENTED(cmd) \
     REGISTER_COMMAND_HANDLER(cmd, ::notsa::script::detail::NotImplemented)
