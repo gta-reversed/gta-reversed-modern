@@ -105,6 +105,9 @@ template<typename... Ts>
 // Eventually could instead verify the returned value? In case of `sscanf` etc...
 #define RET_IGNORED(x) (void)(x);
 
+//! Cause a debug break
+#define NOTSA_DEBUGBREAK() __debugbreak()
+
 /*!
 * @brief Used for static variable references
 *

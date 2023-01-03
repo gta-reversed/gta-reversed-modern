@@ -2260,7 +2260,7 @@ void CStreaming::RemoveCurrentZonesModels() {
         ePopcyclePedGroup pedGroupId = CPopulation::GetPedGroupId(popcycleGroup, 0);
         for (int32 i = 0; i < 5; i++) { // todo: magic number
             int32 modelId = CPopulation::GetPedGroupModelId(pedGroupId, i);
-            if (modelId != CPopulation::m_defaultCarGroupModelId) {
+            if (modelId != CPopulation::m_DefaultModelIDForUnusedSlot) {
                 SetModelAndItsTxdDeletable(modelId);
             }
         }
@@ -3728,7 +3728,7 @@ void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
                             if (otherGangId != gangId && (ms_loadedGangs & (1 << otherGangId))/*other gang is loaded*/) {
                                 const int32 carGroupId = otherGangId + POPCYCLE_CARGROUP_BALLAS;
                                 for (auto& modelId : CPopulation::m_CarGroups[carGroupId]) {
-                                    if (modelId != CPopulation::m_defaultCarGroupModelId && modelId == gangCarModelId) {
+                                    if (modelId != CPopulation::m_DefaultModelIDForUnusedSlot && modelId == gangCarModelId) {
                                         bKeepCarModel = true;
                                     }
                                 }

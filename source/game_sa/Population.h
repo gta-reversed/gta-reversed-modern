@@ -57,7 +57,7 @@ public:
     static uint16* m_nNumPedsInGroup;
     // static int16 m_CarGroups[POPCYCLE_TOTAL_NUM_CARGROUPS][23] (34)
     static int16 (*m_CarGroups)[23];
-    static const uint16 m_defaultCarGroupModelId = 2000; // means not loaded
+    static const uint16 m_DefaultModelIDForUnusedSlot = 2000; // means not loaded
     static bool&   m_bDontCreateRandomGangMembers;
     static bool&   m_bOnlyCreateRandomGangMembers;
     static bool&   m_bDontCreateRandomCops;
@@ -74,7 +74,7 @@ public:
     // static functions
 
     // returns ePedRace value
-    static int32 FindPedRaceFromName(const char* modelName);
+    static ePedRace FindPedRaceFromName(const char* modelName);
     // loads pedgrp.dat
     static void LoadPedGroups();
     // loads cargrp.dat

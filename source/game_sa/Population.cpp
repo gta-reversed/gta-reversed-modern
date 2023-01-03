@@ -80,7 +80,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(IsCorrectTimeOfDayForEffect, 0x611B20, { .reversed = false });
     RH_ScopedGlobalInstall(RemoveSpecificDriverModelsForCar, 0x6119D0, { .reversed = false });
     RH_ScopedGlobalInstall(FindPedRaceFromName, 0x5B6D40);
-    RH_ScopedGlobalInstall(LoadPedGroups, 0x5BCFE0, { .reversed = false });
+    RH_ScopedGlobalInstall(LoadPedGroups, 0x5BCFE0);
     RH_ScopedGlobalInstall(LoadCarGroups, 0x5BD1A0, { .reversed = false });
     RH_ScopedGlobalInstall(Initialise, 0x610E10, { .reversed = false });
     RH_ScopedGlobalInstall(Shutdown, 0x610EC0, { .reversed = false });
@@ -130,7 +130,76 @@ ePedRace CPopulation::FindPedRaceFromName(const char* modelName) {
 
 // 0x5BCFE0
 void CPopulation::LoadPedGroups() {
-    ((void(__cdecl*)())0x5BCFE0)();
+    CFileMgr::ChangeDir("\\DATA\\");
+    const auto file = CFileMgr::OpenFile("PEDGRP.DAT", "r");
+    CFileMgr::ChangeDir("\\");
+
+    size_t currGrpIdx{}, lineno{1};
+    for (;const auto l = CFileLoader::LoadLine(file); lineno++) { // Also replaces `,` with ` ` (space) (Important to know)
+        uint16 npeds{};
+        for (auto begin = l, end = l; *begin; begin = end) {
+            begin = CFileLoader::FindFirstNonNullOrWS(begin);
+            if (*begin == '#') {
+                break;
+            }
+            end = CFileLoader::FindFirstNullOrWS(begin);
+            if (begin == end) {
+                break;
+            }
+
+#ifdef _DEBUG // See bottom of the outer loop for info
+            if (currGrpIdx >= m_PedGroups.size()) {
+                DEV_LOG("Data found past-the-end! This would crash the vanilla game! [Line: {}]", lineno);
+                break;
+            }
+#endif
+
+            // Originally this check was at the end of the loop
+            // but we want to print a useful error message, so the
+            // loop is let to do one more iteration before breaking
+            // to see if there are any more models to be added
+            if (npeds >= m_PedGroups[currGrpIdx].size()) {
+                DEV_LOG("There are peds to be loaded, but there's no memory! [Group: {}]", currGrpIdx);
+                break;
+            }
+            
+            char modelName[256]{};
+            strncpy_s(modelName, begin, end - begin);
+            if (int32 pedModelIdx{ MODEL_INVALID }; CModelInfo::GetModelInfo(modelName, &pedModelIdx)) {
+                m_PedGroups[currGrpIdx][npeds++] = pedModelIdx;
+            } else {
+                DEV_LOG("Model ({}) doesn't exist!", modelName);
+            }
+        }
+        
+        if (npeds == 0) {
+            continue; // Blank line
+        }
+        DEV_LOG("Loaded ({}) peds into the group ({})", m_nNumPedsInGroup[currGrpIdx], currGrpIdx);
+
+        // Only now set this
+        m_nNumPedsInGroup[currGrpIdx] = npeds;
+
+        // Fill the rest (unused slots) with a value
+        rng::fill(m_PedGroups[currGrpIdx] | rng::views::drop(m_nNumPedsInGroup[currGrpIdx]), m_DefaultModelIDForUnusedSlot);
+
+        // Only increment this if it wasn't a blank line
+        currGrpIdx++;
+
+#ifndef _DEBUG // In debug mode we let the loop go to check for past-the-end data (and report it)
+        if (currGrpIdx == m_PedGroups.size()) {
+            break; // No more data needed - This if kind of a bugfix too, as the original game would just keep going, and if there was anything after the last group it would just corrupt the memory :D
+        }
+#endif
+    };
+
+    if (currGrpIdx == m_PedGroups.size()) {
+        DEV_LOG("PEDGRP.DAT has been loaded successfully! [#Groups Loaded: {}]", currGrpIdx);
+    } else {
+        NOTSA_UNREACHABLE("Missing group data in PEDGRP.DAT! [#Groups Loaded: {}/{}]", currGrpIdx, m_PedGroups.size());
+    }
+
+    CFileMgr::CloseFile(file);
 }
 
 // 0x5BD1A0
