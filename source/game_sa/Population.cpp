@@ -99,7 +99,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(ArePedStatsCompatible, 0x610F50);
     RH_ScopedGlobalInstall(PedMICanBeCreatedAtAttractor, 0x6110C0);
     RH_ScopedGlobalInstall(PedMICanBeCreatedAtThisAttractor, 0x6110E0);
-    RH_ScopedGlobalInstall(PedMICanBeCreatedInInterior, 0x611450, { .reversed = false });
+    RH_ScopedGlobalInstall(PedMICanBeCreatedInInterior, 0x611450);
     RH_ScopedGlobalInstall(IsMale, 0x611470, { .reversed = false });
     RH_ScopedGlobalInstall(PopulateInterior, 0x616470, { .reversed = false });
     RH_ScopedGlobalInstall(IsFemale, 0x611490, { .reversed = false });
@@ -433,7 +433,27 @@ bool CPopulation::PedMICanBeCreatedAtThisAttractor(eModelID modelId, const char*
 
 // 0x611450
 bool CPopulation::PedMICanBeCreatedInInterior(int32 modelIndex) {
-    return ((bool(__cdecl*)(int32))0x611450)(modelIndex);
+    switch (CModelInfo::GetPedModelInfo(modelIndex)->m_nPedType) {
+    case PED_TYPE_COP:
+    case PED_TYPE_GANG1:
+    case PED_TYPE_GANG2:
+    case PED_TYPE_GANG3:
+    case PED_TYPE_GANG4:
+    case PED_TYPE_GANG5:
+    case PED_TYPE_GANG6:
+    case PED_TYPE_GANG7:
+    case PED_TYPE_GANG8:
+    case PED_TYPE_GANG9:
+    case PED_TYPE_GANG10:
+    case PED_TYPE_DEALER:
+    case PED_TYPE_MEDIC:
+    case PED_TYPE_FIREMAN:
+    case PED_TYPE_CRIMINAL:
+    case PED_TYPE_BUM:
+    case PED_TYPE_PROSTITUTE:
+        return false;
+    }
+    return true;
 }
 
 // 0x611470
