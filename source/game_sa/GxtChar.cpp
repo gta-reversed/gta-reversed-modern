@@ -14,13 +14,16 @@ void AsciiToGxtChar(const char* src, GxtChar* dst) {
 }
 
 // 0x69F7E0
-const char* GxtCharToAscii(GxtChar* src, uint8 start) {
+const char* GxtCharToAscii(const GxtChar* src, uint8 start) {
     static char buf[256] = { 0 };
 
-    GxtChar* str = src;
-    if (start) {
-        str = &src[start];
-    }
+    const GxtChar* str = [&] {
+        if (start) {
+            return &src[start];
+        } else {
+            return src;
+        }
+    }();
 
     int32 i = 0;
     while (i < (ARRAY_SIZE(buf) - 1) && (str && str[i])) {
@@ -60,7 +63,7 @@ const char* GxtCharToAscii(GxtChar* src, uint8 start) {
     return buf;
 }
 
-GxtChar* GxtCharStrcat(GxtChar* dst, GxtChar* src) {
+GxtChar* GxtCharStrcat(GxtChar* dst, const GxtChar* src) {
     GxtChar* target = dst;
     if (*dst) {
         while (target[0])

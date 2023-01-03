@@ -39,7 +39,7 @@ inline void createDirectory(const wchar_t* path)
 }
 
 // 0x744FB0
-static char* InitUserDirectories()
+char* InitUserDirectories()
 {
     if (gta_user_dir_path[0] != '\0')
         return gta_user_dir_path;
@@ -338,6 +338,11 @@ int32 CFileMgr::Tell(FILESTREAM file)
 bool CFileMgr::GetErrorReadWrite(FILESTREAM file)
 {
     return (bool) ferror(file);
+}
+
+// notsa
+void CFileMgr::SeekNextLine(FILESTREAM file) {
+    while (!feof(file) && fgetc(file) != '\n');
 }
 
 void CFileMgr::InjectHooks()

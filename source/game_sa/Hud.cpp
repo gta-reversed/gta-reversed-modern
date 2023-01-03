@@ -296,7 +296,7 @@ void CHud::SetHelpMessageWithNumber(const char* text, int32 number, bool quickMe
 }
 
 // 0x588F50
-void CHud::SetVehicleName(char* name) {
+void CHud::SetVehicleName(const char* name) {
     m_pVehicleName = name;
 }
 

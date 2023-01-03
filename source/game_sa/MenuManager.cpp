@@ -760,7 +760,7 @@ void CMenuManager::SaveStatsToFile() {
     char date[12]{};
     _strdate_s(date, 12u);
 
-    char* lastMissionPassed = TheText.Get("ITBEG"); // In the beginning
+    const char* lastMissionPassed = TheText.Get("ITBEG"); // In the beginning
     if (CStats::LastMissionPassedName[0]) {
         lastMissionPassed = TheText.Get(CStats::LastMissionPassedName);
     }
@@ -784,7 +784,7 @@ void CMenuManager::SaveStatsToFile() {
                   "<td height=\"59\" colspan=\"2\" bgcolor=\"#000000\"><div align=\"center\"><font color=\"#FFFFFF\" size=\"5\" face=\"Arial, \n");
     fprintf(file, "Helvetica, sans-serif\">-------------------------------------------------------------------</font><font \nsize=\"5\" face=\"Arial, Helvetica, sans-serif\"><br>\n");
     fprintf(file, "<strong><font color=\"#FFFFFF\">GRAND THEFT AUTO SAN ANDREAS ");
-    fprintf(file, "%s</font></strong><br><font\n", _strupr(TheText.Get("FEH_STA"))); // Stats
+    fprintf(file, "%s</font></strong><br><font\n", _strupr((char*)TheText.Get("FEH_STA"))); // Stats
     fprintf(file, "color=\"#FFFFFF\">-------------------------------------------------------------------</font></font></div></td> </tr>\n");
     fprintf(file, "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\">     <td height=\"22\" colspan=\"2\">&nbsp;</td>  </tr>\n"
                   "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n");
@@ -912,7 +912,7 @@ void CMenuManager::DisplayHelperText(const char* key) {
 
     CFont::SetColor(CRGBA(255, 255, 255, alpha));
 
-    char* text{};
+    const char* text{};
     switch (m_nHelperText) {
     case FET_APP:
         text = TheText.Get("FET_APP"); // CLICK LMB / RETURN - APPLY NEW SETTING
@@ -1053,11 +1053,11 @@ void CMenuManager::SmallMessageScreen(const char* key) {
         y = StretchY(float(200 - lines * 9));
     }
 
-    char* text = TheText.Get(key);
+    auto text = TheText.Get(key);
     if (!TheText.m_bCdErrorLoaded) {
         for (auto& k : { "NOCD", "OPENCD", "WRONGCD", "CDERROR" }) {
             if (!_stricmp(k, key)) {
-                AsciiToGxtChar(TheText.m_szCdErrorText, text);
+                AsciiToGxtChar(text, TheText.m_szCdErrorText);
             }
         }
     }
@@ -1067,13 +1067,4 @@ void CMenuManager::SmallMessageScreen(const char* key) {
 // NOTSA
 void CMenuManager::SetBrightness(float brightness, bool arg2) {
     gamma.SetGamma(brightness / 512.0f, arg2);
-}
-
-// NOTSA 0x748BDD
-const char* CMenuManager::GetMovieFileName() const {
-    if (m_nTitleLanguage == 12 || m_nTitleLanguage == 7) {
-        return "movies\\GTAtitlesGER.mpg";
-    } else {
-        return "movies\\GTAtitles.mpg";
-    }
 }

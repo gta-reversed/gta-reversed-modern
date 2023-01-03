@@ -3,8 +3,6 @@
 #include "SurfaceInfos_c.h"
 #include "Skidmark.h"
 
-SurfaceInfos_c* g_surfaceInfos = reinterpret_cast<SurfaceInfos_c*>(0xB79538);
-
 void SurfaceInfos_c::InjectHooks()
 {
     RH_ScopedClass(SurfaceInfos_c);
@@ -364,7 +362,7 @@ void SurfaceInfos_c::LoadSurfaceAudioInfos()
     if (!file) {
         DEV_LOG("[SurfaceInfos_c] Failed to open surfaud.dat");
         CFileMgr::CloseFile(file);
-        return;;
+        return;
     }
 #endif
     for (const char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {

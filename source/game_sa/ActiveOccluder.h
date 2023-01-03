@@ -25,5 +25,6 @@ public:
 
     bool IsPointWithinOcclusionArea(float fX, float fY, float fRadius);
     bool IsPointBehindOccluder(CVector vecPos, float fRadius);
+    auto GetLines() const { return std::span{ m_aLines, m_cLinesCount }; }
 };
 VALIDATE_SIZE(CActiveOccluder, 0xAC);

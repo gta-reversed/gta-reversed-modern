@@ -1,8 +1,12 @@
-#ifdef EXTRA_DEBUG_FEATURES
 #pragma once
 
-namespace CStreamingDebugModule {
-    void ProcessImGui();
-    void ProcessRender();
+#include "DebugModule.h"
+
+class CStreamingDebugModule : public DebugModule {
+public:
+    void RenderWindow() override final;
+    void RenderMenuEntry() override final;
+
+private:
+    bool m_IsOpen{ false };
 };
-#endif

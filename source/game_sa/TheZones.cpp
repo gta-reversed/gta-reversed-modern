@@ -21,7 +21,6 @@ int16& CTheZones::TotalNumberOfNavigationZones = *(int16*)0xBA3794;
 CZone (&CTheZones::MapZoneArray)[39] = *(CZone(*)[39])0xBA1908;
 
 int16& CTheZones::TotalNumberOfZoneInfos = *(int16*)0xBA1DE8;
-CZoneInfo* CTheZones::ZoneInfoArray = (CZoneInfo*)0xBA1DF0;
 
 void CTheZones::InjectHooks() {
     RH_ScopedClass(CTheZones);

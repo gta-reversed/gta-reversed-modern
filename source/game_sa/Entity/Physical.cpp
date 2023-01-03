@@ -1761,8 +1761,8 @@ bool CPhysical::ApplyFriction(float fFriction, CColPoint& colPoint)
 
     auto* vehicle = AsVehicle();
     if (fMoveSpeedMagnitude > 0.1f
-        && g_surfaceInfos->GetFrictionEffect(colPoint.m_nSurfaceTypeB)
-        && (g_surfaceInfos->GetFrictionEffect(colPoint.m_nSurfaceTypeA) == FRICTION_EFFECT_SPARKS || IsVehicle())
+        && g_surfaceInfos.GetFrictionEffect(colPoint.m_nSurfaceTypeB)
+        && (g_surfaceInfos.GetFrictionEffect(colPoint.m_nSurfaceTypeA) == FRICTION_EFFECT_SPARKS || IsVehicle())
         && (!IsVehicle() || !vehicle->IsSubBMX() || !vehicle->m_pDriver
             || fabs(DotProduct(&colPoint.m_vecNormal, &GetRight())) >= 0.86669999f))
     {
@@ -2920,7 +2920,7 @@ bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& t
                 }
                 else
                 {
-                    if (!thisPed->bPedThirdFlags32) // Hmm?? Is this a bug?
+                    if (!thisPed->bPushOtherPeds)
                     {
                         if (fEntitySpeedDotProduct >= 0.0f) {
                             fMoveSpeed = 0.0f;
@@ -4157,7 +4157,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                                 if (bThisOrCollidedEntityStuck || (colPoint->m_nPieceTypeA >= 13 && colPoint->m_nPieceTypeA <= 16)) {
                                     if (ApplySoftCollision(entity, *colPoint, fThisDamageIntensity) &&
                                         (colPoint->m_nSurfaceTypeA != SURFACE_WHEELBASE || colPoint->m_nSurfaceTypeB != SURFACE_WHEELBASE)) {
-                                        float fSurfaceFriction = g_surfaceInfos->GetAdhesiveLimit(colPoint);
+                                        float fSurfaceFriction = g_surfaceInfos.GetAdhesiveLimit(colPoint);
                                         if (ApplyFriction(fSurfaceFriction, *colPoint)) {
                                             m_bHasContacted = true;
                                         }
@@ -4169,7 +4169,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                                         fThisMaxDamageIntensity = fThisDamageIntensity;
                                     }
 
-                                    float fSurfaceFriction = g_surfaceInfos->GetAdhesiveLimit(colPoint);
+                                    float fSurfaceFriction = g_surfaceInfos.GetAdhesiveLimit(colPoint);
                                     float fFriction = fSurfaceFriction / totalColPointsToProcess;
                                     if (!IsVehicle()) {
                                         fFriction *= 150.0f * fThisDamageIntensity;
@@ -4190,8 +4190,8 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                                     } else {
                                         if (thisVehicle->IsBoat()) {
                                             if (colPoint->m_vecNormal.z > 0.6f) {
-                                                if (g_surfaceInfos->GetAdhesionGroup(colPoint->m_nSurfaceTypeB) == ADHESION_GROUP_LOOSE ||
-                                                    g_surfaceInfos->GetAdhesionGroup(colPoint->m_nSurfaceTypeB) == ADHESION_GROUP_SAND) {
+                                                if (g_surfaceInfos.GetAdhesionGroup(colPoint->m_nSurfaceTypeB) == ADHESION_GROUP_LOOSE ||
+                                                    g_surfaceInfos.GetAdhesionGroup(colPoint->m_nSurfaceTypeB) == ADHESION_GROUP_SAND) {
                                                     fFriction *= 3.0f;
                                                 }
                                             } else {
@@ -4322,7 +4322,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                                     SetDamagedPieceRecord(fThisDamageIntensity, physicalEntity, *colPoint1, 1.0f);
                                     physicalEntity->SetDamagedPieceRecord(fEntityDamageIntensity, this, *colPoint1, -1.0f);
 
-                                    float fSurfaceFriction1 = g_surfaceInfos->GetAdhesiveLimit(colPoint1);
+                                    float fSurfaceFriction1 = g_surfaceInfos.GetAdhesiveLimit(colPoint1);
                                     float fFriction3 = fSurfaceFriction1 / totalColPointsToProcess;
                                     if (IsVehicle() && entity->IsVehicle() &&
                                         (m_vecMoveSpeed.SquaredMagnitude() > 0.02f || m_vecTurnSpeed.SquaredMagnitude() > 0.01f)) {
@@ -4376,7 +4376,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                                         SetDamagedPieceRecord(fThisDamageIntensity, physicalEntity, *colPoint4, 1.0f);
                                         physicalEntity->SetDamagedPieceRecord(fEntityDamageIntensity, this, *colPoint4, -1.0f);
 
-                                        float fSurfaceFriction1 = g_surfaceInfos->GetAdhesiveLimit(colPoint4);
+                                        float fSurfaceFriction1 = g_surfaceInfos.GetAdhesiveLimit(colPoint4);
 
                                         float fFriction2 = fSurfaceFriction1 / totalColPointsToProcess;
                                         if (IsVehicle() && entity->IsVehicle() &&
@@ -4424,7 +4424,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                                     SetDamagedPieceRecord(fThisDamageIntensity, physicalEntity, *colPoint3, 1.0f);
                                     physicalEntity->SetDamagedPieceRecord(fEntityDamageIntensity, this, *colPoint3, -1.0f);
 
-                                    float fSurfaceFirction2 = g_surfaceInfos->GetAdhesiveLimit(colPoint3);
+                                    float fSurfaceFirction2 = g_surfaceInfos.GetAdhesiveLimit(colPoint3);
                                     float fFriction1 = fSurfaceFirction2 / totalColPointsToProcess;
                                     if (IsVehicle() && entity->IsVehicle() &&
                                         (m_vecMoveSpeed.SquaredMagnitude() > 0.02f || m_vecTurnSpeed.SquaredMagnitude() > 0.01f)) {
@@ -4628,7 +4628,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
                 {
                     SetDamagedPieceRecord(fThisDamageIntensity, entity, *colPoint, 1.0f);
                     physicalEntity->SetDamagedPieceRecord(fEntityDamageIntensity, this, *colPoint, -1.0f);
-                    float fSurfaceFriction = g_surfaceInfos->GetAdhesiveLimit(colPoint);
+                    float fSurfaceFriction = g_surfaceInfos.GetAdhesiveLimit(colPoint);
                     float fFriction = fSurfaceFriction / totalColPointsToProcess;
                     if (ApplyFriction(physicalEntity, fFriction, *colPoint))
                     {
@@ -4665,7 +4665,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
                     {
                         SetDamagedPieceRecord(fThisDamageIntensity, entity, *colPoint, 1.0f);
                         physicalEntity->SetDamagedPieceRecord(fEntityDamageIntensity, this, *colPoint, -1.0f);
-                        float fSurfaceFriction = g_surfaceInfos->GetAdhesiveLimit(colPoint);
+                        float fSurfaceFriction = g_surfaceInfos.GetAdhesiveLimit(colPoint);
                         float fFriction = fSurfaceFriction / totalColPointsToProcess;
                         if (ApplyFriction(physicalEntity, fFriction, *colPoint))
                         {
@@ -4691,7 +4691,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
                 {
                     SetDamagedPieceRecord(fThisDamageIntensity, entity, *colPoint, 1.0f);
                     physicalEntity->SetDamagedPieceRecord(fEntityDamageIntensity, this, *colPoint, -1.0f);
-                    float fSurfaceFriction = g_surfaceInfos->GetAdhesiveLimit(colPoint);
+                    float fSurfaceFriction = g_surfaceInfos.GetAdhesiveLimit(colPoint);
                     float fFriction = fSurfaceFriction / totalColPointsToProcess;
                     if (ApplyFriction(physicalEntity, fFriction, *colPoint))
                     {

@@ -488,11 +488,24 @@ public:
     float GetCutsceneBarHeight();
     int32 GetCamDirectlyBehind();
 
+    /*!
+    * @addr notsa
+    * @brief Get frustum points of the camera in world space: top left, top right, bottom right, bottom left + the center (0, 0, 0)
+    */
+    auto GetFrustumPoints() -> std::array<CVector, 5>;
+
+    //! Get the camera's front normal (Whatever that is)
+    auto GetFrontNormal2D() const { return CVector2D{ m_fCamFrontXNorm, m_fCamFrontYNorm }; }
+
 public:
     static CCam& GetActiveCamera();
 
     RwMatrix* GetRwMatrix() { return RwFrameGetMatrix(RwCameraGetFrame(m_pRwCamera)); }
     CMatrix& GetViewMatrix() { return m_mViewMatrix; }
+
+    bool IsSphereVisibleInMirror(const CVector& origin, float radius) {
+        return m_bMirrorActive && IsSphereVisible(origin, radius, (RwMatrix*)&m_mMatMirrorInverse);
+    }
 };
 VALIDATE_SIZE(CCamera, 0xD78);
 

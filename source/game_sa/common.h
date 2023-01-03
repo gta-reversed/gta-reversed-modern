@@ -94,7 +94,7 @@ constexpr float FRAC_PI_3      = 1.04719f;          // π / 3
 constexpr float FRAC_PI_4      = 0.785398f;         // π / 4
 constexpr float FRAC_PI_6      = 0.523598f;         // π / 6
 constexpr float FRAC_PI_8      = 0.392699f;         // π / 8
-constexpr float FRAC_TAU_2     = 3.14159f;          // τ / 2
+constexpr float FRAC_TAU_2     = 3.14159f;          // τ / 2 = π
 constexpr float FRAC_TAU_3     = 2.09439f;          // τ / 3
 constexpr float FRAC_TAU_4     = 1.57079f;          // τ / 4
 constexpr float FRAC_TAU_6     = 1.04719f;          // τ / 6
@@ -126,6 +126,7 @@ void InjectCommonHooks();
 void TransformPoint(RwV3d& point, const CSimpleTransform& placement, const RwV3d& vecPos);
 void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CMatrix& matrix, const RwV3d* vecsin);
 void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CSimpleTransform& transform, const RwV3d* vecsin);
+void TransformPoints(RwV3d* pointOut, int count, const RwMatrix& transformMatrix, RwV3d* pointIn);
 
 // Check point is within 2D rectangle
 static bool IsPointInRect2D(const CVector2D& point, const CVector2D& min, const CVector2D& max) {
@@ -153,12 +154,9 @@ constexpr float RadiansToDegrees(float angleInRadians) {
     return angleInRadians * 180.0F / PI;
 }
 
-inline const CVector lerp(const CVector& fMin, const CVector& fMax, float fProgress) {
-    return fMin * (1.0F - fProgress) + fMax * fProgress;
-}
-
-inline const float lerp(float fMin, float fMax, float fProgress) {
-    return fMin * (1.0F - fProgress) + fMax * fProgress;
+template<typename T>
+auto lerp(const T& from, const T& to, float t) {
+    return from * (1.f - t) + to * t;
 }
 
 inline const float invLerp(float fMin, float fMax, float fVal) {
@@ -202,9 +200,6 @@ extern constexpr uint32 make_fourcc4(const char fourcc[4]) {
 char* MakeUpperCase(char *dest, const char *src);
 bool EndsWith(const char* str, const char* with, bool caseSensitive = true);
 
-void Render2dStuff();
-void DefinedState();
-void DefinedState2d();
 RpAtomic* RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data);
 void RemoveRefsForAtomic(RpClump* clump);
 

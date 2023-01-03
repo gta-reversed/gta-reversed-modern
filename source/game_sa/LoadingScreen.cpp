@@ -78,20 +78,15 @@ void CLoadingScreen::RenderSplash() {
 
         if (m_bFadeInNextSplashFromBlack || m_bFadeOutCurrSplashToBlack) {
             color.Set(0, 0, 0);
-            color.a = (CLoadingScreen::m_bFadeInNextSplashFromBlack) ? 255 - m_FadeAlpha : m_FadeAlpha;
+            color.a = (m_bFadeInNextSplashFromBlack) ? 255 - m_FadeAlpha : m_FadeAlpha;
 
             CSprite2d::DrawRect(rect, color);
         } else {
             color.a = 255 - m_FadeAlpha;
 
-            auto next = &GetCurrentDisplayedSplash();
-            next++;
-            next->Draw(rect, color);
+            m_aSplashes[m_currDisplayedSplash - 1].Draw(rect, color);
         }
-        return;
-    }
-
-    if (!m_bReadyToDelete) {
+    } else if (!m_bReadyToDelete) {
         GetCurrentDisplayedSplash().Draw(rect, color);
     }
 }

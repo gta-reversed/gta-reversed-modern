@@ -317,7 +317,7 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
         pickupModel = ModelIndices::MI_PICKUP_HEALTH;
     }
 
-    CPickups::GenerateNewOne(pickupCoors, pickupModel, 5, 0, 0, false, nullptr);
+    CPickups::GenerateNewOne(pickupCoors, pickupModel, PICKUP_ONCE_TIMEOUT_SLOW, 0, 0, false, nullptr);
     return true;
 }
 
@@ -427,17 +427,11 @@ bool CGangWars::MakePlayerGainInfluenceInZone(float removeMult) {
 
 // 0x4439D0
 bool CGangWars::PedStreamedInForThisGang(eGangID gangId) {
-    auto groupId = CPopulation::GetGangGroupId(gangId, 0);
-    auto numPeds = CPopulation::GetNumPedsInGroup(groupId);
-    if (numPeds <= 0)
-        return false;
-
-    for (auto group : std::span{ CPopulation::m_PedGroups, (size_t)numPeds }) {
-        if (!CStreaming::GetInfo(*group).IsLoaded()) {
+    for (auto midx : CPopulation::GetModelsInPedGroup(CPopulation::GetGangGroupId(gangId))) {
+        if (CStreaming::IsModelLoaded(midx)) {
             return true;
         }
     }
-
     return false;
 }
 
