@@ -103,7 +103,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(IsMale, 0x611470, { .reversed = false });
     RH_ScopedGlobalInstall(PopulateInterior, 0x616470, { .reversed = false });
     RH_ScopedGlobalInstall(IsFemale, 0x611490, { .reversed = false });
-    RH_ScopedGlobalInstall(IsSkateable, 0x6114C0, { .reversed = false });
+    RH_ScopedGlobalInstall(IsSkateable, 0x6114C0);
     RH_ScopedGlobalInstall(ChooseGangOccupation, 0x611550, { .reversed = false });
     RH_ScopedGlobalInstall(AddExistingPedInCar, 0x611560, { .reversed = false });
     RH_ScopedGlobalInstall(UpdatePedCount, 0x611570, { .reversed = false });
@@ -329,7 +329,7 @@ bool CPopulation::ArePedStatsCompatible(ePedStats st1, ePedStats st2) {
 
 // 0x6110C0
 bool CPopulation::PedMICanBeCreatedAtAttractor(eModelID modelIndex) {
-    switch (CModelInfo::GetPedModelInfo(modelIndex)->m_nPedType) {
+    switch (CModelInfo::GetPedModelInfo(modelIndex)->GetPedType()) {
     case PED_TYPE_DEALER:
     case PED_TYPE_MEDIC:
     case PED_TYPE_FIREMAN:
@@ -351,7 +351,7 @@ bool CPopulation::PedMICanBeCreatedAtThisAttractor(eModelID modelId, const char*
         return (... || (stricmp(attrName, anyOfValues) == 0));
     };
 
-    const auto pedType = CModelInfo::GetPedModelInfo(modelId)->m_nPedType;
+    const auto pedType = CModelInfo::GetPedModelInfo(modelId)->GetPedType();
 
     if (NameIsAnyOf("COPST", "COPLOOK", "BROWSE")) {
         return pedType == PED_TYPE_COP;
@@ -433,7 +433,7 @@ bool CPopulation::PedMICanBeCreatedAtThisAttractor(eModelID modelId, const char*
 
 // 0x611450
 bool CPopulation::PedMICanBeCreatedInInterior(int32 modelIndex) {
-    switch (CModelInfo::GetPedModelInfo(modelIndex)->m_nPedType) {
+    switch (CModelInfo::GetPedModelInfo(modelIndex)->GetPedType()) {
     case PED_TYPE_COP:
     case PED_TYPE_GANG1:
     case PED_TYPE_GANG2:
@@ -458,22 +458,25 @@ bool CPopulation::PedMICanBeCreatedInInterior(int32 modelIndex) {
 
 // 0x611470
 bool CPopulation::IsMale(int32 modelIndex) {
-    return ((bool(__cdecl*)(int32))0x611470)(modelIndex);
+    return CModelInfo::GetPedModelInfo(modelIndex)->GetPedType() == PED_TYPE_CIVMALE;
 }
 
 // 0x611490
 bool CPopulation::IsFemale(int32 modelIndex) {
-    return ((bool(__cdecl*)(int32))0x611490)(modelIndex);
+    return CModelInfo::GetPedModelInfo(modelIndex)->GetPedType() == PED_TYPE_CIVFEMALE;
 }
 
 // 0x6114B0
 bool CPopulation::IsSecurityGuard(ePedType pedType) {
-    return ((bool(__cdecl*)(ePedType))0x6114B0)(pedType);
+    return false;
 }
 
 // 0x6114C0
 bool CPopulation::IsSkateable(const CVector& point) {
-    return ((bool(__cdecl*)(const CVector&))0x6114C0)(point);
+    CColPoint cp{};
+    CEntity* hitEntity{};
+    CWorld::ProcessVerticalLine(point + CVector{ 0.f, 0.f, 2.f }, point.z - 2.f, cp, hitEntity, true);
+    return hitEntity && g_surfaceInfos.IsSkateable(cp.m_nSurfaceTypeB);
 }
 
 // 0x611550

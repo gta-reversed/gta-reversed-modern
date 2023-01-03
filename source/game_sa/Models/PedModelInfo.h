@@ -60,6 +60,7 @@ public:
     CColModel* AnimatePedColModelSkinnedWorld(RpClump* clump);
     void IncrementVoice();
     auto GetRace() const { return (ePedRace)m_nRace; }
+    auto GetPedType() const { return (ePedType)(m_nPedType); }
 };
 
 VALIDATE_SIZE(CPedModelInfo, 0x44);
