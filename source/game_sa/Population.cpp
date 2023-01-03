@@ -1009,9 +1009,9 @@ void CPopulation::Update(bool generatePeds) {
         return;
     }
 
-    ms_nTotalGangPeds = GetTotalNumGang();
+    ms_nTotalGangPeds = CalculateTotalNumGangPeds();
     ms_nTotalCivPeds  = ms_nNumCivMale + ms_nNumCivFemale;
-    ms_nTotalPeds     = ms_nTotalPeds + ms_nTotalGangPeds + ms_nNumCop + ms_nNumEmergency;
+    ms_nTotalPeds     = ms_nTotalCivPeds + ms_nTotalGangPeds + ms_nNumCop + ms_nNumEmergency;
 
     if (CCutsceneMgr::IsCutsceneProcessing() || !generatePeds) {
         return;
@@ -1042,10 +1042,7 @@ bool CPopulation::DoesCarGroupHaveModelId(int32 carGroupId, int32 modelId)
     return plugin::CallAndReturn<bool, 0x406F50, int32, int32>(carGroupId, modelId);
 }
 
-uint32 CPopulation::GetTotalNumGang() {
-    return std::accumulate(
-        ms_nNumGang.begin(),
-        ms_nNumGang.end(),
-        0
-    );
+// NOTSA
+uint32 CPopulation::CalculateTotalNumGangPeds() {
+    return notsa::accumulate(ms_nNumGang, 0u);
 }
