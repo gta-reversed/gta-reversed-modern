@@ -67,7 +67,7 @@ bool CEventAttractor::AffectsPed_Reversed(CPed* ped)
             || GetEventType() != EVENT_ATTRACTOR
             || !FindPlayerWanted()->m_nWantedLevel
             && pedAttractor.m_nAttractorType == PED_ATTRACTOR_TRIGGER_SCRIPT
-            && CPopulation::PedMICanBeCreatedAtThisAttractor(ped->m_nModelIndex, pedAttractor.m_szScriptName))
+            && CPopulation::PedMICanBeCreatedAtThisAttractor((eModelID)(ped->m_nModelIndex), pedAttractor.m_szScriptName))
         {
             CTask* activeTask = ped->GetTaskManager().GetActiveTask();
             if (!activeTask

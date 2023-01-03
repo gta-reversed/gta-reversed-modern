@@ -98,7 +98,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(ChoosePolicePedOccupation, 0x610F40, { .reversed = false });
     RH_ScopedGlobalInstall(ArePedStatsCompatible, 0x610F50);
     RH_ScopedGlobalInstall(PedMICanBeCreatedAtAttractor, 0x6110C0);
-    RH_ScopedGlobalInstall(PedMICanBeCreatedAtThisAttractor, 0x6110E0, { .reversed = false });
+    RH_ScopedGlobalInstall(PedMICanBeCreatedAtThisAttractor, 0x6110E0);
     RH_ScopedGlobalInstall(PedMICanBeCreatedInInterior, 0x611450, { .reversed = false });
     RH_ScopedGlobalInstall(IsMale, 0x611470, { .reversed = false });
     RH_ScopedGlobalInstall(PopulateInterior, 0x616470, { .reversed = false });
@@ -328,7 +328,7 @@ bool CPopulation::ArePedStatsCompatible(ePedStats st1, ePedStats st2) {
 }
 
 // 0x6110C0
-bool CPopulation::PedMICanBeCreatedAtAttractor(int32 modelIndex) {
+bool CPopulation::PedMICanBeCreatedAtAttractor(eModelID modelIndex) {
     switch (CModelInfo::GetPedModelInfo(modelIndex)->m_nPedType) {
     case PED_TYPE_DEALER:
     case PED_TYPE_MEDIC:
@@ -342,8 +342,93 @@ bool CPopulation::PedMICanBeCreatedAtAttractor(int32 modelIndex) {
 }
 
 // 0x6110E0
-bool CPopulation::PedMICanBeCreatedAtThisAttractor(int32 modelIndex, char* attrName) {
-    return ((bool(__cdecl*)(int32, char*))0x6110E0)(modelIndex, attrName);
+bool CPopulation::PedMICanBeCreatedAtThisAttractor(eModelID modelId, const char* attrName) {
+    if (!attrName) {
+        return true;
+    }
+
+    const auto NameIsAnyOf = [&](auto... anyOfValues) {
+        return (... || (stricmp(attrName, anyOfValues) == 0));
+    };
+
+    const auto pedType = CModelInfo::GetPedModelInfo(modelId)->m_nPedType;
+
+    if (NameIsAnyOf("COPST", "COPLOOK", "BROWSE")) {
+        return pedType == PED_TYPE_COP;
+    }
+
+    if (pedType == PED_TYPE_COP) {
+        return false;
+    }
+
+    if (NameIsAnyOf("DANCER")) {
+        switch (modelId) {
+        case MODEL_BFYRI:
+        case MODEL_BMYRI:
+        case MODEL_BMYST:
+        case MODEL_HFYRI:
+        case MODEL_HMYRI:
+        case MODEL_OFYST:
+        case MODEL_OMOST:
+        case MODEL_OMYRI:
+        case MODEL_OMYST:
+        case MODEL_WFYRI:
+        case MODEL_WFYST:
+        case MODEL_WMYRI:
+        case MODEL_WMYST:
+            return true;
+        }
+        return false;
+    }
+
+    if (NameIsAnyOf("BARGUY", "PEDROUL", "PEDCARD", "PEDSLOT")) {
+        switch (modelId) {
+        case MODEL_WMYCON:
+        case MODEL_HMOGAR:
+        case MODEL_WMYMECH:
+        case MODEL_SBFYST:
+        case MODEL_WMYSGRD:
+        case MODEL_SWMYHP1:
+        case MODEL_SWMYHP2:
+        case MODEL_SWMOTR1:
+        case MODEL_SBMOTR2SBMOTR2:
+        case MODEL_SWMOTR2:
+        case MODEL_SBMYTR3:
+        case MODEL_SWMOTR3:
+        case MODEL_SBMYST:
+        case MODEL_WMYCONB:
+        case MODEL_SOMYST:
+        case MODEL_SBFOST:
+        case MODEL_SOFOST:
+        case MODEL_SOFYST:
+        case MODEL_SOMOST:
+        case MODEL_SWMOTR5:
+        case MODEL_SWFOST:
+        case MODEL_SWFYST:
+        case MODEL_SWMOST:
+        case MODEL_SWMOTR4:
+            return false; // TODO/BUG: Is this correct? Shouldn't it return true?
+        }
+        return true;
+    }
+
+    if (NameIsAnyOf("STRIPW")) {
+        switch (modelId) {
+        case MODEL_VWFYST1:
+        case MODEL_VBFYST2:
+        case MODEL_VHFYST3:
+        case MODEL_SBFYSTR:
+        case MODEL_SWFYSTR:
+            return true;
+        }
+        return false;
+    }
+
+    if (NameIsAnyOf("STRIPM")) {
+        return pedType != PED_TYPE_CIVFEMALE;
+    }
+
+    return false;
 }
 
 // 0x611450
