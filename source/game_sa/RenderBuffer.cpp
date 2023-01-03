@@ -5,6 +5,9 @@ namespace RenderBuffer {
 auto& s_IndicesToBeStored{ StaticRef<int32, 0xC40410>() };
 auto& s_VerticesToBeStored{ StaticRef<int32, 0xC40414>() };
 
+const auto IdxBufferSize = (int32)std::size(aTempBufferIndices);
+const auto VtxBufferSize = (int32)std::size(aTempBufferVertices);
+
 void InjectHooks() {
     RH_ScopedNamespace(RenderBuffer);
     RH_ScopedCategoryGlobal();
@@ -22,14 +25,14 @@ void StartStoring(
     RwImVertexIndex*& outPtrFirstIndex,
     RwIm3DVertex*& outPtrFirstVertex
 ) {
-    assert(nIndicesNeeded  > 0 && nIndicesNeeded  <= (int32)std::size(aTempBufferIndices));
-    assert(nVerticesNeeded > 0 && nVerticesNeeded <= (int32)std::size(aTempBufferVertices));
+    assert(nIndicesNeeded > 0 && nIndicesNeeded <= IdxBufferSize);
+    assert(nVerticesNeeded > 0 && nVerticesNeeded <= VtxBufferSize);
 
-    if (uiTempBufferIndicesStored + nIndicesNeeded >= (int32)std::size(aTempBufferIndices)) {
+    if (uiTempBufferIndicesStored + nIndicesNeeded >= IdxBufferSize) {
         RenderBuffer::RenderStuffInBuffer();
     }
 
-    if (uiTempBufferVerticesStored + nVerticesNeeded >= (int32)std::size(aTempBufferVertices)) {
+    if (uiTempBufferVerticesStored + nVerticesNeeded >= VtxBufferSize) {
         RenderBuffer::RenderStuffInBuffer();
     }
 
@@ -70,5 +73,34 @@ void RenderStuffInBuffer() {
 void ClearRenderBuffer() {
     uiTempBufferIndicesStored  = 0;
     uiTempBufferVerticesStored = 0;
+}
+
+// 0x6E7680 - I know, `LittlTest()` is missing, but nobody cares.
+void RenderIfDoesntFit(int32 nIdxNeeded, int32 nVtxNeeded) {
+    if (uiTempBufferIndicesStored + nIdxNeeded > IdxBufferSize || uiTempBufferVerticesStored + nVtxNeeded > VtxBufferSize) {
+        RenderStuffInBuffer();
+    }
+}
+
+// notsa
+void PushVertex(CVector pos, CVector2D uv, CRGBA color) {
+    const auto vtx = &aTempBufferVertices[uiTempBufferVerticesStored++];
+
+    RwIm3DVertexSetPos(vtx, pos.x, pos.y, pos.z);
+    RwIm3DVertexSetRGBA(vtx, color.r, color.g, color.b, color.a);
+    RwIm3DVertexSetU(vtx, uv.x);
+    RwIm3DVertexSetV(vtx, uv.y);
+}
+
+// notsa
+void PushIndex(RwImVertexIndex idx, bool useCurrentVtxAsBase) {
+    aTempBufferIndices[uiTempBufferIndicesStored++] = useCurrentVtxAsBase ? uiTempBufferVerticesStored + idx : idx;
+}
+
+// notsa
+void PushIndices(std::initializer_list<RwImVertexIndex> idxs, bool useCurrentVtxAsBase) {
+    for (auto idx : idxs) {
+        PushIndex(idx, useCurrentVtxAsBase);
+    }
 }
 }; // namespace RenderBuffer 

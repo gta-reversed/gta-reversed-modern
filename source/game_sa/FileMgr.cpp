@@ -340,6 +340,11 @@ bool CFileMgr::GetErrorReadWrite(FILESTREAM file)
     return (bool) ferror(file);
 }
 
+// notsa
+void CFileMgr::SeekNextLine(FILESTREAM file) {
+    while (!feof(file) && fgetc(file) != '\n');
+}
+
 void CFileMgr::InjectHooks()
 {
     RH_ScopedClass(CFileMgr);
