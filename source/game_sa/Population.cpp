@@ -57,7 +57,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(LoadCarGroups, 0x5BD1A0);
 
     RH_ScopedGlobalInstall(DoesCarGroupHaveModelId, 0x406F50, { .reversed = false });
-    RH_ScopedGlobalInstall(ManagePed, 0x611FC0, { .reversed = false });
+    RH_ScopedGlobalInstall(ManagePed, 0x611FC0);
     RH_ScopedGlobalInstall(FindNumberOfPedsWeCanPlaceOnBenches, 0x612240);
     RH_ScopedGlobalInstall(RemoveAllRandomPeds, 0x6122C0);
     RH_ScopedGlobalInstall(TestRoomForDummyObject, 0x612320);
@@ -683,7 +683,73 @@ float CPopulation::FindPedMultiplierMotorway() {
 
 // 0x611FC0
 void CPopulation::ManagePed(CPed* ped, const CVector& playerPosn) {
-    ((void(__cdecl*)(CPed*, const CVector&))0x611FC0)(ped, playerPosn);
+    if (ped->IsPlayer()) {
+        return;
+    }
+
+    if (!ped->CanBeDeleted()) {
+        return;
+    }
+
+    if (ped->bInVehicle) {
+        return;
+    }
+
+    if (ped->m_pAttachedTo && ped->m_pAttachedTo->m_nType == ENTITY_TYPE_VEHICLE) {
+        return;
+    }
+
+    // If pead is dead, possibly fade them out
+    if (ped->IsStateDead()) {
+        const auto delta = CTimer::GetTimeInMS() - ped->m_nDeathTimeMS;
+        if (   delta > 30'000
+            || CDarkel::FrenzyOnGoing() && delta > 15'000
+            || CGangWars::GangWarFightingGoingOn() && delta > 8'000
+        ) {
+            ped->bFadeOut = true;
+        }
+    }
+
+    // If we've faded the ped completely out, remove it
+    if (ped->bFadeOut && CVisibilityPlugins::GetClumpAlpha(ped->m_pRwClump) == 0) {
+        RemovePed(ped);
+        return;
+    }
+
+    const auto pedsRemovalDist = [&] {
+        const auto GetDist = [&] {
+            return (ped->GetPosition() - playerPosn).Magnitude2D() * ped->m_fRemovalDistMultiplier;
+        };
+        if (IsPedTypeGang(ped->m_nPedType)) {
+            return GetDist() - 30.f;
+        } else if (ped->bDeadPedInFrontOfCar && ped->field_590) { // Never true, because `field_590` is always 0
+            return 0.f;
+        } else {
+            return GetDist();
+        }
+    }() / PedCreationDistMultiplier(); // Simplify the conditions below by dividing here
+
+    if (TheCamera.m_fGenerationDistMultiplier * (ped->bCullExtraFarAway ? 65.f : 54.5f) <= pedsRemovalDist) {
+        if (ped->GetIsOnScreen()) {
+            ped->bFadeOut = true;
+        } else {
+            RemovePed(ped);
+        }
+    } else if (pedsRemovalDist <= 25.f || ped->GetIsOnScreen()) { // From here on I did some truth table magic, and was able to remove some of the redudant code (So some of the code is missing)
+        ped->m_nTimeTillWeNeedThisPed = CTimer::GetTimeInMS() + (ped->m_nPedType == PED_TYPE_COP ? 10'000 : 4'000);
+    } else if (CTimer::GetTimeInMS() > ped->m_nTimeTillWeNeedThisPed) { // Ped not needed anymore
+        const auto& activeCam = TheCamera.GetActiveCamera();
+        switch (activeCam.m_nMode) {
+        case MODE_SNIPER:
+        case MODE_SNIPER_RUNABOUT:
+        case MODE_CAMERA:
+            return;
+        }
+        if (activeCam.m_bLookingLeft || activeCam.m_bLookingRight || activeCam.m_bLookingBehind) {
+            return;
+        }
+        RemovePed(ped);
+    }
 }
 
 // 0x612240
