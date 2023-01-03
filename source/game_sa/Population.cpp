@@ -92,8 +92,8 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(RemoveSpecificDriverModelsForCar, 0x6119D0, { .reversed = false });
     RH_ScopedGlobalInstall(Initialise, 0x610E10, { .reversed = false });
     RH_ScopedGlobalInstall(Shutdown, 0x610EC0, { .reversed = false });
-    RH_ScopedGlobalInstall(FindDummyDistForModel, 0x610ED0, { .reversed = false });
-    RH_ScopedGlobalInstall(FindPedDensityMultiplierCullZone, 0x610F00, { .reversed = false });
+    RH_ScopedGlobalInstall(FindDummyDistForModel, 0x610ED0);
+    RH_ScopedGlobalInstall(FindPedDensityMultiplierCullZone, 0x610F00);
     RH_ScopedGlobalInstall(RemovePed, 0x610F20);
     RH_ScopedGlobalInstall(ChoosePolicePedOccupation, 0x610F40, { .reversed = false });
     RH_ScopedGlobalInstall(ArePedStatsCompatible, 0x610F50, { .reversed = false });
@@ -225,22 +225,48 @@ void CPopulation::LoadCarGroups() {
 
 // 0x610E10
 void CPopulation::Initialise() {
-    ((void(__cdecl*)())0x610E10)();
+    ms_nNumCivMale = 0;
+    ms_nNumCivFemale = 0;
+    ms_nNumCop = 0;
+    ms_nNumEmergency = 0;
+    rng::fill(ms_nNumGang, 0);
+    ms_nTotalCarPassengerPeds = 0;
+    ms_nTotalCivPeds = 0;
+    ms_nTotalGangPeds = 0;
+    ms_nTotalPeds = 0;
+    ms_nTotalMissionPeds = 0;
+    m_CountDownToPedsAtStart = 5;
+    bZoneChangeHasHappened = 0;
+    PedDensityMultiplier = 1.0f;
+    m_AllRandomPedsThisType = -1;
+    MaxNumberOfPedsInUse = 25;
+    NumberOfPedsInUseInterior = 40;
+    bInPoliceStation = 0;
+    m_bDontCreateRandomGangMembers = 0;
+    m_bOnlyCreateRandomGangMembers = 0;
+    m_bDontCreateRandomCops = 0;
+    m_bMoreCarsAndFewerPeds = 0;
+    LoadPedGroups();
+    LoadCarGroups();
 }
 
 // 0x610EC0
 void CPopulation::Shutdown() {
-    ((void(__cdecl*)())0x610EC0)();
+    /* nop */
 }
 
 // 0x610ED0
 float CPopulation::FindDummyDistForModel(int32 modelIndex) {
-    return ((float(__cdecl*)(int32))0x610ED0)(modelIndex);
+    return (modelIndex == ModelIndices::MI_SAMSITE || modelIndex == ModelIndices::MI_SAMSITE2)
+        ? 750.f
+        : 80.f;
 }
 
 // 0x610F00
 float CPopulation::FindPedDensityMultiplierCullZone() {
-    return ((float(__cdecl*)())0x610F00)();
+    return CCullZones::FewerPeds()
+        ? 0.6f
+        : 1.f;
 }
 
 // 0x610F20
