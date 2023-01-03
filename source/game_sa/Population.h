@@ -72,7 +72,7 @@ public:
     static inline auto& m_nNumPedsInGroup = StaticRef<std::array<uint16, (size_t)(POPCYCLE_TOTAL_PEDGROUPS)>, 0xC0ECC0>();
 
     //! Ped model IDs in each corresponding ped group
-    static inline auto& m_PedGroups       = StaticRef<notsa::mdarray<int16, (size_t)(POPCYCLE_TOTAL_PEDGROUPS), 23>, 0xC0F358>();
+    static inline auto& m_PedGroups       = StaticRef<notsa::mdarray<int16, (size_t)(POPCYCLE_TOTAL_PEDGROUPS), 21>, 0xC0F358>();
 
 public:
     static void InjectHooks();
@@ -185,7 +185,7 @@ public:
     static void PopulateInterior(int32 numPeds, CVector posn);
     static void Update(bool generatePeds);
     static bool DoesCarGroupHaveModelId(int32 carGroupId, int32 modelId);
-    static uint32 GetTotalNumGang();
+    static uint32 CalculateTotalNumGangPeds();
 
     static const auto& GetPedGroupsOfGroup(ePopcycleGroup popcycleGroup) { return m_TranslationArray[popcycleGroup].pedGroupIds; }
     static ePopcyclePedGroup GetPedGroupId(ePopcycleGroup popcycleGroup, size_t worldZone = 0) { return static_cast<ePopcyclePedGroup>(m_TranslationArray[popcycleGroup].pedGroupIds[worldZone]); }
