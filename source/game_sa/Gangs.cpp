@@ -43,9 +43,8 @@ bool CGangs::Save() {
 }
 
 // 0x5DE550
-void CGangs::SetGangWeapons(int16 gangId, int32 weapId1, int32 weapId2, int32 weapId3) {
-    assert(weapId1 >= 0 && weapId2 >= 0 && weapId3 >= 0);
-    Gang[gangId].m_nGangWeapons = { weapId1, weapId2, weapId3 };
+void CGangs::SetGangWeapons(int16 gangId, eWeaponType weapId1, eWeaponType weapId2, eWeaponType weapId3) {
+    Gang[gangId].SetWeapons({ weapId1, weapId2, weapId3 });
 }
 
 // 0x5DE5A0
