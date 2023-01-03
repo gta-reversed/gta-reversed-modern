@@ -127,7 +127,7 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
         dealersChance = -10.f;
     }
 
-    // Pirulax: I had to refactor the code to be acceptable and bugless - sorry}
+    // Pirulax: I had to refactor the code to be acceptable and bugless - sorry
     while (true) {
         const auto highestChance = std::max({ civPedsChance, copChance, dealersChance, gangChance });
 

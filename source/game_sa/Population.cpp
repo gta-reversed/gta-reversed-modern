@@ -61,7 +61,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(FindNumberOfPedsWeCanPlaceOnBenches, 0x612240);
     RH_ScopedGlobalInstall(RemoveAllRandomPeds, 0x6122C0);
     RH_ScopedGlobalInstall(TestRoomForDummyObject, 0x612320);
-    RH_ScopedGlobalInstall(TestSafeForRealObject, 0x6123A0, { .reversed = false });
+    RH_ScopedGlobalInstall(TestSafeForRealObject, 0x6123A0);
     RH_ScopedGlobalInstall(AddPed, 0x612710, { .reversed = false });
     RH_ScopedGlobalInstall(AddDeadPedInFrontOfCar, 0x612CD0, { .reversed = false });
     RH_ScopedGlobalInstall(ChooseCivilianOccupation, 0x612F90, { .reversed = false });
@@ -797,8 +797,33 @@ bool CPopulation::TestRoomForDummyObject(CObject* object) {
 }
 
 // 0x6123A0
-bool CPopulation::TestSafeForRealObject(CDummyObject* dummyObject) {
-    return ((bool(__cdecl*)(CDummyObject*))0x6123A0)(dummyObject);
+bool CPopulation::TestSafeForRealObject(CDummyObject* obj) {
+    const auto objCM = obj->GetColModel();
+    return CWorld::IterateSectorsOverlappedByRect(
+        CRect{ objCM->GetBoundCenter(), objCM->GetBoundRadius() },
+        [
+            &,
+            objMat = obj->GetMatrix()
+        ](int32 x, int32 y) {
+            const auto& list = GetRepeatSector(x, y)->GetList(REPEATSECTOR_VEHICLES);
+            for (CPtrNodeDoubleLink* node = list.GetNode(); node; node = node->GetNext()) {
+                const auto entity = node->GetItem<CVehicle>();
+                if (CCollision::ProcessColModels(
+                    objMat,
+                    *objCM,
+                    entity->GetMatrix(),
+                    *entity->GetColModel(),
+                    CWorld::m_aTempColPts,
+                    nullptr,
+                    nullptr,
+                    false
+                ) > 0) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    );
 }
 
 // 0x612710
@@ -868,12 +893,14 @@ int32 CPopulation::PickRiotRoadBlockCar() {
 
 // 0x614580
 void CPopulation::ConvertToRealObject(CDummyObject* dummyObject) {
-    if (!CPopulation::TestSafeForRealObject(dummyObject))
+    if (!CPopulation::TestSafeForRealObject(dummyObject)) {
         return;
+    }
 
     auto* obj = dummyObject->CreateObject();
-    if (!obj)
+    if (!obj) {
         return;
+    }
 
     CWorld::Remove(dummyObject);
     dummyObject->m_bIsVisible = false;
@@ -882,18 +909,14 @@ void CPopulation::ConvertToRealObject(CDummyObject* dummyObject) {
     obj->SetRelatedDummy(dummyObject);
     CWorld::Add(obj);
 
-    if (!IsGlassModel(obj) || CModelInfo::GetModelInfo(obj->m_nModelIndex)->IsGlassType2())
-    {
-        if (obj->m_nModelIndex == ModelIndices::MI_BUOY || obj->physicalFlags.bAttachedToEntity)
-        {
+    if (!IsGlassModel(obj) || CModelInfo::GetModelInfo(obj->m_nModelIndex)->IsGlassType2()) {
+        if (obj->m_nModelIndex == ModelIndices::MI_BUOY || obj->physicalFlags.bAttachedToEntity) {
             obj->SetIsStatic(false);
             obj->m_vecMoveSpeed.Set(0.0F, 0.0F, -0.001F);
             obj->physicalFlags.bTouchingWater = true;
             obj->AddToMovingList();
         }
-    }
-    else
-    {
+    } else {
         obj->m_bIsVisible = false;
     }
 }
