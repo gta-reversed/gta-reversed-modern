@@ -79,7 +79,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(FindCarMultiplierMotorway, 0x611B60, { .reversed = false });
     RH_ScopedGlobalInstall(IsCorrectTimeOfDayForEffect, 0x611B20, { .reversed = false });
     RH_ScopedGlobalInstall(RemoveSpecificDriverModelsForCar, 0x6119D0, { .reversed = false });
-    RH_ScopedGlobalInstall(FindPedRaceFromName, 0x5B6D40, { .reversed = false });
+    RH_ScopedGlobalInstall(FindPedRaceFromName, 0x5B6D40);
     RH_ScopedGlobalInstall(LoadPedGroups, 0x5BCFE0, { .reversed = false });
     RH_ScopedGlobalInstall(LoadCarGroups, 0x5BD1A0, { .reversed = false });
     RH_ScopedGlobalInstall(Initialise, 0x610E10, { .reversed = false });
@@ -114,8 +114,18 @@ void CPopulation::InjectHooks() {
 }
 
 // 0x5B6D40
-int32 CPopulation::FindPedRaceFromName(char* modelName) {
-    return ((int32(__cdecl*)(char*))0x5B6D40)(modelName);
+ePedRace CPopulation::FindPedRaceFromName(const char* modelName) {
+    for (size_t i{}; i < 2; i++) {
+        switch (toupper(modelName[i])) {
+        case 0:   return RACE_DEFAULT; // Not handled properly originally
+        case 'B': return RACE_BLACK;
+        case 'H': return RACE_HISPANIC;
+        case 'O':
+        case 'I': return RACE_ORIENTAL;
+        case 'W': return RACE_WHITE;
+        }
+    }
+    return RACE_DEFAULT;
 }
 
 // 0x5BCFE0

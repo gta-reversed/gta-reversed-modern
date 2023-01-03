@@ -74,7 +74,7 @@ public:
     // static functions
 
     // returns ePedRace value
-    static int32 FindPedRaceFromName(char* modelName);
+    static int32 FindPedRaceFromName(const char* modelName);
     // loads pedgrp.dat
     static void LoadPedGroups();
     // loads cargrp.dat
