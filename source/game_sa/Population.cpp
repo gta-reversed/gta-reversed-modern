@@ -178,6 +178,7 @@ void LoadGroup(const char* fileName, auto& outModelsInGroup, auto& outNumOfModel
             char modelName[256]{};
             strncpy_s(modelName, begin, end - begin);
             if (int32 pedModelIdx{ MODEL_INVALID }; CModelInfo::GetModelInfo(modelName, &pedModelIdx)) {
+                assert(pedModelIdx != MODEL_PLAYER);
                 outModelsInGroup[currGrpIdx][npeds++] = pedModelIdx;
             } else {
                 DEV_LOG("Model ({}) doesn't exist! [Group ID: {}; Line: {}]", modelName, currGrpIdx, lineno);
@@ -188,17 +189,17 @@ void LoadGroup(const char* fileName, auto& outModelsInGroup, auto& outNumOfModel
             continue; // Blank line
         }
 
-        POP_DEV_LOG("Loaded ({}) models into the group ({})", outNumOfModelsPerGroup[currGrpIdx], currGrpIdx);
+        //POP_DEV_LOG("Loaded ({}) models into the group ({})", outNumOfModelsPerGroup[currGrpIdx], currGrpIdx);
 
         // Only now set this
         outNumOfModelsPerGroup[currGrpIdx] = npeds;
 
         // Fill the rest (unused slots) with a value
-        rng::fill(outModelsInGroup[currGrpIdx] | rng::views::drop(outNumOfModelsPerGroup[currGrpIdx]), CPopulation::m_DefaultModelIDForUnusedSlot);
+        rng::fill(outModelsInGroup[currGrpIdx] | rng::views::drop(npeds), CPopulation::m_DefaultModelIDForUnusedSlot);
+        assert(!notsa::contains(outModelsInGroup[currGrpIdx], 0));
 
         // Only increment this if it wasn't a blank line
         currGrpIdx++;
-
 #ifndef _DEBUG // In debug mode we let the loop go to check for past-the-end data (and report it)
         if (currGrpIdx == outModelsInGroup.size()) {
             break; // No more data needed - This if kind of a bugfix too, as the original game would just keep going, and if there was anything after the last group it would just corrupt the memory :D

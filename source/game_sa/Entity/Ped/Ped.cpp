@@ -3325,6 +3325,8 @@ RwMatrix& CPed::GetBoneMatrix(ePedBones bone) const {
 * @brief Set model index (Also re-inits animblend, MoneyCount, and default decision-marker)
 */
 void CPed::SetModelIndex(uint32 modelIndex) {
+    assert(modelIndex != MODEL_PLAYER || IsPlayer());
+
     m_bIsVisible = true;
 
     CEntity::SetModelIndex(modelIndex);
