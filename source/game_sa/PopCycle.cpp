@@ -150,14 +150,11 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
             dealersChance = 0.f;
             continue;
         } else if (highestChance == gangChance) { // 0x60FF13
-            if (outPedType) {
-                outPedMI = CPopulation::ChooseGangOccupation((eGangID)(outPedType - ePedType::PED_TYPE_GANG1));
-                if (outPedMI >= 0) {
-                    outPedType = PickGangToCreateMembersOf();
-                    return true;
-                }
-            } else {
-                outPedMI = MODEL_INVALID;
+            outPedType = PickGangToCreateMembersOf();
+            assert(IsPedTypeGang(outPedType));
+            outPedMI = CPopulation::ChooseGangOccupation((eGangID)(outPedType - ePedType::PED_TYPE_GANG1));
+            if (outPedMI >= 0) {
+                return true;
             }
             if (CPopulation::m_bOnlyCreateRandomGangMembers) {
                 return false;
@@ -170,7 +167,9 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
             return true;
         } else if (highestChance == civPedsChance) { // 0x60FF8F
             outPedMI = CPopulation::ChooseCivilianOccupation(0, 0, -1, -1, -1, 0, 1, 0, 0);
-            if (outPedMI <= MODEL_INVALID || outPedMI == MODEL_MALE01) {
+            switch (outPedMI) {
+            case MODEL_INVALID:
+            case MODEL_MALE01:
                 return false;
             }
             outPedType = CModelInfo::GetPedModelInfo(outPedMI)->m_nPedType;
@@ -436,8 +435,9 @@ ePedType CPopCycle::PickGangToCreateMembersOf() {
     if (CCheat::IsActive(CHEAT_GANGS_CONTROLS_THE_STREETS)) {
         return CGeneral::RandomChoice(GetAllGangPedTypes());
     }
+
     const auto dominatingGangId = rng::max(
-        rng::iota_view{0u, std::size(m_pCurrZoneInfo->GangDensity)},
+        rng::iota_view{0u, (size_t)TOTAL_GANGS},
         rng::less{},
         [sumGangDensity = (float)m_pCurrZoneInfo->GetSumOfGangDensity()](auto gangId) {
             return (float)m_pCurrZoneInfo->GangDensity[gangId] / sumGangDensity - (float)CPopulation::ms_nNumGang[gangId] / m_NumGangs_Peds;
