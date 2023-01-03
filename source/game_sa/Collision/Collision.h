@@ -78,7 +78,7 @@ public:
     static void CalculateTrianglePlanes(CColModel* colModel);
     static void RemoveTrianglePlanes(CColModel* colModel);
     // returns number of resulting collision points
-    static int32 ProcessColModels(const CMatrix& transform1, CColModel& colModel1, const CMatrix& transform2, CColModel& colModel2, CColPoint(&cpB)[32], CColPoint*  lineCPs, float* maxTouchDistance, bool arg7);
+    static int32 ProcessColModels(const CMatrix& transform1, CColModel& colModel1, const CMatrix& transform2, CColModel& colModel2, CColPoint(&cpB)[32], CColPoint* lineCPs = nullptr, float* maxTouchDistance = nullptr, bool arg7 = false);
     static bool SphereCastVsEntity(CColSphere* sphere1, CColSphere* sphere2, CEntity* entity);
     static bool SphereVsEntity(CColSphere* sphere, CEntity* entity);
     static bool CheckCameraCollisionBuildings(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5);
