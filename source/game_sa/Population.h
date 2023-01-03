@@ -108,11 +108,20 @@ public:
     // checks if surface at this point is skateable
     static bool IsSkateable(const CVector& point);
     // calls CGangs::ChooseGangPedModel(int32); parameter - gang id?
-    static int32 ChooseGangOccupation(int32 arg0);
+    static int32 ChooseGangOccupation(eGangID gangId);
     // empty function, returns ped
     static CPed* AddExistingPedInCar(CPed* ped, CVehicle* vehicle);
-    // updates ped counter, for updateState see eUpdatePedCounterState
-    static void UpdatePedCount(CPed* ped, uint8 updateState);
+
+    /*!
+    * @addr 0x611570
+    * 
+    * @brief updates ped counter, for updateState see eUpdatePedCounterState
+    *
+    * @param ped               The ped that was added/removed
+    * @param pedAddedOrRemoved Should be `false` if the ped was added, or `true` if it was removed 
+    */
+    static void UpdatePedCount(CPed* ped, uint8 pedAddedOrRemoved);
+
     // empty function
     static void MoveCarsAndPedsOutOfAbandonedZones();
     // empty function

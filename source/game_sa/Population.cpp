@@ -106,7 +106,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(IsSkateable, 0x6114C0);
     RH_ScopedGlobalInstall(ChooseGangOccupation, 0x611550);
     RH_ScopedGlobalInstall(AddExistingPedInCar, 0x611560);
-    RH_ScopedGlobalInstall(UpdatePedCount, 0x611570, { .reversed = false });
+    RH_ScopedGlobalInstall(UpdatePedCount, 0x611570);
     RH_ScopedGlobalInstall(MoveCarsAndPedsOutOfAbandonedZones, 0x6116A0, { .reversed = false });
     RH_ScopedGlobalInstall(DealWithZoneChange, 0x6116B0, { .reversed = false });
     RH_ScopedGlobalInstall(PedCreationDistMultiplier, 0x6116C0, { .reversed = false });
@@ -490,8 +490,57 @@ CPed* CPopulation::AddExistingPedInCar(CPed* ped, CVehicle* vehicle) {
 }
 
 // 0x611570
-void CPopulation::UpdatePedCount(CPed* ped, uint8 updateState) {
-    ((void(__cdecl*)(CPed*, uint8))0x611570)(ped, updateState);
+void CPopulation::UpdatePedCount(CPed* ped, uint8 pedAddedOrRemoved) {
+    if (pedAddedOrRemoved != ped->bHasBeenAddedToPopulation) {
+        return;
+    }
+
+    ped->bHasBeenAddedToPopulation = !pedAddedOrRemoved;
+
+    const auto DoOp = [&](auto& value) {
+        if (pedAddedOrRemoved) {
+            value--;
+        } else {
+            value++;
+        }
+    };
+
+    switch (ped->m_nPedType) {
+    case PED_TYPE_CIVMALE:
+    case PED_TYPE_CRIMINAL:
+        DoOp(ms_nNumCivMale);
+        break;
+    case PED_TYPE_CIVFEMALE:
+    case PED_TYPE_PROSTITUTE:
+        DoOp(ms_nNumCivFemale);
+        break;
+    case PED_TYPE_COP:
+        DoOp(ms_nNumCop);
+        break;
+    case PED_TYPE_GANG1:
+    case PED_TYPE_GANG2:
+    case PED_TYPE_GANG3:
+    case PED_TYPE_GANG4:
+    case PED_TYPE_GANG5:
+    case PED_TYPE_GANG6:
+    case PED_TYPE_GANG7:
+    case PED_TYPE_GANG8:
+    case PED_TYPE_GANG9:
+    case PED_TYPE_GANG10:
+#ifdef FIX_BUGS
+        DoOp(ms_nNumGang[ped->m_nPedType - PED_TYPE_GANG1]);
+#else
+        DoOp(ms_nNumGang[ped->m_nPedType]);
+#endif
+        break;
+    case PED_TYPE_DEALER:
+        DoOp(ms_nNumDealers);
+        break;
+    case PED_TYPE_MEDIC:
+    case PED_TYPE_FIREMAN:
+        DoOp(ms_nNumEmergency);
+        break;
+    }
 }
 
 // 0x6116A0
