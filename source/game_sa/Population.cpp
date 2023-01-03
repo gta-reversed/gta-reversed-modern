@@ -104,8 +104,8 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(PopulateInterior, 0x616470, { .reversed = false });
     RH_ScopedGlobalInstall(IsFemale, 0x611490, { .reversed = false });
     RH_ScopedGlobalInstall(IsSkateable, 0x6114C0);
-    RH_ScopedGlobalInstall(ChooseGangOccupation, 0x611550, { .reversed = false });
-    RH_ScopedGlobalInstall(AddExistingPedInCar, 0x611560, { .reversed = false });
+    RH_ScopedGlobalInstall(ChooseGangOccupation, 0x611550);
+    RH_ScopedGlobalInstall(AddExistingPedInCar, 0x611560);
     RH_ScopedGlobalInstall(UpdatePedCount, 0x611570, { .reversed = false });
     RH_ScopedGlobalInstall(MoveCarsAndPedsOutOfAbandonedZones, 0x6116A0, { .reversed = false });
     RH_ScopedGlobalInstall(DealWithZoneChange, 0x6116B0, { .reversed = false });
@@ -480,13 +480,13 @@ bool CPopulation::IsSkateable(const CVector& point) {
 }
 
 // 0x611550
-int32 CPopulation::ChooseGangOccupation(int32 arg0) {
-    return ((int32(__cdecl*)(int32))0x611550)(arg0);
+int32 CPopulation::ChooseGangOccupation(eGangID gangId) {
+    return CGangs::ChooseGangPedModel(gangId);
 }
 
-// 0x611560
+// 0x611560 (Unused)
 CPed* CPopulation::AddExistingPedInCar(CPed* ped, CVehicle* vehicle) {
-    return ((CPed * (__cdecl*)(CPed*, CVehicle*))0x611560)(ped, vehicle);
+    NOTSA_UNREACHABLE(); // Does nothing (At least not what the name suggests)
 }
 
 // 0x611570
