@@ -102,7 +102,7 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
 
     auto dealersChance = m_NumDealers_Peds - (float)CPopulation::ms_nNumDealers;
 
-    auto gangChance = m_NumGangs_Peds - (float)CPopulation::GetTotalNumGang();
+    auto gangChance = m_NumGangs_Peds - (float)CPopulation::CalculateTotalNumGangPeds();
     if (CPopulation::m_bOnlyCreateRandomGangMembers) {
         gangChance = 50.f;
     }
@@ -143,6 +143,7 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
             for (auto modelId : CPopulation::GetModelsInPedGroup(CPopulation::GetPedGroupId(POPCYCLE_GROUP_DEALERS)) | rng::views::reverse) {
                 if (CStreaming::IsModelLoaded(modelId)) {
                     outPedMI = modelId;
+                    assert(outPedMI != MODEL_PLAYER);
                     outPedType = PED_TYPE_DEALER;
                     return true;
                 }
@@ -153,6 +154,7 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
             outPedType = PickGangToCreateMembersOf();
             assert(IsPedTypeGang(outPedType));
             outPedMI = CPopulation::ChooseGangOccupation((eGangID)(outPedType - ePedType::PED_TYPE_GANG1));
+            assert(outPedMI != MODEL_PLAYER);
             if (outPedMI >= 0) {
                 return true;
             }
@@ -172,6 +174,7 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
             case MODEL_MALE01:
                 return false;
             }
+            assert(outPedMI != MODEL_PLAYER);
             outPedType = CModelInfo::GetPedModelInfo(outPedMI)->m_nPedType;
             return true;
         } else {
