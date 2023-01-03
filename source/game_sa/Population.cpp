@@ -97,7 +97,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(RemovePed, 0x610F20);
     RH_ScopedGlobalInstall(ChoosePolicePedOccupation, 0x610F40, { .reversed = false });
     RH_ScopedGlobalInstall(ArePedStatsCompatible, 0x610F50);
-    RH_ScopedGlobalInstall(PedMICanBeCreatedAtAttractor, 0x6110C0, { .reversed = false });
+    RH_ScopedGlobalInstall(PedMICanBeCreatedAtAttractor, 0x6110C0);
     RH_ScopedGlobalInstall(PedMICanBeCreatedAtThisAttractor, 0x6110E0, { .reversed = false });
     RH_ScopedGlobalInstall(PedMICanBeCreatedInInterior, 0x611450, { .reversed = false });
     RH_ScopedGlobalInstall(IsMale, 0x611470, { .reversed = false });
@@ -329,7 +329,16 @@ bool CPopulation::ArePedStatsCompatible(ePedStats st1, ePedStats st2) {
 
 // 0x6110C0
 bool CPopulation::PedMICanBeCreatedAtAttractor(int32 modelIndex) {
-    return ((bool(__cdecl*)(int32))0x6110C0)(modelIndex);
+    switch (CModelInfo::GetPedModelInfo(modelIndex)->m_nPedType) {
+    case PED_TYPE_DEALER:
+    case PED_TYPE_MEDIC:
+    case PED_TYPE_FIREMAN:
+    case PED_TYPE_CRIMINAL:
+    case PED_TYPE_BUM:
+    case PED_TYPE_PROSTITUTE:
+        return false;
+    }
+    return true;
 }
 
 // 0x6110E0
