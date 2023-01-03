@@ -8,6 +8,7 @@
 
 #include "eLevelName.h"
 #include "ePedRace.h"
+#include "ePedStats.h"
 #include <extensions/utility.hpp>
 
 class CLoadedCarGroup;
@@ -93,7 +94,7 @@ public:
     static void RemovePed(CPed* ped);
     // returns 0
     static int32 ChoosePolicePedOccupation();
-    static bool  ArePedStatsCompatible(int32 statType1, int32 statType2);
+    static bool  ArePedStatsCompatible(ePedStats statType1, ePedStats statType2);
     static bool  PedMICanBeCreatedAtAttractor(int32 modelIndex);
     // checks if ped with specific model index can be created at script attractor
     static bool PedMICanBeCreatedAtThisAttractor(int32 modelIndex, char* attrName);

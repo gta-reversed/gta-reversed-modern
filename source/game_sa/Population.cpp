@@ -96,7 +96,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(FindPedDensityMultiplierCullZone, 0x610F00);
     RH_ScopedGlobalInstall(RemovePed, 0x610F20);
     RH_ScopedGlobalInstall(ChoosePolicePedOccupation, 0x610F40, { .reversed = false });
-    RH_ScopedGlobalInstall(ArePedStatsCompatible, 0x610F50, { .reversed = false });
+    RH_ScopedGlobalInstall(ArePedStatsCompatible, 0x610F50);
     RH_ScopedGlobalInstall(PedMICanBeCreatedAtAttractor, 0x6110C0, { .reversed = false });
     RH_ScopedGlobalInstall(PedMICanBeCreatedAtThisAttractor, 0x6110E0, { .reversed = false });
     RH_ScopedGlobalInstall(PedMICanBeCreatedInInterior, 0x611450, { .reversed = false });
@@ -281,8 +281,50 @@ int32 CPopulation::ChoosePolicePedOccupation() {
 }
 
 // 0x610F50
-bool CPopulation::ArePedStatsCompatible(int32 statType1, int32 statType2) {
-    return ((bool(__cdecl*)(int32, int32))0x610F50)(statType1, statType2);
+bool CPopulation::ArePedStatsCompatible(ePedStats st1, ePedStats st2) {
+    for (auto stype : { st1, st2 }) {
+        switch (stype) {
+        case ePedStats::PLAYER:
+        case ePedStats::COP:
+        case ePedStats::MEDIC:
+        case ePedStats::FIREMAN:
+        case ePedStats::TRAMP_MALE:
+        case ePedStats::TRAMP_FEMALE:
+        case ePedStats::TOURIST:
+        case ePedStats::PROSTITUTE:
+        case ePedStats::CRIMINAL:
+        case ePedStats::BUSKER:
+        case ePedStats::TAXIDRIVER:
+        case ePedStats::PSYCHO:
+        case ePedStats::STEWARD:
+        case ePedStats::SPORTSFAN:
+        case ePedStats::SHOPPER:
+        case ePedStats::OLDSHOPPER:
+        case ePedStats::BEACH_GUY:
+        case ePedStats::BEACH_GIRL:
+        case ePedStats::SKATER:
+        case ePedStats::STD_MISSION:
+        case ePedStats::COWARD:
+        case ePedStats::GANG1:
+        case ePedStats::GANG2:
+        case ePedStats::GANG3:
+        case ePedStats::GANG4:
+        case ePedStats::GANG5:
+        case ePedStats::GANG6:
+        case ePedStats::GANG7:
+            return false;
+        }
+        return true;
+    }
+    const auto IsOldGuyOrGirl = [](ePedStats st) {
+        switch (st) {
+        case ePedStats::OLD_GUY:
+        case ePedStats::OLD_GIRL:
+            return true;
+        }
+        return false;
+    };
+    return !IsOldGuyOrGirl(st1) || IsOldGuyOrGirl(st2);
 }
 
 // 0x6110C0
