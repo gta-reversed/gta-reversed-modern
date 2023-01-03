@@ -129,7 +129,24 @@ public:
     static void TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point, float radius, float visibleDistance, CEntity* victim, CEntity* creator, bool processVehicleBombTimer, float damage);
     static void Process();
     static bool GetIsLineOfSightSectorClear(CSector& sector, CRepeatSector& repeatSector, const CColLine& colLine, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doIgnoreCameraCheck);
+
+    /*!
+    * Find object that are "kinda" colliding at `point`
+    *
+    * @param point             The point to scan at
+    * @param radius            The radius of the scan
+    * @param b2D               Whenever the distance checks should be 2D (if false they're 3D)
+    * @param outCount          The number of entities colliding (Never more than `maxCount`)
+    * @param maxCount          The maximum number of entities to scan for
+    * @param outEntities [opt] Enitites that are colliding are stored here, array should be the same size as `maxCount`
+    * @param buildings         Check buildings?
+    * @param vehicles          Check vehicles?
+    * @param peds              Check peds?
+    * @param objects           Check objects?
+    * @param dummies           Check dummies?
+    */
     static void FindObjectsKindaColliding(const CVector& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
+
     static void FindObjectsIntersectingCube(const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
     static void FindObjectsIntersectingAngledCollisionBox(const CBox& box, const CMatrix& transform, const CVector& point, float x1, float y1, float x2, float y2, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
     static void FindMissionEntitiesIntersectingCube(const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehicles, bool peds, bool objects);

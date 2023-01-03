@@ -2238,7 +2238,7 @@ void CStreaming::RemoveCarModel(int32 modelId) {
         group.RemoveMember(modelId);
     }
     ms_vehiclesLoaded.RemoveMember(modelId);
-    CPopulation::RemoveSpecificDriverModelsForCar(modelId);
+    CPopulation::RemoveSpecificDriverModelsForCar((eModelID)modelId);
 }
 
 // 0x40B080
@@ -3272,7 +3272,7 @@ void CStreaming::StreamOneNewCar() {
         if (carModelId < 0)
             return;
         RequestModel(carModelId, STREAMING_KEEP_IN_MEMORY);
-        CPopulation::LoadSpecificDriverModelsForCar(carModelId);
+        CPopulation::LoadSpecificDriverModelsForCar((eModelID)carModelId);
         return;
     }
 
@@ -3285,7 +3285,7 @@ void CStreaming::StreamOneNewCar() {
         int32 boatModelId = CCarCtrl::ChooseCarModelToLoad(POPCYCLE_CARGROUP_BOATS);
         if (boatModelId >= 0) {
             RequestModel(boatModelId, STREAMING_KEEP_IN_MEMORY);
-            CPopulation::LoadSpecificDriverModelsForCar(boatModelId);
+            CPopulation::LoadSpecificDriverModelsForCar((eModelID)boatModelId);
             return;
         }
     }
@@ -3319,7 +3319,7 @@ void CStreaming::StreamOneNewCar() {
     }
 
     RequestModel(carModelId, STREAMING_KEEP_IN_MEMORY);
-    CPopulation::LoadSpecificDriverModelsForCar(carModelId);
+    CPopulation::LoadSpecificDriverModelsForCar((eModelID)carModelId);
 }
 
 // 0x40BBB0

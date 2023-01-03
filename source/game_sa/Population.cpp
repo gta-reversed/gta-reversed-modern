@@ -58,9 +58,9 @@ void CPopulation::InjectHooks() {
 
     RH_ScopedGlobalInstall(DoesCarGroupHaveModelId, 0x406F50, { .reversed = false });
     RH_ScopedGlobalInstall(ManagePed, 0x611FC0, { .reversed = false });
-    RH_ScopedGlobalInstall(FindNumberOfPedsWeCanPlaceOnBenches, 0x612240, { .reversed = false });
-    RH_ScopedGlobalInstall(RemoveAllRandomPeds, 0x6122C0, { .reversed = false });
-    RH_ScopedGlobalInstall(TestRoomForDummyObject, 0x612320, { .reversed = false });
+    RH_ScopedGlobalInstall(FindNumberOfPedsWeCanPlaceOnBenches, 0x612240);
+    RH_ScopedGlobalInstall(RemoveAllRandomPeds, 0x6122C0);
+    RH_ScopedGlobalInstall(TestRoomForDummyObject, 0x612320);
     RH_ScopedGlobalInstall(TestSafeForRealObject, 0x6123A0, { .reversed = false });
     RH_ScopedGlobalInstall(AddPed, 0x612710, { .reversed = false });
     RH_ScopedGlobalInstall(AddDeadPedInFrontOfCar, 0x612CD0, { .reversed = false });
@@ -86,10 +86,10 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(ManagePopulation, 0x616190, { .reversed = false });
     RH_ScopedGlobalInstall(RemovePedsIfThePoolGetsFull, 0x616300, { .reversed = false });
     RH_ScopedGlobalInstall(ConvertAllObjectsToDummyObjects, 0x616420, { .reversed = false });
-    RH_ScopedGlobalInstall(FindPedMultiplierMotorway, 0x611B80, { .reversed = false });
-    RH_ScopedGlobalInstall(FindCarMultiplierMotorway, 0x611B60, { .reversed = false });
-    RH_ScopedGlobalInstall(IsCorrectTimeOfDayForEffect, 0x611B20, { .reversed = false });
-    RH_ScopedGlobalInstall(RemoveSpecificDriverModelsForCar, 0x6119D0, { .reversed = false });
+    RH_ScopedGlobalInstall(FindPedMultiplierMotorway, 0x611B80);
+    RH_ScopedGlobalInstall(FindCarMultiplierMotorway, 0x611B60);
+    RH_ScopedGlobalInstall(IsCorrectTimeOfDayForEffect, 0x611B20);
+    RH_ScopedGlobalInstall(RemoveSpecificDriverModelsForCar, 0x6119D0);
     RH_ScopedGlobalInstall(Initialise, 0x610E10, { .reversed = false });
     RH_ScopedGlobalInstall(Shutdown, 0x610EC0, { .reversed = false });
     RH_ScopedGlobalInstall(FindDummyDistForModel, 0x610ED0);
@@ -107,18 +107,20 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(ChooseGangOccupation, 0x611550);
     RH_ScopedGlobalInstall(AddExistingPedInCar, 0x611560);
     RH_ScopedGlobalInstall(UpdatePedCount, 0x611570);
-    RH_ScopedGlobalInstall(MoveCarsAndPedsOutOfAbandonedZones, 0x6116A0, { .reversed = false });
-    RH_ScopedGlobalInstall(DealWithZoneChange, 0x6116B0, { .reversed = false });
-    RH_ScopedGlobalInstall(PedCreationDistMultiplier, 0x6116C0, { .reversed = false });
-    //RH_ScopedGlobalInstall(IsSunbather, 0x611760, { .reversed = false });
-    RH_ScopedGlobalInstall(CanSolicitPlayerOnFoot, 0x611780, { .reversed = false });
-    RH_ScopedGlobalInstall(CanSolicitPlayerInCar, 0x611790, { .reversed = false });
-    RH_ScopedGlobalInstall(CanJeerAtStripper, 0x6117B0, { .reversed = false });
-    RH_ScopedGlobalInstall(PlaceGangMembers, 0x6117D0, { .reversed = false });
-    RH_ScopedGlobalInstall(LoadSpecificDriverModelsForCar, 0x6117F0, { .reversed = false });
-    RH_ScopedGlobalInstall(FindSpecificDriverModelForCar_ToUse, 0x611900, { .reversed = false });
+    RH_ScopedGlobalInstall(MoveCarsAndPedsOutOfAbandonedZones, 0x6116A0);
+    RH_ScopedGlobalInstall(DealWithZoneChange, 0x6116B0);
+    RH_ScopedGlobalInstall(PedCreationDistMultiplier, 0x6116C0);
+    RH_ScopedGlobalInstall(CanSolicitPlayerOnFoot, 0x611780);
+    RH_ScopedGlobalInstall(CanSolicitPlayerInCar, 0x611790);
+    RH_ScopedGlobalInstall(CanJeerAtStripper, 0x6117B0);
+    RH_ScopedGlobalInstall(PlaceGangMembers, 0x6117D0);
+    RH_ScopedGlobalInstall(LoadSpecificDriverModelsForCar, 0x6117F0);
+    RH_ScopedGlobalInstall(FindSpecificDriverModelForCar_ToUse, 0x611900);
     RH_ScopedGlobalInstall(IsSecurityGuard, 0x6114B0, { .reversed = false });
     RH_ScopedGlobalInstall(Update, 0x616650);
+
+    RH_ScopedGlobalOverloadedInstall(IsSunbather, "ModelID", 0x611760, bool(*)(eModelID));
+    //RH_ScopedGlobalOverloadedInstall(IsSunbather, "Ped", 0x611760, bool(*)(CPed*));
 }
 
 // 0x5B6D40
@@ -256,7 +258,7 @@ void CPopulation::Shutdown() {
 }
 
 // 0x610ED0
-float CPopulation::FindDummyDistForModel(int32 modelIndex) {
+float CPopulation::FindDummyDistForModel(eModelID modelIndex) {
     return (modelIndex == ModelIndices::MI_SAMSITE || modelIndex == ModelIndices::MI_SAMSITE2)
         ? 750.f
         : 80.f;
@@ -348,7 +350,7 @@ bool CPopulation::PedMICanBeCreatedAtThisAttractor(eModelID modelId, const char*
     }
 
     const auto NameIsAnyOf = [&](auto... anyOfValues) {
-        return (... || (stricmp(attrName, anyOfValues) == 0));
+        return (... || (_stricmp(attrName, anyOfValues) == 0));
     };
 
     const auto pedType = CModelInfo::GetPedModelInfo(modelId)->GetPedType();
@@ -432,7 +434,7 @@ bool CPopulation::PedMICanBeCreatedAtThisAttractor(eModelID modelId, const char*
 }
 
 // 0x611450
-bool CPopulation::PedMICanBeCreatedInInterior(int32 modelIndex) {
+bool CPopulation::PedMICanBeCreatedInInterior(eModelID modelIndex) {
     switch (CModelInfo::GetPedModelInfo(modelIndex)->GetPedType()) {
     case PED_TYPE_COP:
     case PED_TYPE_GANG1:
@@ -457,12 +459,12 @@ bool CPopulation::PedMICanBeCreatedInInterior(int32 modelIndex) {
 }
 
 // 0x611470
-bool CPopulation::IsMale(int32 modelIndex) {
+bool CPopulation::IsMale(eModelID modelIndex) {
     return CModelInfo::GetPedModelInfo(modelIndex)->GetPedType() == PED_TYPE_CIVMALE;
 }
 
 // 0x611490
-bool CPopulation::IsFemale(int32 modelIndex) {
+bool CPopulation::IsFemale(eModelID modelIndex) {
     return CModelInfo::GetPedModelInfo(modelIndex)->GetPedType() == PED_TYPE_CIVFEMALE;
 }
 
@@ -545,76 +547,138 @@ void CPopulation::UpdatePedCount(CPed* ped, uint8 pedAddedOrRemoved) {
 
 // 0x6116A0
 void CPopulation::MoveCarsAndPedsOutOfAbandonedZones() {
-    ((void(__cdecl*)())0x6116A0)();
+    /* nop */
 }
 
 // 0x6116B0
 void CPopulation::DealWithZoneChange(eLevelName arg0, eLevelName arg1, bool arg2) {
-    ((void(__cdecl*)(eLevelName, eLevelName, bool))0x6116B0)(arg0, arg1, arg2);
+    /* nop */
 }
 
 // 0x6116C0
 float CPopulation::PedCreationDistMultiplier() {
-    return ((float(__cdecl*)())0x6116C0)();
+    if (const auto veh = FindPlayerVehicle()) {
+        return std::clamp(veh->m_vecMoveSpeed.Magnitude2D() - 0.1f + 1.f, 1.f, 1.5f);
+    }
+    return 1.f;
 }
 
 // 0x611760
-bool CPopulation::IsSunbather(int32 modelIndex) {
-    return ((bool(__cdecl*)(int32))0x611760)(modelIndex);
+bool CPopulation::IsSunbather(eModelID modelIndex) {
+    switch (CModelInfo::GetPedModelInfo(modelIndex)->GetPedStatType()) {
+    case ePedStats::BEACH_GUY:
+    case ePedStats::BEACH_GIRL:
+        return true;
+    }
+    return false;
 }
 
 bool CPopulation::IsSunbather(CPed* ped) {
-    return IsSunbather(ped->m_nModelIndex);
+    return IsSunbather(ped->GetModelID());
 }
 
 // 0x611780
-bool CPopulation::CanSolicitPlayerOnFoot(int32 modelIndex) {
-    return ((bool(__cdecl*)(int32))0x611780)(modelIndex);
+bool CPopulation::CanSolicitPlayerOnFoot(eModelID modelIndex) {
+    return false;
 }
 
 // 0x611790
-bool CPopulation::CanSolicitPlayerInCar(int32 modelIndex) {
-    return ((bool(__cdecl*)(int32))0x611790)(modelIndex);
+bool CPopulation::CanSolicitPlayerInCar(eModelID modelIndex) {
+    return CModelInfo::GetPedModelInfo(modelIndex)->GetPedType() == PED_TYPE_PROSTITUTE;
 }
 
 // 0x6117B0
-bool CPopulation::CanJeerAtStripper(int32 modelIndex) {
-    return ((bool(__cdecl*)(int32))0x6117B0)(modelIndex);
+bool CPopulation::CanJeerAtStripper(eModelID modelIndex) {
+    return CModelInfo::GetPedModelInfo(modelIndex)->GetPedType() == PED_TYPE_CIVMALE;
 }
 
 // 0x6117D0
-void CPopulation::PlaceGangMembers(ePedType pedType, int32 arg1, const CVector& posn) {
-    ((void(__cdecl*)(ePedType, int32, const CVector&))0x6117D0)(pedType, arg1, posn);
+void CPopulation::PlaceGangMembers(ePedType pedType, uint32 numOfPeds, const CVector& posn) {
+    CPedGroupPlacer{}.PlaceGroup(pedType, numOfPeds, posn, ePedGroupDefaultTaskAllocatorType::RANDOM);
+}
+
+//! NOTSA - Helper
+void ProcessPossibleDriverModelsOfCar(eModelID carModelIndex, auto&& ProcessModel) {
+    if (carModelIndex == MODEL_FREEWAY) {
+        ProcessModel(MODEL_BIKERA);
+        ProcessModel(MODEL_BIKERB);
+    } else {
+        const auto model = [&] {
+            switch (carModelIndex) {
+            case MODEL_STRETCH:     return MODEL_WMYCH;
+            case MODEL_TAXI:
+            case MODEL_CABBIE:      return (eModelID)(CStreaming::GetDefaultCabDriverModel());
+            case MODEL_MRWHOOP:     return MODEL_WMOICE;
+            case MODEL_SECURICA:    return MODEL_WMYSGRD;
+            case MODEL_PIZZABOY:    return MODEL_WMYPIZZ;
+            case MODEL_FREEWAY:     return MODEL_BIKERA;
+            case MODEL_BMX:         return MODEL_WMYBMX;
+            default:                return MODEL_INVALID;
+        }}();
+        if (model != MODEL_INVALID) {
+            ProcessModel(model);
+        }
+    }
 }
 
 // 0x6117F0
-void CPopulation::LoadSpecificDriverModelsForCar(int32 carModelIndex) {
-    ((void(__cdecl*)(int32))0x6117F0)(carModelIndex);
-}
-
-// 0x611900
-int32 CPopulation::FindSpecificDriverModelForCar_ToUse(int32 carModelIndex) {
-    return ((int32(__cdecl*)(int32))0x611900)(carModelIndex);
+void CPopulation::LoadSpecificDriverModelsForCar(eModelID carModelIndex) {
+    ProcessPossibleDriverModelsOfCar(carModelIndex, [&](eModelID model) {
+        CStreaming::RequestModel(model, STREAMING_KEEP_IN_MEMORY | STREAMING_GAME_REQUIRED);
+    });
 }
 
 // 0x6119D0
-void CPopulation::RemoveSpecificDriverModelsForCar(int32 carModelIndex) {
-    ((void(__cdecl*)(int32))0x6119D0)(carModelIndex);
+void CPopulation::RemoveSpecificDriverModelsForCar(eModelID carModelIndex) {
+    ProcessPossibleDriverModelsOfCar(carModelIndex, CStreaming::SetModelAndItsTxdDeletable);
+}
+
+// 0x611900
+eModelID CPopulation::FindSpecificDriverModelForCar_ToUse(eModelID carModelIndex) {
+    switch (carModelIndex) {
+    case MODEL_STRETCH:  return MODEL_WMYCH;
+    case MODEL_TAXI:
+    case MODEL_CABBIE:   return (eModelID)(CStreaming::GetDefaultCabDriverModel());
+    case MODEL_MRWHOOP:  return MODEL_WMOICE;
+    case MODEL_SECURICA: return MODEL_WMYSGRD;
+    case MODEL_PIZZABOY: return MODEL_WMYPIZZ;
+    case MODEL_BMX:      return MODEL_WMYBMX;
+    case MODEL_FREEWAY: {
+        switch (CGeneral::GetRandomNumberInRange(0, 3)) {
+        case 0:  return MODEL_BIKERA;
+        case 1:  return MODEL_BIKERB;
+        default: return MODEL_INVALID;
+        }
+    }
+    }
+    return MODEL_INVALID;
 }
 
 // 0x611B20
 bool CPopulation::IsCorrectTimeOfDayForEffect(const C2dEffect* effect) {
-    return ((bool(__cdecl*)(const C2dEffect*))0x611B20)(effect);
+    switch (effect->pedAttractor.m_nAttractorType) {
+    case PED_ATTRACTOR_PIZZA:
+    case PED_ATTRACTOR_SHELTER:
+    case PED_ATTRACTOR_TRIGGER_SCRIPT:
+    case PED_ATTRACTOR_LOOK_AT:
+    case PED_ATTRACTOR_SCRIPTED:
+    case PED_ATTRACTOR_PARK:
+    case PED_ATTRACTOR_STEP:
+        return true;
+    }
+    return CClock::GetIsTimeInRange(9, 20); // 9 is correct, because the function uses `>=` not `>`
 }
 
 // 0x611B60
 float CPopulation::FindCarMultiplierMotorway() {
-    return ((float(__cdecl*)())0x611B60)();
+    return m_bMoreCarsAndFewerPeds
+        ? 1.7f
+        : 1.f;
 }
 
 // 0x611B80
 float CPopulation::FindPedMultiplierMotorway() {
-    return ((float(__cdecl*)())0x611B80)();
+    return 1.f;
 }
 
 // 0x611FC0
@@ -624,17 +688,45 @@ void CPopulation::ManagePed(CPed* ped, const CVector& playerPosn) {
 
 // 0x612240
 int32 CPopulation::FindNumberOfPedsWeCanPlaceOnBenches() {
-    return ((int32(__cdecl*)())0x612240)();
+    const auto baseNum = [] {
+        if (CGame::CanSeeOutSideFromCurrArea()) {
+            return NumberOfPedsInUseInterior;
+        }
+        return (uint32)(
+              std::floor(std::min((float)MaxNumberOfPedsInUse, CPopCycle::m_NumOther_Peds))
+            * PedDensityMultiplier
+            * FindPedDensityMultiplierCullZone()
+        );
+    }();
+    return baseNum - ms_nNumCivMale - ms_nNumCivFemale + 2;
 }
 
 // 0x6122C0
 void CPopulation::RemoveAllRandomPeds() {
-    ((void(__cdecl*)())0x6122C0)();
+    for (auto& ped : GetPedPool()->GetAllValid()) {
+        if (ped.CanBeDeleted()) {
+            RemovePed(&ped);
+        }
+    }
 }
 
 // 0x612320
 bool CPopulation::TestRoomForDummyObject(CObject* object) {
-    return ((bool(__cdecl*)(CObject*))0x612320)(object);
+    int16 ncolliding{};
+    CWorld::FindObjectsKindaColliding(
+        object->GetBoundCentre(),
+        object->GetModelInfo()->GetColModel()->GetBoundRadius(),
+        false,
+        &ncolliding,
+        2,              // TODO: Why 2?
+        nullptr,
+        false,
+        true,
+        true,
+        false,
+        false
+    );
+    return ncolliding == 0;
 }
 
 // 0x6123A0
@@ -643,7 +735,7 @@ bool CPopulation::TestSafeForRealObject(CDummyObject* dummyObject) {
 }
 
 // 0x612710
-CPed* CPopulation::AddPed(ePedType pedType, uint32 modelIndex, const CVector& posn, bool makeWander) {
+CPed* CPopulation::AddPed(ePedType pedType, eModelID modelIndex, const CVector& posn, bool makeWander) {
     return ((CPed * (__cdecl*)(ePedType, uint32, const CVector&, bool))0x612710)(pedType, modelIndex, posn, makeWander);
 }
 
@@ -683,12 +775,12 @@ void CPopulation::PlaceMallPedsAsStationaryGroup(const CVector& posn) {
 }
 
 // 0x613D60
-void CPopulation::PlaceCouple(ePedType pedType1, int32 modelIndex1, ePedType pedType2, int32 modelIndex2, CVector posn) {
+void CPopulation::PlaceCouple(ePedType pedType1, eModelID modelIndex1, ePedType pedType2, eModelID modelIndex2, CVector posn) {
     ((void(__cdecl*)(ePedType, int32, ePedType, int32, CVector))0x613D60)(pedType1, modelIndex1, pedType2, modelIndex2, posn);
 }
 
 // 0x614210
-bool CPopulation::AddPedAtAttractor(int32 modelIndex, C2dEffect* attractor, CVector posn, CEntity* entity, int32 decisionMakerType) {
+bool CPopulation::AddPedAtAttractor(eModelID modelIndex, C2dEffect* attractor, CVector posn, CEntity* entity, int32 decisionMakerType) {
     return ((bool(__cdecl*)(int32, C2dEffect*, CVector, CEntity*, int32))0x614210)(modelIndex, attractor, posn, entity, decisionMakerType);
 }
 

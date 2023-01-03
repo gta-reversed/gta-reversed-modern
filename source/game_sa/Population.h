@@ -88,7 +88,7 @@ public:
     static void Initialise();
     // empty function
     static void  Shutdown();
-    static float FindDummyDistForModel(int32 modelIndex);
+    static float FindDummyDistForModel(eModelID modelIndex);
     static float FindPedDensityMultiplierCullZone();
     // CWorld::Remove(ped); delete ped;
     static void RemovePed(CPed* ped);
@@ -98,11 +98,11 @@ public:
     static bool  PedMICanBeCreatedAtAttractor(eModelID modelIndex);
     // checks if ped with specific model index can be created at script attractor
     static bool PedMICanBeCreatedAtThisAttractor(eModelID modelIndex, const char* attrName);
-    static bool PedMICanBeCreatedInInterior(int32 modelIndex);
+    static bool PedMICanBeCreatedInInterior(eModelID modelIndex);
     // is model male
-    static bool IsMale(int32 modelIndex);
+    static bool IsMale(eModelID modelIndex);
     // is model female
-    static bool IsFemale(int32 modelIndex);
+    static bool IsFemale(eModelID modelIndex);
     // returns false
     static bool IsSecurityGuard(ePedType pedType);
     // checks if surface at this point is skateable
@@ -128,19 +128,22 @@ public:
     static void DealWithZoneChange(eLevelName arg0, eLevelName arg1, bool arg2);
     // returns ped creation distance multiplier
     static float PedCreationDistMultiplier();
-    static bool  IsSunbather(int32 modelIndex);
+    static bool  IsSunbather(eModelID modelIndex);
     static bool  IsSunbather(CPed* ped); // NOTSA
     // returns false
-    static bool CanSolicitPlayerOnFoot(int32 modelIndex);
+    static bool CanSolicitPlayerOnFoot(eModelID modelIndex);
     // returns true if ped type is PED_TYPE_PROSTITUTE
-    static bool CanSolicitPlayerInCar(int32 modelIndex);
-    // returns true if ped type is PED_TYPE_CIVMALE
-    static bool CanJeerAtStripper(int32 modelIndex);
-    static void PlaceGangMembers(ePedType pedType, int32 arg1, const CVector& posn);
-    static void LoadSpecificDriverModelsForCar(int32 carModelIndex);
+    static bool CanSolicitPlayerInCar(eModelID modelIndex);
+    // returns true if ped type is PED_TYPE_CIVMALE 
+    static bool CanJeerAtStripper(eModelID modelIndex);
+    static void PlaceGangMembers(ePedType pedType, uint32 numOfPeds, const CVector& posn);
+
+    static void LoadSpecificDriverModelsForCar(eModelID carModelIndex);
+    static void  RemoveSpecificDriverModelsForCar(eModelID carModelIndex);
+
+
     // returns ped model index
-    static int32 FindSpecificDriverModelForCar_ToUse(int32 carModelIndex);
-    static void  RemoveSpecificDriverModelsForCar(int32 carModelIndex);
+    static eModelID FindSpecificDriverModelForCar_ToUse(eModelID carModelIndex);
     static bool  IsCorrectTimeOfDayForEffect(const C2dEffect* effect);
     // return CPopulation::m_bMoreCarsAndFewerPeds? 1.7f : 1.0f;
     static float FindCarMultiplierMotorway();
@@ -151,7 +154,7 @@ public:
     static void  RemoveAllRandomPeds();
     static bool  TestRoomForDummyObject(CObject* object);
     static bool  TestSafeForRealObject(CDummyObject* dummyObject);
-    static CPed* AddPed(ePedType pedType, uint32 modelIndex, const CVector& posn, bool makeWander);
+    static CPed* AddPed(ePedType pedType, eModelID modelIndex, const CVector& posn, bool makeWander);
     // creates male01 ped in front of car?
     static CPed* AddDeadPedInFrontOfCar(const CVector& posn, CVehicle* vehicle);
     static int32 ChooseCivilianOccupation(bool male, bool female, int32 animType, int32 ignoreModelIndex, int32 statType, bool arg5, bool arg6, bool checkAttractor, char* attrName);
@@ -161,9 +164,9 @@ public:
     // Creates ped in a vehicle. gangPedType can be set to -1
     static CPed* AddPedInCar(CVehicle* vehicle, bool driver, int32 gangPedType, int32 seatNumber, bool male, bool criminal);
     static void  PlaceMallPedsAsStationaryGroup(const CVector& posn);
-    static void  PlaceCouple(ePedType pedType1, int32 modelIndex1, ePedType pedType2, int32 modelIndex2, CVector posn);
+    static void  PlaceCouple(ePedType pedType1, eModelID modelIndex1, ePedType pedType2, eModelID modelIndex2, CVector posn);
     // Creates ped at attractor. decisionMakerType can be set to -1
-    static bool  AddPedAtAttractor(int32 modelIndex, C2dEffect* attractor, CVector posn, CEntity* entity, int32 decisionMakerType);
+    static bool  AddPedAtAttractor(eModelID modelIndex, C2dEffect* attractor, CVector posn, CEntity* entity, int32 decisionMakerType);
     static float FindDistanceToNearestPedOfType(ePedType pedType, CVector posn);
     static int32 PickGangCar(int32 carGroupID);
     static int32 PickRiotRoadBlockCar();

@@ -189,6 +189,8 @@ public:
     CBaseModelInfo* GetModelInfo() const;
     CCollisionData* GetColData() { return GetColModel()->m_pColData; }
 
+    auto GetModelID() const { return (eModelID)(m_nModelIndex); }
+
     // Wrapper around the mess called `CleanUpOldReference`
     // Takes in `ref` (which is usually a member variable),
     // calls `CleanUpOldReference` on it, then sets it to `nullptr`

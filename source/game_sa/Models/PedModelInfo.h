@@ -61,6 +61,7 @@ public:
     void IncrementVoice();
     auto GetRace() const { return (ePedRace)m_nRace; }
     auto GetPedType() const { return (ePedType)(m_nPedType); }
+    auto GetPedStatType() const { return (ePedStats)(m_nStatType); }
 };
 
 VALIDATE_SIZE(CPedModelInfo, 0x44);

@@ -151,7 +151,7 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
             continue;
         } else if (highestChance == gangChance) { // 0x60FF13
             if (outPedType) {
-                outPedMI = CPopulation::ChooseGangOccupation(outPedType - ePedType::PED_TYPE_GANG1);
+                outPedMI = CPopulation::ChooseGangOccupation((eGangID)(outPedType - ePedType::PED_TYPE_GANG1));
                 if (outPedMI >= 0) {
                     outPedType = PickGangToCreateMembersOf();
                     return true;
