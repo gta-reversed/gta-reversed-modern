@@ -9,6 +9,13 @@
 
 #include "Population.h"
 
+#include <TaskTypes/TaskComplexWanderCop.h>
+#include <TaskTypes/TaskSimpleStandStill.h>
+#include <TaskTypes/TaskComplexWander.h>
+
+#include <Events/EventAcquaintancePed.h>
+#include <Events/EventSexyPed.h>
+
 //! Define this to have extra DEV_LOG's of CPopulation
 #define EXTRA_DEBUG_LOGS
 
@@ -62,7 +69,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(RemoveAllRandomPeds, 0x6122C0);
     RH_ScopedGlobalInstall(TestRoomForDummyObject, 0x612320);
     RH_ScopedGlobalInstall(TestSafeForRealObject, 0x6123A0);
-    RH_ScopedGlobalInstall(AddPed, 0x612710, { .reversed = false });
+    RH_ScopedGlobalInstall(AddPed, 0x612710);
     RH_ScopedGlobalInstall(AddDeadPedInFrontOfCar, 0x612CD0, { .reversed = false });
     RH_ScopedGlobalInstall(ChooseCivilianOccupation, 0x612F90, { .reversed = false });
     RH_ScopedGlobalInstall(ChooseCivilianCoupleOccupations, 0x613180, { .reversed = false });
@@ -827,8 +834,114 @@ bool CPopulation::TestSafeForRealObject(CDummyObject* obj) {
 }
 
 // 0x612710
-CPed* CPopulation::AddPed(ePedType pedType, eModelID modelIndex, const CVector& posn, bool makeWander) {
-    return ((CPed * (__cdecl*)(ePedType, uint32, const CVector&, bool))0x612710)(pedType, modelIndex, posn, makeWander);
+CPed* CPopulation::AddPed(ePedType pedType, eModelID modelIndex, const CVector& createAtPos, bool makeWander) {
+    const auto GiveAndSetPedWeapon = [](CPed* ped, eWeaponType wtype, uint32 ammo = 25001) { // 0x612970
+        ped->GiveDelayedWeapon(wtype, ammo);
+        ped->SetCurrentWeapon(wtype);
+    };
+
+    // Create the ped
+    const auto ped = [&]() -> CPed* {
+        switch (pedType) {
+        case PED_TYPE_CIVMALE:
+        case PED_TYPE_CIVFEMALE: { // 0x61274E
+            const auto ped = new CCivilianPed(pedType, modelIndex);
+
+            if (CCheat::IsAnyActive({ CHEAT_EVERYONE_ARMED, CHEAT_PEDS_ATTACK_OTHER_WITH_GOLFCLUB })) {
+                GiveAndSetPedWeapon(ped, CGeneral::RandomChoiceFromList({ WEAPON_PISTOL, WEAPON_BASEBALLBAT, WEAPON_SHOTGUN, WEAPON_M4, WEAPON_RLAUNCHER }));
+            }
+
+            return ped;
+        }
+        case PED_TYPE_GANG1:
+        case PED_TYPE_GANG2:
+        case PED_TYPE_GANG3:
+        case PED_TYPE_GANG4:
+        case PED_TYPE_GANG5:
+        case PED_TYPE_GANG6:
+        case PED_TYPE_GANG7:
+        case PED_TYPE_GANG8:
+        case PED_TYPE_GANG9:
+        case PED_TYPE_GANG10: { // 0x6128C4
+            const auto ped = new CCivilianPed(pedType, modelIndex);
+
+            if (CCheat::IsActive(CHEAT_NINJA_THEME) && pedType == PED_TYPE_GANG7) {
+                GiveAndSetPedWeapon(ped, WEAPON_KATANA);
+            } else if (CGeneral::RandomBool(33)) { // Give random weapon
+                if (const auto wtype = CGangs::Gang[GetGangOfPedType(pedType)].GetRandomWeapon(); wtype != WEAPON_UNARMED) {
+                    GiveAndSetPedWeapon(ped, wtype);
+                }
+            }
+
+            return ped;
+        }
+        case PED_TYPE_DEALER:
+        case PED_TYPE_CRIMINAL:
+        case PED_TYPE_PROSTITUTE:
+        case PED_TYPE_SPECIAL:
+        case PED_TYPE_MISSION1:
+        case PED_TYPE_MISSION2:
+        case PED_TYPE_MISSION3:
+        case PED_TYPE_MISSION4:
+        case PED_TYPE_MISSION5:
+        case PED_TYPE_MISSION6:
+        case PED_TYPE_MISSION7:
+        case PED_TYPE_MISSION8: // 0x612992
+            return new CCivilianPed(pedType, modelIndex);
+        case PED_TYPE_MEDIC: // 0x612848
+        case PED_TYPE_FIREMAN: // 0x612886
+            return new CEmergencyPed(pedType, modelIndex);
+        case PED_TYPE_COP: // 0x61280C
+            return new CCopPed(modelIndex);
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
+
+    // 0x6129D9
+
+    ped->SetPosn(createAtPos);
+    ped->SetOrientation(0.f, 0.f, 0.f);
+
+    CWorld::Add(ped);
+
+    if (!makeWander) {
+        return ped;
+    }
+
+    auto& tmgr = ped->GetTaskManager();
+
+    // Set it's default tasks
+    if (pedType == PED_TYPE_COP) {
+        tmgr.SetTask(
+            CTaskComplexWander::GetWanderTaskByPedType(ped),
+            TASK_PRIMARY_PRIMARY
+        );
+        tmgr.SetTask(
+            new CTaskSimpleStandStill{ 0, true },
+            TASK_PRIMARY_DEFAULT
+        );
+    } else {
+        tmgr.SetTask(
+            CTaskComplexWander::GetWanderTaskByPedType(ped),
+            TASK_PRIMARY_DEFAULT
+        );
+    }
+
+    if (CCheat::IsActive(CHEAT_SLUT_MAGNET) && pedType == PED_TYPE_PROSTITUTE) {
+        ped->GetEventGroup().Add(CEventSexyPed{ FindPlayerPed(), TASK_COMPLEX_GANG_HASSLE_PED });
+        GiveAndSetPedWeapon(ped, CGeneral::RandomChoiceFromList({ WEAPON_DILDO1, WEAPON_DILDO2, WEAPON_VIBE1, WEAPON_VIBE2 }), 1);
+    }
+
+    if (CCheat::IsActive(CHEAT_PEDS_ATTACK_OTHER_WITH_GOLFCLUB)) {
+        auto& pedsc = ped->GetIntelligence()->GetPedScanner();
+        pedsc.ScanForPedsInRange(*ped);
+        if (const auto closest = pedsc.GetClosestPedInRange()) { // Not what they did, but better (though possibly hacky)
+            ped->GetEventGroup().Add(CEventAcquaintancePedHate{ closest, TASK_COMPLEX_KILL_PED_ON_FOOT });
+        }
+    }
+
+    return ped;
 }
 
 // 0x612CD0
