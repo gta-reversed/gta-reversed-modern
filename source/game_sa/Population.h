@@ -8,6 +8,7 @@
 
 #include "eLevelName.h"
 #include "ePedRace.h"
+#include <extensions/utility.hpp>
 
 class CLoadedCarGroup;
 class CPed;
@@ -51,12 +52,6 @@ public:
     static uint32& ms_nNumCop;
     static uint32& ms_nNumCivFemale;
     static uint32& ms_nNumCivMale;
-    // static uint16 m_nNumCarsInGroup[POPCYCLE_TOTAL_NUM_CARGROUPS] (34)
-    static uint16* m_nNumCarsInGroup;
-    // static uint16 m_nNumPedsInGroup[POPCYCLE_TOTAL_NUM_PEDGROUPS] (57)
-    static uint16* m_nNumPedsInGroup;
-    // static int16 m_CarGroups[POPCYCLE_TOTAL_NUM_CARGROUPS][23] (34)
-    static int16 (*m_CarGroups)[23];
     static const uint16 m_DefaultModelIDForUnusedSlot = 2000; // means not loaded
     static bool&   m_bDontCreateRandomGangMembers;
     static bool&   m_bOnlyCreateRandomGangMembers;
@@ -66,8 +61,17 @@ public:
     static uint32& NumMiamiViceCops;
     static uint32& CurrentWorldZone;
 
-    /// Array of (possible) model IDs in a given popcycle group
-    static inline auto& m_PedGroups = *(std::array<std::array<int16, 21>, POPCYCLE_TOTAL_PEDGROUPS>*)0xC0F358;
+    //! Number of model IDs in each corresponding car group
+    static inline auto& m_nNumCarsInGroup = StaticRef<std::array<uint16, (size_t)(POPCYCLE_TOTAL_CARGROUPS)>, 0xC0EC78>();
+
+    //! Car model IDs in each corresponding car group
+    static inline auto& m_CarGroups       = StaticRef<notsa::mdarray<int16, (size_t)(POPCYCLE_TOTAL_CARGROUPS), 23>, 0xC0ED38>();
+
+    //! Number of model IDs in each corresponding ped group
+    static inline auto& m_nNumPedsInGroup = StaticRef<std::array<uint16, (size_t)(POPCYCLE_TOTAL_PEDGROUPS)>, 0xC0ECC0>();
+
+    //! Ped model IDs in each corresponding ped group
+    static inline auto& m_PedGroups       = StaticRef<notsa::mdarray<int16, (size_t)(POPCYCLE_TOTAL_PEDGROUPS), 23>, 0xC0F358>();
 
 public:
     static void InjectHooks();

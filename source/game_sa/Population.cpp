@@ -9,6 +9,15 @@
 
 #include "Population.h"
 
+//! Define this to have extra DEV_LOG's of CPopulation
+#define EXTRA_DEBUG_LOGS
+
+#ifdef EXTRA_DEBUG_LOGS
+#define POP_DEV_LOG DEV_LOG
+#else
+#define POP_DEV_LOG(...)
+#endif
+
 float& CPopulation::PedDensityMultiplier = *(float*)0x8D2530;
 int32& CPopulation::m_AllRandomPedsThisType = *(int32*)0x8D2534;
 uint32& CPopulation::MaxNumberOfPedsInUse = *(uint32*)0x8D2538;
@@ -30,9 +39,6 @@ uint32& CPopulation::ms_nNumEmergency = *(uint32*)0xC0EC64;
 uint32& CPopulation::ms_nNumCop = *(uint32*)0xC0EC68;
 uint32& CPopulation::ms_nNumCivFemale = *(uint32*)0xC0EC6C;
 uint32& CPopulation::ms_nNumCivMale = *(uint32*)0xC0EC70;
-uint16* CPopulation::m_nNumCarsInGroup = (uint16*)0xC0EC78;
-uint16* CPopulation::m_nNumPedsInGroup = (uint16*)0xC0ECC0;
-int16(*CPopulation::m_CarGroups)[23] = (int16(*)[23])0xC0ED38;
 bool& CPopulation::m_bDontCreateRandomGangMembers = *(bool*)0xC0FCB2;
 bool& CPopulation::m_bOnlyCreateRandomGangMembers = *(bool*)0xC0FCB3;
 bool& CPopulation::m_bDontCreateRandomCops = *(bool*)0xC0FCB4;
@@ -44,6 +50,11 @@ uint32& CPopulation::CurrentWorldZone = *(uint32*)0xC0FCBC;
 void CPopulation::InjectHooks() {
     RH_ScopedClass(CPopulation);
     RH_ScopedCategoryGlobal();
+
+    RH_ScopedGlobalInstall(FindPedRaceFromName, 0x5B6D40);
+
+    RH_ScopedGlobalInstall(LoadPedGroups, 0x5BCFE0);
+    RH_ScopedGlobalInstall(LoadCarGroups, 0x5BD1A0);
 
     RH_ScopedGlobalInstall(DoesCarGroupHaveModelId, 0x406F50, { .reversed = false });
     RH_ScopedGlobalInstall(ManagePed, 0x611FC0, { .reversed = false });
@@ -79,9 +90,6 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(FindCarMultiplierMotorway, 0x611B60, { .reversed = false });
     RH_ScopedGlobalInstall(IsCorrectTimeOfDayForEffect, 0x611B20, { .reversed = false });
     RH_ScopedGlobalInstall(RemoveSpecificDriverModelsForCar, 0x6119D0, { .reversed = false });
-    RH_ScopedGlobalInstall(FindPedRaceFromName, 0x5B6D40);
-    RH_ScopedGlobalInstall(LoadPedGroups, 0x5BCFE0);
-    RH_ScopedGlobalInstall(LoadCarGroups, 0x5BD1A0, { .reversed = false });
     RH_ScopedGlobalInstall(Initialise, 0x610E10, { .reversed = false });
     RH_ScopedGlobalInstall(Shutdown, 0x610EC0, { .reversed = false });
     RH_ScopedGlobalInstall(FindDummyDistForModel, 0x610ED0, { .reversed = false });
@@ -128,11 +136,13 @@ ePedRace CPopulation::FindPedRaceFromName(const char* modelName) {
     return RACE_DEFAULT;
 }
 
-// 0x5BCFE0
-void CPopulation::LoadPedGroups() {
+//! NOTSA - Unified function to read pedgrp.dat/cargrp.dat
+void LoadGroup(const char* fileName, auto& outModelsInGroup, auto& outNumOfModelsPerGroup) {
     CFileMgr::ChangeDir("\\DATA\\");
-    const auto file = CFileMgr::OpenFile("PEDGRP.DAT", "r");
+    const auto file = CFileMgr::OpenFile(fileName, "r");
     CFileMgr::ChangeDir("\\");
+
+    POP_DEV_LOG("Loading `{}`...", fileName);
 
     size_t currGrpIdx{}, lineno{1};
     for (;const auto l = CFileLoader::LoadLine(file); lineno++) { // Also replaces `,` with ` ` (space) (Important to know)
@@ -148,8 +158,8 @@ void CPopulation::LoadPedGroups() {
             }
 
 #ifdef _DEBUG // See bottom of the outer loop for info
-            if (currGrpIdx >= m_PedGroups.size()) {
-                DEV_LOG("Data found past-the-end! This would crash the vanilla game! [Line: {}]", lineno);
+            if (currGrpIdx >= outModelsInGroup.size()) {
+                POP_DEV_LOG("Data found past-the-end! This would crash the vanilla game! [Line: {}]", lineno);
                 break;
             }
 #endif
@@ -158,53 +168,59 @@ void CPopulation::LoadPedGroups() {
             // but we want to print a useful error message, so the
             // loop is let to do one more iteration before breaking
             // to see if there are any more models to be added
-            if (npeds >= m_PedGroups[currGrpIdx].size()) {
-                DEV_LOG("There are peds to be loaded, but there's no memory! [Group: {}]", currGrpIdx);
+            if (npeds >= outModelsInGroup[currGrpIdx].size()) {
+                POP_DEV_LOG("There are models to be added to the group, but there's no memory! [Group ID: {}; Line: {}]", currGrpIdx, lineno);
                 break;
             }
             
             char modelName[256]{};
             strncpy_s(modelName, begin, end - begin);
             if (int32 pedModelIdx{ MODEL_INVALID }; CModelInfo::GetModelInfo(modelName, &pedModelIdx)) {
-                m_PedGroups[currGrpIdx][npeds++] = pedModelIdx;
+                outModelsInGroup[currGrpIdx][npeds++] = pedModelIdx;
             } else {
-                DEV_LOG("Model ({}) doesn't exist!", modelName);
+                DEV_LOG("Model ({}) doesn't exist! [Group ID: {}; Line: {}]", modelName, currGrpIdx, lineno);
             }
         }
         
         if (npeds == 0) {
             continue; // Blank line
         }
-        DEV_LOG("Loaded ({}) peds into the group ({})", m_nNumPedsInGroup[currGrpIdx], currGrpIdx);
+
+        POP_DEV_LOG("Loaded ({}) models into the group ({})", outNumOfModelsPerGroup[currGrpIdx], currGrpIdx);
 
         // Only now set this
-        m_nNumPedsInGroup[currGrpIdx] = npeds;
+        outNumOfModelsPerGroup[currGrpIdx] = npeds;
 
         // Fill the rest (unused slots) with a value
-        rng::fill(m_PedGroups[currGrpIdx] | rng::views::drop(m_nNumPedsInGroup[currGrpIdx]), m_DefaultModelIDForUnusedSlot);
+        rng::fill(outModelsInGroup[currGrpIdx] | rng::views::drop(outNumOfModelsPerGroup[currGrpIdx]), CPopulation::m_DefaultModelIDForUnusedSlot);
 
         // Only increment this if it wasn't a blank line
         currGrpIdx++;
 
 #ifndef _DEBUG // In debug mode we let the loop go to check for past-the-end data (and report it)
-        if (currGrpIdx == m_PedGroups.size()) {
+        if (currGrpIdx == outModelsInGroup.size()) {
             break; // No more data needed - This if kind of a bugfix too, as the original game would just keep going, and if there was anything after the last group it would just corrupt the memory :D
         }
 #endif
     };
 
-    if (currGrpIdx == m_PedGroups.size()) {
-        DEV_LOG("PEDGRP.DAT has been loaded successfully! [#Groups Loaded: {}]", currGrpIdx);
+    if (currGrpIdx == outModelsInGroup.size()) {
+        DEV_LOG("{} has been loaded successfully! [#Groups Loaded: {}]", fileName, currGrpIdx);
     } else {
-        NOTSA_UNREACHABLE("Missing group data in PEDGRP.DAT! [#Groups Loaded: {}/{}]", currGrpIdx, m_PedGroups.size());
+        NOTSA_UNREACHABLE("Missing group data in {}! [#Groups Loaded: {}/{}]", fileName, currGrpIdx, outModelsInGroup.size());
     }
 
     CFileMgr::CloseFile(file);
 }
 
+// 0x5BCFE0
+void CPopulation::LoadPedGroups() {
+    LoadGroup("PEDGRP.DAT", m_PedGroups, m_nNumPedsInGroup);
+}
+
 // 0x5BD1A0
 void CPopulation::LoadCarGroups() {
-    ((void(__cdecl*)())0x5BD1A0)();
+    LoadGroup("CARGRP.DAT", m_CarGroups, m_nNumCarsInGroup);
 }
 
 // 0x610E10
