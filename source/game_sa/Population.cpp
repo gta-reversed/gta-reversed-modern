@@ -1079,8 +1079,38 @@ eModelID CPopulation::ChooseCivilianOccupation(
 }
 
 // 0x613180
-void CPopulation::ChooseCivilianCoupleOccupations(int32& model1, int32& model2) {
-    ((void(__cdecl*)(int32&, int32&))0x613180)(model1, model2);
+void CPopulation::ChooseCivilianCoupleOccupations(eModelID& husbandOccupation, eModelID& wifeyOccupation) {
+    wifeyOccupation = husbandOccupation = MODEL_INVALID;
+    
+    const auto [husbandMustBeMale, wifeMustBeFemale] = []() -> std::pair<bool, bool> {
+        if (CWeather::WeatherRegion != WEATHER_REGION_SF || (rand() & 16) == 0) {
+            return { true, false };
+        } else if (rand() & 32) {
+            return { true, true };
+        } else {
+            return { false, false };
+        }
+    }();
+
+    // You see, `ChooseCivilianOccupation` breaks if both `mustBeMale` and `mustBeFemale` are `true`... So I'm quite sure they just did an oopsie here.
+#ifdef FIX_BUGS
+    if ((husbandOccupation = ChooseCivilianOccupation(husbandMustBeMale, false)) != MODEL_INVALID) {
+        if ((wifeyOccupation = ChooseCivilianOccupation(false, wifeMustBeFemale)) != MODEL_INVALID) {
+#else
+    if ((husbandOccupation = ChooseCivilianOccupation(husbandMustBeMale, wifeMustBeFemale)) != MODEL_INVALID) {
+        if ((wifeyOccupation = ChooseCivilianOccupation(wifeMustBeFemale, husbandMustBeMale)) != MODEL_INVALID) {
+#endif // FIX_BUGS
+            const auto IsSkater = [](eModelID model) {
+                return CModelInfo::GetPedModelInfo(model)->GetPedStatType() == ePedStats::SKATER;
+            };
+            if (IsSkater(husbandOccupation) == IsSkater(wifeyOccupation)) { // Either they are both skaters, or they both aren't
+                return; // All good
+            }       
+        }
+    }
+
+    // Fail
+    wifeyOccupation = husbandOccupation = MODEL_INVALID;
 }
 
 // 0x613260
