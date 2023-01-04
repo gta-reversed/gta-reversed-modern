@@ -157,10 +157,17 @@ public:
     static CPed* AddPed(ePedType pedType, eModelID modelIndex, const CVector& posn, bool makeWander);
     // creates male01 ped in front of car?
     static CPed* AddDeadPedInFrontOfCar(const CVector& posn, CVehicle* vehicle);
-    static int32 ChooseCivilianOccupation(bool male, bool female, int32 animType, int32 ignoreModelIndex, int32 statType, bool arg5, bool arg6, bool checkAttractor, char* attrName);
-    static void  ChooseCivilianCoupleOccupations(int32& model1, int32& model2);
-    static int32 ChooseCivilianOccupationForVehicle(bool male, CVehicle* vehicle);
-    static void  CreateWaitingCoppers(CVector posn, float arg1);
+    static eModelID ChooseCivilianOccupation(
+        bool         mustBeMale = false,
+        bool         mustBeFemale = false,
+        AssocGroupId mustUseThisAnimGroup = ANIM_GROUP_NONE,
+        eModelID     mustNotBeThisModel = MODEL_INVALID,
+        ePedStats    mustBeCompatibleWithThisPedStat = ePedStats::NONE,
+        bool         bOnlyOnFoots = false,
+        bool         doTestForUsedOccupations = true,
+        bool         isAtAttractor = false, 
+        const char*  attractorScriptName = nullptr
+    );
     // Creates ped in a vehicle. gangPedType can be set to -1
     static CPed* AddPedInCar(CVehicle* vehicle, bool driver, int32 gangPedType, int32 seatNumber, bool male, bool criminal);
     static void  PlaceMallPedsAsStationaryGroup(const CVector& posn);

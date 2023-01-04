@@ -168,7 +168,7 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
             outPedType = PED_TYPE_COP;
             return true;
         } else if (highestChance == civPedsChance) { // 0x60FF8F
-            outPedMI = CPopulation::ChooseCivilianOccupation(0, 0, -1, -1, -1, 0, 1, 0, 0);
+            outPedMI = CPopulation::ChooseCivilianOccupation();
             switch (outPedMI) {
             case MODEL_INVALID:
             case MODEL_MALE01:

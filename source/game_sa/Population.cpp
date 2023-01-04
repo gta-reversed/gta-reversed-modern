@@ -74,7 +74,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(TestSafeForRealObject, 0x6123A0);
     RH_ScopedGlobalInstall(AddPed, 0x612710);
     RH_ScopedGlobalInstall(AddDeadPedInFrontOfCar, 0x612CD0);
-    RH_ScopedGlobalInstall(ChooseCivilianOccupation, 0x612F90, { .reversed = false });
+    RH_ScopedGlobalInstall(ChooseCivilianOccupation, 0x612F90);
     RH_ScopedGlobalInstall(ChooseCivilianCoupleOccupations, 0x613180, { .reversed = false });
     RH_ScopedGlobalInstall(ChooseCivilianOccupationForVehicle, 0x613260, { .reversed = false });
     RH_ScopedGlobalInstall(CreateWaitingCoppers, 0x6133F0, { .reversed = false });
@@ -1003,8 +1003,79 @@ CPed* CPopulation::AddDeadPedInFrontOfCar(const CVector& createPedAt, CVehicle* 
 }
 
 // 0x612F90
-int32 CPopulation::ChooseCivilianOccupation(bool male, bool female, int32 animType, int32 ignoreModelIndex, int32 statType, bool arg5, bool arg6, bool checkAttractor, char* attrName) {
-    return ((int32(__cdecl*)(bool, bool, int32, int32, int32, bool, bool, bool, char*))0x612F90)(male, female, animType, ignoreModelIndex, statType, arg5, arg6, checkAttractor, attrName);
+eModelID CPopulation::ChooseCivilianOccupation(
+    bool         mustBeMale,
+    bool         mustBeFemale,
+    AssocGroupId mustUseThisAnimGroup,
+    eModelID     mustNotBeThisModel,
+    ePedStats    mustBeCompatibleWithThisPedStat,
+    bool         bOnlyOnFoots,
+    bool         doTestForUsedOccupations,
+    bool         isAtAttractor,
+    const char*  attractorScriptName
+) {
+    UNUSED(attractorScriptName);
+
+    const size_t maxModelsToCheck = [&] {
+        // We do some extra math here, so in case the size of the array is ever changed, it scales automagically!
+        const auto nMaxModels = CStreaming::ms_pedsLoaded.size();
+        if (doTestForUsedOccupations) {
+            return nMaxModels * 7 / 8; // 7
+        }
+        if (!CGame::CanSeeOutSideFromCurrArea() && NumberOfPedsInUseInterior > 20) {
+            return nMaxModels * 5 / 8; // 5
+        }
+        return nMaxModels * 3 / 8; // 3
+    }();
+
+    for (size_t i{}; i < maxModelsToCheck; i++) {
+        const auto modelId = CStreaming::ms_pedsLoaded[i];
+        if (modelId == MODEL_INVALID) {
+            continue;
+        }
+        if (!CStreaming::IsModelLoaded(modelId)) { // So why the fuck is it in the `ms_pedsLoaded` array if it's not loaded?
+            continue;
+        }
+        const auto mi = CModelInfo::GetPedModelInfo(modelId);
+        if (mi->m_nRefCount != i) { // TODO/BUG: Why?
+            continue;
+        }
+        if (mustNotBeThisModel == modelId) {
+            continue;
+        }
+        if (CGame::CanSeeOutSideFromCurrArea() && !CPopCycle::PedIsAcceptableInCurrentZone(modelId)) {
+            continue;
+        }
+        if (bOnlyOnFoots && (mi->m_nCarsCanDriveMask & 0x1000) == 0) {
+            continue;
+        }
+        if (mustBeMale && mi->GetPedType() != PED_TYPE_CIVMALE) {
+            continue;
+        }
+        if (mustBeFemale && mi->GetPedType() != PED_TYPE_CIVFEMALE) {
+            continue;
+        }
+        if (mustUseThisAnimGroup != ANIM_GROUP_NONE && mi->m_nAnimType != mustUseThisAnimGroup) {
+            continue;
+        }
+        if (isAtAttractor && !PedMICanBeCreatedAtAttractor(modelId)) {
+            continue;
+        }
+        if (!CGame::CanSeeOutSideFromCurrArea() && !PedMICanBeCreatedInInterior(modelId)) {
+            continue;
+        }
+        if (mustBeCompatibleWithThisPedStat != ePedStats::NONE && !ArePedStatsCompatible(mi->GetPedStatType(), mustBeCompatibleWithThisPedStat)) {
+            continue;
+        }
+        if (CWeather::Rain >= 0.1f && IsSunbather(modelId)) {
+            continue;
+        }
+        return modelId;
+    }
+
+    return doTestForUsedOccupations
+        ? MODEL_INVALID
+        : MODEL_MALE01;
 }
 
 // 0x613180
