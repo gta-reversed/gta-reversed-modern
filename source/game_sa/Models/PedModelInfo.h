@@ -22,7 +22,7 @@ public:
     AssocGroupId m_nAnimType;
     ePedType     m_nPedType;
     ePedStats    m_nStatType;
-    uint16       m_nCarsCanDriveMask;
+    uint16       m_nCarsCanDriveMask; //< Bitset of vehicle classes ped can drive. To check if it can drive a given class check if the bit is set (eg.: & (1 << eVehicleClass))
     uint16       m_nPedFlags;
     CColModel*   m_pHitColModel;
     eRadioID     m_nRadio1;
@@ -62,6 +62,7 @@ public:
     auto GetRace() const { return (ePedRace)m_nRace; }
     auto GetPedType() const { return (ePedType)(m_nPedType); }
     auto GetPedStatType() const { return (ePedStats)(m_nStatType); }
+    auto CanPedDriveVehicleClass(eVehicleClass cls) const { return (m_nCarsCanDriveMask & (1 << (size_t)cls)) != 0; }
 };
 
 VALIDATE_SIZE(CPedModelInfo, 0x44);
