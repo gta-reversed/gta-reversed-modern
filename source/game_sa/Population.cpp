@@ -1114,8 +1114,42 @@ void CPopulation::ChooseCivilianCoupleOccupations(eModelID& husbandOccupation, e
 }
 
 // 0x613260
-int32 CPopulation::ChooseCivilianOccupationForVehicle(bool male, CVehicle* vehicle) {
-    return ((int32(__cdecl*)(bool, CVehicle*))0x613260)(male, vehicle);
+eModelID CPopulation::ChooseCivilianOccupationForVehicle(bool mustBeMale, CVehicle* vehicle) {
+    const auto vehClass = vehicle->GetVehicleModelInfo()->m_nVehicleClass;
+    for (size_t i{}; i < 2; i++) { // In 0th iteration we check if the model is inside the vehicle already, in the second we dont
+        for (size_t k{}; k < 4; k++) {
+            for (auto pedModelId : CStreaming::ms_pedsLoaded) {
+                if (pedModelId == MODEL_INVALID) {
+                    continue;
+                }
+                if (!CStreaming::IsModelLoaded(pedModelId)) {
+                    continue;
+                }
+                const auto mi = CModelInfo::GetPedModelInfo(pedModelId);
+                if (k != 4 && mi->m_nRefCount != k) {
+                    continue;
+                }
+                if (!CCheat::IsAnyActive({
+                    CHEAT_ELVIS_IS_EVERYWHERE,
+                    CHEAT_PEDS_ATTACK_YOU_WITH_ROCKETS,
+                    CHEAT_BEACH_PARTY,
+                    CHEAT_GANGMEMBERS_EVERYWHERE,
+                    CHEAT_NINJA_THEME,
+                    CHEAT_SLUT_MAGNET,
+                    CHEAT_FUNHOUSE_THEME,
+                    CHEAT_COUNTRY_TRAFFIC,
+                })) {
+                    if (mi->CanPedDriveVehicleClass(vehClass)) {
+                        continue;
+                    }
+                }
+                if (i == 1 || !vehicle->IsPedOfModelInside(pedModelId)) {
+                    return pedModelId;
+                }
+            }
+        }
+    }
+    return MODEL_MALE01;
 }
 
 // 0x6133F0
