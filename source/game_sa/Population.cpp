@@ -8,10 +8,13 @@
 #include "StdInc.h"
 
 #include "Population.h"
+#include <PedPlacement.h>
 
 #include <TaskTypes/TaskComplexWanderCop.h>
 #include <TaskTypes/TaskSimpleStandStill.h>
 #include <TaskTypes/TaskComplexWander.h>
+#include <TaskTypes/TaskComplexDie.h>
+#include <TaskTypes/TaskComplexKillPedOnFoot.h>
 
 #include <Events/EventAcquaintancePed.h>
 #include <Events/EventSexyPed.h>
@@ -70,7 +73,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(TestRoomForDummyObject, 0x612320);
     RH_ScopedGlobalInstall(TestSafeForRealObject, 0x6123A0);
     RH_ScopedGlobalInstall(AddPed, 0x612710);
-    RH_ScopedGlobalInstall(AddDeadPedInFrontOfCar, 0x612CD0, { .reversed = false });
+    RH_ScopedGlobalInstall(AddDeadPedInFrontOfCar, 0x612CD0);
     RH_ScopedGlobalInstall(ChooseCivilianOccupation, 0x612F90, { .reversed = false });
     RH_ScopedGlobalInstall(ChooseCivilianCoupleOccupations, 0x613180, { .reversed = false });
     RH_ScopedGlobalInstall(ChooseCivilianOccupationForVehicle, 0x613260, { .reversed = false });
@@ -730,7 +733,7 @@ void CPopulation::ManagePed(CPed* ped, const CVector& playerPosn) {
         };
         if (IsPedTypeGang(ped->m_nPedType)) {
             return GetDist() - 30.f;
-        } else if (ped->bDeadPedInFrontOfCar && ped->field_590) { // Never true, because `field_590` is always 0
+        } else if (ped->bDeadPedInFrontOfCar && ped->m_VehDeadInFrontOf) { // Never true, because `field_590` is always 0
             return 0.f;
         } else {
             return GetDist();
@@ -944,9 +947,59 @@ CPed* CPopulation::AddPed(ePedType pedType, eModelID modelIndex, const CVector& 
     return ped;
 }
 
-// 0x612CD0
-CPed* CPopulation::AddDeadPedInFrontOfCar(const CVector& posn, CVehicle* vehicle) {
-    return ((CPed * (__cdecl*)(const CVector&, CVehicle*))0x612CD0)(posn, vehicle);
+// 0x612CD0 - Unused
+CPed* CPopulation::AddDeadPedInFrontOfCar(const CVector& createPedAt, CVehicle* vehicle) {
+    if (TheCamera.IsSphereVisible({ createPedAt, 2.f })) {
+        if (sq(PedCreationDistMultiplier() * 42.5f) >= (FindPlayerPed()->GetPosition() - createPedAt).SquaredMagnitude2D()) {
+            return nullptr;
+        }
+    }
+
+    bool bGroundHit{};
+    const auto groundZ = std::max(CWorld::FindGroundZFor3DCoord(CVector{ createPedAt, createPedAt.z + 1.f }, &bGroundHit, nullptr) + 1.f, createPedAt.z);
+    if (!bGroundHit) {
+        return nullptr;
+    }
+
+    if (!CModelInfo::GetModelInfo(MODEL_MALE01)->m_pRwObject) {
+        DEV_LOG("Didn't create ped, because `MODEL_MALE01` has no RW object!");
+        return nullptr;
+    }
+
+    const auto ped = AddPed(PED_TYPE_CIVMALE, MODEL_MALE01, CVector{ createPedAt, groundZ }, false);
+
+    ped->GetEventGroup().Add(
+        CEventScriptCommand{
+            TASK_PRIMARY_DEFAULT,
+            new CTaskComplexDie{ WEAPON_UNARMED, ANIM_GROUP_DEFAULT, ANIM_ID_KO_SHOT_FRONT_0}
+        }
+    );
+
+    ped->m_nMoneyCount = 0;
+    ped->bDeadPedInFrontOfCar = true;
+    CEntity::ChangeEntityReference(ped->m_VehDeadInFrontOf, vehicle);
+
+    // Check if it's colliding with anything...
+    if ([&]{
+        if (CEntity* entitiesColliding[3]{}; !CPedPlacement::IsPositionClearForPed(createPedAt, 2.f, std::size(entitiesColliding), entitiesColliding, true, true, true)) {
+            if (!notsa::contains(entitiesColliding, vehicle) && !notsa::contains(entitiesColliding, ped)) { // If the colliding entities werent the ped or the vehicle...
+                return true;
+            }
+        }
+
+        if (CCollision::ProcessColModels(ped->GetMatrix(), *ped->GetColModel(), vehicle->GetMatrix(), *vehicle->GetColModel(), CWorld::m_aTempColPts) > 0) {
+            return true;
+        }
+
+        return false;
+    }()) {
+        RemovePed(ped);
+        return nullptr;
+    }
+
+    CVisibilityPlugins::SetClumpAlpha(ped->m_pRwClump, 0);
+
+    return ped;
 }
 
 // 0x612F90

@@ -310,7 +310,7 @@ public:
     CEntity*            m_pContactEntity;
     float               field_588;
     CVehicle*           m_pVehicle;
-    int32               field_590;
+    CVehicle*           m_VehDeadInFrontOf; // Set if `bDeadPedInFrontOfCar` 
     int32               field_594;
     ePedType            m_nPedType;
     CPedStat*           m_pStats;
