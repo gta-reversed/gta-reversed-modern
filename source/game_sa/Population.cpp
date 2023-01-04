@@ -78,7 +78,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(ChooseCivilianCoupleOccupations, 0x613180);
     RH_ScopedGlobalInstall(ChooseCivilianOccupationForVehicle, 0x613260);
     RH_ScopedGlobalInstall(CreateWaitingCoppers, 0x6133F0);
-    RH_ScopedGlobalInstall(AddPedInCar, 0x613A00, { .reversed = false });
+    RH_ScopedGlobalInstall(AddPedInCar, 0x613A00);
     RH_ScopedGlobalInstall(PlaceMallPedsAsStationaryGroup, 0x613CD0, { .reversed = false });
     RH_ScopedGlobalInstall(PlaceCouple, 0x613D60, { .reversed = false });
     RH_ScopedGlobalInstall(AddPedAtAttractor, 0x614210, { .reversed = false });
@@ -1266,8 +1266,101 @@ void CPopulation::CreateWaitingCoppers(CVector createAt, float createaWithHeadin
 }
 
 // 0x613A00
-CPed* CPopulation::AddPedInCar(CVehicle* vehicle, bool driver, int32 gangPedType, int32 seatNumber, bool male, bool criminal) {
-    return ((CPed * (__cdecl*)(CVehicle*, bool, int32, int32, bool, bool))0x613A00)(vehicle, driver, gangPedType, seatNumber, male, criminal);
+CPed* CPopulation::AddPedInCar(
+    CVehicle* veh,
+    bool      addAsDriver,
+    int32     carRating,
+    int32     seatNumber,
+    bool      mustBeMale,
+    bool      isCriminal
+) {
+    // Pick a model and ped type to use (TODO: Could probably just get the model type, and then resolve the ped type from the model)
+    const auto pedModel = [&]() -> eModelID {
+        if (addAsDriver) {
+            const auto driverModel = FindSpecificDriverModelForCar_ToUse(veh->GetModelID());
+            if (driverModel != MODEL_INVALID && CStreaming::IsModelLoaded(driverModel)) {
+                return driverModel;
+            }
+        }
+
+        const auto FixIfInvalid = [&](eModelID model, bool checkRWObj = false) {
+            return model != MODEL_INVALID && (!checkRWObj || CModelInfo::GetPedModelInfo(model)->m_pRwObject)
+                ? model
+                : MODEL_MALE01;
+        };
+
+        const auto TranslateCopType = [&](eCopType ctype) {
+            return CCopPed::GetPedModelForCopType(ctype);
+        };
+
+        switch (veh->GetModelID()) {
+        case MODEL_FIRETRUK:
+            return FixIfInvalid(CStreaming::GetDefaultFiremanModel());
+        case MODEL_AMBULAN:
+            return FixIfInvalid(CStreaming::GetDefaultMedicModel());
+        case MODEL_ENFORCER:
+            return TranslateCopType(COP_TYPE_SWAT1);
+        case MODEL_PREDATOR:
+        case MODEL_POLMAV:
+        case MODEL_COPCARLA:
+        case MODEL_COPCARSF:
+        case MODEL_COPCARVG:
+        case MODEL_COPCARRU:
+            return TranslateCopType(COP_TYPE_CITYCOP);
+        case MODEL_RHINO:
+        case MODEL_BARRACKS:
+            return TranslateCopType(COP_TYPE_ARMY);
+        case MODEL_FBIRANCH:
+            return TranslateCopType(COP_TYPE_FBI);
+        case MODEL_COPBIKE:
+            return TranslateCopType(COP_TYPE_LAPDM1);
+        case MODEL_STREAKC:
+            return FixIfInvalid(ChooseCivilianOccupation());
+        default: {
+            const auto gangPedTypeForRating = [carRating] {
+                switch (carRating) {
+                case 14: return PED_TYPE_GANG1;
+                case 15: return PED_TYPE_GANG2;
+                case 16: return PED_TYPE_GANG3;
+                case 17: return PED_TYPE_GANG4;
+                case 18: return PED_TYPE_GANG5;
+                case 19: return PED_TYPE_GANG6;
+                case 20: return PED_TYPE_GANG7;
+                case 21: return PED_TYPE_GANG8;
+                case 22: return PED_TYPE_GANG9;
+                case 23: return PED_TYPE_GANG10;
+                default: return PED_TYPE_NONE;
+                }
+            }();
+            if (gangPedTypeForRating != PED_TYPE_NONE) {
+                return FixIfInvalid(CGangs::ChooseGangPedModel(GetGangOfPedType(gangPedTypeForRating)), true);
+            }
+            return FixIfInvalid(ChooseCivilianOccupationForVehicle(mustBeMale, veh), true);
+        }
+        }
+    }();
+
+    const auto ped = AddPed(
+        CModelInfo::GetPedModelInfo(pedModel)->GetPedType(),
+        pedModel,
+        veh->GetPosition(),
+        false
+    );
+
+    CCarEnterExit::SetPedInCarDirect(
+        ped,
+        veh,
+        seatNumber >= 0 ? CCarEnterExit::ComputeTargetDoorToEnterAsPassenger(veh, seatNumber) : 0,
+        addAsDriver
+    );
+
+    if (isCriminal) {
+        UpdatePedCount(ped, false);
+        ped->m_nPedType = PED_TYPE_CRIMINAL;
+        UpdatePedCount(ped, true);
+    }
+
+    return ped;
 }
 
 // 0x613CD0
@@ -1412,6 +1505,7 @@ void CPopulation::PopulateInterior(int32 numPeds, CVector posn) {
 
 // 0x616650
 void CPopulation::Update(bool generatePeds) {
+    generatePeds = true;
     CurrentWorldZone = [] {
         switch (CWeather::WeatherRegion) {
         case WEATHER_REGION_DEFAULT:

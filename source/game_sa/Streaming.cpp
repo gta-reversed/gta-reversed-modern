@@ -2823,16 +2823,16 @@ eModelID CStreaming::GetDefaultCopCarModel(bool ignoreLvpd1Model) {
 
 // 0x407C00
 // Returns a loaded cop model.
-int32 CStreaming::GetDefaultCopModel() {
+eModelID CStreaming::GetDefaultCopModel() {
     // Try current level's model
     const auto& modelId = ms_aDefaultCopModel[CTheZones::m_CurrLevel];
     if (GetInfo(modelId).IsLoaded())
-        return modelId;
+        return (eModelID)modelId;
 
     // Try all other level's model
     for (const auto& mId : ms_aDefaultCopModel) {
         if (GetInfo(mId).IsLoaded()) {
-            return mId;
+            return (eModelID)mId;
         }
     }
 
@@ -2841,13 +2841,13 @@ int32 CStreaming::GetDefaultCopModel() {
 }
 
 // 0x407D40
-int32 CStreaming::GetDefaultFiremanModel() {
-    return ms_aDefaultFiremanModel[CTheZones::m_CurrLevel];
+eModelID CStreaming::GetDefaultFiremanModel() {
+    return (eModelID)ms_aDefaultFiremanModel[CTheZones::m_CurrLevel];
 }
 
 // 0x407D20
-int32 CStreaming::GetDefaultMedicModel() {
-    return ms_aDefaultMedicModel[CTheZones::m_CurrLevel];
+eModelID CStreaming::GetDefaultMedicModel() {
+    return (eModelID)ms_aDefaultMedicModel[CTheZones::m_CurrLevel];
 }
 
 // 0x5B9020

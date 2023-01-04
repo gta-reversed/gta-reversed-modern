@@ -24,7 +24,7 @@ public:
     static bool Load();
     static bool Save();
     static void SetGangWeapons(int16 gangId, eWeaponType weapId1, eWeaponType weapId2, eWeaponType weapId3);
-    static int32 ChooseGangPedModel(int16 gangId);
+    static eModelID ChooseGangPedModel(eGangID gangId);
 
     static bool GetWillAttackPlayerWithCops(ePedType pedType);
     static void SetWillAttackPlayerWithCops(ePedType pedType, bool bAttackPlayerWithCops);

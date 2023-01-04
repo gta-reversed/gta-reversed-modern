@@ -48,9 +48,9 @@ void CGangs::SetGangWeapons(int16 gangId, eWeaponType weapId1, eWeaponType weapI
 }
 
 // 0x5DE5A0
-int32 CGangs::ChooseGangPedModel(int16 gangId) {
-    return plugin::CallAndReturn<int32, 0x5DE5A0, int16>(gangId);
-
+eModelID CGangs::ChooseGangPedModel(eGangID gangId) {
+    return plugin::CallAndReturn<eModelID, 0x5DE5A0, eGangID>(gangId);
+    /*
     // see sub_406E80
     if (Gang[gangId].m_nPedModelOverride != -1) {
         return CPopulation::m_PedGroups[0][21 * CPopulation::m_TranslationArray[18].pedGroupIds[2 * gangId + CPopulation::CurrentWorldZone + gangId]];
@@ -74,6 +74,7 @@ int32 CGangs::ChooseGangPedModel(int16 gangId) {
             return MODEL_INVALID;
     }
     return CPopulation::m_PedGroups[0][21 * CPopulation::m_TranslationArray[18].pedGroupIds[CPopulation::CurrentWorldZone + v2 * 3] + SequenceElement];
+    */
 }
 
 // unused (0x5DE500)

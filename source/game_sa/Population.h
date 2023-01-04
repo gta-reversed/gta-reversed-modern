@@ -171,8 +171,15 @@ public:
     static void     ChooseCivilianCoupleOccupations(eModelID& husbandOccupation, eModelID& wifeyOccupation);
     static eModelID ChooseCivilianOccupationForVehicle(bool mustBeMale, CVehicle* vehicle);
     static void  CreateWaitingCoppers(CVector createAt, float createaWithHeading);
-    // Creates ped in a vehicle. gangPedType can be set to -1
-    static CPed* AddPedInCar(CVehicle* vehicle, bool driver, int32 gangPedType, int32 seatNumber, bool male, bool criminal);
+    // Creates ped in a vehicle. `carRating` can be set to -1
+    static CPed* AddPedInCar(
+        CVehicle* veh,
+        bool      pedAsDriver,
+        int32     carRating,
+        int32     seatNumber,
+        bool      mustBeMale,
+        bool      isCriminal
+    );
     static void  PlaceMallPedsAsStationaryGroup(const CVector& posn);
     static void  PlaceCouple(ePedType pedType1, eModelID modelIndex1, ePedType pedType2, eModelID modelIndex2, CVector posn);
     // Creates ped at attractor. decisionMakerType can be set to -1

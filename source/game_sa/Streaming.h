@@ -292,9 +292,9 @@ public:
     static void ForceLayerToRead(int32 arg1);
     static int32 GetDefaultCabDriverModel();
     static eModelID GetDefaultCopCarModel(bool ignoreLvpd1Model = true);
-    static int32 GetDefaultCopModel();
-    static int32 GetDefaultFiremanModel();
-    static int32 GetDefaultMedicModel();
+    static eModelID GetDefaultCopModel();
+    static eModelID GetDefaultFiremanModel();
+    static eModelID GetDefaultMedicModel();
     static int32 GetDiscInDrive();
     static int32 GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority);
     static bool HasSpecialCharLoaded(int32 slot);
