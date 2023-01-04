@@ -1092,14 +1092,15 @@ void CPopulation::ChooseCivilianCoupleOccupations(eModelID& husbandOccupation, e
         }
     }();
 
+    // TODO: Check this out... I'm not sure what to do here
     // You see, `ChooseCivilianOccupation` breaks if both `mustBeMale` and `mustBeFemale` are `true`... So I'm quite sure they just did an oopsie here.
-#ifdef FIX_BUGS
-    if ((husbandOccupation = ChooseCivilianOccupation(husbandMustBeMale, false)) != MODEL_INVALID) {
-        if ((wifeyOccupation = ChooseCivilianOccupation(false, wifeMustBeFemale)) != MODEL_INVALID) {
-#else
+//#ifdef FIX_BUGS
+  //  if ((husbandOccupation = ChooseCivilianOccupation(husbandMustBeMale, false)) != MODEL_INVALID) {
+  //      if ((wifeyOccupation = ChooseCivilianOccupation(false, wifeMustBeFemale)) != MODEL_INVALID) {
+//#else
     if ((husbandOccupation = ChooseCivilianOccupation(husbandMustBeMale, wifeMustBeFemale)) != MODEL_INVALID) {
         if ((wifeyOccupation = ChooseCivilianOccupation(wifeMustBeFemale, husbandMustBeMale)) != MODEL_INVALID) {
-#endif // FIX_BUGS
+//#endif // FIX_BUGS
             const auto IsSkater = [](eModelID model) {
                 return CModelInfo::GetPedModelInfo(model)->GetPedStatType() == ePedStats::SKATER;
             };
