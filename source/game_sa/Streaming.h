@@ -291,7 +291,7 @@ public:
     static void FlushRequestList();
     static void ForceLayerToRead(int32 arg1);
     static int32 GetDefaultCabDriverModel();
-    static int32 GetDefaultCopCarModel(int32 ignoreLvpd1Model);
+    static eModelID GetDefaultCopCarModel(bool ignoreLvpd1Model = true);
     static int32 GetDefaultCopModel();
     static int32 GetDefaultFiremanModel();
     static int32 GetDefaultMedicModel();

@@ -170,6 +170,7 @@ public:
     );
     static void     ChooseCivilianCoupleOccupations(eModelID& husbandOccupation, eModelID& wifeyOccupation);
     static eModelID ChooseCivilianOccupationForVehicle(bool mustBeMale, CVehicle* vehicle);
+    static void  CreateWaitingCoppers(CVector createAt, float createaWithHeading);
     // Creates ped in a vehicle. gangPedType can be set to -1
     static CPed* AddPedInCar(CVehicle* vehicle, bool driver, int32 gangPedType, int32 seatNumber, bool male, bool criminal);
     static void  PlaceMallPedsAsStationaryGroup(const CVector& posn);

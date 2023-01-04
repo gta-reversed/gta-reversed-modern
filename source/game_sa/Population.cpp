@@ -75,9 +75,9 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(AddPed, 0x612710);
     RH_ScopedGlobalInstall(AddDeadPedInFrontOfCar, 0x612CD0);
     RH_ScopedGlobalInstall(ChooseCivilianOccupation, 0x612F90);
-    RH_ScopedGlobalInstall(ChooseCivilianCoupleOccupations, 0x613180, { .reversed = false });
-    RH_ScopedGlobalInstall(ChooseCivilianOccupationForVehicle, 0x613260, { .reversed = false });
-    RH_ScopedGlobalInstall(CreateWaitingCoppers, 0x6133F0, { .reversed = false });
+    RH_ScopedGlobalInstall(ChooseCivilianCoupleOccupations, 0x613180);
+    RH_ScopedGlobalInstall(ChooseCivilianOccupationForVehicle, 0x613260);
+    RH_ScopedGlobalInstall(CreateWaitingCoppers, 0x6133F0);
     RH_ScopedGlobalInstall(AddPedInCar, 0x613A00, { .reversed = false });
     RH_ScopedGlobalInstall(PlaceMallPedsAsStationaryGroup, 0x613CD0, { .reversed = false });
     RH_ScopedGlobalInstall(PlaceCouple, 0x613D60, { .reversed = false });
@@ -1153,8 +1153,115 @@ eModelID CPopulation::ChooseCivilianOccupationForVehicle(bool mustBeMale, CVehic
 }
 
 // 0x6133F0
-void CPopulation::CreateWaitingCoppers(CVector posn, float arg1) {
-    ((void(__cdecl*)(CVector, float))0x6133F0)(posn, arg1);
+void CPopulation::CreateWaitingCoppers(CVector createAt, float createaWithHeading) {
+    constexpr uint32 NUM_COPS_FOR_WANTED_LEVEL[7]{ 0, 1, 2, 4, 5, 6, 7 };
+    constexpr uint32 NUM_CARS_FOR_WANTED_LEVEL[7]{ 0, 0, 0, 1, 1, 2, 2 };
+
+    const auto plyrWantedLvl = FindPlayerWanted()->m_nWantedLevel;
+    assert(plyrWantedLvl <= 6);
+    
+    createAt.z += 1.f;
+
+    // Create cop cars
+    if (auto numOfCars = NUM_CARS_FOR_WANTED_LEVEL[plyrWantedLvl]) {
+        CNodeAddress createPosNodes[3]{};
+        createPosNodes[0] = ThePaths.FindNthNodeClosestToCoors(
+            createAt,
+            0,
+            30.f,
+            false,
+            false,
+            3,
+            false,
+            true,
+            &createPosNodes[1]
+        );
+
+        const auto copCarModel = CStreaming::GetDefaultCopCarModel();
+
+        for (const auto nodeAddr : createPosNodes) {
+            if (!nodeAddr.IsValid()) {
+                continue;
+            }
+
+            const auto veh = new CAutomobile{ copCarModel, RANDOM_VEHICLE, true };
+
+            // Set vehicle's position to the node's 
+            veh->SetPosn(ThePaths.GetPathNode(nodeAddr)->GetNodeCoors());
+            veh->SetStatus(STATUS_ABANDONED);
+
+            // Adjust vehicle to be pointing at the creation coords
+            auto& vehMat = veh->GetMatrix();
+            const auto createPosToVehDir2D = (CVector2D{createAt} - veh->GetPosition2D()).Normalized();
+            vehMat.GetForward() = CVector{ createPosToVehDir2D };
+            vehMat.GetRight() = CVector{ createPosToVehDir2D.GetPerpLeft() };
+
+            veh->PlaceOnRoadProperly();
+            veh->SetIsStatic(false);
+
+            // Now, update the RW matrix too
+            if (veh->m_pRwObject) {
+                vehMat.UpdateRwMatrix(RwFrameGetMatrix(RpClumpGetFrame(veh->m_pRwClump)));
+            }
+
+            CCarCtrl::JoinCarWithRoadSystem(veh);
+            CWorld::Add(veh);
+
+            if (!--numOfCars) {
+                break;
+            }
+        }
+    }
+
+    // Create cop peds
+    if (auto numOfCopPeds = NUM_COPS_FOR_WANTED_LEVEL[plyrWantedLvl]) {
+        for (int32 i{}; i < 20; i++) { // int32 angleOffset = 0; angleOffset > -20; angleOffset--
+            const auto heading   = CGeneral::GetRandomNumberInRange(0.f, (float)(i) * 0.4f) - (float)(i) * 0.2f + createaWithHeading;
+            auto       copPedPos = CVector{ CVector2D{createAt} + CVector2D{sin(heading), cos(heading)} *CGeneral::GetRandomNumberInRange(8.f, 10.f), createAt.z };
+
+            if (!CWorld::GetIsLineOfSightClear(createAt, copPedPos, true, true, false, true)) {
+                continue;
+            }
+
+            int16 numColliding{};
+            CEntity* entitiesInRange[1];
+            CWorld::FindObjectsInRange(copPedPos, 1.f, true, &numColliding, (int16)std::size(entitiesInRange), entitiesInRange, false, true, true, false, false);
+            if (numColliding) {
+                continue;
+            }
+
+            bool bGroundHit{};
+            copPedPos.z = CWorld::FindGroundZFor3DCoord(copPedPos, &bGroundHit, nullptr);
+            if (!bGroundHit) {
+                continue;
+            }
+
+            const auto ped = new CCopPed{ 0 };
+
+            ped->SetPosn(copPedPos);
+            ped->m_fAimingRotation = ped->m_fCurrentRotation = CVector2D{ createAt - copPedPos }.Heading();
+            ped->SetHeading(ped->m_fCurrentRotation);
+
+            CWorld::Add(ped);
+
+            if (plyrWantedLvl > 1) {
+                ped->GiveWeapon(WEAPON_PISTOL, 30000, true);
+                ped->SetCurrentWeapon(WEAPON_PISTOL);
+            }
+
+            ped->GetEventGroup().Add(
+                CEventScriptCommand{
+                    TASK_PRIMARY_PRIMARY,
+                    new CTaskComplexKillPedOnFoot{FindPlayerPed(), -1, 0, 0, 0, 2, true, true}
+                }
+            );
+            ped->GetIntelligence()->Process();
+
+            if (!--numOfCopPeds) {
+                break;
+            }
+        }
+    }
 }
 
 // 0x613A00
