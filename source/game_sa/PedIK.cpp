@@ -16,28 +16,12 @@ void CPedIK::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x5FD8C0);
     RH_ScopedInstall(RotateTorso, 0x5FDDB0);
     RH_ScopedInstall(RotateTorsoForArm, 0x5FDF90);
-    RH_ScopedOverloadedInstall(MoveLimb, "1", 0x5FDA60, MoveLimbResult(CPedIK::*)(LimbOrientation&, float, float, LimbMovementInfo&));
-    RH_ScopedOverloadedInstall(MoveLimb, "2", 0x5FDB60, MoveLimbResult(CPedIK::*)(LimbOrientation&, float, float, LimbMovementInfo&, float));
+    RH_ScopedOverloadedInstall(MoveLimb, "non-normalized", 0x5FDA60, MoveLimbResult(CPedIK::*)(LimbOrientation&, float, float, LimbMovementInfo&));
+    RH_ScopedOverloadedInstall(MoveLimb, "normalized", 0x5FDB60, MoveLimbResult(CPedIK::*)(LimbOrientation&, float, float, LimbMovementInfo&, float));
     RH_ScopedInstall(PointGunAtPosition, 0x5FDE20);
     RH_ScopedInstall(PointGunInDirection, 0x5FDC00);
     RH_ScopedInstall(PitchForSlope, 0x5FE0E0);
-}
-
-CPedIK* CPedIK::Constructor(CPed* ped) {
-    this->CPedIK::CPedIK(ped);
-    return this;
-}
-
-// 0x5FD8C0
-CPedIK::CPedIK(CPed* ped) {
-    m_pPed                 = ped;
-    m_nFlags               = 0;
-    m_TorsoOrient.m_fYaw   = 0.0f;
-    m_TorsoOrient.m_fPitch = 0.0f;
-    m_fSlopePitch          = 0.0f;
-    m_fSlopePitchLimitMult = 0.0f;
-    m_fSlopeRoll           = 0.0f;
-    m_fBodyRoll            = 0.0f;
+    RH_ScopedInstall(GetWorldMatrix, 0x5FD8F0);
 }
 
 // 0x5FDDB0
@@ -48,8 +32,9 @@ void CPedIK::RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation,
     m_pPed->bDontAcceptIKLookAts = true;
 }
 
-void CPedIK::RotateTorsoForArm(CVector const& dir) {
-    auto destRotation = CVector2D{dir - m_pPed->GetPosition()}.Heading();
+// 0x5FDF90
+void CPedIK::RotateTorsoForArm(const CVector& direction) {
+    auto destRotation = CVector2D{direction - m_pPed->GetPosition()}.Heading();
 
     if (m_pPed->m_fCurrentRotation + PI < destRotation) {
         destRotation -= TWO_PI;
@@ -83,28 +68,32 @@ void CPedIK::RotateTorsoForArm(CVector const& dir) {
     }
 }
 
-bool CPedIK::PointGunInDirection(float Z_angle, float dist, bool flag, float fNormalize) {
-    bool bCanReach = true;
+// 0x5FDC00
+bool CPedIK::PointGunInDirection(float zAngle, float distance, bool flag, float normalize) {
     bGunReachedTarget = false;
     bTorsoUsed = true;
 
-    const auto angle = CGeneral::LimitRadianAngle(Z_angle - m_pPed->m_fCurrentRotation);
-    auto hier = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
-    auto idx = RpHAnimIDGetIndex(hier, m_pPed->m_apBones[PED_NODE_RIGHT_CLAVICLE]->m_nNodeId);
-    RwMatrix* pBone = RwMatrixCreate();
-    pBone = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
-    RwMatrixDestroy(pBone);
+    const auto angle = CGeneral::LimitRadianAngle(zAngle - m_pPed->m_fCurrentRotation);
+    const auto hier  = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
+    const auto index = RpHAnimIDGetIndex(hier, m_pPed->m_apBones[PED_NODE_RIGHT_CLAVICLE]->m_nNodeId);
 
-    MoveLimbResult limbRes;
-    if (fNormalize < 0.0f) {
-        limbRes = MoveLimb(m_TorsoOrient, angle, dist, ms_torsoInfo);
-    } else {
-        limbRes = MoveLimb(m_TorsoOrient, angle, dist, ms_torsoInfo, fNormalize);
-    }
+    // unused code
+    // auto* boneMatrix = RwMatrixCreate();
+    // *boneMatrix = RpHAnimHierarchyGetMatrixArray(hier)[index];
+    // RwMatrixDestroy(boneMatrix);
 
-    switch (limbRes) {
+    const auto limbResult = [&]() -> MoveLimbResult {
+        if (normalize < 0.0f) {
+            return MoveLimb(m_TorsoOrient, angle, distance, ms_torsoInfo);
+        } else {
+            return MoveLimb(m_TorsoOrient, angle, distance, ms_torsoInfo, normalize);
+        }
+    }();
+
+    bool canReach = true;
+    switch (limbResult) {
     case CANT_REACH_TARGET:
-        bCanReach = false;
+        canReach = false;
         break;
     case REACHED_TARGET:
         bGunReachedTarget = true;
@@ -114,40 +103,37 @@ bool CPedIK::PointGunInDirection(float Z_angle, float dist, bool flag, float fNo
     const auto head = &RpHAnimHierarchyGetMatrixArray(hier)[PED_NODE_HEAD];
     const auto headAngle = -CGeneral::LimitRadianAngle(atan2(-head->at.y, -head->at.x) - m_pPed->m_fCurrentRotation);
 
-    CVector axis(0.0f, 0.0f, 0.0f);
-    if (flag) {
-        axis.y = std::cos(headAngle);
-        axis.z = std::sin(headAngle);
-    } else {
-        axis.y = -std::sin(headAngle);
-        axis.z = std::cos(headAngle);
-    }
+    const auto axis = CVector{
+        0.0f,
+        flag ? std::cos(headAngle) : -std::sin(headAngle),
+        flag ? std::sin(headAngle) :  std::cos(headAngle)
+    };
 
     auto Torsoframe = m_pPed->m_apBones[PED_NODE_UPPER_TORSO];
     RtQuatRotate(Torsoframe->GetFrameOrientation().AsRtQuat(), &axis, RadiansToDegrees(m_TorsoOrient.m_fPitch), rwCOMBINEPOSTCONCAT);
     RtQuatRotate(Torsoframe->GetFrameOrientation().AsRtQuat(), &XaxisIK, RadiansToDegrees(m_TorsoOrient.m_fYaw), rwCOMBINEPOSTCONCAT);
     m_pPed->bUpdateMatricesRequired = true;
 
-    return bCanReach;
+    return canReach;
 }
 
-// Converted from thiscall void CPedIK::PointGunAtPosition(CVector const& posn,float arg2)	0x5FDE20
-void CPedIK::PointGunAtPosition(CVector const& posn, float fNormalize) {
-    const auto weaponInfo = CWeaponInfo::GetWeaponInfo(m_pPed->GetActiveWeapon().m_nType, m_pPed->GetWeaponSkill());
+// 0x5FDE20
+void CPedIK::PointGunAtPosition(const CVector& posn, float normalize) {
+    const auto weaponAnimOffsetIdx = CWeaponInfo::GetWeaponInfo(m_pPed)->m_nAimOffsetIndex;
 
-    const CVector newRight = [this, weaponInfo] {
+    const CVector newRight = [this, weaponAnimOffsetIdx] {
         if (m_pPed->bIsDucking) {
-            return g_GunAimingOffsets[weaponInfo->m_nAimOffsetIndex].DuckX * m_pPed->GetRight();
+            return g_GunAimingOffsets[weaponAnimOffsetIdx].DuckX * m_pPed->GetRight();
         } else {
-            return g_GunAimingOffsets[weaponInfo->m_nAimOffsetIndex].AimX * m_pPed->GetRight();
+            return g_GunAimingOffsets[weaponAnimOffsetIdx].AimX * m_pPed->GetRight();
         }
     }();
 
-    const CVector newUp = [this, weaponInfo] {
+    const CVector newUp = [this, weaponAnimOffsetIdx] {
         if (m_pPed->bIsDucking) {
-            return g_GunAimingOffsets[weaponInfo->m_nAimOffsetIndex].DuckZ * m_pPed->GetUp();
+            return g_GunAimingOffsets[weaponAnimOffsetIdx].DuckZ * m_pPed->GetUp();
         } else {
-            return g_GunAimingOffsets[weaponInfo->m_nAimOffsetIndex].AimZ * m_pPed->GetUp();
+            return g_GunAimingOffsets[weaponAnimOffsetIdx].AimZ * m_pPed->GetUp();
         }
     }();
 
@@ -155,9 +141,10 @@ void CPedIK::PointGunAtPosition(CVector const& posn, float fNormalize) {
 
     const auto angle = CGeneral::GetRadianAngleBetweenPoints(posn, newPos);
     const auto dist = DistanceBetweenPoints2D(newPos, posn);
-    PointGunInDirection(angle, CGeneral::GetRadianAngleBetweenPoints(posn.z, dist, newPos.z, 0.0f), false, fNormalize);
+    PointGunInDirection(angle, CGeneral::GetRadianAngleBetweenPoints(posn.z, dist, newPos.z, 0.0f), false, normalize);
 }
 
+// 0x5FE0E0
 void CPedIK::PitchForSlope() {
     const auto clumpData = RpClumpGetAnimBlendClumpData(m_pPed->m_pRwClump);
     const auto hier = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
@@ -167,17 +154,12 @@ void CPedIK::PitchForSlope() {
     }
 
     if (!m_pPed->IsStateDying()) {
-        float offset;
         if (std::abs(m_fSlopePitch) > 0.01f) {
-            offset = 0.1f;
-            if (m_pPed->m_nMoveState == PEDMOVE_WALK) {
-                offset = 0.085f;
-            }
-
+            const auto offset = (m_pPed->m_nMoveState != PEDMOVE_WALK) ? 0.1f : 0.085f;
             m_fSlopePitchLimitMult = (m_fSlopePitchLimitMult * 0.9f) + offset;
 
-            float lowBound = m_fSlopePitchLimitMult * DegreesToRadians(-35.0f);
-            float highBound = m_fSlopePitchLimitMult * PI_6;
+            const auto lowBound  = m_fSlopePitchLimitMult * DegreesToRadians(-35.0f);
+            const auto highBound = m_fSlopePitchLimitMult * DegreesToRadians(+30.0f);
             m_fSlopePitch = std::clamp(m_fSlopePitch, lowBound, highBound);
         }
 
@@ -185,59 +167,44 @@ void CPedIK::PitchForSlope() {
             m_fSlopeRoll = std::clamp(m_fSlopeRoll, DegreesToRadians(-45.0f), DegreesToRadians(45.0f));
         }
 
+        const auto GetAnimHierarchyMatrix = [&hier](ePedBones bone) {
+            return &RpHAnimHierarchyGetMatrixArray(hier)[RpHAnimIDGetIndex(hier, bone)];
+        };
+
+        const auto RotateBone = [clumpData, &hier](ePedBones bone, float angle, const CVector& axis = ZaxisIK) {
+            RtQuatRotate(clumpData->m_Frames[RpHAnimIDGetIndex(hier, bone)].GetFrameOrientation().AsRtQuat(), &axis, angle, rwCOMBINEPRECONCAT);
+        };
+
         // TODO: refactor
         if (std::abs(m_fSlopePitch) > 0.01f) {
-            auto idx = RpHAnimIDGetIndex(hier, BONE_SPINE);
-            auto tmpHier = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
             if (&m_pPed->GetIntelligence()->m_TaskMgr && m_pPed->GetIntelligence()->m_TaskMgr.GetActiveTask()->GetTaskType() == TASK_SIMPLE_STEALTH_KILL) {
-                RtQuatRotate(clumpData->m_Frames[idx].GetFrameOrientation().AsRtQuat(), &ZaxisIK, RadiansToDegrees(m_fSlopePitch), rwCOMBINEPRECONCAT);
+                RotateBone(BONE_SPINE, RadiansToDegrees(m_fSlopePitch));
                 m_pPed->bUpdateMatricesRequired = true;
             } else {
-                float angle = RadiansToDegrees(-m_fSlopePitch) * 0.75f;
-                RtQuatRotate(clumpData->m_Frames[idx].GetFrameOrientation().AsRtQuat(), &ZaxisIK, angle, rwCOMBINEPRECONCAT);
+                RotateBone(BONE_SPINE, RadiansToDegrees(-m_fSlopePitch) * 0.75f);
                 m_pPed->bUpdateMatricesRequired = true;
 
-                idx = RpHAnimIDGetIndex(hier, BONE_R_THIGH);
-                tmpHier = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
-                angle = std::asin(tmpHier->up.z);
-                RtQuatRotate(clumpData->m_Frames[idx].GetFrameOrientation().AsRtQuat(), &ZaxisIK, angle * 30.0f * m_fSlopePitch, rwCOMBINEPOSTCONCAT);
+                RotateBone(BONE_R_THIGH, std::asin(GetAnimHierarchyMatrix(BONE_R_THIGH)->up.z) * 30.0f * m_fSlopePitch);
 
-                idx = RpHAnimIDGetIndex(hier, BONE_R_CALF);
-                tmpHier = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
-                angle = std::max(-angle * m_fSlopePitch, 0.0f);
-                RtQuatRotate(clumpData->m_Frames[idx].GetFrameOrientation().AsRtQuat(), &ZaxisIK, angle * -30.0f, rwCOMBINEPOSTCONCAT);
+                RotateBone(BONE_R_CALF, std::max(-std::asin(GetAnimHierarchyMatrix(BONE_R_THIGH)->up.z), 0.0f) * -30.0f * m_fSlopePitch);
 
-                idx = RpHAnimIDGetIndex(hier, BONE_R_FOOT);
-                tmpHier = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
-                angle = std::max(std::asin(tmpHier->up.z), 0.0f) * m_fSlopePitch;
-                RtQuatRotate(clumpData->m_Frames[idx].GetFrameOrientation().AsRtQuat(), &ZaxisIK, angle * -30.0f, rwCOMBINEPOSTCONCAT);
+                RotateBone(BONE_R_FOOT, std::max(std::asin(GetAnimHierarchyMatrix(BONE_R_FOOT)->up.z), 0.0f) * -30.0f * m_fSlopePitch);
 
-                idx = RpHAnimIDGetIndex(hier, BONE_L_THIGH);
-                tmpHier = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
-                angle = std::asin(tmpHier->up.z);
-                RtQuatRotate(clumpData->m_Frames[idx].GetFrameOrientation().AsRtQuat(), &ZaxisIK, angle * 30.0f * m_fSlopePitch, rwCOMBINEPOSTCONCAT);
+                RotateBone(BONE_L_THIGH, std::asin(GetAnimHierarchyMatrix(BONE_L_THIGH)->up.z) * 30.0f * m_fSlopePitch);
 
-                idx = RpHAnimIDGetIndex(hier, BONE_L_CALF);
-                tmpHier = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
-                angle = std::max(-angle * m_fSlopePitch, 0.0f);
-                RtQuatRotate(clumpData->m_Frames[idx].GetFrameOrientation().AsRtQuat(), &ZaxisIK, angle * -30.0f, rwCOMBINEPOSTCONCAT);
+                RotateBone(BONE_L_CALF, std::max(-std::asin(GetAnimHierarchyMatrix(BONE_L_THIGH)->up.z), 0.0f) * -30.0f * m_fSlopePitch);
 
-                idx = RpHAnimIDGetIndex(hier, BONE_L_FOOT);
-                tmpHier = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
-                angle = std::max(std::asin(tmpHier->up.z), 0.0f) * m_fSlopePitch;
-                RtQuatRotate(clumpData->m_Frames[idx].GetFrameOrientation().AsRtQuat(), &ZaxisIK, angle * -30.0f, rwCOMBINEPOSTCONCAT);
+                RotateBone(BONE_L_FOOT, std::max(-std::asin(GetAnimHierarchyMatrix(BONE_L_FOOT)->up.z), 0.0f) * -30.0f * m_fSlopePitch);
 
-                RwMatrix* rwMat = m_pPed->GetModellingMatrix();
-                CMatrix matResult(rwMat, false);
+                CMatrix result(m_pPed->GetModellingMatrix(), false);
+                CMatrix translate;
+                translate.SetTranslate(CVector{0.0f, 0.0f, 0.0f});
+                translate.RotateX(-m_fSlopePitch / 2.0f);
+                result *= translate;
 
-                CMatrix matTransl;
-                matTransl.SetTranslate(CVector(0.0f, 0.0f, 0.0f));
-                matTransl.RotateX(-(m_fSlopePitch / 2.0f));
-                matResult *= matTransl;
-
-                matResult.GetPosition() += m_pPed->GetForward() * 0.75f * std::sin(m_fSlopePitch);
-                matResult.GetPosition().z += 0.3f / std::cos(m_fSlopeRoll) - 0.3f;
-                matResult.UpdateRW();
+                result.GetPosition() += m_pPed->GetForward() * 0.75f * std::sin(m_fSlopePitch);
+                result.GetPosition().z += 0.3f / std::cos(m_fSlopeRoll) - 0.3f;
+                result.UpdateRW();
                 m_pPed->UpdateRwFrame();
             }
         } else {
@@ -245,26 +212,22 @@ void CPedIK::PitchForSlope() {
         }
 
         if (std::abs(m_fSlopeRoll) > 0.01f) {
-            auto idx = RpHAnimIDGetIndex(hier, BONE_L_FOOT);
-            auto tmpHier = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
-            float angle = CGeneral::LimitRadianAngle(atan2(tmpHier->at.y, tmpHier->at.x) - m_pPed->m_fCurrentRotation);
-            CVector axis = CVector(0.0f, std::cos(angle), std::sin(angle));
-            RtQuatRotate(clumpData->m_Frames[idx].GetFrameOrientation().AsRtQuat(), &axis, RadiansToDegrees(m_fSlopeRoll), rwCOMBINEPRECONCAT);
+            const auto RotateFoot = [&](ePedBones bone) {
+                const auto hierMatrix = GetAnimHierarchyMatrix(bone);
+                const auto angle = CGeneral::LimitRadianAngle(atan2(hierMatrix->at.y, hierMatrix->at.x) - m_pPed->m_fCurrentRotation);
 
-            idx = RpHAnimIDGetIndex(hier, BONE_R_FOOT);
-            tmpHier = &RpHAnimHierarchyGetMatrixArray(hier)[idx];
-            angle = CGeneral::LimitRadianAngle(atan2(tmpHier->at.y, tmpHier->at.x) - m_pPed->m_fCurrentRotation);
-            axis = CVector(0.0f, std::cos(angle), std::sin(angle));
-            RtQuatRotate(clumpData->m_Frames[idx].GetFrameOrientation().AsRtQuat(), &axis, RadiansToDegrees(m_fSlopeRoll), rwCOMBINEPRECONCAT);
+                RotateBone(bone, RadiansToDegrees(m_fSlopeRoll), CVector{0.0f, std::cos(angle), std::sin(angle)});
+            };
 
+            RotateFoot(BONE_L_FOOT);
+            RotateFoot(BONE_R_FOOT);
             m_pPed->bUpdateMatricesRequired = true;
         } else {
             m_fSlopeRoll = 0.0f;
         }
 
     } else {
-        RwMatrix* rwMat = m_pPed->GetModellingMatrix();
-        CMatrix matResult(rwMat, false);
+        CMatrix matResult(m_pPed->GetModellingMatrix());
 
         CMatrix matTransl;
         matTransl.SetTranslate(CVector(0.0f, 0.0f, 1.0f));
@@ -279,6 +242,8 @@ void CPedIK::PitchForSlope() {
     bSlopePitch = false;
 }
 
+// unused
+// 0x5FD8F0
 RwMatrixTag* CPedIK::GetWorldMatrix(RwFrame* frame, RwMatrixTag* transformMat) {
     *transformMat = *RwFrameGetMatrix(frame);
     for (frame = RwFrameGetParent(frame); frame; frame = RwFrameGetParent(frame)) {
@@ -287,9 +252,9 @@ RwMatrixTag* CPedIK::GetWorldMatrix(RwFrame* frame, RwMatrixTag* transformMat) {
     return transformMat;
 }
 
+// 0x5FDA60
 MoveLimbResult CPedIK::MoveLimb(LimbOrientation& limb, float targetYaw, float targetPitch, LimbMovementInfo& moveInfo) {
-
-    MoveLimbResult result = HAVENT_REACHED_TARGET;
+    auto result = HAVENT_REACHED_TARGET;
 
     // yaw
     if (std::abs(limb.m_fYaw - targetYaw) < moveInfo.yawD) {
@@ -328,23 +293,23 @@ MoveLimbResult CPedIK::MoveLimb(LimbOrientation& limb, float targetYaw, float ta
     return result;
 }
 
-MoveLimbResult CPedIK::MoveLimb(LimbOrientation& limb, float targetYaw, float targetPitch, LimbMovementInfo& moveInfo, float fNormalize) {
+// 0x5FDB60
+MoveLimbResult CPedIK::MoveLimb(LimbOrientation& limb, float targetYaw, float targetPitch, LimbMovementInfo& moveInfo, float normalize) {
     auto result = HAVENT_REACHED_TARGET;
 
-    limb.m_fYaw = fNormalize * targetYaw;
-    limb.m_fPitch = fNormalize * targetPitch;
+    limb.m_fYaw = normalize * targetYaw;
+    limb.m_fPitch = normalize * targetPitch;
 
-    if ((limb.m_fYaw > moveInfo.maxYaw) || (limb.m_fYaw < moveInfo.minYaw)) {
+    if (limb.m_fYaw > moveInfo.maxYaw || limb.m_fYaw < moveInfo.minYaw) {
         limb.m_fYaw = std::clamp(limb.m_fYaw, moveInfo.minYaw, moveInfo.maxYaw);
         result = CANT_REACH_TARGET;
     }
 
-    if ((limb.m_fPitch > moveInfo.maxPitch) || (limb.m_fPitch < moveInfo.minPitch)) {
+    if (limb.m_fPitch > moveInfo.maxPitch || limb.m_fPitch < moveInfo.minPitch) {
         limb.m_fPitch = std::clamp(limb.m_fPitch, moveInfo.minPitch, moveInfo.maxPitch);
         result = CANT_REACH_TARGET;
-    } else {
-        if (fNormalize > 0.9f && result == HAVENT_REACHED_TARGET)
-            result = REACHED_TARGET;
+    } else if (normalize > 0.9f && result == HAVENT_REACHED_TARGET) {
+        result = REACHED_TARGET;
     }
 
     return result;

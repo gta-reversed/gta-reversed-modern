@@ -30,5 +30,6 @@ public:
 
     // NOTSA
     CQuaternion& GetFrameOrientation() const { return m_pIFrame->orientation; }
+    CVector& GetFrameTranslation() const { return m_pIFrame->translation; }
 };
 VALIDATE_SIZE(AnimBlendFrameData, 0x18);

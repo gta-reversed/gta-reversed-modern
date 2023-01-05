@@ -17,14 +17,10 @@ enum MoveLimbResult { CANT_REACH_TARGET, HAVENT_REACHED_TARGET, REACHED_TARGET }
 
 struct LimbOrientation {
 public:
-    float m_fYaw;
-    float m_fPitch;
+    float m_fYaw{0.0f};
+    float m_fPitch{0.0f};
 
-    LimbOrientation() {
-        m_fYaw    = 0.0f;
-        m_fPitch  = 0.0f;
-    }
-
+    LimbOrientation() = default;
     LimbOrientation(float yaw, float pitch) : m_fYaw(yaw), m_fPitch(pitch) { }
 };
 VALIDATE_SIZE(LimbOrientation, 0x8);
@@ -39,47 +35,49 @@ VALIDATE_SIZE(LimbMovementInfo, 0x18);
 
 class CPedIK {
 public:
-    CPed* m_pPed;
-    LimbOrientation m_TorsoOrient;
-    float m_fSlopePitch;
-    float m_fSlopePitchLimitMult;
-    float m_fSlopeRoll;
-    float m_fBodyRoll;
+    CPed* m_pPed{nullptr};
+    LimbOrientation m_TorsoOrient{};
+    float m_fSlopePitch{0.0f};
+    float m_fSlopePitchLimitMult{0.0f};
+    float m_fSlopeRoll{0.0f};
+    float m_fBodyRoll{0.0f};
 
     union {
-        uint32 m_nFlags;
+        uint32 m_nFlags{0};
         struct {
-            uint32 bGunReachedTarget : 1;
-            uint32 bTorsoUsed : 1;
-            uint32 bUseArm : 1;
-            uint32 bSlopePitch : 1;
-            uint32 bUnk : 1;
+            bool bGunReachedTarget : 1;
+            bool bTorsoUsed : 1;
+            bool bUseArm : 1;
+            bool bSlopePitch : 1;
+            bool bUnk : 1;
         };
     };
 
-    static inline CVector XaxisIK = CVector(1.0f, 0.0f, 0.0f); // 0x8D232C
-    static inline CVector YaxisIK = CVector(0.0f, 1.0f, 0.0f); // 0x8D2338
-    static inline CVector ZaxisIK = CVector(0.0f, 0.0f, 1.0f); // 0x8D2344
-
+    static inline const CVector XaxisIK = CVector(1.0f, 0.0f, 0.0f); // 0x8D232C
+    static inline const CVector YaxisIK = CVector(0.0f, 1.0f, 0.0f); // 0x8D2338
+    static inline const CVector ZaxisIK = CVector(0.0f, 0.0f, 1.0f); // 0x8D2344
     static inline LimbMovementInfo& ms_torsoInfo = *(LimbMovementInfo*)0x8D22E4;
 
-    CPedIK() = default;
-    explicit CPedIK(CPed* ped);
-
-    CPedIK* Constructor(CPed* ped);
-
-    // funcs
-    void RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation, bool flag);
-    void RotateTorsoForArm(CVector const& vec);
-    bool PointGunInDirection(float Z_angle, float arg2, bool flag, float arg4);
-    void PointGunAtPosition(CVector const& posn, float arg2);
-    void PitchForSlope();
-    static RwMatrixTag* GetWorldMatrix(RwFrame* frame, RwMatrixTag* transformMat);
-
-    MoveLimbResult MoveLimb(LimbOrientation& TorsoOrien, float yaw, float pitch, LimbMovementInfo& LimbMoveInfo);
-    MoveLimbResult MoveLimb(LimbOrientation& TorsoOrien, float yaw, float pitch, LimbMovementInfo& LimbMoveInfo, float fNormalize);
-
+public:
     static void InjectHooks();
-};
 
+    CPedIK* Constructor(CPed* ped) {
+        this->CPedIK::CPedIK(ped);
+        return this;
+    }
+
+public:
+    CPedIK() = default; // NOTSA
+    explicit CPedIK(CPed* ped) : m_pPed(ped) {} // 0x5FD8C0
+
+    void RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation, bool flag);
+    void RotateTorsoForArm(const CVector& direction);
+    bool PointGunInDirection(float zAngle, float distance, bool flag, float normalize);
+    void PointGunAtPosition(const CVector& posn, float normalize);
+    void PitchForSlope();
+    MoveLimbResult MoveLimb(LimbOrientation& limb, float targetYaw, float targetPitch, LimbMovementInfo& moveInfo);
+    MoveLimbResult MoveLimb(LimbOrientation& limb, float targetYaw, float targetPitch, LimbMovementInfo& moveInfo, float normalize);
+
+    static RwMatrixTag* GetWorldMatrix(RwFrame* frame, RwMatrixTag* transformMat);
+};
 VALIDATE_SIZE(CPedIK, 0x20);

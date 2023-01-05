@@ -8,7 +8,6 @@
 
 #include "WeaponInfo.h"
 
-
 void CWeaponInfo::InjectHooks() {
     RH_ScopedClass(CWeaponInfo);
     RH_ScopedCategoryGlobal();
@@ -17,7 +16,7 @@ void CWeaponInfo::InjectHooks() {
     RH_ScopedInstall(LoadWeaponData, 0x5BE670);
     RH_ScopedInstall(Initialise, 0x5BF750);
     RH_ScopedInstall(Shutdown, 0x743C50);
-    RH_ScopedInstall(GetWeaponInfo, 0x743C60);
+    RH_ScopedOverloadedInstall(GetWeaponInfo, "original", 0x743C60, CWeaponInfo*(*)(eWeaponType, eWeaponSkill));
     RH_ScopedInstall(GetSkillStatIndex, 0x743CD0);
     RH_ScopedInstall(FindWeaponType, 0x743D10);
     RH_ScopedInstall(GetCrouchReloadAnimationID, 0x685700);
