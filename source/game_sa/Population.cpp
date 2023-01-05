@@ -15,6 +15,8 @@
 #include <TaskTypes/TaskComplexWander.h>
 #include <TaskTypes/TaskComplexDie.h>
 #include <TaskTypes/TaskComplexKillPedOnFoot.h>
+#include <TaskTypes/TaskComplexBeInCouple.h>
+#include <TaskTypes/TaskComplexFollowLeaderInFormation.h>
 
 #include <Events/EventAcquaintancePed.h>
 #include <Events/EventSexyPed.h>
@@ -80,7 +82,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(CreateWaitingCoppers, 0x6133F0);
     RH_ScopedGlobalInstall(AddPedInCar, 0x613A00);
     RH_ScopedGlobalInstall(PlaceMallPedsAsStationaryGroup, 0x613CD0);
-    RH_ScopedGlobalInstall(PlaceCouple, 0x613D60, { .reversed = false });
+    RH_ScopedGlobalInstall(PlaceCouple, 0x613D60);
     RH_ScopedGlobalInstall(AddPedAtAttractor, 0x614210, { .reversed = false });
     RH_ScopedGlobalInstall(FindDistanceToNearestPedOfType, 0x6143E0, { .reversed = false });
     RH_ScopedGlobalInstall(PickGangCar, 0x614490, { .reversed = false });
@@ -131,6 +133,15 @@ void CPopulation::InjectHooks() {
 
     RH_ScopedGlobalOverloadedInstall(IsSunbather, "ModelID", 0x611760, bool(*)(eModelID));
     //RH_ScopedGlobalOverloadedInstall(IsSunbather, "Ped", 0x611760, bool(*)(CPed*));
+}
+
+bool CanCameraSeeAPedHere(CVector pos) {
+    if (TheCamera.IsSphereVisible({ pos, 2.f })) {
+        if (sq(CPopulation::PedCreationDistMultiplier() * 42.5f) >= (FindPlayerPed()->GetPosition() - pos).SquaredMagnitude2D()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // 0x5B6D40
@@ -949,10 +960,8 @@ CPed* CPopulation::AddPed(ePedType pedType, eModelID modelIndex, const CVector& 
 
 // 0x612CD0 - Unused
 CPed* CPopulation::AddDeadPedInFrontOfCar(const CVector& createPedAt, CVehicle* vehicle) {
-    if (TheCamera.IsSphereVisible({ createPedAt, 2.f })) {
-        if (sq(PedCreationDistMultiplier() * 42.5f) >= (FindPlayerPed()->GetPosition() - createPedAt).SquaredMagnitude2D()) {
-            return nullptr;
-        }
+    if (CanCameraSeeAPedHere(createPedAt)) {
+        return nullptr;
     }
 
     bool bGroundHit{};
@@ -980,19 +989,9 @@ CPed* CPopulation::AddDeadPedInFrontOfCar(const CVector& createPedAt, CVehicle* 
     CEntity::ChangeEntityReference(ped->m_VehDeadInFrontOf, vehicle);
 
     // Check if it's colliding with anything...
-    if ([&]{
-        if (CEntity* entitiesColliding[3]{}; !CPedPlacement::IsPositionClearForPed(createPedAt, 2.f, std::size(entitiesColliding), entitiesColliding, true, true, true)) {
-            if (!notsa::contains(entitiesColliding, vehicle) && !notsa::contains(entitiesColliding, ped)) { // If the colliding entities werent the ped or the vehicle...
-                return true;
-            }
-        }
-
-        if (CCollision::ProcessColModels(ped->GetMatrix(), *ped->GetColModel(), vehicle->GetMatrix(), *vehicle->GetColModel(), CWorld::m_aTempColPts) > 0) {
-            return true;
-        }
-
-        return false;
-    }()) {
+    if (   !CPedPlacement::IsPositionClearForPed(createPedAt, 2.f, {vehicle, ped})
+        || CCollision::ProcessColModels(ped->GetMatrix(), *ped->GetColModel(), vehicle->GetMatrix(), *vehicle->GetColModel(), CWorld::m_aTempColPts) > 0
+    ) {
         RemovePed(ped);
         return nullptr;
     }
@@ -1376,8 +1375,78 @@ void CPopulation::PlaceMallPedsAsStationaryGroup(const CVector& posn) {
 }
 
 // 0x613D60
-void CPopulation::PlaceCouple(ePedType pedType1, eModelID modelIndex1, ePedType pedType2, eModelID modelIndex2, CVector posn) {
-    ((void(__cdecl*)(ePedType, int32, ePedType, int32, CVector))0x613D60)(pedType1, modelIndex1, pedType2, modelIndex2, posn);
+void CPopulation::PlaceCouple(ePedType husbandPedType, eModelID husbandModelId, ePedType wifeyPedType, eModelID wifeyModelId, CVector placeAt) {
+    if (CGameLogic::LaRiotsActiveHere()) {
+        return;
+    }
+
+    if (husbandPedType != PED_TYPE_CIVMALE || wifeyPedType != PED_TYPE_CIVFEMALE) {
+        return;
+    }
+
+    if (CanCameraSeeAPedHere(placeAt)) {
+        return;
+    }
+
+    if (!CPedPlacement::IsPositionClearForPed(placeAt, CModelInfo::GetPedModelInfo(husbandModelId)->GetColModel()->GetBoundRadius())) {
+        return;
+    }
+
+    const auto GetSetGroundZ = [](CVector& posn) {
+        bool bGroundHit{};
+        posn.z = std::max(CWorld::FindGroundZFor3DCoord(posn, &bGroundHit, nullptr) + 1.f, posn.z);
+        return bGroundHit;
+    };
+
+    if (!GetSetGroundZ(placeAt)) {
+        return;
+    }
+
+    const auto CreatePed = [&](ePedType ptype, eModelID model) -> CPed* {
+        if (!CModelInfo::GetPedModelInfo(model)->m_pRwObject) {
+            return nullptr;
+        }
+        return AddPed(ptype, model, placeAt, true);
+    };
+
+    const auto husb = CreatePed(PED_TYPE_CIVMALE, husbandModelId);
+    if (!husb) {
+        return;
+    }
+    CVisibilityPlugins::SetClumpAlpha(husb->m_pRwClump, 0);
+
+    const auto wifey = CreatePed(PED_TYPE_CIVFEMALE, wifeyModelId);
+    if (!wifey) {
+        return; // No need to delete `husband`, as he's been added to the world already (and he'll get deleted eventually)
+    }
+
+    // If they both walk slow (or there's no real difference in their walk speed) => We're done
+    const auto husbWalkSpeed = husb->GetWalkAnimSpeed(), wifeyWalkSpeed = wifey->GetWalkAnimSpeed();
+    if (husbWalkSpeed < 0.75f || wifeyWalkSpeed < 0.75f || std::abs(husbWalkSpeed - wifeyWalkSpeed) > 0.45f) {
+        return;
+    }
+
+    // 0x614028
+    const auto wifeyIsLeader = wifeyWalkSpeed >= husbWalkSpeed; // Whoever is faster is the leader
+    wifey->GetTaskManager().SetTask(new CTaskComplexBeInCouple{ husb, wifeyIsLeader }, TASK_PRIMARY_PRIMARY);
+    husb->GetTaskManager().SetTask(new CTaskComplexBeInCouple{ wifey, !wifeyIsLeader }, TASK_PRIMARY_PRIMARY);
+
+    // Update husband position
+    auto husbNewPos = husb->GetPosition() + CVector{ CTaskComplexFollowLeaderInFormation::ms_offsets.offsets[4] };
+    if (GetSetGroundZ(husbNewPos)) {
+        husb->SetPosn(husbNewPos);
+    }
+
+    if (CPedPlacement::IsPositionClearForPed(
+        husbNewPos,
+        wifey->GetColModel()->GetBoundRadius(),
+        { husb, wifey }
+    )) {
+        CVisibilityPlugins::SetClumpAlpha(wifey->m_pRwClump, 0); // All good
+    }  else { // Blocked by something
+        RemovePed(wifey);
+        RemovePed(husb);
+    }
 }
 
 // 0x614210
