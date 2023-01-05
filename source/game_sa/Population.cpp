@@ -1487,8 +1487,8 @@ float CPopulation::FindDistanceToNearestPedOfType(ePedType pedType, CVector posn
 }
 
 // 0x614490
-int32 CPopulation::PickGangCar(int32 carGroupID) {
-    return ((int32(__cdecl*)(int32))0x614490)(carGroupID);
+eModelID CPopulation::PickGangCar(eGangID forGang) {
+    return (eModelID)m_LoadedGangCars[(size_t)(forGang)].PickRandomCar(false, false);
 }
 
 // 0x6144B0

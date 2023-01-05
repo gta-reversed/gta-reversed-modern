@@ -185,7 +185,7 @@ public:
     // Creates ped at attractor. decisionMakerType can be set to -1
     static bool  AddPedAtAttractor(eModelID modelIndex, C2dEffect* attractor, CVector posn, CEntity* entity, int32 decisionMakerType);
     static float FindDistanceToNearestPedOfType(ePedType pedType, CVector posn);
-    static int32 PickGangCar(int32 carGroupID);
+    static eModelID PickGangCar(eGangID forGang);
     static int32 PickRiotRoadBlockCar();
     static void  ConvertToRealObject(CDummyObject* dummyObject);
     static void  ConvertToDummyObject(CObject* object);
