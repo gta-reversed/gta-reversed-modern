@@ -90,7 +90,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(ConvertToRealObject, 0x614580);
     RH_ScopedGlobalInstall(ConvertToDummyObject, 0x614670);
     RH_ScopedGlobalInstall(AddToPopulation, 0x614720, { .reversed = false });
-    RH_ScopedGlobalInstall(GeneratePedsAtAttractors, 0x615970, { .reversed = false });
+    RH_ScopedGlobalInstall(GeneratePedsAtAttractors, 0x615970);
     RH_ScopedGlobalInstall(GeneratePedsAtStartOfGame, 0x615C90, { .reversed = false });
     RH_ScopedGlobalInstall(ManageObject, 0x615DC0, { .reversed = false });
     RH_ScopedGlobalInstall(ManageDummy, 0x616000, { .reversed = false });
@@ -1589,8 +1589,103 @@ bool CPopulation::AddToPopulation(float arg0, float arg1, float arg2, float arg3
 }
 
 // 0x615970
-int32 CPopulation::GeneratePedsAtAttractors(CVector posn, float arg1, float arg2, float arg3, float arg4, int32 decisionMakerType, int32 numPeds) {
-    return ((int32(__cdecl*)(CVector, float, float, float, float, int32, int32))0x615970)(posn, arg1, arg2, arg3, arg4, decisionMakerType, numPeds);
+int32 CPopulation::GeneratePedsAtAttractors(
+    CVector pos,
+    float   minRadius,
+    float   maxRadius,
+    float   minRadiusClose,
+    float   maxRadiusClose,
+    int32   decisionMaker,
+    int32   numPedsToCreate
+) {
+    if (!numPedsToCreate) {
+        return 0;
+    }
+
+    CEntity* entitiesInRng[512];
+    int16    numEntitiesInRng{};
+    CWorld::FindObjectsInRange(pos, maxRadius, false, &numEntitiesInRng, (int16)std::size(entitiesInRng), entitiesInRng, true, false, false, true, false);
+    if (!numEntitiesInRng) {
+        return 0;
+    }
+
+    const auto IsEffectInRadius = [&](CVector effectPos) {
+        const auto EffInRange = [
+            effDistSq = (effectPos - pos).SquaredMagnitude()
+        ](float min, float max) {
+            return effDistSq >= sq(min) && effDistSq <= sq(max);
+        };
+        return TheCamera.IsSphereVisible(effectPos, 2.f)
+            ? EffInRange(minRadius, maxRadius)
+            : EffInRange(minRadiusClose, maxRadiusClose);
+    };
+
+    const auto GetRadiusForEffect = [=](CVector effectPos) -> std::pair<float, float> { // min, max radius
+    };
+
+    int32 numPedsCreated{};
+    for (size_t i{}; i < 12; i++) {
+        for (int16 o{}; o < numEntitiesInRng; o++) {
+            const auto ent = entitiesInRng[o];
+            assert(ent);
+            if (!ent->m_pRwObject) {
+                continue;
+            }
+            if (!ent->IsInCurrentArea()) {
+                continue;
+            }
+            const auto effect = ent->GetRandom2dEffect(EFFECT_ATTRACTOR, true);
+            if (!effect || !IsCorrectTimeOfDayForEffect(effect)) {
+                continue;
+            }
+            const auto attractor = &effect->pedAttractor;
+            if (attractor->m_nFlags & 1) {
+                if (!ent->IsObject()) {
+                    continue;
+                }
+                if (!ent->AsObject()->objectFlags.b0x1000000) {
+                    continue;
+                }
+            }
+
+            const auto effectPosWS = ent->GetMatrix() * effect->m_vecPosn; // ws = world space
+            if (!IsEffectInRadius(effectPosWS)) {
+                continue;
+            }
+
+            const auto usePoliceModel = bInPoliceStation && CGeneral::RandomBool(70) && PedMICanBeCreatedAtThisAttractor(CStreaming::GetDefaultCopModel(), attractor->m_szScriptName);
+
+            const auto model = usePoliceModel
+                ? CStreaming::GetDefaultCopModel()
+                : ChooseCivilianOccupation(false, false, ANIM_GROUP_NONE, MODEL_INVALID, ePedStats::NONE, true, true, true, attractor->m_szScriptName);
+
+            if (usePoliceModel) {
+                decisionMaker = 1; // TODO: Shouldn't this be local to this iteration instead? Right now this will presist into all futher iterations...
+            }
+
+            switch (model) {
+            case MODEL_INVALID:
+            case MODEL_MALE01:
+                continue;
+            }
+
+            if (!AddPedAtAttractor(model, effect, effectPosWS, ent, decisionMaker)) {
+                continue;
+            }
+
+            numPedsCreated++;
+
+            if (decisionMaker == -1) {
+                break;
+            }
+
+            if (numPedsCreated == numPedsToCreate) {
+                break;
+            }
+        }
+    }
+
+    return numPedsCreated;
 }
 
 // 0x615C90

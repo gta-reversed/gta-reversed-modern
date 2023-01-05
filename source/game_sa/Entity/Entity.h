@@ -181,6 +181,7 @@ public:
     void RemoveEscalatorsForEntity();
     bool IsEntityOccluded();
     bool IsInCurrentAreaOrBarberShopInterior();
+    bool IsInCurrentArea() const;
     void UpdateRW();
     // Always returns a non-null value. In case there's no LOD object `this` is returned. NOTSA
     CEntity* FindLastLOD() noexcept;
