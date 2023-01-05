@@ -93,7 +93,7 @@ public:
     // CWorld::Remove(ped); delete ped;
     static void RemovePed(CPed* ped);
     // returns 0
-    static int32 ChoosePolicePedOccupation();
+    static eModelID ChoosePolicePedOccupation();
     static bool  ArePedStatsCompatible(ePedStats statType1, ePedStats statType2);
     static bool  PedMICanBeCreatedAtAttractor(eModelID modelIndex);
     // checks if ped with specific model index can be created at script attractor
@@ -108,7 +108,7 @@ public:
     // checks if surface at this point is skateable
     static bool IsSkateable(const CVector& point);
     // calls CGangs::ChooseGangPedModel(int32); parameter - gang id?
-    static int32 ChooseGangOccupation(eGangID gangId);
+    static eModelID ChooseGangOccupation(eGangID gangId);
     // empty function, returns ped
     static CPed* AddExistingPedInCar(CPed* ped, CVehicle* vehicle);
 
@@ -219,7 +219,7 @@ public:
     static int32 GetNumPedsInGroup(ePopcycleGroup popcycleGroup, int32 worldZone) { return m_nNumPedsInGroup[GetPedGroupId(popcycleGroup, worldZone)]; }
     static int32 GetNumPedsInGroup(ePopcyclePedGroup pedGroup) { return m_nNumPedsInGroup[pedGroup]; }
 
-    static auto GetModelsInPedGroup(ePopcyclePedGroup pedGroup) { return m_PedGroups[pedGroup] | rng::views::take((size_t)GetNumPedsInGroup(pedGroup)); }
+    static auto GetModelsInPedGroup(ePopcyclePedGroup pedGroup) { return m_PedGroups[pedGroup] | rng::views::take((size_t)GetNumPedsInGroup(pedGroup)) | rng::views::transform([](auto model) {return (eModelID)model; }); }
     static int32 GetPedGroupModelId(ePopcyclePedGroup pedGroup, int32 slot) { return GetModelsInPedGroup(pedGroup)[slot]; } // Doing it like this for (out-of-range) debug checks
 
 private:

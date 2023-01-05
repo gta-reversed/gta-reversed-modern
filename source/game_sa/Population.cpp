@@ -115,7 +115,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(PedMICanBeCreatedAtThisAttractor, 0x6110E0);
     RH_ScopedGlobalInstall(PedMICanBeCreatedInInterior, 0x611450);
     RH_ScopedGlobalInstall(IsMale, 0x611470, { .reversed = false });
-    RH_ScopedGlobalInstall(PopulateInterior, 0x616470, { .reversed = false });
+    RH_ScopedGlobalInstall(PopulateInterior, 0x616470);
     RH_ScopedGlobalInstall(IsFemale, 0x611490, { .reversed = false });
     RH_ScopedGlobalInstall(IsSkateable, 0x6114C0);
     RH_ScopedGlobalInstall(ChooseGangOccupation, 0x611550);
@@ -302,8 +302,8 @@ void CPopulation::RemovePed(CPed* ped) {
 }
 
 // 0x610F40
-int32 CPopulation::ChoosePolicePedOccupation() {
-    return 0;
+eModelID CPopulation::ChoosePolicePedOccupation() {
+    return (eModelID)COP_TYPE_CITYCOP; // See CCopPed::GetPedModelForCopType
 }
 
 // 0x610F50
@@ -506,7 +506,7 @@ bool CPopulation::IsSkateable(const CVector& point) {
 }
 
 // 0x611550
-int32 CPopulation::ChooseGangOccupation(eGangID gangId) {
+eModelID CPopulation::ChooseGangOccupation(eGangID gangId) {
     return CGangs::ChooseGangPedModel(gangId);
 }
 
@@ -1497,7 +1497,7 @@ float CPopulation::FindDistanceToNearestPedOfType(ePedType pedType, CVector posn
     * 
     auto peds = GetPedPool()->GetAllValid()
         | rng::views::filter([&](CPed& ped) { return ped.m_nPedType == pedType; })
-        | rng::views::transform([&](CPed& ped) { return (ped.GetPosition() - posn).SquaredMagnitude(); });
+        | rng::views::transform([&](CPed& ped) { return (ped.GetPosition() - pos).SquaredMagnitude(); });
     return rng::empty(peds)
         ? 10'000'000.f
         : std::sqrt(rng::min(peds));
@@ -1508,7 +1508,7 @@ float CPopulation::FindDistanceToNearestPedOfType(ePedType pedType, CVector posn
     return std::sqrt(notsa::min_default(
           GetPedPool()->GetAllValid()
         | rng::views::filter([&](CPed& ped) { return ped.m_nPedType == pedType; })
-        | rng::views::transform([&](CPed& ped) { return (ped.GetPosition() - posn).SquaredMagnitude(); }),
+        | rng::views::transform([&](CPed& ped) { return (ped.GetPosition() - pos).SquaredMagnitude(); }),
         sq(10'000'000.f)
     ));
     */
@@ -1810,12 +1810,55 @@ void CPopulation::RemovePedsIfThePoolGetsFull() {
 
 // 0x616420
 void CPopulation::ConvertAllObjectsToDummyObjects() {
-    ((void(__cdecl*)())0x616420)();
+    for (auto& obj : GetObjectPool()->GetAllValid()) {
+        if (obj.m_nObjectType != OBJECT_GAME) {
+            continue;
+        }
+        ConvertToDummyObject(&obj);
+    }
 }
 
 // 0x616470
-void CPopulation::PopulateInterior(int32 numPeds, CVector posn) {
-    ((void(__cdecl*)(int32, CVector))0x616470)(numPeds, posn);
+void CPopulation::PopulateInterior(int32 numPedsToCreate, CVector pos) {
+    if (pos.z < 900.f) {
+        return; // Not in interior
+    }
+
+    RemoveAllRandomPeds();
+    CColStore::LoadCollision(pos, true);
+    CStreaming::LoadAllRequestedModels(false);
+
+    if (!numPedsToCreate) {
+        return;
+    }
+
+    numPedsToCreate -= GeneratePedsAtAttractors(pos, 0.f, 150.f, 0.f, 150.f, 7, numPedsToCreate * 19 / 20); // 19 / 20 = 0.95
+    
+    for (size_t i{}; numPedsToCreate && i < 25; i++) {
+        float   orientation{};
+        CVector nodePos{};
+        if (!ThePaths.GeneratePedCreationCoors_Interior(pos.x, pos.y, &nodePos, nullptr, nullptr, &orientation)) {
+            continue;
+        }
+
+        ePedType ptype{};
+        eModelID pmodel{};
+        if (!CPopCycle::FindNewPedType(ptype, pmodel, true, true)) {
+            continue;
+        }
+
+        pos.z += 0.9f; // NOTE/BUG: So they just keep adding it up here?
+
+        const auto ped = AddPed(ptype, pmodel, pos, true);
+
+        numPedsToCreate--;
+
+        ped->GetIntelligence()->SetPedDecisionMakerType(7);
+
+        if (ped->m_nAnimGroup == CAnimManager::GetAnimationGroupId("jogger")) { // TODO: Move `GetAnimationGroupId` out the loop?
+            ped->m_nAnimGroup = CAnimManager::GetAnimationGroupId("man");
+        }
+    }
 }
 
 // 0x616650

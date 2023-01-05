@@ -86,7 +86,7 @@ void CPopCycle::Initialise() {
 }
 
 // 0x60FBD0
-bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGangs, bool noCops) {
+bool CPopCycle::FindNewPedType(ePedType& outPedType, eModelID& outPedMI, bool noGangs, bool noCops) {
     // NOTSA: Bug prevention
     outPedMI = MODEL_INVALID;
 

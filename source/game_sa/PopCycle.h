@@ -256,7 +256,7 @@ public:
     static void InjectHooks();
 
     static void  Initialise();
-    static bool  FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGangs, bool noCops);
+    static bool  FindNewPedType(ePedType& outPedType, eModelID& outPedMI, bool noGangs, bool noCops);
     static float GetCurrentPercOther_Peds();
 
     /*
