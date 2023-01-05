@@ -79,7 +79,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(ChooseCivilianOccupationForVehicle, 0x613260);
     RH_ScopedGlobalInstall(CreateWaitingCoppers, 0x6133F0);
     RH_ScopedGlobalInstall(AddPedInCar, 0x613A00);
-    RH_ScopedGlobalInstall(PlaceMallPedsAsStationaryGroup, 0x613CD0, { .reversed = false });
+    RH_ScopedGlobalInstall(PlaceMallPedsAsStationaryGroup, 0x613CD0);
     RH_ScopedGlobalInstall(PlaceCouple, 0x613D60, { .reversed = false });
     RH_ScopedGlobalInstall(AddPedAtAttractor, 0x614210, { .reversed = false });
     RH_ScopedGlobalInstall(FindDistanceToNearestPedOfType, 0x6143E0, { .reversed = false });
@@ -1365,7 +1365,14 @@ CPed* CPopulation::AddPedInCar(
 
 // 0x613CD0
 void CPopulation::PlaceMallPedsAsStationaryGroup(const CVector& posn) {
-    ((void(__cdecl*)(const CVector&))0x613CD0)(posn);
+    if (CGame::currArea == eAreaCodes::AREA_CODE_4) {
+        CPedGroupPlacer{}.PlaceGroup(
+            CModelInfo::GetPedModelInfo(ChooseCivilianOccupation())->GetPedType(),
+            CGeneral::GetRandomNumberInRange(1, 5),
+            posn,
+            ePedGroupDefaultTaskAllocatorType::STAND_STILL
+        );
+    }        
 }
 
 // 0x613D60
