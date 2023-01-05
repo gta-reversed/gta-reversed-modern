@@ -18,6 +18,7 @@
 #include <TaskTypes/TaskComplexKillPedOnFoot.h>
 #include <TaskTypes/TaskComplexBeInCouple.h>
 #include <TaskTypes/TaskComplexFollowLeaderInFormation.h>
+#include <TaskTypes/TaskSimpleHoldEntity.h>
 
 #include <Events/EventAcquaintancePed.h>
 #include <Events/EventSexyPed.h>
@@ -95,7 +96,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(GeneratePedsAtStartOfGame, 0x615C90);
     RH_ScopedGlobalInstall(ManageObject, 0x615DC0, { .reversed = false });
     RH_ScopedGlobalInstall(ManageDummy, 0x616000, { .reversed = false });
-    RH_ScopedGlobalInstall(ManageAllPopulation, 0x6160A0, { .reversed = false });
+    RH_ScopedGlobalInstall(ManageAllPopulation, 0x6160A0);
     RH_ScopedGlobalInstall(ManagePopulation, 0x616190, { .reversed = false });
     RH_ScopedGlobalInstall(RemovePedsIfThePoolGetsFull, 0x616300, { .reversed = false });
     RH_ScopedGlobalInstall(ConvertAllObjectsToDummyObjects, 0x616420, { .reversed = false });
@@ -1751,7 +1752,24 @@ void CPopulation::ManageDummy(CDummy* dummy, const CVector& posn) {
 
 // 0x6160A0
 void CPopulation::ManageAllPopulation() {
-    ((void(__cdecl*)())0x6160A0)();
+    const auto objPlyrIsHolding = [] {
+        const auto holdEntityTask = CTask::DynCast<CTaskSimpleHoldEntity>(FindPlayerPed()->GetIntelligence()->GetTaskHold(false));
+        return holdEntityTask
+            ? holdEntityTask->GetHeldEntity()
+            : nullptr;
+    }();
+
+    const auto center = FindPlayerCentreOfWorld();
+
+    for (auto& obj : GetObjectPool()->GetAllValid()) {
+        if (&obj != objPlyrIsHolding) {
+            ManageObject(&obj, center);
+        }
+    }
+
+    for (auto& dummy : GetDummyPool()->GetAllValid()) {
+        ManageDummy(&dummy, center);
+    }
 }
 
 // 0x616190
