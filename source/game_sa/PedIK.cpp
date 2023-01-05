@@ -36,18 +36,19 @@ void CPedIK::RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation,
 void CPedIK::RotateTorsoForArm(const CVector& direction) {
     auto destRotation = CVector2D{direction - m_pPed->GetPosition()}.Heading();
 
-    if (m_pPed->m_fCurrentRotation + PI < destRotation) {
-        destRotation -= TWO_PI;
+    // this might be inlined
+    if (m_pPed->m_fCurrentRotation + DegreesToRadians(180.0f) < destRotation) {
+        destRotation -= DegreesToRadians(360.0f);
     }
-    else if (m_pPed->m_fCurrentRotation - PI > destRotation) {
-        destRotation += TWO_PI;
+    else if (m_pPed->m_fCurrentRotation - DegreesToRadians(180.0f) > destRotation) {
+        destRotation += DegreesToRadians(360.0f);
     }
 
     const auto difAngle = destRotation - m_pPed->m_fCurrentRotation;
-    auto resultAngle = QUARTER_PI;
+    auto resultAngle = DegreesToRadians(45.0f);
 
-    if (difAngle > QUARTER_PI && difAngle <= HALF_PI) {
-        resultAngle = difAngle - QUARTER_PI;
+    if (difAngle > DegreesToRadians(45.0f) && difAngle <= DegreesToRadians(90.0f)) {
+        resultAngle = difAngle - DegreesToRadians(45.0f);
     } else {
         if (difAngle >= DegreesToRadians(-60.0f))
             return;
@@ -59,12 +60,12 @@ void CPedIK::RotateTorsoForArm(const CVector& direction) {
         }
     }
 
-    if (resultAngle != 0.0f) {
-        float convertedAngle = RadiansToDegrees(resultAngle / 2.0f);
+    if (resultAngle != DegreesToRadians(0.0f)) {
+        const auto degreesHalf = RadiansToDegrees(resultAngle / 2.0f);
         if (bRotateWithNeck) { // android doesn't have this check
-            RtQuatRotate(m_pPed->m_apBones[PED_NODE_NECK]->m_pIFrame->orientation.AsRtQuat(), &XaxisIK, convertedAngle, rwCOMBINEPOSTCONCAT);
+            RtQuatRotate(m_pPed->m_apBones[PED_NODE_NECK]->m_pIFrame->orientation.AsRtQuat(), &XaxisIK, degreesHalf, rwCOMBINEPOSTCONCAT);
         }
-        RtQuatRotate(m_pPed->m_apBones[PED_NODE_UPPER_TORSO]->m_pIFrame->orientation.AsRtQuat(), &XaxisIK, convertedAngle, rwCOMBINEPOSTCONCAT);
+        RtQuatRotate(m_pPed->m_apBones[PED_NODE_UPPER_TORSO]->m_pIFrame->orientation.AsRtQuat(), &XaxisIK, degreesHalf, rwCOMBINEPOSTCONCAT);
     }
 }
 
@@ -150,7 +151,7 @@ void CPedIK::PitchForSlope() {
     const auto hier = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
 
     if (std::abs(m_fBodyRoll) > 0.01f) {
-        m_fBodyRoll = std::clamp(m_fBodyRoll, -PI_6, PI_6);
+        m_fBodyRoll = std::clamp(m_fBodyRoll, DegreesToRadians(-30.0f), DegreesToRadians(30.0f));
     }
 
     if (!m_pPed->IsStateDying()) {
@@ -230,7 +231,7 @@ void CPedIK::PitchForSlope() {
         CMatrix matResult(m_pPed->GetModellingMatrix());
 
         CMatrix matTransl;
-        matTransl.SetTranslate(CVector(0.0f, 0.0f, 1.0f));
+        matTransl.SetTranslate(ZaxisIK);
         matTransl.RotateX(-m_fSlopePitch);
         matTransl.RotateY(m_fSlopeRoll);
         matResult *= matTransl;
