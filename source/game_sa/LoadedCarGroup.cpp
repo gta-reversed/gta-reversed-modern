@@ -87,7 +87,7 @@ eModelID CLoadedCarGroup::PickRandomCar(bool bNotTooManyInTheWorld, bool bOnlyPi
         // That is more performant, but I doubt that this is so performance critical to care about that.
         return PickRandom(
             GetAllModels() | rng::views::filter([](int16 modelId) {
-                switch (const auto cls = CModelInfo::GetVehicleModelInfo(modelId)->m_nVehicleClass) {
+                switch (CModelInfo::GetVehicleModelInfo(modelId)->m_nVehicleClass) {
                 case VEHICLE_CLASS_NORMAL:
                 case VEHICLE_CLASS_POORFAMILY:
                 case VEHICLE_CLASS_RICHFAMILY:
