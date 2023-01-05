@@ -9,6 +9,7 @@
 
 #include "Population.h"
 #include <PedPlacement.h>
+#include <Attractors/PedAttractorPedPlacer.h>
 
 #include <TaskTypes/TaskComplexWanderCop.h>
 #include <TaskTypes/TaskSimpleStandStill.h>
@@ -83,7 +84,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(AddPedInCar, 0x613A00);
     RH_ScopedGlobalInstall(PlaceMallPedsAsStationaryGroup, 0x613CD0);
     RH_ScopedGlobalInstall(PlaceCouple, 0x613D60);
-    RH_ScopedGlobalInstall(AddPedAtAttractor, 0x614210, { .reversed = false });
+    RH_ScopedGlobalInstall(AddPedAtAttractor, 0x614210);
     RH_ScopedGlobalInstall(FindDistanceToNearestPedOfType, 0x6143E0);
     RH_ScopedGlobalInstall(PickGangCar, 0x614490);
     RH_ScopedGlobalInstall(PickRiotRoadBlockCar, 0x6144B0);
@@ -1451,14 +1452,40 @@ void CPopulation::PlaceCouple(ePedType husbandPedType, eModelID husbandModelId, 
 
 // 0x614210
 bool CPopulation::AddPedAtAttractor(eModelID modelIndex, C2dEffect* attractor, CVector posn, CEntity* entity, int32 decisionMakerType) {
-    return ((bool(__cdecl*)(int32, C2dEffect*, CVector, CEntity*, int32))0x614210)(modelIndex, attractor, posn, entity, decisionMakerType);
+    if (FindDistanceToNearestPed(posn) <= 0.015f) {
+        return false;
+    }
+
+    if (!GetPedAttractorManager()->HasQueueTailArrivedAtSlot(attractor, entity)) {
+        return false;
+    }
+
+    const auto ped = AddPed(CModelInfo::GetPedModelInfo(modelIndex)->GetPedType(), modelIndex, posn, false);
+    if (!ped) {
+        return false;
+    }
+    
+    ped->SetCharCreatedBy(PED_GAME);
+    ped->GetIntelligence()->SetPedDecisionMakerType(decisionMakerType == -1 ? 2 : decisionMakerType);
+    ped->GetTaskManager().SetTask(CTaskComplexWander::GetWanderTaskByPedType(ped), TASK_PRIMARY_DEFAULT);
+
+    CPedAttractorPedPlacer::PlacePedAtEffect(*attractor, entity, ped, 0.02f);
+    ped->bUseAttractorInstantly = true;
+
+    ped->GetEventGroup().Add(CEventAttractor{ attractor, ped, true, TASK_COMPLEX_USE_ATTRACTOR });
+
+    ped->GetIntelligence()->ProcessEventHandler();
+    ped->GetIntelligence()->Process();
+
+    return true;
 }
 
 // 0x6143E0
+// NOTSA: Added option to use `ePedType::NONE` as valid value to ignore the ped type (this way you can get the distance of the nearest ped of any type)
 float CPopulation::FindDistanceToNearestPedOfType(ePedType pedType, CVector posn) {
     float closest3DSq = sq(10'000'000.f);
     for (CPed& ped : GetPedPool()->GetAllValid()) {
-        if (ped.m_nPedType != pedType) {
+        if (pedType != PED_TYPE_NONE /*notsa*/ && ped.m_nPedType != pedType) {
             continue;
         }
         closest3DSq = std::min(closest3DSq, (ped.GetPosition() - posn).SquaredMagnitude());
@@ -1486,6 +1513,10 @@ float CPopulation::FindDistanceToNearestPedOfType(ePedType pedType, CVector posn
     */
 }
 
+float CPopulation::FindDistanceToNearestPed(CVector pos) {
+    return FindDistanceToNearestPedOfType(PED_TYPE_NONE, pos);
+}
+
 // 0x614490
 eModelID CPopulation::PickGangCar(eGangID forGang) {
     return (eModelID)m_LoadedGangCars[(size_t)(forGang)].PickRandomCar(false, false);
@@ -1504,8 +1535,8 @@ eModelID CPopulation::PickRiotRoadBlockCar() {
 
     // Try appropriate/inappropriate cars
     for (auto grp : { &m_AppropriateLoadedCars, &m_InAppropriateLoadedCars }) {
-        for (auto i{ grp->CountMembers() }; i > 0; i--) { // TODO: Use `grp->GetAllModels()`
-            const auto model = (eModelID)grp->GetMember(i - 1);
+        for (auto i{ grp->CountMembers() }; i --> 0;) { // TODO: Use `grp->GetAllModels()`
+            const auto model = (eModelID)grp->GetMember(i);
             if (model == MODEL_INVALID) {
                 continue;
             }
@@ -1769,9 +1800,7 @@ void CPopulation::Update(bool generatePeds) {
         return;
     }
 
-    ms_nTotalGangPeds = CalculateTotalNumGangPeds();
-    ms_nTotalCivPeds  = ms_nNumCivMale + ms_nNumCivFemale;
-    ms_nTotalPeds     = ms_nTotalCivPeds + ms_nTotalGangPeds + ms_nNumCop + ms_nNumEmergency;
+    UpdatePedCounts();
 
     if (CCutsceneMgr::IsCutsceneProcessing() || !generatePeds) {
         return;

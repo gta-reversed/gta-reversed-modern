@@ -23,7 +23,8 @@ void CEventScriptedAttractor::InjectHooks()
     RH_ScopedInstall(Constructor, 0x5FEF40);
 }
 
-CEventAttractor::CEventAttractor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor)
+CEventAttractor::CEventAttractor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor, eTaskType taskType) :
+    CEventEditableResponse{taskType}
 {
     m_2dEffect = effect;
     m_entity   = entity;

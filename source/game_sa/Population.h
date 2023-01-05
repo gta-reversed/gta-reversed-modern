@@ -185,13 +185,22 @@ public:
     // Creates ped at attractor. decisionMakerType can be set to -1
     static bool  AddPedAtAttractor(eModelID modelIndex, C2dEffect* attractor, CVector posn, CEntity* entity, int32 decisionMakerType);
     static float FindDistanceToNearestPedOfType(ePedType pedType, CVector posn);
+    static float FindDistanceToNearestPed(CVector pos);
     static eModelID PickGangCar(eGangID forGang);
     static eModelID PickRiotRoadBlockCar();
     static void  ConvertToRealObject(CDummyObject* dummyObject);
     static void  ConvertToDummyObject(CObject* object);
     static bool  AddToPopulation(float arg0, float arg1, float arg2, float arg3);
     // returns number of generated peds?
-    static int32 GeneratePedsAtAttractors(CVector posn, float arg1, float arg2, float arg3, float arg4, int32 decisionMakerType, int32 numPeds);
+    static int32 GeneratePedsAtAttractors(
+        CVector pos,
+        float   minRadius,
+        float   maxRadius,
+        float   minRadiusClose,
+        float   maxRadiusClose,
+        int32   decisionMaker,
+        int32   numPedsToCreate
+    );
     static void GeneratePedsAtStartOfGame();
     static void ManageObject(CObject* object, const CVector& posn);
     static void ManageDummy(CDummy* dummy, const CVector& posn);

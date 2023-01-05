@@ -9,6 +9,6 @@ void CPedAttractorPedPlacer::InjectHooks() {
 }
 
 // 0x5EA390
-void CPedAttractorPedPlacer::PlacePedAtEffect(C2dEffectPedAttractor const& effect, CEntity* entity, CPed* ped, float forwardOffsetMultiplier) {
-    return plugin::CallAndReturn<void, 0x5EA390, C2dEffectPedAttractor const&, CEntity*, CPed*, float>(effect, entity, ped, forwardOffsetMultiplier);
+void CPedAttractorPedPlacer::PlacePedAtEffect(C2dEffect const& effect, CEntity* entity, CPed* ped, float forwardOffsetMultiplier) {
+    return plugin::CallAndReturn<void, 0x5EA390, C2dEffect const&, CEntity*, CPed*, float>(effect, entity, ped, forwardOffsetMultiplier);
 }
