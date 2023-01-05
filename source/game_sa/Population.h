@@ -186,7 +186,7 @@ public:
     static bool  AddPedAtAttractor(eModelID modelIndex, C2dEffect* attractor, CVector posn, CEntity* entity, int32 decisionMakerType);
     static float FindDistanceToNearestPedOfType(ePedType pedType, CVector posn);
     static eModelID PickGangCar(eGangID forGang);
-    static int32 PickRiotRoadBlockCar();
+    static eModelID PickRiotRoadBlockCar();
     static void  ConvertToRealObject(CDummyObject* dummyObject);
     static void  ConvertToDummyObject(CObject* object);
     static bool  AddToPopulation(float arg0, float arg1, float arg2, float arg3);

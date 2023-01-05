@@ -85,8 +85,8 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(PlaceCouple, 0x613D60);
     RH_ScopedGlobalInstall(AddPedAtAttractor, 0x614210, { .reversed = false });
     RH_ScopedGlobalInstall(FindDistanceToNearestPedOfType, 0x6143E0);
-    RH_ScopedGlobalInstall(PickGangCar, 0x614490, { .reversed = false });
-    RH_ScopedGlobalInstall(PickRiotRoadBlockCar, 0x6144B0, { .reversed = false });
+    RH_ScopedGlobalInstall(PickGangCar, 0x614490);
+    RH_ScopedGlobalInstall(PickRiotRoadBlockCar, 0x6144B0);
     RH_ScopedGlobalInstall(ConvertToRealObject, 0x614580);
     RH_ScopedGlobalInstall(ConvertToDummyObject, 0x614670);
     RH_ScopedGlobalInstall(AddToPopulation, 0x614720, { .reversed = false });
@@ -1492,8 +1492,35 @@ eModelID CPopulation::PickGangCar(eGangID forGang) {
 }
 
 // 0x6144B0
-int32 CPopulation::PickRiotRoadBlockCar() {
-    return ((int32(__cdecl*)())0x6144B0)();
+eModelID CPopulation::PickRiotRoadBlockCar() {
+    // First try gang cars
+    const auto baseIdx = (size_t)CGeneral::GetRandomNumberInRange(0, TOTAL_GANGS);
+    for (size_t i{}; i < TOTAL_GANGS; i++) {
+        const auto model = PickGangCar((eGangID)(baseIdx + i));
+        if (model != MODEL_INVALID) {
+            return model;
+        }
+    }
+
+    // Try appropriate/inappropriate cars
+    for (auto grp : { &m_AppropriateLoadedCars, &m_InAppropriateLoadedCars }) {
+        for (auto i{ grp->CountMembers() }; i > 0; i--) { // TODO: Use `grp->GetAllModels()`
+            const auto model = (eModelID)grp->GetMember(i - 1);
+            if (model == MODEL_INVALID) {
+                continue;
+            }
+            switch (CModelInfo::GetVehicleModelInfo(model)->m_nVehicleClass) {
+            case VEHICLE_CLASS_BIG:
+            case VEHICLE_CLASS_MOPED:
+            case VEHICLE_CLASS_MOTORBIKE:
+                continue;
+            }
+            return model;
+        }
+    }
+
+    // Nothing suits
+    return CStreaming::GetDefaultCopCarModel();
 }
 
 // 0x614580

@@ -289,7 +289,7 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
             continue;
 
         auto gangCarModel = CPopulation::PickGangCar(Gang1);
-        if (gangCarModel >= 0 && CStreaming::GetInfo(gangCarModel).IsLoaded()) {
+        if (gangCarModel != MODEL_INVALID && CStreaming::GetInfo(gangCarModel).IsLoaded()) {
             auto fwd = carNodePos - nodePos;
             fwd.z = 0.0f;
             fwd.Normalise();
@@ -618,7 +618,7 @@ void CGangWars::StartOffensiveGangWar() {
     }
 
     // NOTSA
-    Gang1 = std::ranges::max_element(zoneInfo->GangDensity) - zoneInfo->GangDensity;
+    Gang1 = (eGangID)(std::ranges::max_element(zoneInfo->GangDensity) - zoneInfo->GangDensity);
     auto gang1Density = zoneInfo->GangDensity[Gang1];
     zoneInfo->GangDensity[Gang1] = 0; // to find the second biggest
 
