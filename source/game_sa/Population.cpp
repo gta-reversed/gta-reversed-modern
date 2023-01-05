@@ -91,7 +91,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(ConvertToDummyObject, 0x614670);
     RH_ScopedGlobalInstall(AddToPopulation, 0x614720, { .reversed = false });
     RH_ScopedGlobalInstall(GeneratePedsAtAttractors, 0x615970);
-    RH_ScopedGlobalInstall(GeneratePedsAtStartOfGame, 0x615C90, { .reversed = false });
+    RH_ScopedGlobalInstall(GeneratePedsAtStartOfGame, 0x615C90);
     RH_ScopedGlobalInstall(ManageObject, 0x615DC0, { .reversed = false });
     RH_ScopedGlobalInstall(ManageDummy, 0x616000, { .reversed = false });
     RH_ScopedGlobalInstall(ManageAllPopulation, 0x6160A0, { .reversed = false });
@@ -1690,7 +1690,16 @@ int32 CPopulation::GeneratePedsAtAttractors(
 
 // 0x615C90
 void CPopulation::GeneratePedsAtStartOfGame() {
-    ((void(__cdecl*)())0x615C90)();
+    const auto minRadius = 10.f, maxRadius = 50.5f * PedCreationDistMultiplier();
+    
+    for (int32 i = 100; i --> 0;) { // "down to" operator in use
+        UpdatePedCounts();
+        ms_nTotalPeds -= ms_nTotalCarPassengerPeds; // NOTE/TODO: I wonder why this part isnt in `UpdatePedCounts()`
+
+        AddToPopulation(minRadius, maxRadius, minRadius, maxRadius);
+    }
+
+    GeneratePedsAtAttractors(FindPlayerCentreOfWorld(), minRadius, maxRadius, minRadius, maxRadius, -1, 1);
 }
 
 // 0x615DC0
@@ -1796,4 +1805,11 @@ bool CPopulation::DoesCarGroupHaveModelId(int32 carGroupId, int32 modelId)
 // NOTSA
 uint32 CPopulation::CalculateTotalNumGangPeds() {
     return notsa::accumulate(ms_nNumGang, 0u);
+}
+
+// NOTSA - Moved here for reuseability
+void CPopulation::UpdatePedCounts() {
+    ms_nTotalGangPeds = CalculateTotalNumGangPeds();
+    ms_nTotalCivPeds = ms_nNumCivMale + ms_nNumCivFemale;
+    ms_nTotalPeds = ms_nTotalCivPeds + ms_nTotalGangPeds + ms_nNumCop + ms_nNumEmergency;
 }

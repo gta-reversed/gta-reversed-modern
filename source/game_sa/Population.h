@@ -211,5 +211,8 @@ public:
     static int32 GetNumPedsInGroup(ePopcyclePedGroup pedGroup) { return m_nNumPedsInGroup[pedGroup]; }
 
     static auto GetModelsInPedGroup(ePopcyclePedGroup pedGroup) { return m_PedGroups[pedGroup] | rng::views::take((size_t)GetNumPedsInGroup(pedGroup)); }
-    static int32 GetPedGroupModelId(ePopcyclePedGroup pedGroup, int32 slot) { return GetModelsInPedGroup(pedGroup)[slot]; } // Doing it like this for (out-of-range) debug checks 
+    static int32 GetPedGroupModelId(ePopcyclePedGroup pedGroup, int32 slot) { return GetModelsInPedGroup(pedGroup)[slot]; } // Doing it like this for (out-of-range) debug checks
+
+private:
+    static void UpdatePedCounts();
 };
