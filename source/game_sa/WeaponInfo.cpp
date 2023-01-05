@@ -8,6 +8,7 @@
 
 #include "WeaponInfo.h"
 
+
 void CWeaponInfo::InjectHooks() {
     RH_ScopedClass(CWeaponInfo);
     RH_ScopedCategoryGlobal();
