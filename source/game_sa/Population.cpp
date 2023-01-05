@@ -97,8 +97,8 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(ManageObject, 0x615DC0, { .reversed = false });
     RH_ScopedGlobalInstall(ManageDummy, 0x616000, { .reversed = false });
     RH_ScopedGlobalInstall(ManageAllPopulation, 0x6160A0);
-    RH_ScopedGlobalInstall(ManagePopulation, 0x616190, { .reversed = false });
-    RH_ScopedGlobalInstall(RemovePedsIfThePoolGetsFull, 0x616300, { .reversed = false });
+    RH_ScopedGlobalInstall(ManagePopulation, 0x616190);
+    RH_ScopedGlobalInstall(RemovePedsIfThePoolGetsFull, 0x616300);
     RH_ScopedGlobalInstall(ConvertAllObjectsToDummyObjects, 0x616420, { .reversed = false });
     RH_ScopedGlobalInstall(FindPedMultiplierMotorway, 0x611B80);
     RH_ScopedGlobalInstall(FindCarMultiplierMotorway, 0x611B60);
@@ -1774,12 +1774,38 @@ void CPopulation::ManageAllPopulation() {
 
 // 0x616190
 void CPopulation::ManagePopulation() {
-    ((void(__cdecl*)())0x616190)();
+    // TODO: Implement original `framecounter % 32` pool splitting logic
+    //       It's just a perf optimization, so I didn't bother
+
+    const auto center = FindPlayerCentreOfWorld();
+
+    for (auto& obj : GetObjectPool()->GetAllValid()) {
+        ManageObject(&obj, center);
+    }
+
+    for (auto& dummy : GetDummyPool()->GetAllValid()) {
+        ManageDummy(&dummy, center);
+    }
+
+    for (auto& ped : GetPedPool()->GetAllValid()) {
+        ManagePed(&ped, center);
+    }
 }
 
 // 0x616300
 void CPopulation::RemovePedsIfThePoolGetsFull() {
-    ((void(__cdecl*)())0x616300)();
+    if (CTimer::GetFrameCounter() % 8 != 5) {
+        return;
+    }
+    if (GetPedPool()->GetNoOfFreeSpaces() >= 8) {
+        return;
+    }
+    const auto closest = rng::min( // It's guaranteed there to be a ped
+        GetPedPool()->GetAllValid<CPed*>(),
+        {},
+        [campos = TheCamera.GetPosition()](CPed* ped) { return (ped->GetPosition() - campos).SquaredMagnitude(); }
+    );
+    RemovePed(closest);
 }
 
 // 0x616420
