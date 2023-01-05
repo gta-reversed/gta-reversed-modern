@@ -296,7 +296,7 @@ public:
     // Similar to above, but gives back a pair [index, object]
     template<typename T = A>
     auto GetAllValidWithIndex() {
-        return GetAllValid<T>()
+        return GetAllValid<T&>()
              | rng::views::transform([this](auto&& obj) { return std::make_pair(GetIndex(&obj), std::ref(obj)); });
     }
 };

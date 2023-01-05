@@ -70,7 +70,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(LoadPedGroups, 0x5BCFE0);
     RH_ScopedGlobalInstall(LoadCarGroups, 0x5BD1A0);
 
-    RH_ScopedGlobalInstall(DoesCarGroupHaveModelId, 0x406F50, { .reversed = false });
+    RH_ScopedGlobalInstall(DoesCarGroupHaveModelId, 0x406F50);
     RH_ScopedGlobalInstall(ManagePed, 0x611FC0);
     RH_ScopedGlobalInstall(FindNumberOfPedsWeCanPlaceOnBenches, 0x612240);
     RH_ScopedGlobalInstall(RemoveAllRandomPeds, 0x6122C0);
@@ -95,28 +95,28 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(GeneratePedsAtAttractors, 0x615970);
     RH_ScopedGlobalInstall(GeneratePedsAtStartOfGame, 0x615C90);
     RH_ScopedGlobalInstall(ManageObject, 0x615DC0, { .reversed = false });
-    RH_ScopedGlobalInstall(ManageDummy, 0x616000, { .reversed = false });
+    RH_ScopedGlobalInstall(ManageDummy, 0x616000);
     RH_ScopedGlobalInstall(ManageAllPopulation, 0x6160A0);
     RH_ScopedGlobalInstall(ManagePopulation, 0x616190);
     RH_ScopedGlobalInstall(RemovePedsIfThePoolGetsFull, 0x616300);
-    RH_ScopedGlobalInstall(ConvertAllObjectsToDummyObjects, 0x616420, { .reversed = false });
+    RH_ScopedGlobalInstall(ConvertAllObjectsToDummyObjects, 0x616420);
     RH_ScopedGlobalInstall(FindPedMultiplierMotorway, 0x611B80);
     RH_ScopedGlobalInstall(FindCarMultiplierMotorway, 0x611B60);
     RH_ScopedGlobalInstall(IsCorrectTimeOfDayForEffect, 0x611B20);
     RH_ScopedGlobalInstall(RemoveSpecificDriverModelsForCar, 0x6119D0);
-    RH_ScopedGlobalInstall(Initialise, 0x610E10, { .reversed = false });
-    RH_ScopedGlobalInstall(Shutdown, 0x610EC0, { .reversed = false });
+    RH_ScopedGlobalInstall(Initialise, 0x610E10);
+    RH_ScopedGlobalInstall(Shutdown, 0x610EC0);
     RH_ScopedGlobalInstall(FindDummyDistForModel, 0x610ED0);
     RH_ScopedGlobalInstall(FindPedDensityMultiplierCullZone, 0x610F00);
     RH_ScopedGlobalInstall(RemovePed, 0x610F20);
-    RH_ScopedGlobalInstall(ChoosePolicePedOccupation, 0x610F40, { .reversed = false });
+    RH_ScopedGlobalInstall(ChoosePolicePedOccupation, 0x610F40);
     RH_ScopedGlobalInstall(ArePedStatsCompatible, 0x610F50);
     RH_ScopedGlobalInstall(PedMICanBeCreatedAtAttractor, 0x6110C0);
     RH_ScopedGlobalInstall(PedMICanBeCreatedAtThisAttractor, 0x6110E0);
     RH_ScopedGlobalInstall(PedMICanBeCreatedInInterior, 0x611450);
-    RH_ScopedGlobalInstall(IsMale, 0x611470, { .reversed = false });
+    RH_ScopedGlobalInstall(IsMale, 0x611470);
     RH_ScopedGlobalInstall(PopulateInterior, 0x616470);
-    RH_ScopedGlobalInstall(IsFemale, 0x611490, { .reversed = false });
+    RH_ScopedGlobalInstall(IsFemale, 0x611490);
     RH_ScopedGlobalInstall(IsSkateable, 0x6114C0);
     RH_ScopedGlobalInstall(ChooseGangOccupation, 0x611550);
     RH_ScopedGlobalInstall(AddExistingPedInCar, 0x611560);
@@ -130,7 +130,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(PlaceGangMembers, 0x6117D0);
     RH_ScopedGlobalInstall(LoadSpecificDriverModelsForCar, 0x6117F0);
     RH_ScopedGlobalInstall(FindSpecificDriverModelForCar_ToUse, 0x611900);
-    RH_ScopedGlobalInstall(IsSecurityGuard, 0x6114B0, { .reversed = false });
+    RH_ScopedGlobalInstall(IsSecurityGuard, 0x6114B0);
     RH_ScopedGlobalInstall(Update, 0x616650);
 
     RH_ScopedGlobalOverloadedInstall(IsSunbather, "ModelID", 0x611760, bool(*)(eModelID));
@@ -1919,9 +1919,8 @@ void CPopulation::Update(bool generatePeds) {
     }
 }
 
-bool CPopulation::DoesCarGroupHaveModelId(int32 carGroupId, int32 modelId)
-{
-    return plugin::CallAndReturn<bool, 0x406F50, int32, int32>(carGroupId, modelId);
+bool CPopulation::DoesCarGroupHaveModelId(int32 carGroupId, int32 modelId) {
+    return notsa::contains(GetModelsInCarGroup(carGroupId), modelId);
 }
 
 // NOTSA
