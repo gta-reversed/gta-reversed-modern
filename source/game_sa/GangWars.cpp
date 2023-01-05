@@ -427,17 +427,11 @@ bool CGangWars::MakePlayerGainInfluenceInZone(float removeMult) {
 
 // 0x4439D0
 bool CGangWars::PedStreamedInForThisGang(eGangID gangId) {
-    auto groupId = CPopulation::GetGangGroupId(gangId, 0);
-    auto numPeds = CPopulation::GetNumPedsInGroup(groupId);
-    if (numPeds <= 0)
-        return false;
-
-    for (auto group : std::span{ CPopulation::m_PedGroups, (size_t)numPeds }) {
-        if (!CStreaming::GetInfo(*group).IsLoaded()) {
+    for (auto midx : CPopulation::GetModelsInPedGroup(CPopulation::GetGangGroupId(gangId))) {
+        if (CStreaming::IsModelLoaded(midx)) {
             return true;
         }
     }
-
     return false;
 }
 

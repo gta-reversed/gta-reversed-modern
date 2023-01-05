@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 namespace notsa {
 
 /*!
@@ -46,6 +48,58 @@ T_Ret FirstNonNull(R&& range) {
         : nullptr;
 }
 
+// https://stackoverflow.com/a/52667105
+template <typename T, std::size_t... Ds>
+struct mdarray_impl;
+
+template <typename T, std::size_t D>
+struct mdarray_impl<T, D> {
+    using type = std::array<T, D>;
+};
+
+template <typename T, std::size_t D, std::size_t... Ds>
+struct mdarray_impl<T, D, Ds...> {
+    using type = std::array<typename mdarray_impl<T, Ds...>::type, D>;
+};
+
+//! Multidimensional array - Represents a C array of with dimensions in the same order as specified here
+template <typename T, std::size_t... Ds>
+using mdarray = typename mdarray_impl<T, Ds...>::type;
+
+/*!
+* @arg value The value to search for in the range
+*
+* @brief Check if a range contains a value, uses `rng::find`. NOTE: If you plan on using the iterator, just use `rng::find` instead..
+*/
+template<rng::input_range R, class T, class Proj = std::identity>
+    requires std::indirect_binary_predicate<rng::equal_to, std::projected<rng::iterator_t<R>, Proj>, const T*>
+bool contains(R&& r, const T& value, Proj proj = {}) {
+    return rng::find(r, value, proj) != rng::end(r);
+}
+
+/// `std::ranges` like `accumulate` function => Hopefully to be replaced by an `std` implementation.
+template<rng::input_range R, typename T, typename FnOp = std::plus<>, class Proj = std::identity>
+T accumulate(R&& r, T init, Proj proj = {}, FnOp op = {}) {
+    for (const auto& v : r) {
+        init = std::invoke(op, init, std::invoke(proj, v));
+    }
+    return init;
+}
+
+/*!
+* @brief Helper functor - to be used as projection to `ranges` functions - to cast a value into another type.
+*
+* @tparam O - Type to cast to
+*/
+template<typename O>
+struct cast_to {
+    template<typename I>
+    O operator()(I&& input) {
+        return static_cast<O>(input);
+    }
+};
+
+
 /*!
 * @tparam Start     The number at which to start the iteration
 * @tparam Stop      The number at which to stop the iteration
@@ -84,5 +138,40 @@ static constexpr void IterateFunction(auto&& functor) {
         IterateFunction<Start + ChunkSize, Stop>(functor);
     }
 }
+
+//! Simple (not thread safe) singleton class. Instance created on first call to `GetSingleton()`.
+template<typename T>
+class Singleton {
+    static inline std::unique_ptr<T> s_instance{};
+public:
+    Singleton() = default;
+    Singleton(const Singleton&) = delete;
+    Singleton& operator=(const Singleton&) = delete;
+
+public:
+    //! Get current singleton instance (Create it if none)
+    static T& GetSingleton() {
+        if (!s_instance) {
+            CreateSingleton();
+        }
+        return *s_instance;
+    }
+
+    //! Destroy current instance and create new
+    static void ResetSingleton() {
+        DestroySingleton();
+        CreateSingleton();
+    }
+
+private:
+    static void CreateSingleton() {
+        assert(!s_instance);
+        s_instance = std::make_unique<T>();
+    }
+
+    static void DestroySingleton() {
+        s_instance.reset();
+    }
+};
 
 };

@@ -31,8 +31,8 @@ public:
     void InitLimits();
 
     // Originally these 2 took in the return value as a pointer, lets see if this is ABI compatible..
-    static void EulerToQuat(CVector* angles, CQuaternion* quat);
-    static void QuatToEuler(CQuaternion* quat, CVector* angles);
+    static void EulerToQuat(const CVector& angles, CQuaternion& quat);
+    static void QuatToEuler(const CQuaternion& quat, CVector& angles);
     static int32  GetIdFromBoneTag(ePedBones bone);
 
     void ClampLimitsCurrent(bool LimitX, bool LimitY, bool LimitZ);

@@ -1522,7 +1522,7 @@ void CAutomobile::DoHoverSuspensionRatios()
                 colPointZ = m_wheelColPoint[i].m_vecPoint.z;
             }
             float waterLevel = 0.0f;
-            if (CWaterLevel::GetWaterLevel(end.x, end.y, end.z, &waterLevel, false, nullptr)
+            if (CWaterLevel::GetWaterLevel(end.x, end.y, end.z, waterLevel, false, nullptr)
                 && waterLevel > colPointZ && end.z - 1.0f < waterLevel)
             {
                 if (waterLevel <= end.z)
@@ -2394,7 +2394,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
 
     // 0x6A79AB (Condition inverted)
     if (calcDmgIntensity > minDmgIntensity && m_nStatus != STATUS_WRECKED) {
-        // printf("calcDmgIntensity: %.2f\n", calcDmgIntensity); // NOTSA
+        // DEV_LOG("calcDmgIntensity: {.2f}", calcDmgIntensity); // NOTSA
         // 0x6A79C7
         // If we're a law enforcer, and the damager is the
         // player's vehicle increase their wanted level.
@@ -2642,7 +2642,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
                     m_fHealth -= calcCollHealthLoss / 4.f;
                 }
             }
-            // printf("Health: %.2f (Loss: %.2f) \n", m_fHealth, prevHealth - m_fHealth); // NOTSA
+            // DEV_LOG("Health: {.2f} (Loss: {.2f})", m_fHealth, prevHealth - m_fHealth); // NOTSA
             // 0x6A8338
             if (CCheat::IsActive(CHEAT_SMASH_N_BOOM) && m_pDamageEntity && m_pDamageEntity == FindPlayerVehicle()) {
                 BlowUpCar(m_pDamageEntity, false);
@@ -3635,7 +3635,7 @@ void CAutomobile::DoNitroEffect(float power) {
     float level = 0.0f;
     if (physicalFlags.bTouchingWater) {
         CVector point = *m_matrix * exhaustPosition;
-        if (CWaterLevel::GetWaterLevel(point.x, point.y, point.z, &level, true, nullptr)) {
+        if (CWaterLevel::GetWaterLevel(point.x, point.y, point.z, level, true, nullptr)) {
             if (level >= point.z)
                 firstExhaustSubmergedInWater = true;
         }

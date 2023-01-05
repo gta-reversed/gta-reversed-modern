@@ -141,11 +141,11 @@ group "Dependencies"
 
         local filePaths = {
             "imconfig.h", "imgui.h", "imgui_internal.h", "imstb_rectpack.h", "imstb_textedit.h", "imstb_truetype.h", 
-            "imgui.cpp", "imgui_draw.cpp", "imgui_widgets.cpp", "imgui_tables.cpp"
+            "imgui.cpp", "imgui_draw.cpp", "imgui_widgets.cpp", "imgui_tables.cpp", "imgui_demo.cpp"
         }
         for i, fileName in pairs(filePaths) do 
             filePaths[i] = "libs/imgui/"..fileName
-        end 
+        end
         files {
             "libs/imgui/backends/imgui_impl_win32.h",
             "libs/imgui/backends/imgui_impl_win32.cpp",
