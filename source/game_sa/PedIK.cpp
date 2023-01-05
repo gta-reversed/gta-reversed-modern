@@ -39,8 +39,7 @@ void CPedIK::RotateTorsoForArm(const CVector& direction) {
     // this might be inlined
     if (m_pPed->m_fCurrentRotation + DegreesToRadians(180.0f) < destRotation) {
         destRotation -= DegreesToRadians(360.0f);
-    }
-    else if (m_pPed->m_fCurrentRotation - DegreesToRadians(180.0f) > destRotation) {
+    } else if (m_pPed->m_fCurrentRotation - DegreesToRadians(180.0f) > destRotation) {
         destRotation += DegreesToRadians(360.0f);
     }
 
@@ -176,7 +175,6 @@ void CPedIK::PitchForSlope() {
             RtQuatRotate(clumpData->m_Frames[RpHAnimIDGetIndex(hier, bone)].GetFrameOrientation().AsRtQuat(), &axis, angle, rwCOMBINEPRECONCAT);
         };
 
-        // TODO: refactor
         if (std::abs(m_fSlopePitch) > 0.01f) {
             if (&m_pPed->GetIntelligence()->m_TaskMgr && m_pPed->GetIntelligence()->m_TaskMgr.GetActiveTask()->GetTaskType() == TASK_SIMPLE_STEALTH_KILL) {
                 RotateBone(BONE_SPINE, RadiansToDegrees(m_fSlopePitch));
@@ -186,15 +184,10 @@ void CPedIK::PitchForSlope() {
                 m_pPed->bUpdateMatricesRequired = true;
 
                 RotateBone(BONE_R_THIGH, std::asin(GetAnimHierarchyMatrix(BONE_R_THIGH)->up.z) * 30.0f * m_fSlopePitch);
-
                 RotateBone(BONE_R_CALF, std::max(-std::asin(GetAnimHierarchyMatrix(BONE_R_THIGH)->up.z), 0.0f) * -30.0f * m_fSlopePitch);
-
                 RotateBone(BONE_R_FOOT, std::max(std::asin(GetAnimHierarchyMatrix(BONE_R_FOOT)->up.z), 0.0f) * -30.0f * m_fSlopePitch);
-
                 RotateBone(BONE_L_THIGH, std::asin(GetAnimHierarchyMatrix(BONE_L_THIGH)->up.z) * 30.0f * m_fSlopePitch);
-
                 RotateBone(BONE_L_CALF, std::max(-std::asin(GetAnimHierarchyMatrix(BONE_L_THIGH)->up.z), 0.0f) * -30.0f * m_fSlopePitch);
-
                 RotateBone(BONE_L_FOOT, std::max(-std::asin(GetAnimHierarchyMatrix(BONE_L_FOOT)->up.z), 0.0f) * -30.0f * m_fSlopePitch);
 
                 CMatrix result(m_pPed->GetModellingMatrix(), false);

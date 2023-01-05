@@ -108,7 +108,6 @@ constexpr float LOG10_2        = 0.301029f;         // log10(2)
 constexpr float LOG2_10        = 3.32192f;          // log2(10)
 constexpr float PI             = 3.14159f;          // π
 constexpr float HALF_PI        = PI / 2.0f;         // π / 2
-constexpr float QUARTER_PI     = PI / 4.0f;         // π / 4
 constexpr float PI_6           = PI / 6.0f;         // π / 6
 constexpr float SQRT_2         = 1.41421f;          // √2
 constexpr float SQRT_3         = 1.73205f;          // √3
