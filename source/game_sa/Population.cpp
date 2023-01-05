@@ -84,7 +84,7 @@ void CPopulation::InjectHooks() {
     RH_ScopedGlobalInstall(PlaceMallPedsAsStationaryGroup, 0x613CD0);
     RH_ScopedGlobalInstall(PlaceCouple, 0x613D60);
     RH_ScopedGlobalInstall(AddPedAtAttractor, 0x614210, { .reversed = false });
-    RH_ScopedGlobalInstall(FindDistanceToNearestPedOfType, 0x6143E0, { .reversed = false });
+    RH_ScopedGlobalInstall(FindDistanceToNearestPedOfType, 0x6143E0);
     RH_ScopedGlobalInstall(PickGangCar, 0x614490, { .reversed = false });
     RH_ScopedGlobalInstall(PickRiotRoadBlockCar, 0x6144B0, { .reversed = false });
     RH_ScopedGlobalInstall(ConvertToRealObject, 0x614580);
@@ -1456,7 +1456,34 @@ bool CPopulation::AddPedAtAttractor(eModelID modelIndex, C2dEffect* attractor, C
 
 // 0x6143E0
 float CPopulation::FindDistanceToNearestPedOfType(ePedType pedType, CVector posn) {
-    return ((float(__cdecl*)(ePedType, CVector))0x6143E0)(pedType, posn);
+    float closest3DSq = sq(10'000'000.f);
+    for (CPed& ped : GetPedPool()->GetAllValid()) {
+        if (ped.m_nPedType != pedType) {
+            continue;
+        }
+        closest3DSq = std::min(closest3DSq, (ped.GetPosition() - posn).SquaredMagnitude());
+    }
+    return std::sqrt(closest3DSq);
+
+    /* Which is more readable? Really trying to love `ranges`, but man... (Above is also twice as fast :D, because the transform isn't invoked every time)
+    * 
+    auto peds = GetPedPool()->GetAllValid()
+        | rng::views::filter([&](CPed& ped) { return ped.m_nPedType == pedType; })
+        | rng::views::transform([&](CPed& ped) { return (ped.GetPosition() - posn).SquaredMagnitude(); });
+    return rng::empty(peds)
+        ? 10'000'000.f
+        : std::sqrt(rng::min(peds));
+
+    *
+    ** there's also the 3rd option: **
+    * 
+    return std::sqrt(notsa::min_default(
+          GetPedPool()->GetAllValid()
+        | rng::views::filter([&](CPed& ped) { return ped.m_nPedType == pedType; })
+        | rng::views::transform([&](CPed& ped) { return (ped.GetPosition() - posn).SquaredMagnitude(); }),
+        sq(10'000'000.f)
+    ));
+    */
 }
 
 // 0x614490
