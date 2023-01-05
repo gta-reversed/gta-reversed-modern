@@ -94,7 +94,7 @@ constexpr float FRAC_PI_3      = 1.04719f;          // π / 3
 constexpr float FRAC_PI_4      = 0.785398f;         // π / 4
 constexpr float FRAC_PI_6      = 0.523598f;         // π / 6
 constexpr float FRAC_PI_8      = 0.392699f;         // π / 8
-constexpr float FRAC_TAU_2     = 3.14159f;          // τ / 2
+constexpr float FRAC_TAU_2     = 3.14159f;          // τ / 2 = π
 constexpr float FRAC_TAU_3     = 2.09439f;          // τ / 3
 constexpr float FRAC_TAU_4     = 1.57079f;          // τ / 4
 constexpr float FRAC_TAU_6     = 1.04719f;          // τ / 6
@@ -156,12 +156,9 @@ constexpr float RadiansToDegrees(float angleInRadians) {
     return angleInRadians * 180.0F / PI;
 }
 
-inline const CVector lerp(const CVector& fMin, const CVector& fMax, float fProgress) {
-    return fMin * (1.0F - fProgress) + fMax * fProgress;
-}
-
-inline const float lerp(float fMin, float fMax, float fProgress) {
-    return fMin * (1.0F - fProgress) + fMax * fProgress;
+template<typename T>
+auto lerp(const T& from, const T& to, float t) {
+    return from * (1.f - t) + to * t;
 }
 
 inline const float invLerp(float fMin, float fMax, float fVal) {

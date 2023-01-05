@@ -284,7 +284,6 @@ void IKChain_c::SetupBones(ePedBones boneTag, CVector posn, ePedBones bone, Anim
         auto prevBone = BoneNodeManager_c::ms_boneInfos[BoneNode_c::GetIdFromBoneTag((ePedBones)bonex->m_BoneTag)].m_prev;
         if (prevBone > -1) {
             if (const auto next = GetBoneNodeFromTag(prevBone)) {
-                // printf("next: %i\n", nextIdx);
                 next->AddChild(bonex);
             }
         }

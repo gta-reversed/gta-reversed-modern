@@ -58,7 +58,7 @@ public:
     void Conjugate();
 
     // Squared length of a quat
-    float GetLengthSquared();
+    float GetLengthSquared() const;
 
     // Multiplies quat by a floating point value
     void Scale(float multiplier);

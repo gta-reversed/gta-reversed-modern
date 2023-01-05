@@ -231,7 +231,7 @@ void WaterCreature_c::Update(float fTimeStep)
     {
         auto& vecJellyPos = m_pObject->GetPosition();
         float fWaterLevel;
-        if (CWaterLevel::GetWaterLevel(vecJellyPos.x, vecJellyPos.y, vecJellyPos.z, &fWaterLevel, true, nullptr))
+        if (CWaterLevel::GetWaterLevel(vecJellyPos.x, vecJellyPos.y, vecJellyPos.z, fWaterLevel, true, nullptr))
             m_pObject->SetPosn(CVector(vecJellyPos.x, vecJellyPos.y, fWaterLevel - 0.2F));
     }
 
