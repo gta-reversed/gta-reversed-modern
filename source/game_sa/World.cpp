@@ -631,7 +631,7 @@ void CWorld::ShutDown() {
                 sprintf(gString, "%s overlap list %d,%d not empty\n", listName, x, y);
                 list.Flush();
             #ifdef _DEBUG
-                printf("%s", gString); // Lets also print this string
+                DEV_LOG(gString); // Lets also print this string
             #endif
             }
         };
@@ -1336,7 +1336,7 @@ void CWorld::PrintCarChanges() {
 
         auto prevModelIndex = s_aModelIndexes[poolSize];
         if (modelIndex != prevModelIndex) {
-            printf("Car ModelIndex (slot:%d) has changed from %d into %d\n", poolSize, prevModelIndex, modelIndex);
+            DEV_LOG("Car ModelIndex (slot: {}) has changed from {} into {}", poolSize, prevModelIndex, modelIndex);
             s_aModelIndexes[poolSize] = modelIndex;
         }
     }
@@ -2375,7 +2375,7 @@ float CWorld::FindRoofZFor3DCoord(float x, float y, float z, bool* outResult) {
         if (outResult)
             *outResult = false;
         else
-            printf("THERE IS NO MAP BELOW THE FOLLOWING COORS:%f %f %f. (FindGroundZFor3DCoord)\n", x, y, z); // R* triggered
+            DEV_LOG("THERE IS NO MAP BELOW THE FOLLOWING COORS:{} {} {}. (FindGroundZFor3DCoord)", x, y, z); // R* triggered
         return 20.0f;
     }
 }

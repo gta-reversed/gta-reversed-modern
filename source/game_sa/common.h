@@ -156,12 +156,9 @@ constexpr float RadiansToDegrees(float angleInRadians) {
     return angleInRadians * 180.0F / PI;
 }
 
-inline const CVector lerp(const CVector& fMin, const CVector& fMax, float fProgress) {
-    return fMin * (1.0F - fProgress) + fMax * fProgress;
-}
-
-inline const float lerp(float fMin, float fMax, float fProgress) {
-    return fMin * (1.0F - fProgress) + fMax * fProgress;
+template<typename T>
+auto lerp(const T& from, const T& to, float t) {
+    return from * (1.f - t) + to * t;
 }
 
 inline const float invLerp(float fMin, float fMax, float fVal) {
