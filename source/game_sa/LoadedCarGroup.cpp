@@ -101,7 +101,7 @@ eModelID CLoadedCarGroup::PickRandomCar(bool bNotTooManyInTheWorld, bool bOnlyPi
 #ifdef FIX_BUGS
         return PickRandom(GetAllModels());
 #else
-        return PickRandom(m_members);
+        return PickRandom(m_models);
 #endif
     }
 }
