@@ -120,6 +120,7 @@
 #include "ProcSurfaceInfo.h"
 #include "Pickup.h"
 #include "Pickups.h"
+#include "PedIK.h"
 
 // Plant
 #include "PlantMgr.h"
@@ -654,6 +655,7 @@ void InjectHooksMain() {
     CPlaneTrails::InjectHooks();
     CPickup::InjectHooks();
     CPickups::InjectHooks();
+    CPedIK::InjectHooks();
 
     CCustomBuildingPipeline::InjectHooks();
     CCustomBuildingRenderer::InjectHooks();
