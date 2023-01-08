@@ -869,7 +869,6 @@ void CRunningScript::UpdatePC(int32 newIP) {
     else
         m_IP = m_pBaseIP + std::abs(newIP);
 }
-static std::array<size_t, COMMAND_HIGHEST_ID_TO_HOOK> counter{};
 
 // 0x469EB0, inlined
 OpcodeResult CRunningScript::ProcessOneCommand() {
@@ -882,8 +881,6 @@ OpcodeResult CRunningScript::ProcessOneCommand() {
             uint16 notFlag : 1;
         };
     } op = { CTheScripts::Read2BytesFromScript(m_IP) };
-
-    counter[op.command]++;
 
     m_bNotFlag = op.notFlag;
 

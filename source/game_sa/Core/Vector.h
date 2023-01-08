@@ -22,7 +22,7 @@ public:
     constexpr CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; }
     constexpr explicit CVector(float value) { x = y = z = value; }
 
-    explicit CVector(const CVector2D& v2, float z);
+    explicit CVector(const CVector2D& v2, float z = 0.f);
 
 public:
     static void InjectHooks();

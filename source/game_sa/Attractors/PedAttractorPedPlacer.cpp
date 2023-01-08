@@ -1,5 +1,8 @@
-#include "StdInc.h"
+#include <StdInc.h>
+#include <Plugins/TwoDEffectPlugin/2dEffect.h>
+
 #include "PedAttractorPedPlacer.h"
+
 
 void CPedAttractorPedPlacer::InjectHooks() {
     RH_ScopedClass(CPedAttractorPedPlacer);

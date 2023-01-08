@@ -59,7 +59,7 @@ void CPopCycle::Initialise() {
                 // and read each number one-by-one.
                 // But until then we're stuck with this hardcoded version.
 
-                auto& curr = m_nPercTypeGroup[daytime][wktime][zone];
+                auto& percs = m_nPercTypeGroup[daytime][wktime][zone];
                 const auto nread = sscanf(
                     l,
                     "%hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu",
@@ -72,9 +72,9 @@ void CPopCycle::Initialise() {
                     &m_nPercCops[daytime][wktime][zone],
                     &m_nPercOther[daytime][wktime][zone],
 
-                    &curr[0], &curr[1], &curr[2], &curr[3], &curr[4], &curr[5],
-                    &curr[6], &curr[7], &curr[8], &curr[9], &curr[10], &curr[11],
-                    &curr[12], &curr[13], &curr[14], &curr[15], &curr[16], &curr[17]
+                    &percs[0], &percs[1], &percs[2], &percs[3], &percs[4], &percs[5],
+                    &percs[6], &percs[7], &percs[8], &percs[9], &percs[10], &percs[11],
+                    &percs[12], &percs[13], &percs[14], &percs[15], &percs[16], &percs[17]
                 );
                 if (nread != 6 + 18) {
                     NOTSA_UNREACHABLE("Failed reading all data!");
@@ -82,6 +82,7 @@ void CPopCycle::Initialise() {
             }
         }
     }
+    DEV_LOG("POPCYCLE.DAT has been loaded successfully!");
 }
 
 // 0x60FBD0
@@ -118,7 +119,7 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
 
     for (auto chance : { &civPedsChance, &copChance, &dealersChance, &gangChance }) {
         if (*chance < 2.f) {
-            *chance *= CGeneral::GetRandomNumber();
+            *chance = CGeneral::GetRandomNumberInRange(0.f, *chance);
         }
     }
 
@@ -135,7 +136,6 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
         }
 
         if (highestChance == dealersChance) {
-            outPedType = PED_TYPE_DEALER;
             // 0x60FEF2:
             // Because originally there was no `return` inside the loop itself it always returned at the last viable ID.
             // we reverse the loop and just return at the first viable ID.
@@ -143,16 +143,17 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
             for (auto modelId : CPopulation::GetModelsInPedGroup(CPopulation::GetPedGroupId(POPCYCLE_GROUP_DEALERS)) | rng::views::reverse) {
                 if (CStreaming::IsModelLoaded(modelId)) {
                     outPedMI = modelId;
+                    outPedType = PED_TYPE_DEALER;
                     return true;
                 }
             }
             dealersChance = 0.f;
             continue;
-        } else if (highestChance == gangChance) { // 0x60FBD0
-            outPedType = PickGangToCreateMembersOf();
+        } else if (highestChance == gangChance) { // 0x60FF13
             if (outPedType) {
                 outPedMI = CPopulation::ChooseGangOccupation(outPedType - ePedType::PED_TYPE_GANG1);
                 if (outPedMI >= 0) {
+                    outPedType = PickGangToCreateMembersOf();
                     return true;
                 }
             } else {
@@ -205,8 +206,7 @@ float CPopCycle::GetCurrentPercOther_Peds() {
 
 // 0x610150
 bool CPopCycle::IsPedAppropriateForCurrentZone(int32 modelIndex) {
-    // Check if the model's race is allowed
-    if (IsRaceAllowedInCurrentZone((eModelID)modelIndex)) {
+    if (!IsRaceAllowedInCurrentZone((eModelID)modelIndex)) {
         return false;
     }
 
@@ -218,10 +218,8 @@ bool CPopCycle::IsPedAppropriateForCurrentZone(int32 modelIndex) {
         }
 
         // Check if group contains this model
-        for (auto mdlId : CPopulation::GetModelsInPedGroup(CPopulation::GetPedGroupId((ePopcycleGroup)grpId, CPopulation::CurrentWorldZone))) {
-            if (mdlId == modelIndex) {
-                return true;
-            }
+        if (notsa::contains(CPopulation::GetModelsInPedGroup(CPopulation::GetPedGroupId((ePopcycleGroup)(grpId), CPopulation::CurrentWorldZone)), modelIndex)) {
+            return true;
         }
     }
 
@@ -260,28 +258,27 @@ bool CPopCycle::PedIsAcceptableInCurrentZone(int32 modelIndex) {
 
 // 0x610420
 ePopcycleGroup CPopCycle::PickARandomGroupOfOtherPeds() {
-    auto rndPerc = (uint8)CGeneral::GetRandomNumberInRange(0.f, 100.f);
+    auto rndPerc = CGeneral::GetRandomNumberInRange(0, 100);
     for (auto [grpIdx, grpPerc] : notsa::enumerate(m_nPercTypeGroup[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_pCurrZoneInfo->zonePopulationType])) {
-        if (rndPerc < grpPerc) {
+        if ((int32)(grpPerc) >= rndPerc) {
             return (ePopcycleGroup)grpIdx;
         }
-        rndPerc -= grpPerc;
+        rndPerc -= (int32)(grpPerc);
     }
-    NOTSA_UNREACHABLE(); // In reality this would return an invalid (index eqv. of `array.end()`) => UB
+    NOTSA_UNREACHABLE();
 }
 
 // 0x60FFD0
 eModelID CPopCycle::PickPedMIToStreamInForCurrentZone() {
     for (auto tr = 0; tr < 10; tr++) { // 10 tries
-        const auto pedGrpId      = CPopulation::GetPedGroupId(PickARandomGroupOfOtherPeds(), CPopulation::CurrentWorldZone);
-        const auto npeds         = CPopulation::GetNumPedsInGroup(pedGrpId);
-        auto&      nextPedToLoad = CStreaming::ms_NextPedToLoadFromGroup[pedGrpId];
+        const auto grpId        = PickARandomGroupOfOtherPeds();
+        const auto pedGrpId     = CPopulation::GetPedGroupId(grpId, CPopulation::CurrentWorldZone);
+        const auto npeds        = CPopulation::GetNumPedsInGroup(pedGrpId);
+        auto& nextPedToLoadSlot = CStreaming::ms_NextPedToLoadFromGroup[grpId];
         for (auto p = 0; p < npeds; p++) {
-            nextPedToLoad = (nextPedToLoad + 1) % npeds;
-            const auto modelId = (eModelID)CPopulation::GetPedGroupModelId(pedGrpId, nextPedToLoad);
-
+            nextPedToLoadSlot  = (nextPedToLoadSlot + 1) % npeds;
+            const auto modelId = (eModelID)CPopulation::GetPedGroupModelId(pedGrpId, nextPedToLoadSlot);
             if (!notsa::contains(CStreaming::ms_pedsLoaded, modelId) && IsRaceAllowedInCurrentZone(modelId)) {
-                // Return a non-loaded allowed model.
                 return modelId;
             }
         }
@@ -451,7 +448,7 @@ ePedType CPopCycle::PickGangToCreateMembersOf() {
 
 // notsa
 bool CPopCycle::IsRaceAllowedInCurrentZone(ePedRace race) {
-    return race != RACE_DEFAULT && m_pCurrZoneInfo->zonePopulationRace & (1 << (race - 1));
+    return race == RACE_DEFAULT || m_pCurrZoneInfo->zonePopulationRace & (1 << (race - 1));
 }
 
 // notsa

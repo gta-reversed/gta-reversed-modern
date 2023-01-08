@@ -281,6 +281,11 @@ public:
     bool IsScanCodeCurrent() const;
     void SetCurrentScanCode();
 
+    auto GetBoundRect() {
+        CRect r{};
+        GetBoundRect(&r);
+        return r;
+    }
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

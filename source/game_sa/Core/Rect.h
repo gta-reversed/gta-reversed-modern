@@ -16,7 +16,6 @@
     |                               |
     |_________________B(right;bottom)
     ↓
-
 */
 
 class CRect {
@@ -30,13 +29,15 @@ public:
 public:
     static void InjectHooks();
 
-    CRect() = default; // 0x4041C0
-    constexpr CRect(float left, float bottom, float right, float top) { // 0x4041C0
-       this->left   = left;
-       this->bottom = bottom;
-       this->right  = right;
-       this->top    = top;
-       assert(!IsFlipped());
+    CRect() = default; // 0x4041C0 - TODO: Fix retarded argument order to be: left, top, right, bottom
+
+    constexpr CRect(float left, float bottom, float right, float top) :
+        left{ left },
+        bottom{ bottom },
+        right{ right },
+        top{ top }
+    {
+        assert(!IsFlipped());
     }
 
     constexpr CRect(const CVector2D& left, const CVector2D& right) :
@@ -66,6 +67,17 @@ public:
     CVector2D GetTopLeft() const { return { left, top }; }
     CVector2D GetBottomRight() const { return { right, bottom }; }
 
+    /*!
+    * @notsa
+    * @brief Check if this rect collides with another
+    */
+    bool OverlapsWith(const CRect& o) const;
+
+    /*!
+    * @notsa
+    * @brief Check if this rectangle is inside another one
+    */
+    bool Contains(const CRect& o) const;
 };
 
 VALIDATE_SIZE(CRect, 0x10);

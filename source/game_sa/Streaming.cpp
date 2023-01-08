@@ -40,7 +40,6 @@ uint16& CStreaming::ms_loadedGangCars = *reinterpret_cast<uint16*>(0x8E4BA8);
 // Bitfield of gangs loaded. Each gang is a bit. (0th bit being BALLAS, following the ordering in POPCYCLE_GROUP_BALLAS)
 uint16& CStreaming::ms_loadedGangs = *reinterpret_cast<uint16*>(0x8E4BAC);
 
-int32& CStreaming::ms_numPedsLoaded = *reinterpret_cast<int32*>(0x8E4BB0);
 int32& CStreaming::ms_currentZoneType = *reinterpret_cast<int32*>(0x8E4C20);
 CLoadedCarGroup& CStreaming::ms_vehiclesLoaded = *reinterpret_cast<CLoadedCarGroup*>(0x8E4C24);
 CStreamingInfo*& CStreaming::ms_pEndRequestedList = *reinterpret_cast<CStreamingInfo**>(0x8E4C54);
@@ -65,10 +64,11 @@ bool& CStreaming::m_bCopBikeLoaded = *reinterpret_cast<bool*>(0x9654BE);
 bool& CStreaming::m_bDisableCopBikes = *reinterpret_cast<bool*>(0x9654BF);
 CLinkList<CEntity*>& CStreaming::ms_rwObjectInstances = *reinterpret_cast<CLinkList<CEntity*>*>(0x9654F0);
 CLink<CEntity*>*& CStreaming::ms_renderEntityLink = *reinterpret_cast<CLink<CEntity*>**>(0x8E48A0);
-RwStream& gRwStream = *reinterpret_cast<RwStream*>(0x8E48AC);
 bool& CStreaming::m_bLoadingAllRequestedModels = *reinterpret_cast<bool*>(0x965538);
 bool& CStreaming::m_bModelStreamNotLoaded = *reinterpret_cast<bool*>(0x9654C4);
 static int32& CurrentGangMemberToLoad = *(int32*)0x9654D4;
+
+RwStream& gRwStream = *reinterpret_cast<RwStream*>(0x8E48AC);
 
 void CStreaming::InjectHooks() {
     RH_ScopedClass(CStreaming);
@@ -353,8 +353,8 @@ void CStreaming::ClearFlagForAll(uint32 streamingFlag) {
 }
 
 // 0x40BAA0
-void CStreaming::ClearSlots(int32 totalSlots) {
-    for (auto& modelId : std::span{ ms_pedsLoaded, (size_t)totalSlots }) {
+void CStreaming::ClearSlots(uint32 totalSlots) {
+    for (auto& modelId : ms_pedsLoaded | rng::views::take(totalSlots)) {
         if (modelId >= 0) {
             SetModelAndItsTxdDeletable(modelId);
             modelId = MODEL_INVALID;
@@ -484,6 +484,7 @@ bool CStreaming::ConvertBufferToObject(uint8* fileBuffer, int32 modelId) {
 
     // Make RW stream from memory
     // TODO: The _ prefix seems to indicate its "private" (maybe), perhaps it was some kind of macro originally?
+    // TODO/BUGFIX: Stream seemingly never closed? (But initialized multiple times)
     RwStream* stream = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitData);
 
     switch (GetModelType(modelId)) {
@@ -524,8 +525,9 @@ bool CStreaming::ConvertBufferToObject(uint8* fileBuffer, int32 modelId) {
 
             RwStreamClose(stream, &rwStreamInitData);
 
-            // TODO: It seems like this stream is never closed...
+            // TODO/BUGFIX: Stream seemingly never closed? (But initialized multiple times)
             RwStream* stream2 = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitData);
+
             bFileLoaded = CFileLoader::LoadAtomicFile(stream2, modelId);
             if (pRtDictionary) {
                 RtDictDestroy(pRtDictionary);
@@ -1551,6 +1553,8 @@ void CStreaming::FinishLoadingLargeFile(uint8* pFileBuffer, int32 modelId) {
     if (streamingInfo.IsLoadingFinishing()/*first half loaded?*/) {
         const uint32 bufferSize = streamingInfo.GetCdSize() * STREAMING_SECTOR_SIZE;
         const tRwStreamInitializeData rwStreamInitializationData = { pFileBuffer, bufferSize };
+
+        // TODO/BUGFIX: Stream seemingly never closed? (But initialized multiple times)
         RwStream* pRwStream = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitializationData);
 
         bool bLoaded = false;
@@ -1848,7 +1852,6 @@ void CStreaming::RequestSpecialModel(int32 modelId, const char* name, int32 flag
     if (modelInfo->m_nRefCount > 0) {
         for (auto i = GetPedPool()->GetSize() - 1; i >= 0; i--) {
             if (modelInfo->m_nRefCount <= 0) {
-                printf("[NOTSA] useless or not?\n");
                 break;
             }
 
@@ -1860,7 +1863,6 @@ void CStreaming::RequestSpecialModel(int32 modelId, const char* name, int32 flag
 
         for (auto i = GetObjectPool()->GetSize() - 1; i >= 0; i--) {
             if (modelInfo->m_nRefCount <= 0) {
-                printf("[NOTSA] useless or not?\n");
                 break;
             }
 
@@ -2642,7 +2644,7 @@ void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, int32 streamingFlag
 
 // 0x4076C0
 void CStreaming::RetryLoadFile(int32 chIdx) {
-    printf("CStreaming::RetryLoadFile called!\n"); // NOTSA
+    DEV_LOG("CStreaming::RetryLoadFile called!"); // NOTSA
 
     if (ms_channelError == -1)
         return CLoadingScreen::Continue();

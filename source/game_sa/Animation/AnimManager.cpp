@@ -599,7 +599,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
         animBlock->animationStyle = GetFirstAssocGroup(animBlock->szName);
     }
 
-    printf("Loading ANIMS %s\n", animBlock->szName);
+    DEV_LOG("Loading ANIMS {}", animBlock->szName);
     animBlock->bLoaded = true;
 
     int animIndex = animBlock->startAnimation;
@@ -856,4 +856,19 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* stream, bool compress, bo
     if (animIndex > ms_numAnimations) {
         ms_numAnimations = animIndex;
     }
+}
+
+AnimationId CAnimManager::GetRandomGangTalkAnim() {
+    constexpr AnimationId gangTalkAnims[]{
+        ANIM_ID_PRTIAL_GNGTLKA,
+        ANIM_ID_PRTIAL_GNGTLKB,
+        ANIM_ID_PRTIAL_GNGTLKC,
+        ANIM_ID_PRTIAL_GNGTLKD,
+
+        ANIM_ID_PRTIAL_GNGTLKE,
+        ANIM_ID_PRTIAL_GNGTLKF,
+        ANIM_ID_PRTIAL_GNGTLKG,
+        ANIM_ID_PRTIAL_GNGTLKH,
+    };
+    return CGeneral::RandomChoice(gangTalkAnims);
 }
