@@ -39,9 +39,9 @@ git clone --recurse-submodules https://github.com/gta-reversed/gta-reversed-mode
 <details>
 <summary>Premake5</summary>
 
-1) Execute `premake5.bat` for 2022, or `premake5.bat vs20xx` for other VS versions. (Note: Premake works fine with vs2019, CMake requires vs2022) (e.g: `premake5.bat vs2019`) 
+0) Execute `premake5.bat` for 2022, or `premake5.bat vs20xx` for other VS versions. (Note: Premake works fine with vs2019, CMake requires vs2022) (e.g: `premake5.bat vs2019`) 
 
-2) You'll find gta_reversed.sln shortcut in the same folder as premake5.
+1) You'll find gta_reversed.sln shortcut in the same folder as premake5.
 
 </details>
 
