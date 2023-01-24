@@ -6,6 +6,13 @@
 */
 #pragma once
 
+namespace notsa {
+namespace detail {
+template<typename Y>
+struct TList_Iterator;
+};
+};
+
 /**
  * Double linked list item base class
  *
@@ -21,4 +28,7 @@ protected:
     ~ListItem_c() = default; // 0x49EA70
 
     friend class List_c;
+
+    template<typename T>
+    friend class notsa::detail::TList_Iterator;
 };
