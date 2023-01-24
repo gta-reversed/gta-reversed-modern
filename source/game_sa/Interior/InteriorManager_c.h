@@ -20,7 +20,7 @@ public:
     int32                    m_objectCount;                // 0x43A8
     InteriorObject           m_objects[32];                // 0x43AC
     char                     m_interiorPedsAliveState[16]; // 0x472C
-    int32                    dword473C;                    // 0x473C
+    CEntryExit*              m_enex;                    // 0x473C
     CRect                    m_Rect;                       // 0x4740
     bool                     m_bIsInitialised;             // 0x4750
     int8                     m_pruneVisibleEffects;        // 0x4751

@@ -21,7 +21,7 @@ void InteriorManager_c::InjectHooks() {
     RH_ScopedInstall(HasInteriorHadStealDataSetup, 0x5982B0, { .reversed = false });
     RH_ScopedInstall(IsGroupActive, 0x598280, { .reversed = false });
     RH_ScopedInstall(GetPedsInteriorGroup, 0x598240, { .reversed = false });
-    RH_ScopedInstall(SetEntryExitPtr, 0x598180, { .reversed = false });
+    RH_ScopedInstall(SetEntryExitPtr, 0x598180);
     RH_ScopedInstall(GetBoundingBox, 0x598090);
     RH_ScopedInstall(ActivatePeds, 0x598080);
     RH_ScopedInstall(inlined_prune_visible_effects, 0x598070, { .reversed = false });
@@ -120,8 +120,20 @@ ListItem_c* InteriorManager_c::GetPedsInteriorGroup(CPed* ped) {
 }
 
 // 0x598180
-int32 InteriorManager_c::SetEntryExitPtr(CEntryExit* exit) {
-    return plugin::CallMethodAndReturn<int32, 0x598180, InteriorManager_c*, CEntryExit*>(this, exit);
+int32 InteriorManager_c::SetEntryExitPtr(CEntryExit* enex) {
+    if ((enex->m_pLink ? enex->m_pLink : enex)->m_nArea == eAreaCodes::AREA_CODE_NORMAL_WORLD) {
+        return;
+    }
+    if (enex->m_recEntrance == m_rectEnterance) {
+        return;
+    }
+    m_objectCount   = 0;
+    m_interiorCount = 0;
+
+    rng::fill(m_interiorPedsAliveState, true);
+
+    m_enex          = enex;
+    m_rectEnterance = enex->m_recEntrance;
 }
 
 // 0x598090
