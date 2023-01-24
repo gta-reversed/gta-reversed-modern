@@ -10,30 +10,27 @@
 #include "InteriorInfo_t.h"
 #include "List_c.h"
 #include "ListItem_c.h"
+#include "./FurnitureEntity_c.h"
 
 class CEntity;
 class CObject;
-class FurnitureEntity_c; // TODO
 class Furniture_c;
+class InteriorGroup_c;
 
 class Interior_c : public ListItem_c {
 public:
     int32             m_interiorId;         // 0x8
-    int32             m_pGroup;             // 0xC
+    InteriorGroup_c*  m_pGroup;             // 0xC
     int32             m_areaCode;           // 0x10
     tEffectFurniture* m_furnitureEffect;    // 0x14
     RwMatrix          m_matrix;             // 0x18
     int32             field_58;             // 0x58
     List_c            m_list;               // 0x5C
-    char              field_68[900];        // 0x68
-    int16             field_3EC;            // 0x3EC
-    int16             field_3EE;            // 0x3EE
-    CNodeAddress      m_nodeAddress;        // 0x3F0
-    int16             field_3F4;            // 0x3F4
-    int16             field_3F6;            // 0x3F6
-    int32             field_3F8;            // 0x3F8
-    int32             field_3FC;            // 0x3FC
-    CVector           m_position;           // 0x400
+    uint8             m_tiles[900];         // 0x68
+    CNodeAddress      m_exitAddr{};         // 0x3EC
+    CNodeAddress      m_doorAddr{};         // 0x3EE
+    RwV3d             m_exitPos;
+    RwV3d             m_doorPos;
     int8              field_40C;            // 0x40C
     int8              m_interiorInfosCount; // 0x40D
     int32             field_412;            // 0x412
@@ -55,7 +52,7 @@ public:
 public:
     static void InjectHooks();
 
-    Interior_c();
+    Interior_c() = default;
     ~Interior_c() = default; // 0x591360
 
     int32 Init(CVector* a2);
@@ -84,7 +81,7 @@ public:
     void Shop_FurnishCeiling();
     void Shop_AddShelfInfo(int32 a2, int32 a3, int32 a5);
     void Shop_FurnishEdges();
-    int8 GetBoundingBox(FurnitureEntity_c* entity, CVector* a3);
+    bool GetBoundingBox(FurnitureEntity_c* entity, CVector* a3);
     void ResetTiles();
     CObject* PlaceObject(uint8 isStealable, Furniture_c* furniture, float offsetX, float offsetY, float offsetZ, float rotationZ);
     ListItem_c* GetFurnitureEntity(CEntity*);
