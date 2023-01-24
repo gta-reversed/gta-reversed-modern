@@ -22,7 +22,7 @@ void CTaskAllocatorKillThreatsBasicRandomGroup::AllocateTasks(CPedGroupIntellige
         auto groupId = CPedGroups::GetGroupId(groups);
         auto v5 = &CPedGroups::ms_groups[groupId];
         if (v5 == memberId) {
-            printf("ComputeKillThreatsBasicResponse() - threat ped already in group\n");
+            DEV_LOG("ComputeKillThreatsBasicResponse() - threat ped already in group");
         } else {
             CTaskAllocatorKillThreatsBasic::ComputeClosestPeds(memberId, v5, ped);
             for (auto memberIda = 0; memberIda < 8; ++memberIda) {

@@ -1852,7 +1852,6 @@ void CStreaming::RequestSpecialModel(int32 modelId, const char* name, int32 flag
     if (modelInfo->m_nRefCount > 0) {
         for (auto i = GetPedPool()->GetSize() - 1; i >= 0; i--) {
             if (modelInfo->m_nRefCount <= 0) {
-                printf("[NOTSA] useless or not?\n");
                 break;
             }
 
@@ -1864,7 +1863,6 @@ void CStreaming::RequestSpecialModel(int32 modelId, const char* name, int32 flag
 
         for (auto i = GetObjectPool()->GetSize() - 1; i >= 0; i--) {
             if (modelInfo->m_nRefCount <= 0) {
-                printf("[NOTSA] useless or not?\n");
                 break;
             }
 
@@ -2646,7 +2644,7 @@ void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, int32 streamingFlag
 
 // 0x4076C0
 void CStreaming::RetryLoadFile(int32 chIdx) {
-    printf("CStreaming::RetryLoadFile called!\n"); // NOTSA
+    DEV_LOG("CStreaming::RetryLoadFile called!"); // NOTSA
 
     if (ms_channelError == -1)
         return CLoadingScreen::Continue();
