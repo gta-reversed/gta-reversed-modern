@@ -22,7 +22,7 @@ void InteriorManager_c::InjectHooks() {
     RH_ScopedInstall(IsGroupActive, 0x598280, { .reversed = false });
     RH_ScopedInstall(GetPedsInteriorGroup, 0x598240, { .reversed = false });
     RH_ScopedInstall(SetEntryExitPtr, 0x598180, { .reversed = false });
-    RH_ScopedInstall(GetBoundingBox, 0x598090, { .reversed = false });
+    RH_ScopedInstall(GetBoundingBox, 0x598090);
     RH_ScopedInstall(ActivatePeds, 0x598080, { .reversed = false });
     RH_ScopedInstall(inlined_prune_visible_effects, 0x598070, { .reversed = false });
     RH_ScopedInstall(Update, 0x598F50, { .reversed = false });
@@ -125,8 +125,15 @@ int32 InteriorManager_c::SetEntryExitPtr(CEntryExit* exit) {
 }
 
 // 0x598090
-int8 InteriorManager_c::GetBoundingBox(CEntity* entity, CVector* pos) {
-    return plugin::CallMethodAndReturn<int8, 0x598090, InteriorManager_c*, CEntity*, CVector*>(this, entity, pos);
+bool InteriorManager_c::GetBoundingBox(FurnitureEntity_c* entity, CVector* pos) {
+    for (auto& grp : m_interiorGroupList) {
+        for (const auto i : grp.GetInteriors()) {
+            if (i) {
+                return i->GetBoundingBox(entity, pos);
+            }
+        }
+    }
+    return false;
 }
 
 // 0x598080

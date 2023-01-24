@@ -10,23 +10,23 @@ class InteriorManager_c {
 public:
     // TODO: Use TList_c instead of List_c
 
-    Interior_c      m_interiors[8];               // 0x0
-    List_c          m_interiorList;               // 0x3CA0
-    InteriorGroup_c m_interiorGroups[8];          // 0x3CAC
-    List_c          m_interiorGroupList;          // 0x428C
-    List_c          m_interiorGroupsList;         // 0x4298
-    int32           m_interiorCount;              // 0x42A4
-    int32           m_InteriorIds[64];            // 0x42A8
-    int32           m_objectCount;                // 0x43A8
-    InteriorObject  m_objects[32];                // 0x43AC
-    char            m_interiorPedsAliveState[16]; // 0x472C
-    int32           dword473C;                    // 0x473C
-    CRect           m_Rect;                       // 0x4740
-    bool            m_bIsInitialised;             // 0x4750
-    int8            m_pruneVisibleEffects;        // 0x4751
-    int8            m_bPedsEnabled;               // 0x4752
-    int8            field_4753;                   // 0x4753
-    int32           m_lastUpdateTimeInMs;         // 0x4754
+    Interior_c               m_interiors[8];               // 0x0
+    List_c                   m_interiorList;               // 0x3CA0
+    InteriorGroup_c          m_interiorGroups[8];          // 0x3CAC
+    TList_c<InteriorGroup_c> m_interiorGroupList;          // 0x428C
+    List_c                   m_interiorGroupsList;         // 0x4298
+    int32                    m_interiorCount;              // 0x42A4
+    int32                    m_InteriorIds[64];            // 0x42A8
+    int32                    m_objectCount;                // 0x43A8
+    InteriorObject           m_objects[32];                // 0x43AC
+    char                     m_interiorPedsAliveState[16]; // 0x472C
+    int32                    dword473C;                    // 0x473C
+    CRect                    m_Rect;                       // 0x4740
+    bool                     m_bIsInitialised;             // 0x4750
+    int8                     m_pruneVisibleEffects;        // 0x4751
+    int8                     m_bPedsEnabled;               // 0x4752
+    int8                     field_4753;                   // 0x4753
+    int32                    m_lastUpdateTimeInMs;         // 0x4754
 
 public:
     static void InjectHooks();
@@ -55,7 +55,7 @@ public:
     int8 IsGroupActive(int32 group);
     ListItem_c* GetPedsInteriorGroup(CPed* ped);
     int32 SetEntryExitPtr(CEntryExit* exit);
-    int8 GetBoundingBox(CEntity* entity, CVector* pos);
+    bool GetBoundingBox(FurnitureEntity_c* entity, CVector* pos);
     int8 ActivatePeds(uint8 enable);
 
     void inlined_prune_visible_effects(bool prune) { m_pruneVisibleEffects = prune; } // 0x598070
