@@ -1214,6 +1214,7 @@ void InjectHooksMain() {
     Events();
     Fx();
     Vehicle();
+    Interior();
     Scripts();
 }
 
