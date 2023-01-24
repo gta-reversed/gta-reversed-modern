@@ -256,18 +256,28 @@ public:
     static bool IsPedInGroup(int32 modelIndex, ePopcycleGroup PopCycle_Group);
     static bool  PedIsAcceptableInCurrentZone(int32 modelIndex);
     static ePopcycleGroup PickARandomGroupOfOtherPeds();
+
+    //! Picks a ped model to be streamed in for the current zone
     static eModelID PickPedMIToStreamInForCurrentZone();
+
+    //! Called when the player kills a dealer in the current area
     static void  PlayerKilledADealer();
+
+    //! Update the stuff here
     static void  Update();
-    static void  UpdateAreaDodgyness();
-    static void  UpdateDealerStrengths();
-    static void  UpdatePercentages();
+
+    //! Update dodgyness counter
+    static void UpdateAreaDodgyness();
+    static void UpdateDealerStrengths();
+    static void UpdatePercentages();
+
+    //! Pick a gang whose peds should be created
     static ePedType PickGangToCreateMembersOf();
 
-    /// NOTSA
+    //! NOTSA
     static auto GetMaxPedsCurrently() { return m_nMaxNumPeds[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_nCurrentZoneType]; }
 
-    /// NOTSA
+    //! NOTSA
     static auto GetMaxCarsCurrently() { return m_nMaxNumCars[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_nCurrentZoneType]; }
     
     static void UpdateIsGangArea();

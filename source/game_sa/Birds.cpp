@@ -200,7 +200,7 @@ void CBirds::Update() {
                 );
 
                 float fWaterLevel;
-                if (!CWaterLevel::GetWaterLevelNoWaves(vecBirdSpawnPos.x, vecBirdSpawnPos.y, vecBirdSpawnPos.z, &fWaterLevel, nullptr, nullptr) || fWaterLevel + 4.0F < fBirdSpawnZ) {
+                if (!CWaterLevel::GetWaterLevelNoWaves(vecBirdSpawnPos, &fWaterLevel, nullptr, nullptr) || fWaterLevel + 4.0F < fBirdSpawnZ) {
                     auto vecForward = TheCamera.m_mCameraMatrix.GetForward();
                     vecForward.z = 0.0F;
                     vecForward.Normalise();

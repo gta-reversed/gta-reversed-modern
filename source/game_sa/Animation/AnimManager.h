@@ -77,6 +77,8 @@ public:
     static CAnimBlendAssociation* BlendAnimation(RpClump* clump, CAnimBlendHierarchy* animBlendHier, int32 flags, float clumpAssocBlendData = 8.f);
     static CAnimBlendAssociation* BlendAnimation(RpClump* clump, AssocGroupId groupId, AnimationId animId, float clumpAssocBlendData = 8.f);
 
+    /// NOTSA. Get random gangtalk anim
+    static AnimationId GetRandomGangTalkAnim();
 private:
     static inline void LoadAnimFile_ANPK(RwStream* stream, bool compress, const char (*uncompressedAnims)[32]);
     static inline void LoadAnimFile_ANP23(RwStream* stream, bool compress, bool isANP3);

@@ -120,6 +120,7 @@
 #include "ProcSurfaceInfo.h"
 #include "Pickup.h"
 #include "Pickups.h"
+#include "PedIK.h"
 
 // Plant
 #include "PlantMgr.h"
@@ -277,6 +278,7 @@
 #include "TaskComplexPartner.h"
 #include "TaskComplexFollowPointRoute.h"
 #include "TaskComplexDrivePointRoute.h"
+#include "TaskComplexStareAtPed.h"
 #include "TaskSimpleCarSetPedInAsDriver.h"
 #include "TaskComplexWaitForBus.h"
 #include "TaskSimpleWaitForBus.h"
@@ -375,7 +377,7 @@
 #include "TaskSimpleHandsUp.h"
 #include "TaskComplexEnterCar.h"
 #include "TaskComplexSmartFleePoint.h"
-
+#include "Interior/TaskInteriorBeInHouse.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -394,8 +396,10 @@
 #include "platform/platform.h"
 
 #include "app/app.h"
+#include <RealTimeShadowManager.h>
 
 #include "extensions/utility.hpp"
+#include <RenderBuffer.hpp>
 
 void InjectHooksMain() {
     HookInstall(0x53E230, &Render2dStuff);   // [ImGui] This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without
@@ -403,6 +407,10 @@ void InjectHooksMain() {
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
     CFileMgr::InjectHooks();
 
+    RenderBuffer::InjectHooks();
+    CStaticShadow::InjectHooks();
+    CRealTimeShadowManager::InjectHooks();
+    CRealTimeShadow::InjectHooks();
     CPopCycle::InjectHooks();
     ProcObjectMan_c::InjectHooks();
     ProcSurfaceInfo_c::InjectHooks();
@@ -585,6 +593,7 @@ void InjectHooksMain() {
     CShopping::InjectHooks();
     CInformFriendsEventQueue::InjectHooks();
     C3dMarkers::InjectHooks();
+    C3dMarker::InjectHooks();
     CSpecialFX::InjectHooks();
     CFallingGlassPane::InjectHooks();
     CGlass::InjectHooks();
@@ -645,6 +654,7 @@ void InjectHooksMain() {
     CPlaneTrails::InjectHooks();
     CPickup::InjectHooks();
     CPickups::InjectHooks();
+    CPedIK::InjectHooks();
 
     CCustomBuildingPipeline::InjectHooks();
     CCustomBuildingRenderer::InjectHooks();
@@ -723,11 +733,8 @@ void InjectHooksMain() {
     Plant();
 
     const auto Tasks = []() {
-        CTaskSimpleLeaveGroup::InjectHooks();
-        CTaskGangHasslePed::InjectHooks();
-        CTaskGangHassleVehicle::InjectHooks();
-        CTaskGoToVehicleAndLean::InjectHooks();
-        // CTaskInteriorBeInHouse::InjectHooks();
+        const auto Interior = [] {
+        CTaskInteriorBeInHouse::InjectHooks();
         // CTaskInteriorBeInOffice::InjectHooks();
         // CTaskInteriorBeInShop::InjectHooks();
         // CTaskInteriorGoToInfo::InjectHooks();
@@ -736,6 +743,12 @@ void InjectHooksMain() {
         // CTaskInteriorSitAtDesk::InjectHooks();
         // CTaskInteriorSitInChair::InjectHooks();
         // CTaskInteriorUseInfo::InjectHooks();
+        };
+
+        CTaskSimpleLeaveGroup::InjectHooks();
+        CTaskGangHasslePed::InjectHooks();
+        CTaskGangHassleVehicle::InjectHooks();
+        CTaskGoToVehicleAndLean::InjectHooks();
         CTaskLeanOnVehicle::InjectHooks();
         CTaskComplexCarSlowBeDraggedOut::InjectHooks();
         CTaskComplexCarSlowBeDraggedOutAndStandUp::InjectHooks();
@@ -819,7 +832,7 @@ void InjectHooksMain() {
         CTaskComplexSitDownThenIdleThenStandUp::InjectHooks();
         CTaskComplexSmartFleeEntity::InjectHooks();
         CTaskComplexSmartFleePoint::InjectHooks();
-        // CTaskComplexStareAtPed::InjectHooks();
+        CTaskComplexStareAtPed::InjectHooks();
         CTaskComplexStealCar::InjectHooks();
         CTaskComplexTrackEntity::InjectHooks();
         CTaskComplexTurnToFaceEntityOrCoord::InjectHooks();

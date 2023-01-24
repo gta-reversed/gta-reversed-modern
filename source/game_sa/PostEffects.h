@@ -15,6 +15,17 @@ enum eHeatHazeFXType {
     MAX_HEAT_HAZE_TYPES
 };
 
+static inline RwBlendFunction& gStoredRenderStateSrcBlend = *(RwBlendFunction*)(0xC40280);
+static inline RwBlendFunction& gStoredRenderStateDestBlend = *(RwBlendFunction*)(0xC40284);
+static inline bool& gStoredRenderStateFogEnable = *(bool*)(0xC40288);
+static inline RwCullMode& gStoredRenderStateCullMode = *(RwCullMode*)(0xC4028C);
+static inline bool& gStoredRenderStateZTestEnable = *(bool*)(0xC40290);
+static inline bool& gStoredRenderStateZWriteEnable = *(bool*)(0xC40294);
+static inline RwShadeMode& gStoredRenderStateShadeMode = *(RwShadeMode*)(0xC40298);
+static inline bool& gStoredRenderStateVertexAlphaEnable = *(bool*)(0xC4029C);
+static inline RwTextureAddressMode& gStoredRenderStateTextureAddress = *(RwTextureAddressMode*)(0xC402A0);
+static inline RwTextureFilterMode& gStoredRenderStateTextureFilter = *(RwTextureFilterMode*)(0xC402A4);
+
 class CPostEffects {
 public:
     static float& SCREEN_EXTRA_MULT_BASE_CAP;

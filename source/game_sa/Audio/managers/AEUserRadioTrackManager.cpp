@@ -264,15 +264,15 @@ uint8 CAEUserRadioTrackManager::GetUserTrackPlayMode() {
 
 // 0x4f4a20
 DWORD __stdcall CAEUserRadioTrackManager::WriteUserTracksThread(CAEUserRadioTrackManager* self) {
-    VERIFY(CoInitialize(nullptr));
+    VERIFY(SUCCEEDED(CoInitialize(nullptr)));
 
     // Open sa-ufiles.dat
     CFileMgr::SetDirMyDocuments();
     auto file = CFileMgr::OpenFile("sa-ufiles.dat", "wb");
 
-    if (file == nullptr)
+    if (file == nullptr) {
         self->m_nUserTracksScanState = USER_TRACK_SCAN_ERROR;
-    else {
+    } else {
         // Create path to "User Tracks"
         size_t                       documentsDirLen = strlen(CFileMgr::ms_dirName), dummy = 0;
         char*                        userTracksDir = new char[documentsDirLen + 15];
@@ -291,9 +291,9 @@ DWORD __stdcall CAEUserRadioTrackManager::WriteUserTracksThread(CAEUserRadioTrac
 
         // todo: FIX_BUGS
         // MikuAuahDark: GTASA doesn't check if sa-utrax.dat fails to open
-        if (file == nullptr)
+        if (file == nullptr) {
             self->m_nUserTracksScanState = USER_TRACK_SCAN_ERROR;
-        else {
+        } else {
             if (amountOfTracks > 0)
                 CFileMgr::Write(file, offsets.data(), amountOfTracks * sizeof(tUserTracksInfo));
 
