@@ -34,6 +34,8 @@ public:
     InteriorGroup_c() = default;  // 0x597FE0
     ~InteriorGroup_c() = default; // 0x597FF0
 
+    auto GetInteriors() { return m_interiors | rng::views::take(m_interiorCount); }
+
     void Init(CEntity* entity, int32 a3);
     void Update();
     int32 AddInterior(Interior_c* interior);
