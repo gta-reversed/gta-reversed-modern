@@ -23,7 +23,7 @@ void InteriorManager_c::InjectHooks() {
     RH_ScopedInstall(GetPedsInteriorGroup, 0x598240, { .reversed = false });
     RH_ScopedInstall(SetEntryExitPtr, 0x598180, { .reversed = false });
     RH_ScopedInstall(GetBoundingBox, 0x598090);
-    RH_ScopedInstall(ActivatePeds, 0x598080, { .reversed = false });
+    RH_ScopedInstall(ActivatePeds, 0x598080);
     RH_ScopedInstall(inlined_prune_visible_effects, 0x598070, { .reversed = false });
     RH_ScopedInstall(Update, 0x598F50, { .reversed = false });
     RH_ScopedInstall(Init, 0x5C0500, { .reversed = false });
@@ -137,6 +137,6 @@ bool InteriorManager_c::GetBoundingBox(FurnitureEntity_c* entity, CVector* pos) 
 }
 
 // 0x598080
-int8 InteriorManager_c::ActivatePeds(uint8 enable) {
-    return plugin::CallMethodAndReturn<int8, 0x598080, InteriorManager_c*, uint8>(this, enable);
+void InteriorManager_c::ActivatePeds(bool enable) {
+    m_bPedsEnabled = enable;
 }

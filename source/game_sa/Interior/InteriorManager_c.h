@@ -56,7 +56,7 @@ public:
     ListItem_c* GetPedsInteriorGroup(CPed* ped);
     int32 SetEntryExitPtr(CEntryExit* exit);
     bool GetBoundingBox(FurnitureEntity_c* entity, CVector* pos);
-    int8 ActivatePeds(uint8 enable);
+    void ActivatePeds(bool enable);
 
     void inlined_prune_visible_effects(bool prune) { m_pruneVisibleEffects = prune; } // 0x598070
 };
