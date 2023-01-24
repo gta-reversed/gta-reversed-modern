@@ -35,6 +35,7 @@ public:
     ~InteriorGroup_c() = default; // 0x597FF0
 
     auto GetInteriors() { return m_interiors | rng::views::take(m_interiorCount); }
+    auto GetPeds() { return m_peds | rng::views::take(m_pedCount); }
 
     void Init(CEntity* entity, int32 a3);
     void Update();

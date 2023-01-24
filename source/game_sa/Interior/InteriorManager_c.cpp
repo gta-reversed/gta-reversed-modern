@@ -115,8 +115,13 @@ int8 InteriorManager_c::IsGroupActive(int32 group) {
 }
 
 // 0x598240
-ListItem_c* InteriorManager_c::GetPedsInteriorGroup(CPed* ped) {
-    return plugin::CallMethodAndReturn<ListItem_c*, 0x598240, InteriorManager_c*, CPed*>(this, ped);
+InteriorGroup_c* InteriorManager_c::GetPedsInteriorGroup(CPed* ped) {
+    for (auto& grp : m_interiorGroupList) {
+        if (notsa::contains(grp.GetPeds(), ped)) {
+            return &grp;
+        }
+    }
+    return nullptr;
 }
 
 // 0x598180
