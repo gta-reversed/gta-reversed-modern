@@ -99,16 +99,14 @@ void SetPlayerAbleToUseCrouch(uint32 playerIdx, bool enable) {
     CPad::GetPad(playerIdx)->bDisablePlayerDuck = !enable;
 }
 
+// Originally unsupported
 bool IsPlayerTouchingObject(CPlayerPed& player, CObject& object) {
-#ifdef IMPLEMENT_UNSUPPORTED_OPCODES
     return GetPedOrItsVehicle(player).GetHasCollidedWith(&object);
-#endif
 }
 
+// Originally unsupported
 bool IsPlayerTouchingObjectOnFoot(CPlayerPed& player, CObject& object) {
-#ifdef IMPLEMENT_UNSUPPORTED_OPCODES
     return player.GetHasCollidedWith(&object);
-#endif
 }
 
 void notsa::script::commands::player::RegisterHandlers() {
@@ -121,8 +119,10 @@ void notsa::script::commands::player::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_SET_SWIM_SPEED, SetSwimSpeed);
     REGISTER_COMMAND_HANDLER(COMMAND_SET_PLAYER_GROUP_TO_FOLLOW_ALWAYS, SetPlayerGroupToFollowAlways);
     REGISTER_COMMAND_HANDLER(COMMAND_SET_PLAYER_DUCK_BUTTON, SetPlayerAbleToUseCrouch);
-    REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_TOUCHING_OBJECT, IsPlayerTouchingObject);
-    REGISTER_COMMAND_HANDLER(COMMAND_IS_PLAYER_TOUCHING_OBJECT_ON_FOOT, IsPlayerTouchingObjectOnFoot);
+
+
+    REGISTER_UNSUPPORTED_COMMAND_HANDLER(COMMAND_IS_PLAYER_TOUCHING_OBJECT, IsPlayerTouchingObject);
+    REGISTER_UNSUPPORTED_COMMAND_HANDLER(COMMAND_IS_PLAYER_TOUCHING_OBJECT_ON_FOOT, IsPlayerTouchingObjectOnFoot);
 
     REGISTER_COMMAND_UNIMPLEMENTED(COMMAND_SET_PLAYER_HEED_THREATS);
     REGISTER_COMMAND_UNIMPLEMENTED(COMMAND_IS_PLAYER_STOPPED);
