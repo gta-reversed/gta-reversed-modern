@@ -20,10 +20,10 @@ void CRope::InjectHooks() {
 // use switch like in Android?
 // 0x555FB0
 bool CRope::DoControlsApply() const {
-    return    m_nType == eRopeType::CRANE_MAGNO && CRopes::PlayerControlsCrane == 1
-           || m_nType == eRopeType::WRECKING_BALL && CRopes::PlayerControlsCrane == 2
-           || m_nType == eRopeType::CRANE_TROLLEY && CRopes::PlayerControlsCrane == 3
-           || m_nType == eRopeType::QUARRY_CRANE_ARM && CRopes::PlayerControlsCrane == 4
+    return    m_nType == eRopeType::CRANE_MAGNO && CRopes::PlayerControlsCrane == eControlledCrane::MAGNO_CRANE
+           || m_nType == eRopeType::WRECKING_BALL && CRopes::PlayerControlsCrane == eControlledCrane::WRECKING_BALL
+           || m_nType == eRopeType::CRANE_TROLLEY && CRopes::PlayerControlsCrane == eControlledCrane::LAS_VEGAS_CRANE
+           || m_nType == eRopeType::QUARRY_CRANE_ARM && CRopes::PlayerControlsCrane == eControlledCrane::QUARRY_CRANE
            || m_nType == eRopeType::CRANE_MAGNET1
            || m_nType == eRopeType::MAGNET
            || m_nType == eRopeType::CRANE_HARNESS;
