@@ -35,8 +35,6 @@ constexpr auto DEFAULT_VIEW_WINDOW        = 0.7f;
 #define SCREEN_HEIGHT ((float)RsGlobal.maximumHeight)
 #define SCREEN_ASPECT_RATIO (CDraw::ms_fAspectRatio)
 #define SCREEN_VIEW_WINDOW (std::tan(DegreesToRadians(CDraw::GetFOV() / (2.0f)))) // todo: GetScaledFov
-#define SCREEN_WIDTH_UNIT (SCREEN_WIDTH / 640.0f)
-#define SCREEN_HEIGHT_UNIT (SCREEN_HEIGHT / 448.0f)
 
 // This scales from PS2 pixel coordinates to the real resolution
 constexpr float SCREEN_STRETCH_X(float a)           { return a * SCREEN_WIDTH  / (float)DEFAULT_SCREEN_WIDTH; } // RsGlobal.maximumWidth * 0.0015625 * value

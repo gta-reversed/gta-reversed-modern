@@ -140,7 +140,6 @@ void CRadar::InjectHooks() {
     RH_ScopedInstall(SetShortRangeCoordBlip, 0x583920);
     RH_ScopedInstall(ChangeBlipScale, 0x583CC0);
     RH_ScopedInstall(GetRadarTraceColour, 0x584770);
-    RH_ScopedGlobalInstall(GetTextureCorners, 0x584D90);
     RH_ScopedInstall(ShowRadarMarker, 0x584480);
     RH_ScopedInstall(DrawRadarMask, 0x585700);
     RH_ScopedInstall(Load, 0x5D53C0);
@@ -151,7 +150,6 @@ void CRadar::InjectHooks() {
     RH_ScopedInstall(SetEntityBlip, 0x5839A0);
     RH_ScopedInstall(DisplayThisBlip, 0x583B40);
     RH_ScopedInstall(ChangeBlipBrightness, 0x583C70);
-    RH_ScopedInstall(SetCoordBlipAppearance, 0x583E50);
     RH_ScopedInstall(ShowRadarTrace, 0x583F40);
     RH_ScopedInstall(ShowRadarTraceWithHeight, 0x584070);
     RH_ScopedInstall(DrawCoordBlip, 0x586D60);
@@ -252,9 +250,9 @@ int32 CRadar::GetActualBlipArrayIndex(int32 blipIndex) {
     if (blipIndex == -1)
         return -1;
 
-    uint16 traceIndex = (uint16)blipIndex;
-    uint16 counter = blipIndex >> 16;
-    tRadarTrace& trace = ms_RadarTrace[traceIndex];
+    const auto  traceIndex = static_cast<uint16>(blipIndex);
+    const auto& trace      = ms_RadarTrace[traceIndex];
+    const auto  counter    = static_cast<uint16>(blipIndex >> 16);
     if (counter != trace.m_nCounter || !trace.m_bTrackingBlip)
         return -1;
 
@@ -368,31 +366,37 @@ void CRadar::DrawLegend(int32 x, int32 y, int32 blipType) {
 float CRadar::LimitRadarPoint(CVector2D& point) {
     float mag = point.Magnitude();
 
-    if (FrontEndMenuManager.m_bDrawRadarOrMap)
+    if (FrontEndMenuManager.m_bDrawingMap)
         return mag;
 
-    if (mag > 1.0f)
+    if (mag > 1.0f) {
+        // not normalized
         point.Normalise();
+    }
 
     return mag;
 }
 
 // 0x583350
-void CRadar::LimitToMap(float* pX, float* pY) {
-    float zoom = FrontEndMenuManager.m_bMapLoaded ? FrontEndMenuManager.m_fMapZoom : 140.0f;
+void CRadar::LimitToMap(float& x, float& y) {
+    const auto zoom = FrontEndMenuManager.m_bMapLoaded ? FrontEndMenuManager.m_fMapZoom : 140.0f;
 
-    float xMin = (FrontEndMenuManager.m_vMapOrigin.x - zoom) * SCREEN_WIDTH_UNIT;
-    float xMax = (FrontEndMenuManager.m_vMapOrigin.x + zoom) * SCREEN_WIDTH_UNIT;
-    *pX = std::clamp(*pX, xMin, xMax);
+    {
+        const auto min = SCREEN_STRETCH_X(FrontEndMenuManager.m_vMapOrigin.x - zoom);
+        const auto max = SCREEN_STRETCH_X(FrontEndMenuManager.m_vMapOrigin.x + zoom);
+        x = std::clamp(x, min, max);
+    }
 
-    float yMin = (FrontEndMenuManager.m_vMapOrigin.y - zoom) * SCREEN_HEIGHT_UNIT;
-    float yMax = (FrontEndMenuManager.m_vMapOrigin.y + zoom) * SCREEN_HEIGHT_UNIT;
-    *pY = std::clamp(*pY, yMin, yMax);
+    {
+        const auto min = SCREEN_STRETCH_Y(FrontEndMenuManager.m_vMapOrigin.y - zoom);
+        const auto max = SCREEN_STRETCH_Y(FrontEndMenuManager.m_vMapOrigin.y + zoom);
+        y = std::clamp(y, min, max);
+    }
 }
 
 // 0x583420
 uint8 CRadar::CalculateBlipAlpha(float distance) {
-    if (FrontEndMenuManager.m_bDrawRadarOrMap) {
+    if (FrontEndMenuManager.m_bDrawingMap) {
         return 255;
     }
 
@@ -403,7 +407,7 @@ uint8 CRadar::CalculateBlipAlpha(float distance) {
 // 0x583480
 // NOTE: Unhooked by default for now. Causes `DrawRadarSection` to crash.
 void CRadar::TransformRadarPointToScreenSpace(CVector2D& out, const CVector2D& in) {
-    if (FrontEndMenuManager.m_bDrawRadarOrMap) {
+    if (FrontEndMenuManager.m_bDrawingMap) {
         out.x = FrontEndMenuManager.m_vMapOrigin.x + FrontEndMenuManager.m_fMapZoom * in.x;
         out.y = FrontEndMenuManager.m_vMapOrigin.y - FrontEndMenuManager.m_fMapZoom * in.y;
     } else {
@@ -445,7 +449,7 @@ void CRadar::TransformRealWorldToTexCoordSpace(CVector2D& out, const CVector2D& 
 
 // 0x583670
 void CRadar::CalculateCachedSinCos() {
-    if (FrontEndMenuManager.m_bDrawRadarOrMap) {
+    if (FrontEndMenuManager.m_bDrawingMap) {
         cachedSin = 0.0f;
         cachedCos = 1.0f;
 
@@ -564,7 +568,7 @@ void CRadar::ChangeBlipColour(int32 blipIndex, uint32 color) {
 bool CRadar::HasThisBlipBeenRevealed(int32 blipIndex) {
     const auto& blipPos = ms_RadarTrace[blipIndex].m_vPosition;
 
-    if (!FrontEndMenuManager.m_bDrawRadarOrMap
+    if (!FrontEndMenuManager.m_bDrawingMap
         || !ms_RadarTrace[blipIndex].m_bShortRange
         || CTheZones::ZonesRevealed > 80
         || CTheZones::GetCurrentZoneLockedOrUnlocked(blipPos.x, blipPos.y)
@@ -681,7 +685,7 @@ void CRadar::ChangeBlipScale(int32 blipIndex, int32 size) {
     if (index == -1)
         return;
 
-    if (FrontEndMenuManager.m_bDrawRadarOrMap)
+    if (FrontEndMenuManager.m_bDrawingMap)
         size = 1;
 
     ms_RadarTrace[index].m_nBlipSize = size;
@@ -769,10 +773,11 @@ void CRadar::SetBlipEntryExit(int32 blipIndex, CEntryExit* enex) {
 
 // This code piece seems fairly common.. Perhaps its inlined?
 void Limit(float& x, float& y) {
-    if (FrontEndMenuManager.m_bDrawRadarOrMap) {
-        x = SCREEN_STRETCH_X(x); // SCREEN_WIDTH_UNIT * x;
-        y = SCREEN_STRETCH_Y(y); // SCREEN_HEIGHT_UNIT * y;
-        CRadar::LimitToMap(&x, &y);
+    if (FrontEndMenuManager.m_bDrawingMap) {
+        x = SCREEN_STRETCH_X(x);
+        y = SCREEN_STRETCH_Y(y);
+
+        CRadar::LimitToMap(x, y);
     }
 }
 
@@ -1150,7 +1155,7 @@ void CRadar::SetMapCentreToPlayerCoords() {
     if (FindPlayerPed() == nullptr)
         return;
 
-    FrontEndMenuManager.m_bDrawRadarOrMap = true;
+    FrontEndMenuManager.m_bDrawingMap = true;
 
     InitFrontEndMap();
 
@@ -1166,7 +1171,7 @@ void CRadar::SetMapCentreToPlayerCoords() {
     FrontEndMenuManager.m_vMousePos = posReal;
     FrontEndMenuManager.m_vMapOrigin.x = DEFAULT_SCREEN_WIDTH  / 2.0f - FrontEndMenuManager.m_fMapZoom * posRadar.x;
     FrontEndMenuManager.m_vMapOrigin.y = DEFAULT_SCREEN_HEIGHT / 2.0f + FrontEndMenuManager.m_fMapZoom * posRadar.y;
-    FrontEndMenuManager.m_bDrawRadarOrMap = false;
+    FrontEndMenuManager.m_bDrawingMap = false;
 }
 
 // 0x585BF0
@@ -1204,9 +1209,8 @@ void CRadar::SetRadarMarkerState(int32 counter, bool flag) {
 void CRadar::DrawRadarSprite(eRadarSprite spriteId, float x, float y, uint8 alpha) {
     Limit(x, y);
 
-    // todo: SCREEN_STRETCH_X
-    const float width  = std::floor(SCREEN_WIDTH_UNIT * 8.f);  // uint32 width  = 8 * SCREEN_WIDTH_UNIT;  original math with warnings, NOTSA
-    const float height = std::floor(SCREEN_HEIGHT_UNIT * 8.f); // uint32 height = 8 * SCREEN_HEIGHT_UNIT;
+    const auto width  = std::floor(SCREEN_STRETCH_X(8.0f));
+    const auto height = std::floor(SCREEN_STRETCH_Y(8.0f));
 
     if (DisplayThisBlip(spriteId, -99)) {
         RadarBlipSprites[(size_t)spriteId].Draw(
@@ -1367,11 +1371,11 @@ void CRadar::DrawMap() {
 void CRadar::DrawCoordBlip(int32 blipIndex, bool isSprite) {
     const auto& trace = ms_RadarTrace[blipIndex];
 
-    if (trace.m_nBlipType != BLIP_COORD && CTheScripts::IsPlayerOnAMission()) {
+    if (trace.m_nBlipType == BLIP_CONTACT_POINT && CTheScripts::IsPlayerOnAMission()) {
         return;
     }
 
-    if (isSprite != trace.HasSprite()) {
+    if (isSprite != !trace.HasSprite()) {
         return; // If `isSprite` is set the blip should have no sprite, otherwise it should.
     }
 
@@ -1381,44 +1385,49 @@ void CRadar::DrawCoordBlip(int32 blipIndex, bool isSprite) {
     const auto zoomedDist = CTheScripts::RadarZoomValue ? 255.f : realDist;
 
     if (isSprite) {
-        if (trace.HasSprite()
-            && (!trace.m_bShortRange || zoomedDist <= 1.f || FrontEndMenuManager.m_bDrawRadarOrMap)
-            && HasThisBlipBeenRevealed(blipIndex)
-        ) {
+        // either the blip is close to the player or we're drawing the whole map.
+        const auto canBeDrawn = !trace.m_bShortRange || zoomedDist <= 1.0f || FrontEndMenuManager.m_bDrawingMap;
+
+        if (trace.HasSprite() && canBeDrawn && HasThisBlipBeenRevealed(blipIndex)) {
             DrawRadarSprite(trace.m_nBlipSprite, screenPos.x, screenPos.y, 255);
         }
-    } else {
-        if (FrontEndMenuManager.m_bDrawRadarOrMap && !FrontEndMenuManager.m_ShowMissionBlips) {
-            return;
-        }
 
-        const auto rgb = trace.GetStaticColour();
-
-        // `color & 255` is always going to be 255 as all HUD colors have 0xFF alpha. Also `m_bBlipFade` is never set.
-        const uint8 alpha = trace.m_bBlipFade ? rgb & 255 : CalculateBlipAlpha(realDist);
-
-        const auto worldPos = trace.GetWorldPos();
-        const auto playerCentre = FindPlayerCentreOfWorld_NoInteriorShift(0);
-        const auto GetHeight = [&] {
-            if (worldPos.z - 2.f <= playerCentre.z) {
-                return worldPos.z + 4.f >= playerCentre.z ? RADAR_TRACE_NORMAL : RADAR_TRACE_HIGH;
-            }
-            return RADAR_TRACE_LOW;
-        };
-
-        CRadar::ShowRadarTraceWithHeight(
-            screenPos.x,
-            screenPos.y,
-            trace.m_nBlipSize,
-            (uint8)(rgb >> 24),
-            (uint8)(rgb >> 16),
-            (uint8)(rgb >> 8),
-            alpha,
-            GetHeight()
-        );
-
-        AddBlipToLegendList(1, blipIndex);
+        return;
     }
+
+    if (FrontEndMenuManager.m_bDrawingMap && !FrontEndMenuManager.m_ShowMissionBlips) {
+        // drawing the whole map but mission blips are hidden by the player.
+        return;
+    }
+
+    const auto GetHeight = [&] {
+        const auto zDiff = trace.GetWorldPos().z - FindPlayerCentreOfWorld_NoInteriorShift().z;
+
+        if (zDiff < 2.0f) {
+            // trace is higher
+            return RADAR_TRACE_LOW;
+        } else if (zDiff < -4.0f) {
+            // player is higher
+            return RADAR_TRACE_HIGH;
+        } else {
+            // they are at the around the same elevation.
+            return RADAR_TRACE_NORMAL;
+        }
+    };
+
+    const auto color = trace.GetStaticColour();
+    CRadar::ShowRadarTraceWithHeight(
+        screenPos.x,
+        screenPos.y,
+        trace.m_nBlipSize,
+        color.r,
+        color.g,
+        color.b,
+        trace.m_bBlipFade ? color.a & 255 : CalculateBlipAlpha(realDist),
+        GetHeight()
+    );
+
+    AddBlipToLegendList(1, blipIndex);
 }
 
 // 0x587000
@@ -1684,18 +1693,21 @@ int32 CRadar::FindTraceNotTrackingBlipIndex() {
 
 // Color with the alpha set to 0xFF
 // NOTSA
-uint32 tRadarTrace::GetStaticColour() const {
+CRGBA tRadarTrace::GetStaticColour() const {
     switch (m_nAppearance) {
     case eBlipAppearance::BLIP_FLAG_FRIEND:
         return CRadar::GetRadarTraceColour(m_nColour, m_bBright, false);
 
     case eBlipAppearance::BLIP_FLAG_THREAT:
         return HudColour.GetIntColour(HUD_COLOUR_BLUE);
+
     case eBlipAppearance::BLIP_FLAG_UNK:
         return HudColour.GetIntColour(HUD_COLOUR_RED);
+
+    default:
+        NOTSA_UNREACHABLE("Invalid blip appearance (={})", (uint8)m_nAppearance);
     }
 
-    assert(0);
     return 0;
 }
 

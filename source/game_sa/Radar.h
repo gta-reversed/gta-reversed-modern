@@ -172,12 +172,11 @@ struct tRadarTrace {
     eBlipAppearance m_nAppearance : 2;
 
     [[nodiscard]] auto HasSprite() const { return m_nBlipSprite != eRadarSprite::RADAR_SPRITE_NONE; }
-    [[nodiscard]] uint32 GetStaticColour() const;
+    [[nodiscard]] CRGBA GetStaticColour() const;
     [[nodiscard]] CVector GetWorldPos() const;
 
     std::pair<CVector2D, CVector2D> GetRadarAndScreenPos(float* radarPointDist) const;
 };
-
 VALIDATE_SIZE(tRadarTrace, 0x28);
 
 static constexpr uint32 MAX_RADAR_WIDTH_TILES = 12;
@@ -223,7 +222,7 @@ public:
 
     static void DrawLegend(int32 x, int32 y, int32 blipType);
     static float LimitRadarPoint(CVector2D& point);
-    static void LimitToMap(float* pX, float* pY);
+    static void LimitToMap(float& x, float& y);
     static uint8 CalculateBlipAlpha(float distance);
     static void TransformRadarPointToScreenSpace(CVector2D& out, const CVector2D& in);
     static void TransformRealWorldPointToRadarSpace(CVector2D& out, const CVector2D& in);

@@ -580,8 +580,8 @@ void CPickups::RenderPickUpText() {
         }
 
         // TODO: scaled wrong in windowed mode, but it's fine in fullscreen.
-        auto scaleX = std::min(SCREEN_WIDTH_UNIT, message.width / 30.0f);
-        auto scaleY = std::min(SCREEN_WIDTH_UNIT, message.height / 30.0f);
+        auto scaleX = std::min(SCREEN_STRETCH_X(1.0f), message.width / 30.0f);
+        auto scaleY = std::min(SCREEN_STRETCH_X(1.0f), message.height / 30.0f);
 
         CFont::SetProportional(true);
         CFont::SetBackground(false, false);
