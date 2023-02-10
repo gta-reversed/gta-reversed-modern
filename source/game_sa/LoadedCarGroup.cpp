@@ -26,7 +26,7 @@ void CLoadedCarGroup::InjectHooks() {
 }
 
 // 0x611E10
-void CLoadedCarGroup::SortBasedOnUsage() { // TODO: Maybe this is sorted lower -> higher?
+void CLoadedCarGroup::SortBasedOnUsage() {
     // Sort from higher to lower usage
     rng::sort(GetAllModels(), std::greater<>{}, [](int16 modelid) {
         return CModelInfo::GetVehicleModelInfo(modelid)->m_nTimesUsed; }
