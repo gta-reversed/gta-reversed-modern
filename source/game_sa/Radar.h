@@ -137,7 +137,7 @@ struct tBlipHandle {
     uint16 arrayIndex;
     uint16 number;
 };
-VALIDATE_SIZE(tBlipHandle, 4);
+VALIDATE_SIZE(tBlipHandle, 0x4);
 
 struct airstrip_info {
     CVector2D position;

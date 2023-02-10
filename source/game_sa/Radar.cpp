@@ -396,8 +396,8 @@ uint8 CRadar::CalculateBlipAlpha(float distance) {
         return 255;
     }
 
-    auto distAlpha = 255 - (int32)(distance / 6.0f * 255.0f);
-    return (uint8)std::max(distAlpha, 70);
+    const auto alpha = 255 - (uint32)(distance / 6.0f * 255.0f);
+    return (uint8)std::max((float)alpha, 70.0f);
 }
 
 // 0x583480
