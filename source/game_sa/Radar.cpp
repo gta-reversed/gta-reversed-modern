@@ -804,7 +804,7 @@ void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 gree
 }
 
 // 0x584070
-void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha, eRadarTraceHeight height) {
+void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, CRGBA color, eRadarTraceHeight height) {
     Limit(x, y);
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
 
@@ -818,14 +818,14 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, 
             x,                           y + SCREEN_STRETCH_Y(size3),
             x + SCREEN_STRETCH_X(size3), y - SCREEN_STRETCH_Y(size2),
             x - SCREEN_STRETCH_X(size3), y - SCREEN_STRETCH_Y(size2),
-            { 0, 0, 0, alpha }
+            { 0, 0, 0, color.a }
         );
         CSprite2d::Draw2DPolygon( // draw triangle
             x,                           y + SCREEN_STRETCH_Y(size1),
             x,                           y + SCREEN_STRETCH_Y(size1),
             x + SCREEN_STRETCH_X(size1), y - SCREEN_STRETCH_Y(size1),
             x - SCREEN_STRETCH_X(size1), y - SCREEN_STRETCH_Y(size1),
-            { red, green, blue, alpha }
+            color
         );
         break;
     case RADAR_TRACE_NORMAL:
@@ -834,7 +834,7 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, 
                 x - SCREEN_STRETCH_X(size1), y - SCREEN_STRETCH_Y(size1),
                 x + SCREEN_STRETCH_X(size1), y + SCREEN_STRETCH_Y(size1)
             ),
-            { 0, 0, 0, alpha }
+            { 0, 0, 0, color.a }
         );
 
         CSprite2d::DrawRect( // draw box
@@ -842,7 +842,7 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, 
                 x - SCREEN_STRETCH_X(size0), y - SCREEN_STRETCH_Y(size0),
                 x + SCREEN_STRETCH_X(size0), y + SCREEN_STRETCH_Y(size0)
             },
-            { red, green, blue, alpha }
+            color
         );
         break;
     case RADAR_TRACE_LOW:
@@ -851,7 +851,7 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, 
             x - SCREEN_STRETCH_X(size3), y + SCREEN_STRETCH_Y(size2),
             x,                           y - SCREEN_STRETCH_Y(size3),
             x,                           y - SCREEN_STRETCH_Y(size3),
-            { 0, 0, 0, alpha }
+            { 0, 0, 0, color.a }
         );
 
         CSprite2d::Draw2DPolygon( // draw triangle
@@ -859,7 +859,7 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, 
             x - SCREEN_STRETCH_X(size1), y + SCREEN_STRETCH_Y(size1),
             x,                           y - SCREEN_STRETCH_Y(size1),
             x,                           y - SCREEN_STRETCH_Y(size1),
-            { red, green, blue, alpha }
+            color
         );
         break;
     }
@@ -1370,19 +1370,18 @@ void CRadar::DrawMap() {
 // 0x586D60
 void CRadar::DrawCoordBlip(int32 blipIndex, bool isSprite) {
     const auto& trace = ms_RadarTrace[blipIndex];
-
-    if (trace.m_nBlipType == BLIP_CONTACT_POINT && CTheScripts::IsPlayerOnAMission()) {
+    if (trace.m_nBlipType == BLIP_CONTACT_POINT && CTheScripts::IsPlayerOnAMission())
         return;
-    }
 
-    if (isSprite != !trace.HasSprite()) {
-        return; // If `isSprite` is set the blip should have no sprite, otherwise it should.
-    }
+    if (isSprite == !trace.HasSprite())
+        return;
+
+    if (trace.m_nBlipDisplayFlag != BLIP_DISPLAY_BOTH && trace.m_nBlipDisplayFlag != BLIP_DISPLAY_BLIPONLY)
+        return;
 
     float realDist{};
     const auto [radarPos, screenPos] = trace.GetRadarAndScreenPos(&realDist);
-
-    const auto zoomedDist = CTheScripts::RadarZoomValue ? 255.f : realDist;
+    const auto zoomedDist = CTheScripts::RadarZoomValue != 0u ? 255.0f : realDist;
 
     if (isSprite) {
         // either the blip is close to the player or we're drawing the whole map.
@@ -1391,9 +1390,11 @@ void CRadar::DrawCoordBlip(int32 blipIndex, bool isSprite) {
         if (trace.HasSprite() && canBeDrawn && HasThisBlipBeenRevealed(blipIndex)) {
             DrawRadarSprite(trace.m_nBlipSprite, screenPos.x, screenPos.y, 255);
         }
-
         return;
     }
+
+    if (trace.HasSprite())
+        return;
 
     if (FrontEndMenuManager.m_bDrawingMap && !FrontEndMenuManager.m_ShowMissionBlips) {
         // drawing the whole map but mission blips are hidden by the player.
@@ -1420,10 +1421,12 @@ void CRadar::DrawCoordBlip(int32 blipIndex, bool isSprite) {
         screenPos.x,
         screenPos.y,
         trace.m_nBlipSize,
-        color.r,
-        color.g,
-        color.b,
-        trace.m_bBlipFade ? color.a & 255 : CalculateBlipAlpha(realDist),
+        {
+            color.r,
+            color.g,
+            color.b,
+            trace.m_bBlipFade ? color.a : CalculateBlipAlpha(realDist)
+        },
         GetHeight()
     );
 
