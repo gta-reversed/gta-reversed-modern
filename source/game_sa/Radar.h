@@ -146,6 +146,16 @@ struct airstrip_info {
 };
 VALIDATE_SIZE(airstrip_info, 0x10);
 
+// NOTSA
+enum eAirstripLocation : uint8 {
+    AIRSTRIP_LS_AIRPORT,
+    AIRSTRIP_SF_AIRPORT,
+    AIRSTRIP_LV_AIRPORT,
+    AIRSTRIP_VERDANT_MEADOWS,
+
+    NUM_AIRSTRIPS
+};
+
 class CEntryExit;
 struct tRadarTrace;
 
@@ -187,8 +197,6 @@ public:
     static constexpr uint32 MAX_RADAR_SPRITES = 64;
     static constexpr uint32 MAX_RADAR_TRACES = 175;
 
-    static constexpr size_t MAX_AIRSTRIP_INFOS = 4u;
-
     static inline float& m_fRadarOrientation = *(float*)0xBA8310;
 
     // original name unknown
@@ -206,7 +214,7 @@ public:
     static inline std::array<CSprite2d, MAX_RADAR_SPRITES>& RadarBlipSprites = *(std::array<CSprite2d, MAX_RADAR_SPRITES>*)0xBAA250;
     static inline CRect& m_radarRect = *(CRect*)0x8D0920; // { 1000000.0f, -1000000.0f, -1000000.0f, 1000000.0f }
 
-    static inline uint8& airstrip_location = *(uint8*)0xBA8300; // current airstrip index in airstrip_table
+    static inline eAirstripLocation& airstrip_location = *(eAirstripLocation*)0xBA8300; // current airstrip index in airstrip_table
     static inline int32& airstrip_blip = *(int32*)0xBA8304;     // blip handle
 
 public:

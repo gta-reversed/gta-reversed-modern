@@ -9,7 +9,6 @@
 #include "Radar.h"
 #include "EntryExitManager.h"
 #include <extensions/enumerate.hpp>
-namespace rng = std::ranges;
 
 static inline float& cachedCos = *(float*)0xBA8308;
 static inline float& cachedSin = *(float*)0xBA830c;
@@ -17,19 +16,19 @@ static inline float& cachedSin = *(float*)0xBA830c;
 static inline uint8& airstrip_location = *(uint8*)0xBA8300; // current airstrip index in airstrip_table
 static inline int32& airstrip_blip = *(int32*)0xBA8304;     // blip handle
 
-constexpr std::array<airstrip_info, CRadar::MAX_AIRSTRIP_INFOS> airstrip_table = { // 0x8D06E0
-    airstrip_info{ { +1750.0f,  -2494.0f }, 180.0f, 1000.0f },
-    airstrip_info{ { -1373.0f,  +120.00f }, 315.0f, 1500.0f },
-    airstrip_info{ { +1478.0f,  +1461.0f }, 90.0f,  1200.0f },
-    airstrip_info{ { +175.00f,  +2502.0f }, 180.0f, 1000.0f }
+constexpr std::array<airstrip_info, NUM_AIRSTRIPS> airstrip_table = { // 0x8D06E0
+    airstrip_info{ { +1750.0f,  -2494.0f }, 180.0f, 1000.0f }, // AIRSTRIP_LS_AIRPORT
+    airstrip_info{ { -1373.0f,  +120.00f }, 315.0f, 1500.0f }, // AIRSTRIP_SF_AIRPORT
+    airstrip_info{ { +1478.0f,  +1461.0f }, 90.0f,  1200.0f }, // AIRSTRIP_LV_AIRPORT
+    airstrip_info{ { +175.00f,  +2502.0f }, 180.0f, 1000.0f }  // AIRSTRIP_VERDANT_MEADOWS
 };
 
 // Array of TXD slot indices for each radar section's texture
 static std::array<std::array<int32, MAX_RADAR_WIDTH_TILES>, MAX_RADAR_HEIGHT_TILES>& gRadarTextures = *(std::array<std::array<int32, MAX_RADAR_WIDTH_TILES>, MAX_RADAR_HEIGHT_TILES>*)0xBA8478;
 
-// name, maskName
-// 0x8d0720
+// 0x8D0720
 SpriteFileName CRadar::RadarBlipFileNames[] = {
+    // name,                 maskName
     { nullptr,               nullptr },
     { nullptr,               nullptr },
     { "radar_centre",        nullptr },
@@ -178,30 +177,11 @@ void CRadar::InjectHooks() {
 // 0x587FB0
 void CRadar::Initialise() {
     airstrip_blip = 0;
-    airstrip_location = 0;
+    airstrip_location = AIRSTRIP_LS_AIRPORT;
 
     for (auto& trace : ms_RadarTrace) {
         ClearActualBlip(trace);
     }
-
-    /*
-    for (auto& trace : ms_RadarTrace) {
-        trace.m_fSphereRadius = 1.0f;
-        trace.m_nBlipSize     = 0;
-        trace.m_pEntryExit    = nullptr;
-        trace.m_nCounter      = 1;
-
-        trace.m_bBright              = true;
-        trace.m_bTrackingBlip        = false;
-        trace.m_bShortRange          = false;
-        trace.m_bFriendly            = false;
-        trace.m_bBlipRemain          = false;
-        trace.m_bBlipFade            = false;
-        trace.m_nCoordBlipAppearance = BLIP_FLAG_FRIEND;
-        trace.m_nBlipDisplayFlag     = BLIP_DISPLAY_NEITHER;
-        trace.m_nBlipType            = BLIP_NONE;
-    }
-    */
 
     m_radarRange = 350.0f;
 
@@ -216,9 +196,7 @@ void CRadar::Initialise() {
 
 // 0x585940
 void CRadar::Shutdown() {
-    for (auto& sprite : RadarBlipSprites) {
-        sprite.Delete();
-    }
+    rng::for_each(RadarBlipSprites, &CSprite2d::Delete);
     RemoveRadarSections();
 }
 
@@ -370,7 +348,7 @@ float CRadar::LimitRadarPoint(CVector2D& point) {
         return mag;
 
     if (mag > 1.0f) {
-        // not normalized
+        // not in unit circle
         point.Normalise();
     }
 
@@ -1482,8 +1460,8 @@ void CRadar::ClearBlip(int32 blipIndex) {
     }
 }
 
-CVector GetAirStripLocation(int location) {
-    return { airstrip_table[location].position.x, airstrip_table[location].position.y, 0.0f };
+CVector GetAirStripLocation(eAirstripLocation location) {
+    return CVector(airstrip_table[location].position);
 }
 
 // 0x587D20
@@ -1508,13 +1486,13 @@ void CRadar::SetupAirstripBlips() {
             // todo add condition
         }
 
-        int location = 0;
+        auto location = AIRSTRIP_LS_AIRPORT;
         /*
         if (distanceTo1 >= (double)distanceTo2 ||
             distanceTo1 >= (double)distanceTo3 ||
             distanceTo1 >= (double)distanceTo4
         ) {
-            location = 1;
+            location = AIRSTRIP_SF_AIRPORT;
         }
         if (distanceTo2 >= (double)distanceTo1 ||
             distanceTo2 >= (double)distanceTo3 ||
@@ -1522,9 +1500,9 @@ void CRadar::SetupAirstripBlips() {
         ) {
             if (distanceTo3 >= (double)distanceTo1 ||
                 distanceTo3 >= (double)distanceTo2 ||
-                (location = 2, distanceTo3 >= (double)distanceTo4)
+                (location = AIRSTRIP_LV_AIRPORT, distanceTo3 >= (double)distanceTo4)
             ) {
-                location = 3;
+                location = AIRSTRIP_VERDANT_MEADOWS;
             }
         }
         */
