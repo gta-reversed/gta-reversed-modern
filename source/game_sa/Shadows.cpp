@@ -51,7 +51,7 @@ void CStaticShadow::InjectHooks() {
     RH_ScopedClass(CStaticShadow);
     RH_ScopedCategory("Shadows");
 
-    RH_ScopedInstall(Free, 0x70CCB0);
+    RH_ScopedInstall(Free, 0x707670);
     //RH_ScopedInstall(Init, 0x0);
 }
 
