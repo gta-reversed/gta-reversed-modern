@@ -2256,11 +2256,10 @@ void CStreaming::RemoveCurrentZonesModels() {
     RequestModel(MODEL_MALE01, STREAMING_GAME_REQUIRED);
 
     for (int32 gangId = 0; gangId < TOTAL_GANGS; gangId++) {
-        auto popcycleGroup = static_cast<ePopcycleGroup>(gangId + POPCYCLE_GROUP_BALLAS);
-        ePopcyclePedGroup pedGroupId = CPopulation::GetPedGroupId(popcycleGroup, 0);
-        for (int32 i = 0; i < 5; i++) { // todo: magic number
-            int32 modelId = CPopulation::GetPedGroupModelId(pedGroupId, i);
-            if (modelId != CPopulation::m_defaultCarGroupModelId) {
+        const auto gangPedGroupId = CPopulation::GetPedGroupId(static_cast<ePopcycleGroup>(gangId + POPCYCLE_GROUP_BALLAS));
+
+        // \/ NOTE: Originally they only processed the first 5 models... I'm not sure why, but this should work too.
+        for (const auto modelId : CPopulation::GetModelsInPedGroup(gangPedGroupId)) {   if (modelId != CPopulation::m_defaultCarGroupModelId) {
                 SetModelAndItsTxdDeletable(modelId);
             }
         }
