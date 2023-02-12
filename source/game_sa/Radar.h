@@ -133,11 +133,14 @@ enum eRadarTraceHeight : uint8 {
     RADAR_TRACE_NORMAL // 2 Box □
 };
 
+/*
 struct tBlipHandle {
     uint16 arrayIndex;
     uint16 number;
 };
 VALIDATE_SIZE(tBlipHandle, 0x4);
+*/
+using tBlipHandle = uint32; // TODO: Use struct above
 
 struct airstrip_info {
     CVector2D position;
@@ -225,8 +228,8 @@ public:
 
     static void LoadTextures();
     
-    static int32 GetNewUniqueBlipIndex(int32 blipIndex);
-    static int32 GetActualBlipArrayIndex(int32 blipIndex);
+    static tBlipHandle GetNewUniqueBlipIndex(int32 blipIndex);
+    static int32 GetActualBlipArrayIndex(tBlipHandle blip);
 
     static void DrawLegend(int32 x, int32 y, int32 blipType);
     static float LimitRadarPoint(CVector2D& point);
@@ -237,22 +240,22 @@ public:
     static void TransformRadarPointToRealWorldSpace(CVector2D& out, const CVector2D& in);
     static void TransformRealWorldToTexCoordSpace(CVector2D& out, const CVector2D& in, int32 x, int32 y);
     static void CalculateCachedSinCos();
-    static int32 SetCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, const char* scriptName = nullptr);
-    static int32 SetShortRangeCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, const char* scriptName = nullptr);
-    static int32 SetEntityBlip(eBlipType type, int32 entityHandle, uint32 arg2, eBlipDisplay blipDisplay);
-    static void ChangeBlipColour(int32 blipIndex, uint32 color);
+    static tBlipHandle SetCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, const char* scriptName = nullptr);
+    static tBlipHandle SetShortRangeCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, const char* scriptName = nullptr);
+    static tBlipHandle SetEntityBlip(eBlipType type, int32 entityHandle, uint32 arg2, eBlipDisplay blipDisplay);
+    static void ChangeBlipColour(tBlipHandle blip, eBlipColour color);
     static bool HasThisBlipBeenRevealed(int32 blipIndex);
-    static bool DisplayThisBlip(eRadarSprite spriteId, char priority);
-    static void ChangeBlipBrightness(int32 blipIndex, int32 brightness);
-    static void ChangeBlipScale(int32 blipIndex, int32 size);
-    static void ChangeBlipDisplay(int32 blipIndex, eBlipDisplay blipDisplay);
-    static void SetBlipSprite(int32 blipIndex, eRadarSprite spriteId);
-    static void SetBlipAlwaysDisplayInZoom(int32 blipIndex, bool display);
-    static void SetBlipFade(int32 blipIndex, bool fade);
-    static void SetCoordBlipAppearance(int32 blipIndex, eBlipAppearance appearance);
-    static void SetBlipFriendly(int32 blipIndex, bool friendly);
-    static void SetBlipEntryExit(int32 blipIndex, CEntryExit* enex);
-    static void ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha);
+    static bool DisplayThisBlip(eRadarSprite spriteId, int8 priority);
+    static void ChangeBlipBrightness(tBlipHandle blip, int32 brightness);
+    static void ChangeBlipScale(tBlipHandle blip, int32 size);
+    static void ChangeBlipDisplay(tBlipHandle blip, eBlipDisplay blipDisplay);
+    static void SetBlipSprite(tBlipHandle blip, eRadarSprite spriteId);
+    static void SetBlipAlwaysDisplayInZoom(tBlipHandle blip, bool display);
+    static void SetBlipFade(tBlipHandle blip, bool fade);
+    static void SetCoordBlipAppearance(tBlipHandle blip, eBlipAppearance appearance);
+    static void SetBlipFriendly(tBlipHandle blip, bool friendly);
+    static void SetBlipEntryExit(tBlipHandle blip, CEntryExit* enex);
+    static void ShowRadarTrace(float x, float y, uint32 size, CRGBA color);
     static void ShowRadarTraceWithHeight(float x, float y, uint32 size, CRGBA color, eRadarTraceHeight height);
     static void ShowRadarMarker(CVector posn, uint32 color, float radius);
     static uint32 GetRadarTraceColour(eBlipColour color, bool bright, bool friendly);
@@ -284,7 +287,7 @@ public:
     static void ClearActualBlip(int32 blipIndex);
     static void ClearActualBlip(tRadarTrace& trace);
     static void ClearBlipForEntity(eBlipType blipType, int32 entityHandle);
-    static void ClearBlip(int32 blipIndex);
+    static void ClearBlip(tBlipHandle blip);
     static void SetupAirstripBlips();
     static void DrawBlips();
 

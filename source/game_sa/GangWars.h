@@ -113,5 +113,5 @@ public:
     static void UpdateTerritoryUnderControlPercentage();
 
 private:
-    static uint32 GetGangColor(int32 gang);
+    static eBlipColour GetGangColor(int32 gang);
 };

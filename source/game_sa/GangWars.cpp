@@ -581,7 +581,7 @@ void CGangWars::StartDefensiveGangWar() {
         CHud::SetHelpMessage(TheText.Get("GW_ATK"), true, false, true);
         State2 = WAR_NOTIFIED;
         FightTimer = static_cast<uint32>(DistanceBetweenPoints2D(PointOfAttack, FindPlayerCoors()) * 200.0f + 240'000.0f);
-        RadarBlip = CRadar::SetCoordBlip(BLIP_COORD, PointOfAttack, (eBlipColour)GetGangColor(Gang1), BLIP_DISPLAY_BLIPONLY, nullptr);
+        RadarBlip = CRadar::SetCoordBlip(BLIP_COORD, PointOfAttack, GetGangColor(Gang1), BLIP_DISPLAY_BLIPONLY, nullptr);
 
         CRadar::SetBlipSprite(RadarBlip, [] {
             switch (Gang1) {
@@ -1035,12 +1035,12 @@ void CGangWars::UpdateTerritoryUnderControlPercentage() {
 
 // todo: Use macro for color conversion
 // 0x44582F NOTSA
-uint32 CGangWars::GetGangColor(int32 gang) {
+eBlipColour CGangWars::GetGangColor(int32 gang) {
     // 0x8D1344 0x8D1350 0x8D135C
     static constexpr uint8 gaGangColoursR[] = { 200,  70, 255,   0, 255, 200, 240,   0, 255, 255, 0, 0 };
     static constexpr uint8 gaGangColoursB[] = { 200,   0,   0, 200, 190, 200, 240, 255, 255, 255, 0, 0 };
     static constexpr uint8 gaGangColoursG[] = {   0, 200, 200,   0, 220, 200, 140, 200, 255, 255, 0, 0 };
 
     auto r = gaGangColoursR[gang], g = gaGangColoursG[gang], b = gaGangColoursB[gang];
-    return ((b | (((r << 8) | g) << 8)) << 8) | 0xFF;
+    return (eBlipColour)(((b | (((r << 8) | g) << 8)) << 8) | 0xFF);
 }

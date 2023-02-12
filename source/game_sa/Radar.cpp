@@ -208,8 +208,12 @@ void CRadar::LoadTextures() {
     CTxdStore::PopCurrentTxd();
 }
 
-// 0x582820 - Seemingly unused but actually just inlined
-int32 CRadar::GetNewUniqueBlipIndex(int32 index) {
+/*!
+ * @brief Creates a unique blip handle by blip index from `ms_RadarTrace`. (Inlined)
+ * @addr 0x582820
+ * @returns Unique blip handle
+ */
+tBlipHandle CRadar::GetNewUniqueBlipIndex(int32 index) {
     auto& trace = ms_RadarTrace[index];
     if (trace.m_nCounter >= std::numeric_limits<uint16>::max() - 1)
         trace.m_nCounter = 1; // Wrap back to 1
@@ -218,14 +222,18 @@ int32 CRadar::GetNewUniqueBlipIndex(int32 index) {
     return index | (trace.m_nCounter << 16);
 }
 
-// 0x582870
-int32 CRadar::GetActualBlipArrayIndex(int32 blipIndex) {
-    if (blipIndex == -1)
+/*!
+ * @param blip Blip handle
+ * @addr 0x582870
+ * @returns Index of the handle in `ms_RadarTrace`
+ */
+int32 CRadar::GetActualBlipArrayIndex(tBlipHandle blip) {
+    if (blip == -1)
         return -1;
 
-    const auto  traceIndex = static_cast<uint16>(blipIndex);
+    const auto  traceIndex = static_cast<uint16>(blip);
     const auto& trace      = ms_RadarTrace[traceIndex];
-    const auto  counter    = static_cast<uint16>(blipIndex >> 16);
+    const auto  counter    = static_cast<uint16>(blip >> 16);
     if (counter != trace.m_nCounter || !trace.m_bTrackingBlip)
         return -1;
 
@@ -343,7 +351,13 @@ void CRadar::DrawLegend(int32 x, int32 y, int32 blipType) {
     }
 }
 
-// 0x5832F0
+/*!
+ * @brief Limits a 2D vector to the radar. (which is a unit circle)
+ * @brief This function does not effect the vector if the map is being drawn.
+ * @param point The vector to be limited.
+ * @addr 0x5832F0
+ * @returns Magnitude of the vector before limiting.
+ */
 float CRadar::LimitRadarPoint(CVector2D& point) {
     const auto mag = point.Magnitude();
 
@@ -375,7 +389,14 @@ void CRadar::LimitToMap(float& x, float& y) {
     }
 }
 
-// 0x583420
+/*!
+ * @brief Calculates transparency of a blip based on distance from the player.
+ * @brief This function returns full opacity value if the map is being drawn.
+ * @brief Blip transparency is not used in SA. It's a VC feature.
+ * @param distance Distance from the player
+ * @addr 0x583420
+ * @returns Transparency value in range of [70,255].
+ */
 uint8 CRadar::CalculateBlipAlpha(float distance) {
     if (FrontEndMenuManager.m_bDrawingMap) {
         return 255;
@@ -385,8 +406,11 @@ uint8 CRadar::CalculateBlipAlpha(float distance) {
     return (uint8)std::max((float)alpha, 70.0f);
 }
 
-// 0x583480
-// NOTE: Unhooked by default for now. Causes `DrawRadarSection` to crash.
+/*!
+ * @brief Transforms a radar point to screen.
+ * @brief Unhooked by default for now. Causes `DrawRadarSection` to crash.
+ * @addr 0x583480
+ */
 void CRadar::TransformRadarPointToScreenSpace(CVector2D& out, const CVector2D& in) {
     if (FrontEndMenuManager.m_bDrawingMap) {
         out = {
@@ -401,7 +425,10 @@ void CRadar::TransformRadarPointToScreenSpace(CVector2D& out, const CVector2D& i
     }
 }
 
-// 0x583530
+/*!
+ * @brief Transforms a real coordinate to radar coordinate.
+ * @addr 0x583530
+ */
 void CRadar::TransformRealWorldPointToRadarSpace(CVector2D& out, const CVector2D& in) {
     const auto xOffset = (in.x - vec2DRadarOrigin.x) / m_radarRange;
     const auto yOffset = (in.y - vec2DRadarOrigin.y) / m_radarRange;
@@ -412,8 +439,10 @@ void CRadar::TransformRealWorldPointToRadarSpace(CVector2D& out, const CVector2D
     };
 }
 
-// unused
-// 0x5835A0
+/*!
+ * @brief Transforms a radar coordinate to real coordinate. (Unused)
+ * @addr 0x5835A0
+ */
 void CRadar::TransformRadarPointToRealWorldSpace(CVector2D& out, const CVector2D& in) {
     out = CVector2D{
         cachedCos * in.x - cachedSin * in.y,
@@ -421,8 +450,10 @@ void CRadar::TransformRadarPointToRealWorldSpace(CVector2D& out, const CVector2D
     } * m_radarRange + vec2DRadarOrigin;
 }
 
-// unused, see CRadar::DrawRadarSection
-// 0x583600
+/*!
+ * @brief Transforms a radar coordinate to texture coordinate. (Unused, see CRadar::DrawRadarSection)
+ * @addr 0x583600
+ */
 void CRadar::TransformRealWorldToTexCoordSpace(CVector2D& out, const CVector2D& in, int32 x, int32 y) {
     out = CVector2D{
         +(in.x - (float(500 * x) - 3000.0f)),
@@ -465,9 +496,17 @@ void CRadar::CalculateCachedSinCos() {
     SaveAngle(directionToTarget.Heading());
 }
 
-// param *scriptName* from Android
-// 0x583820
-int32 CRadar::SetCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, const char* scriptName) {
+/*!
+ * @brief Creates a new coordinate blip (i.e. tracing blip with no sprite)
+ * @param type Type
+ * @param posn Position
+ * @param color Color
+ * @param blipDisplay Display option
+ * @param scriptName Script name (Unused) (from Android)
+ * @addr 0x583820
+ * @returns Handle of the blip created.
+ */
+tBlipHandle CRadar::SetCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, const char* scriptName) {
     auto index = FindTraceNotTrackingBlipIndex();
     if (index == -1)
         return -1;
@@ -489,50 +528,72 @@ int32 CRadar::SetCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBli
     return GetNewUniqueBlipIndex(index);
 }
 
-// param *scriptName* from Android
-// 0x583920
-int32 CRadar::SetShortRangeCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, const char* scriptName) {
-    int32 index = SetCoordBlip(type, posn, color, blipDisplay, scriptName);
-    if (index == -1)
-        return -1;
+/*!
+ * @brief Creates a new short-range coordinate blip (i.e. tracing blip with no sprite)
+ * @param type Type
+ * @param posn Position
+ * @param color Color
+ * @param blipDisplay Display option
+ * @param scriptName Script name (Unused) (from Android)
+ * @addr 0x583920
+ * @returns Handle of the blip created.
+ */
+tBlipHandle CRadar::SetShortRangeCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, const char* scriptName) {
+    if (const auto blip = SetCoordBlip(type, posn, color, blipDisplay, scriptName); blip != -1) {
+        ms_RadarTrace[GetActualBlipArrayIndex(blip)].m_bShortRange = true;
+        return blip;
+    }
 
-    auto actualIndex = GetActualBlipArrayIndex(index);
-    ms_RadarTrace[actualIndex].m_bShortRange = true;
-    return index;
+    return -1;
 }
 
-// 0x5839A0
-int32 CRadar::SetEntityBlip(eBlipType type, int32 entityHandle, uint32 arg2, eBlipDisplay blipDisplay) {
-    auto index = FindTraceNotTrackingBlipIndex();
-    if (index == -1)
-        return -1;
+/*!
+ * @brief Creates a new coordinate blip (i.e. tracing blip with no sprite) bound to an entity.
+ * @param type Type
+ * @param entityHandle Opaque entity handle? (CEntity*?)
+ * @param arg2 Unknown argument (Unused)
+ * @param blipDisplay Display option
+ * @addr 0x5839A0
+ * @returns Handle of the blip created.
+ */
+tBlipHandle CRadar::SetEntityBlip(eBlipType type, int32 entityHandle, uint32 arg2, eBlipDisplay blipDisplay) {
+    if (const auto index = FindTraceNotTrackingBlipIndex(); index != -1) {
+        auto& t = ms_RadarTrace[index];
 
-    auto& t = ms_RadarTrace[index];
+        t.m_nBlipDisplayFlag = blipDisplay;
+        t.m_nColour = (type == BLIP_CHAR || type == BLIP_CAR) ? BLIP_COLOUR_THREAT : BLIP_COLOUR_GREEN;
+        t.m_nEntityHandle = entityHandle;
+        t.m_fSphereRadius = 1.f;
+        t.m_nBlipSize = 1;
+        t.m_nBlipDisplayFlag = blipDisplay;
+        t.m_nBlipType = type;
+        t.m_nBlipSprite = eRadarSprite::RADAR_SPRITE_NONE;
+        t.m_bBright = true;
+        t.m_bTrackingBlip = true;
+        t.m_pEntryExit = nullptr;
 
-    t.m_nBlipDisplayFlag = blipDisplay;
-    t.m_nColour          = (type == BLIP_CHAR || type == BLIP_CAR) ? BLIP_COLOUR_THREAT : BLIP_COLOUR_GREEN;
-    t.m_nEntityHandle    = entityHandle;
-    t.m_fSphereRadius    = 1.f;
-    t.m_nBlipSize        = 1;
-    t.m_nBlipDisplayFlag = blipDisplay;
-    t.m_nBlipType        = type;
-    t.m_nBlipSprite      = eRadarSprite::RADAR_SPRITE_NONE;
-    t.m_bBright          = true;
-    t.m_bTrackingBlip    = true;
-    t.m_pEntryExit       = nullptr;
+        return GetNewUniqueBlipIndex(index);
+    }
 
-    return GetNewUniqueBlipIndex(index);
+    return -1;
 }
 
-// 0x583AB0
-void CRadar::ChangeBlipColour(int32 blipIndex, uint32 color) {
-    const auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index != -1) {
-        ms_RadarTrace[index].m_nColour = static_cast<eBlipColour>(color);
+/*!
+ * @brief Change blip color to one of the color of a radar color set.
+ * @addr 0x583AB0
+ */
+void CRadar::ChangeBlipColour(tBlipHandle blip, eBlipColour color) {
+    if (const auto index = GetActualBlipArrayIndex(blip); index != -1) {
+        ms_RadarTrace[index].m_nColour = color;
     }
 }
 
-// 0x583AF0
+/*!
+ * @brief Checks if the blip is revealed.
+ * @param blipIndex Index of the blip in `ms_RadarTrace`
+ * @addr 0x583AF0
+ * @returns True if it's revealed to the player.
+ */
 bool CRadar::HasThisBlipBeenRevealed(int32 blipIndex) {
     const auto& blipPos = ms_RadarTrace[blipIndex].m_vPosition;
 
@@ -547,8 +608,14 @@ bool CRadar::HasThisBlipBeenRevealed(int32 blipIndex) {
     return false;
 }
 
-// 0x583B40
-bool CRadar::DisplayThisBlip(eRadarSprite spriteId, char priority) {
+/*!
+ * @brief Checks if a blip sprite is allowed to be drawn right now.
+ * @param spriteId Blip sprite
+ * @param priority Importance of displaying the blip.
+ * @addr 0x583B40
+ * @returns True if it's allowed to be drawn.
+ */
+bool CRadar::DisplayThisBlip(eRadarSprite spriteId, int8 priority) {
     if (CGame::CanSeeOutSideFromCurrArea() && FindPlayerPed()->m_nAreaCode == AREA_CODE_NORMAL_WORLD) {
         switch (spriteId) {
         case RADAR_SPRITE_NONE:
@@ -637,109 +704,120 @@ bool CRadar::DisplayThisBlip(eRadarSprite spriteId, char priority) {
     }
 }
 
-// unused
-// 0x583C70
-void CRadar::ChangeBlipBrightness(int32 blipIndex, int32 brightness) {
-    auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    ms_RadarTrace[index].m_bBright = brightness == 1 ? true : false;
+/*!
+ * @brief Changes the brightness of a blip. (Unused)
+ * @param blip Blip handle
+ * @param brightness Brightness flag. (=1: bright, ≠1: not bright)
+ * @addr 0x583C70
+ */
+void CRadar::ChangeBlipBrightness(tBlipHandle blip, int32 brightness) {
+    if (const auto index = GetActualBlipArrayIndex(blip); index != -1) {
+        ms_RadarTrace[index].m_bBright = brightness == 1 ? true : false;
+    }
 }
 
-// 0x583CC0
-void CRadar::ChangeBlipScale(int32 blipIndex, int32 size) {
-    auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    if (FrontEndMenuManager.m_bDrawingMap)
-        size = 1;
-
-    ms_RadarTrace[index].m_nBlipSize = size;
+/*!
+ * @brief Changes the size of a blip.
+ * @brief This function does not effect the blip size if the map is being drawn.
+ * @addr 0x583CC0
+ */
+void CRadar::ChangeBlipScale(tBlipHandle blip, int32 size) {
+    if (const auto index = GetActualBlipArrayIndex(blip); index != -1) {
+        ms_RadarTrace[index].m_nBlipSize = FrontEndMenuManager.m_bDrawingMap ? 1 : size;
+    }
 }
 
-// 0x583D20
-void CRadar::ChangeBlipDisplay(int32 blipIndex, eBlipDisplay blipDisplay) {
-    auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    ms_RadarTrace[index].m_nBlipDisplayFlag = blipDisplay;
+/*!
+ * @brief Changes the display option of a blip.
+ * @addr 0x583D20
+ */
+void CRadar::ChangeBlipDisplay(tBlipHandle blip, eBlipDisplay blipDisplay) {
+    if (const auto index = GetActualBlipArrayIndex(blip); index != -1) {
+        ms_RadarTrace[index].m_nBlipDisplayFlag = blipDisplay;
+    }
 }
 
-// 0x583D70
-void CRadar::SetBlipSprite(int32 blipIndex, eRadarSprite spriteId) {
-    auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    if (ms_RadarTrace[index].m_bTrackingBlip)
-        ms_RadarTrace[index].m_nBlipSprite = static_cast<eRadarSprite>(spriteId);
+/*!
+ * @brief Changes the sprite of a blip.
+ * @param blip Blip
+ * @param spriteId Blip sprite
+ * @addr 0x583D70
+ */
+void CRadar::SetBlipSprite(tBlipHandle blip, eRadarSprite spriteId) {
+    if (const auto index = GetActualBlipArrayIndex(blip); index != -1 && ms_RadarTrace[index].m_bTrackingBlip) {
+        ms_RadarTrace[index].m_nBlipSprite = spriteId;
+    }
 }
 
-// 0x583DB0
-void CRadar::SetBlipAlwaysDisplayInZoom(int32 blipIndex, bool display) {
-    auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    if (ms_RadarTrace[index].m_bTrackingBlip)
+/*!
+ * @brief Sets a blip to shown always in zoom.
+ * @addr 0x583DB0
+ */
+void CRadar::SetBlipAlwaysDisplayInZoom(tBlipHandle blip, bool display) {
+    if (const auto index = GetActualBlipArrayIndex(blip); index != -1 && ms_RadarTrace[index].m_bTrackingBlip) {
         ms_RadarTrace[index].m_bBlipRemain = display;
-}
-
-// unused?
-// 0x583E00
-void CRadar::SetBlipFade(int32 blipIndex, bool fade) {
-    auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    ms_RadarTrace[index].m_bBlipFade = fade;
-}
-
-// 0x583E50
-void CRadar::SetCoordBlipAppearance(int32 blipIndex, eBlipAppearance appearance) {
-    const auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1) {
-        return;
-    }
-
-    auto& trace = ms_RadarTrace[index];
-    if (trace.m_nBlipType != eBlipType::BLIP_CAR) {
-        return;
-    }
-
-    switch (appearance) { // Seems like there's a 3rd appearance type?
-    case BLIP_FLAG_FRIEND:
-    case BLIP_FLAG_THREAT:
-    case BLIP_FLAG_UNK:
-        trace.m_nAppearance = appearance;
-        break;
     }
 }
 
-// 0x583EB0
-void CRadar::SetBlipFriendly(int32 blipIndex, bool friendly) {
-    const auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index != -1) {
+/*!
+ * @brief Sets a blip to fade. (Unused?)
+ * @addr 0x583E00
+ */
+void CRadar::SetBlipFade(tBlipHandle blip, bool fade) {
+    if (const auto index = GetActualBlipArrayIndex(blip); index != -1) {
+        ms_RadarTrace[index].m_bBlipFade = fade;
+    }
+}
+
+/*!
+ * @brief Changes the appearnace of a blip.
+ * @addr 0x583E50
+ */
+void CRadar::SetCoordBlipAppearance(tBlipHandle blip, eBlipAppearance appearance) {
+    if (const auto index = GetActualBlipArrayIndex(blip); index != -1) {
+        auto& trace = ms_RadarTrace[index];
+        if (trace.m_nBlipType != eBlipType::BLIP_CAR) {
+            return;
+        }
+
+        switch (appearance) { // Seems like there's a 3rd appearance type?
+        case BLIP_FLAG_FRIEND:
+        case BLIP_FLAG_THREAT:
+        case BLIP_FLAG_UNK:
+            trace.m_nAppearance = appearance;
+            break;
+        }
+    }
+}
+
+/*!
+ * @brief Sets a blip as friendly.
+ * @addr 0x583EB0
+ */
+void CRadar::SetBlipFriendly(tBlipHandle blip, bool friendly) {
+    if (const auto index = GetActualBlipArrayIndex(blip); index != -1) {
         ms_RadarTrace[index].m_bFriendly = friendly;
     }
 }
 
-// 0x583F00
-void CRadar::SetBlipEntryExit(int32 blipIndex, CEntryExit* enex) {
-    const auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    auto& trace = ms_RadarTrace[index];
-    if (trace.m_bTrackingBlip) {
-        trace.m_pEntryExit = enex;
+/*!
+ * @brief Sets an entry point to a blip.
+ * @addr 0x583F00
+ */
+void CRadar::SetBlipEntryExit(tBlipHandle blip, CEntryExit* enex) {
+    if (const auto index = GetActualBlipArrayIndex(blip); index != -1) {
+        auto& trace = ms_RadarTrace[index];
+        if (trace.m_bTrackingBlip) {
+            trace.m_pEntryExit = enex;
+        }
     }
 }
 
-// This code piece seems fairly common.. Perhaps its inlined?
+/*!
+ * @brief Limits stretched X, Y values to the map
+ * @brief This function does nothing if the map is not being drawn.
+ * @brief This code piece seems fairly common.. Perhaps its inlined?
+ */
 void Limit(float& x, float& y) {
     if (FrontEndMenuManager.m_bDrawingMap) {
         x = SCREEN_STRETCH_X(x);
@@ -749,8 +827,11 @@ void Limit(float& x, float& y) {
     }
 }
 
-    // 0x583F40
-void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha) {
+/*!
+ * @brief Draws a square coordinate blip to the map.
+ * @addr 0x583F40
+ */
+void CRadar::ShowRadarTrace(float x, float y, uint32 size, CRGBA color) {
     Limit(x, y);
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
 
@@ -760,7 +841,7 @@ void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 gree
         y - float(size - 1),
         x + float(size + 1),
         y + float(size + 1)
-    }, { 0, 0, 0, alpha });
+    }, { 0, 0, 0, color.a });
 
     // Now draw actual rect on top of it
     CSprite2d::DrawRect({
@@ -768,10 +849,13 @@ void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 gree
         y - float(size),
         x + float(size),
         y + float(size)
-    }, { red, blue, green, alpha });
+    }, color);
 }
 
-// 0x584070
+/*!
+ * @brief Draws a coordinate blip to the map with height information.
+ * @addr 0x584070
+ */
 void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, CRGBA color, eRadarTraceHeight height) {
     Limit(x, y);
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
@@ -849,23 +933,27 @@ void CRadar::ShowRadarMarker(CVector p, uint32 color, float radius) {
     CTheScripts::ScriptDebugLine3D(p - r1 * right, p - r0 * right, color, color);
 }
 
-// 0x584770
+/*!
+ * @brief Get game color from the blip color.
+ * @addr 0x584770
+ * @returns Game color
+ */
 uint32 CRadar::GetRadarTraceColour(eBlipColour color, bool bright, bool friendly) {
     switch (color) {
     case BLIP_COLOUR_RED:
     case BLIP_COLOUR_REDCOPY:
-        return HudColour.GetIntColour((bright) ? HUD_COLOUR_RED : HUD_COLOUR_DARK_RED);
+        return HudColour.GetIntColour(bright ? HUD_COLOUR_RED : HUD_COLOUR_DARK_RED);
     case BLIP_COLOUR_GREEN:
-        return HudColour.GetIntColour((bright) ? HUD_COLOUR_GREEN : HUD_COLOUR_DARK_GREEN);
+        return HudColour.GetIntColour(bright ? HUD_COLOUR_GREEN : HUD_COLOUR_DARK_GREEN);
     case BLIP_COLOUR_BLUE:
     case BLIP_COLOUR_BLUECOPY:
-        return HudColour.GetIntColour((bright) ? HUD_COLOUR_LIGHT_BLUE : HUD_COLOUR_BLUE);
+        return HudColour.GetIntColour(bright ? HUD_COLOUR_LIGHT_BLUE : HUD_COLOUR_BLUE);
     case BLIP_COLOUR_WHITE:
-        return HudColour.GetIntColour((bright) ? HUD_COLOUR_LIGHT_GRAY : HUD_COLOUR_DARK_GRAY);
+        return HudColour.GetIntColour(bright ? HUD_COLOUR_LIGHT_GRAY : HUD_COLOUR_DARK_GRAY);
     case BLIP_COLOUR_YELLOW:
-        return HudColour.GetIntColour((bright) ? HUD_COLOUR_CREAM : HUD_COLOUR_GOLD);
+        return HudColour.GetIntColour(bright ? HUD_COLOUR_CREAM : HUD_COLOUR_GOLD);
     case BLIP_COLOUR_THREAT:
-        return HudColour.GetIntColour((friendly) ? HUD_COLOUR_BLUE : HUD_COLOUR_RED);
+        return HudColour.GetIntColour(friendly ? HUD_COLOUR_BLUE : HUD_COLOUR_RED);
     case BLIP_COLOUR_DESTINATION:
         return HudColour.GetIntColour(HUD_COLOUR_CREAM);
     default:
@@ -873,7 +961,10 @@ uint32 CRadar::GetRadarTraceColour(eBlipColour color, bool bright, bool friendly
     }
 }
 
-// 0x584850
+/*
+ * @brief Draw a sprite to that is rotated.
+ * @addr 0x584850
+ */
 void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, uint32 width, uint32 height, CRGBA color) {
     Limit(x, y);
     CVector2D verts[4];
@@ -974,7 +1065,10 @@ void CRadar::RemoveRadarSections() {
     }
 }
 
-// 0x584D40
+/*
+ * @brief Checks if a 2D point is inside the radar. (i.e. a rect that spans -1 to 1 in both directions)
+ * @addr 0x584D40
+ */
 bool IsPointInsideRadar(const CVector2D& point) {
     return std::abs(point.x) < 1.0f
         && std::abs(point.y) < 1.0f;
@@ -1002,7 +1096,7 @@ int32 CRadar::ClipRadarPoly(CVector2D* out, const CVector2D* in) {
 }
 
 // 0x5853D0
-void CRadar::DrawAreaOnRadar(const CRect& rect, const CRGBA&  color, bool inMenu) {
+void CRadar::DrawAreaOnRadar(const CRect& rect, const CRGBA& color, bool inMenu) {
     return plugin::Call<0x5853D0, const CRect&, const CRGBA&, bool>(rect, color, inMenu);
 
     if (!m_radarRect.IsRectInside(rect)) {
@@ -1166,7 +1260,10 @@ void CRadar::SetRadarMarkerState(int32 counter, bool flag) {
     */
 }
 
-// 0x585FF0
+/*
+ * @brief Draw a sprite to specific location and opacity.
+ * @addr 0x585FF0
+ */
 void CRadar::DrawRadarSprite(eRadarSprite spriteId, float x, float y, uint8 alpha) {
     Limit(x, y);
 
@@ -1253,7 +1350,7 @@ void CRadar::DrawRadarMap() {
             },
             { 20, 175, 20, 200 },
             false
-        );
+        );https://cdn.discordapp.com/attachments/961681815150665768/1074210653574799411/20220602_115428.jpg
 
         cachedSin = cSin;
         cachedCos = cCos;
@@ -1315,7 +1412,10 @@ void CRadar::DrawMap() {
     }
 }
 
-// 0x586D60
+/*
+ * @brief Draw a blip by its index in `ms_RadarTrace`
+ * @addr 0x586D60
+ */
 void CRadar::DrawCoordBlip(int32 blipIndex, bool isSprite) {
     const auto& trace = ms_RadarTrace[blipIndex];
     if (trace.m_nBlipType == BLIP_CONTACT_POINT && CTheScripts::IsPlayerOnAMission())
@@ -1386,7 +1486,10 @@ void CRadar::DrawEntityBlip(int32 blipIndex, uint8 arg1) {
     plugin::Call<0x587000, int32, uint8>(blipIndex, arg1);
 }
 
-// 0x587C10
+/*
+ * @brief Clear a blip by its index in `ms_RadarTrace`
+ * @addr 0x587C10
+ */
 void CRadar::ClearActualBlip(int32 blipIndex) {
     if (blipIndex < 0 || blipIndex >= MAX_RADAR_TRACES)
         return;
@@ -1394,7 +1497,10 @@ void CRadar::ClearActualBlip(int32 blipIndex) {
     ClearActualBlip(ms_RadarTrace[blipIndex]);
 }
 
-// NOTSA
+/*
+ * @notsa
+ * @brief Clear a blip by its trace reference.
+ */
 void CRadar::ClearActualBlip(tRadarTrace& trace) {
     trace.m_nBlipSize = 1;
     trace.m_fSphereRadius = 1.0f;
@@ -1413,7 +1519,10 @@ void CRadar::ClearActualBlip(tRadarTrace& trace) {
     trace.m_nBlipType = BLIP_NONE;
 }
 
-// 0x587C60
+/*
+ * @brief Clear a blip by type and handle of the entity.
+ * @addr 0x587C60
+ */
 void CRadar::ClearBlipForEntity(eBlipType blipType, int32 entityHandle) {
     for (auto& trace : ms_RadarTrace) {
         if (trace.m_nBlipType == blipType && trace.m_nEntityHandle == entityHandle) {
@@ -1422,10 +1531,12 @@ void CRadar::ClearBlipForEntity(eBlipType blipType, int32 entityHandle) {
     }
 }
 
-// 0x587CE0
-void CRadar::ClearBlip(int32 blipIndex) {
-    const auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index != -1) {
+/*
+ * @brief Clear a blip
+ * @addr 0x587CE0
+ */
+void CRadar::ClearBlip(tBlipHandle blip) {
+    if (const auto index = GetActualBlipArrayIndex(blip); index != -1) {
         ClearActualBlip(index);
     }
 }
@@ -1502,7 +1613,8 @@ void CRadar::DrawBlips() {
     plugin::Call<0x588050>();
 }
 
-/*! Load radar blips from save file
+/*
+ * @brief Load radar blips from save file
  * @addr 0x5D53C0
  */
 bool CRadar::Load() {
@@ -1518,7 +1630,8 @@ bool CRadar::Load() {
     return true;
 }
 
-/*! Save radar blips to save file
+/*
+ * @brief Save radar blips to save file
  * @addr 0x5D5860
  */
 bool CRadar::Save() {
@@ -1552,8 +1665,11 @@ bool CRadar::Save() {
 
 }
 
-// see CRadar::DrawLegend
-// NOTSA
+/*!
+ * @notsa
+ * @brief Get name of a blip type. (See CRadar::DrawLegend)
+ * @returns The name of the blip type
+ */
 const char* CRadar::GetBlipName(eRadarSprite blipType) {
     switch (blipType) {
     case RADAR_SPRITE_PLAYER_INTEREST:  return TheText.Get("LG_56");
@@ -1633,6 +1749,10 @@ const char* CRadar::GetBlipName(eRadarSprite blipType) {
     return nullptr;
 }
 
+/*!
+ * @notsa
+ * @brief Returns the first index in `ms_RadarTrace` that is not a tracking blip.
+ */
 int32 CRadar::FindTraceNotTrackingBlipIndex() {
     for (auto&& [i, v] : notsa::enumerate(ms_RadarTrace)) {
         if (!v.m_bTrackingBlip) {
@@ -1642,8 +1762,11 @@ int32 CRadar::FindTraceNotTrackingBlipIndex() {
     return -1;
 }
 
-// Color with the alpha set to 0xFF
-// NOTSA
+
+/*!
+ * @notsa
+ * @brief Returns the color of the blip's apperance (Opaque)
+ */
 CRGBA tRadarTrace::GetStaticColour() const {
     switch (m_nAppearance) {
     case eBlipAppearance::BLIP_FLAG_FRIEND:
@@ -1662,6 +1785,10 @@ CRGBA tRadarTrace::GetStaticColour() const {
     return 0;
 }
 
+/*!
+ * @notsa
+ * @brief Returns the position of the blip always relative to the world.
+ */
 CVector tRadarTrace::GetWorldPos() const {
     if (m_pEntryExit) {
         CVector pos{};
@@ -1672,6 +1799,11 @@ CVector tRadarTrace::GetWorldPos() const {
     }
 }
 
+/*!
+ * @notsa
+ * @brief Returns radar and screen relative positions of the trace.
+ * @param radarPointDist Distance to the point in radar. (Optional)
+ */
 std::pair<CVector2D, CVector2D> tRadarTrace::GetRadarAndScreenPos(float* radarPointDist) const {
     const auto world = GetWorldPos();
 
