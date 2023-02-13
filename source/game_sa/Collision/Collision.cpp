@@ -413,15 +413,15 @@ void CCollision::RemoveTrianglePlanes(CColModel* colModel) {
  * @param         cmA              Col model B
  * @param[out]    lineCPs          Line collision points (At most 16 - It can be null if you're sure the model has no lines)
  * @param[out]    sphereCPs        Sphere collision points (At most 32)
- * @param[in,out] maxTouchDistance Only used if model has lines - If you're sure it has none it can be null.
+ * @param[in,out] maxTouchDistances Only used if model has lines - If you're sure it has none it can be null. It has to be an array of the same size as the number of lines.
  * @param         arg7             Not 100% sure how to explain what this does. TODO.
  *
  * @returns Number of sphere collision points found (At most ~~32~~ 31 - Original function is buggy)
  */
 int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, const CMatrix& transformB, CColModel& cmB, CColPoint (&sphereCPs)[32], CColPoint* lineCPs,
-                                   float* maxTouchDistance, bool arg7) {
+                                   float* maxTouchDistances, bool arg7) {
     return plugin::CallAndReturn<int32, 0x4185C0, const CMatrix&, CColModel&, const CMatrix&, CColModel&, CColPoint(&)[32], CColPoint*, float*, bool>(
-        transformA, cmA, transformB, cmB, sphereCPs, lineCPs, maxTouchDistance, arg7);
+        transformA, cmA, transformB, cmB, sphereCPs, lineCPs, maxTouchDistances, arg7);
 
     // Don't these this should ever happen, but okay?
     if (!cmA.m_pColData) {
@@ -655,7 +655,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
     // and store colpoints for all lines (even if they didn't collide)
     // (I really don't understand how the caller will know which lines have collided?)
     if (cdA.m_nNumLines) {
-        assert(maxTouchDistance);
+        assert(maxTouchDistances);
         assert(lineCPs);
         assert(cdA.m_nNumLines <= MAX_LINES);
 
@@ -674,7 +674,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
             // }
 
             auto& thisLineCP{lineCPs[lineIdx]};
-            auto& thisLineTochDist{maxTouchDistance[lineIdx]};
+            auto& thisLineTochDist{maxTouchDistances[lineIdx]};
 
             bool hasCollided{}; // Instead of the static array we just use a variable (Same functionality)
 
