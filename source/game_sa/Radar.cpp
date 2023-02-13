@@ -1012,10 +1012,10 @@ void CRadar::DrawYouAreHereSprite(float x, float y) {
 
 // 0x584A80
 void CRadar::SetupRadarRect(int32 x, int32 y) {
-    m_radarRect.left   = 500.0f * float(x - 6) - 500.0f;
-    m_radarRect.top    = 500.0f * float(5 - y) - 500.0f;
-    m_radarRect.right  = 500.0f * float(x - 4);
-    m_radarRect.bottom = 500.0f * float(7 - y);
+    m_radarRect.left   = float(500 * (x - 7));
+    m_radarRect.top    = float(500 * (7 - y));
+    m_radarRect.right  = float(500 * (x - 4));
+    m_radarRect.bottom = float(500 * (4 - y));
 }
 
 // unused
@@ -1350,7 +1350,7 @@ void CRadar::DrawRadarMap() {
             },
             { 20, 175, 20, 200 },
             false
-        );https://cdn.discordapp.com/attachments/961681815150665768/1074210653574799411/20220602_115428.jpg
+        );
 
         cachedSin = cSin;
         cachedCos = cCos;
