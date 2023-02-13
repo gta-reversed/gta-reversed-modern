@@ -259,7 +259,7 @@ public:
     static void ShowRadarTraceWithHeight(float x, float y, uint32 size, CRGBA color, eRadarTraceHeight height);
     static void ShowRadarMarker(CVector posn, uint32 color, float radius);
     static uint32 GetRadarTraceColour(eBlipColour color, bool bright, bool friendly);
-    static void DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, uint32 width, uint32 height, CRGBA color);
+    static void DrawRotatingRadarSprite(CSprite2d& sprite, float x, float y, float angle, uint32 width, uint32 height, CRGBA color);
     static void DrawYouAreHereSprite(float x, float y);
     static void SetupRadarRect(int32 x, int32 y);
     static void RequestMapSection(int32 x, int32 y);
@@ -297,6 +297,10 @@ public:
     // NOTSA
     static const char* GetBlipName(eRadarSprite sprite);
     static int32 FindTraceNotTrackingBlipIndex(); // Return the index of the first trace with the `TrackingBlip` flag NOT set
+
+    static bool IsMapSectionInBounds(int32 x, int32 y) {
+        return x >= 0 && x < MAX_RADAR_WIDTH_TILES && y >= 0 && y < MAX_RADAR_HEIGHT_TILES;
+    }
 };
 
 bool ClipRadarTileCoords(int32& x, int32& y);

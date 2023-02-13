@@ -965,45 +965,41 @@ uint32 CRadar::GetRadarTraceColour(eBlipColour color, bool bright, bool friendly
  * @brief Draw a sprite to that is rotated.
  * @addr 0x584850
  */
-void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, uint32 width, uint32 height, CRGBA color) {
+void CRadar::DrawRotatingRadarSprite(CSprite2d& sprite, float x, float y, float angle, uint32 width, uint32 height, CRGBA color) {
     Limit(x, y);
     CVector2D verts[4];
     for (auto i = 0u; i < std::size(verts); i++) {
-        float theta = (float)i * HALF_PI + (angle - FRAC_PI_4);
+        const auto theta = (float)i * HALF_PI + (angle - FRAC_PI_4);
 
         verts[i].x = std::sin(theta) * (float)width + x;
         verts[i].y = std::cos(theta) * (float)height + y;
     }
 
-    sprite->Draw(verts[3].x, verts[3].y, verts[2].x, verts[2].y, verts[0].x, verts[0].y, verts[1].x, verts[1].y, color);
+    sprite.Draw(verts[3].x, verts[3].y, verts[2].x, verts[2].y, verts[0].x, verts[0].y, verts[1].x, verts[1].y, color);
 }
 
 // 0x584960
 void CRadar::DrawYouAreHereSprite(float x, float y) {
-    static uint32& mapYouAreHereTimer = *(uint32*)0xBAA358; // TODO | STATICREF
-    static bool& mapYouAreHereDisplay = *(bool*)0x8D0930;
+    static auto& mapYouAreHereTimer = *(uint32*)0xBAA358;
+    static auto& mapYouAreHereDisplay = *(bool*)0x8D0930;
 
-    if ((CTimer::GetTimeInMSPauseMode() - mapYouAreHereTimer) > 700) {
+    if (CTimer::GetTimeInMSPauseMode() - mapYouAreHereTimer > 700) {
         mapYouAreHereTimer = CTimer::GetTimeInMSPauseMode();
         mapYouAreHereDisplay = !mapYouAreHereDisplay;
     }
 
     if (mapYouAreHereDisplay) {
-        float angle = FindPlayerHeading(0) + PI;
-        float circleAngle = angle + HALF_PI;
-
-        CRGBA white(255, 255, 255, 255);
-        float drawX = x + 17.0f * std::cos(circleAngle);
-        float drawY = y - 17.0f * std::sin(circleAngle);
+        const auto angle = FindPlayerHeading(0) + DegreesToRadians(180.0f);
+        const auto circleAngle = angle + DegreesToRadians(90.0f);
 
         DrawRotatingRadarSprite(
-            &RadarBlipSprites[RADAR_SPRITE_MAP_HERE],
-            drawX,
-            drawY,
+            RadarBlipSprites[RADAR_SPRITE_MAP_HERE],
+            x + 17.0f * std::cos(circleAngle),
+            y - 17.0f * std::sin(circleAngle),
             angle,
             (uint32)(SCREEN_STRETCH_X(25.0f)),
             (uint32)(SCREEN_STRETCH_Y(25.0f)),
-            white
+            { 255, 255, 255, 255 }
         );
     }
 
@@ -1034,26 +1030,22 @@ bool ClipRadarTileCoords(int32& x, int32& y) {
 
 // 0x584B50
 void CRadar::RequestMapSection(int32 x, int32 y) {
-    if (x < 0 || x > MAX_RADAR_WIDTH_TILES - 1 || y < 0 || y > MAX_RADAR_HEIGHT_TILES - 1)
+    if (!IsMapSectionInBounds(x, y))
         return;
 
-    int32 tex = gRadarTextures[y][x];
-    if (tex == -1)
-        return;
-
-    CStreaming::RequestTxdModel(tex, (STREAMING_GAME_REQUIRED | STREAMING_KEEP_IN_MEMORY));
+    if (const auto texture = gRadarTextures[y][x]; texture != -1) {
+        CStreaming::RequestTxdModel(texture, STREAMING_GAME_REQUIRED | STREAMING_KEEP_IN_MEMORY);
+    }
 }
 
 // 0x584BB0
 void CRadar::RemoveMapSection(int32 x, int32 y) {
-    if (x < 0 || x > MAX_RADAR_WIDTH_TILES || y < 0 || y > MAX_RADAR_HEIGHT_TILES)
+    if (!IsMapSectionInBounds(x, y))
         return;
 
-    int32 tex = gRadarTextures[y][x];
-    if (tex == -1)
-        return;
-
-    CStreaming::RemoveTxdModel(tex);
+    if (const auto texture = gRadarTextures[y][x]; texture != -1) {
+        CStreaming::RemoveTxdModel(texture);
+    }
 }
 
 // 0x584BF0
