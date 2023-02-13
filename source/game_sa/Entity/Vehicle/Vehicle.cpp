@@ -493,7 +493,7 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
 
     if (m_pEntityIgnoredCollision == colPhysical || colPhysical->m_pEntityIgnoredCollision == this) {
         bCollidedEntityCollisionIgnored = true;
-        physicalFlags.b13 = true;
+        physicalFlags.bSkipLineCol = true;
         return;
     }
 
@@ -504,7 +504,7 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
 
     if (colPhysical->m_pAttachedTo == this) {
         bCollisionDisabled = true;
-        physicalFlags.b13 = true;
+        physicalFlags.bSkipLineCol = true;
         return;
     }
 
@@ -518,7 +518,7 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
         && (colPhysical->AsVehicle()->physicalFlags.bDisableCollisionForce && !colPhysical->AsVehicle()->physicalFlags.bCollidable)
     ) {
         bCollidedEntityCollisionIgnored = true;
-        physicalFlags.b13 = true;
+        physicalFlags.bSkipLineCol = true;
         return;
     }
 
@@ -590,19 +590,19 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
 
     if (colPhysical->IsRCCar()) {
         bCollidedEntityCollisionIgnored = true;
-        physicalFlags.b13 = true;
+        physicalFlags.bSkipLineCol = true;
         return;
     }
 
     if (IsRCCar() && (colPhysical->IsVehicle() || colPhysical->IsPed())) {
         bCollidedEntityCollisionIgnored = true;
-        physicalFlags.b13 = true;
+        physicalFlags.bSkipLineCol = true;
         return;
     }
 
     if (colPhysical == m_pTractor || colPhysical == m_pTrailer) {
         bThisOrCollidedEntityStuck = true;
-        physicalFlags.b13 = true;
+        physicalFlags.bSkipLineCol = true;
         return;
     }
 
