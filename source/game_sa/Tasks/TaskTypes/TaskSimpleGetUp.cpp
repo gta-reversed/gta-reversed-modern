@@ -108,7 +108,6 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped) {
         || vehicle == ped->m_standingOnEntity
     ) {
         auto& entity = ped->m_pEntityIgnoredCollision;
-        
         if (!entity
             || !entity->IsVehicle()
             || entity->AsVehicle()->IsBike()
