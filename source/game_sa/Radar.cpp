@@ -150,7 +150,7 @@ void CRadar::InjectHooks() {
     RH_ScopedInstall(ShowRadarTraceWithHeight, 0x584070);
     RH_ScopedInstall(DrawCoordBlip, 0x586D60);
 
-    // RH_ScopedInstall(SetupAirstripBlips, 0x587D20);
+    RH_ScopedInstall(SetupAirstripBlips, 0x587D20, {.reversed = false}); // TEST
     RH_ScopedInstall(DrawBlips, 0x588050);
     // RH_ScopedInstall(ClipRadarPoly, 0x585040);
     // RH_ScopedInstall(DrawAreaOnRadar, 0x5853D0);
@@ -1574,62 +1574,41 @@ CVector GetAirStripLocation(eAirstripLocation location) {
 
 // 0x587D20
 void CRadar::SetupAirstripBlips() {
-    return plugin::Call<0x587D20>();
-
-    // WIP
-    auto* vehicle = FindPlayerVehicle();
-    if (vehicle && vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX) {
+    if (const auto veh = FindPlayerVehicle(); veh && veh->IsSubPlane() && veh->m_nModelIndex != MODEL_VORTEX) {
         if ((CTimer::GetFrameCounter() & 4) == 0) {
-            if (airstrip_blip) {
+            if (airstrip_blip)
                 return;
-            }
 
-            CVector pos = GetAirStripLocation(airstrip_location);
+            const auto pos = GetAirStripLocation(airstrip_location);
             airstrip_blip = SetCoordBlip(BLIP_AIRSTRIP, pos, BLIP_COLOUR_RED, BLIP_DISPLAY_BLIPONLY);
             return;
         }
 
-        for (auto& table : airstrip_table) {
-            auto distance = DistanceBetweenPoints2D(table.position, vehicle->GetPosition());
-            // todo add condition
-        }
-
-        auto location = AIRSTRIP_LS_AIRPORT;
-        /*
-        if (distanceTo1 >= (double)distanceTo2 ||
-            distanceTo1 >= (double)distanceTo3 ||
-            distanceTo1 >= (double)distanceTo4
-        ) {
-            location = AIRSTRIP_SF_AIRPORT;
-        }
-        if (distanceTo2 >= (double)distanceTo1 ||
-            distanceTo2 >= (double)distanceTo3 ||
-            distanceTo2 >= (double)distanceTo4
-        ) {
-            if (distanceTo3 >= (double)distanceTo1 ||
-                distanceTo3 >= (double)distanceTo2 ||
-                (location = AIRSTRIP_LV_AIRPORT, distanceTo3 >= (double)distanceTo4)
-            ) {
-                location = AIRSTRIP_VERDANT_MEADOWS;
+        // NOTSA, effectively the same thing though.
+        const auto location = [veh] {
+            float distances[NUM_AIRSTRIPS]{};
+            for (auto&& [i, table] : notsa::enumerate(airstrip_table)) {
+                distances[i] = DistanceBetweenPoints2D(table.position, veh->GetPosition());
             }
-        }
-        */
 
-        if (airstrip_location == location) {
-            if (airstrip_blip) {
+            return (eAirstripLocation)std::distance(distances, rng::min_element(distances));
+        }();
+
+        if (airstrip_blip) {
+            if (airstrip_location == location)
                 return;
-            }
-        } else if (airstrip_blip) {
+
             ClearBlip(airstrip_blip);
             airstrip_location = location;
         }
 
-        CVector pos = GetAirStripLocation(airstrip_location);
+        const auto pos = GetAirStripLocation(airstrip_location);
         airstrip_blip = SetCoordBlip(BLIP_AIRSTRIP, pos, BLIP_COLOUR_RED, BLIP_DISPLAY_BLIPONLY);
         return;
     }
 
     if (airstrip_blip) {
+        // player is not flying anymore.
         ClearBlip(airstrip_blip);
         airstrip_blip = 0;
     }
@@ -1638,12 +1617,12 @@ void CRadar::SetupAirstripBlips() {
 // 0x588050
 void CRadar::DrawBlips() {
     SetupAirstripBlips();
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(false));
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(false));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(false));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(false));
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(true));
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, RWRSTATE(rwBLENDSRCALPHA));
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, RWRSTATE(false));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(false));
 
     const auto TransformRealWorldPointToBlipSpace = [](const CVector2D& pos) {
         CVector2D radar{}, screen{};
@@ -1738,7 +1717,7 @@ void CRadar::DrawBlips() {
                 if (trace.m_nBlipSprite == RADAR_SPRITE_WAYPOINT) {
                     DrawCoordBlip(i, true);
                 }
-                break; // break the loop as well?
+                break;
             default:
                 break;
             }
