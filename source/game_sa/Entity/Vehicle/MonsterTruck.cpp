@@ -33,9 +33,9 @@ CMonsterTruck::CMonsterTruck(int32 modelIndex, eVehicleCreatedBy createdBy) : CA
 }
 
 // 0x6C8AE0
-int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* outColPts) {
+int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) {
     if (m_nStatus != STATUS_SIMPLE) {
-        vehicleFlags.bVehicleColProcessed = true;
+        vehicleFlags.bVehicleColProcessed = true; // OK
     }
 
     const auto thisCM = GetColModel();
@@ -48,7 +48,7 @@ int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* outColPt
     const auto numColPts = CCollision::ProcessColModels(
         GetMatrix(), *thisCM,
         entity->GetMatrix(), *entity->GetColModel(),
-        reinterpret_cast<CColPoint(&)[32]>(outColPts),
+        *(std::array<CColPoint, 32>*)(colPoint), // trust me bro
         m_wheelColPoint.data(),
         wheelColPtsTouchDists.data(),
         false
@@ -96,15 +96,15 @@ int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* outColPt
             }
         }
     } else {
-        thisCM->GetData()->m_nNumLines = 4;
+        thisCM->GetData()->m_nNumLines = MAX_CARWHEELS; // TODO: Magic (Each wheel has 1 suspension line right now, but hardcoding like this isnt good)
     }
 
-    if (numColPts || numProcessedWheels) {
+    if (numColPts > 0 || numProcessedWheels > 0) {
         AddCollisionRecord(entity);
         if (!entity->IsBuilding()) {
             entity->AsPhysical()->AddCollisionRecord(this);
         }
-        if (numColPts) {
+        if (numColPts > 0) {
             if (   entity->IsBuilding()
                 || (entity->IsObject() && entity->AsPhysical()->physicalFlags.bDisableCollisionForce)
             ) {
@@ -114,6 +114,7 @@ int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* outColPt
     }
 
     return numColPts;
+    
 }
 
 // 0x6C83A0

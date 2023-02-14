@@ -39,7 +39,7 @@ public:
     std::array<RwFrame*, CAR_NUM_NODES> m_aCarNodes;
     std::array<CBouncingPanel, 3>       m_panels;
     CDoor                               m_swingingChassis;
-    std::array<CColPoint, 4>            m_wheelColPoint;
+    std::array<CColPoint, 4>            m_wheelColPoint;                    // 0x724
     std::array<float, 4>                m_fWheelsSuspensionCompression;     // 0x7D4 - [0-1] with 0 being suspension fully compressed, and 1 being completely relaxed - Filled with 1.f in the ctor
     std::array<float, 4>                m_fWheelsSuspensionCompressionPrev; // 0x7E4 - Filled with 1.f in the ctor
     std::array<float, 4>                m_aWheelTimer;
