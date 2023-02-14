@@ -71,7 +71,7 @@ CVehicle* CPedPlacement::IsPositionClearOfCars(const CPed* ped) {
         return nullptr;
 
     if (vehHit->IsAutomobile() || vehHit->vehicleFlags.bIsBig) {
-        static CColPoint unusedColPoint[32]; // 0xC102A0
+        std::array<CColPoint, 32> unused{}; // 0xC102A0 - Originally static, but this is fine too.
         if (CCollision::ProcessColModels(
             *ped->m_matrix,
             *CModelInfo::GetModelInfo(ped->m_nModelIndex)->GetColModel(),
@@ -79,7 +79,7 @@ CVehicle* CPedPlacement::IsPositionClearOfCars(const CPed* ped) {
             *vehHit->m_matrix,
             *CModelInfo::GetModelInfo(vehHit->m_nModelIndex)->GetColModel(),
 
-            unusedColPoint, nullptr, nullptr, false
+            unused, nullptr, nullptr, false
         )) {
             return vehHit;
         }

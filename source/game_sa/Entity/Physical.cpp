@@ -588,7 +588,7 @@ bool CPhysical::TestCollision(bool bApplySpeed) {
 // 0x546D00
 int32 CPhysical::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) {
     CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
-    int32 totalColPointsToProcess = CCollision::ProcessColModels(*m_matrix, *colModel, entity->GetMatrix(), *entity->GetColModel(), *(CColPoint(*)[32])colPoint/*should be okay for now*/, nullptr, nullptr, false);
+    int32 totalColPointsToProcess = CCollision::ProcessColModels(*m_matrix, *colModel, entity->GetMatrix(), *entity->GetColModel(), *(std::array<CColPoint, 32>*)colPoint/*should be okay for now*/, nullptr, nullptr, false);
     if (totalColPointsToProcess > 0) {
         AddCollisionRecord(entity);
         if (!entity->IsBuilding())

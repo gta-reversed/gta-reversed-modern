@@ -3,8 +3,6 @@
 #include "TaskSimpleGetUp.h"
 #include "PedPlacement.h"
 
-CColPoint(&CTaskSimpleGetUp::m_aColPoints)[32] = *reinterpret_cast<CColPoint(*)[32]>(0xC18F98);
-
 void CTaskSimpleGetUp::InjectHooks() {
     RH_ScopedClass(CTaskSimpleGetUp);
     RH_ScopedCategory("Tasks/TaskTypes");
@@ -110,7 +108,7 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped) {
         || vehicle == ped->m_standingOnEntity
     ) {
         auto& entity = ped->m_pEntityIgnoredCollision;
-
+        
         if (!entity
             || !entity->IsVehicle()
             || entity->AsVehicle()->IsBike()
