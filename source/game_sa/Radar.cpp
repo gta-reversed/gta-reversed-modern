@@ -151,7 +151,7 @@ void CRadar::InjectHooks() {
     RH_ScopedInstall(DrawCoordBlip, 0x586D60);
 
     // RH_ScopedInstall(SetupAirstripBlips, 0x587D20);
-    // RH_ScopedInstall(DrawBlips, 0x588050);
+    RH_ScopedInstall(DrawBlips, 0x588050);
     // RH_ScopedInstall(ClipRadarPoly, 0x585040);
     // RH_ScopedInstall(DrawAreaOnRadar, 0x5853D0);
     // RH_ScopedInstall(StreamRadarSections, 0x584C50);
@@ -1637,7 +1637,165 @@ void CRadar::SetupAirstripBlips() {
 
 // 0x588050
 void CRadar::DrawBlips() {
-    plugin::Call<0x588050>();
+    SetupAirstripBlips();
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(false));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(false));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(true));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND, RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE, RWRSTATE(false));
+
+    const auto TransformRealWorldPointToBlipSpace = [](const CVector2D& pos) {
+        CVector2D radar{}, screen{};
+        TransformRealWorldPointToRadarSpace(radar, pos);
+        LimitRadarPoint(radar);
+        TransformRadarPointToScreenSpace(screen, radar);
+
+        return screen;
+    };
+
+    if (FrontEndMenuManager.m_bDrawingMap) {
+        if (FrontEndMenuManager.m_bMapLoaded) {
+            // draw the menu map ruler.
+            const auto mouseX = FrontEndMenuManager.m_nMousePosX, mouseY = FrontEndMenuManager.m_nMousePosY;
+
+            if (!CPad::IsMouseLButton() &&
+                mouseX > SCREEN_STRETCH_X(60.0f) && mouseX < SCREEN_STRETCH_FROM_RIGHT(60.0f) &&
+                mouseY > SCREEN_STRETCH_Y(60.0f) && mouseY < SCREEN_STRETCH_FROM_BOTTOM(60.0f) ||
+                !FrontEndMenuManager.m_bDrawMouse)
+            {
+                auto drawPos = TransformRealWorldPointToBlipSpace(FrontEndMenuManager.m_vMousePos);
+                LimitToMap(drawPos.x, drawPos.y);
+
+                CSprite2d::DrawRect(
+                    {
+                        SCREEN_STRETCH_X(drawPos.x) - 1.0f,
+                        0.0f,
+                        SCREEN_STRETCH_X(drawPos.x) + 1.0f,
+                        SCREEN_HEIGHT
+                    },
+                    HudColour.GetRGB(HUD_COLOUR_GOLD)
+                );
+
+                CSprite2d::DrawRect(
+                    {
+                        0.0f,
+                        SCREEN_STRETCH_Y(drawPos.y) - 1.0f,
+                        SCREEN_WIDTH,
+                        SCREEN_STRETCH_Y(drawPos.y) + 1.0f,
+                    },
+                    HudColour.GetRGB(HUD_COLOUR_GOLD)
+                );
+            }
+        }
+    } else {
+        // draw the (N) blip.
+        const auto drawPos = TransformRealWorldPointToBlipSpace(CVector2D{0.0f, m_radarRange * SQRT_2} + vec2DRadarOrigin);
+        DrawRadarSprite(RADAR_SPRITE_NORTH, drawPos.x, drawPos.y, 255);
+    }
+
+    // we first do whole thing with isSprite = true, then = false... yeah.
+    for (auto isSprite = true; isSprite; isSprite = false) {
+        for (auto priority = 1; priority < 4; priority++) {
+            for (auto&& [i, trace] : notsa::enumerate(ms_RadarTrace)) { // todo: check if looping all
+                if (!trace.m_bTrackingBlip)
+                    continue;
+
+                switch (trace.m_nBlipType) {
+                case BLIP_CAR:
+                case BLIP_CHAR:
+                case BLIP_OBJECT:
+                case BLIP_PICKUP:
+                    if (DisplayThisBlip(trace.m_nBlipSprite, priority)) {
+                        DrawEntityBlip(i, isSprite);
+                    }
+                    break;
+                case BLIP_COORD:
+                case BLIP_CONTACT_POINT:
+                    if (trace.m_nBlipSprite != RADAR_SPRITE_WAYPOINT && DisplayThisBlip(trace.m_nBlipSprite, priority)) {
+                        DrawCoordBlip(i, isSprite);
+                    }
+                    break;
+                case BLIP_SPOTLIGHT:
+                case BLIP_AIRSTRIP:
+                    if (priority == 3 && (!CTheScripts::bPlayerIsOffTheMap || !FrontEndMenuManager.m_bDrawingMap)) {
+                        DrawEntityBlip(i, isSprite);
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+        for (auto&& [i, trace] : notsa::enumerate(ms_RadarTrace)) { // todo: check if looping all, same thing with above.
+            if (!trace.m_bTrackingBlip)
+                continue;
+
+            switch (trace.m_nBlipType) {
+            case BLIP_COORD:
+            case BLIP_CONTACT_POINT:
+                if (trace.m_nBlipSprite == RADAR_SPRITE_WAYPOINT) {
+                    DrawCoordBlip(i, true);
+                }
+                break; // break the loop as well?
+            default:
+                break;
+            }
+        }
+    }
+
+    const auto GetPlayerMarkerPosition = [] {
+        const auto playerDirection = (FindPlayerCentreOfWorld_NoInteriorShift(0) - vec2DRadarOrigin) / m_radarRange;
+
+        CVector2D rotatedPos = {
+            cachedSin * playerDirection.y + cachedCos * playerDirection.x,
+            cachedCos * playerDirection.y - cachedSin * playerDirection.x
+        };
+        LimitRadarPoint(rotatedPos);
+
+        CVector2D ret{};
+        TransformRadarPointToScreenSpace(ret, rotatedPos);
+
+        return ret;
+    };
+
+    if (!FrontEndMenuManager.m_bDrawingMap) {
+        for (auto i = 0; i < 2; i++) {
+            const auto player = FindPlayerPed(i);
+            if (!player)
+                continue;
+
+            // we don't draw the player marker while flying.
+            if (auto veh = FindPlayerVehicle(i); veh && veh->IsSubPlane() && veh->m_nModelIndex != MODEL_VORTEX)
+                continue;
+
+            const auto pos = GetPlayerMarkerPosition();
+
+            const auto angle = [] {
+                const auto heading = FindPlayerHeading();
+
+                if (CCamera::GetActiveCamera().m_nMode == MODE_TOPDOWN) {
+                    return heading + DegreesToRadians(180.0f);
+                } else {
+                    return heading - m_fRadarOrientation - DegreesToRadians(180.0f);
+                }
+            }();
+
+            DrawRotatingRadarSprite(
+                RadarBlipSprites[RADAR_SPRITE_CENTRE],
+                pos.x,
+                pos.y,
+                angle,
+                static_cast<uint32>(SCREEN_STRETCH_X(8.0f)),
+                static_cast<uint32>(SCREEN_STRETCH_X(8.0f)), // ?
+                player->IsHidden() ? CRGBA{50, 50, 50, 255} : CRGBA{255, 255, 255, 255}
+            );
+        }
+    } else {
+        const auto pos = GetPlayerMarkerPosition();
+        DrawYouAreHereSprite(pos.x, pos.y);
+    }
 }
 
 /*
