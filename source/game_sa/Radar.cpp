@@ -103,7 +103,7 @@ void CRadar::InjectHooks() {
 
     RH_ScopedInstall(Initialise, 0x587FB0);
     RH_ScopedInstall(LoadTextures, 0x5827D0);
-    // RH_ScopedInstall(DrawLegend, 0x5828A0);
+    RH_ScopedInstall(DrawLegend, 0x5828A0);
     RH_ScopedInstall(LimitRadarPoint, 0x5832F0);
     RH_ScopedInstall(Shutdown, 0x585940);
     RH_ScopedInstall(SetMapCentreToPlayerCoords, 0x585B20);
@@ -116,7 +116,7 @@ void CRadar::InjectHooks() {
     RH_ScopedInstall(SetBlipAlwaysDisplayInZoom, 0x583DB0);
     RH_ScopedInstall(DrawYouAreHereSprite, 0x584960);
     RH_ScopedInstall(ChangeBlipColour, 0x583AB0);
-    RH_ScopedOverloadedInstall(ClearActualBlip, "OG", 0x587C10, void(*)(int32));
+    RH_ScopedOverloadedInstall(ClearActualBlip, "OG", 0x587C10, void (*)(int32));
     RH_ScopedInstall(ClearBlip, 0x587CE0);
     RH_ScopedInstall(ClearBlipForEntity, 0x587C60);
     RH_ScopedInstall(RequestMapSection, 0x584B50);
@@ -125,7 +125,7 @@ void CRadar::InjectHooks() {
     RH_ScopedInstall(DrawRadarSprite, 0x585FF0);
     RH_ScopedInstall(DrawMap, 0x586B00);
     RH_ScopedInstall(DrawRadarMap, 0x586880);
-    RH_ScopedOverloadedInstall(StreamRadarSections, "", 0x5858D0, void(*)(const CVector&));
+    RH_ScopedOverloadedInstall(StreamRadarSections, "", 0x5858D0, void (*)(const CVector&));
     RH_ScopedInstall(SetupRadarRect, 0x584A80);
     RH_ScopedInstall(GetActualBlipArrayIndex, 0x582870);
     RH_ScopedInstall(LimitToMap, 0x583350);
@@ -139,7 +139,7 @@ void CRadar::InjectHooks() {
     RH_ScopedInstall(ShowRadarMarker, 0x584480);
     RH_ScopedInstall(DrawRadarMask, 0x585700);
     RH_ScopedInstall(Load, 0x5D53C0);
-    RH_ScopedGlobalInstall(Save, 0x5D5860, { .reversed = false });
+    RH_ScopedGlobalInstall(Save, 0x5D5860, {.reversed = false});
     RH_ScopedInstall(SetBlipFade, 0x583E00); // unused
     RH_ScopedInstall(SetCoordBlipAppearance, 0x583E50);
     RH_ScopedInstall(SetCoordBlip, 0x583820);
@@ -155,7 +155,7 @@ void CRadar::InjectHooks() {
     // RH_ScopedInstall(ClipRadarPoly, 0x585040);
     // RH_ScopedInstall(DrawAreaOnRadar, 0x5853D0);
     // RH_ScopedInstall(StreamRadarSections, 0x584C50);
-    // RH_ScopedInstall(AddBlipToLegendList, 0x5859F0);
+    RH_ScopedInstall(AddBlipToLegendList, 0x5859F0);
     // RH_ScopedInstall(Draw3dMarkers, 0x585BF0);
     // RH_ScopedInstall(DrawRadarSection, 0x586110);
     // RH_ScopedInstall(DrawRadarSectionMap, 0x586520);
@@ -241,7 +241,7 @@ int32 CRadar::GetActualBlipArrayIndex(tBlipHandle blip) {
 }
 
 // 0x5828A0
-void CRadar::DrawLegend(int32 x, int32 y, int32 blipType) {
+void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType) {
     if (blipType == RADAR_SPRITE_NONE) { // None => Player position
         blipType = RADAR_SPRITE_MAP_HERE;
     }
@@ -249,7 +249,7 @@ void CRadar::DrawLegend(int32 x, int32 y, int32 blipType) {
     CFont::PrintString(
         (float)x + SCREEN_STRETCH_X(20.0f),
         (float)y + SCREEN_STRETCH_Y(3.0f),
-        GetBlipName(static_cast<eRadarSprite>(blipType))
+        GetBlipName(blipType)
     );
 
     if (blipType > -1) { // The blip is a sprite, so just draw it.
@@ -1003,7 +1003,7 @@ void CRadar::DrawYouAreHereSprite(float x, float y) {
         );
     }
 
-    MapLegendList[MapLegendCounter++] = RADAR_SPRITE_MAP_HERE;
+    MapLegendList[++MapLegendCounter] = RADAR_SPRITE_MAP_HERE;
 }
 
 // 0x584A80
@@ -1137,7 +1137,7 @@ void CRadar::DrawRadarMask() {
 
     CVector2D out[8];
     CVector2D in;
-        CVector2D corners[4] = {
+    CVector2D corners[4] = {
         { 1.0f,  -1.0f },
         { 1.0f,  1.0f  },
         { -1.0f, 1.0f  },
@@ -1183,18 +1183,53 @@ void CRadar::StreamRadarSections(int32 x, int32 y) {
 // 0x585960
 void CRadar::InitFrontEndMap() {
     CalculateCachedSinCos();
-    std::ranges::fill(MapLegendList, 0);
+    rng::fill(MapLegendList, RADAR_SPRITE_NONE);
 
     vec2DRadarOrigin.Set(0.0f, 0.0f);
     m_radarRange = 2990.0f; // todo: world const - 1.0f
     MapLegendCounter = 0;
 
-    std::ranges::fill(ArrowBlipColour, CRGBA(0, 0, 0, 0));
+    rng::fill(ArrowBlipColour, CRGBA(0, 0, 0, 0));
 }
 
 // 0x5859F0
-void CRadar::AddBlipToLegendList(uint8 arg0, int32 blipIndex) {
-    plugin::Call<0x5859F0, uint8, int32>(arg0, blipIndex);
+void CRadar::AddBlipToLegendList(bool noSprite, int32 blipIndex) {
+    if (!FrontEndMenuManager.m_bDrawingMap)
+        return;
+
+    auto& trace = ms_RadarTrace[blipIndex];
+
+    const auto sprite = [&] {
+        if (!noSprite)
+            return eRadarSprite(blipIndex);
+
+        switch (trace.m_nBlipType) {
+        case BLIP_CAR:
+        case BLIP_CHAR:
+            return trace.m_bFriendly ? RADAR_SPRITE_FRIEND : RADAR_SPRITE_THREAT;
+            break;
+        case BLIP_OBJECT:
+            return RADAR_SPRITE_OBJECT;
+            break;
+        case BLIP_COORD:
+            return RADAR_SPRITE_DESTINATION;
+            break;
+        default:
+            return RADAR_SPRITE_PLAYER_INTEREST;
+            break;
+        }
+    }();
+
+    // check if it's not already added.
+    if (!rng::contains(MapLegendList, sprite)) {
+        MapLegendList[MapLegendCounter++] = sprite;
+
+        if (noSprite) {
+            const CRGBA color = GetRadarTraceColour(trace.m_nColour, trace.m_bBright, trace.m_bFriendly);
+
+            ArrowBlipColour[-sprite].Set(color, 255);
+        }
+    }
 }
 
 // 0x585B20
@@ -1267,7 +1302,7 @@ void CRadar::DrawRadarSprite(eRadarSprite spriteId, float x, float y, uint8 alph
             { x - width, y - height, x + width, y + height },
             { 255, 255, 255, alpha }
         );
-        AddBlipToLegendList(0, spriteId);
+        AddBlipToLegendList(false, spriteId);
     }
 }
 
@@ -1470,7 +1505,7 @@ void CRadar::DrawCoordBlip(int32 blipIndex, bool isSprite) {
         GetHeight()
     );
 
-    AddBlipToLegendList(1, blipIndex);
+    AddBlipToLegendList(true, blipIndex);
 }
 
 // 0x587000

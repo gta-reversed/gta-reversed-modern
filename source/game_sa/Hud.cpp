@@ -1121,7 +1121,7 @@ void CHud::DrawRadar() {
     if (vehicle && vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX) {
         float angle = PI - std::atan2(-vehicle->m_matrix->GetRight().z, vehicle->m_matrix->GetUp().z);
         CRadar::DrawRotatingRadarSprite(
-            &Sprites[SPRITE_RADAR_RING_PLANE],
+            Sprites[SPRITE_RADAR_RING_PLANE],
             SCREEN_STRETCH_X(87.0f),
             SCREEN_STRETCH_FROM_BOTTOM(66.0f),
             angle,

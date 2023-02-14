@@ -77,7 +77,7 @@ enum eRadarSprite : int8 {
     RADAR_SPRITE_CHICKEN,       // 14
     RADAR_SPRITE_CJ,            // 15
     RADAR_SPRITE_CRASH1,        // 16
-    RADAR_SPRITE_DINER,         // 17 - Yet another one?
+    RADAR_SPRITE_DINER,         // 17
     RADAR_SPRITE_EMMETGUN,      // 18
     RADAR_SPRITE_ENEMYATTACK,   // 19
     RADAR_SPRITE_FIRE,          // 20
@@ -160,7 +160,6 @@ enum eAirstripLocation : uint8 {
 };
 
 class CEntryExit;
-struct tRadarTrace;
 
 struct tRadarTrace {
     eBlipColour  m_nColour;
@@ -172,12 +171,12 @@ struct tRadarTrace {
     CEntryExit*  m_pEntryExit;
     eRadarSprite m_nBlipSprite;
 
-    uint8        m_bBright : 1;              // It makes use of bright colors. Always set.
-    uint8        m_bTrackingBlip : 1;        // It is available.
-    uint8        m_bShortRange : 1;          // It doesn't show permanently on the radar.
-    uint8        m_bFriendly : 1;            // It is affected by BLIP_COLOUR_THREAT.
-    uint8        m_bBlipRemain : 1;          // It has the priority over the entity (it will still appear after the entity's deletion).
-    uint8        m_bBlipFade : 1;            // Possibly a leftover. Always unset (unused).
+    bool         m_bBright : 1;              // It makes use of bright colors. Always set.
+    bool         m_bTrackingBlip : 1;        // It is available.
+    bool         m_bShortRange : 1;          // It doesn't show permanently on the radar.
+    bool         m_bFriendly : 1;            // It is affected by BLIP_COLOUR_THREAT.
+    bool         m_bBlipRemain : 1;          // It has the priority over the entity (it will still appear after the entity's deletion).
+    bool         m_bBlipFade : 1;            // Possibly a leftover. Always unset (unused).
     uint8        m_nCoordBlipAppearance : 2; // see eBlipAppearance
 
     eBlipDisplay    m_nBlipDisplayFlag : 2;
@@ -209,7 +208,7 @@ public:
     static SpriteFileName RadarBlipFileNames[];
 
     static inline float& m_radarRange = *(float*)0xBA8314; // 2990.0 by default
-    static inline std::array<uint16, MAX_RADAR_TRACES>& MapLegendList = *(std::array<uint16, MAX_RADAR_TRACES>*)0xBA8318;
+    static inline std::array<int16, MAX_RADAR_TRACES>& MapLegendList = *(std::array<int16, MAX_RADAR_TRACES>*)0xBA8318; // do not convert int16 to eRadarSprite, they have different sizes.
     static inline uint16& MapLegendCounter = *(uint16*)0xBA86B8; // num icons in legend
     static inline std::array<CRGBA, 6>& ArrowBlipColour = *(std::array<CRGBA, 6>*)0xBA86D4;
     static inline std::array<tRadarTrace, MAX_RADAR_TRACES>& ms_RadarTrace = *(std::array<tRadarTrace, MAX_RADAR_TRACES>*)0xBA86F0;
@@ -231,7 +230,7 @@ public:
     static tBlipHandle GetNewUniqueBlipIndex(int32 blipIndex);
     static int32 GetActualBlipArrayIndex(tBlipHandle blip);
 
-    static void DrawLegend(int32 x, int32 y, int32 blipType);
+    static void DrawLegend(int32 x, int32 y, eRadarSprite blipType);
     static float LimitRadarPoint(CVector2D& point);
     static void LimitToMap(float& x, float& y);
     static uint8 CalculateBlipAlpha(float distance);
@@ -271,7 +270,7 @@ public:
     static void DrawAreaOnRadar(const CRect& rect, const CRGBA& color, bool inMenu);
     static void DrawRadarMask();
     static void InitFrontEndMap();
-    static void AddBlipToLegendList(uint8 arg0, int32 blipIndex);
+    static void AddBlipToLegendList(bool noSprite, int32 blipIndex);
     static void SetMapCentreToPlayerCoords();
     static void Draw3dMarkers();
     static void SetRadarMarkerState(int32 counter, bool flag);
