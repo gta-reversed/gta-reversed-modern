@@ -159,7 +159,7 @@ void CRadar::InjectHooks() {
     // RH_ScopedInstall(Draw3dMarkers, 0x585BF0);
     // RH_ScopedInstall(DrawRadarSection, 0x586110);
     // RH_ScopedInstall(DrawRadarSectionMap, 0x586520);
-    // RH_ScopedInstall(DrawRadarGangOverlay, 0x586650);
+    RH_ScopedInstall(DrawRadarGangOverlay, 0x586650);
     // RH_ScopedInstall(DrawEntityBlip, 0x587000);
     // RH_ScopedGlobalInstall(LineRadarBoxCollision, 0x584E00);
 
@@ -1318,7 +1318,46 @@ void CRadar::DrawRadarSectionMap(int32 x, int32 y, CRect rect) {
 
 // 0x586650
 void CRadar::DrawRadarGangOverlay(bool inMenu) {
-    plugin::Call<0x586650, bool>(inMenu);
+    static uint32& g_RadarGangResetOverlay = *(uint32*)0xBAA36C; // bool?
+    static CRect& g_RadarGangOverlay = *(CRect*)0xBAA35C;
+
+    if ((g_RadarGangResetOverlay & 1) == 0) {
+        g_RadarGangResetOverlay |= 1u;
+        g_RadarGangOverlay = CRect{};
+    }
+
+    if (!CGangWars::bGangWarsActive || !FrontEndMenuManager.m_abPrefsMapBlips[4])
+        return;
+
+    for (auto& zone : CTheZones::GetNavigationZones()) {
+        const auto info = CTheZones::GetZoneInfo(&zone);
+
+        if (!info || !info->radarMode || !CGangWars::CanPlayerStartAGangWarHere(info))
+            continue;
+
+        g_RadarGangOverlay = zone.GetRect();
+
+        // todo: enum
+        switch (info->radarMode) {
+        case 1:
+            DrawAreaOnRadar(g_RadarGangOverlay, info->ZoneColor, inMenu);
+            break;
+        case 2: {
+            const auto color = [&]() -> CRGBA {
+                const auto timeInMS = FrontEndMenuManager.m_bDrawingMap ? CTimer::GetTimeInMSPauseMode() : CTimer::GetTimeInMS();
+
+                auto zoneColor = info->ZoneColor;
+                zoneColor.a = (uint8)((std::sin((float)(timeInMS % 1024) * 0.0061359233f) + 1.0f) / 2.0f * (float)zoneColor.a);
+
+                return zoneColor;
+            }();
+            DrawAreaOnRadar(g_RadarGangOverlay, color, inMenu);
+            break;
+        }
+        default:
+            break;
+        }
+    }
 }
 
 // 0x586880
