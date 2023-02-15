@@ -10,9 +10,6 @@
 #include "EntryExitManager.h"
 #include <extensions/enumerate.hpp>
 
-static inline float& cachedCos = *(float*)0xBA8308;
-static inline float& cachedSin = *(float*)0xBA830C;
-
 constexpr std::array<airstrip_info, NUM_AIRSTRIPS> airstrip_table = { // 0x8D06E0
     airstrip_info{ { +1750.0f,  -2494.0f }, 180.0f, 1000.0f }, // AIRSTRIP_LS_AIRPORT
     airstrip_info{ { -1373.0f,  +120.00f }, 315.0f, 1500.0f }, // AIRSTRIP_SF_AIRPORT
@@ -157,7 +154,7 @@ void CRadar::InjectHooks() {
     // RH_ScopedInstall(StreamRadarSections, 0x584C50);
     RH_ScopedInstall(AddBlipToLegendList, 0x5859F0);
     // RH_ScopedInstall(Draw3dMarkers, 0x585BF0);
-    // RH_ScopedInstall(DrawRadarSection, 0x586110);
+    RH_ScopedInstall(DrawRadarSection, 0x586110, {.reversed = false}); // Run-Time Check Failure #2 - Stack around the variable 'texCoords' was corrupted.
     RH_ScopedInstall(DrawRadarSectionMap, 0x586520);
     RH_ScopedInstall(DrawRadarGangOverlay, 0x586650);
     // RH_ScopedInstall(DrawEntityBlip, 0x587000);
@@ -1158,7 +1155,7 @@ void CRadar::DrawRadarMask() {
             TransformRadarPointToScreenSpace(out[j + 1], in);
         };
 
-        CSprite2d::SetMaskVertices(std::size(out), (float*)out, CSprite2d::GetNearScreenZ());
+        CSprite2d::SetMaskVertices(std::size(out), out, CSprite2d::GetNearScreenZ());
         RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, CSprite2d::GetVertices(), std::size(out));
     }
 
@@ -1308,7 +1305,61 @@ void CRadar::DrawRadarSprite(eRadarSprite spriteId, float x, float y, uint8 alph
 
 // 0x586110
 void CRadar::DrawRadarSection(int32 x, int32 y) {
-    plugin::Call<0x586110, int32, int32>(x, y);
+    CVector2D clipped[4]{};
+    const auto numVerts = [x, y, &clipped] {
+        CVector2D corners[4]{};
+        GetTextureCorners(x, y, corners);
+
+        CVector2D rotated[4]{};
+        for (auto&& [i, corner] : notsa::enumerate(corners)) {
+            rotated[i] = CachedRotateClockwise((corner - vec2DRadarOrigin) / m_radarRange);
+        }
+        return ClipRadarPoly(clipped, rotated);
+    }();
+
+    CVector2D texCoords[4]{};
+    CVector2D verts[4]{};
+    if (numVerts > 0) {
+        const auto texConv = CVector2D{(float)(x * 500), (float)((12 - y) * 500)} - CVector2D{3000.0f};
+
+        for (auto i = 0; i < numVerts; i++) { // numVerts is max 4
+            const auto coord = CachedRotateCounterclockwise(clipped[i]) * m_radarRange + vec2DRadarOrigin;
+            texCoords[i] = (coord - texConv) / CVector2D{ 500.0f, -500.0f };
+
+            TransformRadarPointToScreenSpace(verts[i], clipped[i]);
+        }
+    }
+
+    if (!IsMapSectionInBounds(x, y)) {
+        // there is no land here, draw the sea.
+        const CRGBA seaColor{111, 137, 170, 255};
+
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
+        CSprite2d::SetVertices(numVerts, verts, seaColor);
+    } else {
+        if (CTheScripts::bPlayerIsOffTheMap) {
+            const CRGBA blankColor{204, 204, 204, 255};
+
+            RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
+            CSprite2d::SetVertices(numVerts, verts, blankColor);
+        } else {
+            const auto texture = [x, y] {
+                if (const auto txdIndex = gRadarTextures[y][x]) {
+                    if (const auto txd = CTxdStore::GetTxd(txdIndex)) {
+                        return GetFirstTexture(txd);
+                    }
+                }
+                NOTSA_UNREACHABLE("Couldn't load texture for a map section that supposed to be valid!");
+            }();
+            const CRGBA bg{255, 255, 255, 255};
+
+            RwRenderStateSet(rwRENDERSTATETEXTURERASTER, texture->raster);
+            CSprite2d::SetVertices(numVerts, verts, texCoords, bg);
+        }
+    }
+    if (numVerts > 2) {
+        RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, CSprite2d::maVertices, numVerts);
+    }
 }
 
 // 0x586520
@@ -1411,7 +1462,7 @@ void CRadar::DrawRadarMap() {
     const auto vehicle = FindPlayerVehicle();
 
     // Draw green rectangle when in plane
-    if (vehicle && vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX) {
+    if (vehicle && vehicle->IsSubPlane() && ModelIndices::IsVortex(vehicle->m_nModelIndex)) {
         CVector playerPos = FindPlayerCentreOfWorld_NoInteriorShift(0);
 
         const auto cSin = cachedSin;
@@ -1628,7 +1679,7 @@ CVector GetAirStripLocation(eAirstripLocation location) {
 
 // 0x587D20
 void CRadar::SetupAirstripBlips() {
-    if (const auto veh = FindPlayerVehicle(); veh && veh->IsSubPlane() && veh->m_nModelIndex != MODEL_VORTEX) {
+    if (const auto veh = FindPlayerVehicle(); veh && veh->IsSubPlane() && !ModelIndices::IsVortex(veh->m_nModelIndex)) {
         if ((CTimer::GetFrameCounter() & 4) == 0) {
             if (airstrip_blip)
                 return;
@@ -1800,7 +1851,7 @@ void CRadar::DrawBlips() {
                 continue;
 
             // we don't draw the player marker while flying.
-            if (auto veh = FindPlayerVehicle(i); veh && veh->IsSubPlane() && veh->m_nModelIndex != MODEL_VORTEX)
+            if (auto veh = FindPlayerVehicle(i); veh && veh->IsSubPlane() && !ModelIndices::IsVortex(veh->m_nModelIndex))
                 continue;
 
             const auto pos = GetPlayerMarkerPosition();

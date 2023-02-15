@@ -200,6 +200,8 @@ public:
     static constexpr uint32 MAX_RADAR_TRACES = 175;
 
     static inline float& m_fRadarOrientation = *(float*)0xBA8310;
+    static inline float& cachedCos = *(float*)0xBA8308;
+    static inline float& cachedSin = *(float*)0xBA830C;
 
     // original name unknown
     static inline eRadarTraceHeight& legendTraceHeight = *(eRadarTraceHeight*)0xBAA350;
@@ -299,6 +301,20 @@ public:
 
     static bool IsMapSectionInBounds(int32 x, int32 y) {
         return x >= 0 && x < MAX_RADAR_WIDTH_TILES && y >= 0 && y < MAX_RADAR_HEIGHT_TILES;
+    }
+
+    static auto CachedRotateCounterclockwise(const CVector2D& point) {
+        return CVector2D{
+            cachedCos * point.x - cachedSin * point.y,
+            cachedSin * point.x + cachedCos * point.y
+        };
+    }
+
+    static auto CachedRotateClockwise(const CVector2D& point) {
+        return CVector2D{
+            cachedCos * point.x + cachedSin * point.y,
+            -cachedSin * point.x + cachedCos * point.y
+        };
     }
 };
 
