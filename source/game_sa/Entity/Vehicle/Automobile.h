@@ -32,7 +32,7 @@ enum eExtraHandlingFlags : uint32 {
 
 class FxSystem_c;
 
-class CAutomobile : public CVehicle {
+class NOTSA_EXPORT_VTABLE CAutomobile : public CVehicle {
 public:
     CDamageManager                      m_damageManager;
     std::array<CDoor, 6>                m_doors;
