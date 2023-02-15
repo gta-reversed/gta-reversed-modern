@@ -71,8 +71,8 @@ void UIRenderer::UpdateInput() {
             m_ImIO->MouseWheel += (WHEEL_SPEED * m_ImIO->DeltaTime);
 
         m_ImIO->MouseDown[ImGuiMouseButton_Left]   = CPad::NewMouseControllerState.lmb;
-        m_ImIO->MouseDown[ImGuiMouseButton_Right]  = CPad::NewMouseControllerState.mmb;
-        m_ImIO->MouseDown[ImGuiMouseButton_Middle] = CPad::NewMouseControllerState.rmb;
+        m_ImIO->MouseDown[ImGuiMouseButton_Right]  = CPad::NewMouseControllerState.rmb;
+        m_ImIO->MouseDown[ImGuiMouseButton_Middle] = CPad::NewMouseControllerState.mmb;
 
         CPad::NewMouseControllerState.X = 0.0f;
         CPad::NewMouseControllerState.Y = 0.0f;
