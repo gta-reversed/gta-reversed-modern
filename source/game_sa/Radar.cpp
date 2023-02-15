@@ -158,7 +158,7 @@ void CRadar::InjectHooks() {
     RH_ScopedInstall(AddBlipToLegendList, 0x5859F0);
     // RH_ScopedInstall(Draw3dMarkers, 0x585BF0);
     // RH_ScopedInstall(DrawRadarSection, 0x586110);
-    // RH_ScopedInstall(DrawRadarSectionMap, 0x586520);
+    RH_ScopedInstall(DrawRadarSectionMap, 0x586520);
     RH_ScopedInstall(DrawRadarGangOverlay, 0x586650);
     // RH_ScopedInstall(DrawEntityBlip, 0x587000);
     // RH_ScopedGlobalInstall(LineRadarBoxCollision, 0x584E00);
@@ -1313,7 +1313,22 @@ void CRadar::DrawRadarSection(int32 x, int32 y) {
 
 // 0x586520
 void CRadar::DrawRadarSectionMap(int32 x, int32 y, CRect rect) {
-    plugin::Call<0x586520, int32, int32, CRect>(x, y, rect);
+    if (!IsMapSectionInBounds(x, y))
+        return;
+
+    const auto txdIndex = gRadarTextures[y][x];
+    if (txdIndex == -1)
+        return;
+
+    if (const auto txd = CTxdStore::GetTxd(txdIndex)) {
+        if (const auto texture = GetFirstTexture(txd)) {
+            const auto bg = CRGBA{255, 255, 255, 255};
+            RwRenderStateSet(rwRENDERSTATETEXTURERASTER, texture->raster);
+
+            CSprite2d::SetVertices(rect, bg, bg, bg, bg);
+            RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, CSprite2d::maVertices, 4);
+        }
+    }
 }
 
 // 0x586650
