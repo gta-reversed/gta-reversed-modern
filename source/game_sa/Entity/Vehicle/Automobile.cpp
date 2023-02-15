@@ -22,7 +22,12 @@
 bool& CAutomobile::m_sAllTaxiLights = *(bool*)0xC1BFD0;
 CVector& CAutomobile::vecHunterGunPos = *(CVector*)0x8D3394;
 CMatrix* CAutomobile::matW2B = (CMatrix*)0xC1C220;
-CColPoint* aAutomobileColPoints = (CColPoint*)0xC1BFF8;
+
+constexpr size_t NUM_AUTOMOBILE_SUSP_LINES  = (size_t)MAX_CARWHEELS;
+constexpr size_t NUM_RHINO_EXTRA_SUSP_LINES = (size_t)MAX_CARWHEELS * 2u; // 8
+constexpr size_t NUM_RHINO_SUSP_LINES       = NUM_AUTOMOBILE_SUSP_LINES + NUM_RHINO_EXTRA_SUSP_LINES; // 8
+constexpr size_t MAX_NUM_SUSP_LINES         = std::max(NUM_AUTOMOBILE_SUSP_LINES, NUM_RHINO_SUSP_LINES); // 12
+auto& aAutomobileColPoints = *(std::array<CColPoint, MAX_NUM_SUSP_LINES>*)0xC1BFF8;
 
 static constexpr CVector PACKER_COL_PIVOT = CVector(0.0f, 0.0f, 2.0f);
 static constexpr float CAR_BALANCE_MULT = 0.08f;
@@ -135,6 +140,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedVMTInstall(FindWheelWidth, 0x6A6090);
 
     RH_ScopedVMTInstall(SetupSuspensionLines, 0x6A65D0);
+    RH_ScopedVMTInstall(ProcessEntityCollision, 0x6ACE70);
 }
 
 // 0x6B0A90
@@ -1717,7 +1723,190 @@ void CAutomobile::ProcessSuspension() {
 }
 
 int32 CAutomobile::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) {
-    return plugin::CallMethodAndReturn<int32, 0x6ACE70, CAutomobile*, CEntity*, CColPoint*>(this, entity, colPoint);
+    if (m_nStatus != STATUS_GHOST) {
+        vehicleFlags.bVehicleColProcessed = true;
+    }
+
+    const auto tcd = GetColData(),
+               ocd = entity->GetColData();
+
+    // The Rhinosaurus Rex has extra wheels (8 of them)
+    std::array<float, MAX_NUM_SUSP_LINES> wheelColPtsTouchDists{};
+    rng::copy(m_fWheelsSuspensionCompression, wheelColPtsTouchDists.begin());
+
+    const auto originalWheelSuspCompr{m_fWheelsSuspensionCompression};
+
+    // ...and their suspension compression values are stored inside doors (fml pls)
+    const auto GetRhinosaurusRexExtraWheelSuspCompression = [this](size_t extraWheelIdx) -> float& { // 
+        auto& door = m_doors[extraWheelIdx / 4];
+        switch (extraWheelIdx % 4) {
+        case 0: return door.m_fOpenAngle;
+        case 1: return door.m_fClosedAngle;
+        case 2: return door.m_fAngle;
+        case 3: return door.m_fPrevAngle;
+        default: NOTSA_UNREACHABLE();
+        }
+    };
+
+    // 0x6ACEF7
+    if (m_nModelIndex == eModelID::MODEL_RHINO) {
+        // Store shit for the rhinosaurus rex
+        for (auto i = 0; i < NUM_RHINO_EXTRA_SUSP_LINES; i++) {
+            wheelColPtsTouchDists[NUM_AUTOMOBILE_SUSP_LINES + i] = GetRhinosaurusRexExtraWheelSuspCompression(i);
+        }
+    }
+
+    const auto tNumLines = tcd->m_nNumLines;
+    if (   physicalFlags.bSkipLineCol
+        || physicalFlags.bProcessingShift
+        || entity->IsPed()
+        || m_nModelIndex == eModelID::MODEL_INVALID && entity->IsVehicle()
+    ) {
+        tcd->m_nNumLines = 0; // Later reset back to original value
+    }
+
+    // Hide triangles in some cases
+    const auto didHideTriangles = m_pTractor == entity || m_pTrailer == entity;
+    const auto tNumTri = tcd->m_nNumTriangles, // Saving my sanity here, and unconditionally assigning
+               oNumTri = ocd->m_nNumTriangles;
+    if (didHideTriangles) {
+        tcd->m_nNumTriangles = ocd->m_nNumTriangles = 0;
+    }
+
+    // For ghosts we dont do shit (In case this garbage is a forklift this value is modified below)
+    auto numColPts = m_nStatus == STATUS_GHOST
+        ? 0
+        : CCollision::ProcessColModels(
+            GetMatrix(), *GetColModel(),
+            entity->GetMatrix(), *entity->GetColModel(),
+            *(std::array<CColPoint, 32>*)(colPoint),
+            aAutomobileColPoints.data(),
+            wheelColPtsTouchDists.data(),
+            false
+        );
+
+    // Restore hidden triangles
+    if (didHideTriangles) {
+        tcd->m_nNumTriangles = tNumTri;
+        ocd->m_nNumTriangles = oNumTri;
+    }
+
+    size_t numProcessedWheels{};
+    if (tcd->m_nNumLines) {
+        // Process the real wheels
+        for (auto i = 0; i < MAX_CARWHEELS; i++) {
+            // 0x6AD0D4
+            const auto& cp = aAutomobileColPoints[i];
+
+            const auto wheelColPtsTouchDist = wheelColPtsTouchDists[i];
+            if (wheelColPtsTouchDist >= 1.f || wheelColPtsTouchDist >= m_fWheelsSuspensionCompression[i]) {
+                continue;
+            }
+
+            numProcessedWheels++;
+
+            m_fWheelsSuspensionCompression[i] = wheelColPtsTouchDist;
+            m_wheelColPoint[i] = cp;
+
+            m_anCollisionLighting[i] = cp.m_nLightingB;
+            m_nContactSurface = cp.m_nSurfaceTypeB;
+
+            switch (entity->GetType()) {
+            case ENTITY_TYPE_VEHICLE:
+            case ENTITY_TYPE_OBJECT: {
+                CEntity::ChangeEntityReference(m_apWheelCollisionEntity[i], entity->AsPhysical());
+
+                m_vWheelCollisionPos[i] = cp.m_vecPoint - entity->GetPosition();
+                if (entity->IsVehicle()) {
+                    m_anCollisionLighting[i] = entity->AsVehicle()->m_anCollisionLighting[i];
+                }
+                break;
+            }
+            case ENTITY_TYPE_BUILDING: {
+                m_pEntityWeAreOn = entity;
+                m_bTunnel = entity->m_bTunnel;
+                m_bTunnelTransition = entity->m_bTunnelTransition;
+                break;
+            }
+            }
+        }
+
+        // Deal with extra wheels for the Rhinosaurus Rex
+        if (m_nModelIndex == eModelID::MODEL_RHINO) {
+            for (auto i = 0; i < NUM_RHINO_EXTRA_SUSP_LINES; i++) {
+                auto& compr = GetRhinosaurusRexExtraWheelSuspCompression(i);
+                compr = std::min(wheelColPtsTouchDists[NUM_AUTOMOBILE_SUSP_LINES + i], compr);
+            }
+        }
+    } else {
+        tcd->m_nNumLines = tNumLines;
+    }
+    
+    // 0x6AD38A - Remove a few specific cp's for forklifts
+    if (m_nModelIndex == eModelID::MODEL_FORKLIFT && entity->IsObject() && !m_wMiscComponentAngle && !m_wMiscComponentAnglePrev) {
+        auto pts = aAutomobileColPoints | rng::views::take(numColPts);
+        auto newEndIt = rng::remove_if(pts, [](CColPoint& cp) {
+            return cp.m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT;
+        });
+        numColPts = rng::distance(pts.begin(), newEndIt.begin()); // Cancer
+    }
+
+    if (numColPts <= 0 && numProcessedWheels <= 0) {
+        goto rtn;
+    }
+
+    AddCollisionRecord(entity);
+    if (!entity->IsBuilding()) {
+        entity->AsPhysical()->AddCollisionRecord(this);
+    }
+
+    if (numColPts > 0) {
+        if (   entity->IsBuilding()
+            || (entity->IsObject() && entity->AsPhysical()->physicalFlags.bDisableCollisionForce)
+        ) {
+            m_bHasHitWall = true;
+        }
+    }
+
+    // 0x6AD482 - Add additional output colpoints for wheels
+    if (numProcessedWheels > 0 && entity->IsBuilding() && m_pHandlingData->m_fSuspensionHighSpdComDamp > 0.f) {
+        for (auto i = 0; i < MAX_CARWHEELS; i++) {
+            if (m_damageManager.GetWheelStatus((eCarWheel)i) != eCarWheelStatus::WHEEL_STATUS_OK) { // Move to top
+                continue;
+            }
+            const auto compressionNow = std::min(
+                originalWheelSuspCompr[i],
+                lerp(m_fWheelsSuspensionCompressionPrev[i], 1.f, 1.f - m_aSuspensionSpringLength[i] / m_aSuspensionLineLength[i])
+            );
+            const auto suspComprDelta = (compressionNow - m_fWheelsSuspensionCompression[i]) * m_aSuspensionLineLength[i]; // Suspension compression delta (In meters)
+            if (suspComprDelta <= 0.1f /* 0x8D3200 */) {
+                continue;
+            }
+            const auto& wheelcp = m_wheelColPoint[i];
+            if (g_surfaceInfos.GetAdhesionGroup(wheelcp.m_nSurfaceTypeB) == ADHESION_GROUP_SAND || wheelcp.m_nSurfaceTypeB == SURFACE_RAILTRACK) {
+                continue;
+            }
+            auto& outcp = colPoint[numColPts];
+            outcp = wheelcp;
+            outcp.m_fDepth = (
+                  std::abs(wheelcp.m_vecNormal.Dot(GetUp()))
+                * std::min(std::abs(GetMoveSpeed().Dot(GetForward())), 0.3f) // Forward speed
+                * std::min(0.2f, suspComprDelta)
+                * m_pHandlingData->m_fSuspensionHighSpdComDamp
+            ) / 0.3f;
+            outcp.m_nPieceTypeA = CarWheelToCarPiece((eCarWheel)i);
+            outcp.m_nSurfaceTypeA = outcp.m_nSurfaceTypeB = SURFACE_WHEELBASE;
+            if (numColPts + 1 < 32) { // TODO/NOTE: `32` is ProcessColModels output array size
+#ifdef FIX_BUGS
+                numColPts++;
+                break;
+#endif
+            }
+        }
+    }
+
+rtn:
+    return numColPts;
 }
 
 // 0x6A29C0
@@ -1998,13 +2187,13 @@ void CAutomobile::SetupSuspensionLines() {
     // 0x6A65FB
     const bool hadToAllocateLines = !cd.m_nNumLines;
     if (hadToAllocateLines) {
-        cd.AllocateLines(ModelIndices::IsRhino(m_nModelIndex) ? 12 : 4); // Rhino has 12 lines
+        cd.AllocateLines(ModelIndices::IsRhino(m_nModelIndex) ? NUM_RHINO_SUSP_LINES : NUM_AUTOMOBILE_SUSP_LINES);
     }
 
     // 0x6A6754
     // Calculate col line positions for wheels, set wheel pos, spring and line lengths
     const auto& handling = *m_pHandlingData;
-    for (auto i = 0u; i < 4u; i++) {
+    for (auto i = 0; i < NUM_AUTOMOBILE_SUSP_LINES; i++) {
         auto& colLine = cd.m_pLines[i]; // Collision line for this wheel
 
         CVector wheelPos;
@@ -2082,17 +2271,16 @@ void CAutomobile::SetupSuspensionLines() {
     // 0x6A6995
     // Rhino has 12 suspension lines, which are calculated based on the 4 main wheel's line's position
     if (ModelIndices::IsRhino(m_nModelIndex)) {
-        size_t lineIndex{ 4u }; // Skip first 4 lines as those are already in use for the real wheels
+        size_t lineIndex{ NUM_AUTOMOBILE_SUSP_LINES }; // Skip first 4 lines as those are already in use for the real wheels
 
-        for (auto i = 0u; i < 4u; i += 2u) { // Do left, and right side - Wheels 0, 1 are on the left side, while 2, 3 are on the right
-            for (auto j = 0u; j < 4; j++, lineIndex++) { // Add 4 extra lines on each side
-                // Calculate positions of this wheel's line by
-                // lerping between the 2 wheel's lines on this side
+        for (auto i = 0u; i < NUM_AUTOMOBILE_SUSP_LINES; i += NUM_AUTOMOBILE_SUSP_LINES / 2) { // Do left, and right side - Wheels 0, 1 are on the left side, while 2, 3 are on the right
+            for (auto j = 0u; j < NUM_AUTOMOBILE_SUSP_LINES; j++, lineIndex++) { // Add 4 extra lines on each side
+                const auto wheelRelativePos = (float)(j + 1u) / (float)(NUM_AUTOMOBILE_SUSP_LINES + 1);
 
-                const auto wheelRelativePos = (float)(j + 1u) * 0.2f; // 0.2 probably comes from `1 / 4` - some spacing
-                auto& line = cd.m_pLines[lineIndex];
+                // Calculate positions of this wheel's line by lerping between the 2 wheel's lines on this side
+                auto& line      = cd.m_pLines[lineIndex];
                 line.m_vecStart = lerp(cd.m_pLines[i].m_vecStart, cd.m_pLines[i + 1].m_vecStart, wheelRelativePos);
-                line.m_vecEnd = lerp(cd.m_pLines[i].m_vecEnd, cd.m_pLines[i + 1].m_vecEnd, wheelRelativePos);
+                line.m_vecEnd   = lerp(cd.m_pLines[i].m_vecEnd, cd.m_pLines[i + 1].m_vecEnd, wheelRelativePos);
             }
         }
     }
@@ -3143,9 +3331,10 @@ void CAutomobile::HydraulicControl() {
     }
 
     if (setPrevRatio || suspensionTriggered) {
-        for (int32 i = 0; i < 4; i++) {
-            float wheelRadius1 = 1.0f - m_aSuspensionSpringLength[i] / m_aSuspensionLineLength[i];
-            m_fWheelsSuspensionCompressionPrev[i] = (m_fWheelsSuspensionCompression[i] - wheelRadius1) / (1.0f - wheelRadius1);
+        for (int32 i = 0; i < MAX_CARWHEELS; i++) {
+            const float t = 1.f - m_aSuspensionSpringLength[i] / m_aSuspensionLineLength[i];
+            // same as `(m_fWheelsSuspensionCompression[i] - 1.f + k) / k` where `k = m_aSuspensionSpringLength[i] / m_aSuspensionLineLength[i]`
+            m_fWheelsSuspensionCompressionPrev[i] = (m_fWheelsSuspensionCompression[i] - t) / (1.0f - t); 
         }
     }
     std::ranges::fill(hydraulicData.m_aWheelSuspension, 0.0f);
@@ -5426,7 +5615,7 @@ void CAutomobile::SetDoorDamage(eDoors doorIdx, bool withoutVisualEffect)
     // `0x6B169C` is only reachable if `eDoors::DOOR_BOOT` in which all other if's are ignored (that is the one at `0x6B1650` and `0x6B1673`)
     // If the door isn't BOOT, but is BONNET just ignore it, because of `0x6B1660`
     // Now, if it's neither, then we go on and check the logical invert of the 2 other conditions at `0x6B1650`
-    // If those are all true we will end up @ `0x6B1673`
+    // If those are all true we will rtn up @ `0x6B1673`
 
     switch (doorIdx) {
     case eDoors::DOOR_BOOT: {

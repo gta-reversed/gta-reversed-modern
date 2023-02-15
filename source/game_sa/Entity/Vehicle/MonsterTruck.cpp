@@ -76,6 +76,7 @@ int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint
             m_anCollisionLighting[i] = thisWheelColPtNow.m_nLightingB;
             m_nContactSurface = thisWheelColPtNow.m_nSurfaceTypeB;
 
+            // Same as in CAutomobile::ProcessEntityCollision
             switch (entity->GetType()) {
             case ENTITY_TYPE_VEHICLE:
             case ENTITY_TYPE_OBJECT: {
@@ -114,7 +115,6 @@ int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint
     }
 
     return numColPts;
-    
 }
 
 // 0x6C83A0

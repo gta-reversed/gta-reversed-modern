@@ -80,8 +80,8 @@ public:
     uint16 m_wMiscComponentAnglePrev;               // 0x86E
     uint32 m_nBusDoorTimerEnd;                      // 0x870
     uint32 m_nBusDoorTimerStart;                    // 0x874
-    std::array<float, 4> m_aSuspensionSpringLength; // 0x878
-    std::array<float, 4> m_aSuspensionLineLength;   // 0x888
+    std::array<float, 4> m_aSuspensionSpringLength; // 0x878 // By default SuspensionUpperLimit - SuspensionLowerLimit
+    std::array<float, 4> m_aSuspensionLineLength;   // 0x888 // By default SuspensionUpperLimit - SuspensionLowerLimit + mi.GetSizeOfWheel(<corresponding wheel>) / 2.f - So I assume line is always longer than the spring
     float m_fFrontHeightAboveRoad;
     float m_fRearHeightAboveRoad;
     float m_fCarTraction;
@@ -442,8 +442,6 @@ VALIDATE_OFFSET(CAutomobile, npcFlags, 0x868);
 VALIDATE_OFFSET(CAutomobile, m_bDoingBurnout, 0x86A);
 VALIDATE_OFFSET(CAutomobile, m_wMiscComponentAngle, 0x86C);
 VALIDATE_OFFSET(CAutomobile, m_fGasPedalAudio, 0x964);
-
-extern CColPoint *aAutomobileColPoints;
 
 // Disable matfx (material effects) for material (callback), "data" parameter is unused
 RpMaterial *DisableMatFx(RpMaterial* material, void* data);
