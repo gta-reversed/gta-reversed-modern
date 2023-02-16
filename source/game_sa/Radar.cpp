@@ -153,7 +153,7 @@ void CRadar::InjectHooks() {
     // RH_ScopedInstall(DrawAreaOnRadar, 0x5853D0);
     // RH_ScopedInstall(StreamRadarSections, 0x584C50);
     RH_ScopedInstall(AddBlipToLegendList, 0x5859F0);
-    // RH_ScopedInstall(Draw3dMarkers, 0x585BF0);
+    RH_ScopedInstall(Draw3dMarkers, 0x585BF0);
     RH_ScopedInstall(DrawRadarSection, 0x586110, {.reversed = false}); // Run-Time Check Failure #2 - Stack around the variable 'texCoords' was corrupted.
     RH_ScopedInstall(DrawRadarSectionMap, 0x586520);
     RH_ScopedInstall(DrawRadarGangOverlay, 0x586650);
@@ -1255,7 +1255,93 @@ void CRadar::SetMapCentreToPlayerCoords() {
 
 // 0x585BF0
 void CRadar::Draw3dMarkers() {
-    plugin::Call<0x585BF0>();
+    const auto PutMarkerCone = [](uint32 id, CVector pos, float size, CRGBA color) {
+        C3dMarkers::PlaceMarkerCone(id, pos, size, color.r, color.g, color.b, 255, 1024u, 0.2f, 5, true);
+    };
+
+    for (auto&& [i, trace] : notsa::enumerate(ms_RadarTrace)) {
+        if (!trace.m_bTrackingBlip)
+            continue;
+
+        const auto color = CRGBA{GetRadarTraceColour(trace.m_nColour, trace.m_bBright, trace.m_bFriendly)};
+        // TODO: make a tConeHandle or something for this.
+        const auto coneHandle = (uint16)i | ((uint16)trace.m_nCounter << (sizeof(uint16) * 8u));
+
+        if (trace.m_nBlipDisplayFlag != BLIP_DISPLAY_BOTH && trace.m_nBlipDisplayFlag != BLIP_DISPLAY_MARKERONLY)
+            continue;
+
+        switch (trace.m_nBlipType) {
+        case BLIP_CAR: {
+            const auto vehicle = GetVehiclePool()->GetAt(trace.m_nEntityHandle);
+            assert(vehicle); // NOTSA
+
+            const auto posn = [vehicle] {
+                auto bbMaxZ = vehicle->GetColModel()->GetBoundingBox().m_vecMax.z;
+                auto vehPos = vehicle->GetPosition();
+
+                bbMaxZ *= ModelIndices::IsNevada(vehicle->m_nModelIndex) ? (5.0f / 3.0f) : (6.0f / 5.0f);
+
+                return vehPos + CVector{0.0f, 0.0f, bbMaxZ + 2.0f};
+            }();
+
+            PutMarkerCone(coneHandle, posn, 2.0f, color);
+            break;
+        }
+        case BLIP_CHAR: {
+            const auto posn = [&trace] {
+                const auto ped = GetPedPool()->GetAt(trace.m_nEntityHandle);
+                assert(ped); // NOTSA
+
+                if (ped->IsInVehicle()) { // originally only bInVehicle but vehicle = nullptr should not be a case here.
+                    return ped->GetVehicleIfInOne()->GetPosition();
+                } else {
+                    return ped->GetPosition();
+                }
+            }() + CVector{0.0f, 0.0f, 2.7f};
+
+            PutMarkerCone(coneHandle, posn, 1.2f, color);
+            break;
+        }
+        case BLIP_OBJECT:
+        case BLIP_PICKUP: {
+            const auto posn = [&trace]() {
+                CVector ret{};
+                if (trace.m_nBlipType == BLIP_OBJECT) {
+                    if (const auto obj = GetObjectPool()->GetAt(trace.m_nEntityHandle)) {
+                        const auto bbMaxZ = obj->GetColModel()->GetBoundingBox().m_vecMax.z;
+                        ret = obj->GetPosition() + CVector{0.0f, 0.0f, bbMaxZ};
+                    } else {
+                        NOTSA_UNREACHABLE("Couldn't get the object!");
+                    }
+                } else { // OBJECT_PICKUP
+                    if (const auto idx = CPickups::GetActualPickupIndex(trace.m_nEntityHandle); idx >= 0) {
+                        ret = CPickups::aPickUps[idx].GetPosn() + CVector{0.0f, 0.0f, 2.0f};
+                    } else {
+                        NOTSA_UNREACHABLE("Couldn't get the pickup!");
+                    }
+                }
+                ret.z += (CGame::currArea != 0 || FindPlayerPed()->m_nAreaCode != AREA_CODE_NORMAL_WORLD) ? 1.6f : 1.8f;
+
+                return ret;
+            }();
+
+            PutMarkerCone(coneHandle, posn, 0.8f, color);
+            break;
+        }
+        case BLIP_CONTACT_POINT: {
+            if (CTheScripts::IsPlayerOnAMission() || !FindPlayerPed())
+                break;
+
+            if (!trace.m_bTrackingBlip && FindPlayerPed()->m_nAreaCode != AREA_CODE_NORMAL_WORLD)
+                break;
+
+            C3dMarkers::PlaceMarkerSet(coneHandle, MARKER3D_CYLINDER, trace.m_vPosition, 2.0f, 255, 0, 0, 228, 2048u, 0.2f, 0);
+            break;
+        }
+        default:
+            break;
+        }
+    }
 }
 
 // unused
