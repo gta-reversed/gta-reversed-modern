@@ -37,13 +37,15 @@ enum eTrailerNodes {
 };
 
 class NOTSA_EXPORT_VTABLE CTrailer : public CAutomobile {
+    static constexpr auto NUM_TRAILER_WHEELS = 4;
+    static constexpr auto NUM_TRAILER_SUPPORTS = 2;
+    static constexpr auto NUM_TRAILER_SUSP_LINES = NUM_TRAILER_WHEELS + NUM_TRAILER_SUPPORTS;
 public:
-    CColPoint m_aTrailerColPoints[2];
-    float     m_fTrailerColPointValue1;
-    float     m_fTrailerColPointValue2;
+    std::array<CColPoint, NUM_TRAILER_SUPPORTS> m_supportCPs{};
+    std::array<float, NUM_TRAILER_SUPPORTS> m_supportRatios{ 1.f, 1.f };
     float     m_fHeight; // 0x6CF3DC, 0x6CFC11
-    float     m_fTrailerTowedRatio;
-    float     m_fTrailerTowedRatio2;
+    float     m_fTrailerTowedRatio{ 1.f };
+    float     m_fTrailerTowedRatio2{ 1.f };
 
 public:
     CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy);
