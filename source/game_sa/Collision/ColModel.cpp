@@ -20,7 +20,7 @@ void CColModel::InjectHooks() {
 CColModel::CColModel() : m_boundBox() {
     m_nColSlot = 0;
     m_pColData = nullptr;
-    m_bNotEmpty = false;
+    m_bHasCollisionVolumes = false;
     m_bIsSingleColDataAlloc = false;
     m_bIsActive = true;
 }
