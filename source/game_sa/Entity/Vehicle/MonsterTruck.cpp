@@ -54,7 +54,7 @@ int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint
         false
     );
 
-    size_t numProcessedWheels{};
+    size_t numProcessedLines{};
     if (tcm->GetData()->m_nNumLines) {
         for (auto i = 0; i < MAX_CARWHEELS; i++) {
             const auto  thisWheelTouchDistNow = wheelColPtsTouchDists[i];
@@ -68,7 +68,7 @@ int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint
                 continue;
             }
 
-            numProcessedWheels++;
+            numProcessedLines++;
 
             m_fWheelsSuspensionCompression[i] = 0.f;
             m_wheelPosition[i] = thisWheelTouchDistNow;
@@ -100,7 +100,7 @@ int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint
         tcm->GetData()->m_nNumLines = MAX_CARWHEELS; // TODO: Magic (Each wheel has 1 suspension line right now, but hardcoding like this isnt good)
     }
 
-    if (numColPts > 0 || numProcessedWheels > 0) {
+    if (numColPts > 0 || numProcessedLines > 0) {
         AddCollisionRecord(entity);
         if (!entity->IsBuilding()) {
             entity->AsPhysical()->AddCollisionRecord(this);
