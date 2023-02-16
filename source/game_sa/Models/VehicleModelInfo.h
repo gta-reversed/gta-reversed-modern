@@ -331,7 +331,6 @@ public:
     int32 GetNumDoors();
     // get position of dummy in model-space
     CVector* GetModelDummyPosition(eVehicleDummy dummy) const { return &m_pVehicleStruct->m_avDummyPos[dummy]; } // NOTSA
-
     // Static method's
     // setup lights states for currently rendered vehicle
     static void SetupLightFlags(class CVehicle* vehicle);
