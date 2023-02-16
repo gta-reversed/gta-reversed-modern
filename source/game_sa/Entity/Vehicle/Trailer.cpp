@@ -10,22 +10,24 @@ static float m_fTrailerSuspensionForce    = 1.5f; // 0x8D3464
 static float m_fTrailerDampingForce       = 0.1f; // 0x8D3468
 
 void CTrailer::InjectHooks() {
-    RH_ScopedClass(CTrailer);
+    RH_ScopedVirtualClass(CTrailer, 0x871c28, 71);
     RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(Constructor, 0x6D03A0);
-    RH_ScopedInstall(SetupSuspensionLines, 0x6CF1A0, { .reversed = false });
-    RH_ScopedInstall(SetTowLink, 0x6CFDF0);
+
     RH_ScopedInstall(ScanForTowLink, 0x6CF030);
-    RH_ScopedInstall(ResetSuspension, 0x6CEE50);
-    RH_ScopedInstall(ProcessSuspension, 0x6CF6A0, { .reversed = false });
-    RH_ScopedInstall(ProcessEntityCollision, 0x6CFFD0, { .reversed = false });
-    RH_ScopedInstall(ProcessControl, 0x6CED20, { .reversed = false });
-    RH_ScopedInstall(ProcessAI, 0x6CF590, { .reversed = false });
-    RH_ScopedInstall(PreRender, 0x6CFAC0, { .reversed = false });
-    RH_ScopedInstall(GetTowHitchPos, 0x6CEEA0);
-    RH_ScopedInstall(GetTowBarPos, 0x6CFD60);
-    RH_ScopedInstall(BreakTowLink, 0x6CEFB0);
+
+    RH_ScopedVMTInstall(SetupSuspensionLines, 0x6CF1A0, { .reversed = false });
+    RH_ScopedVMTInstall(SetTowLink, 0x6CFDF0);
+    RH_ScopedVMTInstall(ResetSuspension, 0x6CEE50);
+    RH_ScopedVMTInstall(ProcessSuspension, 0x6CF6A0, { .reversed = false });
+    RH_ScopedVMTInstall(ProcessEntityCollision, 0x6CFFD0, { .reversed = false });
+    RH_ScopedVMTInstall(ProcessControl, 0x6CED20, { .reversed = false });
+    RH_ScopedVMTInstall(ProcessAI, 0x6CF590, { .reversed = false });
+    RH_ScopedVMTInstall(PreRender, 0x6CFAC0, { .reversed = false });
+    RH_ScopedVMTInstall(GetTowHitchPos, 0x6CEEA0);
+    RH_ScopedVMTInstall(GetTowBarPos, 0x6CFD60);
+    RH_ScopedVMTInstall(BreakTowLink, 0x6CEFB0);
 }
 
 // 0x6D03A0
@@ -40,7 +42,7 @@ CTrailer::CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(
     if (m_nModelIndex == MODEL_BAGBOXA || m_nModelIndex == MODEL_BAGBOXB)
         m_fTrailerTowedRatio = -1000.0f;
 
-    SetupSuspensionLines(); // V1053 Calling the 'SetupSuspensionLines' virtual function in the constructor may lead to unexpected result at runtime.
+    CTrailer::SetupSuspensionLines();
 
     m_nStatus = eEntityStatus::STATUS_ABANDONED;
 }

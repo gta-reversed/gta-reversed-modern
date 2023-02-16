@@ -36,7 +36,7 @@ enum eTrailerNodes {
     TRAILER_NUM_NODES
 };
 
-class CTrailer : public CAutomobile {
+class NOTSA_EXPORT_VTABLE CTrailer : public CAutomobile {
 public:
     CColPoint m_aTrailerColPoints[2];
     float     m_fTrailerColPointValue1;
@@ -71,17 +71,6 @@ private:
     static void InjectHooks();
 
     CTrailer* Constructor(int32 modelIndex, eVehicleCreatedBy createdBy) { this->CTrailer::CTrailer(modelIndex, createdBy); return this; }
-    bool SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1) { return CTrailer::SetTowLink(targetVehicle, arg1); }
-    void SetupSuspensionLines_Reversed() { CTrailer::SetupSuspensionLines(); }
-    void ResetSuspension_Reversed() { CTrailer::ResetSuspension(); }
-    void ProcessSuspension_Reversed() { CTrailer::ProcessSuspension(); }
-    void ProcessControl_Reversed() { CTrailer::ProcessControl(); }
-    bool ProcessAI_Reversed(uint32& extraHandlingFlags) { return CTrailer::ProcessAI(extraHandlingFlags); }
-    void PreRender_Reversed() { CTrailer::PreRender(); }
-    bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) { return CTrailer::GetTowHitchPos(outPos, bCheckModelInfo, vehicle); }
-    bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) { return CTrailer::GetTowBarPos(outPos, bCheckModelInfo, vehicle); }
-    bool BreakTowLink_Reversed() { return CTrailer::BreakTowLink(); }
-
 };
 
 VALIDATE_SIZE(CTrailer, 0x9F4);
