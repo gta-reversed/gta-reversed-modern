@@ -92,6 +92,12 @@ template<typename... Ts>
 #define NOTSA_UNREACHABLE(...) UNREACHABLE_INTRINSIC()
 #endif
 
+#ifdef _DEBUG
+#define NOTSA_DEBUG_BREAK() __debugbreak()
+#else
+#define NOTSA_DEBUG_BREAK()
+#endif
+
 // In order to be able to get the vtable address using GetProcAddress
 // the whole class must be exported. (Along which the vtable is exported as well)
 // See `ReversibleHooks::detail::GetClassVTableAddress`

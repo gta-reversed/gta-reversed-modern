@@ -10,37 +10,34 @@ static float m_fTrailerSuspensionForce    = 1.5f; // 0x8D3464
 static float m_fTrailerDampingForce       = 0.1f; // 0x8D3468
 
 void CTrailer::InjectHooks() {
-    RH_ScopedClass(CTrailer);
+    RH_ScopedVirtualClass(CTrailer, 0x871c28, 71);
     RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(Constructor, 0x6D03A0);
-    RH_ScopedInstall(SetupSuspensionLines, 0x6CF1A0, { .reversed = false });
-    RH_ScopedInstall(SetTowLink, 0x6CFDF0);
+
     RH_ScopedInstall(ScanForTowLink, 0x6CF030);
-    RH_ScopedInstall(ResetSuspension, 0x6CEE50);
-    RH_ScopedInstall(ProcessSuspension, 0x6CF6A0, { .reversed = false });
-    RH_ScopedInstall(ProcessEntityCollision, 0x6CFFD0, { .reversed = false });
-    RH_ScopedInstall(ProcessControl, 0x6CED20, { .reversed = false });
-    RH_ScopedInstall(ProcessAI, 0x6CF590, { .reversed = false });
-    RH_ScopedInstall(PreRender, 0x6CFAC0, { .reversed = false });
-    RH_ScopedInstall(GetTowHitchPos, 0x6CEEA0);
-    RH_ScopedInstall(GetTowBarPos, 0x6CFD60);
-    RH_ScopedInstall(BreakTowLink, 0x6CEFB0);
+
+    RH_ScopedVMTInstall(SetupSuspensionLines, 0x6CF1A0, { .reversed = false });
+    RH_ScopedVMTInstall(SetTowLink, 0x6CFDF0);
+    RH_ScopedVMTInstall(ResetSuspension, 0x6CEE50);
+    RH_ScopedVMTInstall(ProcessSuspension, 0x6CF6A0, { .reversed = false });
+    RH_ScopedVMTInstall(ProcessEntityCollision, 0x6CFFD0);
+    RH_ScopedVMTInstall(ProcessControl, 0x6CED20, { .reversed = false });
+    RH_ScopedVMTInstall(ProcessAI, 0x6CF590, { .reversed = false });
+    RH_ScopedVMTInstall(PreRender, 0x6CFAC0, { .reversed = false });
+    RH_ScopedVMTInstall(GetTowHitchPos, 0x6CEEA0);
+    RH_ScopedVMTInstall(GetTowBarPos, 0x6CFD60);
+    RH_ScopedVMTInstall(BreakTowLink, 0x6CEFB0);
 }
 
 // 0x6D03A0
 CTrailer::CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, false) {
-    m_fTrailerColPointValue1 = 1.0f;
-    m_fTrailerColPointValue2 = 1.0f;
-    m_fTrailerTowedRatio     = 1.0f;
-    m_fTrailerTowedRatio2    = 1.0f;
-
     m_nVehicleSubType = VEHICLE_TYPE_TRAILER;
 
     if (m_nModelIndex == MODEL_BAGBOXA || m_nModelIndex == MODEL_BAGBOXB)
         m_fTrailerTowedRatio = -1000.0f;
 
-    SetupSuspensionLines(); // V1053 Calling the 'SetupSuspensionLines' virtual function in the constructor may lead to unexpected result at runtime.
+    CTrailer::SetupSuspensionLines();
 
     m_nStatus = eEntityStatus::STATUS_ABANDONED;
 }
@@ -139,8 +136,7 @@ void CTrailer::ScanForTowLink() {
 // 0x6CEE50
 void CTrailer::ResetSuspension() {
     CAutomobile::ResetSuspension();
-    m_fTrailerColPointValue1 = 1.0f;
-    m_fTrailerColPointValue2 = 1.0f;
+    rng::fill(m_supportRatios, 1.f);
     if (m_pTractor && m_fTrailerTowedRatio > -1000.0f)
         m_fTrailerTowedRatio = 0.0f;
     else
@@ -153,8 +149,129 @@ void CTrailer::ProcessSuspension() {
 }
 
 // 0x6CFFD0
-int32 CTrailer::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) {
-    return plugin::CallMethodAndReturn<int32, 0x6CFFD0, CTrailer*, CEntity*, CColPoint*>(this, entity, colPoint);
+int32 CTrailer::ProcessEntityCollision(CEntity* entity, CColPoint* outColPoints) {
+    if (m_fTrailerTowedRatio == -1000.f) {
+        return CAutomobile::ProcessEntityCollision(entity, outColPoints);
+    }
+
+    if (m_nStatus != STATUS_SIMPLE) {
+        vehicleFlags.bVehicleColProcessed = true;
+    }
+
+    const auto tcd = GetColData(),
+               ocd = entity->GetColData();
+
+#ifdef FIX_BUGS // Text search for `FIX_BUGS@CAutomobile::ProcessEntityCollision:1`
+    if (!tcd || !ocd) {
+        return 0;
+    }
+#endif
+
+    if (physicalFlags.bSkipLineCol || physicalFlags.bProcessingShift || entity->IsPed() || entity->IsVehicle()) {
+        tcd->m_nNumLines = 0; // Later reset back to original value
+    }
+
+    // Hide triangles in some cases
+    const auto didHideTriangles = m_pTractor == entity || m_pTrailer == entity;
+    const auto tNumTri = tcd->m_nNumTriangles, // Saving my sanity here, and unconditionally assigning
+               oNumTri = ocd->m_nNumTriangles;
+    if (didHideTriangles) {
+        tcd->m_nNumTriangles = ocd->m_nNumTriangles = 0;
+    }
+
+    std::array<CColPoint, NUM_TRAILER_SUSP_LINES> suspLineCPs{};
+
+    std::array<float, NUM_TRAILER_SUSP_LINES> suspLineTouchDists{};
+    rng::copy(m_fWheelsSuspensionCompression, suspLineTouchDists.begin());
+    rng::copy(m_supportRatios, suspLineTouchDists.begin() + m_fWheelsSuspensionCompression.size());
+
+    const auto numColPts = CCollision::ProcessColModels(
+        GetMatrix(), *GetColModel(),
+        entity->GetMatrix(), *entity->GetColModel(),
+        *(std::array<CColPoint, 32>*)(outColPoints),
+        suspLineCPs.data(),
+        suspLineTouchDists.data(),
+        false
+    );
+
+    // Restore hidden triangles
+    if (didHideTriangles) {
+        tcd->m_nNumTriangles = tNumTri;
+        ocd->m_nNumTriangles = oNumTri;
+    }
+
+    size_t numProcessedLines{};
+    if (tcd->m_nNumLines) {
+        // Process the real wheel's susp lines
+        for (auto i = 0; i < MAX_CARWHEELS; i++) {
+            // 0x6AD0D4
+            const auto& cp = suspLineCPs[i];
+
+            const auto touchDist = suspLineTouchDists[i];
+            if (touchDist >= 1.f || touchDist >= m_fWheelsSuspensionCompression[i]) {
+                continue;
+            }
+
+            numProcessedLines++;
+
+            m_fWheelsSuspensionCompression[i] = touchDist;
+            m_wheelColPoint[i] = cp;
+
+            m_anCollisionLighting[i] = cp.m_nLightingB;
+            m_nContactSurface = cp.m_nSurfaceTypeB;
+
+            switch (entity->GetType()) {
+            case ENTITY_TYPE_VEHICLE:
+            case ENTITY_TYPE_OBJECT: {
+                CEntity::ChangeEntityReference(m_apWheelCollisionEntity[i], entity->AsPhysical());
+
+                m_vWheelCollisionPos[i] = cp.m_vecPoint - entity->GetPosition();
+                if (entity->IsVehicle()) {
+                    m_anCollisionLighting[i] = entity->AsVehicle()->m_anCollisionLighting[i];
+                }
+                break;
+            }
+            case ENTITY_TYPE_BUILDING: {
+                m_pEntityWeAreOn = entity;
+                m_bTunnel = entity->m_bTunnel;
+                m_bTunnelTransition = entity->m_bTunnelTransition;
+                break;
+            }
+            }
+        }
+
+        // Process trailer support lines
+        for (auto i = 0; i < NUM_TRAILER_SUPPORTS; i++) {
+            const auto suspLineIdx = NUM_TRAILER_WHEELS + i;
+
+            const auto touchDist = suspLineTouchDists[suspLineIdx];
+            if (touchDist >= 1.f || touchDist >= m_supportRatios[i]) {
+                continue;
+            }
+
+            numProcessedLines++;
+            m_supportRatios[i] = touchDist;
+            m_supportCPs[i] = suspLineCPs[suspLineIdx];
+        }
+    } else {
+        tcd->m_nNumLines = NUM_TRAILER_SUSP_LINES;
+    }
+
+    if (numColPts > 0 || numProcessedLines > 0) {
+        AddCollisionRecord(entity);
+        if (!entity->IsBuilding()) {
+            entity->AsPhysical()->AddCollisionRecord(this);
+        }
+        if (numColPts > 0) {
+            if (   entity->IsBuilding()
+                || (entity->IsObject() && entity->AsPhysical()->physicalFlags.bDisableCollisionForce)
+            ) {
+                m_bHasHitWall = true;
+            }
+        }
+    }
+
+    return numColPts;
 }
 
 // 0x6CED20

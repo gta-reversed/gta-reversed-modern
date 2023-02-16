@@ -38,15 +38,15 @@ int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint
         vehicleFlags.bVehicleColProcessed = true; // OK
     }
 
-    const auto thisCM = GetColModel();
+    const auto tcm = GetColModel();
 
     if (physicalFlags.bSkipLineCol || physicalFlags.bProcessingShift || entity->IsPed()) {
-        thisCM->GetData()->m_nNumLines = 0; // hmm.....
+        tcm->GetData()->m_nNumLines = 0; // hmm..... (Later reset back to 4)
     }
 
     auto wheelColPtsTouchDists{ m_wheelPosition };
     const auto numColPts = CCollision::ProcessColModels(
-        GetMatrix(), *thisCM,
+        GetMatrix(), *tcm,
         entity->GetMatrix(), *entity->GetColModel(),
         *(std::array<CColPoint, 32>*)(colPoint), // trust me bro
         m_wheelColPoint.data(),
@@ -54,8 +54,8 @@ int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint
         false
     );
 
-    size_t numProcessedWheels{};
-    if (thisCM->GetData()->m_nNumLines) {
+    size_t numProcessedLines{};
+    if (tcm->GetData()->m_nNumLines) {
         for (auto i = 0; i < MAX_CARWHEELS; i++) {
             const auto  thisWheelTouchDistNow = wheelColPtsTouchDists[i];
             const auto& thisWheelColPtNow = m_wheelColPoint[i];
@@ -68,7 +68,7 @@ int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint
                 continue;
             }
 
-            numProcessedWheels++;
+            numProcessedLines++;
 
             m_fWheelsSuspensionCompression[i] = 0.f;
             m_wheelPosition[i] = thisWheelTouchDistNow;
@@ -76,6 +76,7 @@ int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint
             m_anCollisionLighting[i] = thisWheelColPtNow.m_nLightingB;
             m_nContactSurface = thisWheelColPtNow.m_nSurfaceTypeB;
 
+            // Same as in CAutomobile::ProcessEntityCollision
             switch (entity->GetType()) {
             case ENTITY_TYPE_VEHICLE:
             case ENTITY_TYPE_OBJECT: {
@@ -96,10 +97,10 @@ int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint
             }
         }
     } else {
-        thisCM->GetData()->m_nNumLines = MAX_CARWHEELS; // TODO: Magic (Each wheel has 1 suspension line right now, but hardcoding like this isnt good)
+        tcm->GetData()->m_nNumLines = MAX_CARWHEELS; // TODO: Magic (Each wheel has 1 suspension line right now, but hardcoding like this isnt good)
     }
 
-    if (numColPts > 0 || numProcessedWheels > 0) {
+    if (numColPts > 0 || numProcessedLines > 0) {
         AddCollisionRecord(entity);
         if (!entity->IsBuilding()) {
             entity->AsPhysical()->AddCollisionRecord(this);
@@ -114,7 +115,6 @@ int32 CMonsterTruck::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint
     }
 
     return numColPts;
-    
 }
 
 // 0x6C83A0

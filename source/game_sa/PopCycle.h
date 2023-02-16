@@ -235,6 +235,7 @@ public:
     static inline PercDataArray& m_nMaxNumCars = *(PercDataArray*)0xC0E5B8;
     static inline PercDataArray& m_nMaxNumPeds = *(PercDataArray*)0xC0E798;
 
+    //! See `Initialise` for more info about this array.
     static inline uint8 (&m_nPercTypeGroup)[24 / PERC_DATA_TIME_RESOLUTION_HR][2 /*weekday or weekend*/][(uint32)(ZoneType::COUNT)][POPCYCLE_TOTAL_GROUP_PERCS] = *(uint8(*)[12][2][20][18])0xC0BC78;
 
     static void InjectHooks();
