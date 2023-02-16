@@ -49,6 +49,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedVirtualInstall(ProcessFlyingCarStuff, 0x6A8500);
     RH_ScopedVirtualInstall(DoHoverSuspensionRatios, 0x6A45C0);
     RH_ScopedVirtualInstall(ProcessSuspension, 0x6AFB10);
+    RH_ScopedVirtualInstall(ProcessControlCollisionCheck, 0x6A29C0);
     RH_ScopedInstall(SetupModelNodes, 0x6A0770);
     RH_ScopedInstall(HydraulicControl, 0x6A07A0);
     RH_ScopedInstall(UpdateMovingCollision, 0x6A1460);
@@ -1721,9 +1722,35 @@ int32 CAutomobile::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) 
 }
 
 // 0x6A29C0
-void CAutomobile::ProcessControlCollisionCheck(bool applySpeed)
-{
-    plugin::CallMethod<0x6A29C0, CAutomobile*, bool>(this, applySpeed);
+void CAutomobile::ProcessControlCollisionCheck(bool applySpeed) {
+    m_bIsStuck = false;
+
+    const CMatrix ogmat = GetMatrix(); // Save original matrix (We need it later)
+
+    SkipPhysics();
+
+    physicalFlags.bSkipLineCol = physicalFlags.bProcessingShift = false;
+
+    m_fMovingSpeed = 0.f;
+    rng::fill(m_fWheelsSuspensionCompression, 1.f);
+    
+    if (applySpeed) {
+        ApplyMoveSpeed();
+        ApplyTurnSpeed();
+        for (auto tr = 0; CheckCollision() && tr < 5; tr++) { // tr = tries
+            GetMatrix() = ogmat; // reset matrix
+            ApplyMoveSpeed();
+            ApplyTurnSpeed();
+        }
+    } else {
+        const auto ogUsesCollision = m_bUsesCollision;
+        m_bUsesCollision = false;
+        (void)CheckCollision();
+        m_bUsesCollision = ogUsesCollision; // restore
+    }
+
+    m_bIsStuck          = false;
+    m_bIsInSafePosition = true;
 }
 
 // 0x6AD690
