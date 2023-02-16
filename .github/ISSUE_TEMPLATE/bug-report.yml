@@ -13,7 +13,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: current
+    id: additional
     attributes:
       label: Additional information
       description: If you have anything else to add that you consider to be useful, please type it here.
