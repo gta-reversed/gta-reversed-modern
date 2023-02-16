@@ -611,6 +611,7 @@ void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
     cm.m_boundSphere = h.bounds.sphere;
 
     auto cd = new CCollisionData{};
+    assert(cd);
     cm.m_pColData = cd;
 
     // Spheres
@@ -702,6 +703,7 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
     // CCollisionData | Spheres | Boxes | Suspension Lines | Vertices | Faces
 
     auto p = (uint8*)CMemoryMgr::Malloc(dataSizeAfterHeader + sizeof(CCollisionData));
+    assert(p);
     cm.m_pColData = new(p) CCollisionData; // R* used a cast here, but that's not really a good idea.
     memcpy(p + sizeof(CCollisionData), buffer + sizeof(Header), dataSizeAfterHeader); // Copy actual data into allocated memory after CCollisionData
 
@@ -772,6 +774,7 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
     // CCollisionData | Spheres | Boxes | Suspension Lines | Vertices | Faces
 
     auto p = (uint8*)CMemoryMgr::Malloc(dataSizeAfterHeader + sizeof(CCollisionData));
+    assert(p);
     cm.m_pColData = new(p) CCollisionData; // R* used a cast here, but that's not really a good idea.
     memcpy(p + sizeof(CCollisionData), buffer + sizeof(V3::Header), dataSizeAfterHeader); // Copy actual data into allocated memory after CCollisionData
 
@@ -841,6 +844,7 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
     // CCollisionData | Spheres | Boxes | Suspension Lines | Vertices | Faces
 
     auto p = (uint8*)CMemoryMgr::Malloc(dataSizeAfterHeader + sizeof(CCollisionData));
+    assert(p);
     cm.m_pColData = new(p) CCollisionData; // R* used a cast here, but that's not really a good idea.
     memcpy(p + sizeof(CCollisionData), buffer + sizeof(V4::Header), dataSizeAfterHeader); // Copy actual data into allocated memory after CCollisionData
 
