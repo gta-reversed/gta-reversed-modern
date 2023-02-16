@@ -2,6 +2,14 @@
 
 #include "ColModel.h"
 
+//#define COL_EXTRA_DEBUG
+
+#ifdef COL_DEBUG
+#define DEV_LOG_COL(...) DEV_LOG(__VA_ARGS__)
+#else
+#define DEV_LOG_COL(...)
+#endif
+
 void CColModel::InjectHooks() {
     RH_ScopedClass(CColModel);
     RH_ScopedCategory("Collision");
@@ -26,9 +34,9 @@ CColModel::CColModel() : m_boundBox() {
 }
 
 CColModel::~CColModel() {
-    if (!m_bIsActive)
+    if (!m_bIsActive) {
         return;
-
+    }
     RemoveCollisionVolumes();
 }
 
@@ -42,7 +50,7 @@ CColModel& CColModel::operator=(const CColModel& colModel) {
     if (m_pColData) {
         m_pColData->Copy(*colModel.m_pColData);
     } else {
-        NOTSA_UNREACHABLE(); // ???? What now? We don't copy the stuff ????
+        NOTSA_DEBUG_BREAK(); // ???? What now? We don't copy the stuff ????
     }
 
     return *this;
@@ -52,7 +60,9 @@ void CColModel::MakeMultipleAlloc() {
     if (!m_bIsSingleColDataAlloc)
         return;
 
-    auto* colData = new CCollisionData();
+    const auto colData = new CCollisionData();
+    assert(colData);
+
     colData->Copy(*m_pColData);
     delete m_pColData;
 
@@ -63,6 +73,7 @@ void CColModel::MakeMultipleAlloc() {
 void CColModel::AllocateData() {
     m_bIsSingleColDataAlloc = false;
     m_pColData = new CCollisionData();
+    assert(m_pColData);
 }
 
 // Memory layout of m_pColData is: | CCollisionData | CColSphere[] | CColLine[]/CColDisk[] | CColBox[] | Vertices[] | CColTriangle[] |
@@ -110,13 +121,19 @@ void CColModel::AllocateData(int32 numSpheres, int32 numBoxes, int32 numLines, i
 }
 
 void CColModel::AllocateData(int32 size) {
+    DEV_LOG_COL("AllocateData[Size]: {} [ColSlot: {}; Size: {}]", LOG_PTR(this), m_nColSlot, size);
+
     m_bIsSingleColDataAlloc = true;
     m_pColData = static_cast<CCollisionData*>(CMemoryMgr::Malloc(size));
+    assert(m_pColData);
 }
 
 void CColModel::RemoveCollisionVolumes() {
-    if (!m_pColData)
+    if (!m_pColData) {
         return;
+    }
+
+    DEV_LOG_COL("Removing: {} [ColSlot: {}]", LOG_PTR(this), m_nColSlot);
 
     if (m_bIsSingleColDataAlloc) {
         CCollision::RemoveTrianglePlanes(m_pColData);
