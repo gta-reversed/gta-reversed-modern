@@ -8,6 +8,7 @@ void CColModel::InjectHooks() {
 
     RH_ScopedInstall(operator new, 0x40FC30);
     RH_ScopedInstall(operator delete, 0x40FC40);
+    RH_ScopedInstall(operator=, 0x40F7C0);
     RH_ScopedInstall(MakeMultipleAlloc, 0x40F740);
     RH_ScopedOverloadedInstall(AllocateData, "void", 0x40F810, void(CColModel::*)());
     RH_ScopedOverloadedInstall(AllocateData, "params", 0x40F870, void(CColModel::*)(int32, int32, int32, int32, int32, bool));
@@ -31,13 +32,18 @@ CColModel::~CColModel() {
     RemoveCollisionVolumes();
 }
 
+// 0x40F7C0
 CColModel& CColModel::operator=(const CColModel& colModel) {
-    // BUG(Prone) No self assignment check
-    m_boundSphere.m_vecCenter = colModel.m_boundSphere.m_vecCenter;
-    m_boundSphere.m_fRadius = colModel.m_boundSphere.m_fRadius;
-    m_boundBox = colModel.m_boundBox;
-    if (m_pColData)
+    assert(&colModel != this); // BUG(Prone) No self assignment check
+
+    m_boundSphere = colModel.m_boundSphere;
+    m_boundBox    = colModel.m_boundBox;
+
+    if (m_pColData) {
         m_pColData->Copy(*colModel.m_pColData);
+    } else {
+        NOTSA_UNREACHABLE(); // ???? What now? We don't copy the stuff ????
+    }
 
     return *this;
 }
