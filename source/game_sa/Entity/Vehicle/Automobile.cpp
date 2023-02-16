@@ -1723,7 +1723,7 @@ void CAutomobile::ProcessSuspension() {
 }
 
 // 0x6ACE70
-int32 CAutomobile::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) {
+int32 CAutomobile::ProcessEntityCollision(CEntity* entity, CColPoint* outColPoints) {
     if (m_nStatus != STATUS_SIMPLE) {
         vehicleFlags.bVehicleColProcessed = true;
     }
@@ -1732,6 +1732,7 @@ int32 CAutomobile::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) 
                ocd = entity->GetColData();
 
 #ifdef FIX_BUGS
+    // FIX_BUGS@CAutomobile::ProcessEntityCollision:1
     // The original code handled this properly, because `ProcessColModels` returned `0` 
     // if either colmodel's data was missing
     // but there's a lot of no-op stuff done below that we can just avoid altogether
@@ -1791,7 +1792,7 @@ int32 CAutomobile::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) 
         : CCollision::ProcessColModels(
             GetMatrix(), *GetColModel(),
             entity->GetMatrix(), *entity->GetColModel(),
-            *(std::array<CColPoint, 32>*)(colPoint),
+            *(std::array<CColPoint, 32>*)(outColPoints),
             aAutomobileColPoints.data(),
             wheelColPtsTouchDists.data(),
             false
@@ -1802,12 +1803,6 @@ int32 CAutomobile::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) 
         tcd->m_nNumTriangles = tNumTri;
         ocd->m_nNumTriangles = oNumTri;
     }
-
-#ifdef FIX_BUGS
-    if (!numColPts) {
-        return numColPts; // All code below is no-op in this case, so let's return here
-    }
-#endif
 
     size_t numProcessedWheels{};
     if (tcd->m_nNumLines) {
@@ -1904,7 +1899,7 @@ int32 CAutomobile::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) 
             if (g_surfaceInfos.GetAdhesionGroup(wheelcp.m_nSurfaceTypeB) == ADHESION_GROUP_SAND || wheelcp.m_nSurfaceTypeB == SURFACE_RAILTRACK) {
                 continue;
             }
-            auto& outcp = colPoint[numColPts];
+            auto& outcp = outColPoints[numColPts];
             outcp = wheelcp;
             outcp.m_fDepth = (
                   std::abs(wheelcp.m_vecNormal.Dot(GetUp()))
