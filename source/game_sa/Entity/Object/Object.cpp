@@ -799,7 +799,7 @@ void CObject::Init() {
     } else {
         CObjectData::SetObjectData(m_nModelIndex, *this);
         auto* mi = GetModelInfo();
-        if (mi->GetColModel()->m_bNotEmpty) {
+        if (mi->GetColModel()->m_bHasCollisionVolumes) {
             CColStore::AddRef(mi->GetColModel()->m_nColSlot);
             objectFlags.bHasNoModel = true;
 

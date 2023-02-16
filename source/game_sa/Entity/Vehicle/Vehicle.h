@@ -685,7 +685,15 @@ public: // NOTSA functions
 
     CVehicleModelInfo* GetVehicleModelInfo() const;
 
-    CVector GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace = true);
+    CVector GetDummyPositionObjSpace(eVehicleDummy dummy) const; // NOTSA
+    CVector GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace = true); // NOTSA
+
+    /// get position of driver seat dummy (Object Space)
+    CVector GetDriverSeatDummyPositionOS() const; // NOTSA
+
+    /// get position of driver seat dummy (World Space)
+    CVector GetDriverSeatDummyPositionWS(); // NOTSA
+
     int32 GetRopeIndex();
     [[nodiscard]] CVehicleAnimGroup& GetAnimGroup() const;
     [[nodiscard]] AssocGroupId GetAnimGroupId() const;

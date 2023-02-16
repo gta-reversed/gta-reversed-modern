@@ -1635,10 +1635,14 @@ CVehicleModelInfo* CVehicle::GetVehicleModelInfo() const {
     return CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
 }
 
+CVector CVehicle::GetDummyPositionObjSpace(eVehicleDummy dummy) const {
+    return GetVehicleModelInfo()->GetModelDummyPosition(dummy);
+}
+
 // if bWorldSpace is true, returns the position in world-space
 // otherwise in model-space
 CVector CVehicle::GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace) {
-    CVector pos = GetVehicleModelInfo()->GetModelDummyPosition(dummy);
+    CVector pos = GetDummyPositionObjSpace(dummy);
     if (bWorldSpace)
         pos = GetMatrix() * pos; // transform to world-space
     return pos;
@@ -1908,6 +1912,16 @@ void CVehicle::RemoveWinch() {
         CRopes::GetRope(ropeIndex).Remove();
 
     // todo: m_nBombLightsWinchFlags &= 0x9Fu;
+}
+
+CVector CVehicle::GetDriverSeatDummyPositionOS() const {
+    return GetDummyPositionObjSpace(
+        IsBoat() ? DUMMY_LIGHT_FRONT_MAIN : DUMMY_SEAT_FRONT
+    );
+}
+
+CVector CVehicle::GetDriverSeatDummyPositionWS() {
+    return GetMatrix() * GetDriverSeatDummyPositionOS();
 }
 
 // NOTSA
@@ -2283,10 +2297,7 @@ bool CVehicle::CanBeDriven() const {
     if (IsSubTrailer() || IsSubTrain() && AsTrain()->m_nTrackId || vehicleFlags.bIsRCVehicle) {
         return false;
     }
-    const auto mi = GetVehicleModelInfo();
-    const auto dummyId = IsBoat() ? DUMMY_LIGHT_FRONT_MAIN : DUMMY_SEAT_FRONT;
-    const auto& dummyPos = mi->GetModelDummyPosition(dummyId);
-    return dummyPos->SquaredMagnitude() > 0.0f;
+    return GetDriverSeatDummyPositionOS().SquaredMagnitude() > 0.0f;
 }
 
 // 0x6D5490

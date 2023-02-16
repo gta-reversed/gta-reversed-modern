@@ -17,7 +17,7 @@ public:
     uint8        m_nColSlot;
     union {
         struct {
-            uint8 m_bNotEmpty : 1;
+            uint8 m_bHasCollisionVolumes : 1; // AKA `m_bNotEmpty`
             uint8 m_bIsSingleColDataAlloc : 1;
             uint8 m_bIsActive : 1;
         };
