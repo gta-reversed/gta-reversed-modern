@@ -1722,13 +1722,25 @@ void CAutomobile::ProcessSuspension() {
     }
 }
 
+// 0x6ACE70
 int32 CAutomobile::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) {
-    if (m_nStatus != STATUS_GHOST) {
+    if (m_nStatus != STATUS_SIMPLE) {
         vehicleFlags.bVehicleColProcessed = true;
     }
 
     const auto tcd = GetColData(),
                ocd = entity->GetColData();
+
+#ifdef FIX_BUGS
+    // The original code handled this properly, because `ProcessColModels` returned `0` 
+    // if either colmodel's data was missing
+    // but there's a lot of no-op stuff done below that we can just avoid altogether
+    // Though, in the original code there was an edge case if `m_pTractor == entity || m_pTrailer == entity` => crash
+    // but since I moved the assignment to the outside of the function now it always crashes xD
+    if (!tcd || !ocd) {
+        return 0;
+    }
+#endif
 
     // The Rhinosaurus Rex has extra wheels (8 of them)
     std::array<float, MAX_NUM_SUSP_LINES> wheelColPtsTouchDists{};
@@ -1738,7 +1750,7 @@ int32 CAutomobile::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) 
 
     // ...and their suspension compression values are stored inside doors (fml pls)
     const auto GetRhinosaurusRexExtraWheelSuspCompression = [this](size_t extraWheelIdx) -> float& { // 
-        auto& door = m_doors[extraWheelIdx / 4];
+        auto& door = m_doors[4 + extraWheelIdx / 4];
         switch (extraWheelIdx % 4) {
         case 0: return door.m_fOpenAngle;
         case 1: return door.m_fClosedAngle;
@@ -1790,6 +1802,12 @@ int32 CAutomobile::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) 
         tcd->m_nNumTriangles = tNumTri;
         ocd->m_nNumTriangles = oNumTri;
     }
+
+#ifdef FIX_BUGS
+    if (!numColPts) {
+        return numColPts; // All code below is no-op in this case, so let's return here
+    }
+#endif
 
     size_t numProcessedWheels{};
     if (tcd->m_nNumLines) {
