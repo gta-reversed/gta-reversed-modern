@@ -186,7 +186,7 @@ public:
     CAEVehicleAudioEntity m_vehicleAudio;
     tHandlingData*        m_pHandlingData;
     tFlyingHandlingData*  m_pFlyingHandlingData;
-    union {
+    union { // TODO: The struct in `tHandlingData` is exactly the same thing, so use that here too! (Requires renaming fields in `tHandlingData`)
         eVehicleHandlingFlags m_nHandlingFlagsIntValue;
         struct {
             uint32 b1gBoost : 1;
@@ -393,7 +393,7 @@ public:
         } m_renderLights;
     };
     RwTexture*   m_pCustomCarPlate;
-    float        m_fRawSteerAngle;
+    float        m_fRawSteerAngle; // AKA m_fSteeringLeftRight
     eVehicleType m_nVehicleType;    // Theory by forkerer:
     eVehicleType m_nVehicleSubType; // Hack to have stuff be 2 classes at once, like vortex which can act like a car and a boat
     int16        m_nPreviousRemapTxd;

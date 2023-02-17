@@ -15,6 +15,7 @@
 #include "eSurfaceType.h"
 #include "eCarWheel.h"
 #include "eCarNodes.h"
+
 enum class eSkidmarkType : uint32;
 
 class CVehicleModelInfo;

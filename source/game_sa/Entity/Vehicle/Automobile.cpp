@@ -19,6 +19,8 @@
 #include "VehicleRecording.h"
 #include "EventDanger.h"
 
+#include <Tasks/TaskTypes/TaskSimpleGangDriveBy.h>
+
 bool& CAutomobile::m_sAllTaxiLights = *(bool*)0xC1BFD0;
 CVector& CAutomobile::vecHunterGunPos = *(CVector*)0x8D3394;
 CMatrix* CAutomobile::matW2B = (CMatrix*)0xC1C220;
@@ -142,6 +144,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedVMTInstall(SetupSuspensionLines, 0x6A65D0);
     RH_ScopedVMTInstall(ProcessEntityCollision, 0x6ACE70);
     RH_ScopedVMTInstall(ProcessControlCollisionCheck, 0x6A29C0);
+    RH_ScopedVMTInstall(ProcessControlInputs, 0x6AD690);
 }
 
 // 0x6B0A90
@@ -1774,7 +1777,7 @@ int32 CAutomobile::ProcessEntityCollision(CEntity* entity, CColPoint* outColPoin
     if (   physicalFlags.bSkipLineCol
         || physicalFlags.bProcessingShift
         || entity->IsPed()
-        || m_nModelIndex == eModelID::MODEL_INVALID && entity->IsVehicle()
+        || m_nModelIndex == (uint16)eModelID::UNLOAD_MODEL && entity->IsVehicle()
     ) {
         tcd->m_nNumLines = 0; // Later reset back to original value
     }
@@ -1904,7 +1907,7 @@ int32 CAutomobile::ProcessEntityCollision(CEntity* entity, CColPoint* outColPoin
             outcp = wheelcp;
             outcp.m_fDepth = (
                   std::abs(wheelcp.m_vecNormal.Dot(GetUp()))
-                * std::min(std::abs(GetMoveSpeed().Dot(GetForward())), 0.3f) // Forward speed
+                * std::min(std::abs(GetMoveSpeed().Dot(GetForward())), 0.3f) // Forward speedsq
                 * std::min(0.2f, suspComprDelta)
                 * m_pHandlingData->m_fSuspensionHighSpdComDamp
             ) / 0.3f;
@@ -1956,9 +1959,179 @@ void CAutomobile::ProcessControlCollisionCheck(bool applySpeed) {
 }
 
 // 0x6AD690
-void CAutomobile::ProcessControlInputs(uint8 playerNum)
-{
-    plugin::CallMethod<0x6AD690, CAutomobile*, uint8>(this, playerNum);
+void CAutomobile::ProcessControlInputs(uint8 playerNum) {
+    const auto plyrpad = CPad::GetPad((int32)playerNum);
+    const auto plyrdriver = m_pDriver; // I guess in case of the RC Bandit for example the player isn't sitting in the vehicle, but can control it, so this might be null!
+
+    //> 0x6AD6CB - Update handbrake state
+    const auto automaticallyHandBrake = [&, this] {
+        if (plyrdriver) {
+            auto& tm = plyrdriver->GetTaskManager();
+            if (!tm.Has<TASK_SIMPLE_CAR_JUMP_OUT>()) {
+                if (plyrpad->GetExitVehicle()) {
+                    return true;
+                }
+                if (plyrdriver->m_nPedState == PEDSTATE_ARRESTED) {
+                    return true;
+                }
+                if (tm.HasAnyOf<TASK_COMPLEX_CAR_SLOW_BE_DRAGGED_OUT, TASK_COMPLEX_CAR_QUICK_BE_DRAGGED_OUT, TASK_SIMPLE_CAR_WAIT_TO_SLOW_DOWN>()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }();
+    vehicleFlags.bIsHandbrakeOn = automaticallyHandBrake || plyrpad->GetHandBrake() != 0;
+
+    //> 0x6AD7BD - Update steer angle (And  possible control input too)
+    std::tie(m_fRawSteerAngle, m_nLastControlInput) = [&, this]() -> std::pair<float, eControllerType> {
+        // Calculates steering delta for this frame
+        const auto GetSteeringDeltaForFrame = [&, this] {
+            return (-(float)plyrpad->GetSteeringLeftRight() / 128.f - m_fRawSteerAngle) / 5.f * CTimer::GetTimeStep();
+        };
+    
+        if (!CCamera::m_bUseMouse3rdPerson || !m_bEnableMouseSteering) {
+            return { m_fRawSteerAngle + GetSteeringDeltaForFrame(), CONTROLLER_KEYBOARD1 };
+        }
+
+        if (CPad::NewMouseControllerState.X == 0.f && (m_nLastControlInput != CONTROLLER_MOUSE || plyrpad->GetSteeringLeftRight() != 0)) { // Simplified `if` here
+            return { m_fRawSteerAngle + GetSteeringDeltaForFrame(), CONTROLLER_KEYBOARD1 };
+        }
+
+        if (CPad::NewMouseControllerState.X != 0.f || m_fRawSteerAngle != 0.f) {
+            if (!plyrpad->NewState.m_bVehicleMouseLook) {
+                return { m_fRawSteerAngle - CPad::NewMouseControllerState.X * 0.0035f, CONTROLLER_MOUSE };
+            }
+
+            if (plyrpad->NewState.m_bVehicleMouseLook || std::abs(m_fRawSteerAngle) <= 0.7f) { // Slowly steer back to 0
+                return { m_fRawSteerAngle * std::pow(0.975f, CTimer::GetTimeStep()), CONTROLLER_MOUSE };
+            }
+
+            return { m_fRawSteerAngle, CONTROLLER_MOUSE };
+        }
+
+        return { m_fRawSteerAngle, m_nLastControlInput }; // No change
+    }();
+    m_fRawSteerAngle = std::clamp(m_fRawSteerAngle, -1.f, 1.f);
+
+    //> Calculate gas/brake pedal values
+    std::tie(m_fGasPedal, m_fBreakPedal) = [&, this]() -> std::pair<float, float> {
+        if (automaticallyHandBrake) { // 0x6ADA8D
+            return { 0.f, 1.f };
+        }
+
+        const auto fwdvel = GetMoveSpeed().Dot(GetForward()); // From the beginning
+
+        //> 0x6AD9CC [moved it here]
+        const auto gasPedalInput = [&, this] {
+            if (vehicleFlags.bEngineOn && vehicleFlags.bIsDrowning) { // Moved up as early out
+                return 0.f;
+            }
+            auto value = plyrpad->GetAccelerate() - plyrpad->GetBrake(); // Rescaled later..
+            if (   !value
+                && CTask::DynCast<CTaskSimpleGangDriveBy>(plyrdriver->GetTaskManager().GetSimplestActiveTask())
+                && TheCamera.m_aCams[0].m_nMode == MODE_AIMWEAPON_FROMCAR
+            ) {
+                value = plyrpad->NewState.RightShoulder2 - plyrpad->NewState.LeftShoulder2; // Rescaled later..
+            }
+            return (value < 0 && m_nModelIndex == (uint16)eModelID::UNLOAD_MODEL
+                ? (float)(value * 0.3f)
+                : (float)(value)
+            ) / 255.f;
+        }();
+
+        if (std::abs(fwdvel) < 0.01f) { // 0x6ADAC6
+            if (plyrpad->GetAccelerate() > 150 && plyrpad->GetBrake() > 150) {
+                m_bDoingBurnout = true;
+                return {
+                    (float)plyrpad->GetAccelerate() / 255.f,
+                    (float)plyrpad->GetBrake() / 255.f
+                };
+            } else {
+                return { gasPedalInput, 0.f };
+            }
+        }
+
+        if (fwdvel >= 0.f) { // 0x6ADBA6
+            if (gasPedalInput < 0.f) { 
+                return { 0.f, std::abs(gasPedalInput) }; // Braking by pressing the reverse button
+            } else {
+                return { gasPedalInput, 0.f };
+            }
+        }
+
+        if (gasPedalInput >= 0.f && (m_fGasPedal <= 0.5f || fwdvel <= -0.15f)) { // 0x6ADBD9 - Simplified 
+            return { 0.f, gasPedalInput }; // Apply braking
+        }
+
+        return { gasPedalInput, 0.f }; // Regular go forwards
+    }();
+
+    //> 0x6ADC18 and 0x6ADC64 - Check if we can go towards that direction
+    if (m_fGasPedal != 0.f && plyrdriver) {
+        if (!CGameLogic::IsPlayerAllowedToGoInThisDirection(
+            plyrdriver,
+            m_fGasPedal > 0.f ? GetForward() : -GetForward(),
+            0.f
+        )) {
+            m_fGasPedal = 0.f;
+        }
+    }
+
+    m_fSteerAngle = RWDEG2RAD(m_pHandlingData->m_fSteeringLock * std::copysignf(std::powf(m_fRawSteerAngle, 2), m_fRawSteerAngle)); // sign preserving pow
+
+    //> 0x6ADD28 - Rear wheel steer
+    if (m_pHandlingData->m_bHbRearwheelSteer) {
+        m_f2ndSteerAngle = vehicleFlags.bIsHandbrakeOn
+            ? lerp(m_f2ndSteerAngle, -m_fSteerAngle, 0.9f) // TODO/NOTE: `lerp`'s `from` and `to` arguments must be constant, this is textbook bad practice!
+            : m_f2ndSteerAngle * 0.9f; // TODO/NOTE: Seems incorrect, maybe they meant `m_fSteerAngle * 0.9f`?
+    }
+
+    //> 0x6ADD81 - Comedy controls stuff
+    if (vehicleFlags.bComedyControls) {
+        const auto rndnum = CGeneral::GetRandomNumberInRange(0, 10);
+
+        using enum eComedyControlState;
+        if (m_comedyControlState != INACTIVE) {
+            m_fSteerAngle += m_comedyControlState == STEER_RIGHT ? 0.05f : -0.05f;
+            if (rndnum < 2) {
+                m_comedyControlState = INACTIVE;
+            }
+        } else {
+            m_comedyControlState = [&] {
+                switch (rndnum) { // Using this instead of `rand() % 10`
+                case 0:
+                case 1:
+                    return STEER_RIGHT;
+                case 2:
+                case 3:
+                    return STEER_LEFT;
+                default:
+                    return INACTIVE; // No change
+                }
+            }();
+        }
+    }
+
+    //> 0x6ADDCC - Slow player down in some cases
+    if (const auto pad0 = CPad::GetPad(0); (pad0->DisablePlayerControls && CGameLogic::SkipState != 2) || pad0->bApplyBrakes) {
+        vehicleFlags.bIsHandbrakeOn = true;
+
+        m_fGasPedal = 0.f;
+        m_fBreakPedal = 1.f;
+        FindPlayerPed()->KeepAreaAroundPlayerClear();
+        if (const auto speedsq = GetMoveSpeed().SquaredMagnitude(); speedsq >= sq(0.28f)) {
+            GetMoveSpeed() *= 0.28f / std::sqrt(speedsq);
+        }
+    }
+
+    //> 0x6ADEB3
+    if (vehicleFlags.bEngineBroken) {
+        vehicleFlags.bIsHandbrakeOn = false;
+
+        m_fBreakPedal = 0.05f;
+        m_fGasPedal = 0.f;
+    }
 }
 
 // 0x6A2210
@@ -2397,8 +2570,8 @@ void CAutomobile::DoBurstAndSoftGroundRatios()
             compression = 1.0f;
             break;
         case eCarWheelStatus::WHEEL_STATUS_BURST: {
-            // The more opposite the speed is to the forward vector the bigger chance
-            // The highest chance is when the speed is opposite to forward (ie.: It's backwards)
+            // The more opposite the speedsq is to the forward vector the bigger chance
+            // The highest chance is when the speedsq is opposite to forward (ie.: It's backwards)
             const auto val = CGeneral::GetRandomNumberInRange(0, int32(speedToFwdRatio * 40.0f) + 98);
             if (val < 100) {
                 compression += GetRemainingSuspensionCompression() / 4.f;
@@ -4449,7 +4622,7 @@ void CAutomobile::dmgDrawCarCollidingParticles(const CVector& position, float fo
         FxPrtMult_c prtMult{ 0.4f, 0.4f , 0.4f, 0.6f, 0.4f, 1.f, 1.f };
         CVector velocity{};
 
-        // The higher our speed the more particles we create
+        // The higher our speedsq the more particles we create
         const auto numSmokes = std::max(1u, (uint32)((m_vecMoveSpeed * CTimer::GetTimeStep()).Magnitude() * 4.f));
         for (auto i = 0u; i < numSmokes; i++) {
             g_fx.m_SmokeHuge->AddParticle(&fxPos, &velocity, 0.f, &prtMult, -1.f, 1.2f, 0.6f, 0);
@@ -4954,7 +5127,7 @@ void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIdx, eDoors doorIdx)
     }
 
     // 0x6A9F02
-    // If it's the bonnet, we possibly apply some angle velocity based on our current speed
+    // If it's the bonnet, we possibly apply some angle velocity based on our current speedsq
     if (doorIdx == eDoors::DOOR_BONNET) {
         auto& bonnet = m_doors[eDoors::DOOR_BONNET];
         if ((bonnet.m_nDirn & 15) == 1) { // == 1 necessary
@@ -4996,7 +5169,7 @@ void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIdx, eDoors doorIdx)
 
             // Apply some additional forces to the flying component
             if (flyingObj) {
-                // Apply move speed (with some randomness in up/down direction)
+                // Apply move speedsq (with some randomness in up/down direction)
                 flyingObj->m_vecMoveSpeed = m_vecMoveSpeed * 0.4f + m_matrix->GetRight() * 0.1f;
                 if (CGeneral::GetRandomNumber() % 2) {
                     flyingObj->m_vecMoveSpeed += m_matrix->GetUp() / 2.f;
