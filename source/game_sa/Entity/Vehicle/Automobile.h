@@ -66,15 +66,15 @@ public:
     std::array<float, 4> m_fWheelBurnoutSpeed; // 0x858 - Passed to CVehicle::ProcessWheel as last 3rd parameter, but it's not used
 
     struct {
-        uint8 bTaxiLightOn : 1 { m_sAllTaxiLights };
-        uint8 ucNPCFlagPad2 : 1 ;
-        uint8 bIgnoreWater : 1 ;
-        uint8 bDontDamageOnRoof : 1 ;
-        uint8 bTakePanelDamage : 1 { true };
-        uint8 ucTaxiUnkn6 : 1 { true };
-        uint8 bLostTraction : 1 ;
-        uint8 bSoftSuspension : 1 ;
-    } npcFlags;
+        uint8 bTaxiLightOn : 1 { m_sAllTaxiLights }; // bTaxiLight
+        uint8 ucNPCFlagPad2 : 1; // bShouldNotChangeColour
+        uint8 bIgnoreWater : 1; // bWaterTight
+        uint8 bDontDamageOnRoof : 1; // bDoesNotGetDamagedUpsideDown
+        uint8 bTakePanelDamage : 1 { true }; // bCanBeVisiblyDamaged
+        uint8 ucTaxiUnkn6 : 1 { true }; // bTankExplodesCars
+        uint8 bLostTraction : 1; // bIsBoggedDownInSand
+        uint8 bSoftSuspension : 1; // bIsMonsterTruck
+    } autoFlags;
     int8   _align;
     bool   m_bDoingBurnout;                         // 0x86A
     uint16 m_wMiscComponentAngle;                   // 0x86C
@@ -439,12 +439,13 @@ private:
 VALIDATE_SIZE(CAutomobile, 0x988);
 VALIDATE_OFFSET(CAutomobile, m_damageManager, 0x5A0);
 VALIDATE_OFFSET(CAutomobile, m_wheelColPoint, 0x724);
-VALIDATE_OFFSET(CAutomobile, npcFlags, 0x868);
+VALIDATE_OFFSET(CAutomobile, autoFlags, 0x868);
 VALIDATE_OFFSET(CAutomobile, m_bDoingBurnout, 0x86A);
 VALIDATE_OFFSET(CAutomobile, m_wMiscComponentAngle, 0x86C);
 VALIDATE_OFFSET(CAutomobile, m_fGasPedalAudio, 0x964);
 
 // Disable matfx (material effects) for material (callback), "data" parameter is unused
 RpMaterial *DisableMatFx(RpMaterial* material, void* data);
-// callback
+
 RwObject* GetCurrentAtomicObjectCB(RwObject* object, void* data);
+RwObject* GetCurrentAtomicObject(RwFrame* frame);

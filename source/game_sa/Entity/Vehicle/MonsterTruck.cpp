@@ -28,7 +28,7 @@ void CMonsterTruck::InjectHooks() {
 CMonsterTruck::CMonsterTruck(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, false) {
     std::ranges::fill(field_988, 1.0f);
     CMonsterTruck::SetupSuspensionLines();
-    npcFlags.bSoftSuspension = true;
+    autoFlags.bSoftSuspension = true;
     m_nVehicleSubType = VEHICLE_TYPE_MTRUCK;
 }
 

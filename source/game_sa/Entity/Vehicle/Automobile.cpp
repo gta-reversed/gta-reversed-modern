@@ -21,6 +21,8 @@
 
 #include <Tasks/TaskTypes/TaskSimpleGangDriveBy.h>
 
+#include <FireManager.h>
+
 bool& CAutomobile::m_sAllTaxiLights = *(bool*)0xC1BFD0;
 CVector& CAutomobile::vecHunterGunPos = *(CVector*)0x8D3394;
 CMatrix* CAutomobile::matW2B = (CMatrix*)0xC1C220;
@@ -146,6 +148,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedVMTInstall(ProcessControlCollisionCheck, 0x6A29C0);
     RH_ScopedVMTInstall(ProcessControlInputs, 0x6AD690);
     RH_ScopedVMTInstall(OpenDoor, 0x6A6AE0);
+    RH_ScopedVMTInstall(BlowUpCar, 0x6B3780);
 }
 
 // 0x6B0A90
@@ -441,7 +444,7 @@ void CAutomobile::ProcessControl()
     }
     CCollisionData* colData = GetColModel()->m_pColData;
     m_bDoingBurnout = false;
-    npcFlags.bLostTraction = false;
+    autoFlags.bLostTraction = false;
     vehicleFlags.bWarnedPeds = false;
     vehicleFlags.bRestingOnPhysical = false;
     m_vehicleAudio.Service();
@@ -670,7 +673,7 @@ void CAutomobile::ProcessControl()
         }
         if (m_nModelIndex == MODEL_RCBARON)
             ProcessFlyingCarStuff();
-        if (!npcFlags.bSoftSuspension) {
+        if (!autoFlags.bSoftSuspension) {
             for (int32 i = 0; i < 4; i++) {
                 float wheelRadius = 1.0f - m_aSuspensionSpringLength[i] / m_aSuspensionLineLength[i];
                 m_fWheelsSuspensionCompression[i] = (m_fWheelsSuspensionCompression[i] - wheelRadius) / (1.0f - wheelRadius);
@@ -1294,7 +1297,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags) {
             return false;
         if (m_nModelIndex == MODEL_RCBANDIT || m_nModelIndex == MODEL_SANDKING || m_nModelIndex == MODEL_BFINJECT)
             return false;
-        npcFlags.bLostTraction = true;
+        autoFlags.bLostTraction = true;
         float force = m_fMass * CTimer::GetTimeStep() * 0.005f;
         if (CWeather::WetRoads > 0.0f)
             force *= 1.0f - CWeather::WetRoads;
@@ -1635,7 +1638,7 @@ void CAutomobile::ProcessSuspension() {
             if (handlingFlags.bHydraulicInst && dampingForce > 0.1f && fabs(forwardSpeed) < 0.15f)
                 dampingForce = 0.1f;
 
-            if (springLength[i] < 1.0f && !npcFlags.bSoftSuspension)
+            if (springLength[i] < 1.0f && !autoFlags.bSoftSuspension)
                 ApplySpringDampening(
                     dampingForce,
                     wheelSpringForceDampingLimits[i],
@@ -2334,8 +2337,108 @@ void CAutomobile::RemoveRefsToVehicle(CEntity* entity) {
 }
 
 // 0x6B3780
-void CAutomobile::BlowUpCar(CEntity* damager, bool bHideExplosion) {
-    plugin::CallMethod<0x6B3780, CAutomobile*, CEntity*, bool>(this, damager, bHideExplosion);
+void CAutomobile::BlowUpCar(CEntity* dmgr, bool bHideExplosion) {
+    if (!vehicleFlags.bCanBeDamaged) {
+        return;
+    }
+
+    const auto plyrped = FindPlayerPed();
+    if (dmgr == plyrped || dmgr == FindPlayerVehicle()) {
+        auto& plyrinfo = FindPlayerInfo();
+        plyrinfo.m_nHavocCaused += 20;
+        plyrinfo.m_fCurrentChaseValue += 10.f;
+        CStats::IncrementStat(STAT_COST_OF_PROPERTY_DAMAGED, CGeneral::GetRandomNumberInRange(4000.f, 10'000.f - 1.f));
+    }
+
+    if (m_nModelIndex == eModelID::MODEL_VCNMAV) {
+        CWanted::bUseNewsHeliInAdditionToPolice = false;
+    }
+
+    GetMoveSpeed().z += 0.13f;
+    SetStatus(STATUS_WRECKED);
+    physicalFlags.bDestroyed = true;
+    m_nTimeWhenBlowedUp = CTimer::GetTimeInMS();
+    CVisibilityPlugins::SetClumpForAllAtomicsFlag(m_pRwClump, ATOMIC_IS_BLOWN_UP);
+    m_damageManager.FuckCarCompletely(false);
+
+    const auto isRcShit = [this] {
+        switch (GetModelId()) {
+        case MODEL_RCTIGER:
+        case MODEL_RCBANDIT:
+            return true;
+        }
+        return false;
+    }();
+    if (!isRcShit) {
+        for (auto bumper : { FRONT_BUMPER, REAR_BUMPER }) {
+            SetBumperDamage(bumper, false);
+        }
+        for (auto door : { DOOR_BONNET, DOOR_BOOT, DOOR_LEFT_FRONT, DOOR_RIGHT_FRONT, DOOR_LEFT_REAR, DOOR_RIGHT_REAR }) {
+            SetDoorDamage(door, false);
+        }
+        SpawnFlyingComponent(CAR_WHEEL_LF, 1);
+        if (const auto obj = GetCurrentAtomicObject(m_aCarNodes[CAR_WHEEL_LF])) {
+            RpAtomicSetFlags(obj, 0); // TODO: Use appropriate enum (if any?)
+        }
+    }
+
+    m_nBombOnBoard = 0;
+    m_fHealth = 0.f;
+    m_wBombTimer = 0;
+
+    TheCamera.CamShake(0.4f, GetPosition());
+    KillPedsInVehicle();
+    KillPedsGettingInVehicle();
+
+    vehicleFlags.bLightsOn     = false;
+    vehicleFlags.bEngineOn     = false;
+    vehicleFlags.bSirenOrAlarm = false;
+    m_nOverrideLights          = NO_CAR_LIGHT_OVERRIDE;
+    autoFlags.bTaxiLightOn     = false;
+
+    if (vehicleFlags.bIsAmbulanceOnDuty) {
+        assert(!vehicleFlags.bIsFireTruckOnDuty);
+        vehicleFlags.bIsAmbulanceOnDuty = false;
+        CCarCtrl::NumAmbulancesOnDuty--;
+    }
+
+    if (vehicleFlags.bIsFireTruckOnDuty) {
+        assert(!vehicleFlags.bIsAmbulanceOnDuty);
+        vehicleFlags.bIsFireTruckOnDuty = false;
+        CCarCtrl::NumFireTrucksOnDuty--;
+    }
+
+    ChangeLawEnforcerState(false);
+    gFireManager.StartFire(this, dmgr);
+    CDarkel::RegisterCarBlownUpByPlayer(*this, 0); // Um.... Okay
+
+
+    //> 0x6B3A17 - Add explosion fx (cancer inducing code)
+    const auto tcm = GetColModel();
+    const auto maxOffset = IsSubAutomobile() || IsSubQuad()
+        ? 0.75f
+        : 0.1f;
+    const auto RandomOffset = [&]() { return CGeneral::GetRandomNumberInRange(-maxOffset, maxOffset); };
+    const auto explOffset = CVector{
+        RandomOffset(),
+        RandomOffset(),
+        maxOffset + 0.5f
+    } * GetColModel()->GetBoundingBox().m_vecMax;
+    const auto explPos = // Do a matrix transform... manually, because that's fun!
+          GetPosition()
+        + GetRight() * explOffset.x
+        + GetForward() * explOffset.y
+        - CVector{0.f, 0.f, explOffset.z};
+    CExplosion::AddExplosion(
+        this,
+        dmgr,
+        isRcShit ? EXPLOSION_QUICK_CAR : EXPLOSION_CAR,
+        explPos,
+        0,
+        true,
+        -1.f,
+        bHideExplosion
+    );
 }
 
 // 0x6B3BB0
@@ -2447,7 +2550,7 @@ void CAutomobile::SetupSuspensionLines() {
     }
 
     // 0x6A6754
-    // Calculate col line positions for wheels, set wheel pos, spring and line lengths
+    // Calculate col line positions for wheels, set wheel explPos, spring and line lengths
     const auto& handling = *m_pHandlingData;
     for (auto i = 0; i < NUM_AUTOMOBILE_SUSP_LINES; i++) {
         auto& colLine = cd.m_pLines[i]; // Collision line for this wheel
@@ -2733,7 +2836,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
 
         // 0x6A7705
         if (m_matrix->GetUp().z < 0.f/*is flipped*/ && this != FindPlayerVehicle()) {
-            if (npcFlags.bDontDamageOnRoof) {
+            if (autoFlags.bDontDamageOnRoof) {
                 return;
             }
             switch (m_nStatus) {
@@ -2840,7 +2943,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
     if (calcDmgIntensity > minDmgIntensity && m_nStatus != STATUS_WRECKED) {
         // DEV_LOG("calcDmgIntensity: {.2f}", calcDmgIntensity); // NOTSA
         // 0x6A79C7
-        // If we're a law enforcer, and the damager is the
+        // If we're a law enforcer, and the dmgr is the
         // player's vehicle increase their wanted level.
         if (vehicleFlags.bIsLawEnforcer) {
             const auto vehicle = FindPlayerVehicle();
@@ -3995,7 +4098,7 @@ void CAutomobile::FixPanel(eCarNodes nodeIndex, ePanels panel) {
 
 // 0x6A3740
 void CAutomobile::SetTaxiLight(bool enable) {
-    npcFlags.bTaxiLightOn = enable;
+    autoFlags.bTaxiLightOn = enable;
 }
 
 // 0x6A3760
@@ -4241,7 +4344,7 @@ void CAutomobile::TowTruckControl() {
         return;
     }
 
-    // Update misc comp. angle
+    // Update misc door. angle
     const auto carUpDown = driversPad->GetCarGunUpDown();
     if (std::fabs(carUpDown) > 10.f) {
         const auto speed = carUpDown > 0 ? DOWN_SPEED : UP_SPEED;
@@ -4355,7 +4458,7 @@ void CAutomobile::DoSoftGroundResistance(uint32& extraHandlingFlags)
         CVector speedUp = m_vecMoveSpeed - DotProduct(m_vecMoveSpeed, GetUp()) * GetUp();
         float offroadAbility = 0.005f;
         if (speedUp.SquaredMagnitude() <= sq(0.3f)) {
-            npcFlags.bLostTraction = true;
+            autoFlags.bLostTraction = true;
         }
         else {
             float magnitude = speedUp.NormaliseAndMag();
@@ -4979,7 +5082,7 @@ inline void CAutomobile::ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver)
         return;
 
     ped->physicalFlags.bTouchingWater = true;
-    if (!ped->IsPlayer() && npcFlags.bIgnoreWater)
+    if (!ped->IsPlayer() && autoFlags.bIgnoreWater)
         return;
 
     if (!IsSubQuad() || IsAnyWheelMakingContactWithGround()) {
@@ -5475,7 +5578,7 @@ void CAutomobile::BlowUpCarsInPath() {
         return;
     }
 
-    if (npcFlags.ucTaxiUnkn6) {
+    if (autoFlags.ucTaxiUnkn6) {
         return;
     }
 
@@ -5737,7 +5840,7 @@ void CAutomobile::DoHeliDustEffect(float timeConstMult, float fxMaxZMult) {
         m_pDustParticle->SetConstTime(true, m_heliDustFxTimeConst);
     }
 
-    // Update offset of fx
+    // Update max of fx
     m_pDustParticle->SetOffsetPos({ myPos.x, myPos.y, groundZ });
 
     // Finally enable/disable prims (whatever that is)
@@ -6173,4 +6276,11 @@ RwObject* GetCurrentAtomicObjectCB(RwObject* object, void* data) {
         *reinterpret_cast<RpAtomic**>(data) = reinterpret_cast<RpAtomic*>(object);
 
     return object;
+}
+
+// NOTSA
+RwObject* GetCurrentAtomicObject(RwFrame* frame) {
+    RwObject* out = nullptr;
+    RwFrameForAllObjects(frame, GetCurrentAtomicObjectCB, &out);
+    return out;
 }
