@@ -23,6 +23,8 @@
 #include "FxSystem.h"
 #include "Fire.h"
 
+#include <Enums/eControllerType.h>
+
 /*  Thanks to MTA team for https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CVehicleSA.cpp */
 
 class CWeapon;
@@ -409,7 +411,7 @@ public:
     static bool &bDisableRemoteDetonationOnContact;
     static bool &m_bEnableMouseSteering;
     static bool &m_bEnableMouseFlying;
-    static int32 &m_nLastControlInput;
+    static inline auto& m_nLastControlInput = *(eControllerType*)0xC1CC04;
     static CColModel* (&m_aSpecialColVehicle)[4];
     static bool &ms_forceVehicleLightsOff;
     static bool &s_bPlaneGunsEjectShellCasings;
