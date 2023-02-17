@@ -145,7 +145,7 @@ public:
     void ProcessControlInputs(uint8 playerNum) override;
     void GetComponentWorldPosition(int32 componentId, CVector& outPos) override;
     bool IsComponentPresent(int32 componentId) override;
-    void OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) override;
+    void OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) override; // eCarNodes = componentId
     float GetDooorAngleOpenRatio(eDoors door) override;
     float GetDooorAngleOpenRatio(uint32 door) override;
     bool IsDoorReady(eDoors door) override;

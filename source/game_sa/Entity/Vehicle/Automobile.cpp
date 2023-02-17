@@ -145,6 +145,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedVMTInstall(ProcessEntityCollision, 0x6ACE70);
     RH_ScopedVMTInstall(ProcessControlCollisionCheck, 0x6A29C0);
     RH_ScopedVMTInstall(ProcessControlInputs, 0x6AD690);
+    RH_ScopedVMTInstall(OpenDoor, 0x6A6AE0);
 }
 
 // 0x6B0A90
@@ -2137,8 +2138,9 @@ void CAutomobile::ProcessControlInputs(uint8 playerNum) {
 // 0x6A2210
 void CAutomobile::GetComponentWorldPosition(int32 componentId, CVector& outPos)
 {
-    if (m_aCarNodes[componentId])
+    if (m_aCarNodes[componentId]) {
         outPos = RwFrameGetLTM(m_aCarNodes[componentId])->pos;
+    }
 }
 
 // 0x6A2250
@@ -2148,9 +2150,50 @@ bool CAutomobile::IsComponentPresent(int32 componentId)
 }
 
 // 0x6A6AE0
-void CAutomobile::OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound)
-{
-    plugin::CallMethod<0x6A6AE0, CAutomobile*, CPed*, int32, eDoors, float, bool>(this, ped, componentId, door, doorOpenRatio, playSound);
+void CAutomobile::OpenDoor(CPed* ped, int32 nodeIdx, eDoors doorIdx, float doorOpenRatio, bool playSound) {
+    const auto frame = m_aCarNodes[nodeIdx];
+    if (!frame) {
+        return;
+    }
+
+    CMatrix frameMat{ RwFrameGetMatrix(frame) }; // Is it necessary to do this here?
+    auto& door = m_doors[doorIdx];
+
+    const auto wasClosed = door.IsClosed();
+    if (wasClosed) {
+        RwFrameForAllObjects( // TODO: Make function (See refs to `SetAtomicFlagCB` and `ClearAtomicFlagCB` and combine them somehow)
+            frame,
+            CVehicleModelInfo::ClearAtomicFlagCB,
+            (void*)(ATOMIC_RENDER_ALWAYS)
+        );
+    }
+
+    door.Open(doorOpenRatio);
+
+    const auto ProcessSound = [&](eAudioEvents baseAE, float eventQuietVolume) {
+        if (!playSound) {
+            return;
+        }
+        m_vehicleAudio.AddAudioEvent((eAudioEvents)((size_t)baseAE + (size_t)doorIdx), 0.f);
+        if (!ped) {
+            return;
+        }
+        GetEventGlobalGroup()->Add(CEventSoundQuiet{ ped, eventQuietVolume, (uint32)-1, {} });
+    };
+
+    if (wasClosed && !door.IsClosed()) {
+        RwFrameForAllObjects( // TODO: Make function (See refs to `SetAtomicFlagCB` below)
+            frame,
+            CVehicleModelInfo::SetAtomicFlagCB,
+            (void*)(ATOMIC_RENDER_ALWAYS)
+        );
+        ProcessSound(AE_CAR_BONNET_OPEN, 60.f);
+    } else if (!wasClosed && doorOpenRatio == 0.f) {
+        m_damageManager.SetDoorClosed(doorIdx);
+        ProcessSound(AE_CAR_BONNET_CLOSE, 120.f);
+    }
+
+    door.UpdateFrameMatrix(frameMat);
 }
 
 // 0x6A2270
@@ -2503,7 +2546,7 @@ void CAutomobile::SetupSuspensionLines() {
 void CAutomobile::Fix() {
     m_damageManager.ResetDamageStatus();
 
-    // Reset actual door's status
+    // Reset actual doorIdx's status
     if (m_pHandlingData->m_bWheelFNarrow2) {
         m_damageManager.SetDoorStatus({ DOOR_LEFT_FRONT, DOOR_RIGHT_FRONT, DOOR_LEFT_REAR, DOOR_RIGHT_REAR }, eDoorStatus::DAMSTATE_NOTPRESENT);
     }
@@ -3934,7 +3977,7 @@ void CAutomobile::FixDoor(int32 nodeIndex, eDoors door) {
 void CAutomobile::FixPanel(eCarNodes nodeIndex, ePanels panel) {
     m_damageManager.SetPanelStatus(panel, DAMSTATE_OK);
 
-    // Remove any bouncing panels belonging to this node
+    // Remove any bouncing panels belonging to this frame
     for (auto&& panelx : m_panels) {
         if (panelx.m_nFrameId == nodeIndex) {
             panelx.ResetPanel();
@@ -5121,7 +5164,7 @@ void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIdx, eDoors doorIdx)
         }
     }
 
-    // Try opening the door (If it's not open already)
+    // Try opening the doorIdx (If it's not open already)
     if (!m_damageManager.IsDoorOpen(doorIdx)) {
         return;
     }
@@ -5148,14 +5191,8 @@ void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIdx, eDoors doorIdx)
     }
 
     // 0x6A9FCE
-    // Update component rotation based on it's stored angle
-    {
-        CVector rotation{ 0.f, 0.f, 0.f };
-        rotation[door.m_nAxis] = door.m_fAngle;
-        frameMatrix.SetRotateKeepPos(rotation);
-        frameMatrix.UpdateRW();
-    }
-
+    door.UpdateFrameMatrix(frameMatrix);
+   
     // Possibly detach bonnet and let it fly
     if (doorIdx == eDoors::DOOR_BONNET) {
         if (   door.m_nDoorState == DAMSTATE_OPENED                      // Still open (couldn't close it) ; todo: Comparison of different enumeration types ('eDoorState' and 'ePanelDamageState') is deprecated
@@ -5826,7 +5863,7 @@ void CAutomobile::SetDoorDamage(eDoors doorIdx, bool withoutVisualEffect)
     // Leaving this here for further reference...
     // The `if` @ `0x6B1650` is inverted here a little, because
     // `0x6B169C` is only reachable if `eDoors::DOOR_BOOT` in which all other if's are ignored (that is the one at `0x6B1650` and `0x6B1673`)
-    // If the door isn't BOOT, but is BONNET just ignore it, because of `0x6B1660`
+    // If the doorIdx isn't BOOT, but is BONNET just ignore it, because of `0x6B1660`
     // Now, if it's neither, then we go on and check the logical invert of the 2 other conditions at `0x6B1650`
     // If those are all true we will rtn up @ `0x6B1673`
 
