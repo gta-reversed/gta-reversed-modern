@@ -175,6 +175,12 @@ static constexpr auto NUM_VEHICLE_UPGRADES = 15u;
 
 class CVehicle : public CPhysical {
 public:
+    enum class eComedyControlState : uint8 {
+        INACTIVE,
+        STEER_RIGHT,
+        STEER_LEFT
+    };
+public:
     CAEVehicleAudioEntity m_vehicleAudio;
     tHandlingData*        m_pHandlingData;
     tFlyingHandlingData*  m_pFlyingHandlingData;
@@ -367,7 +373,7 @@ public:
     uint32          m_nHornCounter;
     int8            m_nRandomIdRelatedToSiren;
     char            m_nCarHornTimer; // car horn related
-    char            m_comedyControlState;
+    eComedyControlState m_comedyControlState;
     char            m_nHasslePosId;
     CStoredCollPoly m_FrontCollPoly;          // poly which is under front part of car
     CStoredCollPoly m_RearCollPoly;           // poly which is under rear part of car

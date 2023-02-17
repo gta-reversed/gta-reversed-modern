@@ -312,7 +312,7 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     m_fVehicleFrontGroundZ = 0.0f;
     field_511 = 0;
     field_512 = 0;
-    m_comedyControlState = 0;
+    m_comedyControlState = eComedyControlState::INACTIVE;
     m_FrontCollPoly.m_bIsActual = false;
     m_RearCollPoly.m_bIsActual = false;
     m_pHandlingData = nullptr;
