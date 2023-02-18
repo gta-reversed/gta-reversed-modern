@@ -102,7 +102,7 @@ namespace CGeneral { // More like `Math` (Or `Meth`, given how bad the code is, 
         std::uniform_real_distribution<float> uniform_dist(min, max);
         return uniform_dist(randomEngine);
 #else
-        assert(max >= min);
+        assert(max >= min); // Check is not empty range (We must use `>=` because the `int` version relies on it)
         return lerp<T>(min, max, static_cast<float>(GetRandomNumber()) * RAND_MAX_FLOAT_RECIPROCAL);
 #endif
     }
