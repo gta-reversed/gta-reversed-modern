@@ -1966,7 +1966,7 @@ void CAutomobile::ProcessControlCollisionCheck(bool applySpeed) {
 // 0x6AD690
 void CAutomobile::ProcessControlInputs(uint8 playerNum) {
     const auto plyrpad = CPad::GetPad((int32)playerNum);
-    const auto plyrdriver = m_pDriver; // I guess in case of the RC Bandit for example the player isn't sitting in the vehicle, but can control it, so this might be null!
+    const auto plyrdriver = m_pDriver; // I guess in case of the RC Bandit for example the player isn't sitting in the plyrveh, but can control it, so this might be null!
 
     //> 0x6AD6CB - Update handbrake state
     const auto automaticallyHandBrake = [&, this] {
@@ -2492,38 +2492,39 @@ void CAutomobile::BlowUpCarCutSceneNoExtras(bool bDontShakeCam, bool bDontSpawnS
 // 0x6A3060
 bool CAutomobile::SetUpWheelColModel(CColModel* wheelCol) {
     const auto mi = GetVehicleModelInfo();
-    const auto cm = GetColModel();
-    const auto cd = wheelCol->m_pColData;
+    const auto wcm = GetColModel();
+    const auto wcd = wheelCol->m_pColData;
+
     if (m_nModelIndex == MODEL_TRACTOR || m_nModelIndex == MODEL_COMBINE || m_nModelIndex == MODEL_KART)
         return false;
 
-    wheelCol->m_boundBox = cm->m_boundBox;
-    wheelCol->m_boundSphere = cm->m_boundSphere;
+    wheelCol->m_boundBox = wcm->m_boundBox;
+    wheelCol->m_boundSphere = wcm->m_boundSphere;
 
     CMatrix mat;
 
     mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LF]), false);
-    cd->m_pSpheres[0].Set(mi->m_fWheelSizeFront / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xD);
+    wcd->m_pSpheres[0].Set(mi->m_fWheelSizeFront / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xD);
 
     mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LB]), false);
-    cd->m_pSpheres[1].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xF);
+    wcd->m_pSpheres[1].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xF);
 
     mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RF]), false);
-    cd->m_pSpheres[2].Set(mi->m_fWheelSizeFront / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xE);
+    wcd->m_pSpheres[2].Set(mi->m_fWheelSizeFront / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xE);
 
     mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RB]), false);
-    cd->m_pSpheres[3].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0x10);
+    wcd->m_pSpheres[3].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0x10);
 
     if (m_aCarNodes[CAR_WHEEL_LM] && m_aCarNodes[CAR_WHEEL_RM]) {
         mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LM]), false);
-        cd->m_pSpheres[4].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xF);
+        wcd->m_pSpheres[4].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xF);
 
         mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RM]), false);
-        cd->m_pSpheres[5].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0x10);
+        wcd->m_pSpheres[5].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0x10);
 
-        cd->m_nNumSpheres = 6;
+        wcd->m_nNumSpheres = 6;
     } else {
-        cd->m_nNumSpheres = 4;
+        wcd->m_nNumSpheres = 4;
     }
     return true;
 }
@@ -2539,14 +2540,14 @@ bool CAutomobile::BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) {
     if (physicalFlags.bDestroyed)
         return false;
 
-    const auto GetCarWheel = [&]() -> eCarWheel {
+    const auto GetCarWheel = [&]() -> eCarWheel { // TODO: `CarPieceToCarWheel` (See `CarWheelToCarPiece`)
         switch (tyreComponentId) {
         case CAR_PIECE_WHEEL_LF: return CAR_WHEEL_FRONT_LEFT;
         case CAR_PIECE_WHEEL_RF: return CAR_WHEEL_FRONT_RIGHT;
         case CAR_PIECE_WHEEL_RL: return CAR_WHEEL_REAR_LEFT;
         case CAR_PIECE_WHEEL_RR: return CAR_WHEEL_REAR_RIGHT;
         default:
-            return (eCarWheel)tyreComponentId;
+            return (eCarWheel)tyreComponentId; // TODO: NOTSA_UNREACHABLE()
         }
     };
 
@@ -2637,9 +2638,9 @@ void CAutomobile::SetupSuspensionLines() {
     // 0x6A681C
     // This was probably inlined? Not sure..
     if (cd.m_pLines[0].m_vecEnd.z < cm.m_boundBox.m_vecMin.z) {
-        // V570 The 'cd.m_pLines[0].m_vecEnd.z' variable is assigned to itself.
+        // V570 The 'wcd.m_pLines[0].m_vecEnd.z' variable is assigned to itself.
         // todo: figure out what they want
-        // cd.m_pLines[0].m_vecEnd.z = cd.m_pLines[0].m_vecEnd.z; // Adjust bounding box
+        // wcd.m_pLines[0].m_vecEnd.z = wcd.m_pLines[0].m_vecEnd.z; // Adjust bounding box
 
         // Adjust bounding sphere radius - Originally outside this `if`, but that's pointless - This was most likely inlined.
         cm.m_boundSphere.m_fRadius = std::max({ cm.m_boundSphere.m_fRadius, cm.m_boundBox.m_vecMin.Magnitude(), cm.m_boundBox.m_vecMax.Magnitude() });
@@ -2720,8 +2721,9 @@ void CAutomobile::Fix() {
 }
 
 // 0x6B3E90
-void CAutomobile::SetupDamageAfterLoad()
-{
+void CAutomobile::SetupDamageAfterLoad() {
+    // TODO: Moderinfy....
+
     if (m_aCarNodes[CAR_BUMP_FRONT]) SetBumperDamage(FRONT_BUMPER, false);
     if (m_aCarNodes[CAR_BUMP_REAR])  SetBumperDamage(REAR_BUMPER, false);
 
@@ -2740,7 +2742,7 @@ void CAutomobile::SetupDamageAfterLoad()
 void CAutomobile::DoBurstAndSoftGroundRatios()
 {
     const auto& mi = *GetVehicleModelInfo();
-    const auto speedToFwdRatio = std::fabs(DotProduct(m_vecMoveSpeed, m_matrix->GetForward())); // Remember: Dot product is 0 when the two vectors are perpendicular
+    const auto speedToFwdRatio = std::fabs(DotProduct(m_vecMoveSpeed, m_matrix->GetForward())); // Remember: Dot product is 0 when the two vectors are perpendicular - TODO: Rename var to fwdvel (forward velocity)
 
     for (auto i = 0u; i < 4; i++) {
         const auto& wheelCP = m_wheelColPoint[i];
@@ -2823,7 +2825,7 @@ void CAutomobile::PlayCarHorn()
         return;
     }
 
-    m_nCarHornTimer = CGeneral::GetRandomNumber() % 128 - 106;
+    m_nCarHornTimer = CGeneral::GetRandomNumber() % 128 - 106; // TODO: GetRandomNumberInRange
     if (const auto r = m_nCarHornTimer % 8; r < 4) {
         if (r >= 2) {
             if (m_pDriver && m_autoPilot.carCtrlFlags.bHonkAtCar) {
@@ -2839,20 +2841,17 @@ void CAutomobile::PlayCarHorn()
 }
 
 // 0x6A62B0
-float CAutomobile::GetHeightAboveRoad()
-{
+float CAutomobile::GetHeightAboveRoad() {
     return m_fFrontHeightAboveRoad;
 }
 
 // 0x6A62A0
-int32 CAutomobile::GetNumContactWheels()
-{
+int32 CAutomobile::GetNumContactWheels() {
     return m_nNumContactWheels;
 }
 
 // 0x6A7650
-void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponent collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon)
-{
+void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponent collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) {
     assert(this);
 
     if (!vehicleFlags.bCanBeDamaged) {
@@ -2862,8 +2861,8 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
     assert(m_matrix);
 
     float minDmgIntensity{ 25.f };
-    float calcDmgIntensity{ damageIntensity };
     float collForceMult{ 1.f / 3.f };
+    float calcDmgIntensity{ damageIntensity };
 
     if (damageIntensity == 0.f) {
         // Man this is so stupid..
@@ -2986,7 +2985,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
         // DEV_LOG("calcDmgIntensity: {.2f}", calcDmgIntensity); // NOTSA
         // 0x6A79C7
         // If we're a law enforcer, and the dmgr is the
-        // player's vehicle increase their wanted level.
+        // player's plyrveh increase their wanted level.
         if (vehicleFlags.bIsLawEnforcer) {
             const auto vehicle = FindPlayerVehicle();
             if (vehicle && damager == vehicle && m_nStatus != STATUS_ABANDONED) {
@@ -3047,7 +3046,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
             #else
                 // Must be positive, otherwise calculation below might not work (Adding abs might help?)
                 // Also, here they rely on the fact that all bounding boxes are symmetrical split by the Y axis
-                // Which is true for all vehicle models in the vanilla SA (AFAIK)
+                // Which is true for all plyrveh models in the vanilla SA (AFAIK)
                 // But in order to prevent weird bugs we gotta do it the right way.
                 assert(GetColModel()->m_boundBox.m_vecMax.x > 0.f);
                 return collDirDotRight / GetColModel()->m_boundBox.m_vecMax.x;
@@ -3307,7 +3306,7 @@ bool CAutomobile::GetTowBarPos(CVector& outPos, bool ignoreModelType, CVehicle* 
         outPos = MultiplyMatrixWithVector(*m_matrix, outPos);
         return true;
     }
-    default: {
+    default: { // TODO: Move out to after switch (deindentate)
         if (!m_aCarNodes[CAR_MISC_A]) {
             break;
         }
@@ -3420,7 +3419,7 @@ bool CAutomobile::BreakTowLink() {
     switch (m_nStatus) {
     case eEntityStatus::STATUS_IS_TOWED:
     case eEntityStatus::STATUS_IS_SIMPLE_TOWED: {
-        if (m_pDriver) {
+        if (m_pDriver) { // TODO: Use ternary
             m_nStatus = m_pDriver->IsPlayer() ? eEntityStatus::STATUS_PLAYER : eEntityStatus::STATUS_PHYSICS;
         } else {
             m_nStatus = m_fHealth >= 1.f ? eEntityStatus::STATUS_ABANDONED : eEntityStatus::STATUS_WRECKED;
@@ -3432,8 +3431,8 @@ bool CAutomobile::BreakTowLink() {
 }
 
 // 0x6A6090
-float CAutomobile::FindWheelWidth(bool bRear)
-{
+float CAutomobile::FindWheelWidth(bool bRear) {
+    // TODO: Maybe replace this with `bool flagValaue` and use bitfields directly (instead of bitmasks?)
     static constexpr struct { eVehicleHandlingFlags flag; float mult; } mapping[2][4]{
         { // Rear wheel
             { VEHICLE_HANDLING_WHEEL_R_NARROW2, 0.65f },
@@ -3467,31 +3466,28 @@ float CAutomobile::FindWheelWidth(bool bRear)
 }
 
 // 0x5D47E0
-bool CAutomobile::Save()
-{
+bool CAutomobile::Save() {
     CVehicle::Save();
     CGenericGameStorage::SaveDataToWorkBuffer(&m_damageManager, sizeof(m_damageManager));
     return true;
 }
 
 // 0x5D2980
-bool CAutomobile::Load()
-{
+bool CAutomobile::Load() {
     CVehicle::Load();
     CGenericGameStorage::LoadDataFromWorkBuffer(&m_damageManager, sizeof(m_damageManager));
     return true;
 }
 
 // 0x6A0770
-void CAutomobile::SetupModelNodes()
-{
+void CAutomobile::SetupModelNodes() {
     std::ranges::fill(m_aCarNodes, nullptr);
     CClumpModelInfo::FillFrameArray(m_pRwClump, m_aCarNodes.data());
 }
 
 // 0x6A07A0
 void CAutomobile::HydraulicControl() {
-    if (m_nStatus == STATUS_PHYSICS) {
+    if (m_nStatus == STATUS_PHYSICS) { // TODO: switch()
         if (!IsCreatedBy(MISSION_VEHICLE))
             return;
 
@@ -3900,7 +3896,7 @@ bool CAutomobile::UpdateMovingCollision(float angle) {
 
 // 0x6A2150
 float CAutomobile::GetMovingCollisionOffset() {
-    if (m_wMiscComponentAngle) {
+    if (m_wMiscComponentAngle) { // TODO: Invert
         switch (m_nModelIndex) {
         case eModelID::MODEL_DUMPER:
             return m_aCarNodes[CAR_MISC_C] ? (float)m_wMiscComponentAngle * CMonsterTruck::DUMPER_COL_ANGLEMULT : 0.0f;
@@ -3987,7 +3983,7 @@ void CAutomobile::ShowAllComps() {
 
 // 0x6A2530
 void CAutomobile::SetRandomDamage(bool arg0) {
-    ((void(__thiscall*)(CAutomobile*, bool))0x6A2530)(this, arg0);
+    ((void(__thiscall*)(CAutomobile*, bool))0x6A2530)(this, arg0); // TODO: Reverse
 }
 
 // 0x6A27F0
@@ -4013,7 +4009,7 @@ void CAutomobile::SetTotalDamage(bool randomness) {
     }
 
     // Panels
-    for (auto i = 0u; i < MAX_PANELS; i++) {
+    for (auto i = 0u; i < MAX_PANELS; i++) { // TODO: Maybe use array of panel enums instead?
         switch ((ePanels)i) {
         case ePanels::REAR_LEFT_PANEL:
         case ePanels::REAR_RIGHT_PANEL:
@@ -4039,23 +4035,22 @@ void CAutomobile::SetTotalDamage(bool randomness) {
 }
 
 // 0x6A2980
-RpMaterial* DisableMatFx(RpMaterial* material, void* data)
-{
+RpMaterial* DisableMatFx(RpMaterial* material, void* data) {
     RpMatFXMaterialSetEffects(material, rpMATFXEFFECTNULL);
     return material;
 }
 
 // 0x6A29A0
-void CAutomobile::ReduceHornCounter()
-{
-    if (m_nHornCounter) m_nHornCounter--;
+void CAutomobile::ReduceHornCounter() {
+    if (m_nHornCounter) {
+        m_nHornCounter--;
+    }
 }
 
 static RwTexture*& renderLicensePlateTexture{ *(RwTexture**)0xC1BFD8 };
 
 // 0x6A2F00
-void CAutomobile::CustomCarPlate_BeforeRenderingStart(CVehicleModelInfo* model)
-{
+void CAutomobile::CustomCarPlate_BeforeRenderingStart(CVehicleModelInfo* model) {
     if (model->m_pPlateMaterial) {
         renderLicensePlateTexture = RpMaterialGetTexture(model->m_pPlateMaterial);
         RwTextureAddRef(renderLicensePlateTexture);
@@ -4064,8 +4059,7 @@ void CAutomobile::CustomCarPlate_BeforeRenderingStart(CVehicleModelInfo* model)
 }
 
 // 0x6A2F30
-void CAutomobile::CustomCarPlate_AfterRenderingStop(CVehicleModelInfo* model)
-{
+void CAutomobile::CustomCarPlate_AfterRenderingStop(CVehicleModelInfo* model) {
     if (model->m_pPlateMaterial) {
         RpMaterialSetTexture(model->m_pPlateMaterial, renderLicensePlateTexture);
         RwTextureDestroy(renderLicensePlateTexture);
@@ -4074,17 +4068,15 @@ void CAutomobile::CustomCarPlate_AfterRenderingStop(CVehicleModelInfo* model)
 }
 
 /*
- * Check if vehicle is in air
+ * Check if plyrveh is in air
  * @addr 0x6A2F70
  */
-bool CAutomobile::GetAllWheelsOffGround() const
-{
+bool CAutomobile::GetAllWheelsOffGround() const {
     return m_nWheelsOnGround == 0;
 }
 
 // 0x6A2F80
-void CAutomobile::DebugCode()
-{
+void CAutomobile::DebugCode() {
     auto* mi = GetVehicleModelInfo();
     auto* vehicle = FindPlayerVehicle();
     auto* remoteVehicle = FindPlayerInfo().m_pRemoteVehicle;
@@ -4093,7 +4085,7 @@ void CAutomobile::DebugCode()
         m_fMass             = handling->m_fMass;
         m_fTurnMass         = handling->m_fTurnMass;
         m_fBuoyancyConstant = handling->m_fBuoyancyConstant;
-        m_fAirResistance = GetDefaultAirResistance(); // todo: check handling. does handling in f() equal handling above
+        m_fAirResistance    = GetDefaultAirResistance(); // todo: check handling. does handling in f() equal handling above
     }
 }
 
@@ -4104,7 +4096,7 @@ void CAutomobile::FixTyre(eWheels wheel) {
 
 // 0x6A35A0
 void CAutomobile::FixDoor(int32 nodeIndex, eDoors door) {
-    if (!m_pHandlingData->m_bNoDoors) {
+    if (!m_pHandlingData->m_bNoDoors) { // TODO: Invert
         m_doors[door].Open(0.f);
         m_damageManager.SetDoorStatus(door, DAMSTATE_OK);
         if (const auto frame = m_aCarNodes[nodeIndex]) {
@@ -4159,7 +4151,7 @@ void CAutomobile::PlayHornIfNecessary() {
 void CAutomobile::SetBusDoorTimer(uint32 timerEndDelta, bool setAsStartedInPast) {
     const auto time = setAsStartedInPast ? CTimer::GetTimeInMS() - 500u : CTimer::GetTimeInMS();
     m_nBusDoorTimerStart = time;
-    m_nBusDoorTimerEnd = time + std::max(1000u, timerEndDelta);
+    m_nBusDoorTimerEnd   = time + std::max(1000u, timerEndDelta);
 }
 
 // 0x6A38A0
@@ -4205,7 +4197,7 @@ void CAutomobile::ProcessAutoBusDoors() {
 
 // 0x6A3A60
 void CAutomobile::BoostJumpControl() {
-    if (m_pDriver && m_pDriver->IsPlayer()) {
+    if (m_pDriver && m_pDriver->IsPlayer()) { // TODO: Invert
         if (const auto playerPad = m_pDriver->AsPlayer()->GetPadFromPlayer()) {
             if (playerPad->HornJustDown() && m_fWheelsSuspensionCompression[0] < 1.f) {
                 ApplyMoveForce(CVector{ 0.f, 0.f, 1.f } * (m_fMass * 0.15f));
@@ -4217,6 +4209,8 @@ void CAutomobile::BoostJumpControl() {
 
 // 0x6A3BD0
 void CAutomobile::DoNitroEffect(float power) {
+    // TODO: Refactor
+
     const auto& mi = *GetVehicleModelInfo();
     CVector exhaustPosition = mi.GetModelDummyPosition(DUMMY_EXHAUST);
 
@@ -4288,8 +4282,7 @@ void CAutomobile::StopNitroEffect() {
 }
 
 // 0x6A3EA0
-void CAutomobile::NitrousControl(int8 boost)
-{
+void CAutomobile::NitrousControl(int8 boost) {
     CPad* pad = nullptr;
     if (m_nStatus == STATUS_PLAYER && m_pDriver->IsPlayer()) {
         pad = m_pDriver->AsPlayer()->GetPadFromPlayer();
@@ -4354,14 +4347,17 @@ void CAutomobile::NitrousControl(int8 boost)
             m_fTireTemperature = 1.0f;
         }
     }
-
-    const auto power = m_fGasPedal <= 0.0f
-                           ? 0.5f
-                           : std::abs(m_fGasPedal) / 2.0f + 0.5f;
-    DoNitroEffect(power);
+    DoNitroEffect(
+        m_fGasPedal <= 0.0f
+            ? 0.5f
+            : std::abs(m_fGasPedal) / 2.0f + 0.5f
+    );
 }
+
 template<typename T>
-auto Get(CEntity** entities, size_t numEntities) requires std::is_base_of_v<CEntity, T> {
+auto Get(CEntity** entities, size_t numEntities)
+    requires std::is_base_of_v<CEntity, T>
+{
     return (
         std::span{ entities, numEntities }
       | std::views::transform([](auto&& entity) { return reinterpret_cast<T*>(entity); })
@@ -4399,23 +4395,17 @@ void CAutomobile::TowTruckControl() {
                     m_pTrailer ? TOWTRUCK_HOIST_UP_LIMIT : 0,
                     m_wMiscComponentAngle - step
                 );
-
-                break;
-            }
-
-            // down
-            if (m_wMiscComponentAngle < TOWTRUCK_HOIST_DOWN_LIMIT) {
+            } else if (m_wMiscComponentAngle < TOWTRUCK_HOIST_DOWN_LIMIT) { // down
                 m_wMiscComponentAngle = std::min<uint16>(
                     TOWTRUCK_HOIST_DOWN_LIMIT,
                     m_wMiscComponentAngle - step
                 );
-                break;
             }
             break;
         }
     }
 
-    // Attach a suitable vehicle in range if we don't already have a trailer
+    // Attach a suitable plyrveh in range if we don't already have a trailer
     if (m_wMiscComponentAngle != TOWTRUCK_HOIST_DOWN_LIMIT || m_pTrailer)
         return;
 
@@ -4447,15 +4437,13 @@ void CAutomobile::TowTruckControl() {
 }
 
 // 0x6A44C0
-CPed* CAutomobile::KnockPedOutCar(eWeaponType type, uint16 a2, CPed* ped)
-{
+CPed* CAutomobile::KnockPedOutCar(eWeaponType type, uint16 a2, CPed* ped) {
     return ped;
 }
 
 // 0x6A44D0
 // UNUSED - Likely inlined?
-void CAutomobile::PopBootUsingPhysics()
-{
+void CAutomobile::PopBootUsingPhysics() {
     switch (m_damageManager.GetDoorStatus(eDoors::DOOR_BOOT)) {
     case DAMSTATE_DAMAGED:
         return;
@@ -4471,8 +4459,7 @@ void CAutomobile::PopBootUsingPhysics()
 }
 
 // 0x6A4520
-void CAutomobile::CloseAllDoors()
-{
+void CAutomobile::CloseAllDoors() {
     const auto& mi = *GetVehicleModelInfo();
 
     const auto CloseDoor = [this](tComponent comp, eDoors door) {
@@ -4494,8 +4481,7 @@ void CAutomobile::CloseAllDoors()
     }
 }
 
-void CAutomobile::DoSoftGroundResistance(uint32& extraHandlingFlags)
-{
+void CAutomobile::DoSoftGroundResistance(uint32& extraHandlingFlags) {
     if (IsAnyWheelTouchingSand() && m_nModelIndex != MODEL_RCBANDIT && m_nModelIndex != MODEL_RHINO) {
         CVector speedUp = m_vecMoveSpeed - DotProduct(m_vecMoveSpeed, GetUp()) * GetUp();
         float offroadAbility = 0.005f;
@@ -4519,8 +4505,7 @@ void CAutomobile::DoSoftGroundResistance(uint32& extraHandlingFlags)
         float direction = -(offroadAbility * (CTimer::GetTimeStep() * m_fMass));
         ApplyMoveForce(speedUp * direction);
         extraHandlingFlags |= EXTRA_HANDLING_WHEELS_TOUCHING_SAND;
-    }
-    else if (IsAnyWheelTouchingRailTrack()) {
+    } else if (IsAnyWheelTouchingRailTrack()) {
         if (m_nModelIndex != MODEL_RCBANDIT && m_nModelIndex != MODEL_RHINO) {
             CVector speedUp = m_vecMoveSpeed - DotProduct(m_vecMoveSpeed, GetUp()) * GetUp();
             float direction = -(CTimer::GetTimeStep() * m_fMass * CVehicle::ms_fRailTrackResistance);
@@ -4532,13 +4517,13 @@ void CAutomobile::DoSoftGroundResistance(uint32& extraHandlingFlags)
 // 0x6A4EC0
 void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel, float steerAngle, CVector* contactSpeeds, CVector* contactPoints, float traction, float acceleration, float brake, bool bFront)
 {
-    bool driveWheels = false;
+    bool driveWheels = false; // TODO: Refactor please
     if (bFront && gHandlingDataMgr.HasFrontWheelDrive(m_pHandlingData->m_nVehicleId))
         driveWheels = true;
     else if (!bFront && gHandlingDataMgr.HasRearWheelDrive(m_pHandlingData->m_nVehicleId))
         driveWheels = true;
 
-    float suspensionBias = 2.0f * m_pHandlingData->m_fSuspensionBiasBetweenFrontAndRear;
+    float suspensionBias = 2.0f * m_pHandlingData->m_fSuspensionBiasBetweenFrontAndRear; // TODO: Use lambda 
     if (!bFront) {
         suspensionBias = 2.0f - suspensionBias;
 
@@ -4557,6 +4542,7 @@ void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel,
     }
 
     if (m_aWheelTimer[leftWheel] > 0.0f || m_aWheelTimer[rightWheel] > 0.0f) {
+        // TOOD: Refactor
         float sinSteerAngle = 0.0f;
         float cosSteerAngle = 0.0f;
         bool canSteer = steerAngle > -100.0f;
@@ -4565,7 +4551,9 @@ void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel,
             cosSteerAngle = std::cos(steerAngle);
         }
 
-        bool neutralHandling = m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_REMOTE_CONTROLLED && handlingFlags.bNpcNeutralHandl;
+        const auto neutralHandling = m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_REMOTE_CONTROLLED && handlingFlags.bNpcNeutralHandl;
+
+        // TOOD: Refactor
         float brakeBias = 0.0f;
         float tractionBias = 0.0f;
 
@@ -4576,6 +4564,8 @@ void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel,
             brakeBias = neutralHandling ? 1.0f : 2.0f - (2.0f * m_pHandlingData->m_fBrakeBias);
             tractionBias = neutralHandling ? 1.0f : 2.0f - (2.0f * m_pHandlingData->m_fTractionBias);
         }
+
+        // TOOD: Below seems like a lot of copy-paste code, maybe refactor?
 
         CVector wheelFwd{};
         CVector wheelRight{};
@@ -4803,7 +4793,7 @@ void CAutomobile::dmgDrawCarCollidingParticles(const CVector& position, float fo
     }
 
 
-    CVector fxPos{ lerp(GetPosition(), position, 0.7f) };
+    CVector fxPos{ lerp(GetPosition(), position, 0.7f) }; // Actually const, just that fx functions dont take consts :D
 
     // Add smoke
     {
@@ -4827,7 +4817,7 @@ void CAutomobile::dmgDrawCarCollidingParticles(const CVector& position, float fo
 
 // 0x6A7090
 void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately) {
-    ((void(__thiscall*)(CAutomobile*, uint8))0x6A7090)(this, bExplodeImmediately);
+    ((void(__thiscall*)(CAutomobile*, uint8))0x6A7090)(this, bExplodeImmediately); // TODO: Reverse
 }
 
 // todo: nodeIndex one of { eBikeNodes eBmxNodes eBoatNodes eHeliNodes eMonsterTruckNodes ePlaneNodes eQuadBikeNodes eTrailerNodes eTrainNodes eCarNodes }
@@ -5118,8 +5108,7 @@ void CAutomobile::ProcessBuoyancy()
     }
 }
 
-inline void CAutomobile::ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver)
-{
+inline void CAutomobile::ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver) {
     if (!ped)
         return;
 
@@ -5140,11 +5129,10 @@ inline void CAutomobile::ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver)
 
             ped->GetEventGroup().Add(&damageEvent, false);
         }
-    }
-    else {
-        auto vecCollisionImpact = m_vecMoveSpeed * -1.0F;
+    } else {
+        auto vecCollisionImpact = m_vecMoveSpeed * -1.0F; // TODO: -m_vecMoveSpeed.Normalized()
         vecCollisionImpact.Normalise();
-        auto fDamageIntensity = m_vecMoveSpeed.Magnitude() * m_fMass;
+        auto fDamageIntensity = m_vecMoveSpeed.Magnitude() * m_fMass; // TODO: It's "force"
 
         auto knockOffBikeEvent = CEventKnockOffBike(this, &m_vecMoveSpeed, &vecCollisionImpact, fDamageIntensity,
             0.0F, KNOCK_OFF_TYPE_FALL, 0, 0, nullptr, false, false);
@@ -5367,7 +5355,7 @@ void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIdx, eDoors doorIdx)
 /*!
 * @addr 0x6AA200
 * @brief Remove bonnet if it's present and open
-* @returns Flying component object (May be null even in case the bonnet was removed - See \r SpawnFlyingComponent as to when this happens)
+* @returns Flying component object (May be null even in case the bonnet was removed - See íSpawnFlyingComponentí as to when this happens)
 */
 CObject* CAutomobile::RemoveBonnetInPedCollision() {
     if (!m_aCarNodes[eCarNodes::CAR_BONNET]) {
@@ -5378,7 +5366,7 @@ CObject* CAutomobile::RemoveBonnetInPedCollision() {
         return nullptr; // Not open/missing
     }
 
-    if (const auto& bonnet = m_doors[eDoors::DOOR_BONNET]; bonnet.m_fOpenAngle * 0.4f >= bonnet.m_fAngle) { // TODO: CDoor - Probably inlined (IsDoorHalfOpen?)
+    if (const auto& bonnet = m_doors[eDoors::DOOR_BONNET]; bonnet.m_fOpenAngle * 0.4f >= bonnet.m_fAngle) { // TODO: CDoor - Probably inlined (IsDoorHalf(ish)Open?)
         return nullptr; // Not open enough
     }
 
@@ -5390,14 +5378,12 @@ CObject* CAutomobile::RemoveBonnetInPedCollision() {
 }
 
 // 0x6AA290
-void CAutomobile::UpdateWheelMatrix(int32 nodeIndex, int32 flags)
-{
-    ((void(__thiscall*)(CAutomobile*, int32, int32))0x6AA290)(this, nodeIndex, flags);
+void CAutomobile::UpdateWheelMatrix(int32 nodeIndex, int32 flags) {
+    ((void(__thiscall*)(CAutomobile*, int32, int32))0x6AA290)(this, nodeIndex, flags); // TODO: Reverse
 }
 
 // 0x6ADEF0
-void CAutomobile::PopDoor(eCarNodes nodeIdx, eDoors doorIdx, bool showVisualEffect)
-{
+void CAutomobile::PopDoor(eCarNodes nodeIdx, eDoors doorIdx, bool showVisualEffect) {
     if (!m_damageManager.IsDoorPresent(doorIdx)) {
         return;
     }
@@ -5440,28 +5426,23 @@ void CAutomobile::PopPanel(eCarNodes nodeIdx, ePanels panel, bool showVisualEffe
 /*!
 * @addr 0x6ADFF0
 */
-void CAutomobile::ScanForCrimes()
-{
-    const auto vehicle = FindPlayerVehicle();
-    if (!vehicle)
-        return;
-
-    if (!vehicle->IsAutomobile())
-        return;
-
-    if (vehicle->m_nAlarmState && vehicle->m_nAlarmState != -1) {
-        if (vehicle->m_nStatus != eEntityStatus::STATUS_WRECKED) {
-            if (DistanceBetweenPointsSquared(GetPosition(), vehicle->GetPosition()) < sq(20.f)) {
-                FindPlayerPed()->SetWantedLevelNoDrop(1);
-            }
-        }
+void CAutomobile::ScanForCrimes() {
+    const auto plyrveh = FindPlayerVehicle();
+    if (   plyrveh
+        && plyrveh->IsAutomobile()
+        && plyrveh->m_nStatus != eEntityStatus::STATUS_WRECKED
+        && plyrveh->m_nAlarmState
+        && plyrveh->m_nAlarmState != -1
+        && DistanceBetweenPointsSquared(GetPosition(), plyrveh->GetPosition()) < sq(20.f)
+    ) {
+        FindPlayerPed()->SetWantedLevelNoDrop(1);
     }
 }
 
 // 0x6AE850
 void CAutomobile::TankControl()
 {
-    if (m_nModelIndex == MODEL_RCTIGER && m_nStatus  == STATUS_REMOTE_CONTROLLED) {
+    if (m_nModelIndex == MODEL_RCTIGER && m_nStatus == STATUS_REMOTE_CONTROLLED) {
         if (CPad::GetPad()->CarGunJustDown()) {
             if (CTimer::GetTimeInMS() > m_nGunFiringTime + TIGER_GUNFIRE_RATE) {
                 CWeapon minigun(WEAPON_MINIGUN, 5000);
@@ -5490,8 +5471,7 @@ void CAutomobile::TankControl()
     if (activeCam.m_nMode != MODE_CAM_ON_A_STRING) {
         m_fDoomVerticalRotation   -= ((float)pad->GetCarGunLeftRight() * CTimer::GetTimeStep() * 0.015f) / 128.0f;
         m_fDoomHorizontalRotation += ((float)pad->GetCarGunUpDown() * CTimer::GetTimeStep() * 0.005f) / 128.0f;
-    }
-    else {
+    } else {
         CVector frontDot = Multiply3x3(activeCam.m_vecFront, GetMatrix());
         float doomVerticalRotation   = std::atan2(-frontDot.x, frontDot.y);
         float doomHorizontalRotation = std::atan2(frontDot.z, frontDot.Magnitude2D()) + DegreesToRadians(15);
@@ -5541,7 +5521,7 @@ void CAutomobile::TankControl()
         m_fDoomHorizontalRotation = DOOM_HORIZONTAL_ROT_MIN;
     }
 
-    if (pad->CarGunJustDown()) {
+    if (pad->CarGunJustDown()) { // TODO: Denest
         CPlayerInfo& playerInfo = FindPlayerInfo();
         if (CTimer::GetTimeInMS() > playerInfo.m_nLastTimeBigGunFired + 800) {
             playerInfo.m_nLastTimeBigGunFired = CTimer::GetTimeInMS();
@@ -6274,7 +6254,7 @@ void CAutomobile::FireTruckControl(CFire* fire) {
 
 // 0x44D520
 bool CAutomobile::HasCarStoppedBecauseOfLight() {
-    return ((bool(__thiscall*)(CAutomobile*))0x44D520)(this);
+    return ((bool(__thiscall*)(CAutomobile*))0x44D520)(this); // TODO: Reverse
 }
 
 /*!
