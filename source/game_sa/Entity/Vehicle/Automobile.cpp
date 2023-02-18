@@ -6,8 +6,9 @@
 */
 #include "StdInc.h"
 
-#include "Automobile.h"
+#include <bit> // popcnt
 
+#include "Automobile.h"
 #include "ModelIndices.h"
 #include "WaterCannons.h"
 #include "Buoyancy.h"
@@ -3982,8 +3983,91 @@ void CAutomobile::ShowAllComps() {
 }
 
 // 0x6A2530
-void CAutomobile::SetRandomDamage(bool arg0) {
-    ((void(__thiscall*)(CAutomobile*, bool))0x6A2530)(this, arg0); // TODO: Reverse
+void CAutomobile::SetRandomDamage(bool bRemoveStuff) {
+    //> Bugfix shit
+    const auto FixedRandom = [&](int32 x, int32 y) {
+        // I'm very sure somebody fell into the trap of the shit naming of `GetRandomNumberInRange`
+        // (The int version of it is exclusive, while the float one is inclusive)
+        // Reason being that at `0x6A260B` the possible interval is [0, 1), that is, in integer terms a fat `0` :D
+        // Obviously, they intended it to be `[0, 1]`
+#ifdef FIX_BUGS
+        return (size_t)CGeneral::GetRandomNumberInRange(x, y + 1);
+#else
+        return (size_t)CGeneral::GetRandomNumberInRange(x, y);
+#endif
+    };
+
+    //> Processes a group of components (panels/doors)
+    const auto Process = [
+        this,
+        IsCompDamageable = [vs = GetVehicleModelInfo()->GetVehicleStruct()](auto nodeIdx) {
+            return vs->IsComponentDamageable(nodeIdx);
+        }
+    ](
+        size_t pickedbs, 
+        size_t numToDmg,
+        size_t numTotal,
+        auto   GetNodeIdx,
+        auto   IsDamStateOk,
+        auto   SetAsDamaged
+    ) {
+        /**
+        * Get the `n`-th component that wasn't yet picked
+        * @param n 0-based number
+        * @param pickedbs Bitset of components that were picked previously
+        */
+        const auto GetNthUnpicked = [&](size_t n) {
+            if (pickedbs == 0) {
+                return n; // No pickedbs components so we can directly return
+            }
+            for (size_t i = 0; i < numTotal; i++) {
+                if ((pickedbs & (1 << i)) == 0) {
+                    if (n-- == 0) {
+                        return i;
+                    }
+                }
+            }
+            NOTSA_UNREACHABLE(); // This is reached if the first `ncomps` bits are all set - Should never happen
+        };
+
+        for (size_t i = 0u; i < numToDmg; i++) {
+            const auto pick = GetNthUnpicked((size_t)CGeneral::GetRandomNumberInRange(0, (int32)(numToDmg - i)));
+            pickedbs |= 1 << pick; // We mark here for simplicity
+            if (!IsDamStateOk(pick)) {
+                continue;
+            }
+            const auto nodeIdx = GetNodeIdx(pick);
+            if (!IsCompDamageable(nodeIdx)) {
+                continue;
+            }
+            SetAsDamaged(pick);
+            SetComponentVisibility(m_aCarNodes[nodeIdx], ATOMIC_IS_DAM_STATE);
+        }
+    };
+
+    //> Doors
+    const auto numDoorsToDmg = FixedRandom(0, bRemoveStuff ? MAX_DOORS : 1);
+    Process(
+        0,
+        numDoorsToDmg,
+        MAX_DOORS,
+        [](auto i)     { return CDamageManager::GetCarNodeIndexFromDoor((eDoors)i); },
+        [this](auto i) { return m_damageManager.GetDoorStatus((eDoors)i) == DAMSTATE_OK; },
+        [this](auto i) { return m_damageManager.SetDoorStatus((eDoors)i, DAMSTATE_DAMAGED); }
+    );
+
+    //> Panels (With a few exceptions)
+    const auto numPanelsToDmg = numDoorsToDmg == 0
+        ? bRemoveStuff ? FixedRandom(1, 4) : 1 // The 4 here and below comes from MAX_PANELS - 3 (As 3 panels are never damaged, see below)
+        : FixedRandom(0, bRemoveStuff ? 4 : 1);
+    Process(
+        1 << REAR_LEFT_PANEL | 1 << REAR_RIGHT_PANEL | 1 << WINDSCREEN_PANEL, // These are never damaged
+        numPanelsToDmg,
+        MAX_PANELS,
+        [](auto i)     { return CDamageManager::GetCarNodeIndexFromPanel((ePanels)i); },
+        [this](auto i) { return m_damageManager.GetPanelStatus((ePanels)i) == DAMSTATE_OK; },
+        [this](auto i) { return m_damageManager.SetPanelStatus((ePanels)i, DAMSTATE_DAMAGED); }
+    );
 }
 
 // 0x6A27F0
