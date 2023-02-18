@@ -134,7 +134,8 @@ namespace CGeneral { // More like `Math` (Or `Meth`, given how bad the code is, 
     * @return An item from the range choosen randomly. Same as Python's `random.choice`
     */
     template<rng::random_access_range R>
-    inline auto& RandomChoice(R&& range) { // TODO: Add waring or smth for fossible dangling reference herea
+    inline auto& RandomChoice(R&& range) { // TODO: Add waring or smth for fossible dangling reference here
+        // If range is empty `GetRandomNumberInRange` will assert
         return range[CGeneral::GetRandomNumberInRange(rng::size(range))];
     }
 
