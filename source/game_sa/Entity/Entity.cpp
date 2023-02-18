@@ -1160,7 +1160,7 @@ C2dEffect* CEntity::GetRandom2dEffect(int32 effectType, bool bCheckForEmptySlot)
     }
 
     if (iFoundCount) {
-        return apArr[CGeneral::GetRandomNumberInRange(0, iFoundCount)]; 
+        return apArr[CGeneral::GetRandomNumberInRange(0u, iFoundCount)]; 
     }
 
     return nullptr;
