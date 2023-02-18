@@ -117,7 +117,7 @@ public:
     std::array<FxSystem_c*, 2> m_exhaustNitroFxSystem;
 
     uint8 m_harvesterParticleCounter;
-    char  field_981;
+    uint8 m_fireParticleCounter;
     int16 field_982;
     float m_heliDustFxTimeConst;
 

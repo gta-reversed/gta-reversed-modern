@@ -105,6 +105,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(SetPanelDamage, 0x6B1480);
     RH_ScopedInstall(SetDoorDamage, 0x6B1600);
     RH_ScopedInstall(TowTruckControl, 0x6A40F0);
+    RH_ScopedInstall(ProcessCarOnFireAndExplode, 0x6A7090);
 
     RH_ScopedVMTInstall(Fix, 0x6A3440);
     RH_ScopedVMTInstall(DoBurstAndSoftGroundRatios, 0x6A47F0);
@@ -427,7 +428,7 @@ CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool set
 
     m_vehicleAudio.Initialise(this);
     m_heliDustFxTimeConst = 0.0f;
-    field_981 = 0;
+    m_fireParticleCounter = 0;
 }
 
 // 0x6A61E0
@@ -455,7 +456,7 @@ void CAutomobile::ProcessControl()
         eCarMission carMission = m_autoPilot.m_nCarMission;
         if ((carMission == MISSION_CRASH_PLANE_AND_BURN
             || carMission == MISSION_CRASH_HELI_AND_BURN
-            || m_nStatus == STATUS_PLAYER && m_fHealth < 250.0 && field_981 == 2)
+            || m_nStatus == STATUS_PLAYER && m_fHealth < 250.0 && m_fireParticleCounter == 2)
             && m_nStatus != STATUS_WRECKED
             && (m_fDamageIntensity > 0.0f && m_vecLastCollisionImpactVelocity.z > 0.0f || !IsInAir())
             && (m_vecMoveSpeed.z >= 0.0f || physicalFlags.bSubmergedInWater))
@@ -4901,7 +4902,130 @@ void CAutomobile::dmgDrawCarCollidingParticles(const CVector& position, float fo
 
 // 0x6A7090
 void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately) {
-    ((void(__thiscall*)(CAutomobile*, uint8))0x6A7090)(this, bExplodeImmediately); // TODO: Reverse
+    // TODO: Re-order the code to get rid of lambdas here (and of the really deep nesting)
+
+    const auto DecreaseHealthAndProcess = [this, estatus = m_damageManager.GetEngineStatus()] {
+        if (estatus > 225 && m_fHealth > 250.f) {
+            m_fHealth -= 2.f;
+        }
+        ProcessDelayedExplosion();
+    };
+
+    const auto SetFxVelocity = [&, this] {
+        if (m_pFireParticle) {
+            auto bullshit = GetMoveSpeed() * 50.f;
+            m_pFireParticle->SetVelAdd(&bullshit);
+        }
+        DecreaseHealthAndProcess();
+    };
+
+    const auto CreateFx = [&, this](size_t typ) {
+        auto pos = GetDummyPosition(DUMMY_ENGINE);
+        if (const auto mat = GetModellingMatrix()) {
+            m_pFireParticle = g_fxMan.CreateFxSystem(
+                typ == 1 ? "fire_car" : "fire_large",
+                &pos,
+                mat
+            );
+        }
+        if (m_pFireParticle) {
+            m_pFireParticle->Play();
+            GetEventGlobalGroup()->Add(CEventVehicleOnFire{ this });
+        }
+    };
+
+    if (m_fHealth < 250.f && GetStatus() != STATUS_WRECKED && !vehicleFlags.bIsDrowning) {
+        const auto isSubPlaneOrHeli = notsa::contains(notsa::il(VEHICLE_TYPE_PLANE, VEHICLE_TYPE_HELI), m_nVehicleSubType);
+
+        auto partFxToUse = !m_pFireParticle && !isSubPlaneOrHeli ? 1 : 0;
+
+        const auto floorTsMS = std::floor(CTimer::GetTimeStepInMS());
+        if (isSubPlaneOrHeli) { // 0x6A7117
+            if (!m_fireParticleCounter) {
+                m_fireParticleCounter = IsInAir() ? 2 : 1;
+            }
+
+            if (!bExplodeImmediately) { // 0x6A720B
+                const auto isRcShit = notsa::contains(notsa::il(
+                    MODEL_RCBARON,
+                    MODEL_RCRAIDER,
+                    MODEL_RCGOBLIN,
+                    MODEL_RCBANDIT,
+                    MODEL_RCTIGER
+                ), GetModelId());
+
+                m_fBurnTimer += m_fireParticleCounter || isRcShit
+                    ? floorTsMS
+                    : floorTsMS / 5.f;
+                if (m_fBurnTimer > 5000.f) { // 0x6A72A4
+                    BlowUpCar(m_pExplosionVictim, false);
+                } else { //> 0x6A72D9 - Create smoke particle fx
+                    auto fxPrtMult = [&, this]() -> FxPrtMult_c {
+                        if (!isRcShit) {
+                            return { 0.f, 0.f, 0.f, 0.4f, 1.f, 1.f, 0.3f };
+                        }
+                        if (GetStatus() == STATUS_REMOTE_CONTROLLED) {
+                            return { 0.f, 0.f, 0.5f, 0.4f, 0.1f, 1.f, 0.1f };
+                        }
+                        return { 0.f, 0.f, 0.15f, 0.4f, 0.3f, 1.f, 0.3f };
+                    }();
+                    if (CTimer::GetFrameCounter() % 2 == 0) { // TODO: Don't use frame counter
+                        auto vel = isRcShit
+                            ? CVector::Random({ -0.5f, -0.5f, 0.f }, { 0.5f, 0.5f, 0.4f })
+                            : CVector::Random({ -1.5f, -1.5f, 0.f }, { 1.5f, 1.5f, 1.0f });
+                        auto pos = GetPosition() + (isRcShit
+                            ? CVector::Random({ -0.7f, -0.7f, 0.f }, { 0.7f, 0.7f, 0.f })
+                            : CVector::Random({ -2.0f, -2.0f, 0.f }, { 2.0f, 2.0f, 0.f })
+                        );
+                        g_fx.m_SmokeHuge->AddParticle(
+                            &pos,
+                            &vel,
+                            0.f,
+                            &fxPrtMult,
+                            -1.f,
+                            1.2f,
+                            0.6f,
+                            false
+                        );
+                    }
+                }
+
+                if (notsa::contains(notsa::il(STATUS_PLAYER, STATUS_REMOTE_CONTROLLED), GetStatus())) { // 0x6A745D
+                    if (!m_pFireParticle && m_fBurnTimer > 2500.f) {
+                        CreateFx(2);
+                        SetFxVelocity();
+                        return;
+                    }
+                } else if (!isRcShit && CGeneral::RandomBool(2)) { // originally it was 1.2% (3 / 250), but it doesn't matter
+                    CExplosion::AddExplosion(this, m_pExplosionVictim, EXPLOSION_ROCKET, GetPosition(), 0, true, -1.f, false);
+                }
+            
+                if (partFxToUse == 0) {
+                    SetFxVelocity();
+                    return;
+                }
+                CreateFx(partFxToUse);
+                SetFxVelocity();
+            }
+        } else {
+            m_fBurnTimer += floorTsMS;
+            if (m_fBurnTimer > 5000.f) {
+                BlowUpCar(m_pExplosionVictim, false);
+            }
+            if (partFxToUse == 0) {
+                SetFxVelocity();
+                return;
+            }
+        }
+    }
+
+    m_fBurnTimer = 0.f;
+    if (m_pFireParticle) {
+        m_pFireParticle->Kill();
+        m_pFireParticle = nullptr;
+    }
+
+    DecreaseHealthAndProcess();
 }
 
 // todo: nodeIndex one of { eBikeNodes eBmxNodes eBoatNodes eHeliNodes eMonsterTruckNodes ePlaneNodes eQuadBikeNodes eTrailerNodes eTrainNodes eCarNodes }
