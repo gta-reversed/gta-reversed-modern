@@ -159,7 +159,7 @@ public:
     bool IsOpenTopCar() override;
     void RemoveRefsToVehicle(CEntity* entity) override;
     void BlowUpCar(CEntity* damager, bool bHideExplosion) override;
-    void BlowUpCarCutSceneNoExtras(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound) override;
+    void BlowUpCarCutSceneNoExtras(bool bDontShakeCam, bool bDontSpawnStuff, bool bNoExplosion, bool bMakeSound) override;
     bool SetUpWheelColModel(CColModel* wheelCol) override;
     bool BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) override;
     bool IsRoomForPedToLeaveCar(uint32 arg0, CVector* arg1) override;
@@ -375,6 +375,8 @@ public:
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
+
+    void BlowUpCar_Impl(CEntity* dmgr, bool bDontShakeCam, bool bDontSpawnStuff, bool bNoExplosion, bool bHideExplosionFx, bool bIsForCutScene, bool bMakeSound);
 
     auto Constructor(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) {
         this->CAutomobile::CAutomobile(modelIndex, createdBy, setupSuspensionLines);

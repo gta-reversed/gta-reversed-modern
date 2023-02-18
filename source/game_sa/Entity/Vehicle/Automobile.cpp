@@ -149,6 +149,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedVMTInstall(ProcessControlInputs, 0x6AD690);
     RH_ScopedVMTInstall(OpenDoor, 0x6A6AE0);
     RH_ScopedVMTInstall(BlowUpCar, 0x6B3780);
+    RH_ScopedVMTInstall(BlowUpCarCutSceneNoExtras, 0x6B3BB0);
 }
 
 // 0x6B0A90
@@ -2336,59 +2337,90 @@ void CAutomobile::RemoveRefsToVehicle(CEntity* entity) {
     }
 }
 
-// 0x6B3780
-void CAutomobile::BlowUpCar(CEntity* dmgr, bool bHideExplosion) {
+// NOTSA - Combined implementation of `BlowUpCar` and `BlowUpCarCutSceneNoExtras`
+void CAutomobile::BlowUpCar_Impl(CEntity* dmgr, bool bDontShakeCam, bool bDontSpawnStuff, bool bNoExplosion, bool bHideExplosionFx, bool bIsForCutScene, bool bMakeSound) {
     if (!vehicleFlags.bCanBeDamaged) {
         return;
     }
 
-    const auto plyrped = FindPlayerPed();
-    if (dmgr == plyrped || dmgr == FindPlayerVehicle()) {
-        auto& plyrinfo = FindPlayerInfo();
-        plyrinfo.m_nHavocCaused += 20;
-        plyrinfo.m_fCurrentChaseValue += 10.f;
-        CStats::IncrementStat(STAT_COST_OF_PROPERTY_DAMAGED, CGeneral::GetRandomNumberInRange(4000.f, 10'000.f - 1.f));
+    const bool bFixBugs = // TODO: Make a function for this in `notsa::`
+#ifdef FIX_BUGS
+        true;
+#else
+        false;
+#endif
+
+    if (bIsForCutScene) {
+        if (IsSubPlane() && GetStatus() != STATUS_PLAYER) {
+            switch (m_autoPilot.m_nCarMission) {
+            case MISSION_PLANE_FLYTOCOORS:
+            case MISSION_PLANE_ATTACK_PLAYER_0:
+            case MISSION_PLANE_FLY_IN_DIRECTION:
+            case MISSION_PLANE_FOLLOW_ENTITY:
+            case MISSION_PLANE_ATTACK_PLAYER_1:
+            case MISSION_PLANE_DOGFIGHT:
+            case MISSION_PLANE_DOGFIGHT_AGAINST_PLAYER:
+                m_autoPilot.SetCarMission(MISSION_CRASH_PLANE_AND_BURN);
+                return;
+            }
+        }
+    } else {
+        if (dmgr == FindPlayerPed() || dmgr == FindPlayerVehicle()) {
+            auto& plyrinfo = FindPlayerInfo();
+            plyrinfo.m_nHavocCaused += 20;
+            plyrinfo.m_fCurrentChaseValue += 10.f;
+            CStats::IncrementStat(STAT_COST_OF_PROPERTY_DAMAGED, CGeneral::GetRandomNumberInRange(4000.f, 10'000.f - 1.f));
+        }
     }
 
     if (m_nModelIndex == eModelID::MODEL_VCNMAV) {
         CWanted::bUseNewsHeliInAdditionToPolice = false;
     }
 
-    GetMoveSpeed().z += 0.13f;
+    if (!bNoExplosion) {
+        GetMoveSpeed().z += 0.13f;
+    }
+
     SetStatus(STATUS_WRECKED);
+
     physicalFlags.bDestroyed = true;
-    m_nTimeWhenBlowedUp = CTimer::GetTimeInMS();
+    m_nTimeWhenBlowedUp      = CTimer::GetTimeInMS();
+
     CVisibilityPlugins::SetClumpForAllAtomicsFlag(m_pRwClump, ATOMIC_IS_BLOWN_UP);
     m_damageManager.FuckCarCompletely(false);
 
-    const auto isRcShit = [this] {
-        switch (GetModelId()) {
-        case MODEL_RCTIGER:
-        case MODEL_RCBANDIT:
-            return true;
-        }
-        return false;
-    }();
-    if (!isRcShit) {
+    const auto isRcShit = (bFixBugs || !bIsForCutScene)
+        ? notsa::contains(notsa::il(MODEL_RCTIGER, MODEL_RCBANDIT), GetModelId()) // I'm 99% sure they forgot to copy paste this too, but let it be.
+        : GetModelId() == MODEL_RCBANDIT;
+    if (!isRcShit) { // 0x6B3C61
         for (auto bumper : { FRONT_BUMPER, REAR_BUMPER }) {
-            SetBumperDamage(bumper, false);
+            SetBumperDamage(bumper, bDontSpawnStuff);
         }
         for (auto door : { DOOR_BONNET, DOOR_BOOT, DOOR_LEFT_FRONT, DOOR_RIGHT_FRONT, DOOR_LEFT_REAR, DOOR_RIGHT_REAR }) {
-            SetDoorDamage(door, false);
+            SetDoorDamage(door, bDontSpawnStuff);
         }
-        SpawnFlyingComponent(CAR_WHEEL_LF, 1);
-        if (const auto obj = GetCurrentAtomicObject(m_aCarNodes[CAR_WHEEL_LF])) {
-            RpAtomicSetFlags(obj, 0); // TODO: Use appropriate enum (if any?)
+        if (!bDontSpawnStuff) {
+            SpawnFlyingComponent(CAR_WHEEL_LF, 1);
+        }
+        if (!bNoExplosion) {
+            if (const auto obj = GetCurrentAtomicObject(m_aCarNodes[CAR_WHEEL_LF])) {
+                RpAtomicSetFlags(obj, 0); // TODO: Use appropriate enum (if any?)
+            }
         }
     }
 
     m_nBombOnBoard = 0;
-    m_fHealth = 0.f;
-    m_wBombTimer = 0;
+    m_fHealth      = 0.f;
+    m_wBombTimer   = 0;
 
-    TheCamera.CamShake(0.4f, GetPosition());
+    if (!bDontShakeCam) {
+        TheCamera.CamShake(0.4f, GetPosition());
+    }
+
     KillPedsInVehicle();
-    KillPedsGettingInVehicle();
+    if (bFixBugs || !bIsForCutScene) { // Originally not in `BlowUpCarCutSceneNoExtras`, but they probably just forgot to copy paste it
+        KillPedsGettingInVehicle();  
+    }
 
     vehicleFlags.bLightsOn     = false;
     vehicleFlags.bEngineOn     = false;
@@ -2396,7 +2428,7 @@ void CAutomobile::BlowUpCar(CEntity* dmgr, bool bHideExplosion) {
     m_nOverrideLights          = NO_CAR_LIGHT_OVERRIDE;
     autoFlags.bTaxiLightOn     = false;
 
-    if (vehicleFlags.bIsAmbulanceOnDuty) {
+    if (vehicleFlags.bIsAmbulanceOnDuty) { //> 0x6B3DAE
         assert(!vehicleFlags.bIsFireTruckOnDuty);
         vehicleFlags.bIsAmbulanceOnDuty = false;
         CCarCtrl::NumAmbulancesOnDuty--;
@@ -2409,42 +2441,52 @@ void CAutomobile::BlowUpCar(CEntity* dmgr, bool bHideExplosion) {
     }
 
     ChangeLawEnforcerState(false);
-    gFireManager.StartFire(this, dmgr);
-    CDarkel::RegisterCarBlownUpByPlayer(*this, 0); // Um.... Okay
 
+    if (!bNoExplosion) {
+        CDarkel::RegisterCarBlownUpByPlayer(*this, 0); // Um.... Okay
 
-    //> 0x6B3A17 - Add explosion fx (cancer inducing code)
-    const auto tcm = GetColModel();
-    const auto maxOffset = IsSubAutomobile() || IsSubQuad()
-        ? 0.75f
-        : 0.1f;
-    const auto RandomOffset = [&]() { return CGeneral::GetRandomNumberInRange(-maxOffset, maxOffset); };
-    const auto explOffset = CVector{
-        RandomOffset(),
-        RandomOffset(),
-        maxOffset + 0.5f
-    } * GetColModel()->GetBoundingBox().m_vecMax;
-    const auto explPos = // Do a matrix transform... manually, because that's fun!
-          GetPosition()
-        + GetRight() * explOffset.x
-        + GetForward() * explOffset.y
-        - CVector{0.f, 0.f, explOffset.z};
-    CExplosion::AddExplosion(
-        this,
-        dmgr,
-        isRcShit ? EXPLOSION_QUICK_CAR : EXPLOSION_CAR,
-        explPos,
-        0,
-        true,
-        -1.f,
-        bHideExplosion
-    );
+        gFireManager.StartFire(this, dmgr);
+
+        if (bIsForCutScene) { //> 0x6B3E0D
+            CExplosion::AddExplosion(this, dmgr, EXPLOSION_MOLOTOV, GetPosition(), 0, bMakeSound, -1.f, bHideExplosionFx);
+        } else { //> 0x6B3A17 - Add explosion fx (cancer inducing code)
+            const auto tcm = GetColModel();
+            const auto maxOffset = IsSubAutomobile() || IsSubQuad()
+                ? 0.75f
+                : 0.1f;
+            const auto RandomOffset = [&]() { return CGeneral::GetRandomNumberInRange(-maxOffset, maxOffset); };
+            const auto explOffset = CVector{
+                RandomOffset(),
+                RandomOffset(),
+                maxOffset + 0.5f
+            } * GetColModel()->GetBoundingBox().m_vecMax;
+            const auto explPos = // Do a matrix transform... manually, because that's fun!
+                  GetPosition()
+                + GetRight() * explOffset.x
+                + GetForward() * explOffset.y
+                - CVector{0.f, 0.f, explOffset.z};
+            CExplosion::AddExplosion(
+                this,
+                dmgr,
+                isRcShit ? EXPLOSION_QUICK_CAR : EXPLOSION_CAR,
+                explPos,
+                0,
+                bMakeSound,
+                -1.f,
+                bHideExplosionFx
+            );
+        }
+    }
+}
+
+// 0x6B3780
+void CAutomobile::BlowUpCar(CEntity* dmgr, bool bHideExplosionFx) {
+    BlowUpCar_Impl(dmgr, false, false, false, bHideExplosionFx, false, true);
 }
 
 // 0x6B3BB0
-void CAutomobile::BlowUpCarCutSceneNoExtras(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound)
-{
-    plugin::CallMethod<0x6B3BB0, CAutomobile*, bool, bool, bool, bool>(this, bNoCamShake, bNoSpawnFlyingComps, bDetachWheels, bExplosionSound);
+void CAutomobile::BlowUpCarCutSceneNoExtras(bool bDontShakeCam, bool bDontSpawnStuff, bool bNoExplosion, bool bMakeSound) {
+    BlowUpCar_Impl(nullptr, bDontShakeCam, bDontSpawnStuff, bNoExplosion, false, true, bMakeSound);
 }
 
 // 0x6A3060
