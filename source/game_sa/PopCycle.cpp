@@ -135,7 +135,7 @@ bool CPopCycle::FindNewPedType(ePedType& outPedType, int32& outPedMI, bool noGan
 
     for (auto chance : { &civPedsChance, &copChance, &dealersChance, &gangChance }) {
         if (*chance < 2.f) {
-            *chance = CGeneral::GetRandomNumberInRange(0.f, *chance);
+            *chance *= CGeneral::GetRandomNumberInRange(0.f, 1.f);
         }
     }
 

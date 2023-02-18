@@ -5,6 +5,7 @@
 #include "TaskComplexExtinguishFires.h"
 #include "TaskComplexStealCar.h"
 #include "TaskComplexFleeAnyMeans.h"
+#include "TaskComplexDriveWander.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -208,7 +209,12 @@ void UIRenderer::DebugCode() {
         CTimer::Suspend();
     }
     if (pad->IsStandardKeyJustPressed('5')) {
-        CTimer::Resume();
+        if (const auto veh = FindPlayerVehicle()) {
+            player->GetTaskManager().SetTask(
+                new CTaskComplexCarDriveWander{veh, eCarDrivingStyle::DRIVING_STYLE_PLOUGH_THROUGH, 100.f},
+                TASK_PRIMARY_PRIMARY
+            );
+        }
     }
     if (pad->IsStandardKeyJustPressed('6')) {
         AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_FRONT);

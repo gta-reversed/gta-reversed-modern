@@ -149,7 +149,8 @@ void CBirds::Update() {
         && CClock::ClockHoursInRange(5, 22)
         && (CTimer::GetFrameCounter() % 512) == std::size(aBirds)
     ) {
-        auto iNumBirdsToCreate = (uint32)CGeneral::GetRandomNumberInRange(1, std::size(aBirds) + 1 - uiNumberOfBirds);
+        auto iNumBirdsToCreate = CGeneral::GetRandomNumberInRange(std::size(aBirds) - uiNumberOfBirds) + 1;
+
         eBirdsBiome biome = eBirdsBiome::BIOME_WATER;
 
         if (TheCamera.m_fDistanceToWater > 30.0F) {
