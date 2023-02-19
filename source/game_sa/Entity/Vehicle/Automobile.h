@@ -64,16 +64,15 @@ public:
         };
     };
     std::array<float, 4> m_fWheelBurnoutSpeed; // 0x858 - Passed to CVehicle::ProcessWheel as last 3rd parameter, but it's not used
-
     struct {
-        uint8 bTaxiLightOn : 1 { m_sAllTaxiLights }; // bTaxiLight
-        uint8 ucNPCFlagPad2 : 1; // bShouldNotChangeColour
-        uint8 bIgnoreWater : 1; // bWaterTight
-        uint8 bDontDamageOnRoof : 1; // bDoesNotGetDamagedUpsideDown
-        uint8 bTakePanelDamage : 1 { true }; // bCanBeVisiblyDamaged
-        uint8 ucTaxiUnkn6 : 1 { true }; // bTankExplodesCars
-        uint8 bLostTraction : 1; // bIsBoggedDownInSand
-        uint8 bSoftSuspension : 1; // bIsMonsterTruck
+        bool bTaxiLight : 1 { m_sAllTaxiLights }; // AKA `bTaxiLightOn`
+        bool bShouldNotChangeColour : 1 {}; // AKA `ucNPCFlagPad2`
+        bool bWaterTight : 1 {}; // AKA `bIgnoreWater`
+        bool bDoesNotGetDamagedUpsideDown : 1 {}; // AKA `bDontDamageOnRoof`
+        bool bCanBeVisiblyDamaged : 1 { true }; // AKA `bTakePanelDamage`
+        bool bTankExplodesCars : 1 { true }; // AKA `ucTaxiUnkn6`
+        bool bIsBoggedDownInSand : 1 {}; // AKA `bLostTraction`
+        bool bIsMonsterTruck : 1 {}; // AKA `bSoftSuspension`
     } autoFlags;
     int8   _align;
     bool   m_bDoingBurnout;                         // 0x86A
