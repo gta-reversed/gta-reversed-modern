@@ -77,9 +77,9 @@ namespace CGeneral { // More like `Math` (Or `Meth`, given how bad the code is, 
     uint16 GetRandomNumber();
 
     /*!
-     * @returns True `chanceOfTrue` % of the time, false othertimes
+     * @returns True `chanceOfTrue` % of the time, false othertimes. Valid value are [0, 100)
      */
-    bool RandomBool(uint8 chanceOfTrue);
+    bool RandomBool(float chanceOfTrue);
 
     /*!
      * @returns True 50% of the time

@@ -63,7 +63,7 @@ CTask* CTaskComplexUseAttractor::CreateFirstSubTask(CPed* ped) {
         case PED_ATTRACTOR_SEAT:
         case PED_ATTRACTOR_STEP:
             return new CTaskComplexSitDownThenIdleThenStandUp{
-                CGeneral::RandomBool(40) ? CGeneral::GetRandomNumberInRange(15'000, 60'000) : gDefaultTaskTime,
+                CGeneral::RandomBool(40.f) ? CGeneral::GetRandomNumberInRange(15'000, 60'000) : gDefaultTaskTime,
                 type == PED_ATTRACTOR_STEP,
                 !!ped->bStayInSamePlace
             };

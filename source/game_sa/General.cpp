@@ -156,8 +156,9 @@ float CGeneral::GetRadianAngleBetweenPoints(CVector2D a, CVector2D b) {
     return GetRadianAngleBetweenPoints(a.x, a.y, b.x, b.y);
 }
 
-bool CGeneral::RandomBool(uint8 chanceOfTrue) {
-    return CGeneral::GetRandomNumberInRange(100u) < chanceOfTrue;
+bool CGeneral::RandomBool(float chanceOfTrue) {
+    assert(chanceOfTrue <= 100.f);
+    return CGeneral::GetRandomNumberInRange(0.f, 100.f) <= chanceOfTrue;
 }
 
 /*!
