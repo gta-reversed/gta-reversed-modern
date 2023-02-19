@@ -35,8 +35,8 @@ public:
     static bool DoLineCheckWithinObject(CColTriangle* triangle, int32 a2, CVector* a3, CVector* a4, CVector a5, CVector a6);
     static bool DoesCoverPointStillProvideCover(CCoverPoint* point, CVector position);
     static void Find2HighestPoints(CColTriangle* triangle, CVector* vertPositions, int32& outPoint1, int32& outPoint2);
-    static CCoverPoint* FindAndReserveCoverPoint(CPed* ped, CVector& position, bool a3);
-    static bool FindCoordinatesCoverPoint(CCoverPoint* point, CPed* ped, CVector& position, CVector& outCoordinates);
+    static CCoverPoint* FindAndReserveCoverPoint(CPed* ped, const CVector& position, bool a3);
+    static bool FindCoordinatesCoverPoint(CCoverPoint* point, CPed* ped, const CVector& position, CVector& outCoordinates);
     static void FindCoverPointsForThisBuilding(CBuilding* building);
     static uint8 FindDirFromVector(float x, float y);
     static CVector FindVectorFromDir(uint8 direction);
