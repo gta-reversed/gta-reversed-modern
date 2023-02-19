@@ -15,7 +15,7 @@ void CTaskComplexKillPedOnFootArmed::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x621250);
 
     RH_ScopedInstall(LineOfSightClearForAttack, 0x621500);
-    RH_ScopedInstall(IsPedInLeaderFiringLine, 0x621300, { .reversed = false });
+    RH_ScopedInstall(IsPedInLeaderFiringLine, 0x621300);
     RH_ScopedInstall(CreateSubTask, 0x626FC0, {.reversed = false});
 
     RH_ScopedVMTInstall(Clone, 0x6234C0);
@@ -133,7 +133,55 @@ bool CTaskComplexKillPedOnFootArmed::LineOfSightClearForAttack(CPed* ped) { // p
 
 // 0x621300
 bool CTaskComplexKillPedOnFootArmed::IsPedInLeaderFiringLine(CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x621300>(this, ped);
+    const auto pedGrp = ped->GetGroup();
+    if (!pedGrp) {
+        return false;
+    }
+
+    const auto grpLeaderPlyr = pedGrp->GetMembership().GetLeader();
+    if (!grpLeaderPlyr || !grpLeaderPlyr->IsPlayer()) {
+        return false;
+    }
+
+    if (!grpLeaderPlyr->m_pTargetedObject || grpLeaderPlyr->GetActiveWeapon().IsTypeMelee()) {
+        return false;
+    }
+
+    const auto &leaderPos2D      = grpLeaderPlyr->GetPosition2D();
+    const auto &leaderPos        = grpLeaderPlyr->GetPosition();
+    const auto leaderToPed       = ped->GetPosition() - leaderPos, // 0x6213BD
+               leaderToTargetDir = (grpLeaderPlyr->m_pTargetedObject->GetPosition() - leaderPos).Normalized(); // 0x621394
+
+    /* clang-format off
+     * --[projPointOnLeaderToTargetRay2D]-->[leaderPos]---[leaderToTargetDir]-->[Target]
+     *                                          /
+     *                                         /
+     *                                        /
+     *                                       /
+     *                                 [leaderToPed]
+     *                                     /
+     *                                    /
+     *                                  \|/
+     *                                [Ped]
+     * clang-format on */
+
+    //> 0x6213AE
+    const auto projPointOnLeaderToTargetRay2D = leaderPos + CVector2D{ leaderToPed }.ProjectOnToNormal(leaderToTargetDir);
+    if ((projPointOnLeaderToTargetRay2D - ped->GetPosition2D()).SquaredMagnitude() >= sq(2.f)) {
+        return false;
+    }
+
+    //> 0x0621482
+    if (leaderToTargetDir.Dot(leaderToPed) <= 0.f) { // Ped is "behind" leader (Like on the ASCII art above)
+        return false;
+    }
+
+    //> 0x6214CD
+    if (leaderToPed.SquaredMagnitude() >= sq(10.f)) {
+        return false;
+    }
+
+    return true;
 }
 
 // 0x626FC0
