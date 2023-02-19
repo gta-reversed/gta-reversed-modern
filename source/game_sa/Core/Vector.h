@@ -18,7 +18,6 @@ class CVector : public RwV3d {
 public:
     constexpr CVector() = default;
     constexpr CVector(float X, float Y, float Z) : RwV3d{ X, Y, Z } {}
-    CVector(const CVector2D& v2d, float Z); // DO NOT DEFAULT Z TO 0 HERE, BECAUSE IMPLICIT CONVERSIONS WILL HAPPEN!
     constexpr CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
     constexpr CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; }
     constexpr explicit CVector(float value) { x = y = z = value; }

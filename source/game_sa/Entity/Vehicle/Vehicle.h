@@ -174,9 +174,9 @@ struct tHydraulicData {
 VALIDATE_SIZE(tHydraulicData, 0x28);
 
 class NOTSA_EXPORT_VTABLE CVehicle : public CPhysical {
-static constexpr auto NUM_VEHICLE_UPGRADES = 15u;
+public:
+    static constexpr auto NUM_VEHICLE_UPGRADES = 15u;
 
-class CVehicle : public CPhysical {
 public:
     CAEVehicleAudioEntity m_vehicleAudio;
     tHandlingData*        m_pHandlingData;
@@ -699,12 +699,11 @@ public: // NOTSA functions
     /// get position of driver seat dummy (World Space)
     CVector GetDriverSeatDummyPositionWS(); // NOTSA
 
-    CVector GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace = true);
-    [[nodiscard]] auto GetRopeID() const { return (uint32)&m_nFlags + 1; }
+    [[nodiscard]] auto GetRopeID() const { return (uint32)&m_nFlags + 1; } // yep, flags + 1
     [[nodiscard]] CVehicleAnimGroup& GetAnimGroup() const;
     [[nodiscard]] AssocGroupId GetAnimGroupId() const;
 
-    auto GetPassengers() { return std::span{ m_apPassengers, m_nMaxPassengers }; }
+    auto GetPassengers() const { return std::span{ m_apPassengers, m_nMaxPassengers }; }
     auto GetMaxPassengerSeats() { return std::span{ m_apPassengers, m_nMaxPassengers }; } // NOTE: Added this because I plan to refactor `GetPassengers()`
 
     [[nodiscard]] float GetDefaultAirResistance() const {

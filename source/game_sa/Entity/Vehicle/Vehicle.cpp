@@ -8,10 +8,10 @@
 
 #include <optional>
 #include <functional>
-#include "extensions/utility.hpp"
+#include <extensions/utility.hpp>
 
 #include "Vehicle.h"
-
+#include "Garages.h"
 #include "ModelIndices.h"
 #include "CustomCarPlateMgr.h"
 #include "Buoyancy.h"
@@ -1425,8 +1425,8 @@ void CVehicle::ApplyTurnForceToOccupantOnEntry(CPed* passenger) {
     }
     default: {
         ApplyTurnForce(
-            { .0f, .0f, passenger->m_fMass / -5.f },
-            { CVector2D{passenger->GetPosition() - GetPosition()}, 0.f }
+            CVector{ .0f, .0f, passenger->m_fMass / -5.f },
+            CVector{ CVector2D{passenger->GetPosition() - GetPosition()}, 0.f }
         );
         break;
     }
@@ -1712,7 +1712,7 @@ void CVehicle::KillPedsInVehicle() {
     const auto ProcessOccupant = [this](CPed* occupant) {
         if (occupant) {
             if (!CGameLogic::IsCoopGameGoingOn()) {
-                CDarkel::RegisterKillByPlayer(occupant, WEAPON_EXPLOSION, false, 0);
+                CDarkel::RegisterKillByPlayer(*occupant, WEAPON_EXPLOSION, false, 0);
             }
             CEventVehicleDied event{ this };
             occupant->GetIntelligence()->m_eventGroup.Add(&event);
@@ -1795,7 +1795,7 @@ void CVehicle::DestroyVehicleAndDriverAndPassengers(CVehicle* vehicle) {
     const auto ProcessOccupant = [](CPed* occupant) {
         if (occupant) {
             if (!CGameLogic::IsCoopGameGoingOn()) {
-                CDarkel::RegisterKillByPlayer(occupant, WEAPON_UNIDENTIFIED, false, 0);
+                CDarkel::RegisterKillByPlayer(*occupant, WEAPON_UNIDENTIFIED, false, 0);
             }
             occupant->FlagToDestroyWhenNextProcessed();
         }
@@ -2593,11 +2593,6 @@ CVector CVehicle::GetDriverSeatDummyPositionOS() const {
 
 CVector CVehicle::GetDriverSeatDummyPositionWS() {
     return GetMatrix() * GetDriverSeatDummyPositionOS();
-}
-
-// NOTSA
-int32 CVehicle::GetRopeIndex() {
-    return CRopes::FindRope(m_nFlags + 1); // yep, flags + 1
 }
 
 CVehicleAnimGroup& CVehicle::GetAnimGroup() const {
@@ -3506,7 +3501,7 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
             const auto dirThisToPed = Normalized(thisPosn - ped.GetPosition());
 
             if (!ped.m_pAttachedTo) {
-                ped.ApplyMoveForce({ CVector2D{dirThisToPed} * -5.f, 5.f });
+                ped.ApplyMoveForce(CVector{ CVector2D{dirThisToPed} * -5.f, 5.f });
             }
 
             // TODO: This is such a common pattern, it must be inlined from somewhere...
@@ -3530,7 +3525,7 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
             CVector cpOnRotor{};
             const auto originalElasticity = m_fElasticity;
             m_fElasticity = 1.f;
-            for (const auto& cp : std::span{ CWorld::m_aTempColPts, (size_t)numColls }) {
+            for (const auto& cp : CWorld::m_aTempColPts | rng::views::take(numColls)) {
                 const auto cpToCMCenter = cp.m_vecPoint - colModelCenter;
                 const auto rotorUpDotCpToCenter = DotProduct(cpToCMCenter, rotorUp);
 

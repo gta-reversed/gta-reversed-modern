@@ -28,11 +28,6 @@ void CVector::InjectHooks()
     RH_ScopedGlobalOverloadedInstall(DotProduct, "v3d*v3d*", 0x59C6D0, float(*)(CVector*, CVector*));
 }
 
-CVector::CVector(const CVector2D& v2, float z) :
-    CVector(v2.x, v2.y, z)
-{
-}
-
 /*!
 * @brief From a 2D vector and Z position
 */
