@@ -77,7 +77,7 @@ void CDamageManager::FuckCarCompletely(bool bDontDetachWheel) {
 
 // 0x6C24B0
 bool CDamageManager::ApplyDamage(CAutomobile* vehicle, tComponent compId, float fIntensity, float fColDmgMult) {
-    if (!vehicle->autoFlags.bTakePanelDamage)
+    if (!vehicle->autoFlags.bCanBeVisiblyDamaged)
         return false;
 
     tComponentGroup group{};

@@ -447,7 +447,7 @@ void CAutomobile::ProcessControl()
     }
     CCollisionData* colData = GetColModel()->m_pColData;
     m_bDoingBurnout = false;
-    autoFlags.bLostTraction = false;
+    autoFlags.bIsBoggedDownInSand = false;
     vehicleFlags.bWarnedPeds = false;
     vehicleFlags.bRestingOnPhysical = false;
     m_vehicleAudio.Service();
@@ -676,7 +676,7 @@ void CAutomobile::ProcessControl()
         }
         if (m_nModelIndex == MODEL_RCBARON)
             ProcessFlyingCarStuff();
-        if (!autoFlags.bSoftSuspension) {
+        if (!autoFlags.bIsMonsterTruck) {
             for (int32 i = 0; i < 4; i++) {
                 float wheelRadius = 1.0f - m_aSuspensionSpringLength[i] / m_aSuspensionLineLength[i];
                 m_fWheelsSuspensionCompression[i] = (m_fWheelsSuspensionCompression[i] - wheelRadius) / (1.0f - wheelRadius);
@@ -1300,7 +1300,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags) {
             return false;
         if (m_nModelIndex == MODEL_RCBANDIT || m_nModelIndex == MODEL_SANDKING || m_nModelIndex == MODEL_BFINJECT)
             return false;
-        autoFlags.bLostTraction = true;
+        autoFlags.bIsBoggedDownInSand = true;
         float force = m_fMass * CTimer::GetTimeStep() * 0.005f;
         if (CWeather::WetRoads > 0.0f)
             force *= 1.0f - CWeather::WetRoads;
@@ -1641,7 +1641,7 @@ void CAutomobile::ProcessSuspension() {
             if (handlingFlags.bHydraulicInst && dampingForce > 0.1f && fabs(forwardSpeed) < 0.15f)
                 dampingForce = 0.1f;
 
-            if (springLength[i] < 1.0f && !autoFlags.bSoftSuspension)
+            if (springLength[i] < 1.0f && !autoFlags.bIsMonsterTruck)
                 ApplySpringDampening(
                     dampingForce,
                     wheelSpringForceDampingLimits[i],
@@ -2428,7 +2428,7 @@ void CAutomobile::BlowUpCar_Impl(CEntity* dmgr, bool bDontShakeCam, bool bDontSp
     vehicleFlags.bEngineOn     = false;
     vehicleFlags.bSirenOrAlarm = false;
     m_nOverrideLights          = NO_CAR_LIGHT_OVERRIDE;
-    autoFlags.bTaxiLightOn     = false;
+    autoFlags.bTaxiLight     = false;
 
     if (vehicleFlags.bIsAmbulanceOnDuty) { //> 0x6B3DAE
         assert(!vehicleFlags.bIsFireTruckOnDuty);
@@ -2879,7 +2879,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
 
         // 0x6A7705
         if (m_matrix->GetUp().z < 0.f/*is flipped*/ && this != FindPlayerVehicle()) {
-            if (autoFlags.bDontDamageOnRoof) {
+            if (autoFlags.bDoesNotGetDamagedUpsideDown) {
                 return;
             }
             switch (m_nStatus) {
@@ -4217,7 +4217,7 @@ void CAutomobile::FixPanel(eCarNodes nodeIndex, ePanels panel) {
 
 // 0x6A3740
 void CAutomobile::SetTaxiLight(bool enable) {
-    autoFlags.bTaxiLightOn = enable;
+    autoFlags.bTaxiLight = enable;
 }
 
 // 0x6A3760
@@ -4571,7 +4571,7 @@ void CAutomobile::DoSoftGroundResistance(uint32& extraHandlingFlags) {
         CVector speedUp = m_vecMoveSpeed - DotProduct(m_vecMoveSpeed, GetUp()) * GetUp();
         float offroadAbility = 0.005f;
         if (speedUp.SquaredMagnitude() <= sq(0.3f)) {
-            autoFlags.bLostTraction = true;
+            autoFlags.bIsBoggedDownInSand = true;
         }
         else {
             float magnitude = speedUp.NormaliseAndMag();
@@ -5321,7 +5321,7 @@ inline void CAutomobile::ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver) 
         return;
 
     ped->physicalFlags.bTouchingWater = true;
-    if (!ped->IsPlayer() && autoFlags.bIgnoreWater)
+    if (!ped->IsPlayer() && autoFlags.bWaterTight)
         return;
 
     if (!IsSubQuad() || IsAnyWheelMakingContactWithGround()) {
@@ -5808,7 +5808,7 @@ void CAutomobile::BlowUpCarsInPath() {
         return;
     }
 
-    if (autoFlags.ucTaxiUnkn6) {
+    if (autoFlags.bTankExplodesCars) {
         return;
     }
 
