@@ -11,20 +11,20 @@ void CCustomCarEnvMapPipeline::InjectHooks() {
     RH_ScopedInstall(CreatePipe, 0x5DA020);
     RH_ScopedInstall(DestroyPipe, 0x5DA130);
     RH_ScopedInstall(PreRenderUpdate, 0x5D8870);
-    // RH_ScopedInstall(CustomPipeMaterialSetup, 0x5DA560);
+    RH_ScopedInstall(CustomPipeMaterialSetup, 0x5DA560);
     RH_ScopedInstall(CustomPipeAtomicSetup, 0x5DA610);
     RH_ScopedInstall(CreateCustomObjPipe, 0x5D9F80);
     RH_ScopedInstall(CustomPipeInstanceCB, 0x5D8490);
-    // RH_ScopedInstall(CustomPipeRenderCB, 0x5D9900);
+    RH_ScopedInstall(CustomPipeRenderCB, 0x5D9900, { .reversed = false });
     RH_ScopedInstall(pluginEnvAtmConstructorCB, 0x5D8D30);
     RH_ScopedInstall(pluginEnvAtmDestructorCB, 0x5D9730);
-    // RH_ScopedInstall(pluginEnvAtmCopyConstructorCB, 0x5D9780);
+    RH_ScopedInstall(pluginEnvAtmCopyConstructorCB, 0x5D9780, { .reversed = false });
     RH_ScopedInstall(AllocEnvMapPipeAtomicData, 0x5D96F0);
     RH_ScopedInstall(pluginEnvMatConstructorCB, 0x5D8BD0);
     RH_ScopedInstall(pluginEnvMatDestructorCB, 0x5D95B0);
     RH_ScopedInstall(pluginEnvMatCopyConstructorCB, 0x5D9600);
-    // RH_ScopedInstall(pluginEnvMatStreamReadCB, 0x5D9660);
-    // RH_ScopedInstall(pluginEnvMatStreamWriteCB, 0x5D8CD0);
+    RH_ScopedInstall(pluginEnvMatStreamReadCB, 0x5D9660, { .reversed = false });
+    RH_ScopedInstall(pluginEnvMatStreamWriteCB, 0x5D8CD0, { .reversed = false });
     RH_ScopedInstall(pluginEnvMatStreamGetSizeCB, 0x5D8D10);
     RH_ScopedInstall(GetFxEnvScaleX, 0x5D6F90);
     RH_ScopedInstall(GetFxEnvScaleY, 0x5D6FC0);
@@ -34,13 +34,13 @@ void CCustomCarEnvMapPipeline::InjectHooks() {
     RH_ScopedInstall(SetFxEnvTransScl, 0x5D6FF0);
     RH_ScopedInstall(GetFxEnvShininess, 0x5D8AD0);
     RH_ScopedInstall(SetFxEnvShininess, 0x5D70A0);
-    // RH_ScopedInstall(SetFxEnvTexture, 0x5DA230);
+    RH_ScopedInstall(SetFxEnvTexture, 0x5DA230, { .reversed = false });
     RH_ScopedInstall(SetCustomEnvMapPipeMaterialDataDefaults, 0x5D8BB0);
     RH_ScopedInstall(pluginSpecMatConstructorCB, 0x5D8D40);
     RH_ScopedInstall(pluginSpecMatDestructorCB, 0x5D97D0);
     RH_ScopedInstall(pluginSpecMatCopyConstructorCB, 0x5D9830);
     RH_ScopedInstall(pluginSpecMatStreamReadCB, 0x5D9880);
-    // RH_ScopedInstall(pluginSpecMatStreamWriteCB, 0x5D8D60);
+    RH_ScopedInstall(pluginSpecMatStreamWriteCB, 0x5D8D60, { .reversed = false });
     RH_ScopedInstall(pluginSpecMatStreamGetSizeCB, 0x5D8DD0);
     RH_ScopedInstall(GetFxSpecSpecularity, 0x5D8B90);
     RH_ScopedInstall(GetFxSpecTexture, 0x5D8B50);
@@ -140,23 +140,26 @@ void CCustomCarEnvMapPipeline::PreRenderUpdate() {
 
 // 0x5DA560
 RpMaterial* CCustomCarEnvMapPipeline::CustomPipeMaterialSetup(RpMaterial* material, void* data) {
-    return plugin::CallAndReturn<RpMaterial*, 0x5DA560, RpMaterial*, void*>(material, data);
+    // No other explanation honestly.
+    // According to the docs, `specular` isn't used, so I guess that explains it?
+    auto& flags = reinterpret_cast<uint32&>(material->surfaceProps.specular);
 
-    material->surfaceProps.specular = 0.0f;
+    flags = 0u;
 
     if (RpMatFXMaterialGetEffects(material) == rpMATFXEFFECTENVMAP) {
         SetFxEnvTexture(material, nullptr);
     }
 
-    uint32 flags = 0;
-    if (GetFxEnvShininess(material) != 0.0f && GetFxEnvTexture(material)) {
-        flags = GetFxEnvTexture(material)->name[0] == 'x' ? 2 : 1; // Like Android
-    }
-    if (GetFxSpecSpecularity(material) != 0.0f && GetFxSpecTexture(material)) {
-        flags |= 4;
+    if (GetFxEnvShininess(material) != 0.0f) {
+        if (const auto tex = GetFxEnvTexture(material)) {
+            flags |= RwTextureGetName(tex)[0] == 'x' ? 0b10 : 0b01;
+        }
     }
 
-    material->surfaceProps.specular = 0.0f; // todo: fix
+    if (GetFxSpecSpecularity(material) != 0.0f && GetFxSpecTexture(material)) {
+        flags |= 0b100;
+    }
+
     return material;
 }
 

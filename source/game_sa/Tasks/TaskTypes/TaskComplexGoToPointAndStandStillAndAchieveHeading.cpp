@@ -12,15 +12,15 @@ void CTaskComplexGoToPointAndStandStillAndAchieveHeading::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x668CD0);
     RH_ScopedInstall(Destructor, 0x668D40);
 
-    // RH_ScopedInstall(Clone, 0x66CFD0);
+    RH_ScopedInstall(Clone, 0x66CFD0, { .reversed = false });
     RH_ScopedInstall(GetTaskType, 0x668D30);
-    // RH_ScopedInstall(CreateNextSubTask, 0x66DFD0);
-    // RH_ScopedInstall(CreateFirstSubTask, 0x66E030);
-    // RH_ScopedInstall(ControlSubTask, 0x668E80);
+    RH_ScopedInstall(CreateNextSubTask, 0x66DFD0, { .reversed = false });
+    RH_ScopedInstall(CreateFirstSubTask, 0x66E030, { .reversed = false });
+    RH_ScopedInstall(ControlSubTask, 0x668E80, { .reversed = false });
 }
 
 // 0x668CD0
-CTaskComplexGoToPointAndStandStillAndAchieveHeading::CTaskComplexGoToPointAndStandStillAndAchieveHeading(int32 moveState, const CVector& targetPos, float angle, float radius, float changeRateMult, float maxHeading)
+CTaskComplexGoToPointAndStandStillAndAchieveHeading::CTaskComplexGoToPointAndStandStillAndAchieveHeading(eMoveState moveState, const CVector& targetPos, float angle, float radius, float changeRateMult, float maxHeading)
     : CTaskComplex()
 {
     m_MoveState = moveState;
@@ -52,7 +52,7 @@ CTask* CTaskComplexGoToPointAndStandStillAndAchieveHeading::CreateSubTask(eTaskT
     case TASK_SIMPLE_ACHIEVE_HEADING:
         return new CTaskSimpleAchieveHeading(m_Angle, m_ChangeRateMult, m_MaxHeading);
     case TASK_SIMPLE_STAND_STILL:
-        return new CTaskSimpleStandStill();
+        return new CTaskSimpleStandStill{};
     case TASK_SIMPLE_GO_TO_POINT:
         return new CTaskSimpleGoToPoint(m_MoveState, m_TargetPos, m_Radius, false, false);
     default:

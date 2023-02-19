@@ -83,8 +83,9 @@ void CQuaternion::Conjugate() {
 }
 
 // Squared length of a quat
-float CQuaternion::GetLengthSquared() {
-    return ((float(__thiscall*)(CQuaternion*))0x4D12C0)(this);
+float CQuaternion::GetLengthSquared() const {
+    // Originally NOP.
+    return sq(x) + sq(y) + sq(z) + sq(w);
 }
 
 // Multiplies quat by a floating point value

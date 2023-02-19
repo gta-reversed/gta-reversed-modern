@@ -18,11 +18,11 @@ tEngineDummySlot (&CAEVehicleAudioEntity::s_DummyEngineSlots)[NUM_DUMMY_ENGINE_S
 const tVehicleAudioSettings (&gVehicleAudioSettings)[NUM_VEH_AUDIO_SETTINGS] = *reinterpret_cast<const tVehicleAudioSettings (*)[232]>(0x860AF0);
 
 bool IsSurfaceAudioGrass(eSurfaceType surface) {
-    return g_surfaceInfos->IsAudioGrass(surface) || g_surfaceInfos->IsAudioLongGrass(surface);
+    return g_surfaceInfos.IsAudioGrass(surface) || g_surfaceInfos.IsAudioLongGrass(surface);
 }
 
 bool IsSurfaceAudioEitherGravelWaterSand(eSurfaceType surface) {
-    return g_surfaceInfos->IsAudioGravel(surface) || g_surfaceInfos->IsAudioSand(surface) || g_surfaceInfos->IsAudioWater(surface);
+    return g_surfaceInfos.IsAudioGravel(surface) || g_surfaceInfos.IsAudioSand(surface) || g_surfaceInfos.IsAudioWater(surface);
 }
 
 void CAEVehicleAudioEntity::InjectHooks() {
@@ -51,91 +51,92 @@ void CAEVehicleAudioEntity::InjectHooks() {
     RH_ScopedInstall(GetVehicleTypeForAudio, 0x4F4F00);
     RH_ScopedInstall(IsAccInhibited, 0x4F4F70);
     RH_ScopedInstall(IsAccInhibitedBackwards, 0x4F4FC0);
-    // ? RH_ScopedInstall(IsAccInhibitedForLowSpeed, 0x4F4FF0);
+    RH_ScopedInstall(IsAccInhibitedForLowSpeed, 0x4F4FF0, { .reversed = false });
     RH_ScopedInstall(IsAccInhibitedForTime, 0x4F5020);
     RH_ScopedInstall(InhibitAccForTime, 0x4F5030);
     RH_ScopedInstall(InhibitCrzForTime, 0x4F5060);
     RH_ScopedInstall(IsCrzInhibitedForTime, 0x4F5050);
-    // + RH_ScopedInstall(GetAccelAndBrake, 0x4F5080);
-    // + RH_ScopedInstall(GetVolumeForDummyIdle, 0x4F51F0);
-    // + RH_ScopedInstall(GetFrequencyForDummyIdle, 0x4F5310);
-    // + RH_ScopedInstall(GetVolumeForDummyRev, 0x4F53D0);
-    // + RH_ScopedInstall(GetFrequencyForDummyRev, 0x4F54F0);
-    // + RH_ScopedInstall(CancelVehicleEngineSound, 0x4F55C0);
+    RH_ScopedInstall(GetAccelAndBrake, 0x4F5080, { .reversed = false });
+    RH_ScopedInstall(GetVolumeForDummyIdle, 0x4F51F0, { .reversed = false });
+    RH_ScopedInstall(GetFrequencyForDummyIdle, 0x4F5310, { .reversed = false });
+    RH_ScopedInstall(GetVolumeForDummyRev, 0x4F53D0, { .reversed = false });
+    RH_ScopedInstall(GetFrequencyForDummyRev, 0x4F54F0, { .reversed = false });
+    RH_ScopedInstall(CancelVehicleEngineSound, 0x4F55C0, { .reversed = false });
     RH_ScopedInstall(UpdateVehicleEngineSound, 0x4F56D0);
-    // - RH_ScopedInstall(JustGotInVehicleAsDriver, 0x4F5700);
+    RH_ScopedInstall(JustGotInVehicleAsDriver, 0x4F5700, { .reversed = false });
     RH_ScopedInstall(TurnOnRadioForVehicle, 0x4F5B20);  // -
     RH_ScopedInstall(TurnOffRadioForVehicle, 0x4F5B60); // -
     RH_ScopedInstall(PlayerAboutToExitVehicleAsDriver, 0x4F5BA0);
     RH_ScopedInstall(CopHeli, 0x4F5C40);
-    // crashes on hook switch RH_ScopedInstall(GetFreqForIdle, 0x4F5C60);
+    RH_ScopedInstall(GetFreqForIdle, 0x4F5C60, { .reversed = false });
     RH_ScopedInstall(GetBaseVolumeForBicycleTyre, 0x4F60B0);
-    // crash RH_ScopedInstall(GetVolForPlayerEngineSound, 0x4F5D00);
+    RH_ScopedInstall(GetVolForPlayerEngineSound, 0x4F5D00, { .reversed = false });
     RH_ScopedInstall(JustFinishedAccelerationLoop, 0x4F5E50);
-    // crash RH_ScopedInstall(UpdateGasPedalAudio, 0x4F5EB0);
-    // + RH_ScopedInstall(GetVehicleDriveWheelSkidValue, 0x4F5F30);
-    // + RH_ScopedInstall(GetVehicleNonDriveWheelSkidValue, 0x4F6000);
-    // RH_ScopedInstall(GetHornState, 0x4F61E0);
-    // + RH_ScopedInstall(GetSirenState, 0x4F62A0);
+    RH_ScopedInstall(UpdateGasPedalAudio, 0x4F5EB0, { .reversed = false });
+    RH_ScopedInstall(GetVehicleDriveWheelSkidValue, 0x4F5F30, { .reversed = false });
+    RH_ScopedInstall(GetVehicleNonDriveWheelSkidValue, 0x4F6000, { .reversed = false });
+    RH_ScopedInstall(GetHornState, 0x4F61E0, { .reversed = false });
+    RH_ScopedInstall(GetSirenState, 0x4F62A0, { .reversed = false });
     RH_ScopedInstall(StopGenericEngineSound, 0x4F6320);
-    // RH_ScopedInstall(AddAudioEvent, 0x4F6420);
-    // RH_ScopedInstall(AddAudioEvent, 0x4F7580);
-    // RH_ScopedInstall(RequestNewPlayerCarEngineSound, 0x4F7A50);
-    // RH_ScopedInstall(StartVehicleEngineSound, 0x4F7F20);
-    // RH_ScopedInstall(GetFreqForPlayerEngineSound, 0x4F8070);
-    // RH_ScopedInstall(PlaySkidSound, 0x4F8360);
-    // + RH_ScopedInstall(PlayRoadNoiseSound, 0x4F84D0);
-    // + RH_ScopedInstall(PlayFlatTyreSound, 0x4F8650);
-    // + RH_ScopedInstall(PlayReverseSound, 0x4F87D0);
-    // RH_ScopedInstall(ProcessVehicleFlatTyre, 0x4F8940);
-    // + RH_ScopedInstall(ProcessVehicleRoadNoise, 0x4F8B00);
-    // + RH_ScopedInstall(ProcessReverseGear, 0x4F8DF0);
-    // RH_ScopedInstall(ProcessVehicleSkidding, 0x4F8F10);
+    RH_ScopedInstall(RequestNewPlayerCarEngineSound, 0x4F7A50, { .reversed = false });
+    RH_ScopedInstall(StartVehicleEngineSound, 0x4F7F20, { .reversed = false });
+    RH_ScopedInstall(GetFreqForPlayerEngineSound, 0x4F8070, { .reversed = false });
+    RH_ScopedInstall(PlaySkidSound, 0x4F8360, { .reversed = false });
+    RH_ScopedInstall(PlayRoadNoiseSound, 0x4F84D0, { .reversed = false });
+    RH_ScopedInstall(PlayFlatTyreSound, 0x4F8650, { .reversed = false });
+    RH_ScopedInstall(PlayReverseSound, 0x4F87D0, { .reversed = false });
+    RH_ScopedInstall(ProcessVehicleFlatTyre, 0x4F8940, { .reversed = false });
+    RH_ScopedInstall(ProcessVehicleRoadNoise, 0x4F8B00, { .reversed = false });
+    RH_ScopedInstall(ProcessReverseGear, 0x4F8DF0, { .reversed = false });
+    RH_ScopedInstall(ProcessVehicleSkidding, 0x4F8F10, { .reversed = false });
     RH_ScopedInstall(ProcessRainOnVehicle, 0x4F92C0);
-    // + RH_ScopedInstall(PlayAircraftSound, 0x4F93C0);
-    // + RH_ScopedInstall(PlayBicycleSound, 0x4F9710);
-    // + RH_ScopedInstall(PlayHornOrSiren, 0x4F99D0);
-    // + RH_ScopedInstall(UpdateBoatSound, 0x4F9E90);
-    // + RH_ScopedInstall(ProcessBoatMovingOverWater, 0x4FA0C0);
-    // + RH_ScopedInstall(UpdateTrainSound, 0x4FA1C0);
-    // RH_ScopedInstall(ProcessTrainTrackSound, 0x4FA3F0);
-    // RH_ScopedInstall(PlayTrainBrakeSound, 0x4FA630);
-    // RH_ScopedInstall(ProcessDummyRCPlane, 0x4FA7C0);
-    // RH_ScopedInstall(ProcessDummyRCHeli, 0x4FAA80);
-    // + RH_ScopedInstall(UpdateGenericVehicleSound, 0x4FAD40); // PlaySound?
-    // RH_ScopedInstall(ProcessEngineDamage, 0x4FAE20);
-    // RH_ScopedInstall(ProcessNitro, 0x4FB070);
-    // + RH_ScopedInstall(ProcessMovingParts, 0x4FB260);
-    // RH_ScopedInstall(ProcessPlayerVehicleEngine, 0x4FBB10);
-    // RH_ScopedInstall(ProcessDummyStateTransition, 0x4FCA10);
-    // + RH_ScopedInstall(JustGotOutOfVehicleAsDriver, 0x4FCF40);
-    // + RH_ScopedInstall(JustWreckedVehicle, 0x4FD0B0);
-    // RH_ScopedInstall(ProcessPlayerProp, 0x4FD290);
-    // RH_ScopedInstall(ProcessDummyProp, 0x4FD8F0);
-    // RH_ScopedInstall(ProcessAIProp, 0x4FDFD0);
-    // RH_ScopedInstall(ProcessPlayerHeli, 0x4FE420);
-    // RH_ScopedInstall(ProcessDummyHeli, 0x4FE940);
-    // RH_ScopedInstall(ProcessAIHeli, 0x4FEE20);
-    // RH_ScopedInstall(ProcessPlayerSeaPlane, 0x4FF320);
-    // RH_ScopedInstall(ProcessDummySeaPlane, 0x4FF7C0);
-    // RH_ScopedInstall(ProcessGenericJet, 0x4FF900);
-    // RH_ScopedInstall(ProcessDummyBicycle, 0x4FFDC0);
-    // RH_ScopedInstall(ProcessPlayerBicycle, 0x500040);
-    // + RH_ScopedInstall(ProcessVehicleSirenAlarmHorn, 0x5002C0);
-    // RH_ScopedInstall(ProcessBoatEngine, 0x5003A0);
-    // RH_ScopedInstall(ProcessDummyTrainEngine, 0x500710);
-    // RH_ScopedInstall(ProcessPlayerTrainBrakes, 0x500AB0);
-    // RH_ScopedInstall(ProcessPlayerCombine, 0x500CE0);
-    // RH_ScopedInstall(ProcessDummyRCCar, 0x500DC0);
-    // RH_ScopedInstall(ProcessDummyHovercraft, 0x500F50);
-    // RH_ScopedInstall(ProcessDummyGolfCart, 0x501270);
-    // RH_ScopedInstall(ProcessDummyVehicleEngine, 0x501480);
-    // RH_ScopedInstall(ProcessPlayerJet, 0x501650);
-    // RH_ScopedInstall(ProcessDummyJet, 0x501960);
+    RH_ScopedInstall(PlayAircraftSound, 0x4F93C0, { .reversed = false });
+    RH_ScopedInstall(PlayBicycleSound, 0x4F9710, { .reversed = false });
+    RH_ScopedInstall(PlayHornOrSiren, 0x4F99D0, { .reversed = false });
+    RH_ScopedInstall(UpdateBoatSound, 0x4F9E90, { .reversed = false });
+    RH_ScopedInstall(ProcessBoatMovingOverWater, 0x4FA0C0, { .reversed = false });
+    RH_ScopedInstall(UpdateTrainSound, 0x4FA1C0, { .reversed = false });
+    RH_ScopedInstall(ProcessTrainTrackSound, 0x4FA3F0, { .reversed = false });
+    RH_ScopedInstall(PlayTrainBrakeSound, 0x4FA630, { .reversed = false });
+    RH_ScopedInstall(ProcessDummyRCPlane, 0x4FA7C0, { .reversed = false });
+    RH_ScopedInstall(ProcessDummyRCHeli, 0x4FAA80, { .reversed = false });
+    RH_ScopedInstall(UpdateGenericVehicleSound, 0x4FAD40, { .reversed = false }); // PlaySound?
+    RH_ScopedInstall(ProcessEngineDamage, 0x4FAE20, { .reversed = false });
+    RH_ScopedInstall(ProcessNitro, 0x4FB070, { .reversed = false });
+    RH_ScopedInstall(ProcessMovingParts, 0x4FB260, { .reversed = false });
+    RH_ScopedInstall(ProcessPlayerVehicleEngine, 0x4FBB10, { .reversed = false });
+    RH_ScopedInstall(ProcessDummyStateTransition, 0x4FCA10, { .reversed = false });
+    RH_ScopedInstall(JustGotOutOfVehicleAsDriver, 0x4FCF40, { .reversed = false });
+    RH_ScopedInstall(JustWreckedVehicle, 0x4FD0B0, { .reversed = false });
+    RH_ScopedInstall(ProcessPlayerProp, 0x4FD290, { .reversed = false });
+    RH_ScopedInstall(ProcessDummyProp, 0x4FD8F0, { .reversed = false });
+    RH_ScopedInstall(ProcessAIProp, 0x4FDFD0, { .reversed = false });
+    RH_ScopedInstall(ProcessPlayerHeli, 0x4FE420, { .reversed = false });
+    RH_ScopedInstall(ProcessDummyHeli, 0x4FE940, { .reversed = false });
+    RH_ScopedInstall(ProcessAIHeli, 0x4FEE20, { .reversed = false });
+    RH_ScopedInstall(ProcessPlayerSeaPlane, 0x4FF320, { .reversed = false });
+    RH_ScopedInstall(ProcessDummySeaPlane, 0x4FF7C0, { .reversed = false });
+    RH_ScopedInstall(ProcessGenericJet, 0x4FF900, { .reversed = false });
+    RH_ScopedInstall(ProcessDummyBicycle, 0x4FFDC0, { .reversed = false });
+    RH_ScopedInstall(ProcessPlayerBicycle, 0x500040, { .reversed = false });
+    RH_ScopedInstall(ProcessVehicleSirenAlarmHorn, 0x5002C0, { .reversed = false });
+    RH_ScopedInstall(ProcessBoatEngine, 0x5003A0, { .reversed = false });
+    RH_ScopedInstall(ProcessDummyTrainEngine, 0x500710, { .reversed = false });
+    RH_ScopedInstall(ProcessPlayerTrainBrakes, 0x500AB0, { .reversed = false });
+    RH_ScopedInstall(ProcessPlayerCombine, 0x500CE0, { .reversed = false });
+    RH_ScopedInstall(ProcessDummyRCCar, 0x500DC0, { .reversed = false });
+    RH_ScopedInstall(ProcessDummyHovercraft, 0x500F50, { .reversed = false });
+    RH_ScopedInstall(ProcessDummyGolfCart, 0x501270, { .reversed = false });
+    RH_ScopedInstall(ProcessDummyVehicleEngine, 0x501480, { .reversed = false });
+    RH_ScopedInstall(ProcessPlayerJet, 0x501650, { .reversed = false });
+    RH_ScopedInstall(ProcessDummyJet, 0x501960, { .reversed = false });
     RH_ScopedInstall(ProcessAircraft, 0x501C50);
-    // + RH_ScopedInstall(ProcessVehicle, 0x501E10);
-    // + RH_ScopedInstall(ProcessSpecialVehicle, 0x501AB0);
-    // RH_ScopedInstall(Service, 0x502280);
+    RH_ScopedInstall(ProcessVehicle, 0x501E10, { .reversed = false });
+    RH_ScopedInstall(ProcessSpecialVehicle, 0x501AB0, { .reversed = false });
+    RH_ScopedInstall(Service, 0x502280, { .reversed = false });
+
+    RH_ScopedOverloadedInstall(AddAudioEvent, "0", 0x4F6420, void(CAEVehicleAudioEntity::*)(eAudioEvents, float), { .reversed = false });
+    RH_ScopedOverloadedInstall(AddAudioEvent, "1", 0x4F7580, void(CAEVehicleAudioEntity::*)(eAudioEvents, CVehicle*), { .reversed = false });
 }
 
 // 0x4F63E0

@@ -58,7 +58,7 @@ public:
     void Conjugate();
 
     // Squared length of a quat
-    float GetLengthSquared();
+    float GetLengthSquared() const;
 
     // Multiplies quat by a floating point value
     void Scale(float multiplier);
@@ -108,6 +108,9 @@ public:
     CQuaternion operator-() const {
         return { -x, -y, -z, -w };
     }
+
+    // NOTSA
+    RtQuat* AsRtQuat() { return (RtQuat*)this; }
 };
 
 VALIDATE_SIZE(CQuaternion, 0x10);

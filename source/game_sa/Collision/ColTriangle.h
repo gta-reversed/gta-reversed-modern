@@ -8,6 +8,27 @@
 
 class CColTriangle {
 public:
+    CColTriangle() = default;
+    CColTriangle(uint16 a, uint16 b, uint16 c, eSurfaceType material, uint8 light) :
+          m_nVertA(a),
+          m_nVertB(b),
+          m_nVertC(c),
+          m_nMaterial(material),
+          m_nLight(light)
+    {
+    }
+
+    /*!
+    * @addr notsa
+    * @brief Render the triangle in the 3D world (Be sure to call from a place where 3D stuff is rendered, if called from elsewhere you won't see the lines!)
+    *
+    * @param color     Color of the lines used
+    * @param vertices  Pointer to the array of vertices where this triangles vertices are (CColData::m_pVertices usually)
+    * @param transform Transformation matrix to be used
+    */
+    void DrawWireFrame(CRGBA color, const CompressedVector* vertices, const CMatrix& transform) const;
+
+public:
     union {
         struct {
             uint16 m_nVertA; // vertex index in vertices array
@@ -18,16 +39,5 @@ public:
     };
     eSurfaceType m_nMaterial;
     uint8 m_nLight;
-
-    CColTriangle() = default;
-    CColTriangle(uint16 a, uint16 b, uint16 c, eSurfaceType material, uint8 light) :
-          m_nVertA(a),
-          m_nVertB(b),
-          m_nVertC(c),
-          m_nMaterial(material),
-          m_nLight(light)
-    {
-
-    }
 };
 VALIDATE_SIZE(CColTriangle, 0x8);

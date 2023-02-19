@@ -59,7 +59,8 @@ public:
     static CPtrListSingleLink(&ms_aLodPtrLists)[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X];
     static CPtrListDoubleLink &ms_listMovingEntityPtrs;
     static CPtrListDoubleLink &ms_listObjectsWithControlCode;
-    static inline CColPoint(&m_aTempColPts)[32] = *(CColPoint(*)[32])0xB9ACD0;
+
+    static inline auto& m_aTempColPts = *(std::array<CColPoint, 32>*)0xB9ACD0;
     static CVector &SnookerTableMax; // default { 497.7925, -1670.3999, 13.19 }
     static CVector &SnookerTableMin; // default { 2495.8525, -1671.4099, 12.9 }
 
@@ -201,10 +202,55 @@ public:
         return pos.x > -3000.0f && pos.x < 3000.0f
             && pos.y > -3000.0f && pos.y < 3000.0f;
     }
+
+    static void RemoveVehicleAndItsOccupants(CVehicle* veh);
+
+    /*!
+    * @notsa
+    * 
+    * @brief Call `fn` with the `x, y` grid position of all sectors between the specified grid positions
+    *
+    * @return `fn` may return `false` to stop the iteration in which case
+    *         this function also returns `false`. If no area was iterated, or the `fn` returned
+    *         `true` for all invocations `true` is returned.
+    */
+    template<std::predicate<int32, int32> Fn>
+    static bool IterateSectors(int32 minX, int32 minY, int32 maxX, int32 maxY, Fn&& fn) {
+        assert(maxX >= minX && maxY >= minY);
+
+        for (auto y = minY; y <= maxY; ++y) {
+            for (auto x = minX; x <= maxX; ++x) {
+                if (!std::invoke(fn, x, y)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /*
+    * @notsa
+    *
+    * @brief Call `fn` with the `x, y` grid position of all sectors that are overlapped by the rect
+    *
+    * @param rect The rect. Use it's constructor to ease your life (for example iterating areas in a given radius can be achieved by `CRect{point, 340.f}`)
+    * 
+    * @copyreturn `IterateSectors`
+    */
+    template<std::predicate<int32, int32> Fn>
+    static bool IterateSectorsOverlappedByRect(CRect rect, Fn&& fn) {
+        return IterateSectors(
+            GetSectorX(rect.left),
+            GetSectorY(rect.bottom),
+            GetSectorX(rect.right),
+            GetSectorY(rect.top),
+            std::forward<Fn>(fn)
+        );
+    }
 };
 
 extern uint32 &FilledColPointIndex;
-static inline CColPoint (&gaTempSphereColPoints)[32] = *(CColPoint(*)[32])0xB9B250;
+static inline auto& gaTempSphereColPoints = *(std::array<CColPoint, 32>*)0xB9B250;
 extern int16 &TAG_SPRAYING_INCREMENT_VAL; // default 8
 
 uint16 GetCurrentScanCode();

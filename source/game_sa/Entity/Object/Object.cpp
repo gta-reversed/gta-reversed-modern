@@ -15,6 +15,7 @@
 #include "Ropes.h"
 #include "TheScripts.h"
 #include "Shadows.h"
+#include "Garages.h"
 #include "CustomBuildingRenderer.h"
 
 uint16& CObject::nNoTempObjects = *(uint16*)(0xBB4A70);
@@ -173,7 +174,7 @@ void* CObject::operator new(size_t size) {
 
 // 0x5A1EF0
 void* CObject::operator new(size_t size, int32 poolRef) {
-    return GetObjectPool()->New(poolRef);
+    return GetObjectPool()->NewAt(poolRef);
 }
 
 // 0x5A1F20
@@ -798,7 +799,7 @@ void CObject::Init() {
     } else {
         CObjectData::SetObjectData(m_nModelIndex, *this);
         auto* mi = GetModelInfo();
-        if (mi->GetColModel()->m_bNotEmpty) {
+        if (mi->GetColModel()->m_bHasCollisionVolumes) {
             CColStore::AddRef(mi->GetColModel()->m_nColSlot);
             objectFlags.bHasNoModel = true;
 

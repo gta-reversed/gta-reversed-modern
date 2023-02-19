@@ -237,7 +237,11 @@ auto CCollisionData::GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup> 
 
     if (bHasFaceGroups) {
         // See `CCollisionData` header for explanation
-        return std::span{reinterpret_cast<TFaceGroup*>(reinterpret_cast<uint8*>(m_pTriangles) - sizeof(uint32) - sizeof(TFaceGroup) * GetNumFaceGroups()), GetNumFaceGroups()};
+        const auto numfg = GetNumFaceGroups();
+        return std::span{
+            reinterpret_cast<TFaceGroup*>(reinterpret_cast<uint8*>(m_pTriangles) - sizeof(uint32) - sizeof(TFaceGroup) * numfg),
+            numfg
+        };
     }
     return {};
 }

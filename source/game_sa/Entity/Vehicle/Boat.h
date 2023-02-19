@@ -27,7 +27,7 @@ enum eBoatNodes {
     BOAT_NUM_NODES
 };
 
-class CBoat : public CVehicle {
+class NOTSA_EXPORT_VTABLE CBoat : public CVehicle {
 public:
     float m_fMovingHiRotation; // works as counter also
     float m_fPropSpeed;        // propeller speed
@@ -95,11 +95,14 @@ public:
     void ModifyHandlingValue(const bool& bIncrement);
     void PruneWakeTrail();
     void AddWakePoint(CVector posn);
+    void RenderWakePoints(); // NOTSA
+
 
     static bool IsSectorAffectedByWake(CVector2D vecPos, float fOffset, CBoat** ppBoats);
     static float IsVertexAffectedByWake(CVector vecPos, CBoat* boat, int16 wIndex, bool bUnkn);
     static void CheckForSkippingCalculations();
     static void FillBoatList();
+    static void RenderAllWakePointBoats();
 
 private:
     friend void InjectHooksMain();
@@ -115,6 +118,13 @@ private:
     void GetComponentWorldPosition_Reversed(int32 componentId, CVector& outPos);
     void ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint32 arg2, uint32 arg3, float arg4);
     void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion);
+
+private: // Wrappers for hooks
+    // 0x6F2940
+    CBoat* Constructor(int32 modelId, eVehicleCreatedBy createdBy) { this->CBoat::CBoat(modelId, createdBy); return this; }
+
+    // 0x6F00F0
+    CBoat* Destructor() { this->CBoat::~CBoat(); return this; }
 };
 
 VALIDATE_SIZE(CBoat, 0x7E8);

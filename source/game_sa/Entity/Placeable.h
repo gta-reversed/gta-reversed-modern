@@ -9,6 +9,9 @@
 #include "SimpleTransform.h"
 #include "MatrixLink.h"
 
+class CBox;
+class CRect;
+
 class CPlaceable {
 public:
     CSimpleTransform m_placement;
@@ -20,7 +23,7 @@ public:
     CPlaceable();
     virtual ~CPlaceable();
 
-    CMatrixLink& GetMatrix();
+    CMatrix& GetMatrix();
 
     static void ShutdownMatrixArray();
     static void InitMatrixArray();
@@ -36,8 +39,8 @@ public:
     void GetOrientation(float& x, float& y, float& z);
     void SetHeading(float heading);
     float GetHeading();
-    bool IsWithinArea(float x1, float y1, float x2, float y2);
-    bool IsWithinArea(float x1, float y1, float z1, float x2, float y2, float z2);
+    bool IsWithinArea(float x1, float y1, float x2, float y2) const;
+    bool IsWithinArea(float x1, float y1, float z1, float x2, float y2, float z2) const;
     void RemoveMatrix();
     void AllocateStaticMatrix();
     void AllocateMatrix();

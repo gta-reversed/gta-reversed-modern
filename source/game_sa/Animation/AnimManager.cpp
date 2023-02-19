@@ -14,12 +14,12 @@ void CAnimManager::InjectHooks() {
     RH_ScopedClass(CAnimManager);
     RH_ScopedCategory("Animation");
 
-    // RH_ScopedInstall(Initialise, 0x5BF6B0);
-    // RH_ScopedInstall(ReadAnimAssociationDefinitions, 0x5BC910);
+    RH_ScopedInstall(Initialise, 0x5BF6B0, { .reversed = false });
+    RH_ScopedInstall(ReadAnimAssociationDefinitions, 0x5BC910, { .reversed = false });
     RH_ScopedInstall(Shutdown, 0x4D4130);
     RH_ScopedOverloadedInstall(GetAnimationBlock, "", 0x4D3940, CAnimBlock*(*)(const char*));
-    // RH_ScopedInstall(GetAnimationBlockIndex, 0x4D3990);
-    // RH_ScopedInstall(GetFirstAssocGroup, 0x4D39B0);
+    RH_ScopedOverloadedInstall(GetAnimationBlockIndex, "by-name", 0x4D3990, int32(*)(const char*), { .reversed = false });
+    RH_ScopedInstall(GetFirstAssocGroup, 0x4D39B0, { .reversed = false });
     RH_ScopedOverloadedInstall(GetAnimation, "0", 0x4D39F0, CAnimBlendHierarchy*(*)(uint32, const CAnimBlock*));
     RH_ScopedOverloadedInstall(GetAnimation, "1", 0x4D42F0, CAnimBlendHierarchy*(*)(const char*, const CAnimBlock*));
     RH_ScopedInstall(GetAnimGroupName, 0x4D3A20);
@@ -27,24 +27,24 @@ void CAnimManager::InjectHooks() {
     RH_ScopedInstall(CreateAnimAssociation, 0x4D3A40);
     RH_ScopedOverloadedInstall(GetAnimAssociation, "", 0x4D3A60, CAnimBlendStaticAssociation*(*)(AssocGroupId, AnimationId));
     RH_ScopedOverloadedInstall(GetAnimAssociation, "", 0x4D3A80, CAnimBlendStaticAssociation*(*)(AssocGroupId, const char*));
-    // RH_ScopedOverloadedInstall(AddAnimation, 0x4D3AA0);
-    // RH_ScopedOverloadedInstall(AddAnimation, 0x4D4330);
-    // RH_ScopedInstall(AddAnimationAndSync, 0x4D3B30);
-    // RH_ScopedInstall(AddAnimAssocDefinition, 0x4D3BA0);
-    // RH_ScopedInstall(AddAnimToAssocDefinition, 0x4D3C80);
-    // RH_ScopedInstall(CreateAnimAssocGroups, 0x4D3CC0);
-    // RH_ScopedInstall(RegisterAnimBlock, 0x4D3E50);
-    // RH_ScopedInstall(RemoveLastAnimFile, 0x4D3ED0);
-    // RH_ScopedInstall(RemoveAnimBlock, 0x4D3F40);
-    // RH_ScopedInstall(AddAnimBlockRef, 0x4D3FB0);
-    // RH_ScopedInstall(RemoveAnimBlockRefWithoutDelete, 0x4D3FF0);
-    // RH_ScopedInstall(GetNumRefsToAnimBlock, 0x4D4010);
-    // RH_ScopedInstall(UncompressAnimation, 0x4D41C0);
-    // RH_ScopedInstall(RemoveFromUncompressedCache, 0x4D42A0);
-    // RH_ScopedOverloadedInstall(BlendAnimation, 0x4D4410);
-    // RH_ScopedOverloadedInstall(BlendAnimation, 0x4D4610);
+    RH_ScopedOverloadedInstall(AddAnimation, "id", 0x4D3AA0, CAnimBlendAssociation*(*)(RpClump*, AssocGroupId, AnimationId), { .reversed = false });
+    RH_ScopedOverloadedInstall(AddAnimation, "hier", 0x4D4330, CAnimBlendAssociation*(*)(RpClump*, CAnimBlendHierarchy*, int32), { .reversed = false });
+    RH_ScopedInstall(AddAnimationAndSync, 0x4D3B30, { .reversed = false });
+    RH_ScopedInstall(AddAnimAssocDefinition, 0x4D3BA0, { .reversed = false });
+    RH_ScopedInstall(AddAnimToAssocDefinition, 0x4D3C80, { .reversed = false });
+    RH_ScopedInstall(CreateAnimAssocGroups, 0x4D3CC0, { .reversed = false });
+    RH_ScopedInstall(RegisterAnimBlock, 0x4D3E50, { .reversed = false });
+    RH_ScopedInstall(RemoveLastAnimFile, 0x4D3ED0, { .reversed = false });
+    RH_ScopedInstall(RemoveAnimBlock, 0x4D3F40, { .reversed = false });
+    RH_ScopedInstall(AddAnimBlockRef, 0x4D3FB0, { .reversed = false });
+    RH_ScopedInstall(RemoveAnimBlockRefWithoutDelete, 0x4D3FF0, { .reversed = false });
+    RH_ScopedInstall(GetNumRefsToAnimBlock, 0x4D4010, { .reversed = false });
+    RH_ScopedInstall(UncompressAnimation, 0x4D41C0, { .reversed = false });
+    RH_ScopedInstall(RemoveFromUncompressedCache, 0x4D42A0, { .reversed = false });
+    RH_ScopedOverloadedInstall(BlendAnimation, "id", 0x4D4610, CAnimBlendAssociation*(*)(RpClump*, AssocGroupId, AnimationId, float), { .reversed = false });
+    RH_ScopedOverloadedInstall(BlendAnimation, "hier", 0x4D4410, CAnimBlendAssociation*(*)(RpClump*, CAnimBlendHierarchy*, int32, float), { .reversed = false });
     RH_ScopedInstall(LoadAnimFiles, 0x4D5620);
-    // RH_ScopedInstall(LoadAnimFile, 0x4D47F0);
+    RH_ScopedInstall(LoadAnimFile, 0x4D47F0, { .reversed = false });
 }
 
 struct IfpHeader {
@@ -599,7 +599,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
         animBlock->animationStyle = GetFirstAssocGroup(animBlock->szName);
     }
 
-    printf("Loading ANIMS %s\n", animBlock->szName);
+    DEV_LOG("Loading ANIMS {}", animBlock->szName);
     animBlock->bLoaded = true;
 
     int animIndex = animBlock->startAnimation;
@@ -856,4 +856,19 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* stream, bool compress, bo
     if (animIndex > ms_numAnimations) {
         ms_numAnimations = animIndex;
     }
+}
+
+AnimationId CAnimManager::GetRandomGangTalkAnim() {
+    constexpr AnimationId gangTalkAnims[]{
+        ANIM_ID_PRTIAL_GNGTLKA,
+        ANIM_ID_PRTIAL_GNGTLKB,
+        ANIM_ID_PRTIAL_GNGTLKC,
+        ANIM_ID_PRTIAL_GNGTLKD,
+
+        ANIM_ID_PRTIAL_GNGTLKE,
+        ANIM_ID_PRTIAL_GNGTLKF,
+        ANIM_ID_PRTIAL_GNGTLKG,
+        ANIM_ID_PRTIAL_GNGTLKH,
+    };
+    return CGeneral::RandomChoice(gangTalkAnims);
 }

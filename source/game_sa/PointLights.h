@@ -52,4 +52,5 @@ public:
     static void  RenderFogEffect();
 
     static void ResetNumLights() { NumLights = 0; }
+    static auto GetActiveLights() { return aLights | rng::views::take(NumLights); }
 };

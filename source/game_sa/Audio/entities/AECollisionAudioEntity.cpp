@@ -9,21 +9,22 @@ void CAECollisionAudioEntity::InjectHooks() {
     RH_ScopedClass(CAECollisionAudioEntity);
     RH_ScopedCategory("Audio/Entities");
 
-    // RH_ScopedInstall(Initialise, 0x5B9BD0);
+    RH_ScopedInstall(Initialise, 0x5B9BD0, { .reversed = false });
     RH_ScopedInstall(InitialisePostLoading, 0x4DA050);
-    // RH_ScopedInstall(AddCollisionSoundToList, 0x4DAAC0);
-    // RH_ScopedInstall(Reset, 0x4DA320);
-    // RH_ScopedInstall(ReportGlassCollisionEvent, 0x4DA070);
-    // RH_ScopedInstall(ReportWaterSplash, 0x4DA190);
-    // RH_ScopedInstall(UpdateLoopingCollisionSound, 0x4DA540);
-    // RH_ScopedInstall(GetCollisionSoundStatus, 0x4DA830);
-    // RH_ScopedInstall(ReportObjectDestruction, 0x4DAB60);
-    // RH_ScopedInstall(ReportWaterSplash, 0x4DAE40);
-    // RH_ScopedInstall(PlayOneShotCollisionSound, 0x4DB150);
-    // RH_ScopedInstall(PlayLoopingCollisionSound, 0x4DB450);
-    // RH_ScopedInstall(PlayBulletHitCollisionSound, 0x4DB7C0);
-    // RH_ScopedInstall(ReportCollision, 0x4DBA10);
+    RH_ScopedInstall(AddCollisionSoundToList, 0x4DAAC0, { .reversed = false });
+    RH_ScopedInstall(Reset, 0x4DA320, { .reversed = false });
+    RH_ScopedInstall(ReportGlassCollisionEvent, 0x4DA070, { .reversed = false });
+    RH_ScopedInstall(UpdateLoopingCollisionSound, 0x4DA540, { .reversed = false });
+    RH_ScopedInstall(GetCollisionSoundStatus, 0x4DA830, { .reversed = false });
+    RH_ScopedInstall(ReportObjectDestruction, 0x4DAB60, { .reversed = false });
+    RH_ScopedInstall(PlayOneShotCollisionSound, 0x4DB150, { .reversed = false });
+    RH_ScopedInstall(PlayLoopingCollisionSound, 0x4DB450, { .reversed = false });
+    RH_ScopedInstall(PlayBulletHitCollisionSound, 0x4DB7C0, { .reversed = false });
+    RH_ScopedInstall(ReportCollision, 0x4DBA10, { .reversed = false });
     RH_ScopedInstall(ReportBulletHit, 0x4DBDF0);
+
+    RH_ScopedOverloadedInstall(ReportWaterSplash, "0", 0x4DA190, void(CAECollisionAudioEntity::*)(CVector, float), { .reversed = false });
+    RH_ScopedOverloadedInstall(ReportWaterSplash, "1", 0x4DAE40, void(CAECollisionAudioEntity::*)(CPhysical*, float, bool), { .reversed = false });
 }
 
 // 0x5B9BD0
@@ -81,7 +82,7 @@ void CAECollisionAudioEntity::PlayBulletHitCollisionSound(eSurfaceType surface, 
             iRand = CAEAudioUtility::GetRandomNumberInRange(7, 9);
         while (iRand == m_nRandom);
     }
-    else if (g_surfaceInfos->IsAudioWater(surface))
+    else if (g_surfaceInfos.IsAudioWater(surface))
     {
         do
             iRand = CAEAudioUtility::GetRandomNumberInRange(16, 18);
@@ -89,15 +90,15 @@ void CAECollisionAudioEntity::PlayBulletHitCollisionSound(eSurfaceType surface, 
         maxDistance = 2.0f;
         volume = volume + 6.0f;
     }
-    else if (g_surfaceInfos->IsAudioWood(surface))
+    else if (g_surfaceInfos.IsAudioWood(surface))
     {
         do
             iRand = CAEAudioUtility::GetRandomNumberInRange(19, 21);
         while (iRand == m_nRandom);
     }
-    else if (g_surfaceInfos->IsAudioMetal(surface))
+    else if (g_surfaceInfos.IsAudioMetal(surface))
     {
-        float probability = (90.0f - angleWithColPointNorm) * 0.0055555557f; // see BoneNode_c::EulerToQuat
+        float probability = (90.0f - angleWithColPointNorm) / 180.0f; // see BoneNode_c::EulerToQuat
         if (CAEAudioUtility::ResolveProbability(probability))
         {
             do
@@ -110,11 +111,7 @@ void CAECollisionAudioEntity::PlayBulletHitCollisionSound(eSurfaceType surface, 
                 iRand = CAEAudioUtility::GetRandomNumberInRange(4, 6);
             while (iRand == m_nRandom);
         }
-    }
-    else if (g_surfaceInfos->IsAudioConcrete(surface) ||
-             g_surfaceInfos->IsAudioGravel(surface) ||
-             g_surfaceInfos->IsAudioTile(surface)
-    )
+    } else if (g_surfaceInfos.IsAudioGravelConcreteOrTile(surface))
     {
         do
             iRand = CAEAudioUtility::GetRandomNumberInRange(13, 15);

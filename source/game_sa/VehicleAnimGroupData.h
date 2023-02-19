@@ -68,17 +68,22 @@ public:
 };
 
 enum eInOutTimingMode : uint8 {
-    OPEN_OUT = 0,
-    CLOSE_IN = 1,
-    OPEN_IN = 2,
-    CLOSE_OUT = 3,
+    // TODO: Enum names are incorrect, but don't bother, this enum shit should be removed anyways.
+    OPEN_START = 0,
+    OPEN_STOP = 1,
+    CLOST_START = 2,
+    CLOSE_STOP = 3,
 };
 
-struct sVehAnimGroupInOutTiming {
-    float m_afTimings[4]; // access using eInOutTimingMode
-
+struct sVehAnimGroupInOutTiming { // TODO: Rename to `sVehAnimGroupOpenCloseTiming`
+    float OpenOut{};
+    float CloseIn{};
+    float OpenIn{};
+    float CloseOut{};
 public:
-    sVehAnimGroupInOutTiming() : m_afTimings{0.0F} {}
+    float operator[](eInOutTimingMode mode) { return reinterpret_cast<float*>(this)[(size_t)mode]; } // TODO: Get rid of this
+
+    sVehAnimGroupInOutTiming() = default;
 };
 
 enum eInOutTiming : uint8 {
@@ -123,6 +128,8 @@ public:
     float   ComputeCriticalBlendTime(AnimationId animId);
     CVector ComputeAnimDoorOffsets(eVehAnimDoorOffset doorId);
 
+    /// NOTSA: Helper of `CVehicleAnimGroupData::InitAGroupFromData`
+    int32 InitFromData(const char* line);
 public:
     // Helpers
     sVehAnimGroupInOutTiming& GetInOutTiming(const eInOutTiming timing) { return m_aInOutTiming[timing]; }
@@ -147,6 +154,8 @@ public:
     static bool UsesKartDrivingAnims(AssocGroupId groupId);
     static bool UsesHovercraftDrivingAnims(AssocGroupId groupId);
 
+    /// Helper function for `cHandlingDataMgr::LoadHandlingData`
+    static int32 LoadAGroupFromData(const char* line);
 public:
     // Helpers
     inline static CVehicleAnimGroup& GetVehicleAnimGroup(int32 iGroup) {

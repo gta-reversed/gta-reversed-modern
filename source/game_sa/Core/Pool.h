@@ -190,7 +190,12 @@ public:
     }
 
     // 0x5A1C00
-    A* New(int32 ref) {
+    /*!
+    * @brief Allocate object at ref
+    * @returns A ptr to the object at ref
+    */
+    A* NewAt(int32 ref) {
+        // TODO/NOTE: Maybe check if where we're allocating at is free?
         A* result = &m_pObjects[GetIndexFromRef(ref)]; // GetIndexFromRef asserts if idx out of range
         CreateAtRef(ref);
         return result;
@@ -227,7 +232,7 @@ public:
     * @brief Calculate the number of used slots. CAUTION: Slow, especially for large pools.
     */
     size_t GetNoOfUsedSpaces() {
-        return (size_t)std::count_if(std::execution::parallel_unsequenced_policy{}, m_byteMap, m_byteMap + m_nSize, [](auto&& v) { return !v.bEmpty; });
+        return (size_t)std::count_if(m_byteMap, m_byteMap + m_nSize, [](auto&& v) { return !v.bEmpty; });
     }
 
     auto GetNoOfFreeSpaces() {

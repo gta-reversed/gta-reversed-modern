@@ -80,7 +80,7 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(UpdateAnim, 0x535F00);
     RH_ScopedInstall(IsVisible, 0x536BC0);
     RH_ScopedInstall(GetDistanceFromCentreOfMassToBaseOfModel, 0x536BE0);
-    RH_ScopedInstall(CleanUpOldReference, 0x571A00);
+    RH_ScopedOverloadedInstall(CleanUpOldReference, "", 0x571A00, void(CEntity::*)(CEntity**));
     RH_ScopedInstall(ResolveReferences, 0x571A40);
     RH_ScopedInstall(PruneReferences, 0x571A90);
     RH_ScopedOverloadedInstall(RegisterReference, "", 0x571B70, void(CEntity::*)(CEntity**));
@@ -151,17 +151,17 @@ void CEntity::Add_Reversed(const CRect& rect)
     if (usedRect.right >= 3000.0F)
         usedRect.right = 2999.0F;
 
-    if (usedRect.top < -3000.0F)
-        usedRect.top = -3000.0F;
+    if (usedRect.bottom < -3000.0F)
+        usedRect.bottom = -3000.0F;
 
-    if (usedRect.bottom >= 3000.0F)
-        usedRect.bottom = 2999.0F;
+    if (usedRect.top >= 3000.0F)
+        usedRect.top = 2999.0F;
 
     if (m_bIsBIGBuilding) {
         int32 startSectorX = CWorld::GetLodSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetLodSectorY(usedRect.top);
+        int32 startSectorY = CWorld::GetLodSectorY(usedRect.bottom);
         int32 endSectorX = CWorld::GetLodSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetLodSectorY(usedRect.bottom);
+        int32 endSectorY = CWorld::GetLodSectorY(usedRect.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 auto& pLodListEntry = CWorld::GetLodPtrList(sectorX, sectorY);
@@ -171,9 +171,9 @@ void CEntity::Add_Reversed(const CRect& rect)
     }
     else {
         int32 startSectorX = CWorld::GetSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetSectorY(usedRect.top);
+        int32 startSectorY = CWorld::GetSectorY(usedRect.bottom);
         int32 endSectorX = CWorld::GetSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetSectorY(usedRect.bottom);
+        int32 endSectorY = CWorld::GetSectorY(usedRect.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 CPtrListDoubleLink* list = nullptr;
@@ -222,17 +222,17 @@ void CEntity::Remove_Reversed()
     if (usedRect.right >= 3000.0F)
         usedRect.right = 2999.0F;
 
-    if (usedRect.top < -3000.0F)
-        usedRect.top = -3000.0F;
+    if (usedRect.bottom < -3000.0F)
+        usedRect.bottom = -3000.0F;
 
-    if (usedRect.bottom >= 3000.0F)
-        usedRect.bottom = 2999.0F;
+    if (usedRect.top >= 3000.0F)
+        usedRect.top = 2999.0F;
 
     if (m_bIsBIGBuilding) {
         int32 startSectorX = CWorld::GetLodSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetLodSectorY(usedRect.top);
+        int32 startSectorY = CWorld::GetLodSectorY(usedRect.bottom);
         int32 endSectorX = CWorld::GetLodSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetLodSectorY(usedRect.bottom);
+        int32 endSectorY = CWorld::GetLodSectorY(usedRect.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 auto& list = CWorld::GetLodPtrList(sectorX, sectorY);
@@ -242,9 +242,9 @@ void CEntity::Remove_Reversed()
     }
     else {
         int32 startSectorX = CWorld::GetSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetSectorY(usedRect.top);
+        int32 startSectorY = CWorld::GetSectorY(usedRect.bottom);
         int32 endSectorX = CWorld::GetSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetSectorY(usedRect.bottom);
+        int32 endSectorY = CWorld::GetSectorY(usedRect.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 CPtrListDoubleLink* list = nullptr;
@@ -748,7 +748,7 @@ void CEntity::PreRender_Reversed()
             auto vecStreakEnd = vecPos + vecScaledCam;
             if (CVector2D(obj->m_vecMoveSpeed).Magnitude() > 0.03F) {
                 float fWaterLevel;
-                if (!CWaterLevel::GetWaterLevelNoWaves(vecPos.x, vecPos.y, vecPos.z, &fWaterLevel, nullptr, nullptr) || vecPos.z > fWaterLevel) {
+                if (!CWaterLevel::GetWaterLevelNoWaves(vecPos, &fWaterLevel, nullptr, nullptr) || vecPos.z > fWaterLevel) {
                     CMotionBlurStreaks::RegisterStreak(reinterpret_cast<uint32>(this), 255, 160, 100, 255, vecStreakStart, vecStreakEnd);
                 }
             }
@@ -1607,12 +1607,15 @@ RwMatrix* CEntity::GetModellingMatrix() {
 }
 
 // 0x535300
-CColModel* CEntity::GetColModel()
-{
-    if (IsVehicle() && AsVehicle()->m_vehicleSpecialColIndex > -1)
-        return &CVehicle::m_aSpecialColModel[AsVehicle()->m_vehicleSpecialColIndex];
-    else
-        return CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
+CColModel* CEntity::GetColModel() const {
+    if (IsVehicle()) {
+        const auto veh = static_cast<const CVehicle*>(this);
+        if (veh->m_vehicleSpecialColIndex > -1) {
+            return &CVehicle::m_aSpecialColModel[veh->m_vehicleSpecialColIndex];
+        }
+    }
+    
+    return CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
 }
 
 // 0x535340

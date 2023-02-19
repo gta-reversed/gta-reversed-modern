@@ -35,13 +35,13 @@ void CTrain::InjectHooks() {
     RH_ScopedClass(CTrain);
     RH_ScopedCategory("Vehicle");
 
-    // RH_ScopedInstall(Constructor, 0x6F6030);
-    // RH_ScopedInstall(InitTrains, 0x6F7440);
-    // RH_ScopedInstall(ReadAndInterpretTrackFile, 0x6F55D0);
+    RH_ScopedInstall(Constructor, 0x6F6030, { .reversed = false });
+    RH_ScopedInstall(InitTrains, 0x6F7440, { .reversed = false });
+    RH_ScopedInstall(ReadAndInterpretTrackFile, 0x6F55D0, { .reversed = false });
     RH_ScopedInstall(Shutdown, 0x6F58D0);
     RH_ScopedInstall(UpdateTrains, 0x6F5900);
-    // RH_ScopedInstall(FindCoorsFromPositionOnTrack, 0x6F59E0);
-    // RH_ScopedInstall(FindMaximumSpeedToStopAtStations, 0x6F5BA0);
+    RH_ScopedInstall(FindCoorsFromPositionOnTrack, 0x6F59E0, { .reversed = false });
+    RH_ScopedInstall(FindMaximumSpeedToStopAtStations, 0x6F5BA0, { .reversed = false });
     RH_ScopedInstall(FindNumCarriagesPulled, 0x6F5CD0);
     RH_ScopedInstall(OpenTrainDoor, 0x6F5D80);
     RH_ScopedInstall(AddPassenger, 0x6F5D90);
@@ -51,31 +51,31 @@ void CTrain::InjectHooks() {
     RH_ScopedInstall(ReleaseOneMissionTrain, 0x6F5DF0);
     RH_ScopedInstall(SetTrainSpeed, 0x6F5E20);
     RH_ScopedInstall(SetTrainCruiseSpeed, 0x6F5E50);
-    // RH_ScopedInstall(FindCaboose, 0x6F5E70);
-    // RH_ScopedInstall(FindEngine, 0x6F5E90);
-    // RH_ScopedInstall(FindCarriage, 0x6F5EB0);
+    RH_ScopedInstall(FindCaboose, 0x6F5E70, { .reversed = false });
+    RH_ScopedInstall(FindEngine, 0x6F5E90, { .reversed = false });
+    RH_ScopedInstall(FindCarriage, 0x6F5EB0, { .reversed = false });
     RH_ScopedInstall(FindSideStationIsOn, 0x6F5EF0);
-    // RH_ScopedInstall(FindNextStationPositionInDirection, 0x6F5F00);
+    RH_ScopedInstall(FindNextStationPositionInDirection, 0x6F5F00, { .reversed = false });
     RH_ScopedInstall(IsInTunnel, 0x6F6320);
-    // RH_ScopedInstall(RemoveRandomPassenger, 0x6F6850);
+    RH_ScopedInstall(RemoveRandomPassenger, 0x6F6850, { .reversed = false });
     RH_ScopedInstall(RemoveMissionTrains, 0x6F6A20);
-    // RH_ScopedInstall(RemoveAllTrains, 0x6F6AA0);
+    RH_ScopedInstall(RemoveAllTrains, 0x6F6AA0, { .reversed = false });
     RH_ScopedInstall(ReleaseMissionTrains, 0x6F6B60);
-    // RH_ScopedInstall(FindClosestTrackNode, 0x6F6BD0);
-    // RH_ScopedInstall(FindPositionOnTrackFromCoors, 0x6F6CC0);
-    // RH_ScopedInstall(FindNearestTrain, 0x6F7090);
+    RH_ScopedInstall(FindClosestTrackNode, 0x6F6BD0, { .reversed = false });
+    RH_ScopedInstall(FindPositionOnTrackFromCoors, 0x6F6CC0, { .reversed = false });
+    RH_ScopedInstall(FindNearestTrain, 0x6F7090, { .reversed = false });
     RH_ScopedInstall(SetNewTrainPosition, 0x6F7140);
-    // RH_ScopedInstall(IsNextStationAllowed, 0x6F7260);
-    // RH_ScopedInstall(SkipToNextAllowedStation, 0x6F72F0);
-    // RH_ScopedInstall(CreateMissionTrain, 0x6F7550);
-    // RH_ScopedInstall(DoTrainGenerationAndRemoval, 0x6F7900);
-    // RH_ScopedInstall(AddNearbyPedAsRandomPassenger, 0x6F8170);
+    RH_ScopedInstall(IsNextStationAllowed, 0x6F7260, { .reversed = false });
+    RH_ScopedInstall(SkipToNextAllowedStation, 0x6F72F0, { .reversed = false });
+    RH_ScopedInstall(CreateMissionTrain, 0x6F7550, { .reversed = false });
+    RH_ScopedInstall(DoTrainGenerationAndRemoval, 0x6F7900, { .reversed = false });
+    RH_ScopedInstall(AddNearbyPedAsRandomPassenger, 0x6F8170, { .reversed = false });
     RH_ScopedVirtualInstall(ProcessControl, 0x6F86A0);
 
     RH_ScopedGlobalInstall(ProcessTrainAnnouncements, 0x6F5910);
     RH_ScopedGlobalInstall(PlayAnnouncement, 0x6F5920);
     RH_ScopedGlobalInstall(MarkSurroundingEntitiesForCollisionWithTrain, 0x6F6640);
-    // RH_ScopedGlobalInstall(TrainHitStuff, 0x6F5CF0);
+    RH_ScopedGlobalInstall(TrainHitStuff, 0x6F5CF0, { .reversed = false });
 }
 
 // 0x6F6030
@@ -593,14 +593,14 @@ void CTrain::ProcessControl() {
             if (trainFlags.bForceSlowDown) {
                 const CVector& vecPoint = GetPosition();
                 CVector vecDistance{};
-                if (CGameLogic::CalcDistanceToForbiddenTrainCrossing(vecPoint, m_vecMoveSpeed, true, &vecDistance) < 230.0f) {
+                if (CGameLogic::CalcDistanceToForbiddenTrainCrossing(vecPoint, m_vecMoveSpeed, true, vecDistance) < 230.0f) {
                     if (DotProduct(GetForwardVector(), vecDistance) <= 0.0f) {
                         m_fTrainGas = std::max(0.0f, m_fTrainGas);
                     } else {
                         m_fTrainGas = std::min(0.0f, m_fTrainGas);
                     }
 
-                    if (CGameLogic::CalcDistanceToForbiddenTrainCrossing(vecPoint, m_vecMoveSpeed, false, &vecDistance) < 230.0f) {
+                    if (CGameLogic::CalcDistanceToForbiddenTrainCrossing(vecPoint, m_vecMoveSpeed, false, vecDistance) < 230.0f) {
                         m_fTrainBrake = 512.0f;
                     }
                 }

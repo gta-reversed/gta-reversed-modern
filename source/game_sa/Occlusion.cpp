@@ -35,7 +35,7 @@ void COcclusion::InjectHooks()
     RH_ScopedInstall(AddOne, 0x71DCD0);
     RH_ScopedInstall(IsPositionOccluded, 0x7200B0);
     RH_ScopedInstall(OccluderHidesBehind, 0x71E080);
-    // RH_ScopedInstall(ProcessBeforeRendering, 0x7201C0);
+    RH_ScopedInstall(ProcessBeforeRendering, 0x7201C0, { .reversed = false });
 }
 
 // 0x71DCA0
@@ -181,7 +181,7 @@ void COcclusion::ProcessBeforeRendering()
 {
     return plugin::Call<0x7201C0>();
 
-    /* see https://github.com/Updated-Classic/gta-reversed-modern/pull/50#issuecomment-913173808
+    /* see https://github.com/gta-reversed/gta-reversed-modern/pull/50#issuecomment-913173808
     NumActiveOccluders = 0;
     if (!CGame::currArea) {
         auto listCur = ListWalkThroughFA;

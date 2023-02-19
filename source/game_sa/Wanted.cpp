@@ -9,7 +9,7 @@
 #include "Wanted.h"
 
 uint32& CWanted::MaximumWantedLevel = *(uint32*)0x8CDEE4; // 6
-uint32 CWanted::MaximumChaosLevel = *(uint32*)0x8CDEE8;   // 9200; original name nMaximumWantedLevel
+uint32& CWanted::MaximumChaosLevel = *(uint32*)0x8CDEE8;   // 9200; original name nMaximumWantedLevel
 bool& CWanted::bUseNewsHeliInAdditionToPolice = *(bool*)0xB7CB8C;
 
 void CWanted::InjectHooks() {
@@ -29,7 +29,7 @@ void CWanted::InjectHooks() {
     RH_ScopedInstall(ResetPolicePursuit, 0x561FD0);
     RH_ScopedInstall(UpdateCrimesQ, 0x562760);
     RH_ScopedInstall(ClearQdCrimes, 0x561FE0);
-    // RH_ScopedInstall(AddCrimesToQ, 0x562000);
+    //RH_ScopedInstall(AddCrimesToQ, 0x562000, { .reversed = false });
     RH_ScopedInstall(ReportCrimeNow, 0x562120);
     RH_ScopedInstall(IsInPursuit, 0x562330);
     RH_ScopedInstall(UpdateEachFrame, 0x562360);
@@ -40,7 +40,7 @@ void CWanted::InjectHooks() {
     RH_ScopedInstall(SetWantedLevelNoDrop, 0x562570);
     RH_ScopedInstall(ClearWantedLevelAndGoOnParole, 0x5625A0);
     RH_ScopedInstall(WorkOutPolicePresence, 0x5625F0);
-    // RH_ScopedInstall(IsClosestCop, 0x5627D0);
+    RH_ScopedInstall(IsClosestCop, 0x5627D0, { .reversed = false });
     RH_ScopedInstall(ComputePursuitCopToDisplace, 0x562B00);
     RH_ScopedOverloadedInstall(RemovePursuitCop, "func", 0x562300, void (*)(CCopPed*, CCopPed**, uint8&));
     RH_ScopedOverloadedInstall(RemovePursuitCop, "method", 0x562C10, void(CWanted::*)(CCopPed*));
@@ -605,7 +605,7 @@ void CWanted::Update() {
                 m_nChaosLevel = std::max(chaosLevel, 0);
 
                 UpdateWantedLevel();
-                CGameLogic::SetPlayerWantedLevelForForbiddenTerritories(1);
+                CGameLogic::SetPlayerWantedLevelForForbiddenTerritories(true);
             }
         }
 
@@ -628,11 +628,11 @@ void CWanted::Update() {
         }
 
         if (cops != m_nCopsInPursuit) {
-            printf("CopPursuit total messed up: re-setting\n"); // leftover debug shit
+            DEV_LOG("CopPursuit total messed up: re-setting!"); // leftover debug shit
             m_nCopsInPursuit = cops;
         }
         if (listMessedUp) {
-            printf("CopPursuit pointer list messed up: re-sorting\n");
+            DEV_LOG("CopPursuit pointer list messed up: re-sorting!");
             bool notFixed = true;
 
             for (auto i = 0u; i < MAX_COPS_IN_PURSUIT; i++) {

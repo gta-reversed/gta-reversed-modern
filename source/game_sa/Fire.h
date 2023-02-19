@@ -63,6 +63,7 @@ public:
 
     bool HasTimeToBurn() const;
     bool IsNotInRemovalDistance() const;
+    auto& GetPosition() const { return m_vecPosition; }
 };
 
 VALIDATE_SIZE(CFire, 0x28);

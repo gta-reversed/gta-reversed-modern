@@ -12,8 +12,6 @@
 #define VALIDATE_OFFSET(struc, member, offset) \
 	static_assert(offsetof(struc, member) == offset, "The offset of " #member " in " #struc " is not " #offset "...")
 
-
-
 VALIDATE_SIZE(bool, 1);
 VALIDATE_SIZE(char, 1);
 VALIDATE_SIZE(short, 2);
@@ -53,12 +51,16 @@ typedef uint32    bool32;
 #if _DEBUG
 #include <format>
 #include <winuser.h>
+#include <filesystem>
 
 namespace notsa {
+namespace fs = std::filesystem;
+static const fs::path SOURCE_PATH = fs::path(__FILE__).parent_path();
+
 template<typename... Ts>
-[[noreturn]] static void unreachable(const char* method, const char* file, unsigned line, std::string_view fmt = "", Ts&&... fmtArgs) {
+[[noreturn]] static void unreachable(std::string_view method, std::string_view file, unsigned line, std::string_view fmt = "", Ts&&... fmtArgs) {
     const auto userDetails = std::vformat(fmt, std::make_format_args(std::forward<Ts>(fmtArgs)...));
-    const auto mbMsg = std::format("File:\n{}\n\nIn:\n{}:{}\n\nDetails:\n{}", file, method, line, userDetails.empty() ? "<None provided>" : userDetails.c_str());
+    const auto mbMsg = std::format("File: {}\nIn: {}:{}\n\nDetails:\n{}", fs::relative(file, SOURCE_PATH).string(), method, line, userDetails.empty() ? "<None provided>" : userDetails.c_str());
         
     const auto result = MessageBox(
         NULL,
@@ -90,6 +92,12 @@ template<typename... Ts>
 #define NOTSA_UNREACHABLE(...) UNREACHABLE_INTRINSIC()
 #endif
 
+#ifdef _DEBUG
+#define NOTSA_DEBUG_BREAK() __debugbreak()
+#else
+#define NOTSA_DEBUG_BREAK()
+#endif
+
 // In order to be able to get the vtable address using GetProcAddress
 // the whole class must be exported. (Along which the vtable is exported as well)
 // See `ReversibleHooks::detail::GetClassVTableAddress`
@@ -102,6 +110,17 @@ template<typename... Ts>
 // Macro for unused function return values.
 // Eventually could instead verify the returned value? In case of `sscanf` etc...
 #define RET_IGNORED(x) (void)(x);
+
+/*!
+* @brief Used for static variable references
+*
+* @tparam T    The type of the variable
+* @tparam Addr The address of it
+*/
+template<typename T, uintptr Addr>
+T& StaticRef() {
+    return *reinterpret_cast<T*>(Addr);
+}
 
 #define _IGNORED_
 #define _CAN_BE_NULL_

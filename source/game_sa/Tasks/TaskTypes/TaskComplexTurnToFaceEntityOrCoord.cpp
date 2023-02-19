@@ -22,6 +22,7 @@ CTaskComplexTurnToFaceEntityOrCoord::CTaskComplexTurnToFaceEntityOrCoord(CEntity
     m_fMaxHeading{ maxHeading },
     m_bFaceEntity{ true }
 {
+    assert((uintptr_t)entity != (uintptr_t)-1);
     CEntity::SafeRegisterRef(m_EntityToFace);
 }
 

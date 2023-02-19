@@ -31,12 +31,13 @@ void cTransmission::DisplayGearRatios()
     for (uint8 i = 0; i <= m_nNumberOfGears; i++)
     {
         tTransmissionGear& gear = m_aGears[i];
-        printf(
-            "%d, max v = %3.2f, up at = %3.2f, down at = %3.2f\n",
+        DEV_LOG(
+            "{} => max v = {3.2f}, up at = {3.2f}, down at = {3.2f}",
             i,
-            (1.0f / magic) * gear.m_maxVelocity,
-            (1.0f / magic) * gear.m_changeUpVelocity,
-            (1.0f / magic) * gear.m_changeDownVelocity);
+            gear.m_maxVelocity / magic,
+            gear.m_changeUpVelocity / magic,
+            gear.m_changeDownVelocity / magic
+        );
     }
 }
 

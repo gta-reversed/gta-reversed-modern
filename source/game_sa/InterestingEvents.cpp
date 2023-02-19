@@ -11,11 +11,11 @@ void CInterestingEvents::InjectHooks() {
     RH_ScopedClass(CInterestingEvents);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Constructor, 0x6023A0);
-    // bad RH_ScopedInstall(Destructor, 0x856880);
-    // RH_ScopedInstall(Add, 0x602590);
-    // RH_ScopedInstall(ScanForNearbyEntities, 0x605A30);
-    // RH_ScopedInstall(GetInterestingEvent, 0x6028A0);
+    RH_ScopedInstall(Constructor, 0x6023A0, { .reversed = false });
+    RH_ScopedInstall(Destructor, 0x856880, { .reversed = false });
+    RH_ScopedInstall(Add, 0x602590, { .reversed = false });
+    RH_ScopedInstall(ScanForNearbyEntities, 0x605A30, { .reversed = false });
+    RH_ScopedInstall(GetInterestingEvent, 0x6028A0, { .reversed = false });
     RH_ScopedInstall(InvalidateEvent, 0x602960);
     RH_ScopedInstall(InvalidateNonVisibleEvents, 0x6029C0);
 }
@@ -94,7 +94,7 @@ void CInterestingEvents::Add(CInterestingEvents::EType type, CEntity* entity) {
     if (!m_b1 || !entity)
         return;
 
-    printf("CInterestingEvents::Add %d %d\n", type, entity->m_nModelIndex);
+    DEV_LOG("type={}, model={}", (int32)(type), entity->m_nModelIndex);
 
     const auto& camPos = CCamera::GetActiveCamera().m_vecSource;
     if (m_nLastFrameUpdate != CTimer::GetFrameCounter()) {

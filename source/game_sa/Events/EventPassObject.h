@@ -8,7 +8,7 @@ public:
     bool     m_dontPassObject;
 
 public:
-    CEventPassObject(CEntity* giver, bool dontPassObject);
+    explicit CEventPassObject(CEntity* giver, bool dontPassObject = false);
     ~CEventPassObject() override;
 
     eEventType GetEventType() const override { return EVENT_PASS_OBJECT; }

@@ -43,7 +43,7 @@ void COnscreenTimerEntry::Process() {
     }
 /*
 #ifndef NDEBUG
-    printf("[COnscreenTimerEntry::Process] timerPtr: %d\n", timerPtr);
+    DEV_LOG("[COnscreenTimerEntry::Process] timerPtr: {}", timerPtr);
 #endif
 */
 }
