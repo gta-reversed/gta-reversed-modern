@@ -22,7 +22,12 @@
 bool& CAutomobile::m_sAllTaxiLights = *(bool*)0xC1BFD0;
 CVector& CAutomobile::vecHunterGunPos = *(CVector*)0x8D3394;
 CMatrix* CAutomobile::matW2B = (CMatrix*)0xC1C220;
-CColPoint* aAutomobileColPoints = (CColPoint*)0xC1BFF8;
+
+constexpr size_t NUM_AUTOMOBILE_SUSP_LINES  = (size_t)MAX_CARWHEELS;
+constexpr size_t NUM_RHINO_EXTRA_SUSP_LINES = (size_t)MAX_CARWHEELS * 2u; // 8
+constexpr size_t NUM_RHINO_SUSP_LINES       = NUM_AUTOMOBILE_SUSP_LINES + NUM_RHINO_EXTRA_SUSP_LINES; // 8
+constexpr size_t MAX_NUM_SUSP_LINES         = std::max(NUM_AUTOMOBILE_SUSP_LINES, NUM_RHINO_SUSP_LINES); // 12
+auto& aAutomobileColPoints = *(std::array<CColPoint, MAX_NUM_SUSP_LINES>*)0xC1BFF8;
 
 static constexpr CVector PACKER_COL_PIVOT = CVector(0.0f, 0.0f, 2.0f);
 static constexpr float CAR_BALANCE_MULT = 0.08f;
@@ -36,19 +41,12 @@ static constexpr CVector TIGER_GUN_POS(0.0f, 0.5f, 0.2f); // 0xC1C208
 
 void CAutomobile::InjectHooks()
 {
-    RH_ScopedClass(CAutomobile);
+    RH_ScopedVirtualClass(CAutomobile, 0x871120, 71);
     RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(Constructor, 0x6B0A90);
     RH_ScopedInstall(Destructor, 0x6A61E0);
 
-    RH_ScopedVirtualInstall(ProcessControl, 0x6B1880);
-    RH_ScopedVirtualInstall(AddMovingCollisionSpeed, 0x6A1ED0);
-    RH_ScopedVirtualInstall(ProcessAI, 0x6B4800);
-    RH_ScopedVirtualInstall(ResetSuspension, 0x6A2AE0);
-    RH_ScopedVirtualInstall(ProcessFlyingCarStuff, 0x6A8500);
-    RH_ScopedVirtualInstall(DoHoverSuspensionRatios, 0x6A45C0);
-    RH_ScopedVirtualInstall(ProcessSuspension, 0x6AFB10);
     RH_ScopedInstall(SetupModelNodes, 0x6A0770);
     RH_ScopedInstall(HydraulicControl, 0x6A07A0);
     RH_ScopedInstall(UpdateMovingCollision, 0x6A1460);
@@ -63,27 +61,6 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(FireTruckControl, 0x729B60);
     RH_ScopedInstall(SetHeliOrientation, 0x6A2450);
     RH_ScopedInstall(ClearHeliOrientation, 0x6A2460);
-
-    RH_ScopedVirtualInstall(GetComponentWorldPosition, 0x6A2210);
-    RH_ScopedVirtualInstall(IsComponentPresent, 0x6A2250);
-    // clang moment: RH_ScopedVirtualOverloadedInstall(GetDooorAngleOpenRatio, "enum", 0x6A2270, float (CAutomobile::*)(eDoors));
-    // clang moment: RH_ScopedVirtualOverloadedInstall(GetDooorAngleOpenRatio, "uint", 0x6A62C0, float (CAutomobile::*)(uint32));
-    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorReady, "enum", 0x6A2290, bool (CAutomobile::*)(eDoors));
-    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorReady, "uint", 0x6A6350, bool (CAutomobile::*)(uint32));
-    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorFullyOpen, "enum", 0x6A22D0, bool (CAutomobile::*)(eDoors));
-    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorFullyOpen, "uint", 0x6A63E0, bool (CAutomobile::*)(uint32));
-    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorClosed, "enum", 0x6A2310, bool (CAutomobile::*)(eDoors));
-    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorClosed, "uint", 0x6A6470, bool (CAutomobile::*)(uint32));
-    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorMissing, "enum", 0x6A2330, bool (CAutomobile::*)(eDoors));
-    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorMissing, "uint", 0x6A6500, bool (CAutomobile::*)(uint32));
-    RH_ScopedVirtualInstall(IsOpenTopCar, 0x6A2350);
-    RH_ScopedVirtualInstall(IsRoomForPedToLeaveCar, 0x6A3850);
-    RH_ScopedVirtualInstall(SetupDamageAfterLoad, 0x6B3E90);
-    RH_ScopedVirtualInstall(GetHeightAboveRoad, 0x6A62B0);
-    RH_ScopedVirtualInstall(GetNumContactWheels, 0x6A62A0);
-    RH_ScopedVirtualInstall(Teleport, 0x6A9CA0);
-    RH_ScopedVirtualInstall(Save, 0x5D47E0);
-    RH_ScopedVirtualInstall(Load, 0x5D2980);
     RH_ScopedInstall(ReduceHornCounter, 0x6A29A0);
     RH_ScopedInstall(FixTyre, 0x6A3580);
     RH_ScopedInstall(SetTaxiLight, 0x6A3740);
@@ -122,19 +99,48 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(SetBumperDamage, 0x6B1350);
     RH_ScopedInstall(SetPanelDamage, 0x6B1480);
     RH_ScopedInstall(SetDoorDamage, 0x6B1600);
-
-    RH_ScopedVirtualInstall(Fix, 0x6A3440);
-    RH_ScopedVirtualInstall(SetupSuspensionLines, 0x6A65D0);
-    RH_ScopedVirtualInstall(DoBurstAndSoftGroundRatios, 0x6A47F0);
-    RH_ScopedVirtualInstall(PlayCarHorn, 0x6A3770);
-    RH_ScopedVirtualInstall(VehicleDamage, 0x6A7650);
-    // todo: fix/review Tow funcs
     RH_ScopedInstall(TowTruckControl, 0x6A40F0);
-    RH_ScopedVirtualInstall(GetTowHitchPos, 0x6AF1D0);
-    RH_ScopedVirtualInstall(GetTowBarPos, 0x6AF250);
-    RH_ScopedVirtualInstall(SetTowLink, 0x6B4410);
-    RH_ScopedVirtualInstall(BreakTowLink, 0x6A4400);
-    RH_ScopedVirtualInstall(FindWheelWidth, 0x6A6090);
+
+    RH_ScopedVMTInstall(Fix, 0x6A3440);
+    RH_ScopedVMTInstall(DoBurstAndSoftGroundRatios, 0x6A47F0);
+    RH_ScopedVMTInstall(PlayCarHorn, 0x6A3770);
+    RH_ScopedVMTInstall(VehicleDamage, 0x6A7650);
+    RH_ScopedVMTInstall(GetComponentWorldPosition, 0x6A2210);
+    RH_ScopedVMTInstall(IsComponentPresent, 0x6A2250);
+    RH_ScopedVirtualOverloadedInstall(GetDooorAngleOpenRatio, "enum", 0x6A2270, float (CAutomobile::*)(eDoors));
+    RH_ScopedVirtualOverloadedInstall(GetDooorAngleOpenRatio, "uint", 0x6A62C0, float (CAutomobile::*)(uint32));
+    RH_ScopedVirtualOverloadedInstall(IsDoorReady, "enum", 0x6A2290, bool (CAutomobile::*)(eDoors));
+    RH_ScopedVirtualOverloadedInstall(IsDoorReady, "uint", 0x6A6350, bool (CAutomobile::*)(uint32));
+    RH_ScopedVirtualOverloadedInstall(IsDoorFullyOpen, "enum", 0x6A22D0, bool (CAutomobile::*)(eDoors));
+    RH_ScopedVirtualOverloadedInstall(IsDoorFullyOpen, "uint", 0x6A63E0, bool (CAutomobile::*)(uint32));
+    RH_ScopedVirtualOverloadedInstall(IsDoorClosed, "enum", 0x6A2310, bool (CAutomobile::*)(eDoors));
+    RH_ScopedVirtualOverloadedInstall(IsDoorClosed, "uint", 0x6A6470, bool (CAutomobile::*)(uint32));
+    RH_ScopedVirtualOverloadedInstall(IsDoorMissing, "enum", 0x6A2330, bool (CAutomobile::*)(eDoors));
+    RH_ScopedVirtualOverloadedInstall(IsDoorMissing, "uint", 0x6A6500, bool (CAutomobile::*)(uint32));
+    RH_ScopedVMTInstall(IsOpenTopCar, 0x6A2350);
+    RH_ScopedVMTInstall(IsRoomForPedToLeaveCar, 0x6A3850);
+    RH_ScopedVMTInstall(SetupDamageAfterLoad, 0x6B3E90);
+    RH_ScopedVMTInstall(GetHeightAboveRoad, 0x6A62B0);
+    RH_ScopedVMTInstall(GetNumContactWheels, 0x6A62A0);
+    RH_ScopedVMTInstall(Teleport, 0x6A9CA0);
+    RH_ScopedVMTInstall(Save, 0x5D47E0);
+    RH_ScopedVMTInstall(Load, 0x5D2980);
+    RH_ScopedVMTInstall(ProcessControl, 0x6B1880);
+    RH_ScopedVMTInstall(AddMovingCollisionSpeed, 0x6A1ED0);
+    RH_ScopedVMTInstall(ProcessAI, 0x6B4800);
+    RH_ScopedVMTInstall(ResetSuspension, 0x6A2AE0);
+    RH_ScopedVMTInstall(ProcessFlyingCarStuff, 0x6A8500);
+    RH_ScopedVMTInstall(DoHoverSuspensionRatios, 0x6A45C0);
+    RH_ScopedVMTInstall(ProcessSuspension, 0x6AFB10);
+    // todo: fix/review Tow funcs
+    RH_ScopedVMTInstall(GetTowHitchPos, 0x6AF1D0);
+    RH_ScopedVMTInstall(GetTowBarPos, 0x6AF250);
+    RH_ScopedVMTInstall(SetTowLink, 0x6B4410);
+    RH_ScopedVMTInstall(BreakTowLink, 0x6A4400);
+    RH_ScopedVMTInstall(FindWheelWidth, 0x6A6090);
+
+    RH_ScopedVMTInstall(SetupSuspensionLines, 0x6A65D0);
+    RH_ScopedVMTInstall(ProcessEntityCollision, 0x6ACE70);
 }
 
 // 0x6B0A90
@@ -1716,8 +1722,204 @@ void CAutomobile::ProcessSuspension() {
     }
 }
 
-int32 CAutomobile::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) {
-    return plugin::CallMethodAndReturn<int32, 0x6ACE70, CAutomobile*, CEntity*, CColPoint*>(this, entity, colPoint);
+// 0x6ACE70
+int32 CAutomobile::ProcessEntityCollision(CEntity* entity, CColPoint* outColPoints) {
+    if (m_nStatus != STATUS_SIMPLE) {
+        vehicleFlags.bVehicleColProcessed = true;
+    }
+
+    const auto tcd = GetColData(),
+               ocd = entity->GetColData();
+
+#ifdef FIX_BUGS
+    // FIX_BUGS@CAutomobile::ProcessEntityCollision:1
+    // The original code handled this properly, because `ProcessColModels` returned `0` 
+    // if either colmodel's data was missing
+    // but there's a lot of no-op stuff done below that we can just avoid altogether
+    // Though, in the original code there was an edge case if `m_pTractor == entity || m_pTrailer == entity` => crash
+    // but since I moved the assignment to the outside of the function now it always crashes xD
+    if (!tcd || !ocd) {
+        return 0;
+    }
+#endif
+
+    // The Rhinosaurus Rex has extra wheels (8 of them)
+    std::array<float, MAX_NUM_SUSP_LINES> wheelColPtsTouchDists{};
+    rng::copy(m_fWheelsSuspensionCompression, wheelColPtsTouchDists.begin());
+
+    const auto originalWheelSuspCompr{m_fWheelsSuspensionCompression};
+
+    // ...and their suspension compression values are stored inside doors (fml pls)
+    const auto GetRhinosaurusRexExtraWheelSuspCompression = [this](size_t extraWheelIdx) -> float& { // 
+        auto& door = m_doors[4 + extraWheelIdx / 4];
+        switch (extraWheelIdx % 4) {
+        case 0: return door.m_fOpenAngle;
+        case 1: return door.m_fClosedAngle;
+        case 2: return door.m_fAngle;
+        case 3: return door.m_fPrevAngle;
+        default: NOTSA_UNREACHABLE();
+        }
+    };
+
+    // 0x6ACEF7
+    if (m_nModelIndex == eModelID::MODEL_RHINO) {
+        // Store shit for the rhinosaurus rex
+        for (auto i = 0; i < NUM_RHINO_EXTRA_SUSP_LINES; i++) {
+            wheelColPtsTouchDists[NUM_AUTOMOBILE_SUSP_LINES + i] = GetRhinosaurusRexExtraWheelSuspCompression(i);
+        }
+    }
+
+    const auto tNumLines = tcd->m_nNumLines;
+    if (   physicalFlags.bSkipLineCol
+        || physicalFlags.bProcessingShift
+        || entity->IsPed()
+        || m_nModelIndex == eModelID::MODEL_INVALID && entity->IsVehicle()
+    ) {
+        tcd->m_nNumLines = 0; // Later reset back to original value
+    }
+
+    // Hide triangles in some cases
+    const auto didHideTriangles = m_pTractor == entity || m_pTrailer == entity;
+    const auto tNumTri = tcd->m_nNumTriangles, // Saving my sanity here, and unconditionally assigning
+               oNumTri = ocd->m_nNumTriangles;
+    if (didHideTriangles) {
+        tcd->m_nNumTriangles = ocd->m_nNumTriangles = 0;
+    }
+
+    // For ghosts we dont do shit (In case this garbage is a forklift this value is modified below)
+    auto numColPts = m_nStatus == STATUS_GHOST
+        ? 0
+        : CCollision::ProcessColModels(
+            GetMatrix(), *GetColModel(),
+            entity->GetMatrix(), *entity->GetColModel(),
+            *(std::array<CColPoint, 32>*)(outColPoints),
+            aAutomobileColPoints.data(),
+            wheelColPtsTouchDists.data(),
+            false
+        );
+
+    // Restore hidden triangles
+    if (didHideTriangles) {
+        tcd->m_nNumTriangles = tNumTri;
+        ocd->m_nNumTriangles = oNumTri;
+    }
+
+    size_t numProcessedWheels{};
+    if (tcd->m_nNumLines) {
+        // Process the real wheels
+        for (auto i = 0; i < MAX_CARWHEELS; i++) {
+            // 0x6AD0D4
+            const auto& cp = aAutomobileColPoints[i];
+
+            const auto wheelColPtsTouchDist = wheelColPtsTouchDists[i];
+            if (wheelColPtsTouchDist >= 1.f || wheelColPtsTouchDist >= m_fWheelsSuspensionCompression[i]) {
+                continue;
+            }
+
+            numProcessedWheels++;
+
+            m_fWheelsSuspensionCompression[i] = wheelColPtsTouchDist;
+            m_wheelColPoint[i] = cp;
+
+            m_anCollisionLighting[i] = cp.m_nLightingB;
+            m_nContactSurface = cp.m_nSurfaceTypeB;
+
+            switch (entity->GetType()) {
+            case ENTITY_TYPE_VEHICLE:
+            case ENTITY_TYPE_OBJECT: {
+                CEntity::ChangeEntityReference(m_apWheelCollisionEntity[i], entity->AsPhysical());
+
+                m_vWheelCollisionPos[i] = cp.m_vecPoint - entity->GetPosition();
+                if (entity->IsVehicle()) {
+                    m_anCollisionLighting[i] = entity->AsVehicle()->m_anCollisionLighting[i];
+                }
+                break;
+            }
+            case ENTITY_TYPE_BUILDING: {
+                m_pEntityWeAreOn = entity;
+                m_bTunnel = entity->m_bTunnel;
+                m_bTunnelTransition = entity->m_bTunnelTransition;
+                break;
+            }
+            }
+        }
+
+        // Deal with extra wheels for the Rhinosaurus Rex
+        if (m_nModelIndex == eModelID::MODEL_RHINO) {
+            for (auto i = 0; i < NUM_RHINO_EXTRA_SUSP_LINES; i++) {
+                auto& compr = GetRhinosaurusRexExtraWheelSuspCompression(i);
+                compr = std::min(wheelColPtsTouchDists[NUM_AUTOMOBILE_SUSP_LINES + i], compr);
+            }
+        }
+    } else {
+        tcd->m_nNumLines = tNumLines;
+    }
+    
+    // 0x6AD38A - Remove a few specific cp's for forklifts
+    if (m_nModelIndex == eModelID::MODEL_FORKLIFT && entity->IsObject() && !m_wMiscComponentAngle && !m_wMiscComponentAnglePrev) {
+        auto pts = aAutomobileColPoints | rng::views::take(numColPts);
+        auto newEndIt = rng::remove_if(pts, [](CColPoint& cp) {
+            return cp.m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT;
+        });
+        numColPts = rng::distance(pts.begin(), newEndIt.begin()); // Cancer
+    }
+
+    if (numColPts <= 0 && numProcessedWheels <= 0) {
+        goto rtn;
+    }
+
+    AddCollisionRecord(entity);
+    if (!entity->IsBuilding()) {
+        entity->AsPhysical()->AddCollisionRecord(this);
+    }
+
+    if (numColPts > 0) {
+        if (   entity->IsBuilding()
+            || (entity->IsObject() && entity->AsPhysical()->physicalFlags.bDisableCollisionForce)
+        ) {
+            m_bHasHitWall = true;
+        }
+    }
+
+    // 0x6AD482 - Add additional output colpoints for wheels
+    if (numProcessedWheels > 0 && entity->IsBuilding() && m_pHandlingData->m_fSuspensionHighSpdComDamp > 0.f) {
+        for (auto i = 0; i < MAX_CARWHEELS; i++) {
+            if (m_damageManager.GetWheelStatus((eCarWheel)i) != eCarWheelStatus::WHEEL_STATUS_OK) { // Move to top
+                continue;
+            }
+            const auto compressionNow = std::min(
+                originalWheelSuspCompr[i],
+                lerp(m_fWheelsSuspensionCompressionPrev[i], 1.f, 1.f - m_aSuspensionSpringLength[i] / m_aSuspensionLineLength[i])
+            );
+            const auto suspComprDelta = (compressionNow - m_fWheelsSuspensionCompression[i]) * m_aSuspensionLineLength[i]; // Suspension compression delta (In meters)
+            if (suspComprDelta <= 0.1f /* 0x8D3200 */) {
+                continue;
+            }
+            const auto& wheelcp = m_wheelColPoint[i];
+            if (g_surfaceInfos.GetAdhesionGroup(wheelcp.m_nSurfaceTypeB) == ADHESION_GROUP_SAND || wheelcp.m_nSurfaceTypeB == SURFACE_RAILTRACK) {
+                continue;
+            }
+            auto& outcp = outColPoints[numColPts];
+            outcp = wheelcp;
+            outcp.m_fDepth = (
+                  std::abs(wheelcp.m_vecNormal.Dot(GetUp()))
+                * std::min(std::abs(GetMoveSpeed().Dot(GetForward())), 0.3f) // Forward speed
+                * std::min(0.2f, suspComprDelta)
+                * m_pHandlingData->m_fSuspensionHighSpdComDamp
+            ) / 0.3f;
+            outcp.m_nPieceTypeA = CarWheelToCarPiece((eCarWheel)i);
+            outcp.m_nSurfaceTypeA = outcp.m_nSurfaceTypeB = SURFACE_WHEELBASE;
+            if (numColPts + 1 < 32) { // TODO/NOTE: `32` is ProcessColModels output array size
+#ifdef FIX_BUGS
+                numColPts++;
+                break;
+#endif
+            }
+        }
+    }
+
+rtn:
+    return numColPts;
 }
 
 // 0x6A29C0
@@ -1998,13 +2200,13 @@ void CAutomobile::SetupSuspensionLines() {
     // 0x6A65FB
     const bool hadToAllocateLines = !cd.m_nNumLines;
     if (hadToAllocateLines) {
-        cd.AllocateLines(ModelIndices::IsRhino(m_nModelIndex) ? 12 : 4); // Rhino has 12 lines
+        cd.AllocateLines(ModelIndices::IsRhino(m_nModelIndex) ? NUM_RHINO_SUSP_LINES : NUM_AUTOMOBILE_SUSP_LINES);
     }
 
     // 0x6A6754
     // Calculate col line positions for wheels, set wheel pos, spring and line lengths
     const auto& handling = *m_pHandlingData;
-    for (auto i = 0u; i < 4u; i++) {
+    for (auto i = 0; i < NUM_AUTOMOBILE_SUSP_LINES; i++) {
         auto& colLine = cd.m_pLines[i]; // Collision line for this wheel
 
         CVector wheelPos;
@@ -2082,17 +2284,16 @@ void CAutomobile::SetupSuspensionLines() {
     // 0x6A6995
     // Rhino has 12 suspension lines, which are calculated based on the 4 main wheel's line's position
     if (ModelIndices::IsRhino(m_nModelIndex)) {
-        size_t lineIndex{ 4u }; // Skip first 4 lines as those are already in use for the real wheels
+        size_t lineIndex{ NUM_AUTOMOBILE_SUSP_LINES }; // Skip first 4 lines as those are already in use for the real wheels
 
-        for (auto i = 0u; i < 4u; i += 2u) { // Do left, and right side - Wheels 0, 1 are on the left side, while 2, 3 are on the right
-            for (auto j = 0u; j < 4; j++, lineIndex++) { // Add 4 extra lines on each side
-                // Calculate positions of this wheel's line by
-                // lerping between the 2 wheel's lines on this side
+        for (auto i = 0u; i < NUM_AUTOMOBILE_SUSP_LINES; i += NUM_AUTOMOBILE_SUSP_LINES / 2) { // Do left, and right side - Wheels 0, 1 are on the left side, while 2, 3 are on the right
+            for (auto j = 0u; j < NUM_AUTOMOBILE_SUSP_LINES; j++, lineIndex++) { // Add 4 extra lines on each side
+                const auto wheelRelativePos = (float)(j + 1u) / (float)(NUM_AUTOMOBILE_SUSP_LINES + 1);
 
-                const auto wheelRelativePos = (float)(j + 1u) * 0.2f; // 0.2 probably comes from `1 / 4` - some spacing
-                auto& line = cd.m_pLines[lineIndex];
+                // Calculate positions of this wheel's line by lerping between the 2 wheel's lines on this side
+                auto& line      = cd.m_pLines[lineIndex];
                 line.m_vecStart = lerp(cd.m_pLines[i].m_vecStart, cd.m_pLines[i + 1].m_vecStart, wheelRelativePos);
-                line.m_vecEnd = lerp(cd.m_pLines[i].m_vecEnd, cd.m_pLines[i + 1].m_vecEnd, wheelRelativePos);
+                line.m_vecEnd   = lerp(cd.m_pLines[i].m_vecEnd, cd.m_pLines[i + 1].m_vecEnd, wheelRelativePos);
             }
         }
     }
@@ -3143,9 +3344,10 @@ void CAutomobile::HydraulicControl() {
     }
 
     if (setPrevRatio || suspensionTriggered) {
-        for (int32 i = 0; i < 4; i++) {
-            float wheelRadius1 = 1.0f - m_aSuspensionSpringLength[i] / m_aSuspensionLineLength[i];
-            m_fWheelsSuspensionCompressionPrev[i] = (m_fWheelsSuspensionCompression[i] - wheelRadius1) / (1.0f - wheelRadius1);
+        for (int32 i = 0; i < MAX_CARWHEELS; i++) {
+            const float t = 1.f - m_aSuspensionSpringLength[i] / m_aSuspensionLineLength[i];
+            // same as `(m_fWheelsSuspensionCompression[i] - 1.f + k) / k` where `k = m_aSuspensionSpringLength[i] / m_aSuspensionLineLength[i]`
+            m_fWheelsSuspensionCompressionPrev[i] = (m_fWheelsSuspensionCompression[i] - t) / (1.0f - t); 
         }
     }
     std::ranges::fill(hydraulicData.m_aWheelSuspension, 0.0f);
@@ -5426,7 +5628,7 @@ void CAutomobile::SetDoorDamage(eDoors doorIdx, bool withoutVisualEffect)
     // `0x6B169C` is only reachable if `eDoors::DOOR_BOOT` in which all other if's are ignored (that is the one at `0x6B1650` and `0x6B1673`)
     // If the door isn't BOOT, but is BONNET just ignore it, because of `0x6B1660`
     // Now, if it's neither, then we go on and check the logical invert of the 2 other conditions at `0x6B1650`
-    // If those are all true we will end up @ `0x6B1673`
+    // If those are all true we will rtn up @ `0x6B1673`
 
     switch (doorIdx) {
     case eDoors::DOOR_BOOT: {

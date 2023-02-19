@@ -409,6 +409,7 @@ void InjectHooksMain() {
 
     CFileMgr::InjectHooks();
     CPedGroupPlacer::InjectHooks();
+    CLoadedCarGroup::InjectHooks();
     RenderBuffer::InjectHooks();
     CStaticShadow::InjectHooks();
     CRealTimeShadowManager::InjectHooks();

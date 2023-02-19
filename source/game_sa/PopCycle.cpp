@@ -55,7 +55,7 @@ void CPopCycle::Initialise() {
                     }
                 }
 
-                // Ideall we could/would use a file pointer here (instead of `LoadLine`)
+                // Ideally we could/would use a file pointer here (instead of `LoadLine`)
                 // and read each number one-by-one.
                 // But until then we're stuck with this hardcoded version.
 
@@ -76,9 +76,25 @@ void CPopCycle::Initialise() {
                     &percs[6], &percs[7], &percs[8], &percs[9], &percs[10], &percs[11],
                     &percs[12], &percs[13], &percs[14], &percs[15], &percs[16], &percs[17]
                 );
+
                 if (nread != 6 + 18) {
                     NOTSA_UNREACHABLE("Failed reading all data!");
                 }
+
+                // In the vanilla game the %'s in this array add up to 100% (The original code rescales the values in order to make sure this is the case...but fails sometimes, see below)
+                // But we take another route and don't normalize to 100%. This way there's no rounding error involved and everything works perfectly. 
+#ifndef FIX_BUGS
+                // The percs should always be >= 100 in total (otherwise `PickARandomGroupOfOtherPeds` will fail)
+                if (const auto percsSum = notsa::accumulate(percs, (size_t)0); percsSum < 100) {
+                    for (auto& p : percs) {
+                        p = (size_t)p * 100u / percsSum; // fp math unnecessary here - Rescale to 102% here to make sure we're at 100%
+                    }
+
+                    // At this point this must hold - If the value is over 100 that's fine, but it may not be less!
+                    // assert(notsa::accumulate(percs, (size_t)0) >= 100u); // In vanilla game this always triggers because of rounding errors... Not much to do.
+                }
+#endif
+
             }
         }
     }
@@ -260,8 +276,16 @@ bool CPopCycle::PedIsAcceptableInCurrentZone(int32 modelIndex) {
 
 // 0x610420
 ePopcycleGroup CPopCycle::PickARandomGroupOfOtherPeds() {
-    auto rndPerc = CGeneral::GetRandomNumberInRange(0, 100);
-    for (auto [grpIdx, grpPerc] : notsa::enumerate(m_nPercTypeGroup[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_pCurrZoneInfo->zonePopulationType])) {
+    const auto& percs = m_nPercTypeGroup[m_nCurrentTimeIndex][m_nCurrentTimeOfWeek][m_pCurrZoneInfo->zonePopulationType];
+    auto rndPerc = CGeneral::GetRandomNumberInRange(
+        0,
+#ifdef FIX_BUGS // See `Initialise` for an explanation
+        (int32)notsa::accumulate(percs, (size_t)0)
+#else
+        100
+#endif
+    );
+    for (auto [grpIdx, grpPerc] : notsa::enumerate(percs)) {
         if ((int32)(grpPerc) >= rndPerc) {
             return (ePopcycleGroup)grpIdx;
         }
