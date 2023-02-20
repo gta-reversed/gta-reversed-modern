@@ -157,7 +157,7 @@ constexpr float RadiansToDegrees(float angleInRadians) {
 
 template<typename T>
 auto lerp(const T& from, const T& to, float t) {
-    return from * (1.f - t) + to * t;
+    return to * t + from * (1.f - t);
 }
 
 inline const float invLerp(float fMin, float fMax, float fVal) {

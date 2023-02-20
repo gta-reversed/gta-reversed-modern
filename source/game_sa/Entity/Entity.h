@@ -186,6 +186,7 @@ public:
     CEntity* FindLastLOD() noexcept;
 
     // NOTSA
+    auto GetModelId() const { return (eModelID)m_nModelIndex; }
     CBaseModelInfo* GetModelInfo() const;
     CCollisionData* GetColData() { return GetColModel()->m_pColData; }
 

@@ -188,11 +188,17 @@ void UIRenderer::DebugCode() {
     }
 
     if (pad->IsStandardKeyJustPressed('0')) {
-
+        if (const auto veh = FindPlayerVehicle()) {
+            veh->Fix();
+            veh->AsAutomobile()->SetRandomDamage(false);
+        }
     }
 
     if (pad->IsStandardKeyJustPressed('9')) {
-    
+        if (const auto veh = FindPlayerVehicle()) {
+            veh->Fix();
+            veh->AsAutomobile()->SetRandomDamage(true);
+        }
     }
 
     if (pad->IsStandardKeyJustPressed('1')) {

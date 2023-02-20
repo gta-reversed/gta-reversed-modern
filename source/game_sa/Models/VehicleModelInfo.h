@@ -462,6 +462,8 @@ public:
 
     tHandlingData& GetHandlingData() const;
     tFlyingHandlingData& GetFlyingHandlingData() const;
+
+    auto GetVehicleStruct() const { return m_pVehicleStruct; }
 };
 VALIDATE_SIZE(CVehicleModelInfo::CVehicleStructure, 0x314);
 VALIDATE_SIZE(CVehicleModelInfo, 0x308);

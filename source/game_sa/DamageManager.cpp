@@ -77,7 +77,7 @@ void CDamageManager::FuckCarCompletely(bool bDontDetachWheel) {
 
 // 0x6C24B0
 bool CDamageManager::ApplyDamage(CAutomobile* vehicle, tComponent compId, float fIntensity, float fColDmgMult) {
-    if (!vehicle->npcFlags.bTakePanelDamage)
+    if (!vehicle->autoFlags.bCanBeVisiblyDamaged)
         return false;
 
     tComponentGroup group{};
@@ -175,8 +175,9 @@ void CDamageManager::ProgressEngineDamage() {
 
 // 0x6C2320
 bool CDamageManager::ProgressDoorDamage(eDoors door, CAutomobile* pAuto) {
-    if ((unsigned)door >= (unsigned)eDoors::MAX_DOORS)
+    if ((uint32)door >= (uint32)eDoors::MAX_DOORS) {
         return false;
+    }
 
     switch (GetDoorStatus(door)) {
     case eDoorStatus::DAMSTATE_OK:

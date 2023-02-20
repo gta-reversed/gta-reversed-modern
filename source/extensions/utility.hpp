@@ -1,8 +1,13 @@
 #pragma once
 
 #include <memory>
+#include <initializer_list>
 
 namespace notsa {
+template<typename... Ts>
+auto il(Ts... ts) {
+    return std::initializer_list{ std::forward<Ts>(ts)... };
+}
 
 /*!
 * @brief Call the given function on object destruction.
