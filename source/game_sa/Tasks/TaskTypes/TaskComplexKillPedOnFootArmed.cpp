@@ -61,7 +61,6 @@ CTaskComplexKillPedOnFootArmed::~CTaskComplexKillPedOnFootArmed() {
     CEntity::SafeCleanUpRef(m_target);
 }
 
-
 // 0x621500
 bool CTaskComplexKillPedOnFootArmed::LineOfSightClearForAttack(CPed* ped) { // ped is the task owner ped
     /*
@@ -219,8 +218,8 @@ CTask* CTaskComplexKillPedOnFootArmed::CreateFirstSubTask(CPed* ped) {
         return nullptr;
     }
 
-    const auto& ourPos    = ped->GetPosition(),
-                targetPos = m_target->GetPosition();
+    const auto &ourPos    = ped->GetPosition(),
+               &targetPos = m_target->GetPosition();
 
     const auto targetToOurPedDistSq = (ourPos - targetPos).SquaredMagnitude();
 
@@ -280,8 +279,8 @@ CTask* CTaskComplexKillPedOnFootArmed::ControlSubTask(CPed* ped) {
     }
     const auto ogSubTask = m_pSubTask;
 
-    const auto& ourPos    = ped->GetPosition(),
-                targetPos = m_target->GetPosition();
+    const auto &ourPos    = ped->GetPosition(),
+               &targetPos = m_target->GetPosition();
 
     const auto targetToOurPedDistSq = (ourPos - targetPos).SquaredMagnitude();
 
