@@ -73,7 +73,7 @@ VALIDATE_SIZE(FileHeader, 0x20);
 struct TSurface {
     eSurfaceType material;
     uint8 flag, brightness;
-    uint8 light;
+    tColLighting light;
 };
 
 struct TBox : CBox {
@@ -84,7 +84,7 @@ struct TBox : CBox {
             *reinterpret_cast<const CBox*>(this),
             surface.material,
             surface.flag,
-            *reinterpret_cast<tColLighting*>(surface.light)
+            surface.light
         };
     }
 };
@@ -112,7 +112,7 @@ struct TSphere {
             { center, radius },
             surface.material,
             surface.flag,
-            *reinterpret_cast<tColLighting*>(surface.light)
+            surface.light
         };
     }
 };
@@ -192,17 +192,20 @@ using namespace V2; // Inherit all others stuff
 
 // Header for V3
 struct Header : V2::Header {
+    // NOTE: Face <=> Triangle
+
     uint32 nShdwFaces{};
     uint32 offShdwVerts{}, offShdwFaces{};
 
     // Basically just find the highest shadow vertex index, 0x537510
     uint32 GetNoOfShdwVerts(CCollisionData* cd) const {
-        if (!nShdwFaces)
+        assert(cd->m_nNumShadowTriangles == nShdwFaces);
+        if (!nShdwFaces) {
             return 0;
-
-        uint32 maxVert{};
-        for (auto i = 0u; i < nShdwFaces; i++) {
-            maxVert = std::max(maxVert, (uint32)*std::ranges::max_element(cd->m_pShadowTriangles[i].m_vertIndices));
+        }
+        uint32 maxVert{0};
+        for (auto& tri : cd->GetShdwTris()) {
+            maxVert = std::max<uint32>(maxVert, rng::max(tri.m_vertIndices));
         }
         return maxVert + 1;
     }
