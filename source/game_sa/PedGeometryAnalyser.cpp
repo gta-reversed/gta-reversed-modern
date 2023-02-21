@@ -8,7 +8,7 @@ void CPedGeometryAnalyser::InjectHooks() {
 
     //RH_ScopedInstall(CanPedJumpObstacle, 0x0, { .reversed = false });
     //RH_ScopedInstall(CanPedJumpObstacle, 0x0, { .reversed = false });
-    RH_ScopedInstall(CanPedTargetPed, 0x5F1C40, { .reversed = false });
+    RH_ScopedInstall(CanPedTargetPed, 0x5F1C40);
     RH_ScopedInstall(CanPedTargetPoint, 0x5F1B70, { .reversed = false });
     RH_ScopedInstall(ComputeBuildingHitPoints, 0x5F1E30, { .reversed = false });
     //RH_ScopedInstall(ComputeClearTarget, 0x0, { .reversed = false });
@@ -58,15 +58,17 @@ void CPedGeometryAnalyser::CanPedJumpObstacle(const CPed& ped, const CEntity& en
 }
 
 // 0x5F1C40
-// unused
-void CPedGeometryAnalyser::CanPedTargetPed(CPed& ped, CPed& targetPed, bool a3) {
-    assert(false);
+bool CPedGeometryAnalyser::CanPedTargetPed(CPed& ped, CPed& targetPed, bool checkDirection) {
+    return CanPedTargetPoint(
+        ped,
+        targetPed.GetPosition() + CVector{ 0.f, 0.f, targetPed.GetTaskManager().GetTaskSecondary(TASK_SECONDARY_DUCK) ? -0.25f : 0.75f }, // 0.75f - 1.f = -0.25f
+        checkDirection
+    );
 }
 
 // 0x5F1B70
-// unused
-void CPedGeometryAnalyser::CanPedTargetPoint(const CPed& ped, const CVector& a2, bool a3) {
-    assert(false);
+bool CPedGeometryAnalyser::CanPedTargetPoint(const CPed& ped, const CVector& a2, bool a3) {
+    return plugin::CallMethodAndReturn<bool, 0x5F1B70>(&ped, &a2, a3);
 }
 
 // 0x5F1E30
