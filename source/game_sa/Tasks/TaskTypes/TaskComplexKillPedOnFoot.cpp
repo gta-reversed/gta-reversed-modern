@@ -8,7 +8,9 @@ void CTaskComplexKillPedOnFoot::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x620E30);
 }
 
-CTaskComplexKillPedOnFoot::CTaskComplexKillPedOnFoot(CPed* target, int32 time, int32 pedFlags, int32 delay, int32 chance, int8 a7) : CTaskComplex() {
+CTaskComplexKillPedOnFoot::CTaskComplexKillPedOnFoot(CPed* target, int32 time, int32 pedFlags, int32 delay, int32 chance, int8 a7) :
+    CTaskComplex()
+{
     m_bit_1        = true;
     m_bit_2        = true;
     m_bit_3        = true;
