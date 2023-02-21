@@ -310,7 +310,7 @@ void CStats::LoadActionReactionStats() {
         float reactValue;
 
         if (line[0] != '#' && line[0] != NULL) {
-            sscanf(line, "%d %s %f", &reactId, statName, &reactValue);
+            VERIFY(sscanf(line, "%d %s %f", &reactId, statName, &reactValue) == 3);
 
             StatReactionValue[reactId] = reactValue;
         }

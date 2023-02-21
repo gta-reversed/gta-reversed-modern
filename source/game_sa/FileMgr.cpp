@@ -115,22 +115,22 @@ void CFileMgr::Initialise()
     {
         // MikuAuahDark: Improve the function to use wide char
         wchar_t rootDirTemp[DIRNAMELENGTH];
-        _wgetcwd(rootDirTemp, DIRNAMELENGTH);
+        VERIFY(_wgetcwd(rootDirTemp, DIRNAMELENGTH));
 
         // Just in case
         if (errno == ERANGE)
-            _getcwd(ms_rootDirName, DIRNAMELENGTH);
+            VERIFY(_getcwd(ms_rootDirName, DIRNAMELENGTH));
         else
         {
             std::string rootDirUTF8 = UnicodeToUTF8(rootDirTemp);
             if (rootDirUTF8.length() >= (DIRNAMELENGTH - 2))
-                _getcwd(ms_rootDirName, DIRNAMELENGTH);
+                VERIFY(_getcwd(ms_rootDirName, DIRNAMELENGTH));
             else
                 strcpy(ms_rootDirName, rootDirUTF8.c_str());
         }
     }
     else
-        _getcwd(ms_rootDirName, DIRNAMELENGTH);
+        VERIFY(_getcwd(ms_rootDirName, DIRNAMELENGTH));
 
     ms_rootDirName[strlen(ms_rootDirName)] = '\\';
 }

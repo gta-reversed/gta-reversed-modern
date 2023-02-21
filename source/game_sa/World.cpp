@@ -475,8 +475,8 @@ void CWorld::CallOffChaseForAreaSectorListPeds(CPtrList& ptrList, float x1, floa
         next = node->GetNext();
 
         const auto veh = static_cast<CVehicle*>(node->m_item);
-        const auto pos = veh->GetPosition();
-        const auto mat = (CMatrix)veh->GetMatrix();
+        const auto& pos = veh->GetPosition();
+        const auto& mat = veh->GetMatrix();
 
         if (!IsPointWithinBounds2D({ minX, minY }, { maxX, maxY }, { pos }))
             continue;

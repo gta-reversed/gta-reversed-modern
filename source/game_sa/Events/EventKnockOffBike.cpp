@@ -211,7 +211,11 @@ int32 CEventKnockOffBike::CalcForcesAndAnims(CPed* ped)
             ped->ApplyMoveForce(force);
             return ANIM_ID_KO_SPIN_L;
         }
+        default:
+            NOTSA_UNREACHABLE();
+            break;
         }
+        break;
     case KNOCK_OFF_TYPE_SKIDBACKFRONT:
     {
         ped->m_vecMoveSpeed = m_moveSpeed;

@@ -62,9 +62,9 @@ void CPedStats::LoadPedStats() {
         int32 shootingRate;
         int32 defaultDecisionMaker;
 
-        sscanf(
+        const auto read = sscanf(
             line,
-            "%s %f %f %d %d %d %d %f %f %d %d",
+            "%23s %f %f %d %d %d %d %f %f %d %d",
             name,
             &fleeDistance,
             &headingChangeRate,
@@ -77,6 +77,7 @@ void CPedStats::LoadPedStats() {
             &shootingRate,
             &defaultDecisionMaker
         );
+        VERIFY(read == 11);
 
         ms_apPedStats[statIndex].m_nId = statIndex;
         strcpy(ms_apPedStats[statIndex].m_acName, name);

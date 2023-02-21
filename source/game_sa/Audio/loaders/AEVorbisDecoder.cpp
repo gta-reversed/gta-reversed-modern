@@ -44,7 +44,7 @@ bool CAEVorbisDecoder::Initialise() {
 
     if (m_bIsUserTrack) {
         if (GetStreamLengthMs() < 7000)
-            return m_bInitialized = false;
+            return m_bInitialized == false;
     }
 
     return true;
@@ -107,7 +107,7 @@ long CAEVorbisDecoder::GetStreamPlayTimeMs() {
 // 0x502670
 void CAEVorbisDecoder::SetCursor(unsigned long pos) {
     if (m_bInitialized)
-        ov_time_seek(m_pVorbisFileHandle, pos * 0.001f);
+        ov_time_seek(m_pVorbisFileHandle, static_cast<float>(pos) / 1000.0f);
 }
 
 // 0x502560

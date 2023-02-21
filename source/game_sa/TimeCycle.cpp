@@ -77,26 +77,27 @@ void CTimeCycle::Initialise() {
                 }
             }
 
-            sscanf(line,
-                   "%d %d %d  %d %d %d  %d %d %d  %d %d %d  %d %d %d" "%d %d %d  %d %d %d"
-                   "%f %f %f %d %d %d %f %f %f"
-                   "%d %d %d  %d %d %d  %f %f %f  %f %f %f  %f %f %f" "%f %f %f"
-                   "%f %d %d %f",
-                   &ambR,       &ambG,       &ambB,
-                   &ambObjR,    &ambObjG,    &ambObjB,
-                   &dirR,       &dirG,       &dirB,
-                   &skyTopR,    &skyTopG,    &skyTopB,
-                   &skyBotR,    &skyBotG,    &skyBotB,
-                   &sunCoreR,   &sunCoreG,   &sunCoreB,
-                   &sunCoronaR, &sunCoronaG, &sunCoronaB,
-                   &sunSize, &spriteSize, &spriteBrightness, &shadowStrength, &lightShadowStrength, &poleShadowStrength, &farClip, &fogStart, &lightOnGround,
-                   &lowCloudR, &lowCloudG, &lowCloudB,
-                   &bottomCloudR, &bottomCloudG, &bottomCloudB,
-                   &waterR, &waterG, &waterB, &waterA,
-                   &postFx1a, &postFx1R, &postFx1G, &postFx1B,
-                   &postFx2a, &postFx2R, &postFx2G, &postFx2B,
-                   &cloudAlpha, &highLightMinIntensity, &waterFogAlpha, &dirMult
-           );
+            VERIFY(sscanf(line,
+                "%d %d %d  %d %d %d  %d %d %d  %d %d %d  %d %d %d" "%d %d %d  %d %d %d"
+                "%f %f %f %d %d %d %f %f %f"
+                "%d %d %d  %d %d %d  %f %f %f  %f %f %f  %f %f %f" "%f %f %f"
+                "%f %d %d %f",
+                &ambR,       &ambG,       &ambB,
+                &ambObjR,    &ambObjG,    &ambObjB,
+                &dirR,       &dirG,       &dirB,
+                &skyTopR,    &skyTopG,    &skyTopB,
+                &skyBotR,    &skyBotG,    &skyBotB,
+                &sunCoreR,   &sunCoreG,   &sunCoreB,
+                &sunCoronaR, &sunCoronaG, &sunCoronaB,
+                &sunSize, &spriteSize, &spriteBrightness, &shadowStrength, &lightShadowStrength, &poleShadowStrength, &farClip, &fogStart, &lightOnGround,
+                &lowCloudR, &lowCloudG, &lowCloudB,
+                &bottomCloudR, &bottomCloudG, &bottomCloudB,
+                &waterR, &waterG, &waterB, &waterA,
+                &postFx1a, &postFx1R, &postFx1G, &postFx1B,
+                &postFx2a, &postFx2R, &postFx2G, &postFx2B,
+                &cloudAlpha, &highLightMinIntensity, &waterFogAlpha, &dirMult
+            ) == 52);
+
             m_nAmbientRed[h][w]   = ambR;
             m_nAmbientGreen[h][w] = ambG;
             m_nAmbientBlue[h][w]  = ambB;

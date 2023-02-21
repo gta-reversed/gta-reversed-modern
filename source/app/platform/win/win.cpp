@@ -212,7 +212,7 @@ INT WINAPI __WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine,
     SetErrorMode(SEM_FAILCRITICALERRORS);
 
     bool bNewGameFirstTime = true;
-    MSG Msg;
+    MSG Msg{};
 
     // 0x7489FB
     while (true) {

@@ -4648,8 +4648,10 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
     }
     else
     {
+        assert(entity);
         if (entity->m_bHasContacted)
         {
+            assert(physicalEntity);
             CVector vecOldFrictionMoveSpeed = physicalEntity->m_vecFrictionMoveSpeed;
             CVector vecOldFrictionTurnSpeed = physicalEntity->m_vecFrictionTurnSpeed;
             physicalEntity->ResetFrictionTurnSpeed();

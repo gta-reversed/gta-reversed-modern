@@ -268,7 +268,7 @@ void SurfaceInfos_c::LoadAdhesiveLimits()
             continue;
 
         char value[4];
-        sscanf(line, "%3s", value); // FIX_BUGS: buffer overflow
+        VERIFY(sscanf(line, "%3s", value) == 1); // FIX_BUGS: buffer overflow
         for (auto i = *line; i != ' '; i = *++line) {
             if (i == '\t')
                 break;

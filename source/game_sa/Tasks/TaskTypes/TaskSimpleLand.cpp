@@ -74,6 +74,7 @@ bool CTaskSimpleLand::ProcessPed_Reversed(CPed* ped) {
             ped->bIsLanding = true;
 
             if (ped->IsPlayer()) {
+                assert(m_pAnim); // NOTSA
                 if (ped->m_nMoveState == PEDMOVE_SPRINT && ped->AsPlayer()->GetPadFromPlayer()->GetSprint())
                     m_pAnim->m_fSpeed = 2.0F; // possible bug, m_pAnim can be null here
 

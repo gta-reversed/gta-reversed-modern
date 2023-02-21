@@ -46,30 +46,30 @@ void CPedType::LoadPedData() {
             continue;
 
         char buf[32];
-        sscanf(line, "%s", buf);
+        VERIFY(sscanf(line, "%s", buf) == 1);
 
         const auto GetAcquaintance = [=]() -> uint32 {
             uint32 value = 0;
-            strtok(line, " ,\t");
+            RET_IGNORED(strtok(line, " ,\t"));
             for (const char* pedTypeName = strtok(nullptr, " ,\t"); pedTypeName; pedTypeName = strtok(nullptr, " ,\t")) {
                 value |= GetPedFlag(FindPedType(pedTypeName));
             }
             return value;
         };
 
-        if (!strcmp(buf, "Hate"))
+        if (!strncmp(buf, "Hate", 5u))
         {
             GetPedTypeAcquaintances(pedType).m_nHate = GetAcquaintance();
         }
-        else if (!strcmp(buf, "Dislike"))
+        else if (!strncmp(buf, "Dislike", 8u))
         {
             GetPedTypeAcquaintances(pedType).m_nDislike = GetAcquaintance();
         }
-        else if (!strcmp(buf, "Like"))
+        else if (!strncmp(buf, "Like", 5u))
         {
             GetPedTypeAcquaintances(pedType).m_nLike = GetAcquaintance();
         }
-        else if (!strcmp(buf, "Respect"))
+        else if (!strncmp(buf, "Respect", 8u))
         {
             GetPedTypeAcquaintances(pedType).m_nRespect = GetAcquaintance();
         }

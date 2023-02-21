@@ -27,10 +27,11 @@ void CGridRef::Init() {
 
         uint8 x = 0;
         int32 y = 0;
-        (void)sscanf(line, "%c%d %s", &x, &y, str);
+        VERIFY(sscanf(line, "%c%d %s", &x, &y, str) == 3);
         auto lowstr = _strlwr(str);
         x -= 65; // - 'A'
         y -= 1;
+        assert(x >= 0 && y >= 0);
         strcpy(&GridRefList[x][y][0], lowstr);
     }
     CFileMgr::CloseFile(file);

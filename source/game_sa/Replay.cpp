@@ -408,7 +408,6 @@ void CReplay::SaveReplayToHD() {
         // TODO: Refactor
         const auto NextSlot = [](uint8 slot) { return (slot + 1) % NUM_REPLAY_BUFFERS; };
 
-        // TODO: Refactor
         auto inUse = std::distance(BufferStatus.begin(), rng::find(BufferStatus, REPLAYBUFFER_IN_USE));
         auto slot = NextSlot(inUse);
 
@@ -417,6 +416,7 @@ void CReplay::SaveReplayToHD() {
                 break;
             slot = NextSlot(slot);
         }
+        assert(slot >= 0);
         CFileMgr::Write(file, Buffers[slot].buffer.data(), sizeof(tReplayBuffer));
 
         while (BufferStatus[slot] != REPLAYBUFFER_IN_USE) {
@@ -441,6 +441,7 @@ void CReplay::PlayReplayFromHD() {
             for (; bufferIdx < NUM_REPLAY_BUFFERS && CFileMgr::Read(file, Buffers[bufferIdx].buffer.data(), sizeof(tReplayBuffer)); bufferIdx++) {
                 BufferStatus[bufferIdx] = REPLAYBUFFER_FULL;
             }
+            assert(bufferIdx >= 1);
             BufferStatus[bufferIdx - 1] = REPLAYBUFFER_IN_USE; // Mark last used buffer as in-use.
 
             for (auto i = bufferIdx; i < NUM_REPLAY_BUFFERS; i++) { // Mark unfilled buffer as n/a.
@@ -1549,7 +1550,7 @@ void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loa
         slot = (slot + 1) % 8;
     }
     slot %= 8;
-
+    assert(slot >= 0);
     Playback = CAddressInReplayBuffer(Buffers[slot], slot);
 
     CObject::DeleteAllTempObjectsInArea(CVector{0.0f}, 1'000'000.0f);

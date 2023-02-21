@@ -685,8 +685,8 @@ void CAutomobile::ProcessControl()
 
         ProcessSuspension();
 
-        CVector contactPoints[4];
-        CVector contactSpeeds[4];
+        CVector contactPoints[4]{};
+        CVector contactSpeeds[4]{};
 
         for (int32 i = 0; i < 4; i++) {
             if (m_fWheelsSuspensionCompression[i] >= 1.0f) {

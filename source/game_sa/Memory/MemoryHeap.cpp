@@ -105,6 +105,7 @@ HeapFreeBlockDesc* CMemoryHeap::_JoinFreeBlocks(HeapFreeBlockDesc* desc) {
         next->RemoveHeapFreeBlock();
         next = (HeapFreeBlockDesc*)((uint8*)next + next->m_nSize + sizeof(HeapBlockDesc));
     }
+    assert(next);
 
     // join prev located block
     auto* prev = (HeapFreeBlockDesc*)desc->m_PrevBlock;

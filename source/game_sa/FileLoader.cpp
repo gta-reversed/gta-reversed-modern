@@ -940,7 +940,7 @@ void CFileLoader::Load2dEffect(const char* line) {
     auto modelId{ MODEL_INVALID };
     CVector pos{};
     int32 type;
-    (void*)sscanf(line, "%d %f %f %f %d", &modelId, &pos.x, &pos.y, &pos.z, &type);
+    VERIFY(sscanf(line, "%d %f %f %f %d", &modelId, &pos.x, &pos.y, &pos.z, &type) == 5);
 
     CTxdStore::PushCurrentTxd();
     CTxdStore::SetCurrentTxd(CTxdStore::FindTxdSlot("particle"));

@@ -169,6 +169,7 @@ void CRunningScript::GivePedScriptedTask(int32 pedHandle, CTask* task, int32 opc
     }
 
     CPed* ped = GetPedPool()->GetAtRef(pedHandle);
+    assert(ped);
     CPedGroup* pedGroup = CPedGroups::GetPedsGroup(ped);
 
     CPed* otherPed = nullptr;

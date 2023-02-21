@@ -194,7 +194,7 @@ void CPickup::ProcessGunShot(CVector* start, CVector* end) {
     if (!m_pObject)
         return;
 
-    if (const auto posn = m_pObject->GetPosition(); CCollision::TestLineSphere({start, end}, {4.0f, posn})) {
+    if (const auto& posn = m_pObject->GetPosition(); CCollision::TestLineSphere({start, end}, {4.0f, posn})) {
         CExplosion::AddExplosion(nullptr, nullptr, EXPLOSION_MINE, posn, 0, true, -1.0f, false);
         Remove();
     }

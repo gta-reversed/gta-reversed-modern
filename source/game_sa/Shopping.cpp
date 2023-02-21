@@ -100,7 +100,7 @@ void CShopping::Buy(uint32 key, int32 extraInfo) {
 
     const auto price = GetPrice(key);
     const auto fPrice = static_cast<float>(price);
-    const auto priceInfo = ms_prices[FindItem(key)];
+    const auto& priceInfo = ms_prices[FindItem(key)];
     playerInfo.m_nMoney -= price;
 
     for (const auto modifier : ms_statModifiers[index].modifiers) {

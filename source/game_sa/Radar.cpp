@@ -263,7 +263,7 @@ void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType)
     case RADAR_SPRITE_NONE:
         // blipType = 0 for player position
         blipType = RADAR_SPRITE_MAP_HERE;
-        /* fallthrough */
+        [[fallthrough]];
     case RADAR_SPRITE_MAP_HERE:
         blipName = TheText.Get("LG_01");
         break;
