@@ -410,8 +410,8 @@ void CEventHandler::ComputePedToFleeResponse(CEvent* event, CTask* task1, CTask*
     plugin::CallMethod<0x4B9B50, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
 
     /*
-    if (auto* ped = static_cast<CEventPedToFlee*>(event)->m_ped) {
-        m_ped->Say(69);
+    if (auto* ped = static_cast<CEventPedToFlee*>(event)->m_currPedToKill) {
+        m_currPedToKill->Say(69);
         m_eventResponseTask = new CTaskComplexSmartFleeEntity(ped, 1, 100.0f, -1, 1000, 1.0f);
     }
     */
