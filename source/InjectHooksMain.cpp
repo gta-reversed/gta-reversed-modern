@@ -142,7 +142,7 @@
 #include "TaskSimpleHitByGunFromLeft.h"
 #include "TaskSimpleHitByGunFromRear.h"
 #include "TaskSimpleHitByGunFromRight.h"
-#include <Tasks/TaskTypes/TaskComplexKillPedOnFootMelee.h>
+#include "Tasks/TaskTypes/TaskComplexKillPedOnFootMelee.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculator.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorStandard.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorRadiusAngleOffset.h"
