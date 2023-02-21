@@ -122,10 +122,17 @@ int32 CCarCtrl::ChooseBoatModel() {
 
 // 0x421900
 int32 CCarCtrl::ChooseCarModelToLoad(int32 arg1) {
-    for (auto i = 0; i < 16; i++) {
-        const auto model = CPopulation::m_CarGroups[i][CGeneral::GetRandomNumberInRange(0, CPopulation::m_nNumCarsInGroup[i])];
-        if (!CStreaming::IsModelLoaded(model))
+    for (auto i = 0; i < 16; i++) { // TODO: Why 16?
+        const auto numCarsInGroup = CPopulation::m_nNumCarsInGroup[i];
+#ifdef FIX_BUGS
+        if (!numCarsInGroup) {
+            continue;
+        }
+#endif
+        const auto model = CPopulation::m_CarGroups[i][CGeneral::GetRandomNumberInRange(numCarsInGroup)];
+        if (!CStreaming::IsModelLoaded(model)) {
             return model;
+        }
     }
     return -1;
 }
