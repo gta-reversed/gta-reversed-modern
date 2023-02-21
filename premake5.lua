@@ -65,7 +65,8 @@ solution "gta_reversed"
         staticruntime("On"),
         "NoImportLib",
         rtti ("Off"),
-        "NoBufferSecurityCheck"
+        "NoBufferSecurityCheck",
+        "FatalWarnings"
     }
     defines { "_CRT_SECURE_NO_WARNINGS", "_SCL_SECURE_NO_WARNINGS"}
 
