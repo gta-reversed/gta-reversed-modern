@@ -32,7 +32,7 @@ public:
 public:
     static constexpr auto Type = TASK_COMPLEX_KILL_PED_ON_FOOT;
 
-    CTaskComplexKillPedOnFoot(CPed* target, int32 time, int32 pedFlags, int32 delay, int32 chance, int8 a7);
+    CTaskComplexKillPedOnFoot(CPed* target, int32 time = -1, int32 pedFlags = 0, int32 delay = 0, int32 chance = 0, int8 a7 = true);
     ~CTaskComplexKillPedOnFoot() override;
 
     eTaskType GetTaskType() override { return Type; }
