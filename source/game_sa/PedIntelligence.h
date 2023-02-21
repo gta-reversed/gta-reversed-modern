@@ -148,6 +148,7 @@ public:
         return false;
     }
 
+    CEventHandler&   GetEventHandler() { return m_eventHandler; }
     CEventScanner&   GetEventScanner()    { return m_eventScanner; }
     CPedScanner&     GetPedScanner()      { return m_pedScanner; }
     CVehicleScanner& GetVehicleScanner()  { return m_vehicleScanner; }
