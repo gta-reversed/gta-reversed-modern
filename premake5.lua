@@ -37,23 +37,28 @@ solution "gta_reversed"
 	targetdir("bin/" .. "%{cfg.buildcfg}")
     implibdir("bin/" .. "%{cfg.buildcfg}")
     
-    configuration "Debug*"
+    filter "configurations:Debug*"
         flags { symbols ("On") }
         -- buildoptions {"/MDd"}
         staticruntime "off"
         runtime "Debug"
-    configuration "Release*"
+    filter "configurations:Release*"
         defines { "NDEBUG" }
         flags { symbols ("On") }
         -- buildoptions {"/MD"}
         staticruntime "off"
         runtime "Release"
         optimize "Full"
-    configuration "vs*"
+    filter "action:vs*"
         flags {"MultiProcessorCompile"}
         linkoptions   { "/ignore:4099,4251,4275" }
         buildoptions {"/EHsc", "/Zc:preprocessor", "/bigobj"}
         disablewarnings { 26812, 26495, 4099, 4251, 4275 }
+
+    filter "files:libs/**"
+        warnings "Off"
+
+    filter {}
 
     flags {
         characterset ("MBCS"), --fix strings
@@ -77,7 +82,6 @@ group "Dependencies"
         language "C++"
         kind "StaticLib"
         targetname "ogg"
-        warnings "Off"
         files {
             "libs/ogg/**.h",
             "libs/ogg/**.c"
@@ -93,7 +97,6 @@ group "Dependencies"
         language "C++"
         kind "StaticLib"
         targetname "vorbis"
-        warnings "Off"
 
         local filePaths = {
             "backends.h", "bitrate.h", "codebook.h", "codec_internal.h", "envelope.h", "highlevel.h", "lookup.h", "lookup_data.h", "lpc.h", "lsp.h", "masking.h", "mdct.h", "misc.h", "os.h", "psy.h", "registry.h", "scales.h", "smallft.h", "window.h",
@@ -125,7 +128,6 @@ group "Dependencies"
         kind "StaticLib"
         targetname "vorbisfile"   
         files { "libs/vorbis/lib/vorbisfile.c", "/libs/vorbis/win32/vorbisfile.def" }
-        warnings "Off"
 
     project "imgui"
         vpaths {
@@ -137,7 +139,6 @@ group "Dependencies"
         language "C++"
         kind "StaticLib"
         targetname "imgui" 
-        warnings "Off"
 
         local filePaths = {
             "imconfig.h", "imgui.h", "imgui_internal.h", "imstb_rectpack.h", "imstb_textedit.h", "imstb_truetype.h", 
