@@ -362,7 +362,7 @@ void CPathFind::AddDynamicLinkBetween2Nodes_For1Node(CNodeAddress first, CNodeAd
     auto numAddresses = m_anNumAddresses[first.m_wAreaId];
 
     uint32 firstLinkId;
-    if (firstPathInfo.m_wBaseLinkId >= numAddresses)
+    if (static_cast<uint32>(firstPathInfo.m_wBaseLinkId) >= numAddresses)
         firstLinkId = firstPathInfo.m_wBaseLinkId;
     else {
         auto* nodeLink = &m_pNodeLinks[first.m_wAreaId][numAddresses];

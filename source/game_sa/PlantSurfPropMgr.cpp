@@ -122,25 +122,25 @@ bool CPlantSurfPropMgr::LoadPlantsDat(const char* filename) {
                 plant->color.a = atoi(surfaceName);
                 break;
             case ePlantField::SCALE_XY:
-                plant->scale_xy = atof(surfaceName);
+                plant->scale_xy = static_cast<float>(atof(surfaceName));
                 break;
             case ePlantField::SCALE_Z:
-                plant->scale_z = atof(surfaceName);
+                plant->scale_z = static_cast<float>(atof(surfaceName));
                 break;
             case ePlantField::SCALE_VARIATION_XY:
-                plant->scale_variation_xy = atof(surfaceName);
+                plant->scale_variation_xy = static_cast<float>(atof(surfaceName));
                 break;
             case ePlantField::SCALE_VARIATION_Z:
-                plant->scale_variation_z = atof(surfaceName);
+                plant->scale_variation_z = static_cast<float>(atof(surfaceName));
                 break;
             case ePlantField::WIND_BENDING_SCALE:
-                plant->wind_blending_scale = atof(surfaceName);
+                plant->wind_blending_scale = static_cast<float>(atof(surfaceName));
                 break;
             case ePlantField::WIND_BENDING_VARIATION:
-                plant->wind_blending_variation = atof(surfaceName);
+                plant->wind_blending_variation = static_cast<float>(atof(surfaceName));
                 break;
             case ePlantField::DENSITY:
-                plant->density = atof(surfaceName);
+                plant->density = static_cast<float>(atof(surfaceName));
                 break;
             default:
                 break;

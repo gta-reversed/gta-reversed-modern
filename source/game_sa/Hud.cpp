@@ -1496,7 +1496,7 @@ inline void CHud::DrawMoney(const CPlayerInfo& playerInfo, uint8 alpha) {
 inline void CHud::DrawWeapon(CPlayerPed* ped0, CPlayerPed* ped1) {
     const auto magic = SCREEN_WIDTH * 0.17343046f; // todo: magic
     if (m_WeaponState) {
-        DrawWeaponIcon(ped0, SCREEN_WIDTH - (SCREEN_STRETCH_X(32.0f) + magic), (int32)SCREEN_STRETCH_Y(20.0f), (float)m_WeaponFadeTimer);
+        DrawWeaponIcon(ped0, (int32)(SCREEN_WIDTH - (SCREEN_STRETCH_X(32.0f) + magic)), (int32)SCREEN_STRETCH_Y(20.0f), (float)m_WeaponFadeTimer);
         if (ped1) {
             const auto posX = (int32)(SCREEN_WIDTH - (SCREEN_STRETCH_X(32.0f) + 111.0f));
             const auto posY = (int32)GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(138.0f), 12);

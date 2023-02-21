@@ -64,8 +64,8 @@ CBoat::CBoat(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy
 
     m_pHandlingData = gHandlingDataMgr.GetVehiclePointer(mi->m_nHandlingId);
     m_nHandlingFlagsIntValue = m_pHandlingData->m_nHandlingFlags;
-    m_pFlyingHandlingData = gHandlingDataMgr.GetFlyingPointer(mi->m_nHandlingId);
-    m_pBoatHandling = gHandlingDataMgr.GetBoatPointer(mi->m_nHandlingId);
+    m_pFlyingHandlingData = gHandlingDataMgr.GetFlyingPointer(static_cast<uint8>(mi->m_nHandlingId));
+    m_pBoatHandling = gHandlingDataMgr.GetBoatPointer(static_cast<uint8>(mi->m_nHandlingId));
 
     mi->ChooseVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor, 1);
 

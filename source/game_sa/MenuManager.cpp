@@ -673,7 +673,7 @@ void CMenuManager::LoadSettings() {
     CCamera::m_bUseMouse3rdPerson = m_nController == 0;
     CRenderer::ms_lodDistScale = m_fDrawDistance;
     g_fx.SetFxQuality(fxQuality);
-    SetBrightness(m_PrefsBrightness, true);
+    SetBrightness(static_cast<float>(m_PrefsBrightness), true);
     m_nPrefsAntialiasing = m_nDisplayAntialiasing;
     m_bDoVideoModeUpdate = true;
     AudioEngine.SetMusicMasterVolume(m_nRadioVolume);

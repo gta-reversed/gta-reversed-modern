@@ -38,10 +38,12 @@ typedef uint8     bool8;
 typedef uint16    bool16;
 typedef uint32    bool32;
 
-#if __has_builtin(__builtin_unreachable)
+#if (defined(__GNUC__) || defined(__GNUG__) || defined(__clang__))
 #define UNREACHABLE_INTRINSIC(...) __builtin_unreachable()
-#else
+#elif (defined(_MSC_VER))
 #define UNREACHABLE_INTRINSIC(...) __assume(false)
+#else
+#define UNREACHABLE_INTRINSIC(...) assert(false)
 #endif
 
 // Use the `NOTSA_UNREACHABLE` macro for unreachable code paths.
@@ -120,6 +122,21 @@ template<typename... Ts>
 template<typename T, uintptr Addr>
 T& StaticRef() {
     return *reinterpret_cast<T*>(Addr);
+}
+
+/*!
+ * @brief Used for convert pointer values to integers (i.e. used mostly in RW code)
+ *
+ * @tparam T   The type of the return value.
+ * @param  ptr Pointer value to be converted
+ */
+template <typename T> requires std::is_integral_v<T>
+T pointer_to_int(void* ptr) {
+    union {
+        void* p;
+        T val;
+    } conv{.p = ptr};
+    return conv.val;
 }
 
 #define _IGNORED_

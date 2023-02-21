@@ -27,7 +27,7 @@ void CLines::RenderLineWithClipping(float startX, float startY, float startZ, fl
     auto numVerts = (uint32)std::min(iters, 7.0f);
     if (numVerts > 0) {
         // todo:
-        for (auto i = 0; i < numVerts; i++) {
+        for (auto i = 0u; i < numVerts; i++) {
             // todo:
         }
     }

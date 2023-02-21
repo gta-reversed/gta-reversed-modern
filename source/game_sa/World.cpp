@@ -942,8 +942,8 @@ void CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& ptrLi
         entity->SetCurrentScanCode();
 
         CColSphere sphere{
-            entity->GetColModel()->GetBoundRadius(),
-            Multiply3x3(entity->GetPosition() - point, transform)
+            Multiply3x3(entity->GetPosition() - point, transform),
+            entity->GetColModel()->GetBoundRadius()
         };
         if (CCollision::TestSphereBox(sphere, box)) {
             if (*outCount < maxCount) {

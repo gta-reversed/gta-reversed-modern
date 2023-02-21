@@ -2549,7 +2549,7 @@ RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* atomic, void* data)
 
 RpMaterial* CEntity::SetMaterialAlphaCB(RpMaterial* material, void* data)
 {
-    material->color.alpha = (RwUInt8)data;
+    RpMaterialGetColor(material)->alpha = pointer_to_int<RwUInt8>(data);
     return material;
 }
 

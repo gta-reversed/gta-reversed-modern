@@ -1102,13 +1102,13 @@ RpAtomic* CVehicleModelInfo::SetAtomicRendererCB_Train(RpAtomic* atomic, void* d
 
 RwObject* CVehicleModelInfo::SetAtomicFlagCB(RwObject* object, void* data)
 {
-    CVisibilityPlugins::SetAtomicFlag(reinterpret_cast<RpAtomic*>(object), (uint16)data);
+    CVisibilityPlugins::SetAtomicFlag(reinterpret_cast<RpAtomic*>(object), pointer_to_int<uint16>(data));
     return object;
 }
 
 RwObject* CVehicleModelInfo::ClearAtomicFlagCB(RwObject* object, void* data)
 {
-    CVisibilityPlugins::ClearAtomicFlag(reinterpret_cast<RpAtomic*>(object), (uint16)data);
+    CVisibilityPlugins::ClearAtomicFlag(reinterpret_cast<RpAtomic*>(object), pointer_to_int<uint16>(data));
     return object;
 }
 
@@ -1165,7 +1165,7 @@ RpMaterial* CVehicleModelInfo::GetMatFXEffectMaterialCB(RpMaterial* material, vo
 
 RpMaterial* CVehicleModelInfo::SetEnvironmentMapCB(RpMaterial* material, void* data)
 {
-    if ((uint16)data == 0xFFFF) {
+    if (pointer_to_int<uint16>(data) == 0xFFFF) {
         return DisableMatFx(material, data);
     }
 
@@ -1546,7 +1546,7 @@ tHandlingData& CVehicleModelInfo::GetHandlingData() const {
 }
 
 tFlyingHandlingData& CVehicleModelInfo::GetFlyingHandlingData() const {
-    return *gHandlingDataMgr.GetFlyingPointer(m_nHandlingId);
+    return *gHandlingDataMgr.GetFlyingPointer(static_cast<uint8>(m_nHandlingId));
 }
 
 void CVehicleModelInfo::CLinkedUpgradeList::AddUpgradeLink(int16 upgrade1, int16 upgrade2)

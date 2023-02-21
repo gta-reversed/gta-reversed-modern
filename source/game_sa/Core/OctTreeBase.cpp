@@ -70,7 +70,8 @@ bool COctTreeBase::Insert(uint8 red, uint8 green, uint8 blue) {
 void COctTreeBase::ReduceBranches(int32 newBranchesCount) {
     const int32 branchesToCount = m_bHasTransparentPixels ? newBranchesCount + 1 : newBranchesCount;
 
-    while (m_nNumBranches < branchesToCount) {
+    assert(m_nNumBranches < static_cast<uint32>(std::numeric_limits<int32>::max())); // Signed-unsigned conversion check
+    while (static_cast<int32>(m_nNumBranches) < branchesToCount) {
         Reduce();
     }
 }

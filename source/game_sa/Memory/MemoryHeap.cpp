@@ -85,7 +85,7 @@ void CMemoryHeap::Shutdown() {
 
 // 0x72EB10
 void CMemoryHeap::RegisterFree(HeapFreeBlockDesc* desc) {
-    m_nMemUsed += -sizeof(HeapBlockDesc) - desc->m_nSize;
+    m_nMemUsed -= desc->m_nSize + sizeof(HeapBlockDesc);
 }
 
 // 0x72EAF0

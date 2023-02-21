@@ -332,7 +332,7 @@ RpAtomic* CCustomRoadsignMgr::RenderRoadsignAtomic(RpAtomic* atomic, const CVect
 
 RpMaterial* RoadsignSetMaterialAlphaCB(RpMaterial* material, void* data)
 {
-    RpMaterialGetColor(material)->alpha = (RwUInt8)data;
+    RpMaterialGetColor(material)->alpha = pointer_to_int<RwUInt8>(data);
     return material;
 }
 
