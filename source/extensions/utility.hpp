@@ -30,6 +30,14 @@ private:
     Fn m_fn;
 };
 
+constexpr auto IsFixBugs() {
+#ifdef FIX_BUGS
+    return true;
+#else
+    return false;
+#endif
+}
+
 template<rng::input_range R, typename T_Ptr = rng::range_value_t<R>>
     requires std::is_pointer_v<T_Ptr> 
 auto SpatialQuery(R&& r, CVector distToPos, T_Ptr ignored, T_Ptr closest = nullptr) {
