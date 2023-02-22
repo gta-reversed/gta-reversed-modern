@@ -281,14 +281,14 @@ void TeleportDebugModule::Settings_ReadLine(ImGuiContext* ctx, ImGuiSettingsHand
         int findGround{1};
 
         // [^\t\n] -> https://stackoverflow.com/questions/2854488
-        if (std::sscanf(line, "%f, %f, %f, %d, %d, %[^\t\n]", &pos.x, &pos.y, &pos.z, &area, &findGround, name) == 6) {
+        if (sscanf_s(line, "%f, %f, %f, %d, %d, %[^\t\n]", &pos.x, &pos.y, &pos.z, &area, &findGround, SSCANF_S_STR(name)) == 6) {
             self->s_SavedLocations.emplace_back(name, pos, static_cast<eAreaCodes>(area), static_cast<bool>(findGround));
         } else if (line[0] && line[0] != '\n') { // Report failed reads on non-empty lines only
             std::cerr << "Failed to load saved location from ini: `" << line << "`\n";
         }
     } break;
     case 1: {
-        if (std::sscanf(line, "%f, %f, %f, %[^\t\n]", &pos.x, &pos.y, &pos.z, name) == 4) {
+        if (sscanf_s(line, "%f, %f, %f, %[^\t\n]", &pos.x, &pos.y, &pos.z, SSCANF_S_STR(name)) == 4) {
             self->s_SavedLocations.emplace_back(name, pos);
         } else if (line[0] && line[0] != '\n') {
             std::cerr << "Failed to load saved location from ini: `" << line << "`\n";
@@ -369,7 +369,7 @@ void* ReadOpen(ImGuiContext* ctx, ImGuiSettingsHandler* handler, const char* nam
     UNUSED(handler);
 
     int version{2};
-    VERIFY(std::sscanf(name, "Version %d", &version) == 1);
+    VERIFY(sscanf_s(name, "Version %d", &version) == 1);
     return (void*)version; // Has to return a non-null value, otherwise `ReadLine` won't be called
 }
 

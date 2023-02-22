@@ -46,7 +46,7 @@ void CPedType::LoadPedData() {
             continue;
 
         char buf[32];
-        VERIFY(sscanf(line, "%31s", buf) == 1); // FIX_BUGS: Sized string read
+        VERIFY(sscanf_s(line, "%s", SSCANF_S_STR(buf)) == 1);
 
         const auto GetAcquaintance = [=]() -> uint32 {
             uint32 value = 0;
@@ -57,19 +57,20 @@ void CPedType::LoadPedData() {
             return value;
         };
 
-        if (std::string_view{buf, 4u} == "Hate")
+        using namespace std::string_view_literals;
+        if (buf == "Hate"sv)
         {
             GetPedTypeAcquaintances(pedType).m_nHate = GetAcquaintance();
         }
-        else if (std::string_view{buf, 7u} == "Dislike")
+        else if (buf == "Dislike"sv)
         {
             GetPedTypeAcquaintances(pedType).m_nDislike = GetAcquaintance();
         }
-        else if (std::string_view{buf, 4u} == "Like")
+        else if (buf == "Like"sv)
         {
             GetPedTypeAcquaintances(pedType).m_nLike = GetAcquaintance();
         }
-        else if (std::string_view{buf, 7u} == "Respect")
+        else if (buf == "Respect"sv)
         {
             GetPedTypeAcquaintances(pedType).m_nRespect = GetAcquaintance();
         }

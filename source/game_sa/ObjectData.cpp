@@ -57,13 +57,16 @@ void CObjectData::Initialise(const char* fileName)
         if (line[0] == '*')
             break;
 
+        if (line[0] == '#') // NOTSA: Skip comments so we can use a sanity check for sscanf.
+            continue;
+
         auto& curInfo = CObjectData::GetAtIndex(iFirstFreeInd);
         memset(&curInfo, 0, sizeof(CObjectData));
         char modelName[256], effectName[256];
         float fPercentSubmerged;
         int32 iColDamEffect, iSpecialColResp, iCameraAvoid, iCausesExplosion, iFxType; // Have to be read as 32-bit integers and later assigned to 8 bit int32
-        RET_IGNORED(sscanf(line, "%255s %f %f %f %f %f %f %f %d %d %d %d %d %f %f %f %255s %f %f %f %f %f %d %d", // FIX_BUGS: Sized string read
-            modelName,
+        VERIFY(sscanf_s(line, "%s %f %f %f %f %f %f %f %d %d %d %d %d %f %f %f %s %f %f %f %f %f %d %d", // FIX_BUGS: Sized string read
+            SSCANF_S_STR(modelName),
             &curInfo.m_fMass,
             &curInfo.m_fTurnMass,
             &curInfo.m_fAirResistance,
@@ -76,17 +79,18 @@ void CObjectData::Initialise(const char* fileName)
             &iCameraAvoid,
             &iCausesExplosion,
             &iFxType,
-            &curInfo.m_vFxOffset.x,
-            &curInfo.m_vFxOffset.y,
-            &curInfo.m_vFxOffset.z,
-            effectName,
-            &curInfo.m_fSmashMultiplier,
-            &curInfo.m_vecBreakVelocity.x,
-            &curInfo.m_vecBreakVelocity.y,
-            &curInfo.m_vecBreakVelocity.z,
-            &curInfo.m_fBreakVelocityRand,
-            &curInfo.m_nGunBreakMode,
-            &curInfo.m_nSparksOnImpact));
+            &curInfo.m_vFxOffset.x,        // optional
+            &curInfo.m_vFxOffset.y,        // optional
+            &curInfo.m_vFxOffset.z,        // optional
+            SSCANF_S_STR(effectName),      // optional
+            &curInfo.m_fSmashMultiplier,   // optional (Breakable Info)
+            &curInfo.m_vecBreakVelocity.x, // optional (Breakable Info)
+            &curInfo.m_vecBreakVelocity.y, // optional (Breakable Info)
+            &curInfo.m_vecBreakVelocity.z, // optional (Breakable Info)
+            &curInfo.m_fBreakVelocityRand, // optional (Breakable Info)
+            &curInfo.m_nGunBreakMode,      // optional (Breakable Info)
+            &curInfo.m_nSparksOnImpact     // optional (Breakable Info)
+        ) >= 13);
 
         curInfo.m_pFxSystemBP = nullptr;
         curInfo.m_nFxType = iFxType;

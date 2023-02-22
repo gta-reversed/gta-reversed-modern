@@ -60,7 +60,7 @@ void CPopCycle::Initialise() {
                 // But until then we're stuck with this hardcoded version.
 
                 auto& percs = m_nPercTypeGroup[daytime][wktime][zone];
-                const auto nread = sscanf(
+                const auto nread = sscanf_s(
                     l,
                     "%hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu %hhu",
 

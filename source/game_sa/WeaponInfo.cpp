@@ -170,14 +170,14 @@ void CWeaponInfo::LoadWeaponData() {
             float speed{}, radius{};
             float lifespan{}, spread{};
 
-            VERIFY(sscanf(line,
-                "%*s %31s %31s %f %f %d %d %d %31s %d %d %f %f %f %d %d %f %f %d %d %d %d %d %d %d %x %f %f %f %f",
-                weaponName,
-                fireTypeName,
+            VERIFY(sscanf_s(line,
+                "%*s %s %s %f %f %d %d %d %s %d %d %f %f %f %d %d %f %f %d %d %d %d %d %d %d %x %f %f %f %f",
+                SSCANF_S_STR(weaponName),
+                SSCANF_S_STR(fireTypeName),
                 &targetRange, &weaponRange,
                 &modelId1, &modelId2,
                 &slot,
-                animGrpName,
+                SSCANF_S_STR(animGrpName),
                 &ammo,
                 &dmg,
                 &offset.x, &offset.y, &offset.z,
@@ -253,7 +253,7 @@ void CWeaponInfo::LoadWeaponData() {
             uint32 RLoadA{}, RLoadB{};
             uint32 crouchRLoadA{}, crouchRLoadB{};
 
-            VERIFY(sscanf(line, "%*s %31s %f %f %f %f %d %d %d %d", stealthAnimGrp, &aimX, &aimZ, &duckX, &duckZ, &RLoadA, &RLoadB, &crouchRLoadA, &crouchRLoadB) == 9);
+            VERIFY(sscanf_s(line, "%*s %s %f %f %f %f %d %d %d %d", SSCANF_S_STR(stealthAnimGrp), &aimX, &aimZ, &duckX, &duckZ, &RLoadA, &RLoadB, &crouchRLoadA, &crouchRLoadB) == 9);
 
             g_GunAimingOffsets[CAnimManager::GetAnimationGroupId(stealthAnimGrp) - ANIM_GROUP_PYTHON] = {
                 .AimX = aimX,
@@ -282,19 +282,19 @@ void CWeaponInfo::LoadWeaponData() {
             uint32 flags{};
             char stealthAnimGrpName[32]{};
 
-            VERIFY(sscanf(line,
-                "%*s %31s %31s %f %f %d %d %d %31s %d %x %31s",
-                weaponName,
-                fireTypeName,
+            VERIFY(sscanf_s(line,
+                "%*s %s %s %f %f %d %d %d %s %d %x %s",
+                SSCANF_S_STR(weaponName),
+                SSCANF_S_STR(fireTypeName),
                 &targetRange,
                 &weaponRange,
                 &modelId1,
                 &modelId2,
                 &slot,
-                baseComboName,
+                SSCANF_S_STR(baseComboName),
                 &numCombos,
                 &flags,
-                stealthAnimGrpName
+                SSCANF_S_STR(stealthAnimGrpName)
             ) == 11);
 
             auto wType = FindWeaponType(weaponName);

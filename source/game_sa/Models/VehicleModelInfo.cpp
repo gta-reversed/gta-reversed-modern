@@ -1327,13 +1327,13 @@ void CVehicleModelInfo::LoadVehicleColours()
 
         if (iLastMode == eCarColLineType::GLOBAL_RGB) {
             uint32 red{}, green{}, blue{};
-            const auto read = sscanf(buffer, "%d %d %d", &red, &green, &blue);
+            const auto read = sscanf_s(buffer, "%d %d %d", &red, &green, &blue);
 #ifdef FIX_BUGS
             if (read != 3) {
                 // there is a typo in carcols.dat:
                 // "77.93,96			# 98 malachite poly			blue"
                 //    ^~~ should've be a comma.
-                VERIFY(sscanf(buffer, "%d.%d %d", &red, &green, &blue) == 3);
+                VERIFY(sscanf_s(buffer, "%d.%d %d", &red, &green, &blue) == 3);
             }
 #endif
             curColor->Set(red, green, blue, 255);
@@ -1349,8 +1349,8 @@ void CVehicleModelInfo::LoadVehicleColours()
         if (iLastMode == eCarColLineType::CAR_2COL)
         {
             char modelName[64];
-            auto iNumRead = sscanf(buffer, "%63s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", // FIX_BUGS: Sized string read
-                modelName,
+            auto iNumRead = sscanf_s(buffer, "%s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+                SSCANF_S_STR(modelName),
                 &colorBuffer[0][0],
                 &colorBuffer[0][1],
                 &colorBuffer[1][0],
@@ -1385,8 +1385,8 @@ void CVehicleModelInfo::LoadVehicleColours()
 
         if (iLastMode == eCarColLineType::CAR_4COL) {
             char modelName[64];
-            auto iNumRead = sscanf(buffer, "%63s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", // FIX_BUGS: Sized string read
-                modelName,
+            auto iNumRead = sscanf_s(buffer, "%s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+                SSCANF_S_STR(modelName),
                 &colorBuffer[0][0],
                 &colorBuffer[0][1],
                 &colorBuffer[0][2],
@@ -1516,7 +1516,7 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
 
         case eCarModsLineType::WHEEL: {
             int32 iModelId = -1, iWheelSet;
-            VERIFY(sscanf(line, "%d", &iWheelSet) == 1);
+            VERIFY(sscanf_s(line, "%d", &iWheelSet) == 1);
             RET_IGNORED(strtok(line, " \t,"));
             char* token;
             while ((token = strtok(nullptr, " \t,"))) {

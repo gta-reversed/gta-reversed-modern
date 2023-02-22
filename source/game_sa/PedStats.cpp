@@ -62,10 +62,10 @@ void CPedStats::LoadPedStats() {
         int32 shootingRate;
         int32 defaultDecisionMaker;
 
-        VERIFY(sscanf(
+        VERIFY(sscanf_s(
             line,
-            "%23s %f %f %d %d %d %d %f %f %d %d", // FIX_BUGS: Sized string read
-            name,
+            "%s %f %f %d %d %d %d %f %f %d %d",
+            SSCANF_S_STR(name),
             &fleeDistance,
             &headingChangeRate,
             &fear,

@@ -25,11 +25,11 @@ void CGridRef::Init() {
         if (*line == '#' || !*line)
             continue;
 
-        uint8 x = 0;
+        char x_ch = 0;
         int32 y = 0;
-        VERIFY(sscanf(line, "%c%d %31s", &x, &y, str) == 3); // FIX_BUGS: Sized string read
+        VERIFY(sscanf_s(line, "%c%d %s", &x_ch, 1u, &y, SSCANF_S_STR(str)) == 3);
         auto lowstr = _strlwr(str);
-        x -= 65; // - 'A'
+        int8 x = x_ch - 'A'; // Get alphabetical index
         y -= 1;
         assert(x >= 0 && y >= 0);
         strcpy(&GridRefList[x][y][0], lowstr);

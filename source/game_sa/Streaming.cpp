@@ -1231,7 +1231,7 @@ void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId)
 
         } else if (ExtensionIs("DAT")) {
             // Extract nodes file sector from name (Remember the format: `nodesXX.dat` where XX is the id)
-            VERIFY(sscanf(&entry.m_szName[sizeof("nodes") - 1], "%d", &modelId) == 1);
+            VERIFY(sscanf_s(&entry.m_szName[sizeof("nodes") - 1], "%d", &modelId) == 1);
             modelId += RESOURCE_ID_DAT;
 
         } else if (ExtensionIs("IFP")) {

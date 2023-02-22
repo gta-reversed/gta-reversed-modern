@@ -62,10 +62,10 @@ void ProcObjectMan_c::LoadDataFile() {
         int32 align;
         int32 useGrid;
 
-        VERIFY(sscanf(
-            line, "%63s %63s %f %f %d %d %f %f %f %f %f %f %d %d", // FIX_BUGS: Sized string read
-            surfaceType,
-            objectName,
+        VERIFY(sscanf_s(
+            line, "%s %s %f %f %d %d %f %f %f %f %f %f %d %d",
+            SSCANF_S_STR(surfaceType),
+            SSCANF_S_STR(objectName),
             &spacing,
             &minDist,
             &minRot, &maxRot,

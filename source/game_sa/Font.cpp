@@ -104,24 +104,24 @@ void CFont::LoadFontValues() {
         if (*line == '\0' || *line == '#')
             continue;
 
-        if (sscanf(line, "%31s", attrib) == EOF) // FIX_BUGS: buffer overflow
+        if (sscanf_s(line, "%s", SSCANF_S_STR(attrib)) == EOF)
             continue;
 
         if (!memcmp(attrib, "[TOTAL_FONTS]", 14)) {
             auto nextLine = CFileLoader::LoadLine(file);
 
-            VERIFY(sscanf(nextLine, "%d", &totalFonts) == 1);
+            VERIFY(sscanf_s(nextLine, "%d", &totalFonts) == 1);
         }
         else if (!memcmp(attrib, "[FONT_ID]", 10)) {
             auto nextLine = CFileLoader::LoadLine(file);
 
-            VERIFY(sscanf(nextLine, "%d", &fontId) == 1);
+            VERIFY(sscanf_s(nextLine, "%d", &fontId) == 1);
         }
         else if (!memcmp(attrib, "[REPLACEMENT_SPACE_CHAR]", 25)) {
             auto nextLine = CFileLoader::LoadLine(file);
             uint8 spaceValue;
 
-            VERIFY(sscanf(nextLine, "%hhu", &spaceValue) == 1);
+            VERIFY(sscanf_s(nextLine, "%hhu", &spaceValue) == 1);
             gFontData[fontId].m_spaceValue = spaceValue;
         }
         else if (!memcmp(attrib, "[PROP]", 7)) {
@@ -129,7 +129,7 @@ void CFont::LoadFontValues() {
                 auto nextLine = CFileLoader::LoadLine(file);
                 int32 propValues[8]{};
 
-                VERIFY(sscanf(nextLine, "%d  %d  %d  %d  %d  %d  %d  %d",
+                VERIFY(sscanf_s(nextLine, "%d  %d  %d  %d  %d  %d  %d  %d",
                     &propValues[0], &propValues[1], &propValues[2], &propValues[3],
                     &propValues[4], &propValues[5], &propValues[6], &propValues[7]
                 ) == 8);
@@ -143,7 +143,7 @@ void CFont::LoadFontValues() {
             auto nextLine = CFileLoader::LoadLine(file);
             uint32 unpropValue;
 
-            VERIFY(sscanf(nextLine, "%d", &unpropValue) == 1);
+            VERIFY(sscanf_s(nextLine, "%d", &unpropValue) == 1);
             gFontData[fontId].m_unpropValue = unpropValue;
         }
     }
