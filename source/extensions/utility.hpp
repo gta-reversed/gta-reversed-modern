@@ -15,10 +15,13 @@ namespace notsa {
 //    TChar m_chars[N]{};
 //};
 
-template<typename... Ts>
-auto il(Ts... ts) {
-    return std::initializer_list{ std::forward<Ts>(ts)... };
-}
+/*
+* Want to know something funny?
+* `std::initializer_list` is just a proxy object for a stack allocated array.
+* So, if you return one from a function you're dommed to be fucked :)
+* And best thing, it does allow copying, it has a fucking copy constructor for whatever reason
+* Lesson: Don't return `initializer_list`'s from functions
+*/
 
 /*!
 * @brief Call the given function on object destruction.
@@ -91,6 +94,14 @@ template<rng::input_range R, class T, class Proj = std::identity>
     requires std::indirect_binary_predicate<rng::equal_to, std::projected<rng::iterator_t<R>, Proj>, const T*>
 bool contains(R&& r, const T& value, Proj proj = {}) {
     return rng::find(r, value, proj) != rng::end(r);
+}
+
+/*!
+* Helper (Of your fingers) - Reduces typing needed for Python style `value in {}`
+*/
+template<typename Y, typename T>
+bool contains(std::initializer_list<Y> r, const T& value) {
+    return contains(r, value, {});
 }
 
 /*!
