@@ -611,6 +611,13 @@ public:
     eWeaponSlot GiveWeapon(const CWeapon& weapon, bool likeUnused) {
         return GiveWeapon(weapon.m_nType, weapon.m_nTotalAmmo, likeUnused);
     }
+
+    /*!
+    * @notsa
+    * Can this ped be ever considered as a criminal
+    */
+    bool CanBeCriminal() const;
+
 private:
     void RenderThinBody() const;
     void RenderBigHead() const;
