@@ -62,9 +62,9 @@ void CPedStats::LoadPedStats() {
         int32 shootingRate;
         int32 defaultDecisionMaker;
 
-        const auto read = sscanf(
+        VERIFY(sscanf(
             line,
-            "%23s %f %f %d %d %d %d %f %f %d %d",
+            "%23s %f %f %d %d %d %d %f %f %d %d", // FIX_BUGS: Sized string read
             name,
             &fleeDistance,
             &headingChangeRate,
@@ -76,8 +76,7 @@ void CPedStats::LoadPedStats() {
             &defendWeakness,
             &shootingRate,
             &defaultDecisionMaker
-        );
-        VERIFY(read == 11);
+        ) == 11);
 
         ms_apPedStats[statIndex].m_nId = statIndex;
         rng::copy(name, ms_apPedStats[statIndex].m_acName);

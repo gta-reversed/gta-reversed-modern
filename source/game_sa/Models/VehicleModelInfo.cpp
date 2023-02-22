@@ -1326,8 +1326,16 @@ void CVehicleModelInfo::LoadVehicleColours()
         }
 
         if (iLastMode == eCarColLineType::GLOBAL_RGB) {
-            uint32 red, green, blue;
-            (void)sscanf(buffer, "%d %d %d", &red, &green, &blue);
+            uint32 red{}, green{}, blue{};
+            const auto read = sscanf(buffer, "%d %d %d", &red, &green, &blue);
+#ifdef FIX_BUGS
+            if (read != 3) {
+                // there is a typo in carcols.dat:
+                // "77.93,96			# 98 malachite poly			blue"
+                //    ^~~ should've be a comma.
+                VERIFY(sscanf(buffer, "%d.%d %d", &red, &green, &blue) == 3);
+            }
+#endif
             curColor->Set(red, green, blue, 255);
             auto pLineEnd = pLineStart;
             while (*pLineEnd != '#') // Seems redundant(?)
@@ -1341,7 +1349,7 @@ void CVehicleModelInfo::LoadVehicleColours()
         if (iLastMode == eCarColLineType::CAR_2COL)
         {
             char modelName[64];
-            auto iNumRead = sscanf(buffer, "%s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+            auto iNumRead = sscanf(buffer, "%63s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", // FIX_BUGS: Sized string read
                 modelName,
                 &colorBuffer[0][0],
                 &colorBuffer[0][1],
@@ -1377,7 +1385,7 @@ void CVehicleModelInfo::LoadVehicleColours()
 
         if (iLastMode == eCarColLineType::CAR_4COL) {
             char modelName[64];
-            auto iNumRead = sscanf(buffer, "%s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+            auto iNumRead = sscanf(buffer, "%63s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", // FIX_BUGS: Sized string read
                 modelName,
                 &colorBuffer[0][0],
                 &colorBuffer[0][1],
@@ -1508,8 +1516,8 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
 
         case eCarModsLineType::WHEEL: {
             int32 iModelId = -1, iWheelSet;
-            (void)sscanf(line, "%d", &iWheelSet);
-            (void)strtok(line, " \t,");
+            VERIFY(sscanf(line, "%d", &iWheelSet) == 1);
+            RET_IGNORED(strtok(line, " \t,"));
             char* token;
             while ((token = strtok(nullptr, " \t,"))) {
                 auto wheelMI = static_cast<CAtomicModelInfo*>(CModelInfo::GetModelInfo(token, &iModelId));

@@ -122,7 +122,7 @@ int32 CFileLoader::LoadAnimatedClumpObject(const char* line) {
     float  drawDist{ 2000.f };
     uint32 flags{};
 
-    if (sscanf(line, "%d %s %s %s %f %d", &objID, modelName, txdName, animName, &drawDist, &flags) != 6)
+    if (sscanf(line, "%d %23s %23s %15s %f %d", &objID, modelName, txdName, animName, &drawDist, &flags) != 6) // FIX_BUGS: Sized string read
         return -1;
 
     auto mi = CModelInfo::AddClumpModel(objID);
@@ -249,10 +249,11 @@ void CFileLoader::LoadAudioZone(const char* line) {
     float x2, y2, z2;
     float radius;
 
-    if (sscanf(line, "%s %d %d %f %f %f %f %f %f", name, &id, &enabled, &x1, &y1, &z1, &x2, &y2, &z2) == 9) {
+    // FIX_BUGS: sscanf: Sized string read
+    if (sscanf(line, "%15s %d %d %f %f %f %f %f %f", name, &id, &enabled, &x1, &y1, &z1, &x2, &y2, &z2) == 9) {
         CAudioZones::RegisterAudioBox(name, id, enabled != 0, x1, y1, z1, x2, y2, z2);
     } else {
-        (void)sscanf(line, "%s %d %d %f %f %f %f", name, &id, &enabled, &x1, &y1, &z1, &radius);
+        VERIFY(sscanf(line, "%15s %d %d %f %f %f %f", name, &id, &enabled, &x1, &y1, &z1, &radius) == 7);
         CAudioZones::RegisterAudioSphere(name, id, enabled != 0, x1, y1, z1, radius);
     }
 }
@@ -432,7 +433,7 @@ int32 CFileLoader::LoadClumpObject(const char* line) {
     char  modelName[24];
     char  texName[24];
 
-    if (sscanf(line, "%d %s %s", &objId, modelName, texName) != 3)
+    if (sscanf(line, "%d %23s %23s", &objId, modelName, texName) != 3) // FIX_BUGS: Sized string read
         return MODEL_INVALID;
 
     auto mi = static_cast<CVehicleModelInfo*>(CModelInfo::AddClumpModel(objId));
@@ -899,25 +900,26 @@ int32 CFileLoader::LoadObject(const char* line) {
     float  fDrawDist;
     uint32 nFlags;
 
-    auto iNumRead = sscanf(line, "%d %s %s %f %d", &modelId, modelName, texName, &fDrawDist, &nFlags);
+    // FIX_BUGS: sscanf: Sized string read
+    auto iNumRead = sscanf(line, "%d %23s %23s %f %d", &modelId, modelName, texName, &fDrawDist, &nFlags);
     if (iNumRead != 5 || fDrawDist < 4.0f)
     {
         int32 objType;
         float fDrawDist2_unused, fDrawDist3_unused;
-        iNumRead = sscanf((char*)line, "%d %s %s %d", &modelId, modelName, texName, &objType);
+        iNumRead = sscanf(line, "%d %23s %23s %d", &modelId, modelName, texName, &objType);
         if (iNumRead != 4)
             return -1;
 
         switch (objType)
         {
         case 1:
-            (void)sscanf(line, "%d %s %s %d %f %d", &modelId, modelName, texName, &objType, &fDrawDist, &nFlags);
+            RET_IGNORED(sscanf(line, "%d %23s %23s %d %f %d", &modelId, modelName, texName, &objType, &fDrawDist, &nFlags));
             break;
         case 2:
-            (void)sscanf(line, "%d %s %s %d %f %f %d", &modelId, modelName, texName, &objType, &fDrawDist, &fDrawDist2_unused, &nFlags);
+            RET_IGNORED(sscanf(line, "%d %23s %23s %d %f %f %d", &modelId, modelName, texName, &objType, &fDrawDist, &fDrawDist2_unused, &nFlags));
             break;
         case 3:
-            (void)sscanf(line, "%d %s %s %d %f %f %f %d", &modelId, modelName, texName, &objType, &fDrawDist, &fDrawDist2_unused, &fDrawDist3_unused, &nFlags);
+            RET_IGNORED(sscanf(line, "%d %23s %23s %d %f %f %f %d", &modelId, modelName, texName, &objType, &fDrawDist, &fDrawDist2_unused, &fDrawDist3_unused, &nFlags));
             break;
         }
     }
@@ -1075,9 +1077,9 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
 CEntity* CFileLoader::LoadObjectInstance(const char* line) {
     char modelName[24];
     CFileObjectInstance instance;
-    (void)sscanf(
+    VERIFY(sscanf(
         line,
-        "%d %s %d %f %f %f %f %f %f %f %d",
+        "%d %23s %d %f %f %f %f %f %f %f %d", // FIX_BUGS: Sized string read
         &instance.m_nModelId,
         modelName,
         &instance.m_nInstanceType,
@@ -1089,7 +1091,7 @@ CEntity* CFileLoader::LoadObjectInstance(const char* line) {
         &instance.m_qRotation.imag.z,
         &instance.m_qRotation.real,
         &instance.m_nLodInstanceIndex
-    );
+    ) == 11);
     return LoadObjectInstance(&instance, modelName);
 }
 
@@ -1128,7 +1130,7 @@ void CFileLoader::LoadCullZone(const char* line) {
         return;
     }
 
-    (void)sscanf(
+    VERIFY(sscanf(
         line,
         "%f %f %f %f %f %f %f %f %f %d %d",
         &center.x, &center.y, &center.z,
@@ -1140,7 +1142,7 @@ void CFileLoader::LoadCullZone(const char* line) {
         &zTop,
         &flags,
         &flags2
-    );
+    ) == 11);
     CCullZones::AddCullZone(center, unknown, length, bottom, width, unknown2, zTop, flags);
 }
 
@@ -1159,7 +1161,7 @@ void CFileLoader::LoadEntryExit(const char* line) {
     uint32 skyColor;
     uint32 flags;
 
-    (void)sscanf(
+    VERIFY(sscanf(
         line,
         "%f %f %f %f %f %f %f %f %f %f %f %d %d %s %d %d %d %d",
         &enter.x, &enter.y, &enter.z,
@@ -1175,7 +1177,7 @@ void CFileLoader::LoadEntryExit(const char* line) {
         &numOfPeds,
         &timeOn,
         &timeOff
-    );
+    ) == 18);
 
     auto name = strrchr(interiorName, '"');
     if (name) {
@@ -1248,7 +1250,7 @@ void CFileLoader::LoadGarage(const char* line) {
 
     if (sscanf(
         line,
-        "%f %f %f %f %f %f %f %f %d %d %s",
+        "%f %f %f %f %f %f %f %f %d %d %127s", // FIX_BUGS: Sized string read
         &p1.x, &p1.y, &p1.z,
         &frontX,
         &frontY,
@@ -1390,7 +1392,7 @@ void CFileLoader::LoadOcclusionVolume(const char* line, const char* filename) {
     uint32 nFlags = 0;
     float fCenterX, fCenterY, fBottomZ, fWidth, fLength, fHeight, fRotZ;
 
-    (void)sscanf(line, "%f %f %f %f %f %f %f %f %f %d ", &fCenterX, &fCenterY, &fBottomZ, &fWidth, &fLength, &fHeight, &fRotX, &fRotY, &fRotZ, &nFlags);
+    VERIFY(sscanf(line, "%f %f %f %f %f %f %f %f %f %d ", &fCenterX, &fCenterY, &fBottomZ, &fWidth, &fLength, &fHeight, &fRotX, &fRotY, &fRotZ, &nFlags) == 10);
     auto fCenterZ = fHeight * 0.5F + fBottomZ;
     auto strLen = strlen(filename);
 
@@ -1404,8 +1406,7 @@ void CFileLoader::LoadOcclusionVolume(const char* line, const char* filename) {
 // 0x5B41C0
 int32 CFileLoader::LoadPathHeader(const char* line, int32& outPathType) {
     int32 id;
-    char modelName[32];
-    (void)sscanf(line, "%d %d %s", &outPathType, &id, modelName);
+    VERIFY(sscanf(line, "%d %d %*s", &outPathType, &id) == 2);
     return id;
 }
 
@@ -1428,9 +1429,9 @@ int32 CFileLoader::LoadPedObject(const char* line) {
     char voiceMin[56]{};
     char voiceMax[60]{};
 
-    (void)sscanf(
+    VERIFY(sscanf(
         line,
-        "%d %s %s %s %s %s %x %x %s %d %d %s %s %s",
+        "%d %19s %19s %23s %19s %19s %x %x %11s %d %d %15s %55s %59s", // FIX_BUGS: Sized string read
         &modelId,
         modelName,
         texName,
@@ -1445,7 +1446,7 @@ int32 CFileLoader::LoadPedObject(const char* line) {
         pedVoiceType,
         voiceMin,
         voiceMax
-    );
+    ) == 14);
 
     const auto FindAnimGroup = [animGroup, nAssocGroups = CAnimManager::ms_numAnimAssocDefinitions] {
         for (auto i = 0; i < nAssocGroups; i++) {
@@ -1683,7 +1684,7 @@ void CFileLoader::LoadStuntJump(const char* line) {
 // 0x5B75E0
 int32 CFileLoader::LoadTXDParent(const char* line) {
     char name[32], parentName[32];
-    (void)sscanf(line, "%s %s", name, parentName);
+    VERIFY(sscanf(line, "%31s %31s", name, parentName) == 2); // FIX_BUGS: Sized string read
     auto txdSlot = CTxdStore::FindOrAddTxdSlot(name);
     auto parentSlot = CTxdStore::FindOrAddTxdSlot(parentName);
     CTxdStore::ms_pTxdPool->GetAt(txdSlot)->m_wParentIndex = parentSlot;
@@ -1735,23 +1736,24 @@ int32 CFileLoader::LoadTimeObject(const char* line) {
     int32 timeOn;
     int32 timeOff;
 
-    int32 numValuesRead = sscanf(line, "%d %s %s %f %d %d %d", &modelId, modelName, texName, &drawDistance[0], &flags, &timeOn, &timeOff);
+    // FIX_BUGS: sscanf: Sized string read
+    int32 numValuesRead = sscanf(line, "%d %23s %23s %f %d %d %d", &modelId, modelName, texName, &drawDistance[0], &flags, &timeOn, &timeOff);
 
     if (numValuesRead != 7 || drawDistance[0] < 4.0) {
         int32 numObjs;
 
-        if (sscanf(line, "%d %s %s %d", &modelId, modelName, texName, &numObjs) != 4)
+        if (sscanf(line, "%d %23s %23s %d", &modelId, modelName, texName, &numObjs) != 4)
             return -1;
 
         switch (numObjs) {
         case 1:
-            (void)sscanf(line, "%d %s %s %d %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &flags, &timeOn, &timeOff);
+            VERIFY(sscanf(line, "%d %23s %23s %d %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &flags, &timeOn, &timeOff) == 8);
             break;
         case 2:
-            (void)sscanf(line, "%d %s %s %d %f %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &drawDistance[1], &flags, &timeOn, &timeOff);
+            VERIFY(sscanf(line, "%d %23s %23s %d %f %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &drawDistance[1], &flags, &timeOn, &timeOff) == 9);
             break;
         case 3:
-            (void)sscanf(line, "%d %s %s %d %f %f %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &drawDistance[1], &drawDistance[2], &flags, &timeOn, &timeOff);
+            VERIFY(sscanf(line, "%d %23s %23s %d %f %f %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &drawDistance[1], &drawDistance[2], &flags, &timeOn, &timeOff) == 10);
             break;
         default:
             NOTSA_UNREACHABLE();
@@ -1791,7 +1793,7 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
     float wheelSizeFront{}, wheelSizeRear{};
     int32 wheelUpgradeCls{ -1 };
 
-    (void)sscanf(line, "%d %s %s %s %s %s %s %s %d %d %x %d %f %f %d",
+    VERIFY(sscanf(line, "%d %23s %23s %7s %15s %31s %15s %15s %d %d %x %d %f %f %d", // FIX_BUGS: Sized string read
         &modelId,
         modelName,
         texName,
@@ -1801,13 +1803,13 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
         anims,
         vehCls,
         &frq,
-        &flags,
-        &vehComps.m_nComps,
-        &misc,
-        &wheelSizeFront,
-        &wheelSizeRear,
-        &wheelUpgradeCls
-    );
+        &flags,             // optional
+        &vehComps.m_nComps, // optional
+        &misc,              // optional
+        &wheelSizeFront,    // optional
+        &wheelSizeRear,     // optional
+        &wheelUpgradeCls    // optional
+    ) >= 10);
 
     auto mi = CModelInfo::AddVehicleModel(modelId);
     mi->SetModelName(modelName);
@@ -1924,7 +1926,7 @@ int32 CFileLoader::LoadWeaponObject(const char* line) {
     int32 weaponType;
     float drawDist;
 
-    (void)sscanf(line, "%d %s %s %s %d %f", &objId, modelName, texName, animName, &weaponType, &drawDist);
+    VERIFY(sscanf(line, "%d %23s %23s %15s %d %f", &objId, modelName, texName, animName, &weaponType, &drawDist) == 6);
     CWeaponModelInfo* mi = CModelInfo::AddWeaponModel(objId);
     mi->SetModelName(modelName);
     mi->m_fDrawDistance = drawDist;
@@ -1942,7 +1944,7 @@ void CFileLoader::LoadZone(const char* line) {
     int32 island;
     char  zoneName[12];
 
-    auto iNumRead = sscanf(line, "%s %d %f %f %f %f %f %f %d %s", name, &type, &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &island, zoneName);
+    auto iNumRead = sscanf(line, "%23s %d %f %f %f %f %f %f %d %11s", name, &type, &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &island, zoneName); // FIX_BUGS: Sized string read
     if (iNumRead == 10)
         CTheZones::CreateZone(name, static_cast<eZoneType>(type), min.x, min.y, min.z, max.x, max.y, max.z, static_cast<eLevelName>(island), zoneName);
 }
@@ -2247,7 +2249,7 @@ void CFileLoader::ReloadObjectTypes(const char* arg1) {
 void CFileLoader::ReloadPaths(const char* filename) {
     int32 objModelIndex;
     int32 id;
-    char  unused[4];
+    char  unused[4]{};
 
     bool pathAllocated = false;
     int32 pathEntryIndex = -1;
@@ -2260,7 +2262,7 @@ void CFileLoader::ReloadPaths(const char* filename) {
             if (make_fourcc3(line, "end")) {
                 pathAllocated = false;
             } else if (pathEntryIndex == -1) {
-                (void)sscanf(line, "%d %d %s", &id, &objModelIndex, unused);
+                VERIFY(sscanf(line, "%d %d %*s", &id, &objModelIndex) == 2);
                 pathEntryIndex = 0;
             } else {
                 if (id) {

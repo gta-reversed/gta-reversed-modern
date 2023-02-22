@@ -119,9 +119,9 @@ void CFont::LoadFontValues() {
         }
         else if (!memcmp(attrib, "[REPLACEMENT_SPACE_CHAR]", 25)) {
             auto nextLine = CFileLoader::LoadLine(file);
-            uint32 spaceValue;
+            uint8 spaceValue;
 
-            VERIFY(sscanf(nextLine, "%d", &spaceValue) == 1); // maybe use inttypes?
+            VERIFY(sscanf(nextLine, "%hhu", &spaceValue) == 1);
             gFontData[fontId].m_spaceValue = spaceValue;
         }
         else if (!memcmp(attrib, "[PROP]", 7)) {

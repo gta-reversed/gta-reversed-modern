@@ -62,7 +62,7 @@ void CObjectData::Initialise(const char* fileName)
         char modelName[256], effectName[256];
         float fPercentSubmerged;
         int32 iColDamEffect, iSpecialColResp, iCameraAvoid, iCausesExplosion, iFxType; // Have to be read as 32-bit integers and later assigned to 8 bit int32
-        RET_IGNORED(sscanf(line, "%255s %f %f %f %f %f %f %f %d %d %d %d %d %f %f %f %255s %f %f %f %f %f %d %d",
+        RET_IGNORED(sscanf(line, "%255s %f %f %f %f %f %f %f %d %d %d %d %d %f %f %f %255s %f %f %f %f %f %d %d", // FIX_BUGS: Sized string read
             modelName,
             &curInfo.m_fMass,
             &curInfo.m_fTurnMass,

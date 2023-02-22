@@ -46,7 +46,7 @@ void CPedType::LoadPedData() {
             continue;
 
         char buf[32];
-        VERIFY(sscanf(line, "%32s", buf) == 1); // FIX_BUGS: Sized read
+        VERIFY(sscanf(line, "%31s", buf) == 1); // FIX_BUGS: Sized string read
 
         const auto GetAcquaintance = [=]() -> uint32 {
             uint32 value = 0;

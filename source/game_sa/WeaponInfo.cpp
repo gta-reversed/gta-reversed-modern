@@ -145,10 +145,6 @@ void CWeaponInfo::LoadWeaponData() {
         if (std::string_view{line}.find("ENDWEAPONDATA") != std::string_view::npos) // Not quite the way they did it, but it's fine.
             break;
 
-        // Read beginning of line here (that is, from the first char up to the first string)
-        // This is quite a hacky solution, they should've just skipped to the first non-ws character manually
-        char unused[32]{};
-
         switch ((uint8)line[0]) { // Gotta cast it because of `case 163`
         case '$': { // Gun data
             char weaponName[32]{};
@@ -174,9 +170,8 @@ void CWeaponInfo::LoadWeaponData() {
             float speed{}, radius{};
             float lifespan{}, spread{};
 
-            (void)sscanf(line,
-                "%s %s %s %f %f %d %d %d %s %d %d %f %f %f %d %d %f %f %d %d %d %d %d %d %d %x %f %f %f %f",
-                unused,
+            VERIFY(sscanf(line,
+                "%*s %31s %31s %f %f %d %d %d %31s %d %d %f %f %f %d %d %f %f %d %d %d %d %d %d %d %x %f %f %f %f",
                 weaponName,
                 fireTypeName,
                 &targetRange, &weaponRange,
@@ -194,11 +189,11 @@ void CWeaponInfo::LoadWeaponData() {
                 &animLoopInfo[1].start, &animLoopInfo[1].end, &animLoopInfo[1].fire,
                 &breakoutTime,
                 &flags,
-                &speed,
-                &radius,
-                &lifespan,
-                &spread
-            );
+                &speed,    // optional
+                &radius,   // optional
+                &lifespan, // optional
+                &spread    // optional
+            ) >= 25);
 
             const auto weaponType = FindWeaponType(weaponName);
             const auto skillLevel = WeaponHasSkillStats(weaponType) ? (eWeaponSkill)skill : eWeaponSkill::STD;
@@ -258,7 +253,7 @@ void CWeaponInfo::LoadWeaponData() {
             uint32 RLoadA{}, RLoadB{};
             uint32 crouchRLoadA{}, crouchRLoadB{};
 
-            (void)sscanf(line, "%s %s %f %f %f %f %d %d %d %d", unused, stealthAnimGrp, &aimX, &aimZ, &duckX, &duckZ, &RLoadA, &RLoadB, &crouchRLoadA, &crouchRLoadB);
+            VERIFY(sscanf(line, "%*s %31s %f %f %f %f %d %d %d %d", stealthAnimGrp, &aimX, &aimZ, &duckX, &duckZ, &RLoadA, &RLoadB, &crouchRLoadA, &crouchRLoadB) == 9);
 
             g_GunAimingOffsets[CAnimManager::GetAnimationGroupId(stealthAnimGrp) - ANIM_GROUP_PYTHON] = {
                 .AimX = aimX,
@@ -287,9 +282,8 @@ void CWeaponInfo::LoadWeaponData() {
             uint32 flags{};
             char stealthAnimGrpName[32]{};
 
-            (void)sscanf(line,
-                "%s %s %s %f %f %d %d %d %s %d %x %s",
-                unused,
+            VERIFY(sscanf(line,
+                "%*s %31s %31s %f %f %d %d %d %31s %d %x %31s",
                 weaponName,
                 fireTypeName,
                 &targetRange,
@@ -301,7 +295,7 @@ void CWeaponInfo::LoadWeaponData() {
                 &numCombos,
                 &flags,
                 stealthAnimGrpName
-            );
+            ) == 11);
 
             auto wType = FindWeaponType(weaponName);
             auto& wi = aWeaponInfo[(uint32)wType];

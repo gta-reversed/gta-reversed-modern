@@ -80,7 +80,7 @@ void CAnimManager::ReadAnimAssociationDefinitions() {
             continue;
 
         if (isAnimSection) {
-            if (sscanf(line, "%s", name) == 1) {
+            if (sscanf(line, "%31s", name) == 1) { // FIX_BUGS: Sized string read
                 if (!memcmp(name, "end", 4)) {
                     isAnimSection = false;
                 } else {
@@ -90,7 +90,7 @@ void CAnimManager::ReadAnimAssociationDefinitions() {
         }
         else
         {
-            VERIFY(sscanf(line, "%s %s %s %d", name, block, type, &animCount) == 4);
+            VERIFY(sscanf(line, "%31s %31s %31s %d", name, block, type, &animCount) == 4); // FIX_BUGS: Sized string read
             animStyle = AddAnimAssocDefinition(name, block, MODEL_MALE01, animCount, aStdAnimDescs);
             isAnimSection = true;
         }

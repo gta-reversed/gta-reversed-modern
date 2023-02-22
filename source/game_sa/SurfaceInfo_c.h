@@ -63,7 +63,7 @@ struct SurfaceInfo {
 
     void Read(const char* line) {
         // FIX_BUGS: Possible buffer overflow
-        (void)sscanf(
+        VERIFY(sscanf(
             line, "%63s %31s %f %f %31s %31s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %31s",
             SurfaceName, AdhesionGroup,
             &TyreGrip, &WetGrip, SkidMark, FrictionEffect,
@@ -71,7 +71,7 @@ struct SurfaceInfo {
             &Roughness, &Flame, &Sparks, &Sprint, &Footsteps, &FootDust, &CarDirt, &CarClean, &WheelGrass, &WheelGravel, &WheelMud, &WheelDust, &WheelSand, &WheelSpray,
             &ProcPlant, &ProcObj, &Climbable,
             BulletFx
-        );
+        ) == 36);
     }
 };
 

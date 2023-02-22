@@ -164,7 +164,7 @@ void CVehicleRecording::SmoothRecording(int32 recordId) {
 int32 CVehicleRecording::RegisterRecordingFile(const char* name) {
     auto fileNumber = 850;
     if (sscanf(name, "carrec%d", &fileNumber) == 0) {
-        RET_IGNORED(sscanf(name, "CARREC%d", &fileNumber));
+        VERIFY(sscanf(name, "CARREC%d", &fileNumber) == 1);
     }
 
     CARREC_DEV_LOG("Registering carrec file '{}', (streamIdx={})", name, NumPlayBackFiles);

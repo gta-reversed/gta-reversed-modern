@@ -27,7 +27,7 @@ void CGridRef::Init() {
 
         uint8 x = 0;
         int32 y = 0;
-        VERIFY(sscanf(line, "%c%d %s", &x, &y, str) == 3);
+        VERIFY(sscanf(line, "%c%d %31s", &x, &y, str) == 3); // FIX_BUGS: Sized string read
         auto lowstr = _strlwr(str);
         x -= 65; // - 'A'
         y -= 1;

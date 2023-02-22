@@ -371,7 +371,7 @@ void SurfaceInfos_c::LoadSurfaceAudioInfos()
 
         char  name[64];
         int32 concrete, grass, sand, gravel, wood, water, metal, longGrass, tile;
-        (void)sscanf(line, "%31s %d %d %d %d %d %d %d %d %d", name, &concrete, &grass, &sand, &gravel, &wood, &water, &metal, &longGrass, &tile); // FIX_BUGS: buffer overflow
+        VERIFY(sscanf(line, "%63s %d %d %d %d %d %d %d %d %d", name, &concrete, &grass, &sand, &gravel, &wood, &water, &metal, &longGrass, &tile) == 10); // FIX_BUGS: buffer overflow
 
         auto id = GetSurfaceIdFromName(name);
         auto& surface = m_surfaces[id];

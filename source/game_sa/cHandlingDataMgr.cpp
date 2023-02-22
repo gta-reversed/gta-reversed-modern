@@ -187,7 +187,7 @@ void cHandlingDataMgr::LoadHandlingData() {
     // Get handling by scanning name from `line` using `scanNameFormat`, then calls `GetHandlingFn` to get the handling ptr
     const auto DoLoadHandling = [&, this](const char* line, auto GetHandlingFn) -> int32 {
         char name[32]{};
-        if (sscanf_s(line, "%s", name, std::size(name)) != 1) {
+        if (sscanf_s(line, "%31s", name, std::size(name)) != 1) { // FIX_BUGS: Sized string read
             return 0;
         }
         const auto id = FindExactWord(name, &VehicleNames[0][0], std::size(VehicleNames[0]), std::size(VehicleNames));
