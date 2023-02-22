@@ -142,6 +142,7 @@
 #include "TaskSimpleHitByGunFromLeft.h"
 #include "TaskSimpleHitByGunFromRear.h"
 #include "TaskSimpleHitByGunFromRight.h"
+#include "Tasks/TaskTypes/TaskComplexKillPedOnFootMelee.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculator.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorStandard.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorRadiusAngleOffset.h"
@@ -193,6 +194,7 @@
 #include "TaskSimpleTriggerLookAt.h"
 #include "TaskSimpleHitHead.h"
 #include "TaskUtilityLineUpPedWithCar.h"
+#include "Tasks/TaskTypes/TaskComplexKillPedGroupOnFoot.h"
 #include "TaskSimpleLand.h"
 #include "TaskSimpleJetPack.h"
 #include "TaskSimpleSitIdle.h"
@@ -799,9 +801,9 @@ void InjectHooksMain() {
         CTaskComplexInvestigateDisturbance::InjectHooks();
         // CTaskComplexKillAllThreats::InjectHooks();
         // CTaskComplexKillCriminal::InjectHooks();
-        // CTaskComplexKillPedGroupOnFoot::InjectHooks();
+        CTaskComplexKillPedGroupOnFoot::InjectHooks();
         // CTaskComplexKillPedOnFootArmed::InjectHooks();
-        // CTaskComplexKillPedOnFootMelee::InjectHooks();
+        CTaskComplexKillPedOnFootMelee::InjectHooks();
         // CTaskComplexKillPedOnFootStealth::InjectHooks();
         CTaskComplexLeaveCarAndDie::InjectHooks();
         CTaskComplexLeaveBoat::InjectHooks();

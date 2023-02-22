@@ -76,7 +76,7 @@ bool CTaskSimpleLand::ProcessPed_Reversed(CPed* ped) {
             if (ped->IsPlayer()) {
                 assert(m_pAnim); // NOTSA
                 if (ped->m_nMoveState == PEDMOVE_SPRINT && ped->AsPlayer()->GetPadFromPlayer()->GetSprint())
-                    m_pAnim->m_fSpeed = 2.0F; // possible bug, m_pAnim can be null here
+                    m_pAnim->m_fSpeed = 2.0F; // possible bug, m_anim can be null here
 
                 if (m_nAnimId != ANIM_ID_IDLE_TIRED)
                     m_pAnim->m_fSpeed *= CStats::GetFatAndMuscleModifier(STAT_MOD_2);
