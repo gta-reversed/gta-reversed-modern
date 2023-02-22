@@ -115,6 +115,8 @@ constexpr float SIN_PI         = 0.0f;              // sin(π);
 constexpr float COS_PI         = -1.0f;             // cos(π);
 constexpr float TWO_PI         = 6.28318f;          // τ (TAU)
 
+constexpr float COS_45 = SQRT_2; // cos(45deg)
+
 constexpr float sq(float x) { return x * x; }
 
 struct SpriteFileName {
@@ -157,7 +159,7 @@ constexpr float RadiansToDegrees(float angleInRadians) {
 
 template<typename T>
 auto lerp(const T& from, const T& to, float t) {
-    return from * (1.f - t) + to * t;
+    return to * t + from * (1.f - t);
 }
 
 inline const float invLerp(float fMin, float fMax, float fVal) {

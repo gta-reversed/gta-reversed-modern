@@ -1145,9 +1145,9 @@ CVector* CEntity::FindTriggerPointCoors(CVector* outVec, int32 triggerIndex)
  */
 C2dEffect* CEntity::GetRandom2dEffect(int32 effectType, bool bCheckForEmptySlot)
 {
-    C2dEffect* apArr[32]{};
+    C2dEffect* apArr[32]{}; // todo: static_vector
     auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
-    int32 iFoundCount = 0;
+    size_t iFoundCount = 0;
     for (int32 iFxInd = 0; iFxInd < mi->m_n2dfxCount; ++iFxInd) {
         auto effect = mi->Get2dEffect(iFxInd);
         if (effect->m_nType != effectType)
@@ -1163,8 +1163,7 @@ C2dEffect* CEntity::GetRandom2dEffect(int32 effectType, bool bCheckForEmptySlot)
     }
 
     if (iFoundCount) {
-        auto iRandInd = CGeneral::GetRandomNumberInRange(0, iFoundCount);
-        return apArr[iRandInd];
+        return apArr[CGeneral::GetRandomNumberInRange(0u, iFoundCount)]; 
     }
 
     return nullptr;

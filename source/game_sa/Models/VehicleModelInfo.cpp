@@ -378,12 +378,12 @@ int32 CVehicleModelInfo::ChooseComponent()
 
     if (m_extraComps.nExtraARule && IsValidCompRule(m_extraComps.nExtraARule)) {
         return ::ChooseComponent(m_extraComps.nExtraARule, m_extraComps.nExtraAComp);
-    }
-    else if (CGeneral::GetRandomNumberInRange(0, 3) < 2) {
+    } else if (CGeneral::GetRandomNumberInRange(0, 3) < 2) {
         int32 anVariations[6];
-        auto numComps = GetListOfComponentsNotUsedByRules(m_extraComps.m_nComps, m_pVehicleStruct->m_nNumExtras, anVariations);
-        if (numComps)
-            return anVariations[CGeneral::GetRandomNumberInRange(0, numComps)];
+        auto numComps = (size_t)GetListOfComponentsNotUsedByRules(m_extraComps.m_nComps, m_pVehicleStruct->m_nNumExtras, anVariations);
+        if (numComps) {
+            return anVariations[CGeneral::GetRandomNumberInRange(numComps)];
+        }
     }
 
     return -1;

@@ -143,6 +143,7 @@
 #include "TaskSimpleHitByGunFromLeft.h"
 #include "TaskSimpleHitByGunFromRear.h"
 #include "TaskSimpleHitByGunFromRight.h"
+#include "Tasks/TaskTypes/TaskComplexKillPedOnFootMelee.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculator.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorStandard.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorRadiusAngleOffset.h"
@@ -194,6 +195,7 @@
 #include "TaskSimpleTriggerLookAt.h"
 #include "TaskSimpleHitHead.h"
 #include "TaskUtilityLineUpPedWithCar.h"
+#include "Tasks/TaskTypes/TaskComplexKillPedGroupOnFoot.h"
 #include "TaskSimpleLand.h"
 #include "TaskSimpleJetPack.h"
 #include "TaskSimpleSitIdle.h"
@@ -234,6 +236,7 @@
 #include "TaskSimpleCarSetPedOut.h"
 #include "TaskSimpleAnim.h"
 #include "TaskSimpleRunAnim.h"
+#include "Tasks/TaskTypes/TaskComplexInvestigateDisturbance.h"
 #include "TaskComplexWanderCriminal.h"
 #include "TaskComplexWanderProstitute.h"
 #include "TaskComplexWalkRoundBuildingAttempt.h"
@@ -798,12 +801,12 @@ void InjectHooksMain() {
         CTaskComplexHitResponse::InjectHooks();
         CTaskComplexInWater::InjectHooks();
         CTaskComplexInvestigateDeadPed::InjectHooks();
-        // CTaskComplexInvestigateDisturbance::InjectHooks();
+        CTaskComplexInvestigateDisturbance::InjectHooks();
         // CTaskComplexKillAllThreats::InjectHooks();
         // CTaskComplexKillCriminal::InjectHooks();
-        // CTaskComplexKillPedGroupOnFoot::InjectHooks();
+        CTaskComplexKillPedGroupOnFoot::InjectHooks();
         // CTaskComplexKillPedOnFootArmed::InjectHooks();
-        // CTaskComplexKillPedOnFootMelee::InjectHooks();
+        CTaskComplexKillPedOnFootMelee::InjectHooks();
         // CTaskComplexKillPedOnFootStealth::InjectHooks();
         CTaskComplexLeaveCarAndDie::InjectHooks();
         CTaskComplexLeaveBoat::InjectHooks();

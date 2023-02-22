@@ -922,6 +922,7 @@ void CBoat::ProcessControlInputs_Reversed(uint8 ucPadNum) {
     m_fGasPedal = fGasPower;
 
     // Mouse steering
+    // TODO: Try copy paste code from `CAutomobile::ProcessControlInputs` for this...
     if (CCamera::m_bUseMouse3rdPerson && CVehicle::m_bEnableMouseSteering) {
         auto bChangedInput = CVehicle::m_nLastControlInput != eControllerType::CONTROLLER_MOUSE || pad->GetSteeringLeftRight();
         if (CPad::NewMouseControllerState.X == 0.0F && bChangedInput) { // No longer using mouse controls
@@ -943,8 +944,7 @@ void CBoat::ProcessControlInputs_Reversed(uint8 ucPadNum) {
     }
 
     m_fRawSteerAngle = std::clamp(m_fRawSteerAngle, -1.0F, 1.0F);
-    auto fSignedPow = m_fRawSteerAngle * fabs(m_fRawSteerAngle);
-    m_fSteerAngle = DegreesToRadians(m_pHandlingData->m_fSteeringLock * fSignedPow);
+    m_fSteerAngle = DegreesToRadians(m_pHandlingData->m_fSteeringLock * std::copysignf(std::powf(m_fRawSteerAngle, 2), m_fRawSteerAngle));
 }
 
 // 0x6F01D0
