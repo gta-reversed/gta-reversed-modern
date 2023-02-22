@@ -4596,6 +4596,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
         }
     }
 
+    assert(entity);
     if (m_bHasContacted && entity->m_bHasContacted)
     {
         if (totalColPointsToProcess > 0)
