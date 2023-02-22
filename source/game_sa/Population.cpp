@@ -988,7 +988,7 @@ CPed* CPopulation::AddDeadPedInFrontOfCar(const CVector& createPedAt, CVehicle* 
 
     // Check if it's colliding with anything...
     if (   !CPedPlacement::IsPositionClearForPed(createPedAt, 2.f, {vehicle, ped})
-        || CCollision::ProcessColModels(ped->GetMatrix(), *ped->GetColModel(), vehicle->GetMatrix(), *vehicle->GetColModel(), CWorld::m_aTempColPts) > 0
+        || CCollision::ProcessColModels(ped->GetMatrix(), *ped->GetColModel(), vehicle->GetMatrix(), *vehicle->GetColModel(), CWorld::m_aTempColPts, nullptr, nullptr, false) > 0
     ) {
         RemovePed(ped);
         return nullptr;
@@ -1522,7 +1522,7 @@ eModelID CPopulation::PickGangCar(eGangID forGang) {
 // 0x6144B0
 eModelID CPopulation::PickRiotRoadBlockCar() {
     // First try gang cars
-    const auto baseIdx = (size_t)CGeneral::GetRandomNumberInRange(0, TOTAL_GANGS);
+    const auto baseIdx = CGeneral::GetRandomNumberInRange(0u, (size_t)TOTAL_GANGS);
     for (size_t i{}; i < TOTAL_GANGS; i++) {
         const auto model = PickGangCar((eGangID)(baseIdx + i));
         if (model != MODEL_INVALID) {
@@ -1569,7 +1569,7 @@ void CPopulation::ConvertToRealObject(CDummyObject* dummyObject) {
     obj->SetRelatedDummy(dummyObject);
     CWorld::Add(obj);
 
-    if (!IsGlassModel(obj) || CModelInfo::GetModelInfo(obj->m_nModelIndex)->IsGlassType2()) {
+    if (!IsGlassModel(obj) || obj->GetModelInfo()->IsGlassType2()) {
         if (obj->m_nModelIndex == ModelIndices::MI_BUOY || obj->physicalFlags.bAttachedToEntity) {
             obj->SetIsStatic(false);
             obj->m_vecMoveSpeed.Set(0.0F, 0.0F, -0.001F);
@@ -1588,7 +1588,6 @@ void CPopulation::ConvertToDummyObject(CObject* object) {
         if (!CPopulation::TestRoomForDummyObject(object)) {
             return;
         }
-
         dummy->m_bIsVisible = true;
         dummy->UpdateFromObject(object);
     }
@@ -1606,6 +1605,7 @@ void CPopulation::ConvertToDummyObject(CObject* object) {
 
     CWorld::Remove(object);
     delete object;
+
     if (dummy) {
         CWorld::Add(dummy);
     }

@@ -180,7 +180,9 @@ void CWorld::Add(CEntity* entity) {
 }
 
 /*!
-* @brief Remove ped from the world. Caller still has to `delete` the entity. In case of peds `CPopulation::RemovePed` should be used instead.
+* @brief Remove ped from the world.
+* Caller still has to `delete` the entity. (In case they want to delete it, and not just re-add)
+* In case of peds `CPopulation::RemovePed` should be used instead.
 */
 void CWorld::Remove(CEntity* entity) {
     entity->Remove();

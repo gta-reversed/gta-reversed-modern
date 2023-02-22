@@ -2252,7 +2252,8 @@ void CStreaming::RemoveCurrentZonesModels() {
         const auto gangPedGroupId = CPopulation::GetPedGroupId(static_cast<ePopcycleGroup>(gangId + POPCYCLE_GROUP_BALLAS));
 
         // \/ NOTE: Originally they only processed the first 5 models... I'm not sure why, but this should work too.
-        for (const auto modelId : CPopulation::GetModelsInPedGroup(gangPedGroupId)) {   if (modelId != CPopulation::m_defaultCarGroupModelId) {
+        for (const auto modelId : CPopulation::GetModelsInPedGroup(gangPedGroupId)) {
+            if (modelId != CPopulation::m_DefaultModelIDForUnusedSlot) {
                 SetModelAndItsTxdDeletable(modelId);
             }
         }
@@ -3697,7 +3698,7 @@ void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
                             return false;
                         }
 
-                        if (CPopulation::m_defaultCarGroupModelId == gangCarModelId) {
+                        if (CPopulation::m_DefaultModelIDForUnusedSlot == gangCarModelId) {
                             return false;
                         }
 
