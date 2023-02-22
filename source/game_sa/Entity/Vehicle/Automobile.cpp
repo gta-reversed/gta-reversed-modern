@@ -2392,7 +2392,7 @@ void CAutomobile::BlowUpCar_Impl(CEntity* dmgr, bool bDontShakeCam, bool bDontSp
     m_damageManager.FuckCarCompletely(false);
 
     const auto isRcShit = (bFixBugs || !bIsForCutScene)
-        ? notsa::contains(notsa::il(MODEL_RCTIGER, MODEL_RCBANDIT), GetModelId()) // I'm 99% sure they forgot to copy paste this too, but let it be.
+        ? notsa::contains({ MODEL_RCTIGER, MODEL_RCBANDIT }, GetModelId()) // I'm 99% sure they forgot to copy paste this too, but let it be.
         : GetModelId() == MODEL_RCBANDIT;
     if (!isRcShit) { // 0x6B3C61
         for (auto bumper : { FRONT_BUMPER, REAR_BUMPER }) {
@@ -4935,7 +4935,7 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately) {
     };
 
     if (m_fHealth < 250.f && GetStatus() != STATUS_WRECKED && !vehicleFlags.bIsDrowning) {
-        const auto isSubPlaneOrHeli = notsa::contains(notsa::il(VEHICLE_TYPE_PLANE, VEHICLE_TYPE_HELI), m_nVehicleSubType);
+        const auto isSubPlaneOrHeli = notsa::contains({ VEHICLE_TYPE_PLANE, VEHICLE_TYPE_HELI }, m_nVehicleSubType);
 
         auto partFxToUse = !m_pFireParticle && !isSubPlaneOrHeli ? 1 : 0;
 
@@ -4946,13 +4946,13 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately) {
             }
 
             if (!bExplodeImmediately) { // 0x6A720B
-                const auto isRcShit = notsa::contains(notsa::il(
+                const auto isRcShit = notsa::contains({
                     MODEL_RCBARON,
                     MODEL_RCRAIDER,
                     MODEL_RCGOBLIN,
                     MODEL_RCBANDIT,
                     MODEL_RCTIGER
-                ), GetModelId());
+                }, GetModelId());
 
                 m_fBurnTimer += m_fireParticleCounter || isRcShit
                     ? floorTsMS
@@ -4990,13 +4990,13 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately) {
                     }
                 }
 
-                if (notsa::contains(notsa::il(STATUS_PLAYER, STATUS_REMOTE_CONTROLLED), GetStatus())) { // 0x6A745D
+                if (notsa::contains({ STATUS_PLAYER, STATUS_REMOTE_CONTROLLED }, GetStatus())) { // 0x6A745D
                     if (!m_pFireParticle && m_fBurnTimer > 2500.f) {
                         CreateFx(2);
                         SetFxVelocity();
                         return;
                     }
-                } else if (!isRcShit && CGeneral::RandomBool(2)) { // originally it was 1.2% (3 / 250), but it doesn't matter
+                } else if (!isRcShit && CGeneral::RandomBool(1.2f)) {
                     CExplosion::AddExplosion(this, m_pExplosionVictim, EXPLOSION_ROCKET, GetPosition(), 0, true, -1.f, false);
                 }
             
