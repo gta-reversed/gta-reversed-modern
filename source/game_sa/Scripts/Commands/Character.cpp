@@ -1323,11 +1323,11 @@ void SetCurrentCharWeapon(CPed& ped, eWeaponType weaponType) {
 }
 
 // MARK_CHAR_AS_NO_LONGER_NEEDED
-void MarkCharAsNoLongerNeeded(CRunningScript& S, CPed& ped) {
-    CTheScripts::CleanUpThisPed(&ped);
-
+void MarkCharAsNoLongerNeeded(CRunningScript& S, int32 handle) { // TODO: Some way to get a CPed* and it's handle too (As this function seems to be called even if the handle is not pointing to a ped anymore)
+    const auto ped = GetPedPool()->GetAtRef(handle); // This might be null, but we need the handle even if it is, so we can't take `CPed*` either...
+    CTheScripts::CleanUpThisPed(ped);
     if (S.m_bUseMissionCleanup) {
-        CTheScripts::MissionCleanUp.RemoveEntityFromList(ped);
+        CTheScripts::MissionCleanUp.RemoveEntityFromList(handle, MISSION_CLEANUP_ENTITY_TYPE_PED);
     }
 }
 
