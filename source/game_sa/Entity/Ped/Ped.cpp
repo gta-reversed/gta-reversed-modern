@@ -1496,8 +1496,8 @@ float CPed::GetWalkAnimSpeed() {
 
     const auto lastFrame = firstSequence.GetUncompressedFrame(firstSequence.m_nFrameCount - 1);
     const auto lastFrameY = firstSequence.m_isRoot
-                                ? lastFrame->translation.y
-                                : ((KeyFrame*)lastFrame)->rotation.imag.y;
+        ? lastFrame->translation.y
+        : ((KeyFrame*)lastFrame)->rotation.imag.y;
 
     return (lastFrameY - firstSequence.GetUncompressedFrame(0)->translation.y) / hier->m_fTotalTime;
 }
@@ -3574,6 +3574,29 @@ void CPed::RenderBigHead() const {
     if (RwMatrix* mat = &matrices[index]) {
         RwMatrixScale(mat, &s, rwCOMBINEPRECONCAT);
     }
+}
+
+bool CPed::CanBeCriminal() const {
+    if (IsPlayer() || IsCreatedBy(PED_MISSION)) {
+        return false;
+    }
+
+    switch (m_nPedType) {
+    case PED_TYPE_COP:
+    case PED_TYPE_MEDIC:
+    case PED_TYPE_FIREMAN:
+    case PED_TYPE_MISSION1:
+    case PED_TYPE_MISSION2:
+    case PED_TYPE_MISSION3:
+    case PED_TYPE_MISSION4:
+    case PED_TYPE_MISSION5:
+    case PED_TYPE_MISSION6:
+    case PED_TYPE_MISSION7:
+    case PED_TYPE_MISSION8:
+        return false;
+    }
+
+    return true;
 }
 
 // NOTSA

@@ -78,10 +78,9 @@ CTask* CTaskManager::FindActiveTaskByType(eTaskType taskType) {
         return task;
     }
 
-    // Now try secondarie's sub tasks
+    // Now try secondaries and their sub-tasks
     for (const auto sec : m_aSecondaryTasks) {
-        // NOTE: Original code doesn't break first match, but that's by a bug, not intentional.
-        if (const auto task = FindFirstTaskOfType(sec, taskType)) {
+        if (const auto task = FindFirstTaskOfType(sec, taskType)) { // NOTE: Original code doesn't break first match, but that's by a bug, not intentional.
             return task;
         }
     }

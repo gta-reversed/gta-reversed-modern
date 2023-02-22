@@ -67,7 +67,7 @@ public:
 
     /*!
     * @addr 0x681810
-    * @brief Similar to `FindActiveTaskByType` but only checks the given primary task
+    * @brief Similar to `FindActiveTaskByType` but only checks the given primary task and it's sub-tasks
     */
     CTask* FindTaskByType(ePrimaryTasks taskIndex, eTaskType taskType);
 

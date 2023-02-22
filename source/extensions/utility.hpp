@@ -4,10 +4,13 @@
 #include <initializer_list>
 
 namespace notsa {
-template<typename... Ts>
-auto il(Ts... ts) {
-    return std::initializer_list{ std::forward<Ts>(ts)... };
-}
+/*
+* Want to know something funny?
+* `std::initializer_list` is just a proxy object for a stack allocated array.
+* So, if you return one from a function you're dommed to be fucked :)
+* And best thing, it does allow copying, it has a fucking copy constructor for whatever reason
+* Lesson: Don't return `initializer_list`'s from functions
+*/
 
 /*!
 * @brief Call the given function on object destruction.
@@ -27,6 +30,37 @@ private:
     Fn m_fn;
 };
 
+constexpr auto IsFixBugs() {
+#ifdef FIX_BUGS
+    return true;
+#else
+    return false;
+#endif
+}
+
+template<rng::input_range R, typename T_Ptr = rng::range_value_t<R>>
+    requires std::is_pointer_v<T_Ptr> 
+auto SpatialQuery(R&& r, CVector distToPos, T_Ptr ignored, T_Ptr closest = nullptr) {
+    const auto GetDistSq = [distToPos](T_Ptr e) {
+        return (e->GetPosition() - distToPos).SquaredMagnitude();
+    };
+
+    float closestDistSq = closest ? GetDistSq(closest) : std::numeric_limits<float>::max();
+    for (T_Ptr e : r) {
+        if (ignored && e == ignored) {
+            continue;
+        }
+        const auto distSq = GetDistSq(e);
+        if (closestDistSq > distSq) {
+            closestDistSq = distSq;
+            closest       = e;
+        }
+    }
+
+    struct Ret{ T_Ptr entity; float distSq; };
+    return Ret{ closest, closestDistSq };
+}
+
 /// Predicate to check if `value` is null
 template<typename T>
     requires(std::is_pointer_v<T>)
@@ -44,9 +78,9 @@ struct NotIsNull {
 };
 
 // Find first non-null value in range. If found it's returned, `null` otherwise.
-template<rng::input_range R, typename T_Ret = rng::range_value_t<R>>
-    requires(std::is_pointer_v<T_Ret>)
-T_Ret FirstNonNull(R&& range) {
+template<rng::input_range R, typename T_Ptr = rng::range_value_t<R>>
+    requires(std::is_pointer_v<T_Ptr>)
+T_Ptr FirstNonNull(R&& range) {
     const auto it = rng::find_if(range, NotIsNull{});
     return it != rng::end(range)
         ? *it
@@ -80,6 +114,14 @@ template<rng::input_range R, class T, class Proj = std::identity>
     requires std::indirect_binary_predicate<rng::equal_to, std::projected<rng::iterator_t<R>, Proj>, const T*>
 bool contains(R&& r, const T& value, Proj proj = {}) {
     return rng::find(r, value, proj) != rng::end(r);
+}
+
+/*!
+* Helper (Of your fingers) - Reduces typing needed for Python style `value in {}`
+*/
+template<typename Y, typename T>
+bool contains(std::initializer_list<Y> r, const T& value) {
+    return contains(r, value, {});
 }
 
 /*!
