@@ -63,7 +63,7 @@ inline OpcodeResult CollectArgsAndCall(CRunningScript* S, eScriptCommands comman
 //! These are commands that have no (special) code associated with them
 inline auto NotImplemented(eScriptCommands cmd) {
 #ifdef NOTSA_DEBUG
-    DEV_LOG("Unimplemented command has been called! [ID: {}; Name: {}]", (int)(cmd), GetScriptCommandName(cmd));
+    DEV_LOG("Unimplemented command has been called! [ID: {:04X}; Name: {}]", (unsigned)(cmd), GetScriptCommandName(cmd));
 #endif
     return OR_INTERRUPT; // Vanilla SA behavior
 }
@@ -76,7 +76,10 @@ inline OpcodeResult CommandParser(CRunningScript* S) {
 template<eScriptCommands Command, auto* CommandFn>
 inline void AddCommandHandler() {
     auto& entry = CRunningScript::CustomCommandHandlerOf(Command);
-    assert(!entry); // Make sure it doesn't already have a handler
+    // Make sure it doesn't already have a handler
+    if (entry) {
+        NOTSA_UNREACHABLE("Command already handled!\nOpcode: {:04X} ({})", (unsigned)(Command), GetScriptCommandName(Command));
+    }
     entry = &CommandParser<Command, CommandFn>; // Register handler
 }
 }; // namespace detail
@@ -106,3 +109,13 @@ constexpr inline auto AddressOfFunction(T fn) {
 //! Register a command handler for an unimplemented command (That is, a command that wasn't implemented in the game either)
 #define REGISTER_COMMAND_UNIMPLEMENTED(cmd) \
     REGISTER_COMMAND_HANDLER(cmd, ::notsa::script::detail::NotImplemented)
+
+#ifdef IMPLEMENT_UNSUPPORTED_OPCODES
+//! Register a custom command handler for an unimplmented command. (Won't be implemented if IMPLEMENT_UNSUPPORTED_OPCODES is not defined.)
+#define REGISTER_UNSUPPORTED_COMMAND_HANDLER(cmd, fn) \
+    REGISTER_COMMAND_HANDLER(cmd, fn)
+#else
+//! Register a custom command handler for an unimplmented command. (Not implemented if IMPLEMENT_UNSUPPORTED_OPCODES is not defined.)
+#define REGISTER_UNSUPPORTED_COMMAND_HANDLER(cmd, fn) \
+    REGISTER_COMMAND_HANDLER(cmd, ::notsa::script::detail::NotImplemented)
+#endif

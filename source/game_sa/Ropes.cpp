@@ -10,7 +10,7 @@
 #include "Rope.h"
 #include "Ropes.h"
 
-int32& CRopes::PlayerControlsCrane = *(int32*)0xB76898;
+eControlledCrane& CRopes::PlayerControlsCrane = *(eControlledCrane*)0xB76898;
 uint32& CRopes::m_nRopeIdCreationCounter = *(uint32*)0xB781F8;
 
 void CRopes::InjectHooks() {
@@ -35,7 +35,7 @@ void CRopes::Init() {
     for (auto& rope : aRopes) {
         rope.m_nType = eRopeType::NONE;
     }
-    PlayerControlsCrane = false;
+    PlayerControlsCrane = eControlledCrane::NONE;
 }
 
 // 0x556B10

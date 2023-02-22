@@ -40,8 +40,8 @@ public:
         assert(!IsFlipped());
     }
 
-    constexpr CRect(const CVector2D& left, const CVector2D& right) :
-        CRect{left.x, left.y, right.x, right.y}
+    constexpr CRect(const CVector2D& bottomLeft, const CVector2D& topRight) :
+        CRect{bottomLeft.x, bottomLeft.y, topRight.x, topRight.y}
     {
     }
 
