@@ -45,6 +45,7 @@ CEventGlobalGroup* GetEventGlobalGroup() {
     return globalEvents;
 }
 
+// TODO: Check `outName` size (to avoid buffer overflow)
 // 0x5370A0
 void GetNameAndDamage(const char* name, char* objName, bool& bIsDamageModel) {
     const size_t nodesz = strlen(name);

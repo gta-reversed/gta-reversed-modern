@@ -258,7 +258,7 @@ bool CShopping::FindSection(FILESTREAM file, const char* sectionName) {
         char* nextToken{};
         if (!strncmp(line, "section", 7u)) {
             counter++;
-            strtok_s(line, " \t", &nextToken);
+            RET_IGNORED(strtok_s(line, " \t", &nextToken));
 
             if (counter == 1 && !_stricmp(sectionName, strtok_s(nullptr, " \t", &nextToken))) {
                 return true;
@@ -361,7 +361,7 @@ const char* CShopping::GetNextSection(FILESTREAM file) {
     }
 
     char* lastToken{};
-    strtok_s(line, " \t", &lastToken);
+    RET_IGNORED(strtok_s(line, " \t", &lastToken));
     return strtok_s(nullptr, " \t", &lastToken);
 }
 

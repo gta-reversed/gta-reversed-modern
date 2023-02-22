@@ -127,21 +127,6 @@ T& StaticRef() {
     return *reinterpret_cast<T*>(Addr);
 }
 
-/*!
- * @brief Used for convert pointer values to integers (i.e. used mostly in RW code)
- *
- * @tparam T   The type of the return value.
- * @param  ptr Pointer value to be converted
- */
-template <typename T> requires std::is_integral_v<T>
-T pointer_to_int(void* ptr) {
-    union {
-        void* p;
-        T val;
-    } conv{.p = ptr};
-    return conv.val;
-}
-
 #define _IGNORED_
 #define _CAN_BE_NULL_
 

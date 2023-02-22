@@ -1103,13 +1103,13 @@ RpAtomic* CVehicleModelInfo::SetAtomicRendererCB_Train(RpAtomic* atomic, void* d
 
 RwObject* CVehicleModelInfo::SetAtomicFlagCB(RwObject* object, void* data)
 {
-    CVisibilityPlugins::SetAtomicFlag(reinterpret_cast<RpAtomic*>(object), pointer_to_int<uint16>(data));
+    CVisibilityPlugins::SetAtomicFlag(reinterpret_cast<RpAtomic*>(object), (uint16)(std::bit_cast<uintptr_t>(data)));
     return object;
 }
 
 RwObject* CVehicleModelInfo::ClearAtomicFlagCB(RwObject* object, void* data)
 {
-    CVisibilityPlugins::ClearAtomicFlag(reinterpret_cast<RpAtomic*>(object), pointer_to_int<uint16>(data));
+    CVisibilityPlugins::ClearAtomicFlag(reinterpret_cast<RpAtomic*>(object), (uint16)(std::bit_cast<uintptr_t>(data)));
     return object;
 }
 
@@ -1166,7 +1166,7 @@ RpMaterial* CVehicleModelInfo::GetMatFXEffectMaterialCB(RpMaterial* material, vo
 
 RpMaterial* CVehicleModelInfo::SetEnvironmentMapCB(RpMaterial* material, void* data)
 {
-    if (pointer_to_int<uint16>(data) == 0xFFFF) {
+    if ((uint16)std::bit_cast<uintptr_t>(data) == 0xFFFF) {
         return DisableMatFx(material, data);
     }
 
@@ -1520,7 +1520,7 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
         case eCarModsLineType::WHEEL: {
             int32 iModelId = -1, iWheelSet;
             VERIFY(sscanf_s(line, "%d", &iWheelSet) == 1);
-            strtok_s(line, " \t,", &pLastToken);
+            RET_IGNORED(strtok_s(line, " \t,", &pLastToken));
             char* token;
             while ((token = strtok_s(nullptr, " \t,", &pLastToken))) {
                 auto wheelMI = static_cast<CAtomicModelInfo*>(CModelInfo::GetModelInfo(token, &iModelId));
