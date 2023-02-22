@@ -194,6 +194,7 @@
 #include "TaskSimpleTriggerLookAt.h"
 #include "TaskSimpleHitHead.h"
 #include "TaskUtilityLineUpPedWithCar.h"
+#include "Tasks/TaskTypes/TaskComplexKillPedGroupOnFoot.h"
 #include "TaskSimpleLand.h"
 #include "TaskSimpleJetPack.h"
 #include "TaskSimpleSitIdle.h"
@@ -800,7 +801,7 @@ void InjectHooksMain() {
         CTaskComplexInvestigateDisturbance::InjectHooks();
         // CTaskComplexKillAllThreats::InjectHooks();
         // CTaskComplexKillCriminal::InjectHooks();
-        // CTaskComplexKillPedGroupOnFoot::InjectHooks();
+        CTaskComplexKillPedGroupOnFoot::InjectHooks();
         // CTaskComplexKillPedOnFootArmed::InjectHooks();
         CTaskComplexKillPedOnFootMelee::InjectHooks();
         // CTaskComplexKillPedOnFootStealth::InjectHooks();
