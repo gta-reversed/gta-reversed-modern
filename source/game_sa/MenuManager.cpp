@@ -566,8 +566,8 @@ void CMenuManager::JumpToGenericMessageScreen(eMenuScreen screen, const char* ti
     } else if (screen == SCREEN_GAME_LOADED) {
         mscreen.m_aItems[1].m_nTargetMenu = SCREEN_GAME_SAVE;
     }
-    strncpy(mscreen.m_szTitleName, titleKey, sizeof(mscreen.m_szTitleName));
-    strncpy(mscreen.m_aItems[0].m_szName, textKey, sizeof(mscreen.m_aItems[0].m_szName));
+    strncpy_s(mscreen.m_szTitleName, titleKey, sizeof(mscreen.m_szTitleName));
+    strncpy_s(mscreen.m_aItems[0].m_szName, textKey, sizeof(mscreen.m_aItems[0].m_szName));
 }
 
 // 0x57C520
@@ -777,6 +777,12 @@ void CMenuManager::SaveStatsToFile() {
         return;
     }
 
+    const auto ToUpperCase = [](const char* s) {
+        std::string str{s};
+        rng::for_each(str, [](char& c) { c = (char)std::toupper(c); });
+        return str;
+    };
+
     fprintf_s(file, "<title>Grand Theft Auto San Andreas Stats</title>\n");
     fprintf_s(file, "<body bgcolor=\"#000000\" leftmargin=\"10\" topmargin=\"10\" marginwidth=\"10\" marginheight=\"10\">\n");
     fprintf_s(file, "<table width=\"560\" align=\"center\" border=\"0\" cellpadding=\"5\" cellspacing=\"0\">\n"
@@ -784,14 +790,14 @@ void CMenuManager::SaveStatsToFile() {
                   "<td height=\"59\" colspan=\"2\" bgcolor=\"#000000\"><div align=\"center\"><font color=\"#FFFFFF\" size=\"5\" face=\"Arial, \n");
     fprintf_s(file, "Helvetica, sans-serif\">-------------------------------------------------------------------</font><font \nsize=\"5\" face=\"Arial, Helvetica, sans-serif\"><br>\n");
     fprintf_s(file, "<strong><font color=\"#FFFFFF\">GRAND THEFT AUTO SAN ANDREAS ");
-    fprintf_s(file, "%s</font></strong><br><font\n", _strupr((char*)TheText.Get("FEH_STA"))); // Stats
+    fprintf_s(file, "%s</font></strong><br><font\n", ToUpperCase(TheText.Get("FEH_STA")).c_str()); // Stats
     fprintf_s(file, "color=\"#FFFFFF\">-------------------------------------------------------------------</font></font></div></td> </tr>\n");
     fprintf_s(file, "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\">     <td height=\"22\" colspan=\"2\">&nbsp;</td>  </tr>\n"
-                  "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n");
+                    "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n");
     fprintf_s(file, R"(<td height="40" colspan="2"> <p><font color="#F0000C" size="2" face="Arial, Helvetica, sans-serif"><stro)");
     fprintf_s(file, "ng><font color=\"#F0000C\" size=\"1\">%s: \n", GxtCharToAscii(TheText.Get("FES_DAT"), 0u)); // DATE
     fprintf_s(file, "%s</font><br>        %s: </strong>", date, GxtCharToAscii(TheText.Get("FES_CMI"), 0u));     // LAST MISSION PASSED
-    fprintf_s(file, "%s<strong><br></strong> </font></p></td></tr>\n", _strupr((char*)GxtCharToAscii(lastMissionPassed, 0u)));
+    fprintf_s(file, "%s<strong><br></strong> </font></p></td></tr>\n", ToUpperCase(GxtCharToAscii(lastMissionPassed, 0u)).c_str());
     fprintf_s(file, "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> <td height=\"5\" colspan=\"2\"></td> </tr> <tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n"
                   "<td height=\"10\" colspan=\"2\"></td> </tr> <tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n");
     fprintf_s(file, R"(<td height="20" colspan="2"><font color="#F0000C" size="2" face="Arial, Helvetica, sans-serif">)");

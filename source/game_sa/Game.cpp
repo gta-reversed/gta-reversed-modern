@@ -139,7 +139,7 @@ void ValidateVersion() {
 
     static char(&version_name)[64] = *reinterpret_cast<char(*)[64]>(0xB72C28);
 
-    strncpy(version_name, &buf[15], 64u);
+    strncpy_s(version_name, &buf[15], 64u);
     CFileMgr::CloseFile(file);
 }
 

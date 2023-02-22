@@ -172,12 +172,12 @@ void CWeaponInfo::LoadWeaponData() {
 
             VERIFY(sscanf_s(line,
                 "%*s %s %s %f %f %d %d %d %s %d %d %f %f %f %d %d %f %f %d %d %d %d %d %d %d %x %f %f %f %f",
-                SSCANF_S_STR(weaponName),
-                SSCANF_S_STR(fireTypeName),
+                SCANF_S_STR(weaponName),
+                SCANF_S_STR(fireTypeName),
                 &targetRange, &weaponRange,
                 &modelId1, &modelId2,
                 &slot,
-                SSCANF_S_STR(animGrpName),
+                SCANF_S_STR(animGrpName),
                 &ammo,
                 &dmg,
                 &offset.x, &offset.y, &offset.z,
@@ -253,7 +253,7 @@ void CWeaponInfo::LoadWeaponData() {
             uint32 RLoadA{}, RLoadB{};
             uint32 crouchRLoadA{}, crouchRLoadB{};
 
-            VERIFY(sscanf_s(line, "%*s %s %f %f %f %f %d %d %d %d", SSCANF_S_STR(stealthAnimGrp), &aimX, &aimZ, &duckX, &duckZ, &RLoadA, &RLoadB, &crouchRLoadA, &crouchRLoadB) == 9);
+            VERIFY(sscanf_s(line, "%*s %s %f %f %f %f %d %d %d %d", SCANF_S_STR(stealthAnimGrp), &aimX, &aimZ, &duckX, &duckZ, &RLoadA, &RLoadB, &crouchRLoadA, &crouchRLoadB) == 9);
 
             g_GunAimingOffsets[CAnimManager::GetAnimationGroupId(stealthAnimGrp) - ANIM_GROUP_PYTHON] = {
                 .AimX = aimX,
@@ -284,17 +284,17 @@ void CWeaponInfo::LoadWeaponData() {
 
             VERIFY(sscanf_s(line,
                 "%*s %s %s %f %f %d %d %d %s %d %x %s",
-                SSCANF_S_STR(weaponName),
-                SSCANF_S_STR(fireTypeName),
+                SCANF_S_STR(weaponName),
+                SCANF_S_STR(fireTypeName),
                 &targetRange,
                 &weaponRange,
                 &modelId1,
                 &modelId2,
                 &slot,
-                SSCANF_S_STR(baseComboName),
+                SCANF_S_STR(baseComboName),
                 &numCombos,
                 &flags,
-                SSCANF_S_STR(stealthAnimGrpName)
+                SCANF_S_STR(stealthAnimGrpName)
             ) == 11);
 
             auto wType = FindWeaponType(weaponName);

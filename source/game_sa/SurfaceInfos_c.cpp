@@ -268,7 +268,7 @@ void SurfaceInfos_c::LoadAdhesiveLimits()
             continue;
 
         char value[4];
-        VERIFY(sscanf_s(line, "%s", SSCANF_S_STR(value)) == 1);
+        VERIFY(sscanf_s(line, "%s", SCANF_S_STR(value)) == 1);
         for (auto i = *line; i != ' '; i = *++line) {
             if (i == '\t')
                 break;
@@ -371,7 +371,7 @@ void SurfaceInfos_c::LoadSurfaceAudioInfos()
 
         char  name[64];
         int32 concrete, grass, sand, gravel, wood, water, metal, longGrass, tile;
-        VERIFY(sscanf_s(line, "%s %d %d %d %d %d %d %d %d %d", SSCANF_S_STR(name), &concrete, &grass, &sand, &gravel, &wood, &water, &metal, &longGrass, &tile) == 10);
+        VERIFY(sscanf_s(line, "%s %d %d %d %d %d %d %d %d %d", SCANF_S_STR(name), &concrete, &grass, &sand, &gravel, &wood, &water, &metal, &longGrass, &tile) == 10);
 
         auto id = GetSurfaceIdFromName(name);
         auto& surface = m_surfaces[id];

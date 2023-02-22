@@ -610,7 +610,7 @@ void CMenuManager::ProcessMissionPackNewGame() {
             }
 
             // NOTSA
-            RET_IGNORED(fscanf(file, "%" PRIu8 "#%[^\n\r#]#", &m_MissionPacks[i].m_Id, m_MissionPacks[i].m_Name));
+            VERIFY(fscanf_s(file, "%" PRIu8 "#%[^\n\r#]#", &m_MissionPacks[i].m_Id, SCANF_S_STR(m_MissionPacks[i].m_Name)) == 2);
             CFileMgr::CloseFile(file);
         }
     }
@@ -624,11 +624,11 @@ void CMenuManager::ProcessMissionPackNewGame() {
         if (CGame::bMissionPackGame) {
             // Are you sure you want to start a new standard game?
             // All current game progress in this Mission Pack will be lost. Proceed?
-            strncpy(screen->m_aItems[0].m_szName, "FESZ_MR", 8u);
+            strncpy_s(screen->m_aItems[0].m_szName, "FESZ_MR", 8u);
         } else {
             // Are you sure you want to start a new game?
             // All current game progress will be lost. Proceed?
-            strncpy(screen->m_aItems[0].m_szName, "FESZ_QR", 8u);
+            strncpy_s(screen->m_aItems[0].m_szName, "FESZ_QR", 8u);
         }
     }
 }

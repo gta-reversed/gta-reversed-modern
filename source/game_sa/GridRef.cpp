@@ -27,12 +27,12 @@ void CGridRef::Init() {
 
         char x_ch = 0;
         int32 y = 0;
-        VERIFY(sscanf_s(line, "%c%d %s", &x_ch, 1u, &y, SSCANF_S_STR(str)) == 3);
-        auto lowstr = _strlwr(str);
+        VERIFY(sscanf_s(line, "%c%d %s", &x_ch, 1u, &y, SCANF_S_STR(str)) == 3);
+        _strlwr_s(str);
         int8 x = x_ch - 'A'; // Get alphabetical index
         y -= 1;
         assert(x >= 0 && y >= 0);
-        strcpy_s(GridRefList[x][y], lowstr);
+        strcpy_s(GridRefList[x][y], str);
     }
     CFileMgr::CloseFile(file);
 }

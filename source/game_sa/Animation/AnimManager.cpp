@@ -80,7 +80,7 @@ void CAnimManager::ReadAnimAssociationDefinitions() {
             continue;
 
         if (isAnimSection) {
-            if (sscanf_s(line, "%s", SSCANF_S_STR(name)) == 1) {
+            if (sscanf_s(line, "%s", SCANF_S_STR(name)) == 1) {
                 if (!memcmp(name, "end", 4)) {
                     isAnimSection = false;
                 } else {
@@ -90,7 +90,7 @@ void CAnimManager::ReadAnimAssociationDefinitions() {
         }
         else
         {
-            VERIFY(sscanf_s(line, "%s %s %s %d", SSCANF_S_STR(name), SSCANF_S_STR(block), SSCANF_S_STR(type), &animCount) == 4);
+            VERIFY(sscanf_s(line, "%s %s %s %d", SCANF_S_STR(name), SCANF_S_STR(block), SCANF_S_STR(type), &animCount) == 4);
             animStyle = AddAnimAssocDefinition(name, block, MODEL_MALE01, animCount, aStdAnimDescs);
             isAnimSection = true;
         }
@@ -356,7 +356,7 @@ int32 CAnimManager::RegisterAnimBlock(const char* name) {
     CAnimBlock* animBlock = GetAnimationBlock(name);
     if (animBlock == nullptr) {
         animBlock = &ms_aAnimBlocks[ms_numAnimBlocks++];
-        strncpy(animBlock->szName, name, MAX_ANIM_BLOCK_NAME);
+        strncpy_s(animBlock->szName, name, MAX_ANIM_BLOCK_NAME);
         animBlock->animationCount = 0;
         animBlock->animationStyle = GetFirstAssocGroup(name);
         assert(animBlock->usRefs == 0);
@@ -593,7 +593,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
         }
     } else {
         animBlock = &ms_aAnimBlocks[ms_numAnimBlocks++];
-        strncpy(animBlock->szName, buf + 4, MAX_ANIMBLOCK_NAME);
+        strncpy_s(animBlock->szName, buf + 4, MAX_ANIMBLOCK_NAME);
         animBlock->animationCount = *(int*)buf;
         animBlock->startAnimation = ms_numAnimations;
         animBlock->animationStyle = GetFirstAssocGroup(animBlock->szName);
@@ -762,7 +762,7 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* stream, bool compress, bo
         }
     } else {
         animBlock = &ms_aAnimBlocks[ms_numAnimBlocks++];
-        strncpy(animBlock->szName, buf, MAX_ANIM_BLOCK_NAME);
+        strncpy_s(animBlock->szName, buf, MAX_ANIM_BLOCK_NAME);
         animBlock->animationCount = nAnims;
         animBlock->startAnimation = ms_numAnimations;
         animBlock->animationStyle = GetFirstAssocGroup(animBlock->szName);

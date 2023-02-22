@@ -122,7 +122,7 @@ int32 CFileLoader::LoadAnimatedClumpObject(const char* line) {
     float  drawDist{ 2000.f };
     uint32 flags{};
 
-    if (sscanf_s(line, "%d %s %s %s %f %d", &objID, SSCANF_S_STR(modelName), SSCANF_S_STR(txdName), SSCANF_S_STR(animName), &drawDist, &flags) != 6)
+    if (sscanf_s(line, "%d %s %s %s %f %d", &objID, SCANF_S_STR(modelName), SCANF_S_STR(txdName), SCANF_S_STR(animName), &drawDist, &flags) != 6)
         return -1;
 
     auto mi = CModelInfo::AddClumpModel(objID);
@@ -249,10 +249,10 @@ void CFileLoader::LoadAudioZone(const char* line) {
     float x2, y2, z2;
     float radius;
 
-    if (sscanf_s(line, "%s %d %d %f %f %f %f %f %f", SSCANF_S_STR(name), &id, &enabled, &x1, &y1, &z1, &x2, &y2, &z2) == 9) {
+    if (sscanf_s(line, "%s %d %d %f %f %f %f %f %f", SCANF_S_STR(name), &id, &enabled, &x1, &y1, &z1, &x2, &y2, &z2) == 9) {
         CAudioZones::RegisterAudioBox(name, id, enabled != 0, x1, y1, z1, x2, y2, z2);
     } else {
-        VERIFY(sscanf_s(line, "%s %d %d %f %f %f %f", SSCANF_S_STR(name), &id, &enabled, &x1, &y1, &z1, &radius) == 7);
+        VERIFY(sscanf_s(line, "%s %d %d %f %f %f %f", SCANF_S_STR(name), &id, &enabled, &x1, &y1, &z1, &radius) == 7);
         CAudioZones::RegisterAudioSphere(name, id, enabled != 0, x1, y1, z1, radius);
     }
 }
@@ -432,7 +432,7 @@ int32 CFileLoader::LoadClumpObject(const char* line) {
     char  modelName[24];
     char  texName[24];
 
-    if (sscanf_s(line, "%d %s %s", &objId, SSCANF_S_STR(modelName), SSCANF_S_STR(texName)) != 3)
+    if (sscanf_s(line, "%d %s %s", &objId, SCANF_S_STR(modelName), SCANF_S_STR(texName)) != 3)
         return MODEL_INVALID;
 
     auto mi = static_cast<CVehicleModelInfo*>(CModelInfo::AddClumpModel(objId));
@@ -899,25 +899,25 @@ int32 CFileLoader::LoadObject(const char* line) {
     float  fDrawDist;
     uint32 nFlags;
 
-    auto iNumRead = sscanf_s(line, "%d %s %s %f %d", &modelId, SSCANF_S_STR(modelName), SSCANF_S_STR(texName), &fDrawDist, &nFlags);
+    auto iNumRead = sscanf_s(line, "%d %s %s %f %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &fDrawDist, &nFlags);
     if (iNumRead != 5 || fDrawDist < 4.0f)
     {
         int32 objType;
         float fDrawDist2_unused, fDrawDist3_unused;
-        iNumRead = sscanf_s(line, "%d %s %s %d", &modelId, SSCANF_S_STR(modelName), SSCANF_S_STR(texName), &objType);
+        iNumRead = sscanf_s(line, "%d %s %s %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &objType);
         if (iNumRead != 4)
             return -1;
 
         switch (objType)
         {
         case 1:
-            VERIFY(sscanf_s(line, "%d %s %s %d %f %d", &modelId, SSCANF_S_STR(modelName), SSCANF_S_STR(texName), &objType, &fDrawDist, &nFlags) >= 5);
+            VERIFY(sscanf_s(line, "%d %s %s %d %f %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &objType, &fDrawDist, &nFlags) >= 5);
             break;
         case 2:
-            VERIFY(sscanf_s(line, "%d %s %s %d %f %f %d", &modelId, SSCANF_S_STR(modelName), SSCANF_S_STR(texName), &objType, &fDrawDist, &fDrawDist2_unused, &nFlags) == 7);
+            VERIFY(sscanf_s(line, "%d %s %s %d %f %f %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &objType, &fDrawDist, &fDrawDist2_unused, &nFlags) == 7);
             break;
         case 3:
-            VERIFY(sscanf_s(line, "%d %s %s %d %f %f %f %d", &modelId, SSCANF_S_STR(modelName), SSCANF_S_STR(texName), &objType, &fDrawDist, &fDrawDist2_unused, &fDrawDist3_unused, &nFlags) == 8);
+            VERIFY(sscanf_s(line, "%d %s %s %d %f %f %f %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &objType, &fDrawDist, &fDrawDist2_unused, &fDrawDist3_unused, &nFlags) == 8);
             break;
         }
     }
@@ -1079,7 +1079,7 @@ CEntity* CFileLoader::LoadObjectInstance(const char* line) {
         line,
         "%d %s %d %f %f %f %f %f %f %f %d",
         &instance.m_nModelId,
-        SSCANF_S_STR(modelName),
+        SCANF_S_STR(modelName),
         &instance.m_nInstanceType,
         &instance.m_vecPosition.x,
         &instance.m_vecPosition.y,
@@ -1170,7 +1170,7 @@ void CFileLoader::LoadEntryExit(const char* line) {
         &exitAngle,
         &area,
         &flags,
-        SSCANF_S_STR(interiorName),
+        SCANF_S_STR(interiorName),
         &skyColor,
         &numOfPeds,
         &timeOn,
@@ -1255,7 +1255,7 @@ void CFileLoader::LoadGarage(const char* line) {
         &p2.x, &p2.y, &p2.z,
         &flags,
         &type,
-        SSCANF_S_STR(name)
+        SCANF_S_STR(name)
     ) == 11) {
         CGarages::AddOne(p1.x, p1.y, p1.z, frontX, frontY, p2.x, p2.y, p2.z, (eGarageType)type, 0, name, flags);
     }
@@ -1431,19 +1431,19 @@ int32 CFileLoader::LoadPedObject(const char* line) {
         line,
         "%d %s %s %s %s %s %x %x %11s %d %d %s %s %s",
         &modelId,
-        SSCANF_S_STR(modelName),
-        SSCANF_S_STR(texName),
-        SSCANF_S_STR(pedType),
-        SSCANF_S_STR(statName),
-        SSCANF_S_STR(animGroup),
+        SCANF_S_STR(modelName),
+        SCANF_S_STR(texName),
+        SCANF_S_STR(pedType),
+        SCANF_S_STR(statName),
+        SCANF_S_STR(animGroup),
         &carsCanDriveMask,
         &flags,
-        SSCANF_S_STR(animFile),
+        SCANF_S_STR(animFile),
         &radio1,
         &radio2,
-        SSCANF_S_STR(pedVoiceType),
-        SSCANF_S_STR(voiceMin),
-        SSCANF_S_STR(voiceMax)
+        SCANF_S_STR(pedVoiceType),
+        SCANF_S_STR(voiceMin),
+        SCANF_S_STR(voiceMax)
     ) == 14);
 
     const auto FindAnimGroup = [animGroup, nAssocGroups = CAnimManager::ms_numAnimAssocDefinitions] {
@@ -1682,7 +1682,7 @@ void CFileLoader::LoadStuntJump(const char* line) {
 // 0x5B75E0
 int32 CFileLoader::LoadTXDParent(const char* line) {
     char name[32], parentName[32];
-    VERIFY(sscanf_s(line, "%s %s", SSCANF_S_STR(name), SSCANF_S_STR(parentName)) == 2);
+    VERIFY(sscanf_s(line, "%s %s", SCANF_S_STR(name), SCANF_S_STR(parentName)) == 2);
     auto txdSlot = CTxdStore::FindOrAddTxdSlot(name);
     auto parentSlot = CTxdStore::FindOrAddTxdSlot(parentName);
     CTxdStore::ms_pTxdPool->GetAt(txdSlot)->m_wParentIndex = parentSlot;
@@ -1734,23 +1734,23 @@ int32 CFileLoader::LoadTimeObject(const char* line) {
     int32 timeOn;
     int32 timeOff;
 
-    int32 numValuesRead = sscanf_s(line, "%d %s %s %f %d %d %d", &modelId, SSCANF_S_STR(modelName), SSCANF_S_STR(texName), &drawDistance[0], &flags, &timeOn, &timeOff);
+    int32 numValuesRead = sscanf_s(line, "%d %s %s %f %d %d %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &drawDistance[0], &flags, &timeOn, &timeOff);
 
     if (numValuesRead != 7 || drawDistance[0] < 4.0) {
         int32 numObjs;
 
-        if (sscanf_s(line, "%d %s %s %d", &modelId, SSCANF_S_STR(modelName), SSCANF_S_STR(texName), &numObjs) != 4)
+        if (sscanf_s(line, "%d %s %s %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &numObjs) != 4)
             return -1;
 
         switch (numObjs) {
         case 1:
-            VERIFY(sscanf_s(line, "%d %s %s %d %f %d %d %d", &modelId, SSCANF_S_STR(modelName), SSCANF_S_STR(texName), &numObjs, &drawDistance[0], &flags, &timeOn, &timeOff) == 8);
+            VERIFY(sscanf_s(line, "%d %s %s %d %f %d %d %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &numObjs, &drawDistance[0], &flags, &timeOn, &timeOff) == 8);
             break;
         case 2:
-            VERIFY(sscanf_s(line, "%d %s %s %d %f %f %d %d %d", &modelId, SSCANF_S_STR(modelName), SSCANF_S_STR(texName), &numObjs, &drawDistance[0], &drawDistance[1], &flags, &timeOn, &timeOff) == 9);
+            VERIFY(sscanf_s(line, "%d %s %s %d %f %f %d %d %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &numObjs, &drawDistance[0], &drawDistance[1], &flags, &timeOn, &timeOff) == 9);
             break;
         case 3:
-            VERIFY(sscanf_s(line, "%d %s %s %d %f %f %f %d %d %d", &modelId, SSCANF_S_STR(modelName), SSCANF_S_STR(texName), &numObjs, &drawDistance[0], &drawDistance[1], &drawDistance[2], &flags, &timeOn, &timeOff) == 10);
+            VERIFY(sscanf_s(line, "%d %s %s %d %f %f %f %d %d %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &numObjs, &drawDistance[0], &drawDistance[1], &drawDistance[2], &flags, &timeOn, &timeOff) == 10);
             break;
         default:
             NOTSA_UNREACHABLE();
@@ -1792,13 +1792,13 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
 
     VERIFY(sscanf_s(line, "%d %s %s %s %s %s %s %s %d %d %x %d %f %f %d",
         &modelId,
-        SSCANF_S_STR(modelName),
-        SSCANF_S_STR(texName),
-        SSCANF_S_STR(type),
-        SSCANF_S_STR(handlingName),
-        SSCANF_S_STR(gameName),
-        SSCANF_S_STR(anims),
-        SSCANF_S_STR(vehCls),
+        SCANF_S_STR(modelName),
+        SCANF_S_STR(texName),
+        SCANF_S_STR(type),
+        SCANF_S_STR(handlingName),
+        SCANF_S_STR(gameName),
+        SCANF_S_STR(anims),
+        SCANF_S_STR(vehCls),
         &frq,
         &flags,             // optional
         &vehComps.m_nComps, // optional
@@ -1923,7 +1923,7 @@ int32 CFileLoader::LoadWeaponObject(const char* line) {
     int32 weaponType;
     float drawDist;
 
-    VERIFY(sscanf_s(line, "%d %s %s %s %d %f", &objId, SSCANF_S_STR(modelName), SSCANF_S_STR(texName), SSCANF_S_STR(animName), &weaponType, &drawDist) == 6);
+    VERIFY(sscanf_s(line, "%d %s %s %s %d %f", &objId, SCANF_S_STR(modelName), SCANF_S_STR(texName), SCANF_S_STR(animName), &weaponType, &drawDist) == 6);
     CWeaponModelInfo* mi = CModelInfo::AddWeaponModel(objId);
     mi->SetModelName(modelName);
     mi->m_fDrawDistance = drawDist;
@@ -1941,7 +1941,7 @@ void CFileLoader::LoadZone(const char* line) {
     int32 island;
     char  zoneName[12];
 
-    auto iNumRead = sscanf_s(line, "%s %d %f %f %f %f %f %f %d %s", SSCANF_S_STR(name), &type, &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &island, SSCANF_S_STR(zoneName));
+    auto iNumRead = sscanf_s(line, "%s %d %f %f %f %f %f %f %d %s", SCANF_S_STR(name), &type, &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &island, SCANF_S_STR(zoneName));
     if (iNumRead == 10)
         CTheZones::CreateZone(name, static_cast<eZoneType>(type), min.x, min.y, min.z, max.x, max.y, max.z, static_cast<eLevelName>(island), zoneName);
 }

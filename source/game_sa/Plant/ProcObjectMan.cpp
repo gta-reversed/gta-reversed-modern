@@ -64,8 +64,8 @@ void ProcObjectMan_c::LoadDataFile() {
 
         VERIFY(sscanf_s(
             line, "%s %s %f %f %d %d %f %f %f %f %f %f %d %d",
-            SSCANF_S_STR(surfaceType),
-            SSCANF_S_STR(objectName),
+            SCANF_S_STR(surfaceType),
+            SCANF_S_STR(objectName),
             &spacing,
             &minDist,
             &minRot, &maxRot,

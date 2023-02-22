@@ -114,7 +114,7 @@ template<typename... Ts>
 #define RET_IGNORED(x) (void)(x);
 
 // Macro for providing a string var to *scanf_s function.
-#define SSCANF_S_STR(s) s, std::size(s)
+#define SCANF_S_STR(s) s, std::size(s)
 
 /*!
 * @brief Used for static variable references

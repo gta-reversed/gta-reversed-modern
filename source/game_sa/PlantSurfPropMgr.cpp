@@ -67,8 +67,8 @@ bool CPlantSurfPropMgr::LoadPlantsDat(const char* filename) {
 
         ePlantField field = ePlantField::NAME;
         tSurfPropTab* surfProperties = nullptr;
-
-        char* surfaceName = strtok(line, " \t");
+        char* lastToken{};
+        char* surfaceName = strtok_s(line, " \t", &lastToken);
 
         Plant* plant = nullptr;
         do {
@@ -145,7 +145,7 @@ bool CPlantSurfPropMgr::LoadPlantsDat(const char* filename) {
             default:
                 break;
             }
-            surfaceName = strtok(nullptr, " \t");
+            surfaceName = strtok_s(nullptr, " \t", &lastToken);
             field = static_cast<ePlantField>(static_cast<int32>(field) + 1);
         } while (surfaceName);
 

@@ -65,12 +65,12 @@ struct SurfaceInfo {
         // FIX_BUGS: Possible buffer overflow
         VERIFY(sscanf_s(
             line, "%s %s %f %f %s %s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %s",
-            SSCANF_S_STR(SurfaceName), SSCANF_S_STR(AdhesionGroup),
-            &TyreGrip, &WetGrip, SSCANF_S_STR(SkidMark), SSCANF_S_STR(FrictionEffect),
+            SCANF_S_STR(SurfaceName), SCANF_S_STR(AdhesionGroup),
+            &TyreGrip, &WetGrip, SCANF_S_STR(SkidMark), SCANF_S_STR(FrictionEffect),
             &SoftLand, &SeeThrough, &ShootThrough, &Sand, &Water, &ShallowWater, &Beach, &SteepSlope, &Glass, &Stairs, &Skateable, &Pavement,
             &Roughness, &Flame, &Sparks, &Sprint, &Footsteps, &FootDust, &CarDirt, &CarClean, &WheelGrass, &WheelGravel, &WheelMud, &WheelDust, &WheelSand, &WheelSpray,
             &ProcPlant, &ProcObj, &Climbable,
-            SSCANF_S_STR(BulletFx)
+            SCANF_S_STR(BulletFx)
         ) == 36);
     }
 };

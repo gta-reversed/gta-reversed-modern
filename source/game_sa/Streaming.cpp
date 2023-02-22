@@ -2082,8 +2082,9 @@ void CStreaming::ReadIniFile() {
         if (*line == '#' || !*line)
             continue;
 
-        char* attribute = strtok(line, " ,\t");
-        char* value = strtok(nullptr, " ,\t");
+        char* nextToken{};
+        char* attribute = strtok_s(line, " ,\t", &nextToken);
+        char* value = strtok_s(nullptr, " ,\t", &nextToken);
         // NOTSA: atoi, atof are replaced by safe analogues
         // todo: Handle errors
         if (_stricmp(attribute, "memory") != 0 || bHasDevkitMemory)

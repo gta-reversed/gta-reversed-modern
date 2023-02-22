@@ -68,7 +68,7 @@ solution "gta_reversed"
         "NoBufferSecurityCheck",
         "FatalWarnings"
     }
-    defines { "_CRT_SECURE_NO_WARNINGS", "_SCL_SECURE_NO_WARNINGS"}
+    defines { "_SCL_SECURE_NO_WARNINGS" }
 
 group "Dependencies"
     defines { "WIN32", "_WINDOWS" }

@@ -174,7 +174,7 @@ bool CHud::HelpMessageDisplayed() {
 // 0x588F60
 void CHud::SetMessage(const char* message) {
     if (message) {
-        strncpy(m_Message, message, sizeof(m_Message));
+        strncpy_s(m_Message, message, sizeof(m_Message));
     } else {
         m_Message[0] = '\0';
     }
@@ -187,7 +187,7 @@ void CHud::SetBigMessage(char* message, eMessageStyle style) {
         return;
     }
 
-    strncpy(m_BigMessage[style], message, sizeof(m_BigMessage[style]));
+    strncpy_s(m_BigMessage[style], message, sizeof(m_BigMessage[style]));
 
     switch (style) {
     case STYLE_WHITE_MIDDLE_SMALLER: {
@@ -195,7 +195,7 @@ void CHud::SetBigMessage(char* message, eMessageStyle style) {
             OddJob2OffTimer = 0.0f;
             OddJob2On = 0;
         }
-        strncpy(LastBigMessage[style], message, sizeof(LastBigMessage[style]));
+        strncpy_s(LastBigMessage[style], message, sizeof(LastBigMessage[style]));
         break;
     }
     default: {

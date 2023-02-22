@@ -104,7 +104,7 @@ void CFont::LoadFontValues() {
         if (*line == '\0' || *line == '#')
             continue;
 
-        if (sscanf_s(line, "%s", SSCANF_S_STR(attrib)) == EOF)
+        if (sscanf_s(line, "%s", SCANF_S_STR(attrib)) == EOF)
             continue;
 
         if (!memcmp(attrib, "[TOTAL_FONTS]", 14)) {
@@ -627,7 +627,7 @@ float CFont::GetStringWidth(const char* string, bool full, bool scriptText) {
     size_t len = CMessages::GetStringLength(string);
     char data[400] = {0};
 
-    strncpy(data, string, len);
+    strncpy_s(data, string, len);
     CMessages::InsertPlayerControlKeysInString(data);
 
     float width = 0.0f;

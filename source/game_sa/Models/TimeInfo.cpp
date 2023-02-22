@@ -22,7 +22,7 @@ CTimeInfo* CTimeInfo::FindOtherTimeModel(const char* modelName) {
     char* nightSuffix = strstr(timeSwitchModelName, "_nt");
 
     if (nightSuffix) {
-        strncpy(nightSuffix, "_dy", 4);
+        strncpy_s(nightSuffix, 4, "_dy", 4);
     }
     else {
         char* daySuffix = strstr(timeSwitchModelName, "_dy");
@@ -30,7 +30,7 @@ CTimeInfo* CTimeInfo::FindOtherTimeModel(const char* modelName) {
         if (!daySuffix)
             return nullptr;
 
-        strncpy(daySuffix, "_nt", 4);
+        strncpy_s(daySuffix, 4, "_nt", 4);
     }
 
     int32 index = 0;

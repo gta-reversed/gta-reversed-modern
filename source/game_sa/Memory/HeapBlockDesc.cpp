@@ -44,7 +44,7 @@ void HeapBlockDesc::_DumpBlockInfo() const {
 
     if (!self->m_Flags.NoDebugHint) {
         if (szInfo[0])
-            strcat(szInfo, " ");
+            strcat_s(szInfo, " ");
 
         if (self->m_Flags.StringDebugInfo)
             sprintf_s(szInfo + strlen(szInfo), "[Hint: %s]", self->m_upDebugInfo); // TODO: fix

@@ -298,7 +298,7 @@ void CText::LoadMissionText(const char* mission) {
     CTimer::Resume();
     CFileMgr::SetDir("");
 
-    strncpy(m_szMissionName, mission, sizeof(m_szMissionName));
+    strncpy_s(m_szMissionName, mission, sizeof(m_szMissionName));
     m_bIsMissionPackLoaded = true;
 }
 

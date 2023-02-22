@@ -75,7 +75,7 @@ int32 CdStreamOpen(const char* lpFileName) {
     gStreamFileHandles[freeHandleIndex] = file;
     if (file == INVALID_HANDLE_VALUE)
         return 0;
-    strncpy(gCdImageNames[freeHandleIndex], lpFileName, MAX_CD_STREAM_IMAGE_NAME_SIZE);
+    strncpy_s(gCdImageNames[freeHandleIndex], lpFileName, MAX_CD_STREAM_IMAGE_NAME_SIZE);
     return freeHandleIndex << 24;
 }
 

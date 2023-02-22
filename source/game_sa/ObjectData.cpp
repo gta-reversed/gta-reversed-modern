@@ -66,7 +66,7 @@ void CObjectData::Initialise(const char* fileName)
         float fPercentSubmerged;
         int32 iColDamEffect, iSpecialColResp, iCameraAvoid, iCausesExplosion, iFxType; // Have to be read as 32-bit integers and later assigned to 8 bit int32
         VERIFY(sscanf_s(line, "%s %f %f %f %f %f %f %f %d %d %d %d %d %f %f %f %s %f %f %f %f %f %d %d", // FIX_BUGS: Sized string read
-            SSCANF_S_STR(modelName),
+            SCANF_S_STR(modelName),
             &curInfo.m_fMass,
             &curInfo.m_fTurnMass,
             &curInfo.m_fAirResistance,
@@ -82,7 +82,7 @@ void CObjectData::Initialise(const char* fileName)
             &curInfo.m_vFxOffset.x,        // optional
             &curInfo.m_vFxOffset.y,        // optional
             &curInfo.m_vFxOffset.z,        // optional
-            SSCANF_S_STR(effectName),      // optional
+            SCANF_S_STR(effectName),      // optional
             &curInfo.m_fSmashMultiplier,   // optional (Breakable Info)
             &curInfo.m_vecBreakVelocity.x, // optional (Breakable Info)
             &curInfo.m_vecBreakVelocity.y, // optional (Breakable Info)

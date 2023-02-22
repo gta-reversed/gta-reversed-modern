@@ -65,7 +65,7 @@ void CPedStats::LoadPedStats() {
         VERIFY(sscanf_s(
             line,
             "%s %f %f %d %d %d %d %f %f %d %d",
-            SSCANF_S_STR(name),
+            SCANF_S_STR(name),
             &fleeDistance,
             &headingChangeRate,
             &fear,

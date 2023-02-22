@@ -93,7 +93,7 @@ RwTexture* CCustomRoadsignMgr::CreateRoadsignTexture(char* name, int32 numOfChar
     }
 
     char nameCopy[12] {};
-    strncpy(nameCopy, name, 10);
+    strncpy_s(nameCopy, name, 10);
     RwTextureSetName(texture, nameCopy);
     RwTextureSetFilterMode(texture, rwFILTERLINEAR);
     return texture;

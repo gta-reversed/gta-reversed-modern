@@ -527,7 +527,7 @@ void CVehicleModelInfo::SetCustomCarPlateText(char* text)
         return;
     }
 
-    strncpy(m_szPlateText, text, 8);
+    strncpy_s(m_szPlateText, text, 8);
 }
 
 void CVehicleModelInfo::ReduceMaterialsInVehicle()
@@ -1228,7 +1228,7 @@ void CVehicleModelInfo::AssignRemapTxd(const char* name, int16 txdSlot)
         --iLastIndex;
 
     char buffer[24];
-    strncpy(buffer, name, iLastIndex + 1);
+    strncpy_s(buffer, name, iLastIndex + 1);
     buffer[iLastIndex + 1] = '\0';
 
     auto mi = CModelInfo::GetModelInfo(buffer, 400, 630);
@@ -1351,7 +1351,7 @@ void CVehicleModelInfo::LoadVehicleColours()
         {
             char modelName[64];
             auto iNumRead = sscanf_s(buffer, "%s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
-                SSCANF_S_STR(modelName),
+                SCANF_S_STR(modelName),
                 &colorBuffer[0][0],
                 &colorBuffer[0][1],
                 &colorBuffer[1][0],
@@ -1387,7 +1387,7 @@ void CVehicleModelInfo::LoadVehicleColours()
         if (iLastMode == eCarColLineType::CAR_4COL) {
             char modelName[64];
             auto iNumRead = sscanf_s(buffer, "%s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
-                SSCANF_S_STR(modelName),
+                SCANF_S_STR(modelName),
                 &colorBuffer[0][0],
                 &colorBuffer[0][1],
                 &colorBuffer[0][2],
@@ -1470,15 +1470,17 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
             continue;
         }
 
+        char* pLastToken{};
         switch (iLineType) {
         case eCarModsLineType::LINK: {
             int32 iModelId1 = -1, iModelId2 = -1;
-            auto pToken = strtok(line, " \t,");
+            char* pLastToken{};
+            auto pToken = strtok_s(line, " \t,", &pLastToken);
             if (pToken) {
                 auto pModel1 = static_cast<CAtomicModelInfo*>(CModelInfo::GetModelInfo(pToken, &iModelId1));
                 pModel1->SetupVehicleUpgradeFlags(pToken);
 
-                auto pNextToken = strtok(nullptr, " \t,");
+                auto pNextToken = strtok_s(nullptr, " \t,", &pLastToken);
                 auto pModel2 = static_cast<CAtomicModelInfo*>(CModelInfo::GetModelInfo(pNextToken, &iModelId2));
                 pModel2->SetupVehicleUpgradeFlags(pNextToken);
 
@@ -1488,20 +1490,20 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
         }
 
         case eCarModsLineType::MODS: {
-            auto pToken = strtok(line, " \t,");
+            auto pToken = strtok_s(line, " \t,", &pLastToken);
             if (!pToken)
                 break;
 
             int32 iModelId = -1;
             auto mi = CModelInfo::GetModelInfo(pToken, &iModelId)->AsVehicleModelInfoPtr();
-            auto nextToken = strtok(nullptr, " \t,");
+            auto nextToken = strtok_s(nullptr, " \t,", &pLastToken);
             auto upgrade = mi->m_anUpgrades;
             while (nextToken) {
                 auto ami = static_cast<CAtomicModelInfo*>(CModelInfo::GetModelInfo(nextToken, &iModelId));
                 ami->SetupVehicleUpgradeFlags(nextToken);
                 *upgrade = iModelId;
                 ++upgrade;
-                nextToken = strtok(nullptr, " \t,");
+                nextToken = strtok_s(nullptr, " \t,", &pLastToken);
             }
 
             auto hydraulicsAMI = static_cast<CAtomicModelInfo*>(CModelInfo::GetModelInfo("hydralics", &iModelId));
@@ -1518,9 +1520,9 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
         case eCarModsLineType::WHEEL: {
             int32 iModelId = -1, iWheelSet;
             VERIFY(sscanf_s(line, "%d", &iWheelSet) == 1);
-            RET_IGNORED(strtok(line, " \t,"));
+            strtok_s(line, " \t,", &pLastToken);
             char* token;
-            while ((token = strtok(nullptr, " \t,"))) {
+            while ((token = strtok_s(nullptr, " \t,", &pLastToken))) {
                 auto wheelMI = static_cast<CAtomicModelInfo*>(CModelInfo::GetModelInfo(token, &iModelId));
                 wheelMI->SetupVehicleUpgradeFlags(token);
                 AddWheelUpgrade(iWheelSet, iModelId);
