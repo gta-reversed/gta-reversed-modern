@@ -618,7 +618,7 @@ bool CGenericGameStorage::SaveWorkBuffer(bool bIncludeChecksum) {
 // 0x5D0F50
 uint32 CGenericGameStorage::GetCurrentVersionNumber() {
     char buffer[40]{};
-    sprintf(buffer, "%s%s", "Apr 28 2005", "10:28:55");
+    sprintf_s(buffer, "%s%s", "Apr 28 2005", "10:28:55");
     return CKeyGen::GetKey(buffer);
 }
 

@@ -115,14 +115,14 @@ void CLoadingScreen::LoadSplashes(bool starting, bool nvidia) {
     char name[20];
     for (auto id = 0u; id < MAX_SPLASHES; id++) {
         if (starting) {
-            sprintf(name, nvidia ? "nvidia" : "eax");
+            sprintf_s(name, nvidia ? "nvidia" : "eax");
         } else if (id) {
-            sprintf(name, "loadsc%d", screenIdx[id]);
+            sprintf_s(name, "loadsc%d", screenIdx[id]);
         } else {
 #ifdef USE_EU_STUFF
-            sprintf(name, "title_pc_EU");
+            sprintf_s(name, "title_pc_EU");
 #else
-            sprintf(name, "title_pc_US");
+            sprintf_s(name, "title_pc_US");
 #endif
         }
         m_aSplashes[id].SetTexture(name);

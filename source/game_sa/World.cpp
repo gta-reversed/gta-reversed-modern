@@ -628,7 +628,7 @@ void CWorld::ShutDown() {
     {
         const auto MakeSureListIsEmpty = [](CPtrListDoubleLink& list, int32 x, int32 y, const char* listName) {
             if (!list.IsEmpty()) {
-                sprintf(gString, "%s overlap list %d,%d not empty\n", listName, x, y);
+                sprintf_s(gString, "%s overlap list %d,%d not empty\n", listName, x, y);
                 list.Flush();
             #ifdef _DEBUG
                 DEV_LOG(gString); // Lets also print this string

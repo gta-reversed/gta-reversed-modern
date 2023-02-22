@@ -82,7 +82,7 @@ bool CPlantSurfPropMgr::LoadPlantsDat(const char* filename) {
                         break;
                     }
                 } else {
-                    sprintf(errorMsg, "Unknown surface name '%s' in 'Plants.dat' (line %d)! See Andrzej to fix this.", surfaceName, lineId);
+                    sprintf_s(errorMsg, "Unknown surface name '%s' in 'Plants.dat' (line %d)! See Andrzej to fix this.", surfaceName, lineId);
                 }
                 return false;
             case ePlantField::PCD_ID:

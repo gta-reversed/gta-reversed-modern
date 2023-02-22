@@ -2383,6 +2383,6 @@ const char* GetFilename(const char* filepath) {
 // 0x5B3680
 void LoadingScreenLoadingFile(const char* str) {
     const char* screenName = GetFilename(str);
-    sprintf(gString, "Loading %s", screenName);
+    sprintf_s(gString, "Loading %s", screenName);
     LoadingScreen("Loading the Game", gString);
 }

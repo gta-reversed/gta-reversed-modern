@@ -263,7 +263,7 @@ void CHud::SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float
     m_nHelpMessageStatId = statId;
     m_fHelpMessageStatUpdateValue = diff;
     m_nHelpMessageMaxStatValue = (uint32)max;
-    sprintf(gString, state == STAT_UPDATE_INCREASE ? "+" : "-");
+    sprintf_s(gString, state == STAT_UPDATE_INCREASE ? "+" : "-");
     AsciiToGxtChar(gString, m_pHelpMessage);
 }
 
@@ -1384,7 +1384,7 @@ void CHud::DrawAmmo(CPed* ped, int32 x, int32 y, float alpha) {
     const auto& ammoClip = CWeaponInfo::GetWeaponInfo(weapon.m_nType, ped->GetWeaponSkill())->m_nAmmoClip;
 
     if (ammoClip <= 1 || ammoClip >= 1000) {
-        sprintf(gString, "%d", totalAmmo);
+        sprintf_s(gString, "%d", totalAmmo);
     } else {
         uint32 total, current;
 
@@ -1405,7 +1405,7 @@ void CHud::DrawAmmo(CPed* ped, int32 x, int32 y, float alpha) {
 
             current = ammoInClip;
         }
-        sprintf(gString, "%d-%d", total, current);
+        sprintf_s(gString, "%d-%d", total, current);
     }
     AsciiToGxtChar(gString, gGxtString);
 
@@ -1457,7 +1457,7 @@ inline void CHud::DrawClock() {
     CFont::SetRightJustifyWrap(0.0f);
     CFont::SetEdge(2);
     CFont::SetDropColor({0, 0, 0, 255});
-    sprintf(ascii, "%02d:%02d", CClock::ms_nGameClockHours, CClock::ms_nGameClockMinutes);
+    sprintf_s(ascii, "%02d:%02d", CClock::ms_nGameClockHours, CClock::ms_nGameClockMinutes);
     AsciiToGxtChar(ascii, text);
     CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_LIGHT_GRAY));
     CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(32.0f), SCREEN_STRETCH_Y(22.0f), text);
@@ -1474,10 +1474,10 @@ inline void CHud::DrawMoney(const CPlayerInfo& playerInfo, uint8 alpha) {
         if (m_nDisplayMoney < 0) {
             m_nDisplayMoney = -m_nDisplayMoney;
         }
-        sprintf(ascii, "-$%07d", m_nDisplayMoney);
+        sprintf_s(ascii, "-$%07d", m_nDisplayMoney);
     } else {
         CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_GREEN, alpha));
-        sprintf(ascii, "$%08d", std::abs(playerInfo.m_nDisplayMoney));
+        sprintf_s(ascii, "$%08d", std::abs(playerInfo.m_nDisplayMoney));
     }
     AsciiToGxtChar(ascii, text);
     CFont::SetProportional(false);

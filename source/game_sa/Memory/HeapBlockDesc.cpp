@@ -47,9 +47,9 @@ void HeapBlockDesc::_DumpBlockInfo() const {
             strcat(szInfo, " ");
 
         if (self->m_Flags.StringDebugInfo)
-            sprintf(szInfo + strlen(szInfo), "[Hint: %s]", self->m_upDebugInfo);
+            sprintf_s(szInfo + strlen(szInfo), "[Hint: %s]", self->m_upDebugInfo); // TODO: fix
         else
-            sprintf(szInfo + strlen(szInfo), "[Hint: 0x%08x]", self->m_pDebugInfo);
+            sprintf_s(szInfo + strlen(szInfo), "[Hint: 0x%08x]", self->m_pDebugInfo); // TODO: fix
 
         info = szInfo;
     }
@@ -69,9 +69,9 @@ void HeapBlockDesc::_DumpBlockInfo() const {
 
     char szMem[64] = { 0 };
     for (int32 i = 0; i < 16; ++i) { // todo: magic number (related to m_idStack size?)
-        sprintf(szMem + strlen(szMem), "%02x", ((uint8*)self->_GetBlockData())[i]);
+        sprintf_s(szMem + strlen(szMem), 3u, "%02x", ((uint8*)self->_GetBlockData())[i]);
         if (i + 1 != 16) {
-            strcat(szMem, " ");
+            strcat_s(szMem, " ");
         }
     }
 

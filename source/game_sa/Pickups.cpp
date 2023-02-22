@@ -575,7 +575,7 @@ void CPickups::RenderPickUpText() {
                 CMessages::InsertNumberInString(message.text, 0, 0, 0, 0, 0, 0, gString);
             }
         } else {
-            sprintf(gString, "$%d", message.price);
+            sprintf_s(gString, "$%d", message.price);
             AsciiToGxtChar(gString, gGxtString);
         }
 

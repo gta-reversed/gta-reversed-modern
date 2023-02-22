@@ -316,7 +316,7 @@ void CText::LoadMissionPackText() {
 
     CFileMgr::SetDirMyDocuments();
     char fileName[64];
-    sprintf(fileName, "MPACK//MPACK%d//TEXT.GXT", CGame::bMissionPackGame);
+    sprintf_s(fileName, "MPACK//MPACK%d//TEXT.GXT", CGame::bMissionPackGame);
 
     auto file = CFileMgr::OpenFile(fileName, "rb");
     if (!file) {

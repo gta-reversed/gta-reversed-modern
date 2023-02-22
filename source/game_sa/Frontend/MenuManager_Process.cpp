@@ -122,7 +122,7 @@ void CMenuManager::ProcessFileActions() {
         if (field_1B3E) {
             if (CGame::bMissionPackGame) {
                 CFileMgr::SetDirMyDocuments();
-                sprintf(gString, "MPACK//MPACK%d//SCR.SCM", CGame::bMissionPackGame);
+                sprintf_s(gString, "MPACK//MPACK%d//SCR.SCM", CGame::bMissionPackGame);
                 auto file = CFileMgr::OpenFile(gString, "rb");
                 CFileMgr::SetDir(""); // FIX_BUGS
 
@@ -598,7 +598,7 @@ void CMenuManager::ProcessMissionPackNewGame() {
     auto isAnyAvailable = false;
     CFileMgr::SetDirMyDocuments();
     for (auto i = 0u; i < 25u; i++) {
-        sprintf(gString, "MPACK//MPACK%d//MPACK.DAT", i);
+        sprintf_s(gString, "MPACK//MPACK%d//MPACK.DAT", i);
         if (auto file = CFileMgr::OpenFile(gString, "rb")) {
             // MPACK.DAT file format:
             //

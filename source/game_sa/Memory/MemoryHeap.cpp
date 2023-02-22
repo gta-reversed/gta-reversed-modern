@@ -382,7 +382,7 @@ void CMemoryHeap::ParseHeap() {
         }
 
         if ((k & 63) == 0) { // '?'
-            sprintf(buffer, "\n%5dK:", k / 64);
+            sprintf_s(buffer, "\n%5dK:", k / 64);
             CFileMgr::Write(file, buffer, 8);
         }
 
@@ -391,7 +391,7 @@ void CMemoryHeap::ParseHeap() {
 
         for (uint32 size = block->m_nSize >> 4; size; --size) {
             if ((k & 63) == 0) {
-                sprintf(buffer, "\n%5dK:", k / 64);
+                sprintf_s(buffer, "\n%5dK:", k / 64);
                 CFileMgr::Write(file, buffer, 8);
             }
             CFileMgr::Write(file, &cState, sizeof(char));

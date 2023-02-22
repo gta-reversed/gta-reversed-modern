@@ -3800,7 +3800,7 @@ void CStreaming::UpdateForAnimViewer() {
     CVector position{};
     AddModelsToRequestList(position, 0);
     LoadRequestedModels();
-    sprintf(gString, "Requested %d, memory size %dK\n", ms_numModelsRequested, 2 * ms_memoryUsedBytes);
+    sprintf_s(gString, "Requested %d, memory size %dK\n", ms_numModelsRequested, 2 * ms_memoryUsedBytes);
 }
 
 // 0x407F80

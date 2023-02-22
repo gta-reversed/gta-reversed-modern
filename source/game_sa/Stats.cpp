@@ -705,9 +705,9 @@ bool CStats::Load() {
 // 0x558DE0
 char* CStats::GetStatID(eStats stat) {
     if (!GetStatType(stat)) // int32
-        sprintf(gString, "stat_i_%d", stat);
+        sprintf_s(gString, "stat_i_%d", stat);
     else
-        sprintf(gString, "stat_f_%d", stat);
+        sprintf_s(gString, "stat_f_%d", stat);
 
     return gString;
 }

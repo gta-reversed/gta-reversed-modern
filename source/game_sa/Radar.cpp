@@ -190,7 +190,7 @@ void CRadar::Initialise()
 
     for (auto i = 0u; i < gRadarTextures.size(); i++) {
         char txdName[16] = { 0 };
-        sprintf(txdName, "radar%02d", i);
+        sprintf_s(txdName, "radar%02d", i);
         gRadarTextures[i] = CTxdStore::FindTxdSlot(txdName);
     }
 }
