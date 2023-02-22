@@ -1164,7 +1164,7 @@ void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId)
     {
         char version[4];
         CFileMgr::Read(imgFile, &version, 4u);    // �VER2� for SA
-        assert(strncmp(version, "VER2", 4) == 0); // NOTSA
+        assert((std::string_view{version, 4u} == "VER2")); // NOTSA
     }
 
     int32 previousModelId = MODEL_INVALID;

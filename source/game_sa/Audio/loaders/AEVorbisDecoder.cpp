@@ -44,7 +44,7 @@ bool CAEVorbisDecoder::Initialise() {
 
     if (m_bIsUserTrack) {
         if (GetStreamLengthMs() < 7000)
-            return m_bInitialized == false;
+            return !m_bInitialized;
     }
 
     return true;

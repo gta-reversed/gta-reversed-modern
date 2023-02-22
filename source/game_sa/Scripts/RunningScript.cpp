@@ -185,7 +185,7 @@ void CRunningScript::GivePedScriptedTask(int32 pedHandle, CTask* task, int32 opc
             const int32 slot = CPedScriptedTaskRecord::GetVacantSlot();
             CPedScriptedTaskRecord::ms_scriptedTasks[slot].SetAsAttractorScriptTask(ped, opcode, task);
         }
-    } else if (!pedGroup || ped->IsPlayer()) { // todo: FIXBUGS Warning	C6011 Dereferencing NULL pointer 'ped'
+    } else if (!pedGroup || ped->IsPlayer()) {
         CEventScriptCommand eventScriptCommand(TASK_PRIMARY_PRIMARY, task, false);
         auto* event = static_cast<CEventScriptCommand*>(ped->GetEventGroup().Add(&eventScriptCommand, false));
         if (event) {

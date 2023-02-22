@@ -80,7 +80,7 @@ void CPedStats::LoadPedStats() {
         VERIFY(read == 11);
 
         ms_apPedStats[statIndex].m_nId = statIndex;
-        strcpy(ms_apPedStats[statIndex].m_acName, name);
+        rng::copy(name, ms_apPedStats[statIndex].m_acName);
         ms_apPedStats[statIndex].m_fFleeDistance = fleeDistance;
         ms_apPedStats[statIndex].m_fHeadingChangeRate = headingChangeRate;
         ms_apPedStats[statIndex].m_nFear = fear;

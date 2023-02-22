@@ -416,7 +416,7 @@ void CReplay::SaveReplayToHD() {
                 break;
             slot = NextSlot(slot);
         }
-        assert(slot >= 0);
+        assert(0 <= slot && slot <= std::size(Buffers));
         CFileMgr::Write(file, Buffers[slot].buffer.data(), sizeof(tReplayBuffer));
 
         while (BufferStatus[slot] != REPLAYBUFFER_IN_USE) {

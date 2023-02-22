@@ -90,7 +90,7 @@ void CAnimManager::ReadAnimAssociationDefinitions() {
         }
         else
         {
-            sscanf(line, "%s %s %s %d", name, block, type, &animCount);
+            VERIFY(sscanf(line, "%s %s %s %d", name, block, type, &animCount) == 4);
             animStyle = AddAnimAssocDefinition(name, block, MODEL_MALE01, animCount, aStdAnimDescs);
             isAnimSection = true;
         }

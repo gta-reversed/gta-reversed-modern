@@ -23,7 +23,7 @@ void CAESmoothFadeThread::InjectHooks() {
 }
 
 CAESmoothFadeThread::CAESmoothFadeThread() {
-    m_threadHandle         = (HANDLE)-1;
+    m_threadHandle         = INVALID_HANDLE_VALUE;
     m_dwThreadId           = 0;
     m_bThreadCreated       = false;
     m_bActive              = false;
@@ -36,7 +36,7 @@ CAESmoothFadeThread::CAESmoothFadeThread() {
 void CAESmoothFadeThread::Initialise() {
     InitialiseRequestSlots();
     m_threadHandle = CreateThread(nullptr, 0, &CAESmoothFadeThread::SmoothFadeProc, this, CREATE_SUSPENDED, &m_dwThreadId);
-    if (m_threadHandle == (HANDLE)-1)
+    if (m_threadHandle == INVALID_HANDLE_VALUE || !m_threadHandle) // NOTSA: nullptr check
         m_bThreadCreated = false;
     else {
         SetThreadPriority(m_threadHandle, 0);

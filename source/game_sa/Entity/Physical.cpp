@@ -4404,8 +4404,8 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                         } else if (totalColPointsToProcess > 0) {
                             for (int32 colPointIndex2 = 0; colPointIndex2 < totalColPointsToProcess; colPointIndex2++) {
                                 CColPoint* colPoint3 = &colPoints[colPointIndex2];
-                                if (bThisOrCollidedEntityStuck || (colPoint3->m_nPieceTypeA >= 13 && colPoint3->m_nPieceTypeA <= 16) ||
-                                    (colPoint3->m_nPieceTypeA >= 13 && colPoint3->m_nPieceTypeA <= 16) // BUG: I think it should be m_nPieceTypeB
+                                if (bThisOrCollidedEntityStuck || (colPoint3->m_nPieceTypeA >= 13 && colPoint3->m_nPieceTypeA <= 16)
+                                    // || (colPoint3->m_nPieceTypeA >= 13 && colPoint3->m_nPieceTypeA <= 16) // BUG: I think it should be m_nPieceTypeB
                                 ) {
                                     ++totalAcceptableColPoints;
                                     ApplySoftCollision(physicalEntity, *colPoint3, fThisDamageIntensity, fEntityDamageIntensity);

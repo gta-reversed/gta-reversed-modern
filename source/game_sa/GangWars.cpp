@@ -960,7 +960,7 @@ void CGangWars::Update() {
             if (DistanceBetweenPoints2D(PointOfAttack, playerPos) >= 150.0f) {
                 bPlayerIsCloseby = false;
             } else if (!bPlayerIsCloseby) {
-                CVector unused;
+                CVector unused{};
                 CStreaming::StreamZoneModels_Gangs(unused);
                 bPlayerIsCloseby = true;
             }
