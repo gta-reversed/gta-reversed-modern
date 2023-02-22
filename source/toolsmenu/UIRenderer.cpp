@@ -83,7 +83,7 @@ void UIRenderer::UpdateInput() {
     {
         BYTE KeyStates[256];
 
-        VERIFY(SUCCEEDED(GetKeyboardState(KeyStates)));
+        VERIFY(GetKeyboardState(KeyStates));
 
         const auto IsKeyDown = [&](auto key) { return (KeyStates[key] & 0x80) != 0; };
 

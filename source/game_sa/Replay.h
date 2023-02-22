@@ -93,17 +93,7 @@ public:
             Iterator() = default;
             Iterator(const tReplayBuffer* buffer, uint32 offset) : m_buffer(buffer), m_offset(offset) {}
 
-            Iterator& operator++() {
-                #ifdef NOTSA_DEBUG
-                if (m_offset >= REPLAY_BUFFER_SIZE || !m_buffer) {
-                    NOTSA_UNREACHABLE("Increment after end()!");
-                }
-                #endif
-
-                const auto type = m_buffer->Read<tReplayBlockBase>(m_offset).type;
-                m_offset = (type != REPLAY_PACKET_END) ? m_offset + CReplay::FindSizeOfPacket(type) : REPLAY_BUFFER_SIZE;
-                return *this;
-            }
+            Iterator& operator++();
 
             Iterator operator++(int) {
                 auto a = *this;

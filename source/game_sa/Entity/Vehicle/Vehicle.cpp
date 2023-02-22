@@ -861,8 +861,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId_, uint
             fAnimEnd = 0.1F;
             break;
         default:
-            assert(false); // Shouldn't ever enter this
-            break;
+            NOTSA_UNREACHABLE();
         }
 
         if (fTime < fAnimStart)
@@ -897,8 +896,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId_, uint
             fAnimEnd2 = 0.475f;
             break;
         default:
-            assert(false); // Shouldn't ever enter this
-            break;
+            NOTSA_UNREACHABLE();
         }
 
         if (fTime > fAnimEnd2)

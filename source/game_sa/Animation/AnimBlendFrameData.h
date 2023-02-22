@@ -7,7 +7,7 @@
 #pragma once
 
 #include "Vector.h"
-#include "RpHAnimBlendInterpFrame.h";
+#include "RpHAnimBlendInterpFrame.h"
 
 class AnimBlendFrameData {
 public:

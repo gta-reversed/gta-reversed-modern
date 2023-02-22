@@ -25,7 +25,7 @@ enum ePrimaryTasks // array indexes
 
 enum eSecondaryTask : uint32 // array indexes
 {
-    TASK_SECONDARY_INVALID = -1,
+    TASK_SECONDARY_INVALID = (uint32)-1,
 
     TASK_SECONDARY_ATTACK = 0,              // want duck to be after attack
     TASK_SECONDARY_DUCK,                    // because attack controls ducking movement

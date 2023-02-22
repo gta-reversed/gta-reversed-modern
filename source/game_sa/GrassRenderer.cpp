@@ -51,7 +51,7 @@ void CGrassRenderer::DrawTriPlants(PPTriPlant* triPlants, int32 numTriPlants, Rp
     { // debug
         CFont::InitPerFrame();
         char buf[32]{};
-        sprintf(buf, "hook %d", numTriPlants);
+        sprintf_s(buf, "hook %d", numTriPlants);
         CFont::PrintString(100, 200, buf);
     }
 

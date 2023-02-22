@@ -190,7 +190,7 @@ void CRadar::Initialise()
 
     for (auto i = 0u; i < gRadarTextures.size(); i++) {
         char txdName[16] = { 0 };
-        sprintf(txdName, "radar%02d", i);
+        sprintf_s(txdName, "radar%02d", i);
         gRadarTextures[i] = CTxdStore::FindTxdSlot(txdName);
     }
 }
@@ -263,7 +263,7 @@ void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType)
     case RADAR_SPRITE_NONE:
         // blipType = 0 for player position
         blipType = RADAR_SPRITE_MAP_HERE;
-        /* fallthrough */
+        [[fallthrough]];
     case RADAR_SPRITE_MAP_HERE:
         blipName = TheText.Get("LG_01");
         break;

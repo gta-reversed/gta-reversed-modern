@@ -75,7 +75,7 @@ int32 CdStreamOpen(const char* lpFileName) {
     gStreamFileHandles[freeHandleIndex] = file;
     if (file == INVALID_HANDLE_VALUE)
         return 0;
-    strncpy(gCdImageNames[freeHandleIndex], lpFileName, MAX_CD_STREAM_IMAGE_NAME_SIZE);
+    strncpy_s(gCdImageNames[freeHandleIndex], lpFileName, MAX_CD_STREAM_IMAGE_NAME_SIZE);
     return freeHandleIndex << 24;
 }
 
@@ -183,7 +183,7 @@ bool CdStreamRead(int32 streamId, void* lpBuffer, uint32 offsetAndHandle, int32 
 }
 
 // 0x406560
-[[noreturn]] DWORD WINAPI CdStreamThread(LPVOID lpParam) {
+[[noreturn]] void WINAPI CdStreamThread(LPVOID lpParam) {
     while (true) {
         WaitForSingleObject(gStreamSemaphore, INFINITE);
         const int32 streamId = GetFirstInQueue(&gStreamQueue);
@@ -241,7 +241,7 @@ void CdStreamInitThread() {
     InitialiseQueue(&gStreamQueue, gStreamCount + 1);
     gStreamSemaphore = OS_SemaphoreCreate(5, "CdStream");
     if (gStreamSemaphore) {
-        gStreamingThread = CreateThread(nullptr, 0x10000, CdStreamThread, nullptr, CREATE_SUSPENDED, &gStreamingThreadId);
+        gStreamingThread = CreateThread(nullptr, 0x10000, (LPTHREAD_START_ROUTINE)CdStreamThread, nullptr, CREATE_SUSPENDED, &gStreamingThreadId);
         if (gStreamingThread) {
             SetThreadPriority(gStreamingThread, GetThreadPriority(GetCurrentThread()));
             ResumeThread(gStreamingThread);

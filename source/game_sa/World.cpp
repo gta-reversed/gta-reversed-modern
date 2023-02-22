@@ -475,8 +475,8 @@ void CWorld::CallOffChaseForAreaSectorListPeds(CPtrList& ptrList, float x1, floa
         next = node->GetNext();
 
         const auto veh = static_cast<CVehicle*>(node->m_item);
-        const auto pos = veh->GetPosition();
-        const auto mat = (CMatrix)veh->GetMatrix();
+        const auto& pos = veh->GetPosition();
+        const auto& mat = veh->GetMatrix();
 
         if (!IsPointWithinBounds2D({ minX, minY }, { maxX, maxY }, { pos }))
             continue;
@@ -628,7 +628,7 @@ void CWorld::ShutDown() {
     {
         const auto MakeSureListIsEmpty = [](CPtrListDoubleLink& list, int32 x, int32 y, const char* listName) {
             if (!list.IsEmpty()) {
-                sprintf(gString, "%s overlap list %d,%d not empty\n", listName, x, y);
+                sprintf_s(gString, "%s overlap list %d,%d not empty\n", listName, x, y);
                 list.Flush();
             #ifdef _DEBUG
                 DEV_LOG(gString); // Lets also print this string
@@ -942,8 +942,8 @@ void CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& ptrLi
         entity->SetCurrentScanCode();
 
         CColSphere sphere{
-            entity->GetColModel()->GetBoundRadius(),
-            Multiply3x3(entity->GetPosition() - point, transform)
+            Multiply3x3(entity->GetPosition() - point, transform),
+            entity->GetColModel()->GetBoundRadius()
         };
         if (CCollision::TestSphereBox(sphere, box)) {
             if (*outCount < maxCount) {

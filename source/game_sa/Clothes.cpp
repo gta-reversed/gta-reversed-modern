@@ -81,7 +81,8 @@ void CClothes::LoadClothesFile() {
             continue;
         }
 
-        char* strTag = strtok(line, " \t,");
+        char* nextToken{};
+        char* strTag = strtok_s(line, " \t,", &nextToken);
         if (strTag == nullptr) {
             continue;
         }
@@ -115,8 +116,9 @@ void CClothes::LoadClothesFile() {
             NOTSA_UNREACHABLE("Invalid rule tag: {}", strTag);
         }();
         AddRule(static_cast<uint32>(ruleTag));
-        const auto GetNextArg = []{
-            return strtok(NULL, " \t,");
+
+        const auto GetNextArg = [&nextToken]{
+            return strtok_s(NULL, " \t,", &nextToken);
         };
         switch (ruleTag) {
         case eClothRule::TAG_CUTS:
