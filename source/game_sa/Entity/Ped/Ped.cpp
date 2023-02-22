@@ -1496,8 +1496,8 @@ float CPed::GetWalkAnimSpeed() {
 
     const auto lastFrame = firstSequence.GetUncompressedFrame(firstSequence.m_nFrameCount - 1);
     const auto lastFrameY = firstSequence.m_isRoot
-                                ? lastFrame->translation.y
-                                : ((KeyFrame*)lastFrame)->rotation.imag.y;
+        ? lastFrame->translation.y
+        : ((KeyFrame*)lastFrame)->rotation.imag.y;
 
     return (lastFrameY - firstSequence.GetUncompressedFrame(0)->translation.y) / hier->m_fTotalTime;
 }
