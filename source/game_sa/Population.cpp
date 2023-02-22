@@ -821,21 +821,17 @@ bool CPopulation::TestRoomForDummyObject(CObject* object) {
 
 // 0x6123A0
 bool CPopulation::TestSafeForRealObject(CDummyObject* obj) {
-    const auto objCM = obj->GetColModel();
+    const auto objCM  = obj->GetColModel();
+    const auto objMat = obj->GetMatrix();
     return CWorld::IterateSectorsOverlappedByRect(
-        CRect{ objCM->GetBoundCenter(), objCM->GetBoundRadius() },
-        [
-            &,
-            objMat = obj->GetMatrix()
-        ](int32 x, int32 y) {
+        CRect{ obj->GetBoundCentre(), objCM->GetBoundRadius()},
+        [&](int32 x, int32 y) {
             const auto& list = GetRepeatSector(x, y)->GetList(REPEATSECTOR_VEHICLES);
             for (CPtrNodeDoubleLink* node = list.GetNode(); node; node = node->GetNext()) {
                 const auto entity = node->GetItem<CVehicle>();
                 if (CCollision::ProcessColModels(
-                    objMat,
-                    *objCM,
-                    entity->GetMatrix(),
-                    *entity->GetColModel(),
+                    objMat, *objCM,
+                    entity->GetMatrix(), *entity->GetColModel(),
                     CWorld::m_aTempColPts,
                     nullptr,
                     nullptr,
