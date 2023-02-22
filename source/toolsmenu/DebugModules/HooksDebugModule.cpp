@@ -350,7 +350,27 @@ struct DisabledScope_Helper {
 #define IDScope(id) IDScope_Helper UNIQUE_VAR_NAME(__helper){id}
 #define DisabledScope(disabled) DisabledScope_Helper UNIQUE_VAR_NAME(__helper){disabled}
 
-void RenderCategoryItems(RH::HookCategory& cat) {
+bool HooksDebugModule::HandleSlideSetterForItem(bool& inOutState) {
+    if (m_SlideSetter.Mode == SlideSetterMode::NONE || !IsItemHovered()) {
+        return false;
+    }
+    if (m_SlideSetter.Mode == SlideSetterMode::SETTER) {
+        m_SlideSetter.Mode = inOutState
+            ? SlideSetterMode::TURN_ON
+            : SlideSetterMode::TURN_OFF;
+    }
+    inOutState = [&]{
+        switch (m_SlideSetter.Mode) {
+        case SlideSetterMode::TURN_ON:  return true;
+        case SlideSetterMode::TURN_OFF: return false;
+        case SlideSetterMode::TOGGLE:   return !inOutState;
+        default: NOTSA_UNREACHABLE();
+        }
+    }();
+    return true;
+}
+
+void HooksDebugModule::RenderCategoryItems(RH::HookCategory& cat) {
     for (auto& item : cat.Items()) {
         if (!item->m_isVisible) {
             continue;
@@ -373,7 +393,11 @@ void RenderCategoryItems(RH::HookCategory& cat) {
             DisabledScope(item->Locked());
 
             bool hooked{ item->Hooked() };
+
             if (SameLine(); Checkbox(item->Name().c_str(), &hooked) && !item->Locked()) {
+                cat.SetItemEnabled(item, hooked);
+            }
+            if (!item->Locked() && HandleSlideSetterForItem(hooked)) {
                 cat.SetItemEnabled(item, hooked);
             }
         }
@@ -416,7 +440,7 @@ void RenderCategoryItems(RH::HookCategory& cat) {
     }
 }
 
-void RenderCategory(RH::HookCategory& cat) {
+void HooksDebugModule::RenderCategory(RH::HookCategory& cat) {
     if (!cat.Visible()) {
         return;
     }
@@ -455,6 +479,9 @@ void RenderCategory(RH::HookCategory& cat) {
         const auto [open, stateChanged, cbState] = TreeNodeWithCheckbox(cat.Name().c_str(), cat.OverallState(), cat.Disabled());
         if (stateChanged) {
             cat.ToggleAllItemsState();
+        }
+        if (bool state = cbState; HandleSlideSetterForItem(state)) {
+            cat.SetAllItemsEnabled(state);
         }
         cat.Open(open);
     }
@@ -499,7 +526,13 @@ void HooksDebugModule::RenderWindow() {
     if (!m_IsOpen) {
         return;
     }
-
+    m_SlideSetter.Mode = IsMouseDown(ImGuiMouseButton_Middle)
+        ? SlideSetterMode::TOGGLE
+        : IsMouseDown(ImGuiMouseButton_Right)
+            ? m_SlideSetter.Mode == SlideSetterMode::TURN_OFF || m_SlideSetter.Mode == SlideSetterMode::TURN_ON
+                ? m_SlideSetter.Mode // Technically in setter mode already
+                : SlideSetterMode::SETTER
+            : SlideSetterMode::NONE;
     HookFilter::Render();
     RenderCategory(RH::GetRootCategory());
 }

@@ -5,6 +5,7 @@
 #include "TaskComplexExtinguishFires.h"
 #include "TaskComplexStealCar.h"
 #include "TaskComplexFleeAnyMeans.h"
+#include "TaskComplexDriveWander.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -71,8 +72,8 @@ void UIRenderer::UpdateInput() {
             m_ImIO->MouseWheel += (WHEEL_SPEED * m_ImIO->DeltaTime);
 
         m_ImIO->MouseDown[ImGuiMouseButton_Left]   = CPad::NewMouseControllerState.lmb;
-        m_ImIO->MouseDown[ImGuiMouseButton_Right]  = CPad::NewMouseControllerState.mmb;
-        m_ImIO->MouseDown[ImGuiMouseButton_Middle] = CPad::NewMouseControllerState.rmb;
+        m_ImIO->MouseDown[ImGuiMouseButton_Right]  = CPad::NewMouseControllerState.rmb;
+        m_ImIO->MouseDown[ImGuiMouseButton_Middle] = CPad::NewMouseControllerState.mmb;
 
         CPad::NewMouseControllerState.X = 0.0f;
         CPad::NewMouseControllerState.Y = 0.0f;
@@ -188,11 +189,17 @@ void UIRenderer::DebugCode() {
     }
 
     if (pad->IsStandardKeyJustPressed('0')) {
-
+        if (const auto veh = FindPlayerVehicle()) {
+            veh->Fix();
+            veh->AsAutomobile()->SetRandomDamage(false);
+        }
     }
 
     if (pad->IsStandardKeyJustPressed('9')) {
-    
+        if (const auto veh = FindPlayerVehicle()) {
+            veh->Fix();
+            veh->AsAutomobile()->SetRandomDamage(true);
+        }
     }
 
     if (pad->IsStandardKeyJustPressed('1')) {
@@ -208,7 +215,12 @@ void UIRenderer::DebugCode() {
         CTimer::Suspend();
     }
     if (pad->IsStandardKeyJustPressed('5')) {
-        CTimer::Resume();
+        if (const auto veh = FindPlayerVehicle()) {
+            player->GetTaskManager().SetTask(
+                new CTaskComplexCarDriveWander{veh, eCarDrivingStyle::DRIVING_STYLE_PLOUGH_THROUGH, 100.f},
+                TASK_PRIMARY_PRIMARY
+            );
+        }
     }
     if (pad->IsStandardKeyJustPressed('6')) {
         AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_FRONT);

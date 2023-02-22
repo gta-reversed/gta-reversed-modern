@@ -256,7 +256,7 @@ bool CTaskSimpleGunControl::ProcessPed(CPed* ped) {
             ? DEFAULT_GUN_ATTACK_PERIOD * 2
             : DEFAULT_GUN_ATTACK_PERIOD);
 
-        period *= CGeneral::GetRandomNumberInRange(0.75, 1.25f);
+        period *= CGeneral::GetRandomNumberInRange(0.75f, 1.25f);
         period /= (float)ped->m_nWeaponShootingRate * m_attackIntervalMult * 0.04f;
 
         m_nextAtkTimeMs = CTimer::GetTimeInMS() + (uint32)period;

@@ -108,11 +108,14 @@ constexpr float LOG10_2        = 0.301029f;         // log10(2)
 constexpr float LOG2_10        = 3.32192f;          // log2(10)
 constexpr float PI             = 3.14159f;          // π
 constexpr float HALF_PI        = PI / 2.0f;         // π / 2
+constexpr float PI_6           = PI / 6.0f;         // π / 6
 constexpr float SQRT_2         = 1.41421f;          // √2
 constexpr float SQRT_3         = 1.73205f;          // √3
 constexpr float SIN_PI         = 0.0f;              // sin(π);
 constexpr float COS_PI         = -1.0f;             // cos(π);
 constexpr float TWO_PI         = 6.28318f;          // τ (TAU)
+
+constexpr float COS_45 = SQRT_2; // cos(45deg)
 
 constexpr float sq(float x) { return x * x; }
 
@@ -154,12 +157,9 @@ constexpr float RadiansToDegrees(float angleInRadians) {
     return angleInRadians * 180.0F / PI;
 }
 
-inline const CVector lerp(const CVector& fMin, const CVector& fMax, float fProgress) {
-    return fMin * (1.0F - fProgress) + fMax * fProgress;
-}
-
-inline const float lerp(float fMin, float fMax, float fProgress) {
-    return fMin * (1.0F - fProgress) + fMax * fProgress;
+template<typename T>
+auto lerp(const T& from, const T& to, float t) {
+    return to * t + from * (1.f - t);
 }
 
 inline const float invLerp(float fMin, float fMax, float fVal) {

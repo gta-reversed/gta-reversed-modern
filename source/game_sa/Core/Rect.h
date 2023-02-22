@@ -68,6 +68,31 @@ public:
     CVector2D GetBottomRight() const { return { right, bottom }; }
 
     /*!
+    * @addr notsa
+    * @brief Constrain a point into the rectangle.
+    *
+    * @param pt The point to constrain
+    *
+    * @return Whenever the point was constrained
+    */
+    bool DoConstrainPoint(CVector2D& pt) const;
+
+    /*!
+    * @addr notsa
+    * @brief Get corners of this rect (Order: top left, top right, bottom right, bottom left)
+    * 
+    * @param z The Z position to be used for all corners
+    */
+    auto GetCorners3D(float z) const -> std::array<CVector, 4> {
+        return {
+            CVector{ left,  top, z},
+            CVector{ right, top, z},
+            CVector{ right, bottom, z},
+            CVector{ left,  bottom, z}
+        };
+    }
+    
+    /*!
     * @notsa
     * @brief Check if this rect collides with another
     */

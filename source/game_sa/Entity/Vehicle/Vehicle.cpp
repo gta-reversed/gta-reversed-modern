@@ -28,7 +28,6 @@ bool& CVehicle::bDisableRemoteDetonation = *(bool*)0xC1CC00;
 bool& CVehicle::bDisableRemoteDetonationOnContact = *(bool*)0xC1CC01;
 bool& CVehicle::m_bEnableMouseSteering = *(bool*)0xC1CC02;
 bool& CVehicle::m_bEnableMouseFlying = *(bool*)0xC1CC03;
-int32& CVehicle::m_nLastControlInput = *(int32*)0xC1CC04;
 CColModel* (&CVehicle::m_aSpecialColVehicle)[4] = *(CColModel*(*)[4])0xC1CC08;
 bool& CVehicle::ms_forceVehicleLightsOff = *(bool*)0xC1CC18;
 bool& CVehicle::s_bPlaneGunsEjectShellCasings = *(bool*)0xC1CC19;
@@ -312,7 +311,7 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     m_fVehicleFrontGroundZ = 0.0f;
     field_511 = 0;
     field_512 = 0;
-    m_comedyControlState = 0;
+    m_comedyControlState = eComedyControlState::INACTIVE;
     m_FrontCollPoly.m_bIsActual = false;
     m_RearCollPoly.m_bIsActual = false;
     m_pHandlingData = nullptr;
@@ -493,7 +492,7 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
 
     if (m_pEntityIgnoredCollision == colPhysical || colPhysical->m_pEntityIgnoredCollision == this) {
         bCollidedEntityCollisionIgnored = true;
-        physicalFlags.b13 = true;
+        physicalFlags.bSkipLineCol = true;
         return;
     }
 
@@ -504,7 +503,7 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
 
     if (colPhysical->m_pAttachedTo == this) {
         bCollisionDisabled = true;
-        physicalFlags.b13 = true;
+        physicalFlags.bSkipLineCol = true;
         return;
     }
 
@@ -518,7 +517,7 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
         && (colPhysical->AsVehicle()->physicalFlags.bDisableCollisionForce && !colPhysical->AsVehicle()->physicalFlags.bCollidable)
     ) {
         bCollidedEntityCollisionIgnored = true;
-        physicalFlags.b13 = true;
+        physicalFlags.bSkipLineCol = true;
         return;
     }
 
@@ -590,19 +589,19 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
 
     if (colPhysical->IsRCCar()) {
         bCollidedEntityCollisionIgnored = true;
-        physicalFlags.b13 = true;
+        physicalFlags.bSkipLineCol = true;
         return;
     }
 
     if (IsRCCar() && (colPhysical->IsVehicle() || colPhysical->IsPed())) {
         bCollidedEntityCollisionIgnored = true;
-        physicalFlags.b13 = true;
+        physicalFlags.bSkipLineCol = true;
         return;
     }
 
     if (colPhysical == m_pTractor || colPhysical == m_pTrailer) {
         bThisOrCollidedEntityStuck = true;
-        physicalFlags.b13 = true;
+        physicalFlags.bSkipLineCol = true;
         return;
     }
 
@@ -1635,10 +1634,14 @@ CVehicleModelInfo* CVehicle::GetVehicleModelInfo() const {
     return CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
 }
 
+CVector CVehicle::GetDummyPositionObjSpace(eVehicleDummy dummy) const {
+    return GetVehicleModelInfo()->GetModelDummyPosition(dummy);
+}
+
 // if bWorldSpace is true, returns the position in world-space
 // otherwise in model-space
 CVector CVehicle::GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace) {
-    CVector pos = GetVehicleModelInfo()->GetModelDummyPosition(dummy);
+    CVector pos = GetDummyPositionObjSpace(dummy);
     if (bWorldSpace)
         pos = GetMatrix() * pos; // transform to world-space
     return pos;
@@ -1908,6 +1911,16 @@ void CVehicle::RemoveWinch() {
         CRopes::GetRope(ropeIndex).Remove();
 
     // todo: m_nBombLightsWinchFlags &= 0x9Fu;
+}
+
+CVector CVehicle::GetDriverSeatDummyPositionOS() const {
+    return GetDummyPositionObjSpace(
+        IsBoat() ? DUMMY_LIGHT_FRONT_MAIN : DUMMY_SEAT_FRONT
+    );
+}
+
+CVector CVehicle::GetDriverSeatDummyPositionWS() {
+    return GetMatrix() * GetDriverSeatDummyPositionOS();
 }
 
 // NOTSA
@@ -2283,10 +2296,7 @@ bool CVehicle::CanBeDriven() const {
     if (IsSubTrailer() || IsSubTrain() && AsTrain()->m_nTrackId || vehicleFlags.bIsRCVehicle) {
         return false;
     }
-    const auto mi = GetVehicleModelInfo();
-    const auto dummyId = IsBoat() ? DUMMY_LIGHT_FRONT_MAIN : DUMMY_SEAT_FRONT;
-    const auto& dummyPos = mi->GetModelDummyPosition(dummyId);
-    return dummyPos->SquaredMagnitude() > 0.0f;
+    return GetDriverSeatDummyPositionOS().SquaredMagnitude() > 0.0f;
 }
 
 // 0x6D5490

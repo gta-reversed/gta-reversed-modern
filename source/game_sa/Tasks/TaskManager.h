@@ -288,6 +288,15 @@ public:
 
     /*!
     * @notsa
+    * @brief Check if any active task is of type `T`
+    */
+    template<Task T>
+    bool Has() {
+        return Find<T::Type>();
+    }
+
+    /*!
+    * @notsa
     * @brief Check if the first found task is the same in both managers
     */
     template<eTaskType... Ts>

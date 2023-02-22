@@ -239,6 +239,18 @@ void TeleportDebugModule::RenderTeleporterWindow() {
     }
     HoveredItemTooltip("Hold `ALT` to prevent name input from getting cleared\nHold `CTRL` to save current position");
 
+    // Current position display
+    {
+        const auto pos = FindPlayerCoors();
+        Text("Current Pos: %.3f, %.3f, %.3f", pos.x, pos.y, pos.z);
+        if (SameLine(); Button("Copy")) {
+            char buf[256];
+            sprintf_s(buf, "%.3f, %.3f, %.3f", pos.x, pos.y, pos.z);
+            SetClipboardText(buf);
+        }
+    }
+
+
     if (!s_SavedLocations.empty()) {
         // Search tool input
         PushItemWidth(AlignRight(CalcTextSize("Search").x + 11.0f));

@@ -97,11 +97,14 @@ public:
     void ModifyHandlingValue(const bool& bIncrement);
     void PruneWakeTrail();
     void AddWakePoint(CVector posn);
+    void RenderWakePoints(); // NOTSA
+
 
     static bool IsSectorAffectedByWake(CVector2D vecPos, float fOffset, CBoat** ppBoats);
     static float IsVertexAffectedByWake(CVector vecPos, CBoat* boat, int16 wIndex, bool bUnkn);
     static void CheckForSkippingCalculations();
     static void FillBoatList();
+    static void RenderAllWakePointBoats();
 
 private:
     friend void InjectHooksMain();

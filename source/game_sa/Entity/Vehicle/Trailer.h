@@ -36,14 +36,16 @@ enum eTrailerNodes {
     TRAILER_NUM_NODES
 };
 
-class CTrailer : public CAutomobile {
+class NOTSA_EXPORT_VTABLE CTrailer : public CAutomobile {
+    static constexpr auto NUM_TRAILER_WHEELS = 4;
+    static constexpr auto NUM_TRAILER_SUPPORTS = 2;
+    static constexpr auto NUM_TRAILER_SUSP_LINES = NUM_TRAILER_WHEELS + NUM_TRAILER_SUPPORTS;
 public:
-    CColPoint m_aTrailerColPoints[2];
-    float     m_fTrailerColPointValue1;
-    float     m_fTrailerColPointValue2;
+    std::array<CColPoint, NUM_TRAILER_SUPPORTS> m_supportCPs{};
+    std::array<float, NUM_TRAILER_SUPPORTS> m_supportRatios{ 1.f, 1.f };
     float     m_fHeight; // 0x6CF3DC, 0x6CFC11
-    float     m_fTrailerTowedRatio;
-    float     m_fTrailerTowedRatio2;
+    float     m_fTrailerTowedRatio{ 1.f };
+    float     m_fTrailerTowedRatio2{ 1.f };
 
     static constexpr auto Type = VEHICLE_TYPE_TRAILER;
 
@@ -73,17 +75,6 @@ private:
     static void InjectHooks();
 
     CTrailer* Constructor(int32 modelIndex, eVehicleCreatedBy createdBy) { this->CTrailer::CTrailer(modelIndex, createdBy); return this; }
-    bool SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1) { return CTrailer::SetTowLink(targetVehicle, arg1); }
-    void SetupSuspensionLines_Reversed() { CTrailer::SetupSuspensionLines(); }
-    void ResetSuspension_Reversed() { CTrailer::ResetSuspension(); }
-    void ProcessSuspension_Reversed() { CTrailer::ProcessSuspension(); }
-    void ProcessControl_Reversed() { CTrailer::ProcessControl(); }
-    bool ProcessAI_Reversed(uint32& extraHandlingFlags) { return CTrailer::ProcessAI(extraHandlingFlags); }
-    void PreRender_Reversed() { CTrailer::PreRender(); }
-    bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) { return CTrailer::GetTowHitchPos(outPos, bCheckModelInfo, vehicle); }
-    bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) { return CTrailer::GetTowBarPos(outPos, bCheckModelInfo, vehicle); }
-    bool BreakTowLink_Reversed() { return CTrailer::BreakTowLink(); }
-
 };
 
 VALIDATE_SIZE(CTrailer, 0x9F4);

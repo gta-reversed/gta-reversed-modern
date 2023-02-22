@@ -222,6 +222,104 @@ void CBoat::AddWakePoint(CVector posn) {
     }
 }
 
+// NOTSA: Code from `CWaterLevel::RenderBoatWakes`, but makes more sense here...
+void CBoat::RenderWakePoints() {
+    if (m_nNumWaterTrailPoints <= 1) { // From 0x6EDAF7
+        return;
+    }
+
+    // 0x6EDA1B
+    const auto GetWidth = [
+        &,
+        maxWidth = [&]{
+            const auto maxWidth = GetColModel()->GetBoundingBox().m_vecMax.x * 0.65f; 
+            return m_nModelIndex == MODEL_SKIMMER
+                ? maxWidth * 0.4f
+                : maxWidth;
+        }()
+    ](auto ptIdx) {
+        const auto t = (CBoat::WAKE_LIFETIME - m_afWakePointLifeTime[ptIdx]) * ((m_anWakePointIntensity[ptIdx] / 25.f + 0.5f) / CBoat::WAKE_LIFETIME);
+        return maxWidth + maxWidth * t;
+    };
+
+    // 0x6EDC6B
+    const auto GetAlpha = [
+        &,
+        boatToCamDist2D = (TheCamera.GetPosition() - GetPosition()).Magnitude2D()
+    ](auto ptIdx) {
+        auto alpha = (1.f - (float)ptIdx / (float)m_nNumWaterTrailPoints) * 160.f;
+        if (ptIdx < 3) {
+            // Pirulax: Not really noticeable, but I think this is how it was supposed to be.
+            //          otherwise they wouldn't be calculating it for the 0th point... (would just use 0 instead)
+        #ifdef FIX_BUGS
+            alpha *= (float)(ptIdx + 1) / 3.f;
+        #else
+            alpha *= (float)ptIdx / 3.f;
+        #endif
+        }
+        alpha *= (float)m_anWakePointIntensity[ptIdx] / 100.f + 0.15f;
+        if (boatToCamDist2D > 50.f) {
+            alpha *= (80.f - boatToCamDist2D) / 30.f;
+        }
+        return alpha;
+    };
+
+    auto prevWidth     = GetWidth(0);
+    auto prevAlpha     = GetAlpha(0); // It actually comes out to be 0 for the 0th point... bug?
+    auto prevDirToPrev = CVector2D{GetForward()}; // Direction from the point before the previous to it
+    for (auto wakePtIdx = 1; wakePtIdx < m_nNumWaterTrailPoints; wakePtIdx++) {
+        const auto& currPos = m_avecWakePoints[wakePtIdx];
+        const auto& prevPos = m_avecWakePoints[wakePtIdx - 1];
+
+        auto currToPrevDir      = prevPos - currPos;
+        const auto distToPrevSq = currToPrevDir.SquaredMagnitude();
+        if (distToPrevSq >= sq(3.f)) {
+            currToPrevDir /= std::sqrt(distToPrevSq); // Normalize it
+        }
+
+        const auto currAlpha = GetAlpha(wakePtIdx);
+        const auto currWidth = GetWidth(wakePtIdx);
+
+        if (distToPrevSq <= sq(13.f)) {
+            const auto GetCorners = [](auto& posOnDir, auto& dirToLieOn, float width) {
+                const auto offset = dirToLieOn.GetPerpRight() * width;
+                return std::make_pair(posOnDir - offset, posOnDir + offset);
+            };
+
+            const auto [prevA, prevB] = GetCorners(prevPos, prevDirToPrev, prevWidth);
+            const auto [currB, currA] = GetCorners(currPos, currToPrevDir, currWidth); // yes, order is BA
+                
+            CWaterLevel::RenderWakeSegment(
+                prevA, prevB,
+                currA, currB,
+                -0.03f,    currWidth,
+                prevAlpha, currAlpha,
+                -0.03f
+            );
+        }
+
+        prevWidth     = currWidth;
+        prevAlpha     = currAlpha;
+        prevDirToPrev = currToPrevDir;
+    }
+}
+
+// NOTSA: Moved from 0x6ED9A0, because it just *makes sense*
+void CBoat::RenderAllWakePointBoats() {
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(CWaterLevel::texWaterwake)));
+
+    FillBoatList();
+
+    for (const auto boat : apFrameWakeGeneratingBoats) {
+        if (!boat) {
+            break;
+        }
+        boat->RenderWakePoints();
+    }
+
+    RenderBuffer::RenderStuffInBuffer();
+}
+
 bool CBoat::IsSectorAffectedByWake(CVector2D vecPos, float fOffset, CBoat** ppBoats) {
     if (!apFrameWakeGeneratingBoats[0])
         return false;
@@ -824,6 +922,7 @@ void CBoat::ProcessControlInputs_Reversed(uint8 ucPadNum) {
     m_fGasPedal = fGasPower;
 
     // Mouse steering
+    // TODO: Try copy paste code from `CAutomobile::ProcessControlInputs` for this...
     if (CCamera::m_bUseMouse3rdPerson && CVehicle::m_bEnableMouseSteering) {
         auto bChangedInput = CVehicle::m_nLastControlInput != eControllerType::CONTROLLER_MOUSE || pad->GetSteeringLeftRight();
         if (CPad::NewMouseControllerState.X == 0.0F && bChangedInput) { // No longer using mouse controls
@@ -845,8 +944,7 @@ void CBoat::ProcessControlInputs_Reversed(uint8 ucPadNum) {
     }
 
     m_fRawSteerAngle = std::clamp(m_fRawSteerAngle, -1.0F, 1.0F);
-    auto fSignedPow = m_fRawSteerAngle * fabs(m_fRawSteerAngle);
-    m_fSteerAngle = DegreesToRadians(m_pHandlingData->m_fSteeringLock * fSignedPow);
+    m_fSteerAngle = DegreesToRadians(m_pHandlingData->m_fSteeringLock * std::copysignf(std::powf(m_fRawSteerAngle, 2), m_fRawSteerAngle));
 }
 
 // 0x6F01D0

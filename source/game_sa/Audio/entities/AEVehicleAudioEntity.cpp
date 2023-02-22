@@ -1530,9 +1530,7 @@ void CAEVehicleAudioEntity::PlayBicycleSound(int16 engineState, int16 bankSlotId
             { 8, 25 },
             { 9, 50 }
         };
-        const auto random = CGeneral::GetRandomNumberInRange(0, std::size(RandomArray));
-        const auto& toPlay = RandomArray[random];
-
+        const auto& toPlay = CGeneral::RandomChoice(RandomArray);
         PlayGenericEngineSound(
             engineState,
             2,
