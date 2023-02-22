@@ -1740,7 +1740,7 @@ void CPopulation::ManageDummy(CDummy* dummy, const CVector& posn) {
     if (!dummy->IsInCurrentAreaOrBarberShopInterior() || !dummy->m_bIsVisible) {
         return;
     }
-    if (sq(FindDummyDistForModel(dummy->GetModelID())) >= (posn - dummy->GetPosition()).SquaredMagnitude()) {
+    if ((posn - dummy->GetPosition()).SquaredMagnitude() >= sq(FindDummyDistForModel(dummy->GetModelID()))) {
         return;
     }
     ConvertToRealObject(static_cast<CDummyObject*>(dummy));
