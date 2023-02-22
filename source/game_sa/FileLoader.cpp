@@ -2107,7 +2107,7 @@ void CFileLoader::LoadScene(const char* filename) {
 void CFileLoader::LoadObjectTypes(const char* filename) {
     /* Unused
     char filenameCopy[MAX_PATH]{};
-    strcpy(filenameCopy, filename);
+    strcpy_s(filenameCopy, filename);
     */
 
     enum class SectionID {

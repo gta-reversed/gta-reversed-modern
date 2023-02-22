@@ -283,8 +283,8 @@ AnimAssocDefinition* CAnimManager::AddAnimAssocDefinition(const char* groupName,
 
     /*
     auto* def = &ms_aAnimAssocDefinitions[ms_numAnimAssocDefinitions++];
-    strcpy(def->groupName, groupName);
-    strcpy(def->blockName, blockName);
+    strcpy_s(def->groupName, groupName);
+    strcpy_s(def->blockName, blockName);
     def->modelIndex = modelIndex;
     def->animsCount = animsCount;
     def->animDesc   = descriptor;
@@ -306,7 +306,7 @@ void CAnimManager::AddAnimToAssocDefinition(AnimAssocDefinition* definition, con
     while (*definition->animNames[i]) {
         i++;
     }
-    strcpy(definition->animNames[i], animName);
+    strcpy_s(definition->animNames[i], animName);
     */
 }
 

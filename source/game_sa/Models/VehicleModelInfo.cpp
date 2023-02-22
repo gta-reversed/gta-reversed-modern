@@ -231,9 +231,10 @@ void CVehicleModelInfo::SetAnimFile_Reversed(const char* filename)
         return;
     }
 
-    auto name = new char[strlen(filename) + 1];
+    const auto size = strlen(filename) + 1;
+    auto name = new char[size];
     m_animBlockFileName = name;
-    strcpy(name, filename);
+    strcpy_s(name, size, filename);
 }
 
 void CVehicleModelInfo::ConvertAnimFileIndex()
@@ -910,7 +911,7 @@ RwTexture* CVehicleModelInfo::FindTextureCB(const char* name)
     }
 
     char buffer[32];
-    strcpy(buffer, name);
+    strcpy_s(buffer, name);
     buffer[0] = '#';
     return RwTexDictionaryFindNamedTexture(current, buffer);
 }

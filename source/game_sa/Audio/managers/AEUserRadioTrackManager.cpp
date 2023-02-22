@@ -275,12 +275,13 @@ DWORD __stdcall CAEUserRadioTrackManager::WriteUserTracksThread(CAEUserRadioTrac
     } else {
         // Create path to "User Tracks"
         size_t                       documentsDirLen = strlen(CFileMgr::ms_dirName), dummy = 0;
-        char*                        userTracksDir = new char[documentsDirLen + 15];
+        size_t                       userTracksDirSize = documentsDirLen + 15;
+        char*                        userTracksDir = new char[userTracksDirSize];
         std::vector<tUserTracksInfo> offsets;
 
         // Concat
-        strcpy(userTracksDir, CFileMgr::ms_dirName);
-        strcat(userTracksDir, "\\User Tracks\\");
+        strcpy_s(userTracksDir, userTracksDirSize, CFileMgr::ms_dirName);
+        strcat_s(userTracksDir, userTracksDirSize, "\\User Tracks\\");
 
         // Retrieve all user tracks info
         int32 amountOfTracks = self->WriteUserTracksFile(userTracksDir, dummy, file, offsets, 0);

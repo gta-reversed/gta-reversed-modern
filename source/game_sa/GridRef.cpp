@@ -32,7 +32,7 @@ void CGridRef::Init() {
         int8 x = x_ch - 'A'; // Get alphabetical index
         y -= 1;
         assert(x >= 0 && y >= 0);
-        strcpy(&GridRefList[x][y][0], lowstr);
+        strcpy_s(GridRefList[x][y], lowstr);
     }
     CFileMgr::CloseFile(file);
 }

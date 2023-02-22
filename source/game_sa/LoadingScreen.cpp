@@ -133,7 +133,7 @@ void CLoadingScreen::LoadSplashes(bool starting, bool nvidia) {
 
 // 0x590220
 void CLoadingScreen::DisplayMessage(const char* message) {
-    strcpy(m_PopUpMessage, message);
+    strcpy_s(m_PopUpMessage, message);
 }
 
 // 0x590240

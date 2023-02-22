@@ -50,7 +50,7 @@ char* InitUserDirectories()
     static std::array<wchar_t, MAX_PATH> gtaUserDirWide;
 
     if (SHGetFolderPathW(nullptr, CSIDL_PERSONAL, nullptr, SHGFP_TYPE_CURRENT, gtaUserDirWide.data()) != S_OK) {
-        strcpy(gta_user_dir_path, "data");
+        strcpy_s(gta_user_dir_path, std::size("data"), "data"); // 2nd param is required or game won't be able to find files!
         return gta_user_dir_path;
     }
 

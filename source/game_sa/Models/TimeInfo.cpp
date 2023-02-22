@@ -17,7 +17,7 @@ void CTimeInfo::InjectHooks() {
 // 0x4C47E0
 CTimeInfo* CTimeInfo::FindOtherTimeModel(const char* modelName) {
     char timeSwitchModelName[24];
-    strcpy(timeSwitchModelName, modelName);
+    strcpy_s(timeSwitchModelName, modelName);
 
     char* nightSuffix = strstr(timeSwitchModelName, "_nt");
 

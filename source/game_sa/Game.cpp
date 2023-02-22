@@ -336,7 +336,7 @@ void CGame::GenerateTempPedAtStartOfNetworkGame() {
 // 0x5BF840
 bool CGame::Init1(char const *datFile) {
     CMaths::InitMathsTables();
-    strcpy(aDatFile, datFile);
+    strcpy_s(aDatFile, datFile);
     CPools::Initialise();
     CPlaceable::InitMatrixArray();
     CIniFile::LoadIniFile();
