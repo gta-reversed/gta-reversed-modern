@@ -2,11 +2,13 @@
 
 #include "DebugModule.h"
 
-class CheatDebugModule : public DebugModule {
+class CheatDebugModule final : public DebugModule {
 public:
-    void RenderWindow() override final;
-    void RenderMenuEntry() override final;
+    void RenderWindow() override;
+    void RenderMenuEntry() override;
+    void Update() override;
 
 private:
     bool m_IsOpen{ false };
+    bool m_GodMode{};
 };
