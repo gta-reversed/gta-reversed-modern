@@ -92,7 +92,7 @@ public:
     static bool CheckCameraCollisionVehicles(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5, CVector* arg6);
     static bool CheckCameraCollisionObjects(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5);
     static bool BuildCacheOfCameraCollision(CColSphere* sphere1, CColSphere* sphere2);
-    static bool CameraConeCastVsWorldCollision(CColSphere* sphere1, CColSphere* sphere2, float* arg2, float arg3);
+    static bool CameraConeCastVsWorldCollision(const CColSphere& spA, const CColSphere& spB, float* outDist, float minDist);
 };
 
 void CalculateColPointInsideBox(const CBox& box, const CVector& point, CColPoint& colPoint);

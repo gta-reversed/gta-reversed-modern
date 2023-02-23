@@ -449,7 +449,7 @@ public:
     void CameraPedModeSpecialCases();
     void CameraVehicleModeSpecialCases(CVehicle* vehicle);
     void ClearPlayerWeaponMode();
-    bool ConeCastCollisionResolve(CVector* source, CVector* center, CVector* pVecOut, float radius, float arg5, float* pFloatOut);
+    bool ConeCastCollisionResolve(const CVector& pos, const CVector& lookAt, CVector& outDest, float rad, float minDist, float& outDist);
     bool ConsiderPedAsDucking(CPed* ped);
     void CopyCameraMatrixToRWCam(bool bUpdateMatrix);
     void DealWithMirrorBeforeConstructRenderList(bool bActiveMirror, CVector mirrorNormal, float mirrorV, CMatrix* matMirror);

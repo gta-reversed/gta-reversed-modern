@@ -849,6 +849,6 @@ bool CCollision::BuildCacheOfCameraCollision(CColSphere* sphere1, CColSphere* sp
 }
 
 // 0x41B000
-bool CCollision::CameraConeCastVsWorldCollision(CColSphere* sphere1, CColSphere* sphere2, float* arg2, float arg3) {
-    return plugin::CallAndReturn<bool, 0x41B000, CColSphere*, CColSphere*, float*, float>(sphere1, sphere2, arg2, arg3);
+bool CCollision::CameraConeCastVsWorldCollision(const CColSphere& spA, const CColSphere& spB, float* outDist, float minDist) {
+    return plugin::CallAndReturn<bool, 0x41B000>(&spA, &spB, outDist, minDist);
 }

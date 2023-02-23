@@ -125,7 +125,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(ImproveNearClip, 0x516B20, { .reversed = false });
     RH_ScopedInstall(SetCameraUpForMirror, 0x51A560);
     RH_ScopedInstall(RestoreCameraAfterMirror, 0x51A5A0);
-    RH_ScopedInstall(ConeCastCollisionResolve, 0x51A5D0, { .reversed = false });
+    RH_ScopedInstall(ConeCastCollisionResolve, 0x51A5D0);
     RH_ScopedInstall(TryToStartNewCamMode, 0x51E560, { .reversed = false });
     RH_ScopedInstall(CameraColDetAndReact, 0x520190, { .reversed = false });
     RH_ScopedInstall(CamControl, 0x527FA0, { .reversed = false });
@@ -1596,8 +1596,19 @@ void CCamera::RestoreCameraAfterMirror() {
 }
 
 // 0x51A5D0
-bool CCamera::ConeCastCollisionResolve(CVector* source, CVector* center, CVector* pVecOut, float radius, float arg5, float* pFloatOut) {
-    return plugin::CallMethodAndReturn<bool, 0x51A5D0, CCamera*, CVector*, CVector*, CVector*, float, float, float*>(this, source, center, pVecOut, radius, arg5, pFloatOut);
+bool CCamera::ConeCastCollisionResolve(const CVector& pos, const CVector& lookAt, CVector& outDest, float radius, float minDist, float& outDist) {
+    if (pos == lookAt) {
+        return false;
+    }
+
+    if (CCollision::CameraConeCastVsWorldCollision(CSphere{ pos, radius }, CSphere{ lookAt, radius }, &outDist, minDist)) {
+        outDest = lerp(lookAt, pos, outDist);
+        return true;
+    } else {
+        outDest = pos;
+        outDist = 1.f;
+        return false;
+    }
 }
 
 // 0x51E560
