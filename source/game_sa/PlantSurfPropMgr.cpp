@@ -67,8 +67,8 @@ bool CPlantSurfPropMgr::LoadPlantsDat(const char* filename) {
 
         ePlantField field = ePlantField::NAME;
         tSurfPropTab* surfProperties = nullptr;
-
-        char* surfaceName = strtok(line, " \t");
+        char* lastToken{};
+        char* surfaceName = strtok_s(line, " \t", &lastToken);
 
         Plant* plant = nullptr;
         do {
@@ -82,7 +82,7 @@ bool CPlantSurfPropMgr::LoadPlantsDat(const char* filename) {
                         break;
                     }
                 } else {
-                    sprintf(errorMsg, "Unknown surface name '%s' in 'Plants.dat' (line %d)! See Andrzej to fix this.", surfaceName, lineId);
+                    sprintf_s(errorMsg, "Unknown surface name '%s' in 'Plants.dat' (line %d)! See Andrzej to fix this.", surfaceName, lineId);
                 }
                 return false;
             case ePlantField::PCD_ID:
@@ -122,30 +122,30 @@ bool CPlantSurfPropMgr::LoadPlantsDat(const char* filename) {
                 plant->color.a = atoi(surfaceName);
                 break;
             case ePlantField::SCALE_XY:
-                plant->scale_xy = atof(surfaceName);
+                plant->scale_xy = static_cast<float>(atof(surfaceName));
                 break;
             case ePlantField::SCALE_Z:
-                plant->scale_z = atof(surfaceName);
+                plant->scale_z = static_cast<float>(atof(surfaceName));
                 break;
             case ePlantField::SCALE_VARIATION_XY:
-                plant->scale_variation_xy = atof(surfaceName);
+                plant->scale_variation_xy = static_cast<float>(atof(surfaceName));
                 break;
             case ePlantField::SCALE_VARIATION_Z:
-                plant->scale_variation_z = atof(surfaceName);
+                plant->scale_variation_z = static_cast<float>(atof(surfaceName));
                 break;
             case ePlantField::WIND_BENDING_SCALE:
-                plant->wind_blending_scale = atof(surfaceName);
+                plant->wind_blending_scale = static_cast<float>(atof(surfaceName));
                 break;
             case ePlantField::WIND_BENDING_VARIATION:
-                plant->wind_blending_variation = atof(surfaceName);
+                plant->wind_blending_variation = static_cast<float>(atof(surfaceName));
                 break;
             case ePlantField::DENSITY:
-                plant->density = atof(surfaceName);
+                plant->density = static_cast<float>(atof(surfaceName));
                 break;
             default:
                 break;
             }
-            surfaceName = strtok(nullptr, " \t");
+            surfaceName = strtok_s(nullptr, " \t", &lastToken);
             field = static_cast<ePlantField>(static_cast<int32>(field) + 1);
         } while (surfaceName);
 

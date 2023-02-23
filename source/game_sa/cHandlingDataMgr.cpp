@@ -31,9 +31,9 @@ void cHandlingDataMgr::InjectHooks() {
 int32 tHandlingData::InitFromData(int32 id, const char* line) {
     m_nVehicleId = id;
 
-    const auto n = sscanf(
+    const auto n = sscanf_s(
         line,
-        "%*s\t%f\t%f\t%f\t%f\t%f\t%f\t%hhu\t%f\t%f\t%f\t%hhu\t%f\t%f\t%f\t%c\t%c\t%f\t%f\t%hhu\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%d\t%x\t%x\t%hhu\t%hhu\t%hhu", // Skips name
+        "%*s\t%f\t%f\t%f\t%f\t%f\t%f\t%hhu\t%f\t%f\t%f\t%hhu\t%f\t%f\t%f\t%c\t%c\t%f\t%f\t%hhu\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%d\t%x\t%x\t%hhu\t%hhu\t%hhu",
         &m_fMass, // 1
         &m_fTurnMass,
         &m_fDragMult,
@@ -52,8 +52,8 @@ int32 tHandlingData::InitFromData(int32 id, const char* line) {
         &m_transmissionData.m_fMaxGearVelocity,
         &m_transmissionData.m_fEngineAcceleration,
         &m_transmissionData.m_fEngineInertia,
-        &m_transmissionData.m_nDriveType,
-        &m_transmissionData.m_nEngineType,
+        &m_transmissionData.m_nDriveType, 1u,
+        &m_transmissionData.m_nEngineType, 1u,
 
         &m_fBrakeDeceleration, // 18
         &m_fBrakeBias,
@@ -88,9 +88,9 @@ int32 tHandlingData::InitFromData(int32 id, const char* line) {
 int32 tBoatHandlingData::InitFromData(int32 id, const char* line) {
     m_nVehicleId = id;
 
-    const auto n = sscanf(
+    const auto n = sscanf_s(
         line,
-        "%*s\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f", // Skips name (first token)
+        "%*s\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f",
         &m_fThrustY,
         &m_fThrustZ,
         &m_fThrustAppZ,
@@ -116,9 +116,9 @@ int32 tBoatHandlingData::InitFromData(int32 id, const char* line) {
 int32 tFlyingHandlingData::InitFromData(int32 id, const char* line) {
     m_nVehicleId = id;
 
-    const auto n = sscanf(
+    const auto n = sscanf_s(
         line,
-        "%*s\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f%*c\t%f\t%f\t%f\t%f\t%f\t%f\t%f", // Skips name(first token)
+        "%*s\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f%*c\t%f\t%f\t%f\t%f\t%f\t%f\t%f",
         &m_fThrust, // 1                                            ^^^ there's an extra `s` for the `RCRAIDER` that we have to ignore
         &m_fThrustFallOff,
         &m_fYaw,
@@ -150,9 +150,9 @@ int32 tFlyingHandlingData::InitFromData(int32 id, const char* line) {
 int32 tBikeHandlingData::InitFromData(int32 id, const char* line) {
     m_nVehicleId = id;
 
-    const auto n = sscanf(
+    const auto n = sscanf_s(
         line,
-        "%*s\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f", // Skips name (first token)
+        "%*s\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f",
         &m_fLeanFwdCOM,
         &m_fLeanFwdForce,
         &m_fLeanBakCOM,
@@ -187,7 +187,7 @@ void cHandlingDataMgr::LoadHandlingData() {
     // Get handling by scanning name from `line` using `scanNameFormat`, then calls `GetHandlingFn` to get the handling ptr
     const auto DoLoadHandling = [&, this](const char* line, auto GetHandlingFn) -> int32 {
         char name[32]{};
-        if (sscanf_s(line, "%s", name, std::size(name)) != 1) {
+        if (sscanf_s(line, "%31s", name, std::size(name)) != 1) { // FIX_BUGS: Sized string read
             return 0;
         }
         const auto id = FindExactWord(name, &VehicleNames[0][0], std::size(VehicleNames[0]), std::size(VehicleNames));

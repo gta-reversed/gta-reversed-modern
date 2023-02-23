@@ -543,7 +543,7 @@ public:
 #define KEY_LENGTH_IN_SCRIPT (8)
 
     static void ReadTextLabelFromScript(uint8*& ip, char* buf) {
-        strncpy(buf, (const char*)&ScriptSpace[*ip], KEY_LENGTH_IN_SCRIPT);
+        strncpy_s(buf, KEY_LENGTH_IN_SCRIPT, (const char*) & ScriptSpace[*ip], KEY_LENGTH_IN_SCRIPT);
     }
 
     static auto * GetTextByKeyFromScript(uint8*& ip) {

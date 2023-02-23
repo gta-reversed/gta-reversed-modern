@@ -165,7 +165,7 @@ public:
         m_nPlayerState =                    info->m_nPlayerState;
         m_fRoadDensityAroundPlayer =        info->m_fRoadDensityAroundPlayer;
         m_nDisplayMoney =                   info->m_nDisplayMoney;
-        m_nNumHoursDidntEat =               info->m_nNumHoursDidntEat;
+        m_nNumHoursDidntEat =               static_cast<uint8>(info->m_nNumHoursDidntEat);
         m_nCollectablesPickedUp =           info->m_nCollectablesPickedUp;
         m_nTotalNumCollectables =           info->m_nTotalNumCollectables;
         m_bDoesNotGetTired =                info->m_bDoesNotGetTired;

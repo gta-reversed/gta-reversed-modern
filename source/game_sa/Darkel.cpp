@@ -87,7 +87,7 @@ void CDarkel::DrawMessages() {
 
         if (TimeLimit >= 0) {
             const auto remaining = TimeOfFrenzyStart + TimeLimit - CTimer::GetTimeInMS();
-            sprintf(gString, "%d:%02d", remaining / 60'000, remaining % 60'000 / 1000);
+            sprintf_s(gString, "%d:%02d", remaining / 60'000, remaining % 60'000 / 1000);
             AsciiToGxtChar(gString, gGxtString);
 
             // blink in last 4 second
@@ -95,7 +95,7 @@ void CDarkel::DrawMessages() {
                 CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f), remainingTimerY, gGxtString);
             }
         }
-        sprintf(gString, "%d", KillsNeeded < 0 ? 0 : KillsNeeded);
+        sprintf_s(gString, "%d", KillsNeeded < 0 ? 0 : KillsNeeded);
         AsciiToGxtChar(gString, gGxtString);
         CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(32.0f), remainingKillsY, gGxtString);
     }

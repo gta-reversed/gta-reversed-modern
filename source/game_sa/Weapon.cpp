@@ -619,13 +619,13 @@ void CWeapon::DoWeaponEffect(CVector origin, CVector target) {
     char fxName[32]{};
     switch (m_nType) {
     case eWeaponType::WEAPON_FLAMETHROWER:
-        strcpy(fxName, "flamethrower");
+        strcpy_s(fxName, "flamethrower");
         break;
     case eWeaponType::WEAPON_EXTINGUISHER:
-        strcpy(fxName, "extinguisher");
+        strcpy_s(fxName, "extinguisher");
         break;
     case eWeaponType::WEAPON_SPRAYCAN:
-        strcpy(fxName, "spraycan");
+        strcpy_s(fxName, "spraycan");
         break;
     default:
         return StopWeaponEffect();

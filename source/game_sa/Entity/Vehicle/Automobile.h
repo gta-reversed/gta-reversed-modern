@@ -15,6 +15,7 @@
 #include "eSurfaceType.h"
 #include "eCarWheel.h"
 #include "eCarNodes.h"
+
 enum class eSkidmarkType : uint32;
 
 class CVehicleModelInfo;
@@ -63,17 +64,16 @@ public:
         };
     };
     std::array<float, 4> m_fWheelBurnoutSpeed; // 0x858 - Passed to CVehicle::ProcessWheel as last 3rd parameter, but it's not used
-
     struct {
-        uint8 bTaxiLightOn : 1 { m_sAllTaxiLights };
-        uint8 ucNPCFlagPad2 : 1 ;
-        uint8 bIgnoreWater : 1 ;
-        uint8 bDontDamageOnRoof : 1 ;
-        uint8 bTakePanelDamage : 1 { true };
-        uint8 ucTaxiUnkn6 : 1 { true };
-        uint8 bLostTraction : 1 ;
-        uint8 bSoftSuspension : 1 ;
-    } npcFlags;
+        bool bTaxiLight : 1 { m_sAllTaxiLights }; // AKA `bTaxiLightOn`
+        bool bShouldNotChangeColour : 1 {}; // AKA `ucNPCFlagPad2`
+        bool bWaterTight : 1 {}; // AKA `bIgnoreWater`
+        bool bDoesNotGetDamagedUpsideDown : 1 {}; // AKA `bDontDamageOnRoof`
+        bool bCanBeVisiblyDamaged : 1 { true }; // AKA `bTakePanelDamage`
+        bool bTankExplodesCars : 1 { true }; // AKA `ucTaxiUnkn6`
+        bool bIsBoggedDownInSand : 1 {}; // AKA `bLostTraction`
+        bool bIsMonsterTruck : 1 {}; // AKA `bSoftSuspension`
+    } autoFlags;
     int8   _align;
     bool   m_bDoingBurnout;                         // 0x86A
     uint16 m_wMiscComponentAngle;                   // 0x86C
@@ -116,7 +116,7 @@ public:
     std::array<FxSystem_c*, 2> m_exhaustNitroFxSystem;
 
     uint8 m_harvesterParticleCounter;
-    char  field_981;
+    uint8 m_fireParticleCounter;
     int16 field_982;
     float m_heliDustFxTimeConst;
 
@@ -144,7 +144,7 @@ public:
     void ProcessControlInputs(uint8 playerNum) override;
     void GetComponentWorldPosition(int32 componentId, CVector& outPos) override;
     bool IsComponentPresent(int32 componentId) override;
-    void OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) override;
+    void OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) override; // eCarNodes = componentId
     float GetDooorAngleOpenRatio(eDoors door) override;
     float GetDooorAngleOpenRatio(uint32 door) override;
     bool IsDoorReady(eDoors door) override;
@@ -158,7 +158,7 @@ public:
     bool IsOpenTopCar() override;
     void RemoveRefsToVehicle(CEntity* entity) override;
     void BlowUpCar(CEntity* damager, bool bHideExplosion) override;
-    void BlowUpCarCutSceneNoExtras(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound) override;
+    void BlowUpCarCutSceneNoExtras(bool bDontShakeCam, bool bDontSpawnStuff, bool bNoExplosion, bool bMakeSound) override;
     bool SetUpWheelColModel(CColModel* wheelCol) override;
     bool BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) override;
     bool IsRoomForPedToLeaveCar(uint32 arg0, CVector* arg1) override;
@@ -375,6 +375,8 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
+    void BlowUpCar_Impl(CEntity* dmgr, bool bDontShakeCam, bool bDontSpawnStuff, bool bNoExplosion, bool bHideExplosionFx, bool bIsForCutScene, bool bMakeSound);
+
     auto Constructor(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) {
         this->CAutomobile::CAutomobile(modelIndex, createdBy, setupSuspensionLines);
         return this;
@@ -438,12 +440,13 @@ private:
 VALIDATE_SIZE(CAutomobile, 0x988);
 VALIDATE_OFFSET(CAutomobile, m_damageManager, 0x5A0);
 VALIDATE_OFFSET(CAutomobile, m_wheelColPoint, 0x724);
-VALIDATE_OFFSET(CAutomobile, npcFlags, 0x868);
+VALIDATE_OFFSET(CAutomobile, autoFlags, 0x868);
 VALIDATE_OFFSET(CAutomobile, m_bDoingBurnout, 0x86A);
 VALIDATE_OFFSET(CAutomobile, m_wMiscComponentAngle, 0x86C);
 VALIDATE_OFFSET(CAutomobile, m_fGasPedalAudio, 0x964);
 
 // Disable matfx (material effects) for material (callback), "data" parameter is unused
 RpMaterial *DisableMatFx(RpMaterial* material, void* data);
-// callback
+
 RwObject* GetCurrentAtomicObjectCB(RwObject* object, void* data);
+RwObject* GetCurrentAtomicObject(RwFrame* frame);

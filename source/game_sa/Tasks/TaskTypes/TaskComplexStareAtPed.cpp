@@ -128,7 +128,7 @@ CTask* CTaskComplexStareAtPed::ControlSubTask(CPed* ped) {
         }
         return false;
     }()) {
-        if (!ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM) && CGeneral::RandomBool(1)) {
+        if (!ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM) && CGeneral::RandomBool(1.f)) {
             ped->GetTaskManager().SetTaskSecondary(
                 new CTaskSimpleRunAnim{ ANIM_GROUP_GANGS, CAnimManager::GetRandomGangTalkAnim(), 4.f},
                 TASK_SECONDARY_PARTIAL_ANIM

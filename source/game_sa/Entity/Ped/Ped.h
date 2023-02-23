@@ -292,7 +292,7 @@ public:
     CEntity*            m_pContactEntity;
     float               field_588;
     CVehicle*           m_pVehicle;
-    int32               field_590;
+    CVehicle*           m_VehDeadInFrontOf; // Set if `bDeadPedInFrontOfCar` 
     int32               field_594;
     ePedType            m_nPedType;
     CPedStat*           m_pStats;
@@ -319,7 +319,7 @@ public:
     int32               field_744;
     uint32              m_nLookTime;
     int32               field_74C;
-    int32               m_nDeathTime;
+    int32               m_nDeathTimeMS; //< Death time in MS (CTimer::GetTimeMS())
     char                m_nBodypartToRemove;
     char                field_755;
     int16               m_nMoneyCount; // Used for money pickup when ped is killed

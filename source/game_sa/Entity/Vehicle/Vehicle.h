@@ -23,6 +23,8 @@
 #include "FxSystem.h"
 #include "Fire.h"
 
+#include <Enums/eControllerType.h>
+
 /*  Thanks to MTA team for https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CVehicleSA.cpp */
 
 class CWeapon;
@@ -178,10 +180,16 @@ public:
     static constexpr auto NUM_VEHICLE_UPGRADES = 15u;
 
 public:
+    enum class eComedyControlState : uint8 {
+        INACTIVE,
+        STEER_RIGHT,
+        STEER_LEFT
+    };
+public:
     CAEVehicleAudioEntity m_vehicleAudio;
     tHandlingData*        m_pHandlingData;
     tFlyingHandlingData*  m_pFlyingHandlingData;
-    union {
+    union { // TODO: The struct in `tHandlingData` is exactly the same thing, so use that here too! (Requires renaming fields in `tHandlingData`)
         eVehicleHandlingFlags m_nHandlingFlagsIntValue;
         struct {
             uint32 b1gBoost : 1;
@@ -370,8 +378,8 @@ public:
     uint32          m_nHornCounter;
     int8            m_nRandomIdRelatedToSiren;
     char            m_nCarHornTimer; // car horn related
-    char            m_comedyControlState;
-    uint8           m_nHasslePosId;           // Bitfield
+    eComedyControlState m_comedyControlState;
+    char            m_nHasslePosId;
     CStoredCollPoly m_FrontCollPoly;          // poly which is under front part of car
     CStoredCollPoly m_RearCollPoly;           // poly which is under rear part of car
     tColLighting    m_anCollisionLighting[4]; // left front, left rear, right front, right rear
@@ -388,7 +396,7 @@ public:
         } m_renderLights;
     };
     RwTexture*   m_pCustomCarPlate;
-    float        m_fRawSteerAngle;
+    float        m_fRawSteerAngle; // AKA m_fSteeringLeftRight
     eVehicleType m_nVehicleType;    // Theory by forkerer:
     eVehicleType m_nVehicleSubType; // Hack to have stuff be 2 classes at once, like vortex which can act like a car and a boat
     int16        m_nPreviousRemapTxd;
@@ -406,8 +414,8 @@ public:
     static bool &bDisableRemoteDetonationOnContact;
     static bool &m_bEnableMouseSteering;
     static bool &m_bEnableMouseFlying;
-    static int32 &m_nLastControlInput;
-    static inline std::array<CVehicle*, 4>& m_aSpecialColVehicle = *(std::array<CVehicle*, 4>*)0xC1CC08;
+    static inline auto& m_nLastControlInput = *(eControllerType*)0xC1CC04;
+    static CColModel* (&m_aSpecialColVehicle)[4];
     static bool &ms_forceVehicleLightsOff;
     static bool &s_bPlaneGunsEjectShellCasings;
     static CColModel (&m_aSpecialColModel)[4];
@@ -507,6 +515,7 @@ public:
     CPed* SetupPassenger(int32 seatNumber, int32 pedType, bool arg2, bool arg3);
     bool IsPassenger(CPed* ped) const;
     [[nodiscard]] bool IsPassenger(int32 modelIndex) const;
+    bool IsPedOfModelInside(eModelID model) const; // NOTSA
     bool IsDriver(CPed* ped) const;
     [[nodiscard]] bool IsDriver(int32 modelIndex) const;
     void KillPedsInVehicle();

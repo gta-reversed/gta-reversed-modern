@@ -1033,12 +1033,6 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
     }
 }
 
-RpAtomic* CVisibilityPlugins::SetAtomicFlagCB(RpAtomic* atomic, void* data) {
-    uint16 flag = *reinterpret_cast<uint16*>(&data);
-    ATOMICPLG(atomic, m_flags) |= flag;
-    return atomic;
-}
-
 // 0x7322B0
 void CVisibilityPlugins::SetAtomicFlag(RpAtomic* atomic, uint16 flag) {
     ATOMICPLG(atomic, m_flags) |= flag;
@@ -1046,7 +1040,13 @@ void CVisibilityPlugins::SetAtomicFlag(RpAtomic* atomic, uint16 flag) {
 
 // 0x7322D0
 void CVisibilityPlugins::SetAtomicFlag(RpAtomic* atomic, int32 flag) {
-    ATOMICPLG(atomic, m_flags) |= flag;
+    ATOMICPLG(atomic, m_flags) |= flag; // how does this work??? m_flags is `uint16` ffs
+}
+
+RpAtomic* CVisibilityPlugins::SetAtomicFlagCB(RpAtomic* atomic, void* data) {
+    uint16 flag = *reinterpret_cast<uint16*>(&data);
+    SetAtomicFlag(atomic, flag);
+    return atomic;
 }
 
 // 0x732307

@@ -38,6 +38,7 @@ bool& CVehicle::bDisableRemoteDetonationOnContact = *(bool*)0xC1CC01;
 bool& CVehicle::m_bEnableMouseSteering = *(bool*)0xC1CC02;
 bool& CVehicle::m_bEnableMouseFlying = *(bool*)0xC1CC03;
 int32& CVehicle::m_nLastControlInput = *(int32*)0xC1CC04;
+CColModel* (&CVehicle::m_aSpecialColVehicle)[4] = *(CColModel*(*)[4])0xC1CC08;
 bool& CVehicle::ms_forceVehicleLightsOff = *(bool*)0xC1CC18;
 bool& CVehicle::s_bPlaneGunsEjectShellCasings = *(bool*)0xC1CC19;
 CColModel (&CVehicle::m_aSpecialColModel)[4] = *(CColModel(*)[4])0xC1CC78;
@@ -334,7 +335,7 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     m_fVehicleFrontGroundZ = 0.0f;
     field_511 = 0;
     field_512 = 0;
-    m_comedyControlState = 0;
+    m_comedyControlState = eComedyControlState::INACTIVE;
     m_FrontCollPoly.m_bIsActual = false;
     m_RearCollPoly.m_bIsActual = false;
     m_pHandlingData = nullptr;
@@ -880,8 +881,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId_, uint
             fAnimEnd = 0.1F;
             break;
         default:
-            assert(false); // Shouldn't ever enter this
-            break;
+            NOTSA_UNREACHABLE();
         }
 
         if (fTime < fAnimStart)
@@ -916,8 +916,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId_, uint
             fAnimEnd2 = 0.475f;
             break;
         default:
-            assert(false); // Shouldn't ever enter this
-            break;
+            NOTSA_UNREACHABLE();
         }
 
         if (fTime > fAnimEnd2)
@@ -1689,11 +1688,15 @@ bool CVehicle::IsPassenger(CPed* ped) const {
 // 0x6D1C00
 bool CVehicle::IsPassenger(int32 modelIndex) const {
     for (const auto& passenger : m_apPassengers) {
-        if (passenger->m_nModelIndex == modelIndex) {
+        if (passenger && passenger->m_nModelIndex == modelIndex) {
             return true;
         }
     }
     return false;
+}
+
+bool CVehicle::IsPedOfModelInside(eModelID model) const {
+    return IsDriver(model) || IsPassenger(model);
 }
 
 bool CVehicle::IsDriver(CPed* ped) const {

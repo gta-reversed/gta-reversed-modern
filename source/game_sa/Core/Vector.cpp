@@ -39,6 +39,11 @@ CVector::CVector(const CVector2D& v2d, float Z) :
 /*!
 * @returns A vector with each of its components set to a number in the given range [min, max)
 */
+CVector CVector::Random(CVector min, CVector max) {
+    const auto Get = [=](float fmin, float fmax) { return CGeneral::GetRandomNumberInRange(fmin, fmax); };
+    return { Get(min.x, max.x), Get(min.y, max.y), Get(min.z, max.z) };
+}
+
 CVector CVector::Random(float min, float max) {
     const auto Get = [=] { return CGeneral::GetRandomNumberInRange(min, max); };
     return { Get(), Get(), Get() };
