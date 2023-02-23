@@ -1755,7 +1755,7 @@ void CPopulation::ManageAllPopulation() {
             : nullptr;
     }();
 
-    const auto center = FindPlayerCentreOfWorld();
+    const auto& center = FindPlayerCentreOfWorld();
 
     for (auto& obj : GetObjectPool()->GetAllValid()) {
         if (&obj != objPlyrIsHolding) {
@@ -1773,7 +1773,7 @@ void CPopulation::ManagePopulation() {
     // TODO: Implement original `framecounter % 32` pool splitting logic
     //       It's just a perf optimization, so I didn't bother
 
-    const auto center = FindPlayerCentreOfWorld();
+    const auto& center = FindPlayerCentreOfWorld();
 
     for (auto& obj : GetObjectPool()->GetAllValid()) {
         ManageObject(&obj, center);
