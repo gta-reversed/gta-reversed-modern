@@ -1164,7 +1164,7 @@ void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId)
     {
         char version[4];
         CFileMgr::Read(imgFile, &version, 4u);    // �VER2� for SA
-        assert(strncmp(version, "VER2", 4) == 0); // NOTSA
+        assert((std::string_view{version, 4u} == "VER2")); // NOTSA
     }
 
     int32 previousModelId = MODEL_INVALID;
@@ -1231,8 +1231,7 @@ void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId)
 
         } else if (ExtensionIs("DAT")) {
             // Extract nodes file sector from name (Remember the format: `nodesXX.dat` where XX is the id)
-            // TODO: Maybe one day add some error here if sscanf doesn't return 1 (that is, the number couldn't be read)
-            (void)sscanf(&entry.m_szName[sizeof("nodes") - 1], "%d", &modelId);
+            VERIFY(sscanf_s(&entry.m_szName[sizeof("nodes") - 1], "%d", &modelId) == 1);
             modelId += RESOURCE_ID_DAT;
 
         } else if (ExtensionIs("IFP")) {
@@ -2083,8 +2082,9 @@ void CStreaming::ReadIniFile() {
         if (*line == '#' || !*line)
             continue;
 
-        char* attribute = strtok(line, " ,\t");
-        char* value = strtok(nullptr, " ,\t");
+        char* nextToken{};
+        char* attribute = strtok_s(line, " ,\t", &nextToken);
+        char* value = strtok_s(nullptr, " ,\t", &nextToken);
         // NOTSA: atoi, atof are replaced by safe analogues
         // todo: Handle errors
         if (_stricmp(attribute, "memory") != 0 || bHasDevkitMemory)
@@ -3802,7 +3802,7 @@ void CStreaming::UpdateForAnimViewer() {
     CVector position{};
     AddModelsToRequestList(position, 0);
     LoadRequestedModels();
-    sprintf(gString, "Requested %d, memory size %dK\n", ms_numModelsRequested, 2 * ms_memoryUsedBytes);
+    sprintf_s(gString, "Requested %d, memory size %dK\n", ms_numModelsRequested, 2 * ms_memoryUsedBytes);
 }
 
 // 0x407F80

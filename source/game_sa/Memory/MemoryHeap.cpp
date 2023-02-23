@@ -85,7 +85,7 @@ void CMemoryHeap::Shutdown() {
 
 // 0x72EB10
 void CMemoryHeap::RegisterFree(HeapFreeBlockDesc* desc) {
-    m_nMemUsed += -sizeof(HeapBlockDesc) - desc->m_nSize;
+    m_nMemUsed -= desc->m_nSize + sizeof(HeapBlockDesc);
 }
 
 // 0x72EAF0
@@ -105,6 +105,7 @@ HeapFreeBlockDesc* CMemoryHeap::_JoinFreeBlocks(HeapFreeBlockDesc* desc) {
         next->RemoveHeapFreeBlock();
         next = (HeapFreeBlockDesc*)((uint8*)next + next->m_nSize + sizeof(HeapBlockDesc));
     }
+    assert(next);
 
     // join prev located block
     auto* prev = (HeapFreeBlockDesc*)desc->m_PrevBlock;
@@ -381,7 +382,7 @@ void CMemoryHeap::ParseHeap() {
         }
 
         if ((k & 63) == 0) { // '?'
-            sprintf(buffer, "\n%5dK:", k / 64);
+            sprintf_s(buffer, "\n%5dK:", k / 64);
             CFileMgr::Write(file, buffer, 8);
         }
 
@@ -390,7 +391,7 @@ void CMemoryHeap::ParseHeap() {
 
         for (uint32 size = block->m_nSize >> 4; size; --size) {
             if ((k & 63) == 0) {
-                sprintf(buffer, "\n%5dK:", k / 64);
+                sprintf_s(buffer, "\n%5dK:", k / 64);
                 CFileMgr::Write(file, buffer, 8);
             }
             CFileMgr::Write(file, &cState, sizeof(char));

@@ -88,7 +88,7 @@ CVehicle* CPedPlacement::IsPositionClearOfCars(const CVector* pos) {
 
 // 0x616A40
 CVehicle* CPedPlacement::IsPositionClearOfCars(const CPed* ped) {
-    const auto pedPos = ped->GetPosition();
+    const auto& pedPos = ped->GetPosition();
     const auto vehHit = IsPositionClearOfCars(&pedPos);
 
     if (!vehHit)

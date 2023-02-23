@@ -493,15 +493,15 @@ bool CWanted::IsClosestCop(CPed* ped, int32 numCopsToCheck) {
 
 // 0x562B00
 CCopPed* CWanted::ComputePursuitCopToDisplace(CCopPed* cop, CCopPed** copsArray) {
+    const auto& playerPos = FindPlayerPed()->GetPosition();
     CCopPed* displacedCop = nullptr;
     auto distTargetCop = 1.0f;
-    auto playerPos = FindPlayerPed()->GetPosition();
 
     if (cop)
         distTargetCop = std::max(DistanceBetweenPointsSquared(playerPos, cop->GetPosition()), 1.0f);
 
     for (auto i = 0u; i < MAX_COPS_IN_PURSUIT; i++) {
-        auto& copInPursuit = copsArray[i];
+        const auto& copInPursuit = copsArray[i];
 
         if (!copInPursuit)
             continue;
@@ -509,7 +509,7 @@ CCopPed* CWanted::ComputePursuitCopToDisplace(CCopPed* cop, CCopPed** copsArray)
         if (!copInPursuit->IsAlive())
             return copInPursuit;
 
-        auto distPursuitCop = DistanceBetweenPointsSquared(playerPos, copInPursuit->GetPosition());
+        const auto distPursuitCop = DistanceBetweenPointsSquared(playerPos, copInPursuit->GetPosition());
 
         if (distPursuitCop > distTargetCop) {
             displacedCop = copInPursuit;

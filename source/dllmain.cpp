@@ -11,9 +11,10 @@ void InjectHooksMain(HMODULE hThisDLL);
 void DisplayConsole()
 {
     if (AllocConsole()) {
-        VERIFY(freopen("CONIN$", "r", stdin));
-        VERIFY(freopen("CONOUT$", "w", stdout));
-        VERIFY(freopen("CONOUT$", "w", stderr));
+        FILESTREAM fs{};
+        VERIFY(freopen_s(&fs, "CONIN$",  "r", stdin)  == NOERROR);
+        VERIFY(freopen_s(&fs, "CONOUT$", "w", stdout) == NOERROR);
+        VERIFY(freopen_s(&fs, "CONOUT$", "w", stderr) == NOERROR);
     }
 }
 

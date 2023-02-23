@@ -123,7 +123,7 @@ public:
     // NOTSA
     static int32 GetPriceMultipliedByLevel(int32 price, eLevelName level = NUM_LEVELS) {
         level = (level == NUM_LEVELS) ? CTheZones::m_CurrLevel : level;
-        return static_cast<float>(price) * gPriceMultipliers[level];
+        return static_cast<int32>(static_cast<float>(price) * gPriceMultipliers[level]);
     }
 };
 

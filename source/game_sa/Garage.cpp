@@ -59,7 +59,7 @@ void CGarage::StoreAndRemoveCarsForThisHideOut(CStoredCar* storedCars, int32 max
     for (auto i = pool->GetSize(); i; i--) {
         if (auto vehicle = pool->GetAt(i - 1)) {
             if (IsPointInsideGarage(vehicle->GetPosition()) && vehicle->m_nCreatedBy != MISSION_VEHICLE) {
-                if (storedCarIdx < maxSlot && !EntityHasASphereWayOutsideGarage(vehicle, 1.0f)) {
+                if (storedCarIdx < static_cast<uint32>(maxSlot) && !EntityHasASphereWayOutsideGarage(vehicle, 1.0f)) {
                     storedCars[storedCarIdx++].StoreCar(vehicle);
                 }
 
@@ -180,7 +180,7 @@ bool CGarage::IsGarageEmpty() {
 
     int16 outCount[2];
     CEntity* outEntities[16];
-    CWorld::FindObjectsIntersectingCube(&cornerA, &cornerB, outCount, std::size(outEntities), outEntities, false, true, true, false, false);
+    CWorld::FindObjectsIntersectingCube(&cornerA, &cornerB, outCount, static_cast<int16>(std::size(outEntities)), outEntities, false, true, true, false, false);
     if (outCount[0] <= 0)
         return true;
 

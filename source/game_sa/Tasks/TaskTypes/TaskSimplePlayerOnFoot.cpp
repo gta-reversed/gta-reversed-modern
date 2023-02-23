@@ -749,10 +749,10 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
     if (animAssoc1) {
         while (true) {
             uint32 animHierarchyIndex = (uint32)animAssoc1->m_pHierarchy - (uint32)CAnimManager::ms_aAnimations.data();
-            animHierarchyIndex = animHierarchyIndex / 6 + (animHierarchyIndex >> 31) >> 2;
+            animHierarchyIndex = animHierarchyIndex / 6 + ((animHierarchyIndex >> 31) >> 2);
             animHierarchyIndex = animHierarchyIndex + (animHierarchyIndex >> 31);
 
-            int32 animBlockFirstAnimIndex = animBlock->startAnimation;
+            uint32 animBlockFirstAnimIndex = static_cast<uint32>(animBlock->startAnimation);
             if (animHierarchyIndex >= animBlockFirstAnimIndex && animHierarchyIndex < animBlockFirstAnimIndex + animBlock->animationCount) {
                 break;
             }
