@@ -391,7 +391,7 @@ void CBirds::HandleGunShot(const CVector* pointA, const CVector* pointB) {
             continue;
 
         CColLine line{ *pointA, *pointB };
-        CColSphere sphere{ 0.5f, bird.m_vecPosn };
+        CColSphere sphere{ bird.m_vecPosn, 0.5f };
 
         if (CCollision::TestLineSphere(line, sphere)) {
             vecBirdShotAt = bird.m_vecPosn;

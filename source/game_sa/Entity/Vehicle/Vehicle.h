@@ -513,6 +513,7 @@ public:
     CPed* SetupPassenger(int32 seatNumber, int32 pedType, bool arg2, bool arg3);
     bool IsPassenger(CPed* ped) const;
     [[nodiscard]] bool IsPassenger(int32 modelIndex) const;
+    bool IsPedOfModelInside(eModelID model) const; // NOTSA
     bool IsDriver(CPed* ped) const;
     [[nodiscard]] bool IsDriver(int32 modelIndex) const;
     void KillPedsInVehicle();

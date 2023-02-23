@@ -861,8 +861,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId_, uint
             fAnimEnd = 0.1F;
             break;
         default:
-            assert(false); // Shouldn't ever enter this
-            break;
+            NOTSA_UNREACHABLE();
         }
 
         if (fTime < fAnimStart)
@@ -897,8 +896,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId_, uint
             fAnimEnd2 = 0.475f;
             break;
         default:
-            assert(false); // Shouldn't ever enter this
-            break;
+            NOTSA_UNREACHABLE();
         }
 
         if (fTime > fAnimEnd2)
@@ -1417,11 +1415,15 @@ bool CVehicle::IsPassenger(CPed* ped) const {
 // 0x6D1C00
 bool CVehicle::IsPassenger(int32 modelIndex) const {
     for (const auto& passenger : m_apPassengers) {
-        if (passenger->m_nModelIndex == modelIndex) {
+        if (passenger && passenger->m_nModelIndex == modelIndex) {
             return true;
         }
     }
     return false;
+}
+
+bool CVehicle::IsPedOfModelInside(eModelID model) const {
+    return IsDriver(model) || IsPassenger(model);
 }
 
 bool CVehicle::IsDriver(CPed* ped) const {

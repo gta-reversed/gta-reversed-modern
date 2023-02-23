@@ -2,6 +2,7 @@
 
 // original name. prev name eAnimGroup
 enum AssocGroupId : uint32 {
+    ANIM_GROUP_NONE = (uint32)(-1),
     ANIM_GROUP_DEFAULT = 0,
     ANIM_GROUP_DOOR = 1,
     ANIM_GROUP_BIKES = 2,

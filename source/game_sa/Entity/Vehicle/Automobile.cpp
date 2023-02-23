@@ -685,8 +685,8 @@ void CAutomobile::ProcessControl()
 
         ProcessSuspension();
 
-        CVector contactPoints[4];
-        CVector contactSpeeds[4];
+        CVector contactPoints[4]{};
+        CVector contactSpeeds[4]{};
 
         for (int32 i = 0; i < 4; i++) {
             if (m_fWheelsSuspensionCompression[i] >= 1.0f) {
@@ -6091,9 +6091,8 @@ void CAutomobile::DoHeliDustEffect(float timeConstMult, float fxMaxZMult) {
 }
 
 // 0x6B1350
-void CAutomobile::SetBumperDamage(ePanels panel, bool withoutVisualEffect)
-{
-    auto nodeIdx = CDamageManager::GetCarNodeIndexFromPanel(panel);
+void CAutomobile::SetBumperDamage(ePanels panelIdx, bool withoutVisualEffect) {
+    auto nodeIdx = CDamageManager::GetCarNodeIndexFromPanel(panelIdx);
     auto frame = m_aCarNodes[nodeIdx];
     if (!frame) {
         return;
@@ -6103,11 +6102,11 @@ void CAutomobile::SetBumperDamage(ePanels panel, bool withoutVisualEffect)
         return;
     }
 
-    switch (m_damageManager.GetPanelStatus(panel)) {
+    switch (m_damageManager.GetPanelStatus(panelIdx)) {
     case ePanelDamageState::DAMSTATE_DAMAGED: {
-        if (!m_pHandlingData->m_bBouncePanels) { // TODO: Weird... The flag name might be incorrect, because here we actually set the bouncing panel.
-            if (auto* panel_ = CheckIfExistsGetFree(nodeIdx)) {
-                panel_->SetPanel(nodeIdx, 0, CGeneral::GetRandomNumberInRange(-0.2f, -0.5f));
+        if (!m_pHandlingData->m_bBouncePanels) { // TODO: Weird... The flag name might be incorrect, because here we actually set the bouncing panelIdx.
+            if (auto* panelFrame = CheckIfExistsGetFree(nodeIdx)) {
+                panelFrame->SetPanel(nodeIdx, 0, CGeneral::GetRandomNumberInRange(-0.5f, -0.2f));
             }
         }
         break;
@@ -6141,7 +6140,7 @@ void CAutomobile::SetPanelDamage(ePanels panel, bool createWindowGlass)
 
     switch (m_damageManager.GetPanelStatus(panel)) {
     case ePanelDamageState::DAMSTATE_DAMAGED: {
-        if (m_pHandlingData->m_bBouncePanels) { // TODO: Weird... The flag name might be incorrect, because here we actually set the bouncing panel.
+        if (m_pHandlingData->m_bBouncePanels) { // TODO: Weird... The flag name might be incorrect, because here we actually set the bouncing panelIdx.
             return;
         }
         if (auto* panel_ = CheckIfExistsGetFree(nodeIdx)) {

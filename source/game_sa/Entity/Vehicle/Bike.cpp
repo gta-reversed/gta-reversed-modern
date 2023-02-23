@@ -80,7 +80,7 @@ CBike::CBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy
     m_pHandlingData = gHandlingDataMgr.GetVehiclePointer(mi->m_nHandlingId);
     m_BikeHandling = gHandlingDataMgr.GetBikeHandlingPointer(mi->m_nHandlingId);
     m_nHandlingFlagsIntValue = m_pHandlingData->m_nHandlingFlags;
-    m_pFlyingHandlingData = gHandlingDataMgr.GetFlyingPointer(mi->m_nHandlingId);
+    m_pFlyingHandlingData = gHandlingDataMgr.GetFlyingPointer(static_cast<uint8>(mi->m_nHandlingId));
     m_fBrakeCount = 20.0f;
     mi->ChooseVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor, 1);
     m_fSwingArmLength = 0.0f;

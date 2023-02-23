@@ -160,6 +160,7 @@ void CGlass::CarWindscreenShatters(CVehicle* vehicle) {
         }
     }
 
+    assert(0 <= minRightFwdDotSumIdx && minRightFwdDotSumIdx < std::size(rightDots));
     // Size of pane in directions
     auto extentRight = maxDotRight - rightDots[minRightFwdDotSumIdx];
     auto extentFwd = maxDotFwd - fwdDots[minRightFwdDotSumIdx];

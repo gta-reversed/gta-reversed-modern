@@ -93,8 +93,16 @@ void UpdateWindow() {
 // 0x747660
 void Play(int32 nCmdShow, const char* path) {
     UpdateWindow(PSGLOBAL(window));
+
+#ifdef FIX_BUGS
+    const auto size = MultiByteToWideChar(0, 0, path, -1, nullptr, 0);
+    WCHAR* fileName = new WCHAR[size];
+    MultiByteToWideChar(0, 0, path, -1, fileName, size);
+#else
+    // Buffer overflow may happen in MultiByteToWideChar.
     WCHAR fileName[256] = { 0 };
     MultiByteToWideChar(0, 0, path, -1, fileName, sizeof(fileName) - 1);
+#endif
     HRESULT hr;
 
     if (FAILED(hr = CoInitialize(nullptr))) {
@@ -155,6 +163,10 @@ void Play(int32 nCmdShow, const char* path) {
     }
 
     SetFocus(PSGLOBAL(window));
+
+#ifdef FIX_BUGS
+    delete[] fileName;
+#endif
 };
 
 } // namespace VideoPlayer

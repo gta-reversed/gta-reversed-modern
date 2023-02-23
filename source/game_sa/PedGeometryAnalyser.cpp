@@ -85,7 +85,7 @@ void CPedGeometryAnalyser::ComputeClearTarget(const CPed& ped, const CVector&, C
 // 0x5F3B70
 bool CPedGeometryAnalyser::ComputeClosestSurfacePoint(const CPed& ped, CEntity& entity, CVector& point) {
     CVector corners[4];
-    auto posn = ped.GetPosition();
+    const auto& posn = ped.GetPosition();
     ComputeEntityBoundingBoxCornersUncached(posn.z, entity, corners);
     return ComputeClosestSurfacePoint(posn, corners, point);
 }
@@ -211,8 +211,7 @@ CVector* CPedGeometryAnalyser::ComputeEntityDirs(const CEntity& entity, CVector*
 
 // 0x5F3BC0
 int32 CPedGeometryAnalyser::ComputeEntityHitSide(const CPed& ped, CEntity& entity) {
-    auto posn = ped.GetPosition();
-    return ComputeEntityHitSide(posn, entity);
+    return ComputeEntityHitSide(ped.GetPosition(), entity);
 }
 
 // 0x5F1450

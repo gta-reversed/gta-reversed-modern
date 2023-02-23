@@ -235,7 +235,7 @@ public:
     OpcodeResult Process();
 
     void SetName(const char* name)      { strcpy_s(m_szName, name); }
-    void SetName(std::string_view name) { assert(name.size() < sizeof(m_szName)); strncpy(m_szName, name.data(), name.size()); }
+    void SetName(std::string_view name) { assert(name.size() < sizeof(m_szName)); strncpy_s(m_szName, name.data(), name.size()); }
     void SetBaseIp(uint8* ip)           { m_pBaseIP = ip; }
     void SetCurrentIp(uint8* ip)        { m_IP = ip; }
     void SetActive(bool active)         { m_bIsActive = active; }
