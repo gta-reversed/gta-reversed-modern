@@ -42,9 +42,9 @@ enum eLookingDirection {
 };
 
 enum class eGroundHeightType : int32 {
-    ENTITY_BOUNDINGBOX_BOTTOM = 0, // ground height + boundingBoxMin.z of colliding entity
-    EXACT_GROUND_HEIGHT = 1,       // ignores height of colliding entity at position
-    ENTITY_BOUNDINGBOX_TOP = 2     // ground height + boundingBoxMax.z of colliding entity
+    ENTITY_BB_BOTTOM = 0,    // ground height + boundingBoxMin.z of colliding entity
+    EXACT_GROUND_HEIGHT = 1, // ignores height of colliding entity at position
+    ENTITY_BB_TOP = 2        // ground height + boundingBoxMax.z of colliding entity
 };
 
 enum {

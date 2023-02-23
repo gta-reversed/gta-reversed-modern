@@ -119,7 +119,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(InitialiseScriptableComponents, 0x50D2D0);
     RH_ScopedInstall(DrawBordersForWideScreen, 0x514860);
     RH_ScopedInstall(Find3rdPersonCamTargetVector, 0x514970, { .reversed = false });
-    RH_ScopedInstall(CalculateGroundHeight, 0x514B80, { .reversed = false });
+    RH_ScopedInstall(CalculateGroundHeight, 0x514B80);
     RH_ScopedInstall(CalculateFrustumPlanes, 0x514D60, { .reversed = false });
     RH_ScopedInstall(CalculateDerivedValues, 0x5150E0, { .reversed = false });
     RH_ScopedInstall(ImproveNearClip, 0x516B20, { .reversed = false });
@@ -508,7 +508,7 @@ float CCamera::GetPositionAlongSpline() const {
 
 // 0x516B00
 float CCamera::GetRoughDistanceToGround() {
-    return m_aCams[m_nActiveCam].m_vecSource.z - CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
+    return m_aCams[m_nActiveCam].m_vecSource.z - CalculateGroundHeight(eGroundHeightType::ENTITY_BB_BOTTOM);
 }
 
 // 0x50AFA0
@@ -1222,8 +1222,7 @@ bool CCamera::IsExtraEntityToIgnore(CEntity* entity) {
     if (m_nExtraEntitiesCount <= 0) {
         return false;
     }
-
-    return rng::find(m_pExtraEntity, entity) != rng::end(m_pExtraEntity); // TODO: notsa::contains
+    return notsa::contains(m_pExtraEntity, entity);
 }
 
 // 0x420C40
@@ -1525,7 +1524,43 @@ void CCamera::Find3rdPersonCamTargetVector(float range, CVector source, CVector*
 
 // 0x514B80
 float CCamera::CalculateGroundHeight(eGroundHeightType type) {
-    return plugin::CallMethodAndReturn<float, 0x514B80, CCamera*, eGroundHeightType>(this, type);
+    static auto& lastCalcCamPos    = StaticRef<CVector, 0xB70034>();
+    static auto& exactGroundHeight = StaticRef<float, 0xB70030>();
+    static auto& bbTopZ            = StaticRef<float, 0xB7002C>();
+    static auto& bbBottomZ         = StaticRef<float, 0xB70028>();
+
+    const auto& camPos = GetPosition();
+
+    // Possibly update the positions (If the camera has moved enough)
+    const auto CheckDelta = [](float d) { return std::abs(d) > 20.f; };
+    if (CheckDelta(lastCalcCamPos.x - camPos.x) || CheckDelta(lastCalcCamPos.y - camPos.y) || CheckDelta(lastCalcCamPos.z - camPos.z)) { // Check if there's enough of a delta
+        CColPoint cp;
+        CEntity* hitEntity;
+        if (CWorld::ProcessVerticalLine({ camPos.x, camPos.y, 1000.f }, -1000.f, cp, hitEntity, true, false, false, false, true)) {
+            const auto& hitEntPos = hitEntity->GetPosition();
+            const auto& hitBB = hitEntity->GetColModel()->GetBoundingBox();
+
+            exactGroundHeight = cp.m_vecPoint.z;
+
+            bbTopZ = hitEntPos.z + hitBB.m_vecMax.z;
+
+            const auto bbsz = hitBB.GetSize();
+            bbBottomZ = std::max(
+                0.f,
+                bbsz.x > 120.f || bbsz.y > 120.f
+                    ? exactGroundHeight
+                    : hitEntPos.z + hitBB.m_vecMin.z
+            );
+        }
+        lastCalcCamPos = camPos;
+    }
+
+    switch (type) {
+    case eGroundHeightType::ENTITY_BB_TOP:       return bbTopZ;
+    case eGroundHeightType::EXACT_GROUND_HEIGHT: return exactGroundHeight;
+    case eGroundHeightType::ENTITY_BB_BOTTOM:    return bbBottomZ;
+    default:                                     NOTSA_UNREACHABLE();
+    }
 }
 
 // 0x514D60
