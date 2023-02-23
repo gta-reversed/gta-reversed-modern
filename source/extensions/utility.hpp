@@ -145,6 +145,15 @@ T accumulate(R&& r, T init, Proj proj = {}, FnOp op = {}) {
     return init;
 }
 
+//! Same as rng::min, but accepts a default value that is returned in case the range is empty (Which would result be UB for `rng::min`)
+template<rng::forward_range R, typename Pr = std::less<>, class Proj = std::identity>
+constexpr rng::range_value_t<R> min_default(R&& r, rng::range_value_t<R> defaultValue, Pr pr = {}, Proj proj = {}) {
+    if (rng::empty(r)) {
+        return std::move(defaultValue);
+    }
+    return rng::min(r, pr, proj);
+}
+
 /*!
 * @brief Helper functor - to be used as projection to `ranges` functions - to cast a value into another type.
 *

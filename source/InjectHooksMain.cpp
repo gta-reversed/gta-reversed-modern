@@ -105,6 +105,7 @@
 #include "Scripted2dEffects.h"
 #include "ScriptResourceManager.h"
 #include "PedAttractorManager.h"
+#include "Attractors/PedAttractorPedPlacer.h"
 #include "LoadingScreen.h"
 #include "Securom.h"
 #include "GridRef.h"
@@ -408,8 +409,9 @@ void InjectHooksMain() {
     HookInstall(0x53E230, &Render2dStuff);   // [ImGui] This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without
     HookInstall(0x541DD0, CPad::UpdatePads); // [ImGui] Changes logic of the function and shouldn't be toggled on/off
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
-    CFileMgr::InjectHooks();
 
+    CFileMgr::InjectHooks();
+    CPedGroupPlacer::InjectHooks();
     CLoadedCarGroup::InjectHooks();
     RenderBuffer::InjectHooks();
     CStaticShadow::InjectHooks();
@@ -430,6 +432,7 @@ void InjectHooksMain() {
     CMenuSystem::InjectHooks();
     CCarFXRenderer::InjectHooks();
     CPedAttractorManager::InjectHooks();
+    CPedAttractorPedPlacer::InjectHooks();
     BoneNode_c::InjectHooks();
     BoneNodeManager_c::InjectHooks();
     CAnimBlendClumpData::InjectHooks();

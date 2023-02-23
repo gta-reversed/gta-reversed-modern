@@ -1134,11 +1134,14 @@ CVector* CEntity::FindTriggerPointCoors(CVector* outVec, int32 triggerIndex)
 }
 
 /**
- * Returns a random effect with the given effectType among all the effects of the entity.
- * @param effectType Type of effect. See e2dEffectType. (Always EFFECT_ATTRACTOR)
- * @param bCheckForEmptySlot Should check for empty slot. (Always true)
- * @return Random effect
  * @addr 0x533410
+ * 
+ * Returns a random effect with the given effectType among all the effects of the entity.
+ * 
+ * @param   effectType Type of effect. See e2dEffectType. (Always EFFECT_ATTRACTOR)
+ * @param   bCheckForEmptySlot Should check for empty slot. (Always true)
+ * 
+ * @return Random effect
  */
 C2dEffect* CEntity::GetRandom2dEffect(int32 effectType, bool bCheckForEmptySlot)
 {
@@ -1401,11 +1404,8 @@ CVector* CEntity::GetBoundCentre(CVector* pOutCentre)
 }
 
 // 0x534290
-void CEntity::GetBoundCentre(CVector& outCentre)
-{
-    auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
-    const auto& colCenter = mi->GetColModel()->GetBoundCenter();
-    TransformFromObjectSpace(outCentre, colCenter);
+void CEntity::GetBoundCentre(CVector& outCentre) {
+    TransformFromObjectSpace(outCentre, GetColModel()->GetBoundCenter());
 }
 
 CVector CEntity::GetBoundCentre()
@@ -2515,6 +2515,10 @@ bool CEntity::IsEntityOccluded()
 bool CEntity::IsInCurrentAreaOrBarberShopInterior()
 {
     return m_nAreaCode == CGame::currArea || m_nAreaCode == AREA_CODE_13;
+}
+
+bool CEntity::IsInCurrentArea() const {
+    return m_nAreaCode == CGame::currArea;
 }
 
 // 0x446F90

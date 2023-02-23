@@ -113,7 +113,10 @@ template<typename... Ts>
 // Eventually could instead verify the returned value? In case of `sscanf` etc...
 #define RET_IGNORED(x) (void)(x);
 
-// Macro for providing a string var to *scanf_s function.
+//! Cause a debug break
+#define NOTSA_DEBUGBREAK() __debugbreak()
+
+//! Macro for passing a string var to *scanf_s function.
 #define SCANF_S_STR(s) s, std::size(s)
 
 /*!
