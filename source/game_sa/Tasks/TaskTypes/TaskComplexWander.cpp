@@ -22,7 +22,7 @@ void CTaskComplexWander::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x66F450);
-    // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x674140);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x674140, { .reversed = false });
     RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6740E0);
     RH_ScopedInstall(ControlSubTask_Reversed, 0x674C30);
     RH_ScopedInstall(UpdateDir_Reversed, 0x669DA0);
@@ -334,4 +334,17 @@ CTaskComplexWander* CTaskComplexWander::GetWanderTaskByPedType(CPed* ped) {
     case PED_TYPE_PROSTITUTE: return new CTaskComplexWanderProstitute(PEDMOVE_WALK, randomDir);
     default:                  return new CTaskComplexWanderStandard(PEDMOVE_WALK, randomDir);
     }
+}
+
+// 0x669FF0 - OG name unknown
+float CTaskComplexWander::GetDistSqOfClosestPathNodeToPed(CPed* ped) {
+    return rng::min(
+        std::array{ m_NextNode, m_LastNode }
+     | rng::views::transform([ped](CNodeAddress node) {
+            if (node.IsValid() && ThePaths.IsNodesLoaded(node)) {
+                return (ped->GetPosition() - ThePaths.GetPathNode(node)->GetNodeCoors()).SquaredMagnitude();
+            }
+            return 999'999.f;
+        })
+    );
 }

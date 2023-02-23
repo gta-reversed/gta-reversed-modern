@@ -16,8 +16,8 @@ public:
 public:
     static void InjectHooks();
 
-    static uint32 AppendStringToKey(uint32 key, const char* str);
-    static uint32 GetKey(const char* str);
-    static uint32 GetKey(const char* str, int32 size);
-    static uint32 GetUppercaseKey(const char* str);
+    [[nodiscard]] static uint32 AppendStringToKey(uint32 key, const char* str);
+    [[nodiscard]] static uint32 GetKey(const char* str);
+    [[nodiscard]] static uint32 GetKey(const char* str, int32 size);
+    [[nodiscard]] static uint32 GetUppercaseKey(const char* str);
 };

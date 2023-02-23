@@ -8,7 +8,7 @@
 
 #include "Pad.h"
 
-#include "CDebugMenu.h"
+#include "UIRenderer.h"
 #include "ControllerConfigManager.h"
 #include "app.h"
 
@@ -41,15 +41,15 @@ void CPad::InjectHooks() {
     RH_ScopedInstall(ClearMouseHistory, 0x541BD0);
     RH_ScopedInstall(Clear, 0x541A70);
     RH_ScopedInstall(Update, 0x541C40);
-    // RH_ScopedInstall(UpdateMouse, 0x53F3C0);
-    // RH_ScopedInstall(ProcessPad, 0x746A10);
+    RH_ScopedInstall(UpdateMouse, 0x53F3C0, { .reversed = false });
+    RH_ScopedInstall(ProcessPad, 0x746A10, { .reversed = false });
     RH_ScopedInstall(ProcessPCSpecificStuff, 0x53FB40);
     RH_ScopedInstall(ReconcileTwoControllersInput, 0x53F530);
     RH_ScopedInstall(SetTouched, 0x53F200);
     RH_ScopedInstall(GetTouchedTimeDelta, 0x53F210);
     RH_ScopedInstall(StartShake, 0x53F920);
     RH_ScopedInstall(StartShake_Distance, 0x53F9A0);
-    // RH_ScopedInstall(StartShake_Train, 0x53FA70);
+    //RH_ScopedInstall(StartShake_Train, 0x53FA70, { .reversed = false }); 
     RH_ScopedInstall(StopShaking, 0x53FB50);
     RH_ScopedInstall(GetCarGunLeftRight, 0x53FC50);
     RH_ScopedInstall(GetCarGunUpDown, 0x53FC10);
@@ -216,8 +216,7 @@ void CPad::UpdatePads() {
     ProcessPad(false);
 
     ControlsManager.ClearSimButtonPressCheckers();
-    // NOTSA: Don't handle updates if the menu is open, so we don't affect gameplay inputting text
-    if (!CDebugMenu::Visible()) {
+    if (!notsa::ui::UIRenderer::GetSingleton().Visible()) { // NOTSA: Don't handle updates if the menu is open, so we don't affect gameplay inputting text
         ControlsManager.AffectPadFromKeyBoard();
         ControlsManager.AffectPadFromMouse();
         GetPad(0)->Update(0);
@@ -227,8 +226,7 @@ void CPad::UpdatePads() {
     OldKeyState = NewKeyState;
     NewKeyState = TempKeyState;
 
-    CDebugMenu::ImGuiInitialise();
-    CDebugMenu::ImGuiInputUpdate();
+    notsa::ui::UIRenderer::GetSingleton().UpdateInput();
 }
 
 // 0x53F3C0

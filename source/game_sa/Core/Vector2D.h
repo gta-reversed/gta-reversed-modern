@@ -6,26 +6,44 @@
 */
 #pragma once
 
+#include <span>
+
 #include "RenderWare.h"
+
+class CVector;
 
 class CVector2D : public RwV2d {
 public:
     constexpr CVector2D() = default;
     constexpr CVector2D(float X, float Y) : RwV2d{ X, Y } {}
-    constexpr CVector2D(const CVector& vec3d)   { x = vec3d.x; y = vec3d.y; }
     constexpr CVector2D(const RwV2d& vec2d)     { x = vec2d.x; y = vec2d.y; }
     constexpr CVector2D(const CVector2D& vec2d) { x = vec2d.x; y = vec2d.y; }
 
+    //! Create a vector with the given heading (0 rad is at 3 O'Clock)
+    //! It is made to be compatible with `CMatrix::SetRotateZOnly` but in reality it probably should be x = sin, y = -cos instead
+    //! Because the following should be true: `CVector2D::FromHeading(heading).Heading() + PI == heading` (And it isn't :D)
+    //constexpr static auto FromHeading(float headingRad) { return CVector2D{ -std::sin(headingRad), std::cos(headingRad) }; } 
+
+    CVector2D(const CVector& vec3d);
+
     static void InjectHooks();
 
+    /// Normalize this vector in-place
     void  Normalise();
+
+    /// Get a normalized copy of this vector
+    auto Normalized() const {
+        CVector2D cpy = *this;
+        cpy.Normalise();
+        return cpy;
+    }
 
     [[nodiscard]] constexpr inline float SquaredMagnitude() const {
         return x * x + y * y;
     }
 
     // Returns length of vector
-    [[nodiscard]] inline float Magnitude() {
+    [[nodiscard]] inline float Magnitude() const {
         return std::sqrt(x * x + y * y);
     }
 
@@ -73,14 +91,52 @@ public:
         x = X;
         y = Y;
     }
-     
-    [[nodiscard]] float Heading() const {
+
+    //! Heading of the vector - 
+    float Heading() const {
         return std::atan2(-x, y);
     }
+
+    auto GetComponents() const {
+        return std::span{ reinterpret_cast<const float*>(this), 2 };
+    }
+
+    constexpr friend CVector2D operator*(const CVector2D& vec, float multiplier) {
+        return { vec.x * multiplier, vec.y * multiplier };
+    }
+
+    /// Calculate the dot product with another vector
+    float Dot(const CVector2D& lhs) const {
+        return x * lhs.x + y * lhs.y;
+    }
+
+    //! Get a copy of `*this` vector projected onto `projectOnTo` (which is assumed to be unit length)
+    CVector2D ProjectOnToNormal(const CVector2D& projectOnTo) const {
+        return projectOnTo * Dot(projectOnTo);
+    }
+
+    //! Wrapper around `CGeneral::GetNodeHeadingFromVector`
+    uint32 NodeHeading() const;
+
+    //! Get a vector with the same magnitude as `*this` but rotated by `radians` (Interval: [0, 2PI])
+    CVector2D RotatedBy(float radians) const;
+
+    //! Get vector perpendicular to `*this` on the right side (Same direction `*this` rotated by -90)
+    //! Also see `GetPerpLeft` and `RotatedBy`
+    //! (This sometimes is also called a 2D cross product https://stackoverflow.com/questions/243945 )
+    CVector2D GetPerpRight() const;
+
+    //! Get vector perpendicular to `*this` on the left side (Same direction `*this` rotated by 90)
+    //! Also see `GetPerpRight` and `RotatedBy`
+    CVector2D GetPerpLeft() const;
 };
 
 constexpr inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {
     return { vecOne.x - vecTwo.x, vecOne.y - vecTwo.y };
+}
+
+constexpr inline CVector2D operator-(const CVector2D& vecOne) {
+    return { -vecOne.x, -vecOne.y };
 }
 
 constexpr inline CVector2D operator+(const CVector2D& vecOne, const CVector2D& vecTwo) {
@@ -91,8 +147,8 @@ constexpr inline CVector2D operator*(const CVector2D& vecOne, const CVector2D& v
     return { vecOne.x * vecTwo.x, vecOne.y * vecTwo.y };
 }
 
-constexpr inline CVector2D operator*(const CVector2D& vec, float multiplier) {
-    return { vec.x * multiplier, vec.y * multiplier };
+constexpr inline CVector2D operator/(const CVector2D& vecOne, const CVector2D& vecTwo) {
+    return { vecOne.x / vecTwo.x, vecOne.y / vecTwo.y };
 }
 
 constexpr inline CVector2D operator/(const CVector2D& vec, float dividend) {
@@ -138,4 +194,10 @@ constexpr static bool IsPointWithinBounds2D(CVector2D min, CVector2D max, CVecto
 
 constexpr static bool IsPointInRectangle2D(CVector2D rectTopLeft, CVector2D rectSize, CVector2D point) {
     return IsPointWithinBounds2D(rectTopLeft + rectSize, rectTopLeft, point);
+}
+
+static CVector2D Normalized2D(CVector2D v) { v.Normalise(); return v; }
+
+static auto abs(const CVector2D& v2d) {
+    return CVector2D{ std::abs(v2d.x), std::abs(v2d.y) };
 }

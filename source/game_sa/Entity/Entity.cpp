@@ -80,7 +80,7 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(UpdateAnim, 0x535F00);
     RH_ScopedInstall(IsVisible, 0x536BC0);
     RH_ScopedInstall(GetDistanceFromCentreOfMassToBaseOfModel, 0x536BE0);
-    RH_ScopedInstall(CleanUpOldReference, 0x571A00);
+    RH_ScopedOverloadedInstall(CleanUpOldReference, "", 0x571A00, void(CEntity::*)(CEntity**));
     RH_ScopedInstall(ResolveReferences, 0x571A40);
     RH_ScopedInstall(PruneReferences, 0x571A90);
     RH_ScopedOverloadedInstall(RegisterReference, "", 0x571B70, void(CEntity::*)(CEntity**));
@@ -151,17 +151,17 @@ void CEntity::Add_Reversed(const CRect& rect)
     if (usedRect.right >= 3000.0F)
         usedRect.right = 2999.0F;
 
-    if (usedRect.top < -3000.0F)
-        usedRect.top = -3000.0F;
+    if (usedRect.bottom < -3000.0F)
+        usedRect.bottom = -3000.0F;
 
-    if (usedRect.bottom >= 3000.0F)
-        usedRect.bottom = 2999.0F;
+    if (usedRect.top >= 3000.0F)
+        usedRect.top = 2999.0F;
 
     if (m_bIsBIGBuilding) {
         int32 startSectorX = CWorld::GetLodSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetLodSectorY(usedRect.top);
+        int32 startSectorY = CWorld::GetLodSectorY(usedRect.bottom);
         int32 endSectorX = CWorld::GetLodSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetLodSectorY(usedRect.bottom);
+        int32 endSectorY = CWorld::GetLodSectorY(usedRect.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 auto& pLodListEntry = CWorld::GetLodPtrList(sectorX, sectorY);
@@ -171,9 +171,9 @@ void CEntity::Add_Reversed(const CRect& rect)
     }
     else {
         int32 startSectorX = CWorld::GetSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetSectorY(usedRect.top);
+        int32 startSectorY = CWorld::GetSectorY(usedRect.bottom);
         int32 endSectorX = CWorld::GetSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetSectorY(usedRect.bottom);
+        int32 endSectorY = CWorld::GetSectorY(usedRect.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 CPtrListDoubleLink* list = nullptr;
@@ -222,17 +222,17 @@ void CEntity::Remove_Reversed()
     if (usedRect.right >= 3000.0F)
         usedRect.right = 2999.0F;
 
-    if (usedRect.top < -3000.0F)
-        usedRect.top = -3000.0F;
+    if (usedRect.bottom < -3000.0F)
+        usedRect.bottom = -3000.0F;
 
-    if (usedRect.bottom >= 3000.0F)
-        usedRect.bottom = 2999.0F;
+    if (usedRect.top >= 3000.0F)
+        usedRect.top = 2999.0F;
 
     if (m_bIsBIGBuilding) {
         int32 startSectorX = CWorld::GetLodSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetLodSectorY(usedRect.top);
+        int32 startSectorY = CWorld::GetLodSectorY(usedRect.bottom);
         int32 endSectorX = CWorld::GetLodSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetLodSectorY(usedRect.bottom);
+        int32 endSectorY = CWorld::GetLodSectorY(usedRect.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 auto& list = CWorld::GetLodPtrList(sectorX, sectorY);
@@ -242,9 +242,9 @@ void CEntity::Remove_Reversed()
     }
     else {
         int32 startSectorX = CWorld::GetSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetSectorY(usedRect.top);
+        int32 startSectorY = CWorld::GetSectorY(usedRect.bottom);
         int32 endSectorX = CWorld::GetSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetSectorY(usedRect.bottom);
+        int32 endSectorY = CWorld::GetSectorY(usedRect.top);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 CPtrListDoubleLink* list = nullptr;
@@ -748,7 +748,7 @@ void CEntity::PreRender_Reversed()
             auto vecStreakEnd = vecPos + vecScaledCam;
             if (CVector2D(obj->m_vecMoveSpeed).Magnitude() > 0.03F) {
                 float fWaterLevel;
-                if (!CWaterLevel::GetWaterLevelNoWaves(vecPos.x, vecPos.y, vecPos.z, &fWaterLevel, nullptr, nullptr) || vecPos.z > fWaterLevel) {
+                if (!CWaterLevel::GetWaterLevelNoWaves(vecPos, &fWaterLevel, nullptr, nullptr) || vecPos.z > fWaterLevel) {
                     CMotionBlurStreaks::RegisterStreak(reinterpret_cast<uint32>(this), 255, 160, 100, 255, vecStreakStart, vecStreakEnd);
                 }
             }
@@ -1134,17 +1134,20 @@ CVector* CEntity::FindTriggerPointCoors(CVector* outVec, int32 triggerIndex)
 }
 
 /**
- * Returns a random effect with the given effectType among all the effects of the entity.
- * @param effectType Type of effect. See e2dEffectType. (Always EFFECT_ATTRACTOR)
- * @param bCheckForEmptySlot Should check for empty slot. (Always true)
- * @return Random effect
  * @addr 0x533410
+ * 
+ * Returns a random effect with the given effectType among all the effects of the entity.
+ * 
+ * @param   effectType Type of effect. See e2dEffectType. (Always EFFECT_ATTRACTOR)
+ * @param   bCheckForEmptySlot Should check for empty slot. (Always true)
+ * 
+ * @return Random effect
  */
 C2dEffect* CEntity::GetRandom2dEffect(int32 effectType, bool bCheckForEmptySlot)
 {
-    C2dEffect* apArr[32]{};
+    C2dEffect* apArr[32]{}; // todo: static_vector
     auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
-    int32 iFoundCount = 0;
+    size_t iFoundCount = 0;
     for (int32 iFxInd = 0; iFxInd < mi->m_n2dfxCount; ++iFxInd) {
         auto effect = mi->Get2dEffect(iFxInd);
         if (effect->m_nType != effectType)
@@ -1160,8 +1163,7 @@ C2dEffect* CEntity::GetRandom2dEffect(int32 effectType, bool bCheckForEmptySlot)
     }
 
     if (iFoundCount) {
-        auto iRandInd = CGeneral::GetRandomNumberInRange(0, iFoundCount);
-        return apArr[iRandInd];
+        return apArr[CGeneral::GetRandomNumberInRange(0u, iFoundCount)]; 
     }
 
     return nullptr;
@@ -1402,11 +1404,8 @@ CVector* CEntity::GetBoundCentre(CVector* pOutCentre)
 }
 
 // 0x534290
-void CEntity::GetBoundCentre(CVector& outCentre)
-{
-    auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
-    const auto& colCenter = mi->GetColModel()->GetBoundCenter();
-    TransformFromObjectSpace(outCentre, colCenter);
+void CEntity::GetBoundCentre(CVector& outCentre) {
+    TransformFromObjectSpace(outCentre, GetColModel()->GetBoundCenter());
 }
 
 CVector CEntity::GetBoundCentre()
@@ -1607,12 +1606,15 @@ RwMatrix* CEntity::GetModellingMatrix() {
 }
 
 // 0x535300
-CColModel* CEntity::GetColModel()
-{
-    if (IsVehicle() && AsVehicle()->m_vehicleSpecialColIndex > -1)
-        return &CVehicle::m_aSpecialColModel[AsVehicle()->m_vehicleSpecialColIndex];
-    else
-        return CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
+CColModel* CEntity::GetColModel() const {
+    if (IsVehicle()) {
+        const auto veh = static_cast<const CVehicle*>(this);
+        if (veh->m_vehicleSpecialColIndex > -1) {
+            return &CVehicle::m_aSpecialColModel[veh->m_vehicleSpecialColIndex];
+        }
+    }
+    
+    return CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
 }
 
 // 0x535340
@@ -2515,6 +2517,10 @@ bool CEntity::IsInCurrentAreaOrBarberShopInterior()
     return m_nAreaCode == CGame::currArea || m_nAreaCode == AREA_CODE_13;
 }
 
+bool CEntity::IsInCurrentArea() const {
+    return m_nAreaCode == CGame::currArea;
+}
+
 // 0x446F90
 void CEntity::UpdateRW() {
     if (!m_pRwObject)
@@ -2547,7 +2553,7 @@ RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* atomic, void* data)
 
 RpMaterial* CEntity::SetMaterialAlphaCB(RpMaterial* material, void* data)
 {
-    material->color.alpha = (RwUInt8)data;
+    RpMaterialGetColor(material)->alpha = (RwUInt8)std::bit_cast<uintptr_t>(data);
     return material;
 }
 

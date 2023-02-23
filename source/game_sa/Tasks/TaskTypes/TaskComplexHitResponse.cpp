@@ -11,9 +11,9 @@ void CTaskComplexHitResponse::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x631D70);
-    // RH_ScopedInstall(CreateNextSubTask, 0x631DB0);
-    // RH_ScopedInstall(CreateFirstSubTask, 0x638040);
-    // RH_ScopedInstall(ControlSubTask, 0x631DC0);
+    RH_ScopedInstall(CreateNextSubTask, 0x631DB0, { .reversed = false });
+    RH_ScopedInstall(CreateFirstSubTask, 0x638040, { .reversed = false });
+    RH_ScopedInstall(ControlSubTask, 0x631DC0, { .reversed = false });
 }
 
 // 0x631D70

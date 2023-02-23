@@ -6,11 +6,11 @@ void CScripted2dEffects::InjectHooks() {
     RH_ScopedClass(CScripted2dEffects);
     RH_ScopedCategory("Scripts");
 
-    // RH_ScopedInstall(Init, 0x6FA6F0);
-    // RH_ScopedInstall(GetEffectPairs, 0x6FA840);
-    // RH_ScopedInstall(GetIndex, 0x6F9F60);
-    // RH_ScopedInstall(AddScripted2DEffect, 0x6FA7C0);
-    // RH_ScopedInstall(ReturnScripted2DEffect, 0x6F9E80);
+    RH_ScopedInstall(Init, 0x6FA6F0, { .reversed = false });
+    RH_ScopedInstall(GetEffectPairs, 0x6FA840, { .reversed = false });
+    RH_ScopedInstall(GetIndex, 0x6F9F60, { .reversed = false });
+    RH_ScopedInstall(AddScripted2DEffect, 0x6FA7C0, { .reversed = false });
+    RH_ScopedInstall(ReturnScripted2DEffect, 0x6F9E80, { .reversed = false });
 }
 
 // 0x6FA6F0
@@ -48,4 +48,12 @@ void CScripted2dEffects::ReturnScripted2DEffect(int32 index) {
 
     ms_activated[index] = false;
     return GetPedAttractorManager()->RemoveEffect(&ms_effects[index]);
+}
+
+auto CScripted2dEffects::IndexOfEffect(const C2dEffect* effect) -> std::optional<size_t> {
+    const auto idx = std::distance(ms_effects.data(), effect);
+    if (idx >= 0 && static_cast<size_t>(idx) <= ms_effects.size()) {
+        return static_cast<size_t>(idx);
+    }
+    return std::nullopt;
 }

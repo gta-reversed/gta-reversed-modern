@@ -329,8 +329,8 @@ public:
     static inline std::array<int32, MAX_NUM_MISSION_SCRIPTS>&                                    MultiScriptArray               = *(std::array<int32, MAX_NUM_MISSION_SCRIPTS>*)0xA444C8;
     static inline std::array<tScriptConnectLodsObject, MAX_NUM_SCRIPT_CONNECT_LODS_OBJECTS>&     ScriptConnectLodsObjects       = *(std::array<tScriptConnectLodsObject, MAX_NUM_SCRIPT_CONNECT_LODS_OBJECTS>*)0xA44800;
     static inline std::array<tScriptAttachedAnimGroup, MAX_NUM_SCRIPT_ATTACHED_ANIM_GROUPS>&     ScriptAttachedAnimGroups       = *(std::array<tScriptAttachedAnimGroup, MAX_NUM_SCRIPT_ATTACHED_ANIM_GROUPS>*)0xA44850;
-    static inline std::array<int32*, MAX_NUM_VEHICLE_MODELS_BLOCKED_BY_SCRIPT>&                  VehicleModelsBlockedByScript   = *(std::array<int32*, MAX_NUM_VEHICLE_MODELS_BLOCKED_BY_SCRIPT>*)0xA448F0;
-    static inline std::array<int32*, MAX_NUM_SUPPRESSED_VEHICLE_MODELS>&                         SuppressedVehicleModels        = *(std::array<int32*, MAX_NUM_SUPPRESSED_VEHICLE_MODELS>*)0xA44940;
+    static inline std::array<eModelID, MAX_NUM_VEHICLE_MODELS_BLOCKED_BY_SCRIPT>&                VehicleModelsBlockedByScript   = *(std::array<eModelID, MAX_NUM_VEHICLE_MODELS_BLOCKED_BY_SCRIPT>*)0xA448F0;
+    static inline std::array<eModelID, MAX_NUM_SUPPRESSED_VEHICLE_MODELS>&                       SuppressedVehicleModels        = *(std::array<eModelID, MAX_NUM_SUPPRESSED_VEHICLE_MODELS>*)0xA44940;
     static inline std::array<CEntity*, MAX_NUM_INVISIBILITY_SETTINGS>&                           InvisibilitySettingArray       = *(std::array<CEntity*, MAX_NUM_INVISIBILITY_SETTINGS>*)0xA449E0;
 
     static inline std::array<tScriptParam, MAX_NUM_LOCAL_VARIABLES_FOR_CURRENT_MISSION>&         LocalVariablesForCurrentMission =*(std::array<tScriptParam, MAX_NUM_LOCAL_VARIABLES_FOR_CURRENT_MISSION>*)0xA48960;
@@ -449,7 +449,6 @@ public:
     static int32 GetNewUniqueScriptThingIndex(int32 index, eScriptThingType type);
     static int32 GetScriptIndexFromPointer(CRunningScript* thread);
     static int32 GetUniqueScriptThingIndex(int32 playerGroup, eScriptThingType type);
-    static bool HasVehicleModelBeenBlockedByScript(int32 modelIndex);
 
     static bool IsEntityWithinAnySearchLight(CEntity* entity, int32* pIndex);
     static bool IsEntityWithinSearchLight(uint32 index, CEntity* entity);
@@ -492,6 +491,9 @@ public:
     static void UseSwitchJumpTable(int32* pSwitchLabelAddress);
     static void WipeLocalVariableMemoryForMissionScript();
 
+    static bool HasCarModelBeenSuppressed(eModelID carModelId);
+    static bool HasVehicleModelBeenBlockedByScript(eModelID carModelId);
+
     // DEBUG
     static void ScriptDebugLine3D(const CVector& start, const CVector& end, uint32 color1, uint32 color2);
     static void RenderTheScriptDebugLines();
@@ -500,8 +502,10 @@ public:
 
     static void DrawScriptSpheres();
     static void HighlightImportantArea(uint32 markerId, float fromX, float fromY, float toX, float toY, float height);
+    static void HighlightImportantArea(uint32 markerId, const CRect& area, float height) { HighlightImportantArea(markerId, area.left, area.top, area.right, area.bottom, height); } // NOTSA
     static void HighlightImportantAngledArea(uint32 markerId, float fromX, float fromY, float toX, float toY, float angledToX, float angledToY, float angledFromX, float angledFromY, float height);
     static void DrawDebugSquare(float, float, float, float);
+    static void DrawDebugSquare(const CRect& area) { DrawDebugSquare(area.left, area.top, area.right, area.bottom); }
     static void DrawDebugAngledSquare(const CVector2D& inf, const CVector2D& sup, const CVector2D& rotSup, const CVector2D& rotInf);
     static void DrawDebugCube(const CVector& inf, const CVector& sup);
     static void DrawDebugAngledCube(const CVector& inf, const CVector& sup, const CVector2D& rotSup, const CVector2D& rotInf);
@@ -539,7 +543,7 @@ public:
 #define KEY_LENGTH_IN_SCRIPT (8)
 
     static void ReadTextLabelFromScript(uint8*& ip, char* buf) {
-        strncpy(buf, (const char*)&ScriptSpace[*ip], KEY_LENGTH_IN_SCRIPT);
+        strncpy_s(buf, KEY_LENGTH_IN_SCRIPT, (const char*) & ScriptSpace[*ip], KEY_LENGTH_IN_SCRIPT);
     }
 
     static auto * GetTextByKeyFromScript(uint8*& ip) {

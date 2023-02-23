@@ -170,7 +170,7 @@ public:
     void SetAeroplaneCompStatus(uint8 frame, ePanelDamageState status);
 
     uint32 GetEngineStatus();
-    void SetEngineStatus(uint8 status);
+    void SetEngineStatus(uint32 status);
 
     // There are 2 door functions, one takes `tComponent` the other `eDoors`.
     // To select the correct version to call look at the called function's address when you are REing code
@@ -201,6 +201,7 @@ public:
     void SetDoorOpen(eDoors door);
     void SetDoorClosed(eDoors door);
     [[nodiscard]] auto GetAllLightsState() const -> std::array<eLightsState, 4>;
+    [[nodiscard]] auto GetAllDoorsStatus() const -> std::array<eDoorStatus, MAX_DOORS>;
     [[nodiscard]] bool IsDoorOpen(eDoors door) const;
     [[nodiscard]] bool IsDoorClosed(eDoors door) const;
     [[nodiscard]] bool IsDoorPresent(eDoors door) const;

@@ -190,7 +190,12 @@ public:
     }
 
     // 0x5A1C00
-    A* New(int32 ref) {
+    /*!
+    * @brief Allocate object at ref
+    * @returns A ptr to the object at ref
+    */
+    A* NewAt(int32 ref) {
+        // TODO/NOTE: Maybe check if where we're allocating at is free?
         A* result = &m_pObjects[GetIndexFromRef(ref)]; // GetIndexFromRef asserts if idx out of range
         CreateAtRef(ref);
         return result;
@@ -227,7 +232,7 @@ public:
     * @brief Calculate the number of used slots. CAUTION: Slow, especially for large pools.
     */
     size_t GetNoOfUsedSpaces() {
-        return (size_t)std::count_if(std::execution::parallel_unsequenced_policy{}, m_byteMap, m_byteMap + m_nSize, [](auto&& v) { return !v.bEmpty; });
+        return (size_t)std::count_if(m_byteMap, m_byteMap + m_nSize, [](auto&& v) { return !v.bEmpty; });
     }
 
     auto GetNoOfFreeSpaces() {
@@ -274,18 +279,24 @@ public:
     }
 
     // NOTSA - Get all valid objects - Useful for iteration
-    template<typename T = A> // Type the loop iterator should yield. Now that I think about it should always be `A`...
+    template<typename T = A&>
     auto GetAllValid() {
         using namespace std;
         return span{ m_pObjects, (size_t)m_nSize }
-             | views::filter([this](auto&& obj) { return !IsFreeSlotAtIndex(GetIndex(&obj)); }) // Filter only slots in use
-             | views::transform([](auto&& obj) -> T& { return static_cast<T&>(obj); }); // Cast to required type
+            | views::filter([this](auto&& obj) { return !IsFreeSlotAtIndex(GetIndex(&obj)); }) // Filter only slots in use
+            | views::transform([](auto&& obj) -> T {
+                if constexpr (std::is_pointer_v<T>) { // For pointers we also do an address-of
+                    return static_cast<T>(&obj);
+                } else {
+                    return static_cast<T>(obj);
+                }
+            });
     }
 
     // Similar to above, but gives back a pair [index, object]
     template<typename T = A>
     auto GetAllValidWithIndex() {
-        return GetAllValid<T>()
+        return GetAllValid<T&>()
              | rng::views::transform([this](auto&& obj) { return std::make_pair(GetIndex(&obj), std::ref(obj)); });
     }
 };

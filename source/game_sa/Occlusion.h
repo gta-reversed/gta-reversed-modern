@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Vector.h"
+#include <span>
 
-class COccluder;
-class CActiveOccluder;
+#include "Vector.h"
+#include "ActiveOccluder.h"
+#include "Occluder.h"
 
 class COcclusion {
 public:
@@ -43,4 +44,5 @@ public:
     static bool OccluderHidesBehind(CActiveOccluder* first, CActiveOccluder* second);
     static bool IsPositionOccluded(CVector vecPos, float fRadius);
     static void ProcessBeforeRendering();
+    static auto GetActiveOccluders() { return aActiveOccluders | rng::views::take((size_t)NumActiveOccluders); }
 };

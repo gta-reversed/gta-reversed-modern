@@ -80,7 +80,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(GetLookingLRBFirstPerson, 0x50AE60);
     RH_ScopedInstall(GetLookDirection, 0x50AE90);
     RH_ScopedInstall(GetLookingForwardFirstPerson, 0x50AED0);
-//    RH_ScopedInstall(CopyCameraMatrixToRWCam, 0x50AFA0);
+    RH_ScopedInstall(CopyCameraMatrixToRWCam, 0x50AFA0, { .reversed = false });
     RH_ScopedInstall(CalculateMirroredMatrix, 0x50B380);
     RH_ScopedInstall(DealWithMirrorBeforeConstructRenderList, 0x50B510);
     RH_ScopedInstall(ProcessFade, 0x50B5D0);
@@ -98,10 +98,10 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(UpdateTargetEntity, 0x50C360);
     RH_ScopedInstall(TakeControl, 0x50C7C0);
     RH_ScopedInstall(TakeControlNoEntity, 0x50C8B0);
-    //RH_ScopedInstall(TakeControlAttachToEntity, 0x50C910);
+    RH_ScopedInstall(TakeControlAttachToEntity, 0x50C910);
     RH_ScopedInstall(TakeControlWithSpline, 0x50CAE0);
     RH_ScopedInstall(SetCamCollisionVarDataSet, 0x50CB60);
-//    RH_ScopedInstall(SetNearClipBasedOnPedCollision, 0x50CB90);
+    RH_ScopedInstall(SetNearClipBasedOnPedCollision, 0x50CB90, { .reversed = false });
     RH_ScopedInstall(SetColVarsPed, 0x50CC50);
     RH_ScopedInstall(SetColVarsVehicle, 0x50CCA0);
     RH_ScopedInstall(CameraGenericModeSpecialCases, 0x50CD30);
@@ -111,36 +111,36 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(IsExtraEntityToIgnore, 0x50CE80);
     RH_ScopedInstall(ConsiderPedAsDucking, 0x50CEB0);
     RH_ScopedInstall(ResetDuckingSystem, 0x50CEF0);
-//    RH_ScopedInstall(HandleCameraMotionForDucking, 0x50CFA0);
-//    RH_ScopedInstall(HandleCameraMotionForDuckingDuringAim, 0x50D090);
-//    RH_ScopedInstall(VectorMoveLinear, 0x50D160);
-//    RH_ScopedInstall(VectorTrackLinear, 0x50D1D0);
+    RH_ScopedInstall(HandleCameraMotionForDucking, 0x50CFA0, { .reversed = false });
+    RH_ScopedInstall(HandleCameraMotionForDuckingDuringAim, 0x50D090, { .reversed = false });
+    RH_ScopedInstall(VectorMoveLinear, 0x50D160, { .reversed = false });
+    RH_ScopedInstall(VectorTrackLinear, 0x50D1D0, { .reversed = false });
     RH_ScopedInstall(AddShakeSimple, 0x50D240);
     RH_ScopedInstall(InitialiseScriptableComponents, 0x50D2D0);
     RH_ScopedInstall(DrawBordersForWideScreen, 0x514860);
-//    RH_ScopedInstall(Find3rdPersonCamTargetVector, 0x514970);
-//    RH_ScopedInstall(CalculateGroundHeight, 0x514B80);
-//    RH_ScopedInstall(CalculateFrustumPlanes, 0x514D60);
-//    RH_ScopedInstall(CalculateDerivedValues, 0x5150E0);
-//    RH_ScopedInstall(ImproveNearClip, 0x516B20);
+    RH_ScopedInstall(Find3rdPersonCamTargetVector, 0x514970, { .reversed = false });
+    RH_ScopedInstall(CalculateGroundHeight, 0x514B80, { .reversed = false });
+    RH_ScopedInstall(CalculateFrustumPlanes, 0x514D60, { .reversed = false });
+    RH_ScopedInstall(CalculateDerivedValues, 0x5150E0, { .reversed = false });
+    RH_ScopedInstall(ImproveNearClip, 0x516B20, { .reversed = false });
     RH_ScopedInstall(SetCameraUpForMirror, 0x51A560);
     RH_ScopedInstall(RestoreCameraAfterMirror, 0x51A5A0);
-//    RH_ScopedInstall(ConeCastCollisionResolve, 0x51A5D0);
-//    RH_ScopedInstall(TryToStartNewCamMode, 0x51E560);
-//    RH_ScopedInstall(CameraColDetAndReact, 0x520190);
-//    RH_ScopedInstall(CamControl, 0x527FA0);
-//    RH_ScopedInstall(Process, 0x52B730);
+    RH_ScopedInstall(ConeCastCollisionResolve, 0x51A5D0, { .reversed = false });
+    RH_ScopedInstall(TryToStartNewCamMode, 0x51E560, { .reversed = false });
+    RH_ScopedInstall(CameraColDetAndReact, 0x520190, { .reversed = false });
+    RH_ScopedInstall(CamControl, 0x527FA0, { .reversed = false });
+    RH_ScopedInstall(Process, 0x52B730, { .reversed = false });
     RH_ScopedInstall(DeleteCutSceneCamDataMemory, 0x5B24A0);
-//    RH_ScopedInstall(LoadPathSplines, 0x5B24D0);
-//    RH_ScopedInstall(Init, 0x5BC520);
+    RH_ScopedInstall(LoadPathSplines, 0x5B24D0, { .reversed = false });
+    RH_ScopedInstall(Init, 0x5BC520, { .reversed = false });
 
-//    RH_ScopedInstall(ProcessVectorTrackLinear, 0x50D350);
-//    RH_ScopedInstall(ProcessVectorTrackLinear, 0x516440);
-//    RH_ScopedInstall(ProcessVectorMoveLinear, 0x50D430);
-//    RH_ScopedInstall(ProcessVectorMoveLinear, 0x5164A0);
-//    RH_ScopedInstall(ProcessFOVLerp, 0x50D510);
-//    RH_ScopedInstall(ProcessFOVLerp, 0x516500);
-//    RH_ScopedInstall(ProcessJiggle, 0x516560);
+    RH_ScopedOverloadedInstall(ProcessVectorTrackLinear, "0", 0x50D350, void(CCamera::*)(float), { .reversed = false });
+    RH_ScopedOverloadedInstall(ProcessVectorTrackLinear, "1", 0x516440, void(CCamera::*)(), {.reversed = false});
+    RH_ScopedOverloadedInstall(ProcessVectorMoveLinear, "0", 0x50D430, void(CCamera::*)(float), { .reversed = false });
+    RH_ScopedOverloadedInstall(ProcessVectorMoveLinear, "1", 0x5164A0, void(CCamera::*)(), { .reversed = false });
+    RH_ScopedOverloadedInstall(ProcessFOVLerp, "0", 0x50D510, void(CCamera::*)(float), { .reversed = false });
+    RH_ScopedOverloadedInstall(ProcessFOVLerp, "1", 0x516500, void(CCamera::*)(), { .reversed = false });
+    //RH_ScopedOverloadedInstall(ProcessJiggle, "0", 0x516560, { .reversed = false });
 
     RH_ScopedGlobalInstall(CamShakeNoPos, 0x50A970);
 }
@@ -908,13 +908,13 @@ void CCamera::SetZoomValueCamStringScript(int16 zoomMode) {
 // 0x50C260
 void CCamera::StartCooperativeCamMode() {
     m_bCooperativeCamMode = true;
-    CGameLogic::n2PlayerPedInFocus = 2;
+    CGameLogic::n2PlayerPedInFocus = eFocusedPlayer::NONE;
 }
 
 // 0x50C270
 void CCamera::StopCooperativeCamMode() {
     m_bCooperativeCamMode = false;
-    CGameLogic::n2PlayerPedInFocus = 2;
+    CGameLogic::n2PlayerPedInFocus = eFocusedPlayer::NONE;
 }
 
 // 0x50C280
@@ -1507,8 +1507,8 @@ void CCamera::DrawBordersForWideScreen() {
         m_nMotionBlurAddAlpha = 80;
     }
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
-    CSprite2d::DrawRect({ -5.f, -5.f,     SCREEN_WIDTH + 5.f, rect.bottom         }, { 0, 0, 0, 255 });
-    CSprite2d::DrawRect({ -5.f, rect.top, SCREEN_WIDTH + 5.f, SCREEN_HEIGHT + 5.f }, { 0, 0, 0, 255 });
+    CSprite2d::DrawRect({ -5.f, -5.f,     SCREEN_WIDTH + 5.f, rect.top         }, { 0, 0, 0, 255 });
+    CSprite2d::DrawRect({ -5.f, rect.bottom, SCREEN_WIDTH + 5.f, SCREEN_HEIGHT + 5.f }, { 0, 0, 0, 255 });
 }
 
 // 0x514950
@@ -1599,11 +1599,11 @@ void CCamera::GetScreenRect(CRect* rect) {
     rect->right = SCREEN_WIDTH;
 
     if (m_bWideScreenOn) {
-        rect->bottom = (float)(RsGlobal.maximumHeight / 2)          * m_fScreenReductionPercentage / 100.f - SCREEN_SCALE_Y(22.0f);
-        rect->top    = SCREEN_HEIGHT - (RsGlobal.maximumHeight / 2) * m_fScreenReductionPercentage / 100.f - SCREEN_SCALE_Y(14.0f);
+        rect->top = (float)(RsGlobal.maximumHeight / 2)          * m_fScreenReductionPercentage / 100.f - SCREEN_SCALE_Y(22.0f);
+        rect->bottom    = SCREEN_HEIGHT - (RsGlobal.maximumHeight / 2) * m_fScreenReductionPercentage / 100.f - SCREEN_SCALE_Y(14.0f);
     } else {
-        rect->bottom = 0.0f;
-        rect->top    = SCREEN_HEIGHT;
+        rect->top = 0.0f;
+        rect->bottom    = SCREEN_HEIGHT;
     }
 }
 
@@ -1652,4 +1652,25 @@ void CCamera::StartTransitionWhenNotFinishedInter(eCamMode currentCamMode) {
 // 0x515200
 void CCamera::StartTransition(eCamMode currentCamMode) {
     plugin::CallMethod<0x515200, CCamera*, eCamMode>(this, currentCamMode);
+}
+
+auto CCamera::GetFrustumPoints() -> std::array<CVector, 5> {
+    CVector pts[5]{};
+
+    // First, the corners
+    const auto farPlane  = RwCameraGetFarClipPlane(m_pRwCamera);
+    const auto farVWSize = CVector2D{ *RwCameraGetViewWindow(m_pRwCamera) } * farPlane;
+    const auto corners   = CRect{ -farVWSize, farVWSize }.GetCorners3D(farPlane);
+
+    // Copy it into pts
+    rng::copy(corners, pts);
+
+    // Last is the center point
+    pts[4] = CVector{ 0.f, 0.f, 0.f };
+
+    // Transform them to world space
+    RwV3dTransformPoints(pts, pts, 5, GetRwMatrix());
+
+    // That's it!
+    return std::to_array(pts);
 }

@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <optional>
+
 #include "Physical.h"
 #include "AEVehicleAudioEntity.h"
 #include "tHandlingData.h"
@@ -20,6 +22,8 @@
 #include "DamageManager.h"
 #include "FxSystem.h"
 #include "Fire.h"
+
+#include <Enums/eControllerType.h>
 
 /*  Thanks to MTA team for https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CVehicleSA.cpp */
 
@@ -173,10 +177,16 @@ static constexpr auto NUM_VEHICLE_UPGRADES = 15u;
 
 class CVehicle : public CPhysical {
 public:
+    enum class eComedyControlState : uint8 {
+        INACTIVE,
+        STEER_RIGHT,
+        STEER_LEFT
+    };
+public:
     CAEVehicleAudioEntity m_vehicleAudio;
     tHandlingData*        m_pHandlingData;
     tFlyingHandlingData*  m_pFlyingHandlingData;
-    union {
+    union { // TODO: The struct in `tHandlingData` is exactly the same thing, so use that here too! (Requires renaming fields in `tHandlingData`)
         eVehicleHandlingFlags m_nHandlingFlagsIntValue;
         struct {
             uint32 b1gBoost : 1;
@@ -229,7 +239,7 @@ public:
 
             uint32 bIsVan : 1;                       // Is this vehicle a van (doors at back of vehicle)
             uint32 bIsBus : 1;                       // Is this vehicle a bus
-            uint32 bIsBig : 1;                       // Is this vehicle a bus
+            uint32 bIsBig : 1;                       // Is this vehicle big
             uint32 bLowVehicle : 1;                  // Need this for sporty type cars to use low getting-in/out anims
             uint32 bComedyControls : 1;              // Will make the car hard to control (hopefully in a funny way)
             uint32 bWarnedPeds : 1;                  // Has scan and warn peds of danger been processed?
@@ -299,7 +309,7 @@ public:
     int16             m_nAlarmState;
     int16             m_nForcedRandomRouteSeed; // if this is non-zero the random wander gets deterministic
     CPed*             m_pDriver;
-    CPed*             m_apPassengers[8];
+    CPed*             m_apPassengers[8]{};
     uint8             m_nNumPassengers;
     uint8             m_nNumGettingIn;
     uint8             m_nGettingInFlags;
@@ -365,7 +375,7 @@ public:
     uint32          m_nHornCounter;
     int8            m_nRandomIdRelatedToSiren;
     char            m_nCarHornTimer; // car horn related
-    char            m_comedyControlState;
+    eComedyControlState m_comedyControlState;
     char            m_nHasslePosId;
     CStoredCollPoly m_FrontCollPoly;          // poly which is under front part of car
     CStoredCollPoly m_RearCollPoly;           // poly which is under rear part of car
@@ -383,7 +393,7 @@ public:
         } m_renderLights;
     };
     RwTexture*   m_pCustomCarPlate;
-    float        m_fRawSteerAngle;
+    float        m_fRawSteerAngle; // AKA m_fSteeringLeftRight
     eVehicleType m_nVehicleType;    // Theory by forkerer:
     eVehicleType m_nVehicleSubType; // Hack to have stuff be 2 classes at once, like vortex which can act like a car and a boat
     int16        m_nPreviousRemapTxd;
@@ -401,7 +411,7 @@ public:
     static bool &bDisableRemoteDetonationOnContact;
     static bool &m_bEnableMouseSteering;
     static bool &m_bEnableMouseFlying;
-    static int32 &m_nLastControlInput;
+    static inline auto& m_nLastControlInput = *(eControllerType*)0xC1CC04;
     static CColModel* (&m_aSpecialColVehicle)[4];
     static bool &ms_forceVehicleLightsOff;
     static bool &s_bPlaneGunsEjectShellCasings;
@@ -414,6 +424,9 @@ public:
 
     static void* operator new(unsigned size);
     static void operator delete(void* data);
+
+    static void* operator new(unsigned size, int32 poolRef);
+    static void operator delete(void* data, int32 poolRef);
 
     void SetModelIndex(uint32 index) override;
     void DeleteRwObject() override;
@@ -465,7 +478,7 @@ public:
     virtual void PlayCarHorn() { /* Do nothing */ }
     virtual int32 GetNumContactWheels() { return 4; }
     virtual void VehicleDamage(float damageIntensity, eVehicleCollisionComponent collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { /* Do nothing */ }
-    virtual bool CanPedStepOutCar(bool bIgnoreSpeedUpright);
+    virtual bool CanPedStepOutCar(bool bIgnoreSpeedUpright = false) const;
     virtual bool CanPedJumpOutCar(CPed* ped);
     virtual bool GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
     virtual bool GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
@@ -498,18 +511,19 @@ public:
     CPed* SetupPassenger(int32 seatNumber, int32 pedType, bool arg2, bool arg3);
     bool IsPassenger(CPed* ped) const;
     [[nodiscard]] bool IsPassenger(int32 modelIndex) const;
+    bool IsPedOfModelInside(eModelID model) const; // NOTSA
     bool IsDriver(CPed* ped) const;
     [[nodiscard]] bool IsDriver(int32 modelIndex) const;
     void KillPedsInVehicle();
-    bool IsUpsideDown();
-    bool IsOnItsSide();
+    bool IsUpsideDown() const;
+    bool IsOnItsSide() const;
     bool CanPedOpenLocks(CPed* ped);
     bool CanDoorsBeDamaged();
     bool CanPedEnterCar();
     void ProcessCarAlarm();
     bool IsVehicleNormal();
     void ChangeLawEnforcerState(bool bIsEnforcer);
-    bool IsLawEnforcementVehicle();
+    bool IsLawEnforcementVehicle() const;
     static bool ShufflePassengersToMakeSpace();
     void ExtinguishCarFire();
     void ActivateBomb();
@@ -566,7 +580,7 @@ public:
     void DoPlaneGunFireFX(CWeapon* weapon, CVector& particlePos, CVector& gunshellPos, int32 particleIndex);
     void FirePlaneGuns();
     void FireUnguidedMissile(eOrdnanceType type, bool bCheckTime);
-    bool CanBeDriven();
+    bool CanBeDriven() const;
     void ReactToVehicleDamage(CPed* ped);
     bool GetVehicleLightsStatus();
     bool CanPedLeanOut(CPed* ped);
@@ -580,7 +594,7 @@ public:
     void InflictDamage(CEntity* damager, eWeaponType weapon, float intensity, CVector coords);
     void KillPedsGettingInVehicle();
     bool UsesSiren();
-    bool IsSphereTouchingVehicle(float x, float y, float z, float radius);
+    bool IsSphereTouchingVehicle(CVector posn, float radius);
     void FlyingControl(eFlightModel flightModel, float leftRightSkid, float steeringUpDown, float steeringLeftRight, float accelerationBreakStatus);
     void BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatrix& matrix, int16 rotorType, float damageMult);
     void SetComponentRotation(RwFrame* component, eRotationAxis axis, float angle, bool bResetPosition);
@@ -620,6 +634,8 @@ public:
     void DoDriveByShootings();
 
     bool AreAnyOfPassengersFollowerOfGroup(const CPedGroup& group);
+
+    auto GetPassengerIndex(const CPed* ped) const -> std::optional<size_t>;
 
     static void Shutdown();
     static void SetComponentAtomicAlpha(RpAtomic* atomic, int32 alpha);
@@ -676,13 +692,21 @@ public: // NOTSA functions
     CPlane* AsPlane() { return reinterpret_cast<CPlane*>(this); }
     CHeli*  AsHeli()  { return reinterpret_cast<CHeli*>(this); }
 
-    CVehicleModelInfo* GetVehicleModelInfo(); // todo: inline
+    CVehicleModelInfo* GetVehicleModelInfo() const;
 
-    CVector GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace = true);
+    CVector GetDummyPositionObjSpace(eVehicleDummy dummy) const; // NOTSA
+    CVector GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace = true); // NOTSA
+
+    /// get position of driver seat dummy (Object Space)
+    CVector GetDriverSeatDummyPositionOS() const; // NOTSA
+
+    /// get position of driver seat dummy (World Space)
+    CVector GetDriverSeatDummyPositionWS(); // NOTSA
+
     int32 GetRopeIndex();
     [[nodiscard]] CVehicleAnimGroup& GetAnimGroup() const;
     [[nodiscard]] AssocGroupId GetAnimGroupId() const;
-    auto GetPassengers() { return std::span{ m_apPassengers, m_nMaxPassengers }; }
+    auto GetPassengers() const { return std::span{ m_apPassengers, m_nMaxPassengers }; }
     [[nodiscard]] float GetDefaultAirResistance() const {
         if (m_pHandlingData->m_fDragMult <= 0.01f) {
             return m_pHandlingData->m_fDragMult;
@@ -690,6 +714,15 @@ public: // NOTSA functions
             return m_pHandlingData->m_fDragMult / 1000.0f / 2.0f;
         }
     }
+
+    /// Is there a driver who is also a ped
+    bool IsDriverAPlayer() const;
+
+    /// Is the vehicle totally flipped (Should probably be moved to `CPlaceable`)
+    [[nodiscard]] bool IsTotallyUpsideDown() const { return GetUp().z < 0.f; }
+
+    /// Is there enough space for at least one more passenger
+    [[nodiscard]] bool HasSpaceForAPassenger() const { return m_nMaxPassengers > m_nNumPassengers + 1; }
 
 private:
     friend void InjectHooksMain();
@@ -711,7 +744,7 @@ private:
     void ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 animId, float fTime);
     void ProcessDrivingAnims_Reversed(CPed* driver, bool blend);
     float GetHeightAboveRoad_Reversed();
-    bool CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright);
+    bool CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright) const;
     bool CanPedJumpOutCar_Reversed(CPed* ped);
     bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
     bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
@@ -733,9 +766,6 @@ RpMaterial* SetCompAlphaCB(RpMaterial* material, void* data);
 RwObject* SetVehicleAtomicVisibilityCB(RwObject* object, void* data);
 RwFrame* SetVehicleAtomicVisibilityCB(RwFrame* component, void* data);
 void DestroyVehicleAndDriverAndPassengers(CVehicle* vehicle);
-
-extern char *&HandlingFilename;
-extern char (&VehicleNames)[100][14]; // sorting is based on handling id
 
 /* Missing funcs | from Android
 

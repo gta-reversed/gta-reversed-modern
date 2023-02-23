@@ -10,11 +10,11 @@ void InjectHooksMain(HMODULE hThisDLL);
 
 void DisplayConsole()
 {
-    if (AllocConsole())
-    {
-        freopen("CONIN$", "r", stdin);
-        freopen("CONOUT$", "w", stdout);
-        freopen("CONOUT$", "w", stderr);
+    if (AllocConsole()) {
+        FILESTREAM fs{};
+        VERIFY(freopen_s(&fs, "CONIN$",  "r", stdin)  == NOERROR);
+        VERIFY(freopen_s(&fs, "CONOUT$", "w", stdout) == NOERROR);
+        VERIFY(freopen_s(&fs, "CONOUT$", "w", stderr) == NOERROR);
     }
 }
 
@@ -59,10 +59,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
     {
     case DLL_PROCESS_ATTACH:
     {
-        RwCamera * pRwCamera = *(RwCamera**)0xC1703C;
-
         // Fail if RenderWare has already been started
-        if (pRwCamera)
+        if (*(RwCamera**)0xC1703C)
         {
             MessageBox(NULL, "gta_reversed failed to load (RenderWare has already been started)", "Error", MB_ICONERROR | MB_OK);
             return FALSE;

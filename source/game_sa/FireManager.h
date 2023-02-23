@@ -25,7 +25,7 @@ public:
     void Shutdown();
 
     uint32 GetNumOfNonScriptFires();
-    CFire* FindNearestFire(const CVector& point, bool bCheckWasExtinguished, bool bCheckWasCreatedByScript);
+    CFire* FindNearestFire(const CVector& point, bool bCheckWasExtinguished = false, bool bCheckWasCreatedByScript = false);
     bool PlentyFiresAvailable();
 
     void ExtinguishPoint(CVector point, float fRadiusSq);
@@ -48,7 +48,7 @@ public:
     void DestroyAllFxSystems();
 
     CFire* StartFire(CVector pos, float size, uint8 unused, CEntity* creator, uint32 nTimeToBurn, int8 nGenerations, uint8 unused_);
-    CFire* StartFire(CEntity* target, CEntity* creator, _IGNORED_ float size, _IGNORED_ uint8 arg3, uint32 time, int8 numGenerations);
+    CFire* StartFire(CEntity* target, CEntity* creator, _IGNORED_ float size = 0.8f, _IGNORED_ uint8 arg3 = 1, uint32 time = 7000, int8 numGenerations = 0);
     int32 StartScriptFire(const CVector& point, CEntity* target, _IGNORED_ float arg2, _IGNORED_ uint8 arg3, int8 numGenerations, int32 size);
 
     void Update();
@@ -71,4 +71,4 @@ private:
 
 VALIDATE_SIZE(CFireManager, 0x964);
 
-extern CFireManager& gFireManager;
+inline static CFireManager& gFireManager = *reinterpret_cast<CFireManager*>(0xB71F80);

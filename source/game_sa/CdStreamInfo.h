@@ -77,7 +77,7 @@ eCdStreamStatus CdStreamSync(int32 streamId);
 eCdStreamStatus CdStreamGetStatus(int32 streamId);
 bool CdStreamRead(int32 streamId, void* lpBuffer, uint32 offsetAndHandle, int32 sectorCount);
 static uint32 CdStreamGetLastPosn() { return gLastCdStreamPosn; }
-[[noreturn]] DWORD WINAPI CdStreamThread(LPVOID lpParam);
+[[noreturn]] void WINAPI CdStreamThread(LPVOID lpParam);
 void CdStreamInitThread();
 void CdStreamInit(int32 streamCount);
 void CdStreamRemoveImages();

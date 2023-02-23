@@ -92,6 +92,9 @@ link_asi.bat "<GAME_PATH>/scripts"
 ```
 Replace `<GAME_PATH>` with the path to the game's root directory (i.e.: Where the `exe` is)
     
+### What to work on?
+Check [this](https://github.com/gta-reversed/gta-reversed-modern/discussions/402) out for some inspiration ;)
+    
 ### Credits
 - All contributors of the [plugin-sdk](https://github.com/DK22Pac/plugin-sdk) project.
 - All contributors of the [original project](https://github.com/codenulls/gta-reversed).

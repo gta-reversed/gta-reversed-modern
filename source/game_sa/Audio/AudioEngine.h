@@ -95,7 +95,7 @@ public:
     void SetBassEnhanceOnOff(bool enable);
     void SetRadioBassSetting(int8);
     bool HasRadioRetuneJustStarted();
-    char* GetRadioStationName(RadioStationId id);
+    const char* GetRadioStationName(RadioStationId id);
     void GetRadioStationNameKey(RadioStationId id, char* outStr);
     int32* GetRadioStationListenTimes();
     void DisplayRadioStationName();

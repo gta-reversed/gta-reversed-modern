@@ -38,9 +38,9 @@ void CMenuManager::DrawFrontEnd() {
 // NOTSA
 void CMenuManager::DrawBuildInfo() {
     char buf[128] = {0};
-    strcpy(buf, BUILD_NAME_FULL);
+    strcpy_s(buf, BUILD_NAME_FULL);
     char version[32];
-    sprintf(
+    sprintf_s(
         version,
         " / RW %d.%d.%d.%d.%d",
         0xF & RwEngineGetVersion() >> 16,
@@ -49,7 +49,7 @@ void CMenuManager::DrawBuildInfo() {
         0xF & RwEngineGetVersion() >> 4,
         0xF & RwEngineGetVersion() >> 0
     );
-    strcpy(buf + strlen(buf), version);
+    strcpy_s(buf + strlen(buf), 32u - strlen(buf), version);
 
     CFont::SetProportional(true);
     CFont::SetScale(StretchX(0.25f), StretchY(0.5f));
@@ -308,15 +308,15 @@ void CMenuManager::DrawBackground() {
             CRect rect;
 
             rect.left   = x + StretchX(6.0f);
-            rect.top    = y + StretchY(3.0f);
+            rect.bottom    = y + StretchY(3.0f);
             rect.right  = x + SCREEN_STRETCH_X(24.0f);
-            rect.bottom = y + SCREEN_SCALE_Y(21.0f);
+            rect.top = y + SCREEN_SCALE_Y(21.0f);
             m_aFrontEndSprites[spriteId].Draw(rect, { 100, 100, 100, 50 }); // shadow
 
             rect.left   = x;
-            rect.top    = y;
+            rect.bottom    = y;
             rect.right  = x + SCREEN_STRETCH_X(18.0f);
-            rect.bottom = y + SCREEN_SCALE_Y(18.0f);
+            rect.top = y + SCREEN_SCALE_Y(18.0f);
             m_aFrontEndSprites[spriteId].Draw(rect, { 255, 255, 255, 255 });
         };
 
@@ -351,7 +351,7 @@ void CMenuManager::DrawWindow(const CRect& coords, const char* key, uint8 color,
         CFont::SetScale(SCREEN_SCALE_X(1.0f), SCREEN_SCALE_Y(1.4f));
 
         float x = coords.left + SCREEN_SCALE_X(10.0f);
-        float y = std::min(coords.top, coords.bottom) - SCREEN_SCALE_Y(16);
+        float y = std::min(coords.bottom, coords.top) - SCREEN_SCALE_Y(16);
         CFont::PrintString(x, y, TheText.Get(const_cast<char*>(key)));
     }
 }
@@ -370,7 +370,7 @@ void CMenuManager::DrawWindowedText(float x, float y, float wrap, const char* st
     CRect rt;
     CFont::GetTextRect(&rt, x, y, TheText.Get(str2));
     rt.left -= 4.0f;
-    rt.top  += StretchY(22.0f);
+    rt.bottom  += StretchY(22.0f);
     CSprite2d::DrawRect(rt, {0, 0, 0, 255});
     CFont::SetColor({225, 225, 225, 255});
     CFont::SetDropColor({0, 0, 0, 255});
@@ -381,7 +381,7 @@ void CMenuManager::DrawWindowedText(float x, float y, float wrap, const char* st
     CFont::SetWrapx(rt.right);
 
     if (str1 && *str1) {
-        CFont::PrintString(rt.left + StretchX(20.0f), rt.bottom - StretchY(16.0f), TheText.Get(str1));
+        CFont::PrintString(rt.left + StretchX(20.0f), rt.top - StretchY(16.0f), TheText.Get(str1));
     }
 
     if (str2 && *str2) {

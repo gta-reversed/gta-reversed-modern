@@ -17,16 +17,22 @@ class CPed;
 
 class CCover {
 public:
-    static uint32& m_NumPoints;
-    static CCoverPoint (&m_aPoints)[100]; // static CCoverPoint m_aPoints[100]
-    static CPtrListDoubleLink& m_ListOfProcessedBuildings;
+    inline static uint32& m_NumPoints = *reinterpret_cast<uint32*>(0xC197A4);
+    inline static std::array<CCoverPoint, 100>& m_aPoints = *reinterpret_cast<std::array<CCoverPoint, 100>*>(0xC197C8);
+    inline static CPtrListDoubleLink& m_ListOfProcessedBuildings = *reinterpret_cast<CPtrListDoubleLink*>(0xC1A2B8);
 
 public:
     static void InjectHooks();
 
+    static void Init();
+    static void RemoveCoverPointIfEntityLost(CCoverPoint* point);
+    static void RemoveCoverPointsForThisEntity(CEntity* entity);
+    static bool ShouldThisBuildingHaveItsCoverPointsCreated(CBuilding* building);
+    static void Update();
+
     static void AddCoverPoint(int32 maxPeds, CEntity* coverEntity, CVector* position, char coverType, uint8 direction);
     static float CalculateHorizontalSize(CColTriangle* triangle, CVector* vertPositions);
-    static char DoLineCheckWithinObject(CColTriangle* triangle, int32 a2, CVector* a3, CVector* a4, CVector a5, CVector a6);
+    static bool DoLineCheckWithinObject(CColTriangle* triangle, int32 a2, CVector* a3, CVector* a4, CVector a5, CVector a6);
     static bool DoesCoverPointStillProvideCover(CCoverPoint* point, CVector position);
     static void Find2HighestPoints(CColTriangle* triangle, CVector* vertPositions, int32& outPoint1, int32& outPoint2);
     static CCoverPoint* FindAndReserveCoverPoint(CPed* ped, CVector& position, bool a3);
@@ -35,10 +41,4 @@ public:
     static uint8 FindDirFromVector(float x, float y);
     static CVector FindVectorFromDir(uint8 direction);
     static CVector FindVectorFromFirstToMissingVertex(CColTriangle* triangle, int32* a3, CVector* vertPositions);
-
-    static void Init();
-    static void RemoveCoverPointIfEntityLost(CCoverPoint* point);
-    static void RemoveCoverPointsForThisEntity(CEntity* entity);
-    static bool ShouldThisBuildingHaveItsCoverPointsCreated(CBuilding* building);
-    static void Update();
 };

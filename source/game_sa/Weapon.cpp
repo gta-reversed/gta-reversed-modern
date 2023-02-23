@@ -52,7 +52,7 @@ void CWeapon::InjectHooks() {
     RH_ScopedInstall(FireSniper, 0x73AAC0);
     RH_ScopedInstall(TakePhotograph, 0x73C1F0);
     RH_ScopedInstall(DoDoomAiming, 0x73CDC0);
-    // untested RH_ScopedInstall(FireInstantHitFromCar2, 0x73CBA0);
+    RH_ScopedInstall(FireInstantHitFromCar2, 0x73CBA0, { .reversed = false });
 }
 
 // 0x73B430
@@ -320,7 +320,7 @@ bool CWeapon::HasWeaponAmmoToBeUsed() {
 bool CWeapon::ProcessLineOfSight(const CVector& startPoint, const CVector& endPoint, CColPoint& outColPoint, CEntity*& outEntity, eWeaponType weaponType, CEntity* arg5,
                                  bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool arg11, bool doIgnoreCameraCheck) {
     CBirds::HandleGunShot(&startPoint, &endPoint);
-    CShadows::GunShotSetsOilOnFire(&startPoint, &endPoint);
+    CShadows::GunShotSetsOilOnFire(startPoint, endPoint);
 
     return CWorld::ProcessLineOfSight(startPoint, endPoint, outColPoint, outEntity, buildings, vehicles, peds, objects, dummies, false, doIgnoreCameraCheck, true);
 }
@@ -512,7 +512,7 @@ void CWeapon::FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehi
     CWorld::bIncludeBikers = true;
     CWorld::pIgnoreEntity = vehicle;
     CBirds::HandleGunShot(&startPoint, &endPoint);
-    CShadows::GunShotSetsOilOnFire(&startPoint, &endPoint);
+    CShadows::GunShotSetsOilOnFire(startPoint, endPoint);
 
     CEntity* victim{};
     CColPoint outColPoint{};
@@ -619,13 +619,13 @@ void CWeapon::DoWeaponEffect(CVector origin, CVector target) {
     char fxName[32]{};
     switch (m_nType) {
     case eWeaponType::WEAPON_FLAMETHROWER:
-        strcpy(fxName, "flamethrower");
+        strcpy_s(fxName, "flamethrower");
         break;
     case eWeaponType::WEAPON_EXTINGUISHER:
-        strcpy(fxName, "extinguisher");
+        strcpy_s(fxName, "extinguisher");
         break;
     case eWeaponType::WEAPON_SPRAYCAN:
-        strcpy(fxName, "spraycan");
+        strcpy_s(fxName, "spraycan");
         break;
     default:
         return StopWeaponEffect();
@@ -700,11 +700,11 @@ bool CWeapon::Fire(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, 
                                                                                                                              target, originForDriveBy);
 }
 
-CWeaponInfo& CWeapon::GetWeaponInfo(CPed* owner) {
+CWeaponInfo& CWeapon::GetWeaponInfo(CPed* owner) const {
     return GetWeaponInfo(owner ? owner->GetWeaponSkill(m_nType) : eWeaponSkill::STD);
 }
 
-CWeaponInfo& CWeapon::GetWeaponInfo(eWeaponSkill skill) {
+CWeaponInfo& CWeapon::GetWeaponInfo(eWeaponSkill skill) const {
     return *CWeaponInfo::GetWeaponInfo(m_nType, skill);
 }
 

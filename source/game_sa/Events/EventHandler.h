@@ -39,7 +39,7 @@ public:
     static bool IsTemporaryEvent(const CEvent& event);
     void RecordActiveEvent(const CEvent& event);
     void RecordPassiveEvent(const CEvent& event);
-    void RegisterKill(const CPed* ped, const CEntity* entity, eWeaponType weaponType, bool a4);
+    static void RegisterKill(const CPed* ped, const CEntity* entity, eWeaponType weaponType, bool a4);
     void SetEventResponseTask(const CEvent& event);
 
     void ComputeAreaCodesResponse(CEvent* event, CTask* task1, CTask* task2);
@@ -107,6 +107,8 @@ public:
 
     void ComputeEventResponseTask(CEvent* event, CTask* task);
     CTask* ComputeEventResponseTask(CPed* ped, CEvent* event);
+
+    auto& GetHistory() { return m_history; }
 };
 
 VALIDATE_SIZE(CEventHandler, 0x34);

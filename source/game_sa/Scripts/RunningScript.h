@@ -7,6 +7,7 @@
 #pragma once
 
 #include "eScriptCommands.h"
+#include "OpcodeResult.h"
 #include "eWeaponType.h"
 #include "Ped.h"
 
@@ -26,15 +27,21 @@ enum eScriptParameterType {
     // Number arrays
     SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY,
     SCRIPT_PARAM_LOCAL_NUMBER_ARRAY,
+
     SCRIPT_PARAM_STATIC_SHORT_STRING,
+
     SCRIPT_PARAM_GLOBAL_SHORT_STRING_VARIABLE,
     SCRIPT_PARAM_LOCAL_SHORT_STRING_VARIABLE,
+
     SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY,
     SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY,
+
     SCRIPT_PARAM_STATIC_PASCAL_STRING,
     SCRIPT_PARAM_STATIC_LONG_STRING,
+
     SCRIPT_PARAM_GLOBAL_LONG_STRING_VARIABLE,
     SCRIPT_PARAM_LOCAL_LONG_STRING_VARIABLE,
+
     SCRIPT_PARAM_GLOBAL_LONG_STRING_ARRAY,
     SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY,
 };
@@ -93,12 +100,8 @@ enum {
     NUM_TIMERS      = 2
 };
 
-enum OpcodeResult : int8 {
-    OR_CONTINUE        = 0,
-    OR_WAIT            = 1,
-    OR_INTERRUPT       = -1,
-    OR_IMPLEMENTED_YET = -2 // NOTSA
-};
+constexpr auto SHORT_STRING_SIZE = 8;
+constexpr auto LONG_STRING_SIZE = 16;
 
 class CRunningScript {
     /*!
@@ -108,16 +111,16 @@ class CRunningScript {
      *   1. the number of conditions = `n` (max 8)
      *   2. logical operation between conditions (AND/OR, hence the command name)
      * - `n` commands that update the conditional flag
-     * 
+     *
      * For instance `if ($A > 0 && $B > 0 && $C > 0)` would generate:
-     * 
+     *
      * ```
      * COMMAND_ANDOR                          ANDS_2 // (three conditions joined by AND)
      * COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER $A 0
      * COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER $B 0
      * COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER $C 0
      * ```
-     * 
+     *
      * Each time a condition is tested, the result is AND/OR'd with the previous
      * result and the ANDOR state is decremented until it reaches the lower bound,
      * meaning that all conditions were tested.
@@ -153,7 +156,7 @@ public:
     tScriptParam    m_aLocalVars[NUM_LOCAL_VARS];
     int32           m_anTimers[NUM_TIMERS];
     bool            m_bIsActive;
-    bool            m_bCondResult;
+    bool            m_bCondResult; ///< Used for `COMMAND_GOTO_IF_FALSE`
     bool            m_bUseMissionCleanup;
     bool            m_bIsExternal;
     bool            m_bTextBlockOverride;
@@ -170,7 +173,6 @@ public:
     using CommandHandlerTable_t = std::array<CommandHandlerFn_t, 27>;
 
     static inline CommandHandlerTable_t& CommandHandlerTable = *(CommandHandlerTable_t*)0x8A6168;
-    static        CommandHandlerTable_t  reSA_CommandHandlerTable;
 
 public:
     static void InjectHooks();
@@ -227,40 +229,21 @@ public:
 
     OpcodeResult ProcessOneCommand();
     OpcodeResult Process();
-    OpcodeResult ProcessCommands0To99(int32 commandId);
-    OpcodeResult ProcessCommands100To199(int32 commandId);
-    OpcodeResult ProcessCommands200To299(int32 commandId);
-    OpcodeResult ProcessCommands300To399(int32 commandId);
-    OpcodeResult ProcessCommands400To499(int32 commandId);
-    OpcodeResult ProcessCommands500To599(int32 commandId);
-    OpcodeResult ProcessCommands600To699(int32 commandId);
-    OpcodeResult ProcessCommands700To799(int32 commandId);
-    OpcodeResult ProcessCommands800To899(int32 commandId);
-    OpcodeResult ProcessCommands900To999(int32 commandId);
-    OpcodeResult ProcessCommands1000To1099(int32 commandId);
-    OpcodeResult ProcessCommands1100To1199(int32 commandId);
-    OpcodeResult ProcessCommands1200To1299(int32 commandId);
-    OpcodeResult ProcessCommands1300To1399(int32 commandId);
-    OpcodeResult ProcessCommands1400To1499(int32 commandId);
-    OpcodeResult ProcessCommands1500To1599(int32 commandId);
-    OpcodeResult ProcessCommands1600To1699(int32 commandId);
-    OpcodeResult ProcessCommands1700To1799(int32 commandId);
-    OpcodeResult ProcessCommands1800To1899(int32 commandId);
-    OpcodeResult ProcessCommands1900To1999(int32 commandId);
-    OpcodeResult ProcessCommands2000To2099(int32 commandId);
-    OpcodeResult ProcessCommands2100To2199(int32 commandId);
-    OpcodeResult ProcessCommands2200To2299(int32 commandId);
-    OpcodeResult ProcessCommands2300To2399(int32 commandId);
-    OpcodeResult ProcessCommands2400To2499(int32 commandId);
-    OpcodeResult ProcessCommands2500To2599(int32 commandId);
-    OpcodeResult ProcessCommands2600To2699(int32 commandId);
-    OpcodeResult ProcessExternalCommands(int32 commandId); // NOTSA
 
-    void SetName(const char* name)  { assert(strlen(name) < sizeof(m_szName)); strcpy(m_szName, name); }
-    void SetBaseIp(uint8* ip)       { m_pBaseIP = ip; }
-    void SetCurrentIp(uint8* ip)    { m_pCurrentIP = ip; }
-    void SetActive(bool active)     { m_bIsActive = active; }
-    void SetExternal(bool external) { m_bIsExternal = external; }
+    void SetName(const char* name)      { strcpy_s(m_szName, name); }
+    void SetName(std::string_view name) { assert(name.size() < sizeof(m_szName)); strncpy_s(m_szName, name.data(), name.size()); }
+    void SetBaseIp(uint8* ip)           { m_pBaseIP = ip; }
+    void SetCurrentIp(uint8* ip)        { m_pCurrentIP = ip; }
+    void SetActive(bool active)         { m_bIsActive = active; }
+    void SetExternal(bool external)     { m_bIsExternal = external; }
+
+    template<eScriptCommands Command>
+    OpcodeResult ProcessCommand() {
+        // By default call original GTA handler
+        return std::invoke(CommandHandlerTable[(size_t)Command / 100], this, Command);
+    }
+
+    static void SetCommandHandler(eScriptCommands cmd, OpcodeResult(*handler)(CRunningScript*));
 };
 
 VALIDATE_SIZE(CRunningScript, 0xE0);

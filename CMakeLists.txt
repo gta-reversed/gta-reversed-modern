@@ -10,6 +10,10 @@ endif()
 
 project(GTASA C CXX)
 
+if (MSVC)
+    add_compile_options("/bigobj")
+endif()
+
 option(BUILD_DOC "Build documentation" OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
@@ -32,7 +36,7 @@ set(CMAKE_INSTALL_BINDIR .)
 set(CMAKE_INSTALL_LIBDIR ${RE_PROJECT_LIB_NAME}/lib)
 set(CMAKE_INSTALL_INCLUDEDIR ${RE_PROJECT_LIB_NAME}/include)
 
-add_subdirectory(libs/ EXCLUDE_FROM_ALL)
+add_subdirectory(libs/ EXCLUDE_FROM_ALL SYSTEM)
 add_subdirectory(source)
 
 function(create_source_group target)

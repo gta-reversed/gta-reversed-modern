@@ -18,6 +18,10 @@ class CEvent;
 class CPed;
 class CTaskSimple;
 class CTaskComplex;
+class CTask;
+
+template<typename T>
+concept Task = std::is_base_of_v<CTask, T>;
 
 class CTask {
 public:
@@ -41,8 +45,37 @@ public:
 
     CTaskSimple*  AsSimple()  { return reinterpret_cast<CTaskSimple*>(this); }
     CTaskComplex* AsComplex() { return reinterpret_cast<CTaskComplex*>(this); }
+
+    /// Works like `dynamic_cast` => Checks if task if ofthe required type, if so, returns it, otherwise nullptr
+    template<Task T>
+    static T* DynCast(CTask* task) {
+        if (task) {
+            if (task->GetTaskType() == T::Type) {
+                return static_cast<T*>(task);
+            }
+        }
+        return nullptr;
+    }
+
+    template<eTaskType... Types>
+    static bool IsA(CTask* task) {
+        const auto ttype = task->GetTaskType();
+        return ((ttype == Types) || ...);
+    }
+
+    template<Task... Ts>
+    static bool IsA(CTask* task) {
+        return IsA<Ts::Type...>(task);
+    }
+
+
+    /// Works like `static_cast` + in debug mode asserts the type to be as expected.
+    template<Task T>
+    static T* Cast(CTask* task) {
+        assert(!task || task->GetTaskType() == T::Type);
+        return static_cast<T*>(task);
+    }
 };
 VALIDATE_SIZE(CTask, 0x8);
 
-template<typename T>
-concept Task = std::is_base_of_v<CTask, T>;
+

@@ -12,6 +12,7 @@
 #include "Rope.h"
 #include "Ropes.h"
 #include "TheScripts.h"
+#include "Garages.h"
 
 constexpr uint32 SIZE_OF_ONE_GAME_IN_BYTES = 202748;
 
@@ -486,7 +487,7 @@ bool CGenericGameStorage::LoadDataFromWorkBuffer(void* data, int32 size) {
 
     auto pos = ms_WorkBufferPos;
 
-    if (size + pos > ms_WorkBufferSize) {
+    if (static_cast<uint32>(size + pos) > ms_WorkBufferSize) {
         const auto maxSize = BUFFER_SIZE - pos;
         if (LoadDataFromWorkBuffer(data, maxSize)) {
             if (LoadWorkBuffer()) {
@@ -617,7 +618,7 @@ bool CGenericGameStorage::SaveWorkBuffer(bool bIncludeChecksum) {
 // 0x5D0F50
 uint32 CGenericGameStorage::GetCurrentVersionNumber() {
     char buffer[40]{};
-    sprintf(buffer, "%s%s", "Apr 28 2005", "10:28:55");
+    sprintf_s(buffer, "%s%s", "Apr 28 2005", "10:28:55");
     return CKeyGen::GetKey(buffer);
 }
 

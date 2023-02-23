@@ -17,8 +17,8 @@ void CPlaceable::InjectHooks() {
     RH_ScopedInstall(SetOrientation, 0x439A80);
     RH_ScopedInstall(SetHeading, 0x43E0C0);
     RH_ScopedInstall(GetHeading, 0x441DB0);
-    RH_ScopedOverloadedInstall(IsWithinArea, "xy", 0x54F200, bool(CPlaceable::*)(float, float, float, float));
-    RH_ScopedOverloadedInstall(IsWithinArea, "xyz", 0x54F2B0, bool(CPlaceable::*)(float, float, float, float, float, float));
+    RH_ScopedOverloadedInstall(IsWithinArea, "xy", 0x54F200, bool(CPlaceable::*)(float, float, float, float) const);
+    RH_ScopedOverloadedInstall(IsWithinArea, "xyz", 0x54F2B0, bool(CPlaceable::*)(float, float, float, float, float, float) const);
     RH_ScopedInstall(RemoveMatrix, 0x54F3B0);
     RH_ScopedInstall(AllocateStaticMatrix, 0x54F4C0);
     RH_ScopedInstall(AllocateMatrix, 0x54F560);
@@ -96,7 +96,7 @@ float CPlaceable::GetHeading() {
     return std::atan2(-vecForward.x, vecForward.y);
 }
 
-bool CPlaceable::IsWithinArea(float x1, float y1, float x2, float y2) {
+bool CPlaceable::IsWithinArea(float x1, float y1, float x2, float y2) const {
     const auto& vecPos = GetPosition();
     if (x1 > x2)
         std::swap(x1, x2);
@@ -107,7 +107,8 @@ bool CPlaceable::IsWithinArea(float x1, float y1, float x2, float y2) {
     return vecPos.x >= x1 && vecPos.x <= x2 && vecPos.y >= y1 && vecPos.y <= y2;
 }
 
-bool CPlaceable::IsWithinArea(float x1, float y1, float z1, float x2, float y2, float z2) {
+
+bool CPlaceable::IsWithinArea(float x1, float y1, float z1, float x2, float y2, float z2) const {
     const auto& vecPos = GetPosition();
     if (x1 > x2)
         std::swap(x1, x2);
@@ -181,7 +182,7 @@ bool CPlaceable::IsPointInRange(const CVector& point, float range) {
     return DistanceBetweenPointsSquared(point, GetPosition()) <= sq(range);
 }
 
-CMatrixLink& CPlaceable::GetMatrix() {
+CMatrix& CPlaceable::GetMatrix() {
     if (!m_matrix) {
         CPlaceable::AllocateMatrix();
         m_placement.UpdateMatrix(m_matrix);

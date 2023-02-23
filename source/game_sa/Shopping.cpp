@@ -100,7 +100,7 @@ void CShopping::Buy(uint32 key, int32 extraInfo) {
 
     const auto price = GetPrice(key);
     const auto fPrice = static_cast<float>(price);
-    const auto priceInfo = ms_prices[FindItem(key)];
+    const auto& priceInfo = ms_prices[FindItem(key)];
     playerInfo.m_nMoney -= price;
 
     for (const auto modifier : ms_statModifiers[index].modifiers) {
@@ -120,10 +120,10 @@ void CShopping::Buy(uint32 key, int32 extraInfo) {
             const auto car = veh->AsAutomobile();
 
             // todo: refactor
-            const auto idx = (upgradeModel->m_nFlags >> 10) & 0x1f;
-            auto parentId = vehModel->m_pVehicleStruct->m_aUpgrades[idx].m_nParentComponentId;
+            const auto carModId = upgradeModel->nCarmodId;
+            auto parentId = vehModel->m_pVehicleStruct->m_aUpgrades[carModId].m_nParentComponentId;
             if (upgradeModel->bUsesVehDummy) {
-                parentId = idx;
+                parentId = carModId;
             }
 
             switch (parentId) {
@@ -134,16 +134,16 @@ void CShopping::Buy(uint32 key, int32 extraInfo) {
                 car->FixTyre(CAR_WHEEL_REAR_RIGHT);
                 break;
             case CAR_BUMP_FRONT:
-                car->FixPanel(12, FRONT_BUMPER);
+                car->FixPanel(CAR_BUMP_FRONT, FRONT_BUMPER);
                 break;
             case CAR_BUMP_REAR:
-                car->FixPanel(13, REAR_BUMPER);
+                car->FixPanel(CAR_BUMP_REAR, REAR_BUMPER);
                 break;
             case CAR_BONNET:
-                car->FixDoor(16, DOOR_BONNET);
+                car->FixDoor(CAR_BONNET, DOOR_BONNET);
                 break;
             case CAR_BOOT:
-                car->FixDoor(17, DOOR_BOOT);
+                car->FixDoor(CAR_BOOT, DOOR_BOOT);
                 break;
             default:
                 break;
@@ -255,11 +255,12 @@ bool CShopping::FindSection(FILESTREAM file, const char* sectionName) {
         if (*line == '\0' || *line == '#')
             continue;
 
+        char* nextToken{};
         if (!strncmp(line, "section", 7u)) {
             counter++;
-            RET_IGNORED(strtok(line, " \t"));
+            RET_IGNORED(strtok_s(line, " \t", &nextToken));
 
-            if (counter == 1 && !_stricmp(sectionName, strtok(nullptr, " \t"))) {
+            if (counter == 1 && !_stricmp(sectionName, strtok_s(nullptr, " \t", &nextToken))) {
                 return true;
             }
         } else if (!strncmp(line, "end", 3u) && --counter < 0) {
@@ -359,8 +360,9 @@ const char* CShopping::GetNextSection(FILESTREAM file) {
         }
     }
 
-    RET_IGNORED(strtok(line, " \t"));
-    return strtok(nullptr, " \t");
+    char* lastToken{};
+    RET_IGNORED(strtok_s(line, " \t", &lastToken));
+    return strtok_s(nullptr, " \t", &lastToken);
 }
 
 // 0x49AD50
@@ -456,28 +458,29 @@ void CShopping::LoadPrices(const char* sectionName) {
 
         auto& priceInfo = ms_prices[ms_numPrices];
 
-        const auto model = strtok(line, " \t,");
+        char* lastToken{};
+        const auto model = strtok_s(line, " \t,", &lastToken);
         priceInfo.key = GetKey(model, ms_priceSectionLoaded);
 
-        const auto nameTag = strtok(nullptr, " \t,");
-        strncpy(priceInfo.nameTag, nameTag, 8u);
+        const auto nameTag = strtok_s(nullptr, " \t,", &lastToken);
+        strncpy_s(priceInfo.nameTag, nameTag, 8u);
 
         switch (ms_priceSectionLoaded) {
         case PRICE_SECTION_CLOTHES:
         case PRICE_SECTION_HAIRCUTS: {
-            priceInfo.clothes.modelKey = CKeyGen::GetUppercaseKey(strtok(nullptr, " \t,"));
-            priceInfo.clothes.type = std::atoi(strtok(nullptr, " \t,"));
+            priceInfo.clothes.modelKey = CKeyGen::GetUppercaseKey(strtok_s(nullptr, " \t,", &lastToken));
+            priceInfo.clothes.type = std::atoi(strtok_s(nullptr, " \t,", &lastToken));
             break;
         }
         case PRICE_SECTION_TATTOOS: {
-            const auto type = strtok(nullptr, " \t,");
-            const auto txtkey = strtok(nullptr, " \t,");
+            const auto type = strtok_s(nullptr, " \t,", &lastToken);
+            const auto txtkey = strtok_s(nullptr, " \t,", &lastToken);
             priceInfo.tattoos.type1 = (type[0] == '-') ? -1 : std::atoi(type);
             priceInfo.tattoos.texKey = CKeyGen::GetUppercaseKey(txtkey);
             break;
         }
         case PRICE_SECTION_WEAPONS: {
-            priceInfo.weapon.ammo = std::atoi(strtok(nullptr, " \t,"));
+            priceInfo.weapon.ammo = std::atoi(strtok_s(nullptr, " \t,", &lastToken));
             break;
         }
         default:
@@ -485,15 +488,15 @@ void CShopping::LoadPrices(const char* sectionName) {
         }
 
         for (auto i = 0; i < 4; i++)
-            RET_IGNORED(strtok(nullptr, " \t,"));
+            RET_IGNORED(strtok_s(nullptr, " \t,", &lastToken));
 
-        priceInfo.price = std::atoi(strtok(nullptr, " \t,"));
-        rng::for_each_n(ms_priceModifiers.begin(), ms_numPriceModifiers, [&priceInfo](auto priceModifier) {
+        priceInfo.price = std::atoi(strtok_s(nullptr, " \t,", &lastToken));
+        for (auto& priceModifier : ms_priceModifiers | rng::views::take((size_t)ms_numPriceModifiers)) {
             if (priceInfo.key == priceModifier.key) {
                 priceInfo.price = priceModifier.price;
+                break;
             }
-        });
-
+        }
     }
     CFileMgr::CloseFile(file);
 
@@ -535,13 +538,14 @@ void CShopping::LoadShop(const char* sectionName) {
             if (!strncmp(line, "end", 3u))
                 break;
 
-            const auto type = strtok(line, " \t");
+            char* lastToken{};
+            const auto type = strtok_s(line, " \t", &lastToken);
             if (!strcmp("type", type)) {
-                strcpy_s(sectionName, strtok(nullptr, " \t"));
+                strcpy_s(sectionName, strtok_s(nullptr, " \t", &lastToken));
                 LoadPrices(sectionName);
             } else if (!strcmp("item", type)) {
                 const auto veh = FindPlayerVehicle();
-                const auto model = GetKey(strtok(nullptr, " \t"), ms_priceSectionLoaded);
+                const auto model = GetKey(strtok_s(nullptr, " \t", &lastToken), ms_priceSectionLoaded);
 
                 if (ms_priceSectionLoaded != PRICE_SECTION_CAR_MODS || IsValidModForVehicle(model, veh)) {
                     ms_shopContents[ms_numItemsInShop++] = model;
@@ -567,19 +571,21 @@ void CShopping::LoadStats() {
             if (!strncmp(line, "end", 3u))
                 break;
 
-            ms_keys[ms_numBuyableItems] = GetKey(strtok(line, " \t,"), section);
+            char* lastToken{};
+            ms_keys[ms_numBuyableItems] = GetKey(strtok_s(line, " \t,", &lastToken), section);
             ms_bHasBought[ms_numBuyableItems] = false;
-            RET_IGNORED(strtok(nullptr, " \t,"));
+
+            RET_IGNORED(strtok_s(nullptr, " \t,", &lastToken));
 
             switch (section) {
             case PRICE_SECTION_CLOTHES:
             case PRICE_SECTION_HAIRCUTS:
             case PRICE_SECTION_TATTOOS:
-                RET_IGNORED(strtok(nullptr, " \t,"));
+                RET_IGNORED(strtok_s(nullptr, " \t,", &lastToken));
                 [[fallthrough]];
 
             case PRICE_SECTION_WEAPONS:
-                RET_IGNORED(strtok(nullptr, " \t,"));
+                RET_IGNORED(strtok_s(nullptr, " \t,", &lastToken));
                 break;
             default:
                 break;
@@ -587,8 +593,8 @@ void CShopping::LoadStats() {
 
             for (auto& modifier : ms_statModifiers[ms_numBuyableItems].modifiers) {
                 modifier = {
-                    (int8)GetChangingStatIndex(strtok(nullptr, " \t,")),
-                    (int8)std::atoi(strtok(nullptr, " \t,"))
+                    (int8)GetChangingStatIndex(strtok_s(nullptr, " \t,", &lastToken)),
+                    (int8)std::atoi(strtok_s(nullptr, " \t,", &lastToken))
                 };
             }
 
@@ -626,12 +632,12 @@ void CShopping::AddPriceModifier(const char* name, const char* section, int32 pr
 // 0x (inlined)
 void CShopping::AddPriceModifier(uint32 key, int32 price) {
     // the code may not be same, can not test.
-    rng::for_each_n(ms_priceModifiers.begin(), ms_numPriceModifiers, [key, price](auto priceModifier) {
+    for (auto& priceModifier : std::span{ms_priceModifiers.data(), (size_t)ms_numPriceModifiers}) {
         if (key == priceModifier.key) {
             priceModifier.price = price;
             return;
         }
-    });
+    }
 
     ms_priceModifiers[ms_numPriceModifiers].key = key;
     ms_priceModifiers[ms_numPriceModifiers].price = price;

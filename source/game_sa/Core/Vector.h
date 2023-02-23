@@ -6,12 +6,13 @@
 */
 #pragma once
 
-#include "PluginBase.h" // !!!
-
-#include "RenderWare.h"
 #include <numeric>
+#include <span>
+#include "PluginBase.h" // !!!
+#include "RenderWare.h"
 
 class CMatrix;
+class CVector2D;
 
 class CVector : public RwV3d {
 public:
@@ -21,10 +22,13 @@ public:
     constexpr CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; }
     constexpr explicit CVector(float value) { x = y = z = value; }
 
+    explicit CVector(const CVector2D& v2, float z = 0.f);
+
 public:
     static void InjectHooks();
 
     static CVector Random(float min, float max);
+    static CVector Random(CVector min, CVector max);
 
     // Returns length of vector
     float Magnitude() const;
@@ -32,14 +36,35 @@ public:
     // Returns length of 2d vector
     float Magnitude2D() const;
 
-    // Normalises a vector
+    // Normalises a vector in-place
     void Normalise();
 
     // Normalises a vector and returns length (in-place)
     float NormaliseAndMag();
 
-    // Performs cross calculation
-    void Cross(const CVector& left, const CVector& right);
+    /// Get a normalized copy of this vector
+    auto Normalized() const -> CVector;
+
+    /// Perform a dot product with this and `o`, returning the result
+    auto Dot(const CVector& o) const -> float;
+
+    /*!
+    * @notsa
+    *
+    * There's an SA function with the same name,
+    * but don't get confused, that one stores the
+    * result in-place.
+    * 
+    * @return The cross product of `*this` and `o`
+    */
+    auto Cross(const CVector& other) const -> CVector;
+
+    /*!
+    * @addr 0x70F890
+    *
+    * The original Cross function that stores the result in-place
+    */
+    void Cross_OG(const CVector& a, const CVector& b);
 
     // Adds left + right and stores result
     void Sum(const CVector& left, const CVector& right);
@@ -113,16 +138,25 @@ public:
         return (&x)[i];
     }
 
-    // Calculate the average position
+    //! Calculate the average position
     static CVector Average(const CVector* begin, const CVector* end);
 
     static CVector AverageN(const CVector* begin, size_t n) {
         return Average(begin, begin + n);
     }
 
-    [[nodiscard]] float Heading() const {
-        return std::atan2(-x, y);
+    auto GetComponents() const {
+        return std::span{ reinterpret_cast<const float*>(this), 3 };
     }
+
+    //! Unit Z axis vector (0,0,1)
+    static auto ZAxisVector() { return CVector{ 0.f, 0.f, 1.f }; }
+
+    /*!
+    * @param reMapRangeTo0To2Pi Return value will be in interval [0, 2pi] instead of [-pi, pi]
+    * @returning The heading of the vector in radians.
+    */
+    [[nodiscard]] float Heading(bool reMapRangeTo0To2Pi = false) const;
 };
 VALIDATE_SIZE(CVector, 0xC);
 

@@ -21,6 +21,7 @@ class CObject;
 class CVehicle;
 class CTrain;
 class CBike;
+class CBmx;
 class CBoat;
 class CAutomobile;
 class CBike;
@@ -167,7 +168,7 @@ public:
     void ModifyMatrixForTreeInWind();
     void ModifyMatrixForBannerInWind();
     RwMatrix* GetModellingMatrix();
-    CColModel* GetColModel();
+    CColModel* GetColModel() const;
     void CalculateBBProjection(CVector* corner1, CVector* corner2, CVector* corner3, CVector* corner4);
     void UpdateAnim();
     bool IsVisible();
@@ -180,12 +181,17 @@ public:
     void RemoveEscalatorsForEntity();
     bool IsEntityOccluded();
     bool IsInCurrentAreaOrBarberShopInterior();
+    bool IsInCurrentArea() const;
     void UpdateRW();
     // Always returns a non-null value. In case there's no LOD object `this` is returned. NOTSA
     CEntity* FindLastLOD() noexcept;
 
     // NOTSA
+    auto GetModelId() const { return (eModelID)m_nModelIndex; }
     CBaseModelInfo* GetModelInfo() const;
+    CCollisionData* GetColData() { return GetColModel()->m_pColData; }
+
+    auto GetModelID() const { return (eModelID)(m_nModelIndex); }
 
     // Wrapper around the mess called `CleanUpOldReference`
     // Takes in `ref` (which is usually a member variable),
@@ -204,7 +210,8 @@ public:
     // + clears the old entity (if any)
     // + set the new entity (if any)
     template<typename T, typename Y>
-    static void ChangeEntityReference(T*& inOutRef, Y* entity) requires std::is_base_of_v<CEntity, T> && std::is_base_of_v<CEntity, Y> {
+        requires std::is_base_of_v<CEntity, T> && std::is_base_of_v<CEntity, Y> 
+    static void ChangeEntityReference(T*& inOutRef, Y* entity) {
         ClearReference(inOutRef); // Clear old
         if (entity) { // Set new (if any)
             inOutRef = entity;
@@ -213,8 +220,13 @@ public:
     }
 
     template<typename T>
-    void RegisterReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
-        RegisterReference(reinterpret_cast<CEntity**>(&ref));
+    static void RegisterReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
+        ref->RegisterReference(reinterpret_cast<CEntity**>(&ref));
+    }
+
+    template<typename T>
+    static void CleanUpOldReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
+        ref->CleanUpOldReference(reinterpret_cast<CEntity**>(&ref));
     }
 
     template<typename T>
@@ -248,16 +260,22 @@ public:
     [[nodiscard]] bool IsStatic() const { return m_bIsStatic || m_bIsStaticWaitingForCollision; } // 0x4633E0
     [[nodiscard]] bool IsRCCar()  const { return m_nModelIndex == MODEL_RCBANDIT || m_nModelIndex == MODEL_RCTIGER || m_nModelIndex == MODEL_RCCAM; }
 
-    CPhysical*   AsPhysical()   { return reinterpret_cast<CPhysical*>(this); }
-    CVehicle*    AsVehicle()    { return reinterpret_cast<CVehicle*>(this); }
-    CAutomobile* AsAutomobile() { return reinterpret_cast<CAutomobile*>(this); }
-    CBike*       AsBike()       { return reinterpret_cast<CBike*>(this); }
-    CBoat*       AsBoat()       { return reinterpret_cast<CBoat*>(this); }
-    CTrain*      AsTrain()      { return reinterpret_cast<CTrain*>(this); }
-    CPed*        AsPed()        { return reinterpret_cast<CPed*>(this); }
-    CObject*     AsObject()     { return reinterpret_cast<CObject*>(this); }
-    CBuilding*   AsBuilding()   { return reinterpret_cast<CBuilding*>(this); }
-    CDummy*      AsDummy()      { return reinterpret_cast<CDummy*>(this); }
+    auto AsPhysical()         { return reinterpret_cast<CPhysical*>(this); }
+    auto AsVehicle()          { return reinterpret_cast<CVehicle*>(this); }
+    auto AsAutomobile()       { return reinterpret_cast<CAutomobile*>(this); }
+    auto AsAutomobile() const { return reinterpret_cast<const CAutomobile*>(this); }
+    auto AsBike()             { return reinterpret_cast<CBike*>(this); }
+    auto AsBike()       const { return reinterpret_cast<const CBike*>(this); }
+    auto AsBmx()              { return reinterpret_cast<CBmx*>(this); }
+    auto AsBmx()        const { return reinterpret_cast<const CBmx*>(this); }
+    auto AsBoat()             { return reinterpret_cast<CBoat*>(this); }
+    auto AsBoat()       const { return reinterpret_cast<const CBoat*>(this); }
+    auto AsTrain()            { return reinterpret_cast<CTrain*>(this); }
+    auto AsTrain()      const { return reinterpret_cast<const CTrain*>(this); }
+    auto AsPed()              { return reinterpret_cast<CPed*>(this); }
+    auto AsObject()           { return reinterpret_cast<CObject*>(this); }
+    auto AsBuilding()         { return reinterpret_cast<CBuilding*>(this); }
+    auto AsDummy()            { return reinterpret_cast<CDummy*>(this); }
 
     [[nodiscard]] auto GetType() const noexcept { return m_nType; }
     void SetType(eEntityType type) { m_nType = type; }
@@ -268,6 +286,11 @@ public:
     bool IsScanCodeCurrent() const;
     void SetCurrentScanCode();
 
+    auto GetBoundRect() {
+        CRect r{};
+        GetBoundRect(&r);
+        return r;
+    }
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

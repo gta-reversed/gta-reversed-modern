@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "TagManager.h"
+#include "Garages.h"
 
 tTagDesc (&CTagManager::ms_tagDesc)[MAX_TAGS] = *(tTagDesc(*)[MAX_TAGS])0xA9A8C0;
 int32& CTagManager::ms_numTags = *(int32*)0xA9AD70;
@@ -130,13 +131,13 @@ void CTagManager::UpdateNumTagged()
 
 uint8 CTagManager::GetAlpha(RpAtomic* atomic)
 {
-    return CVisibilityPlugins::GetUserValue(atomic);
+    return static_cast<uint8>(CVisibilityPlugins::GetUserValue(atomic));
 }
 
 uint8 CTagManager::GetAlpha(CEntity* entity)
 {
     if (entity->m_pRwAtomic)
-        return CVisibilityPlugins::GetUserValue(entity->m_pRwAtomic);
+        return static_cast<uint8>(CVisibilityPlugins::GetUserValue(entity->m_pRwAtomic));
 
     auto tag = FindTagDesc(entity);
     assert(tag); // Originally the function would access uninitialized memory, by clearing EAX and dereferencing pointer to [EAX + 0x4] right after that

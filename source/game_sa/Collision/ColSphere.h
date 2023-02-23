@@ -19,7 +19,7 @@ public:
 
     CColSphere() = default;
 
-    explicit CColSphere(const CSphere& sp) : CSphere(sp) {}
+    CColSphere(const CSphere& sp) : CSphere(sp) {}
 
     constexpr CColSphere(CSphere sp, eSurfaceType material, uint8 pieceType, tColLighting lighting = tColLighting(0xFF)) : CSphere(sp) {
         m_Surface.m_nMaterial = material;
@@ -27,9 +27,10 @@ public:
         m_Surface.m_nLighting = lighting;
     }
 
-    CColSphere(float radius, const CVector& center) : CSphere(radius, center){};
+    [[deprecated]]
+    CColSphere(float radius, const CVector& center) : CSphere(center, radius){};
 
-    CColSphere(const CVector& center, float radius) : CSphere(radius, center){};
+    CColSphere(const CVector& center, float radius) : CSphere(center, radius){};
 
     void Set(float radius, const CVector& center, eSurfaceType material, uint8 flags, tColLighting lighting = tColLighting(0xFF));
     bool IntersectRay(const CVector& rayOrigin, const CVector& direction, CVector& intersectPoint1, CVector& intersectPoint2);

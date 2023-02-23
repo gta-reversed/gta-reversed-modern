@@ -22,10 +22,10 @@ void CTaskComplexArrestPed::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x68B990);
     RH_ScopedInstall(Destructor, 0x68BA00);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x68BA60);
-    // ~+ RH_ScopedInstall(CreateNextSubTask_Reversed, 0x690220);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x690220, { .reversed = false });
     RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6907A0);
-    // untested RH_ScopedInstall(ControlSubTask_Reversed, 0x68D350);
-    // + RH_ScopedInstall(CreateSubTask, 0x68CF80);
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x68D350, { .reversed = false });
+    RH_ScopedInstall(CreateSubTask, 0x68CF80, { .reversed = false });
 }
 bool CTaskComplexArrestPed::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable_Reversed(ped, priority, event); }
 CTask* CTaskComplexArrestPed::CreateNextSubTask(CPed* ped) { return CreateNextSubTask_Reversed(ped); }
@@ -282,6 +282,7 @@ CTask* CTaskComplexArrestPed::CreateSubTask(eTaskType taskType, CPed* ped) {
     case TASK_COMPLEX_SEEK_ENTITY: {
         float radius = m_PedToArrest->bIsBeingArrested ? 4.0f : 3.0f;
         // return new CTaskComplexSeekEntity<CEntitySeekPosCalculatorStandard>(m_PedToArrest, 50'000, 1000, radius, 2.0f, 2.0f, 1, 1);
+        NOTSA_UNREACHABLE("Not implemented!");
     }
     case TASK_COMPLEX_DRAG_PED_FROM_CAR:
         return new CTaskComplexDragPedFromCar(m_PedToArrest, 100'000);

@@ -5,13 +5,13 @@
 void CTaskSimpleDead::InjectHooks() {
     RH_ScopedClass(CTaskSimpleDead);
     RH_ScopedCategory("Tasks/TaskTypes");
-    // RH_ScopedInstall(ProcessPed, 0x630600);
+    RH_ScopedInstall(ProcessPed, 0x630600, { .reversed = false });
 }
 
 // NOTSA: *deathTime* originally int32
 // 0x630590
 CTaskSimpleDead::CTaskSimpleDead(uint32 deathTime, bool a3) : CTaskSimple() {
-    m_nDeathTime = deathTime;
+    m_nDeathTimeMS = deathTime;
     m_nFlags = m_nFlags & 0xF9 | (2 * (a3 & 1)) | 1; // todo: flags
 }
 
