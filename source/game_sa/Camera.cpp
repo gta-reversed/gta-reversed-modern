@@ -1623,7 +1623,7 @@ void CCamera::CameraColDetAndReact(CVector* source, CVector* target) {
 
 // 0x527FA0
 void CCamera::CamControl() {
-    plugin::CallMethod<0x527FA0, CCamera*>(this);
+    plugin::CallMethod<0x527FA0, CCamera*>(this); // good luck warrior!
 }
 
 // 0x5B24A0
