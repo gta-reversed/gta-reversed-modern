@@ -37,11 +37,8 @@ bool& CVehicle::bDisableRemoteDetonation = *(bool*)0xC1CC00;
 bool& CVehicle::bDisableRemoteDetonationOnContact = *(bool*)0xC1CC01;
 bool& CVehicle::m_bEnableMouseSteering = *(bool*)0xC1CC02;
 bool& CVehicle::m_bEnableMouseFlying = *(bool*)0xC1CC03;
-int32& CVehicle::m_nLastControlInput = *(int32*)0xC1CC04;
-CColModel* (&CVehicle::m_aSpecialColVehicle)[4] = *(CColModel*(*)[4])0xC1CC08;
 bool& CVehicle::ms_forceVehicleLightsOff = *(bool*)0xC1CC18;
 bool& CVehicle::s_bPlaneGunsEjectShellCasings = *(bool*)0xC1CC19;
-CColModel (&CVehicle::m_aSpecialColModel)[4] = *(CColModel(*)[4])0xC1CC78;
 
 float& fBurstTyreMod = *(float*)0x8D34B4;                // 0.13f
 float& fBurstSpeedMax = *(float*)0x8D34B8;               // 0.3f
@@ -2062,7 +2059,7 @@ void CVehicle::UpdatePassengerList() {
 CPed* CVehicle::PickRandomPassenger() {
     // TODO: Add a function for this to random.hpp
 
-    const auto rnd = CGeneral::GetRandomNumberInRange(0, std::size(m_apPassengers));
+    const auto rnd = CGeneral::GetRandomNumberInRange(0u, std::size(m_apPassengers));
     for (auto i = 0u; i < std::size(m_apPassengers); i++) {
         if (const auto psgr = m_apPassengers[(rnd + i) % std::size(m_apPassengers)]) {
             return psgr;
@@ -3954,7 +3951,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
 // 0x6DD130
 void CVehicle::DoBoatSplashes(float fWaterDamping) {
-    return plugin::CallMethod<0x6DD130, CVehicle*, float>(this, fWaterDamping);
+    //return plugin::CallMethod<0x6DD130, CVehicle*, float>(this, fWaterDamping);
 
     const auto speedDist = m_vecMoveSpeed.SquaredMagnitude();
     if (speedDist <= 0.0025f || GetUp().z <= 0.0f || TheCamera.GetLookingForwardFirstPerson() || !IsVisible()) {

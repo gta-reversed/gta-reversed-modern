@@ -1526,6 +1526,7 @@ void CAutomobile::ProcessFlyingCarStuff()
     }
 }
 
+// 0x6A45C0
 void CAutomobile::DoHoverSuspensionRatios()
 {
     if (GetUp().z >= 0.3f && !vehicleFlags.bIsDrowning) {
