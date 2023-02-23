@@ -809,7 +809,7 @@ void CRunningScript::ReadTextLabelFromScript(char* buffer, uint8 nBufferLength) 
     case SCRIPT_PARAM_STATIC_LONG_STRING:
         // slightly changed code: original code is a bit messy and calls Read1ByteFromScript
         // in a loop and does some additional checks to ensure that buffer can hold the data
-        strncpy_s(buffer, LONG_STRING_SIZE, (char*) m_pCurrentIP, std::min<uint8>(nBufferLength, LONG_STRING_SIZE));
+        strncpy_s(buffer, LONG_STRING_SIZE, (char*)m_IP, std::min<uint8>(nBufferLength, LONG_STRING_SIZE));
         m_IP += LONG_STRING_SIZE;
         break;
 
