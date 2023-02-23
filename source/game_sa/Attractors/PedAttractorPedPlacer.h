@@ -1,7 +1,5 @@
 #pragma once
 
-#include "2dEffect.h"
-
 class CPed;
 class CEntity;
 class C2dEffect;
