@@ -46,7 +46,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(ProcessDiscCollision, 0x413960);
     RH_ScopedInstall(TestLineTriangle, 0x413AC0);
     RH_ScopedInstall(ProcessLineTriangle, 0x4140F0);
-    //RH_ScopedInstall(ProcessVerticalLineTriangle, 0x4147E0);
+    RH_ScopedInstall(ProcessVerticalLineTriangle, 0x4147E0);
     //RH_ScopedInstall(IsStoredPolyStillValidVerticalLine, 0x414D70);
     //RH_ScopedInstall(GetBoundingBoxFromTwoSpheres, 0x415230);
     //RH_ScopedInstall(IsThisVehicleSittingOnMe, 0x4152C0);
@@ -1063,6 +1063,7 @@ bool CCollision::ProcessDiscCollision(
 
 /*!
 * Process line-triangle intersection, internal function (used to implement `ProcessLineTriangle` and `TestLineTriangle`)
+* @tparam TestOnly If we're only doing an intersecetion check, and are not interested in the intersection point, normal, etc. In this case the last 3 arguments can be nullptr.
 * @notsa
 */
 template<bool TestOnly>
@@ -1075,7 +1076,16 @@ bool NOTSA_FORCEINLINE ProcessLineTriangle_Internal(
     CVector* outIP,
     CVector* outPlNorm
 ) {
+    const auto va = UncompressVector(verts[tri.vA]),
+               vb = UncompressVector(verts[tri.vB]),
+               vc = UncompressVector(verts[tri.vC]);
+
 #ifdef NOTSA_VANILLA_COLLISIONS
+    // If the line is vertical, we can do some quick bound checks
+    if (line.IsVertical() && !tri.GetBoundingRect(va, vb, vc).IsPointInside(line.m_vecStart)) {
+        return false;
+    }
+
     const auto plNorm = plane.GetNormal();
     if constexpr (!TestOnly) {
         *outPlNorm = plNorm;
@@ -1114,10 +1124,6 @@ bool NOTSA_FORCEINLINE ProcessLineTriangle_Internal(
     // Get the points relative to the plane's orientation
     // This way the bound checks can be done in 2D
     const auto [pl_va, pl_vb, pl_vc, pl_ip] = [&]() -> std::tuple<CVector2D, CVector2D, CVector2D, CVector2D> {
-	    const auto va = UncompressVector(verts[tri.vA]), 
-	               vb = UncompressVector(verts[tri.vB]), 
-	               vc = UncompressVector(verts[tri.vC]);
-
 	    // We do the test in 2D.
         // With the plane direction we can figure out how to project the vectors.
 	    // normal = (c - a) x (b - a)
@@ -1181,10 +1187,6 @@ bool NOTSA_FORCEINLINE ProcessLineTriangle_Internal(
     return false;
 #else // Not really tested (might not work properly)
     // https://stackoverflow.com/a/42752998
-    const auto va = UncompressVector(verts[tri.vA]), 
-	           vb = UncompressVector(verts[tri.vB]), 
-	           vc = UncompressVector(verts[tri.vC]);
-
     const auto eB = vb - va,
                eC = vc - va,
                n  = eC.Cross(eB);
@@ -1279,10 +1281,17 @@ bool CCollision::ProcessLineTriangle(const CColLine& line, const CompressedVecto
 }
 
 // 0x4147E0
-bool CCollision::ProcessVerticalLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane, CColPoint& colPoint,
-                                             float& maxTouchDistance, CStoredCollPoly* collPoly) {
-    return plugin::CallAndReturn<bool, 0x4147E0, const CColLine&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&, CColPoint&, float&, CStoredCollPoly*>(
-        line, verts, tri, triPlane, colPoint, maxTouchDistance, collPoly);
+bool CCollision::ProcessVerticalLineTriangle(
+    const CColLine& line,
+    const CompressedVector* verts,
+    const CColTriangle& tri,
+    const CColTrianglePlane& plane,
+    CColPoint& colPoint,
+    float& maxTouchDistance,
+    CStoredCollPoly* collPoly
+) {
+    // Not really SA, but the only difference is an early out bounds check that I've implemented into `ProcessLineTriangle_Internal`
+    return ProcessLineTriangle(line, verts, tri, plane, colPoint, maxTouchDistance, collPoly);
 }
 
 // 0x414D70
