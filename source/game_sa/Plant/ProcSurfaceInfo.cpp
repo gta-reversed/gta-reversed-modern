@@ -26,7 +26,7 @@ void ProcSurfaceInfo_c::Init(
     bool align, uint8 useGrid
 ) {
 
-    m_SurfaceId = g_surfaceInfos->GetSurfaceIdFromName(surfaceType);
+    m_SurfaceId = g_surfaceInfos.GetSurfaceIdFromName(surfaceType);
     auto mi = CModelInfo::GetModelInfo(modelName, &m_ModelIndex); // todo: int16 cast here, why?
     if (!mi) {
         return;

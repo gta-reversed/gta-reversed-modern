@@ -111,7 +111,7 @@ void CCutsceneObject::PreRender_Reversed() {
                     auto* animData = RpClumpGetAnimBlendClumpData(m_pRwClump);
                     auto* morphTarget = RpGeometryGetMorphTarget(RpAtomicGetGeometry(firstAtomic), 0);
                     auto* sphere = RpMorphTargetGetBoundingSphere(morphTarget);
-                    sphere->center = animData->m_Frames->m_pIFrame->translation;
+                    sphere->center = animData->m_Frames[0].GetFrameTranslation();
                 }
             }
         }
@@ -123,7 +123,7 @@ void CCutsceneObject::PreRender_Reversed() {
     g_realTimeShadowMan.DoShadowThisFrame(this);
     if (!m_pShadowData) {
         CShadows::StoreShadowForPedObject(
-            this,
+            AsPed(),
             CTimeCycle::m_fShadowDisplacementX[CTimeCycle::m_CurrentStoredValue],
             CTimeCycle::m_fShadowDisplacementY[CTimeCycle::m_CurrentStoredValue],
             CTimeCycle::m_fShadowFrontX[CTimeCycle::m_CurrentStoredValue],

@@ -2,8 +2,6 @@
 
 #include "Gamma.h"
 
-CGamma& gamma = *(CGamma*)0xC92134;
-
 void CGamma::InjectHooks() {
     RH_ScopedClass(CGamma);
     RH_ScopedCategoryGlobal();

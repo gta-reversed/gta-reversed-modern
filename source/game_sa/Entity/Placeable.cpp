@@ -180,7 +180,7 @@ bool CPlaceable::IsPointInRange(const CVector& point, float range) {
     return DistanceBetweenPointsSquared(point, GetPosition()) <= sq(range);
 }
 
-CMatrixLink& CPlaceable::GetMatrix() {
+CMatrix& CPlaceable::GetMatrix() {
     if (!m_matrix) {
         CPlaceable::AllocateMatrix();
         m_placement.UpdateMatrix(m_matrix);

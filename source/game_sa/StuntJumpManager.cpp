@@ -204,17 +204,17 @@ void CStuntJumpManager::Update() {
 
         AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE);
 
-        char* bonusMessage = TheText.Get("USJ"); // UNIQUE STUNT BONUS!
+        auto bonusMessage = TheText.Get("USJ"); // UNIQUE STUNT BONUS!
         if (bonusMessage)
             CMessages::AddBigMessageQ(bonusMessage, 5000, STYLE_MIDDLE_SMALLER_HIGHER);
 
         if (m_iNumCompleted == m_iNumJumps) {
-            char* stuntsCompleteMessage = TheText.Get("USJ_ALL"); // ALL UNIQUE STUNTS COMPLETED!
+            auto stuntsCompleteMessage = TheText.Get("USJ_ALL"); // ALL UNIQUE STUNTS COMPLETED!
             if (stuntsCompleteMessage)
                 CHud::SetHelpMessage(stuntsCompleteMessage, false, false, false);
         }
 
-        char* rewardMessage = TheText.Get("REWARD");
+        auto rewardMessage = TheText.Get("REWARD");
         if (rewardMessage)
             CMessages::AddBigMessageWithNumber(rewardMessage, 6000, STYLE_WHITE_MIDDLE_SMALLER, reward, -1, -1, -1, -1, -1);
 
@@ -250,11 +250,10 @@ void ResetAllJumps() {
 void StuntJumpTestCode() {
     CPad* pad = CPad::GetPad(0);
     if (pad->IsStandardKeyJustDown('1')) {
-        printf("ResetAllJumps");
+        DEV_LOG("ResetAllJumps");
         ResetAllJumps();
     }
     if (pad->IsStandardKeyJustDown('2')) {
-        printf("");
         auto player = FindPlayerPed();
         if (player) {
             CVector posn{-2053.93848f, 236.598221f, 35.5952835f};

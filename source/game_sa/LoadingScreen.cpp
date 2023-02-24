@@ -78,20 +78,15 @@ void CLoadingScreen::RenderSplash() {
 
         if (m_bFadeInNextSplashFromBlack || m_bFadeOutCurrSplashToBlack) {
             color.Set(0, 0, 0);
-            color.a = (CLoadingScreen::m_bFadeInNextSplashFromBlack) ? 255 - m_FadeAlpha : m_FadeAlpha;
+            color.a = (m_bFadeInNextSplashFromBlack) ? 255 - m_FadeAlpha : m_FadeAlpha;
 
             CSprite2d::DrawRect(rect, color);
         } else {
             color.a = 255 - m_FadeAlpha;
 
-            auto next = &GetCurrentDisplayedSplash();
-            next++;
-            next->Draw(rect, color);
+            m_aSplashes[m_currDisplayedSplash - 1].Draw(rect, color);
         }
-        return;
-    }
-
-    if (!m_bReadyToDelete) {
+    } else if (!m_bReadyToDelete) {
         GetCurrentDisplayedSplash().Draw(rect, color);
     }
 }
@@ -120,14 +115,14 @@ void CLoadingScreen::LoadSplashes(bool starting, bool nvidia) {
     char name[20];
     for (auto id = 0u; id < MAX_SPLASHES; id++) {
         if (starting) {
-            sprintf(name, nvidia ? "nvidia" : "eax");
+            sprintf_s(name, nvidia ? "nvidia" : "eax");
         } else if (id) {
-            sprintf(name, "loadsc%d", screenIdx[id]);
+            sprintf_s(name, "loadsc%d", screenIdx[id]);
         } else {
 #ifdef USE_EU_STUFF
-            sprintf(name, "title_pc_EU");
+            sprintf_s(name, "title_pc_EU");
 #else
-            sprintf(name, "title_pc_US");
+            sprintf_s(name, "title_pc_US");
 #endif
         }
         m_aSplashes[id].SetTexture(name);
@@ -138,7 +133,7 @@ void CLoadingScreen::LoadSplashes(bool starting, bool nvidia) {
 
 // 0x590220
 void CLoadingScreen::DisplayMessage(const char* message) {
-    strcpy(m_PopUpMessage, message);
+    strcpy_s(m_PopUpMessage, message);
 }
 
 // 0x590240
