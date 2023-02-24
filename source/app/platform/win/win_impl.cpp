@@ -164,9 +164,10 @@ void psMouseSetPos(RwV2d* pos) {
 
 // 0x745470
 char* psPathnameCreate(const char* buffer) {
-    auto path = (char*)CMemoryMgr::Malloc(std::strlen(buffer) + 1u);
+    const auto pathSize = std::strlen(buffer) + 1u;
+    auto path = (char*)CMemoryMgr::Malloc(pathSize);
     if (path) {
-        std::strcpy(path, buffer);
+        strcpy_s(path, pathSize, buffer);
 
         while (auto ch = std::strchr(path, '/')) {
             *ch = psPathGetSeparator();

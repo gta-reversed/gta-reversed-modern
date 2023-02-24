@@ -1,8 +1,16 @@
 #pragma once
 
 #include <memory>
+#include <initializer_list>
 
 namespace notsa {
+/*
+* Want to know something funny?
+* `std::initializer_list` is just a proxy object for a stack allocated array.
+* So, if you return one from a function you're dommed to be fucked :)
+* And best thing, it does allow copying, it has a fucking copy constructor for whatever reason
+* Lesson: Don't return `initializer_list`'s from functions
+*/
 
 /*!
 * @brief Call the given function on object destruction.
@@ -78,6 +86,14 @@ bool contains(R&& r, const T& value, Proj proj = {}) {
 }
 
 /*!
+* Helper (Of your fingers) - Reduces typing needed for Python style `value in {}`
+*/
+template<typename Y, typename T>
+bool contains(std::initializer_list<Y> r, const T& value) {
+    return contains(r, value, {});
+}
+
+/*!
 * @brief Similar to `std::remove_if`, but only removes the first element found (Unlike the former that removes all)
 * 
 * @return Whenever an element was removed. If it was, you have to pop the last element from your container
@@ -127,6 +143,15 @@ T accumulate(R&& r, T init, Proj proj = {}, FnOp op = {}) {
         init = std::invoke(op, init, std::invoke(proj, v));
     }
     return init;
+}
+
+//! Same as rng::min, but accepts a default value that is returned in case the range is empty (Which would result be UB for `rng::min`)
+template<rng::forward_range R, typename Pr = std::less<>, class Proj = std::identity>
+constexpr rng::range_value_t<R> min_default(R&& r, rng::range_value_t<R> defaultValue, Pr pr = {}, Proj proj = {}) {
+    if (rng::empty(r)) {
+        return std::move(defaultValue);
+    }
+    return rng::min(r, pr, proj);
 }
 
 /*!

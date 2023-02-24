@@ -21,7 +21,7 @@ public:
     void DeleteItem(void* item);
     void DeleteNode(CPtrNodeDoubleLink* node); //Most likely inlined in the final exe, this code is used in multiple places
 
-    CPtrNodeDoubleLink* GetNode() { return reinterpret_cast<CPtrNodeDoubleLink *>(m_node); }
+    CPtrNodeDoubleLink* GetNode() const { return reinterpret_cast<CPtrNodeDoubleLink*>(m_node); }
 };
 
 VALIDATE_SIZE(CPtrListDoubleLink, 0x4);

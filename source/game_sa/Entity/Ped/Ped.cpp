@@ -206,7 +206,7 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
     field_744 = 0;
     field_74C = 0;
     m_nLookTime = 0;
-    m_nDeathTime = 0;
+    m_nDeathTimeMS = 0;
 
     m_vecAnimMovingShift = CVector2D();
     field_56C = CVector();
@@ -271,7 +271,7 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
     m_nMoneyCount = 0;
     field_72F = 0;
     m_nTimeTillWeNeedThisPed = 0;
-    field_590 = 0;
+    m_VehDeadInFrontOf = nullptr;
 
     m_pWeaponObject = nullptr;
     m_pGunflashObject = nullptr;
@@ -2178,9 +2178,9 @@ void CPed::PlayFootSteps() {
     };
 
     if (bDoBloodyFootprints) {
-        if (m_nDeathTime && m_nDeathTime < 300) {
-            m_nDeathTime -= 1;
-            if (!m_nDeathTime) {
+        if (m_nDeathTimeMS && m_nDeathTimeMS < 300) {
+            m_nDeathTimeMS -= 1;
+            if (!m_nDeathTimeMS) {
                 bDoBloodyFootprints = false;
             }
         }
@@ -3325,6 +3325,8 @@ RwMatrix& CPed::GetBoneMatrix(ePedBones bone) const {
 * @brief Set model index (Also re-inits animblend, MoneyCount, and default decision-marker)
 */
 void CPed::SetModelIndex(uint32 modelIndex) {
+    assert(modelIndex != MODEL_PLAYER || IsPlayer());
+
     m_bIsVisible = true;
 
     CEntity::SetModelIndex(modelIndex);

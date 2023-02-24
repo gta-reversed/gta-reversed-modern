@@ -46,13 +46,14 @@ eModelID CLoadedCarGroup::PickRandomCar(bool bNotTooManyInTheWorld, bool bOnlyPi
         return MODEL_INVALID;
     }
 
-    const auto PickRandom = [
-        &,
-        weightSum = notsa::accumulate(GetAllModels(), 0, [](int16 model) { return CModelInfo::GetVehicleModelInfo(model)->m_nFrq; })
-    ](auto&& choices) {
+    const auto PickRandom = [&](auto&& choices) {
         if (rng::empty(choices)) {
             return MODEL_INVALID;
         }
+
+        const auto weightSum = notsa::accumulate(choices, 0, [](int16 model) {
+            return CModelInfo::GetVehicleModelInfo(model)->m_nFrq;
+        });
 
         for (auto tr{ 0 }; tr < 10; tr++) { // tr = tries
             // First, pick a model
@@ -65,6 +66,8 @@ eModelID CLoadedCarGroup::PickRandomCar(bool bNotTooManyInTheWorld, bool bOnlyPi
                     }
                     pickedWeight -= thisModelFrq;
                 }
+                // No frequency of any model in the array was `>=` than `pickedWeight`
+                // Originally in this case the last value from `choices` was used, but most likely unintentionally
                 NOTSA_UNREACHABLE();
             }();
 

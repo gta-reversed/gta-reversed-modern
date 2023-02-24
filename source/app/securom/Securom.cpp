@@ -39,13 +39,13 @@ void SecuromStateDisplay() {
     float y = 140.f;
     for (int32 i = 0; i < 16; i++) {
         if (triggerDisplay[i]) {
-            sprintf(buffer, "Trigger: %d", i);
+            sprintf_s(buffer, "Trigger: %d", i);
             AsciiToGxtChar(buffer, gxt);
             CFont::PrintString(30.f, y, gxt);
             --triggerDisplay[i];
         }
         if (triggerDisplay[i + 16]) {
-            sprintf(buffer, "Trigger: %d", i + 16);
+            sprintf_s(buffer, "Trigger: %d", i + 16);
             AsciiToGxtChar(buffer, gxt);
             CFont::PrintString(160.f, y, gxt);
             --triggerDisplay[i + 16];
@@ -56,13 +56,13 @@ void SecuromStateDisplay() {
     y = 140.f;
     for (int32 i = 0; i < 16; i++) {
         if (trapDisplay[i]) {
-            sprintf(buffer, "Trap: %d", i);
+            sprintf_s(buffer, "Trap: %d", i);
             AsciiToGxtChar(buffer, gxt);
             CFont::PrintString(350.f, y, gxt);
             --trapDisplay[i];
         }
         if (trapDisplay[i + 16]) {
-            sprintf(buffer, "Trap: %d", i + 16);
+            sprintf_s(buffer, "Trap: %d", i + 16);
             AsciiToGxtChar(buffer, gxt);
             CFont::PrintString(450.f, y, gxt);
             --trapDisplay[i + 16];

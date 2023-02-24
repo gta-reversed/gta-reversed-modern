@@ -9,7 +9,7 @@
 class CColTriangle {
 public:
     CColTriangle() = default;
-    CColTriangle(uint16 a, uint16 b, uint16 c, eSurfaceType material, uint8 light) :
+    CColTriangle(uint16 a, uint16 b, uint16 c, eSurfaceType material, tColLighting light) :
           m_nVertA(a),
           m_nVertB(b),
           m_nVertC(c),
@@ -38,6 +38,6 @@ public:
         uint16 m_vertIndices[3];
     };
     eSurfaceType m_nMaterial;
-    uint8 m_nLight;
+    tColLighting m_nLight;
 };
 VALIDATE_SIZE(CColTriangle, 0x8);

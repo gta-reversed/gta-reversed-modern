@@ -663,9 +663,9 @@ void CPostEffects::InfraredVisionStoreAndSetLightsForHeatObjects(CPed* ped) {
     // here we go to fuck cold carbon (Explanation: https://sampik.ru/articles/468-pochemu-piratskij-perevod-gtasa-takoj-strannyj.html)
     // gradually changing from red to blue (dead)
     if (ped->m_nPedState == PEDSTATE_DEAD) {
-        auto time = CTimer::GetTimeInMS() - ped->m_nDeathTime;
+        auto time = CTimer::GetTimeInMS() - ped->m_nDeathTimeMS;
         if (time < 0)
-            time = ped->m_nDeathTime - CTimer::GetTimeInMS();
+            time = ped->m_nDeathTimeMS - CTimer::GetTimeInMS();
 
         auto delta = (float)time / 10'000.0f;
 

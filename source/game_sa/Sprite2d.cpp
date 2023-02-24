@@ -492,7 +492,7 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
     // unused
     if (drawPercentage) {
         char text[12];
-        sprintf(text, "%d%%", (int)progress);
+        sprintf_s(text, "%d%%", (int)progress);
 
         GxtChar gxtText[12];
         AsciiToGxtChar(text, gxtText);

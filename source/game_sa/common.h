@@ -37,10 +37,10 @@ constexpr auto DEFAULT_VIEW_WINDOW        = 0.7f;
 #define SCREEN_VIEW_WINDOW (std::tan(DegreesToRadians(CDraw::GetFOV() / (2.0f)))) // todo: GetScaledFov
 
 // This scales from PS2 pixel coordinates to the real resolution
-static float SCREEN_STRETCH_X(float a)           { return a * SCREEN_WIDTH  / (float)DEFAULT_SCREEN_WIDTH; } // RsGlobal.maximumWidth * 0.0015625 * value
-static float SCREEN_STRETCH_Y(float a)           { return a * SCREEN_HEIGHT / (float)DEFAULT_SCREEN_HEIGHT; }
-static float SCREEN_STRETCH_FROM_RIGHT(float a)  { return SCREEN_WIDTH  - SCREEN_STRETCH_X(a); }
-static float SCREEN_STRETCH_FROM_BOTTOM(float a) { return SCREEN_HEIGHT - SCREEN_STRETCH_Y(a); }
+inline float SCREEN_STRETCH_X(float a)           { return a * SCREEN_WIDTH  / (float)DEFAULT_SCREEN_WIDTH; } // RsGlobal.maximumWidth * 0.0015625 * value
+inline float SCREEN_STRETCH_Y(float a)           { return a * SCREEN_HEIGHT / (float)DEFAULT_SCREEN_HEIGHT; }
+inline float SCREEN_STRETCH_FROM_RIGHT(float a)  { return SCREEN_WIDTH  - SCREEN_STRETCH_X(a); }
+inline float SCREEN_STRETCH_FROM_BOTTOM(float a) { return SCREEN_HEIGHT - SCREEN_STRETCH_Y(a); }
 
 #define ASPECT_RATIO_SCALE
 #ifdef ASPECT_RATIO_SCALE
@@ -50,10 +50,10 @@ static float SCREEN_STRETCH_FROM_BOTTOM(float a) { return SCREEN_HEIGHT - SCREEN
 #endif
 
 // This scales from PS2 pixel coordinates while optionally maintaining the aspect ratio
-static float SCREEN_SCALE_X(float a)           { return SCREEN_SCALE_AR(SCREEN_STRETCH_X(a)); }
-static float SCREEN_SCALE_Y(float a)           { return SCREEN_STRETCH_Y(a); } // RsGlobal.maximumHeight * 0.  * value
-static float SCREEN_SCALE_FROM_RIGHT(float a)  { return SCREEN_WIDTH  - SCREEN_SCALE_X(a); }
-static float SCREEN_SCALE_FROM_BOTTOM(float a) { return SCREEN_HEIGHT - SCREEN_SCALE_Y(a); }
+inline float SCREEN_SCALE_X(float a)           { return SCREEN_SCALE_AR(SCREEN_STRETCH_X(a)); }
+inline float SCREEN_SCALE_Y(float a)           { return SCREEN_STRETCH_Y(a); } // RsGlobal.maximumHeight * 0.  * value
+inline float SCREEN_SCALE_FROM_RIGHT(float a)  { return SCREEN_WIDTH  - SCREEN_SCALE_X(a); }
+inline float SCREEN_SCALE_FROM_BOTTOM(float a) { return SCREEN_HEIGHT - SCREEN_SCALE_Y(a); }
 
 constexpr auto BUILD_NAME_FULL = "TEST"; // NOTSA
 
@@ -111,6 +111,8 @@ constexpr float SQRT_2         = 1.41421f;          // √2
 constexpr float SQRT_3         = 1.73205f;          // √3
 constexpr float TWO_PI         = 6.28318f;          // τ (TAU)
 
+constexpr float COS_45 = SQRT_2; // cos(45deg)
+
 constexpr float sq(float x) { return x * x; }
 
 struct SpriteFileName {
@@ -153,7 +155,7 @@ constexpr float RadiansToDegrees(float angleInRadians) {
 
 template<typename T>
 auto lerp(const T& from, const T& to, float t) {
-    return from * (1.f - t) + to * t;
+    return to * t + from * (1.f - t);
 }
 
 inline const float invLerp(float fMin, float fMax, float fVal) {

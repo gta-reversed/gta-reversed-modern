@@ -634,7 +634,7 @@ bool CObject::Save() {
 // 0x44A4D0
 void CObject::ProcessGarageDoorBehaviour() {
     if (m_nGarageDoorGarageIndex < 0)
-        m_nGarageDoorGarageIndex = CGarages::FindGarageForObject(this);
+        m_nGarageDoorGarageIndex = static_cast<int8>(CGarages::FindGarageForObject(this));
 
     if (m_nGarageDoorGarageIndex < 0)
         return;
@@ -799,7 +799,7 @@ void CObject::Init() {
     } else {
         CObjectData::SetObjectData(m_nModelIndex, *this);
         auto* mi = GetModelInfo();
-        if (mi->GetColModel()->m_bNotEmpty) {
+        if (mi->GetColModel()->m_bHasCollisionVolumes) {
             CColStore::AddRef(mi->GetColModel()->m_nColSlot);
             objectFlags.bHasNoModel = true;
 
