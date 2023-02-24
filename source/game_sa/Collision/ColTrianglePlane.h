@@ -6,14 +6,14 @@
 */
 #pragma once
 
-#include <FixedVector.hpp>
-#include <FixedFloat.hpp>
-#include "CompressedVector.h"
+#include <extensions/FixedVector.hpp>
+#include <extensions/FixedFloat.hpp>
 #include "Vector.h"
 
 class CStoredCollPoly;
 class CColTriangle;
-
+class CompressedVector;
+    
 class CColTrianglePlane {
 public:
     enum class Orientation : uint8 {
