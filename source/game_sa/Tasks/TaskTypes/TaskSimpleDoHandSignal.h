@@ -9,16 +9,16 @@ class CEvent;
 class NOTSA_EXPORT_VTABLE CTaskSimpleDoHandSignal : public CTaskSimple {
 
 public:
-    bool m_initialised = {}; // 0x8
+    bool m_initialised{};
 
 public:
     static void InjectHooks();
 
     static constexpr auto Type = eTaskType::TASK_SIMPLE_DO_HAND_SIGNAL;
 
-    CTaskSimpleDoHandSignal();
+    CTaskSimpleDoHandSignal() = default;
     CTaskSimpleDoHandSignal(const CTaskSimpleDoHandSignal&);
-    ~CTaskSimpleDoHandSignal();
+    ~CTaskSimpleDoHandSignal() = default;
 
     CTask*    Clone() override { return new CTaskSimpleDoHandSignal{*this}; }
     eTaskType GetTaskType() override { return Type; }

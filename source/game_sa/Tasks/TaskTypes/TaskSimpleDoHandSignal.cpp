@@ -23,22 +23,28 @@ CTaskSimpleDoHandSignal::CTaskSimpleDoHandSignal(const CTaskSimpleDoHandSignal& 
 
 // 0x660940
 bool CTaskSimpleDoHandSignal::ProcessPed(CPed* ped) {
-    if (ped->GetIsOnScreen()) {
-        const auto partialAnimTask = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
-        if (m_initialised) {
-            return !partialAnimTask || CTask::IsA<TASK_COMPLEX_HANDSIGNAL_ANIM>(partialAnimTask);
-        }
-
-        if (partialAnimTask) { // Inverted
-            if (!CTask::IsA<TASK_COMPLEX_HANDSIGNAL_ANIM>(partialAnimTask)) { // Inverted
-                partialAnimTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
-                return false;
-            }
-        } else {
-            ped->GetTaskManager().SetTaskSecondary(new CTaskComplexPlayHandSignalAnim{ -1, 4.f }, TASK_SECONDARY_PARTIAL_ANIM)
-            m_initialised = true;
-            return false;
-        }
+    if (!ped->GetIsOnScreen()) {
+        return true;
     }
-    return true;
+
+    const auto partialAnimTask = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
+
+    if (m_initialised) {
+        return !partialAnimTask || CTask::IsA<TASK_COMPLEX_HANDSIGNAL_ANIM>(partialAnimTask);
+    }
+
+    if (partialAnimTask) {
+        if (CTask::IsA<TASK_COMPLEX_HANDSIGNAL_ANIM>(partialAnimTask)) {
+            return true;
+        }
+        partialAnimTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
+        return false;
+    }
+
+    ped->GetTaskManager().SetTaskSecondary(
+        new CTaskComplexPlayHandSignalAnim{},
+        TASK_SECONDARY_PARTIAL_ANIM
+    );
+    m_initialised = true;
+    return false;
 }
