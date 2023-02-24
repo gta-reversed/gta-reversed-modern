@@ -369,9 +369,9 @@ bool CMenuManager::CheckHover(int32 left, int32 right, int32 top, int32 bottom) 
 bool CMenuManager::CheckMissionPackValidMenu() {
     CFileMgr::SetDirMyDocuments();
 
-    sprintf(gString, "MPACK//MPACK%d//SCR.SCM", CGame::bMissionPackGame);
+    sprintf_s(gString, "MPACK//MPACK%d//SCR.SCM", CGame::bMissionPackGame);
     auto scr = CFileMgr::OpenFile(gString, "rb");
-    sprintf(gString, "MPACK//MPACK%d//TEXT.GXT", CGame::bMissionPackGame);
+    sprintf_s(gString, "MPACK//MPACK%d//TEXT.GXT", CGame::bMissionPackGame);
     auto gxt = CFileMgr::OpenFile(gString, "rb");
 
     CFileMgr::SetDir("");

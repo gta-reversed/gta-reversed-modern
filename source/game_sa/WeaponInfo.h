@@ -119,8 +119,12 @@ public:
 
     //! NOTSA: Load models of this weapon (Blocks thread until loaded)
     void StreamModelsForWeapon(eStreamingFlags streamingFlags);
-};
 
+    //! NOTSA: GetWeaponInfo for specific ped.
+    static auto GetWeaponInfo(CPed* ped) {
+        return GetWeaponInfo(ped->GetActiveWeapon().m_nType, ped->GetWeaponSkill());
+    }
+};
 VALIDATE_SIZE(CWeaponInfo, 0x70);
 
 // list of weapon infos. Count: MAX_WEAPON_INFOS (80)

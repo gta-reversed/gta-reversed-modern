@@ -120,7 +120,7 @@ bool CTxdStore::LoadTxd(int32 index, RwStream* stream) {
 bool CTxdStore::LoadTxd(int32 index, const char* filename) {
     char data[260];
     RwStream* stream;
-    sprintf(data, "%s", filename);
+    sprintf_s(data, "%s", filename);
     do {
         stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, data);
     } while (!stream);

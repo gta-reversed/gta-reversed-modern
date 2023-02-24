@@ -8,7 +8,7 @@ public:
     CPed* m_ped;
 
 public:
-    explicit CEventAcquaintancePed(CPed* ped);
+    explicit CEventAcquaintancePed(CPed* ped, eTaskType taskType = TASK_NONE/*notsa arg*/);
     ~CEventAcquaintancePed() override;
 
     int32 GetLifeTime() override { return 0; }
@@ -31,8 +31,7 @@ public:
 
 class NOTSA_EXPORT_VTABLE CEventAcquaintancePedHate : public CEventAcquaintancePed {
 public:
-    explicit CEventAcquaintancePedHate(CPed* ped) : CEventAcquaintancePed (ped) {}
-    ~CEventAcquaintancePedHate() override = default;
+    using CEventAcquaintancePed::CEventAcquaintancePed;
 
     eEventType GetEventType() const override { return EVENT_ACQUAINTANCE_PED_HATE; }
     int32 GetEventPriority() const override { return 26; }
@@ -47,8 +46,7 @@ public:
 
 class NOTSA_EXPORT_VTABLE CEventAcquaintancePedRespect : public CEventAcquaintancePed {
 public:
-    explicit CEventAcquaintancePedRespect(CPed* ped) : CEventAcquaintancePed(ped) {}
-    ~CEventAcquaintancePedRespect() override = default;
+    using CEventAcquaintancePed::CEventAcquaintancePed;
 
     eEventType GetEventType() const override { return EVENT_ACQUAINTANCE_PED_RESPECT; }
     int32 GetEventPriority() const override { return 23; }
@@ -57,8 +55,7 @@ public:
 
 class NOTSA_EXPORT_VTABLE CEventAcquaintancePedLike : public CEventAcquaintancePed {
 public:
-    explicit CEventAcquaintancePedLike(CPed* ped) : CEventAcquaintancePed(ped) {}
-    ~CEventAcquaintancePedLike() override = default;
+    using CEventAcquaintancePed::CEventAcquaintancePed;
 
     eEventType GetEventType() const override { return EVENT_ACQUAINTANCE_PED_LIKE; }
     int32 GetEventPriority() const override { return 22; }
@@ -67,8 +64,7 @@ public:
 
 class NOTSA_EXPORT_VTABLE CEventAcquaintancePedDislike : public CEventAcquaintancePed {
 public:
-    explicit CEventAcquaintancePedDislike(CPed* ped) : CEventAcquaintancePed(ped) {}
-    ~CEventAcquaintancePedDislike() override = default;
+    using CEventAcquaintancePed::CEventAcquaintancePed;
 
     eEventType GetEventType() const override { return EVENT_ACQUAINTANCE_PED_DISLIKE; }
     int32 GetEventPriority() const override { return 24; }
@@ -100,8 +96,7 @@ public:
 
 class NOTSA_EXPORT_VTABLE CEventSeenCop : public CEventAcquaintancePed {
 public:
-    explicit CEventSeenCop(CPed* cop) : CEventAcquaintancePed(cop) {}
-    ~CEventSeenCop() override = default;
+    using CEventAcquaintancePed::CEventAcquaintancePed;
 
     eEventType GetEventType() const override { return EVENT_SEEN_COP; }
     int32 GetEventPriority() const override { return 21; }

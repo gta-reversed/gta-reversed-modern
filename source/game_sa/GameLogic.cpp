@@ -359,7 +359,7 @@ void CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed* player, CVecto
     player->m_fArmour = 0.0f;
     player->m_fHealth = static_cast<float>(playerInfo->m_nMaxHealth);
     player->m_bIsVisible = true;
-    player->m_nDeathTime = 0;
+    player->m_nDeathTimeMS = 0;
     player->bDoBloodyFootprints = false;
     playerData->m_nDrunkenness = 0;
     playerData->m_nFadeDrunkenness = 0;

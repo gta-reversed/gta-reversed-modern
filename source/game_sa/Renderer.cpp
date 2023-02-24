@@ -1022,7 +1022,7 @@ void CRenderer::ScanWorld() {
     const float& width  = TheCamera.m_pRwCamera->viewWindow.x;
     const float& height = TheCamera.m_pRwCamera->viewWindow.y;
 
-    CVector frustumPoints[13];
+    CVector frustumPoints[13]{};
     frustumPoints[0] = CVector(0.0f, 0.0f, 0.0f);
 
     frustumPoints[1].x = frustumPoints[4].x = -(farPlane * width);
@@ -1109,7 +1109,7 @@ void CRenderer::ScanWorld() {
 // 0x554C60
 int32 CRenderer::GetObjectsInFrustum(CEntity** outEntities, float farPlane, RwMatrix* transformMatrix)
 {
-    CVector frustumPoints[13];
+    CVector frustumPoints[13]{};
     const float& width = TheCamera.m_pRwCamera->viewWindow.x;
     const float& height = TheCamera.m_pRwCamera->viewWindow.y;
     frustumPoints[0] = CVector(0.0f, 0.0f, 0.0f);
@@ -1153,7 +1153,7 @@ void CRenderer::RequestObjectsInFrustum(RwMatrix* transformMatrix, int32 modelRe
     const float& width  = TheCamera.m_pRwCamera->viewWindow.x;
     const float& height = TheCamera.m_pRwCamera->viewWindow.y;
 
-    CVector frustumPoints[13];
+    CVector frustumPoints[13]{};
     frustumPoints[0] = CVector(0.0f, 0.0f, 0.0f);
     frustumPoints[1].x = frustumPoints[4].x = -(farPlane * width);
     frustumPoints[1].y = frustumPoints[2].y = farPlane * height;

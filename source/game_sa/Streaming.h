@@ -186,7 +186,7 @@ VALIDATE_SIZE(tStreamingChannel, 0x98);
 class CStreaming {
 public:
     static size_t& ms_memoryAvailable;
-    static int32& desiredNumVehiclesLoaded;
+    static uint32& desiredNumVehiclesLoaded;
     static bool& ms_bLoadVehiclesInLoadScene;
 
     static int32(&ms_aDefaultCopCarModel)[5];
@@ -291,10 +291,10 @@ public:
     static void FlushRequestList();
     static void ForceLayerToRead(int32 arg1);
     static int32 GetDefaultCabDriverModel();
-    static int32 GetDefaultCopCarModel(int32 ignoreLvpd1Model);
-    static int32 GetDefaultCopModel();
-    static int32 GetDefaultFiremanModel();
-    static int32 GetDefaultMedicModel();
+    static eModelID GetDefaultCopCarModel(bool ignoreLvpd1Model = true);
+    static eModelID GetDefaultCopModel();
+    static eModelID GetDefaultFiremanModel();
+    static eModelID GetDefaultMedicModel();
     static int32 GetDiscInDrive();
     static int32 GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority);
     static bool HasSpecialCharLoaded(int32 slot);
@@ -331,7 +331,7 @@ public:
     static void RemoveAllUnusedModels();
     static void RemoveBigBuildings();
     static void RemoveBuildingsNotInArea(eAreaCodes areaCode);
-    static void RemoveCarModel(int32 modelId);
+    static void RemoveCarModel(eModelID modelId);
     static void RemoveCurrentZonesModels();
     static void RemoveDodgyPedsFromRandomSlots();
     static void RemoveEntity(CLink<CEntity*>* streamingLink);

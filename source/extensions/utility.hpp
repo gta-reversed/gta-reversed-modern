@@ -1,8 +1,16 @@
 #pragma once
 
 #include <memory>
+#include <initializer_list>
 
 namespace notsa {
+/*
+* Want to know something funny?
+* `std::initializer_list` is just a proxy object for a stack allocated array.
+* So, if you return one from a function you're dommed to be fucked :)
+* And best thing, it does allow copying, it has a fucking copy constructor for whatever reason
+* Lesson: Don't return `initializer_list`'s from functions
+*/
 
 /*!
 * @brief Call the given function on object destruction.
@@ -77,13 +85,73 @@ bool contains(R&& r, const T& value, Proj proj = {}) {
     return rng::find(r, value, proj) != rng::end(r);
 }
 
-/// `std::ranges` like `accumulate` function => Hopefully to be replaced by an `std` implementation.
+/*!
+* Helper (Of your fingers) - Reduces typing needed for Python style `value in {}`
+*/
+template<typename Y, typename T>
+bool contains(std::initializer_list<Y> r, const T& value) {
+    return contains(r, value, {});
+}
+
+/*!
+* @brief Similar to `std::remove_if`, but only removes the first element found (Unlike the former that removes all)
+* 
+* @return Whenever an element was removed. If it was, you have to pop the last element from your container
+*/
+template <std::permutable I, std::sentinel_for<I> S, class T, class Proj = std::identity>
+    requires std::indirect_binary_predicate<rng::equal_to, std::projected<I, Proj>, const T*>
+constexpr bool remove_first(I first, S last, const T& value, Proj proj = {}) {
+    first = rng::find(std::move(first), last, value, proj);
+    if (first == last) {
+        return false;
+    } else {
+        rng::move_backward(rng::next(first), last, std::prev(last)); // Shift to the left (removing the found element)
+        return true;
+    }
+}
+
+// We require `bidirectional_range`, because we have to use `std::prev`.
+// if for any reason we want to use `forward_range` only, I guess we gotta figure
+// out a different way of getting the pre-end iteartor
+
+//! @copydoc `remove_first`
+template <rng::bidirectional_range R, class T, class Proj = std::identity>
+    requires std::permutable<rng::iterator_t<R>>&& std::indirect_binary_predicate<rng::equal_to, std::projected<rng::iterator_t<R>, Proj>, const T*>
+constexpr bool remove_first(R&& r, const T& value, Proj proj = {}) {
+    return remove_first(rng::begin(r), rng::end(r), value, std::move(proj));
+}
+
+
+/*
+//! Similar to `std::remove_if`, but only removes the first element found (Unlike the former that removes all)
+template<rng::forward_range R, class Proj = std::identity, std::indirect_unary_predicate<std::projected<rng::iterator_t<R>, Proj>> Pr>
+    requires std::permutable<rng::iterator_t<R>>
+constexpr rng::borrowed_subrange_t<R> remove_first(R&& r, Pr pr, Proj proj = {}) {
+    auto end = rng::end(r);
+    auto it = rng::find_if(r, pr, proj);
+    if (it != rng::end(r)) {
+        rng::move_backward(rng::next(it), end, it); // Shift to the left (removing the found element)
+    }
+    return { std::move(it), std::move(end) }; // Return 
+}
+*/  
+
+//! `std::ranges` like `accumulate` function => Hopefully to be replaced by an `std` implementation.
 template<rng::input_range R, typename T, typename FnOp = std::plus<>, class Proj = std::identity>
 T accumulate(R&& r, T init, Proj proj = {}, FnOp op = {}) {
     for (const auto& v : r) {
         init = std::invoke(op, init, std::invoke(proj, v));
     }
     return init;
+}
+
+//! Same as rng::min, but accepts a default value that is returned in case the range is empty (Which would result be UB for `rng::min`)
+template<rng::forward_range R, typename Pr = std::less<>, class Proj = std::identity>
+constexpr rng::range_value_t<R> min_default(R&& r, rng::range_value_t<R> defaultValue, Pr pr = {}, Proj proj = {}) {
+    if (rng::empty(r)) {
+        return std::move(defaultValue);
+    }
+    return rng::min(r, pr, proj);
 }
 
 /*!

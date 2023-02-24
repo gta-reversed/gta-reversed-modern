@@ -135,7 +135,7 @@ void BoneNode_c::ClampLimitsDefault(bool LimitX, bool LimitY, bool LimitZ) {
         return;
 
     const auto id = GetIdFromBoneTag(m_BoneTag);
-    const auto boneInfo = BoneNodeManager_c::ms_boneInfos[id];
+    const auto& boneInfo = BoneNodeManager_c::ms_boneInfos[id];
 
     if (LimitX) {
         m_LimitMax.x = boneInfo.m_Min.x;

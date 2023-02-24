@@ -56,7 +56,7 @@ void CDamageManager::ResetDamageStatusAndWheelDamage() {
 // 0x6C25D0
 void CDamageManager::FuckCarCompletely(bool bDontDetachWheel) {
     if (!bDontDetachWheel)
-        SetWheelStatus((eCarWheel)CGeneral::GetRandomNumberInRange(0, eCarWheel::MAX_CARWHEELS), eCarWheelStatus::WHEEL_STATUS_MISSING);
+        SetWheelStatus((eCarWheel)CGeneral::GetRandomNumberInRange((size_t)eCarWheel::MAX_CARWHEELS), eCarWheelStatus::WHEEL_STATUS_MISSING);
 
     for (size_t i = 0; i < eDoors::MAX_DOORS; i++)
         SetDoorStatus((eDoors)i, eDoorStatus::DAMSTATE_NOTPRESENT);
@@ -77,7 +77,7 @@ void CDamageManager::FuckCarCompletely(bool bDontDetachWheel) {
 
 // 0x6C24B0
 bool CDamageManager::ApplyDamage(CAutomobile* vehicle, tComponent compId, float fIntensity, float fColDmgMult) {
-    if (!vehicle->npcFlags.bTakePanelDamage)
+    if (!vehicle->autoFlags.bCanBeVisiblyDamaged)
         return false;
 
     tComponentGroup group{};
@@ -175,8 +175,9 @@ void CDamageManager::ProgressEngineDamage() {
 
 // 0x6C2320
 bool CDamageManager::ProgressDoorDamage(eDoors door, CAutomobile* pAuto) {
-    if ((unsigned)door >= (unsigned)eDoors::MAX_DOORS)
+    if ((uint32)door >= (uint32)eDoors::MAX_DOORS) {
         return false;
+    }
 
     switch (GetDoorStatus(door)) {
     case eDoorStatus::DAMSTATE_OK:

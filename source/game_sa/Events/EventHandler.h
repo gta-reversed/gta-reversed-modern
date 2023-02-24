@@ -107,6 +107,8 @@ public:
 
     void ComputeEventResponseTask(CEvent* event, CTask* task);
     CTask* ComputeEventResponseTask(CPed* ped, CEvent* event);
+
+    auto& GetHistory() { return m_history; }
 };
 
 VALIDATE_SIZE(CEventHandler, 0x34);

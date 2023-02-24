@@ -282,6 +282,7 @@ CTask* CTaskComplexArrestPed::CreateSubTask(eTaskType taskType, CPed* ped) {
     case TASK_COMPLEX_SEEK_ENTITY: {
         float radius = m_PedToArrest->bIsBeingArrested ? 4.0f : 3.0f;
         // return new CTaskComplexSeekEntity<CEntitySeekPosCalculatorStandard>(m_PedToArrest, 50'000, 1000, radius, 2.0f, 2.0f, 1, 1);
+        NOTSA_UNREACHABLE("Not implemented!");
     }
     case TASK_COMPLEX_DRAG_PED_FROM_CAR:
         return new CTaskComplexDragPedFromCar(m_PedToArrest, 100'000);

@@ -92,7 +92,7 @@ void OS_FileSetPosition(void* file, int32 pos) {
 int32 OS_FileRead(void* file, void* dest, int32 destSize) {
     DWORD dwRead = 0;
     //SetLastError(0);
-    ReadFile(&file, dest, destSize, &dwRead, nullptr);
+    VERIFY(ReadFile(&file, dest, destSize, &dwRead, nullptr));
     return dwRead == destSize ? 0 : 3;
 }
 
@@ -129,7 +129,7 @@ void OS_SemaphoreWait(void* semaphore) {
 }
 
 void OS_SemaphoreDelete(void* semaphore) {
-    VERIFY(CloseHandle(&semaphore));
+    VERIFY(CloseHandle(static_cast<HANDLE>(&semaphore)));
 }
 
 void* OS_MutexCreate(const char* name) {
@@ -148,13 +148,14 @@ void OS_MutexObtain(void* mutex) {
 
 void OS_MutexDelete(void* mutex) {
     if (mutex) {
-        VERIFY(CloseHandle(&mutex));
+        VERIFY(CloseHandle(static_cast<HANDLE>(&mutex)));
     }
 }
 
 void OS_SetFilePathOffset(const char* path) {
     if (!path) {
         BasePath[0] = '\0';
+        return;
     }
     strcpy_s(BasePath, path);
 }
@@ -169,7 +170,7 @@ void* OS_ThreadLaunch(OS_ThreadRoutine pfnStart, void* param, uint32 nFlags, con
 
     DWORD dwThreadID = 0;
     HANDLE hThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)pfnStart, param, dwFlags, &dwThreadID);
-    assert(hThread != INVALID_HANDLE_VALUE);
+    assert(hThread && hThread != INVALID_HANDLE_VALUE);
     switch (priority) {
     case OS_THREAD_PRIORITY_LOW:
         SetThreadPriority(hThread, THREAD_PRIORITY_LOWEST);
@@ -191,7 +192,7 @@ void* OS_ThreadLaunch(OS_ThreadRoutine pfnStart, void* param, uint32 nFlags, con
 }
 
 void OS_ThreadClose(void* thread) {
-    VERIFY(CloseHandle(thread));
+    VERIFY(CloseHandle(static_cast<HANDLE>(thread)));
 }
 
 void OS_ThreadWait(void* thread) {
