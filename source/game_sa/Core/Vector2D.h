@@ -109,9 +109,15 @@ public:
         return { vec.x * multiplier, vec.y * multiplier };
     }
 
-    /// Calculate the dot product with another vector
+    //! Dot product of *this and another vector
     float Dot(const CVector2D& lhs) const {
         return x * lhs.x + y * lhs.y;
+    }
+
+    //! 2D "cross product" of *this and another vector
+    //! See https://stackoverflow.com/a/243977
+    float Cross(const CVector2D& lhs) const {
+        return (x * lhs.y) - (y * lhs.x);
     }
 
     //! Get a copy of `*this` vector projected onto `projectOnTo` (which is assumed to be unit length)
