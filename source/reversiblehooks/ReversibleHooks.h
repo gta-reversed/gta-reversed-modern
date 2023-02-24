@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <filesystem>
 
 #include "ReversibleHook/Base.h"
 
@@ -81,6 +82,9 @@
 // Similar to RH_ScopedInstall but you can specify the name explicitly.
 #define RH_ScopedNamedInstall(fn, fnName, fnAddr, ...) \
     ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, fnName, fnAddr, &RHCurrentNS::fn __VA_OPT__(,) __VA_ARGS__)
+
+#define RH_ScopedVMTOverloadedInstall(fn, suffix, fnGTAAddr, addrCast, ...) \
+    ReversibleHooks::InstallVirtual(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn "-" suffix, pGTAVTbl, pOurVTbl, (void*)(static_cast<addrCast>(&fn)), nVirtFns __VA_OPT__(,) __VA_ARGS__)
 
 // Install a hook on a virtual function. To use it, `RH_ScopedVirtualClass` must be used instead of `RH_ScopedClass`
 #define RH_ScopedVMTInstall(fn, fnGTAAddr, ...) \
@@ -168,4 +172,6 @@ namespace ReversibleHooks {
 
     void OnInjectionBegin(HMODULE hModule);
     void OnInjectionEnd();
+
+    void WriteHooksToFile(const std::filesystem::path&);
 };

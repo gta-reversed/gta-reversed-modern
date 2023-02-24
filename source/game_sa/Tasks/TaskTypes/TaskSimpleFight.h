@@ -52,7 +52,7 @@ public:
     CEntity*               m_pTargetEntity;
     CAnimBlendAssociation* m_pAnim;
     CAnimBlendAssociation* m_pIdleAnim;
-    uint8                  m_nComboSet;
+    int8                   m_nComboSet;
     eFightAttackType       m_nCurrentMove;
     uint8                  m_nNextCommand;
     uint8                  m_nLastCommand;
@@ -60,7 +60,7 @@ public:
     static inline CMeleeInfo (&m_aComboData)[12] = *(CMeleeInfo(*)[12])0xC170D0;
 
 public:
-    static constexpr auto Type = TASK_SIMPLE_FIGHT_CTRL;
+    static constexpr auto Type = eTaskType::TASK_SIMPLE_FIGHT;
 
     CTaskSimpleFight(CEntity* entity, int32 nCommand, uint32 nIdlePeriod = 10000);
     ~CTaskSimpleFight() override;

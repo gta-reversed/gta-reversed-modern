@@ -44,9 +44,6 @@
 
 static auto s_CommandHandlerLUT = notsa::script::GenerateLUT();
 
-constexpr auto SHORT_STRING_SIZE = 8;
-constexpr auto LONG_STRING_SIZE  = 16;
-
 void CRunningScript::InjectHooks() {
     RH_ScopedClass(CRunningScript);
     RH_ScopedCategory("Scripts");
@@ -54,19 +51,19 @@ void CRunningScript::InjectHooks() {
     RH_ScopedInstall(Init, 0x4648E0);
     RH_ScopedInstall(GetCorrectPedModelIndexForEmergencyServiceType, 0x464F50);
 
-    // RH_ScopedInstall(PlayAnimScriptCommand, 0x470150);
-    // RH_ScopedInstall(LocateCarCommand, 0x487A20);
-    // RH_ScopedInstall(LocateCharCommand, 0x486D80);
-    // RH_ScopedInstall(LocateObjectCommand, 0x487D10);
-    // RH_ScopedInstall(LocateCharCarCommand, 0x487420);
-    // RH_ScopedInstall(LocateCharCharCommand, 0x4870F0);
-    // RH_ScopedInstall(LocateCharObjectCommand, 0x487720);
-    // RH_ScopedInstall(CarInAreaCheckCommand, 0x488EC0);
-    // RH_ScopedInstall(CharInAreaCheckCommand, 0x488B50);
-    // RH_ScopedInstall(ObjectInAreaCheckCommand, 0x489150);
-    // RH_ScopedInstall(CharInAngledAreaCheckCommand, 0x487F60);
-    // RH_ScopedInstall(FlameInAngledAreaCheckCommand, 0x488780);
-    // RH_ScopedInstall(ObjectInAngledAreaCheckCommand, 0x4883F0);
+    RH_ScopedInstall(PlayAnimScriptCommand, 0x470150, { .reversed = false });
+    RH_ScopedInstall(LocateCarCommand, 0x487A20, { .reversed = false });
+    RH_ScopedInstall(LocateCharCommand, 0x486D80, { .reversed = false });
+    RH_ScopedInstall(LocateObjectCommand, 0x487D10, { .reversed = false });
+    RH_ScopedInstall(LocateCharCarCommand, 0x487420, { .reversed = false });
+    RH_ScopedInstall(LocateCharCharCommand, 0x4870F0, { .reversed = false });
+    RH_ScopedInstall(LocateCharObjectCommand, 0x487720, { .reversed = false });
+    RH_ScopedInstall(CarInAreaCheckCommand, 0x488EC0, { .reversed = false });
+    RH_ScopedInstall(CharInAreaCheckCommand, 0x488B50, { .reversed = false });
+    RH_ScopedInstall(ObjectInAreaCheckCommand, 0x489150, { .reversed = false });
+    RH_ScopedInstall(CharInAngledAreaCheckCommand, 0x487F60, { .reversed = false });
+    RH_ScopedInstall(FlameInAngledAreaCheckCommand, 0x488780, { .reversed = false });
+    RH_ScopedInstall(ObjectInAngledAreaCheckCommand, 0x4883F0, { .reversed = false });
     RH_ScopedInstall(CollectParameters, 0x464080, { .stackArguments = 1 });
     RH_ScopedInstall(CollectNextParameterWithoutIncreasingPC, 0x464250, { .stackArguments = 0 });
     RH_ScopedInstall(StoreParameters, 0x464370, { .stackArguments = 1 });
@@ -83,10 +80,10 @@ void CRunningScript::InjectHooks() {
     RH_ScopedInstall(GivePedScriptedTask, 0x465C20);
     RH_ScopedInstall(AddScriptToList, 0x464C00, { .stackArguments = 1 });
     RH_ScopedInstall(RemoveScriptFromList, 0x464BD0, { .stackArguments = 1 });
-    // RH_ScopedInstall(ShutdownThisScript, 0x465AA0);
+    RH_ScopedInstall(ShutdownThisScript, 0x465AA0, { .reversed = false });
     RH_ScopedInstall(IsPedDead, 0x464D70);
     RH_ScopedInstall(ThisIsAValidRandomPed, 0x489490);
-    // RH_ScopedInstall(ScriptTaskPickUpObject, 0x46AF50);
+    RH_ScopedInstall(ScriptTaskPickUpObject, 0x46AF50, { .reversed = false });
     RH_ScopedInstall(UpdateCompareFlag, 0x4859D0, { .stackArguments = 1 });
     RH_ScopedInstall(UpdatePC, 0x464DA0, { .stackArguments = 1 });
     RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
@@ -172,6 +169,7 @@ void CRunningScript::GivePedScriptedTask(int32 pedHandle, CTask* task, int32 opc
     }
 
     CPed* ped = GetPedPool()->GetAtRef(pedHandle);
+    assert(ped);
     CPedGroup* pedGroup = CPedGroups::GetPedsGroup(ped);
 
     CPed* otherPed = nullptr;
@@ -187,7 +185,7 @@ void CRunningScript::GivePedScriptedTask(int32 pedHandle, CTask* task, int32 opc
             const int32 slot = CPedScriptedTaskRecord::GetVacantSlot();
             CPedScriptedTaskRecord::ms_scriptedTasks[slot].SetAsAttractorScriptTask(ped, opcode, task);
         }
-    } else if (!pedGroup || ped->IsPlayer()) { // todo: FIXBUGS Warning	C6011 Dereferencing NULL pointer 'ped'
+    } else if (!pedGroup || ped->IsPlayer()) {
         CEventScriptCommand eventScriptCommand(TASK_PRIMARY_PRIMARY, task, false);
         auto* event = static_cast<CEventScriptCommand*>(ped->GetEventGroup().Add(&eventScriptCommand, false));
         if (event) {
@@ -710,14 +708,14 @@ void CRunningScript::ReadTextLabelFromScript(char* buffer, uint8 nBufferLength) 
     case SCRIPT_PARAM_GLOBAL_SHORT_STRING_VARIABLE:
     {
         uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
-        strncpy(buffer, (char*)&CTheScripts::ScriptSpace[index], SHORT_STRING_SIZE);
+        strncpy_s(buffer, SHORT_STRING_SIZE, (char*) & CTheScripts::ScriptSpace[index], SHORT_STRING_SIZE);
         break;
     }
 
     case SCRIPT_PARAM_LOCAL_SHORT_STRING_VARIABLE:
     {
         uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
-        strncpy(buffer, (char*)GetPointerToLocalVariable(index), SHORT_STRING_SIZE);
+        strncpy_s(buffer, SHORT_STRING_SIZE, (char*) GetPointerToLocalVariable(index), SHORT_STRING_SIZE);
         break;
     }
 
@@ -725,18 +723,20 @@ void CRunningScript::ReadTextLabelFromScript(char* buffer, uint8 nBufferLength) 
     case SCRIPT_PARAM_GLOBAL_LONG_STRING_ARRAY:
         ReadArrayInformation(true, &arrVarOffset, &arrElemIdx);
         if (type == SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY)
-            strncpy(buffer, (char*)&CTheScripts::ScriptSpace[SHORT_STRING_SIZE * arrElemIdx + arrVarOffset], SHORT_STRING_SIZE);
+            strncpy_s(buffer, SHORT_STRING_SIZE, (char*) & CTheScripts::ScriptSpace[SHORT_STRING_SIZE * arrElemIdx + arrVarOffset], SHORT_STRING_SIZE);
         else
-            strncpy(buffer, (char*)&CTheScripts::ScriptSpace[LONG_STRING_SIZE * arrElemIdx + arrVarOffset], std::min<uint8>(nBufferLength, LONG_STRING_SIZE));
+            strncpy_s(buffer, SHORT_STRING_SIZE, (char*) & CTheScripts::ScriptSpace[LONG_STRING_SIZE * arrElemIdx + arrVarOffset], std::min<uint8>(nBufferLength, LONG_STRING_SIZE));
         break;
 
     case SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY:
     case SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY:
         ReadArrayInformation(true, &arrVarOffset, &arrElemIdx);
         if (type == SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY)
-            strncpy(buffer, (char*)GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 2), SHORT_STRING_SIZE);
-        else
-            strncpy(buffer, (char*)GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 4), std::min<uint8>(nBufferLength, LONG_STRING_SIZE));
+            strncpy_s(buffer, SHORT_STRING_SIZE, (char*) GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 2), SHORT_STRING_SIZE);
+        else {
+            const auto bufferLength = std::min<uint8>(nBufferLength, LONG_STRING_SIZE);
+            strncpy_s(buffer, bufferLength, (char*)GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 4), bufferLength);
+        }
         break;
 
     case SCRIPT_PARAM_STATIC_PASCAL_STRING:
@@ -753,21 +753,21 @@ void CRunningScript::ReadTextLabelFromScript(char* buffer, uint8 nBufferLength) 
     case SCRIPT_PARAM_STATIC_LONG_STRING:
         // slightly changed code: original code is a bit messy and calls Read1ByteFromScript
         // in a loop and does some additional checks to ensure that buffer can hold the data
-        strncpy(buffer, (char*)m_pCurrentIP, std::min<uint8>(nBufferLength, LONG_STRING_SIZE));
+        strncpy_s(buffer, LONG_STRING_SIZE, (char*) m_pCurrentIP, std::min<uint8>(nBufferLength, LONG_STRING_SIZE));
         m_pCurrentIP += LONG_STRING_SIZE;
         break;
 
     case SCRIPT_PARAM_GLOBAL_LONG_STRING_VARIABLE:
     {
         uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
-        strncpy(buffer, (char*)&CTheScripts::ScriptSpace[index], std::min<uint8>(nBufferLength, LONG_STRING_SIZE));
+        strncpy_s(buffer, LONG_STRING_SIZE, (char*) & CTheScripts::ScriptSpace[index], std::min<uint8>(nBufferLength, LONG_STRING_SIZE));
         break;
     }
 
     case SCRIPT_PARAM_LOCAL_LONG_STRING_VARIABLE:
     {
         uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
-        strncpy(buffer, (char*)GetPointerToLocalVariable(index), std::min<uint8>(nBufferLength, LONG_STRING_SIZE));
+        strncpy_s(buffer, LONG_STRING_SIZE, (char*) GetPointerToLocalVariable(index), std::min<uint8>(nBufferLength, LONG_STRING_SIZE));
         break;
     }
 
@@ -816,7 +816,6 @@ void CRunningScript::UpdatePC(int32 newIP) {
     else
         m_pCurrentIP = &m_pBaseIP[-newIP];
 }
-static std::array<size_t, COMMAND_HIGHEST_ID> counter{};
 
 // 0x469EB0, inlined
 OpcodeResult CRunningScript::ProcessOneCommand() {
@@ -829,8 +828,6 @@ OpcodeResult CRunningScript::ProcessOneCommand() {
             uint16 notFlag : 1;
         };
     } op = { CTheScripts::Read2BytesFromScript(m_pCurrentIP) };
-
-    counter[op.command]++;
 
     m_bNotFlag = op.notFlag;
 

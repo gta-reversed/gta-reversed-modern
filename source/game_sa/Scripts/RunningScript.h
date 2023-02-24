@@ -100,6 +100,9 @@ enum {
     NUM_TIMERS      = 2
 };
 
+constexpr auto SHORT_STRING_SIZE = 8;
+constexpr auto LONG_STRING_SIZE = 16;
+
 class CRunningScript {
     /*!
      * Needed for compound if statements.
@@ -108,16 +111,16 @@ class CRunningScript {
      *   1. the number of conditions = `n` (max 8)
      *   2. logical operation between conditions (AND/OR, hence the command name)
      * - `n` commands that update the conditional flag
-     * 
+     *
      * For instance `if ($A > 0 && $B > 0 && $C > 0)` would generate:
-     * 
+     *
      * ```
      * COMMAND_ANDOR                          ANDS_2 // (three conditions joined by AND)
      * COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER $A 0
      * COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER $B 0
      * COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER $C 0
      * ```
-     * 
+     *
      * Each time a condition is tested, the result is AND/OR'd with the previous
      * result and the ANDOR state is decremented until it reaches the lower bound,
      * meaning that all conditions were tested.
@@ -227,11 +230,12 @@ public:
     OpcodeResult ProcessOneCommand();
     OpcodeResult Process();
 
-    void SetName(const char* name)  { assert(strlen(name) < sizeof(m_szName)); strcpy(m_szName, name); }
-    void SetBaseIp(uint8* ip)       { m_pBaseIP = ip; }
-    void SetCurrentIp(uint8* ip)    { m_pCurrentIP = ip; }
-    void SetActive(bool active)     { m_bIsActive = active; }
-    void SetExternal(bool external) { m_bIsExternal = external; }
+    void SetName(const char* name)      { strcpy_s(m_szName, name); }
+    void SetName(std::string_view name) { assert(name.size() < sizeof(m_szName)); strncpy_s(m_szName, name.data(), name.size()); }
+    void SetBaseIp(uint8* ip)           { m_pBaseIP = ip; }
+    void SetCurrentIp(uint8* ip)        { m_pCurrentIP = ip; }
+    void SetActive(bool active)         { m_bIsActive = active; }
+    void SetExternal(bool external)     { m_bIsExternal = external; }
 
     template<eScriptCommands Command>
     OpcodeResult ProcessCommand() {

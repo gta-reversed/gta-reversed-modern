@@ -64,11 +64,12 @@ public:
 
     void ReleaseEntity();
     bool CanThrowEntity() const;
-    void PlayAnim(AnimationId groupId, AssocGroupId animId);
+    void PlayAnim(AnimationId animId, AssocGroupId grpId);
     static void FinishAnimHoldEntityCB(CAnimBlendAssociation* pAnimAssoc, void* data);
     void StartAnim(CPed* ped);
     void DropEntity(CPed* ped, bool bAddEventSoundQuiet);
     void ChoosePutDownHeight(CPed* ped);
+    auto GetHeldEntity() const { return m_pEntityToHold; }
 
 private:
     friend void InjectHooksMain();

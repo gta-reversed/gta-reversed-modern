@@ -9,7 +9,7 @@ void CTaskComplexSeekCoverUntilTargetDead::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor_Ped, 0x622BC0);
-    RH_ScopedInstall(Constructor_Grp, 0x622BC0);
+    RH_ScopedInstall(Constructor_Grp, 0x622B80);
     RH_ScopedInstall(Destructor, 0x622C20);
 
     RH_ScopedInstall(GetCoverPed, 0x622D50);

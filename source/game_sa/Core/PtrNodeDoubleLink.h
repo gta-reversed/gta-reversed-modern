@@ -21,6 +21,10 @@ public:
     static void  operator delete(void* ptr, size_t sz);
 
     void AddToList(class CPtrListDoubleLink* list);
+    auto GetNext() const { return m_next; }
+
+    template<typename T>
+    auto GetItem() const { return static_cast<T*>(m_item); }
 };
 
 VALIDATE_SIZE(CPtrNodeDoubleLink, 0xC);

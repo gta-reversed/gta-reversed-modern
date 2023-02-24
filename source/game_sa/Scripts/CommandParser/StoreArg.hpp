@@ -74,29 +74,11 @@ void StoreArg(CRunningScript* S, const CVector2D& v2) {
     }
 }
 
-// Below must be after the basic overloads, otherwise won't compile
-
-/*!
-* @brief Overload for MultiReturn => Stores each arg separately, in same order as they appear in the multireturn
-*/
-template<typename... Ts>
-void StoreArg(CRunningScript* S, const MultiRet<Ts...>& ret) {
-    std::apply([&](auto&& arg) { StoreArg(S, arg); }, ret);
-}
-
 void StoreArg(CRunningScript* S, CompareFlagUpdate flag) {
     S->UpdateCompareFlag(flag.state);
 }
 
-/*!
-* @brief Arrays are pushed as arrays
-*/
-//template<typename T, size_t N>
-//void StoreArg(CRunningScript* S, std::array<T, N>&& arr) {
-//    for (const auto& arg : arr) {
-//        StoreArg(S, arg);
-//    }
-//}
+// Below must be after the basic overloads, otherwise won't compile
 
 /*!
 * @brief Overload for types that have a pool (thus we store a reference)
@@ -105,6 +87,15 @@ template<typename T, typename Y = std::decay_t<T>>
 void StoreArg(CRunningScript* S, T* arg) requires(detail::PoolOf<Y>()) {
     StoreArg(S, detail::PoolOf<Y>().GetRef(arg));
 }
+
+/*!
+* @brief Overload for MultiReturn => Stores each arg separately, in same order as they appear in the multireturn
+*/
+template<typename... Ts>
+void StoreArg(CRunningScript* S, const MultiRet<Ts...>& arg) {
+    std::apply([S](const Ts&... args) { (StoreArg(S, args), ...); }, arg);
+}
+
 
 }; // namespace script
 }; // namespace notsa

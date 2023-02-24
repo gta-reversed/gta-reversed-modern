@@ -38,22 +38,22 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(DrawAfterFade, 0x58D490);
     RH_ScopedInstall(DrawAreaName, 0x58AA50);
     RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);
-    // RH_ScopedInstall(DrawCrossHairs, 0x58E020); // -
-    // RH_ScopedInstall(DrawFadeState, 0x58D580);  // untested
-    // RH_ScopedInstall(DrawHelpText, 0x58B6E0);
-    // RH_ScopedInstall(DrawMissionTimers, 0x58B180);
+    RH_ScopedInstall(DrawCrossHairs, 0x58E020, { .reversed = false }); // -
+    RH_ScopedInstall(DrawFadeState, 0x58D580, { .reversed = false });  // untested
+    RH_ScopedInstall(DrawHelpText, 0x58B6E0, { .reversed = false });
+    RH_ScopedInstall(DrawMissionTimers, 0x58B180, { .reversed = false });
     RH_ScopedInstall(DrawMissionTitle, 0x58D240);
     RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);
     RH_ScopedInstall(DrawRadar, 0x58A330);
     RH_ScopedInstall(DrawScriptText, 0x58C080);
-    // RH_ScopedInstall(DrawSubtitles, 0x58C250);
-    // RH_ScopedInstall(DrawSuccessFailedMessage, 0x58C6A0);
+    RH_ScopedInstall(DrawSubtitles, 0x58C250, { .reversed = false });
+    RH_ScopedInstall(DrawSuccessFailedMessage, 0x58C6A0, { .reversed = false });
     RH_ScopedInstall(DrawVehicleName, 0x58AEA0);
-    // RH_ScopedInstall(DrawVitalStats, 0x589650);
+    RH_ScopedInstall(DrawVitalStats, 0x589650, { .reversed = false });
     RH_ScopedInstall(DrawAmmo, 0x5893B0);
-    // RH_ScopedInstall(DrawPlayerInfo, 0x58EAF0);
+    RH_ScopedInstall(DrawPlayerInfo, 0x58EAF0, { .reversed = false });
     RH_ScopedInstall(DrawTripSkip, 0x58A160);
-    // RH_ScopedInstall(DrawWanted, 0x58D9A0);
+    RH_ScopedInstall(DrawWanted, 0x58D9A0, { .reversed = false });
     RH_ScopedInstall(DrawWeaponIcon, 0x58D7D0);
     RH_ScopedInstall(RenderArmorBar, 0x5890A0);
     RH_ScopedInstall(RenderBreathBar, 0x589190);
@@ -174,7 +174,7 @@ bool CHud::HelpMessageDisplayed() {
 // 0x588F60
 void CHud::SetMessage(const char* message) {
     if (message) {
-        strncpy(m_Message, message, sizeof(m_Message));
+        strncpy_s(m_Message, message, sizeof(m_Message));
     } else {
         m_Message[0] = '\0';
     }
@@ -187,7 +187,7 @@ void CHud::SetBigMessage(char* message, eMessageStyle style) {
         return;
     }
 
-    strncpy(m_BigMessage[style], message, sizeof(m_BigMessage[style]));
+    strncpy_s(m_BigMessage[style], message, sizeof(m_BigMessage[style]));
 
     switch (style) {
     case STYLE_WHITE_MIDDLE_SMALLER: {
@@ -195,7 +195,7 @@ void CHud::SetBigMessage(char* message, eMessageStyle style) {
             OddJob2OffTimer = 0.0f;
             OddJob2On = 0;
         }
-        strncpy(LastBigMessage[style], message, sizeof(LastBigMessage[style]));
+        strncpy_s(LastBigMessage[style], message, sizeof(LastBigMessage[style]));
         break;
     }
     default: {
@@ -263,7 +263,7 @@ void CHud::SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float
     m_nHelpMessageStatId = statId;
     m_fHelpMessageStatUpdateValue = diff;
     m_nHelpMessageMaxStatValue = (uint32)max;
-    sprintf(gString, state == STAT_UPDATE_INCREASE ? "+" : "-");
+    sprintf_s(gString, state == STAT_UPDATE_INCREASE ? "+" : "-");
     AsciiToGxtChar(gString, m_pHelpMessage);
 }
 
@@ -296,7 +296,7 @@ void CHud::SetHelpMessageWithNumber(const char* text, int32 number, bool quickMe
 }
 
 // 0x588F50
-void CHud::SetVehicleName(char* name) {
+void CHud::SetVehicleName(const char* name) {
     m_pVehicleName = name;
 }
 
@@ -1384,7 +1384,7 @@ void CHud::DrawAmmo(CPed* ped, int32 x, int32 y, float alpha) {
     const auto& ammoClip = CWeaponInfo::GetWeaponInfo(weapon.m_nType, ped->GetWeaponSkill())->m_nAmmoClip;
 
     if (ammoClip <= 1 || ammoClip >= 1000) {
-        sprintf(gString, "%d", totalAmmo);
+        sprintf_s(gString, "%d", totalAmmo);
     } else {
         uint32 total, current;
 
@@ -1405,7 +1405,7 @@ void CHud::DrawAmmo(CPed* ped, int32 x, int32 y, float alpha) {
 
             current = ammoInClip;
         }
-        sprintf(gString, "%d-%d", total, current);
+        sprintf_s(gString, "%d-%d", total, current);
     }
     AsciiToGxtChar(gString, gGxtString);
 
@@ -1457,7 +1457,7 @@ inline void CHud::DrawClock() {
     CFont::SetRightJustifyWrap(0.0f);
     CFont::SetEdge(2);
     CFont::SetDropColor({0, 0, 0, 255});
-    sprintf(ascii, "%02d:%02d", CClock::ms_nGameClockHours, CClock::ms_nGameClockMinutes);
+    sprintf_s(ascii, "%02d:%02d", CClock::ms_nGameClockHours, CClock::ms_nGameClockMinutes);
     AsciiToGxtChar(ascii, text);
     CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_LIGHT_GRAY));
     CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(32.0f), SCREEN_STRETCH_Y(22.0f), text);
@@ -1474,10 +1474,10 @@ inline void CHud::DrawMoney(const CPlayerInfo& playerInfo, uint8 alpha) {
         if (m_nDisplayMoney < 0) {
             m_nDisplayMoney = -m_nDisplayMoney;
         }
-        sprintf(ascii, "-$%07d", m_nDisplayMoney);
+        sprintf_s(ascii, "-$%07d", m_nDisplayMoney);
     } else {
         CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_GREEN, alpha));
-        sprintf(ascii, "$%08d", std::abs(playerInfo.m_nDisplayMoney));
+        sprintf_s(ascii, "$%08d", std::abs(playerInfo.m_nDisplayMoney));
     }
     AsciiToGxtChar(ascii, text);
     CFont::SetProportional(false);
@@ -1496,7 +1496,7 @@ inline void CHud::DrawMoney(const CPlayerInfo& playerInfo, uint8 alpha) {
 inline void CHud::DrawWeapon(CPlayerPed* ped0, CPlayerPed* ped1) {
     const auto magic = SCREEN_WIDTH * 0.17343046f; // todo: magic
     if (m_WeaponState) {
-        DrawWeaponIcon(ped0, SCREEN_WIDTH - (SCREEN_STRETCH_X(32.0f) + magic), (int32)SCREEN_STRETCH_Y(20.0f), (float)m_WeaponFadeTimer);
+        DrawWeaponIcon(ped0, (int32)(SCREEN_WIDTH - (SCREEN_STRETCH_X(32.0f) + magic)), (int32)SCREEN_STRETCH_Y(20.0f), (float)m_WeaponFadeTimer);
         if (ped1) {
             const auto posX = (int32)(SCREEN_WIDTH - (SCREEN_STRETCH_X(32.0f) + 111.0f));
             const auto posY = (int32)GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(138.0f), 12);

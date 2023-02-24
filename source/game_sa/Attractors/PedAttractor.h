@@ -27,6 +27,8 @@ public:
     int32         field_80;
     char          m_szScriptName[8];
 
+    inline static SArray<CTask>& ms_tasks = *reinterpret_cast<SArray<CTask>*>(0xC0985C);
+
 public:
     static void InjectHooks();
 

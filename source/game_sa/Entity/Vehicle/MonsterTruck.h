@@ -36,7 +36,7 @@ enum eMonsterTruckNodes {
     MONSTER_NUM_NODES
 };
 
-class CMonsterTruck : public CAutomobile {
+class NOTSA_EXPORT_VTABLE CMonsterTruck : public CAutomobile {
 public:
     float field_988[4]; // unused
     float m_fSuspensionRadius;

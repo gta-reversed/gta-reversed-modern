@@ -47,7 +47,7 @@ void CSprite2d::InjectHooks() {
     RH_ScopedInstall(DrawAnyRect, 0x727CC0);
     RH_ScopedInstall(Draw2DPolygon, 0x7285B0);
     RH_ScopedInstall(DrawBarChart, 0x728640);
-    // RH_ScopedInstall(DrawCircleAtNearClip, 0x727D60);
+    RH_ScopedInstall(DrawCircleAtNearClip, 0x727D60, { .reversed = false });
 }
 
 CSprite2d::CSprite2d()
@@ -496,7 +496,7 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
     // unused
     if (drawPercentage) {
         char text[12];
-        sprintf(text, "%d%%", (int)progress);
+        sprintf_s(text, "%d%%", (int)progress);
 
         GxtChar gxtText[12];
         AsciiToGxtChar(text, gxtText);

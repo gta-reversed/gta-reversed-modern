@@ -331,7 +331,6 @@ public:
     int32 GetNumDoors();
     // get position of dummy in model-space
     CVector* GetModelDummyPosition(eVehicleDummy dummy) const { return &m_pVehicleStruct->m_avDummyPos[dummy]; } // NOTSA
-
     // Static method's
     // setup lights states for currently rendered vehicle
     static void SetupLightFlags(class CVehicle* vehicle);
@@ -463,6 +462,8 @@ public:
 
     tHandlingData& GetHandlingData() const;
     tFlyingHandlingData& GetFlyingHandlingData() const;
+
+    auto GetVehicleStruct() const { return m_pVehicleStruct; }
 };
 VALIDATE_SIZE(CVehicleModelInfo::CVehicleStructure, 0x314);
 VALIDATE_SIZE(CVehicleModelInfo, 0x308);

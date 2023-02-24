@@ -108,7 +108,7 @@ void CRadar::InjectHooks()
     RH_ScopedClass(CRadar);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Initialise, 0x587FB0);
+    RH_ScopedInstall(Initialise, 0x587FB0, { .reversed = false });
     RH_ScopedInstall(LoadTextures, 0x5827D0);
     RH_ScopedInstall(DrawLegend, 0x5828A0);
     RH_ScopedInstall(LimitRadarPoint, 0x5832F0);
@@ -116,7 +116,7 @@ void CRadar::InjectHooks()
     RH_ScopedInstall(SetMapCentreToPlayerCoords, 0x585B20);
     RH_ScopedInstall(InitFrontEndMap, 0x585960);
     RH_ScopedInstall(CalculateBlipAlpha, 0x583420);
-    // RH_ScopedInstall(TransformRadarPointToScreenSpace, 0x583480, true); // register problem?
+    //RH_ScopedInstall(TransformRadarPointToScreenSpace, 0x583480, true, { .reversed = false }); // register problem?
     RH_ScopedInstall(TransformRealWorldPointToRadarSpace, 0x583530);
     RH_ScopedInstall(CalculateCachedSinCos, 0x583670);
     RH_ScopedInstall(SetBlipSprite, 0x583D70);
@@ -147,7 +147,7 @@ void CRadar::InjectHooks()
     RH_ScopedInstall(ShowRadarMarker, 0x584480);
     RH_ScopedInstall(DrawRadarMask, 0x585700);
     RH_ScopedInstall(Load, 0x5D53C0);
-    // RH_ScopedGlobalInstall(Save, 0x5D5860);
+    RH_ScopedGlobalInstall(Save, 0x5D5860, { .reversed = false });
     RH_ScopedInstall(SetBlipFade, 0x583E00); // unused
     RH_ScopedInstall(SetCoordBlipAppearance, 0x583E50);
 
@@ -190,7 +190,7 @@ void CRadar::Initialise()
 
     for (auto i = 0u; i < gRadarTextures.size(); i++) {
         char txdName[16] = { 0 };
-        sprintf(txdName, "radar%02d", i);
+        sprintf_s(txdName, "radar%02d", i);
         gRadarTextures[i] = CTxdStore::FindTxdSlot(txdName);
     }
 }
@@ -241,7 +241,7 @@ int32 CRadar::GetActualBlipArrayIndex(int32 blipIndex)
 // 0x5828A0
 void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType)
 {
-    char* blipName{};
+    const char* blipName{};
 
     switch (blipType) {
     case (eRadarSprite)-5:
@@ -263,7 +263,7 @@ void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType)
     case RADAR_SPRITE_NONE:
         // blipType = 0 for player position
         blipType = RADAR_SPRITE_MAP_HERE;
-        /* fallthrough */
+        [[fallthrough]];
     case RADAR_SPRITE_MAP_HERE:
         blipName = TheText.Get("LG_01");
         break;
@@ -1320,7 +1320,7 @@ DRAW_RADAR:
         return;
     }
 
-    if (CGameLogic::n2PlayerPedInFocus == 1) {
+    if (CGameLogic::n2PlayerPedInFocus == eFocusedPlayer::PLAYER2) {
         CVector playerPos = FindPlayerCentreOfWorld_NoInteriorShift(1);
         vec2DRadarOrigin.x = playerPos.x;
         vec2DRadarOrigin.y = playerPos.y;

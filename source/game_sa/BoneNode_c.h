@@ -31,14 +31,14 @@ public:
     void InitLimits();
 
     // Originally these 2 took in the return value as a pointer, lets see if this is ABI compatible..
-    static CQuaternion EulerToQuat(CVector* angles, CQuaternion* quat);
-    static CVector QuatToEuler(CQuaternion* quat, CVector* angles);
+    static void EulerToQuat(const CVector& angles, CQuaternion& quat);
+    static void QuatToEuler(const CQuaternion& quat, CVector& angles);
     static int32  GetIdFromBoneTag(ePedBones bone);
 
     void ClampLimitsCurrent(bool LimitX, bool LimitY, bool LimitZ);
     void ClampLimitsDefault(bool LimitX, bool LimitY, bool LimitZ);
 
-    void Limit(float lim);
+    void Limit(float blend);
 
     void BlendKeyframe(float blend);
 
@@ -49,7 +49,7 @@ public:
     void GetLimits(eRotationAxis axis, float& min, float& max);
 
     void AddChild(BoneNode_c * children);
-    RwMatrix* CalcWldMat(const RwMatrix* boneMatrix);
+    void CalcWldMat(const RwMatrix* boneMatrix);
 
     const auto& GetPosition() const { return *RwMatrixGetPos(&m_WorldMat); }
     const auto& GetMatrix() const { return m_WorldMat;  }

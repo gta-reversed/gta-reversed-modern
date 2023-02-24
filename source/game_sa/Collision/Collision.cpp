@@ -26,14 +26,14 @@ void CCollision::InjectHooks() {
     RH_ScopedCategory("Collision");
 
     RH_ScopedInstall(Init, 0x416260);
-    // RH_ScopedInstall(Shutdown, 0x4162E0);
+    RH_ScopedInstall(Shutdown, 0x4162E0, { .reversed = false });
     RH_ScopedInstall(Update, 0x411E20);
     RH_ScopedInstall(SortOutCollisionAfterLoad, 0x411E30);
 
     RH_ScopedOverloadedInstall(CalculateTrianglePlanes, "colData", 0x416330, void (*)(CCollisionData*));
     RH_ScopedOverloadedInstall(RemoveTrianglePlanes, "colData", 0x416400, void (*)(CCollisionData*));
     RH_ScopedInstall(ProcessLineOfSight, 0x417950);
-    // RH_ScopedInstall(ProcessColModels, 0x4185C0);
+    RH_ScopedInstall(ProcessColModels, 0x4185C0, { .reversed = false });
 }
 
 // 0x416260
@@ -312,7 +312,7 @@ bool CCollision::ProcessLineOfSight(const CColLine& line, const CMatrix& transfo
         return false;
 
     const auto CheckSeeAndShootThrough = [=](auto material) {
-        return (!doSeeThroughCheck || !g_surfaceInfos->IsSeeThrough(material)) && (!doShootThroughCheck || !g_surfaceInfos->IsShootThrough(material));
+        return (!doSeeThroughCheck || !g_surfaceInfos.IsSeeThrough(material)) && (!doShootThroughCheck || !g_surfaceInfos.IsShootThrough(material));
     };
 
     float localMinTouchDist = maxTouchDistance;
@@ -407,22 +407,27 @@ void CCollision::RemoveTrianglePlanes(CColModel* colModel) {
  * Note: Originally the game calculated some disk stuff as well, but SA doesn't use disks (they're disabled when loadedin CFileLoader)
  * thus I omitted the code for it (it would've made the already messy code even worse)
  *
- * @param         transformA       Transformation matrix of model A - Usually owning entity's matrix.
- * @param         cmA              Col model A
- * @param         transformB       Transformation matrix of model B - Usually owning entity's matrix.
- * @param         cmA              Col model B
- * @param[out]    lineCPs          Line collision points (At most 16 - It can be null if you're sure the model has no lines)
- * @param[out]    sphereCPs        Sphere collision points (At most 32)
- * @param[in,out] maxTouchDistance Only used if model has lines - If you're sure it has none it can be null.
- * @param         arg7             Not 100% sure how to explain what this does. TODO.
+ * @param         transformA           Transformation matrix of model A - Usually owning entity's matrix.
+ * @param         cmA                  Col model A
+ * @param         transformB           Transformation matrix of model B - Usually owning entity's matrix.
+ * @param         cmA                  Col model B
+ * @param[out]    lineCPs              Line collision points (At most 16 - It can be null if you're sure the model has no lines)
+ * @param[out]    sphereCPs            Sphere collision points (At most 32)
+ * @param[in,out] maxTouchDistances    Only used if model has lines - If you're sure it has none it can be null. It has to be an array of the same size as the number of lines .
+ * @param         bReturnAllCollisions              
  *
  * @returns Number of sphere collision points found (At most ~~32~~ 31 - Original function is buggy)
  */
-int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, const CMatrix& transformB, CColModel& cmB, CColPoint (&sphereCPs)[32], CColPoint* lineCPs,
-                                   float* maxTouchDistance, bool arg7) {
-    return plugin::CallAndReturn<int32, 0x4185C0, const CMatrix&, CColModel&, const CMatrix&, CColModel&, CColPoint(&)[32], CColPoint*, float*, bool>(
-        transformA, cmA, transformB, cmB, sphereCPs, lineCPs, maxTouchDistance, arg7);
-
+int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
+    const CMatrix& transformB, CColModel& cmB,
+    std::array<CColPoint, 32>& sphereCPs,
+    CColPoint* lineCPs,
+    float* maxTouchDistances,
+    bool bReturnAllCollisions
+) {
+    return plugin::CallAndReturn<int32, 0x4185C0, const CMatrix&, CColModel&, const CMatrix&, CColModel&, std::array<CColPoint, 32>*, CColPoint*, float*, bool>(
+        transformA, cmA, transformB, cmB, &sphereCPs, lineCPs, maxTouchDistances, bReturnAllCollisions);
+    /*
     // Don't these this should ever happen, but okay?
     if (!cmA.m_pColData) {
         return 0;
@@ -598,7 +603,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
                     cp.m_nPieceTypeA = box.m_Surface.m_nPiece;
                     cp.m_nLightingA = box.m_Surface.m_nLighting;
 
-                    if (arg7 && sphereA.m_Surface.m_nPiece <= 2 && nNumSphereCPs < std::size(sphereCPs)) {
+                    if (bReturnAllCollisions && sphereA.m_Surface.m_nPiece <= 2 && nNumSphereCPs < std::size(sphereCPs)) {
                         advanceColPointIdx = false;
                         minTouchDist = 1e24f;
                         sphereCPs[nNumSphereCPs + 1].m_fDepth = -1.f;
@@ -616,7 +621,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
 
                 if (ProcessSphereTriangle(sphereA, cdB.m_pVertices, cdB.m_pTriangles[triIdx], cdB.m_pTrianglePlanes[triIdx], cp, minTouchDist)) {
                     // Same code as above in boxes
-                    if (arg7 && sphereA.m_Surface.m_nPiece <= 2 && nNumSphereCPs < std::size(sphereCPs)) {
+                    if (bReturnAllCollisions && sphereA.m_Surface.m_nPiece <= 2 && nNumSphereCPs < std::size(sphereCPs)) {
                         advanceColPointIdx = false;
                         minTouchDist = 1e24f;
                         sphereCPs[nNumSphereCPs + 1].m_fDepth = -1.f;
@@ -655,7 +660,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
     // and store colpoints for all lines (even if they didn't collide)
     // (I really don't understand how the caller will know which lines have collided?)
     if (cdA.m_nNumLines) {
-        assert(maxTouchDistance);
+        assert(maxTouchDistances);
         assert(lineCPs);
         assert(cdA.m_nNumLines <= MAX_LINES);
 
@@ -674,7 +679,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
             // }
 
             auto& thisLineCP{lineCPs[lineIdx]};
-            auto& thisLineTochDist{maxTouchDistance[lineIdx]};
+            auto& thisLineTochDist{maxTouchDistances[lineIdx]};
 
             bool hasCollided{}; // Instead of the static array we just use a variable (Same functionality)
 
@@ -810,6 +815,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
     // I moved it into the above section to keep things clear.
 
     return (int32)nNumSphereCPs;
+    */
 }
 
 // 0x419F00

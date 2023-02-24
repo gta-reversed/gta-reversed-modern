@@ -14,7 +14,7 @@ CTaskComplexPartnerGreet::CTaskComplexPartnerGreet(const char* commandName, CPed
 {
     m_handShakeType = handShakeType;
     m_taskId = TASK_COMPLEX_PARTNER_GREET;
-    strcpy(m_animBlockName, "gangs");
+    strcpy_s(m_animBlockName, "gangs");
 }
 
 CTaskComplexPartnerGreet* CTaskComplexPartnerGreet::Constructor(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, int32 handShakeType, CVector point)

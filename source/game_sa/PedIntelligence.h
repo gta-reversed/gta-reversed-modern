@@ -90,11 +90,11 @@ public:
     void AddTaskEventResponseTemp(CTask* task, int32 unUsed);
     void AddTaskEventResponseNonTemp(CTask* task, int32 unUsed);
     void AddTaskPrimaryMaybeInGroup(CTask* task, bool bAffectsPed);
-    CTask* FindTaskByType(int32 taskId);
+    CTask* FindTaskByType(eTaskType taskId);
     CTaskSimpleFight* GetTaskFighting();
     CTaskSimpleUseGun* GetTaskUseGun();
     CTaskSimpleThrowProjectile* GetTaskThrow();
-    CTask* GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask);
+    CTask* GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask = true);
     CTaskSimpleSwim* GetTaskSwim();
     CTaskSimpleDuck* GetTaskDuck(bool bIgnoreCheckingForSimplestActiveTask = true);
     CTaskSimpleJetPack* GetTaskJetPack();
@@ -148,6 +148,7 @@ public:
         return false;
     }
 
+    CEventHandler&   GetEventHandler() { return m_eventHandler; }
     CEventScanner&   GetEventScanner()    { return m_eventScanner; }
     CPedScanner&     GetPedScanner()      { return m_pedScanner; }
     CVehicleScanner& GetVehicleScanner()  { return m_vehicleScanner; }

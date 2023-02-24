@@ -6,21 +6,21 @@ void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedClass(CTaskComplexFollowNodeRoute);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    // RH_ScopedInstall(CTaskComplexFollowNodeRoute, 0x66EA30);
-    // RH_ScopedInstall(CTaskComplexFollowNodeRoute, 0x66EB70);
-    // RH_ScopedInstall(Clone, 0x6713E0);
-    // RH_ScopedInstall(StopTimer, 0x6694E0);
-    // RH_ScopedInstall(MakeAbortable, 0x669520);
-    // RH_ScopedInstall(CreateSubTask, 0x669690);
-    // RH_ScopedInstall(ComputeRoute, 0x6699E0);
-    // RH_ScopedInstall(CalcGoToTaskType, 0x66EBE0);
-    // RH_ScopedInstall(CalcBlendRatio, 0x66EDC0);
-    // RH_ScopedInstall(CanGoStraightThere, 0x66EF20);
-    // RH_ScopedInstall(ComputePathNodes, 0x66EFA0);
-    // RH_ScopedInstall(SetTarget, 0x671750);
-    // RH_ScopedInstall(CreateFirstSubTask, 0x671800);
-    // RH_ScopedInstall(CreateNextSubTask, 0x6718D0);
-    // RH_ScopedInstall(ControlSubTask, 0x671AB0);
+    //RH_ScopedInstall(CTaskComplexFollowNodeRoute, 0x66EA30, { .reversed = false }); // TODO: Constructor
+    //RH_ScopedInstall(CTaskComplexFollowNodeRoute, 0x66EB70, { .reversed = false }); // TODO: Constructor
+    RH_ScopedInstall(Clone, 0x6713E0, { .reversed = false });
+    RH_ScopedInstall(StopTimer, 0x6694E0, { .reversed = false });
+    RH_ScopedInstall(MakeAbortable, 0x669520, { .reversed = false });
+    RH_ScopedInstall(CreateSubTask, 0x669690, { .reversed = false });
+    //RH_ScopedInstall(ComputeRoute, 0x6699E0, { .reversed = false });
+    RH_ScopedInstall(CalcGoToTaskType, 0x66EBE0, { .reversed = false });
+    //RH_ScopedInstall(CalcBlendRatio, 0x66EDC0, { .reversed = false });
+    //RH_ScopedInstall(CanGoStraightThere, 0x66EF20, { .reversed = false });
+    RH_ScopedInstall(ComputePathNodes, 0x66EFA0, { .reversed = false });
+    RH_ScopedInstall(SetTarget, 0x671750, { .reversed = false });
+    RH_ScopedInstall(CreateFirstSubTask, 0x671800, { .reversed = false });
+    RH_ScopedInstall(CreateNextSubTask, 0x6718D0, { .reversed = false });
+    RH_ScopedInstall(ControlSubTask, 0x671AB0, { .reversed = false });
 }
 
 // 0x66EA30

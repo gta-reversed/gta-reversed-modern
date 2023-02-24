@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace ReversibleHooks{
+ namespace ReversibleHooks{
 
 // TODO: Maybe this should go into `detail`
 constexpr uint32 JUMP_OPCODE = 0xE9;
@@ -37,14 +37,14 @@ struct Base {
     * 
     * @param hooked If this hook should be installed/uninstalled (true/false)
     *
-    * @returns If state is already the same as `hooked`
+    * @returns If the state has changed
     */
     bool State(bool hooked) {
         if (hooked == m_bIsHooked) {
-            return true;
+            return false; // No change
         }
         if (m_bIsLocked) {
-            return false;
+            return false; // Can't change
         }
         Switch();
         return true;

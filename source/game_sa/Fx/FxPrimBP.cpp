@@ -4,8 +4,8 @@ void FxPrimBP_c::InjectHooks() {
     RH_ScopedClass(FxPrimBP_c);
     RH_ScopedCategory("Fx");
 
-    // RH_ScopedInstall(GetRWMatrix, 0x4A9DC0);
-    // RH_ScopedInstall(Load, 0x5C2010);
+    RH_ScopedInstall(GetRWMatrix, 0x4A9DC0, { .reversed = false });
+    RH_ScopedInstall(Load, 0x5C2010, { .reversed = false });
 }
 
 // 0x4A9CF0

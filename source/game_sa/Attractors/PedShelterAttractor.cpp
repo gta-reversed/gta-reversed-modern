@@ -31,10 +31,10 @@ void CPedShelterAttractor::InjectHooks() {
     RH_ScopedClass(CPedShelterAttractor);
     RH_ScopedCategory("Attractors");
 
-    // RH_ScopedInstall(GetDisplacement, 0x5EF420);
+    RH_ScopedInstall(GetDisplacement, 0x5EF420, { .reversed = false });
     RH_ScopedVirtualInstall(ComputeAttractPos, 0x5EFC40);
     RH_ScopedVirtualInstall(ComputeAttractHeading, 0x5E9690);
-    // RH_ScopedVirtualInstall(BroadcastDeparture, 0x5EF570);
+    RH_ScopedVirtualInstall(BroadcastDeparture, 0x5EF570, { .reversed = false });
 }
 
 void CPedShelterAttractor::ComputeAttractPos_Reversed(int32 pedId, CVector& posn) {

@@ -103,7 +103,7 @@ void CAEGlobalWeaponAudioEntity::InjectHooks() {
     RH_ScopedInstall(UpdateParameters, 0x4DEF90);
     RH_ScopedInstall(AddAudioEvent, 0x4DFAA0);
     RH_ScopedInstall(ProjectileFire, 0x4DF060);
-    // RH_ScopedInstall(ServiceAmbientGunFire, 0x4DF210);
+    RH_ScopedInstall(ServiceAmbientGunFire, 0x4DF210, { .reversed = false });
 }
 
 CAEGlobalWeaponAudioEntity* CAEGlobalWeaponAudioEntity::Constructor() {

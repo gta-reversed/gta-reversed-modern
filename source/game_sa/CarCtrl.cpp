@@ -48,7 +48,7 @@ void CCarCtrl::InjectHooks()
     RH_ScopedInstall(CreateCarForScript, 0x431F80);
     RH_ScopedInstall(ChooseBoatModel, 0x421970);
     RH_ScopedInstall(ChooseCarModelToLoad, 0x421900);
-    // RH_ScopedInstall(GetNewVehicleDependingOnCarModel, 0x421440);
+    RH_ScopedInstall(GetNewVehicleDependingOnCarModel, 0x421440, { .reversed = false });
     RH_ScopedInstall(IsAnyoneParking, 0x42C250);
     RH_ScopedInstall(IsThisVehicleInteresting, 0x423EA0);
     RH_ScopedInstall(JoinCarWithRoadAccordingToMission, 0x432CB0);
@@ -122,15 +122,22 @@ int32 CCarCtrl::ChooseBoatModel() {
 
 // 0x421900
 int32 CCarCtrl::ChooseCarModelToLoad(int32 arg1) {
-    for (auto i = 0; i < 16; i++) {
-        const auto model = CPopulation::m_CarGroups[i][CGeneral::GetRandomNumberInRange(0, CPopulation::m_nNumCarsInGroup[i])];
-        if (!CStreaming::IsModelLoaded(model))
+    for (auto i = 0; i < 16; i++) { // TODO: Why 16?
+        const auto numCarsInGroup = CPopulation::m_nNumCarsInGroup[i];
+#ifdef FIX_BUGS
+        if (!numCarsInGroup) {
+            continue;
+        }
+#endif
+        const auto model = CPopulation::m_CarGroups[i][CGeneral::GetRandomNumberInRange(numCarsInGroup)];
+        if (!CStreaming::IsModelLoaded(model)) {
             return model;
+        }
     }
     return -1;
 }
 
-int32 CCarCtrl::ChooseGangCarModel(int32 loadedCarGroupId) {
+eModelID CCarCtrl::ChooseGangCarModel(eGangID loadedCarGroupId) {
     return CPopulation::PickGangCar(loadedCarGroupId);
 }
 
