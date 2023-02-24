@@ -6,13 +6,16 @@
 */
 #pragma once
 
+#include <Base.h>
+#include <ColTrianglePlane.h>
+
 class CColTriangle {
 public:
     CColTriangle() = default;
     CColTriangle(uint16 a, uint16 b, uint16 c, eSurfaceType material, tColLighting light) :
-          m_nVertA(a),
-          m_nVertB(b),
-          m_nVertC(c),
+          vA(a),
+          vB(b),
+          vC(c),
           m_nMaterial(material),
           m_nLight(light)
     {
@@ -27,13 +30,13 @@ public:
     * @param transform Transformation matrix to be used
     */
     void DrawWireFrame(CRGBA color, const CompressedVector* vertices, const CMatrix& transform) const;
-
+    auto GetPlane(const CompressedVector* vertices) const -> CColTrianglePlane;
 public:
     union {
         struct {
-            uint16 m_nVertA; // vertex index in vertices array
-            uint16 m_nVertB; // vertex index in vertices array
-            uint16 m_nVertC; // vertex index in vertices array
+            uint16 vA; // vertex index in vertices array
+            uint16 vB; // vertex index in vertices array
+            uint16 vC; // vertex index in vertices array
         };
         uint16 m_vertIndices[3];
     };
