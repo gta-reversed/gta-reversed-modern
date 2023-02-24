@@ -9,7 +9,7 @@
 #include "Ped.h"
 #include "eModelID.h"
 
-enum eCopType : uint32 {
+enum eCopType : uint32 { // TODO: Fix naming
     COP_TYPE_CITYCOP,
     COP_TYPE_LAPDM1,
     COP_TYPE_SWAT1,
@@ -30,6 +30,9 @@ public:
     char     field_7C0;
 
 public:
+    //! Get model ID used for a given cop type
+    static eModelID GetPedModelForCopType(eCopType ctype);
+
     /* May also be called with a modelID */
     explicit CCopPed(uint32_t copTypeOrModelID);
     ~CCopPed() override;

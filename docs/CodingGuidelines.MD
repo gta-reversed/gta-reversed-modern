@@ -6,6 +6,7 @@
 ### Code style
 * 4 space indentation, LF line endings.
 * If some rule about something is not specified here, refer to how it's done in the code.
+* Some classes may have *helper* functions to make code more readable. (usually denoted by *NOTSA* or *Helpers*) Try looking for and use them.
 * Use range-based for loops as much as possible.
 ```cpp
 for (auto& element : array); // <-- GOOD

@@ -68,8 +68,8 @@ void CSpecialFX::Render2DFXs() {
 
 // 0x721D30
 void CSpecialFX::ReplayStarted() {
-    if (CSpecialFX::bSnapShotActive) {
-        CSpecialFX::bSnapShotActive = false;
+    if (bSnapShotActive) {
+        bSnapShotActive = false;
         CTimer::ResetTimeScale();
     }
 }

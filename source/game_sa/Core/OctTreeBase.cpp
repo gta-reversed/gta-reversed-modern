@@ -70,7 +70,10 @@ bool COctTreeBase::Insert(uint8 red, uint8 green, uint8 blue) {
 void COctTreeBase::ReduceBranches(int32 newBranchesCount) {
     const int32 branchesToCount = m_bHasTransparentPixels ? newBranchesCount + 1 : newBranchesCount;
 
-    while (m_nNumBranches < branchesToCount) {
+    // Signed-unsigned conversion check
+    // TODO: Replace this with the overflow-check cast in notsa::script.
+    assert(m_nNumBranches < static_cast<uint32>(std::numeric_limits<int32>::max()));
+    while (static_cast<int32>(m_nNumBranches) < branchesToCount) {
         Reduce();
     }
 }

@@ -38,9 +38,9 @@ void CMenuManager::DrawFrontEnd() {
 // NOTSA
 void CMenuManager::DrawBuildInfo() {
     char buf[128] = {0};
-    strcpy(buf, BUILD_NAME_FULL);
+    strcpy_s(buf, BUILD_NAME_FULL);
     char version[32];
-    sprintf(
+    sprintf_s(
         version,
         " / RW %d.%d.%d.%d.%d",
         0xF & RwEngineGetVersion() >> 16,
@@ -49,7 +49,7 @@ void CMenuManager::DrawBuildInfo() {
         0xF & RwEngineGetVersion() >> 4,
         0xF & RwEngineGetVersion() >> 0
     );
-    strcpy(buf + strlen(buf), version);
+    strcpy_s(buf + strlen(buf), 32u - strlen(buf), version);
 
     CFont::SetProportional(true);
     CFont::SetScale(StretchX(0.25f), StretchY(0.5f));

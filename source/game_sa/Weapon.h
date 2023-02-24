@@ -39,6 +39,7 @@ enum class eWeaponSlot : uint32 {
     PARACHUTE,
     DETONATOR,
 };
+constexpr auto NUM_WEAPON_SLOTS = static_cast<size_t>(eWeaponSlot::DETONATOR) + 1u;
 
 class CPed;
 class CVehicle;

@@ -73,7 +73,7 @@ CHeli::CHeli(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelI
 
     field_9B8 = 0;
     m_bSearchLightEnabled = false;
-    field_A14 = CGeneral::GetRandomNumberInRange(2.0, 8.0f);
+    field_A14 = CGeneral::GetRandomNumberInRange(2.f, 8.f);
 }
 
 // 0x6C4340

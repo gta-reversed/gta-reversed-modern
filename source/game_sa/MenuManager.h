@@ -341,9 +341,17 @@ public:
     bool ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed);
     void ProcessMissionPackNewGame();
 
+    // NOTSA
+    const char* GetMovieFileName() const {
+        if (m_nTitleLanguage == 12 || m_nTitleLanguage == 7) {
+            return "movies\\GTAtitlesGER.mpg";
+        } else {
+            return "movies\\GTAtitles.mpg";
+        }
+    }
+
 private:
     static void SetBrightness(float brightness, bool arg2);
-    const char* GetMovieFileName() const;
 };
 
 VALIDATE_SIZE(CMenuManager, 0x1B78);

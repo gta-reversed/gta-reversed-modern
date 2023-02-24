@@ -410,8 +410,8 @@ void CEventHandler::ComputePedToFleeResponse(CEvent* event, CTask* task1, CTask*
     plugin::CallMethod<0x4B9B50, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
 
     /*
-    if (auto* ped = static_cast<CEventPedToFlee*>(event)->m_ped) {
-        m_ped->Say(69);
+    if (auto* ped = static_cast<CEventPedToFlee*>(event)->m_currPedToKill) {
+        m_currPedToKill->Say(69);
         m_eventResponseTask = new CTaskComplexSmartFleeEntity(ped, 1, 100.0f, -1, 1000, 1.0f);
     }
     */
@@ -587,7 +587,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
     if (task1)
         task2 = m_ped->GetTaskManager().GetSimplestActiveTask();
 
-    printf("event: %d task1: %d task2: %d\n", event->GetEventType(), task1->GetTaskType(), task2->GetTaskType()); // NOTSA
+    DEV_LOG("event: {} task1: {} task2: {}", (int32)event->GetEventType(), (int32)task1->GetTaskType(), (int32)task2->GetTaskType()); // NOTSA
 
     switch (event->GetEventType()) {
     case EVENT_VEHICLE_COLLISION:

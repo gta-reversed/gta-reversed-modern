@@ -21,7 +21,8 @@ void CEventSeenCop::InjectHooks()
     RH_ScopedInstall(Constructor1, 0x5FF380);
 }
 
-CEventAcquaintancePed::CEventAcquaintancePed(CPed* ped)
+CEventAcquaintancePed::CEventAcquaintancePed(CPed* ped, eTaskType taskType) :
+    CEventEditableResponse(taskType)
 {
     m_ped = ped;
     CEntity::SafeRegisterRef(m_ped);

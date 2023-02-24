@@ -51,7 +51,7 @@ bool CScriptsForBrains::HasAttractorScriptBrainWithThisNameLoaded(const char* na
 
 int16 CScriptsForBrains::GetIndexOfScriptBrainWithThisName(const char* name, int8 attachType) {
     const auto it = rng::find_if(m_aScriptForBrains, [=](tScriptForBrains& script) {
-        return script.m_nAttachType == attachType && !stricmp(script.m_scriptName, name);
+        return script.m_nAttachType == attachType && !_stricmp(script.m_scriptName, name);
     });
     return it != m_aScriptForBrains.end()
         ? rng::distance(m_aScriptForBrains.begin(), it)
@@ -61,7 +61,7 @@ int16 CScriptsForBrains::GetIndexOfScriptBrainWithThisName(const char* name, int
 void CScriptsForBrains::StartAttractorScriptBrainWithThisName(const char* name, CPed* ped, bool bHasAScriptBrain) {
     if (!ped->bWaitingForScriptBrainToLoad && !ped->bHasAScriptBrain) {
         if (const auto idx = GetIndexOfScriptBrainWithThisName(name, 5); idx >= 0) {
-            StartNewStreamedScriptBrain(idx, ped, bHasAScriptBrain);
+            StartNewStreamedScriptBrain(static_cast<uint8>(idx), ped, bHasAScriptBrain);
         }
     }
 }

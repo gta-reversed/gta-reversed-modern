@@ -256,7 +256,7 @@ void CPlane::BlowUpCar(CEntity* damager, bool bHideExplosion) {
 
         ChangeLawEnforcerState(0);
         gFireManager.StartFire(this, damager, 0.8f, 1, 7000, 0);
-        CDarkel::RegisterCarBlownUpByPlayer(this, 0);
+        CDarkel::RegisterCarBlownUpByPlayer(*this, 0);
         if (m_nModelIndex == MODEL_RCBARON) {
             CExplosion::AddExplosion(this, damager, EXPLOSION_RC_VEHICLE, GetPosition(), 0, 1, -1.0f, 0);
         } else {
@@ -425,11 +425,9 @@ void CPlane::ProcessControl() {
 
     CAutomobile::ProcessControl();
 
+    m_vehicleAudio.field_7C = static_cast<int16>(field_9A0);
     if (field_9A0) {
-        m_vehicleAudio.field_7C = field_9A0;
         field_9A0 = 0;
-    } else {
-        m_vehicleAudio.field_7C = field_9A0;
     }
 
     CVehicle::ProcessWeapons();

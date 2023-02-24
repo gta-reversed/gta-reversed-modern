@@ -25,7 +25,7 @@ enum ePrimaryTasks // array indexes
 
 enum eSecondaryTask : uint32 // array indexes
 {
-    TASK_SECONDARY_INVALID = -1,
+    TASK_SECONDARY_INVALID = (uint32)-1,
 
     TASK_SECONDARY_ATTACK = 0,              // want duck to be after attack
     TASK_SECONDARY_DUCK,                    // because attack controls ducking movement
@@ -156,7 +156,7 @@ public:
     /*!
     * @addr 0x681B60
     * @brief Set the seconady task
-    * @param task The new task, might be null, in case the specified task is to be removed
+    * @param task The new, dynamically allocated, task, might be null, in case the specified task will be removed.
     * @param taskIndex The index of the secondary task to be changed
     */
     void SetTaskSecondary(CTask* task, eSecondaryTask taskIndex) { ChangeTaskInSlot(m_aSecondaryTasks[taskIndex], task); }
@@ -273,6 +273,15 @@ public:
     template<eTaskType T>
     bool Has() {
         return Find<T>();
+    }
+
+    /*!
+    * @notsa
+    * @brief Check if any active task is of type `T`
+    */
+    template<Task T>
+    bool Has() {
+        return Find<T::Type>();
     }
 
     /*!
