@@ -31,7 +31,7 @@ public:
     union {
         struct {
             uint32 bIsPickup : 1;               // 0x1
-            uint32 b0x02 : 1;                   // 0x2
+            uint32 b0x02 : 1;                   // 0x2 - collision related
             uint32 bPickupPropertyForSale : 1;  // 0x4
             uint32 bPickupInShopOutOfStock : 1; // 0x8
             uint32 bGlassBroken : 1;            // 0x10

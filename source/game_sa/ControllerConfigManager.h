@@ -92,13 +92,6 @@ enum eControllerAction {
     CA_SHOW_MOUSE_POINTER_TOGGLE
 };
 
-enum eControllerType {
-    CONTROLLER_KEYBOARD1 = 0,
-    CONTROLLER_KEYBOARD2 = 1,
-    CONTROLLER_MOUSE = 2,
-    CONTROLLER_PAD = 3,
-};
-
 struct CControllerKey {
     uint32 KeyCode;
     uint32 Priority;
@@ -136,8 +129,11 @@ public:
     void SaveSettings(FILESTREAM file);
 
     void InitDefaultControlConfiguration();
+    void InitDefaultControlConfigMouse(const CMouseControllerState& state, bool controller);
     void InitialiseControllerActionNameArray();
     void ReinitControls();
+
+    void SetMouseButtonAssociatedWithAction(eControllerAction action, RsKeyCodes button);
 
     void StoreMouseButtonState(eMouseButtons button, bool state);
     void UpdateJoyInConfigMenus_ButtonDown(ePadButton button, int32 padNumber);

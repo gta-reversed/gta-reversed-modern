@@ -658,6 +658,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* ped) {
     case SWIM_UNDERWATER_SPRINTING: {
         uint32 oxygen = 5;
         if (ped->IsPlayer()) {
+            assert(ped->m_pPlayerData);
             oxygen = static_cast<uint32>(((100.0f - ped->m_pPlayerData->m_fBreath / CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 100.0f) / 3.0f));
         }
         if ((unsigned)CGeneral::GetRandomNumberInRange(0, 100) < oxygen) {
@@ -794,7 +795,7 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* ped) {
                 } else {
                     ped->m_fAimingRotation -= DegreesToRadians(360.0f);
                 }
-                if (CGameLogic::IsPlayerAllowedToGoInThisDirection(ped, vecPedWalkDirection.x, vecPedWalkDirection.y, vecPedWalkDirection.z, 0.0f)) {
+                if (CGameLogic::IsPlayerAllowedToGoInThisDirection(ped, vecPedWalkDirection, 0.0f)) {
                     pedWalkX = (
                         vecPedWalkDirection.x * ped->m_matrix->GetRight().x +
                         vecPedWalkDirection.y * ped->m_matrix->GetRight().y +

@@ -181,7 +181,7 @@ void COcclusion::ProcessBeforeRendering()
 {
     return plugin::Call<0x7201C0>();
 
-    /* see https://github.com/Updated-Classic/gta-reversed-modern/pull/50#issuecomment-913173808
+    /* see https://github.com/gta-reversed/gta-reversed-modern/pull/50#issuecomment-913173808
     NumActiveOccluders = 0;
     if (!CGame::currArea) {
         auto listCur = ListWalkThroughFA;

@@ -25,6 +25,8 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(StartTestScript, 0x464D40);
     RH_ScopedInstall(AddToBuildingSwapArray, 0x481140);
     RH_ScopedInstall(UndoBuildingSwaps, 0x481290);
+    RH_ScopedInstall(HasCarModelBeenSuppressed, 0x46A810);
+    RH_ScopedInstall(HasVehicleModelBeenBlockedByScript, 0x46A890);
 }
 
 // 0x468D50
@@ -330,6 +332,16 @@ void CTheScripts::WipeLocalVariableMemoryForMissionScript() {
     memset(&LocalVariablesForCurrentMission, 0, sizeof(LocalVariablesForCurrentMission));
 }
 
+// 0x46A810
+bool CTheScripts::HasCarModelBeenSuppressed(eModelID carModelId) {
+    return notsa::contains(SuppressedVehicleModels, carModelId);
+}
+
+// 0x46A890
+bool CTheScripts::HasVehicleModelBeenBlockedByScript(eModelID carModelId) {
+    return notsa::contains(VehicleModelsBlockedByScript, carModelId);
+}
+
 // 0x464D40
 void CTheScripts::StartTestScript() {
     StartNewScript(MainSCMBlock);
@@ -358,7 +370,7 @@ void CTheScripts::PrintListSizes() {
     for (CRunningScript* script = pActiveScripts; script; script = script->m_pNext) active++;
     for (CRunningScript* script = pIdleScripts; script; script = script->m_pNext) idle++;
 
-    printf("active: %d, idle: %d\n", active, idle);
+    DEV_LOG("Scripts Active: {}, Idle: {}", active, idle);
 }
 
 uint32 DbgLineColour = 0x0000FFFF; // r = 0, g = 0, b = 255, a = 255
@@ -539,7 +551,7 @@ void CTheScripts::HighlightImportantArea(uint32 id, float x1, float y1, float x2
     center.x = (inf.x + sup.x) / 2;
     center.y = (inf.y + sup.y) / 2;
     center.z = (z <= MAP_Z_LOW_LIMIT) ? CWorld::FindGroundZForCoord(center.x, center.y) : z;
-    CShadows::RenderIndicatorShadow(id, 2, nullptr, &center, sup.x - center.x, 0.0f, 0.0f, center.y - sup.y, 0);
+    CShadows::RenderIndicatorShadow(id, SHADOW_ADDITIVE, nullptr, center, sup.x - center.x, 0.0f, 0.0f, center.y - sup.y, 0);
 }
 
 // 0x485EF0
@@ -577,7 +589,7 @@ void CTheScripts::HighlightImportantAngledArea(uint32 id, float x1, float y1, fl
     center.x = (inf.x + sup.x) / 2;
     center.y = (inf.y + sup.y) / 2;
     center.z = (z <= MAP_Z_LOW_LIMIT) ? CWorld::FindGroundZForCoord(center.x, center.y) : z;
-    CShadows::RenderIndicatorShadow(id, 2, nullptr, &center, sup.x - center.x, 0.0f, 0.0f, center.y - sup.y, 0);
+    CShadows::RenderIndicatorShadow(id, SHADOW_ADDITIVE, nullptr, &center, sup.x - center.x, 0.0f, 0.0f, center.y - sup.y, 0);
 }
 
 static uint16 NumScriptDebugLines;

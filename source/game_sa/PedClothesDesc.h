@@ -11,8 +11,8 @@
 
 class CPedClothesDesc {
 public:
-    uint32 m_anModelKeys[10];
-    uint32 m_anTextureKeys[18];
+    std::array<uint32, 10> m_anModelKeys;
+    std::array<uint32, 18> m_anTextureKeys;
     float  m_fFatStat;
     float  m_fMuscleStat;
 

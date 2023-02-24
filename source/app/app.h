@@ -2,35 +2,36 @@
 
 #include "Game.h"
 
-#define GAME_LIMIT_FPS 30
-#define GAME_LEVEL_FILE "DATA//GTA.DAT"
+#define RSEVENT_SUCCEED(x) ((x) ? rsEVENTPROCESSED : rsEVENTERROR)
 
+#define APP_MINIMAL_WIDTH           640
+#define APP_MINIMAL_HEIGHT          480
+#define APP_DEFAULT_WIDTH           800
+#define APP_DEFAULT_HEIGHT          600
+
+#define APP_MAX_FPS                 30
+#define GAME_LIMIT_FPS              30
+#define GAME_LEVEL_FILE             "DATA\\GTA.DAT"
+
+void AppInjectHooks();
+
+static inline int32& gGameState = *(int32*)0xC8D4C0;
 static inline bool ForegroundApp = *(bool*)0x8D621C;
 
 static inline RwRGBA& gColourTop    = *(RwRGBA*)0xB72CA0;
 static inline RwRGBA& gColourBottom = *(RwRGBA*)0xB72CA4;
 static inline float&  gHorZ = *(float*)0xB72C6C;
 
-/**
- * Game scene information
- */
-/*
-struct CScene {
-    RpWorld*  m_pRpWorld;
-    RwCamera* m_pRwCamera;
-};
-static inline CScene& Scene = *(CScene*)0xC17038;
-*/
-
-extern RsEventStatus AppEventHandler(RsEvent nEvent, void* param);
-extern bool AttachInputDevices();
+extern RsEventStatus AppEventHandler(RsEvent event, void* param);
 extern bool PluginAttach();
 extern bool Initialise3D(void* param);
 extern void Terminate3D();
 
+extern bool RwInitialize(void* param);
+extern void RwTerminate();
+
 extern void DefinedState();
 extern void DefinedState2d();
-extern void DoFade();
 extern void DoGameState();
 extern bool DoGameRestart();
 extern bool DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 BottomRed, int16 BottomGreen, int16 BottomBlue, int16 Alpha);
@@ -43,11 +44,16 @@ extern void InitialiseGame();
 extern uint32 MainGameFunc(void* param);
 extern void RenderScene();
 extern void RenderMenus();
+extern void Render2dStuff();
+extern void RenderDebugShit();
 extern void TheGame();
-extern void GameInit();
 extern bool WasForegroundAppLastFrame();
 extern bool IsForegroundApp();
 extern void CheckAniso();
+extern void RenderEffects();
+
+// NOTSA
+extern void ResetGammaWhenExiting();
 
 /**
  * Camera

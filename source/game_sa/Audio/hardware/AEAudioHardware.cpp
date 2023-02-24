@@ -31,7 +31,6 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(GetSoundHeadroom, 0x4D8E30, { .reversed = false });
     RH_ScopedInstall(EnableEffectsLoading, 0x4D8E40, { .reversed = false });
     RH_ScopedInstall(DisableEffectsLoading, 0x4D8E50, { .reversed = false });
-    RH_ScopedInstall(RequestVirtualChannelSoundInfo, 0x4D8E60, { .reversed = false });
     RH_ScopedInstall(GetVirtualChannelSoundLengths, 0x4D8E90);
     RH_ScopedInstall(GetVirtualChannelSoundLoopStartTimes, 0x4D8EB0);
     RH_ScopedInstall(PlayTrack, 0x4D8F10, { .reversed = false });
@@ -64,7 +63,6 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(Terminate, 0x4D97A0, { .reversed = false });
     RH_ScopedInstall(Service, 0x4D9870, { .reversed = false });
     RH_ScopedInstall(Initialise, 0x4D9930, { .reversed = false });
-    RH_ScopedInstall(AllocateChannels, 0x5B9340, { .reversed = false });
 }
 
 // 0x4D83E0

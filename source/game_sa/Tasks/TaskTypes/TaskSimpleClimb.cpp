@@ -140,8 +140,7 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped) {
             case CLIMB_FINISHED_V:
                 return std::make_pair(ms_fVaultOffsetHorz, ms_fVaultOffsetVert);
             default:
-                printf("[NOTSA] Unknown m_nHeightForPos");
-                return std::make_pair(0.0f, 0.0f);
+                NOTSA_UNREACHABLE();
             }
         }();
 
@@ -382,7 +381,7 @@ void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CV
 
                     return entity;
                 }
-                uint8 nColSphereIndex = CWorld::m_aTempColPts->m_nPieceTypeA;
+                uint8 nColSphereIndex = CWorld::m_aTempColPts[0].m_nPieceTypeA;
 
                 if (nColSphereIndex == 0 ||
                     nColSphereIndex == 1 ||
@@ -396,9 +395,9 @@ void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CV
                     return (void*)1;
                 }
 
-                auto relPosn = CWorld::m_aTempColPts->m_vecPoint - targetPos;
-                if (nColSphereIndex == 16 || CWorld::m_aTempColPts->m_vecPoint.z <= targetPos.z && DotProduct(relPosn, ped->GetForward()) >= 0.0f ||
-                    !g_surfaceInfos->CanClimb(CWorld::m_aTempColPts->m_nSurfaceTypeB)) {
+                auto relPosn = CWorld::m_aTempColPts[0].m_vecPoint - targetPos;
+                if (nColSphereIndex == 16 || CWorld::m_aTempColPts[0].m_vecPoint.z <= targetPos.z && DotProduct(relPosn, ped->GetForward()) >= 0.0f ||
+                    !g_surfaceInfos.CanClimb(CWorld::m_aTempColPts[0].m_nSurfaceTypeB)) {
                     if (entity->IsVehicle() && numSpheres > -1)
                         entity->GetColModel()->m_pColData->m_nNumSpheres = numSpheres;
                     continue;
@@ -422,43 +421,43 @@ void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CV
                     }
                 }
 
-                if (fabsf(CWorld::m_aTempColPts->m_vecNormal.x) <= 0.05f && fabsf(CWorld::m_aTempColPts->m_vecNormal.y) <= 0.05F) {
-                    targetPos = CWorld::m_aTempColPts->m_vecPoint;
+                if (fabsf(CWorld::m_aTempColPts[0].m_vecNormal.x) <= 0.05f && fabsf(CWorld::m_aTempColPts[0].m_vecNormal.y) <= 0.05F) {
+                    targetPos = CWorld::m_aTempColPts[0].m_vecPoint;
                     fAngle = ped->m_fCurrentRotation;
-                    nSurfaceType = CWorld::m_aTempColPts->m_nSurfaceTypeB;
+                    nSurfaceType = CWorld::m_aTempColPts[0].m_nSurfaceTypeB;
                     collidedEntity = entity;
                 } else {
-                    CVector vecNormal = CWorld::m_aTempColPts->m_vecNormal;
+                    CVector vecNormal = CWorld::m_aTempColPts[0].m_vecNormal;
 
-                    if (DotProduct2D(vecNormal, CWorld::m_aTempColPts->m_vecPoint - ped->GetPosition()) < 0.0F)
+                    if (DotProduct2D(vecNormal, CWorld::m_aTempColPts[0].m_vecPoint - ped->GetPosition()) < 0.0F)
                         vecNormal = -vecNormal;
 
                     if (DotProduct(vecNormal, ped->GetForward()) > 0.3F) {
-                        targetPos = CWorld::m_aTempColPts->m_vecPoint;
+                        targetPos = CWorld::m_aTempColPts[0].m_vecPoint;
                         fAngle = std::atan2f(-vecNormal.x, vecNormal.y);
-                        nSurfaceType = CWorld::m_aTempColPts->m_nSurfaceTypeB;
+                        nSurfaceType = CWorld::m_aTempColPts[0].m_nSurfaceTypeB;
                         collidedEntity = entity;
                     }
                 }
 
                 tempMatrix = *ped->m_matrix;
-                tempMatrix.SetTranslateOnly(CWorld::m_aTempColPts->m_vecPoint);
+                tempMatrix.SetTranslateOnly(CWorld::m_aTempColPts[0].m_vecPoint);
 
                 if (CCollision::ProcessColModels(tempMatrix, ms_FindEdgeColModel, entity->GetMatrix(), *entity->GetColModel(), CWorld::m_aTempColPts, nullptr, nullptr, false) > 0) {
-                    if (std::fabsf(CWorld::m_aTempColPts->m_vecNormal.x) <= 0.05f && std::fabsf(CWorld::m_aTempColPts->m_vecNormal.y) <= 0.05F) {
-                        targetPos = CWorld::m_aTempColPts->m_vecPoint;
-                        nSurfaceType = CWorld::m_aTempColPts->m_nSurfaceTypeB;
+                    if (std::fabsf(CWorld::m_aTempColPts[0].m_vecNormal.x) <= 0.05f && std::fabsf(CWorld::m_aTempColPts[0].m_vecNormal.y) <= 0.05F) {
+                        targetPos = CWorld::m_aTempColPts[0].m_vecPoint;
+                        nSurfaceType = CWorld::m_aTempColPts[0].m_nSurfaceTypeB;
                     } else {
-                        CVector vecNormal = CWorld::m_aTempColPts->m_vecNormal;
+                        CVector vecNormal = CWorld::m_aTempColPts[0].m_vecNormal;
 
-                        if (DotProduct2D(vecNormal, CWorld::m_aTempColPts->m_vecPoint - ped->GetPosition()) < 0.0F) {
+                        if (DotProduct2D(vecNormal, CWorld::m_aTempColPts[0].m_vecPoint - ped->GetPosition()) < 0.0F) {
                             vecNormal = -vecNormal;
                         }
 
                         if (DotProduct(vecNormal, ped->GetForward()) > 0.3F) {
-                            targetPos = CWorld::m_aTempColPts->m_vecPoint;
+                            targetPos = CWorld::m_aTempColPts[0].m_vecPoint;
                             fAngle = std::atan2f(-vecNormal.x, vecNormal.y);
-                            nSurfaceType = CWorld::m_aTempColPts->m_nSurfaceTypeB;
+                            nSurfaceType = CWorld::m_aTempColPts[0].m_nSurfaceTypeB;
                             collidedEntity = entity;
                         }
                     }

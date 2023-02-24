@@ -18,11 +18,11 @@ tEngineDummySlot (&CAEVehicleAudioEntity::s_DummyEngineSlots)[NUM_DUMMY_ENGINE_S
 const tVehicleAudioSettings (&gVehicleAudioSettings)[NUM_VEH_AUDIO_SETTINGS] = *reinterpret_cast<const tVehicleAudioSettings (*)[232]>(0x860AF0);
 
 bool IsSurfaceAudioGrass(eSurfaceType surface) {
-    return g_surfaceInfos->IsAudioGrass(surface) || g_surfaceInfos->IsAudioLongGrass(surface);
+    return g_surfaceInfos.IsAudioGrass(surface) || g_surfaceInfos.IsAudioLongGrass(surface);
 }
 
 bool IsSurfaceAudioEitherGravelWaterSand(eSurfaceType surface) {
-    return g_surfaceInfos->IsAudioGravel(surface) || g_surfaceInfos->IsAudioSand(surface) || g_surfaceInfos->IsAudioWater(surface);
+    return g_surfaceInfos.IsAudioGravel(surface) || g_surfaceInfos.IsAudioSand(surface) || g_surfaceInfos.IsAudioWater(surface);
 }
 
 void CAEVehicleAudioEntity::InjectHooks() {
@@ -1530,9 +1530,7 @@ void CAEVehicleAudioEntity::PlayBicycleSound(int16 engineState, int16 bankSlotId
             { 8, 25 },
             { 9, 50 }
         };
-        const auto random = CGeneral::GetRandomNumberInRange(0, std::size(RandomArray));
-        const auto& toPlay = RandomArray[random];
-
+        const auto& toPlay = CGeneral::RandomChoice(RandomArray);
         PlayGenericEngineSound(
             engineState,
             2,

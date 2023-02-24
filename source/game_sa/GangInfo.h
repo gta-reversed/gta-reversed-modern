@@ -8,14 +8,20 @@
 
 class CGangInfo {
 public:
-    int8  m_nPedModelOverride;
-    std::array<int32, 3> m_nGangWeapons;
-
-    CGangInfo() { // 0x5DE520
-        m_nPedModelOverride = -1;
-        m_nGangWeapons.fill(0);
-    };
+    CGangInfo(); // 0x5DE520
     ~CGangInfo() = default; // 0x5DE540
-};
 
+    //! Get the number unique weapon types the gang may have
+    size_t GetNumOfWeaponChoices() const;
+
+    //! Get a random weapon (out of the weapons the gang may have)
+    eWeaponType GetRandomWeapon() const;
+
+    //! Set the weapons this gang may use
+    void SetWeapons(std::array<eWeaponType, 3> weapons) { m_nGangWeapons = weapons; }
+
+public:
+    int8                       m_nPedModelOverride = -1;
+    std::array<eWeaponType, 3> m_nGangWeapons{};
+};
 VALIDATE_SIZE(CGangInfo, 0x10);

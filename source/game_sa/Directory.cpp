@@ -57,7 +57,7 @@ void CDirectory::AddItem(const DirectoryInfo& dirInfo) {
 #endif
         m_pEntries[m_nNumEntries++] = dirInfo;
     } else {
-        printf("Too many objects without modelinfo structures\n");
+        DEV_LOG("Too many objects without modelinfo structures");
     }
 }
 

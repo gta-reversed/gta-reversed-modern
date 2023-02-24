@@ -23,7 +23,7 @@ public:
     CPlaceable();
     virtual ~CPlaceable();
 
-    CMatrixLink& GetMatrix();
+    CMatrix& GetMatrix();
 
     static void ShutdownMatrixArray();
     static void InitMatrixArray();

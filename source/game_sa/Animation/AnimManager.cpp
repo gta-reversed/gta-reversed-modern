@@ -80,7 +80,7 @@ void CAnimManager::ReadAnimAssociationDefinitions() {
             continue;
 
         if (isAnimSection) {
-            if (sscanf(line, "%s", name) == 1) {
+            if (sscanf_s(line, "%s", SCANF_S_STR(name)) == 1) {
                 if (!memcmp(name, "end", 4)) {
                     isAnimSection = false;
                 } else {
@@ -90,7 +90,7 @@ void CAnimManager::ReadAnimAssociationDefinitions() {
         }
         else
         {
-            sscanf(line, "%s %s %s %d", name, block, type, &animCount);
+            VERIFY(sscanf_s(line, "%s %s %s %d", SCANF_S_STR(name), SCANF_S_STR(block), SCANF_S_STR(type), &animCount) == 4);
             animStyle = AddAnimAssocDefinition(name, block, MODEL_MALE01, animCount, aStdAnimDescs);
             isAnimSection = true;
         }
@@ -283,8 +283,8 @@ AnimAssocDefinition* CAnimManager::AddAnimAssocDefinition(const char* groupName,
 
     /*
     auto* def = &ms_aAnimAssocDefinitions[ms_numAnimAssocDefinitions++];
-    strcpy(def->groupName, groupName);
-    strcpy(def->blockName, blockName);
+    strcpy_s(def->groupName, groupName);
+    strcpy_s(def->blockName, blockName);
     def->modelIndex = modelIndex;
     def->animsCount = animsCount;
     def->animDesc   = descriptor;
@@ -306,7 +306,7 @@ void CAnimManager::AddAnimToAssocDefinition(AnimAssocDefinition* definition, con
     while (*definition->animNames[i]) {
         i++;
     }
-    strcpy(definition->animNames[i], animName);
+    strcpy_s(definition->animNames[i], animName);
     */
 }
 
@@ -356,7 +356,7 @@ int32 CAnimManager::RegisterAnimBlock(const char* name) {
     CAnimBlock* animBlock = GetAnimationBlock(name);
     if (animBlock == nullptr) {
         animBlock = &ms_aAnimBlocks[ms_numAnimBlocks++];
-        strncpy(animBlock->szName, name, MAX_ANIM_BLOCK_NAME);
+        strncpy_s(animBlock->szName, name, MAX_ANIM_BLOCK_NAME);
         animBlock->animationCount = 0;
         animBlock->animationStyle = GetFirstAssocGroup(name);
         assert(animBlock->usRefs == 0);
@@ -593,13 +593,13 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
         }
     } else {
         animBlock = &ms_aAnimBlocks[ms_numAnimBlocks++];
-        strncpy(animBlock->szName, buf + 4, MAX_ANIMBLOCK_NAME);
+        strncpy_s(animBlock->szName, buf + 4, MAX_ANIMBLOCK_NAME);
         animBlock->animationCount = *(int*)buf;
         animBlock->startAnimation = ms_numAnimations;
         animBlock->animationStyle = GetFirstAssocGroup(animBlock->szName);
     }
 
-    printf("Loading ANIMS %s\n", animBlock->szName);
+    DEV_LOG("Loading ANIMS {}", animBlock->szName);
     animBlock->bLoaded = true;
 
     int animIndex = animBlock->startAnimation;
@@ -762,7 +762,7 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* stream, bool compress, bo
         }
     } else {
         animBlock = &ms_aAnimBlocks[ms_numAnimBlocks++];
-        strncpy(animBlock->szName, buf, MAX_ANIM_BLOCK_NAME);
+        strncpy_s(animBlock->szName, buf, MAX_ANIM_BLOCK_NAME);
         animBlock->animationCount = nAnims;
         animBlock->startAnimation = ms_numAnimations;
         animBlock->animationStyle = GetFirstAssocGroup(animBlock->szName);
@@ -856,4 +856,19 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* stream, bool compress, bo
     if (animIndex > ms_numAnimations) {
         ms_numAnimations = animIndex;
     }
+}
+
+AnimationId CAnimManager::GetRandomGangTalkAnim() {
+    constexpr AnimationId gangTalkAnims[]{
+        ANIM_ID_PRTIAL_GNGTLKA,
+        ANIM_ID_PRTIAL_GNGTLKB,
+        ANIM_ID_PRTIAL_GNGTLKC,
+        ANIM_ID_PRTIAL_GNGTLKD,
+
+        ANIM_ID_PRTIAL_GNGTLKE,
+        ANIM_ID_PRTIAL_GNGTLKF,
+        ANIM_ID_PRTIAL_GNGTLKG,
+        ANIM_ID_PRTIAL_GNGTLKH,
+    };
+    return CGeneral::RandomChoice(gangTalkAnims);
 }
