@@ -26,7 +26,7 @@ void CCollision::InjectHooks()
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x416260);
-    RH_ScopedInstall(Shutdown, 0x4162E0, { .reversed = false });
+    RH_ScopedInstall(Shutdown, 0x4162E0);
     RH_ScopedInstall(Update, 0x411E20);
     RH_ScopedInstall(SortOutCollisionAfterLoad, 0x411E30);
     RH_ScopedInstall(TestSphereSphere, 0x411E70);
@@ -300,7 +300,13 @@ void CCollision::Init() {
 
 // 0x4162E0
 void CCollision::Shutdown() {
-    plugin::Call<0x4162E0>();
+    for (auto i = ms_colModelCache.freeListTail.prev; i != &ms_colModelCache.usedListHead; i = i->prev) {
+        if (i->data) {
+            RemoveTrianglePlanes(i->data);
+        }
+    }
+    ms_colModelCache.Shutdown();
+    CColStore::Shutdown();
 }
 
 // 0x411E20
