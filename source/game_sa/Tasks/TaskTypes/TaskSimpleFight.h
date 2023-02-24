@@ -52,7 +52,7 @@ public:
     CEntity*               m_pTargetEntity;
     CAnimBlendAssociation* m_pAnim;
     CAnimBlendAssociation* m_pIdleAnim;
-    uint8                  m_nComboSet;
+    int8                   m_nComboSet;
     eFightAttackType       m_nCurrentMove;
     uint8                  m_nNextCommand;
     uint8                  m_nLastCommand;

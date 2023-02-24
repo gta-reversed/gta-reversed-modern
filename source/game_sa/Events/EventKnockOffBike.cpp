@@ -11,7 +11,6 @@ void CEventKnockOffBike::InjectHooks()
     RH_ScopedClass(CEventKnockOffBike);
     RH_ScopedCategory("Events");
 
-    using namespace ReversibleHooks;
     RH_ScopedOverloadedInstall(Constructor, "first", 0x4AFCF0, CEventKnockOffBike*(CEventKnockOffBike::*)(CVehicle*, CVector*, CVector*, float, float, uint8, uint8, int32, CPed*, bool, bool));
     RH_ScopedOverloadedInstall(Constructor, "second", 0x4AFC70, CEventKnockOffBike*(CEventKnockOffBike::*)());
     RH_ScopedVirtualInstall(AffectsPed, 0x4AFEE0);
@@ -211,7 +210,10 @@ int32 CEventKnockOffBike::CalcForcesAndAnims(CPed* ped)
             ped->ApplyMoveForce(force);
             return ANIM_ID_KO_SPIN_L;
         }
+        default:
+            NOTSA_UNREACHABLE();
         }
+        break;
     case KNOCK_OFF_TYPE_SKIDBACKFRONT:
     {
         ped->m_vecMoveSpeed = m_moveSpeed;

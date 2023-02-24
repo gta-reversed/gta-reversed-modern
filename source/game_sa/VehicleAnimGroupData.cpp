@@ -217,7 +217,7 @@ int32 CVehicleAnimGroup::InitFromData(const char* line) {
 
     std::array<bool32, 18> flags{};
 
-    const auto n = sscanf(
+    const auto n = sscanf_s(
         line,
         "%*s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%d",
         &id,
@@ -332,7 +332,7 @@ bool CVehicleAnimGroupData::UsesHovercraftDrivingAnims(AssocGroupId groupId) {
 // NOTSA
 int32 CVehicleAnimGroupData::LoadAGroupFromData(const char* line) {
     int32 id{};
-    if (sscanf(line, "^\t%d", &id) != 1) {
+    if (sscanf_s(line, "^\t%d", &id) != 1) {
         return 0;
     }
     return GetVehicleAnimGroup(id).InitFromData(line);

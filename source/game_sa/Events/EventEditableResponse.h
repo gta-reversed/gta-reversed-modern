@@ -11,7 +11,7 @@ public:
     uint16 field_12;
 
 public:
-    CEventEditableResponse();
+    CEventEditableResponse(eTaskType taskType = TASK_NONE/*notsa*/);
     ~CEventEditableResponse() override = default; // 0x4AC480
 
     CEvent* Clone() override;

@@ -425,11 +425,9 @@ void CPlane::ProcessControl() {
 
     CAutomobile::ProcessControl();
 
+    m_vehicleAudio.field_7C = static_cast<int16>(field_9A0);
     if (field_9A0) {
-        m_vehicleAudio.field_7C = field_9A0;
         field_9A0 = 0;
-    } else {
-        m_vehicleAudio.field_7C = field_9A0;
     }
 
     CVehicle::ProcessWeapons();
