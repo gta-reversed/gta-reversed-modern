@@ -684,7 +684,7 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(
     // literal AIDS code
     const auto CalculateWave = [&](int32 offset, float angularPeriodX, float angularPeriodY) {
         const float freqOffsetMult = TWO_PI / static_cast<float>(offset);
-        const CVector2D w{ TWO_PI / angularPeriodX, TWO_PI / angularPeriodY };
+        const CVector2D w{ TWO_PI * angularPeriodX, TWO_PI * angularPeriodY };
 
         switch (offset) {
         case 5000: {
@@ -718,9 +718,9 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(
         }
     };
 
-    CalculateWave(5000, 64.0f, 64.0f);
-    CalculateWave(3500, 26.0f, 52.0f);
-    CalculateWave(3000,  0.0f, 20.0f);
+    CalculateWave(5000, 1.f / 64.0f, 1.f / 64.0f);
+    CalculateWave(3500, 1.f / 26.0f, 1.f / 52.0f);
+    CalculateWave(3000, 0.0f,        1.f / 20.0f);
 
     vecNormal.Normalise();
     auto v17 = (vecNormal.x + vecNormal.y + vecNormal.z) * 0.57700002f;
