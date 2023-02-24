@@ -92,7 +92,7 @@ void CCollision::InjectHooks()
 
 void CCollision::Tests() {
     const auto seed = time(nullptr);
-    srand(seed + rand());
+    srand(seed);
     std::cout << "CCollision::Tests seed: " << seed << std::endl;
 
     const auto VectorEq = [](const CVector& lhs, const CVector& rhs, float epsilon = 0.01f) {
