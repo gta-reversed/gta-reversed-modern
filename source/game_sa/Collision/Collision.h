@@ -26,7 +26,7 @@ public:
     static inline float& relVelCamCollisionVehiclesSqr = *(float*)0x8A5B18; // = 0.01f
 public:
     static void InjectHooks();
-    static void Tests();
+    static void Tests(int32 i);
 
     // dummy function
     static void Init();

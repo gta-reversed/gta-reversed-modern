@@ -5,22 +5,21 @@
     Do not delete this comment block. Respect others' work!
 */
 
+
 #include "StdInc.h"
 
 #include "Collision.h"
 #include "ColHelpers.h"
 #include "extensions/enumerate.hpp"
 
-void CalculateColPointInsideBox(CBox const& box, CVector const& point, CColPoint& colPoint); // Forward declaration needed for `InjectHooks`
+#define NOTSA_VANILLA_COLLISIONS
 
-void CCollision::InjectHooks()
-{
+void CCollision::InjectHooks() {
     // Must be done be4 hooks are injected
-#ifdef _DEBUG
+
     for (auto i = 0; i < 20; i++) {
-        Tests();
+       Tests(i);
     }
-#endif
 
     RH_ScopedClass(CCollision);
     RH_ScopedCategoryGlobal();
@@ -45,8 +44,8 @@ void CCollision::InjectHooks()
     RH_ScopedInstall(ProcessLineBox, 0x413100);
     RH_ScopedInstall(Test2DLineAgainst2DLine, 0x4138D0);
     RH_ScopedInstall(ProcessDiscCollision, 0x413960);
-    //RH_ScopedInstall(TestLineTriangle, 0x413AC0);
-    //RH_ScopedInstall(ProcessLineTriangle, 0x4140F0);
+    RH_ScopedInstall(TestLineTriangle, 0x413AC0);
+    RH_ScopedInstall(ProcessLineTriangle, 0x4140F0);
     //RH_ScopedInstall(ProcessVerticalLineTriangle, 0x4147E0);
     //RH_ScopedInstall(IsStoredPolyStillValidVerticalLine, 0x414D70);
     //RH_ScopedInstall(GetBoundingBoxFromTwoSpheres, 0x415230);
@@ -89,8 +88,8 @@ void CCollision::InjectHooks()
     RH_ScopedInstall(ProcessLineOfSight, 0x417950);
 }
 
-void CCollision::Tests() {
-    const auto seed = (uint32)time(nullptr);
+void CCollision::Tests(int32 i) {
+    const auto seed = (uint32)time(nullptr) + i;
     srand(seed);
     std::cout << "CCollision::Tests seed: " << seed << std::endl;
 
@@ -117,6 +116,10 @@ void CCollision::Tests() {
         };
     };
 
+    const auto RandomNormal = [&]() {
+        return RandomVector().Normalized();
+    };
+
     const auto RandomSphere = [&](float min = -100.f, float max = 100.f) {
         return CColSphere{ RandomVector(min, max), CGeneral::GetRandomNumberInRange(min, max) };
     };
@@ -136,6 +139,16 @@ void CCollision::Tests() {
         return CColLine{ {pos.x, pos.y, pos.z + fabs(pos.x)}, {pos.x, pos.y, pos.z - fabs(pos.x)} };
     };
 
+    const auto RandomTriangleVertices = [&](float min = -100.f, float max = 100.f) {
+        const auto vtxA = RandomVector(min, max);
+        const auto norm = RandomNormal();
+        return std::array<CompressedVector, 3>{
+            CompressVector(vtxA),
+            CompressVector(vtxA.Cross(norm)),
+            CompressVector(norm.Cross(vtxA))
+        };
+    };
+
     const auto Test = [](auto name, auto org, auto rev, auto cmp, auto&&... args) {
         const auto orgResult = org(args...);
         const auto revResult = rev(args...);
@@ -144,7 +157,7 @@ void CCollision::Tests() {
             assert(0);
         }
     };
-
+#if 1
     // TestSphereSphere
     {
         auto sp1 = RandomSphere(), sp2 = RandomSphere();
@@ -263,6 +276,38 @@ void CCollision::Tests() {
         Test("TestVerticalLineBox", Org, TestVerticalLineBox, std::equal_to{}, RandomVerticalLine(), RandomBox());
     }
 
+    // TestLineTriangle
+    {
+        const auto vtxs  = RandomTriangleVertices();
+        const auto tri   = CColTriangle{ 0, 1, 2, SURFACE_CAR_PANEL, {} };
+        const auto tripl = tri.GetPlane(vtxs.data());
+
+        const auto line  = RandomLine();
+
+        const auto Org = plugin::CallAndReturn<bool, 0x413AC0, const CColLine&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&>;
+        /*
+        const auto Benchmark = [&](auto fn, const char* title) {
+            using namespace std::chrono;
+            const auto begin = high_resolution_clock::now();
+            for (auto i = 0; i < 100'000'000; i++) {
+                const auto volatile v = fn(line, vtxs.data(), tri, tripl);
+            }
+            printf("[%s]: Took %llu ms\n", title, duration_cast<milliseconds>(high_resolution_clock::now() - begin).count());
+            //std::cout << "Took " << duration_cast<milliseconds>(high_resolution_clock::now() - begin) << " ms" << std::endl;
+        };
+        if (i % 2) {
+            Benchmark(TestLineTriangle, "TestLineTriangle");
+            Benchmark(Org, "Org");
+        } else {
+            Benchmark(Org, "Org");
+            Benchmark(TestLineTriangle, "TestLineTriangle");
+        }
+        printf("\n\n");
+        */
+        Test("TestLineTriangle", Org, TestLineTriangle, std::equal_to{}, line, vtxs.data(), tri, tripl);
+    }
+#endif
+
     // ProcessLineBox
     /*{
         const auto Org = [&](auto line, auto box) {
@@ -321,8 +366,8 @@ void CCollision::SortOutCollisionAfterLoad() {
 }
 
 // 0x411E70
-bool CCollision::TestSphereSphere(CColSphere const& sphere1, CColSphere const& sphere2) {
-    return (sphere1.m_vecCenter - sphere2.m_vecCenter).SquaredMagnitude() <= std::pow(sphere1.m_fRadius + sphere2.m_fRadius, 2);
+bool CCollision::TestSphereSphere(CColSphere const& sphere1, CColSphere const& sphere2) { // Yes, it's __stdcall
+    return (sphere1.m_vecCenter - sphere2.m_vecCenter).SquaredMagnitude() <= sq(sphere1.m_fRadius + sphere2.m_fRadius);
 }
 
 // 0x411EC0
@@ -357,7 +402,7 @@ void CalculateColPointInsideBox(CBox const& box, CVector const& point, CColPoint
 
 /*!
 * @address 0x4120C0
-* @brief Tests if \a box is fully inside \a sphere
+* @brief Tests if the \a box is fully inside \a sphere
 */
 bool CCollision::TestSphereBox(CSphere const& sphere, CBox const& box) {
     for (auto i = 0u; i < 3u; i++) {
@@ -407,14 +452,14 @@ bool CCollision::ProcessSphereBox(CColSphere const& sph, CColBox const& box, CCo
                             CColPoint boxCP{};
                             CalculateColPointInsideBox(box, sphere.m_vecCenter, boxCP);
 
-                            colPoint.m_vecPoint = boxCP.m_vecPoint - boxCP.m_vecNormal * sphere.m_fRadius;
-                            colPoint.m_fDepth = boxCP.m_fDepth;
+                            diskColPoint.m_vecPoint = boxCP.m_vecPoint - boxCP.m_vecNormal * sphere.m_fRadius;
+                            diskColPoint.m_fDepth = boxCP.m_fDepth;
 
-                            colPoint.m_nLightingA = sphere.m_nLighting;
-                            colPoint.m_nSurfaceTypeA = sphere.m_nMaterial;
+                            diskColPoint.m_nLightingA = sphere.m_nLighting;
+                            diskColPoint.m_nSurfaceTypeA = sphere.m_nMaterial;
 
-                            colPoint.m_nLightingB = box.m_nLighting;
-                            colPoint.m_nSurfaceTypeB = box.m_nMaterial;
+                            diskColPoint.m_nLightingB = box.m_nLighting;
+                            diskColPoint.m_nSurfaceTypeB = box.m_nMaterial;
 
                             maxTouchDistance = 0.f;
 
@@ -597,11 +642,11 @@ bool __stdcall CCollision::PointInTriangle(CVector const& point, CVector const* 
 * @address 0x412850
 * @brief Retruns the squared magnitude of the perpendicular vector starting at \a point and ending on the line defined by \a lineStart and \a lineEnd.
 *
-* If this vector doesn't intersect the line (eg.: Intersection point would be before\after \a lineStart or \a lineEnd respectively) either
+* If this vector doesn'maxTouchDist intersect the line (eg.: Intersection point would be before\after \a lineStart or \a lineEnd respectively) either
 * \a lineStart or \a lineEnd is returned (whichever is closer)
 */
 float CCollision::DistToLineSqr(CVector const& lineStart, CVector const& lineEnd, CVector const& point) {
-    // Make line end (l) and point (p) relative to lineStart (by this lineStart becomes the space origin)
+    // Make line end (l) and point (pl_ip) relative to lineStart (by this lineStart becomes the space origin)
     const auto l = lineEnd - lineStart;
     const auto p = point - lineStart;
 
@@ -677,7 +722,7 @@ float CCollision::DistAlongLine2D(float lineX, float lineY, float lineDirX, floa
 
 /*!
 * @address 0x412AA0
-* @brief Process line sphere intersection - Doesn't deal well with cases where line starts/ends inside the sphere.
+* @brief Process line sphere intersection - Doesn'maxTouchDist deal well with cases where line starts/ends inside the sphere.
 *
 * @param[in,out] depth `t` parameter - relative distance on line from it's origin (`line.start`)
 */
@@ -692,11 +737,11 @@ bool CCollision::ProcessLineSphere(CColLine const& line, CColSphere const& spher
     // Tanget of line to sphere centre
     const auto tanDistSq = sph.SquaredMagnitude() - (sphere.m_fRadius * sphere.m_fRadius);
 
-    // `projLineMagScaled` is scaled by |l|, and the only way around it without using sqrt is to make both sides scaled by lmagsq
-    // Scaled by |l|^2 (`lmagsq`)
+    // `projLineMagScaled` is scaled by |l|, and the only way around it
+    // without using sqrt is to make both sides scaled by lmagsq scaled by |l|^2 (`lmagsq`)
     const auto distOnLineSqScaled = (projLineMagScaled * projLineMagScaled) - tanDistSq * lmagsq;
 
-    if (distOnLineSqScaled < 0.f) { // Line doesn't intersect sphere
+    if (distOnLineSqScaled < 0.f) { // Line doesn'maxTouchDist intersect sphere
         return false;
     }
 
@@ -834,7 +879,7 @@ bool CCollision::TestVerticalLineBox(CColLine const& line, CBox const& box) {
 * @address 0x413100
 * @brief Process \a line and \a box collision.
 *
-* @param[out]    colPoint         Collision point
+* @param[out]    diskColPoint         Collision point
 * @param[in,out] maxTouchDistance Collision point depth inside box - If calculated value is higher than this value the function will return false, and no colpoint will be set.
 *
 * @returns If there was a collision or not. If there was a collision, but calculated depth is bigger than `maxTouchDistance` it returns false regardless.
@@ -1016,28 +1061,221 @@ bool CCollision::ProcessDiscCollision(
 }
 
 
-}
-
-// 0x413AC0
 /*!
-* @address 0x413AC0
+* Process line-triangle intersection, internal function (used to implement `ProcessLineTriangle` and `TestLineTriangle`)
+* @notsa
 */
-bool CCollision::TestLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane) {
-    return plugin::CallAndReturn<bool, 0x413AC0, const CColLine&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&>(line, verts, tri, triPlane);
+template<bool TestOnly>
+bool NOTSA_FORCEINLINE ProcessLineTriangle_Internal(
+    const CColLine& line,
+    const CompressedVector* verts,
+    const CColTriangle& tri,
+    const CColTrianglePlane& plane,
+    float* inOutMaxTouchDist,
+    CVector* outIP,
+    CVector* outPlNorm
+) {
+#ifdef NOTSA_VANILLA_COLLISIONS
+    const auto plNorm = plane.GetNormal();
+    if constexpr (!TestOnly) {
+        *outPlNorm = plNorm;
+    }
+
+    // Origin of line on the plane
+    const auto plNormDotLnOrigin = plane.GetPtDotNormal(line.m_vecStart);
+
+    // Check if both points are above or below the plane, if so, no chance of intersection
+    if (std::signbit(plNormDotLnOrigin) == std::signbit(plane.GetPtDotNormal(line.m_vecEnd))) {
+		return false;
+    }
+
+    // Magnitude of line on plane
+    const auto plLnMag = -(line.m_vecEnd - line.m_vecStart).Dot(plNorm);
+
+#ifdef FIX_BUGS
+	// Line is lies on plane, no intersection
+    if (plLnMag == 0.0f) {
+		return false;
+    }
+#endif
+    const auto t = plNormDotLnOrigin / plLnMag;
+    if constexpr (!TestOnly) {
+        if (t >= *inOutMaxTouchDist) {
+            return false;
+        }
+    }
+
+	// Find point of intersection
+    const auto ip = lerp(line.m_vecStart, line.m_vecEnd, t);
+    if constexpr (!TestOnly) {
+        *outIP = ip;
+    }
+
+    // Get the points relative to the plane's orientation
+    // This way the bound checks can be done in 2D
+    const auto [pl_va, pl_vb, pl_vc, pl_ip] = [&]() -> std::tuple<CVector2D, CVector2D, CVector2D, CVector2D> {
+	    const auto va = UncompressVector(verts[tri.vA]), 
+	               vb = UncompressVector(verts[tri.vB]), 
+	               vc = UncompressVector(verts[tri.vC]);
+
+	    // We do the test in 2D.
+        // With the plane direction we can figure out how to project the vectors.
+	    // normal = (c - a) x (b - a)
+        using enum CColTrianglePlane::Orientation;
+	    switch (plane.m_orientation){
+	    case POS_X: return {
+            {va.y, va.z},
+            {vc.y, vc.z},
+            {vb.y, vb.z},
+            {ip.y, ip.z}
+        };
+        case NEG_X: return {
+            {va.y, va.z},
+            {vb.y, vb.z},
+            {vc.y, vc.z},
+            {ip.y, ip.z}
+        };
+        case POS_Y: return {
+            {va.z, va.x},
+            {vc.z, vc.x},
+            {vb.z, vb.x},
+            {ip.z, ip.x}
+        };
+        case NEG_Y: return {
+            {va.z, va.x},
+            {vb.z, vb.x},
+            {vc.z, vc.x},
+            {ip.z, ip.x}
+        };
+        case POS_Z: return {
+            {va.x, va.y},
+            {vc.x, vc.y},
+            {vb.x, vb.y},
+            {ip.x, ip.y}
+        };
+        case NEG_Z: return {
+			{va.x, va.y},
+			{vb.x, vb.y},
+			{vc.x, vc.y},
+			{ip.x, ip.y}
+		};
+	    default: NOTSA_UNREACHABLE();
+	    }
+    }();
+
+	// This is our triangle:
+	// pl_vc---pl_vb
+	//    \     /
+	//     \   /
+	//      \ /
+	//     pl_va
+	// We can use the "2d cross product" to check on which side
+	// a vector is of another. Test is true if point is inside of all edges.
+    const auto pl_ip_a = pl_ip - pl_va;
+    if ((pl_vb - pl_va).Cross(pl_ip_a) >= 0.0f && (pl_vc - pl_va).Cross(pl_ip_a) <= 0.0f && (pl_vc - pl_vb).Cross(pl_ip - pl_vb) >= 0.0f) {
+        if (inOutMaxTouchDist) {
+            *inOutMaxTouchDist = t;
+        }
+        return true;
+    }
+    return false;
+#else // Not really tested (might not work properly)
+    // https://stackoverflow.com/a/42752998
+    const auto va = UncompressVector(verts[tri.vA]), 
+	           vb = UncompressVector(verts[tri.vB]), 
+	           vc = UncompressVector(verts[tri.vC]);
+
+    const auto eB = vb - va,
+               eC = vc - va,
+               n  = eC.Cross(eB);
+
+    const auto lnseg = line.m_vecEnd - line.m_vecStart;
+    
+    const auto det = -lnseg.Dot(n);
+    if (det < 1e-6f) {
+        return false;
+    }
+
+    const auto AO = line.m_vecStart - va;
+    const auto t  = AO.Dot(n) / det;
+    if (t < 0.f || t > 1.f) {
+        return false;
+    }
+
+    if constexpr (!TestOnly) {
+        if (t >= *inOutMaxTouchDist) {
+            return false;
+        }
+    }
+
+    const auto DAO = lnseg.Cross(AO);
+
+    const auto u = eC.Dot(DAO) / det;
+    if (u > 1.f) {
+        return false;
+    }
+
+    const auto v = -eB.Dot(DAO) / det;
+    if (v > 1.f) {
+        return false;
+    }
+
+    if (u + v > 1.f) {
+        return false;
+    }
+
+    if constexpr (!TestOnly) {
+        *inOutMaxTouchDist = t;
+        *outIP             = line.m_vecStart + lnseg * t;
+        *outPlNorm         = plane.GetNormal();
+    }
+    return true;
+#endif
 }
 
 /*!
-* @address 0x4140F0
-* @Processes \a line \a tri collision.
+* @addr 0x413AC0
+*/
+bool CCollision::TestLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& plane) {
+    return ProcessLineTriangle_Internal<true>(line, verts, tri, plane, nullptr, nullptr, nullptr);
+}
+
+/*!
+* Processes `line \a tri collision.
+* 
+* @addr 0x4140F0
 *
-* @param[out]    colPoint         Collision point
+* @param[out]    diskColPoint     Collision point
 * @param[in,out] maxTouchDistance Distance from line origin to intersection point
 * @pram[out]     collPoly         If given (can be null) stored the uncompressed vertices of the triangle and set's it's `actual` field to `true`
 *
-* @returns If there was a collision or not. If there was a collision, but calculated touch distance is bigger than `maxTouchDistance` it returns false regardless.
+* @returns If there was a collision that was closer to the beginning of the line than `maxTouchDistance`
 */
-bool CCollision::ProcessLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane, CColPoint& colPoint, float& maxTouchDistance, CStoredCollPoly* collPoly) {
-    return plugin::CallAndReturn<bool, 0x4140F0, const CColLine&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&, CColPoint&, float&, CStoredCollPoly*>(line, verts, tri, triPlane, colPoint, maxTouchDistance, collPoly);
+bool CCollision::ProcessLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& plane, CColPoint& colPoint, float& maxTouchDistance, CStoredCollPoly* collPoly) {
+    CVector ip, normal;
+    if (!ProcessLineTriangle_Internal<false>(line, verts, tri, plane, &maxTouchDistance, &ip, &normal)) {
+        return false;
+    }
+
+    colPoint.m_vecPoint  = ip;
+    colPoint.m_vecNormal = normal;
+
+    colPoint.m_nSurfaceTypeB = tri.m_nMaterial;
+    colPoint.m_nPieceTypeB = 0;
+    colPoint.m_nLightingB = tri.m_nLight;
+
+    colPoint.m_nSurfaceTypeA = SURFACE_DEFAULT;
+    colPoint.m_nPieceTypeA = 0;
+
+    if (collPoly) {
+        for (auto&& [i, vtx] : notsa::enumerate(tri.m_vertIndices)) {
+            collPoly->m_aMeshVertices[i] = UncompressVector(verts[vtx]);
+        }
+        collPoly->m_bIsActual = true;
+        collPoly->m_nLighting = tri.m_nLight;
+    }
+
+    return true;
 }
 
 // 0x4147E0
@@ -1290,7 +1528,7 @@ void CCollision::RemoveTrianglePlanes(CColModel* colModel) {
  * Box       +
  * Lines +   +   +
  *
- * Note: Originally the game calculated some disk stuff as well, but SA doesn't use disks (they're disabled when loadedin CFileLoader)
+ * Note: Originally the game calculated some disk stuff as well, but SA doesn'maxTouchDist use disks (they're disabled when loadedin CFileLoader)
  * thus I omitted the code for it (it would've made the already messy code even worse)
  *
  * @param         transformA           Transformation matrix of model A - Usually owning entity's matrix.
@@ -1314,7 +1552,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
     return plugin::CallAndReturn<int32, 0x4185C0, const CMatrix&, CColModel&, const CMatrix&, CColModel&, std::array<CColPoint, 32>*, CColPoint*, float*, bool>(
         transformA, cmA, transformB, cmB, &sphereCPs, lineCPs, maxTouchDistances, bReturnAllCollisions);
     /*
-    // Don't these this should ever happen, but okay?
+    // Don'maxTouchDist these this should ever happen, but okay?
     if (!cmA.m_pColData) {
         return 0;
     }
@@ -1345,10 +1583,10 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
     constexpr auto MAX_SPHERES{ 128u }; // Max no. of spheres colliding with other model's bounding sphere. - If more - Possible crash
     constexpr auto MAX_BOXES{ 64u };    // Same, but for boxes      - If more, all following are ignored.
     constexpr auto MAX_TRIS{ 600u };    // Same, but for triangles  - If more, all following are ignored.
-    constexpr auto MAX_LINES{ 16u };    // Game didn't originally check for this, so I assume no models ever have more than 16 lines.
+    constexpr auto MAX_LINES{ 16u };    // Game didn'maxTouchDist originally check for this, so I assume no models ever have more than 16 lines.
 
     // Transform `spheres` center position using `transform` and store them in `outSpheres`
-    const auto TransformSpheres = []<size_t N>(auto&& spheres, const CMatrix& transform, CColSphere(&outSpheres)[N]) {
+    const auto TransformSpheres = []<size_t n>(auto&& spheres, const CMatrix& transform, CColSphere(&outSpheres)[n]) {
         std::ranges::transform(spheres, outSpheres, [&](const auto& sp) {
             CColSphere transformed = sp;                                                   // Copy sphere
             transformed.m_vecCenter = MultiplyMatrixWithVector(transform, sp.m_vecCenter); // Set copy's center as the transformed point
@@ -1357,10 +1595,10 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
     };
 
     // Test `spheres` against bounding box `bb` and store all colliding sphere's indices in `collidedIdxs`
-    const auto TestSpheresAgainstBB = []<size_t N>(auto&& spheres, const auto& bb, uint32& numCollided, uint32(&collidedIdxs)[N]) {
+    const auto TestSpheresAgainstBB = []<size_t n>(auto&& spheres, const auto& bb, uint32& numCollided, uint32(&collidedIdxs)[n]) {
         for (const auto& [i, sp] : notsa::enumerate(spheres)) {
             if (TestSphereBox(sp, bb)) {
-                assert(numCollided < N); // Avoid out-of-bounds (Game originally didn't check)
+                assert(numCollided < n); // Avoid out-of-bounds (Game originally didn'maxTouchDist check)
                 collidedIdxs[numCollided++] = (uint32)i;
             }
         }
@@ -1396,7 +1634,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
     }
 
     // 0x418902
-    // Here the game tests collision of disks, but SA doesn't use disks, so I won't bother with it.
+    // Here the game tests collision of disks, but SA doesn'maxTouchDist use disks, so I won'maxTouchDist bother with it.
     assert(!cdB.bUsesDisks); // If this asserts then I was wrong and this part has to be reversed as well :D
 
     // 0x418A4E
@@ -1418,7 +1656,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
     uint32 numCollTrisB{};
 
     if (cdB.m_nNumTriangles) {
-        CalculateTrianglePlanes(&cmB); // Moved check inside if (Doesn't make a difference practically)
+        CalculateTrianglePlanes(&cmB); // Moved check inside if (Doesn'maxTouchDist make a difference practically)
         assert(cdB.m_pTrianglePlanes);
 
         // Process a single triangle
@@ -1475,7 +1713,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
                 }
 
                 // Original code also processed disk's spheres here (which were added to `colBCollSpheres` above (I skipped that part as well :D))
-                // But since the game doesn't use disks we skip this part.
+                // But since the game doesn'maxTouchDist use disks we skip this part.
             }
 
             // 0x418D86
@@ -1543,14 +1781,14 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
 
     // 0x4196B9
     // Test all of A's lines against all of B's colliding spheres, boxes and triangles,
-    // and store colpoints for all lines (even if they didn't collide)
-    // (I really don't understand how the caller will know which lines have collided?)
+    // and store colpoints for all lines (even if they didn'maxTouchDist collide)
+    // (I really don'maxTouchDist understand how the caller will know which lines have collided?)
     if (cdA.m_nNumLines) {
         assert(maxTouchDistances);
         assert(lineCPs);
         assert(cdA.m_nNumLines <= MAX_LINES);
 
-        // 0x419731 - Moved logic into loop (storing all lines in a separate array isn't necessary at all)
+        // 0x419731 - Moved logic into loop (storing all lines in a separate array isn'maxTouchDist necessary at all)
         // 0x419752 - Skipped this, as it just filled an array with 1:1 index mapping - Useless - They probably had some BB checking logic here?
 
         for (auto lineIdx = 0u; lineIdx < cdA.m_nNumLines; lineIdx++) {
@@ -1614,7 +1852,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
             CalculateTrianglePlanes(&cmA);
             assert(cdA.m_pTrianglePlanes);
 
-            // NOTE/TODO: Weird how they didn't use the facegroup stuff here as well.
+            // NOTE/TODO: Weird how they didn'maxTouchDist use the facegroup stuff here as well.
             //            Should probably implement it here some day too, as it speeds up the process quite a bit.
             for (auto i = 0; i < cdA.m_nNumTriangles; i++) {
                 if (TestSphereTriangle(colBSphereInASpace, cdA.m_pVertices, cdA.m_pTriangles[i], cdA.m_pTrianglePlanes[i])) {
