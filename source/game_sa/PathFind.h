@@ -109,7 +109,7 @@ public:
         if (m_nNumRightLanes) {
             return 0.5f - (float)m_nPathNodeWidth * 0.011574074f / 2.f;
         }
-        return 0.5 - (float)m_nNumLeftLanes / 2.f;
+        return 0.5f - (float)m_nNumLeftLanes / 2.f;
     }
 };
 VALIDATE_SIZE(CCarPathLink, 0xE);

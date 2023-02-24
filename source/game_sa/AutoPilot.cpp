@@ -12,8 +12,8 @@ void CAutoPilot::InjectHooks() {
 
 // 0x6D5E20
 CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo() {
-    _smthNext = 1;
-    _smthCurr = 1;
+    m_inverseDirToNextLink = 1;
+    m_inverseDirToCurrLink = 1;
 
     m_nCarCtrlFlags = 0;
 
