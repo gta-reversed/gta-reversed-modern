@@ -74,7 +74,7 @@ void CCollision::InjectHooks()
     //RH_ScopedInstall(ClosestPointOnLine, 0x417FD0);
     //RH_ScopedInstall(ClosestPointsOnPoly, 0x418100);
     //RH_ScopedInstall(ClosestPointOnPoly, 0x418150);
-    RH_ScopedInstall(ProcessColModels, 0x4185C0);
+    RH_ScopedInstall(ProcessColModels, 0x4185C0, { .reversed = false });
     //RH_ScopedInstall(SphereCastVsCaches, 0x4181B0);
     //RH_ScopedInstall(SphereCastVsEntity, 0x419F00);
     //RH_ScopedInstall(SphereVsEntity, 0x41A5A0);
@@ -87,17 +87,16 @@ void CCollision::InjectHooks()
     RH_ScopedOverloadedInstall(CalculateTrianglePlanes, "colData", 0x416330, void (*)(CCollisionData*));
     RH_ScopedOverloadedInstall(RemoveTrianglePlanes, "colData", 0x416400, void (*)(CCollisionData*));
     RH_ScopedInstall(ProcessLineOfSight, 0x417950);
-    RH_ScopedInstall(ProcessColModels, 0x4185C0, { .reversed = false });
 }
 
 void CCollision::Tests() {
-    const auto seed = time(nullptr);
+    const auto seed = (uint32)time(nullptr);
     srand(seed);
     std::cout << "CCollision::Tests seed: " << seed << std::endl;
 
     const auto VectorEq = [](const CVector& lhs, const CVector& rhs, float epsilon = 0.01f) {
         for (auto i = 0u; i < 3u; i++) {
-            if (approxEqual(lhs[i], rhs[i], epsilon)) {
+            if (!approxEqual(lhs[i], rhs[i], epsilon)) {
                 return false;
             }
         }
@@ -106,7 +105,7 @@ void CCollision::Tests() {
 
     const auto ColPointEq = [&](const CColPoint& lhs, const CColPoint& rhs) {
         return VectorEq(lhs.m_vecPoint, rhs.m_vecPoint)
-            && lhs.m_fDepth == rhs.m_fDepth
+            && approxEqual(lhs.m_fDepth, rhs.m_fDepth, 0.01f)
             && VectorEq(lhs.m_vecNormal, rhs.m_vecNormal);
     };
 
@@ -209,7 +208,7 @@ void CCollision::Tests() {
 
     // DistToLineSqr
     {
-        const auto Org = plugin::CallAndReturn<double, 0x412850, CVector const*, CVector const*, CVector const*>;
+        const auto Org = plugin::CallAndReturn<float, 0x412850, CVector const*, CVector const*, CVector const*>;
         const auto ls{ RandomVector() }, le{ RandomVector() }, p{ RandomVector() };
         const auto CmpEq = [](float org, float rev) {
             return approxEqual(org, rev, 0.02f);
