@@ -38,6 +38,10 @@ public:
         return cpy;
     }
 
+    [[nodiscard]] constexpr float ComponentwiseSum() const {
+        return x + y;
+    }
+
     [[nodiscard]] constexpr inline float SquaredMagnitude() const {
         return x * x + y * y;
     }
