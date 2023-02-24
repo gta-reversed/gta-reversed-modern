@@ -49,7 +49,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(ProcessVerticalLineTriangle, 0x4147E0);
     RH_ScopedInstall(IsStoredPolyStillValidVerticalLine, 0x414D70);
     RH_ScopedInstall(GetBoundingBoxFromTwoSpheres, 0x415230);
-    //RH_ScopedInstall(IsThisVehicleSittingOnMe, 0x4152C0);
+    RH_ScopedInstall(IsThisVehicleSittingOnMe, 0x4152C0);
     //RH_ScopedInstall(CheckCameraCollisionPeds, 0x415320);
     //RH_ScopedInstall(CheckPeds, 0x4154A0);
     //RH_ScopedInstall(ResetMadeInvisibleObjects, 0x415540);
@@ -1323,8 +1323,18 @@ void CCollision::GetBoundingBoxFromTwoSpheres(CColBox* bb, CColSphere* spA, CCol
 }
 
 // 0x4152C0
-bool CCollision::IsThisVehicleSittingOnMe(CVehicle* vehicle, CVehicle* vehicleOnMe) {
-    return plugin::CallAndReturn<bool, 0x4152C0, CVehicle*, CVehicle*>(vehicle, vehicleOnMe);
+bool CCollision::IsThisVehicleSittingOnMe(CVehicle* veh, CVehicle* vehOnMe) {
+    if (!veh || !vehOnMe) {
+        return false;
+    }
+    const auto Check = [veh](auto& wheelColEntities) {
+        return notsa::contains(wheelColEntities, veh);
+    };
+    switch (vehOnMe->m_nVehicleType) {
+    case VEHICLE_TYPE_AUTOMOBILE: return Check(vehOnMe->AsAutomobile()->m_apWheelCollisionEntity);
+    case VEHICLE_TYPE_BIKE:       return Check(vehOnMe->AsBike()->m_aGroundPhysicalPtrs);
+    default:                      return false;
+    }
 }
 
 // 0x415320
