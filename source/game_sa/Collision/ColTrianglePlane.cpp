@@ -19,7 +19,6 @@ CColTrianglePlane::CColTrianglePlane(const CColTriangle& tri, const CompressedVe
         UncompressVector(vertices[tri.vC])
     }
 {
-    Set(vertices, tri);
 }
 
 CColTrianglePlane::CColTrianglePlane(const CStoredCollPoly& poly) :
