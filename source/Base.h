@@ -38,10 +38,12 @@ typedef uint8     bool8;
 typedef uint16    bool16;
 typedef uint32    bool32;
 
-#if __has_builtin(__builtin_unreachable)
+#if (defined(__GNUC__) || defined(__GNUG__) || defined(__clang__))
 #define UNREACHABLE_INTRINSIC(...) __builtin_unreachable()
-#else
+#elif (defined(_MSC_VER))
 #define UNREACHABLE_INTRINSIC(...) __assume(false)
+#else
+#define UNREACHABLE_INTRINSIC(...) assert(false)
 #endif
 
 // Use the `NOTSA_UNREACHABLE` macro for unreachable code paths.
@@ -92,6 +94,12 @@ template<typename... Ts>
 #define NOTSA_UNREACHABLE(...) UNREACHABLE_INTRINSIC()
 #endif
 
+#ifdef _DEBUG
+#define NOTSA_DEBUG_BREAK() __debugbreak()
+#else
+#define NOTSA_DEBUG_BREAK()
+#endif
+
 // In order to be able to get the vtable address using GetProcAddress
 // the whole class must be exported. (Along which the vtable is exported as well)
 // See `ReversibleHooks::detail::GetClassVTableAddress`
@@ -104,6 +112,23 @@ template<typename... Ts>
 // Macro for unused function return values.
 // Eventually could instead verify the returned value? In case of `sscanf` etc...
 #define RET_IGNORED(x) (void)(x);
+
+//! Cause a debug break
+#define NOTSA_DEBUGBREAK() __debugbreak()
+
+//! Macro for passing a string var to *scanf_s function.
+#define SCANF_S_STR(s) s, std::size(s)
+
+/*!
+* @brief Used for static variable references
+*
+* @tparam T    The type of the variable
+* @tparam Addr The address of it
+*/
+template<typename T, uintptr Addr>
+T& StaticRef() {
+    return *reinterpret_cast<T*>(Addr);
+}
 
 #define _IGNORED_
 #define _CAN_BE_NULL_

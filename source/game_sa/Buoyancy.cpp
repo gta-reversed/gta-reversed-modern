@@ -447,7 +447,7 @@ void cBuoyancy::FindWaterLevel(const CVector& vecInitialZPos, CVector* outVecOff
 {
     CVector transformedPos = Multiply3x3(m_EntityMatrix, *outVecOffset);
     auto vecWorldPos = transformedPos + m_vecPos;
-    CWaterLevel::GetWaterLevel(vecWorldPos.x, vecWorldPos.y, m_vecPos.z, &outVecOffset->z, true, nullptr);
+    CWaterLevel::GetWaterLevel(vecWorldPos.x, vecWorldPos.y, m_vecPos.z, outVecOffset->z, true, nullptr);
     outVecOffset->z -= (transformedPos.z + vecInitialZPos.z);
 
     if (outVecOffset->z > m_vecBoundingMax.z) {
@@ -467,7 +467,7 @@ void cBuoyancy::FindWaterLevelNorm(const CVector& vecInitialZPos, CVector* outVe
 {
     CVector transformedPos = Multiply3x3(m_EntityMatrix, *outVecOffset);
     auto vecWorldPos = transformedPos + m_vecPos;
-    CWaterLevel::GetWaterLevel(vecWorldPos.x, vecWorldPos.y, m_vecPos.z, &outVecOffset->z, true, outVecNormal);
+    CWaterLevel::GetWaterLevel(vecWorldPos.x, vecWorldPos.y, m_vecPos.z, outVecOffset->z, true, outVecNormal);
     outVecOffset->z -= (transformedPos.z + vecInitialZPos.z);
 
     if (outVecOffset->z > m_vecBoundingMax.z) {

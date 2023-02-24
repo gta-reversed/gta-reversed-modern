@@ -206,7 +206,7 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
     field_744 = 0;
     field_74C = 0;
     m_nLookTime = 0;
-    m_nDeathTime = 0;
+    m_nDeathTimeMS = 0;
 
     m_vecAnimMovingShift = CVector2D();
     field_56C = CVector();
@@ -271,7 +271,7 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
     m_nMoneyCount = 0;
     field_72F = 0;
     m_nTimeTillWeNeedThisPed = 0;
-    field_590 = 0;
+    m_VehDeadInFrontOf = nullptr;
 
     m_pWeaponObject = nullptr;
     m_pGunflashObject = nullptr;
@@ -1739,7 +1739,7 @@ void CPed::ProcessBuoyancy()
         auto vecMoveDir = m_vecMoveSpeed * CTimer::GetTimeStep() * 4.0F;
         auto vecSplashPos = GetPosition() + vecMoveDir;
         float fWaterZ;
-        if (CWaterLevel::GetWaterLevel(vecSplashPos.x, vecSplashPos.y, vecSplashPos.z, &fWaterZ, true, nullptr)) {
+        if (CWaterLevel::GetWaterLevel(vecSplashPos, fWaterZ, true, nullptr)) {
             vecSplashPos.z = fWaterZ;
             g_fx.TriggerWaterSplash(vecSplashPos);
             AudioEngine.ReportWaterSplash(this, -100.0F, true);
@@ -2178,9 +2178,9 @@ void CPed::PlayFootSteps() {
     };
 
     if (bDoBloodyFootprints) {
-        if (m_nDeathTime && m_nDeathTime < 300) {
-            m_nDeathTime -= 1;
-            if (!m_nDeathTime) {
+        if (m_nDeathTimeMS && m_nDeathTimeMS < 300) {
+            m_nDeathTimeMS -= 1;
+            if (!m_nDeathTimeMS) {
                 bDoBloodyFootprints = false;
             }
         }
@@ -3179,7 +3179,7 @@ void CPed::RemoveBodyPart(ePedNode pedNode, char localDir) {
             m_nBodypartToRemove = pedNode;
         }
     } else {
-        printf("Trying to remove ped component");
+        DEV_LOG("Trying to remove ped component");
     }
 }
 
@@ -3325,6 +3325,8 @@ RwMatrix& CPed::GetBoneMatrix(ePedBones bone) const {
 * @brief Set model index (Also re-inits animblend, MoneyCount, and default decision-marker)
 */
 void CPed::SetModelIndex(uint32 modelIndex) {
+    assert(modelIndex != MODEL_PLAYER || IsPlayer());
+
     m_bIsVisible = true;
 
     CEntity::SetModelIndex(modelIndex);
@@ -3547,8 +3549,9 @@ void CPed::Render() {
 // https://github.com/gennariarmando/bobble-heads
 // NOTSA
 void CPed::RenderBigHead() const {
-    if (!G_CHEAT_BIG_HEAD) // todo: !CCheat::IsActive(CHEAT_BIG_HEAD)
+    if (!CCheat::IsActive(CHEAT_BIG_HEAD)) {
         return;
+    }
 
     auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump);
     auto* matrices = RpHAnimHierarchyGetMatrixArray(hier);
@@ -3577,9 +3580,9 @@ void CPed::RenderBigHead() const {
 
 // NOTSA
 void CPed::RenderThinBody() const {
-    if (!G_CHEAT_THIN_BODY) // todo: !CCheat::IsActive(CHEAT_THIN_BODY)
+    if (!CCheat::IsActive(CHEAT_THIN_BODY)) {
         return;
-
+    }
 }
 
 /*!

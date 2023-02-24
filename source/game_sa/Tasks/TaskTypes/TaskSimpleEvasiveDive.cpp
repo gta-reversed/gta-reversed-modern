@@ -43,7 +43,7 @@ void CTaskSimpleEvasiveDive::StartAnim(CPed* ped) {
         return;
 
     if (m_Vehicle->m_pDriver && m_Vehicle->m_pDriver->IsPlayer()) {
-        auto pedPos = ped->GetPosition();
+        const auto& pedPos = ped->GetPosition();
         auto wanted = FindPlayerWanted();
         wanted->RegisterCrime_Immediately(CRIME_VEHICLE_DAMAGE, pedPos, ped, 0);
         wanted->RegisterCrime_Immediately(CRIME_TYPE_9, pedPos, ped, 0);

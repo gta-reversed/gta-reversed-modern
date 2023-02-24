@@ -92,13 +92,6 @@ enum eControllerAction {
     CA_SHOW_MOUSE_POINTER_TOGGLE
 };
 
-enum eControllerType {
-    CONTROLLER_KEYBOARD1 = 0,
-    CONTROLLER_KEYBOARD2 = 1,
-    CONTROLLER_MOUSE = 2,
-    CONTROLLER_PAD = 3,
-};
-
 struct CControllerKey {
     uint32 KeyCode;
     uint32 Priority;

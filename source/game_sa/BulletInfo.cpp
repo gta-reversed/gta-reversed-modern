@@ -124,6 +124,7 @@ void CBulletInfo::Update() {
                     }
                     newPosition = colPoint.m_vecPoint;
                 }
+                break;
             }
             case ENTITY_TYPE_VEHICLE: {
                 // std::cout << "Hit vehicle\n";

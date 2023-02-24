@@ -1,16 +1,13 @@
 #include "StdInc.h"
 #include <span>
 
-#include "TimecycEditor.h"
 #include "VehicleRecording.h"
 
-#include "toolsmenu\DebugModules\CStreamingDebugModule.h"
-#include "toolsmenu\DebugModules\CullZonesDebugModule.h"
 #include "extensions\enumerate.hpp"
 
 uint32 CPath::GetIndex() const {
     const auto index = this - CVehicleRecording::StreamingArray.data();
-    assert(index >= 0 && index < TOTAL_VEHICLE_RECORDS);
+    assert(index >= 0 && static_cast<size_t>(index) < CVehicleRecording::StreamingArray.size());
 
     return index;
 }
@@ -90,13 +87,6 @@ void CVehicleRecording::ShutDown() {
 
 // 0x459F70 hook not needed
 void CVehicleRecording::Render() {
-// NOTSA: Originally an empty function, called late in rendering pipeline, used for debug stuff
-#ifdef EXTRA_DEBUG_FEATURES
-    TimeCycleDebugModule::ProcessRender();
-    COcclusionDebugModule::ProcessRender();
-    CStreamingDebugModule::ProcessRender();
-    CullZonesDebugModule::ProcessRender();
-#endif
 }
 
 // 0x45A360
@@ -173,8 +163,8 @@ void CVehicleRecording::SmoothRecording(int32 recordId) {
 // 0x459F80
 int32 CVehicleRecording::RegisterRecordingFile(const char* name) {
     auto fileNumber = 850;
-    if (sscanf(name, "carrec%d", &fileNumber) == 0) {
-        RET_IGNORED(sscanf(name, "CARREC%d", &fileNumber));
+    if (sscanf_s(name, "carrec%d", &fileNumber) == 0) {
+        VERIFY(sscanf_s(name, "CARREC%d", &fileNumber) == 1);
     }
 
     CARREC_DEV_LOG("Registering carrec file '{}', (streamIdx={})", name, NumPlayBackFiles);

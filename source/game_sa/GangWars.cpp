@@ -289,7 +289,7 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
             continue;
 
         auto gangCarModel = CPopulation::PickGangCar(Gang1);
-        if (gangCarModel >= 0 && CStreaming::GetInfo(gangCarModel).IsLoaded()) {
+        if (gangCarModel != MODEL_INVALID && CStreaming::GetInfo(gangCarModel).IsLoaded()) {
             auto fwd = carNodePos - nodePos;
             fwd.z = 0.0f;
             fwd.Normalise();
@@ -427,17 +427,11 @@ bool CGangWars::MakePlayerGainInfluenceInZone(float removeMult) {
 
 // 0x4439D0
 bool CGangWars::PedStreamedInForThisGang(eGangID gangId) {
-    auto groupId = CPopulation::GetGangGroupId(gangId, 0);
-    auto numPeds = CPopulation::GetNumPedsInGroup(groupId);
-    if (numPeds <= 0)
-        return false;
-
-    for (auto group : std::span{ CPopulation::m_PedGroups, (size_t)numPeds }) {
-        if (!CStreaming::GetInfo(*group).IsLoaded()) {
+    for (auto midx : CPopulation::GetModelsInPedGroup(CPopulation::GetGangGroupId(gangId))) {
+        if (CStreaming::IsModelLoaded(midx)) {
             return true;
         }
     }
-
     return false;
 }
 
@@ -624,7 +618,7 @@ void CGangWars::StartOffensiveGangWar() {
     }
 
     // NOTSA
-    Gang1 = std::ranges::max_element(zoneInfo->GangDensity) - zoneInfo->GangDensity;
+    Gang1 = (eGangID)(std::ranges::max_element(zoneInfo->GangDensity) - zoneInfo->GangDensity);
     auto gang1Density = zoneInfo->GangDensity[Gang1];
     zoneInfo->GangDensity[Gang1] = 0; // to find the second biggest
 
@@ -966,7 +960,7 @@ void CGangWars::Update() {
             if (DistanceBetweenPoints2D(PointOfAttack, playerPos) >= 150.0f) {
                 bPlayerIsCloseby = false;
             } else if (!bPlayerIsCloseby) {
-                CVector unused;
+                CVector unused{};
                 CStreaming::StreamZoneModels_Gangs(unused);
                 bPlayerIsCloseby = true;
             }

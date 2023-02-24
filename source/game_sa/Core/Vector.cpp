@@ -33,6 +33,11 @@ CVector::CVector(const CVector2D& v2, float z) :
 {
 }
 
+CVector CVector::Random(CVector min, CVector max) {
+    const auto Get = [=](float fmin, float fmax) { return CGeneral::GetRandomNumberInRange(fmin, fmax); };
+    return { Get(min.x, max.x), Get(min.y, max.y), Get(min.z, max.z) };
+}
+
 CVector CVector::Random(float min, float max) {
     const auto Get = [=] { return CGeneral::GetRandomNumberInRange(min, max); };
     return { Get(), Get(), Get() };

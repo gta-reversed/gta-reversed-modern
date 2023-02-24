@@ -111,7 +111,7 @@ void CGarages::Update() {
         return;
 
     // Originally they've clearly used an some kind of `abs` macro (probably to "optimize" it)... And failed miserably lol
-    const auto camPos = TheCamera.GetPosition();
+    const auto& camPos = TheCamera.GetPosition();
     if (   std::abs(garageToCheck.m_fLeftCoord - camPos.x) < 40.f
         && std::abs(garageToCheck.m_fFrontCoord - camPos.y) < 40.f
     ) {
@@ -461,7 +461,7 @@ bool CGarages::Load() {
         }
     }
 
-    // our debug leftover std::ranges::for_each(aCarsInSafeHouse, [&](auto& car) { printf("%d\n", car->m_wModelIndex); });
+    // our debug leftover std::ranges::for_each(aCarsInSafeHouse, [&](auto& car) { DEV_LOG("%d\n", car->m_wModelIndex); });
 
     for (auto i = 0; i < NumGarages; i++) {
         CSaveGarage sg{};

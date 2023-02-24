@@ -143,7 +143,7 @@ bool CTaskSimpleCarOpenDoorFromOutside::ProcessPed(CPed* ped) {
         }
     }
 
-    const auto doorOpenTiming = m_veh->GetAnimGroup().GetInOutTiming(TIMING_START)[OPEN_OUT];
+    const auto doorOpenTiming = m_veh->GetAnimGroup().GetInOutTiming(TIMING_START)[OPEN_START];
     if (m_veh->IsAutomobile() || m_anim->m_fCurrentTime >= doorOpenTiming) {
         const auto [groupId, animId] = ComputeAnimID();
         m_veh->ProcessOpenDoor(ped, m_door, groupId, m_anim->m_nAnimId, m_anim->m_fCurrentTime);        

@@ -10,8 +10,10 @@
 
 #include "Buoyancy.h"
 
+
+
 void CBike::InjectHooks() {
-    RH_ScopedClass(CBike);
+    RH_ScopedVirtualClass(CBike, 0x871360, 67);
     RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(Constructor, 0x6BF430);
@@ -38,7 +40,7 @@ void CBike::InjectHooks() {
     RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6BF400);
     RH_ScopedVirtualInstall(BurstTyre, 0x6BEB20, { .reversed = false });
     RH_ScopedVirtualInstall(ProcessControlInputs, 0x6BE310, { .reversed = false });
-    RH_ScopedVirtualInstall(ProcessEntityCollision, 0x6BDEA0, { .reversed = false });
+    RH_ScopedVMTInstall(ProcessEntityCollision, 0x6BDEA0);
     RH_ScopedVirtualInstall(Render, 0x6BDE20);
     RH_ScopedVirtualInstall(PreRender, 0x6BD090, { .reversed = false });
     RH_ScopedVirtualInstall(Teleport, 0x6BCFC0);
@@ -78,7 +80,7 @@ CBike::CBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy
     m_pHandlingData = gHandlingDataMgr.GetVehiclePointer(mi->m_nHandlingId);
     m_BikeHandling = gHandlingDataMgr.GetBikeHandlingPointer(mi->m_nHandlingId);
     m_nHandlingFlagsIntValue = m_pHandlingData->m_nHandlingFlags;
-    m_pFlyingHandlingData = gHandlingDataMgr.GetFlyingPointer(mi->m_nHandlingId);
+    m_pFlyingHandlingData = gHandlingDataMgr.GetFlyingPointer(static_cast<uint8>(mi->m_nHandlingId));
     m_fBrakeCount = 20.0f;
     mi->ChooseVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor, 1);
     m_fSwingArmLength = 0.0f;
@@ -304,8 +306,124 @@ void CBike::ProcessControlInputs(uint8 playerNum) {
 }
 
 // 0x6BDEA0
-int32 CBike::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) {
-    return plugin::CallMethodAndReturn<int32, 0x6BDEA0, CBike*, CEntity*, CColPoint*>(this, entity, colPoint);
+int32 CBike::ProcessEntityCollision(CEntity* entity, CColPoint* outColPoints) {
+    if (m_nStatus != STATUS_SIMPLE) {
+        vehicleFlags.bVehicleColProcessed = true;
+    }
+
+    const auto tcd = GetColData(),
+               ocd = entity->GetColData();
+
+#ifdef FIX_BUGS // Text search for `FIX_BUGS@CAutomobile::ProcessEntityCollision:1`
+    if (!tcd || !ocd) {
+        return 0;
+    }
+#endif
+
+    if (physicalFlags.bSkipLineCol || physicalFlags.bProcessingShift || entity->IsPed()) {
+        tcd->m_nNumLines = 0; // Later reset back to original value
+    }
+
+    const auto ogWheelRatios = m_aWheelRatios;
+
+    auto numColPts = CCollision::ProcessColModels(
+        GetMatrix(), *GetColModel(),
+        entity->GetMatrix(), *entity->GetColModel(),
+        *(std::array<CColPoint, 32>*)(outColPoints),
+        m_aWheelColPoints,
+        m_aWheelRatios,
+        false
+    );
+
+    // Possibly add driver & entity collisions to `outColPoints`
+    if (m_pDriver && m_nTestPedCollision) {
+        const auto pcd = m_pDriver->GetColData();
+        if (!pcd->m_nNumLines) {
+            std::array<CColPoint, 32> pedCPs{};
+
+            CMatrix driverMat = GetMatrix();
+            driverMat.GetPosition() += GetDriverSeatDummyPositionWS();
+
+            std::array<CColPoint, 32> pedEntityColPts{};
+            const auto numPedEntityColPts = CCollision::ProcessColModels(
+                driverMat, *m_pDriver->GetColModel(),
+                entity->GetMatrix(), *entity->GetColModel(),
+                pedEntityColPts,
+                nullptr,
+                nullptr,
+                false
+            );
+
+            if (numPedEntityColPts) {
+                if (m_nTestPedCollision == 1) {
+                    m_nTestPedCollision = 0;
+                } else {
+                    for (auto i = 0; i < numPedEntityColPts && numColPts < 32; i++) {
+                        const auto& pedEntityCP = pedCPs[i];
+                        if (pedEntityCP.m_nPieceTypeA == PED_PIECE_UNKNOWN) {
+                            continue;
+                        }
+                        outColPoints[numColPts++] = pedEntityCP;
+                    }
+                }
+            }
+        }
+    }
+    
+    size_t numProcessedLines{};
+    if (tcd->m_nNumLines) {
+        // Process the real wheels
+        for (auto i = 0; i < NUM_SUSP_LINES; i++) {
+            const auto& cp = m_aWheelColPoints[i];
+
+            const auto wheelColPtsTouchDist = m_aWheelRatios[i];
+            if (wheelColPtsTouchDist >= 1.f || wheelColPtsTouchDist >= ogWheelRatios[i]) {
+                continue;
+            }
+
+            numProcessedLines++;
+
+            m_anCollisionLighting[i] = cp.m_nLightingB;
+            m_nContactSurface = cp.m_nSurfaceTypeB;
+
+            switch (entity->GetType()) {
+            case ENTITY_TYPE_VEHICLE:
+            case ENTITY_TYPE_OBJECT: {
+                CEntity::ChangeEntityReference(m_aGroundPhysicalPtrs[i], entity->AsPhysical());
+
+                m_aGroundOffsets[i] = cp.m_vecPoint - entity->GetPosition();
+                if (entity->IsVehicle()) {
+                    m_anCollisionLighting[i] = entity->AsVehicle()->m_anCollisionLighting[i];
+                }
+                break;
+            }
+            case ENTITY_TYPE_BUILDING: {
+                m_pEntityWeAreOn = entity;
+                m_bTunnel = entity->m_bTunnel;
+                m_bTunnelTransition = entity->m_bTunnelTransition;
+                break;
+            }
+            }
+        }
+    } else {
+        tcd->m_nNumLines = NUM_SUSP_LINES;
+    }
+
+    if (numColPts > 0 || numProcessedLines > 0) {
+        AddCollisionRecord(entity);
+        if (!entity->IsBuilding()) {
+            entity->AsPhysical()->AddCollisionRecord(this);
+        }
+        if (numColPts > 0) {
+            if (   entity->IsBuilding()
+                || (entity->IsObject() && entity->AsPhysical()->physicalFlags.bDisableCollisionForce)
+            ) {
+                m_bHasHitWall = true;
+            }
+        }
+    }
+
+    return numColPts;
 }
 
 // 0x6B9250
@@ -479,7 +597,7 @@ void CBike::GetComponentWorldPosition(int32 componentId, CVector& outPos) {
     if (IsComponentPresent(componentId))
         outPos = RwFrameGetLTM(m_aBikeNodes[componentId])->pos;
     else
-        printf("BikeNode missing: %d %d\n", m_nModelIndex, componentId);
+        DEV_LOG("BikeNode missing: model={}, nodeIdx={}", m_nModelIndex, componentId);
 }
 
 // 0x6B58D0

@@ -194,7 +194,7 @@ void CPickup::ProcessGunShot(CVector* start, CVector* end) {
     if (!m_pObject)
         return;
 
-    if (const auto posn = m_pObject->GetPosition(); CCollision::TestLineSphere({start, end}, {4.0f, posn})) {
+    if (const auto& posn = m_pObject->GetPosition(); CCollision::TestLineSphere({start, end}, {posn, 4.0f})) {
         CExplosion::AddExplosion(nullptr, nullptr, EXPLOSION_MINE, posn, 0, true, -1.0f, false);
         Remove();
     }
@@ -211,8 +211,7 @@ void CPickup::Remove() {
 // Updates the pickup. Returns TRUE if pickup was removed/disabled
 // 0x457410
 bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
-    const auto& mi = m_pObject->m_nModelIndex;
-          auto& pt = m_nPickupType;
+    auto& pt = m_nPickupType;
 
     if (m_pObject) {
         m_pObject->SetPosn(GetPosn());
@@ -262,6 +261,8 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
     }
 
     if (m_pObject) {
+        const auto& mi = m_pObject->m_nModelIndex;
+
         const auto ObjectWaterLevelCheck = [this](float extra = 0.0f) {
             float level;
             if (CWaterLevel::GetWaterLevel(m_pObject->GetPosition(), level, true)) {
@@ -589,7 +590,7 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
                                 break;
                             case PICKUP_PROPERTY_FORSALE:
                                 char labelKey[9];
-                                std::strncpy(labelKey, FindStringForTextIndex((ePickupPropertyText)m_nFlags.nPropertyTextIndex), 9);
+                                strncpy_s(labelKey, FindStringForTextIndex((ePickupPropertyText)m_nFlags.nPropertyTextIndex), 9);
                                 ModifyStringLabelForControlSetting(labelKey);
                                 CMessages::InsertNumberInString(TheText.Get(labelKey), m_nAmmo, 0, 0, 0, 0, 0, gGxtString);
 

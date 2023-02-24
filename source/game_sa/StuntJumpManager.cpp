@@ -250,11 +250,10 @@ void ResetAllJumps() {
 void StuntJumpTestCode() {
     CPad* pad = CPad::GetPad(0);
     if (pad->IsStandardKeyJustDown('1')) {
-        printf("ResetAllJumps");
+        DEV_LOG("ResetAllJumps");
         ResetAllJumps();
     }
     if (pad->IsStandardKeyJustDown('2')) {
-        printf("");
         auto player = FindPlayerPed();
         if (player) {
             CVector posn{-2053.93848f, 236.598221f, 35.5952835f};

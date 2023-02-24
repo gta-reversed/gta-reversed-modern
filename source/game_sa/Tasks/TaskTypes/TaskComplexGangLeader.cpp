@@ -188,7 +188,7 @@ CTask* CTaskComplexGangLeader::CreateNextSubTask(CPed* ped) {
         }
     }
 
-    if (CGeneral::RandomBool(5) || 3 > m_gang->GetMembership().CountMembers()) {
+    if (CGeneral::RandomBool(5.f) || 3 > m_gang->GetMembership().CountMembers()) {
         m_wanderTimer.Start(CGeneral::GetRandomNumberInRange(0, 15'000));
         return new CTaskComplexWanderGang{ PEDMOVE_WALK, (uint8)CGeneral::GetRandomNumberInRange(0, 8), 5000, true, 0.05f };
     }
@@ -253,7 +253,7 @@ CTask* CTaskComplexGangLeader::ControlSubTask(CPed* ped) {
     }
 
     // If ped isn't already looking at someone, find a random meber to look at them
-    if (!g_ikChainMan.IsLooking(ped) && CGeneral::RandomBool(5)) { // 0x662574
+    if (!g_ikChainMan.IsLooking(ped) && CGeneral::RandomBool(5.f)) { // 0x662574
         // The random logic has changed a little here for the sole reason
         // that I want to use `GetRandom()`.
         // This code path is very infrequent anyways (5% chance)...

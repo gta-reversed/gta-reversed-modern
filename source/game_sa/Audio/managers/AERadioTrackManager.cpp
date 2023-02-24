@@ -256,11 +256,11 @@ const char* CAERadioTrackManager::GetRadioStationName(RadioStationId id) {
 // 0x4E8380
 void CAERadioTrackManager::GetRadioStationNameKey(RadioStationId id, char* outStr) {
     if (id == RADIO_OFF) {
-        strcpy(outStr, "FEA_NON");
+        strcpy_s(outStr, 8u, "FEA_NON");
     } else if (id == RADIO_USER_TRACKS) {
-        strcpy(outStr, "FEA_MP3");
+        strcpy_s(outStr, 8u, "FEA_MP3");
     } else {
-        sprintf(outStr, "FEA_R%d", id - 1);
+        sprintf_s(outStr, 8u, "FEA_R%d", id - 1);
     }
 }
 

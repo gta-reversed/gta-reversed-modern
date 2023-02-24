@@ -1115,9 +1115,9 @@ void CPlayerPed::ProcessControl() {
                 setRGB = false;
         }
         if (setRGB) {
-            r = ((1.0f - markColor) * 255.0f);
-            g = (markColor * 255.0f);
-            b = 0;
+            r = static_cast<uint8>((1.0f - markColor) * 255.0f);
+            g = static_cast<uint8>(markColor * 255.0f);
+            b = static_cast<uint8>(0.0f);
         }
         CVector distance = effectPos - GetPosition();
         float size = 1.0f - distance.Magnitude() * 0.02f;
@@ -1217,13 +1217,13 @@ void CPlayerPed::ProcessControl() {
     if (physicalFlags.bSubmergedInWater) {
         CVector pos = GetPosition();
         pos.z += 1.5f;
-        if (CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, &m_pPlayerData->m_fWaterHeight, true, nullptr)) {
+        if (CWaterLevel::GetWaterLevel(pos.x, pos.y, pos.z, m_pPlayerData->m_fWaterHeight, true, nullptr)) {
             auto& box = CEntity::GetColModel()->GetBoundingBox();
             float playerMinZ = pos.z + box.m_vecMin.z;
             float playerMaxZ = pos.z + box.m_vecMax.z;
             if (m_pPlayerData->m_fWaterHeight < playerMaxZ) {
                 if (m_pPlayerData->m_fWaterHeight > playerMinZ)
-                    m_pPlayerData->m_nWaterCoverPerc = ((m_pPlayerData->m_fWaterHeight - playerMinZ) / (playerMaxZ - playerMinZ) * 100.0f);
+                    m_pPlayerData->m_nWaterCoverPerc = static_cast<uint8>((m_pPlayerData->m_fWaterHeight - playerMinZ) / (playerMaxZ - playerMinZ) * 100.0f);
                 else
                     m_pPlayerData->m_nWaterCoverPerc = 0;
             } else {

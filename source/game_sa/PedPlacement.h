@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <initializer_list>
+
 class CVector;
 class CEntity;
 class CVehicle;
@@ -16,7 +18,23 @@ public:
     static void InjectHooks();
 
     static bool FindZCoorForPed(CVector& inoutPos);
-    static bool IsPositionClearForPed(const CVector& pos, float radius, int32 maxHitEntities, CEntity** outHitEntities, bool bCheckVehicles, bool bCheckPeds, bool bCheckObjects);
+    static bool IsPositionClearForPed(
+        const CVector& pos,
+        float          radius,
+        int32          maxHitEntities = -1,
+        CEntity**      outHitEntities = nullptr,
+        bool           bCheckVehicles = true,
+        bool           bCheckPeds = true,
+        bool           bCheckObjects = true
+    );
+    static bool IsPositionClearForPed(
+        const CVector&                  pos,
+        float                           radius,
+        std::initializer_list<CEntity*> ignoreEntities,
+        bool                            bCheckVehicles = true,
+        bool                            bCheckPeds = true,
+        bool                            bCheckObjects = true
+    );
     static CVehicle* IsPositionClearOfCars(const CVector* pos);
     static CVehicle* IsPositionClearOfCars(const CPed* ped);
 };
