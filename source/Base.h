@@ -119,6 +119,8 @@ template<typename... Ts>
 //! Macro for passing a string var to *scanf_s function.
 #define SCANF_S_STR(s) s, std::size(s)
 
+#define NOTSA_FORCEINLINE __forceinline
+
 /*!
 * @brief Used for static variable references
 *
