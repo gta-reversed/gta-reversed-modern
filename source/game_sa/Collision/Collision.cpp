@@ -47,7 +47,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(TestLineTriangle, 0x413AC0);
     RH_ScopedInstall(ProcessLineTriangle, 0x4140F0);
     RH_ScopedInstall(ProcessVerticalLineTriangle, 0x4147E0);
-    //RH_ScopedInstall(IsStoredPolyStillValidVerticalLine, 0x414D70);
+    RH_ScopedInstall(IsStoredPolyStillValidVerticalLine, 0x414D70);
     //RH_ScopedInstall(GetBoundingBoxFromTwoSpheres, 0x415230);
     //RH_ScopedInstall(IsThisVehicleSittingOnMe, 0x4152C0);
     //RH_ScopedInstall(CheckCameraCollisionPeds, 0x415320);
@@ -455,10 +455,10 @@ bool CCollision::ProcessSphereBox(CColSphere const& sph, CColBox const& box, CCo
                             diskColPoint.m_vecPoint = boxCP.m_vecPoint - boxCP.m_vecNormal * sphere.m_fRadius;
                             diskColPoint.m_fDepth = boxCP.m_fDepth;
 
-                            diskColPoint.m_nLightingA = sphere.m_nLighting;
+                            diskColPoint.m_nLightingA = sphere.ligthing;
                             diskColPoint.m_nSurfaceTypeA = sphere.m_nMaterial;
 
-                            diskColPoint.m_nLightingB = box.m_nLighting;
+                            diskColPoint.m_nLightingB = box.ligthing;
                             diskColPoint.m_nSurfaceTypeB = box.m_nMaterial;
 
                             maxTouchDistance = 0.f;
@@ -1069,20 +1069,19 @@ bool CCollision::ProcessDiscCollision(
 template<bool TestOnly>
 bool NOTSA_FORCEINLINE ProcessLineTriangle_Internal(
     const CColLine& line,
-    const CompressedVector* verts,
-    const CColTriangle& tri,
+    const CStoredCollPoly& poly,
     const CColTrianglePlane& plane,
     float* inOutMaxTouchDist,
     CVector* outIP,
     CVector* outPlNorm
 ) {
-    const auto va = UncompressVector(verts[tri.vA]),
-               vb = UncompressVector(verts[tri.vB]),
-               vc = UncompressVector(verts[tri.vC]);
+    const auto &va = poly.verts[0],
+               &vb = poly.verts[1],
+               &vc = poly.verts[2];
 
 #ifdef NOTSA_VANILLA_COLLISIONS
     // If the line is vertical, we can do some quick bound checks
-    if (line.IsVertical() && !tri.GetBoundingRect(va, vb, vc).IsPointInside(line.m_vecStart)) {
+    if (line.IsVertical() && !CColTriangle::GetBoundingRect(va, vb, vc).IsPointInside(line.m_vecStart)) {
         return false;
     }
 
@@ -1239,7 +1238,7 @@ bool NOTSA_FORCEINLINE ProcessLineTriangle_Internal(
 * @addr 0x413AC0
 */
 bool CCollision::TestLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& plane) {
-    return ProcessLineTriangle_Internal<true>(line, verts, tri, plane, nullptr, nullptr, nullptr);
+    return ProcessLineTriangle_Internal<true>(line, tri.GetPoly(verts), plane, nullptr, nullptr, nullptr);
 }
 
 /*!
@@ -1255,7 +1254,8 @@ bool CCollision::TestLineTriangle(const CColLine& line, const CompressedVector* 
 */
 bool CCollision::ProcessLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& plane, CColPoint& colPoint, float& maxTouchDistance, CStoredCollPoly* collPoly) {
     CVector ip, normal;
-    if (!ProcessLineTriangle_Internal<false>(line, verts, tri, plane, &maxTouchDistance, &ip, &normal)) {
+    const auto poly = tri.GetPoly(verts);
+    if (!ProcessLineTriangle_Internal<false>(line, poly, plane, &maxTouchDistance, &ip, &normal)) {
         return false;
     }
 
@@ -1270,11 +1270,7 @@ bool CCollision::ProcessLineTriangle(const CColLine& line, const CompressedVecto
     colPoint.m_nPieceTypeA = 0;
 
     if (collPoly) {
-        for (auto&& [i, vtx] : notsa::enumerate(tri.m_vertIndices)) {
-            collPoly->m_aMeshVertices[i] = UncompressVector(verts[vtx]);
-        }
-        collPoly->m_bIsActual = true;
-        collPoly->m_nLighting = tri.m_nLight;
+        *collPoly = poly;
     }
 
     return true;
@@ -1295,8 +1291,23 @@ bool CCollision::ProcessVerticalLineTriangle(
 }
 
 // 0x414D70
-bool CCollision::IsStoredPolyStillValidVerticalLine(const CVector& lineOrigin, float lineDist, CColPoint& colPoint, CStoredCollPoly* collPoly) {
-    return plugin::CallAndReturn<bool, 0x414D70, const CVector&, float, CColPoint&, CStoredCollPoly*>(lineOrigin, lineDist, colPoint, collPoly);
+bool CCollision::IsStoredPolyStillValidVerticalLine(const CVector& lineOrigin, float lnMag, CColPoint& colPoint, CStoredCollPoly* collPoly) {
+    if (!collPoly->valid) {
+        return false;
+    }
+
+    // Not really SA (I really don't feel like copy pasting code :])
+    return ProcessLineTriangle_Internal<true>(
+        CColLine{
+            lineOrigin,
+            { lineOrigin.x, lineOrigin.y, lineOrigin.z * lnMag }
+        },
+        *collPoly,
+        CColTrianglePlane{ *collPoly },
+        nullptr,
+        nullptr,
+        nullptr
+    );
 }
 
 // 0x415230
@@ -1734,7 +1745,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
                 if (ProcessSphereBox(sphereA, box, cp, minTouchDist)) {
                     cp.m_nSurfaceTypeA = box.m_Surface.m_nMaterial;
                     cp.m_nPieceTypeA = box.m_Surface.m_nPiece;
-                    cp.m_nLightingA = box.m_Surface.m_nLighting;
+                    cp.m_nLightingA = box.m_Surface.ligthing;
 
                     if (bReturnAllCollisions && sphereA.m_Surface.m_nPiece <= 2 && nNumSphereCPs < std::size(sphereCPs)) {
                         advanceColPointIdx = false;
@@ -1913,11 +1924,11 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
                 if (ProcessSphereBox(sphere, box, cp, minTouchDist)) {
                     cp.m_nSurfaceTypeA = box.m_Surface.m_nMaterial;
                     cp.m_nPieceTypeA = box.m_Surface.m_nPiece;
-                    cp.m_nLightingA = box.m_Surface.m_nLighting;
+                    cp.m_nLightingA = box.m_Surface.ligthing;
 
                     cp.m_nSurfaceTypeB = sphere.m_Surface.m_nMaterial;
                     cp.m_nPieceTypeB = sphere.m_Surface.m_nPiece;
-                    cp.m_nLightingB = sphere.m_Surface.m_nLighting;
+                    cp.m_nLightingB = sphere.m_Surface.ligthing;
 
                     cp.m_vecNormal *= -1.f; // Invert direction
 

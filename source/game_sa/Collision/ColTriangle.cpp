@@ -18,8 +18,16 @@ auto CColTriangle::GetPlane(const CompressedVector* vertices) const -> CColTrian
     return { *this, vertices };
 }
 
-auto CColTriangle::GetBoundingRect(const CVector& a, const CVector& b, const CVector& c) const -> CRect {
+auto CColTriangle::GetBoundingRect(const CVector& a, const CVector& b, const CVector& c) -> CRect {
     const auto [left, right] = std::minmax({ a.x, b.x, c.x });
     const auto [bottom, top] = std::minmax({ a.y, b.y, c.y });
     return CRect{ left, bottom, right, top };
+}
+
+auto CColTriangle::GetPoly(const CompressedVector* verts) const -> CStoredCollPoly {
+    return CStoredCollPoly{
+        .verts    = { UncompressVector(verts[vA]), UncompressVector(verts[vB]), UncompressVector(verts[vC])},
+        .valid    = true,
+        .ligthing = m_nLight,
+    };
 }

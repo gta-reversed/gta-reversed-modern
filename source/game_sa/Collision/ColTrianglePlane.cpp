@@ -12,19 +12,26 @@ void CColTrianglePlane::InjectHooks()
     RH_ScopedInstall(Set, 0x411660);
 }
 
-void CColTrianglePlane::GetNormal(CVector& out) {
-    out = GetNormal();
-}
-
-CColTrianglePlane::CColTrianglePlane(const CColTriangle& tri, const CompressedVector* vertices) {
+CColTrianglePlane::CColTrianglePlane(const CColTriangle& tri, const CompressedVector* vertices) :
+    CColTrianglePlane{
+        UncompressVector(vertices[tri.vA]),
+        UncompressVector(vertices[tri.vB]),
+        UncompressVector(vertices[tri.vC])
+    }
+{
     Set(vertices, tri);
 }
 
-void CColTrianglePlane::Set(const CompressedVector* vertices, const CColTriangle& triangle) {
-    const auto vA = UncompressVector(vertices[triangle.vA]);
-    const auto vB = UncompressVector(vertices[triangle.vB]);
-    const auto vC = UncompressVector(vertices[triangle.vC]);
+CColTrianglePlane::CColTrianglePlane(const CStoredCollPoly& poly) :
+    CColTrianglePlane{
+        poly.verts[0],
+        poly.verts[1],
+        poly.verts[2]
+    }
+{
+}
 
+CColTrianglePlane::CColTrianglePlane(const CVector& vA, const CVector& vB, const CVector& vC) {
     const auto normal = (vC - vA).Cross(vB - vA).Normalized();
 
     m_normal       = normal;
@@ -44,4 +51,12 @@ void CColTrianglePlane::Set(const CompressedVector* vertices, const CColTriangle
         }
         return normal.z <= 0.0f ? NEG_Z : POS_Z;
     }();
+} 
+
+void CColTrianglePlane::GetNormal(CVector& out) {
+    out = GetNormal();
+}
+
+void CColTrianglePlane::Set(const CompressedVector* vertices, const CColTriangle& triangle) {
+    *this = CColTrianglePlane{ triangle, vertices };
 }

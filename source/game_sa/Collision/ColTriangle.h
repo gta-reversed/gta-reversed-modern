@@ -8,6 +8,7 @@
 
 #include <Base.h>
 #include <ColTrianglePlane.h>
+#include "StoredCollPoly.h"
 
 class CColTriangle {
 public:
@@ -31,7 +32,10 @@ public:
     */
     void DrawWireFrame(CRGBA color, const CompressedVector* vertices, const CMatrix& transform) const;
     auto GetPlane(const CompressedVector* vertices) const -> CColTrianglePlane;
-    auto GetBoundingRect(const CVector& a, const CVector& b, const CVector& c) const -> CRect;
+    auto GetPoly(const CompressedVector* verts) const -> CStoredCollPoly;
+
+    static auto GetBoundingRect(const CVector& a, const CVector& b, const CVector& c) -> CRect;
+
 public:
     union {
         struct {
