@@ -8,7 +8,7 @@ void CTaskComplexSeekEntityXYOffset::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x661DC0);
     RH_ScopedInstall(Destructor, 0x661F30);
 
-    RH_ScopedInstall(CreateSubTask, 0x496270);
+    RH_ScopedInstall(CreateSubTask, 0x496DC0);
 
     RH_ScopedVMTInstall(Clone, 0x664AF0);
     RH_ScopedVMTInstall(GetTaskType, 0x661EA0);

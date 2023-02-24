@@ -377,7 +377,7 @@ void CAEPedAudioEntity::HandleLandingEvent(eAudioEvents event) {
     int16 sfxId;
     int16 playPosn;
     auto volume = GetDefaultVolume(event);
-    if (g_surfaceInfos->IsAudioWater(m_pPed->m_nContactSurface)) {
+    if (g_surfaceInfos.IsAudioWater(m_pPed->m_nContactSurface)) {
         if (!AEAudioHardware.IsSoundBankLoaded(128u, 32)) {
             AEAudioHardware.LoadSoundBank(128, 32);
             return;

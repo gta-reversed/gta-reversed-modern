@@ -48,7 +48,7 @@ public:
     static inline eGangAttackState& State2 = *(eGangAttackState*)0x96AB4C;
     static inline std::array<int32, 6> aSpecificZones = *(std::array<int32, 6>*)0x96AB68;
     static inline float& Difficulty = *(float*)0x96AB80;
-    static inline int32& Gang1 = *(int32*)0x96AB84;
+    static inline eGangID& Gang1 = *(eGangID*)0x96AB84;
     static inline CZone*& pZoneToFightOver = *(CZone**)0x96AB88;
     static inline CZoneInfo*& pZoneInfoToFightOver = *(CZoneInfo**)0x96AB8C;
     static inline bool& bGangWarsActive = *(bool*)0x96AB90;

@@ -159,7 +159,7 @@ public:
     void   RetuneRadio(int8 radioId);
 
     void  DisplayRadioStationName();
-    char* GetRadioStationName(RadioStationId id);
+    const char* GetRadioStationName(RadioStationId id);
     void  GetRadioStationNameKey(RadioStationId id, char* outStr);
     static bool IsVehicleRadioActive();
 

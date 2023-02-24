@@ -7,6 +7,7 @@ public:
     static inline CPed*& m_pPed = *(CPed**)0x9691C0;
 
     static void Clear();
+    static void Update();
 };
 
 class CConversations {
@@ -14,8 +15,8 @@ public:
     static void Clear();
     static void RemoveConversationForPed(CPed* ped);
 
-    /* Check the signatures before starting work
     static void Update();
+    /* Check the signatures before starting work
     static bool IsPlayerInPositionForConversation(CPed* ped, bool);
     static bool IsConversationGoingOn();
     static bool IsConversationAtNode(char*, CPed* ped);

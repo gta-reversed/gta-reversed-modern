@@ -11,5 +11,5 @@ public:
     static void InjectHooks();
 
     static void Init();
-    static void Process(RwV3d* cameraPos);
+    static void Process(CVector& cameraPos);
 };

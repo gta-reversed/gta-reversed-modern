@@ -303,14 +303,13 @@ void CStats::LoadActionReactionStats() {
     CFileMgr::SetDir("");
 
     auto* file = CFileMgr::OpenFile("DATA\\AR_STATS.DAT", "rb");
-    char statName[64]{}; // unused
 
     for (char* line = CFileLoader::LoadLine(file); line != nullptr; line = CFileLoader::LoadLine(file)) {
         int32 reactId;
         float reactValue;
 
         if (line[0] != '#' && line[0] != NULL) {
-            sscanf(line, "%d %s %f", &reactId, statName, &reactValue);
+            VERIFY(sscanf_s(line, "%d %*s %f", &reactId, &reactValue) == 2);
 
             StatReactionValue[reactId] = reactValue;
         }
@@ -706,9 +705,9 @@ bool CStats::Load() {
 // 0x558DE0
 char* CStats::GetStatID(eStats stat) {
     if (!GetStatType(stat)) // int32
-        sprintf(gString, "stat_i_%d", stat);
+        sprintf_s(gString, "stat_i_%d", stat);
     else
-        sprintf(gString, "stat_f_%d", stat);
+        sprintf_s(gString, "stat_f_%d", stat);
 
     return gString;
 }

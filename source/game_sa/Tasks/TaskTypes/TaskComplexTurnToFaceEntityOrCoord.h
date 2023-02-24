@@ -8,11 +8,11 @@ class CEntity;
 
 class CTaskComplexTurnToFaceEntityOrCoord : public CTaskComplex {
 public:
-    CEntity* m_EntityToFace;
-    bool     m_bFaceEntity;
-    CVector  m_CoordsToFace;
-    float    m_fChangeRateMult;
-    float    m_fMaxHeading;
+    CEntity* m_EntityToFace{};
+    bool     m_bFaceEntity{};
+    CVector  m_CoordsToFace{};
+    float    m_fChangeRateMult{};
+    float    m_fMaxHeading{};
 
 public:
     constexpr static auto Type = TASK_COMPLEX_TURN_TO_FACE_ENTITY;

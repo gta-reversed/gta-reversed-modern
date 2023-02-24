@@ -39,3 +39,14 @@ bool CDoor::IsClosed() {
 bool CDoor::IsFullyOpen() {
     return plugin::CallMethodAndReturn<bool, 0x6F4820, CDoor*>(this);
 }
+
+CVector CDoor::GetRotation() const {
+    CVector rotation{ 0.f, 0.f, 0.f };
+    rotation[m_nAxis] = m_fAngle;
+    return rotation;
+}
+
+void CDoor::UpdateFrameMatrix(CMatrix& mat) {
+    mat.SetRotateKeepPos(GetRotation());
+    mat.UpdateRW();
+}
