@@ -17,3 +17,9 @@ void CColTriangle::DrawWireFrame(CRGBA color, const CompressedVector* vertices, 
 auto CColTriangle::GetPlane(const CompressedVector* vertices) const -> CColTrianglePlane {
     return { *this, vertices };
 }
+
+auto CColTriangle::GetBoundingRect(const CVector& a, const CVector& b, const CVector& c) const -> CRect {
+    const auto [left, right] = std::minmax({ a.x, b.x, c.x });
+    const auto [bottom, top] = std::minmax({ a.y, b.y, c.y });
+    return CRect{ left, bottom, right, top };
+}

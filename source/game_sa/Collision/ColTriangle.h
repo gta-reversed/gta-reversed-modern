@@ -31,6 +31,7 @@ public:
     */
     void DrawWireFrame(CRGBA color, const CompressedVector* vertices, const CMatrix& transform) const;
     auto GetPlane(const CompressedVector* vertices) const -> CColTrianglePlane;
+    auto GetBoundingRect(const CVector& a, const CVector& b, const CVector& c) const -> CRect;
 public:
     union {
         struct {
