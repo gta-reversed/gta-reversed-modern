@@ -48,7 +48,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(ProcessLineTriangle, 0x4140F0);
     RH_ScopedInstall(ProcessVerticalLineTriangle, 0x4147E0);
     RH_ScopedInstall(IsStoredPolyStillValidVerticalLine, 0x414D70);
-    //RH_ScopedInstall(GetBoundingBoxFromTwoSpheres, 0x415230);
+    RH_ScopedInstall(GetBoundingBoxFromTwoSpheres, 0x415230);
     //RH_ScopedInstall(IsThisVehicleSittingOnMe, 0x4152C0);
     //RH_ScopedInstall(CheckCameraCollisionPeds, 0x415320);
     //RH_ScopedInstall(CheckPeds, 0x4154A0);
@@ -1311,8 +1311,15 @@ bool CCollision::IsStoredPolyStillValidVerticalLine(const CVector& lineOrigin, f
 }
 
 // 0x415230
-void CCollision::GetBoundingBoxFromTwoSpheres(CColBox* bbox, CColSphere* sphere1, CColSphere* sphere2) {
-    plugin::Call<0x415230, CColBox*, CColSphere*, CColSphere*>(bbox, sphere1, sphere2);
+void CCollision::GetBoundingBoxFromTwoSpheres(CColBox* bb, CColSphere* spA, CColSphere* spB) {
+    auto &min = bb->m_vecMin,
+         &max = bb->m_vecMax;
+    for (size_t i = 0; i < 3; i++) {
+        std::tie(min[i], max[i]) = std::minmax(spA->m_vecCenter[i], spB->m_vecCenter[i]);
+
+        min[i] -= spA->m_fRadius;
+        max[i] += spA->m_fRadius;
+    }
 }
 
 // 0x4152C0
