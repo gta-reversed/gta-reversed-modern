@@ -29,7 +29,7 @@ void CCollision::InjectHooks()
     RH_ScopedInstall(Shutdown, 0x4162E0);
     RH_ScopedInstall(Update, 0x411E20);
     RH_ScopedInstall(SortOutCollisionAfterLoad, 0x411E30);
-    RH_ScopedInstall(TestSphereSphere, 0x411E70);
+    RH_ScopedInstall(TestSphereSphere, 0x411E70, { .enabled = false, .locked = true});
     RH_ScopedGlobalInstall(CalculateColPointInsideBox, 0x411EC0);
     RH_ScopedInstall(TestSphereBox, 0x4120C0);
     RH_ScopedInstall(ProcessSphereBox, 0x412130);
