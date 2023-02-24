@@ -694,8 +694,8 @@ void CAutomobile::ProcessControl()
                 CColDisk& colDisk = colData->m_pDisks[i];
                 if (colData->bUsesDisks) {
                     CVector& point = contactPoints[i];
-                    point = colDisk.m_vecStart;
-                    point.z -= colDisk.m_fStartRadius;
+                    point = colDisk.m_vecCenter;
+                    point.z -= colDisk.m_fRadius;
                     point = Multiply3x3(GetMatrix(), contactPoints[i]);
                 }
                 else {

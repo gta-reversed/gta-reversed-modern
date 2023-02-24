@@ -44,7 +44,7 @@ void CCollision::InjectHooks()
     RH_ScopedInstall(TestVerticalLineBox, 0x413080);
     RH_ScopedInstall(ProcessLineBox, 0x413100);
     RH_ScopedInstall(Test2DLineAgainst2DLine, 0x4138D0);
-    //RH_ScopedInstall(ProcessDiscCollision, 0x413960);
+    RH_ScopedInstall(ProcessDiscCollision, 0x413960);
     //RH_ScopedInstall(TestLineTriangle, 0x413AC0);
     //RH_ScopedInstall(ProcessLineTriangle, 0x4140F0);
     //RH_ScopedInstall(ProcessVerticalLineTriangle, 0x4147E0);
@@ -968,14 +968,54 @@ bool CCollision::Test2DLineAgainst2DLine(float line1StartX, float line1StartY, f
 }
 
 /*
+* Process disk-colpoint or otherwise line-colpoint collision.
 * @address 0x413960
-* @brief Used in the original ProcessColModels code. SA doesn't uses disks, so I won't bother with this function :D
-* @returns I dont know
+* @param tempTriCol    Colpoint with a triangle (Space B)
+* @param matBA         Transformation matrix from B's space into A's (The space we're in)
+* @param disk          The disk (Space A)
+* @param diskColPoint  Disk collision point (Space A)
+* @param lineCollision If there was a line collision (Only checked if no disc collision)
+* @param lineRatio     Not sure
+* @param lineColPoint  Line colpoint (Only valid if `lineCollision` was set)
+* @returns If the diskColPoint collides with the disc
 */
 // 0x413960
-bool ProcessDiscCollision(CColPoint& colPoint1, const CMatrix& mat, const CColDisk& disk, CColPoint& colPoint2, bool& arg4, float& arg5, CColPoint& colPoint3) {
-    return plugin::CallAndReturn<bool, 0x413960, CColPoint&, const CMatrix&, const CColDisk&, CColPoint&, bool&, float&, CColPoint&>(colPoint1, mat, disk, colPoint2, arg4, arg5,
-                                                                                                                                     colPoint3);
+bool CCollision::ProcessDiscCollision(
+    CColPoint& tempTriCol,
+    const CMatrix& matBA,
+    const CColDisk& disk,
+    CColPoint& diskColPoint,
+    bool& lineCollision,
+    float& lineRatio,
+    CColPoint& lineColPoint
+) {
+    const auto cp       = matBA * tempTriCol.m_vecPoint;
+    const auto cpNormal = Multiply3x3(matBA, tempTriCol.m_vecNormal);
+    
+    if (std::abs((cpNormal * disk.m_vThickness).ComponentwiseSum()) >= 0.77f ||
+        std::abs((((cp - disk.m_vecCenter) * disk.m_vThickness).ComponentwiseSum()) >= disk.m_fThickness)
+    ) {
+        if (disk.m_Surface.m_nPiece < 17 && tempTriCol.m_fDepth > diskColPoint.m_fDepth) {
+            diskColPoint = tempTriCol;
+            //diskColPoint.m_fDepth = tempTriCol.m_fDepth; // Done in operator=
+            diskColPoint.m_nSurfaceTypeB = SURFACE_WHEELBASE;
+            return true;
+        }
+    } else {
+        const auto hitThickness = (CVector2D{cp} - CVector2D{disk.m_vecCenter}) * CVector2D{disk.m_vThickness};
+        const auto lineRatioNow = std::sqrt(hitThickness.SquaredMagnitude() + sq(disk.m_fRadius)) + cp.z;
+        if (lineRatioNow >= lineRatio) {
+            lineCollision = true;
+            lineRatio     = lineRatioNow;
+            lineColPoint  = tempTriCol;
+            // lineColPoint.m_fDepth = tempTriCol.m_fDepth;  // Done in operator=
+            return false; // False is returned here, but `lineCollision` was set to true.
+        }
+    }
+    return false;
+}
+
+
 }
 
 // 0x413AC0

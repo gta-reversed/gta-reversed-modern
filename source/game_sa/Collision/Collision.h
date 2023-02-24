@@ -47,6 +47,7 @@ public:
     static bool TestVerticalLineBox(const CColLine& line, const CBox& box);
     static bool ProcessLineBox(const CColLine& line, const CColBox& box, CColPoint& colPoint, float& maxTouchDistance);
     static bool Test2DLineAgainst2DLine(float line1StartX, float line1StartY, float line1EndX, float line1EndY, float line2StartX, float line2StartY, float line2EndX, float line2EndY);
+    static bool ProcessDiscCollision(CColPoint& tempTriCol, const CMatrix& matBA, const CColDisk& disk, CColPoint& diskColPoint, bool& lineCollision, float& lineRatio, CColPoint& lineColPoint);
     static bool TestLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane);
     static bool ProcessLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane, CColPoint& colPoint, float& maxTouchDistance, CStoredCollPoly* collPoly);
     static bool ProcessVerticalLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane, CColPoint& colPoint, float& maxTouchDistance, CStoredCollPoly* collPoly);
