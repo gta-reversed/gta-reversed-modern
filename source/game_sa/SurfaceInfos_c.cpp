@@ -3,8 +3,6 @@
 #include "SurfaceInfos_c.h"
 #include "Skidmark.h"
 
-SurfaceInfos_c* g_surfaceInfos = reinterpret_cast<SurfaceInfos_c*>(0xB79538);
-
 void SurfaceInfos_c::InjectHooks()
 {
     RH_ScopedClass(SurfaceInfos_c);
@@ -270,7 +268,7 @@ void SurfaceInfos_c::LoadAdhesiveLimits()
             continue;
 
         char value[4];
-        sscanf(line, "%3s", value); // FIX_BUGS: buffer overflow
+        VERIFY(sscanf_s(line, "%s", SCANF_S_STR(value)) == 1);
         for (auto i = *line; i != ' '; i = *++line) {
             if (i == '\t')
                 break;
@@ -364,7 +362,7 @@ void SurfaceInfos_c::LoadSurfaceAudioInfos()
     if (!file) {
         DEV_LOG("[SurfaceInfos_c] Failed to open surfaud.dat");
         CFileMgr::CloseFile(file);
-        return;;
+        return;
     }
 #endif
     for (const char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
@@ -373,7 +371,7 @@ void SurfaceInfos_c::LoadSurfaceAudioInfos()
 
         char  name[64];
         int32 concrete, grass, sand, gravel, wood, water, metal, longGrass, tile;
-        (void)sscanf(line, "%31s %d %d %d %d %d %d %d %d %d", name, &concrete, &grass, &sand, &gravel, &wood, &water, &metal, &longGrass, &tile); // FIX_BUGS: buffer overflow
+        VERIFY(sscanf_s(line, "%s %d %d %d %d %d %d %d %d %d", SCANF_S_STR(name), &concrete, &grass, &sand, &gravel, &wood, &water, &metal, &longGrass, &tile) == 10);
 
         auto id = GetSurfaceIdFromName(name);
         auto& surface = m_surfaces[id];

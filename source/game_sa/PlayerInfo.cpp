@@ -314,8 +314,7 @@ void CPlayerInfo::MakePlayerSafe(bool enable, float radius) {
 void CPlayerInfo::PlayerFailedCriticalMission() {
     if (m_nPlayerState == PLAYERSTATE_PLAYING) {
         m_nPlayerState = PLAYERSTATE_FAILED_MISSION;
-        CGameLogic::GameState = GAME_STATE_TITLE;
-        CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS();
+        CGameLogic::SetMissionFailed();
         CDarkel::ResetOnPlayerDeath();
     }
 }
@@ -535,6 +534,6 @@ CPlayerInfo& CPlayerInfo::operator=(const CPlayerInfo& rhs) {
     m_pSkinTexture                     = rhs.m_pSkinTexture;
     m_bParachuteReferenced             = rhs.m_bParachuteReferenced;
     m_nRequireParachuteTimer           = rhs.m_nRequireParachuteTimer;
-    strcpy(m_szSkinName, rhs.m_szSkinName);
+    strcpy_s(m_szSkinName, rhs.m_szSkinName);
     return *this;
 }

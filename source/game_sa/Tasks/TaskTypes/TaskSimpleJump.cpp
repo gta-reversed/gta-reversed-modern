@@ -223,13 +223,13 @@ void CTaskSimpleJump::Launch(CPed* ped)
         v += v1 + CVector(0.0F, 0.0F, -0.1F);
         CShadows::AddPermanentShadow(SHADOW_DEFAULT, gpBloodPoolTex, &v, v1.x * 0.26F, v1.y * 0.26F, ped->GetForward().x * 0.14F, ped->GetForward().y * 0.14F, 255, 255, 0, 0, 4.0F, 3000, 1.0F);
 
-        if (ped->m_nDeathTime <= 40)
+        if (ped->m_nDeathTimeMS <= 40)
         {
-            ped->m_nDeathTime = 0;
+            ped->m_nDeathTimeMS = 0;
             ped->bDoBloodyFootprints = false;
         }
         else
-            ped->m_nDeathTime -= 40;
+            ped->m_nDeathTimeMS -= 40;
     }
 }
 
@@ -242,8 +242,8 @@ bool CTaskSimpleJump::StartLaunchAnim(CPed* ped)
     if (m_pAnim)
         return false;
 
-    if (g_surfaceInfos->IsSteepSlope(ped->m_nContactSurface) && DotProduct(ped->GetForward(), ped->field_578) < 0.0F
-        || ped->IsPlayer() && !CGameLogic::IsPlayerAllowedToGoInThisDirection(ped, ped->GetForward().x, ped->GetForward().y, ped->GetForward().z, 5.0F))
+    if (g_surfaceInfos.IsSteepSlope(ped->m_nContactSurface) && DotProduct(ped->GetForward(), ped->field_578) < 0.0F
+        || ped->IsPlayer() && !CGameLogic::IsPlayerAllowedToGoInThisDirection(ped, ped->GetForward(), 5.0F))
     {
         ped->m_pedIK.bSlopePitch = true;
         return false;

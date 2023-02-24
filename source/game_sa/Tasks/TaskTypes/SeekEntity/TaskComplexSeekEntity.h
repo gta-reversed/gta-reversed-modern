@@ -54,7 +54,7 @@ public:
         float     unk2,
         bool      flag0,
         bool      faceSeekEntityAfterReachingIt,
-        T_PosCalc seekPosCalculator = {}
+        T_PosCalc seekPosCalculator = {} // NOTSA
     ) :
         m_entityToSeek{ entity },
         m_seekInterval{ seekInterval },

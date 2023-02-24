@@ -62,10 +62,10 @@ void CPedStats::LoadPedStats() {
         int32 shootingRate;
         int32 defaultDecisionMaker;
 
-        sscanf(
+        VERIFY(sscanf_s(
             line,
             "%s %f %f %d %d %d %d %f %f %d %d",
-            name,
+            SCANF_S_STR(name),
             &fleeDistance,
             &headingChangeRate,
             &fear,
@@ -76,10 +76,10 @@ void CPedStats::LoadPedStats() {
             &defendWeakness,
             &shootingRate,
             &defaultDecisionMaker
-        );
+        ) == 11);
 
         ms_apPedStats[statIndex].m_nId = statIndex;
-        strcpy(ms_apPedStats[statIndex].m_acName, name);
+        rng::copy(name, ms_apPedStats[statIndex].m_acName);
         ms_apPedStats[statIndex].m_fFleeDistance = fleeDistance;
         ms_apPedStats[statIndex].m_fHeadingChangeRate = headingChangeRate;
         ms_apPedStats[statIndex].m_nFear = fear;

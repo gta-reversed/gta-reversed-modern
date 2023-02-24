@@ -122,3 +122,7 @@ void CEntryExitManager::GotoEntryExitVC(const char* name) {
 void CEntryExitManager::LinkEntryExit(CEntryExit* entryExit) {
     plugin::Call<0x43F050, CEntryExit*>(entryExit);
 }
+
+bool CEntryExitManager::WeAreInInteriorTransition() {
+    return plugin::CallAndReturn<bool, 0x43E400>();
+}

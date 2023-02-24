@@ -12,8 +12,8 @@
 #include "PedClothesDesc.h"
 
 int32& CClothes::ms_clothesImageId = *(int32*)0xBC12F8;
-int32& CClothes::ms_numRuleTags = *(int32*)0xBC12FC;
-int32 (&CClothes::ms_clothesRules)[600] = *(int32(*)[600])0xBC1300;
+uint32& CClothes::ms_numRuleTags = *(uint32*)0xBC12FC;
+uint32 (&CClothes::ms_clothesRules)[600] = *(uint32(*)[600])0xBC1300;
 
 CPedClothesDesc& PlayerClothes = *(CPedClothesDesc*)0xBC1C78;
 
@@ -22,16 +22,14 @@ void CClothes::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x5A80D0);
-    RH_ScopedInstall(LoadClothesFile, 0x5A7B30, { .reversed = false });
+    RH_ScopedInstall(LoadClothesFile, 0x5A7B30);
     RH_ScopedInstall(ConstructPedModel, 0x5A81E0);
     RH_ScopedInstall(RequestMotionGroupAnims, 0x5A8120);
     RH_ScopedInstall(RebuildPlayerIfNeeded, 0x5A8390);
     RH_ScopedInstall(RebuildPlayer, 0x5A82C0);
     RH_ScopedInstall(RebuildCutscenePlayer, 0x5A8270);
-    /* crashes, incompatible registers?
     RH_ScopedInstall(GetTextureDependency, 0x5A7EA0);
     RH_ScopedInstall(GetDependentTexture, 0x5A7F30);
-    */
     RH_ScopedInstall(GetPlayerMotionGroupToLoad, 0x5A7FB0);
     RH_ScopedInstall(GetDefaultPlayerMotionGroup, 0x5A81B0);
 }
@@ -67,7 +65,93 @@ int32 GetClothesModelFromName(const char* name) {
 
 // 0x5A7B30
 void CClothes::LoadClothesFile() {
-    plugin::Call<0x5A7B30>();
+    bool isRuleStarted = false;
+    auto* file = CFileMgr::OpenFile("DATA\\CLOTHES.DAT", "r");
+
+    for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
+        if (line[0] == '\0' || line[0] == '#') {
+            continue;
+        }
+        if (!isRuleStarted) {
+            isRuleStarted = !strcmp("rule", line);
+            continue;
+        }
+        if (!strcmp("end", line)) {
+            isRuleStarted = false;
+            continue;
+        }
+
+        char* nextToken{};
+        char* strTag = strtok_s(line, " \t,", &nextToken);
+        if (strTag == nullptr) {
+            continue;
+        }
+
+        enum class eClothRule : uint8_t {
+            TAG_CUTS,
+            TAG_SETC,
+            TAG_TEX,
+            TAG_HIDE,
+            TAG_END_IGNORE,
+            TAG_IGNORE,
+            TAG_END_EXCLUSIVE,
+            TAG_EXCLUSIVE
+        };
+        const eClothRule ruleTag = [&](){
+            constexpr struct {const char* name; eClothRule rule;} map[]{
+                {"cuts", eClothRule::TAG_CUTS},
+                {"setc", eClothRule::TAG_SETC},
+                {"tex", eClothRule::TAG_TEX},
+                {"hide", eClothRule::TAG_HIDE},
+                {"endignore", eClothRule::TAG_END_IGNORE},
+                {"ignore", eClothRule::TAG_IGNORE},
+                {"endexclusive", eClothRule::TAG_END_EXCLUSIVE},
+                {"exclusive", eClothRule::TAG_EXCLUSIVE}
+            };
+            for (const auto& [name, rule] : map) {
+                if (!strcmp(strTag, name)) {
+                    return rule;
+                }
+            }
+            NOTSA_UNREACHABLE("Invalid rule tag: {}", strTag);
+        }();
+        AddRule(static_cast<uint32>(ruleTag));
+
+        const auto GetNextArg = [&nextToken]{
+            return strtok_s(NULL, " \t,", &nextToken);
+        };
+        switch (ruleTag) {
+        case eClothRule::TAG_CUTS:
+        case eClothRule::TAG_TEX: {
+            for (auto i = 0u; i < 2u; i++) {
+                AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
+            }
+            break;
+        }
+        case eClothRule::TAG_SETC: {
+            AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
+            AddRule(GetClothesModelFromName(GetNextArg()));
+            for (auto i = 0u; i < 2u; i++) {
+                const auto rule = GetNextArg();
+                AddRule(!strcmp("-", rule) ? 0 : CKeyGen::GetUppercaseKey(rule));
+            }
+            break;
+        }
+        case eClothRule::TAG_HIDE: {
+            AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
+            AddRule(GetClothesModelFromName(GetNextArg()));
+            break;
+        }
+        case eClothRule::TAG_END_IGNORE:
+        case eClothRule::TAG_IGNORE:
+        case eClothRule::TAG_END_EXCLUSIVE:
+        case eClothRule::TAG_EXCLUSIVE: 
+            AddRule(CKeyGen::GetUppercaseKey(GetNextArg()));
+            break;
+        }
+    }
+
+    CFileMgr::CloseFile(file);
 }
 
 // 0x5A81E0

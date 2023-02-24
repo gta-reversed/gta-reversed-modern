@@ -8,51 +8,58 @@ class CPlantLocTri;
 
 class CPlantMgr {
 public:
-    static RwTexture* (&PC_PlantTextureTab0)[4];
-    static RwTexture* (&PC_PlantTextureTab1)[4];
-    static RwTexture* (&PC_PlantTextureTab2)[4];
-    static RwTexture* (&PC_PlantTextureTab3)[4];
+    static inline RwTexture* (&PC_PlantTextureTab)[4][4] = *(RwTexture * (*)[4][4])0xC039A0;
+    static inline RpAtomic* (&PC_PlantModelsTab)[4][4] = *(RpAtomic * (*)[4][4])0xC039A0;
 
-    static RpAtomic* (&PC_PlantModelsTab0)[4];
-    static RpAtomic* (&PC_PlantModelsTab1)[4];
-    static RpAtomic* (&PC_PlantModelsTab2)[4];
-    static RpAtomic* (&PC_PlantModelsTab3)[4];
+    static inline int16& m_scanCode = *(int16*)0xC03980;
+    static inline CPlantLocTri* m_UnusedLocTriListHead = *(CPlantLocTri**)0xC03984;
+    static inline CPlantLocTri* (&m_CloseLocTriListHead)[4] = *(CPlantLocTri*(*)[4])0xC03988;
+    static inline CPlantColEntEntry* m_UnusedColEntListHead = *(CPlantColEntEntry**)0xC03998;
+    static inline CPlantColEntEntry* m_CloseColEntListHead = *(CPlantColEntEntry**)0xC0399C;
+    static inline CRGBA& m_AmbientColor = *(CRGBA*)0xC03A44;
+    static inline CPlantLocTri (&m_LocTrisTab)[256] = *(CPlantLocTri(*)[256])0xC03A48;
+    static inline CPlantColEntEntry (&m_ColEntCacheTab)[40] = *(CPlantColEntEntry(*)[40])0xC08E48;
 
 public:
     static void InjectHooks();
 
-    CPlantMgr();
-    ~CPlantMgr();
-
     static bool Initialise();
     static void Shutdown();
-
-    static void CalculateWindBending();
-    static void MoveColEntToList(CPlantColEntEntry**, CPlantColEntEntry**, CPlantColEntEntry*);
-    static void MoveLocTriToList(CPlantLocTri**, CPlantLocTri**, CPlantLocTri*);
-    static void PreUpdateOnceForNewCameraPos(const CVector&);
     static bool ReloadConfig();
-    static void Render();
+
+    static void MoveLocTriToList(CPlantLocTri*& oldList, CPlantLocTri*& newList, CPlantLocTri* triangle);
+    static void MoveColEntToList(CPlantColEntEntry*& oldList, CPlantColEntEntry*& newList, CPlantColEntEntry* entry);
     static void SetPlantFriendlyFlagInAtomicMI(CAtomicModelInfo*);
+
     static void Update(const CVector& cameraPosition);
     static void UpdateAmbientColor();
+    static void PreUpdateOnceForNewCameraPos(const CVector& posn);
+    static float CalculateWindBending();
+
+    static void Render();
 
 private:
-    // From Android
+    static void _ColEntityCache_Add(CEntity* entity, bool checkAlreadyExists);
+    static CPlantColEntEntry* _ColEntityCache_FindInCache(CEntity* entity);
+    static void _ColEntityCache_Remove(CEntity* entity);
+    static void _ColEntityCache_Update(const CVector& cameraPos, bool fast);
 
-    static void _ColEntityCache_Add(CEntity*, uint8);
-    static void _ColEntityCache_FindInCache(CEntity*);
-    static void _ColEntityCache_Remove(CEntity*);
-    static void _ColEntityCache_Update(const CVector&, uint8);
+    static void _ProcessEntryCollisionDataSections(const CPlantColEntEntry& entry, const CVector& center, int32 a3);
+    static void _ProcessEntryCollisionDataSections_AddLocTris(const CPlantColEntEntry& entry, const CVector& center, int32 a3, int32 start, int32 end);
+    static void _ProcessEntryCollisionDataSections_RemoveLocTris(const CPlantColEntEntry& entry, const CVector& center, int32 a3, int32 start, int32 end);
 
-    static void _ProcessEntryCollisionDataSections(CPlantColEntEntry*, const CVector&, int32);
-    static void _ProcessEntryCollisionDataSections_AddLocTris(CPlantColEntEntry*, const CVector&, int32, int32, int32);
-    static void _ProcessEntryCollisionDataSections_RemoveLocTris(CPlantColEntEntry*, const CVector&, int32, int32, int32);
+    static void _UpdateLocTris(const CVector& center, int32);
 
-    static void _UpdateLocTris(const CVector&, int32);
+    static float _CalcDistanceSqrToEntity(CEntity* entity, const CVector& posn);
 
-    static void DbgCountCachedEntities(uint32*);
-    static void DbgCountLocTrisAndPlants(uint32, uint32*, uint32*);
-    static void DbgRenderCachedEntities(uint32*);
-    static void DbgRenderLocTris();
+    static bool DbgCountCachedEntities(uint32*);
+    static bool DbgCountLocTrisAndPlants(uint32, uint32*, uint32*);
+    static bool DbgRenderCachedEntities(uint32*);
+    static bool DbgRenderLocTris();
+
+    static void IncrementScanCode() { ++m_scanCode; } // 0x5DB2D0
 };
+
+static inline RwTexture* (&grassTexturesPtr)[4] = *(RwTexture * (*)[4])0xC039E0;
+static inline RpAtomic* (&grassModelsPtr)[4] = *(RpAtomic * (*)[4])0xC03A30;
+static inline RwTexture*& tex_gras07Si = *(RwTexture**)0xC09174;

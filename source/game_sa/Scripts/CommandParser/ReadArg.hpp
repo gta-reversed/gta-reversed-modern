@@ -22,7 +22,7 @@ auto ReadArrayInfo(CRunningScript* S) {
 
 /*!
 * @notsa
-* @brief Read one POD parameter from the script at the current IP and increment the IP. Non-POD parameters can be read using `notsa::script::ReadParam`
+* @brief Read an arithmetic type (numbers/enums/bools/floats)
 * @return The value read casted to the required type. The value will be read correctly,
 *         even if the original type was wider or narrower then the
 *         requested one (eg.: originally it was `int8`, but `T = int32`)
@@ -68,7 +68,12 @@ concept PooledType = requires {
 
 template<PooledType T, typename Y = std::decay_t<T>>
 Y& Read(CRunningScript* S) {
-    return *detail::PoolOf<Y>().GetAtRef(Read<int32>(S));
+    auto&      pool = detail::PoolOf<Y>();
+    const auto ref  = Read<int32>(S);
+    if (const auto p = pool.GetAtRef(ref)) {
+        return *p;
+    }
+    NOTSA_UNREACHABLE("Object expected, got null. [Script Ref/Index: {}/{}]", ref, pool.GetIndexFromRef(ref));
 }
 
 /*!

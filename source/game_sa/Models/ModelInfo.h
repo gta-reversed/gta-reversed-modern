@@ -90,5 +90,7 @@ public:
     static int32 IsVehicleModelType(int32 index);
 
     static CBaseModelInfo* GetModelInfo(int32 index) { return ms_modelInfoPtrs[index]; }
+    static auto GetPedModelInfo(int32 index) { return GetModelInfo(index)->AsPedModelInfoPtr(); }
+    static auto GetVehicleModelInfo(int32 index) { return GetModelInfo(index)->AsVehicleModelInfoPtr(); }
     static void SetModelInfo(int32 index, CBaseModelInfo* pInfo) { ms_modelInfoPtrs[index] = pInfo; }
 };

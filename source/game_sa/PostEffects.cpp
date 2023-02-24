@@ -88,17 +88,6 @@ float& CPostEffects::m_RadiosityPixelsY = *(float*)0xC40318;        // SCREEN_HE
 uint32& CPostEffects::m_RadiosityFilterPasses = *(uint32*)0x8D5110; // 1
 uint32& CPostEffects::m_RadiosityRenderPasses = *(uint32*)0x8D510C; // 2
 
-static RwBlendFunction& gStoredRenderStateSrcBlend = *(RwBlendFunction*)(0xC40280);
-static RwBlendFunction& gStoredRenderStateDestBlend = *(RwBlendFunction*)(0xC40284);
-static bool& gStoredRenderStateFogEnable = *(bool*)(0xC40288);
-static RwCullMode& gStoredRenderStateCullMode = *(RwCullMode*)(0xC4028C);
-static bool& gStoredRenderStateZTestEnable = *(bool*)(0xC40290);
-static bool& gStoredRenderStateZWriteEnable = *(bool*)(0xC40294);
-static RwShadeMode& gStoredRenderStateShadeMode = *(RwShadeMode*)(0xC40298);
-static bool& gStoredRenderStateVertexAlphaEnable = *(bool*)(0xC4029C);
-static RwTextureAddressMode& gStoredRenderStateTextureAddress = *(RwTextureAddressMode*)(0xC402A0);
-static RwTextureFilterMode& gStoredRenderStateTextureFilter = *(RwTextureFilterMode*)(0xC402A4);
-
 // see NightVision
 static float& fRasterFrontBufferWidth = *(float*)0xC4015C;
 static float& fRasterFrontBufferHeight = *(float*)0xC40160;
@@ -254,7 +243,7 @@ void CPostEffects::SetupBackBufferVertex() {
 
     pRasterFrontBuffer = RasterCreatePostEffects({ 0, 0, 64, 64 });
     if (!pRasterFrontBuffer) {
-        printf("Error subrastering");
+        DEV_LOG("Error subrastering");
         RwRasterDestroy(pRasterFrontBuffer);
         pRasterFrontBuffer = nullptr;
     }
@@ -674,9 +663,9 @@ void CPostEffects::InfraredVisionStoreAndSetLightsForHeatObjects(CPed* ped) {
     // here we go to fuck cold carbon (Explanation: https://sampik.ru/articles/468-pochemu-piratskij-perevod-gtasa-takoj-strannyj.html)
     // gradually changing from red to blue (dead)
     if (ped->m_nPedState == PEDSTATE_DEAD) {
-        auto time = CTimer::GetTimeInMS() - ped->m_nDeathTime;
+        auto time = CTimer::GetTimeInMS() - ped->m_nDeathTimeMS;
         if (time < 0)
-            time = ped->m_nDeathTime - CTimer::GetTimeInMS();
+            time = ped->m_nDeathTimeMS - CTimer::GetTimeInMS();
 
         auto delta = (float)time / 10'000.0f;
 

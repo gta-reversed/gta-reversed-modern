@@ -7,8 +7,7 @@
 #pragma once
 
 #include "Vector.h"
-
-struct RpHAnimBlendInterpFrame;
+#include "RpHAnimBlendInterpFrame.h"
 
 class AnimBlendFrameData {
 public:
@@ -28,5 +27,9 @@ public:
     CVector                  m_vecOffset;
     RpHAnimBlendInterpFrame* m_pIFrame;
     uint32                   m_nNodeId; // In case of peds it's ePedBone (NOTE: I might be wrong, see `IsPedHeadAbovePos`)
+
+    // NOTSA
+    CQuaternion& GetFrameOrientation() const { return m_pIFrame->orientation; }
+    CVector& GetFrameTranslation() const { return m_pIFrame->translation; }
 };
 VALIDATE_SIZE(AnimBlendFrameData, 0x18);

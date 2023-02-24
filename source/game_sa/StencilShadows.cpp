@@ -20,6 +20,6 @@ void CStencilShadows::Init() {
 }
 
 // 0x711D90
-void CStencilShadows::Process(RwV3d* cameraPos) {
-    plugin::Call<0x711D90, RwV3d*>(cameraPos);
+void CStencilShadows::Process(CVector& cameraPos) {
+    plugin::Call<0x711D90, CVector&>(cameraPos);
 }

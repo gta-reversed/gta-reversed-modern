@@ -10,7 +10,7 @@
 // The list was generated from unmodified data of GTA San Andreas.
 // Author: fastman92
 
-enum eModelID { // Number of entries: 14832
+enum eModelID : int32 { // Number of entries: 14832
     UNLOAD_MODEL  = -2,
     MODEL_INVALID = -1,
 

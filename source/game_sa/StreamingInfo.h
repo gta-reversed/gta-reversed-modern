@@ -7,6 +7,7 @@
 #pragma once
 
 enum eStreamingFlags {
+    STREAMING_DEFAULT = 0x0,
     STREAMING_UNKNOWN_1 = 0x1,
     STREAMING_GAME_REQUIRED = 0x2,
     STREAMING_MISSION_REQUIRED = 0x4,
@@ -65,7 +66,6 @@ public:
     static void InjectHooks();
 
     void Init();
-    void AddToList(CStreamingInfo* listStart);
     [[nodiscard]] size_t GetCdPosn() const;
     void SetCdPosnAndSize(size_t CdPosn, size_t CdSize);
     bool GetCdPosnAndSize(size_t& CdPosn, size_t& CdSize);
@@ -73,14 +73,30 @@ public:
     [[nodiscard]] auto GetCdSize() const { return m_nCdSize; }
     CStreamingInfo* GetNext() { return m_nNextIndex == -1 ? nullptr : &ms_pArrayBase[m_nNextIndex]; }
     CStreamingInfo* GetPrev() { return m_nPrevIndex == -1 ? nullptr : &ms_pArrayBase[m_nPrevIndex]; }
-    [[nodiscard]] bool InList() const;
+
+    /*!
+    * @addr 0x407480
+    * @brief Insert `*this` after the item `*after`
+    */
+    void AddToList(CStreamingInfo* after);
+
+    /*!
+    * @addr 0x4074E0
+    * @brief Remove `*this` from it's current list
+    */
     void RemoveFromList();
+
+    /*!
+    * @notsa
+    * @brief Check if `*this` is in any list
+    */
+    bool InList() const;
 
     void SetFlags(uint32 flags) { m_nFlags |= flags; }
     void ClearFlags(uint32 flags) { m_nFlags &= ~flags; }
     [[nodiscard]] auto GetFlags() const noexcept { return m_nFlags; }
     void ClearAllFlags() noexcept { m_nFlags = 0; } // Clears all flags
-    [[nodiscard]] bool AreAnyFlagsSetOutOf(uint32 flags) const noexcept { return GetFlags() & flags; } // Checks if any flags in `flags` are set
+    [[nodiscard]] bool AreAnyFlagsSetOutOf(uint32 flags) const noexcept { return GetFlags() & flags; }
 
     [[nodiscard]] bool IsLoadedOrBeingRead() const noexcept {
         switch (m_nLoadState) {

@@ -16,8 +16,8 @@ class CPlayerPed;
 class CClothes {
 public:
     static int32& ms_clothesImageId;
-    static int32& ms_numRuleTags;
-    static int32 (&ms_clothesRules)[600];
+    static uint32& ms_numRuleTags;
+    static uint32 (&ms_clothesRules)[600];
 
 public:
     static void InjectHooks();
@@ -34,4 +34,10 @@ public:
     static eClothesTexturePart GetDependentTexture(eClothesModelPart eClothesModelPart);
     static AssocGroupId GetPlayerMotionGroupToLoad();
     static AssocGroupId GetDefaultPlayerMotionGroup();
+
+    // NOTSA
+    static void AddRule(uint32 rule) {
+        ms_clothesRules[ms_numRuleTags] = rule;
+        ms_numRuleTags += 1;
+    }
 };
