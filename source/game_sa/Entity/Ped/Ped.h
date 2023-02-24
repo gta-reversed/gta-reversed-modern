@@ -611,6 +611,9 @@ public:
     eWeaponSlot GiveWeapon(const CWeapon& weapon, bool likeUnused) {
         return GiveWeapon(weapon.m_nType, weapon.m_nTotalAmmo, likeUnused);
     }
+
+    auto GetPedModelInfo() const { return reinterpret_cast<CPedModelInfo*>(GetModelInfo()); }
+
 private:
     void RenderThinBody() const;
     void RenderBigHead() const;

@@ -10,6 +10,8 @@
 
 #include "Collision.h"
 #include "ColHelpers.h"
+#include "PedModelInfo.h"
+#include "TaskSimpleHoldEntity.h"
 #include "extensions/enumerate.hpp"
 
 #define NOTSA_VANILLA_COLLISIONS
@@ -50,7 +52,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(IsStoredPolyStillValidVerticalLine, 0x414D70);
     RH_ScopedInstall(GetBoundingBoxFromTwoSpheres, 0x415230);
     RH_ScopedInstall(IsThisVehicleSittingOnMe, 0x4152C0);
-    //RH_ScopedInstall(CheckCameraCollisionPeds, 0x415320);
+    RH_ScopedInstall(CheckCameraCollisionPeds, 0x415320);
     //RH_ScopedInstall(CheckPeds, 0x4154A0);
     //RH_ScopedInstall(ResetMadeInvisibleObjects, 0x415540);
     //RH_ScopedInstall(SphereCastVsBBox, 0x415590);
@@ -616,7 +618,7 @@ bool __stdcall CCollision::PointInTriangle(CVector const& point, CVector const* 
     const auto p  = point        - triPoints[0];
 
     // NOTE:
-    // Because no vectors are normalized all dot products are scaled.
+    // Because no vectors are normalized all offset products are scaled.
     // In order to compensate for this they multiply values by either vector's squared magnitude.
 
     const auto v1_dot_v2 = DotProduct(v1, v2); 
@@ -1337,9 +1339,79 @@ bool CCollision::IsThisVehicleSittingOnMe(CVehicle* veh, CVehicle* vehOnMe) {
     }
 }
 
+float GetNearestDistanceOfPedSphereToCameraNearClip(CPed* ped) {
+    const auto mi = ped->GetPedModelInfo();
+
+    // Calculate hit colmodel
+    mi->AnimatePedColModelSkinnedWorld(ped->m_pRwClump);
+    const auto hitCM = mi->m_pHitColModel;
+    assert(hitCM->GetData()->m_nNumSpheres == 12); // In theory it should have 12 spheres
+
+    // Calculate some other shite
+    auto&       cam     = TheCamera.GetActiveCamera();
+    const auto  offset  = cam.m_vecFront.Dot(cam.m_vecSource);
+    const auto  nearClp = RwCameraGetNearClipPlane(Scene.m_pRwCamera);
+
+    // Now find the closest sphere's distance sq
+    float ret = FLT_MAX;
+    for (auto& sp : hitCM->GetData()->GetSpheres()) {
+        ret = std::min(ret, sp.m_vecCenter.Dot(cam.m_vecFront) - offset - sp.m_fRadius - nearClp);
+    }
+    return ret;
+}
+
 // 0x415320
 bool CCollision::CheckCameraCollisionPeds(int32 sectorX, int32 sectorY, CVector* pos, CVector* dir, float* arg4) {
-    return plugin::CallAndReturn<bool, 0x415320, int32, int32, CVector*, CVector*, float*>(sectorX, sectorY, pos, dir, arg4);
+    constexpr auto gPedCylinderWidth = 1.f;
+
+    bool addedAny = false;
+
+    const auto& sector = GetRepeatSector(sectorX, sectorY);
+    for (CPtrNodeDoubleLink* it = sector->GetList(REPEATSECTOR_PEDS).GetNode(), *next{}; it; it = next) {
+        next = it->GetNext();
+        
+        const auto ped = it->GetItem<CPed>();
+
+        if (ped->IsScanCodeCurrent()) {
+            continue;
+        }
+
+        ped->SetCurrentScanCode();
+
+        if (!ped->m_bIsVisible || CWorld::pIgnoreEntity == ped || ped->IsPlayer()) {
+            continue;
+        }
+        
+        if ((CVector2D{ *pos } - CVector2D{ ped->GetBoundCentre() }).SquaredMagnitude() >= sq(gPedCylinderWidth)) {
+            continue;
+        }
+
+        if (GetNearestDistanceOfPedSphereToCameraNearClip(ped) > 0.f) {
+            continue;
+        }
+        
+        const auto AddInvisibleEntity = [](CEntity* entity) {
+            entity->m_bIsVisible = false;
+
+            auto& ref = gpMadeInvisibleEntities[gNumEntitiesSetInvisible++];
+            ref = entity;
+            CEntity::RegisterReference(ref);
+        };
+
+        AddInvisibleEntity(ped);
+
+        // Add entity the peds holds too (if any)
+        if (const auto task = ped->GetIntelligence()->GetTaskHold()) {
+            if (const auto ent = task->m_pEntityToHold) {
+                if (ent->m_bIsVisible) {
+                    AddInvisibleEntity(ent);
+                }
+            }
+        }
+
+        addedAny = true;
+    }
+    return addedAny;
 }
 
 // 0x4154A0

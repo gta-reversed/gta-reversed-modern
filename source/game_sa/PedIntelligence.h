@@ -94,7 +94,7 @@ public:
     CTaskSimpleFight* GetTaskFighting();
     CTaskSimpleUseGun* GetTaskUseGun();
     CTaskSimpleThrowProjectile* GetTaskThrow();
-    CTask* GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask = true);
+    CTaskSimpleHoldEntity* GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask = true);
     CTaskSimpleSwim* GetTaskSwim();
     CTaskSimpleDuck* GetTaskDuck(bool bIgnoreCheckingForSimplestActiveTask = true);
     CTaskSimpleJetPack* GetTaskJetPack();
