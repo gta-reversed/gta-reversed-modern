@@ -95,8 +95,8 @@ float CCollision::DistToMathematicalLine(const CVector* lineStart, const CVector
 }
 
 // 0x412A30
-float CCollision::DistToMathematicalLine2D(float lineStartX, float lineStartY, float lineEndX, float lineEndY, float pointX, float pointY) {
-    return plugin::CallAndReturn<float, 0x412A30, float, float, float, float, float, float>(lineStartX, lineStartY, lineEndX, lineEndY, pointX, pointY);
+float CCollision::DistToMathematicalLine2D(float lineStartX, float lineStartY, float lineDirX, float lineDirY, float pointX, float pointY) {
+    return plugin::CallAndReturn<float, 0x412A30, float, float, float, float, float, float>(lineStartX, lineStartY, lineDirX, lineDirY, pointX, pointY);
 }
 
 // 0x412A80
