@@ -1397,11 +1397,8 @@ void CVehicle::ProcessDelayedExplosion() {
         return;
     }
 
-    if (const auto period = (int16)(CTimer::GetTimeStep() * 16.666666f); m_wBombTimer > period) {
-        m_wBombTimer -= period;
-    } else {
-        m_wBombTimer = 0;
-    }
+    const auto period = (int16)(CTimer::GetTimeStep() * (100.0f / 6.0f));
+    m_wBombTimer = std::max(m_wBombTimer - period, 0);
 
     if (!m_wBombTimer) {
         BlowUpCar(m_pWhoDetonatedMe, false);
@@ -1636,11 +1633,8 @@ CPed* CVehicle::SetupPassenger(int32 seatIdx, int32 gangPedType, bool createAsMa
             }
             break;
         }
-        default: {
-            if (IsPedTypeGang(psgrAdded->m_nPedType)) {
-                return false;
-            }
-        }
+        default: 
+            return !IsPedTypeGang(psgrAdded->m_nPedType);
         }
         return true;
     };
@@ -2748,7 +2742,7 @@ CVector CVehicle::GetPlaneGunsPosition(int32 gunId) {
     case MODEL_HUNTER:   return VehicleGunOffset[0];
     case MODEL_SEASPAR:  return { -0.5f, 2.4f, -0.785f }; // 0x8D35F8
     case MODEL_RCBARON:  return { 0.0f, 0.45f, 0.0f };    // 0x8D3634
-    case MODEL_RUSTLER:  return CVector{ 2.19f, 1.5f, -0.58f } + CVector{ 0.2f, 0.0f, 0.0f } * (float)(gunId - 1);  // 0x8D3610, 0x8D361C
+    case MODEL_RUSTLER:  return CVector{ 2.19f, 1.5f, -0.58f } + CVector{ 0.2f, 0.0f, 0.0f } * (float)(gunId - 1);  // 0x8D3610 (posn), 0x8D361C (offset)
     case MODEL_MAVERICK: return { 0.0f, 2.85f, -0.5f };   // 0x8D35E0
     case MODEL_POLMAV:   return { 0.0f, 2.85f, -0.5f };   // 0x8D35EC [Values same as the maverick's]
     case MODEL_HYDRA:    return { 1.48f, 0.44f, -0.52f }; // 0x8D3628
@@ -3457,9 +3451,7 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
         case  1: return {  matrix.GetRight(),   {  0.2f,  0.0f,  0.0f }, };
         case  2: return {  matrix.GetForward(), {  0.0f,  0.2f,  0.0f }, };
         case  3: return {  matrix.GetUp(),      {  0.0f,  0.0f,  0.2f }, };
-        default:
-            NOTSA_UNREACHABLE("Unknown rotorType");
-            return { {}, {} };
+        default: NOTSA_UNREACHABLE("Unknown rotorType");
         }
     };
 
