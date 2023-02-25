@@ -113,7 +113,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(SphereCastVsEntity, 0x419F00);
     //RH_ScopedInstall(SphereVsEntity, 0x41A5A0);
     RH_ScopedInstall(CheckCameraCollisionBuildings, 0x41A820);
-    //RH_ScopedInstall(CheckCameraCollisionVehicles, 0x41A990);
+    RH_ScopedInstall(CheckCameraCollisionVehicles, 0x41A990);
     //RH_ScopedInstall(CheckCameraCollisionObjects, 0x41AB20);
     //RH_ScopedInstall(BuildCacheOfCameraCollision, 0x41AC40);
     //RH_ScopedInstall(CameraConeCastVsWorldCollision, 0x41B000);
@@ -2349,8 +2349,58 @@ bool CCollision::CheckCameraCollisionBuildings(
 }
 
 // 0x41A990
-bool CCollision::CheckCameraCollisionVehicles(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5, CVector* arg6) {
-    return plugin::CallAndReturn<bool, 0x41A990, int32, int32, CColBox*, CColSphere*, CColSphere*, CColSphere*, CVector*>(sectorX, sectorY, arg2, arg3, arg4, arg5, arg6);
+bool CCollision::CheckCameraCollisionVehicles(
+    int32 X,
+    int32 Y,
+    const CColBox& bbSpAB,
+    const CColSphere& spS,
+    const CColSphere& spA,
+    const CColSphere& spB,
+    const CVector* plyrVelocity
+) {
+    static auto& gFramesSittingOnTimeOut = StaticRef<int32, 0x9689D4>();
+    static auto& gpLastSittingOnEntity   = StaticRef<CEntity*, 0x9689D8>();
+
+    bool anyCollided = false;
+    for (CPtrNodeDoubleLink* it = GetRepeatSector(X, Y)->GetList(REPEATSECTOR_VEHICLES).GetNode(), *next{}; it; it = next) {
+        next = it->GetNext();
+
+        const auto entity = it->GetItem<CVehicle>();
+
+        if (!entity->ProcessScan()) {
+            continue;
+        }
+
+        if (CWorld::pIgnoreEntity == entity) {
+            continue;
+        }
+
+        if (IsThisVehicleSittingOnMe(CWorld::pIgnoreEntity->AsVehicle(), entity)) {
+            gpLastSittingOnEntity = entity;
+            gFramesSittingOnTimeOut = 30; // from 0x8A5B1C
+            continue;
+        }
+
+        if (gpLastSittingOnEntity == entity) {
+            if (gFramesSittingOnTimeOut-- == 0) { // TODO: FPS bug
+                gpLastSittingOnEntity = nullptr;
+            }
+            continue;
+        }
+
+        if (plyrVelocity) {
+            if (relVelCamCollisionVehiclesSqr <= (*plyrVelocity - entity->GetMoveSpeed()).SquaredMagnitude()) {
+                continue;
+            }
+        }
+
+        if (!TestSphereSphere(spS, TransformObject(entity->GetColModel()->GetBoundingSphere(), entity->GetMatrix()))) {
+            continue;
+        }
+
+        anyCollided |= SphereCastVsEntity(spA, spB, entity);
+    }
+    return anyCollided;
 }
 
 // 0x41AB20

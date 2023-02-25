@@ -121,6 +121,16 @@ public:
         const CColSphere& spA,
         const CColSphere& spB
     );
+    static bool CheckCameraCollisionVehicles(
+        int32 X,
+        int32 Y,
+        const CColBox& bbSpAB,
+        const CColSphere& spS,
+        const CColSphere& spA,
+        const CColSphere& spB,
+        const CVector* plyrVelocity
+    );
+
     static bool CheckCameraCollisionObjects(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5);
     static bool BuildCacheOfCameraCollision(CColSphere* sphere1, CColSphere* sphere2);
     static bool CameraConeCastVsWorldCollision(CColSphere* sphere1, CColSphere* sphere2, float* arg2, float arg3);
