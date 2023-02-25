@@ -50,3 +50,7 @@ void CSphere::DrawWireFrame(CRGBA color, const CMatrix& transform) const {
 auto CSphere::GetTransformed(const CMatrix& transform) const -> CSphere {
     return { transform * m_vecCenter, m_fRadius };
 }
+
+auto TransformObject(const CSphere& sp, const CMatrix& transform) -> CSphere {
+    return { transform * sp.m_vecCenter, sp.m_fRadius };
+}

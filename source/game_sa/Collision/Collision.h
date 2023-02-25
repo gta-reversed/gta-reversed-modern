@@ -97,10 +97,30 @@ public:
         float* maxTouchDistances,
         bool arg7
     );
-    static bool SphereCastVsEntity(CColSphere* sphere1, CColSphere* sphere2, CEntity* entity);
+    static bool SphereCastVsEntity(
+        const CColSphere& spAws,
+        const CColSphere& spBws,
+        CEntity* entity
+    );
     static bool SphereVsEntity(CColSphere* sphere, CEntity* entity);
-    static bool CheckCameraCollisionBuildings(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5);
-    static bool CheckCameraCollisionVehicles(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5, CVector* arg6);
+
+    /*!
+    * @param X      Sector X
+    * @param Y      Sector Y
+    * @param bbSpAB Bounding box of spA and spB
+    * @param spS    Fuck knows
+    * @param spA    Camera sphere 
+    * @param spB    Camera sphere next frame (Offsetted by velocity)
+    * @addr 0x41A820
+    */
+    static bool CheckCameraCollisionBuildings(
+        int32 X,
+        int32 Y,
+        const CColBox& bbSpAB,
+        const CColSphere& spS,
+        const CColSphere& spA,
+        const CColSphere& spB
+    );
     static bool CheckCameraCollisionObjects(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5);
     static bool BuildCacheOfCameraCollision(CColSphere* sphere1, CColSphere* sphere2);
     static bool CameraConeCastVsWorldCollision(CColSphere* sphere1, CColSphere* sphere2, float* arg2, float arg3);

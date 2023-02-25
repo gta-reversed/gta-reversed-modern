@@ -112,7 +112,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(SphereCastVsCaches, 0x4181B0);
     RH_ScopedInstall(SphereCastVsEntity, 0x419F00);
     //RH_ScopedInstall(SphereVsEntity, 0x41A5A0);
-    //RH_ScopedInstall(CheckCameraCollisionBuildings, 0x41A820);
+    RH_ScopedInstall(CheckCameraCollisionBuildings, 0x41A820);
     //RH_ScopedInstall(CheckCameraCollisionVehicles, 0x41A990);
     //RH_ScopedInstall(CheckCameraCollisionObjects, 0x41AB20);
     //RH_ScopedInstall(BuildCacheOfCameraCollision, 0x41AC40);
@@ -2195,7 +2195,11 @@ finished:
 * Refer to `SphereCastVsCaches`
 * @addr 0x419F00
 */ 
-bool CCollision::SphereCastVsEntity(CColSphere* spAws, CColSphere* spBws, CEntity* entity) {
+bool CCollision::SphereCastVsEntity(
+    const CColSphere& spAws,
+    const CColSphere& spBws,
+    CEntity* entity
+) {
     if (!entity->m_bUsesCollision || TheCamera.IsExtraEntityToIgnore(entity)) {
         return false;
     }
@@ -2209,8 +2213,8 @@ bool CCollision::SphereCastVsEntity(CColSphere* spAws, CColSphere* spBws, CEntit
     const auto invEntMat = Invert(entity->GetMatrix());
 
     // There was a bug (Noteably spBws's radius was set to spAws's, I've fixed that here)
-    CColSphere spAos{ spAws->GetTransformed(invEntMat) }, // os = object space
-               spBos{ spBws->GetTransformed(invEntMat) };
+    CColSphere spAos{ spAws.GetTransformed(invEntMat) }, // os = object space
+               spBos{ spBws.GetTransformed(invEntMat) };
 
     if (!SphereCastVsBBox(spAos, spBos, ecm->GetBoundingBox())) {
         return false;
@@ -2307,12 +2311,41 @@ bool CCollision::SphereCastVsEntity(CColSphere* spAws, CColSphere* spBws, CEntit
 
 // 0x41A5A0
 bool CCollision::SphereVsEntity(CColSphere* sphere, CEntity* entity) {
-    return plugin::CallAndReturn<bool, 0x41A5A0, CColSphere*, CEntity*>(sphere, entity);
+    NOTSA_UNREACHABLE(); /* unused */
 }
 
 // 0x41A820
-bool CCollision::CheckCameraCollisionBuildings(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5) {
-    return plugin::CallAndReturn<bool, 0x41A820, int32, int32, CColBox*, CColSphere*, CColSphere*, CColSphere*>(sectorX, sectorY, arg2, arg3, arg4, arg5);
+bool CCollision::CheckCameraCollisionBuildings(
+    int32 X,
+    int32 Y,
+    const CColBox& pBox,
+    const CColSphere& spS,
+    const CColSphere& spA,
+    const CColSphere& spB
+) {
+    const auto plyrVeh = FindPlayerVehicle();
+    const auto checkFlyerCollision = plyrVeh && plyrVeh->physicalFlags.bDontCollideWithFlyers;
+
+    bool anyCollided = false;
+    for (CPtrNodeDoubleLink* it = GetSector(X, Y)->m_buildings.GetNode(), *next{}; it; it = next) {
+        next = it->GetNext();
+
+        const auto entity = it->GetItem<CBuilding>();
+        if (!entity->ProcessScan()) {
+            continue;
+        }
+
+        if (checkFlyerCollision && (!entity->DoesNotCollideWithFlyers() || CWorld::pIgnoreEntity == entity)) {
+            continue;
+        }
+
+        if (!TestSphereSphere(spS, TransformObject(entity->GetColModel()->GetBoundingSphere(), entity->GetMatrix()))) {
+            continue;
+        }
+
+        anyCollided |= SphereCastVsEntity(spA, spB, entity);
+    }
+    return anyCollided;
 }
 
 // 0x41A990

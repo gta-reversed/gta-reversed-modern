@@ -2543,6 +2543,14 @@ CBaseModelInfo* CEntity::GetModelInfo() const {
     return CModelInfo::GetModelInfo(m_nModelIndex);
 }
 
+bool CEntity::ProcessScan() {
+    if (IsScanCodeCurrent()) {
+        return false;
+    }
+    SetCurrentScanCode();
+    return true;
+}
+
 RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* atomic, void* data)
 {
     auto geometry = RpAtomicGetGeometry(atomic);

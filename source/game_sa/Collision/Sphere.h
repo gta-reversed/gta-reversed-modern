@@ -34,5 +34,7 @@ public:
 
     //! Get *this but transformed
     auto GetTransformed(const CMatrix& transform) const -> CSphere;
+
+    friend auto TransformObject(const CSphere& sp, const CMatrix& transform) -> CSphere;
 };
 VALIDATE_SIZE(CSphere, 0x10);
