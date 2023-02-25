@@ -114,7 +114,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(ProcessColModels, 0x4185C0, { .reversed = false });
     RH_ScopedInstall(SphereCastVsCaches, 0x4181B0);
     RH_ScopedInstall(SphereCastVsEntity, 0x419F00);
-    //RH_ScopedInstall(SphereVsEntity, 0x41A5A0);
+    RH_ScopedInstall(SphereVsEntity, 0x41A5A0);
     RH_ScopedInstall(CheckCameraCollisionBuildings, 0x41A820);
     RH_ScopedInstall(CheckCameraCollisionVehicles, 0x41A990);
     RH_ScopedInstall(CheckCameraCollisionObjects, 0x41AB20);
