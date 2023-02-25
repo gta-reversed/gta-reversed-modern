@@ -14,6 +14,9 @@
 #include "TaskSimpleHoldEntity.h"
 #include "extensions/enumerate.hpp"
 
+#include "TaskComplexEnterCarAsDriver.h"
+#include "TaskComplexEnterCarAsPassenger.h"
+
 struct CColCacheEntry {
     enum class eType : uint8 {
         NONE,
@@ -115,7 +118,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(CheckCameraCollisionBuildings, 0x41A820);
     RH_ScopedInstall(CheckCameraCollisionVehicles, 0x41A990);
     RH_ScopedInstall(CheckCameraCollisionObjects, 0x41AB20);
-    //RH_ScopedInstall(BuildCacheOfCameraCollision, 0x41AC40);
+    RH_ScopedInstall(BuildCacheOfCameraCollision, 0x41AC40);
     //RH_ScopedInstall(CameraConeCastVsWorldCollision, 0x41B000);
 
     RH_ScopedOverloadedInstall(CalculateTrianglePlanes, "colData", 0x416330, void (*)(CCollisionData*));
@@ -1346,15 +1349,15 @@ bool CCollision::IsStoredPolyStillValidVerticalLine(const CVector& lineOrigin, f
 }
 
 // 0x415230
-void CCollision::GetBoundingBoxFromTwoSpheres(CColBox* bb, CColSphere* spA, CColSphere* spB) {
-    auto &min = bb->m_vecMin,
-         &max = bb->m_vecMax;
+CColBox CCollision::GetBoundingBoxFromTwoSpheres(const CColSphere& spA, const CColSphere& spB) {
+    CVector min, max;
     for (size_t i = 0; i < 3; i++) {
-        std::tie(min[i], max[i]) = std::minmax(spA->m_vecCenter[i], spB->m_vecCenter[i]);
+        std::tie(min[i], max[i]) = std::minmax(spA.m_vecCenter[i], spB.m_vecCenter[i]);
 
-        min[i] -= spA->m_fRadius;
-        max[i] += spA->m_fRadius;
+        min[i] -= spA.m_fRadius;
+        max[i] += spA.m_fRadius; // NOTE: They assume both spheres have the same radius, but that might not be the case. Really should be using max(spA.radius, spB.radius) instead!
     }
+    return CColBox{ CBox{min, max} };
 }
 
 // 0x4152C0
@@ -2436,9 +2439,59 @@ bool CCollision::CheckCameraCollisionObjects(
     return anyCollided;
 }
 
+// Ah, yes, the ultimate solution, just use static variables!
+static inline auto& gnBottom = StaticRef<int32, 0x965598>();
+static inline auto& gnTop    = StaticRef<int32, 0x965590>();
+static inline auto& gnRight  = StaticRef<int32, 0x965594>();
+static inline auto& gnLeft   = StaticRef<int32, 0x96559C>();
+
 // 0x41AC40
-bool CCollision::BuildCacheOfCameraCollision(CColSphere* sphere1, CColSphere* sphere2) {
-    return plugin::CallAndReturn<bool, 0x41AC40, CColSphere*, CColSphere*>(sphere1, sphere2);
+bool CCollision::BuildCacheOfCameraCollision(
+    const CColSphere& spA,
+    const CColSphere& spB
+) {
+    const auto spABBox = GetBoundingBoxFromTwoSpheres(spA, spB);
+    const auto spABBSp = CColSphere{CSphere{ spABBox.GetCenter(), spABBox.GetSize().Magnitude() / 2.f} };
+
+    gnLeft   = CWorld::GetSectorX(spABBox.m_vecMin.x);
+    gnRight  = CWorld::GetSectorX(spABBox.m_vecMax.x);
+    gnBottom = CWorld::GetSectorY(spABBox.m_vecMin.y);
+    gnTop    = CWorld::GetSectorY(spABBox.m_vecMax.y);
+
+    CWorld::IncrementCurrentScanCode();
+
+    gColCacheNumEntries = 0;
+
+    const auto ogpIgnoreEntity = CWorld::pIgnoreEntity;
+    if (!CWorld::pIgnoreEntity) {
+        auto& plyrtm = FindPlayerPed(0)->GetTaskManager();
+
+        if (const auto task = static_cast<CTaskComplexEnterCar*>(plyrtm.Find<CTaskComplexEnterCarAsPassenger, CTaskComplexEnterCarAsDriver>())) {
+            CWorld::pIgnoreEntity = task->GetCameraAvoidVehicle();
+        }
+    }
+
+    const auto plyrVeh = FindPlayerVehicle();
+
+    bool anyCollision = false;
+    CWorld::IterateSectors(gnLeft, gnBottom, gnRight, gnTop, [&](int32 sx, int32 sy) {
+        if (bCamCollideWithBuildings) {
+            gbTryDoubleSidedCollision = true;
+            anyCollision |= CheckCameraCollisionBuildings(sx, sy, spABBox, spABBSp, spA, spB);
+            gbTryDoubleSidedCollision = false;
+        }
+        if (bCamCollideWithVehicles) {
+            anyCollision |= CheckCameraCollisionVehicles(sx, sy, spABBox, spABBSp, spA, spB, plyrVeh ? &plyrVeh->GetMoveSpeed() : nullptr);
+        }
+        if (bCamCollideWithObjects) {
+            anyCollision |= CheckCameraCollisionObjects(sx, sy, spABBox, spABBSp, spA, spB);
+        }
+        return true;
+    });
+
+    CWorld::pIgnoreEntity = ogpIgnoreEntity;
+
+    return anyCollision;
 }
 
 // 0x41B000

@@ -25,6 +25,7 @@ public:
     static inline bool& bCamCollideWithVehicles = *(bool*)0x8A5B14;         // = true
     static inline bool& bCamCollideWithObjects = *(bool*)0x8A5B15;          // = true
     static inline bool& bCamCollideWithPeds = *(bool*)0x8A5B17;             // = true
+    static inline bool& bCamCollideWithBuildings = *(bool*)0x8A5B16;        // = true
     static inline float& relVelCamCollisionVehiclesSqr = *(float*)0x8A5B18; // = 0.01f
 public:
     static void InjectHooks();
@@ -54,7 +55,7 @@ public:
     static bool ProcessLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane, CColPoint& colPoint, float& maxTouchDistance, CStoredCollPoly* collPoly);
     static bool ProcessVerticalLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane, CColPoint& colPoint, float& maxTouchDistance, CStoredCollPoly* collPoly);
     static bool IsStoredPolyStillValidVerticalLine(const CVector& lineOrigin, float lineDist, CColPoint& colPoint, CStoredCollPoly* collPoly);
-    static void GetBoundingBoxFromTwoSpheres(CColBox* bbox, CColSphere* sphere1, CColSphere* sphere2);
+    static CColBox GetBoundingBoxFromTwoSpheres(const CColSphere& spA, const CColSphere& spB);
     static bool IsThisVehicleSittingOnMe(CVehicle* vehicle, CVehicle* vehicleOnMe);
     static bool CheckCameraCollisionPeds(int32 sectorX, int32 sectorY, CVector* pos, CVector* dir, float* arg4);
     static bool CheckPeds(CVector* pos, CVector* dir, float* arg2);
@@ -161,7 +162,10 @@ public:
         const CColSphere& spA,
         const CColSphere& spB
     );
-    static bool BuildCacheOfCameraCollision(CColSphere* sphere1, CColSphere* sphere2);
+    static bool BuildCacheOfCameraCollision(
+        const CColSphere& spA,
+        const CColSphere& spB
+    );
     static bool CameraConeCastVsWorldCollision(CColSphere* sphere1, CColSphere* sphere2, float* arg2, float arg3);
 };
 
