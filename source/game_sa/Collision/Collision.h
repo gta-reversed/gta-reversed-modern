@@ -61,7 +61,7 @@ public:
     static bool CheckPeds(const CVector& src, const CVector& normal, float& nearest);
     static bool SphereCastVsBBox(const CColSphere& sphere1, const CColSphere& sphere2, const CColBox& box);
     static bool RayPolyPOP(CVector* arg0, CVector* arg1, CColTriangle* arg2, CVector* arg3, CVector* arg4);
-    static int32 GetPrincipleAxis(CVector* vec);
+    static int32 GetPrincipleAxis(const CVector& normal);
     static bool PointInPoly(CVector* point, CColTriangle* tri, CVector* arg2, CVector* triVerts);
     static void Closest3(CVector* arg0, CVector* arg1);
     static bool SphereCastVersusVsPoly(const CColSphere& sphere1, const CColSphere& sphere2, const CColTriangle& tri, const CColTrianglePlane& triPlane, CompressedVector* verts);

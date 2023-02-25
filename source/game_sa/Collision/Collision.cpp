@@ -1117,12 +1117,20 @@ void ResetMadeInvisibleObjects() {
 
 // 0x415620
 bool CCollision::RayPolyPOP(CVector* arg0, CVector* arg1, CColTriangle* arg2, CVector* arg3, CVector* arg4) {
-    return plugin::CallAndReturn<bool, 0x415620, CVector*, CVector*, CColTriangle*, CVector*, CVector*>(arg0, arg1, arg2, arg3, arg4);
+    NOTSA_UNREACHABLE();
 }
 
 // 0x4156D0
-int32 CCollision::GetPrincipleAxis(CVector* vec) {
-    return plugin::CallAndReturn<int32, 0x4156D0, CVector*>(vec);
+int32 CCollision::GetPrincipleAxis(const CVector& normal) {
+    const auto nx = std::abs(normal.x),
+               ny = std::abs(normal.y),
+               nz = std::abs(normal.z);
+    if (nx > ny && nx > nz) {
+        return 0; // X
+    }
+    return ny <= nz
+        ? 4  // Z
+        : 2; // Y
 }
 
 // 0x415730
@@ -2359,8 +2367,8 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(CheckPeds, 0x4154A0);
     RH_ScopedGlobalInstall(ResetMadeInvisibleObjects, 0x415540);
     RH_ScopedInstall(SphereCastVsBBox, 0x415590);
-    //RH_ScopedInstall(RayPolyPOP, 0x415620);
-    //RH_ScopedInstall(GetPrincipleAxis, 0x4156D0);
+    RH_ScopedInstall(RayPolyPOP, 0x415620);
+    RH_ScopedInstall(GetPrincipleAxis, 0x4156D0);
     //RH_ScopedInstall(PointInPoly, 0x415730);
     //RH_ScopedInstall(Closest3, 0x415950);
     //RH_ScopedInstall(ClosestSquaredDistanceBetweenFiniteLines, 0x415A40);
