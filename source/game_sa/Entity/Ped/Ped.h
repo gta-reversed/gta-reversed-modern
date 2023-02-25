@@ -36,24 +36,6 @@ class CEntryExit;
 class CAnimBlendClumpData;
 struct RpHAnimHierarchy;
 
-static bool IsPedTypeGang(ePedType type) {
-    switch (type) {
-        case PED_TYPE_GANG1:
-        case PED_TYPE_GANG2:
-        case PED_TYPE_GANG3:
-        case PED_TYPE_GANG4:
-        case PED_TYPE_GANG5:
-        case PED_TYPE_GANG6:
-        case PED_TYPE_GANG7:
-        case PED_TYPE_GANG8:
-        case PED_TYPE_GANG9:
-        case PED_TYPE_GANG10: {
-            return true;
-        }
-    }
-    return false;
-}
-
 enum ePedNode : int32 {
     PED_NODE_UPPER_TORSO     = 1,
     PED_NODE_HEAD            = 2,

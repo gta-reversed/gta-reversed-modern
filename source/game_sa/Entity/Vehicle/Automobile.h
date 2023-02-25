@@ -214,7 +214,7 @@ public:
     void SetTotalDamage(bool component);
     void ReduceHornCounter();
     // Apply custom car plate texture to vehicle
-    void CustomCarPlate_BeforeRenderingStart(CVehicleModelInfo* model);
+    void CustomCarPlate_BeforeRenderingStart(const CVehicleModelInfo& model);
     // Reset car plate texture after rendering
     void CustomCarPlate_AfterRenderingStop(CVehicleModelInfo* model);
     bool GetAllWheelsOffGround() const;

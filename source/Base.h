@@ -123,7 +123,7 @@ template<typename... Ts>
 * @brief Used for static variable references
 *
 * @tparam T    The type of the variable
-* @tparam Addr The address of it
+* @param Addr  The address of it
 */
 template<typename T, uintptr Addr>
 T& StaticRef() {

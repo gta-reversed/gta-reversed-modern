@@ -4,6 +4,8 @@
 #include <initializer_list>
 
 namespace notsa {
+namespace rng = std::ranges;
+
 /*
 * Want to know something funny?
 * `std::initializer_list` is just a proxy object for a stack allocated array.
@@ -85,6 +87,7 @@ bool contains(R&& r, const T& value, Proj proj = {}) {
     return rng::find(r, value, proj) != rng::end(r);
 }
 
+
 /*!
 * Helper (Of your fingers) - Reduces typing needed for Python style `value in {}`
 */
@@ -95,7 +98,7 @@ bool contains(std::initializer_list<Y> r, const T& value) {
 
 /*!
 * @brief Similar to `std::remove_if`, but only removes the first element found (Unlike the former that removes all)
-* 
+*
 * @return Whenever an element was removed. If it was, you have to pop the last element from your container
 */
 template <std::permutable I, std::sentinel_for<I> S, class T, class Proj = std::identity>
@@ -104,7 +107,8 @@ constexpr bool remove_first(I first, S last, const T& value, Proj proj = {}) {
     first = rng::find(std::move(first), last, value, proj);
     if (first == last) {
         return false;
-    } else {
+    }
+    else {
         rng::move_backward(rng::next(first), last, std::prev(last)); // Shift to the left (removing the found element)
         return true;
     }
@@ -120,21 +124,6 @@ template <rng::bidirectional_range R, class T, class Proj = std::identity>
 constexpr bool remove_first(R&& r, const T& value, Proj proj = {}) {
     return remove_first(rng::begin(r), rng::end(r), value, std::move(proj));
 }
-
-
-/*
-//! Similar to `std::remove_if`, but only removes the first element found (Unlike the former that removes all)
-template<rng::forward_range R, class Proj = std::identity, std::indirect_unary_predicate<std::projected<rng::iterator_t<R>, Proj>> Pr>
-    requires std::permutable<rng::iterator_t<R>>
-constexpr rng::borrowed_subrange_t<R> remove_first(R&& r, Pr pr, Proj proj = {}) {
-    auto end = rng::end(r);
-    auto it = rng::find_if(r, pr, proj);
-    if (it != rng::end(r)) {
-        rng::move_backward(rng::next(it), end, it); // Shift to the left (removing the found element)
-    }
-    return { std::move(it), std::move(end) }; // Return 
-}
-*/  
 
 //! `std::ranges` like `accumulate` function => Hopefully to be replaced by an `std` implementation.
 template<rng::input_range R, typename T, typename FnOp = std::plus<>, class Proj = std::identity>

@@ -1050,11 +1050,11 @@ bool CPhysical::ApplyCollision(CEntity* entity, CColPoint& colPoint, float& dama
 }
 
 // 0x543890
-bool CPhysical::ApplySoftCollision(CEntity* entity, CColPoint& colPoint, float& damageIntensity)
+bool CPhysical::ApplySoftCollision(CEntity* entity, CColPoint& colPoint, float& outDamageIntensity)
 {
     if (physicalFlags.bDisableTurnForce)
     {
-        ApplyCollision(entity, colPoint, damageIntensity);
+        ApplyCollision(entity, colPoint, outDamageIntensity);
     }
 
     CVector vecDistanceToPointFromThis = colPoint.m_vecPoint - GetPosition();
@@ -1106,35 +1106,35 @@ bool CPhysical::ApplySoftCollision(CEntity* entity, CColPoint& colPoint, float& 
             fDepth = colPoint.m_fDepth;
         }
 
-        damageIntensity = fDepth * CTimer::GetTimeStep() * SOFTCOL_DEPTH_MULT * fCollisionMass * 0.008f;
+        outDamageIntensity = fDepth * CTimer::GetTimeStep() * SOFTCOL_DEPTH_MULT * fCollisionMass * 0.008f;
         if (fSpeedDotProduct >= 0.0f)
         {
-            damageIntensity = 0.0f;
+            outDamageIntensity = 0.0f;
             return false;
         }
-        damageIntensity -= fCollisionMass * fSpeedDotProduct * fSoftColSpeedMult;
+        outDamageIntensity -= fCollisionMass * fSpeedDotProduct * fSoftColSpeedMult;
     }
     else
     {
-        damageIntensity = colPoint.m_fDepth * CTimer::GetTimeStep() * SOFTCOL_DEPTH_MULT * fCollisionMass * 0.008f;
+        outDamageIntensity = colPoint.m_fDepth * CTimer::GetTimeStep() * SOFTCOL_DEPTH_MULT * fCollisionMass * 0.008f;
         if (fSpeedDotProduct < 0.0f)
         {
-            damageIntensity -= SOFTCOL_CARLINE_SPEED_MULT * fCollisionMass * fSpeedDotProduct;
+            outDamageIntensity -= SOFTCOL_CARLINE_SPEED_MULT * fCollisionMass * fSpeedDotProduct;
         }
 
         float fRightDotProduct = DotProduct(&vecMoveDirection, &GetRight());
         vecMoveDirection -= 0.9f * fRightDotProduct * GetRight();
     }
 
-    if (damageIntensity == 0.0f)
+    if (outDamageIntensity == 0.0f)
     {
         return false;
     }
 
-    ApplyForce(vecMoveDirection * damageIntensity, vecDistanceToPointFromThis, true);
-    if (damageIntensity < 0.0f)
+    ApplyForce(vecMoveDirection * outDamageIntensity, vecDistanceToPointFromThis, true);
+    if (outDamageIntensity < 0.0f)
     {
-        damageIntensity *= -1.0f;
+        outDamageIntensity *= -1.0f;
     }
     return true;
 }
