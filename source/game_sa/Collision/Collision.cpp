@@ -1133,9 +1133,38 @@ int32 CCollision::GetPrincipleAxis(const CVector& normal) {
         : 2; // Y
 }
 
+// NOTSA
+bool IsPointInPoly2D(CVector2D pt, CVector2D a, CVector2D b, CVector2D c) {
+    // Code they used originally: https://stackoverflow.com/revisions/2049593/4
+    // It's slower than than the one below.
+    
+    // Based on: https://stackoverflow.com/a/9755252
+    const auto pt_a = pt - a;
+    const bool s_ab = (b - a).Cross(pt_a) > 0.f;
+    return (c - a).Cross(pt_a) > 0.f != s_ab && (c - b).Cross(pt - b) > 0.f == s_ab;
+}
+
 // 0x415730
-bool CCollision::PointInPoly(CVector* point, CColTriangle* tri, CVector* arg2, CVector* triVerts) {
-    return plugin::CallAndReturn<bool, 0x415730, CVector*, CColTriangle*, CVector*, CVector*>(point, tri, arg2, triVerts);
+bool CCollision::PointInPoly(
+    const CVector& testPt,
+    const CColTriangle& /*unused*/,
+    const CVector& normal,
+    const CVector* verts // Uncompressed vertices
+) {
+    // Shuffle look-up table
+    constexpr uint8 lut[3][2]{
+        { 1, 2 }, // X
+        { 0, 2 }, // Y
+        { 0, 1 }  // Z
+    };
+
+    // Shuffle vectors for the principal axis
+    const auto Do = [shuffle = lut[GetPrincipleAxis(normal) / 2]](const CVector& v) {
+        return CVector2D{ v[shuffle[0]], v[shuffle[1]] };
+    };
+
+    // Now we can do the test in 2D
+    return IsPointInPoly2D(Do(testPt), Do(verts[0]), Do(verts[1]), Do(verts[2]));
 }
 
 // 0x415950
@@ -2369,7 +2398,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(SphereCastVsBBox, 0x415590);
     RH_ScopedInstall(RayPolyPOP, 0x415620);
     RH_ScopedInstall(GetPrincipleAxis, 0x4156D0);
-    //RH_ScopedInstall(PointInPoly, 0x415730);
+    RH_ScopedInstall(PointInPoly, 0x415730);
     //RH_ScopedInstall(Closest3, 0x415950);
     //RH_ScopedInstall(ClosestSquaredDistanceBetweenFiniteLines, 0x415A40);
     //RH_ScopedInstall(SphereCastVersusVsPoly, 0x415CF0);
