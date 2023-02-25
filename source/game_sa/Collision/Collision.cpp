@@ -19,326 +19,6 @@
 
 #define NOTSA_VANILLA_COLLISIONS
 
-void CCollision::InjectHooks() {
-    // Must be done be4 hooks are injected
-
-    for (auto i = 0; i < 20; i++) {
-       Tests(i);
-    }
-
-    RH_ScopedClass(CCollision);
-    RH_ScopedCategoryGlobal();
-
-    RH_ScopedInstall(Init, 0x416260);
-    RH_ScopedInstall(Shutdown, 0x4162E0);
-    RH_ScopedInstall(Update, 0x411E20);
-    RH_ScopedInstall(SortOutCollisionAfterLoad, 0x411E30);
-    RH_ScopedInstall(TestSphereSphere, 0x411E70);
-    RH_ScopedGlobalInstall(CalculateColPointInsideBox, 0x411EC0);
-    RH_ScopedInstall(TestSphereBox, 0x4120C0);
-    RH_ScopedInstall(ProcessSphereBox, 0x412130);
-    RH_ScopedInstall(PointInTriangle, 0x412700);
-    RH_ScopedInstall(DistToLineSqr, 0x412850);
-    RH_ScopedInstall(DistToMathematicalLine, 0x412970);
-    RH_ScopedInstall(DistToMathematicalLine2D, 0x412A30);
-    RH_ScopedInstall(DistAlongLine2D, 0x412A80);
-    RH_ScopedInstall(ProcessLineSphere, 0x412AA0);
-    RH_ScopedInstall(TestLineBox_DW, 0x412C70);
-    RH_ScopedInstall(TestLineBox, 0x413070);
-    RH_ScopedInstall(TestVerticalLineBox, 0x413080);
-    RH_ScopedInstall(ProcessLineBox, 0x413100);
-    RH_ScopedInstall(Test2DLineAgainst2DLine, 0x4138D0);
-    RH_ScopedInstall(ProcessDiscCollision, 0x413960);
-    RH_ScopedInstall(TestLineTriangle, 0x413AC0);
-    RH_ScopedInstall(ProcessLineTriangle, 0x4140F0);
-    RH_ScopedInstall(ProcessVerticalLineTriangle, 0x4147E0);
-    RH_ScopedInstall(IsStoredPolyStillValidVerticalLine, 0x414D70);
-    RH_ScopedInstall(GetBoundingBoxFromTwoSpheres, 0x415230);
-    RH_ScopedInstall(IsThisVehicleSittingOnMe, 0x4152C0);
-    RH_ScopedInstall(CheckCameraCollisionPeds, 0x415320);
-    RH_ScopedInstall(CheckPeds, 0x4154A0);
-    //RH_ScopedInstall(ResetMadeInvisibleObjects, 0x415540);
-    //RH_ScopedInstall(SphereCastVsBBox, 0x415590);
-    //RH_ScopedInstall(RayPolyPOP, 0x415620);
-    //RH_ScopedInstall(GetPrincipleAxis, 0x4156D0);
-    //RH_ScopedInstall(PointInPoly, 0x415730);
-    //RH_ScopedInstall(Closest3, 0x415950);
-    //RH_ScopedInstall(ClosestSquaredDistanceBetweenFiniteLines, 0x415A40);
-    //RH_ScopedInstall(SphereCastVersusVsPoly, 0x415CF0);
-    //RH_ScopedInstall(Init, 0x416260);
-    //RH_ScopedInstall(ProcessSphereSphere, 0x416450);
-    //RH_ScopedInstall(TestSphereTriangle, 0x4165B0);
-    //RH_ScopedInstall(ProcessSphereTriangle, 0x416BA0);
-    //RH_ScopedInstall(TestLineSphere, 0x417470);
-    //RH_ScopedInstall(DistToLine, 0x417610);
-    //RH_ScopedInstall(TestLineOfSight, 0x417730);
-    //RH_ScopedInstall(ProcessLineOfSight, 0x417950);
-    //RH_ScopedInstall(ProcessVerticalLine, 0x417BF0);
-    RH_ScopedInstall(SphereCastVsSphere, 0x417F20, { .locked = true }); // Can only be unhooked if `TestSphereSphere` is unhooked too
-    //RH_ScopedInstall(ClosestPointOnLine, 0x417FD0);
-    //RH_ScopedInstall(ClosestPointsOnPoly, 0x418100);
-    //RH_ScopedInstall(ClosestPointOnPoly, 0x418150);
-    RH_ScopedInstall(ProcessColModels, 0x4185C0, { .reversed = false });
-    RH_ScopedInstall(SphereCastVsCaches, 0x4181B0);
-    RH_ScopedInstall(SphereCastVsEntity, 0x419F00);
-    RH_ScopedInstall(SphereVsEntity, 0x41A5A0);
-    RH_ScopedInstall(CheckCameraCollisionBuildings, 0x41A820);
-    RH_ScopedInstall(CheckCameraCollisionVehicles, 0x41A990);
-    RH_ScopedInstall(CheckCameraCollisionObjects, 0x41AB20);
-    RH_ScopedInstall(BuildCacheOfCameraCollision, 0x41AC40);
-    RH_ScopedInstall(CameraConeCastVsWorldCollision, 0x41B000);
-
-    RH_ScopedOverloadedInstall(CalculateTrianglePlanes, "colData", 0x416330, void (*)(CCollisionData*));
-    RH_ScopedOverloadedInstall(RemoveTrianglePlanes, "colData", 0x416400, void (*)(CCollisionData*));
-    RH_ScopedInstall(ProcessLineOfSight, 0x417950);
-}
-
-void CCollision::Tests(int32 i) {
-    const auto seed = (uint32)time(nullptr) + i;
-    srand(seed);
-    std::cout << "CCollision::Tests seed: " << seed << std::endl;
-
-    const auto VectorEq = [](const CVector& lhs, const CVector& rhs, float epsilon = 0.01f) {
-        for (auto i = 0u; i < 3u; i++) {
-            if (!approxEqual(lhs[i], rhs[i], epsilon)) {
-                return false;
-            }
-        }
-        return true;
-    };
-
-    const auto ColPointEq = [&](const CColPoint& lhs, const CColPoint& rhs) {
-        return VectorEq(lhs.m_vecPoint, rhs.m_vecPoint)
-            && approxEqual(lhs.m_fDepth, rhs.m_fDepth, 0.01f)
-            && VectorEq(lhs.m_vecNormal, rhs.m_vecNormal);
-    };
-
-    const auto RandomVector = [](float min = -100.f, float max = 100.f) {
-        return CVector{
-            CGeneral::GetRandomNumberInRange(min, max),
-            CGeneral::GetRandomNumberInRange(min, max),
-            CGeneral::GetRandomNumberInRange(min, max)
-        };
-    };
-
-    const auto RandomNormal = [&]() {
-        return RandomVector().Normalized();
-    };
-
-    const auto RandomSphere = [&](float min = -100.f, float max = 100.f) {
-        return CColSphere{ RandomVector(min, max), CGeneral::GetRandomNumberInRange(min, max) };
-    };
-
-    const auto RandomBox = [&](float min = -100.f, float max = 100.f) {
-        CColBox cb{ RandomVector(min, max), RandomVector(min, max) };
-        cb.Recalc();
-        return cb;
-    };
-
-    const auto RandomLine = [&](float min = -100.f, float max = 100.f) {
-        return CColLine{ RandomVector(min, max) , RandomVector(min, max) };
-    };
-
-    const auto RandomVerticalLine = [&](float min = -100.f, float max = 100.f) {
-        const auto pos = RandomVector(min, max);
-        return CColLine{ {pos.x, pos.y, pos.z + fabs(pos.x)}, {pos.x, pos.y, pos.z - fabs(pos.x)} };
-    };
-
-    const auto RandomTriangleVertices = [&](float min = -100.f, float max = 100.f) {
-        const auto vtxA = RandomVector(min, max);
-        const auto norm = RandomNormal();
-        return std::array<CompressedVector, 3>{
-            CompressVector(vtxA),
-            CompressVector(vtxA.Cross(norm)),
-            CompressVector(norm.Cross(vtxA))
-        };
-    };
-
-    const auto Test = [](auto name, auto org, auto rev, auto cmp, auto&&... args) {
-        const auto orgResult = org(args...);
-        const auto revResult = rev(args...);
-        if (!cmp(orgResult, revResult)) {
-            std::cerr << "[CCollision::Tests]: " << name << " failed. " << std::endl;
-            assert(0);
-        }
-    };
-#if 1
-    // TestSphereSphere
-    {
-        auto sp1 = RandomSphere(), sp2 = RandomSphere();
-        auto Original = plugin::CallAndReturn<bool, 0x411E70, CColSphere const&, CColSphere const&>;
-        Test("TestSphereSphere", Original, TestSphereSphere, std::equal_to<>{}, sp1, sp2);
-    }
-
-    // CalculateColPointInsideBox
-    {
-        const auto Org = [&](auto box, auto point) {
-            CColPoint cp{};
-            plugin::Call<0x411EC0, CBox const&, CVector const&, CColPoint&>(box, point, cp);
-            return cp;
-        };
-
-        const auto Rev = [](auto box, auto point) {
-            CColPoint cp{};
-            CalculateColPointInsideBox(box, point, cp);
-            return cp;
-        };
-
-        Test("CalculateColPointInsideBox", Org, Rev, ColPointEq, RandomBox(), RandomVector());
-    }
-
-    // TestSphereBox
-    {
-        const auto Org = plugin::CallAndReturn<bool, 0x4120C0, CSphere const&, CBox const&>;
-        Test("TestSphereBox", Org, TestSphereBox, std::equal_to{}, RandomSphere(), RandomBox());
-    }
-
-    // CalculateColPointInsideBox
-    {
-        // both will be of type pair<CColPoint, float> 
-        const auto CmpEq = [&](auto o, auto r) {
-            return o.second == r.second && ColPointEq(o.first, r.first);
-        };
-
-        const auto Org = [&](auto sp, auto box) {
-            CColPoint cp{};
-            float dist{1.f};
-            plugin::Call<0x412130, CColSphere const&, CColBox const&, CColPoint&, float&>(sp, box, cp, dist);
-            return std::make_pair(cp, dist);
-        };
-
-        const auto Rev = [](auto sp, auto box) {
-            CColPoint cp{};
-            float dist{1.f};
-            ProcessSphereBox(sp, box, cp, dist);
-            return std::make_pair(cp, dist);
-        };
-
-        Test("CalculateColPointInsideBox", Org, Rev, CmpEq, RandomSphere(), RandomBox());
-    }
-
-    // PointInTriangle
-    {
-        const CVector tri[3]{ RandomVector(), RandomVector(), RandomVector() };
-        const auto Org = (bool(__stdcall*)(CVector const&, CVector const*))0x412700;
-        Test("PointInTriangle", Org, PointInTriangle, std::equal_to{}, RandomVector(), tri);
-    }
-
-    // DistToLineSqr
-    {
-        const auto Org = plugin::CallAndReturn<float, 0x412850, CVector const*, CVector const*, CVector const*>;
-        const auto ls{ RandomVector() }, le{ RandomVector() }, p{ RandomVector() };
-        const auto CmpEq = [](float org, float rev) {
-            return approxEqual(org, rev, 0.02f);
-        };
-        Test("DistToLineSqr", Org, DistToLineSqr, CmpEq, &ls, &le, &p);
-    }
-
-    // DistToMathematicalLine2D
-    {
-        const auto Org = plugin::CallAndReturn<float, 0x412A30, float, float, float, float, float, float>;
-        const auto ls{ RandomVector() }, le{ RandomVector() }, p{ RandomVector() };
-        const auto CmpEq = [](float org, float rev) {
-            return approxEqual(org, rev, 0.02f);
-        };
-        Test("DistToLineSqr", Org, DistToMathematicalLine2D, CmpEq, ls.x, ls.y, le.x, le.y, p.x, p.y);
-    }
-
-    // ProcessLineSphere
-    {
-        const auto Org = [&](auto line, auto sp) {
-            CColPoint cp{};
-            float depth{ 100.f };
-            const bool s = plugin::CallAndReturn<bool, 0x412AA0, CColLine const&, CColSphere const&, CColPoint&, float&>(line, sp, cp, depth);
-            return std::make_tuple(cp, depth, s);
-        };
-
-        const auto Rev = [](auto line, auto sp) {
-            CColPoint cp{};
-            float depth{ 100.f };
-            const bool s = ProcessLineSphere(line, sp, cp, depth);
-            return std::make_tuple(cp, depth, s);
-        };
-
-        const auto CmpEq = [&](auto org, auto rev) {
-            auto [org_cp, org_d, org_s] = org;
-            auto [rev_cp, rev_d, rev_s] = rev;
-            return org_s == rev_s && approxEqual(rev_d, org_d, 0.001f) && ColPointEq(org_cp, rev_cp);
-        };
-
-        Test("ProcessLineSphere", Org, Rev, CmpEq, RandomLine(), RandomSphere());
-    }
-
-    // TestLineBox
-    {
-        const auto Org = plugin::CallAndReturn<bool, 0x413070, CColLine const&, CBox const&>;
-        Test("TestLineBox", Org, TestLineBox, std::equal_to{}, RandomLine(), RandomBox());
-    }
-
-    // TestVerticalLineBox
-    {
-        const auto Org = plugin::CallAndReturn<bool, 0x413080, CColLine const&, CBox const&>;
-        Test("TestVerticalLineBox", Org, TestVerticalLineBox, std::equal_to{}, RandomVerticalLine(), RandomBox());
-    }
-
-    // TestLineTriangle
-    {
-        const auto vtxs  = RandomTriangleVertices();
-        const auto tri   = CColTriangle{ 0, 1, 2, SURFACE_CAR_PANEL, {} };
-        const auto tripl = tri.GetPlane(vtxs.data());
-
-        const auto line  = RandomLine();
-
-        const auto Org = plugin::CallAndReturn<bool, 0x413AC0, const CColLine&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&>;
-        /*
-        const auto Benchmark = [&](auto fn, const char* title) {
-            using namespace std::chrono;
-            const auto begin = high_resolution_clock::now();
-            for (auto triIdx = 0; triIdx < 100'000'000; triIdx++) {
-                const auto volatile v = fn(line, vtxs.data(), tri, triPl);
-            }
-            printf("[%s]: Took %llu ms\n", title, duration_cast<milliseconds>(high_resolution_clock::now() - begin).count());
-            //std::cout << "Took " << duration_cast<milliseconds>(high_resolution_clock::now() - begin) << " ms" << std::endl;
-        };
-        if (triIdx % 2) {
-            Benchmark(TestLineTriangle, "TestLineTriangle");
-            Benchmark(Org, "Org");
-        } else {
-            Benchmark(Org, "Org");
-            Benchmark(TestLineTriangle, "TestLineTriangle");
-        }
-        printf("\n\n");
-        */
-        Test("TestLineTriangle", Org, TestLineTriangle, std::equal_to{}, line, vtxs.data(), tri, tripl);
-    }
-#endif
-
-    // ProcessLineBox
-    /*{
-        const auto Org = [&](auto line, auto bb) {
-            CColPoint cp{};
-            float depth{ 100.f };
-            const bool s = plugin::CallAndReturn<bool, 0x413100, CColLine const&, CColBox const&, CColPoint&, float&>(line, bb, cp, depth);
-            return std::make_tuple(cp, depth, s);
-        };
-
-        const auto Rev = [](auto line, auto bb) {
-            CColPoint cp{};
-            float depth{ 100.f };
-            const bool s = ProcessLineBox(line, bb, cp, depth);
-            return std::make_tuple(cp, depth, s);
-        };
-
-        const auto CmpEq = [&](auto org, auto rev) {
-            auto [org_cp, org_d, org_s] = org;
-            auto [rev_cp, rev_d, rev_s] = rev;
-            return org_s == rev_s && approxEqual(rev_d, org_d, 0.001f) && ColPointEq(org_cp, rev_cp);
-        };
-
-        Test("ProcessLineBox", Org, Rev, CmpEq, RandomLine(), RandomBox());
-    }*/
-}
-
 /*!
 * @address 0x416260
 */
@@ -1425,7 +1105,14 @@ bool CCollision::CheckCameraCollisionPeds(
 
 // 0x415540
 void ResetMadeInvisibleObjects() {
-    plugin::Call<0x415540>();
+    for (auto ent : gpMadeInvisibleEntities | rng::views::take(gNumEntitiesSetInvisible)) {
+        if (!ent) { // Must check, as the reference system might've cleared it
+            continue;
+        }
+        ent->m_bIsVisible = true;
+        CEntity::CleanUpOldReference(ent);
+    }
+    gNumEntitiesSetInvisible = 0;
 }
 
 // 0x415590
@@ -2621,3 +2308,325 @@ bool CCollision::CameraConeCastVsWorldCollision(
 bool CCollision::SphereVsEntity(CColSphere* sphere, CEntity* entity) {
     NOTSA_UNREACHABLE(); /* unused */
 }
+
+
+void CCollision::InjectHooks() {
+    // Must be done be4 hooks are injected
+
+    for (auto i = 0; i < 20; i++) {
+       Tests(i);
+    }
+
+    RH_ScopedClass(CCollision);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x416260);
+    RH_ScopedInstall(Shutdown, 0x4162E0);
+    RH_ScopedInstall(Update, 0x411E20);
+    RH_ScopedInstall(SortOutCollisionAfterLoad, 0x411E30);
+    RH_ScopedInstall(TestSphereSphere, 0x411E70);
+    RH_ScopedGlobalInstall(CalculateColPointInsideBox, 0x411EC0);
+    RH_ScopedInstall(TestSphereBox, 0x4120C0);
+    RH_ScopedInstall(ProcessSphereBox, 0x412130);
+    RH_ScopedInstall(PointInTriangle, 0x412700);
+    RH_ScopedInstall(DistToLineSqr, 0x412850);
+    RH_ScopedInstall(DistToMathematicalLine, 0x412970);
+    RH_ScopedInstall(DistToMathematicalLine2D, 0x412A30);
+    RH_ScopedInstall(DistAlongLine2D, 0x412A80);
+    RH_ScopedInstall(ProcessLineSphere, 0x412AA0);
+    RH_ScopedInstall(TestLineBox_DW, 0x412C70);
+    RH_ScopedInstall(TestLineBox, 0x413070);
+    RH_ScopedInstall(TestVerticalLineBox, 0x413080);
+    RH_ScopedInstall(ProcessLineBox, 0x413100);
+    RH_ScopedInstall(Test2DLineAgainst2DLine, 0x4138D0);
+    RH_ScopedInstall(ProcessDiscCollision, 0x413960);
+    RH_ScopedInstall(TestLineTriangle, 0x413AC0);
+    RH_ScopedInstall(ProcessLineTriangle, 0x4140F0);
+    RH_ScopedInstall(ProcessVerticalLineTriangle, 0x4147E0);
+    RH_ScopedInstall(IsStoredPolyStillValidVerticalLine, 0x414D70);
+    RH_ScopedInstall(GetBoundingBoxFromTwoSpheres, 0x415230);
+    RH_ScopedInstall(IsThisVehicleSittingOnMe, 0x4152C0);
+    RH_ScopedInstall(CheckCameraCollisionPeds, 0x415320);
+    RH_ScopedInstall(CheckPeds, 0x4154A0);
+    RH_ScopedGlobalInstall(ResetMadeInvisibleObjects, 0x415540);
+    //RH_ScopedInstall(SphereCastVsBBox, 0x415590);
+    //RH_ScopedInstall(RayPolyPOP, 0x415620);
+    //RH_ScopedInstall(GetPrincipleAxis, 0x4156D0);
+    //RH_ScopedInstall(PointInPoly, 0x415730);
+    //RH_ScopedInstall(Closest3, 0x415950);
+    //RH_ScopedInstall(ClosestSquaredDistanceBetweenFiniteLines, 0x415A40);
+    //RH_ScopedInstall(SphereCastVersusVsPoly, 0x415CF0);
+    //RH_ScopedInstall(Init, 0x416260);
+    //RH_ScopedInstall(ProcessSphereSphere, 0x416450);
+    //RH_ScopedInstall(TestSphereTriangle, 0x4165B0);
+    //RH_ScopedInstall(ProcessSphereTriangle, 0x416BA0);
+    //RH_ScopedInstall(TestLineSphere, 0x417470);
+    //RH_ScopedInstall(DistToLine, 0x417610);
+    //RH_ScopedInstall(TestLineOfSight, 0x417730);
+    //RH_ScopedInstall(ProcessLineOfSight, 0x417950);
+    //RH_ScopedInstall(ProcessVerticalLine, 0x417BF0);
+    RH_ScopedInstall(SphereCastVsSphere, 0x417F20, { .locked = true }); // Can only be unhooked if `TestSphereSphere` is unhooked too
+    //RH_ScopedInstall(ClosestPointOnLine, 0x417FD0);
+    //RH_ScopedInstall(ClosestPointsOnPoly, 0x418100);
+    //RH_ScopedInstall(ClosestPointOnPoly, 0x418150);
+    RH_ScopedInstall(ProcessColModels, 0x4185C0, { .reversed = false });
+    RH_ScopedInstall(SphereCastVsCaches, 0x4181B0);
+    RH_ScopedInstall(SphereCastVsEntity, 0x419F00);
+    RH_ScopedInstall(SphereVsEntity, 0x41A5A0);
+    RH_ScopedInstall(CheckCameraCollisionBuildings, 0x41A820);
+    RH_ScopedInstall(CheckCameraCollisionVehicles, 0x41A990);
+    RH_ScopedInstall(CheckCameraCollisionObjects, 0x41AB20);
+    RH_ScopedInstall(BuildCacheOfCameraCollision, 0x41AC40);
+    RH_ScopedInstall(CameraConeCastVsWorldCollision, 0x41B000);
+
+    RH_ScopedOverloadedInstall(CalculateTrianglePlanes, "colData", 0x416330, void (*)(CCollisionData*));
+    RH_ScopedOverloadedInstall(RemoveTrianglePlanes, "colData", 0x416400, void (*)(CCollisionData*));
+    RH_ScopedInstall(ProcessLineOfSight, 0x417950);
+}
+
+void CCollision::Tests(int32 i) {
+    const auto seed = (uint32)time(nullptr) + i;
+    srand(seed);
+    std::cout << "CCollision::Tests seed: " << seed << std::endl;
+
+    const auto VectorEq = [](const CVector& lhs, const CVector& rhs, float epsilon = 0.01f) {
+        for (auto i = 0u; i < 3u; i++) {
+            if (!approxEqual(lhs[i], rhs[i], epsilon)) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    const auto ColPointEq = [&](const CColPoint& lhs, const CColPoint& rhs) {
+        return VectorEq(lhs.m_vecPoint, rhs.m_vecPoint)
+            && approxEqual(lhs.m_fDepth, rhs.m_fDepth, 0.01f)
+            && VectorEq(lhs.m_vecNormal, rhs.m_vecNormal);
+    };
+
+    const auto RandomVector = [](float min = -100.f, float max = 100.f) {
+        return CVector{
+            CGeneral::GetRandomNumberInRange(min, max),
+            CGeneral::GetRandomNumberInRange(min, max),
+            CGeneral::GetRandomNumberInRange(min, max)
+        };
+    };
+
+    const auto RandomNormal = [&]() {
+        return RandomVector().Normalized();
+    };
+
+    const auto RandomSphere = [&](float min = -100.f, float max = 100.f) {
+        return CColSphere{ RandomVector(min, max), CGeneral::GetRandomNumberInRange(min, max) };
+    };
+
+    const auto RandomBox = [&](float min = -100.f, float max = 100.f) {
+        CColBox cb{ RandomVector(min, max), RandomVector(min, max) };
+        cb.Recalc();
+        return cb;
+    };
+
+    const auto RandomLine = [&](float min = -100.f, float max = 100.f) {
+        return CColLine{ RandomVector(min, max) , RandomVector(min, max) };
+    };
+
+    const auto RandomVerticalLine = [&](float min = -100.f, float max = 100.f) {
+        const auto pos = RandomVector(min, max);
+        return CColLine{ {pos.x, pos.y, pos.z + fabs(pos.x)}, {pos.x, pos.y, pos.z - fabs(pos.x)} };
+    };
+
+    const auto RandomTriangleVertices = [&](float min = -100.f, float max = 100.f) {
+        const auto vtxA = RandomVector(min, max);
+        const auto norm = RandomNormal();
+        return std::array<CompressedVector, 3>{
+            CompressVector(vtxA),
+            CompressVector(vtxA.Cross(norm)),
+            CompressVector(norm.Cross(vtxA))
+        };
+    };
+
+    const auto Test = [](auto name, auto org, auto rev, auto cmp, auto&&... args) {
+        const auto orgResult = org(args...);
+        const auto revResult = rev(args...);
+        if (!cmp(orgResult, revResult)) {
+            std::cerr << "[CCollision::Tests]: " << name << " failed. " << std::endl;
+            assert(0);
+        }
+    };
+#if 1
+    // TestSphereSphere
+    {
+        auto sp1 = RandomSphere(), sp2 = RandomSphere();
+        auto Original = plugin::CallAndReturn<bool, 0x411E70, CColSphere const&, CColSphere const&>;
+        Test("TestSphereSphere", Original, TestSphereSphere, std::equal_to<>{}, sp1, sp2);
+    }
+
+    // CalculateColPointInsideBox
+    {
+        const auto Org = [&](auto box, auto point) {
+            CColPoint cp{};
+            plugin::Call<0x411EC0, CBox const&, CVector const&, CColPoint&>(box, point, cp);
+            return cp;
+        };
+
+        const auto Rev = [](auto box, auto point) {
+            CColPoint cp{};
+            CalculateColPointInsideBox(box, point, cp);
+            return cp;
+        };
+
+        Test("CalculateColPointInsideBox", Org, Rev, ColPointEq, RandomBox(), RandomVector());
+    }
+
+    // TestSphereBox
+    {
+        const auto Org = plugin::CallAndReturn<bool, 0x4120C0, CSphere const&, CBox const&>;
+        Test("TestSphereBox", Org, TestSphereBox, std::equal_to{}, RandomSphere(), RandomBox());
+    }
+
+    // CalculateColPointInsideBox
+    {
+        // both will be of type pair<CColPoint, float> 
+        const auto CmpEq = [&](auto o, auto r) {
+            return o.second == r.second && ColPointEq(o.first, r.first);
+        };
+
+        const auto Org = [&](auto sp, auto box) {
+            CColPoint cp{};
+            float dist{1.f};
+            plugin::Call<0x412130, CColSphere const&, CColBox const&, CColPoint&, float&>(sp, box, cp, dist);
+            return std::make_pair(cp, dist);
+        };
+
+        const auto Rev = [](auto sp, auto box) {
+            CColPoint cp{};
+            float dist{1.f};
+            ProcessSphereBox(sp, box, cp, dist);
+            return std::make_pair(cp, dist);
+        };
+
+        Test("CalculateColPointInsideBox", Org, Rev, CmpEq, RandomSphere(), RandomBox());
+    }
+
+    // PointInTriangle
+    {
+        const CVector tri[3]{ RandomVector(), RandomVector(), RandomVector() };
+        const auto Org = (bool(__stdcall*)(CVector const&, CVector const*))0x412700;
+        Test("PointInTriangle", Org, PointInTriangle, std::equal_to{}, RandomVector(), tri);
+    }
+
+    // DistToLineSqr
+    {
+        const auto Org = plugin::CallAndReturn<float, 0x412850, CVector const*, CVector const*, CVector const*>;
+        const auto ls{ RandomVector() }, le{ RandomVector() }, p{ RandomVector() };
+        const auto CmpEq = [](float org, float rev) {
+            return approxEqual(org, rev, 0.02f);
+        };
+        Test("DistToLineSqr", Org, DistToLineSqr, CmpEq, &ls, &le, &p);
+    }
+
+    // DistToMathematicalLine2D
+    {
+        const auto Org = plugin::CallAndReturn<float, 0x412A30, float, float, float, float, float, float>;
+        const auto ls{ RandomVector() }, le{ RandomVector() }, p{ RandomVector() };
+        const auto CmpEq = [](float org, float rev) {
+            return approxEqual(org, rev, 0.02f);
+        };
+        Test("DistToLineSqr", Org, DistToMathematicalLine2D, CmpEq, ls.x, ls.y, le.x, le.y, p.x, p.y);
+    }
+
+    // ProcessLineSphere
+    {
+        const auto Org = [&](auto line, auto sp) {
+            CColPoint cp{};
+            float depth{ 100.f };
+            const bool s = plugin::CallAndReturn<bool, 0x412AA0, CColLine const&, CColSphere const&, CColPoint&, float&>(line, sp, cp, depth);
+            return std::make_tuple(cp, depth, s);
+        };
+
+        const auto Rev = [](auto line, auto sp) {
+            CColPoint cp{};
+            float depth{ 100.f };
+            const bool s = ProcessLineSphere(line, sp, cp, depth);
+            return std::make_tuple(cp, depth, s);
+        };
+
+        const auto CmpEq = [&](auto org, auto rev) {
+            auto [org_cp, org_d, org_s] = org;
+            auto [rev_cp, rev_d, rev_s] = rev;
+            return org_s == rev_s && approxEqual(rev_d, org_d, 0.001f) && ColPointEq(org_cp, rev_cp);
+        };
+
+        Test("ProcessLineSphere", Org, Rev, CmpEq, RandomLine(), RandomSphere());
+    }
+
+    // TestLineBox
+    {
+        const auto Org = plugin::CallAndReturn<bool, 0x413070, CColLine const&, CBox const&>;
+        Test("TestLineBox", Org, TestLineBox, std::equal_to{}, RandomLine(), RandomBox());
+    }
+
+    // TestVerticalLineBox
+    {
+        const auto Org = plugin::CallAndReturn<bool, 0x413080, CColLine const&, CBox const&>;
+        Test("TestVerticalLineBox", Org, TestVerticalLineBox, std::equal_to{}, RandomVerticalLine(), RandomBox());
+    }
+
+    // TestLineTriangle
+    {
+        const auto vtxs  = RandomTriangleVertices();
+        const auto tri   = CColTriangle{ 0, 1, 2, SURFACE_CAR_PANEL, {} };
+        const auto tripl = tri.GetPlane(vtxs.data());
+
+        const auto line  = RandomLine();
+
+        const auto Org = plugin::CallAndReturn<bool, 0x413AC0, const CColLine&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&>;
+        /*
+        const auto Benchmark = [&](auto fn, const char* title) {
+            using namespace std::chrono;
+            const auto begin = high_resolution_clock::now();
+            for (auto triIdx = 0; triIdx < 100'000'000; triIdx++) {
+                const auto volatile v = fn(line, vtxs.data(), tri, triPl);
+            }
+            printf("[%s]: Took %llu ms\n", title, duration_cast<milliseconds>(high_resolution_clock::now() - begin).count());
+            //std::cout << "Took " << duration_cast<milliseconds>(high_resolution_clock::now() - begin) << " ms" << std::endl;
+        };
+        if (triIdx % 2) {
+            Benchmark(TestLineTriangle, "TestLineTriangle");
+            Benchmark(Org, "Org");
+        } else {
+            Benchmark(Org, "Org");
+            Benchmark(TestLineTriangle, "TestLineTriangle");
+        }
+        printf("\n\n");
+        */
+        Test("TestLineTriangle", Org, TestLineTriangle, std::equal_to{}, line, vtxs.data(), tri, tripl);
+    }
+#endif
+
+    // ProcessLineBox
+    /*{
+        const auto Org = [&](auto line, auto bb) {
+            CColPoint cp{};
+            float depth{ 100.f };
+            const bool s = plugin::CallAndReturn<bool, 0x413100, CColLine const&, CColBox const&, CColPoint&, float&>(line, bb, cp, depth);
+            return std::make_tuple(cp, depth, s);
+        };
+
+        const auto Rev = [](auto line, auto bb) {
+            CColPoint cp{};
+            float depth{ 100.f };
+            const bool s = ProcessLineBox(line, bb, cp, depth);
+            return std::make_tuple(cp, depth, s);
+        };
+
+        const auto CmpEq = [&](auto org, auto rev) {
+            auto [org_cp, org_d, org_s] = org;
+            auto [rev_cp, rev_d, rev_s] = rev;
+            return org_s == rev_s && approxEqual(rev_d, org_d, 0.001f) && ColPointEq(org_cp, rev_cp);
+        };
+
+        Test("ProcessLineBox", Org, Rev, CmpEq, RandomLine(), RandomBox());
+    }*/
+}
+
