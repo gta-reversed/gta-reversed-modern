@@ -57,8 +57,8 @@ public:
     static bool IsStoredPolyStillValidVerticalLine(const CVector& lineOrigin, float lineDist, CColPoint& colPoint, CStoredCollPoly* collPoly);
     static CColBox GetBoundingBoxFromTwoSpheres(const CColSphere& spA, const CColSphere& spB);
     static bool IsThisVehicleSittingOnMe(CVehicle* vehicle, CVehicle* vehicleOnMe);
-    static bool CheckCameraCollisionPeds(int32 sectorX, int32 sectorY, CVector* pos, CVector* dir, float* arg4);
-    static bool CheckPeds(CVector* pos, CVector* dir, float* arg2);
+    static bool CheckCameraCollisionPeds(int32 sectorX, int32 sectorY, const CVector& pos, const CVector& dir, float& /*unused*/);
+    static bool CheckPeds(const CVector& src, const CVector& normal, float& nearest);
     static bool SphereCastVsBBox(const CColSphere& sphere1, const CColSphere& sphere2, const CColBox& box);
     static bool RayPolyPOP(CVector* arg0, CVector* arg1, CColTriangle* arg2, CVector* arg3, CVector* arg4);
     static int32 GetPrincipleAxis(CVector* vec);

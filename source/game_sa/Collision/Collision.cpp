@@ -56,7 +56,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(GetBoundingBoxFromTwoSpheres, 0x415230);
     RH_ScopedInstall(IsThisVehicleSittingOnMe, 0x4152C0);
     RH_ScopedInstall(CheckCameraCollisionPeds, 0x415320);
-    //RH_ScopedInstall(CheckPeds, 0x4154A0);
+    RH_ScopedInstall(CheckPeds, 0x4154A0);
     //RH_ScopedInstall(ResetMadeInvisibleObjects, 0x415540);
     //RH_ScopedInstall(SphereCastVsBBox, 0x415590);
     //RH_ScopedInstall(RayPolyPOP, 0x415620);
@@ -1364,7 +1364,13 @@ float GetNearestDistanceOfPedSphereToCameraNearClip(CPed* ped) {
 }
 
 // 0x415320
-bool CCollision::CheckCameraCollisionPeds(int32 sectorX, int32 sectorY, CVector* pos, CVector* dir, float* arg4) {
+bool CCollision::CheckCameraCollisionPeds(
+    int32 sectorX,
+    int32 sectorY,
+    const CVector& pos,
+    const CVector& /*unused*/,
+    float& /*unused*/
+) {
     constexpr auto gPedCylinderWidth = 1.f;
 
     bool addedAny = false;
@@ -1385,7 +1391,7 @@ bool CCollision::CheckCameraCollisionPeds(int32 sectorX, int32 sectorY, CVector*
             continue;
         }
         
-        if ((CVector2D{ *pos } - CVector2D{ ped->GetBoundCentre() }).SquaredMagnitude() >= sq(gPedCylinderWidth)) {
+        if ((CVector2D{ pos } - CVector2D{ ped->GetBoundCentre() }).SquaredMagnitude() >= sq(gPedCylinderWidth)) {
             continue;
         }
 
@@ -1415,11 +1421,6 @@ bool CCollision::CheckCameraCollisionPeds(int32 sectorX, int32 sectorY, CVector*
         addedAny = true;
     }
     return addedAny;
-}
-
-// 0x4154A0
-bool CCollision::CheckPeds(CVector* pos, CVector* dir, float* arg2) {
-    return plugin::CallAndReturn<bool, 0x4154A0, CVector*, CVector*, float*>(pos, dir, arg2);
 }
 
 // 0x415540
@@ -2477,9 +2478,27 @@ bool CCollision::CheckCameraCollisionObjects(
 
 // Ah, yes, the ultimate solution, just use static variables!
 static inline auto& gnBottom = StaticRef<int32, 0x965598>();
-static inline auto& gnTop    = StaticRef<int32, 0x965590>();
-static inline auto& gnRight  = StaticRef<int32, 0x965594>();
-static inline auto& gnLeft   = StaticRef<int32, 0x96559C>();
+static inline auto& gnTop = StaticRef<int32, 0x965590>();
+static inline auto& gnRight = StaticRef<int32, 0x965594>();
+static inline auto& gnLeft = StaticRef<int32, 0x96559C>();
+
+// 0x4154A0
+bool CCollision::CheckPeds(
+    const CVector& src,
+    const CVector& normal, /*unused*/
+    float& nearest /*unused*/
+) {
+    if (!bCamCollideWithPeds) {
+        return false;
+    }
+
+    bool anyCollides = false;
+    CWorld::IterateSectors(gnLeft, gnBottom, gnRight, gnTop, [&](int32 sx, int32 sy) {
+        anyCollides |= CheckCameraCollisionPeds(sx, sy, src, normal, nearest);
+        return true;
+    });
+    return anyCollides;
+}
 
 // 0x41AC40
 bool CCollision::BuildCacheOfCameraCollision(
