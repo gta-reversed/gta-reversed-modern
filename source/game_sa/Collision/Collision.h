@@ -10,9 +10,9 @@
 #include "ColPoint.h"
 #include "StoredCollPoly.h"
 
-class CEntity;
-class CVehicle;
-class CColCacheEntry;
+class  CEntity;
+class  CVehicle;
+struct CColCacheEntry;
 
 class CCollision {
 public:
@@ -56,12 +56,12 @@ public:
     static bool IsThisVehicleSittingOnMe(CVehicle* vehicle, CVehicle* vehicleOnMe);
     static bool CheckCameraCollisionPeds(int32 sectorX, int32 sectorY, CVector* pos, CVector* dir, float* arg4);
     static bool CheckPeds(CVector* pos, CVector* dir, float* arg2);
-    static bool SphereCastVsBBox(CColSphere* sphere1, CColSphere* sphere2, CColBox* box);
+    static bool SphereCastVsBBox(const CColSphere& sphere1, const CColSphere& sphere2, const CColBox& box);
     static bool RayPolyPOP(CVector* arg0, CVector* arg1, CColTriangle* arg2, CVector* arg3, CVector* arg4);
     static int32 GetPrincipleAxis(CVector* vec);
     static bool PointInPoly(CVector* point, CColTriangle* tri, CVector* arg2, CVector* triVerts);
     static void Closest3(CVector* arg0, CVector* arg1);
-    static bool SphereCastVersusVsPoly(CColSphere* sphere1, CColSphere* sphere2, CColTriangle* tri, CColTrianglePlane* triPlane, CompressedVector* verts);
+    static bool SphereCastVersusVsPoly(const CColSphere& sphere1, const CColSphere& sphere2, const CColTriangle& tri, const CColTrianglePlane& triPlane, CompressedVector* verts);
     static void CalculateTrianglePlanes(CCollisionData* colData);
     static void RemoveTrianglePlanes(CCollisionData* colData);
     static bool ProcessSphereSphere(const CColSphere& sphere1, const CColSphere& sphere2, CColPoint& colPoint, float& maxTouchDistance);
