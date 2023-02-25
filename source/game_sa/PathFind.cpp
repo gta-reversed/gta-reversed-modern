@@ -421,3 +421,7 @@ bool CPathFind::Load() {
 bool CPathFind::Save() {
     return plugin::CallMethodAndReturn<bool, 0x5D1502>(this);
 }
+
+bool CPathFind::IsNodeAreaLoaded(const std::initializer_list<CNodeAddress>& addrs) const {
+    return rng::all_of(addrs, [this](auto&& addr) { return IsNodeAreaLoaded(addr); });
+}

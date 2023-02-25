@@ -2,15 +2,23 @@
 
 #include "AutoPilot.h"
 
+void CAutoPilot::InjectHooks() {
+    RH_ScopedClass(CAutoPilot);
+    RH_ScopedCategory("Tasks/TaskTypes");
+
+    RH_ScopedInstall(RemoveOnePathNode, 0x41B950);
+    RH_ScopedInstall(ModifySpeed, 0x41B980, {.reversed = false});
+}
+
 // 0x6D5E20
 CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo() {
-    _smthNext = 1;
-    _smthCurr = 1;
+    m_inverseDirToNextLink = 1;
+    m_inverseDirToCurrLink = 1;
 
     m_nCarCtrlFlags = 0;
 
-    field_C = 0;
-    m_nSpeedScaleFactor = 1000;
+    m_timeToLeaveLink = 0;
+    m_timeToNextLink = 1000;
     m_nNextLane = 0;
     m_nCurrentLane = 0;
     m_nCarDrivingStyle = DRIVING_STYLE_STOP_FOR_CARS;
@@ -43,13 +51,27 @@ CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo() {
     m_fMaxTrafficSpeed = 0.0F;
 }
 
-void CAutoPilot::ModifySpeed(float target) {
-    plugin::CallMethod<0x41B980, CAutoPilot*, float>(this, target);
+// 0x41B980
+void CAutoPilot::ModifySpeed(float targetSpeed) {
+    /*
+    * Code fine so far, missing CCurves stub
+    // Check if both nodes are loaded
+    if (!ThePaths.IsNodeAreaLoaded({ m_currentAddress, m_nNextPathNodeInfo })) {
+        return;
+    }
+
+    // Make sure target speed is never 0 (to avoid division by 0 presumeably)
+    targetSpeed = std::max(targetSpeed, 0.01f);
+    */
 }
 
 // 0x41B950
 void CAutoPilot::RemoveOnePathNode() {
-    plugin::CallMethod<0x41B950, CAutoPilot*>(this);
+    assert(m_nPathFindNodesCount >= 1); // Otherwise `- 1` would underflow it, and bug out
+    
+    // Shift to the left, this way the first node is "popped off" 
+    std::shift_left(m_aPathFindNodesInfo.begin(), std::next(m_aPathFindNodesInfo.begin(), (size_t)m_nPathFindNodesCount), 1u);
+    m_nPathFindNodesCount--;
 }
 
 

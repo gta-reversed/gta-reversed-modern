@@ -62,7 +62,7 @@ bool CTrafficLights::ShouldCarStopForLight(CVehicle* vehicle, bool bUnkn) {
                 }
 
                 const auto dot = CalcDot(naviNode);
-                if (vehicle->m_autoPilot._smthCurr == -1 ? dot > 0.0F && dot < 12.0F : dot < 0.0F && dot > -12.0F) {
+                if (vehicle->m_autoPilot.m_inverseDirToCurrLink == -1 ? dot > 0.0F && dot < 12.0F : dot < 0.0F && dot > -12.0F) {
                     return true;
                 }
             }
@@ -84,7 +84,7 @@ bool CTrafficLights::ShouldCarStopForLight(CVehicle* vehicle, bool bUnkn) {
                 }
 
                 const auto dot = CalcDot(naviNode);
-                if (vehicle->m_autoPilot._smthNext == -1 ? dot > 0.0F && dot < 12.0F : dot < 0.0F && dot > -12.0F) {
+                if (vehicle->m_autoPilot.m_inverseDirToNextLink == -1 ? dot > 0.0F && dot < 12.0F : dot < 0.0F && dot > -12.0F) {
                     return true;
                 }
             }
