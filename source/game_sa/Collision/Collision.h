@@ -72,11 +72,20 @@ public:
     static bool TestLineOfSight(const CColLine& line, const CMatrix& transform, CColModel& colModel, bool doSeeThroughCheck, bool doShootThroughCheck);
     static bool ProcessLineOfSight(const CColLine& line, const CMatrix& transform, CColModel& colModel, CColPoint& colPoint, float& maxTouchDistance, bool doSeeThroughCheck, bool doShootThroughCheck);
     static bool ProcessVerticalLine(const CColLine& line, const CMatrix& transform, CColModel& colModel, CColPoint& colPoint, float& maxTouchDistance, bool doSeeThroughCheck, bool doShootThroughCheck, CStoredCollPoly* collPoly);
-    static bool SphereCastVsSphere(CColSphere* arg0, CColSphere* arg1, CColSphere* arg2);
+    static bool SphereCastVsSphere(const CColSphere& spA, const CColSphere& spB, const CColSphere& spS);
     static void ClosestPointOnLine(CVector* arg0, CVector* arg1, CVector* arg2, CVector* arg3);
     static void ClosestPointsOnPoly(CColTriangle* arg0, CVector* arg1, CVector* arg2, CVector* arg3);
     static void ClosestPointOnPoly(CColTriangle* arg0, CVector* arg1, CVector* arg2);
-    static bool SphereCastVsCaches(CColSphere* sphere, CVector* arg1, int32 arg2, CColCacheEntry* arg3, int32* arg4, CColCacheEntry* arg5);
+    static bool SphereCastVsCaches(
+        const CColSphere& spA,
+        const CVector& velocity,
+
+        int32 numTest,
+        CColCacheEntry* pTest,
+
+        int32& pNumWrite,
+        CColCacheEntry* pWrite
+    );
     static void CalculateTrianglePlanes(CColModel* colModel);
     static void RemoveTrianglePlanes(CColModel* colModel);
     // returns number of resulting collision points
