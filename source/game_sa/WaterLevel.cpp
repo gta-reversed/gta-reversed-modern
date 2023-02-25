@@ -682,9 +682,9 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(
     float fX = (float)x, fY = (float)y;
 
     // literal AIDS code
-    const auto CalculateWave = [&](int32 offset, float angularPeriodX, float angularPeriodY) {
+    const auto CalculateWave = [&](int32 offset, float angularFreqX, float angularFreqY) {
         const float freqOffsetMult = TWO_PI / static_cast<float>(offset);
-        const CVector2D w{ TWO_PI * angularPeriodX, TWO_PI * angularPeriodY };
+        const CVector2D w{ TWO_PI * angularFreqX, TWO_PI * angularFreqY }; // w = angular frequency
 
         switch (offset) {
         case 5000: {
