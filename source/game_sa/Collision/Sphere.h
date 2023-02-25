@@ -31,5 +31,8 @@ public:
     * @param color     Color of the lines used
     */
     void DrawWireFrame(CRGBA color, const CMatrix& transform) const;
+
+    //! Get *this but transformed
+    auto GetTransformed(const CMatrix& transform) const -> CSphere;
 };
 VALIDATE_SIZE(CSphere, 0x10);
