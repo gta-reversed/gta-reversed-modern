@@ -89,7 +89,7 @@ void CCollision::InjectHooks() {
     //RH_ScopedInstall(TestLineOfSight, 0x417730);
     //RH_ScopedInstall(ProcessLineOfSight, 0x417950);
     //RH_ScopedInstall(ProcessVerticalLine, 0x417BF0);
-    //RH_ScopedInstall(SphereCastVsSphere, 0x417F20);
+    RH_ScopedInstall(SphereCastVsSphere, 0x417F20, { .locked = true }); // Can only be unhooked if `TestSphereSphere` is unhooked too
     //RH_ScopedInstall(ClosestPointOnLine, 0x417FD0);
     //RH_ScopedInstall(ClosestPointsOnPoly, 0x418100);
     //RH_ScopedInstall(ClosestPointOnPoly, 0x418150);
@@ -1607,8 +1607,14 @@ bool CCollision::ProcessVerticalLine(const CColLine& line, const CMatrix& transf
 }
 
 // 0x417F20
-bool CCollision::SphereCastVsSphere(CColSphere* arg0, CColSphere* arg1, CColSphere* arg2) {
-    return plugin::CallAndReturn<bool, 0x417F20, CColSphere*, CColSphere*, CColSphere*>(arg0, arg1, arg2);
+bool CCollision::SphereCastVsSphere(const CColSphere& spA, const CColSphere& spB, const CColSphere& spS) {
+    if (TestSphereSphere(spA, spS) || TestSphereSphere(spB, spS)) {
+        return true;
+    }
+    return CCollision::TestLineSphere(
+        { spA.m_vecCenter, spB.m_vecCenter },
+        { spS.m_vecCenter, spS.m_fRadius + spA.m_fRadius }
+    );
 }
 
 // 0x417FD0
@@ -2119,7 +2125,7 @@ bool CCollision::SphereCastVsEntity(CColSphere* spAws, CColSphere* spBws, CEntit
 
     // Process spheres
     for (auto&& [idx, sp] : notsa::enumerate(ecd->GetSpheres())) {
-        if (!SphereCastVsSphere(&spAos, &spBos, &sp)) {
+        if (!SphereCastVsSphere(spAos, spBos, sp)) {
             continue;
         }
         if (!AddEntryToColCache(SPHERE, idx)) {
