@@ -13,6 +13,8 @@
 class  CEntity;
 class  CVehicle;
 struct CColCacheEntry;
+class  CColSphere;
+class  CColBox;
 
 class CCollision {
 public:
@@ -110,7 +112,7 @@ public:
     * @param bbSpAB Bounding box of spA and spB
     * @param spS    Fuck knows
     * @param spA    Camera sphere 
-    * @param spB    Camera sphere next frame (Offsetted by velocity)
+    * @param spB    Camera sphere next frame (Offsetted by player velocity)
     * @addr 0x41A820
     */
     static bool CheckCameraCollisionBuildings(
@@ -121,6 +123,17 @@ public:
         const CColSphere& spA,
         const CColSphere& spB
     );
+
+    /*!
+    * @param X          Repeat Sector X
+    * @param Y          Repeat Sector Y
+    * @param bbSpAB     Bounding box of spA and spB
+    * @param spS        Fuck knows
+    * @param spA        Camera sphere 
+    * @param spB        Camera sphere next frame (Offsetted by player velocity)
+    * @param plyrVehVel Player vehicle's velocity (Or null if player is not in a vehicle)
+    * @addr 0x41A990
+    */
     static bool CheckCameraCollisionVehicles(
         int32 X,
         int32 Y,
@@ -128,10 +141,26 @@ public:
         const CColSphere& spS,
         const CColSphere& spA,
         const CColSphere& spB,
-        const CVector* plyrVelocity
+        const CVector* plyrVehVel
     );
 
-    static bool CheckCameraCollisionObjects(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5);
+    /*!
+    * @param X      Repeat Sector X
+    * @param Y      Repeat Sector Y
+    * @param bbSpAB Bounding box of spA and spB
+    * @param spS    Fuck knows
+    * @param spA    Camera sphere
+    * @param spB    Camera sphere next frame (Offsetted by player velocity)
+    * @addr 0x41AB20
+    */
+    static bool CheckCameraCollisionObjects(
+        int32 X,
+        int32 Y,
+        const CColBox& pBox,
+        const CColSphere& spS,
+        const CColSphere& spA,
+        const CColSphere& spB
+    );
     static bool BuildCacheOfCameraCollision(CColSphere* sphere1, CColSphere* sphere2);
     static bool CameraConeCastVsWorldCollision(CColSphere* sphere1, CColSphere* sphere2, float* arg2, float arg3);
 };

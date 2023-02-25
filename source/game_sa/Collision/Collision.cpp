@@ -114,7 +114,7 @@ void CCollision::InjectHooks() {
     //RH_ScopedInstall(SphereVsEntity, 0x41A5A0);
     RH_ScopedInstall(CheckCameraCollisionBuildings, 0x41A820);
     RH_ScopedInstall(CheckCameraCollisionVehicles, 0x41A990);
-    //RH_ScopedInstall(CheckCameraCollisionObjects, 0x41AB20);
+    RH_ScopedInstall(CheckCameraCollisionObjects, 0x41AB20);
     //RH_ScopedInstall(BuildCacheOfCameraCollision, 0x41AC40);
     //RH_ScopedInstall(CameraConeCastVsWorldCollision, 0x41B000);
 
@@ -2356,7 +2356,7 @@ bool CCollision::CheckCameraCollisionVehicles(
     const CColSphere& spS,
     const CColSphere& spA,
     const CColSphere& spB,
-    const CVector* plyrVelocity
+    const CVector* plyrVehVel
 ) {
     static auto& gFramesSittingOnTimeOut = StaticRef<int32, 0x9689D4>();
     static auto& gpLastSittingOnEntity   = StaticRef<CEntity*, 0x9689D8>();
@@ -2388,8 +2388,8 @@ bool CCollision::CheckCameraCollisionVehicles(
             continue;
         }
 
-        if (plyrVelocity) {
-            if (relVelCamCollisionVehiclesSqr <= (*plyrVelocity - entity->GetMoveSpeed()).SquaredMagnitude()) {
+        if (plyrVehVel) {
+            if (relVelCamCollisionVehiclesSqr <= (*plyrVehVel - entity->GetMoveSpeed()).SquaredMagnitude()) {
                 continue;
             }
         }
@@ -2404,8 +2404,36 @@ bool CCollision::CheckCameraCollisionVehicles(
 }
 
 // 0x41AB20
-bool CCollision::CheckCameraCollisionObjects(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5) {
-    return plugin::CallAndReturn<bool, 0x41AB20, int32, int32, CColBox*, CColSphere*, CColSphere*, CColSphere*>(sectorX, sectorY, arg2, arg3, arg4, arg5);
+bool CCollision::CheckCameraCollisionObjects(
+    int32 X,
+    int32 Y,
+    const CColBox& pBox,
+    const CColSphere& spS,
+    const CColSphere& spA,
+    const CColSphere& spB
+) {
+    // Pirulax: At this point I'm certain R* devs were paid by lines written
+
+    bool anyCollided = false;
+    for (CPtrNodeDoubleLink* it = GetRepeatSector(X, Y)->GetList(REPEATSECTOR_OBJECTS).GetNode(), *next{}; it; it = next) {
+        next = it->GetNext();
+
+        const auto entity = it->GetItem<CObject>();
+        if (!entity->ProcessScan()) {
+            continue;
+        }
+
+        if (CWorld::CameraToIgnoreThisObject(entity) && CWorld::pIgnoreEntity == entity) {
+            continue;
+        }
+
+        if (!TestSphereSphere(spS, TransformObject(entity->GetColModel()->GetBoundingSphere(), entity->GetMatrix()))) {
+            continue;
+        }
+
+        anyCollided |= SphereCastVsEntity(spA, spB, entity);
+    }
+    return anyCollided;
 }
 
 // 0x41AC40
