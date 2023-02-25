@@ -119,7 +119,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(CheckCameraCollisionVehicles, 0x41A990);
     RH_ScopedInstall(CheckCameraCollisionObjects, 0x41AB20);
     RH_ScopedInstall(BuildCacheOfCameraCollision, 0x41AC40);
-    //RH_ScopedInstall(CameraConeCastVsWorldCollision, 0x41B000);
+    RH_ScopedInstall(CameraConeCastVsWorldCollision, 0x41B000);
 
     RH_ScopedOverloadedInstall(CalculateTrianglePlanes, "colData", 0x416330, void (*)(CCollisionData*));
     RH_ScopedOverloadedInstall(RemoveTrianglePlanes, "colData", 0x416400, void (*)(CCollisionData*));
@@ -2494,7 +2494,72 @@ bool CCollision::BuildCacheOfCameraCollision(
     return anyCollision;
 }
 
-// 0x41B000
-bool CCollision::CameraConeCastVsWorldCollision(CColSphere* sphere1, CColSphere* sphere2, float* arg2, float arg3) {
-    return plugin::CallAndReturn<bool, 0x41B000, CColSphere*, CColSphere*, float*, float>(sphere1, sphere2, arg2, arg3);
+/*!
+* Cast the cone of the camera against the world
+* Honestly, as much as I bash the devs from 2003, this one
+* is quite well done (Other than using static variables xD)
+* This function is responsible for the anit-clipping
+* (When you move the camera and instead of clipping thru the
+* object it slides along it's collision)
+* 
+* @addr 0x41B000
+*
+* @param spA     Sphere representing the camera
+* @param spB     `spA` but it's center offset by the velocity of the player (Basically, where the camera would be the next timestep)
+* @param dst     Minimum distance that doesn't collide ("Distance" is a bad word tbh, it's more like a scale from [minDist, 1])
+* @param minDist See `dst`
+*/
+bool CCollision::CameraConeCastVsWorldCollision(
+    const CColSphere& spA,
+    const CColSphere& spB,
+    float& dst,
+    float minDist
+) {
+    ColCache caches[2]{};
+    gpColCache  = &caches[0];
+    gpColCache2 = &caches[1];
+
+    if (!BuildCacheOfCameraCollision(spA, spB)) {
+        return false;
+    }
+
+    // Reminder: The 2 spheres are offset by the velocity of the player...
+    const auto velocity = spB.m_vecCenter - spA.m_vecCenter;
+
+    // Radius of the badass spehere we're going to use
+    const auto spRadius = spA.m_fRadius;
+
+    // Badass sphere that represents the camera
+    // (gets smaller and smaller as we progress with the binary search)
+    CColSphere spCam = CSphere{ spA.m_vecCenter, spRadius};
+
+    // Since writing to overlapping arrays is a bad idea we use 2 caches
+    // one is the current, other one is the next one to use
+    size_t cacheToUse = 0;
+
+    // Now, we do a badass binary search to find the closest 
+    // possible distance to the collision such that the camera
+    // (or well, the sphere representing it `spCam`)
+    // isn't clipping into it
+    float max = 1.f, min = minDist, rng;
+    do {
+        rng = max - min;
+        dst = min + rng / 2.f;
+
+        spCam.m_fRadius = spRadius * dst;
+
+        if (int32 numOut = 0; SphereCastVsCaches(spCam, velocity * dst, gColCacheNumEntries, caches[cacheToUse].data(), numOut, caches[(cacheToUse + 1) % 2].data())) {
+            gColCacheNumEntries = numOut;
+            cacheToUse          = (cacheToUse + 1) % 2;
+            max                 = dst;
+        } else {
+            min = dst;
+        }
+    } while (rng > gLimitPrecisionOfBinarySearch);
+
+    gLastRadiusUsedInCollisionPreventionOfCamera = dst;
+
+    return true;
+}
+
 }

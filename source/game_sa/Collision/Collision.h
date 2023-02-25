@@ -166,7 +166,12 @@ public:
         const CColSphere& spA,
         const CColSphere& spB
     );
-    static bool CameraConeCastVsWorldCollision(CColSphere* sphere1, CColSphere* sphere2, float* arg2, float arg3);
+    static bool CameraConeCastVsWorldCollision(
+        const CColSphere& spA,
+        const CColSphere& spB,
+        float& dist,
+        float minDist
+    );
 };
 
 void CalculateColPointInsideBox(const CBox& box, const CVector& point, CColPoint& colPoint);
