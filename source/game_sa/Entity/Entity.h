@@ -222,6 +222,7 @@ public:
         }
     }
 
+    // Register a reference to the entity that is stored in that given reference
     template<typename T>
     static void RegisterReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
         ref->RegisterReference(reinterpret_cast<CEntity**>(&ref));

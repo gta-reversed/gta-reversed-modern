@@ -169,14 +169,9 @@ void CAERadioTrackManager::SetRadioAutoRetuneOnOff(bool enable) {
 
 // 0x4E82F0
 void CAERadioTrackManager::SetBassSetting(int8 nBassSet, float fBassGrain) {
-    settings1.m_fBassGain = fBassGrain;
-    settings2.m_fBassGain = fBassGrain;
-
-    settings1.m_nBassSet = nBassSet;
-    settings2.m_nBassSet = nBassSet;
-
-    m_bBassEnhance ? AEAudioHardware.SetBassSetting(nBassSet, fBassGrain)
-                   : AEAudioHardware.SetBassSetting(0, fBassGrain);
+    settings1.m_fBassGain = settings2.m_fBassGain = fBassGrain;
+    settings1.m_nBassSet = settings2.m_nBassSet = nBassSet;
+    AEAudioHardware.SetBassSetting(m_bBassEnhance ? nBassSet : 0, fBassGrain);
 }
 
 // 0x4E9DB0
