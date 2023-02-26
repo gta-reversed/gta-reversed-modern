@@ -68,11 +68,11 @@ public:
     }
 private:
     // RwV3d-like:
-    CVector m_right;        // 0x0
+    CVector m_right;        // 0x0  // RW: Right
     uint32  flags;          // 0xC
-    CVector m_forward;      // 0x10
+    CVector m_forward;      // 0x10 // RW: Up
     uint32  pad1;           // 0x1C
-    CVector m_up;           // 0x20
+    CVector m_up;           // 0x20 // RW: At
     uint32  pad2;           // 0x2C
     CVector m_pos;          // 0x30
     uint32  pad3;           // 0x3C
@@ -154,6 +154,15 @@ public:
         m_pos = pos;
     }
 
+    static auto GetIdentity() {
+        CMatrix mat;
+        mat.m_right   = CVector{ 1.f, 0.f, 0.f };
+        mat.m_forward = CVector{ 0.f, 1.f, 0.f };
+        mat.m_up      = CVector{ 0.f, 0.f, 1.f };
+        mat.m_pos     = CVector{ 0.f, 0.f, 0.f };
+        return mat;
+    }
+    
     // Similar to ::Scale but this also scales the position vector.
     // 0x45AF40
     void ScaleAll(float mult) {

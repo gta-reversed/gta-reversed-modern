@@ -75,6 +75,7 @@ public:
             uint8 bIsBackfaceCulled : 1;
             uint8 bIsLod : 1;
 
+            // 1st byte
             union {
                 struct { // Atomic flags
                     uint8 bIsRoad : 1;
