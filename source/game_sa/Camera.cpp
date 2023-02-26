@@ -938,7 +938,7 @@ void CCamera::StoreValuesDuringInterPol(CVector* sourceDuringInter, CVector* tar
 
 // 0x50C360
 void CCamera::UpdateTargetEntity() {
-    m_bPlayerWasOnBike = m_pTargetEntity->IsVehicle() && m_pTargetEntity->AsVehicle()->m_vecMoveSpeed.SquaredMagnitude() > 0.3f;
+    m_bPlayerWasOnBike = m_pTargetEntity && m_pTargetEntity->IsVehicle() && m_pTargetEntity->AsVehicle()->m_vecMoveSpeed.SquaredMagnitude() > 0.3f;
 
     const auto player = FindPlayerPed();
     assert(player);
@@ -1601,7 +1601,7 @@ bool CCamera::ConeCastCollisionResolve(const CVector& pos, const CVector& lookAt
         return false;
     }
 
-    if (CCollision::CameraConeCastVsWorldCollision(CSphere{ pos, radius }, CSphere{ lookAt, radius }, &outDist, minDist)) {
+    if (CCollision::CameraConeCastVsWorldCollision(CSphere{ lookAt, radius }, CSphere{ pos, radius }, &outDist, minDist)) {
         outDest = lerp(lookAt, pos, outDist);
         return true;
     } else {
