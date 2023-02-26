@@ -111,6 +111,7 @@ public:
     }
 
     //! Get a copy of `*this` vector projected onto `projectOnTo` (which is assumed to be unit length)
+    //! The result will have a magnitude of `sqrt(abs(this->Dot(projectOnTo)))`
     CVector2D ProjectOnToNormal(const CVector2D& projectOnTo) const {
         return projectOnTo * Dot(projectOnTo);
     }

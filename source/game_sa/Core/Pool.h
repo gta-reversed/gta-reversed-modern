@@ -163,8 +163,10 @@ public:
             if (++m_nFirstFree >= m_nSize) {
                 if (bReachedTop) {
                     m_nFirstFree = -1;
-                    if constexpr (!DontDebugCheckAlloc) {
-                        NOTSA_UNREACHABLE("Allocation failed");
+                    if constexpr (DontDebugCheckAlloc) {
+                        DEV_LOG("Allocataion failed!"); // Code can handle alloc failures
+                    } else {
+                        NOTSA_DEBUG_BREAK(); // Code can't handle alloc failures, so break
                     }
                     return nullptr;
                 }
