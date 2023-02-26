@@ -1371,12 +1371,12 @@ void CCollision::ClosestPointOnLine(CVector* arg0, CVector* arg1, CVector* arg2,
     plugin::Call<0x417FD0, CVector*, CVector*, CVector*, CVector*>(arg0, arg1, arg2, arg3);
 }
 
-// 0x418100
+// 0x418100 // unused
 void CCollision::ClosestPointsOnPoly(CColTriangle* arg0, CVector* arg1, CVector* arg2, CVector* arg3) {
     plugin::Call<0x418100, CColTriangle*, CVector*, CVector*, CVector*>(arg0, arg1, arg2, arg3);
 }
 
-// 0x418150
+// 0x418150 // unused
 void CCollision::ClosestPointOnPoly(CColTriangle* arg0, CVector* arg1, CVector* arg2) {
     plugin::Call<0x418150, CColTriangle*, CVector*, CVector*>(arg0, arg1, arg2);
 }
