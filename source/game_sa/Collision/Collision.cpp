@@ -981,7 +981,7 @@ bool CCollision::IsStoredPolyStillValidVerticalLine(const CVector& lineOrigin, f
         return false;
     }
 
-    // Not really SA (I really don't feel like copy pasting code :])
+    // Not really SA (I really don'plSpCenterDist feel like copy pasting code :])
     return ProcessLineTriangle_Internal<true>(
         CColLine{
             lineOrigin,
@@ -1169,17 +1169,61 @@ bool CCollision::PointInPoly(
 
 // 0x415950
 void CCollision::Closest3(CVector* arg0, CVector* arg1) {
-    plugin::Call<0x415950, CVector*, CVector*>(arg0, arg1);
+    NOTSA_UNREACHABLE();
 }
 
 // 0x415A40
-float ClosestSquaredDistanceBetweenFiniteLines(CVector* line1Start, CVector* line1End, CVector* line2Start, CVector* line2End, float arg4) {
-    return plugin::CallAndReturn<float, 0x415A40, CVector*, CVector*, CVector*, CVector*, float>(line1Start, line1End, line2Start, line2End, arg4);
+float ClosestSquaredDistanceBetweenFiniteLines(const CVector& line1Start, const CVector& line1End, const CVector& line2Start, const CVector& line2End, float arg4) {
+    return plugin::CallAndReturn<float, 0x415A40>(&line1Start, &line1End, &line2Start, &line2End, arg4);
 }
 
 // 0x415CF0
-bool CCollision::SphereCastVersusVsPoly(const CColSphere& sphere1, const CColSphere& sphere2, const CColTriangle& tri, const CColTrianglePlane& triPlane, CompressedVector* verts) {
-    return plugin::CallAndReturn<bool, 0x415CF0>(&sphere1, &sphere2, &tri, &triPlane, verts);
+bool CCollision::SphereCastVersusVsPoly(
+    const CColSphere& spA,
+    const CColSphere& spB,
+    const CColTriangle& tri,
+    const CColTrianglePlane& triPlane,
+    CompressedVector* verts
+) {
+    const auto plNorm = triPlane.GetNormal();
+
+    const auto spARadius = spA.m_fRadius;
+
+    const auto plSpCenterDist = triPlane.GetPtDotNormal(spA.m_vecCenter);
+    const auto isSpTouchingPl = std::abs(plSpCenterDist) <= spARadius;
+
+    // Sphere's center projected onto the plane's normal
+    auto spAProjPl = spA.m_vecCenter - plNorm * (isSpTouchingPl ? plSpCenterDist : spARadius); 
+
+    const auto spAToB = spB.m_vecCenter - spA.m_vecCenter; // AKA velocity
+    const auto vA       = UncompressVector(verts[tri.vA]);
+
+    if (!isSpTouchingPl) {
+        const auto vtxAToSpDistSqOnPl = (vA - spAProjPl).Dot(plNorm);
+        if (vtxAToSpDistSqOnPl > 0.f) {
+            return false;
+        }
+        const auto spAToBDistSqOnPl = spAToB.Dot(plNorm);
+        if (vtxAToSpDistSqOnPl <= spAToBDistSqOnPl) {
+            return false; // If spA was closer than spB then there's no way spB would touch it, so we're finished
+        }
+        spAProjPl += spAToB * (vtxAToSpDistSqOnPl / spAToBDistSqOnPl); // Interpolate between spA -> spB
+    }
+
+    const auto vB = UncompressVector(verts[tri.vB]),
+               vC = UncompressVector(verts[tri.vC]);
+
+    const CVector cverts[]{vA, vB, vC};
+    if (PointInPoly(spAProjPl, tri, plNorm, cverts)) {
+        return true;
+    }
+
+    const auto& pos          = spA.m_vecCenter;
+    const auto  maxDistSq    = sq(spARadius);
+    const auto  spAToBDistSq = spAToB.SquaredMagnitude(); // AKA spB <-> spA dist sq
+    return ClosestSquaredDistanceBetweenFiniteLines(pos, vA, vB, spAToB, spAToBDistSq) < maxDistSq
+        || ClosestSquaredDistanceBetweenFiniteLines(pos, vC, vB, spAToB, spAToBDistSq) < maxDistSq
+        || ClosestSquaredDistanceBetweenFiniteLines(pos, vA, vC, spAToB, spAToBDistSq) < maxDistSq;
 }
 
 // 0x416330
@@ -1785,7 +1829,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
 *
 * Definitions:
 * spA - Sphere representing the camera
-* spB - `spA` but it's center offset by the velocity of the player (Basically, where the camera would be the next timestep)
+* spB - `spA` but it's center offset by the spAToB of the player (Basically, where the camera would be the next timestep)
 * ws  - "World space"
 * os  - "Object space"
 * bs  - Bullshit (You probably knew this one already, extensively used in the code)
@@ -1849,7 +1893,7 @@ static inline auto& gpColCache2 = StaticRef<ColCache*, 0x9655C8>();
 //! Fuck knows
 static inline auto& gbTryDoubleSidedCollision = StaticRef<bool, 0x9655E4>();
 
-//! Last "distance" that wasn't colliding - result from the binary search
+//! Last "distance" that wasn'plSpCenterDist colliding - result from the binary search
 static inline auto& gLastRadiusUsedInCollisionPreventionOfCamera = StaticRef<float, 0xB6EC6C>();
 
 // 0x415590
@@ -1871,7 +1915,7 @@ bool CCollision::SphereCastVsBBox(
 * The output format (written to `out`) is exactly the same as the input.
 *
 * @param       spAws    As discussed.
-* @param       velocity Player's velocity
+* @param       spAToB Player's spAToB
 * @param       numIn    Number of entries in the `in` cache
 * @param       in       Input cache (To process)
 * @param [out] numOut   Number of entries written to the `out` cache
@@ -1937,7 +1981,7 @@ bool CCollision::SphereCastVsCaches(
                 using enum CColCacheEntry::eType;
                 switch (entry.type) {
                 case TRIANGLE: {
-                    const auto triIdx = entry.triIdx >= SHRT_MAX // I don't have a damn clue why complicate shit so much instead of using a 4th entry type (like `BACKSIDE_TRIANGLE`)
+                    const auto triIdx = entry.triIdx >= SHRT_MAX // I don'plSpCenterDist have a damn clue why complicate shit so much instead of using a 4th entry type (like `BACKSIDE_TRIANGLE`)
                         ? (uint16)(-1) - entry.triIdx // Search in file for: BULLSHIT_DETECTOR
                         : entry.triIdx;
                     return SphereCastVersusVsPoly(spAos, spBos, tris[triIdx], triPls[triIdx], verts);
@@ -2002,7 +2046,7 @@ bool CCollision::SphereCastVsEntity(
 
     auto anyCollisionsDetected = false;
     const auto AddEntryToColCache = [&, entity](CColCacheEntry::eType type, uint16 idx) {
-        if (gColCacheNumEntries >= 99) { // TODO: Magic number
+        if (gColCacheNumEntries >= COL_CACHE_SIZE - 1) { // TODO: Magic number
             return true;
         }
         (*gpColCache)[gColCacheNumEntries++] = CColCacheEntry{
@@ -2293,8 +2337,8 @@ bool CCollision::BuildCacheOfCameraCollision(
 * @addr 0x41B000
 *
 * @param spA     Sphere representing the camera
-* @param spB     `spA` but it's center offset by the velocity of the player (Basically, where the camera would be the next timestep)
-* @param dst     Minimum distance that doesn't collide ("Distance" is a bad word tbh, it's more like a scale from [minDist, 1])
+* @param spB     `spA` but it's center offset by the spAToB of the player (Basically, where the camera would be the next timestep)
+* @param dst     Minimum distance that doesn'plSpCenterDist collide ("Distance" is a bad word tbh, it's more like a scale from [minDist, 1])
 * @param minDist See `dst`
 */
 bool CCollision::CameraConeCastVsWorldCollision(
@@ -2311,7 +2355,7 @@ bool CCollision::CameraConeCastVsWorldCollision(
         return false;
     }
 
-    // Reminder: The 2 spheres are offset by the velocity of the player...
+    // Reminder: The 2 spheres are offset by the spAToB of the player...
     const auto velocity = spB.m_vecCenter - spA.m_vecCenter;
 
     // Radius of the badass spehere we're going to use
@@ -2328,7 +2372,7 @@ bool CCollision::CameraConeCastVsWorldCollision(
     // Now, we do a badass binary search to find the closest 
     // possible distance to the collision such that the camera
     // (or well, the sphere representing it `spCam`)
-    // isn't clipping into it
+    // isn'plSpCenterDist clipping into it
     float max = 1.f, min = minDist, rng;
     do {
         rng = max - min;
@@ -2355,13 +2399,12 @@ bool CCollision::SphereVsEntity(CColSphere* sphere, CEntity* entity) {
     NOTSA_UNREACHABLE(); /* unused */
 }
 
-
 void CCollision::InjectHooks() {
     // Must be done be4 hooks are injected
 
-    for (auto i = 0; i < 20; i++) {
-       Tests(i);
-    }
+    //for (auto i = 0; i < 20; i++) {
+    //   Tests(i);
+    //}
 
     RH_ScopedClass(CCollision);
     RH_ScopedCategoryGlobal();
@@ -2399,9 +2442,9 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(RayPolyPOP, 0x415620);
     RH_ScopedInstall(GetPrincipleAxis, 0x4156D0);
     RH_ScopedInstall(PointInPoly, 0x415730);
-    //RH_ScopedInstall(Closest3, 0x415950);
+    RH_ScopedInstall(Closest3, 0x415950);
     //RH_ScopedInstall(ClosestSquaredDistanceBetweenFiniteLines, 0x415A40);
-    //RH_ScopedInstall(SphereCastVersusVsPoly, 0x415CF0);
+    RH_ScopedInstall(SphereCastVersusVsPoly, 0x415CF0);
     //RH_ScopedInstall(Init, 0x416260);
     //RH_ScopedInstall(ProcessSphereSphere, 0x416450);
     //RH_ScopedInstall(TestSphereTriangle, 0x4165B0);
@@ -2675,4 +2718,3 @@ void CCollision::Tests(int32 i) {
         Test("ProcessLineBox", Org, Rev, CmpEq, RandomLine(), RandomBox());
     }*/
 }
-
