@@ -27,6 +27,37 @@ public:
     static inline bool& bCamCollideWithPeds = *(bool*)0x8A5B17;             // = true
     static inline bool& bCamCollideWithBuildings = *(bool*)0x8A5B16;        // = true
     static inline float& relVelCamCollisionVehiclesSqr = *(float*)0x8A5B18; // = 0.01f
+
+    static inline struct DebugSettings {
+        struct ShapeShapeCollision {
+            enum Shape { // I don't like casting, sorry
+                SBOX,
+                SSPHERE,
+                STRI,
+                SLINE,
+                SNUM
+            };
+
+            enum State : uint8 {
+                DISABLED,
+                ENABLED,
+                NOT_SUPPORTED
+            };
+
+            // Entry permutations are linked in state (eg.: BOX-TRI and TRI-BOX always are in the same state)
+            // So it's enough to check States[SBOX][STRI], no need to check States[STRI][SBOX]
+            State States[SNUM][SNUM]{
+                // Box           Sphere   Triangle       Line
+                { NOT_SUPPORTED, ENABLED, NOT_SUPPORTED, ENABLED       }, // Box
+                { ENABLED,       ENABLED, ENABLED,       ENABLED       }, // Sphere
+                { NOT_SUPPORTED, ENABLED, NOT_SUPPORTED, ENABLED       }, // Triangle
+                { ENABLED,       ENABLED, ENABLED,       NOT_SUPPORTED }, // Line
+            };
+
+            bool IsEnabled(Shape a, Shape b) { return States[a][b] == ENABLED; }
+        } ShapeShapeCollision;
+    } s_DebugSettings;
+
 public:
     static void InjectHooks();
     static void Tests(int32 i);

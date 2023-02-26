@@ -19,6 +19,8 @@
 
 #define NOTSA_VANILLA_COLLISIONS
 
+using Shape = CCollision::DebugSettings::ShapeShapeCollision::Shape;
+
 /*!
 * @address 0x416260
 */
@@ -760,6 +762,10 @@ bool NOTSA_FORCEINLINE ProcessLineTriangle_Internal(
     CVector* outIP,
     CVector* outPlNorm
 ) {
+    if (!CCollision::s_DebugSettings.ShapeShapeCollision.IsEnabled(Shape::SLINE, Shape::STRI)) {
+        return false;
+    }
+
     const auto &va = poly.verts[0],
                &vb = poly.verts[1],
                &vc = poly.verts[2];
@@ -859,7 +865,7 @@ bool NOTSA_FORCEINLINE ProcessLineTriangle_Internal(
 	//     \   /
 	//      \ /
 	//     pl_va
-	// We can use the "2d cross product" to check on which side
+	// We can use the "2v2 cross product" to check on which side
 	// a vector is of another. Test is true if point is inside of all edges.
     const auto pl_ip_a = pl_ip - pl_va;
     if ((pl_vb - pl_va).Cross(pl_ip_a) >= 0.0f && (pl_vc - pl_va).Cross(pl_ip_a) <= 0.0f && (pl_vc - pl_vb).Cross(pl_ip - pl_vb) >= 0.0f) {
@@ -1293,31 +1299,109 @@ bool CCollision::ProcessSphereSphere(const CColSphere& spA, const CColSphere& sp
     return true;
 }
 
-// 0x4165B0
-bool CCollision::TestSphereTriangle(const CColSphere& sphere, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& plane) {
-    const auto& P = sphere.m_vecCenter;
-    const auto  r = sphere.m_fRadius;
+CVector ClosestPtOnLine(const CVector* l0, const CVector* l1, const CVector* point) {
+    const auto lnMagSq = (*l1 - *l0).SquaredMagnitude();
+	const auto dot = DotProduct(*point - *l0, *l1 - *l0);
+    if (dot <= 0.0f) {
+		return *l0;
+    }
+    if (dot >= lnMagSq) {
+		return *l1;
+    }
+    return lerp(*l0, *l1, dot / lnMagSq);
+}
 
-    // Seems to work perfectly, likely faster than original code (because it's basically branchless, and can be AVX2'd to oblivion)
+//! Calculate clamped barycentric coordinates of a point (p) on a triangle (a, b, c)
+//! See: https://gamedev.stackexchange.com/a/23745
+NOTSA_FORCEINLINE CVector GetBaryCoordsOnTriangle(CVector a, CVector b, CVector c, CVector p) {
+    const auto vab = b - a, vac = c - a, vap = p - a;
+    const auto bb  = vab.Dot(vab);
+    const auto bc  = vab.Dot(vac);
+    const auto cc  = vac.Dot(vac);
+    const auto pb  = vap.Dot(vab);
+    const auto pc  = vap.Dot(vac);
+    const auto d   = bb * cc - bc * bc;
+    const auto v   = (cc * pb - bc * pc) / d;
+    const auto w   = (bb * pc - bc * pb) / d;
+    const auto u   = 1.0f - v - w;
+    const auto pt = a * u + b * v + c * w;
+    return { u, v, w };
+}
+
+//! Get barycentric coords of point (p) clamped onto triangle (a, b, c)
+//! See: https://stackoverflow.com/a/37923949
+NOTSA_FORCEINLINE CVector GetClampedBaryCoordsIntoTriangle(CVector a, CVector b, CVector c, CVector p) {
+    // Calculate barycentric coords
+    const auto [u, v, w] = GetBaryCoordsOnTriangle(a, b, c, p);
+
+    // Calculate new `t` 
+    const auto Get = [&](CVector v1, CVector v2) {
+        const auto d = v1 - v2;
+        return std::clamp((p - v2).Dot(d) / d.Dot(d), 0.f, 1.f);
+    };
+
+    if (u < 0.f) {
+        const auto t = Get(c, b);
+        return { 0.0f, 1.0f - t, t };
+    }
+    
+    if (v < 0.f) {
+        const auto t = Get(a, c);
+        return { t, 0.0f, 1.0f - t };
+    }
+
+    
+    if (w < 0.f) {
+        const auto t = Get(b, a);
+        return { 1.0f - t, t, 0.0f };
+    }
+
+    return { u, v, w }; // Point was in the triangle
+}
+
+NOTSA_FORCEINLINE CVector GetCoordsClampedIntoTriangle(CVector a, CVector b, CVector c, CVector p) {
+    const auto [u, v, w] = GetClampedBaryCoordsIntoTriangle(a, b, c, p);
+    return a * u + b * v + c * w;
+}
+
+template<bool TestOnly>
+NOTSA_FORCEINLINE bool ProcessSphereTriangle_Internal(
+    const CColSphere& sphere,
+    const CompressedVector* verts,
+    const CColTriangle& tri, const
+    CColTrianglePlane& plane,
+    CVector* ip,
+    float* maxTouchDist
+) {
+    if (!CCollision::s_DebugSettings.ShapeShapeCollision.IsEnabled(Shape::SSPHERE, Shape::STRI)) {
+        return false;
+    }
+
+    const auto P = sphere.m_vecCenter;
+    const auto r = sphere.m_fRadius;
+
+    // Seems to work perfectly, likely faster than original code (because it's basically branchless, and can be AVX2'v2 to oblivion)
     // From: https://realtimecollisiondetection.net/blog/?p=103
 
-    const auto A = UncompressVector(verts[tri.vA]) - P;
-    const auto B = UncompressVector(verts[tri.vB]) - P;
-    const auto C = UncompressVector(verts[tri.vC]) - P;
+    const auto vA = UncompressVector(verts[tri.vA]),
+               vB = UncompressVector(verts[tri.vB]),
+               vC = UncompressVector(verts[tri.vC]);
+
+    const auto A  = vA - P;
+    const auto B  = vB - P;
+    const auto C  = vC - P;
     const auto rr = r * r;
-    const auto V = (B - A).Cross(C - A);
-    const auto d = A.Dot(V);
-    const auto e = V.Dot(V);
-    const auto s1 = d * d > rr * e;
+    const auto N  = plane.GetNormal();
+    const int  s1 = std::abs(A.Dot(N)) > r;
     const auto aa = A.Dot(A);
     const auto ab = A.Dot(B);
     const auto ac = A.Dot(C);
     const auto bb = B.Dot(B);
     const auto bc = B.Dot(C);
     const auto cc = C.Dot(C);
-    const auto s2 = (aa > rr) & (ab > aa) & (ac > aa);
-    const auto s3 = (bb > rr) & (ab > bb) & (bc > bb);
-    const auto s4 = (cc > rr) & (ac > cc) & (bc > cc);
+    const int  s2 = (aa > rr) & (ab > aa) & (ac > aa);
+    const int  s3 = (bb > rr) & (ab > bb) & (bc > bb);
+    const int  s4 = (cc > rr) & (ac > cc) & (bc > cc);
     const auto AB = B - A;
     const auto BC = C - B;
     const auto CA = A - C;
@@ -1333,18 +1417,129 @@ bool CCollision::TestSphereTriangle(const CColSphere& sphere, const CompressedVe
     const auto QC = C * e1 - Q1;
     const auto QA = A * e2 - Q2;
     const auto QB = B * e3 - Q3;
-    const auto s5 = (Q1.Dot(Q1) > rr * e1 * e1) && (Q1.Dot(QC) > 0);
-    const auto s6 = (Q2.Dot(Q2) > rr * e2 * e2) && (Q2.Dot(QA) > 0);
-    const auto s7 = (Q3.Dot(Q3) > rr * e3 * e3) && (Q3.Dot(QB) > 0);
-    return !(s1 || s2 || s3 || s4 || s5 || s6 || s7);
+    const int  s5 = (Q1.Dot(Q1) > rr * e1 * e1) & (Q1.Dot(QC) > 0);
+    const int  s6 = (Q2.Dot(Q2) > rr * e2 * e2) & (Q2.Dot(QA) > 0);
+    const int  s7 = (Q3.Dot(Q3) > rr * e3 * e3) & (Q3.Dot(QB) > 0);
+
+    if (s1 | s2 | s3 | s4 | s5 | s6 | s7) {
+        return false;
+    }
+
+    if constexpr (!TestOnly) {
+        const auto plDist    = plane.GetPtDotNormal(P);
+        const auto touchDist = sq(plDist);
+        if (touchDist >= *maxTouchDist) {
+            return false;
+        }
+        *maxTouchDist = touchDist;
+        *ip           = GetCoordsClampedIntoTriangle(vA, vB, vC, P - N * std::abs(plDist));
+    }
+
+    return true;
+}
+
+// 0x4165B0
+bool CCollision::TestSphereTriangle(
+    const CColSphere& sphere,
+    const CompressedVector* verts,
+    const CColTriangle& tri,
+    const CColTrianglePlane& plane
+) {
+    return ProcessSphereTriangle_Internal<true>(sphere, verts, tri, plane, nullptr, nullptr);
+}
+
+CVector ClosestPtPointTriangle(
+    CVector a, CVector b, CVector c,
+    const CColTrianglePlane& plane,
+    CVector p
+) {
+    // Check if P in vertex region outside A
+    auto ab = b - a;
+    auto ac = c - a;
+    auto ap = p - a;
+    float d1 = ab.Dot(ap);
+    float d2 = ac.Dot(ap);
+    if (d1 <= 0.0f && d2 <= 0.0f) return a; // barycentric coordinates (1,0,0)
+    // Check if P in vertex region outside B
+    auto bp = p - b;
+    float d3 = ab.Dot(bp);
+    float d4 = ac.Dot(bp);
+    if (d3 >= 0.0f && d4 <= d3) return b; // barycentric coordinates (0,1,0)
+    // Check if P in edge region of AB, if so return projection of P onto AB
+    float vc = d1 * d4 - d3 * d2;
+    if (vc <= 0.0f && d1 >= 0.0f && d3 <= 0.0f) {
+        float v = d1 / (d1 - d3);
+        return a + v * ab; // barycentric coordinates (1-v,v,0)
+    }
+    // Check if P in vertex region outside C
+    auto cp = p - c;
+    float d5 = ab.Dot(cp);
+    float d6 = ac.Dot(cp);
+    if (d6 >= 0.0f && d5 <= d6) return c; // barycentric coordinates (0,0,1)
+    // Check if P in edge region of AC, if so return projection of P onto AC
+    float vb = d5 * d2 - d1 * d6;
+    if (vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f) {
+        float w = d2 / (d2 - d6);
+        return a + w * ac; // barycentric coordinates (1-w,0,w)
+    }
+    // Check if P in edge region of BC, if so return projection of P onto BC
+    float va = d3 * d6 - d5 * d4;
+    if (va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f) {
+        float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
+        return b + w * (c - b); // barycentric coordinates (0,1-w,w)
+    }
+    // P inside face region. Compute Q through its barycentric coordinates (u,v,w)
+    float denom = 1.0f / (va + vb + vc);
+    float v = vb * denom;
+    float w = vc * denom;
+    return a + ab * v + ac * w; // = u*a + v*b + w*c, u = va * denom = 1.0f-v-w
 }
 
 // 0x416BA0
-bool CCollision::ProcessSphereTriangle(const CColSphere& sphere, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane, CColPoint& colPoint,
-                                       float& maxTouchDistance) {
-    return plugin::CallAndReturn<bool, 0x416BA0, const CColSphere&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&, CColPoint&, float&>(
-        sphere, verts, tri, triPlane, colPoint, maxTouchDistance);
-}
+bool CCollision::ProcessSphereTriangle(
+    const CColSphere& sphere,
+    const CompressedVector* verts,
+    const CColTriangle& tri,
+    const CColTrianglePlane& plane,
+    CColPoint& colPoint,
+    float& maxTouchDistance
+) {
+    CVector ip;
+    if (!ProcessSphereTriangle_Internal<false>(sphere, verts, tri, plane, &ip, &maxTouchDistance)) {
+        return false;
+    }
+
+    //const auto a = UncompressVector(verts[tri.vA]),
+    //           b = UncompressVector(verts[tri.vB]),
+    //           c = UncompressVector(verts[tri.vC]);
+    //
+    //const auto ip = ClosestPtPointTriangle(a, b, c, plane, sphere.m_vecCenter);
+    //if ((sphere.m_vecCenter - ip).SquaredMagnitude() > sq(sphere.m_fRadius)) {
+    //    return false;
+    //}
+    //
+    //const auto plDist = plane.GetPtDotNormal(sphere.m_vecCenter);
+    //const auto touchDist = sq(plDist);
+    //if (touchDist >= maxTouchDistance) {
+    //    return false;
+    //}
+    //maxTouchDistance = touchDist;
+
+    colPoint.m_vecPoint  = ip;
+    colPoint.m_vecNormal = (sphere.m_vecCenter - ip).Normalized();
+    colPoint.m_fDepth    = sphere.m_fRadius - (sphere.m_vecCenter - ip).Magnitude();
+
+    colPoint.m_nSurfaceTypeA = sphere.m_Surface.m_nMaterial;
+    colPoint.m_nPieceTypeA   = sphere.m_Surface.m_nPiece;
+    colPoint.m_nLightingA    = sphere.m_Surface.m_nLighting;
+
+
+    colPoint.m_nSurfaceTypeB = tri.m_nMaterial;
+    colPoint.m_nPieceTypeB   = 0;
+    colPoint.m_nLightingB    = tri.m_nLight;
+
+    return true;
+} 
 
 // 0x417470
 bool CCollision::TestLineSphere(const CColLine& line, const CColSphere& sphere) {
@@ -2478,29 +2673,56 @@ void CCollision::InjectHooks() {
     RH_ScopedClass(CCollision);
     RH_ScopedCategoryGlobal();
 
+    ////
+    // Test & Process
+    ////
+
+    RH_ScopedInstall(Test2DLineAgainst2DLine, 0x4138D0);
+
+    RH_ScopedInstall(ProcessDiscCollision, 0x413960);
+
+    RH_ScopedInstall(TestLineBox_DW, 0x412C70);
+    RH_ScopedInstall(TestLineBox, 0x413070);
+    RH_ScopedInstall(ProcessLineBox, 0x413100);
+    RH_ScopedInstall(TestVerticalLineBox, 0x413080);
+
+    RH_ScopedInstall(TestLineTriangle, 0x413AC0);
+    RH_ScopedInstall(ProcessLineTriangle, 0x4140F0);
+    RH_ScopedInstall(ProcessVerticalLineTriangle, 0x4147E0);
+
+    //RH_ScopedInstall(TestLineSphere, 0x417470);
+    RH_ScopedInstall(ProcessLineSphere, 0x412AA0);
+
+    RH_ScopedInstall(TestSphereBox, 0x4120C0);
+    RH_ScopedInstall(ProcessSphereBox, 0x412130);
+
+    RH_ScopedInstall(TestSphereSphere, 0x411E70);
+    RH_ScopedInstall(ProcessSphereSphere, 0x416450);
+
+    RH_ScopedInstall(TestSphereTriangle, 0x4165B0);
+    RH_ScopedInstall(ProcessSphereTriangle, 0x416BA0);
+
+    RH_ScopedInstall(ProcessColModels, 0x4185C0, { .reversed = false });
+
+    //RH_ScopedInstall(TestLineOfSight, 0x417730);
+    RH_ScopedInstall(ProcessLineOfSight, 0x417950);
+
+    //RH_ScopedInstall(ProcessVerticalLine, 0x417BF0);
+
+    ////
+    // Rest
+    ////
+
     RH_ScopedInstall(Init, 0x416260);
     RH_ScopedInstall(Shutdown, 0x4162E0);
     RH_ScopedInstall(Update, 0x411E20);
     RH_ScopedInstall(SortOutCollisionAfterLoad, 0x411E30);
-    RH_ScopedInstall(TestSphereSphere, 0x411E70);
     RH_ScopedGlobalInstall(CalculateColPointInsideBox, 0x411EC0);
-    RH_ScopedInstall(TestSphereBox, 0x4120C0);
-    RH_ScopedInstall(ProcessSphereBox, 0x412130);
     RH_ScopedInstall(PointInTriangle, 0x412700);
     RH_ScopedInstall(DistToLineSqr, 0x412850);
     RH_ScopedInstall(DistToMathematicalLine, 0x412970);
     RH_ScopedInstall(DistToMathematicalLine2D, 0x412A30);
     RH_ScopedInstall(DistAlongLine2D, 0x412A80);
-    RH_ScopedInstall(ProcessLineSphere, 0x412AA0);
-    RH_ScopedInstall(TestLineBox_DW, 0x412C70);
-    RH_ScopedInstall(TestLineBox, 0x413070);
-    RH_ScopedInstall(TestVerticalLineBox, 0x413080);
-    RH_ScopedInstall(ProcessLineBox, 0x413100);
-    RH_ScopedInstall(Test2DLineAgainst2DLine, 0x4138D0);
-    RH_ScopedInstall(ProcessDiscCollision, 0x413960);
-    RH_ScopedInstall(TestLineTriangle, 0x413AC0);
-    RH_ScopedInstall(ProcessLineTriangle, 0x4140F0);
-    RH_ScopedInstall(ProcessVerticalLineTriangle, 0x4147E0);
     RH_ScopedInstall(IsStoredPolyStillValidVerticalLine, 0x414D70);
     RH_ScopedInstall(GetBoundingBoxFromTwoSpheres, 0x415230);
     RH_ScopedInstall(IsThisVehicleSittingOnMe, 0x4152C0);
@@ -2514,20 +2736,11 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(Closest3, 0x415950);
     //RH_ScopedInstall(ClosestSquaredDistanceBetweenFiniteLines, 0x415A40);
     RH_ScopedInstall(SphereCastVersusVsPoly, 0x415CF0);
-    RH_ScopedInstall(Init, 0x416260);
-    RH_ScopedInstall(ProcessSphereSphere, 0x416450);
-    RH_ScopedInstall(TestSphereTriangle, 0x4165B0);
-    //RH_ScopedInstall(ProcessSphereTriangle, 0x416BA0);
-    //RH_ScopedInstall(TestLineSphere, 0x417470);
-    //RH_ScopedInstall(DistToLine, 0x417610);
-    //RH_ScopedInstall(TestLineOfSight, 0x417730);
-    //RH_ScopedInstall(ProcessLineOfSight, 0x417950);
-    //RH_ScopedInstall(ProcessVerticalLine, 0x417BF0);
+    //RH_ScopedInstall(DistToLine, 0x417610); 
     RH_ScopedInstall(SphereCastVsSphere, 0x417F20, { .locked = true }); // Can only be unhooked if `TestSphereSphere` is unhooked too
     //RH_ScopedInstall(ClosestPointOnLine, 0x417FD0);
     //RH_ScopedInstall(ClosestPointsOnPoly, 0x418100);
     //RH_ScopedInstall(ClosestPointOnPoly, 0x418150);
-    RH_ScopedInstall(ProcessColModels, 0x4185C0, { .reversed = false });
     RH_ScopedInstall(SphereCastVsCaches, 0x4181B0);
     RH_ScopedInstall(SphereCastVsEntity, 0x419F00);
     RH_ScopedInstall(SphereVsEntity, 0x41A5A0);
@@ -2539,7 +2752,6 @@ void CCollision::InjectHooks() {
 
     RH_ScopedOverloadedInstall(CalculateTrianglePlanes, "colData", 0x416330, void (*)(CCollisionData*));
     RH_ScopedOverloadedInstall(RemoveTrianglePlanes, "colData", 0x416400, void (*)(CCollisionData*));
-    RH_ScopedInstall(ProcessLineOfSight, 0x417950);
 }
 
 void CCollision::Tests(int32 i) {
@@ -2744,7 +2956,7 @@ void CCollision::Tests(int32 i) {
             using namespace std::chrono;
             const auto begin = high_resolution_clock::now();
             for (auto triIdx = 0; triIdx < 100'000'000; triIdx++) {
-                const auto volatile v = fn(line, vtxs.data(), tri, triPl);
+                const auto volatile v1 = fn(line, vtxs.data(), tri, triPl);
             }
             printf("[%s]: Took %llu ms\n", title, duration_cast<milliseconds>(high_resolution_clock::now() - begin).count());
             //std::cout << "Took " << duration_cast<milliseconds>(high_resolution_clock::now() - begin) << " ms" << std::endl;
@@ -2769,7 +2981,7 @@ void CCollision::Tests(int32 i) {
         const auto tri   = CColTriangle{ 0, 1, 2, SURFACE_CAR_PANEL, {} };
         const auto tripl = tri.GetPlane(vtxs.data());
 
-        // Our version seems to fail sometimes, but I'd assume they're edge cases
+        // Our version seems to fail sometimes, but I'v2 assume they're edge cases
         const auto Org = plugin::CallAndReturn<bool, 0x4165B0, const CColSphere&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&>;
         Test("TestSphereTriangle", Org, TestSphereTriangle, std::equal_to{}, sp, vtxs.data(), tri, tripl);
     }
