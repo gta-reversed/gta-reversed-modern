@@ -1294,8 +1294,49 @@ bool CCollision::ProcessSphereSphere(const CColSphere& spA, const CColSphere& sp
 }
 
 // 0x4165B0
-bool CCollision::TestSphereTriangle(const CColSphere& sphere, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane) {
-    return plugin::CallAndReturn<bool, 0x4165B0, const CColSphere&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&>(sphere, verts, tri, triPlane);
+bool CCollision::TestSphereTriangle(const CColSphere& sphere, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& plane) {
+    const auto& P = sphere.m_vecCenter;
+    const auto  r = sphere.m_fRadius;
+
+    // Seems to work perfectly, likely faster than original code (because it's basically branchless, and can be AVX2'd to oblivion)
+    // From: https://realtimecollisiondetection.net/blog/?p=103
+
+    const auto A = UncompressVector(verts[tri.vA]) - P;
+    const auto B = UncompressVector(verts[tri.vB]) - P;
+    const auto C = UncompressVector(verts[tri.vC]) - P;
+    const auto rr = r * r;
+    const auto V = (B - A).Cross(C - A);
+    const auto d = A.Dot(V);
+    const auto e = V.Dot(V);
+    const auto s1 = d * d > rr * e;
+    const auto aa = A.Dot(A);
+    const auto ab = A.Dot(B);
+    const auto ac = A.Dot(C);
+    const auto bb = B.Dot(B);
+    const auto bc = B.Dot(C);
+    const auto cc = C.Dot(C);
+    const auto s2 = (aa > rr) & (ab > aa) & (ac > aa);
+    const auto s3 = (bb > rr) & (ab > bb) & (bc > bb);
+    const auto s4 = (cc > rr) & (ac > cc) & (bc > cc);
+    const auto AB = B - A;
+    const auto BC = C - B;
+    const auto CA = A - C;
+    const auto d1 = ab - aa;
+    const auto d2 = bc - bb;
+    const auto d3 = ac - cc;
+    const auto e1 = AB.Dot(AB);
+    const auto e2 = BC.Dot(BC);
+    const auto e3 = CA.Dot(CA);
+    const auto Q1 = A * e1 - d1 * AB;
+    const auto Q2 = B * e2 - d2 * BC;
+    const auto Q3 = C * e3 - d3 * CA;
+    const auto QC = C * e1 - Q1;
+    const auto QA = A * e2 - Q2;
+    const auto QB = B * e3 - Q3;
+    const auto s5 = (Q1.Dot(Q1) > rr * e1 * e1) && (Q1.Dot(QC) > 0);
+    const auto s6 = (Q2.Dot(Q2) > rr * e2 * e2) && (Q2.Dot(QA) > 0);
+    const auto s7 = (Q3.Dot(Q3) > rr * e3 * e3) && (Q3.Dot(QB) > 0);
+    return !(s1 || s2 || s3 || s4 || s5 || s6 || s7);
 }
 
 // 0x416BA0
@@ -2430,10 +2471,9 @@ bool CCollision::SphereVsEntity(CColSphere* sphere, CEntity* entity) {
 
 void CCollision::InjectHooks() {
     // Must be done be4 hooks are injected
-
-    //for (auto i = 0; i < 20; i++) {
-    //   Tests(i);
-    //}
+    for (auto i = 0; i < 20; i++) {
+       Tests(i);
+    }
 
     RH_ScopedClass(CCollision);
     RH_ScopedCategoryGlobal();
@@ -2476,7 +2516,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(SphereCastVersusVsPoly, 0x415CF0);
     RH_ScopedInstall(Init, 0x416260);
     RH_ScopedInstall(ProcessSphereSphere, 0x416450);
-    //RH_ScopedInstall(TestSphereTriangle, 0x4165B0);
+    RH_ScopedInstall(TestSphereTriangle, 0x4165B0);
     //RH_ScopedInstall(ProcessSphereTriangle, 0x416BA0);
     //RH_ScopedInstall(TestLineSphere, 0x417470);
     //RH_ScopedInstall(DistToLine, 0x417610);
@@ -2503,7 +2543,7 @@ void CCollision::InjectHooks() {
 }
 
 void CCollision::Tests(int32 i) {
-    const auto seed = (uint32)time(nullptr) + i;
+    const auto seed = (uint32)time(nullptr) + i; // 1677425263
     srand(seed);
     std::cout << "CCollision::Tests seed: " << seed << std::endl;
 
@@ -2720,6 +2760,36 @@ void CCollision::Tests(int32 i) {
         */
         Test("TestLineTriangle", Org, TestLineTriangle, std::equal_to{}, line, vtxs.data(), tri, tripl);
     }
+
+    // TestSphereTriangle
+    {
+        const auto sp = RandomSphere();
+
+        const auto vtxs  = RandomTriangleVertices();
+        const auto tri   = CColTriangle{ 0, 1, 2, SURFACE_CAR_PANEL, {} };
+        const auto tripl = tri.GetPlane(vtxs.data());
+
+        // Our version seems to fail sometimes, but I'd assume they're edge cases
+        const auto Org = plugin::CallAndReturn<bool, 0x4165B0, const CColSphere&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&>;
+        Test("TestSphereTriangle", Org, TestSphereTriangle, std::equal_to{}, sp, vtxs.data(), tri, tripl);
+    }
+
+    // PointInPoly
+    {
+        const auto vtxs = RandomTriangleVertices();
+        const auto tri = CColTriangle{ 0, 1, 2, SURFACE_CAR_PANEL, {} };
+        const auto tripl = tri.GetPlane(vtxs.data());
+        const auto pt = RandomVector();
+        const CVector ucverts[]{
+            UncompressVector(vtxs[tri.vA]),
+            UncompressVector(vtxs[tri.vB]),
+            UncompressVector(vtxs[tri.vC])
+        };
+
+        const auto Org = plugin::CallAndReturn<bool, 0x415730, const CVector&, const CColTriangle&, const CVector&, const CVector*>;
+        Test("PointInPoly", Org, PointInPoly, std::equal_to{}, pt, tri, tripl.GetNormal(), ucverts);
+    }
+
 #endif
 
     // ProcessLineBox
