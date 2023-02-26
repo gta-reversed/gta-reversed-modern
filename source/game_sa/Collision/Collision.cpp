@@ -1260,8 +1260,37 @@ void CCollision::RemoveTrianglePlanes(CCollisionData* colData) {
 }
 
 // 0x416450
-bool CCollision::ProcessSphereSphere(const CColSphere& sphere1, const CColSphere& sphere2, CColPoint& colPoint, float& maxTouchDistance) {
-    return plugin::CallAndReturn<bool, 0x416450, const CColSphere&, const CColSphere&, CColPoint&, float&>(sphere1, sphere2, colPoint, maxTouchDistance);
+bool CCollision::ProcessSphereSphere(const CColSphere& spA, const CColSphere& spB, CColPoint& colPoint, float& maxTouchDistance) {
+    const auto spBToA = spA.m_vecCenter - spB.m_vecCenter;
+    const auto distSq = spBToA.SquaredMagnitude();
+ 
+    if (distSq >= sq(spA.m_fRadius + spB.m_fRadius)) { // Original code did it differently (This way sqrt is only used when there's a collision)
+        return false;
+    }
+
+    const auto touchDist   = std::max(std::sqrt(distSq) - spB.m_fRadius, 0.f);
+    const auto touchDistSq = sq(touchDist);
+
+    if (touchDistSq >= maxTouchDistance) { 
+        return false;
+    }
+
+    maxTouchDistance = touchDistSq;
+
+    colPoint.m_vecNormal = spBToA.Normalized();
+    colPoint.m_vecPoint  = spA.m_vecCenter - colPoint.m_vecNormal * touchDist;
+    colPoint.m_fDepth    = spA.m_fRadius - touchDist;
+
+    colPoint.m_nSurfaceTypeA = spA.m_Surface.m_nMaterial;
+    colPoint.m_nPieceTypeA   = spA.m_Surface.m_nPiece;
+    colPoint.m_nLightingA    = spA.m_Surface.m_nLighting;
+
+
+    colPoint.m_nSurfaceTypeB = spB.m_Surface.m_nMaterial;
+    colPoint.m_nPieceTypeB   = spB.m_Surface.m_nPiece;
+    colPoint.m_nLightingB    = spB.m_Surface.m_nLighting;
+
+    return true;
 }
 
 // 0x4165B0
@@ -1829,7 +1858,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
 *
 * Definitions:
 * spA - Sphere representing the camera
-* spB - `spA` but it's center offset by the spAToB of the player (Basically, where the camera would be the next timestep)
+* spB - `spA` but it's center offset by the spBToA of the player (Basically, where the camera would be the next timestep)
 * ws  - "World space"
 * os  - "Object space"
 * bs  - Bullshit (You probably knew this one already, extensively used in the code)
@@ -1915,7 +1944,7 @@ bool CCollision::SphereCastVsBBox(
 * The output format (written to `out`) is exactly the same as the input.
 *
 * @param       spAws    As discussed.
-* @param       spAToB Player's spAToB
+* @param       spBToA Player's spBToA
 * @param       numIn    Number of entries in the `in` cache
 * @param       in       Input cache (To process)
 * @param [out] numOut   Number of entries written to the `out` cache
@@ -2337,7 +2366,7 @@ bool CCollision::BuildCacheOfCameraCollision(
 * @addr 0x41B000
 *
 * @param spA     Sphere representing the camera
-* @param spB     `spA` but it's center offset by the spAToB of the player (Basically, where the camera would be the next timestep)
+* @param spB     `spA` but it's center offset by the spBToA of the player (Basically, where the camera would be the next timestep)
 * @param dst     Minimum distance that doesn'plSpCenterDist collide ("Distance" is a bad word tbh, it's more like a scale from [minDist, 1])
 * @param minDist See `dst`
 */
@@ -2355,7 +2384,7 @@ bool CCollision::CameraConeCastVsWorldCollision(
         return false;
     }
 
-    // Reminder: The 2 spheres are offset by the spAToB of the player...
+    // Reminder: The 2 spheres are offset by the spBToA of the player...
     const auto velocity = spB.m_vecCenter - spA.m_vecCenter;
 
     // Radius of the badass spehere we're going to use
@@ -2446,7 +2475,7 @@ void CCollision::InjectHooks() {
     //RH_ScopedInstall(ClosestSquaredDistanceBetweenFiniteLines, 0x415A40);
     RH_ScopedInstall(SphereCastVersusVsPoly, 0x415CF0);
     RH_ScopedInstall(Init, 0x416260);
-    //RH_ScopedInstall(ProcessSphereSphere, 0x416450);
+    RH_ScopedInstall(ProcessSphereSphere, 0x416450);
     //RH_ScopedInstall(TestSphereTriangle, 0x4165B0);
     //RH_ScopedInstall(ProcessSphereTriangle, 0x416BA0);
     //RH_ScopedInstall(TestLineSphere, 0x417470);
