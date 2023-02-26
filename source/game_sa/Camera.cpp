@@ -885,7 +885,7 @@ void CCamera::SetZoomValueCamStringScript(int16 zoomMode) {
 
     if (entity->m_nStatus == STATUS_SIMPLE) {
         int32 arrPos{};
-        RET_CHECK(GetArrPosForVehicleType(static_cast<eVehicleType>(entity->AsVehicle()->GetVehicleAppearance()), arrPos));
+        VERIFY(GetArrPosForVehicleType(static_cast<eVehicleType>(entity->AsVehicle()->GetVehicleAppearance()), arrPos));
         m_fCarZoomValueScript = [zoomMode]{
             switch (zoomMode) {
             case 0:
