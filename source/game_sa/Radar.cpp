@@ -154,7 +154,7 @@ void CRadar::InjectHooks() {
     // RH_ScopedInstall(StreamRadarSections, 0x584C50);
     RH_ScopedInstall(AddBlipToLegendList, 0x5859F0);
     RH_ScopedInstall(Draw3dMarkers, 0x585BF0);
-    RH_ScopedInstall(DrawRadarSection, 0x586110, {.reversed = false}); // Run-Time Check Failure #2 - Stack around the variable 'texCoords' was corrupted.
+    RH_ScopedInstall(DrawRadarSection, 0x586110, {.reversed = false}); // Run-Time Check Failure #2 - Stack around the variable 'texCoords' was corrupted. Possibly wrong calling conv
     RH_ScopedInstall(DrawRadarSectionMap, 0x586520);
     RH_ScopedInstall(DrawRadarGangOverlay, 0x586650);
     // RH_ScopedInstall(DrawEntityBlip, 0x587000);
@@ -263,17 +263,15 @@ void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType) {
     if (CTimer::GetTimeInMSPauseMode() - legendTraceTimer > 600) {
         legendTraceTimer = CTimer::GetTimeInMSPauseMode();
 
-        switch (legendTraceHeight) {
-        case RADAR_TRACE_LOW:
-            legendTraceHeight = RADAR_TRACE_HIGH;
-            break;
-        case RADAR_TRACE_HIGH:
-            legendTraceHeight = RADAR_TRACE_NORMAL;
-            break;
-        case RADAR_TRACE_NORMAL:
-            legendTraceHeight = RADAR_TRACE_LOW;
-            break;
-        }
+        legendTraceHeight = [] {
+            switch (legendTraceHeight) {
+            case RADAR_TRACE_LOW:    return RADAR_TRACE_HIGH;
+            case RADAR_TRACE_HIGH:   return RADAR_TRACE_NORMAL;
+            case RADAR_TRACE_NORMAL: return RADAR_TRACE_LOW;
+            default:
+                NOTSA_UNREACHABLE();
+            }
+        }();
     }
 
     const auto posX = std::round(SCREEN_STRETCH_X(8.0f) + (float)x);
@@ -448,13 +446,13 @@ void CRadar::TransformRadarPointToRealWorldSpace(CVector2D& out, const CVector2D
 }
 
 /*!
- * @brief Transforms a radar coordinate to texture coordinate. (Unused, see CRadar::DrawRadarSection)
+ * @brief Transforms a radar coordinate to texture coordinate. (Inlined, see CRadar::DrawRadarSection)
  * @addr 0x583600
  */
 void CRadar::TransformRealWorldToTexCoordSpace(CVector2D& out, const CVector2D& in, int32 x, int32 y) {
     out = CVector2D{
         +(in.x - (float(500 * x) - 3000.0f)),
-        -(in.y - ((500 * float(12 - y)) - 3000.0f))
+        -(in.y - ((500 * float(MAX_RADAR_HEIGHT_TILES - y)) - 3000.0f))
     } / 500.0f;
 }
 
@@ -1204,21 +1202,17 @@ void CRadar::AddBlipToLegendList(bool noSprite, int32 blipIndex) {
         case BLIP_CAR:
         case BLIP_CHAR:
             return trace.m_bFriendly ? RADAR_SPRITE_FRIEND : RADAR_SPRITE_THREAT;
-            break;
         case BLIP_OBJECT:
             return RADAR_SPRITE_OBJECT;
-            break;
         case BLIP_COORD:
             return RADAR_SPRITE_DESTINATION;
-            break;
         default:
             return RADAR_SPRITE_PLAYER_INTEREST;
-            break;
         }
     }();
 
     // check if it's not already added.
-    if (!rng::contains(MapLegendList, sprite)) {
+    if (!notsa::contains(MapLegendList, sprite)) {
         MapLegendList[MapLegendCounter++] = sprite;
 
         if (noSprite) {
@@ -1288,18 +1282,10 @@ void CRadar::Draw3dMarkers() {
             break;
         }
         case BLIP_CHAR: {
-            const auto posn = [&trace] {
-                const auto ped = GetPedPool()->GetAt(trace.m_nEntityHandle);
-                assert(ped); // NOTSA
+            const auto ped = GetPedPool()->GetAt(trace.m_nEntityHandle);
+            assert(ped); // NOTSA
 
-                if (ped->IsInVehicle()) { // originally only bInVehicle but vehicle = nullptr should not be a case here.
-                    return ped->GetVehicleIfInOne()->GetPosition();
-                } else {
-                    return ped->GetPosition();
-                }
-            }() + CVector{0.0f, 0.0f, 2.7f};
-
-            PutMarkerCone(coneHandle, posn, 1.2f, color);
+            PutMarkerCone(coneHandle, ped->GetRealPosition() + CVector{0.0f, 0.0f, 2.7f}, 1.2f, color);
             break;
         }
         case BLIP_OBJECT:
@@ -1405,15 +1391,11 @@ void CRadar::DrawRadarSection(int32 x, int32 y) {
 
     CVector2D texCoords[4]{};
     CVector2D verts[4]{};
-    if (numVerts > 0) {
-        const auto texConv = CVector2D{(float)(x * 500), (float)((12 - y) * 500)} - CVector2D{3000.0f};
+    for (auto i = 0; i < numVerts; i++) { // numVerts is max 4
+        const auto coord = CachedRotateCounterclockwise(clipped[i]) * m_radarRange + vec2DRadarOrigin;
 
-        for (auto i = 0; i < numVerts; i++) { // numVerts is max 4
-            const auto coord = CachedRotateCounterclockwise(clipped[i]) * m_radarRange + vec2DRadarOrigin;
-            texCoords[i] = (coord - texConv) / CVector2D{ 500.0f, -500.0f };
-
-            TransformRadarPointToScreenSpace(verts[i], clipped[i]);
-        }
+        TransformRealWorldToTexCoordSpace(texCoords[i], coord, x, y);
+        TransformRadarPointToScreenSpace(verts[i], clipped[i]);
     }
 
     if (!IsMapSectionInBounds(x, y)) {
@@ -1499,7 +1481,7 @@ void CRadar::DrawRadarGangOverlay(bool inMenu) {
                 const auto timeInMS = FrontEndMenuManager.m_bDrawingMap ? CTimer::GetTimeInMSPauseMode() : CTimer::GetTimeInMS();
 
                 auto zoneColor = info->ZoneColor;
-                zoneColor.a = (uint8)((std::sin((float)(timeInMS % 1024) * 0.0061359233f) + 1.0f) / 2.0f * (float)zoneColor.a);
+                zoneColor.a = (uint8)((std::sin((float)(timeInMS % 1024) * (1024.f / TWO_PI)) + 1.0f) / 2.0f * (float)zoneColor.a);
 
                 return zoneColor;
             }();
@@ -1865,7 +1847,7 @@ void CRadar::DrawBlips() {
     }
 
     // we first do whole thing with isSprite = true, then = false... yeah.
-    for (auto isSprite = true; isSprite; isSprite = false) {
+    for (const auto isSprite : {false, true}) {
         for (auto priority = 1; priority < 4; priority++) {
             for (auto&& [i, trace] : notsa::enumerate(ms_RadarTrace)) { // todo: check if looping all
                 if (!trace.m_bTrackingBlip)
@@ -1958,7 +1940,11 @@ void CRadar::DrawBlips() {
                 pos.y,
                 angle,
                 static_cast<uint32>(SCREEN_STRETCH_X(8.0f)),
-                static_cast<uint32>(SCREEN_STRETCH_X(8.0f)), // ?
+            #ifdef FIX_BUGS
+                static_cast<uint32>(SCREEN_STRETCH_Y(8.0f)),
+            #else
+                static_cast<uint32>(SCREEN_STRETCH_X(8.0f)),
+            #endif
                 player->IsHidden() ? CRGBA{50, 50, 50, 255} : CRGBA{255, 255, 255, 255}
             );
         }

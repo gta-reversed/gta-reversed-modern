@@ -20,7 +20,7 @@ public:
     CRGBA(uint8 red, uint8 green, uint8 blue, uint8 alpha){ Set(red, green, blue, alpha); }
     CRGBA(uint32 intValue) { Set(intValue); }
     CRGBA(const RwRGBA& rhs) { Set(rhs); }
-    CRGBA(const CRGBA& rhs, float alpha) { Set(rhs, alpha); };
+    CRGBA(const CRGBA& rhs, uint8 alpha) { Set(rhs, alpha); };
     explicit CRGBA(RwRGBAReal rgba);
 
     void Set(uint8 red, uint8 green, uint8 blue);

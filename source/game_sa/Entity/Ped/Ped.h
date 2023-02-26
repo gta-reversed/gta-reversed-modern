@@ -611,6 +611,14 @@ public:
     eWeaponSlot GiveWeapon(const CWeapon& weapon, bool likeUnused) {
         return GiveWeapon(weapon.m_nType, weapon.m_nTotalAmmo, likeUnused);
     }
+
+    /*!
+     * @notsa
+     * @brief Returns vehicle's position if ped is in one, ped's otherwise.
+     */
+    CVector& GetRealPosition() { return IsInVehicle() ? m_pVehicle->GetPosition() : GetPosition(); }
+    const CVector& GetRealPosition() const { return IsInVehicle() ? m_pVehicle->GetPosition() : GetPosition(); }
+
 private:
     void RenderThinBody() const;
     void RenderBigHead() const;
