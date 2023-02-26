@@ -2445,7 +2445,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(Closest3, 0x415950);
     //RH_ScopedInstall(ClosestSquaredDistanceBetweenFiniteLines, 0x415A40);
     RH_ScopedInstall(SphereCastVersusVsPoly, 0x415CF0);
-    //RH_ScopedInstall(Init, 0x416260);
+    RH_ScopedInstall(Init, 0x416260);
     //RH_ScopedInstall(ProcessSphereSphere, 0x416450);
     //RH_ScopedInstall(TestSphereTriangle, 0x4165B0);
     //RH_ScopedInstall(ProcessSphereTriangle, 0x416BA0);
