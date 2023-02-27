@@ -478,10 +478,10 @@ void CCollision::Closest3(CVector* arg0, CVector* arg1) {
 * Computes closest points C1 and C2 of S1(s)=P1+s*d1 and
 * S2(t)=P2+t*d2, returning s and t.
 *
-* @param       p1 Origin of ln. seg 1
+* @param       s1p0 Origin of ln. seg 1
 * @param       d1 Direction of ln. seg. 1 (Not normalized!)
 * @param       a  Sq. mag. of ln. seg 1
-* @param       p2 As p1 ln. seg. 2
+* @param       s2p1 As s1p0 ln. seg. 2
 * @param       d1 As d1 ln. seg. 2
 * @param       e  As a for ln. seg. 2
 * @param [out] s  Intersection parameter on ln. seg. 1
@@ -564,103 +564,112 @@ float CCollision::ClosestPtSegmentSegment(
 }
 
 // 0x415A40
+/*!
+* This one took me quite a bit to figure out.
+* Of course they weren't logical at all and did something weird :)
+* Turns out, they used an algorithm out of a book by Dan Sunday,
+* see here (https://web.archive.org/web/20210330143700/http://geomalgorithms.com/a07-_distance.html)
+* I opted to use something different, but it remains to be seen how much more efficient it is (or isnt)
+*
+* @param s1p0 Seg. 1 origin
+* @param s2p0 Seg. 2 origin
+* @param s2p1 Seg. 2 end
+* @param u    Dir. of seg. 1 (Unnormalized!)
+* @param a    Sq. mag. of seg 1
+*
+* @returns Sq. dist. of the closest points on the 2 line segments
+*/
 float ClosestSquaredDistanceBetweenFiniteLines(
-    const CVector& p1, const CVector& q1,
-    const CVector& p2, const CVector& d2, float e
+    const CVector& s1p0,
+    const CVector& s2p0, const CVector& s2p1,
+    const CVector& u, float a
 ) {
-    /*
-    * Seems like this shitty function does something entirely different
-    * Because the values returned sometimes just don't make sense.
-    * Example: 1 paralell vertical lines. This function (GTA) returns
-    * 0, while the expected result is 100 (And that's what `ClosestPtSegmentSegment`)
-    * returns.
-    * So, until we figure out what the different is, we're gonna stick with the OG code.
-    *
-    * Here's the code I tried using:
-    * (It does what the function is supposed to, at least according to the name)
     float s, t;
     CVector c1, c2;
-    CVector d1 = lnAEnd - lnAOrigin;
+    CVector d2 = s2p1 - s2p0;
     return CCollision::ClosestPtSegmentSegment(
-        lnAOrigin, d1, d1.SquaredMagnitude(),
-        lnBOrigin, lnBDir, lnBMagSq,
+        s1p0, u, a,
+        s2p0, d2, d2.Dot(d2),
         s, t,
         c1, c2
     );
-    */
-
+    
+    /* Original code below:
     constexpr auto EPSILON = 1e-5f;
 
-    const auto
-        r  = p2 - q1,
-        d1 = p1 - q1; // Direction of line segment 1
+    // For completeness sake I'll include the copyright:
+    //
+    // Copyright 2001 softSurfer, 2012 Dan Sunday
+    // This code may be freely used and modified for any purpose
+    // providing that this copyright notice is included with it.
+    // SoftSurfer makes no warranty for this code, and cannot be held
+    // liable for any real or imagined damage resulting from its use.
+    // Users of this code must verify correctness for their application.
 
-    const auto
-        rd2  = r.Dot(d2),
-        rr   = r.Dot(r),
-        d1d2 = d1.Dot(d2),
-        d1r  = d1.Dot(r);
+    //CVector u = s1p1 - s1p0; //S1.P1 - S1.P0;
+    CVector v = s2p1 - s2p0; //S2.P1 - S2.P0;
+    CVector w = s1p0 - s2p0; //S1.P0 - S2.P0;
+    //float   a = u.Dot(u);         // always >= 0
+    float   b = u.Dot(v);
+    float   c = v.Dot(v);// v.Dot(v);         // always >= 0
+    float   d = u.Dot(w);
+    float   e = v.Dot(w);
+    float   D = a*c - b*b;        // always >= 0
+    float   sc, sN, sD = D;       // sc = sN / sD, default sD = D >= 0
+    float   tc, tN, tD = D;       // tc = tN / tD, default tD = D >= 0
 
-    const auto m = rr * e - sq(rd2);
-
-    float ds = m, dt = m; // denominators
-    float ns, nt; // numerators
-
-    if (m >= EPSILON) {
-        ns = d1r * rd2 - d1d2 * rr;
-        nt = d1r * e - d1d2 * rd2;
-        if (ns < 0.f) {
-            ns = 0.f;
-
-            nt = d1r;
-            dt = rr;
-        } else if (ns > m) {
-            ns = m;
-
-            dt = rr;
-            nt = d1r + rd2;
+    // compute the line parameters of the two closest points
+    if (D < EPSILON) { // the lines are almost parallel
+        sN = 0.f;         // force using point P0 on segment S1
+        sD = 1.f;         // to prevent possible division by 0.0 later
+        tN = e;
+        tD = c;
+    } else {                 // get the closest points on the infinite lines
+        sN = (b*e - c*d);
+        tN = (a*e - b*d);
+        if (sN < 0.f) {        // sc < 0 => the s=0 edge is visible
+            sN = 0.f;
+            tN = e;
+            tD = c;
         }
-    } else {
-        ds = 1.f;
-        ns = 0.f;
-
-        nt = d1r;
-        dt = rr;
-    }
-    
-    if (nt < 0.f || nt > dt) {
-        if (nt >= 0.f) {
-            nt = dt;
-            ns = rd2 - d1d2;
-        } else {
-            nt = 0.f;
-            ns = -d1d2;
-        }
-
-        if (ns >= 0.f) {
-            if (ns <= e) {
-                ds = e;
-            } else {
-                ns = ds;
-            }
-        } else {
-            ns = 0.f;
+        else if (sN > sD) {  // sc > 1  => the s=1 edge is visible
+            sN = sD;
+            tN = e + b;
+            tD = c;
         }
     }
 
-    const auto DoDiv = [&](float n, float d) {
-        return std::abs(n) >= EPSILON
-            ? n / d
-            : 0.f;
-    };
+    if (tN < 0.f) {            // tc < 0 => the t=0 edge is visible
+        tN = 0.f;
+        // recompute sc for this edge
+        if (-d < 0.f)
+            sN = 0.f;
+        else if (-d > a)
+            sN = sD;
+        else {
+            sN = -d;
+            sD = a;
+        }
+    } else if (tN > tD) {      // tc > 1  => the t=1 edge is visible
+        tN = tD;
+        // recompute sc for this edge
+        if ((-d + b) < 0.0)
+            sN = 0;
+        else if ((-d + b) > a)
+            sN = sD;
+        else {
+            sN = (-d + b);
+            sD = a;
+        }
+    }
+    // finally do the division to get sc and tc
+    sc = (abs(sN) < EPSILON ? 0.f : sN / sD);
+    tc = (abs(tN) < EPSILON ? 0.f : tN / tD);
 
-    const auto
-        t = DoDiv(nt, dt),
-        s = DoDiv(ns, ds);
-
-    const auto c1 = r * t;
-    const auto c2 = d1 + d2 * s;
-    return (c1 - c2).SquaredMagnitude();
+    // get the difference of the two closest points
+    CVector dP = w + (sc * u) - (tc * v);  // =  S1(sc) - S2(tc)
+    return dP.SquaredMagnitude(); //return norm(dP);   // return the closest distance
+    */
 }
 
 /*!
