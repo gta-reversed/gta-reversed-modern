@@ -601,6 +601,76 @@ CVector ClosestPtPointTriangle(
     return a + ab * v + ac * w; // = u*a + v*b + w*c, u = va * denom = 1.0f-v-w
 }
 
+NOTSA_FORCEINLINE bool ProcessLineSphere_Internal(
+    const CColLine& line,
+    const CColSphere& sphere,
+    CVector* ip,
+    float*   depth
+) {
+    if (!CCollision::s_DebugSettings.ShapeShapeCollision.IsEnabled(Shape::SSPHERE, Shape::SLINE)) {
+        return false;
+    }
+
+    // C - sphere center
+    // P - line segment origin
+    // d - line segment dir (unnormalized in our case)
+    // m - P - C
+    // Solve:             (d.d)t^2 + 2(m.d)t + (m.m) - r^2 = 0 (for t)
+    // Quadratic formula: (-b ± sqrt(b²-ac)) / a
+    // Where:              a = d.d, b = m.d, c = m.m - r^2
+
+    const auto d = line.m_vecEnd - line.m_vecStart;
+    const auto m = line.m_vecStart - sphere.m_vecCenter;
+    const auto c = m.Dot(m) - sq(sphere.m_fRadius);
+    const auto a = d.Dot(d);
+
+    // Line origin inside sphere
+    if (c <= 0.f) {
+        if (CCollision::s_DebugSettings.AllowLineOriginInsideSphere) {
+            if (depth) {
+                // No need to check for depth value, as 0 is the lowest it ever gets
+                *ip    = line.m_vecStart;
+                *depth = 0.f;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    const auto b = m.Dot(d);
+
+    // Ray origin outside sphere and ray pointing away from sphere
+    if (b > 0.f) {
+        return false;
+    }
+
+    const auto discr = sq(b) - a * c;
+
+    // A negative discriminant corresponds to ray missing sphere
+    if (discr < 0.0f) {
+        return false;
+    }
+
+    // Solve quadratic for smallest `t` (As it's closer to the line origin)
+    const auto t = (-b - std::sqrt(discr)) / a;
+
+    // Finally, check if the intersection point is actually on the line segment
+    if (t > 1.f) {
+        return false;
+    }
+
+    // Calculate intersection point (if needed)
+    if (depth) {
+        if (t >= *depth) {
+            return false; // Act like there was no intersection
+        }
+        *depth = t;
+        *ip    = line.m_vecStart + d * t;
+    }
+
+    return true;
+}
+
 /*!
 * @address 0x412AA0
 * @brief Process line sphere intersection - Doesn'maxTouchDist deal well with cases where line starts/ends inside the sphere.
@@ -608,43 +678,29 @@ CVector ClosestPtPointTriangle(
 * @param[in,out] depth `t` parameter - relative distance on line from it's origin (`line.start`)
 */
 bool CCollision::ProcessLineSphere(CColLine const& line, CColSphere const& sphere, CColPoint& colPoint, float& depth) {
-    const auto l      = line.m_vecEnd - line.m_vecStart;
-    const auto lmagsq = l.SquaredMagnitude();
-    const auto sph    = sphere.m_vecCenter - line.m_vecStart;
-
-    // Scaled by |l|
-    const auto projLineMagScaled = DotProduct(l, sph);
-
-    // Tanget of line to sphere centre
-    const auto tanDistSq = sph.SquaredMagnitude() - (sphere.m_fRadius * sphere.m_fRadius);
-
-    // `projLineMagScaled` is scaled by |l|, and the only way around it
-    // without using sqrt is to make both sides scaled by lmagsq scaled by |l|^2 (`lmagsq`)
-    const auto distOnLineSqScaled = (projLineMagScaled * projLineMagScaled) - tanDistSq * lmagsq;
-
-    if (distOnLineSqScaled < 0.f) { // Line doesn'maxTouchDist intersect sphere
+    if (!ProcessLineSphere_Internal(line, sphere, &colPoint.m_vecPoint, &depth)) {
         return false;
     }
 
-    const auto t = (projLineMagScaled - std::sqrt(distOnLineSqScaled)) / lmagsq; // Interpolation on the line
-    if (t < 0.f || t > 1.f || t >= depth) {
-        return false;
-    }
+    colPoint.m_vecNormal = (colPoint.m_vecPoint - sphere.m_vecCenter).Normalized(); // A little different from the original, but same effect
 
-    colPoint.m_vecPoint = line.m_vecStart + l * t;
-    colPoint.m_vecNormal = Normalized(colPoint.m_vecPoint - sphere.m_vecCenter); // A little different from the original, but same effect
+    colPoint.m_nSurfaceTypeA = {};
+    colPoint.m_nLightingA    = {};
 
     colPoint.m_nSurfaceTypeB = sphere.m_Surface.m_nMaterial;
-    colPoint.m_nLightingB = sphere.m_Surface.m_nLighting;
-
-    colPoint.m_nSurfaceTypeA = eSurfaceType::SURFACE_DEFAULT;
-    colPoint.m_nLightingA = tColLighting(0);
-
-    depth = t;
+    colPoint.m_nLightingB    = sphere.m_Surface.m_nLighting;
 
     ms_iProcessLineNumCrossings += 2;
 
     return true;
+}
+
+// 0x417470
+bool CCollision::TestLineSphere(
+    const CColLine& line,
+    const CColSphere& sphere
+) {
+    return ProcessLineSphere_Internal(line, sphere, nullptr, nullptr);
 }
 
 // 0x412C70
@@ -900,10 +956,10 @@ bool CCollision::Test2DLineAgainst2DLine(float line1StartX, float line1StartY, f
 * @param matBA         Transformation matrix from B's space into A's (The space we're in)
 * @param disk          The disk (Space A)
 * @param diskColPoint  Disk collision point (Space A)
-* @param lineCollision If there was a line collision (Only checked if no disc collision)
+* @param lineCollision If there was a line collision (Only checked if no discr collision)
 * @param lineRatio     Not sure
 * @param lineColPoint  Line colpoint (Only valid if `lineCollision` was set)
-* @returns If the diskColPoint collides with the disc
+* @returns If the diskColPoint collides with the discr
 */
 // 0x413960
 bool CCollision::ProcessDiscCollision(
@@ -1317,11 +1373,6 @@ bool CCollision::ProcessSphereTriangle(
 
     return true;
 } 
-
-// 0x417470
-bool CCollision::TestLineSphere(const CColLine& line, const CColSphere& sphere) {
-    return plugin::CallAndReturn<bool, 0x417470, const CColLine&, const CColSphere&>(line, sphere);
-}
 
 // 0x417610
 float CCollision::DistToLine(const CVector& lineStart, const CVector& lineEnd, const CVector& point) {
@@ -2709,7 +2760,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(ProcessLineTriangle, 0x4140F0);
     RH_ScopedInstall(ProcessVerticalLineTriangle, 0x4147E0);
 
-    //RH_ScopedInstall(TestLineSphere, 0x417470);
+    RH_ScopedInstall(TestLineSphere, 0x417470);
     RH_ScopedInstall(ProcessLineSphere, 0x412AA0);
 
     RH_ScopedInstall(TestSphereBox, 0x4120C0);
@@ -2774,7 +2825,7 @@ void CCollision::InjectHooks() {
 }
 
 void CCollision::Tests(int32 i) {
-    const auto seed = (uint32)time(nullptr) + i; // 1677425263
+    const auto seed = (uint32)time(nullptr) + i;
     srand(seed);
     std::cout << "CCollision::Tests seed: " << seed << std::endl;
 
@@ -2947,6 +2998,15 @@ void CCollision::Tests(int32 i) {
         };
 
         Test("ProcessLineSphere", Org, Rev, CmpEq, RandomLine(), RandomSphere());
+    }
+
+    // TestLineSphere
+    {
+        const auto ln = RandomLine();
+        const auto sp = RandomSphere();
+
+        const auto Org = plugin::CallAndReturn<bool, 0x417470, const CColLine&, const CColSphere&>;
+        Test("TestLineSphere", Org, TestLineSphere, std::equal_to{}, ln, sp);
     }
 
     // TestLineBox

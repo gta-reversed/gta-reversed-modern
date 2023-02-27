@@ -55,8 +55,11 @@ public:
             };
 
             bool IsEnabled(Shape a, Shape b) { return States[a][b] == ENABLED; }
-        } ShapeShapeCollision;
-    } s_DebugSettings;
+        } ShapeShapeCollision{};
+
+        // OG code considered lines that begin and end within the sphere as not intersecting it
+        bool AllowLineOriginInsideSphere{false};
+    } s_DebugSettings{};
 
 public:
     static void InjectHooks();
