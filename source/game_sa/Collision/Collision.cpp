@@ -3016,8 +3016,8 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(SphereCastVersusVsPoly, 0x415CF0);
     RH_ScopedInstall(DistToLine, 0x417610); 
     RH_ScopedInstall(SphereCastVsSphere, 0x417F20, { .locked = true }); // Can only be unhooked if `TestSphereSphere` is unhooked too
-    //RH_ScopedInstall(ClosestPointOnLine, 0x417FD0);
-    //RH_ScopedInstall(ClosestPointsOnPoly, 0x418100);
+    RH_ScopedInstall(ClosestPointOnLine, 0x417FD0);
+    RH_ScopedInstall(ClosestPointsOnPoly, 0x418100);
     RH_ScopedInstall(ClosestPointOnPoly, 0x418150);
     RH_ScopedInstall(SphereCastVsCaches, 0x4181B0);
     RH_ScopedInstall(SphereCastVsEntity, 0x419F00);
