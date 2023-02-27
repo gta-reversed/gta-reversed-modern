@@ -365,46 +365,58 @@ bool __stdcall CCollision::PointInTriangle(CVector const& point, CVector const* 
 
 /*!
 * @address 0x412850
-* @brief Retruns the squared magnitude of the perpendicular vector starting at \a point and ending on the line defined by \a lineStart and \a lineEnd.
 *
-* If this vector doesn'maxTouchDist intersect the line (eg.: Intersection point would be before\after \a lineStart or \a lineEnd respectively) either
-* \a lineStart or \a lineEnd is returned (whichever is closer)
+* @param ln0 Origin of line seg.
+* @param ln1 End of line seg.
+* @param pt  The point
+* 
+* @returns Sq. dist. from `pt` to point closest to `pt` on the line segment (ln0, ln1) 
 */
-float CCollision::DistToLineSqr(CVector const& lineStart, CVector const& lineEnd, CVector const& point) {
-    // Make line end (l) and point (pl_ip) relative to lineStart (by this lineStart becomes the space origin)
-    const auto l = lineEnd - lineStart;
-    const auto p = point - lineStart;
+float CCollision::DistToLineSqr(CVector const& ln0, CVector const& ln1, CVector const& pt) {
+    // Make line end (l) and pt (pl_ip) relative to ln0 (by this ln0 becomes the space origin)
+    const auto l = ln1 - ln0;
+    const auto p = pt - ln0;
 
     //        * P
     //      / |
     //   c /  | a
     //    /   |
     // O *----+--------* L
-    //     b  IP
+    //     pl  IP
     //
     // O    - Origin (line start)
     // L    - Line end
     // P    - Point
-    // IP   - Intersection point
+    // IP   - Intersection pt
     // b, c - Triangle sides
     // a    - The distance we want to find out :D
 
-    const auto lineMagSq = l.SquaredMagnitude();
-    const auto bScaled   = DotProduct(p, l); // Side b scaled by magnitude of `l`
+    const auto ll = l.Dot(l); // Line mag. sq.
+    const auto pl = p.Dot(l);
 
-    if (bScaled <= 0.f) // Before beginning of line, return distance to beginning
-        return p.SquaredMagnitude();
+    if (pl <= 0.f) { // Before origin
+        return p.SquaredMagnitude(); // Dist to origin
+    }
 
-    if (bScaled >= lineMagSq) // After end of line, return distance to end
-        return (p - l).SquaredMagnitude();
+    if (pl >= ll) { // After end
+        return (p - l).SquaredMagnitude(); // Dist to end
+    }
 
-    // Simple Pythagorean here, we gotta find side `a`
+    // Simple Pythagorean here, we gotta find `a^2`
+   
+    const auto cSq = p.Dot(p);
 
-    const auto cSq = p.SquaredMagnitude();
-    const auto bSq = bScaled * bScaled / lineMagSq; // Clever trick to divide by `l`'s magntiude without taking it's sqrt
+    // Clever trick to divide by |l| without taking it's sqrt
+    // We have to do this, because `pl` is multiplied by |l|
+    // (Result of the dot product)
+    const auto bSq = pl * pl / ll;
 
-    const auto aSq = cSq - bSq;
-    return aSq;
+    return cSq - bSq; // return a^2
+}
+
+// 0x417610
+float CCollision::DistToLine(const CVector& lineStart, const CVector& lineEnd, const CVector& point) {
+    return std::sqrt(DistToLineSqr(lineStart, lineEnd, point));
 }
 
 /*!
@@ -3002,7 +3014,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(Closest3, 0x415950);
     RH_ScopedGlobalInstall(ClosestSquaredDistanceBetweenFiniteLines, 0x415A40);
     RH_ScopedInstall(SphereCastVersusVsPoly, 0x415CF0);
-    //RH_ScopedInstall(DistToLine, 0x417610); 
+    RH_ScopedInstall(DistToLine, 0x417610); 
     RH_ScopedInstall(SphereCastVsSphere, 0x417F20, { .locked = true }); // Can only be unhooked if `TestSphereSphere` is unhooked too
     //RH_ScopedInstall(ClosestPointOnLine, 0x417FD0);
     //RH_ScopedInstall(ClosestPointsOnPoly, 0x418100);
