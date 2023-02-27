@@ -36,6 +36,7 @@ public:
 
     static auto GetBoundingRect(const CVector& a, const CVector& b, const CVector& c) -> CRect;
 
+    auto GetSurfaceType() const { return m_nMaterial; }
 public:
     union {
         struct {

@@ -1588,8 +1588,57 @@ bool CCollision::ProcessSphereTriangle(
 } 
 
 // 0x417730
-bool CCollision::TestLineOfSight(const CColLine& line, const CMatrix& transform, CColModel& colModel, bool doSeeThroughCheck, bool doShootThroughCheck) {
-    return plugin::CallAndReturn<bool, 0x417730, const CColLine&, const CMatrix&, CColModel&, bool, bool>(line, transform, colModel, doSeeThroughCheck, doShootThroughCheck);
+bool CCollision::TestLineOfSight(
+    const CColLine& line,
+    const CMatrix& transform,
+    CColModel& cm,
+    bool doSeeThroughCheck,
+    bool doShootThroughCheck
+) {
+    const auto cd = cm.GetData();
+    if (!cd) {
+        return false;
+    }
+
+    // Transform line to object space
+    const auto lnos{ TransformObject(line, Invert(transform)) };
+    
+    // If we don't intersect with the bounding box, no chance on the rest
+    if (!TestLineBox(lnos, cm.GetBoundingBox())) {
+        return false;
+    }
+
+    const auto ShouldTest = [=](eSurfaceType surf) {
+        return (!doSeeThroughCheck || g_surfaceInfos.IsSeeThrough(surf))
+            && (!doShootThroughCheck || g_surfaceInfos.IsShootThrough(surf));
+    };
+
+    const auto Process = [&](const auto& arr, auto TestFn) {
+        for (const auto& v : arr) {
+            if (ShouldTest(v.GetSurfaceType()) && TestFn(line, v)) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    // Check spheres / boxes
+    if (Process(cd->GetSpheres(), TestLineSphere) || Process(cd->GetBoxes(), TestLineBox)) {
+        return true;
+    }
+
+    // Lastly, check triangles
+    CalculateTrianglePlanes(cd);
+    const auto verts = cd->GetTriVerts();
+    const auto pls   = cd->GetTriPlanes();
+    for (const auto&& [idx, tri] : notsa::enumerate(cd->GetTris())) { // TODO: rng::zip
+        if (ShouldTest(tri.GetSurfaceType()) && TestLineTriangle(line, verts, tri, pls[idx])) {
+            return true;
+        }
+    }
+
+    // No intersection whatsovever
+    return false;
 }
 
 // 0x417950
@@ -2977,10 +3026,9 @@ void CCollision::InjectHooks() {
 
     RH_ScopedInstall(ProcessColModels, 0x4185C0, { .reversed = false });
 
-    //RH_ScopedInstall(TestLineOfSight, 0x417730);
+    RH_ScopedInstall(TestLineOfSight, 0x417730);
     RH_ScopedInstall(ProcessLineOfSight, 0x417950);
-
-    //RH_ScopedInstall(ProcessVerticalLine, 0x417BF0);
+    RH_ScopedInstall(ProcessVerticalLine, 0x417BF0);
 
     ////
     // Rest

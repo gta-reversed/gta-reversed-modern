@@ -26,5 +26,7 @@ public:
 
     void Set(const CVector& sup, const CVector& inf, eSurfaceType material, uint8 pieceType, tColLighting lighting);
     CColBox& operator=(const CColBox& right);
+
+    auto GetSurfaceType() const { return m_Surface.m_nMaterial; }
 };
 VALIDATE_SIZE(CColBox, 0x1C);

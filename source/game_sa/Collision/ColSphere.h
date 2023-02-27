@@ -40,6 +40,8 @@ public:
     bool IntersectSphere(const CColSphere& right);
     bool IntersectPoint(const CVector& point);
 
+    auto GetSurfaceType() const { return m_Surface.m_nMaterial; }
+
     friend auto TransformObject(const CColSphere& sp, const CMatrix& mat) -> CColSphere;
 };
 VALIDATE_SIZE(CColSphere, 0x14);
