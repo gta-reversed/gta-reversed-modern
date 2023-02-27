@@ -217,6 +217,7 @@ public:
     static CVector GetBaryCoordsOnTriangle(CVector a, CVector b, CVector c, CVector p);
     static CVector GetClampedBaryCoordsIntoTriangle(CVector a, CVector b, CVector c, CVector p);
     static CVector GetCoordsClampedIntoTriangle(CVector a, CVector b, CVector c, CVector p);
+    static float   ClosestPtSegmentSegment(CVector p1, CVector d1, float a, CVector p2, CVector d2, float e, float& s, float& t, CVector& c1, CVector& c2);
 };
 
 void CalculateColPointInsideBox(const CBox& box, const CVector& point, CColPoint& colPoint);

@@ -8,6 +8,8 @@
 
 #include "StdInc.h"
 
+#include <numbers>
+
 #include "Collision.h"
 #include "ColHelpers.h"
 #include "PedModelInfo.h"
@@ -472,53 +474,198 @@ void CCollision::Closest3(CVector* arg0, CVector* arg1) {
     NOTSA_UNREACHABLE();
 }
 
+/*!
+* Computes closest points C1 and C2 of S1(s)=P1+s*d1 and
+* S2(t)=P2+t*d2, returning s and t.
+*
+* @param       p1 Origin of ln. seg 1
+* @param       d1 Direction of ln. seg. 1 (Not normalized!)
+* @param       a  Sq. mag. of ln. seg 1
+* @param       p2 As p1 ln. seg. 2
+* @param       d1 As d1 ln. seg. 2
+* @param       e  As a for ln. seg. 2
+* @param [out] s  Intersection parameter on ln. seg. 1
+* @param [out] t  Intersection parameter on ln. seg. 2
+* @param [out] c1 Point on ln. seg. 1
+* @param [out] c2 Point on ln. seg. 2
+* 
+* @returns squared distance between between S1(s) and S2(t)
+*
+* Credit: Code from "Real-Time Collision Detection" by Christer Ericson, published by Morgan Kaufmann Publishers, © 2005 Elsevier Inc
+*/
+float CCollision::ClosestPtSegmentSegment(
+    CVector p1, CVector d1, float a,
+    CVector p2, CVector d2, float e,
+    float& s, float& t,
+    CVector& c1, CVector& c2
+) {
+    // Must be non-negative!
+    assert(a >= 0.f);
+    assert(e >= 0.f);
+
+    constexpr auto EPSILON = std::numeric_limits<float>::epsilon();
+
+    const auto r = p1 - p2;
+    const auto f = d2.Dot(r);
+
+    // Check if either or both segments degenerate into points
+    if (a <= EPSILON && e <= EPSILON) {
+        // Both segments degenerate into points
+        s = t = 0.0f;
+        c1 = p1;
+        c2 = p2;
+        return (c1 - c2).SquaredMagnitude();
+    }
+
+    if (a <= EPSILON) {
+        // First segment degenerates into a point
+        s = 0.0f;
+        t = f / e;
+        // s = 0 => t = (b*s + f) / e = f / e
+        t = std::clamp(t, 0.0f, 1.0f);
+    } else {
+        const auto c = d1.Dot(r);
+        if (e <= EPSILON) {
+            // Second segment degenerates into a point
+            t = 0.0f;
+            s = std::clamp(-c / a, 0.0f, 1.0f);
+            // t = 0 => s = (b*t - c) / a = -c / a
+        } else {
+            // The general nondegenerate case starts here
+            const auto b = d1.Dot(d2);
+            const auto denom = a * e - b * b;
+            // Always nonnegative
+            // If segments not parallel, compute closest point on L1 to L2 and
+            // clamp to segment S1. Else pick arbitrary s (here 0)
+            if (denom != 0.0f) {
+                s = std::clamp((b * f - c * e) / denom, 0.0f, 1.0f);
+            } else {
+                s = 0.0f;
+            }
+            // Compute point on L2 closest to S1(s) using
+            // t = Dot((P1 + D1*s) - P2,D2) / Dot(D2,D2) = (b*s + f) / e
+            t = (b * s + f) / e;
+            // If t in [0,1] done. Else clamp t, recompute s for the new value
+            // of t using s = Dot((P2 + D2*t) - P1,D1) / Dot(D1,D1)= (t*b - c) / a
+            // and clamp s to [0, 1]
+            if (t < 0.0f) {
+                t = 0.0f;
+                s = std::clamp(-c / a, 0.0f, 1.0f);
+            } else if (t > 1.0f) {
+                t = 1.0f;
+                s = std::clamp((b - c) / a, 0.0f, 1.0f);
+            }
+        }
+    }
+
+    c1 = p1 + d1 * s;
+    c2 = p2 + d2 * t;
+    return (c1 - c2).SquaredMagnitude();
+}
+
 // 0x415A40
 float ClosestSquaredDistanceBetweenFiniteLines(
-    const CVector& lnAOrigin,
-    const CVector& lnAEnd,
-    const CVector& lnBOrigin,
-    const CVector& lnBDir,
-    float lnBMagSq
+    const CVector& p1, const CVector& q1,
+    const CVector& p2, const CVector& d2, float e
 ) {
-    return plugin::CallAndReturn<float, 0x415A40, const CVector&, const CVector&, const CVector&, const CVector&, float>(lnAOrigin, lnAEnd, lnBOrigin, lnBDir, lnBMagSq);
-    /* TODO: Fix
+    /*
+    * Seems like this shitty function does something entirely different
+    * Because the values returned sometimes just don't make sense.
+    * Example: 1 paralell vertical lines. This function (GTA) returns
+    * 0, while the expected result is 100 (And that's what `ClosestPtSegmentSegment`)
+    * returns.
+    * So, until we figure out what the different is, we're gonna stick with the OG code.
+    *
+    * Here's the code I tried using:
+    * (It does what the function is supposed to, at least according to the name)
+    float s, t;
+    CVector c1, c2;
+    CVector d1 = lnAEnd - lnAOrigin;
+    return CCollision::ClosestPtSegmentSegment(
+        lnAOrigin, d1, d1.SquaredMagnitude(),
+        lnBOrigin, lnBDir, lnBMagSq,
+        s, t,
+        c1, c2
+    );
+    */
+
     constexpr auto EPSILON = 1e-5f;
 
-    const CVector u = lnAEnd - lnAOrigin;
-    const CVector v = lnBDir;
-    const CVector w = lnAOrigin - lnBOrigin;
+    const auto
+        r  = p2 - q1,
+        d1 = p1 - q1; // Direction of line segment 1
 
-    const float uv = u.Dot(v);
-    const float vv = lnBMagSq;
-    const float uu = u.Dot(u);
-    const float vw = v.Dot(w);
+    const auto
+        rd2  = r.Dot(d2),
+        rr   = r.Dot(r),
+        d1d2 = d1.Dot(d2),
+        d1r  = d1.Dot(r);
 
-    const float a = uu * vv - uv * uv;
-    const float b = uv * vv - u.Dot(w * v) * uv;
-    const float c = vv * uv - vw * uv;
+    const auto m = rr * e - sq(rd2);
 
-    float s, t;
+    float ds = m, dt = m; // denominators
+    float ns, nt; // numerators
 
-    const auto SafeClampedDiv = [](float dividend, float divisor, float def = 0.f) {
-        if (divisor < EPSILON) {
-            return def;
+    if (m < EPSILON) {
+        ds = 1.f;
+    ns_small:
+        ns = 0.f;
+
+        nt = d1r;
+        dt = rr;
+
+        goto fk1;
+    } else {
+        ns = d1r * rd2 - d1d2 * rr;
+        nt = d1r * e - d1d2 * rd2;
+        if (ns < 0.f) {
+            goto ns_small;
         }
-        return std::clamp(dividend / divisor, 0.f, 1.f);
+    }
+
+    if (ns > m) {
+        ns = m;
+
+        dt = rr;
+        nt = d1r + rd2;
+    }
+
+fk1:
+    if (nt >= 0.f) {
+        if (nt <= dt) {
+            goto do_div;
+        }
+        nt = dt;
+        ns = rd2 - d1d2;
+    } else {
+        nt = 0.f;
+        ns = -d1d2;
+    }
+
+    if (ns >= 0.f) {
+        if (ns <= e) {
+            ds = e;
+        } else {
+            ns = ds;
+        }
+    } else {
+        ns = 0.f;
+    }
+
+do_div:
+    const auto DoDiv = [&](float n, float d) {
+        return std::abs(n) >= EPSILON
+            ? n / d
+            : 0.f;
     };
 
-    // Compute the closest points on the two lines
+    const auto
+        t = DoDiv(nt, dt),
+        s = DoDiv(ns, ds);
 
-    s = SafeClampedDiv(b, a);
-    t = SafeClampedDiv(uv * s - vw, vv);
-
-    // Compute the squared distance between the two closest points
-    const CVector closestPointOnA = lnAOrigin + s * u;
-    const CVector closestPointOnB = lnBOrigin + t * v;
-    const CVector distanceVec = closestPointOnA - closestPointOnB;
-    const float distanceSquared = distanceVec.Dot(distanceVec);
-
-    return distanceSquared;
-    */
+    const auto c1 = r * t;
+    const auto c2 = d1 + d2 * s;
+    return (c1 - c2).SquaredMagnitude();
 }
 
 /*!
@@ -634,21 +781,21 @@ CVector ClosestPtPointTriangle(
     const auto vb = d5 * d2 - d1 * d6;
     if (vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f) {
         const auto w = d2 / (d2 - d6);
-        return a + w * ac; // barycentric coordinates (1-w,0,w)
+        return a + w * ac; // barycentric coordinates (1-d1,0,d1)
     }
 
     // Check if P in edge region of BC, if so return projection of P onto BC
     const auto va = d3 * d6 - d5 * d4;
     if (va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f) {
         const auto w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
-        return b + w * (c - b); // barycentric coordinates (0,1-w,w)
+        return b + w * (c - b); // barycentric coordinates (0,1-d1,d1)
     }
 
-    // P inside face region. Compute Q through its barycentric coordinates (u,v,w)
+    // P inside face region. Compute Q through its barycentric coordinates (r,v,d1)
     const auto denom = va + vb + vc;
     const auto v     = vb / denom;
     const auto w     = vc / denom;
-    return a + ab * v + ac * w; // = u*a + v*b + w*c, u = va * denom = 1.0f-v-w
+    return a + ab * v + ac * w; // = r*a + v*b + d1*c, r = va * denom = 1.0f-v-d1
 }
 
 NOTSA_FORCEINLINE bool ProcessLineSphere_Internal(
@@ -2849,7 +2996,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(GetPrincipleAxis, 0x4156D0);
     RH_ScopedInstall(PointInPoly, 0x415730);
     RH_ScopedInstall(Closest3, 0x415950);
-    //RH_ScopedInstall(ClosestSquaredDistanceBetweenFiniteLines, 0x415A40);
+    RH_ScopedGlobalInstall(ClosestSquaredDistanceBetweenFiniteLines, 0x415A40);
     RH_ScopedInstall(SphereCastVersusVsPoly, 0x415CF0);
     //RH_ScopedInstall(DistToLine, 0x417610); 
     RH_ScopedInstall(SphereCastVsSphere, 0x417F20, { .locked = true }); // Can only be unhooked if `TestSphereSphere` is unhooked too
@@ -3021,17 +3168,53 @@ void CCollision::Tests(int32 i) {
     }
 
     // ClosestSquaredDistanceBetweenFiniteLines
-    {
+    if (false) {
+        const auto Org = plugin::CallAndReturn<float, 0x415A40, const CVector&, const CVector&, const CVector&, const CVector&, float>;
+
+        const auto DoLnTest = [&](CColLine lnA, CColLine lnB) {
+            Test(
+                "ClosestSquaredDistanceBetweenFiniteLines",
+                Org, ClosestSquaredDistanceBetweenFiniteLines, std::equal_to{},
+                lnA.m_vecStart, lnA.m_vecEnd,
+                lnB.m_vecStart, lnB.m_vecEnd - lnB.m_vecStart, (lnB.m_vecEnd - lnB.m_vecStart).SquaredMagnitude()
+            );
+        };
+
+        // Vertical Parallel lines, expected: 100 [GTA: 0]
+        DoLnTest(
+            { { -5.f, 0.f, 0.f, }, CVector{ -5.f, 0.f, 100.f, } },
+            { { +5.f, 0.f, 0.f, }, CVector{ +5.f, 0.f, 100.f, } }
+        );
+
+        // Vertical lines intersecting at the top, expected: 0 [GTA: 100]
+        DoLnTest(
+            { { -5.f, 0.f, 0.f, }, CVector{ +5.f, 0.f, 100.f, } },
+            { { +5.f, 0.f, 0.f, }, CVector{ +5.f, 0.f, 100.f, } }
+        );
+
+        // Vertical lines intersecting at the bottom, expected: 0 [GTA: 0]
+        DoLnTest(
+            { { +5.f, 0.f, 0.f, }, CVector{ -5.f, 0.f, 100.f, } },
+            { { +5.f, 0.f, 0.f, }, CVector{ +5.f, 0.f, 100.f, } }
+        );
+
+        // Vertical lines intersecting at middle, expected: 0 [GTA: 100]
+        DoLnTest(
+            { { -5.f, 0.f, 0.f, }, CVector{ +10.f, 0.f, 100.f, } },
+            { { +5.f, 0.f, 0.f, }, CVector{ +5.f, 0.f, 100.f, } }
+        );
+
+        /*
         const auto lnA = RandomLine();
         const auto lnB = RandomLine();
 
-        const auto Org = plugin::CallAndReturn<float, 0x415A40, const CVector&, const CVector&, const CVector&, const CVector&, float>;
         Test(
             "ClosestSquaredDistanceBetweenFiniteLines",
             Org, ClosestSquaredDistanceBetweenFiniteLines, std::equal_to{},
             lnA.m_vecStart, lnA.m_vecEnd,
             lnB.m_vecStart, lnB.m_vecEnd - lnB.m_vecStart, (lnB.m_vecEnd - lnB.m_vecStart).SquaredMagnitude()
         );
+        */
     }
 
     // ProcessLineSphere
