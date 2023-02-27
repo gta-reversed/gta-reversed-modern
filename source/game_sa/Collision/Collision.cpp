@@ -606,53 +606,48 @@ float ClosestSquaredDistanceBetweenFiniteLines(
     float ds = m, dt = m; // denominators
     float ns, nt; // numerators
 
-    if (m < EPSILON) {
+    if (m >= EPSILON) {
+        ns = d1r * rd2 - d1d2 * rr;
+        nt = d1r * e - d1d2 * rd2;
+        if (ns < 0.f) {
+            ns = 0.f;
+
+            nt = d1r;
+            dt = rr;
+        } else if (ns > m) {
+            ns = m;
+
+            dt = rr;
+            nt = d1r + rd2;
+        }
+    } else {
         ds = 1.f;
-    ns_small:
         ns = 0.f;
 
         nt = d1r;
         dt = rr;
-
-        goto fk1;
-    } else {
-        ns = d1r * rd2 - d1d2 * rr;
-        nt = d1r * e - d1d2 * rd2;
-        if (ns < 0.f) {
-            goto ns_small;
-        }
     }
-
-    if (ns > m) {
-        ns = m;
-
-        dt = rr;
-        nt = d1r + rd2;
-    }
-
-fk1:
-    if (nt >= 0.f) {
-        if (nt <= dt) {
-            goto do_div;
-        }
-        nt = dt;
-        ns = rd2 - d1d2;
-    } else {
-        nt = 0.f;
-        ns = -d1d2;
-    }
-
-    if (ns >= 0.f) {
-        if (ns <= e) {
-            ds = e;
+    
+    if (nt < 0.f || nt > dt) {
+        if (nt >= 0.f) {
+            nt = dt;
+            ns = rd2 - d1d2;
         } else {
-            ns = ds;
+            nt = 0.f;
+            ns = -d1d2;
         }
-    } else {
-        ns = 0.f;
+
+        if (ns >= 0.f) {
+            if (ns <= e) {
+                ds = e;
+            } else {
+                ns = ds;
+            }
+        } else {
+            ns = 0.f;
+        }
     }
 
-do_div:
     const auto DoDiv = [&](float n, float d) {
         return std::abs(n) >= EPSILON
             ? n / d
@@ -3168,7 +3163,7 @@ void CCollision::Tests(int32 i) {
     }
 
     // ClosestSquaredDistanceBetweenFiniteLines
-    if (false) {
+    {
         const auto Org = plugin::CallAndReturn<float, 0x415A40, const CVector&, const CVector&, const CVector&, const CVector&, float>;
 
         const auto DoLnTest = [&](CColLine lnA, CColLine lnB) {
@@ -3186,13 +3181,13 @@ void CCollision::Tests(int32 i) {
             { { +5.f, 0.f, 0.f, }, CVector{ +5.f, 0.f, 100.f, } }
         );
 
-        // Vertical lines intersecting at the top, expected: 0 [GTA: 100]
+        // Vertical lines intersecting at the top (line end), expected: 0 [GTA: 100]
         DoLnTest(
             { { -5.f, 0.f, 0.f, }, CVector{ +5.f, 0.f, 100.f, } },
             { { +5.f, 0.f, 0.f, }, CVector{ +5.f, 0.f, 100.f, } }
         );
 
-        // Vertical lines intersecting at the bottom, expected: 0 [GTA: 0]
+        // Vertical lines intersecting at the bottom (line origin), expected: 0 [GTA: 0]
         DoLnTest(
             { { +5.f, 0.f, 0.f, }, CVector{ -5.f, 0.f, 100.f, } },
             { { +5.f, 0.f, 0.f, }, CVector{ +5.f, 0.f, 100.f, } }
