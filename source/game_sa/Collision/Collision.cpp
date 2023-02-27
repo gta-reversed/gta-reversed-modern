@@ -1587,11 +1587,6 @@ bool CCollision::ProcessSphereTriangle(
     return true;
 } 
 
-// 0x417610
-float CCollision::DistToLine(const CVector& lineStart, const CVector& lineEnd, const CVector& point) {
-    return plugin::CallAndReturn<float, 0x417610, const CVector&, const CVector&, const CVector&>(lineStart, lineEnd, point);
-}
-
 // 0x417730
 bool CCollision::TestLineOfSight(const CColLine& line, const CMatrix& transform, CColModel& colModel, bool doSeeThroughCheck, bool doShootThroughCheck) {
     return plugin::CallAndReturn<bool, 0x417730, const CColLine&, const CMatrix&, CColModel&, bool, bool>(line, transform, colModel, doSeeThroughCheck, doShootThroughCheck);
