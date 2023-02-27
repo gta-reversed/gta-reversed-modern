@@ -52,6 +52,40 @@ void CCollision::SortOutCollisionAfterLoad() {
     CStreaming::LoadAllRequestedModels(false);
 }
 
+
+// 0x416330
+void CCollision::CalculateTrianglePlanes(CCollisionData* colData) {
+    if (!colData->m_nNumTriangles)
+        return;
+
+    if (colData->m_pTrianglePlanes) {
+        auto* link = colData->GetLinkPtr();
+        link->Remove();
+        ms_colModelCache.usedListHead.Insert(link);
+    } else {
+        auto* link = ms_colModelCache.Insert(colData);
+        if (!link) {
+            auto* toRemove = ms_colModelCache.usedListTail.prev;
+            toRemove->data->RemoveTrianglePlanes();
+            ms_colModelCache.Remove(toRemove);
+            link = ms_colModelCache.Insert(colData);
+        }
+
+        colData->CalculateTrianglePlanes();
+        colData->SetLinkPtr(link);
+    }
+}
+
+// 0x416400
+void CCollision::RemoveTrianglePlanes(CCollisionData* colData) {
+    if (!colData->m_pTrianglePlanes)
+        return;
+
+    auto* link = colData->GetLinkPtr();
+    ms_colModelCache.Remove(link);
+    colData->RemoveTrianglePlanes();
+}
+
 // 0x411E70
 bool CCollision::TestSphereSphere(CColSphere const& sphere1, CColSphere const& sphere2) { // Yes, it's __stdcall
     return (sphere1.m_vecCenter - sphere2.m_vecCenter).SquaredMagnitude() <= sq(sphere1.m_fRadius + sphere2.m_fRadius);
@@ -294,6 +328,8 @@ bool CCollision::ProcessSphereBox(CColSphere const& sph, CColBox const& box, CCo
 }
 
 /*!
+* Check if point is within the triangle
+* Unused function - Most likely inlined
 * @address 0x412700
 */
 bool __stdcall CCollision::PointInTriangle(CVector const& point, CVector const* triPoints) {
@@ -405,6 +441,164 @@ float CCollision::DistToMathematicalLine2D(float lineStartX, float lineStartY, f
 */
 float CCollision::DistAlongLine2D(float lineX, float lineY, float lineDirX, float lineDirY, float pointX, float pointY) {
     return (pointX - lineX) * lineDirX + (pointY - lineY) * lineDirY;
+}
+
+
+/*!
+* Calculate point closest to `point` on line (l0 - l1)
+*
+* @notsa
+*/
+CVector CCollision::GetClosestPtOnLine(const CVector& l0, const CVector& l1, const CVector& point) {
+    const auto lnMagSq = (l1 - l0).SquaredMagnitude();
+	const auto dot = (point - l0).Dot(l1 - l0);
+    if (dot <= 0.0f) {
+		return l0;
+    }
+    if (dot >= lnMagSq) {
+		return l1;
+    }
+    return lerp(l0, l1, dot / lnMagSq);
+}
+
+// 0x415950
+void CCollision::Closest3(CVector* arg0, CVector* arg1) {
+    NOTSA_UNREACHABLE();
+}
+
+// 0x415A40
+float ClosestSquaredDistanceBetweenFiniteLines(const CVector& line1Start, const CVector& line1End, const CVector& line2Start, const CVector& line2End, float arg4) {
+    return plugin::CallAndReturn<float, 0x415A40>(&line1Start, &line1End, &line2Start, &line2End, arg4);
+}
+
+/*!
+* Calculate clamped barycentric coordinates of a point (p) on a triangle (a, b, c)
+* See: https://gamedev.stackexchange.com/a/23745
+*
+* @notsa
+*/
+CVector CCollision::GetBaryCoordsOnTriangle(CVector a, CVector b, CVector c, CVector p) {
+    const auto vab = b - a, vac = c - a, vap = p - a;
+    const auto bb  = vab.Dot(vab);
+    const auto bc  = vab.Dot(vac);
+    const auto cc  = vac.Dot(vac);
+    const auto pb  = vap.Dot(vab);
+    const auto pc  = vap.Dot(vac);
+    const auto d   = bb * cc - bc * bc;
+    const auto v   = (cc * pb - bc * pc) / d;
+    const auto w   = (bb * pc - bc * pb) / d;
+    const auto u   = 1.0f - v - w;
+    return { u, v, w };
+}
+
+/*!
+* Get barycentric coords of point (p) clamped onto triangle (a, b, c)
+* See: https://stackoverflow.com/a/37923949
+*
+* @notsa
+*/
+CVector CCollision::GetClampedBaryCoordsIntoTriangle(CVector a, CVector b, CVector c, CVector p) {
+    // Calculate barycentric coords
+    const auto [u, v, w] = GetBaryCoordsOnTriangle(a, b, c, p);
+
+    // Calculate new `t` 
+    const auto Get = [&](CVector v1, CVector v2) {
+        const auto d = v1 - v2;
+        return std::clamp((p - v2).Dot(d) / d.Dot(d), 0.f, 1.f);
+    };
+
+    if (u < 0.f) {
+        const auto t = Get(c, b);
+        return { 0.0f, 1.0f - t, t };
+    }
+    
+    if (v < 0.f) {
+        const auto t = Get(a, c);
+        return { t, 0.0f, 1.0f - t };
+    }
+
+    
+    if (w < 0.f) {
+        const auto t = Get(b, a);
+        return { 1.0f - t, t, 0.0f };
+    }
+
+    return { u, v, w }; // Point was in the triangle
+}
+
+/*!
+* Calculate the point closest to `p` on the triangle (a, b, c)
+* Basically same as `ClosestPtPointTriangle`.
+* I'm leaving it here (even though it's unused), as it might actually be faster than the abovementioned function .
+*/
+CVector CCollision::GetCoordsClampedIntoTriangle(CVector a, CVector b, CVector c, CVector p) {
+    const auto [u, v, w] = GetClampedBaryCoordsIntoTriangle(a, b, c, p);
+    return a * u + b * v + c * w;
+}
+
+/*!
+* Calculate the point closest to `p` on the triangle (a, b, c)
+* 
+* Credit: Code from "Real-Time Collision Detection" by Christer Ericson, published by Morgan Kaufmann Publishers, © 2005 Elsevier Inc
+*/
+CVector ClosestPtPointTriangle(
+    CVector a, CVector b, CVector c,
+    CVector p
+) {
+    // Check if P in vertex region outside A
+    const auto ab = b - a;
+    const auto ac = c - a;
+    const auto ap = p - a;
+
+    const auto d1 = ab.Dot(ap);
+    const auto d2 = ac.Dot(ap);
+
+    if (d1 <= 0.0f && d2 <= 0.0f) {
+        return a; // barycentric coordinates (1,0,0)
+    }
+
+    // Check if P in vertex region outside B
+    const auto bp = p - b;
+    const auto d3 = ab.Dot(bp);
+    const auto d4 = ac.Dot(bp);
+    if (d3 >= 0.0f && d4 <= d3) {
+        return b; // barycentric coordinates (0,1,0)
+    }
+
+    // Check if P in edge region of AB, if so return projection of P onto AB
+    const auto vc = d1 * d4 - d3 * d2;
+    if (vc <= 0.0f && d1 >= 0.0f && d3 <= 0.0f) {
+        const auto v = d1 / (d1 - d3);
+        return a + v * ab; // barycentric coordinates (1-v,v,0)
+    }
+
+    // Check if P in vertex region outside C
+    const auto cp = p - c;
+    const auto d5 = ab.Dot(cp);
+    const auto d6 = ac.Dot(cp);
+    if (d6 >= 0.0f && d5 <= d6) {
+        return c; // barycentric coordinates (0,0,1)
+    }
+
+    // Check if P in edge region of AC, if so return projection of P onto AC
+    const auto vb = d5 * d2 - d1 * d6;
+    if (vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f) {
+        const auto w = d2 / (d2 - d6);
+        return a + w * ac; // barycentric coordinates (1-w,0,w)
+    }
+
+    // Check if P in edge region of BC, if so return projection of P onto BC
+    const auto va = d3 * d6 - d5 * d4;
+    if (va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f) {
+        const auto w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
+        return b + w * (c - b); // barycentric coordinates (0,1-w,w)
+    }
+
+    // P inside face region. Compute Q through its barycentric coordinates (u,v,w)
+    const auto denom = va + vb + vc;
+    const auto v     = vb / denom;
+    const auto w     = vc / denom;
+    return a + ab * v + ac * w; // = u*a + v*b + w*c, u = va * denom = 1.0f-v-w
 }
 
 /*!
@@ -798,6 +992,7 @@ bool NOTSA_FORCEINLINE ProcessLineTriangle_Internal(
 		return false;
     }
 #endif
+
     const auto t = plNormDotLnOrigin / plLnMag;
     if constexpr (!TestOnly) {
         if (t >= *inOutMaxTouchDist) {
@@ -981,290 +1176,6 @@ bool CCollision::ProcessVerticalLineTriangle(
     return ProcessLineTriangle(line, verts, tri, plane, colPoint, maxTouchDistance, collPoly);
 }
 
-// 0x414D70
-bool CCollision::IsStoredPolyStillValidVerticalLine(const CVector& lineOrigin, float lnMag, CColPoint& colPoint, CStoredCollPoly* collPoly) {
-    if (!collPoly->valid) {
-        return false;
-    }
-
-    // Not really SA (I really don'plSpCenterDist feel like copy pasting code :])
-    return ProcessLineTriangle_Internal<true>(
-        CColLine{
-            lineOrigin,
-            { lineOrigin.x, lineOrigin.y, lineOrigin.z * lnMag }
-        },
-        *collPoly,
-        CColTrianglePlane{ *collPoly },
-        nullptr,
-        nullptr,
-        nullptr
-    );
-}
-
-// 0x415230
-CColBox CCollision::GetBoundingBoxFromTwoSpheres(const CColSphere& spA, const CColSphere& spB) {
-    CVector min, max;
-    for (size_t i = 0; i < 3; i++) {
-        std::tie(min[i], max[i]) = std::minmax(spA.m_vecCenter[i], spB.m_vecCenter[i]);
-
-        min[i] -= spA.m_fRadius;
-        max[i] += spA.m_fRadius; // NOTE: They assume both spheres have the same spRadius, but that might not be the case. Really should be using max(spA.spRadius, spB.spRadius) instead!
-    }
-    return CColBox{ CBox{min, max} };
-}
-
-// 0x4152C0
-bool CCollision::IsThisVehicleSittingOnMe(CVehicle* veh, CVehicle* vehOnMe) {
-    if (!veh || !vehOnMe) {
-        return false;
-    }
-    const auto Check = [veh](auto& wheelColEntities) {
-        return notsa::contains(wheelColEntities, veh);
-    };
-    switch (vehOnMe->m_nVehicleType) {
-    case VEHICLE_TYPE_AUTOMOBILE: return Check(vehOnMe->AsAutomobile()->m_apWheelCollisionEntity);
-    case VEHICLE_TYPE_BIKE:       return Check(vehOnMe->AsBike()->m_aGroundPhysicalPtrs);
-    default:                      return false;
-    }
-}
-
-float GetNearestDistanceOfPedSphereToCameraNearClip(CPed* ped) {
-    const auto mi = ped->GetPedModelInfo();
-
-    // Calculate hit colmodel
-    mi->AnimatePedColModelSkinnedWorld(ped->m_pRwClump);
-    const auto hitCM = mi->m_pHitColModel;
-    assert(hitCM->GetData()->m_nNumSpheres == 12); // In theory it should have 12 spheres
-
-    // Calculate some other shite
-    auto&       cam     = TheCamera.GetActiveCamera();
-    const auto  offset  = cam.m_vecFront.Dot(cam.m_vecSource);
-    const auto  nearClp = RwCameraGetNearClipPlane(Scene.m_pRwCamera);
-
-    // Now find the closest sphere's distance sq
-    float ret = FLT_MAX;
-    for (auto& sp : hitCM->GetData()->GetSpheres()) {
-        ret = std::min(ret, sp.m_vecCenter.Dot(cam.m_vecFront) - offset - sp.m_fRadius - nearClp);
-    }
-    return ret;
-}
-
-// 0x415320
-bool CCollision::CheckCameraCollisionPeds(
-    int32 sectorX,
-    int32 sectorY,
-    const CVector& pos,
-    const CVector& /*unused*/,
-    float& /*unused*/
-) {
-    constexpr auto gPedCylinderWidth = 1.f;
-
-    bool addedAny = false;
-
-    const auto& sector = GetRepeatSector(sectorX, sectorY);
-    for (CPtrNodeDoubleLink* it = sector->GetList(REPEATSECTOR_PEDS).GetNode(), *next{}; it; it = next) {
-        next = it->GetNext();
-        
-        const auto ped = it->GetItem<CPed>();
-
-        if (ped->IsScanCodeCurrent()) {
-            continue;
-        }
-
-        ped->SetCurrentScanCode();
-
-        if (!ped->m_bIsVisible || CWorld::pIgnoreEntity == ped || ped->IsPlayer()) {
-            continue;
-        }
-        
-        if ((CVector2D{ pos } - CVector2D{ ped->GetBoundCentre() }).SquaredMagnitude() >= sq(gPedCylinderWidth)) {
-            continue;
-        }
-
-        if (GetNearestDistanceOfPedSphereToCameraNearClip(ped) > 0.f) {
-            continue;
-        }
-        
-        const auto AddInvisibleEntity = [](CEntity* entity) {
-            entity->m_bIsVisible = false;
-
-            auto& ref = gpMadeInvisibleEntities[gNumEntitiesSetInvisible++];
-            ref = entity;
-            CEntity::RegisterReference(ref);
-        };
-
-        AddInvisibleEntity(ped);
-
-        // Add entity the peds holds too (if any)
-        if (const auto task = ped->GetIntelligence()->GetTaskHold()) {
-            if (const auto ent = task->m_pEntityToHold) {
-                if (ent->m_bIsVisible) {
-                    AddInvisibleEntity(ent);
-                }
-            }
-        }
-
-        addedAny = true;
-    }
-    return addedAny;
-}
-
-// 0x415540
-void ResetMadeInvisibleObjects() {
-    for (auto ent : gpMadeInvisibleEntities | rng::views::take(gNumEntitiesSetInvisible)) {
-        if (!ent) { // Must check, as the reference system might've cleared it
-            continue;
-        }
-        ent->m_bIsVisible = true;
-        CEntity::CleanUpOldReference(ent);
-    }
-    gNumEntitiesSetInvisible = 0;
-}
-
-// 0x415620
-bool CCollision::RayPolyPOP(CVector* arg0, CVector* arg1, CColTriangle* arg2, CVector* arg3, CVector* arg4) {
-    NOTSA_UNREACHABLE();
-}
-
-// 0x4156D0
-int32 CCollision::GetPrincipleAxis(const CVector& normal) {
-    const auto nx = std::abs(normal.x),
-               ny = std::abs(normal.y),
-               nz = std::abs(normal.z);
-    if (nx > ny && nx > nz) {
-        return 0; // X
-    }
-    return ny <= nz
-        ? 4  // Z
-        : 2; // Y
-}
-
-// NOTSA
-bool IsPointInPoly2D(CVector2D pt, CVector2D a, CVector2D b, CVector2D c) {
-    // Code they used originally: https://stackoverflow.com/revisions/2049593/4
-    // It's slower than than the one below.
-    
-    // Based on: https://stackoverflow.com/a/9755252
-    const auto pt_a = pt - a;
-    const bool s_ab = (b - a).Cross(pt_a) > 0.f;
-    return (c - a).Cross(pt_a) > 0.f != s_ab && (c - b).Cross(pt - b) > 0.f == s_ab;
-}
-
-// 0x415730
-bool CCollision::PointInPoly(
-    const CVector& testPt,
-    const CColTriangle& /*unused*/,
-    const CVector& normal,
-    const CVector* verts // Uncompressed vertices
-) {
-    // Shuffle look-up table
-    constexpr uint8 lut[3][2]{
-        { 1, 2 }, // X
-        { 0, 2 }, // Y
-        { 0, 1 }  // Z
-    };
-
-    // Shuffle vectors for the principal axis
-    const auto Do = [shuffle = lut[GetPrincipleAxis(normal) / 2]](const CVector& v) {
-        return CVector2D{ v[shuffle[0]], v[shuffle[1]] };
-    };
-
-    // Now we can do the test in 2D
-    return IsPointInPoly2D(Do(testPt), Do(verts[0]), Do(verts[1]), Do(verts[2]));
-}
-
-// 0x415950
-void CCollision::Closest3(CVector* arg0, CVector* arg1) {
-    NOTSA_UNREACHABLE();
-}
-
-// 0x415A40
-float ClosestSquaredDistanceBetweenFiniteLines(const CVector& line1Start, const CVector& line1End, const CVector& line2Start, const CVector& line2End, float arg4) {
-    return plugin::CallAndReturn<float, 0x415A40>(&line1Start, &line1End, &line2Start, &line2End, arg4);
-}
-
-// 0x415CF0
-bool CCollision::SphereCastVersusVsPoly(
-    const CColSphere& spA,
-    const CColSphere& spB,
-    const CColTriangle& tri,
-    const CColTrianglePlane& triPlane,
-    CompressedVector* verts
-) {
-    const auto plNorm = triPlane.GetNormal();
-
-    const auto spARadius = spA.m_fRadius;
-
-    const auto plSpCenterDist = triPlane.GetPtDotNormal(spA.m_vecCenter);
-    const auto isSpTouchingPl = std::abs(plSpCenterDist) <= spARadius;
-
-    // Sphere's center projected onto the plane's normal
-    auto spAProjPl = spA.m_vecCenter - plNorm * (isSpTouchingPl ? plSpCenterDist : spARadius); 
-
-    const auto spAToB = spB.m_vecCenter - spA.m_vecCenter; // AKA velocity
-    const auto vA       = UncompressVector(verts[tri.vA]);
-
-    if (!isSpTouchingPl) {
-        const auto vtxAToSpDistSqOnPl = (vA - spAProjPl).Dot(plNorm);
-        if (vtxAToSpDistSqOnPl > 0.f) {
-            return false;
-        }
-        const auto spAToBDistSqOnPl = spAToB.Dot(plNorm);
-        if (vtxAToSpDistSqOnPl <= spAToBDistSqOnPl) {
-            return false; // If spA was closer than spB then there's no way spB would touch it, so we're finished
-        }
-        spAProjPl += spAToB * (vtxAToSpDistSqOnPl / spAToBDistSqOnPl); // Interpolate between spA -> spB
-    }
-
-    const auto vB = UncompressVector(verts[tri.vB]),
-               vC = UncompressVector(verts[tri.vC]);
-
-    const CVector cverts[]{vA, vB, vC};
-    if (PointInPoly(spAProjPl, tri, plNorm, cverts)) {
-        return true;
-    }
-
-    const auto& pos          = spA.m_vecCenter;
-    const auto  maxDistSq    = sq(spARadius);
-    const auto  spAToBDistSq = spAToB.SquaredMagnitude(); // AKA spB <-> spA dist sq
-    return ClosestSquaredDistanceBetweenFiniteLines(pos, vA, vB, spAToB, spAToBDistSq) < maxDistSq
-        || ClosestSquaredDistanceBetweenFiniteLines(pos, vC, vB, spAToB, spAToBDistSq) < maxDistSq
-        || ClosestSquaredDistanceBetweenFiniteLines(pos, vA, vC, spAToB, spAToBDistSq) < maxDistSq;
-}
-
-// 0x416330
-void CCollision::CalculateTrianglePlanes(CCollisionData* colData) {
-    if (!colData->m_nNumTriangles)
-        return;
-
-    if (colData->m_pTrianglePlanes) {
-        auto* link = colData->GetLinkPtr();
-        link->Remove();
-        ms_colModelCache.usedListHead.Insert(link);
-    } else {
-        auto* link = ms_colModelCache.Insert(colData);
-        if (!link) {
-            auto* toRemove = ms_colModelCache.usedListTail.prev;
-            toRemove->data->RemoveTrianglePlanes();
-            ms_colModelCache.Remove(toRemove);
-            link = ms_colModelCache.Insert(colData);
-        }
-
-        colData->CalculateTrianglePlanes();
-        colData->SetLinkPtr(link);
-    }
-}
-
-// 0x416400
-void CCollision::RemoveTrianglePlanes(CCollisionData* colData) {
-    if (!colData->m_pTrianglePlanes)
-        return;
-
-    auto* link = colData->GetLinkPtr();
-    ms_colModelCache.Remove(link);
-    colData->RemoveTrianglePlanes();
-}
-
 // 0x416450
 bool CCollision::ProcessSphereSphere(const CColSphere& spA, const CColSphere& spB, CColPoint& colPoint, float& maxTouchDistance) {
     const auto spBToA = spA.m_vecCenter - spB.m_vecCenter;
@@ -1299,79 +1210,16 @@ bool CCollision::ProcessSphereSphere(const CColSphere& spA, const CColSphere& sp
     return true;
 }
 
-CVector ClosestPtOnLine(const CVector* l0, const CVector* l1, const CVector* point) {
-    const auto lnMagSq = (*l1 - *l0).SquaredMagnitude();
-	const auto dot = DotProduct(*point - *l0, *l1 - *l0);
-    if (dot <= 0.0f) {
-		return *l0;
-    }
-    if (dot >= lnMagSq) {
-		return *l1;
-    }
-    return lerp(*l0, *l1, dot / lnMagSq);
-}
-
-//! Calculate clamped barycentric coordinates of a point (p) on a triangle (a, b, c)
-//! See: https://gamedev.stackexchange.com/a/23745
-NOTSA_FORCEINLINE CVector GetBaryCoordsOnTriangle(CVector a, CVector b, CVector c, CVector p) {
-    const auto vab = b - a, vac = c - a, vap = p - a;
-    const auto bb  = vab.Dot(vab);
-    const auto bc  = vab.Dot(vac);
-    const auto cc  = vac.Dot(vac);
-    const auto pb  = vap.Dot(vab);
-    const auto pc  = vap.Dot(vac);
-    const auto d   = bb * cc - bc * bc;
-    const auto v   = (cc * pb - bc * pc) / d;
-    const auto w   = (bb * pc - bc * pb) / d;
-    const auto u   = 1.0f - v - w;
-    const auto pt = a * u + b * v + c * w;
-    return { u, v, w };
-}
-
-//! Get barycentric coords of point (p) clamped onto triangle (a, b, c)
-//! See: https://stackoverflow.com/a/37923949
-NOTSA_FORCEINLINE CVector GetClampedBaryCoordsIntoTriangle(CVector a, CVector b, CVector c, CVector p) {
-    // Calculate barycentric coords
-    const auto [u, v, w] = GetBaryCoordsOnTriangle(a, b, c, p);
-
-    // Calculate new `t` 
-    const auto Get = [&](CVector v1, CVector v2) {
-        const auto d = v1 - v2;
-        return std::clamp((p - v2).Dot(d) / d.Dot(d), 0.f, 1.f);
-    };
-
-    if (u < 0.f) {
-        const auto t = Get(c, b);
-        return { 0.0f, 1.0f - t, t };
-    }
-    
-    if (v < 0.f) {
-        const auto t = Get(a, c);
-        return { t, 0.0f, 1.0f - t };
-    }
-
-    
-    if (w < 0.f) {
-        const auto t = Get(b, a);
-        return { 1.0f - t, t, 0.0f };
-    }
-
-    return { u, v, w }; // Point was in the triangle
-}
-
-NOTSA_FORCEINLINE CVector GetCoordsClampedIntoTriangle(CVector a, CVector b, CVector c, CVector p) {
-    const auto [u, v, w] = GetClampedBaryCoordsIntoTriangle(a, b, c, p);
-    return a * u + b * v + c * w;
-}
-
-template<bool TestOnly>
-NOTSA_FORCEINLINE bool ProcessSphereTriangle_Internal(
+/*!
+* See: https://realtimecollisiondetection.net/blog/?p=103
+* 
+* @addr 0x4165B0
+*/
+bool CCollision::TestSphereTriangle(
     const CColSphere& sphere,
     const CompressedVector* verts,
-    const CColTriangle& tri, const
-    CColTrianglePlane& plane,
-    CVector* ip,
-    float* maxTouchDist
+    const CColTriangle& tri,
+    const CColTrianglePlane& plane
 ) {
     if (!CCollision::s_DebugSettings.ShapeShapeCollision.IsEnabled(Shape::SSPHERE, Shape::STRI)) {
         return false;
@@ -1380,16 +1228,9 @@ NOTSA_FORCEINLINE bool ProcessSphereTriangle_Internal(
     const auto P = sphere.m_vecCenter;
     const auto r = sphere.m_fRadius;
 
-    // Seems to work perfectly, likely faster than original code (because it's basically branchless, and can be AVX2'v2 to oblivion)
-    // From: https://realtimecollisiondetection.net/blog/?p=103
-
-    const auto vA = UncompressVector(verts[tri.vA]),
-               vB = UncompressVector(verts[tri.vB]),
-               vC = UncompressVector(verts[tri.vC]);
-
-    const auto A  = vA - P;
-    const auto B  = vB - P;
-    const auto C  = vC - P;
+    const auto A  = UncompressVector(verts[tri.vA]) - P;
+    const auto B  = UncompressVector(verts[tri.vB]) - P;
+    const auto C  = UncompressVector(verts[tri.vC]) - P;
     const auto rr = r * r;
     const auto N  = plane.GetNormal();
     const int  s1 = std::abs(A.Dot(N)) > r;
@@ -1421,78 +1262,7 @@ NOTSA_FORCEINLINE bool ProcessSphereTriangle_Internal(
     const int  s6 = (Q2.Dot(Q2) > rr * e2 * e2) & (Q2.Dot(QA) > 0);
     const int  s7 = (Q3.Dot(Q3) > rr * e3 * e3) & (Q3.Dot(QB) > 0);
 
-    if (s1 | s2 | s3 | s4 | s5 | s6 | s7) {
-        return false;
-    }
-
-    if constexpr (!TestOnly) {
-        const auto plDist    = plane.GetPtDotNormal(P);
-        const auto touchDist = sq(plDist);
-        if (touchDist >= *maxTouchDist) {
-            return false;
-        }
-        *maxTouchDist = touchDist;
-        *ip           = GetCoordsClampedIntoTriangle(vA, vB, vC, P - N * std::abs(plDist));
-    }
-
-    return true;
-}
-
-// 0x4165B0
-bool CCollision::TestSphereTriangle(
-    const CColSphere& sphere,
-    const CompressedVector* verts,
-    const CColTriangle& tri,
-    const CColTrianglePlane& plane
-) {
-    return ProcessSphereTriangle_Internal<true>(sphere, verts, tri, plane, nullptr, nullptr);
-}
-
-CVector ClosestPtPointTriangle(
-    CVector a, CVector b, CVector c,
-    const CColTrianglePlane& plane,
-    CVector p
-) {
-    // Check if P in vertex region outside A
-    auto ab = b - a;
-    auto ac = c - a;
-    auto ap = p - a;
-    float d1 = ab.Dot(ap);
-    float d2 = ac.Dot(ap);
-    if (d1 <= 0.0f && d2 <= 0.0f) return a; // barycentric coordinates (1,0,0)
-    // Check if P in vertex region outside B
-    auto bp = p - b;
-    float d3 = ab.Dot(bp);
-    float d4 = ac.Dot(bp);
-    if (d3 >= 0.0f && d4 <= d3) return b; // barycentric coordinates (0,1,0)
-    // Check if P in edge region of AB, if so return projection of P onto AB
-    float vc = d1 * d4 - d3 * d2;
-    if (vc <= 0.0f && d1 >= 0.0f && d3 <= 0.0f) {
-        float v = d1 / (d1 - d3);
-        return a + v * ab; // barycentric coordinates (1-v,v,0)
-    }
-    // Check if P in vertex region outside C
-    auto cp = p - c;
-    float d5 = ab.Dot(cp);
-    float d6 = ac.Dot(cp);
-    if (d6 >= 0.0f && d5 <= d6) return c; // barycentric coordinates (0,0,1)
-    // Check if P in edge region of AC, if so return projection of P onto AC
-    float vb = d5 * d2 - d1 * d6;
-    if (vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f) {
-        float w = d2 / (d2 - d6);
-        return a + w * ac; // barycentric coordinates (1-w,0,w)
-    }
-    // Check if P in edge region of BC, if so return projection of P onto BC
-    float va = d3 * d6 - d5 * d4;
-    if (va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f) {
-        float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
-        return b + w * (c - b); // barycentric coordinates (0,1-w,w)
-    }
-    // P inside face region. Compute Q through its barycentric coordinates (u,v,w)
-    float denom = 1.0f / (va + vb + vc);
-    float v = vb * denom;
-    float w = vc * denom;
-    return a + ab * v + ac * w; // = u*a + v*b + w*c, u = va * denom = 1.0f-v-w
+    return (s1 | s2 | s3 | s4 | s5 | s6 | s7) == 0;
 }
 
 // 0x416BA0
@@ -1504,30 +1274,37 @@ bool CCollision::ProcessSphereTriangle(
     CColPoint& colPoint,
     float& maxTouchDistance
 ) {
-    CVector ip;
-    if (!ProcessSphereTriangle_Internal<false>(sphere, verts, tri, plane, &ip, &maxTouchDistance)) {
+    if (!CCollision::s_DebugSettings.ShapeShapeCollision.IsEnabled(Shape::SSPHERE, Shape::STRI)) {
         return false;
     }
 
-    //const auto a = UncompressVector(verts[tri.vA]),
-    //           b = UncompressVector(verts[tri.vB]),
-    //           c = UncompressVector(verts[tri.vC]);
-    //
-    //const auto ip = ClosestPtPointTriangle(a, b, c, plane, sphere.m_vecCenter);
-    //if ((sphere.m_vecCenter - ip).SquaredMagnitude() > sq(sphere.m_fRadius)) {
-    //    return false;
-    //}
-    //
-    //const auto plDist = plane.GetPtDotNormal(sphere.m_vecCenter);
-    //const auto touchDist = sq(plDist);
-    //if (touchDist >= maxTouchDistance) {
-    //    return false;
-    //}
-    //maxTouchDistance = touchDist;
+    // Find closest point on triangle to sphere
+    const auto ip = ClosestPtPointTriangle(
+        UncompressVector(verts[tri.vA]),
+        UncompressVector(verts[tri.vB]),
+        UncompressVector(verts[tri.vC]),
+        sphere.m_vecCenter
+    );
 
+    const auto spToIp      = sphere.m_vecCenter - ip;
+    const auto touchDistSq = spToIp.SquaredMagnitude();
+
+    // Check touch distance first
+    if (touchDistSq >= maxTouchDistance) {
+        return false;
+    }
+
+    // Check if it's within the sphere
+    if (touchDistSq > sq(sphere.m_fRadius)) {
+        return false;
+    }
+
+    maxTouchDistance = touchDistSq;
+
+    const auto touchDist = std::sqrt(touchDistSq);
+    colPoint.m_vecNormal = spToIp / touchDist; // Normalize
+    colPoint.m_fDepth    = sphere.m_fRadius - touchDist;
     colPoint.m_vecPoint  = ip;
-    colPoint.m_vecNormal = (sphere.m_vecCenter - ip).Normalized();
-    colPoint.m_fDepth    = sphere.m_fRadius - (sphere.m_vecCenter - ip).Magnitude();
 
     colPoint.m_nSurfaceTypeA = sphere.m_Surface.m_nMaterial;
     colPoint.m_nPieceTypeA   = sphere.m_Surface.m_nPiece;
@@ -2082,6 +1859,248 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
 
     return (int32)nNumSphereCPs;
     */
+}
+
+
+// 0x414D70
+bool CCollision::IsStoredPolyStillValidVerticalLine(const CVector& lineOrigin, float lnMag, CColPoint& colPoint, CStoredCollPoly* collPoly) {
+    if (!collPoly->valid) {
+        return false;
+    }
+
+    // Not really SA (I really don'plSpCenterDist feel like copy pasting code :])
+    return ProcessLineTriangle_Internal<true>(
+        CColLine{
+            lineOrigin,
+            { lineOrigin.x, lineOrigin.y, lineOrigin.z * lnMag }
+        },
+        *collPoly,
+        CColTrianglePlane{ *collPoly },
+        nullptr,
+        nullptr,
+        nullptr
+    );
+}
+
+// 0x415230
+CColBox CCollision::GetBoundingBoxFromTwoSpheres(const CColSphere& spA, const CColSphere& spB) {
+    CVector min, max;
+    for (size_t i = 0; i < 3; i++) {
+        std::tie(min[i], max[i]) = std::minmax(spA.m_vecCenter[i], spB.m_vecCenter[i]);
+
+        min[i] -= spA.m_fRadius;
+        max[i] += spA.m_fRadius; // NOTE: They assume both spheres have the same spRadius, but that might not be the case. Really should be using max(spA.spRadius, spB.spRadius) instead!
+    }
+    return CColBox{ CBox{min, max} };
+}
+
+// 0x4152C0
+bool CCollision::IsThisVehicleSittingOnMe(CVehicle* veh, CVehicle* vehOnMe) {
+    if (!veh || !vehOnMe) {
+        return false;
+    }
+    const auto Check = [veh](auto& wheelColEntities) {
+        return notsa::contains(wheelColEntities, veh);
+    };
+    switch (vehOnMe->m_nVehicleType) {
+    case VEHICLE_TYPE_AUTOMOBILE: return Check(vehOnMe->AsAutomobile()->m_apWheelCollisionEntity);
+    case VEHICLE_TYPE_BIKE:       return Check(vehOnMe->AsBike()->m_aGroundPhysicalPtrs);
+    default:                      return false;
+    }
+}
+
+float GetNearestDistanceOfPedSphereToCameraNearClip(CPed* ped) {
+    const auto mi = ped->GetPedModelInfo();
+
+    // Calculate hit colmodel
+    mi->AnimatePedColModelSkinnedWorld(ped->m_pRwClump);
+    const auto hitCM = mi->m_pHitColModel;
+    assert(hitCM->GetData()->m_nNumSpheres == 12); // In theory it should have 12 spheres
+
+    // Calculate some other shite
+    auto&       cam     = TheCamera.GetActiveCamera();
+    const auto  offset  = cam.m_vecFront.Dot(cam.m_vecSource);
+    const auto  nearClp = RwCameraGetNearClipPlane(Scene.m_pRwCamera);
+
+    // Now find the closest sphere's distance sq
+    float ret = FLT_MAX;
+    for (auto& sp : hitCM->GetData()->GetSpheres()) {
+        ret = std::min(ret, sp.m_vecCenter.Dot(cam.m_vecFront) - offset - sp.m_fRadius - nearClp);
+    }
+    return ret;
+}
+
+// 0x415320
+bool CCollision::CheckCameraCollisionPeds(
+    int32 sectorX,
+    int32 sectorY,
+    const CVector& pos,
+    const CVector& /*unused*/,
+    float& /*unused*/
+) {
+    constexpr auto gPedCylinderWidth = 1.f;
+
+    bool addedAny = false;
+
+    const auto& sector = GetRepeatSector(sectorX, sectorY);
+    for (CPtrNodeDoubleLink* it = sector->GetList(REPEATSECTOR_PEDS).GetNode(), *next{}; it; it = next) {
+        next = it->GetNext();
+        
+        const auto ped = it->GetItem<CPed>();
+
+        if (ped->IsScanCodeCurrent()) {
+            continue;
+        }
+
+        ped->SetCurrentScanCode();
+
+        if (!ped->m_bIsVisible || CWorld::pIgnoreEntity == ped || ped->IsPlayer()) {
+            continue;
+        }
+        
+        if ((CVector2D{ pos } - CVector2D{ ped->GetBoundCentre() }).SquaredMagnitude() >= sq(gPedCylinderWidth)) {
+            continue;
+        }
+
+        if (GetNearestDistanceOfPedSphereToCameraNearClip(ped) > 0.f) {
+            continue;
+        }
+        
+        const auto AddInvisibleEntity = [](CEntity* entity) {
+            entity->m_bIsVisible = false;
+
+            auto& ref = gpMadeInvisibleEntities[gNumEntitiesSetInvisible++];
+            ref = entity;
+            CEntity::RegisterReference(ref);
+        };
+
+        AddInvisibleEntity(ped);
+
+        // Add entity the peds holds too (if any)
+        if (const auto task = ped->GetIntelligence()->GetTaskHold()) {
+            if (const auto ent = task->m_pEntityToHold) {
+                if (ent->m_bIsVisible) {
+                    AddInvisibleEntity(ent);
+                }
+            }
+        }
+
+        addedAny = true;
+    }
+    return addedAny;
+}
+
+// 0x415540
+void ResetMadeInvisibleObjects() {
+    for (auto ent : gpMadeInvisibleEntities | rng::views::take(gNumEntitiesSetInvisible)) {
+        if (!ent) { // Must check, as the reference system might've cleared it
+            continue;
+        }
+        ent->m_bIsVisible = true;
+        CEntity::CleanUpOldReference(ent);
+    }
+    gNumEntitiesSetInvisible = 0;
+}
+
+// 0x415620
+bool CCollision::RayPolyPOP(CVector* arg0, CVector* arg1, CColTriangle* arg2, CVector* arg3, CVector* arg4) {
+    NOTSA_UNREACHABLE(); // Unused
+}
+
+// 0x4156D0
+int32 CCollision::GetPrincipleAxis(const CVector& normal) {
+    const auto nx = std::abs(normal.x),
+               ny = std::abs(normal.y),
+               nz = std::abs(normal.z);
+    if (nx > ny && nx > nz) {
+        return 0; // X
+    }
+    return ny <= nz
+        ? 4  // Z
+        : 2; // Y
+}
+
+// NOTSA
+bool IsPointInPoly2D(CVector2D pt, CVector2D a, CVector2D b, CVector2D c) {
+    // Code they used originally: https://stackoverflow.com/revisions/2049593/4
+    // It's slower than than the one below.
+    
+    // Based on: https://stackoverflow.com/a/9755252
+    const auto pt_a = pt - a;
+    const bool s_ab = (b - a).Cross(pt_a) > 0.f;
+    return (c - a).Cross(pt_a) > 0.f != s_ab && (c - b).Cross(pt - b) > 0.f == s_ab;
+}
+
+// 0x415730
+bool CCollision::PointInPoly(
+    const CVector& testPt,
+    const CColTriangle& /*unused*/,
+    const CVector& normal,
+    const CVector* verts // Uncompressed vertices
+) {
+    // Shuffle look-up table
+    constexpr uint8 lut[3][2]{
+        { 1, 2 }, // X
+        { 0, 2 }, // Y
+        { 0, 1 }  // Z
+    };
+
+    // Shuffle vectors for the principal axis
+    const auto Do = [shuffle = lut[GetPrincipleAxis(normal) / 2]](const CVector& v) {
+        return CVector2D{ v[shuffle[0]], v[shuffle[1]] };
+    };
+
+    // Now we can do the test in 2D
+    return IsPointInPoly2D(Do(testPt), Do(verts[0]), Do(verts[1]), Do(verts[2]));
+}
+
+// 0x415CF0
+bool CCollision::SphereCastVersusVsPoly(
+    const CColSphere& spA,
+    const CColSphere& spB,
+    const CColTriangle& tri,
+    const CColTrianglePlane& triPlane,
+    CompressedVector* verts
+) {
+    const auto plNorm = triPlane.GetNormal();
+
+    const auto spARadius = spA.m_fRadius;
+
+    const auto plSpCenterDist = triPlane.GetPtDotNormal(spA.m_vecCenter);
+    const auto isSpTouchingPl = std::abs(plSpCenterDist) <= spARadius;
+
+    // Sphere's center projected onto the plane's normal
+    auto spAProjPl = spA.m_vecCenter - plNorm * (isSpTouchingPl ? plSpCenterDist : spARadius); 
+
+    const auto spAToB = spB.m_vecCenter - spA.m_vecCenter; // AKA velocity
+    const auto vA       = UncompressVector(verts[tri.vA]);
+
+    if (!isSpTouchingPl) {
+        const auto vtxAToSpDistSqOnPl = (vA - spAProjPl).Dot(plNorm);
+        if (vtxAToSpDistSqOnPl > 0.f) {
+            return false;
+        }
+        const auto spAToBDistSqOnPl = spAToB.Dot(plNorm);
+        if (vtxAToSpDistSqOnPl <= spAToBDistSqOnPl) {
+            return false; // If spA was closer than spB then there's no way spB would touch it, so we're finished
+        }
+        spAProjPl += spAToB * (vtxAToSpDistSqOnPl / spAToBDistSqOnPl); // Interpolate between spA -> spB
+    }
+
+    const auto vB = UncompressVector(verts[tri.vB]),
+               vC = UncompressVector(verts[tri.vC]);
+
+    const CVector cverts[]{vA, vB, vC};
+    if (PointInPoly(spAProjPl, tri, plNorm, cverts)) {
+        return true;
+    }
+
+    const auto& pos          = spA.m_vecCenter;
+    const auto  maxDistSq    = sq(spARadius);
+    const auto  spAToBDistSq = spAToB.SquaredMagnitude(); // AKA spB <-> spA dist sq
+    return ClosestSquaredDistanceBetweenFiniteLines(pos, vA, vB, spAToB, spAToBDistSq) < maxDistSq
+        || ClosestSquaredDistanceBetweenFiniteLines(pos, vC, vB, spAToB, spAToBDistSq) < maxDistSq
+        || ClosestSquaredDistanceBetweenFiniteLines(pos, vA, vC, spAToB, spAToBDistSq) < maxDistSq;
 }
 
 /*!

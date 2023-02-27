@@ -208,6 +208,12 @@ public:
         float& dist,
         float minDist
     );
+
+    // NOTSA section
+    static CVector GetClosestPtOnLine(const CVector& l0, const CVector& l1, const CVector& point);
+    static CVector GetBaryCoordsOnTriangle(CVector a, CVector b, CVector c, CVector p);
+    static CVector GetClampedBaryCoordsIntoTriangle(CVector a, CVector b, CVector c, CVector p);
+    static CVector GetCoordsClampedIntoTriangle(CVector a, CVector b, CVector c, CVector p);
 };
 
 void CalculateColPointInsideBox(const CBox& box, const CVector& point, CColPoint& colPoint);
