@@ -42,7 +42,7 @@ void CMenuManager::PlaceRedMarker() {
         m_nTargetBlipIndex = 0;
     } else {
         AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_SELECT);
-        m_nTargetBlipIndex = CRadar::SetCoordBlip(BLIP_COORD, { m_vMousePos.x, m_vMousePos.y, 0.0f }, 0, BLIP_DISPLAY_BLIPONLY, "CODEWAY");
+        m_nTargetBlipIndex = CRadar::SetCoordBlip(BLIP_COORD, { m_vMousePos.x, m_vMousePos.y, 0.0f }, BLIP_COLOUR_RED, BLIP_DISPLAY_BLIPONLY, "CODEWAY");
         CRadar::SetBlipSprite(m_nTargetBlipIndex, RADAR_SPRITE_WAYPOINT);
     }
 }
