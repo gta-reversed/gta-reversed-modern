@@ -461,14 +461,64 @@ CVector CCollision::GetClosestPtOnLine(const CVector& l0, const CVector& l1, con
     return lerp(l0, l1, dot / lnMagSq);
 }
 
+
+// 0x417FD0
+void CCollision::ClosestPointOnLine(const CVector& l0, const CVector& l1, const CVector& point, CVector& closest) {
+    closest = GetClosestPtOnLine(l0, l1, point);
+}
+
 // 0x415950
 void CCollision::Closest3(CVector* arg0, CVector* arg1) {
     NOTSA_UNREACHABLE();
 }
 
 // 0x415A40
-float ClosestSquaredDistanceBetweenFiniteLines(const CVector& line1Start, const CVector& line1End, const CVector& line2Start, const CVector& line2End, float arg4) {
-    return plugin::CallAndReturn<float, 0x415A40>(&line1Start, &line1End, &line2Start, &line2End, arg4);
+float ClosestSquaredDistanceBetweenFiniteLines(
+    const CVector& lnAOrigin,
+    const CVector& lnAEnd,
+    const CVector& lnBOrigin,
+    const CVector& lnBDir,
+    float lnBMagSq
+) {
+    return plugin::CallAndReturn<float, 0x415A40, const CVector&, const CVector&, const CVector&, const CVector&, float>(lnAOrigin, lnAEnd, lnBOrigin, lnBDir, lnBMagSq);
+    /* TODO: Fix
+    constexpr auto EPSILON = 1e-5f;
+
+    const CVector u = lnAEnd - lnAOrigin;
+    const CVector v = lnBDir;
+    const CVector w = lnAOrigin - lnBOrigin;
+
+    const float uv = u.Dot(v);
+    const float vv = lnBMagSq;
+    const float uu = u.Dot(u);
+    const float vw = v.Dot(w);
+
+    const float a = uu * vv - uv * uv;
+    const float b = uv * vv - u.Dot(w * v) * uv;
+    const float c = vv * uv - vw * uv;
+
+    float s, t;
+
+    const auto SafeClampedDiv = [](float dividend, float divisor, float def = 0.f) {
+        if (divisor < EPSILON) {
+            return def;
+        }
+        return std::clamp(dividend / divisor, 0.f, 1.f);
+    };
+
+    // Compute the closest points on the two lines
+
+    s = SafeClampedDiv(b, a);
+    t = SafeClampedDiv(uv * s - vw, vv);
+
+    // Compute the squared distance between the two closest points
+    const CVector closestPointOnA = lnAOrigin + s * u;
+    const CVector closestPointOnB = lnBOrigin + t * v;
+    const CVector distanceVec = closestPointOnA - closestPointOnB;
+    const float distanceSquared = distanceVec.Dot(distanceVec);
+
+    return distanceSquared;
+    */
 }
 
 /*!
@@ -539,7 +589,7 @@ CVector CCollision::GetCoordsClampedIntoTriangle(CVector a, CVector b, CVector c
 /*!
 * Calculate the point closest to `p` on the triangle (a, b, c)
 * 
-* Credit: Code from "Real-Time Collision Detection" by Christer Ericson, published by Morgan Kaufmann Publishers, © 2005 Elsevier Inc
+* Credit: Code from "Real-Time Collision Detection" by Christer Ericson, published by Morgan Kaufmann Publishers, Â© 2005 Elsevier Inc
 */
 CVector ClosestPtPointTriangle(
     CVector a, CVector b, CVector c,
@@ -616,7 +666,7 @@ NOTSA_FORCEINLINE bool ProcessLineSphere_Internal(
     // d - line segment dir (unnormalized in our case)
     // m - P - C
     // Solve:             (d.d)t^2 + 2(m.d)t + (m.m) - r^2 = 0 (for t)
-    // Quadratic formula: (-b ± sqrt(b²-ac)) / a
+    // Quadratic formula: (-b Â± sqrt(bÂ²-ac)) / a
     // Where:              a = d.d, b = m.d, c = m.m - r^2
 
     const auto d = line.m_vecEnd - line.m_vecStart;
@@ -1459,19 +1509,14 @@ bool CCollision::SphereCastVsSphere(const CColSphere& spA, const CColSphere& spB
     );
 }
 
-// 0x417FD0
-void CCollision::ClosestPointOnLine(CVector* arg0, CVector* arg1, CVector* arg2, CVector* arg3) {
-    plugin::Call<0x417FD0, CVector*, CVector*, CVector*, CVector*>(arg0, arg1, arg2, arg3);
-}
-
 // 0x418100 // unused
 void CCollision::ClosestPointsOnPoly(CColTriangle* arg0, CVector* arg1, CVector* arg2, CVector* arg3) {
-    plugin::Call<0x418100, CColTriangle*, CVector*, CVector*, CVector*>(arg0, arg1, arg2, arg3);
+    NOTSA_UNREACHABLE();
 }
 
 // 0x418150 // unused
 void CCollision::ClosestPointOnPoly(CColTriangle* arg0, CVector* arg1, CVector* arg2) {
-    plugin::Call<0x418150, CColTriangle*, CVector*, CVector*>(arg0, arg1, arg2);
+    NOTSA_UNREACHABLE();
 }
 
 // 0x418580
@@ -2124,7 +2169,7 @@ bool CCollision::SphereCastVersusVsPoly(
     auto spAProjPl = spA.m_vecCenter - plNorm * (isSpTouchingPl ? plSpCenterDist : spARadius); 
 
     const auto spAToB = spB.m_vecCenter - spA.m_vecCenter; // AKA velocity
-    const auto vA       = UncompressVector(verts[tri.vA]);
+    const auto vA     = UncompressVector(verts[tri.vA]);
 
     if (!isSpTouchingPl) {
         const auto vtxAToSpDistSqOnPl = (vA - spAProjPl).Dot(plNorm);
@@ -2810,7 +2855,7 @@ void CCollision::InjectHooks() {
     RH_ScopedInstall(SphereCastVsSphere, 0x417F20, { .locked = true }); // Can only be unhooked if `TestSphereSphere` is unhooked too
     //RH_ScopedInstall(ClosestPointOnLine, 0x417FD0);
     //RH_ScopedInstall(ClosestPointsOnPoly, 0x418100);
-    //RH_ScopedInstall(ClosestPointOnPoly, 0x418150);
+    RH_ScopedInstall(ClosestPointOnPoly, 0x418150);
     RH_ScopedInstall(SphereCastVsCaches, 0x4181B0);
     RH_ScopedInstall(SphereCastVsEntity, 0x419F00);
     RH_ScopedInstall(SphereVsEntity, 0x41A5A0);
@@ -2973,6 +3018,20 @@ void CCollision::Tests(int32 i) {
             return approxEqual(org, rev, 0.02f);
         };
         Test("DistToLineSqr", Org, DistToMathematicalLine2D, CmpEq, ls.x, ls.y, le.x, le.y, p.x, p.y);
+    }
+
+    // ClosestSquaredDistanceBetweenFiniteLines
+    {
+        const auto lnA = RandomLine();
+        const auto lnB = RandomLine();
+
+        const auto Org = plugin::CallAndReturn<float, 0x415A40, const CVector&, const CVector&, const CVector&, const CVector&, float>;
+        Test(
+            "ClosestSquaredDistanceBetweenFiniteLines",
+            Org, ClosestSquaredDistanceBetweenFiniteLines, std::equal_to{},
+            lnA.m_vecStart, lnA.m_vecEnd,
+            lnB.m_vecStart, lnB.m_vecEnd - lnB.m_vecStart, (lnB.m_vecEnd - lnB.m_vecStart).SquaredMagnitude()
+        );
     }
 
     // ProcessLineSphere
