@@ -4,6 +4,8 @@ class CPed;
 class CConversationForPed;
 class CConversationNode;
 
+enum class eConversationForPedStatus : uint32;
+
 struct CTempConversationNode {
     char m_Name[8];
     char m_NameNodeYes[8];
@@ -31,8 +33,14 @@ VALIDATE_SIZE(CTempConversationNode, 0x2C);
 
 class CConversations {
 public:
+    enum class AwkwardSayState : int32 {
+        NOT_AVAILABLE,
+        AUDIO_PLAYING,
+        FINISHING
+    };
+
     static inline bool& m_bSettingUpConversation = *(bool*)0x9691D0;
-    static inline int32& m_AwkwardSayStatus = *(int32*)0x9691C4;
+    static inline AwkwardSayState& m_AwkwardSayStatus = *(AwkwardSayState*)0x9691C4;
     static inline int32& m_SettingUpConversationNumNodes = *(int32*)0x9691C8;
     static inline CPed*& m_pSettingUpConversationPed = *(CPed**)0x9691CC;
 
@@ -58,5 +66,5 @@ public:
     static uint32 FindFreeNodeSlot();
     static CConversationForPed* FindConversationForPed(CPed* ped);
     static CConversationForPed* FindFreeConversationSlot();
-    static uint32 GetConversationStatus(CPed* ped);
+    static eConversationForPedStatus GetConversationStatus(CPed* ped);
 };

@@ -2,6 +2,13 @@
 #include "Conversations.h"
 #include "ConversationNode.h"
 
+enum class eConversationForPedStatus : uint32 {
+    NOT_AVAILABLE,
+    UNK_1,
+    UNK_2,
+    UNK_3
+};
+
 class CConversationForPed {
 public:
     int32 m_FirstNode;
@@ -9,7 +16,7 @@ public:
     CPed* m_Ped;
     uint32 m_LastChange;
     uint32 m_LastTimeWeWereCloseEnough;
-    uint32 m_Status;
+    eConversationForPedStatus m_Status;
     bool m_bEnabled;
     bool m_bSuppressSubtitles;
 

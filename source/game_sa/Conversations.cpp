@@ -32,7 +32,7 @@ void CConversations::Clear() {
     rng::for_each(m_aNodes, &CConversationNode::Clear);
 
     m_bSettingUpConversation = false;
-    m_AwkwardSayStatus = 0;
+    m_AwkwardSayStatus = AwkwardSayState::NOT_AVAILABLE;
 }
 
 // 0x43A960
@@ -47,19 +47,19 @@ void CConversations::RemoveConversationForPed(CPed* ped) {
 // 0x43C590
 void CConversations::Update() {
     switch (m_AwkwardSayStatus) {
-    case 1:
+    case AwkwardSayState::AUDIO_PLAYING:
         if (AudioEngine.GetMissionAudioLoadingStatus(0)) {
             AudioEngine.PlayLoadedMissionAudio(0);
-            m_AwkwardSayStatus = 2;
+            m_AwkwardSayStatus = AwkwardSayState::FINISHING;
         }
         break;
-    case 2:
+    case AwkwardSayState::FINISHING:
         if (!AudioEngine.IsMissionAudioSampleFinished(0))
             return;
 
-        m_AwkwardSayStatus = 0;
+        m_AwkwardSayStatus = AwkwardSayState::NOT_AVAILABLE;
         break;
-    case 0:
+    case AwkwardSayState::NOT_AVAILABLE:
     default:
         break;
     }
@@ -69,7 +69,7 @@ void CConversations::Update() {
 
 // 0x43AAC0
 bool CConversations::IsConversationGoingOn() {
-    return rng::any_of(m_aConversations, [](auto& conversation) { return conversation.m_Status != 0; });
+    return rng::any_of(m_aConversations, [](auto& conversation) { return conversation.m_Status != eConversationForPedStatus::NOT_AVAILABLE; });
 }
 
 // 0x43B0B0
@@ -135,7 +135,7 @@ void CConversations::DoneSettingUpConversation(bool suppressSubtitles) {
         conversation->m_LastTimeWeWereCloseEnough = 0;
         conversation->m_bEnabled = true;
         conversation->m_bSuppressSubtitles = suppressSubtitles;
-        conversation->m_Status = 0; // missing in Android
+        conversation->m_Status = eConversationForPedStatus::NOT_AVAILABLE; // missing in Android
 
         m_SettingUpConversationNumNodes = 0;
         m_bSettingUpConversation = false;
@@ -169,7 +169,7 @@ void CConversations::StartSettingUpConversation(CPed* ped) {
 void CConversations::AwkwardSay(int32 sampleId, CPed* ped) {
     AudioEngine.PreloadMissionAudio(0u, sampleId);
     AudioEngine.AttachMissionAudioToPed(0u, ped);
-    m_AwkwardSayStatus = 1;
+    m_AwkwardSayStatus = AwkwardSayState::AUDIO_PLAYING;
 }
 
 // 0x43AA10
@@ -199,7 +199,7 @@ CConversationForPed* CConversations::FindFreeConversationSlot() {
 }
 
 // 0x43AA80
-uint32 CConversations::GetConversationStatus(CPed* ped) {
+eConversationForPedStatus CConversations::GetConversationStatus(CPed* ped) {
     if (const auto conversation = FindConversationForPed(ped)) {
         return conversation->m_Status;
     }
