@@ -21,28 +21,14 @@
 extern void WinPsInjectHooks();
 
 static LPSTR AppClassName = LPSTR(APP_CLASS);
+static auto& windowsVersion = StaticRef<MEMORYSTATUS, 0xC8CF68>();
+
 
 // forward declarations
 bool IsAlreadyRunning();
 char** CommandLineToArgv(char* cmdLine, int* argCount);
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 INT WINAPI __WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, INT nCmdShow);
-
-void Win32InjectHooks() {
-    RH_ScopedCategory("Win");
-    RH_ScopedNamespaceName("Win");
-
-    RH_ScopedGlobalInstall(IsForegroundApp, 0x746060);
-    RH_ScopedGlobalInstall(IsAlreadyRunning, 0x7468E0);
-    RH_ScopedGlobalInstall(CommandLineToArgv, 0x746480, {.reversed = false});
-
-    RH_ScopedGlobalInstall(MainWndProc, 0x747EB0, {.reversed = false});
-    RH_ScopedNamedGlobalInstall(__WinMain, "WinMain", 0x745560, {.reversed = false});
-
-    WinPsInjectHooks();
-    WinInput::InjectHooks();
-}
-
 // @notsa
 // @brief Resets the screen gamma if ever changed.
 void ResetGammaWhenExiting() {
@@ -124,6 +110,83 @@ bool IsForegroundApp() {
 // 0x746480
 char** CommandLineToArgv(char* cmdLine, int* argCount) {
     return plugin::CallAndReturn<char**, 0x746480, char*, int*>(cmdLine, argCount);
+}
+
+// 0x747820
+BOOL GTATranslateKey(RsKeyCodes* ck, LPARAM lParam, UINT vk) {
+    *ck = [&] {
+        // Handle extended keys
+        const auto Ext = [kf = HIWORD(lParam)](RsKeyCodes extended, RsKeyCodes unextended) {
+            return (kf & KF_EXTENDED) ? extended : unextended;
+        };
+
+        switch (vk) {
+        case VK_RETURN:     return Ext(rsPADENTER, rsENTER);
+        case VK_CONTROL:    return Ext(rsRCTRL, rsLCTRL);
+        case VK_MENU:       return Ext(rsRALT, rsLALT);
+        case VK_PRIOR:      return Ext(rsPGUP, rsPADPGUP);
+        case VK_NEXT:       return Ext(rsPGDN, rsPADPGDN);
+        case VK_END:        return Ext(rsEND, rsPADEND);
+        case VK_HOME:       return Ext(rsHOME, rsPADHOME);
+        case VK_LEFT:       return Ext(rsLEFT, rsPADLEFT);
+        case VK_UP:         return Ext(rsUP, rsPADUP);
+        case VK_RIGHT:      return Ext(rsRIGHT, rsPADRIGHT);
+        case VK_DOWN:       return Ext(rsDOWN, rsPADDOWN);
+        case VK_INSERT:     return Ext(rsINS, rsPADINS);
+        case VK_DELETE:     return Ext(rsDEL, rsPADDEL);
+        case VK_BACK:       return rsBACKSP;
+        case VK_TAB:        return rsTAB;
+        case VK_PAUSE:      return rsPAUSE;
+        case VK_CAPITAL:    return rsCAPSLK;
+        case VK_ESCAPE:     return rsESC;
+        case VK_LWIN:       return rsLWIN;
+        case VK_RWIN:       return rsRWIN;
+        case VK_APPS:       return rsAPPS;
+        case VK_NUMPAD0:    return rsPADINS;
+        case VK_NUMPAD1:    return rsPADEND;
+        case VK_NUMPAD2:    return rsPADDOWN;
+        case VK_NUMPAD3:    return rsPADPGDN;
+        case VK_NUMPAD4:    return rsPADLEFT;
+        case VK_NUMPAD5:    return rsPAD5;
+        case VK_NUMPAD6:    return rsPADRIGHT;
+        case VK_NUMPAD7:    return rsPADHOME;
+        case VK_NUMPAD8:    return rsPADUP;
+        case VK_NUMPAD9:    return rsPADPGUP;
+        case VK_MULTIPLY:   return rsTIMES;
+        case VK_ADD:        return rsPLUS;
+        case VK_SUBTRACT:   return rsMINUS;
+        case VK_DECIMAL:    return rsPADDEL;
+        case VK_DIVIDE:     return rsDIVIDE;
+        case VK_F1:         return rsF1;
+        case VK_F2:         return rsF2;
+        case VK_F3:         return rsF3;
+        case VK_F4:         return rsF4;
+        case VK_F5:         return rsF5;
+        case VK_F6:         return rsF6;
+        case VK_F7:         return rsF7;
+        case VK_F8:         return rsF8;
+        case VK_F9:         return rsF9;
+        case VK_F10:        return rsF10;
+        case VK_F11:        return rsF11;
+        case VK_F12:        return rsF12;
+        case VK_NUMLOCK:    return rsNUMLOCK;
+        case VK_SCROLL:     return rsSCROLL;
+        case VK_SHIFT: {
+            return windowsVersion.dwLength != 1 // Windows 95 and Windows NT 3.1 - Pretty sure something is fucked up here
+                ? rsNULL
+                : rsSHIFT;
+        }
+        default: { // Try mapping to regular ASCII char
+            const auto chr = MapVirtualKey(vk, MAPVK_VK_TO_CHAR);
+            if (chr <= 0xFF) {
+                return (RsKeyCodes)(chr);
+            }
+            break;
+        }
+        }
+        return rsNULL;
+    }();
+    return *ck != rsNULL;
 }
 
 // 0x747EB0
@@ -399,4 +462,20 @@ INT WINAPI __WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine,
     SetErrorMode(0);
 
     return Msg.wParam;
+}
+
+void Win32InjectHooks() {
+    RH_ScopedCategory("Win");
+    RH_ScopedNamespaceName("Win");
+
+    RH_ScopedGlobalInstall(IsForegroundApp, 0x746060);
+    RH_ScopedGlobalInstall(IsAlreadyRunning, 0x7468E0);
+    RH_ScopedGlobalInstall(CommandLineToArgv, 0x746480, {.reversed = false});
+
+    RH_ScopedGlobalInstall(GTATranslateKey, 0x747820);
+    RH_ScopedGlobalInstall(MainWndProc, 0x747EB0, { .reversed = false });
+    RH_ScopedNamedGlobalInstall(__WinMain, "WinMain", 0x745560, {.reversed = false});
+
+    WinPsInjectHooks();
+    WinInput::InjectHooks();
 }
