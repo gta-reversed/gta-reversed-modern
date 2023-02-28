@@ -66,12 +66,12 @@ solution "gta_reversed"
     flags {
         "NoImportLib",
         --"NoBufferSecurityCheck"
+        "FatalWarnings",
     }
 
     defines { 
         "_CRT_SECURE_NO_WARNINGS", 
         "_SCL_SECURE_NO_WARNINGS",
-        "FatalWarnings"
     }
 
     include "source/"
