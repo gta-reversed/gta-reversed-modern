@@ -14,8 +14,8 @@ void CConversations::InjectHooks() {
     RH_ScopedInstall(IsConversationGoingOn, 0x43AAC0);
     RH_ScopedInstall(IsConversationAtNode, 0x43B000);
     RH_ScopedInstall(EnableConversation, 0x43AA40);
-    RH_ScopedInstall(DoneSettingUpConversation, 0x43ADB0, {.reversed = false});
-    RH_ScopedInstall(SetUpConversationNode, 0x43A870, {.reversed = false});
+    RH_ScopedInstall(DoneSettingUpConversation, 0x43ADB0);
+    RH_ScopedInstall(SetUpConversationNode, 0x43A870);
     RH_ScopedInstall(StartSettingUpConversation, 0x43A840);
     RH_ScopedInstall(AwkwardSay, 0x43A810);
 
@@ -84,10 +84,57 @@ void CConversations::EnableConversation(CPed* ped, bool enable) {
 }
 
 // 0x43ADB0
-void CConversations::DoneSettingUpConversation(bool suppressSubtitles) {}
+void CConversations::DoneSettingUpConversation(bool suppressSubtitles) {
+    rng::for_each(std::span{m_aTempNodes.data(), (size_t)m_SettingUpConversationNumNodes}, &CTempConversationNode::ClearNodes);
+    rng::for_each(std::span{m_aNodes.data(), (size_t)m_SettingUpConversationNumNodes}, &CConversationNode::Clear);
+
+    for (auto i = 0; i < m_SettingUpConversationNumNodes; i++) {
+              auto& node = m_aNodes[i];
+        const auto& tempNode = m_aTempNodes[i];
+
+        strcpy_s(node.m_Name, tempNode.m_Name);
+
+        if (tempNode.m_NodeYes >= 0) {
+            node.m_NodeYes = tempNode.m_NodeYes;
+        } /* else: already set to -1 in CConversationNode::Clear. */
+
+        if (tempNode.m_NodeNo >= 0) {
+            node.m_NodeNo = tempNode.m_NodeNo;
+        } /* else: already set to -1 in CConversationNode::Clear. */
+
+        node.m_Speech = tempNode.m_Speech;
+        node.m_SpeechY = tempNode.m_SpeechY;
+        node.m_SpeechN = tempNode.m_SpeechN;
+    }
+
+    if (const auto conversation = FindFreeConversationSlot()) {
+        conversation->m_FirstNode = conversation->m_CurrentNode = m_aTempNodes[0].m_FinalSlot;
+        conversation->m_Ped = m_pSettingUpConversationPed;
+        CEntity::RegisterReference(conversation->m_Ped);
+
+        conversation->m_LastChange = CTimer::GetTimeInMS();
+        conversation->m_LastTimeWeWereCloseEnough = 0;
+        conversation->m_bEnabled = true;
+        conversation->m_bSuppressSubtitles = suppressSubtitles;
+        conversation->m_Status = 0; // missing in Android
+
+        m_SettingUpConversationNumNodes = 0;
+        m_bSettingUpConversation = false;
+    }
+    // Originally in this case game would derefecence a nullptr, accessing many offsets.
+    NOTSA_UNREACHABLE("Couldn't find a free conversation slot!");
+}
 
 // 0x43A870
-void CConversations::SetUpConversationNode(char*, char*, char*, int32, int32, int32) {}
+void CConversations::SetUpConversationNode(
+    const char* name,
+    const char* linkYes,
+    const char* linkNo,
+    int32 speech,
+    int32 speechY,
+    int32 speechN) {
+    SetUpConversationNode(name, linkYes, linkNo, speech, speechY, speechN);
+}
 
 // 0x43A840
 void CConversations::StartSettingUpConversation(CPed* ped) {

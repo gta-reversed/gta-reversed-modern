@@ -14,6 +14,18 @@ struct CTempConversationNode {
     uint32 m_Speech;
     uint32 m_SpeechY;
     uint32 m_SpeechN;
+
+    void ClearNodes() {
+        m_NodeYes = m_NodeNo = -1;
+
+        if (!strcmp(m_NameNodeYes, m_Name)) {
+            m_NameNodeYes[0] = '\0';
+        }
+
+        if (!strcmp(m_NameNodeNo, m_Name)) {
+            m_NameNodeNo[0] = '\0';
+        }
+    }
 };
 VALIDATE_SIZE(CTempConversationNode, 0x2C);
 
@@ -39,7 +51,7 @@ public:
     static bool IsConversationAtNode(char* nodeName, CPed* ped);
     static void EnableConversation(CPed* ped, bool enable);
     static void DoneSettingUpConversation(bool suppressSubtitles);
-    static void SetUpConversationNode(char*, char*, char*, int32, int32, int32);
+    static void SetUpConversationNode(const char* name, const char* linkYes, const char* linkNo, int32 speech, int32 speechY, int32 speechN);
     static void StartSettingUpConversation(CPed* ped);
     static void AwkwardSay(int32 sampleId, CPed* ped);
 
