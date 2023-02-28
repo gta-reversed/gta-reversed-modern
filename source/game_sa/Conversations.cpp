@@ -10,7 +10,12 @@ void CConversations::InjectHooks() {
 
     RH_ScopedInstall(Clear, 0x43A7B0);
     RH_ScopedInstall(RemoveConversationForPed, 0x43A960);
+    RH_ScopedInstall(Update, 0x43C590, {.reversed = false});
     RH_ScopedInstall(IsConversationGoingOn, 0x43AAC0);
+    RH_ScopedInstall(IsConversationAtNode, 0x43B000);
+    RH_ScopedInstall(EnableConversation, 0x43AA40);
+    RH_ScopedInstall(DoneSettingUpConversation, 0x43ADB0, {.reversed = false});
+    RH_ScopedInstall(SetUpConversationNode, 0x43A870, {.reversed = false});
     RH_ScopedInstall(StartSettingUpConversation, 0x43A840);
     RH_ScopedInstall(AwkwardSay, 0x43A810);
 
@@ -33,12 +38,13 @@ void CConversations::Clear() {
 // 0x43A960
 void CConversations::RemoveConversationForPed(CPed* ped) {
     if (const auto conversation = FindConversationForPed(ped)) {
-        m_aNodes[conversation->m_FirstNode].ClearRecursively();
+        assert(conversation->GetFirstNode());
+        conversation->GetFirstNode()->ClearRecursively();
         conversation->Clear();
     }
 }
 
-// 0x0x43C590
+// 0x43C590
 void CConversations::Update() {
     plugin::Call<0x43C590>();
 }
@@ -57,6 +63,31 @@ bool CConversations::IsPlayerInPositionForConversation(CPed* ped, bool isRandomC
     // Originally in this case game would call a THISCALL function with nullptr `this`, so game would crash.
     NOTSA_UNREACHABLE("Couldn't find the specified ped in any conversation.");
 }
+
+// 0x43B000
+bool CConversations::IsConversationAtNode(char* nodeName, CPed* ped) {
+    if (const auto conversation = FindConversationForPed(ped)) {
+        assert(conversation->GetCurrentNode());
+        return strcmp(MakeUpperCase(nodeName, nodeName), conversation->GetCurrentNode()->m_Name);
+    }
+
+    return false;
+}
+
+// 0x43AA40
+void CConversations::EnableConversation(CPed* ped, bool enable) {
+    if (const auto conversation = FindConversationForPed(ped)) {
+        conversation->m_bEnabled = enable;
+    }
+    // Originally in this case game would derefecence a nullptr, accessing address `0x18`.
+    NOTSA_UNREACHABLE("Couldn't find conversation for ped!");
+}
+
+// 0x43ADB0
+void CConversations::DoneSettingUpConversation(bool suppressSubtitles) {}
+
+// 0x43A870
+void CConversations::SetUpConversationNode(char*, char*, char*, int32, int32, int32) {}
 
 // 0x43A840
 void CConversations::StartSettingUpConversation(CPed* ped) {

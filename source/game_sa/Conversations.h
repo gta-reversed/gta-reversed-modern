@@ -22,13 +22,10 @@ public:
     static void Update();
     static bool IsConversationGoingOn();
     static bool IsPlayerInPositionForConversation(CPed* ped, bool isRandomConversation);
-    /* Check the signatures before starting work
-    
-    static bool IsConversationAtNode(char*, CPed* ped);
-    static void EnableConversation(CPed* ped, bool);
-    static void DoneSettingUpConversation(bool);
+    static bool IsConversationAtNode(char* nodeName, CPed* ped);
+    static void EnableConversation(CPed* ped, bool enable);
+    static void DoneSettingUpConversation(bool suppressSubtitles);
     static void SetUpConversationNode(char*, char*, char*, int32, int32, int32);
-     */
     static void StartSettingUpConversation(CPed* ped);
     static void AwkwardSay(int32 sampleId, CPed* ped);
 

@@ -58,6 +58,7 @@
 #include "InterestingEvents.h"
 #include "WindModifiers.h"
 #include "GrassRenderer.h"
+#include "PedToPlayerConversations.h"
 
 void CGame::InjectHooks() {
     RH_ScopedClass(CGame);

@@ -327,7 +327,7 @@ public:
     float               field_75C;
     char                m_nLastWeaponDamage;
     CEntity*            m_pLastEntityDamage;
-    int32               m_nLastDamageTime;
+    uint32               m_nLastDamageTime;
 
     // TODO: Not turret, but rather attached entity, see `AttachPedToEntity` and `AttachPedToBike`
     CVector             m_vecTurretOffset;
