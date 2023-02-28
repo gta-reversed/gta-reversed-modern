@@ -6,15 +6,27 @@
 #include "TaskSimpleStandStill.h"
 #include "TaskComplexKillPedOnFoot.h"
 
+void CPedToPlayerConversations::InjectHooks() {
+    RH_ScopedClass(CPedToPlayerConversations);
+    RH_ScopedCategory("Conversations");
+
+    RH_ScopedInstall(Clear, 0x43AAE0);
+    RH_ScopedInstall(Update, 0x43B0F0);
+    RH_ScopedInstall(EndConversation, 0x43AB10);
+}
+
 // 0x43AAE0
 void CPedToPlayerConversations::Clear() {
-    plugin::Call<0x43AAE0>();
+    if (m_State != State::NO_CONVERSATION) {
+        m_State = State::NO_CONVERSATION;
+        CAEPedSpeechAudioEntity::ReleasePlayerConversation();
+    }
+    m_pPed = nullptr;
+    m_TimeOfLastPlayerConversation = 0;
 }
 
 // 0x43B0F0
 void CPedToPlayerConversations::Update() {
-    return plugin::Call<0x43B0F0>();
-
     if (const auto vehicle = FindPlayerVehicle()) {
         pLastVehicle = vehicle;
         CEntity::RegisterReference(pLastVehicle);
@@ -377,8 +389,6 @@ void CPedToPlayerConversations::Update() {
 
 // 0x43AB10
 void CPedToPlayerConversations::EndConversation() {
-    return plugin::Call<0x43AB10>();
-
     m_State = State::NO_CONVERSATION;
     CAEPedSpeechAudioEntity::ReleasePlayerConversation();
 
@@ -393,6 +403,11 @@ void CPedToPlayerConversations::EndConversation() {
             g_ikChainMan.AbortLookAt(m_pPed);
         }
     }
+}
+
+void CConversations::InjectHooks() {
+    RH_ScopedClass(CConversations);
+    RH_ScopedCategory("Conversations");;
 }
 
 void CConversations::Clear() {

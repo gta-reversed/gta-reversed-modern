@@ -32,6 +32,8 @@ public:
     static inline Topic& m_Topic = *(Topic*)0x9691BC;
     static inline bool& m_bPositiveOpening = *(bool*)0x9691B1;
 
+    static void InjectHooks();
+
     static void Clear();
     static void Update();
     static void EndConversation();
@@ -48,6 +50,8 @@ public:
 
 class CConversations {
 public:
+    static void InjectHooks();
+
     static void Clear();
     static void RemoveConversationForPed(CPed* ped);
 
