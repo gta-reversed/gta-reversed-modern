@@ -10,7 +10,7 @@ void CConversations::InjectHooks() {
 
     RH_ScopedInstall(Clear, 0x43A7B0);
     RH_ScopedInstall(RemoveConversationForPed, 0x43A960);
-    RH_ScopedInstall(Update, 0x43C590, {.reversed = false});
+    RH_ScopedInstall(Update, 0x43C590);
     RH_ScopedInstall(IsConversationGoingOn, 0x43AAC0);
     RH_ScopedInstall(IsConversationAtNode, 0x43B000);
     RH_ScopedInstall(EnableConversation, 0x43AA40);
@@ -46,7 +46,25 @@ void CConversations::RemoveConversationForPed(CPed* ped) {
 
 // 0x43C590
 void CConversations::Update() {
-    plugin::Call<0x43C590>();
+    switch (m_AwkwardSayStatus) {
+    case 1:
+        if (AudioEngine.GetMissionAudioLoadingStatus(0)) {
+            AudioEngine.PlayLoadedMissionAudio(0);
+            m_AwkwardSayStatus = 2;
+        }
+        break;
+    case 2:
+        if (!AudioEngine.IsMissionAudioSampleFinished(0))
+            return;
+
+        m_AwkwardSayStatus = 0;
+        break;
+    case 0:
+    default:
+        break;
+    }
+
+    rng::for_each(m_aConversations, &CConversationForPed::Update);
 }
 
 // 0x43AAC0
