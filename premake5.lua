@@ -39,6 +39,7 @@ solution "gta_reversed"
         symbols "On"
         runtime "Debug"
         vectorextensions "AVX2"
+        defines { "NOTSA_DEBUG" }
 
     filter "configurations:Release*"
         staticruntime "off"
