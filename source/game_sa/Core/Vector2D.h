@@ -131,6 +131,14 @@ public:
     //! Get vector perpendicular to `*this` on the left side (Same direction `*this` rotated by 90)
     //! Also see `GetPerpRight` and `RotatedBy`
     CVector2D GetPerpLeft() const;
+
+    float operator[](size_t i) const {
+        return (&x)[i];
+    }
+
+    float& operator[](size_t i) {
+        return (&x)[i];
+    }
 };
 
 constexpr inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {

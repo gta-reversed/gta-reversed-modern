@@ -19,8 +19,8 @@
 
 union tPoolObjectFlags {
     struct {
-        uint8 nId : 7;
-        bool  bEmpty : 1;
+        uint8 nId : 7;    // Mask: 0x7F
+        bool  bEmpty : 1; // Mask: 0x80
     };
 
 private:

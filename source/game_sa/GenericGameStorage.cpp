@@ -33,8 +33,8 @@ void CGenericGameStorage::InjectHooks() {
     RH_ScopedInstall(GenericLoad, 0x5D17B0, { .reversed = false });
     RH_ScopedInstall(GenericSave, 0x5D13E0, { .reversed = false });
     RH_ScopedInstall(CheckSlotDataValid, 0x5D1380, { .reversed = false });
-    RH_ScopedInstall(LoadDataFromWorkBuffer, 0x5D1300, { .reversed = false });
-    RH_ScopedInstall(SaveDataToWorkBuffer, 0x5D1270, { .reversed = false });
+    //RH_ScopedInstall(LoadDataFromWorkBuffer, 0x5D1300, { .reversed = false });
+    //RH_ScopedInstall(SaveDataToWorkBuffer, 0x5D1270, { .reversed = false });
     RH_ScopedInstall(LoadWorkBuffer, 0x5D10B0, { .reversed = false });
     RH_ScopedInstall(SaveWorkBuffer, 0x5D0F80, { .reversed = false });
     RH_ScopedInstall(GetCurrentVersionNumber, 0x5D0F50, { .reversed = false });
