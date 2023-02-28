@@ -112,6 +112,6 @@ public:
     static void FindFreeConversationSlot();
     static void SetUpConversationNode(char*, char*, char*, int32, int32, int32);
     static void StartSettingUpConversation(CPed* ped);
-    static void AwkwardSay(int32, CPed* ped);
      */
+    static void AwkwardSay(int32 sampleId, CPed* ped);
 };

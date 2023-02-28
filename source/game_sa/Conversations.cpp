@@ -410,6 +410,7 @@ void CConversations::InjectHooks() {
     RH_ScopedCategory("Conversations");
 
     RH_ScopedInstall(Clear, 0x43A7B0);
+    RH_ScopedInstall(AwkwardSay, 0x43A810);
 }
 
 // 0x43A7B0
@@ -428,6 +429,13 @@ void CConversations::Update() {
 // 0x43AAC0
 bool CConversations::IsConversationGoingOn() {
     return plugin::CallAndReturn<bool, 0x43AAC0>();
+}
+
+// 0x43A810
+void CConversations::AwkwardSay(int32 sampleId, CPed* ped) {
+    AudioEngine.PreloadMissionAudio(0u, sampleId);
+    AudioEngine.AttachMissionAudioToPed(0u, ped);
+    m_AwkwardSayStatus = 1;
 }
 
 // 0x43A960
