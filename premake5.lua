@@ -72,116 +72,6 @@ solution "gta_reversed"
         "FatalWarnings"
     }
 
-group "Dependencies"
-    defines { "WIN32", "_WINDOWS" }
-
-    project "ogg"
-        includedirs { "libs/vorbis/include", "libs/ogg/include", "libs/ogg/include" }
-        language "C++"
-        kind "StaticLib"
-        targetname "ogg"
-        warnings "Off"
-
-        vpaths {
-            ["Headers/*"] = {"libs/ogg/**.h",},
-            ["Sources/*"] = {"libs/ogg/**.c",},
-            ["*"] = {"premake5.lua", "CMakeLists.txt"}
-        }
-
-        files {
-            "libs/ogg/**.h",
-            "libs/ogg/**.c"
-        }
-
-    project "vorbis"
-        includedirs { "libs/vorbis/include", "libs/ogg/include", "%{cfg.targetdir}" }
-        language "C++"
-        kind "StaticLib"
-        targetname "vorbis"
-        warnings "Off"
-
-        vpaths {
-            ["Headers/*"] = {"libs/vorbis/**.h",},
-            ["Sources/*"] = {"libs/vorbis/**.c",},
-            ["*"] = {"premake5.lua", "CMakeLists.txt"}
-        }
-
-        files { 
-            "libs/vorbis/win32/vorbis.def", 
-            "libs/vorbis/lib/**.*"
-        }
-        removefiles {
-            "libs/vorbis/lib/psytune.c",
-            "libs/vorbis/lib/tone.c",
-            "libs/vorbis/lib/misc.c",
-            "libs/vorbis/lib/psy.h",
-        }
-
-    project "vorbisenc"
-        includedirs { "libs/vorbis/include", "libs/ogg/include", "%{cfg.targetdir}" }
-        language "C++"
-        kind "StaticLib"
-        targetname "vorbisenc"
-        warnings "Off"
-        
-        vpaths {
-            ["Sources/*"] = {"libs/vorbis/**.c",},
-            ["*"] = {"premake5.lua", "CMakeLists.txt"}
-        }
-
-        files { 
-            "libs/vorbis/lib/vorbisenc.c", 
-            "/libs/vorbis/win32/vorbisenc.def" 
-        }
-
-    project "vorbisfile"
-        includedirs { "libs/vorbis/include", "libs/ogg/include", "%{cfg.targetdir}" }
-        language "C++"
-        kind "StaticLib"
-        targetname "vorbisfile"   
-        warnings "Off"
-
-        vpaths {
-            ["Sources/*"] = {"libs/vorbis/**.c",},
-            ["*"] = {"premake5.lua", "CMakeLists.txt"}
-        }
-
-        files { 
-            "libs/vorbis/lib/vorbisfile.c", 
-            "/libs/vorbis/win32/vorbisfile.def" 
-        }
-
-    project "imgui"
-        includedirs { "libs/imgui", "libs/imgui/backends", "libs/imgui/misc/cpp" }
-        language "C++"
-        kind "StaticLib"
-        targetname "imgui" 
-        warnings "Off"
-
-        vpaths {
-            ["Headers/*"] = {"libs/imgui/**.h",},
-            ["Sources/*"] = {"libs/imgui/**.c*",},
-            ["*"] = {"premake5.lua", "CMakeLists.txt"}
-        }
-
-        local filePaths = {
-            "imconfig.h", "imgui.h", "imgui_internal.h", "imstb_rectpack.h", "imstb_textedit.h", "imstb_truetype.h", 
-            "imgui.cpp", "imgui_draw.cpp", "imgui_widgets.cpp", "imgui_tables.cpp", "imgui_demo.cpp"
-        }
-        for i, fileName in pairs(filePaths) do 
-            filePaths[i] = "libs/imgui/"..fileName
-        end
-        files {
-            "libs/imgui/backends/imgui_impl_win32.h",
-            "libs/imgui/backends/imgui_impl_win32.cpp",
-            "libs/imgui/backends/imgui_impl_dx9.h",
-            "libs/imgui/backends/imgui_impl_dx9.cpp",
-            "libs/imgui/misc/cpp/imgui_stdlib.h",
-            "libs/imgui/misc/cpp/imgui_stdlib.cpp",
-            table.unpack(filePaths),
-        }
-
-group ""
     project "gta_reversed"
         cppdialect "C++20"        
         kind "SharedLib"
@@ -247,3 +137,7 @@ group ""
             defines { "ENABLE_SCRIPT_COMMAND_HOOKS" }   
 
         filter {} -- Clear filter
+
+    group "Dependencies"
+        defines { "WIN32", "_WINDOWS" }
+        include "libs/"
