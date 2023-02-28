@@ -38,12 +38,14 @@ solution "gta_reversed"
         staticruntime "off"
         symbols "On"
         runtime "Debug"
+        vectorextensions "AVX2"
 
     filter "configurations:Release*"
         staticruntime "off"
         symbols "On"
-        defines { "NDEBUG" }
         runtime "Release"
+        vectorextensions "AVX2"
+        defines { "NDEBUG" }
         optimize "Full"
 
     filter "action:vs*"
