@@ -212,10 +212,13 @@ group ""
         }
 
         includedirs {
-            "source", "source/**",
+            "source", 
+            "source/**",
             "libs/vorbis/include",
             "libs/ogg/include",
-            "libs/imgui", "libs/imgui/backends", "libs/imgui/misc/cpp",
+            "libs/imgui", 
+            "libs/imgui/backends", 
+            "libs/imgui/misc/cpp",
             "libs/dxsdk"
         }
 
