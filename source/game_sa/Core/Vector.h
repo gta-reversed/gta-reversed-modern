@@ -10,9 +10,9 @@
 #include <span>
 #include "PluginBase.h" // !!!
 #include "RenderWare.h"
+#include "Vector2D.h"
 
 class CMatrix;
-class CVector2D;
 
 class CVector : public RwV3d {
 public:

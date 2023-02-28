@@ -421,3 +421,7 @@ bool CPathFind::Load() {
 bool CPathFind::Save() {
     return plugin::CallMethodAndReturn<bool, 0x5D1502>(this);
 }
+
+void CPathFind::SetPathsNeededAtPosition(const CVector& posn) {
+    return plugin::CallAndReturn<void, 0x44DCD0, CPathFind*, const CVector&>(this,posn);
+}
