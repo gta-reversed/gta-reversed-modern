@@ -33,7 +33,7 @@ void CPedToPlayerConversations::Update() {
         CEntity::RegisterReference(pLastVehicle);
     }
 
-    static int32& lastPedPoolIdx = *(int32*)0x969A3C;
+    static auto& lastPedPoolIdx = StaticRef<int32, 0x969A3C>();
 
     const auto player = FindPlayerPed();
     switch (m_State) {
@@ -73,7 +73,7 @@ void CPedToPlayerConversations::Update() {
                 continue;
 
             const auto RandomPedTalk = [ped] {
-                if (CGeneral::RandomBool(0.02f)) { // NOTSA, originally: rand() % 4096 == 3
+                if (CGeneral::RandomBool(1.0f / 4096.0f * 100.0f)) { // NOTSA, originally: rand() % 4096 == 3
                     ped->Say(88);
                 }
             };

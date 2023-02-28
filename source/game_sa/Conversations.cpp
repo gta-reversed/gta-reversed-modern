@@ -86,7 +86,7 @@ bool CConversations::IsPlayerInPositionForConversation(CPed* ped, bool isRandomC
 bool CConversations::IsConversationAtNode(char* nodeName, CPed* ped) {
     if (const auto conversation = FindConversationForPed(ped)) {
         assert(conversation->GetCurrentNode());
-        return strcmp(MakeUpperCase(nodeName, nodeName), conversation->GetCurrentNode()->m_Name);
+        return !strcmp(MakeUpperCase(nodeName, nodeName), conversation->GetCurrentNode()->m_Name);
     }
 
     return false;
@@ -96,9 +96,10 @@ bool CConversations::IsConversationAtNode(char* nodeName, CPed* ped) {
 void CConversations::EnableConversation(CPed* ped, bool enable) {
     if (const auto conversation = FindConversationForPed(ped)) {
         conversation->m_bEnabled = enable;
+    } else {
+        // Originally in this case game would derefecence a nullptr, accessing address `0x18`.
+        NOTSA_UNREACHABLE("Couldn't find conversation for ped!");
     }
-    // Originally in this case game would derefecence a nullptr, accessing address `0x18`.
-    NOTSA_UNREACHABLE("Couldn't find conversation for ped!");
 }
 
 // 0x43ADB0
@@ -138,9 +139,10 @@ void CConversations::DoneSettingUpConversation(bool suppressSubtitles) {
 
         m_SettingUpConversationNumNodes = 0;
         m_bSettingUpConversation = false;
+    } else {
+        // Originally in this case game would derefecence a nullptr, accessing many offsets.
+        NOTSA_UNREACHABLE("Couldn't find a free conversation slot!");
     }
-    // Originally in this case game would derefecence a nullptr, accessing many offsets.
-    NOTSA_UNREACHABLE("Couldn't find a free conversation slot!");
 }
 
 // 0x43A870
@@ -177,6 +179,7 @@ uint32 CConversations::FindFreeNodeSlot() {
         return 0;
     }
 
+    // Set a temporary name for the node, so it won't be considered free.
     strcpy_s(free->m_Name, "X");
     return rng::distance(m_aNodes.begin(), free);
 }

@@ -42,7 +42,7 @@ enum ePedType : uint32 {
 };
 
 // 0x43A6A0
-static constexpr bool IsPedTypeFemale(ePedType ptype) {
+inline constexpr bool IsPedTypeFemale(ePedType ptype) {
     return ptype == PED_TYPE_CIVFEMALE || ptype == PED_TYPE_PROSTITUTE;
 }
 
