@@ -153,7 +153,31 @@ void CConversations::SetUpConversationNode(
     int32 speech,
     int32 speechY,
     int32 speechN) {
-    CConversationNode::SetUpConversationNode(name, linkYes, linkNo, speech, speechY, speechN);
+    auto& currentTempNode = CConversations::m_aTempNodes[CConversations::m_SettingUpConversationNumNodes];
+
+    const auto CopyUpperCase = [](char* dest, const char* src) {
+        strncpy_s((char(&)[8])dest, src, 6u);
+        MakeUpperCase(dest, dest);
+    };
+
+    CopyUpperCase(currentTempNode.m_Name, name);
+    currentTempNode.m_Speech = speech;
+    currentTempNode.m_SpeechY = speechY;
+    currentTempNode.m_SpeechN = speechN;
+
+    if (linkYes) {
+        CopyUpperCase(currentTempNode.m_NameNodeYes, linkYes);
+    } else {
+        currentTempNode.m_NameNodeYes[0] = '\0';
+    }
+
+    if (linkNo) {
+        CopyUpperCase(currentTempNode.m_NameNodeNo, linkNo);
+    } else {
+        currentTempNode.m_NameNodeNo[0] = '\0';
+    }
+
+    CConversations::m_SettingUpConversationNumNodes++;
 }
 
 // 0x43A840

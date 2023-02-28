@@ -403,6 +403,11 @@
 #include "app/app.h"
 #include <RealTimeShadowManager.h>
 
+#include "Conversations.h"
+#include "ConversationForPed.h"
+#include "ConversationNode.h"
+#include "PedToPlayerConversations.h"
+
 #include "extensions/utility.hpp"
 #include <RenderBuffer.hpp>
 
@@ -1218,6 +1223,13 @@ void InjectHooksMain() {
         CAnimManager::InjectHooks();
     };
 
+    const auto Conversations = []() {
+        CConversations::InjectHooks();
+        CConversationForPed::InjectHooks();
+        CConversationNode::InjectHooks();
+        CPedToPlayerConversations::InjectHooks();
+    };
+
     App();
     Audio();
     Tasks();
@@ -1225,6 +1237,7 @@ void InjectHooksMain() {
     Fx();
     Vehicle();
     Scripts();
+    Conversations();
 }
 
 void InjectHooksMain(HMODULE hThisDLL) {

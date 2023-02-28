@@ -20,6 +20,5 @@ public:
     }
 
     void ClearRecursively();
-    static void SetUpConversationNode(const char* name, const char* linkYes, const char* linkNo, int32 speech, int32 speechY, int32 speechN);
 };
 VALIDATE_SIZE(CConversationNode, 0x18);
