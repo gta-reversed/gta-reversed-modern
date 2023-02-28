@@ -69,11 +69,6 @@ solution "gta_reversed"
         "FatalWarnings",
     }
 
-    defines { 
-        "_CRT_SECURE_NO_WARNINGS", 
-        "_SCL_SECURE_NO_WARNINGS",
-    }
-
     include "source/"
 
     group "Dependencies"
