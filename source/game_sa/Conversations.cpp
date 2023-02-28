@@ -410,6 +410,7 @@ void CConversations::InjectHooks() {
     RH_ScopedCategory("Conversations");
 
     RH_ScopedInstall(Clear, 0x43A7B0);
+    RH_ScopedInstall(IsConversationGoingOn, 0x43AAC0);
     RH_ScopedInstall(AwkwardSay, 0x43A810);
 }
 
@@ -428,7 +429,7 @@ void CConversations::Update() {
 
 // 0x43AAC0
 bool CConversations::IsConversationGoingOn() {
-    return plugin::CallAndReturn<bool, 0x43AAC0>();
+    return rng::any_of(m_aConversations, [](auto& conversation) { return conversation.m_Status; });
 }
 
 // 0x43A810
