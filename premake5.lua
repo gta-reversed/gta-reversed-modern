@@ -65,7 +65,7 @@ solution "gta_reversed"
 
     flags {
         "NoImportLib",
-        "NoBufferSecurityCheck"
+        --"NoBufferSecurityCheck"
     }
 
     defines { 
