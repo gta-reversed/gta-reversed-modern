@@ -28,116 +28,135 @@ end
 --]]
 
 solution "gta_reversed"
-
     configurations { "Release", "Debug" }
 
-    location( _OPTIONS["outdir"] )
+    location(_OPTIONS["outdir"])
     targetprefix "" -- no 'lib' prefix on gcc
-    targetdir "bin"
 	targetdir("bin/" .. "%{cfg.buildcfg}")
-    implibdir("bin/" .. "%{cfg.buildcfg}")
     
     configuration "Debug*"
-        flags { symbols ("On") }
-        -- buildoptions {"/MDd"}
         staticruntime "off"
+        symbols "On"
         runtime "Debug"
+
     configuration "Release*"
-        defines { "NDEBUG" }
-        flags { symbols ("On") }
-        -- buildoptions {"/MD"}
         staticruntime "off"
+        symbols "On"
+        defines { "NDEBUG" }
         runtime "Release"
         optimize "Full"
+
     configuration "vs*"
-        flags {"MultiProcessorCompile"}
+        flags { "MultiProcessorCompile" }
         linkoptions   { "/ignore:4099,4251,4275" }
-        buildoptions {"/EHsc", "/Zc:preprocessor", "/bigobj"}
+        buildoptions { "/EHsc", "/Zc:preprocessor", "/bigobj" }
         disablewarnings { 26812, 26495, 4099, 4251, 4275 }
 
+    characterset "MBCS"  -- Fix strings
+    staticruntime "On" 
+    rtti "Off"
+
     flags {
-        characterset ("MBCS"), --fix strings
-        staticruntime("On"),
         "NoImportLib",
-        rtti ("Off"),
         "NoBufferSecurityCheck"
     }
-    defines { "_CRT_SECURE_NO_WARNINGS", "_SCL_SECURE_NO_WARNINGS"}
+
+    defines { 
+        "_CRT_SECURE_NO_WARNINGS", 
+        "_SCL_SECURE_NO_WARNINGS"
+    }
 
 group "Dependencies"
     defines { "WIN32", "_WINDOWS" }
 
     project "ogg"
-        vpaths {
-            ["Headers/*"] = {"libs/ogg/**.h",},
-            ["Sources/*"] = {"libs/ogg/**.c",},
-            ["*"] = {"premake5.lua", "CMakeLists.txt"}
-        }
         includedirs { "libs/vorbis/include", "libs/ogg/include", "libs/ogg/include" }
         language "C++"
         kind "StaticLib"
         targetname "ogg"
         warnings "Off"
+
+        vpaths {
+            ["Headers/*"] = {"libs/ogg/**.h",},
+            ["Sources/*"] = {"libs/ogg/**.c",},
+            ["*"] = {"premake5.lua", "CMakeLists.txt"}
+        }
+
         files {
             "libs/ogg/**.h",
             "libs/ogg/**.c"
         }
 
     project "vorbis"
-        vpaths {
-            ["Headers/*"] = {"libs/vorbis/**.h",},
-            ["Sources/*"] = {"libs/vorbis/**.c",},
-            ["*"] = {"premake5.lua", "CMakeLists.txt"}
-        }
         includedirs { "libs/vorbis/include", "libs/ogg/include", "%{cfg.targetdir}" }
         language "C++"
         kind "StaticLib"
         targetname "vorbis"
         warnings "Off"
 
-        local filePaths = {
-            "backends.h", "bitrate.h", "codebook.h", "codec_internal.h", "envelope.h", "highlevel.h", "lookup.h", "lookup_data.h", "lpc.h", "lsp.h", "masking.h", "mdct.h", "misc.h", "os.h", "psy.h", "registry.h", "scales.h", "smallft.h", "window.h",
-            "analysis.c", "bitrate.c", "block.c", "codebook.c", "envelope.c", "floor0.c", "floor1.c", "info.c", "lookup.c", "lpc.c", "lsp.c", "mapping0.c", "mdct.c", "psy.c", "registry.c", "res0.c", "sharedbook.c", "smallft.c", "synthesis.c", "vorbisenc.c", "window.c"
-        }
-        for i, fileName in pairs(filePaths) do 
-            filePaths[i] = "libs/vorbis/lib/"..fileName
-        end 
-        files { "libs/vorbis/win32/vorbis.def", table.unpack(filePaths) }
-
-    project "vorbisenc"
         vpaths {
+            ["Headers/*"] = {"libs/vorbis/**.h",},
             ["Sources/*"] = {"libs/vorbis/**.c",},
             ["*"] = {"premake5.lua", "CMakeLists.txt"}
         }
+
+        files { 
+            "libs/vorbis/win32/vorbis.def", 
+            "libs/vorbis/lib/**.*"
+        }
+        removefiles {
+            "libs/vorbis/lib/psytune.c",
+            "libs/vorbis/lib/tone.c",
+            "libs/vorbis/lib/misc.c",
+            "libs/vorbis/lib/psy.h",
+        }
+
+    project "vorbisenc"
         includedirs { "libs/vorbis/include", "libs/ogg/include", "%{cfg.targetdir}" }
         language "C++"
         kind "StaticLib"
-        targetname "vorbisenc"   
-        files { "libs/vorbis/lib/vorbisenc.c", "/libs/vorbis/win32/vorbisenc.def" }
-
-    project "vorbisfile"
+        targetname "vorbisenc"
+        warnings "Off"
+        
         vpaths {
             ["Sources/*"] = {"libs/vorbis/**.c",},
             ["*"] = {"premake5.lua", "CMakeLists.txt"}
         }
+
+        files { 
+            "libs/vorbis/lib/vorbisenc.c", 
+            "/libs/vorbis/win32/vorbisenc.def" 
+        }
+
+    project "vorbisfile"
         includedirs { "libs/vorbis/include", "libs/ogg/include", "%{cfg.targetdir}" }
         language "C++"
         kind "StaticLib"
         targetname "vorbisfile"   
-        files { "libs/vorbis/lib/vorbisfile.c", "/libs/vorbis/win32/vorbisfile.def" }
         warnings "Off"
 
-    project "imgui"
         vpaths {
-            ["Headers/*"] = {"libs/imgui/**.h",},
-            ["Sources/*"] = {"libs/imgui/**.c*",},
+            ["Sources/*"] = {"libs/vorbis/**.c",},
             ["*"] = {"premake5.lua", "CMakeLists.txt"}
         }
+
+        files { 
+            "libs/vorbis/lib/vorbisfile.c", 
+            "/libs/vorbis/win32/vorbisfile.def" 
+        }
+
+    project "imgui"
         includedirs { "libs/imgui", "libs/imgui/backends", "libs/imgui/misc/cpp" }
         language "C++"
         kind "StaticLib"
         targetname "imgui" 
         warnings "Off"
+
+        vpaths {
+            ["Headers/*"] = {"libs/imgui/**.h",},
+            ["Sources/*"] = {"libs/imgui/**.c*",},
+            ["*"] = {"premake5.lua", "CMakeLists.txt"}
+        }
 
         local filePaths = {
             "imconfig.h", "imgui.h", "imgui_internal.h", "imstb_rectpack.h", "imstb_textedit.h", "imstb_truetype.h", 
@@ -158,13 +177,34 @@ group "Dependencies"
 
 group ""
     project "gta_reversed"
+        cppdialect "C++20"        
+        kind "SharedLib"
+        targetname "gta_reversed"
+        targetextension ".asi"
+
+        pchheader "StdInc.h"
+        pchsource "source/StdInc.cpp"
+
         vpaths {
             ["Headers/*"] = {"source/**.h*",},
             ["Sources/*"] = {"source/**.c*",},
             ["*"] = {"premake5.lua", "CMakeLists.txt"}
         }
+     
+        files {
+            "source/StdInc.h",
+            "source/StdInc.cpp",
+            "source/**.h*",
+            "source/**.c*"
+        }
 
-        defines { "NOMINMAX", "USE_GTASA_ALLOCATOR", "EXTRA_DEBUG_FEATURES", "FIX_BUGS" }
+        defines { 
+            "NOMINMAX", 
+            "USE_GTASA_ALLOCATOR", 
+            "EXTRA_DEBUG_FEATURES", 
+            "FIX_BUGS" 
+        }
+
         includedirs {
             "source", "source/**",
             "libs/vorbis/include",
@@ -172,28 +212,23 @@ group ""
             "libs/imgui", "libs/imgui/backends", "libs/imgui/misc/cpp",
             "libs/dxsdk"
         }
-        links { "ogg", "vorbis", "vorbisenc", "vorbisfile", "imgui" }
+
+        links { 
+            "ogg", 
+            "vorbis", 
+            "vorbisenc", 
+            "vorbisfile", 
+            "imgui" 
+        }
+
         libdirs { 
-            "%{cfg.targetdir}/ogg.lib", "%{cfg.targetdir}/vorbis.lib", "%{cfg.targetdir}/vorbisfile.lib", 
-            "%{cfg.targetdir}/vorbisenc.lib",  "%{cfg.targetdir}/imgui.lib", "libs/dxsdk/d3d9.lib", "libs/dxsdk/dinput.lib"
-        }
-
-        cppdialect "C++20"        
-
-        kind "SharedLib"
-        targetname "gta_reversed"
-        targetextension ".asi"
-        pchheader "StdInc.h"
-        pchsource "source/StdInc.cpp"   
-        files {
-            "source/StdInc.h",
-            "source/StdInc.cpp",
-            "source/**.h*",
-            "source/**.c*"
-        }
-        excludes{
-            "source/**/errcom.def", --bugfix for premake5
-            "source/**/errcore.def"
+            "%{cfg.targetdir}/ogg.lib", 
+            "%{cfg.targetdir}/vorbis.lib", 
+            "%{cfg.targetdir}/vorbisfile.lib", 
+            "%{cfg.targetdir}/vorbisenc.lib",  
+            "%{cfg.targetdir}/imgui.lib", 
+            "libs/dxsdk/d3d9.lib", 
+            "libs/dxsdk/dinput.lib"
         }
 
         filter {"vs*", "options:allow-script-cmd-hooks"}
