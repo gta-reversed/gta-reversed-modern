@@ -407,11 +407,18 @@ void CPedToPlayerConversations::EndConversation() {
 
 void CConversations::InjectHooks() {
     RH_ScopedClass(CConversations);
-    RH_ScopedCategory("Conversations");;
+    RH_ScopedCategory("Conversations");
+
+    RH_ScopedInstall(Clear, 0x43A7B0);
 }
 
+// 0x43A7B0
 void CConversations::Clear() {
-    plugin::Call<0x43A7B0>();
+    rng::for_each(m_aConversations, &CConversationForPed::Clear);
+    rng::for_each(m_aNodes, &CConversationNode::Clear);
+
+    m_bSettingUpConversation = false;
+    m_AwkwardSayStatus = 0;
 }
 
 void CConversations::Update() {

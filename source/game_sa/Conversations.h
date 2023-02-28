@@ -48,8 +48,51 @@ public:
     }
 };
 
+class CConversationForPed {
+public:
+    int32  m_FirstNode;
+    int32  m_CurrentNode;
+    CPed*  m_Ped;
+    uint32 m_LastChange;
+    uint32 m_LastTimeWeWereCloseEnough;
+    uint32 m_Status;
+    bool   m_bEnabled;
+    bool   m_bSuppressSubtitles;
+
+    void Clear() {
+        m_FirstNode = m_CurrentNode = -1;
+        m_Ped = nullptr;
+        m_LastChange = m_LastTimeWeWereCloseEnough = 0;
+    }
+};
+VALIDATE_SIZE(CConversationForPed, 0x1C);
+
+class CConversationNode {
+public:
+    char   m_Name[8];
+    int16  m_NodeYes;
+    int16  m_NodeNo;
+    uint32 m_Speech;
+    uint32 m_SpeechY;
+    uint32 m_SpeechN;
+
+    void Clear() {
+        m_Name[0] = '\0';
+        m_NodeYes = m_NodeNo = -1;
+        m_SpeechY = m_SpeechN = 0;
+        m_Speech = 0;
+    }
+};
+VALIDATE_SIZE(CConversationNode, 0x18);
+
 class CConversations {
 public:
+    static inline bool& m_bSettingUpConversation = *(bool*)0x9691D0;
+    static inline int32& m_AwkwardSayStatus = *(int32*)0x9691C4;
+
+    static inline std::array<CConversationForPed, 14>& m_aConversations = *(std::array<CConversationForPed, 14>*)0x9691D8;
+    static inline std::array<CConversationNode, 50>& m_aNodes = *(std::array<CConversationNode, 50>*)0x969570;
+
     static void InjectHooks();
 
     static void Clear();
