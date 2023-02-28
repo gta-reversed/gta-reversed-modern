@@ -4,6 +4,19 @@ class CPed;
 class CConversationForPed;
 class CConversationNode;
 
+struct CTempConversationNode {
+    char m_Name[8];
+    char m_NameNodeYes[8];
+    char m_NameNodeNo[8];
+    int32 m_FinalSlot;
+    int16 m_NodeYes;
+    int16 m_NodeNo;
+    uint32 m_Speech;
+    uint32 m_SpeechY;
+    uint32 m_SpeechN;
+};
+VALIDATE_SIZE(CTempConversationNode, 0x2C);
+
 class CConversations {
 public:
     static inline bool& m_bSettingUpConversation = *(bool*)0x9691D0;
@@ -12,6 +25,7 @@ public:
     static inline CPed*& m_pSettingUpConversationPed = *(CPed**)0x9691CC;
 
     static inline std::array<CConversationForPed, 14>& m_aConversations = *(std::array<CConversationForPed, 14>*)0x9691D8;
+    static inline std::array<CTempConversationNode, 12>& m_aTempNodes = *(std::array<CTempConversationNode, 12>*)0x969360;
     static inline std::array<CConversationNode, 50>& m_aNodes = *(std::array<CConversationNode, 50>*)0x969570;
 
     static void InjectHooks();
