@@ -15,7 +15,7 @@ class QuadTreeNode;
 class CEntryExit;
 class CEntity;
 
-typedef CPool<CEntryExit> CEntryExitsPool;
+typedef CPool<CEntryExit, CEntryExit, true> CEntryExitsPool;
 
 enum ExitEnterState : int32 {
     EXIT_ENTER_STATE_0,
@@ -36,7 +36,7 @@ public:
     static inline int32& ms_exitEnterState = *(int32*)0x96A7CC; // TODO: Some kind of enum, seems to have values [0, 4]
     static inline CQuadTreeNode*& mp_QuadTree = *(CQuadTreeNode**)0x96A7D0;
     static inline CEntryExit*& mp_Active = *(CEntryExit**)0x96A7D4;
-    static inline CPool<CEntryExit>*& mp_poolEntryExits = *(CPool<CEntryExit>**)0x96A7D8;
+    static inline auto& mp_poolEntryExits = StaticRef<CEntryExitsPool*, 0x96A7D8>();
     static inline int32& ms_numVisibleEntities = *(int32*)0x96A7DC;
 
 public:
