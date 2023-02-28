@@ -2,7 +2,9 @@
 
 #include "Conversations.h"
 #include "PedClothesDesc.h"
-#include <IKChainManager_c.h>
+#include "IKChainManager_c.h"
+#include "TaskSimpleStandStill.h"
+#include "TaskComplexKillPedOnFoot.h"
 
 // 0x43AAE0
 void CPedToPlayerConversations::Clear() {
@@ -18,12 +20,12 @@ void CPedToPlayerConversations::Update() {
         CEntity::RegisterReference(pLastVehicle);
     }
 
-    static uint32& lastPedPoolIdx = *(uint32*)0x969A3C;
+    static int32& lastPedPoolIdx = *(int32*)0x969A3C;
 
     const auto player = FindPlayerPed();
     switch (m_State) {
     case State::NO_CONVERSATION: {
-        if (CTimer::GetTimeInMS() <= m_TimeOfLastPlayerConversation + 30'000u)
+        if (CTimer::GetTimeInMS() <= m_TimeOfLastPlayerConversation + 30'000)
             return;
 
         if (FindPlayerVehicle())
@@ -40,7 +42,6 @@ void CPedToPlayerConversations::Update() {
                 // rewind
                 lastPedPoolIdx = 0;
             }
-
             
             const auto ped = GetPedPool()->GetAt(lastPedPoolIdx);
             if (!ped || ped->m_nCreatedBy != PED_GAME || ped->bHasAScriptBrain || !ped->GetIsOnScreen())
@@ -212,10 +213,11 @@ void CPedToPlayerConversations::Update() {
             }
 
             // Ped said something to the player, change the conversation state.
-            m_State = State::UNK_1;
+            m_State = State::PLAYER_REPLY;
+            m_TimeOfLastPlayerConversation = m_StartTime = CTimer::GetTimeInMS();
+
             m_pPed = ped;
             CEntity::RegisterReference(m_pPed);
-            m_TimeOfLastPlayerConversation = m_StartTime = CTimer::GetTimeInMS();
             ped->DisablePedSpeech(false);
 
             g_ikChainMan.LookAt(
@@ -249,45 +251,37 @@ void CPedToPlayerConversations::Update() {
         }
         break;
     }
-    case State::UNK_1:
-        const auto AbortConversation = [player](bool includingPed) {
-            m_State = State::NO_CONVERSATION;
-            CAEPedSpeechAudioEntity::ReleasePlayerConversation();
-
-            if (g_ikChainMan.IsLooking(player)) {
-                g_ikChainMan.AbortLookAt(player);
-            }
-
-            if (includingPed && g_ikChainMan.IsLooking(m_pPed)) {
-                g_ikChainMan.AbortLookAt(m_pPed);
-                if (m_bPositiveOpening) {
-                    m_pPed->Say(0x38); // Ped is ignored by the player.
-                }
-            }
-        };
-
+    case State::PLAYER_REPLY: {
         if (!m_pPed) {
-            AbortConversation(false);
-            break;
+            return EndConversation();
         }
 
         if (CTimer::GetTimeInMS() > m_StartTime + 4000) {
-            AbortConversation(true);
-            break;
+            if (g_ikChainMan.IsLooking(m_pPed) && m_bPositiveOpening) {
+                m_pPed->Say(0x38); // Ped is ignored by the player.
+            }
+            return EndConversation();
         }
+
+        const auto MakePedAttackPlayer = [player] {
+            CTaskComplexSequence taskSequence{};
+            taskSequence.AddTask(new CTaskSimpleStandStill(2000));
+            taskSequence.AddTask(new CTaskComplexKillPedOnFoot(player, -1, 0, 0, 0, 0));
+
+            m_pPed->GetIntelligence()->m_eventGroup.Add(CEventScriptCommand{3, taskSequence.AsComplex()});
+        };
 
         if (CPad::GetPad()->ConversationYesJustDown()) {
             if (!m_bPositiveOpening) {
                 // responding catcalling
+                player->Say(IsPedTypeFemale(m_pPed->m_nPedType) ? 0x83 : 0x84);
 
-                if (IsPedTypeFemale(m_pPed->m_nPedType)) {
-                    player->Say(0x83);
-                } else {
-                    player->Say(0x84);
-                }
+                m_State = State::ENDING;
+                m_StartTime = CTimer::GetTimeInMS();
                 break;
             }
 
+            // Player replies...
             switch (m_Topic) {
             case Topic::CAR:
                 player->Say(0x81);
@@ -314,21 +308,90 @@ void CPedToPlayerConversations::Update() {
                 player->Say(0xea);
                 break;
             case Topic::WHERE_ARE_YOU_FROM:
-                player->Say(0xec);
-                break;
-            case Topic::GANGBANG:
-                player->Say(0x6b);
+            case Topic::GANGBANG: {
+                // Player always dismisses calls from enemy gangsters.
+                player->Say(m_Topic == Topic::WHERE_ARE_YOU_FROM ? 0xec : 0x6b);
+
+                if (CGeneral::RandomBool(75.0f)) {
+                    MakePedAttackPlayer();
+                }
+                return EndConversation();
+            }
+            default:
                 break;
             }
+
+            m_State = State::ENDING;
+            m_StartTime = CTimer::GetTimeInMS();
+        } else if (CPad::GetPad()->ConversationNoJustDown()) {
+            if (m_bPositiveOpening) {
+                // Player dismisses the ped.
+                switch (m_Topic) {
+                case Topic::WHERE_ARE_YOU_FROM:
+                case Topic::GANGBANG:
+                    player->Say(m_Topic == Topic::WHERE_ARE_YOU_FROM ? 0xeb : 0x6a);
+                    return EndConversation();
+                default:
+                    player->Say(IsPedTypeFemale(m_pPed->m_nPedType) ? 0x83 : 0x84);
+                    break;
+                }
+
+                m_State = State::PLAYER_DISMISSED;
+                m_StartTime = CTimer::GetTimeInMS();
+                break;
+            }
+
+            // Player curses the ped.
+            player->Say(IsPedTypeFemale(m_pPed->m_nPedType) ? 0x87 : 0x88);
+
+            if (m_pPed->m_nPedType != PED_TYPE_GANG2 && CGeneral::RandomBool(40.0f)) {
+                MakePedAttackPlayer();
+            }
+
+            m_State = State::ENDING;
+            m_StartTime = CTimer::GetTimeInMS();
         }
 
         break;
-    case State::UNK_2:
+    }
+    case State::PLAYER_DISMISSED:
+        if (!m_pPed) {
+            return EndConversation();
+        }
+
+        if (CTimer::GetTimeInMS() > m_StartTime + 3000 && !m_pPed->GetPedTalking()) {
+            m_pPed->Say(0x85); // Ped replies to the dismissal.
+            m_State = State::ENDING;
+            m_StartTime = CTimer::GetTimeInMS();
+        }
         break;
-    case State::UNK_3:
+    case State::ENDING:
+        if (!m_pPed || CTimer::GetTimeInMS() > m_StartTime + 2500) {
+            return EndConversation();
+        }
         break;
     default:
         break;
+    }
+}
+
+// 0x43AB10
+void CPedToPlayerConversations::EndConversation() {
+    return plugin::Call<0x43AB10>();
+
+    m_State = State::NO_CONVERSATION;
+    CAEPedSpeechAudioEntity::ReleasePlayerConversation();
+
+    if (const auto player = FindPlayerPed(); g_ikChainMan.IsLooking(player)) {
+        g_ikChainMan.AbortLookAt(player);
+    }
+
+    if (m_pPed) {
+        m_pPed->EnablePedSpeech();
+
+        if (g_ikChainMan.IsLooking(m_pPed)) {
+            g_ikChainMan.AbortLookAt(m_pPed);
+        }
     }
 }
 

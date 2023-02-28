@@ -6,9 +6,9 @@ class CPedToPlayerConversations {
 public:
     enum class State : uint32 {
         NO_CONVERSATION,
-        UNK_1,
-        UNK_2,
-        UNK_3
+        PLAYER_REPLY,
+        PLAYER_DISMISSED,
+        ENDING
     };
 
     enum class Topic : int32 {
@@ -34,6 +34,7 @@ public:
 
     static void Clear();
     static void Update();
+    static void EndConversation();
 
     // NOTSA
     static Topic GetRandomTopicForPed(CPed* ped) {
