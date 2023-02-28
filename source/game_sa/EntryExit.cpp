@@ -28,6 +28,56 @@ void CEntryExit::InjectHooks() {
     RH_ScopedInstall(ProcessStealableObjects, 0x43E990, { .reversed = false });
 }
 
+// Code based on 0x43FA00
+CEntryExit::CEntryExit(
+    CVector center,
+    CVector entranceRange,
+    float entranceAngleDeg,
+    CVector exit,
+    float exitAngle,
+    int32 area,
+    CEntryExit::eFlags flags,
+    int32 skyColor,
+    int32 timeOn, int32 timeOff,
+    int32 numberOfPeds,
+    const char* name
+) :
+    m_nFlags{(uint16)flags}, // Set here, this way we can directly use the flag fields instead of using the enum
+    m_recEntrance{
+        center.x - entranceRange.x / 2.f,
+        center.y - entranceRange.y / 2.f,
+        center.x + entranceRange.x / 2.f,
+        center.y + entranceRange.y / 2.f,
+    },
+    m_vecExitPos{ exit + CVector{ 0.f, 0.f, 1.f } },
+    m_nArea{ (uint8)area },
+    m_nNumberOfPeds{ (uint8)numberOfPeds },
+    m_fExitAngle{ exitAngle },
+    m_nSkyColor{ (uint8)skyColor },
+    m_fEntranceZ{ center.z + 1.f },
+    m_fEntranceAngleRad{ RWDEG2RAD(entranceAngleDeg) }
+{
+    std::tie(m_nTimeOn, m_nTimeOff) = [&]() -> std::pair<uint8, uint8> {
+        if (bUnknownBurglary && CGeneral::RandomBool(50.f)) {
+            return { 0, 0 };
+        } else if (bBurglaryAccess) {
+            return { 0, 24 };
+        } else {
+            return { timeOn, timeOff };
+        }
+    }();
+
+    if (CEntryExitManager::ms_bBurglaryHousesEnabled || !bBurglaryAccess) {
+        bEnableAccess = true;
+    }
+
+    if (name){
+        strcpy_s(m_szName, name);
+    } else {
+        m_szName[0] = 0;
+    }
+}
+
 // 0x43E8B0
 void CEntryExit::GenerateAmbientPeds(const CVector& posn) {
     CPopulation::bInPoliceStation = false;
@@ -86,7 +136,7 @@ CVector2D CEntryExit::GetPosition2D() const {
 // Returns the matrix with which `rectEntrance`'s points were calculated.
 CMatrix CEntryExit::GetRectEntranceMatrix() const {
     CMatrix mat;
-    mat.SetRotateZ(m_fEntranceAngle);
+    mat.SetRotateZ(m_fEntranceAngleRad);
     mat.GetPosition() = GetPosition();
     return mat;
 }
@@ -154,7 +204,7 @@ bool CEntryExit::IsInArea(const CVector& position) {
     };
 
     // It's quite common `m_fEntranceAngle` is 0, so I guess this is some kind of an optimization?
-    return CheckPointInEntranceRect(m_fEntranceAngle == 0.f ? position : TransformEntrancePoint(position));
+    return CheckPointInEntranceRect(m_fEntranceAngleRad == 0.f ? position : TransformEntrancePoint(position));
 }
 
 // 0x43FFD0

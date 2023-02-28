@@ -178,86 +178,43 @@ void CEntryExitManager::AddEntryExitToStack(CEntryExit* enex) {
 *
 * @returns The pool index of the created entry exit, 0 if failed.
 */
-int32 CEntryExitManager::AddOne(float centerX, float centerY, float centerZ, float entranceAngle, float entranceRangeX, float entranceRangeY, float fUnused, float exitX,
-                                float exitY, float exitZ, float exitAngle, int32 area, CEntryExit::eFlags flags, int32 skyColor, int32 timeOn, int32 timeOff, int32 numberOfPeds,
-                                const char* name
+int32 CEntryExitManager::AddOne(
+    float centerX, float centerY, float centerZ,
+    float entranceAngle,
+    float entranceRangeX, float entranceRangeY, float entranceRangeZ /*unused*/,
+    float exitX, float exitY, float exitZ,
+    float exitAngle,
+    int32 area,
+    CEntryExit::eFlags flags,
+    int32 skyColor,
+    int32 timeOn, int32 timeOff,
+    int32 numberOfPeds,
+    const char* name
 ) {
-    const auto enex = mp_poolEntryExits->New();
-    if (!enex) {
-        assert(0); // NOTSA: Returns an actually valid index, instead of -1, so let's add an assert..
-        return 0;
+    const auto ptr = mp_poolEntryExits->New();
+    if (!ptr) {
+#ifdef FIX_BUGS
+        return -1;
+#else
+        return 0; // Returns an actually valid index, not good
+#endif
     }
 
-    enex->m_nFlags = flags; // Set here, this way we can directly use the flag fields instead of using the enum
-
-    // Deal with on/off (visibility) intervals
-    if (enex->bBurglaryAccess) {
-        enex->m_nTimeOn = 0;
-        enex->m_nTimeOff = 24;
-    } else {
-        enex->m_nTimeOn = timeOn;
-        enex->m_nTimeOff = timeOff;
-    }
-
-    if (enex->bUnknownBurglary && (CGeneral::GetRandomNumber() < RAND_MAX / 2)) {
-        enex->m_nTimeOn = 0;
-        enex->m_nTimeOff = 0;
-    } else {
-        enex->m_nTimeOff = timeOff;
-    }
-
-    if (ms_bBurglaryHousesEnabled || !enex->bBurglaryAccess) {
-        enex->bEnableAccess = true;
-    }
-
-    enex->m_vecExitPos.Set(exitX, exitY, exitZ + 1.f);
-    enex->m_nArea = (uint8)area;
-    enex->m_nNumberOfPeds = (uint8)numberOfPeds;
-    enex->m_fExitAngle = exitAngle;
-    enex->m_nSkyColor = (uint8)skyColor;
-    enex->m_pLink = nullptr;
-
-    enex->m_fEntranceZ = centerZ + 1.f;
-    enex->m_fEntranceAngle = DegreesToRadians(entranceAngle);
-
-    if (name){
-        strncpy_s(enex->m_szName, name, sizeof(enex->m_szName));
-    } else {
-        enex->m_szName[0] = 0;
-    }
-
-    enex->m_recEntrance = {
-        centerX - entranceRangeX / 2.f,
-        centerY - entranceRangeY / 2.f,
-        centerX + entranceRangeX / 2.f,
-        centerY + entranceRangeY / 2.f,
+    const auto enex = new (ptr) CEntryExit{
+        { centerX, centerY, centerZ },
+        { entranceRangeX, entranceRangeY, entranceRangeZ },
+        entranceAngle,
+        { exitX, exitY, exitZ },
+        exitAngle,
+        area,
+        flags,
+        skyColor,
+        timeOn, timeOff,
+        numberOfPeds,
+        name
     };
 
-    // Add EnEx to QuadTree
-    {
-        // Calculate bounding rectangle for it
-        CMatrix enexmat;
-        enexmat.SetRotateZ(entranceAngle);
-        enexmat.GetPosition().Set(centerX, centerY, 0.f); // They didn't use this, but it's nicer this way, so lets do it.
-
-        // Calculate corner positions
-        const CVector2D corners[]{
-            {  entranceRangeX / 2.f,  entranceRangeY / 2.f },
-            { -entranceRangeX / 2.f, -entranceRangeY / 2.f },
-        };
-
-        // Now rotate these points by the rotation angle (`entranceAngle`) (Using the matrix)
-        CVector2D rotatedCorners[std::size(corners)];
-        rng::transform(corners, rotatedCorners, [&](auto&& p) { return CVector2D{ MultiplyMatrixWithVector(enexmat, CVector{ p.x, p.y, 0.0f }) }; });
-
-        // Find min, max for the rect
-        const auto [minX, maxX] = rng::minmax(rotatedCorners | rng::views::transform([](auto&& p) -> float { return p.x; })); // TODO: Use Vector operator[] and refactor this
-        const auto [minY, maxY] = rng::minmax(rotatedCorners | rng::views::transform([](auto&& p) -> float { return p.y; }));
-
-        // Add it to the QuadTree using the calculated bounding rect
-        mp_QuadTree->AddItem(enex, {minX, minY, maxX, maxY});
-    }
-
+    AddEnExToWorld(enex);
     LinkEntryExit(enex);
 
     return mp_poolEntryExits->GetIndex(enex);
@@ -474,6 +431,32 @@ bool CEntryExitManager::Save() {
     }
 
     return true;
+}
+
+// NOTSA (Code somewhat based on 0x43FC00)
+void CEntryExitManager::AddEnExToWorld(CEntryExit* enex) {
+    // Calculate corner positions (We ain't gonna use a matrix for this like they did, too complicated)
+    const auto& r = enex->m_recEntrance;
+    CVector2D corners[]{
+        { r.right, r.top },
+        { r.left, r.bottom }
+    };
+    for (auto& c : corners) {
+        c = c.RotatedBy(enex->m_fEntranceAngleRad); // NOTE: If doesn't work properly, negate (-angle) the angle
+    }
+
+    const auto GetMinMax = [&](size_t axis) {
+        return rng::minmax(
+            corners | rng::views::transform([axis](auto&& c) { return c[axis]; })
+        );
+    };
+
+    // Calculate min-max coordinates
+    const auto [minX, maxX] = GetMinMax(0);
+    const auto [minY, maxY] = GetMinMax(1);
+    
+    // Add it to the QuadTree using the calculated bounding rect
+    mp_QuadTree->AddItem(enex, {minX, minY, maxX, maxY});
 }
 
 bool CEntryExitManager::WeAreInInteriorTransition() {

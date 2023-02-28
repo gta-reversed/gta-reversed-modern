@@ -35,12 +35,12 @@ public:
         DELETE_ENEX            = 1 << 15,
     };
 
-    char    m_szName[8];
-    CRect   m_recEntrance;
-    float   m_fEntranceZ;
-    float   m_fEntranceAngle; // In radians
-    CVector m_vecExitPos;
-    float   m_fExitAngle;
+    char    m_szName[8]{};
+    CRect   m_recEntrance{};
+    float   m_fEntranceZ{};
+    float   m_fEntranceAngleRad;
+    CVector m_vecExitPos{};
+    float   m_fExitAngle{};
     union {
         struct {
             uint16 bUnknownInterior : 1;     // 0x1
@@ -61,14 +61,14 @@ public:
             uint16 bEnableAccess : 1;        // 0x4000
             uint16 bDeleteEnex : 1;          // 0x8000
         };
-        uint16 m_nFlags;
+        uint16 m_nFlags{};
     };
-    uint8       m_nArea;
-    uint8       m_nSkyColor;
-    uint8       m_nTimeOn;
-    uint8       m_nTimeOff;
-    uint8       m_nNumberOfPeds;
-    CEntryExit* m_pLink;
+    uint8       m_nArea{};
+    uint8       m_nSkyColor{};
+    uint8       m_nTimeOn{};
+    uint8       m_nTimeOff{};
+    uint8       m_nNumberOfPeds{};
+    CEntryExit* m_pLink{};
 
     static bool& ms_bWarping;
     static CObject*& ms_pDoor;
@@ -76,6 +76,20 @@ public:
 
 public:
     static void InjectHooks();
+
+    CEntryExit(
+        CVector center,
+        CVector enteranceRage,
+        float entranceAngle,
+        CVector exit,
+        float exitAngle,
+        int32 area,
+        CEntryExit::eFlags flags,
+        int32 skyColor,
+        int32 timeOn, int32 timeOff,
+        int32 numberOfPeds,
+        const char* name
+    );
 
     void GenerateAmbientPeds(const CVector& posn);
     CEntryExit* GetEntryExitToDisplayNameOf();

@@ -73,4 +73,7 @@ public:
 
     static bool Load();
     static bool Save();
+
+private:
+    static void AddEnExToWorld(CEntryExit* enex);
 };
