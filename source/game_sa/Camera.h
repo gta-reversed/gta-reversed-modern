@@ -381,7 +381,7 @@ public:
     void ResetDuckingSystem(CPed *ped);
 
     void SetCamCutSceneOffSet(const CVector& offset);
-    void SetCamPositionForFixedMode(const CVector* fixedModeSource, const CVector* fixedModeUpOffset);
+    void SetCamPositionForFixedMode(const CVector& fixedModeSource, const CVector& fixedModeUpOffset);
     void SetCameraDirectlyBehindForFollowPed_CamOnAString();
     void SetCameraDirectlyInFrontForFollowPed_CamOnAString();
     void SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString(CPed* targetPed);

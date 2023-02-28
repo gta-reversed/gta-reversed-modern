@@ -41,25 +41,28 @@ public:
     float   m_fEntranceAngle; // In radians
     CVector m_vecExitPos;
     float   m_fExitAngle;
-    struct {
-        uint16 bUnknownInterior : 1;     // 0x1
-        uint16 bUnknownPairing : 1;      // 0x2
-        uint16 bCreateLinkedPair : 1;    // 0x4
-        uint16 bRewardInterior : 1;      // 0x8
-        uint16 bUsedRewardEntrance : 1;  // 0x10
-        uint16 bCarsAndAircraft : 1;     // 0x20
-        uint16 bBikesAndMotorcycles : 1; // 0x40
-        uint16 bDisableOnFoot : 1;       // 0x80
+    union {
+        struct {
+            uint16 bUnknownInterior : 1;     // 0x1
+            uint16 bUnknownPairing : 1;      // 0x2
+            uint16 bCreateLinkedPair : 1;    // 0x4
+            uint16 bRewardInterior : 1;      // 0x8
+            uint16 bUsedRewardEntrance : 1;  // 0x10
+            uint16 bCarsAndAircraft : 1;     // 0x20
+            uint16 bBikesAndMotorcycles : 1; // 0x40
+            uint16 bDisableOnFoot : 1;       // 0x80
 
-        uint16 bAcceptNpcGroup : 1;      // 0x100
-        uint16 bFoodDateFlag : 1;        // 0x200
-        uint16 bUnknownBurglary : 1;     // 0x400
-        uint16 bDisableExit : 1;         // 0x800
-        uint16 bBurglaryAccess : 1;      // 0x1000
-        uint16 bEnteredWithoutExit : 1;  // 0x2000
-        uint16 bEnableAccess : 1;        // 0x4000
-        uint16 bDeleteEnex : 1;          // 0x8000
-    } m_nFlags;
+            uint16 bAcceptNpcGroup : 1;      // 0x100
+            uint16 bFoodDateFlag : 1;        // 0x200
+            uint16 bUnknownBurglary : 1;     // 0x400
+            uint16 bDisableExit : 1;         // 0x800
+            uint16 bBurglaryAccess : 1;      // 0x1000
+            uint16 bEnteredWithoutExit : 1;  // 0x2000
+            uint16 bEnableAccess : 1;        // 0x4000
+            uint16 bDeleteEnex : 1;          // 0x8000
+        };
+        uint16 m_nFlags;
+    };
     uint8       m_nArea;
     uint8       m_nSkyColor;
     uint8       m_nTimeOn;
@@ -90,8 +93,6 @@ public:
     // NOTSA
 
     // These 5 were probably inlined
-    CVector2D GetPosition2D() const;
-    CVector GetPosition() const;
     auto GetLinkedOrThis() { return m_pLink ? m_pLink : this; }
     auto GetLinkedOrThis() const { return m_pLink ? m_pLink : this; }
     bool IsVisibleByTime() const;

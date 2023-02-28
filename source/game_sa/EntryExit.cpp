@@ -136,17 +136,6 @@ const CRect& CEntryExit::GetEntranceRect() const {
     return m_recEntrance;
 }
 
-// Return center of entrance rect
-CVector CEntryExit::GetPosition() const {
-    const auto& center = GetEntranceRect().GetCenter();
-    return CVector{ center.x, center.y, m_fEntranceZ };
-}
-
-CVector2D CEntryExit::GetPosition2D() const {
-    const auto& center = GetEntranceRect().GetCenter();
-    return CVector2D{ center.x, center.y };
-}
-
 uint8 CEntryExit::GetMyOrLinkedArea() const {
     return m_pLink ? m_pLink->m_nArea : m_nArea;
 }
@@ -169,7 +158,7 @@ bool CEntryExit::IsInArea(const CVector& position) {
 
 // 0x43FFD0
 bool CEntryExit::TransitionStarted(CPed* ped) {
-    if (   !m_nFlags.bEnableAccess
+    if (   !bEnableAccess
         || CEntryExitManager::ms_exitEnterState != 0
         || !IsVisibleByTime()
     ) {
@@ -184,13 +173,13 @@ bool CEntryExit::TransitionStarted(CPed* ped) {
 
         switch (ped->m_pVehicle->m_nVehicleType) {
         case eVehicleType::VEHICLE_TYPE_AUTOMOBILE: {
-            if (!m_nFlags.bCarsAndAircraft) {
+            if (!bCarsAndAircraft) {
                 return false;
             }
             break;
         }
         case eVehicleType::VEHICLE_TYPE_BIKE: {
-            if (!m_nFlags.bBikesAndMotorcycles) {
+            if (!bBikesAndMotorcycles) {
                 return false;
             }
             break;
@@ -199,7 +188,7 @@ bool CEntryExit::TransitionStarted(CPed* ped) {
             return false;
         }
         }
-    } else if (m_nFlags.bDisableExit) {
+    } else if (bDisableExit) {
         return false;
     }
 
@@ -216,7 +205,7 @@ bool CEntryExit::TransitionStarted(CPed* ped) {
         return false;
     }
 
-    m_nFlags.bEnteredWithoutExit = true;
+    bEnteredWithoutExit = true;
     ms_pDoor = nullptr;
 
     ped->bCanExitCar = false;
@@ -226,7 +215,7 @@ bool CEntryExit::TransitionStarted(CPed* ped) {
         ped->GetEventGroup().Add(&scriptCmdEvent);
     };
 
-    if ((m_nFlags.bUnknownPairing || m_nFlags.bFoodDateFlag) || ped->bInVehicle) {
+    if ((bUnknownPairing || bFoodDateFlag) || ped->bInVehicle) {
         if (spawnPointExitToUs.Magnitude() > 10.f) {
             ms_bWarping = true;
         }
@@ -254,7 +243,7 @@ bool CEntryExit::TransitionStarted(CPed* ped) {
         } else {
             // 0x440246
             if (ms_bWarping) {
-                m_nFlags.bUnknownPairing = true;
+                bUnknownPairing = true;
                 return true;
             }
             AddPedScriptCommand(new CTaskComplexGotoDoorAndOpen(GetPosition(), GetPosition() + spawnPointExitToUsDir * 4.f));
@@ -285,7 +274,7 @@ bool CEntryExit::TransitionFinished(CPed* ped) {
         }
     };
 
-    if ((m_nFlags.bFoodDateFlag || m_nFlags.bUnknownPairing) || ped->bInVehicle) {
+    if ((bFoodDateFlag || bUnknownPairing) || ped->bInVehicle) {
         switch (CEntryExitManager::ms_exitEnterState) {
         case EXIT_ENTER_STATE_0: { // 0x440ABE
             TheCamera.SetFadeColour(0, 0, 0);
@@ -371,8 +360,8 @@ bool CEntryExit::TransitionFinished(CPed* ped) {
 
     CClothes::RebuildPlayerIfNeeded(ped->AsPlayer());
 
-    if (m_nFlags.bFoodDateFlag) {
-        m_nFlags.bEnteredWithoutExit = false;
+    if (bFoodDateFlag) {
+        bEnteredWithoutExit = false;
         return true;
     }
 
@@ -438,26 +427,26 @@ bool CEntryExit::TransitionFinished(CPed* ped) {
 
         CTheScripts::ClearSpaceForMissionEntity(ped->GetPosition(), ped);
 
-        if (m_nFlags.bRewardInterior) {
+        if (bRewardInterior) {
             CShopping::RemoveLoadedShop();
         } else {
             CShopping::LoadShop(m_szName);
             if (m_pLink) {
-                m_pLink->m_nFlags.bRewardInterior = true;
+                m_pLink->bRewardInterior = true;
             }
         }
 
         CPopulation::ManageAllPopulation();
         CTheScripts::Process();
 
-        if (ms_spawnPoint->m_nFlags.bAcceptNpcGroup) {
+        if (ms_spawnPoint->bAcceptNpcGroup) {
             WarpGangWithPlayer(ped);
         }
 
         ProcessStealableObjects(ped);
 
-        ms_spawnPoint->m_nFlags.bEnteredWithoutExit = false;
-        if (ms_spawnPoint->m_nFlags.bDeleteEnex) {
+        ms_spawnPoint->bEnteredWithoutExit = false;
+        if (ms_spawnPoint->bDeleteEnex) {
             CEntryExitManager::DeleteOne(CEntryExitManager::mp_poolEntryExits->GetIndex(ms_spawnPoint));
         }
 
