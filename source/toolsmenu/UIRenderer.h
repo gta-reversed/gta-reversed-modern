@@ -38,6 +38,9 @@ private:
     friend void ::Render2dStuff(); // For `DrawLoop()`
     friend void ::CPad::UpdatePads();
 
+    void UpdateInputMouse();
+    void UpdateInputKeyboard();
+
 private:
     bool          m_Initialised{};
     bool          m_ShowMenu{};

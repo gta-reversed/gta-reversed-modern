@@ -46,71 +46,74 @@ UIRenderer::~UIRenderer() {
     DEV_LOG("Good bye!");
 }
 
+void UIRenderer::UpdateInputMouse() {
+    const auto WHEEL_SPEED = 20.0f;
+
+    CPad::GetPad()->DisablePlayerControls = true;
+
+    // Update position
+    auto& MousePos = m_ImIO->MousePos;
+    MousePos.x += CPad::NewMouseControllerState.X;
+    MousePos.y -= CPad::NewMouseControllerState.Y;
+
+    MousePos.x = std::clamp(MousePos.x, 0.0f, SCREEN_WIDTH);
+    MousePos.y = std::clamp(MousePos.y, 0.0f, SCREEN_HEIGHT);
+
+    if (CPad::NewMouseControllerState.wheelDown)
+        m_ImIO->MouseWheel -= (WHEEL_SPEED * m_ImIO->DeltaTime);
+
+    if (CPad::NewMouseControllerState.wheelUp)
+        m_ImIO->MouseWheel += (WHEEL_SPEED * m_ImIO->DeltaTime);
+
+    m_ImIO->MouseDown[ImGuiMouseButton_Left]   = CPad::NewMouseControllerState.lmb;
+    m_ImIO->MouseDown[ImGuiMouseButton_Right]  = CPad::NewMouseControllerState.rmb;
+    m_ImIO->MouseDown[ImGuiMouseButton_Middle] = CPad::NewMouseControllerState.mmb;
+
+    CPad::NewMouseControllerState.X = 0.0f;
+    CPad::NewMouseControllerState.Y = 0.0f;
+}
+
+void UIRenderer::UpdateInputKeyboard() {
+    
+    /*
+    BYTE KeyStates[256];
+
+    VERIFY(GetKeyboardState(KeyStates));
+
+    const auto IsKeyDown = [&](auto key) { return (KeyStates[key] & 0x80) != 0; };
+
+    for (auto key = 0; key < 256; key++) {
+        // Check if there was a state change
+        if (IsKeyDown(key) == m_ImIO->KeysDown[key]) {
+            continue;
+        }
+
+        // There was!
+        if (IsKeyDown(key)) { // Key is now down
+            m_ImIO->KeysDown[key] = true;
+
+            char ResultUTF8[16] = {0};
+            if (ToAscii(key, MapVirtualKey(key, 0), KeyStates, (LPWORD)ResultUTF8, 0)) {
+                m_ImIO->AddInputCharactersUTF8(ResultUTF8);
+            }
+        } else { // Key is now released
+            m_ImIO->KeysDown[key] = false;
+        }
+    }
+
+    m_ImIO->KeyCtrl  = IsKeyDown(VK_CONTROL);
+    m_ImIO->KeyShift = IsKeyDown(VK_SHIFT);
+    m_ImIO->KeyAlt   = IsKeyDown(VK_MENU);
+    m_ImIO->KeySuper = false;
+    */
+}
+
 void UIRenderer::UpdateInput() {
     if (!Visible()) {
         return;
     }
-
-    // Update mouse
-    {
-        const auto WHEEL_SPEED = 20.0f;
-
-        CPad::GetPad()->DisablePlayerControls = true;
-
-        // Update position
-        auto& MousePos = m_ImIO->MousePos;
-        MousePos.x += CPad::NewMouseControllerState.X;
-        MousePos.y -= CPad::NewMouseControllerState.Y;
-
-        MousePos.x = std::clamp(MousePos.x, 0.0f, SCREEN_WIDTH);
-        MousePos.y = std::clamp(MousePos.y, 0.0f, SCREEN_HEIGHT);
-
-        if (CPad::NewMouseControllerState.wheelDown)
-            m_ImIO->MouseWheel -= (WHEEL_SPEED * m_ImIO->DeltaTime);
-
-        if (CPad::NewMouseControllerState.wheelUp)
-            m_ImIO->MouseWheel += (WHEEL_SPEED * m_ImIO->DeltaTime);
-
-        m_ImIO->MouseDown[ImGuiMouseButton_Left]   = CPad::NewMouseControllerState.lmb;
-        m_ImIO->MouseDown[ImGuiMouseButton_Right]  = CPad::NewMouseControllerState.rmb;
-        m_ImIO->MouseDown[ImGuiMouseButton_Middle] = CPad::NewMouseControllerState.mmb;
-
-        CPad::NewMouseControllerState.X = 0.0f;
-        CPad::NewMouseControllerState.Y = 0.0f;
-    }
-
-    // Update keyboard
-    {
-        BYTE KeyStates[256];
-
-        VERIFY(GetKeyboardState(KeyStates));
-
-        const auto IsKeyDown = [&](auto key) { return (KeyStates[key] & 0x80) != 0; };
-
-        for (auto key = 0; key < 256; key++) {
-            // Check if there was a state change
-            if (IsKeyDown(key) == m_ImIO->KeysDown[key]) {
-                continue;
-            }
-
-            // There was!
-            if (IsKeyDown(key)) { // Key is now down
-                m_ImIO->KeysDown[key] = true;
-
-                char ResultUTF8[16] = {0};
-                if (ToAscii(key, MapVirtualKey(key, 0), KeyStates, (LPWORD)ResultUTF8, 0)) {
-                    m_ImIO->AddInputCharactersUTF8(ResultUTF8);
-                }
-            } else { // Key is now released
-                m_ImIO->KeysDown[key] = false;
-            }
-        }
-
-        m_ImIO->KeyCtrl  = IsKeyDown(VK_CONTROL);
-        m_ImIO->KeyShift = IsKeyDown(VK_SHIFT);
-        m_ImIO->KeyAlt   = IsKeyDown(VK_MENU);
-        m_ImIO->KeySuper = false;
-    }
+    //UpdateInputMouse();
+    //UpdateInputKeyboard();
 }
 
 void UIRenderer::PreRenderUpdate() {
@@ -135,7 +138,7 @@ void UIRenderer::DrawLoop() {
     }
 
     PreRenderUpdate();
-
+    ImGui_ImplWin32_NewFrame();
     ImGui_ImplDX9_NewFrame();
     ImGui::NewFrame();
 
