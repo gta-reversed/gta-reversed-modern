@@ -11,6 +11,7 @@
 
 class CObject;
 class CPed;
+class CPlayerPed;
 class CEntryExit;
 
 class CEntryExit {
@@ -76,6 +77,8 @@ public:
 
 public:
     static void InjectHooks();
+    
+    static void WarpGangWithPlayer(CPlayerPed* plyr);
 
     CEntryExit(
         CVector center,
@@ -99,7 +102,6 @@ public:
     void RequestObjectsInFrustum() const;
     bool TransitionFinished(CPed* ped);
     bool TransitionStarted(CPed* ped);
-    static void WarpGangWithPlayer(CPed* ped);
     void ProcessStealableObjects(CPed* ped);
     void FindValidTeleportPoint(CVector* point);
     bool HasNameSet() const;
@@ -121,6 +123,7 @@ public:
     [[nodiscard]] CVector GetPosition() const;
     [[nodiscard]] CVector2D GetPosition2D() const;
     [[nodiscard]] uint8 GetMyOrLinkedArea() const;
+    [[nodiscard]] auto GetArea() const { return m_nArea; }
 };
 
 VALIDATE_SIZE(CEntryExit, 0x3C);

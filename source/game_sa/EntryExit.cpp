@@ -4,8 +4,10 @@
 #include "EntryExitManager.h"
 #include "TaskComplexGotoDoorAndOpen.h"
 #include "TaskSimpleUninterruptable.h"
+#include "TaskComplexFollowLeaderInFormation.h"
 #include "TaskComplexFacial.h"
 #include "Garages.h"
+#include "PlayerPed.h"
 
 bool& CEntryExit::ms_bWarping = *(bool*)0x96A7B8;
 CObject*& CEntryExit::ms_pDoor = *(CObject**)0x96A7BC;
@@ -24,7 +26,7 @@ void CEntryExit::InjectHooks() {
     RH_ScopedInstall(TransitionFinished, 0x4404A0, { .reversed = false });
     RH_ScopedInstall(RequestObjectsInFrustum, 0x43E690);
     RH_ScopedInstall(RequestAmbientPeds, 0x43E6D0);
-    RH_ScopedInstall(WarpGangWithPlayer, 0x43F1F0, { .reversed = false });
+    RH_ScopedInstall(WarpGangWithPlayer, 0x43F1F0);
     RH_ScopedInstall(ProcessStealableObjects, 0x43E990, { .reversed = false });
 }
 
@@ -563,27 +565,59 @@ void CEntryExit::RequestObjectsInFrustum() const {
     CRenderer::RequestObjectsInDirection(ms_spawnPoint->m_vecExitPos, m_fExitAngle, 0);
 }
 
+// 0x43EA90
+bool IsTeleportPointValid(const CVector& origin, const CVector& target) {
+    return !CWorld::TestSphereAgainstWorld(target, 0.35f, false, true, true, true, true, true, false)
+        && CWorld::GetIsLineOfSightClear(origin, target, true, true, false, true, true, false, false);
+}
+
 // 0x43F1F0
-void CEntryExit::WarpGangWithPlayer(CPed* ped) {
-    auto& grp = ped->AsPlayer()->GetPlayerGroup();
+void CEntryExit::WarpGangWithPlayer(CPlayerPed* plyr) {
+    auto& grp = plyr->GetPlayerGroup();
     
-    if (!CPedGroups::ScriptReferenceIndex[grp.GetId()]) {
+    if (!grp.IsActive()) {
         return;
     }
 
     auto& ms = grp.GetMembership();
 
-    if (!ms.IsLeader(ped)) {
+    if (!ms.IsLeader(plyr)) {
         return;
     }
 
-    /*
-    for (auto i = 0; i < 8 - 1; i++) {
-        const auto member = membership.GetMember(i);
-        if (!member || member == ped || )
+    const auto& plyrPos = plyr->GetPosition();
+    const auto& offsets = CTaskComplexFollowLeaderInFormation::ms_offsets.offsets;
 
-        // TODO: Missing CTaskComplexFollowLeaderInFormation::ms_offsets
-    }*/
+    size_t offsetIdx = 0;
+    for (auto & mem : ms.GetMembers()) {
+        if (&mem == plyr) {
+            continue;
+        }
+        const auto& memPos = mem.GetPosition();
+
+        // Find position to teleport member to
+        // Original code tried only twice, but we'll try all offsets
+        // (Probably won't make a lot of difference)
+        CVector memTeleportTo;
+        do {
+            if (offsetIdx >= offsets.size()) {
+                return; // No more offsets
+            }
+            memTeleportTo = memPos + CVector{ offsets[offsetIdx++], 0.f };
+        } while (!IsTeleportPointValid(plyrPos, memTeleportTo));
+
+        // Calculate member heading (So that they'll face the player)
+        const auto memHeading = (plyrPos - memPos).Heading();
+
+        // Teleport them
+        mem.Teleport(memTeleportTo, false);
+
+        // Make the member be heading towards the player
+        mem.m_fCurrentRotation = mem.m_fAimingRotation = memHeading;
+        mem.SetHeading(memHeading);
+        mem.m_nAreaCode = plyr->m_nAreaCode;
+        mem.m_pEnex = plyr->m_pEnex;
+    }
 }
 
 // 0x43E990
