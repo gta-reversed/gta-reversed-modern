@@ -9,9 +9,9 @@
 #include "Vector.h"
 
 struct CStoredCollPoly {
-    CVector      verts[3]; // triangle vertices
-    bool         valid = true;
+    CVector      verts[3]{}; // triangle vertices
+    bool         valid{};
     char         _pad[3];
-    tColLighting ligthing;
+    tColLighting ligthing{};
 };
 VALIDATE_SIZE(CStoredCollPoly, 0x2C);

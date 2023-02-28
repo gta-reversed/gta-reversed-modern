@@ -1589,7 +1589,7 @@ bool CCollision::ProcessSphereTriangle(
 
 // 0x417730
 bool CCollision::TestLineOfSight(
-    const CColLine& line,
+    const CColLine& lnws,
     const CMatrix& transform,
     CColModel& cm,
     bool doSeeThroughCheck,
@@ -1601,7 +1601,7 @@ bool CCollision::TestLineOfSight(
     }
 
     // Transform line to object space
-    const auto lnos{ TransformObject(line, Invert(transform)) };
+    const auto lnos{ TransformObject(lnws, Invert(transform)) };
     
     // If we don't intersect with the bounding box, no chance on the rest
     if (!TestLineBox(lnos, cm.GetBoundingBox())) {
@@ -1615,7 +1615,7 @@ bool CCollision::TestLineOfSight(
 
     const auto Process = [&](const auto& arr, auto TestFn) {
         for (const auto& v : arr) {
-            if (ShouldTest(v.GetSurfaceType()) && TestFn(line, v)) {
+            if (ShouldTest(v.GetSurfaceType()) && TestFn(lnos, v)) {
                 return true;
             }
         }
@@ -1632,7 +1632,7 @@ bool CCollision::TestLineOfSight(
     const auto verts = cd->GetTriVerts();
     const auto pls   = cd->GetTriPlanes();
     for (const auto&& [idx, tri] : notsa::enumerate(cd->GetTris())) { // TODO: rng::zip
-        if (ShouldTest(tri.GetSurfaceType()) && TestLineTriangle(line, verts, tri, pls[idx])) {
+        if (ShouldTest(tri.GetSurfaceType()) && TestLineTriangle(lnos, verts, tri, pls[idx])) {
             return true;
         }
     }
@@ -1642,7 +1642,7 @@ bool CCollision::TestLineOfSight(
 }
 
 // 0x417950
-bool CCollision::ProcessLineOfSight(const CColLine& line, const CMatrix& transform, CColModel& colModel, CColPoint& colPoint, float& maxTouchDistance, bool doSeeThroughCheck,
+bool CCollision::ProcessLineOfSight(const CColLine& lnws, const CMatrix& transform, CColModel& colModel, CColPoint& colPoint, float& maxTouchDistance, bool doSeeThroughCheck,
                                     bool doShootThroughCheck) {
     assert(colModel.m_pColData);
 
@@ -1654,8 +1654,8 @@ bool CCollision::ProcessLineOfSight(const CColLine& line, const CMatrix& transfo
 
     // Transform lime into object space
     const CColLine line_OS = {
-        MultiplyMatrixWithVector(invertedTransform, line.m_vecStart),
-        MultiplyMatrixWithVector(invertedTransform, line.m_vecEnd),
+        MultiplyMatrixWithVector(invertedTransform, lnws.m_vecStart),
+        MultiplyMatrixWithVector(invertedTransform, lnws.m_vecEnd),
     };
 
     if (!TestLineBox_DW(line_OS, colModel.GetBoundingBox()))
@@ -1699,10 +1699,81 @@ bool CCollision::ProcessLineOfSight(const CColLine& line, const CMatrix& transfo
 }
 
 // 0x417BF0
-bool CCollision::ProcessVerticalLine(const CColLine& line, const CMatrix& transform, CColModel& colModel, CColPoint& colPoint, float& maxTouchDistance, bool doSeeThroughCheck,
-                                     bool doShootThroughCheck, CStoredCollPoly* collPoly) {
-    return plugin::CallAndReturn<bool, 0x417BF0, const CColLine&, const CMatrix&, CColModel&, CColPoint&, float&, bool, bool, CStoredCollPoly*>(
-        line, transform, colModel, colPoint, maxTouchDistance, doSeeThroughCheck, doShootThroughCheck, collPoly);
+bool CCollision::ProcessVerticalLine(
+    const CColLine& lnws,
+    const CMatrix& transform,
+    CColModel& cm,
+    CColPoint& cp,
+    float& maxTouchDistance,
+    bool doSeeThroughCheck,
+    bool doShootThroughCheck,
+    CStoredCollPoly* outColPoly
+) {
+    const auto cd = cm.GetData();
+    if (!cd) {
+        return false;
+    }
+
+    // Transform line to object space
+    //auto lnos = line;
+    //lnos.m_vecStart = Multiply3x3(lnos.m_vecStart, transform);
+    //lnos.m_vecEnd = Multiply3x3(lnos.m_vecEnd, transform);
+    //lnos.m_vecEnd.x = lnos.m_vecStart.x;
+    //lnos.m_vecEnd.y = lnos.m_vecStart.y;
+
+    auto lnos{ TransformObject(lnws, Invert(transform)) };
+    lnos.m_vecEnd.x = lnos.m_vecStart.x;
+    lnos.m_vecEnd.y = lnos.m_vecStart.y;
+
+    if (!TestLineBox(lnos, cm.GetBoundingBox())) {
+        return false;
+    }
+
+    auto localMaxTouchDist = maxTouchDistance;
+
+    const auto ShouldTest = [=](eSurfaceType surf) {
+        return (!doSeeThroughCheck || g_surfaceInfos.IsSeeThrough(surf));
+            //&& (!doShootThroughCheck || g_surfaceInfos.IsShootThrough(surf)); // NOTSA: Also do this check
+    };
+    
+    const auto Process = [&](const auto arr, auto ProcessFn) {
+        for (const auto& v : arr) {
+            if (ShouldTest(v.GetSurfaceType())) {
+                ProcessFn(lnos, v, cp, localMaxTouchDist);
+            }
+        }
+    };
+    Process(cd->GetSpheres(), ProcessLineSphere);
+    Process(cd->GetBoxes(), ProcessLineBox);
+
+    // Lastly, triangles
+    CalculateTrianglePlanes(cd);
+    CStoredCollPoly storedColPoly{};
+    const auto verts = cd->GetTriVerts();
+    const auto pls   = cd->GetTriPlanes();
+    for (const auto&& [idx, tri] : notsa::enumerate(cd->GetTris())) { // TODO: rng::zip
+        if (ShouldTest(tri.GetSurfaceType())) {
+            ProcessLineTriangle(lnos, verts, tri, pls[idx], cp, localMaxTouchDist, &storedColPoly);
+        }
+    }
+
+    if (localMaxTouchDist >= maxTouchDistance) {
+        return false; // No collisions closer to line origin than originally
+    }
+    maxTouchDistance = localMaxTouchDist;
+
+    // Transform back from object space
+    cp.m_vecPoint  = transform * cp.m_vecPoint;
+    cp.m_vecNormal = Multiply3x3(transform, cp.m_vecNormal);
+
+    if (outColPoly && storedColPoly.valid) {
+        for (auto& vtx : storedColPoly.verts) {
+            vtx = transform * vtx; // Transform back from object space
+        }
+        *outColPoly = storedColPoly;
+    }
+
+    return true;
 }
 
 // 0x417F20
