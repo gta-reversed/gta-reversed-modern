@@ -224,7 +224,7 @@ CTask* CTaskComplexKillPedOnFootArmed::CreateFirstSubTask(CPed* ped) {
     const auto targetToOurPedDistSq = (ourPos - targetPos).SquaredMagnitude();
 
     if (   !ped->bStayInSamePlace
-        && CGeneral::RandomBool(50)
+        && CGeneral::RandomBool(50.0f)
         && m_competence > 0
         && (targetToOurPedDistSq >= sq(30.f) || targetToOurPedDistSq >= sq(6.f) && !m_target->GetActiveWeapon().IsTypeMelee()) 
     ) {
