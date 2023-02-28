@@ -25,14 +25,15 @@ public:
     /* Check the signatures before starting work
     
     static bool IsConversationAtNode(char*, CPed* ped);
-    static void GetConversationStatus(CPed* ped);
     static void EnableConversation(CPed* ped, bool);
     static void DoneSettingUpConversation(bool);
-    static void FindFreeNodeSlot();
-    static void FindConversationForPed(CPed* ped);
-    static void FindFreeConversationSlot();
     static void SetUpConversationNode(char*, char*, char*, int32, int32, int32);
      */
     static void StartSettingUpConversation(CPed* ped);
     static void AwkwardSay(int32 sampleId, CPed* ped);
+
+    static uint32 FindFreeNodeSlot();
+    static CConversationForPed* FindConversationForPed(CPed* ped);
+    static CConversationForPed* FindFreeConversationSlot();
+    static uint32 GetConversationStatus(CPed* ped);
 };
