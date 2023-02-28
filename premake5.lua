@@ -72,71 +72,7 @@ solution "gta_reversed"
         "FatalWarnings"
     }
 
-    project "gta_reversed"
-        cppdialect "C++20"        
-        kind "SharedLib"
-        targetname "gta_reversed"
-        targetextension ".asi"
-
-        pchheader "StdInc.h"
-        pchsource "source/StdInc.cpp"
-
-        vpaths {
-            ["Headers/*"] = {"source/**.h*",},
-            ["Sources/*"] = {"source/**.c*",},
-            ["*"] = {"premake5.lua", "CMakeLists.txt"}
-        }
-     
-        files {
-            "source/StdInc.h",
-            "source/StdInc.cpp",
-            "source/**.h*",
-            "source/**.c*"
-        }
-
-        defines { 
-            "NOMINMAX", 
-            "USE_GTASA_ALLOCATOR", 
-            "EXTRA_DEBUG_FEATURES", 
-            "FIX_BUGS" 
-        }
-
-        includedirs {
-            "source", 
-            "source/**",
-            "libs/vorbis/include",
-            "libs/ogg/include",
-            "libs/imgui", 
-            "libs/imgui/backends", 
-            "libs/imgui/misc/cpp",
-            "libs/dxsdk"
-        }
-
-        links { 
-            "ogg", 
-            "vorbis", 
-            "vorbisenc", 
-            "vorbisfile", 
-            "imgui" 
-        }
-
-        libdirs { 
-            "%{cfg.targetdir}/ogg.lib", 
-            "%{cfg.targetdir}/vorbis.lib", 
-            "%{cfg.targetdir}/vorbisfile.lib", 
-            "%{cfg.targetdir}/vorbisenc.lib",  
-            "%{cfg.targetdir}/imgui.lib", 
-            "libs/dxsdk/d3d9.lib", 
-            "libs/dxsdk/dinput.lib"
-        }
-
-        filter {"vs*", "options:allow-script-cmd-hooks"}
-            buildoptions { "/bigobj"}
-
-        filter {"options:allow-script-cmd-hooks"}
-            defines { "ENABLE_SCRIPT_COMMAND_HOOKS" }   
-
-        filter {} -- Clear filter
+    include "source/"
 
     group "Dependencies"
         defines { "WIN32", "_WINDOWS" }
