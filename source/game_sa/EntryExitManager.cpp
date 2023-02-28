@@ -84,7 +84,7 @@ void CEntryExitManager::Update() {
          CCutsceneMgr::ms_cutsceneProcessing
       || CPad::GetPad()->DisablePlayerControls
       || CGameLogic::IsCoopGameGoingOn()
-      || CReplay::Mode == eReplayMode::REPLAY_MODE_1
+      || CReplay::Mode == eReplayMode::MODE_PLAYBACK
       || CEntryExitManager::ms_bDisabled;
 
     if (!bDontShowMarkers && ms_exitEnterState == 0) { // Moved `bDontShowMarkers` here from inner loop

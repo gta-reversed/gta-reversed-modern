@@ -110,9 +110,7 @@ public:
     static void SetupPlayerPed(int playerId);
 
     // NOTSA
-    auto GetGroupIdx() const { return m_pPlayerData->m_nPlayerGroup; }
-    CPedGroup& GetGroup() const noexcept { return CPedGroups::GetGroup(GetGroupIdx()); }
-    CPedGroupMembership& GetGroupMembership() const noexcept { return GetGroup().GetMembership(); }
+    CPedGroup& GetPlayerGroup() const noexcept { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
 };
 
 VALIDATE_SIZE(CPlayerPed, 0x7A4);

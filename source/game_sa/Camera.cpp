@@ -1054,7 +1054,7 @@ void CCamera::TakeControl(CEntity* target, eCamMode modeToGoTo, eSwitchType swit
 }
 
 // 0x50C8B0
-void CCamera::TakeControlNoEntity(const CVector* fixedModeVector, eSwitchType switchType, int32 whoIsInControlOfTheCamera) {
+void CCamera::TakeControlNoEntity(const CVector& fixedModeVector, eSwitchType switchType, int32 whoIsInControlOfTheCamera) {
     if (whoIsInControlOfTheCamera == 2 && m_nWhoIsInControlOfTheCamera == 1)
         return;
 
@@ -1062,7 +1062,7 @@ void CCamera::TakeControlNoEntity(const CVector* fixedModeVector, eSwitchType sw
     m_bLookingAtVector           = true;
     m_nModeToGoTo                = MODE_FIXED;
     m_bLookingAtPlayer           = false;
-    m_vecFixedModeVector         = *fixedModeVector;
+    m_vecFixedModeVector         = fixedModeVector;
     m_nTypeOfSwitch              = switchType;
     m_bStartInterScript          = true;
 }

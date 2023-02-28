@@ -5,6 +5,7 @@
 #include "TaskComplexGotoDoorAndOpen.h"
 #include "TaskSimpleUninterruptable.h"
 #include "TaskComplexFacial.h"
+#include "Garages.h"
 
 bool& CEntryExit::ms_bWarping = *(bool*)0x96A7B8;
 CObject*& CEntryExit::ms_pDoor = *(CObject**)0x96A7BC;
@@ -514,14 +515,15 @@ void CEntryExit::RequestObjectsInFrustum() const {
 
 // 0x43F1F0
 void CEntryExit::WarpGangWithPlayer(CPed* ped) {
-    if (!CPedGroups::ScriptReferenceIndex[ped->AsPlayer()->GetGroupIdx()]) {
+    auto& grp = ped->AsPlayer()->GetPlayerGroup();
+    
+    if (!CPedGroups::ScriptReferenceIndex[grp.GetId()]) {
         return;
     }
 
-    auto& playerGroup = ped->AsPlayer()->GetGroup();
-    auto& membership = playerGroup.GetMembership();
+    auto& ms = grp.GetMembership();
 
-    if (!membership.IsLeader(ped)) {
+    if (!ms.IsLeader(ped)) {
         return;
     }
 
