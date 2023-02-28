@@ -411,6 +411,7 @@ void CConversations::InjectHooks() {
 
     RH_ScopedInstall(Clear, 0x43A7B0);
     RH_ScopedInstall(IsConversationGoingOn, 0x43AAC0);
+    RH_ScopedInstall(StartSettingUpConversation, 0x43A840);
     RH_ScopedInstall(AwkwardSay, 0x43A810);
 }
 
@@ -430,6 +431,15 @@ void CConversations::Update() {
 // 0x43AAC0
 bool CConversations::IsConversationGoingOn() {
     return rng::any_of(m_aConversations, [](auto& conversation) { return conversation.m_Status; });
+}
+
+// 0x43A840
+void CConversations::StartSettingUpConversation(CPed* ped) {
+    m_pSettingUpConversationPed = ped;
+    CEntity::RegisterReference(m_pSettingUpConversationPed);
+
+    m_SettingUpConversationNumNodes = 0;
+    m_bSettingUpConversation = true;
 }
 
 // 0x43A810
