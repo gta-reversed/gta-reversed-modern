@@ -435,25 +435,28 @@ bool CEntryExitManager::Save() {
 
 // NOTSA (Code somewhat based on 0x43FC00)
 void CEntryExitManager::AddEnExToWorld(CEntryExit* enex) {
-    // Calculate corner positions (We ain't gonna use a matrix for this like they did, too complicated)
-    const auto& r = enex->m_recEntrance;
+    // Calculate rotated corner positions (We ain't gonna use a matrix for this like they did, too complicated)
+    const auto& r  = enex->m_recEntrance;
+    const auto  rc = r.GetCenter();
     CVector2D corners[]{
         { r.right, r.top },
         { r.left, r.bottom }
     };
-    for (auto& c : corners) {
-        c = c.RotatedBy(enex->m_fEntranceAngleRad); // NOTE: If doesn't work properly, negate (-angle) the angle
+
+    // Rotate it around the center
+    for (auto& corner : corners) {
+        corner = rc + (corner - rc).RotatedBy(enex->m_fEntranceAngleRad); // NOTE: If doesn't work properly, negate (-angle) the angle
     }
 
-    const auto GetMinMax = [&](size_t axis) {
+    const auto GetMinMaxAxis = [&](size_t axis) {
         return rng::minmax(
             corners | rng::views::transform([axis](auto&& c) { return c[axis]; })
         );
     };
 
     // Calculate min-max coordinates
-    const auto [minX, maxX] = GetMinMax(0);
-    const auto [minY, maxY] = GetMinMax(1);
+    const auto [minX, maxX] = GetMinMaxAxis(0);
+    const auto [minY, maxY] = GetMinMaxAxis(1);
     
     // Add it to the QuadTree using the calculated bounding rect
     mp_QuadTree->AddItem(enex, {minX, minY, maxX, maxY});
