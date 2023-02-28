@@ -382,6 +382,7 @@
 #include "TaskComplexEnterCar.h"
 #include "TaskComplexSmartFleePoint.h"
 #include "Interior/TaskInteriorBeInHouse.h"
+#include "Tasks/TaskTypes/TaskComplexKillPedOnFootArmed.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -804,10 +805,12 @@ void InjectHooksMain() {
         CTaskComplexInvestigateDisturbance::InjectHooks();
         // CTaskComplexKillAllThreats::InjectHooks();
         // CTaskComplexKillCriminal::InjectHooks();
+        
+        CTaskComplexKillPedOnFootArmed::InjectHooks();
         CTaskComplexKillPedGroupOnFoot::InjectHooks();
-        // CTaskComplexKillPedOnFootArmed::InjectHooks();
         CTaskComplexKillPedOnFootMelee::InjectHooks();
         // CTaskComplexKillPedOnFootStealth::InjectHooks();
+
         CTaskComplexLeaveCarAndDie::InjectHooks();
         CTaskComplexLeaveBoat::InjectHooks();
         CTaskComplexLeaveCarAndFlee::InjectHooks();
