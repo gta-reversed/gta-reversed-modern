@@ -46,7 +46,7 @@ solution "gta_reversed"
         runtime "Release"
         optimize "Full"
 
-    configuration "vs*"
+    filter "action:vs*"
         flags { "MultiProcessorCompile" }
         linkoptions   { "/ignore:4099,4251,4275" }
         buildoptions { "/EHsc", "/Zc:preprocessor", "/bigobj" }
@@ -98,6 +98,7 @@ group "Dependencies"
         language "C++"
         kind "StaticLib"
         targetname "vorbis"
+        warnings "Off"
 
         vpaths {
             ["Headers/*"] = {"libs/vorbis/**.h",},
@@ -155,6 +156,7 @@ group "Dependencies"
         language "C++"
         kind "StaticLib"
         targetname "imgui" 
+        warnings "Off"
 
         vpaths {
             ["Headers/*"] = {"libs/imgui/**.h",},
