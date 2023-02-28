@@ -156,9 +156,8 @@ void CEntryExitManager::Update() {
 
 // 0x43E410
 void CEntryExitManager::AddEntryExitToStack(CEntryExit* enex) {
-    if (enex->m_pLink)
-        enex = enex->m_pLink;
-
+    enex = enex->GetLinkedOrThis();
+    
     if (ms_entryExitStackPosn > 0 && ms_entryExitStack[ms_entryExitStackPosn - 1] == enex) {
         ms_entryExitStackPosn--;
     } else if (enex->m_nArea != AREA_CODE_NORMAL_WORLD) {
@@ -224,6 +223,9 @@ int32 CEntryExitManager::AddOne(
 void CEntryExitManager::DeleteOne(int32 index) {
     if (const auto enex = mp_poolEntryExits->GetAt(index)) {
         mp_QuadTree->DeleteItem(enex);
+#ifdef FIX_BUGS // Call destructor
+        std::destroy_at(enex);
+#endif
         mp_poolEntryExits->Delete(enex);
     }
 }
@@ -236,30 +238,31 @@ CObject* CEntryExitManager::FindNearestDoor(CEntryExit const& exit, float radius
     int16 numObjsInRange{};
     CWorld::FindObjectsInRange(entranceCenter, radius, false, &numObjsInRange, (int16)std::size(objsInRange), objsInRange, false, false, false, true, false);
 
-    if (numObjsInRange) {
-        float closestDistSq{ FLT_MAX };
-        CObject* closest{};
-
-        for (auto&& entity : std::span{ objsInRange, (size_t)numObjsInRange }) {
-            const auto object = entity->AsObject();
-            if (object->physicalFlags.bDisableMoveForce) {
-                const auto distSq = (object->GetPosition() - entranceCenter).SquaredMagnitude(); // Using `SqMag` instead of `Mag`
-                if (distSq < closestDistSq) {
-                    closest = object;
-                    closestDistSq = distSq;
-                }
-            }
-        }
-        return closest;
+    if (!numObjsInRange) {
+        return nullptr;
     }
-    return nullptr;
+    
+    float closestDistSq{ FLT_MAX };
+    CObject* closest{};
+    for (auto&& entity : std::span{ objsInRange, (size_t)numObjsInRange }) {
+        const auto obj = entity->AsObject();
+        if (!obj->physicalFlags.bDisableMoveForce) {
+            continue;
+        }
+
+        const auto distSq = (obj->GetPosition() - entranceCenter).SquaredMagnitude(); // Using `SqMag` instead of `Mag`
+        if (distSq < closestDistSq) {
+            closest       = obj;
+            closestDistSq = distSq;
+        }
+    }
+    return closest;
 }
 
 // 0x43F4B0
 int32 CEntryExitManager::FindNearestEntryExit(const CVector2D& position, float range, int32 ignoreArea) {
-    CRect rect(position.x - range, position.y - range, position.x + range, position.y + range);
     CPtrListSingleLink enexInRange{};
-    mp_QuadTree->GetAllMatching(rect, enexInRange);
+    mp_QuadTree->GetAllMatching(CRect{ position, range }, enexInRange);
 
     float closestDist2D{ 2.f * range };
     CEntryExit* closest{};
@@ -267,16 +270,20 @@ int32 CEntryExitManager::FindNearestEntryExit(const CVector2D& position, float r
         next = it->GetNext();
 
         auto* enex = it->ItemAs<CEntryExit>();
-        if (enex->GetMyOrLinkedArea() != ignoreArea) {
-            const auto dist = (enex->GetPosition2D() - position).Magnitude(); // TODO: Use SqMag
-            if (dist < closestDist2D) {
-                closest = enex;
-                closestDist2D = dist;
-            }
+        if (enex->GetLinkedOrThis()->GetArea() == ignoreArea) {
+            continue;
+        }
+
+        const auto dist = (enex->GetPosition2D() - position).Magnitude(); // TODO: Use SqMag
+        if (dist < closestDist2D) {
+            closest = enex;
+            closestDist2D = dist;
         }
     }
 
-    return closest ? mp_poolEntryExits->GetIndex(closest) : -1;
+    return closest
+        ? mp_poolEntryExits->GetIndex(closest)
+        : -1;
 }
 
 // 0x43F180
@@ -323,6 +330,7 @@ void CEntryExitManager::LinkEntryExit(CEntryExit* enex) {
         if (linkedEnEx->m_pLink) {
             linkedEnEx->m_pLink = enex;
         }
+        // ?????
         linkedEnEx->m_nTimeOn = 0;
         linkedEnEx->m_nTimeOff = 24;
     }
@@ -375,64 +383,6 @@ void CEntryExitManager::SetAreaCodeForVisibleObjects() {
     ms_oldAreaCode = CGame::currArea;
 }
 
-// 0x5D55C0
-bool CEntryExitManager::Load() {
-    // Load entry exit stack
-    CGenericGameStorage::LoadDataFromWorkBuffer(&ms_entryExitStackPosn, sizeof(ms_entryExitStackPosn));
-    for (auto i = 0u; i < ms_entryExitStackPosn; i++) {
-        uint16 enexIdx{};
-        CGenericGameStorage::LoadDataFromWorkBuffer(&enexIdx, sizeof(enexIdx));
-        ms_entryExitStack[i] = mp_poolEntryExits->GetAt(enexIdx);
-    }
-
-    // Load entry exits
-    int16 enexIdx{};
-    CGenericGameStorage::LoadDataFromWorkBuffer(&enexIdx, sizeof(enexIdx));
-    while (enexIdx != -1) {
-        uint16 flags{};
-        CGenericGameStorage::LoadDataFromWorkBuffer(&flags, sizeof(flags));
-
-        int16 linkedIdx{};
-        CGenericGameStorage::LoadDataFromWorkBuffer(&linkedIdx, sizeof(linkedIdx));
-
-        if (auto enex = mp_poolEntryExits->GetAt(enexIdx)) {
-            if (linkedIdx == -1) {
-                enex->m_pLink = nullptr;
-            } else if (const auto linked = mp_poolEntryExits->GetAt(linkedIdx)) {
-                enex->m_pLink = linked;
-            } else {
-                enex->m_pLink = nullptr;
-            }
-        } else {
-            assert(0); // NOTSA - Probably corrupted save file or something.
-        }
-
-        CGenericGameStorage::LoadDataFromWorkBuffer(&enexIdx, sizeof(enexIdx));
-    }
-
-    return true;
-}
-
-// 0x5D5970
-bool CEntryExitManager::Save() {
-    // Save entry exit stack
-    CGenericGameStorage::SaveDataToWorkBuffer(&ms_entryExitStackPosn, sizeof(ms_entryExitStackPosn));
-    for (auto&& enex : std::span{ ms_entryExitStack, ms_entryExitStackPosn}) {
-        CGenericGameStorage::SaveDataToWorkBuffer((uint16)mp_poolEntryExits->GetIndex(enex));
-    }
-
-    // Save entry exits
-    for (auto i = 0; i < mp_poolEntryExits->GetSize(); i++) {
-        if (const auto enex = mp_poolEntryExits->GetAt(i)) {
-            CGenericGameStorage::SaveDataToWorkBuffer((uint16)i); // Enex idx in pool
-            CGenericGameStorage::SaveDataToWorkBuffer((uint16)(enex->m_pLink ? mp_poolEntryExits->GetIndex(enex->m_pLink) : -1)); // Linked enex idx in pool
-            CGenericGameStorage::SaveDataToWorkBuffer((uint16)enex->m_nFlags);
-        }
-    }
-
-    return true;
-}
-
 // NOTSA (Code somewhat based on 0x43FC00)
 void CEntryExitManager::AddEnExToWorld(CEntryExit* enex) {
     // Calculate rotated corner positions (We ain't gonna use a matrix for this like they did, too complicated)
@@ -463,5 +413,63 @@ void CEntryExitManager::AddEnExToWorld(CEntryExit* enex) {
 }
 
 bool CEntryExitManager::WeAreInInteriorTransition() {
-    return plugin::CallAndReturn<bool, 0x43E400>();
+    return ms_exitEnterState != 0;
+}
+
+// 0x5D55C0
+bool CEntryExitManager::Load() {
+    // Load entry exit stack
+    CGenericGameStorage::LoadDataFromWorkBuffer(&ms_entryExitStackPosn, sizeof(ms_entryExitStackPosn));
+    for (auto i = 0u; i < ms_entryExitStackPosn; i++) {
+        uint16 enexIdx{};
+        CGenericGameStorage::LoadDataFromWorkBuffer(&enexIdx, sizeof(enexIdx));
+        ms_entryExitStack[i] = mp_poolEntryExits->GetAt(enexIdx);
+    }
+
+    // Load entry exits
+    int16 enexIdx{};
+    CGenericGameStorage::LoadDataFromWorkBuffer(&enexIdx, sizeof(enexIdx));
+    while (enexIdx != -1) {
+        uint16 flags{};
+        CGenericGameStorage::LoadDataFromWorkBuffer(&flags, sizeof(flags));
+
+        int16 linkedIdx{};
+        CGenericGameStorage::LoadDataFromWorkBuffer(&linkedIdx, sizeof(linkedIdx));
+
+        if (auto enex = mp_poolEntryExits->GetAt(enexIdx)) {
+            if (linkedIdx == -1) {
+                enex->m_pLink = nullptr;
+            } else if (const auto linked = mp_poolEntryExits->GetAt(linkedIdx)) {
+                enex->m_pLink = linked;
+            } else {
+                enex->m_pLink = nullptr;
+            }
+        } else {
+            NOTSA_UNREACHABLE(); // NOTSA - Probably corrupted save file or something.
+        }
+
+        CGenericGameStorage::LoadDataFromWorkBuffer(&enexIdx, sizeof(enexIdx));
+    }
+
+    return true;
+}
+
+// 0x5D5970
+bool CEntryExitManager::Save() {
+    // Save entry exit stack
+    CGenericGameStorage::SaveDataToWorkBuffer(&ms_entryExitStackPosn, sizeof(ms_entryExitStackPosn));
+    for (auto&& enex : std::span{ ms_entryExitStack, ms_entryExitStackPosn}) {
+        CGenericGameStorage::SaveDataToWorkBuffer((uint16)mp_poolEntryExits->GetIndex(enex));
+    }
+
+    // Save entry exits
+    for (auto i = 0; i < mp_poolEntryExits->GetSize(); i++) {
+        if (const auto enex = mp_poolEntryExits->GetAt(i)) {
+            CGenericGameStorage::SaveDataToWorkBuffer((uint16)i); // Enex idx in pool
+            CGenericGameStorage::SaveDataToWorkBuffer((uint16)(enex->m_pLink ? mp_poolEntryExits->GetIndex(enex->m_pLink) : -1)); // Linked enex idx in pool
+            CGenericGameStorage::SaveDataToWorkBuffer((uint16)enex->m_nFlags);
+        }
+    }
+
+    return true;
 }

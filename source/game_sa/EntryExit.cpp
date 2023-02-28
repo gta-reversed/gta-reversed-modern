@@ -237,9 +237,8 @@ bool CEntryExit::TransitionStarted(CPed* ped) {
             }
             break;
         }
-        default: { // Nothing else is disallowed - TODO: Allow uncomment this, I want my Rhino in CJ's house
+        default: // Nothing else is disallowed - TODO: Uncomment this, I want my Rhino in CJ's house
             return false;
-        }
         }
     } else if (bDisableExit) {
         return false;
@@ -259,21 +258,24 @@ bool CEntryExit::TransitionStarted(CPed* ped) {
     }
 
     bEnteredWithoutExit = true;
-    ms_pDoor = nullptr;
+    ms_pDoor            = nullptr;
 
-    ped->bCanExitCar = false;
+    ped->bCanExitCar    = false;
 
     const auto AddPedScriptCommand = [ped](auto* task) {
-        CEventScriptCommand scriptCmdEvent{ ePrimaryTasks::TASK_PRIMARY_PRIMARY, task, false };
-        ped->GetEventGroup().Add(&scriptCmdEvent);
+        ped->GetEventGroup().Add(CEventScriptCommand{
+            TASK_PRIMARY_PRIMARY,
+            task,
+            false
+        });
     };
 
-    if ((bUnknownPairing || bFoodDateFlag) || ped->bInVehicle) {
-        if (spawnPointExitToUs.Magnitude() > 10.f) {
+    if (bUnknownPairing || bFoodDateFlag || ped->bInVehicle) {
+        if (spawnPointExitToUs.SquaredMagnitude() > sq(10.f)) {
             ms_bWarping = true;
         }
     } else {
-        ms_bWarping = spawnPointExitToUs.Magnitude() > 10.f;
+        ms_bWarping = spawnPointExitToUs.SquaredMagnitude() > sq(10.f);
 
         const auto spawnPointExitToUsDir = Normalized(spawnPointExitToUs);
 
@@ -314,7 +316,7 @@ bool CEntryExit::TransitionStarted(CPed* ped) {
 // 0x4404A0
 bool CEntryExit::TransitionFinished(CPed* ped) {
     return plugin::CallMethodAndReturn<bool, 0x4404A0, CEntryExit*, CPed*>(this, ped);
-
+    /*
     const auto spawnPos = ms_spawnPoint->m_vecExitPos;
 
     if (const auto entity = ped->GetEntityThatThisPedIsHolding()) {
@@ -511,6 +513,7 @@ bool CEntryExit::TransitionFinished(CPed* ped) {
     }
 
     return 0; // TODO
+    */
 }
 
 // 0x43E6D0
@@ -520,44 +523,34 @@ void CEntryExit::RequestAmbientPeds() {
         return;
     }
 
-    if (_stricmp("bar1", m_szName) == 0) {
-        int32 peds[] = {
-            MODEL_BFYRI, MODEL_OFYST, MODEL_WFYST, MODEL_WMYST,
-            MODEL_BMYRI, MODEL_BMYST, MODEL_OMOST, MODEL_OMYST,
-        };
-        CStreaming::StreamPedsIntoRandomSlots(peds);
-    }
+    constexpr struct { const char* name; int32 models[TOTAL_LOADED_PEDS]; } mapping[]{
+        { 
+            "bar1", 
+            {MODEL_BFYRI, MODEL_OFYST, MODEL_WFYST, MODEL_WMYST, MODEL_BMYRI, MODEL_BMYST, MODEL_OMOST, MODEL_OMYST} 
+        },
+        { 
+            "strip2", 
+            {MODEL_SBFYSTR, MODEL_SWFYSTR, MODEL_INVALID, MODEL_INVALID, MODEL_INVALID, MODEL_INVALID, MODEL_INVALID, MODEL_INVALID} 
+        },
+        { 
+            "LAstrip", 
+            {MODEL_VWFYST1, MODEL_VBFYST2, MODEL_VHFYST3, MODEL_INVALID, MODEL_INVALID, MODEL_INVALID, MODEL_INVALID, MODEL_INVALID} 
+        },
+        { 
+            "MAFCAS", 
+            {MODEL_BFORI, MODEL_HFYRI, MODEL_OMYRI, MODEL_WMYRI, MODEL_OFYST, MODEL_VHMYELV, MODEL_WMOST, MODEL_BMORI} 
+        },
+        { 
+            "TRICAS", 
+            {MODEL_BFYRI, MODEL_BMYRI, MODEL_HFORI, MODEL_HMORI, MODEL_WMORI, MODEL_WFYRI, MODEL_OMOST, MODEL_VBMYELV} 
+        },
+    };
 
-    if (_stricmp("strip2", m_szName) == 0) {
-        int32 peds[] = {
-            MODEL_SBFYSTR, MODEL_SWFYSTR, MODEL_INVALID, MODEL_INVALID,
-            MODEL_INVALID, MODEL_INVALID, MODEL_INVALID, MODEL_INVALID,
-        };
-        CStreaming::StreamPedsIntoRandomSlots(peds);
-    }
-
-    if (_stricmp("LAstrip", m_szName) == 0) {
-        int32 peds[] = {
-            MODEL_VWFYST1, MODEL_VBFYST2, MODEL_VHFYST3, MODEL_INVALID,
-            MODEL_INVALID, MODEL_INVALID, MODEL_INVALID, MODEL_INVALID,
-        };
-        CStreaming::StreamPedsIntoRandomSlots(peds);
-    }
-
-    if (_stricmp("MAFCAS", m_szName) == 0) {
-        int32 peds[] = {
-            MODEL_BFORI, MODEL_HFYRI, MODEL_OMYRI, MODEL_WMYRI,
-            MODEL_OFYST, MODEL_VHMYELV, MODEL_WMOST, MODEL_BMORI,
-        };
-        CStreaming::StreamPedsIntoRandomSlots(peds);
-    }
-
-    if (_stricmp("TRICAS", m_szName) == 0) {
-        int32 peds[] = {
-            MODEL_BFYRI, MODEL_BMYRI, MODEL_HFORI, MODEL_HMORI,
-            MODEL_WMORI, MODEL_WFYRI, MODEL_OMOST, MODEL_VBMYELV,
-        };
-        CStreaming::StreamPedsIntoRandomSlots(peds);
+    for (auto&& [name, models] : mapping) {
+        if (_stricmp(name, m_szName)) {
+            CStreaming::StreamPedsIntoRandomSlots(models);
+            return;
+        }
     }
 }
 // 0x43E690
@@ -567,7 +560,7 @@ void CEntryExit::RequestObjectsInFrustum() const {
 
 // 0x43EA90
 bool IsTeleportPointValid(const CVector& origin, const CVector& target) {
-    return !CWorld::TestSphereAgainstWorld(target, 0.35f, false, true, true, true, true, true, false)
+    return !CWorld::TestSphereAgainstWorld(target, 0.35f, nullptr, true, true, true, true, true, false)
         && CWorld::GetIsLineOfSightClear(origin, target, true, true, false, true, true, false, false);
 }
 

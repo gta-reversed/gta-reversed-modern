@@ -370,7 +370,7 @@ public:
     static bool StreamFireEngineAndFireman(bool bStreamForFire);
     static void StreamOneNewCar();
     static void StreamPedsForInterior(int32 interiorType);
-    static void StreamPedsIntoRandomSlots(int32 modelArray[TOTAL_LOADED_PEDS]);
+    static void StreamPedsIntoRandomSlots(const int32 (&modelArray)[TOTAL_LOADED_PEDS]);
     static void StreamVehiclesAndPeds();
     static void StreamVehiclesAndPeds_Always(const CVector& unused);
     static void StreamZoneModels(const CVector& unused);
