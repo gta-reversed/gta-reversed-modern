@@ -8,24 +8,14 @@
 
 #include "RGBA.h"
 
-CRGBA::CRGBA(uint8 red, uint8 green, uint8 blue) {
-    Set(red, green, blue, 255);
-}
-
-CRGBA::CRGBA(uint8 red, uint8 green, uint8 blue, uint8 alpha) {
-    Set(red, green, blue, alpha);
-}
-
-CRGBA::CRGBA(const CRGBA& rhs) {
-    Set(rhs);
-}
-
-CRGBA::CRGBA(uint32 intValue) {
-    Set(intValue);
-}
-
-CRGBA::CRGBA(const RwRGBA& rhs) {
-    Set(rhs);
+CRGBA::CRGBA(RwRGBAReal rgba) :
+    CRGBA{
+        (uint8)(rgba.red * 255.f),
+        (uint8)(rgba.green * 255.f),
+        (uint8)(rgba.blue * 255.f),
+        (uint8)(rgba.alpha * 255.f)
+    }
+{
 }
 
 void CRGBA::Set(uint8 red, uint8 green, uint8 blue) {

@@ -4,20 +4,29 @@
 #include "TaskComplexWanderStandard.h"
 #include "IKChainManager_c.h"
 
+// TODO: Inject Hooks
+
 // 0x6836F0
-CTaskComplexBeInCouple::CTaskComplexBeInCouple(CPed* ped, bool a3, bool a4, bool a5, float a6) : CTaskComplex() {
-    byte14 = a3;
-    byte15 = a4;
-    m_Ped = ped;
-    byte16 = a5;
-    float18 = a6;
-    byte1C = 0;
-    CEntity::SafeRegisterRef(m_Ped);
+CTaskComplexBeInCouple::CTaskComplexBeInCouple(
+    CPed* ped,
+    bool  isLeader,
+    bool  holdHands,
+    bool  lookAtEachOther,
+    float giveUpDist
+) :
+    CTaskComplex(),
+    m_partner{ped},
+    m_isLeader{isLeader},
+    m_holdHands{holdHands},
+    m_lookAtEachOther{lookAtEachOther},
+    m_giveUpDist{giveUpDist}
+{
+    CEntity::SafeRegisterRef(m_partner);
 }
 
 // 0x683780
 CTaskComplexBeInCouple::~CTaskComplexBeInCouple() {
-    CEntity::SafeCleanUpRef(m_Ped);
+    CEntity::SafeCleanUpRef(m_partner);
 }
 
 // 0x6837E0
@@ -38,7 +47,7 @@ void CTaskComplexBeInCouple::AbortArmIK(CPed* ped) {
 
 // 0x6847C0
 bool CTaskComplexBeInCouple::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    if (m_Ped && event && event->HasEditableResponse()) {
+    if (m_partner && event && event->HasEditableResponse()) {
         auto editable = static_cast<CEventEditableResponse*>(const_cast<CEvent*>(event)); // Okay let's go!
 
         bool bAddToEventGroup = editable->m_bAddToEventGroup;
@@ -47,7 +56,7 @@ bool CTaskComplexBeInCouple::MakeAbortable(CPed* ped, eAbortPriority priority, c
         case EVENT_DAMAGE:
         case EVENT_GUN_AIMED_AT:
         case EVENT_SHOT_FIRED:
-            m_Ped->GetEventGroup().Add(editable, false);
+            m_partner->GetEventGroup().Add(editable, false);
             break;
         }
         editable->m_bAddToEventGroup = bAddToEventGroup;
@@ -59,19 +68,20 @@ bool CTaskComplexBeInCouple::MakeAbortable(CPed* ped, eAbortPriority priority, c
 // 0x684840
 CTask* CTaskComplexBeInCouple::CreateNextSubTask(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x684840, CTaskComplexBeInCouple*, CPed*>(this, ped);
-
-    if (!m_Ped) {
+    /*
+    if (!m_otherPed) {
         AbortArmIK(ped);
         return nullptr;
     }
 
-    if (this->byte14) {
+    if (this->m_isLeader) {
         AbortArmIK(ped);
         return new CTaskComplexWanderStandard(4, CGeneral::GetRandomNumberInRange(0, 8), true);
     } else {
         AbortArmIK(ped);
-        // todo: return new CTaskComplexWalkAlongsidePed(m_Ped, float18);
+        // todo: return new CTaskComplexWalkAlongsidePed(m_otherPed, m_giveUpDist);
     }
+    */
 }
 
 // 0x684930

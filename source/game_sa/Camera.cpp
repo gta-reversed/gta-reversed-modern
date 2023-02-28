@@ -1630,3 +1630,24 @@ void CCamera::StartTransitionWhenNotFinishedInter(eCamMode currentCamMode) {
 void CCamera::StartTransition(eCamMode currentCamMode) {
     plugin::CallMethod<0x515200, CCamera*, eCamMode>(this, currentCamMode);
 }
+
+auto CCamera::GetFrustumPoints() -> std::array<CVector, 5> {
+    CVector pts[5]{};
+
+    // First, the corners
+    const auto farPlane  = RwCameraGetFarClipPlane(m_pRwCamera);
+    const auto farVWSize = CVector2D{ *RwCameraGetViewWindow(m_pRwCamera) } * farPlane;
+    const auto corners   = CRect{ -farVWSize, farVWSize }.GetCorners3D(farPlane);
+
+    // Copy it into pts
+    rng::copy(corners, pts);
+
+    // Last is the center point
+    pts[4] = CVector{ 0.f, 0.f, 0.f };
+
+    // Transform them to world space
+    RwV3dTransformPoints(pts, pts, 5, GetRwMatrix());
+
+    // That's it!
+    return std::to_array(pts);
+}

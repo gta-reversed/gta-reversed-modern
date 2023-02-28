@@ -103,8 +103,8 @@ public:
     };
     int8          m_nNumLodChildren;
     uint8         m_nNumLodChildrenRendered;
-    eEntityType   m_nType : 3;
-    eEntityStatus m_nStatus : 5;
+    eEntityType   m_nType : 3;          // Mask: & 0x7  = 7
+    eEntityStatus m_nStatus : 5;        // Mask: & 0xF8 = 248 (Remember: In the original code unless this was left shifted the value it's compared to has to be left shifted by 3!)
 
 public:
     CEntity();
@@ -181,13 +181,17 @@ public:
     void RemoveEscalatorsForEntity();
     bool IsEntityOccluded();
     bool IsInCurrentAreaOrBarberShopInterior();
+    bool IsInCurrentArea() const;
     void UpdateRW();
     // Always returns a non-null value. In case there's no LOD object `this` is returned. NOTSA
     CEntity* FindLastLOD() noexcept;
 
     // NOTSA
+    auto GetModelId() const { return (eModelID)m_nModelIndex; }
     CBaseModelInfo* GetModelInfo() const;
     CCollisionData* GetColData() { return GetColModel()->m_pColData; }
+
+    auto GetModelID() const { return (eModelID)(m_nModelIndex); }
 
     // Wrapper around the mess called `CleanUpOldReference`
     // Takes in `ref` (which is usually a member variable),
@@ -206,7 +210,8 @@ public:
     // + clears the old entity (if any)
     // + set the new entity (if any)
     template<typename T, typename Y>
-    static void ChangeEntityReference(T*& inOutRef, Y* entity) requires std::is_base_of_v<CEntity, T> && std::is_base_of_v<CEntity, Y> {
+        requires std::is_base_of_v<CEntity, T> && std::is_base_of_v<CEntity, Y> 
+    static void ChangeEntityReference(T*& inOutRef, Y* entity) {
         ClearReference(inOutRef); // Clear old
         if (entity) { // Set new (if any)
             inOutRef = entity;
@@ -214,6 +219,7 @@ public:
         }
     }
 
+    // Register a reference to the entity that is stored in that given reference
     template<typename T>
     static void RegisterReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
         ref->RegisterReference(reinterpret_cast<CEntity**>(&ref));
@@ -281,6 +287,11 @@ public:
     bool IsScanCodeCurrent() const;
     void SetCurrentScanCode();
 
+    auto GetBoundRect() {
+        CRect r{};
+        GetBoundRect(&r);
+        return r;
+    }
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

@@ -52,8 +52,8 @@ void CScripted2dEffects::ReturnScripted2DEffect(int32 index) {
 
 auto CScripted2dEffects::IndexOfEffect(const C2dEffect* effect) -> std::optional<size_t> {
     const auto idx = std::distance(ms_effects.data(), effect);
-    if (idx >= 0 && idx <= ms_effects.size()) {
-        return (size_t)idx;
+    if (idx >= 0 && static_cast<size_t>(idx) <= ms_effects.size()) {
+        return static_cast<size_t>(idx);
     }
     return std::nullopt;
 }

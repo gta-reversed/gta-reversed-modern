@@ -15,11 +15,11 @@ void CCopPed::InjectHooks() {
     RH_ScopedVirtualInstall(ProcessControl, 0x5DE160);
 }
 
-/* Horrible design, but R* also allowed to pass in a ModelID */
-eModelID ResolveModelForCopType(uint32_t typeOrModelID) {
-    switch (typeOrModelID) {
+// NOTSA
+eModelID CCopPed::GetPedModelForCopType(eCopType ctype) {
+    switch (ctype) {
     case COP_TYPE_CITYCOP:
-        return (eModelID)CStreaming::GetDefaultCopModel();
+        return CStreaming::GetDefaultCopModel();
     case COP_TYPE_LAPDM1:
         return MODEL_LAPDM1;
     case COP_TYPE_CSHER:
@@ -32,7 +32,23 @@ eModelID ResolveModelForCopType(uint32_t typeOrModelID) {
     case COP_TYPE_SWAT2:
         return MODEL_SWAT;
     default:
-        return (eModelID)typeOrModelID; /* A modelID was passed in */
+        NOTSA_UNREACHABLE();
+    }
+}
+
+/* Horrible design, but R* also allowed to pass in a ModelID */
+eModelID ResolveModelForCopType(uint32_t typeOrModelID) {
+    switch (typeOrModelID) {
+    case COP_TYPE_CITYCOP:
+    case COP_TYPE_LAPDM1:
+    case COP_TYPE_CSHER:
+    case COP_TYPE_ARMY:
+    case COP_TYPE_FBI:
+    case COP_TYPE_SWAT1:
+    case COP_TYPE_SWAT2:
+        return CCopPed::GetPedModelForCopType((eCopType)(typeOrModelID));
+    default:
+        return (eModelID)(typeOrModelID); /* A modelID was passed in */
     }
 }
 

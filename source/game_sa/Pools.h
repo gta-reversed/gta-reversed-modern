@@ -218,7 +218,7 @@ public:
     }
 };
 
-class CTaskAllocatorPool : public CPool<CTaskAllocator> {
+class CTaskAllocatorPool : public CPool<CTaskAllocator, CTaskAllocator, true> {
 public:
     static void InjectHooks() {
         RH_ScopedClass(CTaskAllocatorPool);

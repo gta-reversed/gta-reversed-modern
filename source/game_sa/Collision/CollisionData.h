@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <extensions/enumerate.hpp>
+
 #include "ColSphere.h"
 #include "ColBox.h"
 #include "ColLine.h"
@@ -96,7 +98,7 @@ public:
     auto GetBoxes()        const { return std::span{ m_pBoxes, m_nNumBoxes }; }
 
     auto GetTris()         const { return std::span{ m_pTriangles, m_nNumTriangles }; }
-    auto GetTriVerts()     const { return m_pVertices; } // Sadly there's no easy way to provide a span here
+    auto GetTriVerts()     const { return m_pVertices; } // Sadly there's no easy way to provide a span here - we don't know the number of vertices, and finding it is expensive
 
     auto GetShdwTris()     const { return std::span{ m_pShadowTriangles, m_nNumShadowTriangles }; }
     auto GetShdwTriVerts() const { return std::span{ m_pShadowVertices, m_nNumShadowVertices }; }
@@ -104,6 +106,8 @@ public:
     auto GetLines()        const { return std::span{ m_pLines, m_nNumLines }; }
 
     auto GetFaceGroups()   const -> std::span<ColHelpers::TFaceGroup>;
+
+    [[nodiscard]] auto GetTriVertices(const CColTriangle& tri) const->std::array<CVector, 3>;
 
     void AllocateLines(uint32 num);
 

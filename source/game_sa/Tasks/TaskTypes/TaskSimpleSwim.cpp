@@ -658,6 +658,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* ped) {
     case SWIM_UNDERWATER_SPRINTING: {
         uint32 oxygen = 5;
         if (ped->IsPlayer()) {
+            assert(ped->m_pPlayerData);
             oxygen = static_cast<uint32>(((100.0f - ped->m_pPlayerData->m_fBreath / CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 100.0f) / 3.0f));
         }
         if ((unsigned)CGeneral::GetRandomNumberInRange(0, 100) < oxygen) {

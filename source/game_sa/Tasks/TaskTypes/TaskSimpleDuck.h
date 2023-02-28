@@ -47,9 +47,12 @@ public:
     bool ProcessPed(CPed* ped) override;
 
     static bool CanPedDuck(CPed* ped);
+
     bool ControlDuckMove(float moveSpeedX, float moveSpeedY);
+    bool ControlDuckMove(CVector2D moveSpeed) { return ControlDuckMove(moveSpeed.x, moveSpeed.y); }
     bool IsTaskInUseByOtherTasks();
     void ForceStopMove();
+    void SetDuckTimer(uint16 lengthOfDuck); // 0x692530
 
 private:
     friend void InjectHooksMain();

@@ -122,7 +122,7 @@ int32 CFileLoader::LoadAnimatedClumpObject(const char* line) {
     float  drawDist{ 2000.f };
     uint32 flags{};
 
-    if (sscanf(line, "%d %s %s %s %f %d", &objID, modelName, txdName, animName, &drawDist, &flags) != 6)
+    if (sscanf_s(line, "%d %s %s %s %f %d", &objID, SCANF_S_STR(modelName), SCANF_S_STR(txdName), SCANF_S_STR(animName), &drawDist, &flags) != 6)
         return -1;
 
     auto mi = CModelInfo::AddClumpModel(objID);
@@ -195,10 +195,16 @@ RpClump* CFileLoader::LoadAtomicFile2Return(const char* filename) {
     return clump;
 }
 
-// Find first non-null, non-whitespace character
-char* FindFirstNonNullOrWS(char* it) {
+// NOTSA
+char* CFileLoader::FindFirstNonNullOrWS(char* it) {
     // Have to cast to uint8, because signed ASCII is retarded
     for (; *it && (uint8)*it <= (uint8)' '; it++);
+    return it;
+}
+
+// NOTSA
+char* CFileLoader::FindFirstNullOrWS(char* it) {
+    for (; *it && *it > ' '; it++);
     return it;
 }
 
@@ -249,10 +255,10 @@ void CFileLoader::LoadAudioZone(const char* line) {
     float x2, y2, z2;
     float radius;
 
-    if (sscanf(line, "%s %d %d %f %f %f %f %f %f", name, &id, &enabled, &x1, &y1, &z1, &x2, &y2, &z2) == 9) {
+    if (sscanf_s(line, "%s %d %d %f %f %f %f %f %f", SCANF_S_STR(name), &id, &enabled, &x1, &y1, &z1, &x2, &y2, &z2) == 9) {
         CAudioZones::RegisterAudioBox(name, id, enabled != 0, x1, y1, z1, x2, y2, z2);
     } else {
-        (void)sscanf(line, "%s %d %d %f %f %f %f", name, &id, &enabled, &x1, &y1, &z1, &radius);
+        VERIFY(sscanf_s(line, "%s %d %d %f %f %f %f", SCANF_S_STR(name), &id, &enabled, &x1, &y1, &z1, &radius) == 7);
         CAudioZones::RegisterAudioSphere(name, id, enabled != 0, x1, y1, z1, radius);
     }
 }
@@ -287,7 +293,7 @@ void CFileLoader::LoadCarGenerator(CFileCarGenerator* carGen, int32 iplId) {
 // 0x5B4740
 void CFileLoader::LoadCarGenerator(const char* line, int32 iplId) {
     CFileCarGenerator carGen{};
-    if (sscanf(
+    if (sscanf_s(
         line,
         "%f %f %f %f %d %d %d %d %d %d %d %d",
         &carGen.m_vecPosn.x,
@@ -432,7 +438,7 @@ int32 CFileLoader::LoadClumpObject(const char* line) {
     char  modelName[24];
     char  texName[24];
 
-    if (sscanf(line, "%d %s %s", &objId, modelName, texName) != 3)
+    if (sscanf_s(line, "%d %s %s", &objId, SCANF_S_STR(modelName), SCANF_S_STR(texName)) != 3)
         return MODEL_INVALID;
 
     auto mi = static_cast<CVehicleModelInfo*>(CModelInfo::AddClumpModel(objId));
@@ -611,6 +617,7 @@ void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
     cm.m_boundSphere = h.bounds.sphere;
 
     auto cd = new CCollisionData{};
+    assert(cd);
     cm.m_pColData = cd;
 
     // Spheres
@@ -674,7 +681,7 @@ void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
     cd->m_pShadowTriangles = nullptr;
 
     if (cd->m_nNumSpheres || cd->m_nNumBoxes || cd->m_nNumTriangles)
-        cm.m_bNotEmpty = true;
+        cm.m_bHasCollisionVolumes = true;
 }
 
 // 0x537EE0
@@ -688,7 +695,7 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
     auto& h = *reinterpret_cast<Header*>(buffer);
     cm.m_boundBox = h.bounds.box;
     cm.m_boundSphere = h.bounds.sphere;
-    cm.m_bNotEmpty = !h.IsEmpty();
+    cm.m_bHasCollisionVolumes = !h.IsEmpty();
 
     auto dataSizeAfterHeader = dataSize - sizeof(Header);
     if (!dataSizeAfterHeader) {
@@ -702,6 +709,7 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
     // CCollisionData | Spheres | Boxes | Suspension Lines | Vertices | Faces
 
     auto p = (uint8*)CMemoryMgr::Malloc(dataSizeAfterHeader + sizeof(CCollisionData));
+    assert(p);
     cm.m_pColData = new(p) CCollisionData; // R* used a cast here, but that's not really a good idea.
     memcpy(p + sizeof(CCollisionData), buffer + sizeof(Header), dataSizeAfterHeader); // Copy actual data into allocated memory after CCollisionData
 
@@ -758,7 +766,7 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
     auto& h = *reinterpret_cast<V3::Header*>(buffer);
     cm.m_boundBox = h.bounds.box;
     cm.m_boundSphere = h.bounds.sphere;
-    cm.m_bNotEmpty = !h.IsEmpty();
+    cm.m_bHasCollisionVolumes = !h.IsEmpty();
 
     auto dataSizeAfterHeader = dataSize - sizeof(V3::Header);
     if (!dataSizeAfterHeader) {
@@ -772,6 +780,7 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
     // CCollisionData | Spheres | Boxes | Suspension Lines | Vertices | Faces
 
     auto p = (uint8*)CMemoryMgr::Malloc(dataSizeAfterHeader + sizeof(CCollisionData));
+    assert(p);
     cm.m_pColData = new(p) CCollisionData; // R* used a cast here, but that's not really a good idea.
     memcpy(p + sizeof(CCollisionData), buffer + sizeof(V3::Header), dataSizeAfterHeader); // Copy actual data into allocated memory after CCollisionData
 
@@ -827,7 +836,7 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
     auto& h = *reinterpret_cast<V4::Header*>(buffer);
     cm.m_boundBox = h.bounds.box;
     cm.m_boundSphere = h.bounds.sphere;
-    cm.m_bNotEmpty = !h.IsEmpty();
+    cm.m_bHasCollisionVolumes = !h.IsEmpty();
 
     auto dataSizeAfterHeader = dataSize - sizeof(V4::Header);
     if (!dataSizeAfterHeader) {
@@ -841,6 +850,7 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
     // CCollisionData | Spheres | Boxes | Suspension Lines | Vertices | Faces
 
     auto p = (uint8*)CMemoryMgr::Malloc(dataSizeAfterHeader + sizeof(CCollisionData));
+    assert(p);
     cm.m_pColData = new(p) CCollisionData; // R* used a cast here, but that's not really a good idea.
     memcpy(p + sizeof(CCollisionData), buffer + sizeof(V4::Header), dataSizeAfterHeader); // Copy actual data into allocated memory after CCollisionData
 
@@ -895,25 +905,25 @@ int32 CFileLoader::LoadObject(const char* line) {
     float  fDrawDist;
     uint32 nFlags;
 
-    auto iNumRead = sscanf(line, "%d %s %s %f %d", &modelId, modelName, texName, &fDrawDist, &nFlags);
+    auto iNumRead = sscanf_s(line, "%d %s %s %f %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &fDrawDist, &nFlags);
     if (iNumRead != 5 || fDrawDist < 4.0f)
     {
         int32 objType;
         float fDrawDist2_unused, fDrawDist3_unused;
-        iNumRead = sscanf((char*)line, "%d %s %s %d", &modelId, modelName, texName, &objType);
+        iNumRead = sscanf_s(line, "%d %s %s %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &objType);
         if (iNumRead != 4)
             return -1;
 
         switch (objType)
         {
         case 1:
-            (void)sscanf(line, "%d %s %s %d %f %d", &modelId, modelName, texName, &objType, &fDrawDist, &nFlags);
+            VERIFY(sscanf_s(line, "%d %s %s %d %f %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &objType, &fDrawDist, &nFlags) >= 5);
             break;
         case 2:
-            (void)sscanf(line, "%d %s %s %d %f %f %d", &modelId, modelName, texName, &objType, &fDrawDist, &fDrawDist2_unused, &nFlags);
+            VERIFY(sscanf_s(line, "%d %s %s %d %f %f %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &objType, &fDrawDist, &fDrawDist2_unused, &nFlags) == 7);
             break;
         case 3:
-            (void)sscanf(line, "%d %s %s %d %f %f %f %d", &modelId, modelName, texName, &objType, &fDrawDist, &fDrawDist2_unused, &fDrawDist3_unused, &nFlags);
+            VERIFY(sscanf_s(line, "%d %s %s %d %f %f %f %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &objType, &fDrawDist, &fDrawDist2_unused, &fDrawDist3_unused, &nFlags) == 8);
             break;
         }
     }
@@ -936,7 +946,7 @@ void CFileLoader::Load2dEffect(const char* line) {
     auto modelId{ MODEL_INVALID };
     CVector pos{};
     int32 type;
-    (void*)sscanf(line, "%d %f %f %f %d", &modelId, &pos.x, &pos.y, &pos.z, &type);
+    VERIFY(sscanf_s(line, "%d %f %f %f %d", &modelId, &pos.x, &pos.y, &pos.z, &type) == 5);
 
     CTxdStore::PushCurrentTxd();
     CTxdStore::SetCurrentTxd(CTxdStore::FindTxdSlot("particle"));
@@ -1045,7 +1055,7 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
 
     auto* cm = mi->GetColModel();
     if (cm) {
-        if (cm->m_bNotEmpty)
+        if (cm->m_bHasCollisionVolumes)
         {
             if (cm->m_nColSlot)
             {
@@ -1071,11 +1081,11 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
 CEntity* CFileLoader::LoadObjectInstance(const char* line) {
     char modelName[24];
     CFileObjectInstance instance;
-    (void)sscanf(
+    VERIFY(sscanf_s(
         line,
         "%d %s %d %f %f %f %f %f %f %f %d",
         &instance.m_nModelId,
-        modelName,
+        SCANF_S_STR(modelName),
         &instance.m_nInstanceType,
         &instance.m_vecPosition.x,
         &instance.m_vecPosition.y,
@@ -1085,7 +1095,7 @@ CEntity* CFileLoader::LoadObjectInstance(const char* line) {
         &instance.m_qRotation.imag.z,
         &instance.m_qRotation.real,
         &instance.m_nLodInstanceIndex
-    );
+    ) == 11);
     return LoadObjectInstance(&instance, modelName);
 }
 
@@ -1095,7 +1105,7 @@ void CFileLoader::LoadCullZone(const char* line) {
     float unknown, length, bottom, width, unknown2, zTop, cm;
     int32 flags, flags2 = 0;
 
-    if (sscanf(
+    if (sscanf_s(
         line,
         "%f %f %f %f %f %f %f %f %f %d %f %f %f %f",
         &center.x, &center.y, &center.z,
@@ -1124,7 +1134,7 @@ void CFileLoader::LoadCullZone(const char* line) {
         return;
     }
 
-    (void)sscanf(
+    VERIFY(sscanf_s(
         line,
         "%f %f %f %f %f %f %f %f %f %d %d",
         &center.x, &center.y, &center.z,
@@ -1136,7 +1146,7 @@ void CFileLoader::LoadCullZone(const char* line) {
         &zTop,
         &flags,
         &flags2
-    );
+    ) == 11);
     CCullZones::AddCullZone(center, unknown, length, bottom, width, unknown2, zTop, flags);
 }
 
@@ -1155,7 +1165,7 @@ void CFileLoader::LoadEntryExit(const char* line) {
     uint32 skyColor;
     uint32 flags;
 
-    (void)sscanf(
+    VERIFY(sscanf_s(
         line,
         "%f %f %f %f %f %f %f %f %f %f %f %d %d %s %d %d %d %d",
         &enter.x, &enter.y, &enter.z,
@@ -1166,12 +1176,12 @@ void CFileLoader::LoadEntryExit(const char* line) {
         &exitAngle,
         &area,
         &flags,
-        interiorName,
+        SCANF_S_STR(interiorName),
         &skyColor,
         &numOfPeds,
         &timeOn,
         &timeOff
-    );
+    ) == 18);
 
     auto name = strrchr(interiorName, '"');
     if (name) {
@@ -1242,7 +1252,7 @@ void CFileLoader::LoadGarage(const char* line) {
     float frontX, frontY;
     char name[128];
 
-    if (sscanf(
+    if (sscanf_s(
         line,
         "%f %f %f %f %f %f %f %f %d %d %s",
         &p1.x, &p1.y, &p1.z,
@@ -1251,7 +1261,7 @@ void CFileLoader::LoadGarage(const char* line) {
         &p2.x, &p2.y, &p2.z,
         &flags,
         &type,
-        &name
+        SCANF_S_STR(name)
     ) == 11) {
         CGarages::AddOne(p1.x, p1.y, p1.z, frontX, frontY, p2.x, p2.y, p2.z, (eGarageType)type, 0, name, flags);
     }
@@ -1386,7 +1396,7 @@ void CFileLoader::LoadOcclusionVolume(const char* line, const char* filename) {
     uint32 nFlags = 0;
     float fCenterX, fCenterY, fBottomZ, fWidth, fLength, fHeight, fRotZ;
 
-    (void)sscanf(line, "%f %f %f %f %f %f %f %f %f %d ", &fCenterX, &fCenterY, &fBottomZ, &fWidth, &fLength, &fHeight, &fRotX, &fRotY, &fRotZ, &nFlags);
+    VERIFY(sscanf_s(line, "%f %f %f %f %f %f %f %f %f %d ", &fCenterX, &fCenterY, &fBottomZ, &fWidth, &fLength, &fHeight, &fRotX, &fRotY, &fRotZ, &nFlags) == 10);
     auto fCenterZ = fHeight * 0.5F + fBottomZ;
     auto strLen = strlen(filename);
 
@@ -1400,8 +1410,7 @@ void CFileLoader::LoadOcclusionVolume(const char* line, const char* filename) {
 // 0x5B41C0
 int32 CFileLoader::LoadPathHeader(const char* line, int32& outPathType) {
     int32 id;
-    char modelName[32];
-    (void)sscanf(line, "%d %d %s", &outPathType, &id, modelName);
+    VERIFY(sscanf_s(line, "%d %d %*s", &outPathType, &id) == 2);
     return id;
 }
 
@@ -1424,24 +1433,24 @@ int32 CFileLoader::LoadPedObject(const char* line) {
     char voiceMin[56]{};
     char voiceMax[60]{};
 
-    (void)sscanf(
+    VERIFY(sscanf_s(
         line,
-        "%d %s %s %s %s %s %x %x %s %d %d %s %s %s",
+        "%d %s %s %s %s %s %x %x %11s %d %d %s %s %s",
         &modelId,
-        modelName,
-        texName,
-        pedType,
-        statName,
-        animGroup,
+        SCANF_S_STR(modelName),
+        SCANF_S_STR(texName),
+        SCANF_S_STR(pedType),
+        SCANF_S_STR(statName),
+        SCANF_S_STR(animGroup),
         &carsCanDriveMask,
         &flags,
-        animFile,
+        SCANF_S_STR(animFile),
         &radio1,
         &radio2,
-        pedVoiceType,
-        voiceMin,
-        voiceMax
-    );
+        SCANF_S_STR(pedVoiceType),
+        SCANF_S_STR(voiceMin),
+        SCANF_S_STR(voiceMax)
+    ) == 14);
 
     const auto FindAnimGroup = [animGroup, nAssocGroups = CAnimManager::ms_numAnimAssocDefinitions] {
         for (auto i = 0; i < nAssocGroups; i++) {
@@ -1488,7 +1497,7 @@ void CFileLoader::LoadPickup(const char* line) {
     CVector pos{};
     int32   weaponType{};
 
-    if (sscanf(line, "%d %f %f %f", &weaponType, &pos.x, &pos.y, &pos.z) != 4)
+    if (sscanf_s(line, "%d %f %f %f", &weaponType, &pos.x, &pos.y, &pos.z) != 4)
         return;
 
     const auto GetModel = [weaponType] {
@@ -1649,7 +1658,7 @@ void CFileLoader::LoadStuntJump(const char* line) {
     CVector cameraPosn{};
     int32 reward;
 
-    int32 iNumRead = sscanf(
+    int32 iNumRead = sscanf_s(
         line,
         "%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %d",
         &start.m_vecMin.x,
@@ -1679,7 +1688,7 @@ void CFileLoader::LoadStuntJump(const char* line) {
 // 0x5B75E0
 int32 CFileLoader::LoadTXDParent(const char* line) {
     char name[32], parentName[32];
-    (void)sscanf(line, "%s %s", name, parentName);
+    VERIFY(sscanf_s(line, "%s %s", SCANF_S_STR(name), SCANF_S_STR(parentName)) == 2);
     auto txdSlot = CTxdStore::FindOrAddTxdSlot(name);
     auto parentSlot = CTxdStore::FindOrAddTxdSlot(parentName);
     CTxdStore::ms_pTxdPool->GetAt(txdSlot)->m_wParentIndex = parentSlot;
@@ -1697,7 +1706,7 @@ void CFileLoader::LoadTimeCyclesModifier(const char* line) {
     float unused = 1.0f;
     float lodDistMult = 1.0f;
 
-    auto iNumRead = sscanf(
+    auto iNumRead = sscanf_s(
         line,
         "%f %f %f %f %f %f %d %d %f %f %f %f",
         &vec1.x,
@@ -1731,23 +1740,23 @@ int32 CFileLoader::LoadTimeObject(const char* line) {
     int32 timeOn;
     int32 timeOff;
 
-    int32 numValuesRead = sscanf(line, "%d %s %s %f %d %d %d", &modelId, modelName, texName, &drawDistance[0], &flags, &timeOn, &timeOff);
+    int32 numValuesRead = sscanf_s(line, "%d %s %s %f %d %d %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &drawDistance[0], &flags, &timeOn, &timeOff);
 
     if (numValuesRead != 7 || drawDistance[0] < 4.0) {
         int32 numObjs;
 
-        if (sscanf(line, "%d %s %s %d", &modelId, modelName, texName, &numObjs) != 4)
+        if (sscanf_s(line, "%d %s %s %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &numObjs) != 4)
             return -1;
 
         switch (numObjs) {
         case 1:
-            (void)sscanf(line, "%d %s %s %d %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &flags, &timeOn, &timeOff);
+            VERIFY(sscanf_s(line, "%d %s %s %d %f %d %d %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &numObjs, &drawDistance[0], &flags, &timeOn, &timeOff) == 8);
             break;
         case 2:
-            (void)sscanf(line, "%d %s %s %d %f %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &drawDistance[1], &flags, &timeOn, &timeOff);
+            VERIFY(sscanf_s(line, "%d %s %s %d %f %f %d %d %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &numObjs, &drawDistance[0], &drawDistance[1], &flags, &timeOn, &timeOff) == 9);
             break;
         case 3:
-            (void)sscanf(line, "%d %s %s %d %f %f %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &drawDistance[1], &drawDistance[2], &flags, &timeOn, &timeOff);
+            VERIFY(sscanf_s(line, "%d %s %s %d %f %f %f %d %d %d", &modelId, SCANF_S_STR(modelName), SCANF_S_STR(texName), &numObjs, &drawDistance[0], &drawDistance[1], &drawDistance[2], &flags, &timeOn, &timeOff) == 10);
             break;
         default:
             NOTSA_UNREACHABLE();
@@ -1787,23 +1796,23 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
     float wheelSizeFront{}, wheelSizeRear{};
     int32 wheelUpgradeCls{ -1 };
 
-    (void)sscanf(line, "%d %s %s %s %s %s %s %s %d %d %x %d %f %f %d",
+    VERIFY(sscanf_s(line, "%d %s %s %s %s %s %s %s %d %d %x %d %f %f %d",
         &modelId,
-        modelName,
-        texName,
-        type,
-        handlingName,
-        gameName,
-        anims,
-        vehCls,
+        SCANF_S_STR(modelName),
+        SCANF_S_STR(texName),
+        SCANF_S_STR(type),
+        SCANF_S_STR(handlingName),
+        SCANF_S_STR(gameName),
+        SCANF_S_STR(anims),
+        SCANF_S_STR(vehCls),
         &frq,
-        &flags,
-        &vehComps.m_nComps,
-        &misc,
-        &wheelSizeFront,
-        &wheelSizeRear,
-        &wheelUpgradeCls
-    );
+        &flags,             // optional
+        &vehComps.m_nComps, // optional
+        &misc,              // optional
+        &wheelSizeFront,    // optional
+        &wheelSizeRear,     // optional
+        &wheelUpgradeCls    // optional
+    ) >= 10);
 
     auto mi = CModelInfo::AddVehicleModel(modelId);
     mi->SetModelName(modelName);
@@ -1920,7 +1929,7 @@ int32 CFileLoader::LoadWeaponObject(const char* line) {
     int32 weaponType;
     float drawDist;
 
-    (void)sscanf(line, "%d %s %s %s %d %f", &objId, modelName, texName, animName, &weaponType, &drawDist);
+    VERIFY(sscanf_s(line, "%d %s %s %s %d %f", &objId, SCANF_S_STR(modelName), SCANF_S_STR(texName), SCANF_S_STR(animName), &weaponType, &drawDist) == 6);
     CWeaponModelInfo* mi = CModelInfo::AddWeaponModel(objId);
     mi->SetModelName(modelName);
     mi->m_fDrawDistance = drawDist;
@@ -1938,7 +1947,7 @@ void CFileLoader::LoadZone(const char* line) {
     int32 island;
     char  zoneName[12];
 
-    auto iNumRead = sscanf(line, "%s %d %f %f %f %f %f %f %d %s", name, &type, &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &island, zoneName);
+    auto iNumRead = sscanf_s(line, "%s %d %f %f %f %f %f %f %d %s", SCANF_S_STR(name), &type, &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &island, SCANF_S_STR(zoneName));
     if (iNumRead == 10)
         CTheZones::CreateZone(name, static_cast<eZoneType>(type), min.x, min.y, min.z, max.x, max.y, max.z, static_cast<eLevelName>(island), zoneName);
 }
@@ -2104,7 +2113,7 @@ void CFileLoader::LoadScene(const char* filename) {
 void CFileLoader::LoadObjectTypes(const char* filename) {
     /* Unused
     char filenameCopy[MAX_PATH]{};
-    strcpy(filenameCopy, filename);
+    strcpy_s(filenameCopy, filename);
     */
 
     enum class SectionID {
@@ -2243,7 +2252,7 @@ void CFileLoader::ReloadObjectTypes(const char* arg1) {
 void CFileLoader::ReloadPaths(const char* filename) {
     int32 objModelIndex;
     int32 id;
-    char  unused[4];
+    char  unused[4]{};
 
     bool pathAllocated = false;
     int32 pathEntryIndex = -1;
@@ -2256,7 +2265,7 @@ void CFileLoader::ReloadPaths(const char* filename) {
             if (make_fourcc3(line, "end")) {
                 pathAllocated = false;
             } else if (pathEntryIndex == -1) {
-                (void)sscanf(line, "%d %d %s", &id, &objModelIndex, unused);
+                VERIFY(sscanf_s(line, "%d %d %*s", &id, &objModelIndex) == 2);
                 pathEntryIndex = 0;
             } else {
                 if (id) {
@@ -2380,6 +2389,6 @@ const char* GetFilename(const char* filepath) {
 // 0x5B3680
 void LoadingScreenLoadingFile(const char* str) {
     const char* screenName = GetFilename(str);
-    sprintf(gString, "Loading %s", screenName);
+    sprintf_s(gString, "Loading %s", screenName);
     LoadingScreen("Loading the Game", gString);
 }

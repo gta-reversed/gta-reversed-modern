@@ -237,9 +237,21 @@ auto CCollisionData::GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup> 
 
     if (bHasFaceGroups) {
         // See `CCollisionData` header for explanation
-        return std::span{reinterpret_cast<TFaceGroup*>(reinterpret_cast<uint8*>(m_pTriangles) - sizeof(uint32) - sizeof(TFaceGroup) * GetNumFaceGroups()), GetNumFaceGroups()};
+        const auto numfg = GetNumFaceGroups();
+        return std::span{
+            reinterpret_cast<TFaceGroup*>(reinterpret_cast<uint8*>(m_pTriangles) - sizeof(uint32) - sizeof(TFaceGroup) * numfg),
+            numfg
+        };
     }
     return {};
+}
+
+auto CCollisionData::GetTriVertices(const CColTriangle& tri) const->std::array<CVector, 3> {
+    std::array<CVector, 3> verts;
+    for (const auto [i, j] : notsa::enumerate(tri.m_vertIndices)) {
+        verts[i] = UncompressVector(m_pVertices[j]);
+    }
+    return verts;
 }
 
 // NOTSA

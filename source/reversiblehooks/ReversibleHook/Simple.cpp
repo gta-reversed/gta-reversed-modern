@@ -108,6 +108,7 @@ void Simple::GenerateECXPreservationThunk(int stackArguments)
     size_t maxThunkSize = 7 * stackArguments + 16; // space for push instrs and prologue/epilogue
     int32 stackOffset = 4 * (stackArguments + 1);
     void* pThunk = VirtualAlloc(nullptr, maxThunkSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+    assert(pThunk);
     uint8* pCode = (uint8*)pThunk;
 
     // push ECX (save ECX)

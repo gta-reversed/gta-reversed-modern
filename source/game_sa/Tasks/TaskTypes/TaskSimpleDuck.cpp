@@ -9,7 +9,7 @@ void CTaskSimpleDuck::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x691FC0);
     RH_ScopedInstall(Destructor, 0x692030);
     RH_ScopedInstall(CanPedDuck, 0x692610, { .reversed = false });
-    RH_ScopedInstall(ControlDuckMove, 0x6923F0, { .reversed = false });
+    //RH_ScopedInstall(ControlDuckMove, 0x6923F0, { .reversed = false }); // todo
     RH_ScopedInstall(IsTaskInUseByOtherTasks, 0x61C3D0, { .reversed = false });
     RH_ScopedVirtualInstall(MakeAbortable, 0x692100, { .reversed = false });
     RH_ScopedVirtualInstall(ProcessPed, 0x694390, { .reversed = false });
@@ -93,4 +93,11 @@ bool CTaskSimpleDuck::ProcessPed_Reversed(CPed* ped) {
 void CTaskSimpleDuck::ForceStopMove() {
     m_bIsInControl = true;
     m_vecMoveCommand.y = 0.f;
+}
+
+void CTaskSimpleDuck::SetDuckTimer(uint16 lengthOfDuck) {
+    if (m_nDuckControlType != DUCK_SCRIPT_CONTROLLED) {
+        m_nStartTime = CTimer::GetTimeInMS();
+        m_nLengthOfDuck = lengthOfDuck;
+    }
 }

@@ -111,7 +111,7 @@ void CGarages::Update() {
         return;
 
     // Originally they've clearly used an some kind of `abs` macro (probably to "optimize" it)... And failed miserably lol
-    const auto camPos = TheCamera.GetPosition();
+    const auto& camPos = TheCamera.GetPosition();
     if (   std::abs(garageToCheck.m_fLeftCoord - camPos.x) < 40.f
         && std::abs(garageToCheck.m_fFrontCoord - camPos.y) < 40.f
     ) {
@@ -369,10 +369,10 @@ void CGarages::PrintMessages() {
     }
 
     // Draw it
-    CFont::SetScale(SCREEN_WIDTH_UNIT * 0.5f, SCREEN_HEIGHT_UNIT * 1.4f);
+    CFont::SetScale(SCREEN_STRETCH_X(0.5f), SCREEN_STRETCH_Y(1.4f));
     CFont::SetProportional(true);
     CFont::SetBackground(false, false);
-    CFont::SetCentreSize(SCREEN_WIDTH - SCREEN_WIDTH_UNIT * 230.f);
+    CFont::SetCentreSize(SCREEN_STRETCH_FROM_RIGHT(230.f));
     CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
     CFont::SetFontStyle(eFontStyle::FONT_MENU);
     CFont::SetColor(HudColour.GetRGB(eHudColours::HUD_COLOUR_LIGHT_BLUE));
@@ -381,12 +381,12 @@ void CGarages::PrintMessages() {
 
     const auto DrawFormattedString = [&](auto... formatArgs) {
         CMessages::InsertNumberInString(TheText.Get(MessageIDString), formatArgs..., gGxtString);
-        CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT_UNIT * 155.f, gGxtString);
+        CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_STRETCH_Y(155.f), gGxtString);
     };
 
     if (MessageNumberInString < 0) {
         if (MessageNumberInString2 < 0) {
-            CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT_UNIT * 155.f, TheText.Get(MessageIDString));
+            CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_STRETCH_Y(155.f), TheText.Get(MessageIDString));
         } else {
             DrawFormattedString(MessageNumberInString2, -1, -1, -1, -1, -1);
         }
@@ -461,7 +461,7 @@ bool CGarages::Load() {
         }
     }
 
-    // our debug leftover std::ranges::for_each(aCarsInSafeHouse, [&](auto& car) { printf("%d\n", car->m_wModelIndex); });
+    // our debug leftover std::ranges::for_each(aCarsInSafeHouse, [&](auto& car) { DEV_LOG("%d\n", car->m_wModelIndex); });
 
     for (auto i = 0; i < NumGarages; i++) {
         CSaveGarage sg{};
