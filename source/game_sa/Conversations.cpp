@@ -153,7 +153,7 @@ void CConversations::SetUpConversationNode(
     int32 speech,
     int32 speechY,
     int32 speechN) {
-    SetUpConversationNode(name, linkYes, linkNo, speech, speechY, speechN);
+    CConversationNode::SetUpConversationNode(name, linkYes, linkNo, speech, speechY, speechN);
 }
 
 // 0x43A840

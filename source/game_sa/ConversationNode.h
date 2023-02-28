@@ -5,9 +5,9 @@ public:
     char m_Name[8];
     int16 m_NodeYes;
     int16 m_NodeNo;
-    uint32 m_Speech;
-    uint32 m_SpeechY;
-    uint32 m_SpeechN;
+    int32 m_Speech;
+    int32 m_SpeechY;
+    int32 m_SpeechN;
 
     static void InjectHooks();
 
@@ -20,6 +20,6 @@ public:
     }
 
     void ClearRecursively();
-    void SetUpConversationNode(const char* name, const char* linkYes, const char* linkNo, int32 speech, int32 speechY, int32 speechN);
+    static void SetUpConversationNode(const char* name, const char* linkYes, const char* linkNo, int32 speech, int32 speechY, int32 speechN);
 };
 VALIDATE_SIZE(CConversationNode, 0x18);
