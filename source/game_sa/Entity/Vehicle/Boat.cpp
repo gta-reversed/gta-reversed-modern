@@ -64,8 +64,8 @@ CBoat::CBoat(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy
 
     m_pHandlingData = gHandlingDataMgr.GetVehiclePointer(mi->m_nHandlingId);
     m_nHandlingFlagsIntValue = m_pHandlingData->m_nHandlingFlags;
-    m_pFlyingHandlingData = gHandlingDataMgr.GetFlyingPointer(mi->m_nHandlingId);
-    m_pBoatHandling = gHandlingDataMgr.GetBoatPointer(mi->m_nHandlingId);
+    m_pFlyingHandlingData = gHandlingDataMgr.GetFlyingPointer(static_cast<uint8>(mi->m_nHandlingId));
+    m_pBoatHandling = gHandlingDataMgr.GetBoatPointer(static_cast<uint8>(mi->m_nHandlingId));
 
     mi->ChooseVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor, 1);
 
@@ -148,8 +148,8 @@ void CBoat::DebugCode() {
 // 0x6F0D90
 void CBoat::PrintThrustAndRudderInfo() {
     char cBuffer[64]{};
-    sprintf(cBuffer, "Thrust %3.2f", m_pHandlingData->m_transmissionData.m_fEngineAcceleration * m_pHandlingData->m_fMass);
-    sprintf(cBuffer, "Rudder Angle  %3.2f", m_pHandlingData->m_fSteeringLock);
+    std::format_to(cBuffer, "Thrust {:3.2f}", m_pHandlingData->m_transmissionData.m_fEngineAcceleration * m_pHandlingData->m_fMass);
+    std::format_to(cBuffer, "Rudder Angle  {:3.2f}", m_pHandlingData->m_fSteeringLock);
 }
 
 void CBoat::ModifyHandlingValue(const bool& bIncrement) {

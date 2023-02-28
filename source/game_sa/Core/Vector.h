@@ -17,7 +17,7 @@ class CVector2D;
 class CVector : public RwV3d {
 public:
     constexpr CVector() = default;
-    constexpr CVector(float X, float Y, float Z) : RwV3d{X, Y, Z} {}
+    constexpr CVector(float X, float Y, float Z) : RwV3d{ X, Y, Z } {}
     constexpr CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
     constexpr CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; }
     constexpr explicit CVector(float value) { x = y = z = value; }
@@ -138,6 +138,12 @@ public:
         return (&x)[i];
     }
 
+    //! Get a copy of `*this` vector projected onto `projectOnTo` (which is assumed to be unit length)
+    //! The result will have a magnitude of `sqrt(abs(this->Dot(projectOnTo)))`
+    CVector ProjectOnToNormal(const CVector& projectOnTo) const {
+        return projectOnTo * Dot(projectOnTo);
+    }
+
     //! Calculate the average position
     static CVector Average(const CVector* begin, const CVector* end);
 
@@ -157,6 +163,11 @@ public:
     * @returning The heading of the vector in radians.
     */
     [[nodiscard]] float Heading(bool reMapRangeTo0To2Pi = false) const;
+
+    friend constexpr CVector operator*(const CVector& vec, float multiplier) {
+        return { vec.x * multiplier, vec.y * multiplier, vec.z * multiplier };
+    }
+
 };
 VALIDATE_SIZE(CVector, 0xC);
 
@@ -188,9 +199,6 @@ constexpr inline bool operator==(const CVector& vecLeft, const CVector& vecRight
     return vecLeft.x == vecRight.x && vecLeft.y == vecRight.y && vecLeft.z == vecRight.z;
 }
 
-constexpr inline CVector operator*(const CVector& vec, float multiplier) {
-    return { vec.x * multiplier, vec.y * multiplier, vec.z * multiplier };
-}
 
 constexpr inline CVector operator/(const CVector& vec, float dividend) {
     return { vec.x / dividend, vec.y / dividend, vec.z / dividend };

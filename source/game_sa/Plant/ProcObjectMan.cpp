@@ -62,10 +62,10 @@ void ProcObjectMan_c::LoadDataFile() {
         int32 align;
         int32 useGrid;
 
-        RET_IGNORED(sscanf(
+        VERIFY(sscanf_s(
             line, "%s %s %f %f %d %d %f %f %f %f %f %f %d %d",
-            surfaceType,
-            objectName,
+            SCANF_S_STR(surfaceType),
+            SCANF_S_STR(objectName),
             &spacing,
             &minDist,
             &minRot, &maxRot,
@@ -73,7 +73,7 @@ void ProcObjectMan_c::LoadDataFile() {
             &minScaleZ, &maxScaleZ,
             &zOffsetMin, &zOffsetMax,
             &align, &useGrid
-        ));
+        ) == 14);
         m_ProcObjSurfaceInfos[m_numProcSurfaceInfos].Init(
             surfaceType,
             objectName,

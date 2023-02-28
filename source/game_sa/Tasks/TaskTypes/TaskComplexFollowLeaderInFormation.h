@@ -16,6 +16,13 @@ class CTaskComplexFollowLeaderInFormation : public CTaskComplex {
 public:
     static constexpr auto Type = TASK_COMPLEX_FOLLOW_LEADER_IN_FORMATION;
 
+    struct Offsets {
+        CVector2D offsets[8];
+        CVector2D movingOffsets[8];
+        float     scale;
+    };
+    static inline auto& ms_offsets = StaticRef<Offsets, 0xC196E8>();
+
     CTaskComplexFollowLeaderInFormation(CPedGroup* pedGroup, CPed* ped, const CVector& posn, float dist = -1.f);
     ~CTaskComplexFollowLeaderInFormation() override;
 

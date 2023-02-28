@@ -34,12 +34,12 @@ solution "gta_reversed"
     targetprefix "" -- no 'lib' prefix on gcc
 	targetdir("bin/" .. "%{cfg.buildcfg}")
     
-    configuration "Debug*"
+    filter "configurations:Debug*"
         staticruntime "off"
         symbols "On"
         runtime "Debug"
 
-    configuration "Release*"
+    filter "configurations:Release*"
         staticruntime "off"
         symbols "On"
         defines { "NDEBUG" }
@@ -52,6 +52,11 @@ solution "gta_reversed"
         buildoptions { "/EHsc", "/Zc:preprocessor", "/bigobj" }
         disablewarnings { 26812, 26495, 4099, 4251, 4275 }
 
+    filter "files:libs/**"
+        warnings "Off"
+
+    filter {}
+
     characterset "MBCS"  -- Fix strings
     staticruntime "On" 
     rtti "Off"
@@ -63,7 +68,8 @@ solution "gta_reversed"
 
     defines { 
         "_CRT_SECURE_NO_WARNINGS", 
-        "_SCL_SECURE_NO_WARNINGS"
+        "_SCL_SECURE_NO_WARNINGS",
+        "FatalWarnings"
     }
 
 group "Dependencies"
@@ -92,7 +98,6 @@ group "Dependencies"
         language "C++"
         kind "StaticLib"
         targetname "vorbis"
-        warnings "Off"
 
         vpaths {
             ["Headers/*"] = {"libs/vorbis/**.h",},
@@ -150,7 +155,6 @@ group "Dependencies"
         language "C++"
         kind "StaticLib"
         targetname "imgui" 
-        warnings "Off"
 
         vpaths {
             ["Headers/*"] = {"libs/imgui/**.h",},

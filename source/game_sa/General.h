@@ -139,6 +139,11 @@ namespace CGeneral { // More like `Math` (Or `Meth`, given how bad the code is, 
         return range[CGeneral::GetRandomNumberInRange(rng::size(range))];
     }
 
+    template<typename T>
+    static T RandomChoiceFromList(std::initializer_list<T> list) {
+        return RandomChoice(rng::subrange{list.begin(), list.end()});
+    }
+
     /*
     * @notsa
     * @brief Return a random node heading, or direction as commonly referred to. See `GetNodeHeadingFromVector`

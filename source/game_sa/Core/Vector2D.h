@@ -15,9 +15,15 @@ class CVector;
 class CVector2D : public RwV2d {
 public:
     constexpr CVector2D() = default;
+    constexpr CVector2D(float XY) : RwV2d{XY, XY} {}
     constexpr CVector2D(float X, float Y) : RwV2d{ X, Y } {}
     constexpr CVector2D(const RwV2d& vec2d)     { x = vec2d.x; y = vec2d.y; }
     constexpr CVector2D(const CVector2D& vec2d) { x = vec2d.x; y = vec2d.y; }
+
+    //! Create a vector with the given heading (0 rad is at 3 O'Clock)
+    //! It is made to be compatible with `CMatrix::SetRotateZOnly` but in reality it probably should be x = sin, y = -cos instead
+    //! Because the following should be true: `CVector2D::FromHeading(heading).Heading() + PI == heading` (And it isn't :D)
+    //constexpr static auto FromHeading(float headingRad) { return CVector2D{ -std::sin(headingRad), std::cos(headingRad) }; } 
 
     CVector2D(const CVector& vec3d);
 
@@ -86,11 +92,11 @@ public:
         x = X;
         y = Y;
     }
-     
-    [[nodiscard]] float Heading() const {
+
+    //! Heading of the vector - 
+    float Heading() const {
         return std::atan2(-x, y);
     }
-
 
     auto GetComponents() const {
         return std::span{ reinterpret_cast<const float*>(this), 2 };
@@ -106,6 +112,7 @@ public:
     }
 
     //! Get a copy of `*this` vector projected onto `projectOnTo` (which is assumed to be unit length)
+    //! The result will have a magnitude of `sqrt(abs(this->Dot(projectOnTo)))`
     CVector2D ProjectOnToNormal(const CVector2D& projectOnTo) const {
         return projectOnTo * Dot(projectOnTo);
     }

@@ -685,8 +685,8 @@ void CAutomobile::ProcessControl()
 
         ProcessSuspension();
 
-        CVector contactPoints[4];
-        CVector contactSpeeds[4];
+        CVector contactPoints[4]{};
+        CVector contactSpeeds[4]{};
 
         for (int32 i = 0; i < 4; i++) {
             if (m_fWheelsSuspensionCompression[i] >= 1.0f) {
@@ -1526,6 +1526,7 @@ void CAutomobile::ProcessFlyingCarStuff()
     }
 }
 
+// 0x6A45C0
 void CAutomobile::DoHoverSuspensionRatios()
 {
     if (GetUp().z >= 0.3f && !vehicleFlags.bIsDrowning) {
@@ -2392,7 +2393,7 @@ void CAutomobile::BlowUpCar_Impl(CEntity* dmgr, bool bDontShakeCam, bool bDontSp
     m_damageManager.FuckCarCompletely(false);
 
     const auto isRcShit = (bFixBugs || !bIsForCutScene)
-        ? notsa::contains(notsa::il(MODEL_RCTIGER, MODEL_RCBANDIT), GetModelId()) // I'm 99% sure they forgot to copy paste this too, but let it be.
+        ? notsa::contains({ MODEL_RCTIGER, MODEL_RCBANDIT }, GetModelId()) // I'm 99% sure they forgot to copy paste this too, but let it be.
         : GetModelId() == MODEL_RCBANDIT;
     if (!isRcShit) { // 0x6B3C61
         for (auto bumper : { FRONT_BUMPER, REAR_BUMPER }) {
@@ -4135,11 +4136,12 @@ void CAutomobile::ReduceHornCounter() {
 static RwTexture*& renderLicensePlateTexture{ *(RwTexture**)0xC1BFD8 };
 
 // 0x6A2F00
-void CAutomobile::CustomCarPlate_BeforeRenderingStart(CVehicleModelInfo* model) {
-    if (model->m_pPlateMaterial) {
-        renderLicensePlateTexture = RpMaterialGetTexture(model->m_pPlateMaterial);
+void CAutomobile::CustomCarPlate_BeforeRenderingStart(const CVehicleModelInfo& mi)
+{
+    if (mi.m_pPlateMaterial) {
+        renderLicensePlateTexture = RpMaterialGetTexture(mi.m_pPlateMaterial);
         RwTextureAddRef(renderLicensePlateTexture);
-        RpMaterialSetTexture(model->m_pPlateMaterial, m_pCustomCarPlate);
+        RpMaterialSetTexture(mi.m_pPlateMaterial, m_pCustomCarPlate);
     }
 }
 
@@ -4935,7 +4937,7 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately) {
     };
 
     if (m_fHealth < 250.f && GetStatus() != STATUS_WRECKED && !vehicleFlags.bIsDrowning) {
-        const auto isSubPlaneOrHeli = notsa::contains(notsa::il(VEHICLE_TYPE_PLANE, VEHICLE_TYPE_HELI), m_nVehicleSubType);
+        const auto isSubPlaneOrHeli = notsa::contains({ VEHICLE_TYPE_PLANE, VEHICLE_TYPE_HELI }, m_nVehicleSubType);
 
         auto partFxToUse = !m_pFireParticle && !isSubPlaneOrHeli ? 1 : 0;
 
@@ -4946,13 +4948,13 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately) {
             }
 
             if (!bExplodeImmediately) { // 0x6A720B
-                const auto isRcShit = notsa::contains(notsa::il(
+                const auto isRcShit = notsa::contains({
                     MODEL_RCBARON,
                     MODEL_RCRAIDER,
                     MODEL_RCGOBLIN,
                     MODEL_RCBANDIT,
                     MODEL_RCTIGER
-                ), GetModelId());
+                }, GetModelId());
 
                 m_fBurnTimer += m_fireParticleCounter || isRcShit
                     ? floorTsMS
@@ -4990,13 +4992,13 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately) {
                     }
                 }
 
-                if (notsa::contains(notsa::il(STATUS_PLAYER, STATUS_REMOTE_CONTROLLED), GetStatus())) { // 0x6A745D
+                if (notsa::contains({ STATUS_PLAYER, STATUS_REMOTE_CONTROLLED }, GetStatus())) { // 0x6A745D
                     if (!m_pFireParticle && m_fBurnTimer > 2500.f) {
                         CreateFx(2);
                         SetFxVelocity();
                         return;
                     }
-                } else if (!isRcShit && CGeneral::RandomBool(2)) { // originally it was 1.2% (3 / 250), but it doesn't matter
+                } else if (!isRcShit && CGeneral::RandomBool(1.2f)) {
                     CExplosion::AddExplosion(this, m_pExplosionVictim, EXPLOSION_ROCKET, GetPosition(), 0, true, -1.f, false);
                 }
             
@@ -6091,9 +6093,8 @@ void CAutomobile::DoHeliDustEffect(float timeConstMult, float fxMaxZMult) {
 }
 
 // 0x6B1350
-void CAutomobile::SetBumperDamage(ePanels panel, bool withoutVisualEffect)
-{
-    auto nodeIdx = CDamageManager::GetCarNodeIndexFromPanel(panel);
+void CAutomobile::SetBumperDamage(ePanels panelIdx, bool withoutVisualEffect) {
+    auto nodeIdx = CDamageManager::GetCarNodeIndexFromPanel(panelIdx);
     auto frame = m_aCarNodes[nodeIdx];
     if (!frame) {
         return;
@@ -6103,11 +6104,11 @@ void CAutomobile::SetBumperDamage(ePanels panel, bool withoutVisualEffect)
         return;
     }
 
-    switch (m_damageManager.GetPanelStatus(panel)) {
+    switch (m_damageManager.GetPanelStatus(panelIdx)) {
     case ePanelDamageState::DAMSTATE_DAMAGED: {
-        if (!m_pHandlingData->m_bBouncePanels) { // TODO: Weird... The flag name might be incorrect, because here we actually set the bouncing panel.
-            if (auto* panel_ = CheckIfExistsGetFree(nodeIdx)) {
-                panel_->SetPanel(nodeIdx, 0, CGeneral::GetRandomNumberInRange(-0.2f, -0.5f));
+        if (!m_pHandlingData->m_bBouncePanels) { // TODO: Weird... The flag name might be incorrect, because here we actually set the bouncing panelIdx.
+            if (auto* panelFrame = CheckIfExistsGetFree(nodeIdx)) {
+                panelFrame->SetPanel(nodeIdx, 0, CGeneral::GetRandomNumberInRange(-0.5f, -0.2f));
             }
         }
         break;
@@ -6141,7 +6142,7 @@ void CAutomobile::SetPanelDamage(ePanels panel, bool createWindowGlass)
 
     switch (m_damageManager.GetPanelStatus(panel)) {
     case ePanelDamageState::DAMSTATE_DAMAGED: {
-        if (m_pHandlingData->m_bBouncePanels) { // TODO: Weird... The flag name might be incorrect, because here we actually set the bouncing panel.
+        if (m_pHandlingData->m_bBouncePanels) { // TODO: Weird... The flag name might be incorrect, because here we actually set the bouncing panelIdx.
             return;
         }
         if (auto* panel_ = CheckIfExistsGetFree(nodeIdx)) {

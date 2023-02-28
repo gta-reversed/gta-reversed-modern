@@ -55,9 +55,9 @@ public:
     static void SetVertices(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4);
     static void SetVertices(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4);
     static void SetVertices(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4, float u1, float v1, float u2, float v2, float u3, float v3, float u4, float v4);
-    static void SetVertices(int32 numVerts, float* posn, float* texCoors, const CRGBA& color);
-    static void SetVertices(int32 numVerts, float* posn, CRGBA* color);
-    static void SetMaskVertices(int32 numVerts, float* posn, float depth);
+    static void SetVertices(int32 numVerts, const CVector2D* posn, const CVector2D* texCoors, const CRGBA& color);
+    static void SetVertices(int32 numVerts, const CVector2D* posn, const CRGBA& color);
+    static void SetMaskVertices(int32 numVerts, const CVector2D* posn, float depth);
     static void SetVertices(RwD3D9Vertex* vertices, const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4, float u1, float v1, float u2, float v2, float u3, float v3, float u4, float v4);
     static void DrawRect(const CRect& posn, const CRGBA& color);
     static void DrawTxRect(const CRect& posn, const CRGBA& color);

@@ -137,7 +137,7 @@ int32 CCarCtrl::ChooseCarModelToLoad(int32 arg1) {
     return -1;
 }
 
-int32 CCarCtrl::ChooseGangCarModel(int32 loadedCarGroupId) {
+eModelID CCarCtrl::ChooseGangCarModel(eGangID loadedCarGroupId) {
     return CPopulation::PickGangCar(loadedCarGroupId);
 }
 
