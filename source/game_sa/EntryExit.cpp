@@ -106,18 +106,19 @@ void CEntryExit::GenerateAmbientPeds(const CVector& posn) {
 
 // 0x43E650
 CEntryExit* CEntryExit::GetEntryExitToDisplayNameOf() {
-    if (ms_spawnPoint->m_nArea != eAreaCodes::AREA_CODE_NORMAL_WORLD && HasNameSet()) {
-        if (m_nArea != eAreaCodes::AREA_CODE_NORMAL_WORLD) {
-            // TODO: Probably inlined from `CEntryExitManager`
-            if (   CEntryExitManager::ms_entryExitStackPosn > 1
-                && CEntryExitManager::ms_entryExitStack[CEntryExitManager::ms_entryExitStackPosn - 1] == ms_spawnPoint
-            ) {
-                return CEntryExitManager::ms_entryExitStack[CEntryExitManager::ms_entryExitStackPosn];
-            }
-            return this;
-        }
+    if (ms_spawnPoint->m_nArea == eAreaCodes::AREA_CODE_NORMAL_WORLD || !HasNameSet()) {
+        return nullptr;
     }
-    return nullptr;
+    if (m_nArea == eAreaCodes::AREA_CODE_NORMAL_WORLD) {
+        return nullptr;
+    }
+    // TODO: Probably inlined from `CEntryExitManager`
+    if (   CEntryExitManager::ms_entryExitStackPosn > 1
+        && CEntryExitManager::ms_entryExitStack[CEntryExitManager::ms_entryExitStackPosn - 1] == ms_spawnPoint
+    ) {
+        return CEntryExitManager::ms_entryExitStack[CEntryExitManager::ms_entryExitStackPosn];
+    }
+    return this;
 }
 
 // 0x43EA00
