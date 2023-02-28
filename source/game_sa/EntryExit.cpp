@@ -8,6 +8,8 @@
 #include "TaskComplexFacial.h"
 #include "Garages.h"
 #include "PlayerPed.h"
+#include "Object.h"
+#include "Interior/InteriorManager_c.h"
 
 bool& CEntryExit::ms_bWarping = *(bool*)0x96A7B8;
 CObject*& CEntryExit::ms_pDoor = *(CObject**)0x96A7BC;
@@ -27,7 +29,7 @@ void CEntryExit::InjectHooks() {
     RH_ScopedInstall(RequestObjectsInFrustum, 0x43E690);
     RH_ScopedInstall(RequestAmbientPeds, 0x43E6D0);
     RH_ScopedInstall(WarpGangWithPlayer, 0x43F1F0);
-    RH_ScopedInstall(ProcessStealableObjects, 0x43E990, { .reversed = false });
+    RH_ScopedInstall(ProcessStealableObjects, 0x43E990);
 }
 
 // Code based on 0x43FA00
@@ -78,6 +80,12 @@ CEntryExit::CEntryExit(
     } else {
         m_szName[0] = 0;
     }
+}
+
+// 0x43EA90
+bool IsTeleportPointValid(const CVector& origin, const CVector& target) {
+    return !CWorld::TestSphereAgainstWorld(target, 0.35f, nullptr, true, true, true, true, true, false)
+        && CWorld::GetIsLineOfSightClear(origin, target, true, true, false, true, true, false, false);
 }
 
 // 0x43E8B0
@@ -153,29 +161,27 @@ CVector CEntryExit::TransformEntrancePoint(const CVector& point) const {
 }
 
 // 0x43EAF0
-void CEntryExit::FindValidTeleportPoint(CVector* outTeleportPoint) {
-    const auto spawnPointExitPos = ms_spawnPoint->m_vecExitPos;
+void CEntryExit::FindValidTeleportPoint(CVector& outTeleportPoint) {
+    outTeleportPoint = ms_spawnPoint->m_vecExitPos;
 
-    if (!CWorld::TestSphereAgainstWorld(spawnPointExitPos, 0.35f, nullptr, true, true, true, true, true, false)) {
+    if (!CWorld::TestSphereAgainstWorld(outTeleportPoint, 0.35f, nullptr, true, true, true, true, true, false)) {
         return;
     }
-
-    // Test 8 spheres around the spawn point, and return whichever
+    
+    // Test 2 * 8 spheres around the spawn point, and return whichever
     // doesn't collide with the world and the line of sight between it and `outPoint` is clear
     for (auto r : { 1.25f, 2.f }) { // Test with 2 ranges
         constexpr auto NumTestPoints{ 8 };
         for (auto i = 0; i < NumTestPoints; i++) {
             const auto rot{ (float)i * TWO_PI / (float)NumTestPoints };
-            const auto point = *outTeleportPoint + CVector{
+            const auto point = outTeleportPoint + CVector{
                 std::cos(rot) * r,
                 std::sin(rot) * r,
                 0.f
             };
-            if (!CWorld::TestSphereAgainstWorld(point, 0.35f, nullptr, true, true, true, true, true, false)) {
-                if (CWorld::GetIsLineOfSightClear(*outTeleportPoint, point, true, true, false, true, true, false, false)) {
-                    *outTeleportPoint = point;
-                    return;
-                }
+            if (IsTeleportPointValid(outTeleportPoint, point)) {
+                outTeleportPoint = point;
+                return;
             }
         }
     }
@@ -558,12 +564,6 @@ void CEntryExit::RequestObjectsInFrustum() const {
     CRenderer::RequestObjectsInDirection(ms_spawnPoint->m_vecExitPos, m_fExitAngle, 0);
 }
 
-// 0x43EA90
-bool IsTeleportPointValid(const CVector& origin, const CVector& target) {
-    return !CWorld::TestSphereAgainstWorld(target, 0.35f, nullptr, true, true, true, true, true, false)
-        && CWorld::GetIsLineOfSightClear(origin, target, true, true, false, true, true, false, false);
-}
-
 // 0x43F1F0
 void CEntryExit::WarpGangWithPlayer(CPlayerPed* plyr) {
     auto& grp = plyr->GetPlayerGroup();
@@ -615,5 +615,25 @@ void CEntryExit::WarpGangWithPlayer(CPlayerPed* plyr) {
 
 // 0x43E990
 void CEntryExit::ProcessStealableObjects(CPed* ped) {
-    plugin::CallMethod<0x43E990, CEntryExit*, CPed*>(this, ped);
+    const auto helde = ped->GetEntityThatThisPedIsHolding();
+    if (!helde || !helde->IsObject() || !helde->AsObject()->objectFlags.bIsLiftable) {
+        return;
+    }
+    const auto heldobj = helde->AsObject();
+    switch (heldobj->m_nObjectType) {
+    case OBJECT_MISSION:
+    case OBJECT_MISSION2:
+        break;
+    default: {
+        if (ms_spawnPoint->GetArea() != AREA_CODE_NORMAL_WORLD) {
+            if (g_interiorMan.FindStealableObjectId(heldobj) != -1) {
+                g_interiorMan.SetStealableObjectStolen(heldobj, false);
+            }
+        } else {
+            g_interiorMan.SetStealableObjectStolen(heldobj, true);
+        }
+        break;
+    }
+    }
+    heldobj->m_nAreaCode = ms_spawnPoint->GetArea();
 }
