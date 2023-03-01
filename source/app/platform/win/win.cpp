@@ -569,14 +569,14 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
         if (windowPlacement.showCmd != SW_SHOWMINIMIZED) {
             RsEventHandler(rsFRONTENDIDLE, nullptr);
         }
-
-        if (!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bLoadingData) {
-            gGameState = GAME_STATE_LOADING_STARTED;
-            if (FrontEndMenuManager.m_bLoadingData) {
-                gGameState = GAME_STATE_LOADING_STARTED;
-            }
+        if (FrontEndMenuManager.m_bMenuActive && !FrontEndMenuManager.m_bLoadingData) {
+            break;
         }
-        break;
+        gGameState = GAME_STATE_LOADING_STARTED;
+        if (!FrontEndMenuManager.m_bLoadingData) {
+            break;
+        }
+        NOTSA_SWCFALLTHRU; // Fall down and start loading
     }
     case GAME_STATE_LOADING_STARTED: {
         AudioEngine.StartLoadingTune();
@@ -771,7 +771,7 @@ void Win32InjectHooks() {
     
     RH_ScopedGlobalInstall(GTATranslateShiftKey, 0x747CD0);
     RH_ScopedGlobalInstall(GTATranslateKey, 0x747820);
-    RH_ScopedGlobalInstall(__MainWndProc, 0x747EB0);
+    RH_ScopedGlobalInstall(__MainWndProc, 0x747EB0, {.reversed = false});
     RH_ScopedGlobalInstall(__WinMain, 0x748710);
     RH_ScopedGlobalInstall(InitInstance, 0x745560);
     
