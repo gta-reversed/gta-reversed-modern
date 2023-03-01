@@ -2,6 +2,13 @@
 
 #define APP_CLASS "Grand theft auto San Andreas"
 
+#define JIF(x) do { \
+        if (FAILED(hr=(x))) { \
+	        DEV_LOG(TEXT("FAILED(hr=0x{:x}) in ") TEXT(#x) TEXT("\n"), (size_t)(hr)); \
+            return; \
+        } \
+    } while (0) \
+
 static bool& anisotropySupportedByGFX = *(bool*)0xC87FFC;
 static bool& isForeground = *(bool*)0xC920EC;
 static bool& Windowed = *(bool*)0xC920CC;
