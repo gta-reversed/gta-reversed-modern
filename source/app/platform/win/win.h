@@ -2,8 +2,9 @@
 
 #define APP_CLASS "Grand theft auto San Andreas"
 
-#define JIF(x) do { \
-        if (FAILED(hr=(x))) { \
+//! Win32 fail check (returns from function automagically)
+#define WIN_FCHECK(x) do { \
+        if (HRESULT hr = (x); FAILED(hr)) { \
 	        DEV_LOG(TEXT("FAILED(hr=0x{:x}) in ") TEXT(#x) TEXT("\n"), (size_t)(hr)); \
             return; \
         } \

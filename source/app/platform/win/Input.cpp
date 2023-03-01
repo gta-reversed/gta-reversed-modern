@@ -59,12 +59,10 @@ HRESULT Shutdown() {
 
 // 0x7469A0
 void InitialiseMouse(bool exclusive) {
-    HRESULT hr;
-
-    JIF(PSGLOBAL(diInterface)->CreateDevice(GUID_SysMouse, &PSGLOBAL(diMouse), 0));
-    JIF(PSGLOBAL(diMouse)->SetDataFormat(&c_dfDIMouse2));
-    JIF(PSGLOBAL(diMouse)->SetCooperativeLevel(PSGLOBAL(window), DISCL_FOREGROUND | (exclusive ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE)));
-    JIF(PSGLOBAL(diMouse)->Acquire());
+    WIN_FCHECK(PSGLOBAL(diInterface)->CreateDevice(GUID_SysMouse, &PSGLOBAL(diMouse), 0));
+    WIN_FCHECK(PSGLOBAL(diMouse)->SetDataFormat(&c_dfDIMouse2));
+    WIN_FCHECK(PSGLOBAL(diMouse)->SetCooperativeLevel(PSGLOBAL(window), DISCL_FOREGROUND | (exclusive ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE)));
+    WIN_FCHECK(PSGLOBAL(diMouse)->Acquire());
 }
 
 // 0x7485C0
