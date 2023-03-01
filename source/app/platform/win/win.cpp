@@ -754,6 +754,8 @@ void Win32InjectHooks() {
     RH_ScopedGlobalInstall(GTATranslateKey, 0x747820);
     RH_ScopedGlobalInstall(__MainWndProc, 0x747EB0);
     RH_ScopedNamedGlobalInstall(__WinMain, "WinMain", 0x748710, { .reversed = false });
+    RH_ScopedGlobalInstall(InitInstance, 0x745560);
+    
     WinPsInjectHooks();
     WinInput::InjectHooks();
 }
