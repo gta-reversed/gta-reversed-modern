@@ -46,6 +46,17 @@ bool Initialise() {
     return true;
 }
 
+HRESULT ReleaseInput() {
+    if (const auto ifc = PSGLOBAL(diInterface)) {
+        return ifc->Release();
+    }
+    return S_OK; // Nothing to release
+}
+
+HRESULT Shutdown() {
+    return ReleaseInput();
+}
+
 // 0x7469A0
 void InitialiseMouse(bool exclusive) {
     HRESULT hr;

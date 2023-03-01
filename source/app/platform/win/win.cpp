@@ -317,10 +317,8 @@ LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
     }
     case WA_CLICKACTIVE:
     case WM_CLOSE: { // 0x747EF3
-        ClipCursor(nullptr);
-        if (const auto dev = PSGLOBAL(diInterface)) { // `diRelease()`
-            dev->Release();
-        }
+        VERIFY(ClipCursor(nullptr));
+        VERIFY(SUCCEEDED(WinInput::Shutdown()));
         PostQuitMessage(0);
         return 0;
     }
