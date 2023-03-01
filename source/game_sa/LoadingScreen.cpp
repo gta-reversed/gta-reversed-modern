@@ -351,6 +351,7 @@ void CLoadingScreen::Update() {
 // 0x53DED0
 void LoadingScreen(const char* msg1, const char* msg2, const char* msg3) {
     if (msg1) {
+        DEV_LOG("Loadingscreen: {} [{}][{}]", msg1, msg2 ? msg2 : "NULL", msg3 ? msg3 : "NULL");
         CLoadingScreen::SetLoadingBarMsg(msg1, msg2);
     }
     CLoadingScreen::NewChunkLoaded();
