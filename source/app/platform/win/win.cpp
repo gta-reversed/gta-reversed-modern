@@ -475,6 +475,7 @@ LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
     return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
+// Code from winmain, 0x748DCF
 bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
     if (RsGlobal.quit || FrontEndMenuManager.m_bStartGameLoading) {
         return false;
@@ -486,7 +487,7 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
             return false;
         }
         TranslateMessage(&Msg);
-        DispatchMessageA(&Msg);
+        DispatchMessage(&Msg);
         return true;
     }
 
@@ -501,41 +502,51 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
 
     switch (gGameState) {
     case GAME_STATE_INITIAL: {
-        CLoadingScreen::LoadSplashes(true, false);
-        CLoadingScreen::Init(true, true);
-        CLoadingScreen::DoPCTitleFadeOut();
-        CLoadingScreen::DoPCTitleFadeIn();
-        CLoadingScreen::Shutdown();
-
-        CLoadingScreen::LoadSplashes(true, true);
-        CLoadingScreen::Init(true, true);
-        CLoadingScreen::DoPCTitleFadeOut();
-        CLoadingScreen::DoPCTitleFadeIn();
-        CLoadingScreen::Shutdown();
-        gGameState = GAME_STATE_LOGO;
+        // Why is this done twice?
+        for (auto i = 0; i < 2; i++) {
+            CLoadingScreen::LoadSplashes(true, false);
+            CLoadingScreen::Init(true, true);
+            CLoadingScreen::DoPCTitleFadeOut();
+            CLoadingScreen::DoPCTitleFadeIn();
+            CLoadingScreen::Shutdown();
+        }
+        ChangeGameStateTo(GAME_STATE_LOGO);
         break;
     }
     case GAME_STATE_LOGO: {
         if (!Windowed) {
             VideoPlayer::Play(nCmdShow, "movies\\Logo.mpg");
         }
-        gGameState = GAME_STATE_PLAYING_LOGO;
+        ChangeGameStateTo(GAME_STATE_PLAYING_LOGO);
         break;
     }
     case GAME_STATE_PLAYING_LOGO:
     case GAME_STATE_PLAYING_INTRO: { // 0x748B17
         CPad::UpdatePads();
         auto* pad = CPad::GetPad();
-        if (Windowed || ControlsManager.GetJoyButtonJustDown() || pad->NewState.CheckForInput() || CPad::IsMouseLButtonPressed() || CPad::IsEnterJustPressed() ||
-            pad->IsStandardKeyJustPressed(VK_SPACE) || CPad::IsMenuKeyJustPressed() || CPad::IsTabJustPressed()) {
-            gGameState = eGameState(gGameState + 1);
+        if (   Windowed
+            || ControlsManager.GetJoyButtonJustDown()
+            || pad->NewState.CheckForInput()
+            || CPad::IsMouseLButtonPressed()
+            || CPad::IsEnterJustPressed()
+            || pad->IsStandardKeyJustPressed(VK_SPACE)
+            || CPad::IsMenuKeyJustPressed()
+            || CPad::IsTabJustPressed()
+        ) {
+            ChangeGameStateTo([] {
+                switch (gGameState) {
+                case GAME_STATE_PLAYING_LOGO:  return GAME_STATE_TITLE;
+                case GAME_STATE_PLAYING_INTRO: return GAME_STATE_FRONTEND_LOADING;
+                default:                       NOTSA_UNREACHABLE();
+                }
+            }());
         }
         break;
     }
     case GAME_STATE_TITLE: {
         VideoPlayer::Shutdown();
         VideoPlayer::Play(nCmdShow, FrontEndMenuManager.GetMovieFileName());
-        gGameState = GAME_STATE_PLAYING_INTRO;
+        ChangeGameStateTo(GAME_STATE_PLAYING_INTRO);
         break;
     }
     case GAME_STATE_FRONTEND_LOADING: {
@@ -546,7 +557,7 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
             RsGlobal.quit = true;
         }
         CGame::InitialiseCoreDataAfterRW();
-        gGameState = GAME_STATE_FRONTEND_LOADED;
+        ChangeGameStateTo(GAME_STATE_FRONTEND_LOADED);
         anisotropySupportedByGFX = (RwD3D9GetCaps()->RasterCaps & D3DPRASTERCAPS_ANISOTROPY) != 0; // todo: func
         break;
     }
@@ -554,24 +565,23 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
         FrontEndMenuManager.m_bActivateMenuNextFrame = true;
         FrontEndMenuManager.m_bMainMenuSwitch = true;
         if (VideoModeNotSelected) {
-            FrontEndMenuManager.m_nPrefsVideoMode = gCurrentVideoMode;
-            FrontEndMenuManager.m_nDisplayVideoMode = gCurrentVideoMode;
+            FrontEndMenuManager.m_nPrefsVideoMode = FrontEndMenuManager.m_nDisplayVideoMode = gCurrentVideoMode;
             VideoModeNotSelected = false;
         }
-        gGameState = GAME_STATE_FRONTEND_IDLE;
+        ChangeGameStateTo(GAME_STATE_FRONTEND_IDLE);
         CLoadingScreen::DoPCTitleFadeIn();
         break;
     }
     case GAME_STATE_FRONTEND_IDLE: { // 0x748CB2
         WINDOWPLACEMENT wndpl{ .length = sizeof(WINDOWPLACEMENT) };
-        GetWindowPlacement(PSGLOBAL(window), &wndpl);
+        VERIFY(GetWindowPlacement(PSGLOBAL(window), &wndpl));
         if (wndpl.showCmd != SW_SHOWMINIMIZED) {
             RsEventHandler(rsFRONTENDIDLE, nullptr);
         }
         if (FrontEndMenuManager.m_bMenuActive && !FrontEndMenuManager.m_bLoadingData) {
             break;
         }
-        gGameState = GAME_STATE_LOADING_STARTED;
+        ChangeGameStateTo(GAME_STATE_LOADING_STARTED);
         if (!FrontEndMenuManager.m_bLoadingData) {
             break;
         }
@@ -580,7 +590,7 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
     case GAME_STATE_LOADING_STARTED: {
         AudioEngine.StartLoadingTune();
         InitialiseGame();
-        gGameState = GAME_STATE_IDLE;
+        ChangeGameStateTo(GAME_STATE_IDLE);
         FrontEndMenuManager.m_bMainMenuSwitch = false;
         AudioEngine.InitialisePostLoading();
         break;
@@ -605,6 +615,7 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
     return true;
 }
 
+// Code from winmain, 0x7489FB
 void MainLoop(INT nCmdShow, MSG& Msg) {
     bool bNewGameFirstTime = false;
     while (true) {

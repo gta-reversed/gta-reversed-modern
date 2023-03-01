@@ -344,11 +344,12 @@ public:
 
     // NOTSA
     const char* GetMovieFileName() const {
-        if (m_nTitleLanguage == 12 || m_nTitleLanguage == 7) {
+        switch (m_nTitleLanguage) {
+        case 12:
+        case 7:
             return "movies\\GTAtitlesGER.mpg";
-        } else {
-            return "movies\\GTAtitles.mpg";
         }
+        return "movies\\GTAtitles.mpg";
     }
 
 private:

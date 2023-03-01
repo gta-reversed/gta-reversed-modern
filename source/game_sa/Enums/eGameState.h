@@ -12,3 +12,19 @@ enum eGameState : uint8 {
     GAME_STATE_LOADING_STARTED  = 8, // Loading the game
     GAME_STATE_IDLE             = 9, // In-game (loop state)
 };
+
+inline const char* EnumToString(eGameState gs) {
+    switch (gs) {
+    case GAME_STATE_INITIAL:          return "INITIAL";
+    case GAME_STATE_LOGO:             return "LOGO";
+    case GAME_STATE_PLAYING_LOGO:     return "PLAYING_LOGO";
+    case GAME_STATE_TITLE:            return "TITLE";
+    case GAME_STATE_PLAYING_INTRO:    return "PLAYING_INTRO";
+    case GAME_STATE_FRONTEND_LOADING: return "FRONTEND_LOADING";
+    case GAME_STATE_FRONTEND_LOADED:  return "FRONTEND_LOADED";
+    case GAME_STATE_FRONTEND_IDLE:    return "FRONTEND_IDLE";
+    case GAME_STATE_LOADING_STARTED:  return "LOADING_STARTED";
+    case GAME_STATE_IDLE:             return "IDLE";
+    default:                          return "UNKNOWN";
+    }
+}

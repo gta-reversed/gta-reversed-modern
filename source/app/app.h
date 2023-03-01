@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Game.h"
+#include "Enums/eGameState.h"
 
 #define RSEVENT_SUCCEED(x) ((x) ? rsEVENTPROCESSED : rsEVENTERROR)
 
@@ -16,6 +17,13 @@
 void AppInjectHooks();
 
 static inline int32& gGameState = *(int32*)0xC8D4C0;
+inline void ChangeGameStateTo(eGameState newgs) {
+    if (gGameState != newgs) {
+        DEV_LOG("GS Change: `{}` to `{}`", EnumToString((eGameState)gGameState), EnumToString(newgs));
+        gGameState = newgs;
+    }
+};
+
 static inline bool& ForegroundApp = *(bool*)0x8D621C;
 
 static inline RwRGBA& gColourTop    = *(RwRGBA*)0xB72CA0;
