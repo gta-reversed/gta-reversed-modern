@@ -166,7 +166,7 @@ void CTrain::InitTrains() {
         "data\\paths\\tracks2.dat",
         "data\\paths\\tracks4.dat",
     };
-    for (auto i = 0; i < std::size(pTrackNodes); ++i) {
+    for (auto i = 0u; i < std::size(pTrackNodes); ++i) {
         if (!pTrackNodes[i]) {
             CTrain::ReadAndInterpretTrackFile(filenames[i], pTrackNodes, NumTrackNodes, arrTotalTrackLength, i);
         }

@@ -46,30 +46,32 @@ void CPedType::LoadPedData() {
             continue;
 
         char buf[32];
-        sscanf(line, "%s", buf);
+        VERIFY(sscanf_s(line, "%s", SCANF_S_STR(buf)) == 1);
 
-        const auto GetAcquaintance = [=]() -> uint32 {
+        char* nextToken{};
+        const auto GetAcquaintance = [=, &nextToken]() -> uint32 {
             uint32 value = 0;
-            strtok(line, " ,\t");
-            for (const char* pedTypeName = strtok(nullptr, " ,\t"); pedTypeName; pedTypeName = strtok(nullptr, " ,\t")) {
+            RET_IGNORED(strtok_s(line, " ,\t", &nextToken));
+            for (const char* pedTypeName = strtok_s(nullptr, " ,\t", &nextToken); pedTypeName; pedTypeName = strtok_s(nullptr, " ,\t", &nextToken)) {
                 value |= GetPedFlag(FindPedType(pedTypeName));
             }
             return value;
         };
 
-        if (!strcmp(buf, "Hate"))
+        using namespace std::string_view_literals;
+        if (std::string_view{buf, 4u} == "Hate")
         {
             GetPedTypeAcquaintances(pedType).m_nHate = GetAcquaintance();
         }
-        else if (!strcmp(buf, "Dislike"))
+        else if (std::string_view{buf, 7u} == "Dislike")
         {
             GetPedTypeAcquaintances(pedType).m_nDislike = GetAcquaintance();
         }
-        else if (!strcmp(buf, "Like"))
+        else if (std::string_view{buf, 4u} == "Like")
         {
             GetPedTypeAcquaintances(pedType).m_nLike = GetAcquaintance();
         }
-        else if (!strcmp(buf, "Respect"))
+        else if (std::string_view{buf, 7u} == "Respect")
         {
             GetPedTypeAcquaintances(pedType).m_nRespect = GetAcquaintance();
         }

@@ -634,7 +634,7 @@ bool CObject::Save() {
 // 0x44A4D0
 void CObject::ProcessGarageDoorBehaviour() {
     if (m_nGarageDoorGarageIndex < 0)
-        m_nGarageDoorGarageIndex = CGarages::FindGarageForObject(this);
+        m_nGarageDoorGarageIndex = static_cast<int8>(CGarages::FindGarageForObject(this));
 
     if (m_nGarageDoorGarageIndex < 0)
         return;
@@ -1404,16 +1404,16 @@ void CObject::ProcessControlLogic() {
         if (m_nModelIndex == ModelIndices::MI_MAGNOCRANE) {
             auto vecRopePoint = *m_matrix * CVector(0.0F, 36.64F, -1.69F);
             vecRopePoint.z += fRopeLengthChange;
-            CRopes::RegisterRope(this, static_cast<uint32>(eRopeType::CRANE_MAGNO), vecRopePoint, false, nSegments, 1u, this, 20'000u);
+            CRopes::RegisterRope((uint32)this, static_cast<uint32>(eRopeType::CRANE_MAGNO), vecRopePoint, false, nSegments, 1u, this, 20'000u);
         } else if (m_nModelIndex == ModelIndices::MI_CRANETROLLEY) {
             const auto nRopeType = static_cast<const uint32>(GetPosition().x >= 0 ? eRopeType::CRANE_TROLLEY : eRopeType::WRECKING_BALL);
             auto vecRopePoint = *m_matrix * CVector(0.0F, 0.0F, 0.0F);
             vecRopePoint.z += fRopeLengthChange;
-            CRopes::RegisterRope(this, nRopeType, vecRopePoint, false, nSegments, 1u, this, 20'000u);
+            CRopes::RegisterRope((uint32)this, nRopeType, vecRopePoint, false, nSegments, 1u, this, 20'000u);
         } else {
             auto vecRopePoint = *m_matrix * CVector(0.0F, 0.0F, 59.0F);
             vecRopePoint.z += fRopeLengthChange;
-            CRopes::RegisterRope(this, static_cast<uint32>(eRopeType::QUARRY_CRANE_ARM), vecRopePoint, false, nSegments, 1u, this, 20'000u);
+            CRopes::RegisterRope((uint32)this, static_cast<uint32>(eRopeType::QUARRY_CRANE_ARM), vecRopePoint, false, nSegments, 1u, this, 20'000u);
         }
     }
 

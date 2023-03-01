@@ -94,7 +94,7 @@ public:
     int32     m_nCurrentScreenItem;
     bool      m_bQuitGameNoDVD; // CMenuManager::WaitForUserCD 0x57C5E0
 
-    bool      m_bDrawRadarOrMap;
+    bool      m_bDrawingMap;
     bool      m_bStreamingDisabled;
     bool      m_bAllStreamingStuffLoaded;
 

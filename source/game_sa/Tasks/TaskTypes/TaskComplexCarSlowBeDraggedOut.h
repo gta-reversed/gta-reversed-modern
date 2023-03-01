@@ -1,9 +1,9 @@
 #pragma once
 
 #include "TaskComplex.h"
-class CVehicle;
+#include "TaskUtilityLineUpPedWithCar.h"
 
-class CTaskUtilityLineUpPedWithCar;
+class CVehicle;
 class CTaskSimpleCarFallOut;
 
 class CTaskComplexCarSlowBeDraggedOut : public CTaskComplex {
