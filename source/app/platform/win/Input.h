@@ -7,10 +7,11 @@ namespace WinInput {
 
 void InjectHooks();
 bool Initialise();
+HRESULT Shutdown();
 void InitialiseMouse(bool exclusive);
 void InitialiseJoys();
 BOOL CALLBACK EnumDevicesCallback(LPCDIDEVICEINSTANCEA pInst, LPVOID);
 
-const CMouseControllerState& GetMouseButtonMask();
+CMouseControllerState GetMouseState();
 
 }; // namespace WinInput
