@@ -225,7 +225,7 @@ BOOL GTATranslateShiftKey(RsKeyCodes*) { // The in keycode is ignored, so we won
         for (auto [ck, vk] : Keys) {
             // GetKeyState reads from the message queue,
             // so we must call it like the og code
-            const auto isDown = HIWORD(GetKeyState(vk)) & 0x80; // Check is key pressed
+            const auto isDown = (HIWORD(GetKeyState(vk)) & 0x80) == 1; // Check is key pressed
             if (isDown == shouldBeDown) {
                 RsEventHandler(
                     isDown ? rsKEYDOWN : rsKEYUP,
@@ -234,6 +234,8 @@ BOOL GTATranslateShiftKey(RsKeyCodes*) { // The in keycode is ignored, so we won
             }
         }
     }
+
+    return true;
 }
 
 // 0x747EB0
@@ -241,15 +243,20 @@ LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
     switch (uMsg) {
     case WM_SETCURSOR: {
         ShowCursor(false);
-        SetCursor(false);
+        SetCursor(NULL);
         break;
     }
-    case WM_KEYFIRST:
+    case WM_KEYDOWN:
     case WM_SYSKEYDOWN: 
     case WM_KEYUP:
     case WM_SYSKEYUP: { //< 0x74823B - wParam is a `VK_` (virtual key), lParam are the flags (See https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-keyup)
         if (RsKeyCodes ck; GTATranslateKey(&ck, lParam, wParam)) {
-            RsKeyboardEventHandler(rsKEYDOWN, &ck);
+            RsKeyboardEventHandler(
+                (uMsg == WM_KEYDOWN || uMsg == WM_SYSKEYDOWN)
+                    ? rsKEYDOWN
+                    : rsKEYUP,
+                &ck
+            );
         }
         if (wParam == VK_SHIFT) {
             RsKeyCodes ck;
@@ -258,7 +265,7 @@ LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
         return 0;
     }
     case WM_ACTIVATEAPP: { // 0x748087
-        const auto wndBeingActivated = wParam == TRUE;
+        const auto wndBeingActivated = !!wParam;
 
         //> 0x748087 - Set gamma (If changed)
         if (gbGammaChanged) {
@@ -346,7 +353,7 @@ LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
         return 0;
     }
     case WM_ACTIVATE: { // 0x747FA3
-        const auto wndBeingActivated = wParam == TRUE;
+        const auto wndBeingActivated = !!wParam;
         if (wndBeingActivated) {
             CAudioEngine::ResumeAllSounds();
             ShowCursor(FALSE);
