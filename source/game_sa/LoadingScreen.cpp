@@ -331,7 +331,11 @@ void CLoadingScreen::NewChunkLoaded() {
         return DoPCScreenChange((uint32)true);
     }
 
-    if ((m_currDisplayedSplash && delta < 5.0f) || delta < 5.5f) {
+#ifdef FIX_BUGS // Fix copyright screen appearing instead of a splash screen
+    if (m_currDisplayedSplash && delta < 5.0f) {
+#else
+    if ((m_currDisplayedSplash && delta < 5.0f) || (!m_currDisplayedSplash && delta < 5.5f)) {
+#endif
         return DisplayPCScreen();
     }
 
