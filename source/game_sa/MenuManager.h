@@ -351,6 +351,10 @@ public:
         return "movies\\GTAtitles.mpg";
     }
 
+    //! Simulate that we came into the menu and clicked to load game
+    //! @param newGame If we should start a new game
+    //! @param slot    Slot of the save-game to load (Ignored if `newGame`)
+    void SimulateGameLoad(bool newGame, uint32 slot);
 private:
     static void SetBrightness(float brightness, bool arg2);
 };

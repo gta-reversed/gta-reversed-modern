@@ -194,40 +194,21 @@ void CLoadingScreen::RenderLoadingBar() {
         m_TimeBarAppeared = GetClockTime();
     }
 
-    // NOTSA
-    // TODO: Add some kind of ifdef for dev stuff
-    // TODO: Fix new-line not rendered when using fastload into a savegame
-    char loadingMsg[1024];
-    *std::format_to(loadingMsg, "{}\n{}", m_LoadingGxtMsg1, m_LoadingGxtMsg2) = 0;
-    CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
-    CFont::SetDropShadowPosition(2);
-    CFont::SetJustify(false);
-    CFont::PrintString(
-        SCREEN_STRETCH_X(50.0f),
-        SCREEN_STRETCH_Y(40.0f),
-        loadingMsg
-    );
-    CFont::RenderFontBuffer();
+    if (m_bLegalScreen || gfLoadingPercentage <= 0.0f || gfLoadingPercentage >= 100.0f)
+        return;
 
+    CSprite2d::DrawBarChart(
+        SCREEN_STRETCH_X(50.0f),
+        SCREEN_STRETCH_FROM_BOTTOM(40.0f),
+        (uint16)SCREEN_STRETCH_X(180.0f),
+        (uint8)SCREEN_STRETCH_Y(10.0f),
+        gfLoadingPercentage,
+        0,
+        false,
+        true,
         HudColour.GetRGBA(HUD_COLOUR_LIGHT_GRAY, 255),
         CRGBA{ 0, 0, 0, 0 }
     );
-
-    // NOTSA
-    // TODO: Add some kind of ifdef for dev stuff
-    char loadingMsg[1024];
-    *std::format_to(loadingMsg, "{}\n{}", m_LoadingGxtMsg1, m_LoadingGxtMsg2) = 0;
-    CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
-    CFont::PrintString(
-        SCREEN_STRETCH_X(50.0f),
-        SCREEN_STRETCH_Y(40.0f),
-        loadingMsg
-    );
-    CFont::RenderFontBuffer();
-
-    if (m_TimeBarAppeared == 0.0f) {
-        m_TimeBarAppeared = GetClockTime();
-    }
 }
 
 // 0x5904D0, inlined
@@ -367,7 +348,7 @@ void CLoadingScreen::NewChunkLoaded() {
 #else
     if ((m_currDisplayedSplash && delta < 5.0f) || (!m_currDisplayedSplash && delta < 5.5f)) {
 #endif
-        if (!FastLoadSettings.NoLoadScreen || !FastLoadSettings.NoLoadBar) { // In order to 
+        if (!FastLoadSettings.NoLoadScreen || !FastLoadSettings.NoLoadBar) {
             DisplayPCScreen();
         }
     } else { // New splash screen

@@ -1087,6 +1087,19 @@ void CMenuManager::SmallMessageScreen(const char* key) {
     CFont::PrintString(x, y, text);
 }
 
+//! NOTSA
+void CMenuManager::SimulateGameLoad(bool newGame, uint32 slot) {
+    m_bDontDrawFrontEnd     = newGame;
+    m_bSelectedSaveGame     = slot;
+    CGame::bMissionPackGame = false;
+    if (newGame) {
+        DoSettingsBeforeStartingAGame();
+    } else {
+        m_nCurrentScreen = SCREEN_LOAD_FIRST_SAVE;
+        field_1B3C = true;
+    } 
+}
+
 // NOTSA
 void CMenuManager::SetBrightness(float brightness, bool arg2) {
     gamma.SetGamma(brightness / 512.0f, arg2);

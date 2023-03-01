@@ -500,6 +500,7 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
         return true;
     }
 
+    // TODO: Move this out from here (It's not platform specific at all)
     switch (gGameState) {
     case GAME_STATE_INITIAL: {
         const auto ProcessSplash = [](bool isNVidia) {
@@ -590,7 +591,13 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
     case GAME_STATE_FRONTEND_IDLE: { // 0x748CB2
         WINDOWPLACEMENT wndpl{ .length = sizeof(WINDOWPLACEMENT) };
         VERIFY(GetWindowPlacement(PSGLOBAL(window), &wndpl));
-        if (wndpl.showCmd != SW_SHOWMINIMIZED) {
+        if (FastLoadSettings.ShouldLoadSaveGame()) {
+            RsEventHandler(rsFRONTENDIDLE, nullptr); // We need to still run the frontend processing once because it has some important stuff
+            if ((GetAsyncKeyState(FastLoadSettings.SkipSaveGameLoadKey) & 0xF000) == 0) {
+                FastLoadSettings.StartGame(FastLoadSettings.SaveGameToLoad); // Load game
+            }
+            FastLoadSettings.TriedLoadingSaveGame = true;
+        } else if (FastLoadSettings.RenderAtAllTimes || wndpl.showCmd != SW_SHOWMINIMIZED) {
             RsEventHandler(rsFRONTENDIDLE, nullptr);
         }
         if (FrontEndMenuManager.m_bMenuActive && !FrontEndMenuManager.m_bLoadingData) {
