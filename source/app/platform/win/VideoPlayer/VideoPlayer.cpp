@@ -62,12 +62,18 @@ void OnGraphNotify() {
 
     while (!FAILED(pvMediaEvent->GetEvent(&code, &param1, &param2, 0))) {
         pvMediaEvent->FreeEventParams(code, param1, param2);
-        if (code == EC_COMPLETE) {
-            if (gGameState == GAME_STATE_PLAYING_LOGO || gGameState == GAME_STATE_PLAYING_INTRO) {
-                gGameState = eGameState(gGameState + 1);
-            }
-            pvMediaEvent->SetNotifyWindow(NULL, 0, 0);
+        if (code != EC_COMPLETE) {
+            continue;
         }
+        // Possibly advance game state
+        ChangeGameStateTo([] {
+            switch (gGameState) {
+            case GAME_STATE_PLAYING_LOGO:  return GAME_STATE_TITLE;
+            case GAME_STATE_PLAYING_INTRO: return GAME_STATE_FRONTEND_LOADING;
+            }
+            return (eGameState)gGameState; // No change
+        }());
+        pvMediaEvent->SetNotifyWindow(NULL, 0, 0);
     }
 }
 
@@ -150,7 +156,7 @@ void Play(int32 nCmdShow, const char* path) {
         return;
     }
 
-    if (FAILED(hr = pvMediaEvent->SetNotifyWindow((OAHWND)PSGLOBAL(window), 1037, 0))) {
+    if (FAILED(hr = pvMediaEvent->SetNotifyWindow((OAHWND)PSGLOBAL(window), WM_GRAPHNOTIFY, 0))) {
         DEV_LOG("FAILED(hr=0x{:x}) in pvMediaEvent->SetNotifyWindow((OAHWND)PSGLOBAL(window), WM_GRAPHNOTIFY, 0)\n", hr);
         return;
     }
@@ -168,5 +174,9 @@ void Play(int32 nCmdShow, const char* path) {
     delete[] fileName;
 #endif
 };
+
+auto GetMediaControl() -> IMediaControl* {
+    return pvMediaControl;
+}
 
 } // namespace VideoPlayer
