@@ -371,18 +371,30 @@ LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
             pad.Clear(false, true);
         }
 
+#ifdef FIX_BUGS
         break;
+#else
+        return 0;
+#endif
     }
     case WM_SETFOCUS: { // 0x748063
         ForegroundApp = true;
         if (!FrontEndMenuManager.m_bMainMenuSwitch && !FrontEndMenuManager.m_bMenuActive) { // OnSetFocus
             FrontEndMenuManager.m_bActivateMenuNextFrame = true;
         }
+#ifdef FIX_BUGS
         break;
+#else
+        return 0;
+#endif
     }
     case WM_KILLFOCUS: { // 0x748054
         ForegroundApp = false;
+#ifdef FIX_BUGS
         break;
+#else
+        return 0;
+#endif
     }
     case WM_GRAPHNOTIFY: { //< 0x74842A - Dispatched from VideoPlayer::Play
         switch (gGameState) {
@@ -392,7 +404,11 @@ LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
             break;
         }
         }
+#ifdef FIX_BUGS
         break;
+#else
+        return 0;
+#endif
     }
     case WM_DEVICECHANGE: { //> 0x748282 - Handle AudioHardware DVD removal
         if (wParam != DBT_DEVICEREMOVECOMPLETE) {
