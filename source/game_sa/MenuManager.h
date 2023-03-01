@@ -103,7 +103,6 @@ public:
     int8      m_nGameState;
     char      m_bIsSaveDone;
     bool      m_bLoadingData;
-
     float     m_fMapZoom;
     CVector2D m_vMapOrigin;
     CVector2D m_vMousePos;  // Red marker position (world coordinates)

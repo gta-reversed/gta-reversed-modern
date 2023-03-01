@@ -907,6 +907,7 @@ RwFrame* RwFrameCreate() {
 }
 
 RwBool RwFrameDestroy(RwFrame* frame) {
+    assert(frame);
     return ((RwBool(__cdecl *)(RwFrame*))0x7F05A0)(frame);
 }
 

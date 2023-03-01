@@ -502,9 +502,8 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
 
     switch (gGameState) {
     case GAME_STATE_INITIAL: {
-        // Why is this done twice?
         for (auto i = 0; i < 2; i++) {
-            CLoadingScreen::LoadSplashes(true, false);
+            CLoadingScreen::LoadSplashes(true, i == 1);
             CLoadingScreen::Init(true, true);
             CLoadingScreen::DoPCTitleFadeOut();
             CLoadingScreen::DoPCTitleFadeIn();
@@ -589,9 +588,11 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
     }
     case GAME_STATE_LOADING_STARTED: {
         AudioEngine.StartLoadingTune();
+
         InitialiseGame();
         ChangeGameStateTo(GAME_STATE_IDLE);
         FrontEndMenuManager.m_bMainMenuSwitch = false;
+
         AudioEngine.InitialisePostLoading();
         break;
     }
@@ -646,9 +647,11 @@ void MainLoop(INT nCmdShow, MSG& Msg) {
             FrontEndMenuManager.m_bLoadingData = false;
         } else if (bNewGameFirstTime) {
             CTimer::Stop();
-            gGameState = FrontEndMenuManager.m_nGameState != 1
-                ? GAME_STATE_LOADING_STARTED
-                : GAME_STATE_FRONTEND_LOADED;
+            ChangeGameStateTo(
+                FrontEndMenuManager.m_nGameState != 1
+                    ? GAME_STATE_LOADING_STARTED
+                    : GAME_STATE_FRONTEND_LOADED
+            );
         } else {
             CCheat::ResetCheats();
             CGame::ShutDownForRestart();
@@ -695,9 +698,6 @@ INT WINAPI __WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine,
     // 0x7487CF
     VERIFY(WinInput::Initialise());
 
-    // todo: CInputEvents::MapMouseButtons && See ASM
-    // const auto state = GetMouseButtonMask();
-    // ControlsManager.InitDefaultControlConfigMouse(state, FrontEndMenuManager.m_nController == 0);
     ControlsManager.InitDefaultControlConfigMouse(WinInput::GetMouseState(), !FrontEndMenuManager.m_nController);
 
     // 0x748847
@@ -747,7 +747,7 @@ INT WINAPI __WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine,
     MSG Msg;
     MainLoop(nCmdShow, Msg);
 
-    // if game is loaded, shutdown it
+    // if game is loaded, shut it down
     if (gGameState == GAME_STATE_IDLE) {
         CGame::Shutdown();
     }
@@ -782,7 +782,7 @@ void Win32InjectHooks() {
     RH_ScopedGlobalInstall(GTATranslateShiftKey, 0x747CD0);
     RH_ScopedGlobalInstall(GTATranslateKey, 0x747820);
     RH_ScopedGlobalInstall(__MainWndProc, 0x747EB0, {.reversed = false});
-    RH_ScopedGlobalInstall(__WinMain, 0x748710);
+    RH_ScopedGlobalInstall(__WinMain, 0x748710, { .reversed = false });
     RH_ScopedGlobalInstall(InitInstance, 0x745560);
     
     WinPsInjectHooks();

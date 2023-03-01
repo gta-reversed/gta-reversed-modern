@@ -38,15 +38,16 @@ void CLoadingScreen::InjectHooks() {
 
 // 0x5902B0
 void CLoadingScreen::Init(bool unusedFlag, bool loaded) {
-    if (IsActive())
+    if (IsActive()) {
         return;
+    }
 
     if (!loaded) {
         LoadSplashes(false, false);
     }
 
     m_currDisplayedSplash = -1;
-    m_bActive = true;
+    m_bActive             = true;
     m_timeSinceLastScreen = GetClockTime();
 }
 
