@@ -502,21 +502,29 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
 
     switch (gGameState) {
     case GAME_STATE_INITIAL: {
-        for (auto i = 0; i < 2; i++) {
-            CLoadingScreen::LoadSplashes(true, i == 1);
+        const auto ProcessSplash = [](bool isNVidia) {
+            CLoadingScreen::LoadSplashes(true, isNVidia);
             CLoadingScreen::Init(true, true);
             CLoadingScreen::DoPCTitleFadeOut();
             CLoadingScreen::DoPCTitleFadeIn();
             CLoadingScreen::Shutdown();
+        };
+        if (!FastLoadSettings.NoEAX) {
+            ProcessSplash(false);
+        }
+        if (!FastLoadSettings.NoNVidia) {
+            ProcessSplash(true);
         }
         ChangeGameStateTo(GAME_STATE_LOGO);
         break;
     }
     case GAME_STATE_LOGO: {
-        if (!Windowed) {
-            VideoPlayer::Play(nCmdShow, "movies\\Logo.mpg");
+        if (!FastLoadSettings.NoLogo) {
+            if (!Windowed) {
+                VideoPlayer::Play(nCmdShow, "movies\\Logo.mpg");
+            }
         }
-        ChangeGameStateTo(GAME_STATE_PLAYING_LOGO);
+        ChangeGameStateTo(FastLoadSettings.NoLogo ? GAME_STATE_TITLE : GAME_STATE_PLAYING_LOGO);
         break;
     }
     case GAME_STATE_PLAYING_LOGO:
@@ -543,15 +551,19 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
         break;
     }
     case GAME_STATE_TITLE: {
-        VideoPlayer::Shutdown();
-        VideoPlayer::Play(nCmdShow, FrontEndMenuManager.GetMovieFileName());
-        ChangeGameStateTo(GAME_STATE_PLAYING_INTRO);
+        if (!FastLoadSettings.NoTitleOrIntro) {
+            VideoPlayer::Shutdown();
+            VideoPlayer::Play(nCmdShow, FrontEndMenuManager.GetMovieFileName());
+        }
+        ChangeGameStateTo(FastLoadSettings.NoTitleOrIntro ? GAME_STATE_FRONTEND_LOADING : GAME_STATE_PLAYING_INTRO);
         break;
     }
     case GAME_STATE_FRONTEND_LOADING: {
         VideoPlayer::Shutdown();
         CLoadingScreen::Init(true, false);
-        CLoadingScreen::DoPCTitleFadeOut();
+        if (!FastLoadSettings.NoCopyright) {
+            CLoadingScreen::DoPCTitleFadeOut();
+        }
         if (!CGame::InitialiseEssentialsAfterRW()) {
             RsGlobal.quit = true;
         }
@@ -568,7 +580,11 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
             VideoModeNotSelected = false;
         }
         ChangeGameStateTo(GAME_STATE_FRONTEND_IDLE);
-        CLoadingScreen::DoPCTitleFadeIn();
+        if (FastLoadSettings.NoCopyright) {
+            CLoadingScreen::SkipCopyrightSplash();
+        } else {
+            CLoadingScreen::DoPCTitleFadeIn();
+        }
         break;
     }
     case GAME_STATE_FRONTEND_IDLE: { // 0x748CB2
@@ -587,7 +603,9 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
         NOTSA_SWCFALLTHRU; // Fall down and start loading
     }
     case GAME_STATE_LOADING_STARTED: {
-        AudioEngine.StartLoadingTune();
+        if (!FastLoadSettings.NoLoadingTune) {
+            AudioEngine.StartLoadingTune();
+        }
 
         InitialiseGame();
         ChangeGameStateTo(GAME_STATE_IDLE);
@@ -781,8 +799,8 @@ void Win32InjectHooks() {
     
     RH_ScopedGlobalInstall(GTATranslateShiftKey, 0x747CD0);
     RH_ScopedGlobalInstall(GTATranslateKey, 0x747820);
-    RH_ScopedGlobalInstall(__MainWndProc, 0x747EB0, {.reversed = false});
-    RH_ScopedGlobalInstall(__WinMain, 0x748710, { .reversed = false });
+    RH_ScopedGlobalInstall(__MainWndProc, 0x747EB0);
+    RH_ScopedGlobalInstall(__WinMain, 0x748710);
     RH_ScopedGlobalInstall(InitInstance, 0x745560);
     
     WinPsInjectHooks();

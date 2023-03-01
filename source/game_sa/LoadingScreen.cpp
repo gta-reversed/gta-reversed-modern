@@ -237,8 +237,10 @@ void CLoadingScreen::DisplayPCScreen() {
         DefinedState2d();
         RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
         RenderSplash();
-        if (m_currDisplayedSplash > 0 && (!m_bFading || m_currDisplayedSplash != 1)) {
-            RenderLoadingBar();
+        if (!FastLoadSettings.NoLoadBar) {
+            if (m_currDisplayedSplash > 0 && (!m_bFading || m_currDisplayedSplash != 1)) {
+                RenderLoadingBar();
+            }
         }
         RwCameraEndUpdate(Scene.m_pRwCamera);
         RsCameraShowRaster(Scene.m_pRwCamera);
@@ -294,9 +296,11 @@ void CLoadingScreen::DoPCScreenChange(uint32 finish) {
 #endif
     }
 
-    for (auto i = 20; i > 0; i--) {
-        m_FadeAlpha = 0;
-        DisplayPCScreen();
+    if (!FastLoadSettings.NoFading) {
+        for (auto i = 20; i > 0; i--) {
+            m_FadeAlpha = 0;
+            DisplayPCScreen();
+        }
     }
 
     for (auto i = 0u; i < 50u; i++) {
@@ -336,19 +340,21 @@ void CLoadingScreen::NewChunkLoaded() {
         return DoPCScreenChange((uint32)true);
     }
 
-#ifdef FIX_BUGS // Fix copyright screen appearing instead of a splash screen
-    if (m_currDisplayedSplash && delta < 5.0f) {
+#ifdef FIX_BUGS // Fix copyright screen appearing instead of an actual loading screen splash
+    if (m_currDisplayedSplash && delta < FastLoadSettings.ScreenChangeTime) {
 #else
     if ((m_currDisplayedSplash && delta < 5.0f) || (!m_currDisplayedSplash && delta < 5.5f)) {
 #endif
-        return DisplayPCScreen();
-    }
+        if (!FastLoadSettings.NoLoadScreen || !FastLoadSettings.NoLoadBar) { // In order to 
+            DisplayPCScreen();
+        }
+    } else { // New splash screen
+        DoPCScreenChange((uint32)false);
+        m_timeSinceLastScreen = now;
 
-    DoPCScreenChange((uint32)false);
-    m_timeSinceLastScreen = now;
-
-    if (m_chunkBarAppeared == -1) {
-        m_chunkBarAppeared = m_numChunksLoaded;
+        if (m_chunkBarAppeared == -1) {
+            m_chunkBarAppeared = m_numChunksLoaded;
+        }
     }
 }
 
@@ -357,10 +363,20 @@ void CLoadingScreen::Update() {
     plugin::Call<0x5905E0>();
 }
 
+void CLoadingScreen::SkipCopyrightSplash() {
+    m_currDisplayedSplash  = 0;     // Copyright splash
+#ifndef FIX_BUGS // Fixed this in DoPCScreenChange
+    m_timeSinceLastScreen -= 1000.f; // Decrease timeSinceLastScreen, so it will change immediately
+#endif // !FIX_BUGS
+    m_bFadeInNextSplashFromBlack = true; // First Loading Splash
+}
+
 // 0x53DED0
 void LoadingScreen(const char* msg1, const char* msg2, const char* msg3) {
     if (msg1) {
-        DEV_LOG("Loadingscreen: {} [{}][{}]", msg1, msg2 ? msg2 : "NULL", msg3 ? msg3 : "NULL");
+        if (!FastLoadSettings.NoDbgLogScreens) { // Very slow, so skip it
+            DEV_LOG("Loadingscreen: {} [{}][{}]", msg1, msg2 ? msg2 : "NULL", msg3 ? msg3 : "NULL");
+        }
         CLoadingScreen::SetLoadingBarMsg(msg1, msg2);
     }
     CLoadingScreen::NewChunkLoaded();

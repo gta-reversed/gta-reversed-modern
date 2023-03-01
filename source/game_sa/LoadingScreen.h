@@ -8,6 +8,21 @@
 
 class CSprite2d;
 
+// TODO: Move this to an appropriate place
+constexpr struct FastLoadSettings {
+    bool  NoEAX            = true;  // Skip EAX splash
+    bool  NoNVidia         = true;  // Skip nVidia splash
+    bool  NoLogo           = true;  // Skip Logo.mpg
+    bool  NoTitleOrIntro   = true;  // Skip GTAtitles.mpg
+    bool  NoCopyright      = true;  // Skip Copyright screen
+    bool  NoFading         = true;  // Skip fading (takes quite a bit of time)
+    bool  NoLoadScreen     = true;  // Skip load pre-game screen 
+    bool  NoLoadBar        = false; // Skip load bar in pre-game load screen
+    bool  NoLoadingTune    = true;  // Skip GTA theme music
+    bool  NoDbgLogScreens  = true;  // Don't display [notsa] loading screen debug messages to console
+    float ScreenChangeTime = 5.f;   // Time to change splash screens in the loading screen (seconds?)
+} FastLoadSettings;
+
 class CLoadingScreen {
 public:
     static constexpr size_t MAX_SPLASHES = 7u;
@@ -66,6 +81,8 @@ public:
 
     [[nodiscard]] static bool IsActive() { return m_bActive; } // 0x744DB5
     static CSprite2d& GetCurrentDisplayedSplash() { return m_aSplashes[m_currDisplayedSplash]; }
+
+    static void SkipCopyrightSplash();
 };
 
 void LoadingScreen(const char* msg1, const char* msg2 = nullptr, const char* msg3 = nullptr);
