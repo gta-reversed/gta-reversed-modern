@@ -476,7 +476,7 @@ LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 }
 
 bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
-    if (FrontEndMenuManager.m_bStartGameLoading) {
+    if (RsGlobal.quit || FrontEndMenuManager.m_bStartGameLoading) {
         return false;
     }
 
@@ -498,7 +498,6 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
         Sleep(100);
         return true;
     }
-
 
     switch (gGameState) {
     case GAME_STATE_INITIAL: {
@@ -564,9 +563,9 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
         break;
     }
     case GAME_STATE_FRONTEND_IDLE: { // 0x748CB2
-        WINDOWPLACEMENT windowPlacement{.length = 44};
-        GetWindowPlacement(PSGLOBAL(window), &windowPlacement);
-        if (windowPlacement.showCmd != SW_SHOWMINIMIZED) {
+        WINDOWPLACEMENT wndpl{ .length = sizeof(WINDOWPLACEMENT) };
+        GetWindowPlacement(PSGLOBAL(window), &wndpl);
+        if (wndpl.showCmd != SW_SHOWMINIMIZED) {
             RsEventHandler(rsFRONTENDIDLE, nullptr);
         }
         if (FrontEndMenuManager.m_bMenuActive && !FrontEndMenuManager.m_bLoadingData) {
@@ -607,7 +606,7 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
 }
 
 void MainLoop(INT nCmdShow, MSG& Msg) {
-    bool bNewGameFirstTime = true;
+    bool bNewGameFirstTime = false;
     while (true) {
         RwInitialized = true;
 
@@ -617,7 +616,7 @@ void MainLoop(INT nCmdShow, MSG& Msg) {
         gamma.Init();
 
         // Game logic main loop
-        while (!RsGlobal.quit && ProcessGameLogic(nCmdShow, Msg));
+        while (ProcessGameLogic(nCmdShow, Msg));
 
         // 0x748DDA
         RwInitialized = false;
@@ -630,10 +629,10 @@ void MainLoop(INT nCmdShow, MSG& Msg) {
         CCheat::ResetCheats();
         CTimer::Stop();
 
-        if (FrontEndMenuManager.m_bStartGameLoading) {
+        if (FrontEndMenuManager.m_bLoadingData) {
             CGame::ShutDownForRestart();
             CGame::InitialiseWhenRestarting();
-            FrontEndMenuManager.m_bStartGameLoading = false;
+            FrontEndMenuManager.m_bLoadingData = false;
         } else if (bNewGameFirstTime) {
             CTimer::Stop();
             gGameState = FrontEndMenuManager.m_nGameState != 1
