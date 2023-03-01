@@ -11,21 +11,23 @@ void InjectHooks() {
     RH_ScopedCategory("Win");
     RH_ScopedNamespaceName("Input");
 
-    RH_ScopedGlobalInstall(Initialise, 0x7487CF, {.reversed = false}); // <-- hooking it crashes the game
+    RH_ScopedGlobalInstall(Initialise, 0x7487CF); // <-- hooking it crashes the game
     RH_ScopedGlobalInstall(InitialiseMouse, 0x7469A0);
     RH_ScopedGlobalInstall(InitialiseJoys, 0x7485C0, {.reversed = false});
     RH_ScopedGlobalInstall(EnumDevicesCallback, 0x747020);
 }
 
 // 0x746990
-bool CreateInput() {
-    static IID riidltf = *(IID*)0x8588B4;
-
-    if (!PSGLOBAL(diInterface) ||
-        FAILED(DirectInput8Create(GetModuleHandle(nullptr), DIRECTINPUT_VERSION, riidltf, (LPVOID*)&PSGLOBAL(diInterface), nullptr))) {
-        return false;
+HRESULT CreateInput() {
+    if (PSGLOBAL(diInterface)) {
+        return S_OK; // Already created
     }
-    return true;
+
+    if (SUCCEEDED(DirectInput8Create(GetModuleHandle(nullptr), DIRECTINPUT_VERSION, IID_IDirectInput8, (LPVOID*)&PSGLOBAL(diInterface), nullptr))) {
+        return S_OK;
+    }
+
+    return S_FALSE; 
 }
 
 // 0x7487CF
