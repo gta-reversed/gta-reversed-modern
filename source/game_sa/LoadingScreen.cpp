@@ -190,6 +190,18 @@ void CLoadingScreen::RenderLoadingBar() {
         CRGBA{ 0, 0, 0, 0 }
     );
 
+    // NOTSA
+    // TODO: Add some kind of ifdef for dev stuff
+    char loadingMsg[1024];
+    *std::format_to(loadingMsg, "{}\n{}", m_LoadingGxtMsg1, m_LoadingGxtMsg2) = 0;
+    CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
+    CFont::PrintString(
+        SCREEN_STRETCH_X(50.0f),
+        SCREEN_STRETCH_Y(40.0f),
+        loadingMsg
+    );
+    CFont::RenderFontBuffer();
+
     if (m_TimeBarAppeared == 0.0f) {
         m_TimeBarAppeared = GetClockTime();
     }
