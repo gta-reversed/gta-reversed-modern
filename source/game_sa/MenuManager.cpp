@@ -995,6 +995,23 @@ void CMenuManager::ResetHelperText() {
     m_nHelperTextFadingAlpha = 300;
 }
 
+// 0x57C5E0
+void CMenuManager::NoDiskInDriveMessage() {
+    DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 0);
+    if (RsGlobal.quit) {
+        return;
+    }
+    MessageLoop();
+    CPad::UpdatePads();
+    MessageScreen("NO_PCCD", true, false);
+    CFont::DrawFonts();
+    DoRWStuffEndOfFrame();
+    if (CPad::IsEscJustPressed()) {
+        m_bQuitGameNoDVD = true;
+        RsEventHandler(rsQUITAPP, NULL);
+    }
+}
+
 // 0x579330
 void CMenuManager::MessageScreen(const char* key, bool blackBackground, bool cameraUpdateStarted) {
     const CRect fullscreen = CRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);

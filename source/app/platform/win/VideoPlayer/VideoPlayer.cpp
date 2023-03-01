@@ -142,7 +142,7 @@ void Play(int32 nCmdShow, const char* path) {
         return;
     }
 
-    if (FAILED(hr = pvMediaEvent->SetNotifyWindow((OAHWND)PSGLOBAL(window), 1037, 0))) {
+    if (FAILED(hr = pvMediaEvent->SetNotifyWindow((OAHWND)PSGLOBAL(window), WM_GRAPHNOTIFY, 0))) {
         DEV_LOG("FAILED(hr=0x{:x}) in pvMediaEvent->SetNotifyWindow((OAHWND)PSGLOBAL(window), WM_GRAPHNOTIFY, 0)\n", hr);
         return;
     }
@@ -156,5 +156,9 @@ void Play(int32 nCmdShow, const char* path) {
 
     SetFocus(PSGLOBAL(window));
 };
+
+auto GetMediaControl() -> IMediaControl* {
+    return pvMediaControl;
+}
 
 } // namespace VideoPlayer

@@ -598,8 +598,8 @@ RwBool RwD3D9DeviceSupportsDXTTexture() {
     return ((RwBool(__cdecl *)(void))0x7F9C30)();
 }
 
-void* RwD3D9GetCurrentD3DDevice() {
-    return ((void*(__cdecl *)(void))0x7F9D50)();
+IDirect3DDevice9* RwD3D9GetCurrentD3DDevice() {
+    return ((IDirect3DDevice9*(__cdecl *)(void))0x7F9D50)();
 }
 
 RwUInt32 RwD3D9EngineGetMaxMultiSamplingLevels() {

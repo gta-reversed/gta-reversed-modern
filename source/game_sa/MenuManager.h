@@ -314,6 +314,7 @@ public:
     void DisplayHelperText(const char* key);
     void SetHelperText(eHelperText messageId);
     void ResetHelperText();
+    void NoDiskInDriveMessage();
 
     void MessageScreen(const char* key, bool blackBackground, bool cameraUpdateStarted);
     void SmallMessageScreen(const char* key);
