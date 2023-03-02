@@ -25,7 +25,7 @@ UIRenderer::UIRenderer() :
 {
     IMGUI_CHECKVERSION();
 
-    m_ImIO->ConfigFlags = ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
+    m_ImIO->ConfigFlags = ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad | ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
     m_ImIO->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
     m_ImIO->NavActive   = false;
 
@@ -79,8 +79,15 @@ void UIRenderer::DrawLoop() {
     ImGui::EndFrame();
     ImGui::Render();
     ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
-    ImGui_ImplDX9_InvalidateDeviceObjects();
+    //ImGui_ImplDX9_InvalidateDeviceObjects();
+
     PostRenderUpdate();
+
+    // Update and Render additional Platform Windows
+    if (m_ImIO->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+    }
 }
 
 void UIRenderer::Render2D() {
