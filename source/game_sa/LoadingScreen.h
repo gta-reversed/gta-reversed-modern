@@ -37,7 +37,7 @@ inline struct FastLoadSettings {
         if (slot == -1) { // Find first valid slot and load that
             CFileMgr::SetDirMyDocuments();
             for (auto i = 0u; i < MAX_SAVEGAME_SLOTS; i++) {
-                if (std::filesystem::exists(std::format("GTASAsf{}.b", i))) {
+                if (std::filesystem::exists(std::format("GTASAsf{}.b", i + 1))) { // Save file IDs start from 1, not 0
                     return StartGame(i); // Load this slot
                 }
             }
