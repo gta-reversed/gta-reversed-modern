@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "win.h"
+#include "Platform.h"
 #include <ddraw.h>
 #include <dsound.h>
 #include "VideoMode.h"

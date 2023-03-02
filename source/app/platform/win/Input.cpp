@@ -2,7 +2,7 @@
 
 #include "Input.h"
 #include "ControllerConfigManager.h"
-#include "win.h"
+#include "Platform.h"
 #include "VideoMode.h"
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")

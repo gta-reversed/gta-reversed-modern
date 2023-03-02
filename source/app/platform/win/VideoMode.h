@@ -1,6 +1,6 @@
 #pragma once
 
-#include "win.h"
+#include "Platform.h"
 #include <array>
 #include <rwplcore.h>
 
