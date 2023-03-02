@@ -279,7 +279,7 @@ LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
         }
         return 0;
     }
-    case WM_MOUSEFIRST: { //< 0x748323
+    case WM_MOUSEMOVE: { //< 0x748323
         if (imio && imio->WantCaptureMouse) {
             return 0;
         }
