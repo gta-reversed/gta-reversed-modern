@@ -258,9 +258,6 @@ void Render2dStuff() {
     CDarkel::DrawMessages();
     CGarages::PrintMessages();
     CFont::DrawFonts();
-
-    // NOTSA: ImGui menu draw loop
-    notsa::ui::UIRenderer::GetSingleton().DrawLoop();
 }
 
 // 0x53E160
@@ -311,8 +308,11 @@ void Idle(void* param) {
     }
 
     if (!FrontEndMenuManager.m_bMenuActive && TheCamera.GetScreenFadeStatus() != eNameState::NAME_FADE_IN) {
-        CVector2D mousePos{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f};
-        RsMouseSetPos(&mousePos);
+        if (!notsa::ui::UIRenderer::GetSingleton().GetImIO()->NavActive) { // If imgui nav is active don't center the cursor
+            CVector2D mousePos{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f};
+            RsMouseSetPos(&mousePos);
+        }
+
         CRenderer::ConstructRenderList();
         CRenderer::PreRender();
         CWorld::ProcessPedsAfterPreRender();
@@ -349,6 +349,7 @@ void Idle(void* param) {
     }
 
     RenderMenus();
+    notsa::ui::UIRenderer::GetSingleton().DrawLoop(); // NOTSA: ImGui menu draw loop
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
     DoFade();
     CHud::DrawAfterFade();
