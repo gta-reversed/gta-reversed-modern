@@ -37,11 +37,11 @@ struct OSStatus {
         SIZE_T Avail;
     } VRAM;
 };
-static inline auto& s_OSStatus = StaticRef<OSStatus, 0xC8CF68>();
+inline auto& s_OSStatus = StaticRef<OSStatus, 0xC8CF68>();
 
-static bool& anisotropySupportedByGFX = *(bool*)0xC87FFC;
-static bool& isForeground = *(bool*)0xC920EC;
-static bool& Windowed = *(bool*)0xC920CC;
+inline bool& anisotropySupportedByGFX = *(bool*)0xC87FFC;
+inline bool& isForeground = *(bool*)0xC920EC;
+inline bool& Windowed = *(bool*)0xC920CC;
 
 void Win32InjectHooks();
 
