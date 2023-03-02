@@ -9,7 +9,7 @@
 class CSprite2d;
 
 // TODO: Move this to an appropriate place
-static inline struct FastLoadSettings {
+inline struct FastLoadSettings {
     int32  SaveGameToLoad       = -1;         //< -2 - Don't load, -1 = Load first available, 0 <= - load from save slot
     bool   TriedLoadingSaveGame = false;      //< [Runtime Var] Whenever `SaveGameToLoad` was tried to be loaded
     uint32 SkipSaveGameLoadKey  = VK_CONTROL; //< Skip auto-loading save game (If enabled)
