@@ -56,7 +56,7 @@ RwCamera* RsCameraShowRaster(RwCamera* camera);
 /**
  * Platform Specific
  */
-bool psInitialize();
+RwBool psInitialize();
 void psTerminate();
 
 void psWindowSetText(const char* str);

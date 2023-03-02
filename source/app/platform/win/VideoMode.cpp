@@ -60,7 +60,7 @@ char** GetVideoModeList() {
         }
 
         if (videoMode.width != APP_MINIMAL_WIDTH || videoMode.height != APP_MINIMAL_HEIGHT) {
-            if (gnMemTotalVideo - videoMode.height * videoMode.width * videoMode.depth / 8 <= GAME_FREE_VIDEO_MEM_REQUIRED) {
+            if (s_OSStatus.VRAM.Avail - videoMode.height * videoMode.width * videoMode.depth / 8 <= GAME_FREE_VIDEO_MEM_REQUIRED) {
                 continue;
             }
         }

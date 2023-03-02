@@ -1,38 +1,198 @@
 #include "StdInc.h"
 
 #include "win.h"
+#include <ddraw.h>
+#include <dsound.h>
 
 #include "platform.h"
 #include "LoadingScreen.h"
+#include "C_PcSave.h"
 
-void WinPsInjectHooks() {
-    RH_ScopedCategory("Win");
-    RH_ScopedNamespaceName("Ps");
+#define USE_D3D9
 
-    RH_ScopedGlobalInstall(psInitialize, 0x747420, {.reversed = false});
-    RH_ScopedGlobalInstall(psTerminate, 0x7458A0);
-    RH_ScopedGlobalInstall(psWindowSetText, 0x7451B0);
-    RH_ScopedGlobalInstall(psErrorMessage, 0x7451D0);
-    RH_ScopedGlobalInstall(psWarningMessage, 0x7451F0);
-    RH_ScopedGlobalInstall(psCameraBeginUpdate, 0x745210);
-    RH_ScopedGlobalInstall(psCameraShowRaster, 0x745240);
-    RH_ScopedGlobalInstall(psTimer, 0x745270);
-    RH_ScopedGlobalInstall(psGrabScreen, 0x7452B0);
-    RH_ScopedGlobalInstall(psMouseSetVisibility, 0x7453E0);
-    RH_ScopedGlobalInstall(psMouseSetPos, 0x7453F0);
-    RH_ScopedGlobalInstall(psPathnameCreate, 0x745470);
-    RH_ScopedGlobalInstall(psPathnameDestroy, 0x7454E0);
-    RH_ScopedGlobalInstall(psPathGetSeparator, 0x745500);
-    RH_ScopedGlobalInstall(psInstallFileSystem, 0x745520);
-    RH_ScopedGlobalInstall(psNativeTextureSupport, 0x745530);
-    RH_ScopedGlobalInstall(psDebugMessageHandler, 0x745540);
-    RH_ScopedGlobalInstall(psAlwaysOnTop, 0x7458B0);
-    RH_ScopedGlobalInstall(psSelectDevice, 0x746190, {.reversed = false});
+// TODO: Move these into premake/cmake
+#ifndef USE_D3D9
+#pragma comment(lib, "d3d8.lib")
+#endif
+#pragma comment(lib, "ddraw.lib")
+#pragma comment(lib, "Winmm.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "strmiids.lib")
+#pragma comment(lib, "dinput8.lib")
+#pragma comment(lib, "dsound.lib")
+
+static auto& PsGlobal = StaticRef<psGlobalType, 0xC8CF88>();
+
+//! Disable "This function was depracated"
+#pragma warning (disable : 28159 4996)
+
+// 0x7455E0 - Get available videomem
+HRESULT GetVideoMemInfo(LPDWORD total, LPDWORD available) {
+	LPDIRECTDRAW7 dd;
+
+    if (HRESULT hr = DirectDrawCreateEx(NULL, (LPVOID*)&dd, IID_IDirectDraw7, NULL); FAILED(hr)) {
+        return hr;
+    }
+
+	DDSCAPS2 caps;
+	ZeroMemory(&caps, sizeof(DDSCAPS2));
+	caps.dwCaps = DDSCAPS_VIDEOMEMORY;
+	HRESULT hr = dd->GetAvailableVidMem(&caps, total, available);
+	dd->Release();
+
+    return hr;
+}
+
+//! Check if D3D9 can be loaded (Originally this checked for versions 7 => 9, but GTA can only run with 9, so... :D
+BOOL CheckDirectX() {
+    const auto hD3D9DLL = LoadLibrary("D3D9.DLL");
+    if (hD3D9DLL == NULL) {
+        return FALSE;
+    }
+    FreeLibrary(hD3D9DLL);
+    return TRUE;
+}
+
+//! 0x745840 - Check if DirectSound can be loaded
+BOOL CheckDirectSound() {
+    LPDIRECTSOUND ds;
+
+    if (FAILED(DirectSoundCreate(NULL, &ds, NULL))) {
+        return FALSE;
+    }
+
+    DSCAPS  caps{ sizeof(DSCAPS) };
+    HRESULT hr = ds->GetCaps(&caps);
+
+    ds->Release();
+
+    return SUCCEEDED(hr);
+}
+
+// 0x7465B0
+void InitialiseLanguage() {
+//#pragma warning (disable : 4302) // "Type truncation from HKL to 
+
+    // TODO: Use `GetLocaleInfoEx`
+    const auto sysDefaultLCID = PRIMARYLANGID(GetSystemDefaultLCID());
+	const auto usrDefaultLCID = PRIMARYLANGID(GetUserDefaultLCID());
+    const auto kbLayoutLCID   = PRIMARYLANGID(LOWORD(GetKeyboardLayout(0)));
+
+	FrontEndMenuManager.m_nTitleLanguage = sysDefaultLCID;
+
+    FrontEndMenuManager.m_nTextLanguage = (int32)[&] {
+	    switch (kbLayoutLCID) {
+		case LANG_GERMAN:  return eLanguage::GERMAN;
+		case LANG_SPANISH: return eLanguage::SPANISH;
+		case LANG_FRENCH:  return eLanguage::FRENCH;
+		case LANG_ITALIAN: return eLanguage::ITALIAN;
+		default:           return eLanguage::AMERICAN;
+	    }
+    }();
+
+    FrontEndMenuManager.m_nPrefsLanguage = [&] {
+        switch (usrDefaultLCID) {
+        case LANG_SPANISH: return eLanguage::SPANISH;
+        default:           return eLanguage::AMERICAN;
+        }
+    }();
+
+    // Reload text
+	TheText.Unload(false);
+	TheText.Load(false);
 }
 
 // 0x747420
-bool psInitialize() {
-    return plugin::CallAndReturn<bool, 0x747420>();
+RwBool psInitialize() {
+    auto ps = &PsGlobal;
+
+    RsGlobal.ps = ps;
+
+    ps->lastMousePos.y = 0.f;
+    ps->lastMousePos.x = 0.f;
+    ps->fullScreen    = FALSE;
+    ps->diInterface   = NULL;
+    ps->diMouse       = NULL;
+    ps->diDevice1     = NULL;
+    ps->diDevice2     = NULL;
+    
+    CFileMgr::Initialise();
+    const auto usrdir = InitUserDirectories();
+    s_PcSaveHelper.SetSaveDirectory(usrdir);
+
+    gGameState = GAME_STATE_INITIAL;
+
+    // TODO: Load vendor from CPUID
+
+    // Figure out Windows version (TODO: Use `IsWindowsVersion*` from VersionHelpers.h instead)
+    s_OSStatus.OSVer = [&] {
+        OSVERSIONINFO verInfo{ sizeof(OSVERSIONINFO) };	
+	    GetVersionEx(&verInfo);
+
+        if (verInfo.dwPlatformId == VER_PLATFORM_WIN32_NT) {
+            switch (const auto mv = verInfo.dwMajorVersion) {
+            case 4:  return WinVer::WIN_NT;
+            case 5:  return WinVer::WIN_2000_XP_2003;
+            case 6:  return WinVer::WIN_VISTA_OR_LATER;
+            default: return mv < 4 ? WinVer::WIN_NT : WinVer::WIN_VISTA_OR_LATER;
+            }
+        } else if (verInfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
+            return verInfo.dwMajorVersion > 4 || verInfo.dwMajorVersion == 4 && verInfo.dwMinorVersion != 0
+                ? WinVer::WIN_98
+                : WinVer::WIN_95;
+        }
+        NOTSA_UNREACHABLE(); // If this is reached the game wouldn't run anyways, so might as well just crash it.
+    }();
+
+    if (s_OSStatus.OSVer == WinVer::WIN_95) {
+        MessageBoxW(
+            NULL,
+            (LPCWSTR)TheText.Get("WIN_95"),	 // Grand Theft Auto San Andreas cannot run on Windows 95
+            (LPCWSTR)TheText.Get("WIN_TTL"), // Grand Theft Auto San Andreas
+            MB_OK
+        );
+
+        return FALSE;
+    }
+
+    // Originally figured out available dx version and only allowed dx9, but we've simplified it.
+    if (!CheckDirectX()) {
+        MessageBoxW(
+            NULL,
+            (LPCWSTR)TheText.Get("WIN_DX"),	 // Grand Theft Auto San Andreas requires at least DirectX version 8.1
+            (LPCWSTR)TheText.Get("WIN_TTL"), // Grand Theft Auto San Andreas
+            MB_OK
+        );
+        return FALSE;
+    }
+
+    // CheckDirectX() Checks for Dx9 only, so use that
+    s_OSStatus.DxVer = 0x900;
+
+    if (!CheckDirectSound()) {
+        MessageBoxW(
+            NULL,
+            (LPCWSTR)TheText.Get("WIN_NSC"), // Grand Theft Auto San Andreas requires a sound card (I guess?)
+            (LPCWSTR)TheText.Get("WIN_TTL"), // Grand Theft Auto San Andreas
+            MB_ICONEXCLAMATION
+        );
+        return FALSE;
+    }
+
+    MEMORYSTATUS memstat{ sizeof(MEMORYSTATUS) };
+    GlobalMemoryStatus(&memstat); // TODO: `GlobalMemoryStatusEx`
+    s_OSStatus.RAM.TotalPhys    = memstat.dwTotalPhys;
+    s_OSStatus.RAM.AvailPhys    = memstat.dwAvailPhys;
+    s_OSStatus.RAM.TotalVirtual = memstat.dwTotalVirtual;
+    s_OSStatus.RAM.AvailVirtual = memstat.dwAvailVirtual;
+
+    VERIFY(SUCCEEDED(GetVideoMemInfo(&s_OSStatus.VRAM.Total, &s_OSStatus.VRAM.Avail)));
+    VERIFY(SUCCEEDED(CoInitialize(NULL)));
+
+    // Load setting only after everything was checked - TODO: Move this out from here, it's not platform specific
+    FrontEndMenuManager.LoadSettings();
+
+    return TRUE;
 }
 
 // 0x7458A0
@@ -230,4 +390,33 @@ bool psAlwaysOnTop(bool alwaysOnTop) {
 // 0x746190
 bool psSelectDevice() {
     return plugin::CallAndReturn<bool, 0x746190>();
+}
+
+void WinPsInjectHooks() {
+    RH_ScopedCategory("Win");
+    RH_ScopedNamespaceName("Ps");
+
+    RH_ScopedGlobalInstall(psInitialize, 0x747420);
+    RH_ScopedGlobalInstall(psTerminate, 0x7458A0);
+    RH_ScopedGlobalInstall(psWindowSetText, 0x7451B0);
+    RH_ScopedGlobalInstall(psErrorMessage, 0x7451D0);
+    RH_ScopedGlobalInstall(psWarningMessage, 0x7451F0);
+    RH_ScopedGlobalInstall(psCameraBeginUpdate, 0x745210);
+    RH_ScopedGlobalInstall(psCameraShowRaster, 0x745240);
+    RH_ScopedGlobalInstall(psTimer, 0x745270);
+    RH_ScopedGlobalInstall(psGrabScreen, 0x7452B0);
+    RH_ScopedGlobalInstall(psMouseSetVisibility, 0x7453E0);
+    RH_ScopedGlobalInstall(psMouseSetPos, 0x7453F0);
+    RH_ScopedGlobalInstall(psPathnameCreate, 0x745470);
+    RH_ScopedGlobalInstall(psPathnameDestroy, 0x7454E0);
+    RH_ScopedGlobalInstall(psPathGetSeparator, 0x745500);
+    RH_ScopedGlobalInstall(psInstallFileSystem, 0x745520);
+    RH_ScopedGlobalInstall(psNativeTextureSupport, 0x745530);
+    RH_ScopedGlobalInstall(psDebugMessageHandler, 0x745540);
+    RH_ScopedGlobalInstall(psAlwaysOnTop, 0x7458B0);
+    RH_ScopedGlobalInstall(psSelectDevice, 0x746190, {.reversed = false});
+
+    RH_ScopedGlobalInstall(InitialiseLanguage, 0x7465B0);
+    RH_ScopedGlobalInstall(CheckDirectSound, 0x745840);
+    RH_ScopedGlobalInstall(GetVideoMemInfo, 0x7455E0);
 }
