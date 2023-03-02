@@ -4,6 +4,7 @@
 #include <ddraw.h>
 #include <dsound.h>
 #include "VideoMode.h"
+#include "VideoModeSelectDialog.h"
 #include "platform.h"
 #include "LoadingScreen.h"
 #include "C_PcSave.h"
@@ -391,20 +392,6 @@ bool psAlwaysOnTop(bool alwaysOnTop) {
     );
 }
 
-// 0x745E50
-INT_PTR CALLBACK DialogFunc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam) {
-    return (*(DLGPROC)(0x745E50))(hDlg, Msg, wParam, lParam);
-    /*
-    switch (Msg) {
-    case WM_INITDIALOG: {
-        const auto devsel = GetDlgItem(hDlg, IDC_DEVICESEL);
-        
-        return FALSE;
-    }
-    }
-    */
-}
-
 BOOL SelectVideoModeFullScreen800x600x32() {
     const auto numVM = RwEngineGetNumVideoModes();
     for (; GcurSelVM < numVM; GcurSelVM++) { // TODO/NOTE: Why not set GcurSelVM = 0?
@@ -492,7 +479,7 @@ RwBool psSelectDevice() {
 
     // Select video mode to use
     if (MultipleSubSystems && !UseDefaultVM) {
-        if (!DialogBoxParam(inst, MAKEINTRESOURCEA(IDD_DIALOG1), wnd, DialogFunc, 0)) {
+        if (!CreateVidModeSelectDialog(inst, wnd)) {
             return FALSE; // User failed to select video mode
         }
     }
