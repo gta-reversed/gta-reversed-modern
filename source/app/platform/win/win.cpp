@@ -841,7 +841,7 @@ void Win32InjectHooks() {
     
     RH_ScopedGlobalInstall(GTATranslateShiftKey, 0x747CD0);
     RH_ScopedGlobalInstall(GTATranslateKey, 0x747820);
-    RH_ScopedGlobalInstall(__MainWndProc, 0x747EB0);
+    RH_ScopedGlobalInstall(__MainWndProc, 0x747EB0, { .locked = true });
 
     // Unhooking these 2 after the game has started will do nothing
     RH_ScopedGlobalInstall(__WinMain, 0x748710);
