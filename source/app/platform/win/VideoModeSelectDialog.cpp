@@ -2,6 +2,7 @@
 
 #include "VideoModeSelectDialog.h"
 #include "VideoMode.h"
+#include "platform/platform.h"
 
 //
 // TODO:
@@ -64,10 +65,12 @@ void FillAvailableVMs(HWND hVMSel) {
             SendMessage(hVMSel, CB_SETITEMDATA, idx, i); // Set index of that entry to correspond to `i`
         };
 
-        if (aspectr == 3.f / 4.f || aspectr == 0.8f) { // TODO: What aspect ratio is 0.8?
+        if (IsFullScreenRatio(aspectr)) {
             AddThisVMEntry("FULLSCRCEEN");
-        } else if (aspectr == 0.6f || aspectr == 10.f / 16.f) { // TODO: What aspect ratio is 0.6?
+        } else if (IsWideScreenRatio(aspectr)) {
             AddThisVMEntry("WIDESCREEN");
+        } else {
+            DEV_LOG("Not listing video mode ({}) to device select! [Aspect Ratio: {}; Res: {} x {}]", i, aspectr, vmi.width, vmi.height);
         }
     }
 }
