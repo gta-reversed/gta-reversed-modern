@@ -131,7 +131,7 @@ bool rsCommandLine(void* param) {
 // 0x619530
 bool rsPreInitCommandLine(RwChar* arg) {
     if (strcmp(arg, RWSTRING("-vms")) == 0) {
-        DefaultVideoMode = FALSE;
+        DefaultVM = FALSE;
         return true;
     }
     return false;
@@ -245,7 +245,7 @@ RwMemoryFunctions* psGetMemoryFunctions() {
 }
 
 // 0x619C90
-bool RsRwInitialize(void* param) {
+bool RsRwInitialize(void* param) { // Win32: Param is HWND
     if (!RwEngineInit(psGetMemoryFunctions(), 0, rsRESOURCESDEFAULTARENASIZE))
         return false;
 
@@ -304,7 +304,7 @@ RsEventStatus RsEventHandler(RsEvent event, void* param) {
     case rsREGISTERIMAGELOADER:
         return rsEVENTPROCESSED;
 
-    case rsRWINITIALIZE:
+    case rsRWINITIALIZE: // Win32: Param is HWND 
         return RSEVENT_SUCCEED(RsRwInitialize(param));
 
     case rsRWTERMINATE:

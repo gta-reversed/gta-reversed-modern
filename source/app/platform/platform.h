@@ -81,4 +81,4 @@ bool psInstallFileSystem();
 bool psNativeTextureSupport();
 RsEventStatus psDebugMessageHandler(RsEvent event, void* param);
 bool psAlwaysOnTop(bool alwaysOnTop);
-bool psSelectDevice();
+BOOL psSelectDevice();

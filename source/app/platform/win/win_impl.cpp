@@ -3,7 +3,7 @@
 #include "win.h"
 #include <ddraw.h>
 #include <dsound.h>
-
+#include "VideoMode.h"
 #include "platform.h"
 #include "LoadingScreen.h"
 #include "C_PcSave.h"
@@ -11,7 +11,9 @@
 #define USE_D3D9
 
 // TODO: Move these into premake/cmake
-#ifndef USE_D3D9
+#ifdef USE_D3D9
+#pragma comment(lib, "d3d9.lib")
+#else
 #pragma comment(lib, "d3d8.lib")
 #endif
 #pragma comment(lib, "ddraw.lib")
@@ -375,21 +377,169 @@ RsEventStatus psDebugMessageHandler(RsEvent event, void* param) {
 
 // 0x7458B0
 bool psAlwaysOnTop(bool alwaysOnTop) {
+    const auto hwnd = PSGLOBAL(window);
+
     RECT winRect;
+    VERIFY(GetWindowRect(hwnd, &winRect));
 
-    HWND hwnd = PSGLOBAL(window);
-    GetWindowRect(hwnd, &winRect);
-
-    if (alwaysOnTop) {
-        return (bool)SetWindowPos(hwnd, HWND_TOPMOST, winRect.left, winRect.top, winRect.right - winRect.left, winRect.bottom - winRect.top, 0);
-    } else {
-        return (bool)SetWindowPos(hwnd, HWND_NOTOPMOST, winRect.left, winRect.top, winRect.right - winRect.left, winRect.bottom - winRect.top, 0);
-    }
+    return SetWindowPos(
+        hwnd,
+        alwaysOnTop ? HWND_TOPMOST : HWND_NOTOPMOST,
+        winRect.left,                 winRect.top,
+        winRect.right - winRect.left, winRect.bottom - winRect.top,
+        NULL
+    );
 }
 
-// 0x746190
-bool psSelectDevice() {
-    return plugin::CallAndReturn<bool, 0x746190>();
+// 0x745E50
+INT_PTR CALLBACK DialogFunc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam) {
+    return (*(DLGPROC)(0x745E50))(hDlg, Msg, wParam, lParam);
+    /*
+    switch (Msg) {
+    case WM_INITDIALOG: {
+        const auto devsel = GetDlgItem(hDlg, IDC_DEVICESEL);
+        
+        return FALSE;
+    }
+    }
+    */
+}
+
+BOOL SelectVideoModeFullScreen800x600x32() {
+    const auto numVM = RwEngineGetNumVideoModes();
+    for (; GcurSelVM < numVM; GcurSelVM++) { // TODO/NOTE: Why not set GcurSelVM = 0?
+        const auto vm = RwEngineGetVideoModeInfo(GcurSelVM);
+        if (vm.width == 800 && vm.height == 600 && vm.depth == 32 && (vm.flags & rwVIDEOMODEEXCLUSIVE)) {
+            return TRUE;
+        }
+    }
+    MessageBox(NULL, "Cannot find 800x600x32 video mode", "GTA: San Andreas", IDOK);
+    return FALSE;
+}
+
+// 0x7460A0
+RwUInt32 GetBestRefreshRate(RwUInt32 width, RwUInt32 height, RwUInt32 depth) {
+#ifdef USE_D3D9
+    const auto d3d = Direct3DCreate9(D3D_SDK_VERSION);
+#else
+    const auto d3d = Direct3DCreate8(D3D_SDK_VERSION);
+#endif
+    const notsa::AutoCallOnDestruct released3d{ [d3d] { d3d->Release(); } };
+
+    assert(d3d != NULL);
+
+    RwUInt32 refreshRate = INT_MAX;
+
+    const auto format = depth == 32
+        ? D3DFMT_X8R8G8B8
+        : depth == 24
+            ? D3DFMT_R8G8B8
+            : D3DFMT_R5G6B5;
+    
+#ifdef USE_D3D9
+    for (auto i = d3d->GetAdapterModeCount(GcurSelSS, format); i-- > 0;) {
+#else
+    for (auto i = d3d->GetAdapterModeCount(GcurSel); i-- > 0;) {
+#endif
+        D3DDISPLAYMODE mode;
+
+#ifdef USE_D3D9
+        d3d->EnumAdapterModes(GcurSelSS, format, i, &mode);
+#else
+        d3d->EnumAdapterModes(GcurSel, i, &mode);
+#endif
+
+        if (mode.Width != width || mode.Height != height || mode.Format != format) {
+            continue;
+        }
+
+        if (mode.RefreshRate == 0) {
+            return 0;
+        }
+
+        if (mode.RefreshRate < refreshRate && mode.RefreshRate >= 60) {
+            refreshRate = mode.RefreshRate;
+        }
+    }
+
+    return refreshRate;
+}
+
+RwBool psSelectDevice() {
+    const auto wnd  = PSGLOBAL(window);
+    const auto inst = PSGLOBAL(instance);
+
+    if (!UseDefaultVM) {
+        GnumSubSystems = RwEngineGetNumSubSystems();
+        if (!GnumSubSystems) {
+            DEV_LOG("No SubSystems to select from!");
+            return FALSE;
+        }
+
+        /* Just to be sure ... */
+        GnumSubSystems = std::min(MAX_SUBSYSTEMS, GnumSubSystems);
+
+        /* Get the names of all the sub systems */
+        for (auto i = 0; i < GnumSubSystems; i++) {
+            RwEngineGetSubSystemInfo(&GsubSysInfo[i], i);
+        }
+
+        /* Get the default selection */
+        GcurSelSS = RwEngineGetCurrentSubSystem();
+    }
+
+    MultipleSubSystems = GnumSubSystems > 1;
+
+    // Select video mode to use
+    if (MultipleSubSystems && !UseDefaultVM) {
+        if (!DialogBoxParam(inst, MAKEINTRESOURCEA(IDD_DIALOG1), wnd, DialogFunc, 0)) {
+            return FALSE; // User failed to select video mode
+        }
+    }
+
+    // Set selected subsystem
+    if (!RwEngineSetSubSystem(GcurSelSS)) {
+        DEV_LOG("Failed: RwEngineSetSubSystem({})", GcurSelSS);
+        return FALSE;
+    }
+
+    DEV_LOG("GcurSelSS={}", GcurSelSS);
+
+    if (!UseDefaultVM && !MultipleSubSystems) {
+        const auto vmDisplay = FrontEndMenuManager.m_nDisplayVideoMode;
+        if (!vmDisplay || !GetVideoModeList()[vmDisplay]) {
+            if (IsVMNotSelected && !SelectVideoModeFullScreen800x600x32()) {
+                return FALSE;
+            }
+        } else {
+            GcurSelVM = FrontEndMenuManager.m_nPrefsVideoMode = vmDisplay;
+        }
+    }
+
+    FrontEndMenuManager.m_nCurrentScreenItem = 0;
+
+    // Set selected videomode
+    if (!RwEngineSetVideoMode(GcurSelVM)) {
+        DEV_LOG("Failed: RwEngineSetVideoMode({})", GcurSelVM);
+        return FALSE;
+    }
+
+    DEV_LOG("GcurSelVM={}", GcurSelVM);
+
+    if (const auto vmi = RwEngineGetVideoModeInfo(GcurSelVM); vmi.flags & rwVIDEOMODEEXCLUSIVE) {
+        if (const auto rr = GetBestRefreshRate(vmi.width, vmi.height, vmi.depth); rr != -1) {
+            DEV_LOG("Refresh Rate: {} Hz", rr);
+            RwD3D9EngineSetRefreshRate(rr);
+        }
+
+        RsGlobal.maximumHeight = vmi.height;
+        RsGlobal.maximumWidth  = vmi.width;
+        PSGLOBAL(fullScreen)   = true;
+    }
+
+    RwD3D9EngineSetMultiSamplingLevels(FrontEndMenuManager.m_nPrefsAntialiasing);
+
+    return TRUE;
 }
 
 void WinPsInjectHooks() {
@@ -414,7 +564,7 @@ void WinPsInjectHooks() {
     RH_ScopedGlobalInstall(psNativeTextureSupport, 0x745530);
     RH_ScopedGlobalInstall(psDebugMessageHandler, 0x745540);
     RH_ScopedGlobalInstall(psAlwaysOnTop, 0x7458B0);
-    RH_ScopedGlobalInstall(psSelectDevice, 0x746190, {.reversed = false});
+    RH_ScopedGlobalInstall(psSelectDevice, 0x746190);
 
     RH_ScopedGlobalInstall(InitialiseLanguage, 0x7465B0);
     RH_ScopedGlobalInstall(CheckDirectSound, 0x745840);

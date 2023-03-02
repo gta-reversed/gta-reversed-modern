@@ -74,8 +74,7 @@ void CameraSize(RwCamera* camera, RwRect* rect, RwReal viewWindow, RwReal aspect
         rect->x = rect->y = 0;
     }
 
-    RwVideoMode videoMode;
-    RwEngineGetVideoModeInfo(&videoMode, RwEngineGetCurrentVideoMode());
+    const auto videoMode = RwEngineGetVideoModeInfo(RwEngineGetCurrentVideoMode());
 
     if (videoMode.flags & rwVIDEOMODEEXCLUSIVE) {
         rect->x = rect->y = 0;

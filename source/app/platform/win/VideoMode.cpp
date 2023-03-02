@@ -32,9 +32,8 @@ char** GetVideoModeList() {
 
     gVideoModes = (char**)CMemoryMgr::Calloc(numVidModes, sizeof(char*));
 
-    RwVideoMode videoMode{};
     for (auto modeId = 0u; modeId < numVidModes; modeId++) {
-        VERIFY(RwEngineGetVideoModeInfo(&videoMode, modeId));
+        const auto videoMode = RwEngineGetVideoModeInfo(modeId);
 
         gVideoModes[modeId] = nullptr;
         if ((videoMode.flags & rwVIDEOMODEEXCLUSIVE) == 0) {
@@ -105,7 +104,5 @@ void SetVideoMode(int32 mode) {
 
 // 0x745CA0
 bool IsVideoModeExclusive() { // AKA isCurrentModeFullscreen
-    RwVideoMode videoMode{};
-    VERIFY(RwEngineGetVideoModeInfo(&videoMode, gCurrentVideoMode));
-    return videoMode.flags & rwVIDEOMODEEXCLUSIVE;
+    return RwEngineGetVideoModeInfo(gCurrentVideoMode).flags & rwVIDEOMODEEXCLUSIVE;
 }

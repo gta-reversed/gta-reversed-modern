@@ -576,9 +576,9 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
     case GAME_STATE_FRONTEND_LOADED: {
         FrontEndMenuManager.m_bActivateMenuNextFrame = true;
         FrontEndMenuManager.m_bMainMenuSwitch = true;
-        if (VideoModeNotSelected) {
+        if (IsVMNotSelected) {
             FrontEndMenuManager.m_nPrefsVideoMode = FrontEndMenuManager.m_nDisplayVideoMode = gCurrentVideoMode;
-            VideoModeNotSelected = false;
+            IsVMNotSelected = false;
         }
         ChangeGameStateTo(GAME_STATE_FRONTEND_IDLE);
         if (FastLoadSettings.NoCopyright) {
@@ -737,7 +737,7 @@ INT WINAPI __WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine,
         RsEventHandler(rsCOMMANDLINE, argv[i]);
     }
 
-    if (MultipleVideoModes || PSGLOBAL(fullScreen)) {
+    if (MultipleSubSystems || PSGLOBAL(fullScreen)) {
         SetWindowLongPtr(PSGLOBAL(window), GWL_STYLE, (LONG_PTR)WS_POPUP);
         SetWindowPos(PSGLOBAL(window), nullptr, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
     }
