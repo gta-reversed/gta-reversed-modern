@@ -25,12 +25,9 @@ UIRenderer::UIRenderer() :
 {
     IMGUI_CHECKVERSION();
 
-    m_ImIO->WantCaptureMouse    = true;
-    m_ImIO->WantCaptureKeyboard = true;
-    m_ImIO->WantSetMousePos     = true;
-    m_ImIO->MouseDrawCursor     = false;
-    m_ImIO->ConfigFlags         = ImGuiConfigFlags_NavEnableSetMousePos | ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
-    m_ImIO->DisplaySize         = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
+    m_ImIO->ConfigFlags = ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
+    m_ImIO->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
+    m_ImIO->NavActive   = false;
 
     ImGui_ImplWin32_Init(PSGLOBAL(window));
     ImGui_ImplDX9_Init(GetD3DDevice());
@@ -46,76 +43,6 @@ UIRenderer::~UIRenderer() {
     DEV_LOG("Good bye!");
 }
 
-void UIRenderer::UpdateInputMouse() {
-    const auto WHEEL_SPEED = 20.0f;
-
-    CPad::GetPad()->DisablePlayerControls = true;
-
-    // Update position
-    auto& MousePos = m_ImIO->MousePos;
-    MousePos.x += CPad::NewMouseControllerState.X;
-    MousePos.y -= CPad::NewMouseControllerState.Y;
-
-    MousePos.x = std::clamp(MousePos.x, 0.0f, SCREEN_WIDTH);
-    MousePos.y = std::clamp(MousePos.y, 0.0f, SCREEN_HEIGHT);
-
-    if (CPad::NewMouseControllerState.wheelDown)
-        m_ImIO->MouseWheel -= (WHEEL_SPEED * m_ImIO->DeltaTime);
-
-    if (CPad::NewMouseControllerState.wheelUp)
-        m_ImIO->MouseWheel += (WHEEL_SPEED * m_ImIO->DeltaTime);
-
-    m_ImIO->MouseDown[ImGuiMouseButton_Left]   = CPad::NewMouseControllerState.lmb;
-    m_ImIO->MouseDown[ImGuiMouseButton_Right]  = CPad::NewMouseControllerState.rmb;
-    m_ImIO->MouseDown[ImGuiMouseButton_Middle] = CPad::NewMouseControllerState.mmb;
-
-    CPad::NewMouseControllerState.X = 0.0f;
-    CPad::NewMouseControllerState.Y = 0.0f;
-}
-
-void UIRenderer::UpdateInputKeyboard() {
-    
-    /*
-    BYTE KeyStates[256];
-
-    VERIFY(GetKeyboardState(KeyStates));
-
-    const auto IsKeyDown = [&](auto key) { return (KeyStates[key] & 0x80) != 0; };
-
-    for (auto key = 0; key < 256; key++) {
-        // Check if there was a state change
-        if (IsKeyDown(key) == m_ImIO->KeysDown[key]) {
-            continue;
-        }
-
-        // There was!
-        if (IsKeyDown(key)) { // Key is now down
-            m_ImIO->KeysDown[key] = true;
-
-            char ResultUTF8[16] = {0};
-            if (ToAscii(key, MapVirtualKey(key, 0), KeyStates, (LPWORD)ResultUTF8, 0)) {
-                m_ImIO->AddInputCharactersUTF8(ResultUTF8);
-            }
-        } else { // Key is now released
-            m_ImIO->KeysDown[key] = false;
-        }
-    }
-
-    m_ImIO->KeyCtrl  = IsKeyDown(VK_CONTROL);
-    m_ImIO->KeyShift = IsKeyDown(VK_SHIFT);
-    m_ImIO->KeyAlt   = IsKeyDown(VK_MENU);
-    m_ImIO->KeySuper = false;
-    */
-}
-
-void UIRenderer::UpdateInput() {
-    if (!Visible()) {
-        return;
-    }
-    //UpdateInputMouse();
-    //UpdateInputKeyboard();
-}
-
 void UIRenderer::PreRenderUpdate() {
     m_ImIO->DeltaTime   = CTimer::GetTimeStepInSeconds();
     m_ImIO->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT); // Update display size, in case of window resize after imgui was already initialized
@@ -125,10 +52,15 @@ void UIRenderer::PreRenderUpdate() {
     ReversibleHooks::CheckAll();
 
     if (const auto pad = CPad::GetPad(); pad->DebugMenuJustPressed()) {
-        m_ShowMenu              = !m_ShowMenu;
-        m_ImIO->MouseDrawCursor = m_ShowMenu;
-        pad->bPlayerSafe        = m_ShowMenu;
+        m_ShowMenu = !m_ShowMenu;
+        m_ImIO->MouseDrawCursor    = m_ShowMenu;
+        m_ImIO->NavActive          = m_ShowMenu;
+        pad->DisablePlayerControls = m_ShowMenu;
     }
+}
+
+void UIRenderer::PostRenderUpdate() {
+    m_ImIO->NavActive = m_ShowMenu; // ImGUI clears `NavActive` every frame, so have to set it here.
 }
 
 void UIRenderer::DrawLoop() {
@@ -148,6 +80,7 @@ void UIRenderer::DrawLoop() {
     ImGui::Render();
     ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
     ImGui_ImplDX9_InvalidateDeviceObjects();
+    PostRenderUpdate();
 }
 
 void UIRenderer::Render2D() {

@@ -25,9 +25,6 @@ private:
     //! Render 2D stuff (Called after a new (ImGui) frame has been began)
     void Render2D();
 
-    //! Update input (mouse and keyboard) if necessary 
-    void UpdateInput();
-
     //! Called before a new (ImGui) frame is started (and after the previous one has ended)
     void PreRenderUpdate();
 
@@ -45,9 +42,6 @@ private:
     friend void ::Render2dStuff(); // For `DrawLoop()`
     friend void ::CPad::UpdatePads();
     friend void ::Idle(void*);
-
-    void UpdateInputMouse();
-    void UpdateInputKeyboard();
 
 private:
     bool          m_Initialised{};
