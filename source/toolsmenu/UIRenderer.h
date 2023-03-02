@@ -15,6 +15,9 @@ public:
     //! Request restart of render (done on before frame)
     void RequestReInit() { m_ReInitRequested = true; }
 
+    //! Same as ImGui::GetIO(), but won't crash the code if called before ctx is created
+    auto GetImIO() const { return m_ImIO; }
+
 private:
     //! Render 3D stuff in the world (If rendered elsewhere it won't be visible)
     void Render3D();
@@ -28,15 +31,20 @@ private:
     //! Called before a new (ImGui) frame is started (and after the previous one has ended)
     void PreRenderUpdate();
 
+    //! Called after the frame has ended
+    void PostRenderUpdate();
+
     //! The actual draw loop
     void DrawLoop();
 
     //! Random code you want to run (Called from `PreRenderUpdate`)
     void DebugCode();
+
 private:
     friend void ::RenderEffects(); // For `Render3D()`
     friend void ::Render2dStuff(); // For `DrawLoop()`
     friend void ::CPad::UpdatePads();
+    friend void ::Idle(void*);
 
     void UpdateInputMouse();
     void UpdateInputKeyboard();
