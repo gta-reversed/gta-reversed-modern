@@ -10,6 +10,7 @@ void CTaskComplexEnterCar::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x63DFA0);
 
     RH_ScopedInstall(GetTargetPos, 0x63A300, { .reversed = false });
+    RH_ScopedInstall(GetCameraAvoidVehicle, 0x63A690);
     //RH_ScopedInstall(SetVehicleFlags, 0x63AB90, { .reversed = false });
     RH_ScopedInstall(CreateSubTask, 0x63E040, { .reversed = false });
 
@@ -91,4 +92,32 @@ CVector CTaskComplexEnterCar::GetTargetPos() {
     CVector temp;
     plugin::CallMethod<0x63A300, CTaskComplexEnterCar*, CVector&>(this, temp);
     return temp;
+}
+
+// 0x63A690
+CVehicle* CTaskComplexEnterCar::GetCameraAvoidVehicle() {
+    if (m_pTargetVehicle) {
+        if (const auto st = GetSubTask()) {
+            switch (st->GetTaskType()) {
+            case TASK_COMPLEX_LEAVE_CAR:
+            case TASK_SIMPLE_CAR_OPEN_DOOR_FROM_OUTSIDE:
+            case TASK_SIMPLE_CAR_OPEN_LOCKED_DOOR_FROM_OUTSIDE:
+            case TASK_SIMPLE_BIKE_PICK_UP:
+            case TASK_SIMPLE_STAND_STILL:
+            case TASK_SIMPLE_CAR_QUICK_DRAG_PED_OUT:
+            case TASK_SIMPLE_CAR_SLOW_DRAG_PED_OUT:
+            case TASK_SIMPLE_CAR_SET_PED_OUT:
+            case TASK_COMPLEX_ENTER_BOAT_AS_DRIVER:
+            case TASK_SIMPLE_CAR_DRIVE_TIMED:
+            case TASK_SIMPLE_CAR_GET_IN:
+            case TASK_SIMPLE_CAR_CLOSE_DOOR_FROM_INSIDE:
+            case TASK_SIMPLE_CAR_SHUFFLE:
+            case TASK_SIMPLE_CAR_ALIGN:
+            case TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER:
+            case TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER:
+                return m_pTargetVehicle;
+            }
+        }
+    }
+    return nullptr;
 }

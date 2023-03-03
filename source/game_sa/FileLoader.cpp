@@ -1157,7 +1157,7 @@ void CFileLoader::LoadEntryExit(const char* line) {
     uint32 timeOn = 0, timeOff = 24;
     CVector enter{}, exit{};
     CVector2D range;
-    float enteranceAngle;
+    float entranceAngle;
     float unused;
     float exitAngle;
     int32 area;
@@ -1169,7 +1169,7 @@ void CFileLoader::LoadEntryExit(const char* line) {
         line,
         "%f %f %f %f %f %f %f %f %f %f %f %d %d %s %d %d %d %d",
         &enter.x, &enter.y, &enter.z,
-        &enteranceAngle,
+        &entranceAngle,
         &range.x, &range.y,
         &unused,
         &exit.x, &exit.y, &exit.z,
@@ -1191,13 +1191,13 @@ void CFileLoader::LoadEntryExit(const char* line) {
 
     const auto enexPoolIdx = CEntryExitManager::AddOne(
         enter.x, enter.y, enter.z,
-        enteranceAngle,
+        entranceAngle,
         range.x, range.y,
         unused,
         exit.x, exit.y, exit.z,
         exitAngle,
         area,
-        flags,
+        (CEntryExit::eFlags)flags,
         skyColor,
         timeOn,
         timeOff,
@@ -1219,28 +1219,28 @@ void CFileLoader::LoadEntryExit(const char* line) {
     };
 
     if (flags & UNKNOWN_INTERIOR)
-        enex->m_nFlags.bUnknownInterior = true;
+        enex->bUnknownInterior = true;
 
     if (flags & UNKNOWN_PAIRING)
-        enex->m_nFlags.bUnknownPairing = true;
+        enex->bUnknownPairing = true;
 
     if (flags & CREATE_LINKED_PAIR)
-        enex->m_nFlags.bCreateLinkedPair = true;
+        enex->bCreateLinkedPair = true;
 
     if (flags & REWARD_INTERIOR)
-        enex->m_nFlags.bRewardInterior = true;
+        enex->bRewardInterior = true;
 
     if (flags & USED_REWARD_ENTRANCE)
-        enex->m_nFlags.bUsedRewardEntrance = true;
+        enex->bUsedRewardEntrance = true;
 
     if (flags & CARS_AND_AIRCRAFT)
-        enex->m_nFlags.bCarsAndAircraft = true;
+        enex->bCarsAndAircraft = true;
 
     if (flags & BIKES_AND_MOTORCYCLES)
-        enex->m_nFlags.bBikesAndMotorcycles = true;
+        enex->bBikesAndMotorcycles = true;
 
     if (flags & DISABLE_ONFOOT)
-        enex->m_nFlags.bDisableOnFoot = true;
+        enex->bDisableOnFoot = true;
 }
 
 // IPL -> GRGE

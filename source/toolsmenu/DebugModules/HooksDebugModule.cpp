@@ -455,6 +455,7 @@ void HooksDebugModule::RenderCategory(RH::HookCategory& cat) {
 
     const auto& name = cat.Name();
 
+    // TODO: Replace with `TreeNodeWithTriStateCheckBox`
     //! returns tuple<bool open, bool cbStateChanged, bool cbState>
     const auto TreeNodeWithCheckbox = [](auto label, ImTristate triState, bool disabled) {
         // TODO/NOTE: The Tree's label is a workaround for when the label is shorter than the visual checkbox (otherwise the checkbox can't be clic
