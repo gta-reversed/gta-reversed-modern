@@ -38,10 +38,12 @@ typedef uint8     bool8;
 typedef uint16    bool16;
 typedef uint32    bool32;
 
-#if __has_builtin(__builtin_unreachable)
+#if (defined(__GNUC__) || defined(__GNUG__) || defined(__clang__))
 #define UNREACHABLE_INTRINSIC(...) __builtin_unreachable()
-#else
+#elif (defined(_MSC_VER))
 #define UNREACHABLE_INTRINSIC(...) __assume(false)
+#else
+#define UNREACHABLE_INTRINSIC(...) assert(false)
 #endif
 
 // Use the `NOTSA_UNREACHABLE` macro for unreachable code paths.
@@ -111,11 +113,22 @@ template<typename... Ts>
 // Eventually could instead verify the returned value? In case of `sscanf` etc...
 #define RET_IGNORED(x) (void)(x);
 
+//! Cause a debug break
+#define NOTSA_DEBUGBREAK() __debugbreak()
+
+//! switch case fallthru
+#define NOTSA_SWCFALLTHRU [[fallthrough]]
+
+//! Macro for passing a string var to *scanf_s function.
+#define SCANF_S_STR(s) s, std::size(s)
+
+#define NOTSA_FORCEINLINE __forceinline
+
 /*!
 * @brief Used for static variable references
 *
 * @tparam T    The type of the variable
-* @tparam Addr The address of it
+* @param Addr  The address of it
 */
 template<typename T, uintptr Addr>
 T& StaticRef() {

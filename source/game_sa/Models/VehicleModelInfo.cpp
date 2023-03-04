@@ -231,9 +231,10 @@ void CVehicleModelInfo::SetAnimFile_Reversed(const char* filename)
         return;
     }
 
-    auto name = new char[strlen(filename) + 1];
+    const auto size = strlen(filename) + 1;
+    auto name = new char[size];
     m_animBlockFileName = name;
-    strcpy(name, filename);
+    strcpy_s(name, size, filename);
 }
 
 void CVehicleModelInfo::ConvertAnimFileIndex()
@@ -526,7 +527,7 @@ void CVehicleModelInfo::SetCustomCarPlateText(char* text)
         return;
     }
 
-    strncpy(m_szPlateText, text, 8);
+    strncpy_s(m_szPlateText, text, 8);
 }
 
 void CVehicleModelInfo::ReduceMaterialsInVehicle()
@@ -910,7 +911,7 @@ RwTexture* CVehicleModelInfo::FindTextureCB(const char* name)
     }
 
     char buffer[32];
-    strcpy(buffer, name);
+    strcpy_s(buffer, name);
     buffer[0] = '#';
     return RwTexDictionaryFindNamedTexture(current, buffer);
 }
@@ -1102,13 +1103,13 @@ RpAtomic* CVehicleModelInfo::SetAtomicRendererCB_Train(RpAtomic* atomic, void* d
 
 RwObject* CVehicleModelInfo::SetAtomicFlagCB(RwObject* object, void* data)
 {
-    CVisibilityPlugins::SetAtomicFlag(reinterpret_cast<RpAtomic*>(object), (uint16)data);
+    CVisibilityPlugins::SetAtomicFlag(reinterpret_cast<RpAtomic*>(object), (uint16)(std::bit_cast<uintptr_t>(data)));
     return object;
 }
 
 RwObject* CVehicleModelInfo::ClearAtomicFlagCB(RwObject* object, void* data)
 {
-    CVisibilityPlugins::ClearAtomicFlag(reinterpret_cast<RpAtomic*>(object), (uint16)data);
+    CVisibilityPlugins::ClearAtomicFlag(reinterpret_cast<RpAtomic*>(object), (uint16)(std::bit_cast<uintptr_t>(data)));
     return object;
 }
 
@@ -1165,7 +1166,7 @@ RpMaterial* CVehicleModelInfo::GetMatFXEffectMaterialCB(RpMaterial* material, vo
 
 RpMaterial* CVehicleModelInfo::SetEnvironmentMapCB(RpMaterial* material, void* data)
 {
-    if ((uint16)data == 0xFFFF) {
+    if ((uint16)std::bit_cast<uintptr_t>(data) == 0xFFFF) {
         return DisableMatFx(material, data);
     }
 
@@ -1227,7 +1228,7 @@ void CVehicleModelInfo::AssignRemapTxd(const char* name, int16 txdSlot)
         --iLastIndex;
 
     char buffer[24];
-    strncpy(buffer, name, iLastIndex + 1);
+    strncpy_s(buffer, name, iLastIndex + 1);
     buffer[iLastIndex + 1] = '\0';
 
     auto mi = CModelInfo::GetModelInfo(buffer, 400, 630);
@@ -1326,8 +1327,16 @@ void CVehicleModelInfo::LoadVehicleColours()
         }
 
         if (iLastMode == eCarColLineType::GLOBAL_RGB) {
-            uint32 red, green, blue;
-            (void)sscanf(buffer, "%d %d %d", &red, &green, &blue);
+            uint32 red{}, green{}, blue{};
+            const auto read = sscanf_s(buffer, "%d %d %d", &red, &green, &blue);
+#ifdef FIX_BUGS
+            if (read != 3) {
+                // there is a typo in carcols.dat:
+                // "77.93,96			# 98 malachite poly			blue"
+                //    ^~~ should've be a comma.
+                VERIFY(sscanf_s(buffer, "%d.%d %d", &red, &green, &blue) == 3);
+            }
+#endif
             curColor->Set(red, green, blue, 255);
             auto pLineEnd = pLineStart;
             while (*pLineEnd != '#') // Seems redundant(?)
@@ -1341,8 +1350,8 @@ void CVehicleModelInfo::LoadVehicleColours()
         if (iLastMode == eCarColLineType::CAR_2COL)
         {
             char modelName[64];
-            auto iNumRead = sscanf(buffer, "%s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
-                modelName,
+            auto iNumRead = sscanf_s(buffer, "%s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+                SCANF_S_STR(modelName),
                 &colorBuffer[0][0],
                 &colorBuffer[0][1],
                 &colorBuffer[1][0],
@@ -1377,8 +1386,8 @@ void CVehicleModelInfo::LoadVehicleColours()
 
         if (iLastMode == eCarColLineType::CAR_4COL) {
             char modelName[64];
-            auto iNumRead = sscanf(buffer, "%s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
-                modelName,
+            auto iNumRead = sscanf_s(buffer, "%s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+                SCANF_S_STR(modelName),
                 &colorBuffer[0][0],
                 &colorBuffer[0][1],
                 &colorBuffer[0][2],
@@ -1461,15 +1470,17 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
             continue;
         }
 
+        char* pLastToken{};
         switch (iLineType) {
         case eCarModsLineType::LINK: {
             int32 iModelId1 = -1, iModelId2 = -1;
-            auto pToken = strtok(line, " \t,");
+            char* pLastToken{};
+            auto pToken = strtok_s(line, " \t,", &pLastToken);
             if (pToken) {
                 auto pModel1 = static_cast<CAtomicModelInfo*>(CModelInfo::GetModelInfo(pToken, &iModelId1));
                 pModel1->SetupVehicleUpgradeFlags(pToken);
 
-                auto pNextToken = strtok(nullptr, " \t,");
+                auto pNextToken = strtok_s(nullptr, " \t,", &pLastToken);
                 auto pModel2 = static_cast<CAtomicModelInfo*>(CModelInfo::GetModelInfo(pNextToken, &iModelId2));
                 pModel2->SetupVehicleUpgradeFlags(pNextToken);
 
@@ -1479,20 +1490,20 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
         }
 
         case eCarModsLineType::MODS: {
-            auto pToken = strtok(line, " \t,");
+            auto pToken = strtok_s(line, " \t,", &pLastToken);
             if (!pToken)
                 break;
 
             int32 iModelId = -1;
             auto mi = CModelInfo::GetModelInfo(pToken, &iModelId)->AsVehicleModelInfoPtr();
-            auto nextToken = strtok(nullptr, " \t,");
+            auto nextToken = strtok_s(nullptr, " \t,", &pLastToken);
             auto upgrade = mi->m_anUpgrades;
             while (nextToken) {
                 auto ami = static_cast<CAtomicModelInfo*>(CModelInfo::GetModelInfo(nextToken, &iModelId));
                 ami->SetupVehicleUpgradeFlags(nextToken);
                 *upgrade = iModelId;
                 ++upgrade;
-                nextToken = strtok(nullptr, " \t,");
+                nextToken = strtok_s(nullptr, " \t,", &pLastToken);
             }
 
             auto hydraulicsAMI = static_cast<CAtomicModelInfo*>(CModelInfo::GetModelInfo("hydralics", &iModelId));
@@ -1508,10 +1519,10 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
 
         case eCarModsLineType::WHEEL: {
             int32 iModelId = -1, iWheelSet;
-            (void)sscanf(line, "%d", &iWheelSet);
-            (void)strtok(line, " \t,");
+            VERIFY(sscanf_s(line, "%d", &iWheelSet) == 1);
+            RET_IGNORED(strtok_s(line, " \t,", &pLastToken));
             char* token;
-            while ((token = strtok(nullptr, " \t,"))) {
+            while ((token = strtok_s(nullptr, " \t,", &pLastToken))) {
                 auto wheelMI = static_cast<CAtomicModelInfo*>(CModelInfo::GetModelInfo(token, &iModelId));
                 wheelMI->SetupVehicleUpgradeFlags(token);
                 AddWheelUpgrade(iWheelSet, iModelId);
@@ -1546,7 +1557,7 @@ tHandlingData& CVehicleModelInfo::GetHandlingData() const {
 }
 
 tFlyingHandlingData& CVehicleModelInfo::GetFlyingHandlingData() const {
-    return *gHandlingDataMgr.GetFlyingPointer(m_nHandlingId);
+    return *gHandlingDataMgr.GetFlyingPointer(static_cast<uint8>(m_nHandlingId));
 }
 
 void CVehicleModelInfo::CLinkedUpgradeList::AddUpgradeLink(int16 upgrade1, int16 upgrade2)

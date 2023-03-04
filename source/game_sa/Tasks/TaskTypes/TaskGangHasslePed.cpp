@@ -59,7 +59,7 @@ CTask* CTaskGangHasslePed::CreateFirstSubTask(CPed* ped) {
     if (!m_Ped)
         return nullptr;
 
-    m_nTime = CTimer::GetTimeInMS();
+    m_spentWaitingMs = CTimer::GetTimeInMS();
     m_nSomeRandomShit = CGeneral::GetRandomNumberInRange(m_RndMin, m_RndMax);
     m_bFirstSubTaskInitialised = true;
 

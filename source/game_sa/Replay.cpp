@@ -137,20 +137,20 @@ void CReplay::StorePedAnimation(CPed* ped, CStoredAnimationState& state) {
     CAnimBlendAssociation* second{};
     const auto main = RpAnimBlendClumpGetMainAssociation(ped->m_pRwClump, &second, &blendValue);
     if (main) {
-        state[0] = AnimationState::Make(main->m_nAnimId, main->m_fCurrentTime, main->m_fSpeed, main->m_nAnimGroup);
+        state[0] = AnimationState::Make(main->m_nAnimId, main->m_fCurrentTime, main->m_fSpeed, static_cast<uint8>(main->m_nAnimGroup));
     } else {
         state[0] = AnimationState::Make(ANIM_ID_IDLE, 0.0f, 1.0f, 0);
     }
 
     if (second) {
-        state[1] = AnimationState::MakeBlend(second->m_nAnimId, second->m_fCurrentTime, second->m_fSpeed, second->m_nAnimGroup, blendValue);
+        state[1] = AnimationState::MakeBlend(second->m_nAnimId, second->m_fCurrentTime, second->m_fSpeed, static_cast<uint8>(second->m_nAnimGroup), blendValue);
     } else {
         state[1] = AnimationState::MakeBlend(ANIM_ID_WALK, 0.0f, 0.0f, 0, 0.0f);
     }
 
     const auto partial = RpAnimBlendClumpGetMainPartialAssociation(ped->m_pRwClump);
     if (partial && partial->m_nAnimId >= ANIM_ID_WALK) {
-        state[2] = AnimationState::MakeBlend(partial->m_nAnimId, partial->m_fCurrentTime, partial->m_fSpeed, partial->m_nAnimGroup, partial->m_fBlendAmount);
+        state[2] = AnimationState::MakeBlend(partial->m_nAnimId, partial->m_fCurrentTime, partial->m_fSpeed, static_cast<uint8>(partial->m_nAnimGroup), partial->m_fBlendAmount);
     } else {
         state[2] = AnimationState::MakeBlend(ANIM_ID_WALK, 0.0f, 0.0f, 0, 0.0f);
     }
@@ -408,7 +408,6 @@ void CReplay::SaveReplayToHD() {
         // TODO: Refactor
         const auto NextSlot = [](uint8 slot) { return (slot + 1) % NUM_REPLAY_BUFFERS; };
 
-        // TODO: Refactor
         auto inUse = std::distance(BufferStatus.begin(), rng::find(BufferStatus, REPLAYBUFFER_IN_USE));
         auto slot = NextSlot(inUse);
 
@@ -417,6 +416,7 @@ void CReplay::SaveReplayToHD() {
                 break;
             slot = NextSlot(slot);
         }
+        assert(0 <= slot && slot <= std::size(Buffers));
         CFileMgr::Write(file, Buffers[slot].buffer.data(), sizeof(tReplayBuffer));
 
         while (BufferStatus[slot] != REPLAYBUFFER_IN_USE) {
@@ -441,6 +441,7 @@ void CReplay::PlayReplayFromHD() {
             for (; bufferIdx < NUM_REPLAY_BUFFERS && CFileMgr::Read(file, Buffers[bufferIdx].buffer.data(), sizeof(tReplayBuffer)); bufferIdx++) {
                 BufferStatus[bufferIdx] = REPLAYBUFFER_FULL;
             }
+            assert(bufferIdx >= 1);
             BufferStatus[bufferIdx - 1] = REPLAYBUFFER_IN_USE; // Mark last used buffer as in-use.
 
             for (auto i = bufferIdx; i < NUM_REPLAY_BUFFERS; i++) { // Mark unfilled buffer as n/a.
@@ -1165,7 +1166,7 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
             modelling->up = TheCamera.GetMatrix().GetUp();
             modelling->right = TheCamera.GetMatrix().GetRight();
 
-            CameraFocus = cameraPacket.firstFocusPosn * interpolation + CameraFocus * (1.0f - interpolation);
+            CameraFocus = cameraPacket.firstFocusPosn * interpolation + CVector{ CameraFocus } * (1.0f - interpolation);
             bIsUsingRemoteCar = cameraPacket.isUsingRemoteVehicle;
             break;
         }
@@ -1549,7 +1550,7 @@ void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loa
         slot = (slot + 1) % 8;
     }
     slot %= 8;
-
+    assert(slot >= 0);
     Playback = CAddressInReplayBuffer(Buffers[slot], slot);
 
     CObject::DeleteAllTempObjectsInArea(CVector{0.0f}, 1'000'000.0f);
@@ -1585,6 +1586,18 @@ void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loa
     TheCamera.Fade(0.0f, eFadeFlag::FADE_IN);
     TheCamera.ProcessFade();
     TheCamera.Fade(1.5f, eFadeFlag::FADE_OUT);
+}
+
+CReplay::tReplayBuffer::Iterator& CReplay::tReplayBuffer::Iterator::operator++() {
+#ifdef NOTSA_DEBUG
+    if (m_offset >= REPLAY_BUFFER_SIZE || !m_buffer) {
+        NOTSA_UNREACHABLE("Increment after end()!");
+    }
+#endif
+
+    const auto type = m_buffer->Read<tReplayBlockBase>(m_offset).type;
+    m_offset = (type != REPLAY_PACKET_END) ? m_offset + CReplay::FindSizeOfPacket(type) : REPLAY_BUFFER_SIZE;
+    return *this;
 }
 
 #define VALIDATE_BLOCK(block) static_assert(sizeof(block) == CReplay::FindSizeOfPacket(block::Type), "Block size mismatch!")

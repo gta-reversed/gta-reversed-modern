@@ -14,7 +14,12 @@
 //! If you see this value, USE THE FLOAT VERSION of `GetRandomNumberInRange`
 constexpr float RAND_MAX_FLOAT_RECIPROCAL = 1.0f / static_cast<float>(RAND_MAX);   // 1.0 / 32767.0 == 1.0 / RAND_MAX       = 0.0000305185094
 
+//#define BETTER_RNG
+
 namespace CGeneral { // More like `Math` (Or `Meth`, given how bad the code is, these guys must've been high!)
+    static thread_local std::random_device randomDevice{};
+    static thread_local std::mt19937 randomEngine(randomDevice());
+
     void InjectHooks();
 
     /*!
@@ -96,11 +101,7 @@ namespace CGeneral { // More like `Math` (Or `Meth`, given how bad the code is, 
         requires std::is_floating_point_v<T>
     inline T GetRandomNumberInRange(T min, T max) {
 #ifdef BETTER_RNG
-        // TODO: Move these statics out somewhere (Fucks perfomrnace if they're here)
-        static std::random_device randomDevice;
-        static std::mt19937 randomEngine(randomDevice());
-        std::uniform_real_distribution<float> uniform_dist(min, max);
-        return uniform_dist(randomEngine);
+        return std::uniform_real_distribution<float>{min, max}(randomEngine);
 #else
         assert(max >= min); // Check is not empty range (We must use `>=` because the `int` version relies on it)
         return lerp<T>(min, max, static_cast<float>(GetRandomNumber()) * RAND_MAX_FLOAT_RECIPROCAL);
@@ -137,6 +138,11 @@ namespace CGeneral { // More like `Math` (Or `Meth`, given how bad the code is, 
     inline auto& RandomChoice(R&& range) { // TODO: Add warning or smth for a possible dangling reference here
         // If range is empty `GetRandomNumberInRange` will assert
         return range[CGeneral::GetRandomNumberInRange(rng::size(range))];
+    }
+
+    template<typename T>
+    static T RandomChoiceFromList(std::initializer_list<T> list) {
+        return RandomChoice(rng::subrange{list.begin(), list.end()});
     }
 
     /*

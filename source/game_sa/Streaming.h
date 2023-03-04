@@ -28,7 +28,7 @@ enum class eChannelState
 
     // A big model (also called a large file) is loaded in steps:
     // First, the variable `ms_bLoadingBigModel` is set to `true` in `RequestModelStream`.
-    // When the first half is finished loading, and `ProcessLoadingChannel` is called
+    // When the first half has finished loading, and `ProcessLoadingChannel` is called
     // `ConvertBufferToObject` will be called by it, which will set the model's load state to
     // `LOADSTATE_FINISHING`. When the latter function returns the former checks if
     // the model's loadstate is `FINISHING`, if it is the channel's state is set to
@@ -291,10 +291,10 @@ public:
     static void FlushRequestList();
     static void ForceLayerToRead(int32 arg1);
     static int32 GetDefaultCabDriverModel();
-    static int32 GetDefaultCopCarModel(int32 ignoreLvpd1Model);
-    static int32 GetDefaultCopModel();
-    static int32 GetDefaultFiremanModel();
-    static int32 GetDefaultMedicModel();
+    static eModelID GetDefaultCopCarModel(bool ignoreLvpd1Model = true);
+    static eModelID GetDefaultCopModel();
+    static eModelID GetDefaultFiremanModel();
+    static eModelID GetDefaultMedicModel();
     static int32 GetDiscInDrive();
     static int32 GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority);
     static bool HasSpecialCharLoaded(int32 slot);

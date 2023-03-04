@@ -29,7 +29,7 @@ CTaskComplexFallToDeath::CTaskComplexFallToDeath(int32 direction, const CVector&
     m_nAnimId               = ANIM_ID_UNDEFINED;
     m_nAnimId1              = ANIM_ID_UNDEFINED;
     m_nFallToDeathDir       = static_cast<eFallDir>(direction);
-    m_nFlags = m_nFlags & 0xE0 | (8 * (bFallToDeathOverRailing | (2 * a5))); // todo: flags
+    m_nFlags = m_nFlags & 0xE0 | (8 * ((uint8)bFallToDeathOverRailing | (2 * (uint8)a5))); // todo: flags
 }
 
 void CTaskComplexFallToDeath::UpdateAnims(CPed* ped) {

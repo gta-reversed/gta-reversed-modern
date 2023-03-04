@@ -25,7 +25,7 @@ enum ePrimaryTasks // array indexes
 
 enum eSecondaryTask : uint32 // array indexes
 {
-    TASK_SECONDARY_INVALID = -1,
+    TASK_SECONDARY_INVALID = (uint32)-1,
 
     TASK_SECONDARY_ATTACK = 0,              // want duck to be after attack
     TASK_SECONDARY_DUCK,                    // because attack controls ducking movement
@@ -236,7 +236,8 @@ public:
     * @brief Find an active task from the given types and return the first one.
     */
     template<Task... Ts>
-    auto Find() requires(sizeof...(Ts) > 1) { // Only use this overload if there's more than 1 Task
+        requires(sizeof...(Ts) > 1)
+    auto Find() {
         return Find<Ts::Type...>();
     }
 

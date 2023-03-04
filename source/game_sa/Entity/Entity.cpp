@@ -1134,11 +1134,14 @@ CVector* CEntity::FindTriggerPointCoors(CVector* outVec, int32 triggerIndex)
 }
 
 /**
- * Returns a random effect with the given effectType among all the effects of the entity.
- * @param effectType Type of effect. See e2dEffectType. (Always EFFECT_ATTRACTOR)
- * @param bCheckForEmptySlot Should check for empty slot. (Always true)
- * @return Random effect
  * @addr 0x533410
+ * 
+ * Returns a random effect with the given effectType among all the effects of the entity.
+ * 
+ * @param   effectType Type of effect. See e2dEffectType. (Always EFFECT_ATTRACTOR)
+ * @param   bCheckForEmptySlot Should check for empty slot. (Always true)
+ * 
+ * @return Random effect
  */
 C2dEffect* CEntity::GetRandom2dEffect(int32 effectType, bool bCheckForEmptySlot)
 {
@@ -1240,7 +1243,7 @@ void CEntity::CreateEffects()
                 vecWorldExit.z,
                 fExitRot,
                 effect->enEx.m_nInteriorId,
-                effect->enEx.m_nFlags1 + (effect->enEx.m_nFlags2 << 8),
+                (CEntryExit::eFlags)(effect->enEx.m_nFlags1 + (effect->enEx.m_nFlags2 << 8)),
                 effect->enEx.m_nSkyColor,
                 effect->enEx.m_nTimeOn,
                 effect->enEx.m_nTimeOff,
@@ -1250,8 +1253,8 @@ void CEntity::CreateEffects()
 
             if (iEnExId != -1) {
                 auto addedEffect = CEntryExitManager::mp_poolEntryExits->GetAt(iEnExId);
-                if (addedEffect->m_pLink && !addedEffect->m_pLink->m_nFlags.bEnableAccess)
-                    addedEffect->m_nFlags.bEnableAccess = false;
+                if (addedEffect->m_pLink && !addedEffect->m_pLink->bEnableAccess)
+                    addedEffect->bEnableAccess = false;
             }
             break;
         }
@@ -1326,8 +1329,8 @@ void CEntity::DestroyEffects()
             auto iNearestEnex = CEntryExitManager::FindNearestEntryExit(vecWorld, 1.5F, -1);
             if (iNearestEnex != -1) {
                 auto enex = CEntryExitManager::mp_poolEntryExits->GetAt(iNearestEnex);
-                if (enex->m_nFlags.bEnteredWithoutExit)
-                    enex->m_nFlags.bDeleteEnex = true;
+                if (enex->bEnteredWithoutExit)
+                    enex->bDeleteEnex = true;
                 else
                     CEntryExitManager::DeleteOne(iNearestEnex);
             }
@@ -1401,11 +1404,8 @@ CVector* CEntity::GetBoundCentre(CVector* pOutCentre)
 }
 
 // 0x534290
-void CEntity::GetBoundCentre(CVector& outCentre)
-{
-    auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
-    const auto& colCenter = mi->GetColModel()->GetBoundCenter();
-    TransformFromObjectSpace(outCentre, colCenter);
+void CEntity::GetBoundCentre(CVector& outCentre) {
+    TransformFromObjectSpace(outCentre, GetColModel()->GetBoundCenter());
 }
 
 CVector CEntity::GetBoundCentre()
@@ -2517,6 +2517,10 @@ bool CEntity::IsInCurrentAreaOrBarberShopInterior()
     return m_nAreaCode == CGame::currArea || m_nAreaCode == AREA_CODE_13;
 }
 
+bool CEntity::IsInCurrentArea() const {
+    return m_nAreaCode == CGame::currArea;
+}
+
 // 0x446F90
 void CEntity::UpdateRW() {
     if (!m_pRwObject)
@@ -2539,6 +2543,14 @@ CBaseModelInfo* CEntity::GetModelInfo() const {
     return CModelInfo::GetModelInfo(m_nModelIndex);
 }
 
+bool CEntity::ProcessScan() {
+    if (IsScanCodeCurrent()) {
+        return false;
+    }
+    SetCurrentScanCode();
+    return true;
+}
+
 RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* atomic, void* data)
 {
     auto geometry = RpAtomicGetGeometry(atomic);
@@ -2549,7 +2561,7 @@ RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* atomic, void* data)
 
 RpMaterial* CEntity::SetMaterialAlphaCB(RpMaterial* material, void* data)
 {
-    material->color.alpha = (RwUInt8)data;
+    RpMaterialGetColor(material)->alpha = (RwUInt8)std::bit_cast<uintptr_t>(data);
     return material;
 }
 

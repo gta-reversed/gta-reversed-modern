@@ -131,7 +131,8 @@ public:
     static void ProcessWeaponSlotCheats();
 #endif
 
-    [[nodiscard]] static bool IsActive(eCheats cheat) noexcept { return m_aCheatsActive[cheat]; };
+    static bool IsActive(eCheats cheat) { return m_aCheatsActive[cheat]; };
+    static bool IsAnyActive(std::initializer_list<eCheats> cheats) { return rng::any_of(cheats, IsActive); };
     static void Toggle(eCheats cheat)  { m_aCheatsActive[cheat] ^= true; }
     static void Enable(eCheats cheat)  { m_aCheatsActive[cheat] = true; }
     static void Disable(eCheats cheat) { m_aCheatsActive[cheat] = false; }
