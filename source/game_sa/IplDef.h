@@ -21,7 +21,7 @@ public:
 
     int16 m_nRelatedIpl{ -1 }; // entity arrays index
     bool  m_bInterior{};
-    char  field_2D{}; // Seemingly something like `m_bIsLoaded`
+    char  m_IsLoaded{}; // Seemingly something like `m_bIsLoaded`
     bool  m_bLoadRequest{};
     bool  m_bDisableDynamicStreaming{ true };
     char  field_30{};

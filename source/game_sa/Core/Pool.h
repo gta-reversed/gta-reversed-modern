@@ -220,9 +220,9 @@ public:
     // Returns pointer to object by SCM handle (ref)
     A* GetAtRef(int32 ref) {
         int32 idx = ref >> 8; // It is possible the ref is invalid here, thats why we check for the idx is valid below (And also why GetIndexFromRef isn't used, it would assert)
-        return IsIndexInBounds(idx) && m_byteMap[idx].IntValue() == (ref & 0xFF) ?
-            reinterpret_cast<A*>(&m_pObjects[idx]) :
-            nullptr;
+        return IsIndexInBounds(idx) && m_byteMap[idx].IntValue() == (ref & 0xFF)
+            ? reinterpret_cast<A*>(&m_pObjects[idx])
+            : nullptr;
     }
 
     A* GetAtRefNoChecks(int32 ref) {

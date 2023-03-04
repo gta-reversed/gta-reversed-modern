@@ -49,7 +49,7 @@ void CIplStore::InjectHooks() {
     RH_ScopedInstall(GetNewIplEntityIndexArray, 0x404780);
     RH_ScopedInstall(SetIplsRequired, 0x404700);
     RH_ScopedInstall(ClearIplsNeededAtPosn, 0x4045E0);
-    RH_ScopedInstall(LoadIpls, 0x405170, { .reversed = false });
+    RH_ScopedInstall(LoadIpls, 0x405170);
     RH_ScopedGlobalInstall(SetIfInteriorIplIsRequired, 0x4045F0);
     RH_ScopedGlobalInstall(SetIfIplIsRequired, 0x404660);
     RH_ScopedGlobalInstall(SetIfIplIsRequiredReducedBB, 0x404690);
@@ -244,7 +244,7 @@ bool CIplStore::HaveIplsLoaded(const CVector& coords, int32 /*playerNumber*/) {
         if (!def->m_bLoadRequest) {
             continue;
         }
-        if (def->m_boundBox.IsPointInside(coords, notsa::IsFixBugs() ? 190.f : -190.f) && !def->m_IsLoaded && !def->m_bDisableDynamicStreaming) {
+        if (def->m_boundBox.IsPointInside(coords, -190.f) && !def->m_IsLoaded && !def->m_bDisableDynamicStreaming) {
             ret = false;
         }
         def->m_bLoadRequest = false;
@@ -482,8 +482,6 @@ bool CIplStore::LoadIplBoundingBox(int32 iplSlotIndex, char* data, int32 dataSiz
  * @addr 0x405170
  */
 void CIplStore::LoadIpls(CVector posn, bool bAvoidLoadInPlayerVehicleMovingDirection) {
-    return plugin::Call<0x405170, CVector, bool>(posn, bAvoidLoadInPlayerVehicleMovingDirection);
-
     if (CStreaming::ms_disableStreaming) {
         return;
     }
@@ -501,9 +499,60 @@ void CIplStore::LoadIpls(CVector posn, bool bAvoidLoadInPlayerVehicleMovingDirec
         SetIplsRequired(&gvecIplsNeededAtPosn, CGame::currArea);
     }
 
-    //
-    // Above code should be okay, but code below is a mess.
-    //
+    const auto ProcessEntity = [](CPhysical* e) {
+        if (e->m_pAttachedTo || e->physicalFlags.bDontApplySpeed || e->physicalFlags.b15) {
+            return;
+        }
+        ms_currentIPLAreaCode = e->m_nAreaCode;
+        ms_pQuadTree->ForAllMatching(e->GetPosition2D(), SetIfIplIsRequiredReducedBB);
+    };
+
+    for (auto& mce : CTheScripts::MissionCleanUp.m_Objects) {
+        switch (mce.type) {
+        case MISSION_CLEANUP_ENTITY_TYPE_PED: {
+            const auto ped = GetPedPool()->GetAtRef(mce.handle);
+            assert(ped);
+            if (ped->IsStateDying()) {
+                continue;
+            }
+            ProcessEntity(ped);
+        }
+        case MISSION_CLEANUP_ENTITY_TYPE_VEHICLE: {
+            const auto veh = GetVehiclePool()->GetAtRef(mce.handle);
+            assert(veh);
+            switch (veh->GetStatus()) {
+            case STATUS_PHYSICS:
+            case STATUS_SIMPLE:
+            case STATUS_ABANDONED:
+                continue;
+            }
+            ProcessEntity(veh);
+            break;
+        }
+        }
+    }
+
+    for (auto slot = ms_pPool->GetSize(); slot-- > 1;) { // skips 1st
+        const auto def = ms_pPool->GetAt(slot);
+        if (!def || def->m_bDisableDynamicStreaming) {
+            continue;
+        }
+        if (def->m_bLoadRequest) {
+            if (!def->m_IsLoaded) {
+                CStreaming::RequestModel(IPLToModelId(slot), STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY);
+            }
+            def->m_bLoadRequest = false;
+        } else if (def->m_IsLoaded) {
+            CStreaming::RemoveModel(IPLToModelId(slot));
+            if (def->field_30) {
+                def->m_bDisableDynamicStreaming = true;
+            }
+        }
+    }
+
+    if (!bAvoidLoadInPlayerVehicleMovingDirection) {
+        gbIplsNeededAtPosn = false;
+    }
 }
 
 /*!
@@ -517,7 +566,6 @@ void CIplStore::RemoveAllIpls() {
         if (!def) {
             continue;
         }
-
         if (!CStreaming::GetInfo(IPLToModelId(slot)).IsMissionOrGameRequired()) {
             CStreaming::RemoveModel(IPLToModelId(slot));
         }
