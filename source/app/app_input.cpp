@@ -9,9 +9,9 @@ void AppInputInjectHooks() {
 
     RH_ScopedGlobalInstall(AttachInputDevices, 0x744A20);
 
-    RH_ScopedGlobalInstall(HandleKeyDown, 0x743DF0, {.reversed = false});
-    RH_ScopedGlobalInstall(HandleKeyUp, 0x7443C0, {.reversed = false});
-    RH_ScopedGlobalInstall(KeyboardHandler, 0x744880, {.reversed = false});
+    RH_ScopedGlobalInstall(HandleKeyDown, 0x743DF0);
+    RH_ScopedGlobalInstall(HandleKeyUp, 0x7443C0);
+    RH_ScopedGlobalInstall(KeyboardHandler, 0x744880);
     RH_ScopedGlobalInstall(HandlePadButtonDown, 0x7448B0, {.reversed = false});
     RH_ScopedGlobalInstall(HandlePadButtonUp, 0x744930, {.reversed = false});
     RH_ScopedGlobalInstall(PadHandler, 0x7449F0, {.reversed = false});
@@ -24,14 +24,133 @@ bool AttachInputDevices() {
     return true;
 }
 
+// Combined code from `0x743DF0` and `0x7443C0`
+RsEventStatus HandleKeyEvent(bool isDown, RsKeyStatus* ks) {
+    // First handle keyboard keys
+    const auto pKBKeyState = [ks]()  -> int16* {
+        auto& tks = CPad::TempKeyState;
+        switch (ks->keyScanCode) {
+        case rsNULL:     return nullptr;
+        case rsF1:       
+        case rsF2:       
+        case rsF3:       
+        case rsF4:       
+        case rsF5:       
+        case rsF6:       
+        case rsF7:       
+        case rsF8:       
+        case rsF9:       
+        case rsF10:      
+        case rsF11:      
+        case rsF12:      return &tks.FKeys[ks->keyScanCode - rsF1];
+        case rsESC:      return &tks.esc;
+        case rsINS:      return &tks.insert;
+        case rsDEL:      return &tks.del;
+        case rsHOME:     return &tks.home;
+        case rsEND:      return &tks.end;
+        case rsPGUP:     return &tks.pgup;
+        case rsPGDN:     return &tks.pgdn;
+        case rsUP:       return &tks.up;
+        case rsDOWN:     return &tks.down;
+        case rsLEFT:     return &tks.left;
+        case rsRIGHT:    return &tks.right;
+        case rsDIVIDE:   return &tks.div;
+        case rsTIMES:    return &tks.mul;
+        case rsPLUS:     return &tks.add;
+        case rsMINUS:    return &tks.sub;
+        case rsPADDEL:   return &tks.decimal;
+        case rsPADEND:   return &tks.num1;
+        case rsPADDOWN:  return &tks.num2;
+        case rsPADPGDN:  return &tks.num3;
+        case rsPADLEFT:  return &tks.num4;
+        case rsPAD5:     return &tks.num5;
+        case rsNUMLOCK:  return &tks.numlock;
+        case rsPADRIGHT: return &tks.num6;
+        case rsPADHOME:  return &tks.num7;
+        case rsPADUP:    return &tks.num8;
+        case rsPADPGUP:  return &tks.num9;
+        case rsPADINS:   return &tks.num0;
+        case rsPADENTER: return &tks.enter;
+        case rsSCROLL:   return &tks.scroll;
+        case rsPAUSE:    return &tks.pause;
+        case rsBACKSP:   return &tks.back;
+        case rsTAB:      return &tks.tab;
+        case rsCAPSLK:   return &tks.capslock;
+        case rsENTER:    return &tks.extenter;
+        case rsLSHIFT:   return &tks.lshift;
+        case rsRSHIFT:   return &tks.rshift;
+        case rsSHIFT:    return &tks.shift;
+        case rsLCTRL:    return &tks.lctrl;
+        case rsRCTRL:    return &tks.rctrl;
+        case rsLALT:     return &tks.lmenu;
+        case rsRALT:     return &tks.rmenu;
+        case rsLWIN:     return &tks.lwin;
+        case rsRWIN:     return &tks.rwin;
+        case rsAPPS:     return &tks.apps;
+        default:         return (ks->keyScanCode < 255) ? &tks.standardKeys[ks->keyScanCode] : nullptr;
+        }
+    }();
+    if (pKBKeyState) {
+        *pKBKeyState = isDown ? 255 : 0;
+    }
+
+    // Then if a pad is plugged in, possibly handle that as well
+    if (CPad::padNumber) {
+        const auto [pPadBtnState, downValue] = [&]() -> std::pair<int16*, int16> {
+            auto& pctks = CPad::GetPad(1)->PCTempKeyState; // Why pad 1?
+            switch (ks->keyScanCode) { // TODO: Enums
+            case 68:   return { &pctks.LeftStickX,      128 };
+            case 65:   return { &pctks.LeftStickX,     -128 };
+
+            case 87:   return { &pctks.LeftStickY,      128 };
+            case 83:   return { &pctks.LeftStickY,     -128 };
+
+            case 74:   return { &pctks.RightStickX,     128 };
+            case 71:   return { &pctks.RightStickX,    -128 };
+
+            case 89:   return { &pctks.RightStickY,     128 };
+            case 72:   return { &pctks.RightStickY,    -128 };
+
+            case 90:   return { &pctks.LeftShoulder1,   255 };
+            case 88:   return { &pctks.LeftShoulder2,   255 };
+
+            case 67:   return { &pctks.RightShoulder1,  255 };
+            case 86:   return { &pctks.RightShoulder2,  255 };
+
+            case 79:   return { &pctks.DPadUp,          255 };
+            case 76:   return { &pctks.DPadDown,        255 };
+            case 75:   return { &pctks.DPadLeft,        255 };
+            case 59:   return { &pctks.DPadRight,       255 };
+
+            case 66:   return { &pctks.Start,           255 };
+            case 78:   return { &pctks.Select,          255 };
+
+            case 77:   return { &pctks.ButtonSquare,    255 };
+            case 44:   return { &pctks.ButtonTriangle,  255 };
+            case 46:   return { &pctks.ButtonCross,     255 };
+            case 47:   return { &pctks.ButtonCircle,    255 };
+
+            case 1047: return { &pctks.ShockButtonL,    255 };
+            case 1050: return { &pctks.ShockButtonR,    255 };
+            }
+            return { NULL, NULL };
+        }();
+        if (pPadBtnState) {
+            *pPadBtnState = isDown ? downValue : 0;
+        }
+    }
+
+    return rsEVENTPROCESSED;
+}
+
 // 0x743DF0
-RsEventStatus HandleKeyDown(RsKeyStatus* param) {
-    return plugin::CallAndReturn<RsEventStatus, 0x743DF0, RsKeyStatus*>(param);
+RsEventStatus HandleKeyDown(RsKeyStatus* ks) {
+    return HandleKeyEvent(true, ks);
 }
 
 // 0x7443C0
-RsEventStatus HandleKeyUp(RsKeyStatus* param) {
-    return plugin::CallAndReturn<RsEventStatus, 0x7443C0, RsKeyStatus*>(param);
+RsEventStatus HandleKeyUp(RsKeyStatus* ks) {
+    return HandleKeyEvent(false, ks);
 }
 
 // 0x744880
