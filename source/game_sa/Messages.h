@@ -7,13 +7,13 @@
 #pragma once
 
 struct tMessage {
-    char*  m_pText;
-    uint16 m_nFlags;
-    uint32 m_nTime;
-    uint32 m_nStartTime;
-    int32  m_nNumber[6];
-    char*  m_pString;
-    uint8  m_bPreviousBrief;
+    const char* m_pText;
+    uint16      m_nFlags;
+    uint32      m_nTime;
+    uint32      m_nStartTime;
+    int32       m_nNumber[6];
+    char*       m_pString;
+    uint8       m_bPreviousBrief;
 };
 
 struct tBigMessage {
@@ -37,6 +37,7 @@ public:
     static void InjectHooks();
 
     static void Init();
+    static auto FindFreeBriefMessage() -> tMessage*;
     static void AddMessage(const char* text, uint32 time, uint16 flag, bool bPreviousBrief);
     static void AddMessageJumpQ(const char* text, uint32 time, uint16 flag, bool bPreviousBrief);
     static void AddMessageWithString(const char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief);

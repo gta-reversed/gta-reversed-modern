@@ -31,7 +31,7 @@ void CMessages::InjectHooks() {
     RH_ScopedInstall(ClearAllMessagesDisplayedByGame, 0x69EDC0);
     RH_ScopedInstall(Process, 0x69EE60, { .reversed = false });
     RH_ScopedInstall(Display, 0x69EFC0, { .reversed = false });
-    RH_ScopedInstall(AddMessage, 0x69F0B0, { .reversed = false });
+    RH_ScopedInstall(AddMessage, 0x69F0B0);
     RH_ScopedInstall(AddMessageJumpQ, 0x69F1E0, { .reversed = false });
     RH_ScopedInstall(AddBigMessage, 0x69F2B0, { .reversed = false });
     RH_ScopedInstall(AddBigMessageQ, 0x69F370, { .reversed = false });
@@ -44,10 +44,48 @@ void CMessages::Init() {
     rng::fill(PreviousBriefs, tPreviousBrief{});
 }
 
+tMessage* CMessages::FindFreeBriefMessage() {
+    for (auto& msg : BriefMessages) {
+        if (!msg.m_pText) {
+            return &msg;
+        }
+    }
+    DEV_LOG("No free brief message found!");
+    return nullptr;
+}
+
 // Adds message to queue
 // 0x69F0B0
 void CMessages::AddMessage(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
-    plugin::Call<0x69F0B0, const char*, uint32, uint16, bool>(text, time, flag, bPreviousBrief);
+    /* Some string copy code here */
+
+    const auto msg = FindFreeBriefMessage();
+    if (!msg) {
+        return;
+    }
+
+    *msg = {
+        .m_pText = text,
+        .m_nFlags = flag,
+        .m_nTime = time,
+        .m_nStartTime = CTimer::GetTimeInMS(),
+        .m_pString = nullptr,
+        .m_bPreviousBrief = bPreviousBrief,
+    };
+    rng::fill(msg->m_nNumber, -1);
+
+    if (msg == &BriefMessages.front() && bPreviousBrief) {
+		AddToPreviousBriefArray(
+			msg->m_pText,
+			msg->m_nNumber[0],
+			msg->m_nNumber[1],
+			msg->m_nNumber[2],
+			msg->m_nNumber[3],
+			msg->m_nNumber[4],
+			msg->m_nNumber[5],
+			msg->m_pString
+        );
+    }
 }
 
 // Adds message and shows it instantly
