@@ -193,6 +193,9 @@ public:
 
     auto GetModelID() const { return (eModelID)(m_nModelIndex); }
 
+    //! @notsa
+    bool ProcessScan();
+
     // Wrapper around the mess called `CleanUpOldReference`
     // Takes in `ref` (which is usually a member variable),
     // calls `CleanUpOldReference` on it, then sets it to `nullptr`

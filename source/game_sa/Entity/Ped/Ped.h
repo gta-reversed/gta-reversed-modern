@@ -594,6 +594,8 @@ public:
         return GiveWeapon(weapon.m_nType, weapon.m_nTotalAmmo, likeUnused);
     }
 
+    auto GetPedModelInfo() const { return reinterpret_cast<CPedModelInfo*>(GetModelInfo()); }
+    
     /*!
      * @notsa
      * @brief Returns vehicle's position if ped is in one, ped's otherwise.
