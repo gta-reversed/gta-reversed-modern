@@ -789,14 +789,33 @@ int32 CIplStore::SetupRelatedIpls(const char* iplFilePath, int32 entityArraysInd
  * @addr 0x5D5420
  */
 bool CIplStore::Save() {
-    return plugin::CallAndReturn<bool, 0x5D5420>();
+    const auto num = ms_pPool->GetSize();
+    SaveDataToWorkBuffer<false>(num);
+    for (auto i = 1; i < num; i++) { // skips 1st
+        const auto ipl = ms_pPool->GetAt(i);
+        SaveDataToWorkBuffer<false>(ipl && ipl->m_IsLoaded && ipl->m_bDisableDynamicStreaming);
+    }
+    return true;
 }
 
 /*!
  * @addr 0x5D54A0
  */
 bool CIplStore::Load() {
-    return plugin::CallAndReturn<bool, 0x5D54A0>();
+    const auto num = LoadDataFromWorkBuffer<int32>();
+    assert(num == ms_pPool->GetSize());
+    for (auto i = 1; i < num; i++) { // skips 1st
+        const auto ipl = ms_pPool->GetAt(i);
+        if (!ipl) {
+            continue;
+        }
+        if (LoadDataFromWorkBuffer<bool>()) { // Was loaded
+            RequestIplAndIgnore(i);
+        } else {
+            RemoveIplAndIgnore(i);
+        }
+    }
+    return true;
 }
 
 /*!

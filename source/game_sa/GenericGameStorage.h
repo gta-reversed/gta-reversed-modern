@@ -122,8 +122,15 @@ template<typename T, bool HasSizeHeader = true>
 */
 
 template<typename T>
-static bool LoadDataFromWorkBuffer(const T& data) {
+static bool LoadDataFromWorkBuffer(T& data) {
     return CGenericGameStorage::LoadDataFromWorkBuffer((void*)&data, sizeof(T));
+}
+
+template<typename T>
+static T LoadDataFromWorkBuffer() {
+    T data;
+    assert(LoadDataFromWorkBuffer(data));
+    return data;
 }
 
 template<bool WriteSizeHeader = true, typename T>
