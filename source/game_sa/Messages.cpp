@@ -4,6 +4,8 @@
 #include "Hud.h"
 #include <ControllerConfigManager.h>
 
+constexpr auto MSG_BUF_SZ = 400u;
+
 void CMessages::InjectHooks() {
     RH_ScopedClass(CMessages);
     RH_ScopedCategoryGlobal();
@@ -30,7 +32,7 @@ void CMessages::InjectHooks() {
     RH_ScopedInstall(ClearThisPrintBigNow, 0x69ED80);
     RH_ScopedInstall(Init, 0x69EE00);
     RH_ScopedInstall(ClearAllMessagesDisplayedByGame, 0x69EDC0);
-    RH_ScopedInstall(Process, 0x69EE60, { .reversed = false });
+    RH_ScopedInstall(Process, 0x69EE60);
     RH_ScopedInstall(Display, 0x69EFC0);
     RH_ScopedInstall(AddMessageQ, 0x69F0B0);
     RH_ScopedInstall(AddMessageJump, 0x69F1E0);
@@ -428,7 +430,7 @@ void CMessages::InsertStringInString(char* target, char* replacement) {
         return;
     }
 
-    char buf[400];
+    char buf[MSG_BUF_SZ];
     strcpy_s(buf, target);
     StringReplace(buf, "~1~", target, [&, szrepl = strlen(replacement)](char* where) {
         return std::copy(replacement, replacement + szrepl, where);
@@ -438,7 +440,7 @@ void CMessages::InsertStringInString(char* target, char* replacement) {
 // Inserts key events into string
 // 0x69E160
 void CMessages::InsertPlayerControlKeysInString(char* string) {
-    char haystack[400];
+    char haystack[MSG_BUF_SZ];
     strcpy_s(haystack, string);
 
     // Based on https://stackoverflow.com/a/32413923
@@ -551,6 +553,36 @@ void CMessages::Process() {
 
 // Displays messages
 // 0x69EFC0
-void CMessages::Display(bool flag) {
-    plugin::Call<0x69EFC0, bool>(flag);
+void CMessages::Display(bool bNotFading) {
+    char msgText[MSG_BUF_SZ];
+    const auto PreProcessMsgText = [&](tMessage msg) {
+        InsertNumberInString(
+            msg.m_pText,
+            msg.m_nNumber[0],
+            msg.m_nNumber[1],
+            msg.m_nNumber[2],
+            msg.m_nNumber[3],
+            msg.m_nNumber[4],
+            msg.m_nNumber[5],
+            msgText
+        );
+        InsertStringInString(msgText, msg.m_pString);
+        InsertPlayerControlKeysInString(msgText);
+    };
+
+    if (bNotFading) {
+        for (auto&& [style, omgVeryBig] : notsa::enumerate(BIGMessages)) {
+            const auto& msg = omgVeryBig.m_Stack.front();
+            if (!msg.IsValid()) {
+                continue;
+            }
+            PreProcessMsgText(msg);
+            CHud::SetBigMessage(msgText, (eMessageStyle)style);
+        }
+    }
+
+    if (bNotFading == CTheScripts::bDrawSubtitlesBeforeFade) {
+        PreProcessMsgText(BriefMessages[0]);
+        CHud::SetMessage(msgText);
+    }
 }
