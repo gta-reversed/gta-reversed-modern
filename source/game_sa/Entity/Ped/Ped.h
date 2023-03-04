@@ -424,7 +424,7 @@ public:
     bool IsAlive() const;
     void UpdateStatEnteringVehicle();
     void UpdateStatLeavingVehicle();
-    void GetTransformedBonePosition(RwV3d& inOffsetOutPosn, ePedBones boneId, bool updateSkinBones);
+    void GetTransformedBonePosition(RwV3d& inOffsetOutPosn, ePedBones boneId, bool updateSkinBones = false);
     void ReleaseCoverPoint();
     CTaskSimpleHoldEntity* GetHoldingTask();
     CEntity* GetEntityThatThisPedIsHolding();
@@ -593,6 +593,15 @@ public:
     eWeaponSlot GiveWeapon(const CWeapon& weapon, bool likeUnused) {
         return GiveWeapon(weapon.m_nType, weapon.m_nTotalAmmo, likeUnused);
     }
+
+    auto GetPedModelInfo() const { return reinterpret_cast<CPedModelInfo*>(GetModelInfo()); }
+    
+    /*!
+     * @notsa
+     * @brief Returns vehicle's position if ped is in one, ped's otherwise.
+     */
+    CVector GetRealPosition() const { return IsInVehicle() ? m_pVehicle->GetPosition() : GetPosition(); }
+
 private:
     void RenderThinBody() const;
     void RenderBigHead() const;

@@ -13,6 +13,9 @@ public:
 
     CPtrNode(void* item) : m_item(item) {}
     CPtrNode* GetNext() const { return m_next; }
+
+    template<typename T>
+    T* ItemAs() { return reinterpret_cast<T*>(m_item); }
 };
 
 VALIDATE_SIZE(CPtrNode, 8);

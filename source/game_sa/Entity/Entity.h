@@ -103,8 +103,8 @@ public:
     };
     int8          m_nNumLodChildren;
     uint8         m_nNumLodChildrenRendered;
-    eEntityType   m_nType : 3;
-    eEntityStatus m_nStatus : 5;
+    eEntityType   m_nType : 3;          // Mask: & 0x7  = 7
+    eEntityStatus m_nStatus : 5;        // Mask: & 0xF8 = 248 (Remember: In the original code unless this was left shifted the value it's compared to has to be left shifted by 3!)
 
 public:
     CEntity();
@@ -192,6 +192,9 @@ public:
     CCollisionData* GetColData() { return GetColModel()->m_pColData; }
 
     auto GetModelID() const { return (eModelID)(m_nModelIndex); }
+
+    //! @notsa
+    bool ProcessScan();
 
     // Wrapper around the mess called `CleanUpOldReference`
     // Takes in `ref` (which is usually a member variable),

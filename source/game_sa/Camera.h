@@ -381,7 +381,7 @@ public:
     void ResetDuckingSystem(CPed *ped);
 
     void SetCamCutSceneOffSet(const CVector& offset);
-    void SetCamPositionForFixedMode(const CVector* fixedModeSource, const CVector* fixedModeUpOffset);
+    void SetCamPositionForFixedMode(const CVector& fixedModeSource, const CVector& fixedModeUpOffset);
     void SetCameraDirectlyBehindForFollowPed_CamOnAString();
     void SetCameraDirectlyInFrontForFollowPed_CamOnAString();
     void SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString(CPed* targetPed);
@@ -414,7 +414,7 @@ public:
     void StoreValuesDuringInterPol(CVector *sourceDuringInter, CVector *targetDuringInter, CVector *upDuringInter, float *FOVDuringInter);
 
     void TakeControl(CEntity *target, eCamMode modeToGoTo, eSwitchType switchType, int32 whoIsInControlOfTheCamera);
-    void TakeControlNoEntity(const CVector* fixedModeVector, eSwitchType switchType, int32 whoIsInControlOfTheCamera);
+    void TakeControlNoEntity(const CVector& fixedModeVector, eSwitchType switchType, int32 whoIsInControlOfTheCamera);
     void TakeControlAttachToEntity(CEntity* target, CEntity* attached, CVector* attachedCamOffset, CVector* attachedCamLookAt, float attachedCamAngle, eSwitchType switchType, int32 whoIsInControlOfTheCamera);
     void TakeControlWithSpline(eSwitchType switchType);
 
@@ -518,5 +518,7 @@ extern bool& gPlayerPedVisible;
 extern uint8& gCurCamColVars;
 extern float*& gpCamColVars;
 extern float (&gCamColVars)[28][6];
+static inline auto& gpMadeInvisibleEntities = StaticRef<std::array<CEntity*, 10>, 0x9655A0>();
+static inline auto& gNumEntitiesSetInvisible = StaticRef<uint32, 0x9655DC>();
 
 void CamShakeNoPos(CCamera* camera, float strength);

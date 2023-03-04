@@ -694,8 +694,8 @@ void CAutomobile::ProcessControl()
                 CColDisk& colDisk = colData->m_pDisks[i];
                 if (colData->bUsesDisks) {
                     CVector& point = contactPoints[i];
-                    point = colDisk.m_vecStart;
-                    point.z -= colDisk.m_fStartRadius;
+                    point = colDisk.m_vecCenter;
+                    point.z -= colDisk.m_fRadius;
                     point = Multiply3x3(GetMatrix(), contactPoints[i]);
                 }
                 else {
@@ -5868,12 +5868,12 @@ void CAutomobile::PlaceOnRoadProperly()
             fColZ = colPoint.m_vecPoint.z;
             m_pEntityWeAreOn = colEntity;
 
-            m_FrontCollPoly.m_nLighting = colPoint.m_nLightingB;
+            m_FrontCollPoly.ligthing = colPoint.m_nLightingB;
             vecFrontCheck.z = fColZ;
         }
     }
     else if (bColFoundFront) {
-        m_FrontCollPoly.m_nLighting = colPoint.m_nLightingB;
+        m_FrontCollPoly.ligthing = colPoint.m_nLightingB;
         vecFrontCheck.z = fColZ;
     }
 
@@ -5895,12 +5895,12 @@ void CAutomobile::PlaceOnRoadProperly()
             fColZ = colPoint.m_vecPoint.z;
             m_pEntityWeAreOn = colEntity;
 
-            m_RearCollPoly.m_nLighting = colPoint.m_nLightingB;
+            m_RearCollPoly.ligthing = colPoint.m_nLightingB;
             vecRearCheck.z = fColZ;
         }
     }
     else if (bColFoundRear) {
-        m_RearCollPoly.m_nLighting = colPoint.m_nLightingB;
+        m_RearCollPoly.ligthing = colPoint.m_nLightingB;
         vecRearCheck.z = fColZ;
     }
 

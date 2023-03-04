@@ -5,15 +5,9 @@ TODO: size of CLoadMonitor is unknown, and it's uncomplete.
 */
 class CLoadMonitor {
 public:
-    int32 field_0;
-    char  field_4;
-    char  field_5;
-    char  field_6;
-    char  field_7;
-    char  field_8;
-    char  field_9;
-    char  field_A;
-    char  field_B;
+    uint32 m_bInFrame;
+    uint32 m_bUseLoadMonitor;
+    uint32 m_bForceProcLevel;
     char  field_C;
     char  field_D;
     char  field_E;

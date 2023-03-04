@@ -94,18 +94,20 @@ public:
     // NOTSA section
     auto GetNumFaceGroups() const -> uint32;
 
-    auto GetSpheres()      const { return std::span{ m_pSpheres, m_nNumSpheres }; }
-    auto GetBoxes()        const { return std::span{ m_pBoxes, m_nNumBoxes }; }
-
-    auto GetTris()         const { return std::span{ m_pTriangles, m_nNumTriangles }; }
-    auto GetTriVerts()     const { return m_pVertices; } // Sadly there's no easy way to provide a span here - we don't know the number of vertices, and finding it is expensive
-
-    auto GetShdwTris()     const { return std::span{ m_pShadowTriangles, m_nNumShadowTriangles }; }
-    auto GetShdwTriVerts() const { return std::span{ m_pShadowVertices, m_nNumShadowVertices }; }
-
-    auto GetLines()        const { return std::span{ m_pLines, m_nNumLines }; }
-
-    auto GetFaceGroups()   const -> std::span<ColHelpers::TFaceGroup>;
+    auto GetSpheres()        const { return std::span{ m_pSpheres, m_nNumSpheres }; }
+    auto GetBoxes()          const { return std::span{ m_pBoxes, m_nNumBoxes }; }
+                             
+    auto GetNumTris()        const { return m_nNumTriangles; }
+    auto GetTris()           const { return std::span{ m_pTriangles, m_nNumTriangles }; }
+    auto GetTriVerts()       const { return m_pVertices; } // Sadly there's no easy way to provide a span here - we don't know the number of vertices, and finding it is expensive
+    auto GetTriPlanes()      const { return std::span{ m_pTrianglePlanes, m_nNumTriangles }; }
+                             
+    auto GetShdwTris()       const { return std::span{ m_pShadowTriangles, m_nNumShadowTriangles }; }
+    auto GetShdwTriVerts()   const { return std::span{ m_pShadowVertices, m_nNumShadowVertices }; }
+                             
+    auto GetLines()          const { return std::span{ m_pLines, m_nNumLines }; }
+                             
+    auto GetFaceGroups()     const -> std::span<ColHelpers::TFaceGroup>;
 
     [[nodiscard]] auto GetTriVertices(const CColTriangle& tri) const->std::array<CVector, 3>;
 

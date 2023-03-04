@@ -6,30 +6,40 @@
 */
 #pragma once
 
-#include "CompressedVector.h"
+#include <extensions/FixedVector.hpp>
+#include <extensions/FixedFloat.hpp>
 #include "Vector.h"
-#include "ColTriangle.h"
 
-enum eTrianglePlaneOrientation : uint8 {
-    POS_X = 0,
-    NEG_X = 1,
-    POS_Y = 2,
-    NEG_Y = 3,
-    POS_Z = 4,
-    NEG_Z = 5,
-};
-
+class CStoredCollPoly;
+class CColTriangle;
+class CompressedVector;
+    
 class CColTrianglePlane {
 public:
-    CompressedVector m_normal;
-    uint16           m_nDistance;
-    uint8            m_nOrientation;
+    enum class Orientation : uint8 {
+        POS_X,
+        NEG_X,
+        POS_Y,
+        NEG_Y,
+        POS_Z,
+        NEG_Z,
+    };
+public:
+    FixedVector<int16, 4096.f> m_normal{};       //< Surface normal
+    FixedFloat<int16, 128.f>   m_normalOffset{}; //< vA.Dot(m_normal)
+    Orientation                m_orientation{};  //< The planes orientation (Calculated from the normal)
 
 public:
     static void InjectHooks();
 
+    CColTrianglePlane(const CStoredCollPoly& poly);
+    CColTrianglePlane(const CColTriangle& tri, const CompressedVector* vertices);
+    CColTrianglePlane(const CVector& a, const CVector& b, const CVector& c);
+
     void GetNormal(CVector& out);
-    CVector GetNormal() const noexcept;
-    void Set(const CompressedVector* vertices, CColTriangle& triangle);
+    CVector GetNormal() const noexcept { return m_normal; }
+    void Set(const CompressedVector* vertices, const CColTriangle& triangle);
+
+    float GetPtDotNormal(const CVector& pt) const { return pt.Dot(m_normal) - m_normalOffset; }
 };
 VALIDATE_SIZE(CColTrianglePlane, 0xA);
