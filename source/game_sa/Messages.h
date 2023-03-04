@@ -94,7 +94,7 @@ public:
     static void CutString(int32 count, const char* str, char** dest);
 
     static void InsertNumberInString(const char* src, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1, char* dst = nullptr);
-    static void InsertStringInString(char* into, char* string);
+    static void InsertStringInString(char* into, char* str);
     static void InsertPlayerControlKeysInString(const char* string);
 
     static void Process();

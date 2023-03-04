@@ -374,46 +374,48 @@ void CMessages::CutString(int32 count, const char* str, char** dest) {
     NOTSA_UNREACHABLE(); // unused
 }
 
+void StringReplace(const char* haystack, std::string_view needle, char* dst, auto&& Replace) {
+    // Based on https://stackoverflow.com/a/32413923
+    auto        pdst = dst;
+    const char* phs  = haystack;
+    
+    for(;;) {
+        const char* pneedle = strstr(phs, needle);
+
+        // walked past last occurrence of needle; copy remaining part
+        if (!pneedle) {
+            pdst = std::copy(phs, phs + strlen(phs), pdst);
+            break;
+        }
+
+        // copy part before needle
+        pdst = std::copy(phs, pneedle, pdst);
+
+        // replace portion of string
+        pdst = Replace(pdst);
+
+        // adjust pointers, move on
+        phs = pneedle + needle.size();
+    }
+}
+
 // Insert numbers into string
 // 0x69DE90
-void CMessages::InsertNumberInString(const char* src, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, char* dst) {
-    plugin::Call<0x69DE90, const char*, int32, int32, int32, int32, int32, int32, char*>(src, n1, n2, n3, n4, n5, n6, dst);
+void CMessages::InsertNumberInString(const char* str, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, char* dst) {
+    StringReplace(str, "~1~", dst, [n = 0, numbers = std::array{ n1, n2, n3, n4, n5, n6 }](char* where) mutable {
+        // Originally they used sprintf + AsciiToGxtChar, but this should work for now (Until we start using GtxChar properly)
+        return std::format_to(where, "{}", numbers[n++]);
+    });
 }
 
 // Inserts string into src
 // 0x69E040
 void CMessages::InsertStringInString(char* target, char* replacement) {
-    constexpr auto needle = "~a~";
-
-    // Based on https://stackoverflow.com/a/32413923
-    std::array<char, 400> result{};
-
-    auto pr = result.begin();
-    const char *hs = target; // haystack
-    const auto szneedle = strlen(needle);
-    const auto szrepl = strlen(replacement);
-    
-    for(;;) {
-        const char* p = strstr(hs, needle);
-
-        // walked past last occurrence of needle; copy remaining part
-        if (!p) {
-            pr = std::copy(hs, hs + strlen(hs), pr);
-            break;
-        }
-
-        // copy part before needle
-        pr = std::copy(hs, p, pr);
-
-        // copy replacement string
-        pr = std::copy(replacement, replacement + szrepl, pr);
-
-        // adjust pointers, move on
-        hs = p + szneedle;
-    }
-
-    // write altered string back to target
-    std::copy(result.begin(), pr, target);
+    char buf[400];
+    strcpy_s(buf, target);
+    StringReplace(buf, "~1~", target, [&, szrepl = strlen(replacement)](char* where) {
+        return std::copy(replacement, replacement + szrepl, where);
+    });
 }
 
 // Inserts key events into string
