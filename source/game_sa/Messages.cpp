@@ -16,7 +16,7 @@ void CMessages::InjectHooks() {
     RH_ScopedInstall(AddToPreviousBriefArray, 0x69DD50);
     RH_ScopedInstall(ClearPreviousBriefArray, 0x69DE70);
     // RH_ScopedInstall(InsertNumberInString, 0x69DE90, { .reversed = false }); // Weird build error here
-    RH_ScopedInstall(InsertStringInString, 0x69E040, { .reversed = false });
+    RH_ScopedInstall(InsertStringInString, 0x69E040);
     RH_ScopedInstall(InsertPlayerControlKeysInString, 0x69E160, { .reversed = false });
     RH_ScopedInstall(AddMessageWithNumber, 0x69E360);
     RH_ScopedInstall(AddMessageJumpQWithNumber, 0x69E4E0);
@@ -382,8 +382,38 @@ void CMessages::InsertNumberInString(const char* src, int32 n1, int32 n2, int32 
 
 // Inserts string into src
 // 0x69E040
-void CMessages::InsertStringInString(const char* src, char* string) {
-    plugin::Call<0x69E040, const char*, char*>(src, string);
+void CMessages::InsertStringInString(char* target, char* replacement) {
+    constexpr auto needle = "~a~";
+
+    // Based on https://stackoverflow.com/a/32413923
+    std::array<char, 400> result{};
+
+    auto pr = result.begin();
+    const char *hs = target; // haystack
+    const auto szneedle = strlen(needle);
+    const auto szrepl = strlen(replacement);
+    
+    for(;;) {
+        const char* p = strstr(hs, needle);
+
+        // walked past last occurrence of needle; copy remaining part
+        if (!p) {
+            pr = std::copy(hs, hs + strlen(hs), pr);
+            break;
+        }
+
+        // copy part before needle
+        pr = std::copy(hs, p, pr);
+
+        // copy replacement string
+        pr = std::copy(replacement, replacement + szrepl, pr);
+
+        // adjust pointers, move on
+        hs = p + szneedle;
+    }
+
+    // write altered string back to target
+    std::copy(result.begin(), pr, target);
 }
 
 // Inserts key events into string
