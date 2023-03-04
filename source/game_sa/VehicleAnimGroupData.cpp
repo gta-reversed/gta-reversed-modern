@@ -25,10 +25,14 @@ CVehicleAnimGroup::CVehicleAnimGroup() : m_animFlags(), m_specialFlags(), m_gene
     }
 }
 
-void CVehicleAnimGroup::InitAnimGroup(uint8 firstGroup, uint8 secondGroup, int32 animFlags,
-                                      int32 animSpecialFlags, sVehAnimGroupGeneralTiming* generalTiming, sVehAnimGroupInOutTiming* startTiming,
-                                      sVehAnimGroupInOutTiming* endTiming)
-{
+void CVehicleAnimGroup::InitAnimGroup(
+    uint8 firstGroup,
+    uint8 secondGroup,
+    int32 animFlags,
+    int32 animSpecialFlags,
+    sVehAnimGroupGeneralTiming* generalTiming,
+    sVehAnimGroupInOutTiming* startTiming, sVehAnimGroupInOutTiming* endTiming
+) {
     m_ucFirstGroup = firstGroup;
     m_ucSecondGroup = secondGroup;
     m_animFlags.intValue = animFlags;
@@ -204,6 +208,79 @@ CVector CVehicleAnimGroup::ComputeAnimDoorOffsets(eVehAnimDoorOffset doorId) {
     return GetDoorOffset(doorId);
 }
 
+int32 CVehicleAnimGroup::InitFromData(const char* line) {
+    int32 id{};
+    int32 firstGroup{}, secondGroup{};
+    int32 animSpecialFlags{};
+    sVehAnimGroupGeneralTiming generalTiming{};
+    sVehAnimGroupInOutTiming startTiming{}, stopTiming{};
+
+    std::array<bool32, 18> flags{};
+
+    const auto n = sscanf_s(
+        line,
+        "%*s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%d",
+        &id,
+        &firstGroup,
+        &secondGroup,
+
+        // OpenOutF, GetInF, Jack, CloseInsR, GetOutF, BeJacked
+        &flags[0], &flags[1], &flags[2], &flags[3], &flags[4], &flags[5],
+
+        // CloseOutR, CloseRoll, OpenLocked, Align, OpenOutR, GetInR
+        &flags[6], &flags[7], &flags[8], &flags[9], &flags[10], &flags[11],
+
+        // CloseInsF, Shuffle, GetOutR, CloseOutF, JumpOut, FallDie
+        &flags[12], &flags[13], &flags[14], &flags[15], &flags[16], &flags[17],
+
+        &generalTiming.m_fGetInTime,
+        &generalTiming.m_fJumpOutTime,
+        &generalTiming.m_fGetOutTime,
+        &generalTiming.m_fCarJackTime,
+        &generalTiming.m_fFallOutTime,
+
+        &startTiming.OpenOut,
+        &stopTiming.OpenOut,
+
+        &startTiming.CloseIn,
+        &stopTiming.CloseIn,
+
+        &startTiming.OpenIn,
+        &stopTiming.OpenIn,
+
+        &startTiming.CloseOut,
+        &stopTiming.CloseOut,
+
+        &animSpecialFlags
+    );
+
+    // Check for fail
+    if (n != 35) {
+        return n;
+    }
+
+    // Actually build the flags value from it
+    int32 animFlags{};
+    for (auto [i, flag] : notsa::enumerate(flags)) {
+        animFlags |= (int32)flag << (int32)i;
+    }
+
+    // Create anim group
+    CVehicleAnimGroup grp{};
+    grp.InitAnimGroup(
+        (uint8)firstGroup + (uint8)ANIM_GROUP_STDCARAMIMS, (uint8)secondGroup + (uint8)ANIM_GROUP_STDCARAMIMS,
+        animFlags, animSpecialFlags,
+        &generalTiming,
+        &startTiming, &stopTiming
+    );
+
+    // Copy it into the current anim group data
+    CopyAnimGroup(&grp);
+
+    return -1;
+}
+
+
 void CVehicleAnimGroupData::InjectHooks()
 {
     RH_ScopedClass(CVehicleAnimGroupData);
@@ -219,8 +296,8 @@ void CVehicleAnimGroupData::InjectHooks()
 // 0x645630
 void CVehicleAnimGroupData::GetInOutTimings(AssocGroupId groupId, eInOutTimingMode mode, float* pfAnimStart, float* pfAnimEnd) {
     auto& group = CVehicleAnimGroupData::GetVehicleAnimGroup(groupId);
-    *pfAnimStart = group.GetInOutTiming(eInOutTiming::TIMING_START).m_afTimings[mode];
-    *pfAnimEnd = group.GetInOutTiming(eInOutTiming::TIMING_END).m_afTimings[mode];
+    *pfAnimStart = group.GetInOutTiming(eInOutTiming::TIMING_START)[mode];
+    *pfAnimEnd = group.GetInOutTiming(eInOutTiming::TIMING_END)[mode];
 }
 
 // 0x639FC0
@@ -250,4 +327,13 @@ bool CVehicleAnimGroupData::UsesKartDrivingAnims(AssocGroupId groupId) {
 
 bool CVehicleAnimGroupData::UsesHovercraftDrivingAnims(AssocGroupId groupId) {
     return CVehicleAnimGroupData::GetVehicleAnimGroup(groupId).m_specialFlags.bUseHovercraftDriveAnims;
+}
+
+// NOTSA
+int32 CVehicleAnimGroupData::LoadAGroupFromData(const char* line) {
+    int32 id{};
+    if (sscanf_s(line, "^\t%d", &id) != 1) {
+        return 0;
+    }
+    return GetVehicleAnimGroup(id).InitFromData(line);
 }

@@ -534,6 +534,6 @@ CPlayerInfo& CPlayerInfo::operator=(const CPlayerInfo& rhs) {
     m_pSkinTexture                     = rhs.m_pSkinTexture;
     m_bParachuteReferenced             = rhs.m_bParachuteReferenced;
     m_nRequireParachuteTimer           = rhs.m_nRequireParachuteTimer;
-    strcpy(m_szSkinName, rhs.m_szSkinName);
+    strcpy_s(m_szSkinName, rhs.m_szSkinName);
     return *this;
 }

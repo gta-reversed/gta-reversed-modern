@@ -289,7 +289,7 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
             continue;
 
         auto gangCarModel = CPopulation::PickGangCar(Gang1);
-        if (gangCarModel >= 0 && CStreaming::GetInfo(gangCarModel).IsLoaded()) {
+        if (gangCarModel != MODEL_INVALID && CStreaming::GetInfo(gangCarModel).IsLoaded()) {
             auto fwd = carNodePos - nodePos;
             fwd.z = 0.0f;
             fwd.Normalise();
@@ -618,7 +618,7 @@ void CGangWars::StartOffensiveGangWar() {
     }
 
     // NOTSA
-    Gang1 = std::ranges::max_element(zoneInfo->GangDensity) - zoneInfo->GangDensity;
+    Gang1 = (eGangID)(std::ranges::max_element(zoneInfo->GangDensity) - zoneInfo->GangDensity);
     auto gang1Density = zoneInfo->GangDensity[Gang1];
     zoneInfo->GangDensity[Gang1] = 0; // to find the second biggest
 
@@ -960,7 +960,7 @@ void CGangWars::Update() {
             if (DistanceBetweenPoints2D(PointOfAttack, playerPos) >= 150.0f) {
                 bPlayerIsCloseby = false;
             } else if (!bPlayerIsCloseby) {
-                CVector unused;
+                CVector unused{};
                 CStreaming::StreamZoneModels_Gangs(unused);
                 bPlayerIsCloseby = true;
             }
@@ -1035,12 +1035,12 @@ void CGangWars::UpdateTerritoryUnderControlPercentage() {
 
 // todo: Use macro for color conversion
 // 0x44582F NOTSA
-uint32 CGangWars::GetGangColor(int32 gang) {
+eBlipColour CGangWars::GetGangColor(int32 gang) {
     // 0x8D1344 0x8D1350 0x8D135C
     static constexpr uint8 gaGangColoursR[] = { 200,  70, 255,   0, 255, 200, 240,   0, 255, 255, 0, 0 };
     static constexpr uint8 gaGangColoursB[] = { 200,   0,   0, 200, 190, 200, 240, 255, 255, 255, 0, 0 };
     static constexpr uint8 gaGangColoursG[] = {   0, 200, 200,   0, 220, 200, 140, 200, 255, 255, 0, 0 };
 
     auto r = gaGangColoursR[gang], g = gaGangColoursG[gang], b = gaGangColoursB[gang];
-    return ((b | (((r << 8) | g) << 8)) << 8) | 0xFF;
+    return (eBlipColour)(((b | (((r << 8) | g) << 8)) << 8) | 0xFF);
 }

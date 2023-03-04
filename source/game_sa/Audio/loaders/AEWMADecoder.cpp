@@ -29,7 +29,7 @@ CAEWMADecoder::~CAEWMADecoder() {
 bool CAEWMADecoder::Initialise() {
     WMT_STREAM_SELECTION activateStream = WMT_ON;
 
-    CoInitialize(nullptr);
+    VERIFY(SUCCEEDED(CoInitialize(nullptr)));
 
     if (!WMCreateSyncReader)
         return m_bInitialized;

@@ -180,7 +180,9 @@ void CWorld::Add(CEntity* entity) {
 }
 
 /*!
-* @brief Remove ped from the world. Caller still has to `delete` the entity. In case of peds `CPopulation::RemovePed` should be used instead.
+* @brief Remove ped from the world.
+* Caller still has to `delete` the entity. (In case they want to delete it, and not just re-add)
+* In case of peds `CPopulation::RemovePed` should be used instead.
 */
 void CWorld::Remove(CEntity* entity) {
     entity->Remove();
@@ -475,8 +477,8 @@ void CWorld::CallOffChaseForAreaSectorListPeds(CPtrList& ptrList, float x1, floa
         next = node->GetNext();
 
         const auto veh = static_cast<CVehicle*>(node->m_item);
-        const auto pos = veh->GetPosition();
-        const auto mat = (CMatrix)veh->GetMatrix();
+        const auto& pos = veh->GetPosition();
+        const auto& mat = veh->GetMatrix();
 
         if (!IsPointWithinBounds2D({ minX, minY }, { maxX, maxY }, { pos }))
             continue;
@@ -628,10 +630,10 @@ void CWorld::ShutDown() {
     {
         const auto MakeSureListIsEmpty = [](CPtrListDoubleLink& list, int32 x, int32 y, const char* listName) {
             if (!list.IsEmpty()) {
-                sprintf(gString, "%s overlap list %d,%d not empty\n", listName, x, y);
+                sprintf_s(gString, "%s overlap list %d,%d not empty\n", listName, x, y);
                 list.Flush();
             #ifdef _DEBUG
-                printf("%s", gString); // Lets also print this string
+                DEV_LOG(gString); // Lets also print this string
             #endif
             }
         };
@@ -942,8 +944,8 @@ void CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& ptrLi
         entity->SetCurrentScanCode();
 
         CColSphere sphere{
-            entity->GetColModel()->GetBoundRadius(),
-            Multiply3x3(entity->GetPosition() - point, transform)
+            Multiply3x3(entity->GetPosition() - point, transform),
+            entity->GetColModel()->GetBoundRadius()
         };
         if (CCollision::TestSphereBox(sphere, box)) {
             if (*outCount < maxCount) {
@@ -998,7 +1000,9 @@ void CWorld::FindMissionEntitiesIntersectingCubeSectorList(CPtrList& ptrList, co
 }
 
 // 0x565450
-void CWorld::FindNearestObjectOfTypeSectorList(int32 modelId, CPtrList& ptrList, const CVector& point, float radius, bool b2D, CEntity *& outEntity, float& outDistance) {
+void CWorld::FindNearestObjectOfTypeSectorList(int32 modelId, CPtrList& ptrList, const CVector& point, float radius, bool b2D, CEntity *& outNearestEntity, float& outNearestDist) {
+    UNUSED(modelId);
+
     for (CPtrNode* node = ptrList.GetNode(), *next{}; node; node = next) {
         next = node->GetNext();
 
@@ -1016,8 +1020,8 @@ void CWorld::FindNearestObjectOfTypeSectorList(int32 modelId, CPtrList& ptrList,
         };
 
         if (const float dist = GetDistance(); dist <= radius) {
-            outDistance = dist;
-            outEntity   = entity;
+            outNearestDist   = dist;
+            outNearestEntity = entity;
         }
     }
 }
@@ -1336,7 +1340,7 @@ void CWorld::PrintCarChanges() {
 
         auto prevModelIndex = s_aModelIndexes[poolSize];
         if (modelIndex != prevModelIndex) {
-            printf("Car ModelIndex (slot:%d) has changed from %d into %d\n", poolSize, prevModelIndex, modelIndex);
+            DEV_LOG("Car ModelIndex (slot: {}) has changed from {} into {}", poolSize, prevModelIndex, modelIndex);
             s_aModelIndexes[poolSize] = modelIndex;
         }
     }
@@ -1700,7 +1704,7 @@ bool CWorld::ProcessLineOfSightSectorList(CPtrList& ptrList, const CColLine& col
     }
 
     if (localMinTouchDist < minTouchDistance) {
-        // assert(outEntity); // If there was a collision there must be an entity as well! - Checked in the above loop already.
+        // assert(outNearestEntity); // If there was a collision there must be an entity as well! - Checked in the above loop already.
         minTouchDistance = localMinTouchDist;
         return true;
     }
@@ -2375,7 +2379,7 @@ float CWorld::FindRoofZFor3DCoord(float x, float y, float z, bool* outResult) {
         if (outResult)
             *outResult = false;
         else
-            printf("THERE IS NO MAP BELOW THE FOLLOWING COORS:%f %f %f. (FindGroundZFor3DCoord)\n", x, y, z); // R* triggered
+            DEV_LOG("THERE IS NO MAP BELOW THE FOLLOWING COORS:{} {} {}. (FindGroundZFor3DCoord)", x, y, z); // R* triggered
         return 20.0f;
     }
 }
@@ -2600,8 +2604,7 @@ bool CWorld::GetIsLineOfSightClear(const CVector& origin, const CVector& target,
 
     if (originSectorX == targetSectorX && originSectorY == targetSectorY) { // Both in the same sector
         return ProcessSector(originSectorX, originSectorY);
-    }
-    else if (originSectorX == targetSectorX) { // Same X for both, iterate on Y
+    } else if (originSectorX == targetSectorX) { // Same X for both, iterate on Y
         if (originSectorY >= targetSectorY) { // origin => target on Y axis
             for (auto y = originSectorY; y >= targetSectorY; y--) {
                 if (!ProcessSector(originSectorX, y))
@@ -2613,8 +2616,7 @@ bool CWorld::GetIsLineOfSightClear(const CVector& origin, const CVector& target,
                     return false;
             }
         }
-    }
-    else if (originSectorY == targetSectorY) { // Same Y for both, iterate on X
+    } else if (originSectorY == targetSectorY) { // Same Y for both, iterate on X
         if (originSectorX >= targetSectorX) { // origin => target on X axis
             for (auto x = originSectorX; x >= targetSectorX; x--) {
                 if (!ProcessSector(x, originSectorY))
@@ -2627,8 +2629,7 @@ bool CWorld::GetIsLineOfSightClear(const CVector& origin, const CVector& target,
                     return false;
             }
         }
-    }
-    else {  // Different x and y sectors
+    } else {  // Different x and y sectors
         float displacement = (target.y - origin.y) / (target.x - origin.x);
 
         // TODO: Make this more readable
@@ -2643,8 +2644,7 @@ bool CWorld::GetIsLineOfSightClear(const CVector& origin, const CVector& target,
                     if (!ProcessSector(originSectorX, y))
                         return false;
                 }
-            }
-            else {
+            } else {
                 for (y = originSectorY; y >= endY; y--) {
                     if (!ProcessSector(originSectorX, y))
                         return false;

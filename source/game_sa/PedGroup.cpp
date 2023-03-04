@@ -58,6 +58,6 @@ void CPedGroup::Teleport(const CVector* pos) {
     plugin::CallMethod<0x5F7AD0, CPedGroup*, const CVector*>(this, pos);
 }
 
-int32 CPedGroup::GetId() {
+int32 CPedGroup::GetId() const {
     return CPedGroups::GetGroupId(this);
 }

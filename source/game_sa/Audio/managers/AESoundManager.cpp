@@ -53,7 +53,7 @@ bool CAESoundManager::Initialise() {
     m_nPauseUpdateTime = 0;
     m_bManuallyPaused = false;
 
-    printf("Initialised SoundManager\n");
+    DEV_LOG("Initialised SoundManager");
     return true;
 }
 

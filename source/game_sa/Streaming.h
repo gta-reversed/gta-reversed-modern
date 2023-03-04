@@ -28,7 +28,7 @@ enum class eChannelState
 
     // A big model (also called a large file) is loaded in steps:
     // First, the variable `ms_bLoadingBigModel` is set to `true` in `RequestModelStream`.
-    // When the first half is finished loading, and `ProcessLoadingChannel` is called
+    // When the first half has finished loading, and `ProcessLoadingChannel` is called
     // `ConvertBufferToObject` will be called by it, which will set the model's load state to
     // `LOADSTATE_FINISHING`. When the latter function returns the former checks if
     // the model's loadstate is `FINISHING`, if it is the channel's state is set to
@@ -186,7 +186,7 @@ VALIDATE_SIZE(tStreamingChannel, 0x98);
 class CStreaming {
 public:
     static size_t& ms_memoryAvailable;
-    static int32& desiredNumVehiclesLoaded;
+    static uint32& desiredNumVehiclesLoaded;
     static bool& ms_bLoadVehiclesInLoadScene;
 
     static int32(&ms_aDefaultCopCarModel)[5];
@@ -214,17 +214,17 @@ public:
     static int32& ms_lastCullZone;
     static uint16& ms_loadedGangCars;
     static uint16& ms_loadedGangs;
-    static int32& ms_numPedsLoaded;
 
-    //! Currently loaded peds (For/from ped groups)
-    static inline eModelID(&ms_pedsLoaded)[8] = *(eModelID(*)[8])0x8E4C00;
+    //! Currently loaded peds (For/from ped groups) - Prefer using `GetLoadedPeds()` to access.
+    static inline auto& ms_pedsLoaded = *(std::array<eModelID, 8>*)0x8E4C00;
 
-    /*!
-    * Contains the next slot, that is, index at which the next model to load of a group is.
-    * This is used by `PickPedMIToStreamInForCurrentZone`
-    * And the modelId to load can be accessed by `CPopulation::GetPedGroupModelId` for a given group
-    */
-    static inline int32 (&ms_NextPedToLoadFromGroup)[18] = *reinterpret_cast<int32(*)[18]>(0x8E4BB8);
+    //! Number of active values in `ms_pedsLoaded`
+    static inline auto& ms_numPedsLoaded = *reinterpret_cast<uint32*>(0x8E4BB0);
+
+    //! Contains the next slot, that is, index at which the next model to load of a group is.
+    //! This is used by `PickPedMIToStreamInForCurrentZone`
+    //! And the modelId to load can be accessed by `CPopulation::GetPedGroupModelId` for a given 
+    static inline auto& ms_NextPedToLoadFromGroup = *(std::array<int32, 18>*)0x8E4BB8;
 
     static int32& ms_currentZoneType;
     static CLoadedCarGroup& ms_vehiclesLoaded;
@@ -267,7 +267,7 @@ public:
     static bool AreAnimsUsedByRequestedModels(int32 animModelId);
     static bool AreTexturesUsedByRequestedModels(int32 txdModelId);
     static void ClearFlagForAll(uint32 streamingFlag);
-    static void ClearSlots(int32 totalSlots);
+    static void ClearSlots(uint32 totalSlots);
     static bool ConvertBufferToObject(uint8* pFileBuffer, int32 modelId);
     static void DeleteAllRwObjects();
     static bool DeleteLeastUsedEntityRwObject(bool bNotOnScreen, int32 flags);
@@ -291,10 +291,10 @@ public:
     static void FlushRequestList();
     static void ForceLayerToRead(int32 arg1);
     static int32 GetDefaultCabDriverModel();
-    static int32 GetDefaultCopCarModel(int32 ignoreLvpd1Model);
-    static int32 GetDefaultCopModel();
-    static int32 GetDefaultFiremanModel();
-    static int32 GetDefaultMedicModel();
+    static eModelID GetDefaultCopCarModel(bool ignoreLvpd1Model = true);
+    static eModelID GetDefaultCopModel();
+    static eModelID GetDefaultFiremanModel();
+    static eModelID GetDefaultMedicModel();
     static int32 GetDiscInDrive();
     static int32 GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority);
     static bool HasSpecialCharLoaded(int32 slot);
@@ -331,7 +331,7 @@ public:
     static void RemoveAllUnusedModels();
     static void RemoveBigBuildings();
     static void RemoveBuildingsNotInArea(eAreaCodes areaCode);
-    static void RemoveCarModel(int32 modelId);
+    static void RemoveCarModel(eModelID modelId);
     static void RemoveCurrentZonesModels();
     static void RemoveDodgyPedsFromRandomSlots();
     static void RemoveEntity(CLink<CEntity*>* streamingLink);
@@ -391,6 +391,5 @@ public:
     static CStreamingInfo& GetInfo(int32 modelId) { assert(modelId >= 0); return ms_aInfoForModel[modelId]; }
     static bool IsRequestListEmpty() { return ms_pEndRequestedList->GetPrev() == ms_pStartRequestedList; }
     static ptrdiff_t GetModelFromInfo(const CStreamingInfo* info) { return info - CStreaming::ms_aInfoForModel; }
+    static auto GetLoadedPeds() { return ms_pedsLoaded | rng::views::take(ms_numPedsLoaded); }
 };
-
-extern RwStream& gRwStream;

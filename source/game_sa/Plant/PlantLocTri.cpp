@@ -22,7 +22,7 @@ void CPlantLocTri::InjectHooks() {
 }
 
 // 0x5DC290
-CPlantLocTri* CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, uint8 surface, uint8 lightning, bool createsPlants, bool createsObjects) {
+CPlantLocTri* CPlantLocTri::Add(const CVector& p1, const CVector& p2, const CVector& p3, uint8 surface, tColLighting lightning, bool createsPlants, bool createsObjects) {
     m_V1 = p1;
     m_V2 = p2;
     m_V3 = p3;

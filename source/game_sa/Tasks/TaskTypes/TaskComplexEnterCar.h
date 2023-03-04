@@ -49,6 +49,7 @@ public:
     CTask*         CreateSubTask(eTaskType type, CPed* ped);
     virtual CTask* CreateNextSubTask_AfterSimpleCarAlign(CPed* ped);
     CVector        GetTargetPos();
+    CVehicle*      GetCameraAvoidVehicle();
 
     auto GetVehicle() const { return m_car; }
 private:

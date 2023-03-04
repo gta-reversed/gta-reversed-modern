@@ -66,7 +66,7 @@ char** GetVideoModeList() {
         }
 
         gVideoModes[modeId] = (char*)CMemoryMgr::Calloc(100, sizeof(char));                                  // 100 chars
-        sprintf(gVideoModes[modeId], "%lu X %lu X %lu", videoMode.width, videoMode.height, videoMode.depth); // rwsprintf
+        sprintf_s(gVideoModes[modeId], 100 * sizeof(char), "%lu X %lu X %lu", videoMode.width, videoMode.height, videoMode.depth); // rwsprintf
 
 #ifdef VIDEO_MODE_LOGS
         DEV_LOG("Available video mode id={:02d}: {}", modeId, gVideoModes[modeId]);
@@ -104,7 +104,7 @@ void SetVideoMode(int32 mode) {
 }
 
 // 0x745CA0
-bool IsVideoModeExclusive() {
+bool IsVideoModeExclusive() { // AKA isCurrentModeFullscreen
     RwVideoMode videoMode{};
     VERIFY(RwEngineGetVideoModeInfo(&videoMode, gCurrentVideoMode));
     return videoMode.flags & rwVIDEOMODEEXCLUSIVE;

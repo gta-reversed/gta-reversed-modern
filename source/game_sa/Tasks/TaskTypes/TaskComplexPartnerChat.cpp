@@ -19,7 +19,7 @@ CTaskComplexPartnerChat::CTaskComplexPartnerChat(const char* commandName, CPed* 
         m_updateDirectionCount = 4;
     }
     field_75 = a8;
-    strcpy(m_commandName, commandName);
+    strcpy_s(m_commandName, commandName);
 }
 
 // 0x684320

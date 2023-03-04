@@ -138,7 +138,7 @@ bool rsPreInitCommandLine(RwChar* arg) {
 }
 
 // 0x619560
-RsEventStatus RsKeyboardEventHandler(RsEvent event, void* param) {
+RsEventStatus RsKeyboardEventHandler(RsEvent event, void* param) { // Param should be `RsKeyCodes*` (so pass in a ptr to a `RsKeyCodes`)
     if (RsGlobal.keyboard.used) {
         return RsGlobal.keyboard.inputEventHandler(event, param);
     }

@@ -46,6 +46,17 @@ public:
     float GetSoundLevel(const CEntity* entity, CVector& position);
     static float CalcSoundLevelIncrement(float level1, float level2);
 
+    /// Works like `dynamic_cast` => Checks if the event if ofthe required type, if so, returns it, otherwise nullptr
+    template<std::derived_from<CEvent> T>
+    static T* DynCast(auto event) {
+        if (event) {
+            if (event->GetEventType() == T::Type) {
+                return static_cast<T*>(event);
+            }
+        }
+        return nullptr;
+    }
+
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

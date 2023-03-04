@@ -51,7 +51,7 @@ void GetNameAndDamage(const char* name, char* objName, bool& bIsDamageModel) {
     const size_t nodesz = strlen(name);
 
     const auto TerminatedCopy = [=](size_t offset) {
-        strncpy(objName, name, nodesz - offset);
+        strncpy_s(objName, nodesz - offset + 1, name, nodesz - offset);
         objName[nodesz - offset] = 0;
     };
 
@@ -69,7 +69,7 @@ void GetNameAndDamage(const char* name, char* objName, bool& bIsDamageModel) {
         ) {
             TerminatedCopy(sizeof("_l0") - 1);
         } else
-            strcpy(objName, name);
+            strcpy_s(objName, strlen(name) + 1, name);
     }
 }
 

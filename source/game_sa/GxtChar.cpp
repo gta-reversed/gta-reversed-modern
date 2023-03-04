@@ -46,13 +46,13 @@ const char* GxtCharToAscii(const GxtChar* src, uint8 start) {
         else if (symbol >= 0xA9 && symbol <= 0xCC)
             symbol += 0x50;
         else if (symbol == 0xCD)
-            symbol = 0xD1;
+            symbol = static_cast<GxtChar>(0xD1);
         else if (symbol == 0xCE)
-            symbol = 0xF1;
+            symbol = static_cast<GxtChar>(0xF1);
         else if (symbol == 0xCF)
-            symbol = 0xBF;
+            symbol = static_cast<GxtChar>(0xBF);
         else if (symbol >= 0xD0)
-            symbol = 0x23; // '#'
+            symbol = static_cast<GxtChar>(0x23); // '#'
 
         buf[i] = symbol;
 

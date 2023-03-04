@@ -14,7 +14,7 @@ public:
 public:
     static void InjectHooks();
 
-    CEventAttractor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor);
+    CEventAttractor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor, /* notsa => */eTaskType taskType = TASK_NONE);
     ~CEventAttractor() override;
 
     eEventType GetEventType() const override { return EVENT_ATTRACTOR; }

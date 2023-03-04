@@ -187,9 +187,16 @@ bool IKChainManager_c::CanAcceptLookAt(CPed* ped) {
         return false;
     }
 
-    const auto GetPedClumpAnimAssoc = [ped](AnimationId anim) { return RpAnimBlendClumpGetAssociation(ped->m_pRwClump, anim); };
-
-    if (rng::any_of(std::to_array({ANIM_ID_DRNKBR_PRTL, ANIM_ID_SMKCIG_PRTL, ANIM_ID_DRNKBR_PRTL_F}), GetPedClumpAnimAssoc)) {
+    // Check if ped has any of the anims present - TODO: Make this into a CPed funtion perhaps?
+    if (rng::any_of(
+        std::array{
+            ANIM_ID_DRNKBR_PRTL,
+            ANIM_ID_SMKCIG_PRTL,
+            ANIM_ID_DRNKBR_PRTL_F
+        }, [ped](AnimationId anim) {
+            return RpAnimBlendClumpGetAssociation(ped->m_pRwClump, anim);
+        }
+    )) {
         return false;
     }
 

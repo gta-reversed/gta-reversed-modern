@@ -243,7 +243,7 @@ void CPostEffects::SetupBackBufferVertex() {
 
     pRasterFrontBuffer = RasterCreatePostEffects({ 0, 0, 64, 64 });
     if (!pRasterFrontBuffer) {
-        printf("Error subrastering");
+        DEV_LOG("Error subrastering");
         RwRasterDestroy(pRasterFrontBuffer);
         pRasterFrontBuffer = nullptr;
     }
@@ -458,50 +458,50 @@ void CPostEffects::HeatHazeFXInit() {
         m_HeatHazeFXRandomShift = 0;
         m_HeatHazeFXSpeedMin    = 12;
         m_HeatHazeFXSpeedMax    = 18;
-        m_HeatHazeFXScanSizeX   = uint32(SCREEN_WIDTH_UNIT  * 47.0f);
-        m_HeatHazeFXScanSizeY   = uint32(SCREEN_HEIGHT_UNIT * 47.0f);
-        m_HeatHazeFXRenderSizeX = uint32(SCREEN_WIDTH_UNIT  * 50.0f);
-        m_HeatHazeFXRenderSizeY = uint32(SCREEN_HEIGHT_UNIT * 50.0f);
+        m_HeatHazeFXScanSizeX   = uint32(SCREEN_STRETCH_X(47.0f));
+        m_HeatHazeFXScanSizeY   = uint32(SCREEN_STRETCH_Y(47.0f));
+        m_HeatHazeFXRenderSizeX = uint32(SCREEN_STRETCH_X(50.0f));
+        m_HeatHazeFXRenderSizeY = uint32(SCREEN_STRETCH_Y(50.0f));
         break;
     case HEAT_HAZE_1:
         m_HeatHazeFXIntensity   = 32;
         m_HeatHazeFXRandomShift = 0;
         m_HeatHazeFXSpeedMin    = 6;
         m_HeatHazeFXSpeedMax    = 10;
-        m_HeatHazeFXScanSizeX   = uint32(SCREEN_WIDTH_UNIT  * 100.0f);
-        m_HeatHazeFXScanSizeY   = uint32(SCREEN_HEIGHT_UNIT * 52.0f);
-        m_HeatHazeFXRenderSizeX = uint32(SCREEN_WIDTH_UNIT  * 100.0f);
-        m_HeatHazeFXRenderSizeY = uint32(SCREEN_HEIGHT_UNIT * 60.0f);
+        m_HeatHazeFXScanSizeX   = uint32(SCREEN_STRETCH_X(100.0f));
+        m_HeatHazeFXScanSizeY   = uint32(SCREEN_STRETCH_Y(52.0f));
+        m_HeatHazeFXRenderSizeX = uint32(SCREEN_STRETCH_X(100.0f));
+        m_HeatHazeFXRenderSizeY = uint32(SCREEN_STRETCH_Y(60.0f));
         break;
     case HEAT_HAZE_2:
         m_HeatHazeFXIntensity   = 32;
         m_HeatHazeFXRandomShift = 0;
         m_HeatHazeFXSpeedMin    = 4;
         m_HeatHazeFXSpeedMax    = 8;
-        m_HeatHazeFXScanSizeX   = uint32(SCREEN_WIDTH_UNIT  * 70.0f);
-        m_HeatHazeFXScanSizeY   = uint32(SCREEN_HEIGHT_UNIT * 70.0f);
-        m_HeatHazeFXRenderSizeX = uint32(SCREEN_WIDTH_UNIT  * 80.0f);
-        m_HeatHazeFXRenderSizeY = uint32(SCREEN_HEIGHT_UNIT * 80.0f);
+        m_HeatHazeFXScanSizeX   = uint32(SCREEN_STRETCH_X(70.0f));
+        m_HeatHazeFXScanSizeY   = uint32(SCREEN_STRETCH_Y(70.0f));
+        m_HeatHazeFXRenderSizeX = uint32(SCREEN_STRETCH_X(80.0f));
+        m_HeatHazeFXRenderSizeY = uint32(SCREEN_STRETCH_Y(80.0f));
         break;
     case HEAT_HAZE_3:
         m_HeatHazeFXRandomShift = 0;
         m_HeatHazeFXIntensity   = 150;
         m_HeatHazeFXSpeedMin    = 5;
         m_HeatHazeFXSpeedMax    = 8;
-        m_HeatHazeFXScanSizeX   = uint32(SCREEN_WIDTH_UNIT  * 60.0f);
-        m_HeatHazeFXScanSizeY   = uint32(SCREEN_HEIGHT_UNIT * 24.0f);
-        m_HeatHazeFXRenderSizeX = uint32(SCREEN_WIDTH_UNIT  * 62.0f);
-        m_HeatHazeFXRenderSizeY = uint32(SCREEN_HEIGHT_UNIT * 24.0f);
+        m_HeatHazeFXScanSizeX   = uint32(SCREEN_STRETCH_X(60.0f));
+        m_HeatHazeFXScanSizeY   = uint32(SCREEN_STRETCH_Y(24.0f));
+        m_HeatHazeFXRenderSizeX = uint32(SCREEN_STRETCH_X(62.0f));
+        m_HeatHazeFXRenderSizeY = uint32(SCREEN_STRETCH_Y(24.0f));
         break;
     case HEAT_HAZE_4:
         m_HeatHazeFXRandomShift = 1;
         m_HeatHazeFXIntensity   = 150;
         m_HeatHazeFXSpeedMin    = 5;
         m_HeatHazeFXSpeedMax    = 8;
-        m_HeatHazeFXScanSizeX   = uint32(SCREEN_WIDTH_UNIT  * 60.0f);
-        m_HeatHazeFXScanSizeY   = uint32(SCREEN_HEIGHT_UNIT * 24.0f);
-        m_HeatHazeFXRenderSizeX = uint32(SCREEN_WIDTH_UNIT  * 62.0f);
-        m_HeatHazeFXRenderSizeY = uint32(SCREEN_HEIGHT_UNIT * 24.0f);
+        m_HeatHazeFXScanSizeX   = uint32(SCREEN_STRETCH_X(60.0f));
+        m_HeatHazeFXScanSizeY   = uint32(SCREEN_STRETCH_Y(24.0f));
+        m_HeatHazeFXRenderSizeX = uint32(SCREEN_STRETCH_X(62.0f));
+        m_HeatHazeFXRenderSizeY = uint32(SCREEN_STRETCH_Y(24.0f));
         break;
     default:
         break;
@@ -663,9 +663,9 @@ void CPostEffects::InfraredVisionStoreAndSetLightsForHeatObjects(CPed* ped) {
     // here we go to fuck cold carbon (Explanation: https://sampik.ru/articles/468-pochemu-piratskij-perevod-gtasa-takoj-strannyj.html)
     // gradually changing from red to blue (dead)
     if (ped->m_nPedState == PEDSTATE_DEAD) {
-        auto time = CTimer::GetTimeInMS() - ped->m_nDeathTime;
+        auto time = CTimer::GetTimeInMS() - ped->m_nDeathTimeMS;
         if (time < 0)
-            time = ped->m_nDeathTime - CTimer::GetTimeInMS();
+            time = ped->m_nDeathTimeMS - CTimer::GetTimeInMS();
 
         auto delta = (float)time / 10'000.0f;
 

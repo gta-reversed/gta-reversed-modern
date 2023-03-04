@@ -10,6 +10,9 @@
 
 class CSphere {
 public:
+    CVector m_vecCenter{};
+    float   m_fRadius{};
+
     constexpr CSphere() = default;
     constexpr CSphere(CVector center, float radius) : m_vecCenter(center), m_fRadius(radius) {}
     [[deprecated]]
@@ -29,8 +32,9 @@ public:
     */
     void DrawWireFrame(CRGBA color, const CMatrix& transform) const;
 
-public:
-    CVector m_vecCenter;
-    float   m_fRadius;
+    //! Get *this but transformed
+    auto GetTransformed(const CMatrix& transform) const -> CSphere;
+
+    friend auto TransformObject(const CSphere& sp, const CMatrix& transform) -> CSphere;
 };
 VALIDATE_SIZE(CSphere, 0x10);

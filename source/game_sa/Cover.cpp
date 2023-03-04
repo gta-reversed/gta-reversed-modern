@@ -83,13 +83,13 @@ void CCover::Find2HighestPoints(CColTriangle* triangle, CVector* vertPositions, 
 }
 
 // 0x6992B0
-CCoverPoint* CCover::FindAndReserveCoverPoint(CPed* ped, CVector& position, bool a3) {
-    return plugin::CallAndReturn<CCoverPoint*, 0x6992B0, CPed*, CVector&, bool>(ped, position, a3);
+CCoverPoint* CCover::FindAndReserveCoverPoint(CPed* ped, const CVector& position, bool a3) {
+    return plugin::CallAndReturn<CCoverPoint*, 0x6992B0, CPed*, const CVector&, bool>(ped, position, a3);
 }
 
 // 0x699570
-bool CCover::FindCoordinatesCoverPoint(CCoverPoint* point, CPed* ped, CVector& position, CVector& outCoordinates) {
-    return plugin::CallAndReturn<bool, 0x699570, CCoverPoint*, CPed*, CVector&, CVector&>(point, ped, position, outCoordinates);
+bool CCover::FindCoordinatesCoverPoint(CCoverPoint* point, CPed* ped, const CVector& position, CVector& outCoordinates) {
+    return plugin::CallAndReturn<bool, 0x699570, CCoverPoint*, CPed*, const CVector&, CVector&>(point, ped, position, outCoordinates);
 }
 
 void CCover::FindCoverPointsForThisBuilding(CBuilding* building) {
