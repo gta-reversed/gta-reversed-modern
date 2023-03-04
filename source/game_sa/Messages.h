@@ -12,7 +12,8 @@ struct tMessage {
         char* str,
         uint16 nFlags,
         uint32 nTime,
-        bool bPreviousBrief
+        bool bPreviousBrief,
+        std::optional<std::array<int32, 6>> numbers
     ) :
         m_pText{ pText },
         m_pString{str},
@@ -21,7 +22,11 @@ struct tMessage {
         m_nStartTime{ CTimer::GetTimeInMS() },
         m_bPreviousBrief{bPreviousBrief }
     {
-        rng::fill(m_nNumber, -1);
+        if (numbers) {
+            rng::copy(*numbers, rng::begin(m_nNumber));
+        } else {
+            rng::fill(m_nNumber, -1);
+        }
     }
 
     const char* m_pText{};
@@ -58,6 +63,7 @@ public:
     static void AddMessage(const char* text, uint32 time, uint16 flag, bool bPreviousBrief);
     static void AddMessageJumpQ(const char* text, uint32 time, uint16 flag, bool bPreviousBrief);
     static void AddMessageWithString(const char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief);
+    static void AddMessage2(const char* text, uint32 time, uint16 flag, bool bPreviousBrief, char* str = nullptr, std::optional<std::array<int32, 6>> numbers = {});
     static void AddMessageWithNumber(const char* text, uint32 time, uint16 flag, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1, bool bPreviousBrief = false);
     static void AddMessageJumpQWithNumber(const char* text, uint32 time, uint16 flag, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1, bool bPreviousBrief = false);
     static void AddMessageJumpQWithString(const char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief);

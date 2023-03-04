@@ -18,7 +18,7 @@ void CMessages::InjectHooks() {
     // RH_ScopedInstall(InsertNumberInString, 0x69DE90, { .reversed = false }); // Weird build error here
     RH_ScopedInstall(InsertStringInString, 0x69E040, { .reversed = false });
     RH_ScopedInstall(InsertPlayerControlKeysInString, 0x69E160, { .reversed = false });
-    RH_ScopedInstall(AddMessageWithNumber, 0x69E360, { .reversed = false });
+    RH_ScopedInstall(AddMessageWithNumber, 0x69E360);
     RH_ScopedInstall(AddMessageJumpQWithNumber, 0x69E4E0, { .reversed = false });
     RH_ScopedInstall(AddBigMessageWithNumber, 0x69E5F0, { .reversed = false });
     RH_ScopedInstall(AddBigMessageWithNumberQ, 0x69E6E0, { .reversed = false });
@@ -57,19 +57,46 @@ tMessage* CMessages::FindFreeBriefMessage() {
 // Adds message to queue
 // 0x69F0B0
 void CMessages::AddMessage(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
-    AddMessageWithString(text, time, flag, nullptr, bPreviousBrief);
+    /* Some string copy code here */
+    AddMessage2(text, time, flag, bPreviousBrief);
 }
 
 // Adds message with string to queue
 // 0x69E800
 void CMessages::AddMessageWithString(const char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief) {
     /* Some string copy code here */
+    AddMessage2(text, time, flag, bPreviousBrief);
+}
 
+// Adds message and shows it instantly
+// 0x69F1E0
+void CMessages::AddMessageJumpQ(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
+    /* unused string copy here */
+    BriefMessages.front() = { text, nullptr, flag, time, bPreviousBrief };
+    AddToPreviousBriefArray(text, -1, -1, -1, -1, -1, -1, 0);
+}
+/*!
+* Add a new brief message.
+* @param text           The text (Possibly with format characters, eg.: ~~~~
+* @param flag           Flags
+* @param bPreviousBrief Whenever to call `AddToPreviousBriefArray`
+* @param str            String to insert [May be null]
+* @param numbers        Numbers to insert (Use -1 as placeholder)
+* @notsa
+*/
+void CMessages::AddMessage2(const char* text, uint32 time, uint16 flag, bool bPreviousBrief, char* str, std::optional<std::array<int32, 6>> numbers) {
     const auto msg = FindFreeBriefMessage();
     if (!msg) {
         return;
     }
-    new (msg) tMessage{ text, string, flag, time, bPreviousBrief };
+    new (msg) tMessage{
+        text,
+        str,
+        flag,
+        time,
+        bPreviousBrief,
+        numbers
+    };
     if (msg == &BriefMessages.front() && bPreviousBrief) {
 		AddToPreviousBriefArray(
 			msg->m_pText,
@@ -84,19 +111,12 @@ void CMessages::AddMessageWithString(const char* text, uint32 time, uint16 flag,
     }
 }
 
-// Adds message and shows it instantly
-// 0x69F1E0
-void CMessages::AddMessageJumpQ(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
-    /* unused string copy here */
-    BriefMessages.front() = { text, nullptr, flag, time, bPreviousBrief };
-    AddToPreviousBriefArray(text, -1, -1, -1, -1, -1, -1, 0);
-}
-
 
 // Adds message with numbers to queue
 // 0x69E360
 void CMessages::AddMessageWithNumber(const char* text, uint32 time, uint16 flag, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, bool bPreviousBrief) {
-    plugin::Call<0x69E360, const char*, uint32, uint16, int32, int32, int32, int32, int32, int32, bool>(text, time, flag, n1, n2, n3, n4, n5, n6, bPreviousBrief);
+    /* Some string copy code here */
+    AddMessage2(text, time, flag, bPreviousBrief, nullptr, { { n1, n2, n3, n4, n5, n6 } });
 }
 
 // Adds message with numbers and shows it instantly
