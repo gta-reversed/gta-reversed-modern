@@ -64,15 +64,7 @@ void CMessages::AddMessage(const char* text, uint32 time, uint16 flag, bool bPre
         return;
     }
 
-    *msg = {
-        .m_pText = text,
-        .m_nFlags = flag,
-        .m_nTime = time,
-        .m_nStartTime = CTimer::GetTimeInMS(),
-        .m_pString = nullptr,
-        .m_bPreviousBrief = bPreviousBrief,
-    };
-    rng::fill(msg->m_nNumber, -1);
+    *msg = { text, flag, time, bPreviousBrief };
 
     if (msg == &BriefMessages.front() && bPreviousBrief) {
 		AddToPreviousBriefArray(
@@ -91,7 +83,9 @@ void CMessages::AddMessage(const char* text, uint32 time, uint16 flag, bool bPre
 // Adds message and shows it instantly
 // 0x69F1E0
 void CMessages::AddMessageJumpQ(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
-    plugin::Call<0x69F1E0, const char*, uint32, uint16, bool>(text, time, flag, bPreviousBrief);
+    /* unused string copy here */
+    BriefMessages.front() = { text, flag, time, bPreviousBrief };
+    AddToPreviousBriefArray(text, -1, -1, -1, -1, -1, -1, 0);
 }
 
 // Adds message with string to queue

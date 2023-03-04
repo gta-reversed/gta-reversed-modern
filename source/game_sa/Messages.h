@@ -7,13 +7,28 @@
 #pragma once
 
 struct tMessage {
-    const char* m_pText;
-    uint16      m_nFlags;
-    uint32      m_nTime;
-    uint32      m_nStartTime;
-    int32       m_nNumber[6];
-    char*       m_pString;
-    uint8       m_bPreviousBrief;
+    tMessage(
+        const char* pText,
+        uint16 nFlags,
+        uint32 nTime,
+        bool bPreviousBrief
+    ) :
+        m_pText{ pText },
+        m_nFlags{nFlags },
+        m_nTime{ nTime },
+        m_nStartTime{ CTimer::GetTimeInMS() },
+        m_bPreviousBrief{bPreviousBrief }
+    {
+        rng::fill(m_nNumber, -1);
+    }
+
+    const char* m_pText{};
+    uint16      m_nFlags{};
+    uint32      m_nTime{};
+    uint32      m_nStartTime{};
+    int32       m_nNumber[6]{};
+    char*       m_pString{};
+    uint8       m_bPreviousBrief{};
 };
 
 struct tBigMessage {
