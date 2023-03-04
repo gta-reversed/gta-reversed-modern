@@ -25,8 +25,8 @@ void CMessages::InjectHooks() {
     RH_ScopedInstall(AddMessageWithString, 0x69E800);
     RH_ScopedInstall(AddMessageJumpQWithString, 0x69E950);
     RH_ScopedInstall(ClearThisPrint, 0x69EA30);
-    RH_ScopedInstall(ClearThisBigPrint, 0x69EBE0, { .reversed = false });
-    RH_ScopedInstall(ClearThisPrintBigNow, 0x69ED80, { .reversed = false });
+    RH_ScopedInstall(ClearThisBigPrint, 0x69EBE0);
+    RH_ScopedInstall(ClearThisPrintBigNow, 0x69ED80);
     RH_ScopedInstall(Init, 0x69EE00);
     RH_ScopedInstall(ClearAllMessagesDisplayedByGame, 0x69EDC0);
     RH_ScopedInstall(Process, 0x69EE60, { .reversed = false });
@@ -265,63 +265,79 @@ void CMessages::ClearPreviousBriefArray() {
     rng::fill(PreviousBriefs, tPreviousBrief{});
 }
 
-// Removes small message with this text
-// 0x69EA30
-void CMessages::ClearThisPrint(const char* text) {
+template<size_t N>
+void ClearThisPrint_Impl(std::array<tMessage, N>& messages, const char* text, auto&& OnFirstMessageCleared) {
     for (;;) {
         size_t i = 0;
         for (;;) {
-            const auto& msg = BriefMessages[i];
+            const auto& msg = messages[i];
             if (!msg.m_pText) {
                 return; // Reached end of active texts
             }
             if (strcmp(msg.m_pText, text) == 0) {
                 break; // Texts match, so clear this
             }
-            if (++i >= BriefMessages.size()) {
+            if (++i >= messages.size()) {
                 return; // Reached end
             }
         }
         
         // Overwrite this element
         std::shift_left(
-            BriefMessages.begin() + i,
-            BriefMessages.end(),
+            messages.begin() + i,
+            messages.end(),
             1
         );
 
         // Clear last (As it was left in an unspecified state)
-        BriefMessages.back() = {};
+        messages.back() = {};
 
         if (i == 0) {
-            auto& msg = BriefMessages[i];
+            auto& msg = messages[i];
             msg.m_nStartTime = CTimer::GetTimeInMS();
-            if (msg.m_pText) {
-                AddToPreviousBriefArray(
-                    msg.m_pText,
-                    msg.m_nNumber[0],
-                    msg.m_nNumber[1],
-                    msg.m_nNumber[2],
-                    msg.m_nNumber[3],
-                    msg.m_nNumber[4],
-                    msg.m_nNumber[5],
-                    msg.m_pString
-                );
+            if (OnFirstMessageCleared) {
+                OnFirstMessageCleared(msg);
             }
         }
     }
 }
 
+// Removes small message with this text
+// 0x69EA30
+void CMessages::ClearThisPrint(const char* text) {
+    ClearThisPrint_Impl(BriefMessages, text, [](tMessage& msg) {
+        if (!msg.m_pText) {
+            return;
+        }
+        AddToPreviousBriefArray(
+            msg.m_pText,
+            msg.m_nNumber[0],
+            msg.m_nNumber[1],
+            msg.m_nNumber[2],
+            msg.m_nNumber[3],
+            msg.m_nNumber[4],
+            msg.m_nNumber[5],
+            msg.m_pString
+        );
+    });
+}
+
 // Removes big message with this text
 // 0x69EBE0
 void CMessages::ClearThisBigPrint(const char* text) {
-    plugin::Call<0x69EBE0, const char*>(text);
+    for (size_t b = 0; b < NUM_MESSAGE_STYLES; b++) {
+        ClearThisPrint_Impl(BIGMessages[b].m_Stack, text, [](tMessage&) { /*nop*/ });
+    }
 }
 
 // Removes first big message in messages stack
 // 0x69ED80
 void CMessages::ClearThisPrintBigNow(eMessageStyle style) {
-    plugin::Call<0x69ED80, eMessageStyle>(style);
+    for (auto& msg : BIGMessages[style].m_Stack) {
+        ClearThisBigPrint(msg.m_pText);
+    }
+    CHud::BigMessageX[style] = 0.f;
+    CHud::m_BigMessage[style][0] = 0;
 }
 
 // Removes all displayed messages
