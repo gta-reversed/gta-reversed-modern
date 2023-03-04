@@ -22,9 +22,9 @@ struct tBigMessage {
 };
 
 struct tPreviousBrief {
-    char* m_pText;
-    int32 m_nNumber[6];
-    char* m_pString;
+    char* m_pText{};
+    int32 m_nNumber[6]{};
+    char* m_pString{};
 };
 
 class CMessages {

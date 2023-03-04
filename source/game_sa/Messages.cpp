@@ -27,7 +27,7 @@ void CMessages::InjectHooks() {
     RH_ScopedInstall(ClearThisPrint, 0x69EA30, { .reversed = false });
     RH_ScopedInstall(ClearThisBigPrint, 0x69EBE0, { .reversed = false });
     RH_ScopedInstall(ClearThisPrintBigNow, 0x69ED80, { .reversed = false });
-    RH_ScopedInstall(Init, 0x69EE00, { .reversed = false });
+    RH_ScopedInstall(Init, 0x69EE00);
     RH_ScopedInstall(ClearAllMessagesDisplayedByGame, 0x69EDC0);
     RH_ScopedInstall(Process, 0x69EE60, { .reversed = false });
     RH_ScopedInstall(Display, 0x69EFC0, { .reversed = false });
@@ -40,10 +40,8 @@ void CMessages::InjectHooks() {
 // Initialises messages
 // 0x69EE00
 void CMessages::Init() {
-    plugin::Call<0x69EE00>();
-
-    // ? ClearMessages(true);
-    // ClearPreviousBriefArray();
+    ClearMessages(true);
+    rng::fill(PreviousBriefs, tPreviousBrief{});
 }
 
 // Adds message to queue
