@@ -7,11 +7,11 @@ void CMessages::InjectHooks() {
     RH_ScopedClass(CMessages);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(GetStringLength, 0x69DB50, { .reversed = false });
+    RH_ScopedInstall(GetStringLength, 0x69DB50);
     RH_ScopedInstall(StringCopy, 0x69DB70, { .reversed = false });
-    RH_ScopedInstall(StringCompare, 0x69DBD0, { .reversed = false });
-    RH_ScopedInstall(CutString, 0x69DC50, { .reversed = false });
-    RH_ScopedInstall(ClearMessages, 0x69DCD0, { .reversed = false });
+    RH_ScopedInstall(StringCompare, 0x69DBD0);
+    RH_ScopedInstall(CutString, 0x69DC50);
+    RH_ScopedInstall(ClearMessages, 0x69DCD0);
     RH_ScopedInstall(ClearSmallMessagesOnly, 0x69DD30);
     RH_ScopedInstall(AddToPreviousBriefArray, 0x69DD50);
     RH_ScopedInstall(ClearPreviousBriefArray, 0x69DE70);
@@ -351,24 +351,27 @@ void CMessages::ClearAllMessagesDisplayedByGame(bool unk) {
 // Returns length of a string
 // 0x69DB50
 uint32 CMessages::GetStringLength(const char* string) {
-    return plugin::CallAndReturn<uint32, 0x69DB50, const char*>(string);
+    return strlen(string);
 }
 
 // Copies string src to dest
 // 0x69DB70
-void CMessages::StringCopy(const char* dest, const char* src, uint16 len) {
+void CMessages::StringCopy(char* dest, const char* src, uint16 len) {
+    //strncpy(dest, src, len); - TODO: Can't use this cause it's unsafe
     plugin::Call<0x69DB70, const char*, const char*, uint16>(dest, src, len);
 }
 
-// Compares 2 strings
-// 0x69DBD0
-uint8 CMessages::StringCompare(const char* str1, const char* str2, uint16 len) {
-    return plugin::CallAndReturn<uint8, 0x69DBD0, const char*, const char*, uint16>(str1, str2, len);
+/*!
+* Check if 2 string are equal
+* @addr 0x69DBD0
+*/
+bool CMessages::StringCompare(const char* str1, const char* str2, uint16 len) {
+    return strncmp(str1, str2, len);
 }
 
 // 0x69DC50
 void CMessages::CutString(int32 count, const char* str, char** dest) {
-    plugin::Call<0x69DC50, int32, const char*, char**>(count, str, dest);
+    NOTSA_UNREACHABLE(); // unused
 }
 
 // Insert numbers into string

@@ -89,8 +89,8 @@ public:
 
     static uint32 GetStringLength(const char* string);
 
-    static void StringCopy(const char* dest, const char* src, uint16 len);
-    static uint8 StringCompare(const char* str1, const char* str2, uint16 len);
+    static void StringCopy(char* dest, const char* src, uint16 len);
+    static bool StringCompare(const char* str1, const char* str2, uint16 len);
     static void CutString(int32 count, const char* str, char** dest);
 
     static void InsertNumberInString(const char* src, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1, char* dst = nullptr);
