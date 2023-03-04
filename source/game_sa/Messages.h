@@ -7,6 +7,8 @@
 #pragma once
 
 struct tMessage {
+    tMessage() = default;
+
     tMessage(
         const char* pText,
         char* str,
@@ -39,8 +41,8 @@ struct tMessage {
 };
 
 struct tBigMessage {
-    tMessage m_Current;
-    std::array<tMessage, 3> m_Stack;
+    tMessage                m_Current{};
+    std::array<tMessage, 3> m_Stack{};
 };
 
 struct tPreviousBrief {

@@ -24,7 +24,7 @@ void CMessages::InjectHooks() {
     RH_ScopedInstall(AddBigMessageWithNumberQ, 0x69E6E0);
     RH_ScopedInstall(AddMessageWithString, 0x69E800);
     RH_ScopedInstall(AddMessageJumpQWithString, 0x69E950);
-    RH_ScopedInstall(ClearThisPrint, 0x69EA30, { .reversed = false });
+    RH_ScopedInstall(ClearThisPrint, 0x69EA30);
     RH_ScopedInstall(ClearThisBigPrint, 0x69EBE0, { .reversed = false });
     RH_ScopedInstall(ClearThisPrintBigNow, 0x69ED80, { .reversed = false });
     RH_ScopedInstall(Init, 0x69EE00);
@@ -249,31 +249,67 @@ void CMessages::AddToPreviousBriefArray(const char* text, int32 n1, int32 n2, in
 // Removes registered messages
 // 0x69DCD0
 void CMessages::ClearMessages(bool flag) {
-    plugin::Call<0x69DCD0, bool>(flag);
+    rng::fill(BIGMessages, tBigMessage{});
+    ClearSmallMessagesOnly();
 }
 
 // Removes small messages
 // 0x69DD30
 void CMessages::ClearSmallMessagesOnly() {
-    for (auto& brief : BriefMessages) {
-        brief.m_pText = nullptr;
-        brief.m_pString = nullptr;
-    }
+    rng::fill(BriefMessages, tMessage{});
 }
 
 // Remove messages from previous brief
 // 0x69DE70
 void CMessages::ClearPreviousBriefArray() {
-    for (auto& brief : PreviousBriefs) {
-        brief.m_pText = nullptr;
-        brief.m_pString = nullptr;
-    }
+    rng::fill(PreviousBriefs, tPreviousBrief{});
 }
 
 // Removes small message with this text
 // 0x69EA30
 void CMessages::ClearThisPrint(const char* text) {
-    plugin::Call<0x69EA30, const char*>(text);
+    for (;;) {
+        size_t i = 0;
+        for (;;) {
+            const auto& msg = BriefMessages[i];
+            if (!msg.m_pText) {
+                return; // Reached end of active texts
+            }
+            if (strcmp(msg.m_pText, text) == 0) {
+                break; // Texts match, so clear this
+            }
+            if (++i >= BriefMessages.size()) {
+                return; // Reached end
+            }
+        }
+        
+        // Overwrite this element
+        std::shift_left(
+            BriefMessages.begin() + i,
+            BriefMessages.end(),
+            1
+        );
+
+        // Clear last (As it was left in an unspecified state)
+        BriefMessages.back() = {};
+
+        if (i == 0) {
+            auto& msg = BriefMessages[i];
+            msg.m_nStartTime = CTimer::GetTimeInMS();
+            if (msg.m_pText) {
+                AddToPreviousBriefArray(
+                    msg.m_pText,
+                    msg.m_nNumber[0],
+                    msg.m_nNumber[1],
+                    msg.m_nNumber[2],
+                    msg.m_nNumber[3],
+                    msg.m_nNumber[4],
+                    msg.m_nNumber[5],
+                    msg.m_pString
+                );
+            }
+        }
+    }
 }
 
 // Removes big message with this text
