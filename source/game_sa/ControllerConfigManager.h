@@ -109,7 +109,7 @@ public:
     DIJOYSTATE2       m_NewJoyState;
 
     char              m_arrControllerActionName[59][40]; // todo: 182
-    bool              m_ButtonStates[17];
+    bool              m_ButtonStates[17];   // True if down, false if up or missing
     CControllerAction m_Actions[59];
 
     bool m_bStickL_X_Rgh_Lft_MovementBothDown[4];
@@ -125,6 +125,7 @@ public:
     CControllerConfigManager();
     CControllerConfigManager* Constructor();
 
+
     bool LoadSettings(FILESTREAM file);
     void SaveSettings(FILESTREAM file);
 
@@ -137,8 +138,10 @@ public:
 
     void StoreMouseButtonState(eMouseButtons button, bool state);
     void UpdateJoyInConfigMenus_ButtonDown(ePadButton button, int32 padNumber);
+    void UpdateJoy_ButtonDown(ePadButton button, int32 unk);
     void AffectControllerStateOn_ButtonDown_DebugStuff(int32, eControllerType);
     void UpdateJoyInConfigMenus_ButtonUp(ePadButton button, int32 padNumber);
+    void UpdateJoy_ButtonUp(ePadButton button, int32 unk);
     void AffectControllerStateOn_ButtonUp_DebugStuff(int32, eControllerType);
     void ClearSimButtonPressCheckers();
 
@@ -153,6 +156,8 @@ public:
     eActionType GetActionType(eControllerAction action);
     char* GetControllerSettingTextMouse(eControllerAction action);
     char* GetControllerSettingTextJoystick(eControllerAction action);
+    void StoreJoyButtonStates();
+    void HandleJoyButtonUpDown(int32 joyNo, bool isDown); // NOTSA
 
     void ClearSettingsAssociatedWithAction(eControllerAction action, eControllerType type);
     void MakeControllerActionsBlank();

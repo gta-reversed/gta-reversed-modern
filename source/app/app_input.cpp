@@ -2,6 +2,7 @@
 
 #include "app_input.h"
 #include "platform.h"
+#include "ControllerConfigManager.h"
 
 void AppInputInjectHooks() {
     RH_ScopedCategory("App");
@@ -12,9 +13,12 @@ void AppInputInjectHooks() {
     RH_ScopedGlobalInstall(HandleKeyDown, 0x743DF0);
     RH_ScopedGlobalInstall(HandleKeyUp, 0x7443C0);
     RH_ScopedGlobalInstall(KeyboardHandler, 0x744880);
-    RH_ScopedGlobalInstall(HandlePadButtonDown, 0x7448B0, {.reversed = false});
-    RH_ScopedGlobalInstall(HandlePadButtonUp, 0x744930, {.reversed = false});
-    RH_ScopedGlobalInstall(PadHandler, 0x7449F0, {.reversed = false});
+
+    // Can't hook these, because argument is passed in eax (And I don't feel like dealing with that)
+    //RH_ScopedGlobalInstall(HandlePadButtonDown, 0x7448B0);
+    //RH_ScopedGlobalInstall(HandlePadButtonUp, 0x744930);
+
+    RH_ScopedGlobalInstall(PadHandler, 0x7449F0);
 }
 
 // 0x744A20
@@ -167,12 +171,14 @@ RsEventStatus KeyboardHandler(RsEvent event, void* param) {
 
 // 0x7448B0
 RsEventStatus HandlePadButtonDown(RsKeyStatus* param) {
-    return plugin::CallAndReturn<RsEventStatus, 0x7448B0, RsKeyStatus*>(param);
+    ControlsManager.HandleJoyButtonUpDown(CPad::padNumber ? 1 : 0, true);
+    return rsEVENTPROCESSED;
 }
 
 // 0x744930
 RsEventStatus HandlePadButtonUp(RsKeyStatus* param) {
-    return plugin::CallAndReturn<RsEventStatus, 0x744930, RsKeyStatus*>(param);
+    ControlsManager.HandleJoyButtonUpDown(CPad::padNumber ? 1 : 0, false);
+    return rsEVENTPROCESSED;
 }
 
 // 0x7449F0
