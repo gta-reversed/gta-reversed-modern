@@ -231,6 +231,7 @@
 #include "TaskComplexWanderMedic.h"
 #include "TaskComplexMoveBackAndJump.h"
 #include "TaskSimpleCarDriveTimed.h"
+#include "TaskComplexKillPedOnFootStealth.h"
 #include "TaskComplexDriveWander.h"
 #include "TaskSimpleStealthKill.h"
 #include "TaskSimpleCarSetPedOut.h"
@@ -805,11 +806,11 @@ void InjectHooksMain() {
         CTaskComplexInvestigateDisturbance::InjectHooks();
         // CTaskComplexKillAllThreats::InjectHooks();
         // CTaskComplexKillCriminal::InjectHooks();
-        
+
         CTaskComplexKillPedOnFootArmed::InjectHooks();
         CTaskComplexKillPedGroupOnFoot::InjectHooks();
         CTaskComplexKillPedOnFootMelee::InjectHooks();
-        // CTaskComplexKillPedOnFootStealth::InjectHooks();
+        CTaskComplexKillPedOnFootStealth::InjectHooks();
 
         CTaskComplexLeaveCarAndDie::InjectHooks();
         CTaskComplexLeaveBoat::InjectHooks();
