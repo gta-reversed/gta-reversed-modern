@@ -9,11 +9,13 @@
 struct tMessage {
     tMessage(
         const char* pText,
+        char* str,
         uint16 nFlags,
         uint32 nTime,
         bool bPreviousBrief
     ) :
         m_pText{ pText },
+        m_pString{str},
         m_nFlags{nFlags },
         m_nTime{ nTime },
         m_nStartTime{ CTimer::GetTimeInMS() },

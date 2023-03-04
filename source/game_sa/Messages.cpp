@@ -22,7 +22,7 @@ void CMessages::InjectHooks() {
     RH_ScopedInstall(AddMessageJumpQWithNumber, 0x69E4E0, { .reversed = false });
     RH_ScopedInstall(AddBigMessageWithNumber, 0x69E5F0, { .reversed = false });
     RH_ScopedInstall(AddBigMessageWithNumberQ, 0x69E6E0, { .reversed = false });
-    RH_ScopedInstall(AddMessageWithString, 0x69E800, { .reversed = false });
+    RH_ScopedInstall(AddMessageWithString, 0x69E800);
     RH_ScopedInstall(AddMessageJumpQWithString, 0x69E950, { .reversed = false });
     RH_ScopedInstall(ClearThisPrint, 0x69EA30, { .reversed = false });
     RH_ScopedInstall(ClearThisBigPrint, 0x69EBE0, { .reversed = false });
@@ -57,15 +57,19 @@ tMessage* CMessages::FindFreeBriefMessage() {
 // Adds message to queue
 // 0x69F0B0
 void CMessages::AddMessage(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
+    AddMessageWithString(text, time, flag, nullptr, bPreviousBrief);
+}
+
+// Adds message with string to queue
+// 0x69E800
+void CMessages::AddMessageWithString(const char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief) {
     /* Some string copy code here */
 
     const auto msg = FindFreeBriefMessage();
     if (!msg) {
         return;
     }
-
-    *msg = { text, flag, time, bPreviousBrief };
-
+    new (msg) tMessage{ text, string, flag, time, bPreviousBrief };
     if (msg == &BriefMessages.front() && bPreviousBrief) {
 		AddToPreviousBriefArray(
 			msg->m_pText,
@@ -84,15 +88,10 @@ void CMessages::AddMessage(const char* text, uint32 time, uint16 flag, bool bPre
 // 0x69F1E0
 void CMessages::AddMessageJumpQ(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
     /* unused string copy here */
-    BriefMessages.front() = { text, flag, time, bPreviousBrief };
+    BriefMessages.front() = { text, nullptr, flag, time, bPreviousBrief };
     AddToPreviousBriefArray(text, -1, -1, -1, -1, -1, -1, 0);
 }
 
-// Adds message with string to queue
-// 0x69E800
-void CMessages::AddMessageWithString(const char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief) {
-    plugin::Call<0x69E800, const char*, uint32, uint16, const char*, bool>(text, time, flag, string, bPreviousBrief);
-}
 
 // Adds message with numbers to queue
 // 0x69E360
