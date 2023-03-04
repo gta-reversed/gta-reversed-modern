@@ -516,6 +516,7 @@ void CIplStore::LoadIpls(CVector posn, bool bAvoidLoadInPlayerVehicleMovingDirec
                 continue;
             }
             ProcessEntity(ped);
+            break;
         }
         case MISSION_CLEANUP_ENTITY_TYPE_VEHICLE: {
             const auto veh = GetVehiclePool()->GetAtRef(mce.handle);
