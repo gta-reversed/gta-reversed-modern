@@ -33,5 +33,4 @@ public:
         strcpy_s(m_szName, name); // Using `_s` variant here
     }
 };
-
 VALIDATE_SIZE(IplDef, 0x34);

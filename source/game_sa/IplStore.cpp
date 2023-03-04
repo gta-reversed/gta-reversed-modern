@@ -31,7 +31,7 @@ void CIplStore::InjectHooks() {
     RH_ScopedInstall(RequestIplAndIgnore, 0x405850);
     RH_ScopedInstall(LoadAllRemainingIpls, 0x405780);
     RH_ScopedInstall(RemoveAllIpls, 0x405720);
-    RH_ScopedInstall(HaveIplsLoaded, 0x405600, { .reversed = false });
+    RH_ScopedInstall(HaveIplsLoaded, 0x405600);
     RH_ScopedInstall(RequestIpls, 0x405520);
     RH_ScopedInstall(Load, 0x5D54A0, { .reversed = false });
     RH_ScopedInstall(Save, 0x5D5420, { .reversed = false });
@@ -231,32 +231,25 @@ int32 CIplStore::GetNewIplEntityIndexArray(int32 entitiesCount) {
 
 /*!
  * @addr 0x405600
+ * @returns If all IPLs around `coords` in a 190 unit radius have loaded
  */
-bool CIplStore::HaveIplsLoaded(const CVector& coords, int32 playerNumber) {
-    return plugin::CallAndReturn<bool, 0x405600, const CVector&, int32>(coords, playerNumber);
-
+bool CIplStore::HaveIplsLoaded(const CVector& coords, int32 /*playerNumber*/) {
     // Can't use `ms_pPool->GetAllValid()` here, because we must ignore the first slot (whenever it's valid or not).
+    bool ret = true;
     for (auto slot = 1; slot < TOTAL_IPL_MODEL_IDS; slot++) {
-       auto def = ms_pPool->GetAt(slot);
-       if (!def) {
-           continue;
-       }
-
+        auto def = ms_pPool->GetAt(slot);
+        if (!def) {
+            continue;
+        }
         if (!def->m_bLoadRequest) {
             continue;
         }
-
-        if (def->m_boundBox.IsPointInside(coords, -190.f) && !def->field_2D && !def->m_bDisableDynamicStreaming) {
-            // Stuff from 0x4056B9 should go here
-            // Should probably use a lambda here
-            // Also should figure out what field_2D is, otherwise this doesn't make a lot of sense.
-
-            return false;
-        } else {
-            def->m_bLoadRequest = false;
+        if (def->m_boundBox.IsPointInside(coords, notsa::IsFixBugs() ? 190.f : -190.f) && !def->m_IsLoaded && !def->m_bDisableDynamicStreaming) {
+            ret = false;
         }
+        def->m_bLoadRequest = false;
     }
-    return true;
+    return ret;
 }
 
 /*!
@@ -303,7 +296,7 @@ void CIplStore::LoadAllRemainingIpls() {
 
         if (CColAccel::isCacheLoading()) {
             *def = CColAccel::getIplDef(slot);
-            def->field_2D = false;
+            def->m_IsLoaded = false;
             ms_pQuadTree->AddItem(&def, def->m_boundBox);
         } else {
             CStreaming::RequestModel(IPLToModelId(slot), STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY);
@@ -319,7 +312,7 @@ void CIplStore::LoadAllRemainingIpls() {
  */
 bool CIplStore::LoadIpl(int32 iplSlotIndex, char* data, int32 dataSize) {
     auto& def = *GetInSlot(iplSlotIndex);
-    def.field_2D = true; // We're setting this here, as it's set in all cases.
+    def.m_IsLoaded = true; // We're setting this here, as it's set in all cases.
 
     // First of all, load bounding box (if not loaded already)
     if (def.m_boundBox.IsFlipped()) {
@@ -536,7 +529,7 @@ void CIplStore::RemoveAllIpls() {
  */
 void CIplStore::RemoveIpl(int32 iplSlotIndex) {
     auto def = ms_pPool->GetAt(iplSlotIndex);
-    def->field_2D = false;
+    def->m_IsLoaded = false;
 
     const auto ProcessPool = [iplSlotIndex]<typename PoolT>(PoolT& pool, int32 minId, int32 maxId) {
         for (auto i = minId; i < maxId; i++) {
@@ -582,7 +575,7 @@ void CIplStore::RemoveIplAndIgnore(int32 iplSlotIndex) {
  */
 void CIplStore::RemoveIplSlot(int32 iplSlotIndex) {
     auto def = ms_pPool->GetAt(iplSlotIndex);
-    if (def->field_2D) {
+    if (def->m_IsLoaded) {
         RemoveIpl(iplSlotIndex);
     }
     ms_pQuadTree->DeleteItem(def);
@@ -711,7 +704,7 @@ int32 CIplStore::SetupRelatedIpls(const char* iplFilePath, int32 entityArraysInd
                 def = CColAccel::getIplDef(slot);
                 def.m_nRelatedIpl = entityArraysIndex;
                 def.m_bInterior = isIPLAnInterior;
-                def.field_2D = false;
+                def.m_IsLoaded = false;
                 ms_pQuadTree->AddItem(&def, def.m_boundBox);
             }
         }
