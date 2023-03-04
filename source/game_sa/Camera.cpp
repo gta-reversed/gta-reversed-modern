@@ -1601,7 +1601,7 @@ bool CCamera::ConeCastCollisionResolve(const CVector& pos, const CVector& lookAt
         return false;
     }
 
-    if (CCollision::CameraConeCastVsWorldCollision(CSphere{ lookAt, radius }, CSphere{ pos, radius }, &outDist, minDist)) {
+    if (CCollision::CameraConeCastVsWorldCollision(CSphere{ lookAt, radius }, CSphere{ pos, radius }, outDist, minDist)) {
         outDest = lerp(lookAt, pos, outDist);
         return true;
     } else {
