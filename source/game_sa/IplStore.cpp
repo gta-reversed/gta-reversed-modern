@@ -704,42 +704,52 @@ void CIplStore::SetIsInterior(int32 iplSlotIndex, bool isInterior) {
     GetInSlot(iplSlotIndex)->m_bInterior = isInterior;
 }
 
+bool IsIPLAnInterior(const char* iplFileName) {
+    return rng::any_of(std::array{
+        "gen_int1",
+        "gen_int2",
+        "gen_int3",
+        "gen_int4",
+        "gen_int5",
+        "gen_intb",
+        "savehous",
+        "stadint",
+        "int_la",
+        "int_sf",
+        "int_veg",
+        "int_cont",
+        "levelmap"
+    }, [iplFileName](auto name) {
+        return _stricmp(iplFileName, name) == 0;
+    });
+}
+
+template<size_t N>
+bool ExtractIPLNameFromPath(const char* iplFilePath, char(&out)[N]) {
+    // Extract name of IPL from path
+    const auto fileNameWithExt = strrchr(iplFilePath, '\\');
+    if (!fileNameWithExt) {
+        DEV_LOG("Failed to extract ipl name from path ({}) [No path separator]", iplFilePath);
+        return false;
+    }
+    const auto dot = strchr(fileNameWithExt, '.');
+    if (!dot) {
+        DEV_LOG("Failed to extract ipl name from path ({}) [No file ext]", iplFilePath);
+        return false;
+    }
+    memcpy_s(out, rng::size(out), fileNameWithExt + 1, dot - (fileNameWithExt + 1)); // They used a manual loop, but this is better.
+    return true;
+}
+
 /*!
  * @addr 0x404DE0
  */
 int32 CIplStore::SetupRelatedIpls(const char* iplFilePath, int32 entityArraysIndex, CEntity** pIPLInsts) {
-    char iplName[32]{};
-
-    // Extract name of IPL from path
-    if (const auto pathSep = strrchr(iplFilePath, '\\')) { // Find last path separator
-        if (const auto dot = strchr(pathSep, '.')) {
-            memcpy_s(iplName, sizeof(iplName), pathSep + 1, dot - (pathSep + 1)); // They used a manual loop, but this is better.
-        } else {
-            return 0;
-        }
-    } else {
+    char iplName[1024]{}; // OG Size: 32
+    if (!ExtractIPLNameFromPath(iplFilePath, iplName)) {
         return 0;
     }
-
-    const auto isIPLAnInterior = [&iplName] {
-        if (!_stricmp(iplName, "gen_int1") ||
-            !_stricmp(iplName, "gen_int2") ||
-            !_stricmp(iplName, "gen_int3") ||
-            !_stricmp(iplName, "gen_int4") ||
-            !_stricmp(iplName, "gen_int5") ||
-            !_stricmp(iplName, "gen_intb") ||
-            !_stricmp(iplName, "savehous") ||
-            !_stricmp(iplName, "stadint")  ||
-            !_stricmp(iplName, "int_la")   ||
-            !_stricmp(iplName, "int_sf")   ||
-            !_stricmp(iplName, "int_veg")  ||
-            !_stricmp(iplName, "int_cont") ||
-            !_stricmp(iplName, "levelmap")
-        ) {
-            return true;
-        }
-        return false;
-    }();
+    const auto isIPLAnInterior = IsIPLAnInterior(iplName);
 
     strcat_s(iplName, "_stream");
     const auto iplNameLen = strlen(iplName);
@@ -748,22 +758,24 @@ int32 CIplStore::SetupRelatedIpls(const char* iplFilePath, int32 entityArraysInd
 
     if (CColAccel::isCacheLoading()) { // NOTSA: Inverted conditional
         for (auto&& [slot, def] : ms_pPool->GetAllValidWithIndex()) {
-            if (!_strnicmp(iplName, def.m_szName, iplNameLen /*they used strlen(iplName), but we optimized it*/)) {
-                def = CColAccel::getIplDef(slot);
-                def.m_nRelatedIpl = entityArraysIndex;
-                def.m_bInterior = isIPLAnInterior;
-                def.m_IsLoaded = false;
-                ms_pQuadTree->AddItem(&def, def.m_boundBox);
+            if (_strnicmp(iplName, def.m_szName, iplNameLen)) {
+                continue;
             }
+            def = CColAccel::getIplDef(slot);
+            def.m_nRelatedIpl = entityArraysIndex;
+            def.m_bInterior = isIPLAnInterior;
+            def.m_IsLoaded = false;
+            ms_pQuadTree->AddItem(&def, def.m_boundBox);
         }
     } else {
         for (auto&& [slot, def] : ms_pPool->GetAllValidWithIndex()) {
-            if (!_strnicmp(iplName, def.m_szName, iplNameLen /*they used strlen(iplName), but we optimized it*/)) {
-                def.m_nRelatedIpl = entityArraysIndex;
-                def.m_bInterior = isIPLAnInterior;
-                def.m_bDisableDynamicStreaming = false; // NOTE: Inlined function was used to set this.
-                CStreaming::RequestModel(IPLToModelId(slot), STREAMING_KEEP_IN_MEMORY);
+            if (_strnicmp(iplName, def.m_szName, iplNameLen)) {
+                continue;
             }
+            def.m_nRelatedIpl = entityArraysIndex;
+            def.m_bInterior = isIPLAnInterior;
+            def.m_bDisableDynamicStreaming = false; // NOTE: Inlined function was used to set this.
+            CStreaming::RequestModel(IPLToModelId(slot), STREAMING_KEEP_IN_MEMORY);
         }
         CStreaming::LoadAllRequestedModels(false);
     }
