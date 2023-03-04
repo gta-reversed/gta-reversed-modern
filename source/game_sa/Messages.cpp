@@ -19,11 +19,11 @@ void CMessages::InjectHooks() {
     RH_ScopedInstall(InsertStringInString, 0x69E040, { .reversed = false });
     RH_ScopedInstall(InsertPlayerControlKeysInString, 0x69E160, { .reversed = false });
     RH_ScopedInstall(AddMessageWithNumber, 0x69E360);
-    RH_ScopedInstall(AddMessageJumpQWithNumber, 0x69E4E0, { .reversed = false });
-    RH_ScopedInstall(AddBigMessageWithNumber, 0x69E5F0, { .reversed = false });
-    RH_ScopedInstall(AddBigMessageWithNumberQ, 0x69E6E0, { .reversed = false });
+    RH_ScopedInstall(AddMessageJumpQWithNumber, 0x69E4E0);
+    RH_ScopedInstall(AddBigMessageWithNumber, 0x69E5F0);
+    RH_ScopedInstall(AddBigMessageWithNumberQ, 0x69E6E0);
     RH_ScopedInstall(AddMessageWithString, 0x69E800);
-    RH_ScopedInstall(AddMessageJumpQWithString, 0x69E950, { .reversed = false });
+    RH_ScopedInstall(AddMessageJumpQWithString, 0x69E950);
     RH_ScopedInstall(ClearThisPrint, 0x69EA30, { .reversed = false });
     RH_ScopedInstall(ClearThisBigPrint, 0x69EBE0, { .reversed = false });
     RH_ScopedInstall(ClearThisPrintBigNow, 0x69ED80, { .reversed = false });
@@ -32,9 +32,9 @@ void CMessages::InjectHooks() {
     RH_ScopedInstall(Process, 0x69EE60, { .reversed = false });
     RH_ScopedInstall(Display, 0x69EFC0, { .reversed = false });
     RH_ScopedInstall(AddMessage, 0x69F0B0);
-    RH_ScopedInstall(AddMessageJumpQ, 0x69F1E0, { .reversed = false });
-    RH_ScopedInstall(AddBigMessage, 0x69F2B0, { .reversed = false });
-    RH_ScopedInstall(AddBigMessageQ, 0x69F370, { .reversed = false });
+    RH_ScopedInstall(AddMessageJumpQ, 0x69F1E0);
+    RH_ScopedInstall(AddBigMessage, 0x69F2B0);
+    RH_ScopedInstall(AddBigMessageQ, 0x69F370);
 }
 
 // Initialises messages
@@ -44,8 +44,9 @@ void CMessages::Init() {
     rng::fill(PreviousBriefs, tPreviousBrief{});
 }
 
-tMessage* CMessages::FindFreeBriefMessage() {
-    for (auto& msg : BriefMessages) {
+template<size_t N>
+tMessage* FindUnusedMsgInArray(std::array<tMessage, N>& arr) {
+    for (auto& msg : arr) {
         if (!msg.m_pText) {
             return &msg;
         }
@@ -54,37 +55,26 @@ tMessage* CMessages::FindFreeBriefMessage() {
     return nullptr;
 }
 
-// Adds message to queue
-// 0x69F0B0
-void CMessages::AddMessage(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
-    /* Some string copy code here */
-    AddMessage2(text, time, flag, bPreviousBrief);
+// notsa
+tMessage* CMessages::FindFreeBriefMessage() {
+    return FindUnusedMsgInArray(BriefMessages);
 }
 
-// Adds message with string to queue
-// 0x69E800
-void CMessages::AddMessageWithString(const char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief) {
-    /* Some string copy code here */
-    AddMessage2(text, time, flag, bPreviousBrief);
-}
+/*********************
+* BRIEF MESSAGES
+**********************/
 
-// Adds message and shows it instantly
-// 0x69F1E0
-void CMessages::AddMessageJumpQ(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
-    /* unused string copy here */
-    BriefMessages.front() = { text, nullptr, flag, time, bPreviousBrief };
-    AddToPreviousBriefArray(text, -1, -1, -1, -1, -1, -1, 0);
-}
 /*!
 * Add a new brief message.
 * @param text           The text (Possibly with format characters, eg.: ~~~~
 * @param flag           Flags
 * @param bPreviousBrief Whenever to call `AddToPreviousBriefArray`
+* @param showInstantly  Whenever to show the message instantly
 * @param str            String to insert [May be null]
 * @param numbers        Numbers to insert (Use -1 as placeholder)
 * @notsa
 */
-void CMessages::AddMessage2(const char* text, uint32 time, uint16 flag, bool bPreviousBrief, char* str, std::optional<std::array<int32, 6>> numbers) {
+void CMessages::AddMessage2(const char* text, uint32 time, uint16 flag, bool bPreviousBrief, bool showInstantly, char* str, std::optional<std::array<int32, 6>> numbers) {
     const auto msg = FindFreeBriefMessage();
     if (!msg) {
         return;
@@ -97,7 +87,7 @@ void CMessages::AddMessage2(const char* text, uint32 time, uint16 flag, bool bPr
         bPreviousBrief,
         numbers
     };
-    if (msg == &BriefMessages.front() && bPreviousBrief) {
+    if (bPreviousBrief && (showInstantly || msg == &BriefMessages.front())) {
 		AddToPreviousBriefArray(
 			msg->m_pText,
 			msg->m_nNumber[0],
@@ -111,48 +101,106 @@ void CMessages::AddMessage2(const char* text, uint32 time, uint16 flag, bool bPr
     }
 }
 
+/*!
+* Adds message to queue
+* @addr 0x69F0B0
+*/
+void CMessages::AddMessage(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
+    /* Some string copy code here */
+    AddMessage2(text, time, flag, bPreviousBrief);
+}
 
-// Adds message with numbers to queue
-// 0x69E360
+/*!
+* Adds message to queue [With string in `text`]
+* @addr 0x69E800
+*/
+void CMessages::AddMessageWithString(const char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief) {
+    /* Some string copy code here */
+    AddMessage2(text, time, flag, bPreviousBrief, false, string);
+}
+
+/*!
+* Show a message instantly
+* @addr 0x69F1E0
+*/
+void CMessages::AddMessageJumpQ(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
+    /* unused string copy here */
+    AddMessage2(text, time, flag, bPreviousBrief, true);
+}
+
+/*!
+* Adds message to queue [With numbers in `text`]
+* @addr 0x69E360
+*/
 void CMessages::AddMessageWithNumber(const char* text, uint32 time, uint16 flag, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, bool bPreviousBrief) {
     /* Some string copy code here */
-    AddMessage2(text, time, flag, bPreviousBrief, nullptr, { { n1, n2, n3, n4, n5, n6 } });
+    AddMessage2(text, time, flag, bPreviousBrief, false, nullptr, { { n1, n2, n3, n4, n5, n6 } });
 }
 
-// Adds message with numbers and shows it instantly
-// 0x69E4E0
+/*!
+* Show a message instantly [With numbers in `text`]
+* @addr 0x69E4E0
+*/
 void CMessages::AddMessageJumpQWithNumber(const char* text, uint32 time, uint16 flag, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, bool bPreviousBrief) {
-    plugin::Call<0x69E4E0, const char*, uint32, uint16, int32, int32, int32, int32, int32, int32, bool>(text, time, flag, n1, n2, n3, n4, n5, n6, bPreviousBrief);
+    AddMessage2(text, time, flag, bPreviousBrief, false, nullptr, { { n1, n2, n3, n4, n5, n6 } });
 }
 
-// Adds message with string and shows it instantly
-// 0x69E950
+/*!
+* Show a message instantly [With a string in `text`]
+* @addr 0x69E950
+*/
 void CMessages::AddMessageJumpQWithString(const char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief) {
-    plugin::Call<0x69E950, const char*, uint32, uint16, const char*, bool>(text, time, flag, string, bPreviousBrief);
+    AddMessage2(text, time, flag, bPreviousBrief, false, string);
+}
+
+/*********************
+* BIG MESSAGES
+**********************/
+
+/*!
+* Add a new big message.
+* @param text           The text (Possibly with format characters, eg.: ~~~~)
+* @param bPreviousBrief Whenever to call `AddToPreviousBriefArray`
+* @param showInstantly  Whenever to show the message instantly
+* @param str            String to insert [May be null]
+* @param numbers        Numbers to insert (Use -1 as placeholder)
+* @notsa
+*/
+void CMessages::AddBigMessage2(const char* text, uint32 time, eMessageStyle style, char* str, std::optional<std::array<int32, 6>> numbers) {
+    if (const auto msg = FindUnusedMsgInArray(BIGMessages[style].m_Stack)) {
+        new (msg) tMessage{
+            text,
+            str,
+            0,
+            time,
+            false,
+            numbers
+        };
+    }
 }
 
 // Adds big message and shows it instantly
 // 0x69F2B0
 void CMessages::AddBigMessage(const char* text, uint32 time, eMessageStyle style) {
-    plugin::Call<0x69F2B0, const char*, uint32, eMessageStyle>(text, time, style);
+    AddBigMessage2(text, time, style);
 }
 
 // Adds big message to queue
 // 0x69F370
 void CMessages::AddBigMessageQ(const char* text, uint32 time, eMessageStyle style) {
-    plugin::Call<0x69F370, const char*, uint32, eMessageStyle>(text, time, style);
+    AddBigMessage2(text, time, style);
 }
 
 // Adds big message with numbers and shows it instantly
 // 0x69E5F0
 void CMessages::AddBigMessageWithNumber(const char* text, uint32 time, eMessageStyle style, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6) {
-    plugin::Call<0x69E5F0, const char*, uint32, eMessageStyle, int32, int32, int32, int32, int32, int32>(text, time, style, n1, n2, n3, n4, n5, n6);
+    AddBigMessage2(text, time, style, nullptr, { { n1, n2, n3, n4, n5, n6 } });
 }
 
 // Adds big message with numbers to queue
 // 0x69E6E0
 void CMessages::AddBigMessageWithNumberQ(const char* text, uint32 time, eMessageStyle style, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6) {
-    plugin::Call<0x69E6E0, const char*, uint32, eMessageStyle, int32, int32, int32, int32, int32, int32>(text, time, style, n1, n2, n3, n4, n5, n6);
+    AddBigMessageWithNumber(text, time, style, n1, n2, n3, n4, n5, n6);
 }
 
 // Adds message to previous brief

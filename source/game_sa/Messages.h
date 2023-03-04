@@ -40,7 +40,7 @@ struct tMessage {
 
 struct tBigMessage {
     tMessage m_Current;
-    tMessage m_Stack[3];
+    std::array<tMessage, 3> m_Stack;
 };
 
 struct tPreviousBrief {
@@ -63,12 +63,14 @@ public:
     static void AddMessage(const char* text, uint32 time, uint16 flag, bool bPreviousBrief);
     static void AddMessageJumpQ(const char* text, uint32 time, uint16 flag, bool bPreviousBrief);
     static void AddMessageWithString(const char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief);
-    static void AddMessage2(const char* text, uint32 time, uint16 flag, bool bPreviousBrief, char* str = nullptr, std::optional<std::array<int32, 6>> numbers = {});
+    static void AddMessage2(const char* text, uint32 time, uint16 flag, bool bPreviousBrief, bool showInstantly = false, char* str = nullptr, std::optional<std::array<int32, 6>> numbers = {});
     static void AddMessageWithNumber(const char* text, uint32 time, uint16 flag, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1, bool bPreviousBrief = false);
     static void AddMessageJumpQWithNumber(const char* text, uint32 time, uint16 flag, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1, bool bPreviousBrief = false);
     static void AddMessageJumpQWithString(const char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief);
 
     static void AddBigMessage(const char* text, uint32 time, eMessageStyle style);
+    static auto FindFreeMessageInBigMessage(eMessageStyle style) -> tMessage*;
+    static void AddBigMessage2(const char* text, uint32 time, eMessageStyle style, char* str = nullptr, std::optional<std::array<int32, 6>> numbers = {});
     static void AddBigMessageQ(const char* text, uint32 time, eMessageStyle style);
     static void AddBigMessageWithNumber(const char* text, uint32 time, eMessageStyle style, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1);
     static void AddBigMessageWithNumberQ(const char* text, uint32 time, eMessageStyle style, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1);
