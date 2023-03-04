@@ -31,6 +31,17 @@ struct tMessage {
         }
     }
 
+    ~tMessage() {
+        m_pText = nullptr; // This marks that this object is destroyed
+    }
+
+    //! If this object is in use
+    bool IsValid() const { return m_pText != nullptr; }
+
+    //! Ticks to disappear at
+    auto GetTimeToDisappearAtMS() const { return m_nStartTime + m_nTime; }
+
+
     const char*          m_pText{};
     uint16               m_nFlags{};
     uint32               m_nTime{};

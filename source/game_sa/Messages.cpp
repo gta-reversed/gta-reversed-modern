@@ -31,7 +31,7 @@ void CMessages::InjectHooks() {
     RH_ScopedInstall(Init, 0x69EE00);
     RH_ScopedInstall(ClearAllMessagesDisplayedByGame, 0x69EDC0);
     RH_ScopedInstall(Process, 0x69EE60, { .reversed = false });
-    RH_ScopedInstall(Display, 0x69EFC0, { .reversed = false });
+    RH_ScopedInstall(Display, 0x69EFC0);
     RH_ScopedInstall(AddMessageQ, 0x69F0B0);
     RH_ScopedInstall(AddMessageJump, 0x69F1E0);
     RH_ScopedInstall(AddBigMessage, 0x69F2B0);
@@ -512,7 +512,41 @@ void CMessages::InsertPlayerControlKeysInString(char* string) {
 // Processing messages. This is called from CWorld::Process
 // 0x69EE60
 void CMessages::Process() {
-    plugin::Call<0x69EE60>();
+    const auto ProcessMessagesArray = [](auto&& msgs) {
+        auto& f = msgs.front();
+        if (!f.IsValid()) { // Not even valid (Neither are the ones after it)
+            return;
+        }
+        if (CTimer::GetTimeInMS() <= f.GetTimeToDisappearAtMS()) { // Still visible
+            return;
+        }
+        std::destroy_at(&f); // First one disappeared, so we can delete it
+        std::shift_right(msgs.begin(), msgs.end(), 1);
+        std::destroy_at(&msgs.back()); // Last is def. unused now
+        if (f.IsValid()) { // front is now another object (because of the shift)
+            f.m_nStartTime = CTimer::GetTimeInMS();
+        }
+    };
+
+    // Process big messages
+    for (auto& omgVeryBig : BIGMessages) {
+        ProcessMessagesArray(omgVeryBig.m_Stack);
+	}
+
+    // Process briefs
+    ProcessMessagesArray(BriefMessages);
+    if (const auto f = BriefMessages.front(); f.IsValid()) {
+		AddToPreviousBriefArray(
+            f.m_pText,
+            f.m_nNumber[0],
+            f.m_nNumber[1],
+            f.m_nNumber[2],
+            f.m_nNumber[3],
+            f.m_nNumber[4],
+            f.m_nNumber[5],
+            f.m_pString
+        );
+    }
 }
 
 // Displays messages
