@@ -101,6 +101,8 @@ struct CControllerAction {
     CControllerKey Keys[4];
 };
 
+using ControlName = char[40];
+
 class CControllerConfigManager {
 public:
     bool              m_bJoyJustInitialised;
@@ -108,7 +110,7 @@ public:
     DIJOYSTATE2       m_OldJoyState;
     DIJOYSTATE2       m_NewJoyState;
 
-    char              m_arrControllerActionName[59][40]; // todo: 182
+    ControlName       m_arrControllerActionName[59];
     bool              m_ButtonStates[17];
     CControllerAction m_Actions[59];
 
@@ -159,6 +161,11 @@ public:
     void AffectPadFromKeyBoard();
     void AffectPadFromMouse();
     void DeleteMatchingActionInitiators(eControllerAction Action, int32 KeyToBeChecked, eControllerType ControllerTypeToBeChecked);
+
+    void GetDefinedKeyByGxtName(uint16 actionId, char* buf, uint16 bufsz);
+
+    // NOTSA
+    uint16 GetActionIDByName(std::string_view name);
 };
 VALIDATE_SIZE(CControllerConfigManager, 0x12E4);
 

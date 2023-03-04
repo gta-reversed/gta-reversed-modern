@@ -2,6 +2,7 @@
 
 #include "Messages.h"
 #include "Hud.h"
+#include <ControllerConfigManager.h>
 
 void CMessages::InjectHooks() {
     RH_ScopedClass(CMessages);
@@ -17,12 +18,12 @@ void CMessages::InjectHooks() {
     RH_ScopedInstall(ClearPreviousBriefArray, 0x69DE70);
     // RH_ScopedInstall(InsertNumberInString, 0x69DE90, { .reversed = false }); // Weird build error here
     RH_ScopedInstall(InsertStringInString, 0x69E040);
-    RH_ScopedInstall(InsertPlayerControlKeysInString, 0x69E160, { .reversed = false });
-    RH_ScopedInstall(AddMessageWithNumber, 0x69E360);
+    RH_ScopedInstall(InsertPlayerControlKeysInString, 0x69E160);
+    RH_ScopedInstall(AddMessageWithNumberQ, 0x69E360);
     RH_ScopedInstall(AddMessageJumpQWithNumber, 0x69E4E0);
     RH_ScopedInstall(AddBigMessageWithNumber, 0x69E5F0);
     RH_ScopedInstall(AddBigMessageWithNumberQ, 0x69E6E0);
-    RH_ScopedInstall(AddMessageWithString, 0x69E800);
+    RH_ScopedInstall(AddMessageWithStringQ, 0x69E800);
     RH_ScopedInstall(AddMessageJumpQWithString, 0x69E950);
     RH_ScopedInstall(ClearThisPrint, 0x69EA30);
     RH_ScopedInstall(ClearThisBigPrint, 0x69EBE0);
@@ -31,8 +32,8 @@ void CMessages::InjectHooks() {
     RH_ScopedInstall(ClearAllMessagesDisplayedByGame, 0x69EDC0);
     RH_ScopedInstall(Process, 0x69EE60, { .reversed = false });
     RH_ScopedInstall(Display, 0x69EFC0, { .reversed = false });
-    RH_ScopedInstall(AddMessage, 0x69F0B0);
-    RH_ScopedInstall(AddMessageJumpQ, 0x69F1E0);
+    RH_ScopedInstall(AddMessageQ, 0x69F0B0);
+    RH_ScopedInstall(AddMessageJump, 0x69F1E0);
     RH_ScopedInstall(AddBigMessage, 0x69F2B0);
     RH_ScopedInstall(AddBigMessageQ, 0x69F370);
 }
@@ -55,11 +56,6 @@ tMessage* FindUnusedMsgInArray(std::array<tMessage, N>& arr) {
     return nullptr;
 }
 
-// notsa
-tMessage* CMessages::FindFreeBriefMessage() {
-    return FindUnusedMsgInArray(BriefMessages);
-}
-
 /*********************
 * BRIEF MESSAGES
 **********************/
@@ -75,46 +71,49 @@ tMessage* CMessages::FindFreeBriefMessage() {
 * @notsa
 */
 void CMessages::AddMessage2(const char* text, uint32 time, uint16 flag, bool bPreviousBrief, bool showInstantly, char* str, std::optional<std::array<int32, 6>> numbers) {
-    const auto msg = FindFreeBriefMessage();
-    if (!msg) {
-        return;
-    }
-    new (msg) tMessage{
-        text,
-        str,
-        flag,
-        time,
-        bPreviousBrief,
-        numbers
+    const auto CreateAt = [&](tMessage* p) {
+        new (p) tMessage{
+            text,
+            str,
+            flag,
+            time,
+            bPreviousBrief,
+            numbers
+        };
+        if (bPreviousBrief && (showInstantly || p == &BriefMessages.front())) {
+		    AddToPreviousBriefArray(
+			    p->m_pText,
+			    p->m_nNumber[0],
+			    p->m_nNumber[1],
+			    p->m_nNumber[2],
+			    p->m_nNumber[3],
+			    p->m_nNumber[4],
+			    p->m_nNumber[5],
+			    p->m_pString
+            );
+        }
     };
-    if (bPreviousBrief && (showInstantly || msg == &BriefMessages.front())) {
-		AddToPreviousBriefArray(
-			msg->m_pText,
-			msg->m_nNumber[0],
-			msg->m_nNumber[1],
-			msg->m_nNumber[2],
-			msg->m_nNumber[3],
-			msg->m_nNumber[4],
-			msg->m_nNumber[5],
-			msg->m_pString
-        );
+    if (showInstantly) {
+        CreateAt(&BriefMessages[0]);
+    } else if (const auto p = FindUnusedMsgInArray(BriefMessages)) {
+        CreateAt(p);
     }
 }
 
 /*!
-* Adds message to queue
+* Adds message to [Q]ueue
 * @addr 0x69F0B0
 */
-void CMessages::AddMessage(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
+void CMessages::AddMessageQ(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
     /* Some string copy code here */
-    AddMessage2(text, time, flag, bPreviousBrief);
+    AddMessage2(text, time, flag, bPreviousBrief, false);
 }
 
 /*!
-* Adds message to queue [With string in `text`]
+* Adds message to [Q]ueue [With a string in `text` that will be replaced by `string`]
 * @addr 0x69E800
 */
-void CMessages::AddMessageWithString(const char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief) {
+void CMessages::AddMessageWithStringQ(const char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief) {
     /* Some string copy code here */
     AddMessage2(text, time, flag, bPreviousBrief, false, string);
 }
@@ -123,16 +122,16 @@ void CMessages::AddMessageWithString(const char* text, uint32 time, uint16 flag,
 * Show a message instantly
 * @addr 0x69F1E0
 */
-void CMessages::AddMessageJumpQ(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
+void CMessages::AddMessageJump(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
     /* unused string copy here */
     AddMessage2(text, time, flag, bPreviousBrief, true);
 }
 
 /*!
-* Adds message to queue [With numbers in `text`]
+* Adds message to [Q]ueue [With numbers in `text`]
 * @addr 0x69E360
 */
-void CMessages::AddMessageWithNumber(const char* text, uint32 time, uint16 flag, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, bool bPreviousBrief) {
+void CMessages::AddMessageWithNumberQ(const char* text, uint32 time, uint16 flag, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, bool bPreviousBrief) {
     /* Some string copy code here */
     AddMessage2(text, time, flag, bPreviousBrief, false, nullptr, { { n1, n2, n3, n4, n5, n6 } });
 }
@@ -142,7 +141,7 @@ void CMessages::AddMessageWithNumber(const char* text, uint32 time, uint16 flag,
 * @addr 0x69E4E0
 */
 void CMessages::AddMessageJumpQWithNumber(const char* text, uint32 time, uint16 flag, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, bool bPreviousBrief) {
-    AddMessage2(text, time, flag, bPreviousBrief, false, nullptr, { { n1, n2, n3, n4, n5, n6 } });
+    AddMessage2(text, time, flag, bPreviousBrief, true, nullptr, { { n1, n2, n3, n4, n5, n6 } });
 }
 
 /*!
@@ -150,7 +149,7 @@ void CMessages::AddMessageJumpQWithNumber(const char* text, uint32 time, uint16 
 * @addr 0x69E950
 */
 void CMessages::AddMessageJumpQWithString(const char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief) {
-    AddMessage2(text, time, flag, bPreviousBrief, false, string);
+    AddMessage2(text, time, flag, bPreviousBrief, true, string);
 }
 
 /*********************
@@ -166,9 +165,9 @@ void CMessages::AddMessageJumpQWithString(const char* text, uint32 time, uint16 
 * @param numbers        Numbers to insert (Use -1 as placeholder)
 * @notsa
 */
-void CMessages::AddBigMessage2(const char* text, uint32 time, eMessageStyle style, char* str, std::optional<std::array<int32, 6>> numbers) {
-    if (const auto msg = FindUnusedMsgInArray(BIGMessages[style].m_Stack)) {
-        new (msg) tMessage{
+void CMessages::AddBigMessage2(const char* text, uint32 time, eMessageStyle style, bool showInstantly, char* str, std::optional<std::array<int32, 6>> numbers) {
+    const auto CreateAt = [&](auto* ptr) {
+        new (ptr) tMessage{
             text,
             str,
             0,
@@ -176,31 +175,36 @@ void CMessages::AddBigMessage2(const char* text, uint32 time, eMessageStyle styl
             false,
             numbers
         };
+    };
+    if (showInstantly) {
+        CreateAt(&BIGMessages[style].m_Stack[0]);
+    } else if (const auto p = FindUnusedMsgInArray(BIGMessages[style].m_Stack)) {
+        CreateAt(p);
     }
 }
 
 // Adds big message and shows it instantly
 // 0x69F2B0
 void CMessages::AddBigMessage(const char* text, uint32 time, eMessageStyle style) {
-    AddBigMessage2(text, time, style);
+    AddBigMessage2(text, time, style, true);
 }
 
-// Adds big message to queue
+// Adds big message to [Q]ueue
 // 0x69F370
 void CMessages::AddBigMessageQ(const char* text, uint32 time, eMessageStyle style) {
-    AddBigMessage2(text, time, style);
+    AddBigMessage2(text, time, style, false);
 }
 
 // Adds big message with numbers and shows it instantly
 // 0x69E5F0
 void CMessages::AddBigMessageWithNumber(const char* text, uint32 time, eMessageStyle style, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6) {
-    AddBigMessage2(text, time, style, nullptr, { { n1, n2, n3, n4, n5, n6 } });
+    AddBigMessage2(text, time, style, true, nullptr, {{n1, n2, n3, n4, n5, n6}});
 }
 
-// Adds big message with numbers to queue
+// Adds big message with numbers to [Q]ueue
 // 0x69E6E0
 void CMessages::AddBigMessageWithNumberQ(const char* text, uint32 time, eMessageStyle style, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6) {
-    AddBigMessageWithNumber(text, time, style, n1, n2, n3, n4, n5, n6);
+    AddBigMessage2(text, time, style, false, nullptr, { {n1, n2, n3, n4, n5, n6} });
 }
 
 // Adds message to previous brief
@@ -248,8 +252,12 @@ void CMessages::AddToPreviousBriefArray(const char* text, int32 n1, int32 n2, in
 
 // Removes registered messages
 // 0x69DCD0
-void CMessages::ClearMessages(bool flag) {
-    rng::fill(BIGMessages, tBigMessage{});
+void CMessages::ClearMessages(bool bIgnoreMissionTitle) {
+    for (auto i = BIGMessages.size(); i-- > 0;) {
+        if (bIgnoreMissionTitle || (i != STYLE_BOTTOM_RIGHT && i != STYLE_MIDDLE_SMALLER_HIGHER)) {
+            BIGMessages[i] = {};
+        }
+    }
     ClearSmallMessagesOnly();
 }
 
@@ -366,7 +374,7 @@ void CMessages::StringCopy(char* dest, const char* src, uint16 len) {
 * @addr 0x69DBD0
 */
 bool CMessages::StringCompare(const char* str1, const char* str2, uint16 len) {
-    return strncmp(str1, str2, len);
+    return strncmp(str1, str2, len) == 0;
 }
 
 // 0x69DC50
@@ -374,7 +382,8 @@ void CMessages::CutString(int32 count, const char* str, char** dest) {
     NOTSA_UNREACHABLE(); // unused
 }
 
-void StringReplace(const char* haystack, std::string_view needle, char* dst, auto&& Replace) {
+template<size_t N>
+void StringReplace(const char* haystack, const char (&needle)[N], char* dst, auto&& Replace) {
     // Based on https://stackoverflow.com/a/32413923
     auto        pdst = dst;
     const char* phs  = haystack;
@@ -384,7 +393,7 @@ void StringReplace(const char* haystack, std::string_view needle, char* dst, aut
 
         // walked past last occurrence of needle; copy remaining part
         if (!pneedle) {
-            pdst = std::copy(phs, phs + strlen(phs), pdst);
+            pdst = std::copy(phs, phs + strlen(phs) + 1, pdst);
             break;
         }
 
@@ -395,13 +404,17 @@ void StringReplace(const char* haystack, std::string_view needle, char* dst, aut
         pdst = Replace(pdst);
 
         // adjust pointers, move on
-        phs = pneedle + needle.size();
+        phs = pneedle + (N - 1);
     }
 }
 
 // Insert numbers into string
 // 0x69DE90
 void CMessages::InsertNumberInString(const char* str, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, char* dst) {
+    if (!str) { // Appereantly that's valid?
+        *dst = 0; // Null terminate result anyways
+        return;
+    }
     StringReplace(str, "~1~", dst, [n = 0, numbers = std::array{ n1, n2, n3, n4, n5, n6 }](char* where) mutable {
         // Originally they used sprintf + AsciiToGxtChar, but this should work for now (Until we start using GtxChar properly)
         return std::format_to(where, "{}", numbers[n++]);
@@ -411,6 +424,10 @@ void CMessages::InsertNumberInString(const char* str, int32 n1, int32 n2, int32 
 // Inserts string into src
 // 0x69E040
 void CMessages::InsertStringInString(char* target, char* replacement) {
+    if (!target || !replacement) { // Appereantly that's valid?
+        return;
+    }
+
     char buf[400];
     strcpy_s(buf, target);
     StringReplace(buf, "~1~", target, [&, szrepl = strlen(replacement)](char* where) {
@@ -420,8 +437,76 @@ void CMessages::InsertStringInString(char* target, char* replacement) {
 
 // Inserts key events into string
 // 0x69E160
-void CMessages::InsertPlayerControlKeysInString(const char* string) {
-    plugin::Call<0x69E160, const char*>(string);
+void CMessages::InsertPlayerControlKeysInString(char* string) {
+    char haystack[400];
+    strcpy_s(haystack, string);
+
+    // Based on https://stackoverflow.com/a/32413923
+    auto        pDst = string;
+    const char* pHS  = haystack;
+
+    // Skip over a portion in the haystack and copy it into `dst`
+    const auto SkipTo = [&](const char* to) {
+        pDst = std::copy(pHS, to, pDst);
+        pHS  = to;
+    };
+
+    // An action is in the format of ~k~~ACTION_NAME_HERE~
+    // We tolerate errors because this function is called for all strings printed on the screen
+    // So in case it's a debug string that happens to contain ~k~ we don't want to `assert` and crash.
+    for(;;) {
+        const auto pNeedle = strstr(pHS, "~k~~");
+
+        // walked past last occurrence of needle; copy remaining part (up to the end)
+        if (!pNeedle) {
+            SkipTo(pHS + strlen(pHS));
+            break;
+        }
+
+        // Now pneedle points at the beginning of ~k~~
+        // there should be another `~` after it, and in
+        // [pControlName, pend) should be the action name
+        const auto pControlName = pNeedle + 4; // + 4 to skip `~k~~`
+
+        const auto pNameEnd = strchr(pControlName, '~');  
+
+        // If not found, skip `~k`, as that for sure won't be a valid format string the next time. (This way ~k~k would still work)
+        if (!pNameEnd) {
+            DEV_LOG("Closing tag of ~k~ not found [String: {}]", haystack);
+            SkipTo(pHS + 2);
+            continue;
+        }
+        
+        // Okay, find this action's ID
+        const auto actionName = std::string_view{ pControlName, pNameEnd };
+        const auto actionId   = ControlsManager.GetActionIDByName(actionName);
+
+        // If not found we know the location of the next `~`, so skip to there
+        if (actionId == (uint16)-1) {
+            SkipTo(pNameEnd);
+            DEV_LOG("Invalid action name({}) [String: {}]", std::string_view{ pNeedle, pNameEnd }, haystack);
+            continue;
+        }
+
+        // Copy stuff from before the control name (Using SkipTo for ease of life)
+        SkipTo(pNeedle);
+
+        // Get action name....
+        char aname[256];
+        ControlsManager.GetDefinedKeyByGxtName(actionId, aname, (uint16)std::size(aname));
+
+        // ...and insert it into the string.
+        // This is kinda shit for now, as we  don't know the 
+        // size of the output (dst) buffer so we might as
+        // well just be writing over the stack :)
+        pDst = std::copy(aname, aname + strlen(aname), pDst);
+
+        // We don't use SkipTo here, as we don't want to copy anything
+        pHS  = pNameEnd + 1; // Go past the `~` that's after the control name
+    }
+
+    // null terminate
+    *pDst = 0;
 }
 
 // Processing messages. This is called from CWorld::Process
