@@ -13,7 +13,7 @@ void CMessages::InjectHooks() {
     RH_ScopedInstall(CutString, 0x69DC50, { .reversed = false });
     RH_ScopedInstall(ClearMessages, 0x69DCD0, { .reversed = false });
     RH_ScopedInstall(ClearSmallMessagesOnly, 0x69DD30);
-    RH_ScopedInstall(AddToPreviousBriefArray, 0x69DD50, { .reversed = false });
+    RH_ScopedInstall(AddToPreviousBriefArray, 0x69DD50);
     RH_ScopedInstall(ClearPreviousBriefArray, 0x69DE70);
     // RH_ScopedInstall(InsertNumberInString, 0x69DE90, { .reversed = false }); // Weird build error here
     RH_ScopedInstall(InsertStringInString, 0x69E040, { .reversed = false });
@@ -206,7 +206,44 @@ void CMessages::AddBigMessageWithNumberQ(const char* text, uint32 time, eMessage
 // Adds message to previous brief
 // 0x69DD50
 void CMessages::AddToPreviousBriefArray(const char* text, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, char* string) {
-    plugin::Call<0x69DD50, const char*, int32, int32, int32, int32, int32, int32, const char*>(text, n1, n2, n3, n4, n5, n6, string);
+    const auto numbers = std::array{ n1, n2, n3, n4, n5, n6 };
+
+    // Find unused entry + duplicate check
+    size_t i = 0;
+    for (; i < PreviousBriefs.size(); i++) {
+        const auto& prev = PreviousBriefs[i];
+        if (!prev.m_pText) {
+            break; // Found unused
+        }
+        // Check if it's a duplicate of the one we're about to insert
+        if (prev.m_pText != text || prev.m_pString != string) { // I mean that's a pretty naive way, but okay
+            continue;
+        }
+        if (numbers != prev.m_nNumber) {
+            continue; 
+        }
+        return; // Duplicate messages after each other, so skip
+    }
+
+    // In case no free entries were found we overwrite the last one
+    if (i == PreviousBriefs.size()) {
+        i = PreviousBriefs.size() - 1;
+    }
+
+    // Move entries so that we overwrite the unused entry at `i` and thus free up the 0th entry
+    // if `i == 0` this won't do anything.
+    std::shift_right(
+        PreviousBriefs.begin(),
+        PreviousBriefs.begin() + i,
+        1
+    );
+
+    // Now construct at the 0th enry (as it's now freed up)
+    new (&PreviousBriefs[0]) tPreviousBrief {
+        .m_pText   = text,
+        .m_nNumber = numbers,
+        .m_pString = string,
+    };
 }
 
 // Removes registered messages

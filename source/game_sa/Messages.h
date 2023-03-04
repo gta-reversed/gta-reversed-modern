@@ -29,13 +29,13 @@ struct tMessage {
         }
     }
 
-    const char* m_pText{};
-    uint16      m_nFlags{};
-    uint32      m_nTime{};
-    uint32      m_nStartTime{};
-    int32       m_nNumber[6]{};
-    char*       m_pString{};
-    uint8       m_bPreviousBrief{};
+    const char*          m_pText{};
+    uint16               m_nFlags{};
+    uint32               m_nTime{};
+    uint32               m_nStartTime{};
+    std::array<int32, 6> m_nNumber{};
+    char*                m_pString{};
+    uint8                m_bPreviousBrief{};
 };
 
 struct tBigMessage {
@@ -44,9 +44,9 @@ struct tBigMessage {
 };
 
 struct tPreviousBrief {
-    char* m_pText{};
-    int32 m_nNumber[6]{};
-    char* m_pString{};
+    const char*          m_pText{};
+    std::array<int32, 6> m_nNumber{};
+    char*                m_pString{};
 };
 
 class CMessages {
@@ -99,7 +99,7 @@ public:
     static void Display(bool flag);
 
     // NOTSA helpers
-    static void InsertNumberInString(char* text, int32* n, char* dst) {
+    static void InsertNumberInString(const char* text, auto&& n, char* dst) {
         InsertNumberInString(text, n[0], n[1], n[2], n[3], n[4], n[5], dst);
     }
 };
