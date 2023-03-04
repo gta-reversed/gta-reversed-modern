@@ -8,16 +8,6 @@
 #pragma comment(lib, "dxguid.lib")
 
 namespace WinInput {
-void InjectHooks() {
-    RH_ScopedCategory("Win");
-    RH_ScopedNamespaceName("Input");
-
-    //RH_ScopedGlobalInstall(Initialise, 0x7487CF, { .reversed = false }); 
-    //RH_ScopedGlobalInstall(InitialiseMouse, 0x7469A0, { .reversed = false }); // Can't be hooked because it fails with ACCESS DENIED and crashes
-    //RH_ScopedGlobalInstall(InitialiseJoys, 0x7485C0, {.reversed = false});
-    RH_ScopedGlobalInstall(EnumDevicesCallback, 0x747020);
-}
-
 // 0x746990
 HRESULT CreateInput() {
     if (PSGLOBAL(diInterface)) {
@@ -41,7 +31,7 @@ bool Initialise() {
     }
 
     InitialiseMouse(false);
-    InitialiseJoys();
+    diPadInit();
 
     return true;
 }
@@ -65,9 +55,104 @@ void InitialiseMouse(bool exclusive) {
     WIN_FCHECK(PSGLOBAL(diMouse)->Acquire());
 }
 
+// 0x746D80
+HRESULT diPadSetRanges(LPDIRECTINPUTDEVICE8 dev, DWORD padNum) {
+    if (dev == NULL) {
+        return S_OK; // Weird but okay
+    }
+
+    enum {
+        NO_PROPERTY,    // Device doesn't have this property
+        PROP_READ_ONLY, // Deivce does have this property, but it's read-only
+        SUCCESS         // Device has property and we've set it successfully
+    };
+
+    const auto SetPropery = [&](DWORD prop) {
+        // Set ranges
+        DIDEVICEOBJECTINSTANCEA objinfo{
+            sizeof(DIDEVICEOBJECTINSTANCEA)
+        };
+        DIPROPRANGE range{
+            .diph = DIPROPHEADER{
+                .dwSize       = sizeof(DIPROPRANGE),
+                .dwHeaderSize = sizeof(DIPROPHEADER),
+                .dwObj        = prop,
+                .dwHow        = DIPH_BYOFFSET,
+            },
+            .lMin = -2000,
+            .lMax = 2000,
+        };
+        if (FAILED(dev->GetObjectInfo(&objinfo, prop, DIPH_BYOFFSET))) {
+            return NO_PROPERTY; 
+        }
+        if (FAILED(dev->SetProperty(DIPROP_RANGE, &range.diph))) {
+            return PROP_READ_ONLY; 
+        }
+        return SUCCESS; 
+    };
+
+    if (SetPropery(DIJOFS_X) == PROP_READ_ONLY) {
+        return S_FALSE;
+    }
+
+    if (SetPropery(DIJOFS_Y) == PROP_READ_ONLY) {
+        return S_FALSE;
+    }
+
+    const auto SetProperyAndSetFlag = [&](DWORD prop, bool& flag) {
+        const auto res = SetPropery(DIJOFS_Z);
+        if (res != NO_PROPERTY) {
+            flag = true;
+        }
+        return res;
+    };
+
+    if (SetProperyAndSetFlag(DIJOFS_Z, PadConfigs[padNum].zAxisPresent) == PROP_READ_ONLY) {
+        return S_FALSE;
+    }
+
+    if (SetProperyAndSetFlag(DIJOFS_RZ, PadConfigs[padNum].rzAxisPresent) == PROP_READ_ONLY) {
+        return S_FALSE;
+    }
+
+    return S_OK;
+}
+
+//! [NOTSA - From 0x7485C0] - Set device config product/vendor id
+void diPadSetPIDVID(LPDIRECTINPUTDEVICE8 dev, DWORD padNum) {
+    DIPROPDWORD vidpid{
+        .diph = DIPROPHEADER{
+            .dwSize       = sizeof(DIPROPDWORD),
+            .dwHeaderSize = sizeof(DIPROPHEADER),
+            .dwObj        = NULL,
+            .dwHow        = DIPH_DEVICE,
+        }
+    };
+    WIN_FCHECK(dev->GetProperty(DIPROP_VIDPID, &vidpid.diph));
+    auto& cfg = PadConfigs[padNum];
+    cfg.vendorId = LOWORD(vidpid.dwData);
+    cfg.vendorId = HIWORD(vidpid.dwData);
+}
+
 // 0x7485C0
-void InitialiseJoys() {
-    plugin::Call<0x7485C0>();
+void diPadInit() {
+    rng::fill(PadConfigs, CPadConfig{});
+
+    // Initialize devices (+ Set PSGLOBAL(diDeviceX) vars)
+    WIN_FCHECK(PSGLOBAL(diInterface)->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumDevicesCallback, NULL, DIEDFL_ALLDEVICES));
+    
+    // Pirulax: Original code queried the capabilities [for pad 0] too, but did nothing with it, so I'll skip that.
+
+    const auto InitializePad = [](LPDIRECTINPUTDEVICE8 dev, DWORD padNum) {
+        if (dev == NULL) {
+            return;
+        }
+        WIN_FCHECK(diPadSetRanges(dev, padNum));
+        diPadSetPIDVID(dev, padNum);
+        PadConfigs[padNum].present  = true;
+    };
+    InitializePad(PSGLOBAL(diDevice1), 0);
+    InitializePad(PSGLOBAL(diDevice2), 1);
 }
 
 // 0x747020
@@ -140,4 +225,15 @@ CMouseControllerState GetMouseState() {
 	return state;
 }
 
+void InjectHooks() {
+    RH_ScopedCategory("Win");
+    RH_ScopedNamespaceName("Input");
+
+    //RH_ScopedGlobalInstall(Initialise, 0x7487CF, { .reversed = false }); 
+    //RH_ScopedGlobalInstall(InitialiseMouse, 0x7469A0, { .reversed = false }); // Can't be hooked because it fails with ACCESS DENIED and crashes
+    //RH_ScopedGlobalInstall(InitialiseJoys, 0x7485C0, {.reversed = false});
+    RH_ScopedGlobalInstall(EnumDevicesCallback, 0x747020);
+    RH_ScopedGlobalInstall(diPadInit, 0x7485C0);
+    RH_ScopedGlobalInstall(diPadSetRanges, 0x746D80);
+}
 } // namespace WinInput

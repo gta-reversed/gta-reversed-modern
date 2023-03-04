@@ -101,6 +101,20 @@ struct CControllerAction {
     CControllerKey Keys[4];
 };
 
+struct CPadConfig {
+    int32 field_0{};
+    bool present{};         // Device exists
+    bool zAxisPresent{};    // Has property DIJOFS_Z
+    bool rzAxisPresent{};   // Has property DIJOFS_RZ
+private:
+    char __align{};
+public:
+    int32 vendorId{};
+    int32 productId{};
+};
+static inline auto& PadConfigs = StaticRef<std::array<CPadConfig, 2>, 0xC92144>();
+
+
 class CControllerConfigManager {
 public:
     bool              m_bJoyJustInitialised;
