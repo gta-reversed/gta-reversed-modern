@@ -2782,70 +2782,41 @@ enum eScriptCommands {
     COMMAND_POW                                           = 0x0AEE,
     COMMAND_LOG                                           = 0x0AEF, // 2799
 
-    // CLEO+
-    COMMAND_READ_STRUCT_OFFSET                            = 0x0D4E, // 3406
-    COMMAND_GET_CAR_ALARM                                 = 0x0E00, // 3584
-    COMMAND_CREATE_OBJECT_NO_SAVE                         = 0x0E01,
-    COMMAND_SET_CAR_GENERATOR_NO_SAVE                     = 0x0E02,
-    COMMAND_PERLIN_NOISE                                  = 0x0E03,
-    COMMAND_GET_NEXT_WEATHER                              = 0x0E04,
-    COMMAND_SET_NEXT_WEATHER                              = 0x0E05,
-    COMMAND_GET_RAIN_INTENSITY                            = 0x0E06,
-    COMMAND_SET_RAIN_INTENSITY                            = 0x0E07,
-    COMMAND_IS_CAR_SCRIPT_CONTROLLED                      = 0x0E08,
-    COMMAND_MARK_CAR_AS_NEEDED                            = 0x0E09,
-    COMMAND_IS_CHAR_SCRIPT_CONTROLLED                     = 0x0E0A,
-    COMMAND_MARK_CHAR_AS_NEEDED                           = 0x0E0B,
-    COMMAND_IS_OBJECT_SCRIPT_CONTROLLED                   = 0x0E0C,
-    COMMAND_MARK_OBJECT_AS_NEEDED                         = 0x0E0D,
-    COMMAND_GET_CURRENT_RESOLUTION                        = 0x0E0E,
-    COMMAND_GET_FIXED_XY_ASPECT_RATIO                     = 0x0E0F,
-    COMMAND_IS_MOUSE_WHEEL_UP                             = 0x0E10,
-    COMMAND_IS_MOUSE_WHEEL_DOWN                           = 0x0E11,
-    COMMAND_GET_VEHICLE_SUBCLASS                          = 0x0E12,
-    COMMAND_GET_ENTITY_TYPE                               = 0x0E13, // 3603
-    COMMAND_IS_ON_MISSION                                 = 0x0E1D, // 3613
-    COMMAND_IS_ON_SAMP                                    = 0x0E20, // 3616
-    COMMAND_GET_AUDIO_SFX_VOLUME                          = 0x0E21,
-    COMMAND_GET_AUDIO_RADIO_VOLUME                        = 0x0E22,
-    COMMAND_GET_MOUSE_SENSIBILITY                         = 0x0E23,
-    COMMAND_FIX_CHAR_GROUND_BRIGHTNESS_AND_FADE_IN        = 0x0E24,
-    COMMAND_IS_ON_CUTSCENE                                = 0x0E25,
-    COMMAND_IS_WEAPON_FIRE_TYPE                           = 0x0E26,
-    COMMAND_GET_ANGLE_FROM_TWO_COORDS                     = 0x0E27,
-    COMMAND_WRITE_STRUCT_OFFSET                           = 0x0E28,
-    COMMAND_PERLIN_NOISE_FRACTAL                          = 0x0E29,
-    COMMAND_SET_CAR_ALARM                                 = 0x0E61, // 3681
-    COMMAND_PERLIN_NOISE_FRACTAL_2D                       = 0x0EF1, // 3825
-    COMMAND_PERLIN_NOISE_FRACTAL_3D                       = 0x0EF2, // 3826
-
-    // Bitwise
-    COMMAND_BIT_AND                                       = 0x0B10, // 2832
-    COMMAND_BIT_OR                                        = 0x0B11,
-    COMMAND_BIT_XOR                                       = 0x0B12,
-    COMMAND_BIT_NOT                                       = 0x0B13,
-    COMMAND_BIT_MOD                                       = 0x0B14,
-    COMMAND_BIT_SHR                                       = 0x0B15,
-    COMMAND_BIT_SHL                                       = 0x0B16,
-    COMMAND_BITWISE_AND_THING_WITH_THING                  = 0x0B17,
-    COMMAND_BITWISE_OR_THING_WITH_THING                   = 0x0B18,
-    COMMAND_BITWISE_XOR_THING_WITH_THING                  = 0x0B19,
-    COMMAND_BITWISE_NOT                                   = 0x0B1A,
-    COMMAND_BITWISE_MOD_THING_BY_THING                    = 0x0B1B,
-    COMMAND_BITWISE_SHR_THING_BY_THING                    = 0x0B1C,
-    COMMAND_BITWISE_SHL_THING_BY_THING                    = 0x0B1D, // 2845
-
-    // Clipboard
-    COMMAND_READ_CLIPBOARD_DATA                           = 0x0B20, // 2848
-    COMMAND_WRITE_CLIPBOARD_DATA                          = 0x0B21, // 2849
+    // INI
+    COMMAND_READ_INT_FROM_INI_FILE = 0x0AF0, // 2800
+    COMMAND_WRITE_INT_TO_INI_FILE = 0x0AF1,
+    COMMAND_READ_FLOAT_FROM_INI_FILE = 0x0AF2,
+    COMMAND_WRITE_FLOAT_TO_INI_FILE = 0x0AF3,
+    COMMAND_READ_STRING_FROM_INI_FILE = 0x0AF4,
+    COMMAND_WRITE_STRING_TO_INI_FILE = 0x0AF5, // 2805
 
     // File
-    COMMAND_DELETE_FILE                                   = 0x0B00, // 2816
-    COMMAND_DELETE_DIRECTORY                              = 0x0B01,
-    COMMAND_MOVE_FILE                                     = 0x0B02,
-    COMMAND_MOVE_DIRECTORY                                = 0x0B03,
-    COMMAND_COPY_FILE                                     = 0x0B04,
-    COMMAND_COPY_DIRECTORY                                = 0x0B05, // 2821
+    COMMAND_DELETE_FILE = 0x0B00, // 2816
+    COMMAND_DELETE_DIRECTORY = 0x0B01,
+    COMMAND_MOVE_FILE = 0x0B02,
+    COMMAND_MOVE_DIRECTORY = 0x0B03,
+    COMMAND_COPY_FILE = 0x0B04,
+    COMMAND_COPY_DIRECTORY = 0x0B05, // 2821
+
+    // Bitwise
+    COMMAND_BIT_AND = 0x0B10, // 2832
+    COMMAND_BIT_OR = 0x0B11,
+    COMMAND_BIT_XOR = 0x0B12,
+    COMMAND_BIT_NOT = 0x0B13,
+    COMMAND_BIT_MOD = 0x0B14,
+    COMMAND_BIT_SHR = 0x0B15,
+    COMMAND_BIT_SHL = 0x0B16,
+    COMMAND_BITWISE_AND_THING_WITH_THING = 0x0B17,
+    COMMAND_BITWISE_OR_THING_WITH_THING = 0x0B18,
+    COMMAND_BITWISE_XOR_THING_WITH_THING = 0x0B19,
+    COMMAND_BITWISE_NOT = 0x0B1A,
+    COMMAND_BITWISE_MOD_THING_BY_THING = 0x0B1B,
+    COMMAND_BITWISE_SHR_THING_BY_THING = 0x0B1C,
+    COMMAND_BITWISE_SHL_THING_BY_THING = 0x0B1D, // 2845
+
+    // Clipboard
+    COMMAND_READ_CLIPBOARD_DATA = 0x0B20, // 2848
+    COMMAND_WRITE_CLIPBOARD_DATA = 0x0B21, // 2849
 
     // ImGui
     COMMAND_IMGUI_BEGIN                                   = 0x0C00, // 3072

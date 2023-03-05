@@ -65,8 +65,8 @@ public:
     
     static void CanPedJumpObstacle(const CPed& ped, const CEntity& entity);
     static void CanPedJumpObstacle(const CPed& ped, const CEntity& entity, const CVector&, const CVector&);
-    static void CanPedTargetPed(CPed& ped, CPed& targetPed, bool a3);
-    static void CanPedTargetPoint(const CPed& ped, const CVector& a2, bool a3);
+    static bool CanPedTargetPed(CPed& ped, CPed& targetPed, bool a3);
+    static bool CanPedTargetPoint(const CPed& ped, const CVector& a2, bool a3);
 
     static int32 ComputeBuildingHitPoints(const CVector& a1, const CVector& a2);
     static void ComputeClearTarget(const CPed& ped, const CVector&, CVector&);
