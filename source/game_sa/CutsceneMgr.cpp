@@ -79,8 +79,9 @@ void CCutsceneMgr::AppendToNextCutscene(const char* objectName, const char* anim
 }
 
 // 0x5B0450
-void CCutsceneMgr::AttachObjectToBone(CObject* attachment, CObject* object, int32 boneId) {
-    plugin::Call<0x5B0450, CObject*, CObject*, int32>(attachment, object, boneId);
+void CCutsceneMgr::AttachObjectToBone(CCutsceneObject* attachment, CCutsceneObject* object, int32 boneId) {
+    attachment->m_pAttachmentObject = object;
+    attachment->m_nAttachBone       = RpHAnimIDGetIndex(GetAnimHierarchyFromSkinClump(object->m_pRwClump), boneId);
 }
 
 // 0x5B0480
@@ -252,7 +253,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(SetCutsceneAnim, 0x5B0390, {.reversed = false});
     RH_ScopedGlobalInstall(SetCutsceneAnimToLoop, 0x5B0420, {.reversed = false});
     RH_ScopedGlobalInstall(SetHeadAnim, 0x5B0440, {.reversed = false});
-    RH_ScopedGlobalInstall(AttachObjectToBone, 0x5B0450, {.reversed = false});
+    RH_ScopedGlobalInstall(AttachObjectToBone, 0x5B0450);
     RH_ScopedGlobalInstall(AttachObjectToFrame, 0x5B0480, {.reversed = false});
     RH_ScopedGlobalInstall(AttachObjectToParent, 0x5B04B0, {.reversed = false});
     RH_ScopedGlobalInstall(AddCutsceneHead, 0x5B0380, {.reversed = false});
