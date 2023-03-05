@@ -6,6 +6,7 @@
 
 #include "Base.h"
 
+
 namespace notsa {
 namespace rng = std::ranges;
 
@@ -29,13 +30,13 @@ T ston(std::string_view sv, int radix = 10) {
 * @brief Call the given function on object destruction.
 */
 template<typename Fn>
-struct AutoCallOnDestruct {
-    AutoCallOnDestruct(Fn fn) :
+struct ACOD { // "AutoCallOnDestruct" = ACOD
+    ACOD(Fn fn) :
         m_fn{ std::move(fn) }
     {
     }
 
-    ~AutoCallOnDestruct() {
+    ~ACOD() {
         std::invoke(m_fn);
     }
 

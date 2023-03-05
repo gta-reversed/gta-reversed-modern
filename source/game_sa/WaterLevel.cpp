@@ -55,7 +55,7 @@ void CWaterLevel::InjectHooks() {
 bool CWaterLevel::LoadDataFile() {
     const auto file = CFileMgr::OpenFile(m_nWaterConfiguration == 1 ? "DATA//water1.dat" : "DATA//water.dat", "r");
 
-    const notsa::AutoCallOnDestruct autoCloser{ [&] { CFileMgr::CloseFile(file); } };
+    const notsa::ACOD autoCloser{ [&] { CFileMgr::CloseFile(file); } };
 
     uint32 nline{}, ntri{}, nquad{};
     for (;; nline++) {
