@@ -7,6 +7,7 @@
 #include "StdInc.h"
 
 #include "CutsceneMgr.h"
+#include "Rubbish.h"
 #include <TempColModels.h>
 
 uint32 MAX_NUM_CUTSCENE_OBJECTS = 50;
@@ -127,7 +128,112 @@ void CCutsceneMgr::DeleteCutsceneData() {
 
 // 0x5AFD60
 void CCutsceneMgr::DeleteCutsceneData_overlay() {
-    plugin::Call<0x5AFD60>();
+    if (!ms_cutsceneLoadStatus) {
+        return;
+    }
+
+    // We suspend the timer here (is resumed at the end)
+    CTimer::Suspend();
+
+    // Restore multipliers
+    CPopulation::PedDensityMultiplier = m_fPrevPedDensity;
+    CCarCtrl::CarDensityMultiplier = m_fPrevCarDensity;
+
+    // Restore extra colors
+    if (m_PrevExtraColourOn) {
+        CTimeCycle::StartExtraColour(m_PrevExtraColour, false);
+    } else {
+        CTimeCycle::StopExtraColour(false);
+    }
+
+    // Make hidden entities visible again
+    for (auto& e : ms_pHiddenEntities | rng::views::take(ms_iNumHiddenEntities)) {
+        if (e) {
+            CEntity::CleanUpOldReference(e);
+            e->m_bIsVisible = true;
+        }
+    }
+    ms_iNumHiddenEntities = 0;
+
+    // Destroy particle effects
+    for (auto& fx : ms_pParticleEffects | rng::views::take(ms_iNumParticleEffects)) {
+        if (fx.m_pFxSystem) {
+            g_fxMan.DestroyFxSystem(fx.m_pFxSystem);
+            fx.m_pFxSystem = nullptr;
+        }
+    }
+    ms_iNumParticleEffects = 0;
+
+    CMessages::ClearMessages(false);
+    CRubbish::SetVisibility(false);
+    
+    // Delete cutscene objects
+    for (auto& obj : ms_pCutsceneObjects | rng::views::take(ms_numCutsceneObjs)) {
+        assert(obj);
+
+        CWorld::Remove(obj);
+        obj->DeleteRwObject();
+        delete obj;
+    }
+    ms_numCutsceneObjs = 0;
+
+    // Unload anims
+    if (ms_animLoaded) {
+        CAnimManager::RemoveLastAnimFile();
+    }
+    ms_animLoaded = false;
+    ms_cutsceneAssociations.DestroyAssociations();
+    ms_aUncompressedCutsceneAnims[0] = 0;
+    ms_numUncompressedCutsceneAnims = 0;
+
+    if (dataFileLoaded) {
+        TheCamera.RestoreWithJumpCut();
+        TheCamera.SetWideScreenOff();
+        TheCamera.DeleteCutSceneCamDataMemory();
+    }
+
+    CIplStore::ClearIplsNeededAtPosn();
+
+    ms_cutsceneLoadStatus = false;
+    ms_running = false;
+
+    const auto plyr = FindPlayerPed();
+    const auto pad = CPad::GetPad(0);
+    plyr->m_bIsVisible = true;
+    pad->bPlayerSkipsToDestination = false;
+    pad->Clear(false, false); // moved up here
+    plyr->GetPlayerInfoForThisPlayerPed()->MakePlayerSafe(0, 10000.0);
+
+    if (_stricmp(ms_cutsceneName, "finale") != 0) {
+        AudioEngine.StopCutsceneTrack(true);
+        CAudioEngine::EnableEffectsLoading();
+        CAEPedSpeechAudioEntity::EnableAllPedSpeech();
+    }
+
+    CStreaming::ms_disableStreaming = false;
+    CWorld::bProcessCutsceneOnly = false;
+
+    if (dataFileLoaded) {
+        CGame::DrasticTidyUpMemory(TheCamera.CCamera::GetScreenFadeStatus() == NAME_FADE_IN ? true : false);
+    }
+
+    // there's some code to restore the player's stored weapons, but it
+    // doesn't seem to do anything, cause the guarding `if`'s
+    // condition is always false
+
+    // Tell the streamer that we don't need any (possibly) loaded special chars
+    for (const auto modelId : ms_iModelIndex | rng::views::take(ms_numLoadObjectNames)) {
+        if (CTheScripts::ScriptResourceManager.HasResourceBeenRequested(modelId, RESOURCE_TYPE_MODEL_OR_SPECIAL_CHAR)) {
+            CStreaming::SetMissionDoesntRequireModel(modelId);
+        }
+    }
+
+    CStreaming::SetMissionDoesntRequireModel(MODEL_CSPLAY);
+    CStreaming::StreamZoneModels(FindPlayerCoors());
+
+    CTimer::Resume();
+
+    CStreaming::ForceLayerToRead(true);
 }
 
 // 0x5B04D0
@@ -276,7 +382,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(SetupCutsceneToStart, 0x5B14D0, {.reversed = false});
     RH_ScopedGlobalInstall(GetCutsceneTimeInMilleseconds, 0x5B0550, {.reversed = false});
     RH_ScopedGlobalInstall(CreateCutsceneObject, 0x5B02A0);
-    RH_ScopedGlobalInstall(DeleteCutsceneData_overlay, 0x5AFD60, {.reversed = false});
+    RH_ScopedGlobalInstall(DeleteCutsceneData_overlay, 0x5AFD60);
     RH_ScopedGlobalInstall(LoadCutsceneData_postload, 0x5AFBC0, {.reversed = false});
     //RH_ScopedGlobalInstall(sub_489400, 0x489400, {.reversed = false});
     RH_ScopedGlobalInstall(Initialise, 0x4D5A20, {.reversed = false});

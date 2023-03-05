@@ -58,14 +58,14 @@ public:
 
     static inline auto& ms_pCutsceneDir = StaticRef<CDirectory*, 0xB5F848>();
     static inline auto& ms_cutsceneLoadStatus = StaticRef<int32, 0xB5F84C>();
-    static inline auto& ms_animLoaded = StaticRef<int8, 0xB5F850>();
+    static inline auto& ms_animLoaded = StaticRef<bool, 0xB5F850>();
     static inline auto& ms_running = StaticRef<int8, 0xB5F851>();
-    static inline auto& ms_cutsceneProcessing = StaticRef<int8, 0xB5F852>();
-    static inline auto& ms_useLodMultiplier = StaticRef<int8, 0xB5F853>();
-    static inline auto& ms_wasCutsceneSkipped = StaticRef<int8, 0xB5F854>();
+    static inline auto& ms_cutsceneProcessing = StaticRef<bool, 0xB5F852>();
+    static inline auto& ms_useLodMultiplier = StaticRef<bool, 0xB5F853>();
+    static inline auto& ms_wasCutsceneSkipped = StaticRef<bool, 0xB5F854>();
     static inline auto& ms_hasFileInfo = StaticRef<int8, 0xB5F855>();
     static inline auto& ms_numAppendObjectNames = StaticRef<int32, 0xB5F858>();
-    static inline auto& restoreEverythingAfterCutscene = StaticRef<int8, 0xB5F85C>();
+    static inline auto& restoreEverythingAfterCutscene = StaticRef<bool, 0xB5F85C>();
     static inline auto& m_fPrevCarDensity = StaticRef<float, 0xBC1D68>();
     static inline auto& m_fPrevPedDensity = StaticRef<float, 0xBC1D6C>();
     static inline auto& ms_pParticleEffects = StaticRef<std::array<tCutsceneParticleEffect, 8>, 0xBC1D70>();
@@ -82,7 +82,7 @@ public:
     static inline auto& ms_cLoadAnimName = StaticRef<notsa::mdarray<char, 50, 32>, 0xBC3288>();
     static inline auto& ms_cLoadObjectName = StaticRef<notsa::mdarray<char, 50, 32>, 0xBC38C8>();
     static inline auto& ms_cutsceneTimer = StaticRef<float, 0xBC3F08>();
-    static inline auto& ms_cutsceneName = StaticRef<std::array<char, 8>, 0xBC3F0C>();
+    static inline auto& ms_cutsceneName = StaticRef<char[8], 0xBC3F0C>();
     static inline auto& ms_pCutsceneObjects = StaticRef<std::array<CCutsceneObject*, 50>, 0xBC3F18>();
     static inline auto& ms_cutscenePlayStatus = StaticRef<int32, 0xBC3FE0>();
     static inline auto& ms_numCutsceneObjs = StaticRef<int32, 0xBC3FE4>();
