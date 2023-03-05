@@ -167,7 +167,11 @@ CCutsceneObject* CCutsceneMgr::CreateCutsceneObject(eModelID modelId) {
 
 // 0x4D5ED0
 void CCutsceneMgr::DeleteCutsceneData() {
-    plugin::Call<0x4D5ED0>();
+    DeleteCutsceneData_overlay();
+    CStreaming::SetMissionDoesntRequireModel(MODEL_CSPLAY);
+    if (restoreEverythingAfterCutscene) {
+        LoadEverythingBecauseCutsceneDeletedAllOfIt();
+    }
 }
 
 // 0x5AFD60
@@ -335,7 +339,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(RemoveCutscenePlayer, 0x4D5E50, {.reversed = false});
     RH_ScopedGlobalInstall(Shutdown, 0x4D5E60, {.reversed = false});
     RH_ScopedGlobalInstall(LoadCutsceneData, 0x4D5E80, {.reversed = false});
-    RH_ScopedGlobalInstall(DeleteCutsceneData, 0x4D5ED0, {.reversed = false});
+    RH_ScopedGlobalInstall(DeleteCutsceneData, 0x4D5ED0);
     //RH_ScopedGlobalInstall(sub_5099F0, 0x5099F0, {.reversed = false});
     RH_ScopedGlobalInstall(HideRequestedObjects, 0x5AFAD0, { .reversed = false });
     RH_ScopedGlobalInstall(UpdateCutsceneObjectBoundingBox, 0x5B01E0);
