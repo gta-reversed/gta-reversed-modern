@@ -128,7 +128,7 @@ static bool LoadDataFromWorkBuffer(T& data) {
 
 template<typename T>
 static T LoadDataFromWorkBuffer() {
-    T data;
+    T data{};
     assert(LoadDataFromWorkBuffer(data));
     return data;
 }
