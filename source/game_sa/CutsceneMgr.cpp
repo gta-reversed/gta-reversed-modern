@@ -307,13 +307,30 @@ bool CCutsceneMgr::IsCutsceneSkipButtonBeingPressed() {
 
 // 0x4D5AB0
 void CCutsceneMgr::LoadAnimationUncompressed(const char* animName) {
+    DEV_LOG("Loading uncompressed anim ({})", animName);
+
     strcpy_s(ms_aUncompressedCutsceneAnims[ms_numUncompressedCutsceneAnims++], animName);
     ms_aUncompressedCutsceneAnims[ms_numUncompressedCutsceneAnims][0] = 0; // Null terminate next
 }
 
 // 0x4D5E80
 void CCutsceneMgr::LoadCutsceneData(const char* cutsceneName) {
-    plugin::Call<0x4D5E80, const char*>(cutsceneName);
+    DEV_LOG("Loading cutscene ({})", cutsceneName);
+
+    const auto plyr = FindPlayerPed(-1);
+
+    CClothes::RebuildPlayerIfNeeded(plyr);
+
+    CStreaming::RequestModel(MODEL_CSPLAY, STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED);
+    CStreaming::LoadAllRequestedModels(true);
+
+    CClothes::RebuildCutscenePlayer(plyr, MODEL_CSPLAY);
+
+    if (!ms_pCutsceneDir->HasLoaded()) {
+        ms_pCutsceneDir->ReadDirFile("ANIM\\CUTS.IMG");
+    }
+
+    LoadCutsceneData_overlay(cutsceneName);
 }
 
 // 0x5B11C0
@@ -435,7 +452,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(BuildCutscenePlayer, 0x4D5E20);
     RH_ScopedGlobalInstall(RemoveCutscenePlayer, 0x4D5E50, {.reversed = false});
     RH_ScopedGlobalInstall(Shutdown, 0x4D5E60, {.reversed = false});
-    RH_ScopedGlobalInstall(LoadCutsceneData, 0x4D5E80, {.reversed = false});
+    RH_ScopedGlobalInstall(LoadCutsceneData, 0x4D5E80);
     RH_ScopedGlobalInstall(DeleteCutsceneData, 0x4D5ED0);
     //RH_ScopedGlobalInstall(sub_5099F0, 0x5099F0, {.reversed = false});
     RH_ScopedGlobalInstall(HideRequestedObjects, 0x5AFAD0);
