@@ -37,6 +37,7 @@ public:
     {
         // TODO: Add some kind of `assert` to check validity
     }
+    
     CMatrix(const CMatrix& matrix);
     CMatrix(RwMatrix* matrix, bool temporary = false); // like previous + attach
 
@@ -135,6 +136,13 @@ public:
 
     static uint8* EulerIndices1;
     static uint8* EulerIndices2;
+
+    ///< Returns an identity matrix
+    static auto Identity() {
+        CMatrix mat;
+        mat.SetScale(1.f);
+        return mat;
+    }
 
     void SetRotate(const CVector& rot) {
         SetRotate(rot.x, rot.y, rot.z);
