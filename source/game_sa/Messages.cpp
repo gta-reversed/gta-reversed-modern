@@ -18,7 +18,7 @@ void CMessages::InjectHooks() {
     RH_ScopedInstall(ClearSmallMessagesOnly, 0x69DD30);
     RH_ScopedInstall(AddToPreviousBriefArray, 0x69DD50);
     RH_ScopedInstall(ClearPreviousBriefArray, 0x69DE70);
-    // RH_ScopedInstall(InsertNumberInString, 0x69DE90, { .reversed = false }); // Weird build error here
+    RH_ScopedInstall(InsertNumberInString, 0x69DE90);
     RH_ScopedInstall(InsertStringInString, 0x69E040);
     RH_ScopedInstall(InsertPlayerControlKeysInString, 0x69E160);
     RH_ScopedInstall(AddMessageWithNumberQ, 0x69E360);
@@ -50,7 +50,7 @@ void CMessages::Init() {
 template<size_t N>
 tMessage* FindUnusedMsgInArray(std::array<tMessage, N>& arr) {
     for (auto& msg : arr) {
-        if (!msg.m_pText) {
+        if (!msg.IsValid()) {
             return &msg;
         }
     }
@@ -84,14 +84,14 @@ void CMessages::AddMessage2(const char* text, uint32 time, uint16 flag, bool bPr
         };
         if (bPreviousBrief && (showInstantly || p == &BriefMessages.front())) {
 		    AddToPreviousBriefArray(
-			    p->m_pText,
-			    p->m_nNumber[0],
-			    p->m_nNumber[1],
-			    p->m_nNumber[2],
-			    p->m_nNumber[3],
-			    p->m_nNumber[4],
-			    p->m_nNumber[5],
-			    p->m_pString
+			    p->Text,
+			    p->NumbersToInsert[0],
+			    p->NumbersToInsert[1],
+			    p->NumbersToInsert[2],
+			    p->NumbersToInsert[3],
+			    p->NumbersToInsert[4],
+			    p->NumbersToInsert[5],
+			    p->StringToInsert
             );
         }
     };
@@ -179,8 +179,8 @@ void CMessages::AddBigMessage2(const char* text, uint32 time, eMessageStyle styl
         };
     };
     if (showInstantly) {
-        CreateAt(&BIGMessages[style].m_Stack[0]);
-    } else if (const auto p = FindUnusedMsgInArray(BIGMessages[style].m_Stack)) {
+        CreateAt(&BIGMessages[style].Stack[0]);
+    } else if (const auto p = FindUnusedMsgInArray(BIGMessages[style].Stack)) {
         CreateAt(p);
     }
 }
@@ -211,21 +211,21 @@ void CMessages::AddBigMessageWithNumberQ(const char* text, uint32 time, eMessage
 
 // Adds message to previous brief
 // 0x69DD50
-void CMessages::AddToPreviousBriefArray(const char* text, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, char* string) {
+void CMessages::AddToPreviousBriefArray(const char* text, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, const char* string) {
     const auto numbers = std::array{ n1, n2, n3, n4, n5, n6 };
 
     // Find unused entry + duplicate check
     size_t i = 0;
     for (; i < PreviousBriefs.size(); i++) {
         const auto& prev = PreviousBriefs[i];
-        if (!prev.m_pText) {
+        if (!prev.Text) {
             break; // Found unused
         }
         // Check if it's a duplicate of the one we're about to insert
-        if (prev.m_pText != text || prev.m_pString != string) { // I mean that's a pretty naive way, but okay
+        if (prev.Text != text || prev.StringToInsert != string) { // I mean that's a pretty naive way, but okay
             continue;
         }
-        if (numbers != prev.m_nNumber) {
+        if (numbers != prev.NumbersToInsert) {
             continue; 
         }
         return; // Duplicate messages after each other, so skip
@@ -246,9 +246,9 @@ void CMessages::AddToPreviousBriefArray(const char* text, int32 n1, int32 n2, in
 
     // Now construct at the 0th enry (as it's now freed up)
     new (&PreviousBriefs[0]) tPreviousBrief {
-        .m_pText   = text,
-        .m_nNumber = numbers,
-        .m_pString = string,
+        .Text            = text,
+        .NumbersToInsert = numbers,
+        .StringToInsert  = string,
     };
 }
 
@@ -281,10 +281,10 @@ void ClearThisPrint_Impl(std::array<tMessage, N>& messages, const char* text, au
         size_t i = 0;
         for (;;) {
             const auto& msg = messages[i];
-            if (!msg.m_pText) {
+            if (!msg.IsValid()) {
                 return; // Reached end of active texts
             }
-            if (strcmp(msg.m_pText, text) == 0) {
+            if (strcmp(msg.Text, text) == 0) {
                 break; // Texts match, so clear this
             }
             if (++i >= messages.size()) {
@@ -304,7 +304,7 @@ void ClearThisPrint_Impl(std::array<tMessage, N>& messages, const char* text, au
 
         if (i == 0) {
             auto& msg = messages[i];
-            msg.m_nStartTime = CTimer::GetTimeInMS();
+            msg.CreatedAtMS = CTimer::GetTimeInMS();
             if (OnFirstMessageCleared) {
                 OnFirstMessageCleared(msg);
             }
@@ -316,18 +316,18 @@ void ClearThisPrint_Impl(std::array<tMessage, N>& messages, const char* text, au
 // 0x69EA30
 void CMessages::ClearThisPrint(const char* text) {
     ClearThisPrint_Impl(BriefMessages, text, [](tMessage& msg) {
-        if (!msg.m_pText) {
+        if (!msg.Text) {
             return;
         }
         AddToPreviousBriefArray(
-            msg.m_pText,
-            msg.m_nNumber[0],
-            msg.m_nNumber[1],
-            msg.m_nNumber[2],
-            msg.m_nNumber[3],
-            msg.m_nNumber[4],
-            msg.m_nNumber[5],
-            msg.m_pString
+            msg.Text,
+            msg.NumbersToInsert[0],
+            msg.NumbersToInsert[1],
+            msg.NumbersToInsert[2],
+            msg.NumbersToInsert[3],
+            msg.NumbersToInsert[4],
+            msg.NumbersToInsert[5],
+            msg.StringToInsert
         );
     });
 }
@@ -336,15 +336,15 @@ void CMessages::ClearThisPrint(const char* text) {
 // 0x69EBE0
 void CMessages::ClearThisBigPrint(const char* text) {
     for (size_t b = 0; b < NUM_MESSAGE_STYLES; b++) {
-        ClearThisPrint_Impl(BIGMessages[b].m_Stack, text, [](tMessage&) { /*nop*/ });
+        ClearThisPrint_Impl(BIGMessages[b].Stack, text, [](tMessage&) { /*nop*/ });
     }
 }
 
 // Removes first big message in messages stack
 // 0x69ED80
 void CMessages::ClearThisPrintBigNow(eMessageStyle style) {
-    for (auto& msg : BIGMessages[style].m_Stack) {
-        ClearThisBigPrint(msg.m_pText);
+    for (auto& msg : BIGMessages[style].Stack) {
+        ClearThisBigPrint(msg.Text);
     }
     CHud::BigMessageX[style] = 0.f;
     CHud::m_BigMessage[style][0] = 0;
@@ -387,27 +387,28 @@ void CMessages::CutString(int32 count, const char* str, char** dest) {
 template<size_t N>
 void StringReplace(const char* haystack, const char (&needle)[N], char* dst, auto&& Replace) {
     // Based on https://stackoverflow.com/a/32413923
-    auto        pdst = dst;
-    const char* phs  = haystack;
+    auto        pDst = dst;
+    const char* pHS  = haystack;
     
     for(;;) {
-        const char* pneedle = strstr(phs, needle);
+        const char* pNeedle = strstr(pHS, needle);
 
         // walked past last occurrence of needle; copy remaining part
-        if (!pneedle) {
-            pdst = std::copy(phs, phs + strlen(phs) + 1, pdst);
+        if (!pNeedle) {
+            pDst = std::copy(pHS, pHS + strlen(pHS), pDst);
             break;
         }
 
         // copy part before needle
-        pdst = std::copy(phs, pneedle, pdst);
+        pDst = std::copy(pHS, pNeedle, pDst);
 
         // replace portion of string
-        pdst = Replace(pdst);
+        pDst = Replace(pDst);
 
         // adjust pointers, move on
-        phs = pneedle + (N - 1);
+        pHS = pNeedle + (N - 1);
     }
+    *pDst = 0; // Null terminate
 }
 
 // Insert numbers into string
@@ -425,7 +426,7 @@ void CMessages::InsertNumberInString(const char* str, int32 n1, int32 n2, int32 
 
 // Inserts string into src
 // 0x69E040
-void CMessages::InsertStringInString(char* target, char* replacement) {
+void CMessages::InsertStringInString(char* target, const char* replacement) {
     if (!target || !replacement) { // Appereantly that's valid?
         return;
     }
@@ -526,27 +527,27 @@ void CMessages::Process() {
         std::shift_right(msgs.begin(), msgs.end(), 1);
         std::destroy_at(&msgs.back()); // Last is def. unused now
         if (f.IsValid()) { // front is now another object (because of the shift)
-            f.m_nStartTime = CTimer::GetTimeInMS();
+            f.CreatedAtMS = CTimer::GetTimeInMS();
         }
     };
 
     // Process big messages
     for (auto& omgVeryBig : BIGMessages) {
-        ProcessMessagesArray(omgVeryBig.m_Stack);
+        ProcessMessagesArray(omgVeryBig.Stack);
 	}
 
     // Process briefs
     ProcessMessagesArray(BriefMessages);
     if (const auto f = BriefMessages.front(); f.IsValid()) {
 		AddToPreviousBriefArray(
-            f.m_pText,
-            f.m_nNumber[0],
-            f.m_nNumber[1],
-            f.m_nNumber[2],
-            f.m_nNumber[3],
-            f.m_nNumber[4],
-            f.m_nNumber[5],
-            f.m_pString
+            f.Text,
+            f.NumbersToInsert[0],
+            f.NumbersToInsert[1],
+            f.NumbersToInsert[2],
+            f.NumbersToInsert[3],
+            f.NumbersToInsert[4],
+            f.NumbersToInsert[5],
+            f.StringToInsert
         );
     }
 }
@@ -557,22 +558,22 @@ void CMessages::Display(bool bNotFading) {
     char msgText[MSG_BUF_SZ];
     const auto PreProcessMsgText = [&](tMessage msg) {
         InsertNumberInString(
-            msg.m_pText,
-            msg.m_nNumber[0],
-            msg.m_nNumber[1],
-            msg.m_nNumber[2],
-            msg.m_nNumber[3],
-            msg.m_nNumber[4],
-            msg.m_nNumber[5],
+            msg.Text,
+            msg.NumbersToInsert[0],
+            msg.NumbersToInsert[1],
+            msg.NumbersToInsert[2],
+            msg.NumbersToInsert[3],
+            msg.NumbersToInsert[4],
+            msg.NumbersToInsert[5],
             msgText
         );
-        InsertStringInString(msgText, msg.m_pString);
+        InsertStringInString(msgText, msg.StringToInsert);
         InsertPlayerControlKeysInString(msgText);
     };
 
     if (bNotFading) {
         for (auto&& [style, omgVeryBig] : notsa::enumerate(BIGMessages)) {
-            const auto& msg = omgVeryBig.m_Stack.front();
+            const auto& msg = omgVeryBig.Stack.front();
             if (!msg.IsValid()) {
                 continue;
             }

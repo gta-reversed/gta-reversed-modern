@@ -226,7 +226,7 @@ void UIRenderer::DebugCode() {
         CMessages::AddBigMessage("PRESS ~k~~PED_ANSWER_PHONE~ TO FUCK", 1000, eMessageStyle::STYLE_BOTTOM_RIGHT);
     }
     if (pad->IsStandardKeyJustPressed('7')) {
-        CMessages::AddMessageQ("PRESS ~k~~PED_ANSWER_PHONE~ TO FUCK", 1000, 0, false);
+        CMessages::AddMessageWithNumberQ("PRESS ~k~~PED_ANSWER_PHONE~TO FUCK ~1~~1~~1~", 1000, 0, 1, 2, 3, 4, 5, 6);
     }
 
     if (pad->IsStandardKeyJustPressed('8')) {

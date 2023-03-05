@@ -10,55 +10,55 @@ struct tMessage {
     tMessage() = default;
 
     tMessage(
-        const char* pText,
-        char* str = {},
-        uint16 nFlags = {},
-        uint32 nTime = {},
-        bool bPreviousBrief = {},
+        const char* text,
+        const char* strToInsert = {},
+        uint16 flags = {},
+        uint32 time = {},
+        bool previousBrief = {},
         std::optional<std::array<int32, 6>> numbers = {}
     ) :
-        m_pText{ pText },
-        m_pString{str},
-        m_nFlags{nFlags },
-        m_nTime{ nTime },
-        m_nStartTime{ CTimer::GetTimeInMS() },
-        m_bPreviousBrief{bPreviousBrief }
+        Text{ text },
+        StringToInsert{ strToInsert},
+        Flags{ flags },
+        VisibleTime{ time },
+        CreatedAtMS{ CTimer::GetTimeInMS() },
+        PreviousBrief{ previousBrief }
     {
         if (numbers) {
-            rng::copy(*numbers, rng::begin(m_nNumber));
+            rng::copy(*numbers, rng::begin(NumbersToInsert));
         } else {
-            rng::fill(m_nNumber, -1);
+            rng::fill(NumbersToInsert, -1);
         }
     }
 
     ~tMessage() {
-        m_pText = nullptr; // This marks that this object is destroyed
+        Text = nullptr; // This marks that this object is destroyed
     }
 
     //! If this object is in use
-    bool IsValid() const { return m_pText != nullptr; }
+    bool IsValid() const { return Text != nullptr; }
 
     //! Ticks to disappear at
-    auto GetTimeToDisappearAtMS() const { return m_nStartTime + m_nTime; }
+    auto GetTimeToDisappearAtMS() const { return CreatedAtMS + VisibleTime; }
 
 
-    const char*          m_pText{};
-    uint16               m_nFlags{};
-    uint32               m_nTime{};
-    uint32               m_nStartTime{};
-    std::array<int32, 6> m_nNumber{};
-    char*                m_pString{};
-    uint8                m_bPreviousBrief{};
+    const char*          Text{};
+    uint16               Flags{};
+    uint32               VisibleTime{};
+    uint32               CreatedAtMS{};
+    std::array<int32, 6> NumbersToInsert{};
+    const char*          StringToInsert{};
+    uint8                PreviousBrief{};
 };
 
 struct tBigMessage {
-    std::array<tMessage, 4> m_Stack{};
+    std::array<tMessage, 4> Stack{};
 };
 
 struct tPreviousBrief {
-    const char*          m_pText{};
-    std::array<int32, 6> m_nNumber{};
-    char*                m_pString{};
+    const char*          Text{};
+    std::array<int32, 6> NumbersToInsert{};
+    const char*          StringToInsert{};
 };
 
 class CMessages {
@@ -85,7 +85,7 @@ public:
     static void AddBigMessageWithNumber(const char* text, uint32 time, eMessageStyle style, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1);
     static void AddBigMessage(const char* text, uint32 time, eMessageStyle style);
 
-    static void AddToPreviousBriefArray(const char* text, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1, char* string = nullptr);
+    static void AddToPreviousBriefArray(const char* text, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1, const char* string = nullptr);
 
     static void ClearMessages(bool flag);
     static void ClearSmallMessagesOnly();
@@ -102,14 +102,14 @@ public:
     static void CutString(int32 count, const char* str, char** dest);
 
     static void InsertNumberInString(const char* src, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1, char* dst = nullptr);
-    static void InsertStringInString(char* into, char* str);
+    static void InsertStringInString(char* into, const char* str);
     static void InsertPlayerControlKeysInString(char* str);
 
     static void Process();
     static void Display(bool flag);
 
     // NOTSA helpers
-    static void InsertNumberInString(const char* text, auto&& n, char* dst) {
+    static void InsertNumberInString2(const char* text, auto&& n, char* dst) {
         InsertNumberInString(text, n[0], n[1], n[2], n[3], n[4], n[5], dst);
     }
 };
