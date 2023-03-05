@@ -1,10 +1,21 @@
 #pragma once
 
 #include <memory>
+#include <charconv>
 #include <initializer_list>
+
+#include "Base.h"
 
 namespace notsa {
 namespace rng = std::ranges;
+
+//! Much like std::stoi [and variants] but takes an `std::string_view` + in debug does error checking [unlike the C stuff]
+template<typename T>
+T ston(std::string_view sv, int radix = 10) {
+    T out;
+    NOTSA_AASSERT(std::from_chars(sv.data(), sv.data() + sv.size(), out, radix).ec == std::errc{});
+    return out;
+}
 
 /*
 * Want to know something funny?
