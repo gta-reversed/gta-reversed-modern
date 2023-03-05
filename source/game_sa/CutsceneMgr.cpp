@@ -67,7 +67,15 @@ int32 CCutsceneMgr::AddCutsceneHead(CObject* object, int32 arg1) {
 
 // 0x4D5DB0
 void CCutsceneMgr::AppendToNextCutscene(const char* objectName, const char* animName) {
-    plugin::Call<0x4D5DB0, const char*, const char*>(objectName, animName);
+    const auto CopyAndLower = [](auto&& dst, const char* src) {
+        strcpy_s(dst, src);
+        strlwr(dst);
+    };
+
+    auto& num = ms_numAppendObjectNames;
+    CopyAndLower(ms_cAppendObjectName[num], objectName);
+    CopyAndLower(ms_cAppendAnimName[num], animName);
+    num++;
 }
 
 // 0x5B0450
@@ -233,4 +241,47 @@ int16 FindCutsceneAudioTrackId(const char* cutsceneName) {
 // 0x5B01E0
 void UpdateCutsceneObjectBoundingBox(RpClump* clump, int32 modelId) {
     plugin::Call<0x5B01E0, RpClump*, int32>(clump, modelId);
+}
+
+
+void CCutsceneMgr::InjectHooks() {
+    RH_ScopedClass(CCutsceneMgr);
+    RH_ScopedCategory(); // TODO: Change this to the appropriate category!
+
+    //RH_ScopedGlobalInstall(SetPos_wrongname_inlined, 0x47E070, {.reversed = false});
+    RH_ScopedGlobalInstall(SetCutsceneAnim, 0x5B0390, {.reversed = false});
+    RH_ScopedGlobalInstall(SetCutsceneAnimToLoop, 0x5B0420, {.reversed = false});
+    RH_ScopedGlobalInstall(SetHeadAnim, 0x5B0440, {.reversed = false});
+    RH_ScopedGlobalInstall(AttachObjectToBone, 0x5B0450, {.reversed = false});
+    RH_ScopedGlobalInstall(AttachObjectToFrame, 0x5B0480, {.reversed = false});
+    RH_ScopedGlobalInstall(AttachObjectToParent, 0x5B04B0, {.reversed = false});
+    RH_ScopedGlobalInstall(AddCutsceneHead, 0x5B0380, {.reversed = false});
+    RH_ScopedGlobalInstall(FinishCutscene, 0x5B04D0, {.reversed = false});
+    RH_ScopedGlobalInstall(HasCutsceneFinished, 0x5B0570, {.reversed = false});
+    RH_ScopedGlobalInstall(LoadCutsceneData_preload, 0x5B05A0, {.reversed = false});
+    RH_ScopedGlobalInstall(LoadCutsceneData_loading, 0x5B11C0, {.reversed = false});
+    RH_ScopedGlobalInstall(LoadCutsceneData_overlay, 0x5B13F0, {.reversed = false});
+    RH_ScopedGlobalInstall(StartCutscene, 0x5B1460, {.reversed = false});
+    RH_ScopedGlobalInstall(SetupCutsceneToStart, 0x5B14D0, {.reversed = false});
+    RH_ScopedGlobalInstall(GetCutsceneTimeInMilleseconds, 0x5B0550, {.reversed = false});
+    RH_ScopedGlobalInstall(CreateCutsceneObject, 0x5B02A0, {.reversed = false});
+    RH_ScopedGlobalInstall(DeleteCutsceneData_overlay, 0x5AFD60, {.reversed = false});
+    RH_ScopedGlobalInstall(LoadCutsceneData_postload, 0x5AFBC0, {.reversed = false});
+    //RH_ScopedGlobalInstall(sub_489400, 0x489400, {.reversed = false});
+    RH_ScopedGlobalInstall(Initialise, 0x4D5A20, {.reversed = false});
+    RH_ScopedGlobalInstall(LoadAnimationUncompressed, 0x4D5AB0, {.reversed = false});
+    RH_ScopedGlobalInstall(RemoveEverythingBecauseCutsceneDoesntFitInMemory, 0x4D5AF0, {.reversed = false});
+    RH_ScopedGlobalInstall(LoadEverythingBecauseCutsceneDeletedAllOfIt, 0x4D5C10, {.reversed = false});
+    RH_ScopedGlobalInstall(Update, 0x4D5D00, {.reversed = false});
+    RH_ScopedGlobalInstall(IsCutsceneSkipButtonBeingPressed, 0x4D5D10, {.reversed = false});
+    RH_ScopedGlobalInstall(AppendToNextCutscene, 0x4D5DB0);
+    RH_ScopedGlobalInstall(BuildCutscenePlayer, 0x4D5E20, {.reversed = false});
+    RH_ScopedGlobalInstall(RemoveCutscenePlayer, 0x4D5E50, {.reversed = false});
+    RH_ScopedGlobalInstall(Shutdown, 0x4D5E60, {.reversed = false});
+    RH_ScopedGlobalInstall(LoadCutsceneData, 0x4D5E80, {.reversed = false});
+    RH_ScopedGlobalInstall(DeleteCutsceneData, 0x4D5ED0, {.reversed = false});
+    //RH_ScopedGlobalInstall(sub_5099F0, 0x5099F0, {.reversed = false});
+    RH_ScopedGlobalInstall(HideRequestedObjects, 0x5AFAD0, {.reversed = false});
+    RH_ScopedGlobalInstall(SkipCutscene, 0x5B1700, {.reversed = false});
+    RH_ScopedGlobalInstall(Update_overlay, 0x5B1720, {.reversed = false});
 }

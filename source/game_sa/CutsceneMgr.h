@@ -93,6 +93,8 @@ public:
     static CAnimBlendAssocGroup &ms_cutsceneAssociations;
     static CVector &ms_cutsceneOffset;
 
+    static void InjectHooks();
+
     static int32 AddCutsceneHead(CObject* object, int32 arg1);
     static void AppendToNextCutscene(const char* objectName, const char* animName);
     static void AttachObjectToBone(CObject* attachment, CObject* object, int32 boneId);
@@ -126,6 +128,7 @@ public:
     static void StartCutscene();
     static void Update();
     static void Update_overlay();
+
 
     static bool IsRunning() { return ms_running; }
     static bool IsCutsceneProcessing() { return ms_cutsceneProcessing; }
