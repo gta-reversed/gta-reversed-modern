@@ -78,9 +78,9 @@ public:
     static inline auto& ms_iTextDuration = StaticRef<std::array<int32, 64>, 0xBC2DC0>();
     static inline auto& ms_iTextStartTime = StaticRef<std::array<int32, 64>, 0xBC2EC0>();
     static inline auto& ms_cTextOutput = StaticRef<std::array<char, 320>, 0xBC2FC0>();
-    static inline auto& ms_iModelIndex = StaticRef<std::array<int32, 50>, 0xBC31C0>();
-    static inline auto& ms_cLoadAnimName = StaticRef<notsa::mdarray<char, 50, 32>, 0xBC3288>();
-    static inline auto& ms_cLoadObjectName = StaticRef<notsa::mdarray<char, 50, 32>, 0xBC38C8>();
+    static inline auto& ms_iModelIndex = StaticRef<std::array<eModelID, 50>, 0xBC31C0>();
+    static inline auto& ms_cLoadAnimName = StaticRef<std::array<char[32], 50>, 0xBC3288>();
+    static inline auto& ms_cLoadObjectName = StaticRef<std::array<char[32], 50>, 0xBC38C8>();
     static inline auto& ms_cutsceneTimer = StaticRef<float, 0xBC3F08>();
     static inline auto& ms_cutsceneName = StaticRef<char[8], 0xBC3F0C>();
     static inline auto& ms_pCutsceneObjects = StaticRef<std::array<CCutsceneObject*, 50>, 0xBC3F18>();

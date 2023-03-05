@@ -6,10 +6,12 @@
 */
 #include "StdInc.h"
 
+#include <win.h> // TODO: Remove (Included because of isForeground)
+
+#include "Fx.h"
 #include "CutsceneMgr.h"
 #include "Rubbish.h"
 #include <TempColModels.h>
-#include <win.h> // TODO: Remove (Included because of isForeground)
 
 uint32 MAX_NUM_CUTSCENE_OBJECTS = 50;
 uint32 MAX_NUM_CUTSCENE_PARTICLE_EFFECTS = 8;
@@ -335,7 +337,69 @@ void CCutsceneMgr::LoadCutsceneData(const char* cutsceneName) {
 
 // 0x5B11C0
 void CCutsceneMgr::LoadCutsceneData_loading() {
-    plugin::Call<0x5B11C0>();
+    // Make sure all neceesary models are streamed in
+    for (const auto model : ms_iModelIndex | rng::views::take(ms_numLoadObjectNames)) {
+        if (!CStreaming::IsModelLoaded(model)) {
+            return;
+        }
+    }
+
+    // All models are streamed in now
+    LoadCutsceneData_postload();
+
+    // Load custcene anims and create objects
+    CCutsceneObject* obj = nullptr;
+    for (auto i = 0; i < ms_numLoadObjectNames; i++) {
+        if (!ms_bRepeatObject[i]) {
+            obj = CreateCutsceneObject(ms_iModelIndex[i]);
+        }
+        if (const auto& animName = ms_cLoadAnimName[i]; animName[0]) {
+            SetCutsceneAnim(animName, obj);
+        }
+    }
+
+    // Create FXs that are attached to objects
+    for (auto& csfx : ms_pParticleEffects | rng::views::take(ms_iNumParticleEffects)) {
+        // Create the effect's transform matrix
+        RwMatrix fxTransform;
+        g_fx.CreateMatFromVec(&fxTransform, &csfx.m_vecPosn, &csfx.m_vecDirection);
+
+        // Find object's matrix
+        const auto objMat = [&]() -> RwMatrix* {
+            const auto objIdx = csfx.m_nObjectId;
+
+            // If not a cutscene object we don't have an object matrix - i'm not quite sure how this works, but okay.
+            if (objIdx < 0 || objIdx >= ms_numCutsceneObjs + 1) { // TODO: Bug? Pretty sure the +1 is erronous...
+                return nullptr;
+            }
+
+            // If it's a skinned object, we use bone indencies
+            const auto csobj = ms_pCutsceneObjects[objIdx];
+            if (const auto atomic = GetFirstAtomic(csobj->m_pRwClump); atomic && RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic))) {
+                const auto nodeIdx = notsa::ston<uint32>({ csfx.m_szObjectPart }); // Obj Part is just an node index in this case
+                const auto hier = GetAnimHierarchyFromSkinClump(csobj->m_pRwClump);
+                return &RpHAnimHierarchyGetMatrixArray(hier)[RpHAnimIDGetIndex(hier, nodeIdx)];
+            }
+
+            // If not skinned, it's the name of a frame
+            if (const auto frame = CClumpModelInfo::GetFrameFromName(csobj->m_pRwClump, csfx.m_szObjectPart)) {
+                return RwFrameGetMatrix(frame);
+            } else {
+                DEV_LOG("Part({}) of object not found", csfx.m_szObjectPart);
+            }
+
+            // Otherwise we're fucked
+            return nullptr;
+        }();
+
+        // Finally, create the fx
+        csfx.m_pFxSystem = g_fxMan.CreateFxSystem(csfx.m_szEffectName, &fxTransform, objMat, true);
+    }
+
+    // Finally, process attachments
+    for (const auto& v : ms_iAttachObjectToBone | rng::views::take(ms_numAttachObjectToBones)) {
+        AttachObjectToBone(ms_pCutsceneObjects[v.m_nCutscenePedObjectId], ms_pCutsceneObjects[v.m_nCutscenePedObjectId], v.m_nBoneId);
+    }
 }
 
 // 0x5B13F0
@@ -433,7 +497,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(FinishCutscene, 0x5B04D0);
     RH_ScopedGlobalInstall(HasCutsceneFinished, 0x5B0570);
     RH_ScopedGlobalInstall(LoadCutsceneData_preload, 0x5B05A0, {.reversed = false});
-    RH_ScopedGlobalInstall(LoadCutsceneData_loading, 0x5B11C0, {.reversed = false});
+    RH_ScopedGlobalInstall(LoadCutsceneData_loading, 0x5B11C0);
     RH_ScopedGlobalInstall(LoadCutsceneData_overlay, 0x5B13F0, {.reversed = false});
     RH_ScopedGlobalInstall(StartCutscene, 0x5B1460, {.reversed = false});
     RH_ScopedGlobalInstall(SetupCutsceneToStart, 0x5B14D0, {.reversed = false});
