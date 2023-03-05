@@ -284,7 +284,14 @@ void CCutsceneMgr::HideRequestedObjects() {
 
 // 0x4D5A20
 void CCutsceneMgr::Initialise() {
-    plugin::Call<0x4D5A20>();
+    ms_cutsceneLoadStatus = 0;
+    ms_running            = false;
+    ms_animLoaded         = false;
+    ms_cutsceneProcessing = false;
+    ms_useLodMultiplier   = false;
+    ms_wasCutsceneSkipped = false;
+    ms_hasFileInfo        = false;
+    ms_pCutsceneDir       = new CDirectory{};
 }
 
 // 0x4D5D10
@@ -411,7 +418,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(DeleteCutsceneData_overlay, 0x5AFD60);
     RH_ScopedGlobalInstall(LoadCutsceneData_postload, 0x5AFBC0, {.reversed = false});
     //RH_ScopedGlobalInstall(sub_489400, 0x489400, {.reversed = false});
-    RH_ScopedGlobalInstall(Initialise, 0x4D5A20, {.reversed = false});
+    RH_ScopedGlobalInstall(Initialise, 0x4D5A20);
     RH_ScopedGlobalInstall(LoadAnimationUncompressed, 0x4D5AB0, {.reversed = false});
     RH_ScopedGlobalInstall(RemoveEverythingBecauseCutsceneDoesntFitInMemory, 0x4D5AF0, {.reversed = false});
     RH_ScopedGlobalInstall(LoadEverythingBecauseCutsceneDeletedAllOfIt, 0x4D5C10, {.reversed = false});
