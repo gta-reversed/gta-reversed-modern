@@ -14855,3 +14855,7 @@ enum eModelID : int32 { // Number of entries: 14832
     MODEL_CS_LANDBIT_06_A = 18629,
     MODEL_CS_LANDBIT_20_A = 18630,
 };
+
+inline bool IsModelIDForCutScene(eModelID modelId) {
+    return modelId >= MODEL_CUTOBJ01 && modelId <= MODEL_CUTOBJ20;
+}

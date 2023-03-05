@@ -11,9 +11,8 @@
 class NOTSA_EXPORT_VTABLE CCutsceneObject : public CObject {
 public:
     union {
-        RpHAnimBlendInterpFrame* m_pAttachToIPFrame;
-        RwFrame*                 m_pAttachToFrame;
-        uint32                   m_nAttachBone; // this one if m_pAttachmentObject != 0
+        RwFrame* m_pAttachToFrame;
+        uint32   m_nAttachBone; // this one if m_pAttachmentObject != 0
     };
     CObject* m_pAttachmentObject;
     CVector  m_vWorldPosition;

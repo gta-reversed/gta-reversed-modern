@@ -7,11 +7,14 @@
 #include "StdInc.h"
 
 #include "CutsceneMgr.h"
+#include <TempColModels.h>
 
 uint32 MAX_NUM_CUTSCENE_OBJECTS = 50;
 uint32 MAX_NUM_CUTSCENE_PARTICLE_EFFECTS = 8;
 uint32 MAX_NUM_CUTSCENE_ITEMS_TO_HIDE = 50;
 uint32 MAX_NUM_CUTSCENE_ATTACHMENTS = 50;
+
+static inline auto& ms_cutsceneColBoundSphereRadiuses = StaticRef<std::array<float, CTempColModels::MAX_NUM_CUTSCENE_COLMODELS>, 0x968A54>();
 
 bool &CCutsceneMgr::ms_useCutsceneShadows = *(bool *)0x8AC158;
 uint32 &CCutsceneMgr::numPlayerWeaponsToRestore = *(uint32 *)0xB5EB58;
@@ -69,7 +72,7 @@ int32 CCutsceneMgr::AddCutsceneHead(CObject* object, int32 arg1) {
 void CCutsceneMgr::AppendToNextCutscene(const char* objectName, const char* animName) {
     const auto CopyAndLower = [](auto&& dst, const char* src) {
         strcpy_s(dst, src);
-        strlwr(dst);
+        _strlwr_s(dst);
     };
 
     auto& num = ms_numAppendObjectNames;
@@ -105,9 +108,61 @@ void CCutsceneMgr::BuildCutscenePlayer() {
     CClothes::RebuildCutscenePlayer(plyr, true);
 }
 
+// 0x5B0130
+RpAtomic* CalculateBoundingSphereRadiusCB(RpAtomic* atomic, void* data) {
+    auto& maxRadius = *(float*)data;
+
+    const auto sp = RpAtomicGetBoundingSphere(atomic);
+
+    // Take bound sphere's center, and transform it all back to the world
+    auto center = sp->center;
+    for (RwFrame* frame = RpAtomicGetFrame(atomic); RwFrameGetParent(frame); frame = RwFrameGetParent(frame)) {
+        RwV3dTransformPoint(&center, &center, RwFrameGetMatrix(frame));
+    }
+
+    // Not sure? I guess `center` is now just the offset from the object space center?
+    // Fuck knows...
+    maxRadius = std::max(RwV3dLength(&center) + sp->radius, maxRadius);
+
+    return atomic;
+}
+
+// 0x5B01E0
+void CCutsceneMgr::UpdateCutsceneObjectBoundingBox(RpClump* clump, eModelID modelId) {
+    assert(IsModelIDForCutScene(modelId));
+    assert(RwObjectGetType(clump) == rpCLUMP);
+
+    // Figure out bounding sphere radius
+    float radius = 0.f;
+    RpClumpForAllAtomics(clump, CalculateBoundingSphereRadiusCB, &radius);
+
+    // Now update the col model with it
+    auto& cm = CTempColModels::ms_colModelCutObj[modelId - MODEL_CUTOBJ01];
+    cm.GetBoundingSphere().m_fRadius = radius;
+    cm.GetBoundingBox() = CBoundingBox{ // Bounding box of the sphere basically
+        {-radius, -radius, -radius},
+        { radius,  radius,  radius}
+    };
+}
+
 // 0x5B02A0
-CCutsceneObject* CCutsceneMgr::CreateCutsceneObject(int32 modelId) {
-    return plugin::CallAndReturn<CCutsceneObject*, 0x5B02A0, int32>(modelId);
+CCutsceneObject* CCutsceneMgr::CreateCutsceneObject(eModelID modelId) {
+    CStreaming::ImGonnaUseStreamingMemory();
+
+    // Create col model for it (If cutscene object)
+    if (IsModelIDForCutScene(modelId)) {
+        const auto mi = CModelInfo::GetModelInfo(modelId);
+        mi->SetColModel(&CTempColModels::ms_colModelCutObj[modelId - MODEL_CUTOBJ01]);
+        UpdateCutsceneObjectBoundingBox(mi->m_pRwClump, modelId);
+    }
+
+    // Actually create the object now
+    const auto obj = ms_pCutsceneObjects[ms_numCutsceneObjs++] = new CCutsceneObject{};
+    obj->SetModelIndex(modelId);
+
+    CStreaming::IHaveUsedStreamingMemory();
+
+    return obj;
 }
 
 // 0x4D5ED0
@@ -245,12 +300,6 @@ int16 FindCutsceneAudioTrackId(const char* cutsceneName) {
     return plugin::CallAndReturn<int16, 0x5AFA50, const char*>(cutsceneName);
 }
 
-// 0x5B01E0
-void UpdateCutsceneObjectBoundingBox(RpClump* clump, int32 modelId) {
-    plugin::Call<0x5B01E0, RpClump*, int32>(clump, modelId);
-}
-
-
 void CCutsceneMgr::InjectHooks() {
     RH_ScopedClass(CCutsceneMgr);
     RH_ScopedCategory(); // TODO: Change this to the appropriate category!
@@ -271,7 +320,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(StartCutscene, 0x5B1460, {.reversed = false});
     RH_ScopedGlobalInstall(SetupCutsceneToStart, 0x5B14D0, {.reversed = false});
     RH_ScopedGlobalInstall(GetCutsceneTimeInMilleseconds, 0x5B0550, {.reversed = false});
-    RH_ScopedGlobalInstall(CreateCutsceneObject, 0x5B02A0, {.reversed = false});
+    RH_ScopedGlobalInstall(CreateCutsceneObject, 0x5B02A0);
     RH_ScopedGlobalInstall(DeleteCutsceneData_overlay, 0x5AFD60, {.reversed = false});
     RH_ScopedGlobalInstall(LoadCutsceneData_postload, 0x5AFBC0, {.reversed = false});
     //RH_ScopedGlobalInstall(sub_489400, 0x489400, {.reversed = false});
@@ -288,7 +337,9 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(LoadCutsceneData, 0x4D5E80, {.reversed = false});
     RH_ScopedGlobalInstall(DeleteCutsceneData, 0x4D5ED0, {.reversed = false});
     //RH_ScopedGlobalInstall(sub_5099F0, 0x5099F0, {.reversed = false});
-    RH_ScopedGlobalInstall(HideRequestedObjects, 0x5AFAD0, {.reversed = false});
+    RH_ScopedGlobalInstall(HideRequestedObjects, 0x5AFAD0, { .reversed = false });
+    RH_ScopedGlobalInstall(UpdateCutsceneObjectBoundingBox, 0x5B01E0);
+    RH_ScopedGlobalInstall(CalculateBoundingSphereRadiusCB, 0x5B0130);
     RH_ScopedGlobalInstall(SkipCutscene, 0x5B1700, {.reversed = false});
     RH_ScopedGlobalInstall(Update_overlay, 0x5B1720, {.reversed = false});
 }

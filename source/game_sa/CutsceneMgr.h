@@ -101,7 +101,8 @@ public:
     static void AttachObjectToFrame(CCutsceneObject* attachment, CEntity* object, const char* frameName);
     static void AttachObjectToParent(CCutsceneObject* attachment, CEntity* object);
     static void BuildCutscenePlayer();
-    static CCutsceneObject* CreateCutsceneObject(int32 modelId);
+    static void UpdateCutsceneObjectBoundingBox(RpClump* clump, eModelID modellId);
+    static CCutsceneObject* CreateCutsceneObject(eModelID modelId);
     static void DeleteCutsceneData();
     static void DeleteCutsceneData_overlay();
     static void FinishCutscene();
