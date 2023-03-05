@@ -98,7 +98,11 @@ void CCutsceneMgr::AttachObjectToParent(CCutsceneObject* attachment, CEntity* ob
 
 // 0x4D5E20
 void CCutsceneMgr::BuildCutscenePlayer() {
-    plugin::Call<0x4D5E20>();
+    const auto plyr = FindPlayerPed();
+    CClothes::RebuildPlayerIfNeeded(plyr);
+    CStreaming::RequestModel(MODEL_CSPLAY, STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED);
+    CStreaming::LoadAllRequestedModels(true);
+    CClothes::RebuildCutscenePlayer(plyr, true);
 }
 
 // 0x5B02A0
@@ -278,7 +282,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(Update, 0x4D5D00, {.reversed = false});
     RH_ScopedGlobalInstall(IsCutsceneSkipButtonBeingPressed, 0x4D5D10, {.reversed = false});
     RH_ScopedGlobalInstall(AppendToNextCutscene, 0x4D5DB0);
-    RH_ScopedGlobalInstall(BuildCutscenePlayer, 0x4D5E20, {.reversed = false});
+    RH_ScopedGlobalInstall(BuildCutscenePlayer, 0x4D5E20);
     RH_ScopedGlobalInstall(RemoveCutscenePlayer, 0x4D5E50, {.reversed = false});
     RH_ScopedGlobalInstall(Shutdown, 0x4D5E60, {.reversed = false});
     RH_ScopedGlobalInstall(LoadCutsceneData, 0x4D5E80, {.reversed = false});
