@@ -404,7 +404,24 @@ void CCutsceneMgr::LoadCutsceneData_loading() {
 
 // 0x5B13F0
 void CCutsceneMgr::LoadCutsceneData_overlay(const char* cutsceneName) {
-    plugin::Call<0x5B13F0, const char*>(cutsceneName);
+    CTimer::Suspend();
+
+    ms_cutsceneProcessing = true;
+    ms_wasCutsceneSkipped = false;
+
+    if (!m_bDontClearZone) {
+        CStreaming::RemoveCurrentZonesModels();
+    }
+
+    ms_pCutsceneDir->Clear();
+    ms_pCutsceneDir->ReadDirFile("ANIM\\CUTS.IMG");
+
+    CStreaming::RemoveUnusedModelsInLoadedList();
+    CGame::DrasticTidyUpMemory(true);
+    strcpy_s(ms_cutsceneName, cutsceneName);
+    CCutsceneMgr::LoadCutsceneData_preload();
+
+    CTimer::Resume();
 }
 
 // 0x5AFBC0
@@ -498,7 +515,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(HasCutsceneFinished, 0x5B0570);
     RH_ScopedGlobalInstall(LoadCutsceneData_preload, 0x5B05A0, {.reversed = false});
     RH_ScopedGlobalInstall(LoadCutsceneData_loading, 0x5B11C0);
-    RH_ScopedGlobalInstall(LoadCutsceneData_overlay, 0x5B13F0, {.reversed = false});
+    RH_ScopedGlobalInstall(LoadCutsceneData_overlay, 0x5B13F0);
     RH_ScopedGlobalInstall(StartCutscene, 0x5B1460, {.reversed = false});
     RH_ScopedGlobalInstall(SetupCutsceneToStart, 0x5B14D0, {.reversed = false});
     RH_ScopedGlobalInstall(GetCutsceneTimeInMilleseconds, 0x5B0550);

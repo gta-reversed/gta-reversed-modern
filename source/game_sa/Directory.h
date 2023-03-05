@@ -40,7 +40,7 @@ public:
 
     // notsa
     bool HasLoaded() const { return m_nNumEntries != 0; }
-
+    void Clear() { m_nNumEntries = 0; }
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
