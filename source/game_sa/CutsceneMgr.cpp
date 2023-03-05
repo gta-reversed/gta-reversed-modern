@@ -131,7 +131,7 @@ void CCutsceneMgr::DeleteCutsceneData() {
 
 // 0x5AFD60
 void CCutsceneMgr::DeleteCutsceneData_overlay() {
-    if (!ms_cutsceneLoadStatus) {
+    if (ms_cutsceneLoadStatus == LoadStatus::NOT_LOADED) {
         return;
     }
 
@@ -197,7 +197,7 @@ void CCutsceneMgr::DeleteCutsceneData_overlay() {
 
     CIplStore::ClearIplsNeededAtPosn();
 
-    ms_cutsceneLoadStatus = false;
+    ms_cutsceneLoadStatus = LoadStatus::NOT_LOADED;
     ms_running = false;
 
     const auto plyr = FindPlayerPed();
@@ -287,7 +287,7 @@ void CCutsceneMgr::HideRequestedObjects() {
 
 // 0x4D5A20
 void CCutsceneMgr::Initialise() {
-    ms_cutsceneLoadStatus = 0;
+    ms_cutsceneLoadStatus = LoadStatus::NOT_LOADED;
     ms_running            = false;
     ms_animLoaded         = false;
     ms_cutsceneProcessing = false;
@@ -426,7 +426,66 @@ void CCutsceneMgr::LoadCutsceneData_overlay(const char* cutsceneName) {
 
 // 0x5AFBC0
 void CCutsceneMgr::LoadCutsceneData_postload() {
-    plugin::Call<0x5AFBC0>();
+    CMessages::ClearThisPrintBigNow(STYLE_MIDDLE);
+
+    CPopulation::PedDensityMultiplier = 0.0;
+    CCarCtrl::CarDensityMultiplier = 0.0;
+    CStreaming::ms_disableStreaming = 0;
+
+    // Load animations for this cutscene
+    {
+        const auto stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, "ANIM\\CUTS.IMG");
+        const auto raii   = notsa::ACOD{ [&] { RwStreamClose(stream, nullptr); } };
+
+        char csIFPFile[1024];
+        std::format_to(csIFPFile, "{}.IFP", ms_cutsceneName);
+        
+        if (uint32 streamOffset, streamSz; ms_animLoaded = ms_pCutsceneDir->FindItem(csIFPFile, streamOffset, streamSz)) {
+            CStreaming::MakeSpaceFor(streamSz * STREAMING_SECTOR_SIZE / 2); // Not sure why it's only half, but okay
+
+            CStreaming::ImGonnaUseStreamingMemory();
+
+            // Load ifp file
+            RwStreamSkip(stream, streamOffset * STREAMING_SECTOR_SIZE);
+            CAnimManager::LoadAnimFile(stream, 1, ms_aUncompressedCutsceneAnims.data());
+
+            // Now create the anims in memory
+            assert(ms_cLoadAnimName.size() == ms_cLoadAnimName.size());
+            assert(std::size(ms_cLoadAnimName[0]) == std::size(ms_cLoadAnimName[0]));
+            ms_cutsceneAssociations.CreateAssociations(
+                ms_cutsceneName,
+                ms_cLoadAnimName[0],
+                ms_cLoadObjectName[0],
+                std::size(ms_cLoadAnimName[0])
+            );
+
+            CStreaming::IHaveUsedStreamingMemory();
+        }
+    }
+
+    // Load camera path splines for this cutscene
+    {
+        const auto img  = CFileMgr::OpenFile("ANIM\\CUTS.IMG", "rb");
+        const auto raii = notsa::ACOD{ [&] { CFileMgr::CloseFile(img); } };
+        
+        char csSplinesFile[1024];
+        std::format_to(csSplinesFile, "{}.IFP", ms_cutsceneName);
+
+        if (uint32 streamOffset, streamSz; dataFileLoaded = ms_pCutsceneDir->FindItem(csSplinesFile, streamOffset, streamSz)) {
+            CStreaming::ImGonnaUseStreamingMemory();
+
+            CFileMgr::Seek(img, streamOffset * STREAMING_SECTOR_SIZE, SEEK_SET);
+            TheCamera.LoadPathSplines(img);
+
+            CStreaming::IHaveUsedStreamingMemory();
+        }
+    }
+
+    ms_cutsceneLoadStatus = LoadStatus::LOADED;
+
+    ms_cutsceneTimer = 0.f;
+
+    FindPlayerWanted()->ClearQdCrimes();
 }
 
 // 0x5B05A0
@@ -521,7 +580,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(GetCutsceneTimeInMilleseconds, 0x5B0550);
     RH_ScopedGlobalInstall(CreateCutsceneObject, 0x5B02A0);
     RH_ScopedGlobalInstall(DeleteCutsceneData_overlay, 0x5AFD60);
-    RH_ScopedGlobalInstall(LoadCutsceneData_postload, 0x5AFBC0, {.reversed = false});
+    RH_ScopedGlobalInstall(LoadCutsceneData_postload, 0x5AFBC0);
     //RH_ScopedGlobalInstall(sub_489400, 0x489400, {.reversed = false});
     RH_ScopedGlobalInstall(Initialise, 0x4D5A20);
     RH_ScopedGlobalInstall(LoadAnimationUncompressed, 0x4D5AB0);

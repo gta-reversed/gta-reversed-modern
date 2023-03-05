@@ -651,8 +651,9 @@ void CWorld::ShutDown() {
 
 // 0x564360
 void CWorld::ClearForRestart() {
-    if (CCutsceneMgr::ms_cutsceneLoadStatus == 2)
+    if (CCutsceneMgr::HasLoaded()) {
         CCutsceneMgr::DeleteCutsceneData();
+    }
 
     CProjectileInfo::RemoveAllProjectiles();
     CObject::DeleteAllTempObjects();

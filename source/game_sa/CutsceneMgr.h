@@ -45,7 +45,18 @@ extern uint32 MAX_NUM_CUTSCENE_PARTICLE_EFFECTS; // default: 8
 extern uint32 MAX_NUM_CUTSCENE_ITEMS_TO_HIDE; // default: 50
 extern uint32 MAX_NUM_CUTSCENE_ATTACHMENTS; // default: 50
 
+
 class CCutsceneMgr {
+public:
+    enum class LoadStatus {
+        NOT_LOADED,
+        LOADING,
+        LOADED,
+        S3,
+        S4,
+        S5
+    };
+
 public:
     static inline auto& ms_useCutsceneShadows = StaticRef<int8, 0x8AC158>();
     static inline auto& numPlayerWeaponsToRestore = StaticRef<int32, 0xB5EB58>();
@@ -57,7 +68,7 @@ public:
     static inline auto& ms_cAppendObjectName = StaticRef<std::array<char[32], 50>, 0xB5F208>();
 
     static inline auto& ms_pCutsceneDir = StaticRef<CDirectory*, 0xB5F848>();
-    static inline auto& ms_cutsceneLoadStatus = StaticRef<int32, 0xB5F84C>();
+    static inline auto& ms_cutsceneLoadStatus = StaticRef<LoadStatus, 0xB5F84C>();
     static inline auto& ms_animLoaded = StaticRef<bool, 0xB5F850>();
     static inline auto& ms_running = StaticRef<int8, 0xB5F851>();
     static inline auto& ms_cutsceneProcessing = StaticRef<bool, 0xB5F852>();
@@ -74,7 +85,7 @@ public:
     static inline auto& ms_numAttachObjectToBones = StaticRef<int32, 0xBC2A30>();
     static inline auto& ms_bRepeatObject = StaticRef<std::array<char, 50>, 0xBC2A34>();
     static inline auto& ms_iAttachObjectToBone = StaticRef<std::array<tCutsceneAttachment, 50>, 0xBC2A68>();
-    static inline auto& ms_aUncompressedCutsceneAnims = StaticRef<std::array<char[8], 32>, 0xBC2CC0>(); // is this char[8] x 32, or char[32] x 8?
+    static inline auto& ms_aUncompressedCutsceneAnims = StaticRef<std::array<char[32], 8>, 0xBC2CC0>(); 
     static inline auto& ms_iTextDuration = StaticRef<std::array<int32, 64>, 0xBC2DC0>();
     static inline auto& ms_iTextStartTime = StaticRef<std::array<int32, 64>, 0xBC2EC0>();
     static inline auto& ms_cTextOutput = StaticRef<std::array<char, 320>, 0xBC2FC0>();
@@ -93,9 +104,9 @@ public:
     static inline auto& ms_iNumHiddenEntities = StaticRef<uint32, 0xBC3FF8>();
     static inline auto& ms_iNumParticleEffects = StaticRef<uint32, 0xBC3FFC>();
     static inline auto& m_PrevExtraColour = StaticRef<int32, 0xBC4000>();
-    static inline auto& m_PrevExtraColourOn = StaticRef<int8, 0xBC4004>();
-    static inline auto& m_bDontClearZone = StaticRef<int8, 0xBC4005>();
-    static inline auto& dataFileLoaded = StaticRef<int8, 0xBC4006>();
+    static inline auto& m_PrevExtraColourOn = StaticRef<bool, 0xBC4004>();
+    static inline auto& m_bDontClearZone = StaticRef<bool, 0xBC4005>();
+    static inline auto& dataFileLoaded = StaticRef<bool, 0xBC4006>(); // If the camera splines were loaded (See `LoadCutsceneData_postload`)
     static inline auto& ms_cutsceneAssociations = StaticRef<CAnimBlendAssocGroup, 0xBC4020>();
     static inline auto& ms_cutsceneOffset = StaticRef<CVector, 0xBC4034>();
 
@@ -139,6 +150,7 @@ public:
 
     static bool IsRunning() { return ms_running; }
     static bool IsCutsceneProcessing() { return ms_cutsceneProcessing; }
+    static bool HasLoaded() { return ms_cutsceneLoadStatus == LoadStatus::LOADED; }
 };
 
 int16 FindCutsceneAudioTrackId(const char* cutsceneName);

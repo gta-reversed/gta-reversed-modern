@@ -165,7 +165,7 @@ void InitializeAndStartNewScript() {
 
 bool MissionDebugModule::StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
     if (!m_bStartMission && CTheScripts::IsPlayerOnAMission()) {
-        if (CCutsceneMgr::ms_cutsceneLoadStatus == 2) {
+        if (CCutsceneMgr::HasLoaded()) {
             CCutsceneMgr::DeleteCutsceneData();
         }
         CTheScripts::FailCurrentMission = 2;
