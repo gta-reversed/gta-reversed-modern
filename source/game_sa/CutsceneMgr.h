@@ -7,6 +7,7 @@
 #pragma once
 
 #include "RenderWare.h"
+#include <extensions/utility.hpp>
 
 class CEntity;
 class CObject;
@@ -26,6 +27,7 @@ struct tCutsceneParticleEffect {
     bool        m_bPlaying;
     bool        m_bStopped;
 };
+VALIDATE_SIZE(tCutsceneParticleEffect, 0x6C);
 
 struct tCutsceneAttachment {
     int32 m_nCutscenePedObjectId;
@@ -45,53 +47,57 @@ extern uint32 MAX_NUM_CUTSCENE_ATTACHMENTS; // default: 50
 
 class CCutsceneMgr {
 public:
-    static bool &ms_useCutsceneShadows; // always 'true', doesn't change anything
-    static uint32 &numPlayerWeaponsToRestore;
-    static uint32 *playerWeaponsToRestore_Ammo; // static uint32 playerWeaponsToRestore_Ammo[13]
-    static uint32 *playerWeaponsToRestore_Type; // static uint32 playerWeaponsToRestore_Type[13]
-    static char (*ms_cAppendAnimName)[32]; // static char ms_cAppendAnimName[50][32]
-    static char (*ms_cAppendObjectName)[32]; // static char ms_cAppendObjectName[50][32]
-    static CDirectory *ms_pCutsceneDir;
-    static uint32 &ms_cutsceneLoadStatus;
-    static bool &ms_animLoaded;
-    static bool &ms_running;
-    static bool &ms_cutsceneProcessing;
-    static bool &ms_useLodMultiplier;
-    static bool &ms_wasCutsceneSkipped;
-    static bool &ms_hasFileInfo;
-    static uint32 &ms_numAppendObjectNames;
-    static bool &restoreEverythingAfterCutscene;
-    static float &m_fPrevCarDensity;
-    static float &m_fPrevPedDensity;
-    static tCutsceneParticleEffect *ms_pParticleEffects; // static tCutsceneParticleEffect ms_pParticleEffects[8]
-    static tCutsceneRemoval *ms_crToHideItems; // static tCutsceneRemoval ms_crToHideItems[50]
-    static CEntity **ms_pHiddenEntities; // static CEntity *ms_pHiddenEntities[50]
-    static uint32 &ms_numAttachObjectToBones;
-    static bool *ms_bRepeatObject; // static bool ms_bRepeatObject[50]
-    static tCutsceneAttachment *ms_iAttachObjectToBone; // static tCutsceneAttachment ms_iAttachObjectToBone[]
-    static char (*ms_aUncompressedCutsceneAnims)[32]; // static char ms_aUncompressedCutsceneAnims[8][32]
-    static int32 *ms_iTextDuration; // static int32 ms_iTextDuration[64]
-    static int32 *ms_iTextStartTime; // static int32 ms_iTextStartTime[64]
-    static char (*ms_cTextOutput)[8]; // static char ms_cTextOutput[40][8]
-    static int32 *ms_iModelIndex; // static int32 ms_iModelIndex[50]
-    static char (*ms_cLoadAnimName)[32]; // static char ms_cLoadAnimName[50][32]
-    static char (*ms_cLoadObjectName)[32]; // static char ms_cLoadObjectName[50][32]
-    static float &ms_cutsceneTimer;
-    static char *ms_cutsceneName; // static char ms_cutsceneName[8]
-    static inline CCutsceneObject* (&ms_pCutsceneObjects)[50] = *(CCutsceneObject * (*)[50])0xBC3F18;
-    static uint32 &ms_cutscenePlayStatus;
-    static uint32 &ms_numCutsceneObjs;
-    static uint32 &ms_numLoadObjectNames;
-    static uint32 &ms_numTextOutput;
-    static uint32 &ms_currTextOutput;
-    static uint32 &ms_numUncompressedCutsceneAnims;
-    static uint32 &ms_iNumHiddenEntities;
-    static uint32 &ms_iNumParticleEffects;
-    static uint32 &m_PrevExtraColour;
-    static bool &m_PrevExtraColourOn;
-    static bool &dataFileLoaded;
-    static CAnimBlendAssocGroup &ms_cutsceneAssociations;
-    static CVector &ms_cutsceneOffset;
+    static inline auto& ms_useCutsceneShadows = StaticRef<int8, 0x8AC158>();
+    static inline auto& numPlayerWeaponsToRestore = StaticRef<int32, 0xB5EB58>();
+
+    static inline auto& playerWeaponsToRestore_Ammo = StaticRef<std::array<int32, 13>, 0xB5EB5C>(); // TODO: Where does the 13 number come from? 
+    static inline auto& playerWeaponsToRestore_Type = StaticRef<std::array<int32, 13>, 0xB5EB90>(); // TODO: Where does the 13 number come from?
+
+    static inline auto& ms_cAppendAnimName = StaticRef<std::array<char[32], 50>, 0xB5EBC8>();
+    static inline auto& ms_cAppendObjectName = StaticRef<std::array<char[32], 50>, 0xB5F208>();
+
+    static inline auto& ms_pCutsceneDir = StaticRef<CDirectory*, 0xB5F848>();
+    static inline auto& ms_cutsceneLoadStatus = StaticRef<int32, 0xB5F84C>();
+    static inline auto& ms_animLoaded = StaticRef<int8, 0xB5F850>();
+    static inline auto& ms_running = StaticRef<int8, 0xB5F851>();
+    static inline auto& ms_cutsceneProcessing = StaticRef<int8, 0xB5F852>();
+    static inline auto& ms_useLodMultiplier = StaticRef<int8, 0xB5F853>();
+    static inline auto& ms_wasCutsceneSkipped = StaticRef<int8, 0xB5F854>();
+    static inline auto& ms_hasFileInfo = StaticRef<int8, 0xB5F855>();
+    static inline auto& ms_numAppendObjectNames = StaticRef<int32, 0xB5F858>();
+    static inline auto& restoreEverythingAfterCutscene = StaticRef<int8, 0xB5F85C>();
+    static inline auto& m_fPrevCarDensity = StaticRef<float, 0xBC1D68>();
+    static inline auto& m_fPrevPedDensity = StaticRef<float, 0xBC1D6C>();
+    static inline auto& ms_pParticleEffects = StaticRef<std::array<tCutsceneParticleEffect, 8>, 0xBC1D70>();
+    static inline auto& ms_crToHideItems = StaticRef<std::array<tCutsceneRemoval, 50>, 0xBC20D0>();
+    static inline auto& ms_pHiddenEntities = StaticRef<std::array<CEntity*, 50>, 0xBC2968>();
+    static inline auto& ms_numAttachObjectToBones = StaticRef<int32, 0xBC2A30>();
+    static inline auto& ms_bRepeatObject = StaticRef<std::array<char, 50>, 0xBC2A34>();
+    static inline auto& ms_iAttachObjectToBone = StaticRef<std::array<tCutsceneAttachment, 50>, 0xBC2A68>();
+    static inline auto& ms_aUncompressedCutsceneAnims = StaticRef<std::array<char, 256>, 0xBC2CC0>();
+    static inline auto& ms_iTextDuration = StaticRef<std::array<int32, 64>, 0xBC2DC0>();
+    static inline auto& ms_iTextStartTime = StaticRef<std::array<int32, 64>, 0xBC2EC0>();
+    static inline auto& ms_cTextOutput = StaticRef<std::array<char, 320>, 0xBC2FC0>();
+    static inline auto& ms_iModelIndex = StaticRef<std::array<int32, 50>, 0xBC31C0>();
+    static inline auto& ms_cLoadAnimName = StaticRef<notsa::mdarray<char, 50, 32>, 0xBC3288>();
+    static inline auto& ms_cLoadObjectName = StaticRef<notsa::mdarray<char, 50, 32>, 0xBC38C8>();
+    static inline auto& ms_cutsceneTimer = StaticRef<float, 0xBC3F08>();
+    static inline auto& ms_cutsceneName = StaticRef<std::array<char, 8>, 0xBC3F0C>();
+    static inline auto& ms_pCutsceneObjects = StaticRef<std::array<CCutsceneObject*, 50>, 0xBC3F18>();
+    static inline auto& ms_cutscenePlayStatus = StaticRef<int32, 0xBC3FE0>();
+    static inline auto& ms_numCutsceneObjs = StaticRef<int32, 0xBC3FE4>();
+    static inline auto& ms_numLoadObjectNames = StaticRef<int32, 0xBC3FE8>();
+    static inline auto& ms_numTextOutput = StaticRef<int32, 0xBC3FEC>();
+    static inline auto& ms_currTextOutput = StaticRef<int32, 0xBC3FF0>();
+    static inline auto& ms_numUncompressedCutsceneAnims = StaticRef<int32, 0xBC3FF4>();
+    static inline auto& ms_iNumHiddenEntities = StaticRef<int32, 0xBC3FF8>();
+    static inline auto& ms_iNumParticleEffects = StaticRef<int32, 0xBC3FFC>();
+    static inline auto& m_PrevExtraColour = StaticRef<int32, 0xBC4000>();
+    static inline auto& m_PrevExtraColourOn = StaticRef<int8, 0xBC4004>();
+    static inline auto& m_bDontClearZone = StaticRef<int8, 0xBC4005>();
+    static inline auto& dataFileLoaded = StaticRef<int8, 0xBC4006>();
+    static inline auto& ms_cutsceneAssociations = StaticRef<CAnimBlendAssocGroup, 0xBC4020>();
+    static inline auto& ms_cutsceneOffset = StaticRef<CVector, 0xBC4034>();
 
     static void InjectHooks();
 
