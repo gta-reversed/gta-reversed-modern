@@ -179,7 +179,7 @@ void CMessages::AddBigMessage2(const char* text, uint32 time, eMessageStyle styl
         };
     };
     if (showInstantly) {
-        CreateAt(&BIGMessages[style].Stack[0]);
+        CreateAt(&BIGMessages[style].Stack.front());
     } else if (const auto p = FindUnusedMsgInArray(BIGMessages[style].Stack)) {
         CreateAt(p);
     }
