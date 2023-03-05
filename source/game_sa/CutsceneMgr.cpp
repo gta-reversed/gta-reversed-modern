@@ -85,13 +85,15 @@ void CCutsceneMgr::AttachObjectToBone(CCutsceneObject* attachment, CCutsceneObje
 }
 
 // 0x5B0480
-void CCutsceneMgr::AttachObjectToFrame(CObject* attachment, CEntity* object, const char* frameName) {
-    plugin::Call<0x5B0480, CObject*, CEntity*, const char*>(attachment, object, frameName);
+void CCutsceneMgr::AttachObjectToFrame(CCutsceneObject* attachment, CEntity* object, const char* frameName) {
+    attachment->m_pAttachmentObject = nullptr;
+    attachment->m_pAttachToFrame    = RpAnimBlendClumpFindFrame(object->m_pRwClump, frameName)->m_pFrame;
 }
 
 // 0x5B04B0
-void CCutsceneMgr::AttachObjectToParent(CObject* attachment, CEntity* object) {
-    plugin::Call<0x5B04B0, CObject*, CEntity*>(attachment, object);
+void CCutsceneMgr::AttachObjectToParent(CCutsceneObject* attachment, CEntity* object) {
+    attachment->m_pAttachmentObject = nullptr;
+    attachment->m_pAttachToFrame    = RpClumpGetFrame(object->m_pRwClump);
 }
 
 // 0x4D5E20
@@ -254,8 +256,8 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(SetCutsceneAnimToLoop, 0x5B0420, {.reversed = false});
     RH_ScopedGlobalInstall(SetHeadAnim, 0x5B0440, {.reversed = false});
     RH_ScopedGlobalInstall(AttachObjectToBone, 0x5B0450);
-    RH_ScopedGlobalInstall(AttachObjectToFrame, 0x5B0480, {.reversed = false});
-    RH_ScopedGlobalInstall(AttachObjectToParent, 0x5B04B0, {.reversed = false});
+    RH_ScopedGlobalInstall(AttachObjectToFrame, 0x5B0480);
+    RH_ScopedGlobalInstall(AttachObjectToParent, 0x5B04B0);
     RH_ScopedGlobalInstall(AddCutsceneHead, 0x5B0380, {.reversed = false});
     RH_ScopedGlobalInstall(FinishCutscene, 0x5B04D0, {.reversed = false});
     RH_ScopedGlobalInstall(HasCutsceneFinished, 0x5B0570, {.reversed = false});

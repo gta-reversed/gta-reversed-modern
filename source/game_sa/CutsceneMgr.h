@@ -98,8 +98,8 @@ public:
     static int32 AddCutsceneHead(CObject* object, int32 arg1);
     static void AppendToNextCutscene(const char* objectName, const char* animName);
     static void AttachObjectToBone(CCutsceneObject* attachment, CCutsceneObject* object, int32 boneId);
-    static void AttachObjectToFrame(CObject* attachment, CEntity* object, const char* frameName);
-    static void AttachObjectToParent(CObject* attachment, CEntity* object);
+    static void AttachObjectToFrame(CCutsceneObject* attachment, CEntity* object, const char* frameName);
+    static void AttachObjectToParent(CCutsceneObject* attachment, CEntity* object);
     static void BuildCutscenePlayer();
     static CCutsceneObject* CreateCutsceneObject(int32 modelId);
     static void DeleteCutsceneData();
