@@ -74,7 +74,7 @@ public:
     static inline auto& ms_numAttachObjectToBones = StaticRef<int32, 0xBC2A30>();
     static inline auto& ms_bRepeatObject = StaticRef<std::array<char, 50>, 0xBC2A34>();
     static inline auto& ms_iAttachObjectToBone = StaticRef<std::array<tCutsceneAttachment, 50>, 0xBC2A68>();
-    static inline auto& ms_aUncompressedCutsceneAnims = StaticRef<std::array<char, 256>, 0xBC2CC0>();
+    static inline auto& ms_aUncompressedCutsceneAnims = StaticRef<std::array<char[8], 32>, 0xBC2CC0>(); // is this char[8] x 32, or char[32] x 8?
     static inline auto& ms_iTextDuration = StaticRef<std::array<int32, 64>, 0xBC2DC0>();
     static inline auto& ms_iTextStartTime = StaticRef<std::array<int32, 64>, 0xBC2EC0>();
     static inline auto& ms_cTextOutput = StaticRef<std::array<char, 320>, 0xBC2FC0>();

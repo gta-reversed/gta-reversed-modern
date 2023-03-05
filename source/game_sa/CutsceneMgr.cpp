@@ -9,6 +9,7 @@
 #include "CutsceneMgr.h"
 #include "Rubbish.h"
 #include <TempColModels.h>
+#include <win.h> // TODO: Remove (Included because of isForeground)
 
 uint32 MAX_NUM_CUTSCENE_OBJECTS = 50;
 uint32 MAX_NUM_CUTSCENE_PARTICLE_EFFECTS = 8;
@@ -183,7 +184,7 @@ void CCutsceneMgr::DeleteCutsceneData_overlay() {
     }
     ms_animLoaded = false;
     ms_cutsceneAssociations.DestroyAssociations();
-    ms_aUncompressedCutsceneAnims[0] = 0;
+    ms_aUncompressedCutsceneAnims[0][0] = 0;
     ms_numUncompressedCutsceneAnims = 0;
 
     if (dataFileLoaded) {
@@ -296,12 +297,18 @@ void CCutsceneMgr::Initialise() {
 
 // 0x4D5D10
 bool CCutsceneMgr::IsCutsceneSkipButtonBeingPressed() {
-    return plugin::CallAndReturn<bool, 0x4D5D10>();
+    const auto pad = CPad::GetPad(0);
+    return pad->IsCrossPressed()
+        || pad->IsMouseLButtonPressed()
+        || pad->IsEnterJustPressed()
+        || pad->IsStandardKeyJustDown(' ')
+        || !isForeground; // ????
 }
 
 // 0x4D5AB0
 void CCutsceneMgr::LoadAnimationUncompressed(const char* animName) {
-    plugin::Call<0x4D5AB0, const char*>(animName);
+    strcpy_s(ms_aUncompressedCutsceneAnims[ms_numUncompressedCutsceneAnims++], animName);
+    ms_aUncompressedCutsceneAnims[ms_numUncompressedCutsceneAnims][0] = 0; // Null terminate next
 }
 
 // 0x4D5E80
@@ -419,11 +426,11 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(LoadCutsceneData_postload, 0x5AFBC0, {.reversed = false});
     //RH_ScopedGlobalInstall(sub_489400, 0x489400, {.reversed = false});
     RH_ScopedGlobalInstall(Initialise, 0x4D5A20);
-    RH_ScopedGlobalInstall(LoadAnimationUncompressed, 0x4D5AB0, {.reversed = false});
+    RH_ScopedGlobalInstall(LoadAnimationUncompressed, 0x4D5AB0);
     RH_ScopedGlobalInstall(RemoveEverythingBecauseCutsceneDoesntFitInMemory, 0x4D5AF0, {.reversed = false});
     RH_ScopedGlobalInstall(LoadEverythingBecauseCutsceneDeletedAllOfIt, 0x4D5C10, {.reversed = false});
     RH_ScopedGlobalInstall(Update, 0x4D5D00, {.reversed = false});
-    RH_ScopedGlobalInstall(IsCutsceneSkipButtonBeingPressed, 0x4D5D10, {.reversed = false});
+    RH_ScopedGlobalInstall(IsCutsceneSkipButtonBeingPressed, 0x4D5D10);
     RH_ScopedGlobalInstall(AppendToNextCutscene, 0x4D5DB0);
     RH_ScopedGlobalInstall(BuildCutscenePlayer, 0x4D5E20);
     RH_ScopedGlobalInstall(RemoveCutscenePlayer, 0x4D5E50, {.reversed = false});
