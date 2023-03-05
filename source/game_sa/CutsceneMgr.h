@@ -89,9 +89,9 @@ public:
     static inline auto& ms_numLoadObjectNames = StaticRef<int32, 0xBC3FE8>();
     static inline auto& ms_numTextOutput = StaticRef<int32, 0xBC3FEC>();
     static inline auto& ms_currTextOutput = StaticRef<int32, 0xBC3FF0>();
-    static inline auto& ms_numUncompressedCutsceneAnims = StaticRef<int32, 0xBC3FF4>();
-    static inline auto& ms_iNumHiddenEntities = StaticRef<int32, 0xBC3FF8>();
-    static inline auto& ms_iNumParticleEffects = StaticRef<int32, 0xBC3FFC>();
+    static inline auto& ms_numUncompressedCutsceneAnims = StaticRef<uint32, 0xBC3FF4>();
+    static inline auto& ms_iNumHiddenEntities = StaticRef<uint32, 0xBC3FF8>();
+    static inline auto& ms_iNumParticleEffects = StaticRef<uint32, 0xBC3FFC>();
     static inline auto& m_PrevExtraColour = StaticRef<int32, 0xBC4000>();
     static inline auto& m_PrevExtraColourOn = StaticRef<int8, 0xBC4004>();
     static inline auto& m_bDontClearZone = StaticRef<int8, 0xBC4005>();

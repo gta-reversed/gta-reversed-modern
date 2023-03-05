@@ -258,7 +258,28 @@ bool CCutsceneMgr::HasCutsceneFinished() {
 
 // 0x5AFAD0
 void CCutsceneMgr::HideRequestedObjects() {
-    plugin::Call<0x5AFAD0>();
+    if (ms_iNumHiddenEntities == 0) {
+        return;
+    }
+
+    for (const auto& cr : ms_crToHideItems | rng::views::take(ms_iNumHiddenEntities)) {
+        int32 modelId;
+        if (!CModelInfo::GetModelInfo(cr.m_szObjectName, &modelId)) {
+            DEV_LOG("Invalid model name({})", cr.m_szObjectName);
+            continue;
+        }
+
+        int16 nObjInRng;
+        CEntity* objInRng[32];
+        CWorld::FindObjectsOfTypeInRange(modelId, cr.m_vecPosn, 1.5f, true, &nObjInRng, (int16)std::size(objInRng), objInRng, true, false, false, true, true);
+        for (auto e : objInRng | rng::views::take((size_t)nObjInRng)) {
+            if (!e->m_bIsVisible) {
+                continue;
+            }
+            e->m_bIsVisible = false;
+            CEntity::SetEntityReference(ms_pHiddenEntities[ms_iNumHiddenEntities++], e);
+        }
+    }
 }
 
 // 0x4D5A20
@@ -403,7 +424,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(LoadCutsceneData, 0x4D5E80, {.reversed = false});
     RH_ScopedGlobalInstall(DeleteCutsceneData, 0x4D5ED0);
     //RH_ScopedGlobalInstall(sub_5099F0, 0x5099F0, {.reversed = false});
-    RH_ScopedGlobalInstall(HideRequestedObjects, 0x5AFAD0, { .reversed = false });
+    RH_ScopedGlobalInstall(HideRequestedObjects, 0x5AFAD0);
     RH_ScopedGlobalInstall(UpdateCutsceneObjectBoundingBox, 0x5B01E0);
     RH_ScopedGlobalInstall(CalculateBoundingSphereRadiusCB, 0x5B0130);
     RH_ScopedGlobalInstall(SkipCutscene, 0x5B1700, {.reversed = false});
