@@ -112,7 +112,7 @@ public:
     static void DeleteCutsceneData();
     static void DeleteCutsceneData_overlay();
     static void FinishCutscene();
-    static long long GetCutsceneTimeInMilleseconds();
+    static uint64 GetCutsceneTimeInMilleseconds();
     static bool HasCutsceneFinished();
     static void HideRequestedObjects();
     static void Initialise();

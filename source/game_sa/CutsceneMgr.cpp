@@ -238,17 +238,22 @@ void CCutsceneMgr::DeleteCutsceneData_overlay() {
 
 // 0x5B04D0
 void CCutsceneMgr::FinishCutscene() {
-    plugin::Call<0x5B04D0>();
+    if (dataFileLoaded) {
+        ms_cutsceneTimer = TheCamera.CCamera::GetCutSceneFinishTime() / 1000.f;
+        TheCamera.CCamera::FinishCutscene();
+    }
+    FindPlayerPed()->m_bIsVisible = true;
+    FindPlayerInfo().MakePlayerSafe(false, 10000.f);
 }
 
 // 0x5B0550
-long long CCutsceneMgr::GetCutsceneTimeInMilleseconds() {
-    return plugin::CallAndReturn<long long, 0x5B0550>();
+uint64 CCutsceneMgr::GetCutsceneTimeInMilleseconds() {
+    return (uint64)ms_cutsceneTimer * 1000;
 }
 
 // 0x5B0570
 bool CCutsceneMgr::HasCutsceneFinished() {
-    return plugin::CallAndReturn<bool, 0x5B0570>();
+    return !dataFileLoaded || TheCamera.GetPositionAlongSpline() == 1.0;;
 }
 
 // 0x5AFAD0
@@ -373,14 +378,14 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(AttachObjectToFrame, 0x5B0480);
     RH_ScopedGlobalInstall(AttachObjectToParent, 0x5B04B0);
     RH_ScopedGlobalInstall(AddCutsceneHead, 0x5B0380, {.reversed = false});
-    RH_ScopedGlobalInstall(FinishCutscene, 0x5B04D0, {.reversed = false});
-    RH_ScopedGlobalInstall(HasCutsceneFinished, 0x5B0570, {.reversed = false});
+    RH_ScopedGlobalInstall(FinishCutscene, 0x5B04D0);
+    RH_ScopedGlobalInstall(HasCutsceneFinished, 0x5B0570);
     RH_ScopedGlobalInstall(LoadCutsceneData_preload, 0x5B05A0, {.reversed = false});
     RH_ScopedGlobalInstall(LoadCutsceneData_loading, 0x5B11C0, {.reversed = false});
     RH_ScopedGlobalInstall(LoadCutsceneData_overlay, 0x5B13F0, {.reversed = false});
     RH_ScopedGlobalInstall(StartCutscene, 0x5B1460, {.reversed = false});
     RH_ScopedGlobalInstall(SetupCutsceneToStart, 0x5B14D0, {.reversed = false});
-    RH_ScopedGlobalInstall(GetCutsceneTimeInMilleseconds, 0x5B0550, {.reversed = false});
+    RH_ScopedGlobalInstall(GetCutsceneTimeInMilleseconds, 0x5B0550);
     RH_ScopedGlobalInstall(CreateCutsceneObject, 0x5B02A0);
     RH_ScopedGlobalInstall(DeleteCutsceneData_overlay, 0x5AFD60);
     RH_ScopedGlobalInstall(LoadCutsceneData_postload, 0x5AFBC0, {.reversed = false});
