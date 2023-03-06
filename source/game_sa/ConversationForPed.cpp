@@ -54,13 +54,13 @@ void CConversationForPed::Update() {
         case eConversationForPedStatus::UNK_3: {
             assert(GetCurrentNode());
             if (pad->ConversationNoJustDown() && GetCurrentNode()->m_NodeNo >= 0) {
-                PrintSubtitle(std::format("{}N", TheText.Get(GetCurrentNode()->m_Name)).c_str(), 3);
+                PrintSubtitle(TheText.Get(std::format("{}N", GetCurrentNode()->m_Name).c_str()), 3);
                 Speak(GetCurrentNode()->m_SpeechN, FindPlayerPed());
 
                 m_CurrentNode = GetCurrentNode()->m_NodeNo;
                 PrintSubtitle(TheText.Get(GetCurrentNode()->m_Name), 1);
             } else if (pad->ConversationYesJustDown() && GetCurrentNode()->m_NodeYes >= 0) {
-                PrintSubtitle(std::format("{}Y", TheText.Get(GetCurrentNode()->m_Name)).c_str(), 3);
+                PrintSubtitle(TheText.Get(std::format("{}Y", GetCurrentNode()->m_Name).c_str()), 3);
                 Speak(GetCurrentNode()->m_SpeechY, FindPlayerPed());
 
                 m_CurrentNode = GetCurrentNode()->m_NodeYes;
