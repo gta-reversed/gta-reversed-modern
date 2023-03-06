@@ -32,6 +32,14 @@ private:
     Fn m_fn;
 };
 
+constexpr auto IsFixBugs() {
+#ifdef FIX_BUGS
+    return true;
+#else
+    return false;
+#endif
+}
+
 /// Predicate to check if `value` is null
 template<typename T>
     requires(std::is_pointer_v<T>)

@@ -81,7 +81,7 @@ CVector CTaskComplexEnterCar::GetTargetPos() {
 
 // 0x63A690
 CVehicle* CTaskComplexEnterCar::GetCameraAvoidVehicle() {
-    if (m_pTargetVehicle) {
+    if (m_car) {
         if (const auto st = GetSubTask()) {
             switch (st->GetTaskType()) {
             case TASK_COMPLEX_LEAVE_CAR:
@@ -100,7 +100,7 @@ CVehicle* CTaskComplexEnterCar::GetCameraAvoidVehicle() {
             case TASK_SIMPLE_CAR_ALIGN:
             case TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER:
             case TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER:
-                return m_pTargetVehicle;
+                return m_car;
             }
         }
     }
