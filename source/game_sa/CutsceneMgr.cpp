@@ -301,7 +301,7 @@ void CCutsceneMgr::Initialise() {
     ms_useLodMultiplier   = false;
     ms_wasCutsceneSkipped = false;
     ms_hasFileInfo        = false;
-    ms_pCutsceneDir       = new CDirectory{};
+    ms_pCutsceneDir       = new CDirectory{512};
 }
 
 // 0x4D5D10
