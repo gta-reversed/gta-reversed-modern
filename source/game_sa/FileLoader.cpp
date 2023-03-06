@@ -238,6 +238,12 @@ char* CFileLoader::LoadLine(char*& bufferIt, int32& buffSize) {
     // Copy with sanitization (Otherwise random crashes appear)
     char* copyIt = s_MemoryHeapBuffer;
     for (; *bufferIt && *bufferIt != '\n' && buffSize != 0; bufferIt++, buffSize--) {
+        // Handle EOL (\r\n) correctly
+        // Technically a bugfix, but can't place it under the macro
+        // cause code(See `LoadCutSceneFile`) relies on it filtering `\r` even in vanilla mode
+        if (*bufferIt == '\r') {
+            continue;
+        }
         // Have to cast to uint8, because signed ASCII is retarded
         *copyIt++ = ((uint8)*bufferIt < (uint8)' ' || *bufferIt == ',') ? ' ' : *bufferIt; // Replace chars before space and ',' (comma) by space, otherwise copy
     }
