@@ -22,6 +22,7 @@ uint32 MAX_NUM_CUTSCENE_PARTICLE_EFFECTS = 8;
 uint32 MAX_NUM_CUTSCENE_ITEMS_TO_HIDE = 50;
 uint32 MAX_NUM_CUTSCENE_ATTACHMENTS = 50;
 
+//! Is the cutscene close to finishing (If this is set the camera is already fading in)
 static inline auto& g_bCutSceneFinishing = StaticRef<bool, 0xBC1CF8>();
 
 // 0x5B0380
@@ -213,7 +214,7 @@ void CCutsceneMgr::DeleteCutsceneData_overlay() {
     pad->Clear(false, false); // moved up here
     plyr->GetPlayerInfoForThisPlayerPed()->MakePlayerSafe(0, 10000.0);
 
-    if (_stricmp(ms_cutsceneName, "finale") != 0) {
+    if (!IsPlayingCSTheFinale()) {
         AudioEngine.StopCutsceneTrack(true);
         CAudioEngine::EnableEffectsLoading();
         CAEPedSpeechAudioEntity::EnableAllPedSpeech();
@@ -248,7 +249,7 @@ void CCutsceneMgr::DeleteCutsceneData_overlay() {
 // 0x5B04D0
 void CCutsceneMgr::FinishCutscene() {
     if (dataFileLoaded) {
-        ms_cutsceneTimer = TheCamera.CCamera::GetCutSceneFinishTime() / 1000.f;
+        ms_cutsceneTimerS = TheCamera.CCamera::GetCutSceneFinishTime() / 1000.f;
         TheCamera.CCamera::FinishCutscene();
     }
     FindPlayerPed()->m_bIsVisible = true;
@@ -257,7 +258,7 @@ void CCutsceneMgr::FinishCutscene() {
 
 // 0x5B0550
 uint64 CCutsceneMgr::GetCutsceneTimeInMilleseconds() {
-    return (uint64)ms_cutsceneTimer * 1000;
+    return (uint64)ms_cutsceneTimerS * 1000;
 }
 
 // 0x5B0570
@@ -475,7 +476,7 @@ void CCutsceneMgr::LoadCutsceneData_postload() {
         const auto raii = notsa::ACOD{ [&] { CFileMgr::CloseFile(img); } };
         
         char csSplinesFile[1024];
-        *std::format_to(csSplinesFile, "{}.IFP", ms_cutsceneName) = 0;
+        *std::format_to(csSplinesFile, "{}.DAT", ms_cutsceneName) = 0;
 
         if (uint32 streamOffset, streamSz; dataFileLoaded = ms_pCutsceneDir->FindItem(csSplinesFile, streamOffset, streamSz)) {
             CStreaming::ImGonnaUseStreamingMemory();
@@ -489,7 +490,7 @@ void CCutsceneMgr::LoadCutsceneData_postload() {
 
     ms_cutsceneLoadStatus = LoadStatus::LOADED;
 
-    ms_cutsceneTimer = 0.f;
+    ms_cutsceneTimerS = 0.f;
 
     FindPlayerWanted()->ClearQdCrimes();
 }
@@ -697,22 +698,13 @@ bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
         CTimeCycle::StopExtraColour(false);
     }
 
-    // Append objects added by script
-    for (auto i = ms_numAppendObjectNames; i-- > 0;) {
-        const auto objId = ms_numLoadObjectNames++;
-        ms_iModelIndex[objId + i] = MODEL_LOAD_THIS;
-        strcpy_s(ms_cLoadObjectName[objId], ms_cAppendObjectName[objId]);
-        strcpy_s(ms_cLoadAnimName[objId], ms_cAppendAnimName[objId]);
-    }
-    ms_numAppendObjectNames = 0;
-
     return true;
 }
 
 // 0x5B05A0
 void CCutsceneMgr::LoadCutsceneData_preload() {
     // Preload cutscene track (Except for the "finale" cutscene)
-    if (_stricmp(ms_cutsceneName, "finale") != 0) {
+    if (!IsPlayingCSTheFinale()) {
         if (const auto trkId = FindCutsceneAudioTrackId(ms_cutsceneName); trkId != -1) {
             AudioEngine.PreloadCutsceneTrack(trkId, true);
         }
@@ -753,8 +745,10 @@ void CCutsceneMgr::LoadCutsceneData_preload() {
         name[0] = 0;
     }
 
-    rng::fill(ms_iModelIndex, MODEL_PLAYER);
+    rng::fill(ms_iModelIndex, MODEL_PLAYER); // TODO: Change to MODEL_INVALID
+
     TheCamera.SetNearClipScript(0.1f);
+
     CRubbish::SetVisibility(false);
 
     FindPlayerWanted()->ClearQdCrimes();
@@ -762,6 +756,7 @@ void CCutsceneMgr::LoadCutsceneData_preload() {
     CPad::GetPad()->bPlayerSkipsToDestination = false;
     FindPlayerInfo().MakePlayerSafe(true, 10000.f);
 
+    // Load cutscene data file from `CUTS.IMG`
     char csFileName[1024];
     *std::format_to(csFileName, "{}.CUT", ms_cutsceneName) = 0;
     if (!LoadCutSceneFile(csFileName)) {
@@ -769,7 +764,16 @@ void CCutsceneMgr::LoadCutsceneData_preload() {
         return;
     }
 
-    // Request all models to be loaded
+    // Append objects added by script to the ones added by `LoadCutSceneFile`
+    for (auto i = ms_numAppendObjectNames; i-- > 0;) {
+        const auto objId = ms_numLoadObjectNames++;
+        ms_iModelIndex[objId + i] = MODEL_LOAD_THIS;
+        strcpy_s(ms_cLoadObjectName[objId], ms_cAppendObjectName[objId]);
+        strcpy_s(ms_cLoadAnimName[objId], ms_cAppendAnimName[objId]);
+    }
+    ms_numAppendObjectNames = 0;
+
+    // Request all models to be loaded [Added by `LoadCutSceneFile` and the scripts]
     size_t specialModelOffset = 0;
     for (auto i = 0; i < ms_numLoadObjectNames; i++) {
         const auto& modelName = ms_cLoadObjectName[i];
@@ -848,6 +852,7 @@ void CCutsceneMgr::SetCutsceneAnim(const char* animName, CObject* object) {
     CStreaming::ImGonnaUseStreamingMemory();
     const auto cpyOfTheAnim = ms_cutsceneAssociations.CopyAnimation(animName);
     CStreaming::IHaveUsedStreamingMemory();
+
     cpyOfTheAnim->SetFlag(ANIMATION_TRANSLATE_Y, true);
     cpyOfTheAnim->Start(0.f);
 
@@ -910,7 +915,7 @@ void CCutsceneMgr::SetupCutsceneToStart() {
     CTimer::Update();
     CTimer::Update(); // unnecessary
 
-    ms_cutsceneTimer = 0.f;
+    ms_cutsceneTimerS = 0.f;
     ms_running       = true;
 }
 
@@ -921,18 +926,19 @@ void CCutsceneMgr::Shutdown() {
 
 // 0x5B1700
 void CCutsceneMgr::SkipCutscene() {
-    CHud::m_BigMessage[STYLE_BOTTOM_RIGHT][0] = 0;
+    CHud::m_BigMessage[STYLE_BOTTOM_RIGHT][0] = 0; // todo: add CHud::ClearBigMessage
     ms_wasCutsceneSkipped = true;
     FinishCutscene();
 }
 
 // 0x5B1460
 void CCutsceneMgr::StartCutscene() {
-    CCutsceneMgr::ms_cutscenePlayStatus = 1;
+    CCutsceneMgr::ms_cutscenePlayStatus = PlayStatus::STARTING;
     if (dataFileLoaded) {
         TheCamera.SetCamCutSceneOffSet(ms_cutsceneOffset);
         TheCamera.TakeControlWithSpline(eSwitchType::JUMPCUT);
         TheCamera.SetWideScreenOn();
+
         CHud::SetHelpMessage(nullptr, true, false, false);
         CPlantMgr::PreUpdateOnceForNewCameraPos(TheCamera.GetPosition());
     }
@@ -947,7 +953,101 @@ void CCutsceneMgr::Update() {
 
 // 0x5B1720
 void CCutsceneMgr::Update_overlay() {
-    plugin::Call<0x5B1720>();
+    switch (ms_cutsceneLoadStatus) {
+    case LoadStatus::LOADING: {
+        CTimer::Suspend();
+        LoadCutsceneData_loading();
+        CTimer::Resume();
+        break;
+    }
+    case LoadStatus::LOADED: {
+        ms_cutscenePlayStatus = [&]{
+            switch (ms_cutscenePlayStatus) {
+            case PlayStatus::S0:
+                return ms_cutscenePlayStatus; // no change
+            case PlayStatus::STARTING: {
+                SetupCutsceneToStart();
+                HideRequestedObjects();
+                if (!IsPlayingCSTheFinale()) {
+                    CAudioEngine::DisableEffectsLoading();
+                    CAEPedSpeechAudioEntity::DisableAllPedSpeech();
+                    CAudioEngine::PlayPreloadedCutsceneTrack();
+                }
+                return PlayStatus::S2;
+            }
+            case PlayStatus::S2: return PlayStatus::S3;
+            case PlayStatus::S3: return PlayStatus::S4;
+            case PlayStatus::S4: return PlayStatus::S0;
+            default:             NOTSA_UNREACHABLE();
+            }
+        }();
+
+        if (!ms_running) {
+            break;
+        }
+
+        ms_cutsceneTimerS += CTimer::GetTimeStepNonClippedInSeconds();
+        const auto csTimeMS = (int32)(ms_cutsceneTimerS * 1000.f);
+
+        // Deal with fx [Start and stop them]
+        for (auto& csfx : ms_pParticleEffects | rng::views::take(ms_iNumParticleEffects)) {
+            const auto fxsys = csfx.m_pFxSystem;
+            if (!fxsys) {
+                continue; // I'm not sure how this could happen, but okay.
+            }
+            if (csfx.m_bPlaying) {
+                if (csfx.m_nEndTime != -1) { // Time to end?
+                    if (csTimeMS >= csfx.m_nEndTime + csfx.m_nStartTime) {
+                        fxsys->Stop();
+                        csfx.m_bPlaying = false;
+                        csfx.m_bStopped = true;
+                    }
+                }
+            } else if (!csfx.m_bStopped && csTimeMS >= csfx.m_nStartTime) { // Time to start? (Only if not stopped once already)
+                fxsys->Play();
+                csfx.m_bPlaying = true;
+            }
+        }
+
+        // Deal with text upcoming texts
+        if (ms_currTextOutput < ms_numTextOutput && csTimeMS >= ms_iTextStartTime[ms_currTextOutput]) {
+            CMessages::AddMessageJumpQ(
+                TheText.Get(ms_cTextOutput[ms_currTextOutput]),
+                ms_iTextDuration[ms_currTextOutput],
+                1,
+                true
+            );
+            ms_currTextOutput++;
+        }
+
+        // Update cutscene specific model bounding boxes
+        for (const auto csobj : ms_pCutsceneObjects | rng::views::take(ms_numCutsceneObjs)) {
+            if (IsModelIDForCutScene(csobj->GetModelID())) {
+                UpdateCutsceneObjectBoundingBox(csobj->m_pRwClump, csobj->GetModelID());
+            }
+        }
+
+        // Deal with cutscene skip user input + fading at the end
+        if (dataFileLoaded && !IsPlayingCSTheFinale()) {
+            if (TheCamera.GetActiveCam().m_nMode == MODE_FLYBY) { // load status check is redudant here
+                if (csTimeMS + 1000 > (int32)TheCamera.GetCutSceneFinishTime() && !g_bCutSceneFinishing) {
+                    g_bCutSceneFinishing = true;
+                    TheCamera.Fade(1.f, eFadeFlag::FADE_IN);
+                }
+                if (IsCutsceneSkipButtonBeingPressed()) {
+                    SkipCutscene();
+                }
+            }
+        }
+        break;
+    }
+    default:
+        NOTSA_UNREACHABLE();
+    }
+}
+
+bool CCutsceneMgr::IsPlayingCSTheFinale() {
+    return notsa::ci_string_view{ ms_cutsceneName } == "finale";
 }
 
 // 0x5AFA50
@@ -956,7 +1056,9 @@ int16 FindCutsceneAudioTrackId(const char* cutsceneName) {
     constexpr struct {
         notsa::ci_string_view name;
         int32 id;
-    } mapping[]{ { "BCESAR2", 626 }, { "BCESAR4", 627 }, { "BCESA4W", 628 }, { "BCESAR5", 629 }, { "BCESA5W", 630 }, { "BCRAS1", 631 }, { "BCRAS2", 632 }, { "BHILL1", 633 }, { "BHILL2", 634 }, { "BHILL3a", 635 }, { "BHILL3b", 636 }, { "BHILL3c", 637 }, { "BHILL5a", 638 }, { "BHILL5b", 639 }, { "CAS_1a", 640 }, { "CAS_1b", 642 }, { "CAS_2", 643 }, { "CAS_3", 644 }, { "CAS_4a", 645 }, { "CAS_4b", 646 }, { "CAS_4c", 647 }, { "CAS_5a", 648 }, { "CAS_6a", 649 }, { "CAS6b_1", 650 }, { "CAS6b_2", 651 }, { "CAS_7b", 652 }, { "CAS_9a1", 653 }, { "CAS_9a2", 654 }, { "CAS_11a", 641 }, { "CAT_1", 655 }, { "CAT_2", 656 }, { "CAT_3", 657 }, { "CAT_4", 658 }, { "CESAR1A", 659 }, { "CESAR2A", 660 }, { "CRASH1A", 661 }, { "CRASH2A", 662 }, { "CRASH3A", 663 }, { "CRASHV1", 664 }, { "CRASv2a", 665 }, { "CRASv2b", 666 }, { "D10_ALT", 667 }, { "D8_ALT", 668 }, { "DESERT1", 671 }, { "DESERT2", 672 }, { "DESERT3", 673 }, { "DESERT4", 674 }, { "DESERT6", 675 }, { "DESERT8", 676 }, { "DESERT9", 677 }, { "DES_10A", 678 }, { "DES_10B", 679 }, { "DOC_2", 680 }, { "EPILOG", 681 }, { "FARL_2A", 682 }, { "FARL_3A", 683 }, { "FARL_3B", 684 }, { "FARL_4A", 685 }, { "FARL_5A", 686 }, { "FINAL1A", 687 }, { "FINAL2A", 688 }, { "FINAL2B", 689 }, { "GARAG1B", 690 }, { "GARAG1C", 691 }, { "GARAG3A", 692 }, { "GROVE1a", 693 }, { "GROVE1b", 694 }, { "GROVE1c", 695 }, { "GROVE2", 696 }, { "HEIST1a", 697 }, { "HEIST2a", 698 }, { "HEIST4a", 699 }, { "HEIST5a", 700 }, { "HEIST6a", 701 }, { "HEIST8a", 702 }, { "INTRO1A", 703 }, { "INTRO1B", 704 }, { "INTRO2A", 705 }, { "PROLOG1", 706 }, { "PROLOG2", 707 }, { "PROLOG3", 708 }, { "RIOT_1a", 709 }, { "RIOT_1b", 710 }, { "RIOT_2", 711 }, { "RIOT_4a", 712 }, { "RIOT_4b", 713 }, { "RIOT_4c", 714 }, { "RIOT_4d", 715 }, { "RIOT4e1", 716 }, { "RIOT4e2", 717 }, { "RYDER1A", 718 }, { "RYDER2A", 719 }, { "RYDER3A", 720 }, { "SCRASH1", 721 }, { "SCRASH2", 722 }, { "SMOKE1A", 723 }, { "SMOKE1B", 724 }, { "SMOKE2A", 725 }, { "SMOKE2B", 726 }, { "SMOKE3A", 727 }, { "SMOKE4A", 728 }, { "STEAL_1", 729 }, { "STEAL_2", 730 }, { "STEAL_4", 731 }, { "STEAL_5", 732 }, { "STRAP1A", 733 }, { "STRAP2A", 734 }, { "STRAP3A", 735 }, { "STRAP4A", 736 }, { "STRP4B1", 737 }, { "STRP4B2", 738 }, { "SWEET1A", 739 }, { "SWEET1B", 740 }, { "SWEET1C", 741 }, { "SWEET2A", 742 }, { "SWEET2B", 743 }, { "SWEET3A", 744 }, { "SWEET3B", 745 }, { "SWEET4A", 746 }, { "SWEET5A", 747 }, { "SWEET6A", 748 }, { "SWEET6B", 749 }, { "SWEET7A", 750 }, { "SYND_2A", 751 }, { "SYND_2B", 752 }, { "SYND_3A", 753 }, { "SYND_4A", 754 }, { "SYND_4B", 755 }, { "SYND_7", 756 }, { "TRUTH_1", 758 }, { "TRUTH_2", 757 }, { "W2_ALT", 759 }, { "WOOZI1A", 761 }, { "WOOZI1B", 762 }, { "WOOZIE2", 760 }, { "WOOZIE4", 763 }, { "ZERO_1", 764 }, { "ZERO_2", 765 }, { "ZERO_4", 766 }, { "DATE1a", 670 }, { "DATE1b", 669 }, { "DATE2a", 670 }, { "DATE2b", 669 }, { "DATE3a", 670 }, { "DATE3b", 669 }, { "DATE4a", 670 }, { "DATE4b", 669 }, { "DATE5a", 670 }, { "DATE5b", 669 }, { "DATE6a", 670 }, { "DATE6b", 669 } };
+    } mapping[]{
+        { "BCESAR2", 626 }, { "BCESAR4", 627 }, { "BCESA4W", 628 }, { "BCESAR5", 629 }, { "BCESA5W", 630 }, { "BCRAS1", 631 }, { "BCRAS2", 632 }, { "BHILL1", 633 }, { "BHILL2", 634 }, { "BHILL3a", 635 }, { "BHILL3b", 636 }, { "BHILL3c", 637 }, { "BHILL5a", 638 }, { "BHILL5b", 639 }, { "CAS_1a", 640 }, { "CAS_1b", 642 }, { "CAS_2", 643 }, { "CAS_3", 644 }, { "CAS_4a", 645 }, { "CAS_4b", 646 }, { "CAS_4c", 647 }, { "CAS_5a", 648 }, { "CAS_6a", 649 }, { "CAS6b_1", 650 }, { "CAS6b_2", 651 }, { "CAS_7b", 652 }, { "CAS_9a1", 653 }, { "CAS_9a2", 654 }, { "CAS_11a", 641 }, { "CAT_1", 655 }, { "CAT_2", 656 }, { "CAT_3", 657 }, { "CAT_4", 658 }, { "CESAR1A", 659 }, { "CESAR2A", 660 }, { "CRASH1A", 661 }, { "CRASH2A", 662 }, { "CRASH3A", 663 }, { "CRASHV1", 664 }, { "CRASv2a", 665 }, { "CRASv2b", 666 }, { "D10_ALT", 667 }, { "D8_ALT", 668 }, { "DESERT1", 671 }, { "DESERT2", 672 }, { "DESERT3", 673 }, { "DESERT4", 674 }, { "DESERT6", 675 }, { "DESERT8", 676 }, { "DESERT9", 677 }, { "DES_10A", 678 }, { "DES_10B", 679 }, { "DOC_2", 680 }, { "EPILOG", 681 }, { "FARL_2A", 682 }, { "FARL_3A", 683 }, { "FARL_3B", 684 }, { "FARL_4A", 685 }, { "FARL_5A", 686 }, { "FINAL1A", 687 }, { "FINAL2A", 688 }, { "FINAL2B", 689 }, { "GARAG1B", 690 }, { "GARAG1C", 691 }, { "GARAG3A", 692 }, { "GROVE1a", 693 }, { "GROVE1b", 694 }, { "GROVE1c", 695 }, { "GROVE2", 696 }, { "HEIST1a", 697 }, { "HEIST2a", 698 }, { "HEIST4a", 699 }, { "HEIST5a", 700 }, { "HEIST6a", 701 }, { "HEIST8a", 702 }, { "INTRO1A", 703 }, { "INTRO1B", 704 }, { "INTRO2A", 705 }, { "PROLOG1", 706 }, { "PROLOG2", 707 }, { "PROLOG3", 708 }, { "RIOT_1a", 709 }, { "RIOT_1b", 710 }, { "RIOT_2", 711 }, { "RIOT_4a", 712 }, { "RIOT_4b", 713 }, { "RIOT_4c", 714 }, { "RIOT_4d", 715 }, { "RIOT4e1", 716 }, { "RIOT4e2", 717 }, { "RYDER1A", 718 }, { "RYDER2A", 719 }, { "RYDER3A", 720 }, { "SCRASH1", 721 }, { "SCRASH2", 722 }, { "SMOKE1A", 723 }, { "SMOKE1B", 724 }, { "SMOKE2A", 725 }, { "SMOKE2B", 726 }, { "SMOKE3A", 727 }, { "SMOKE4A", 728 }, { "STEAL_1", 729 }, { "STEAL_2", 730 }, { "STEAL_4", 731 }, { "STEAL_5", 732 }, { "STRAP1A", 733 }, { "STRAP2A", 734 }, { "STRAP3A", 735 }, { "STRAP4A", 736 }, { "STRP4B1", 737 }, { "STRP4B2", 738 }, { "SWEET1A", 739 }, { "SWEET1B", 740 }, { "SWEET1C", 741 }, { "SWEET2A", 742 }, { "SWEET2B", 743 }, { "SWEET3A", 744 }, { "SWEET3B", 745 }, { "SWEET4A", 746 }, { "SWEET5A", 747 }, { "SWEET6A", 748 }, { "SWEET6B", 749 }, { "SWEET7A", 750 }, { "SYND_2A", 751 }, { "SYND_2B", 752 }, { "SYND_3A", 753 }, { "SYND_4A", 754 }, { "SYND_4B", 755 }, { "SYND_7", 756 }, { "TRUTH_1", 758 }, { "TRUTH_2", 757 }, { "W2_ALT", 759 }, { "WOOZI1A", 761 }, { "WOOZI1B", 762 }, { "WOOZIE2", 760 }, { "WOOZIE4", 763 }, { "ZERO_1", 764 }, { "ZERO_2", 765 }, { "ZERO_4", 766 }, { "DATE1a", 670 }, { "DATE1b", 669 }, { "DATE2a", 670 }, { "DATE2b", 669 }, { "DATE3a", 670 }, { "DATE3b", 669 }, { "DATE4a", 670 }, { "DATE4b", 669 }, { "DATE5a", 670 }, { "DATE5b", 669 }, { "DATE6a", 670 }, { "DATE6b", 669 }
+    };
     const auto csName = notsa::ci_string_view{ cutsceneName };
     for (const auto& [name, id] : mapping) {
         if (csName == name) {
@@ -970,7 +1072,6 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedClass(CCutsceneMgr);
     RH_ScopedCategoryGlobal();
 
-    //RH_ScopedGlobalInstall(SetPos_wrongname_inlined, 0x47E070, {.reversed = false});
     RH_ScopedGlobalInstall(FindCutsceneAudioTrackId, 0x8D0AA8);
     RH_ScopedGlobalInstall(SetCutsceneAnim, 0x5B0390);
     RH_ScopedGlobalInstall(SetCutsceneAnimToLoop, 0x5B0420);
@@ -990,7 +1091,6 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(CreateCutsceneObject, 0x5B02A0);
     RH_ScopedGlobalInstall(DeleteCutsceneData_overlay, 0x5AFD60);
     RH_ScopedGlobalInstall(LoadCutsceneData_postload, 0x5AFBC0);
-    //RH_ScopedGlobalInstall(sub_489400, 0x489400, {.reversed = false});
     RH_ScopedGlobalInstall(Initialise, 0x4D5A20);
     RH_ScopedGlobalInstall(LoadAnimationUncompressed, 0x4D5AB0);
     RH_ScopedGlobalInstall(RemoveEverythingBecauseCutsceneDoesntFitInMemory, 0x4D5AF0);
@@ -1003,10 +1103,9 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(Shutdown, 0x4D5E60);
     RH_ScopedGlobalInstall(LoadCutsceneData, 0x4D5E80);
     RH_ScopedGlobalInstall(DeleteCutsceneData, 0x4D5ED0);
-    //RH_ScopedGlobalInstall(sub_5099F0, 0x5099F0, {.reversed = false});
     RH_ScopedGlobalInstall(HideRequestedObjects, 0x5AFAD0);
     RH_ScopedGlobalInstall(UpdateCutsceneObjectBoundingBox, 0x5B01E0);
     RH_ScopedGlobalInstall(CalculateBoundingSphereRadiusCB, 0x5B0130);
     RH_ScopedGlobalInstall(SkipCutscene, 0x5B1700);
-    RH_ScopedGlobalInstall(Update_overlay, 0x5B1720, {.reversed = false});
+    RH_ScopedGlobalInstall(Update_overlay, 0x5B1720);
 }

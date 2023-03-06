@@ -52,9 +52,14 @@ public:
         NOT_LOADED,
         LOADING,
         LOADED,
+    };
+
+    enum class PlayStatus {
+        S0,
+        STARTING = 1,
+        S2,
         S3,
-        S4,
-        S5
+        S4
     };
 
 public:
@@ -69,7 +74,6 @@ public:
 
     static inline auto& ms_pCutsceneDir = StaticRef<CDirectory*, 0xB5F848>();
     static inline auto& ms_cutsceneLoadStatus = StaticRef<LoadStatus, 0xB5F84C>();
-    static inline auto& ms_animLoaded = StaticRef<bool, 0xB5F850>();
     static inline auto& ms_running = StaticRef<int8, 0xB5F851>();
     static inline auto& ms_cutsceneProcessing = StaticRef<bool, 0xB5F852>();
     static inline auto& ms_useLodMultiplier = StaticRef<bool, 0xB5F853>();
@@ -92,10 +96,10 @@ public:
     static inline auto& ms_iModelIndex = StaticRef<std::array<eModelID, 50>, 0xBC31C0>();
     static inline auto& ms_cLoadAnimName = StaticRef<std::array<char[32], 50>, 0xBC3288>();
     static inline auto& ms_cLoadObjectName = StaticRef<std::array<char[32], 50>, 0xBC38C8>();
-    static inline auto& ms_cutsceneTimer = StaticRef<float, 0xBC3F08>();
+    static inline auto& ms_cutsceneTimerS = StaticRef<float, 0xBC3F08>(); // In seconds
     static inline auto& ms_cutsceneName = StaticRef<char[8], 0xBC3F0C>();
     static inline auto& ms_pCutsceneObjects = StaticRef<std::array<CCutsceneObject*, 50>, 0xBC3F18>();
-    static inline auto& ms_cutscenePlayStatus = StaticRef<int32, 0xBC3FE0>();
+    static inline auto& ms_cutscenePlayStatus = StaticRef<PlayStatus, 0xBC3FE0>();
     static inline auto& ms_numCutsceneObjs = StaticRef<int32, 0xBC3FE4>();
     static inline auto& ms_numLoadObjectNames = StaticRef<int32, 0xBC3FE8>();
     static inline auto& ms_numTextOutput = StaticRef<int32, 0xBC3FEC>();
@@ -106,7 +110,14 @@ public:
     static inline auto& m_PrevExtraColour = StaticRef<int32, 0xBC4000>();
     static inline auto& m_PrevExtraColourOn = StaticRef<bool, 0xBC4004>();
     static inline auto& m_bDontClearZone = StaticRef<bool, 0xBC4005>();
-    static inline auto& dataFileLoaded = StaticRef<bool, 0xBC4006>(); // If the camera splines were loaded (See `LoadCutsceneData_postload`)
+
+    //! If the camera splines were loaded (See `LoadCutsceneData_postload`)
+    //! from the .DAT file of the cutscene found in CUTS.IMG
+    static inline auto& dataFileLoaded = StaticRef<bool, 0xBC4006>();
+
+    //! If the anims were loaded (From the cutscene's .IFP file found in CUTS.IMG)
+    static inline auto& ms_animLoaded = StaticRef<bool, 0xB5F850>();
+
     static inline auto& ms_cutsceneAssociations = StaticRef<CAnimBlendAssocGroup, 0xBC4020>();
     static inline auto& ms_cutsceneOffset = StaticRef<CVector, 0xBC4034>();
 
@@ -152,6 +163,8 @@ public:
     static bool IsRunning() { return ms_running; }
     static bool IsCutsceneProcessing() { return ms_cutsceneProcessing; }
     static bool HasLoaded() { return ms_cutsceneLoadStatus == LoadStatus::LOADED; }
+    static bool IsLoading() { return ms_cutsceneLoadStatus == LoadStatus::LOADING; }
+    static bool IsPlayingCSTheFinale();
 };
 
 int16 FindCutsceneAudioTrackId(const char* cutsceneName);
