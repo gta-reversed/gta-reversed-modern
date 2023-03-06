@@ -928,7 +928,7 @@ int16 FindCutsceneAudioTrackId(const char* cutsceneName) {
 
 void CCutsceneMgr::InjectHooks() {
     RH_ScopedClass(CCutsceneMgr);
-    RH_ScopedCategory(); // TODO: Change this to the appropriate category!
+    RH_ScopedCategoryGlobal();
 
     //RH_ScopedGlobalInstall(SetPos_wrongname_inlined, 0x47E070, {.reversed = false});
     RH_ScopedGlobalInstall(FindCutsceneAudioTrackId, 0x8D0AA8);
