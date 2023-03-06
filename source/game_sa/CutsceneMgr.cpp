@@ -898,7 +898,9 @@ void CCutsceneMgr::StartCutscene() {
 
 // 0x4D5D00
 void CCutsceneMgr::Update() {
-    plugin::Call<0x4D5D00>();
+    if (ms_cutsceneLoadStatus != LoadStatus::NOT_LOADED) {
+        Update_overlay();
+    }
 }
 
 // 0x5B1720
@@ -939,7 +941,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(LoadAnimationUncompressed, 0x4D5AB0);
     RH_ScopedGlobalInstall(RemoveEverythingBecauseCutsceneDoesntFitInMemory, 0x4D5AF0);
     RH_ScopedGlobalInstall(LoadEverythingBecauseCutsceneDeletedAllOfIt, 0x4D5C10);
-    RH_ScopedGlobalInstall(Update, 0x4D5D00, {.reversed = false});
+    RH_ScopedGlobalInstall(Update, 0x4D5D00);
     RH_ScopedGlobalInstall(IsCutsceneSkipButtonBeingPressed, 0x4D5D10);
     RH_ScopedGlobalInstall(AppendToNextCutscene, 0x4D5DB0);
     RH_ScopedGlobalInstall(BuildCutscenePlayer, 0x4D5E20);
