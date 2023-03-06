@@ -810,17 +810,24 @@ void CCutsceneMgr::LoadCutsceneData_preload() {
 
 // 0x4D5C10
 void CCutsceneMgr::LoadEverythingBecauseCutsceneDeletedAllOfIt() {
-    plugin::Call<0x4D5C10>();
+    restoreEverythingAfterCutscene = false;
+    CStreaming::LoadInitialPeds();
+    CStreaming::LoadInitialWeapons();
+
+    //There's some code below that is unreachable
+    //reason being that `numPlayerWeaponsToRestore` is only increased in a function
+    //that's never called (`RemoveEverythingBecauseCutsceneDoesntFitInMemory`)
+    assert(numPlayerWeaponsToRestore <= 0);
 }
 
 // 0x4D5E50
 void CCutsceneMgr::RemoveCutscenePlayer() {
-    plugin::Call<0x4D5E50>();
+    CStreaming::SetMissionDoesntRequireModel(MODEL_CSPLAY);
 }
 
 // 0x4D5AF0
 void CCutsceneMgr::RemoveEverythingBecauseCutsceneDoesntFitInMemory() {
-    plugin::Call<0x4D5AF0>();
+    NOTSA_UNREACHABLE(); // Unused function
 }
 
 // 0x5B0390
@@ -899,13 +906,13 @@ void CCutsceneMgr::InjectHooks() {
     //RH_ScopedGlobalInstall(sub_489400, 0x489400, {.reversed = false});
     RH_ScopedGlobalInstall(Initialise, 0x4D5A20);
     RH_ScopedGlobalInstall(LoadAnimationUncompressed, 0x4D5AB0);
-    RH_ScopedGlobalInstall(RemoveEverythingBecauseCutsceneDoesntFitInMemory, 0x4D5AF0, {.reversed = false});
-    RH_ScopedGlobalInstall(LoadEverythingBecauseCutsceneDeletedAllOfIt, 0x4D5C10, {.reversed = false});
+    RH_ScopedGlobalInstall(RemoveEverythingBecauseCutsceneDoesntFitInMemory, 0x4D5AF0);
+    RH_ScopedGlobalInstall(LoadEverythingBecauseCutsceneDeletedAllOfIt, 0x4D5C10);
     RH_ScopedGlobalInstall(Update, 0x4D5D00, {.reversed = false});
     RH_ScopedGlobalInstall(IsCutsceneSkipButtonBeingPressed, 0x4D5D10);
     RH_ScopedGlobalInstall(AppendToNextCutscene, 0x4D5DB0);
     RH_ScopedGlobalInstall(BuildCutscenePlayer, 0x4D5E20);
-    RH_ScopedGlobalInstall(RemoveCutscenePlayer, 0x4D5E50, {.reversed = false});
+    RH_ScopedGlobalInstall(RemoveCutscenePlayer, 0x4D5E50);
     RH_ScopedGlobalInstall(Shutdown, 0x4D5E60, {.reversed = false});
     RH_ScopedGlobalInstall(LoadCutsceneData, 0x4D5E80);
     RH_ScopedGlobalInstall(DeleteCutsceneData, 0x4D5ED0);
