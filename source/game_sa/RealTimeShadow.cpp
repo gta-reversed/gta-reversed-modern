@@ -122,13 +122,16 @@ RwTexture* CRealTimeShadow::Update() {
 
     // Do blur
     auto raster = m_camera.GetRwRenderRaster();
+    assert(raster);
 
     if (m_bBlurred) {
         raster = m_blurCamera.RasterResample(raster);
+        assert(raster);
     }
 
     if (m_nBlurPasses) {
         raster = g_realTimeShadowMan.m_BlurCamera.RasterBlur(raster, m_nBlurPasses);
+        assert(raster);
     }
 
     if (m_bDrawMoreBlur) {
