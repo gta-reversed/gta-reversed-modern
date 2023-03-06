@@ -934,7 +934,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(FindCutsceneAudioTrackId, 0x8D0AA8);
     RH_ScopedGlobalInstall(SetCutsceneAnim, 0x5B0390);
     RH_ScopedGlobalInstall(SetCutsceneAnimToLoop, 0x5B0420);
-    RH_ScopedGlobalInstall(SetHeadAnim, 0x5B0440, {.reversed = false});
+    RH_ScopedGlobalInstall(SetHeadAnim, 0x5B0440);
     RH_ScopedGlobalInstall(AttachObjectToBone, 0x5B0450);
     RH_ScopedGlobalInstall(AttachObjectToFrame, 0x5B0480);
     RH_ScopedGlobalInstall(AttachObjectToParent, 0x5B04B0);
