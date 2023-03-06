@@ -263,7 +263,7 @@ void CMessages::ClearMessages(bool bIgnoreMissionTitle) {
     ClearSmallMessagesOnly();
 }
 
-// Removes small messages
+// Removes messages in brief
 // 0x69DD30
 void CMessages::ClearSmallMessagesOnly() {
     rng::fill(BriefMessages, tMessage{});
