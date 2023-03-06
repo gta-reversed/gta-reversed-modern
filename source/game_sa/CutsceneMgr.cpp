@@ -871,7 +871,47 @@ void CCutsceneMgr::SetHeadAnim(const char* animName, CObject* headObject) {
 
 // 0x5B14D0
 void CCutsceneMgr::SetupCutsceneToStart() {
-    plugin::Call<0x5B14D0>();
+    // Calculate cutscene object world positions
+    ms_cutsceneOffset.z += 1.f;
+    for (auto i = ms_numCutsceneObjs; i-- > 0;) {
+        const auto csobj = ms_pCutsceneObjects[i];
+        assert(csobj);
+
+        const auto SetObjPos = [csobj](const CVector& pos) {
+            csobj->m_vWorldPosition = pos;
+            csobj->SetPosn(pos);
+        };
+
+        if (const auto anim = RpAnimBlendClumpGetFirstAssociation(csobj->m_pRwClump)) {
+            if (csobj->m_pAttachToFrame) {
+                anim->SetFlag(ANIMATION_TRANSLATE_Y, false);
+                anim->SetFlag(ANIMATION_STARTED, true);
+            } else {
+                // Get anim translation and offset the object's position by it
+                const auto animTrans = anim->m_pHierarchy->m_bRunningCompressed
+                    ? anim->m_pHierarchy->m_pSequences->GetCompressedFrame(1)->GetTranslation()
+                    : anim->m_pHierarchy->m_pSequences->GetUncompressedFrame(1)->translation;
+                SetObjPos(ms_cutsceneOffset + animTrans);
+
+                // Start the anim
+                anim->SetFlag(ANIMATION_STARTED, true);
+            }
+        } else { // Object has no animation applied
+            SetObjPos(ms_cutsceneOffset);
+        }
+
+        // Add it to the world and update skinning
+        CWorld::Add(csobj);
+        if (RwObjectGetType(csobj->m_pRwObject) == rpCLUMP) {
+            csobj->UpdateRpHAnim();
+        }
+    }
+
+    CTimer::Update();
+    CTimer::Update(); // unnecessary
+
+    ms_cutsceneTimer = 0.f;
+    ms_running       = true;
 }
 
 // 0x4D5E60
@@ -945,7 +985,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(LoadCutsceneData_loading, 0x5B11C0);
     RH_ScopedGlobalInstall(LoadCutsceneData_overlay, 0x5B13F0);
     RH_ScopedGlobalInstall(StartCutscene, 0x5B1460);
-    RH_ScopedGlobalInstall(SetupCutsceneToStart, 0x5B14D0, {.reversed = false});
+    RH_ScopedGlobalInstall(SetupCutsceneToStart, 0x5B14D0);
     RH_ScopedGlobalInstall(GetCutsceneTimeInMilleseconds, 0x5B0550);
     RH_ScopedGlobalInstall(CreateCutsceneObject, 0x5B02A0);
     RH_ScopedGlobalInstall(DeleteCutsceneData_overlay, 0x5AFD60);
