@@ -858,7 +858,7 @@ void CCutsceneMgr::SetCutsceneAnim(const char* animName, CObject* object) {
 
 // 0x5B0420
 void CCutsceneMgr::SetCutsceneAnimToLoop(const char* animName) {
-    plugin::Call<0x5B0420, const char*>(animName);
+    ms_cutsceneAssociations.GetAnimation(animName)->m_nFlags |= ANIMATION_LOOPED;
 }
 
 // 0x5B0440
@@ -907,7 +907,7 @@ void CCutsceneMgr::InjectHooks() {
 
     //RH_ScopedGlobalInstall(SetPos_wrongname_inlined, 0x47E070, {.reversed = false});
     RH_ScopedGlobalInstall(SetCutsceneAnim, 0x5B0390);
-    RH_ScopedGlobalInstall(SetCutsceneAnimToLoop, 0x5B0420, {.reversed = false});
+    RH_ScopedGlobalInstall(SetCutsceneAnimToLoop, 0x5B0420);
     RH_ScopedGlobalInstall(SetHeadAnim, 0x5B0440, {.reversed = false});
     RH_ScopedGlobalInstall(AttachObjectToBone, 0x5B0450);
     RH_ScopedGlobalInstall(AttachObjectToFrame, 0x5B0480);
