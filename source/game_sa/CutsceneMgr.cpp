@@ -938,7 +938,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(AttachObjectToBone, 0x5B0450);
     RH_ScopedGlobalInstall(AttachObjectToFrame, 0x5B0480);
     RH_ScopedGlobalInstall(AttachObjectToParent, 0x5B04B0);
-    RH_ScopedGlobalInstall(AddCutsceneHead, 0x5B0380, {.reversed = false});
+    RH_ScopedGlobalInstall(AddCutsceneHead, 0x5B0380);
     RH_ScopedGlobalInstall(FinishCutscene, 0x5B04D0);
     RH_ScopedGlobalInstall(HasCutsceneFinished, 0x5B0570);
     RH_ScopedGlobalInstall(LoadCutsceneData_preload, 0x5B05A0);
