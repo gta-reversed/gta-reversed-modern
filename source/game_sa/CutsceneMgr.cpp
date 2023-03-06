@@ -832,7 +832,28 @@ void CCutsceneMgr::RemoveEverythingBecauseCutsceneDoesntFitInMemory() {
 
 // 0x5B0390
 void CCutsceneMgr::SetCutsceneAnim(const char* animName, CObject* object) {
-    plugin::Call<0x5B0390, const char*, CObject*>(animName, object);
+    const auto theAnim = ms_cutsceneAssociations.GetAnimation(animName);
+    if (!theAnim) {
+        DEV_LOG("Animation ({}) not found!", animName);
+        return;
+    }
+
+    if (theAnim->m_pHierarchy->m_bRunningCompressed) {
+        theAnim->m_pHierarchy->m_bKeepCompressed = true;
+    }
+
+    CStreaming::ImGonnaUseStreamingMemory();
+    const auto cpyOfTheAnim = ms_cutsceneAssociations.CopyAnimation(animName);
+    CStreaming::IHaveUsedStreamingMemory();
+    cpyOfTheAnim->SetFlag(ANIMATION_TRANSLATE_Y, true);
+    cpyOfTheAnim->Start(0.f);
+
+    const auto blendData = RpClumpGetAnimBlendClumpData(object->m_pRwClump);
+    blendData->m_Associations.Prepend(&cpyOfTheAnim->m_Link);
+
+    if (cpyOfTheAnim->m_pHierarchy->m_bKeepCompressed) {
+        blendData->m_Frames->m_bIsCompressed = true;
+    }
 }
 
 // 0x5B0420
@@ -885,7 +906,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedCategory(); // TODO: Change this to the appropriate category!
 
     //RH_ScopedGlobalInstall(SetPos_wrongname_inlined, 0x47E070, {.reversed = false});
-    RH_ScopedGlobalInstall(SetCutsceneAnim, 0x5B0390, {.reversed = false});
+    RH_ScopedGlobalInstall(SetCutsceneAnim, 0x5B0390);
     RH_ScopedGlobalInstall(SetCutsceneAnimToLoop, 0x5B0420, {.reversed = false});
     RH_ScopedGlobalInstall(SetHeadAnim, 0x5B0440, {.reversed = false});
     RH_ScopedGlobalInstall(AttachObjectToBone, 0x5B0450);
