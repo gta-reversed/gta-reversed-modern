@@ -873,12 +873,14 @@ void CCutsceneMgr::SetupCutsceneToStart() {
 
 // 0x4D5E60
 void CCutsceneMgr::Shutdown() {
-    plugin::Call<0x4D5E60>();
+    delete ms_pCutsceneDir;
 }
 
 // 0x5B1700
 void CCutsceneMgr::SkipCutscene() {
-    plugin::Call<0x5B1700>();
+    CHud::m_BigMessage[STYLE_BOTTOM_RIGHT][0] = 0;
+    ms_wasCutsceneSkipped = true;
+    FinishCutscene();
 }
 
 // 0x5B1460
@@ -941,6 +943,6 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(HideRequestedObjects, 0x5AFAD0);
     RH_ScopedGlobalInstall(UpdateCutsceneObjectBoundingBox, 0x5B01E0);
     RH_ScopedGlobalInstall(CalculateBoundingSphereRadiusCB, 0x5B0130);
-    RH_ScopedGlobalInstall(SkipCutscene, 0x5B1700, {.reversed = false});
+    RH_ScopedGlobalInstall(SkipCutscene, 0x5B1700);
     RH_ScopedGlobalInstall(Update_overlay, 0x5B1720, {.reversed = false});
 }
