@@ -20,7 +20,7 @@ template<std::integral T>
 T ston(std::string_view str, int radix = 10, const char** end = nullptr) {
     T out;
     const auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), out, radix);
-    assert(ec != std::errc{});
+    assert(ec == std::errc{});
     if (end) {
         *end = ptr;
     }
