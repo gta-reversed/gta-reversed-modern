@@ -13,6 +13,7 @@
 #include "TaskSimpleCarSetPedOut.h"
 #include "Rubbish.h"
 #include <TempColModels.h>
+#include <PlantMgr.h>
 
 uint32 MAX_NUM_CUTSCENE_OBJECTS = 50;
 uint32 MAX_NUM_CUTSCENE_PARTICLE_EFFECTS = 8;
@@ -885,7 +886,14 @@ void CCutsceneMgr::SkipCutscene() {
 
 // 0x5B1460
 void CCutsceneMgr::StartCutscene() {
-    plugin::Call<0x5B1460>();
+    CCutsceneMgr::ms_cutscenePlayStatus = 1;
+    if (dataFileLoaded) {
+        TheCamera.SetCamCutSceneOffSet(ms_cutsceneOffset);
+        TheCamera.TakeControlWithSpline(eSwitchType::JUMPCUT);
+        TheCamera.SetWideScreenOn();
+        CHud::SetHelpMessage(nullptr, true, false, false);
+        CPlantMgr::PreUpdateOnceForNewCameraPos(TheCamera.GetPosition());
+    }
 }
 
 // 0x4D5D00
@@ -920,7 +928,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(LoadCutsceneData_preload, 0x5B05A0);
     RH_ScopedGlobalInstall(LoadCutsceneData_loading, 0x5B11C0);
     RH_ScopedGlobalInstall(LoadCutsceneData_overlay, 0x5B13F0);
-    RH_ScopedGlobalInstall(StartCutscene, 0x5B1460, {.reversed = false});
+    RH_ScopedGlobalInstall(StartCutscene, 0x5B1460);
     RH_ScopedGlobalInstall(SetupCutsceneToStart, 0x5B14D0, {.reversed = false});
     RH_ScopedGlobalInstall(GetCutsceneTimeInMilleseconds, 0x5B0550);
     RH_ScopedGlobalInstall(CreateCutsceneObject, 0x5B02A0);
