@@ -73,13 +73,13 @@ CVector stov3d(std::string_view str, std::chars_format fmt = std::chars_format::
 * @brief Call the given function on object destruction.
 */
 template<typename Fn>
-struct ACOD { // "AutoCallOnDestruct" = ACOD
-    ACOD(Fn fn) :
+struct ScopeGuard {
+    ScopeGuard(Fn fn) :
         m_fn{ std::move(fn) }
     {
     }
 
-    ~ACOD() {
+    ~ScopeGuard() {
         std::invoke(m_fn);
     }
 

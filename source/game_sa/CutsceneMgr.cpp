@@ -447,7 +447,7 @@ void CCutsceneMgr::LoadCutsceneData_postload() {
     // Load animations for this cutscene
     {
         const auto stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, "ANIM\\CUTS.IMG");
-        const auto raii   = notsa::ACOD{ [&] { RwStreamClose(stream, nullptr); } };
+        const auto raii   = notsa::ScopeGuard{ [&] { RwStreamClose(stream, nullptr); } };
 
         char csIFPFile[1024];
         *std::format_to(csIFPFile, "{}.IFP", ms_cutsceneName) = 0;
@@ -478,7 +478,7 @@ void CCutsceneMgr::LoadCutsceneData_postload() {
     // Load camera path splines for this cutscene
     {
         const auto img  = CFileMgr::OpenFile("ANIM\\CUTS.IMG", "rb");
-        const auto raii = notsa::ACOD{ [&] { CFileMgr::CloseFile(img); } };
+        const auto raii = notsa::ScopeGuard{ [&] { CFileMgr::CloseFile(img); } };
         
         char csSplinesFile[1024];
         *std::format_to(csSplinesFile, "{}.DAT", ms_cutsceneName) = 0;

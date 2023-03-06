@@ -180,7 +180,7 @@ void cHandlingDataMgr::LoadHandlingData() {
     CFileMgr::SetDir("");
 
     // Automatically closes file on function return
-    const notsa::ACOD closeFile{ [&] { CFileMgr::CloseFile(file); } };
+    const notsa::ScopeGuard closeFile{ [&] { CFileMgr::CloseFile(file); } };
 
     auto nLoadedHandlings{ 0u };
 

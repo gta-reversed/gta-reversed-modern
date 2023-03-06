@@ -104,7 +104,7 @@ CTask* CTaskComplexArrestPed::ControlSubTask_Reversed(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x68D350, CTaskComplexArrestPed*, CPed*>(this, ped);
 
     // Automatically make ped say something on function return
-    const notsa::ACOD Have_A_Nice_Day_Sir{
+    const notsa::ScopeGuard Have_A_Nice_Day_Sir{
         [this, ped] {
             if (m_PedToArrest && m_PedToArrest->IsPlayer()) {
                 if (FindPlayerWanted()->m_nCopsInPursuit == 1) {

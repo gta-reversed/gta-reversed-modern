@@ -250,7 +250,7 @@ public:
             || subTaskType == TASK_SIMPLE_STAND_STILL
             || m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)
         ) {
-            notsa::ACOD makePedTalkOnReturn{ [this, ped] {
+            notsa::ScopeGuard makePedTalkOnReturn{ [this, ped] {
                 if (m_entityToSeek && m_entityToSeek->IsPed()) {
                     if (m_entityToSeek->AsPed()->IsPlayer()) { // Entity to seek is a player
                         if (FindPlayerPed()->GetPlayerGroup().GetMembership().IsFollower(ped)) { // And ped is part of the player's group
