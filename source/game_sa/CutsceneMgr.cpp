@@ -157,7 +157,7 @@ void CCutsceneMgr::DeleteCutsceneData_overlay() {
     }
 
     // Make hidden entities visible again
-    for (auto& e : ms_pHiddenEntities | rng::views::take(ms_iNumHiddenEntities)) {
+    for (auto& e : ms_pHiddenEntities | rngv::take(ms_iNumHiddenEntities)) {
         if (e) {
             CEntity::CleanUpOldReference(e);
             e->m_bIsVisible = true;
@@ -166,7 +166,7 @@ void CCutsceneMgr::DeleteCutsceneData_overlay() {
     ms_iNumHiddenEntities = 0;
 
     // Destroy particle effects
-    for (auto& fx : ms_pParticleEffects | rng::views::take(ms_iNumParticleEffects)) {
+    for (auto& fx : ms_pParticleEffects | rngv::take(ms_iNumParticleEffects)) {
         if (fx.m_pFxSystem) {
             g_fxMan.DestroyFxSystem(fx.m_pFxSystem);
             fx.m_pFxSystem = nullptr;
@@ -178,7 +178,7 @@ void CCutsceneMgr::DeleteCutsceneData_overlay() {
     CRubbish::SetVisibility(false);
     
     // Delete cutscene objects
-    for (auto& obj : ms_pCutsceneObjects | rng::views::take(ms_numCutsceneObjs)) {
+    for (auto& obj : ms_pCutsceneObjects | rngv::take(ms_numCutsceneObjs)) {
         assert(obj);
 
         CWorld::Remove(obj);
@@ -227,12 +227,15 @@ void CCutsceneMgr::DeleteCutsceneData_overlay() {
         CGame::DrasticTidyUpMemory(TheCamera.CCamera::GetScreenFadeStatus() == NAME_FADE_IN ? true : false);
     }
 
+    // cpad clear moved up a few lines
+
     // there's some code to restore the player's stored weapons, but it
     // doesn't seem to do anything, cause the guarding `if`'s
     // condition is always false
+    assert(!m_bDontClearZone);
 
     // Tell the streamer that we don't need any (possibly) loaded special chars
-    for (const auto modelId : ms_iModelIndex | rng::views::take(ms_numLoadObjectNames)) {
+    for (const auto modelId : ms_iModelIndex | rngv::take(ms_numLoadObjectNames)) {
         if (CTheScripts::ScriptResourceManager.HasResourceBeenRequested(modelId, RESOURCE_TYPE_MODEL_OR_SPECIAL_CHAR)) {
             CStreaming::SetMissionDoesntRequireModel(modelId);
         }
@@ -272,17 +275,17 @@ void CCutsceneMgr::HideRequestedObjects() {
         return;
     }
 
-    for (const auto& cr : ms_crToHideItems | rng::views::take(ms_iNumHiddenEntities)) {
+    for (const auto& cr : ms_crToHideItems | rngv::take(ms_iNumHiddenEntities)) {
         int32 modelId;
         if (!CModelInfo::GetModelInfo(cr.m_szObjectName, &modelId)) {
-            DEV_LOG("Invalid model name({})", cr.m_szObjectName);
+            DEV_LOG("Invalid model name(\"{}\")", cr.m_szObjectName);
             continue;
         }
 
         int16 nObjInRng;
         CEntity* objInRng[32];
         CWorld::FindObjectsOfTypeInRange(modelId, cr.m_vecPosn, 1.5f, true, &nObjInRng, (int16)std::size(objInRng), objInRng, true, false, false, true, true);
-        for (auto e : objInRng | rng::views::take((size_t)nObjInRng)) {
+        for (auto e : objInRng | rngv::take((size_t)nObjInRng)) {
             if (!e->m_bIsVisible) {
                 continue;
             }
@@ -316,7 +319,7 @@ bool CCutsceneMgr::IsCutsceneSkipButtonBeingPressed() {
 
 // 0x4D5AB0
 void CCutsceneMgr::LoadAnimationUncompressed(const char* animName) {
-    DEV_LOG("Loading uncompressed anim ({})", animName);
+    DEV_LOG("Loading uncompressed anim (\"{}\")", animName);
 
     strcpy_s(ms_aUncompressedCutsceneAnims[ms_numUncompressedCutsceneAnims++], animName);
     ms_aUncompressedCutsceneAnims[ms_numUncompressedCutsceneAnims][0] = 0; // Null terminate next
@@ -324,7 +327,7 @@ void CCutsceneMgr::LoadAnimationUncompressed(const char* animName) {
 
 // 0x4D5E80
 void CCutsceneMgr::LoadCutsceneData(const char* cutsceneName) {
-    DEV_LOG("Loading cutscene ({})", cutsceneName);
+    DEV_LOG("Loading cutscene data (\"{}\")", cutsceneName);
 
     const auto plyr = FindPlayerPed(-1);
 
@@ -345,7 +348,7 @@ void CCutsceneMgr::LoadCutsceneData(const char* cutsceneName) {
 // 0x5B11C0
 void CCutsceneMgr::LoadCutsceneData_loading() {
     // Make sure all neceesary models are streamed in
-    for (const auto model : ms_iModelIndex | rng::views::take(ms_numLoadObjectNames)) {
+    for (const auto model : ms_iModelIndex | rngv::take(ms_numLoadObjectNames)) {
         if (!CStreaming::IsModelLoaded(model)) {
             return;
         }
@@ -366,7 +369,7 @@ void CCutsceneMgr::LoadCutsceneData_loading() {
     }
 
     // Create FXs that are attached to objects
-    for (auto& csfx : ms_pParticleEffects | rng::views::take(ms_iNumParticleEffects)) {
+    for (auto& csfx : ms_pParticleEffects | rngv::take(ms_iNumParticleEffects)) {
         // Create the effect's transform matrix
         RwMatrix fxTransform;
         g_fx.CreateMatFromVec(&fxTransform, &csfx.m_vecPosn, &csfx.m_vecDirection);
@@ -392,7 +395,7 @@ void CCutsceneMgr::LoadCutsceneData_loading() {
             if (const auto frame = CClumpModelInfo::GetFrameFromName(csobj->m_pRwClump, csfx.m_szObjectPart)) {
                 return RwFrameGetMatrix(frame);
             } else {
-                DEV_LOG("Part({}) of object not found", csfx.m_szObjectPart);
+                DEV_LOG("Part(\"{}\") of object not found", csfx.m_szObjectPart);
             }
 
             // Otherwise we're fucked
@@ -404,13 +407,15 @@ void CCutsceneMgr::LoadCutsceneData_loading() {
     }
 
     // Finally, process attachments
-    for (const auto& v : ms_iAttachObjectToBone | rng::views::take(ms_numAttachObjectToBones)) {
+    for (const auto& v : ms_iAttachObjectToBone | rngv::take(ms_numAttachObjectToBones)) {
         AttachObjectToBone(ms_pCutsceneObjects[v.m_nCutscenePedObjectId], ms_pCutsceneObjects[v.m_nCutscenePedObjectId], v.m_nBoneId);
     }
 }
 
 // 0x5B13F0
 void CCutsceneMgr::LoadCutsceneData_overlay(const char* cutsceneName) {
+    DEV_LOG("LoadCutsceneData_overlay(\"{}\")", cutsceneName);
+
     CTimer::Suspend();
 
     ms_cutsceneProcessing = true;
@@ -498,10 +503,10 @@ void CCutsceneMgr::LoadCutsceneData_postload() {
 //! NOTSA: Code from at 0x5B0794
 //! @param csFileName cutscene file name in the CUTS.IMG archive
 bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
-    DEV_LOG("Loading cutscene def ({})", csFileName);
+    DEV_LOG("LoadCutSceneFile(\"{}\")", csFileName);
 
     uint32 csFileOffsetBytes, csFileSzBytes;
-    if (ms_pCutsceneDir->FindItem(csFileName, csFileOffsetBytes, csFileSzBytes)) {
+    if (!ms_pCutsceneDir->FindItem(csFileName, csFileOffsetBytes, csFileSzBytes)) {
         return false;
     }
     csFileOffsetBytes *= STREAMING_SECTOR_SIZE;
@@ -510,7 +515,7 @@ bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
     // Allocate data for the file
     auto csFileData{ std::make_unique<char[]>(csFileSzBytes * STREAMING_SECTOR_SIZE) };
 
-    // Load cutscene file
+    // Load cutscene data
     {
         const auto s = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, "ANIM\\CUTS.IMG");
         RwStreamSkip(s, csFileOffsetBytes); // Skip to beginning of it
@@ -556,19 +561,26 @@ bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
     };
 
     // We're cheating here, and using `CFileLoader::LoadLine`.
-    // Originally the code checked for line feeds (\r), but I don't think that's going to cause any issues.
+    // They originally didn't do that.
+    // Now, LoadLine originally didn't handle \r\n properly,
+    // but we've fixed it do so.
+    // Oh, also, LoadLine changes `,` to ` ` (space), so
+    // I had to change the `,`'s in the sscanf' below to be spaces.
     auto bufRemSz = (int32)csFileSzBytes;
     auto bufIt    = csFileData.get();
     auto curSec   = NONE;
 
     auto hasSetExtraColors = false;
 
-    for (auto lineno = 0;; lineno++) {
+    for (auto lineno = 0; ; lineno++) {
         const auto ln = CFileLoader::LoadLine(bufIt, bufRemSz);
-        if (*ln == 0) {
+        if (!ln) {
             break; // No more lines found
         }
         const auto lnsv = std::string_view{ ln };
+        if (lnsv.empty()) {
+            continue;
+        }
 
         if (lnsv == "end"sv) { // End of section
             curSec = NONE;
@@ -578,6 +590,7 @@ bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
         switch (curSec) {
         case NONE: {
             curSec = StringToSection(lnsv);
+            assert(curSec != NONE);
             break;
         }
         case INFO: { // 0x5B09F2
@@ -597,6 +610,8 @@ bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
                 CStreaming::SetLoadVehiclesInLoadScene(false);
                 CStreaming::LoadScene(ms_cutsceneOffset);
                 CStreaming::SetLoadVehiclesInLoadScene(true);
+            } else {
+                assert(0 && "incorrect operand type in info section");
             }
             break;
         }
@@ -607,19 +622,18 @@ bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
 
             // Find out model name
             char modelName[1024];
-            strcpy_s(modelName, strtok_s(ln, ", ", &stctx)); // This will hard crash if no model name is set
+            strcpy_s(modelName, strtok_s(NULL, ", ", &stctx)); // This will hard crash if no model name is set
             _strlwr_s(modelName);
 
             // Start loading anims
             bool first = true;
             for(auto& numObj = ms_numLoadObjectNames; ;numObj++, first = false) {
-                auto pAnimName = strtok_s(ln, ", ", &stctx);
+                auto pAnimName = strtok_s(NULL, ", ", &stctx);
                 if (!pAnimName) {
-                    if (first) {
-                        DEV_LOG("Line {}: Missing anim name ", lineno);
-                    }
+                    assert(!first);
                     break;
                 }
+                
                 // Store model name
                 strcpy_s(ms_cLoadObjectName[numObj], modelName);
 
@@ -637,7 +651,7 @@ bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
 
             int32 startTime, duration;
             auto& gxtEntry = ms_cTextOutput[numTxt];
-            NOTSA_AASSERT(sscanf_s(ln, "%d,%d,%s", &startTime, &duration, gxtEntry, std::size(gxtEntry)) == 3);
+            NOTSA_AASSERT(sscanf_s(ln, "%d %d %s", &startTime, &duration, gxtEntry, std::size(gxtEntry)) == 3);
             _strupr_s(gxtEntry);
 
             ms_iTextStartTime[numTxt] = startTime;
@@ -653,20 +667,20 @@ bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
         }
         case ATTACH: { // 0x5B0D40
             auto& a = ms_iAttachObjectToBone[ms_numAttachObjectToBones++];
-            NOTSA_AASSERT(sscanf_s(ln, "%d,%d,%d", &a.m_nCutscenePedObjectId, &a.m_nCutsceneAttachmentObjectId, &a.m_nBoneId) == 3);
+            NOTSA_AASSERT(sscanf_s(ln, "%d %d %d", &a.m_nCutscenePedObjectId, &a.m_nCutsceneAttachmentObjectId, &a.m_nBoneId) == 3);
             break;
         }
         case REMOVE: { // 0x5B0DBA
             auto& cr = ms_crToHideItems[ms_iNumHiddenEntities++];
             auto& p  = cr.m_vecPosn;
-            NOTSA_AASSERT(sscanf_s(ln, "%f,%f,%f,%s", &p.x, &p.y, &p.z, cr.m_szObjectName, std::size(cr.m_szObjectName)) == 4);
+            NOTSA_AASSERT(sscanf_s(ln, "%f %f %f %s", &p.x, &p.y, &p.z, cr.m_szObjectName, std::size(cr.m_szObjectName)) == 4);
             break;
         }
         case PEFFECT: { // 0x5B0E1D
             // Originally used strtok, not sure why
             auto& csfx = ms_pParticleEffects[ms_iNumParticleEffects++];
             NOTSA_AASSERT(sscanf_s(
-                ln, "%s,%d,%d,%d,%s,%f,%f,%f,%f,%f,%f",
+                ln, "%s %d %d %d %s %f %f %f %f %f %f",
                 csfx.m_szEffectName, std::size(csfx.m_szEffectName),
                 &csfx.m_nStartTime,
                 &csfx.m_nEndTime,
@@ -674,7 +688,7 @@ bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
                 csfx.m_szObjectPart, std::size(csfx.m_szObjectPart),
                 &csfx.m_vecPosn.x, &csfx.m_vecPosn.y, &csfx.m_vecPosn.z,
                 &csfx.m_vecDirection.x, &csfx.m_vecDirection.y, &csfx.m_vecDirection.z
-            ) == 12);
+            ) == 11);
             break;
         }
         case EXTRACOL: { // 0x5B099E
@@ -760,14 +774,15 @@ void CCutsceneMgr::LoadCutsceneData_preload() {
     char csFileName[1024];
     *std::format_to(csFileName, "{}.CUT", ms_cutsceneName) = 0;
     if (!LoadCutSceneFile(csFileName)) {
-        DEV_LOG("Failed loading cutscene({}) def", ms_cutsceneName);
+        DEV_LOG("Failed loading cutscene(\"{}\") def", ms_cutsceneName);
         return;
     }
 
+    // 0x5B1011
     // Append objects added by script to the ones added by `LoadCutSceneFile`
-    for (auto i = ms_numAppendObjectNames; i-- > 0;) {
+    rng::fill(ms_iModelIndex | rngv::drop(ms_numLoadObjectNames) | rngv::take(ms_numAppendObjectNames), MODEL_LOAD_THIS); // Appended objects are loaded directly
+    for (auto i = 0; i < ms_numAppendObjectNames; i++) {
         const auto objId = ms_numLoadObjectNames++;
-        ms_iModelIndex[objId + i] = MODEL_LOAD_THIS;
         strcpy_s(ms_cLoadObjectName[objId], ms_cAppendObjectName[objId]);
         strcpy_s(ms_cLoadAnimName[objId], ms_cAppendAnimName[objId]);
     }
@@ -805,7 +820,8 @@ void CCutsceneMgr::LoadCutsceneData_preload() {
             break;
         }
         case MODEL_USE_PREV: { // Just use the previous model
-            ms_iModelIndex[i] = ms_iModelIndex[i - 1];
+            assert(i > 0); // The model index array should always start with `MODEL_LOAD_THIS`
+            ms_iModelIndex[i] = ms_iModelIndex[i - 1]; 
             break;
         }
         }
@@ -841,7 +857,7 @@ void CCutsceneMgr::RemoveEverythingBecauseCutsceneDoesntFitInMemory() {
 void CCutsceneMgr::SetCutsceneAnim(const char* animName, CObject* object) {
     const auto theAnim = ms_cutsceneAssociations.GetAnimation(animName);
     if (!theAnim) {
-        DEV_LOG("Animation ({}) not found!", animName);
+        DEV_LOG("Animation (\"{}\") not found!", animName);
         return;
     }
 
@@ -990,7 +1006,7 @@ void CCutsceneMgr::Update_overlay() {
         const auto csTimeMS = (int32)(ms_cutsceneTimerS * 1000.f);
 
         // Deal with fx [Start and stop them]
-        for (auto& csfx : ms_pParticleEffects | rng::views::take(ms_iNumParticleEffects)) {
+        for (auto& csfx : ms_pParticleEffects | rngv::take(ms_iNumParticleEffects)) {
             const auto fxsys = csfx.m_pFxSystem;
             if (!fxsys) {
                 continue; // I'm not sure how this could happen, but okay.
@@ -1021,7 +1037,7 @@ void CCutsceneMgr::Update_overlay() {
         }
 
         // Update cutscene specific model bounding boxes
-        for (const auto csobj : ms_pCutsceneObjects | rng::views::take(ms_numCutsceneObjs)) {
+        for (const auto csobj : ms_pCutsceneObjects | rngv::take(ms_numCutsceneObjs)) {
             if (IsModelIDForCutScene(csobj->GetModelID())) {
                 UpdateCutsceneObjectBoundingBox(csobj->m_pRwClump, csobj->GetModelID());
             }
@@ -1072,7 +1088,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedClass(CCutsceneMgr);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedGlobalInstall(FindCutsceneAudioTrackId, 0x8D0AA8);
+    RH_ScopedGlobalInstall(FindCutsceneAudioTrackId, 0x8D0AA8, {.locked = true}); // Calling the original function from our code crashes
     RH_ScopedGlobalInstall(SetCutsceneAnim, 0x5B0390);
     RH_ScopedGlobalInstall(SetCutsceneAnimToLoop, 0x5B0420);
     RH_ScopedGlobalInstall(SetHeadAnim, 0x5B0440);
