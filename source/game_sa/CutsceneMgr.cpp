@@ -960,7 +960,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(AppendToNextCutscene, 0x4D5DB0);
     RH_ScopedGlobalInstall(BuildCutscenePlayer, 0x4D5E20);
     RH_ScopedGlobalInstall(RemoveCutscenePlayer, 0x4D5E50);
-    RH_ScopedGlobalInstall(Shutdown, 0x4D5E60, {.reversed = false});
+    RH_ScopedGlobalInstall(Shutdown, 0x4D5E60);
     RH_ScopedGlobalInstall(LoadCutsceneData, 0x4D5E80);
     RH_ScopedGlobalInstall(DeleteCutsceneData, 0x4D5ED0);
     //RH_ScopedGlobalInstall(sub_5099F0, 0x5099F0, {.reversed = false});
