@@ -88,7 +88,7 @@ public:
     static inline auto& ms_aUncompressedCutsceneAnims = StaticRef<std::array<char[32], 8>, 0xBC2CC0>(); 
     static inline auto& ms_iTextDuration = StaticRef<std::array<int32, 64>, 0xBC2DC0>();
     static inline auto& ms_iTextStartTime = StaticRef<std::array<int32, 64>, 0xBC2EC0>();
-    static inline auto& ms_cTextOutput = StaticRef<std::array<char, 320>, 0xBC2FC0>();
+    static inline auto& ms_cTextOutput = StaticRef<std::array<char[8], 64>, 0xBC2FC0>();
     static inline auto& ms_iModelIndex = StaticRef<std::array<eModelID, 50>, 0xBC31C0>();
     static inline auto& ms_cLoadAnimName = StaticRef<std::array<char[32], 50>, 0xBC3288>();
     static inline auto& ms_cLoadObjectName = StaticRef<std::array<char[32], 50>, 0xBC38C8>();
@@ -133,6 +133,7 @@ public:
     static void LoadCutsceneData_loading();
     static void LoadCutsceneData_overlay(const char* cutsceneName);
     static void LoadCutsceneData_postload();
+    static bool LoadCutSceneFile(const char* csFileName);
     static void LoadCutsceneData_preload();
     static void LoadEverythingBecauseCutsceneDeletedAllOfIt();
     static void RemoveCutscenePlayer();

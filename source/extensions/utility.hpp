@@ -10,12 +10,55 @@
 namespace notsa {
 namespace rng = std::ranges;
 
-//! Much like std::stoi [and variants] but takes an `std::string_view` + in debug does error checking [unlike the C stuff]
-template<typename T>
-T ston(std::string_view sv, int radix = 10) {
+/*!
+* Much like std::stoi [and variants] but takes an `std::string_view` + in debug does error checking [unlike the C stuff]
+* @param str   The string to convert
+* @param radix The radix (base) of the number
+* @param end   The end of the the number in the string (points to inside `sv`)
+*/
+template<std::integral T>
+T ston(std::string_view str, int radix = 10, const char** end = nullptr) {
     T out;
-    NOTSA_AASSERT(std::from_chars(sv.data(), sv.data() + sv.size(), out, radix).ec == std::errc{});
+    const auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), out, radix);
+    assert(ec != std::errc{});
+    if (end) {
+        *end = ptr;
+    }
     return out;
+}
+
+/*!
+* Much like std::stof [and variants] but takes an `std::string_view` + in debug does error checking [unlike the C stuff]
+* @param str   The string to convert
+* @param fmt   The formatting mode
+* @param end   The end of the the number in the string (points to inside `sv`)
+*/
+template<typename T>
+    requires std::is_floating_point_v<T>
+T ston(std::string_view str, std::chars_format fmt = std::chars_format::general, const char** end = nullptr) {
+    T out;
+    const auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), out, fmt);
+    assert(ec != std::errc{});
+    if (end) {
+        *end = ptr;
+    }
+    return out;
+}
+
+/*
+* Parse a string into a 3D vector. The format is `X Y Z` (There might be multiple spaces, they're ignored)
+* [On failure asserts in debug]
+*/
+CVector stov3d(std::string_view str, std::chars_format fmt = std::chars_format::general) {
+    CVector v3d;
+    for (auto i = 0; i < 3; i++) {
+        const char* end;
+        v3d[i] = ston<float>(str, fmt, &end);
+        if (i < 2) {
+            str = str.substr(end - str.data() + 1);
+        }
+    }
+    return v3d;
 }
 
 /*

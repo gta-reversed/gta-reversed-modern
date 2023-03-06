@@ -16,6 +16,11 @@ enum eModelID : int32 { // Number of entries: 14832
 
     MODEL_PLAYER = 0,
     MODEL_CSPLAY = 1,
+
+    // Special values used in cutscene loading
+    MODEL_LOAD_THIS = 2,
+    MODEL_USE_PREV = 3,
+
     MODEL_MALE01 = 7,
     MODEL_BFORI = 9,
     MODEL_BFOST = 10,

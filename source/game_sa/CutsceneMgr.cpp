@@ -10,6 +10,7 @@
 
 #include "Fx.h"
 #include "CutsceneMgr.h"
+#include "TaskSimpleCarSetPedOut.h"
 #include "Rubbish.h"
 #include <TempColModels.h>
 
@@ -17,6 +18,8 @@ uint32 MAX_NUM_CUTSCENE_OBJECTS = 50;
 uint32 MAX_NUM_CUTSCENE_PARTICLE_EFFECTS = 8;
 uint32 MAX_NUM_CUTSCENE_ITEMS_TO_HIDE = 50;
 uint32 MAX_NUM_CUTSCENE_ATTACHMENTS = 50;
+
+static inline auto& g_bCutSceneFinishing = StaticRef<bool, 0xBC1CF8>();
 
 // 0x5B0380
 int32 CCutsceneMgr::AddCutsceneHead(CObject* object, int32 arg1) {
@@ -438,7 +441,7 @@ void CCutsceneMgr::LoadCutsceneData_postload() {
         const auto raii   = notsa::ACOD{ [&] { RwStreamClose(stream, nullptr); } };
 
         char csIFPFile[1024];
-        std::format_to(csIFPFile, "{}.IFP", ms_cutsceneName);
+        *std::format_to(csIFPFile, "{}.IFP", ms_cutsceneName) = 0;
         
         if (uint32 streamOffset, streamSz; ms_animLoaded = ms_pCutsceneDir->FindItem(csIFPFile, streamOffset, streamSz)) {
             CStreaming::MakeSpaceFor(streamSz * STREAMING_SECTOR_SIZE / 2); // Not sure why it's only half, but okay
@@ -469,7 +472,7 @@ void CCutsceneMgr::LoadCutsceneData_postload() {
         const auto raii = notsa::ACOD{ [&] { CFileMgr::CloseFile(img); } };
         
         char csSplinesFile[1024];
-        std::format_to(csSplinesFile, "{}.IFP", ms_cutsceneName);
+        *std::format_to(csSplinesFile, "{}.IFP", ms_cutsceneName) = 0;
 
         if (uint32 streamOffset, streamSz; dataFileLoaded = ms_pCutsceneDir->FindItem(csSplinesFile, streamOffset, streamSz)) {
             CStreaming::ImGonnaUseStreamingMemory();
@@ -488,9 +491,321 @@ void CCutsceneMgr::LoadCutsceneData_postload() {
     FindPlayerWanted()->ClearQdCrimes();
 }
 
+//! NOTSA: Code from at 0x5B0794
+//! @param csFileName cutscene file name in the CUTS.IMG archive
+bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
+    DEV_LOG("Loading cutscene def ({})", csFileName);
+
+    uint32 csFileOffsetBytes, csFileSzBytes;
+    if (ms_pCutsceneDir->FindItem(csFileName, csFileOffsetBytes, csFileSzBytes)) {
+        return false;
+    }
+    csFileOffsetBytes *= STREAMING_SECTOR_SIZE;
+    csFileSzBytes     *= STREAMING_SECTOR_SIZE;
+
+    // Allocate data for the file
+    auto csFileData{ std::make_unique<char[]>(csFileSzBytes * STREAMING_SECTOR_SIZE) };
+
+    // Load cutscene file
+    {
+        const auto s = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, "ANIM\\CUTS.IMG");
+        RwStreamSkip(s, csFileOffsetBytes); // Skip to beginning of it
+        RwStreamRead(s, csFileData.get(), csFileSzBytes);
+        RwStreamClose(s, nullptr);
+    }
+
+    // Def sections
+    enum Section {
+        NONE,
+        INFO,
+        MODEL,
+        TEXT,
+        UNCOMPRESS,
+        ATTACH,
+        REMOVE,
+        PEFFECT,
+        EXTRACOL,
+        END         // Technically not a section, but rather the end of one
+    };
+
+    using namespace std::string_view_literals;
+
+    // Parse this line as a section beginning
+    const auto StringToSection = [&](std::string_view str) {
+        constexpr struct { std::string_view name;  Section sec; } mapping[]{
+            { "info"sv,       INFO       },
+            { "model"sv,      MODEL      },
+            { "text"sv,       TEXT       },
+            { "uncompress"sv, UNCOMPRESS },
+            { "attach"sv,     ATTACH     },
+            { "remove"sv,     REMOVE     },
+            { "peffect"sv,    PEFFECT    },
+            { "extracol"sv,   EXTRACOL   },
+            { "end"sv,        END        } 
+        };
+        for (const auto& [name, sec] : mapping) {
+            if (str == name) {
+                return sec;
+            }
+        }
+        return NONE;
+    };
+
+    // We're cheating here, and using `CFileLoader::LoadLine`.
+    // Originally the code checked for line feeds (\r), but I don't think that's going to cause any issues.
+    auto bufRemSz = (int32)csFileSzBytes;
+    auto bufIt    = csFileData.get();
+    auto curSec   = NONE;
+
+    auto hasSetExtraColors = false;
+
+    for (auto lineno = 0;; lineno++) {
+        const auto ln = CFileLoader::LoadLine(bufIt, bufRemSz);
+        if (*ln == 0) {
+            break; // No more lines found
+        }
+        const auto lnsv = std::string_view{ ln };
+
+        if (lnsv == "end"sv) { // End of section
+            curSec = NONE;
+            continue;
+        }
+
+        switch (curSec) {
+        case NONE: {
+            curSec = StringToSection(lnsv);
+            break;
+        }
+        case INFO: { // 0x5B09F2
+            if (lnsv.starts_with("offset"sv)) {
+                auto& o = ms_cutsceneOffset;
+                NOTSA_AASSERT(sscanf_s(ln + strlen("offset"), "%f %f %f", &o.x, &o.y, &o.z) == 3);
+
+                // Warp ped out of the vehicle
+                if (const auto plyr = FindPlayerPed(); plyr->IsInVehicle()) {
+                    CTaskSimpleCarSetPedOut{ plyr->m_pVehicle, TARGET_DOOR_FRONT_LEFT, true }.ProcessPed(plyr);
+                }
+
+                // Load IPLs
+                CIplStore::AddIplsNeededAtPosn(ms_cutsceneOffset);
+
+                // Load the scene now
+                CStreaming::SetLoadVehiclesInLoadScene(false);
+                CStreaming::LoadScene(ms_cutsceneOffset);
+                CStreaming::SetLoadVehiclesInLoadScene(true);
+            }
+            break;
+        }
+        case MODEL: { // 0x5B0B11 
+            char* stctx; // strok ctx
+
+            (void)strtok_s(ln, ", ", &stctx); // ignore first value (it was originally a number, but it's unused - maybe model id?)
+
+            // Find out model name
+            char modelName[1024];
+            strcpy_s(modelName, strtok_s(ln, ", ", &stctx)); // This will hard crash if no model name is set
+            _strlwr_s(modelName);
+
+            // Start loading anims
+            bool first = true;
+            for(auto& numObj = ms_numLoadObjectNames; ;numObj++, first = false) {
+                auto pAnimName = strtok_s(ln, ", ", &stctx);
+                if (!pAnimName) {
+                    if (first) {
+                        DEV_LOG("Line {}: Missing anim name ", lineno);
+                    }
+                    break;
+                }
+                // Store model name
+                strcpy_s(ms_cLoadObjectName[numObj], modelName);
+
+                // Store anim to use
+                strcpy_s(ms_cLoadAnimName[numObj], pAnimName);
+                _strlwr_s(ms_cLoadAnimName[numObj]);
+
+                ms_iModelIndex[numObj]   = first ? MODEL_LOAD_THIS : MODEL_USE_PREV;
+                ms_bRepeatObject[numObj] = !first;
+            }
+            break;
+        }
+        case TEXT: { // 0x5B0C62
+            auto& numTxt = ms_numTextOutput;
+
+            int32 startTime, duration;
+            auto& gxtEntry = ms_cTextOutput[numTxt];
+            NOTSA_AASSERT(sscanf_s(ln, "%d,%d,%s", &startTime, &duration, gxtEntry, std::size(gxtEntry)) == 3);
+            _strupr_s(gxtEntry);
+
+            ms_iTextStartTime[numTxt] = startTime;
+            ms_iTextDuration[numTxt] = duration;
+
+            ms_numTextOutput++;
+            break;
+        }
+        case UNCOMPRESS: { // 0x5B0D09
+            char* ctx;
+            LoadAnimationUncompressed(strtok_s(ln, ", ", &ctx)); // I'm not quite sure what purpose `strtok` serves here, but okay
+            break;
+        }
+        case ATTACH: { // 0x5B0D40
+            auto& a = ms_iAttachObjectToBone[ms_numAttachObjectToBones++];
+            NOTSA_AASSERT(sscanf_s(ln, "%d,%d,%d", &a.m_nCutscenePedObjectId, &a.m_nCutsceneAttachmentObjectId, &a.m_nBoneId) == 3);
+            break;
+        }
+        case REMOVE: { // 0x5B0DBA
+            auto& cr = ms_crToHideItems[ms_iNumHiddenEntities++];
+            auto& p  = cr.m_vecPosn;
+            NOTSA_AASSERT(sscanf_s(ln, "%f,%f,%f,%s", &p.x, &p.y, &p.z, cr.m_szObjectName, std::size(cr.m_szObjectName)) == 4);
+            break;
+        }
+        case PEFFECT: { // 0x5B0E1D
+            // Originally used strtok, not sure why
+            auto& csfx = ms_pParticleEffects[ms_iNumParticleEffects++];
+            NOTSA_AASSERT(sscanf_s(
+                ln, "%s,%d,%d,%d,%s,%f,%f,%f,%f,%f,%f",
+                csfx.m_szEffectName, std::size(csfx.m_szEffectName),
+                &csfx.m_nStartTime,
+                &csfx.m_nEndTime,
+                &csfx.m_nObjectId,
+                csfx.m_szObjectPart, std::size(csfx.m_szObjectPart),
+                &csfx.m_vecPosn.x, &csfx.m_vecPosn.y, &csfx.m_vecPosn.z,
+                &csfx.m_vecDirection.x, &csfx.m_vecDirection.y, &csfx.m_vecDirection.z
+            ) == 12);
+            break;
+        }
+        case EXTRACOL: { // 0x5B099E
+            if (hasSetExtraColors) { // Pretty sure they fucked up something, see note below VVVV
+                continue;
+            }
+            int32 extraColIdx;
+            NOTSA_AASSERT(sscanf_s(ln, "%d", &extraColIdx) == 1);
+            if (extraColIdx) {
+                CTimeCycle::StartExtraColour(extraColIdx - 1, false);
+                hasSetExtraColors = true;
+            } else {
+                hasSetExtraColors = false; // unreachable, see note above ^^^^^^
+            }
+            break;
+        }
+        }
+    }
+
+    if (!hasSetExtraColors) {
+        CTimeCycle::StopExtraColour(false);
+    }
+
+    // Append objects added by script
+    for (auto i = ms_numAppendObjectNames; i-- > 0;) {
+        const auto objId = ms_numLoadObjectNames++;
+        ms_iModelIndex[objId + i] = MODEL_LOAD_THIS;
+        strcpy_s(ms_cLoadObjectName[objId], ms_cAppendObjectName[objId]);
+        strcpy_s(ms_cLoadAnimName[objId], ms_cAppendAnimName[objId]);
+    }
+    ms_numAppendObjectNames = 0;
+
+    return true;
+}
+
 // 0x5B05A0
 void CCutsceneMgr::LoadCutsceneData_preload() {
-    plugin::Call<0x5B05A0>();
+    // Preload cutscene track (Except for the "finale" cutscene)
+    if (_stricmp(ms_cutsceneName, "finale") != 0) {
+        if (const auto trkId = FindCutsceneAudioTrackId(ms_cutsceneName); trkId != -1) {
+            AudioEngine.PreloadCutsceneTrack(trkId, true);
+        }
+    }
+
+    // Unload cutscene models
+    for (int32 i = MODEL_CUTOBJ01; i < MODEL_CUTOBJ20; i++) {
+        const auto mi = CModelInfo::GetModelInfo(i);
+        if (mi->m_nRefCount) {
+            continue;
+        }
+        if (!CStreaming::IsModelLoaded(i)) {
+            continue;
+        }
+        CStreaming::RemoveModel(i);
+        mi->m_nKey = CKeyGen::GetUppercaseKey("&*%"); // Set some invalid key I guess? I don't think anything like this is used anywhere :D
+    }
+
+    // Save states
+    m_PrevExtraColour   = CTimeCycle::m_ExtraColour;
+    m_PrevExtraColourOn = CTimeCycle::m_bExtraColourOn;
+
+    m_fPrevCarDensity   = CCarCtrl::CarDensityMultiplier;
+    m_fPrevPedDensity   = CPopulation::PedDensityMultiplier;
+
+    // Reset internal states
+    ms_cutsceneOffset               = CVector{};
+    ms_numTextOutput                = 0;
+    ms_currTextOutput               = 0;
+    ms_numLoadObjectNames           = 0;
+    ms_numUncompressedCutsceneAnims = 0;
+    ms_numAttachObjectToBones       = 0;
+    ms_iNumHiddenEntities           = 0;
+    ms_iNumParticleEffects          = 0;
+    g_bCutSceneFinishing            = false;
+
+    for (auto&& name : ms_aUncompressedCutsceneAnims) { // Clear all names
+        name[0] = 0;
+    }
+
+    rng::fill(ms_iModelIndex, MODEL_PLAYER);
+    TheCamera.SetNearClipScript(0.1f);
+    CRubbish::SetVisibility(false);
+
+    FindPlayerWanted()->ClearQdCrimes();
+    FindPlayerPed()->m_bIsVisible = false;
+    CPad::GetPad()->bPlayerSkipsToDestination = false;
+    FindPlayerInfo().MakePlayerSafe(true, 10000.f);
+
+    char csFileName[1024];
+    *std::format_to(csFileName, "{}.CUT", ms_cutsceneName) = 0;
+    if (!LoadCutSceneFile(csFileName)) {
+        DEV_LOG("Failed loading cutscene({}) def", ms_cutsceneName);
+        return;
+    }
+
+    // Request all models to be loaded
+    size_t specialModelOffset = 0;
+    for (auto i = 0; i < ms_numLoadObjectNames; i++) {
+        const auto& modelName = ms_cLoadObjectName[i];
+
+        if (_stricmp(modelName, "csplay") == 0) {
+           ms_iModelIndex[i] = MODEL_CSPLAY;
+           continue;
+        }
+
+        switch (ms_iModelIndex[i]) {
+        case MODEL_LOAD_THIS: { // 0x5B10F0 - Load a new model
+            auto& modelId = ms_iModelIndex[i];
+
+            if (CModelInfo::GetModelInfo(modelName, (int32*)&modelId)) { // Regular model
+                CStreaming::RequestModel(modelId, STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED);
+            } else { // Special model
+                // Figure out cut-scene model ID
+                modelId = (eModelID)(MODEL_CUTOBJ01 + specialModelOffset++);
+
+                // Request the model to be loaded
+                CStreaming::RequestSpecialModel(modelId, modelName, STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED);
+
+                // Find next not-yet loaded cutscene model
+                while (CStreaming::IsModelLoaded((eModelID)(MODEL_CUTOBJ01 + specialModelOffset))) { // TODO/BUG: Missing check (should only try cutscene models (eg.: up to MODEL_CUTOBJ20), nothing more)
+                    specialModelOffset++;
+                }
+                assert(specialModelOffset <= (MODEL_CUTOBJ20 - MODEL_CUTOBJ01));
+            }
+            break;
+        }
+        case MODEL_USE_PREV: { // Just use the previous model
+            ms_iModelIndex[i] = ms_iModelIndex[i - 1];
+            break;
+        }
+        }
+    }
+    CStreaming::LoadAllRequestedModels(true);
+    
+    ms_cutsceneLoadStatus = LoadStatus::LOADING;
 }
 
 // 0x4D5C10
@@ -572,7 +887,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedGlobalInstall(AddCutsceneHead, 0x5B0380, {.reversed = false});
     RH_ScopedGlobalInstall(FinishCutscene, 0x5B04D0);
     RH_ScopedGlobalInstall(HasCutsceneFinished, 0x5B0570);
-    RH_ScopedGlobalInstall(LoadCutsceneData_preload, 0x5B05A0, {.reversed = false});
+    RH_ScopedGlobalInstall(LoadCutsceneData_preload, 0x5B05A0);
     RH_ScopedGlobalInstall(LoadCutsceneData_loading, 0x5B11C0);
     RH_ScopedGlobalInstall(LoadCutsceneData_overlay, 0x5B13F0);
     RH_ScopedGlobalInstall(StartCutscene, 0x5B1460, {.reversed = false});

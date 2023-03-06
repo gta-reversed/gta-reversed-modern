@@ -224,10 +224,13 @@ char* CFileLoader::LoadLine(auto file) {
     return FindFirstNonNullOrWS(ms_line);
 }
 
-// 0x536FE0
-// Load line from a text buffer
-// bufferIt - Iterator into buffer. It is modified by this function to point after the last character of this line
-// buffSize - Size of buffer. It is modified to represent the size of the buffer remaining after the end of this line
+/*!
+* Load line from a text buffer with sanitization (replaces chars < 32 (space) with a space)
+* @param bufferIt Iterator into buffer. It is modified by this function to point after the last character of this line
+* @param buffSize Size of buffer. It is modified to represent the size of the buffer remaining after the end of this line
+* @returns The beginning of the line - Note, this isn't a pointer into the passed in buffer!
+* @addr 0x536FE0
+*/
 char* CFileLoader::LoadLine(char*& bufferIt, int32& buffSize) {
     if (buffSize <= 0 || !*bufferIt)
         return nullptr;
