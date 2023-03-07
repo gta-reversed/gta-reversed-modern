@@ -10,6 +10,7 @@
 #include "Vector.h"
 #include "NodeAddress.h"
 #include "NodeRoute.h"
+#include "FixedFloat.hpp"
 #include <functional>
 
 static constexpr auto NUM_PATH_MAP_AREA_X{ 8 };
@@ -83,30 +84,19 @@ VALIDATE_SIZE(CPathIntersectionInfo, 0x1);
 
 class CCarPathLink { // "Navi Nodes"
 public:
-    struct {
-        int16 x, y;
-    } m_posn;                  /// Fixed-point ("compressed") position. Divide by 8.
-    CNodeAddress m_attachedTo; /// Identifies the target node a navi node is attached to.
-    /*!
-    * This is a normalized vector pointing towards above mentioned target node,
-    * thus defining the general direction of the path segment.
-    * The vector components are represented by signed bytes
-    * with values within the interval[-100, 100],
-    * which corresponds to the range of floating point values[-1.0, 1.0].
-    */
-    struct {
-        int8 x, y;
-    } m_dir; // 0x10
-    int8         m_nPathNodeWidth;              /// Fixed-point path node width, usually a copy of the linked node's path width (byte). Divide by 16.
-    uint8        m_numOppositeDirLanes : 3;     /// Number of (left) lanes that are opposite to this lane's direction, eg.: dotproduct is < 0
-    uint8        m_numSameDirLanes : 3;         /// Number of (right) lanes that are the going the same direction as this node's direction, eg.: dotproduct is > 0
-    uint8        m_bTrafficLightDirection : 1;  /// 1 if the navi node has the same direction as the traffic light and 0 if the navi node points somewhere else
-    uint8        : 1;                           /// Unused
-    uint16       m_nTrafficLightState : 2;      /// `eTrafficLightsDirection`
-    uint16       m_bridgeLights : 1;            /// See `SetLinksBridgeLights`
+    FixedVector2D<int16, 8.f>  m_posn;
+    CNodeAddress               m_attachedTo;                 ///< Identifies the target node a navi node is attached to.
+    FixedVector2D<int8, 100.f> m_dir;                        ///< This is a normalized vector pointing towards the [above mentioned] target node, thus defining the general direction of the path segment.
+    FixedFloat<int8, 16.f>     m_nPathNodeWidth;             ///< Usually a copy of the linked node's path width (byte)
+    uint8                      m_numOppositeDirLanes : 3;    ///< Number of (left) lanes that are opposite to this lane's direction, eg.: `other->dir.Dot(this->dir)` is `< 0`
+    uint8                      m_numSameDirLanes : 3;        ///< Number of (right) lanes that are the going the same direction as this node's direction, eg.: `other->dir.Dot(this->dir)` is `> 0`
+    uint8                      m_bTrafficLightDirection : 1; ///< `1` if the navi node has the same direction as the traffic light and `0` if the navi node points somewhere else
+    uint8                      : 1;                          ///< Unused
+    uint16                     m_nTrafficLightState : 2;     ///< `eTrafficLightsDirection`
+    uint16                     m_bridgeLights : 1;           ///< See `SetLinksBridgeLights`
 
     float GetNodePathWidth() const {
-        return (float)m_nPathNodeWidth / 16.f;
+        return (float)m_nPathNodeWidth;
     }
 
     float OneWayLaneOffset() const {
@@ -121,8 +111,8 @@ public:
     }
 
     /// Get uncompressed world position
-    auto GetNodeCoors() const {
-        return CVector2D{ (float)m_posn.x, (float)m_posn.y } / 8.f;
+    CVector2D GetNodeCoors() const {
+        return m_posn;
     }
 };
 VALIDATE_SIZE(CCarPathLink, 0xE);

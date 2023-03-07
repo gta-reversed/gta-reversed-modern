@@ -43,8 +43,7 @@ bool CTrafficLights::ShouldCarStopForLight(CVehicle* vehicle, bool bUnkn) {
 
     const auto CalcDot = [&vehicle](const CCarPathLink& naviNode) {
         const auto& pos = vehicle->GetPosition();
-        return (pos.y - (float)naviNode.m_posn.y / 8.0F) * ((float)naviNode.m_dir.y / 100.0F)
-             + (pos.x - (float)naviNode.m_posn.x / 8.0F) * ((float)naviNode.m_dir.x / 100.0F);
+        return (pos - naviNode.m_posn).Dot(naviNode.m_dir);
     };
 
     auto& currentNodeInfo = vehicle->m_autoPilot.m_nCurrentPathNodeInfo;
