@@ -1232,7 +1232,3 @@ void CPathFind::AddNodeToList(CPathNode* node, int32 distFromOrigin) {
 
     m_totalNumNodesInPathFindHashTable++;
 }
-
-void CPathFind::SetPathsNeededAtPosition(const CVector& posn) {
-    return plugin::CallAndReturn<void, 0x44DCD0, CPathFind*, const CVector&>(this,posn);
-}

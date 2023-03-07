@@ -130,12 +130,6 @@ public:
     //! Wrapper around `CGeneral::GetNodeHeadingFromVector`
     uint32 NodeHeading() const;
 
-    /*!
-    * @notsa
-    * @return Make all component's values absolute (positive).
-    */
-    static friend CVector2D abs(CVector2D v2) {
-        return { std::abs(v2.x), std::abs(v2.y) };
     //! Get a vector with the same magnitude as `*this` but rotated by `radians` (Interval: [0, 2PI])
     CVector2D RotatedBy(float radians) const;
 
@@ -147,6 +141,18 @@ public:
     //! Get vector perpendicular to `*this` on the left side (Same direction `*this` rotated by 90)
     //! Also see `GetPerpRight` and `RotatedBy`
     CVector2D GetPerpLeft() const;
+
+    /*!
+    * @notsa
+    * @return Make all component's values absolute (positive).
+    */
+    static friend CVector2D abs(CVector2D v2) {
+        return { std::abs(v2.x), std::abs(v2.y) };
+    }
+
+    static friend CVector2D pow(CVector2D vec, float power) { // todo/note: maybe use operator^?
+        return { std::pow(vec.x, power), std::pow(vec.y, power) };
+    }
 
     float operator[](size_t i) const {
         return (&x)[i];
@@ -164,10 +170,6 @@ constexpr inline CVector2D operator-(const CVector2D& lhs) {
 
 constexpr inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {
     return { vecOne.x - vecTwo.x, vecOne.y - vecTwo.y };
-}
-
-constexpr inline CVector2D operator-(const CVector2D& vecOne) {
-    return { -vecOne.x, -vecOne.y };
 }
 
 constexpr inline CVector2D operator+(const CVector2D& vecOne, const CVector2D& vecTwo) {
@@ -228,7 +230,3 @@ constexpr static bool IsPointInRectangle2D(CVector2D rectTopLeft, CVector2D rect
 }
 
 static CVector2D Normalized2D(CVector2D v) { v.Normalise(); return v; }
-
-static auto abs(const CVector2D& v2d) {
-    return CVector2D{ std::abs(v2d.x), std::abs(v2d.y) };
-}

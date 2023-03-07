@@ -310,7 +310,7 @@ public:
     void MarkRoadsBetweenLevelsNodeAndNeighbours(int) { /*noop*/ }
     bool TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
     bool TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
-    void GeneratePedCreationCoors_Interior(float x, float y, CVector* outCoords, CNodeAddress* unused1, CNodeAddress* unused2, float* outOrientation);
+    bool GeneratePedCreationCoors_Interior(float x, float y, CVector* outCoords, CNodeAddress* unused1, CNodeAddress* unused2, float* outOrientation);
     void GeneratePedCreationCoors(float x, float y, float minDist1, float maxDist1, float minDist2, float maxDist2, CVector* outCoords, CNodeAddress* outAddress1,
                                   CNodeAddress* outAddress2, float* outOrientation, bool bLowTraffic, CMatrix* transformMatrix);
     CNodeAddress FindNodeClosestToCoors(CVector pos, ePathType nodeType, float maxDistance, uint16 unk2, int32 unk3, uint16 unk4,

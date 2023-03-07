@@ -51,12 +51,6 @@ public:
     {
     }
 
-    /// A rect that can fit a circle of `radius` inside with `pos` being the center
-    constexpr CRect(const CVector2D& pos, float radius) :
-        CRect{ pos.x - radius, pos.y - radius, pos.x + radius, pos.y + radius }
-    {
-    }
-
     [[nodiscard]] constexpr inline bool IsFlipped() const { // 0x404190
         return left > right || bottom > top;
     }
