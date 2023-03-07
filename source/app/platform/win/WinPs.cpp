@@ -12,19 +12,6 @@
 // NOTE: This macro doesn't do a whole lot. Leaving it here for completeness sake
 #define USE_D3D9
 
-// TODO: Move these into premake/cmake
-#ifdef USE_D3D9
-#pragma comment(lib, "d3d9.lib")
-#else
-#pragma comment(lib, "d3d8.lib")
-#endif
-#pragma comment(lib, "ddraw.lib")
-#pragma comment(lib, "Winmm.lib")
-#pragma comment(lib, "dxguid.lib")
-#pragma comment(lib, "strmiids.lib")
-#pragma comment(lib, "dinput8.lib")
-#pragma comment(lib, "dsound.lib")
-
 static auto& PsGlobal = StaticRef<psGlobalType, 0xC8CF88>();
 
 //! Disable "This function was depracated"

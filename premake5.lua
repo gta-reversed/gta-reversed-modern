@@ -174,7 +174,14 @@ group ""
             "libs/imgui", "libs/imgui/backends", "libs/imgui/misc/cpp",
             "libs/dxsdk"
         }
-        links { "ogg", "vorbis", "vorbisenc", "vorbisfile", "imgui" }
+        links { 
+            "ogg", "vorbis", "vorbisenc", "vorbisfile", "imgui",
+            "ddraw.lib",
+            "Winmm.lib",
+            "dxguid.lib",
+            "strmiids.lib",
+            "dsound.lib",
+        }
         libdirs { 
             "%{cfg.targetdir}/ogg.lib", "%{cfg.targetdir}/vorbis.lib", "%{cfg.targetdir}/vorbisfile.lib", 
             "%{cfg.targetdir}/vorbisenc.lib",  "%{cfg.targetdir}/imgui.lib", "libs/dxsdk/d3d9.lib", "libs/dxsdk/dinput.lib"
