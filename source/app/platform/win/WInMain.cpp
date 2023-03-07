@@ -64,17 +64,14 @@ HWND InitInstance(HINSTANCE hInstance) {
 
 // 0x7468E0
 bool IsAlreadyRunning() {
-    CreateEventA(nullptr, false, true, APP_CLASS);
+    CreateEvent(nullptr, false, true, APP_CLASS);
     if (GetLastError() != ERROR_ALREADY_EXISTS) {
         return false;
     }
 
-    HWND window = FindWindowA(APP_CLASS, RsGlobal.appName);
-    if (window)
-        SetForegroundWindow(window);
-    else
-        SetForegroundWindow(PSGLOBAL(window));
-
+    const auto fgwnd = FindWindow(APP_CLASS, RsGlobal.appName);
+    SetForegroundWindow(fgwnd != INVALID_HANDLE_VALUE ? fgwnd : PSGLOBAL(window));
+    
     return true;
 };
 
