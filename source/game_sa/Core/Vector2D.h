@@ -165,7 +165,7 @@ public:
 
 /// Negate all components of the vector
 constexpr inline CVector2D operator-(const CVector2D& lhs) {
-    return { lhs.x, lhs.y };
+    return { -lhs.x, -lhs.y };
 }
 
 constexpr inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {
