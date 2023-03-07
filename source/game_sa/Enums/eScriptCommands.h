@@ -2674,7 +2674,7 @@ enum eScriptCommands {
     COMMAND_IS_XBOX_PLAYER2_PRESSING_START = 0x0A4E,
     COMMAND_FINISHED_WITH_XBOX_PLAYER2 = 0x0A4F,
     COMMAND_DO_DEBUG_STUFF = 0x0A50,
-
+    /*
     // NOTSA -- CLEO
     COMMAND_WRITE_MEMORY                                  = 0x0A8C, // 2700
     COMMAND_READ_MEMORY                                   = 0x0A8D,
@@ -2872,17 +2872,9 @@ enum eScriptCommands {
     COMMAND_IMGUI_GET_SCALING_SIZE                        = 0x0C37,
     COMMAND_IMGUI_SET_NEXT_WINDOW_TRANSPARENCY            = 0x0C38, // 3128
 
-    // INI
-    COMMAND_READ_INT_FROM_INI_FILE                        = 0x0AF0, // 2800
-    COMMAND_WRITE_INT_TO_INI_FILE                         = 0x0AF1,
-    COMMAND_READ_FLOAT_FROM_INI_FILE                      = 0x0AF2,
-    COMMAND_WRITE_FLOAT_TO_INI_FILE                       = 0x0AF3,
-    COMMAND_READ_STRING_FROM_INI_FILE                     = 0x0AF4,
-    COMMAND_WRITE_STRING_TO_INI_FILE                      = 0x0AF5, // 2805
-
     //! Make sure this is always up to date!
     COMMAND_HIGHEST_ID = COMMAND_PERLIN_NOISE_FRACTAL_3D,
-
+    */
     //! Highest vanilla SA ID
     COMMAND_HIGHEST_VANILLA_ID = COMMAND_DO_DEBUG_STUFF,
 
@@ -5547,6 +5539,7 @@ static std::string_view GetScriptCommandName(eScriptCommands cmd) {
     CASE(COMMAND_IS_XBOX_PLAYER2_PRESSING_START);
     CASE(COMMAND_FINISHED_WITH_XBOX_PLAYER2);
     CASE(COMMAND_DO_DEBUG_STUFF);
+    /*
     CASE(COMMAND_WRITE_MEMORY);
     CASE(COMMAND_READ_MEMORY);
     CASE(COMMAND_INT_ADD);
@@ -5767,6 +5760,7 @@ static std::string_view GetScriptCommandName(eScriptCommands cmd) {
     CASE(COMMAND_WRITE_FLOAT_TO_INI_FILE);
     CASE(COMMAND_READ_STRING_FROM_INI_FILE);
     CASE(COMMAND_WRITE_STRING_TO_INI_FILE);
+    */
     default:
         return "Unknown";
     }

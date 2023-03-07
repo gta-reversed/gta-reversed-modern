@@ -13,5 +13,5 @@ bool IsKeyPressed(int32 virtualKey) {
 }
 
 void notsa::script::commands::cleo::pad::RegisterHandlers() {
-    REGISTER_COMMAND_HANDLER(COMMAND_IS_KEY_PRESSED, IsKeyPressed);
+    //REGISTER_COMMAND_HANDLER(COMMAND_IS_KEY_PRESSED, IsKeyPressed);
 }

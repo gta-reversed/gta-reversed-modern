@@ -32,9 +32,11 @@ void SetCarEngineOn(CVehicle& vehicle, bool state) {
 
 
 void notsa::script::commands::cleo::vehicle::RegisterHandlers() {
+#if 0
     REGISTER_COMMAND_HANDLER(COMMAND_GET_CAR_NUMBER_OF_GEARS, GetCarNumberOfGears);
     REGISTER_COMMAND_HANDLER(COMMAND_GET_CAR_CURRENT_GEAR, GetCarNumberOfGears);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CAR_SIREN_ON, IsCarSirenOn);
     REGISTER_COMMAND_HANDLER(COMMAND_IS_CAR_ENGINE_ON, IsCarEngineOn);
     REGISTER_COMMAND_HANDLER(COMMAND_CLEO_SET_CAR_ENGINE_ON, SetCarEngineOn);
+#endif
 }

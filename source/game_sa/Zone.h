@@ -21,7 +21,7 @@ public:
     auto GetTranslatedName() const -> const char*;
     auto GetInfoLabel()      const { return std::string_view{ m_InfoLabel }; }
     auto GetNaviLabel()      const { return std::string_view{ m_TextLabel }; }
-
+    auto GetRect()           const { return CRect{ (float)m_fX1, (float)m_fY1, (float)m_fX2, (float)m_fY2 }; }
 public:
     char       m_InfoLabel[8]; // Zone info `TheText.Get` key (Unsure)
     char       m_TextLabel[8]; // Display name `TheText.Get` key
@@ -35,12 +35,6 @@ public:
     eZoneType  m_nType;
     eLevelName m_nLevel;
 
-    const char* GetTranslatedName() const;
-
-    // NOTSA
-    CRect GetRect() const {
-        return {(float)m_fX1, (float)m_fY1, (float)m_fX2, (float)m_fY2};
-    }
 
 };
 VALIDATE_SIZE(CZone, 0x20);

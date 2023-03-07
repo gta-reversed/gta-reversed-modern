@@ -146,7 +146,7 @@ bool CTheZones::FindZone(const CVector& point, std::string_view name, eZoneType 
         return false;
     }
 
-    for (auto& zone : GetNaviZones()) {
+    for (auto& zone : GetNavigationZones()) {
         if ((type == ZONE_TYPE_INFO ? zone.GetInfoLabel() : zone.GetNaviLabel()) == name) {
             if (PointLiesWithinZone(&point, &zone)) {
                 return true;

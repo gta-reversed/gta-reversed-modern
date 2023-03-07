@@ -82,6 +82,7 @@ const char* GetScriptStructNamed(CRunningScript* S) {
 }
 
 void notsa::script::commands::cleo::memory::RegisterHandlers() {
+    /*
     REGISTER_COMMAND_HANDLER(COMMAND_WRITE_MEMORY, WriteMemory);
     REGISTER_COMMAND_HANDLER(COMMAND_READ_MEMORY, ReadMemory);
     REGISTER_COMMAND_HANDLER(COMMAND_GET_PED_POINTER, GetPedPointer);
@@ -89,4 +90,5 @@ void notsa::script::commands::cleo::memory::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_GET_OBJECT_POINTER, GetObjectPointer);
     REGISTER_COMMAND_HANDLER(COMMAND_GET_THIS_SCRIPT_STRUCT, GetThisScriptStruct);
     REGISTER_COMMAND_HANDLER(COMMAND_GET_THIS_SCRIPT_STRUCT, GetScriptStructNamed);
+    */
 }

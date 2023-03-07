@@ -1372,7 +1372,7 @@ CVehicle* GetCarCharIsUsing(CPed& ped) {
         return nullptr;
     }());
 
-    return task ? task->m_pTargetVehicle : nullptr;
+    return task ? task->m_car : nullptr;
 }
 
 // ENABLE_CHAR_SPEECH

@@ -27,5 +27,7 @@ CVector GetCheckpointBlipCoords(CRunningScript* S) {
 }
 
 void notsa::script::commands::cleo::world::RegisterHandlers() {
+    /*
     REGISTER_COMMAND_HANDLER(COMMAND_GET_TARGET_BLIP_COORDS, GetCheckpointBlipCoords);
+    */
 }

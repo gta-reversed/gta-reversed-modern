@@ -54,6 +54,7 @@ auto BitwiseModThingByThing(uint32& a, uint32 b) {
 }
 
 void notsa::script::commands::cleo::extensions::intoperations::RegisterHandlers() {
+    /*
     REGISTER_COMMAND_HANDLER(COMMAND_BIT_AND, BitAnd);
     REGISTER_COMMAND_HANDLER(COMMAND_BITWISE_AND_THING_WITH_THING, BitwiseAndThingWithThing);
     REGISTER_COMMAND_HANDLER(COMMAND_BIT_OR, BitOr);
@@ -67,4 +68,5 @@ void notsa::script::commands::cleo::extensions::intoperations::RegisterHandlers(
     REGISTER_COMMAND_HANDLER(COMMAND_BITWISE_SHR_THING_BY_THING, BitwiseShrThingByThing);
     REGISTER_COMMAND_HANDLER(COMMAND_BIT_MOD, BitMod);
     REGISTER_COMMAND_HANDLER(COMMAND_BITWISE_MOD_THING_BY_THING, BitwiseModThingByThing);
+    */
 }
