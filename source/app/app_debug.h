@@ -29,7 +29,7 @@ static void DevPrint(int lineno, std::string_view file, std::string_view fmt, Ts
 #define DEV_LOG(...) notsa::DevPrint(__LINE__, __FILE__, ##__VA_ARGS__)
 #define LOG_PTR(x) ((const void*)x)
 #else
-#define DEV_LOG(...)
+#define DEV_LOG(...) (void)0
 #define LOG_PTR(x)
 #endif
 

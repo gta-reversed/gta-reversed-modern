@@ -34,5 +34,13 @@ public:
     int16      m_nZoneExtraIndexInfo;
     eZoneType  m_nType;
     eLevelName m_nLevel;
+
+    const char* GetTranslatedName() const;
+
+    // NOTSA
+    CRect GetRect() const {
+        return {(float)m_fX1, (float)m_fY1, (float)m_fX2, (float)m_fY2};
+    }
+
 };
 VALIDATE_SIZE(CZone, 0x20);

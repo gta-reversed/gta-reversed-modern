@@ -376,12 +376,17 @@ void FrontendIdle() {
     }
     FrontEndMenuManager.Process();
 
-    if (RsGlobal.quit)
+    if (RsGlobal.quit) {
         return;
+    }
 
     AudioEngine.Service();
     CameraSize(Scene.m_pRwCamera, nullptr, SCREEN_VIEW_WINDOW, SCREEN_ASPECT_RATIO);
     CVisibilityPlugins::SetRenderWareCamera(Scene.m_pRwCamera);
+
+    if (FastLoadSettings.ShouldLoadSaveGame()) {
+        return; // Don't render anything
+    }
 
     RwCameraClear(Scene.m_pRwCamera, &gColourTop, rwCAMERACLEARZ);
     if (RsCameraBeginUpdate(Scene.m_pRwCamera)) {

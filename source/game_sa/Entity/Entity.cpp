@@ -1243,7 +1243,7 @@ void CEntity::CreateEffects()
                 vecWorldExit.z,
                 fExitRot,
                 effect->enEx.m_nInteriorId,
-                effect->enEx.m_nFlags1 + (effect->enEx.m_nFlags2 << 8),
+                (CEntryExit::eFlags)(effect->enEx.m_nFlags1 + (effect->enEx.m_nFlags2 << 8)),
                 effect->enEx.m_nSkyColor,
                 effect->enEx.m_nTimeOn,
                 effect->enEx.m_nTimeOff,
@@ -1253,8 +1253,8 @@ void CEntity::CreateEffects()
 
             if (iEnExId != -1) {
                 auto addedEffect = CEntryExitManager::mp_poolEntryExits->GetAt(iEnExId);
-                if (addedEffect->m_pLink && !addedEffect->m_pLink->m_nFlags.bEnableAccess)
-                    addedEffect->m_nFlags.bEnableAccess = false;
+                if (addedEffect->m_pLink && !addedEffect->m_pLink->bEnableAccess)
+                    addedEffect->bEnableAccess = false;
             }
             break;
         }
@@ -1329,8 +1329,8 @@ void CEntity::DestroyEffects()
             auto iNearestEnex = CEntryExitManager::FindNearestEntryExit(vecWorld, 1.5F, -1);
             if (iNearestEnex != -1) {
                 auto enex = CEntryExitManager::mp_poolEntryExits->GetAt(iNearestEnex);
-                if (enex->m_nFlags.bEnteredWithoutExit)
-                    enex->m_nFlags.bDeleteEnex = true;
+                if (enex->bEnteredWithoutExit)
+                    enex->bDeleteEnex = true;
                 else
                     CEntryExitManager::DeleteOne(iNearestEnex);
             }
@@ -2532,6 +2532,14 @@ CEntity* CEntity::FindLastLOD() noexcept {
 
 CBaseModelInfo* CEntity::GetModelInfo() const {
     return CModelInfo::GetModelInfo(m_nModelIndex);
+}
+
+bool CEntity::ProcessScan() {
+    if (IsScanCodeCurrent()) {
+        return false;
+    }
+    SetCurrentScanCode();
+    return true;
 }
 
 RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* atomic, void* data)

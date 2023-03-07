@@ -133,7 +133,7 @@ void CCollisionData::Copy(const CCollisionData& src) {
             // Get number of vertices
             uint16 iHighestVertInd = 0;
             for (auto i = 0; i < src.m_nNumTriangles; ++i)
-                iHighestVertInd = std::max({iHighestVertInd, src.m_pTriangles[i].m_nVertA, src.m_pTriangles[i].m_nVertB, src.m_pTriangles[i].m_nVertC});
+                iHighestVertInd = std::max({iHighestVertInd, src.m_pTriangles[i].vA, src.m_pTriangles[i].vB, src.m_pTriangles[i].vC});
 
             if (iHighestVertInd) {
                 iHighestVertInd++; // allocated space needs to be 1 bigger to compensate for index 0
@@ -163,7 +163,7 @@ void CCollisionData::Copy(const CCollisionData& src) {
             // Get number of vertices
             uint16 iHighestVertInd = 0;
             for (uint32 i = 0; i < src.m_nNumShadowTriangles; ++i)
-                iHighestVertInd = std::max({iHighestVertInd, src.m_pShadowTriangles[i].m_nVertA, src.m_pShadowTriangles[i].m_nVertB, src.m_pShadowTriangles[i].m_nVertC});
+                iHighestVertInd = std::max({iHighestVertInd, src.m_pShadowTriangles[i].vA, src.m_pShadowTriangles[i].vB, src.m_pShadowTriangles[i].vC});
 
             if (iHighestVertInd) {
                 iHighestVertInd++; // allocated space needs to be 1 bigger to compensate for index 0
@@ -244,6 +244,14 @@ auto CCollisionData::GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup> 
         };
     }
     return {};
+}
+
+auto CCollisionData::GetTriVertices(const CColTriangle& tri) const->std::array<CVector, 3> {
+    std::array<CVector, 3> verts;
+    for (const auto [i, j] : notsa::enumerate(tri.m_vertIndices)) {
+        verts[i] = UncompressVector(m_pVertices[j]);
+    }
+    return verts;
 }
 
 // NOTSA

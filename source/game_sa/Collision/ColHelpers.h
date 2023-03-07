@@ -89,11 +89,12 @@ struct TBox : CBox {
     }
 };
 
+// NOTE: Face = triangle
 struct TFaceGroup {
     // Bounding box of all faces in this group.
     // TODO: Check if all vertices of these triangles are within the BB or not - It might be a useful information to know.
     CBoundingBox bb{};
-    uint16 first{}, last{}; // First and last face index (Inclusive: [first, last])
+    uint16       first{}, last{}; // First and last face index (Inclusive: [first, last])
 };
 
 namespace V1 {

@@ -116,14 +116,19 @@ template<typename... Ts>
 //! Cause a debug break
 #define NOTSA_DEBUGBREAK() __debugbreak()
 
+//! switch case fallthru
+#define NOTSA_SWCFALLTHRU [[fallthrough]]
+
 //! Macro for passing a string var to *scanf_s function.
 #define SCANF_S_STR(s) s, std::size(s)
+
+#define NOTSA_FORCEINLINE __forceinline
 
 /*!
 * @brief Used for static variable references
 *
 * @tparam T    The type of the variable
-* @tparam Addr The address of it
+* @param Addr  The address of it
 */
 template<typename T, uintptr Addr>
 T& StaticRef() {

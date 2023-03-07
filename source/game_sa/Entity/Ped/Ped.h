@@ -36,33 +36,6 @@ class CEntryExit;
 class CAnimBlendClumpData;
 struct RpHAnimHierarchy;
 
-static bool IsPedTypeGang(ePedType type) {
-    switch (type) {
-        case PED_TYPE_GANG1:
-        case PED_TYPE_GANG2:
-        case PED_TYPE_GANG3:
-        case PED_TYPE_GANG4:
-        case PED_TYPE_GANG5:
-        case PED_TYPE_GANG6:
-        case PED_TYPE_GANG7:
-        case PED_TYPE_GANG8:
-        case PED_TYPE_GANG9:
-        case PED_TYPE_GANG10: {
-            return true;
-        }
-    }
-    return false;
-}
-
-inline bool IsPedTypeFemale(ePedType type) {
-    switch (type) {
-    case PED_TYPE_PROSTITUTE:
-    case PED_TYPE_CIVFEMALE:
-        return true;
-    }
-    return false;
-}
-
 enum ePedNode : int32 {
     PED_NODE_UPPER_TORSO     = 1,
     PED_NODE_HEAD            = 2,
@@ -451,7 +424,7 @@ public:
     bool IsAlive() const;
     void UpdateStatEnteringVehicle();
     void UpdateStatLeavingVehicle();
-    void GetTransformedBonePosition(RwV3d& inOffsetOutPosn, ePedBones boneId, bool updateSkinBones);
+    void GetTransformedBonePosition(RwV3d& inOffsetOutPosn, ePedBones boneId, bool updateSkinBones = false);
     void ReleaseCoverPoint();
     CTaskSimpleHoldEntity* GetHoldingTask();
     CEntity* GetEntityThatThisPedIsHolding();
@@ -627,6 +600,15 @@ public:
     eWeaponSlot GiveWeapon(const CWeapon& weapon, bool likeUnused) {
         return GiveWeapon(weapon.m_nType, weapon.m_nTotalAmmo, likeUnused);
     }
+
+    auto GetPedModelInfo() const { return reinterpret_cast<CPedModelInfo*>(GetModelInfo()); }
+    
+    /*!
+     * @notsa
+     * @brief Returns vehicle's position if ped is in one, ped's otherwise.
+     */
+    CVector GetRealPosition() const { return IsInVehicle() ? m_pVehicle->GetPosition() : GetPosition(); }
+
 private:
     void RenderThinBody() const;
     void RenderBigHead() const;

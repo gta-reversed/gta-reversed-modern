@@ -74,5 +74,10 @@ public:
         return &ZoneInfoArray[idx];
     }
 
+    [[depracated]]
     static auto GetNaviZones() { return std::span{ NavigationZoneArray, (size_t)(TotalNumberOfNavigationZones) }; }
+    
+    static auto GetNavigationZones() {
+        return std::span{NavigationZoneArray, (size_t)TotalNumberOfNavigationZones};
+    }
 };

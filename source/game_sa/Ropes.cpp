@@ -69,8 +69,8 @@ void CRopes::Render() {
 
 // Must be used in loop to make attached to holder
 // 0x556B40
-bool CRopes::RegisterRope(CEntity* ropeObj, uint32 ropeType, CVector startPos, bool bExpires, uint8 segmentCount, uint8 flags, CPhysical* holder, uint32 timeExpire) {
-    return plugin::CallAndReturn<bool, 0x556B40, CEntity*, uint32, CVector, bool, uint8, uint8, CPhysical*, uint32>(ropeObj, ropeType, startPos, bExpires, segmentCount, flags, holder, timeExpire);
+bool CRopes::RegisterRope(uint32 ropeID, uint32 ropeType, CVector startPos, bool bExpires, uint8 segmentCount, uint8 flags, CPhysical* holder, uint32 timeExpire) {
+    return plugin::CallAndReturn<bool, 0x556B40, uint32, uint32, CVector, bool, uint8, uint8, CPhysical*, uint32>(ropeID, ropeType, startPos, bExpires, segmentCount, flags, holder, timeExpire);
 }
 
 // 0x556760
@@ -97,7 +97,7 @@ bool CRopes::FindCoorsAlongRope(uint32 ropeId, float fDistAlongRope, CVector* ou
 // 0x558D10
 int32 CRopes::CreateRopeForSwatPed(const CVector& startPos) {
     int32 newRopeId = m_nRopeIdCreationCounter + 100;
-    if (RegisterRope(reinterpret_cast<CEntity*>(newRopeId), static_cast<uint32>(eRopeType::SWAT), startPos, true, 0, 0, nullptr, 4000)) {
+    if (RegisterRope(newRopeId, static_cast<uint32>(eRopeType::SWAT), startPos, true, 0, 0, nullptr, 4000)) {
         return -1;
     }
 

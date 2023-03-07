@@ -15,6 +15,7 @@ class CVector;
 class CVector2D : public RwV2d {
 public:
     constexpr CVector2D() = default;
+    constexpr CVector2D(float XY) : RwV2d{XY, XY} {}
     constexpr CVector2D(float X, float Y) : RwV2d{ X, Y } {}
     constexpr CVector2D(const RwV2d& vec2d)     { x = vec2d.x; y = vec2d.y; }
     constexpr CVector2D(const CVector2D& vec2d) { x = vec2d.x; y = vec2d.y; }
@@ -44,6 +45,10 @@ public:
         CVector2D cpy = *this;
         cpy.Normalise(outMag);
         return cpy;
+    }
+
+    [[nodiscard]] constexpr float ComponentwiseSum() const {
+        return x + y;
     }
 
     [[nodiscard]] constexpr inline float SquaredMagnitude() const {
@@ -113,12 +118,19 @@ public:
         return { vec.x * multiplier, vec.y * multiplier };
     }
 
-    /// Calculate the dot product with another vector
+    //! Dot product of *this and another vector
     float Dot(const CVector2D& lhs) const {
         return x * lhs.x + y * lhs.y;
     }
 
+    //! 2D "cross product" of *this and another vector
+    //! See https://stackoverflow.com/a/243977
+    float Cross(const CVector2D& lhs) const {
+        return (x * lhs.y) - (y * lhs.x);
+    }
+
     //! Get a copy of `*this` vector projected onto `projectOnTo` (which is assumed to be unit length)
+    //! The result will have a magnitude of `sqrt(abs(this->Dot(projectOnTo)))`
     CVector2D ProjectOnToNormal(const CVector2D& projectOnTo) const {
         return projectOnTo * Dot(projectOnTo);
     }
@@ -137,6 +149,14 @@ public:
     //! Get vector perpendicular to `*this` on the left side (Same direction `*this` rotated by 90)
     //! Also see `GetPerpRight` and `RotatedBy`
     CVector2D GetPerpLeft() const;
+
+    float operator[](size_t i) const {
+        return (&x)[i];
+    }
+
+    float& operator[](size_t i) {
+        return (&x)[i];
+    }
 };
 
 constexpr inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {

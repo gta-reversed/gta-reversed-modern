@@ -57,8 +57,9 @@ public:
 
     void Restrict(const CRect& restriction);
     void Resize(float resizeX, float resizeY);
-    [[nodiscard]] bool IsPointInside(const CVector2D& point) const;
-    [[nodiscard]] bool IsPointInside(const CVector2D& point, float tolerance) const;
+    [[nodiscard]] bool IsPointInside(CVector2D const& point) const;
+    [[nodiscard]] bool IsPointInside(CVector2D const& point, float tolerance) const;
+    [[nodiscard]] bool IsRectInside(const CRect& rect) const; // NOTSA (or maybe it is?)
     void SetFromCenter(float x, float y, float size);
     void GetCenter(float* x, float* y) const;
     [[nodiscard]] inline CVector2D GetCenter() const { return { (right + left) * 0.5F, (bottom + top) * 0.5F }; }

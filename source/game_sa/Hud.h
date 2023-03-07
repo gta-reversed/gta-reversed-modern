@@ -51,7 +51,7 @@ public:
     static inline eNameState& m_ZoneState = *(eNameState*)0xBAA930;
     static inline int32& m_ZoneFadeTimer = *(int32*)0xBAA934;
     static inline uint32& m_ZoneNameTimer = *(uint32*)0xBAA938;
-    static inline const char*& m_ZoneToPrint = *(const char**)0xBAB1D0;
+    static inline const char*& m_ZoneToPrint = *(const char**)0xBAB1D0; // TODO: Use GxtChar
     static inline const char*& m_pLastZoneName = *(const char**)0xBAB1D4;
     static inline const char*& m_pZoneName = *(const char**)0xBAB1D8;
 

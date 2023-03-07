@@ -6,6 +6,7 @@
 #include "app/app.h"
 #include "VideoMode.h" // todo
 #include "ControllerConfigManager.h"
+#include "LoadingScreen.h"
 
 /*!
  * @addr 0x57FD70
@@ -229,7 +230,9 @@ void CMenuManager::CheckForMenuClosing() {
 
             if ((!field_35 || !m_bActivateMenuNextFrame) && !m_bLoadingData) {
                 AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_START);
-                AudioEngine.Service();
+                if (!FastLoadSettings.ShouldLoadSaveGame()) { // If loading, skip menu audio
+                    AudioEngine.Service();
+                }
             }
 
             m_bMenuActive = !m_bMenuActive;
@@ -268,6 +271,7 @@ void CMenuManager::CheckForMenuClosing() {
             } else {
                 AudioEngine.StopRadio(nullptr, false);
                 AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
+
                 if (m_nSysMenu >= 0u) {
                     CMenuSystem::SwitchOffMenu(0);
                     m_nSysMenu = 157;
@@ -328,7 +332,10 @@ void CMenuManager::CheckForMenuClosing() {
         DoRWStuffEndOfFrame();
 
         AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_START);
-        AudioEngine.Service();
+
+        if (!FastLoadSettings.ShouldLoadSaveGame()) { // If loading, skip menu audio
+            AudioEngine.Service();
+        }
 
         auto pad = CPad::GetPad(m_nPlayerNumber);
         field_1B34 = pad->DisablePlayerControls;

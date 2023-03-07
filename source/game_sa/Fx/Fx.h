@@ -85,9 +85,9 @@ public:
     void SetFxQuality(FxQuality_e quality);
     [[nodiscard]] FxQuality_e GetFxQuality() const;
 
-    void AddBlood(CVector& origin, CVector& direction, int32 amount, float arg3);
+    void AddBlood(Const CVector& origin, Const CVector& direction, int32 amount, float arg3);
     void AddWood(CVector& origin, CVector& direction, int32 amount, float arg3);
-    void AddSparks(CVector& origin, CVector& direction, float force, int32 amount, CVector across, eSparkType sparksType, float spread, float life);
+    void AddSparks(Const CVector& origin, Const CVector& direction, float force, int32 amount, CVector across, eSparkType sparksType, float spread, float life);
     void AddTyreBurst(CVector& posn, CVector& velocity);
     void AddBulletImpact(CVector& posn, CVector& direction, int32 bulletFxType, int32 amount, float arg4);
     void AddPunchImpact(CVector& posn, CVector& velocity, int32 arg2);

@@ -5,7 +5,8 @@
 
 namespace notsa{
 namespace detail {
-template <std::input_iterator ItType> class enumerate_iterator {
+template <std::input_iterator ItType>
+class enumerate_iterator {
 public:
     using underlaying_iter_traits = typename std::iterator_traits<ItType>;
 
