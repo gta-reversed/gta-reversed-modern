@@ -382,8 +382,8 @@ void CPathFind::DoPathSearch(
             }
 
             for (auto linkNum = 0u; linkNum < node->m_nNumLinks; linkNum++) {
-                const auto linkedAddr = m_pNodeLinks[node->m_wAreaId][linkNum];
-                const auto linkIdx = node->m_wBaseLinkId + linkNum;
+                const auto linkIdx    = node->m_wBaseLinkId + linkNum;
+                const auto linkedAddr = m_pNodeLinks[node->m_wAreaId][linkIdx];
 
                 if (!IsAreaNodesAvailable(linkedAddr)) {
                     continue;
@@ -458,6 +458,7 @@ void CPathFind::DoPathSearch(
         if (outResultNodes) { // Weird check really, because below it isn't checked :D
             outResultNodes[outNodesCount++] = origin->GetAddress();
         }
+
         for (auto node = origin; node == target || outNodesCount < maxNodesToFind; outNodesCount++) {
             for (auto linkNum = 0u; linkNum < node->m_nNumLinks; linkNum++) {
                 const auto linkedAddr = m_pNodeLinks[node->m_wAreaId][linkNum];
@@ -500,10 +501,7 @@ void CPathFind::SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, floa
 namespace detail {
 // NOTSA
 CVector GetPosnBetweenNodesForScript(CPathNode* nodeA, CVector2D dir) {
-    // Rotate by 90 degrees counter clockwise (Source: https://stackoverflow.com/q/243945 - comments under the OP's question)
-    dir = { -dir.y, dir.x };
-
-    return nodeA->GetNodeCoors() + CVector{dir * ((float)nodeA->m_nPathWidth / 16.f + 2.7f)};
+    return nodeA->GetNodeCoors() + CVector{dir.GetPerpLeft() * ((float)nodeA->m_nPathWidth / 16.f + 2.7f)};
 }
 };
 
