@@ -196,7 +196,6 @@ void CControllerConfigManager::UpdateJoy_ButtonUp(ePadButton button, int32 unk) 
     plugin::CallMethod<0x531070>(this, button, unk);
 }
 
-
 // unused
 // 0x52DD80
 void CControllerConfigManager::AffectControllerStateOn_ButtonUp_DebugStuff(int32, eControllerType) {
