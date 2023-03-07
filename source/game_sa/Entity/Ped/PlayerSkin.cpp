@@ -67,7 +67,7 @@ RwTexture* CPlayerSkin::GetSkinTexture(const char* name) {
     } else {
         imagePath = "skins\\%s.bmp";
     }
-    sprintf(gString, imagePath, name);
+    sprintf_s(gString, imagePath, name);
 
     RwImage* image = RtBMPImageRead(gString);
     if (!image) {

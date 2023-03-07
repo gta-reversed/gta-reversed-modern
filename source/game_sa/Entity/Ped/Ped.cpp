@@ -39,8 +39,9 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(AttachPedToBike, 0x5E7E60);
     RH_ScopedInstall(AttachPedToEntity, 0x5E7CB0);
     RH_ScopedInstall(OurPedCanSeeThisEntity, 0x5E1660);
-    RH_ScopedInstall(operator delete, 0x5E4760);
-    RH_ScopedInstall(operator new, 0x5E4720);
+    RH_ScopedOverloadedInstall(operator delete, "anon", 0x5E4760, void (*)(void*));
+    RH_ScopedOverloadedInstall(operator new, "anon", 0x5E4720, void* (*)(unsigned));
+    RH_ScopedOverloadedInstall(operator new, "poolIndexed", 0x5E4730, void* (*)(unsigned, int32));
     RH_ScopedInstall(SpawnFlyingComponent, 0x5F0190);
     RH_ScopedInstall(PedCanPickUpPickUp, 0x455560);
     RH_ScopedInstall(Update, 0x5DEBE0);
@@ -54,7 +55,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(ClearWeapon, 0x5E62B0);
     RH_ScopedOverloadedInstall(SetCurrentWeapon, "WepType", 0x5E6280, void(CPed::*)(eWeaponType));
     RH_ScopedOverloadedInstall(SetCurrentWeapon, "Slot", 0x5E61F0, void(CPed::*)(int32));
-    RH_ScopedInstall(GiveWeapon, 0x5E6080);
+    RH_ScopedOverloadedInstall(GiveWeapon, "", 0x5E6080, eWeaponSlot(CPed::*)(eWeaponType, uint32, bool));
     RH_ScopedInstall(TakeOffGoggles, 0x5E6010);
     RH_ScopedInstall(AddWeaponModel, 0x5E5ED0);
     RH_ScopedInstall(PlayFootSteps, 0x5E57F0, { .reversed = false });
@@ -205,7 +206,7 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
     field_744 = 0;
     field_74C = 0;
     m_nLookTime = 0;
-    m_nDeathTime = 0;
+    m_nDeathTimeMS = 0;
 
     m_vecAnimMovingShift = CVector2D();
     field_56C = CVector();
@@ -270,7 +271,7 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
     m_nMoneyCount = 0;
     field_72F = 0;
     m_nTimeTillWeNeedThisPed = 0;
-    field_590 = 0;
+    m_VehDeadInFrontOf = nullptr;
 
     m_pWeaponObject = nullptr;
     m_pGunflashObject = nullptr;
@@ -360,9 +361,21 @@ void* CPed::operator new(unsigned size) {
 }
 
 /*!
+* @addr 0x5E4730
+*/
+void* CPed::operator new(unsigned size, int32 poolRef) {
+    return GetPedPool()->NewAt(poolRef);
+}
+
+/*!
 * @addr 0x5E4760
 */
 void CPed::operator delete(void* data) {
+    GetPedPool()->Delete((CPed*)data);
+}
+
+// NOTSA
+void CPed::operator delete(void* data, int poolRef) {
     GetPedPool()->Delete((CPed*)data);
 }
 
@@ -1726,7 +1739,7 @@ void CPed::ProcessBuoyancy()
         auto vecMoveDir = m_vecMoveSpeed * CTimer::GetTimeStep() * 4.0F;
         auto vecSplashPos = GetPosition() + vecMoveDir;
         float fWaterZ;
-        if (CWaterLevel::GetWaterLevel(vecSplashPos.x, vecSplashPos.y, vecSplashPos.z, &fWaterZ, true, nullptr)) {
+        if (CWaterLevel::GetWaterLevel(vecSplashPos, fWaterZ, true, nullptr)) {
             vecSplashPos.z = fWaterZ;
             g_fx.TriggerWaterSplash(vecSplashPos);
             AudioEngine.ReportWaterSplash(this, -100.0F, true);
@@ -2036,16 +2049,16 @@ void CPed::GetBonePosition(RwV3d& outPosition, ePedBones bone, bool updateSkinBo
         }
     } else if (!bCalledPreRender) { // Return static local bone position instead
         outPosition = MultiplyMatrixWithVector(*m_matrix, GetPedBoneStdPosition(bone));
-        return;
-    }
-
-    if (const auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump)) { // Use position of bone matrix from anim hierarchy (if any)
+    } else if (const auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump)) { // Use position of bone matrix from anim hierarchy (if any)
         // NOTE: Can't use `GetBoneMatrix` here, because it doesn't check for `hier`'s validity. (It's questionable whenever that's needed at all..)
         RwV3dAssign(&outPosition, RwMatrixGetPos(&RpHAnimHierarchyGetMatrixArray(hier)[RpHAnimIDGetIndex(hier, (size_t)bone)]));
     } else { // Not sure when can this happen.. GetTransformedBonePosition doesn't check this case.
         outPosition = GetPosition(); // Return something close to valid..
         assert(0); // Let's see if this is possible at all.
     }
+
+    // TODO: Sometimes this shit becomes nan, let's investigate
+    assert(!std::isnan(outPosition.x));
 }
 
 /*!
@@ -2165,9 +2178,9 @@ void CPed::PlayFootSteps() {
     };
 
     if (bDoBloodyFootprints) {
-        if (m_nDeathTime && m_nDeathTime < 300) {
-            m_nDeathTime -= 1;
-            if (!m_nDeathTime) {
+        if (m_nDeathTimeMS && m_nDeathTimeMS < 300) {
+            m_nDeathTimeMS -= 1;
+            if (!m_nDeathTimeMS) {
                 bDoBloodyFootprints = false;
             }
         }
@@ -2234,7 +2247,7 @@ void CPed::PlayFootSteps() {
         const float animTimeMult = walkAssoc->m_nAnimId != AnimationId::ANIM_ID_WALK ? 8.f / 15.f : 5.f / 15.f;
 
         float adhesionMult{ 1.f };
-        switch (g_surfaceInfos->GetAdhesionGroup(m_nContactSurface)) {
+        switch (g_surfaceInfos.GetAdhesionGroup(m_nContactSurface)) {
         case eAdhesionGroup::ADHESION_GROUP_SAND: { // 0X5E599F
             if (CGeneral::GetRandomNumber() % 64) {
                 m_vecAnimMovingShiftLocal *= 0.2f;
@@ -3166,7 +3179,7 @@ void CPed::RemoveBodyPart(ePedNode pedNode, char localDir) {
             m_nBodypartToRemove = pedNode;
         }
     } else {
-        printf("Trying to remove ped component");
+        DEV_LOG("Trying to remove ped component");
     }
 }
 
@@ -3312,6 +3325,8 @@ RwMatrix& CPed::GetBoneMatrix(ePedBones bone) const {
 * @brief Set model index (Also re-inits animblend, MoneyCount, and default decision-marker)
 */
 void CPed::SetModelIndex(uint32 modelIndex) {
+    assert(modelIndex != MODEL_PLAYER || IsPlayer());
+
     m_bIsVisible = true;
 
     CEntity::SetModelIndex(modelIndex);
@@ -3534,8 +3549,9 @@ void CPed::Render() {
 // https://github.com/gennariarmando/bobble-heads
 // NOTSA
 void CPed::RenderBigHead() const {
-    if (!G_CHEAT_BIG_HEAD) // todo: !CCheat::IsActive(CHEAT_BIG_HEAD)
+    if (!CCheat::IsActive(CHEAT_BIG_HEAD)) {
         return;
+    }
 
     auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump);
     auto* matrices = RpHAnimHierarchyGetMatrixArray(hier);
@@ -3564,9 +3580,9 @@ void CPed::RenderBigHead() const {
 
 // NOTSA
 void CPed::RenderThinBody() const {
-    if (!G_CHEAT_THIN_BODY) // todo: !CCheat::IsActive(CHEAT_THIN_BODY)
+    if (!CCheat::IsActive(CHEAT_THIN_BODY)) {
         return;
-
+    }
 }
 
 /*!

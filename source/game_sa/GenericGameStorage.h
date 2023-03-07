@@ -94,6 +94,12 @@ public:
     static bool CheckDataNotCorrupt(int32 slot, const char* fileName);
     static bool RestoreForStartLoad();
 
+    // NOTSA
+    template<typename T>
+    static T LoadDataFromWorkBuffer() { T data; LoadDataFromWorkBuffer(&data, sizeof(T)); return std::move(data); }
+
+    template<typename T>
+    static void SaveDataToWorkBuffer(const T& data) { SaveDataToWorkBuffer(const_cast<void*>((const void*)&data), sizeof(T)); }
 private:
     static const char* GetBlockName(eBlocks);
 };
@@ -116,8 +122,15 @@ template<typename T, bool HasSizeHeader = true>
 */
 
 template<typename T>
-static bool LoadDataFromWorkBuffer(const T& data) {
+static bool LoadDataFromWorkBuffer(T& data) {
     return CGenericGameStorage::LoadDataFromWorkBuffer((void*)&data, sizeof(T));
+}
+
+template<typename T>
+static T LoadDataFromWorkBuffer() {
+    T data{};
+    assert(LoadDataFromWorkBuffer(data));
+    return data;
 }
 
 template<bool WriteSizeHeader = true, typename T>

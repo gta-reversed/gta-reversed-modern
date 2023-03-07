@@ -94,7 +94,7 @@ public:
     CTaskSimpleFight* GetTaskFighting();
     CTaskSimpleUseGun* GetTaskUseGun();
     CTaskSimpleThrowProjectile* GetTaskThrow();
-    CTask* GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask);
+    CTaskSimpleHoldEntity* GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask = true);
     CTaskSimpleSwim* GetTaskSwim();
     CTaskSimpleDuck* GetTaskDuck(bool bIgnoreCheckingForSimplestActiveTask = true);
     CTaskSimpleJetPack* GetTaskJetPack();
@@ -148,6 +148,7 @@ public:
         return false;
     }
 
+    CEventHandler&   GetEventHandler() { return m_eventHandler; }
     CEventScanner&   GetEventScanner()    { return m_eventScanner; }
     CPedScanner&     GetPedScanner()      { return m_pedScanner; }
     CVehicleScanner& GetVehicleScanner()  { return m_vehicleScanner; }

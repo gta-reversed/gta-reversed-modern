@@ -21,7 +21,8 @@ public:
     static int16&      TotalNumberOfMapZones;        // Map zones
     static CZone       (&MapZoneArray)[39];
     static int16&      TotalNumberOfZoneInfos;
-    static CZoneInfo*  ZoneInfoArray;
+    
+    static inline std::array<CZoneInfo, 380>& ZoneInfoArray = *(std::array<CZoneInfo, 380>*)0xBA1DF0;
 
 public:
     static void InjectHooks();
@@ -67,5 +68,9 @@ public:
             return nullptr;
 
         return &ZoneInfoArray[idx];
+    }
+
+    static auto GetNavigationZones() {
+        return std::span{NavigationZoneArray, (size_t)TotalNumberOfNavigationZones};
     }
 };

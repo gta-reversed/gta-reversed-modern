@@ -91,7 +91,7 @@ void CColAccel::addCacheCol(PackedModelStartEnd startEnd, const CColModel& colMo
     colEntry.m_boundBox = colModel.m_boundBox;
     colEntry.m_boundSphere = colModel.m_boundSphere;
     colEntry.m_nColSlot = colModel.m_nColSlot;
-    colEntry.m_bColModelNotEmpty = colModel.m_bNotEmpty;
+    colEntry.m_bColModelNotEmpty = colModel.m_bHasCollisionVolumes;
 
     ++m_iNumColItems;
 }
@@ -108,7 +108,7 @@ void CColAccel::cacheLoadCol() {
         cm->m_boundBox = colEntry.m_boundBox;
         cm->m_boundSphere = colEntry.m_boundSphere;
         cm->m_nColSlot = colEntry.m_nColSlot;
-        cm->m_bNotEmpty = colEntry.m_bColModelNotEmpty;
+        cm->m_bHasCollisionVolumes = colEntry.m_bColModelNotEmpty;
 
         mi->SetColModel(cm, true);
         CColStore::IncludeModelIndex(colEntry.m_nColSlot, colEntry.m_wModelStart);

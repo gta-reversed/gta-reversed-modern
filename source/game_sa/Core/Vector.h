@@ -10,14 +10,14 @@
 #include <span>
 #include "PluginBase.h" // !!!
 #include "RenderWare.h"
+#include "Vector2D.h"
 
 class CMatrix;
-class CVector2D;
 
 class CVector : public RwV3d {
 public:
     constexpr CVector() = default;
-    constexpr CVector(float X, float Y, float Z) : RwV3d{X, Y, Z} {}
+    constexpr CVector(float X, float Y, float Z) : RwV3d{ X, Y, Z } {}
     constexpr CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
     constexpr CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; }
     constexpr explicit CVector(float value) { x = y = z = value; }
@@ -28,6 +28,7 @@ public:
     static void InjectHooks();
 
     static CVector Random(float min, float max);
+    static CVector Random(CVector min, CVector max);
 
     // Returns length of vector
     float Magnitude() const;
@@ -47,8 +48,23 @@ public:
     /// Perform a dot product with this and `o`, returning the result
     auto Dot(const CVector& o) const -> float;
 
-    // Performs cross calculation
-    void Cross(const CVector& left, const CVector& right);
+    /*!
+    * @notsa
+    *
+    * There's an SA function with the same name,
+    * but don't get confused, that one stores the
+    * result in-place.
+    * 
+    * @return The cross product of `*this` and `o`
+    */
+    auto Cross(const CVector& other) const -> CVector;
+
+    /*!
+    * @addr 0x70F890
+    *
+    * The original Cross function that stores the result in-place
+    */
+    void Cross_OG(const CVector& a, const CVector& b);
 
     // Adds left + right and stores result
     void Sum(const CVector& left, const CVector& right);
@@ -122,6 +138,12 @@ public:
         return (&x)[i];
     }
 
+    //! Get a copy of `*this` vector projected onto `projectOnTo` (which is assumed to be unit length)
+    //! The result will have a magnitude of `sqrt(abs(this->Dot(projectOnTo)))`
+    CVector ProjectOnToNormal(const CVector& projectOnTo) const {
+        return projectOnTo * Dot(projectOnTo);
+    }
+
     //! Calculate the average position
     static CVector Average(const CVector* begin, const CVector* end);
 
@@ -153,6 +175,11 @@ public:
     static friend CVector pow(CVector vec, float power) {
         return { std::pow(vec.x, power), std::pow(vec.y, power), std::pow(vec.z, power) };
     }
+    
+    friend constexpr CVector operator*(const CVector& vec, float multiplier) {
+        return { vec.x * multiplier, vec.y * multiplier, vec.z * multiplier };
+    }
+
 };
 VALIDATE_SIZE(CVector, 0xC);
 
@@ -184,9 +211,6 @@ constexpr inline bool operator==(const CVector& vecLeft, const CVector& vecRight
     return vecLeft.x == vecRight.x && vecLeft.y == vecRight.y && vecLeft.z == vecRight.z;
 }
 
-constexpr inline CVector operator*(const CVector& vec, float multiplier) {
-    return { vec.x * multiplier, vec.y * multiplier, vec.z * multiplier };
-}
 
 constexpr inline CVector operator/(const CVector& vec, float dividend) {
     return { vec.x / dividend, vec.y / dividend, vec.z / dividend };

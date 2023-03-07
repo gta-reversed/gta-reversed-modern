@@ -67,22 +67,12 @@ struct RtQuat
     RwReal              real;   /**< The real part */
 };
 
-typedef struct RtQuatSlerpCache RtQuatSlerpCache;
-
-struct RtQuatSlerpCache {
-    RtQuat raFrom;
-    RtQuat raTo;
-    RwReal omega;
-    RwBool nearlyZeroOm;
-};
-
 /*
  * Backwards compatibility code
  */
 
 typedef RtQuat RpQuat;
 
-void RtQuatSetupSlerpCache(RtQuat* qpFrom, RtQuat* qpTo, RtQuatSlerpCache* sCache); // 0x7EC220
 void RtQuatConvertToMatrix(const RtQuat* const qpQuat, RwMatrix* const mpMatrix);
 RwBool RtQuatConvertFromMatrix(RtQuat * qpQuat, const RwMatrix * const mpMatrix); // 0x7EB5C0
 RtQuat* RtQuatRotate(RtQuat* quat, const RwV3d* axis, RwReal angle, RwOpCombineType combineOp); // 0x7EB7C0

@@ -169,14 +169,9 @@ void CAERadioTrackManager::SetRadioAutoRetuneOnOff(bool enable) {
 
 // 0x4E82F0
 void CAERadioTrackManager::SetBassSetting(int8 nBassSet, float fBassGrain) {
-    settings1.m_fBassGain = fBassGrain;
-    settings2.m_fBassGain = fBassGrain;
-
-    settings1.m_nBassSet = nBassSet;
-    settings2.m_nBassSet = nBassSet;
-
-    m_bBassEnhance ? AEAudioHardware.SetBassSetting(nBassSet, fBassGrain)
-                   : AEAudioHardware.SetBassSetting(0, fBassGrain);
+    settings1.m_fBassGain = settings2.m_fBassGain = fBassGrain;
+    settings1.m_nBassSet = settings2.m_nBassSet = nBassSet;
+    AEAudioHardware.SetBassSetting(m_bBassEnhance ? nBassSet : 0, fBassGrain);
 }
 
 // 0x4E9DB0
@@ -244,7 +239,7 @@ void CAERadioTrackManager::DisplayRadioStationName() {
 }
 
 // 0x4E9E10
-char* CAERadioTrackManager::GetRadioStationName(RadioStationId id) {
+const char* CAERadioTrackManager::GetRadioStationName(RadioStationId id) {
     if (id <= 0)
         return nullptr;
 
@@ -256,11 +251,11 @@ char* CAERadioTrackManager::GetRadioStationName(RadioStationId id) {
 // 0x4E8380
 void CAERadioTrackManager::GetRadioStationNameKey(RadioStationId id, char* outStr) {
     if (id == RADIO_OFF) {
-        strcpy(outStr, "FEA_NON");
+        strcpy_s(outStr, 8u, "FEA_NON");
     } else if (id == RADIO_USER_TRACKS) {
-        strcpy(outStr, "FEA_MP3");
+        strcpy_s(outStr, 8u, "FEA_MP3");
     } else {
-        sprintf(outStr, "FEA_R%d", id - 1);
+        sprintf_s(outStr, 8u, "FEA_R%d", id - 1);
     }
 }
 

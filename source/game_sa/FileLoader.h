@@ -79,6 +79,13 @@ public:
     static void LoadAtomicFile(const char* filename);
     static RpClump* LoadAtomicFile2Return(const char* filename);
 
+
+    //! Find first non-null, non-whitespace character
+    static char* FindFirstNonNullOrWS(char* it);
+
+    //! Find the first whitespace (or null) character
+    static char* FindFirstNullOrWS(char* it);
+
     static char* LoadLine(auto file);
     static char* LoadLine(char*& outLine, int32& outSize);
 

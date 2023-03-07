@@ -248,6 +248,11 @@ bool CPathFind::TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targ
     return intersect && intersect->m_bRoadCross;
 }
 
+// 0x44ECA0
+bool CPathFind::GeneratePedCreationCoors_Interior(float x, float y, CVector* outCoords, CNodeAddress* unused1, CNodeAddress* unused2, float* outOrientation) {
+    return plugin::CallMethodAndReturn<bool, 0x44ECA0>(this, x, y, outCoords, unused1, unused2, outOrientation);
+}
+
 // 0x44D480
 bool CPathFind::TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress) {
     const auto intersect = FindIntersection(startNodeAddress, targetNodeAddress);
@@ -594,7 +599,7 @@ bool CPathFind::FindNodeCoorsForScript(CVector& outPos, CNodeAddress addr) {
 // 0x452F40
 void CPathFind::LoadPathFindData(int32 areaId) {
     CTimer::Suspend();
-    sprintf(gString, "data\\paths\\nodes%d.dat", areaId);
+    sprintf_s(gString, "data\\paths\\nodes%d.dat", areaId);
     auto* stream = RwStreamOpen(RwStreamType::rwSTREAMFILENAME, RwStreamAccessType::rwSTREAMREAD, gString);
     LoadPathFindData(stream, areaId);
     CTimer::Resume();
@@ -874,7 +879,7 @@ void CPathFind::AddDynamicLinkBetween2Nodes_For1Node(CNodeAddress first, CNodeAd
     auto numAddresses = m_anNumAddresses[first.m_wAreaId];
 
     uint32 firstLinkId;
-    if (firstPathInfo.m_wBaseLinkId >= numAddresses)
+    if (static_cast<uint32>(firstPathInfo.m_wBaseLinkId) >= numAddresses)
         firstLinkId = firstPathInfo.m_wBaseLinkId;
     else {
         auto* nodeLink = &m_pNodeLinks[first.m_wAreaId][numAddresses];
@@ -1226,4 +1231,8 @@ void CPathFind::AddNodeToList(CPathNode* node, int32 distFromOrigin) {
     node->m_totalDistFromOrigin = (int16)distFromOrigin;
 
     m_totalNumNodesInPathFindHashTable++;
+}
+
+void CPathFind::SetPathsNeededAtPosition(const CVector& posn) {
+    return plugin::CallAndReturn<void, 0x44DCD0, CPathFind*, const CVector&>(this,posn);
 }

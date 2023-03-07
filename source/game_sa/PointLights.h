@@ -48,8 +48,9 @@ public:
     static float GetLightMultiplier(const CVector* point);
     static void  RemoveLightsAffectingObject();
     static bool  ProcessVerticalLineUsingCache(CVector point, float* outZ);
-    static void  AddLight(uint8 lightType, CVector point, CVector direction, float radius, float red, float green, float blue, uint8 fogType, bool generateExtraShadows, CEntity* entityAffected);
+    static void  AddLight(uint8 lightType, CVector point, CVector direction, float radius, float red, float green, float blue, uint8 fogType = 0, bool generateExtraShadows = false, CEntity* entityAffected = nullptr);
     static void  RenderFogEffect();
 
     static void ResetNumLights() { NumLights = 0; }
+    static auto GetActiveLights() { return aLights | rng::views::take(NumLights); }
 };

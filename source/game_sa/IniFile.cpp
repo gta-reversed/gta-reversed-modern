@@ -19,7 +19,7 @@ void CIniFile::LoadIniFile() {
     auto file = CFileMgr::OpenFile("gta3.ini", "r");
     if (file) {
         CFileMgr::ReadLine(file, gString, 200);
-        (void)sscanf(gString, "%f", &PedNumberMultiplier);
+        VERIFY(sscanf_s(gString, "%f", &PedNumberMultiplier) == 1);
         if (PedNumberMultiplier >= 0.5f) {
             if (PedNumberMultiplier > 3.0f)
                 PedNumberMultiplier = 3.0f;
@@ -28,7 +28,7 @@ void CIniFile::LoadIniFile() {
         }
 
         CFileMgr::ReadLine(file, gString, 200);
-        (void)sscanf(gString, "%f", &CarNumberMultiplier);
+        VERIFY(sscanf_s(gString, "%f", &CarNumberMultiplier) == 1);
         if (CarNumberMultiplier >= 0.5f) {
             if (CarNumberMultiplier > 3.0f)
                 CarNumberMultiplier = 3.0f;

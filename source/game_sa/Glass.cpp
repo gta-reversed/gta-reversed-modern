@@ -90,7 +90,7 @@ void CGlass::CarWindscreenShatters(CVehicle* vehicle) {
     // They're after each other, so we just have to find the first one here
     uint32 glassTriIdx{};
     for (; glassTriIdx < colModel->GetTriCount(); glassTriIdx++) {
-        if (g_surfaceInfos->IsGlass(triangles[glassTriIdx].m_nMaterial)) {
+        if (g_surfaceInfos.IsGlass(triangles[glassTriIdx].m_nMaterial)) {
             break;
         }
     }
@@ -160,6 +160,7 @@ void CGlass::CarWindscreenShatters(CVehicle* vehicle) {
         }
     }
 
+    assert(0 <= minRightFwdDotSumIdx && minRightFwdDotSumIdx < std::size(rightDots));
     // Size of pane in directions
     auto extentRight = maxDotRight - rightDots[minRightFwdDotSumIdx];
     auto extentFwd = maxDotFwd - fwdDots[minRightFwdDotSumIdx];
@@ -290,7 +291,7 @@ void CGlass::GeneratePanesForWindow(ePaneType type, CVector point, CVector fwd, 
     const auto [countX, sizeX] = CalculateCountOfSectionsAndSizeAxis(totalSizeX);
     const auto [countY, sizeY] = CalculateCountOfSectionsAndSizeAxis(totalSizeY);
 
-    // printf("Panes: %u x %u (%.3f x %.3f) \n", countX, countY, sizeX, sizeY);
+    // DEV_LOG("Panes: {} x {} ({.3f} x {.3f})", countX, countY, sizeX, sizeY);
 
     bool hitGround{};
     float groundZ = CWorld::FindGroundZFor3DCoord(point, &hitGround, nullptr);

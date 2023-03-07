@@ -62,8 +62,8 @@ CPedGroup* CPedGroups::GetPedsGroup(const CPed* ped) {
 }
 
 // 0x5F7EE0
-int32 CPedGroups::GetGroupId(CPedGroup* pedGroup) {
-    return plugin::CallAndReturn<int32, 0x5F7EE0, CPedGroup*>(pedGroup);
+int32 CPedGroups::GetGroupId(const CPedGroup* pedGroup) {
+    return plugin::CallAndReturn<int32, 0x5F7EE0, const CPedGroup*>(pedGroup);
 }
 
 // 0x5FC800

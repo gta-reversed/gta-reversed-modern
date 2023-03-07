@@ -13,9 +13,7 @@
 #include "Shadows.h"
 #include "CarFXRenderer.h"
 
-#ifdef EXTRA_DEBUG_FEATURES
-#include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
-#endif
+#include "toolsmenu/UIRenderer.h"
 
 bool& CRenderer::ms_bRenderTunnels = *(bool*)0xB745C0;
 bool& CRenderer::ms_bRenderOutsideTunnels = *(bool*)0xB745C1;
@@ -437,10 +435,6 @@ void CRenderer::RenderFirstPersonVehicle() {
         if (bRestoreAlphaTest)
             RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(NULL));
     }
-
-#ifdef EXTRA_DEBUG_FEATURES
-    CollisionDebugModule::ProcessRender();
-#endif
 }
 
 // 0x553E40
@@ -600,9 +594,6 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
             }
 
             if (!entity->GetIsOnScreen() || entity->IsEntityOccluded()) {
-#ifdef EXTRA_DEBUG_FEATURES
-                ++COcclusionDebugModule::NumEntitiesSkipped;
-#endif
                 return RENDERER_CULLED;
             }
 
@@ -647,9 +638,6 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
 
                 if (!entity->GetIsOnScreen() || entity->IsEntityOccluded())
                 {
-#ifdef EXTRA_DEBUG_FEATURES
-                    ++COcclusionDebugModule::NumEntitiesSkipped;
-#endif
                     return RENDERER_CULLED;
                 }
 
@@ -986,11 +974,11 @@ void CRenderer::ConstructRenderList() {
 
     CPlayerPed* player = FindPlayerPed();
     if (player && player->m_nAreaCode == AREA_CODE_NORMAL_WORLD) {
-        float fGroundHeightZ = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
+        float fGroundHeightZ = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BB_BOTTOM);
         float fPlayerHeightZ = player->GetPosition().z;
 
         if (fPlayerHeightZ - fGroundHeightZ > 50.0f) {
-            fGroundHeightZ = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_TOP);
+            fGroundHeightZ = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BB_TOP);
             if (fPlayerHeightZ - fGroundHeightZ > 10.0f && FindPlayerVehicle()) {
                 ms_bInTheSky = true;
             }
@@ -1034,13 +1022,19 @@ void CRenderer::ScanWorld() {
     const float& width  = TheCamera.m_pRwCamera->viewWindow.x;
     const float& height = TheCamera.m_pRwCamera->viewWindow.y;
 
-    CVector frustumPoints[13];
+    CVector frustumPoints[13]{};
     frustumPoints[0] = CVector(0.0f, 0.0f, 0.0f);
+
     frustumPoints[1].x = frustumPoints[4].x = -(farPlane * width);
     frustumPoints[1].y = frustumPoints[2].y = farPlane * height;
+
     frustumPoints[2].x = frustumPoints[3].x = farPlane * width;
+
     frustumPoints[3].y = frustumPoints[4].y = -(farPlane * height);
+
     frustumPoints[1].z = frustumPoints[2].z = frustumPoints[3].z = frustumPoints[4].z = farPlane;
+
+    // Clear the rest of the array
     for (auto i = 5u; i < std::size(frustumPoints); i++) {
         frustumPoints[i] = CVector(0.0f, 0.0f, 0.0f);
     }
@@ -1095,14 +1089,19 @@ void CRenderer::ScanWorld() {
 
     points[0].x = CWorld::GetLodSectorfX(frustumPoints[0].x);
     points[0].y = CWorld::GetLodSectorfY(frustumPoints[0].y);
+
     points[1].x = CWorld::GetLodSectorfX(frustumPoints[1].x);
     points[1].y = CWorld::GetLodSectorfY(frustumPoints[1].y);
+
     points[2].x = CWorld::GetLodSectorfX(frustumPoints[2].x);
     points[2].y = CWorld::GetLodSectorfY(frustumPoints[2].y);
+
     points[3].x = CWorld::GetLodSectorfX(frustumPoints[3].x);
     points[3].y = CWorld::GetLodSectorfY(frustumPoints[3].y);
+
     points[4].x = CWorld::GetLodSectorfX(frustumPoints[4].x);
     points[4].y = CWorld::GetLodSectorfY(frustumPoints[4].y );
+
     CWorldScan::ScanWorld(points, (int)std::size(points), ScanBigBuildingList);
 }
 
@@ -1110,7 +1109,7 @@ void CRenderer::ScanWorld() {
 // 0x554C60
 int32 CRenderer::GetObjectsInFrustum(CEntity** outEntities, float farPlane, RwMatrix* transformMatrix)
 {
-    CVector frustumPoints[13];
+    CVector frustumPoints[13]{};
     const float& width = TheCamera.m_pRwCamera->viewWindow.x;
     const float& height = TheCamera.m_pRwCamera->viewWindow.y;
     frustumPoints[0] = CVector(0.0f, 0.0f, 0.0f);
@@ -1154,7 +1153,7 @@ void CRenderer::RequestObjectsInFrustum(RwMatrix* transformMatrix, int32 modelRe
     const float& width  = TheCamera.m_pRwCamera->viewWindow.x;
     const float& height = TheCamera.m_pRwCamera->viewWindow.y;
 
-    CVector frustumPoints[13];
+    CVector frustumPoints[13]{};
     frustumPoints[0] = CVector(0.0f, 0.0f, 0.0f);
     frustumPoints[1].x = frustumPoints[4].x = -(farPlane * width);
     frustumPoints[1].y = frustumPoints[2].y = farPlane * height;

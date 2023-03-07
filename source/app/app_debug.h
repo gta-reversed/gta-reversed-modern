@@ -1,24 +1,35 @@
 #pragma once
+#include "common.h"
 
-#define VERIFY_IMPL(expr, ...) expr
-#define VERIFY VERIFY_IMPL
+namespace notsa {
+namespace detail {
+static void VerifyMacroImpl(bool result) {
+    assert(result); // In release mode this won't do anything
+}
+};
+};
+
+#define VERIFY notsa::detail::VerifyMacroImpl
 
 #ifdef _DEBUG
 namespace notsa {
-static void DevPrintf(int lineno, const char* file, const char* fmt, ...) {
-    (void)printf("[%s @ %i]: ", file, lineno);
 
-    va_list vargs;
-    va_start(vargs, fmt);
-    (void)vprintf(fmt, vargs);
-    va_end(vargs);
+template<typename... Ts>
+static void DevPrint(int lineno, std::string_view file, std::string_view fmt, Ts&&... fmtArgs) {
+    const auto userFormat = std::vformat(fmt, std::make_format_args(std::forward<Ts>(fmtArgs)...));
+    std::cout << std::format("[{} @ {}] {}", fs::relative(file, SOURCE_PATH).string(), lineno, userFormat);
 
-    printf("\n");
+    if (fmt.back() != '\n') {
+        std::cout << std::endl;
+    }
 }
 };
-#define DEV_LOG(...) notsa::DevPrintf(__LINE__, __FILE__, ##__VA_ARGS__)
+// WARNING: Use std::format specifiers! Use LOG_PTR macro for pointer arguments.
+#define DEV_LOG(...) notsa::DevPrint(__LINE__, __FILE__, ##__VA_ARGS__)
+#define LOG_PTR(x) ((const void*)x)
 #else
-#define DEV_LOG(...)
+#define DEV_LOG(...) (void)0
+#define LOG_PTR(x)
 #endif
 
 #define PUSH_RENDERGROUP(str) 0

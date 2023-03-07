@@ -75,10 +75,11 @@ public:
             uint8 bIsBackfaceCulled : 1;
             uint8 bIsLod : 1;
 
+            // 1st byte
             union {
                 struct { // Atomic flags
                     uint8 bIsRoad : 1;
-                    uint8 : 1;
+                    uint8 bAtomicFlag0x200: 1;
                     uint8 bDontCollideWithFlyer : 1;
                     uint8 nSpecialType : 4;
                     uint8 bWetRoadReflection : 1;

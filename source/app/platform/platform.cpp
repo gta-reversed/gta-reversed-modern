@@ -4,8 +4,6 @@
 #include "VideoMode.h"
 #include "app/app.h"
 
-#define RSEVENT_SUCCEED(x) ((x) ? rsEVENTPROCESSED : rsEVENTERROR)
-
 void RsInjectHooks() {
     RH_ScopedNamespaceName("Rs");
     RH_ScopedCategoryGlobal();
@@ -36,7 +34,7 @@ void RsInjectHooks() {
     RH_ScopedGlobalInstall(RsErrorMessage, 0x619B00);
     RH_ScopedGlobalInstall(RsWarningMessage, 0x619B30);
     RH_ScopedGlobalInstall(RsEventHandler, 0x619B60);
-    RH_ScopedGlobalInstall(RsRwInitialize, 0x619C90, { .reversed = false });
+    RH_ScopedGlobalInstall(RsRwInitialize, 0x619C90);
 }
 
 static std::array<uint8, 256>& KeysShifted = *(std::array<uint8, 256>*)0x8D2D00;
@@ -108,25 +106,26 @@ int32 RsInputDeviceAttach(RsInputDeviceType type, RsInputEventHandler eventHandl
     case rsKEYBOARD:
         RsGlobal.keyboard.inputEventHandler = eventHandler;
         RsGlobal.keyboard.used = true;
-        return true;
+        break;
     case rsMOUSE:
         RsGlobal.mouse.inputEventHandler = eventHandler;
         RsGlobal.mouse.used = true;
-        return true;
+        break;
     case rsPAD:
         RsGlobal.pad.inputEventHandler = eventHandler;
         RsGlobal.pad.used = true;
-        return true;
+        break;
     default:
         return false;
     }
+
+    return true;
 }
 
 // 0x619510
 bool rsCommandLine(void* param) {
-    return plugin::CallAndReturn<bool, 0x619510, void*>(param);
-    // RsEventHandler(rsFILELOAD, param);
-    // return true;
+    RsEventHandler(rsFILELOAD, param);
+    return true;
 }
 
 // 0x619530
@@ -139,7 +138,7 @@ bool rsPreInitCommandLine(RwChar* arg) {
 }
 
 // 0x619560
-RsEventStatus RsKeyboardEventHandler(RsEvent event, void* param) {
+RsEventStatus RsKeyboardEventHandler(RsEvent event, void* param) { // Param should be `RsKeyCodes*` (so pass in a ptr to a `RsKeyCodes`)
     if (RsGlobal.keyboard.used) {
         return RsGlobal.keyboard.inputEventHandler(event, param);
     }
@@ -247,23 +246,15 @@ RwMemoryFunctions* psGetMemoryFunctions() {
 
 // 0x619C90
 bool RsRwInitialize(void* param) {
-    return plugin::CallAndReturn<bool, 0x619C90, void*>(param);
-
-    if (!RwEngineInit(psGetMemoryFunctions(), 0, rsRESOURCESDEFAULTARENASIZE)) {
+    if (!RwEngineInit(psGetMemoryFunctions(), 0, rsRESOURCESDEFAULTARENASIZE))
         return false;
-    }
 
     AppEventHandler(rsINITDEBUG, nullptr);
-
     psInstallFileSystem();
-
-    RsEventStatus es;
-    es = AppEventHandler(rsPLUGINATTACH, nullptr);
-    if (es != rsEVENTNOTPROCESSED && es == rsEVENTERROR)
+    if (!AppEventHandler(rsPLUGINATTACH, nullptr))
         return false;
 
-    es = AppEventHandler(rsINPUTDEVICEATTACH, nullptr);
-    if (es != rsEVENTNOTPROCESSED && es == rsEVENTERROR)
+    if (!AppEventHandler(rsINPUTDEVICEATTACH, nullptr))
         return false;
 
     RwEngineOpenParams openParams = {.displayID = param};
@@ -272,14 +263,15 @@ bool RsRwInitialize(void* param) {
         return false;
     }
 
-    es = AppEventHandler(rsSELECTDEVICE, param);
-    if (es == rsEVENTNOTPROCESSED || psSelectDevice() == 0) { // maybe wrong
-        RwEngineClose();
-        RwEngineTerm();
-        return false;
-    }
+    auto res = [&param] {
+        if (auto r = AppEventHandler(rsSELECTDEVICE, param); r != rsEVENTNOTPROCESSED) {
+            return r;
+        } else {
+            return (RsEventStatus)psSelectDevice();
+        }
+    }();
 
-    if (!RwEngineStart()) {
+    if (res == rsEVENTERROR || !RwEngineStart()) {
         RwEngineClose();
         RwEngineTerm();
         return false;

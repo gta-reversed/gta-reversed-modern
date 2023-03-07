@@ -31,25 +31,31 @@ char** GetVideoModeList() {
     assert(numVidModes != -1 && "Failed to get Video Modes");
 
     gVideoModes = (char**)CMemoryMgr::Calloc(numVidModes, sizeof(char*));
-        
+
     RwVideoMode videoMode{};
     for (auto modeId = 0u; modeId < numVidModes; modeId++) {
         VERIFY(RwEngineGetVideoModeInfo(&videoMode, modeId));
 
         gVideoModes[modeId] = nullptr;
         if ((videoMode.flags & rwVIDEOMODEEXCLUSIVE) == 0) {
-            DEV_LOG("Unavailable video mode id=%02d: %lu X %lu X %lu [reason: video mode not exclusive]", modeId, videoMode.width, videoMode.height, videoMode.depth);
+#ifdef VIDEO_MODE_LOGS
+            DEV_LOG("Unavailable video mode id={:02d}: {} X {} X {} [reason: video mode not exclusive]", modeId, videoMode.width, videoMode.height, videoMode.depth);
+#endif
             continue;
         }
 
         if (videoMode.width < APP_MINIMAL_WIDTH || videoMode.height < APP_MINIMAL_HEIGHT) {
-            DEV_LOG("Unavailable video mode id=%02d: %lu X %lu X %lu [reason: size]", modeId, videoMode.width, videoMode.height, videoMode.depth);
+#ifdef VIDEO_MODE_LOGS
+            DEV_LOG("Unavailable video mode id={:02d}: {} X {} X {} [reason: size]", modeId, videoMode.width, videoMode.height, videoMode.depth);
+#endif
             continue;
         }
 
         float fRatio = float(videoMode.height) / float(videoMode.width);
         if (!IS_FULLSCREEN_RATIO(fRatio) && !IS_WIDESCREEN_RATIO(fRatio)) {
-            DEV_LOG("Unavailable video mode id=%02d: %lu X %lu X %lu [reason: ratio %f]", modeId, videoMode.width, videoMode.height, videoMode.depth, fRatio);
+#ifdef VIDEO_MODE_LOGS
+            DEV_LOG("Unavailable video mode id={:02d}: {} X {} X {} [reason: ratio {:0.2f}]", modeId, videoMode.width, videoMode.height, videoMode.depth, fRatio);
+#endif
             continue;
         }
 
@@ -60,9 +66,11 @@ char** GetVideoModeList() {
         }
 
         gVideoModes[modeId] = (char*)CMemoryMgr::Calloc(100, sizeof(char));                                  // 100 chars
-        sprintf(gVideoModes[modeId], "%lu X %lu X %lu", videoMode.width, videoMode.height, videoMode.depth); // rwsprintf
+        sprintf_s(gVideoModes[modeId], 100 * sizeof(char), "%lu X %lu X %lu", videoMode.width, videoMode.height, videoMode.depth); // rwsprintf
 
-        DEV_LOG("Available video mode id=%02d: %s", modeId, gVideoModes[modeId]);
+#ifdef VIDEO_MODE_LOGS
+        DEV_LOG("Available video mode id={:02d}: {}", modeId, gVideoModes[modeId]);
+#endif
     }
 
     return gVideoModes;
@@ -84,7 +92,10 @@ bool FreeVideoModeList() {
 // 0x745C70
 void SetVideoMode(int32 mode) {
     assert(mode < RwEngineGetNumVideoModes());
-    DEV_LOG("Changing Video Mode to %d (%s)", mode, gVideoModes ? gVideoModes[mode] : "unknown");
+
+#ifdef VIDEO_MODE_LOGS
+    DEV_LOG("Changing Video Mode to {} ({})", mode, gVideoModes ? gVideoModes[mode] : "unknown");
+#endif
 
     RwD3D9ChangeVideoMode(mode);
     CPostEffects::SetupBackBufferVertex();
@@ -93,7 +104,7 @@ void SetVideoMode(int32 mode) {
 }
 
 // 0x745CA0
-bool IsVideoModeExclusive() {
+bool IsVideoModeExclusive() { // AKA isCurrentModeFullscreen
     RwVideoMode videoMode{};
     VERIFY(RwEngineGetVideoModeInfo(&videoMode, gCurrentVideoMode));
     return videoMode.flags & rwVIDEOMODEEXCLUSIVE;

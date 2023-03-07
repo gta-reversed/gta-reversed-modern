@@ -93,7 +93,7 @@ public:
     int32          field_7C;
     float          m_f80; // 80 and 84 volume related fields. See ::UpdateRadioVolumes
     float          m_f84;
-    tRadioSettings settings1;
+    tRadioSettings settings1; // TODO: Maybe just make an array out of this??
     tRadioSettings settings2;
     tRadioState    m_aRadioState[RADIO_COUNT];
     uint32         field_368;
@@ -159,7 +159,7 @@ public:
     void   RetuneRadio(int8 radioId);
 
     void  DisplayRadioStationName();
-    char* GetRadioStationName(RadioStationId id);
+    const char* GetRadioStationName(RadioStationId id);
     void  GetRadioStationNameKey(RadioStationId id, char* outStr);
     static bool IsVehicleRadioActive();
 

@@ -40,8 +40,10 @@ public:
     bool  IsFullyOpen();
 
     // NOTSA
-    void OpenFully()  { m_fAngle = m_fOpenAngle; }
-    void CloseFully() { m_fAngle = m_fClosedAngle; }
+    void    OpenFully()  { m_fAngle = m_fOpenAngle; }
+    void    CloseFully() { m_fAngle = m_fClosedAngle; }
+    CVector GetRotation() const;
+    void    UpdateFrameMatrix(CMatrix& mat);
 };
 
 VALIDATE_SIZE(CDoor, 0x18);

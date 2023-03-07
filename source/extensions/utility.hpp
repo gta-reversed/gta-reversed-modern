@@ -1,6 +1,18 @@
 #pragma once
 
+#include <memory>
+#include <initializer_list>
+
 namespace notsa {
+namespace rng = std::ranges;
+
+/*
+* Want to know something funny?
+* `std::initializer_list` is just a proxy object for a stack allocated array.
+* So, if you return one from a function you're dommed to be fucked :)
+* And best thing, it does allow copying, it has a fucking copy constructor for whatever reason
+* Lesson: Don't return `initializer_list`'s from functions
+*/
 
 /*!
 * @brief Call the given function on object destruction.
@@ -19,6 +31,14 @@ struct AutoCallOnDestruct {
 private:
     Fn m_fn;
 };
+
+constexpr auto IsFixBugs() {
+#ifdef FIX_BUGS
+    return true;
+#else
+    return false;
+#endif
+}
 
 /// Predicate to check if `value` is null
 template<typename T>
@@ -45,6 +65,105 @@ T_Ret FirstNonNull(R&& range) {
         ? *it
         : nullptr;
 }
+
+// https://stackoverflow.com/a/52667105
+template <typename T, std::size_t... Ds>
+struct mdarray_impl;
+
+template <typename T, std::size_t D>
+struct mdarray_impl<T, D> {
+    using type = std::array<T, D>;
+};
+
+template <typename T, std::size_t D, std::size_t... Ds>
+struct mdarray_impl<T, D, Ds...> {
+    using type = std::array<typename mdarray_impl<T, Ds...>::type, D>;
+};
+
+//! Multidimensional array - Represents a C array of with dimensions in the same order as specified here
+template <typename T, std::size_t... Ds>
+using mdarray = typename mdarray_impl<T, Ds...>::type;
+
+/*!
+* @arg value The value to search for in the range
+*
+* @brief Check if a range contains a value, uses `rng::find`. NOTE: If you plan on using the iterator, just use `rng::find` instead..
+*/
+template<rng::input_range R, class T, class Proj = std::identity>
+    requires std::indirect_binary_predicate<rng::equal_to, std::projected<rng::iterator_t<R>, Proj>, const T*>
+bool contains(R&& r, const T& value, Proj proj = {}) {
+    return rng::find(r, value, proj) != rng::end(r);
+}
+
+
+/*!
+* Helper (Of your fingers) - Reduces typing needed for Python style `value in {}`
+*/
+template<typename Y, typename T>
+bool contains(std::initializer_list<Y> r, const T& value) {
+    return contains(r, value, {});
+}
+
+/*!
+* @brief Similar to `std::remove_if`, but only removes the first element found (Unlike the former that removes all)
+*
+* @return Whenever an element was removed. If it was, you have to pop the last element from your container
+*/
+template <std::permutable I, std::sentinel_for<I> S, class T, class Proj = std::identity>
+    requires std::indirect_binary_predicate<rng::equal_to, std::projected<I, Proj>, const T*>
+constexpr bool remove_first(I first, S last, const T& value, Proj proj = {}) {
+    first = rng::find(std::move(first), last, value, proj);
+    if (first == last) {
+        return false;
+    }
+    else {
+        rng::move_backward(rng::next(first), last, std::prev(last)); // Shift to the left (removing the found element)
+        return true;
+    }
+}
+
+// We require `bidirectional_range`, because we have to use `std::prev`.
+// if for any reason we want to use `forward_range` only, I guess we gotta figure
+// out a different way of getting the pre-end iteartor
+
+//! @copydoc `remove_first`
+template <rng::bidirectional_range R, class T, class Proj = std::identity>
+    requires std::permutable<rng::iterator_t<R>>&& std::indirect_binary_predicate<rng::equal_to, std::projected<rng::iterator_t<R>, Proj>, const T*>
+constexpr bool remove_first(R&& r, const T& value, Proj proj = {}) {
+    return remove_first(rng::begin(r), rng::end(r), value, std::move(proj));
+}
+
+//! `std::ranges` like `accumulate` function => Hopefully to be replaced by an `std` implementation.
+template<rng::input_range R, typename T, typename FnOp = std::plus<>, class Proj = std::identity>
+T accumulate(R&& r, T init, Proj proj = {}, FnOp op = {}) {
+    for (const auto& v : r) {
+        init = std::invoke(op, init, std::invoke(proj, v));
+    }
+    return init;
+}
+
+//! Same as rng::min, but accepts a default value that is returned in case the range is empty (Which would result be UB for `rng::min`)
+template<rng::forward_range R, typename Pr = std::less<>, class Proj = std::identity>
+constexpr rng::range_value_t<R> min_default(R&& r, rng::range_value_t<R> defaultValue, Pr pr = {}, Proj proj = {}) {
+    if (rng::empty(r)) {
+        return std::move(defaultValue);
+    }
+    return rng::min(r, pr, proj);
+}
+
+/*!
+* @brief Helper functor - to be used as projection to `ranges` functions - to cast a value into another type.
+*
+* @tparam O - Type to cast to
+*/
+template<typename O>
+struct cast_to {
+    template<typename I>
+    O operator()(I&& input) {
+        return static_cast<O>(input);
+    }
+};
+
 
 /*!
 * @tparam Start     The number at which to start the iteration
@@ -84,5 +203,40 @@ static constexpr void IterateFunction(auto&& functor) {
         IterateFunction<Start + ChunkSize, Stop>(functor);
     }
 }
+
+//! Simple (not thread safe) singleton class. Instance created on first call to `GetSingleton()`.
+template<typename T>
+class Singleton {
+    static inline std::unique_ptr<T> s_instance{};
+public:
+    Singleton() = default;
+    Singleton(const Singleton&) = delete;
+    Singleton& operator=(const Singleton&) = delete;
+
+public:
+    //! Get current singleton instance (Create it if none)
+    static T& GetSingleton() {
+        if (!s_instance) {
+            CreateSingleton();
+        }
+        return *s_instance;
+    }
+
+    //! Destroy current instance and create new
+    static void ResetSingleton() {
+        DestroySingleton();
+        CreateSingleton();
+    }
+
+private:
+    static void CreateSingleton() {
+        assert(!s_instance);
+        s_instance = std::make_unique<T>();
+    }
+
+    static void DestroySingleton() {
+        s_instance.reset();
+    }
+};
 
 };

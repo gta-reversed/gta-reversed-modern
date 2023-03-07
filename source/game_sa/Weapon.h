@@ -39,6 +39,7 @@ enum class eWeaponSlot : uint32 {
     PARACHUTE,
     DETONATOR,
 };
+constexpr auto NUM_WEAPON_SLOTS = static_cast<size_t>(eWeaponSlot::DETONATOR) + 1u;
 
 class CPed;
 class CVehicle;
@@ -100,8 +101,8 @@ public:
     bool FireInstantHitFromCar(CVehicle* vehicle, bool leftSide, bool rightSide);
     void FireFromCar(CVehicle* vehicle, bool leftSide, bool rightSide);
     void FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehicle* vehicle, CEntity* owner);
-    bool FireInstantHit(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, CEntity* targetEntity, CVector* target, CVector* originForDriveBy, bool arg6, bool muzzle);
-    bool FireProjectile(CEntity* firingEntity, CVector* origin, CEntity* targetEntity, CVector* target, float force);
+    bool FireInstantHit(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, CEntity* targetEntity = nullptr, CVector* target = nullptr, CVector* originForDriveBy = nullptr, bool arg6 = false, bool muzzle = false);
+    bool FireProjectile(CEntity* firingEntity, CVector* origin, CEntity* targetEntity = nullptr, CVector* target = nullptr, float force = 0.f);
     bool FireM16_1stPerson(CEntity* owner);
     bool Fire(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, CEntity* targetEntity, CVector* target, CVector* originForDriveBy);
 
