@@ -392,7 +392,7 @@ bool psAlwaysOnTop(bool alwaysOnTop) {
     );
 }
 
-BOOL SelectVideoModeFullScreen800x600x32() {
+BOOL CheckDefaultVideoModeSupported() {
     const auto numVM = RwEngineGetNumVideoModes();
     for (; GcurSelVM < numVM; GcurSelVM++) { // TODO/NOTE: Why not set GcurSelVM = 0?
         const auto vm = RwEngineGetVideoModeInfo(GcurSelVM);
@@ -495,7 +495,7 @@ RwBool psSelectDevice() {
     if (!UseDefaultVM && !MultipleSubSystems) {
         const auto vmDisplay = FrontEndMenuManager.m_nDisplayVideoMode;
         if (!vmDisplay || !GetVideoModeList()[vmDisplay]) {
-            if (IsVMNotSelected && !SelectVideoModeFullScreen800x600x32()) {
+            if (IsVMNotSelected && !CheckDefaultVideoModeSupported()) {
                 return FALSE;
             }
         } else {
