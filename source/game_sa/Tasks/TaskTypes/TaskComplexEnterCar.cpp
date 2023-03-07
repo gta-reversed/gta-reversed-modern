@@ -22,40 +22,25 @@ void CTaskComplexEnterCar::InjectHooks() {
 }
 
 // 0x63A220
-CTaskComplexEnterCar::CTaskComplexEnterCar(CVehicle* targetVehicle, bool bAsDriver, bool bQuitAfterOpeningDoor, bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff) : CTaskComplex() {
-    m_nFlags                      = 0;
-    m_bAsDriver                   = bAsDriver;
-    m_bQuitAfterOpeningDoor       = bQuitAfterOpeningDoor;
-    m_bQuitAfterDraggingPedOut    = bQuitAfterDraggingPedOut;
-    m_bCarryOnAfterFallingOff     = bCarryOnAfterFallingOff;
-    m_pTargetVehicle              = targetVehicle;
-    m_nTargetDoor                 = 0;
-    m_nTargetDoorOppositeToFlag   = 0;
-    m_nTargetSeat                 = 0;
-    m_nDraggedPedDownTime         = 0;
-    m_nMoveState                  = PEDMOVE_RUN;
-    m_nNumGettingInSet            = 0;
-    m_nCamMovementChoice          = 0;
-    m_pTaskUtilityLineUpPedWithCar= nullptr;
-    m_bIsAborting                 = false;
-    m_pDraggedPed                 = nullptr;
-    m_nDoorFlagsSet               = 0;
-    m_fCruiseSpeed                = -1.0f;
-    //m_nEnterCarStartTime          = 0; // NOTSA
-
-    CEntity::SafeRegisterRef(m_pTargetVehicle);
+CTaskComplexEnterCar::CTaskComplexEnterCar(CVehicle* targetVehicle, bool bAsDriver, bool bQuitAfterOpeningDoor, bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff) :
+    m_bAsDriver{bAsDriver},
+    m_bQuitAfterOpeningDoor{bQuitAfterOpeningDoor},
+    m_bQuitAfterDraggingPedOut{bQuitAfterDraggingPedOut},
+    m_bCarryOnAfterFallingOff{bCarryOnAfterFallingOff},
+    m_car{targetVehicle}
+{
+    CEntity::SafeRegisterRef(m_car);
 }
 
 // 0x63DFA0
 CTaskComplexEnterCar::~CTaskComplexEnterCar() {
-    CEntity::SafeCleanUpRef(m_pTargetVehicle);
+    delete m_lineUpUtil;
 
-    delete m_pTaskUtilityLineUpPedWithCar;
-    if (!m_pTargetVehicle)
-        return;
-
-    m_pTargetVehicle->m_nNumGettingIn -= m_nNumGettingInSet;
-    m_pTargetVehicle->ClearGettingInFlags(m_nDoorFlagsSet);
+    CEntity::SafeCleanUpRef(m_car);
+    if (m_car) {
+        m_car->m_nNumGettingIn -= m_numGettingInSet;
+        m_car->ClearGettingInFlags(m_doorFlagsSet);
+    }
 }
 
 // 0x63A730
@@ -96,7 +81,7 @@ CVector CTaskComplexEnterCar::GetTargetPos() {
 
 // 0x63A690
 CVehicle* CTaskComplexEnterCar::GetCameraAvoidVehicle() {
-    if (m_pTargetVehicle) {
+    if (m_car) {
         if (const auto st = GetSubTask()) {
             switch (st->GetTaskType()) {
             case TASK_COMPLEX_LEAVE_CAR:
@@ -115,7 +100,7 @@ CVehicle* CTaskComplexEnterCar::GetCameraAvoidVehicle() {
             case TASK_SIMPLE_CAR_ALIGN:
             case TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER:
             case TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER:
-                return m_pTargetVehicle;
+                return m_car;
             }
         }
     }

@@ -2,11 +2,12 @@
 
 #include "Camera.h"
 
+#include "TaskSimpleGangDriveBy.h"
 #include "TaskSimpleHoldEntity.h"
 #include "TaskSimpleDuck.h"
 #include "Hud.h"
 
-float& CCamera::m_f3rdPersonCHairMultY = *reinterpret_cast<float*>(0xB6EC10);
+float& CCamera::m_f3rdPersonCHairMultY = *reinterpret_cast<float*>(0xB6EC10); ///< Where the player will be on the screen in relative coords when quick aiming
 float& CCamera::m_f3rdPersonCHairMultX = *reinterpret_cast<float*>(0xB6EC14);
 float& CCamera::m_fMouseAccelVertical = *reinterpret_cast<float*>(0xB6EC18);
 float& CCamera::m_fMouseAccelHorzntl = *reinterpret_cast<float*>(0xB6EC1C);
@@ -66,14 +67,14 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(Get_Just_Switched_Status, 0x50AE10);
     RH_ScopedInstall(GetGameCamPosition, 0x50AE50);
 
-    RH_ScopedInstall(Constructor, 0x51A450, { .reversed = false });
+    RH_ScopedInstall(Constructor, 0x51A450);
     RH_ScopedInstall(InitCameraVehicleTweaks, 0x50A3B0);
     RH_ScopedInstall(ApplyVehicleCameraTweaks, 0x50A480);
     RH_ScopedInstall(CamShake, 0x50A9F0);
     RH_ScopedInstall(GetScreenRect, 0x50AB50);
     RH_ScopedInstall(Enable1rstPersonWeaponsCamera, 0x50AC10);
     RH_ScopedInstall(Fade, 0x50AC20);
-    RH_ScopedInstall(Find3rdPersonQuickAimPitch, 0x50AD40, { .reversed = false });
+    RH_ScopedInstall(Find3rdPersonQuickAimPitch, 0x50AD40);
     RH_ScopedInstall(GetCutSceneFinishTime, 0x50AD90);
     RH_ScopedInstall(GetScreenFadeStatus, 0x50AE20);
     RH_ScopedInstall(GetLookingLRBFirstPerson, 0x50AE60);
@@ -83,21 +84,21 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(CalculateMirroredMatrix, 0x50B380);
     RH_ScopedInstall(DealWithMirrorBeforeConstructRenderList, 0x50B510);
     RH_ScopedInstall(ProcessFade, 0x50B5D0);
-    RH_ScopedInstall(ProcessMusicFade, 0x50B6D0, { .reversed = false });
+    RH_ScopedInstall(ProcessMusicFade, 0x50B6D0);
     RH_ScopedInstall(Restore, 0x50B930);
     RH_ScopedInstall(RestoreWithJumpCut, 0x50BAB0);
     RH_ScopedInstall(SetCamCutSceneOffSet, 0x50BD20);
-    RH_ScopedInstall(SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString, 0x50BDA0, { .reversed = false });
+    RH_ScopedInstall(SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString, 0x50BDA0);
     RH_ScopedInstall(SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString, 0x50BE30);
     RH_ScopedInstall(Using1stPersonWeaponMode, 0x50BFF0);
     RH_ScopedInstall(SetParametersForScriptInterpolation, 0x50C030);
     RH_ScopedInstall(SetPercentAlongCutScene, 0x50C070);
     RH_ScopedInstall(SetZoomValueFollowPedScript, 0x50C160);
-    RH_ScopedInstall(SetZoomValueCamStringScript, 0x50C1B0, { .reversed = false });
-    RH_ScopedInstall(UpdateTargetEntity, 0x50C360, { .reversed = false });
-    RH_ScopedInstall(TakeControl, 0x50C7C0, { .reversed = false });
+    RH_ScopedInstall(SetZoomValueCamStringScript, 0x50C1B0);
+    RH_ScopedInstall(UpdateTargetEntity, 0x50C360);
+    RH_ScopedInstall(TakeControl, 0x50C7C0);
     RH_ScopedInstall(TakeControlNoEntity, 0x50C8B0);
-    RH_ScopedInstall(TakeControlAttachToEntity, 0x50C910, { .reversed = false });
+    RH_ScopedInstall(TakeControlAttachToEntity, 0x50C910);
     RH_ScopedInstall(TakeControlWithSpline, 0x50CAE0);
     RH_ScopedInstall(SetCamCollisionVarDataSet, 0x50CB60);
     RH_ScopedInstall(SetNearClipBasedOnPedCollision, 0x50CB90, { .reversed = false });
@@ -118,13 +119,13 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(InitialiseScriptableComponents, 0x50D2D0);
     RH_ScopedInstall(DrawBordersForWideScreen, 0x514860);
     RH_ScopedInstall(Find3rdPersonCamTargetVector, 0x514970, { .reversed = false });
-    RH_ScopedInstall(CalculateGroundHeight, 0x514B80, { .reversed = false });
+    RH_ScopedInstall(CalculateGroundHeight, 0x514B80);
     RH_ScopedInstall(CalculateFrustumPlanes, 0x514D60, { .reversed = false });
     RH_ScopedInstall(CalculateDerivedValues, 0x5150E0, { .reversed = false });
     RH_ScopedInstall(ImproveNearClip, 0x516B20, { .reversed = false });
     RH_ScopedInstall(SetCameraUpForMirror, 0x51A560);
     RH_ScopedInstall(RestoreCameraAfterMirror, 0x51A5A0);
-    RH_ScopedInstall(ConeCastCollisionResolve, 0x51A5D0, { .reversed = false });
+    RH_ScopedInstall(ConeCastCollisionResolve, 0x51A5D0);
     RH_ScopedInstall(TryToStartNewCamMode, 0x51E560, { .reversed = false });
     RH_ScopedInstall(CameraColDetAndReact, 0x520190, { .reversed = false });
     RH_ScopedInstall(CamControl, 0x527FA0, { .reversed = false });
@@ -164,177 +165,63 @@ CCamera::~CCamera() {
 
 // 0x5BC520
 void CCamera::Init() {
-    return plugin::CallMethod<0x5BC520, CCamera*>(this);
-
-    memset(&m_bAboveGroundTrainNodesLoaded, 0, 0xD60u);
-    m_pRwCamera = nullptr;
     InitialiseScriptableComponents();
-    m_bPlayerWasOnBike = false;
-    m_b1rstPersonRunCloseToAWall = false;
-    m_fPositionAlongSpline = 0.0f;
-    m_bCameraJustRestored = false;
-
+    
     for (auto& camera : m_aCams) {
         camera.Init();
     }
 
-    m_bEnable1rstPersonCamCntrlsScript = false;
-    m_bAllow1rstPersonWeaponsCamera = false;
-    m_bCooperativeCamMode = false;
-    m_bAllowShootingWith2PlayersInCar = true;
-    m_bVehicleSuspenHigh = false;
-
-    m_aCams[0].m_nMode = MODE_FOLLOWPED;
-    m_aCams[0].m_fTargetCloseInDist = 2.0837801f - 1.85f;
-    m_aCams[0].m_fMinRealGroundDist = 1.85f;
-    m_aCams[0].m_fTargetZoomGroundOne = -0.55f;
-    m_aCams[0].m_fTargetZoomGroundTwo = 1.5f;
-    m_aCams[0].m_fTargetZoomGroundThree = 3.6f;
-    m_aCams[0].m_fTargetZoomOneZExtra = 0.06f;
-    m_aCams[0].m_fTargetZoomTwoZExtra = -0.1f;
-    m_aCams[0].m_fTargetZoomTwoInteriorZExtra = 0.0f;
-    m_aCams[0].m_fTargetZoomThreeZExtra = -0.07f;
-    m_aCams[0].m_fTargetZoomZCloseIn = 0.90040702f;
-
-    m_aCams[0].m_pCamTargetEntity = nullptr;
-    m_aCams[0].m_fCamBufferedHeight = 0.0f;
-    m_aCams[0].m_fCamBufferedHeightSpeed = 0.0f;
-    m_aCams[0].m_bCamLookingAtVector = false;
-    m_aCams[0].m_fPlayerVelocity = 0.0f;
-
-    m_aCams[1].m_nMode = MODE_FOLLOWPED;
-    m_aCams[1].m_pCamTargetEntity = nullptr;
-    m_aCams[1].m_fCamBufferedHeight = 0.0f;
-    m_aCams[1].m_fCamBufferedHeightSpeed = 0.0f;
-    m_aCams[1].m_bCamLookingAtVector = false;
-    m_aCams[1].m_fPlayerVelocity = 0.0f;
-
-    m_aCams[2].m_pCamTargetEntity = nullptr;
-    m_aCams[2].m_bCamLookingAtVector = false;
-    m_aCams[2].m_fPlayerVelocity = 0.0f;
-
-    m_bMoveCamToAvoidGeom = false;
-    ClearPlayerWeaponMode();
-    m_bInATunnelAndABigVehicle = false;
-
-    m_bHeadBob = false;
-    m_fFractionInterToStopMoving = 0.25f;
-    m_fFractionInterToStopCatchUp = 0.75f;
-    m_fGaitSwayBuffer = 0.85f;
-    m_bScriptParametersSetForInterp = false;
-    m_nCamShakeStart = 0;
-    m_fCamShakeForce = 0.0f;
-    m_nModeObbeCamIsInForCar = 30;
-    m_bIgnoreFadingStuffForMusic = false;
-    m_bWaitForInterpolToFinish = false;
-
-    m_pToGarageWeAreIn = nullptr;
-    m_pToGarageWeAreInForHackAvoidFirstPerson = nullptr;
-    m_bPlayerIsInGarage = false;
-    m_bJustCameOutOfGarage = false;
-
-    m_fNearClipScript = 0.9f;
-    m_bUseNearClipScript = false;
-    m_bDoingSpecialInterp = false;
-    m_bBelowGroundTrainNodesLoaded = false;
-
-    m_nModeForTwoPlayersSeparateCars = MODE_TWOPLAYER_SEPARATE_CARS;
-    m_nModeForTwoPlayersSameCarShootingAllowed = MODE_TWOPLAYER_IN_CAR_AND_SHOOTING;
-    m_nModeForTwoPlayersSameCarShootingNotAllowed = MODE_BEHINDCAR;
-    m_nModeForTwoPlayersNotBothInCar = MODE_TWOPLAYER;
-
-    m_bWideScreenOn = false;
-    m_fFOV_Wide_Screen = 0.0f;
-    m_bRestoreByJumpCut = false;
-
-    m_nCarZoom = 2;
-    m_nPedZoom = 2;
-
-    m_fCarZoomSmoothed = 0.0f;
-    m_fCarZoomTotal = 0.0f;
-    m_fCarZoomBase = 0.0f;
-    m_fPedZoomSmoothed = 0.0f;
-    m_fPedZoomTotal = 0.0f;
-    m_fPedZoomBase = 0.0f;
-    if (FindPlayerVehicle()) {
-        m_pTargetEntity = FindPlayerVehicle();
-    } else {
-        m_pTargetEntity = FindPlayerPed();
+    {
+        auto& cam = m_aCams[0];
+        cam.m_nMode = MODE_FOLLOWPED;
+        cam.m_fTargetCloseInDist = 2.0837801f - 1.85f;
+        cam.m_fMinRealGroundDist = 1.85f;
+        cam.m_fTargetZoomGroundOne = -0.55f;
+        cam.m_fTargetZoomGroundTwo = 1.5f;
+        cam.m_fTargetZoomGroundThree = 3.6f;
+        cam.m_fTargetZoomOneZExtra = 0.06f;
+        cam.m_fTargetZoomTwoZExtra = -0.1f;
+        cam.m_fTargetZoomTwoInteriorZExtra = 0.0f;
+        cam.m_fTargetZoomThreeZExtra = -0.07f;
+        cam.m_fTargetZoomZCloseIn = 0.90040702f;
+        cam.m_pCamTargetEntity = nullptr;
+        cam.m_fCamBufferedHeight = 0.0f;
+        cam.m_fCamBufferedHeightSpeed = 0.0f;
+        cam.m_bCamLookingAtVector = false;
+        cam.m_fPlayerVelocity = 0.0f;
     }
+
+    {
+        auto& cam = m_aCams[1];
+        cam.m_nMode = MODE_FOLLOWPED;
+        cam.m_pCamTargetEntity = nullptr;
+        cam.m_fCamBufferedHeight = 0.0f;
+        cam.m_fCamBufferedHeightSpeed = 0.0f;
+        cam.m_bCamLookingAtVector = false;
+        cam.m_fPlayerVelocity = 0.0f;
+    }
+
+    {
+        auto& cam = m_aCams[2];
+        cam.m_pCamTargetEntity = nullptr;
+        cam.m_bCamLookingAtVector = false;
+        cam.m_fPlayerVelocity = 0.0f;
+    }
+
+    ClearPlayerWeaponMode();
+
+    m_pTargetEntity = FindPlayerEntity();
     CEntity::SafeRegisterRef(m_pTargetEntity);
 
-    m_bInitialNodeFound = false;
-    m_fScreenReductionPercentage = 0.0f;
-    m_fScreenReductionSpeed = 0.0f;
-    m_bWideScreenOn = false;
-    m_bWantsToSwitchWidescreenOff = false;
-    m_bWorldViewerBeingUsed = false;
-    m_fPlayerExhaustion = 1.0f;
-    m_fPedOrientForBehindOrInFront = 0.0f;
-
     if (!FrontEndMenuManager.m_bStartGameLoading) {
-        m_bFading = false;
         CDraw::FadeValue = 0;
-        m_fFadeAlpha = 0.0f;
-        m_bMusicFading = false;
-        m_fTimeToFadeMusic = 0.0f;
-        m_fEffectsFaderScalingFactor = 0.0f;
         m_fMouseAccelVertical = 0.0015f;
     }
-
-    if (FrontEndMenuManager.m_bStartGameLoading)
-        m_fTimeToFadeMusic = 0.0f;
-
-    m_bStartingSpline = false;
-    m_nTypeOfSwitch = eSwitchType::INTERPOLATION;
-    m_bUseScriptZoomValuePed = false;
-    m_bUseScriptZoomValueCar = false;
-    m_fPedZoomValueScript = 0.0f;
-    m_fCarZoomValueScript = 0.0f;
-    m_bUseSpecialFovTrain = false;
-    m_fFovForTrain = 70.0f;
-    m_nModeToGoTo = MODE_FOLLOWPED;
-    m_bJust_Switched = false;
-    m_bUseTransitionBeta = false;
-    m_mCameraMatrix.SetScale(1.0f);
-    m_bTargetJustBeenOnTrain = false;
-    m_bInitialNoNodeStaticsSet = false;
-    m_nLongestTimeInMill = 5000;
-    m_nTimeLastChange = 0;
-    m_bIdleOn = false;
-    m_nTimeWeLeftIdle_StillNoInput = 0;
-    m_nTimeWeEnteredIdle = 0;
-    m_fLODDistMultiplier = 1.0f;
-    m_bCamDirectlyBehind = false;
-    m_bCamDirectlyInFront = false;
-    m_nMotionBlur = 0;
-    m_bGarageFixedCamPositionSet = false;
+    
     SetMotionBlur(255, 255, 255, 0, 0);
-    m_bCullZoneChecksOn = false;
-    m_bFailedCullZoneTestPreviously = false;
-    m_nCheckCullZoneThisNumFrames = 6;
-    m_nZoneCullFrameNumWereAt = 0;
-    m_fCameraAverageSpeed = 0.0f;
-    m_fCameraSpeedSoFar = 0.0f;
-
-    m_vecPreviousCameraPosition = CVector{};
-
-    m_nWorkOutSpeedThisNumFrames = 4;
-    m_nNumFramesSoFar = 0;
-    m_bJustInitialized = true;
-    m_bTransitionState = false;
-
-    m_nTimeTransitionStart = 0;
-
-    m_bLookingAtPlayer = true;
-    m_bLookingAtVector = false;
 
     m_f3rdPersonCHairMultX = 0.53f;
     m_f3rdPersonCHairMultY = 0.4f;
-
-    m_fAvoidTheGeometryProbsTimer = 0.0f;
-    m_nAvoidTheGeometryProbsDirn = 0;
-
     gPlayerPedVisible = 1;
     m_bResetOldMatrix = true;
 }
@@ -499,16 +386,18 @@ float CCamera::FindCamFOV() {
     return m_aCams[m_nActiveCam].m_fFOV;
 }
 
-// 0x50AD40
+/*!
+* @addr 0x50AD40
+* @return Rotation in radians at which the gun should point at, relative to the camera's vertical angle
+*/
 float CCamera::Find3rdPersonQuickAimPitch() {
-    return plugin::CallMethodAndReturn<float, 0x50AD40, CCamera*>(this);
-
     const auto& cam = m_aCams[m_nActiveCam];
-    const auto radians = DegreesToRadians(cam.m_fFOV / 2.0f);
-    const auto tan1  = std::tan(radians) * (0.5f - m_f3rdPersonCHairMultY + 0.5f - m_f3rdPersonCHairMultY) * (1.0f / CDraw::ms_fAspectRatio);
-    const auto atan1 = std::atan2(tan1, 1.0f);
-    const auto pitch = atan1 + cam.m_fVerticalAngle;
-    return -pitch;
+
+    // https://mathworld.wolfram.com/images/eps-svg/SOHCAHTOA_500.svg
+    const auto adjacent = (0.5f - m_f3rdPersonCHairMultY) * 2.f;
+    const auto opposite = std::tan(RWDEG2RAD(cam.m_fFOV / 2.0f)) * adjacent;
+    const auto relAngle = cam.m_fVerticalAngle - std::atan(opposite / CDraw::ms_fAspectRatio);
+    return -relAngle; // Flip it
 }
 
 // 0x50AD90
@@ -590,25 +479,25 @@ int32 CCamera::GetLookDirection() {
 }
 
 // 0x50AF00
-void CCamera::GetArrPosForVehicleType(eVehicleType type, int32& arrPos) {
+bool CCamera::GetArrPosForVehicleType(eVehicleType type, int32& arrPos) {
     switch (type) {
     case VEHICLE_TYPE_MTRUCK:
         arrPos = 0;
-        break;
+        return true;
     case VEHICLE_TYPE_QUAD:
         arrPos = 1;
-        break;
+        return true;
     case VEHICLE_TYPE_HELI:
         arrPos = 2;
-        break;
+        return true;
     case VEHICLE_TYPE_PLANE:
         arrPos = 4;
-        break;
+        return true;
     case VEHICLE_TYPE_BOAT:
         arrPos = 3;
-        break;
+        return true;
     default:
-        break;
+        return false;
     }
 }
 
@@ -619,7 +508,7 @@ float CCamera::GetPositionAlongSpline() const {
 
 // 0x516B00
 float CCamera::GetRoughDistanceToGround() {
-    return m_aCams[m_nActiveCam].m_vecSource.z - CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
+    return m_aCams[m_nActiveCam].m_vecSource.z - CalculateGroundHeight(eGroundHeightType::ENTITY_BB_BOTTOM);
 }
 
 // 0x50AFA0
@@ -839,7 +728,16 @@ void CCamera::SetCameraDirectlyInFrontForFollowPed_CamOnAString() {
 // unused
 // 0x50BDA0
 void CCamera::SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString(CPed* targetPed) {
-    return plugin::CallMethod<0x50BDA0, CCamera*, CPed*>(this, targetPed);
+    if (!targetPed) {
+        return;
+    }
+
+    m_bCamDirectlyBehind = true;
+    m_bLookingAtPlayer = false;
+
+    TheCamera.m_pTargetEntity = targetPed;
+    CEntity::ChangeEntityReference(GetActiveCamera().m_pCamTargetEntity, targetPed);
+    m_fPedOrientForBehindOrInFront = targetPed->GetHeading();
 }
 
 // 0x50BE30
@@ -983,33 +881,28 @@ void CCamera::SetZoomValueFollowPedScript(int16 zoomMode) {
 // zoomMode : 0- ZOOM_ONE , 1- ZOOM_TWO , 2- ZOOM_THREE
 // 0x50C1B0
 void CCamera::SetZoomValueCamStringScript(int16 zoomMode) {
-    return plugin::CallMethod<0x50C1B0, CCamera*, int16>(this, zoomMode);
-
-    static constexpr float ZOOM_ONE_DISTANCE_ptr[]   = { +1.0f, +1.4f, +0.65f, 1.90f, +6.49f }; // 0x8CC3F4
-    static constexpr float ZOOM_TWO_DISTANCE_ptr[]   = { +6.0f, +6.0f, +15.9f, 15.9f, +15.0f }; // 0x8CC408
-    static constexpr float ZOOM_THREE_DISTANCE_ptr[] = { -1.0f, -0.2f, -3.20f, 0.05f, -2.41f }; // 0x8CC3E0
-
     auto entity = m_aCams[0].m_pCamTargetEntity;
-    if (entity->m_nStatus == STATUS_SIMPLE) {
-        int32 arrPos = 0;
-        auto appearance = static_cast<eVehicleType>(entity->AsVehicle()->GetVehicleAppearance());
-        GetArrPosForVehicleType(appearance, arrPos);
-        switch (zoomMode) {
-        case 1:
-            m_fCarZoomValueScript = ZOOM_ONE_DISTANCE_ptr[arrPos];
-            break;
-        case 2:
-            m_fCarZoomValueScript = ZOOM_TWO_DISTANCE_ptr[arrPos];
-            break;
-        default:
-            m_fCarZoomValueScript = ZOOM_THREE_DISTANCE_ptr[arrPos];
-            break;
-        }
-        m_bUseScriptZoomValueCar = true;
-        return;
-    }
 
-    SetZoomValueFollowPedScript(zoomMode);
+    if (entity->m_nStatus == STATUS_SIMPLE) {
+        int32 arrPos{};
+        VERIFY(GetArrPosForVehicleType(static_cast<eVehicleType>(entity->AsVehicle()->GetVehicleAppearance()), arrPos));
+        m_fCarZoomValueScript = [zoomMode]{
+            switch (zoomMode) {
+            case 0:
+                return std::array{ -1.0f, -0.2f, -3.20f, 0.05f, -2.41f }; // 0x8CC3E0
+            case 1:
+                return std::array{ +1.0f, +1.4f, +0.65f, 1.90f, +6.49f }; // 0x8CC3F4
+            case 2:
+                return std::array{ +6.0f, +6.0f, +15.9f, 15.9f, +15.0f }; // 0x8CC408
+            default:
+                NOTSA_UNREACHABLE("Unexpected zoom mode: {}", zoomMode);
+            }
+        }()[arrPos];
+    
+        m_bUseScriptZoomValueCar = true;
+    } else {
+        SetZoomValueFollowPedScript(zoomMode);
+    }
 }
 
 // 0x50C260
@@ -1045,12 +938,150 @@ void CCamera::StoreValuesDuringInterPol(CVector* sourceDuringInter, CVector* tar
 
 // 0x50C360
 void CCamera::UpdateTargetEntity() {
-    plugin::CallMethod<0x50C360, CCamera*>(this);
+    m_bPlayerWasOnBike = m_pTargetEntity && m_pTargetEntity->IsVehicle() && m_pTargetEntity->AsVehicle()->m_vecMoveSpeed.SquaredMagnitude() > 0.3f;
+
+    const auto player = FindPlayerPed();
+    assert(player);
+
+    auto something{ true };
+    if (m_nWhoIsInControlOfTheCamera == 2) {
+        m_nModeObbeCamIsInForCar = m_nModeObbeCamIsInForCar;
+        switch (m_nModeObbeCamIsInForCar) {
+        case 8:
+        case 7: {
+            if (player->m_nPedState != PEDSTATE_ARRESTED) {
+                something = false;
+            }
+
+            if (!FindPlayerVehicle()) {
+                CEntity::ChangeEntityReference(m_pTargetEntity, player);
+            }
+
+            break;
+        }
+        }
+    }
+
+    if (!m_bLookingAtPlayer && !something || m_bTransitionState) {
+        if (m_pTargetEntity) {
+            if (!m_bTargetJustBeenOnTrain) {
+                return;
+            }
+        }
+        
+    }
+
+    bool playerDoingSomethingWhileDriveBy{};
+    if ([&, this]() { // Check is player doing drive-by
+        if (!FindPlayerVehicle()) {
+            return true;
+        }
+
+        if (!CGameLogic::IsCoopGameGoingOn()) {
+            if (player->GetTaskManager().GetSimplestActiveTaskAs<CTaskSimpleGangDriveBy>()) {
+                return true;
+            }
+        }
+
+        return false;
+    }()) {
+        CEntity::ChangeEntityReference(m_pTargetEntity, player);
+
+        playerDoingSomethingWhileDriveBy = [this, player] {
+            switch (player->m_nPedState) {
+            case PEDSTATE_ENTER_CAR:
+            case PEDSTATE_CARJACK:
+            case PEDSTATE_OPEN_DOOR:
+                return true;
+            }
+            return false;
+        }();
+
+        if (!playerDoingSomethingWhileDriveBy) {
+            auto& cam = GetActiveCam();
+            if (cam.m_pCamTargetEntity != m_pTargetEntity) {
+                CEntity::ChangeEntityReference(cam.m_pCamTargetEntity, m_pTargetEntity);
+            }
+        }
+    } else {
+        CEntity::ChangeEntityReference(m_pTargetEntity, FindPlayerVehicle());
+    }
+
+    const auto canEnterCar = player && player->m_pVehicle && player->m_pVehicle->CanPedOpenLocks(player); // Inverted this variable
+
+    if (canEnterCar && player->m_nPedState == PEDSTATE_ENTER_CAR && !playerDoingSomethingWhileDriveBy) {
+        if (m_nCarZoom) {
+            CEntity::ChangeEntityReference(m_pTargetEntity, FindPlayerEntity());
+        }
+    }
+
+    if (canEnterCar) {
+        switch (player->m_nPedState) {
+        case PEDSTATE_CARJACK:
+        case PEDSTATE_OPEN_DOOR: {
+            if (!playerDoingSomethingWhileDriveBy) {
+                if (m_nCarZoom) {
+                    CEntity::ChangeEntityReference(m_pTargetEntity, FindPlayerEntity());
+                }
+            }
+
+            if (!FindPlayerVehicle()) {
+                CEntity::ChangeEntityReference(m_pTargetEntity, player);
+            }
+        }
+        }
+    }
+
+    switch (player->m_nPedState) {
+    case PEDSTATE_EXIT_CAR:
+    case PEDSTATE_DRAGGED_FROM_CAR:
+        CEntity::ChangeEntityReference(m_pTargetEntity, player);
+    }
+
+    if (m_pTargetEntity->IsVehicle()) {
+        if (m_nCarZoom == 0) {
+            if (player->m_nPedState == PEDSTATE_ARRESTED) {
+                CEntity::ChangeEntityReference(m_pTargetEntity, player);
+            }
+        }
+    }
 }
 
 // 0x50C7C0
 void CCamera::TakeControl(CEntity* target, eCamMode modeToGoTo, eSwitchType switchType, int32 whoIsInControlOfTheCamera) {
-    plugin::CallMethod<0x50C7C0, CCamera*, CEntity*, eCamMode, eSwitchType, int32>(this, target, modeToGoTo, switchType, whoIsInControlOfTheCamera);
+    if (!m_bCinemaCamera) {
+        if (whoIsInControlOfTheCamera == 2 && m_nWhoIsInControlOfTheCamera == 1) {
+            return;
+        }
+    }
+
+    const auto [newGoToMode, newTargetEntity] = [&, this]() -> std::tuple<eCamMode, CEntity*>{
+        if (target) {
+            return {
+                [&, this] {
+                    if (modeToGoTo == MODE_NONE) {
+                        switch (target->m_nType) {
+                        case ENTITY_TYPE_PED:
+                            return MODE_FOLLOWPED;
+                        case ENTITY_TYPE_VEHICLE:
+                            return MODE_CAM_ON_A_STRING;
+                        }
+                    }
+                    return modeToGoTo;
+                }(),
+                target
+            };
+        }
+
+        return { modeToGoTo, FindPlayerEntity() };
+    }();
+
+    CEntity::ChangeEntityReference(m_pTargetEntity, newTargetEntity);
+    m_nModeToGoTo = newGoToMode;
+
+    m_nMusicFadingDirection = (eFadeFlag)switchType; // TODO: Investigate, this looks sus
+    m_bLookingAtPlayer = m_bLookingAtVector = false;
+    m_bStartInterScript = true;
 }
 
 // 0x50C8B0
@@ -1191,14 +1222,7 @@ bool CCamera::IsExtraEntityToIgnore(CEntity* entity) {
     if (m_nExtraEntitiesCount <= 0) {
         return false;
     }
-
-    for (auto& extraEntity : m_pExtraEntity) {
-        if (extraEntity == entity) {
-            return true;
-        }
-    }
-
-    return false;
+    return notsa::contains(m_pExtraEntity, entity);
 }
 
 // 0x420C40
@@ -1206,9 +1230,9 @@ bool CCamera::IsSphereVisible(const CVector& origin, float radius, RwMatrix* tra
     return plugin::CallMethodAndReturn<bool, 0x420C40, CCamera*, const CVector&, float, RwMatrix*>(this, origin, radius, transformMatrix);
 }
 
-// 0x420D40
+// 0x420D40 - NOTE: Function has no hook
 bool CCamera::IsSphereVisible(const CVector& origin, float radius) {
-    return plugin::CallMethodAndReturn<bool, 0x420D40, CCamera*, const CVector&, float>(this, origin, radius);
+    return IsSphereVisible(origin, radius, (RwMatrix*)&m_mMatInverse) || (m_bMirrorActive && IsSphereVisible(origin, radius, (RwMatrix*)&m_mMatMirrorInverse));
 }
 
 // 0x50CEB0
@@ -1333,37 +1357,34 @@ void CCamera::ProcessFade() {
 
 // 0x50B6D0
 void CCamera::ProcessMusicFade() {
-    return plugin::CallMethod<0x50B6D0, CCamera*>(this);
-
     if (!m_bMusicFading)
         return;
 
     if (m_fTimeToWaitToFadeMusic <= 0.0f) {
-        if (m_nModeToGoTo == MODE_TOPDOWN) {
-            if (m_fTimeToFadeMusic > 0.0f)
-                m_fEffectsFaderScalingFactor = CTimer::GetTimeStepInSeconds() / m_fTimeToFadeMusic + m_fEffectsFaderScalingFactor;
-            else
-                m_fEffectsFaderScalingFactor = 1.0f;
-
+        switch (m_nMusicFadingDirection) {
+        case eFadeFlag::FADE_OUT: {
+            m_fEffectsFaderScalingFactor = m_fTimeToFadeMusic > 0.0f
+                ? CTimer::GetTimeStepInSeconds() / m_fTimeToFadeMusic + m_fEffectsFaderScalingFactor
+                : 1.f;
+            
             if (m_fEffectsFaderScalingFactor >= 1.0f) {
                 m_bMusicFadedOut = false;
                 m_bMusicFading = false;
                 m_fEffectsFaderScalingFactor = 1.0f;
             }
-        } else if (m_nFadeInOutFlag == eFadeFlag::FADE_IN) {
+            break;
+        }
+        case eFadeFlag::FADE_IN: {
             if (m_fEffectsFaderScalingFactor <= 0.0f) {
                 m_bMusicFadedOut = true;
                 m_bMusicFading = false;
                 m_fEffectsFaderScalingFactor = 0.0f;
             }
-
-            if (m_fTimeToFadeMusic > 0.0f)
-                m_fEffectsFaderScalingFactor = m_fEffectsFaderScalingFactor - CTimer::GetTimeStepInSeconds() / m_fTimeToFadeMusic;
-            else
-                m_fEffectsFaderScalingFactor = 0.0f;
-
-            if (m_fEffectsFaderScalingFactor <= 0.0f)
-                m_fEffectsFaderScalingFactor = 0.0f;
+            m_fEffectsFaderScalingFactor = m_fTimeToFadeMusic > 0.0f
+                ? std::max(0.f, m_fEffectsFaderScalingFactor - CTimer::GetTimeStepInSeconds() / m_fTimeToFadeMusic)
+                : 0.f;
+            break;
+        }
         }
     } else {
         m_fTimeToWaitToFadeMusic = m_fTimeToWaitToFadeMusic - CTimer::GetTimeStepInSeconds();
@@ -1502,7 +1523,43 @@ void CCamera::Find3rdPersonCamTargetVector(float range, CVector source, CVector*
 
 // 0x514B80
 float CCamera::CalculateGroundHeight(eGroundHeightType type) {
-    return plugin::CallMethodAndReturn<float, 0x514B80, CCamera*, eGroundHeightType>(this, type);
+    static auto& lastCalcCamPos    = StaticRef<CVector, 0xB70034>();
+    static auto& exactGroundHeight = StaticRef<float, 0xB70030>();
+    static auto& bbTopZ            = StaticRef<float, 0xB7002C>();
+    static auto& bbBottomZ         = StaticRef<float, 0xB70028>();
+
+    const auto& camPos = GetPosition();
+
+    // Possibly update the positions (If the camera has moved enough)
+    const auto CheckDelta = [](float d) { return std::abs(d) > 20.f; };
+    if (CheckDelta(lastCalcCamPos.x - camPos.x) || CheckDelta(lastCalcCamPos.y - camPos.y) || CheckDelta(lastCalcCamPos.z - camPos.z)) { // Check if there's enough of a delta
+        CColPoint cp;
+        CEntity* hitEntity;
+        if (CWorld::ProcessVerticalLine({ camPos.x, camPos.y, 1000.f }, -1000.f, cp, hitEntity, true, false, false, false, true)) {
+            const auto& hitEntPos = hitEntity->GetPosition();
+            const auto& hitBB = hitEntity->GetColModel()->GetBoundingBox();
+
+            exactGroundHeight = cp.m_vecPoint.z;
+
+            bbTopZ = hitEntPos.z + hitBB.m_vecMax.z;
+
+            const auto bbsz = hitBB.GetSize();
+            bbBottomZ = std::max(
+                0.f,
+                bbsz.x > 120.f || bbsz.y > 120.f
+                    ? exactGroundHeight
+                    : hitEntPos.z + hitBB.m_vecMin.z
+            );
+        }
+        lastCalcCamPos = camPos;
+    }
+
+    switch (type) {
+    case eGroundHeightType::ENTITY_BB_TOP:       return bbTopZ;
+    case eGroundHeightType::EXACT_GROUND_HEIGHT: return exactGroundHeight;
+    case eGroundHeightType::ENTITY_BB_BOTTOM:    return bbBottomZ;
+    default:                                     NOTSA_UNREACHABLE();
+    }
 }
 
 // 0x514D60
@@ -1538,8 +1595,19 @@ void CCamera::RestoreCameraAfterMirror() {
 }
 
 // 0x51A5D0
-bool CCamera::ConeCastCollisionResolve(CVector* source, CVector* center, CVector* pVecOut, float radius, float arg5, float* pFloatOut) {
-    return plugin::CallMethodAndReturn<bool, 0x51A5D0, CCamera*, CVector*, CVector*, CVector*, float, float, float*>(this, source, center, pVecOut, radius, arg5, pFloatOut);
+bool CCamera::ConeCastCollisionResolve(const CVector& pos, const CVector& lookAt, CVector& outDest, float radius, float minDist, float& outDist) {
+    if (pos == lookAt) {
+        return false;
+    }
+
+    if (CCollision::CameraConeCastVsWorldCollision(CSphere{ lookAt, radius }, CSphere{ pos, radius }, outDist, minDist)) {
+        outDest = lerp(lookAt, pos, outDist);
+        return true;
+    } else {
+        outDest = pos;
+        outDist = 1.f;
+        return false;
+    }
 }
 
 // 0x51E560
@@ -1554,7 +1622,7 @@ void CCamera::CameraColDetAndReact(CVector* source, CVector* target) {
 
 // 0x527FA0
 void CCamera::CamControl() {
-    plugin::CallMethod<0x527FA0, CCamera*>(this);
+    plugin::CallMethod<0x527FA0, CCamera*>(this); // good luck warrior!
 }
 
 // 0x5B24A0

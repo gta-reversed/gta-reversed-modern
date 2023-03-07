@@ -327,7 +327,7 @@ void CGangWars::DoStuffWhenPlayerVictorious() {
     ReleaseCarsInAttackWave();
     CheerVictory();
     State = NOT_IN_WAR;
-    CMessages::AddMessage(TheText.Get("GW_YRS"), 4500, 1, true);
+    CMessages::AddMessageQ(TheText.Get("GW_YRS"), 4500, 1, true);
     CMessages::AddToPreviousBriefArray(TheText.Get("GW_YRS"), -1, -1, -1, -1, -1, -1, nullptr);
     Provocation = 0.0f;
     TellGangMembersTo(true);
@@ -633,7 +633,7 @@ void CGangWars::StartOffensiveGangWar() {
             return;
 
         auto provText = TheText.Get("GW_PROV");
-        CMessages::AddMessage(provText, 4500, 1, true);
+        CMessages::AddMessageQ(provText, 4500, 1, true);
         CMessages::AddToPreviousBriefArray(provText);
         TimeStarted = CTimer::GetTimeInMS();
         State = PRE_FIRST_WAVE;
@@ -774,7 +774,7 @@ void CGangWars::Update() {
             // goto label_33;
         }
         auto clr1 = TheText.Get("GW_CLR1");
-        CMessages::AddMessage(clr1, 4500, 1, true);
+        CMessages::AddMessageQ(clr1, 4500, 1, true);
         CMessages::AddToPreviousBriefArray(clr1);
         State = PRE_SECOND_WAVE;
         TimeStarted = CTimer::GetTimeInMS();
@@ -799,7 +799,7 @@ void CGangWars::Update() {
             // goto label_33;
         }
         auto clr2 = TheText.Get("GW_CLR2");
-        CMessages::AddMessage(clr2, 4500, 1, true);
+        CMessages::AddMessageQ(clr2, 4500, 1, true);
         CMessages::AddToPreviousBriefArray(clr2);
         State = PRE_THIRD_WAVE;
         TimeStarted = CTimer::GetTimeInMS();
@@ -849,7 +849,7 @@ void CGangWars::Update() {
             CTheZones::FillZonesWithGangColours(false);
 
             // label_49:
-            CMessages::AddMessage(TheText.Get("GW_FLEE"), 4500, 1, true);
+            CMessages::AddMessageQ(TheText.Get("GW_FLEE"), 4500, 1, true);
             CMessages::AddToPreviousBriefArray(TheText.Get("GW_WARN"));
             // goto label_50;
         }
@@ -878,7 +878,7 @@ void CGangWars::Update() {
 
                     if (FightTimer < 0) {
                         auto nosh = TheText.Get("GW_NOSH");
-                        CMessages::AddMessage(nosh, 4500, 1, true);
+                        CMessages::AddMessageQ(nosh, 4500, 1, true);
                         CMessages::AddToPreviousBriefArray(nosh);
 
                         State2 = NO_ATTACK;
@@ -896,7 +896,7 @@ void CGangWars::Update() {
             case PLAYER_CAME_TO_WAR:
                 if (AttackWaveOvercome()) {
                     auto won = TheText.Get("GW_WON");
-                    CMessages::AddMessage(won, 4500, 1, true);
+                    CMessages::AddMessageQ(won, 4500, 1, true);
                     CMessages::AddToPreviousBriefArray(won);
 
                     State2 = NO_ATTACK;
@@ -909,7 +909,7 @@ void CGangWars::Update() {
 
                     if (FightTimer < 0) {
                         auto slow = TheText.Get("GW_SLOW");
-                        CMessages::AddMessage(slow, 4500, 1, true);
+                        CMessages::AddMessageQ(slow, 4500, 1, true);
                         CMessages::AddToPreviousBriefArray(slow);
 
                         State2 = NO_ATTACK;

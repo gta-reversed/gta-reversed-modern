@@ -5,7 +5,6 @@
 */
 
 
-
 template<>
 OpcodeResult CRunningScript::ProcessCommand<COMMAND_PRINT_BIG>() { // 0x0BA
     char label[8];
@@ -23,7 +22,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_PRINT>() { // 0x0BB
     auto text = TheText.Get(label);
     CollectParameters(2);
     if (!text || text[0] != '~' || text[1] != 'z' || text[2] != '~' || FrontEndMenuManager.m_bShowSubtitles)
-        CMessages::AddMessage(text, ScriptParams[0].iParam, ScriptParams[1].iParam, CTheScripts::bAddNextMessageToPreviousBriefs);
+        CMessages::AddMessageQ(text, ScriptParams[0].iParam, ScriptParams[1].iParam, CTheScripts::bAddNextMessageToPreviousBriefs);
     CTheScripts::bAddNextMessageToPreviousBriefs = true;
     return OR_CONTINUE;
 }
@@ -35,7 +34,7 @@ OpcodeResult CRunningScript::ProcessCommand<COMMAND_PRINT_NOW>() { // 0x0BC
     auto text = TheText.Get(label);
     CollectParameters(2);
     if (!text || text[0] != '~' || text[1] != 'z' || text[2] != '~' || FrontEndMenuManager.m_bShowSubtitles)
-        CMessages::AddMessageJumpQ(text, ScriptParams[0].iParam, ScriptParams[1].iParam, CTheScripts::bAddNextMessageToPreviousBriefs);
+        CMessages::AddMessageJump(text, ScriptParams[0].iParam, ScriptParams[1].iParam, CTheScripts::bAddNextMessageToPreviousBriefs);
     CTheScripts::bAddNextMessageToPreviousBriefs = true;
     return OR_CONTINUE;
 }
