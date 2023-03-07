@@ -32,7 +32,7 @@ solution "gta_reversed"
 
     location(_OPTIONS["outdir"])
     targetprefix "" -- no 'lib' prefix on gcc
-	targetdir("bin")
+    targetdir("bin/%{cfg.buildcfg}")
     
     filter "configurations:Debug*"
         staticruntime "off"
