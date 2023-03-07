@@ -103,7 +103,6 @@ public:
     int8      m_nGameState;
     char      m_bIsSaveDone;
     bool      m_bLoadingData;
-
     float     m_fMapZoom;
     CVector2D m_vMapOrigin;
     CVector2D m_vMousePos;  // Red marker position (world coordinates)
@@ -314,6 +313,7 @@ public:
     void DisplayHelperText(const char* key);
     void SetHelperText(eHelperText messageId);
     void ResetHelperText();
+    void NoDiskInDriveMessage();
 
     void MessageScreen(const char* key, bool blackBackground, bool cameraUpdateStarted);
     void SmallMessageScreen(const char* key);
@@ -343,13 +343,18 @@ public:
 
     // NOTSA
     const char* GetMovieFileName() const {
-        if (m_nTitleLanguage == 12 || m_nTitleLanguage == 7) {
+        switch (m_nTitleLanguage) {
+        case 12:
+        case 7:
             return "movies\\GTAtitlesGER.mpg";
-        } else {
-            return "movies\\GTAtitles.mpg";
         }
+        return "movies\\GTAtitles.mpg";
     }
 
+    //! Simulate that we came into the menu and clicked to load game
+    //! @param newGame If we should start a new game
+    //! @param slot    Slot of the save-game to load (Ignored if `newGame`)
+    void SimulateGameLoad(bool newGame, uint32 slot);
 private:
     static void SetBrightness(float brightness, bool arg2);
 };

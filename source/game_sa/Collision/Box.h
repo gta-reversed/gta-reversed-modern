@@ -11,9 +11,11 @@
 
 class CBox {
 public:
-    static void InjectHooks();
+    CVector m_vecMin{}, m_vecMax{};
 
-public:
+    constexpr CBox() = default;
+    constexpr CBox(CVector min, CVector max) : m_vecMin(min), m_vecMax(max) {}
+
     void Set(const CVector& vecMin, const CVector& vecMax);
 
     //! Updates box corners, like (if left>right then swap(left, right))
@@ -35,7 +37,7 @@ public:
     void DrawWireFrame(CRGBA color, const CMatrix& transform = CMatrix::Unity()) const;
 
 public:
-    CVector m_vecMin, m_vecMax;
+    static void InjectHooks();
 };
 
 VALIDATE_SIZE(CBox, 0x18);

@@ -104,7 +104,7 @@ void SetVideoMode(int32 mode) {
 }
 
 // 0x745CA0
-bool IsVideoModeExclusive() {
+bool IsVideoModeExclusive() { // AKA isCurrentModeFullscreen
     RwVideoMode videoMode{};
     VERIFY(RwEngineGetVideoModeInfo(&videoMode, gCurrentVideoMode));
     return videoMode.flags & rwVIDEOMODEEXCLUSIVE;
