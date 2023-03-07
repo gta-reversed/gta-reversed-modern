@@ -65,18 +65,18 @@ void CControllerConfigManager::HandleJoyButtonUpDown(int32 joyNo, bool isDown) {
     StoreJoyButtonStates();
     const auto forceConfigMenuMode = !isDown && notsa::contains({ MODE_FLYBY, MODE_FIXED }, TheCamera.GetActiveCamera().m_nMode); // Probably leftover debug stuff?
     for (auto i = isDown ? 1u : 2u; i < std::size(m_ButtonStates); i++) { // TODO: Why is this starting from 1/2?
-        const auto padBtn = (m_ButtonStates[i - 1] == isDown) ? i : 0;
+        const auto padBtn = (ePadButton)((m_ButtonStates[i - 1] == isDown) ? i : 0); // This doesn't make sense
         if (forceConfigMenuMode || FrontEndMenuManager.m_bMenuActive || joyNo != 0) {
             if (isDown) {
-                UpdateJoyInConfigMenus_ButtonDown((ePadButton)padBtn, joyNo);
+                UpdateJoyInConfigMenus_ButtonDown(padBtn, joyNo);
             } else {
-                UpdateJoyInConfigMenus_ButtonUp((ePadButton)padBtn, joyNo);
+                UpdateJoyInConfigMenus_ButtonUp(padBtn, joyNo);
             }
         } else {
             if (isDown) {
-                UpdateJoy_ButtonDown((ePadButton)padBtn, 3);
+                UpdateJoy_ButtonDown(padBtn, 3);
             } else {
-                UpdateJoy_ButtonUp((ePadButton)padBtn, 3);
+                UpdateJoy_ButtonUp(padBtn, 3);
             }
         }
     }
