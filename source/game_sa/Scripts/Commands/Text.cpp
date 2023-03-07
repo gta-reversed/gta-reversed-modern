@@ -31,14 +31,14 @@ void PrintBig(const char* key, uint32 time, uint32 flags) {
 void Print(const char* key, uint32 time, uint32 flags) {
     const auto text = TheText.Get(key);
     if (!text || strncmp(text, "~z~", 3u) != 0 || FrontEndMenuManager.m_bShowSubtitles)
-        CMessages::AddMessage(text, time, flags, CTheScripts::bAddNextMessageToPreviousBriefs);
+        CMessages::AddMessageQ(text, time, flags, CTheScripts::bAddNextMessageToPreviousBriefs);
     CTheScripts::bAddNextMessageToPreviousBriefs = true;
 }
 
 void PrintNow(const char* key, uint32 time, uint32 flags) {
     const auto text = TheText.Get(key);
     if (!text || strncmp(text, "~z~", 3u) != 0 || FrontEndMenuManager.m_bShowSubtitles)
-        CMessages::AddMessageJumpQ(text, time, flags, CTheScripts::bAddNextMessageToPreviousBriefs);
+        CMessages::AddMessageJump(text, time, flags, CTheScripts::bAddNextMessageToPreviousBriefs);
     CTheScripts::bAddNextMessageToPreviousBriefs = true;
 }
 
