@@ -73,11 +73,10 @@ public:
     //! Get all the members
     auto GetMembers(bool bIncludeLeader = true) {
         assert(LEADER_MEM_ID == m_apMembers.size() - 1); // the drop below requires this
-        return
-            m_apMembers
-            | rng::views::drop(bIncludeLeader ? 0 : 1) // Last member is the leader
-            | rng::views::filter(notsa::NotIsNull{})
-            | rng::views::transform([](CPed* mem) -> CPed& { return *mem; }); // Dereference
+        return m_apMembers
+             | rng::views::drop(bIncludeLeader ? 0 : 1) // Last member is the leader
+             | rng::views::filter(notsa::NotIsNull{})
+             | rng::views::transform([](CPed* mem) -> CPed& { return *mem; }); // Dereference
     }
 
     /*!

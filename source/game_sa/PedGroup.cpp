@@ -28,6 +28,7 @@ float CPedGroup::FindDistanceToFurthestMember() {
     }*/
 }
 
+// 0x5FB0A0
 float CPedGroup::FindDistanceToNearestMember(CPed** ppOutNearestMember) {
     const auto [nearest, distSq] = GetMembership().FindClosestFollowerToLeader();
     if (nearest) {
@@ -39,22 +40,51 @@ float CPedGroup::FindDistanceToNearestMember(CPed** ppOutNearestMember) {
     return 1.0e10;
 }
 
+// 0x5FACD0
+CPed* CPedGroup::GetClosestGroupPed(CPed* ped, float* pOutDistSq) {
+    const auto [closest, distSq] = GetMembership().GetMemberClosestTo(ped);
+    if (closest) {
+        if (pOutDistSq) {
+            *pOutDistSq = distSq;
+        }
+    }
+    return closest;
+}
+
+// 0x5FB790
 void CPedGroup::Flush() {
     m_groupMembership.Flush();
     m_groupIntelligence.Flush();
     m_bIsMissionGroup = false;
 }
 
-CPed* CPedGroup::GetClosestGroupPed(CPed* ped, float* pOutDistance) {
-    return plugin::CallMethodAndReturn<CPed*, 0x5FACD0, CPedGroup*, CPed*, float*>(this, ped, pOutDistance);
-}
-
+// 0x5F7DB0
 bool CPedGroup::IsAnyoneUsingCar(const CVehicle* vehicle) {
-    return plugin::CallMethodAndReturn<bool, 0x5F7DB0, CPedGroup*, const CVehicle*>(this, vehicle);
+    assert(vehicle);
+
+    for (auto& mem : m_groupMembership.GetMembers()) {
+        if (mem.GetVehicleIfInOne() == vehicle) {
+            return true;
+        }
+        // I did a slight change here.
+        // Game originally checked both EnterAsDriver and EnterAsPassenger tasks
+        // but that makes no sense, as the ped can't have both tasks at the same time (I hope)
+        // So the function below returns the target vehicle of the first task found
+        if (mem.GetIntelligence()->GetEnteringVehicle() == vehicle) {
+            return true;
+        }
+    }
+    return false;
 }
 
-void CPedGroup::PlayerGaveCommand_Attack(CPed* playerPed, CPed* ped) {
-    plugin::CallMethod<0x5F7CC0, CPedGroup*, CPed*, CPed*>(this, playerPed, ped);
+// 0x5F7CC0
+void CPedGroup::PlayerGaveCommand_Attack(CPed* playerPed, CPed* target) {
+    if (!m_groupIntelligence.AddEvent(CEventGroupEvent{ playerPed, new CEventPlayerCommandToGroup{PLAYER_GROUP_COMMAND_ATTACK, target} })) {
+        return;
+    }
+    if (target && target->m_nPedType != PED_TYPE_GANG2) {
+        target->Say(target->IsGangster() ? 147 : 148);
+    }
 }
 
 void CPedGroup::PlayerGaveCommand_Gather(CPed* ped) {
@@ -62,11 +92,12 @@ void CPedGroup::PlayerGaveCommand_Gather(CPed* ped) {
 }
 
 void CPedGroup::Process() {
-    plugin::CallMethod<0x5FC7E0, CPedGroup*>(this);
+    m_groupMembership.Process();
+    m_groupIntelligence.Process();
 }
 
 void CPedGroup::RemoveAllFollowers() {
-    plugin::CallMethod<0x5FB7D0, CPedGroup*>(this);
+    GetMembership().RemoveAllFollowers(false);
 }
 
 void CPedGroup::Teleport(const CVector* pos) {
@@ -85,11 +116,13 @@ void CPedGroup::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x5FC190);
 
     RH_ScopedInstall(Teleport, 0x5F7AD0, {.reversed = false});
+    RH_ScopedInstall(PlayerGaveCommand_Gather, 0x5FAB60, {.reversed = false});
     RH_ScopedInstall(PlayerGaveCommand_Attack, 0x5F7CC0, {.reversed = false});
-    RH_ScopedInstall(IsAnyoneUsingCar, 0x5F7DB0, {.reversed = false});
+    RH_ScopedInstall(IsAnyoneUsingCar, 0x5F7DB0);
     RH_ScopedInstall(GetClosestGroupPed, 0x5FACD0, {.reversed = false});
     RH_ScopedInstall(FindDistanceToFurthestMember, 0x5FB010, {.reversed = false});
     RH_ScopedInstall(FindDistanceToNearestMember, 0x5FB0A0);
     RH_ScopedInstall(Flush, 0x5FB790);
-    RH_ScopedInstall(Process, 0x5FC7E0, {.reversed = false});
+    RH_ScopedInstall(Process, 0x5FC7E0);
+    RH_ScopedInstall(RemoveAllFollowers, 0x5FB7D0);
 }

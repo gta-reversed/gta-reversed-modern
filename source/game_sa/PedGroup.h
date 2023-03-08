@@ -27,12 +27,20 @@ public:
     CPedGroup();
     ~CPedGroup();
 
-    float FindDistanceToFurthestMember();
 
     //! Find follower closest to the leader
     float FindDistanceToNearestMember(CPed** ppOutNearestMember);
-    void  Flush();
+
+    //! Clear state
+    void Flush();
+
+    //! Find member closest to `ped`
     CPed* GetClosestGroupPed(CPed* ped, float* pOutDistance);
+
+    //! Find distance of the furthest member to `ped`
+    float FindDistanceToFurthestMember();
+
+    //! Is anyone from this group using the given car
     bool  IsAnyoneUsingCar(const CVehicle* vehicle);
     void  PlayerGaveCommand_Attack(CPed* playerPed, CPed* ped);
     void  PlayerGaveCommand_Gather(CPed* ped);

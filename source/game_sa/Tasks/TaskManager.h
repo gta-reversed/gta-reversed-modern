@@ -55,7 +55,7 @@ public:
 
     /*!
     * @0x681720
-    * @brief Get the first primary task (that is, the first non-null entry from `m_aPrimaryTasks`)
+    * @brief Get the first present primary task (that is, the first non-null entry from `m_aPrimaryTasks`)
     */
     CTask* GetActiveTask();
 
@@ -67,7 +67,7 @@ public:
 
     /*!
     * @addr 0x681810
-    * @brief Similar to `FindActiveTaskByType` but only checks the given primary task
+    * @brief Similar to `FindActiveTaskByType` but only checks the given primary task's subtasks
     */
     CTask* FindTaskByType(ePrimaryTasks taskIndex, eTaskType taskType);
 
@@ -101,9 +101,6 @@ public:
     */
     void Flush();
 
-
-
-    /// Create the next subtask of `task`
     /*!
     * @addr 0x681920
     * @brief Set the next sub task of `task`
