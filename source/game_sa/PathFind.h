@@ -10,7 +10,7 @@
 #include "Vector.h"
 #include "NodeAddress.h"
 #include "NodeRoute.h"
-#include "FixedFloat.hpp"
+#include <extensions/FixedFloat.hpp>
 #include <functional>
 
 static constexpr auto NUM_PATH_MAP_AREA_X{ 8 };
