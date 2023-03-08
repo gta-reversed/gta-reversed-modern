@@ -1361,31 +1361,30 @@ void CCamera::ProcessMusicFade() {
         return;
 
     if (m_fTimeToWaitToFadeMusic <= 0.0f) {
-        if (m_nModeToGoTo == MODE_TOPDOWN) {
-            if (m_fTimeToFadeMusic > 0.0f)
-                m_fEffectsFaderScalingFactor = CTimer::GetTimeStepInSeconds() / m_fTimeToFadeMusic + m_fEffectsFaderScalingFactor;
-            else
-                m_fEffectsFaderScalingFactor = 1.0f;
-
+        switch (m_nMusicFadingDirection) {
+        case eFadeFlag::FADE_OUT: {
+            m_fEffectsFaderScalingFactor = m_fTimeToFadeMusic > 0.0f
+                ? CTimer::GetTimeStepInSeconds() / m_fTimeToFadeMusic + m_fEffectsFaderScalingFactor
+                : 1.f;
+            
             if (m_fEffectsFaderScalingFactor >= 1.0f) {
                 m_bMusicFadedOut = false;
                 m_bMusicFading = false;
                 m_fEffectsFaderScalingFactor = 1.0f;
             }
-        } else if (m_nFadeInOutFlag == eFadeFlag::FADE_IN) {
+            break;
+        }
+        case eFadeFlag::FADE_IN: {
             if (m_fEffectsFaderScalingFactor <= 0.0f) {
                 m_bMusicFadedOut = true;
                 m_bMusicFading = false;
                 m_fEffectsFaderScalingFactor = 0.0f;
             }
-
-            if (m_fTimeToFadeMusic > 0.0f)
-                m_fEffectsFaderScalingFactor = m_fEffectsFaderScalingFactor - CTimer::GetTimeStepInSeconds() / m_fTimeToFadeMusic;
-            else
-                m_fEffectsFaderScalingFactor = 0.0f;
-
-            if (m_fEffectsFaderScalingFactor <= 0.0f)
-                m_fEffectsFaderScalingFactor = 0.0f;
+            m_fEffectsFaderScalingFactor = m_fTimeToFadeMusic > 0.0f
+                ? std::max(0.f, m_fEffectsFaderScalingFactor - CTimer::GetTimeStepInSeconds() / m_fTimeToFadeMusic)
+                : 0.f;
+            break;
+        }
         }
     } else {
         m_fTimeToWaitToFadeMusic = m_fTimeToWaitToFadeMusic - CTimer::GetTimeStepInSeconds();
