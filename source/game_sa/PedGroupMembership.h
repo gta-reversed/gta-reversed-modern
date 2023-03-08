@@ -41,6 +41,7 @@ public:
     void  Flush();
     void  From(const CPedGroupMembership& obj);
     CPed* GetLeader() const;
+    bool HasLeader() const { return GetLeader() != nullptr; }
     CPed* GetMember(int32 memberId);
     int32 GetMemberId(const CPed* ped) const;
     //! Is ped a follower (A member, but not the leader)

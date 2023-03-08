@@ -93,7 +93,39 @@ bool CPedGroupMembership::IsMember(const CPed* ped) const {
 
 // 0x5FBA60
 void CPedGroupMembership::Process() {
-    plugin::CallMethod<0x5FBA60, CPedGroupMembership*>(this);
+    // Remove dead members (except player ped)
+    for (auto&& [i, mem] : notsa::enumerate(m_apMembers)) {
+        if (mem->IsAlive()) {
+            continue;
+        }
+        if (IsLeader(mem) && mem->IsPlayer()) { // Player always stays in it's group
+            continue;
+        }
+        RemoveMember(i);
+    }
+
+    // If no leader, try appointing a new one
+    if (!HasLeader()) {
+        AppointNewLeader();
+        if (!HasLeader()) { // Couldn't appoint a new leader
+            return;
+        }
+    }
+
+    // Now that we have a leader, check for separation distance and remove members further than it
+    const auto leaderPos = GetLeader()->GetPosition();
+    for (auto&& [i, mem] : notsa::enumerate(m_apMembers)) {
+        if (mem->bNeverLeavesGroup) {
+            continue;
+        }
+        if (IsLeader(mem)) { // Leader's distance to itself always 0
+            continue;
+        }
+        if (sq(m_fSeparationRange) >= (leaderPos - mem->GetPosition()).SquaredMagnitude()) {
+            continue;
+        }
+        RemoveMember(i); // Ped is too far
+    }
 }
 
 // 0x5FB190
@@ -214,5 +246,5 @@ void CPedGroupMembership::InjectHooks() {
     RH_ScopedOverloadedInstall(RemoveMember, "ByPed", 0x5FB210, void(CPedGroupMembership::*)(CPed*));
     RH_ScopedOverloadedInstall(RemoveMember, "ByMemIdx", 0x5F80D0, void(CPedGroupMembership::*)(int32));
 
-    RH_ScopedInstall(Process, 0x5FBA60, {.reversed = false});
+    RH_ScopedInstall(Process, 0x5FBA60);
 }
