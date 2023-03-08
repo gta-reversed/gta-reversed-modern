@@ -52,6 +52,8 @@ public:
     CPedGroupIntelligence();
     ~CPedGroupIntelligence();
 
+    void Flush();
+
     bool       AddEvent(CEvent* event);
     void       ComputeDefaultTasks(CPed* ped);
     void*      ComputeEventResponseTasks();

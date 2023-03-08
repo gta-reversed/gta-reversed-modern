@@ -238,7 +238,7 @@ void CPedGroupMembership::SetLeader(CPed* ped) {
     GivePedRandomObjectToHold(ped);
 }
 
-auto CPedGroupMembership::FindNearestFollowerToLeader() -> FindMemberResult {
+auto CPedGroupMembership::FindClosestFollowerToLeader() -> FindMemberResult {
     if (const auto leader = GetLeader()) {
         return GetMemberClosestTo(leader);
     }

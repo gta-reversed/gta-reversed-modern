@@ -28,7 +28,7 @@ float CPedGroup::FindDistanceToFurthestMember() {
     }*/
 }
 
-float CPedGroup::FindNearestFollowerToLeader(CPed** ppOutNearestMember) {
+float CPedGroup::FindDistanceToNearestMember(CPed** ppOutNearestMember) {
     const auto [nearest, distSq] = GetMembership().FindClosestFollowerToLeader();
     if (nearest) {
         if (ppOutNearestMember) {
@@ -40,7 +40,9 @@ float CPedGroup::FindNearestFollowerToLeader(CPed** ppOutNearestMember) {
 }
 
 void CPedGroup::Flush() {
-    plugin::CallMethod<0x5FB790, CPedGroup*>(this);
+    m_groupMembership.Flush();
+    m_groupIntelligence.Flush();
+    m_bIsMissionGroup = false;
 }
 
 CPed* CPedGroup::GetClosestGroupPed(CPed* ped, float* pOutDistance) {
@@ -87,7 +89,7 @@ void CPedGroup::InjectHooks() {
     RH_ScopedInstall(IsAnyoneUsingCar, 0x5F7DB0, {.reversed = false});
     RH_ScopedInstall(GetClosestGroupPed, 0x5FACD0, {.reversed = false});
     RH_ScopedInstall(FindDistanceToFurthestMember, 0x5FB010, {.reversed = false});
-    RH_ScopedInstall(FindNearestFollowerToLeader, 0x5FB0A0);
-    RH_ScopedInstall(Flush, 0x5FB790, {.reversed = false});
+    RH_ScopedInstall(FindDistanceToNearestMember, 0x5FB0A0);
+    RH_ScopedInstall(Flush, 0x5FB790);
     RH_ScopedInstall(Process, 0x5FC7E0, {.reversed = false});
 }

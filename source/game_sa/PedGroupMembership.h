@@ -117,7 +117,7 @@ public:
     auto GetMemberClosestTo(CPed* ped) { return GetMemberClosestToIf(ped, [](CPed&) { return true; }); }
 
     //! Find follower closest to the leader
-    auto FindNearestFollowerToLeader() -> FindMemberResult;
+    auto FindClosestFollowerToLeader() -> FindMemberResult;
 
     static eModelID GetObjectForPedToHold();
 private:
