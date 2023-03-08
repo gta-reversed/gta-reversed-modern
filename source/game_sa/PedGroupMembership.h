@@ -58,7 +58,7 @@ public:
     void  RemoveAllFollowers(bool bCreatedByGameOnly);
     void  RemoveMember(int32 memberID);
     void  RemoveMember(CPed* ped);
-    char  RemoveNFollowers(int32 count);
+    void  RemoveNFollowers(size_t count);
 
     void  SetLeader(CPed* ped);
 
