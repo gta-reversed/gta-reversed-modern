@@ -18,8 +18,14 @@ CPedGroup::~CPedGroup() {
     }
 }
 
+//! @returns Distance of the furthers member from the leader
 float CPedGroup::FindDistanceToFurthestMember() {
     return plugin::CallMethodAndReturn<float, 0x5FB010, CPedGroup*>(this);
+    /*
+    const auto leader = GetMembership().GetLeader();
+    for (const auto& mem : GetMembership().GetMembers(true)) {
+
+    }*/
 }
 
 float CPedGroup::FindDistanceToNearestMember(CPed** ppOutNearestMember) {
