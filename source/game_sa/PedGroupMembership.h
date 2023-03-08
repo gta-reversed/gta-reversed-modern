@@ -30,7 +30,7 @@ public:
     static void InjectHooks();
 
     CPedGroupMembership();
-    CPedGroupMembership(const CPedGroupMembership& from);
+    CPedGroupMembership(const CPedGroupMembership&) = default; // 0x5FB140
     ~CPedGroupMembership();
 
     void  AddFollower(CPed* ped);
@@ -114,8 +114,16 @@ public:
     /// Wrapper around `GetMemberClosestToIf`, using an always-true predicate
     auto GetMemberClosestTo(CPed* ped) { return GetMemberClosestToIf(ped, [](CPed&) { return true; }); }
 
-    static int32 GetObjectForPedToHold();
+    static eModelID GetObjectForPedToHold();
+private:
+    //! NOTSA
+    int32 FindNewLeaderToAppoint() const;
 
+    //! NOTSA
+    int32 FindIdForNewMember() const;
+
+    //! Based on code from 0x5F80BE
+    void  GivePedRandomObjectToHold(CPed* mem, bool onlyIfUnarmed = true) const;
 private: // Wrappers for hooks
     // 0x5F6930
     CPedGroupMembership* Constructor() {

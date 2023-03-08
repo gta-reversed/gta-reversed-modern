@@ -9,11 +9,6 @@ CPedGroupMembership::CPedGroupMembership() {
     m_fSeparationRange = 60.0f;
 }
 
-// 0x5FB140
-CPedGroupMembership::CPedGroupMembership(const CPedGroupMembership& obj) {
-    From(obj);
-}
-
 CPedGroupMembership::~CPedGroupMembership() {
     Flush();
 }
@@ -27,17 +22,51 @@ void CPedGroupMembership::From(const CPedGroupMembership& obj) {
     m_fSeparationRange = obj.m_fSeparationRange;
 }
 
+// 0x5F8020
 void CPedGroupMembership::AddFollower(CPed* ped) {
-    plugin::CallMethod<0x5F8020, CPedGroupMembership*, CPed*>(this, ped);
+    ped->bHasGroupDriveTask = false;
+
+    // Peds in the player's group can't drown
+    if (const auto leader = GetLeader()) {
+        if (leader->IsPlayer()) { // same effect as m_pPlayerData, no?
+            assert(leader->m_pPlayerData); // Test above theory
+            ped->bDrownsInWater = false;
+        }
+    }
+
+    if (IsFollower(ped) || GetLeader() == ped) { // TODO/BUG/NOTE: Stuff that was set above is now not reverted... I'm not sure if that's intended
+        return;
+    }
+
+    const auto memId = FindIdForNewMember();
+    if (memId == -1) {
+        return;
+    }
+
+    AddMember(ped, memId);
+    GivePedRandomObjectToHold(ped);
 }
 
 // 0x5F6AE0
 void CPedGroupMembership::AddMember(CPed* member, int32 memberID) {
-    plugin::CallMethod<0x5F6AE0, CPedGroupMembership*, CPed*, int32>(this, member, memberID);
+    /* dead code before checking if the member is in the player's group */
+    if (!member->IsPlayer()) {
+        member->GetIntelligence()->SetPedDecisionMakerType(0);
+    }
 }
 
 void CPedGroupMembership::AppointNewLeader() {
-    plugin::CallMethod<0x5FB240, CPedGroupMembership*>(this);
+    if (HasLeader()) {
+        return;
+    }
+
+    const auto memId = FindNewLeaderToAppoint();
+    if (memId == -1) {
+        return;
+    }
+
+    RemoveMember(memId); // Must call as it does some cleanup
+    AddMember(m_apMembers[memId], LEADER_MEM_ID);
 }
 
 // 0x5F6A50
@@ -59,7 +88,7 @@ void CPedGroupMembership::Flush() {
 }
 
 CPed* CPedGroupMembership::GetLeader() const {
-    return m_apMembers[7];
+    return m_apMembers[LEADER_MEM_ID];
 }
 
 // 0x5F69B0
@@ -118,7 +147,7 @@ void CPedGroupMembership::Process() {
         if (mem->bNeverLeavesGroup) {
             continue;
         }
-        if (IsLeader(mem)) { // Leader's distance to itself always 0
+        if (IsLeader(mem)) { // Leader's distance to itself always 0, thus ignore
             continue;
         }
         if (sq(m_fSeparationRange) >= (leaderPos - mem->GetPosition()).SquaredMagnitude()) {
@@ -206,18 +235,43 @@ void CPedGroupMembership::SetLeader(CPed* ped) {
 
     // Now add member as the leader
     AddMember(ped, LEADER_MEM_ID);
-
-    if (!m_pPedGroup->m_bIsMissionGroup && ped->IsCurrentlyUnarmed()) {
-        if (const auto obj = GetObjectForPedToHold(); obj != -1) {
-            ped->GiveObjectToPedToHold(obj, true);
-        }
-    }
+    GivePedRandomObjectToHold(ped);
 }
 
 // 0x5F6950
-int32 CPedGroupMembership::GetObjectForPedToHold() {
+eModelID CPedGroupMembership::GetObjectForPedToHold() {
     using namespace ModelIndices;
     return CGeneral::RandomChoiceFromList({ (eModelID)MI_GANG_SMOKE, MODEL_INVALID, (eModelID)MI_GANG_DRINK }); // Each has 33% chance
+}
+
+int32 CPedGroupMembership::FindNewLeaderToAppoint() const {
+    for (auto&& [i, mem] : notsa::enumerate(m_apMembers)) {
+        if (mem) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int32 CPedGroupMembership::FindIdForNewMember() const {
+    for (auto&& [i, mem] : notsa::enumerate(m_apMembers)) {
+        if (!mem) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void CPedGroupMembership::GivePedRandomObjectToHold(CPed* mem, bool onlyIfUnarmed) const {
+    if (m_pPedGroup->m_bIsMissionGroup) {
+        return;
+    }
+    if (onlyIfUnarmed && !mem->IsCurrentlyUnarmed()) {
+        return;
+    }
+    if (const auto modelId = GetObjectForPedToHold(); modelId != MODEL_INVALID) {
+        mem->GiveObjectToPedToHold(modelId, true);
+    }
 }
 
 bool CPedGroupMembership::CanAddFollower() {
