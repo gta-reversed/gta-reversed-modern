@@ -61,3 +61,20 @@ void CPedGroup::Teleport(const CVector* pos) {
 int32 CPedGroup::GetId() const {
     return CPedGroups::GetGroupId(this);
 }
+
+void CPedGroup::InjectHooks() {
+    RH_ScopedClass(CPedGroup);
+    RH_ScopedCategory(); // TODO: Change this to the appropriate category!
+
+    RH_ScopedInstall(Constructor, 0x5FC150);
+    RH_ScopedInstall(Destructor, 0x5FC190);
+
+    RH_ScopedInstall(Teleport, 0x5F7AD0, {.reversed = false});
+    RH_ScopedInstall(PlayerGaveCommand_Attack, 0x5F7CC0, {.reversed = false});
+    RH_ScopedInstall(IsAnyoneUsingCar, 0x5F7DB0, {.reversed = false});
+    RH_ScopedInstall(GetClosestGroupPed, 0x5FACD0, {.reversed = false});
+    RH_ScopedInstall(FindDistanceToFurthestMember, 0x5FB010, {.reversed = false});
+    RH_ScopedInstall(FindDistanceToNearestMember, 0x5FB0A0, {.reversed = false});
+    RH_ScopedInstall(Flush, 0x5FB790, {.reversed = false});
+    RH_ScopedInstall(Process, 0x5FC7E0, {.reversed = false});
+}

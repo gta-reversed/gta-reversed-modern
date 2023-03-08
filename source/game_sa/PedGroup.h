@@ -20,9 +20,10 @@ public:
     CPedGroupMembership   m_groupMembership;
     CPedGroupIntelligence m_groupIntelligence;
     bool                  m_bIsMissionGroup;
-    char                  field_2D1[3];
-
+    
 public:
+    static void InjectHooks();
+
     CPedGroup();
     ~CPedGroup();
 
@@ -44,6 +45,18 @@ public:
 
     inline auto& GetMembership() const { return m_groupMembership; }
     inline auto& GetMembership() { return m_groupMembership; }
-};
 
+private: // Wrappers for hooks
+    // 0x5FC150
+    CPedGroup* Constructor() {
+        this->CPedGroup::CPedGroup();
+        return this;
+    }
+
+    // 0x5FC190
+    CPedGroup* Destructor() {
+        this->CPedGroup::~CPedGroup();
+        return this;
+    }
+};
 VALIDATE_SIZE(CPedGroup, 0x2D4);
