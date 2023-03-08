@@ -238,6 +238,13 @@ void CPedGroupMembership::SetLeader(CPed* ped) {
     GivePedRandomObjectToHold(ped);
 }
 
+auto CPedGroupMembership::FindNearestFollowerToLeader() -> FindMemberResult {
+    if (const auto leader = GetLeader()) {
+        return GetMemberClosestTo(leader);
+    }
+    return { nullptr, 0.f }; // We return 0.f here, `GetMemberClosestTo` returns FLT_MAX, but it should be ignored anyways, because the CPed* is nullptr
+}
+
 // 0x5F6950
 eModelID CPedGroupMembership::GetObjectForPedToHold() {
     using namespace ModelIndices;
@@ -275,7 +282,7 @@ void CPedGroupMembership::GivePedRandomObjectToHold(CPed* mem, bool onlyIfUnarme
 }
 
 bool CPedGroupMembership::CanAddFollower() {
-    return std::size(m_apMembers) > CountMembers();
+    return std::size(m_apMembers) - 1 >= CountMembers(); // - 1 to compensate for leader
 }
 
 CPed* CPedGroupMembership::GetRandom() {

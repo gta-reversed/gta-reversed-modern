@@ -28,6 +28,8 @@ public:
     ~CPedGroup();
 
     float FindDistanceToFurthestMember();
+
+    //! Find follower closest to the leader
     float FindDistanceToNearestMember(CPed** ppOutNearestMember);
     void  Flush();
     CPed* GetClosestGroupPed(CPed* ped, float* pOutDistance);

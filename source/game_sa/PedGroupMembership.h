@@ -18,6 +18,8 @@ const int32 TOTAL_PED_GROUP_FOLLOWERS = TOTAL_PED_GROUP_MEMBERS - 1;
 
 class CPedGroupMembership {
     static constexpr int32 LEADER_MEM_ID = 7; ///< Leader member ID
+
+    using FindMemberResult = std::tuple<CPed*, float>;
 public:
     CPedGroup* m_pPedGroup;
     std::array<CPed*, TOTAL_PED_GROUP_MEMBERS> m_apMembers; // m_apMembers[LEADER_MEM_ID] is the leader
@@ -88,7 +90,7 @@ public:
     * @return The closest member (may be null, in which case the distance should be considered invalid), and it's sq. dist from `ped`
     */
     template<std::predicate<CPed&> Pred>
-    auto GetMemberClosestToIf(CPed* ped, Pred&& pred) -> std::tuple<CPed*, float> {
+    auto GetMemberClosestToIf(CPed* ped, Pred&& pred) -> FindMemberResult {
         const auto& pedPos = ped->GetPosition();
 
         float closestDistSq{ std::numeric_limits<float>::max() };
@@ -113,6 +115,9 @@ public:
 
     /// Wrapper around `GetMemberClosestToIf`, using an always-true predicate
     auto GetMemberClosestTo(CPed* ped) { return GetMemberClosestToIf(ped, [](CPed&) { return true; }); }
+
+    //! Find follower closest to the leader
+    auto FindNearestFollowerToLeader() -> FindMemberResult;
 
     static eModelID GetObjectForPedToHold();
 private:
