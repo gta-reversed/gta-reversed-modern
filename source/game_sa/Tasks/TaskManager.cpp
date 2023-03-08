@@ -209,6 +209,15 @@ void CTaskManager::ParentsControlChildren(CTask* parent) {
     }
 }
 
+void CTaskManager::AbortFirstPrimaryTaskIn(std::initializer_list<ePrimaryTasks> slots, CPed* ped, eAbortPriority priority, const CEvent* event) {
+    for (const auto slot : slots) {
+        if (const auto task = GetTaskPrimary(slot)) {
+            task->MakeAbortable(ped, priority, event);
+            break;
+        }
+    }
+}
+
 // 0x681BD0
 void CTaskManager::ClearTaskEventResponse() {
     // Looking at the code, I think `nontemp` is only present if `temp` is, as it's not deleted otherwise.

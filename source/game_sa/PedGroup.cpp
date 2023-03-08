@@ -1,6 +1,8 @@
 #include "StdInc.h"
 
 #include "PedGroup.h"
+#include <TaskSimpleCarSetPedOut.h>
+#include <TaskComplexFollowLeaderInFormation.h>
 
 // 0x5FC150
 CPedGroup::CPedGroup() {
@@ -100,8 +102,35 @@ void CPedGroup::RemoveAllFollowers() {
     GetMembership().RemoveAllFollowers(false);
 }
 
-void CPedGroup::Teleport(const CVector* pos) {
-    plugin::CallMethod<0x5F7AD0, CPedGroup*, const CVector*>(this, pos);
+void CPedGroup::Teleport(const CVector& pos) {
+    if (const auto leader = GetMembership().GetLeader()) {
+        leader->Teleport(pos, false);
+    }
+
+    if (const auto oevent = m_groupIntelligence.m_pOldEventGroupEvent) {
+        if (oevent->GetEventType() == EVENT_LEADER_ENTRY_EXIT) {
+            return;
+        }
+    }
+
+    // Set *followers* out of the vehicle
+    for (auto& flwr : GetMembership().GetMembers(false)) {
+        if (!flwr.IsAlive() || !flwr.bInVehicle || flwr.IsCreatedByMission()) {
+            continue;
+        }
+        CTaskSimpleCarSetPedOut{ flwr.m_pVehicle, (eTargetDoor)CCarEnterExit::ComputeTargetDoorToExit(flwr.m_pVehicle, &flwr), false }.ProcessPed(&flwr);
+    }
+
+    // Teleport *followers*
+    const auto& offsets = CTaskComplexFollowLeaderInFormation::ms_offsets.offsets;
+    for (auto&& [offsetIdx, flwr] : notsa::enumerate(GetMembership().GetMembers(false))) {
+        if (!flwr.IsAlive()) {
+            continue;
+        }
+        flwr.Teleport(pos + CVector{ offsets[offsetIdx] }, false);
+        flwr.PositionAnyPedOutOfCollision();
+        flwr.GetTaskManager().AbortFirstPrimaryTaskIn({ TASK_PRIMARY_PHYSICAL_RESPONSE, TASK_PRIMARY_EVENT_RESPONSE_TEMP, TASK_PRIMARY_EVENT_RESPONSE_NONTEMP }, &flwr);
+    }
 }
 
 int32 CPedGroup::GetId() const {
@@ -115,7 +144,7 @@ void CPedGroup::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x5FC150);
     RH_ScopedInstall(Destructor, 0x5FC190);
 
-    RH_ScopedInstall(Teleport, 0x5F7AD0, {.reversed = false});
+    RH_ScopedInstall(Teleport, 0x5F7AD0);
     RH_ScopedInstall(PlayerGaveCommand_Gather, 0x5FAB60, {.reversed = false});
     RH_ScopedInstall(PlayerGaveCommand_Attack, 0x5F7CC0, {.reversed = false});
     RH_ScopedInstall(IsAnyoneUsingCar, 0x5F7DB0);

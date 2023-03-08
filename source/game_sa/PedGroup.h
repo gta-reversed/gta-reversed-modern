@@ -46,7 +46,9 @@ public:
     void  PlayerGaveCommand_Gather(CPed* ped);
     void  Process();
     void  RemoveAllFollowers();
-    void  Teleport(const CVector* pos);
+
+    //! Teleport the whole group [incl. leader] to a position
+    void  Teleport(const CVector& pos);
 
     // NOTSA
     inline CPedGroupIntelligence& GetIntelligence() { return m_groupIntelligence; }

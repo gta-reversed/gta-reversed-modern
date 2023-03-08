@@ -92,6 +92,10 @@ eSecondaryTask CPedGroupIntelligence::GetTaskSecondarySlot(CPed* ped) {
     return plugin::CallMethodAndReturn<eSecondaryTask, 0x5F8650>(this, ped);
 }
 
+void CPedGroupIntelligence::Process() {
+    plugin::CallMethod<0x5FC4A0>(this);
+}
+
 // 0x5F88D0
 void CPedGroupIntelligence::ComputeDefaultTasks(CPed* ped) {
     plugin::CallMethod<0x5F88D0, CPedGroupIntelligence*, CPed*>(this, ped);

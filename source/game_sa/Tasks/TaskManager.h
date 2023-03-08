@@ -159,6 +159,12 @@ public:
     void SetTaskSecondary(CTask* task, eSecondaryTask taskIndex) { ChangeTaskInSlot(m_aSecondaryTasks[taskIndex], task); }
 
     /*!
+    * Abort the first task found out of the primary tasks given
+    * @notsa
+    */
+    void AbortFirstPrimaryTaskIn(std::initializer_list<ePrimaryTasks> idxs, CPed* ped, eAbortPriority priority = ABORT_PRIORITY_LEISURE, const CEvent* event = nullptr);
+
+    /*!
     * @brief Clear primary tasks `TASK_PRIMARY_EVENT_RESPONSE_TEMP` and `TASK_PRIMARY_EVENT_RESPONSE_NONTEMP`
     */
     void ClearTaskEventResponse();
