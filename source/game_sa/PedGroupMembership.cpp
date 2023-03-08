@@ -144,9 +144,9 @@ void CPedGroupMembership::InjectHooks() {
     RH_ScopedInstall(IsFollower, 0x5F69E0);
     RH_ScopedInstall(IsLeader, 0x5F69C0);
 
-    RH_ScopedInstall(GetMember, 0x5F69B0, {.reversed = false});
+    RH_ScopedInstall(GetMember, 0x5F69B0);
 
-    RH_ScopedInstall(GetLeader, 0x5F69A0, {.reversed = false});
+    RH_ScopedInstall(GetLeader, 0x5F69A0);
     RH_ScopedInstall(SetLeader, 0x5FB9C0, {.reversed = false});
 
     RH_ScopedInstall(Process, 0x5FBA60, {.reversed = false});
