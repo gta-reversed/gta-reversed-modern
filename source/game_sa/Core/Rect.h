@@ -22,9 +22,9 @@ class CRect {
 public:
     // Init in flipped state
     float left      =  1000000.0F; // x1
-    float top       = -1000000.0F; // y2
+    float top       = -1000000.0F; // y1
     float right     = -1000000.0F; // x2
-    float bottom    =  1000000.0F; // y1
+    float bottom    =  1000000.0F; // y2
 
 public:
     static void InjectHooks();
