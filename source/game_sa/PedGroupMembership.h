@@ -26,6 +26,8 @@ public:
     static const float& ms_fPlayerGroupMaxSeparation;
 
 public:
+    static void InjectHooks();
+
     CPedGroupMembership();
     CPedGroupMembership(const CPedGroupMembership& from);
     ~CPedGroupMembership();
@@ -37,11 +39,18 @@ public:
     int32 CountMembersExcludingLeader();
     void  Flush();
     void  From(const CPedGroupMembership& obj);
-    CPed* GetLeader();
+    CPed* GetLeader() const;
     CPed* GetMember(int32 memberId);
+
+    //! Is ped a follower (A member, but not the leader)
     bool  IsFollower(const CPed* ped) const;
-    bool  IsLeader(const CPed* ped);
-    bool  IsMember(const CPed* ped);
+
+    //! Is ped the leader
+    bool  IsLeader(const CPed* ped) const;
+
+    //! Is ped a member (follower or leader)
+    bool  IsMember(const CPed* ped) const;
+
     void  Process();
     void  RemoveAllFollowers(bool bCreatedByGameOnly);
     void  RemoveMember(int32 memberID);
@@ -100,6 +109,18 @@ public:
     auto GetMemberClosestTo(CPed* ped) { return GetMemberClosestToIf(ped, [](CPed&) { return true; }); }
 
     static int32 GetObjectForPedToHold();
+
+private: // Wrappers for hooks
+    // 0x5F6930
+    CPedGroupMembership* Constructor() {
+        this->CPedGroupMembership::CPedGroupMembership();
+        return this;
+    }
+    //// 0x5FB140 
+    //CPedGroupMembership* Constructor(CPedGroupMembership const& ojb) { // copy ctor
+    //    this->CPedGroupMembership::CPedGroupMembership(ojb);
+    //    return this;
+    //}
 };
 
 VALIDATE_SIZE(CPedGroupMembership, 0x28);
