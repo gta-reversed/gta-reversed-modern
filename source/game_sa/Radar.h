@@ -288,6 +288,7 @@ public:
     static void ClearActualBlip(int32 blipIndex);
     static void ClearActualBlip(tRadarTrace& trace);
     static void ClearBlipForEntity(eBlipType blipType, int32 entityHandle);
+    static void ClearBlipForEntity(CPed* ped);
     static void ClearBlip(tBlipHandle blip);
     static void SetupAirstripBlips();
     static void DrawBlips();

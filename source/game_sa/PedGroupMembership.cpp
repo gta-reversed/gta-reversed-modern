@@ -93,8 +93,30 @@ void CPedGroupMembership::RemoveAllFollowers(bool bCreatedByGameOnly) {
 }
 
 // 0x5F80D0
-void CPedGroupMembership::RemoveMember(int32 memberID) {
-    plugin::CallMethod<0x5F80D0, CPedGroupMembership*, int32>(this, memberID);
+void CPedGroupMembership::RemoveMember(int32 memIdx) {
+    const auto mem = m_apMembers[memIdx];
+    assert(mem);
+
+    CEntity::ClearReference(m_apMembers[memIdx]);
+
+    if (mem->IsPlayer()) {
+        return;
+    }
+
+    if (mem->bClearRadarBlipOnDeath) {
+        CRadar::ClearBlipForEntity(mem);
+        mem->bClearRadarBlipOnDeath = false;
+    }
+
+    mem->GetIntelligence()->RestorePedDecisionMakerType();
+
+    if (const auto leader = GetLeader()) {
+        if (const auto plyrdat = leader->m_pPlayerData) {
+            mem->bDrownsInWater = true;
+        }
+    }
+
+
 }
 
 // 0x5FB1D0
@@ -104,7 +126,7 @@ char CPedGroupMembership::RemoveNFollowers(int32 count) {
 
 // 0x5FB9C0
 void CPedGroupMembership::SetLeader(CPed* ped) {
-    plugin::CallMethod<0x5FB9C0, CPedGroupMembership*, CPed*>(this, ped);
+    
 }
 
 // 0x5F6950
@@ -133,7 +155,7 @@ void CPedGroupMembership::InjectHooks() {
     //RH_ScopedOverloadedInstall(RemoveMember, "ByPed", 0x5FB210, void(CPedGroupMembership::*)(CPed*), {.reversed = false});
     RH_ScopedInstall(RemoveNFollowers, 0x5FB1D0, {.reversed = false});
     RH_ScopedInstall(RemoveAllFollowers, 0x5FB190, {.reversed = false});
-    RH_ScopedOverloadedInstall(RemoveMember, "ByMemIdx", 0x5F80D0, void(CPedGroupMembership::*)(int32), {.reversed = false});
+    RH_ScopedOverloadedInstall(RemoveMember, "ByMemIdx", 0x5F80D0, void(CPedGroupMembership::*)(int32));
     RH_ScopedInstall(AddFollower, 0x5F8020, {.reversed = false});
     RH_ScopedInstall(From, 0x5F7FE0, {.reversed = false});
     RH_ScopedInstall(AddMember, 0x5F6AE0, {.reversed = false});
@@ -147,7 +169,7 @@ void CPedGroupMembership::InjectHooks() {
     RH_ScopedInstall(GetMember, 0x5F69B0);
 
     RH_ScopedInstall(GetLeader, 0x5F69A0);
-    RH_ScopedInstall(SetLeader, 0x5FB9C0, {.reversed = false});
+    RH_ScopedInstall(SetLeader, 0x5FB9C0);
 
     RH_ScopedInstall(Process, 0x5FBA60, {.reversed = false});
 }
