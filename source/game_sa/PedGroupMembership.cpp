@@ -97,8 +97,16 @@ void CPedGroupMembership::Process() {
 }
 
 // 0x5FB190
-void CPedGroupMembership::RemoveAllFollowers(bool bCreatedByGameOnly) {
-    plugin::CallMethod<0x5FB190, CPedGroupMembership*, bool>(this, bCreatedByGameOnly);
+void CPedGroupMembership::RemoveAllFollowers(bool bCreatedByMissionOnly) {
+    for (auto&& [i, mem] : notsa::enumerate(m_apMembers)) {
+        if (i == LEADER_MEM_ID) { // Leader isn't a follower
+            continue;
+        }
+        if (bCreatedByMissionOnly && mem->IsCreatedBy(PED_MISSION)) {
+            continue;
+        }
+        RemoveMember(i);
+    }
 }
 
 // 0x5F80D0
@@ -202,7 +210,7 @@ void CPedGroupMembership::InjectHooks() {
     RH_ScopedInstall(AppointNewLeader, 0x5FB240, {.reversed = false});
 
     RH_ScopedInstall(RemoveNFollowers, 0x5FB1D0, {.reversed = false});
-    RH_ScopedInstall(RemoveAllFollowers, 0x5FB190, {.reversed = false});
+    RH_ScopedInstall(RemoveAllFollowers, 0x5FB190);
     RH_ScopedOverloadedInstall(RemoveMember, "ByPed", 0x5FB210, void(CPedGroupMembership::*)(CPed*));
     RH_ScopedOverloadedInstall(RemoveMember, "ByMemIdx", 0x5F80D0, void(CPedGroupMembership::*)(int32));
 

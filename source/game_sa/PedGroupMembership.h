@@ -67,12 +67,12 @@ public:
     /// Whenever `AddFollower` can be called to add a new follower
     bool CanAddFollower();
 
-    /// Get all the members (including the leader)
-    auto GetMembers(bool bExcludeLeader = false) {
+    //! Get all the members
+    auto GetMembers(bool bIncludeLeader = true) {
         assert(LEADER_MEM_ID == m_apMembers.size() - 1); // the drop below requires this
         return
             m_apMembers
-            | rng::views::drop(bExcludeLeader ? 1 : 0) // Last member is the leader
+            | rng::views::drop(bIncludeLeader ? 0 : 1) // Last member is the leader
             | rng::views::filter(notsa::NotIsNull{})
             | rng::views::transform([](CPed* mem) -> CPed& { return *mem; }); // Dereference
     }
