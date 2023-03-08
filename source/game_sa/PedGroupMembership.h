@@ -17,9 +17,10 @@ const int32 TOTAL_PED_GROUP_MEMBERS = 8;
 const int32 TOTAL_PED_GROUP_FOLLOWERS = TOTAL_PED_GROUP_MEMBERS - 1;
 
 class CPedGroupMembership {
+    static constexpr int32 LEADER_MEM_ID = 7; ///< Leader member ID
 public:
     CPedGroup* m_pPedGroup;
-    std::array<CPed*, TOTAL_PED_GROUP_MEMBERS> m_apMembers; // m_apMembers[7] is the leader
+    std::array<CPed*, TOTAL_PED_GROUP_MEMBERS> m_apMembers; // m_apMembers[LEADER_MEM_ID] is the leader
     float m_fSeparationRange;
 
     static const float& ms_fMaxSeparation;
@@ -41,7 +42,7 @@ public:
     void  From(const CPedGroupMembership& obj);
     CPed* GetLeader() const;
     CPed* GetMember(int32 memberId);
-
+    int32 GetMemberId(const CPed* ped) const;
     //! Is ped a follower (A member, but not the leader)
     bool  IsFollower(const CPed* ped) const;
 
@@ -52,9 +53,12 @@ public:
     bool  IsMember(const CPed* ped) const;
 
     void  Process();
+
     void  RemoveAllFollowers(bool bCreatedByGameOnly);
     void  RemoveMember(int32 memberID);
+    void  RemoveMember(CPed* ped);
     char  RemoveNFollowers(int32 count);
+
     void  SetLeader(CPed* ped);
 
     /// Get a random ped from the group. Might return null.
@@ -65,6 +69,7 @@ public:
 
     /// Get all the members (including the leader)
     auto GetMembers(bool bExcludeLeader = false) {
+        assert(LEADER_MEM_ID == m_apMembers.size() - 1); // the drop below requires this
         return
             m_apMembers
             | rng::views::drop(bExcludeLeader ? 1 : 0) // Last member is the leader

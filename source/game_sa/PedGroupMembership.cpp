@@ -67,6 +67,15 @@ CPed* CPedGroupMembership::GetMember(int32 memberId) {
     return m_apMembers[memberId];
 }
 
+int32 CPedGroupMembership::GetMemberId(const CPed* ped) const {
+    for (auto&& [id, mem] : notsa::enumerate(m_apMembers)) {
+        if (mem == ped) {
+            return id;
+        }
+    }
+    return -1;
+}
+
 // 0x5F69E0
 bool CPedGroupMembership::IsFollower(const CPed* ped) const {
     return !IsLeader(ped) && IsMember(ped);
@@ -97,7 +106,7 @@ void CPedGroupMembership::RemoveMember(int32 memIdx) {
     const auto mem = m_apMembers[memIdx];
     assert(mem);
 
-    CEntity::ClearReference(m_apMembers[memIdx]);
+    CEntity::ClearReference(m_apMembers[memIdx]); // Does `m_apMembers[memIdx] = nullptr`
 
     if (mem->IsPlayer()) {
         return;
@@ -115,8 +124,13 @@ void CPedGroupMembership::RemoveMember(int32 memIdx) {
             mem->bDrownsInWater = true;
         }
     }
+}
 
-
+// 0x5FB210
+void CPedGroupMembership::RemoveMember(CPed* ped) {
+    if (const auto id = GetMemberId(ped); id != -1) {
+        RemoveMember(id);
+    }
 }
 
 // 0x5FB1D0
@@ -126,12 +140,30 @@ char CPedGroupMembership::RemoveNFollowers(int32 count) {
 
 // 0x5FB9C0
 void CPedGroupMembership::SetLeader(CPed* ped) {
-    
+    assert(ped);
+
+    // Remove member (Just in case he's in the group already)
+    RemoveMember(ped);
+
+    // Remov the current leader (If any)
+    if (GetLeader()) {
+        RemoveMember(GetLeader());
+    }
+
+    // Now add member as the leader
+    AddMember(ped, LEADER_MEM_ID);
+
+    if (!m_pPedGroup->m_bIsMissionGroup && ped->IsCurrentlyUnarmed()) {
+        if (const auto obj = GetObjectForPedToHold(); obj != -1) {
+            ped->GiveObjectToPedToHold(obj, true);
+        }
+    }
 }
 
 // 0x5F6950
 int32 CPedGroupMembership::GetObjectForPedToHold() {
-    return plugin::CallAndReturn<int32, 0x5F6950>();
+    using namespace ModelIndices;
+    return CGeneral::RandomChoiceFromList({ (eModelID)MI_GANG_SMOKE, MODEL_INVALID, (eModelID)MI_GANG_DRINK }); // Each has 33% chance
 }
 
 bool CPedGroupMembership::CanAddFollower() {
@@ -149,16 +181,10 @@ void CPedGroupMembership::InjectHooks() {
     RH_ScopedOverloadedInstall(Constructor, "", 0x5F6930, CPedGroupMembership * (CPedGroupMembership::*)());
     //RH_ScopedOverloadedInstall(Constructor, "", 0x5FB140, CPedGroupMembership * (CPedGroupMembership::*)(CPedGroupMembership const&)); // copy ctor
 
-    RH_ScopedGlobalInstall(GetObjectForPedToHold, 0x5F6950, {.reversed = false});
+    RH_ScopedGlobalInstall(GetObjectForPedToHold, 0x5F6950);
 
-    RH_ScopedInstall(AppointNewLeader, 0x5FB240, {.reversed = false});
-    //RH_ScopedOverloadedInstall(RemoveMember, "ByPed", 0x5FB210, void(CPedGroupMembership::*)(CPed*), {.reversed = false});
-    RH_ScopedInstall(RemoveNFollowers, 0x5FB1D0, {.reversed = false});
-    RH_ScopedInstall(RemoveAllFollowers, 0x5FB190, {.reversed = false});
-    RH_ScopedOverloadedInstall(RemoveMember, "ByMemIdx", 0x5F80D0, void(CPedGroupMembership::*)(int32));
-    RH_ScopedInstall(AddFollower, 0x5F8020, {.reversed = false});
     RH_ScopedInstall(From, 0x5F7FE0, {.reversed = false});
-    RH_ScopedInstall(AddMember, 0x5F6AE0, {.reversed = false});
+
     RH_ScopedInstall(CountMembersExcludingLeader, 0x5F6AA0, {.reversed = false});
     RH_ScopedInstall(CountMembers, 0x5F6A50, {.reversed = false});
 
@@ -167,9 +193,18 @@ void CPedGroupMembership::InjectHooks() {
     RH_ScopedInstall(IsLeader, 0x5F69C0);
 
     RH_ScopedInstall(GetMember, 0x5F69B0);
+    RH_ScopedInstall(AddMember, 0x5F6AE0, {.reversed = false});
+
+    RH_ScopedInstall(AddFollower, 0x5F8020, {.reversed = false});
 
     RH_ScopedInstall(GetLeader, 0x5F69A0);
     RH_ScopedInstall(SetLeader, 0x5FB9C0);
+    RH_ScopedInstall(AppointNewLeader, 0x5FB240, {.reversed = false});
+
+    RH_ScopedInstall(RemoveNFollowers, 0x5FB1D0, {.reversed = false});
+    RH_ScopedInstall(RemoveAllFollowers, 0x5FB190, {.reversed = false});
+    RH_ScopedOverloadedInstall(RemoveMember, "ByPed", 0x5FB210, void(CPedGroupMembership::*)(CPed*));
+    RH_ScopedOverloadedInstall(RemoveMember, "ByMemIdx", 0x5F80D0, void(CPedGroupMembership::*)(int32));
 
     RH_ScopedInstall(Process, 0x5FBA60, {.reversed = false});
 }
