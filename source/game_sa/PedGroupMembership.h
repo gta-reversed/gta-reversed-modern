@@ -55,9 +55,10 @@ public:
     bool CanAddFollower();
 
     /// Get all the members (including the leader)
-    auto GetMembers() {
+    auto GetMembers(bool bExcludeLeader = false) {
         return
             m_apMembers
+            | rng::views::drop(bExcludeLeader ? 1 : 0) // Last member is the leader
             | rng::views::filter(notsa::NotIsNull{})
             | rng::views::transform([](CPed* mem) -> CPed& { return *mem; }); // Dereference
     }
