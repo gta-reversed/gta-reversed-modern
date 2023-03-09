@@ -180,6 +180,17 @@ public:
         return { vec.x * multiplier, vec.y * multiplier, vec.z * multiplier };
     }
 
+#ifdef _DEBUG
+    bool HasNanOrInf() const {
+        for (auto i = 0; i < 3; i++) {
+            const auto v = (*this)[i];
+            if (std::isnan(v) || std::isinf(v)) {
+                return true;
+            }
+        }
+        return false;
+    }
+#endif
 };
 VALIDATE_SIZE(CVector, 0xC);
 
