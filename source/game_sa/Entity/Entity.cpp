@@ -930,15 +930,11 @@ void CEntity::UpdateRwFrame()
 }
 
 // 0x532B20
-void CEntity::UpdateRpHAnim()
-{
-    auto* firstAtomic = GetFirstAtomic(m_pRwClump);
-    if (!firstAtomic)
-        return;
-
-    if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(firstAtomic)) && !m_bDontUpdateHierarchy) {
-        auto* animHierarchy = GetAnimHierarchyFromSkinClump(m_pRwClump);
-        RpHAnimHierarchyUpdateMatrices(animHierarchy);
+void CEntity::UpdateRpHAnim() {
+    if (const auto atomic = GetFirstAtomic(m_pRwClump)) {
+        if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic)) && !m_bDontUpdateHierarchy) {
+            RpHAnimHierarchyUpdateMatrices(GetAnimHierarchyFromSkinClump(m_pRwClump));
+        }
     }
 }
 

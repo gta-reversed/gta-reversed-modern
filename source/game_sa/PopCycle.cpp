@@ -36,7 +36,7 @@ void CPopCycle::Initialise() {
     const auto file = CFileMgr::OpenFile("POPCYCLE.DAT", "r");
     CFileMgr::SetDir("");
 
-    const notsa::AutoCallOnDestruct autoCloser{ [&] { CFileMgr::CloseFile(file); } };
+    const notsa::ScopeGuard autoCloser{ [&] { CFileMgr::CloseFile(file); } };
 
     auto nline{ 1u };
     for (auto zone = 0; zone < (uint32)ZoneType::COUNT; zone++) {

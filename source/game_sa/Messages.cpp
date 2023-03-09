@@ -277,6 +277,7 @@ void CMessages::ClearPreviousBriefArray() {
 
 template<size_t N>
 void ClearThisPrint_Impl(std::array<tMessage, N>& messages, const char* text, auto&& OnFirstMessageCleared) {
+    assert(text);
     for (;;) {
         size_t i = 0;
         for (;;) {
@@ -335,6 +336,7 @@ void CMessages::ClearThisPrint(const char* text) {
 // Removes big message with this text
 // 0x69EBE0
 void CMessages::ClearThisBigPrint(const char* text) {
+    assert(text);
     for (size_t b = 0; b < NUM_MESSAGE_STYLES; b++) {
         ClearThisPrint_Impl(BIGMessages[b].Stack, text, [](tMessage&) { /*nop*/ });
     }
@@ -343,7 +345,7 @@ void CMessages::ClearThisBigPrint(const char* text) {
 // Removes first big message in messages stack
 // 0x69ED80
 void CMessages::ClearThisPrintBigNow(eMessageStyle style) {
-    for (auto& msg : BIGMessages[style].Stack) {
+    if (auto& msg = BIGMessages[style].Stack[0]; msg.Text) {
         ClearThisBigPrint(msg.Text);
     }
     CHud::BigMessageX[style] = 0.f;

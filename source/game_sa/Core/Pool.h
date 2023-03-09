@@ -285,8 +285,8 @@ public:
     auto GetAllValid() {
         using namespace std;
         return span{ m_pObjects, (size_t)m_nSize }
-            | views::filter([this](auto&& obj) { return !IsFreeSlotAtIndex(GetIndex(&obj)); }) // Filter only slots in use
-            | views::transform([](auto&& obj) -> T {
+            | rngv::filter([this](auto&& obj) { return !IsFreeSlotAtIndex(GetIndex(&obj)); }) // Filter only slots in use
+            | rngv::transform([](auto&& obj) -> T {
                 if constexpr (std::is_pointer_v<T>) { // For pointers we also do an address-of
                     return static_cast<T>(&obj);
                 } else {

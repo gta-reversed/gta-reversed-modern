@@ -34,8 +34,8 @@ void CAnimBlendAssocGroup::CreateAssociations(const char* AnimName, RpClump* clu
 }
 
 // 0x4CE3B0
-void CAnimBlendAssocGroup::CreateAssociations(const char* AnimName, const char* arg2, const char* arg3, int32 arg4) {
-    plugin::CallMethod<0x4CE3B0, CAnimBlendAssocGroup*, const char*, const char*, const char*, int32>(this, AnimName, arg2, arg3, arg4);
+void CAnimBlendAssocGroup::CreateAssociations(const char* AnimName, const char* arg2, const char* arg3, uint32 strStorageSz) {
+    plugin::CallMethod<0x4CE3B0, CAnimBlendAssocGroup*, const char*, const char*, const char*, int32>(this, AnimName, arg2, arg3, strStorageSz);
 }
 
 // 0x4CDFF0

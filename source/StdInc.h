@@ -27,6 +27,7 @@
 
 #include <ranges>
 namespace rng = std::ranges;
+namespace rngv = std::views;
 
 #include "Base.h"
 #include "config.h"

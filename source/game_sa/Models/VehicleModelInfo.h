@@ -130,8 +130,7 @@ VALIDATE_SIZE(UpgradePosnDesc, 0x20);
 class NOTSA_EXPORT_VTABLE CVehicleModelInfo : public CClumpModelInfo {
 public:
     RpMaterial*        m_pPlateMaterial;
-    char               m_szPlateText[8];
-    char               field_30;
+    char               m_szPlateText[9];
     uint8              m_nPlateType;
     char               m_szGameName[8];
     eVehicleType       m_nVehicleType;
