@@ -311,3 +311,18 @@ void CControllerConfigManager::AffectPadFromMouse() {
 void CControllerConfigManager::DeleteMatchingActionInitiators(eControllerAction Action, int32 KeyToBeChecked, eControllerType ControllerTypeToBeChecked) {
     plugin::CallMethod<0x531C90, CControllerConfigManager*, eControllerAction, int32, eControllerType>(this, Action, KeyToBeChecked, ControllerTypeToBeChecked);
 }
+
+// 0x5303D0
+void CControllerConfigManager::GetDefinedKeyByGxtName(uint16 actionId, char* buf, uint16 bufsz) {
+    plugin::CallMethod<0x5303D0>(this, actionId, buf, bufsz);
+}
+
+// NOTSA
+uint16 CControllerConfigManager::GetActionIDByName(std::string_view name) {
+    for (auto&& [i, actionName] : notsa::enumerate(m_arrControllerActionName)) {
+        if (std::string_view{ actionName } == name) {
+            return i;
+        }
+    }
+    return (uint16)-1;
+}
