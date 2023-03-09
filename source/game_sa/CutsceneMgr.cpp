@@ -969,6 +969,7 @@ void CCutsceneMgr::Update() {
 
 // 0x5B1720
 void CCutsceneMgr::Update_overlay() {
+    CIplStore::AddIplsNeededAtPosn(ms_cutsceneOffset);
     switch (ms_cutsceneLoadStatus) {
     case LoadStatus::LOADING: {
         CTimer::Suspend();
@@ -1088,7 +1089,7 @@ void CCutsceneMgr::InjectHooks() {
     RH_ScopedClass(CCutsceneMgr);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedGlobalInstall(FindCutsceneAudioTrackId, 0x8D0AA8, {.locked = true}); // Calling the original function from our code crashes
+    //RH_ScopedGlobalInstall(FindCutsceneAudioTrackId, 0x8D0AA8, {.locked = true}); // Calling the original function from our code crashes, and vice versa
     RH_ScopedGlobalInstall(SetCutsceneAnim, 0x5B0390);
     RH_ScopedGlobalInstall(SetCutsceneAnimToLoop, 0x5B0420);
     RH_ScopedGlobalInstall(SetHeadAnim, 0x5B0440);
