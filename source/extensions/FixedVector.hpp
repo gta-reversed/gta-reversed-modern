@@ -14,3 +14,16 @@ struct FixedVector {
 public: // Public, because in some cases it might be useful to only access 1
     FixedFloat<T, CompressValue> x{}, y{}, z{};
 };
+
+template<typename T, float CompressValue>
+struct FixedVector2D {
+    constexpr FixedVector2D() = default;
+    constexpr FixedVector2D(float X, float Y) : x(X), y(Y) {}
+    constexpr FixedVector2D(CVector2D v2d) : FixedVector2D{v2d.x, v2d.y} {}
+    explicit constexpr FixedVector2D(T X, T Y) : FixedVector2D{ x, y }  {}
+
+    constexpr operator CVector2D() const { return { x, y }; }
+
+public: // Public, because in some cases it might be useful to only access 1
+    FixedFloat<T, CompressValue> x{}, y{};
+};

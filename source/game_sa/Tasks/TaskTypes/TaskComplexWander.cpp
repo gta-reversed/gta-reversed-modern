@@ -176,7 +176,7 @@ CTask* CTaskComplexWander::ControlSubTask_Reversed(CPed* ped) {
 // 0x669DA0
 void CTaskComplexWander::UpdateDir_Reversed(CPed* ped) {
     uint8 newDir = m_nDir;
-    if (m_NextNode.IsAreaValid()) {
+    if (m_NextNode.IsValid()) {
         const CPathNode* pathNodes = ThePaths.m_pPathNodes[m_NextNode.m_wAreaId];
         if (pathNodes) {
             const CPathNode* pathNode = &pathNodes[m_NextNode.m_wNodeId];
@@ -221,7 +221,7 @@ void CTaskComplexWander::UpdatePathNodes_Reversed(const CPed* ped, uint8 dir, CN
     originNode = targetNode;
     targetNode.m_wAreaId = (uint16)-1;
     const CVector& pos = ped->GetPosition();
-    ThePaths.FindNextNodeWandering(PATH_TYPE_BOATS, pos, &originNode, &targetNode, dir, &outDir);
+    ThePaths.FindNextNodeWandering(PATH_TYPE_PED, pos, &originNode, &targetNode, dir, &outDir);
 }
 
 // 0x671CB0
@@ -272,7 +272,7 @@ void CTaskComplexWander::ComputeTargetPos(const CPed* ped, CVector& outTargetPos
 
 // 0x669F30
 bool CTaskComplexWander::ValidNodes() const {
-    if (m_NextNode.IsAreaValid() && m_LastNode.IsAreaValid()) {
+    if (m_NextNode.IsValid() && m_LastNode.IsValid()) {
         if (m_NextNode.m_wAreaId != m_LastNode.m_wAreaId || m_NextNode.m_wNodeId != m_LastNode.m_wNodeId) {
             return true;
         }
@@ -282,7 +282,7 @@ bool CTaskComplexWander::ValidNodes() const {
 
 // 0x674560
 void CTaskComplexWander::ScanForBlockedNodes(CPed* ped) {
-    if (m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT && m_NextNode.IsAreaValid()) {
+    if (m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT && m_NextNode.IsValid()) {
         if (ScanForBlockedNode(ped, m_NextNode)) {
             m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_LEISURE, nullptr);
 
@@ -341,7 +341,7 @@ float CTaskComplexWander::GetDistSqOfClosestPathNodeToPed(CPed* ped) {
     return rng::min(
         std::array{ m_NextNode, m_LastNode }
      | rng::views::transform([ped](CNodeAddress node) {
-            if (node.IsValid() && ThePaths.IsNodesLoaded(node)) {
+            if (node.IsValid() && ThePaths.IsAreaNodesAvailable(node)) {
                 return (ped->GetPosition() - ThePaths.GetPathNode(node)->GetNodeCoors()).SquaredMagnitude();
             }
             return 999'999.f;

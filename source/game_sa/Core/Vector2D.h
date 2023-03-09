@@ -150,6 +150,18 @@ public:
     //! Also see `GetPerpRight` and `RotatedBy`
     CVector2D GetPerpLeft() const;
 
+    /*!
+    * @notsa
+    * @return Make all component's values absolute (positive).
+    */
+    static friend CVector2D abs(CVector2D v2) {
+        return { std::abs(v2.x), std::abs(v2.y) };
+    }
+
+    static friend CVector2D pow(CVector2D vec, float power) { // todo/note: maybe use operator^?
+        return { std::pow(vec.x, power), std::pow(vec.y, power) };
+    }
+
     float operator[](size_t i) const {
         return (&x)[i];
     }
@@ -159,12 +171,13 @@ public:
     }
 };
 
-constexpr inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {
-    return { vecOne.x - vecTwo.x, vecOne.y - vecTwo.y };
+/// Negate all components of the vector
+constexpr inline CVector2D operator-(const CVector2D& lhs) {
+    return { -lhs.x, -lhs.y };
 }
 
-constexpr inline CVector2D operator-(const CVector2D& vecOne) {
-    return { -vecOne.x, -vecOne.y };
+constexpr inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {
+    return { vecOne.x - vecTwo.x, vecOne.y - vecTwo.y };
 }
 
 constexpr inline CVector2D operator+(const CVector2D& vecOne, const CVector2D& vecTwo) {
@@ -225,7 +238,3 @@ constexpr static bool IsPointInRectangle2D(CVector2D rectTopLeft, CVector2D rect
 }
 
 static CVector2D Normalized2D(CVector2D v) { v.Normalise(); return v; }
-
-static auto abs(const CVector2D& v2d) {
-    return CVector2D{ std::abs(v2d.x), std::abs(v2d.y) };
-}
