@@ -205,7 +205,7 @@ CTask* CTaskComplexProstituteSolicit::CreateNextSubTask(CPed* ped) {
     switch (m_pSubTask->GetTaskType()) {
     case TASK_COMPLEX_TURN_TO_FACE_ENTITY:
         ped->Say(192);
-        CMessages::AddMessage(TheText.Get("PROS_04"), 5000, 1, true); // You want a good time, honey?
+        CMessages::AddMessageQ(TheText.Get("PROS_04"), 5000, 1, true); // You want a good time, honey?
         return CreateSubTask(TASK_SIMPLE_STAND_STILL, ped);
 
     case TASK_COMPLEX_SEEK_ENTITY:
@@ -234,8 +234,8 @@ CTask* CTaskComplexProstituteSolicit::CreateNextSubTask(CPed* ped) {
             return CreateSubTask(TASK_COMPLEX_ENTER_CAR_AS_PASSENGER, ped);
         }
         CMessages::ClearMessages(false);
-        CMessages::AddMessage(TheText.Get("PROS_06"), 2000, 1, true); // You've got money right?
-        CMessages::AddMessage(TheText.Get("PROS_09"), 3000, 1, true); // Stop wasting my time!
+        CMessages::AddMessageQ(TheText.Get("PROS_06"), 2000, 1, true); // You've got money right?
+        CMessages::AddMessageQ(TheText.Get("PROS_09"), 3000, 1, true); // Stop wasting my time!
         return CreateSubTask(TASK_FINISHED, ped);
     }
 
