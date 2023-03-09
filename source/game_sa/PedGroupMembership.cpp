@@ -80,7 +80,9 @@ int32 CPedGroupMembership::CountMembersExcludingLeader() {
 // 0x5FB160
 void CPedGroupMembership::Flush() {
     for (auto i = 0u; i < m_members.size(); i++) {
-        RemoveMember(i);
+        if (GetMember(i)) {
+            RemoveMember(i);
+        }
     }
 }
 
