@@ -176,7 +176,10 @@ void CCutsceneMgr::DeleteCutsceneData_overlay() {
 
     CMessages::ClearMessages(false);
     CRubbish::SetVisibility(false);
-    
+
+    ms_cutsceneProcessing = false;
+    ms_useLodMultiplier = false;
+
     // Delete cutscene objects
     for (auto& obj : ms_pCutsceneObjects | rngv::take(ms_numCutsceneObjs)) {
         assert(obj);
@@ -252,8 +255,8 @@ void CCutsceneMgr::DeleteCutsceneData_overlay() {
 // 0x5B04D0
 void CCutsceneMgr::FinishCutscene() {
     if (dataFileLoaded) {
-        ms_cutsceneTimerS = TheCamera.CCamera::GetCutSceneFinishTime() / 1000.f;
-        TheCamera.CCamera::FinishCutscene();
+        ms_cutsceneTimerS = TheCamera.GetCutSceneFinishTime() / 1000.f;
+        TheCamera.FinishCutscene();
     }
     FindPlayerPed()->m_bIsVisible = true;
     FindPlayerInfo().MakePlayerSafe(false, 10000.f);
@@ -534,7 +537,7 @@ bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
         REMOVE,
         PEFFECT,
         EXTRACOL,
-        END         // Technically not a section, but rather the end of one
+        MOTION      // Unused section, but has to be present in order to avoid asserts
     };
 
     using namespace std::string_view_literals;
@@ -550,7 +553,7 @@ bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
             { "remove"sv,     REMOVE     },
             { "peffect"sv,    PEFFECT    },
             { "extracol"sv,   EXTRACOL   },
-            { "end"sv,        END        } 
+            { "motion"sv,     MOTION     } 
         };
         for (const auto& [name, sec] : mapping) {
             if (str == name) {
@@ -593,6 +596,8 @@ bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
             assert(curSec != NONE);
             break;
         }
+        case MOTION:
+            break; // Unused section, so skip parsing
         case INFO: { // 0x5B09F2
             if (lnsv.starts_with("offset"sv)) {
                 auto& o = ms_cutsceneOffset;
