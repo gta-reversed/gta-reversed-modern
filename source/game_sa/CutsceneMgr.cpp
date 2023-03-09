@@ -1027,7 +1027,7 @@ void CCutsceneMgr::Update_overlay() {
 
         // Deal with text upcoming texts
         if (ms_currTextOutput < ms_numTextOutput && csTimeMS >= ms_iTextStartTime[ms_currTextOutput]) {
-            CMessages::AddMessageJumpQ(
+            CMessages::AddMessageJump(
                 TheText.Get(ms_cTextOutput[ms_currTextOutput]),
                 ms_iTextDuration[ms_currTextOutput],
                 1,
