@@ -141,7 +141,7 @@ void CPedGroupMembership::Process() {
     }
 
     // Now that we have a leader, check for separation distance and remove members further than it
-    const auto leaderPos = GetLeader()->GetPosition();
+    const auto& leaderPos = GetLeader()->GetPosition();
     for (auto&& [i, mem] : notsa::enumerate(m_members)) {
         if (!mem || mem->bNeverLeavesGroup) {
             continue;
