@@ -97,6 +97,11 @@ void CPedGroupMembership::RemoveMember(int32 memberID) {
     plugin::CallMethod<0x5F80D0, CPedGroupMembership*, int32>(this, memberID);
 }
 
+// 0x5FB210
+void CPedGroupMembership::RemoveMember(CPed& ped) {
+    plugin::CallMethod<0x5FB210>(this, &ped);
+}
+
 // 0x5FB1D0
 char CPedGroupMembership::RemoveNFollowers(int32 count) {
     return plugin::CallMethodAndReturn<char, 0x5FB1D0, CPedGroupMembership*, int32>(this, count);

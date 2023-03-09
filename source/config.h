@@ -9,3 +9,6 @@
 #ifdef BUILD_PC
 //#define USE_EU_STUFF
 #endif
+
+// Enables opcodes from III/VC that are not implemented in SA
+#define IMPLEMENT_UNSUPPORTED_OPCODES

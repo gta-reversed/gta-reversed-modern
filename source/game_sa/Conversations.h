@@ -16,6 +16,7 @@ public:
     static void RemoveConversationForPed(CPed* ped);
 
     static void Update();
+    static void SetUpConversationNode(const char*, const char*, const char*, int32, int32, int32);
     /* Check the signatures before starting work
     static bool IsPlayerInPositionForConversation(CPed* ped, bool);
     static bool IsConversationGoingOn();
@@ -26,7 +27,6 @@ public:
     static void FindFreeNodeSlot();
     static void FindConversationForPed(CPed* ped);
     static void FindFreeConversationSlot();
-    static void SetUpConversationNode(char*, char*, char*, int32, int32, int32);
     static void StartSettingUpConversation(CPed* ped);
     static void AwkwardSay(int32, CPed* ped);
      */

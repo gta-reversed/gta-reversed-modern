@@ -20,6 +20,9 @@ public:
     void ResetAreaId() { m_wAreaId = UINT16_MAX; }
     void ResetNodeId() { m_wNodeId = UINT16_MAX; }
 
-    [[nodiscard]] bool IsValid() const { return m_wAreaId != (uint16)-1; }};
+    [[nodiscard]] bool IsAreaValid() const { return m_wAreaId != (uint16)-1; }
+    [[nodiscard]] bool IsValid() const { return m_wAreaId != (uint16)-1 || m_wNodeId != (uint16)-1; }
 
+    operator bool() const { return IsValid(); }
+};
 VALIDATE_SIZE(CNodeAddress, 0x4);

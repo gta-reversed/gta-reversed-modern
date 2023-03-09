@@ -45,41 +45,41 @@ public:
     union {
         struct {
             /* https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CEntitySA.h */
-            uint32 m_bUsesCollision : 1;               // does entity use collision
-            uint32 m_bCollisionProcessed : 1;          // has object been processed by a ProcessEntityCollision function
-            uint32 m_bIsStatic : 1;                    // is entity static
-            uint32 m_bHasContacted : 1;                // has entity processed some contact forces
-            uint32 m_bIsStuck : 1;                     // is entity stuck
-            uint32 m_bIsInSafePosition : 1;            // is entity in a collision free safe position
-            uint32 m_bWasPostponed : 1;                // was entity control processing postponed
-            uint32 m_bIsVisible : 1;                   // is the entity visible
+            bool m_bUsesCollision : 1;               // does entity use collision
+            bool m_bCollisionProcessed : 1;          // has object been processed by a ProcessEntityCollision function
+            bool m_bIsStatic : 1;                    // is entity static
+            bool m_bHasContacted : 1;                // has entity processed some contact forces
+            bool m_bIsStuck : 1;                     // is entity stuck
+            bool m_bIsInSafePosition : 1;            // is entity in a collision free safe position
+            bool m_bWasPostponed : 1;                // was entity control processing postponed
+            bool m_bIsVisible : 1;                   // is the entity visible
 
-            uint32 m_bIsBIGBuilding : 1;               // Set if this entity is a big building
-            uint32 m_bRenderDamaged : 1;               // use damaged LOD models for objects with applicable damage
-            uint32 m_bStreamingDontDelete : 1;         // Don't let the streaming remove this
-            uint32 m_bRemoveFromWorld : 1;             // remove this entity next time it should be processed
-            uint32 m_bHasHitWall : 1;                  // has collided with a building (changes subsequent collisions)
-            uint32 m_bImBeingRendered : 1;             // don't delete me because I'm being rendered
-            uint32 m_bDrawLast : 1;                    // draw object last
-            uint32 m_bDistanceFade : 1;                // Fade entity because it is far away
+            bool m_bIsBIGBuilding : 1;               // Set if this entity is a big building
+            bool m_bRenderDamaged : 1;               // use damaged LOD models for objects with applicable damage
+            bool m_bStreamingDontDelete : 1;         // Don't let the streaming remove this
+            bool m_bRemoveFromWorld : 1;             // remove this entity next time it should be processed
+            bool m_bHasHitWall : 1;                  // has collided with a building (changes subsequent collisions)
+            bool m_bImBeingRendered : 1;             // don't delete me because I'm being rendered
+            bool m_bDrawLast : 1;                    // draw object last
+            bool m_bDistanceFade : 1;                // Fade entity because it is far away
 
-            uint32 m_bDontCastShadowsOn : 1;           // Don't cast shadows on this object
-            uint32 m_bOffscreen : 1;                   // offscreen flag. This can only be trusted when it is set to true
-            uint32 m_bIsStaticWaitingForCollision : 1; // this is used by script created entities - they are static until the collision is loaded below them
-            uint32 m_bDontStream : 1;                  // tell the streaming not to stream me
-            uint32 m_bUnderwater : 1;                  // this object is underwater change drawing order
-            uint32 m_bHasPreRenderEffects : 1;         // Object has a prerender effects attached to it
-            uint32 m_bIsTempBuilding : 1;              // whether the building is temporary (i.e. can be created and deleted more than once)
-            uint32 m_bDontUpdateHierarchy : 1;         // Don't update the animation hierarchy this frame
+            bool m_bDontCastShadowsOn : 1;           // Don't cast shadows on this object
+            bool m_bOffscreen : 1;                   // offscreen flag. This can only be trusted when it is set to true
+            bool m_bIsStaticWaitingForCollision : 1; // this is used by script created entities - they are static until the collision is loaded below them
+            bool m_bDontStream : 1;                  // tell the streaming not to stream me
+            bool m_bUnderwater : 1;                  // this object is underwater change drawing order
+            bool m_bHasPreRenderEffects : 1;         // Object has a prerender effects attached to it
+            bool m_bIsTempBuilding : 1;              // whether the building is temporary (i.e. can be created and deleted more than once)
+            bool m_bDontUpdateHierarchy : 1;         // Don't update the animation hierarchy this frame
 
-            uint32 m_bHasRoadsignText : 1;             // entity is roadsign and has some 2dEffect text stuff to be rendered
-            uint32 m_bDisplayedSuperLowLOD : 1;
-            uint32 m_bIsProcObject : 1;                // set object has been generated by procedural object generator
-            uint32 m_bBackfaceCulled : 1;              // has backface culling on
-            uint32 m_bLightObject : 1;                 // light object with directional lights
-            uint32 m_bUnimportantStream : 1;           // set that this object is unimportant, if streaming is having problems
-            uint32 m_bTunnel : 1;                      // Is this model part of a tunnel
-            uint32 m_bTunnelTransition : 1;            // This model should be rendered from within and outside the tunnel
+            bool m_bHasRoadsignText : 1;             // entity is roadsign and has some 2dEffect text stuff to be rendered
+            bool m_bDisplayedSuperLowLOD : 1;
+            bool m_bIsProcObject : 1;                // set object has been generated by procedural object generator
+            bool m_bBackfaceCulled : 1;              // has backface culling on
+            bool m_bLightObject : 1;                 // light object with directional lights
+            bool m_bUnimportantStream : 1;           // set that this object is unimportant, if streaming is having problems
+            bool m_bTunnel : 1;                      // Is this model part of a tunnel
+            bool m_bTunnelTransition : 1;            // This model should be rendered from within and outside the tunnel
         };
         uint32 m_nFlags;
     };

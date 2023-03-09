@@ -3675,6 +3675,17 @@ bool CPed::IsRunningOrSprinting() const {
     return false;
 }
 
+bool CPed::IsPedStandingInPlace() const {
+    switch (m_nMoveState) {
+    case PEDMOVE_NONE:
+    case PEDMOVE_STILL:
+    case PEDMOVE_TURN_L:
+    case PEDMOVE_TURN_R:
+        return true;
+    }
+    return false;
+}
+
 // 0x6497A0
 bool SayJacked(CPed* jacked, CVehicle* vehicle, uint32 offset) {
     if (vehicle->m_vehicleAudio.GetVehicleTypeForAudio())

@@ -106,7 +106,7 @@ void CMessages::AddMessage2(const char* text, uint32 time, uint16 flag, bool bPr
 * Adds message to [Q]ueue
 * @addr 0x69F0B0
 */
-void CMessages::AddMessageQ(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
+void CMessages::AddMessageQ(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) { // Renamed from AddMessage
     /* Some string copy code here */
     AddMessage2(text, time, flag, bPreviousBrief, false);
 }
@@ -124,7 +124,7 @@ void CMessages::AddMessageWithStringQ(const char* text, uint32 time, uint16 flag
 * Show a message instantly
 * @addr 0x69F1E0
 */
-void CMessages::AddMessageJump(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
+void CMessages::AddMessageJump(const char* text, uint32 time, uint16 flag, bool bPreviousBrief) { // Renamed from AddMessageJumpQ
     /* unused string copy here */
     AddMessage2(text, time, flag, bPreviousBrief, true);
 }

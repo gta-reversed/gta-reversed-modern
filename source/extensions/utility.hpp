@@ -8,6 +8,16 @@
 
 
 namespace notsa {
+//template<typename TChar, size_t N>
+//struct basic_static_string {
+//    template<typename YChar>
+//    friend std::strong_ordering operator<=>(const basic_static_string<YChar>& self, std::basic_string_view<YChar> sv) {
+//        sv.compare(std::basic_string_view<YChar>{m_chars});
+//    }
+//    
+//private:
+//    TChar m_chars[N]{};
+//};
 namespace rng = std::ranges;
 
 /*!
@@ -255,7 +265,7 @@ static constexpr void IterateFunction(auto&& functor) {
 
     // Continue recursing if there's anything left
     if constexpr (Stop - Start > ChunkSize) {
-        IterateFunction<Start + ChunkSize, Stop>(functor);
+        IterateFunction<Start + ChunkSize, Stop, ChunkSize>(functor);
     }
 }
 

@@ -129,6 +129,8 @@ public:
     static CVector&        vecHunterGunPos; // { 0.0f, 4.8f, -1.3f }
     static CMatrix*        matW2B;
 
+    static constexpr auto Type = VEHICLE_TYPE_AUTOMOBILE;
+
 public:
     CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines);
     ~CAutomobile() override;

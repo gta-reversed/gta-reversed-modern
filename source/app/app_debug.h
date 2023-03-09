@@ -1,5 +1,5 @@
 #pragma once
-#include "common.h"
+//#include "common.h"
 
 namespace notsa {
 namespace detail {
@@ -10,6 +10,7 @@ static void VerifyMacroImpl(bool result) {
 };
 
 #define VERIFY notsa::detail::VerifyMacroImpl
+#define VERIFY_TODO_FIX(_expr) (_expr) // Macro used to mark shit that uses `VERIFY and sometimes fails
 
 #ifdef _DEBUG
 namespace notsa {
