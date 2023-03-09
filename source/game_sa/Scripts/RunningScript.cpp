@@ -7,7 +7,7 @@
 
 //! Define it to dump out all commands that don't have a custom handler (that is, they aren't reversed)
 //! Makes compilation slow, so don't enable unless necessary!
-#define DUMP_CUSTOM_COMMAND_HANDLERS_TO_FILE
+//#define DUMP_CUSTOM_COMMAND_HANDLERS_TO_FILE
 
 #ifdef DUMP_CUSTOM_COMMAND_HANDLERS_TO_FILE
 #include <fstream>
@@ -25,7 +25,7 @@
 
 // https://library.sannybuilder.com/#/sa
 
-//! Holds all custom command handlers (or null of entries with no custom handler)
+//! Holds all custom command handlers (or null for commands with no custom handler)
 static inline std::array<notsa::script::CommandHandlerFunction, (size_t)(COMMAND_HIGHEST_ID_TO_HOOK) + 1> s_CustomCommandHandlerTable{};
 
 void CRunningScript::InjectHooks() {
