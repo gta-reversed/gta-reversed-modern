@@ -222,6 +222,14 @@ public:
         }
     }
 
+    // Similar to `ChangeEntityReference`, but doesn't clear the old reference
+    template<typename T, typename Y>
+        requires std::is_base_of_v<CEntity, T> && std::is_base_of_v<CEntity, Y> 
+    static void SetEntityReference(T*& inOutRef, Y* entity) {
+        inOutRef = entity;
+        inOutRef->RegisterReference(reinterpret_cast<CEntity**>(&inOutRef));
+    }
+
     // Register a reference to the entity that is stored in that given reference
     template<typename T>
     static void RegisterReference(T*& ref) requires std::is_base_of_v<CEntity, T> {

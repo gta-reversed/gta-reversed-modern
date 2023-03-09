@@ -520,14 +520,12 @@ char* CVehicleModelInfo::GetCustomCarPlateText()
     return m_szPlateText;
 }
 
-void CVehicleModelInfo::SetCustomCarPlateText(char* text)
-{
-    if (!text) {
+void CVehicleModelInfo::SetCustomCarPlateText(char* text) {
+    if (text) {
+        strcpy_s(m_szPlateText, text); // OG code truncated to 8 chars, but we're not gonna do that (As we want to get errors instead of quietly truncating)
+    } else {
         m_szPlateText[0] = '\0';
-        return;
     }
-
-    strncpy_s(m_szPlateText, text, 8);
 }
 
 void CVehicleModelInfo::ReduceMaterialsInVehicle()
