@@ -124,9 +124,6 @@ template<typename... Ts>
 
 #define NOTSA_FORCEINLINE __forceinline
 
-//! An assert-like function that always executes the expression (Unlikes assert where it's lost in NDEBUG mode)
-#define NOTSA_AASSERT(_expr) do { bool res = !!(_expr); assert(res); } while(0);
-
 /*!
 * @brief Used for static variable references
 *

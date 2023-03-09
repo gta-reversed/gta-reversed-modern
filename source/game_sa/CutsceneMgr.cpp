@@ -601,7 +601,7 @@ bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
         case INFO: { // 0x5B09F2
             if (lnsv.starts_with("offset"sv)) {
                 auto& o = ms_cutsceneOffset;
-                NOTSA_AASSERT(sscanf_s(ln + strlen("offset"), "%f %f %f", &o.x, &o.y, &o.z) == 3);
+                VERIFY(sscanf_s(ln + strlen("offset"), "%f %f %f", &o.x, &o.y, &o.z) == 3);
 
                 // Warp ped out of the vehicle
                 if (const auto plyr = FindPlayerPed(); plyr->IsInVehicle()) {
@@ -656,7 +656,7 @@ bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
 
             int32 startTime, duration;
             auto& gxtEntry = ms_cTextOutput[numTxt];
-            NOTSA_AASSERT(sscanf_s(ln, "%d %d %s", &startTime, &duration, gxtEntry, std::size(gxtEntry)) == 3);
+            VERIFY(sscanf_s(ln, "%d %d %s", &startTime, &duration, gxtEntry, std::size(gxtEntry)) == 3);
             _strupr_s(gxtEntry);
 
             ms_iTextStartTime[numTxt] = startTime;
@@ -672,19 +672,19 @@ bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
         }
         case ATTACH: { // 0x5B0D40
             auto& a = ms_iAttachObjectToBone[ms_numAttachObjectToBones++];
-            NOTSA_AASSERT(sscanf_s(ln, "%d %d %d", &a.m_nCutscenePedObjectId, &a.m_nCutsceneAttachmentObjectId, &a.m_nBoneId) == 3);
+            VERIFY(sscanf_s(ln, "%d %d %d", &a.m_nCutscenePedObjectId, &a.m_nCutsceneAttachmentObjectId, &a.m_nBoneId) == 3);
             break;
         }
         case REMOVE: { // 0x5B0DBA
             auto& cr = ms_crToHideItems[ms_iNumHiddenEntities++];
             auto& p  = cr.m_vecPosn;
-            NOTSA_AASSERT(sscanf_s(ln, "%f %f %f %s", &p.x, &p.y, &p.z, cr.m_szObjectName, std::size(cr.m_szObjectName)) == 4);
+            VERIFY(sscanf_s(ln, "%f %f %f %s", &p.x, &p.y, &p.z, cr.m_szObjectName, std::size(cr.m_szObjectName)) == 4);
             break;
         }
         case PEFFECT: { // 0x5B0E1D
             // Originally used strtok, not sure why
             auto& csfx = ms_pParticleEffects[ms_iNumParticleEffects++];
-            NOTSA_AASSERT(sscanf_s(
+            VERIFY(sscanf_s(
                 ln, "%s %d %d %d %s %f %f %f %f %f %f",
                 csfx.m_szEffectName, std::size(csfx.m_szEffectName),
                 &csfx.m_nStartTime,
@@ -701,7 +701,7 @@ bool CCutsceneMgr::LoadCutSceneFile(const char* csFileName) {
                 continue;
             }
             int32 extraColIdx;
-            NOTSA_AASSERT(sscanf_s(ln, "%d", &extraColIdx) == 1);
+            VERIFY(sscanf_s(ln, "%d", &extraColIdx) == 1);
             if (extraColIdx) {
                 CTimeCycle::StartExtraColour(extraColIdx - 1, false);
                 hasSetExtraColors = true;
