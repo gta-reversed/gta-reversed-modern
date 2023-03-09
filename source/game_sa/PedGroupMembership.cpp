@@ -291,35 +291,24 @@ CPed* CPedGroupMembership::GetRandom() {
 
 void CPedGroupMembership::InjectHooks() {
     RH_ScopedClass(CPedGroupMembership);
-    RH_ScopedCategory(); // TODO: Change this to the appropriate category!
+    RH_ScopedCategoryGlobal();
 
-    RH_ScopedOverloadedInstall(Constructor, "", 0x5F6930, CPedGroupMembership * (CPedGroupMembership::*)());
-    //RH_ScopedOverloadedInstall(Constructor, "", 0x5FB140, CPedGroupMembership * (CPedGroupMembership::*)(CPedGroupMembership const&)); // copy ctor
-
-    RH_ScopedGlobalInstall(GetObjectForPedToHold, 0x5F6950);
-
-    RH_ScopedInstall(From, 0x5F7FE0, {.reversed = false});
-
-    RH_ScopedInstall(CountMembersExcludingLeader, 0x5F6AA0, {.reversed = false});
-    RH_ScopedInstall(CountMembers, 0x5F6A50, {.reversed = false});
-
+    RH_ScopedInstall(GetObjectForPedToHold, 0x5F6950);
+    RH_ScopedInstall(From, 0x5F7FE0);
+    RH_ScopedInstall(CountMembersExcludingLeader, 0x5F6AA0);
+    RH_ScopedInstall(CountMembers, 0x5F6A50);
     RH_ScopedInstall(IsMember, 0x5F6A10);
     RH_ScopedInstall(IsFollower, 0x5F69E0);
     RH_ScopedInstall(IsLeader, 0x5F69C0);
-
     RH_ScopedInstall(GetMember, 0x5F69B0);
-    RH_ScopedInstall(AddMember, 0x5F6AE0, {.reversed = false});
-
-    RH_ScopedInstall(AddFollower, 0x5F8020, {.reversed = false});
-
+    RH_ScopedInstall(AddMember, 0x5F6AE0);
+    RH_ScopedInstall(AddFollower, 0x5F8020);
     RH_ScopedInstall(GetLeader, 0x5F69A0);
     RH_ScopedInstall(SetLeader, 0x5FB9C0);
-    RH_ScopedInstall(AppointNewLeader, 0x5FB240, {.reversed = false});
-
+    RH_ScopedInstall(AppointNewLeader, 0x5FB240);
     RH_ScopedInstall(RemoveNFollowers, 0x5FB1D0);
     RH_ScopedInstall(RemoveAllFollowers, 0x5FB190);
     RH_ScopedOverloadedInstall(RemoveMember, "ByPed", 0x5FB210, void(CPedGroupMembership::*)(CPed*));
     RH_ScopedOverloadedInstall(RemoveMember, "ByMemIdx", 0x5F80D0, void(CPedGroupMembership::*)(int32));
-
     RH_ScopedInstall(Process, 0x5FBA60);
 }
