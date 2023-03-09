@@ -50,6 +50,7 @@ public:
     static void InjectHooks();
 
     CPedGroupIntelligence();
+    CPedGroupIntelligence(CPedGroup& owner); // notsa
     ~CPedGroupIntelligence();
 
     void Flush();

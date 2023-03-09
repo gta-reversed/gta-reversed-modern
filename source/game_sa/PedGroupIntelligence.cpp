@@ -28,6 +28,11 @@ CPedGroupIntelligence::CPedGroupIntelligence() {
     plugin::CallMethod<0x5F7250, CPedGroupIntelligence*>(this);
 }
 
+CPedGroupIntelligence::CPedGroupIntelligence(CPedGroup& owner) :
+    m_pPedGroup{ &owner }
+{
+}
+
 // Unknown address (If any)
 CPedGroupIntelligence::~CPedGroupIntelligence() {
     Flush(); // Not sure if it does this at all, but it worked so far, so let's leave it like this for now

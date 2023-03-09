@@ -3,23 +3,13 @@
 #include <functional>
 #include "PedGroupMembership.h"
 
-// 0x5F6930
-CPedGroupMembership::CPedGroupMembership() {
-    std::ranges::fill(m_apMembers, nullptr);
-    m_fSeparationRange = 60.0f;
+CPedGroupMembership::CPedGroupMembership(CPedGroup& group) :
+    m_group{&group}
+{
 }
 
 CPedGroupMembership::~CPedGroupMembership() {
     Flush();
-}
-
-// 0x5F7FE0
-void CPedGroupMembership::From(const CPedGroupMembership& obj) {
-    for (auto i = 0; i < TOTAL_PED_GROUP_MEMBERS; i++) {
-        AddMember(obj.m_apMembers[i], i);
-    }
-    m_pPedGroup        = obj.m_pPedGroup;
-    m_fSeparationRange = obj.m_fSeparationRange;
 }
 
 // 0x5F8020
@@ -39,6 +29,7 @@ void CPedGroupMembership::AddFollower(CPed* ped) {
     }
 
     const auto memId = FindIdForNewMember();
+    assert(memId != -1); 
     if (memId == -1) {
         return;
     }
@@ -48,13 +39,17 @@ void CPedGroupMembership::AddFollower(CPed* ped) {
 }
 
 // 0x5F6AE0
-void CPedGroupMembership::AddMember(CPed* member, int32 memberID) {
+void CPedGroupMembership::AddMember(CPed* member, int32 memIdx) {
+    assert(!m_members[memIdx]);
+    m_members[memIdx] = member;
+    CEntity::RegisterReference(m_members[memIdx]);
     /* dead code before checking if the member is in the player's group */
     if (!member->IsPlayer()) {
         member->GetIntelligence()->SetPedDecisionMakerType(0);
     }
 }
 
+// 0x5FB240
 void CPedGroupMembership::AppointNewLeader() {
     if (HasLeader()) {
         return;
@@ -66,38 +61,40 @@ void CPedGroupMembership::AppointNewLeader() {
     }
 
     RemoveMember(memId); // Must call as it does some cleanup
-    AddMember(m_apMembers[memId], LEADER_MEM_ID);
+    AddMember(m_members[memId], LEADER_MEM_ID);
 }
 
 // 0x5F6A50
 size_t CPedGroupMembership::CountMembers() {
-    return rng::count_if(m_apMembers, notsa::NotIsNull{});
+    return rng::count_if(m_members, notsa::NotIsNull{});
 }
 
 // 0x5F6AA0
 int32 CPedGroupMembership::CountMembersExcludingLeader() {
-    // Last member is the leader
-    return rng::count_if(m_apMembers | rng::views::drop(1), notsa::NotIsNull{});
+    const auto cnt = CountMembers();
+    return HasLeader()
+        ? cnt - 1
+        : cnt;
 }
 
 // 0x5FB160
 void CPedGroupMembership::Flush() {
-    for (auto i = 0u; i < m_apMembers.size(); i++) {
+    for (auto i = 0u; i < m_members.size(); i++) {
         RemoveMember(i);
     }
 }
 
 CPed* CPedGroupMembership::GetLeader() const {
-    return m_apMembers[LEADER_MEM_ID];
+    return m_members[LEADER_MEM_ID];
 }
 
 // 0x5F69B0
 CPed* CPedGroupMembership::GetMember(int32 memberId) {
-    return m_apMembers[memberId];
+    return m_members[memberId];
 }
 
 int32 CPedGroupMembership::GetMemberId(const CPed* ped) const {
-    for (auto&& [id, mem] : notsa::enumerate(m_apMembers)) {
+    for (auto&& [id, mem] : notsa::enumerate(m_members)) {
         if (mem == ped) {
             return id;
         }
@@ -117,14 +114,14 @@ bool CPedGroupMembership::IsLeader(const CPed* ped) const {
 
 // 0x5F6A10
 bool CPedGroupMembership::IsMember(const CPed* ped) const {
-    return ped && notsa::contains(m_apMembers, ped);
+    return ped && notsa::contains(m_members, ped);
 }
 
 // 0x5FBA60
 void CPedGroupMembership::Process() {
     // Remove dead members (except player ped)
-    for (auto&& [i, mem] : notsa::enumerate(m_apMembers)) {
-        if (mem->IsAlive()) {
+    for (auto&& [i, mem] : notsa::enumerate(m_members)) {
+        if (!mem || mem->IsAlive()) {
             continue;
         }
         if (IsLeader(mem) && mem->IsPlayer()) { // Player always stays in it's group
@@ -143,14 +140,14 @@ void CPedGroupMembership::Process() {
 
     // Now that we have a leader, check for separation distance and remove members further than it
     const auto leaderPos = GetLeader()->GetPosition();
-    for (auto&& [i, mem] : notsa::enumerate(m_apMembers)) {
-        if (mem->bNeverLeavesGroup) {
+    for (auto&& [i, mem] : notsa::enumerate(m_members)) {
+        if (!mem || mem->bNeverLeavesGroup) {
             continue;
         }
         if (IsLeader(mem)) { // Leader's distance to itself always 0, thus ignore
             continue;
         }
-        if (sq(m_fSeparationRange) >= (leaderPos - mem->GetPosition()).SquaredMagnitude()) {
+        if (sq(m_separationRange) >= (leaderPos - mem->GetPosition()).SquaredMagnitude()) {
             continue;
         }
         RemoveMember(i); // Ped is too far
@@ -159,7 +156,7 @@ void CPedGroupMembership::Process() {
 
 // 0x5FB190
 void CPedGroupMembership::RemoveAllFollowers(bool bCreatedByMissionOnly) {
-    for (auto&& [i, mem] : notsa::enumerate(m_apMembers)) {
+    for (auto&& [i, mem] : notsa::enumerate(m_members)) {
         if (IsLeader(mem)) { // Leader isn't a follower
             continue;
         }
@@ -175,7 +172,7 @@ void CPedGroupMembership::RemoveNFollowers(size_t count) {
     if (count == 0) { // Nothing to do
         return;
     }
-    for (auto&& [i, mem] : notsa::enumerate(m_apMembers)) {
+    for (auto&& [i, mem] : notsa::enumerate(m_members)) {
         if (IsLeader(mem)) { // Leader isn't a follower
             continue;
         }
@@ -191,10 +188,10 @@ void CPedGroupMembership::RemoveNFollowers(size_t count) {
 
 // 0x5F80D0
 void CPedGroupMembership::RemoveMember(int32 memIdx) {
-    const auto mem = m_apMembers[memIdx];
+    const auto mem = m_members[memIdx];
     assert(mem);
 
-    CEntity::ClearReference(m_apMembers[memIdx]); // Does `m_apMembers[memIdx] = nullptr`
+    CEntity::ClearReference(m_members[memIdx]); // Does `m_apMembers[memIdx] = nullptr`
 
     if (mem->IsPlayer()) {
         return;
@@ -238,6 +235,7 @@ void CPedGroupMembership::SetLeader(CPed* ped) {
     GivePedRandomObjectToHold(ped);
 }
 
+// NOTSA
 auto CPedGroupMembership::FindClosestFollowerToLeader() -> FindMemberResult {
     if (const auto leader = GetLeader()) {
         return GetMemberClosestTo(leader);
@@ -251,8 +249,9 @@ eModelID CPedGroupMembership::GetObjectForPedToHold() {
     return CGeneral::RandomChoiceFromList({ (eModelID)MI_GANG_SMOKE, MODEL_INVALID, (eModelID)MI_GANG_DRINK }); // Each has 33% chance
 }
 
+// NOTSA
 int32 CPedGroupMembership::FindNewLeaderToAppoint() const {
-    for (auto&& [i, mem] : notsa::enumerate(m_apMembers)) {
+    for (auto&& [i, mem] : notsa::enumerate(m_members)) {
         if (mem) {
             return i;
         }
@@ -260,8 +259,9 @@ int32 CPedGroupMembership::FindNewLeaderToAppoint() const {
     return -1;
 }
 
+// NOTSA
 int32 CPedGroupMembership::FindIdForNewMember() const {
-    for (auto&& [i, mem] : notsa::enumerate(m_apMembers)) {
+    for (auto&& [i, mem] : notsa::enumerate(m_members)) {
         if (!mem) {
             return i;
         }
@@ -269,8 +269,9 @@ int32 CPedGroupMembership::FindIdForNewMember() const {
     return -1;
 }
 
+// Based on code from 0x5F80BE
 void CPedGroupMembership::GivePedRandomObjectToHold(CPed* mem, bool onlyIfUnarmed) const {
-    if (m_pPedGroup->m_bIsMissionGroup) {
+    if (m_group->m_bIsMissionGroup) {
         return;
     }
     if (onlyIfUnarmed && !mem->IsCurrentlyUnarmed()) {
@@ -281,12 +282,14 @@ void CPedGroupMembership::GivePedRandomObjectToHold(CPed* mem, bool onlyIfUnarme
     }
 }
 
+// NOTSA
 bool CPedGroupMembership::CanAddFollower() {
-    return std::size(m_apMembers) - 1 >= CountMembers(); // - 1 to compensate for leader
+    return std::size(m_members) - 1 >= CountMembers(); // - 1 to compensate for leader
 }
 
+// NOTSA
 CPed* CPedGroupMembership::GetRandom() {
-    return CGeneral::RandomChoice(m_apMembers | rng::views::take(CountMembers()));
+    return CGeneral::RandomChoice(m_members | rng::views::take(CountMembers()));
 }
 
 void CPedGroupMembership::InjectHooks() {
