@@ -25,6 +25,7 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(StartTestScript, 0x464D40);
     RH_ScopedInstall(AddToBuildingSwapArray, 0x481140);
     RH_ScopedInstall(UndoBuildingSwaps, 0x481290);
+    RH_ScopedInstall(IsPedStopped, 0x486110);
     RH_ScopedInstall(HasCarModelBeenSuppressed, 0x46A810);
     RH_ScopedInstall(HasVehicleModelBeenBlockedByScript, 0x46A890);
 }
@@ -305,6 +306,28 @@ void CTheScripts::UndoBuildingSwaps() {
             swap.Clear();
         }
     }
+}
+
+// 0x486110
+bool CTheScripts::IsPedStopped(CPed* ped) {
+    if (ped->IsInVehicle()) {
+        return CTimer::GetTimeStep() / 100.f >= ped->m_pVehicle->m_fMovingSpeed;
+    }
+    if (!ped->IsPedStandingInPlace()) {
+        return false;
+    }
+    if (ped->IsPlayer()) {
+        if (RpAnimBlendClumpGetAssociation(ped->m_pRwClump, { ANIM_ID_RUN_STOP, ANIM_ID_RUN_STOPR, ANIM_ID_JUMP_LAUNCH, ANIM_ID_JUMP_GLIDE })) {
+            return false;
+        }
+    }
+    if (ped->bIsLanding || ped->bIsInTheAir || !ped->bIsStanding) {
+        return false;
+    }
+    if (ped->m_vecAnimMovingShiftLocal.IsZero()) {
+        return true;
+    }
+    return false;
 }
 
 // 0x464D50

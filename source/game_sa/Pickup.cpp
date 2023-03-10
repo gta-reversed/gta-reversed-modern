@@ -105,8 +105,9 @@ void CPickup::GiveUsAPickUpObject(CObject** obj, int32 slotIndex) {
     auto& object = *obj;
     object = nullptr;
 
-    if (CCutsceneMgr::ms_cutsceneLoadStatus == 2)
+    if (CCutsceneMgr::HasLoaded()) {
         return;
+    }
 
     if (mi->GetModelType() == MODEL_INFO_WEAPON) {
         CWeaponInfo::GetWeaponInfo(mi->AsWeaponModelInfoPtr()->m_weaponInfo);

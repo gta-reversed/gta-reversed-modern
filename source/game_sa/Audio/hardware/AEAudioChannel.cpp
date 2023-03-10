@@ -162,7 +162,7 @@ void CAEAudioChannel::SetFrequency(uint32 freq) {
 
     #ifdef USE_DSOUND
     if (m_pDirectSoundBuffer) {
-        VERIFY(SUCCEEDED(m_pDirectSoundBuffer->SetFrequency(freq)));
+        VERIFY_TODO_FIX(SUCCEEDED(m_pDirectSoundBuffer->SetFrequency(freq)));
     }
     #endif
 }

@@ -138,6 +138,11 @@ T& StaticRef() {
 #define _IGNORED_
 #define _CAN_BE_NULL_
 
+// TODO: Use premake/cmake for this instead of relaying on `_DEBUG`
+#ifdef _DEBUG
+#define NOTSA_DEBUG 1
+#endif
+
 #if (defined(__GNUC__) || defined(__GNUG__) || defined(__clang__))
 #define PLUGIN_SOURCE_FILE
 #define PLUGIN_VARIABLE

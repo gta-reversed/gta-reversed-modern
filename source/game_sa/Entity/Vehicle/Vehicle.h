@@ -421,6 +421,8 @@ public:
     static bool &s_bPlaneGunsEjectShellCasings;
     static inline tHydraulicData(&m_aSpecialHydraulicData)[4] = *(tHydraulicData(*)[4])0xC1CB60;
 
+    static constexpr auto Type = VEHICLE_TYPE_IGNORE;
+
 public:
     CVehicle(eVehicleCreatedBy createdBy);
     ~CVehicle() override;

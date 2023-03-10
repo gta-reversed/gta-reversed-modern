@@ -224,10 +224,13 @@ char* CFileLoader::LoadLine(auto file) {
     return FindFirstNonNullOrWS(ms_line);
 }
 
-// 0x536FE0
-// Load line from a text buffer
-// bufferIt - Iterator into buffer. It is modified by this function to point after the last character of this line
-// buffSize - Size of buffer. It is modified to represent the size of the buffer remaining after the end of this line
+/*!
+* Load line from a text buffer with sanitization (replaces chars < 32 (space) with a space)
+* @param bufferIt Iterator into buffer. It is modified by this function to point after the last character of this line
+* @param buffSize Size of buffer. It is modified to represent the size of the buffer remaining after the end of this line
+* @returns The beginning of the line - Note, this isn't a pointer into the passed in buffer!
+* @addr 0x536FE0
+*/
 char* CFileLoader::LoadLine(char*& bufferIt, int32& buffSize) {
     if (buffSize <= 0 || !*bufferIt)
         return nullptr;
@@ -235,6 +238,12 @@ char* CFileLoader::LoadLine(char*& bufferIt, int32& buffSize) {
     // Copy with sanitization (Otherwise random crashes appear)
     char* copyIt = s_MemoryHeapBuffer;
     for (; *bufferIt && *bufferIt != '\n' && buffSize != 0; bufferIt++, buffSize--) {
+        // Handle EOL (\r\n) correctly
+        // Technically a bugfix, but can't place it under the macro
+        // cause code(See `LoadCutSceneFile`) relies on it filtering `\r` even in vanilla mode
+        if (*bufferIt == '\r') {
+            continue;
+        }
         // Have to cast to uint8, because signed ASCII is retarded
         *copyIt++ = ((uint8)*bufferIt < (uint8)' ' || *bufferIt == ',') ? ' ' : *bufferIt; // Replace chars before space and ',' (comma) by space, otherwise copy
     }
@@ -953,8 +962,8 @@ void CFileLoader::Load2dEffect(const char* line) {
 
     auto& effect = CModelInfo::Get2dEffectStore()->AddItem();
     CModelInfo::GetModelInfo(modelId)->Add2dEffect(&effect);
-    effect.m_vecPosn = pos;
-    effect.m_nType = *reinterpret_cast<e2dEffectType*>(type);
+    effect.m_pos = pos;
+    effect.m_type = *reinterpret_cast<e2dEffectType*>(type);
 
     switch (type) {
     case EFFECT_LIGHT:

@@ -10,7 +10,7 @@ void CDecisionMakerTypesFileLoader::InjectHooks() {
     RH_ScopedInstall(GetPedDMName, 0x600860, {.reversed = false});
     RH_ScopedInstall(GetGrpDMName, 0x600880, {.reversed = false});
     RH_ScopedInstall(LoadDefaultDecisionMaker, 0x5BF400, {.reversed = false});
-    RH_ScopedOverloadedInstall(LoadDecisionMaker, "enum", 0x607D30, void(*)(const char*, eDecisionTypes, bool));
+    RH_ScopedOverloadedInstall(LoadDecisionMaker, "enum", 0x607D30, int32(*)(const char*, eDecisionTypes, bool));
     RH_ScopedOverloadedInstall(LoadDecisionMaker, "ptr", 0x6076B0, void (*)(const char*, CDecisionMaker*), {.reversed = false});
 }
 
@@ -34,11 +34,11 @@ void CDecisionMakerTypesFileLoader::LoadDefaultDecisionMaker() {
     plugin::Call<0x5BF400>();
 }
 
-// 0x607D30
-void CDecisionMakerTypesFileLoader::LoadDecisionMaker(const char* filepath, eDecisionTypes decisionMakerType, bool bUseMissionCleanup) {
+// 0x607D30 - Returns script handle for the DM
+int32 CDecisionMakerTypesFileLoader::LoadDecisionMaker(const char* filepath, eDecisionTypes decisionMakerType, bool bUseMissionCleanup) {
     CDecisionMaker decisionMaker;
     LoadDecisionMaker(filepath, &decisionMaker);
-    CDecisionMakerTypes::GetInstance()->AddDecisionMaker(&decisionMaker, decisionMakerType, bUseMissionCleanup);
+    return CDecisionMakerTypes::GetInstance()->AddDecisionMaker(&decisionMaker, decisionMakerType, bUseMissionCleanup);
 }
 
 // 0x6076B0
@@ -52,8 +52,8 @@ void CDecisionMakerTypes::InjectHooks() {
 }
 
 // 0x607050
-void CDecisionMakerTypes::AddDecisionMaker(CDecisionMaker* decisionMaker, eDecisionTypes decisionMakerType, bool bUseMissionCleanup) {
-    plugin::CallMethod<0x607050, CDecisionMakerTypes*, CDecisionMaker*, eDecisionTypes, bool>(this, decisionMaker, decisionMakerType, bUseMissionCleanup);
+int32 CDecisionMakerTypes::AddDecisionMaker(CDecisionMaker* decisionMaker, eDecisionTypes decisionMakerType, bool bUseMissionCleanup) {
+    return plugin::CallMethodAndReturn<int32, 0x607050, CDecisionMakerTypes*, CDecisionMaker*, eDecisionTypes, bool>(this, decisionMaker, decisionMakerType, bUseMissionCleanup);
 }
 
 // 0x4684F0

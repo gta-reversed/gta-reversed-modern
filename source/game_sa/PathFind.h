@@ -10,7 +10,7 @@
 #include "Vector.h"
 #include "NodeAddress.h"
 #include "NodeRoute.h"
-#include "FixedFloat.hpp"
+#include <extensions/FixedFloat.hpp>
 #include <functional>
 
 static constexpr auto NUM_PATH_MAP_AREA_X{ 8 };
@@ -303,8 +303,8 @@ public:
     bool GeneratePedCreationCoors_Interior(float x, float y, CVector* outCoords, CNodeAddress* unused1, CNodeAddress* unused2, float* outOrientation);
     void GeneratePedCreationCoors(float x, float y, float minDist1, float maxDist1, float minDist2, float maxDist2, CVector* outCoords, CNodeAddress* outAddress1,
                                   CNodeAddress* outAddress2, float* outOrientation, bool bLowTraffic, CMatrix* transformMatrix);
-    CNodeAddress FindNodeClosestToCoors(CVector pos, ePathType nodeType, float maxDistance, uint16 unk2, int32 unk3, uint16 unk4,
-                                         uint16 bBoatsOnly, int32 unk6);
+    CNodeAddress FindNodeClosestToCoors(CVector pos, ePathType nodeType = PATH_TYPE_PED, float maxDistance = 999999.88f, uint16 unk2 = 1, int32 unk3 = 0, uint16 unk4 = 0,
+                                         uint16 bBoatsOnly = 0, int32 unk6 = 0);
     void MarkRoadNodeAsDontWander(float x, float y, float z);
     void RecordNodesClosestToCoors(CVector pos, uint8 nodeType, int count, CNodeAddress* outAddresses, float maxDist, bool, bool, bool, bool);
     void Find2NodesForCarCreation(CVector pos, CNodeAddress* outAddress1, CNodeAddress* outAddress2, bool bLowTraffic);

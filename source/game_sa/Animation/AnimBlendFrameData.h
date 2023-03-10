@@ -24,8 +24,18 @@ public:
         };
         uint8 m_nFlags;
     };
+
+    /* todo
+    union {
+      RwV3d_0 m_posn;
+      RwV3d_0 m_bonePosition;
+    };
+    */
     CVector                  m_vecOffset;
-    RpHAnimBlendInterpFrame* m_pIFrame;
+    union {
+        RpHAnimBlendInterpFrame* m_pIFrame; // TODO: Rename to `m_pStdKeyFrame`
+        RwFrame*                 m_pFrame;
+    };
     uint32                   m_nNodeId; // In case of peds it's ePedBone (NOTE: I might be wrong, see `IsPedHeadAbovePos`)
 
     // NOTSA
