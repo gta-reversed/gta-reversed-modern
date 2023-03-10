@@ -138,8 +138,17 @@ void CGarages::GivePlayerDetonator() {
 // 0x2	door goes in
 // 0x4	camera follow players
 // TODO...
-void CGarages::AddOne(float x1, float y1, float z1, float frontX, float frontY, float x2, float y2, float z2, uint8 type, uint32 a10, char* name, uint32 argFlags) {
-    return plugin::Call<0x4471E0, float, float, float, float, float, float, float, float, uint8, uint32, char*, uint32>(x1, y1, z1, frontX, frontY, x2, y2, z2, type, a10, name, argFlags);
+void CGarages::AddOne(
+    CVector base,
+    CVector2D p1,
+    CVector2D p2,
+    float ceilingZ,
+    uint8 type,
+    uint32 modelIndexToBeCollected,
+    const char* name,
+    uint32 flags
+) {
+    return plugin::Call<0x4471E0>(base, p1, p2, ceilingZ, type, modelIndexToBeCollected, name, flags);
 }
 
 // 0x44A170
@@ -222,6 +231,16 @@ int32 CGarages::FindSafeHouseIndexForGarageType(eGarageType type) {
 // 0x44A240
 int16 CGarages::FindGarageForObject(CObject* obj) {
     return plugin::CallAndReturn<int16, 0x44A240, CObject*>(obj);
+    /*
+    const auto& objPos = obj->GetPosition();
+
+    auto closestDistSq = std::numeric_limits<float>::max();
+    for (auto& grg : GetAll()) {
+        if (!grg.IsPointInsideGarage(objPos, 7.f)) {
+            continue;
+        }
+    }
+    */
 }
 
 // 0x447680

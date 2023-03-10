@@ -48,7 +48,16 @@ public:
     static void Shutdown();
     static void Update();
 
-    static void AddOne(float x1, float y1, float z1, float frontX, float frontY, float x2, float y2, float z2, uint8 type, uint32 a10, char* name, uint32 argFlags);
+    static void AddOne(
+        CVector base,
+        CVector2D p1,
+        CVector2D p2,
+        float ceilingZ,
+        uint8 type,
+        uint32 modelIndexToBeCollected,
+        const char* name,
+        uint32 flagsFromMax
+    );
     static void CloseHideOutGaragesBeforeSave();
     static void PlayerArrestedOrDied();
     static void AllRespraysCloseOrOpen(bool state);
@@ -91,4 +100,6 @@ public:
     static CGarage&    GetGarage(int32 iGarageInd) { return aGarages[iGarageInd]; }
     static CStoredCar* GetStoredCarsInSafehouse(int32 iSafehouseInd) { return aCarsInSafeHouse[iSafehouseInd]; }
     static CStoredCar& GetStoredCar(int32 iSafehouseInd, int32 iCarInd) { return aCarsInSafeHouse[iSafehouseInd][iCarInd]; }
+
+    static auto GetAll() { return aGarages | rng::views::take(NumGarages); }
 };
