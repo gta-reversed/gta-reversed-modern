@@ -93,24 +93,45 @@ public:
 };
 VALIDATE_SIZE(CStoredCar, 0x40);
 
+/*!
+*  [C]                   [A]
+*   +---------------------+ 
+*   |                    /|\
+*   |                     |
+*   |                  [dir A]
+*   |                     |
+*   |                    /|\
+*   |                     |
+*   +<-----<[dir B]<------+
+* [B]                    [base]
+* Side lengths are lenA and lenB [not called height and width, because that would depend on the orientation of it]
+*/
 class CGarage {
 public:
-    CVector          m_vPosn;
-    CVector2D        m_vDirectionA;
-    CVector2D        m_vDirectionB;
-    float            m_fTopZ;
-    float            m_fWidth;
-    float            m_fHeight;
-    float            m_fLeftCoord;
-    float            m_fRightCoord;
-    float            m_fFrontCoord;
-    float            m_fBackCoord;
-    float            m_fDoorPosition;
-    uint32           m_nTimeToOpen;
-    CVehicle*        m_pTargetCar;
-    char             m_anName[8];
-    eGarageType      m_nType;
-    eGarageDoorState m_nDoorState;
+    // https://gtamods.com/wiki/GRGE#Garage_flags
+    enum eIPLFlags {
+        IPL_FLAG_DOOR_UP_AND_ROTATE = 1 << 0,
+        IPL_FLAG_DOOR_GOES_IN       = 1 << 1,
+        IPL_FLAG_CAM_FOLLOW_PLAYER  = 1 << 2,
+    };
+
+public:
+    CVector          m_Base{};
+    CVector2D        m_DirA{};
+    CVector2D        m_DirB{};
+    float            m_CeilingZ{};
+    float            m_LenA{};
+    float            m_LenB{};
+    float            m_MinX{};
+    float            m_MaxX{};
+    float            m_MinY{};
+    float            m_MaxY{};
+    float            m_DoorOpenness{};
+    uint32           m_TimeToOpen{};
+    CVehicle*        m_TargetCar{};
+    char             m_Name[8]{};
+    eGarageType      m_Type{};
+    eGarageDoorState m_DoorState{};
     union {
         uint8 m_nFlags;
         struct {
@@ -124,13 +145,24 @@ public:
             uint8 m_bRespraysAlwaysFree : 1;
         };
     };
-    eGarageType        m_nOriginalType;
-    CAEDoorAudioEntity m_GarageAudio;
+    eGarageType        m_OriginalType{};
+    CAEDoorAudioEntity m_GarageAudio{};
 
 public:
     static constexpr auto NUM_GARAGE_STORED_CARS{ 4u };
 
     static void InjectHooks();
+
+    CGarage(
+        CVector base,
+        CVector2D p1,
+        CVector2D p2,
+        float ceilingZ,
+        eGarageType type,
+        uint32,
+        const char* name,
+        uint32 flagsIPL // See eIPLFlags
+    );
 
     CGarage() = default;  // 0x4470E0
     ~CGarage() = default; // 0x447110
@@ -175,11 +207,11 @@ public:
 
     // NOTSA section
     [[nodiscard]] bool IsHideOut() const;
-    [[nodiscard]] bool IsOpen()   const { return m_nDoorState == GARAGE_DOOR_OPEN || m_nDoorState == GARAGE_DOOR_WAITING_PLAYER_TO_EXIT; }
-    [[nodiscard]] bool IsClosed() const { return m_nDoorState == GARAGE_DOOR_CLOSED; }
-    void SetOpened() { m_nDoorState = GARAGE_DOOR_OPEN; }
-    void SetClosed() { m_nDoorState = GARAGE_DOOR_CLOSED; }
-    void ResetDoorPosition() { m_fDoorPosition = 0.0f; } // todo: not good name
+    [[nodiscard]] bool IsOpen()   const { return m_DoorState == GARAGE_DOOR_OPEN || m_DoorState == GARAGE_DOOR_WAITING_PLAYER_TO_EXIT; }
+    [[nodiscard]] bool IsClosed() const { return m_DoorState == GARAGE_DOOR_CLOSED; }
+    void SetOpened() { m_DoorState = GARAGE_DOOR_OPEN; }
+    void SetClosed() { m_DoorState = GARAGE_DOOR_CLOSED; }
+    void ResetDoorPosition() { m_DoorOpenness = 0.0f; } // todo: not good name
 };
 
 VALIDATE_SIZE(CGarage, 0xD8);

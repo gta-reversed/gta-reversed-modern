@@ -53,10 +53,10 @@ public:
         CVector2D p1,
         CVector2D p2,
         float ceilingZ,
-        uint8 type,
-        uint32 modelIndexToBeCollected,
+        eGarageType type,
+        uint32,
         const char* name,
-        uint32 flagsFromMax
+        uint32 flagsIPL
     );
     static void CloseHideOutGaragesBeforeSave();
     static void PlayerArrestedOrDied();
@@ -84,7 +84,7 @@ public:
     static void StoreCarInNearestImpoundingGarage(CVehicle* vehicle);
 
     static void ChangeGarageType(int16 garageId, eGarageType type, uint32 unused);
-    static bool HasCarBeenDroppedOffYet(int16 garageId) { return GetGarage(garageId).m_nDoorState == GARAGE_DOOR_CLOSED_DROPPED_CAR; } // 0x447C90
+    static bool HasCarBeenDroppedOffYet(int16 garageId) { return GetGarage(garageId).m_DoorState == GARAGE_DOOR_CLOSED_DROPPED_CAR; } // 0x447C90
     static bool HasResprayHappened(int16 garageId);
     static bool CameraShouldBeOutside() { return bCamShouldBeOutside; } // 0x448650
     static void GivePlayerDetonator();

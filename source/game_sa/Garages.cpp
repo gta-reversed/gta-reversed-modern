@@ -11,7 +11,7 @@ void CGarages::InjectHooks() {
     RH_ScopedInstall(Init, 0x447120);
     RH_ScopedInstall(Init_AfterRestart, 0x448B60);
     RH_ScopedInstall(Shutdown, 0x4471B0);
-    // RH_ScopedInstall(AddOne, 0x4471E0);
+    RH_ScopedInstall(AddOne, 0x4471E0);
     RH_ScopedInstall(CloseHideOutGaragesBeforeSave, 0x44A170);
     RH_ScopedInstall(PlayerArrestedOrDied, 0x449E60);
     RH_ScopedInstall(AllRespraysCloseOrOpen, 0x448B30);
@@ -64,7 +64,7 @@ void CGarages::Init_AfterRestart() {
     if (NumGarages) {
         for (auto i = 0; i < NumGarages; i++) {
             auto& garage = GetGarage(i);
-            garage.m_nType = garage.m_nOriginalType;
+            garage.m_Type = garage.m_OriginalType;
             garage.InitDoorsAtStart();
             garage.m_GarageAudio.Reset();
         }
@@ -107,13 +107,13 @@ void CGarages::Update() {
     if (LastUpdatedGarageId >= std::size(aGarages))
         LastUpdatedGarageId = 0;
 
-    if (garageToCheck.m_nType == eGarageType::INVALID)
+    if (garageToCheck.m_Type == eGarageType::INVALID)
         return;
 
     // Originally they've clearly used an some kind of `abs` macro (probably to "optimize" it)... And failed miserably lol
     const auto& camPos = TheCamera.GetPosition();
-    if (   std::abs(garageToCheck.m_fLeftCoord - camPos.x) < 40.f
-        && std::abs(garageToCheck.m_fFrontCoord - camPos.y) < 40.f
+    if (   std::abs(garageToCheck.m_MinX - camPos.x) < 40.f
+        && std::abs(garageToCheck.m_MinY - camPos.y) < 40.f
     ) {
         garageToCheck.TidyUpGarageClose();
     } else {
@@ -143,20 +143,29 @@ void CGarages::AddOne(
     CVector2D p1,
     CVector2D p2,
     float ceilingZ,
-    uint8 type,
-    uint32 modelIndexToBeCollected,
+    eGarageType type,
+    uint32,
     const char* name,
-    uint32 flags
+    uint32 flagsIPL
 ) {
-    return plugin::Call<0x4471E0>(base, p1, p2, ceilingZ, type, modelIndexToBeCollected, name, flags);
+    new (&aGarages[NumGarages++]) CGarage{
+        base,
+        p1,
+        p2,
+        ceilingZ,
+        type,
+        {},
+        name,
+        flagsIPL,
+    };
 }
 
 // 0x44A170
 void CGarages::CloseHideOutGaragesBeforeSave() {
     for (auto& garage : aGarages) {
-        if (garage.IsHideOut() && garage.m_nDoorState == GARAGE_DOOR_OPEN) {
+        if (garage.IsHideOut() && garage.m_DoorState == GARAGE_DOOR_OPEN) {
             garage.SetClosed();
-            garage.StoreAndRemoveCarsForThisHideOut(GetStoredCarsInSafehouse(FindSafeHouseIndexForGarageType(garage.m_nType)), 4); // todo: 4 is NUM_GARAGE_STORED_CARS?
+            garage.StoreAndRemoveCarsForThisHideOut(GetStoredCarsInSafehouse(FindSafeHouseIndexForGarageType(garage.m_Type)), 4); // todo: 4 is NUM_GARAGE_STORED_CARS?
             garage.RemoveCarsBlockingDoorNotInside();
             garage.ResetDoorPosition();
         }
@@ -166,7 +175,7 @@ void CGarages::CloseHideOutGaragesBeforeSave() {
 // 0x449E60
 void CGarages::PlayerArrestedOrDied() {
     for (auto& garage : aGarages) {
-        if (garage.m_nType != eGarageType::INVALID) {
+        if (garage.m_Type != eGarageType::INVALID) {
             garage.PlayerArrestedOrDied();
         }
     }
@@ -180,8 +189,8 @@ void CGarages::AllRespraysCloseOrOpen(bool bOpen) {
     if (NumGarages) {
         for (auto i = 0; i < NumGarages; i++) {
             auto& garage = GetGarage(i);
-            if (garage.m_nType == eGarageType::PAYNSPRAY) {
-                garage.m_nDoorState = bOpen ? GARAGE_DOOR_OPEN : GARAGE_DOOR_CLOSED;
+            if (garage.m_Type == eGarageType::PAYNSPRAY) {
+                garage.m_DoorState = bOpen ? GARAGE_DOOR_OPEN : GARAGE_DOOR_CLOSED;
             }
         }
     }
@@ -246,7 +255,7 @@ int16 CGarages::FindGarageForObject(CObject* obj) {
 // 0x447680
 int16 CGarages::FindGarageIndex(char* name) {
     for (auto i = 0; i < NumGarages; i++) {
-        if (_stricmp(name, GetGarage(i).m_anName) == 0)
+        if (_stricmp(name, GetGarage(i).m_Name) == 0)
             return i;
     }
     return -1;
@@ -309,7 +318,7 @@ bool CGarages::IsThisCarWithinGarageArea(int16 garageId, CEntity* entity) {
 // 0x448990
 bool CGarages::IsPointWithinAnyGarage(CVector& point) {
     for (auto& garage : aGarages) {
-        if (garage.m_nType != eGarageType::INVALID || garage.IsPointInsideGarage(point)) {
+        if (garage.m_Type != eGarageType::INVALID || garage.IsPointInsideGarage(point)) {
             return true;
         }
     }
@@ -319,7 +328,7 @@ bool CGarages::IsPointWithinAnyGarage(CVector& point) {
 // 0x449BA0
 bool CGarages::IsPointInAGarageCameraZone(CVector point) {
     for (auto& garage : aGarages) {
-        if (garage.m_nType && garage.IsPointInsideGarage(point, 0.5f)) // todo: m_nType == ONLY_TARGET_VEH or != INVALID
+        if (garage.m_Type && garage.IsPointInsideGarage(point, 0.5f)) // todo: m_nType == ONLY_TARGET_VEH or != INVALID
             return true;
     }
     return false;
@@ -329,10 +338,10 @@ bool CGarages::IsPointInAGarageCameraZone(CVector point) {
 void CGarages::ActivateGarage(int16 garageId) {
     auto& garage = GetGarage(garageId);
     garage.m_bInactive = false;
-    if (   garage.m_nType == eGarageType::UNKN_CLOSESONTOUCH
-        && garage.m_nDoorState != GARAGE_DOOR_CLOSED
+    if (   garage.m_Type == eGarageType::UNKN_CLOSESONTOUCH
+        && garage.m_DoorState != GARAGE_DOOR_CLOSED
     ) {
-        garage.m_nDoorState = GARAGE_DOOR_OPENING;
+        garage.m_DoorState = GARAGE_DOOR_OPENING;
     }
 }
 
@@ -345,17 +354,17 @@ void CGarages::DeActivateGarage(int16 garageId) {
 void CGarages::SetTargetCarForMissionGarage(int16 garageId, CVehicle* vehicle) {
     auto& garage = GetGarage(garageId);
     if (vehicle) {
-        garage.m_pTargetCar = vehicle;
-        vehicle->RegisterReference(reinterpret_cast<CEntity**>(&garage.m_pTargetCar));
-        if (garage.m_nDoorState == GARAGE_DOOR_CLOSED_DROPPED_CAR)
+        garage.m_TargetCar = vehicle;
+        vehicle->RegisterReference(reinterpret_cast<CEntity**>(&garage.m_TargetCar));
+        if (garage.m_DoorState == GARAGE_DOOR_CLOSED_DROPPED_CAR)
             garage.SetClosed();
     } else {
 #if FIX_BUGS
         // NOTE/TODO: They forgot to call `CleanUpOldReference` | test it!
-        if (garage.m_pTargetCar)
-            garage.m_pTargetCar->CleanUpOldReference(reinterpret_cast<CEntity**>(&garage.m_pTargetCar));
+        if (garage.m_TargetCar)
+            garage.m_TargetCar->CleanUpOldReference(reinterpret_cast<CEntity**>(&garage.m_TargetCar));
 #endif
-        garage.m_pTargetCar = nullptr;
+        garage.m_TargetCar = nullptr;
     }
 }
 
@@ -417,7 +426,7 @@ void CGarages::PrintMessages() {
 // 0x4476D0
 void CGarages::ChangeGarageType(int16 garageId, eGarageType type, uint32 unused) {
     auto garage = GetGarage(garageId);
-    garage.m_nType = type;
+    garage.m_Type = type;
 
     if (type < BOMBSHOP_TIMED) {
         garage.SetClosed();
@@ -436,7 +445,7 @@ void CGarages::ChangeGarageType(int16 garageId, eGarageType type, uint32 unused)
 
     if (garage.IsClosed()) {
         garage.SetOpened();
-        garage.m_fDoorPosition = 1.0f;
+        garage.m_DoorOpenness = 1.0f;
     }
 }
 
@@ -444,7 +453,7 @@ void CGarages::ChangeGarageType(int16 garageId, eGarageType type, uint32 unused)
 int16 CGarages::GetGarageNumberByName(const char* name) {
     for (auto i = 0; i < NumGarages; i++) {
         const auto& garage = aGarages[i];
-        if (_stricmp(garage.m_anName, name) == 0)
+        if (_stricmp(garage.m_Name, name) == 0)
             return i;
     }
     return -1;

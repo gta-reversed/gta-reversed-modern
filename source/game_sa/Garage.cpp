@@ -25,6 +25,35 @@ void CGarage::InjectHooks() {
     // RH_ScopedInstall(Update, 0x44AA50);
 }
 
+// NOTSA [Based on 0x4471E0]
+CGarage::CGarage(
+    CVector base,
+    CVector2D pA,
+    CVector2D pB,
+    float ceilingZ,
+    eGarageType type,
+    uint32,
+    const char* name,
+    uint32 flagsIPL
+) :
+    m_Base{ base },
+    m_DirA{ (pA - base).Normalized(&m_LenA) },
+    m_DirB{ (pB - base).Normalized(&m_LenB) },
+    m_CeilingZ{ ceilingZ },
+    m_Type{ type },
+    m_bDoorGoesIn{ flagsIPL & IPL_FLAG_DOOR_GOES_IN },
+    m_bCameraFollowsPlayer{ flagsIPL & IPL_FLAG_CAM_FOLLOW_PLAYER },
+    m_bDoorOpensUp{ flagsIPL & IPL_FLAG_DOOR_UP_AND_ROTATE }
+{
+    strcpy_s(m_Name, name);
+
+    const auto SetMinMaxAxis = [&](float& min, float& max, size_t axis) {
+        std::tie(min, max) = std::minmax({ base[axis], pA[axis], pB[axis], (pA[axis] + pB[axis]) - base[axis] });
+    };
+    SetMinMaxAxis(m_MinX, m_MaxX, 0);
+    SetMinMaxAxis(m_MinY, m_MaxY, 1);
+}
+
 // 0x4479F0
 void CGarage::BuildRotatedDoorMatrix(CEntity* entity, float fDoorPosition) {
     const auto fAngle = fDoorPosition * -HALF_PI;
@@ -117,18 +146,18 @@ eGarageDoorState CGarage::PlayerArrestedOrDied() {
 
 // 0x447D50
 void CGarage::OpenThisGarage() {
-  if ( m_nDoorState == GARAGE_DOOR_CLOSED
-    || m_nDoorState == GARAGE_DOOR_CLOSING
-    || m_nDoorState == GARAGE_DOOR_CLOSED_DROPPED_CAR)
+  if ( m_DoorState == GARAGE_DOOR_CLOSED
+    || m_DoorState == GARAGE_DOOR_CLOSING
+    || m_DoorState == GARAGE_DOOR_CLOSED_DROPPED_CAR)
   {
-    m_nDoorState = GARAGE_DOOR_OPENING;
+    m_DoorState = GARAGE_DOOR_OPENING;
   }
 }
 
 // 0x447D70
 void CGarage::CloseThisGarage() {
-    if (m_nDoorState == GARAGE_DOOR_OPEN || m_nDoorState == GARAGE_DOOR_OPENING)
-        m_nDoorState = GARAGE_DOOR_CLOSING;
+    if (m_DoorState == GARAGE_DOOR_OPEN || m_DoorState == GARAGE_DOOR_OPENING)
+        m_DoorState = GARAGE_DOOR_CLOSING;
 }
 
 // 0x447600
@@ -147,7 +176,7 @@ void CGarage::Update(int32 garageId) {
 }
 
 bool CGarage::IsHideOut() const {
-    switch (m_nType) {
+    switch (m_Type) {
     case eGarageType::SAFEHOUSE_GANTON:
     case eGarageType::SAFEHOUSE_SANTAMARIA:
     case eGarageType::SAGEHOUSE_ROCKSHORE:
@@ -175,8 +204,8 @@ bool CGarage::IsHideOut() const {
 bool CGarage::IsGarageEmpty() {
     return plugin::CallMethodAndReturn<bool, 0x44A9C0, CGarage*>(this);
 
-    CVector cornerA = { m_fLeftCoord, m_fFrontCoord, m_vPosn.z };
-    CVector cornerB = { m_fRightCoord, m_fBackCoord, m_fTopZ   };
+    CVector cornerA = { m_MinX, m_MinY, m_Base.z };
+    CVector cornerB = { m_MaxX, m_MaxY, m_CeilingZ   };
 
     int16 outCount[2];
     CEntity* outEntities[16];
@@ -229,45 +258,45 @@ void CGarage::CenterCarInGarage(CEntity* entity) {
 
 // 0x5D3020
 void CSaveGarage::CopyGarageIntoSaveGarage(Const CGarage& g) {
-    m_nType         = g.m_nType;
-    m_nDoorState    = g.m_nDoorState;
+    m_nType         = g.m_Type;
+    m_nDoorState    = g.m_DoorState;
     m_nFlags        = g.m_nFlags;
-    m_vPosn         = g.m_vPosn;
-    m_vDirectionA   = g.m_vDirectionA;
-    m_vDirectionB   = g.m_vDirectionB;
-    m_fTopZ         = g.m_fTopZ;
-    m_fWidth        = g.m_fWidth;
-    m_fHeight       = g.m_fHeight;
-    m_fLeftCoord    = g.m_fLeftCoord;
-    m_fRightCoord   = g.m_fRightCoord;
-    m_fFrontCoord   = g.m_fFrontCoord;
-    m_fBackCoord    = g.m_fBackCoord;
-    m_fDoorPosition = g.m_fDoorPosition;
-    m_nTimeToOpen   = g.m_nTimeToOpen;
-    m_nOriginalType = g.m_nOriginalType;
-    strcpy_s(m_anName, g.m_anName);
+    m_vPosn         = g.m_Base;
+    m_vDirectionA   = g.m_DirA;
+    m_vDirectionB   = g.m_DirB;
+    m_fTopZ         = g.m_CeilingZ;
+    m_fWidth        = g.m_LenA;
+    m_fHeight       = g.m_LenB;
+    m_fLeftCoord    = g.m_MinX;
+    m_fRightCoord   = g.m_MaxX;
+    m_fFrontCoord   = g.m_MinY;
+    m_fBackCoord    = g.m_MaxY;
+    m_fDoorPosition = g.m_DoorOpenness;
+    m_nTimeToOpen   = g.m_TimeToOpen;
+    m_nOriginalType = g.m_OriginalType;
+    strcpy_s(m_anName, g.m_Name);
 }
 
 // 0x5D30C0
 void CSaveGarage::CopyGarageOutOfSaveGarage(CGarage& g) const {
-    g.m_nType         = m_nType;
-    g.m_nDoorState    = m_nDoorState;
+    g.m_Type         = m_nType;
+    g.m_DoorState    = m_nDoorState;
     g.m_nFlags        = m_nFlags;
-    g.m_vPosn         = m_vPosn;
-    g.m_vDirectionA   = m_vDirectionA;
-    g.m_vDirectionB   = m_vDirectionB;
-    g.m_fTopZ         = m_fTopZ;
-    g.m_fWidth        = m_fWidth;
-    g.m_fHeight       = m_fHeight;
-    g.m_fLeftCoord    = m_fLeftCoord;
-    g.m_fRightCoord   = m_fRightCoord;
-    g.m_fFrontCoord   = m_fFrontCoord;
-    g.m_fBackCoord    = m_fBackCoord;
-    g.m_fDoorPosition = m_fDoorPosition;
-    g.m_nTimeToOpen   = m_nTimeToOpen;
-    g.m_nOriginalType = m_nOriginalType;
-    g.m_pTargetCar    = nullptr;
-    strcpy_s(g.m_anName, m_anName);
+    g.m_Base         = m_vPosn;
+    g.m_DirA   = m_vDirectionA;
+    g.m_DirB   = m_vDirectionB;
+    g.m_CeilingZ         = m_fTopZ;
+    g.m_LenA        = m_fWidth;
+    g.m_LenB       = m_fHeight;
+    g.m_MinX    = m_fLeftCoord;
+    g.m_MaxX   = m_fRightCoord;
+    g.m_MinY   = m_fFrontCoord;
+    g.m_MaxY    = m_fBackCoord;
+    g.m_DoorOpenness = m_fDoorPosition;
+    g.m_TimeToOpen   = m_nTimeToOpen;
+    g.m_OriginalType = m_nOriginalType;
+    g.m_TargetCar    = nullptr;
+    strcpy_s(g.m_Name, m_anName);
 }
 
 // todo move
