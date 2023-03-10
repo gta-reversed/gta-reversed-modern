@@ -212,6 +212,10 @@ public:
     void SetOpened() { m_DoorState = GARAGE_DOOR_OPEN; }
     void SetClosed() { m_DoorState = GARAGE_DOOR_CLOSED; }
     void ResetDoorPosition() { m_DoorOpenness = 0.0f; } // todo: not good name
+
+    //! Get offset to center [from the base]
+    CVector2D GetCenterOffset() const;
+    CVector2D GetCenter2D() const { return m_Base + GetCenterOffset(); }
 };
 
 VALIDATE_SIZE(CGarage, 0xD8);

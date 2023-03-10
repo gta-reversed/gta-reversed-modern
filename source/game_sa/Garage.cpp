@@ -200,6 +200,11 @@ bool CGarage::IsHideOut() const {
     }
 }
 
+CVector2D CGarage::GetCenterOffset() const {
+    return m_DirA * (m_DirA / 2.f)
+         + m_DirB * (m_DirB / 2.f);
+}
+
 // 0x44A9C0
 bool CGarage::IsGarageEmpty() {
     return plugin::CallMethodAndReturn<bool, 0x44A9C0, CGarage*>(this);
