@@ -16,8 +16,8 @@ void CGarages::InjectHooks() {
     RH_ScopedInstall(PlayerArrestedOrDied, 0x449E60);
     RH_ScopedInstall(AllRespraysCloseOrOpen, 0x448B30);
     RH_ScopedInstall(IsModelIndexADoor, 0x448AF0);
-    // RH_ScopedInstall(FindSafeHouseIndexForGarageType, 0x4489F0);
-    // RH_ScopedInstall(FindGarageForObject, 0x44A240);
+    //RH_ScopedInstall(FindSafeHouseIndexForGarageType, 0x4489F0); // Not hooked - fucks up the stack and crashes
+    RH_ScopedInstall(FindGarageForObject, 0x44A240);
     RH_ScopedInstall(IsPointWithinHideOutGarage, 0x448900);
     RH_ScopedInstall(IsGarageOpen, 0x447D00);
     RH_ScopedInstall(IsGarageClosed, 0x447D30);
@@ -208,11 +208,8 @@ bool CGarages::IsModelIndexADoor(int32 model) {
     return false;
 }
 
-// wrong
-// 0x4489F0
+// 0x4489F0 - Not hooked
 int32 CGarages::FindSafeHouseIndexForGarageType(eGarageType type) {
-    return plugin::CallAndReturn<int32, 0x4489F0, eGarageType>(type);
-
     switch (type) {
     case SAFEHOUSE_SANTAMARIA:     return 1;
     case SAGEHOUSE_ROCKSHORE:      return 2;
@@ -239,17 +236,22 @@ int32 CGarages::FindSafeHouseIndexForGarageType(eGarageType type) {
 
 // 0x44A240
 int16 CGarages::FindGarageForObject(CObject* obj) {
-    return plugin::CallAndReturn<int16, 0x44A240, CObject*>(obj);
-    /*
     const auto& objPos = obj->GetPosition();
 
-    auto closestDistSq = std::numeric_limits<float>::max();
-    for (auto& grg : GetAll()) {
-        if (!grg.IsPointInsideGarage(objPos, 7.f)) {
+    auto  closestDistSqToCenter = std::numeric_limits<float>::max();
+    int32 closest              = -1;
+    for (auto&& [i, grg] : notsa::enumerate(GetAll())) {
+        if (!grg.IsPointInsideGarage(objPos, 7.f)) { // TODO: Maybe use bounding sphere size of the object instead?
             continue;
         }
+        const auto distSq = (grg.GetCenter2D() - objPos).SquaredMagnitude();
+        if (distSq >= closestDistSqToCenter) {
+            continue;
+        }
+        closestDistSqToCenter = distSq;
+        closest               = (int32)i;
     }
-    */
+    return closest;
 }
 
 // 0x447680
