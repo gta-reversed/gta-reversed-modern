@@ -459,8 +459,6 @@ int16 CGarages::GetGarageNumberByName(const char* name) {
 
 // 0x5D3270
 bool CGarages::Load() {
-    return plugin::CallAndReturn<bool, 0x5D3270>();
-
     CloseHideOutGaragesBeforeSave();
 
     LoadDataFromWorkBuffer(NumGarages);
