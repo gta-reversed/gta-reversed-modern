@@ -92,7 +92,7 @@ public:
     static bool CameraShouldBeOutside() { return bCamShouldBeOutside; } // 0x448650
     static void GivePlayerDetonator();
     static void StopCarFromBlowingUp(CAutomobile* vehicle);
-    static int32 CountCarsInHideoutGarage(eGarageType type);
+    static size_t CountCarsInHideoutGarage(eGarageType type);
 
     static void TriggerMessage(const char* tagMsg, int16 msgMin = -1, uint16 time = 5000, int16 msgMax = -1);
     static void PrintMessages();

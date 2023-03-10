@@ -307,14 +307,3 @@ void CSaveGarage::CopyGarageOutOfSaveGarage(CGarage& g) const {
     g.m_TargetCar    = nullptr;
     strcpy_s(g.m_Name, m_anName);
 }
-
-// todo move
-// 0x449760
-void CStoredCar::StoreCar(CVehicle* vehicle) {
-    plugin::CallMethod<0x449760, CStoredCar*, CVehicle*>(this, vehicle);
-}
-
-// 0x447E40
-CVehicle* CStoredCar::RestoreCar() {
-    return plugin::CallMethodAndReturn<CVehicle*, 0x447E40, CStoredCar*>(this);
-}

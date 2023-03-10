@@ -53,9 +53,7 @@ void CGarages::Init() {
     NoResprays = false;
 
     for (auto& safeHouseCars : aCarsInSafeHouse) {
-        for (auto& car : safeHouseCars) {
-            car.m_wModelIndex = 0;
-        }
+        rng::fill(safeHouseCars, CStoredCar{});
     }
 }
 
@@ -72,10 +70,8 @@ void CGarages::Init_AfterRestart() {
 
     NoResprays = false;
 
-    for (auto& safeHouseCars : aCarsInSafeHouse) { // TODO: Seems like inlined?
-        for (auto& car : safeHouseCars) {
-            car.Init();
-        }
+    for (auto& safeHouseCars : aCarsInSafeHouse) {
+        rng::fill(safeHouseCars, CStoredCar{});
     }
 }
 
