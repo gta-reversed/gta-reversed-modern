@@ -20,7 +20,7 @@ public:
     static_assert(MAX_CARS_IN_SAFEHOUSE >= MAX_CARS_IN_IMPOUND); // Impound vehicles are stored in safehouses too
     static constexpr auto MAX_NUM_GARAGES{ 50 };
 
-    static inline CStoredCar (&aCarsInSafeHouse)[MAX_NUM_SAFEHOUSES][MAX_CARS_IN_SAFEHOUSE] = *(CStoredCar(*)[20][4])0x96ABD4; // TODO: Address should be `0x96ABD8`
+    static inline CStoredCar (&aCarsInSafeHouse)[MAX_NUM_SAFEHOUSES][MAX_CARS_IN_SAFEHOUSE] = *(CStoredCar(*)[20][4])0x96ABD8; // NOTE: This was originally (incorrectly) at 0x96ABD4, so watch out!
     static inline CGarage    (&aGarages)[MAX_NUM_GARAGES] = *(CGarage(*)[50])0x96C048;
     static inline char       (&MessageIDString)[8] = *(char (*)[8])0x96C014;
     static inline int32&     LastGaragePlayerWasIn = *(int32*)0x96BFDC;
