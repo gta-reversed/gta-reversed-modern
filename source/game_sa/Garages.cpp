@@ -32,8 +32,8 @@ void CGarages::InjectHooks() {
     RH_ScopedInstall(ChangeGarageType, 0x4476D0);
     RH_ScopedInstall(GetGarageNumberByName, 0x447680);
     RH_ScopedInstall(CountCarsInHideoutGarage, 0x44A210);
-    RH_ScopedInstall(Load, 0x5D3270); // bad
-    // RH_ScopedInstall(Save, 0x5D3160); // possible bad
+    RH_ScopedInstall(Load, 0x5D3270);
+    RH_ScopedInstall(Save, 0x5D3160);
 }
 
 // 0x447120
