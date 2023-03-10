@@ -200,6 +200,10 @@ bool CGarage::IsHideOut() const {
     }
 }
 
+bool CGarage::IsImpound() const {
+    return notsa::contains({ IMPOUND_LS, IMPOUND_LV, IMPOUND_SF }, m_Type);
+}
+
 CVector2D CGarage::GetCenterOffset() const {
     return m_DirA * (m_DirA / 2.f)
          + m_DirB * (m_DirB / 2.f);

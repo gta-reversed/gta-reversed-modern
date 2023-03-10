@@ -26,7 +26,7 @@ void CGarages::InjectHooks() {
     RH_ScopedInstall(ActivateGarage, 0x447CD0);
     RH_ScopedInstall(DeActivateGarage, 0x447CB0);
     RH_ScopedInstall(SetTargetCarForMissionGarage, 0x447C40);
-    // RH_ScopedInstall(StoreCarInNearestImpoundingGarage, 0x44A3C0);
+    RH_ScopedInstall(StoreCarInNearestImpoundingGarage, 0x44A3C0, {.reversed = false});
     RH_ScopedInstall(TriggerMessage, 0x447B80);
     RH_ScopedInstall(PrintMessages, 0x447790);
     RH_ScopedInstall(ChangeGarageType, 0x4476D0);
@@ -544,9 +544,41 @@ bool CGarages::Save() {
     return true;
 }
 
+// NOTSA [Code based on 0x44A3C0]
+CGarage* CGarages::FindNearestImpountGarage(CVector pos) {
+    auto     closestDistSq = std::numeric_limits<float>::max();
+    CGarage* closest       = nullptr;
+    for (auto& grg : GetAll()) {
+        if (!grg.IsImpound()) {
+            continue;
+        }
+        const auto distSq = (grg.m_Base - pos).SquaredMagnitude();
+        if (distSq >= closestDistSq) {
+            continue;
+        }
+        closestDistSq = distSq;
+        closest       = &grg;
+    }
+    return closest;
+}
+
 // 0x44A3C0
 void CGarages::StoreCarInNearestImpoundingGarage(CVehicle* vehicle) {
-    plugin::Call<0x44A3C0, CVehicle*>(vehicle);
+    const auto impoundGrg = FindNearestImpountGarage(vehicle->GetPosition());
+    if (!impoundGrg) {
+        return;
+    }
+    // Now find a slot to store it.
+    // If all slots in use, drop first one,
+    // so the vehicle is put in the last slot
+    auto impoundedCars = aCarsInSafeHouse[FindSafeHouseIndexForGarageType(impoundGrg->m_Type)] | rng::views::take(MAX_CARS_IN_IMPOUND);
+    auto freeIdx = rng::count_if(impoundedCars, &CStoredCar::HasCar); // Since the array is [presumeably] sorted by usage, by counting the number of used slots we get the index of the unused slot
+    if (freeIdx == MAX_CARS_IN_IMPOUND) { // All in use
+        notsa::shift(impoundedCars, -1); 
+        freeIdx -= 1;
+        std::destroy_at(&impoundedCars[freeIdx]);
+    }
+    std::construct_at(&impoundedCars[freeIdx], vehicle);
 }
 
 // unused

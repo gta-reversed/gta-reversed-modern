@@ -83,6 +83,9 @@ struct CStoredCar {
     uint8   _pad1;
 
 public:
+    // NOTSA
+    CStoredCar(CVehicle* veh) { StoreCar(veh); }
+
     void      StoreCar(CVehicle* vehicle); // 0x449760
     CVehicle* RestoreCar();                // 0x447E40
 
@@ -209,6 +212,7 @@ public:
     [[nodiscard]] bool IsHideOut() const;
     [[nodiscard]] bool IsOpen()   const { return m_DoorState == GARAGE_DOOR_OPEN || m_DoorState == GARAGE_DOOR_WAITING_PLAYER_TO_EXIT; }
     [[nodiscard]] bool IsClosed() const { return m_DoorState == GARAGE_DOOR_CLOSED; }
+    bool IsImpound() const;
     void SetOpened() { m_DoorState = GARAGE_DOOR_OPEN; }
     void SetClosed() { m_DoorState = GARAGE_DOOR_CLOSED; }
     void ResetDoorPosition() { m_DoorOpenness = 0.0f; } // todo: not good name
