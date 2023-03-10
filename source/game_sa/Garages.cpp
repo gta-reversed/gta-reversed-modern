@@ -505,8 +505,6 @@ bool CGarages::Load() {
 // todo: fix Update()
 // 0x5D3160
 bool CGarages::Save() {
-    return plugin::CallAndReturn<bool, 0x5D3160>();
-
     SaveDataToWorkBuffer(NumGarages);
     SaveDataToWorkBuffer(BombsAreFree);
     SaveDataToWorkBuffer(RespraysAreFree);
