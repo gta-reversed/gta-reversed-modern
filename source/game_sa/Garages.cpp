@@ -1,4 +1,5 @@
 #include "StdInc.h"
+#include <extensions/ci_string.hpp>
 
 #include "Garages.h"
 
@@ -449,10 +450,11 @@ void CGarages::ChangeGarageType(int16 garageId, eGarageType type, uint32 unused)
 
 // 0x447680
 int16 CGarages::GetGarageNumberByName(const char* name) {
-    for (auto i = 0; i < NumGarages; i++) {
-        const auto& garage = aGarages[i];
-        if (_stricmp(garage.m_Name, name) == 0)
-            return i;
+    const auto ciName = notsa::ci_string_view{ name };
+    for (auto&& [i, grg] : notsa::enumerate(GetAll())) {
+        if (grg.m_Name == ciName) {
+            return (int16)i;
+        }
     }
     return -1;
 }
