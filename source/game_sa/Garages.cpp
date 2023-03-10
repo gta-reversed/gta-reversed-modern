@@ -31,7 +31,7 @@ void CGarages::InjectHooks() {
     RH_ScopedInstall(PrintMessages, 0x447790);
     RH_ScopedInstall(ChangeGarageType, 0x4476D0);
     RH_ScopedInstall(GetGarageNumberByName, 0x447680);
-    // RH_ScopedInstall(CountCarsInHideoutGarage, 0x44A210);
+    RH_ScopedInstall(CountCarsInHideoutGarage, 0x44A210, {.reversed = false});
     // RH_ScopedInstall(Load, 0x5D3270, true); // bad
     // RH_ScopedInstall(Save, 0x5D3160, true); // possible bad
 }
@@ -608,6 +608,6 @@ bool CGarages::HasResprayHappened(int16 garageId) {
 }
 
 // 0x44A210
-int32 CGarages::CountCarsInHideoutGarage(eGarageType type) {
-    return plugin::CallAndReturn<int32, 0x44A210, eGarageType>(type);
+size_t CGarages::CountCarsInHideoutGarage(eGarageType type) {
+    return rng::count_if(aCarsInSafeHouse[FindSafeHouseIndexForGarageType(type)], &CStoredCar::HasCar);
 }
