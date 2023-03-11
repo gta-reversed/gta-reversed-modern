@@ -11,7 +11,7 @@ void CGarage::InjectHooks() {
     RH_ScopedInstall(OpenThisGarage, 0x447D50);
     RH_ScopedInstall(CloseThisGarage, 0x447D70);
     RH_ScopedInstall(TidyUpGarageClose, 0x449D10);
-    RH_ScopedInstall(TidyUpGarage, 0x449C50, {.reversed = false});
+    RH_ScopedInstall(TidyUpGarage, 0x449C50);
     RH_ScopedInstall(EntityHasASphereWayOutsideGarage, 0x449050, {.reversed = false});
     RH_ScopedInstall(RemoveCarsBlockingDoorNotInside, 0x449690, {.reversed = false});
     RH_ScopedInstall(IsEntityTouching3D, 0x448EE0, {.reversed = false});
@@ -79,8 +79,12 @@ void CGarage::TidyUpGarageClose() {
             continue;
         }
         if (!IsClosed()) {
+            // TODO/NOTE/BUG:
             // I'm not sure what this check is supposed to do
             // The door is open, so why check if the vehicle is not wholly inside?
+            // I think this check is meant to be done in case the door *IS* closed
+            // and is meant to check if the vehicle *IS* wholly inside the garage.
+            // This is kinda confirmed by looking at `TidyUpGarage` [where the veh. is only removed if inside the garage]
             if (rng::all_of(
                 veh.GetColData()->GetSpheres(),
                 [&](CColSphere& sp) { return IsSphereInsideGarage(TransformObject(sp, veh.GetMatrix())); }
@@ -95,7 +99,19 @@ void CGarage::TidyUpGarageClose() {
 
 // 0x449C50
 void CGarage::TidyUpGarage() {
-    plugin::CallMethod<0x449C50, CGarage*>(this);
+    for (auto& veh : GetVehiclePool()->GetAllValid()) {
+        if (!veh.IsAutomobile() && !veh.IsBike()) {
+            continue;
+        }
+        if (veh.GetStatus() != STATUS_WRECKED && veh.GetUp().z >= 0.5f) {
+            continue;
+        }
+        if (!IsPointInsideGarage(veh.GetPosition())) {
+            continue;
+        }
+        CWorld::Remove(&veh);
+        delete &veh;
+    }
 }
 
 // 0x449900
@@ -157,7 +173,7 @@ bool CGarage::IsEntityEntirelyInside3D(CEntity* entity, float radius) {
 }
 
 // 0x448740
-bool CGarage::IsPointInsideGarage(CVector point) {
+bool CGarage::IsPointInsideGarage(CVector point) { // NOTE: __spoils<>
     return plugin::CallMethodAndReturn<bool, 0x448740, CGarage*, CVector>(this, point);
 }
 
