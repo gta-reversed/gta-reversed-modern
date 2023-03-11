@@ -15,7 +15,7 @@ bool AngledRect::IsPointWithin(const CVector2D& pos) const {
         return dot >= 0.f && dot <= mag;
     };
 
-    return PointLiesOnSegment(m_dirBtoA, m_height) && PointLiesOnSegment(m_dirDtoA, m_width);
+    return PointLiesOnSegment(m_dirAB, m_height) && PointLiesOnSegment(m_dirAD, m_width);
 }
 
 void AngledRect::DrawWireFrame(CRGBA color, float z, const CMatrix& transform) const {
