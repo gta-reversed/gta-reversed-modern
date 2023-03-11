@@ -31,8 +31,10 @@ AngledBox::AngledBox(
 {
 }
 
-bool AngledBox::IsPointWithin(CVector pt) const {
-    return pt.z >= m_bottomZ && pt.z <= m_ceilingZ && m_rect.IsPointWithin(pt);
+bool AngledBox::IsPointWithin(CVector pt, float tolerance) const {
+    return pt.z >= m_bottomZ - tolerance
+        && pt.z <= m_ceilingZ + tolerance
+        && m_rect.IsPointWithin(pt, tolerance);
 }
 
 void AngledBox::DrawWireFrame(CRGBA color, float z, const CMatrix& transform) const {

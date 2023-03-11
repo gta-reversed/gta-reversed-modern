@@ -26,7 +26,9 @@ public:
 
 
     //! Check if a point is inside this box
-    bool IsPointWithin(CVector pt) const;
+    //! @param pos       The point
+    //! @param tolerance Makes the box larger/smaller in each direction [This way the point might be considered to be within even if it wouldn't be otherwise]
+    bool IsPointWithin(CVector pt, float tolerance = 0.f) const;
 
     //! Draw wireframe of this quad (Must set-up render states beforehands!)
     void DrawWireFrame(CRGBA color, float z, const CMatrix& transform = CMatrix::Unity()) const;
