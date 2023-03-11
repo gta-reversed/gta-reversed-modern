@@ -36,6 +36,7 @@ public:
         m_dirAD{ widthAndDir >= 0 ? m_dirAB.GetPerpLeft() : m_dirAB.GetPerpRight() },
         m_width{ std::abs(widthAndDir) }
     {
+        DoDebugChecks();
     }
 
     /*!
@@ -52,6 +53,7 @@ public:
         m_width{lenAD},
         m_height{lenAB}
     {
+        DoDebugChecks();
     }
 
     auto GetCornerA() const { return m_a; }
@@ -59,16 +61,25 @@ public:
     auto GetCornerC() const { return GetCornerB() + m_dirAD * m_width; }
     auto GetCornerD() const { return GetCornerA() + m_dirAD * m_width; }
     auto GetCorners() const { return std::to_array({ GetCornerA(), GetCornerB(), GetCornerC(), GetCornerD() }); }
-    auto GetCorners(float z, const CMatrix& transform) const;
 
     //! Check if a point is within this quad
-    bool IsPointWithin(const CVector2D& pos) const;
+    //! @param pos       The point
+    //! @param tolerance Makes the rect larger/smaller in each direction [This way the point might be considered to be within even if it wouldn't be otherwise]
+    bool IsPointWithin(const CVector2D& pt, float tolerance = 0.f) const;
 
     //! Draw wireframe of this quad (Must set-up render states beforehands!)
     void DrawWireFrame(CRGBA color, float z, const CMatrix& transform = CMatrix::Unity()) const;
 
     //! Highlight this rect with markers in each corner
     void HighlightWithMarkers(const CMatrix& transform = CMatrix::Unity()) const;
+
+private:
+    void DoDebugChecks() {
+        assert(m_width > 0.f);
+        assert(m_height > 0.f);
+        assert(m_dirAB.IsUnitVector());
+        assert(m_dirAD.IsUnitVector());
+    }
 private:
     CVector2D m_a;               //< Corner A and B 
     CVector2D m_dirAB, m_dirAD;  //< Unit vectors - directions to/from corners `C -> A` is the same as `B -> D`
