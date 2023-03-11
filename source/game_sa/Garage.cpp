@@ -7,22 +7,22 @@ void CGarage::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(BuildRotatedDoorMatrix, 0x4479F0);
-    // RH_ScopedInstall(TidyUpGarageClose, 0x449D10);
-    // RH_ScopedInstall(TidyUpGarage, 0x449C50);
     RH_ScopedInstall(StoreAndRemoveCarsForThisHideOut, 0x449900);
-    // RH_ScopedInstall(EntityHasASphereWayOutsideGarage, 0x449050);
-    // RH_ScopedInstall(RemoveCarsBlockingDoorNotInside, 0x449690);
-    // RH_ScopedInstall(IsEntityTouching3D, 0x448EE0);
-    // RH_ScopedInstall(IsEntityEntirelyOutside, 0x448D30);
-    // RH_ScopedInstall(IsStaticPlayerCarEntirelyInside, 0x44A830);
-    // RH_ScopedInstall(IsEntityEntirelyInside3D, 0x448BE0);
-    // RH_ScopedInstall(IsPointInsideGarage, 0x448740);
-    // RH_ScopedInstall(PlayerArrestedOrDied, 0x4486C0);
     RH_ScopedInstall(OpenThisGarage, 0x447D50);
     RH_ScopedInstall(CloseThisGarage, 0x447D70);
-    // RH_ScopedInstall(InitDoorsAtStart, 0x447600);
-    // RH_ScopedInstall(IsPointInsideGarage, 0x4487D0);
-    // RH_ScopedInstall(Update, 0x44AA50);
+    RH_ScopedInstall(TidyUpGarageClose, 0x449D10, {.reversed = false});
+    RH_ScopedInstall(TidyUpGarage, 0x449C50, {.reversed = false});
+    RH_ScopedInstall(EntityHasASphereWayOutsideGarage, 0x449050, {.reversed = false});
+    RH_ScopedInstall(RemoveCarsBlockingDoorNotInside, 0x449690, {.reversed = false});
+    RH_ScopedInstall(IsEntityTouching3D, 0x448EE0, {.reversed = false});
+    RH_ScopedInstall(IsEntityEntirelyOutside, 0x448D30, {.reversed = false});
+    RH_ScopedInstall(IsStaticPlayerCarEntirelyInside, 0x44A830, {.reversed = false});
+    RH_ScopedInstall(IsEntityEntirelyInside3D, 0x448BE0, {.reversed = false});
+    //RH_ScopedInstall(IsPointInsideGarage, 0x448740, {.reversed = false});
+    RH_ScopedInstall(PlayerArrestedOrDied, 0x4486C0, {.reversed = false});
+    RH_ScopedInstall(InitDoorsAtStart, 0x447600, {.reversed = false});
+    //RH_ScopedInstall(IsPointInsideGarage, 0x4487D0, {.reversed = false});
+    RH_ScopedInstall(Update, 0x44AA50, {.reversed = false});
 }
 
 // NOTSA [Based on 0x4471E0]
