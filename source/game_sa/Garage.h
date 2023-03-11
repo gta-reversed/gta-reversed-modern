@@ -13,8 +13,14 @@ enum eGarageType : uint8 {
     BOMBSHOP_ENGINE = 3,
     BOMBSHOP_REMOTE = 4,
     PAYNSPRAY = 5,
-
+    COLLECTORSITEMS = 6,
+    COLLECTSPECIFICCARS = 7,
+    COLLECTCARS_1 = 8,
+    COLLECTCARS_2 = 9,
+    COLLECTCARS_3 = 10,
     UNKN_CLOSESONTOUCH = 11,
+    SIXTY_SECONDS = 12,
+    CRUSHER = 13,
     OPEN_FOR_TARGET_FREEZE_PLAYER = 14,
     SCRIPT_ONLY_OPEN = 15,
 
@@ -25,6 +31,7 @@ enum eGarageType : uint8 {
     SCRIPT_CONTROLLED = 19,
     STAY_OPEN_WITH_CAR_INSIDE = 20,
     CLOSE_WITH_CAR_DONT_OPEN_AGAIN = 21,
+    COLLECTCARS_4 = 22,
     SCRIPT_OPEN_FREEZE_WHEN_CLOSING = 23,
 
     SAFEHOUSE_FORTCARSON = 24,
@@ -150,7 +157,7 @@ public:
     bool IsPointInsideGarage(CVector point);
     bool IsPointInsideGarage(CVector point, float radius);
     bool IsSphereInsideGarage(const CSphere& sp) { return IsPointInsideGarage(sp.m_vecCenter, sp.m_fRadius); }
-    eGarageDoorState PlayerArrestedOrDied();
+    void PlayerArrestedOrDied();
     void OpenThisGarage();
     void CloseThisGarage();
     void InitDoorsAtStart();
