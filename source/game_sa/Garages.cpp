@@ -3,8 +3,6 @@
 
 #include "Garages.h"
 
-static uint32& LastUpdatedGarageId = *(uint32*)0x96EA78;
-
 void CGarages::InjectHooks() {
     RH_ScopedClass(CGarages);
     RH_ScopedCategoryGlobal();
@@ -60,15 +58,12 @@ void CGarages::Init() {
 
 // 0x448B60
 void CGarages::Init_AfterRestart() {
-    if (NumGarages) {
-        for (auto i = 0; i < NumGarages; i++) {
-            auto& garage = GetGarage(i);
-            garage.m_Type = garage.m_OriginalType;
-            garage.InitDoorsAtStart();
-            garage.m_GarageAudio.Reset();
-        }
+    for (auto& grg : GetAll()) {
+        grg.m_Type = grg.m_OriginalType;
+        grg.InitDoorsAtStart();
+        grg.m_GarageAudio.Reset();
     }
-
+    
     NoResprays = false;
 
     for (auto& safeHouseCars : aCarsInSafeHouse) {
@@ -85,8 +80,9 @@ void CGarages::Shutdown() {
 
 // 0x44C8C0
 void CGarages::Update() {
-    if (CReplay::Mode == eReplayMode::MODE_PLAYBACK || CGameLogic::IsCoopGameGoingOn())
+    if (CReplay::Mode == eReplayMode::MODE_PLAYBACK || CGameLogic::IsCoopGameGoingOn()) {
         return;
+    }
 
     bCamShouldBeOutside = false;
     pOldToGarageWeAreIn = TheCamera.m_pToGarageWeAreIn;
@@ -100,12 +96,16 @@ void CGarages::Update() {
     if (CTimer::GetFrameCounter() % 16 != 12) // todo: magic number
         return;
 
-    auto& garageToCheck = GetGarage(LastUpdatedGarageId++);
-    if (LastUpdatedGarageId >= std::size(aGarages))
-        LastUpdatedGarageId = 0;
+    auto& LastUpdatedGarageId = StaticRef<uint32, 0x96EA78>();
 
-    if (garageToCheck.m_Type == eGarageType::INVALID)
+    auto& garageToCheck = GetGarage(LastUpdatedGarageId++);
+    if (LastUpdatedGarageId >= std::size(aGarages)) {
+        LastUpdatedGarageId = 0;
+    }
+
+    if (garageToCheck.m_Type == eGarageType::INVALID) {
         return;
+    }
 
     // Originally they've clearly used an some kind of `abs` macro (probably to "optimize" it)... And failed miserably lol
     const auto& camPos = TheCamera.GetPosition();
@@ -160,12 +160,13 @@ void CGarages::AddOne(
 // 0x44A170
 void CGarages::CloseHideOutGaragesBeforeSave() {
     for (auto& garage : aGarages) {
-        if (garage.IsHideOut() && garage.m_DoorState == GARAGE_DOOR_OPEN) {
-            garage.SetClosed();
-            garage.StoreAndRemoveCarsForThisHideOut(GetStoredCarsInSafehouse(FindSafeHouseIndexForGarageType(garage.m_Type)), 4); // todo: 4 is NUM_GARAGE_STORED_CARS?
-            garage.RemoveCarsBlockingDoorNotInside();
-            garage.ResetDoorPosition();
+        if (!garage.IsHideOut() || garage.IsClosed()) {
+            continue;
         }
+        garage.SetClosed();
+        garage.StoreAndRemoveCarsForThisHideOut(GetStoredCarsInSafehouse(FindSafeHouseIndexForGarageType(garage.m_Type)));
+        garage.RemoveCarsBlockingDoorNotInside();
+        garage.ResetDoorPosition();
     }
 }
 
@@ -183,12 +184,9 @@ void CGarages::PlayerArrestedOrDied() {
 
 // 0x448B30
 void CGarages::AllRespraysCloseOrOpen(bool bOpen) {
-    if (NumGarages) {
-        for (auto i = 0; i < NumGarages; i++) {
-            auto& garage = GetGarage(i);
-            if (garage.m_Type == eGarageType::PAYNSPRAY) {
-                garage.m_DoorState = bOpen ? GARAGE_DOOR_OPEN : GARAGE_DOOR_CLOSED;
-            }
+    for (auto& grg : GetAll()) {
+        if (grg.m_Type == PAYNSPRAY) {
+            grg.SetOpened(bOpen);
         }
     }
 }
@@ -251,15 +249,6 @@ int16 CGarages::FindGarageForObject(CObject* obj) {
     return closest;
 }
 
-// 0x447680
-int16 CGarages::FindGarageIndex(char* name) {
-    for (auto i = 0; i < NumGarages; i++) {
-        if (_stricmp(name, GetGarage(i).m_Name) == 0)
-            return i;
-    }
-    return -1;
-}
-
 // 0x449C30
 float CGarages::FindDoorHeightForMI(uint32 modelIndex) {
     const auto* mi = CModelInfo::GetModelInfo(modelIndex);
@@ -269,18 +258,21 @@ float CGarages::FindDoorHeightForMI(uint32 modelIndex) {
 // 0x448900
 bool CGarages::IsPointWithinHideOutGarage(Const CVector& point) {
     for (auto& garage : aGarages) {
-        if (garage.IsHideOut()) {
-            if (garage.IsPointInsideGarage(point))
-                return true;
-            break;
+        if (!garage.IsHideOut()) {
+            continue;
         }
+        if (!garage.IsPointInsideGarage(point)) {
+            continue;
+        }
+        return true;
     }
     return false;
 }
 
 // 0x447D00
 bool CGarages::IsGarageOpen(int16 garageId) {
-    return GetGarage(garageId).IsOpen();
+    const auto& grg = GetGarage(garageId);
+    return GetGarage(garageId).IsOpen(true);
 }
 
 // 0x447D30
@@ -298,8 +290,8 @@ bool CGarages::IsCarSprayable(CVehicle* vehicle) {
     case eModelID::MODEL_COACH:
     /* TODO:
     * In the source it compares against -2, but the in the ASM comment it says `artict1`
-    * artict1 is Articulated Trailer which by logic cannot to sprayed due big size, but who know..
-    * original code also disallow artict1 to be sprayed (tested)
+    * artict1 is Articulated Trailer which by logic cannot to sprayed due big size, but who knows..
+    * original code also disallows artict1 to be sprayed (tested)
     */
     case eModelID::MODEL_ARTICT1:
     case eModelID::MODEL_FIRETRUK:
@@ -317,7 +309,7 @@ bool CGarages::IsThisCarWithinGarageArea(int16 garageId, CEntity* entity) {
 // 0x448990
 bool CGarages::IsPointWithinAnyGarage(CVector& point) {
     for (auto& garage : aGarages) {
-        if (garage.m_Type != eGarageType::INVALID || garage.IsPointInsideGarage(point)) {
+        if (garage.m_Type != eGarageType::INVALID && garage.IsPointInsideGarage(point)) {
             return true;
         }
     }
@@ -327,26 +319,21 @@ bool CGarages::IsPointWithinAnyGarage(CVector& point) {
 // 0x449BA0
 bool CGarages::IsPointInAGarageCameraZone(CVector point) {
     for (auto& garage : aGarages) {
-        if (garage.m_Type && garage.IsPointInsideGarage(point, 0.5f)) // todo: m_nType == ONLY_TARGET_VEH or != INVALID
+        if (garage.m_Type != INVALID && garage.IsPointInsideGarage(point, 0.5f)) {
             return true;
+        }
     }
     return false;
 }
 
-// 0x447CD0
+// 0x447CD0 - TODO: Remove, useless stub
 void CGarages::ActivateGarage(int16 garageId) {
-    auto& garage = GetGarage(garageId);
-    garage.m_bInactive = false;
-    if (   garage.m_Type == eGarageType::UNKN_CLOSESONTOUCH
-        && garage.m_DoorState != GARAGE_DOOR_CLOSED
-    ) {
-        garage.m_DoorState = GARAGE_DOOR_OPENING;
-    }
+    GetGarage(garageId).Activate();
 }
 
-// 0x447CB0
+// 0x447CB0 - TODO: Remove, useless stub
 void CGarages::DeActivateGarage(int16 garageId) {
-    GetGarage(garageId).m_bInactive = true;
+    GetGarage(garageId).DeActivate();
 }
 
 // 0x447C40
@@ -369,7 +356,7 @@ void CGarages::SetTargetCarForMissionGarage(int16 garageId, CVehicle* vehicle) {
 
 // 0x447B80
 void CGarages::TriggerMessage(const char* tagMsg, int16 numInStr1, uint16 time, int16 numInStr2) {
-    if (   strcmp(tagMsg, MessageIDString) != 0 // Different strings
+    if (   strcmp(tagMsg, MessageIDString) != 0
         || CTimer::GetTimeInMS() < MessageStartTime
         || CTimer::GetTimeInMS() >= MessageEndTime
     ) {
@@ -380,8 +367,8 @@ void CGarages::TriggerMessage(const char* tagMsg, int16 numInStr1, uint16 time, 
             return;
         MessageStartTime = CTimer::GetTimeInMS() - 500;
     }
-    MessageEndTime = MessageStartTime + time;
-    MessageNumberInString = numInStr1;
+    MessageEndTime         = MessageStartTime + time;
+    MessageNumberInString  = numInStr1;
     MessageNumberInString2 = numInStr2;
 }
 
@@ -407,13 +394,15 @@ void CGarages::PrintMessages() {
     CFont::SetDropColor({ 0, 0, 0, 255 });
 
     const auto DrawFormattedString = [&](auto... formatArgs) {
-        CMessages::InsertNumberInString(TheText.Get(MessageIDString), formatArgs..., gGxtString);
+        if constexpr (sizeof...(formatArgs)) {
+            CMessages::InsertNumberInString(TheText.Get(MessageIDString), formatArgs..., gGxtString);
+        }
         CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_STRETCH_Y(155.f), gGxtString);
     };
 
     if (MessageNumberInString < 0) {
         if (MessageNumberInString2 < 0) {
-            CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_STRETCH_Y(155.f), TheText.Get(MessageIDString));
+            DrawFormattedString();
         } else {
             DrawFormattedString(MessageNumberInString2, -1, -1, -1, -1, -1);
         }
@@ -422,30 +411,9 @@ void CGarages::PrintMessages() {
     }
 }
 
-// 0x4476D0
+// 0x4476D0 - TODO: Useless stub, remove
 void CGarages::ChangeGarageType(int16 garageId, eGarageType type, uint32 unused) {
-    auto garage = GetGarage(garageId);
-    garage.m_Type = type;
-
-    if (type < BOMBSHOP_TIMED) {
-        garage.SetClosed();
-        garage.ResetDoorPosition();
-        return;
-    }
-
-    if (type > PAYNSPRAY) {
-        if (type == BURGLARY)
-            return;
-
-        garage.SetClosed();
-        garage.ResetDoorPosition();
-        return;
-    }
-
-    if (garage.IsClosed()) {
-        garage.SetOpened();
-        garage.m_DoorOpenness = 1.0f;
-    }
+    GetGarage(garageId).ChangeType(type);
 }
 
 // 0x447680
@@ -584,11 +552,11 @@ void CGarages::StopCarFromBlowingUp(CAutomobile* vehicle) {
     vehicle->m_fBurnTimer = 0.0f;
     vehicle->m_fHealth = vehicle->m_fHealth <= 300.0f ? 300.0f : vehicle->m_fHealth;
 
-    auto& manager = vehicle->m_damageManager;
-    if (manager.GetEngineStatus() >= 275) {
-        manager.SetEngineStatus(manager.GetEngineStatus());
+    auto& dmgmgr = vehicle->m_damageManager;
+    if (dmgmgr.GetEngineStatus() >= 275) {
+        dmgmgr.SetEngineStatus(dmgmgr.GetEngineStatus());
     } else {
-        manager.SetEngineStatus(275u);
+        dmgmgr.SetEngineStatus(275u);
     }
 }
 

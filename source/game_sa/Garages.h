@@ -66,10 +66,11 @@ public:
 
     static int32 FindSafeHouseIndexForGarageType(eGarageType type);
     static int16 FindGarageForObject(CObject*);
-    static int16 FindGarageIndex(char* name);
     static float FindDoorHeightForMI(uint32 modelIndex);
 
     static bool IsModelIndexADoor(int32 model);
+
+    //! Check is point within any hideout garage (See `CGarage::IsHideOut`)
     static bool IsPointWithinHideOutGarage(Const CVector& point);
     static bool IsGarageOpen(int16 garageId);
     static bool IsGarageClosed(int16 garageId);

@@ -231,6 +231,42 @@ bool CGarage::IsGarageEmpty() {
     return false;
 }
 
+// Based on 0x4476D0
+void CGarage::ChangeType(eGarageType newType) {
+    m_Type = newType;
+    switch (newType) {
+    case BOMBSHOP_TIMED:
+    case BOMBSHOP_ENGINE:
+    case BOMBSHOP_REMOTE:
+    case PAYNSPRAY: {
+        if (IsClosed()) {
+            SetOpened();
+            m_DoorOpenness = 1.0f;
+        }
+        break;
+    }
+    case BURGLARY:
+        break;
+    default: {
+        SetClosed();
+        ResetDoorPosition();
+        break;
+    }
+    }
+}
+
+// Based on 0x447CD0
+void CGarage::Activate() {
+    m_bInactive = false;
+    if (m_Type == eGarageType::UNKN_CLOSESONTOUCH && IsClosed()) {
+        SetOpened();
+    }
+}
+
+void CGarage::DeActivate() {
+    m_bInactive = true;
+}
+
 /*
 void CGarage::CenterCarInGarage(CEntity* entity) {
     auto vehicle = FindPlayerVehicle();

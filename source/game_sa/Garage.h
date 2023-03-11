@@ -138,7 +138,7 @@ public:
 
     void TidyUpGarageClose();
     void TidyUpGarage();
-    void StoreAndRemoveCarsForThisHideOut(CStoredCar* car, int32 maxSlot);
+    void StoreAndRemoveCarsForThisHideOut(CStoredCar* car, int32 maxSlot = NUM_GARAGE_STORED_CARS);
     void RemoveCarsBlockingDoorNotInside();
     bool IsEntityTouching3D(CEntity* entity);
     bool IsEntityEntirelyOutside(CEntity* entity, float radius);
@@ -172,14 +172,19 @@ public:
     bool SlideDoorOpen();
     bool SlideDoorClosed();
     bool IsGarageEmpty();
-    static void BuildRotatedDoorMatrix(CEntity* entity, float fDoorPosition);
 
+    void ChangeType(eGarageType newType);
+    void Activate();
+    void DeActivate();
+
+
+    static void BuildRotatedDoorMatrix(CEntity* entity, float fDoorPosition);
     // NOTSA section
     [[nodiscard]] bool IsHideOut() const;
-    [[nodiscard]] bool IsOpen()   const { return m_DoorState == GARAGE_DOOR_OPEN || m_DoorState == GARAGE_DOOR_WAITING_PLAYER_TO_EXIT; }
+    [[nodiscard]] bool IsOpen(bool checkIsWaitingToExit = false) const { return m_DoorState == GARAGE_DOOR_OPEN || (checkIsWaitingToExit && m_DoorState == GARAGE_DOOR_WAITING_PLAYER_TO_EXIT); }
     [[nodiscard]] bool IsClosed() const { return m_DoorState == GARAGE_DOOR_CLOSED; }
     bool IsImpound() const;
-    void SetOpened() { m_DoorState = GARAGE_DOOR_OPEN; }
+    void SetOpened(bool open = true) { m_DoorState = open ? GARAGE_DOOR_OPEN : GARAGE_DOOR_CLOSED; }
     void SetClosed() { m_DoorState = GARAGE_DOOR_CLOSED; }
     void ResetDoorPosition() { m_DoorOpenness = 0.0f; } // todo: not good name
 
