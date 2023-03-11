@@ -150,6 +150,9 @@ public:
     //! Also see `GetPerpRight` and `RotatedBy`
     CVector2D GetPerpLeft() const;
 
+    //! Is this vector a unit vector (eg.: magnitude == 1)
+    bool IsUnitVector() const { return approxEqual(SquaredMagnitude(), 1.f, 0.000002); }
+
     /*!
     * @notsa
     * @return Make all component's values absolute (positive).
