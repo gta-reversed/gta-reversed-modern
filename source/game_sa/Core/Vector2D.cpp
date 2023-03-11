@@ -56,3 +56,7 @@ CVector2D CVector2D::GetPerpRight() const {
 CVector2D CVector2D::GetPerpLeft() const {
     return { -y, x };
 }
+
+bool CVector2D::IsUnitVector() const {
+    return approxEqual(SquaredMagnitude(), 1.f, 0.000002f);
+}

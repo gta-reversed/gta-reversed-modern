@@ -151,7 +151,7 @@ public:
     CVector2D GetPerpLeft() const;
 
     //! Is this vector a unit vector (eg.: magnitude == 1)
-    bool IsUnitVector() const { return approxEqual(SquaredMagnitude(), 1.f, 0.000002); }
+    bool IsUnitVector() const;
 
     /*!
     * @notsa
