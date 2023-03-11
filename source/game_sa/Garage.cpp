@@ -15,7 +15,7 @@ void CGarage::InjectHooks() {
     RH_ScopedInstall(EntityHasASphereWayOutsideGarage, 0x449050);
     RH_ScopedInstall(RemoveCarsBlockingDoorNotInside, 0x449690);
     RH_ScopedInstall(IsEntityTouching3D, 0x448EE0);
-    RH_ScopedInstall(IsEntityEntirelyOutside, 0x448D30, {.reversed = false});
+    RH_ScopedInstall(IsEntityEntirelyOutside, 0x448D30);
     RH_ScopedInstall(IsStaticPlayerCarEntirelyInside, 0x44A830, {.reversed = false});
     RH_ScopedInstall(IsEntityEntirelyInside3D, 0x448BE0, {.reversed = false});
     //RH_ScopedInstall(IsPointInsideGarage, 0x448740, {.reversed = false});
@@ -141,26 +141,30 @@ void CGarage::StoreAndRemoveCarsForThisHideOut(CStoredCar* storedCars, int32 max
         storedCars[i].Clear();
 }
 
-// 0x449050
-bool CGarage::EntityHasASphereWayOutsideGarage(CEntity* entity, float tolerance) {
+// !any_of(outside) = all_of(inside)
+// !any_of(inside) = all_of(outside)
+
+bool CGarage::EntityHasASphereTest(CEntity* entity, bool inside, float tolerance) {
     return rng::any_of(
         entity->GetColData()->GetSpheres(),
         [&](CColSphere sp) {
             sp.m_fRadius += tolerance;
-            return !IsSphereInsideGarage(TransformObject(sp, entity->GetMatrix()));
+            const auto hasSphereInside = IsSphereInsideGarage(TransformObject(sp, entity->GetMatrix()));
+            return inside
+                ? hasSphereInside
+                : !hasSphereInside;
         }
     );
 }
 
+// 0x449050
+bool CGarage::EntityHasASphereWayOutsideGarage(CEntity* entity, float tolerance) {
+    return EntityHasASphereTest(entity, false, tolerance);
+}
+
 // NOTSA
 bool CGarage::EntityHasSphereInsideGarage(CEntity* entity, float tolerance) {
-    return rng::any_of(
-        entity->GetColData()->GetSpheres(),
-        [&](CColSphere sp) {
-            sp.m_fRadius += tolerance;
-            return IsSphereInsideGarage(TransformObject(sp, entity->GetMatrix())); // Yes, a single `!` is the difference between this and `EntityHasASphereWayOutsideGarage`
-        }
-    );
+    return EntityHasASphereTest(entity, true, tolerance);
 }
 
 // 0x449690
@@ -188,12 +192,18 @@ void CGarage::RemoveCarsBlockingDoorNotInside() {
 
 // 0x448EE0
 bool CGarage::IsEntityTouching3D(CEntity* entity) {
-    return GetBoundingBox().IsPointWithin(entity->GetPosition()) || EntityHasSphereInsideGarage(entity);
+    if (CCollision::TestSphereBox({ entity->GetPosition(), entity->GetColModel()->GetBoundRadius() }, GetBoundingBox())) {
+        return true;
+    }
+    return EntityHasSphereInsideGarage(entity);
 }
 
 // 0x448D30
 bool CGarage::IsEntityEntirelyOutside(CEntity* entity, float radius) {
-    return plugin::CallMethodAndReturn<bool, 0x448D30, CGarage*, CEntity*, float>(this, entity, radius);
+    if (!CCollision::TestSphereBox({ entity->GetPosition(), entity->GetColModel()->GetBoundRadius() }, GetBoundingBox())) {
+        return true;
+    }
+    return !EntityHasSphereInsideGarage(entity);
 }
 
 // 0x44A830
