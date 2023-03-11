@@ -13,7 +13,7 @@ void CGarage::InjectHooks() {
     RH_ScopedInstall(TidyUpGarageClose, 0x449D10);
     RH_ScopedInstall(TidyUpGarage, 0x449C50);
     RH_ScopedInstall(EntityHasASphereWayOutsideGarage, 0x449050);
-    RH_ScopedInstall(RemoveCarsBlockingDoorNotInside, 0x449690, {.reversed = false});
+    RH_ScopedInstall(RemoveCarsBlockingDoorNotInside, 0x449690);
     RH_ScopedInstall(IsEntityTouching3D, 0x448EE0, {.reversed = false});
     RH_ScopedInstall(IsEntityEntirelyOutside, 0x448D30, {.reversed = false});
     RH_ScopedInstall(IsStaticPlayerCarEntirelyInside, 0x44A830, {.reversed = false});
@@ -152,7 +152,25 @@ bool CGarage::EntityHasASphereWayOutsideGarage(CEntity* entity, float tolerance)
 
 // 0x449690
 void CGarage::RemoveCarsBlockingDoorNotInside() {
-    plugin::CallMethod<0x449690, CGarage*>(this);
+    for (auto& veh : GetVehiclePool()->GetAllValid()) {
+        if (!IsEntityTouching3D(&veh)) {
+            continue;
+        }
+        if (!IsPointInsideGarage(veh.GetPosition())) {
+            continue;
+        }
+        if (veh.vehicleFlags.bIsLocked) {
+            continue;
+        }
+        if (!veh.CanBeDeleted()) {
+            continue;
+        }
+        CWorld::Remove(&veh);
+        delete &veh;
+        if (!notsa::IsFixBugs()) { // For some reason original code only deletes one vehicle
+            break;
+        }
+    }
 }
 
 // 0x448EE0
