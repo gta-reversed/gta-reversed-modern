@@ -161,7 +161,7 @@ public:
     int32 FindMaxNumStoredCarsForGarage();
     bool IsPlayerOutsideGarage(float fRadius);
     bool IsPlayerEntirelyInsideGarage();
-    bool EntityHasASphereWayOutsideGarage(CEntity* entity, float fRadius);
+    bool EntityHasASphereWayOutsideGarage(CEntity* entity, float tolerance = 0.f);
     bool IsAnyOtherCarTouchingGarage(CVehicle* ignoredVehicle);
     void ThrowCarsNearDoorOutOfGarage(CVehicle* ignoredVehicle);
     bool IsAnyOtherPedTouchingGarage(CPed* ignoredVehicle);

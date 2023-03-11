@@ -12,7 +12,7 @@ void CGarage::InjectHooks() {
     RH_ScopedInstall(CloseThisGarage, 0x447D70);
     RH_ScopedInstall(TidyUpGarageClose, 0x449D10);
     RH_ScopedInstall(TidyUpGarage, 0x449C50);
-    RH_ScopedInstall(EntityHasASphereWayOutsideGarage, 0x449050, {.reversed = false});
+    RH_ScopedInstall(EntityHasASphereWayOutsideGarage, 0x449050);
     RH_ScopedInstall(RemoveCarsBlockingDoorNotInside, 0x449690, {.reversed = false});
     RH_ScopedInstall(IsEntityTouching3D, 0x448EE0, {.reversed = false});
     RH_ScopedInstall(IsEntityEntirelyOutside, 0x448D30, {.reversed = false});
@@ -85,11 +85,8 @@ void CGarage::TidyUpGarageClose() {
             // I think this check is meant to be done in case the door *IS* closed
             // and is meant to check if the vehicle *IS* wholly inside the garage.
             // This is kinda confirmed by looking at `TidyUpGarage` [where the veh. is only removed if inside the garage]
-            if (rng::all_of(
-                veh.GetColData()->GetSpheres(),
-                [&](CColSphere& sp) { return IsSphereInsideGarage(TransformObject(sp, veh.GetMatrix())); }
-            )) {
-                continue; 
+            if (!EntityHasASphereWayOutsideGarage(&veh)) {
+                continue;
             }
         }
         CWorld::Remove(&veh);
@@ -143,8 +140,14 @@ void CGarage::StoreAndRemoveCarsForThisHideOut(CStoredCar* storedCars, int32 max
 }
 
 // 0x449050
-bool CGarage::EntityHasASphereWayOutsideGarage(CEntity* entity, float fRadius) {
-    return plugin::CallMethodAndReturn<bool, 0x449050, CGarage*, CEntity*, float>(this, entity, fRadius);
+bool CGarage::EntityHasASphereWayOutsideGarage(CEntity* entity, float tolerance) {
+    return rng::any_of(
+        entity->GetColData()->GetSpheres(),
+        [&](CColSphere sp) {
+            sp.m_fRadius += tolerance;
+            return !IsSphereInsideGarage(TransformObject(sp, entity->GetMatrix()));
+        }
+    );
 }
 
 // 0x449690
