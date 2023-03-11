@@ -10,7 +10,7 @@ void CGarage::InjectHooks() {
     RH_ScopedInstall(StoreAndRemoveCarsForThisHideOut, 0x449900);
     RH_ScopedInstall(OpenThisGarage, 0x447D50);
     RH_ScopedInstall(CloseThisGarage, 0x447D70);
-    RH_ScopedInstall(TidyUpGarageClose, 0x449D10, {.reversed = false});
+    RH_ScopedInstall(TidyUpGarageClose, 0x449D10);
     RH_ScopedInstall(TidyUpGarage, 0x449C50, {.reversed = false});
     RH_ScopedInstall(EntityHasASphereWayOutsideGarage, 0x449050, {.reversed = false});
     RH_ScopedInstall(RemoveCarsBlockingDoorNotInside, 0x449690, {.reversed = false});
@@ -68,7 +68,29 @@ void CGarage::BuildRotatedDoorMatrix(CEntity* entity, float fDoorPosition) {
 
 // 0x449D10
 void CGarage::TidyUpGarageClose() {
-    plugin::CallMethod<0x449D10, CGarage*>(this);
+    for (auto& veh : GetVehiclePool()->GetAllValid()) {
+        if (!veh.IsAutomobile() && !veh.IsBike()) {
+            continue;
+        }
+        if (veh.GetStatus() != STATUS_WRECKED) {
+            continue;
+        }
+        if (!IsEntityTouching3D(&veh)) {
+            continue;
+        }
+        if (!IsClosed()) {
+            // I'm not sure what this check is supposed to do
+            // The door is open, so why check if the vehicle is not wholly inside?
+            if (rng::all_of(
+                veh.GetColData()->GetSpheres(),
+                [&](CColSphere& sp) { return IsSphereInsideGarage(TransformObject(sp, veh.GetMatrix())); }
+            )) {
+                continue; 
+            }
+        }
+        CWorld::Remove(&veh);
+        delete &veh;
+    }
 }
 
 // 0x449C50

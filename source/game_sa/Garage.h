@@ -145,11 +145,12 @@ public:
     bool IsStaticPlayerCarEntirelyInside();
     bool IsEntityEntirelyInside3D(CEntity* entity, float radius);
     bool IsPointInsideGarage(CVector point);
+    bool IsPointInsideGarage(CVector point, float radius);
+    bool IsSphereInsideGarage(const CSphere& sp) { return IsPointInsideGarage(sp.m_vecCenter, sp.m_fRadius); }
     eGarageDoorState PlayerArrestedOrDied();
     void OpenThisGarage();
     void CloseThisGarage();
     void InitDoorsAtStart();
-    bool IsPointInsideGarage(CVector point, float radius);
     void Update(int32 garageId);
 
     bool RightModTypeForThisGarage(CVehicle* vehicle);

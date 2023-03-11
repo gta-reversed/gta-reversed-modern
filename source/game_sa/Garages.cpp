@@ -37,19 +37,20 @@ void CGarages::InjectHooks() {
 
 // 0x447120
 void CGarages::Init() {
-    NumGarages = 0;
-    MessageEndTime = 0;
-    MessageStartTime = 0;
-    PlayerInGarage = 0;
-    BombsAreFree = 0;
-    CarsCollected = 0;
-    BankVansCollected = 0;
-    PoliceCarsCollected = 0;
-    std::ranges::fill(CarTypesCollected, 0);
-    CrushedCarId = -1;
-    LastTimeHelpMessage = 0;
+    NumGarages            = 0;
+    MessageEndTime        = 0;
+    MessageStartTime      = 0;
+    PlayerInGarage        = 0;
+    BombsAreFree          = 0;
+    CarsCollected         = 0;
+    BankVansCollected     = 0;
+    PoliceCarsCollected   = 0;
+    CrushedCarId          = -1;
+    LastTimeHelpMessage   = 0;
     LastGaragePlayerWasIn = -1;
-    NoResprays = false;
+    NoResprays            = false;
+
+    std::ranges::fill(CarTypesCollected, 0);
 
     for (auto& safeHouseCars : aCarsInSafeHouse) {
         rng::fill(safeHouseCars, CStoredCar{});
