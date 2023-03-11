@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "Garage.h"
+#include <extensions/Shapes/AngledRect.hpp>
 
 void CGarage::InjectHooks() {
     RH_ScopedClass(CGarage);
@@ -17,8 +18,8 @@ void CGarage::InjectHooks() {
     RH_ScopedInstall(IsEntityTouching3D, 0x448EE0);
     RH_ScopedInstall(IsEntityEntirelyOutside, 0x448D30);
     RH_ScopedInstall(IsStaticPlayerCarEntirelyInside, 0x44A830);
-    RH_ScopedInstall(IsEntityEntirelyInside3D, 0x448BE0, {.reversed = false});
-    //RH_ScopedInstall(IsPointInsideGarage, 0x448740, {.reversed = false});
+    RH_ScopedInstall(IsEntityEntirelyInside3D, 0x448BE0);
+    RH_ScopedInstall(IsPointInsideGarage, 0x448740);
     RH_ScopedInstall(PlayerArrestedOrDied, 0x4486C0, {.reversed = false});
     RH_ScopedInstall(InitDoorsAtStart, 0x447600, {.reversed = false});
     //RH_ScopedInstall(IsPointInsideGarage, 0x4487D0, {.reversed = false});
@@ -192,18 +193,34 @@ void CGarage::RemoveCarsBlockingDoorNotInside() {
 
 // 0x448EE0
 bool CGarage::IsEntityTouching3D(CEntity* entity) {
-    if (CCollision::TestSphereBox({ entity->GetPosition(), entity->GetColModel()->GetBoundRadius() }, GetBoundingBox())) {
+    if (CCollision::TestSphereBox({ entity->GetPosition(), entity->GetColModel()->GetBoundRadius() }, GetAABB())) {
         return true;
     }
     return EntityHasSphereInsideGarage(entity);
 }
 
-// 0x448D30
-bool CGarage::IsEntityEntirelyOutside(CEntity* entity, float radius) {
-    if (!CCollision::TestSphereBox({ entity->GetPosition(), entity->GetColModel()->GetBoundRadius() }, GetBoundingBox())) {
+// 0x448BE0
+bool CGarage::IsEntityEntirelyInside3D(CEntity* entity, float tolerance) {
+    if (!CCollision::TestSphereBox({ entity->GetPosition(), entity->GetColModel()->GetBoundRadius() }, GetAABB())) {
         return true;
     }
     return !EntityHasSphereInsideGarage(entity);
+}
+
+// 0x448D30
+bool CGarage::IsEntityEntirelyOutside(CEntity* entity, float radius) {
+    if (!CCollision::TestSphereBox({ entity->GetPosition(), entity->GetColModel()->GetBoundRadius() }, GetAABB())) {
+        return true;
+    }
+    return !EntityHasSphereInsideGarage(entity);
+}
+
+// 0x448740 - Original function was __spoils<>, so we have to keep the registers intact!
+bool CGarage::IsPointInsideGarage(CVector point) {
+    __asm pushad;
+    const auto ret = GetBB().IsPointWithin(point);
+    __asm popad;
+    return ret;
 }
 
 // 0x44A830
@@ -218,7 +235,7 @@ bool CGarage::IsStaticPlayerCarEntirelyInside() {
     if (FindPlayerPed()->GetTaskManager().Find<TASK_COMPLEX_LEAVE_CAR>()) { // Ped is leaving teh car
         return false;
     }
-    if (!GetBoundingBox().IsPointWithin(plyrVeh->GetPosition())) {
+    if (!GetAABB().IsPointWithin(plyrVeh->GetPosition())) {
         return false;
     }
     if (plyrVeh->GetMoveSpeed().SquaredMagnitude() >= sq(0.01f)) { // The originally compared each component: abs(x) > 0.01, but that's retarded
@@ -228,16 +245,6 @@ bool CGarage::IsStaticPlayerCarEntirelyInside() {
         return false;
     }
     return true;
-}
-
-// 0x448BE0
-bool CGarage::IsEntityEntirelyInside3D(CEntity* entity, float tolerance) {
-    return plugin::CallMethodAndReturn<bool, 0x448BE0, CGarage*, CEntity*, float>(this, entity, tolerance);
-}
-
-// 0x448740
-bool CGarage::IsPointInsideGarage(CVector point) { // NOTE: __spoils<>
-    return plugin::CallMethodAndReturn<bool, 0x448740, CGarage*, CVector>(this, point);
 }
 
 // 0x4486C0
@@ -310,10 +317,28 @@ CVector2D CGarage::GetCenterOffset() const {
          + m_DirB * (m_DirB / 2.f);
 }
 
-CBoundingBox CGarage::GetBoundingBox() const {
+CBoundingBox CGarage::GetAABB() const {
     return {
         CVector{m_MinX, m_MinY, m_Base.z},
         CVector{m_MaxX, m_MaxY, m_CeilingZ}
+    };
+}
+
+notsa::shapes::AngledRect CGarage::GetBaseAngledRect() const {
+    return notsa::shapes::AngledRect{
+        m_Base,
+        -m_DirA, // AngledRect's AB goes left to right, but ours is vice versa, so flip it
+        m_LenA,
+        m_DirB,
+        m_LenB
+    };
+}
+
+notsa::shapes::AngledBox CGarage::GetBB() const {
+    return {
+        GetBaseAngledRect(),
+        m_Base.z,
+        m_CeilingZ
     };
 }
 

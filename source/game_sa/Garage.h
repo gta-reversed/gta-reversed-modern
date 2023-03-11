@@ -1,5 +1,8 @@
 #pragma once
 
+#include <extensions/Shapes/AngledRect.hpp>
+#include <extensions/Shapes/AngledBox.hpp>
+
 #include "AEDoorAudioEntity.h"
 #include "StoredCar.h"
 
@@ -195,7 +198,14 @@ public:
     CVector2D GetCenterOffset() const;
     CVector2D GetCenter2D() const { return m_Base + GetCenterOffset(); }
 
-    CBoundingBox GetBoundingBox() const;
+    //! Represents the AABB of this garage
+    CBoundingBox GetAABB() const;
+
+    //! Represents the base of the garage in 2D
+    notsa::shapes::AngledRect GetBaseAngledRect() const;
+
+    //! Represents the garage's actual bounding box
+    notsa::shapes::AngledBox GetBB() const;
 };
 
 VALIDATE_SIZE(CGarage, 0xD8);
