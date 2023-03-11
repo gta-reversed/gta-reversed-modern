@@ -19,10 +19,10 @@ void CGarage::InjectHooks() {
     RH_ScopedInstall(IsEntityEntirelyOutside, 0x448D30);
     RH_ScopedInstall(IsStaticPlayerCarEntirelyInside, 0x44A830);
     RH_ScopedInstall(IsEntityEntirelyInside3D, 0x448BE0);
-    RH_ScopedInstall(IsPointInsideGarage, 0x448740);
     RH_ScopedInstall(PlayerArrestedOrDied, 0x4486C0, {.reversed = false});
     RH_ScopedInstall(InitDoorsAtStart, 0x447600, {.reversed = false});
-    //RH_ScopedInstall(IsPointInsideGarage, 0x4487D0, {.reversed = false});
+    RH_ScopedOverloadedInstall(IsPointInsideGarage, "NoTolerance", 0x448740, bool(CGarage::*)(CVector));
+    RH_ScopedOverloadedInstall(IsPointInsideGarage, "WithTolerance", 0x4487D0, bool(CGarage::*)(CVector, float));
     RH_ScopedInstall(Update, 0x44AA50, {.reversed = false});
 }
 
@@ -216,12 +216,21 @@ bool CGarage::IsEntityEntirelyOutside(CEntity* entity, float radius) {
 }
 
 // 0x448740 - Original function was __spoils<>, so we have to keep the registers intact!
-bool CGarage::IsPointInsideGarage(CVector point) {
+bool CGarage::IsPointInsideGarage(CVector point) { // TODO: Remove this in favor of the overloaded version
     __asm pushad;
     const auto ret = GetBB().IsPointWithin(point);
     __asm popad;
     return ret;
 }
+
+// 0x4487D0 - Original function was __spoils<>, so we have to keep the registers intact!
+bool CGarage::IsPointInsideGarage(CVector point, float tolerance) {
+    __asm pushad;
+    const auto ret = GetBB().IsPointWithin(point, tolerance);
+    __asm popad;
+    return ret;
+}
+
 
 // 0x44A830
 bool CGarage::IsStaticPlayerCarEntirelyInside() {
@@ -271,11 +280,6 @@ void CGarage::CloseThisGarage() {
 // 0x447600
 void CGarage::InitDoorsAtStart() {
     plugin::CallMethod<0x447600, CGarage*>(this);
-}
-
-// 0x4487D0
-bool CGarage::IsPointInsideGarage(CVector point, float radius) {
-    return plugin::CallMethodAndReturn<bool, 0x4487D0, CGarage*, CVector, float>(this, point, radius);
 }
 
 // 0x44AA50
