@@ -231,7 +231,6 @@ bool CGarage::IsPointInsideGarage(CVector point, float tolerance) {
     return ret;
 }
 
-
 // 0x44A830
 bool CGarage::IsStaticPlayerCarEntirelyInside() {
     const auto plyrVeh = FindPlayerVehicle();
@@ -348,24 +347,12 @@ notsa::shapes::AngledBox CGarage::GetBB() const {
 
 // 0x44A9C0
 bool CGarage::IsGarageEmpty() {
-    return plugin::CallMethodAndReturn<bool, 0x44A9C0, CGarage*>(this);
-
-    CVector cornerA = { m_MinX, m_MinY, m_Base.z };
-    CVector cornerB = { m_MaxX, m_MaxY, m_CeilingZ   };
-
-    int16 outCount[2];
-    CEntity* outEntities[16];
-    CWorld::FindObjectsIntersectingCube(&cornerA, &cornerB, outCount, static_cast<int16>(std::size(outEntities)), outEntities, false, true, true, false, false);
-    if (outCount[0] <= 0)
-        return true;
-
-    int16 entityIndex = 0;
-
-    while (!IsEntityTouching3D(outEntities[entityIndex])) {
-        if (++entityIndex >= outCount[0])
-            return true;
-    }
-    return false;
+    int16 countEntities;
+    std::array<CEntity*, 16> entities;
+    CWorld::FindObjectsIntersectingBB(GetAABB(), &countEntities, entities, false, true, true, false, false);
+    return rng::all_of(entities | rngv::take(countEntities), [this](auto&& e) {
+        return !IsEntityTouching3D(e);
+    });
 }
 
 // Based on 0x4476D0
