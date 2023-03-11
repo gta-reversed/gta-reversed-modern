@@ -20,7 +20,7 @@ void CGarage::InjectHooks() {
     RH_ScopedInstall(IsStaticPlayerCarEntirelyInside, 0x44A830);
     RH_ScopedInstall(IsEntityEntirelyInside3D, 0x448BE0);
     RH_ScopedInstall(PlayerArrestedOrDied, 0x4486C0);
-    RH_ScopedInstall(InitDoorsAtStart, 0x447600, {.reversed = false});
+    RH_ScopedInstall(InitDoorsAtStart, 0x447600);
     RH_ScopedOverloadedInstall(IsPointInsideGarage, "NoTolerance", 0x448740, bool(CGarage::*)(CVector));
     RH_ScopedOverloadedInstall(IsPointInsideGarage, "WithTolerance", 0x4487D0, bool(CGarage::*)(CVector, float));
     RH_ScopedInstall(Update, 0x44AA50, {.reversed = false});
@@ -332,6 +332,72 @@ void CGarage::PlayerArrestedOrDied() {
     }
 }
 
+// 0x447600
+void CGarage::InitDoorsAtStart() {
+    m_bRespraysAlwaysFree = false;
+    m_bUsedRespray        = false;
+    m_bInactive           = false;
+    m_bDoorClosed         = true;
+    m_TimeToOpen          = 0;
+    switch (m_Type) {
+    case ONLY_TARGET_VEH:
+    case COLLECTORSITEMS:
+    case COLLECTSPECIFICCARS:
+    case COLLECTCARS_1:
+    case COLLECTCARS_2:
+    case COLLECTCARS_3:
+    case UNKN_CLOSESONTOUCH:
+    case SIXTY_SECONDS:
+    case OPEN_FOR_TARGET_FREEZE_PLAYER:
+    case SCRIPT_ONLY_OPEN:
+    case SAFEHOUSE_GANTON:
+    case SAFEHOUSE_SANTAMARIA:
+    case SAGEHOUSE_ROCKSHORE:
+    case SCRIPT_CONTROLLED:
+    case STAY_OPEN_WITH_CAR_INSIDE:
+    case CLOSE_WITH_CAR_DONT_OPEN_AGAIN:
+    case COLLECTCARS_4:
+    case SCRIPT_OPEN_FREEZE_WHEN_CLOSING:
+    case SAFEHOUSE_FORTCARSON:
+    case SAFEHOUSE_VERDANTMEADOWS:
+    case SAFEHOUSE_DILLIMORE:
+    case SAFEHOUSE_PRICKLEPINE:
+    case SAFEHOUSE_WHITEWOOD:
+    case SAFEHOUSE_PALOMINOCREEK:
+    case SAFEHOUSE_REDSANDSWEST:
+    case SAFEHOUSE_ELCORONA:
+    case SAFEHOUSE_MULHOLLAND:
+    case IMPOUND_LS:
+    case IMPOUND_SF:
+    case IMPOUND_LV:
+    case TUNING_LOCO_LOW_CO:
+    case TUNING_WHEEL_ARCH_ANGELS:
+    case TUNING_TRANSFENDER:
+    case SAFEHOUSE_CALTONHEIGHTS:
+    case SAFEHOUSE_PARADISO:
+    case SAFEHOUSE_DOHERTY:
+    case SAFEHOUSE_HASHBURY:
+    case BURGLARY:
+    case HANGAR_AT400:
+    case HANGAR_ABANDONED_AIRPORT: {
+        m_DoorState = GARAGE_DOOR_CLOSED;
+        m_DoorOpenness = 0.f;
+        break;
+    }
+    case BOMBSHOP_TIMED:
+    case BOMBSHOP_ENGINE:
+    case BOMBSHOP_REMOTE:
+    case PAYNSPRAY: {
+        m_DoorState = GARAGE_DOOR_OPEN;
+        m_DoorOpenness = 1.f;
+        break;
+    }
+    default: // Pirulax: TODO/NOTE: Is this even reachable?
+        m_DoorState = GARAGE_DOOR_CLOSED;
+        break;
+    }
+}
+
 // 0x447D50
 void CGarage::OpenThisGarage() {
   if ( m_DoorState == GARAGE_DOOR_CLOSED
@@ -347,11 +413,6 @@ void CGarage::CloseThisGarage() {
     if (m_DoorState == GARAGE_DOOR_OPEN || m_DoorState == GARAGE_DOOR_OPENING) {
         m_DoorState = GARAGE_DOOR_CLOSING;
     }
-}
-
-// 0x447600
-void CGarage::InitDoorsAtStart() {
-    plugin::CallMethod<0x447600, CGarage*>(this);
 }
 
 // 0x44AA50
