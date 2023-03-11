@@ -143,7 +143,7 @@ public:
     bool IsEntityTouching3D(CEntity* entity);
     bool IsEntityEntirelyOutside(CEntity* entity, float radius);
     bool IsStaticPlayerCarEntirelyInside();
-    bool IsEntityEntirelyInside3D(CEntity* entity, float radius);
+    bool IsEntityEntirelyInside3D(CEntity* entity, float tolerance = 0.f);
     bool IsPointInsideGarage(CVector point);
     bool IsPointInsideGarage(CVector point, float radius);
     bool IsSphereInsideGarage(const CSphere& sp) { return IsPointInsideGarage(sp.m_vecCenter, sp.m_fRadius); }

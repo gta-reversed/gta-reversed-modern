@@ -16,7 +16,7 @@ void CGarage::InjectHooks() {
     RH_ScopedInstall(RemoveCarsBlockingDoorNotInside, 0x449690);
     RH_ScopedInstall(IsEntityTouching3D, 0x448EE0);
     RH_ScopedInstall(IsEntityEntirelyOutside, 0x448D30);
-    RH_ScopedInstall(IsStaticPlayerCarEntirelyInside, 0x44A830, {.reversed = false});
+    RH_ScopedInstall(IsStaticPlayerCarEntirelyInside, 0x44A830);
     RH_ScopedInstall(IsEntityEntirelyInside3D, 0x448BE0, {.reversed = false});
     //RH_ScopedInstall(IsPointInsideGarage, 0x448740, {.reversed = false});
     RH_ScopedInstall(PlayerArrestedOrDied, 0x4486C0, {.reversed = false});
@@ -118,27 +118,27 @@ void CGarage::StoreAndRemoveCarsForThisHideOut(CStoredCar* storedCars, int32 max
     maxSlot = std::min<int32>(maxSlot, NUM_GARAGE_STORED_CARS);
 
     for (auto i = 0; i < NUM_GARAGE_STORED_CARS; i++)
-        storedCars[i].Clear();
+storedCars[i].Clear();
 
-    auto pool = GetVehiclePool();
-    auto storedCarIdx{0u};
-    for (auto i = pool->GetSize(); i; i--) {
-        if (auto vehicle = pool->GetAt(i - 1)) {
-            if (IsPointInsideGarage(vehicle->GetPosition()) && vehicle->m_nCreatedBy != MISSION_VEHICLE) {
-                if (storedCarIdx < static_cast<uint32>(maxSlot) && !EntityHasASphereWayOutsideGarage(vehicle, 1.0f)) {
-                    storedCars[storedCarIdx++].StoreCar(vehicle);
-                }
-
-                FindPlayerInfo().CancelPlayerEnteringCars(vehicle);
-                CWorld::Remove(vehicle);
-                delete vehicle;
+auto pool = GetVehiclePool();
+auto storedCarIdx{ 0u };
+for (auto i = pool->GetSize(); i; i--) {
+    if (auto vehicle = pool->GetAt(i - 1)) {
+        if (IsPointInsideGarage(vehicle->GetPosition()) && vehicle->m_nCreatedBy != MISSION_VEHICLE) {
+            if (storedCarIdx < static_cast<uint32>(maxSlot) && !EntityHasASphereWayOutsideGarage(vehicle, 1.0f)) {
+                storedCars[storedCarIdx++].StoreCar(vehicle);
             }
+
+            FindPlayerInfo().CancelPlayerEnteringCars(vehicle);
+            CWorld::Remove(vehicle);
+            delete vehicle;
         }
     }
+}
 
-    // Clear slots with no vehicles in it
-    for (auto i = storedCarIdx; i < NUM_GARAGE_STORED_CARS; i++)
-        storedCars[i].Clear();
+// Clear slots with no vehicles in it
+for (auto i = storedCarIdx; i < NUM_GARAGE_STORED_CARS; i++)
+    storedCars[i].Clear();
 }
 
 // !any_of(outside) = all_of(inside)
@@ -149,10 +149,10 @@ bool CGarage::EntityHasASphereTest(CEntity* entity, bool inside, float tolerance
         entity->GetColData()->GetSpheres(),
         [&](CColSphere sp) {
             sp.m_fRadius += tolerance;
-            const auto hasSphereInside = IsSphereInsideGarage(TransformObject(sp, entity->GetMatrix()));
-            return inside
-                ? hasSphereInside
-                : !hasSphereInside;
+    const auto hasSphereInside = IsSphereInsideGarage(TransformObject(sp, entity->GetMatrix()));
+    return inside
+        ? hasSphereInside
+        : !hasSphereInside;
         }
     );
 }
@@ -183,7 +183,7 @@ void CGarage::RemoveCarsBlockingDoorNotInside() {
             continue;
         }
         CWorld::Remove(&veh);
-        delete &veh;
+        delete& veh;
         if (!notsa::IsFixBugs()) { // For some reason original code only deletes one vehicle
             break;
         }
@@ -208,12 +208,31 @@ bool CGarage::IsEntityEntirelyOutside(CEntity* entity, float radius) {
 
 // 0x44A830
 bool CGarage::IsStaticPlayerCarEntirelyInside() {
-    return plugin::CallMethodAndReturn<bool, 0x44A830, CGarage*>(this);
+    const auto plyrVeh = FindPlayerVehicle();
+    if (!plyrVeh) {
+        return false;
+    }
+    if (!plyrVeh->IsAutomobile() && !plyrVeh->IsBike()) {
+        return false;
+    }
+    if (FindPlayerPed()->GetTaskManager().Find<TASK_COMPLEX_LEAVE_CAR>()) { // Ped is leaving teh car
+        return false;
+    }
+    if (!GetBoundingBox().IsPointWithin(plyrVeh->GetPosition())) {
+        return false;
+    }
+    if (plyrVeh->GetMoveSpeed().SquaredMagnitude() >= sq(0.01f)) { // The originally compared each component: abs(x) > 0.01, but that's retarded
+        return false;
+    }
+    if (!IsEntityEntirelyInside3D(plyrVeh)) {
+        return false;
+    }
+    return true;
 }
 
 // 0x448BE0
-bool CGarage::IsEntityEntirelyInside3D(CEntity* entity, float radius) {
-    return plugin::CallMethodAndReturn<bool, 0x448BE0, CGarage*, CEntity*, float>(this, entity, radius);
+bool CGarage::IsEntityEntirelyInside3D(CEntity* entity, float tolerance) {
+    return plugin::CallMethodAndReturn<bool, 0x448BE0, CGarage*, CEntity*, float>(this, entity, tolerance);
 }
 
 // 0x448740
