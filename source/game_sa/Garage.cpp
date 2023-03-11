@@ -14,7 +14,7 @@ void CGarage::InjectHooks() {
     RH_ScopedInstall(TidyUpGarage, 0x449C50);
     RH_ScopedInstall(EntityHasASphereWayOutsideGarage, 0x449050);
     RH_ScopedInstall(RemoveCarsBlockingDoorNotInside, 0x449690);
-    RH_ScopedInstall(IsEntityTouching3D, 0x448EE0, {.reversed = false});
+    RH_ScopedInstall(IsEntityTouching3D, 0x448EE0);
     RH_ScopedInstall(IsEntityEntirelyOutside, 0x448D30, {.reversed = false});
     RH_ScopedInstall(IsStaticPlayerCarEntirelyInside, 0x44A830, {.reversed = false});
     RH_ScopedInstall(IsEntityEntirelyInside3D, 0x448BE0, {.reversed = false});
@@ -45,6 +45,8 @@ CGarage::CGarage(
     m_bCameraFollowsPlayer{ flagsIPL & IPL_FLAG_CAM_FOLLOW_PLAYER },
     m_bDoorOpensUp{ flagsIPL & IPL_FLAG_DOOR_UP_AND_ROTATE }
 {
+    assert(m_Base.z <= ceilingZ);
+
     strcpy_s(m_Name, name);
 
     const auto SetMinMaxAxis = [&](float& min, float& max, size_t axis) {
@@ -150,6 +152,17 @@ bool CGarage::EntityHasASphereWayOutsideGarage(CEntity* entity, float tolerance)
     );
 }
 
+// NOTSA
+bool CGarage::EntityHasSphereInsideGarage(CEntity* entity, float tolerance) {
+    return rng::any_of(
+        entity->GetColData()->GetSpheres(),
+        [&](CColSphere sp) {
+            sp.m_fRadius += tolerance;
+            return IsSphereInsideGarage(TransformObject(sp, entity->GetMatrix())); // Yes, a single `!` is the difference between this and `EntityHasASphereWayOutsideGarage`
+        }
+    );
+}
+
 // 0x449690
 void CGarage::RemoveCarsBlockingDoorNotInside() {
     for (auto& veh : GetVehiclePool()->GetAllValid()) {
@@ -175,7 +188,7 @@ void CGarage::RemoveCarsBlockingDoorNotInside() {
 
 // 0x448EE0
 bool CGarage::IsEntityTouching3D(CEntity* entity) {
-    return plugin::CallMethodAndReturn<bool, 0x448EE0, CGarage*, CEntity*>(this, entity);
+    return GetBoundingBox().IsPointWithin(entity->GetPosition()) || EntityHasSphereInsideGarage(entity);
 }
 
 // 0x448D30
@@ -266,6 +279,13 @@ bool CGarage::IsImpound() const {
 CVector2D CGarage::GetCenterOffset() const {
     return m_DirA * (m_DirA / 2.f)
          + m_DirB * (m_DirB / 2.f);
+}
+
+CBoundingBox CGarage::GetBoundingBox() const {
+    return {
+        CVector{m_MinX, m_MinY, m_Base.z},
+        CVector{m_MaxX, m_MaxY, m_CeilingZ}
+    };
 }
 
 // 0x44A9C0

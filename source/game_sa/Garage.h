@@ -162,6 +162,7 @@ public:
     bool IsPlayerOutsideGarage(float fRadius);
     bool IsPlayerEntirelyInsideGarage();
     bool EntityHasASphereWayOutsideGarage(CEntity* entity, float tolerance = 0.f);
+    bool EntityHasSphereInsideGarage(CEntity* entity, float tolerance = 0.f);
     bool IsAnyOtherCarTouchingGarage(CVehicle* ignoredVehicle);
     void ThrowCarsNearDoorOutOfGarage(CVehicle* ignoredVehicle);
     bool IsAnyOtherPedTouchingGarage(CPed* ignoredVehicle);
@@ -178,7 +179,6 @@ public:
     void Activate();
     void DeActivate();
 
-
     static void BuildRotatedDoorMatrix(CEntity* entity, float fDoorPosition);
     // NOTSA section
     [[nodiscard]] bool IsHideOut() const;
@@ -192,6 +192,8 @@ public:
     //! Get offset to center [from the base]
     CVector2D GetCenterOffset() const;
     CVector2D GetCenter2D() const { return m_Base + GetCenterOffset(); }
+
+    CBoundingBox GetBoundingBox() const;
 };
 
 VALIDATE_SIZE(CGarage, 0xD8);
