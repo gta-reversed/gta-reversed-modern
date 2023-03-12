@@ -9,6 +9,10 @@ TextDebugModule::TextDebugModule() :
 }
 
 void TextDebugModule::RenderMainWindow() {
+    if (m_Filter.Draw()) {
+        m_FilterTextHash = CKeyGen::GetUppercaseKey(m_Filter.InputBuf);
+    }
+
     if (!ImGui::BeginTable("TextDebugModule_Table", 3, ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ContextMenuInBody)) {
         return;
     }
@@ -18,7 +22,12 @@ void TextDebugModule::RenderMainWindow() {
     ImGui::TableSetupColumn("String");
     ImGui::TableHeadersRow();
 
-    const auto WriteRow = [](const auto& entry, const auto& tabl) {
+    const auto WriteRow = [this](const auto& entry, const auto& tabl) {
+        if (!m_Filter.PassFilter(entry.string) && m_FilterTextHash != entry.hash) {
+            return;
+        }
+
+
         ImGui::TableNextRow();
         ImGui::PushID(&entry);
 
@@ -30,6 +39,10 @@ void TextDebugModule::RenderMainWindow() {
 
         ImGui::TableNextColumn();
         ImGui::TextUnformatted(entry.string);
+
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
+            ImGui::SetClipboardText(entry.string);
+        }
 
         ImGui::PopID();
     };

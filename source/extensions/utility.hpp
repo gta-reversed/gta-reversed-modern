@@ -105,14 +105,15 @@ constexpr auto IsFixBugs() {
 #endif
 }
 
-/// Predicate to check if `value` is null
-template<typename T>
-    requires(std::is_pointer_v<T>)
-bool IsNull(T value) { return value == nullptr; }
-
-/// Negate another predicate function
-template<typename T>
-auto Not(bool(*fn)(T)) { return [fn](const T& value) { return !fn(value); }; }
+//! Functor to check if `value` is null
+//! Useful for rng::any_of/all_of, etc...
+struct is_nullptr {
+    template<typename T>
+        requires(std::is_pointer_v<T>)
+    bool operator()(T value) {
+        return value == nullptr;
+    }
+};
 
 struct NotIsNull {
     template<typename T>

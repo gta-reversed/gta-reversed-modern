@@ -81,6 +81,7 @@ void DebugModules::CreateModules() {
     Add<AmbienceTrackManagerDebugModule>();
     Add<CutsceneTrackManagerDebugModule>();
     Add<notsa::debugmodules::ScriptDebugModule>();
+    Add<TextDebugModule>();
 
     // Stuff that is present in multiple menus
     Add<TimeCycleDebugModule>(); // Visualization + Extra

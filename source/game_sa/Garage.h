@@ -70,6 +70,7 @@ enum eGarageDoorState : uint8 {
     GARAGE_DOOR_OPENING = 3,
     GARAGE_DOOR_WAITING_PLAYER_TO_EXIT = 4,
     GARAGE_DOOR_CLOSED_DROPPED_CAR = 5,
+    GARAGE_DOOR_CRUSHING = 6,
 };
 
 /*!
@@ -114,7 +115,7 @@ public:
     union {
         uint8 m_nFlags;
         struct {
-            uint8 m_b0x1 : 1;
+            uint8 m_bClosingEmpty : 1; // Was anything inside the garage when it's door started closing
             uint8 m_bInactive : 1;
             uint8 m_bUsedRespray : 1;
             uint8 m_bDoorOpensUp : 1;
@@ -151,41 +152,47 @@ public:
     void StoreAndRemoveCarsForThisHideOut(CStoredCar* car, int32 maxSlot = NUM_GARAGE_STORED_CARS);
     void RemoveCarsBlockingDoorNotInside();
     bool IsEntityTouching3D(CEntity* entity);
-    bool IsEntityEntirelyOutside(CEntity* entity, float radius);
-    bool IsStaticPlayerCarEntirelyInside();
+    bool IsEntityEntirelyOutside(CEntity* entity, float tolerance = 0.f);
+    bool IsPlayerOutsideGarage(float tolerance = 0.f);
+
     bool IsEntityEntirelyInside3D(CEntity* entity, float tolerance = 0.f);
+    bool IsStaticPlayerCarEntirelyInside();
+    bool IsPlayerEntirelyInsideGarage();
+
     bool IsPointInsideGarage(CVector point);
     bool IsPointInsideGarage(CVector point, float radius);
     bool IsSphereInsideGarage(const CSphere& sp) { return IsPointInsideGarage(sp.m_vecCenter, sp.m_fRadius); }
     void PlayerArrestedOrDied();
     void OpenThisGarage();
     void CloseThisGarage();
+    void UpdatePlayerCameraStuff();
     void InitDoorsAtStart();
     void Update(int32 garageId);
 
     bool RightModTypeForThisGarage(CVehicle* vehicle);
     float CalcDistToGarageRectangleSquared(float, float);
-    void NeatlyLineUpStoredCars(CStoredCar* car);
-    bool RestoreCarsForThisHideOut(CStoredCar* car);
+    void NeatlyLineUpStoredCars(CStoredCar* cars);
+    bool RestoreCarsForThisHideOut(CStoredCar* storedCars);
+
     bool RestoreCarsForThisImpoundingGarage(CStoredCar* car);
+    void StoreAndRemoveCarsForThisImpoundingGarage(CStoredCar* storedCars, uint32 numCarsToStore);
+
     int32 FindMaxNumStoredCarsForGarage();
-    bool IsPlayerOutsideGarage(float fRadius);
-    bool IsPlayerEntirelyInsideGarage();
     bool EntityHasASphereTest(CEntity* entity, bool inside, float tolerance = 0.f);
     bool EntityHasASphereWayOutsideGarage(CEntity* entity, float tolerance = 0.f);
     bool EntityHasSphereInsideGarage(CEntity* entity, float tolerance = 0.f);
     bool EntityHasSphereOutsideGarage(CEntity* entity, float tolerance = 0.f) { return EntityHasASphereWayOutsideGarage(entity, tolerance); }
-    bool IsAnyOtherCarTouchingGarage(CVehicle* ignoredVehicle);
+    bool IsAnyOtherCarTouchingGarage(CVehicle* ignoredVehicle = nullptr);
     void ThrowCarsNearDoorOutOfGarage(CVehicle* ignoredVehicle);
     bool IsAnyOtherPedTouchingGarage(CPed* ignoredVehicle);
     bool IsAnyCarBlockingDoor();
-    int32 CountCarsWithCenterPointWithinGarage(CVehicle* ignoredVehicle);
-    void StoreAndRemoveCarsForThisImpoundingGarage(CStoredCar* storedCars, int32 iMaxSlot);
+    size_t CountCarsWithCenterPointWithinGarage(CVehicle* ignoredVehicle);
     void CenterCarInGarage(CVehicle* vehicle);
-    void FindDoorsWithGarage(CObject** ppFirstDoor, CObject** ppSecondDoor);
+    void FindDoorsWithGarage(CObject*& door1, CObject*& door2);
     bool SlideDoorOpen();
     bool SlideDoorClosed();
     bool IsGarageEmpty();
+    float CalcDistToGarageRectangleSquared(CVector2D pos);
 
     void ChangeType(eGarageType newType);
     void Activate();
@@ -211,8 +218,16 @@ public:
     //! Represents the base of the garage in 2D
     notsa::shapes::AngledRect GetBaseAngledRect() const;
 
+    //! Represents the base rect, but axis aligned in 2D
+    CRect GetAARect() const;
+
     //! Represents the garage's actual bounding box
     notsa::shapes::AngledBox GetBB() const;
+
+    bool IsVehicleTypeAllowedInside(CVehicle* veh);
+
+    //! Only call this if garage is a safehouse
+    CStoredCar* GetStoredCarsInThisSafehouse();
 };
 
 VALIDATE_SIZE(CGarage, 0xD8);

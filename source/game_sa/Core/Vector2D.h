@@ -29,6 +29,8 @@ public:
 
     static void InjectHooks();
 
+    static CVector2D Random(float min, float max);
+
     /*!
     * @brief Normalize this vector in-place
     *

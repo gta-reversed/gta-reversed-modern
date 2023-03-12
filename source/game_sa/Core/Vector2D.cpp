@@ -18,6 +18,11 @@ void CVector2D::InjectHooks() {
     RH_ScopedInstall(operator=, 0x43E110);
 }
 
+CVector2D CVector2D::Random(float min, float max) {
+    const auto Rand = [=] { return CGeneral::GetRandomNumberInRange(min, max); };
+    return {Rand(), Rand()};
+}
+
 CVector2D::CVector2D(const CVector& v3) :
     CVector2D{v3.x, v3.y}
 {

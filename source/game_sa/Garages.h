@@ -14,16 +14,18 @@ class CVector;
 
 class CGarages {
 public:
-    static constexpr auto MAX_NUM_SAFEHOUSES{ 20 };
-    static constexpr auto MAX_CARS_IN_SAFEHOUSE{ 4 };
-    static constexpr auto MAX_CARS_IN_IMPOUND{ 3 };
+    static constexpr size_t MAX_NUM_SAFEHOUSES{ 20 };
+    static constexpr size_t MAX_CARS_IN_SAFEHOUSE{ 4 };
+    static constexpr size_t MAX_CARS_IN_IMPOUND{ 3 };
+    static constexpr size_t MAX_CARS_IN_GANTON_SAFEHOUSE{ 2 };
+    static constexpr size_t MAX_NUM_GARAGES{ 50 };
+
     static_assert(MAX_CARS_IN_SAFEHOUSE >= MAX_CARS_IN_IMPOUND); // Impound vehicles are stored in safehouses too
-    static constexpr auto MAX_NUM_GARAGES{ 50 };
 
     static inline CStoredCar (&aCarsInSafeHouse)[MAX_NUM_SAFEHOUSES][MAX_CARS_IN_SAFEHOUSE] = *(CStoredCar(*)[20][4])0x96ABD8; // NOTE: This was originally (incorrectly) at 0x96ABD4, so watch out!
     static inline CGarage    (&aGarages)[MAX_NUM_GARAGES] = *(CGarage(*)[50])0x96C048;
     static inline char       (&MessageIDString)[8] = *(char (*)[8])0x96C014;
-    static inline int32&     LastGaragePlayerWasIn = *(int32*)0x96BFDC;
+    static inline int32&     LastGaragePlayerWasIn = *(int32*)0x96BFDC; // garage id
     static inline int32&     LastTimeHelpMessage = *(int32*)0x96BFE0;
     static inline bool&      bCamShouldBeOutside = *(bool*)0x96BFE4;
     static inline int32&     CrushedCarId = *(int32*)0x96BFE8;

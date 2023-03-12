@@ -1,7 +1,10 @@
 #include "StdInc.h"
 
 #include "Garage.h"
+#include "Garages.h"
 #include <extensions/Shapes/AngledRect.hpp>
+
+constexpr auto RESPRAY_COST = 100u;
 
 void CGarage::InjectHooks() {
     RH_ScopedClass(CGarage);
@@ -23,7 +26,7 @@ void CGarage::InjectHooks() {
     RH_ScopedInstall(InitDoorsAtStart, 0x447600);
     RH_ScopedOverloadedInstall(IsPointInsideGarage, "NoTolerance", 0x448740, bool(CGarage::*)(CVector));
     RH_ScopedOverloadedInstall(IsPointInsideGarage, "WithTolerance", 0x4487D0, bool(CGarage::*)(CVector, float));
-    RH_ScopedInstall(Update, 0x44AA50, {.reversed = false});
+    RH_ScopedInstall(Update, 0x44AA50);
 }
 
 // NOTSA [Based on 0x4471E0]
@@ -168,6 +171,14 @@ bool CGarage::EntityHasSphereInsideGarage(CEntity* entity, float tolerance) {
     return EntityHasASphereTest(entity, true, tolerance);
 }
 
+bool CGarage::IsAnyOtherCarTouchingGarage(CVehicle* ignoredVehicle) {
+    return plugin::CallMethodAndReturn<bool, 0x449100>(this, ignoredVehicle);
+}
+
+void CGarage::ThrowCarsNearDoorOutOfGarage(CVehicle* ignoredVehicle) {
+    plugin::CallMethod<0x449220>(this, ignoredVehicle);
+}
+
 // 0x449690
 void CGarage::RemoveCarsBlockingDoorNotInside() {
     for (auto& veh : GetVehiclePool()->GetAllValid()) {
@@ -208,11 +219,16 @@ bool CGarage::IsEntityEntirelyInside3D(CEntity* entity, float tolerance) {
 }
 
 // 0x448D30
-bool CGarage::IsEntityEntirelyOutside(CEntity* entity, float radius) {
+bool CGarage::IsEntityEntirelyOutside(CEntity* entity, float tolerance) {
     if (!CCollision::TestSphereBox({ entity->GetPosition(), entity->GetColModel()->GetBoundRadius() }, GetAABB())) {
         return true;
     }
     return !EntityHasSphereInsideGarage(entity);
+}
+
+// Address unknown
+bool CGarage::IsPlayerOutsideGarage(float tolerance) {
+    return IsEntityEntirelyOutside(FindPlayerEntity(), tolerance);
 }
 
 // 0x448740 - Original function was __spoils<>, so we have to keep the registers intact!
@@ -253,6 +269,11 @@ bool CGarage::IsStaticPlayerCarEntirelyInside() {
         return false;
     }
     return true;
+}
+
+// Unknown address
+bool CGarage::IsPlayerEntirelyInsideGarage() {
+    return IsEntityEntirelyInside3D(FindPlayerEntity());
 }
 
 // 0x4486C0
@@ -415,9 +436,878 @@ void CGarage::CloseThisGarage() {
     }
 }
 
+// NOTSA [Based on 0x44AA50]
+void CGarage::UpdatePlayerCameraStuff() {
+    if (m_Type == CRUSHER || m_DoorState == GARAGE_DOOR_CRUSHING) {
+        return;
+    }
+    const auto plyrPed = FindPlayerPed();
+    if (!plyrPed || plyrPed->m_bIsInSafePosition) {
+        return;
+    }
+    if (const auto plyrVeh = plyrPed->GetVehicleIfInOne()) {
+        if (!CGarage::IsEntityEntirelyInside3D( // 0x44AAFB
+            plyrVeh->GetModelID() == eModelID::MODEL_KART
+                ? (CEntity*)plyrVeh
+                : (CEntity*)plyrPed,
+            0.25f
+        )) { // 0x44AB1B
+            if (!IsEntityEntirelyOutside(plyrVeh)) {
+                TheCamera.m_pToGarageWeAreInForHackAvoidFirstPerson = this;
+            }
+            if (plyrVeh->GetModelID() != MODEL_MRWHOOP) {
+                return;
+            }
+            if (!GetAARect().IsPointInside(plyrVeh->GetPosition2D(), 0.5f)) {
+                return;
+            }
+        }
+    } else {
+        if (!CGarage::IsEntityEntirelyInside3D(plyrPed, 0.25f)) { // 0x44AAFB [Yes, same as above, but we know the vehicle is null, so that is omitted]
+            return;
+        }
+    }
+
+    CGarages::bCamShouldBeOutside = true;
+    TheCamera.m_pToGarageWeAreIn = this;
+}
+
 // 0x44AA50
 void CGarage::Update(int32 garageId) {
-    plugin::CallMethod<0x44AA50, CGarage*>(this, garageId);
+    UpdatePlayerCameraStuff();
+
+    if (m_bInactive) {
+        return;
+    }
+
+    if (m_bDoorOpensUp) {
+        m_bDoorClosed = (m_DoorState != GARAGE_DOOR_OPENING || m_DoorOpenness <= 0.4f) && m_DoorState != GARAGE_DOOR_OPEN;
+    }
+
+    const auto  plyrVeh = FindPlayerVehicle();
+    const auto  plyrPed = FindPlayerPed();
+    const auto& plyrCoors = FindPlayerCoors();
+
+    const auto SetDoorOpeningIfPlayerVehicleClose = [this] { // 0x44B9CC
+        const auto plyrVeh = FindPlayerVehicle();
+        if (!plyrVeh) {
+            return;
+        }
+        if (CalcDistToGarageRectangleSquared(plyrVeh->GetPosition2D()) <= sq(8.f)) {
+            m_DoorState = GARAGE_DOOR_OPENING;
+        }
+    };
+
+    const auto IsPlayerInRadiusOfGarage = [&, this](float r) {
+        return (GetCenter2D() - plyrCoors).SquaredMagnitude() <= sq(r);
+    };
+
+    const auto SetIsPlayerInGarage = [this](bool inGaragae) {
+        CPad::GetPad()->bPlayerAwaitsInGarage = inGaragae;
+        FindPlayerWanted()->m_bPoliceBackOffGarage = inGaragae;
+    };
+
+    const auto ProessSlideDoor = [&, this](eGarageDoorState stateOnSlideDoorOpened) {
+        if (SlideDoorOpen()) {
+            m_DoorState = stateOnSlideDoorOpened;
+        }
+        if (m_DoorOpenness > 0.5f) {
+            SetIsPlayerInGarage(false);
+        }
+    };
+
+    // Let the hell unfold
+    switch (m_Type) {
+    case ONLY_TARGET_VEH: {
+        switch (m_DoorState) {
+        case GARAGE_DOOR_CLOSED: {// 0x44B7FB
+            if (m_TargetCar = plyrVeh) {
+                SetDoorOpeningIfPlayerVehicleClose();
+            }
+            return;
+        }
+        case GARAGE_DOOR_OPEN: { // 0x44B80C
+            if (IsPlayerInRadiusOfGarage(30.f)) {
+                if (!m_TargetCar || plyrVeh == m_TargetCar) {
+                    return;
+                }
+                if (!IsEntityEntirelyInside3D(m_TargetCar)) {
+                    return;
+                }
+                if (!IsPlayerOutsideGarage(2.f)) {
+                    return;
+                }
+                m_DoorState = GARAGE_DOOR_CLOSING;
+                m_bClosingEmpty = false;
+                SetIsPlayerInGarage(true);
+                return;
+            }
+            if (CTimer::GetFrameCounter() % 32) {
+                return;
+            }
+            if (m_TargetCar && IsEntityEntirelyInside3D(m_TargetCar)) {
+                return;
+            }
+            m_bClosingEmpty = true;
+            m_DoorState     = GARAGE_DOOR_CLOSING;
+            return;
+        }
+        case GARAGE_DOOR_CLOSING: { // 0x44B963
+            if (m_TargetCar) {
+                ThrowCarsNearDoorOutOfGarage(m_TargetCar);
+            }
+            if (!SlideDoorClosed()) {
+                return;
+            }
+            if (m_bClosingEmpty) {
+                m_DoorState = GARAGE_DOOR_CLOSED;
+                return;
+            }
+            if (m_TargetCar) { // Inverted
+                CVehicle::DestroyVehicleAndDriverAndPassengers(m_TargetCar);
+                m_DoorState = GARAGE_DOOR_CLOSED_DROPPED_CAR;
+                m_TargetCar = nullptr;
+            } else {
+                m_DoorState = GARAGE_DOOR_CLOSING;
+            }
+            SetIsPlayerInGarage(false);
+            break;
+        }
+        case GARAGE_DOOR_OPENING: {
+            if (SlideDoorOpen()) {
+                m_DoorState = GARAGE_DOOR_OPEN;
+            }
+            return;
+        }
+        }
+    }
+    case BOMBSHOP_TIMED:
+    case BOMBSHOP_ENGINE:
+    case BOMBSHOP_REMOTE: { // 0x44B419
+        switch (m_DoorState) { 
+        case GARAGE_DOOR_CLOSED: {
+            if (CTimer::GetTimeInMS() <= m_TimeToOpen) { // TODO: Is this correct?
+                return;
+            }
+
+            // Make sure bomb model is loaded [if needed]
+            if (m_Type == BOMBSHOP_REMOTE && !CStreaming::IsModelLoaded(MODEL_BOMB)) {
+                CStreaming::RequestModel(MODEL_BOMB, STREAMING_GAME_REQUIRED);
+                return;
+            }
+
+            // 0x44ABF9
+            AudioEngine.ReportFrontendAudioEvent([this] {
+                switch (m_Type) {
+                case BOMBSHOP_TIMED:  return AE_FRONTEND_CAR_FIT_BOMB_TIMED;
+                case BOMBSHOP_ENGINE: return AE_FRONTEND_CAR_FIT_BOMB_BOOBY_TRAPPED;
+                case BOMBSHOP_REMOTE: return AE_FRONTEND_CAR_FIT_BOMB_REMOTE_CONTROLLED;
+                default:              NOTSA_UNREACHABLE();
+                }
+            }());
+
+            m_DoorState = GARAGE_DOOR_OPENING;
+
+            // Deduce the price of a bomb [We've checked if the player has enough upon entering, no need to check it here again]
+            if (!CGarages::BombsAreFree) {
+                VERIFY(FindPlayerInfo().DeductMoney(500)); // Check it again just in case...
+            }
+
+            //< 0x44B657 - Install bomb on vehicle if possible
+            if (plyrVeh && plyrVeh->CanBomBeInstalled()) { // 0x44B657
+                plyrVeh->m_nBombOnBoard = [this] {
+                    switch (m_Type) {
+                    case BOMBSHOP_TIMED:  return BOB_TIMED;
+                    case BOMBSHOP_ENGINE: return BOB_ON_IGNITION;
+                    case BOMBSHOP_REMOTE: return BOB_REMOTE;
+                    default:              NOTSA_UNREACHABLE();
+                    }
+                }();
+                plyrVeh->m_pWhoInstalledBombOnMe = plyrPed;
+                if (m_Type == BOMBSHOP_REMOTE) {
+                    CGarages::GivePlayerDetonator();
+                }
+                CStats::IncrementStat(STAT_KGS_OF_EXPLOSIVES_USED, 10.f);
+            }
+
+            //< 0x44B6E8 - Set help message
+            if (const auto messageKey = [this] {
+                const auto Choose = [](auto a, auto b) -> const char* {
+                    switch (CPad::GetPad()->Mode) {
+                    case 0:
+                    case 1:
+                    case 2:
+                        return a;
+                    case 3:
+                        return b;
+                    }
+                    return nullptr;
+                };
+                switch (m_Type) {
+                case BOMBSHOP_TIMED:  return Choose("GA_6", "GA_6B");
+                case BOMBSHOP_ENGINE: return Choose("GA_7", "GA_7B");
+                case BOMBSHOP_REMOTE: return "GA_8";
+                default:              NOTSA_UNREACHABLE();
+                }
+            }()) {
+                CHud::SetHelpMessage(TheText.Get(messageKey), false, false, true);
+            }
+
+            return;
+        }
+        case GARAGE_DOOR_OPENING: { // 0x44B42F
+            if (!IsStaticPlayerCarEntirelyInside()) {
+                return;
+            }
+            if (!plyrVeh || !plyrVeh->CanBomBeInstalled()) {
+                return;
+            }
+
+            if (plyrVeh->GetBombOnBoard() != BOB_NONE) { // If there's a bomb on board trigger it
+                CGarages::TriggerMessage("GA_5", -1, 4000);
+                m_DoorState = GARAGE_DOOR_WAITING_PLAYER_TO_EXIT;
+                AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_CAR_ALREADY_RIGGED);
+            } else if (CGarages::BombsAreFree || FindPlayerInfo().m_nMoney >= 500) { // Buy bomb if player has enough money
+                m_DoorState = GARAGE_DOOR_CLOSING;
+                SetIsPlayerInGarage(true);
+            } else { // Not enough money
+                CGarages::TriggerMessage("GA_4", -1, 4000u);
+                m_DoorState = GARAGE_DOOR_WAITING_PLAYER_TO_EXIT;
+                AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_CAR_NO_CASH);
+            }
+            return;
+        }
+        case GARAGE_DOOR_CLOSING: { // 0x44B567
+            if (plyrVeh) {
+                ThrowCarsNearDoorOutOfGarage(plyrVeh);
+            }
+            if (SlideDoorClosed()) {
+                m_DoorState = GARAGE_DOOR_CLOSED;
+                m_TimeToOpen = CTimer::GetTimeInMS() + 2000;
+            }
+            if (m_Type == BOMBSHOP_REMOTE) {
+                CStreaming::RequestModel(MODEL_BOMB, STREAMING_GAME_REQUIRED);
+            }
+            return;
+        }
+        case GARAGE_DOOR_OPEN: { // 0x44B426
+            ProessSlideDoor(GARAGE_DOOR_WAITING_PLAYER_TO_EXIT);
+            return;
+        }
+        }
+
+        break;
+    }
+    case PAYNSPRAY: { // 0x44AC36
+        if (plyrCoors.z >= 950.f) {
+            return;
+        }
+        const auto CallOffChase = [&, this](bool onlyIfCloseEnoughInVehicle) { // 0x44B3C1
+            if (onlyIfCloseEnoughInVehicle && (!IsPlayerInRadiusOfGarage(8.f) || !plyrVeh)) {
+                return;
+            }
+            CWorld::CallOffChaseForArea(
+                m_MinX - 10.f,
+                m_MinY - 10.f,
+                m_MaxX + 10.f,
+                m_MaxY + 10.f
+            );
+        };
+        switch (m_DoorState) { // 0x44AC49
+        case GARAGE_DOOR_CLOSED: {
+            if (!CGarages::NoResprays) {
+                return;
+            }
+            if (CTimer::GetTimeInMS() >= m_TimeToOpen) {
+                m_DoorState = GARAGE_DOOR_OPENING;
+
+                auto bNeededRespray = false;
+
+                const auto plyrWanted = FindPlayerWanted();
+                const auto bPlayerIsWanted = bNeededRespray = plyrWanted->m_nWantedLevel;
+                if (bPlayerIsWanted) {
+                    plyrWanted->ClearWantedLevelAndGoOnParole();
+                    bNeededRespray = true;
+                }
+
+                bool bShowChangedColorMessage = false;
+                if (plyrVeh && IsVehicleTypeAllowedInside(plyrVeh)) { // 0x44AF40
+                    if (plyrVeh->m_fHealth < 970.f) {
+                        bNeededRespray = true;
+                    }
+                    plyrVeh->m_fHealth = std::max(1000.f, plyrVeh->m_fHealth);
+                    switch (plyrVeh->m_nVehicleType) {
+                    case VEHICLE_TYPE_AUTOMOBILE: plyrVeh->AsAutomobile()->m_fBurnTimer = 0.f; break;
+                    case VEHICLE_TYPE_BIKE:       plyrVeh->AsBike()->m_BlowUpTimer = 0; break;
+                    }
+                    plyrVeh->Fix();
+                    plyrVeh->UnFlipIfFlipped();
+                    CStats::IncrementStat(STAT_VEHICLE_RESPRAYS);
+
+                    // Set [possibly] new color
+                    if (plyrVeh->GetRemapIndex() < 0) { // 0x44B0E4
+                        assert(plyrVeh->IsAutomobile()); // Original game did an oopsie here and [potentially] casted a CBike* into CAutomobile*
+                        if (!plyrVeh->AsAutomobile()->autoFlags.bShouldNotChangeColour) {
+                            plyrVeh->SetRemap(-1);
+
+                            std::array<uint8, 4> newColors;
+                            plyrVeh->GetVehicleModelInfo()->ChooseVehicleColour(
+                                newColors[0],
+                                newColors[1],
+                                newColors[2],
+                                newColors[3],
+                                true
+                            );
+
+                            const auto colorsHaveChanged = plyrVeh->SetColors(newColors);
+                            bShowChangedColorMessage |= colorsHaveChanged;
+
+                            // Add fx
+                            if (colorsHaveChanged) {
+                                const auto primColor = RwRGBAReal(CVehicleModelInfo::ms_vehicleColourTable[plyrVeh->m_nPrimaryColor]);
+                                FxPrtMult_c fxPrt{
+                                    primColor.red, primColor.green, primColor.blue, 0.6f,
+                                    0.7f,
+                                    1.f,
+                                    0.4f
+                                };
+                                auto& vehPos = plyrVeh->GetPosition();
+                                for (auto i = 0; i < 10; i++) { // 0x44B26C
+                                    // CVector::Random({ -3.f, -3.f, 0.f }, { 3.f, 3.f, 0.05f })
+                                    auto fxVel = CVector{0.f, 0.f, CGeneral::GetRandomNumberInRange(0.f, 0.05f)};
+                                    auto fxPos = vehPos + CVector{ CVector2D::Random(-3.f, 3.f) };
+                                    g_fx.m_SmokeHuge->AddParticle(
+                                        &vehPos,
+                                        &fxPos,
+                                        0.f,
+                                        &fxPrt,
+                                        -1.f,
+                                        1.2f,
+                                        0.6f,
+                                        false
+                                    );
+                                }
+                            }
+                        }
+                    }
+
+                    plyrVeh->vehicleFlags.bDisableParticles = false;
+                    plyrVeh->m_fDirtLevel = 0.f;
+                } else {
+                    bShowChangedColorMessage = bPlayerIsWanted;
+                }
+
+                //< 0x44B2DE - Display messages
+                if (m_bRespraysAlwaysFree) { // Inverted
+                    CGarages::TriggerMessage("GA_22", -1, 4000); // "Your girlfriend has fixed your vehicle."
+                } else {
+                    if (bShowChangedColorMessage) {
+                        if (!bNeededRespray || CGarages::RespraysAreFree) {
+                            // "Hope you like the new color" or "Respray is complementary"
+                            CGarages::TriggerMessage(CGeneral::RandomChoiceFromList({ "GA_15", "GA_16" }), -1, 4000);
+                        }
+                    } else {
+                        VERIFY(FindPlayerInfo().DeductMoney(RESPRAY_COST));
+                        CStats::IncrementStat(STAT_AUTO_REPAIR_AND_PAINTING_BUDGET, (float)RESPRAY_COST);
+
+                        // "New engine and paint job: $100~n~Cops won't recognize you!" or "New engine and paint job: $100"
+                        CGarages::TriggerMessage(bPlayerIsWanted ? "GA_2" : "GA_XX", -1, 4000); 
+                    }
+                }
+                m_bUsedRespray = true;
+                if (plyrVeh) {
+                    plyrVeh->vehicleFlags.bHasBeenResprayed = true;
+                }
+            }
+            CallOffChase(false);
+            return;
+        }
+        case GARAGE_DOOR_OPEN: { // 0x44AC57
+            if (CGarages::NoResprays) {
+                return;
+            }
+
+            const auto ProcessPlayerIsInGarage = [&, this] {
+                FindPlayerWanted()->m_bPoliceBackOffGarage = true;
+                CGarages::LastGaragePlayerWasIn = garageId;
+                CallOffChase(true);
+            };
+
+            if (IsStaticPlayerCarEntirelyInside()) {
+                const auto WaitForPlayerToExitForReason = [this](const char* reasonTxtKey, eAudioEvents ae) {
+                    CGarages::TriggerMessage(reasonTxtKey, -1, 4000);
+                    AudioEngine.ReportFrontendAudioEvent(ae);
+                    m_DoorState = GARAGE_DOOR_WAITING_PLAYER_TO_EXIT;
+                };
+                if (CGarages::IsCarSprayable(plyrVeh)) {
+                    if (CGarages::RespraysAreFree || FindPlayerInfo().m_nMoney >= RESPRAY_COST) {
+                        m_DoorState = GARAGE_DOOR_CLOSING;
+                        CPad::GetPad()->bPlayerAwaitsInGarage = true;
+                        plyrVeh->m_fDirtLevel = 0.f;
+                    } else {
+                        WaitForPlayerToExitForReason("GA_3", AE_FRONTEND_CAR_NO_CASH);
+                    }
+                } else {
+                    WaitForPlayerToExitForReason(plyrVeh->IsSubBMX() ? "GA_18" : "GA_1", AE_FRONTEND_CAR_IS_HOT);
+                }
+                ProcessPlayerIsInGarage();
+                return;
+            }
+
+            if (!IsPlayerOutsideGarage()) {
+                ProcessPlayerIsInGarage();
+                return;
+            }
+
+            // Player is leaving garage now
+
+            if (garageId == CGarages::LastGaragePlayerWasIn) {
+                FindPlayerWanted()->m_bPoliceBackOffGarage = false;
+            }
+
+            CallOffChase(true);
+
+            return;
+        }
+        case GARAGE_DOOR_CLOSING: { // 0x44AE0F
+            if (plyrVeh) {
+                ThrowCarsNearDoorOutOfGarage(plyrVeh);
+            }
+            if (SlideDoorClosed()) {
+                m_DoorState = GARAGE_DOOR_CLOSED;
+                AudioEngine.ReportFrontendAudioEvent(AE_BUY_CAR_RESPRAY);
+                m_TimeToOpen = CTimer::GetTimeInMS() + 2000;
+                CStats::IncrementStat(STAT_TOTAL_LEGITIMATE_KILLS, CStats::GetStatValue(STAT_KILLS_SINCE_LAST_CHECKPOINT));
+                CStats::SetStatValue(STAT_KILLS_SINCE_LAST_CHECKPOINT, 0.f);
+            }
+            if (plyrVeh) {
+                assert(plyrVeh->IsAutomobile());
+                plyrVeh->AsAutomobile()->m_fBurnTimer = 0.f;
+                plyrVeh->vehicleFlags.bDisableParticles = true;
+            }
+            CallOffChase(false);
+            return;
+        }
+        case GARAGE_DOOR_OPENING: {// 0x44B79E
+            ProessSlideDoor(GARAGE_DOOR_WAITING_PLAYER_TO_EXIT);
+            return;
+        }
+        case GARAGE_DOOR_WAITING_PLAYER_TO_EXIT: {
+            if (IsPlayerEntirelyInsideGarage()) {
+                m_DoorState = GARAGE_DOOR_OPEN;
+            }
+            return;
+        }
+        }
+        return;
+    }
+    case UNKN_CLOSESONTOUCH: { // 0x44BA04
+        m_DoorState = [&, this] {
+            switch (m_DoorState) {
+            case GARAGE_DOOR_OPEN:
+                if (IsGarageEmpty()) {
+                    return GARAGE_DOOR_CLOSING;
+                }
+                break;
+            case GARAGE_DOOR_OPENING:
+                if (SlideDoorOpen()) {
+                    return GARAGE_DOOR_OPEN;
+                }
+                break;
+            case GARAGE_DOOR_CLOSING: {
+                if (SlideDoorClosed()) {
+                    return GARAGE_DOOR_CLOSED;
+                }
+                if (!IsGarageEmpty()) {
+                    return GARAGE_DOOR_OPENING;
+                }
+                break;
+            }
+            }
+            return m_DoorState; // No change            
+        }();
+        return;
+    }
+    case OPEN_FOR_TARGET_FREEZE_PLAYER:
+    case CLOSE_WITH_CAR_DONT_OPEN_AGAIN: { // 0x44BA5C
+        switch (m_DoorState) {
+        case GARAGE_DOOR_CLOSED: {
+            if (!plyrVeh || plyrVeh != m_TargetCar) { // NOTE/TODO: Pretty sure they made a mistake and it should've been `plyrVeh != m_TargetCar` [just note that in our case it's inverted, so here it should be `plyrVeh == m_TargetCar`]
+                return;
+            }
+            if (CalcDistToGarageRectangleSquared(plyrVeh->GetPosition2D()) >= sq(17.f)) {
+                return;
+            }
+            m_DoorState = GARAGE_DOOR_OPENING;
+            return;
+        }
+        case GARAGE_DOOR_OPEN: { // 0x44BA89
+            if (m_TargetCar && IsPlayerInRadiusOfGarage(30.f)) { // Inverted
+                m_bClosingEmpty = true;
+            } else {
+                if (m_TargetCar != plyrVeh) {
+                    return;
+                }
+                if (!IsStaticPlayerCarEntirelyInside()) {
+                    return;
+                }
+                if (IsAnyCarBlockingDoor()) {
+                    return;
+                }
+                m_bClosingEmpty = false;
+                SetIsPlayerInGarage(true);
+            }
+            m_DoorState = GARAGE_DOOR_CLOSING;
+            return;
+        }
+        case GARAGE_DOOR_CLOSING: { // 0x44BB8D
+            if (m_TargetCar) {
+                ThrowCarsNearDoorOutOfGarage(m_TargetCar);
+            }
+            if (!SlideDoorClosed()) {
+                return;
+            }
+            if (m_bClosingEmpty) {
+                m_DoorState = GARAGE_DOOR_CLOSED;
+            } else {
+                if (m_TargetCar) {
+                    m_DoorState  = GARAGE_DOOR_CLOSED_DROPPED_CAR;
+                    m_TimeToOpen = CTimer::GetTimeInMS() + 2000;
+                    m_TargetCar  = nullptr;
+                } else {
+                    m_DoorState = GARAGE_DOOR_CLOSED;
+                }
+                SetIsPlayerInGarage(false);
+            }
+            return;
+        }
+        case GARAGE_DOOR_OPENING: {
+            if (SlideDoorOpen()) {
+                m_DoorState = GARAGE_DOOR_OPEN;
+            }
+            return;
+        }
+        case GARAGE_DOOR_CLOSED_DROPPED_CAR: {
+            if (m_Type == OPEN_FOR_TARGET_FREEZE_PLAYER && CTimer::GetTimeInMS() > m_TimeToOpen) {
+                m_DoorState = GARAGE_DOOR_OPENING;
+            }
+            return;
+        }
+        }
+        return;
+    }
+    case SCRIPT_ONLY_OPEN: { // 0x44BCA4
+        if (m_DoorState == GARAGE_DOOR_OPENING && SlideDoorOpen()) {
+            m_DoorState = GARAGE_DOOR_OPEN;
+        }
+        return;
+    }
+    case SAFEHOUSE_GANTON:
+    case SAFEHOUSE_SANTAMARIA:
+    case SAGEHOUSE_ROCKSHORE:
+    case SAFEHOUSE_FORTCARSON:
+    case SAFEHOUSE_VERDANTMEADOWS:
+    case SAFEHOUSE_DILLIMORE:
+    case SAFEHOUSE_PRICKLEPINE:
+    case SAFEHOUSE_WHITEWOOD:
+    case SAFEHOUSE_PALOMINOCREEK:
+    case SAFEHOUSE_REDSANDSWEST:
+    case SAFEHOUSE_ELCORONA:
+    case SAFEHOUSE_MULHOLLAND:
+    case SAFEHOUSE_CALTONHEIGHTS:
+    case SAFEHOUSE_PARADISO:
+    case SAFEHOUSE_DOHERTY:
+    case SAFEHOUSE_HASHBURY:
+    case HANGAR_AT400:
+    case HANGAR_ABANDONED_AIRPORT: { // 0x44BE5D
+        const auto maxNumCarsInThiSafeHouse = m_Type == SAFEHOUSE_GANTON
+            ? CGarages::MAX_CARS_IN_GANTON_SAFEHOUSE
+            : CGarages::MAX_CARS_IN_SAFEHOUSE;
+        switch (m_DoorState) {
+        case GARAGE_DOOR_CLOSED: {
+            if (plyrCoors.z >= 950.f) { // TODO: Magic 950
+                return;
+            }
+
+            // Check player distance from garage
+            const auto plyrDistSqToGrgRect = CalcDistToGarageRectangleSquared(plyrCoors);
+            if (plyrDistSqToGrgRect >= sq(3.5f)) {
+                if (plyrDistSqToGrgRect >= sq(10.f)) {
+                    return;
+                }
+                if (!plyrVeh || plyrVeh->m_nVehicleSubType == VEHICLE_TYPE_BMX) {
+                    return;
+                }
+            }
+
+            if (   !plyrVeh
+                || m_Type == HANGAR_AT400
+                || CGarages::CountCarsInHideoutGarage(m_Type) < maxNumCarsInThiSafeHouse
+            ) {
+                if (m_Type == HANGAR_AT400 || !RestoreCarsForThisHideOut(CGarages::aCarsInSafeHouse[CGarages::FindSafeHouseIndexForGarageType(m_Type)])) {
+                    m_DoorState = GARAGE_DOOR_OPENING; // 0x44C1EF
+                }
+            } else { // Display help message in some specific scnearios
+                // Moved these out here, from 0x44C144, as it's pointless to do the stuff below, if in the end this is false
+                if (CTimer::GetTimeInMS() - CGarages::LastTimeHelpMessage <= 18'000) {
+                    return;
+                }
+                switch (plyrVeh->GetVehicleAppearance()) {
+                case VEHICLE_APPEARANCE_HELI:
+                case VEHICLE_APPEARANCE_PLANE:
+                    return;
+                }
+                CObject* doors[2];
+                FindDoorsWithGarage(doors[1], doors[2]);
+                if (rng::none_of(doors, [&](CObject* door) {
+                    if (!door) {
+                        return false;
+                    }
+                    if ((door->GetPosition2D() - plyrVeh->GetPosition2D()).SquaredMagnitude() >= sq(5.f)) {
+                        return false;
+                    }
+                    return true;
+                })) {
+                    return;
+                }
+                // 0x44C1B4
+                CHud::SetHelpMessage(TheText.Get("GA_21"), 0, 0, 1);
+                CGarages::LastTimeHelpMessage = CTimer::m_snTimeInMilliseconds;
+            }
+        }
+        case GARAGE_DOOR_OPEN: { // 0x44BCFC
+            const auto distSq = CalcDistToGarageRectangleSquared(plyrCoors);
+            if (!IsAnyCarBlockingDoor()) {
+                if (   distSq >= sq(25.f)
+                    || distSq >= sq(4.f) && (!plyrVeh || plyrVeh->IsSubBMX())
+                ) {
+                    m_DoorState = GARAGE_DOOR_CLOSING;
+                    return;
+                }
+            }
+            if (plyrVeh) {
+                if (IsPlayerOutsideGarage() && CountCarsWithCenterPointWithinGarage(plyrVeh) >= maxNumCarsInThiSafeHouse) {
+                    m_DoorState = GARAGE_DOOR_CLOSING;
+                    return;
+                }
+            }
+            if (distSq >= sq(70.f)) {
+                m_DoorState = GARAGE_DOOR_CLOSING;
+                RemoveCarsBlockingDoorNotInside();
+            }
+            return;
+        }
+        case GARAGE_DOOR_CLOSING: { // 0x44BDF3
+            //SlideDoorClosed(); // Um, okay? Maybe it's a typo and should be `SlideDoorClose()`?
+            if (IsPlayerOutsideGarage()) { // Inverted
+                if (m_DoorOpenness == 0.f) {
+                    m_DoorState = GARAGE_DOOR_CLOSED;
+                    if (m_Type != HANGAR_AT400) {
+                        StoreAndRemoveCarsForThisHideOut(GetStoredCarsInThisSafehouse());
+                    }
+                }
+            } else {
+                m_DoorState = GARAGE_DOOR_OPENING;
+            }
+            return;
+        }
+        case GARAGE_DOOR_OPENING: { // 0x44BE53
+            if (SlideDoorOpen()) {
+                m_DoorState = GARAGE_DOOR_OPEN;
+            }
+            return;
+        }
+        }
+        return;
+    }
+    case SCRIPT_CONTROLLED: { // 0x44BCAA
+        switch (m_DoorState) {
+        case GARAGE_DOOR_CLOSING:
+            if (SlideDoorClosed()) {
+                m_DoorState = GARAGE_DOOR_CLOSED;
+            }
+            break;
+        case GARAGE_DOOR_OPENING:
+            if (SlideDoorOpen()) {
+                m_DoorState = GARAGE_DOOR_OPEN;
+            }
+            break;
+        }
+        return;
+    }
+    case STAY_OPEN_WITH_CAR_INSIDE: {
+        switch (m_DoorState) {
+        case GARAGE_DOOR_CLOSED: {
+            if (plyrVeh && plyrVeh == m_TargetCar) {
+                SetDoorOpeningIfPlayerVehicleClose();
+            }
+            return;
+        }
+        case GARAGE_DOOR_OPEN: {
+            if (IsPlayerInRadiusOfGarage(30.f)) {
+                return;
+            }
+            if (!m_TargetCar || !IsEntityEntirelyOutside(m_TargetCar)) {
+                return;
+            }
+            m_bClosingEmpty = true;
+            m_DoorState = GARAGE_DOOR_CLOSING;
+            return;
+        }
+        case GARAGE_DOOR_CLOSING: {
+            if (m_TargetCar) {
+                ThrowCarsNearDoorOutOfGarage(m_TargetCar);
+            }
+            if (SlideDoorClosed()) {
+                m_DoorState = GARAGE_DOOR_CLOSED;
+            }
+            return;
+        }
+        case GARAGE_DOOR_OPENING: {
+            if (SlideDoorOpen()) {
+                m_DoorState = GARAGE_DOOR_OPEN;
+            }
+            return;
+        }
+        }
+        return;
+    }
+    case SCRIPT_OPEN_FREEZE_WHEN_CLOSING: { // 0x44C2F3
+        switch (m_DoorState) {
+        case GARAGE_DOOR_OPEN: {
+            if (!m_TargetCar || !IsEntityEntirelyInside3D(m_TargetCar)) {
+                return;
+            }
+            if (IsAnyCarBlockingDoor()) {
+                return;
+            }
+            if (!IsPlayerOutsideGarage()) {
+                return;
+            }
+            CPad::GetPad()->bPlayerAwaitsInGarage = true;
+            m_bClosingEmpty = false;
+            return;
+        }
+        case GARAGE_DOOR_CLOSING: { // 0x44C303
+            if (SlideDoorClosed()) {
+                m_DoorState = GARAGE_DOOR_CLOSED;
+                CPad::GetPad()->bPlayerAwaitsInGarage = false;
+            }
+            return;
+        }
+        case GARAGE_DOOR_OPENING: { 
+            if (SlideDoorOpen()) { // 0x44C2FB
+                m_DoorState = GARAGE_DOOR_OPEN;
+            }
+            return;
+        }
+        }
+        return;
+    }
+    case IMPOUND_LS:
+    case IMPOUND_LV:
+    case IMPOUND_SF: {
+        const auto playerInBBZ = plyrCoors.z <= m_CeilingZ - 2.f && m_Base.z + 2.f >= plyrCoors.z;
+        switch (m_DoorState) {
+        case GARAGE_DOOR_OPEN: 
+        case GARAGE_DOOR_CLOSING: { // 0x44C3B5
+            if (!playerInBBZ || m_DoorState == GARAGE_DOOR_CLOSING || CalcDistToGarageRectangleSquared(plyrCoors) >= sq(65.f)) {
+                m_DoorState = GARAGE_DOOR_CLOSED;
+                StoreAndRemoveCarsForThisHideOut(GetStoredCarsInThisSafehouse(), CGarages::MAX_CARS_IN_IMPOUND);
+            }
+            return;
+        }
+        case GARAGE_DOOR_CLOSED: { // 0x44C490
+            if (!playerInBBZ) {
+                return;
+            }
+            if (CalcDistToGarageRectangleSquared(plyrCoors) >= sq(36.f)) {
+                return;
+            }
+            const auto cars = GetStoredCarsInThisSafehouse();
+            NeatlyLineUpStoredCars(cars);
+            if (RestoreCarsForThisImpoundingGarage(cars)) {
+                m_DoorState = GARAGE_DOOR_OPEN;
+            }
+            return;
+        }
+        }
+        return;
+    }
+    case TUNING_LOCO_LOW_CO:
+    case TUNING_WHEEL_ARCH_ANGELS:
+    case TUNING_TRANSFENDER: {
+        switch (m_DoorState) {
+        case GARAGE_DOOR_CLOSED: { // 0x44C6C0
+            if (RightModTypeForThisGarage(plyrVeh)) {
+                SetDoorOpeningIfPlayerVehicleClose();
+            }
+            return;
+        }
+        case GARAGE_DOOR_OPEN: {
+            if (IsPlayerInRadiusOfGarage(30.f)) {
+                return;
+            }
+            if (RightModTypeForThisGarage(plyrVeh) && IsEntityTouching3D(plyrVeh)) {
+                return;
+            }
+            if (IsAnyOtherCarTouchingGarage()) {
+                return;
+            }
+            m_bClosingEmpty = true;
+            m_DoorState = GARAGE_DOOR_CLOSING;
+            return;
+        }
+        case GARAGE_DOOR_CLOSING: {
+            if (plyrVeh) {
+                ThrowCarsNearDoorOutOfGarage(plyrVeh);
+            }
+            if (SlideDoorClosed()) {
+                m_DoorState = GARAGE_DOOR_CLOSED;
+            }
+            return;
+        }
+        case GARAGE_DOOR_OPENING: {
+            if (SlideDoorOpen()) {
+                m_DoorState = GARAGE_DOOR_OPEN;
+            }
+            return;
+        }
+        }
+        return;
+    }
+    case BURGLARY: { // 0x44C70A
+        switch (m_DoorState) { // NOTE/TODO: Where's `case GARAGE_DOOR_CLOSED`?
+        case GARAGE_DOOR_OPEN: {
+            if (!IsPlayerInRadiusOfGarage(30.f) && !IsAnyOtherCarTouchingGarage()) {
+                m_DoorState = GARAGE_DOOR_CLOSING;
+            }
+            return;
+        }
+        case GARAGE_DOOR_CLOSING: {
+            if (plyrVeh) {
+                ThrowCarsNearDoorOutOfGarage(plyrVeh);
+            }
+            if (SlideDoorClosed()) {
+                m_DoorState = GARAGE_DOOR_CLOSED;
+            }
+            return;
+        }
+        case GARAGE_DOOR_OPENING: {
+            if (SlideDoorOpen()) {
+                m_DoorState = GARAGE_DOOR_OPEN;
+            }
+            return;
+        }
+        }
+        return;
+    }
+    default: NOTSA_UNREACHABLE();
+    }
+}
+
+bool CGarage::RightModTypeForThisGarage(CVehicle* vehicle) {
+    return plugin::CallMethodAndReturn<bool, 0x447720>(this, vehicle);
 }
 
 bool CGarage::IsHideOut() const {
@@ -471,12 +1361,45 @@ notsa::shapes::AngledRect CGarage::GetBaseAngledRect() const {
     };
 }
 
+CRect CGarage::GetAARect() const {
+    return {
+        m_MinX, m_MinY,
+        m_MaxX, m_MaxY,
+    };
+}
+
 notsa::shapes::AngledBox CGarage::GetBB() const {
     return {
         GetBaseAngledRect(),
         m_Base.z,
         m_CeilingZ
     };
+}
+
+bool CGarage::IsVehicleTypeAllowedInside(CVehicle* veh) {
+    switch (veh->m_nVehicleType) {
+    case VEHICLE_TYPE_BIKE:
+    case VEHICLE_TYPE_AUTOMOBILE:
+        return true;
+    }
+    return false;
+}
+
+CStoredCar* CGarage::GetStoredCarsInThisSafehouse() {
+    return CGarages::GetStoredCarsInSafehouse(CGarages::FindSafeHouseIndexForGarageType(m_Type));
+}
+
+// 0x449FF0
+void CGarage::FindDoorsWithGarage(CObject*& door1, CObject*& door2) {
+    return plugin::CallMethod<0x449FF0>(this, &door1, &door2);
+}
+
+bool CGarage::SlideDoorOpen() {
+    return plugin::CallMethodAndReturn<bool, 0x44A660>(this);
+}
+
+bool CGarage::SlideDoorClosed() {
+    return plugin::CallMethodAndReturn<bool, 0x44A750>(this);
 }
 
 // 0x44A9C0
@@ -487,6 +1410,11 @@ bool CGarage::IsGarageEmpty() {
     return rng::all_of(entities | rngv::take(countEntities), [this](auto&& e) {
         return !IsEntityTouching3D(e);
     });
+}
+
+// 0x447D80
+float CGarage::CalcDistToGarageRectangleSquared(CVector2D pt) {
+    return GetAARect().DistSqToPt(pt);
 }
 
 // Based on 0x4476D0
@@ -558,6 +1486,32 @@ void CGarage::CenterCarInGarage(CEntity* entity) {
         entity->SetPosn(entity->GetPosition());
 }
 */
+
+bool CGarage::IsAnyCarBlockingDoor() {
+    return plugin::CallMethodAndReturn<bool, 0x4494F0>(this);
+}
+
+// 0x4495F0
+size_t CGarage::CountCarsWithCenterPointWithinGarage(CVehicle* ignoredVehicle) {
+    return plugin::CallMethodAndReturn<bool, 0x4495F0>(this, ignoredVehicle);
+}
+
+void CGarage::NeatlyLineUpStoredCars(CStoredCar* cars) {
+    plugin::CallMethod<0x448330>(this, cars);
+}
+
+// 0x448550
+bool CGarage::RestoreCarsForThisHideOut(CStoredCar* cars) {
+    return plugin::CallMethodAndReturn<bool, 0x448550>(this, cars);
+}
+
+bool CGarage::RestoreCarsForThisImpoundingGarage(CStoredCar* cars) {
+    return plugin::CallMethodAndReturn<bool, 0x4485C0>(this, cars);
+}
+
+void CGarage::StoreAndRemoveCarsForThisImpoundingGarage(CStoredCar* cars, uint32 numCarsToStore) {
+    plugin::CallMethod<0x449A50>(cars, numCarsToStore);
+}
 
 // 0x5D3020
 void CSaveGarage::CopyGarageIntoSaveGarage(Const CGarage& g) {
