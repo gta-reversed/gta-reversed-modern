@@ -16,6 +16,14 @@ public:
     //! Process 3D rendering
     void Render3D();
 
+    //! TODO: Move this out of here. Make an event manager or something
+    template<typename T>
+    void HandleEvent(const T& event) {
+        for (auto& m : m_Modules) {
+            m->HandleEvent(event);
+        }
+    }
+
 private:
     //! Creates all modules
     void CreateModules();

@@ -458,7 +458,7 @@ bool CGarages::Load() {
 
     // our debug leftover std::ranges::for_each(aCarsInSafeHouse, [&](auto& car) { DEV_LOG("%d\n", car->m_wModelIndex); });
 
-    for (auto i = 0; i < NumGarages; i++) {
+    for (auto i = 0u; i < NumGarages; i++) {
         CSaveGarage sg{};
         LoadDataFromWorkBuffer(sg);
         sg.CopyGarageOutOfSaveGarage(aGarages[i]);
@@ -498,7 +498,7 @@ bool CGarages::Save() {
         }
     }
 
-    for (auto i = 0; i < NumGarages; i++) {
+    for (auto i = 0u; i < NumGarages; i++) {
         CSaveGarage sg{};
         sg.CopyGarageIntoSaveGarage(aGarages[i]);
         SaveDataToWorkBuffer(sg);

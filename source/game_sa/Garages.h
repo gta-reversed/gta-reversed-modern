@@ -41,7 +41,7 @@ public:
     static inline int32&     MessageNumberInString2 = *(int32*)0x96C010;
     static inline uint32&    MessageEndTime = *(uint32*)0x96C01C;
     static inline uint32&    MessageStartTime = *(uint32*)0x96C020;
-    static inline int32&     NumGarages = *(int32*)0x96C024;
+    static inline uint32&    NumGarages = *(uint32*)0x96C024;
     static inline CGarage*&  pOldToGarageWeAreIn = *(CGarage**)0x96BFD8;
 
 public:
