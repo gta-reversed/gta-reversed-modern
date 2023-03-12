@@ -579,6 +579,7 @@ void CGarage::Update(int32 garageId) {
             }
             return;
         }
+        return;
         }
     }
     case BOMBSHOP_TIMED:
@@ -1057,8 +1058,8 @@ void CGarage::Update(int32 garageId) {
                 case VEHICLE_APPEARANCE_PLANE:
                     return;
                 }
-                CObject* doors[2];
-                FindDoorsWithGarage(doors[1], doors[2]);
+                CObject* doors[2]{};
+                FindDoorsWithGarage(doors[0], doors[1]);
                 if (rng::none_of(doors, [&](CObject* door) {
                     if (!door) {
                         return false;
@@ -1074,6 +1075,7 @@ void CGarage::Update(int32 garageId) {
                 CHud::SetHelpMessage(TheText.Get("GA_21"), 0, 0, 1);
                 CGarages::LastTimeHelpMessage = CTimer::m_snTimeInMilliseconds;
             }
+            return;
         }
         case GARAGE_DOOR_OPEN: { // 0x44BCFC
             const auto distSq = CalcDistToGarageRectangleSquared(plyrCoors);
