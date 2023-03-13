@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 #include "app_debug.h"
+#include <windows.h>
+#include <DbgHelp.h>
+#include <spdlog/sinks/basic_file_sink.h>
 
 #define FINAL 0
 
@@ -52,12 +55,106 @@ void FlushObrsPrintfs() {
 #endif
 }
 
+// This probably should be in winps :D
+LONG WINAPI WindowsExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
+    // If this function itself crashes it's invoked again
+    // So let's prevent the recusion with this simple hack
+    static bool s_HasHandled = false;
+    if (s_HasHandled) {
+        return EXCEPTION_CONTINUE_EXECUTION;
+    }
+    s_HasHandled = true;
+
+    spdlog::dump_backtrace();
+
+    const auto Section = [](const char* name) {
+        SPDLOG_INFO("*********{}**********", name);
+    };
+
+    Section("UNHANDLED EXCEPTION");
+
+    SPDLOG_INFO("Exception Code: {:#010x}", pExceptionInfo->ExceptionRecord->ExceptionCode);
+    SPDLOG_INFO("Exception Flags: {:#010x}", pExceptionInfo->ExceptionRecord->ExceptionFlags);
+    SPDLOG_INFO("Exception Address: {:#010x}", (uintptr_t)pExceptionInfo->ExceptionRecord->ExceptionAddress);
+
+    // Dump exception parameters
+    Section("PARAMTERS");
+    SPDLOG_INFO("Parameters[{}]:", pExceptionInfo->ExceptionRecord->NumberParameters);
+    for (DWORD i = 0; i < pExceptionInfo->ExceptionRecord->NumberParameters; i++) {
+        SPDLOG_INFO("{:>8}: {:#010x}", i, pExceptionInfo->ExceptionRecord->ExceptionInformation[i]);
+    }
+
+    CONTEXT& context = *pExceptionInfo->ContextRecord;
+
+    // Dump registers
+    Section("REGISTERS");
+    const auto DumpRegister = [](auto name, auto value) {
+        SPDLOG_INFO("{:>8}: {:#010x}", name, value);
+    };
+    DumpRegister("EAX", context.Eax);
+    DumpRegister("EBX", context.Ebx);
+    DumpRegister("ECX", context.Ecx);
+    DumpRegister("EDX", context.Edx);
+    DumpRegister("ESI", context.Esi);
+    DumpRegister("EDI", context.Edi);
+    DumpRegister("EBP", context.Ebp);
+    DumpRegister("ESP", context.Esp);
+    DumpRegister("EIP", context.Eip);
+    DumpRegister("EFLAGS", context.EFlags);
+
+    // Dump call stack
+    Section("CALL STACK");
+    HANDLE hProcess = GetCurrentProcess();
+    HANDLE hThread = GetCurrentThread();
+    
+    // Initialize symbol handler
+    SymInitialize(hProcess, NULL, TRUE);
+
+    STACKFRAME stackFrame = {};
+    stackFrame.AddrPC.Mode = AddrModeFlat;
+    stackFrame.AddrStack.Mode = AddrModeFlat;
+    stackFrame.AddrFrame.Mode = AddrModeFlat;
+    stackFrame.AddrPC.Offset = context.Eip;
+    stackFrame.AddrStack.Offset = context.Esp;
+    stackFrame.AddrFrame.Offset = context.Ebp;
+
+    while (StackWalk(
+        IMAGE_FILE_MACHINE_I386, hProcess, hThread, &stackFrame, &context, NULL,
+        SymFunctionTableAccess, SymGetModuleBase, NULL))
+    {
+        DWORD symbolAddress = stackFrame.AddrPC.Offset;
+        char symbolBuffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME] = { 0 };
+        PSYMBOL_INFO pSymbol = (PSYMBOL_INFO)symbolBuffer;
+        pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+        pSymbol->MaxNameLen = MAX_SYM_NAME;
+
+        if (SymFromAddr(hProcess, symbolAddress, NULL, pSymbol)) {
+            SPDLOG_INFO("{:#010x}: {}", pSymbol->Address, &pSymbol->Name[0]);
+        } else {
+            SPDLOG_INFO("{:#010x}: [UNKNOWN]", symbolAddress);
+        }   
+    }
+
+    // Cleanup symbol handler
+    SymCleanup(hProcess);
+
+    Section("END OF UNHANDLED EXCEPTION");
+
+    // Close spdlog now, this way everything is flushed
+    spdlog::shutdown();
+
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+
 void notsa::InitLogging() {
     // See https://github.com/gabime/spdlog/wiki/3.-Custom-formatting#pattern-flags
     spdlog::set_pattern("%^[%l][%H:%M:%S.%e][%s:%#]: %v%$");
     spdlog::default_logger()->sinks().emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/log.log"));
     spdlog::enable_backtrace(128);
 
+    AddVectoredExceptionHandler(1, WindowsExceptionHandler);
+
+    //*reinterpret_cast<int*>(rand()) = 1;
 }
 
 void notsa::ShutdownLogging() {
