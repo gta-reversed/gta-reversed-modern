@@ -122,3 +122,34 @@ project "imgui"
         "imgui/backends", 
         "imgui/misc/cpp" 
     }
+
+project "spdlog"
+    language "C++"
+    kind "StaticLib"
+    targetname "spdlog"
+    warnings "Off"
+
+    vpaths {
+        ["Headers/*"] = {"spdlog/include/spdlog/**.*",},
+        ["Sources/*"] = {"spdlog/src/**.c*",},
+        ["*"] = {"premake5.lua", "CMakeLists.txt"}
+    }
+
+    files {
+        "spdlog/src/spdlog.cpp", 
+        "spdlog/src/stdout_sinks.cpp", 
+        "spdlog/src/color_sinks.cpp", 
+        "spdlog/src/file_sinks.cpp", 
+        "spdlog/src/async.cpp", 
+        "spdlog/src/cfg.cpp",
+        "spdlog/include/**"
+    }
+
+    includedirs {
+        "spdlog/include"
+    }
+
+    defines {
+        "SPDLOG_USE_STD_FORMAT",
+        "SPDLOG_COMPILED_LIB",
+    }

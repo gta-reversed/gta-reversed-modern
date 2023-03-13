@@ -1,7 +1,11 @@
 #pragma once
-//#include "common.h"
+
+#include <spdlog/spdlog.h>
+
 
 namespace notsa {
+inline constexpr auto SPDLOG_PATTEN = "[%n][%l][%H:%M:%S]: %v";
+
 namespace detail {
 static void VerifyMacroImpl(bool result) {
     assert(result); // In release mode this won't do anything
@@ -14,7 +18,7 @@ static void VerifyMacroImpl(bool result) {
 
 #ifdef _DEBUG
 namespace notsa {
-
+/*
 template<typename... Ts>
 static void DevPrint(int lineno, std::string_view file, std::string_view fmt, Ts&&... fmtArgs) {
     const auto userFormat = std::vformat(fmt, std::make_format_args(std::forward<Ts>(fmtArgs)...));
@@ -24,9 +28,10 @@ static void DevPrint(int lineno, std::string_view file, std::string_view fmt, Ts
         std::cout << std::endl;
     }
 }
+*/
 };
 // WARNING: Use std::format specifiers! Use LOG_PTR macro for pointer arguments.
-#define DEV_LOG(...) notsa::DevPrint(__LINE__, __FILE__, ##__VA_ARGS__)
+#define DEV_LOG(...) SPDLOG_INFO(__VA_ARGS__)
 #define LOG_PTR(x) ((const void*)x)
 #else
 #define DEV_LOG(...) (void)0
@@ -38,5 +43,5 @@ static void DevPrint(int lineno, std::string_view file, std::string_view fmt, Ts
 
 void CreateDebugFont();
 void DestroyDebugFont();
-void ObrsPrintfString(const char* str, int16 x, int16 y);
+//void ObrsPrintfString(const char* str, int16 x, int16 y);
 void FlushObrsPrintfs();

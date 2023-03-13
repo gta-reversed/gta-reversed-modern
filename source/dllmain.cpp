@@ -53,8 +53,9 @@ void Process() {
 
 } // namespace CommandLineArguments
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
-{
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
+    spdlog::set_pattern(notsa::SPDLOG_PATTEN);
+
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:

@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include "app/app_debug.h"
+
 #define PLUGIN_API
 
 #define VALIDATE_SIZE(struc, size) static_assert(sizeof(struc) == size, "Invalid structure size of " #struc)

@@ -33,14 +33,16 @@ project "gta_reversed"
         "../libs/imgui", 
         "../libs/imgui/backends", 
         "../libs/imgui/misc/cpp",
-        "../libs/dxsdk"
+        "../libs/dxsdk",
+        "../libs/spdlog/include"
     }
     
     defines { 
         "NOMINMAX", 
         "USE_GTASA_ALLOCATOR", 
         "EXTRA_DEBUG_FEATURES", 
-        "FIX_BUGS" 
+        "FIX_BUGS",
+        --"SPDLOG_USE_STD_FORMAT"
     }
 
     links { 
@@ -48,10 +50,12 @@ project "gta_reversed"
         "vorbis", 
         "vorbisenc", 
         "vorbisfile", 
-        "imgui" 
+        "imgui" ,
+        "spdlog"
     }
 
     libdirs { 
+        "../libs",
         "../%{cfg.targetdir}/ogg.lib", 
         "../%{cfg.targetdir}/vorbis.lib", 
         "../%{cfg.targetdir}/vorbisfile.lib", 
