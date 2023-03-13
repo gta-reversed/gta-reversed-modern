@@ -885,6 +885,8 @@ OpcodeResult CRunningScript::ProcessOneCommand() {
         };
     } op = { CTheScripts::Read2BytesFromScript(m_IP) };
 
+    NOTASA_LOG_TRACE(notsa::script::GetScriptCommandName((eScriptCommands)op.command));
+
     m_bNotFlag = op.notFlag;
 
     if (const auto handler = CustomCommandHandlerOf((eScriptCommands)(op.command))) {
