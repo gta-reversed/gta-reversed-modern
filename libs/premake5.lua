@@ -124,7 +124,7 @@ project "imgui"
     }
 
 project "spdlog"
-    language "C++"
+    cppdialect "C++20"
     kind "StaticLib"
     targetname "spdlog"
     warnings "Off"
@@ -150,6 +150,8 @@ project "spdlog"
     }
 
     defines {
-        "SPDLOG_USE_STD_FORMAT",
-        "SPDLOG_COMPILED_LIB",
+        "SPDLOG_COMPILED_LIB"
     }
+
+workspace "*"
+    defines { "SPDLOG_USE_STD_FORMAT" }

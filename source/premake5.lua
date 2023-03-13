@@ -42,7 +42,6 @@ project "gta_reversed"
         "USE_GTASA_ALLOCATOR", 
         "EXTRA_DEBUG_FEATURES", 
         "FIX_BUGS",
-        --"SPDLOG_USE_STD_FORMAT"
     }
 
     links { 
@@ -53,6 +52,12 @@ project "gta_reversed"
         "imgui" ,
         "spdlog"
     }
+
+    filter "configurations:Debug*"
+        links { 
+            "dbghelp" 
+        }
+    filter {}
 
     libdirs { 
         "../libs",
