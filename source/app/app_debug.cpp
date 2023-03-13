@@ -51,3 +51,15 @@ void FlushObrsPrintfs() {
     RtCharsetBufferFlush();
 #endif
 }
+
+void notsa::InitLogging() {
+    // See https://github.com/gabime/spdlog/wiki/3.-Custom-formatting#pattern-flags
+    spdlog::set_pattern("%^[%l][%H:%M:%S.%e][%s:%#]: %v%$");
+    spdlog::default_logger()->sinks().emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/log.log"));
+    spdlog::enable_backtrace(128);
+
+}
+
+void notsa::ShutdownLogging() {
+    spdlog::shutdown();
+}

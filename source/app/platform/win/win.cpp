@@ -707,6 +707,8 @@ void MainLoop(INT nCmdShow, MSG& Msg) {
 
 // 0x748710
 INT WINAPI __WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, INT nCmdShow) {
+    notsa::InitLogging();
+
     SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0u, nullptr, 2);
     if (IsAlreadyRunning()) {
         return false;
@@ -806,6 +808,8 @@ INT WINAPI __WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine,
     SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, 1u, nullptr, 2u);
     // nullsub_0x72F3C0()
     SetErrorMode(0);
+
+    notsa::ShutdownLogging();
 
     return Msg.wParam;
 }
