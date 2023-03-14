@@ -157,6 +157,7 @@ auto AndOr(CRunningScript& S, int32 logicalOp) { // 0x0D6
 // Script loading, stopping
 //
 
+// COMMAND_TERMINATE_THIS_SCRIPT
 auto TerminateThisScript(CRunningScript& S) { // 0x04E 
     if (S.m_bIsMission) {
         CTheScripts::bAlreadyRunningAMissionScript = false;
