@@ -3,37 +3,50 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 
 void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
-    RH_ScopedClass(CTaskComplexAvoidOtherPedWhileWandering);
-    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedVirtualClass(CTaskComplexAvoidOtherPedWhileWandering, 0x86fec4, 11);
+    RH_ScopedCategory("Tasks/TaskTypes"); // TODO: Change this to the appropriate category!
+
     RH_ScopedInstall(Constructor, 0x66A100);
+    RH_ScopedInstall(Destructor, 0x66A1D0);
+
+    RH_ScopedInstall(QuitIK, 0x66A230, { .reversed = false });
+    RH_ScopedInstall(ComputeSphere, 0x66A320, { .reversed = false });
+    RH_ScopedInstall(ComputeRouteRoundSphere, 0x66A7B0, { .reversed = false });
+    RH_ScopedInstall(SetUpIK, 0x66A850, { .reversed = false });
+    RH_ScopedInstall(NearbyPedsInSphere, 0x671FE0, { .reversed = false });
+    RH_ScopedInstall(ComputeAvoidSphere, 0x672080, { .reversed = false });
+    RH_ScopedInstall(ComputeDetourTarget, 0x672180, { .reversed = false });
+
+    RH_ScopedVMTInstall(Clone, 0x66D050);
+    RH_ScopedVMTInstall(GetTaskType, 0x66A1C0);
+    RH_ScopedVMTInstall(MakeAbortable, 0x66A260, { .reversed = false });
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x66A2C0, { .reversed = false });
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x674610, { .reversed = false });
+    RH_ScopedVMTInstall(ControlSubTask, 0x6721B0, { .reversed = false });
 }
 
 // 0x66A100
-CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering(CPed* ped, const CVector& targetPoint, int32 moveState) : CTaskComplex() {
-    m_ped       = ped;
-    field_1C    = targetPoint;
-    field_28    = targetPoint;
-    m_moveState = static_cast<eMoveState>(moveState); // todo: change signature
-    m_flag1     = false;
-    m_flag2     = false;
-    m_flag3     = false;
-    m_flag4     = false;
+CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering(
+    CPed* pedToAvoid,
+    const CVector& targetPoint,
+    eMoveState moveState
+) :
+    m_PedToAvoid{pedToAvoid},
+    m_TargetPt{targetPoint},
+    m_DetourTargetPt{targetPoint}
+{
+    CEntity::SafeRegisterRef(m_PedToAvoid);
+}
 
-    CEntity::SafeRegisterRef(m_ped);
+CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering(const CTaskComplexAvoidOtherPedWhileWandering& o) :
+    CTaskComplexAvoidOtherPedWhileWandering{m_PedToAvoid, m_TargetPt, m_moveState}
+{
+    m_bMovingTarget = o.m_bMovingTarget;
 }
 
 // 0x66A1D0
 CTaskComplexAvoidOtherPedWhileWandering::~CTaskComplexAvoidOtherPedWhileWandering() {
-    CEntity::SafeCleanUpRef(m_ped);
-}
-
-CTaskComplexAvoidOtherPedWhileWandering* CTaskComplexAvoidOtherPedWhileWandering::Constructor(CPed* ped, const CVector& targetPoint, int32 moveState) {
-    this->CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering(ped, targetPoint, moveState);
-    return this;
-}
-
-CTask* CTaskComplexAvoidOtherPedWhileWandering::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x66D050, CTaskComplexAvoidOtherPedWhileWandering*>(this);
+    CEntity::SafeCleanUpRef(m_PedToAvoid);
 }
 
 CTask* CTaskComplexAvoidOtherPedWhileWandering::ControlSubTask(CPed* ped) {
@@ -56,7 +69,7 @@ void CTaskComplexAvoidOtherPedWhileWandering::QuitIK(CPed* ped) {
     return plugin::CallMethod<0x66A230, CTaskComplexAvoidOtherPedWhileWandering*, CPed*>(this, ped);
 }
 
-uint8 CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CColSphere* colSphere, CPed* ped) {
+bool CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CColSphere* colSphere, CPed* ped) {
     return plugin::CallMethodAndReturn<uint8, 0x66A320, CTaskComplexAvoidOtherPedWhileWandering*, CColSphere*, CPed*>(this, colSphere, ped);
 }
 
@@ -72,7 +85,7 @@ void CTaskComplexAvoidOtherPedWhileWandering::ComputeAvoidSphere(CPed* ped, CCol
     return plugin::CallMethod<0x672080, CTaskComplexAvoidOtherPedWhileWandering*, CPed*, CColSphere*>(this, ped, colSphere);
 }
 
-bool CTaskComplexAvoidOtherPedWhileWandering::ComputeDetourTarget(CPed* ped, CColSphere* colSphere) {
+bool CTaskComplexAvoidOtherPedWhileWandering::ComputeRouteRoundSphere(CPed* ped, CColSphere* colSphere) {
     return plugin::CallMethodAndReturn<bool, 0x66A7B0, CTaskComplexAvoidOtherPedWhileWandering*, CPed*, CColSphere*>(this, ped, colSphere);
 }
 
