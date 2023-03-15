@@ -62,6 +62,8 @@ namespace rngv = std::views;
 #include "game_sa\RenderWare\rw\rwtexdict.h"
 #include "game_sa\RenderWare\rw\skeleton.h"
 #include "game_sa\RenderWare\RenderWare.h"
+#include <PluginBase.h>
+#include <RenderWare.h>
 
 // oswrapper
 #include "oswrapper/oswrapper.h"

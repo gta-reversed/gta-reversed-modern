@@ -1,11 +1,9 @@
 #pragma once
 
-#include <memory>
 #include <charconv>
 #include <initializer_list>
-
+#include <Vector.h>
 #include "Base.h"
-
 
 namespace notsa {
 //template<typename TChar, size_t N>
