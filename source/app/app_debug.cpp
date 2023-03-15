@@ -108,6 +108,7 @@ LONG WINAPI WindowsExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
         DumpRegister("EFLAGS", context.EFlags);
     }
 
+#if 0
     Section("LOADED MODULES");
     {
         HANDLE hProcess = GetCurrentProcess();
@@ -128,6 +129,7 @@ LONG WINAPI WindowsExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
             }
         }
     }
+#endif
 
     Section("CALL STACK");
     {
