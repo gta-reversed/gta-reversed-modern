@@ -206,6 +206,8 @@ void CRunningScript::RemoveScriptFromList(CRunningScript** queueList) {
  * @addr 0x465AA0
  */
 void CRunningScript::ShutdownThisScript() {
+    return plugin::CallMethod<0x465AA0>(this);
+    /*
     if (m_bIsExternal) {
         const auto idx = CTheScripts::StreamedScripts.GetStreamedScriptWithThisStartAddress(m_pBaseIP);
         CTheScripts::StreamedScripts.m_aScripts[idx].m_nStatus--;
@@ -228,6 +230,7 @@ void CRunningScript::ShutdownThisScript() {
         break;
     }
     }
+    */
 }
 
 // 0x465C20
