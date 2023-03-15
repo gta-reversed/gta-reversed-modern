@@ -61,9 +61,9 @@ inline OpcodeResult CollectArgsAndCall(CRunningScript* S, eScriptCommands comman
 
 //! Called for unimplemented commands
 //! These are commands that have no (special) code associated with them
-inline auto NotImplemented(eScriptCommands cmd) {
+inline auto NotImplemented(CRunningScript& S, eScriptCommands cmd) {
 #ifdef NOTSA_DEBUG
-    DEV_LOG("Unimplemented command has been called! [ID: {:04X}; Name: {}]", (unsigned)(cmd), GetScriptCommandName(cmd));
+    NOTSA_LOG_TRACE("[{}][IP Offset: {:#X}]: Unimplemented command has been called! [ID: {:04X}; Name: {}]", S.m_szName, LOG_PTR(S.m_IP - S.m_pBaseIP), (unsigned)(cmd), GetScriptCommandName(cmd));
 #endif
     return OR_INTERRUPT; // Vanilla SA behavior
 }
@@ -71,7 +71,7 @@ inline auto NotImplemented(eScriptCommands cmd) {
 template<eScriptCommands Command, auto* CommandFn>
 inline OpcodeResult CommandParser(CRunningScript* S) {
     return detail::CollectArgsAndCall(S, Command, CommandFn);
-}
+} 
 
 template<eScriptCommands Command, auto* CommandFn>
 inline void AddCommandHandler() {

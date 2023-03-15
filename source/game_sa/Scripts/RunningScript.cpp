@@ -4,6 +4,9 @@
 #include "TheScripts.h"
 #include "CarGenerator.h"
 #include "Hud.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
+
+//static auto logger = NOTSA_MAKE_LOGGER("script");
 
 //! Define it to dump out all commands that don't have a custom handler (that is, they aren't reversed)
 //! Makes compilation slow, so don't enable unless necessary!
@@ -885,8 +888,8 @@ OpcodeResult CRunningScript::ProcessOneCommand() {
         };
     } op = { CTheScripts::Read2BytesFromScript(m_IP) };
 
-    NOTASA_LOG_TRACE(notsa::script::GetScriptCommandName((eScriptCommands)op.command));
-
+    NOTSA_LOG_TRACE("[{}][IP Offset: {:#X}]: {} [{:#X}]", m_szName, LOG_PTR(m_IP - m_pBaseIP), notsa::script::GetScriptCommandName((eScriptCommands)op.command), (size_t)op.command);
+    
     m_bNotFlag = op.notFlag;
 
     if (const auto handler = CustomCommandHandlerOf((eScriptCommands)(op.command))) {

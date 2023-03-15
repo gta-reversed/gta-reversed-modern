@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <DbgHelp.h>
 #include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 #define FINAL 0
 
@@ -160,3 +161,10 @@ void notsa::InitLogging() {
 void notsa::ShutdownLogging() {
     spdlog::shutdown();
 }
+
+// Doesn't work as expected [console doesn't appear, etc... but would be nice to get this to work...]
+//auto notsa::details::NewLogger(const char* name) -> std::shared_ptr<spdlog::logger> {
+//    auto logger = spdlog::stdout_color_mt(name);
+//    spdlog::initialize_logger(logger);
+//    return logger;
+//}
