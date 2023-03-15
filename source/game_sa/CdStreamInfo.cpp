@@ -165,7 +165,7 @@ bool CdStreamRead(int32 streamId, void* lpBuffer, uint32 offsetAndHandle, int32 
         stream.bLocked = false;
         AddToQueue(&gStreamQueue, streamId);
         if (!ReleaseSemaphore(gStreamSemaphore, 1, nullptr))
-            DEV_LOG("Signal Sema Error");
+            NOTSA_LOG_DEBUG("Signal Sema Error");
         return true;
     }
     const DWORD numberOfBytesToRead = sectorCount * STREAMING_SECTOR_SIZE;
@@ -234,7 +234,7 @@ void CdStreamInitThread() {
         HANDLE hSemaphore = OS_SemaphoreCreate(2, nullptr);
         stream.sync.hSemaphore = hSemaphore;
         if (!hSemaphore) {
-            DEV_LOG("cdvd_stream: failed to create sync semaphore");
+            NOTSA_LOG_DEBUG("cdvd_stream: failed to create sync semaphore");
             return;
         }
     }
@@ -246,10 +246,10 @@ void CdStreamInitThread() {
             SetThreadPriority(gStreamingThread, GetThreadPriority(GetCurrentThread()));
             ResumeThread(gStreamingThread);
         } else {
-            DEV_LOG("cdvd_stream: failed to create streaming thread");
+            NOTSA_LOG_DEBUG("cdvd_stream: failed to create streaming thread");
         }
     } else {
-        DEV_LOG("cdvd_stream: failed to create stream semaphore");
+        NOTSA_LOG_DEBUG("cdvd_stream: failed to create stream semaphore");
     }
 }
 

@@ -221,7 +221,7 @@ notsa::Logging::~Logging() {
     //spdlog::shutdown();
 }
 
-auto notsa::Logging::Create(std::string name, std::optional<spdlog::level::level_enum> level) -> std::shared_ptr<spdlog::logger> {
+auto notsa::Logging::Create(std::string name, std::optional<spdlog::level::level_enum> level) -> notsa::log_ptr {
     auto logger = std::make_shared<spdlog::logger>(name, m_sinks.begin(), m_sinks.end());
     spdlog::initialize_logger(logger);
     if (level.has_value()) {

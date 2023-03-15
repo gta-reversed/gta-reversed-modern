@@ -587,7 +587,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
     if (task1)
         task2 = m_ped->GetTaskManager().GetSimplestActiveTask();
 
-    DEV_LOG("event: {} task1: {} task2: {}", (int32)event->GetEventType(), (int32)task1->GetTaskType(), (int32)task2->GetTaskType()); // NOTSA
+    NOTSA_LOG_DEBUG("event: {} task1: {} task2: {}", (int32)event->GetEventType(), (int32)task1->GetTaskType(), (int32)task2->GetTaskType()); // NOTSA
 
     switch (event->GetEventType()) {
     case EVENT_VEHICLE_COLLISION:

@@ -105,29 +105,29 @@ bool CAudioEngine::Initialise() {
     CLoadingScreen::Pause();
 
     if (!AEAudioHardware.Initialise()) {
-        DEV_LOG("[AudioEngine] Failed to initialise Audio Hardware");
+        NOTSA_LOG_DEBUG("[AudioEngine] Failed to initialise Audio Hardware");
         return false;
     }
 
     m_nBackgroundAudioChannel = AEAudioHardware.AllocateChannels(1);
 
     if (!AERadioTrackManager.Initialise(m_nBackgroundAudioChannel)) {
-        DEV_LOG("[AudioEngine] Failed to initialise Radio Track Manager");
+        NOTSA_LOG_DEBUG("[AudioEngine] Failed to initialise Radio Track Manager");
         return false;
     }
 
     if (!AECutsceneTrackManager.Initialise(m_nBackgroundAudioChannel)) {
-        DEV_LOG("[AudioEngine] Failed to initialise Cutscene Track Manager");
+        NOTSA_LOG_DEBUG("[AudioEngine] Failed to initialise Cutscene Track Manager");
         return false;
     }
 
     if (!AEAmbienceTrackManager.Initialise(m_nBackgroundAudioChannel)) {
-        DEV_LOG("[AudioEngine] Failed to initialise Ambience Track Manager");
+        NOTSA_LOG_DEBUG("[AudioEngine] Failed to initialise Ambience Track Manager");
         return false;
     }
 
     if (!AESoundManager.Initialise()) {
-        DEV_LOG("[AudioEngine] Failed to initialise Sound Manager");
+        NOTSA_LOG_DEBUG("[AudioEngine] Failed to initialise Sound Manager");
         return false;
     }
 

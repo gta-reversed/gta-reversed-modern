@@ -63,7 +63,7 @@ inline OpcodeResult CollectArgsAndCall(CRunningScript* S, eScriptCommands comman
 //! These are commands that have no (special) code associated with them
 inline auto NotImplemented(CRunningScript& S, eScriptCommands cmd) {
 #ifdef NOTSA_DEBUG
-    DEV_LOG("[{}][IP: {:#x} + {:#x}]: Unimplemented command has been called! [ID: {:04X}; Name: {}]", S.m_szName, LOG_PTR(S.m_pBaseIP), LOG_PTR(S.m_IP - S.m_pBaseIP), (unsigned)(cmd), GetScriptCommandName(cmd));
+    NOTSA_LOG_DEBUG("[{}][IP: {:#x} + {:#x}]: Unimplemented command has been called! [ID: {:04X}; Name: {}]", S.m_szName, LOG_PTR(S.m_pBaseIP), LOG_PTR(S.m_IP - S.m_pBaseIP), (unsigned)(cmd), GetScriptCommandName(cmd));
 #endif
     return OR_INTERRUPT; // Vanilla SA behavior
 }

@@ -35,7 +35,7 @@ UIRenderer::UIRenderer() :
     ImGui_ImplWin32_Init(PSGLOBAL(window));
     ImGui_ImplDX9_Init(GetD3DDevice());
 
-    DEV_LOG("I say hello!");
+    NOTSA_LOG_DEBUG("I say hello!");
 }
 
 UIRenderer::~UIRenderer() {
@@ -43,7 +43,7 @@ UIRenderer::~UIRenderer() {
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext(m_ImCtx);
 
-    //DEV_LOG("Good bye!");
+    //NOTSA_LOG_DEBUG("Good bye!");
 }
 
 void UIRenderer::UpdateInput() {

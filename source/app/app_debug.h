@@ -34,7 +34,7 @@ private:
 //! Instead, make the static variable with type `notsa::log_ptr` and initialize it in `InjectHooks`!
 #define NOTSA_MAKE_LOGGER notsa::Logging::GetSingleton().Create
 
-#define DEV_LOG SPDLOG_INFO
+#define NOTSA_LOG_DEBUG SPDLOG_DEBUG
 #define NOTSA_LOG_CRIT SPDLOG_CRITICAL
 #define NOTSA_LOG_ERR SPDLOG_ERROR
 #define NOTSA_LOG_TRACE SPDLOG_TRACE

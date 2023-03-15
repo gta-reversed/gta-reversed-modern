@@ -27,9 +27,9 @@
 #define EXTRA_DEBUG_LOGS
 
 #ifdef EXTRA_DEBUG_LOGS
-#define POP_DEV_LOG DEV_LOG
+#define POP_LOG_DEBUG NOTSA_LOG_DEBUG
 #else
-#define POP_DEV_LOG(...)
+#define POP_LOG_DEBUG(...)
 #endif
 
 float& CPopulation::PedDensityMultiplier = *(float*)0x8D2530;
@@ -167,7 +167,7 @@ void LoadGroup(const char* fileName, auto& outModelsInGroup, auto& outNumOfModel
     const auto file = CFileMgr::OpenFile(fileName, "r");
     CFileMgr::ChangeDir("\\");
 
-    POP_DEV_LOG("Loading `{}`...", fileName);
+    POP_LOG_DEBUG("Loading `{}`...", fileName);
 
     size_t currGrpIdx{}, lineno{1};
     for (;const auto l = CFileLoader::LoadLine(file); lineno++) { // Also replaces `,` with ` ` (space) (Important to know)
@@ -184,7 +184,7 @@ void LoadGroup(const char* fileName, auto& outModelsInGroup, auto& outNumOfModel
 
 #ifdef _DEBUG // See bottom of the outer loop for info
             if (currGrpIdx >= outModelsInGroup.size()) {
-                POP_DEV_LOG("Data found past-the-end! This would crash the vanilla game! [Line: {}]", lineno);
+                POP_LOG_DEBUG("Data found past-the-end! This would crash the vanilla game! [Line: {}]", lineno);
                 break;
             }
 #endif
@@ -194,7 +194,7 @@ void LoadGroup(const char* fileName, auto& outModelsInGroup, auto& outNumOfModel
             // loop is let to do one more iteration before breaking
             // to see if there are any more models to be added
             if (npeds >= outModelsInGroup[currGrpIdx].size()) {
-                POP_DEV_LOG("There are models to be added to the group, but there's no memory! [Group ID: {}; Line: {}]", currGrpIdx, lineno);
+                POP_LOG_DEBUG("There are models to be added to the group, but there's no memory! [Group ID: {}; Line: {}]", currGrpIdx, lineno);
                 break;
             }
             
@@ -204,7 +204,7 @@ void LoadGroup(const char* fileName, auto& outModelsInGroup, auto& outNumOfModel
                 assert(pedModelIdx != MODEL_PLAYER);
                 outModelsInGroup[currGrpIdx][npeds++] = pedModelIdx;
             } else {
-                DEV_LOG("Model ({}) doesn't exist! [Group ID: {}; Line: {}]", modelName, currGrpIdx, lineno);
+                NOTSA_LOG_DEBUG("Model ({}) doesn't exist! [Group ID: {}; Line: {}]", modelName, currGrpIdx, lineno);
             }
         }
         
@@ -212,7 +212,7 @@ void LoadGroup(const char* fileName, auto& outModelsInGroup, auto& outNumOfModel
             continue; // Blank line
         }
 
-        //POP_DEV_LOG("Loaded ({}) models into the group ({})", outNumOfModelsPerGroup[currGrpIdx], currGrpIdx);
+        //POP_LOG_DEBUG("Loaded ({}) models into the group ({})", outNumOfModelsPerGroup[currGrpIdx], currGrpIdx);
 
         // Only now set this
         outNumOfModelsPerGroup[currGrpIdx] = npeds;
@@ -231,7 +231,7 @@ void LoadGroup(const char* fileName, auto& outModelsInGroup, auto& outNumOfModel
     };
 
     if (currGrpIdx == outModelsInGroup.size()) {
-        DEV_LOG("{} has been loaded successfully! [#Groups Loaded: {}]", fileName, currGrpIdx);
+        NOTSA_LOG_DEBUG("{} has been loaded successfully! [#Groups Loaded: {}]", fileName, currGrpIdx);
     } else {
         NOTSA_UNREACHABLE("Missing group data in {}! [#Groups Loaded: {}/{}]", fileName, currGrpIdx, outModelsInGroup.size());
     }
@@ -969,7 +969,7 @@ CPed* CPopulation::AddDeadPedInFrontOfCar(const CVector& createPedAt, CVehicle* 
     }
 
     if (!CModelInfo::GetModelInfo(MODEL_MALE01)->m_pRwObject) {
-        DEV_LOG("Didn't create ped, because `MODEL_MALE01` has no RW object!");
+        NOTSA_LOG_DEBUG("Didn't create ped, because `MODEL_MALE01` has no RW object!");
         return nullptr;
     }
 

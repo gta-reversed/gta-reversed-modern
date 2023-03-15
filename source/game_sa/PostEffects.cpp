@@ -243,7 +243,7 @@ void CPostEffects::SetupBackBufferVertex() {
 
     pRasterFrontBuffer = RasterCreatePostEffects({ 0, 0, 64, 64 });
     if (!pRasterFrontBuffer) {
-        DEV_LOG("Error subrastering");
+        NOTSA_LOG_DEBUG("Error subrastering");
         RwRasterDestroy(pRasterFrontBuffer);
         pRasterFrontBuffer = nullptr;
     }

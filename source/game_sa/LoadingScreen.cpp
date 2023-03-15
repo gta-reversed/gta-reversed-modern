@@ -378,7 +378,7 @@ void CLoadingScreen::SkipCopyrightSplash() {
 void LoadingScreen(const char* msg1, const char* msg2, const char* msg3) {
     if (msg1) {
         if (!FastLoadSettings.NoDbgLogScreens) { // Very slow, so skip it
-            DEV_LOG("Loadingscreen: {} [{}][{}]", msg1, msg2 ? msg2 : "NULL", msg3 ? msg3 : "NULL");
+            NOTSA_LOG_DEBUG("Loadingscreen: {} [{}][{}]", msg1, msg2 ? msg2 : "NULL", msg3 ? msg3 : "NULL");
         }
         CLoadingScreen::SetLoadingBarMsg(msg1, msg2);
     }

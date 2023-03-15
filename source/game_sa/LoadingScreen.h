@@ -42,14 +42,14 @@ static inline struct FastLoadSettings {
                 }
             }
             CFileMgr::ChangeDir("");
-            DEV_LOG("Didn't find any savegame to load!");
+            NOTSA_LOG_DEBUG("Didn't find any savegame to load!");
             return false;
         }
 
         // Load game from slot
         assert(slot >= 0);
 
-        DEV_LOG("Loading game from slot ({})", slot);
+        NOTSA_LOG_DEBUG("Loading game from slot ({})", slot);
 
         if (!NoLoadingTune) {
             for (size_t i = 0; i < SoundDelay; i++) {
