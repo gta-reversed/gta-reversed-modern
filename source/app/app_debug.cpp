@@ -2,6 +2,8 @@
 
 #include "app_debug.h"
 #include <windows.h>
+#include <TlHelp32.h>
+#include <Psapi.h>
 #include <DbgHelp.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -80,69 +82,111 @@ LONG WINAPI WindowsExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
 
     // Dump exception parameters
     Section("PARAMTERS");
-    SPDLOG_INFO("Parameters[{}]:", pExceptionInfo->ExceptionRecord->NumberParameters);
-    for (DWORD i = 0; i < pExceptionInfo->ExceptionRecord->NumberParameters; i++) {
-        SPDLOG_INFO("{:>8}: {:#010x}", i, pExceptionInfo->ExceptionRecord->ExceptionInformation[i]);
+    {
+        SPDLOG_INFO("Parameters[{}]:", pExceptionInfo->ExceptionRecord->NumberParameters);
+        for (DWORD i = 0; i < pExceptionInfo->ExceptionRecord->NumberParameters; i++) {
+            SPDLOG_INFO("{:>8}: {:#010x}", i, pExceptionInfo->ExceptionRecord->ExceptionInformation[i]);
+        }
     }
 
     CONTEXT& context = *pExceptionInfo->ContextRecord;
 
-    // Dump registers
     Section("REGISTERS");
-    const auto DumpRegister = [](auto name, auto value) {
-        SPDLOG_INFO("{:>8}: {:#010x}", name, value);
-    };
-    DumpRegister("EAX", context.Eax);
-    DumpRegister("EBX", context.Ebx);
-    DumpRegister("ECX", context.Ecx);
-    DumpRegister("EDX", context.Edx);
-    DumpRegister("ESI", context.Esi);
-    DumpRegister("EDI", context.Edi);
-    DumpRegister("EBP", context.Ebp);
-    DumpRegister("ESP", context.Esp);
-    DumpRegister("EIP", context.Eip);
-    DumpRegister("EFLAGS", context.EFlags);
-
-    // Dump call stack
-    Section("CALL STACK");
-    HANDLE hProcess = GetCurrentProcess();
-    HANDLE hThread = GetCurrentThread();
-    
-    // Initialize symbol handler
-    SymInitialize(hProcess, NULL, TRUE);
-
-    STACKFRAME stackFrame = {};
-    stackFrame.AddrPC.Mode = AddrModeFlat;
-    stackFrame.AddrStack.Mode = AddrModeFlat;
-    stackFrame.AddrFrame.Mode = AddrModeFlat;
-    stackFrame.AddrPC.Offset = context.Eip;
-    stackFrame.AddrStack.Offset = context.Esp;
-    stackFrame.AddrFrame.Offset = context.Ebp;
-
-    while (StackWalk(
-        IMAGE_FILE_MACHINE_I386, hProcess, hThread, &stackFrame, &context, NULL,
-        SymFunctionTableAccess, SymGetModuleBase, NULL))
     {
-        DWORD symbolAddress = stackFrame.AddrPC.Offset;
-        char symbolBuffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME] = { 0 };
-        PSYMBOL_INFO pSymbol = (PSYMBOL_INFO)symbolBuffer;
-        pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-        pSymbol->MaxNameLen = MAX_SYM_NAME;
-
-        if (SymFromAddr(hProcess, symbolAddress, NULL, pSymbol)) {
-            SPDLOG_INFO("{:#010x}: {}", pSymbol->Address, &pSymbol->Name[0]);
-        } else {
-            SPDLOG_INFO("{:#010x}: [UNKNOWN]", symbolAddress);
-        }   
+        const auto DumpRegister = [](auto name, auto value) {
+            SPDLOG_INFO("\t{}: {:#010x}", name, value);
+        };
+        DumpRegister("EAX", context.Eax);
+        DumpRegister("EBX", context.Ebx);
+        DumpRegister("ECX", context.Ecx);
+        DumpRegister("EDX", context.Edx);
+        DumpRegister("ESI", context.Esi);
+        DumpRegister("EDI", context.Edi);
+        DumpRegister("EBP", context.Ebp);
+        DumpRegister("ESP", context.Esp);
+        DumpRegister("EIP", context.Eip);
+        DumpRegister("EFLAGS", context.EFlags);
     }
 
-    // Cleanup symbol handler
-    SymCleanup(hProcess);
+    Section("LOADED MODULES");
+    {
+        HANDLE hProcess = GetCurrentProcess();
+
+        HMODULE hModules[1024];
+        DWORD cbNeeded;
+
+        if (EnumProcessModules(hProcess, hModules, sizeof(hModules), &cbNeeded)) {
+            const DWORD numModules = cbNeeded / sizeof(HMODULE);
+            for (DWORD i = 0; i < numModules; i++) {
+                MODULEINFO moduleInfo;
+                if (GetModuleInformation(hProcess, hModules[i], &moduleInfo, sizeof(moduleInfo))) {
+                    char moduleName[MAX_PATH];
+                    GetModuleBaseName(hProcess, hModules[i], moduleName, sizeof(moduleName));
+
+                    SPDLOG_INFO("\t{:#010x}: {}", LOG_PTR(moduleInfo.lpBaseOfDll), moduleName);
+                }
+            }
+        }
+    }
+
+    Section("CALL STACK");
+    {
+        HANDLE hProcess = GetCurrentProcess();
+        HANDLE hThread = GetCurrentThread();
+    
+        // Initialize symbol handler
+        SymInitialize(hProcess, NULL, TRUE);
+
+        STACKFRAME stackFrame = {};
+        stackFrame.AddrPC.Mode = AddrModeFlat;
+        stackFrame.AddrStack.Mode = AddrModeFlat;
+        stackFrame.AddrFrame.Mode = AddrModeFlat;
+        stackFrame.AddrPC.Offset = context.Eip;
+        stackFrame.AddrStack.Offset = context.Esp;
+        stackFrame.AddrFrame.Offset = context.Ebp;
+
+        DWORD prevFrameOffset = 0;
+        while (StackWalk(
+            IMAGE_FILE_MACHINE_I386, hProcess, hThread, &stackFrame, &context, NULL,
+            SymFunctionTableAccess, SymGetModuleBase, NULL))
+        {
+            DWORD pcOffset = stackFrame.AddrPC.Offset;
+            DWORD moduleBase = SymGetModuleBase(hProcess, pcOffset);
+            if (moduleBase == NULL) {
+                break;
+            }
+
+            DWORD displacement = 0;
+            IMAGEHLP_LINE lineInfo = { sizeof(IMAGEHLP_LINE) };
+            BOOL hasLineInfo = SymGetLineFromAddr(hProcess, pcOffset, &displacement, &lineInfo);
+
+            IMAGEHLP_MODULE moduleInfo{ sizeof(IMAGEHLP_MODULE) };
+            BOOL hasModuleInfo = SymGetModuleInfo(hProcess, moduleBase, &moduleInfo);
+        
+            char symbolBuffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME] = { 0 };
+            PSYMBOL_INFO sym = (PSYMBOL_INFO)symbolBuffer;
+            sym->SizeOfStruct = sizeof(SYMBOL_INFO);
+            sym->MaxNameLen = MAX_SYM_NAME;
+            BOOL hasSym = SymFromAddr(hProcess, pcOffset, NULL, sym);
+
+            SPDLOG_INFO(
+                "\t{:#010x}: {}!{}:{}",
+                pcOffset,
+                hasModuleInfo ? moduleInfo.ModuleName : "<unknown>",
+                hasSym ? sym->Name : "<unknown>",
+                hasLineInfo ? lineInfo.LineNumber : 0
+            );
+        }
+
+        // Cleanup symbol handler
+        SymCleanup(hProcess);
+    }
 
     Section("END OF UNHANDLED EXCEPTION");
 
-    // Close spdlog now, this way everything is flushed
-    spdlog::shutdown();
+    spdlog::apply_all([](auto&& logger) {
+        logger->flush();
+    });
 
     return EXCEPTION_EXECUTE_HANDLER;
 }
