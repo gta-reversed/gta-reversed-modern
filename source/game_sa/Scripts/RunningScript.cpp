@@ -888,7 +888,7 @@ OpcodeResult CRunningScript::ProcessOneCommand() {
         };
     } op = { CTheScripts::Read2BytesFromScript(m_IP) };
 
-    NOTSA_LOG_TRACE("[{}][IP Offset: {:#X}]: {} [{:#X}]", m_szName, LOG_PTR(m_IP - m_pBaseIP), notsa::script::GetScriptCommandName((eScriptCommands)op.command), (size_t)op.command);
+    NOTSA_LOG_TRACE("[{}][IP: {:#x} + {:#x}]: {} [{:#x}]", m_szName, LOG_PTR(m_pBaseIP), LOG_PTR(m_IP - m_pBaseIP), notsa::script::GetScriptCommandName((eScriptCommands)op.command), (size_t)op.command);
     
     m_bNotFlag = op.notFlag;
 
