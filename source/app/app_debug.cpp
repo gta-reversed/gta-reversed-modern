@@ -5,6 +5,7 @@
 #include <TlHelp32.h>
 #include <Psapi.h>
 #include <DbgHelp.h>
+#include <spdlog/async.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
@@ -68,8 +69,10 @@ LONG WINAPI WindowsExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
     }
     s_HasHandled = true;
 
-    spdlog::dump_backtrace();
-
+    spdlog::apply_all([](auto&& logger) {
+        logger->dump_backtrace();
+    });
+    
     const auto Section = [](const char* name) {
         SPDLOG_INFO("*********{}**********", name);
     };
@@ -122,7 +125,7 @@ LONG WINAPI WindowsExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
                 MODULEINFO moduleInfo;
                 if (GetModuleInformation(hProcess, hModules[i], &moduleInfo, sizeof(moduleInfo))) {
                     char moduleName[MAX_PATH];
-                    GetModuleBaseName(hProcess, hModules[i], moduleName, sizeof(moduleName));
+                    GetModuleBaseName (hProcess, hModules[i], moduleName, sizeof(moduleName));
 
                     SPDLOG_INFO("\t{:#010x}: {}", LOG_PTR(moduleInfo.lpBaseOfDll), moduleName);
                 }
@@ -193,24 +196,36 @@ LONG WINAPI WindowsExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
     return EXCEPTION_EXECUTE_HANDLER;
 }
 
-void notsa::InitLogging() {
+notsa::Logging::Logging() {
+#if 0
+    while (!IsDebuggerPresent()) {
+        Sleep(1);
+    }
+#endif
+    spdlog::init_thread_pool(1 << 16, 4);
+
     // See https://github.com/gabime/spdlog/wiki/3.-Custom-formatting#pattern-flags
     spdlog::set_pattern("%^[%l][%H:%M:%S.%e][%s:%#]: %v%$");
-    spdlog::default_logger()->sinks().emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/log.log"));
     spdlog::enable_backtrace(128);
+    spdlog::set_level(spdlog::level::debug);
+
+    m_sinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/log.log"));
+    m_sinks.emplace_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
+
+    spdlog::set_default_logger(Create("default"));
 
     AddVectoredExceptionHandler(1, WindowsExceptionHandler);
-
-    //*reinterpret_cast<int*>(rand()) = 1;
 }
 
-void notsa::ShutdownLogging() {
-    spdlog::shutdown();
+notsa::Logging::~Logging() {
+    //spdlog::shutdown();
 }
 
-// Doesn't work as expected [console doesn't appear, etc... but would be nice to get this to work...]
-//auto notsa::details::NewLogger(const char* name) -> std::shared_ptr<spdlog::logger> {
-//    auto logger = spdlog::stdout_color_mt(name);
-//    spdlog::initialize_logger(logger);
-//    return logger;
-//}
+auto notsa::Logging::Create(std::string name, std::optional<spdlog::level::level_enum> level) -> std::shared_ptr<spdlog::logger> {
+    auto logger = std::make_shared<spdlog::logger>(name, m_sinks.begin(), m_sinks.end());
+    spdlog::initialize_logger(logger);
+    if (level.has_value()) {
+        logger->set_level(*level);
+    }
+    return logger;
+}

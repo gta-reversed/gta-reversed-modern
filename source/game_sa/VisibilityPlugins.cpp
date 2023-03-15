@@ -1152,3 +1152,7 @@ bool CVisibilityPlugins::VehicleVisibilityCB(RpClump* clump) {
 bool CVisibilityPlugins::VehicleVisibilityCB_BigVehicle(RpClump* clump) {
     return FrustumSphereCB(clump);
 }
+
+void weaponPedsForPc_Insert(CPed* ped) {
+    plugin::Call<0x5E46D0>(ped);
+}

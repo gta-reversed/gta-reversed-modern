@@ -707,7 +707,10 @@ void MainLoop(INT nCmdShow, MSG& Msg) {
 
 // 0x748710
 INT WINAPI __WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, INT nCmdShow) {
-    notsa::InitLogging();
+    // It's possible that the singleton was already created by a static initialization of a logger
+    if (!notsa::Logging::HasInstance()) {
+        notsa::Logging::CreateInstance();
+    }
 
     SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0u, nullptr, 2);
     if (IsAlreadyRunning()) {
@@ -809,7 +812,7 @@ INT WINAPI __WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine,
     // nullsub_0x72F3C0()
     SetErrorMode(0);
 
-    notsa::ShutdownLogging();
+    notsa::Logging::DestroySingleton();
 
     return Msg.wParam;
 }

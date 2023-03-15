@@ -6,6 +6,8 @@
 #include "Hud.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 
+static notsa::log_ptr logger;
+
 //static auto logger = NOTSA_MAKE_LOGGER("script");
 
 //! Define it to dump out all commands that don't have a custom handler (that is, they aren't reversed)
@@ -32,6 +34,8 @@
 static inline std::array<notsa::script::CommandHandlerFunction, (size_t)(COMMAND_HIGHEST_ID_TO_HOOK) + 1> s_CustomCommandHandlerTable{};
 
 void CRunningScript::InjectHooks() {
+    logger = NOTSA_MAKE_LOGGER("script");
+
     InjectCustomCommandHooks();
 
     RH_ScopedClass(CRunningScript);
@@ -888,7 +892,7 @@ OpcodeResult CRunningScript::ProcessOneCommand() {
         };
     } op = { CTheScripts::Read2BytesFromScript(m_IP) };
 
-    NOTSA_LOG_TRACE("[{}][IP: {:#x} + {:#x}]: {} [{:#x}]", m_szName, LOG_PTR(m_pBaseIP), LOG_PTR(m_IP - m_pBaseIP), notsa::script::GetScriptCommandName((eScriptCommands)op.command), (size_t)op.command);
+    SPDLOG_LOGGER_TRACE(logger, "[{}][IP: {:#x} + {:#x}]: {} [{:#x}]", m_szName, LOG_PTR(m_pBaseIP), LOG_PTR(m_IP - m_pBaseIP), notsa::script::GetScriptCommandName((eScriptCommands)op.command), (size_t)op.command);
     
     m_bNotFlag = op.notFlag;
 
