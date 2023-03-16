@@ -24,7 +24,7 @@ void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
 
     RH_ScopedVMTInstall(Clone, 0x66D050);
     RH_ScopedVMTInstall(GetTaskType, 0x66A1C0);
-    RH_ScopedVMTInstall(MakeAbortable, 0x66A260, { .reversed = false });
+    RH_ScopedVMTInstall(MakeAbortable, 0x66A260);
     RH_ScopedVMTInstall(CreateNextSubTask, 0x66A2C0, { .reversed = false });
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x674610, { .reversed = false });
     RH_ScopedVMTInstall(ControlSubTask, 0x6721B0);
@@ -130,7 +130,12 @@ CTask* CTaskComplexAvoidOtherPedWhileWandering::ControlSubTask(CPed* ped) {
 }
 
 bool CTaskComplexAvoidOtherPedWhileWandering::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return plugin::CallMethodAndReturn<bool, 0x66A260, CTaskComplexAvoidOtherPedWhileWandering*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
+    const bool subTaskAborted = m_pSubTask->MakeAbortable(ped, priority, event);
+    if (subTaskAborted) {
+        QuitIK(ped);
+        ped->bIgnoreHeightCheckOnGotoPointTask = false;
+    }
+    return subTaskAborted;
 }
 
 CTask* CTaskComplexAvoidOtherPedWhileWandering::CreateNextSubTask(CPed* ped) {
