@@ -35,9 +35,11 @@ public:
     CTask*    ControlSubTask(CPed* ped) override;
 
     void QuitIK(CPed* ped);
-    bool NearbyPedsInSphere(CColSphere* colSphere, CPed* ped);
+    bool ComputeSphere(CColSphere* colSphere, CPed* ped);
     void SetUpIK(CPed* ped);
-    bool ComputeSphere(CPed* ped, CColSphere* colSphere, CPed** pedsToCheck, CPed** pedsInSphere);
+
+    using PedsArray_t = std::array<CPed*, 16>;
+    bool NearbyPedsInSphere(CPed* ped, const CColSphere& colSphere, PedsArray_t& pedsToCheck, PedsArray_t& pedsInSphere);
     void ComputeAvoidSphere(CPed* ped, CColSphere* colSphere);
     bool ComputeRouteRoundSphere(CPed* ped, CColSphere* colSphere);
     bool ComputeDetourTarget(CPed* ped);

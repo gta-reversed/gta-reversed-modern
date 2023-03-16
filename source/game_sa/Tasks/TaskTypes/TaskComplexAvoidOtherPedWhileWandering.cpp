@@ -14,11 +14,11 @@ void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x66A100);
     RH_ScopedInstall(Destructor, 0x66A1D0);
 
-    RH_ScopedInstall(QuitIK, 0x66A230);
+    RH_ScopedInstall(QuitIK, 0x66A230, { .reversed = false });
     RH_ScopedInstall(ComputeSphere, 0x66A320, { .reversed = false });
     RH_ScopedInstall(ComputeRouteRoundSphere, 0x66A7B0, { .reversed = false });
     RH_ScopedInstall(SetUpIK, 0x66A850, { .reversed = false });
-    RH_ScopedInstall(NearbyPedsInSphere, 0x671FE0, { .reversed = false });
+    RH_ScopedInstall(NearbyPedsInSphere, 0x671FE0);
     RH_ScopedInstall(ComputeAvoidSphere, 0x672080, { .reversed = false });
     RH_ScopedInstall(ComputeDetourTarget, 0x672180, { .reversed = false });
 
@@ -172,7 +172,7 @@ void CTaskComplexAvoidOtherPedWhileWandering::QuitIK(CPed* ped) {
     }
 }
 
-bool CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CColSphere* colSphere, CPed* ped) {
+bool CTaskComplexAvoidOtherPedWhileWandering::ComputeSphere(CColSphere* colSphere, CPed* ped) {
     return plugin::CallMethodAndReturn<uint8, 0x66A320, CTaskComplexAvoidOtherPedWhileWandering*, CColSphere*, CPed*>(this, colSphere, ped);
 }
 
@@ -180,8 +180,25 @@ void CTaskComplexAvoidOtherPedWhileWandering::SetUpIK(CPed* ped) {
     return plugin::CallMethod<0x66A850, CTaskComplexAvoidOtherPedWhileWandering*, CPed*>(this, ped);
 }
 
-bool CTaskComplexAvoidOtherPedWhileWandering::ComputeSphere(CPed* ped, CColSphere* colSphere, CPed** pedsToCheck, CPed** pedsInSphere) {
-    return plugin::CallMethodAndReturn<bool, 0x671FE0, CTaskComplexAvoidOtherPedWhileWandering*, CPed*, CColSphere*, CPed**, CPed**>(this, ped, colSphere, pedsToCheck, pedsInSphere);
+bool CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CPed* ped, const CColSphere& colSphere, PedsArray_t& pedsToCheck, PedsArray_t& pedsInSphere) {
+    bool anyInSphere = false;
+    for (auto&& [i, pedToCheck] : notsa::enumerate(pedsToCheck)) {
+        if (!colSphere.IntersectSphere(CSphere{ pedToCheck->GetPosition(), 1.05f })) {
+            continue;
+        }
+
+        // Find where to insert
+        const auto insertAt = rng::find(pedsInSphere, nullptr);
+        if (insertAt == pedsInSphere.end()) {
+            return anyInSphere; // No space
+        }
+
+        // Insert it
+        pedToCheck  = nullptr;    // Null out array entry
+        *insertAt   = pedToCheck; 
+        anyInSphere = true;
+    }
+    return anyInSphere;
 }
 
 void CTaskComplexAvoidOtherPedWhileWandering::ComputeAvoidSphere(CPed* ped, CColSphere* colSphere) {
