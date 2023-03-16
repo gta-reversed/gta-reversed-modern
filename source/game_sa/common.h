@@ -111,7 +111,7 @@ constexpr float SQRT_2         = 1.41421f;          // √2
 constexpr float SQRT_3         = 1.73205f;          // √3
 constexpr float TWO_PI         = 6.28318f;          // τ (TAU)
 
-constexpr float COS_45 = SQRT_2; // cos(45deg)
+constexpr float COS_45 = SQRT_2 / 2.f; // cos(45deg)
 
 constexpr float sq(float x) { return x * x; }
 

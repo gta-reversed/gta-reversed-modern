@@ -1,5 +1,10 @@
 #include "StdInc.h"
 
+#include <IKChainManager_c.h>
+
+#include "TaskSimpleStandStill.h"
+#include "TaskComplexGangFollower.h"
+#include "TaskSimpleGoToPoint.h"
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 
 void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
@@ -22,7 +27,7 @@ void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
     RH_ScopedVMTInstall(MakeAbortable, 0x66A260, { .reversed = false });
     RH_ScopedVMTInstall(CreateNextSubTask, 0x66A2C0, { .reversed = false });
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x674610, { .reversed = false });
-    RH_ScopedVMTInstall(ControlSubTask, 0x6721B0, { .reversed = false });
+    RH_ScopedVMTInstall(ControlSubTask, 0x6721B0);
 }
 
 // 0x66A100
@@ -50,7 +55,78 @@ CTaskComplexAvoidOtherPedWhileWandering::~CTaskComplexAvoidOtherPedWhileWanderin
 }
 
 CTask* CTaskComplexAvoidOtherPedWhileWandering::ControlSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x6721B0, CTaskComplexAvoidOtherPedWhileWandering*, CPed*>(this, ped);
+    // Pirulax: Yes, I know, using goto's isn't necessary.
+    // Alternative is to nest it.
+
+    if (!m_PedToAvoid) {
+    quitik_and_end:
+        QuitIK(ped);
+    end:
+        ped->bIgnoreHeightCheckOnGotoPointTask = false;
+        return nullptr;
+    }
+
+    if (m_bWantsToQuit && m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+        goto end;
+    }
+
+    m_Timer.StartIfNotAlready(200);
+
+    SetUpIK(ped);
+
+    if (m_pSubTask->GetTaskType() == TASK_SIMPLE_STAND_STILL) {
+        return m_pSubTask;
+    }
+
+    if (ped->GetIntelligence()->m_AnotherStaticCounter > 30) {
+        QuitIK(ped);
+        return new CTaskSimpleStandStill{ CGeneral::GetRandomNumberInRange(500, 2500) };
+    }
+
+    const auto &pedPos        = ped->GetPosition(),
+               &pedToAvoidPos = m_PedToAvoid->GetPosition();
+    if (std::abs(pedToAvoidPos.z - pedPos.z) >= 3.f) {
+        goto quitik_and_end;
+    }
+
+    const auto pedToAvoidDist2DSq = (pedPos - pedToAvoidPos).SquaredMagnitude2D();
+    const auto pedSimplestTask = ped->GetTaskManager().GetSimplestActiveTask();
+    if (   pedSimplestTask
+        && CTask::IsGoToTask(pedSimplestTask)
+        && m_DontQuitYetTimer.IsOutOfTime()
+        && ped->GetForward().Dot(m_PedToAvoid->GetForward()) >= 0.923 // 22 and change degrees
+        && (ped->GetMoveSpeed() * CTimer::TIMESTEP_PER_SECOND).SquaredMagnitude2D() <= (m_PedToAvoid->GetMoveSpeed() * CTimer::TIMESTEP_PER_SECOND).SquaredMagnitude2D() + sq(0.5f)
+        && pedToAvoidDist2DSq >= sq(1.f)
+    ) {
+        goto quitik_and_end;
+    }
+
+    if (pedToAvoidDist2DSq >= sq(2.5f) + 1.f) {
+        goto quitik_and_end;
+    }
+
+    if (!m_Timer.IsOutOfTime()) {
+        return m_pSubTask;
+    }
+
+    m_Timer.Start(200);
+
+    if (!m_bMovingTarget) {
+        goto quitik_and_end;
+    }
+
+    if (const auto followerTask = CTask::DynCast<CTaskComplexGangFollower>(ped->GetIntelligence()->FindTaskByType(TASK_COMPLEX_GANG_FOLLOWER))) {
+        if (followerTask->m_Leader) {
+            m_TargetPt = followerTask->m_Leader->GetPosition() + followerTask->CalculateOffsetPosition();
+        }
+    }
+
+    if (ComputeDetourTarget(ped)) {
+        CTask::Cast<CTaskSimpleGoToPoint>(m_pSubTask)->UpdatePoint(m_TargetPt);
+        return m_pSubTask;
+    }
+
+    goto quitik_and_end;
 }
 
 bool CTaskComplexAvoidOtherPedWhileWandering::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
