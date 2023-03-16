@@ -14,7 +14,7 @@ void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x66A100);
     RH_ScopedInstall(Destructor, 0x66A1D0);
 
-    RH_ScopedInstall(QuitIK, 0x66A230, { .reversed = false });
+    RH_ScopedInstall(QuitIK, 0x66A230);
     RH_ScopedInstall(ComputeSphere, 0x66A320, { .reversed = false });
     RH_ScopedInstall(ComputeRouteRoundSphere, 0x66A7B0, { .reversed = false });
     RH_ScopedInstall(SetUpIK, 0x66A850, { .reversed = false });
@@ -167,7 +167,9 @@ CTask* CTaskComplexAvoidOtherPedWhileWandering::CreateFirstSubTask(CPed* ped) {
 }
 
 void CTaskComplexAvoidOtherPedWhileWandering::QuitIK(CPed* ped) {
-    return plugin::CallMethod<0x66A230, CTaskComplexAvoidOtherPedWhileWandering*, CPed*>(this, ped);
+    if (m_bDoingIK && g_ikChainMan.IsLooking(ped)) {
+        g_ikChainMan.AbortLookAt(ped);
+    }
 }
 
 bool CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CColSphere* colSphere, CPed* ped) {
