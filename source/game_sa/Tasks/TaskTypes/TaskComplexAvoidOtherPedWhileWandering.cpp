@@ -16,7 +16,7 @@ void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
 
     RH_ScopedInstall(QuitIK, 0x66A230, { .reversed = false });
     RH_ScopedInstall(ComputeSphere, 0x66A320);
-    RH_ScopedInstall(ComputeRouteRoundSphere, 0x66A7B0, { .reversed = false });
+    RH_ScopedInstall(ComputeRouteRoundSphere, 0x66A7B0);
     RH_ScopedInstall(SetUpIK, 0x66A850);
     RH_ScopedInstall(NearbyPedsInSphere, 0x671FE0);
     RH_ScopedInstall(ComputeAvoidSphere, 0x672080);
@@ -283,7 +283,16 @@ void CTaskComplexAvoidOtherPedWhileWandering::ComputeAvoidSphere(CPed* ped, CCol
 }
 
 bool CTaskComplexAvoidOtherPedWhileWandering::ComputeRouteRoundSphere(CPed* ped, CColSphere* colSphere) {
-    return plugin::CallMethodAndReturn<bool, 0x66A7B0, CTaskComplexAvoidOtherPedWhileWandering*, CPed*, CColSphere*>(this, ped, colSphere);
+    CVector start = m_StartPt, target = m_TargetPt;
+    start.z = target.z = colSphere->m_vecCenter.z = ped->GetPosition().z;
+    return CPedGeometryAnalyser::ComputeRouteRoundSphere(
+        *ped,
+        *colSphere,
+        start,
+        target,
+        m_NewTargetPt,
+        m_DetourTargetPt
+    );
 }
 
 bool CTaskComplexAvoidOtherPedWhileWandering::ComputeDetourTarget(CPed* ped) {
