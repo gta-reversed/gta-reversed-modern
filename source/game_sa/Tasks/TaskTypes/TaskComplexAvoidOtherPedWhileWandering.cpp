@@ -26,7 +26,7 @@ void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
     RH_ScopedVMTInstall(GetTaskType, 0x66A1C0);
     RH_ScopedVMTInstall(MakeAbortable, 0x66A260);
     RH_ScopedVMTInstall(CreateNextSubTask, 0x66A2C0);
-    RH_ScopedVMTInstall(CreateFirstSubTask, 0x674610, { .reversed = false });
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x674610);
     RH_ScopedVMTInstall(ControlSubTask, 0x6721B0);
 }
 
@@ -44,7 +44,7 @@ CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering
 }
 
 CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering(const CTaskComplexAvoidOtherPedWhileWandering& o) :
-    CTaskComplexAvoidOtherPedWhileWandering{m_PedToAvoid, m_TargetPt, m_moveState}
+    CTaskComplexAvoidOtherPedWhileWandering{m_PedToAvoid, m_TargetPt, m_MoveState}
 {
     m_bMovingTarget = o.m_bMovingTarget;
 }
@@ -149,7 +149,21 @@ CTask* CTaskComplexAvoidOtherPedWhileWandering::CreateNextSubTask(CPed* ped) {
 }
 
 CTask* CTaskComplexAvoidOtherPedWhileWandering::CreateFirstSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x674610, CTaskComplexAvoidOtherPedWhileWandering*, CPed*>(this, ped);
+    if (m_PedToAvoid) {
+        m_StartPt = ped->GetPosition();
+
+        CColSphere avoidSph;
+        ComputeAvoidSphere(ped, &avoidSph);
+        if (ComputeRouteRoundSphere(ped, &avoidSph)) {
+            ped->bIgnoreHeightCheckOnGotoPointTask = true;
+            m_DontQuitYetTimer.Start(2000);
+            return new CTaskSimpleGoToPoint{ m_MoveState, m_DetourTargetPt };
+        } else {
+            QuitIK(ped);
+        }
+    }
+    ped->bIgnoreHeightCheckOnGotoPointTask = false;
+    return nullptr;
 }
 
 void CTaskComplexAvoidOtherPedWhileWandering::QuitIK(CPed* ped) {
