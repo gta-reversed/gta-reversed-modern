@@ -25,7 +25,7 @@ void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
     RH_ScopedVMTInstall(Clone, 0x66D050);
     RH_ScopedVMTInstall(GetTaskType, 0x66A1C0);
     RH_ScopedVMTInstall(MakeAbortable, 0x66A260);
-    RH_ScopedVMTInstall(CreateNextSubTask, 0x66A2C0, { .reversed = false });
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x66A2C0);
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x674610, { .reversed = false });
     RH_ScopedVMTInstall(ControlSubTask, 0x6721B0);
 }
@@ -54,6 +54,7 @@ CTaskComplexAvoidOtherPedWhileWandering::~CTaskComplexAvoidOtherPedWhileWanderin
     CEntity::SafeCleanUpRef(m_PedToAvoid);
 }
 
+// 0x6721B0
 CTask* CTaskComplexAvoidOtherPedWhileWandering::ControlSubTask(CPed* ped) {
     // Pirulax: Yes, I know, using goto's isn't necessary.
     // Alternative is to nest it.
@@ -67,7 +68,7 @@ CTask* CTaskComplexAvoidOtherPedWhileWandering::ControlSubTask(CPed* ped) {
     }
 
     if (m_bWantsToQuit && m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
-        goto end;
+        goto end; // maybe this is just a mistake? And they wanted to do `goto quitik_and_end`?
     }
 
     m_Timer.StartIfNotAlready(200);
@@ -139,7 +140,12 @@ bool CTaskComplexAvoidOtherPedWhileWandering::MakeAbortable(CPed* ped, eAbortPri
 }
 
 CTask* CTaskComplexAvoidOtherPedWhileWandering::CreateNextSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x66A2C0, CTaskComplexAvoidOtherPedWhileWandering*, CPed*>(this, ped);
+    if (m_pSubTask->GetTaskType() == TASK_SIMPLE_STAND_STILL) {
+        return m_pSubTask->AsComplex()->CreateFirstSubTask(ped);
+    }
+    QuitIK(ped);
+    ped->bIgnoreHeightCheckOnGotoPointTask = false;
+    return nullptr;
 }
 
 CTask* CTaskComplexAvoidOtherPedWhileWandering::CreateFirstSubTask(CPed* ped) {
