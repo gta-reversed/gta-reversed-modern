@@ -15,7 +15,7 @@ void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x66A1D0);
 
     RH_ScopedInstall(QuitIK, 0x66A230, { .reversed = false });
-    RH_ScopedInstall(ComputeSphere, 0x66A320, { .reversed = false });
+    RH_ScopedInstall(ComputeSphere, 0x66A320);
     RH_ScopedInstall(ComputeRouteRoundSphere, 0x66A7B0, { .reversed = false });
     RH_ScopedInstall(SetUpIK, 0x66A850);
     RH_ScopedInstall(NearbyPedsInSphere, 0x671FE0);
@@ -172,8 +172,35 @@ void CTaskComplexAvoidOtherPedWhileWandering::QuitIK(CPed* ped) {
     }
 }
 
-bool CTaskComplexAvoidOtherPedWhileWandering::ComputeSphere(CColSphere* colSphere, PedsToAvoidArray& accountedPeds) {
-    return plugin::CallMethodAndReturn<uint8, 0x66A320, CTaskComplexAvoidOtherPedWhileWandering*, CColSphere*, PedsToAvoidArray&>(this, colSphere, accountedPeds);
+// Calculate minimum bounding sphere of all peds in `accountedPeds`
+CColSphere CTaskComplexAvoidOtherPedWhileWandering::ComputeSphere(PedsToAvoidArray& accountedPeds) {
+    // Step 1: Find center
+    CVector center{};
+    size_t numPeds{};
+    for (CPed* ped : accountedPeds) {
+        if (!ped) {
+            continue;
+        }
+        numPeds++;
+        center += ped->GetPosition();
+    }
+    center /= (float)numPeds;
+
+    // Step 2: Find max 2D[!] distance [this is going to be the radius]
+    float maxDist2DSq{FLT_MIN};
+    for (CPed* ped : accountedPeds) {
+        if (!ped) {
+            continue;
+        }
+        const auto dist2DSq = (center - ped->GetPosition()).SquaredMagnitude2D();
+        if (dist2DSq <= maxDist2DSq) {
+            continue;
+        }
+        maxDist2DSq = dist2DSq;
+    }
+
+    // Step 3: Construct sphere from it
+    return CSphere{ center, std::sqrt(maxDist2DSq) };
 }
 
 void CTaskComplexAvoidOtherPedWhileWandering::SetUpIK(CPed* ped) {
@@ -250,7 +277,7 @@ void CTaskComplexAvoidOtherPedWhileWandering::ComputeAvoidSphere(CPed* ped, CCol
     PedsToAvoidArray pedsInSphere{m_PedToAvoid};
     CColSphere sp{ m_PedToAvoid->GetPosition(), 1.05f };
     while (NearbyPedsInSphere(ped, sp, pedsToCheck, pedsInSphere)) {
-        ComputeSphere(&sp, pedsInSphere);
+        sp = ComputeSphere(pedsInSphere);
     }
 }
 

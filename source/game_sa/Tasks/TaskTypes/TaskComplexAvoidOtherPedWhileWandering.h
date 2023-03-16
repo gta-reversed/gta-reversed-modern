@@ -36,13 +36,13 @@ public:
     CTask*    ControlSubTask(CPed* ped) override;
 
     void QuitIK(CPed* ped);
-    bool ComputeSphere(CColSphere* colSphere, PedsToAvoidArray& accountedPeds);
     void SetUpIK(CPed* ped);
 
-    bool NearbyPedsInSphere(CPed* ped, const CColSphere& colSphere, PedsToAvoidArray& pedsToCheck, PedsToAvoidArray& pedsInSphere);
-    void ComputeAvoidSphere(CPed* ped, CColSphere* colSphere);
-    bool ComputeRouteRoundSphere(CPed* ped, CColSphere* colSphere);
-    bool ComputeDetourTarget(CPed* ped);
+    bool       NearbyPedsInSphere(CPed* ped, const CColSphere& colSphere, PedsToAvoidArray& pedsToCheck, PedsToAvoidArray& pedsInSphere);
+    CColSphere ComputeSphere(PedsToAvoidArray& accountedPeds);
+    void       ComputeAvoidSphere(CPed* ped, CColSphere* colSphere);
+    bool       ComputeRouteRoundSphere(CPed* ped, CColSphere* colSphere);
+    bool       ComputeDetourTarget(CPed* ped);
 
 private:
     friend void InjectHooksMain();
