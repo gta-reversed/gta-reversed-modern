@@ -17,7 +17,7 @@ void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
     RH_ScopedInstall(QuitIK, 0x66A230, { .reversed = false });
     RH_ScopedInstall(ComputeSphere, 0x66A320, { .reversed = false });
     RH_ScopedInstall(ComputeRouteRoundSphere, 0x66A7B0, { .reversed = false });
-    RH_ScopedInstall(SetUpIK, 0x66A850, { .reversed = false });
+    RH_ScopedInstall(SetUpIK, 0x66A850);
     RH_ScopedInstall(NearbyPedsInSphere, 0x671FE0);
     RH_ScopedInstall(ComputeAvoidSphere, 0x672080, { .reversed = false });
     RH_ScopedInstall(ComputeDetourTarget, 0x672180, { .reversed = false });
@@ -177,7 +177,40 @@ bool CTaskComplexAvoidOtherPedWhileWandering::ComputeSphere(CColSphere* colSpher
 }
 
 void CTaskComplexAvoidOtherPedWhileWandering::SetUpIK(CPed* ped) {
-    return plugin::CallMethod<0x66A850, CTaskComplexAvoidOtherPedWhileWandering*, CPed*>(this, ped);
+    assert(ped);
+    if (ped == FindPlayerPed() && !CPad::GetPad()->DisablePlayerControls) {
+        return;
+    }
+    if (m_bDoingIK) {
+        return;
+    }
+    if (!ped->GetIsOnScreen()) {
+        return;
+    }
+    if (!g_ikChainMan.GetLookAtEntity(ped)) {
+        return;
+    }
+    if (!ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_IK)) {
+        return;
+    }
+    switch (m_pParentTask->GetTaskType()) {
+    case TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING:
+    case TASK_COMPLEX_AVOID_ENTITY:
+        return;
+    }
+    const auto pedToTarget = m_TargetPt - ped->GetPosition();
+    const auto pedToTargetDistSq = pedToTarget.SquaredMagnitude();
+    if (pedToTargetDistSq <= sq(3.f)) {
+        return;
+    }
+    const auto pedToTargetDir = pedToTarget / std::sqrt(pedToTargetDistSq); // Normalize
+    if (ped->GetForward().Dot(pedToTargetDir) >= CTaskSimpleGoTo::ms_fLookAtThresholdDotProduct) {
+        return;
+    }
+    CVector lookAt = m_TargetPt + pedToTargetDir * 2.f;
+    lookAt.z += 0.61f;
+    g_ikChainMan.LookAt("TaskAvoidOthPed", ped, 0, 5000, BONE_UNKNOWN, &lookAt, false, 0.25f, 500, 3, false);
+    m_bDoingIK = true;
 }
 
 bool CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CPed* ped, const CColSphere& colSphere, PedsArray_t& pedsToCheck, PedsArray_t& pedsInSphere) {
