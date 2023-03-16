@@ -265,7 +265,8 @@ bool CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CPed* ped, cons
     return anyInSphere;
 }
 
-void CTaskComplexAvoidOtherPedWhileWandering::ComputeAvoidSphere(CPed* ped, CColSphere* colSphere) {
+// 0x672080
+void CTaskComplexAvoidOtherPedWhileWandering::ComputeAvoidSphere(CPed* ped, CColSphere& outSp) {
     PedsToAvoidArray pedsToCheck{};
     for (auto&& [i, entityToCheck] : notsa::enumerate(ped->GetIntelligence()->GetPedScanner().m_apEntities)) { // Can't use GetEntities<CPed>() because it filters null entries
         const auto pedToCheck = entityToCheck->AsPed();
@@ -275,9 +276,9 @@ void CTaskComplexAvoidOtherPedWhileWandering::ComputeAvoidSphere(CPed* ped, CCol
     }
 
     PedsToAvoidArray pedsInSphere{m_PedToAvoid};
-    CColSphere sp{ m_PedToAvoid->GetPosition(), 1.05f };
-    while (NearbyPedsInSphere(ped, sp, pedsToCheck, pedsInSphere)) {
-        sp = ComputeSphere(pedsInSphere);
+    outSp = CColSphere{ m_PedToAvoid->GetPosition(), 1.05f };
+    while (NearbyPedsInSphere(ped, outSp, pedsToCheck, pedsInSphere)) {
+        outSp = ComputeSphere(pedsInSphere);
     }
 }
 

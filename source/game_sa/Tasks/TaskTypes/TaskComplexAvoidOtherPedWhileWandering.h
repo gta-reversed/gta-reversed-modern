@@ -40,7 +40,7 @@ public:
 
     bool       NearbyPedsInSphere(CPed* ped, const CColSphere& colSphere, PedsToAvoidArray& pedsToCheck, PedsToAvoidArray& pedsInSphere);
     CColSphere ComputeSphere(PedsToAvoidArray& accountedPeds);
-    void       ComputeAvoidSphere(CPed* ped, CColSphere* colSphere);
+    void       ComputeAvoidSphere(CPed* ped, CColSphere& colSphere);
     bool       ComputeRouteRoundSphere(CPed* ped, CColSphere* colSphere);
     bool       ComputeDetourTarget(CPed* ped);
 
