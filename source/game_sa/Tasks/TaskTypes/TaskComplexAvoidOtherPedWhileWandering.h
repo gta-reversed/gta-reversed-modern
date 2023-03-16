@@ -7,6 +7,7 @@
 class CColSphere;
 
 class CTaskComplexAvoidOtherPedWhileWandering : public CTaskComplex {
+    using PedsToAvoidArray = std::array<CPed*, 16>;
 public:
     CPed*      m_PedToAvoid{};
     CVector    m_StartPt{};
@@ -35,11 +36,10 @@ public:
     CTask*    ControlSubTask(CPed* ped) override;
 
     void QuitIK(CPed* ped);
-    bool ComputeSphere(CColSphere* colSphere, CPed* ped);
+    bool ComputeSphere(CColSphere* colSphere, PedsToAvoidArray& accountedPeds);
     void SetUpIK(CPed* ped);
 
-    using PedsArray_t = std::array<CPed*, 16>;
-    bool NearbyPedsInSphere(CPed* ped, const CColSphere& colSphere, PedsArray_t& pedsToCheck, PedsArray_t& pedsInSphere);
+    bool NearbyPedsInSphere(CPed* ped, const CColSphere& colSphere, PedsToAvoidArray& pedsToCheck, PedsToAvoidArray& pedsInSphere);
     void ComputeAvoidSphere(CPed* ped, CColSphere* colSphere);
     bool ComputeRouteRoundSphere(CPed* ped, CColSphere* colSphere);
     bool ComputeDetourTarget(CPed* ped);

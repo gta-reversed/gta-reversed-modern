@@ -19,7 +19,7 @@ void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
     RH_ScopedInstall(ComputeRouteRoundSphere, 0x66A7B0, { .reversed = false });
     RH_ScopedInstall(SetUpIK, 0x66A850);
     RH_ScopedInstall(NearbyPedsInSphere, 0x671FE0);
-    RH_ScopedInstall(ComputeAvoidSphere, 0x672080, { .reversed = false });
+    RH_ScopedInstall(ComputeAvoidSphere, 0x672080);
     RH_ScopedInstall(ComputeDetourTarget, 0x672180, { .reversed = false });
 
     RH_ScopedVMTInstall(Clone, 0x66D050);
@@ -172,8 +172,8 @@ void CTaskComplexAvoidOtherPedWhileWandering::QuitIK(CPed* ped) {
     }
 }
 
-bool CTaskComplexAvoidOtherPedWhileWandering::ComputeSphere(CColSphere* colSphere, CPed* ped) {
-    return plugin::CallMethodAndReturn<uint8, 0x66A320, CTaskComplexAvoidOtherPedWhileWandering*, CColSphere*, CPed*>(this, colSphere, ped);
+bool CTaskComplexAvoidOtherPedWhileWandering::ComputeSphere(CColSphere* colSphere, PedsToAvoidArray& accountedPeds) {
+    return plugin::CallMethodAndReturn<uint8, 0x66A320, CTaskComplexAvoidOtherPedWhileWandering*, CColSphere*, PedsToAvoidArray&>(this, colSphere, accountedPeds);
 }
 
 void CTaskComplexAvoidOtherPedWhileWandering::SetUpIK(CPed* ped) {
@@ -213,9 +213,13 @@ void CTaskComplexAvoidOtherPedWhileWandering::SetUpIK(CPed* ped) {
     m_bDoingIK = true;
 }
 
-bool CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CPed* ped, const CColSphere& colSphere, PedsArray_t& pedsToCheck, PedsArray_t& pedsInSphere) {
+bool CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CPed* ped, const CColSphere& colSphere, PedsToAvoidArray& pedsToCheck, PedsToAvoidArray& pedsInSphere) {
     bool anyInSphere = false;
     for (auto&& [i, pedToCheck] : notsa::enumerate(pedsToCheck)) {
+        if (!pedToCheck) {
+            continue;
+        }
+
         if (!colSphere.IntersectSphere(CSphere{ pedToCheck->GetPosition(), 1.05f })) {
             continue;
         }
@@ -235,7 +239,19 @@ bool CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CPed* ped, cons
 }
 
 void CTaskComplexAvoidOtherPedWhileWandering::ComputeAvoidSphere(CPed* ped, CColSphere* colSphere) {
-    return plugin::CallMethod<0x672080, CTaskComplexAvoidOtherPedWhileWandering*, CPed*, CColSphere*>(this, ped, colSphere);
+    PedsToAvoidArray pedsToCheck{};
+    for (auto&& [i, entityToCheck] : notsa::enumerate(ped->GetIntelligence()->GetPedScanner().m_apEntities)) { // Can't use GetEntities<CPed>() because it filters null entries
+        const auto pedToCheck = entityToCheck->AsPed();
+        pedsToCheck[i] = pedToCheck != m_PedToAvoid && !CPedGroups::AreInSameGroup(ped, pedToCheck) // Inverted
+            ? pedToCheck
+            : nullptr;
+    }
+
+    PedsToAvoidArray pedsInSphere{m_PedToAvoid};
+    CColSphere sp{ m_PedToAvoid->GetPosition(), 1.05f };
+    while (NearbyPedsInSphere(ped, sp, pedsToCheck, pedsInSphere)) {
+        ComputeSphere(&sp, pedsInSphere);
+    }
 }
 
 bool CTaskComplexAvoidOtherPedWhileWandering::ComputeRouteRoundSphere(CPed* ped, CColSphere* colSphere) {
