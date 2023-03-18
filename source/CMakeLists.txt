@@ -65,6 +65,16 @@ target_link_libraries(${RE_PROJECT_LIB_NAME} PRIVATE
     imgui
     spdlog
 )
+if(WIN32) 
+    if(MSVC) # MSVC knows how to find dbghelp on it's own
+        target_link_libraries(${RE_PROJECT_LIB_NAME} PRIVATE
+            dbghelp
+        )
+    else()
+        message(FATAL_ERROR "Need to link dbghelp lib for win32")
+    endif()
+endif()
+
 target_include_directories(${RE_PROJECT_LIB_NAME} PRIVATE
     /
     toolsmenu/
