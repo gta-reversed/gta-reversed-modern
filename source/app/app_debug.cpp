@@ -84,7 +84,7 @@ LONG WINAPI WindowsExceptionHandler(PEXCEPTION_POINTERS pExceptionInfo) {
     SPDLOG_INFO("Exception Address: {:#010x}", (uintptr_t)pExceptionInfo->ExceptionRecord->ExceptionAddress);
 
     // Dump exception parameters
-    Section("PARAMTERS");
+    Section("PARAMETERS");
     {
         SPDLOG_INFO("Parameters[{}]:", pExceptionInfo->ExceptionRecord->NumberParameters);
         for (DWORD i = 0; i < pExceptionInfo->ExceptionRecord->NumberParameters; i++) {
