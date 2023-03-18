@@ -43,7 +43,7 @@ jobs:
                 shell: cmd
                 run: cmake --build build --config ${{ matrix.conf }}
 
-            - name: Doxygen Action
+            -   name: Doxygen Action
                 uses: mattnotmitt/doxygen-action@1.9.5
 
             -   name: Upload artifacts for ${{ matrix.conf }}-${{ matrix.arch }}
