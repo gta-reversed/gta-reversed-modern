@@ -30,7 +30,7 @@ function(supress_deps_warnings targets)
         )
     endforeach()
 endfunction()
-supress_deps_warnings(ogg imgui vorbisfile)
+supress_deps_warnings(ogg imgui vorbisfile spdlog)
 
 set_target_properties(${RE_PROJECT_LIB_NAME}
     PROPERTIES
@@ -63,6 +63,7 @@ target_link_libraries(${RE_PROJECT_LIB_NAME} PRIVATE
     ogg
     vorbisfile
     imgui
+    spdlog
 )
 target_include_directories(${RE_PROJECT_LIB_NAME} PRIVATE
     /
