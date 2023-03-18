@@ -10,8 +10,8 @@ set(OGG_FOUND 1)
 
 add_subdirectory(vorbis EXCLUDE_FROM_ALL)
 
-set(SPDLOG_ENABLE_PCH TRUE)
-set(SPDLOG_USE_STD_FORMAT TRUE)
+option(SPDLOG_ENABLE_PCH "" ON)
+option(SPDLOG_USE_STD_FORMAT "" ON)
 add_subdirectory(spdlog EXCLUDE_FROM_ALL)
 
 #############################################################################################
