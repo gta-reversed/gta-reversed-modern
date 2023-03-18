@@ -60,11 +60,11 @@ inline OpcodeResult CollectArgsAndCall(CRunningScript* S, eScriptCommands comman
 }
 
 //! Called for unimplemented commands
-//! These are commands that have no (special) code associated with them
+//! That is, ones that aren't used anywhere.
+//! If this ever gets called, that means that the command is used after all, and shouldn't be hooked as unimplemented.
 inline auto NotImplemented(eScriptCommands cmd) {
-#ifdef NOTSA_DEBUG
     DEV_LOG("Unimplemented command has been called! [ID: {:04X}; Name: {}]", (unsigned)(cmd), GetScriptCommandName(cmd));
-#endif
+    NOTSA_DEBUGBREAK(); // Something went horribly wrong here, and the game will crash after this, so better stop here.
     return OR_INTERRUPT; // Vanilla SA behavior
 }
 

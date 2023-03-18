@@ -206,7 +206,31 @@ void CRunningScript::RemoveScriptFromList(CRunningScript** queueList) {
  * @addr 0x465AA0
  */
 void CRunningScript::ShutdownThisScript() {
-    plugin::CallMethod<0x465AA0, CRunningScript*>(this);
+    return plugin::CallMethod<0x465AA0>(this);
+    /*
+    if (m_bIsExternal) {
+        const auto idx = CTheScripts::StreamedScripts.GetStreamedScriptWithThisStartAddress(m_pBaseIP);
+        CTheScripts::StreamedScripts.m_aScripts[idx].m_nStatus--;
+    }
+
+    switch (m_nExternalType) {
+    case 0:
+    case 2:
+    case 3:
+    case 5: {
+        const auto pedRef = m_bIsMission
+            ? CTheScripts::LocalVariablesForCurrentMission.front().iParam
+            : m_aLocalVars[0].iParam;
+        if (const auto ped = GetPedPool()->GetAtRef(pedRef)) {
+            ped->bHasAScriptBrain = false;
+            if (m_nExternalType == 5) {
+                CScriptedBrainTaskStore::SetTask(ped, new CTaskSimpleFinishBrain{});
+            }
+        }
+        break;
+    }
+    }
+    */
 }
 
 // 0x465C20
