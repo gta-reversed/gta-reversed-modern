@@ -6,7 +6,7 @@
 
 class CColSphere;
 
-class CTaskComplexAvoidOtherPedWhileWandering : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexAvoidOtherPedWhileWandering : public CTaskComplex {
     using PedsToAvoidArray = std::array<CPed*, 16>;
 public:
     CPed*      m_PedToAvoid{};
@@ -41,7 +41,7 @@ public:
     bool       NearbyPedsInSphere(CPed* ped, const CColSphere& colSphere, PedsToAvoidArray& pedsToCheck, PedsToAvoidArray& pedsInSphere);
     CColSphere ComputeSphere(PedsToAvoidArray& accountedPeds);
     void       ComputeAvoidSphere(CPed* ped, CColSphere& colSphere);
-    bool       ComputeRouteRoundSphere(CPed* ped, CColSphere* colSphere);
+    bool       ComputeRouteRoundSphere(CPed* ped, CColSphere& spToAvoid);
     bool       ComputeDetourTarget(CPed* ped);
 
 private:

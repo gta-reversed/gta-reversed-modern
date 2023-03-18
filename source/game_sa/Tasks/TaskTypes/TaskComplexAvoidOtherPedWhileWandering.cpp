@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
 #include <IKChainManager_c.h>
-
+#include <PedGeometryAnalyser.h>
 #include "TaskSimpleStandStill.h"
 #include "TaskComplexGangFollower.h"
 #include "TaskSimpleGoToPoint.h"
@@ -14,13 +14,13 @@ void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x66A100);
     RH_ScopedInstall(Destructor, 0x66A1D0);
 
-    RH_ScopedInstall(QuitIK, 0x66A230, { .reversed = false });
+    RH_ScopedInstall(QuitIK, 0x66A230);
     RH_ScopedInstall(ComputeSphere, 0x66A320);
     RH_ScopedInstall(ComputeRouteRoundSphere, 0x66A7B0);
     RH_ScopedInstall(SetUpIK, 0x66A850);
     RH_ScopedInstall(NearbyPedsInSphere, 0x671FE0);
     RH_ScopedInstall(ComputeAvoidSphere, 0x672080);
-    RH_ScopedInstall(ComputeDetourTarget, 0x672180, { .reversed = false });
+    RH_ScopedInstall(ComputeDetourTarget, 0x672180);
 
     RH_ScopedVMTInstall(Clone, 0x66D050);
     RH_ScopedVMTInstall(GetTaskType, 0x66A1C0);
@@ -130,6 +130,7 @@ CTask* CTaskComplexAvoidOtherPedWhileWandering::ControlSubTask(CPed* ped) {
     goto quitik_and_end;
 }
 
+// 0x66A260
 bool CTaskComplexAvoidOtherPedWhileWandering::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     const bool subTaskAborted = m_pSubTask->MakeAbortable(ped, priority, event);
     if (subTaskAborted) {
@@ -139,6 +140,7 @@ bool CTaskComplexAvoidOtherPedWhileWandering::MakeAbortable(CPed* ped, eAbortPri
     return subTaskAborted;
 }
 
+// 0x66A2C0
 CTask* CTaskComplexAvoidOtherPedWhileWandering::CreateNextSubTask(CPed* ped) {
     if (m_pSubTask->GetTaskType() == TASK_SIMPLE_STAND_STILL) {
         return m_pSubTask->AsComplex()->CreateFirstSubTask(ped);
@@ -148,13 +150,12 @@ CTask* CTaskComplexAvoidOtherPedWhileWandering::CreateNextSubTask(CPed* ped) {
     return nullptr;
 }
 
+// 0x674610
 CTask* CTaskComplexAvoidOtherPedWhileWandering::CreateFirstSubTask(CPed* ped) {
     if (m_PedToAvoid) {
         m_StartPt = ped->GetPosition();
 
-        CColSphere avoidSph;
-        ComputeAvoidSphere(ped, &avoidSph);
-        if (ComputeRouteRoundSphere(ped, &avoidSph)) {
+        if (ComputeDetourTarget(ped)) {
             ped->bIgnoreHeightCheckOnGotoPointTask = true;
             m_DontQuitYetTimer.Start(2000);
             return new CTaskSimpleGoToPoint{ m_MoveState, m_DetourTargetPt };
@@ -172,7 +173,8 @@ void CTaskComplexAvoidOtherPedWhileWandering::QuitIK(CPed* ped) {
     }
 }
 
-// Calculate minimum bounding sphere of all peds in `accountedPeds`
+//! Calculate minimum bounding sphere of all peds in `accountedPeds`
+// 0x66A320
 CColSphere CTaskComplexAvoidOtherPedWhileWandering::ComputeSphere(PedsToAvoidArray& accountedPeds) {
     // Step 1: Find center
     CVector center{};
@@ -203,6 +205,7 @@ CColSphere CTaskComplexAvoidOtherPedWhileWandering::ComputeSphere(PedsToAvoidArr
     return CSphere{ center, std::sqrt(maxDist2DSq) };
 }
 
+// 0x66A850
 void CTaskComplexAvoidOtherPedWhileWandering::SetUpIK(CPed* ped) {
     assert(ped);
     if (ped == FindPlayerPed() && !CPad::GetPad()->DisablePlayerControls) {
@@ -240,6 +243,9 @@ void CTaskComplexAvoidOtherPedWhileWandering::SetUpIK(CPed* ped) {
     m_bDoingIK = true;
 }
 
+// 0x671FE0
+//! Check if peds in `pedsToCheck` are in the sphere, if so, null out the entry in the latter, and insert into `pedsInSphere` at the first available index
+//! @returns If any peds were in the sphere
 bool CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CPed* ped, const CColSphere& colSphere, PedsToAvoidArray& pedsToCheck, PedsToAvoidArray& pedsInSphere) {
     bool anyInSphere = false;
     for (auto&& [i, pedToCheck] : notsa::enumerate(pedsToCheck)) {
@@ -251,7 +257,7 @@ bool CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CPed* ped, cons
             continue;
         }
 
-        // Find where to insert
+        // Find where to insert - NOTE: I don't think this can ever fail
         const auto insertAt = rng::find(pedsInSphere, nullptr);
         if (insertAt == pedsInSphere.end()) {
             return anyInSphere; // No space
@@ -282,12 +288,13 @@ void CTaskComplexAvoidOtherPedWhileWandering::ComputeAvoidSphere(CPed* ped, CCol
     }
 }
 
-bool CTaskComplexAvoidOtherPedWhileWandering::ComputeRouteRoundSphere(CPed* ped, CColSphere* colSphere) {
+// 0x66A7B0
+bool CTaskComplexAvoidOtherPedWhileWandering::ComputeRouteRoundSphere(CPed* ped, CColSphere& spToAvoid) {
     CVector start = m_StartPt, target = m_TargetPt;
-    start.z = target.z = colSphere->m_vecCenter.z = ped->GetPosition().z;
+    start.z = target.z = spToAvoid.m_vecCenter.z = ped->GetPosition().z; // NOTE: Changes sphere's center.z!
     return CPedGeometryAnalyser::ComputeRouteRoundSphere(
         *ped,
-        *colSphere,
+        spToAvoid,
         start,
         target,
         m_NewTargetPt,
@@ -295,6 +302,9 @@ bool CTaskComplexAvoidOtherPedWhileWandering::ComputeRouteRoundSphere(CPed* ped,
     );
 }
 
+// 0x672180
 bool CTaskComplexAvoidOtherPedWhileWandering::ComputeDetourTarget(CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x672180, CTaskComplexAvoidOtherPedWhileWandering*, CPed*>(this, ped);
+    CColSphere sp;
+    ComputeAvoidSphere(ped, sp);
+    return ComputeRouteRoundSphere(ped, sp);
 }
