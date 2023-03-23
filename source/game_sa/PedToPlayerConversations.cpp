@@ -28,12 +28,13 @@ void CPedToPlayerConversations::Clear() {
 
 // 0x43B0F0
 void CPedToPlayerConversations::Update() {
+    static auto& lastPedPoolIdx = StaticRef<int32, 0x969A3C>();
+    static auto& pLastVehicle = StaticRef<CVehicle*, 0x969A40>();
+
     if (const auto vehicle = FindPlayerVehicle()) {
         pLastVehicle = vehicle;
         CEntity::RegisterReference(pLastVehicle);
     }
-
-    static auto& lastPedPoolIdx = StaticRef<int32, 0x969A3C>();
 
     const auto player = FindPlayerPed();
     switch (m_State) {
@@ -62,6 +63,9 @@ void CPedToPlayerConversations::Update() {
 
             const auto &playerPos = player->GetPosition(), &pedPos = ped->GetPosition();
 
+            if (DistanceBetweenPoints(playerPos, pedPos) >= 7.0f)
+                continue;
+
             if (ped->GetForwardVector().Dot(playerPos - pedPos) <= 0.0f)
                 continue;
 
@@ -83,8 +87,7 @@ void CPedToPlayerConversations::Update() {
             };
 
             // shorthands, these were called from each topic's procedure.
-            const auto pedRequestsPlayerConversation = CAEPedSpeechAudioEntity::RequestPlayerConversation(ped);
-            if (!pedRequestsPlayerConversation) {
+            if (!CAEPedSpeechAudioEntity::RequestPlayerConversation(ped)) {
                 RandomPedTalk();
                 continue;
             }

@@ -28,6 +28,8 @@ struct CTempConversationNode {
             m_NameNodeNo[0] = '\0';
         }
     }
+
+    void ResolveYesNoNodes();
 };
 VALIDATE_SIZE(CTempConversationNode, 0x2C);
 

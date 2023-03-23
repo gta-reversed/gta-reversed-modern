@@ -35,17 +35,6 @@ void CConversations::Clear() {
     m_AwkwardSayStatus = AwkwardSayState::NOT_AVAILABLE;
 }
 
-// 0x43A870
-void CConversations::SetUpConversationNode(
-    const char* questionKey,
-    const char* answerYesKey,
-    const char* answerNoKey,
-    int32 questionWAV,
-    int32 answerYesWAV,
-    int32 answerNoWAV) {
-    plugin::Call<0x43A870, const char*, const char*, const char*, int32, int32, int32>(questionKey, answerYesKey, answerNoKey, questionWAV, answerYesWAV, answerNoWAV);
-}
-
 // 0x43A960
 void CConversations::RemoveConversationForPed(CPed* ped) {
     if (const auto conversation = FindConversationForPed(ped)) {
@@ -97,7 +86,7 @@ bool CConversations::IsPlayerInPositionForConversation(CPed* ped, bool isRandomC
 bool CConversations::IsConversationAtNode(char* nodeName, CPed* ped) {
     if (const auto conversation = FindConversationForPed(ped)) {
         assert(conversation->GetCurrentNode());
-        return !strcmp(MakeUpperCase(nodeName, nodeName), conversation->GetCurrentNode()->m_Name);
+        return !strcmp(MakeUpperCase(nodeName), conversation->GetCurrentNode()->m_Name);
     }
 
     return false;
@@ -119,10 +108,11 @@ void CConversations::DoneSettingUpConversation(bool suppressSubtitles) {
     rng::for_each(std::span{m_aNodes.data(), (size_t)m_SettingUpConversationNumNodes}, &CConversationNode::Clear);
 
     for (auto i = 0; i < m_SettingUpConversationNumNodes; i++) {
-              auto& node = m_aNodes[i];
-        const auto& tempNode = m_aTempNodes[i];
+        auto& node = m_aNodes[i];
+        auto& tempNode = m_aTempNodes[i];
 
         strcpy_s(node.m_Name, tempNode.m_Name);
+        tempNode.ResolveYesNoNodes();
 
         if (tempNode.m_NodeYes >= 0) {
             node.m_NodeYes = tempNode.m_NodeYes;
@@ -166,9 +156,9 @@ void CConversations::SetUpConversationNode(
     int32 speechN) {
     auto& currentTempNode = CConversations::m_aTempNodes[CConversations::m_SettingUpConversationNumNodes];
 
-    const auto CopyUpperCase = [](char* dest, const char* src) {
-        strncpy_s((char(&)[8])dest, src, 6u);
-        MakeUpperCase(dest, dest);
+    const auto CopyUpperCase = [](char(&dest)[8], const char* src) {
+        strncpy_s(dest, src, 6u);
+        MakeUpperCase(dest);
     };
 
     CopyUpperCase(currentTempNode.m_Name, name);
@@ -221,16 +211,12 @@ uint32 CConversations::FindFreeNodeSlot() {
 
 // 0x43A9E0
 CConversationForPed* CConversations::FindConversationForPed(CPed* ped) {
-    const auto conversation = rng::find_if(m_aConversations, [ped](auto& conv) { return conv.m_Ped == ped; });
-
-    return conversation != m_aConversations.end() ? &(*conversation) : nullptr;
+    return notsa::find_if_or_nullptr<CConversationForPed>(m_aConversations, [ped](auto& conv) { return conv.m_Ped == ped; });
 }
 
 // 0x43A9B0
 CConversationForPed* CConversations::FindFreeConversationSlot() {
-    const auto conversation = rng::find_if(m_aConversations, [](auto& conv) { return conv.m_Ped != nullptr; });
-
-    return conversation != m_aConversations.end() ? &(*conversation) : nullptr;
+    return notsa::find_if_or_nullptr<CConversationForPed>(m_aConversations, [](auto& conv) { return !conv.m_Ped; });
 }
 
 // 0x43AA80
@@ -240,4 +226,17 @@ eConversationForPedStatus CConversations::GetConversationStatus(CPed* ped) {
     }
     // Originally in this case game would derefecence a nullptr, accessing address `0x14`.
     NOTSA_UNREACHABLE("Couldn't find conversation for ped!");
+}
+
+// NOTSA
+void CTempConversationNode::ResolveYesNoNodes() {
+    for (auto&& [idx, tempNode] : notsa::enumerate(CConversations::m_aTempNodes)) {
+        if (m_NameNodeYes[0] != '\0' && !strcmp(m_NameNodeYes, tempNode.m_Name)) {
+            m_NodeYes = idx;
+        }
+
+        if (m_NameNodeNo[0] != '\0' && !strcmp(m_NameNodeNo, tempNode.m_Name)) {
+            m_NodeNo = idx;
+        }
+    }
 }

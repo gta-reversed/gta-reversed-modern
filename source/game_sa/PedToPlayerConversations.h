@@ -23,7 +23,6 @@ public:
     };
 
     static inline CPed*& m_pPed = *(CPed**)0x9691C0;
-    static inline CVehicle*& pLastVehicle = *(CVehicle**)0x969A40;
     static inline State& m_State = *(State*)0x969A20;
     static inline uint32& m_TimeOfLastPlayerConversation = *(uint32*)0x9691B4;
     static inline uint32& m_StartTime = *(uint32*)0x9691B8;
