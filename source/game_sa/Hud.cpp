@@ -301,7 +301,7 @@ void CHud::SetVehicleName(const char* name) {
 }
 
 // 0x588BB0
-void CHud::SetZoneName(char* name, bool displayImmediately) {
+void CHud::SetZoneName(const char* name, bool displayImmediately) {
     if (displayImmediately) {
         m_pZoneName = name;
         return;

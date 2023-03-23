@@ -275,7 +275,7 @@ CTaskSimpleThrowProjectile* CPedIntelligence::GetTaskThrow() {
 }
 
 // 0x600FF0
-CTask* CPedIntelligence::GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask) {
+CTaskSimpleHoldEntity* CPedIntelligence::GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask) {
     if (const auto task = CTask::DynCast<CTaskSimpleHoldEntity>(m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM))) {
         return task;
     }
@@ -283,7 +283,7 @@ CTask* CPedIntelligence::GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask) 
     if (!bIgnoreCheckingForSimplestActiveTask) {
         if (const auto task = m_TaskMgr.GetSimplestActiveTask()) {
             if (CTask::IsA<TASK_SIMPLE_PICKUP_ENTITY, TASK_SIMPLE_PUTDOWN_ENTITY>(task)) {
-                return task;
+                return static_cast<CTaskSimpleHoldEntity*>(task);
             }
         }
     }

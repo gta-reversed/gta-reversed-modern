@@ -501,9 +501,9 @@ void CPlantMgr::_ProcessEntryCollisionDataSections_AddLocTris(const CPlantColEnt
             const auto& tri = cd->m_pTriangles[i];
 
             CVector vertices[3];
-            cd->GetTrianglePoint(vertices[0], tri.m_nVertA);
-            cd->GetTrianglePoint(vertices[1], tri.m_nVertB);
-            cd->GetTrianglePoint(vertices[2], tri.m_nVertC);
+            cd->GetTrianglePoint(vertices[0], tri.vA);
+            cd->GetTrianglePoint(vertices[1], tri.vB);
+            cd->GetTrianglePoint(vertices[2], tri.vC);
 
             TransformPoints(vertices, 3, (RwMatrix&)entity->GetMatrix(), vertices);
 

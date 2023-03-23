@@ -100,7 +100,7 @@ public:
     void AddWheelSand(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness);
     void AddWheelDust(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness);
     void TriggerWaterHydrant(CVector& posn);
-    void TriggerGunshot(CEntity* entity, CVector& origin, CVector& target, bool doGunflash);
+    void TriggerGunshot(CEntity* entity, const CVector& origin, const CVector& target, bool doGunflash);
     void TriggerTankFire(CVector& origin, CVector& target);
     void TriggerWaterSplash(CVector& posn);
     void TriggerBulletSplash(CVector& posn);

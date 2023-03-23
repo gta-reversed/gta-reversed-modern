@@ -22,9 +22,9 @@ class CRect {
 public:
     // Init in flipped state
     float left      =  1000000.0F; // x1
-    float top       = -1000000.0F; // y2
+    float top       = -1000000.0F; // y1
     float right     = -1000000.0F; // x2
-    float bottom    =  1000000.0F; // y1
+    float bottom    =  1000000.0F; // y2
 
 public:
     static void InjectHooks();
@@ -64,6 +64,9 @@ public:
     void GetCenter(float* x, float* y) const;
     [[nodiscard]] inline CVector2D GetCenter() const { return { (right + left) * 0.5F, (bottom + top) * 0.5F }; }
     void StretchToPoint(float x, float y);
+
+    CVector2D GetTopLeft() const { return { left, top }; }
+    CVector2D GetBottomRight() const { return { right, bottom }; }
 
     /*!
     * @addr notsa

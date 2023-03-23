@@ -222,6 +222,17 @@ public:
 
     /*!
     * @notsa
+    * @brief Check if the simplest active task is any of the given types
+    */
+    bool IsSimplestActiveTaskOfType(std::initializer_list<eTaskType> types) {
+        if (const auto task = GetSimplestActiveTask()) {
+            return notsa::contains(types, task->GetTaskType());
+        }
+        return false;
+    }
+
+    /*!
+    * @notsa
     * @brief Find an active task from the give types and return the first one.
     */
     template<eTaskType... Ts>
@@ -236,7 +247,8 @@ public:
     * @brief Find an active task from the given types and return the first one.
     */
     template<Task... Ts>
-    auto Find() requires(sizeof...(Ts) > 1) { // Only use this overload if there's more than 1 Task
+        requires(sizeof...(Ts) > 1)
+    auto Find() {
         return Find<Ts::Type...>();
     }
 

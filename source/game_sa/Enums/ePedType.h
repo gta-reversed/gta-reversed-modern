@@ -63,6 +63,15 @@ static constexpr bool IsPedTypeGang(ePedType ptype) {
     return std::ranges::find(s_GangPedTypes, ptype) != s_GangPedTypes.end();
 }
 
+inline bool IsPedTypeFemale(ePedType type) {
+    switch (type) {
+    case PED_TYPE_PROSTITUTE:
+    case PED_TYPE_CIVFEMALE:
+        return true;
+    }
+    return false;
+}
+
 static constexpr auto GetAllGangPedTypes() {
     return std::array{
         PED_TYPE_GANG1,

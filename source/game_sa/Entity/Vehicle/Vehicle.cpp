@@ -333,8 +333,8 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     field_511 = 0;
     field_512 = 0;
     m_comedyControlState = eComedyControlState::INACTIVE;
-    m_FrontCollPoly.m_bIsActual = false;
-    m_RearCollPoly.m_bIsActual = false;
+    m_FrontCollPoly.valid = false;
+    m_RearCollPoly.valid = false;
     m_pHandlingData = nullptr;
     m_nHandlingFlagsIntValue = static_cast<eVehicleHandlingFlags>(0);
     m_autoPilot.m_nCarMission = MISSION_NONE;
@@ -1238,11 +1238,11 @@ void CVehicle::SetCollisionLighting(tColLighting lighting) {
 
 // 0x6D0CC0
 void CVehicle::UpdateLightingFromStoredPolys() {
-    m_anCollisionLighting[0] = m_FrontCollPoly.m_nLighting;
-    m_anCollisionLighting[1] = m_FrontCollPoly.m_nLighting;
+    m_anCollisionLighting[0] = m_FrontCollPoly.ligthing;
+    m_anCollisionLighting[1] = m_FrontCollPoly.ligthing;
 
-    m_anCollisionLighting[2] = m_RearCollPoly.m_nLighting;
-    m_anCollisionLighting[3] = m_RearCollPoly.m_nLighting;
+    m_anCollisionLighting[2] = m_RearCollPoly.ligthing;
+    m_anCollisionLighting[3] = m_RearCollPoly.ligthing;
 }
 
 // 0x6D0CF0
@@ -3326,7 +3326,7 @@ void CVehicle::KillPedsGettingInVehicle() {
         }
 
         if (const auto task = static_cast<CTaskComplexEnterCar*>(ped.GetTaskManager().Find<CTaskComplexEnterCarAsPassenger, CTaskComplexEnterCarAsDriver>());
-            !task || task->m_pTargetVehicle != this
+            !task || task->m_car != this
         ) {
             continue;
         }

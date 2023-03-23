@@ -26,7 +26,7 @@ public:
     CAnimBlendAssociation*       CopyAnimation(uint32 ID);
     void                         CreateAssociations(const char* szBlockName);
     void                         CreateAssociations(const char* AnimName, RpClump* clump, char** arg3, int32 NumAnimations);
-    void                         CreateAssociations(const char* AnimName, const char* arg2, const char* arg3, int32 arg4);
+    void                         CreateAssociations(const char* AnimName, const char* arg2, const char* arg3, uint32 arg4);
     void                         DestroyAssociations();
     CAnimBlendStaticAssociation* GetAnimation(const char* AnimName);
     CAnimBlendStaticAssociation* GetAnimation(uint32 ID);

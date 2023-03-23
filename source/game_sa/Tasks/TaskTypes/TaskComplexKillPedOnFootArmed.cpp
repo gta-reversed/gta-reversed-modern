@@ -89,7 +89,7 @@ bool CTaskComplexKillPedOnFootArmed::LineOfSightClearForAttack(CPed* ped) { // p
     // Temporarily disable the target ped vehicle's collision (To ignore it)
     // Perhaps, `CWorld::pIgnoreEntity` could be used?
     const auto targetVeh = m_target->GetVehicleIfInOne();
-    const notsa::AutoCallOnDestruct restore{[targetVeh, had = targetVeh && targetVeh->m_bUsesCollision] {
+    const notsa::ScopeGuard restore{[targetVeh, had = targetVeh && targetVeh->m_bUsesCollision] {
         if (targetVeh) {
             targetVeh->m_bUsesCollision = had;
         }
@@ -291,7 +291,7 @@ CTask* CTaskComplexKillPedOnFootArmed::ControlSubTask(CPed* ped) {
     ) {
         if (   m_duckingConditions & 1
             && m_bShotFiredByPlayer
-            && CGeneral::RandomBool(m_duckChancePerc)
+            && CGeneral::RandomBool((float)m_duckChancePerc)
         ) {
             if (const auto quack = ped->GetIntelligence()->GetTaskDuck()) {
                 quack->SetDuckTimer((uint16)m_lengthOfDuck);
@@ -303,7 +303,7 @@ CTask* CTaskComplexKillPedOnFootArmed::ControlSubTask(CPed* ped) {
             }
         }
     } else {
-        if (CGeneral::RandomBool(m_duckChancePerc)) {
+        if (CGeneral::RandomBool((float)m_duckChancePerc)) {
             if (targetToOurPedDistSq <= sq(20.f)) {
                 ped->GetIntelligence()->SetTaskDuckSecondary((uint16)m_lengthOfDuck);
             }

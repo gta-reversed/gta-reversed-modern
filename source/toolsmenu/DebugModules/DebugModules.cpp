@@ -22,6 +22,7 @@
 #include "./TextDebugModule.h"
 #include "./Spawner/SpawnerDebugModule.hpp"
 #include "./ImGuiDebugModule.hpp"
+#include "./ScriptDebugModule.hpp"
 
 DebugModules::DebugModules(ImGuiContext* ctx) :
     m_ImCtx(ctx)
@@ -79,6 +80,7 @@ void DebugModules::CreateModules() {
     Add<PoliceScannerAudioEntityDebugModule>();
     Add<AmbienceTrackManagerDebugModule>();
     Add<CutsceneTrackManagerDebugModule>();
+    Add<notsa::debugmodules::ScriptDebugModule>();
 
     // Stuff that is present in multiple menus
     Add<TimeCycleDebugModule>(); // Visualization + Extra
