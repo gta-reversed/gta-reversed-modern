@@ -14,8 +14,8 @@ void CLodAtomicModelInfo::InjectHooks()
 
 CLodAtomicModelInfo::CLodAtomicModelInfo() : CAtomicModelInfo()
 {
-    numChildren = 0;
-    numChildrenRendered = 0;
+    m_numChildren = 0;
+    m_numChildrenRendered = 0;
 }
 
 CLodAtomicModelInfo* CLodAtomicModelInfo::AsLodAtomicModelInfoPtr()

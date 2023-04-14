@@ -4,8 +4,8 @@
 
 class NOTSA_EXPORT_VTABLE CLodAtomicModelInfo : public CAtomicModelInfo {
 public:
-    int16 numChildren;
-    int16 numChildrenRendered;
+    int16 m_numChildren;
+    int16 m_numChildrenRendered;
 
 public:
     CLodAtomicModelInfo();
