@@ -19,7 +19,7 @@
 #include "TaskComplexEnterCarAsDriver.h"
 #include "TaskComplexEnterCarAsPassenger.h"
 
-#define NOTSA_VANILLA_COLLISIONS
+#define NOTSA_VANILLA_COLLISIONS // TODO: move to config.h?
 
 using Shape = CCollision::DebugSettings::ShapeShapeCollision::Shape;
 
@@ -3058,10 +3058,12 @@ bool CCollision::SphereVsEntity(CColSphere* sphere, CEntity* entity) {
 }
 
 void CCollision::InjectHooks() {
-    // Must be done be4 hooks are injected
+#ifdef TEST_COLLISION_FUNCS
+    // Must be done before hooks are injected
     for (auto i = 0; i < 20; i++) {
        Tests(i);
     }
+#endif
 
     RH_ScopedClass(CCollision);
     RH_ScopedCategoryGlobal();
@@ -3147,6 +3149,7 @@ void CCollision::InjectHooks() {
 }
 
 void CCollision::Tests(int32 i) {
+#ifdef TEST_COLLISION_FUNCS
     const auto seed = (uint32)time(nullptr) + i;
     srand(seed);
     std::cout << "CCollision::Tests seed: " << seed << std::endl;
@@ -3479,4 +3482,5 @@ void CCollision::Tests(int32 i) {
 
         Test("ProcessLineBox", Org, Rev, CmpEq, RandomLine(), RandomBox());
     }*/
+#endif
 }

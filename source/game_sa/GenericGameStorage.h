@@ -181,7 +181,7 @@ static void SaveMultipleDataToWorkBuffer(Ts&&... data) {
 template<uint32 ExpectedSize, bool HasSizeHeader = true, typename... Ts>
 static void LoadMultipleDataFromWorkBuffer(Ts*... out) {
     if constexpr (HasSizeHeader) { // Verify size header
-        const auto size = LoadDataFromWorkBuffer<uint32, false>();
+        const auto size = LoadDataFromWorkBuffer<uint32>();
         assert(size == ExpectedSize);
     }
     (CGenericGameStorage::LoadDataFromWorkBuffer((void*)out, sizeof(Ts)), ...); // And now load all data
