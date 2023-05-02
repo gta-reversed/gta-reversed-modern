@@ -566,8 +566,8 @@ void CEntryExit::RequestObjectsInFrustum() const {
 }
 
 // 0x43F1F0
-void CEntryExit::WarpGangWithPlayer(CPlayerPed* plyr) {
-    auto& grp = plyr->GetPlayerGroup();
+void CEntryExit::WarpGangWithPlayer(CPlayerPed* player) {
+    auto& grp = player->GetPlayerGroup();
     
     if (!grp.IsActive()) {
         return;
@@ -575,16 +575,16 @@ void CEntryExit::WarpGangWithPlayer(CPlayerPed* plyr) {
 
     auto& ms = grp.GetMembership();
 
-    if (!ms.IsLeader(plyr)) {
+    if (!ms.IsLeader(player)) {
         return;
     }
 
-    const auto& plyrPos = plyr->GetPosition();
+    const auto& plyrPos = player->GetPosition();
     const auto& offsets = CTaskComplexFollowLeaderInFormation::ms_offsets.offsets;
 
     size_t offsetIdx = 0;
     for (auto & mem : ms.GetMembers()) {
-        if (&mem == plyr) {
+        if (&mem == player) {
             continue;
         }
         const auto& memPos = mem.GetPosition();
@@ -609,8 +609,8 @@ void CEntryExit::WarpGangWithPlayer(CPlayerPed* plyr) {
         // Make the member be heading towards the player
         mem.m_fCurrentRotation = mem.m_fAimingRotation = memHeading;
         mem.SetHeading(memHeading);
-        mem.m_nAreaCode = plyr->m_nAreaCode;
-        mem.m_pEnex = plyr->m_pEnex;
+        mem.m_nAreaCode = player->m_nAreaCode;
+        mem.m_pEnex = player->m_pEnex;
     }
 }
 
