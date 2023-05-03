@@ -79,15 +79,16 @@ concept PooledType =
 };
 
 namespace detail {
+//! Check if the type is an integer type excluding bool and character types.
+template<typename T>
+inline constexpr bool is_standard_integer = std::is_integral_v<T> && !is_any_of_type_v<T, bool, char, wchar_t, char8_t, char16_t, char32_t>;
+
 //! Safely cast one arithmetic type to another (Checks for under/overflow in debug mode only), then casts to `T`
 template<typename T, typename F>
 inline T safe_arithmetic_cast(F value) {
 #ifdef NOTSA_DEBUG
-    if constexpr (std::numeric_limits<F>::lowest() < std::numeric_limits<T>::lowest()) { // Underflow
-        assert(value >= static_cast<F>(std::numeric_limits<T>::lowest())); 
-    }
-    if constexpr (std::numeric_limits<F>::max() >= std::numeric_limits<T>::max()) { // Overflow
-        assert(value <= static_cast<F>(std::numeric_limits<T>::max())); 
+    if constexpr (is_standard_integer<T> && is_standard_integer<F>) {
+        assert(std::in_range<T>(value));
     }
 #endif
     return static_cast<T>(value); // In release mode just a simple, regular cast
