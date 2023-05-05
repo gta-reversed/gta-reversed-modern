@@ -13,7 +13,7 @@ CAERadioTrackManager& AERadioTrackManager = *(CAERadioTrackManager*)0x8CB6F8;
 int32 (&CAERadioTrackManager::m_nDJBanterIndexHistory)[DJBANTER_INDEX_HISTORY_COUNT][RADIO_COUNT] = *(int32(*)[DJBANTER_INDEX_HISTORY_COUNT][RADIO_COUNT])0xB61D78;
 int32 (&CAERadioTrackManager::m_nAdvertIndexHistory)[ADVERT_INDEX_HISTORY_COUNT][RADIO_COUNT] = *(int32(*)[ADVERT_INDEX_HISTORY_COUNT][RADIO_COUNT])0xB620C0;
 int32 (&CAERadioTrackManager::m_nIdentIndexHistory)[IDENT_INDEX_HISTORY_COUNT][RADIO_COUNT] = *(int32(*)[IDENT_INDEX_HISTORY_COUNT][RADIO_COUNT])0xB62980;
-int8 (&CAERadioTrackManager::m_nMusicTrackIndexHistory)[220] = *(int8(*)[220])0xB62B40;
+tMusicTrackHistory (&CAERadioTrackManager::m_nMusicTrackIndexHistory)[RADIO_COUNT] = *(tMusicTrackHistory(*)[RADIO_COUNT])0xB62B40;
 
 uint8& CAERadioTrackManager::m_nStatsLastHitTimeOutHours = *(uint8*)0xB62C58;
 uint8& CAERadioTrackManager::m_nStatsLastHitGameClockHours = *(uint8*)0xB62C59;
@@ -96,6 +96,25 @@ void CAERadioTrackManager::InjectHooks() {
 // 0x5B9390
 bool CAERadioTrackManager::Initialise(int32 channelId) {
     return plugin::CallMethodAndReturn<bool, 0x5B9390, CAERadioTrackManager*, int32>(this, channelId);
+
+    *this = CAERadioTrackManager{};
+
+    m_nChannel = channelId;
+    // NOTSA: SA gets the list via CStats::GetFullFavoriteRadioStationList() but this way is much more clear.
+    rng::copy(CStats::FavoriteRadioStationList, m_aListenTimes);
+
+    for (auto i = 0u; i < RADIO_COUNT; i++) {
+        rng::fill(m_nMusicTrackIndexHistory[i].historyIndices, -1);
+        rng::fill(m_nDJBanterIndexHistory[i], -1);
+        rng::fill(m_nAdvertIndexHistory[i], -1);
+        rng::fill(m_nIdentIndexHistory[i], -1);
+    }
+
+    // [1st radio, off]
+    settings1 = settings2 = tRadioSettings{CAEAudioUtility::GetRandomNumberInRange(0, RADIO_COUNT - 1)};
+
+    *(uint32*)&m_iRadioStationMenuRequest = -1; // TODO: make sense of this.
+    m_nUserTrackPlayMode = AEUserRadioTrackManager.GetUserTrackPlayMode();
 }
 
 // 0x4E8330

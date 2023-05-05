@@ -18,21 +18,27 @@ enum {
 };
 
 struct tRadioSettings {
-    int32 m_aTrackQueue[5];
-    int32 m_iCurrentTrackID;
-    int32 m_iPrevTrackID;
-    int32 m_iTrackPlayTime;
-    int32 m_iTrackLengthMs;
-    int8  m_f24;
-    int8  m_nCurrentRadioStation;
-    int8  m_nBassSet;
-    float m_fBassGain;
-    int8  m_aTrackTypes[5];
-    int8  m_iCurrentTrackType;
-    int8  m_iPrevTrackType;
-    int8  m_aTrackIndexes[5];
-    int8  m_iCurrentTrackIndex;
-    int8  m_iPrevTrackIndex;
+    static constexpr size_t NUM_TRACKS = 5u;
+
+    int32 m_aTrackQueue[NUM_TRACKS]{-1};
+    int32 m_iCurrentTrackID{-1};
+    int32 m_iPrevTrackID{-1};
+    int32 m_iTrackPlayTime{0};
+    int32 m_iTrackLengthMs{0};
+    int8  m_f24{2}; // TODO: enum
+    int8  m_nCurrentRadioStation{RADIO_OFF}; // NOTSA init value.
+    int8  m_nBassSet{0};
+    float m_fBassGain{}; // unk. init
+    int8  m_aTrackTypes[NUM_TRACKS]{TYPE_NONE};
+    int8  m_iCurrentTrackType{TYPE_NONE};
+    int8  m_iPrevTrackType{TYPE_NONE};
+    int8  m_aTrackIndexes[NUM_TRACKS]{-1};
+    int8  m_iCurrentTrackIndex{-1};
+    int8  m_iPrevTrackIndex{-1};
+
+    tRadioSettings(int32 currentStation = RADIO_OFF)
+        : m_nCurrentRadioStation(currentStation)
+    {}
 
     void Reset() {
         for (auto i = 0u; i < std::size(m_aTrackQueue); i++) {
@@ -42,61 +48,60 @@ struct tRadioSettings {
         }
     }
 };
-
 VALIDATE_SIZE(tRadioSettings, 0x3C);
 
 struct tRadioState {
-    int32 m_aElapsed[3];
-    int32 m_iTimeInPauseModeInMs;
-    int32 m_iTimeInMs;
-    int32 m_iTrackPlayTime;
-    int32 m_aTrackQueue[3];
-    int8  m_aTrackTypes[3];
-    uint8 m_nGameClockDays;
-    uint8 m_nGameClockHours;
+    int32 m_aElapsed[3]{0};
+    int32 m_iTimeInPauseModeInMs{-1};
+    int32 m_iTimeInMs{-1};
+    int32 m_iTrackPlayTime{-1};
+    int32 m_aTrackQueue[3]{-1};
+    int8 m_aTrackTypes[3]{TYPE_NONE};
+    int8 m_nGameClockDays{-1};
+    int8 m_nGameClockHours{-1};
 };
-
 VALIDATE_SIZE(tRadioState, 0x2C);
 
 struct tMusicTrackHistory {
-    int8 historyIndices[20];
+    int32 historyIndices[5];
 };
+VALIDATE_SIZE(tMusicTrackHistory, 0x14);
 
 typedef int8 RadioStationId;
 
 class CAERadioTrackManager {
 public:
-    bool           m_bInitialised;
-    bool           m_bDisplayStationName;
-    char           m_prev;
-    bool           m_bEnabledInPauseMode;
-    bool           m_bBassEnhance;
-    bool           m_bPauseMode;
-    bool           m_bRetuneJustStarted;
-    bool           m_bRadioAutoSelect;
-    uint8          m_nTracksInARow[RADIO_COUNT];
-    uint8          m_nSavedGameClockDays;
-    uint8          m_nSavedGameClockHours;
+    bool           m_bInitialised{false};
+    bool           m_bDisplayStationName{false};
+    char           m_prev{0}; // TODO: make sense of this.
+    bool           m_bEnabledInPauseMode{false};
+    bool           m_bBassEnhance{true};
+    bool           m_bPauseMode{false};
+    bool           m_bRetuneJustStarted{false};
+    bool           m_bRadioAutoSelect{true};
+    uint8          m_nTracksInARow[RADIO_COUNT]{0};
+    uint8          m_nSavedGameClockDays{0};
+    uint8          m_nSavedGameClockHours{0};
     int32          m_aListenTimes[RADIO_COUNT];
-    uint32         m_nTimeRadioStationRetuned;
-    uint32         m_nTimeToDisplayRadioName;
-    uint32         m_nSavedTimeMs;
+    uint32         m_nTimeRadioStationRetuned{0};
+    uint32         m_nTimeToDisplayRadioName{0};
+    uint32         m_nSavedTimeMs{0};
     uint32         m_nRetuneStartedTime;
-    uint32         field_60;
+    uint32         field_60{0};
     int32          m_nChannel;
-    int32          m_nMode;
-    int32          m_nStationsListed;
-    int32          m_nStationsListDown;
-    int32          m_nSavedRadioStationId;
+    int32          m_nMode{7}; // TODO: enum
+    int32          m_nStationsListed{0};
+    int32          m_nStationsListDown{0};
+    int32          m_nSavedRadioStationId{-1};
     int8           m_iRadioStationMenuRequest;
     int8           m_iRadioStationRequest;
     int32          field_7C;
-    float          m_f80; // 80 and 84 volume related fields. See ::UpdateRadioVolumes
-    float          m_f84;
+    float          m_f80{0.0f}; // 80 and 84 volume related fields. See ::UpdateRadioVolumes
+    float          m_f84{0.0f};
     tRadioSettings settings1; // TODO: Maybe just make an array out of this??
     tRadioSettings settings2;
-    tRadioState    m_aRadioState[RADIO_COUNT];
-    uint32         field_368;
+    tRadioState    m_aRadioState[RADIO_COUNT]{};
+    uint32         field_368{0};
     int8           m_nUserTrackPlayMode;
 
 public:
@@ -107,40 +112,41 @@ public:
     static int32 (&m_nDJBanterIndexHistory)  [DJBANTER_INDEX_HISTORY_COUNT][RADIO_COUNT]; // 210
     static int32 (&m_nAdvertIndexHistory)    [ADVERT_INDEX_HISTORY_COUNT][RADIO_COUNT];   // 560
     static int32 (&m_nIdentIndexHistory)     [IDENT_INDEX_HISTORY_COUNT][RADIO_COUNT];    // 112
-    static int8  (&m_nMusicTrackIndexHistory)[220];             // 220;
+    static tMusicTrackHistory (&m_nMusicTrackIndexHistory)[RADIO_COUNT];                  // 280
 
-    static uint8& m_nStatsLastHitTimeOutHours;
-    static uint8& m_nStatsLastHitGameClockHours;
-    static uint8& m_nStatsLastHitGameClockDays;
-    static uint8& m_nStatsStartedCrash1;
-    static uint8& m_nStatsStartedCat2;
-    static uint8& m_nStatsStartedBadlands;
-    static uint8& m_nStatsPassedVCrash2;
-    static uint8& m_nStatsPassedTruth2;
-    static uint8& m_nStatsPassedSweet2;
-    static uint8& m_nStatsPassedStrap4;
-    static uint8& m_nStatsPassedSCrash1;
-    static uint8& m_nStatsPassedRiot1;
-    static uint8& m_nStatsPassedRyder2;
-    static uint8& m_nStatsPassedMansion2;
-    static uint8& m_nStatsPassedLAFin2;
-    static uint8& m_nStatsPassedFarlie3;
-    static uint8& m_nStatsPassedDesert10;
-    static uint8& m_nStatsPassedDesert8;
-    static uint8& m_nStatsPassedDesert5;
-    static uint8& m_nStatsPassedDesert3;
-    static uint8& m_nStatsPassedDesert1;
-    static uint8& m_nStatsPassedCat1;
-    static uint8& m_nStatsPassedCasino10;
-    static uint8& m_nStatsPassedCasino6;
-    static uint8& m_nStatsPassedCasino3;
-    static uint8& m_nStatsCitiesPassed;
-    static uint8& m_nSpecialDJBanterIndex;
-    static uint8& m_nSpecialDJBanterPending;
+    static uint8& m_nStatsLastHitTimeOutHours;   // = -1;
+    static uint8& m_nStatsLastHitGameClockHours; // = -1;
+    static uint8& m_nStatsLastHitGameClockDays;  // = -1;
+    static uint8& m_nStatsStartedCrash1;         // = 0;
+    static uint8& m_nStatsStartedCat2;           // = 0;
+    static uint8& m_nStatsStartedBadlands;       // = 0;
+    static uint8& m_nStatsPassedVCrash2;         // = 0;
+    static uint8& m_nStatsPassedTruth2;          // = 0;
+    static uint8& m_nStatsPassedSweet2;          // = 0;
+    static uint8& m_nStatsPassedStrap4;          // = 0;
+    static uint8& m_nStatsPassedSCrash1;         // = 0;
+    static uint8& m_nStatsPassedRiot1;           // = 0;
+    static uint8& m_nStatsPassedRyder2;          // = 0;
+    static uint8& m_nStatsPassedMansion2;        // = 0;
+    static uint8& m_nStatsPassedLAFin2;          // = 0;
+    static uint8& m_nStatsPassedFarlie3;         // = 0;
+    static uint8& m_nStatsPassedDesert10;        // = 0;
+    static uint8& m_nStatsPassedDesert8;         // = 0;
+    static uint8& m_nStatsPassedDesert5;         // = 0;
+    static uint8& m_nStatsPassedDesert3;         // = 0;
+    static uint8& m_nStatsPassedDesert1;         // = 0;
+    static uint8& m_nStatsPassedCat1;            // = 0;
+    static uint8& m_nStatsPassedCasino10;        // = 0;
+    static uint8& m_nStatsPassedCasino6;         // = 0;
+    static uint8& m_nStatsPassedCasino3;         // = 0;
+    static uint8& m_nStatsCitiesPassed;          // = 0;
+    static uint8& m_nSpecialDJBanterIndex;       // = -1;
+    static uint8& m_nSpecialDJBanterPending;     // = 3; // ?
 
 public:
     static void InjectHooks();
 
+    CAERadioTrackManager() = default; // NOTSA
     ~CAERadioTrackManager() = default;
 
     bool Initialise(int32 channelId);
@@ -198,7 +204,6 @@ protected:
     bool QueueUpTracksForStation(RadioStationId id, int8* iTrackCount, int8 radioState, tRadioSettings* settings);
     bool TrackRadioStation(RadioStationId id, uint8 a2);
 };
-
 VALIDATE_SIZE(CAERadioTrackManager, 0x370);
 
 extern CAERadioTrackManager& AERadioTrackManager;
