@@ -62,12 +62,35 @@ struct tRadioState {
 };
 VALIDATE_SIZE(tRadioState, 0x2C);
 
-struct tMusicTrackHistory {
-    int32 historyIndices[5];
-};
-VALIDATE_SIZE(tMusicTrackHistory, 0x14);
-
 typedef int8 RadioStationId;
+
+// NOTSA
+template<size_t Count>
+struct tRadioIndexHistory {
+    std::array<int32, Count> indices{-1};
+
+    void Reset() {
+        rng::fill(indices, -1);
+    }
+
+    void PutAtFirst(int32 index) {
+        if (indices[0] == index)
+            return;
+
+        if constexpr (Count > 1) {
+            // rotate all elements to right.
+            std::rotate(indices.rbegin(), indices.rbegin() + 1, indices.rend());
+        }
+        indices[0] = index;
+    }
+};
+VALIDATE_SIZE(tRadioIndexHistory<1>, 0x04);
+
+//struct tMusicTrackHistory {
+//    int32 historyIndices[5];
+//};
+using tMusicTrackHistory = tRadioIndexHistory<5>;
+VALIDATE_SIZE(tMusicTrackHistory, 0x14);
 
 class CAERadioTrackManager {
 public:
@@ -108,11 +131,14 @@ public:
     static constexpr auto DJBANTER_INDEX_HISTORY_COUNT = 15;
     static constexpr auto ADVERT_INDEX_HISTORY_COUNT   = 40;
     static constexpr auto IDENT_INDEX_HISTORY_COUNT    = 8;
+    using DJBanterIndexHistory = tRadioIndexHistory<DJBANTER_INDEX_HISTORY_COUNT>;
+    using AdvertIndexHistory   = tRadioIndexHistory<ADVERT_INDEX_HISTORY_COUNT>;
+    using IdentIndexHistory    = tRadioIndexHistory<IDENT_INDEX_HISTORY_COUNT>;
 
-    static int32 (&m_nDJBanterIndexHistory)  [DJBANTER_INDEX_HISTORY_COUNT][RADIO_COUNT]; // 210
-    static int32 (&m_nAdvertIndexHistory)    [ADVERT_INDEX_HISTORY_COUNT][RADIO_COUNT];   // 560
-    static int32 (&m_nIdentIndexHistory)     [IDENT_INDEX_HISTORY_COUNT][RADIO_COUNT];    // 112
-    static tMusicTrackHistory (&m_nMusicTrackIndexHistory)[RADIO_COUNT];                  // 280
+    static inline DJBanterIndexHistory (&m_nDJBanterIndexHistory)[RADIO_COUNT] = *(DJBanterIndexHistory(*)[RADIO_COUNT])0xB61D78; // 210
+    static inline AdvertIndexHistory (&m_nAdvertIndexHistory)[RADIO_COUNT] = *(AdvertIndexHistory(*)[RADIO_COUNT])0xB620C0;       // 560
+    static inline IdentIndexHistory (&m_nIdentIndexHistory)[RADIO_COUNT] = *(IdentIndexHistory(*)[RADIO_COUNT])0xB62980;          // 112
+    static inline tMusicTrackHistory (&m_nMusicTrackIndexHistory)[RADIO_COUNT] = *(tMusicTrackHistory(*)[RADIO_COUNT])0xB62B40;   // 280
 
     static uint8& m_nStatsLastHitTimeOutHours;   // = -1;
     static uint8& m_nStatsLastHitGameClockHours; // = -1;

@@ -10,11 +10,6 @@
 
 CAERadioTrackManager& AERadioTrackManager = *(CAERadioTrackManager*)0x8CB6F8;
 
-int32 (&CAERadioTrackManager::m_nDJBanterIndexHistory)[DJBANTER_INDEX_HISTORY_COUNT][RADIO_COUNT] = *(int32(*)[DJBANTER_INDEX_HISTORY_COUNT][RADIO_COUNT])0xB61D78;
-int32 (&CAERadioTrackManager::m_nAdvertIndexHistory)[ADVERT_INDEX_HISTORY_COUNT][RADIO_COUNT] = *(int32(*)[ADVERT_INDEX_HISTORY_COUNT][RADIO_COUNT])0xB620C0;
-int32 (&CAERadioTrackManager::m_nIdentIndexHistory)[IDENT_INDEX_HISTORY_COUNT][RADIO_COUNT] = *(int32(*)[IDENT_INDEX_HISTORY_COUNT][RADIO_COUNT])0xB62980;
-tMusicTrackHistory (&CAERadioTrackManager::m_nMusicTrackIndexHistory)[RADIO_COUNT] = *(tMusicTrackHistory(*)[RADIO_COUNT])0xB62B40;
-
 uint8& CAERadioTrackManager::m_nStatsLastHitTimeOutHours = *(uint8*)0xB62C58;
 uint8& CAERadioTrackManager::m_nStatsLastHitGameClockHours = *(uint8*)0xB62C59;
 uint8& CAERadioTrackManager::m_nStatsLastHitGameClockDays = *(uint8*)0xB62C5A;
@@ -104,10 +99,10 @@ bool CAERadioTrackManager::Initialise(int32 channelId) {
     rng::copy(CStats::FavoriteRadioStationList, m_aListenTimes);
 
     for (auto i = 0u; i < RADIO_COUNT; i++) {
-        rng::fill(m_nMusicTrackIndexHistory[i].historyIndices, -1);
-        rng::fill(m_nDJBanterIndexHistory[i], -1);
-        rng::fill(m_nAdvertIndexHistory[i], -1);
-        rng::fill(m_nIdentIndexHistory[i], -1);
+        m_nMusicTrackIndexHistory[i].Reset();
+        m_nDJBanterIndexHistory[i].Reset();
+        m_nAdvertIndexHistory[i].Reset();
+        m_nIdentIndexHistory[i].Reset();
     }
 
     // [1st radio, off]
@@ -268,13 +263,6 @@ const char* CAERadioTrackManager::GetRadioStationName(RadioStationId id) {
 
 // 0x4E8380
 void CAERadioTrackManager::GetRadioStationNameKey(RadioStationId id, char* outStr) {
-    if (id == RADIO_OFF) {
-        strcpy_s(outStr, 8u, "FEA_NON");
-    } else if (id == RADIO_USER_TRACKS) {
-        strcpy_s(outStr, 8u, "FEA_MP3");
-    } else {
-        sprintf_s(outStr, 8u, "FEA_R%d", id - 1);
-    }
     switch (id) {
     case RADIO_OFF:
         strcpy_s(outStr, 8u, "FEA_MON");
@@ -283,7 +271,7 @@ void CAERadioTrackManager::GetRadioStationNameKey(RadioStationId id, char* outSt
         strcpy_s(outStr, 8u, "FEA_MP3");
         break;
     default:
-        assert(0 <= id < RADIO_USER_TRACKS);
+        assert(0 <= id && id < RADIO_USER_TRACKS);
         sprintf_s(outStr, 8u, "FEA_R%d", id - 1);
         break;
     }
@@ -601,21 +589,29 @@ int8 CAERadioTrackManager::ChooseTalkRadioShow() {
 // 0x4E96C0
 void CAERadioTrackManager::AddMusicTrackIndexToHistory(RadioStationId id, int8 trackIndex) {
     plugin::CallMethod<0x4E96C0, CAERadioTrackManager*, int8, int8>(this, id, trackIndex);
+    m_nMusicTrackIndexHistory[id].PutAtFirst(trackIndex);
+    m_nTracksInARow[id]++;
 }
 
 // 0x4E9720
 void CAERadioTrackManager::AddIdentIndexToHistory(RadioStationId id, int8 trackIndex) {
     plugin::CallMethod<0x4E9720, CAERadioTrackManager*, RadioStationId, int8>(this, id, trackIndex);
+    m_nIdentIndexHistory[id].PutAtFirst(trackIndex);
+    m_nTracksInARow[id]++;
 }
 
 // 0x4E9760
 void CAERadioTrackManager::AddAdvertIndexToHistory(RadioStationId id, int8 trackIndex) {
     plugin::CallMethod<0x4E9760, CAERadioTrackManager*, RadioStationId, int8>(this, id, trackIndex);
+    m_nAdvertIndexHistory[id].PutAtFirst(trackIndex);
+    m_nTracksInARow[id]++;
 }
 
 // 0x4E97B0
 void CAERadioTrackManager::AddDJBanterIndexToHistory(RadioStationId id, int8 trackIndex) {
-    plugin::CallMethod<0x4E97B0, CAERadioTrackManager*, RadioStationId, int8>(this, id, trackIndex);
+    return plugin::CallMethod<0x4E97B0, CAERadioTrackManager*, RadioStationId, int8>(this, id, trackIndex);
+    m_nDJBanterIndexHistory[id].PutAtFirst(trackIndex);
+    m_nTracksInARow[id]++;
 }
 
 // 0x4EA590
@@ -655,15 +651,15 @@ void CAERadioTrackManager::Load() {
         // todo: m_nMusicTrackIndexHistory;
 
         for (auto i = 0; i < IDENT_INDEX_HISTORY_COUNT; i++) {
-            CGenericGameStorage::LoadDataFromWorkBuffer(&m_nIdentIndexHistory[r][i], sizeof(m_nIdentIndexHistory[r][i]));
+            CGenericGameStorage::LoadDataFromWorkBuffer(&m_nIdentIndexHistory[r].indices[i], sizeof(m_nIdentIndexHistory[r].indices[i]));
         }
 
         for (auto i = 0; i < ADVERT_INDEX_HISTORY_COUNT; i++) {
-            CGenericGameStorage::LoadDataFromWorkBuffer(&m_nAdvertIndexHistory[r][i], sizeof(m_nAdvertIndexHistory[r][i]));
+            CGenericGameStorage::LoadDataFromWorkBuffer(&m_nAdvertIndexHistory[r].indices[i], sizeof(m_nAdvertIndexHistory[r].indices[i]));
         }
 
         for (auto i = 0; i < DJBANTER_INDEX_HISTORY_COUNT; i++) {
-            CGenericGameStorage::LoadDataFromWorkBuffer(&m_nDJBanterIndexHistory[r][i], sizeof(m_nDJBanterIndexHistory[r][i]));
+            CGenericGameStorage::LoadDataFromWorkBuffer(&m_nDJBanterIndexHistory[r].indices[i], sizeof(m_nDJBanterIndexHistory[r].indices[i]));
         }
     }
 
@@ -705,15 +701,15 @@ void CAERadioTrackManager::Save() {
         // todo: m_nMusicTrackIndexHistory;
 
         for (auto i = 0; i < IDENT_INDEX_HISTORY_COUNT; i++) {
-            CGenericGameStorage::SaveDataToWorkBuffer(&m_nIdentIndexHistory[r][i], sizeof(m_nIdentIndexHistory[r][i]));
+            CGenericGameStorage::SaveDataToWorkBuffer(&m_nIdentIndexHistory[r].indices[i], sizeof(m_nIdentIndexHistory[r].indices[i]));
         }
 
         for (auto i = 0; i < ADVERT_INDEX_HISTORY_COUNT; i++) {
-            CGenericGameStorage::SaveDataToWorkBuffer(&m_nAdvertIndexHistory[r][i], sizeof(m_nAdvertIndexHistory[r][i]));
+            CGenericGameStorage::SaveDataToWorkBuffer(&m_nAdvertIndexHistory[r].indices[i], sizeof(m_nAdvertIndexHistory[r].indices[i]));
         }
 
         for (auto i = 0; i < DJBANTER_INDEX_HISTORY_COUNT; i++) {
-            CGenericGameStorage::SaveDataToWorkBuffer(&m_nDJBanterIndexHistory[r][i], sizeof(m_nDJBanterIndexHistory[r][i]));
+            CGenericGameStorage::SaveDataToWorkBuffer(&m_nDJBanterIndexHistory[r].indices[i], sizeof(m_nDJBanterIndexHistory[r].indices[i]));
         }
     }
 
