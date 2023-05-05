@@ -39,7 +39,7 @@ float CAEAudioUtility::GetRandomNumberInRange(float a, float b) {
 
 // 0x4d9c80
 bool CAEAudioUtility::ResolveProbability(float p) {
-    return p >= 1.0f || ((float)CGeneral::GetRandomNumber() * RAND_MAX_FLOAT_RECIPROCAL) < p;
+    return p >= 1.0f || CGeneral::RandomBool(100.0f * p);
 }
 
 // 0x4d9d90

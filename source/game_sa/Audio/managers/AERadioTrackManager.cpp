@@ -232,13 +232,12 @@ void CAERadioTrackManager::DisplayRadioStationName() {
     }
 
     if (CTimer::GetTimeInMS() < m_nTimeToDisplayRadioName) {
-        auto station = m_nStationsListed + settings1.m_nCurrentRadioStation;
+        int station = m_nStationsListed + settings1.m_nCurrentRadioStation;
         if (station) {
-            if (station > 0) {
-                if (station >= RADIO_COUNT)
-                    station = station - 13;
-            } else {
-                station = station + 13;
+            if (station >= RADIO_COUNT) {
+                station %= RADIO_COUNT;
+            } else if (station <= 0) {
+                station += 13;
             }
 
             CFont::SetFontStyle(eFontStyle::FONT_MENU);
@@ -276,11 +275,33 @@ void CAERadioTrackManager::GetRadioStationNameKey(RadioStationId id, char* outSt
     } else {
         sprintf_s(outStr, 8u, "FEA_R%d", id - 1);
     }
+    switch (id) {
+    case RADIO_OFF:
+        strcpy_s(outStr, 8u, "FEA_MON");
+        break;
+    case RADIO_USER_TRACKS:
+        strcpy_s(outStr, 8u, "FEA_MP3");
+        break;
+    default:
+        assert(0 <= id < RADIO_USER_TRACKS);
+        sprintf_s(outStr, 8u, "FEA_R%d", id - 1);
+        break;
+    }
 }
 
 // 0x4E9800
 bool CAERadioTrackManager::IsVehicleRadioActive() {
-    return plugin::CallAndReturn<bool, 0x4E9800>();
+    if (const auto opts = CAEVehicleAudioEntity::StaticGetPlayerVehicleAudioSettingsForRadio()) {
+        switch (opts->m_nRadioType) {
+        case RADIO_CIVILIAN:
+        case RADIO_EMERGENCY:
+        case RADIO_UNKNOWN:
+            return true;
+        default:
+            break;
+        }
+    }
+    return false;
 }
 
 // 0x4E8410
