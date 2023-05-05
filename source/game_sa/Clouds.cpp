@@ -221,10 +221,9 @@ void CClouds::MovingFogRender() {
     {
         const float step = CTimer::GetTimeStep() / 300.f;
         if (CCullZones::CamNoRain() && CCullZones::PlayerNoRain())
-            CurrentFogIntensity = std::max(CurrentFogIntensity - step, 0.f);
+            CurrentFogIntensity = std::max(CurrentFogIntensity - step, 0.f); // Decreasing [towards 0]
         else
-            CurrentFogIntensity = std::min(CurrentFogIntensity + step, 1.f);
-
+            CurrentFogIntensity = std::min(CurrentFogIntensity + step, 1.f); // Increasing [towards 1]
 
         if (CWeather::UnderWaterness >= CPostEffects::m_fWaterFXStartUnderWaterness) {
             CurrentFogIntensity = 0.f;
@@ -301,9 +300,146 @@ void CClouds::MovingFogRender() {
     MovingFog_Update();
 }
 
+// From `CClouds::Render` [0x7139B2 - 0x713D2A]
+void CClouds::Render_MaybeRenderMoon(float colorBalance) {
+    // 3D position offset of the moon relative to the camera
+    constexpr auto CAMERA_TO_CLOUD_OFFSET = CVector{ 0.f, -100.f, 15.f };
+
+    // How big the [moon] mask texture is relative to the actual moon
+    constexpr auto MOON_TO_MASK_SIZE_MULT = 1.7f;
+
+    // Time range the moon is visible in
+    // The default value [220] means the moon is visible starting at
+    // 220 minutes before noon, and until 220 minutes after it
+    // So, that's 20:20 - 03:40
+    constexpr auto MOON_VISIBILITY_RANGE_MINS = 3u * 60u + 40u;
+
+    // Unused
+    //const auto clckHrs  = CClock::ms_nGameClockHours;
+    //const auto clckMins = CClock::ms_nGameClockMinutes;
+
+    const auto moonVisibilityTimeMins = (size_t)std::abs(CClock::GetMinutesToday() - (float)MOON_VISIBILITY_RANGE_MINS);
+    if (moonVisibilityTimeMins >= MOON_VISIBILITY_RANGE_MINS) {
+        return; // Moon not visible at the current time
+    }
+
+    const auto ccolorB  = MOON_VISIBILITY_RANGE_MINS - moonVisibilityTimeMins;
+    static_assert(MOON_VISIBILITY_RANGE_MINS == 220); // NOTE/TODO: The above will break otherwise, as it's really just a clever trick to avoid a more complex solution
+    const auto ccolorRG = lerp((float)ccolorB, 0.f, colorBalance); // AKA (1.f - colorBalance) * ccolorB
+    if (ccolorRG == 0) {
+        return;
+    }
+
+    //
+    // Calculate moon position on the screen [From the 3D position]
+    //
+    CVector   moonPosScr;
+    CVector2D scrSize;
+    if (!CSprite::CalcScreenCoors(TheCamera.GetPosition() + CAMERA_TO_CLOUD_OFFSET, &moonPosScr, &scrSize.x, &scrSize.y, false, true)) {
+        return;
+    }
+
+    const auto z   = CDraw::GetFarClipZ();
+    const auto rhw = 1.f / z;
+
+    //
+    // Draw black [textureless] sprite
+    //
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,      RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,     RWRSTATE(rwBLENDONE));
+
+    const auto moonSz = scrSize * ((float)CCoronas::MoonSize * 2.f + 4.f);
+    CSprite::RenderOneXLUSprite(
+        moonPosScr.x, moonPosScr.y, z,
+        moonSz.x, moonSz.y,
+        0, 0, 0, 255,
+        rhw,
+        255,
+        0,
+        0
+    );
+
+    //
+    // Draw moon's mask
+    //
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpMoonMask)));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,      RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,     RWRSTATE(rwBLENDONE));
+
+    const auto moonMaskSz     = moonSz * MOON_TO_MASK_SIZE_MULT;
+    const auto moonMaskPosScr = moonPosScr + moonMaskSz * CVector2D{
+        0.7f,
+        5.4f * (((float)CClock::GetGameClockDays() / 31.f - 0.5f)) // Slowly glide on the X axis according to current game day
+    };
+    CSprite::RenderOneXLUSprite(
+        moonMaskPosScr.x, moonMaskPosScr.y, z,
+        moonMaskSz.x, moonMaskSz.y,
+        0, 0, 0, 0, // NOTE/TODO: Alpha 0?
+        rhw,
+        255,
+        0,
+        0
+    );
+
+    //
+    // Draw the actual moon texture
+    //
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpCoronaTexture[2])));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,      RWRSTATE(rwBLENDDESTALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,     RWRSTATE(rwBLENDONE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,  RWRSTATE(FALSE));
+
+    CSprite::RenderOneXLUSprite(
+        moonPosScr.x, moonPosScr.y, z,
+        moonSz.x, moonSz.y,
+        ccolorRG, ccolorRG, (uint8)((float)ccolorB * 0.85f), 255,
+        rhw,
+        255,
+        0,
+        0
+    );
+
+    //
+    // [Cleanup]: Restore generic render states
+    //
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,  RWRSTATE(rwBLENDONE));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDONE));
+}
+
+void CClouds::Render_MaybeRenderStars(float colorBalance) {
+    constexpr struct {
+        size_t begin, end;
+    } STARS_VISIBILITY_HRS{
+        22u,
+        5u
+    };
+    
+    const auto clckHrs  = CClock::GetGameClockHours();
+    const auto clckMins = CClock::GetGameClockMinutes();
+
+    if (STARS_VISIBILITY_HRS.begin )
+}
+
 // 0x713950
 void CClouds::Render() {
-    plugin::Call<0x713950>();
+    if (!CGame::CanSeeOutSideFromCurrArea()) {
+        return;
+    }
+
+    CCoronas::SunBlockedByClouds = false;
+
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDONE));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDONE));
+
+    CSprite::InitSpriteBuffer();
+
+    Render_MaybeRenderMoon(); // [0x7139B2 - 0x713D2A]
+    Render_MaybeRenderStars();
+
 }
 
 // 0x714650

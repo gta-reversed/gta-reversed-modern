@@ -76,6 +76,8 @@ public:
     static void MovingFog_Delete(int32 fogSlotIndex);
     static void MovingFog_Update();
     static void MovingFogRender();
+    static void Render_MaybeRenderMoon(float colorBalance);
+    static void Render_MaybeRenderStars(float colorBalance);
     static float MovingFog_GetFXIntensity();
     static CVector MovingFog_GetWind();
     static int32 MovingFog_GetFirstFreeSlot();
