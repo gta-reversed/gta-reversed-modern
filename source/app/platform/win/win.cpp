@@ -48,6 +48,11 @@ char** CommandLineToArgv(char* cmdLine, int* argCount);
 LRESULT CALLBACK __MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 INT WINAPI __WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, INT nCmdShow);
 
+// 0x747300
+char* getDvdGamePath() {
+    return plugin::CallAndReturn<char*, 0x747300>();
+}
+
 // @notsa
 // @brief Resets the screen gamma if ever changed.
 void ResetGammaWhenExiting() {
@@ -825,7 +830,9 @@ void Win32InjectHooks() {
     // Unhooking these 2 after the game has started will do nothing
     RH_ScopedGlobalInstall(__WinMain, 0x748710);
     RH_ScopedGlobalInstall(InitInstance, 0x745560);
-    
+
+    RH_ScopedGlobalInstall(getDvdGamePath, 0x747300);
+
     WinPsInjectHooks();
     WinInput::InjectHooks();
 }

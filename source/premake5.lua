@@ -40,7 +40,8 @@ project "gta_reversed"
         "NOMINMAX", 
         "USE_GTASA_ALLOCATOR", 
         "EXTRA_DEBUG_FEATURES", 
-        "FIX_BUGS" 
+        "FIX_BUGS",
+		"_CRT_SECURE_NO_WARNINGS"
     }
 
     links { 
