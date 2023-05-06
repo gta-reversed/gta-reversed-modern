@@ -48,7 +48,7 @@ void CClouds::InjectHooks() {
     RH_ScopedInstall(MovingFog_GetWind, 0x7136E0);
     RH_ScopedInstall(MovingFog_GetFirstFreeSlot, 0x713710);
     RH_ScopedInstall(MovingFogRender, 0x716C90);
-    RH_ScopedInstall(Render, 0x713950, { .reversed = false });
+    RH_ScopedInstall(Render, 0x713950);
     RH_ScopedInstall(RenderSkyPolys, 0x714650);
     RH_ScopedInstall(RenderBottomFromHeight, 0x7154B0, { .reversed = false });
     RH_ScopedInstall(VolumetricCloudsInit, 0x7131C0);
@@ -300,6 +300,10 @@ void CClouds::MovingFogRender() {
     MovingFog_Update();
 }
 
+uint8 CalculateColorWithBalance(uint8 blue, float colorBalance) {
+    return lerp<uint8>(blue, 0u, colorBalance);
+}
+
 // From `CClouds::Render` [0x7139B2 - 0x713D2A]
 void CClouds::Render_MaybeRenderMoon(float colorBalance) {
     // 3D position offset of the moon relative to the camera
@@ -323,10 +327,10 @@ void CClouds::Render_MaybeRenderMoon(float colorBalance) {
         return; // Moon not visible at the current time
     }
 
-    const auto ccolorB  = MOON_VISIBILITY_RANGE_MINS - moonVisibilityTimeMins;
+    const auto colorB  = MOON_VISIBILITY_RANGE_MINS - moonVisibilityTimeMins;
     static_assert(MOON_VISIBILITY_RANGE_MINS == 220); // NOTE/TODO: The above will break otherwise, as it's really just a clever trick to avoid a more complex solution
-    const auto ccolorRG = lerp((float)ccolorB, 0.f, colorBalance); // AKA (1.f - colorBalance) * ccolorB
-    if (ccolorRG == 0) {
+    const auto colorRG = CalculateColorWithBalance(colorB, colorBalance);
+    if (colorRG == 0) {
         return;
     }
 
@@ -393,7 +397,7 @@ void CClouds::Render_MaybeRenderMoon(float colorBalance) {
     CSprite::RenderOneXLUSprite(
         moonPosScr.x, moonPosScr.y, z,
         moonSz.x, moonSz.y,
-        ccolorRG, ccolorRG, (uint8)((float)ccolorB * 0.85f), 255,
+        colorRG, colorRG, (uint8)((float)colorB * 0.85f), 255,
         rhw,
         255,
         0,
@@ -407,18 +411,247 @@ void CClouds::Render_MaybeRenderMoon(float colorBalance) {
     RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDONE));
 }
 
-void CClouds::Render_MaybeRenderStars(float colorBalance) {
-    constexpr struct {
-        size_t begin, end;
-    } STARS_VISIBILITY_HRS{
-        22u,
-        5u
-    };
-    
-    const auto clckHrs  = CClock::GetGameClockHours();
-    const auto clckMins = CClock::GetGameClockMinutes();
+// From `CClouds::Render` [0x713D2A - 0x714019]
+// Draws the R* logo on the sky
+void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
+    constexpr auto STARS_VISIBLE_FROM_HRS = 5u,
+                   STARS_VISIBLE_TO_HRS = 22u;
 
-    if (STARS_VISIBILITY_HRS.begin )
+    constexpr auto STARS_OFFSET_FROM_CAMERA = CVector{ 100.f, 0.f, 10.f };
+    constexpr auto LAST_STAR_OFFSET_FROM_CAMERA = CVector{ 100.f, 0.f, STARS_OFFSET_FROM_CAMERA.z - 90.f };
+
+    constexpr auto  STARS_NUM_POSITIONS                    = 9;
+    constexpr float STARS_Y_POSITIONS[STARS_NUM_POSITIONS] = { 0.00f, 0.05f, 0.13f, 0.40f, 0.70f, 0.60f, 0.27f, 0.55f, 0.75f }; // 0x8D55EC
+    constexpr float STARS_Z_POSITIONS[STARS_NUM_POSITIONS] = { 0.00f, 0.45f, 0.90f, 1.00f, 0.85f, 0.52f, 0.48f, 0.35f, 0.20f }; // 0x8D5610
+    constexpr float STARS_SIZES[STARS_NUM_POSITIONS]       = { 1.00f, 1.40f, 0.90f, 1.00f, 0.60f, 1.50f, 1.30f, 1.00f, 0.80f }; // 0x8D5634
+
+    if (!CClock::GetIsTimeInRange(STARS_VISIBLE_FROM_HRS, STARS_VISIBLE_TO_HRS)) {
+        return;
+    }
+
+    const auto time = CClock::GetGameClockHours() == STARS_VISIBLE_FROM_HRS
+        ? CClock::GetGameClockMinutes()
+        : 60u - CClock::GetGameClockMinutes();
+
+    const auto colorB  = 255u * time / 60u;
+    const auto colorRG = CalculateColorWithBalance(colorB, colorBalance);
+
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpCoronaTexture[0])));
+
+    const auto camPos = TheCamera.GetPosition();
+
+    //
+    // Draw R
+    //
+    for (auto i = 0; i < 11; i++) {
+        CVector offset = STARS_OFFSET_FROM_CAMERA;
+        if (i >= 9) { // Clever trick to save memory I guess, re-uses the first 2 star vertices, but with X adjusted to be on the flipside
+            offset.x = -offset.x;
+        }
+
+        const auto posIdx = i % STARS_NUM_POSITIONS;
+        offset.y -= STARS_Y_POSITIONS[posIdx] * 90.f;
+        offset.z += STARS_Z_POSITIONS[posIdx] * 80.f;
+
+        CVector   starPosScr;
+        CVector2D starSizeScr;
+        if (!CSprite::CalcScreenCoors(camPos + offset, &starPosScr, &starSizeScr.x, &starSizeScr.y, false, true)) {
+            continue;
+        }
+
+        const auto cc = CalculateColorWithBalance(colorB, (float)(rand() % 32) * 0.0015f);
+
+        starSizeScr *= STARS_SIZES[posIdx] * 0.8f;
+
+        CSprite::RenderBufferedOneXLUSprite(
+            starPosScr.x, starPosScr.y, starPosScr.z,
+            starSizeScr.x, starSizeScr.y,
+            cc, cc, cc, 255,
+            1.f / starPosScr.z,
+            255
+        );
+    }
+
+    //
+    // Draw the `*`
+    //
+    CVector   lastStarPosScr;
+    CVector2D lastStarSizeScr;
+    if (CSprite::CalcScreenCoors(camPos + LAST_STAR_OFFSET_FROM_CAMERA, &lastStarPosScr, &lastStarSizeScr.x, &lastStarSizeScr.y, false, true)) {
+        const auto cc = CalculateColorWithBalance(colorB, (float)(rand() % 128) * 0.0015625f);
+
+        lastStarSizeScr *= 5.f;
+
+        CSprite::RenderBufferedOneXLUSprite(
+            lastStarPosScr.x, lastStarPosScr.y, lastStarPosScr.z,
+            lastStarSizeScr.x, lastStarSizeScr.y,
+            cc, cc, cc, 255,
+            1.f / lastStarPosScr.z,
+            255
+        );
+    }
+
+    //
+    // Finally, draw it
+    //
+    CSprite::FlushSpriteBuffer();
+}
+
+// From `CClouds::Render` [0x714019 - 0x71422A]
+void CClouds::Render_RenderLowClouds(float colorBalance) {
+    constexpr size_t NUM_LOW_CLOUDS = 12u;
+    constexpr float  LOW_CLOUDS_X_COORDS[NUM_LOW_CLOUDS]{ 1.0f,  0.7f,  0.0f, -0.7f, -1.0f, -0.7f, 0.0f, 0.7f, 0.8f, -0.8f,  0.4f,  0.4f }; // 0x8D5394
+    constexpr float  LOW_CLOUDS_Y_COORDS[NUM_LOW_CLOUDS]{ 0.0f, -0.7f, -1.0f, -0.7f,  0.0f,  0.7f, 1.0f, 0.7f, 0.4f,  0.4f, -0.8f, -0.8f }; // 0x8D53C4 
+    constexpr float  LOW_CLOUDS_Z_COORDS[NUM_LOW_CLOUDS]{ 0.0f,  1.0f,  0.5f,  0.0f,  1.0f,  0.3f, 0.9f, 0.4f, 1.3f,  1.4f,  1.2f,  1.7f }; // 0x8D53F4
+
+    const auto colorR = CalculateColorWithBalance((uint8)CTimeCycle::m_CurrentColours.m_nLowCloudsRed, colorBalance);
+    const auto colorG = CalculateColorWithBalance((uint8)CTimeCycle::m_CurrentColours.m_nLowCloudsGreen, colorBalance);
+    const auto colorB = CalculateColorWithBalance((uint8)CTimeCycle::m_CurrentColours.m_nLowCloudsBlue, colorBalance);
+
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpCloudTex)));
+
+    // Calculate camera roll
+    ms_cameraRoll = [&] {
+        const auto cmat = TheCamera.m_matrix;
+        if (!cmat) {
+            return 0.f;
+        }
+        const auto& right = cmat->GetRight();
+        const auto xymag  = CVector2D{ right }.SquaredMagnitude();
+        return std::atan2(right.z, cmat->GetUp().z < 0.f ? -xymag : xymag);
+    }();
+
+    const auto camPos = TheCamera.GetPosition();
+    for (auto i = 0u; i < NUM_LOW_CLOUDS; i++) {
+        // Offset from camera
+        const auto offset = CVector{
+            LOW_CLOUDS_X_COORDS[i] * 800.f,
+            LOW_CLOUDS_Y_COORDS[i] * 800.f,
+            LOW_CLOUDS_Z_COORDS[i] * 60.f + 40.f
+        };
+
+        CVector   cloudPosScr;
+        CVector2D cloudSizeScr;
+        if (!CSprite::CalcScreenCoors(camPos + offset, &cloudPosScr, &cloudSizeScr.x, &cloudSizeScr.y, false, true)) {
+            continue;
+        }
+        cloudSizeScr *= CVector2D{ 40.f, 320.f };
+
+        CSprite::RenderBufferedOneXLUSprite_Rotate_Dimension(
+            cloudPosScr.x, cloudPosScr.y, cloudPosScr.z,
+            cloudSizeScr.x, cloudSizeScr.y,
+            colorR, colorG, colorB, 255,
+            1.f / cloudPosScr.z,
+            ms_cameraRoll,
+            255
+        );
+    }
+
+    CSprite::FlushSpriteBuffer();
+}
+
+// From `CClouds::Render` [0x71422A - 0x714387]
+void CClouds::Render_MaybeRenderRainbows() {
+    constexpr size_t NUM_RAINBOW_LINES = 6;
+    constexpr uint8  RAINBOW_LINES_COLOR_RED[NUM_RAINBOW_LINES]{ 30, 30, 30, 10,  0,  15 };
+    constexpr uint8  RAINBOW_LINES_COLOR_GREEN[NUM_RAINBOW_LINES]{ 0,  15, 30, 30,  0,  0 };
+    constexpr uint8  RAINBOW_LINES_COLOR_BLUE[NUM_RAINBOW_LINES]{  0,  0,  0,  10,  30, 30 };
+
+    if (CWeather::Rainbow == 0.f) {
+        return;
+    }
+
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpCoronaTexture[0])));
+
+    const auto camPos = TheCamera.GetPosition();
+
+    for (auto i = 0; i < NUM_RAINBOW_LINES; i++) {
+        const auto offset = CVector{
+            (float)i * 1.5f,
+            100.f,
+            5.f
+        };
+
+        CVector   rblinePosScr;
+        CVector2D rblineSizeScr;
+        if (!CSprite::CalcScreenCoors(camPos + offset, &rblinePosScr, &rblineSizeScr.x, &rblineSizeScr.y, false, true)) {
+            continue;
+        }
+        rblineSizeScr *= CVector2D{ 2.f, 50.f };
+
+        CSprite::RenderBufferedOneXLUSprite(
+            rblinePosScr.x, rblinePosScr.y, rblinePosScr.z,
+            rblineSizeScr.x, rblineSizeScr.y,
+            (uint8)((float)RAINBOW_LINES_COLOR_RED[i] * CWeather::Rainbow),
+            (uint8)((float)RAINBOW_LINES_COLOR_GREEN[i] * CWeather::Rainbow),
+            (uint8)((float)RAINBOW_LINES_COLOR_BLUE[i] * CWeather::Rainbow),
+            255,
+            1.f / rblinePosScr.z,
+            255
+        );
+    }
+
+    CSprite::FlushSpriteBuffer();
+}
+
+// From `CClouds::Render` [0x714387 - 0x714640]
+void CClouds::Render_MaybeRenderStreaks() {
+    constexpr auto REPEAT_INTERVAL_MS = 8192; // Use power-of-2 numbers here if possible
+    constexpr auto VISIBILE_TIME_MS   = 800;
+    static_assert(REPEAT_INTERVAL_MS >= VISIBILE_TIME_MS);
+
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,  RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
+
+    if (CClock::GetGameClockHours() >= 5) {
+        return;
+    }
+
+    if (!IsExtraSunny(CWeather::OldWeatherType) && !IsExtraSunny(CWeather::NewWeatherType)) {
+        return;
+    }
+
+    const auto repeatDelta = CTimer::GetTimeInMS() % REPEAT_INTERVAL_MS;
+    if (repeatDelta >= VISIBILE_TIME_MS) {
+        return;
+    }
+
+    const auto repeatIdx = CTimer::GetTimeInMS() / REPEAT_INTERVAL_MS;
+
+    //> 0x714464
+    const auto size = CVector{
+        (float)(repeatIdx % 64 % 7 - 3) * 0.1f,
+        (float)(repeatIdx - 4) * 0.1f,
+        1.f
+    }.Normalized();
+
+    //> 0x7144C7
+    const auto offsetDir = CVector{
+        (float)(repeatIdx % 64 % 9 - 5),
+        (float)(repeatIdx % 64 % 10 - 5),
+        0.1f
+    }.Normalized();
+
+    const auto basePos = offsetDir * 1000.f + TheCamera.GetPosition();
+
+    const auto v0Scale = (float)((VISIBILE_TIME_MS / 2 - repeatDelta) * 2);
+    const auto v1Scale = v0Scale + 50.f;
+
+    RenderBuffer::ClearRenderBuffer();
+
+    const auto PushVertex = [=](float scale, CRGBA color) {
+        RenderBuffer::PushVertex(
+            basePos + size * scale,
+            color
+        );
+    };
+
+    PushVertex(v0Scale, { 255, 255, 255, 225 });
+    PushVertex(v1Scale, { 255, 255, 255, 0 });
+
+    RenderBuffer::PushIndices({ 0, 1 }, true);
+
+    RenderBuffer::Render(rwPRIMTYPEPOLYLINE, nullptr, rwIM3D_VERTEXRGBA | rwIM3D_VERTEXXYZ);
 }
 
 // 0x713950
@@ -437,9 +670,15 @@ void CClouds::Render() {
 
     CSprite::InitSpriteBuffer();
 
-    Render_MaybeRenderMoon(); // [0x7139B2 - 0x713D2A]
-    Render_MaybeRenderStars();
+    const auto colorBalance = std::max(CWeather::Foggyness, CWeather::CloudCoverage);
 
+    // I've broken up this function into several others to make the code easier to understand
+
+    Render_MaybeRenderMoon(colorBalance); // [0x7139B2 - 0x713D2A]
+    Render_MaybeRenderRockstarLogo(colorBalance); // 0x713D2A - 0x714019
+    Render_RenderLowClouds(std::max(colorBalance, CWeather::ExtraSunnyness));
+    Render_MaybeRenderRainbows();
+    Render_MaybeRenderStreaks();
 }
 
 // 0x714650

@@ -95,6 +95,11 @@ public:
         y *= multiplier;
     }
 
+    inline void operator*=(CVector2D multiplier) {
+        x *= multiplier.x;
+        y *= multiplier.y;
+    }
+
     inline void operator/=(float divisor) {
         x /= divisor;
         y /= divisor;

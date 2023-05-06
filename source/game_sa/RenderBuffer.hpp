@@ -39,6 +39,12 @@ void StopStoring();
 void RenderStuffInBuffer();
 
 /*!
+* @notsa
+* @brief Render out the contents of the temporary buffer as specified by the arguments. Frequently inlined!
+*/
+void Render(RwPrimitiveType primType, RwMatrix* ltm = nullptr, RwUInt32 /*RwIm3DTransformFlags*/ flags = 0);
+
+/*!
 * @addr 0x707790
 * @brief Reset the index/vertex buffer stored counters.
 * Frequently inlined!
@@ -53,9 +59,15 @@ void RenderIfDoesntFit(int32 nIdx, int32 nVtx);
 
 /*
 * @addr notsa
-* @brief Push a vertex to the buffer. Not to be used with `StartStoring`!
+* @brief Push a vertex to the buffer. Not to be used with `StartStoring`! Use if the VERTEXUV flag **IS NOT** used when calling `Render`
 */
-void PushVertex(CVector pos, CVector2D uv, CRGBA color);
+RwIm3DVertex* PushVertex(CVector pos, CRGBA color);
+
+/*
+* @addr notsa
+* @brief Push a vertex to the buffer. Not to be used with `StartStoring`! Use if the VERTEXUV flag **IS** used when calling `Render`
+*/
+RwIm3DVertex* PushVertex(CVector pos, CVector2D uv, CRGBA color);
 
 /*!
 * @addr notsa

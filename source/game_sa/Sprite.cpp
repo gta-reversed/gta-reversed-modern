@@ -67,13 +67,13 @@ bool CSprite::CalcScreenCoors(const RwV3d& posn, RwV3d* out, float* w, float* h,
     if (out->z >= CDraw::GetFarClipZ() && checkMaxVisible)
         return false;
 
-    const float recip = 1.0f / out->z;
+    const float rd = 1.0f / out->z; // reciprocal of depth
 
-    out->x = SCREEN_WIDTH * recip * out->x;
-    out->y = SCREEN_HEIGHT * recip * out->y;
+    out->x = SCREEN_WIDTH * rd * out->x;
+    out->y = SCREEN_HEIGHT * rd * out->y;
 
-    *w = SCREEN_WIDTH  * recip / CDraw::GetFOV() * 70.0f;
-    *h = SCREEN_HEIGHT * recip / CDraw::GetFOV() * 70.0f;
+    *w = SCREEN_WIDTH  * rd / CDraw::GetFOV() * 70.0f;
+    *h = SCREEN_HEIGHT * rd / CDraw::GetFOV() * 70.0f;
 
     return true;
 }
