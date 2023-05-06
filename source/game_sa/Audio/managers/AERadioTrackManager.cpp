@@ -106,14 +106,14 @@ bool CAERadioTrackManager::Initialise(int32 channelId) {
     }
 
     // [1st radio, off]
-    settings1 = settings2 = tRadioSettings{CAEAudioUtility::GetRandomNumberInRange(0, RADIO_COUNT - 1)};
+    settings1 = settings2 = tRadioSettings{CAEAudioUtility::GetRandomRadioStation()};
 
     *(uint32*)&m_iRadioStationMenuRequest = -1; // TODO: make sense of this.
     m_nUserTrackPlayMode = AEUserRadioTrackManager.GetUserTrackPlayMode();
 }
 
 // 0x4E8330
-void CAERadioTrackManager::InitialiseRadioStationID(RadioStationId id) {
+void CAERadioTrackManager::InitialiseRadioStationID(eRadioID id) {
     settings1.m_nCurrentRadioStation = id;
     settings2.m_nCurrentRadioStation = id;
 }
@@ -125,38 +125,37 @@ void CAERadioTrackManager::Reset() {
 
 // 0x4E8200
 void CAERadioTrackManager::ResetStatistics() {
-    m_nStatsCitiesPassed          = 0;
-    m_nStatsLastHitGameClockDays  = -1;
+    m_nStatsCitiesPassed = 0;
+    m_nStatsLastHitGameClockDays = -1;
     m_nStatsLastHitGameClockHours = -1;
-    m_nStatsLastHitTimeOutHours   = -1;
-    m_nStatsPassedCasino3         = false;
-    m_nStatsPassedCasino6         = false;
-    m_nStatsPassedCasino10        = false;
-    m_nStatsPassedCat1            = false;
-    m_nStatsPassedDesert1         = false;
-    m_nStatsPassedDesert3         = false;
-    m_nStatsPassedDesert5         = false;
-    m_nStatsPassedDesert8         = false;
-    m_nStatsPassedDesert10        = false;
-    m_nStatsPassedFarlie3         = false;
-    m_nStatsPassedLAFin2          = false;
-    m_nStatsPassedMansion2        = false;
-    m_nStatsPassedRyder2          = false;
-    m_nStatsPassedRiot1           = false;
-    m_nStatsPassedSCrash1         = false;
-    m_nStatsPassedStrap4          = false;
-    m_nStatsPassedSweet2          = false;
-    m_nStatsPassedTruth2          = false;
-    m_nStatsPassedVCrash2         = false;
-    m_nStatsStartedBadlands       = false;
-    m_nStatsStartedCat2           = false;
-    m_nStatsStartedCrash1         = false;
+    m_nStatsLastHitTimeOutHours = -1;
+    m_nStatsPassedCasino3 = false;
+    m_nStatsPassedCasino6 = false;
+    m_nStatsPassedCasino10 = false;
+    m_nStatsPassedCat1 = false;
+    m_nStatsPassedDesert1 = false;
+    m_nStatsPassedDesert3 = false;
+    m_nStatsPassedDesert5 = false;
+    m_nStatsPassedDesert8 = false;
+    m_nStatsPassedDesert10 = false;
+    m_nStatsPassedFarlie3 = false;
+    m_nStatsPassedLAFin2 = false;
+    m_nStatsPassedMansion2 = false;
+    m_nStatsPassedRyder2 = false;
+    m_nStatsPassedRiot1 = false;
+    m_nStatsPassedSCrash1 = false;
+    m_nStatsPassedStrap4 = false;
+    m_nStatsPassedSweet2 = false;
+    m_nStatsPassedTruth2 = false;
+    m_nStatsPassedVCrash2 = false;
+    m_nStatsStartedBadlands = false;
+    m_nStatsStartedCat2 = false;
+    m_nStatsStartedCrash1 = false;
 }
-
 
 // 0x4E8350
 bool CAERadioTrackManager::IsRadioOn() const {
-    return m_nMode != 7 || m_bInitialised || m_nStationsListed || m_nStationsListDown;
+    return m_nMode != eRadioTrackMode::UNK_7 || m_bInitialised || m_nStationsListed || m_nStationsListDown;
 }
 
 // 0x4E8370
@@ -170,10 +169,8 @@ int32* CAERadioTrackManager::GetRadioStationListenTimes() {
 }
 
 // 0x4E83F0
-int8 CAERadioTrackManager::GetCurrentRadioStationID() const {
-    return settings1.m_nCurrentRadioStation == -1
-               ? RADIO_OFF
-               : settings1.m_nCurrentRadioStation;
+eRadioID CAERadioTrackManager::GetCurrentRadioStationID() const {
+    return settings1.m_nCurrentRadioStation == RADIO_INVALID ? RADIO_OFF : settings1.m_nCurrentRadioStation;
 }
 
 // 0x4E82E0
@@ -191,7 +188,7 @@ void CAERadioTrackManager::SetBassSetting(int8 nBassSet, float fBassGrain) {
 // 0x4E9DB0
 void CAERadioTrackManager::SetBassEnhanceOnOff(bool enable) {
     m_bBassEnhance = enable;
-    if (m_nMode == 2) {
+    if (m_nMode == eRadioTrackMode::UNK_2) {
         settings1.m_nBassSet = settings2.m_nBassSet;
         settings1.m_fBassGain = settings2.m_fBassGain;
         if (enable) {
@@ -203,8 +200,23 @@ void CAERadioTrackManager::SetBassEnhanceOnOff(bool enable) {
 }
 
 // 0x4E8290
-void CAERadioTrackManager::RetuneRadio(RadioStationId id) {
-    plugin::CallMethod<0x4E8290, CAERadioTrackManager*, int8>(this, id);
+void CAERadioTrackManager::RetuneRadio(eRadioID id) {
+    return plugin::CallMethod<0x4E8290, CAERadioTrackManager*, eRadioID>(this, id);
+
+    const auto retunedStation = [id] {
+        if (id == RADIO_USER_TRACKS && !AEUserRadioTrackManager.m_nUserTracksCount) {
+            return RADIO_OFF;
+        } else {
+            return id;
+        }
+    }();
+
+    if (CTimer::GetIsPaused()) {
+        m_iRadioStationMenuRequest = retunedStation;
+        m_nRetuneStartedTime = CTimer::GetTimeInMSPauseMode();
+    } else {
+        field_7C = retunedStation;
+    }
 }
 
 // 0x4E9E50
@@ -252,7 +264,7 @@ void CAERadioTrackManager::DisplayRadioStationName() {
 }
 
 // 0x4E9E10
-const char* CAERadioTrackManager::GetRadioStationName(RadioStationId id) {
+const char* CAERadioTrackManager::GetRadioStationName(eRadioID id) {
     if (id <= 0)
         return nullptr;
 
@@ -262,7 +274,7 @@ const char* CAERadioTrackManager::GetRadioStationName(RadioStationId id) {
 }
 
 // 0x4E8380
-void CAERadioTrackManager::GetRadioStationNameKey(RadioStationId id, char* outStr) {
+void CAERadioTrackManager::GetRadioStationNameKey(eRadioID id, char* outStr) {
     switch (id) {
     case RADIO_OFF:
         strcpy_s(outStr, 8u, "FEA_MON");
@@ -312,11 +324,11 @@ void CAERadioTrackManager::CheckForMissionStatsChanges() {
     if ((float)m_nStatsCitiesPassed < statsCitiesPassed) {
         m_nStatsCitiesPassed = (uint8)statsCitiesPassed;
         if (statsCitiesPassed == 1 || statsCitiesPassed == 2) {
-            m_nStatsLastHitGameClockDays  = CClock::GetGameClockDays();
+            m_nStatsLastHitGameClockDays = CClock::GetGameClockDays();
             m_nStatsLastHitGameClockHours = CClock::GetGameClockHours();
-            m_nStatsLastHitTimeOutHours   = 24;
-            m_nSpecialDJBanterPending     = 1;
-            m_nSpecialDJBanterIndex       = m_nStatsCitiesPassed - 1;
+            m_nStatsLastHitTimeOutHours = 24;
+            m_nSpecialDJBanterPending = 1;
+            m_nSpecialDJBanterIndex = m_nStatsCitiesPassed - 1;
         }
     }
 
@@ -325,37 +337,37 @@ void CAERadioTrackManager::CheckForMissionStatsChanges() {
         if ((float)inputStat < statValue) {
             inputStat = (uint8)statValue;
             if (inputStat == 1) {
-                m_nStatsLastHitGameClockDays  = CClock::GetGameClockDays();
+                m_nStatsLastHitGameClockDays = CClock::GetGameClockDays();
                 m_nStatsLastHitGameClockHours = CClock::GetGameClockHours();
-                m_nStatsLastHitTimeOutHours   = 24 * 7;
-                m_nSpecialDJBanterPending     = 2;
-                m_nSpecialDJBanterIndex       = specialDJBanterIndex;
+                m_nStatsLastHitTimeOutHours = 24 * 7;
+                m_nSpecialDJBanterPending = 2;
+                m_nSpecialDJBanterIndex = specialDJBanterIndex;
             }
         }
     };
 
-    Update(m_nStatsPassedCasino3,   STAT_LEAST_FAVORITE_RADIO_STATION,                     0);
-    Update(m_nStatsPassedCasino6,   STAT_CURRENT_WEAPON_SKILL,                             1);
-    Update(m_nStatsPassedCasino10,  STAT_WEAPON_SKILL_LEVELS,                              2);
-    Update(m_nStatsPassedCat1,      STAT_LOCAL_LIQUOR_STORE_MISSION_ACCOMPLISHED,          3);
-    Update(m_nStatsPassedDesert1,   STAT_PLAYING_TIME,                                     4);
-    Update(m_nStatsPassedDesert3,   STAT_PILOT_RANKING,                                    5);
-    Update(m_nStatsPassedDesert5,   STAT_STRONGEST_GANG,                                   6);
-    Update(m_nStatsPassedDesert8,   STAT_2ND_STRONGEST_GANG,                               7);
-    Update(m_nStatsPassedDesert10,  STAT_3RD_STRONGEST_GANG,                               8);
-    Update(m_nStatsPassedFarlie3,   STAT_MIKE_TORENO_MISSION_ACCOMPLISHED,                 9);
-    Update(m_nStatsPassedLAFin2,    STAT_LEAST_FAVORITE_GANG,                              10);
-    Update(m_nStatsPassedMansion2,  STAT_A_HOME_IN_THE_HILLS_MISSION_ACCOMPLISHED,         11);
-    Update(m_nStatsPassedRyder2,    STAT_RYDERS_MISSION_ROBBING_UNCLE_SAM_ACCOMPLISHED,    12);
-    Update(m_nStatsPassedRiot1,     STAT_RIOT_MISSION_ACCOMPLISHED,                        13);
-    Update(m_nStatsPassedSCrash1,   STAT_GANG_STRENGTH,                                    14);
-    Update(m_nStatsPassedStrap4,    STAT_TERRITORY_UNDER_CONTROL,                          15);
-    Update(m_nStatsPassedSweet2,    STAT_DRIVE_THRU_MISSION_ACCOMPLISHED,                  16);
-    Update(m_nStatsPassedTruth2,    STAT_ARE_YOU_GOING_TO_SAN_FIERRO_MISSION_ACCOMPLISHED, 17);
-    Update(m_nStatsPassedVCrash2,   STAT_HIGH_NOON_MISSION_ACCOMPLISHED,                   18);
-    Update(m_nStatsStartedBadlands, STAT_THE_GREEN_SABRE_MISSION_ACCOMPLISHED,             19);
-    Update(m_nStatsStartedCat2,     STAT_MAYBE_CATALINA_MEETING,                           20);
-    Update(m_nStatsStartedCrash1,   STAT_MAYBE_WU_ZI_MEETING,                              21);
+    Update(m_nStatsPassedCasino3, STAT_LEAST_FAVORITE_RADIO_STATION, 0);
+    Update(m_nStatsPassedCasino6, STAT_CURRENT_WEAPON_SKILL, 1);
+    Update(m_nStatsPassedCasino10, STAT_WEAPON_SKILL_LEVELS, 2);
+    Update(m_nStatsPassedCat1, STAT_LOCAL_LIQUOR_STORE_MISSION_ACCOMPLISHED, 3);
+    Update(m_nStatsPassedDesert1, STAT_PLAYING_TIME, 4);
+    Update(m_nStatsPassedDesert3, STAT_PILOT_RANKING, 5);
+    Update(m_nStatsPassedDesert5, STAT_STRONGEST_GANG, 6);
+    Update(m_nStatsPassedDesert8, STAT_2ND_STRONGEST_GANG, 7);
+    Update(m_nStatsPassedDesert10, STAT_3RD_STRONGEST_GANG, 8);
+    Update(m_nStatsPassedFarlie3, STAT_MIKE_TORENO_MISSION_ACCOMPLISHED, 9);
+    Update(m_nStatsPassedLAFin2, STAT_LEAST_FAVORITE_GANG, 10);
+    Update(m_nStatsPassedMansion2, STAT_A_HOME_IN_THE_HILLS_MISSION_ACCOMPLISHED, 11);
+    Update(m_nStatsPassedRyder2, STAT_RYDERS_MISSION_ROBBING_UNCLE_SAM_ACCOMPLISHED, 12);
+    Update(m_nStatsPassedRiot1, STAT_RIOT_MISSION_ACCOMPLISHED, 13);
+    Update(m_nStatsPassedSCrash1, STAT_GANG_STRENGTH, 14);
+    Update(m_nStatsPassedStrap4, STAT_TERRITORY_UNDER_CONTROL, 15);
+    Update(m_nStatsPassedSweet2, STAT_DRIVE_THRU_MISSION_ACCOMPLISHED, 16);
+    Update(m_nStatsPassedTruth2, STAT_ARE_YOU_GOING_TO_SAN_FIERRO_MISSION_ACCOMPLISHED, 17);
+    Update(m_nStatsPassedVCrash2, STAT_HIGH_NOON_MISSION_ACCOMPLISHED, 18);
+    Update(m_nStatsStartedBadlands, STAT_THE_GREEN_SABRE_MISSION_ACCOMPLISHED, 19);
+    Update(m_nStatsStartedCat2, STAT_MAYBE_CATALINA_MEETING, 20);
+    Update(m_nStatsStartedCrash1, STAT_MAYBE_WU_ZI_MEETING, 21);
 }
 
 // 0x4EA930
@@ -372,7 +384,6 @@ void CAERadioTrackManager::CheckForStationRetune() {
 void CAERadioTrackManager::CheckForStationRetuneDuringPause() {
     plugin::CallMethod<0x4EB890, CAERadioTrackManager*>(this);
 }
-
 
 // 0x4EA640
 void CAERadioTrackManager::StartTrackPlayback() {
@@ -466,53 +477,53 @@ void CAERadioTrackManager::StartRadio(tVehicleAudioSettings* settings) {
 }
 
 // 0x4EB3C0
-void CAERadioTrackManager::StartRadio(RadioStationId id, int8 bassValue, float bassGain, uint8 a5) {
+void CAERadioTrackManager::StartRadio(eRadioID id, int8 bassValue, float bassGain, uint8 a5) {
     plugin::CallMethod<0x4EB3C0, CAERadioTrackManager*, int8, int8, float, uint8>(this, id, bassValue, bassGain, a5);
 }
 
 // 0x4EAC30
-bool CAERadioTrackManager::TrackRadioStation(RadioStationId id, uint8 a2) {
+bool CAERadioTrackManager::TrackRadioStation(eRadioID id, uint8 a2) {
     return plugin::CallMethodAndReturn<bool, 0x4EAC30, CAERadioTrackManager*, int8, uint8>(this, id, a2);
 }
 
 // 0x4EA670
-bool CAERadioTrackManager::QueueUpTracksForStation(RadioStationId id, int8* iTrackCount, int8 radioState, tRadioSettings* settings) {
+bool CAERadioTrackManager::QueueUpTracksForStation(eRadioID id, int8* iTrackCount, int8 radioState, tRadioSettings* settings) {
     return plugin::CallMethodAndReturn<bool, 0x4EA670, CAERadioTrackManager*, int8, int8*, int8, tRadioSettings*>(this, id, iTrackCount, radioState, settings);
 }
 
 // 0x4E9820
-void CAERadioTrackManager::StopRadio(tVehicleAudioSettings* settings, bool bDuringPause) {
-    plugin::CallMethod<0x4E9820, CAERadioTrackManager*, tVehicleAudioSettings*, bool>(this, settings, bDuringPause);
+void CAERadioTrackManager::StopRadio(tVehicleAudioSettings* settings, bool duringPause) {
+    return plugin::CallMethod<0x4E9820, CAERadioTrackManager*, tVehicleAudioSettings*, bool>(this, settings, duringPause);
 }
 
 // 0x4E94C0
-int32 CAERadioTrackManager::ChooseIdentIndex(RadioStationId id) {
+int32 CAERadioTrackManager::ChooseIdentIndex(eRadioID id) {
     return plugin::CallAndReturn<int32, 0x4E94C0, CAERadioTrackManager*, int8>(this, id);
 }
 
 // 0x4E9570
-int32 CAERadioTrackManager::ChooseAdvertIndex(RadioStationId id) {
+int32 CAERadioTrackManager::ChooseAdvertIndex(eRadioID id) {
     return plugin::CallAndReturn<int32, 0x4E9570, CAERadioTrackManager*, int8>(this, id);
 }
 
 // 0x4EA270
-int8 CAERadioTrackManager::ChooseMusicTrackIndex(RadioStationId id) {
+int8 CAERadioTrackManager::ChooseMusicTrackIndex(eRadioID id) {
     return plugin::CallAndReturn<int8, 0x4EA270, CAERadioTrackManager*, int8>(this, id);
 }
 
 // 0x4EA2D0
-int32 CAERadioTrackManager::ChooseDJBanterIndex(RadioStationId id) {
+int32 CAERadioTrackManager::ChooseDJBanterIndex(eRadioID id) {
     return plugin::CallAndReturn<int32, 0x4EA2D0, CAERadioTrackManager*, int8>(this, id);
 }
 
 // 0x4E95E0
-int32 CAERadioTrackManager::ChooseDJBanterIndexFromList(RadioStationId id, int32** list) {
-    return plugin::CallMethodAndReturn<int32, 0x4E95E0, CAERadioTrackManager*, RadioStationId, int32**>(this, id, list);
+int32 CAERadioTrackManager::ChooseDJBanterIndexFromList(eRadioID id, int32** list) {
+    return plugin::CallMethodAndReturn<int32, 0x4E95E0, CAERadioTrackManager*, eRadioID, int32**>(this, id, list);
 }
 
 // 0x4EB180
-void CAERadioTrackManager::ChooseTracksForStation(RadioStationId id) {
-    int8            trackCount = 0;
+void CAERadioTrackManager::ChooseTracksForStation(eRadioID id) {
+    int8 trackCount = 0;
     tRadioSettings* settings = &settings1;
 
     settings->Reset();
@@ -530,7 +541,7 @@ void CAERadioTrackManager::ChooseTracksForStation(RadioStationId id) {
                 return;
             }
         } else {
-            QueueUpTracksForStation(0, &trackCount, TYPE_DJ_BANTER, settings);
+            QueueUpTracksForStation(RADIO_EMERGENCY_AA, &trackCount, TYPE_DJ_BANTER, settings);
         }
         QueueUpTracksForStation(id, &trackCount, TYPE_INTRO, settings);
         return;
@@ -562,7 +573,7 @@ void CAERadioTrackManager::ChooseTracksForStation(RadioStationId id) {
     AddMusicTrackIndexToHistory(id, *(&settings1.m_iPrevTrackType + trackCount));
 
     if (id == RADIO_EMERGENCY_AA) {
-        QueueUpTracksForStation(0, &trackCount, TYPE_DJ_BANTER, settings);
+        QueueUpTracksForStation(id, &trackCount, TYPE_DJ_BANTER, settings);
         return;
     }
 
@@ -587,29 +598,29 @@ int8 CAERadioTrackManager::ChooseTalkRadioShow() {
 }
 
 // 0x4E96C0
-void CAERadioTrackManager::AddMusicTrackIndexToHistory(RadioStationId id, int8 trackIndex) {
+void CAERadioTrackManager::AddMusicTrackIndexToHistory(eRadioID id, int8 trackIndex) {
     plugin::CallMethod<0x4E96C0, CAERadioTrackManager*, int8, int8>(this, id, trackIndex);
     m_nMusicTrackIndexHistory[id].PutAtFirst(trackIndex);
     m_nTracksInARow[id]++;
 }
 
 // 0x4E9720
-void CAERadioTrackManager::AddIdentIndexToHistory(RadioStationId id, int8 trackIndex) {
-    plugin::CallMethod<0x4E9720, CAERadioTrackManager*, RadioStationId, int8>(this, id, trackIndex);
+void CAERadioTrackManager::AddIdentIndexToHistory(eRadioID id, int8 trackIndex) {
+    plugin::CallMethod<0x4E9720, CAERadioTrackManager*, eRadioID, int8>(this, id, trackIndex);
     m_nIdentIndexHistory[id].PutAtFirst(trackIndex);
     m_nTracksInARow[id]++;
 }
 
 // 0x4E9760
-void CAERadioTrackManager::AddAdvertIndexToHistory(RadioStationId id, int8 trackIndex) {
-    plugin::CallMethod<0x4E9760, CAERadioTrackManager*, RadioStationId, int8>(this, id, trackIndex);
+void CAERadioTrackManager::AddAdvertIndexToHistory(eRadioID id, int8 trackIndex) {
+    plugin::CallMethod<0x4E9760, CAERadioTrackManager*, eRadioID, int8>(this, id, trackIndex);
     m_nAdvertIndexHistory[id].PutAtFirst(trackIndex);
     m_nTracksInARow[id]++;
 }
 
 // 0x4E97B0
-void CAERadioTrackManager::AddDJBanterIndexToHistory(RadioStationId id, int8 trackIndex) {
-    return plugin::CallMethod<0x4E97B0, CAERadioTrackManager*, RadioStationId, int8>(this, id, trackIndex);
+void CAERadioTrackManager::AddDJBanterIndexToHistory(eRadioID id, int8 trackIndex) {
+    return plugin::CallMethod<0x4E97B0, CAERadioTrackManager*, eRadioID, int8>(this, id, trackIndex);
     m_nDJBanterIndexHistory[id].PutAtFirst(trackIndex);
     m_nTracksInARow[id]++;
 }

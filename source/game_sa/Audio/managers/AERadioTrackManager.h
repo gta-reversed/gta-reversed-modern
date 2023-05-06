@@ -26,7 +26,7 @@ struct tRadioSettings {
     int32 m_iTrackPlayTime{0};
     int32 m_iTrackLengthMs{0};
     int8  m_f24{2}; // TODO: enum
-    int8  m_nCurrentRadioStation{RADIO_OFF}; // NOTSA init value.
+    eRadioID m_nCurrentRadioStation{RADIO_OFF}; // NOTSA init value.
     int8  m_nBassSet{0};
     float m_fBassGain{}; // unk. init
     int8  m_aTrackTypes[NUM_TRACKS]{TYPE_NONE};
@@ -36,7 +36,7 @@ struct tRadioSettings {
     int8  m_iCurrentTrackIndex{-1};
     int8  m_iPrevTrackIndex{-1};
 
-    tRadioSettings(int32 currentStation = RADIO_OFF)
+    tRadioSettings(eRadioID currentStation = RADIO_OFF)
         : m_nCurrentRadioStation(currentStation)
     {}
 
@@ -59,10 +59,23 @@ struct tRadioState {
     int8 m_aTrackTypes[3]{TYPE_NONE};
     int8 m_nGameClockDays{-1};
     int8 m_nGameClockHours{-1};
+
+    void Reset(bool paused = false) {
+        rng::fill(m_aElapsed, 0);
+        rng::fill(m_aTrackQueue, -1);
+        rng::fill(m_aTrackTypes, TYPE_NONE);
+
+        m_iTimeInMs = -1;
+        if (!paused)
+            m_iTimeInPauseModeInMs = -1;
+        m_iTrackPlayTime = -1;
+        m_nGameClockDays = -1;
+        m_nGameClockHours = -1;
+    }
 };
 VALIDATE_SIZE(tRadioState, 0x2C);
 
-typedef int8 RadioStationId;
+//typedef int8 RadioStationId; => eRadioID
 
 // NOTSA
 template<size_t Count>
@@ -92,40 +105,51 @@ VALIDATE_SIZE(tRadioIndexHistory<1>, 0x04);
 using tMusicTrackHistory = tRadioIndexHistory<5>;
 VALIDATE_SIZE(tMusicTrackHistory, 0x14);
 
+enum class eRadioTrackMode {
+    UNK_0,
+    UNK_1,
+    UNK_2,
+    GAME_PAUSED, // ?
+    UNK_4,
+    UNK_5,
+    UNK_6,
+    UNK_7
+};
+
 class CAERadioTrackManager {
 public:
-    bool           m_bInitialised{false};
-    bool           m_bDisplayStationName{false};
-    char           m_prev{0}; // TODO: make sense of this.
-    bool           m_bEnabledInPauseMode{false};
-    bool           m_bBassEnhance{true};
-    bool           m_bPauseMode{false};
-    bool           m_bRetuneJustStarted{false};
-    bool           m_bRadioAutoSelect{true};
-    uint8          m_nTracksInARow[RADIO_COUNT]{0};
-    uint8          m_nSavedGameClockDays{0};
-    uint8          m_nSavedGameClockHours{0};
-    int32          m_aListenTimes[RADIO_COUNT];
-    uint32         m_nTimeRadioStationRetuned{0};
-    uint32         m_nTimeToDisplayRadioName{0};
-    uint32         m_nSavedTimeMs{0};
-    uint32         m_nRetuneStartedTime;
-    uint32         field_60{0};
-    int32          m_nChannel;
-    int32          m_nMode{7}; // TODO: enum
-    int32          m_nStationsListed{0};
-    int32          m_nStationsListDown{0};
-    int32          m_nSavedRadioStationId{-1};
-    int8           m_iRadioStationMenuRequest;
-    int8           m_iRadioStationRequest;
-    int32          field_7C;
-    float          m_f80{0.0f}; // 80 and 84 volume related fields. See ::UpdateRadioVolumes
-    float          m_f84{0.0f};
-    tRadioSettings settings1; // TODO: Maybe just make an array out of this??
-    tRadioSettings settings2;
-    tRadioState    m_aRadioState[RADIO_COUNT]{};
-    uint32         field_368{0};
-    int8           m_nUserTrackPlayMode;
+    bool            m_bInitialised{false};
+    bool            m_bDisplayStationName{false};
+    char            m_prev{0}; // TODO: make sense of this.
+    bool            m_bEnabledInPauseMode{false};
+    bool            m_bBassEnhance{true};
+    bool            m_bPauseMode{false};
+    bool            m_bRetuneJustStarted{false};
+    bool            m_bRadioAutoSelect{true};
+    uint8           m_nTracksInARow[RADIO_COUNT]{0};
+    uint8           m_nSavedGameClockDays{0};
+    uint8           m_nSavedGameClockHours{0};
+    int32           m_aListenTimes[RADIO_COUNT];
+    uint32          m_nTimeRadioStationRetuned{0};
+    uint32          m_nTimeToDisplayRadioName{0};
+    uint32          m_nSavedTimeMs{0};
+    uint32          m_nRetuneStartedTime;
+    uint32          field_60{0};
+    int32           m_nChannel;
+    eRadioTrackMode m_nMode{eRadioTrackMode::UNK_7};
+    int32           m_nStationsListed{0};
+    int32           m_nStationsListDown{0};
+    int32           m_nSavedRadioStationId{-1};
+    int8            m_iRadioStationMenuRequest;
+    int8            m_iRadioStationRequest;
+    int32           field_7C;
+    float           m_f80{0.0f}; // 80 and 84 volume related fields. See ::UpdateRadioVolumes
+    float           m_f84{0.0f};
+    tRadioSettings  settings1; // TODO: Maybe just make an array out of this??
+    tRadioSettings  settings2;
+    tRadioState     m_aRadioState[RADIO_COUNT]{};
+    uint32          field_368{0};
+    int8            m_nUserTrackPlayMode;
 
 public:
     static constexpr auto DJBANTER_INDEX_HISTORY_COUNT = 15;
@@ -176,29 +200,29 @@ public:
     ~CAERadioTrackManager() = default;
 
     bool Initialise(int32 channelId);
-    void InitialiseRadioStationID(RadioStationId id);
+    void InitialiseRadioStationID(eRadioID id);
 
     void Reset();
     static void ResetStatistics();
 
     bool   IsRadioOn() const;
     bool   HasRadioRetuneJustStarted() const;
-    int8   GetCurrentRadioStationID() const;
+    eRadioID GetCurrentRadioStationID() const;
     int32* GetRadioStationListenTimes();
     void   SetRadioAutoRetuneOnOff(bool enable);
     void   SetBassEnhanceOnOff(bool enable);
     void   SetBassSetting(int8 nBassSet, float fBassGrain);
-    void   RetuneRadio(int8 radioId);
+    void   RetuneRadio(eRadioID radioId);
 
     void  DisplayRadioStationName();
-    const char* GetRadioStationName(RadioStationId id);
-    void  GetRadioStationNameKey(RadioStationId id, char* outStr);
+    const char* GetRadioStationName(eRadioID id);
+    void  GetRadioStationNameKey(eRadioID id, char* outStr);
     static bool IsVehicleRadioActive();
 
     void StartTrackPlayback();
     void UpdateRadioVolumes();
     void PlayRadioAnnouncement(uint32);
-    void StartRadio(RadioStationId id, int8 bassValue, float bassGain, uint8 a5);
+    void StartRadio(eRadioID id, int8 bassValue, float bassGain, uint8 a5);
     void StartRadio(tVehicleAudioSettings* settings);
     void StopRadio(tVehicleAudioSettings* settings, bool bDuringPause);
 
@@ -208,17 +232,17 @@ public:
     static void Save();
 
 protected:
-    void AddMusicTrackIndexToHistory(RadioStationId id, int8 trackIndex);
-    void AddIdentIndexToHistory(RadioStationId id, int8 trackIndex);
-    void AddAdvertIndexToHistory(RadioStationId id, int8 trackIndex);
-    void AddDJBanterIndexToHistory(RadioStationId id, int8 trackIndex);
+    void AddMusicTrackIndexToHistory(eRadioID id, int8 trackIndex);
+    void AddIdentIndexToHistory(eRadioID id, int8 trackIndex);
+    void AddAdvertIndexToHistory(eRadioID id, int8 trackIndex);
+    void AddDJBanterIndexToHistory(eRadioID id, int8 trackIndex);
 
-    void  ChooseTracksForStation(RadioStationId id);
-    int32 ChooseIdentIndex(RadioStationId id);
-    int32 ChooseAdvertIndex(RadioStationId id);
-    int32 ChooseDJBanterIndex(RadioStationId id);
-    int32 ChooseDJBanterIndexFromList(RadioStationId id, int32** list);
-    int8  ChooseMusicTrackIndex(RadioStationId id);
+    void  ChooseTracksForStation(eRadioID id);
+    int32 ChooseIdentIndex(eRadioID id);
+    int32 ChooseAdvertIndex(eRadioID id);
+    int32 ChooseDJBanterIndex(eRadioID id);
+    int32 ChooseDJBanterIndexFromList(eRadioID id, int32** list);
+    int8  ChooseMusicTrackIndex(eRadioID id);
     static int8  ChooseTalkRadioShow();
 
     void CheckForTrackConcatenation();
@@ -227,8 +251,8 @@ protected:
     void CheckForStationRetuneDuringPause();
     void CheckForPause();
 
-    bool QueueUpTracksForStation(RadioStationId id, int8* iTrackCount, int8 radioState, tRadioSettings* settings);
-    bool TrackRadioStation(RadioStationId id, uint8 a2);
+    bool QueueUpTracksForStation(eRadioID id, int8* iTrackCount, int8 radioState, tRadioSettings* settings);
+    bool TrackRadioStation(eRadioID id, uint8 a2);
 };
 VALIDATE_SIZE(CAERadioTrackManager, 0x370);
 

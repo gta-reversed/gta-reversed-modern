@@ -89,7 +89,7 @@ public:
     int8      m_nRadioVolume;
     bool      m_bRadioEq;
 
-    int8      m_nRadioStation;
+    eRadioID  m_nRadioStation;
     char      field_53;
     int32     m_nCurrentScreenItem;
     bool      m_bQuitGameNoDVD; // CMenuManager::WaitForUserCD 0x57C5E0

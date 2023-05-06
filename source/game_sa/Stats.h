@@ -78,7 +78,7 @@ public:
     static void RegisterMissionPassed(uint8 missionId);
     static bool PopulateFavoriteRadioStationList();
     static int32* GetFullFavoriteRadioStationList();
-    static int32 FindMostFavoriteRadioStation();
+    static eRadioID FindMostFavoriteRadioStation();
     static int32 FindLeastFavoriteRadioStation();
     static int32 FindCriminalRatingNumber();
     static float GetPercentageProgress();

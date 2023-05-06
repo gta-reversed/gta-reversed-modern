@@ -150,8 +150,8 @@ int32* CStats::GetFullFavoriteRadioStationList() {
 }
 
 // 0x558FA0
-int32 CStats::FindMostFavoriteRadioStation() {
-    return plugin::CallAndReturn<int32, 0x558FA0>();
+eRadioID CStats::FindMostFavoriteRadioStation() {
+    return plugin::CallAndReturn<eRadioID, 0x558FA0>();
 }
 
 // 0x559010

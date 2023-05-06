@@ -24,8 +24,8 @@ class CAudioEngine {
 public:
     bool                        field_0;
     bool                        field_1;
-    RadioStationId              m_nCurrentRadioStationId;
-    RadioStationId              m_nSavedRadioStationId;
+    eRadioID                    m_nCurrentRadioStationId;
+    eRadioID                    m_nSavedRadioStationId;
     int32                       m_nBackgroundAudioChannel;
     tBeatInfo                   m_BeatInfo;
     CAEFrontendAudioEntity      m_FrontendAE;
@@ -87,21 +87,21 @@ public:
     void ReportMissionAudioEvent(uint16 eventId, CPhysical* physical, float a3, float a4);
     void ReportFrontendAudioEvent(eAudioEvents eventId, float volumeChange = 0.0f, float speed = 1.0f);
 
-    void InitialiseRadioStationID(RadioStationId id);
+    void InitialiseRadioStationID(eRadioID id);
     void StartRadio(tVehicleAudioSettings* settings);
-    void StartRadio(int8, int8);
+    void StartRadio(eRadioID id, int8 bassValue);
     void StopRadio(tVehicleAudioSettings* settings, bool bDuringPause);
     void SetRadioAutoRetuneOnOff(bool);
     void SetBassEnhanceOnOff(bool enable);
     void SetRadioBassSetting(int8);
     bool HasRadioRetuneJustStarted();
-    const char* GetRadioStationName(RadioStationId id);
-    void GetRadioStationNameKey(RadioStationId id, char* outStr);
+    const char* GetRadioStationName(eRadioID id);
+    void GetRadioStationNameKey(eRadioID id, char* outStr);
     int32* GetRadioStationListenTimes();
     void DisplayRadioStationName();
-    RadioStationId GetCurrentRadioStationID();
+    eRadioID GetCurrentRadioStationID();
     void PlayRadioAnnouncement(uint32);
-    void RetuneRadio(int8);
+    void RetuneRadio(eRadioID id);
 
     void PreloadCutsceneTrack(int16 trackId, bool wait);
     static void PlayPreloadedCutsceneTrack();

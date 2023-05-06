@@ -1,4 +1,5 @@
 #pragma once
+#include "eRadioID.h"
 
 class CVehicle;
 
@@ -19,6 +20,11 @@ public:
     static bool      GetBankAndSoundFromScriptSlotAudioEvent(int32* a1, int32* a2, int32* a3, int32 a4);
     static float     GetPiecewiseLinear(float x, int16 dataCount, float (*data)[2]);
     static uint64    GetCurrentTimeInMilliseconds();
+
+    // NOTSA
+    static eRadioID GetRandomRadioStation() {
+        return static_cast<eRadioID>(GetRandomNumberInRange(1, RADIO_COUNT - 1));
+    }
 
 private:
     static uint64& startTimeMs;
