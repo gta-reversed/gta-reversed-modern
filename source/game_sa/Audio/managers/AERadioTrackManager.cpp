@@ -382,7 +382,29 @@ void CAERadioTrackManager::CheckForStationRetune() {
 
 // 0x4EB890
 void CAERadioTrackManager::CheckForStationRetuneDuringPause() {
-    plugin::CallMethod<0x4EB890, CAERadioTrackManager*>(this);
+    return plugin::CallMethod<0x4EB890, CAERadioTrackManager*>(this);
+    if (settings2.m_nCurrentRadioStation == RADIO_EMERGENCY_AA && IsRadioOn())
+        return;
+
+    if (const auto station = m_iRadioStationMenuRequest; station != RADIO_OFF) {
+        if (settings2.m_nCurrentRadioStation == RADIO_OFF) {
+            AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_RADIO_CLICK_ON);
+            settings2.m_nCurrentRadioStation = RADIO_INVALID;
+        } else {
+            AudioEngine.StopRadio(nullptr, true);
+        }
+
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_RADIO_RETUNE_START);
+        if (CTimer::GetTimeInMSPauseMode() > m_nRetuneStartedTime + 700u) {
+            StartRadio(RADIO_OFF, settings2.m_nBassSet, settings2.m_fBassGain, 0);
+            *(int32*)&m_iRadioStationMenuRequest = -1; // TODO
+        }
+    } else {
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_RADIO_CLICK_OFF);
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
+        StartRadio(RADIO_OFF, settings2.m_nBassSet, settings2.m_fBassGain, 0);
+        *(int32*)&m_iRadioStationMenuRequest = -1; // TODO
+    }
 }
 
 // 0x4EA640
@@ -487,8 +509,8 @@ bool CAERadioTrackManager::TrackRadioStation(eRadioID id, uint8 a2) {
 }
 
 // 0x4EA670
-bool CAERadioTrackManager::QueueUpTracksForStation(eRadioID id, int8* iTrackCount, int8 radioState, tRadioSettings* settings) {
-    return plugin::CallMethodAndReturn<bool, 0x4EA670, CAERadioTrackManager*, int8, int8*, int8, tRadioSettings*>(this, id, iTrackCount, radioState, settings);
+bool CAERadioTrackManager::QueueUpTracksForStation(eRadioID id, int8* iTrackCount, int8 radioState, tRadioSettings& settings) {
+    return plugin::CallMethodAndReturn<bool, 0x4EA670, CAERadioTrackManager*, int8, int8*, int8, tRadioSettings&>(this, id, iTrackCount, radioState, settings);
 }
 
 // 0x4E9820
@@ -524,72 +546,70 @@ int32 CAERadioTrackManager::ChooseDJBanterIndexFromList(eRadioID id, int32** lis
 // 0x4EB180
 void CAERadioTrackManager::ChooseTracksForStation(eRadioID id) {
     int8 trackCount = 0;
-    tRadioSettings* settings = &settings1;
 
-    settings->Reset();
-
+    settings1.Reset();
     if (!CAEAudioUtility::ResolveProbability(0.95f)) {
         if (id) {
             if (CAEAudioUtility::ResolveProbability(0.5f))
-                QueueUpTracksForStation(id, &trackCount, TYPE_INDENT, settings);
+                QueueUpTracksForStation(id, &trackCount, TYPE_INDENT, settings1);
 
-            if (!QueueUpTracksForStation(id, &trackCount, TYPE_DJ_BANTER, settings))
-                QueueUpTracksForStation(id, &trackCount, TYPE_ADVERT, settings);
+            if (!QueueUpTracksForStation(id, &trackCount, TYPE_DJ_BANTER, settings1))
+                QueueUpTracksForStation(id, &trackCount, TYPE_ADVERT, settings1);
 
             if (id == RADIO_USER_TRACKS) {
-                QueueUpTracksForStation(RADIO_USER_TRACKS, &trackCount, TYPE_TRACK, settings);
+                QueueUpTracksForStation(RADIO_USER_TRACKS, &trackCount, TYPE_TRACK, settings1);
                 return;
             }
         } else {
-            QueueUpTracksForStation(RADIO_EMERGENCY_AA, &trackCount, TYPE_DJ_BANTER, settings);
+            QueueUpTracksForStation(RADIO_EMERGENCY_AA, &trackCount, TYPE_DJ_BANTER, settings1);
         }
-        QueueUpTracksForStation(id, &trackCount, TYPE_INTRO, settings);
+        QueueUpTracksForStation(id, &trackCount, TYPE_INTRO, settings1);
         return;
     }
 
     if (id == RADIO_USER_TRACKS) {
-        QueueUpTracksForStation(RADIO_USER_TRACKS, &trackCount, TYPE_TRACK, settings);
-        QueueUpTracksForStation(RADIO_USER_TRACKS, &trackCount, TYPE_TRACK, settings);
+        QueueUpTracksForStation(RADIO_USER_TRACKS, &trackCount, TYPE_TRACK, settings1);
+        QueueUpTracksForStation(RADIO_USER_TRACKS, &trackCount, TYPE_TRACK, settings1);
         if (!FrontEndMenuManager.m_nRadioMode && CAEAudioUtility::ResolveProbability(0.17f)) {
-            QueueUpTracksForStation(RADIO_USER_TRACKS, &trackCount, TYPE_ADVERT, settings);
+            QueueUpTracksForStation(RADIO_USER_TRACKS, &trackCount, TYPE_ADVERT, settings1);
         }
         return;
     }
 
     if (CAEAudioUtility::ResolveProbability(0.9f)) {
-        QueueUpTracksForStation(id, &trackCount, TYPE_TRACK, settings);
+        QueueUpTracksForStation(id, &trackCount, TYPE_TRACK, settings1);
         return;
     }
 
     if (CAEAudioUtility::ResolveProbability(0.5f)) {
         if (CAEAudioUtility::ResolveProbability(0.5f)) {
-            QueueUpTracksForStation(id, &trackCount, TYPE_INDENT, settings);
+            QueueUpTracksForStation(id, &trackCount, TYPE_INDENT, settings1);
         }
-        QueueUpTracksForStation(id, &trackCount, TYPE_INTRO, settings);
+        QueueUpTracksForStation(id, &trackCount, TYPE_INTRO, settings1);
         return;
     }
 
-    QueueUpTracksForStation(id, &trackCount, TYPE_OUTRO, settings);
-    AddMusicTrackIndexToHistory(id, *(&settings1.m_iPrevTrackType + trackCount));
+    QueueUpTracksForStation(id, &trackCount, TYPE_OUTRO, settings1);
+    AddMusicTrackIndexToHistory(id, settings1.m_aTrackIndexes[trackCount - 1]);
 
     if (id == RADIO_EMERGENCY_AA) {
-        QueueUpTracksForStation(id, &trackCount, TYPE_DJ_BANTER, settings);
+        QueueUpTracksForStation(id, &trackCount, TYPE_DJ_BANTER, settings1);
         return;
     }
 
     if (CAEAudioUtility::ResolveProbability(0.5f)) {
         if (CAEAudioUtility::ResolveProbability(0.5f)) {
-            QueueUpTracksForStation(id, &trackCount, TYPE_INDENT, settings);
+            QueueUpTracksForStation(id, &trackCount, TYPE_INDENT, settings1);
         }
-        QueueUpTracksForStation(id, &trackCount, TYPE_INTRO, settings);
+        QueueUpTracksForStation(id, &trackCount, TYPE_INTRO, settings1);
         return;
     }
 
     if (CAEAudioUtility::ResolveProbability(0.5f))
-        QueueUpTracksForStation(id, &trackCount, TYPE_INDENT, settings);
+        QueueUpTracksForStation(id, &trackCount, TYPE_INDENT, settings1);
 
-    if (!QueueUpTracksForStation(id, &trackCount, TYPE_DJ_BANTER, settings))
-        QueueUpTracksForStation(id, &trackCount, TYPE_ADVERT, settings);
+    if (!QueueUpTracksForStation(id, &trackCount, TYPE_DJ_BANTER, settings1))
+        QueueUpTracksForStation(id, &trackCount, TYPE_ADVERT, settings1);
 }
 
 // 0x4E8E40

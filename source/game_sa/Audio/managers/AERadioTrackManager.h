@@ -251,7 +251,7 @@ protected:
     void CheckForStationRetuneDuringPause();
     void CheckForPause();
 
-    bool QueueUpTracksForStation(eRadioID id, int8* iTrackCount, int8 radioState, tRadioSettings* settings);
+    bool QueueUpTracksForStation(eRadioID id, int8* iTrackCount, int8 radioState, tRadioSettings& settings);
     bool TrackRadioStation(eRadioID id, uint8 a2);
 };
 VALIDATE_SIZE(CAERadioTrackManager, 0x370);
