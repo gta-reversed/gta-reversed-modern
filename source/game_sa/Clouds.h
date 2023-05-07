@@ -33,25 +33,31 @@ struct tMovingFog {
 };
 
 struct tVolumetricClouds {
-    bool       m_bSlots[MAX_VOLUMETRIC_CLOUDS];
-    bool       m_bInsideVisibilityRange[MAX_VOLUMETRIC_CLOUDS];
-    CVector    field_168[MAX_VOLUMETRIC_CLOUDS];
-    CVector    field_9D8[MAX_VOLUMETRIC_CLOUDS];
-    int32      m_nHeight[MAX_VOLUMETRIC_CLOUDS];
-    RwTexture* m_pTex;
-    CVector    m_vecCloudsSpace[3];
-    float      m_fCloudXCoords[18];
-    float      m_fCloudYCoords[18];
-    float      m_fCloudZCoords[18];
-    float      m_fCloudUCoords[18];
-    float      m_fCloudVCoords[18];
+    bool       bUsed[MAX_VOLUMETRIC_CLOUDS];
+    bool       bJustCreated[MAX_VOLUMETRIC_CLOUDS];
+
+    CVector    pos[MAX_VOLUMETRIC_CLOUDS];
+    CVector    size[MAX_VOLUMETRIC_CLOUDS];
+
+    int32      alpha[MAX_VOLUMETRIC_CLOUDS];
+
+    RwTexture* texture;
+
+    CVector    quadNormal[3];
+
+    float      modelX[18];
+    float      modelY[18];
+    float      modelZ[18];
+
+    float      modelU[18];
+    float      modelV[18];
 };
 
 class CClouds {
 public:
-    static float& m_fVolumetricCloudDensity;        // default 1.0f
-    static bool& m_bVolumetricCloudHeightSwitch;    // default true
-    static float& m_fVolumetricCloudWindMoveFactor; // default 0.1f
+    static inline auto& m_fVolumetricCloudDensity = StaticRef<float, 0x8D5388>();
+    static inline auto& m_bVolumetricCloudHeightSwitch = StaticRef<int8, 0x8D538C>();
+    static inline auto& m_fVolumetricCloudWindMoveFactor = StaticRef<float, 0x8D5390>();
     static float& m_fVolumetricCloudMaxDistance;
     static uint32& m_VolumetricCloudsUsedNum;
     static float& ms_cameraRoll;
@@ -65,7 +71,7 @@ public:
     static inline struct DebugSettings {
         struct RenderSettingPair {
             bool Enabled = true, Force = false;
-        } Moon, Rockstar, LowClouds, Rainbow, Streaks;
+        } Moon, Rockstar, LowClouds, Rainbow, Streaks, VolumetricClouds;
     } s_DebugSettings;
 
 public:

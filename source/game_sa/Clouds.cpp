@@ -3,9 +3,6 @@
 #include "Clouds.h"
 #include "PostEffects.h"
 
-// float& CClouds::m_fVolumetricCloudDensity; // unused
-// bool& CClouds::m_bVolumetricCloudHeightSwitch; // unused
-// float& CClouds::m_fVolumetricCloudWindMoveFactor; // unused
 float& CClouds::m_fVolumetricCloudMaxDistance = *reinterpret_cast<float*>(0xC6AA58);
 uint32& CClouds::m_VolumetricCloudsUsedNum = *reinterpret_cast<uint32*>(0xC6AA5C);
 
@@ -52,7 +49,7 @@ void CClouds::InjectHooks() {
     RH_ScopedInstall(RenderSkyPolys, 0x714650);
     RH_ScopedInstall(RenderBottomFromHeight, 0x7154B0, { .reversed = false });
     RH_ScopedInstall(VolumetricCloudsInit, 0x7131C0);
-    RH_ScopedInstall(VolumetricClouds_Create, 0x715F40, { .reversed = false });
+    RH_ScopedInstall(VolumetricClouds_Create, 0x715F40);
     RH_ScopedInstall(VolumetricClouds_Delete, 0x7135F0);
     RH_ScopedInstall(VolumetricClouds_GetFirstFreeSlot, 0x7135C0);
     RH_ScopedInstall(VolumetricCloudsGetMaxDistance, 0x713630);
@@ -66,7 +63,7 @@ void CClouds::Init() {
     gpCloudTex = RwTextureRead("cloud1", nullptr);
     gpCloudMaskTex = RwTextureRead("cloudmasked", nullptr);
     gpMoonMask = RwTextureRead("lunar", "lunarm");
-    ms_vc.m_pTex = RwTextureRead("cloudhigh", "cloudhighm");
+    ms_vc.texture = RwTextureRead("cloudhigh", "cloudhighm");
     CTxdStore::PopCurrentTxd();
     CloudRotation = 0.0f;
     VolumetricCloudsInit();
@@ -87,8 +84,8 @@ void CClouds::Shutdown() {
     RwTextureDestroy(gpCloudMaskTex);
     gpCloudMaskTex = nullptr;
 
-    RwTextureDestroy(ms_vc.m_pTex);
-    ms_vc.m_pTex = nullptr;
+    RwTextureDestroy(ms_vc.texture);
+    ms_vc.texture = nullptr;
 }
 
 // 0x713060
@@ -887,137 +884,188 @@ void CClouds::RenderBottomFromHeight() {
     plugin::Call<0x7154B0>();
 }
 
+//
+// -- VOLUMETRIC CLOUDS --
+//
+
 // 0x7131C0
 void CClouds::VolumetricCloudsInit() {
-    ms_vc.m_vecCloudsSpace[0] = CVector(0.0f, 1.0f, 0.0f);
-    ms_vc.m_vecCloudsSpace[1] = CVector(0.0f, 0.0f, 1.0f);
-    ms_vc.m_vecCloudsSpace[2] = CVector(1.0f, 0.0f, 0.0f);
+    ms_vc.quadNormal[0] = CVector(0.0f, 1.0f, 0.0f);
+    ms_vc.quadNormal[1] = CVector(0.0f, 0.0f, 1.0f);
+    ms_vc.quadNormal[2] = CVector(1.0f, 0.0f, 0.0f);
 
-    ms_vc.m_fCloudXCoords[0] = -0.5f;
-    ms_vc.m_fCloudYCoords[0] = 0.0f;
-    ms_vc.m_fCloudZCoords[0] = 0.5f;
-    ms_vc.m_fCloudUCoords[0] = 0.0f;
-    ms_vc.m_fCloudVCoords[0] = 0.0f;
+    ms_vc.modelX[0] = -0.5f;
+    ms_vc.modelY[0] = 0.0f;
+    ms_vc.modelZ[0] = 0.5f;
+    ms_vc.modelU[0] = 0.0f;
+    ms_vc.modelV[0] = 0.0f;
 
-    ms_vc.m_fCloudXCoords[1] = 0.5f;
-    ms_vc.m_fCloudYCoords[1] = 0.0f;
-    ms_vc.m_fCloudZCoords[1] = 0.5f;
-    ms_vc.m_fCloudUCoords[1] = 1.0f;
-    ms_vc.m_fCloudVCoords[1] = 0.0f;
+    ms_vc.modelX[1] = 0.5f;
+    ms_vc.modelY[1] = 0.0f;
+    ms_vc.modelZ[1] = 0.5f;
+    ms_vc.modelU[1] = 1.0f;
+    ms_vc.modelV[1] = 0.0f;
 
-    ms_vc.m_fCloudXCoords[2] = -0.5f;
-    ms_vc.m_fCloudYCoords[2] = 0.0f;
-    ms_vc.m_fCloudZCoords[2] = -0.5f;
-    ms_vc.m_fCloudUCoords[2] = 0.0f;
-    ms_vc.m_fCloudVCoords[2] = 1.0f;
+    ms_vc.modelX[2] = -0.5f;
+    ms_vc.modelY[2] = 0.0f;
+    ms_vc.modelZ[2] = -0.5f;
+    ms_vc.modelU[2] = 0.0f;
+    ms_vc.modelV[2] = 1.0f;
 
-    ms_vc.m_fCloudXCoords[3] = 0.5f;
-    ms_vc.m_fCloudYCoords[3] = 0.0f;
-    ms_vc.m_fCloudZCoords[3] = 0.5f;
-    ms_vc.m_fCloudUCoords[3] = 1.0f;
-    ms_vc.m_fCloudVCoords[3] = 0.0f;
+    ms_vc.modelX[3] = 0.5f;
+    ms_vc.modelY[3] = 0.0f;
+    ms_vc.modelZ[3] = 0.5f;
+    ms_vc.modelU[3] = 1.0f;
+    ms_vc.modelV[3] = 0.0f;
 
-    ms_vc.m_fCloudXCoords[4] = 0.5f;
-    ms_vc.m_fCloudYCoords[4] = 0.0f;
-    ms_vc.m_fCloudZCoords[4] = -0.5f;
-    ms_vc.m_fCloudUCoords[4] = 1.0f;
-    ms_vc.m_fCloudVCoords[4] = 1.0f;
+    ms_vc.modelX[4] = 0.5f;
+    ms_vc.modelY[4] = 0.0f;
+    ms_vc.modelZ[4] = -0.5f;
+    ms_vc.modelU[4] = 1.0f;
+    ms_vc.modelV[4] = 1.0f;
 
-    ms_vc.m_fCloudXCoords[5] = -0.5f;
-    ms_vc.m_fCloudYCoords[5] = 0.0f;
-    ms_vc.m_fCloudZCoords[5] = -0.5f;
-    ms_vc.m_fCloudUCoords[5] = 0.0f;
-    ms_vc.m_fCloudVCoords[5] = 1.0f;
+    ms_vc.modelX[5] = -0.5f;
+    ms_vc.modelY[5] = 0.0f;
+    ms_vc.modelZ[5] = -0.5f;
+    ms_vc.modelU[5] = 0.0f;
+    ms_vc.modelV[5] = 1.0f;
 
-    ms_vc.m_fCloudXCoords[6] = -0.5f;
-    ms_vc.m_fCloudYCoords[6] = 0.5f;
-    ms_vc.m_fCloudZCoords[6] = 0.0f;
-    ms_vc.m_fCloudUCoords[6] = 0.0f;
-    ms_vc.m_fCloudVCoords[6] = 0.0f;
+    ms_vc.modelX[6] = -0.5f;
+    ms_vc.modelY[6] = 0.5f;
+    ms_vc.modelZ[6] = 0.0f;
+    ms_vc.modelU[6] = 0.0f;
+    ms_vc.modelV[6] = 0.0f;
 
-    ms_vc.m_fCloudXCoords[7] = 0.5f;
-    ms_vc.m_fCloudYCoords[7] = 0.5f;
-    ms_vc.m_fCloudZCoords[7] = 0.0f;
-    ms_vc.m_fCloudUCoords[7] = 1.0f;
-    ms_vc.m_fCloudVCoords[7] = 0.0f;
+    ms_vc.modelX[7] = 0.5f;
+    ms_vc.modelY[7] = 0.5f;
+    ms_vc.modelZ[7] = 0.0f;
+    ms_vc.modelU[7] = 1.0f;
+    ms_vc.modelV[7] = 0.0f;
 
-    ms_vc.m_fCloudXCoords[8] = -0.5f;
-    ms_vc.m_fCloudYCoords[8] = -0.5f;
-    ms_vc.m_fCloudZCoords[8] = 0.0f;
-    ms_vc.m_fCloudUCoords[8] = 0.0f;
-    ms_vc.m_fCloudVCoords[8] = 1.0f;
+    ms_vc.modelX[8] = -0.5f;
+    ms_vc.modelY[8] = -0.5f;
+    ms_vc.modelZ[8] = 0.0f;
+    ms_vc.modelU[8] = 0.0f;
+    ms_vc.modelV[8] = 1.0f;
 
-    ms_vc.m_fCloudXCoords[9] = 0.5f;
-    ms_vc.m_fCloudYCoords[9] = 0.5f;
-    ms_vc.m_fCloudZCoords[9] = 0.0f;
-    ms_vc.m_fCloudUCoords[9] = 1.0f;
-    ms_vc.m_fCloudVCoords[9] = 0.0f;
+    ms_vc.modelX[9] = 0.5f;
+    ms_vc.modelY[9] = 0.5f;
+    ms_vc.modelZ[9] = 0.0f;
+    ms_vc.modelU[9] = 1.0f;
+    ms_vc.modelV[9] = 0.0f;
 
-    ms_vc.m_fCloudXCoords[10] = 0.5f;
-    ms_vc.m_fCloudYCoords[10] = -0.5f;
-    ms_vc.m_fCloudZCoords[10] = 0.0f;
-    ms_vc.m_fCloudUCoords[10] = 1.0f;
-    ms_vc.m_fCloudVCoords[10] = 1.0f;
+    ms_vc.modelX[10] = 0.5f;
+    ms_vc.modelY[10] = -0.5f;
+    ms_vc.modelZ[10] = 0.0f;
+    ms_vc.modelU[10] = 1.0f;
+    ms_vc.modelV[10] = 1.0f;
 
-    ms_vc.m_fCloudXCoords[11] = -0.5f;
-    ms_vc.m_fCloudYCoords[11] = -0.5f;
-    ms_vc.m_fCloudZCoords[11] = 0.0f;
-    ms_vc.m_fCloudUCoords[11] = 0.0f;
-    ms_vc.m_fCloudVCoords[11] = 1.0f;
+    ms_vc.modelX[11] = -0.5f;
+    ms_vc.modelY[11] = -0.5f;
+    ms_vc.modelZ[11] = 0.0f;
+    ms_vc.modelU[11] = 0.0f;
+    ms_vc.modelV[11] = 1.0f;
 
-    ms_vc.m_fCloudXCoords[12] = 0.0f;
-    ms_vc.m_fCloudYCoords[12] = -0.5f;
-    ms_vc.m_fCloudZCoords[12] = 0.5f;
-    ms_vc.m_fCloudUCoords[12] = 0.0f;
-    ms_vc.m_fCloudVCoords[12] = 0.0f;
+    ms_vc.modelX[12] = 0.0f;
+    ms_vc.modelY[12] = -0.5f;
+    ms_vc.modelZ[12] = 0.5f;
+    ms_vc.modelU[12] = 0.0f;
+    ms_vc.modelV[12] = 0.0f;
 
-    ms_vc.m_fCloudXCoords[13] = 0.0f;
-    ms_vc.m_fCloudYCoords[13] = 0.5f;
-    ms_vc.m_fCloudZCoords[13] = 0.5f;
-    ms_vc.m_fCloudUCoords[13] = 1.0f;
-    ms_vc.m_fCloudVCoords[13] = 0.0f;
+    ms_vc.modelX[13] = 0.0f;
+    ms_vc.modelY[13] = 0.5f;
+    ms_vc.modelZ[13] = 0.5f;
+    ms_vc.modelU[13] = 1.0f;
+    ms_vc.modelV[13] = 0.0f;
 
-    ms_vc.m_fCloudXCoords[14] = 0.0f;
-    ms_vc.m_fCloudYCoords[14] = -0.5f;
-    ms_vc.m_fCloudZCoords[14] = -0.5f;
-    ms_vc.m_fCloudUCoords[14] = 0.0f;
-    ms_vc.m_fCloudVCoords[14] = 1.0f;
+    ms_vc.modelX[14] = 0.0f;
+    ms_vc.modelY[14] = -0.5f;
+    ms_vc.modelZ[14] = -0.5f;
+    ms_vc.modelU[14] = 0.0f;
+    ms_vc.modelV[14] = 1.0f;
 
-    ms_vc.m_fCloudXCoords[15] = 0.0f;
-    ms_vc.m_fCloudYCoords[15] = 0.5f;
-    ms_vc.m_fCloudZCoords[15] = 0.5f;
-    ms_vc.m_fCloudUCoords[15] = 1.0f;
-    ms_vc.m_fCloudVCoords[15] = 0.0f;
+    ms_vc.modelX[15] = 0.0f;
+    ms_vc.modelY[15] = 0.5f;
+    ms_vc.modelZ[15] = 0.5f;
+    ms_vc.modelU[15] = 1.0f;
+    ms_vc.modelV[15] = 0.0f;
 
-    ms_vc.m_fCloudXCoords[16] = 0.0f;
-    ms_vc.m_fCloudYCoords[16] = 0.5f;
-    ms_vc.m_fCloudZCoords[16] = -0.5f;
-    ms_vc.m_fCloudUCoords[16] = 1.0f;
-    ms_vc.m_fCloudVCoords[16] = 1.0f;
+    ms_vc.modelX[16] = 0.0f;
+    ms_vc.modelY[16] = 0.5f;
+    ms_vc.modelZ[16] = -0.5f;
+    ms_vc.modelU[16] = 1.0f;
+    ms_vc.modelV[16] = 1.0f;
 
-    ms_vc.m_fCloudXCoords[17] = 0.0f;
-    ms_vc.m_fCloudYCoords[17] = -0.5f;
-    ms_vc.m_fCloudZCoords[17] = -0.5f;
-    ms_vc.m_fCloudUCoords[17] = 0.0f;
-    ms_vc.m_fCloudVCoords[17] = 1.0f;
+    ms_vc.modelX[17] = 0.0f;
+    ms_vc.modelY[17] = -0.5f;
+    ms_vc.modelZ[17] = -0.5f;
+    ms_vc.modelU[17] = 0.0f;
+    ms_vc.modelV[17] = 1.0f;
 
     for (auto i = 0u; i < MAX_VOLUMETRIC_CLOUDS; ++i) {
-        ms_vc.m_bSlots[i] = false;
-        ms_vc.m_bInsideVisibilityRange[i] = 0;
+        ms_vc.bUsed[i] = false;
+        ms_vc.bJustCreated[i] = 0;
     }
 }
 
-// see VolumetricClouds_GetFirstFreeSlot
 // 0x715F40
 void CClouds::VolumetricClouds_Create(CVector* posn) {
-    plugin::Call<0x715F40, CVector*>(posn);
+    using CGeneral::GetRandomNumberInRange;
+
+    const auto rand1To5 = GetRandomNumberInRange(1.f, 5.f);
+
+    const auto AddVolumetricCloud = [
+        randMinSizeXYZ = rand1To5 * 20.f,
+        randMaxSizeXY  = rand1To5 * 100.f,
+        randMaxSizeZ   = rand1To5 * 40.f
+    ](int32 vcidx, CVector pos) {
+        ms_vc.bUsed[vcidx]        = true;
+        ms_vc.bJustCreated[vcidx] = true;
+        ms_vc.alpha[vcidx]        = GetRandomNumberInRange<int32>(36, 128);
+
+        ms_vc.size[vcidx] = CVector{
+            GetRandomNumberInRange(randMinSizeXYZ, randMaxSizeXY),
+            GetRandomNumberInRange(randMinSizeXYZ, randMaxSizeXY),
+            GetRandomNumberInRange(randMinSizeXYZ, randMaxSizeZ),
+        };
+
+        ms_vc.pos[vcidx] = pos;
+    };
+
+    if (posn) {
+        const auto randMinMaxOffsetXYZ = rand1To5 * 3.f;
+        for (auto i = 0; i < 5; i++) {
+            const auto vcidx = VolumetricClouds_GetFirstFreeSlot();
+            if (vcidx == -1) {
+                return;
+            }
+            const auto pos = *posn = *posn + CVector::Random(-randMinMaxOffsetXYZ, randMinMaxOffsetXYZ);
+            AddVolumetricCloud(
+                vcidx,
+                pos
+            );
+        }
+    } else {
+        const auto camPos  = TheCamera.GetPosition();
+        const auto maxDist = m_fVolumetricCloudMaxDistance;
+        for (auto i = 0; i < MAX_VOLUMETRIC_CLOUDS; i++) {
+            AddVolumetricCloud(
+                i,
+                camPos + CVector{
+                    GetRandomNumberInRange(-maxDist, maxDist),
+                    GetRandomNumberInRange(-maxDist, maxDist),
+                    GetRandomNumberInRange(-maxDist * 0.25f, maxDist * 0.25f),
+                }
+            );
+        }
+    }
 }
 
 // 0x7135F0
 void CClouds::VolumetricClouds_Delete(int32 vcSlotIndex) {
     vcSlotIndex = std::clamp(vcSlotIndex, 0, MAX_VOLUMETRIC_CLOUDS - 1);
-    ms_vc.m_bSlots[vcSlotIndex] = false;
-    ms_vc.m_bInsideVisibilityRange[vcSlotIndex] = false;
+    ms_vc.bUsed[vcSlotIndex]        = false;
+    ms_vc.bJustCreated[vcSlotIndex] = false;
 }
 
 // unused
@@ -1025,20 +1073,203 @@ void CClouds::VolumetricClouds_Delete(int32 vcSlotIndex) {
 // 0x7135C0
 int32 CClouds::VolumetricClouds_GetFirstFreeSlot() {
     for (auto i = 0u; i < m_VolumetricCloudsUsedNum; i++) {
-        if (!ms_vc.m_bSlots[i])
-            return i;
+        if (!ms_vc.bUsed[i]) {
+            return (int32)i;
+        }
     }
-
     return -1;
 }
 
 // 0x713630
 float CClouds::VolumetricCloudsGetMaxDistance() {
-    const auto farPlane = RwCameraGetFarClipPlane(Scene.m_pRwCamera);
-    return farPlane < 600.0f ? farPlane : 600.0f;
+    return std::min(RwCameraGetFarClipPlane(Scene.m_pRwCamera), 600.f);
 }
 
 // 0x716380
 void CClouds::VolumetricCloudsRender() {
-    plugin::Call<0x716380>();
+    if (!s_DebugSettings.VolumetricClouds.Enabled) {
+        return;
+    }
+
+    const auto plyr = FindPlayerPed();
+    if (!CGame::CanSeeOutSideFromCurrArea() || plyr->IsInCurrentArea()) {
+        if (!s_DebugSettings.VolumetricClouds.Force) {
+            return;
+        }
+    }
+
+    m_fVolumetricCloudDensity = [] {
+        switch (g_fx.GetFxQuality()) {
+        case FX_QUALITY_LOW:    return 0.5f;
+        case FX_QUALITY_MEDIUM: return 1.f / 3.f;
+        default:                return 1.f;
+        }
+    }();
+
+    m_VolumetricCloudsUsedNum = lerp(0, MAX_VOLUMETRIC_CLOUDS, m_fVolumetricCloudDensity);
+
+    if (!m_VolumetricCloudsUsedNum) {
+        return;
+    }
+
+    m_fVolumetricCloudMaxDistance = CClouds::VolumetricCloudsGetMaxDistance();
+
+    const auto fadeOutBeginDist = m_fVolumetricCloudMaxDistance - 100.f;
+    const auto fadeOutDist      = m_fVolumetricCloudMaxDistance + 200.f;
+
+    const auto camPos = TheCamera.GetPosition();
+
+    auto& gfVolumetricCloudFader = StaticRef<float, 0xC6E970>();
+    if (m_bVolumetricCloudHeightSwitch) {
+        const auto delta = CTimer::GetTimeStep() * 4.f;
+        if (camPos.z < 220.f) {
+            gfVolumetricCloudFader += delta;
+            if (gfVolumetricCloudFader >= 255.f) {
+                gfVolumetricCloudFader = 255.f;
+                return;
+            }
+        } else {
+            gfVolumetricCloudFader -= delta;
+            if (gfVolumetricCloudFader < 0.f) {
+                gfVolumetricCloudFader = 0.f;
+            }
+        }
+    } else {
+        gfVolumetricCloudFader = 0.f;
+    }
+
+    CPostEffects::ImmediateModeRenderStatesStore();
+    CPostEffects::ImmediateModeRenderStatesSet();
+
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,   RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(ms_vc.texture)));
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
+
+    const auto plyrPos = FindPlayerCoors();
+    const auto plyrVeh = FindPlayerVehicle();
+
+    //> 0x71653F
+    auto& gVecCameraCoors = StaticRef<CVector, 0xC6E964>();
+    auto& gVecPlayerCoors = StaticRef<CVector, 0xC6E958>();
+
+    const auto bIsCameraOrPlayerPosNotStatic = (camPos != gVecCameraCoors) || (plyrPos != gVecPlayerCoors);
+
+    gVecCameraCoors = camPos;
+    gVecPlayerCoors = plyrPos;
+
+    if (bIsCameraOrPlayerPosNotStatic) { // If player/it's veh has moved, recreate the clouds
+        const auto t = plyrVeh ? (CPlaceable*)plyrVeh : (CPlaceable*)&TheCamera;
+        auto pos = (
+              t->GetPosition()
+            + t->GetForward() * fadeOutDist
+            + CVector::Random(
+                CVector{-200.f, -200.f, -50.f},
+                CVector{ 200.f,  200.f, 50.f}
+            )
+        );
+        VolumetricClouds_Create(&pos);
+    }
+
+    //> 0x7166DD -  Calculate color
+    const auto& cc = CTimeCycle::m_CurrentColours;
+    const auto vcClr = (uint8)std::min((
+          cc.m_nSkyTopRed
+        + cc.m_nSkyTopGreen
+        + cc.m_nSkyTopBlue
+        + cc.m_nSkyBottomRed
+        + cc.m_nSkyBottomGreen
+        + cc.m_nSkyBottomBlue
+    ) / 6 + 64, 255);
+
+    if (!m_VolumetricCloudsUsedNum) {
+        CPostEffects::ImmediateModeRenderStatesReStore();
+        return;
+    }
+
+    //
+    // Actually render the vc's
+    //
+
+
+    // NOTE: They didn't use RenderBuffer functions, but to make our life easier [and the code nicer] we do
+    RenderBuffer::ClearRenderBuffer();
+
+    const auto RenderOutBuffer = [] {
+        RenderBuffer::Render(rwPRIMTYPETRILIST, nullptr, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXUV, false);
+    };
+
+    for (auto vcidx = 0u; vcidx < MAX_VOLUMETRIC_CLOUDS; vcidx++) {
+        if (!ms_vc.bUsed[vcidx]) {
+            continue;
+        }
+
+        auto& vcpos = ms_vc.pos[vcidx];
+        auto& vcsz  = ms_vc.size[vcidx];
+
+        const auto vcDistToCam2D = (camPos - vcpos).Magnitude2D();
+
+        // Adjust vc position by wind [TODO: Should use TimeStep/Framedelta]
+        vcpos += CVector{ m_fVolumetricCloudWindMoveFactor * CVector2D{ CWeather::WindDir } };
+
+        //> 0x716772 - VC too far, delete it
+        if (!ms_vc.bJustCreated[vcidx] && vcDistToCam2D > m_fVolumetricCloudMaxDistance) {
+            VolumetricClouds_Delete(vcidx);
+            continue;
+        }
+
+        if (vcDistToCam2D <= m_fVolumetricCloudMaxDistance || fadeOutDist <= vcDistToCam2D) {
+            ms_vc.bJustCreated[vcidx] = false;
+        }
+
+        //> 0x7167DC - Alpha calculation [I don't understand it either]
+        auto vcAlpha = std::max(0, (int32)(ms_vc.alpha[vcidx] - gfVolumetricCloudFader));
+        if (vcDistToCam2D > fadeOutBeginDist) {
+            if (!vcAlpha) {
+                continue;
+            }
+            if (vcDistToCam2D > m_fVolumetricCloudMaxDistance) {
+                continue;
+            }
+            const auto distAlpha = std::max<int32>(0, (int32)(((m_fVolumetricCloudMaxDistance - fadeOutBeginDist) - (vcDistToCam2D - fadeOutBeginDist)) * (float)vcAlpha / (m_fVolumetricCloudMaxDistance - fadeOutBeginDist)));
+            vcAlpha = std::min<int32>(vcAlpha, distAlpha);
+            if (!vcAlpha) {
+                continue;
+            }
+        }
+
+        // Direction of vc to camera
+        const auto vcToCamDir = (vcpos - camPos).Normalized();
+
+        //> 0x7168F0 - Calculate quad colors
+        CRGBA quadColors[3];
+        for (auto i = 0; i < 3; i++) {
+            quadColors[i] = {
+                vcClr,
+                vcClr,
+                vcClr,
+                (uint8)(std::abs(vcToCamDir.Dot(ms_vc.quadNormal[i]) * (float)vcAlpha))
+            };
+        }
+
+        //> 0x7169F0 - Each quad has 3 vertices [As each quad consists of 2 triangles, each with 3 vertices]
+        for (auto k = 0; k < 3 * 6; k++) {
+            const auto quadIdx = k / 6;
+
+            RenderBuffer::PushVertex(
+                vcpos + CVector{ ms_vc.modelX[k], ms_vc.modelY[k], ms_vc.modelZ[k] } * vcsz,
+                CVector2D{ms_vc.modelU[k], ms_vc.modelV[k]},
+                quadColors[quadIdx]
+            );
+
+            // If the buffer is full - Render it to make space for the upcoming vertices
+            if (!RenderBuffer::CanFitVertices(1)) {
+                RenderOutBuffer();
+            }
+        }
+    }
+
+    // Render whatever remains in the buffer
+    RenderOutBuffer();
+
+    CPostEffects::ImmediateModeRenderStatesReStore();
 }

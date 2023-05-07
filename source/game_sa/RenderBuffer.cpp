@@ -59,10 +59,15 @@ void StopStoring() {
 }
 
 // NOTSA
-void Render(RwPrimitiveType primType, RwMatrix* ltm, RwUInt32 /*RwIm3DTransformFlags*/ flags) {
+void Render(RwPrimitiveType primType, RwMatrix* ltm, RwUInt32 /*RwIm3DTransformFlags*/ flags, bool isIndexed) {
     if (uiTempBufferVerticesStored) {
-        if (RwIm3DTransform(aTempBufferVertices, uiTempBufferVerticesStored, nullptr, rwIM3D_VERTEXUV)) {
-            RwIm3DRenderIndexedPrimitive(primType, aTempBufferIndices, uiTempBufferIndicesStored);
+        if (RwIm3DTransform(aTempBufferVertices, uiTempBufferVerticesStored, ltm, flags)) {
+            if (isIndexed) {
+                assert(aTempBufferIndices);
+                RwIm3DRenderIndexedPrimitive(primType, aTempBufferIndices, uiTempBufferIndicesStored);
+            } else {
+                RwIm3DRenderPrimitive(primType);
+            }
             RwIm3DEnd();
         }
     }
@@ -120,4 +125,9 @@ void PushIndices(std::initializer_list<RwImVertexIndex> idxs, bool useCurrentVtx
         PushIndex(idx, useCurrentVtxAsBase);
     }
 }
+
+bool CanFitVertices(int32 nVtxNeeded) {
+    return uiTempBufferVerticesStored + nVtxNeeded <= VtxBufferSize;
+}
+
 }; // namespace RenderBuffer 

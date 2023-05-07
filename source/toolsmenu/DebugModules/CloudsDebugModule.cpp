@@ -41,6 +41,7 @@ void RenderDebugSettingPairs() {
     RenderSettingPair(LowClouds);
     RenderSettingPair(Rainbow);
     RenderSettingPair(Streaks);
+    RenderSettingPair(VolumetricClouds);
 #undef RenderSettingPair
 
     EndTable();
