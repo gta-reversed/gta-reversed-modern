@@ -46,7 +46,7 @@ public:
 
 static CSync cdStreamThreadSync;
 #endif
-
+#include "AEBankLoader.h"
 void InjectCdStreamHooks() {
     RH_ScopedNamespaceName("CdStream");
     RH_ScopedCategoryGlobal();
@@ -60,10 +60,13 @@ void InjectCdStreamHooks() {
     RH_ScopedGlobalInstall(CdStreamInit, 0x406B70);
     RH_ScopedGlobalInstall(CdStreamRemoveImages, 0x406690);
     RH_ScopedGlobalInstall(CdStreamShutdown, 0x406370);
+
+    RH_ScopedGlobalInstall(CAEBankLoader::LoadSFXPakLookupFile, 0x4DFC70); // TODO: REMOVE!
 }
 
 // 0x4067B0
 int32 CdStreamOpen(const char* lpFileName) {
+    printf("CdStreamOpen: %s\n", lpFileName);
     int32 freeHandleIndex = 0;
     for (; freeHandleIndex < MAX_CD_STREAM_HANDLES; freeHandleIndex++) {
         if (!gStreamFileHandles[freeHandleIndex])
