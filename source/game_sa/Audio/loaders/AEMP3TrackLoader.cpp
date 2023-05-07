@@ -158,10 +158,10 @@ bool AEMP3TrackLoader::IsCurrentAudioStreamAvailable() {
             m_bStreamingFromDVD = true;
 
             CFileMgr::CloseFile(file);
+            return true;
         }
-    } else {
-        m_bStreamingFromDVD = false;
     }
 
-    return m_bStreamingFromDVD;
+    m_bStreamingFromDVD = false;
+    return false;
 }
