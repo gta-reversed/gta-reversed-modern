@@ -4,18 +4,28 @@
 #include "FileMgr.h"
 #include "MemoryMgr.h"
 
-void AEMP3TrackLoader::InjectHooks() {
+void CAEMP3TrackLoader::InjectHooks() {
     // TODO
+    RH_ScopedClass(CAEMP3TrackLoader);
+    RH_ScopedCategory("Audio/Loaders");
+
+    RH_ScopedInstall(Constructor, 0x4E0930);
+    RH_ScopedInstall(Deconstructor, 0x4E0940);
+    RH_ScopedInstall(Initialise, 0x4E0C50);
+    RH_ScopedInstall(LoadStreamPackTable, 0x4E0970);
+    RH_ScopedInstall(LoadTrackLookupTable, 0x4E09F0);
+    RH_ScopedInstall(GetTrackInfo, 0x4E0A70);
+    RH_ScopedInstall(IsCurrentAudioStreamAvailable, 0x4E0BD0);
 }
 
 // 0x4E0930
-AEMP3TrackLoader::AEMP3TrackLoader() {
+CAEMP3TrackLoader::CAEMP3TrackLoader() {
     m_bInitialised = false;
     m_pszDvdDrivePath = nullptr;
 }
 
 // 0x4E0940
-AEMP3TrackLoader::~AEMP3TrackLoader() {
+CAEMP3TrackLoader::~CAEMP3TrackLoader() {
     if (m_bInitialised) {
         CMemoryMgr::Free(m_paTrackLookups);
         CMemoryMgr::Free(m_paStreamPacks);
@@ -27,7 +37,7 @@ AEMP3TrackLoader::~AEMP3TrackLoader() {
 }
 
 // 0x4E0C50
-bool AEMP3TrackLoader::Initialise() {
+bool CAEMP3TrackLoader::Initialise() {
     if (!LoadStreamPackTable() || !LoadTrackLookupTable())
         return false;
 
@@ -50,7 +60,7 @@ bool AEMP3TrackLoader::Initialise() {
 }
 
 // 0x4E0970
-bool AEMP3TrackLoader::LoadStreamPackTable(void) {
+bool CAEMP3TrackLoader::LoadStreamPackTable(void) {
     // NOTSA: Originally Win32 file API was used.
     auto* fp = fopen("AUDIO\\CONFIG\\STRMPAKS.DAT", "r");
     if (!fp) {
@@ -80,7 +90,7 @@ bool AEMP3TrackLoader::LoadStreamPackTable(void) {
 }
 
 // 0x4E09F0
-bool AEMP3TrackLoader::LoadTrackLookupTable(void) {
+bool CAEMP3TrackLoader::LoadTrackLookupTable(void) {
     // NOTSA: Originally Win32 file API was used.
     auto* fp = fopen("AUDIO\\CONFIG\\TRAKLKUP.DAT", "r");
     if (!fp) {
@@ -110,7 +120,7 @@ bool AEMP3TrackLoader::LoadTrackLookupTable(void) {
 }
 
 // 0x4E0A70
-tTrackInfo* AEMP3TrackLoader::GetTrackInfo(uint32 trackId) {
+tTrackInfo* CAEMP3TrackLoader::GetTrackInfo(uint32 trackId) {
     if (trackId >= m_nTrackCount)
         return nullptr;
 
@@ -150,7 +160,7 @@ tTrackInfo* AEMP3TrackLoader::GetTrackInfo(uint32 trackId) {
 }
 
 // 0x4E0BD0
-bool AEMP3TrackLoader::IsCurrentAudioStreamAvailable() {
+bool CAEMP3TrackLoader::IsCurrentAudioStreamAvailable() {
     if (m_pszDvdDrivePath = getDvdGamePath()) {
         const auto dvdPath = std::format("{}\\AUDIO\\STREAMS\\{}", getDvdGamePath(), m_paStreamPacks[0].m_szName);
         if (auto file = CFileMgr::OpenFile(dvdPath.c_str(), "r")) {

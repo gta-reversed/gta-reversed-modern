@@ -60,8 +60,6 @@ void InjectCdStreamHooks() {
     RH_ScopedGlobalInstall(CdStreamInit, 0x406B70);
     RH_ScopedGlobalInstall(CdStreamRemoveImages, 0x406690);
     RH_ScopedGlobalInstall(CdStreamShutdown, 0x406370);
-
-    RH_ScopedGlobalInstall(CAEBankLoader::LoadSFXPakLookupFile, 0x4DFC70); // TODO: REMOVE!
 }
 
 // 0x4067B0

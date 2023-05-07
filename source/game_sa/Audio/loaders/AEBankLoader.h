@@ -79,5 +79,9 @@ public:
     bool LoadSFXPakLookupFile();
 
     void CalculateBankSlotsInfosOffsets();
+
+private:
+    // NOTSA
+    void Deconstructor() { this->~CAEBankLoader(); }
 };
 VALIDATE_SIZE(CAEBankLoader, 0x6E4);

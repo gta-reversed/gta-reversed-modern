@@ -2,9 +2,18 @@
 #include "AEBankLoader.h"
 
 void CAEBankLoader::InjectHooks() {
+    RH_ScopedClass(CAEBankLoader);
+    RH_ScopedCategory("Audio/Loaders");
 
+    RH_ScopedInstall(Deconstructor, 0x4DFB20);
+    RH_ScopedInstall(GetBankLookup, 0x4E01B0);
+    RH_ScopedInstall(LoadBankLookupFile, 0x4DFBD0);
+    RH_ScopedInstall(LoadBankSlotFile, 0x4E0590);
+    RH_ScopedInstall(LoadSFXPakLookupFile, 0x4DFC70, {.reversed = false});
+    RH_ScopedInstall(CalculateBankSlotsInfosOffsets, 0x4DFBA0);
 }
 
+// 0x4DFB20
 CAEBankLoader::~CAEBankLoader() {
     if (m_bInitialised) {
         CMemoryMgr::Free(m_pBuffer);
@@ -15,6 +24,7 @@ CAEBankLoader::~CAEBankLoader() {
     }
 }
 
+// 0x4E01B0
 CAEBankLookupItem* CAEBankLoader::GetBankLookup(uint16 bankId) {
     if (m_bInitialised && bankId < m_nBankLookupCount)
         return &m_paBankLookups[bankId];
@@ -22,6 +32,7 @@ CAEBankLookupItem* CAEBankLoader::GetBankLookup(uint16 bankId) {
     return nullptr;
 }
 
+// 0x4DFBD0
 bool CAEBankLoader::LoadBankLookupFile() {
     const auto file = CFileMgr::OpenFile("AUDIO\\CONFIG\\BANKLKUP.DAT", "rb");
     if (!file)
@@ -45,6 +56,7 @@ bool CAEBankLoader::LoadBankLookupFile() {
     return false;
 }
 
+// 0x4E0590
 bool CAEBankLoader::LoadBankSlotFile() {
     const auto file = CFileMgr::OpenFile("AUDIO\\CONFIG\\BANKSLOT.DAT", "rb");
     if (!file)
@@ -91,5 +103,11 @@ bool CAEBankLoader::LoadSFXPakLookupFile() {
     return !failed;
 }
 
+// 0x4DFBA0
 void CAEBankLoader::CalculateBankSlotsInfosOffsets() {
+    auto offset = 0u;
+    for (auto& slot : std::span{m_paBankSlots, m_nBankSlotCount}) {
+        slot.m_nOffset = offset;
+        offset += slot.m_nSize;
+    }
 }

@@ -1,12 +1,12 @@
 #pragma once
 #include "AETrackLoader.h"
 
-class AEMP3TrackLoader : public CAETrackLoader {
+class CAEMP3TrackLoader : public CAETrackLoader {
 public:
     static void InjectHooks();
 
-    AEMP3TrackLoader();
-    ~AEMP3TrackLoader();
+    CAEMP3TrackLoader();
+    ~CAEMP3TrackLoader();
 
     bool Initialise();
     bool LoadStreamPackTable(void);
@@ -15,4 +15,13 @@ public:
 
     // Checks for DVD stream.
     bool IsCurrentAudioStreamAvailable();
+
+private:
+    // NOTSA
+    CAEMP3TrackLoader* Constructor() {
+        this->CAEMP3TrackLoader::CAEMP3TrackLoader();
+        return this;
+    }
+
+    void Deconstructor() { this->~CAEMP3TrackLoader(); }
 };
