@@ -322,9 +322,19 @@ void CClouds::Render_MaybeRenderMoon(float colorBalance) {
     //const auto clckHrs  = CClock::ms_nGameClockHours;
     //const auto clckMins = CClock::ms_nGameClockMinutes;
 
+#ifdef NOTSA_DEBUG
+    if (!s_DebugSettings.Moon.Enabled) {
+        return;
+    }
+#endif
+
     const auto moonVisibilityTimeMins = (size_t)std::abs(CClock::GetMinutesToday() - (float)MOON_VISIBILITY_RANGE_MINS);
-    if (moonVisibilityTimeMins >= MOON_VISIBILITY_RANGE_MINS) {
-        return; // Moon not visible at the current time
+    if (moonVisibilityTimeMins >= MOON_VISIBILITY_RANGE_MINS) { // Check is the moon not visible at the current time
+#ifdef NOTSA_DEBUG
+        if (!s_DebugSettings.Moon.Force) {
+            return;
+        }
+#endif
     }
 
     const auto colorB  = MOON_VISIBILITY_RANGE_MINS - moonVisibilityTimeMins;
@@ -414,22 +424,32 @@ void CClouds::Render_MaybeRenderMoon(float colorBalance) {
 // From `CClouds::Render` [0x713D2A - 0x714019]
 // Draws the R* logo on the sky
 void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
-    constexpr auto STARS_VISIBLE_FROM_HRS = 5u,
-                   STARS_VISIBLE_TO_HRS = 22u;
+    constexpr auto LOGO_VISIBLE_FROM_HRS  = 22u,
+                   LOGO_VISIBLE_UNTIL_HRS = 5u;
 
-    constexpr auto STARS_OFFSET_FROM_CAMERA = CVector{ 100.f, 0.f, 10.f };
-    constexpr auto LAST_STAR_OFFSET_FROM_CAMERA = CVector{ 100.f, 0.f, STARS_OFFSET_FROM_CAMERA.z - 90.f };
+    constexpr auto R_OFFSET_FROM_CAMERA    = CVector{ 100.f, 0.f, 10.f }; // Letter `R` offset from camera
+    constexpr auto STAR_OFFSET_FROM_CAMERA = CVector{ 100.f, 0.f, R_OFFSET_FROM_CAMERA.z - 90.f }; // `*` [As in R*] offset from camera
 
     constexpr auto  STARS_NUM_POSITIONS                    = 9;
     constexpr float STARS_Y_POSITIONS[STARS_NUM_POSITIONS] = { 0.00f, 0.05f, 0.13f, 0.40f, 0.70f, 0.60f, 0.27f, 0.55f, 0.75f }; // 0x8D55EC
     constexpr float STARS_Z_POSITIONS[STARS_NUM_POSITIONS] = { 0.00f, 0.45f, 0.90f, 1.00f, 0.85f, 0.52f, 0.48f, 0.35f, 0.20f }; // 0x8D5610
     constexpr float STARS_SIZES[STARS_NUM_POSITIONS]       = { 1.00f, 1.40f, 0.90f, 1.00f, 0.60f, 1.50f, 1.30f, 1.00f, 0.80f }; // 0x8D5634
 
-    if (!CClock::GetIsTimeInRange(STARS_VISIBLE_FROM_HRS, STARS_VISIBLE_TO_HRS)) {
+#ifdef NOTSA_DEBUG
+    if (!s_DebugSettings.Rockstar.Enabled) {
         return;
     }
+#endif
 
-    const auto time = CClock::GetGameClockHours() == STARS_VISIBLE_FROM_HRS
+    if (!CClock::GetIsTimeInRange(LOGO_VISIBLE_FROM_HRS, LOGO_VISIBLE_UNTIL_HRS)) {
+#ifdef NOTSA_DEBUG
+        if (!s_DebugSettings.Rockstar.Force) {
+            return;
+        }
+#endif
+    }
+
+    const auto time = CClock::GetGameClockHours() == LOGO_VISIBLE_FROM_HRS
         ? CClock::GetGameClockMinutes()
         : 60u - CClock::GetGameClockMinutes();
 
@@ -441,10 +461,10 @@ void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
     const auto camPos = TheCamera.GetPosition();
 
     //
-    // Draw R
+    // Draw `R`
     //
     for (auto i = 0; i < 11; i++) {
-        CVector offset = STARS_OFFSET_FROM_CAMERA;
+        CVector offset = R_OFFSET_FROM_CAMERA;
         if (i >= 9) { // Clever trick to save memory I guess, re-uses the first 2 star vertices, but with X adjusted to be on the flipside
             offset.x = -offset.x;
         }
@@ -459,7 +479,7 @@ void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
             continue;
         }
 
-        const auto cc = CalculateColorWithBalance(colorB, (float)(rand() % 32) * 0.0015f);
+        const auto cc = CalculateColorWithBalance(colorB, (float)(rand() % 32) * 0.015f);
 
         starSizeScr *= STARS_SIZES[posIdx] * 0.8f;
 
@@ -477,8 +497,8 @@ void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
     //
     CVector   lastStarPosScr;
     CVector2D lastStarSizeScr;
-    if (CSprite::CalcScreenCoors(camPos + LAST_STAR_OFFSET_FROM_CAMERA, &lastStarPosScr, &lastStarSizeScr.x, &lastStarSizeScr.y, false, true)) {
-        const auto cc = CalculateColorWithBalance(colorB, (float)(rand() % 128) * 0.0015625f);
+    if (CSprite::CalcScreenCoors(camPos + STAR_OFFSET_FROM_CAMERA, &lastStarPosScr, &lastStarSizeScr.x, &lastStarSizeScr.y, false, true)) {
+        const auto cc = CalculateColorWithBalance(colorB, (float)(rand() % 128) * 0.0015625f + 0.5f);
 
         lastStarSizeScr *= 5.f;
 
@@ -507,6 +527,12 @@ void CClouds::Render_RenderLowClouds(float colorBalance) {
     const auto colorR = CalculateColorWithBalance((uint8)CTimeCycle::m_CurrentColours.m_nLowCloudsRed, colorBalance);
     const auto colorG = CalculateColorWithBalance((uint8)CTimeCycle::m_CurrentColours.m_nLowCloudsGreen, colorBalance);
     const auto colorB = CalculateColorWithBalance((uint8)CTimeCycle::m_CurrentColours.m_nLowCloudsBlue, colorBalance);
+
+#ifdef NOTSA_DEBUG
+    if (!s_DebugSettings.LowClouds.Enabled) {
+        return;
+    }
+#endif
 
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpCloudTex)));
 
@@ -557,8 +583,18 @@ void CClouds::Render_MaybeRenderRainbows() {
     constexpr uint8  RAINBOW_LINES_COLOR_GREEN[NUM_RAINBOW_LINES]{ 0,  15, 30, 30,  0,  0 };
     constexpr uint8  RAINBOW_LINES_COLOR_BLUE[NUM_RAINBOW_LINES]{  0,  0,  0,  10,  30, 30 };
 
-    if (CWeather::Rainbow == 0.f) {
+#ifdef NOTSA_DEBUG
+    if (!s_DebugSettings.Rainbow.Enabled) {
         return;
+    }
+#endif
+
+    if (CWeather::Rainbow == 0.f) {
+#ifdef NOTSA_DEBUG
+        if (!s_DebugSettings.Rainbow.Force) {
+            return;
+        }
+#endif
     }
 
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpCoronaTexture[0])));
@@ -603,14 +639,26 @@ void CClouds::Render_MaybeRenderStreaks() {
     RwRenderStateSet(rwRENDERSTATESRCBLEND,  RWRSTATE(rwBLENDSRCALPHA));
     RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
 
-    if (CClock::GetGameClockHours() >= 5) {
+#ifdef NOTSA_DEBUG
+    if (!s_DebugSettings.Rainbow.Enabled) {
         return;
     }
+#endif
 
-    if (!IsExtraSunny(CWeather::OldWeatherType) && !IsExtraSunny(CWeather::NewWeatherType)) {
-        return;
+#ifdef NOTSA_DEBUG
+    if (!s_DebugSettings.Rainbow.Force)
+#endif
+    {
+        if (CClock::GetGameClockHours() >= 5) {
+            return;
+        }
+
+        if (!IsExtraSunny(CWeather::OldWeatherType) && !IsExtraSunny(CWeather::NewWeatherType)) {
+            return;
+        }
     }
 
+    // This must always be checked, otherwise code breaks
     const auto repeatDelta = CTimer::GetTimeInMS() % REPEAT_INTERVAL_MS;
     if (repeatDelta >= VISIBILE_TIME_MS) {
         return;

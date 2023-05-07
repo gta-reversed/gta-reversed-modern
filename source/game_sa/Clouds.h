@@ -62,6 +62,12 @@ public:
     static CVector& PlayerCoords;
     static CVector& CameraCoors;
 
+    static inline struct DebugSettings {
+        struct RenderSettingPair {
+            bool Enabled = true, Force = false;
+        } Moon, Rockstar, LowClouds, Rainbow, Streaks;
+    } s_DebugSettings;
+
 public:
     static void InjectHooks();
 
