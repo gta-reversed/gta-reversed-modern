@@ -53,7 +53,7 @@ void CClouds::InjectHooks() {
     RH_ScopedInstall(VolumetricClouds_Delete, 0x7135F0);
     RH_ScopedInstall(VolumetricClouds_GetFirstFreeSlot, 0x7135C0);
     RH_ScopedInstall(VolumetricCloudsGetMaxDistance, 0x713630);
-    RH_ScopedInstall(VolumetricCloudsRender, 0x716380, { .reversed = false });
+    RH_ScopedInstall(VolumetricCloudsRender, 0x716380);
 }
 
 // 0x7138D0
@@ -1092,7 +1092,7 @@ void CClouds::VolumetricCloudsRender() {
     }
 
     const auto plyr = FindPlayerPed();
-    if (!CGame::CanSeeOutSideFromCurrArea() || plyr->IsInCurrentArea()) {
+    if (!CGame::CanSeeOutSideFromCurrArea() || !plyr->IsInCurrentArea()) {
         if (!s_DebugSettings.VolumetricClouds.Force) {
             return;
         }
@@ -1129,10 +1129,7 @@ void CClouds::VolumetricCloudsRender() {
                 return;
             }
         } else {
-            gfVolumetricCloudFader -= delta;
-            if (gfVolumetricCloudFader < 0.f) {
-                gfVolumetricCloudFader = 0.f;
-            }
+            gfVolumetricCloudFader = std::max(0.f, gfVolumetricCloudFader - delta);
         }
     } else {
         gfVolumetricCloudFader = 0.f;
@@ -1145,8 +1142,11 @@ void CClouds::VolumetricCloudsRender() {
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(ms_vc.texture)));
     RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
 
+    FindPlayerPed()->GetMoveSpeed() = CVector{0.f, 0.f, 0.f};
+
     const auto plyrPos = FindPlayerCoors();
     const auto plyrVeh = FindPlayerVehicle();
+
 
     //> 0x71653F
     auto& gVecCameraCoors = StaticRef<CVector, 0xC6E964>();
@@ -1198,39 +1198,39 @@ void CClouds::VolumetricCloudsRender() {
         RenderBuffer::Render(rwPRIMTYPETRILIST, nullptr, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXUV, false);
     };
 
-    for (auto vcidx = 0u; vcidx < MAX_VOLUMETRIC_CLOUDS; vcidx++) {
+    for (auto vcidx = 0u; vcidx < m_VolumetricCloudsUsedNum; vcidx++) {
         if (!ms_vc.bUsed[vcidx]) {
             continue;
         }
 
-        auto& vcpos = ms_vc.pos[vcidx];
-        auto& vcsz  = ms_vc.size[vcidx];
+        auto& vcPos = ms_vc.pos[vcidx];
+        auto& vcSz  = ms_vc.size[vcidx];
 
-        const auto vcDistToCam2D = (camPos - vcpos).Magnitude2D();
+        const auto vcDistToCam = (camPos - vcPos).Magnitude();
 
-        // Adjust vc position by wind [TODO: Should use TimeStep/Framedelta]
-        vcpos += CVector{ m_fVolumetricCloudWindMoveFactor * CVector2D{ CWeather::WindDir } };
+        //> 0x71674E - Adjust vc position by wind [TODO: Should use TimeStep/Framedelta]
+        vcPos += CVector{ m_fVolumetricCloudWindMoveFactor * CVector2D{ CWeather::WindDir } };
 
         //> 0x716772 - VC too far, delete it
-        if (!ms_vc.bJustCreated[vcidx] && vcDistToCam2D > m_fVolumetricCloudMaxDistance) {
+        if (!ms_vc.bJustCreated[vcidx] && vcDistToCam > m_fVolumetricCloudMaxDistance) {
             VolumetricClouds_Delete(vcidx);
             continue;
         }
 
-        if (vcDistToCam2D <= m_fVolumetricCloudMaxDistance || fadeOutDist <= vcDistToCam2D) {
+        if (vcDistToCam <= m_fVolumetricCloudMaxDistance || fadeOutDist <= vcDistToCam) {
             ms_vc.bJustCreated[vcidx] = false;
         }
 
         //> 0x7167DC - Alpha calculation [I don't understand it either]
-        auto vcAlpha = std::max(0, (int32)(ms_vc.alpha[vcidx] - gfVolumetricCloudFader));
-        if (vcDistToCam2D > fadeOutBeginDist) {
+        auto vcAlpha = std::max(0, ms_vc.alpha[vcidx] - (int32)gfVolumetricCloudFader);
+        if (vcDistToCam > fadeOutBeginDist) {
             if (!vcAlpha) {
                 continue;
             }
-            if (vcDistToCam2D > m_fVolumetricCloudMaxDistance) {
+            if (vcDistToCam > m_fVolumetricCloudMaxDistance) {
                 continue;
             }
-            const auto distAlpha = std::max<int32>(0, (int32)(((m_fVolumetricCloudMaxDistance - fadeOutBeginDist) - (vcDistToCam2D - fadeOutBeginDist)) * (float)vcAlpha / (m_fVolumetricCloudMaxDistance - fadeOutBeginDist)));
+            const auto distAlpha = std::max<int32>(0, (int32)(((m_fVolumetricCloudMaxDistance - fadeOutBeginDist) - (vcDistToCam - fadeOutBeginDist)) * (float)vcAlpha / (m_fVolumetricCloudMaxDistance - fadeOutBeginDist)));
             vcAlpha = std::min<int32>(vcAlpha, distAlpha);
             if (!vcAlpha) {
                 continue;
@@ -1238,7 +1238,7 @@ void CClouds::VolumetricCloudsRender() {
         }
 
         // Direction of vc to camera
-        const auto vcToCamDir = (vcpos - camPos).Normalized();
+        const auto vcToCamDir = (vcPos - camPos).Normalized();
 
         //> 0x7168F0 - Calculate quad colors
         CRGBA quadColors[3];
@@ -1247,7 +1247,7 @@ void CClouds::VolumetricCloudsRender() {
                 vcClr,
                 vcClr,
                 vcClr,
-                (uint8)(std::abs(vcToCamDir.Dot(ms_vc.quadNormal[i]) * (float)vcAlpha))
+                (uint8)(std::abs(vcToCamDir.Dot(ms_vc.quadNormal[i])) * (float)vcAlpha)
             };
         }
 
@@ -1255,16 +1255,18 @@ void CClouds::VolumetricCloudsRender() {
         for (auto k = 0; k < 3 * 6; k++) {
             const auto quadIdx = k / 6;
 
-            RenderBuffer::PushVertex(
-                vcpos + CVector{ ms_vc.modelX[k], ms_vc.modelY[k], ms_vc.modelZ[k] } * vcsz,
-                CVector2D{ms_vc.modelU[k], ms_vc.modelV[k]},
-                quadColors[quadIdx]
-            );
-
             // If the buffer is full - Render it to make space for the upcoming vertices
-            if (!RenderBuffer::CanFitVertices(1)) {
+            // This does differ a little from what they did originally, but it's fine, as the
+            // end result is the same
+            if (!RenderBuffer::CanFitVertices(3)) { // Must be rendered in groups of 3, otherwise triangles would be rendered with the wrong vertices
                 RenderOutBuffer();
             }
+
+            RenderBuffer::PushVertex(
+                vcPos + CVector{ ms_vc.modelX[k], ms_vc.modelY[k], ms_vc.modelZ[k] } * vcSz,
+                CVector2D{ms_vc.modelU[k], ms_vc.modelV[k]},
+                quadColors[k / 6]
+            );
         }
     }
 
