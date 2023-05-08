@@ -1,17 +1,41 @@
 #pragma once
 
+enum class eSoundRequestStatus {
+    UNK_0,
+    JUST_LOADED,
+    ALREADY_LOADED,
+    UNK_3
+};
+
+// NOTSA
+struct CdAudioStream {
+    int16 m_nSoundCount;
+    int16 __pad;
+    CAEBankSlotItem m_aSlotItems[400];
+    uint8 m_aBankData[]; // uint16 samples?
+};
+VALIDATE_SIZE(CdAudioStream, 0x12C4 /* + samples*/);
+
 class CAESoundRequest {
 public:
-    void* m_pBankSlotInfo;
+    CAEBankSlot* m_pBankSlotInfo;
     uint32 m_nBankOffset;
     uint32 m_nBankSize;
-    void* m_pStreamOffset;
-    void* m_pStreamBuffer;
-    uint32 m_nStatus;
+    CdAudioStream* m_pStreamOffset;
+    CdAudioStream* m_pStreamBuffer;
+    eSoundRequestStatus m_nStatus;
     uint16 m_nBankId;
     uint16 m_nBankSlotId;
     uint16 m_nNumSounds;
     uint8 m_nPakFileNumber;
+
+    void Reset() {
+        m_nBankId = m_nBankSlotId = m_nNumSounds = -1;
+        m_pBankSlotInfo = nullptr;
+        m_nStatus = eSoundRequestStatus::UNK_0;
+    }
+
+    bool IsSingleSound() const { return m_nNumSounds == -1; }
 };
 VALIDATE_SIZE(CAESoundRequest, 0x20);
 
@@ -36,8 +60,10 @@ struct CAEBankSlot {
     uint32 field_8;
     uint32 field_C;
     uint16 m_nBankId;
-    uint16 m_nSoundCount;
+    uint16 m_nSoundCount; // -1: Single sound.
     CAEBankSlotItem m_aSlotItems[400];
+
+    bool IsSingleSound() const { return m_nSoundCount == -1; }
 };
 VALIDATE_SIZE(CAEBankSlot, 0x12D4);
 
@@ -57,7 +83,7 @@ public:
     int16 m_nPakLookupCount;
     bool m_bInitialised;
     uint32 m_nBufferSize;
-    void* m_pBuffer;
+    uint8* m_pBuffer;
     int32* m_paStreamHandles;
     CAESoundRequest m_aRequests[50];
     uint16 field_664;
