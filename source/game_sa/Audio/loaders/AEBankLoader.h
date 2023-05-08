@@ -7,38 +7,6 @@ enum class eSoundRequestStatus {
     UNK_3
 };
 
-// NOTSA
-struct CdAudioStream {
-    int16 m_nSoundCount;
-    int16 __pad;
-    CAEBankSlotItem m_aSlotItems[400];
-    uint8 m_aBankData[]; // uint16 samples?
-};
-VALIDATE_SIZE(CdAudioStream, 0x12C4 /* + samples*/);
-
-class CAESoundRequest {
-public:
-    CAEBankSlot* m_pBankSlotInfo;
-    uint32 m_nBankOffset;
-    uint32 m_nBankSize;
-    CdAudioStream* m_pStreamOffset;
-    CdAudioStream* m_pStreamBuffer;
-    eSoundRequestStatus m_nStatus;
-    uint16 m_nBankId;
-    uint16 m_nBankSlotId;
-    uint16 m_nNumSounds;
-    uint8 m_nPakFileNumber;
-
-    void Reset() {
-        m_nBankId = m_nBankSlotId = m_nNumSounds = -1;
-        m_pBankSlotInfo = nullptr;
-        m_nStatus = eSoundRequestStatus::UNK_0;
-    }
-
-    bool IsSingleSound() const { return m_nNumSounds == -1; }
-};
-VALIDATE_SIZE(CAESoundRequest, 0x20);
-
 struct CAEBankLookupItem {
     uint8 m_nPakFileNumber;
     uint32 m_nOffset;
@@ -72,6 +40,40 @@ struct tPakLookup {
     uint32 field_0C[10];
 };
 VALIDATE_SIZE(tPakLookup, 0x34);
+
+// NOTSA
+struct CdAudioStream {
+    int16 m_nSoundCount;
+    int16 __pad;
+    CAEBankSlotItem m_aSlotItems[400];
+    uint8 m_aBankData[]; // uint16 samples?
+};
+VALIDATE_SIZE(CdAudioStream, 0x12C4 /* + samples*/);
+
+class CAESoundRequest {
+public:
+    CAEBankSlot* m_pBankSlotInfo;
+    uint32 m_nBankOffset;
+    uint32 m_nBankSize;
+    CdAudioStream* m_pStreamOffset;
+    CdAudioStream* m_pStreamBuffer;
+    eSoundRequestStatus m_nStatus;
+    uint16 m_nBankId;
+    uint16 m_nBankSlotId;
+    uint16 m_nNumSounds;
+    uint8 m_nPakFileNumber;
+
+    void Reset() {
+        m_nBankId = m_nBankSlotId = m_nNumSounds = -1;
+        m_pBankSlotInfo = nullptr;
+        m_nStatus = eSoundRequestStatus::UNK_0;
+    }
+
+    bool IsSingleSound() const {
+        return m_nNumSounds == -1;
+    }
+};
+VALIDATE_SIZE(CAESoundRequest, 0x20);
 
 class CAEBankLoader {
 public:
