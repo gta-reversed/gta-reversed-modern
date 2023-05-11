@@ -526,15 +526,7 @@ void CClouds::Render_RenderLowClouds(float colorBalance) {
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpCloudTex)));
 
     // Calculate camera roll
-    ms_cameraRoll = [&] {
-        const auto cmat = TheCamera.m_matrix;
-        if (!cmat) {
-            return 0.f;
-        }
-        const auto& right = cmat->GetRight();
-        const auto xymag  = CVector2D{ right }.SquaredMagnitude();
-        return std::atan2(right.z, cmat->GetUp().z < 0.f ? -xymag : xymag);
-    }();
+    ms_cameraRoll = TheCamera.GetRoll();
 
     const auto camPos = TheCamera.GetPosition();
     for (auto i = 0u; i < NUM_LOW_CLOUDS; i++) {
