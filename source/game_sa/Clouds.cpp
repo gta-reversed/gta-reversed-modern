@@ -25,18 +25,21 @@ RwTexture*& gpCloudTex = *reinterpret_cast<RwTexture**>(0xC6AA78);
 RwTexture*& gpCloudMaskTex = *reinterpret_cast<RwTexture**>(0xC6AA78 + 0x4);
 
 float& flt_C6E954 = *reinterpret_cast<float*>(0xC6E954); // see CClouds::RenderBottomFromHeight, CClouds::MovingFogRender
-float& flt_C6E970 = *reinterpret_cast<float*>(0xC6E970); // see CClouds::VolumetricCloudsRender
-
-int32& dword_C6E974 = *reinterpret_cast<int32*>(0xC6E974); // see CClouds::VolumetricCloudsRender
 
 void CClouds::InjectHooks() {
     RH_ScopedClass(CClouds);
     RH_ScopedCategoryGlobal();
 
+    // Clouds
     RH_ScopedInstall(Init, 0x7138D0);
     RH_ScopedInstall(Update, 0x712FF0);
     RH_ScopedInstall(Shutdown, 0x712FA0);
     RH_ScopedInstall(SetUpOneSkyPoly, 0x713060);
+    RH_ScopedInstall(Render, 0x713950);
+    RH_ScopedInstall(RenderSkyPolys, 0x714650);
+    RH_ScopedInstall(RenderBottomFromHeight, 0x7154B0, { .reversed = false });
+
+    // Moving fog
     RH_ScopedInstall(MovingFogInit, 0x713660);
     RH_ScopedInstall(MovingFog_Create, 0x713760);
     RH_ScopedInstall(MovingFog_Delete, 0x713730);
@@ -45,9 +48,8 @@ void CClouds::InjectHooks() {
     RH_ScopedInstall(MovingFog_GetWind, 0x7136E0);
     RH_ScopedInstall(MovingFog_GetFirstFreeSlot, 0x713710);
     RH_ScopedInstall(MovingFogRender, 0x716C90);
-    RH_ScopedInstall(Render, 0x713950);
-    RH_ScopedInstall(RenderSkyPolys, 0x714650);
-    RH_ScopedInstall(RenderBottomFromHeight, 0x7154B0, { .reversed = false });
+
+    // Volumetric clouds
     RH_ScopedInstall(VolumetricCloudsInit, 0x7131C0);
     RH_ScopedInstall(VolumetricClouds_Create, 0x715F40);
     RH_ScopedInstall(VolumetricClouds_Delete, 0x7135F0);
@@ -319,19 +321,15 @@ void CClouds::Render_MaybeRenderMoon(float colorBalance) {
     //const auto clckHrs  = CClock::ms_nGameClockHours;
     //const auto clckMins = CClock::ms_nGameClockMinutes;
 
-#ifdef NOTSA_DEBUG
     if (!s_DebugSettings.Moon.Enabled) {
         return;
     }
-#endif
 
     const auto moonVisibilityTimeMins = (size_t)std::abs(CClock::GetMinutesToday() - (float)MOON_VISIBILITY_RANGE_MINS);
-    if (moonVisibilityTimeMins >= MOON_VISIBILITY_RANGE_MINS) { // Check is the moon not visible at the current time
-#ifdef NOTSA_DEBUG
-        if (!s_DebugSettings.Moon.Force) {
+    if (!s_DebugSettings.Moon.Force) {
+        if (moonVisibilityTimeMins >= MOON_VISIBILITY_RANGE_MINS) { // Check is the moon not visible at the current time
             return;
         }
-#endif
     }
 
     const auto colorB  = MOON_VISIBILITY_RANGE_MINS - moonVisibilityTimeMins;
@@ -432,18 +430,14 @@ void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
     constexpr float STARS_Z_POSITIONS[STARS_NUM_POSITIONS] = { 0.00f, 0.45f, 0.90f, 1.00f, 0.85f, 0.52f, 0.48f, 0.35f, 0.20f }; // 0x8D5610
     constexpr float STARS_SIZES[STARS_NUM_POSITIONS]       = { 1.00f, 1.40f, 0.90f, 1.00f, 0.60f, 1.50f, 1.30f, 1.00f, 0.80f }; // 0x8D5634
 
-#ifdef NOTSA_DEBUG
     if (!s_DebugSettings.Rockstar.Enabled) {
         return;
     }
-#endif
 
-    if (!CClock::GetIsTimeInRange(LOGO_VISIBLE_FROM_HRS, LOGO_VISIBLE_UNTIL_HRS)) {
-#ifdef NOTSA_DEBUG
-        if (!s_DebugSettings.Rockstar.Force) {
+    if (!s_DebugSettings.Rockstar.Force) {
+        if (!CClock::GetIsTimeInRange(LOGO_VISIBLE_FROM_HRS, LOGO_VISIBLE_UNTIL_HRS)) {
             return;
         }
-#endif
     }
 
     const auto time = CClock::GetGameClockHours() == LOGO_VISIBLE_FROM_HRS
@@ -525,11 +519,9 @@ void CClouds::Render_RenderLowClouds(float colorBalance) {
     const auto colorG = CalculateColorWithBalance((uint8)CTimeCycle::m_CurrentColours.m_nLowCloudsGreen, colorBalance);
     const auto colorB = CalculateColorWithBalance((uint8)CTimeCycle::m_CurrentColours.m_nLowCloudsBlue, colorBalance);
 
-#ifdef NOTSA_DEBUG
     if (!s_DebugSettings.LowClouds.Enabled) {
         return;
     }
-#endif
 
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpCloudTex)));
 
@@ -580,18 +572,14 @@ void CClouds::Render_MaybeRenderRainbows() {
     constexpr uint8  RAINBOW_LINES_COLOR_GREEN[NUM_RAINBOW_LINES]{ 0,  15, 30, 30,  0,  0 };
     constexpr uint8  RAINBOW_LINES_COLOR_BLUE[NUM_RAINBOW_LINES]{  0,  0,  0,  10,  30, 30 };
 
-#ifdef NOTSA_DEBUG
     if (!s_DebugSettings.Rainbow.Enabled) {
         return;
     }
-#endif
 
-    if (CWeather::Rainbow == 0.f) {
-#ifdef NOTSA_DEBUG
-        if (!s_DebugSettings.Rainbow.Force) {
+    if (!s_DebugSettings.Rainbow.Force) {
+        if (CWeather::Rainbow == 0.f) {
             return;
         }
-#endif
     }
 
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpCoronaTexture[0])));
@@ -636,16 +624,11 @@ void CClouds::Render_MaybeRenderStreaks() {
     RwRenderStateSet(rwRENDERSTATESRCBLEND,  RWRSTATE(rwBLENDSRCALPHA));
     RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
 
-#ifdef NOTSA_DEBUG
-    if (!s_DebugSettings.Rainbow.Enabled) {
+    if (!s_DebugSettings.Streaks.Enabled) {
         return;
     }
-#endif
 
-#ifdef NOTSA_DEBUG
-    if (!s_DebugSettings.Rainbow.Force)
-#endif
-    {
+    if (!s_DebugSettings.Streaks.Force) {
         if (CClock::GetGameClockHours() >= 5) {
             return;
         }
