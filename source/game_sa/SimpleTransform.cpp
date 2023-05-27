@@ -21,7 +21,6 @@ void CSimpleTransform::UpdateRwMatrix(RwMatrix* out)
 
     RwMatrixUpdate(out);
 
-  //  ((void(__thiscall*)(CSimpleTransform*, RwMatrix*))0x54EF40)(this, out);
 }
 
 void CSimpleTransform::Invert(const CSimpleTransform& base)
