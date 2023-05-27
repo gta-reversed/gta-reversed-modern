@@ -34,7 +34,6 @@ void CSimpleTransform::Invert(const CSimpleTransform& base)
     this->m_vPosn.z = -base.m_vPosn.z;
     this->m_fHeading = -base.m_fHeading;
 
-  //  ((void(__thiscall*)(CSimpleTransform*, const CSimpleTransform&))0x54EF90)(this, base);
 }
 
 void CSimpleTransform::UpdateMatrix(CMatrix* out)
