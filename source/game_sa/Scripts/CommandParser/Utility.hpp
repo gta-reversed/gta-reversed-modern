@@ -125,4 +125,7 @@ inline auto GetPedOrItsVehicle(CPed& ped) -> CPhysical& {
 template<std::size_t I, typename... Ts>
 using nth_element_t = typename std::tuple_element<I, std::tuple<Ts...>>::type;
 
+template<typename T, typename... Ts>
+concept is_any_of_type_v = (std::same_as<T, Ts> || ...);
+
 }; // notsa

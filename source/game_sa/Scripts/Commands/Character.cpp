@@ -1386,13 +1386,13 @@ void DisableCharSpeech(CPed& ped, bool stopCurrentSpeech) {
 }
 
 // SET_CHAR_WANTED_BY_POLICE
-void SetCharWantedByPolice(CPed& ped) {
-    ped.bWantedByPolice = true;
+void SetCharWantedByPolice(CPed& ped, bool state) {
+    ped.bWantedByPolice = state;
 }
 
 // SET_CHAR_SIGNAL_AFTER_KILL
-void SetCharSignalAfterKill(CPed& ped) {
-    ped.bSignalAfterKill = true;
+void SetCharSignalAfterKill(CPed& ped, bool state) {
+    ped.bSignalAfterKill = state;
 }
 
 // SET_CHAR_COORDINATES_DONT_WARP_GANG_NO_OFFSET

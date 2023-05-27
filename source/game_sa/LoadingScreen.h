@@ -9,7 +9,7 @@
 class CSprite2d;
 
 // TODO: Move this to an appropriate place
-static inline struct FastLoadSettings {
+inline struct FastLoadSettings {
     int32  SaveGameToLoad       = -1;         //< -2 - Don't load, -1 = Load first available, 0 <= - load from save slot
     bool   TriedLoadingSaveGame = false;      //< [Runtime Var] Whenever `SaveGameToLoad` was tried to be loaded
     uint32 SkipSaveGameLoadKey  = VK_CONTROL; //< Skip auto-loading save game (If enabled)
@@ -37,7 +37,7 @@ static inline struct FastLoadSettings {
         if (slot == -1) { // Find first valid slot and load that
             CFileMgr::SetDirMyDocuments();
             for (auto i = 0u; i < MAX_SAVEGAME_SLOTS; i++) {
-                if (std::filesystem::exists(std::format("GTASAsf{}.b", i))) {
+                if (std::filesystem::exists(std::format("GTASAsf{}.b", i + 1))) { // Save file IDs start from 1, not 0
                     return StartGame(i); // Load this slot
                 }
             }
