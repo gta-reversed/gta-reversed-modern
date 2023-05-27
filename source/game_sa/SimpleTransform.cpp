@@ -42,5 +42,4 @@ void CSimpleTransform::UpdateMatrix(CMatrix* out)
     out->SetTranslate(m_vPosn);
     out->SetRotateZOnly(m_fHeading);
 
-   // ((void(__thiscall*)(CSimpleTransform*, class CMatrix*))0x54F1B0)(this, out);
 }
