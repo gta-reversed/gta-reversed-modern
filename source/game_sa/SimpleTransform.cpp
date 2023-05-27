@@ -11,9 +11,8 @@
 
 void CSimpleTransform::UpdateRwMatrix(RwMatrix* out)
 {
-    const float heading = this->m_fHeading;
-    const float sinHeading = sinf(heading);
-    const float cosHeading = cosf(heading);
+    const float sinHeading = std::sin(m_fHeading);
+    const float cosHeading = std::cos(m_fHeading);
 
     out->right = { cosHeading, sinHeading, 0.0 };
     out->up = { -sinHeading, cosHeading, 0.0 };
