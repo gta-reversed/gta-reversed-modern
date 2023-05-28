@@ -14,10 +14,10 @@ void CSimpleTransform::UpdateRwMatrix(RwMatrix* out)
     const float sinHeading = std::sin(m_fHeading);
     const float cosHeading = std::cos(m_fHeading);
 
-    out->right = { cosHeading, sinHeading, 0.0 };
-    out->up = { -sinHeading, cosHeading, 0.0 };
-    out->at = { 0.0, 0.0, 1.0 };
-    out->pos = this->m_vPosn;
+    out->right = { cosHeading, sinHeading, 0.0f };
+    out->up = { -sinHeading, cosHeading, 0.0f };
+    out->at = { 0.0f, 0.0f, 1.0f };
+    out->pos = m_vPosn;
 
     RwMatrixUpdate(out);
 
