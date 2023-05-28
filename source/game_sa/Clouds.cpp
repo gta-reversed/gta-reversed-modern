@@ -528,6 +528,7 @@ void CClouds::Render_RenderLowClouds(float colorBalance) {
     // Calculate camera roll
     ms_cameraRoll = TheCamera.GetRoll();
 
+    // Render clouds
     const auto camPos = TheCamera.GetPosition();
     for (auto i = 0u; i < NUM_LOW_CLOUDS; i++) {
         // Offset from camera
@@ -621,11 +622,10 @@ void CClouds::Render_MaybeRenderStreaks() {
     }
 
     if (!s_DebugSettings.Streaks.Force) {
-        if (CClock::GetGameClockHours() >= 5) {
+        if (CClock::GetGameClockHours() >= 5) { // Time is between 0 and 5 AM
             return;
         }
-
-        if (!IsExtraSunny(CWeather::OldWeatherType) && !IsExtraSunny(CWeather::NewWeatherType)) {
+        if (!IsExtraSunny(CWeather::OldWeatherType) || !IsExtraSunny(CWeather::NewWeatherType)) { // Both weathers must be extra sunny
             return;
         }
     }
@@ -636,19 +636,20 @@ void CClouds::Render_MaybeRenderStreaks() {
         return;
     }
 
-    const auto repeatIdx = CTimer::GetTimeInMS() / REPEAT_INTERVAL_MS;
+    const auto timeMs = CTimer::GetTimeInMS();
+    const auto repeat64 = (timeMs / REPEAT_INTERVAL_MS) % 64;
 
     //> 0x714464
     const auto size = CVector{
-        (float)(repeatIdx % 64 % 7 - 3) * 0.1f,
-        (float)(repeatIdx - 4) * 0.1f,
+        (float)(repeat64 % 7 - 3) * 0.1f,
+        (float)((timeMs & 0xFFFF) / REPEAT_INTERVAL_MS - 4) * 0.1f,
         1.f
     }.Normalized();
 
     //> 0x7144C7
     const auto offsetDir = CVector{
-        (float)(repeatIdx % 64 % 9 - 5),
-        (float)(repeatIdx % 64 % 10 - 5),
+        (float)(repeat64 % 9 - 5),
+        (float)(repeat64 % 10 - 5),
         0.1f
     }.Normalized();
 
@@ -856,7 +857,22 @@ void CClouds::RenderSkyPolys() {
 
 // 0x7154B0
 void CClouds::RenderBottomFromHeight() {
-    plugin::Call<0x7154B0>();
+    const auto camPos = TheCamera.GetPosition();
+    if (camPos.z < -90.f) { // 0x71557D
+        return;
+    }
+
+    const auto& cc = CTimeCycle::m_CurrentColours;
+    const auto ClampClr = [](float clr) {
+        return (uint8)std::min(255.f, clr);
+    };
+    const auto fcClr = CRGBA{
+        ClampClr(cc.m_nFluffyCloudsBottomRed * 2.f + 20.f),
+        ClampClr(cc.m_nFluffyCloudsBottomGreen * 1.5f),
+        ClampClr(cc.m_nFluffyCloudsBottomBlue * 1.5f),
+        255
+    };
+
 }
 
 //
