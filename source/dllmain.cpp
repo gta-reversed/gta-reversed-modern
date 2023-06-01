@@ -36,13 +36,13 @@ void LoadConfigurations() {
     g_ConfigurationMgr.Load(DEFAULT_INI_FILENAME);
 
     // Then load all specific configurations.
-    g_FastLoaderConfiguration.Load();
+    g_FastLoaderConfig.Load();
     // ...
 }
 
 void SaveConfigurations() {
     // Save all specific configurations.
-    g_FastLoaderConfiguration.Save();
+    g_FastLoaderConfig.Save();
     // ...
 
     // Lastly, save the INI file.

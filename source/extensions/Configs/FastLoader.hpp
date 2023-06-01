@@ -9,7 +9,9 @@
 
 #include "extensions/Configuration.hpp"
 
-inline struct {
+inline struct FastLoaderConfig {
+    INI_CONFIG_SECTION("FastLoader");
+
     int32  SaveGameToLoad       = -1;         //< -2 - Don't load, -1 = Load first available, 0 <= - load from save slot
     bool   TriedLoadingSaveGame = false;      //< [Runtime Var] Whenever `SaveGameToLoad` was tried to be loaded
     uint32 SkipSaveGameLoadKey  = VK_CONTROL; //< Skip auto-loading save game (If enabled)
@@ -64,40 +66,40 @@ inline struct {
     }
 
     void Load() {
-        GET_INI_CONFIG_VALUE("FastLoader", SaveGameToLoad, -1);
-        GET_INI_CONFIG_VALUE("FastLoader", SkipSaveGameLoadKey, false);
-        GET_INI_CONFIG_VALUE("FastLoader", SoundDelay, 50);
+        GET_INI_CONFIG_VALUE(SaveGameToLoad, -1);
+        GET_INI_CONFIG_VALUE(SkipSaveGameLoadKey, false);
+        GET_INI_CONFIG_VALUE(SoundDelay, 50);
 
-        GET_INI_CONFIG_VALUE("FastLoader", NoEAX, true);
-        GET_INI_CONFIG_VALUE("FastLoader", NoNVidia, true);
-        GET_INI_CONFIG_VALUE("FastLoader", NoLogo, true);
-        GET_INI_CONFIG_VALUE("FastLoader", NoTitleOrIntro, true);
-        GET_INI_CONFIG_VALUE("FastLoader", NoCopyright, true);
-        GET_INI_CONFIG_VALUE("FastLoader", NoFading, true);
-        GET_INI_CONFIG_VALUE("FastLoader", NoLoadScreen, true);
-        GET_INI_CONFIG_VALUE("FastLoader", NoLoadBar, false);
-        GET_INI_CONFIG_VALUE("FastLoader", NoLoadingTune, true);
-        GET_INI_CONFIG_VALUE("FastLoader", NoDbgLogScreens, true);
-        GET_INI_CONFIG_VALUE("FastLoader", RenderAtAllTimes, true);
-        GET_INI_CONFIG_VALUE("FastLoader", ScreenChangeTime, 5.f);
+        GET_INI_CONFIG_VALUE(NoEAX, true);
+        GET_INI_CONFIG_VALUE(NoNVidia, true);
+        GET_INI_CONFIG_VALUE(NoLogo, true);
+        GET_INI_CONFIG_VALUE(NoTitleOrIntro, true);
+        GET_INI_CONFIG_VALUE(NoCopyright, true);
+        GET_INI_CONFIG_VALUE(NoFading, true);
+        GET_INI_CONFIG_VALUE(NoLoadScreen, true);
+        GET_INI_CONFIG_VALUE(NoLoadBar, false);
+        GET_INI_CONFIG_VALUE(NoLoadingTune, true);
+        GET_INI_CONFIG_VALUE(NoDbgLogScreens, true);
+        GET_INI_CONFIG_VALUE(RenderAtAllTimes, true);
+        GET_INI_CONFIG_VALUE(ScreenChangeTime, 5.f);
     }
 
     void Save() {
-        SAVE_INI_CONFIG_VALUE("FastLoader", SaveGameToLoad);
-        SAVE_INI_CONFIG_VALUE("FastLoader", SkipSaveGameLoadKey);
-        SAVE_INI_CONFIG_VALUE("FastLoader", SoundDelay);
+        SAVE_INI_CONFIG_VALUE(SaveGameToLoad);
+        SAVE_INI_CONFIG_VALUE(SkipSaveGameLoadKey);
+        SAVE_INI_CONFIG_VALUE(SoundDelay);
 
-        SAVE_INI_CONFIG_VALUE("FastLoader", NoEAX);
-        SAVE_INI_CONFIG_VALUE("FastLoader", NoNVidia);
-        SAVE_INI_CONFIG_VALUE("FastLoader", NoLogo);
-        SAVE_INI_CONFIG_VALUE("FastLoader", NoTitleOrIntro);
-        SAVE_INI_CONFIG_VALUE("FastLoader", NoCopyright);
-        SAVE_INI_CONFIG_VALUE("FastLoader", NoFading);
-        SAVE_INI_CONFIG_VALUE("FastLoader", NoLoadScreen);
-        SAVE_INI_CONFIG_VALUE("FastLoader", NoLoadBar);
-        SAVE_INI_CONFIG_VALUE("FastLoader", NoLoadingTune);
-        SAVE_INI_CONFIG_VALUE("FastLoader", NoDbgLogScreens);
-        SAVE_INI_CONFIG_VALUE("FastLoader", RenderAtAllTimes);
-        SAVE_INI_CONFIG_VALUE("FastLoader", ScreenChangeTime);
+        SAVE_INI_CONFIG_VALUE(NoEAX);
+        SAVE_INI_CONFIG_VALUE(NoNVidia);
+        SAVE_INI_CONFIG_VALUE(NoLogo);
+        SAVE_INI_CONFIG_VALUE(NoTitleOrIntro);
+        SAVE_INI_CONFIG_VALUE(NoCopyright);
+        SAVE_INI_CONFIG_VALUE(NoFading);
+        SAVE_INI_CONFIG_VALUE(NoLoadScreen);
+        SAVE_INI_CONFIG_VALUE(NoLoadBar);
+        SAVE_INI_CONFIG_VALUE(NoLoadingTune);
+        SAVE_INI_CONFIG_VALUE(NoDbgLogScreens);
+        SAVE_INI_CONFIG_VALUE(RenderAtAllTimes);
+        SAVE_INI_CONFIG_VALUE(ScreenChangeTime);
     }
-} g_FastLoaderConfiguration{};
+} g_FastLoaderConfig{};

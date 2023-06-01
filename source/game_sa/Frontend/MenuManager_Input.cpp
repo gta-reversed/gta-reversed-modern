@@ -231,7 +231,7 @@ void CMenuManager::CheckForMenuClosing() {
 
             if ((!field_35 || !m_bActivateMenuNextFrame) && !m_bLoadingData) {
                 AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_START);
-                if (!g_FastLoaderConfiguration.ShouldLoadSaveGame()) { // If loading, skip menu audio
+                if (!g_FastLoaderConfig.ShouldLoadSaveGame()) { // If loading, skip menu audio
                     AudioEngine.Service();
                 }
             }
@@ -334,7 +334,7 @@ void CMenuManager::CheckForMenuClosing() {
 
         AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_START);
 
-        if (!g_FastLoaderConfiguration.ShouldLoadSaveGame()) { // If loading, skip menu audio
+        if (!g_FastLoaderConfig.ShouldLoadSaveGame()) { // If loading, skip menu audio
             AudioEngine.Service();
         }
 

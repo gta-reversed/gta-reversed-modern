@@ -242,7 +242,7 @@ void CLoadingScreen::DisplayPCScreen() {
         DefinedState2d();
         RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
         RenderSplash();
-        if (!g_FastLoaderConfiguration.NoLoadBar) {
+        if (!g_FastLoaderConfig.NoLoadBar) {
             if (m_currDisplayedSplash > 0 && (!m_bFading || m_currDisplayedSplash != 1)) {
                 RenderLoadingBar();
             }
@@ -301,7 +301,7 @@ void CLoadingScreen::DoPCScreenChange(uint32 finish) {
 #endif
     }
 
-    if (!g_FastLoaderConfiguration.NoFading) {
+    if (!g_FastLoaderConfig.NoFading) {
         for (auto i = 20; i > 0; i--) {
             m_FadeAlpha = 0;
             DisplayPCScreen();
@@ -346,11 +346,11 @@ void CLoadingScreen::NewChunkLoaded() {
     }
 
 #ifdef FIX_BUGS // Fix copyright screen appearing instead of an actual loading screen splash
-    if (m_currDisplayedSplash && delta < g_FastLoaderConfiguration.ScreenChangeTime) {
+    if (m_currDisplayedSplash && delta < g_FastLoaderConfig.ScreenChangeTime) {
 #else
     if ((m_currDisplayedSplash && delta < 5.0f) || (!m_currDisplayedSplash && delta < 5.5f)) {
 #endif
-        if (!g_FastLoaderConfiguration.NoLoadScreen || !g_FastLoaderConfiguration.NoLoadBar) {
+        if (!g_FastLoaderConfig.NoLoadScreen || !g_FastLoaderConfig.NoLoadBar) {
             DisplayPCScreen();
         }
     } else { // New splash screen
@@ -379,7 +379,7 @@ void CLoadingScreen::SkipCopyrightSplash() {
 // 0x53DED0
 void LoadingScreen(const char* msg1, const char* msg2, const char* msg3) {
     if (msg1) {
-        if (!g_FastLoaderConfiguration.NoDbgLogScreens) { // Very slow, so skip it
+        if (!g_FastLoaderConfig.NoDbgLogScreens) { // Very slow, so skip it
             DEV_LOG("Loadingscreen: {} [{}][{}]", msg1, msg2 ? msg2 : "NULL", msg3 ? msg3 : "NULL");
         }
         CLoadingScreen::SetLoadingBarMsg(msg1, msg2);

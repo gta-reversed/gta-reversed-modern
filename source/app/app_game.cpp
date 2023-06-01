@@ -386,7 +386,7 @@ void FrontendIdle() {
     CameraSize(Scene.m_pRwCamera, nullptr, SCREEN_VIEW_WINDOW, SCREEN_ASPECT_RATIO);
     CVisibilityPlugins::SetRenderWareCamera(Scene.m_pRwCamera);
 
-    if (g_FastLoaderConfiguration.ShouldLoadSaveGame()) {
+    if (g_FastLoaderConfig.ShouldLoadSaveGame()) {
         return; // Don't render anything
     }
 

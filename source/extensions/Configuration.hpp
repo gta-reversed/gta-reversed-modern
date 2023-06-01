@@ -50,11 +50,16 @@ public:
     }
 
     void Load(const std::string& fileName) {
-        ParseIniFile(std::ifstream{fileName}, m_content);
+        std::ifstream in(fileName);
+        assert(!in.bad());
+
+        ParseIniFile(in, m_content);
     }
 
     void Save(const std::string& fileName) {
-        std::ofstream out{fileName};
+        std::ofstream out(fileName);
+        assert(!out.bad());
+
         for (auto&& [section, keys] : m_content) {
             // We consider section == "" as the root.
             if (section != "")
@@ -68,7 +73,7 @@ public:
     }
 
 private:
-    static void ParseIniFile(std::ifstream file, IniContent& ini) {
+    static void ParseIniFile(std::ifstream& file, IniContent& ini) {
         std::string sectionName{""};
         std::string line;
         while (std::getline(file, line)) {
@@ -109,8 +114,11 @@ private:
     }
 } g_ConfigurationMgr;
 
-#define GET_INI_CONFIG_VALUE(section, key_var, _default) \
-	key_var = g_ConfigurationMgr.GetIniValue<decltype(key_var)>(section, #key_var).value_or(_default)
+#define INI_CONFIG_SECTION(name) \
+    static constexpr auto IniSectionName = name
 
-#define SAVE_INI_CONFIG_VALUE(section, key_var) \
-	g_ConfigurationMgr.SetIniValue<decltype(key_var)>(section, #key_var, key_var);
+#define GET_INI_CONFIG_VALUE(key_var, _default) \
+	key_var = g_ConfigurationMgr.GetIniValue<decltype(key_var)>(IniSectionName, #key_var).value_or(_default)
+
+#define SAVE_INI_CONFIG_VALUE(key_var) \
+	g_ConfigurationMgr.SetIniValue<decltype(key_var)>(IniSectionName, #key_var, key_var);

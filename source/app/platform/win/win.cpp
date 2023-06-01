@@ -526,22 +526,22 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
             CLoadingScreen::DoPCTitleFadeIn();
             CLoadingScreen::Shutdown();
         };
-        if (!g_FastLoaderConfiguration.NoEAX) {
+        if (!g_FastLoaderConfig.NoEAX) {
             ProcessSplash(false);
         }
-        if (!g_FastLoaderConfiguration.NoNVidia) {
+        if (!g_FastLoaderConfig.NoNVidia) {
             ProcessSplash(true);
         }
         ChangeGameStateTo(GAME_STATE_LOGO);
         break;
     }
     case GAME_STATE_LOGO: {
-        if (!g_FastLoaderConfiguration.NoLogo) {
+        if (!g_FastLoaderConfig.NoLogo) {
             if (!Windowed) {
                 VideoPlayer::Play(nCmdShow, "movies\\Logo.mpg");
             }
         }
-        ChangeGameStateTo(g_FastLoaderConfiguration.NoLogo ? GAME_STATE_TITLE : GAME_STATE_PLAYING_LOGO);
+        ChangeGameStateTo(g_FastLoaderConfig.NoLogo ? GAME_STATE_TITLE : GAME_STATE_PLAYING_LOGO);
         break;
     }
     case GAME_STATE_PLAYING_LOGO:
@@ -568,17 +568,17 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
         break;
     }
     case GAME_STATE_TITLE: {
-        if (!g_FastLoaderConfiguration.NoTitleOrIntro) {
+        if (!g_FastLoaderConfig.NoTitleOrIntro) {
             VideoPlayer::Shutdown();
             VideoPlayer::Play(nCmdShow, FrontEndMenuManager.GetMovieFileName());
         }
-        ChangeGameStateTo(g_FastLoaderConfiguration.NoTitleOrIntro ? GAME_STATE_FRONTEND_LOADING : GAME_STATE_PLAYING_INTRO);
+        ChangeGameStateTo(g_FastLoaderConfig.NoTitleOrIntro ? GAME_STATE_FRONTEND_LOADING : GAME_STATE_PLAYING_INTRO);
         break;
     }
     case GAME_STATE_FRONTEND_LOADING: {
         VideoPlayer::Shutdown();
         CLoadingScreen::Init(true, false);
-        if (!g_FastLoaderConfiguration.NoCopyright) {
+        if (!g_FastLoaderConfig.NoCopyright) {
             CLoadingScreen::DoPCTitleFadeOut();
         }
         if (!CGame::InitialiseEssentialsAfterRW()) {
@@ -597,7 +597,7 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
             VideoModeNotSelected = false;
         }
         ChangeGameStateTo(GAME_STATE_FRONTEND_IDLE);
-        if (g_FastLoaderConfiguration.NoCopyright) {
+        if (g_FastLoaderConfig.NoCopyright) {
             CLoadingScreen::SkipCopyrightSplash();
         } else {
             CLoadingScreen::DoPCTitleFadeIn();
@@ -607,13 +607,13 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
     case GAME_STATE_FRONTEND_IDLE: { // 0x748CB2
         WINDOWPLACEMENT wndpl{ .length = sizeof(WINDOWPLACEMENT) };
         VERIFY(GetWindowPlacement(PSGLOBAL(window), &wndpl));
-        if (g_FastLoaderConfiguration.ShouldLoadSaveGame()) {
+        if (g_FastLoaderConfig.ShouldLoadSaveGame()) {
             RsEventHandler(rsFRONTENDIDLE, nullptr); // We need to still run the frontend processing once because it has some important stuff
-            if ((GetAsyncKeyState(g_FastLoaderConfiguration.SkipSaveGameLoadKey) & 0xF000) == 0) {
-                g_FastLoaderConfiguration.StartGame(g_FastLoaderConfiguration.SaveGameToLoad); // Load game
+            if ((GetAsyncKeyState(g_FastLoaderConfig.SkipSaveGameLoadKey) & 0xF000) == 0) {
+                g_FastLoaderConfig.StartGame(g_FastLoaderConfig.SaveGameToLoad); // Load game
             }
-            g_FastLoaderConfiguration.TriedLoadingSaveGame = true;
-        } else if (g_FastLoaderConfiguration.RenderAtAllTimes || wndpl.showCmd != SW_SHOWMINIMIZED) {
+            g_FastLoaderConfig.TriedLoadingSaveGame = true;
+        } else if (g_FastLoaderConfig.RenderAtAllTimes || wndpl.showCmd != SW_SHOWMINIMIZED) {
             RsEventHandler(rsFRONTENDIDLE, nullptr);
         }
         if (FrontEndMenuManager.m_bMenuActive && !FrontEndMenuManager.m_bLoadingData) {
@@ -626,7 +626,7 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
         NOTSA_SWCFALLTHRU; // Fall down and start loading
     }
     case GAME_STATE_LOADING_STARTED: {
-        if (!g_FastLoaderConfiguration.NoLoadingTune) {
+        if (!g_FastLoaderConfig.NoLoadingTune) {
             AudioEngine.StartLoadingTune();
         }
 
