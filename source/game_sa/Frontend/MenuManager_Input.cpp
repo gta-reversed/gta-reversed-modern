@@ -7,7 +7,7 @@
 #include "VideoMode.h" // todo
 #include "ControllerConfigManager.h"
 
-#include "extensions/Configuration/FastLoader.hpp"
+#include "extensions/Configs/FastLoader.hpp"
 
 /*!
  * @addr 0x57FD70

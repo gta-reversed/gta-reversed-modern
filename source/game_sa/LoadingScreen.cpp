@@ -9,7 +9,7 @@
 #include "platform.h"
 #include "LoadingScreen.h"
 
-#include "extensions/Configuration/FastLoader.hpp"
+#include "extensions/Configs/FastLoader.hpp"
 
 void CLoadingScreen::InjectHooks() {
     RH_ScopedClass(CLoadingScreen);

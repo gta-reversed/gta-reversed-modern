@@ -29,7 +29,7 @@ void WaitForDebugger() {
 
 static constexpr auto DEFAULT_INI_FILENAME = "gta-reversed.ini";
 
-#include "FastLoader.hpp"
+#include "extensions/Configs/FastLoader.hpp"
 
 void LoadConfigurations() {
     // Firstly load the INI into the memory.
@@ -50,6 +50,7 @@ void SaveConfigurations() {
 }
 
 // TODO: stop
+// We will be calling Load/SaveConfiguration at main after reversing.
 struct Ded {
     ~Ded() {
         SaveConfigurations();

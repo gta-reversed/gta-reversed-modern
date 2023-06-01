@@ -22,7 +22,7 @@
 #include "MenuManager.h"
 #include <AEAudioHardware.h>
 
-#include "extensions/Configuration/FastLoader.hpp"
+#include "extensions/Configs/FastLoader.hpp"
 
 extern void WinPsInjectHooks();
 

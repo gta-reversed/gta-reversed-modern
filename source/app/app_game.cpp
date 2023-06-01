@@ -22,7 +22,7 @@
 #include <VehicleRecording.h>
 #include <PostEffects.h>
 
-#include "extensions/Configuration/FastLoader.hpp"
+#include "extensions/Configs/FastLoader.hpp"
 
 void AppGameInjectHooks() {
     RH_ScopedCategory("App");
