@@ -6,6 +6,7 @@
 #include "config.h"
 
 #include "extensions/CommandLine.h"
+#include "extensions/Configuration.hpp"
 
 void InjectHooksMain(HMODULE hThisDLL);
 
@@ -26,6 +27,35 @@ void WaitForDebugger() {
     }
 }
 
+static constexpr auto DEFAULT_INI_FILENAME = "gta-reversed.ini";
+
+#include "FastLoader.hpp"
+
+void LoadConfigurations() {
+    // Firstly load the INI into the memory.
+    g_ConfigurationMgr.Load(DEFAULT_INI_FILENAME);
+
+    // Then load all specific configurations.
+    g_FastLoaderConfiguration.Load();
+    // ...
+}
+
+void SaveConfigurations() {
+    // Save all specific configurations.
+    g_FastLoaderConfiguration.Save();
+    // ...
+
+    // Lastly, save the INI file.
+    g_ConfigurationMgr.Save(DEFAULT_INI_FILENAME);
+}
+
+// TODO: stop
+struct Ded {
+    ~Ded() {
+        SaveConfigurations();
+    }
+} g_Ded{};
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {
     switch (ul_reason_for_call)
@@ -44,6 +74,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 
         if (CommandLine::waitForDebugger)
             WaitForDebugger();
+
+        LoadConfigurations();
 
         InjectHooksMain(hModule);
         break;

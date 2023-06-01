@@ -22,6 +22,8 @@
 #include <VehicleRecording.h>
 #include <PostEffects.h>
 
+#include "extensions/Configuration/FastLoader.hpp"
+
 void AppGameInjectHooks() {
     RH_ScopedCategory("App");
     RH_ScopedNamespaceName("Game");
@@ -384,7 +386,7 @@ void FrontendIdle() {
     CameraSize(Scene.m_pRwCamera, nullptr, SCREEN_VIEW_WINDOW, SCREEN_ASPECT_RATIO);
     CVisibilityPlugins::SetRenderWareCamera(Scene.m_pRwCamera);
 
-    if (FastLoadSettings.ShouldLoadSaveGame()) {
+    if (g_FastLoaderConfiguration.ShouldLoadSaveGame()) {
         return; // Don't render anything
     }
 

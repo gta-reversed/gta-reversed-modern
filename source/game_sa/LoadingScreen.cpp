@@ -9,6 +9,8 @@
 #include "platform.h"
 #include "LoadingScreen.h"
 
+#include "extensions/Configuration/FastLoader.hpp"
+
 void CLoadingScreen::InjectHooks() {
     RH_ScopedClass(CLoadingScreen);
     RH_ScopedCategoryGlobal();
@@ -240,7 +242,7 @@ void CLoadingScreen::DisplayPCScreen() {
         DefinedState2d();
         RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
         RenderSplash();
-        if (!FastLoadSettings.NoLoadBar) {
+        if (!g_FastLoaderConfiguration.NoLoadBar) {
             if (m_currDisplayedSplash > 0 && (!m_bFading || m_currDisplayedSplash != 1)) {
                 RenderLoadingBar();
             }
@@ -299,7 +301,7 @@ void CLoadingScreen::DoPCScreenChange(uint32 finish) {
 #endif
     }
 
-    if (!FastLoadSettings.NoFading) {
+    if (!g_FastLoaderConfiguration.NoFading) {
         for (auto i = 20; i > 0; i--) {
             m_FadeAlpha = 0;
             DisplayPCScreen();
@@ -344,11 +346,11 @@ void CLoadingScreen::NewChunkLoaded() {
     }
 
 #ifdef FIX_BUGS // Fix copyright screen appearing instead of an actual loading screen splash
-    if (m_currDisplayedSplash && delta < FastLoadSettings.ScreenChangeTime) {
+    if (m_currDisplayedSplash && delta < g_FastLoaderConfiguration.ScreenChangeTime) {
 #else
     if ((m_currDisplayedSplash && delta < 5.0f) || (!m_currDisplayedSplash && delta < 5.5f)) {
 #endif
-        if (!FastLoadSettings.NoLoadScreen || !FastLoadSettings.NoLoadBar) {
+        if (!g_FastLoaderConfiguration.NoLoadScreen || !g_FastLoaderConfiguration.NoLoadBar) {
             DisplayPCScreen();
         }
     } else { // New splash screen
@@ -377,7 +379,7 @@ void CLoadingScreen::SkipCopyrightSplash() {
 // 0x53DED0
 void LoadingScreen(const char* msg1, const char* msg2, const char* msg3) {
     if (msg1) {
-        if (!FastLoadSettings.NoDbgLogScreens) { // Very slow, so skip it
+        if (!g_FastLoaderConfiguration.NoDbgLogScreens) { // Very slow, so skip it
             DEV_LOG("Loadingscreen: {} [{}][{}]", msg1, msg2 ? msg2 : "NULL", msg3 ? msg3 : "NULL");
         }
         CLoadingScreen::SetLoadingBarMsg(msg1, msg2);

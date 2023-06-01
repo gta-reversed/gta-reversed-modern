@@ -205,7 +205,7 @@ struct RtDictSchema
     RwUInt32 compatibilityVersion;
         /**< Used for inner version checking when streaming in dictionaries. If
           *< the dictionary's version is less than this, \ref streamReadCompatibilityCB
-          *< will be used for reading in the contents. */
+          *< will be used for reading in the s_Contents. */
     RwSList *dictionaries;
         /**< List of dictionaries that have been created using this layout */
     RtDict *current;

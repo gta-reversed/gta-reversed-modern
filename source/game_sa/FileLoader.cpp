@@ -712,7 +712,7 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
         return; // No data present, other than the header
     }
 
-    // Here's the meat. We allocate some memory to hold both the file's contents and the CCollisionData struct.
+    // Here's the meat. We allocate some memory to hold both the file's s_Contents and the CCollisionData struct.
     // So, memory layout is as follows:
     //                [              DATA FROM FILE COPIED                  ]
     // CCollisionData | Spheres | Boxes | Suspension Lines | Vertices | Faces
@@ -783,7 +783,7 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
         return; // No data present, other than the header
     }
 
-    // Here's the meat. We allocate some memory to hold both the file's contents and the CCollisionData struct.
+    // Here's the meat. We allocate some memory to hold both the file's s_Contents and the CCollisionData struct.
     // So, memory layout is as follows:
     //                [              DATA FROM FILE COPIED                  ]
     // CCollisionData | Spheres | Boxes | Suspension Lines | Vertices | Faces
@@ -853,7 +853,7 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
         return; // No data present, other than the header
     }
 
-    // Here's the meat. We allocate some memory to hold both the file's contents and the CCollisionData struct.
+    // Here's the meat. We allocate some memory to hold both the file's s_Contents and the CCollisionData struct.
     // So, memory layout is as follows:
     //                [              DATA FROM FILE COPIED                  ]
     // CCollisionData | Spheres | Boxes | Suspension Lines | Vertices | Faces
@@ -1301,7 +1301,7 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             // - Copy is cheap
             // - Lifetime issue
             // The latter is the reason why they had to make a copy in the first place.
-            // If we were to just return `l + strlen(id) + 1` we'd depend on the line buffer's content not to change,
+            // If we were to just return `l + strlen(id) + 1` we'd depend on the line buffer's s_Content not to change,
             // but the line is just a static buffer (ms_line) which is modified each time `LoadLine` is called.
             // So if any of the invoked functions call `LoadLine` the path will no longer be valid
             // So in order to prevent this nasty bug we're just going to copy it each time.
@@ -1323,7 +1323,7 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             RwTexDictionaryForAllTextures(txd, AddTextureCB, txd);
             RwTexDictionaryDestroy(txd);
         } else if (LineBeginsWith("IPL")) {
-            // Have to call this here, because line buffer's content may change after the `if` below
+            // Have to call this here, because line buffer's s_Content may change after the `if` below
             const auto path = ExtractPathFor("IPL");
 
             if (!hasLoadedAnyIPLs) {

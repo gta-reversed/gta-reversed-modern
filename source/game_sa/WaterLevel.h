@@ -152,7 +152,7 @@ class CWaterLevel {
         float r{ 1.f }, g{ 1.f }, b{ 1.f };
     } WakeSegmentPartColors[4]{};
 
-    //! Used to describe a block/combo's content
+    //! Used to describe a block/combo's s_Content
     struct PolyInfo {
     public:
         enum class PType {
