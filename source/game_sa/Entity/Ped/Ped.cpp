@@ -825,7 +825,7 @@ void CPed::ClearAimFlag() {
 
 /*!
 * @addr 0x5DEF60
-* @returns Which quadrant a given point is in relative to the ped's rotation. (Google: "Angle quadrants" - https://www.mathstips.com/wp-s_Content/uploads/2014/03/unit-circle.png)
+* @returns Which quadrant a given point is in relative to the ped's rotation. (Google: "Angle quadrants" - https://www.mathstips.com/wp-content/uploads/2014/03/unit-circle.png)
 * @param point Point should be relative to the ped's position. Eg.: point = actualPoint - ped.GetPostion2D()
 */
 uint8 CPed::GetLocalDirection(const CVector2D& point) const {

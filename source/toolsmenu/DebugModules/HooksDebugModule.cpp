@@ -42,7 +42,7 @@ namespace HookFilter {
     bool m_caseSensitive{};
 
     // Contains all the tokens on the left side split by `NAMESPACE_SEP` of the input split by `HOOKNAME_SEP`
-    // Eg `m_input` => s_Content:
+    // Eg `m_input` => content:
     // - `Name/Space/` => `Name`, `Space`, `` (<= empty string)
     // - `Name/Space/::` => -||- (Same as the above example)
     // - `/` - `` (empty string) - Indicates root namespace (See `IsRelativeToRootNamespace`)

@@ -33,7 +33,7 @@ void StopStoring();
 
 /*!
 * @addr 0x707800
-* @brief Render out the s_Contents of the temporary buffers as a trilist.
+* @brief Render out the contents of the temporary buffers as a trilist.
 * Frequently inlined!
 */
 void RenderStuffInBuffer();

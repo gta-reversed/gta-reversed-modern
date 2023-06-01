@@ -16,7 +16,7 @@ Simple::Simple(std::string fnName, uint32 installAddress, void* addressToJumpTo,
     m_HookContent.jumpLocation = ReversibleHooks::GetJMPLocation(installAddress, m_iLibFunctionAddress);
     memset(m_HookContent.possibleNops, NOP_OPCODE, iJmpCodeSize - ReversibleHooks::x86JMPSize);
 
-    // Copy lib function s_Content
+    // Copy lib function content
     m_LibHookContent.jumpLocation = ReversibleHooks::GetJMPLocation(m_iLibFunctionAddress, installAddress);
     m_iLibHookedBytes = ReversibleHooks::x86JMPSize;
     memcpy(&m_LibOriginalFunctionContent, (void*)m_iLibFunctionAddress, m_iLibHookedBytes);
