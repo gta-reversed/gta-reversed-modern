@@ -3,8 +3,9 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
 #include "StdInc.h"
-
 #include "config.h"
+
+#include "extensions/CommandLine.h"
 
 void InjectHooksMain(HMODULE hThisDLL);
 
@@ -25,34 +26,6 @@ void WaitForDebugger() {
     }
 }
 
-namespace CommandLineArguments {
-
-std::vector<std::wstring> Get() {
-    std::vector<std::wstring> out;
-    int numArgs{0};
-    LPWSTR* szArgs = CommandLineToArgvW(GetCommandLineW(), &numArgs);
-    out.reserve(numArgs);
-    if (szArgs) {
-        for (int i = 0; i < numArgs; i++) {
-            out.emplace_back(szArgs[i]);
-        }
-    }
-    LocalFree(szArgs);
-    return out;
-}
-
-void Process() {
-    using namespace std::literals;
-    const auto args = Get();
-    for (const auto& arg : args) {
-        if (arg == L"--debug") {
-            WaitForDebugger();
-        }
-    }
-}
-
-} // namespace CommandLineArguments
-
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {
     switch (ul_reason_for_call)
@@ -67,7 +40,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
         }
 
         DisplayConsole();
-        CommandLineArguments::Process();
+        CommandLine::Load(__argc, __argv);
+
+        if (CommandLine::waitForDebugger)
+            WaitForDebugger();
+
         InjectHooksMain(hModule);
         break;
     }
