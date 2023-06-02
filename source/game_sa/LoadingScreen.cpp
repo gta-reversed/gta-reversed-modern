@@ -177,9 +177,10 @@ void CLoadingScreen::Continue() {
 
 // 0x590370
 void CLoadingScreen::RenderLoadingBar() {
+#ifdef PRINT_LOADMSG
     // NOTSA
-    // TODO: Add some kind of ifdef for dev stuff
     // TODO: Fix new-line not rendered when using fastload into a savegame
+
     char loadingMsg[1024];
     *std::format_to(loadingMsg, "{}\n{}", m_LoadingGxtMsg1, m_LoadingGxtMsg2) = 0;
     CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
@@ -191,6 +192,7 @@ void CLoadingScreen::RenderLoadingBar() {
         loadingMsg
     );
     CFont::RenderFontBuffer();
+#endif
 
     if (m_TimeBarAppeared == 0.0f) {
         m_TimeBarAppeared = GetClockTime();

@@ -10,22 +10,23 @@
 #include "extensions/Configuration.hpp"
 
 inline struct FastLoaderConfig {
+    bool TriedLoadingSaveGame = false; //< [Runtime Var] Whenever `SaveGameToLoad` was tried to be loaded
+
     INI_CONFIG_SECTION("FastLoader");
 
-    int32  SaveGameToLoad       = -1;         //< -2 - Don't load, -1 = Load first available, 0 <= - load from save slot
-    bool   TriedLoadingSaveGame = false;      //< [Runtime Var] Whenever `SaveGameToLoad` was tried to be loaded
+    int32  SaveGameToLoad       = -2;         //< -2 - Don't load, -1 = Load first available, 0 <= - load from save slot
     uint32 SkipSaveGameLoadKey  = VK_CONTROL; //< Skip auto-loading save game (If enabled)
     uint32 SoundDelay           = 50;
 
-    bool  NoEAX            = true;  //< Skip EAX splash
-    bool  NoNVidia         = true;  //< Skip nVidia splash
-    bool  NoLogo           = true;  //< Skip Logo.mpg
-    bool  NoTitleOrIntro   = true;  //< Skip GTAtitles.mpg
-    bool  NoCopyright      = true;  //< Skip Copyright screen
-    bool  NoFading         = true;  //< Skip fading (takes quite a bit of time)
-    bool  NoLoadScreen     = true;  //< Skip load pre-game screen 
+    bool  NoEAX            = false; //< Skip EAX splash
+    bool  NoNVidia         = false; //< Skip nVidia splash
+    bool  NoLogo           = false; //< Skip Logo.mpg
+    bool  NoTitleOrIntro   = false; //< Skip GTAtitles.mpg
+    bool  NoCopyright      = false; //< Skip Copyright screen
+    bool  NoFading         = false; //< Skip fading (takes quite a bit of time)
+    bool  NoLoadScreen     = false; //< Skip load pre-game screen 
     bool  NoLoadBar        = false; //< Skip load bar in pre-game load screen
-    bool  NoLoadingTune    = true;  //< Skip GTA theme music
+    bool  NoLoadingTune    = false; //< Skip GTA theme music
     bool  NoDbgLogScreens  = true;  //< Don't display [notsa] loading screen debug messages to console
     bool  RenderAtAllTimes = true;  //< Render even when minimized
     float ScreenChangeTime = 5.f;   //< Time to change splash screens in the loading screen (seconds?)
@@ -66,6 +67,7 @@ inline struct FastLoaderConfig {
     }
 
     void Load() {
+#ifdef EXT_FAST_LOADER
         GET_INI_CONFIG_VALUE(SaveGameToLoad, -1);
         GET_INI_CONFIG_VALUE(SkipSaveGameLoadKey, false);
         GET_INI_CONFIG_VALUE(SoundDelay, 50);
@@ -82,5 +84,6 @@ inline struct FastLoaderConfig {
         GET_INI_CONFIG_VALUE(NoDbgLogScreens, true);
         GET_INI_CONFIG_VALUE(RenderAtAllTimes, true);
         GET_INI_CONFIG_VALUE(ScreenChangeTime, 5.f);
+#endif
     }
 } g_FastLoaderConfig{};
