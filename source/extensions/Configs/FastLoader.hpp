@@ -37,22 +37,30 @@ inline struct FastLoaderConfig {
     //! Start the game from a slot
     //! `slot` can have the same values as `SaveGameToLoad`
     bool StartGame(int32 slot) {
-        if (slot == -1) { // Find first valid slot and load that
+        const auto CheckIfSaveFileExists = [](int32 slot) {
             CFileMgr::SetDirMyDocuments();
+            const bool exists = std::filesystem::exists(std::format("GTASAsf{}.b", slot + 1));
+            CFileMgr::ChangeDir("");
+            return exists;
+        };
+
+        if (slot == -1) { // Find first valid slot and load that
             for (auto i = 0u; i < MAX_SAVEGAME_SLOTS; i++) {
-                if (std::filesystem::exists(std::format("GTASAsf{}.b", i + 1))) { // Save file IDs start from 1, not 0
+                if (CheckIfSaveFileExists(i)) { // Save file IDs start from 1, not 0
                     return StartGame(i); // Load this slot
                 }
             }
-            CFileMgr::ChangeDir("");
-            DEV_LOG("Didn't find any savegame to load!");
+            DEV_LOG("Couldn't find any savegame to load!");
             return false;
         }
 
         // Load game from slot
         assert(slot >= 0);
-
-        DEV_LOG("Loading game from slot ({})", slot);
+        if (!CheckIfSaveFileExists(slot)) {
+            DEV_LOG("Save slot {} is empty!", slot + 1);
+            return false;
+        }
+        DEV_LOG("Loading game from slot ({})", slot + 1);
 
         if (!NoLoadingTune) {
             for (size_t i = 0; i < SoundDelay; i++) {
