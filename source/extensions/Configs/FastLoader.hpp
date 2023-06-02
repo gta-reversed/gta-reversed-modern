@@ -68,22 +68,26 @@ inline struct FastLoaderConfig {
 
     void Load() {
 #ifdef EXT_FAST_LOADER
-        GET_INI_CONFIG_VALUE(SaveGameToLoad, -1);
-        GET_INI_CONFIG_VALUE(SkipSaveGameLoadKey, false);
-        GET_INI_CONFIG_VALUE(SoundDelay, 50);
+        if (!GET_INI_CONFIG_VALUE("Enable", true)) {
+            return;
+        }
 
-        GET_INI_CONFIG_VALUE(NoEAX, true);
-        GET_INI_CONFIG_VALUE(NoNVidia, true);
-        GET_INI_CONFIG_VALUE(NoLogo, true);
-        GET_INI_CONFIG_VALUE(NoTitleOrIntro, true);
-        GET_INI_CONFIG_VALUE(NoCopyright, true);
-        GET_INI_CONFIG_VALUE(NoFading, true);
-        GET_INI_CONFIG_VALUE(NoLoadScreen, true);
-        GET_INI_CONFIG_VALUE(NoLoadBar, false);
-        GET_INI_CONFIG_VALUE(NoLoadingTune, true);
-        GET_INI_CONFIG_VALUE(NoDbgLogScreens, true);
-        GET_INI_CONFIG_VALUE(RenderAtAllTimes, true);
-        GET_INI_CONFIG_VALUE(ScreenChangeTime, 5.f);
+        STORE_INI_CONFIG_VALUE(SaveGameToLoad, -1);
+        STORE_INI_CONFIG_VALUE(SkipSaveGameLoadKey, VK_CONTROL);
+        STORE_INI_CONFIG_VALUE(SoundDelay, 50);
+
+        STORE_INI_CONFIG_VALUE(NoEAX, true);
+        STORE_INI_CONFIG_VALUE(NoNVidia, true);
+        STORE_INI_CONFIG_VALUE(NoLogo, true);
+        STORE_INI_CONFIG_VALUE(NoTitleOrIntro, true);
+        STORE_INI_CONFIG_VALUE(NoCopyright, true);
+        STORE_INI_CONFIG_VALUE(NoFading, true);
+        STORE_INI_CONFIG_VALUE(NoLoadScreen, true);
+        STORE_INI_CONFIG_VALUE(NoLoadBar, false);
+        STORE_INI_CONFIG_VALUE(NoLoadingTune, true);
+        STORE_INI_CONFIG_VALUE(NoDbgLogScreens, true);
+        STORE_INI_CONFIG_VALUE(RenderAtAllTimes, true);
+        STORE_INI_CONFIG_VALUE(ScreenChangeTime, 5.f);
 #endif
     }
 } g_FastLoaderConfig{};

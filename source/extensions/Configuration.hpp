@@ -86,5 +86,8 @@ private:
 #define INI_CONFIG_SECTION(name) \
     static constexpr auto IniSectionName = name
 
-#define GET_INI_CONFIG_VALUE(key_var, _default) \
+#define GET_INI_CONFIG_VALUE(key, _default) \
+	g_ConfigurationMgr.GetIniValue<decltype(_default)>(IniSectionName, key).value_or(_default)
+
+#define STORE_INI_CONFIG_VALUE(key_var, _default) \
 	key_var = g_ConfigurationMgr.GetIniValue<decltype(key_var)>(IniSectionName, #key_var).value_or(_default)
