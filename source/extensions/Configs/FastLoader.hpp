@@ -83,23 +83,4 @@ inline struct FastLoaderConfig {
         GET_INI_CONFIG_VALUE(RenderAtAllTimes, true);
         GET_INI_CONFIG_VALUE(ScreenChangeTime, 5.f);
     }
-
-    void Save() {
-        SAVE_INI_CONFIG_VALUE(SaveGameToLoad);
-        SAVE_INI_CONFIG_VALUE(SkipSaveGameLoadKey);
-        SAVE_INI_CONFIG_VALUE(SoundDelay);
-
-        SAVE_INI_CONFIG_VALUE(NoEAX);
-        SAVE_INI_CONFIG_VALUE(NoNVidia);
-        SAVE_INI_CONFIG_VALUE(NoLogo);
-        SAVE_INI_CONFIG_VALUE(NoTitleOrIntro);
-        SAVE_INI_CONFIG_VALUE(NoCopyright);
-        SAVE_INI_CONFIG_VALUE(NoFading);
-        SAVE_INI_CONFIG_VALUE(NoLoadScreen);
-        SAVE_INI_CONFIG_VALUE(NoLoadBar);
-        SAVE_INI_CONFIG_VALUE(NoLoadingTune);
-        SAVE_INI_CONFIG_VALUE(NoDbgLogScreens);
-        SAVE_INI_CONFIG_VALUE(RenderAtAllTimes);
-        SAVE_INI_CONFIG_VALUE(ScreenChangeTime);
-    }
 } g_FastLoaderConfig{};

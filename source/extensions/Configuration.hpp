@@ -34,42 +34,11 @@ public:
         }
     }
 
-    template <typename T>
-    void SetIniValue(const std::string& section, const std::string& key, const T& value) {
-        auto& ct = m_content[section][key];
-
-        if constexpr (std::is_same_v<T, std::string>) {
-            ct = value;
-        } else if constexpr (std::is_same_v<T, bool>) {
-            ct = value ? "true" : "false";
-        } else if constexpr (notsa::is_standard_integer<T> || std::is_floating_point_v<T>) {
-            ct = std::to_string(value);
-        } else {
-            ct = std::string{value}; // not sure about that.
-        }
-    }
-
     void Load(const std::string& fileName) {
         std::ifstream in(fileName);
         assert(!in.bad());
 
         ParseIniFile(in, m_content);
-    }
-
-    void Save(const std::string& fileName) {
-        std::ofstream out(fileName);
-        assert(!out.bad());
-
-        for (auto&& [section, keys] : m_content) {
-            // We consider section == "" as the root.
-            if (section != "")
-                out << "[" << section << "]" << std::endl;
-
-            for (auto&& [key, value] : keys) {
-                out << key << "=" << value << std::endl;
-            }
-            out << std::endl;
-        }
     }
 
 private:
@@ -119,6 +88,3 @@ private:
 
 #define GET_INI_CONFIG_VALUE(key_var, _default) \
 	key_var = g_ConfigurationMgr.GetIniValue<decltype(key_var)>(IniSectionName, #key_var).value_or(_default)
-
-#define SAVE_INI_CONFIG_VALUE(key_var) \
-	g_ConfigurationMgr.SetIniValue<decltype(key_var)>(IniSectionName, #key_var, key_var);

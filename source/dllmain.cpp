@@ -40,23 +40,6 @@ void LoadConfigurations() {
     // ...
 }
 
-void SaveConfigurations() {
-    // Save all specific configurations.
-    g_FastLoaderConfig.Save();
-    // ...
-
-    // Lastly, save the INI file.
-    g_ConfigurationMgr.Save(DEFAULT_INI_FILENAME);
-}
-
-// TODO: stop
-// We will be calling Load/SaveConfiguration at main after reversing.
-struct Ded {
-    ~Ded() {
-        SaveConfigurations();
-    }
-} g_Ded{};
-
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {
     switch (ul_reason_for_call)
