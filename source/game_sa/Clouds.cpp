@@ -24,8 +24,6 @@ RwTexture*& gpMoonMask = *reinterpret_cast<RwTexture**>(0xC6AA74);
 RwTexture*& gpCloudTex = *reinterpret_cast<RwTexture**>(0xC6AA78);
 RwTexture*& gpCloudMaskTex = *reinterpret_cast<RwTexture**>(0xC6AA78 + 0x4);
 
-float& flt_C6E954 = *reinterpret_cast<float*>(0xC6E954); // see CClouds::RenderBottomFromHeight, CClouds::MovingFogRender
-
 void CClouds::InjectHooks() {
     RH_ScopedClass(CClouds);
     RH_ScopedCategoryGlobal();
@@ -857,22 +855,41 @@ void CClouds::RenderSkyPolys() {
 
 // 0x7154B0
 void CClouds::RenderBottomFromHeight() {
+    /****
+    * Code below should be good
+    * but it isn't complete...
+    *****\
+   
     const auto camPos = TheCamera.GetPosition();
-    if (camPos.z < -90.f) { // 0x71557D
+    if (camPos.z < -90.f) { // 0x71557D [Moved up here]
         return;
     }
 
-    const auto& cc = CTimeCycle::m_CurrentColours;
+    const auto& cc = CTimeCycle::m_CurrentColours; // cc = color component
     const auto ClampClr = [](float clr) {
-        return (uint8)std::min(255.f, clr);
+        return std::min(clr, 255.f);
     };
-    const auto fcClr = CRGBA{
-        ClampClr(cc.m_nFluffyCloudsBottomRed * 2.f + 20.f),
-        ClampClr(cc.m_nFluffyCloudsBottomGreen * 1.5f),
-        ClampClr(cc.m_nFluffyCloudsBottomBlue * 1.5f),
-        255
+    const auto fcClr = CRGBA{ // fc = fluffy clouds
+        (uint8)ClampClr(cc.m_nFluffyCloudsBottomRed * 2.f + 20.f),
+        (uint8)ClampClr(cc.m_nFluffyCloudsBottomGreen * 1.5f),
+        (uint8)ClampClr(cc.m_nFluffyCloudsBottomBlue * 1.5f),
+        (uint8)255
     };
 
+    auto lowZ = 160.f, highZ = 190.f;
+
+    auto& windShift = StaticRef<float, 0xC6E954>();
+
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(RwTextureGetRaster(gpCloudMaskTex)));
+
+    // TODO....
+    */
 }
 
 //
