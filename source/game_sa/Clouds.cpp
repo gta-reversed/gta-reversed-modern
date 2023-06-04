@@ -610,8 +610,8 @@ void CClouds::Render_MaybeRenderRainbows() {
 
 // From `CClouds::Render` [0x714387 - 0x714640]
 void CClouds::Render_MaybeRenderStreaks() {
-    constexpr auto REPEAT_INTERVAL_MS = 8192; // Use power-of-2 numbers here if possible
-    constexpr auto VISIBILE_TIME_MS   = 800;
+    constexpr auto REPEAT_INTERVAL_MS = 8192u; // Use power-of-2 numbers here if possible
+    constexpr auto VISIBILE_TIME_MS   = 800u;
     static_assert(REPEAT_INTERVAL_MS >= VISIBILE_TIME_MS);
 
     RwRenderStateSet(rwRENDERSTATESRCBLEND,  RWRSTATE(rwBLENDSRCALPHA));
@@ -630,47 +630,47 @@ void CClouds::Render_MaybeRenderStreaks() {
         }
     }
 
+    const auto timeMS = CTimer::GetTimeInMS();
+
     // This must always be checked, otherwise code breaks
-    const auto repeatDelta = CTimer::GetTimeInMS() % REPEAT_INTERVAL_MS;
+    const auto repeatDelta = timeMS % REPEAT_INTERVAL_MS;
     if (repeatDelta >= VISIBILE_TIME_MS) {
         return;
     }
 
-    const auto timeMs = CTimer::GetTimeInMS();
-    const auto repeat64 = (timeMs / REPEAT_INTERVAL_MS) % 64;
+    const auto repeat64 = (timeMS / REPEAT_INTERVAL_MS) % 64;
 
     //> 0x714464
     const auto size = CVector{
-        (float)(repeat64 % 7 - 3) * 0.1f,
-        (float)((timeMs & 0xFFFF) / REPEAT_INTERVAL_MS - 4) * 0.1f,
+        (float)((int32)(repeat64 % 7) - 3) * 0.1f,
+        (float)((int32)((timeMS & 0xFFFF) / REPEAT_INTERVAL_MS) - 4) * 0.1f,
         1.f
     }.Normalized();
 
     //> 0x7144C7
     const auto offsetDir = CVector{
-        (float)(repeat64 % 9 - 5),
-        (float)(repeat64 % 10 - 5),
+        (float)((int32)(repeat64 % 9) - 5),
+        (float)((int32)(repeat64 % 10) - 5),
         0.1f
     }.Normalized();
 
-    const auto basePos = offsetDir * 1000.f + TheCamera.GetPosition();
-
-    const auto v0Scale = (float)((VISIBILE_TIME_MS / 2 - repeatDelta) * 2);
-    const auto v1Scale = v0Scale + 50.f;
-
     RenderBuffer::ClearRenderBuffer();
 
-    const auto PushVertex = [=](float scale, CRGBA color) {
+    const auto PushVertex = [
+        basePos = offsetDir * 1000.f + TheCamera.GetPosition(),
+        size
+    ](float scale, CRGBA color) {
         RenderBuffer::PushVertex(
             basePos + size * scale,
             color
         );
     };
 
-    PushVertex(v0Scale, { 255, 255, 255, 225 });
-    PushVertex(v1Scale, { 255, 255, 255, 0 });
+    const auto scale = (float)((VISIBILE_TIME_MS / 2 - (int32)repeatDelta) * 2);
+    PushVertex(scale,        { 255, 255, 255, 225 });
+    PushVertex(scale + 50.f, { 255, 255, 255, 0 });
 
-    RenderBuffer::PushIndices({ 0, 1 }, true);
+    RenderBuffer::PushIndices({ 1, 0 }, false);
 
     RenderBuffer::Render(rwPRIMTYPEPOLYLINE, nullptr, rwIM3D_VERTEXRGBA | rwIM3D_VERTEXXYZ);
 }
