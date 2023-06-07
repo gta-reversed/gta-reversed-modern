@@ -304,4 +304,11 @@ private:
     }
 };
 
+template<typename T, typename... Ts>
+concept is_any_of_type_v = (std::same_as<T, Ts> || ...);
+
+//! Check if the type is an integer type excluding bool and character types.
+template<typename T>
+inline constexpr bool is_standard_integer = std::is_integral_v<T> && !is_any_of_type_v<T, bool, char, wchar_t, char8_t, char16_t, char32_t>;
+
 };

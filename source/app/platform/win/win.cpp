@@ -22,6 +22,8 @@
 #include "MenuManager.h"
 #include <AEAudioHardware.h>
 
+#include "extensions/Configs/FastLoader.hpp"
+
 extern void WinPsInjectHooks();
 
 static LPSTR AppClassName = LPSTR(APP_CLASS);
@@ -524,22 +526,22 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
             CLoadingScreen::DoPCTitleFadeIn();
             CLoadingScreen::Shutdown();
         };
-        if (!FastLoadSettings.NoEAX) {
+        if (!g_FastLoaderConfig.NoEAX) {
             ProcessSplash(false);
         }
-        if (!FastLoadSettings.NoNVidia) {
+        if (!g_FastLoaderConfig.NoNVidia) {
             ProcessSplash(true);
         }
         ChangeGameStateTo(GAME_STATE_LOGO);
         break;
     }
     case GAME_STATE_LOGO: {
-        if (!FastLoadSettings.NoLogo) {
+        if (!g_FastLoaderConfig.NoLogo) {
             if (!Windowed) {
                 VideoPlayer::Play(nCmdShow, "movies\\Logo.mpg");
             }
         }
-        ChangeGameStateTo(FastLoadSettings.NoLogo ? GAME_STATE_TITLE : GAME_STATE_PLAYING_LOGO);
+        ChangeGameStateTo(g_FastLoaderConfig.NoLogo ? GAME_STATE_TITLE : GAME_STATE_PLAYING_LOGO);
         break;
     }
     case GAME_STATE_PLAYING_LOGO:
@@ -566,17 +568,17 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
         break;
     }
     case GAME_STATE_TITLE: {
-        if (!FastLoadSettings.NoTitleOrIntro) {
+        if (!g_FastLoaderConfig.NoTitleOrIntro) {
             VideoPlayer::Shutdown();
             VideoPlayer::Play(nCmdShow, FrontEndMenuManager.GetMovieFileName());
         }
-        ChangeGameStateTo(FastLoadSettings.NoTitleOrIntro ? GAME_STATE_FRONTEND_LOADING : GAME_STATE_PLAYING_INTRO);
+        ChangeGameStateTo(g_FastLoaderConfig.NoTitleOrIntro ? GAME_STATE_FRONTEND_LOADING : GAME_STATE_PLAYING_INTRO);
         break;
     }
     case GAME_STATE_FRONTEND_LOADING: {
         VideoPlayer::Shutdown();
         CLoadingScreen::Init(true, false);
-        if (!FastLoadSettings.NoCopyright) {
+        if (!g_FastLoaderConfig.NoCopyright) {
             CLoadingScreen::DoPCTitleFadeOut();
         }
         if (!CGame::InitialiseEssentialsAfterRW()) {
@@ -595,7 +597,7 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
             VideoModeNotSelected = false;
         }
         ChangeGameStateTo(GAME_STATE_FRONTEND_IDLE);
-        if (FastLoadSettings.NoCopyright) {
+        if (g_FastLoaderConfig.NoCopyright) {
             CLoadingScreen::SkipCopyrightSplash();
         } else {
             CLoadingScreen::DoPCTitleFadeIn();
@@ -605,13 +607,13 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
     case GAME_STATE_FRONTEND_IDLE: { // 0x748CB2
         WINDOWPLACEMENT wndpl{ .length = sizeof(WINDOWPLACEMENT) };
         VERIFY(GetWindowPlacement(PSGLOBAL(window), &wndpl));
-        if (FastLoadSettings.ShouldLoadSaveGame()) {
+        if (g_FastLoaderConfig.ShouldLoadSaveGame()) {
             RsEventHandler(rsFRONTENDIDLE, nullptr); // We need to still run the frontend processing once because it has some important stuff
-            if ((GetAsyncKeyState(FastLoadSettings.SkipSaveGameLoadKey) & 0xF000) == 0) {
-                FastLoadSettings.StartGame(FastLoadSettings.SaveGameToLoad); // Load game
+            if ((GetAsyncKeyState(g_FastLoaderConfig.SkipSaveGameLoadKey) & 0xF000) == 0) {
+                g_FastLoaderConfig.StartGame(g_FastLoaderConfig.SaveGameToLoad); // Load game
             }
-            FastLoadSettings.TriedLoadingSaveGame = true;
-        } else if (FastLoadSettings.RenderAtAllTimes || wndpl.showCmd != SW_SHOWMINIMIZED) {
+            g_FastLoaderConfig.TriedLoadingSaveGame = true;
+        } else if (g_FastLoaderConfig.RenderAtAllTimes || wndpl.showCmd != SW_SHOWMINIMIZED) {
             RsEventHandler(rsFRONTENDIDLE, nullptr);
         }
         if (FrontEndMenuManager.m_bMenuActive && !FrontEndMenuManager.m_bLoadingData) {
@@ -624,7 +626,7 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
         NOTSA_SWCFALLTHRU; // Fall down and start loading
     }
     case GAME_STATE_LOADING_STARTED: {
-        if (!FastLoadSettings.NoLoadingTune) {
+        if (!g_FastLoaderConfig.NoLoadingTune) {
             AudioEngine.StartLoadingTune();
         }
 
