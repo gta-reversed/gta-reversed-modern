@@ -79,9 +79,6 @@ concept PooledType =
 };
 
 namespace detail {
-//! Check if the type is an integer type excluding bool and character types.
-template<typename T>
-inline constexpr bool is_standard_integer = std::is_integral_v<T> && !is_any_of_type_v<T, bool, char, wchar_t, char8_t, char16_t, char32_t>;
 
 //! Safely cast one arithmetic type to another (Checks for under/overflow in debug mode only), then casts to `T`
 template<typename T, typename F>

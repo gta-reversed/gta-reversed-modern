@@ -156,9 +156,8 @@ void CEntryExitManager::Update() {
 
 // 0x43E410
 void CEntryExitManager::AddEntryExitToStack(CEntryExit* enex) {
-    if (enex->m_pLink)
-        enex = enex->m_pLink;
-
+    enex = enex->GetLinkedOrThis();
+    
     if (ms_entryExitStackPosn > 0 && ms_entryExitStack[ms_entryExitStackPosn - 1] == enex) {
         ms_entryExitStackPosn--;
     } else if (enex->m_nArea != AREA_CODE_NORMAL_WORLD) {
@@ -224,6 +223,9 @@ int32 CEntryExitManager::AddOne(
 void CEntryExitManager::DeleteOne(int32 index) {
     if (const auto enex = mp_poolEntryExits->GetAt(index)) {
         mp_QuadTree->DeleteItem(enex);
+#ifdef FIX_BUGS // Call destructor
+        std::destroy_at(enex);
+#endif
         mp_poolEntryExits->Delete(enex);
     }
 }
@@ -236,30 +238,31 @@ CObject* CEntryExitManager::FindNearestDoor(CEntryExit const& exit, float radius
     int16 numObjsInRange{};
     CWorld::FindObjectsInRange(entranceCenter, radius, false, &numObjsInRange, (int16)std::size(objsInRange), objsInRange, false, false, false, true, false);
 
-    if (numObjsInRange) {
-        float closestDistSq{ FLT_MAX };
-        CObject* closest{};
-
-        for (auto&& entity : std::span{ objsInRange, (size_t)numObjsInRange }) {
-            const auto object = entity->AsObject();
-            if (object->physicalFlags.bDisableMoveForce) {
-                const auto distSq = (object->GetPosition() - entranceCenter).SquaredMagnitude(); // Using `SqMag` instead of `Mag`
-                if (distSq < closestDistSq) {
-                    closest = object;
-                    closestDistSq = distSq;
-                }
-            }
-        }
-        return closest;
+    if (!numObjsInRange) {
+        return nullptr;
     }
-    return nullptr;
+    
+    float closestDistSq{ FLT_MAX };
+    CObject* closest{};
+    for (auto&& entity : std::span{ objsInRange, (size_t)numObjsInRange }) {
+        const auto obj = entity->AsObject();
+        if (!obj->physicalFlags.bDisableMoveForce) {
+            continue;
+        }
+
+        const auto distSq = (obj->GetPosition() - entranceCenter).SquaredMagnitude(); // Using `SqMag` instead of `Mag`
+        if (distSq < closestDistSq) {
+            closest       = obj;
+            closestDistSq = distSq;
+        }
+    }
+    return closest;
 }
 
 // 0x43F4B0
 int32 CEntryExitManager::FindNearestEntryExit(const CVector2D& position, float range, int32 ignoreArea) {
-    CRect rect(position.x - range, position.y - range, position.x + range, position.y + range);
     CPtrListSingleLink enexInRange{};
-    mp_QuadTree->GetAllMatching(rect, enexInRange);
+    mp_QuadTree->GetAllMatching(CRect{ position, range }, enexInRange);
 
     float closestDist2D{ 2.f * range };
     CEntryExit* closest{};
@@ -267,16 +270,20 @@ int32 CEntryExitManager::FindNearestEntryExit(const CVector2D& position, float r
         next = it->GetNext();
 
         auto* enex = it->ItemAs<CEntryExit>();
-        if (enex->GetMyOrLinkedArea() != ignoreArea) {
-            const auto dist = (enex->GetPosition2D() - position).Magnitude(); // TODO: Use SqMag
-            if (dist < closestDist2D) {
-                closest = enex;
-                closestDist2D = dist;
-            }
+        if (enex->GetLinkedOrThis()->GetArea() == ignoreArea) {
+            continue;
+        }
+
+        const auto dist = (enex->GetPosition2D() - position).Magnitude(); // TODO: Use SqMag
+        if (dist < closestDist2D) {
+            closest = enex;
+            closestDist2D = dist;
         }
     }
 
-    return closest ? mp_poolEntryExits->GetIndex(closest) : -1;
+    return closest
+        ? mp_poolEntryExits->GetIndex(closest)
+        : -1;
 }
 
 // 0x43F180
@@ -323,6 +330,7 @@ void CEntryExitManager::LinkEntryExit(CEntryExit* enex) {
         if (linkedEnEx->m_pLink) {
             linkedEnEx->m_pLink = enex;
         }
+        // ?????
         linkedEnEx->m_nTimeOn = 0;
         linkedEnEx->m_nTimeOff = 24;
     }
@@ -375,6 +383,39 @@ void CEntryExitManager::SetAreaCodeForVisibleObjects() {
     ms_oldAreaCode = CGame::currArea;
 }
 
+// NOTSA (Code somewhat based on 0x43FC00)
+void CEntryExitManager::AddEnExToWorld(CEntryExit* enex) {
+    // Calculate rotated corner positions (We ain't gonna use a matrix for this like they did, too complicated)
+    const auto& r  = enex->m_recEntrance;
+    const auto  rc = r.GetCenter();
+    CVector2D corners[]{
+        { r.right, r.top },
+        { r.left, r.bottom }
+    };
+
+    // Rotate it around the center
+    for (auto& corner : corners) {
+        corner = rc + (corner - rc).RotatedBy(enex->m_fEntranceAngleRad); // NOTE: If doesn't work properly, negate (-angle) the angle
+    }
+
+    const auto GetMinMaxAxis = [&](size_t axis) {
+        return rng::minmax(
+            corners | rng::views::transform([axis](auto&& c) { return c[axis]; })
+        );
+    };
+
+    // Calculate min-max coordinates
+    const auto [minX, maxX] = GetMinMaxAxis(0);
+    const auto [minY, maxY] = GetMinMaxAxis(1);
+    
+    // Add it to the QuadTree using the calculated bounding rect
+    mp_QuadTree->AddItem(enex, {minX, minY, maxX, maxY});
+}
+
+bool CEntryExitManager::WeAreInInteriorTransition() {
+    return ms_exitEnterState != 0;
+}
+
 // 0x5D55C0
 bool CEntryExitManager::Load() {
     // Load entry exit stack
@@ -404,7 +445,7 @@ bool CEntryExitManager::Load() {
                 enex->m_pLink = nullptr;
             }
         } else {
-            assert(0); // NOTSA - Probably corrupted save file or something.
+            NOTSA_UNREACHABLE(); // NOTSA - Probably corrupted save file or something.
         }
 
         CGenericGameStorage::LoadDataFromWorkBuffer(&enexIdx, sizeof(enexIdx));
@@ -431,34 +472,4 @@ bool CEntryExitManager::Save() {
     }
 
     return true;
-}
-
-// NOTSA (Code somewhat based on 0x43FC00)
-void CEntryExitManager::AddEnExToWorld(CEntryExit* enex) {
-    // Calculate corner positions (We ain't gonna use a matrix for this like they did, too complicated)
-    const auto& r = enex->m_recEntrance;
-    CVector2D corners[]{
-        { r.right, r.top },
-        { r.left, r.bottom }
-    };
-    for (auto& c : corners) {
-        c = c.RotatedBy(enex->m_fEntranceAngleRad); // NOTE: If doesn't work properly, negate (-angle) the angle
-    }
-
-    const auto GetMinMax = [&](size_t axis) {
-        return rng::minmax(
-            corners | rng::views::transform([axis](auto&& c) { return c[axis]; })
-        );
-    };
-
-    // Calculate min-max coordinates
-    const auto [minX, maxX] = GetMinMax(0);
-    const auto [minY, maxY] = GetMinMax(1);
-    
-    // Add it to the QuadTree using the calculated bounding rect
-    mp_QuadTree->AddItem(enex, {minX, minY, maxX, maxY});
-}
-
-bool CEntryExitManager::WeAreInInteriorTransition() {
-    return plugin::CallAndReturn<bool, 0x43E400>();
 }
