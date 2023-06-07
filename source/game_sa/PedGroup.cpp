@@ -61,3 +61,7 @@ void CPedGroup::Teleport(const CVector* pos) {
 int32 CPedGroup::GetId() const {
     return CPedGroups::GetGroupId(this);
 }
+
+bool CPedGroup::IsActive() const {
+    return CPedGroups::ms_activeGroups[GetId()];
+}
