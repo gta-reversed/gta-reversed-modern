@@ -7,25 +7,24 @@ Building this project will result in a DLL file that can be injected into GTA:SA
 
 ### Progress
 The progress of reversed classes can be tracked [here](docs/ReversedClasses.MD). (needs to be updated)
+We currently estimate that about 50-60% of the code is done.
+Since this project is done as a hobby, and worked on at irregular intervals, there's no real time estimate.
 
 ### Coding Guidelines 
 Before you start writing code, please make sure to read the [coding guidelines](docs/CodingGuidelines.MD) for this project.
 
 ### Requirements
-
 * [Visual Studio 2022](https://visualstudio.microsoft.com/en/downloads/) (Community Edition is enough)
 * [CMake](https://cmake.org) (for those who want to use CMake instead of premake5)
 
 #### Game
-
 * GTA SA **Compact** exe
 * [ASI Loader](https://gtaforums.com/topic/523982-relopensrc-silents-asi-loader/)
 * [III.VC.SA.WindowedMode.asi](https://github.com/ThirteenAG/III.VC.SA.WindowedMode)
-* [Improved Fast Loader](https://www.gtagarage.com/mods/show.php?id=25665) (Optional)
-* Mouse Fix (**dinput8.dll**)
+* [Mouse Fix (**dinput8.dll**)]()
 
 You can download them in a single [archive](https://github.com/codenulls/gta-reversed/files/6949371/gta_sa.zip).
-Using other plugins is strongly discouraged as the compact version doesn't like them.
+Using other plugins is strongly discouraged and we provide __**no support**__.
 
 ### Build Instructions
 
@@ -83,7 +82,7 @@ git clone --recurse-submodules https://github.com/gta-reversed/gta-reversed-mode
 
 ### Preparing Environment (Optional)
 
-You can create symbolic links for artifacts to not copy them every time you compiled the project.
+You can create symbolic links [symlinks] for artifacts [the `.asi`] to need not copy them every time you compile the project.
 
 Open a console with administrator privileges in the git repo's directory and run `contrib\link_asi.bat` or right click `link_asi.bat` file and click `Run as administrator`, then
 follow instructions at the command window.
