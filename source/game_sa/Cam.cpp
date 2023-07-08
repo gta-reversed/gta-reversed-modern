@@ -77,7 +77,7 @@ void CCam::Init() {
     m_fBetaSpeed = 0.0f;
     m_fAlphaSpeed = 0.0f;
     m_fCameraHeightMultiplier = 0.75;
-    m_fMaxRoleAngle = 0.034906585f;
+    m_fMaxRoleAngle = DegreesToRadians(20.0f);
     m_fDistance = 30.0f;
     m_fDistanceSpeed = 0.0f;
     m_pLastCarEntered = nullptr;
@@ -92,7 +92,7 @@ void CCam::Init() {
     m_bLookingBehind = false;
     m_bLookingLeft = false;
     m_bLookingRight = false;
-    m_fPlayerInFrontSyphonAngleOffSet = 0.34906587f;
+    m_fPlayerInFrontSyphonAngleOffSet = DegreesToRadians(20.0f);
     m_fSyphonModeTargetZOffSet = 0.5f;
     m_fRadiusForDead = 1.5f;
     m_nDirectionWasLooking = 3;
@@ -123,7 +123,7 @@ void CCam::Init() {
     }
     m_nCurrentHistoryPoints = 0;
     gPlayerPedVisible = true;
-    gbCineyCamMessageDisplayed = 2;
+    gbCineyCamMessageDisplayed = 2; // TODO: enum
     gCameraDirection = 3;
     gCameraMode = (eCamMode)-1;
     gLastTime2PlayerCameraWasOK = 0;
