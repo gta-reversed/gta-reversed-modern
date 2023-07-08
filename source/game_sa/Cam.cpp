@@ -77,7 +77,7 @@ void CCam::Init() {
     m_fBetaSpeed = 0.0f;
     m_fAlphaSpeed = 0.0f;
     m_fCameraHeightMultiplier = 0.75;
-    m_fMaxRoleAngle = 0.034906585f;
+    m_fMaxRoleAngle = DegreesToRadians(20.0f);
     m_fDistance = 30.0f;
     m_fDistanceSpeed = 0.0f;
     m_pLastCarEntered = nullptr;
