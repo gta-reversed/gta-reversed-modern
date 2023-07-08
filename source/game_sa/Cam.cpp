@@ -123,7 +123,7 @@ void CCam::Init() {
     }
     m_nCurrentHistoryPoints = 0;
     gPlayerPedVisible = true;
-    gbCineyCamMessageDisplayed = 2;
+    gbCineyCamMessageDisplayed = 2; // TODO: enum
     gCameraDirection = 3;
     gCameraMode = (eCamMode)-1;
     dword_B6EC24 = 0;
