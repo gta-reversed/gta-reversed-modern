@@ -6,7 +6,12 @@
 struct tAudioZoneSphere {
     char    m_szName[8];
     int16   m_nAudioZone;
-    uint16  m_nFlags;
+    union {
+        struct {
+            uint16 m_bIsActive : 1;
+        };
+        uint16 m_nFlags;
+    };
     CVector m_vPosn;
     float   m_fRadius;
 };
@@ -15,7 +20,12 @@ VALIDATE_SIZE(tAudioZoneSphere, 0x1C);
 struct tAudioZoneBox {
     char          m_szName[8];
     int16         m_nAudioZone;
-    uint16        m_Flags;
+    union {
+        struct {
+            uint16 m_bIsActive : 1;
+        };
+        uint16 m_nFlags;
+    };
     CompressedBox m_Box;
     void DrawWireFrame(CRGBA color, const CMatrix& transform) const {
         m_Box.DrawWireFrame(color, transform);
