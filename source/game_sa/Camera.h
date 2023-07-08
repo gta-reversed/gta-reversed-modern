@@ -518,6 +518,8 @@ extern bool& gPlayerPedVisible;
 extern uint8& gCurCamColVars;
 extern int32& gCameraDirection;
 extern eCamMode& gCameraMode;
+extern int32& dword_B6EC24; // Probably used to measure time between frames
+extern int32& dword_B6EC28; // Probably used to measure time between frames
 extern float*& gpCamColVars;
 extern float (&gCamColVars)[28][6];
 static inline auto& gpMadeInvisibleEntities = StaticRef<std::array<CEntity*, 10>, 0x9655A0>();

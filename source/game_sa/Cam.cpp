@@ -9,7 +9,7 @@ void CCam::InjectHooks() {
     RH_ScopedCategory("Camera");
 
     RH_ScopedInstall(Constructor, 0x517730);
-    RH_ScopedInstall(Init, 0x50E490, { .reversed = false });
+    RH_ScopedInstall(Init, 0x50E490);
     RH_ScopedInstall(CacheLastSettingsDWCineyCam, 0x50D7A0, { .reversed = false });
     RH_ScopedInstall(DoCamBump, 0x50CB30);
     RH_ScopedInstall(Finalise_DW_CineyCams, 0x50DD70, { .reversed = false });
@@ -126,11 +126,9 @@ void CCam::Init() {
     gbCineyCamMessageDisplayed = 2;
     gCameraDirection = 3;
     gCameraMode = (eCamMode)-1;
-    /*
     dword_B6EC24 = 0;
     dword_B6EC28 = 0;
-    TheCamera.field_CF0 = 0;*/
-    this->
+    TheCamera.m_bCinemaCamera = false;
 }
 
 // 0x50D7A0
