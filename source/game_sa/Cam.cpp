@@ -92,7 +92,7 @@ void CCam::Init() {
     m_bLookingBehind = false;
     m_bLookingLeft = false;
     m_bLookingRight = false;
-    m_fPlayerInFrontSyphonAngleOffSet = 0.34906587f;
+    m_fPlayerInFrontSyphonAngleOffSet = DegreesToRadians(20.0f);
     m_fSyphonModeTargetZOffSet = 0.5f;
     m_fRadiusForDead = 1.5f;
     m_nDirectionWasLooking = 3;
