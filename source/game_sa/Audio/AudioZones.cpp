@@ -33,26 +33,26 @@ void CAudioZones::Init() {
 }
 
 // 0x508240
-void CAudioZones::RegisterAudioBox(char name[8], int32 id, bool isActive, float x1, float y1, float z1, float x2, float y2, float z2) {
+void CAudioZones::RegisterAudioBox(char name[8], int32 id, bool isActive, CVector min, CVector max) {
 
     tAudioZoneBox audioZoneBox;
     strcpy_s(audioZoneBox.m_szName, name);
     audioZoneBox.m_bIsActive = isActive; // TODO: m_nFlags field has only 1 flag - Active or inactive and takes only 1 bit. Although gta uses 2 bytes for this, but how is the idea to define this single flag so as not to be confused in the future
     audioZoneBox.m_nAudioZone = id;
     audioZoneBox.m_Box = CompressedBox{
-        .m_vecMin = CompressLargeVector(CVector(x1, z1, z1)),
-        .m_vecMax = CompressLargeVector(CVector(x2, y2, z2)),
+        .m_vecMin = CompressLargeVector(min),
+        .m_vecMax = CompressLargeVector(max),
     };
     CAudioZones::m_aBoxes[m_NumBoxes++] = audioZoneBox;
 }
 
 // 0x5081C0
-void CAudioZones::RegisterAudioSphere(char name[8], int32 id, bool isActive, float x1, float y1, float z1, float radius) {
+void CAudioZones::RegisterAudioSphere(char name[8], int32 id, bool isActive, CVector position, float radius) {
     tAudioZoneSphere audioZoneSphere;
     strcpy_s(audioZoneSphere.m_szName, name);
     audioZoneSphere.m_nAudioZone = id;
     audioZoneSphere.m_bIsActive = isActive; // TODO: m_nFlags field has only 1 flag - Active or inactive and takes only 1 bit. Although gta uses 2 bytes for this, but how is the idea to define this single flag so as not to be confused in the future
-    audioZoneSphere.m_vPosn = CVector(x1, y1, z1);
+    audioZoneSphere.m_vPosn = position;
     audioZoneSphere.m_fRadius = radius;
 
     CAudioZones::m_aSpheres[m_NumSpheres++] = audioZoneSphere;

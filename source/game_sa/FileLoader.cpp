@@ -257,7 +257,7 @@ char* CFileLoader::LoadLine(char*& bufferIt, int32& buffSize) {
 // IPL -> AUZO
 // 0x5B4D70
 void CFileLoader::LoadAudioZone(const char* line) {
-    char  name[8];
+    char name[8];
     int32 id;
     int32 flags;
     float x1, y1, z1;
@@ -265,10 +265,10 @@ void CFileLoader::LoadAudioZone(const char* line) {
     float radius;
 
     if (sscanf_s(line, "%s %d %d %f %f %f %f %f %f", SCANF_S_STR(name), &id, &flags, &x1, &y1, &z1, &x2, &y2, &z2) == 9) {
-        CAudioZones::RegisterAudioBox(name, id, flags == 1, x1, y1, z1, x2, y2, z2);
+        CAudioZones::RegisterAudioBox(name, id, flags == 1, {x1, y1, z1}, {x2, y2, z2});
     } else {
         VERIFY(sscanf_s(line, "%s %d %d %f %f %f %f", SCANF_S_STR(name), &id, &flags, &x1, &y1, &z1, &radius) == 7);
-        CAudioZones::RegisterAudioSphere(name, id, flags == 1, x1, y1, z1, radius);
+        CAudioZones::RegisterAudioSphere(name, id, flags == 1, {x1, y1, z1}, radius);
     }
 }
 
