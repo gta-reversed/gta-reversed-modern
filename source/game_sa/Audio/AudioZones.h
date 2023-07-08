@@ -44,8 +44,8 @@ public:
 
     static void Init();
 
-    static void RegisterAudioBox(char name[8], int32 id, bool b, float x1, float y1, float z1, float x2, float y2, float z2);
-    static void RegisterAudioSphere(char name[8], int32 id, bool b, float x1, float y1, float z1, float radius);
+    static void RegisterAudioBox(char name[8], int32 id, uint16_t flags, float x1, float y1, float z1, float x2, float y2, float z2);
+    static void RegisterAudioSphere(char name[8], int32 id, uint16_t flags, float x1, float y1, float z1, float radius);
 
     static void SwitchAudioZone(char* zoneName, bool enable);
     static void Update(bool a1, CVector posn);

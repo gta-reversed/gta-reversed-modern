@@ -259,16 +259,16 @@ char* CFileLoader::LoadLine(char*& bufferIt, int32& buffSize) {
 void CFileLoader::LoadAudioZone(const char* line) {
     char  name[8];
     int32 id;
-    int32 enabled;
+    int32 flags;
     float x1, y1, z1;
     float x2, y2, z2;
     float radius;
 
-    if (sscanf_s(line, "%s %d %d %f %f %f %f %f %f", SCANF_S_STR(name), &id, &enabled, &x1, &y1, &z1, &x2, &y2, &z2) == 9) {
-        CAudioZones::RegisterAudioBox(name, id, enabled != 0, x1, y1, z1, x2, y2, z2);
+    if (sscanf_s(line, "%s %d %d %f %f %f %f %f %f", SCANF_S_STR(name), &id, &flags, &x1, &y1, &z1, &x2, &y2, &z2) == 9) {
+        CAudioZones::RegisterAudioBox(name, id, flags, x1, y1, z1, x2, y2, z2);
     } else {
-        VERIFY(sscanf_s(line, "%s %d %d %f %f %f %f", SCANF_S_STR(name), &id, &enabled, &x1, &y1, &z1, &radius) == 7);
-        CAudioZones::RegisterAudioSphere(name, id, enabled != 0, x1, y1, z1, radius);
+        VERIFY(sscanf_s(line, "%s %d %d %f %f %f %f", SCANF_S_STR(name), &id, &flags, &x1, &y1, &z1, &radius) == 7);
+        CAudioZones::RegisterAudioSphere(name, id, flags, x1, y1, z1, radius);
     }
 }
 
