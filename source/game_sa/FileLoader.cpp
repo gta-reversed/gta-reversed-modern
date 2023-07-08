@@ -265,10 +265,10 @@ void CFileLoader::LoadAudioZone(const char* line) {
     float radius;
 
     if (sscanf_s(line, "%s %d %d %f %f %f %f %f %f", SCANF_S_STR(name), &id, &flags, &x1, &y1, &z1, &x2, &y2, &z2) == 9) {
-        CAudioZones::RegisterAudioBox(name, id, flags, x1, y1, z1, x2, y2, z2);
+        CAudioZones::RegisterAudioBox(name, id, flags == 1, x1, y1, z1, x2, y2, z2);
     } else {
         VERIFY(sscanf_s(line, "%s %d %d %f %f %f %f", SCANF_S_STR(name), &id, &flags, &x1, &y1, &z1, &radius) == 7);
-        CAudioZones::RegisterAudioSphere(name, id, flags, x1, y1, z1, radius);
+        CAudioZones::RegisterAudioSphere(name, id, flags == 1, x1, y1, z1, radius);
     }
 }
 
