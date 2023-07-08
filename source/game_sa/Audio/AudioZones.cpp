@@ -48,11 +48,11 @@ void CAudioZones::RegisterAudioBox(char name[8], int32 id, bool isActive, float 
 }
 
 // 0x5081C0
-void CAudioZones::RegisterAudioSphere(char name[8], int32 id, uint16_t flags, float x1, float y1, float z1, float radius) {
+void CAudioZones::RegisterAudioSphere(char name[8], int32 id, bool isActive, float x1, float y1, float z1, float radius) {
     tAudioZoneSphere audioZoneSphere;
     strcpy_s(audioZoneSphere.m_szName, name);
     audioZoneSphere.m_nAudioZone = id;
-    audioZoneSphere.m_bIsActive = flags == 1;   // TODO: m_nFlags field has only 1 flag - Active or inactive and takes only 1 bit. Although gta uses 2 bytes for this, but how is the
+    audioZoneSphere.m_bIsActive = isActive;
                                                 // idea to define this single flag so as not to be confused in the future;
     audioZoneSphere.m_vPosn = CVector(x1, y1, z1);
     audioZoneSphere.m_fRadius = radius;
