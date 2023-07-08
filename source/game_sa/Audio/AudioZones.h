@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CompressedBox.h"
+#include <span>
 
 struct tAudioZoneSphere {
     char    m_szName[8];
@@ -12,10 +13,13 @@ struct tAudioZoneSphere {
 VALIDATE_SIZE(tAudioZoneSphere, 0x1C);
 
 struct tAudioZoneBox {
-    char          m_Name[8];
+    char          m_szName[8];
     int16         m_nAudioZone;
     uint16        m_Flags;
     CompressedBox m_Box;
+    void DrawWireFrame(CRGBA color, const CMatrix& transform) const {
+        m_Box.DrawWireFrame(color, transform);
+    }
 };
 VALIDATE_SIZE(tAudioZoneBox, 0x18);
 
@@ -40,9 +44,13 @@ public:
 
     static void Init();
 
-    static int32  RegisterAudioBox(char name[16], int32 id, bool b, float x1, float y1, float z1, float x2, float y2, float z2);
-    static int32  RegisterAudioSphere(char name[16], int32 id, bool b, float x1, float y1, float z1, float radius);
+    static void RegisterAudioBox(char name[8], int32 id, bool b, float x1, float y1, float z1, float x2, float y2, float z2);
+    static void RegisterAudioSphere(char name[8], int32 id, bool b, float x1, float y1, float z1, float radius);
 
     static void SwitchAudioZone(char* zoneName, bool enable);
     static void Update(bool a1, CVector posn);
+
+    static auto GetActiveAudioBoxes() {
+        return m_aBoxes | rng::views::take((size_t)m_NumBoxes);
+    }
 };

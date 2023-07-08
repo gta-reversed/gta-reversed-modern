@@ -257,7 +257,7 @@ char* CFileLoader::LoadLine(char*& bufferIt, int32& buffSize) {
 // IPL -> AUZO
 // 0x5B4D70
 void CFileLoader::LoadAudioZone(const char* line) {
-    char  name[16];
+    char  name[8];
     int32 id;
     int32 enabled;
     float x1, y1, z1;
