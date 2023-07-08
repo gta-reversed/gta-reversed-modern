@@ -126,8 +126,8 @@ void CCam::Init() {
     gbCineyCamMessageDisplayed = 2;
     gCameraDirection = 3;
     gCameraMode = (eCamMode)-1;
-    dword_B6EC24 = 0;
-    dword_B6EC28 = 0;
+    gLastTime2PlayerCameraWasOK = 0;
+    gLastTime2PlayerCameraCollided = 0;
     TheCamera.m_bCinemaCamera = false;
 }
 
