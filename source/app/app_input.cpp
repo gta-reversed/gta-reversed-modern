@@ -160,9 +160,9 @@ RsEventStatus HandleKeyUp(RsKeyStatus* ks) {
 // 0x744880
 RsEventStatus KeyboardHandler(RsEvent event, void* param) {
     switch (event) {
-    case rsPADBUTTONDOWN:
+    case rsKEYDOWN:
         return HandleKeyDown((RsKeyStatus*)param);
-    case rsPADBUTTONUP:
+    case rsKEYUP:
         return HandleKeyUp((RsKeyStatus*)param);
     default:
         return rsEVENTNOTPROCESSED;

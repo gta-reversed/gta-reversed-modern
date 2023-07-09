@@ -9,7 +9,7 @@
 #include <Dbt.h>
 #include <dshow.h>
 
-#include "Platform.h"
+#include <platform/platform.h>
 #include "PostEffects.h"
 #include "AEAudioHardware.h"
 #include "VideoMode.h"
