@@ -36,6 +36,8 @@ void InteriorManager_c::Init() {
 
 // 0x598F50
 int8 InteriorManager_c::Update() {
+    ZoneScoped;
+
     return plugin::CallMethodAndReturn<int8, 0x598F50, InteriorManager_c*>(this);
 }
 

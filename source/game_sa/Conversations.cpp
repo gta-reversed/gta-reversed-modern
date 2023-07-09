@@ -15,6 +15,8 @@ void CConversations::Clear() {
 }
 
 void CConversations::Update() {
+    ZoneScoped;
+
     plugin::Call<0x43C590>();
 }
 

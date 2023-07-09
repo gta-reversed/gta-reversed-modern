@@ -34,5 +34,7 @@ bool CSetPieces::Save() {
 
 // 0x49AA00
 void CSetPieces::Update() {
+    ZoneScoped;
+
     plugin::Call<0x49AA00>();
 }

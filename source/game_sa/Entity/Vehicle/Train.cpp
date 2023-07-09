@@ -195,6 +195,8 @@ void CTrain::Shutdown() {
 
 // 0x6F5900
 void CTrain::UpdateTrains() {
+    ZoneScoped;
+
     // NOP
 }
 

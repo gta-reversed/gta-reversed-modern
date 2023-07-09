@@ -87,6 +87,8 @@ void CVehicleRecording::ShutDown() {
 
 // 0x459F70 hook not needed
 void CVehicleRecording::Render() {
+    ZoneScoped;
+
 }
 
 // 0x45A360

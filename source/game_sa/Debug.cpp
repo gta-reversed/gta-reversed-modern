@@ -33,8 +33,9 @@ void CDebug::DebugAddText(const char* str, float x, float y)
     m_debugStrings.push_back({ str, x, y });
 }
 
-void CDebug::DebugDisplayTextBuffer()
-{
+void CDebug::DebugDisplayTextBuffer() {
+    ZoneScoped;
+
     CFont::SetBackground(0, 0);
     CFont::SetBackgroundColor(CRGBA(0, 0, 0, 128));
     CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);

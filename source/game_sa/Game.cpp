@@ -707,6 +707,8 @@ void CGame::InitialiseWhenRestarting() {
 
 // 0x53BEE0
 void CGame::Process() {
+    ZoneScoped;
+
     CPad::UpdatePads();
     g_LoadMonitor.BeginFrame();
 
@@ -749,8 +751,7 @@ void CGame::Process() {
 
         if (updateTimeDelta >= 4) {
             CPopulation::Update(false);
-        }
-        else {
+        } else {
             const auto timeBeforePopulationUpdate = GetTime();
             CPopulation::Update(true);
             updateTimeDelta = GetTime() - timeBeforePopulationUpdate;
@@ -794,8 +795,7 @@ void CGame::Process() {
 
         if (CReplay::ShouldStandardCameraBeProcessed()) {
             TheCamera.Process();
-        }
-        else {
+        } else {
             TheCamera.CCamera::ProcessFade();
         }
 

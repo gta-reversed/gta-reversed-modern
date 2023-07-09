@@ -129,6 +129,8 @@ void UIRenderer::PreRenderUpdate() {
 }
 
 void UIRenderer::DrawLoop() {
+    ZoneScoped;
+
     if (m_ReInitRequested) {
         ResetSingleton(); // This will destruct the current object so we gotta stop here.
         return;
@@ -152,6 +154,8 @@ void UIRenderer::Render2D() {
 }
 
 void UIRenderer::Render3D() {
+    ZoneScoped;
+
     m_DebugModules.Render3D();
 }
 

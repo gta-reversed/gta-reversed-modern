@@ -298,6 +298,8 @@ void CWeather::SetWeatherToAppropriateTypeNow() {
 
 // 0x72B850
 void CWeather::Update() {
+    ZoneScoped;
+
     plugin::Call<0x72B850>();
 }
 

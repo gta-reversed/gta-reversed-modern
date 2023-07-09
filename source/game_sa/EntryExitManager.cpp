@@ -80,6 +80,8 @@ void CEntryExitManager::ShutdownForRestart() {
 
 // 0x440D10
 void CEntryExitManager::Update() {
+    ZoneScoped;
+
     const bool bDontShowMarkers =
          CCutsceneMgr::ms_cutsceneProcessing
       || CPad::GetPad()->DisablePlayerControls

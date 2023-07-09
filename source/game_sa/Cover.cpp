@@ -51,6 +51,8 @@ bool CCover::ShouldThisBuildingHaveItsCoverPointsCreated(CBuilding* building) {
 
 // 0x6997E0
 void CCover::Update() {
+    ZoneScoped;
+
     plugin::Call<0x6997E0>();
 }
 

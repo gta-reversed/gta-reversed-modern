@@ -621,6 +621,8 @@ bool CPickups::TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, ePick
 
 // 0x458DE0
 void CPickups::Update() {
+    ZoneScoped;
+
     if (CReplay::Mode == MODE_PLAYBACK)
         return;
 

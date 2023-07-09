@@ -65,5 +65,7 @@ void CAudioZones::SwitchAudioZone(char* zoneName, bool enable) {
 
 // 0x5083C0
 void CAudioZones::Update(bool a1, CVector posn) {
+    ZoneScoped;
+
     plugin::Call<0x5083C0, bool, CVector>(a1, posn);
 }

@@ -89,6 +89,8 @@ void RwTerminate() {
 
 // 0x53E170
 void RenderEffects() {
+    ZoneScoped;
+
     CBirds::Render();
     CSkidmarks::Render();
     CRopes::Render();
@@ -122,6 +124,8 @@ void RenderEffects() {
 
 // 0x53DF40
 void RenderScene() {
+    ZoneScoped;
+
     const auto underWater = CWeather::UnderWaterness <= 0.0f;
 
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
@@ -206,6 +210,8 @@ void RenderScene() {
 
 // 0x53E530
 void RenderMenus() {
+    ZoneScoped;
+
     if (FrontEndMenuManager.m_bMenuActive) {
         FrontEndMenuManager.DrawFrontEnd();
     }
@@ -213,6 +219,8 @@ void RenderMenus() {
 
 // 0x53E230
 void Render2dStuff() {
+    ZoneScoped;
+
     RenderDebugShit(); // NOTSA, temp
 
     const auto DrawOuterZoomBox = []() {
@@ -279,6 +287,8 @@ void RenderDebugShit() {
 
 // 0x53E920
 void Idle(void* param) {
+    ZoneScoped;
+
     /* FPS lock. Limits to 26 frames per second.
     CTimer::GetCurrentTimeInCycles();
     CTimer::GetCyclesPerMillisecond();

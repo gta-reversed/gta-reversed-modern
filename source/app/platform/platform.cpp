@@ -67,6 +67,8 @@ bool RsCameraBeginUpdate(RwCamera* camera) {
 
 // 0x619440
 RwCamera* RsCameraShowRaster(RwCamera* camera) {
+    ZoneScoped;
+
     return psCameraShowRaster(camera);
 }
 

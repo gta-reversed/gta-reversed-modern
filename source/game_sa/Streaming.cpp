@@ -3735,6 +3735,8 @@ void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
 
 // 0x40E670
 void CStreaming::Update() {
+    ZoneScoped;
+
     g_LoadMonitor.m_numModelsRequest = ms_numModelsRequested;
     if (CTimer::GetIsPaused())
         return;

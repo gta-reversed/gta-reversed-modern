@@ -12,11 +12,6 @@ project "gta_reversed"
 
     filter {} -- Clear filter
 
-    defines { 
-        "ENABLE_SCRIPT_COMMAND_HOOKS",
-        "TRACY_ENABLE" 
-    }
-
     vpaths {
         ["Headers/*"] = {"**.h*",},
         ["Sources/*"] = {"**.c*",},
@@ -46,7 +41,10 @@ project "gta_reversed"
         "NOMINMAX", 
         "USE_GTASA_ALLOCATOR", 
         "EXTRA_DEBUG_FEATURES", 
-        "FIX_BUGS" 
+        "FIX_BUGS",
+
+        "TRACY_ENABLE",
+        "TRACY_CALLSTACK"
     }
 
     links { 

@@ -21,5 +21,7 @@ void CStencilShadows::Init() {
 
 // 0x711D90
 void CStencilShadows::Process(CVector& cameraPos) {
+    ZoneScoped;
+
     plugin::Call<0x711D90, CVector&>(cameraPos);
 }

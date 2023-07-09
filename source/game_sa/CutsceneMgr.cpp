@@ -967,6 +967,8 @@ void CCutsceneMgr::StartCutscene() {
 
 // 0x4D5D00
 void CCutsceneMgr::Update() {
+    ZoneScoped;
+
     if (ms_cutsceneLoadStatus != LoadStatus::NOT_LOADED) {
         Update_overlay();
     }

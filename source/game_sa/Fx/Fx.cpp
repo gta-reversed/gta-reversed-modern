@@ -159,11 +159,15 @@ void Fx_c::DestroyEntityFx(CEntity* entity) {
 
 // 0x49E640
 void Fx_c::Update(RwCamera* camera, float timeDelta) {
+    ZoneScoped;
+
     ((void(__thiscall*)(Fx_c*, RwCamera*, float))0x49E640)(this, camera, timeDelta);
 }
 
 // 0x49E650
 void Fx_c::Render(RwCamera* camera, bool heatHaze) {
+    ZoneScoped;
+
     g_fxMan.Render(camera, heatHaze);
 }
 

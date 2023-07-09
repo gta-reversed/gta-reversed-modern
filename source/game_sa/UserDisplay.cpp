@@ -25,6 +25,8 @@ void CUserDisplay::Init() {
 
 // 0x5720A0
 void CUserDisplay::Process() {
+    ZoneScoped;
+
     PlaceName.Process();
     OnscnTimer.Process();
     CurrentVehicle.Process();

@@ -142,6 +142,8 @@ void CBirds::Shutdown() {
 
 // 0x712330
 void CBirds::Update() {
+    ZoneScoped;
+
     const auto& vecCamPos = TheCamera.GetPosition();
 
     if (!CGame::currArea
@@ -249,6 +251,8 @@ void CBirds::Update() {
 
 // 0x712810
 void CBirds::Render() {
+    ZoneScoped;
+
     if (uiNumberOfBirds == 0)
         return;
 

@@ -79,6 +79,8 @@ void CTheCarGenerators::Load() {
 
 // 0x6F3F40
 void CTheCarGenerators::Process() {
+    ZoneScoped;
+
     if (FindPlayerTrain() || CCutsceneMgr::IsCutsceneProcessing() || CReplay::Mode == MODE_PLAYBACK)
         return;
 

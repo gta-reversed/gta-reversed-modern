@@ -88,6 +88,8 @@ void CGarages::Shutdown() {
 
 // 0x44C8C0
 void CGarages::Update() {
+    ZoneScoped;
+
     if (CReplay::Mode == eReplayMode::MODE_PLAYBACK || CGameLogic::IsCoopGameGoingOn())
         return;
 

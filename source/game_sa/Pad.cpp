@@ -212,6 +212,8 @@ void CPad::Update(int32 pad) {
 
 // 0x541DD0
 void CPad::UpdatePads() {
+    ZoneScoped;
+
     GetPad(0)->UpdateMouse();
     ProcessPad(false);
 

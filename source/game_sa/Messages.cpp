@@ -557,6 +557,8 @@ void CMessages::Process() {
 // Displays messages
 // 0x69EFC0
 void CMessages::Display(bool bNotFading) {
+    ZoneScoped;
+
     char msgText[MSG_BUF_SZ];
     const auto PreProcessMsgText = [&](tMessage msg) {
         InsertNumberInString(

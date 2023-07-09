@@ -232,6 +232,8 @@ void CCheat::ResetCheats() {
 
 // 0x439AF0
 void CCheat::DoCheats() {
+    ZoneScoped;
+
     for (auto key = 0; key < 256; ++key) {
         if (CPad::GetPad(0)->IsStandardKeyJustPressed(key)) {
             AddToCheatString(key);

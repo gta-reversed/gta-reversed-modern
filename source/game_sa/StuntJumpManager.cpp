@@ -85,6 +85,8 @@ void CStuntJumpManager::AddOne(const CBoundingBox& start, const CBoundingBox& en
 
 // 0x49C490
 void CStuntJumpManager::Update() {
+    ZoneScoped;
+
     if (!mp_poolStuntJumps || CReplay::Mode == MODE_PLAYBACK)
         return;
 

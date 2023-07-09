@@ -171,6 +171,8 @@ void CTheZones::SetZoneRadarColours(int16 index, char flag, uint8 red, uint8 gre
 // Updates CTheZones info
 // 0x572D10
 void CTheZones::Update() {
+    ZoneScoped;
+
     ((void(__cdecl*)())0x572D10)();
 }
 
