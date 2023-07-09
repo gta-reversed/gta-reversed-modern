@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ColModel.h"
+#include <array>
+#include "Base.h"
 
 class CTempColModels {
 public:
@@ -16,6 +18,8 @@ public:
     static CColModel& ms_colModelBBox;
     static inline CColModel& ms_colModelPeds = *(CColModel*)0x968DF0;
 
+    static constexpr auto MAX_NUM_CUTSCENE_COLMODELS = MODEL_CUTOBJ20 - MODEL_CUTOBJ01;
+    static inline auto& ms_colModelCutObj            = StaticRef<std::array<CColModel, MAX_NUM_CUTSCENE_COLMODELS>, 0x968A30>();
 public:
     static void InjectHooks();
 

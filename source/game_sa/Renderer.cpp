@@ -974,11 +974,11 @@ void CRenderer::ConstructRenderList() {
 
     CPlayerPed* player = FindPlayerPed();
     if (player && player->m_nAreaCode == AREA_CODE_NORMAL_WORLD) {
-        float fGroundHeightZ = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
+        float fGroundHeightZ = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BB_BOTTOM);
         float fPlayerHeightZ = player->GetPosition().z;
 
         if (fPlayerHeightZ - fGroundHeightZ > 50.0f) {
-            fGroundHeightZ = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_TOP);
+            fGroundHeightZ = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BB_TOP);
             if (fPlayerHeightZ - fGroundHeightZ > 10.0f && FindPlayerVehicle()) {
                 ms_bInTheSky = true;
             }

@@ -86,6 +86,8 @@ public:
     static bool& bDisableRandomTrains;
     static CVector aStationCoors[6];
 
+    static constexpr auto Type = VEHICLE_TYPE_TRAIN;
+
 public:
     CTrain(int32 modelIndex, eVehicleCreatedBy createdBy);
 

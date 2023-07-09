@@ -37,6 +37,7 @@ public:
     {
         // TODO: Add some kind of `assert` to check validity
     }
+    
     CMatrix(const CMatrix& matrix);
     CMatrix(RwMatrix* matrix, bool temporary = false); // like previous + attach
 
@@ -115,7 +116,7 @@ public:
     void SetRotateX(float angle);
     void SetRotateY(float angle);
     void SetRotateZ(float angle);
-    void SetRotate(float x, float y, float z);  // set rotate on 3 axes
+    void SetRotate(float x, float y, float z); // set rotate on 3 axes (Values are in radians)
     void RotateX(float angle);
     void RotateY(float angle);
     void RotateZ(float angle);
@@ -135,6 +136,13 @@ public:
 
     static uint8* EulerIndices1;
     static uint8* EulerIndices2;
+
+    ///< Returns an identity matrix
+    static auto Identity() {
+        CMatrix mat;
+        mat.SetScale(1.f);
+        return mat;
+    }
 
     void SetRotate(const CVector& rot) {
         SetRotate(rot.x, rot.y, rot.z);

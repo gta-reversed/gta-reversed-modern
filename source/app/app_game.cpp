@@ -22,6 +22,8 @@
 #include <VehicleRecording.h>
 #include <PostEffects.h>
 
+#include "extensions/Configs/FastLoader.hpp"
+
 void AppGameInjectHooks() {
     RH_ScopedCategory("App");
     RH_ScopedNamespaceName("Game");
@@ -258,9 +260,6 @@ void Render2dStuff() {
     CDarkel::DrawMessages();
     CGarages::PrintMessages();
     CFont::DrawFonts();
-
-    // NOTSA: ImGui menu draw loop
-    notsa::ui::UIRenderer::GetSingleton().DrawLoop();
 }
 
 // 0x53E160
@@ -357,6 +356,10 @@ void Idle(void* param) {
     CCredits::Render();
     CDebug::DebugDisplayTextBuffer();
     FlushObrsPrintfs();
+
+    // NOTSA: ImGui menu draw loop
+    notsa::ui::UIRenderer::GetSingleton().DrawLoop();
+
     RwCameraEndUpdate(Scene.m_pRwCamera);
     RsCameraShowRaster(Scene.m_pRwCamera);
 }
@@ -383,7 +386,7 @@ void FrontendIdle() {
     CameraSize(Scene.m_pRwCamera, nullptr, SCREEN_VIEW_WINDOW, SCREEN_ASPECT_RATIO);
     CVisibilityPlugins::SetRenderWareCamera(Scene.m_pRwCamera);
 
-    if (FastLoadSettings.ShouldLoadSaveGame()) {
+    if (g_FastLoaderConfig.ShouldLoadSaveGame()) {
         return; // Don't render anything
     }
 
@@ -408,6 +411,9 @@ void FrontendIdle() {
         CFont::DrawFonts();
         CDebug::DebugDisplayTextBuffer();
         FlushObrsPrintfs();
+
+        // NOTSA: ImGui menu draw loop
+        notsa::ui::UIRenderer::GetSingleton().DrawLoop();
 
         RwCameraEndUpdate(Scene.m_pRwCamera);
         RsCameraShowRaster(Scene.m_pRwCamera);

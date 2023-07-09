@@ -114,6 +114,7 @@ public:
 };
 static inline auto& PadConfigs = StaticRef<std::array<CPadConfig, 2>, 0xC92144>();
 
+using ControlName = char[40];
 
 class CControllerConfigManager {
 public:
@@ -178,6 +179,11 @@ public:
     void AffectPadFromKeyBoard();
     void AffectPadFromMouse();
     void DeleteMatchingActionInitiators(eControllerAction Action, int32 KeyToBeChecked, eControllerType ControllerTypeToBeChecked);
+
+    void GetDefinedKeyByGxtName(uint16 actionId, char* buf, uint16 bufsz);
+
+    // NOTSA
+    uint16 GetActionIDByName(std::string_view name);
 };
 VALIDATE_SIZE(CControllerConfigManager, 0x12E4);
 

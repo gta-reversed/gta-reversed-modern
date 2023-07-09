@@ -223,10 +223,14 @@ void UIRenderer::DebugCode() {
         }
     }
     if (pad->IsStandardKeyJustPressed('6')) {
-        AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_FRONT);
+        CMessages::AddBigMessage("PRESS ~k~~PED_ANSWER_PHONE~ TO FUCK", 1000, eMessageStyle::STYLE_BOTTOM_RIGHT);
     }
     if (pad->IsStandardKeyJustPressed('7')) {
-        AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_REAR);
+        CMessages::AddMessageWithNumberQ("PRESS ~k~~PED_ANSWER_PHONE~TO FUCK ~1~~1~~1~", 1000, 0, 1, 2, 3, 4, 5, 6);
+    }
+
+    if (pad->IsStandardKeyJustPressed('8')) {
+        CMessages::AddToPreviousBriefArray("PRESS ~k~~PED_ANSWER_PHONE~ TO FUCK");
     }
 }
 }; // namespace ui

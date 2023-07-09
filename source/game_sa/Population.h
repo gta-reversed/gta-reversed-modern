@@ -120,7 +120,7 @@ public:
     * @param ped               The ped that was added/removed
     * @param pedAddedOrRemoved Should be `false` if the ped was added, or `true` if it was removed 
     */
-    static void UpdatePedCount(CPed* ped, uint8 pedAddedOrRemoved);
+    static void UpdatePedCount(CPed* ped, bool pedAddedOrRemoved);
 
     // empty function
     static void MoveCarsAndPedsOutOfAbandonedZones();

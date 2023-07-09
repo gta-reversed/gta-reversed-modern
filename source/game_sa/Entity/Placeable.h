@@ -36,6 +36,7 @@ public:
     void SetPosn(float x, float y, float z);
     void SetPosn(const CVector& posn);
     void SetOrientation(float x, float y, float z);
+    void SetOrientation(CVector radians) { SetOrientation(radians.x, radians.y, radians.z); } // TODO: Replace method above with this
     void GetOrientation(float& x, float& y, float& z);
     void SetHeading(float heading);
     float GetHeading();

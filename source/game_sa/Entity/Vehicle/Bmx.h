@@ -36,6 +36,8 @@ public:
     float m_fMidWheelFracY;
     bool  m_bIsFreewheeling;
 
+    static constexpr auto Type = VEHICLE_TYPE_BMX;
+
 public:
     CBmx(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CBmx() override;

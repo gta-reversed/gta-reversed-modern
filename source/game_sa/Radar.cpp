@@ -1254,19 +1254,21 @@ void CRadar::Draw3dMarkers() {
     };
 
     for (auto&& [i, trace] : notsa::enumerate(ms_RadarTrace)) {
-        if (!trace.m_bTrackingBlip)
+        if (!trace.m_bTrackingBlip) {
             continue;
+        }
 
         const auto color = CRGBA{GetRadarTraceColour(trace.m_nColour, trace.m_bBright, trace.m_bFriendly)};
         // TODO: make a tConeHandle or something for this.
-        const auto coneHandle = (uint16)i | ((uint16)trace.m_nCounter << (sizeof(uint16) * 8u));
+        const auto coneHandle = (uint32)i | ((uint32)trace.m_nCounter << (sizeof(uint16) * 8));
 
-        if (trace.m_nBlipDisplayFlag != BLIP_DISPLAY_BOTH && trace.m_nBlipDisplayFlag != BLIP_DISPLAY_MARKERONLY)
+        if (trace.m_nBlipDisplayFlag != BLIP_DISPLAY_BOTH && trace.m_nBlipDisplayFlag != BLIP_DISPLAY_MARKERONLY) {
             continue;
+        }
 
         switch (trace.m_nBlipType) {
         case BLIP_CAR: {
-            const auto vehicle = GetVehiclePool()->GetAt(trace.m_nEntityHandle);
+            const auto vehicle = GetVehiclePool()->GetAtRef(trace.m_nEntityHandle);
             assert(vehicle); // NOTSA
 
             const auto posn = [vehicle] {
@@ -1282,7 +1284,7 @@ void CRadar::Draw3dMarkers() {
             break;
         }
         case BLIP_CHAR: {
-            const auto ped = GetPedPool()->GetAt(trace.m_nEntityHandle);
+            const auto ped = GetPedPool()->GetAtRef(trace.m_nEntityHandle);
             assert(ped); // NOTSA
 
             PutMarkerCone(coneHandle, ped->GetRealPosition() + CVector{0.0f, 0.0f, 2.7f}, 1.2f, color);
@@ -1293,7 +1295,7 @@ void CRadar::Draw3dMarkers() {
             const auto posn = [&trace]() {
                 CVector ret{};
                 if (trace.m_nBlipType == BLIP_OBJECT) {
-                    if (const auto obj = GetObjectPool()->GetAt(trace.m_nEntityHandle)) {
+                    if (const auto obj = GetObjectPool()->GetAtRef(trace.m_nEntityHandle)) {
                         const auto bbMaxZ = obj->GetColModel()->GetBoundingBox().m_vecMax.z;
                         ret = obj->GetPosition() + CVector{0.0f, 0.0f, bbMaxZ};
                     } else {

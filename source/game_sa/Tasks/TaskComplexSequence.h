@@ -23,8 +23,8 @@ public:
     * and then calling `AddTask` for every task passed in.
     */
     template<Task... T>
-    CTaskComplexSequence(T*... tasks)
-        : CTaskComplexSequence{}
+    CTaskComplexSequence(T*... tasks) :
+        CTaskComplexSequence{}
     {
         (AddTask(tasks), ...);
     }
