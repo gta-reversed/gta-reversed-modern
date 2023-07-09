@@ -47,6 +47,8 @@ UIRenderer::~UIRenderer() {
 }
 
 void UIRenderer::UpdateInput() {
+    ZoneScoped;
+
     if (!Visible()) {
         return;
     }
@@ -114,6 +116,8 @@ void UIRenderer::UpdateInput() {
 }
 
 void UIRenderer::PreRenderUpdate() {
+    ZoneScoped;
+
     m_ImIO->DeltaTime   = CTimer::GetTimeStepInSeconds();
     m_ImIO->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT); // Update display size, in case of window resize after imgui was already initialized
 
@@ -150,6 +154,8 @@ void UIRenderer::DrawLoop() {
 }
 
 void UIRenderer::Render2D() {
+    ZoneScoped;
+
     m_DebugModules.Render2D();
 }
 

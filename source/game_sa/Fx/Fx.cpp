@@ -127,6 +127,8 @@ void Fx_c::ExitEntitySystems() {
 
 // 0x49EA90
 void Fx_c::Init() {
+    ZoneScoped;
+
     g_fxMan.Init();
     g_fxMan.LoadFxProject("models\\effects.fxp");
     g_fxMan.SetWindData(&CWeather::WindDir, &CWeather::Wind);

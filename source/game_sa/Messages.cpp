@@ -43,6 +43,8 @@ void CMessages::InjectHooks() {
 // Initialises messages
 // 0x69EE00
 void CMessages::Init() {
+    ZoneScoped;
+
     ClearMessages(true);
     rng::fill(PreviousBriefs, tPreviousBrief{});
 }
@@ -355,6 +357,8 @@ void CMessages::ClearThisPrintBigNow(eMessageStyle style) {
 // Removes all displayed messages
 // 0x69EDC0
 void CMessages::ClearAllMessagesDisplayedByGame(bool unk) {
+    ZoneScoped;
+
     ClearMessages(unk);
     ClearPreviousBriefArray();
     CHud::GetRidOfAllHudMessages(unk);

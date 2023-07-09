@@ -26,6 +26,8 @@ void CCullZones::InjectHooks() {
 
 // 0x72D6B0
 void CCullZones::Init() {
+    ZoneScoped;
+
     NumAttributeZones = 0;
     CurrentFlags_Player = 0;
     CurrentFlags_Camera = 0;

@@ -82,6 +82,8 @@ bool CGangWars::Save() {
 
 // 0x443920
 void CGangWars::InitAtStartOfGame() {
+    ZoneScoped;
+
     State               = NOT_IN_WAR;
     State2              = NO_ATTACK;
     NumSpecificZones    = 0;

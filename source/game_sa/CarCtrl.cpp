@@ -64,6 +64,8 @@ void CCarCtrl::InjectHooks()
 
 // 0x4212E0
 void CCarCtrl::Init() {
+    ZoneScoped;
+
     CarDensityMultiplier = 1.0f;
     NumRandomCars = 0;
     NumLawEnforcerCars = 0;

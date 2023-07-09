@@ -3,6 +3,8 @@
 #include "Conversations.h"
 
 void CPedToPlayerConversations::Clear() {
+    ZoneScoped;
+
     plugin::Call<0x43AAE0>();
 }
 
@@ -11,6 +13,8 @@ void CPedToPlayerConversations::Update() {
 }
 
 void CConversations::Clear() {
+    ZoneScoped;
+
     plugin::Call<0x43A7B0>();
 }
 

@@ -115,6 +115,8 @@ long double CTheZones::Calc2DDistanceBetween2Zones(CZone* zone1, CZone* zone2) {
 // Initializes CTheZones
 // 0x572670
 void CTheZones::Init() {
+    ZoneScoped;
+
     ((void(__cdecl*)())0x572670)();
 }
 

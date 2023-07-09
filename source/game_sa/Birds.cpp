@@ -38,6 +38,8 @@ void CBirds::InjectHooks() {
 
 // 0x711EC0
 void CBirds::Init() {
+    ZoneScoped;
+
     for (auto& bird : aBirds) {
         bird.m_bCreated = false;
     }

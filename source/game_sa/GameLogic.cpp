@@ -129,6 +129,8 @@ void CGameLogic::ForceDeathRestart() {
 
 // 0x441210
 void CGameLogic::InitAtStartOfGame() {
+    ZoneScoped;
+
     ActivePlayers            = true;
     SkipState                = SKIP_NONE;
     NumAfterDeathStartPoints = 0;

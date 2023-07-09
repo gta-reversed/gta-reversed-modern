@@ -223,6 +223,8 @@ void CCheat::ApplyCheat(eCheats cheat) {
 
 // 0x438450
 void CCheat::ResetCheats() {
+    ZoneScoped;
+
     memset(&m_aCheatsActive, 0, sizeof(m_aCheatsActive));
     CWeather::ReleaseWeather();
     CTimer::ResetTimeScale();

@@ -27,6 +27,8 @@ void CCover::InjectHooks() {
 
 // 0x698710
 void CCover::Init() {
+    ZoneScoped;
+
     plugin::Call<0x698710>();
 }
 

@@ -38,6 +38,8 @@ void CGarages::InjectHooks() {
 
 // 0x447120
 void CGarages::Init() {
+    ZoneScoped;
+
     NumGarages = 0;
     MessageEndTime = 0;
     MessageStartTime = 0;

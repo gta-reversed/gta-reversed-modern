@@ -61,6 +61,8 @@ void CVehicleRecording::InjectHooks() {
 
 // 0x459390
 void CVehicleRecording::Init() {
+    ZoneScoped;
+
     rng::fill(bPlaybackGoingOn, false);
     rng::fill(bPlaybackPaused, false);
     rng::fill(pPlaybackBuffer, nullptr);

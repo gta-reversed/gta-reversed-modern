@@ -64,6 +64,8 @@ void CPickups::InjectHooks() {
 
 // 0x454A70
 void CPickups::Init() {
+    ZoneScoped;
+
     NumMessages = 0;
     for (auto& pickup : aPickUps) {
         pickup.m_nPickupType = PICKUP_NONE;

@@ -155,6 +155,8 @@ void CTrain::SetupModelNodes() {
 
 // 0x6F7440
 void CTrain::InitTrains() {
+    ZoneScoped;
+
     return plugin::Call<0x6F7440>();
 
     bDisableRandomTrains = false;

@@ -26,6 +26,8 @@ void CAudioZones::InjectHooks() {
 
 // 0x5081A0
 void CAudioZones::Init() {
+    ZoneScoped;
+
     m_NumSpheres = 0;
     m_NumBoxes = 0;
     m_NumActiveSpheres = 0;

@@ -105,6 +105,8 @@ void CPlantMgr::InjectHooks() {
 
 // 0x5DD910
 bool CPlantMgr::Initialise() {
+    ZoneScoped;
+
     if (!ReloadConfig())
         return false;
 

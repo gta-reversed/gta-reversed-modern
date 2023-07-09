@@ -154,6 +154,8 @@ void CWorld::ResetLineTestOptions() {
 
 // 0x5631E0
 void CWorld::Initialise() {
+    ZoneScoped;
+
     bDoingCarCollisions    = false;
     bNoMoreCollisionTorque = false;
     bIncludeDeadPeds       = false;

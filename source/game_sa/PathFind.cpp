@@ -112,6 +112,8 @@ void CPathNode::InjectHooks() {
 
 // 0x44D080
 void CPathFind::Init() {
+    ZoneScoped;
+
     static int32 NumTempExternalNodes = 0; // Unused
     m_nNumForbiddenAreas = 0;
     m_loadAreaRequestPending = false;

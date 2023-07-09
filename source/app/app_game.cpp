@@ -55,6 +55,8 @@ void GameInit() {
 
 // 0x53E580
 void InitialiseGame() {
+    ZoneScoped;
+
     static int16& version_number = *(int16*)(0xB72C68);
     version_number = 78;
 

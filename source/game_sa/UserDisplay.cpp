@@ -18,6 +18,8 @@ void CUserDisplay::InjectHooks() {
 
 // 0x571EE0
 void CUserDisplay::Init() {
+    ZoneScoped;
+
     PlaceName.Init();
     OnscnTimer.Init();
     CurrentVehicle.Init();

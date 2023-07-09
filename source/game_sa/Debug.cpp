@@ -12,8 +12,9 @@ void CDebug::InjectHooks()
     RH_ScopedInstall(DebugDisplayTextBuffer, 0x532260);
 }
 
-void CDebug::DebugInitTextBuffer()
-{
+void CDebug::DebugInitTextBuffer() {
+    ZoneScoped;
+
     m_debugStrings.reserve(500);
 }
 
