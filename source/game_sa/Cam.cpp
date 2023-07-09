@@ -95,7 +95,7 @@ void CCam::Init() {
     m_fPlayerInFrontSyphonAngleOffSet = DegreesToRadians(20.0f);
     m_fSyphonModeTargetZOffSet = 0.5f;
     m_fRadiusForDead = 1.5f;
-    m_nDirectionWasLooking = 3;
+    m_nDirectionWasLooking = 3; // TODO: enum
     m_bLookBehindCamWasInFront = 0;
     m_fRoll = 0.0f;
     m_fRollSpeed = 0.0f;
