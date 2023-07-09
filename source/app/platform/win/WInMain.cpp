@@ -5,7 +5,7 @@
 #include "StdInc.h"
 
 #include "LoadingScreen.h"
-#include "FastLoader.hpp"
+#include <extensions/Configs/FastLoader.hpp>
 #include "ControllerConfigManager.h"
 #include "Gamma.h"
 
