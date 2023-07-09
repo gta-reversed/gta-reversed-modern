@@ -124,7 +124,7 @@ void CCam::Init() {
     m_nCurrentHistoryPoints = 0;
     gPlayerPedVisible = true;
     gbCineyCamMessageDisplayed = 2; // TODO: enum
-    gCameraDirection = 3;
+    gCameraDirection = 3; // TODO: enum
     gCameraMode = (eCamMode)-1;
     gLastTime2PlayerCameraWasOK = 0;
     gLastTime2PlayerCameraCollided = 0;
