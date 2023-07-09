@@ -572,6 +572,13 @@ void CMenuManager::JumpToGenericMessageScreen(eMenuScreen screen, const char* ti
 
 // 0x57C520
 void CMenuManager::CentreMousePointer() {
+#ifdef FIX_BUGS
+    // Not really a vanilla bug, because the vanilla game stops rendering when not in foreground
+    if (!IsForegroundApp()) {
+        return;
+    }
+#endif
+
     CVector2D pos{ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
     if (pos.x != 0.0f && pos.y != 0.0f) {
         RsMouseSetPos(&pos);

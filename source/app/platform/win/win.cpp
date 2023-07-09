@@ -665,8 +665,9 @@ void MainLoop(INT nCmdShow, MSG& Msg) {
     while (true) {
         RwInitialized = true;
 
-        RwV2d pos{ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
-        RsMouseSetPos(&pos);
+        // Useless, and annoying
+        //RwV2d pos{ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
+        //RsMouseSetPos(&pos);
 
         gamma.Init();
 

@@ -312,8 +312,7 @@ void Idle(void* param) {
     }
 
     if (!FrontEndMenuManager.m_bMenuActive && TheCamera.GetScreenFadeStatus() != eNameState::NAME_FADE_IN) {
-        CVector2D mousePos{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f};
-        RsMouseSetPos(&mousePos);
+        FrontEndMenuManager.CentreMousePointer();
         CRenderer::ConstructRenderList();
         CRenderer::PreRender();
         CWorld::ProcessPedsAfterPreRender();
