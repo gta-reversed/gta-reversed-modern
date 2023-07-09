@@ -44,6 +44,7 @@ project "gta_reversed"
         "FIX_BUGS",
 
         "TRACY_ENABLE",
+        "TRACY_ON_DEMAND",
         "TRACY_CALLSTACK"
     }
 

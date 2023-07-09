@@ -194,6 +194,7 @@ project "tracy"
     defines {
         "TRACY_ENABLE",
         "TRACY_CALLSTACK",
+        "TRACY_ON_DEMAND",
         --"TRACY_NO_CODE_TRANSFER" -- Uncomment if you want callstacks to be working
     }
 
