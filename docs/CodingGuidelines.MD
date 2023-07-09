@@ -26,6 +26,14 @@ for (auto&& [i, e] : notsa::enumerate(array));
 * `CVector` is interchangible with 3 floats [As is `CVector2D` with 2 floats] for function args
 * Use lambdas for repetitive procedures in functions
 * Use `constexpr` variables instead of macros
+* Use `static inline` instead of `extern` and `static` in headers:
+```cpp
+class Foo {
+    static uint32& m_FooCount; // Bad
+
+    static inline auto& m_FooCount = StaticRef<uint32 0xDEADBEEF>(); // Good
+}
+```
 
 #### Types
 * Use `auto` in function bodies if the variables' type is guessable.
