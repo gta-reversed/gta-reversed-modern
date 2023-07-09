@@ -20,7 +20,20 @@ for (int i = 0; i < std::size(array); i++); // <-- BAD
 ```cpp
 for (auto&& [i, e] : notsa::enumerate(array));
 ```
-* If there's a `count` variable associated with a fixed size array, use `std::span` or `rng::views::take`
+* If there's a dynamic `count` variable associated with a fixed size array, use `std::span` or `rng::views::take`. E.g.:
+```cpp
+// Bad
+for (auto i = 0u; i < m_numThings; i++);
+
+// Good
+for (auto& thing : std::span{ m_things, m_numThings });
+// Also good
+for (auto& thing : m_things | rng::views::take(m_numThings));
+
+// ^ If these funcs are called more than once, make a helper function in the header. Like below:
+auto GetActiveThings() {
+    return std::span{ m_things, m_numThings }
+}
 * Use `f` in float literals [As omitting it would make them a `double`] (e.g. `1.0f`)
 * Use `std` library for generic functions like `min`, `max`, `lerp`, etc...
 * `CVector` is interchangible with 3 floats [As is `CVector2D` with 2 floats] for function args
@@ -31,7 +44,7 @@ for (auto&& [i, e] : notsa::enumerate(array));
 class Foo {
     static uint32& m_FooCount; // Bad
 
-    static inline auto& m_FooCount = StaticRef<uint32 0xDEADBEEF>(); // Good
+    static inline auto& m_FooCount = StaticRef<uint32, 0xDEADBEEF>(); // Good
 }
 ```
 
@@ -41,8 +54,7 @@ class Foo {
 * Take care of const correctness [Especially of class methods] (e.g. `const char*` over `char*`)
 * Try to use SA types over RW as much as possible, **except** `RwMatrix`. (e.g. `CVector` for `RwV3d`, `CRGBA` for `RwRGBA`)
 * Use fixed width integer types (e.g. `uint8`, `int32`).
-* Use `std::array` for arrays most of the time. Do not use it if the variable is just a pair of values or something basic like that.
-* Do not use Win32 types. (e.g. `DWORD` -> `uint32`)
+* Do not use Win32 integer types. [Except for Win32 exclusive code] (e.g. `DWORD` -> `uint32`)
 * For array sizes, etc.. prefer using `unsigned` types over `signed` ones
 * Whenever possible use `std::array` over `C-Style` array [as the former has bounds checking in debug mode, and can help us discover many bugs]
 
