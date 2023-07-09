@@ -48,7 +48,13 @@ project "gta_reversed"
         "vorbis", 
         "vorbisenc", 
         "vorbisfile", 
-        "imgui" 
+        "imgui",
+        "ddraw.lib",
+        "Winmm.lib",
+        "dxguid.lib",
+        "strmiids.lib",
+        "dsound.lib",
+        "d3d9.lib"
     }
 
     libdirs { 
