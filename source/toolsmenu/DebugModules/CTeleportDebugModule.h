@@ -12,7 +12,11 @@ public:
     void RenderMenuEntry() override;
     void Update() override;
 
-    static void TeleportTo(const CVector& pos, eAreaCodes areaCode = eAreaCodes::AREA_CODE_NORMAL_WORLD);
+    //! Teleport player [and it's group] to the exact position
+    static void TeleportTo(CVector pos, eAreaCodes areaCode = eAreaCodes::AREA_CODE_NORMAL_WORLD);
+
+    //! Similar to `TeleportTo`, but finds the ground position
+    static void TeleportToGround(CVector2D pos, eAreaCodes areaCode = eAreaCodes::AREA_CODE_NORMAL_WORLD);
 
 private:
     void DoTeleportTo(CVector pos, eAreaCodes areaCode);

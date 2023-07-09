@@ -539,18 +539,30 @@ bool CGame::Init3(const char* datFile) {
 
 // 0x53BC80
 void CGame::Initialise(const char* datFile) {
+    using notsa::events::OnGameInit;
+    const auto DispatchGameInit = [&, ui = &notsa::ui::UIRenderer::GetSingleton()](OnGameInit::Stage s) {
+        ui->HandleEvent(OnGameInit{ s, datFile });
+    };
+     
+    DispatchGameInit(OnGameInit::Stage::PRE);
+
     Init1(datFile);
     CColAccel::startCache();
     CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
     CFileLoader::LoadLevel(datFile);
     CColAccel::endCache();
+    DispatchGameInit(OnGameInit::Stage::S1);
+
     Init2(datFile);
     CStencilShadows::Init();
     LoadingScreen("Loading the Game", "Start script");
     CTheScripts::StartTestScript();
     CTheScripts::Process();
     TheCamera.Process();
+    DispatchGameInit(OnGameInit::Stage::S2);
+
     Init3(datFile);
+    DispatchGameInit(OnGameInit::Stage::POST);
 }
 
 // 0x5BFA90

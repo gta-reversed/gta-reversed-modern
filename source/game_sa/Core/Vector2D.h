@@ -29,6 +29,8 @@ public:
 
     static void InjectHooks();
 
+    static CVector2D Random(float min, float max);
+
     /*!
     * @brief Normalize this vector in-place
     *
@@ -149,6 +151,9 @@ public:
     //! Get vector perpendicular to `*this` on the left side (Same direction `*this` rotated by 90)
     //! Also see `GetPerpRight` and `RotatedBy`
     CVector2D GetPerpLeft() const;
+
+    //! Is this vector a unit vector (eg.: magnitude == 1)
+    bool IsUnitVector() const;
 
     /*!
     * @notsa

@@ -15,6 +15,11 @@ public:
     //! Request restart of render (done on before frame)
     void RequestReInit() { m_ReInitRequested = true; }
 
+    //! TODO: Move this out of here. Make an event manager or something
+    template<typename T>
+    void HandleEvent(const T& event) {
+        m_DebugModules.HandleEvent(event);
+    }
 private:
     //! Render 3D stuff in the world (If rendered elsewhere it won't be visible)
     void Render3D();
@@ -33,6 +38,7 @@ private:
 
     //! Random code you want to run (Called from `PreRenderUpdate`)
     void DebugCode();
+
 private:
     friend void ::RenderEffects();  // For `Render3D()`
     friend void ::FrontendIdle();   // For `DrawLoop()` VVV

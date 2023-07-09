@@ -149,6 +149,10 @@ public:
     static void FindObjectsKindaColliding(const CVector& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
 
     static void FindObjectsIntersectingCube(const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
+    template<size_t N>
+    static void FindObjectsIntersectingBB(const CBoundingBox& bb, int16* outCount, std::array<CEntity*, N>& outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
+        return FindObjectsIntersectingCube(bb.m_vecMin, bb.m_vecMax, outCount, (int16)N, outEntities.data(), buildings, vehicles, peds, objects, dummies);
+    }
     static void FindObjectsIntersectingAngledCollisionBox(const CBox& box, const CMatrix& transform, const CVector& point, float x1, float y1, float x2, float y2, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
     static void FindMissionEntitiesIntersectingCube(const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehicles, bool peds, bool objects);
     static CEntity* FindNearestObjectOfType(int32 modelId, const CVector& point, float radius, bool b2D, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);

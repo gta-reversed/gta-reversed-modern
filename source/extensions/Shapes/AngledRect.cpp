@@ -5,17 +5,17 @@
 
 namespace notsa {
 namespace shapes {
-bool AngledRect::IsPointWithin(const CVector2D& pos) const {
+bool AngledRect::IsPointWithin(const CVector2D& pos, float tolerance) const {
     // Check if `pos` lies on the segment defined by `A` and `dir * mag`
     const auto PointLiesOnSegment = [
         &,
-            posRelativeToA = pos - m_a
-    ](const CVector2D& dir, float mag) {
+        posRelativeToA = pos - m_a
+    ](const CVector2D& dir, float sideLen) {
         const auto dot = dir.Dot(posRelativeToA);
-        return dot >= 0.f && dot <= mag;
+        return dot + tolerance >= 0.f && dot <= sideLen + tolerance;
     };
 
-        return PointLiesOnSegment(m_dirBtoA, m_height) && PointLiesOnSegment(m_dirDtoA, m_width);
+    return PointLiesOnSegment(m_dirAB, m_height) && PointLiesOnSegment(m_dirAD, m_width);
 }
 
 void AngledRect::DrawWireFrame(CRGBA color, float z, const CMatrix& transform) const {
@@ -25,7 +25,7 @@ void AngledRect::DrawWireFrame(CRGBA color, float z, const CMatrix& transform) c
     CVector corners[4];
     rng::transform(GetCorners(), corners, [&](auto& c) {
         return transform * CVector{ c.x, c.y, z };
-        });
+    });
 
     // Draw lines going from one corner to another
     for (auto i = 0u; i < 4; i++) {

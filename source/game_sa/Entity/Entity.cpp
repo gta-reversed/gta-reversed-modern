@@ -970,7 +970,7 @@ bool CEntity::HasPreRenderEffects()
 
         if (!mi->m_n2dfxCount)
             return false;
-
+         
         for (int32 i = 0; i < mi->m_n2dfxCount; ++i) {
             if (mi->Get2dEffect(i)->m_type == e2dEffectType::EFFECT_LIGHT)
                 return true;
