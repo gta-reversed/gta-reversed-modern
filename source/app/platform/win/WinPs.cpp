@@ -1,11 +1,11 @@
 #include "StdInc.h"
 
-#include "Platform.h"
+#include <platform/win/platform.h>
+#include <platform/platform.h>
 #include <ddraw.h>
 #include <dsound.h>
 #include "VideoMode.h"
 #include "VideoModeSelectDialog.h"
-#include "platform.h"
 #include "LoadingScreen.h"
 #include "C_PcSave.h"
 
@@ -399,7 +399,7 @@ RwUInt32 GetBestRefreshRate(RwUInt32 width, RwUInt32 height, RwUInt32 depth) {
 #else
     const auto d3d = Direct3DCreate8(D3D_SDK_VERSION);
 #endif
-    const notsa::AutoCallOnDestruct released3d{ [d3d] { d3d->Release(); } };
+    const notsa::ScopeGuard released3d{ [d3d] { d3d->Release(); } };
 
     assert(d3d != NULL);
 
