@@ -1,6 +1,8 @@
 #include "StdInc.h"
-#include "app_game.h"
 
+#include <tracy/Tracy.hpp>
+
+#include "app_game.h"
 #include "LoadingScreen.h"
 #include "PlantMgr.h"
 #include "Shadows.h"
@@ -366,6 +368,8 @@ void Idle(void* param) {
 
 // 0x53E770
 void FrontendIdle() {
+    ZoneScoped;
+
     CDraw::CalculateAspectRatio();
     CTimer::Update();
     CSprite2d::SetRecipNearClip();
