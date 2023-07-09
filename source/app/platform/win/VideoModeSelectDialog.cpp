@@ -49,8 +49,10 @@ void SetSelectedVM(HWND hDlg, RwInt32 vm) {
 
 // 0x745920 - Fill in the available VMs to the dialog box vm select item
 void FillAvailableVMs(HWND hVMSel) {
-    for (auto i = RwEngineGetNumVideoModes(); i-- > 0;) {
+    const auto numVM = RwEngineGetNumVideoModes();
+    for (auto i = 0; i < numVM; i++) {
         const auto vmi = RwEngineGetVideoModeInfo(i);
+
         if ((vmi.flags & rwVIDEOMODEEXCLUSIVE) == 0 || vmi.width < 640 || vmi.height < 480) {
             continue;
         }
@@ -100,19 +102,22 @@ INT_PTR InitDialog(HWND hDlg) {
     FillAvailableVMs(hVMSel);
 
     // Figure out currently selected videomode
-    const auto numVM = RwEngineGetNumVideoModes();
-    if (GcurSelVM == -1 && FrontEndMenuManager.m_nDisplayVideoMode < numVM && GetVideoModeList()[numVM]) {
-        for (auto i = numVM; i-- > 0;) {
+    const auto numVM    = RwEngineGetNumVideoModes();
+    const auto lastUsedVM = FrontEndMenuManager.m_nDisplayVideoMode;
+    if (GcurSelVM == -1 && lastUsedVM < numVM && GetVideoModeList()[lastUsedVM]) {
+        for (auto i = 0; i < numVM; i++) {
             if (GetCBItemData(hVMSel, i) == FrontEndMenuManager.m_nDisplayVideoMode) {
                 SetSelectedVM(hDlg, i);
-                break;
+                return NULL;
             }
         }
+
+        // Failed
         SetSelectedVM(hDlg, -1);
     } else {
         SetSelectedVM(hDlg, RwEngineGetCurrentVideoMode());
     }
-
+    
     return NULL;
 }
 
