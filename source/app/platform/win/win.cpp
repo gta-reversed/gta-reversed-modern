@@ -9,8 +9,8 @@
 #include "VideoPlayer.h"
 #include "Gamma.h"
 
-// #include "InputEvents.h"
 #include "platform.h"
+#include <tracy/Tracy.hpp>
 
 #include "PostEffects.h"
 #include "Clouds.h"
@@ -493,6 +493,8 @@ LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 // Code from winmain, 0x748DCF
 bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
+    FrameMarkNamed("Main");
+
     if (RsGlobal.quit || FrontEndMenuManager.m_bStartGameLoading) {
         return false;
     }

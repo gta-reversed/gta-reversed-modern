@@ -8,9 +8,14 @@ project "gta_reversed"
     pchsource "StdInc.cpp"
  
     filter {"options:allow-script-cmd-hooks"}
-        defines { "ENABLE_SCRIPT_COMMAND_HOOKS" }   
+        defines { "ENABLE_SCRIPT_COMMAND_HOOKS" }
 
     filter {} -- Clear filter
+
+    defines { 
+        "ENABLE_SCRIPT_COMMAND_HOOKS",
+        "TRACY_ENABLE" 
+    }
 
     vpaths {
         ["Headers/*"] = {"**.h*",},
@@ -33,7 +38,8 @@ project "gta_reversed"
         "../libs/imgui", 
         "../libs/imgui/backends", 
         "../libs/imgui/misc/cpp",
-        "../libs/dxsdk"
+        "../libs/dxsdk",
+        "../libs/tracy/public",
     }
     
     defines { 
@@ -48,7 +54,8 @@ project "gta_reversed"
         "vorbis", 
         "vorbisenc", 
         "vorbisfile", 
-        "imgui" 
+        "imgui",
+        "tracy"
     }
 
     libdirs { 
@@ -58,5 +65,5 @@ project "gta_reversed"
         "../%{cfg.targetdir}/vorbisenc.lib",  
         "../%{cfg.targetdir}/imgui.lib", 
         "../libs/dxsdk/d3d9.lib", 
-        "../libs/dxsdk/dinput.lib"
+        "../libs/dxsdk/dinput.lib",
     }

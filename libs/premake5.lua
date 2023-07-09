@@ -122,3 +122,27 @@ project "imgui"
         "imgui/backends", 
         "imgui/misc/cpp" 
     }
+
+project "tracy"
+    language "C++"
+    kind "StaticLib"
+    targetname "tracy"
+    warnings "Off"
+
+    vpaths {
+        ["Headers/*"] = {"tracy/**.h*",},
+        ["Sources/*"] = {"tracy/**.cpp",},
+        ["*"] = {"premake5.lua", "CMakeLists.txt"}
+    }
+
+    includedirs {
+        "tracy/public/"
+    }
+
+    files {
+        "tracy/public/TracyClient.cpp",
+    }
+
+    defines {
+        "TRACY_ENABLE" -- Remove this to disable Tracy
+    }
