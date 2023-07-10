@@ -404,5 +404,5 @@ void InjectHooksWndProcStuff() {
 
     RH_ScopedGlobalInstall(GTATranslateShiftKey, 0x747CD0);
     RH_ScopedGlobalInstall(GTATranslateKey, 0x747820);
-    RH_ScopedGlobalInstall(NOTSA_WndProc, 0x747EB0, {.locked = true}); // Locked because of ImGui
+    RH_ScopedGlobalInstall(__MainWndProc, 0x747EB0, {.locked = true}); // Locked because of ImGui
 }
