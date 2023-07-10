@@ -7,3 +7,4 @@
 [submodule "libs/imgui"]
 	path = libs/imgui
 	url = ../../ocornut/imgui.git
+	branch = docking
