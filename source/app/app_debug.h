@@ -7,7 +7,6 @@
 
 #define PUSH_RENDERGROUP(str) 0
 #define POP_RENDERGROUP() 0
-#include "common.h"
 
 namespace notsa {
 namespace detail {

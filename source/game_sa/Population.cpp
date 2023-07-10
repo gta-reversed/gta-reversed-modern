@@ -23,7 +23,7 @@
 #include <Events/EventAcquaintancePed.h>
 #include <Events/EventSexyPed.h>
 
-//! Define this to have extra DEV_LOG's of CPopulation
+//! Define this to have extra NOTSA_LOG_DEBUG's of CPopulation
 #define EXTRA_DEBUG_LOGS
 
 #ifdef EXTRA_DEBUG_LOGS

@@ -5,9 +5,9 @@
 //#define COL_EXTRA_DEBUG
 
 #ifdef COL_DEBUG
-#define DEV_LOG_COL(...) NOTSA_LOG_DEBUG(__VA_ARGS__)
+#define NOTSA_LOG_DEBUG_COL(...) NOTSA_LOG_DEBUG(__VA_ARGS__)
 #else
-#define DEV_LOG_COL(...)
+#define NOTSA_LOG_DEBUG_COL(...)
 #endif
 
 void CColModel::InjectHooks() {
@@ -121,7 +121,7 @@ void CColModel::AllocateData(int32 numSpheres, int32 numBoxes, int32 numLines, i
 }
 
 void CColModel::AllocateData(int32 size) {
-    DEV_LOG_COL("AllocateData[Size]: {} [ColSlot: {}; Size: {}]", LOG_PTR(this), m_nColSlot, size);
+    NOTSA_LOG_DEBUG_COL("AllocateData[Size]: {} [ColSlot: {}; Size: {}]", LOG_PTR(this), m_nColSlot, size);
 
     m_bIsSingleColDataAlloc = true;
     m_pColData = static_cast<CCollisionData*>(CMemoryMgr::Malloc(size));
@@ -133,7 +133,7 @@ void CColModel::RemoveCollisionVolumes() {
         return;
     }
 
-    DEV_LOG_COL("Removing: {} [ColSlot: {}]", LOG_PTR(this), m_nColSlot);
+    NOTSA_LOG_DEBUG_COL("Removing: {} [ColSlot: {}]", LOG_PTR(this), m_nColSlot);
 
     if (m_bIsSingleColDataAlloc) {
         CCollision::RemoveTrianglePlanes(m_pColData);

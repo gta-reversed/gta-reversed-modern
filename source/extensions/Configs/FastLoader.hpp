@@ -50,17 +50,17 @@ inline struct FastLoaderConfig {
                     return StartGame(i); // Load this slot
                 }
             }
-            DEV_LOG("Couldn't find any savegame to load!");
+            NOTSA_LOG_DEBUG("Couldn't find any savegame to load!");
             return false;
         }
 
         // Load game from slot
         assert(slot >= 0);
         if (!CheckIfSaveFileExists(slot)) {
-            DEV_LOG("Save slot {} is empty!", slot + 1);
+            NOTSA_LOG_DEBUG("Save slot {} is empty!", slot + 1);
             return false;
         }
-        DEV_LOG("Loading game from slot ({})", slot + 1);
+        NOTSA_LOG_DEBUG("Loading game from slot ({})", slot + 1);
 
         if (!NoLoadingTune) {
             for (size_t i = 0; i < SoundDelay; i++) {
