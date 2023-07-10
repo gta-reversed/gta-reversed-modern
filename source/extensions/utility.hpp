@@ -266,4 +266,47 @@ static constexpr void IterateFunction(auto&& functor) {
         IterateFunction<Start + ChunkSize, Stop, ChunkSize>(functor);
     }
 }
+
+//! Simple (not thread safe) singleton class. Instance created on first call to `GetSingleton()`.
+template<typename T>
+class Singleton {
+    static inline std::unique_ptr<T> s_instance{};
+public:
+    Singleton() = default;
+    Singleton(const Singleton&) = delete;
+    Singleton& operator=(const Singleton&) = delete;
+
+public:
+    //! Get current singleton instance (Create it if none)
+    static T& GetSingleton() {
+        if (!s_instance) {
+            CreateSingleton();
+        }
+        return *s_instance;
+    }
+
+    //! Destroy current instance and create new
+    static void ResetSingleton() {
+        DestroySingleton();
+        CreateSingleton();
+    }
+
+private:
+    static void CreateSingleton() {
+        assert(!s_instance);
+        s_instance = std::make_unique<T>();
+    }
+
+    static void DestroySingleton() {
+        s_instance.reset();
+    }
+};
+
+template<typename T, typename... Ts>
+concept is_any_of_type_v = (std::same_as<T, Ts> || ...);
+
+//! Check if the type is an integer type excluding bool and character types.
+template<typename T>
+inline constexpr bool is_standard_integer = std::is_integral_v<T> && !is_any_of_type_v<T, bool, char, wchar_t, char8_t, char16_t, char32_t>;
+
 };

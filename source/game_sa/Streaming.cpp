@@ -3374,7 +3374,7 @@ void CStreaming::StreamPedsForInterior(int32 interiorType) {
 // * -2 - Unload model from slot (If there's any)
 // * Positive values - Load given model into slot
 // 0x40BDA0
-void CStreaming::StreamPedsIntoRandomSlots(int32 modelArray[TOTAL_LOADED_PEDS]) {
+void CStreaming::StreamPedsIntoRandomSlots(const int32(&modelArray)[TOTAL_LOADED_PEDS]) {
     for (int32 i = 0; i < TOTAL_LOADED_PEDS; i++) {
         if (modelArray[i] >= 0) {
             // Load model into slot

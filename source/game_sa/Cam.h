@@ -102,7 +102,7 @@ public:
     CVehicle* m_pCarWeAreFocussingOnI;
     float     m_fCamBumpedHorz;
     float     m_fCamBumpedVert;
-    uint32    m_nCamBumpedTime;
+    uint32    m_nCamBumpedTime; // TODO: Probably float
     CVector   m_vecSourceSpeedOverOneFrame;
     CVector   m_vecTargetSpeedOverOneFrame;
     CVector   m_vecUpOverOneFrame;

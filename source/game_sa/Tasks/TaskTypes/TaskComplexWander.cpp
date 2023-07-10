@@ -176,7 +176,7 @@ CTask* CTaskComplexWander::ControlSubTask_Reversed(CPed* ped) {
 // 0x669DA0
 void CTaskComplexWander::UpdateDir_Reversed(CPed* ped) {
     uint8 newDir = m_nDir;
-    if (m_NextNode.IsValid()) {
+    if (m_NextNode.IsAreaValid()) {
         const CPathNode* pathNodes = ThePaths.m_pPathNodes[m_NextNode.m_wAreaId];
         if (pathNodes) {
             const CPathNode* pathNode = &pathNodes[m_NextNode.m_wNodeId];

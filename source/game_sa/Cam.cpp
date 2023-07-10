@@ -8,8 +8,8 @@ void CCam::InjectHooks() {
     RH_ScopedClass(CCam);
     RH_ScopedCategory("Camera");
 
-    RH_ScopedInstall(Constructor, 0x517730, { .reversed = false });
-    RH_ScopedInstall(Init, 0x50E490, { .reversed = false });
+    RH_ScopedInstall(Constructor, 0x517730);
+    RH_ScopedInstall(Init, 0x50E490);
     RH_ScopedInstall(CacheLastSettingsDWCineyCam, 0x50D7A0, { .reversed = false });
     RH_ScopedInstall(DoCamBump, 0x50CB30);
     RH_ScopedInstall(Finalise_DW_CineyCams, 0x50DD70, { .reversed = false });
@@ -65,7 +65,70 @@ CCam* CCam::Constructor() {
 
 // 0x50E490
 void CCam::Init() {
-    plugin::CallMethod<0x50E490, CCam*>(this);
+    m_vecFront = CVector(0, 0, -1);
+    m_vecUp = CVector(0, 0, 1);
+    m_nMode = eCamMode::MODE_FOLLOWPED;
+    m_bRotating = false;
+    m_nDoCollisionChecksOnFrameNum = 1;
+    m_nDoCollisionCheckEveryNumOfFrames = 9;
+    m_nFrameNumWereAt = 0;
+    m_bCollisionChecksOn = true;
+    m_fRealGroundDist = 0.0f;
+    m_fBetaSpeed = 0.0f;
+    m_fAlphaSpeed = 0.0f;
+    m_fCameraHeightMultiplier = 0.75;
+    m_fMaxRoleAngle = DegreesToRadians(20.0f);
+    m_fDistance = 30.0f;
+    m_fDistanceSpeed = 0.0f;
+    m_pLastCarEntered = nullptr;
+    m_pLastPedLookedAt = nullptr;
+    m_bResetStatics = true;
+    m_fHorizontalAngle = 0.0f;
+    m_fTilt = 0.0f;
+    m_fTiltSpeed = 0.0f;
+    m_bFixingBeta = false;
+    m_fCaMinDistance = 0.0f;
+    m_fCaMaxDistance = 0.0f;
+    m_bLookingBehind = false;
+    m_bLookingLeft = false;
+    m_bLookingRight = false;
+    m_fPlayerInFrontSyphonAngleOffSet = DegreesToRadians(20.0f);
+    m_fSyphonModeTargetZOffSet = 0.5f;
+    m_fRadiusForDead = 1.5f;
+    m_nDirectionWasLooking = 3; // TODO: enum
+    m_bLookBehindCamWasInFront = 0;
+    m_fRoll = 0.0f;
+    m_fRollSpeed = 0.0f;
+    m_fCloseInPedHeightOffset = 0.0f;
+    m_fCloseInPedHeightOffsetSpeed = 0.0f;
+    m_fCloseInCarHeightOffset = 0.0f;
+    m_fCloseInCarHeightOffsetSpeed = 0.0f;
+    m_fPedBetweenCameraHeightOffset = 0.0f;
+    m_fTargetBeta = 0.0f;
+    m_fBufferedTargetBeta = 0.0f;
+    m_fBufferedTargetOrientation = 0.0f;
+    m_fBufferedTargetOrientationSpeed = 0.0f;
+    m_fDimensionOfHighestNearCar = 0.0;
+    m_fBeta_Targeting = 0.0f;
+    m_fX_Targetting = 0.0f;
+    m_fY_Targetting = 0.0f;
+    m_pCarWeAreFocussingOn = nullptr;
+    m_pCarWeAreFocussingOnI = nullptr;
+    m_fCamBumpedHorz = 1.0f;
+    m_fCamBumpedVert = 0.0f;
+    m_nCamBumpedTime = 0;
+    for (int i = 0; i < 4; ++i) {
+        m_anTargetHistoryTime[i] = 0;
+        m_avecTargetHistoryPos[i] = CVector{};
+    }
+    m_nCurrentHistoryPoints = 0;
+    gPlayerPedVisible = true;
+    gbCineyCamMessageDisplayed = 2; // TODO: enum
+    gCameraDirection = 3; // TODO: enum
+    gCameraMode = (eCamMode)-1;
+    gLastTime2PlayerCameraWasOK = 0;
+    gLastTime2PlayerCameraCollided = 0;
+    TheCamera.m_bCinemaCamera = false;
 }
 
 // 0x50D7A0

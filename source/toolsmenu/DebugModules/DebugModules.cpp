@@ -23,6 +23,7 @@
 #include "./Spawner/SpawnerDebugModule.hpp"
 #include "./ImGuiDebugModule.hpp"
 #include "./ScriptDebugModule.hpp"
+#include "./AudioZonesDebugModule.h"
 
 DebugModules::DebugModules(ImGuiContext* ctx) :
     m_ImCtx(ctx)
@@ -86,6 +87,7 @@ void DebugModules::CreateModules() {
     Add<TimeCycleDebugModule>(); // Visualization + Extra
     Add<CullZonesDebugModule>(); // Visualization + Extra
     Add<COcclusionDebugModule>(); // Visualization + Extra
+    Add<AudioZonesDebugModule>(); // Visualization + Extra
     Add<notsa::debugmodules::ImGui>(); // Stats + Extra
 }
 
