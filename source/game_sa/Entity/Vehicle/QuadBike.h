@@ -41,6 +41,8 @@ public:
     float              field_9A8[4]; // unused
     uint8              m_nQuadFlags;
 
+    static constexpr auto Type = VEHICLE_TYPE_QUAD;
+
 public:
     CQuadBike(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CQuadBike() override = default; // 0x6CDC30

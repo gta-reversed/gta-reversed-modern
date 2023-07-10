@@ -2359,7 +2359,7 @@ bool CStreaming::RemoveLeastUsedModel(int32 streamingFlags) {
     }
 
     // todo: make more readable
-    if (TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM) > 50.0f
+    if (TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BB_BOTTOM) > 50.0f
             && (
                 ms_numPedsLoaded > 4
                 && RemoveLoadedZoneModel()
@@ -3374,7 +3374,7 @@ void CStreaming::StreamPedsForInterior(int32 interiorType) {
 // * -2 - Unload model from slot (If there's any)
 // * Positive values - Load given model into slot
 // 0x40BDA0
-void CStreaming::StreamPedsIntoRandomSlots(int32 modelArray[TOTAL_LOADED_PEDS]) {
+void CStreaming::StreamPedsIntoRandomSlots(const int32(&modelArray)[TOTAL_LOADED_PEDS]) {
     for (int32 i = 0; i < TOTAL_LOADED_PEDS; i++) {
         if (modelArray[i] >= 0) {
             // Load model into slot
@@ -3740,7 +3740,7 @@ void CStreaming::Update() {
         return;
 
     const auto& camPos = TheCamera.GetPosition();
-    const float fCamDistanceToGroundZ = camPos.z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
+    const float fCamDistanceToGroundZ = camPos.z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BB_BOTTOM);
     if (!ms_disableStreaming && !CRenderer::m_loadingPriority) {
         if (fCamDistanceToGroundZ >= 50.0f) {
             if (CGame::CanSeeOutSideFromCurrArea()) {

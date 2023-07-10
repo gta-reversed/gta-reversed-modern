@@ -17,6 +17,9 @@ public:
         m_bDamageCalculated  = false;
         m_bCheckIfAffectsPed = false;
     }
+
+    //! Mark the damage as calculated
+    void SetDamageAsCalculated() { m_bDamageCalculated = true; }
 };
 VALIDATE_SIZE(CPedDamageResponse, 0xC);
 

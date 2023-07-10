@@ -231,6 +231,7 @@
 #include "TaskComplexWanderMedic.h"
 #include "TaskComplexMoveBackAndJump.h"
 #include "TaskSimpleCarDriveTimed.h"
+#include "TaskComplexKillPedOnFootStealth.h"
 #include "TaskComplexDriveWander.h"
 #include "TaskSimpleStealthKill.h"
 #include "TaskSimpleCarSetPedOut.h"
@@ -411,6 +412,7 @@ void InjectHooksMain() {
     HookInstall(0x541DD0, CPad::UpdatePads); // [ImGui] Changes logic of the function and shouldn't be toggled on/off
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
 
+    CCutsceneMgr::InjectHooks();
     CFileMgr::InjectHooks();
     CPedGroupPlacer::InjectHooks();
     CLoadedCarGroup::InjectHooks();
@@ -805,11 +807,11 @@ void InjectHooksMain() {
         CTaskComplexInvestigateDisturbance::InjectHooks();
         // CTaskComplexKillAllThreats::InjectHooks();
         // CTaskComplexKillCriminal::InjectHooks();
-        
+
         CTaskComplexKillPedOnFootArmed::InjectHooks();
         CTaskComplexKillPedGroupOnFoot::InjectHooks();
         CTaskComplexKillPedOnFootMelee::InjectHooks();
-        // CTaskComplexKillPedOnFootStealth::InjectHooks();
+        CTaskComplexKillPedOnFootStealth::InjectHooks();
 
         CTaskComplexLeaveCarAndDie::InjectHooks();
         CTaskComplexLeaveBoat::InjectHooks();

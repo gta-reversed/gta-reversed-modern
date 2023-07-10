@@ -99,7 +99,7 @@ void CCover::FindCoverPointsForThisBuilding(CBuilding* building) {
 
     for (int32 iFxInd = 0; iFxInd < mi->m_n2dfxCount; ++iFxInd) {
         auto* effect = mi->Get2dEffect(iFxInd);
-        if (effect->m_nType != e2dEffectType::EFFECT_COVER_POINT)
+        if (effect->m_type != e2dEffectType::EFFECT_COVER_POINT)
             continue;
 
         auto vecDir = CVector(effect->coverPoint.m_vecDirection.x, effect->coverPoint.m_vecDirection.y, 0.0F);
@@ -107,7 +107,7 @@ void CCover::FindCoverPointsForThisBuilding(CBuilding* building) {
 
         const auto fTwoPiToChar = 256.0F / TWO_PI;
         const auto ucAngle = static_cast<uint8>(atan2(vedTransformed.x, vedTransformed.y) * fTwoPiToChar);
-        auto vecPoint = building->GetMatrix() * effect->m_vecPosn;
+        auto vecPoint = building->GetMatrix() * effect->m_pos;
         CCover::AddCoverPoint(3, building, &vecPoint, effect->coverPoint.m_nType, ucAngle);
     }
 }

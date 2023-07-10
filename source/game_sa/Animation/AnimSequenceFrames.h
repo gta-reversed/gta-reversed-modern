@@ -77,6 +77,12 @@ struct KeyFrameTransCompressed : KeyFrameCompressed {
         vec->z = float(trans[2]) * scale;
     }
 
+    CVector GetTranslation() {
+        CVector out;
+        GetTranslation(&out);
+        return out;
+    }
+
     void SetTranslation(const CVector& vec) {
         trans[0] = int16(vec.x * 1024.0f);
         trans[1] = int16(vec.y * 1024.0f);

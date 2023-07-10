@@ -38,8 +38,9 @@ private:
     void DebugCode();
 
 private:
-    friend void ::RenderEffects(); // For `Render3D()`
-    friend void ::Render2dStuff(); // For `DrawLoop()`
+    friend void ::RenderEffects();  // For `Render3D()`
+    friend void ::FrontendIdle();   // For `DrawLoop()` VVV
+    friend void ::Idle(void*);      // For `DrawLoop()` Yes, called in 2 places, but they are never called in the same frame (As `Idle` is called when not in the menu only)
     friend void ::CPad::UpdatePads();
     friend void ::Idle(void*);
 

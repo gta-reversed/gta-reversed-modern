@@ -83,7 +83,7 @@ CTask* CTaskComplexUseAttractor::CreateFirstSubTask(CPed* ped) {
             }
 
             if (const auto entity = m_attractor->m_pEntity) {
-                if (!entity->IsObject() || entity->AsObject()->objectFlags.b0x1000000) {
+                if (!entity->IsObject() || entity->AsObject()->objectFlags.bEnableDisabledAttractors) {
                     CTheScripts::ScriptsForBrains.StartAttractorScriptBrainWithThisName(m_attractor->m_szScriptName, ped, ped->bUseAttractorInstantly);
                     CScriptedBrainTaskStore::Clear(ped);
                     return new CTaskComplexUseScriptedBrain{ m_attractor->m_szScriptName };

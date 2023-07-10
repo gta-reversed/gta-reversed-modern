@@ -226,8 +226,9 @@ public:
     bool CheckCollision();
     bool CheckCollision_SimpleCar();
 
-    CVector& GetMoveSpeed() { return m_vecMoveSpeed; }
-    void ResetMoveSpeed() { m_vecMoveSpeed = CVector(); }
+    CVector& GetMoveSpeed()            { return m_vecMoveSpeed; }
+    void     SetVelocity(CVector velocity) { m_vecMoveSpeed = velocity; } // 0x441130
+    void     ResetMoveSpeed()              { SetVelocity(CVector{}); }
 
     CVector& GetTurnSpeed() { return m_vecTurnSpeed; }
     void ResetTurnSpeed() { m_vecTurnSpeed = CVector(); }
