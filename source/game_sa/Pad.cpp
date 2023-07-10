@@ -7,7 +7,7 @@
 #include "StdInc.h"
 
 #include "Pad.h"
-
+#include "platform/win/Input.h"
 #include "UIRenderer.h"
 #include "ControllerConfigManager.h"
 #include "app.h"
@@ -212,11 +212,16 @@ void CPad::Update(int32 pad) {
 
 // 0x541DD0
 void CPad::UpdatePads() {
-    GetPad(0)->UpdateMouse();
-    ProcessPad(false);
+    const auto& ImIONavActive = notsa::ui::UIRenderer::GetSingleton().GetImIO()->NavActive;
 
+    if (!ImIONavActive) {
+        GetPad(0)->UpdateMouse();
+    }
+
+    ProcessPad(false);
     ControlsManager.ClearSimButtonPressCheckers();
-    if (!notsa::ui::UIRenderer::GetSingleton().Visible()) { // NOTSA: Don't handle updates if the menu is open, so we don't affect gameplay inputting text
+
+    if (!ImIONavActive) {
         ControlsManager.AffectPadFromKeyBoard();
         ControlsManager.AffectPadFromMouse();
         GetPad(0)->Update(0);
@@ -225,8 +230,6 @@ void CPad::UpdatePads() {
 
     OldKeyState = NewKeyState;
     NewKeyState = TempKeyState;
-
-    notsa::ui::UIRenderer::GetSingleton().UpdateInput();
 }
 
 // 0x53F3C0
@@ -1190,10 +1193,10 @@ int GetCurrentKeyPressed(RsKeyCodes& keys) {
     return plugin::CallAndReturn<int, 0x541490, RsKeyCodes&>(keys);
 }
 
-IDirectInputDevice8* DIReleaseMouse() {
+IDirectInputDevice8* DIReleaseMouse() { // todo: wininput
     return plugin::CallAndReturn<IDirectInputDevice8*, 0x746F70>();
 }
 
 void InitialiseMouse(bool exclusive) {
-    plugin::Call<0x7469A0, bool>(exclusive);
+    WinInput::InitialiseMouse(exclusive);
 }

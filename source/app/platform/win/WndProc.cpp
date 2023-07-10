@@ -4,6 +4,8 @@
 
 #include "StdInc.h"
 
+#include "imgui_impl_win32.h"
+
 #include <windows.h>
 #include <rwplcore.h>
 #include <Dbt.h>
@@ -17,6 +19,8 @@
 #include "Input.h"
 #include "Gamma.h"
 
+// Dear ImGui said I have to copy this here
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 // 0x747820
 BOOL GTATranslateKey(RsKeyCodes* ck, LPARAM lParam, UINT vk) {
@@ -127,8 +131,14 @@ BOOL GTATranslateShiftKey(RsKeyCodes*) { // The in keycode is ignored, so we won
     return true;
 }
 
+
 // 0x747EB0
-LRESULT CALLBACK NOTSA_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    const auto imio = ImGui::GetCurrentContext() ? &ImGui::GetIO() : nullptr;
+    if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam)) {
+        return true;
+    }
+
     switch (uMsg) {
     case WM_SETCURSOR: {
         ShowCursor(false);
@@ -138,7 +148,11 @@ LRESULT CALLBACK NOTSA_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN: 
     case WM_KEYUP:
-    case WM_SYSKEYUP: { //< 0x74823B - wParam is a `VK_` (virtual key), lParam are the flags (See https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-keyup)
+    case WM_SYSKEYUP: { //< 0x74823B - wParam is a `VK_` (virtual key), lParam are the flags (See https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-keyup)]
+        if (imio && imio->WantCaptureKeyboard) {
+            return 0;
+        }
+
         if (RsKeyCodes ck; GTATranslateKey(&ck, lParam, wParam)) {
             RsKeyboardEventHandler(
                 (uMsg == WM_KEYDOWN || uMsg == WM_SYSKEYDOWN)
@@ -151,6 +165,54 @@ LRESULT CALLBACK NOTSA_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
             RsKeyCodes ck;
             GTATranslateShiftKey(&ck); // Original code uses this variable for storage, so we can't pass in nullptr - TODO: Remove parameter
         }
+        return 0;
+    }
+    case WM_MOUSEMOVE: { //< 0x748323
+        if (imio && imio->WantCaptureMouse) {
+            return 0;
+        }
+        FrontEndMenuManager.m_nMousePosWinX = GET_X_LPARAM(lParam);
+        FrontEndMenuManager.m_nMousePosWinY = GET_Y_LPARAM(lParam);
+        break;
+    }
+    case WM_LBUTTONDOWN:
+    case WM_RBUTTONDOWN:
+    case WM_MBUTTONDOWN: {
+        if (imio && imio->WantCaptureMouse) {
+            return 0;
+        }
+        SetCapture(hWnd);
+        return 0;
+    }
+    case WM_LBUTTONUP:
+    case WM_RBUTTONUP:
+    case WM_MBUTTONUP: {
+        if (imio && imio->WantCaptureMouse) {
+            return 0;
+        }
+        ReleaseCapture();
+        return 0;
+    }
+    case WM_MOUSEWHEEL:
+        return 0;
+    case WM_SIZING: { // 0x74829E
+        if (RwInitialized) {
+            if (gGameState == GAME_STATE_IDLE) {
+                RsEventHandler(rsIDLE, (void*)TRUE);
+            }
+        }
+
+        const auto wndrect = reinterpret_cast<PRECT>(lParam);
+        VERIFY(SetWindowPos(
+            hWnd,
+            HWND_TOP,
+            0,                              0,
+            wndrect->right - wndrect->left, wndrect->bottom - wndrect->top,
+            SWP_NOSIZE | SWP_NOMOVE
+        ));
+
+        CPostEffects::SetupBackBufferVertex();
+
         return 0;
     }
     case WM_ACTIVATEAPP: { // 0x748087
@@ -202,7 +264,7 @@ LRESULT CALLBACK NOTSA_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
         
         return 0;
     }
-    case WA_CLICKACTIVE:
+    case WM_DESTROY:
     case WM_CLOSE: { // 0x747EF3
         VERIFY(ClipCursor(nullptr));
         VERIFY(SUCCEEDED(WinInput::Shutdown()));
@@ -332,46 +394,6 @@ LRESULT CALLBACK NOTSA_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
         CTimer::SetCodePause(false);
         break;
     }
-    case WM_MOUSEFIRST: { //< 0x748323
-        FrontEndMenuManager.m_nMousePosWinX = GET_X_LPARAM(lParam);
-        FrontEndMenuManager.m_nMousePosWinY = GET_Y_LPARAM(lParam);
-        return 0;
-    }
-    case WM_LBUTTONDOWN:
-    case WM_RBUTTONDOWN:
-    case WM_MBUTTONDOWN: {
-        SetCapture(hWnd);
-        return 0;
-    }
-    case WM_LBUTTONUP:
-    case WM_RBUTTONUP:
-    case WM_MBUTTONUP: {
-        ReleaseCapture();
-        return 0;
-    }
-    case WM_MOUSEWHEEL: {
-        return 0;
-    }
-    case WM_SIZING: { // 0x74829E
-        if (RwInitialized) {
-            if (gGameState == GAME_STATE_IDLE) {
-                RsEventHandler(rsIDLE, (void*)TRUE);
-            }
-        }
-
-        const auto wndrect = reinterpret_cast<PRECT>(lParam);
-        VERIFY(SetWindowPos(
-            hWnd,
-            HWND_TOP,
-            0,                              0,
-            wndrect->right - wndrect->left, wndrect->bottom - wndrect->top,
-            SWP_NOSIZE | SWP_NOMOVE
-        ));
-
-        CPostEffects::SetupBackBufferVertex();
-
-        return 0;
-    }
     }
     return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
@@ -382,5 +404,5 @@ void InjectHooksWndProcStuff() {
 
     RH_ScopedGlobalInstall(GTATranslateShiftKey, 0x747CD0);
     RH_ScopedGlobalInstall(GTATranslateKey, 0x747820);
-    RH_ScopedGlobalInstall(NOTSA_WndProc, 0x747EB0);
+    RH_ScopedGlobalInstall(NOTSA_WndProc, 0x747EB0, {.locked = true}); // Locked because of ImGui
 }
