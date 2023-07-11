@@ -2,5 +2,5 @@
 
 #include <windows.h>
 
-LRESULT CALLBACK NOTSA_WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 void InjectHooksWndProcStuff();

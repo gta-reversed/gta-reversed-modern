@@ -5,7 +5,6 @@
 #include "StdInc.h"
 
 #include "LoadingScreen.h"
-#include <extensions/Configs/FastLoader.hpp>
 #include "ControllerConfigManager.h"
 #include "Gamma.h"
 
@@ -14,6 +13,8 @@
 #include "Input.h"
 #include "Platform.h"
 #include "WndProc.h"
+
+#include "extensions/Configs/FastLoader.hpp"
 
 constexpr auto NO_FOREGROUND_PAUSE = true;
 
@@ -34,7 +35,7 @@ void MessageLoop() {
 bool InitApplication(HINSTANCE hInstance) {
     WNDCLASS windowClass      = { 0 };
     windowClass.style         = CS_BYTEALIGNWINDOW;
-    windowClass.lpfnWndProc   = NOTSA_WndProc;
+    windowClass.lpfnWndProc   = __MainWndProc;
     windowClass.hInstance     = hInstance;
     windowClass.hIcon         = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
     windowClass.hCursor       = LoadCursor(nullptr, IDC_ARROW);
