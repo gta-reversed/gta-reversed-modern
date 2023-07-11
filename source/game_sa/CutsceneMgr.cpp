@@ -5,9 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-
-#include <win.h> // TODO: Remove (Included because of isForeground)
-
+#include <platform/win/Platform.h>
 #include <extensions/ci_string.hpp>
 
 #include "Fx.h"
