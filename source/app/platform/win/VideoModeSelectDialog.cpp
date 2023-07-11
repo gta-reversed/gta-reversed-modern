@@ -53,7 +53,7 @@ void FillAvailableVMs(HWND hVMSel) {
     for (auto i = 0; i < numVM; i++) {
         const auto vmi = RwEngineGetVideoModeInfo(i);
 
-        if ((vmi.flags & rwVIDEOMODEEXCLUSIVE) == 0 || vmi.width < 640 || vmi.height < 480) {
+        if ((vmi.flags & rwVIDEOMODEEXCLUSIVE) == 0 || vmi.width < APP_MINIMAL_WIDTH || vmi.height < APP_MINIMAL_HEIGHT) {
             continue;
         }
 
