@@ -10,7 +10,7 @@ public:
     UIRenderer();
     ~UIRenderer();
 
-    bool Visible() { return m_ShowMenu; }
+    bool Visible() { return m_InputActive; }
 
     //! Request restart of render (done on before frame)
     void RequestReInit() { m_ReInitRequested = true; }
@@ -46,7 +46,7 @@ private:
 
 private:
     bool          m_Initialised{};
-    bool          m_ShowMenu{};
+    bool          m_InputActive{};
     bool          m_ReInitRequested{};
     ImGuiContext* m_ImCtx{};
     ImGuiIO*      m_ImIO{};
