@@ -440,7 +440,8 @@ RwUInt32 GetBestRefreshRate(RwUInt32 width, RwUInt32 height, RwUInt32 depth) {
     return refreshRate;
 }
 
-RwBool psSelectDevice() {
+// 0x746190
+bool psSelectDevice() {
     const auto wnd  = PSGLOBAL(window);
     const auto inst = PSGLOBAL(instance);
 
