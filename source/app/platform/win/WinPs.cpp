@@ -380,14 +380,53 @@ bool psAlwaysOnTop(bool alwaysOnTop) {
     );
 }
 
+// NOTSA
+auto GetNativeResolutionOfCurrentSubsystem() {
+#ifdef USE_D3D9
+    const auto d3d = Direct3DCreate9(D3D_SDK_VERSION);
+#else
+    const auto d3d = Direct3DCreate8(D3D_SDK_VERSION);
+#endif
+    const notsa::ScopeGuard released3d{[d3d] { d3d->Release(); }};
+    assert(d3d != NULL);
+
+    D3DDISPLAYMODE nativeRes;
+    d3d->GetAdapterDisplayMode(RwEngineGetCurrentSubSystem(), &nativeRes);
+
+    DEV_LOG("Got native resolution from RW subsystem ({}): {} x {}", RwEngineGetCurrentSubSystem(), nativeRes.Width, nativeRes.Height);
+
+    return std::make_pair(nativeRes.Width, nativeRes.Height);
+}
+
 BOOL CheckDefaultVideoModeSupported() {
-    const auto numVM = RwEngineGetNumVideoModes();
-    for (; GcurSelVM < numVM; GcurSelVM++) { // TODO/NOTE: Why not set GcurSelVM = 0?
-        const auto vm = RwEngineGetVideoModeInfo(GcurSelVM);
-        if (vm.width == 800 && vm.height == 600 && vm.depth == 32 && (vm.flags & rwVIDEOMODEEXCLUSIVE)) {
+    // IMPROVEMENT/FIX_BUGS: The game will now default to native adapter
+    // resolution instead of 800x600.
+
+    const auto SearchVideoMode = [](int32 width, int32 height) {
+        for (auto i = 0; i < RwEngineGetNumVideoModes(); i++) {
+            const auto vm = RwEngineGetVideoModeInfo(i);
+            if (vm.width == width && vm.height == height && vm.depth == 32 && (vm.flags & rwVIDEOMODEEXCLUSIVE)) {
+                return i;
+            }
+        }
+
+        return -1;
+    };
+
+    if (notsa::IsFixBugs()) {
+        const auto&& [w, h] = GetNativeResolutionOfCurrentSubsystem();
+        if (const auto vm = SearchVideoMode(w, h); vm != -1) {
+            GcurSelVM = vm;
             return TRUE;
         }
+        /* fallthrough if native res is not supported! */
     }
+
+    if (const auto vm = SearchVideoMode(800, 600); vm != -1) {
+        GcurSelVM = vm;
+        return TRUE;
+    }
+
     MessageBox(NULL, "Cannot find 800x600x32 video mode", "GTA: San Andreas", IDOK);
     return FALSE;
 }
