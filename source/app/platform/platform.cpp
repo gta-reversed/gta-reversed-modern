@@ -331,10 +331,10 @@ RsEventStatus RsEventHandler(RsEvent event, void* param) {
     return rsEVENTNOTPROCESSED;
 }
 
-float IsWideScreenRatio(float ratio) {
+bool IsWideScreenRatio(float ratio) {
     return ratio == 0.6f || ratio == 10.0f / 16.0f || ratio == 9.0f / 16.0f;
 }
 
-float IsFullScreenRatio(float ratio) {
+bool IsFullScreenRatio(float ratio) {
     return ratio == 3.0f / 4.0f || ratio == 0.8f;
 }

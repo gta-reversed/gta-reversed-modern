@@ -1,7 +1,7 @@
 #pragma once
 
-float IsWideScreenRatio(float ratio);
-float IsFullScreenRatio(float ratio);
+bool IsWideScreenRatio(float ratio);
+bool IsFullScreenRatio(float ratio);
 #define IS_WIDESCREEN_RATIO(ratio) IsWideScreenRatio(ratio)
 #define IS_FULLSCREEN_RATIO(ratio) IsFullScreenRatio(ratio)
 
