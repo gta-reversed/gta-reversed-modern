@@ -51,20 +51,23 @@ HWND InitInstance(HINSTANCE hInstance) {
     // after 'window-stretch-freeze' bug fixed.
     RsGlobal.maximumWidth = g_WindowedModeConfig.WindowWidth;
     RsGlobal.maximumHeight = g_WindowedModeConfig.WindowHeight;
-    DEV_LOG("MW: {} - MH: {}", RsGlobal.maximumWidth, RsGlobal.maximumHeight);
+
+    RECT winRt;
+    GetClientRect(GetDesktopWindow(), &winRt);
 
     RECT rect = { 0, 0, RsGlobal.maximumWidth, RsGlobal.maximumHeight };
     AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
+    const auto width = rect.right - rect.left, height = rect.bottom - rect.top;
 
     return CreateWindowEx(
         0,
         APP_CLASS,
         RsGlobal.appName,
         WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT,
-        CW_USEDEFAULT,
-        rect.right - rect.left,
-        rect.bottom - rect.top,
+        (g_WindowedModeConfig.Centered) ? (winRt.right - winRt.left - width) / 2  : CW_USEDEFAULT,
+        (g_WindowedModeConfig.Centered) ? (winRt.bottom - winRt.top - height) / 2 : CW_USEDEFAULT,
+        width,
+        height,
         nullptr,
         nullptr,
         hInstance,
