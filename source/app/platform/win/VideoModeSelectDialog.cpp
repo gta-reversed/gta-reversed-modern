@@ -60,19 +60,17 @@ void FillAvailableVMs(HWND hVMSel) {
         const auto aspectr = (float)vmi.height / (float)vmi.width;
         // printf("%f\n", aspectr) // annoying printf that spams the console was here
 
-        const auto AddThisVMEntry = [&](auto type) {
-            char vmName[1024];
-            *std::format_to(vmName, "{} x {} x {} ({})", vmi.width, vmi.height, vmi.depth, type) = 0;
-            const auto idx = SendMessage(hVMSel, CB_ADDSTRING, NULL, (LPARAM)vmName); // Add entry, and get it's index
-            SendMessage(hVMSel, CB_SETITEMDATA, idx, i); // Set index of that entry to correspond to `i`
-        };
+        const auto gcd = std::gcd(vmi.width, vmi.height);
+        const auto ratioW = vmi.width / gcd, ratioH = vmi.height / gcd;
 
-        if (IsFullScreenRatio(aspectr)) {
-            AddThisVMEntry("FULLSCRCEEN");
-        } else if (IsWideScreenRatio(aspectr)) {
-            AddThisVMEntry("WIDESCREEN");
+        // NOTSA: Provide aspect ratio info (W:H) instead of 'FULLSCREEN' and 'WIDESCREEN'.
+        if (IsFullScreenRatio(aspectr) || IsWideScreenRatio(aspectr)) {
+            static char vmName[1024];
+            *std::format_to(vmName, "{} x {} x {} ({}:{})", vmi.width, vmi.height, vmi.depth, ratioW, ratioH) = 0;
+            const auto idx = SendMessage(hVMSel, CB_ADDSTRING, NULL, (LPARAM)vmName); // Add entry, and get it's index
+            SendMessage(hVMSel, CB_SETITEMDATA, idx, i);                              // Set index of that entry to correspond to `i`
         } else {
-            DEV_LOG("Not listing video mode ({}) to device select! [Aspect Ratio: {}; Res: {} x {}]", i, aspectr, vmi.width, vmi.height);
+            DEV_LOG("Not listing video mode ({}) to device select! [{} x {} ({}:{})]", i, vmi.width, vmi.height, ratioW, ratioH);
         }
     }
 }
