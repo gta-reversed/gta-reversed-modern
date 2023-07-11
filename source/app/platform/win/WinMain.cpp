@@ -15,6 +15,7 @@
 #include "WndProc.h"
 
 #include "extensions/Configs/FastLoader.hpp"
+#include "extensions/Configs/WindowedMode.hpp"
 
 constexpr auto NO_FOREGROUND_PAUSE = true;
 
@@ -45,6 +46,13 @@ bool InitApplication(HINSTANCE hInstance) {
 
 // 0x745560
 HWND InitInstance(HINSTANCE hInstance) {
+    // NOTSA/HACK: With this hack we can set a specific value for
+    // windowed mode. Also this is so stupid it needs to be changed
+    // after 'window-stretch-freeze' bug fixed.
+    RsGlobal.maximumWidth = g_WindowedModeConfig.WindowWidth;
+    RsGlobal.maximumHeight = g_WindowedModeConfig.WindowHeight;
+    DEV_LOG("MW: {} - MH: {}", RsGlobal.maximumWidth, RsGlobal.maximumHeight);
+
     RECT rect = { 0, 0, RsGlobal.maximumWidth, RsGlobal.maximumHeight };
     AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
 
@@ -417,6 +425,6 @@ void InjectWinMainStuff() {
     RH_ScopedGlobalInstall(CommandLineToArgv, 0x746480, { .reversed = false });
 
     // Unhooking these 2 after the game has started will do nothing
-    RH_ScopedGlobalInstall(NOTSA_WinMain, 0x748710);
+    RH_ScopedGlobalInstall(NOTSA_WinMain, 0x748710, { .locked = true });
     RH_ScopedGlobalInstall(InitInstance, 0x745560);
 }
