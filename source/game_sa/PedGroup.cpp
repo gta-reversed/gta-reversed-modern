@@ -23,7 +23,7 @@ float CPedGroup::FindDistanceToNearestMember(CPed** ppOutNearestMember) {
         }
         return std::sqrt(distSq);
     }
-    return 1.0e10;
+    return 1.0e10f;
 }
 
 // 0x5FACD0

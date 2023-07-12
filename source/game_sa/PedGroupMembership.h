@@ -127,7 +127,6 @@ public:
             if (!std::invoke(pred, mem)) {
                 continue;
             }
-            
             if (const auto distSq = (pedPos - mem.GetPosition()).SquaredMagnitude(); closestDistSq > distSq) {
                 closestDistSq = distSq;
                 closest       = &mem;
