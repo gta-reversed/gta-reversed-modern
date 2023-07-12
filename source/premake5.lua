@@ -49,8 +49,8 @@ project "gta_reversed"
         "vorbis", 
         "vorbisenc", 
         "vorbisfile", 
-        "imgui" ,
-        "spdlog"
+        "imgui",
+        "spdlog",
         "imgui",
         "ddraw.lib",
         "Winmm.lib",
