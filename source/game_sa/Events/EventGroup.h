@@ -42,9 +42,9 @@ public:
     auto GetEvents()       { return std::span{ m_events, (size_t)m_count }; }
     auto GetEvents() const { return std::span{ m_events, (size_t)m_count }; }
 
-    // Helper so events can be directly passed in without having to put them into a variable
-    template<typename T>
-    CEvent* Add(T event, bool valid = false) requires std::is_base_of_v<CEvent, T> {
+    //! Helper so events can be directly passed in without having to put them into a variable
+    template<std::derived_from<CEvent> T>
+    CEvent* Add(T event, bool valid = false) {
         return Add(&event, valid);
     }
 };

@@ -378,8 +378,8 @@ RwInt32 RwEngineGetNumVideoModes() {
     return ((RwInt32(__cdecl *)(void))0x7F2CC0)();
 }
 
-RwVideoMode* RwEngineGetVideoModeInfo(RwVideoMode* modeinfo, RwInt32 modeIndex) {
-    return ((RwVideoMode*(__cdecl *)(RwVideoMode*, RwInt32))0x7F2CF0)(modeinfo, modeIndex);
+RwVideoMode RwEngineGetVideoModeInfo(RwInt32 modeIndex) {
+    return ((RwVideoMode(__cdecl *)(RwInt32))0x7F2CF0)(modeIndex);
 }
 
 RwInt32 RwEngineGetCurrentVideoMode() {

@@ -6,7 +6,8 @@
 #include "app/app.h"
 #include "VideoMode.h" // todo
 #include "ControllerConfigManager.h"
-#include "LoadingScreen.h"
+
+#include "extensions/Configs/FastLoader.hpp"
 
 /*!
  * @addr 0x57FD70
@@ -230,7 +231,7 @@ void CMenuManager::CheckForMenuClosing() {
 
             if ((!field_35 || !m_bActivateMenuNextFrame) && !m_bLoadingData) {
                 AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_START);
-                if (!FastLoadSettings.ShouldLoadSaveGame()) { // If loading, skip menu audio
+                if (!g_FastLoaderConfig.ShouldLoadSaveGame()) { // If loading, skip menu audio
                     AudioEngine.Service();
                 }
             }
@@ -284,7 +285,11 @@ void CMenuManager::CheckForMenuClosing() {
 
                 if (IsVideoModeExclusive()) {
                     DIReleaseMouse();
+#ifdef FIX_BUGS // Causes the retarded fucktard code to not dispatch mouse input to WndProc => ImGUI mouse not working. Amazing piece of technology.
+                    InitialiseMouse(false);
+#else
                     InitialiseMouse(true);
+#endif // !FIX_BUGS
                 }
 
                 m_fStatsScrollSpeed = 150.0f;
@@ -333,7 +338,7 @@ void CMenuManager::CheckForMenuClosing() {
 
         AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_START);
 
-        if (!FastLoadSettings.ShouldLoadSaveGame()) { // If loading, skip menu audio
+        if (!g_FastLoaderConfig.ShouldLoadSaveGame()) { // If loading, skip menu audio
             AudioEngine.Service();
         }
 

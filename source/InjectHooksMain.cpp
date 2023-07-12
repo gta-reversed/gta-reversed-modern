@@ -398,8 +398,7 @@
 
 #include "platform/win/VideoPlayer/VideoPlayer.h"
 #include "platform/win/VideoMode.h"
-#include "platform/win/win.h"
-#include "platform/platform.h"
+#include "platform/win/Platform.h"
 
 #include "app/app.h"
 #include <RealTimeShadowManager.h>
@@ -412,6 +411,7 @@ void InjectHooksMain() {
     HookInstall(0x541DD0, CPad::UpdatePads); // [ImGui] Changes logic of the function and shouldn't be toggled on/off
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
 
+    CCutsceneMgr::InjectHooks();
     CFileMgr::InjectHooks();
     CPedGroupPlacer::InjectHooks();
     CLoadedCarGroup::InjectHooks();

@@ -52,6 +52,7 @@ public:
 
     //! Get id of this group
     int32 GetId() const;
+    bool IsActive() const;
 
     auto& GetIntelligence()     { return m_groupIntelligence; }
     auto& GetMembership() const { return m_groupMembership; }

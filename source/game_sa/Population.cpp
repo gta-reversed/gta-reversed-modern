@@ -516,7 +516,7 @@ CPed* CPopulation::AddExistingPedInCar(CPed* ped, CVehicle* vehicle) {
 }
 
 // 0x611570
-void CPopulation::UpdatePedCount(CPed* ped, uint8 pedAddedOrRemoved) {
+void CPopulation::UpdatePedCount(CPed* ped, bool pedAddedOrRemoved) {
     if (pedAddedOrRemoved != ped->bHasBeenAddedToPopulation) {
         return;
     }
@@ -1466,7 +1466,7 @@ bool CPopulation::AddPedAtAttractor(eModelID modelIndex, C2dEffect* attractor, C
     ped->GetIntelligence()->SetPedDecisionMakerType(decisionMakerType == -1 ? 2 : decisionMakerType);
     ped->GetTaskManager().SetTask(CTaskComplexWander::GetWanderTaskByPedType(ped), TASK_PRIMARY_DEFAULT);
 
-    CPedAttractorPedPlacer::PlacePedAtEffect(*attractor, entity, ped, 0.02f);
+    CPedAttractorPedPlacer::PlacePedAtEffect(reinterpret_cast<C2dEffectPedAttractor&>(*attractor), entity, ped, 0.02f);
     ped->bUseAttractorInstantly = true;
 
     ped->GetEventGroup().Add(CEventAttractor{ attractor, ped, true, TASK_COMPLEX_USE_ATTRACTOR });
@@ -1671,12 +1671,12 @@ int32 CPopulation::GeneratePedsAtAttractors(
                 if (!ent->IsObject()) {
                     continue;
                 }
-                if (!ent->AsObject()->objectFlags.b0x1000000) {
+                if (!ent->AsObject()->objectFlags.bEnableDisabledAttractors) {
                     continue;
                 }
             }
 
-            const auto effectPosWS = ent->GetMatrix() * effect->m_vecPosn; // ws = world space
+            const auto effectPosWS = ent->GetMatrix() * effect->m_pos; // ws = world space
             if (!IsEffectInRadius(effectPosWS)) {
                 continue;
             }

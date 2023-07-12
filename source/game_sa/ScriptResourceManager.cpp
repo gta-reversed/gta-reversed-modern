@@ -21,19 +21,17 @@ void CScriptResourceManager::Initialise() {
 
 // 0x4704B0
 void CScriptResourceManager::AddToResourceManager(int32 modelId, eScriptResourceType type, CRunningScript* script) {
-    assert(false);
+    plugin::Call<0x4704B0, int32, eScriptResourceType, CRunningScript*>(modelId, type, script);
 }
 
 // 0x470510
 bool CScriptResourceManager::RemoveFromResourceManager(int32 modelId, eScriptResourceType type, CRunningScript* script) {
-    assert(false);
-    return true;
+    return plugin::CallAndReturn<bool, 0x470510, int32, eScriptResourceType, CRunningScript*>(modelId, type, script);
 }
 
 // 0x470620
 bool CScriptResourceManager::HasResourceBeenRequested(int32 modelId, eScriptResourceType type) {
-    assert(false);
-    return true;
+    return plugin::CallAndReturn<bool, 0x470620, int32, eScriptResourceType>(modelId, type);
 }
 
 // 0x0

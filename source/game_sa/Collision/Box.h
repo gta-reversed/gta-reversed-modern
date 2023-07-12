@@ -27,6 +27,9 @@ public:
     float   GetHeight() const { return m_vecMax.z - m_vecMin.z; }
     CVector GetCenter() const { return (m_vecMax + m_vecMin) / 2.f; }
 
+    //! Check is point within the box
+    bool IsPointInside(const CVector& point) const;
+
     /*!
     * @addr notsa
     * @brief Render the box in the 3D world (Be sure to call from a place where 3D stuff is rendered, if called from elsewhere you won't see the lines!)

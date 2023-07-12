@@ -116,7 +116,7 @@ public:
     void SetRotateX(float angle);
     void SetRotateY(float angle);
     void SetRotateZ(float angle);
-    void SetRotate(float x, float y, float z);  // set rotate on 3 axes
+    void SetRotate(float x, float y, float z); // set rotate on 3 axes (Values are in radians)
     void RotateX(float angle);
     void RotateY(float angle);
     void RotateZ(float angle);

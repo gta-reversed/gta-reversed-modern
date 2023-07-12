@@ -16,7 +16,7 @@ void CPopCycle::InjectHooks() {
     RH_ScopedGlobalInstall(Initialise, 0x5BC090);
     RH_ScopedGlobalInstall(PickGangToCreateMembersOf, 0x60F8D0);
     RH_ScopedGlobalInstall(FindNewPedType, 0x60FBD0);
-    RH_ScopedGlobalInstall(PickPedMIToStreamInForCurrentZone, 0x60FFD0);
+    RH_ScopedGlobalInstall(PickPedMIToStreamInForCurrentZone, 0x60FFD0, { .reversed = false });
     RH_ScopedGlobalInstall(IsPedAppropriateForCurrentZone, 0x610150);
     RH_ScopedGlobalInstall(IsPedInGroup, 0x610210);
     RH_ScopedGlobalInstall(PickARandomGroupOfOtherPeds, 0x610420);
@@ -36,7 +36,7 @@ void CPopCycle::Initialise() {
     const auto file = CFileMgr::OpenFile("POPCYCLE.DAT", "r");
     CFileMgr::SetDir("");
 
-    const notsa::AutoCallOnDestruct autoCloser{ [&] { CFileMgr::CloseFile(file); } };
+    const notsa::ScopeGuard autoCloser{ [&] { CFileMgr::CloseFile(file); } };
 
     auto nline{ 1u };
     for (auto zone = 0; zone < (uint32)ZoneType::COUNT; zone++) {

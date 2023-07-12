@@ -39,7 +39,7 @@ public:
     bool HasEmptySlot(const C2dEffect* effect, const CEntity* entity);
 
     void* GetPedUsingEffect(const C2dEffect* effect, const CEntity* entity, const SArray<CPedAttractor*>& array);
-    void* GetPedUsingEffect(const C2dEffect* effect, const CEntity* entity);
+    CPed* GetPedUsingEffect(const C2dEffect* effect, const CEntity* entity = nullptr);
 
     void* GetRelevantAttractor(const CPed* ped, const C2dEffect* effect, const CEntity* entity, const SArray<CPedAttractor*>& array);
     void* GetRelevantAttractor(const CPed* ped, const C2dEffect* effect, const CEntity* entity);

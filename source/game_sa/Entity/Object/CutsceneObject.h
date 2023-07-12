@@ -11,7 +11,7 @@
 class NOTSA_EXPORT_VTABLE CCutsceneObject : public CObject {
 public:
     union {
-        RwFrame* m_pAttachTo;
+        RwFrame* m_pAttachToFrame;
         uint32   m_nAttachBone; // this one if m_pAttachmentObject != 0
     };
     CObject* m_pAttachmentObject;

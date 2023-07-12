@@ -121,6 +121,10 @@ int32 CPedGroup::GetId() const {
     return CPedGroups::GetGroupId(this);
 }
 
+bool CPedGroup::IsActive() const {
+    return CPedGroups::ms_activeGroups[GetId()];
+}
+
 void CPedGroup::InjectHooks() {
     RH_ScopedClass(CPedGroup);
     RH_ScopedCategory(); // TODO: Change this to the appropriate category!

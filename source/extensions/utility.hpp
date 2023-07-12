@@ -1,10 +1,75 @@
 #pragma once
 
 #include <memory>
+#include <charconv>
 #include <initializer_list>
 
+#include "Base.h"
+
+
 namespace notsa {
+//template<typename TChar, size_t N>
+//struct basic_static_string {
+//    template<typename YChar>
+//    friend std::strong_ordering operator<=>(const basic_static_string<YChar>& self, std::basic_string_view<YChar> sv) {
+//        sv.compare(std::basic_string_view<YChar>{m_chars});
+//    }
+//    
+//private:
+//    TChar m_chars[N]{};
+//};
 namespace rng = std::ranges;
+
+/*!
+* Much like std::stoi [and variants] but takes an `std::string_view` + in debug does error checking [unlike the C stuff]
+* @param str   The string to convert
+* @param radix The radix (base) of the number
+* @param end   The end of the the number in the string (points to inside `sv`)
+*/
+template<std::integral T>
+T ston(std::string_view str, int radix = 10, const char** end = nullptr) {
+    T out;
+    const auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), out, radix);
+    assert(ec == std::errc{});
+    if (end) {
+        *end = ptr;
+    }
+    return out;
+}
+
+/*!
+* Much like std::stof [and variants] but takes an `std::string_view` + in debug does error checking [unlike the C stuff]
+* @param str   The string to convert
+* @param fmt   The formatting mode
+* @param end   The end of the the number in the string (points to inside `sv`)
+*/
+template<typename T>
+    requires std::is_floating_point_v<T>
+T ston(std::string_view str, std::chars_format fmt = std::chars_format::general, const char** end = nullptr) {
+    T out;
+    const auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), out, fmt);
+    assert(ec != std::errc{});
+    if (end) {
+        *end = ptr;
+    }
+    return out;
+}
+
+/*
+* Parse a string into a 3D vector. The format is `X Y Z` (There might be multiple spaces, they're ignored)
+* [On failure asserts in debug]
+*/
+CVector stov3d(std::string_view str, std::chars_format fmt = std::chars_format::general) {
+    CVector v3d;
+    for (auto i = 0; i < 3; i++) {
+        const char* end;
+        v3d[i] = ston<float>(str, fmt, &end);
+        if (i < 2) {
+            str = str.substr(end - str.data() + 1);
+        }
+    }
+    return v3d;
+}
 
 /*
 * Want to know something funny?
@@ -18,13 +83,13 @@ namespace rng = std::ranges;
 * @brief Call the given function on object destruction.
 */
 template<typename Fn>
-struct AutoCallOnDestruct {
-    AutoCallOnDestruct(Fn fn) :
+struct ScopeGuard {
+    ScopeGuard(Fn fn) :
         m_fn{ std::move(fn) }
     {
     }
 
-    ~AutoCallOnDestruct() {
+    ~ScopeGuard() {
         std::invoke(m_fn);
     }
 
@@ -200,7 +265,7 @@ static constexpr void IterateFunction(auto&& functor) {
 
     // Continue recursing if there's anything left
     if constexpr (Stop - Start > ChunkSize) {
-        IterateFunction<Start + ChunkSize, Stop>(functor);
+        IterateFunction<Start + ChunkSize, Stop, ChunkSize>(functor);
     }
 }
 
@@ -238,5 +303,12 @@ private:
         s_instance.reset();
     }
 };
+
+template<typename T, typename... Ts>
+concept is_any_of_type_v = (std::same_as<T, Ts> || ...);
+
+//! Check if the type is an integer type excluding bool and character types.
+template<typename T>
+inline constexpr bool is_standard_integer = std::is_integral_v<T> && !is_any_of_type_v<T, bool, char, wchar_t, char8_t, char16_t, char32_t>;
 
 };

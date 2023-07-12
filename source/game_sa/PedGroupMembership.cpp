@@ -169,6 +169,11 @@ void CPedGroupMembership::RemoveAllFollowers(bool bCreatedByMissionOnly) {
     }
 }
 
+// 0x5FB210
+void CPedGroupMembership::RemoveMember(CPed& ped) {
+    plugin::CallMethod<0x5FB210>(this, &ped);
+}
+
 // 0x5FB1D0
 void CPedGroupMembership::RemoveNFollowers(size_t count) {
     if (count == 0) { // Nothing to do

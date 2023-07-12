@@ -63,6 +63,12 @@ target_link_libraries(${RE_PROJECT_LIB_NAME} PRIVATE
     ogg
     vorbisfile
     imgui
+    ddraw
+    Winmm
+    dxguid
+    strmiids
+    dsound
+    d3d9
 )
 target_include_directories(${RE_PROJECT_LIB_NAME} PRIVATE
     /
