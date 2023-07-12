@@ -25,12 +25,9 @@ UIRenderer::UIRenderer() :
 {
     IMGUI_CHECKVERSION();
 
-    m_ImIO->WantCaptureMouse    = true;
-    m_ImIO->WantCaptureKeyboard = true;
-    m_ImIO->WantSetMousePos     = true;
-    m_ImIO->MouseDrawCursor     = false;
-    m_ImIO->ConfigFlags         = ImGuiConfigFlags_NavEnableSetMousePos | ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
-    m_ImIO->DisplaySize         = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
+    m_ImIO->ConfigFlags = ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad | ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
+    m_ImIO->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
+    m_ImIO->NavActive   = false;
 
     ImGui_ImplWin32_Init(PSGLOBAL(window));
     ImGui_ImplDX9_Init(GetD3DDevice());
@@ -46,75 +43,6 @@ UIRenderer::~UIRenderer() {
     DEV_LOG("Good bye!");
 }
 
-void UIRenderer::UpdateInput() {
-    ZoneScoped;
-
-    if (!Visible()) {
-        return;
-    }
-
-    // Update mouse
-    {
-        const auto WHEEL_SPEED = 20.0f;
-
-        CPad::GetPad()->DisablePlayerControls = true;
-
-        // Update position
-        auto& MousePos = m_ImIO->MousePos;
-        MousePos.x += CPad::NewMouseControllerState.X;
-        MousePos.y -= CPad::NewMouseControllerState.Y;
-
-        MousePos.x = std::clamp(MousePos.x, 0.0f, SCREEN_WIDTH);
-        MousePos.y = std::clamp(MousePos.y, 0.0f, SCREEN_HEIGHT);
-
-        if (CPad::NewMouseControllerState.wheelDown)
-            m_ImIO->MouseWheel -= (WHEEL_SPEED * m_ImIO->DeltaTime);
-
-        if (CPad::NewMouseControllerState.wheelUp)
-            m_ImIO->MouseWheel += (WHEEL_SPEED * m_ImIO->DeltaTime);
-
-        m_ImIO->MouseDown[ImGuiMouseButton_Left]   = CPad::NewMouseControllerState.lmb;
-        m_ImIO->MouseDown[ImGuiMouseButton_Right]  = CPad::NewMouseControllerState.rmb;
-        m_ImIO->MouseDown[ImGuiMouseButton_Middle] = CPad::NewMouseControllerState.mmb;
-
-        CPad::NewMouseControllerState.X = 0.0f;
-        CPad::NewMouseControllerState.Y = 0.0f;
-    }
-
-    // Update keyboard
-    {
-        BYTE KeyStates[256];
-
-        VERIFY(GetKeyboardState(KeyStates));
-
-        const auto IsKeyDown = [&](auto key) { return (KeyStates[key] & 0x80) != 0; };
-
-        for (auto key = 0; key < 256; key++) {
-            // Check if there was a state change
-            if (IsKeyDown(key) == m_ImIO->KeysDown[key]) {
-                continue;
-            }
-
-            // There was!
-            if (IsKeyDown(key)) { // Key is now down
-                m_ImIO->KeysDown[key] = true;
-
-                char ResultUTF8[16] = {0};
-                if (ToAscii(key, MapVirtualKey(key, 0), KeyStates, (LPWORD)ResultUTF8, 0)) {
-                    m_ImIO->AddInputCharactersUTF8(ResultUTF8);
-                }
-            } else { // Key is now released
-                m_ImIO->KeysDown[key] = false;
-            }
-        }
-
-        m_ImIO->KeyCtrl  = IsKeyDown(VK_CONTROL);
-        m_ImIO->KeyShift = IsKeyDown(VK_SHIFT);
-        m_ImIO->KeyAlt   = IsKeyDown(VK_MENU);
-        m_ImIO->KeySuper = false;
-    }
-}
-
 void UIRenderer::PreRenderUpdate() {
     ZoneScoped;
 
@@ -125,11 +53,21 @@ void UIRenderer::PreRenderUpdate() {
     DebugCode();
     ReversibleHooks::CheckAll();
 
-    if (const auto pad = CPad::GetPad(); pad->DebugMenuJustPressed()) {
-        m_ShowMenu              = !m_ShowMenu;
-        m_ImIO->MouseDrawCursor = m_ShowMenu;
-        pad->bPlayerSafe        = m_ShowMenu;
+    // A delay of a frame has to be added, otherwise the release of F7 wont be processed
+    // and the menu will close
+    const auto Shortcut = [](ImGuiKeyChord chord) {
+        return ImGui::Shortcut(chord, ImGuiKeyOwner_Any, ImGuiInputFlags_RouteAlways);
+    };
+    if (Shortcut(ImGuiKey_F7) || Shortcut(ImGuiKey_M | ImGuiMod_Ctrl)) {
+        m_InputActive                         = !m_InputActive;
+        m_ImIO->MouseDrawCursor               = m_InputActive;
+        m_ImIO->NavActive                     = m_InputActive;
+        CPad::GetPad()->DisablePlayerControls = m_InputActive;
     }
+}
+
+void UIRenderer::PostRenderUpdate() {
+    m_ImIO->NavActive = m_InputActive; // ImGUI clears `NavActive` every frame, so have to set it here.
 }
 
 void UIRenderer::DrawLoop() {
@@ -141,7 +79,7 @@ void UIRenderer::DrawLoop() {
     }
 
     PreRenderUpdate();
-
+    ImGui_ImplWin32_NewFrame();
     ImGui_ImplDX9_NewFrame();
     ImGui::NewFrame();
 
@@ -150,7 +88,15 @@ void UIRenderer::DrawLoop() {
     ImGui::EndFrame();
     ImGui::Render();
     ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
-    ImGui_ImplDX9_InvalidateDeviceObjects();
+    //ImGui_ImplDX9_InvalidateDeviceObjects();
+
+    PostRenderUpdate();
+
+    // Update and Render additional Platform Windows
+    if (m_ImIO->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+    }
 }
 
 void UIRenderer::Render2D() {

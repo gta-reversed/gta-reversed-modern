@@ -133,7 +133,7 @@ bool rsCommandLine(void* param) {
 // 0x619530
 bool rsPreInitCommandLine(RwChar* arg) {
     if (strcmp(arg, RWSTRING("-vms")) == 0) {
-        DefaultVideoMode = FALSE;
+        DefaultVM = FALSE;
         return true;
     }
     return false;
@@ -247,7 +247,7 @@ RwMemoryFunctions* psGetMemoryFunctions() {
 }
 
 // 0x619C90
-bool RsRwInitialize(void* param) {
+bool RsRwInitialize(void* param) { // Win32: Param is HWND
     if (!RwEngineInit(psGetMemoryFunctions(), 0, rsRESOURCESDEFAULTARENASIZE))
         return false;
 
@@ -306,7 +306,7 @@ RsEventStatus RsEventHandler(RsEvent event, void* param) {
     case rsREGISTERIMAGELOADER:
         return rsEVENTPROCESSED;
 
-    case rsRWINITIALIZE:
+    case rsRWINITIALIZE: // Win32: Param is HWND 
         return RSEVENT_SUCCEED(RsRwInitialize(param));
 
     case rsRWTERMINATE:
@@ -333,10 +333,12 @@ RsEventStatus RsEventHandler(RsEvent event, void* param) {
     return rsEVENTNOTPROCESSED;
 }
 
-float IsWideScreenRatio(float ratio) {
+// Returns true if ratio is 5:3, 16:9 or 16:10.
+bool IsWideScreenRatio(float ratio) {
     return ratio == 0.6f || ratio == 10.0f / 16.0f || ratio == 9.0f / 16.0f;
 }
 
-float IsFullScreenRatio(float ratio) {
-    return ratio == 3.0f / 4.0f || ratio == 0.8f;
+// Returns true if ratio is 4:3 or 5:4.
+bool IsFullScreenRatio(float ratio) {
+    return ratio == 3.0f / 4.0f || ratio == 4.0f / 5.0f;
 }
