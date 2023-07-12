@@ -31,6 +31,8 @@ void ProcObjectMan_c::Init() {
 
 // 0x5A3110
 void ProcObjectMan_c::Update() {
+    ZoneScoped;
+
     // NOP
 }
 

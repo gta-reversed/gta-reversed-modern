@@ -44,6 +44,8 @@ UIRenderer::~UIRenderer() {
 }
 
 void UIRenderer::PreRenderUpdate() {
+    ZoneScoped;
+
     m_ImIO->DeltaTime   = CTimer::GetTimeStepInSeconds();
     m_ImIO->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT); // Update display size, in case of window resize after imgui was already initialized
 
@@ -69,6 +71,8 @@ void UIRenderer::PostRenderUpdate() {
 }
 
 void UIRenderer::DrawLoop() {
+    ZoneScoped;
+
     if (m_ReInitRequested) {
         ResetSingleton(); // This will destruct the current object so we gotta stop here.
         return;
@@ -96,10 +100,14 @@ void UIRenderer::DrawLoop() {
 }
 
 void UIRenderer::Render2D() {
+    ZoneScoped;
+
     m_DebugModules.Render2D();
 }
 
 void UIRenderer::Render3D() {
+    ZoneScoped;
+
     m_DebugModules.Render3D();
 }
 

@@ -36,6 +36,8 @@ void CBrightLights::RenderOutGeometryBuffer() {
 
 // 0x7241C0
 void CBrightLights::Render() {
+    ZoneScoped;
+
     if (NumBrightLights == 0)
         return;
 

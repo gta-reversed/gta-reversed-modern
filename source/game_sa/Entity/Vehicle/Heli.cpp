@@ -124,6 +124,8 @@ void CHeli::PreRenderAlways() {
 
 // 0x6C4650
 void CHeli::Pre_SearchLightCone() {
+    ZoneScoped;
+
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATESRCBLEND,             RWRSTATE(rwBLENDONE));
@@ -138,6 +140,8 @@ void CHeli::Pre_SearchLightCone() {
 
 // 0x6C46E0
 void CHeli::Post_SearchLightCone() {
+    ZoneScoped;
+
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATESRCBLEND,             RWRSTATE(rwBLENDSRCALPHA));
@@ -223,11 +227,15 @@ bool CHeli::SendDownSwat() {
 
 // 0x6C79A0
 void CHeli::UpdateHelis() {
+    ZoneScoped;
+
     ((void(__cdecl*)())0x6C79A0)();
 }
 
 // 0x6C7C50
 void CHeli::RenderAllHeliSearchLights() {
+    ZoneScoped;
+
     for (auto& light : HeliSearchLights) {
         SearchLightCone(
             light.m_nCoronaIndex,

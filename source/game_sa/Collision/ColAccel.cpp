@@ -39,6 +39,8 @@ bool CColAccel::isCacheLoading() {
 
 // 0x5B31A0
 void CColAccel::startCache() {
+    ZoneScoped;
+
     m_iCachingColSize = GetColModelPool()->GetSize();
     m_iSectionSize    = new int32[64];
     m_iplDefs         = new IplDef[TOTAL_IPL_MODEL_IDS]();
@@ -47,6 +49,8 @@ void CColAccel::startCache() {
 
 // 0x5B2AD0
 void CColAccel::endCache() {
+    ZoneScoped;
+
     if (m_iCacheState == eColAccelState::COLACCEL_STARTED) {
         auto* file = CFileMgr::OpenFileForWriting(mp_cCacheName);
         CFileMgr::Write(file, &m_iNumColItems,  sizeof(m_iNumColItems));

@@ -359,6 +359,8 @@ int32 CFireManager::StartScriptFire(const CVector& pos, CEntity* target, float _
 
 // 0x53AF00
 void CFireManager::Update() {
+    ZoneScoped;
+
     if (CReplay::Mode == MODE_PLAYBACK)
         return;
 

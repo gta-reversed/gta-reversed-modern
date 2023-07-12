@@ -1278,6 +1278,8 @@ void CFileLoader::LoadGarage(const char* line) {
 
 // 0x5B9030
 void CFileLoader::LoadLevel(const char* levelFileName) {
+    ZoneScoped;
+
     auto txd = RwTexDictionaryGetCurrent();
     if (!txd) {
         txd = RwTexDictionaryCreate();
@@ -1316,15 +1318,22 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             break; // Done
 
         if (LineBeginsWith("TEXDICTION")) {
+            ZoneScopedN("TEXDICTION");
+
             const auto path = ExtractPathFor("TEXDICTION");
+            ZoneText(path, strlen(path));
+
             LoadingScreenLoadingFile(path);
 
             const auto txd = LoadTexDictionary(path);
             RwTexDictionaryForAllTextures(txd, AddTextureCB, txd);
             RwTexDictionaryDestroy(txd);
         } else if (LineBeginsWith("IPL")) {
+            ZoneScopedN("IPL");
+
             // Have to call this here, because line buffer's content may change after the `if` below
             const auto path = ExtractPathFor("IPL");
+            ZoneText(path, strlen(path));
 
             if (!hasLoadedAnyIPLs) {
                 MatchAllModelStrings();
@@ -1378,9 +1387,15 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             };
             for (const auto& v : functions) {
                 if (LineBeginsWith(v.id)) {
+                    ZoneScoped;
+                    ZoneText(v.id.data(), v.id.size());
+
                     const auto path = ExtractPathFor(v.id);
+                    ZoneText(path, strlen(path));
+
                     LoadingScreenLoadingFile(path);
                     v.fn(path);
+
                     break;
                 }
             }
@@ -1389,8 +1404,8 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
     CFileMgr::CloseFile(f);
 
     RwTexDictionarySetCurrent(txd);
-    if (hasLoadedAnyIPLs)
-    {
+
+    if (hasLoadedAnyIPLs) {
         CIplStore::LoadAllRemainingIpls();
         CColStore::BoundingBoxesPostProcess();
         CTrain::InitTrains();
@@ -1968,6 +1983,8 @@ void LinkLods(int32 a1) {
 
 // 0x5B8700
 void CFileLoader::LoadScene(const char* filename) {
+    ZoneScoped;
+
     gCurrIplInstancesCount = 0;
 
     enum class SectionID {

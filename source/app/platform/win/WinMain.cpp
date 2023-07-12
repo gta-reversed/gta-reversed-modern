@@ -111,6 +111,8 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
         Sleep(100);
         return true;
     }
+    
+    FrameMark;
 
     // TODO: Move this out from here (It's not platform specific at all)
     switch (gGameState) {
@@ -259,8 +261,9 @@ void MainLoop(INT nCmdShow, MSG& Msg) {
     while (true) {
         RwInitialized = true;
 
-        RwV2d pos{ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
-        RsMouseSetPos(&pos);
+        // Useless, and annoying
+        //RwV2d pos{ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
+        //RsMouseSetPos(&pos);
 
         gamma.Init();
 

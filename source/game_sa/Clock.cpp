@@ -58,6 +58,8 @@ void CClock::Initialise(uint32 millisecondsPerGameMinute) {
  * @addr  0x52CF10
  */
 void CClock::Update() {
+    ZoneScoped;
+
     if (gbFreezeTime) { // NOTSA
         ms_nLastClockTick = CTimer::GetTimeInMS();
     }
