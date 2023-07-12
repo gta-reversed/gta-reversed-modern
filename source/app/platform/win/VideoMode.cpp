@@ -32,9 +32,8 @@ char** GetVideoModeList() {
 
     gVideoModes = (char**)CMemoryMgr::Calloc(numVidModes, sizeof(char*));
 
-    RwVideoMode videoMode{};
     for (auto modeId = 0u; modeId < numVidModes; modeId++) {
-        VERIFY(RwEngineGetVideoModeInfo(&videoMode, modeId));
+        const auto videoMode = RwEngineGetVideoModeInfo(modeId);
 
         gVideoModes[modeId] = nullptr;
         if ((videoMode.flags & rwVIDEOMODEEXCLUSIVE) == 0) {
@@ -60,7 +59,7 @@ char** GetVideoModeList() {
         }
 
         if (videoMode.width != APP_MINIMAL_WIDTH || videoMode.height != APP_MINIMAL_HEIGHT) {
-            if (gnMemTotalVideo - videoMode.height * videoMode.width * videoMode.depth / 8 <= GAME_FREE_VIDEO_MEM_REQUIRED) {
+            if (s_OSStatus.VRAM.Avail - videoMode.height * videoMode.width * videoMode.depth / 8 <= GAME_FREE_VIDEO_MEM_REQUIRED) {
                 continue;
             }
         }
@@ -105,7 +104,5 @@ void SetVideoMode(int32 mode) {
 
 // 0x745CA0
 bool IsVideoModeExclusive() { // AKA isCurrentModeFullscreen
-    RwVideoMode videoMode{};
-    VERIFY(RwEngineGetVideoModeInfo(&videoMode, gCurrentVideoMode));
-    return videoMode.flags & rwVIDEOMODEEXCLUSIVE;
+    return RwEngineGetVideoModeInfo(gCurrentVideoMode).flags & rwVIDEOMODEEXCLUSIVE;
 }

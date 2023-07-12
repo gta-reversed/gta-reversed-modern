@@ -51,16 +51,21 @@ void UIRenderer::PreRenderUpdate() {
     DebugCode();
     ReversibleHooks::CheckAll();
 
-    if (const auto pad = CPad::GetPad(); pad->DebugMenuJustPressed()) {
-        m_ShowMenu = !m_ShowMenu;
-        m_ImIO->MouseDrawCursor    = m_ShowMenu;
-        m_ImIO->NavActive          = m_ShowMenu;
-        pad->DisablePlayerControls = m_ShowMenu;
+    // A delay of a frame has to be added, otherwise the release of F7 wont be processed
+    // and the menu will close
+    const auto Shortcut = [](ImGuiKeyChord chord) {
+        return ImGui::Shortcut(chord, ImGuiKeyOwner_Any, ImGuiInputFlags_RouteAlways);
+    };
+    if (Shortcut(ImGuiKey_F7) || Shortcut(ImGuiKey_M | ImGuiMod_Ctrl)) {
+        m_InputActive                         = !m_InputActive;
+        m_ImIO->MouseDrawCursor               = m_InputActive;
+        m_ImIO->NavActive                     = m_InputActive;
+        CPad::GetPad()->DisablePlayerControls = m_InputActive;
     }
 }
 
 void UIRenderer::PostRenderUpdate() {
-    m_ImIO->NavActive = m_ShowMenu; // ImGUI clears `NavActive` every frame, so have to set it here.
+    m_ImIO->NavActive = m_InputActive; // ImGUI clears `NavActive` every frame, so have to set it here.
 }
 
 void UIRenderer::DrawLoop() {

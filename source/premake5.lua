@@ -51,6 +51,13 @@ project "gta_reversed"
         "vorbisfile", 
         "imgui" ,
         "spdlog"
+        "imgui",
+        "ddraw.lib",
+        "Winmm.lib",
+        "dxguid.lib",
+        "strmiids.lib",
+        "dsound.lib",
+        "d3d9.lib"
     }
 
     filter "configurations:Debug*"

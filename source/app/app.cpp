@@ -10,7 +10,7 @@
 #include "Plugins/BreakablePlugin/BreakablePlugin.h"
 #include "Pipelines/CustomBuilding/CustomBuildingRenderer.h"
 
-#include "win/win.h"
+#include "platform/win/Platform.h"
 
 void AppInjectHooks() {
     RH_ScopedCategory("App");
