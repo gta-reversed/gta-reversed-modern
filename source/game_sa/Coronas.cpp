@@ -24,7 +24,7 @@ void CCoronas::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x6FAA70);
-    RH_ScopedInstall(Shutdown, 0x6FAB00, { .reversed = false });
+    RH_ScopedInstall(Shutdown, 0x6FAB00);
     RH_ScopedInstall(Update, 0x6FADF0, { .reversed = false });
     RH_ScopedInstall(Render, 0x6FAEC0, { .reversed = false });
     RH_ScopedInstall(RenderReflections, 0x6FB630, { .reversed = false });
@@ -59,7 +59,7 @@ void CCoronas::Init() {
 // Terminates coronas
 // 0x6FAB00
 void CCoronas::Shutdown() {
-    plugin::Call<0x6FAB00>();
+    rng::for_each(gpCoronaTexture, RwTextureDestroy);
 }
 
 // Updates coronas
