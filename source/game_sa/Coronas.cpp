@@ -2,6 +2,8 @@
 
 #include "Coronas.h"
 
+
+
 float& CCoronas::SunScreenX = *(float*)0xC3E028;
 float& CCoronas::SunScreenY = *(float*)0xC3E02C;
 //bool& CCoronas::SunBlockedByClouds = *(bool*)0x0;
@@ -14,13 +16,14 @@ CRegisteredCorona(&CCoronas::aCoronas)[MAX_NUM_CORONAS] = *(CRegisteredCorona(*)
 
 uint16(&CCoronas::ms_aEntityLightsOffsets)[8] = *(uint16(*)[8])0x8D5028;
 
-char (&coronaTexturesAlphaMasks)[260] = *(char (*)[260])0x8D4A58;
+auto& aCoronastar = StaticRef<std::array<char[26], 10>, 0x8D4950>();
+auto& coronaTexturesAlphaMasks = StaticRef<std::array<char[26], 10>, 0x8D4A58>();
 
 void CCoronas::InjectHooks() {
     RH_ScopedClass(CCoronas);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(Init, 0x6FAA70, { .reversed = false });
+    RH_ScopedInstall(Init, 0x6FAA70);
     RH_ScopedInstall(Shutdown, 0x6FAB00, { .reversed = false });
     RH_ScopedInstall(Update, 0x6FADF0, { .reversed = false });
     RH_ScopedInstall(Render, 0x6FAEC0, { .reversed = false });
@@ -28,6 +31,7 @@ void CCoronas::InjectHooks() {
     RH_ScopedInstall(RenderSunReflection, 0x6FBAA0, { .reversed = false });
     RH_ScopedOverloadedInstall(RegisterCorona, "type", 0x6FC180, void(*)(uint32, CEntity*, uint8, uint8, uint8, uint8, const CVector&, float, float, RwTexture*, eCoronaFlareType, bool, bool, int32, float, bool, float, uint8, float, bool, bool reflectionDelay), { .reversed = false });
     RH_ScopedOverloadedInstall(RegisterCorona, "texture", 0x6FC580, void(*)(uint32, CEntity*, uint8, uint8, uint8, uint8, const CVector&, float, float, eCoronaType, eCoronaFlareType, bool, bool, int32, float, bool, float, uint8, float, bool, bool reflectionDelay), { .reversed = false });
+     
     RH_ScopedInstall(UpdateCoronaCoors, 0x6FC4D0, { .reversed = false });
     RH_ScopedInstall(DoSunAndMoon, 0x6FC5A0, { .reversed = false });
 }
@@ -35,7 +39,21 @@ void CCoronas::InjectHooks() {
 // Initialises coronas
 // 0x6FAA70
 void CCoronas::Init() {
-    plugin::Call<0x6FAA70>();
+    {
+        CTxdStore::ScopedTXDSlot txd{"particle"};
+        //for (auto&& [tex, name, maskName] : rng::zip_view{ gpCoronaTexture, aCoronastar, coronaTexturesAlphaMasks }) { // TODO: C++23
+        //    if (!tex) { 
+        //        tex = RwTextureRead(name, maskName);
+        //    }
+        //}
+        for (auto i = 0; i < CORONA_TEXTURES_COUNT; i++) {
+            auto& tex = gpCoronaTexture[i];
+            if (!tex) {
+                tex = RwTextureRead(aCoronastar[i], coronaTexturesAlphaMasks[i]);
+            }
+        }
+    }
+    rng::fill(aCoronas, CRegisteredCorona{});
 }
 
 // Terminates coronas

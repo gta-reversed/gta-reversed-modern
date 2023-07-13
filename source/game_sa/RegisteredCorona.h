@@ -32,7 +32,7 @@ enum eCoronaFlareType : uint8 { FLARETYPE_NONE, FLARETYPE_SUN, FLARETYPE_HEADLIG
 class CRegisteredCorona {
 public:
     CVector          m_vPosn;
-    uint32           m_dwId;     // Should be unique for each corona. Address or something
+    uint32           m_dwId{};     // Should be unique for each corona. Address or something
     RwTexture*       m_pTexture; // Pointer to the actual texture to be rendered
     float            m_fSize;
     float            m_fAngle;    // left from III&VC
@@ -54,6 +54,8 @@ public:
     uint8            m_bDrawWithWhiteCore : 1; // This corona rendered with a small white core.
     uint8            m_bAttached : 1;          // This corona is attached to an entity.
     CEntity*         m_pAttachedTo;
+
+    CRegisteredCorona() = default;
 
     void Update();
 };
