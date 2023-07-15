@@ -120,8 +120,8 @@ void CSprite::RenderOneXLUSprite_Triangle(float, float, float, float, float, flo
 }
 
 // 0x70D490
-void CSprite::RenderOneXLUSprite_Rotate_Aspect(float, float, float, float, float, uint8, uint8, uint8, int16, float, float, uint8) {
-    assert(false);
+void CSprite::RenderOneXLUSprite_Rotate_Aspect(CVector pos, CVector2D size, uint8 r, uint8 g, uint8 b, int16 intensity, float rz, float rotation, uint8 alpha) {
+    plugin::Call<0x70D490>(pos, size, r, g, b, intensity, rz, rotation, alpha);
 }
 
 // Android
@@ -168,8 +168,8 @@ void CSprite::RenderBufferedOneXLUSprite_Rotate_2Colours(float, float, float, fl
 }
 
 // 0x70F440
-void CSprite::RenderBufferedOneXLUSprite2D(float, float, float, float, const RwRGBA&, int16, uint8) {
-    assert(false);
+void CSprite::RenderBufferedOneXLUSprite2D(CVector2D pos, CVector2D size, const RwRGBA& color, int16 intensity, uint8 alpha) {
+    plugin::Call<0x70F440>(pos, size, &color, intensity, alpha);
 }
 
 // unused

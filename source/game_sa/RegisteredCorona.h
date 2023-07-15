@@ -41,7 +41,7 @@ public:
     float            m_fHeightAboveGround;
     float            m_fFadeSpeed; // The speed the corona fades in and out
     CRGBA            m_Color;
-    uint8            m_nFadeState;           // Intensity that lags behind the given intenisty and fades out if the LOS is blocked
+    uint8            m_FadedIntensity;           // Intensity that lags behind the given intenisty and fades out if the LOS is blocked
     uint8            m_bRegisteredThisFrame; // Has this corona been registered by game code this frame
     eCoronaFlareType m_nFlareType;
     uint8            m_bUsesReflection;

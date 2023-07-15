@@ -11,7 +11,5 @@ public:
     constexpr FixedFloat(float X) : value(static_cast<T>(X * CompressValue)) {}
     explicit constexpr FixedFloat(T X) : value(X) {}
 
-    constexpr operator float() const {
-        return static_cast<float>(value) / CompressValue;
-    }
+    constexpr operator float() const { return static_cast<float>(value) / CompressValue; }
 };
