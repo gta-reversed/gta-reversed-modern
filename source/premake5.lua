@@ -54,7 +54,7 @@ project "gta_reversed"
         "vorbisenc", 
         "vorbisfile", 
         "imgui",
-        "tracy"
+        "tracy",
         "ddraw.lib",
         "Winmm.lib",
         "dxguid.lib",
