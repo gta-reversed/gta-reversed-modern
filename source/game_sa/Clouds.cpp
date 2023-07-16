@@ -512,10 +512,20 @@ void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
 
 // From `CClouds::Render` [0x714019 - 0x71422A]
 void CClouds::Render_RenderLowClouds(float colorBalance) {
-    constexpr size_t NUM_LOW_CLOUDS = 12u;
-    constexpr float  LOW_CLOUDS_X_COORDS[NUM_LOW_CLOUDS]{ 1.0f,  0.7f,  0.0f, -0.7f, -1.0f, -0.7f, 0.0f, 0.7f, 0.8f, -0.8f,  0.4f,  0.4f }; // 0x8D5394
-    constexpr float  LOW_CLOUDS_Y_COORDS[NUM_LOW_CLOUDS]{ 0.0f, -0.7f, -1.0f, -0.7f,  0.0f,  0.7f, 1.0f, 0.7f, 0.4f,  0.4f, -0.8f, -0.8f }; // 0x8D53C4 
-    constexpr float  LOW_CLOUDS_Z_COORDS[NUM_LOW_CLOUDS]{ 0.0f,  1.0f,  0.5f,  0.0f,  1.0f,  0.3f, 0.9f, 0.4f, 1.3f,  1.4f,  1.2f,  1.7f }; // 0x8D53F4
+    constexpr CVector LOW_CLOUDS_COORDS[]{
+        {1.0f, 0.0f, 0.0f},
+        {0.7f, -0.7f, 1.0f},
+        {0.0f, -1.0f, 0.5f},
+        {-0.7f, -0.7f, 0.0f},
+        {-1.0f, 0.0f, 1.0f},
+        {-0.7f, 0.7f, 0.3f},
+        {0.0f, 1.0f, 0.9f},
+        {0.7f, 0.7f, 0.4f},
+        {0.8f, 0.4f, 1.3f},
+        {-0.8f, 0.4f, 1.4f},
+        {0.4f, -0.8f, 1.2f},
+        {0.4f, -0.8f, 1.7f},
+    };
 
     const auto colorR = CalculateColorWithBalance((uint8)CTimeCycle::m_CurrentColours.m_nLowCloudsRed, colorBalance);
     const auto colorG = CalculateColorWithBalance((uint8)CTimeCycle::m_CurrentColours.m_nLowCloudsGreen, colorBalance);
@@ -532,24 +542,15 @@ void CClouds::Render_RenderLowClouds(float colorBalance) {
 
     // Render clouds
     const auto camPos = TheCamera.GetPosition();
-    for (auto i = 0u; i < NUM_LOW_CLOUDS; i++) {
-        // Offset from camera
-        const auto offset = CVector{
-            LOW_CLOUDS_X_COORDS[i] * 800.f,
-            LOW_CLOUDS_Y_COORDS[i] * 800.f,
-            LOW_CLOUDS_Z_COORDS[i] * 60.f + 40.f
-        };
-
+    for (const auto& offset : LOW_CLOUDS_COORDS) {
         CVector   cloudPosScr;
         CVector2D cloudSizeScr;
         if (!CSprite::CalcScreenCoors(camPos + offset, &cloudPosScr, &cloudSizeScr.x, &cloudSizeScr.y, false, true)) {
             continue;
         }
-        cloudSizeScr *= CVector2D{ 40.f, 320.f };
-
         CSprite::RenderBufferedOneXLUSprite_Rotate_Dimension(
-            cloudPosScr.x, cloudPosScr.y, cloudPosScr.z,
-            cloudSizeScr.x, cloudSizeScr.y,
+            cloudPosScr,
+            cloudSizeScr * CVector2D{ 40.f, 320.f },
             colorR, colorG, colorB, 255,
             1.f / cloudPosScr.z,
             ms_cameraRoll,
@@ -563,9 +564,14 @@ void CClouds::Render_RenderLowClouds(float colorBalance) {
 // From `CClouds::Render` [0x71422A - 0x714387]
 void CClouds::Render_MaybeRenderRainbows() {
     constexpr size_t NUM_RAINBOW_LINES = 6;
-    constexpr uint8  RAINBOW_LINES_COLOR_RED[NUM_RAINBOW_LINES]{ 30, 30, 30, 10,  0,  15 };
-    constexpr uint8  RAINBOW_LINES_COLOR_GREEN[NUM_RAINBOW_LINES]{ 0,  15, 30, 30,  0,  0 };
-    constexpr uint8  RAINBOW_LINES_COLOR_BLUE[NUM_RAINBOW_LINES]{  0,  0,  0,  10,  30, 30 };
+    const CRGBA RAINBOW_LINES_COLOR[]{
+        {30, 0,  0,  255},
+        {30, 15, 0,  255},
+        {30, 30, 0,  255},
+        {10, 30, 10, 255},
+        {0,  0,  30, 255},
+        {15, 0,  30, 255}
+    };
 
     if (!s_DebugSettings.Rainbow.Enabled) {
         return;
@@ -595,13 +601,14 @@ void CClouds::Render_MaybeRenderRainbows() {
         }
         rblineSizeScr *= CVector2D{ 2.f, 50.f };
 
+        const auto& clr = RAINBOW_LINES_COLOR[i];
         CSprite::RenderBufferedOneXLUSprite(
             rblinePosScr,
             rblineSizeScr,
-            (uint8)((float)RAINBOW_LINES_COLOR_RED[i] * CWeather::Rainbow),
-            (uint8)((float)RAINBOW_LINES_COLOR_GREEN[i] * CWeather::Rainbow),
-            (uint8)((float)RAINBOW_LINES_COLOR_BLUE[i] * CWeather::Rainbow),
-            255,
+            (uint8)((float)clr.r * CWeather::Rainbow),
+            (uint8)((float)clr.g * CWeather::Rainbow),
+            (uint8)((float)clr.b * CWeather::Rainbow),
+            clr.a,
             1.f / rblinePosScr.z,
             255
         );
