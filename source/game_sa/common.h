@@ -159,7 +159,7 @@ auto lerp(const T& from, const T& to, float t) {
     return to * t + from * (1.f - t);
 }
 
-inline const float invLerp(float fMin, float fMax, float fVal) {
+constexpr float invLerp(float fMin, float fMax, float fVal) {
     return (fVal - fMin) / (fMax - fMin);
 }
 

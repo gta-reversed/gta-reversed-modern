@@ -39,7 +39,7 @@ void CCoronas::InjectHooks() {
     RH_ScopedInstall(Shutdown, 0x6FAB00);
     RH_ScopedInstall(Update, 0x6FADF0, { .reversed = false });
     RH_ScopedInstall(Render, 0x6FAEC0);
-    RH_ScopedInstall(RenderReflections, 0x6FB630, { .reversed = false });
+    RH_ScopedInstall(RenderReflections, 0x6FB630);
     RH_ScopedInstall(RenderSunReflection, 0x6FBAA0, { .reversed = false });
     RH_ScopedOverloadedInstall(RegisterCorona, "type", 0x6FC180, void(*)(uint32, CEntity*, uint8, uint8, uint8, uint8, const CVector&, float, float, RwTexture*, eCoronaFlareType, bool, bool, int32, float, bool, float, uint8, float, bool, bool reflectionDelay), { .reversed = false });
     RH_ScopedOverloadedInstall(RegisterCorona, "texture", 0x6FC580, void(*)(uint32, CEntity*, uint8, uint8, uint8, uint8, const CVector&, float, float, eCoronaType, eCoronaFlareType, bool, bool, int32, float, bool, float, uint8, float, bool, bool reflectionDelay), { .reversed = false });
@@ -129,16 +129,7 @@ void CCoronas::Render() {
             continue;
         }
 
-        // Figure out position to use for rendering
-        const auto covidPos = [&]{
-            if (!c.m_pAttachedTo) {
-                return c.m_vPosn;
-            }
-            if (c.m_pAttachedTo->GetType() == ENTITY_TYPE_VEHICLE && c.m_pAttachedTo->AsVehicle()->IsSubBike()) {
-                return c.m_pAttachedTo->AsBike()->m_mLeanMatrix * c.m_vPosn;
-            }
-            return c.m_pAttachedTo->GetMatrix() * c.m_vPosn;
-        }();
+        const auto covidPos = c.GetPosition();
 
         //< 0x6FB009 - Get on-screen position, and check if it's on it
         CVector   onScrPos;
@@ -161,8 +152,8 @@ void CCoronas::Render() {
 
         const auto rz = 1.f / onScrPos.z;
 
-        // Start fading out at half the far clip distance
-        const auto intensity = (int16)((float)c.m_FadedIntensity * std::min(1.f, 1.f - invLerp(c.m_fFarClip / 2.f, c.m_fFarClip, onScrPos.z)));
+        //< 0x6FB0A7 - Start fading out at half the far clip distance
+        const auto intensity = (int16)((float)c.m_FadedIntensity * c.CalculateIntensity(onScrPos.z, c.m_fFarClip));
 
         //< 0x6FB0D9 - Enable/disable Z test if necessary
         if (c.m_bCheckObstacles == zTestEnable) {
@@ -279,12 +270,90 @@ void CCoronas::Render() {
         }
     }
     CSprite::FlushSpriteBuffer();
+
+    /* NOTE/BUG: Renderstates not restored? */
 }
 
 // Renders coronas reflections on a wet ground
 // 0x6FB630
 void CCoronas::RenderReflections() {
-    plugin::Call<0x6FB630>();
+    if (s_DebugSettings.DisableWetRoadReflections) {
+        return;
+    }
+
+    if (!s_DebugSettings.AlwaysRenderWetRoadReflections) {
+        // Check if the roads are wet enough
+        if (CWeather::WetRoads <= 0.f) {
+            for (auto& c : aCoronas) {
+                c.m_bHasValidHeightAboveGround = false;
+            }
+            return;
+        }
+    }
+
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDONE));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDONE));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(RwTextureGetRaster(gpCoronaTexture[3])));
+
+    const auto camPos = TheCamera.GetPosition();
+    for (auto&& [i, c] : notsa::enumerate(aCoronas)) {
+        const auto covidPos = c.GetPosition();
+        if (!c.m_bHasValidHeightAboveGround || ((i & 0xFF) + (CTimer::GetFrameCounter() & 0xFF) % 16) == 0) { //< Simplified code
+            bool bGroundFound;
+            const auto groundZ = CWorld::FindGroundZFor3DCoord(covidPos, &bGroundFound);
+            if (bGroundFound) { // NOTE/BUG: Weird.. Why not set it according to `bGroundFound` directly?
+                c.m_bHasValidHeightAboveGround = true;
+                c.m_fHeightAboveGround         = covidPos.z - groundZ;
+            }
+        }
+        if (!c.m_bHasValidHeightAboveGround) {
+            continue;
+        }
+        if (c.m_bHasValidHeightAboveGround >= 20.f) {
+            continue;
+        }
+        if (covidPos.z - c.m_fHeightAboveGround >= camPos.z) {
+            continue;
+        }
+        CVector   onScrPos;
+        CVector2D onScrSize;
+        if (!CSprite::CalcScreenCoors(covidPos - CVector{0.f, 0.f, 2 * c.m_fHeightAboveGround }, & onScrPos, & onScrSize.x, & onScrSize.y, true, true)) {
+            continue;
+        }
+        const auto clampedFarClip = std::min(55.f, c.m_fFarClip * 0.75f);
+        if (onScrPos.z >= clampedFarClip) {
+            continue;
+        }
+        const auto LerpColorC = [
+            t =   (s_DebugSettings.AlwaysRenderWetRoadReflections ? 1.f : CWeather::WetRoads)
+                * c.CalculateIntensity(onScrPos.z, clampedFarClip)
+                * invLerp(20.f, 0.f, c.m_fHeightAboveGround)
+                * 230.f
+        ](uint8 cc) {
+            return (uint8)((uint16)((float)cc * t) >> 8 & 0xFF); // divide by 256
+        };
+        CSprite::RenderBufferedOneXLUSprite(
+            { onScrPos.x, onScrPos.y, notsa::IsFixBugs() ? RwIm2DGetFarScreenZMacro() : RwIm2DGetNearScreenZMacro() },
+            onScrSize * CVector2D{0.75f, 2.f} * c.m_fSize,
+            LerpColorC(c.m_Color.r),
+            LerpColorC(c.m_Color.g),
+            LerpColorC(c.m_Color.b),
+            128,
+            1.f / RwCameraGetNearClipPlane(Scene.m_pRwCamera),
+            255
+        );
+    }
+    CSprite::FlushSpriteBuffer();
+
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
 }
 
 // Renders sun reflection on water

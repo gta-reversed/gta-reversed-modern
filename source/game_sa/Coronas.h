@@ -29,6 +29,11 @@ public:
 
     static uint16 (&ms_aEntityLightsOffsets)[8];
 
+    inline static struct { // NOTSA
+        bool DisableWetRoadReflections;
+        bool AlwaysRenderWetRoadReflections; // Ignored if if `DisableReflections == false`
+    } s_DebugSettings{};
+
 public:
     static void InjectHooks();
 
