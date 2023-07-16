@@ -34,7 +34,7 @@ project "gta_reversed"
         "../libs/imgui/backends", 
         "../libs/imgui/misc/cpp",
         "../libs/dxsdk",
-        "../libs/spdlog/include"
+        "../libs/spdlog/include",
         "../libs/tracy/public",
     }
     
@@ -46,7 +46,9 @@ project "gta_reversed"
 
         "TRACY_ENABLE",
         "TRACY_ON_DEMAND",
-        "TRACY_CALLSTACK"
+        "TRACY_CALLSTACK",
+
+        "SPDLOG_USE_STD_FORMAT"
     }
 
     links { 

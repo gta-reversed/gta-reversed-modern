@@ -152,10 +152,7 @@ project "spdlog"
     defines {
         "SPDLOG_COMPILED_LIB"
     }
-
-workspace "*"
-    defines { "SPDLOG_USE_STD_FORMAT" }
-
+    
 project "tracy"
     language "C++"
     kind "StaticLib"
@@ -230,4 +227,3 @@ project "tracy"
         "TRACY_ON_DEMAND",
         --"TRACY_NO_CODE_TRANSFER" -- Uncomment if you want callstacks to be working
     }
-    
