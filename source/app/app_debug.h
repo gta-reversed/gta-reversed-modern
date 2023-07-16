@@ -35,6 +35,8 @@ private:
 #define NOTSA_MAKE_LOGGER notsa::Logging::GetSingleton().Create
 
 #define NOTSA_LOG_DEBUG SPDLOG_DEBUG
+#define DEV_LOG NOTSA_LOG_DEBUG // Prefer using `NOTSA_LOG_DEBUG` [This macro will be eventually replaced by the latter]
+
 #define NOTSA_LOG_CRIT SPDLOG_CRITICAL
 #define NOTSA_LOG_ERR SPDLOG_ERROR
 #define NOTSA_LOG_TRACE SPDLOG_TRACE

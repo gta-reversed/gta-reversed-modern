@@ -38,14 +38,14 @@ char** GetVideoModeList() {
         gVideoModes[modeId] = nullptr;
         if ((videoMode.flags & rwVIDEOMODEEXCLUSIVE) == 0) {
 #ifdef VIDEO_MODE_LOGS
-            NOTSA_LOG_DEBUG("Unavailable video mode id={:02d}: {} X {} X {} [reason: video mode not exclusive]", modeId, videoMode.width, videoMode.height, videoMode.depth);
+            DEV_LOG("Unavailable video mode id={:02d}: {} X {} X {} [reason: video mode not exclusive]", modeId, videoMode.width, videoMode.height, videoMode.depth);
 #endif
             continue;
         }
 
         if (videoMode.width < APP_MINIMAL_WIDTH || videoMode.height < APP_MINIMAL_HEIGHT) {
 #ifdef VIDEO_MODE_LOGS
-            NOTSA_LOG_DEBUG("Unavailable video mode id={:02d}: {} X {} X {} [reason: size]", modeId, videoMode.width, videoMode.height, videoMode.depth);
+            DEV_LOG("Unavailable video mode id={:02d}: {} X {} X {} [reason: size]", modeId, videoMode.width, videoMode.height, videoMode.depth);
 #endif
             continue;
         }
@@ -53,7 +53,7 @@ char** GetVideoModeList() {
         float fRatio = float(videoMode.height) / float(videoMode.width);
         if (!IS_FULLSCREEN_RATIO(fRatio) && !IS_WIDESCREEN_RATIO(fRatio)) {
 #ifdef VIDEO_MODE_LOGS
-            NOTSA_LOG_DEBUG("Unavailable video mode id={:02d}: {} X {} X {} [reason: ratio {:0.2f}]", modeId, videoMode.width, videoMode.height, videoMode.depth, fRatio);
+            DEV_LOG("Unavailable video mode id={:02d}: {} X {} X {} [reason: ratio {:0.2f}]", modeId, videoMode.width, videoMode.height, videoMode.depth, fRatio);
 #endif
             continue;
         }
@@ -68,7 +68,7 @@ char** GetVideoModeList() {
         sprintf_s(gVideoModes[modeId], 100 * sizeof(char), "%lu X %lu X %lu", videoMode.width, videoMode.height, videoMode.depth); // rwsprintf
 
 #ifdef VIDEO_MODE_LOGS
-        NOTSA_LOG_DEBUG("Available video mode id={:02d}: {}", modeId, gVideoModes[modeId]);
+        DEV_LOG("Available video mode id={:02d}: {}", modeId, gVideoModes[modeId]);
 #endif
     }
 
@@ -93,7 +93,7 @@ void SetVideoMode(int32 mode) {
     assert(mode < RwEngineGetNumVideoModes());
 
 #ifdef VIDEO_MODE_LOGS
-    NOTSA_LOG_DEBUG("Changing Video Mode to {} ({})", mode, gVideoModes ? gVideoModes[mode] : "unknown");
+    DEV_LOG("Changing Video Mode to {} ({})", mode, gVideoModes ? gVideoModes[mode] : "unknown");
 #endif
 
     RwD3D9ChangeVideoMode(mode);

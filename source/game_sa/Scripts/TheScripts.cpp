@@ -397,7 +397,7 @@ void CTheScripts::PrintListSizes() {
     for (CRunningScript* script = pActiveScripts; script; script = script->m_pNext) active++;
     for (CRunningScript* script = pIdleScripts; script; script = script->m_pNext) idle++;
 
-    NOTSA_LOG_DEBUG("Scripts Active: {}, Idle: {}", active, idle);
+    DEV_LOG("Scripts Active: {}, Idle: {}", active, idle);
 }
 
 uint32 DbgLineColour = 0x0000FFFF; // r = 0, g = 0, b = 255, a = 255

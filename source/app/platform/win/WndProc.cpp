@@ -378,7 +378,7 @@ LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
         if (dvletter < 'A' || (idev->dbcv_unitmask & (1 << dvletter)) == 0) {
             break;
         }
-        NOTSA_LOG_DEBUG("About to check CD drive");
+        DEV_LOG("About to check CD drive");
         CTimer::SetCodePause(true);
         if (CCutsceneMgr::IsRunning()) {
             CCutsceneMgr::SkipCutscene();
@@ -386,11 +386,11 @@ LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
         while (!AEAudioHardware.CheckDVD()) {
             FrontEndMenuManager.NoDiskInDriveMessage();
             if (FrontEndMenuManager.m_bQuitGameNoDVD) {
-                NOTSA_LOG_DEBUG("Exiting game as Audio CD was not inserted");
+                DEV_LOG("Exiting game as Audio CD was not inserted");
                 break;
             }
         }
-        NOTSA_LOG_DEBUG("GTA Audio DVD has been inserted");
+        DEV_LOG("GTA Audio DVD has been inserted");
         CTimer::SetCodePause(false);
         break;
     }

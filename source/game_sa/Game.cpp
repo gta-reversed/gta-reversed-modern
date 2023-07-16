@@ -449,7 +449,7 @@ bool CGame::Init2(const char* datFile) {
     CDraw::ms_fLODDistance = 0.0f;
 
     if (!CCustomCarPlateMgr::Initialise()) {
-        NOTSA_LOG_DEBUG("[CGame::Init2] CCustomCarPlateMgr::Initialise() failed");
+        DEV_LOG("[CGame::Init2] CCustomCarPlateMgr::Initialise() failed");
         return false;
     }
 

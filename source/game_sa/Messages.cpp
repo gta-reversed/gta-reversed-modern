@@ -56,7 +56,7 @@ tMessage* FindUnusedMsgInArray(std::array<tMessage, N>& arr) {
             return &msg;
         }
     }
-    NOTSA_LOG_DEBUG("No free brief message found!");
+    DEV_LOG("No free brief message found!");
     return nullptr;
 }
 
@@ -481,7 +481,7 @@ void CMessages::InsertPlayerControlKeysInString(char* string) {
 
         // If not found, skip `~k`, as that for sure won't be a valid format string the next time. (This way ~k~k would still work)
         if (!pNameEnd) {
-            NOTSA_LOG_DEBUG("Closing tag of ~k~ not found [String: {}]", haystack);
+            DEV_LOG("Closing tag of ~k~ not found [String: {}]", haystack);
             SkipTo(pHS + 2);
             continue;
         }
@@ -493,7 +493,7 @@ void CMessages::InsertPlayerControlKeysInString(char* string) {
         // If not found we know the location of the next `~`, so skip to there
         if (actionId == (uint16)-1) {
             SkipTo(pNameEnd);
-            NOTSA_LOG_DEBUG("Invalid action name({}) [String: {}]", std::string_view{ pNeedle, pNameEnd }, haystack);
+            DEV_LOG("Invalid action name({}) [String: {}]", std::string_view{ pNeedle, pNameEnd }, haystack);
             continue;
         }
 

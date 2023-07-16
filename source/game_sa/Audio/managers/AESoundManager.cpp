@@ -53,7 +53,7 @@ bool CAESoundManager::Initialise() {
     m_nPauseUpdateTime = 0;
     m_bManuallyPaused = false;
 
-    NOTSA_LOG_DEBUG("Initialised SoundManager");
+    DEV_LOG("Initialised SoundManager");
     return true;
 }
 

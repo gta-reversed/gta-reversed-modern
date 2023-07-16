@@ -159,7 +159,7 @@ void PedDebugModule::RenderWindow() {
             };
 
             if (!CalcScreenCoors(ped.GetBonePosition(BONE_HEAD) + ped.GetRightVector() * 0.5f, &pi.posScreen)) {
-                NOTSA_LOG_DEBUG("Failed to calculate on-screen coords of ped");
+                DEV_LOG("Failed to calculate on-screen coords of ped");
                 return std::nullopt;
             }
                

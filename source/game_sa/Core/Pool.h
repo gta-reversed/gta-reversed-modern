@@ -164,7 +164,7 @@ public:
                 if (bReachedTop) {
                     m_nFirstFree = -1;
                     if constexpr (DontDebugCheckAlloc) {
-                        NOTSA_LOG_DEBUG("Allocataion failed!"); // Code can handle alloc failures
+                        DEV_LOG("Allocataion failed!"); // Code can handle alloc failures
                     } else {
                         NOTSA_DEBUG_BREAK(); // Code can't handle alloc failures, so break
                     }

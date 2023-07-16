@@ -785,11 +785,11 @@ void CPathFind::UpdateStreaming(bool bForceStreaming) {
                         ? STREAMING_MISSION_REQUIRED
                         : STREAMING_KEEP_IN_MEMORY
                 );
-                NOTSA_LOG_DEBUG("Requested area: %i", (int)areaId);
+                DEV_LOG("Requested area: %i", (int)areaId);
             }
         } else if (IsAreaLoaded(areaId)) {
             CStreaming::RemoveModel(DATToModelId(areaId));
-            NOTSA_LOG_DEBUG("Removed area: %i", (int)areaId);
+            DEV_LOG("Removed area: %i", (int)areaId);
         }
     }
 }

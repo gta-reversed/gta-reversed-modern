@@ -224,7 +224,7 @@ void cHandlingDataMgr::LoadHandlingData() {
             NOTSA_UNREACHABLE("Failed to process handling. [Line: {}; #Tokens Read: {}]", nline, ret);
         }
     }
-    NOTSA_LOG_DEBUG("Successfully loaded {}x handlings for {}x vehicles!", nLoadedHandlings, nLoadedVehHandlings);
+    DEV_LOG("Successfully loaded {}x handlings for {}x vehicles!", nLoadedHandlings, nLoadedVehHandlings);
 }
 
 // 0x005BF3D0
@@ -367,6 +367,6 @@ int32 cHandlingDataMgr::FindExactWord(const char* name, const char* nameTable, u
             return i;
         }
     }
-    NOTSA_LOG_DEBUG("Vehicle name not found in table: {}", name);
+    DEV_LOG("Vehicle name not found in table: {}", name);
     return -1;
 }
