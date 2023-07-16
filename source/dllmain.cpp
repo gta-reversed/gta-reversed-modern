@@ -30,6 +30,7 @@ void WaitForDebugger() {
 static constexpr auto DEFAULT_INI_FILENAME = "gta-reversed.ini";
 
 #include "extensions/Configs/FastLoader.hpp"
+#include "extensions/Configs/WindowedMode.hpp"
 
 void LoadConfigurations() {
     // Firstly load the INI into the memory.
@@ -37,6 +38,7 @@ void LoadConfigurations() {
 
     // Then load all specific configurations.
     g_FastLoaderConfig.Load();
+    g_WindowedModeConfig.Load();
     // ...
 }
 
