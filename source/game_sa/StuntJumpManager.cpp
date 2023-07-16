@@ -20,6 +20,8 @@ void CStuntJumpManager::InjectHooks() {
 
 // 0x49CA50
 void CStuntJumpManager::Init() {
+    ZoneScoped;
+
     mp_poolStuntJumps = new CStuntJumpsPool(STUNT_JUMP_COUNT, "Stunt Jumps");
     m_bActive = true;
 }
@@ -85,6 +87,8 @@ void CStuntJumpManager::AddOne(const CBoundingBox& start, const CBoundingBox& en
 
 // 0x49C490
 void CStuntJumpManager::Update() {
+    ZoneScoped;
+
     if (!mp_poolStuntJumps || CReplay::Mode == MODE_PLAYBACK)
         return;
 

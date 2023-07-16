@@ -1613,6 +1613,8 @@ void CPopulation::ConvertToDummyObject(CObject* object) {
 
 // 0x614720
 bool CPopulation::AddToPopulation(float arg0, float arg1, float arg2, float arg3) {
+    ZoneScoped;
+
     return ((bool(__cdecl*)(float, float, float, float))0x614720)(arg0, arg1, arg2, arg3);
 }
 
@@ -1626,6 +1628,8 @@ int32 CPopulation::GeneratePedsAtAttractors(
     int32   decisionMaker,
     int32   numPedsToCreate
 ) {
+    ZoneScoped;
+
     if (!numPedsToCreate) {
         return 0;
     }
@@ -1718,6 +1722,8 @@ int32 CPopulation::GeneratePedsAtAttractors(
 
 // 0x615C90
 void CPopulation::GeneratePedsAtStartOfGame() {
+    ZoneScoped;
+
     const auto minRadius = 10.f, maxRadius = 50.5f * PedCreationDistMultiplier();
     
     for (int32 i = 100; i --> 0;) { // "down to" operator in use
@@ -1770,26 +1776,36 @@ void CPopulation::ManageAllPopulation() {
 
 // 0x616190
 void CPopulation::ManagePopulation() {
+    ZoneScoped;
+
     // TODO: Implement original `framecounter % 32` pool splitting logic
     //       It's just a perf optimization, so I didn't bother
 
     const auto& center = FindPlayerCentreOfWorld();
-
-    for (auto& obj : GetObjectPool()->GetAllValid()) {
-        ManageObject(&obj, center);
+    {
+        ZoneScopedN("Manage Objects");
+        for (auto& obj : GetObjectPool()->GetAllValid()) {
+            ManageObject(&obj, center);
+        }
     }
-
-    for (auto& dummy : GetDummyPool()->GetAllValid()) {
-        ManageDummy(&dummy, center);
+    {
+        ZoneScopedN("Manage Dummies");
+        for (auto& dummy : GetDummyPool()->GetAllValid()) {
+            ManageDummy(&dummy, center);
+        }
     }
-
-    for (auto& ped : GetPedPool()->GetAllValid()) {
-        ManagePed(&ped, center);
+    {
+        ZoneScopedN("Manage Peds");
+        for (auto& ped : GetPedPool()->GetAllValid()) {
+            ManagePed(&ped, center);
+        }
     }
 }
 
 // 0x616300
 void CPopulation::RemovePedsIfThePoolGetsFull() {
+    ZoneScoped;
+
     if (CTimer::GetFrameCounter() % 8 != 5) {
         return;
     }
@@ -1859,6 +1875,8 @@ void CPopulation::PopulateInterior(int32 numPedsToCreate, CVector pos) {
 
 // 0x616650
 void CPopulation::Update(bool generatePeds) {
+    ZoneScoped;
+
     generatePeds = true;
     CurrentWorldZone = [] {
         switch (CWeather::WeatherRegion) {
@@ -1926,6 +1944,8 @@ uint32 CPopulation::CalculateTotalNumGangPeds() {
 
 // NOTSA - Moved here for reuseability
 void CPopulation::UpdatePedCounts() {
+    ZoneScoped;
+
     ms_nTotalGangPeds = CalculateTotalNumGangPeds();
     ms_nTotalCivPeds = ms_nNumCivMale + ms_nNumCivFemale;
     ms_nTotalPeds = ms_nTotalCivPeds + ms_nTotalGangPeds + ms_nNumCop + ms_nNumEmergency;

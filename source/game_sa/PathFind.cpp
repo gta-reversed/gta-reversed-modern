@@ -112,6 +112,8 @@ void CPathNode::InjectHooks() {
 
 // 0x44D080
 void CPathFind::Init() {
+    ZoneScoped;
+
     static int32 NumTempExternalNodes = 0; // Unused
     m_nNumForbiddenAreas = 0;
     m_loadAreaRequestPending = false;
@@ -723,6 +725,8 @@ CNodeAddress CPathFind::FindNodeClosestToCoors(
 
 // 0x450A60
 void CPathFind::UpdateStreaming(bool bForceStreaming) {
+    ZoneScoped;
+
     // The time thingy I think is some kind of `% 512`, not sure yet, will have to figure it out.
     if (!s_bLoadPathsNeeded && !bForceStreaming && (CTimer::m_snTimeInMilliseconds ^ CTimer::m_snPreviousTimeInMilliseconds) < 512) {
         return;

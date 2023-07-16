@@ -154,6 +154,8 @@ void CWorld::ResetLineTestOptions() {
 
 // 0x5631E0
 void CWorld::Initialise() {
+    ZoneScoped;
+
     bDoingCarCollisions    = false;
     bNoMoreCollisionTorque = false;
     bIncludeDeadPeds       = false;
@@ -254,6 +256,8 @@ void CWorld::ProcessForAnimViewer() {
 
 // 0x563430
 void CWorld::ProcessPedsAfterPreRender() {
+    ZoneScoped;
+
     if (CTimer::bSkipProcessThisFrame)
         return;
 
@@ -1963,6 +1967,8 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
 
 // 0x5684A0
 void CWorld::Process() {
+    ZoneScoped;
+
     const auto IterateMovingList = [&](auto&& fn) {
         for (CPtrNodeDoubleLink* node = ms_listMovingEntityPtrs.GetNode(), *next{}; node; node = next) {
             next = node->m_next;
@@ -2009,6 +2015,8 @@ void CWorld::Process() {
 
     // Process moving entities (And possibly remove them from the world)
     {
+        ZoneScopedN("Process moving entities");
+
         const auto DoProcessMovingEntity = [&](CEntity* entity) {
             if (entity->m_bRemoveFromWorld) {
                 if (entity->IsPed()) {
@@ -2046,6 +2054,8 @@ void CWorld::Process() {
 
     g_LoadMonitor.StartTimer(true);
     if (CReplay::Mode == MODE_PLAYBACK) {
+        ZoneScopedN("Update entity RW");
+
         IterateMovingList([&](CEntity* entity) {
             entity->m_bIsInSafePosition = true;
             entity->UpdateRW();
@@ -2054,6 +2064,8 @@ void CWorld::Process() {
     } else {
         // Process collision
         {
+            ZoneScopedN("Process collision");
+
             const auto ProcessMovingEntityCollision = [](CEntity* entity) {
                 if (!entity->m_bIsInSafePosition) {
                     entity->ProcessCollision();
@@ -2092,6 +2104,8 @@ void CWorld::Process() {
 
         // Process "Shift" (Not sure what that is)
         {
+            ZoneScopedN("Process shift");
+
             bSecondShift = false;
 
             IterateMovingList([&](CEntity* entity) {

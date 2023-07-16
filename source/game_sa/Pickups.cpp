@@ -64,6 +64,8 @@ void CPickups::InjectHooks() {
 
 // 0x454A70
 void CPickups::Init() {
+    ZoneScoped;
+
     NumMessages = 0;
     for (auto& pickup : aPickUps) {
         pickup.m_nPickupType = PICKUP_NONE;
@@ -621,6 +623,8 @@ bool CPickups::TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, ePick
 
 // 0x458DE0
 void CPickups::Update() {
+    ZoneScoped;
+
     if (CReplay::Mode == MODE_PLAYBACK)
         return;
 

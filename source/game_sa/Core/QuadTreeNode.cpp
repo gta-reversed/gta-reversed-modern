@@ -218,6 +218,8 @@ bool CQuadTreeNode::InSector(const CRect& rect, int32 sector) const
 
 // 0x552C00
 void CQuadTreeNode::InitPool() {
+    ZoneScoped;
+
     if (ms_pQuadTreeNodePool)
         return;
 

@@ -149,6 +149,8 @@ void CInterestingEvents::Add(CInterestingEvents::EType type, CEntity* entity) {
 
 // 0x605A30
 void CInterestingEvents::ScanForNearbyEntities() {
+    ZoneScoped;
+
     return plugin::CallMethod<0x605A30, CInterestingEvents*>(this);
 
     if (!m_b1)

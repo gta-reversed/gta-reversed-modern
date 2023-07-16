@@ -8,7 +8,7 @@ project "gta_reversed"
     pchsource "StdInc.cpp"
  
     filter {"options:allow-script-cmd-hooks"}
-        defines { "ENABLE_SCRIPT_COMMAND_HOOKS" }   
+        defines { "ENABLE_SCRIPT_COMMAND_HOOKS" }
 
     filter {} -- Clear filter
 
@@ -35,6 +35,7 @@ project "gta_reversed"
         "../libs/imgui/misc/cpp",
         "../libs/dxsdk",
         "../libs/spdlog/include"
+        "../libs/tracy/public",
     }
     
     defines { 
@@ -42,6 +43,10 @@ project "gta_reversed"
         "USE_GTASA_ALLOCATOR", 
         "EXTRA_DEBUG_FEATURES", 
         "FIX_BUGS",
+
+        "TRACY_ENABLE",
+        "TRACY_ON_DEMAND",
+        "TRACY_CALLSTACK"
     }
 
     links { 
@@ -52,6 +57,7 @@ project "gta_reversed"
         "imgui",
         "spdlog",
         "imgui",
+        "tracy",
         "ddraw.lib",
         "Winmm.lib",
         "dxguid.lib",
@@ -74,5 +80,5 @@ project "gta_reversed"
         "../%{cfg.targetdir}/vorbisenc.lib",  
         "../%{cfg.targetdir}/imgui.lib", 
         "../libs/dxsdk/d3d9.lib", 
-        "../libs/dxsdk/dinput.lib"
+        "../libs/dxsdk/dinput.lib",
     }

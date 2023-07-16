@@ -366,6 +366,8 @@ bool CDarkel::CheckDamagedWeaponType(eWeaponType damageWeaponId, eWeaponType exp
 
 // 0x43DAC0
 void CDarkel::Update() {
+    ZoneScoped;
+
     if (!FrenzyOnGoing())
         return;
 

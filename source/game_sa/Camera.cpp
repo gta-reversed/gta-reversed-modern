@@ -555,6 +555,8 @@ void CCamera::DealWithMirrorBeforeConstructRenderList(bool bActiveMirror, CVecto
 /// III/VC leftover
 // 0x50B8F0
 void CCamera::RenderMotionBlur() {
+    ZoneScoped;
+
     if (m_nBlurType) {
         // CMBlur::MotionBlurRender(); // todo: Add CMBlur::MotionBlurRender is NOP, 0x71D700
     }
@@ -1316,6 +1318,8 @@ void CCamera::LerpFOV(float zoomInFactor, float zoomOutFactor, float timeLimit, 
 
 // 0x50B5D0
 void CCamera::ProcessFade() {
+    ZoneScoped;
+
     if (!m_bFading) {
         return;
     }
@@ -1498,6 +1502,8 @@ void CCamera::ProcessScriptedCommands() {
 
 // 0x52B730
 void CCamera::Process() {
+    ZoneScoped;
+
     plugin::CallMethod<0x52B730, CCamera*>(this);
 }
 

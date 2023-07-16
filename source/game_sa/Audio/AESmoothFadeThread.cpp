@@ -36,9 +36,9 @@ CAESmoothFadeThread::CAESmoothFadeThread() {
 void CAESmoothFadeThread::Initialise() {
     InitialiseRequestSlots();
     m_threadHandle = CreateThread(nullptr, 0, &CAESmoothFadeThread::SmoothFadeProc, this, CREATE_SUSPENDED, &m_dwThreadId);
-    if (m_threadHandle == INVALID_HANDLE_VALUE || !m_threadHandle) // NOTSA: nullptr check
+    if (m_threadHandle == INVALID_HANDLE_VALUE || !m_threadHandle) { // NOTSA: nullptr check
         m_bThreadCreated = false;
-    else {
+    } else {
         SetThreadPriority(m_threadHandle, 0);
         m_bThreadCreated = true;
         m_bThreadInvalid = false;
@@ -229,8 +229,14 @@ void CAESmoothFadeThread::SetBufferVolume(IDirectSoundBuffer* buffer, float volu
 }
 
 DWORD WINAPI CAESmoothFadeThread::SmoothFadeProc(void* smoothFade) {
+#ifdef TRACY_ENABLE
+    tracy::SetThreadName("AESmoothFadeThread");
+#endif
+
     auto* fade = static_cast<CAESmoothFadeThread*>(smoothFade);
     while (fade->m_bActive) {
+        ZoneScoped;
+
         fade->Service();
         Sleep(1);
     }

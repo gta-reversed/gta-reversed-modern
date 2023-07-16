@@ -26,6 +26,8 @@ void CAudioZones::InjectHooks() {
 
 // 0x5081A0
 void CAudioZones::Init() {
+    ZoneScoped;
+
     m_NumSpheres = 0;
     m_NumBoxes = 0;
     m_NumActiveSpheres = 0;
@@ -65,5 +67,7 @@ void CAudioZones::SwitchAudioZone(char* zoneName, bool enable) {
 
 // 0x5083C0
 void CAudioZones::Update(bool a1, CVector posn) {
+    ZoneScoped;
+
     plugin::Call<0x5083C0, bool, CVector>(a1, posn);
 }

@@ -64,6 +64,7 @@ target_link_libraries(${RE_PROJECT_LIB_NAME} PRIVATE
     vorbisfile
     imgui
     spdlog
+    Tracy::TracyClient
     ddraw
     Winmm
     dxguid
@@ -71,6 +72,7 @@ target_link_libraries(${RE_PROJECT_LIB_NAME} PRIVATE
     dsound
     d3d9
 )
+
 if(WIN32) 
     if(MSVC) # MSVC knows how to find dbghelp on it's own
         target_link_libraries(${RE_PROJECT_LIB_NAME} PRIVATE

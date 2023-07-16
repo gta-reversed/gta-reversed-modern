@@ -32,6 +32,8 @@ void CPools::InjectHooks() {
 
 // 0x550F10
 void CPools::Initialise() {
+    ZoneScoped;
+
     plugin::Call<0x550F10>();
     /*
     CMemoryMgr::PushMemId(MEM_POOLS);

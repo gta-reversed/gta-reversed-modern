@@ -253,6 +253,8 @@ void CPostEffects::SetupBackBufferVertex() {
 
 // 0x7046A0
 void CPostEffects::Update() {
+    ZoneScoped;
+
     m_bRainEnable = CWeather::Rain > 0.0f;
     if (!pRasterFrontBuffer) {
         SetupBackBufferVertex();
@@ -753,5 +755,7 @@ void CPostEffects::Radiosity(int32 intensityLimit, int32 filterPasses, int32 ren
 
 // 0x7046E0
 void CPostEffects::Render() {
+    ZoneScoped;
+
     plugin::Call<0x7046E0>();
 }

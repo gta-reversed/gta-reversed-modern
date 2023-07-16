@@ -321,6 +321,8 @@ void CPopCycle::PlayerKilledADealer() {
 
 // 0x610BF0
 void CPopCycle::Update() {
+    ZoneScoped;
+
     m_nCurrentTimeOfWeek = [] {
         switch (CClock::GetGameWeekDay()) {
         case 0: // Not sure (Maybe Sunday)

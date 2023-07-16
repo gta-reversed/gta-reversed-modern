@@ -570,6 +570,8 @@ void CWaterLevel::SplitWaterRectangleAlongYLine(int32 splitAtY, int32 minX, int3
 
 // 0x6EB710
 void CWaterLevel::PreRenderWater() {
+    ZoneScoped;
+
     if (CGame::CanSeeWaterFromCurrArea()) {
         ScanThroughBlocks();
         UpdateFlow();
@@ -659,6 +661,8 @@ bool CWaterLevel::GetWaterDepth(const CVector& vecPos, float* pOutWaterDepth, fl
 
 // 0x6E7760
 void CWaterLevel::RenderWaterFog() {
+    ZoneScoped;
+
     plugin::Call<0x6E7760>();
 }
 

@@ -1078,7 +1078,7 @@ void CPed::GrantAmmo(eWeaponType weaponType, uint32 ammo) {
     if (wepSlot != -1) {
         auto& wepInSlot = GetWeaponInSlot(wepSlot);
 
-        wepInSlot.m_nTotalAmmo = std::min(ammo, 99'999u); // Clamp upper
+        wepInSlot.m_nTotalAmmo = std::min(wepInSlot.m_nTotalAmmo + ammo, 99'999u); // Clamp upper
 
         // TODO: Inlined
         if (wepInSlot.m_nState == WEAPONSTATE_OUT_OF_AMMO) {

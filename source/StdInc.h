@@ -35,6 +35,8 @@ namespace rngv = std::views;
 #include "HookSystem.h"
 #include "reversiblehooks\ReversibleHooks.h"
 
+#include <tracy/Tracy.hpp>
+
 // DirectX
 #include <d3d9.h>
 #define DIRECTINPUT_VERSION 0x0800
