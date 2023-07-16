@@ -45,6 +45,8 @@ int32 CTheCarGenerators::CreateCarGenerator(CVector posn, float angle, int32 mod
 
 // 0x6F3270
 void CTheCarGenerators::Init() {
+    ZoneScoped;
+
     NumOfCarGenerators = 0;
     ProcessCounter = 0;
     GenerateEvenIfPlayerIsCloseCounter = 0;
@@ -79,6 +81,8 @@ void CTheCarGenerators::Load() {
 
 // 0x6F3F40
 void CTheCarGenerators::Process() {
+    ZoneScoped;
+
     if (FindPlayerTrain() || CCutsceneMgr::IsCutsceneProcessing() || CReplay::Mode == MODE_PLAYBACK)
         return;
 

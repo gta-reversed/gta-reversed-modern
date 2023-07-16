@@ -83,6 +83,8 @@ void CReplay::Init() {
 
 // 0x460500
 void CReplay::Update() {
+    ZoneScoped;
+
     if (CCutsceneMgr::IsCutsceneProcessing() || CPad::GetPad()->ArePlayerControlsDisabled()
         || FrontEndMenuManager.m_bMenuActive || CEntryExitManager::ms_exitEnterState) {
         Init();

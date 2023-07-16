@@ -27,6 +27,8 @@ void CCover::InjectHooks() {
 
 // 0x698710
 void CCover::Init() {
+    ZoneScoped;
+
     plugin::Call<0x698710>();
 }
 
@@ -51,6 +53,8 @@ bool CCover::ShouldThisBuildingHaveItsCoverPointsCreated(CBuilding* building) {
 
 // 0x6997E0
 void CCover::Update() {
+    ZoneScoped;
+
     plugin::Call<0x6997E0>();
 }
 

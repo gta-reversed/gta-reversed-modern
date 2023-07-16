@@ -129,6 +129,8 @@ void CCoronas::Shutdown() {
 // Updates coronas
 // 0x6FADF0
 void CCoronas::Update() {
+    ZoneScoped;
+
     plugin::Call<0x6FADF0>();
 
     /**
@@ -157,6 +159,8 @@ void CCoronas::Update() {
 
 // 0x6FAEC0
 void CCoronas::Render() {
+    ZoneScoped;
+
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDONE));
@@ -521,6 +525,8 @@ void CCoronas::UpdateCoronaCoors(uint32 id, const CVector& posn, float farClip, 
 // Draw sun (Moon went to CClouds since SA)
 // 0x6FC5A0
 void CCoronas::DoSunAndMoon() {
+    ZoneScoped;
+
     if (!CGame::CanSeeOutSideFromCurrArea()) {
         return;
     }

@@ -35,8 +35,9 @@ void CTagManager::InjectHooks()
 }
 
 // 0x49CC50
-void CTagManager::Init()
-{
+void CTagManager::Init() {
+    ZoneScoped;
+
     ms_numTags = 0;
     ms_numTagged = 0;
 }
