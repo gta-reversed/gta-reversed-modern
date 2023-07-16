@@ -52,6 +52,8 @@ void CMissionCleanup::RemoveEntityFromList(int32 handle, MissionCleanUpEntityTyp
  * @addr 0x4652D0
  */
 void CMissionCleanup::CheckIfCollisionHasLoadedForMissionObjects() {
+    ZoneScoped;
+
     ((void(__thiscall*)(CMissionCleanup*))0x4652D0)(this);
 }
 
