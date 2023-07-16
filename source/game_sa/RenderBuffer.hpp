@@ -61,12 +61,12 @@ void PushVertex(CVector pos, CVector2D uv, CRGBA color);
 * @addr notsa
 * @brief Push an index into the buffer. Not to be used with `StartStoring`!
 */
-void PushIndex(RwImVertexIndex idx, bool useCurrentVtxAsBase);
+void PushIndex(int32 idx, bool useCurrentVtxAsBase);
 
 
 /*!
 * @addr notsa
 * @brief Push multiple indices into the buffer. Not to be used with `StartStoring`!
 */
-void PushIndices(std::initializer_list<RwImVertexIndex> idxs, bool useCurrentVtxAsBase);
+void PushIndices(std::initializer_list<int32> idxs, bool useCurrentVtxAsBase);
 }; // namespace RenderBuffer

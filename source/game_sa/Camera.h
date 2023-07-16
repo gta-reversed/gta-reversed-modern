@@ -34,6 +34,12 @@ enum class eSwitchType : uint16 {
     JUMPCUT
 };
 
+/* todo:
+  LOOKING_BEHIND = 0x0,
+  LOOKING_LEFT = 0x1,
+  LOOKING_RIGHT = 0x2,
+  LOOKING_FORWARD = 0x3,
+*/
 enum eLookingDirection {
     LOOKING_DIRECTION_UNKNOWN_1 = 0,
     LOOKING_DIRECTION_BEHIND    = 1,

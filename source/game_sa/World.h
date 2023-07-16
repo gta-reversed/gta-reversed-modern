@@ -153,7 +153,7 @@ public:
     static void FindMissionEntitiesIntersectingCube(const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehicles, bool peds, bool objects);
     static CEntity* FindNearestObjectOfType(int32 modelId, const CVector& point, float radius, bool b2D, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
     static float FindGroundZForCoord(float x, float y);
-    static float FindGroundZFor3DCoord(CVector coord, bool* outResult, CEntity** outEntity);
+    static float FindGroundZFor3DCoord(CVector coord, bool* outResult = nullptr, CEntity** outEntity = nullptr);
     static float FindRoofZFor3DCoord(float x, float y, float z, bool* outResult);
     static float FindLowestZForCoord(float x, float y);
     static void RepositionOneObject(CEntity* object);

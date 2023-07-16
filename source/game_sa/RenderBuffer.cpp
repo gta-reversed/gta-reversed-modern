@@ -93,12 +93,16 @@ void PushVertex(CVector pos, CVector2D uv, CRGBA color) {
 }
 
 // notsa
-void PushIndex(RwImVertexIndex idx, bool useCurrentVtxAsBase) {
-    aTempBufferIndices[uiTempBufferIndicesStored++] = useCurrentVtxAsBase ? uiTempBufferVerticesStored + idx : idx;
+void PushIndex(int32 idx, bool useCurrentVtxAsBase) {
+    idx = useCurrentVtxAsBase
+        ? (int32)uiTempBufferVerticesStored + idx
+        : idx;
+    assert(idx >= 0);
+    aTempBufferIndices[uiTempBufferIndicesStored++] = idx;
 }
 
 // notsa
-void PushIndices(std::initializer_list<RwImVertexIndex> idxs, bool useCurrentVtxAsBase) {
+void PushIndices(std::initializer_list<int32> idxs, bool useCurrentVtxAsBase) {
     for (auto idx : idxs) {
         PushIndex(idx, useCurrentVtxAsBase);
     }
