@@ -513,18 +513,18 @@ void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
 // From `CClouds::Render` [0x714019 - 0x71422A]
 void CClouds::Render_RenderLowClouds(float colorBalance) {
     constexpr CVector LOW_CLOUDS_COORDS[]{
-        {1.0f, 0.0f, 0.0f},
-        {0.7f, -0.7f, 1.0f},
-        {0.0f, -1.0f, 0.5f},
+        {1.0f,   0.0f, 0.0f},
+        {0.7f,  -0.7f, 1.0f},
+        {0.0f,  -1.0f, 0.5f},
         {-0.7f, -0.7f, 0.0f},
-        {-1.0f, 0.0f, 1.0f},
-        {-0.7f, 0.7f, 0.3f},
-        {0.0f, 1.0f, 0.9f},
-        {0.7f, 0.7f, 0.4f},
-        {0.8f, 0.4f, 1.3f},
-        {-0.8f, 0.4f, 1.4f},
-        {0.4f, -0.8f, 1.2f},
-        {0.4f, -0.8f, 1.7f},
+        {-1.0f,  0.0f, 1.0f},
+        {-0.7f,  0.7f, 0.3f},
+        {0.0f,   1.0f, 0.9f},
+        {0.7f,   0.7f, 0.4f},
+        {0.8f,   0.4f, 1.3f},
+        {-0.8f,  0.4f, 1.4f},
+        {0.4f,  -0.8f, 1.2f},
+        {0.4f,  -0.8f, 1.7f},
     };
 
     const auto colorR = CalculateColorWithBalance((uint8)CTimeCycle::m_CurrentColours.m_nLowCloudsRed, colorBalance);
@@ -545,7 +545,7 @@ void CClouds::Render_RenderLowClouds(float colorBalance) {
     for (const auto& offset : LOW_CLOUDS_COORDS) {
         CVector   cloudPosScr;
         CVector2D cloudSizeScr;
-        if (!CSprite::CalcScreenCoors(camPos + offset, &cloudPosScr, &cloudSizeScr.x, &cloudSizeScr.y, false, true)) {
+        if (!CSprite::CalcScreenCoors(camPos + offset * CVector{800.f, 800.f, 60.f} + CVector{0.f, 0.f, 40.f}, &cloudPosScr, &cloudSizeScr.x, &cloudSizeScr.y, false, true)) {
             continue;
         }
         CSprite::RenderBufferedOneXLUSprite_Rotate_Dimension(
