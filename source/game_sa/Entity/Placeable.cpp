@@ -209,6 +209,8 @@ void CPlaceable::ShutdownMatrixArray() {
 }
 
 void CPlaceable::InitMatrixArray() {
+    ZoneScoped;
+
     gMatrixList.Init(CPlaceable::NUM_MATRICES_TO_CREATE);
 }
 

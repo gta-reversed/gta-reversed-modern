@@ -24,6 +24,7 @@
 #include "./ImGuiDebugModule.hpp"
 #include "./ScriptDebugModule.hpp"
 #include "./CloudsDebugModule.hpp"
+#include "./AudioZonesDebugModule.h"
 
 DebugModules::DebugModules(ImGuiContext* ctx) :
     m_ImCtx(ctx)
@@ -51,6 +52,8 @@ void DebugModules::Render2D() {
 }
 
 void DebugModules::Render3D() {
+    ZoneScoped;
+
     for (auto& module : m_Modules) {
         module->Render3D();
     }
@@ -88,6 +91,7 @@ void DebugModules::CreateModules() {
     Add<TimeCycleDebugModule>(); // Visualization + Extra
     Add<CullZonesDebugModule>(); // Visualization + Extra
     Add<COcclusionDebugModule>(); // Visualization + Extra
+    Add<AudioZonesDebugModule>(); // Visualization + Extra
     Add<notsa::debugmodules::ImGui>(); // Stats + Extra
 }
 

@@ -72,6 +72,8 @@ void CClouds::Init() {
 
 // 0x712FF0
 void CClouds::Update() {
+    ZoneScoped;
+
     CloudRotation = std::sin(TheCamera.m_fOrientation - 0.85f) * CWeather::Wind * 0.001f + CloudRotation;
     IndividualRotation += (int32)((CTimer::GetTimeStep() * CWeather::Wind * 0.5f + 0.3f) * 60.0f);
 }
@@ -211,6 +213,8 @@ int32 CClouds::MovingFog_GetFirstFreeSlot() {
 
 // 0x716C90
 void CClouds::MovingFogRender() {
+    ZoneScoped;
+
     if (MovingFog_GetFXIntensity() == 0.f || !CGame::CanSeeOutSideFromCurrArea() && FindPlayerPed()->m_nAreaCode != AREA_CODE_NORMAL_WORLD)
         return;
 
@@ -1095,6 +1099,8 @@ float CClouds::VolumetricCloudsGetMaxDistance() {
 
 // 0x716380
 void CClouds::VolumetricCloudsRender() {
+    ZoneScoped;
+
     if (!s_DebugSettings.VolumetricClouds.Enabled) {
         return;
     }
