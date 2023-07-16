@@ -362,8 +362,8 @@ void CClouds::Render_MaybeRenderMoon(float colorBalance) {
 
     const auto moonSz = scrSize * ((float)CCoronas::MoonSize * 2.f + 4.f);
     CSprite::RenderOneXLUSprite(
-        moonPosScr.x, moonPosScr.y, z,
-        moonSz.x, moonSz.y,
+        { moonPosScr.x, moonPosScr.y, z },
+        moonSz,
         0, 0, 0, 255,
         rhw,
         255,
@@ -384,9 +384,9 @@ void CClouds::Render_MaybeRenderMoon(float colorBalance) {
         5.4f * (((float)CClock::GetGameClockDays() / 31.f - 0.5f)) // Slowly glide on the X axis according to current game day
     };
     CSprite::RenderOneXLUSprite(
-        moonMaskPosScr.x, moonMaskPosScr.y, z,
-        moonMaskSz.x, moonMaskSz.y,
-        0, 0, 0, 0, // NOTE/TODO: Alpha 0?
+        { moonMaskPosScr.x, moonMaskPosScr.y, z },
+        moonMaskSz,
+        0, 0, 0, 0,
         rhw,
         255,
         0,
@@ -402,8 +402,8 @@ void CClouds::Render_MaybeRenderMoon(float colorBalance) {
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,  RWRSTATE(FALSE));
 
     CSprite::RenderOneXLUSprite(
-        moonPosScr.x, moonPosScr.y, z,
-        moonSz.x, moonSz.y,
+        { moonPosScr.x, moonPosScr.y, z },
+        moonSz,
         colorRG, colorRG, (uint8)((float)colorB * 0.85f), 255,
         rhw,
         255,

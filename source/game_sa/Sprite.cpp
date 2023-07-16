@@ -110,8 +110,8 @@ void CSprite::Set4Vertices2D(RwD3D9Vertex*, float, float, float, float, float, f
 /* --- XLU Sprite --- */
 
 // 0x70D000
-void CSprite::RenderOneXLUSprite(float x, float y, float z, float halfWidth, float halfHeight, uint8 r, uint8 g, uint8 b, int16 a, float rhw, uint8 intensity, uint8 udir, uint8 vdir) {
-    plugin::Call<0x70D000, float, float, float, float, float, uint8, uint8, uint8, int16, float, uint8, uint8, uint8>(x, y, z, halfWidth, halfHeight, r, g, b, a, rhw, intensity, udir, vdir);
+void CSprite::RenderOneXLUSprite(CVector pos, CVector2D halfSize, uint8 r, uint8 g, uint8 b, int16 intensity, float rhw, uint8 a, uint8 udir, uint8 vdir) {
+    plugin::Call<0x70D000>(pos, halfSize, r, g, b, intensity, rhw, a, udir, vdir);
 }
 
 // 0x70D320
