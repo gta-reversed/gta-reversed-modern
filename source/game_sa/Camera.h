@@ -291,7 +291,7 @@ public:
     CVector         m_vecTrackLinear{};
     bool            m_bVecTrackLinearProcessed{};
     float           m_fShakeIntensity{};
-    float           m_fStartShakeTime{};
+    float           m_fStartShakeTime{}; ///< In MS [Obtained from `CTimer::GetTimeInMS()`]
     float           m_fEndShakeTime{};
     int32           field_C9C{};
     int32           m_nShakeType{};
