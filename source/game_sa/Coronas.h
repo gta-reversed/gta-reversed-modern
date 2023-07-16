@@ -40,9 +40,25 @@ public:
     static void Init();
     static void Shutdown();
     static void Update();
+
+    /*!
+    * @addr 0x6FAEC0
+    * Renders the registered coronas
+    */
     static void Render();
+
+    /*!
+    * @addr 0x6FB630
+    * Renders registered coronas reflections on a wet roads ground
+    */
     static void RenderReflections();
+
+    /*!
+    * @addr 0x6FBAA0
+    * Renders sun's reflection on the water [sea]
+    */
     static void RenderSunReflection();
+
     static void RegisterCorona(uint32 id, CEntity* attachTo, uint8 red, uint8 green, uint8 blue, uint8 alpha, const CVector& posn,
                                float radius, float farClip, RwTexture* texture, eCoronaFlareType flareType, bool enableReflection, bool checkObstacles, int32 _param_not_used,
                                float angle, bool longDistance, float nearClip, uint8 fadeState, float fadeSpeed, bool onlyFromBelow, bool reflectionDelay);

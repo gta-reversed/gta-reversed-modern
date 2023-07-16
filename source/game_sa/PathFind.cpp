@@ -230,7 +230,7 @@ auto CPathFind::FindIntersection(const CNodeAddress& startNodeAddress, const CNo
         return nullptr;
     }
 
-    const auto& startNode = m_pPathNodes[startNodeAddress.m_wAreaId][startNodeAddress.m_wNodeId];
+    const auto& startNode = *GetPathNode(startNodeAddress);
     const auto& nodeLinks = m_pNodeLinks[startNodeAddress.m_wAreaId];
     for (auto i = 0u; i < startNode.m_nNumLinks; i++) {
         const auto linkedNodeIdx = startNode.m_wBaseLinkId + i;
@@ -584,6 +584,7 @@ void CPathFind::SwitchRoadsOffInAreaForOneRegion(float xMin, float xMax, float y
 // NOTSA
 CPathNode* CPathFind::GetPathNode(CNodeAddress address) {
     assert(address.IsValid());
+    assert(IsAreaNodesAvailable(address));
     return &m_pPathNodes[address.m_wAreaId][address.m_wNodeId];
 }
 
@@ -873,6 +874,8 @@ CNodeAddress CPathFind::FindNearestExteriorNodeToInteriorNode(int32 interiorId) 
 
 // 0x44E000
 void CPathFind::AddDynamicLinkBetween2Nodes_For1Node(CNodeAddress first, CNodeAddress second) {
+    assert(IsAreaNodesAvailable(first));
+
     auto& firstPathInfo = m_pPathNodes[first.m_wAreaId][first.m_wNodeId];
     auto numAddresses = m_anNumAddresses[first.m_wAreaId];
 

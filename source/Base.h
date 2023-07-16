@@ -130,9 +130,15 @@ template<typename... Ts>
 * @tparam T    The type of the variable
 * @param Addr  The address of it
 */
+template<typename T>
+T& StaticRef(uintptr addr) {
+    return *reinterpret_cast<T*>(addr);
+}
+
+// TODO: Replace this with the one above
 template<typename T, uintptr Addr>
 T& StaticRef() {
-    return *reinterpret_cast<T*>(Addr);
+    return StaticRef<T>(Addr);
 }
 
 #define _IGNORED_

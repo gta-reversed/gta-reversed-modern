@@ -144,11 +144,11 @@ public:
     //! Get vector perpendicular to `*this` on the right side (Same direction `*this` rotated by -90)
     //! Also see `GetPerpLeft` and `RotatedBy`
     //! (This sometimes is also called a 2D cross product https://stackoverflow.com/questions/243945 )
-    CVector2D GetPerpRight() const;
+    CVector2D GetPerpRight() const { return { y, -x }; }
 
     //! Get vector perpendicular to `*this` on the left side (Same direction `*this` rotated by 90)
     //! Also see `GetPerpRight` and `RotatedBy`
-    CVector2D GetPerpLeft() const;
+    CVector2D GetPerpLeft() const { return { -y, x }; }
 
     /*!
     * @notsa
