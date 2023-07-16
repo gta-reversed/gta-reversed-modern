@@ -417,6 +417,8 @@ void InjectHooksMain() {
     CLoadedCarGroup::InjectHooks();
     RenderBuffer::InjectHooks();
     CStaticShadow::InjectHooks();
+    CPedGroup::InjectHooks();
+    CPedGroupMembership::InjectHooks();
     CRealTimeShadowManager::InjectHooks();
     CRealTimeShadow::InjectHooks();
     CPopCycle::InjectHooks();
