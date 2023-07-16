@@ -378,7 +378,7 @@ void CTheScripts::StartTestScript() {
 void CTheScripts::Process() {
     ZoneScoped;
 
-    if (CReplay::Mode == 1) {
+    if (CReplay::Mode == MODE_PLAYBACK) {
         return;
     }
 
