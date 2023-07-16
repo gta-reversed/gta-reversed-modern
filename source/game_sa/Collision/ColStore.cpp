@@ -138,8 +138,9 @@ int32 CColStore::FindColSlot()
 }
 
 // 0x410EC0
-void CColStore::BoundingBoxesPostProcess()
-{
+void CColStore::BoundingBoxesPostProcess() {
+    ZoneScoped;
+
     for (auto i = 1; i < ms_pColPool->GetSize(); i++) {
         auto* def = ms_pColPool->GetAt(i);
         if (!def)
@@ -241,8 +242,9 @@ bool CColStore::HasCollisionLoaded(const CVector& pos, int32 areaCode)
 }
 
 // 0x4113D0
-void CColStore::LoadAllBoundingBoxes()
-{
+void CColStore::LoadAllBoundingBoxes() {
+    ZoneScoped;
+
     if (CColAccel::isCacheLoading())
         CColAccel::cacheLoadCol();
     else
@@ -250,8 +252,7 @@ void CColStore::LoadAllBoundingBoxes()
 }
 
 // 0x410E60
-void CColStore::LoadAllCollision()
-{
+void CColStore::LoadAllCollision() {
     for (auto i = 1; i < ms_pColPool->GetSize(); i++) {
         auto* def = ms_pColPool->GetAt(i);
         if (!def)
@@ -353,8 +354,9 @@ void CColStore::LoadCollision(CVector pos, bool bIgnorePlayerVeh)
 }
 
 // 0x410E00
-void CColStore::RemoveAllCollision()
-{
+void CColStore::RemoveAllCollision() {
+    ZoneScoped;
+
     for (auto i = 1; i < ms_pColPool->GetSize(); i++) {
         auto* def = ms_pColPool->GetAt(i);
         if (!def)

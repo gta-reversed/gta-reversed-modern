@@ -367,11 +367,15 @@ bool CTheScripts::HasVehicleModelBeenBlockedByScript(eModelID carModelId) {
 
 // 0x464D40
 void CTheScripts::StartTestScript() {
+    ZoneScoped;
+
     StartNewScript(MainSCMBlock);
 }
 
 // 0x46A000
 void CTheScripts::Process() {
+    ZoneScoped;
+
     plugin::Call<0x46A000>();
 }
 
@@ -648,5 +652,7 @@ void CTheScripts::RenderTheScriptDebugLines() {
 
 // 0x493E30
 void CTheScripts::RenderAllSearchLights() {
+    ZoneScoped;
+
     return plugin::Call<0x493E30>();
 }

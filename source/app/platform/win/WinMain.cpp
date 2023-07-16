@@ -15,6 +15,7 @@
 #include "WndProc.h"
 
 #include "extensions/Configs/FastLoader.hpp"
+#include "extensions/Configs/WindowedMode.hpp"
 
 constexpr auto NO_FOREGROUND_PAUSE = true;
 
@@ -45,18 +46,28 @@ bool InitApplication(HINSTANCE hInstance) {
 
 // 0x745560
 HWND InitInstance(HINSTANCE hInstance) {
+    // NOTSA/HACK: With this hack we can set a specific value for
+    // windowed mode. Also this is so stupid it needs to be changed
+    // after 'window-stretch-freeze' bug fixed.
+    RsGlobal.maximumWidth = g_WindowedModeConfig.WindowWidth;
+    RsGlobal.maximumHeight = g_WindowedModeConfig.WindowHeight;
+
+    RECT winRt;
+    GetClientRect(GetDesktopWindow(), &winRt);
+
     RECT rect = { 0, 0, RsGlobal.maximumWidth, RsGlobal.maximumHeight };
     AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
+    const auto width = rect.right - rect.left, height = rect.bottom - rect.top;
 
     return CreateWindowEx(
         0,
         APP_CLASS,
         RsGlobal.appName,
         WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT,
-        CW_USEDEFAULT,
-        rect.right - rect.left,
-        rect.bottom - rect.top,
+        (g_WindowedModeConfig.Centered) ? (winRt.right - winRt.left - width) / 2  : CW_USEDEFAULT,
+        (g_WindowedModeConfig.Centered) ? (winRt.bottom - winRt.top - height) / 2 : CW_USEDEFAULT,
+        width,
+        height,
         nullptr,
         nullptr,
         hInstance,
@@ -111,6 +122,8 @@ bool ProcessGameLogic(INT nCmdShow, MSG& Msg) {
         Sleep(100);
         return true;
     }
+    
+    FrameMark;
 
     // TODO: Move this out from here (It's not platform specific at all)
     switch (gGameState) {
@@ -259,8 +272,9 @@ void MainLoop(INT nCmdShow, MSG& Msg) {
     while (true) {
         RwInitialized = true;
 
-        RwV2d pos{ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
-        RsMouseSetPos(&pos);
+        // Useless, and annoying
+        //RwV2d pos{ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
+        //RsMouseSetPos(&pos);
 
         gamma.Init();
 
@@ -417,6 +431,6 @@ void InjectWinMainStuff() {
     RH_ScopedGlobalInstall(CommandLineToArgv, 0x746480, { .reversed = false });
 
     // Unhooking these 2 after the game has started will do nothing
-    RH_ScopedGlobalInstall(NOTSA_WinMain, 0x748710);
+    RH_ScopedGlobalInstall(NOTSA_WinMain, 0x748710, { .locked = true });
     RH_ScopedGlobalInstall(InitInstance, 0x745560);
 }

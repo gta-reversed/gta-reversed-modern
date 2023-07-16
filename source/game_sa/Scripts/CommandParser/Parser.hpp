@@ -59,19 +59,18 @@ inline OpcodeResult CollectArgsAndCall(CRunningScript* S, eScriptCommands comman
     }
 }
 
-//! Called for unimplemented commands
 //! That is, ones that aren't used anywhere.
 //! If this ever gets called, that means that the command is used after all, and shouldn't be hooked as unimplemented.
-inline auto NotImplemented(eScriptCommands cmd) {
-    DEV_LOG("Unimplemented command has been called! [ID: {:04X}; Name: {}]", (unsigned)(cmd), GetScriptCommandName(cmd));
-    NOTSA_DEBUGBREAK(); // Something went horribly wrong here, and the game will crash after this, so better stop here.
+inline auto NotImplemented(CRunningScript& S, eScriptCommands cmd) {
+    DEV_LOG("[{}][IP: {:#x} + {:#x}]: Unimplemented command has been called! [ID: {:04X}; Name: {}]", S.m_szName, LOG_PTR(S.m_pBaseIP), LOG_PTR(S.m_IP - S.m_pBaseIP), (unsigned)(cmd), GetScriptCommandName(cmd));
+    NOTSA_DEBUGBREAK(); // Something went horribly wrong here, and the game will crash after this [if the function is supposed to take/return any arguments], so better stop here.
     return OR_INTERRUPT; // Vanilla SA behavior
 }
 
 template<eScriptCommands Command, auto* CommandFn>
 inline OpcodeResult CommandParser(CRunningScript* S) {
     return detail::CollectArgsAndCall(S, Command, CommandFn);
-}
+} 
 
 template<eScriptCommands Command, auto* CommandFn>
 inline void AddCommandHandler() {

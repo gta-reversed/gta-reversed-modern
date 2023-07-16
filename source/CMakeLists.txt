@@ -30,7 +30,7 @@ function(supress_deps_warnings targets)
         )
     endforeach()
 endfunction()
-supress_deps_warnings(ogg imgui vorbisfile)
+supress_deps_warnings(ogg imgui vorbisfile spdlog)
 
 set_target_properties(${RE_PROJECT_LIB_NAME}
     PROPERTIES
@@ -63,6 +63,8 @@ target_link_libraries(${RE_PROJECT_LIB_NAME} PRIVATE
     ogg
     vorbisfile
     imgui
+    spdlog
+    Tracy::TracyClient
     ddraw
     Winmm
     dxguid
@@ -70,6 +72,17 @@ target_link_libraries(${RE_PROJECT_LIB_NAME} PRIVATE
     dsound
     d3d9
 )
+
+if(WIN32) 
+    if(MSVC) # MSVC knows how to find dbghelp on it's own
+        target_link_libraries(${RE_PROJECT_LIB_NAME} PRIVATE
+            dbghelp
+        )
+    else()
+        message(FATAL_ERROR "Need to link dbghelp lib for win32")
+    endif()
+endif()
+
 target_include_directories(${RE_PROJECT_LIB_NAME} PRIVATE
     /
     toolsmenu/

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DebugModules/DebugModules.h"
-#include "extensions/utility.hpp"
+#include <extensions/Singleton.hpp>
 
 namespace notsa {
 namespace ui {

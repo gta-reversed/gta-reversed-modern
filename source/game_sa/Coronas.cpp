@@ -47,12 +47,16 @@ void CCoronas::Shutdown() {
 // Updates coronas
 // 0x6FADF0
 void CCoronas::Update() {
+    ZoneScoped;
+
     plugin::Call<0x6FADF0>();
 }
 
 // Renders coronas
 // 0x6FAEC0
 void CCoronas::Render() {
+    ZoneScoped;
+
     plugin::Call<0x6FAEC0>();
 }
 
@@ -88,5 +92,7 @@ void CCoronas::UpdateCoronaCoors(uint32 id, const CVector& posn, float farClip, 
 // Draw sun (Moon went to CClouds since SA)
 // 0x6FC5A0
 void CCoronas::DoSunAndMoon() {
+    ZoneScoped;
+
     plugin::Call<0x6FC5A0>();
 }

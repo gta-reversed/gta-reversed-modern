@@ -8,8 +8,7 @@
 
 #include <numeric>
 #include <span>
-#include "PluginBase.h" // !!!
-#include "RenderWare.h"
+#include <rwplcore.h>
 #include "Vector2D.h"
 
 class CMatrix;

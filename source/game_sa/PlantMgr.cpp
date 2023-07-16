@@ -105,6 +105,8 @@ void CPlantMgr::InjectHooks() {
 
 // 0x5DD910
 bool CPlantMgr::Initialise() {
+    ZoneScoped;
+
     if (!ReloadConfig())
         return false;
 
@@ -303,6 +305,8 @@ void CPlantMgr::SetPlantFriendlyFlagInAtomicMI(CAtomicModelInfo* ami) {
 
 // 0x5DCFA0
 void CPlantMgr::Update(const CVector& cameraPosition) {
+    ZoneScoped;
+
     static int8& cache = *(int8*)0xC09171;
     static int8& section = *(int8*)0xC09170;
 
