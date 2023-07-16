@@ -10,9 +10,6 @@
 
 class CCoronas {
 public:
-    // sun 2d position
-    static float& SunScreenX;
-    static float& SunScreenY;
     // are there any obstacles between sun and camera
     static bool& SunBlockedByClouds;
     // change coronas brightness immediately

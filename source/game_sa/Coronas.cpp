@@ -2,10 +2,6 @@
 
 #include "Coronas.h"
 
-
-
-float& CCoronas::SunScreenX = *(float*)0xC3E028;
-float& CCoronas::SunScreenY = *(float*)0xC3E02C;
 //bool& CCoronas::SunBlockedByClouds = *(bool*)0x0;
 bool& CCoronas::bChangeBrightnessImmediately = *(bool*)0xC3E034;
 uint32& CCoronas::NumCoronas = *(uint32*)0xC3E038;
@@ -56,6 +52,7 @@ constexpr CFlareDefinition HeadLightsFlareDef[]{
     { -9.00f, 14.f, { 70,  50,  70  }, 200, 4 },
     {  0.00f, 0.0f, { 255, 255, 255 }, 255, 0 }
 };
+
 constexpr CFlareDefinition SunFlareDef[]{
     {  4.00f, 8.00f, { 36,  30,  24  }, 200, 4 },
     {  3.00f, 11.2f, { 24,  18,  15  }, 200, 4 },
@@ -100,7 +97,7 @@ void CCoronas::InjectHooks() {
     RH_ScopedOverloadedInstall(RegisterCorona, "texture", 0x6FC580, void(*)(uint32, CEntity*, uint8, uint8, uint8, uint8, const CVector&, float, float, eCoronaType, eCoronaFlareType, bool, bool, int32, float, bool, float, uint8, float, bool, bool reflectionDelay), { .reversed = false });
      
     RH_ScopedInstall(UpdateCoronaCoors, 0x6FC4D0, { .reversed = false });
-    RH_ScopedInstall(DoSunAndMoon, 0x6FC5A0, { .reversed = false });
+    RH_ScopedInstall(DoSunAndMoon, 0x6FC5A0);
 }
 
 // Initialises coronas
@@ -524,5 +521,46 @@ void CCoronas::UpdateCoronaCoors(uint32 id, const CVector& posn, float farClip, 
 // Draw sun (Moon went to CClouds since SA)
 // 0x6FC5A0
 void CCoronas::DoSunAndMoon() {
-    plugin::Call<0x6FC5A0>();
+    if (!CGame::CanSeeOutSideFromCurrArea()) {
+        return;
+    }
+
+    const auto vecToSun  = CTimeCycle::GetVectorToSun();
+    
+    if (vecToSun.z >= -0.1f) {
+        const auto DoRegisterCorona = [
+            coronaPos = vecToSun * (CDraw::GetFarClipZ() * 0.95f) + TheCamera.GetPosition()
+        ](uint32 id, eCoronaFlareType ftype, float radiusMult) {
+            const auto& cc = CTimeCycle::m_CurrentColours;
+            RegisterCorona(
+                id,
+                nullptr,
+                (uint8)cc.m_nSunCoreRed,
+                (uint8)cc.m_nSunCoreGreen,
+                (uint8)cc.m_nSunCoreBlue,
+                255u,
+                &coronaPos,
+                cc.m_fSunSize * radiusMult,
+                999999.88f,
+                gpCoronaTexture[0],
+                ftype,
+                false,
+                false,
+                0,
+                0.f,
+                false,
+                1.5f,
+                0,
+                15.f,
+                false,
+                false
+            );
+        };
+        DoRegisterCorona(1, FLARETYPE_NONE, 2.7335f);
+        if (vecToSun.z >= 0.f) { // Removed redudant check
+            DoRegisterCorona(2, FLARETYPE_SUN, 6.f);
+        }
+    }
+
+    // Dead code here
 }
