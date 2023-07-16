@@ -7,8 +7,8 @@
 #pragma once
 
 #include <span>
-
-#include "RenderWare.h"
+#include <rwplcore.h>
+#include <Base.h>
 
 class CVector;
 

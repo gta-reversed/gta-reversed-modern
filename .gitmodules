@@ -8,6 +8,9 @@
 	path = libs/imgui
 	url = ../../ocornut/imgui.git
 	branch = docking
+[submodule "libs/spdlog"]
+	path = libs/spdlog
+	url = git@github.com:gabime/spdlog.git
 [submodule "libs/tracy"]
 	path = libs/tracy
 	url = git@github.com:wolfpld/tracy.git

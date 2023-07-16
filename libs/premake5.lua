@@ -123,6 +123,36 @@ project "imgui"
         "imgui/misc/cpp" 
     }
 
+project "spdlog"
+    cppdialect "C++20"
+    kind "StaticLib"
+    targetname "spdlog"
+    warnings "Off"
+
+    vpaths {
+        ["Headers/*"] = {"spdlog/include/spdlog/**.*",},
+        ["Sources/*"] = {"spdlog/src/**.c*",},
+        ["*"] = {"premake5.lua", "CMakeLists.txt"}
+    }
+
+    files {
+        "spdlog/src/spdlog.cpp", 
+        "spdlog/src/stdout_sinks.cpp", 
+        "spdlog/src/color_sinks.cpp", 
+        "spdlog/src/file_sinks.cpp", 
+        "spdlog/src/async.cpp", 
+        "spdlog/src/cfg.cpp",
+        "spdlog/include/**"
+    }
+
+    includedirs {
+        "spdlog/include"
+    }
+
+    defines {
+        "SPDLOG_COMPILED_LIB"
+    }
+    
 project "tracy"
     language "C++"
     kind "StaticLib"
@@ -197,7 +227,3 @@ project "tracy"
         "TRACY_ON_DEMAND",
         --"TRACY_NO_CODE_TRANSFER" -- Uncomment if you want callstacks to be working
     }
-
-    --removefiles {
-    --    "tracy/public/server/**.*"
-    --}

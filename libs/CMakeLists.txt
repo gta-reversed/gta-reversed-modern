@@ -10,6 +10,10 @@ set(OGG_FOUND 1)
 
 add_subdirectory(vorbis EXCLUDE_FROM_ALL)
 
+option(SPDLOG_ENABLE_PCH "" ON)
+option(SPDLOG_USE_STD_FORMAT "" ON)
+add_subdirectory(spdlog EXCLUDE_FROM_ALL)
+
 #############################################################################################
 ############# create the imgui project
 #############################################################################################

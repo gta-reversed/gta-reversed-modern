@@ -58,9 +58,7 @@ struct tFrameVisibilityPlugin {
 VALIDATE_SIZE(tFrameVisibilityPlugin, 0x4);
 
 // TODO: Probably belongs inside `CVisibilityPlugins`
-static void weaponPedsForPc_Insert(CPed* ped) {
-    plugin::Call<0x5E46D0>(ped);
-}
+void weaponPedsForPc_Insert(CPed* ped);
 
 class CVisibilityPlugins {
 public:

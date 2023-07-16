@@ -34,6 +34,7 @@ project "gta_reversed"
         "../libs/imgui/backends", 
         "../libs/imgui/misc/cpp",
         "../libs/dxsdk",
+        "../libs/spdlog/include",
         "../libs/tracy/public",
     }
     
@@ -45,7 +46,9 @@ project "gta_reversed"
 
         "TRACY_ENABLE",
         "TRACY_ON_DEMAND",
-        "TRACY_CALLSTACK"
+        "TRACY_CALLSTACK",
+
+        "SPDLOG_USE_STD_FORMAT"
     }
 
     links { 
@@ -53,6 +56,8 @@ project "gta_reversed"
         "vorbis", 
         "vorbisenc", 
         "vorbisfile", 
+        "imgui",
+        "spdlog",
         "imgui",
         "tracy",
         "ddraw.lib",
@@ -63,7 +68,14 @@ project "gta_reversed"
         "d3d9.lib"
     }
 
+    filter "configurations:Debug*"
+        links { 
+            "dbghelp" 
+        }
+    filter {}
+
     libdirs { 
+        "../libs",
         "../%{cfg.targetdir}/ogg.lib", 
         "../%{cfg.targetdir}/vorbis.lib", 
         "../%{cfg.targetdir}/vorbisfile.lib", 
