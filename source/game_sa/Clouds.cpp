@@ -477,8 +477,8 @@ void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
         starSizeScr *= STARS_SIZES[posIdx] * 0.8f;
 
         CSprite::RenderBufferedOneXLUSprite(
-            starPosScr.x, starPosScr.y, starPosScr.z,
-            starSizeScr.x, starSizeScr.y,
+            starPosScr,
+            starSizeScr,
             cc, cc, cc, 255,
             1.f / starPosScr.z,
             255
@@ -496,8 +496,8 @@ void CClouds::Render_MaybeRenderRockstarLogo(float colorBalance) {
         lastStarSizeScr *= 5.f;
 
         CSprite::RenderBufferedOneXLUSprite(
-            lastStarPosScr.x, lastStarPosScr.y, lastStarPosScr.z,
-            lastStarSizeScr.x, lastStarSizeScr.y,
+            lastStarPosScr,
+            lastStarSizeScr,
             cc, cc, cc, 255,
             1.f / lastStarPosScr.z,
             255
@@ -596,8 +596,8 @@ void CClouds::Render_MaybeRenderRainbows() {
         rblineSizeScr *= CVector2D{ 2.f, 50.f };
 
         CSprite::RenderBufferedOneXLUSprite(
-            rblinePosScr.x, rblinePosScr.y, rblinePosScr.z,
-            rblineSizeScr.x, rblineSizeScr.y,
+            rblinePosScr,
+            rblineSizeScr,
             (uint8)((float)RAINBOW_LINES_COLOR_RED[i] * CWeather::Rainbow),
             (uint8)((float)RAINBOW_LINES_COLOR_GREEN[i] * CWeather::Rainbow),
             (uint8)((float)RAINBOW_LINES_COLOR_BLUE[i] * CWeather::Rainbow),
