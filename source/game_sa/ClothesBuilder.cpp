@@ -5,6 +5,8 @@
 CDirectory& playerImg = *(CDirectory*)0xBC12C0;
 CDirectory::DirectoryInfo& playerImgEntries = *(CDirectory::DirectoryInfo*)0xBBCDC8;
 
+auto& gBoneIndices = StaticRef<notsa::mdarray<int16, 10, 64>>(0xBBC8C8);
+
 void CClothesBuilder::InjectHooks() {
     RH_ScopedClass(CClothesBuilder);
     RH_ScopedCategoryGlobal();
@@ -27,7 +29,7 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedInstall(CopyGeometry, 0x5A5340, { .reversed = false });
     RH_ScopedInstall(ConstructGeometryArray, 0x5A55A0, { .reversed = false });
     RH_ScopedInstall(DestroySkinArrays, 0x5A56C0, { .reversed = false });
-    RH_ScopedInstall(BuildBoneIndexConversionTable, 0x5A56E0, { .reversed = false });
+    RH_ScopedInstall(BuildBoneIndexConversionTable, 0x5A56E0);
     RH_ScopedInstall(CopyTexture, 0x5A5730, { .reversed = false });
     RH_ScopedInstall(PlaceTextureOnTopOfTexture, 0x5A57B0, { .reversed = false });
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A5820, void (*)(RwTexture*, RwTexture*, float, float, int32));
@@ -138,8 +140,14 @@ void CClothesBuilder::DestroySkinArrays(RwMatrixWeights* weights, uint32* a2) {
 }
 
 // 0x5A56E0
-void CClothesBuilder::BuildBoneIndexConversionTable(uint8* a1, RpHAnimHierarchy* a2, int32 a3) {
-    plugin::Call<0x5A56E0, uint8*, RpHAnimHierarchy*, int32>(a1, a2, a3);
+void CClothesBuilder::BuildBoneIndexConversionTable(uint8* pTable, RpHAnimHierarchy* hier, int32 index) {
+    for (const auto [tableIdx, boneId] : notsa::enumerate(gBoneIndices[index])) {
+        if (boneId == -1) {
+            break;
+        }
+        const auto idx = RpHAnimIDGetIndex(hier, boneId);
+        pTable[tableIdx] = idx == 0xFF ? 0 : idx;
+    }
 }
 
 // 0x5A5730
