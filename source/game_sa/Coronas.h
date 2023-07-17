@@ -11,7 +11,7 @@
 class CCoronas {
 public:
     // are there any obstacles between sun and camera
-    static bool& SunBlockedByClouds;
+    static inline auto& SunBlockedByClouds = StaticRef<bool, 0xC3E030>();
     // change coronas brightness immediately
     static bool& bChangeBrightnessImmediately;
     // num of registered coronas in frame

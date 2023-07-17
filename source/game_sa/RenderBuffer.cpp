@@ -58,15 +58,25 @@ void StopStoring() {
     }
 }
 
-// 0x707800
-void RenderStuffInBuffer() {
+// NOTSA
+void Render(RwPrimitiveType primType, RwMatrix* ltm, RwUInt32 /*RwIm3DTransformFlags*/ flags, bool isIndexed) {
     if (uiTempBufferVerticesStored) {
-        if (RwIm3DTransform(aTempBufferVertices, uiTempBufferVerticesStored, nullptr, rwIM3D_VERTEXUV)) {
-            RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, aTempBufferIndices, uiTempBufferIndicesStored);
+        if (RwIm3DTransform(aTempBufferVertices, uiTempBufferVerticesStored, ltm, flags)) {
+            if (isIndexed) {
+                assert(aTempBufferIndices);
+                RwIm3DRenderIndexedPrimitive(primType, aTempBufferIndices, uiTempBufferIndicesStored);
+            } else {
+                RwIm3DRenderPrimitive(primType);
+            }
             RwIm3DEnd();
         }
     }
     ClearRenderBuffer();
+}
+
+// 0x707800
+void RenderStuffInBuffer() {
+    Render(rwPRIMTYPETRILIST, nullptr, rwIM3D_VERTEXUV);
 }
 
 // 0x707790
@@ -83,13 +93,23 @@ void RenderIfDoesntFit(int32 nIdxNeeded, int32 nVtxNeeded) {
 }
 
 // notsa
-void PushVertex(CVector pos, CVector2D uv, CRGBA color) {
+RwIm3DVertex* PushVertex(CVector pos, CRGBA color) {
     const auto vtx = &aTempBufferVertices[uiTempBufferVerticesStored++];
 
     RwIm3DVertexSetPos(vtx, pos.x, pos.y, pos.z);
     RwIm3DVertexSetRGBA(vtx, color.r, color.g, color.b, color.a);
+
+    return vtx;
+}
+
+// notsa
+RwIm3DVertex* PushVertex(CVector pos, CVector2D uv, CRGBA color) {
+    const auto vtx = PushVertex(pos, color);
+
     RwIm3DVertexSetU(vtx, uv.x);
     RwIm3DVertexSetV(vtx, uv.y);
+
+    return vtx;
 }
 
 // notsa
@@ -107,4 +127,9 @@ void PushIndices(std::initializer_list<int32> idxs, bool useCurrentVtxAsBase) {
         PushIndex(idx, useCurrentVtxAsBase);
     }
 }
+
+bool CanFitVertices(int32 nVtxNeeded) {
+    return uiTempBufferVerticesStored + nVtxNeeded <= VtxBufferSize;
+}
+
 }; // namespace RenderBuffer 
