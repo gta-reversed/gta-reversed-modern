@@ -9,8 +9,8 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedClass(CClothesBuilder);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(LoadCdDirectory, 0x5A4190, { .reversed = false });
-    RH_ScopedInstall(RequestGeometry, 0x5A41C0, { .reversed = false });
+    RH_ScopedInstall(LoadCdDirectory, 0x5A4190);
+    RH_ScopedInstall(RequestGeometry, 0x5A41C0);
     RH_ScopedInstall(RequestTexture, 0x5A4220, { .reversed = false }); 
     //RH_ScopedInstall(nullptr, 0x5A42B0, { .reversed = false }); 
     //RH_ScopedInstall(nullptr, 0x5A4380, { .reversed = false }); AtomicInstanceCB
@@ -54,8 +54,11 @@ void CClothesBuilder::LoadCdDirectory() {
 }
 
 // 0x5A41C0
-void CClothesBuilder::RequestGeometry(int32 modelId, uint32 crc) {
-    plugin::Call<0x5A41C0, int32, uint32>(modelId, crc);
+void CClothesBuilder::RequestGeometry(int32 modelId, uint32 modelNameKey) {
+    CModelInfo::GetModelInfo(modelId)->bHasComplexHierarchy = true; // TODO/NOTE: Not sure
+    uint32 offset, size;
+    VERIFY(playerImg.FindItem(CKeyGen::AppendStringToKey(modelNameKey, ".DFF"), offset, size));
+    CStreaming::RequestFile(modelId, offset, size, CClothes::ms_clothesImageId, STREAMING_PRIORITY_REQUEST | STREAMING_GAME_REQUIRED);
 }
 
 // 0x5A4220
