@@ -31,7 +31,7 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedInstall(DestroySkinArrays, 0x5A56C0, { .reversed = false });
     RH_ScopedInstall(BuildBoneIndexConversionTable, 0x5A56E0);
     RH_ScopedInstall(CopyTexture, 0x5A5730, { .reversed = false });
-    RH_ScopedInstall(PlaceTextureOnTopOfTexture, 0x5A57B0, { .reversed = false });
+    RH_ScopedInstall(PlaceTextureOnTopOfTexture, 0x5A57B0);
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A5820, void (*)(RwTexture*, RwTexture*, float, float, int32));
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A59C0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32));
     // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A5BC0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32, RwTexture*));
@@ -156,8 +156,27 @@ RwTexture* CClothesBuilder::CopyTexture(RwTexture* texture) {
 }
 
 // 0x5A57B0
-void CClothesBuilder::PlaceTextureOnTopOfTexture(RwTexture* texture1, RwTexture* texture2) {
-    plugin::Call<0x5A57B0, RwTexture*, RwTexture*>(texture1, texture2);
+void CClothesBuilder::PlaceTextureOnTopOfTexture(RwTexture* dstTex, RwTexture* srcTex) {
+    const auto dstRaster = RwTextureGetRaster(dstTex);
+    const auto srcRaster = RwTextureGetRaster(srcTex);
+
+    assert(RwRasterGetStride(dstRaster) == RwRasterGetStride(srcRaster));
+    assert(RwRasterGetWidth(dstRaster) == RwRasterGetWidth(srcRaster));
+    assert(RwRasterGetHeight(dstRaster) == RwRasterGetHeight(srcRaster));
+    assert(RwRasterGetDepth(dstRaster) == RwRasterGetDepth(srcRaster));
+
+    auto dstIt = RwRasterLock(dstRaster, 0, rwRASTERLOCKWRITE | rwRASTERLOCKREAD);
+    auto srcIt = RwRasterLock(srcRaster, 0, rwRASTERLOCKWRITE | rwRASTERLOCKREAD);
+
+    // NOTE: They don't skip the stride, but it's fine [This way vectorization should be easier for the compiler]
+    for (auto x = RwRasterGetHeight(srcRaster) * RwRasterGetWidth(srcRaster); x-- > 0; dstIt++, srcIt++) {
+        if (*srcIt & 0xFF000000) { // Check alpha != 0
+            *dstIt = *srcIt;
+        }
+    }
+
+    RwRasterUnlock(dstRaster);
+    RwRasterUnlock(srcRaster);
 }
 
 // 0x5A5820
