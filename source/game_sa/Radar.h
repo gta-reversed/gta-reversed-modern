@@ -203,10 +203,6 @@ public:
     static inline float& cachedCos = *(float*)0xBA8308;
     static inline float& cachedSin = *(float*)0xBA830C;
 
-    // original name unknown
-    static inline eRadarTraceHeight& legendTraceHeight = *(eRadarTraceHeight*)0xBAA350;
-    static inline uint32& legendTraceTimer = *(uint32*)0xBAA354;
-
     static SpriteFileName RadarBlipFileNames[];
 
     static inline float& m_radarRange = *(float*)0xBA8314; // 2990.0 by default
@@ -312,7 +308,7 @@ public:
 
     static auto CachedRotateClockwise(const CVector2D& point) {
         return CVector2D{
-            cachedCos * point.x + cachedSin * point.y,
+            +cachedCos * point.x + cachedSin * point.y,
             -cachedSin * point.x + cachedCos * point.y
         };
     }
