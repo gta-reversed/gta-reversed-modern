@@ -32,9 +32,9 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedInstall(BuildBoneIndexConversionTable, 0x5A56E0);
     RH_ScopedInstall(CopyTexture, 0x5A5730, { .reversed = false });
     RH_ScopedInstall(PlaceTextureOnTopOfTexture, 0x5A57B0);
-    // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A5820, void (*)(RwTexture*, RwTexture*, float, float, int32));
-    // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A59C0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32));
-    // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A5BC0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32, RwTexture*));
+    RH_ScopedOverloadedInstall(BlendTextures, "Dst-Src", 0x5A5820, void (*)(RwTexture*, RwTexture*, float, float, int32));
+    RH_ScopedOverloadedInstall(BlendTextures, "Dst-Src1-Src2", 0x5A59C0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32));
+    RH_ScopedOverloadedInstall(BlendTextures, "Dst-Src1-Src2-Tat", 0x5A5BC0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32, RwTexture*));
     RH_ScopedInstall(InitPaletteOctTree, 0x5A5EB0, { .reversed = false });
     RH_ScopedInstall(ShutdownPaletteOctTree, 0x5A5EE0, { .reversed = false });
     RH_ScopedInstall(ReducePaletteOctTree, 0x5A5EF0, { .reversed = false });
@@ -155,21 +155,33 @@ RwTexture* CClothesBuilder::CopyTexture(RwTexture* texture) {
     return plugin::CallAndReturn<RwTexture*, 0x5A5730, RwTexture*>(texture);
 }
 
+void AssertTextureLayouts(std::initializer_list<RwTexture*> textures) {
+    assert(textures.size() >= 2);
+    for (auto i = 0u; i < textures.size() - 1; i++) {
+        const auto r1 = RwTextureGetRaster(textures.begin()[i]), r2 = RwTextureGetRaster(textures.begin()[i + 1]);
+
+        assert(RwRasterGetStride(r1) == RwRasterGetStride(r2));
+        assert(RwRasterGetWidth(r1) == RwRasterGetWidth(r2));
+        assert(RwRasterGetHeight(r1) == RwRasterGetHeight(r2));
+        assert(RwRasterGetDepth(r1) == RwRasterGetDepth(r2));
+        assert(RwRasterGetDepth(r1) == 32);
+    }
+}
+
 // 0x5A57B0
 void CClothesBuilder::PlaceTextureOnTopOfTexture(RwTexture* dstTex, RwTexture* srcTex) {
+    ZoneScoped;
+
+    AssertTextureLayouts({ dstTex, srcTex });
+
     const auto dstRaster = RwTextureGetRaster(dstTex);
     const auto srcRaster = RwTextureGetRaster(srcTex);
 
-    assert(RwRasterGetStride(dstRaster) == RwRasterGetStride(srcRaster));
-    assert(RwRasterGetWidth(dstRaster) == RwRasterGetWidth(srcRaster));
-    assert(RwRasterGetHeight(dstRaster) == RwRasterGetHeight(srcRaster));
-    assert(RwRasterGetDepth(dstRaster) == RwRasterGetDepth(srcRaster));
-
-    auto dstIt = RwRasterLock(dstRaster, 0, rwRASTERLOCKWRITE | rwRASTERLOCKREAD);
-    auto srcIt = RwRasterLock(srcRaster, 0, rwRASTERLOCKWRITE | rwRASTERLOCKREAD);
+    auto dstIt = (RwUInt32*)RwRasterLock(dstRaster, 0, rwRASTERLOCKWRITE | rwRASTERLOCKREAD);
+    auto srcIt = (RwUInt32*)RwRasterLock(srcRaster, 0, rwRASTERLOCKWRITE | rwRASTERLOCKREAD);
 
     // NOTE: They don't skip the stride, but it's fine [This way vectorization should be easier for the compiler]
-    for (auto x = RwRasterGetHeight(srcRaster) * RwRasterGetWidth(srcRaster); x-- > 0; dstIt++, srcIt++) {
+    for (auto i = RwRasterGetHeight(dstRaster) * RwRasterGetWidth(dstRaster); i-- > 0; dstIt++, srcIt++) {
         if (*srcIt & 0xFF000000) { // Check alpha != 0
             *dstIt = *srcIt;
         }
@@ -180,18 +192,91 @@ void CClothesBuilder::PlaceTextureOnTopOfTexture(RwTexture* dstTex, RwTexture* s
 }
 
 // 0x5A5820
-void CClothesBuilder::BlendTextures(RwTexture* t1, RwTexture* t2, float a3, float a4, int32 a5) {
-    plugin::Call<0x5A5820, RwTexture*, RwTexture*, float, float, int32>(t1, t2, a3, a4, a5);
+void CClothesBuilder::BlendTextures(RwTexture* dst, RwTexture* src, float r1, float r2, int32 numColors) {
+    ZoneScoped;
+
+    AssertTextureLayouts({ dst, src });
+
+    const auto dstRaster = RwTextureGetRaster(dst);
+    const auto srcRaster = RwTextureGetRaster(src);
+
+    CTimer::Suspend();
+
+    auto srcIt = RwRasterLock(srcRaster, 0, rwRASTERLOCKREAD);
+    auto dstIt = RwRasterLock(dstRaster, 0, rwRASTERLOCKREAD | rwRASTERLOCKWRITE);
+
+    for (auto i = RwRasterGetHeight(dstRaster) * RwRasterGetWidth(dstRaster); i-- > 0; dstIt++, srcIt++) {
+        for (auto c = 3; i-- > 0; dstIt++, srcIt++) { // Copy RGB, alpha stays the same
+            *dstIt = multiply_weighted<RwUInt8>({ { *dstIt, r1 }, { *srcIt, r2 } });
+        }
+    }
+
+    RwRasterUnlock(dstRaster);
+    RwRasterUnlock(srcRaster);
+
+    CTimer::Resume();
 }
 
 // 0x5A59C0
-void CClothesBuilder::BlendTextures(RwTexture* t1, RwTexture* t2, RwTexture* t3, float factorA, float factorB, float factorC, int32 a7) {
-    plugin::Call<0x5A59C0, RwTexture*, RwTexture*, RwTexture*, float, float, float>(t1, t2, t3, factorA, factorB, factorC, a7);
+void CClothesBuilder::BlendTextures(RwTexture* dst, RwTexture* src1, RwTexture* src2, float r1, float r2, float r3, int32) {
+    ZoneScoped;
+
+    AssertTextureLayouts({ dst, src1, src2 });
+
+    const auto dstRaster  = RwTextureGetRaster(dst);
+    const auto src1Raster = RwTextureGetRaster(src1);
+    const auto src2Raster = RwTextureGetRaster(src2);
+
+    CTimer::Suspend();
+
+    auto src1It = RwRasterLock(src1Raster, 0, rwRASTERLOCKREAD);
+    auto src2It = RwRasterLock(src2Raster, 0, rwRASTERLOCKREAD);
+    auto dstIt  = RwRasterLock(dstRaster, 0, rwRASTERLOCKREAD | rwRASTERLOCKWRITE);
+
+    for (auto i = RwRasterGetHeight(dstRaster) * RwRasterGetWidth(dstRaster); i-- > 0; dstIt++, src1It++, src2It++) {
+        for (auto c = 3; i-- > 0; dstIt++, src1It++, src2It++) { // Copy RGB, alpha doesn't change
+            *dstIt = multiply_weighted<RwUInt8>({ { *dstIt, r1 }, { *src1It, r2 }, { *src2It, r3 } });
+        }
+    }
+
+    RwRasterUnlock(dstRaster);
+    RwRasterUnlock(src1Raster);
+    RwRasterUnlock(src2Raster);
+
+    CTimer::Resume();
 }
 
 // 0x5A5BC0
-void CClothesBuilder::BlendTextures(RwTexture* t1, RwTexture* t2, RwTexture* t3, float factorA, float factorB, float factorC, int32 a7, RwTexture* t4) {
-    plugin::Call<0x5A5BC0, RwTexture*, RwTexture*, RwTexture*, float, float, float, int32, RwTexture*>(t1, t2, t3, factorA, factorB, factorC, a7, t4);
+void CClothesBuilder::BlendTextures(RwTexture* dst, RwTexture* src1, RwTexture* src2, float r1, float r2, float r3, int32 numColors, RwTexture* tattoos) {
+    ZoneScoped;
+
+    AssertTextureLayouts({ dst, src1, src2, tattoos });
+
+    const auto dstRaster = RwTextureGetRaster(dst);
+    const auto src1Raster = RwTextureGetRaster(src1);
+    const auto src2Raster = RwTextureGetRaster(src2);
+    const auto tatRaster = RwTextureGetRaster(src2);
+
+    CTimer::Suspend();
+
+    auto src1It = RwRasterLock(src1Raster, 0, rwRASTERLOCKREAD);
+    auto src2It = RwRasterLock(src2Raster, 0, rwRASTERLOCKREAD);
+    auto tatIt  = RwRasterLock(tatRaster, 0, rwRASTERLOCKREAD);
+    auto dstIt  = RwRasterLock(dstRaster, 0, rwRASTERLOCKREAD | rwRASTERLOCKWRITE);
+
+    for (auto i = RwRasterGetHeight(dstRaster) * RwRasterGetWidth(dstRaster); i-- > 0; dstIt++, src1It++, src2It++, tatIt++) {
+        const auto tatAlphaT = (float)tatIt[3] / 255.f;
+        for (auto c = 3; i-- > 0; dstIt++, src1It++, src2It++, tatIt++) { // Copy RGB, alpha doesn't change
+            *dstIt = lerp(multiply_weighted<RwUInt8>({ { *dstIt, r1 }, { *src1It, r2 }, { *src2It, r3 } }), *tatIt, tatAlphaT);
+        }
+    }
+
+    RwRasterUnlock(dstRaster);
+    RwRasterUnlock(src1Raster);
+    RwRasterUnlock(src2Raster);
+    RwRasterUnlock(tatRaster);
+
+    CTimer::Resume();
 }
 
 // unused or inlined

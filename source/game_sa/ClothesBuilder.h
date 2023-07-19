@@ -30,9 +30,46 @@ public:
     static void BuildBoneIndexConversionTable(uint8* a1, RpHAnimHierarchy* a2, int32 a3);
     static RwTexture* CopyTexture(RwTexture* texture);
     static void PlaceTextureOnTopOfTexture(RwTexture* texture1, RwTexture* texture2);
-    static void BlendTextures(RwTexture* t1, RwTexture* t2, float a3, float a4, int32 a5);
-    static void BlendTextures(RwTexture* t1, RwTexture* t2, RwTexture* t3, float factorA, float factorB, float factorC, int32 a7);
-    static void BlendTextures(RwTexture* t1, RwTexture* t2, RwTexture* t3, float factorA, float factorB, float factorC, int32 a7, RwTexture* t4);
+
+    /*!
+    * Blend textures with a given blend ratio
+    *
+    * @addr 0x5A5820
+    * 
+    * @arg dst The texture to which the blended data is written to, and read from
+    * @arg src The texture that should be blended with the other one
+    * @arg r1 Ratio of the `dst` texture
+    * @arg r2 Ratio of the `src` texture
+    */
+    static void BlendTextures(RwTexture* dst, RwTexture* src, float r1, float r2, int32);
+
+    /*!
+    * Blend textures with a given blend ratio
+    *
+    * @addr 0x5A59C0
+    *
+    * @arg dst The texture to which the blended data is written to, and read from
+    * @arg src1 The texture that should be blended with the other one
+    * @arg src2 The texture that should be blended with the other one
+    * @arg r1 Ratio of the `dst` texture
+    * @arg r2 Ratio of the `src1` texture
+    * @arg r3 Ratio of the `src2` texture
+    */
+    static void BlendTextures(RwTexture* dst, RwTexture* src1, RwTexture* src2, float r1, float r2, float r3, int32);
+
+    /*!
+    * Blend textures with a given blend ratio
+    *
+    * @addr 0x5A5BC0
+    *
+    * @arg dst The texture to which the blended data is written to, and read from
+    * @arg src1 The texture that should be blended with the other one
+    * @arg src2 The texture that should be blended with the other one
+    * @arg r1 Ratio of the `dst` texture
+    * @arg r2 Ratio of the `src1` texture
+    * @arg r3 Ratio of the `src2` texture
+    */
+    static void BlendTextures(RwTexture* dst, RwTexture* src1, RwTexture* src2, float r1, float r2, float r3, int32 numColors, RwTexture* tattoos);
     static void InitPaletteOctTree(int32 numColors);
     static void ShutdownPaletteOctTree();
     static void ReducePaletteOctTree(int32 numColorsToReduce);
