@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "ClothesBuilder.h"
+#include <extensions/ci_string.hpp>
 
 CDirectory& playerImg = *(CDirectory*)0xBC12C0;
 CDirectory::DirectoryInfo& playerImgEntries = *(CDirectory::DirectoryInfo*)0xBBCDC8;
@@ -13,15 +14,14 @@ void CClothesBuilder::InjectHooks() {
 
     RH_ScopedInstall(LoadCdDirectory, 0x5A4190);
     RH_ScopedInstall(RequestGeometry, 0x5A41C0);
-    RH_ScopedInstall(RequestTexture, 0x5A4220); 
+    RH_ScopedInstall(RequestTexture, 0x5A4220);
     //RH_ScopedInstall(nullptr, 0x5A42B0, { .reversed = false }); 
     //RH_ScopedInstall(nullptr, 0x5A4380, { .reversed = false }); AtomicInstanceCB
     //RH_ScopedInstall(nullptr, 0x5A43A0, { .reversed = false });
     //RH_ScopedInstall(nullptr, 0x5A44A0, { .reversed = false }); DestroyTextureCB
     RH_ScopedInstall(PreprocessClothesDesc, 0x5A44C0, { .reversed = false });
     RH_ScopedInstall(ReleaseGeometry, 0x5A47B0, { .reversed = false });
-    RH_ScopedGlobalInstall(FindAtomicFromNameCB, 0x5A47E0, { .reversed = false });
-    RH_ScopedGlobalInstall(GetAtomicWithName, 0x5A4810, { .reversed = false });
+    RH_ScopedGlobalInstall(GetAtomicWithName, 0x5A4810);
     RH_ScopedInstall(sub_5A4840, 0x5A4840, { .reversed = false });
     RH_ScopedInstall(StoreBoneArray, 0x5A48B0, { .reversed = false });
     // RH_ScopedOverloadedInstall(BlendGeometry, "", 0x5A4940, RpGeometry* (*)(RpClump*, const char*, const char*, const char*, float, float, float));
@@ -75,7 +75,7 @@ int32 CClothesBuilder::RequestTexture(uint32 txdNameKey) {
 
     uint32 offset, size;
     VERIFY(playerImg.FindItem(CKeyGen::AppendStringToKey(txdNameKey, ".TXD"), offset, size));
-    CStreaming::RequestFile(TXDToModelId(defaultTxdIdx), offset, size, CClothes::ms_clothesImageId, STREAMING_PRIORITY_REQUEST | STREAMING_GAME_REQUIRED);
+    CStreaming::RequestFile(TXDToModelId(defaultTxd), offset, size, CClothes::ms_clothesImageId, STREAMING_PRIORITY_REQUEST | STREAMING_GAME_REQUIRED);
 
     return defaultTxd;
 }
@@ -92,14 +92,22 @@ void CClothesBuilder::ReleaseGeometry(int32 numToRelease) {
         --i;
 }
 
-// 0x5A47E0
-void FindAtomicFromNameCB(RpAtomic* atomic, void* data) {
-    plugin::Call<0x5A47E0, RpAtomic*, void*>(atomic, data);
-}
-
 // 0x5A4810
-void GetAtomicWithName(RpClump* clump, const char* name) {
-    plugin::Call<0x5A4810, RpClump*, const char*>(clump, name);
+RpAtomic* GetAtomicWithName(RpClump* clump, const char* name) {
+    struct Context {
+        notsa::ci_string_view name{};
+        RpAtomic*             a{};
+    } c{name};
+    RpClumpForAllAtomics(clump, [](RpAtomic* a, void* data) { // 0x5A47E0
+        auto& c = *static_cast<Context*>(data);
+
+        if (c.name == GetFrameNodeName(RpAtomicGetFrame(a))) {
+            c.a = a;
+        }
+
+        return a;
+    }, &c);
+    return c.a;
 }
 
 // 0x5A4840

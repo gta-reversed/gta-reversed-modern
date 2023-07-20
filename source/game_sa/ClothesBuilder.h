@@ -82,6 +82,5 @@ public:
     static RpClump* CreateSkinnedClump(RpClump* clump, RwTexDictionary* dict, CPedClothesDesc& newClothes, const CPedClothesDesc* oldClothes, bool CutscenePlayer);
 };
 
-void FindAtomicFromNameCB(RpAtomic* atomic, void* data);
-void GetAtomicWithName(RpClump* clump, const char* name);
+RpAtomic* GetAtomicWithName(RpClump* clump, const char* name);
 RwTexture* GetTextureFromTxdAndLoadNextTxd(RwTexture* destTexture, int32 txdId_withTexture, int32 CRC_nextTxd, int32* nextTxdId);
