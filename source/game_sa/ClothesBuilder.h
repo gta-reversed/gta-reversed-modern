@@ -37,7 +37,20 @@ public:
     * @arg r2         Blend ratio of the corresponding frame
     */
     static RpGeometry* BlendGeometry(RpClump* pClump, const char* frameName0, const char* frameName1, const char* frameName2, float r0, float r1, float r2);
-    static RpGeometry* BlendGeometry(RpClump* clump, const char* a2, const char* a3, float a4, float a5);
+
+    /*!
+    * Blend 2 geometries together and store the result in the first one
+    *
+    * @addr 0x5A4F10
+    *
+    * @arg clump      The clump of the named frames [which in turn contain the geometries]
+    * @arg frameName0 The 0th frame - This is where the result is stored to
+    * @arg frameName1 The 1st frame
+    * @arg r0         Blend ratio of the corresponding frame
+    * @arg r1         Blend ratio of the corresponding frame
+    */
+    static RpGeometry* BlendGeometry(RpClump* clump, const char* frameName0, const char* frameName1, float r0, float r1);
+
     static RpGeometry* CopyGeometry(RpClump* clump, const char* a2, const char* a3);
     static void ConstructGeometryArray(RpGeometry** geometry, uint32* a2, float a3, float a4, float a5);
     static void DestroySkinArrays(RwMatrixWeights* weights, uint32* a2);

@@ -24,8 +24,8 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedGlobalInstall(GetAtomicWithName, 0x5A4810);
     RH_ScopedInstall(AddWeightToBoneVertex, 0x5A4840);
     RH_ScopedInstall(StoreBoneArray, 0x5A48B0, { .reversed = false });
-    RH_ScopedOverloadedInstall(BlendGeometry, "3", 0x5A4940, RpGeometry* (*)(RpClump*, const char*, const char*, const char*, float, float, float), {.reversed = false});
-    // RH_ScopedOverloadedInstall(BlendGeometry, "", 0x5A4F10, RpGeometry* (*)(RpClump*, const char*, const char*, float, float));
+    RH_ScopedOverloadedInstall(BlendGeometry, "3", 0x5A4940, RpGeometry* (*)(RpClump*, const char*, const char*, const char*, float, float, float));
+    RH_ScopedOverloadedInstall(BlendGeometry, "2", 0x5A4F10, RpGeometry* (*)(RpClump*, const char*, const char*, float, float));
     RH_ScopedInstall(CopyGeometry, 0x5A5340, { .reversed = false });
     RH_ScopedInstall(ConstructGeometryArray, 0x5A55A0, { .reversed = false });
     RH_ScopedInstall(DestroySkinArrays, 0x5A56C0, { .reversed = false });
@@ -135,41 +135,67 @@ void CClothesBuilder::StoreBoneArray(RpClump* clump, int32 a2) {
     plugin::Call<0x5A48B0, RpClump*, int32>(clump, a2);
 }
 
-// 0x5A4940
-RpGeometry* CClothesBuilder::BlendGeometry(RpClump* clump, const char* frameName0, const char* frameName1, const char* frameName2, float r0, float r1, float r2) {
-    assert(r0 + r1 + r2 <= 1.f);
-    assert(r0 + r1 + r2 >= 0.f);
+/*
+* @notsa
+* 
+* Based on 0x5A4940
+* Blend any number of geometries together
+* The result is stored in the 0th frame's geometry.
+*
+* @arg clump  The clump to which the frames belong to
+* @arg frames A list of frames whose geometry should be blended together
+*/
+template<size_t N>
+RpGeometry* BlendGeometry(RpClump* clump, std::pair<const char*, float> (&&frameNamesRatios)[N]) {
+#ifdef NOTSA_DEBUG
+    {
+        float a{};
+        for (auto&& v : frameNamesRatios) {
+            a += v.second;
+        }
+        assert(a >= 0.f && a <= 1.f);
+    }
+#endif
 
-    RpAtomic* atomics[3]{};
-    for (auto i = 0u; const auto name : { frameName0, frameName1, frameName2 }) {
-        VERIFY(atomics[i++] = GetAtomicWithName(clump, name));
+    // Process data needed for blending
+    struct GeoBlendData {
+        RpAtomic*        a;
+        RpGeometry*      g;
+        const RwUInt8*   boneIdxs;
+        RwMatrixWeights* boneWeights;
+        RwTexCoords*     uvs;
+        CVector*         verts;
+        CVector*         nrmls;
+        float            r; // Blend ratio
+    } fds[N];
+    auto& out = fds[0];
+    for (auto&& [i, v] : notsa::enumerate(frameNamesRatios)) {
+        const auto a  = GetAtomicWithName(clump, v.first);
+        const auto g  = RpAtomicGetGeometry(a);
+        const auto s  = RpSkinGeometryGetSkin(g);
+        const auto mt = RpGeometryGetMorphTarget(g, 0);
+        fds[i] = {
+            a,
+            g,
+            (const RwUInt8*)RpSkinGetVertexBoneIndices(s), // NOTE: Not sure why it's casted to UInt8, but that really is how the data is stored
+            RpSkinGetVertexBoneWeights(s),
+            RpGeometryGetVertexTexCoords(g, 1),
+            (CVector*)RpMorphTargetGetVertices(mt),
+            (CVector*)RpMorphTargetGetVertexNormals(mt),
+            v.second
+        };
     }
 
-    RpGeometry*      geos[3]{};
-    const RwUInt32*  boneIdxs[3]{};
-    RwMatrixWeights* boneWeights[3]{};
-    RwTexCoords*     uvs[3]{};
-    CVector*         verts[3];
-    CVector*         norms[3];
-    for (auto i = 0; i < 3; i++) {
-        const auto geo = geos[i] = RpAtomicGetGeometry(atomics[i]);
-        const auto skin          = RpSkinGeometryGetSkin(geo);
-        const auto mt            = RpGeometryGetMorphTarget(geo, 0);
+    RpGeometryLock(out.g, rpGEOMETRYLOCKALL);
 
-        verts[i]       = (CVector*)RpMorphTargetGetVertices(mt);
-        norms[i]       = (CVector*)RpMorphTargetGetVertexNormals(mt);
-        uvs[i]         = RpGeometryGetVertexTexCoords(geo, 1);
-        boneIdxs[i]    = RpSkinGetVertexBoneIndices(skin); // TODO/NOTE: This function returns a garbage pointer [or at least the data it points doesn't make any sense]
-        boneWeights[i] = RpSkinGetVertexBoneWeights(skin);
-    }
+    for (auto i = 0; i < RpGeometryGetNumVertices(out.g); i++) {
+        const auto Blend = [&](auto&& Get) {
+            return multiply_weighted(fds | rng::views::transform([&](auto&& fd) { return WeightedValue{ std::invoke(Get, &fd)[i], fd.r }; }));
+        };
 
-    RpGeometryLock(geos[0], rpGEOMETRYLOCKALL);
-
-    for (auto i = 0; i < RpGeometryGetNumVertices(geos[0]); i++) {
-        verts[0][i] = multiply_weighted<CVector>({ {verts[0][i], r0}, {verts[1][i], r1}, {verts[2][i], r2} });
-        norms[0][i] = multiply_weighted<CVector>({ {norms[0][i], r0}, {norms[1][i], r1}, {norms[2][i], r2} }).Normalized(); // NOTE/TODO: I'm quite certain that this normalization here is useless
-        uvs[0][i].u = multiply_weighted<float>({ {uvs[0][i].u, r0}, {uvs[1][i].u, r1}, {uvs[2][i].u, r2} });
-        uvs[0][i].v = multiply_weighted<float>({ {uvs[0][i].v, r0}, {uvs[1][i].v, r1}, {uvs[2][i].v, r2} });
+        out.verts[i] = Blend(&GeoBlendData::verts);
+        out.nrmls[i] = Blend(&GeoBlendData::nrmls);
+        out.uvs[i]   = Blend(&GeoBlendData::uvs);
 
         // Helper function to get the weight at a given weight index
         const auto RwMatrixWeightsGetWeight = [](RwMatrixWeights& mw, int32 wi) -> float& {
@@ -185,37 +211,42 @@ RpGeometry* CClothesBuilder::BlendGeometry(RpClump* clump, const char* frameName
         // Calculate bone weights
         float weights[8]{};
         uint8 boneVertexIdxs[8]{};
-        for (auto g = 0; g < 3; g++) { // (g)eometry
+        for (auto& fd : fds) {
             for (auto wi = 0; wi < 4; wi++) {
                 const auto vtxIdx = i + wi;
-                AddWeightToBoneVertex(
+                CClothesBuilder::AddWeightToBoneVertex(
                     weights,
                     boneVertexIdxs,
-                    RwMatrixWeightsGetWeight(boneWeights[g][vtxIdx], wi),
-                    boneIdxs[g][vtxIdx]
+                    RwMatrixWeightsGetWeight(fd.boneWeights[vtxIdx], wi),
+                    fd.boneIdxs[vtxIdx]
                 );
             }
         }
         for (auto b = 0; b < 4; b++) {
-            const_cast<RwUInt32*>(boneIdxs[0])[i + b] = boneVertexIdxs[b];
+            const_cast<RwUInt8*>(out.boneIdxs)[i + b] = boneVertexIdxs[b];
         }
         const auto t = weights[4] != 0.f
             ? 1.f / std::accumulate(weights, weights + 4, 0.f)
             : 1.f;
         for (auto wi = 0; wi < 4; wi++) {
-            RwMatrixWeightsGetWeight(boneWeights[0][i + wi], wi) = weights[wi] * t;
+            RwMatrixWeightsGetWeight(out.boneWeights[i + wi], wi) = weights[wi] * t;
         }
     }
 
-    RpGeometryUnlock(geos[0]);
-    geos[0]->refCount++; // TODO: Function missing
+    RpGeometryUnlock(out.g);
+    out.g->refCount++; // TODO: Function missing
 
-    return geos[0];
+    return out.g;
+}
+
+// 0x5A4940
+RpGeometry* CClothesBuilder::BlendGeometry(RpClump* clump, const char* frameName0, const char* frameName1, const char* frameName2, float r0, float r1, float r2) {
+    return ::BlendGeometry(clump, { {frameName0, r0}, {frameName1, r1}, {frameName2, r2} });
 }
 
 // 0x5A4F10
-RpGeometry* CClothesBuilder::BlendGeometry(RpClump* clump, const char* a2, const char* a3, float a4, float a5) {
-    return plugin::CallAndReturn<RpGeometry*, 0x5A4F10, RpClump*, const char*, const char*, float, float>(clump, a2, a3, a4, a5);
+RpGeometry* CClothesBuilder::BlendGeometry(RpClump* clump, const char* frameName0, const char* frameName1, float r0, float r1) {
+    return ::BlendGeometry(clump, { {frameName0, r0}, {frameName1, r1} });
 }
 
 // 0x5A5340
