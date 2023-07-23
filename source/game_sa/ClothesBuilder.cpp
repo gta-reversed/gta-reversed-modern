@@ -6,7 +6,7 @@
 CDirectory& playerImg = *(CDirectory*)0xBC12C0;
 CDirectory::DirectoryInfo& playerImgEntries = *(CDirectory::DirectoryInfo*)0xBBCDC8;
 
-auto& gBoneIndices = StaticRef<notsa::mdarray<int16, 10, 64>>(0xBBC8C8);
+auto& gBoneIndices = StaticRef<notsa::mdarray<int16, 10, 64>, 0xBBC8C8>();
 
 void CClothesBuilder::InjectHooks() {
     RH_ScopedClass(CClothesBuilder);
@@ -22,9 +22,9 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedInstall(PreprocessClothesDesc, 0x5A44C0, { .reversed = false });
     RH_ScopedInstall(ReleaseGeometry, 0x5A47B0, { .reversed = false });
     RH_ScopedGlobalInstall(GetAtomicWithName, 0x5A4810);
-    RH_ScopedInstall(sub_5A4840, 0x5A4840, { .reversed = false });
+    RH_ScopedInstall(AddWeightToBoneVertex, 0x5A4840);
     RH_ScopedInstall(StoreBoneArray, 0x5A48B0, { .reversed = false });
-    // RH_ScopedOverloadedInstall(BlendGeometry, "", 0x5A4940, RpGeometry* (*)(RpClump*, const char*, const char*, const char*, float, float, float));
+    RH_ScopedOverloadedInstall(BlendGeometry, "3", 0x5A4940, RpGeometry* (*)(RpClump*, const char*, const char*, const char*, float, float, float), {.reversed = false});
     // RH_ScopedOverloadedInstall(BlendGeometry, "", 0x5A4F10, RpGeometry* (*)(RpClump*, const char*, const char*, float, float));
     RH_ScopedInstall(CopyGeometry, 0x5A5340, { .reversed = false });
     RH_ScopedInstall(ConstructGeometryArray, 0x5A55A0, { .reversed = false });
@@ -69,7 +69,7 @@ int32 CClothesBuilder::RequestTexture(uint32 txdNameKey) {
         return -1;
     }
 
-    auto& defaultTxdIdx = StaticRef<uint32>(0xBC12D0);
+    auto& defaultTxdIdx = StaticRef<uint32, 0xBC12D0>();
     const auto defaultTxd = CTxdStore::defaultTxds[defaultTxdIdx];
     defaultTxdIdx = (defaultTxdIdx + 1) % 4;
 
@@ -111,8 +111,23 @@ RpAtomic* GetAtomicWithName(RpClump* clump, const char* name) {
 }
 
 // 0x5A4840
-void CClothesBuilder::sub_5A4840() {
-
+void CClothesBuilder::AddWeightToBoneVertex(float (&weights)[8], uint8(&boneVertexIdxs)[8], float weightToAdd, RwUInt32 targetVertexIdx) { // Unknown OG name
+    if (weightToAdd == 0.f) {
+        return;
+    }
+    for (auto i = 0; i < 8; i++) {
+        if (weights[i] == 0.f) { // Weight not yet used?
+            boneVertexIdxs[i] = targetVertexIdx; // Add to list
+            weights[i]        = weightToAdd;
+            weights[i + 1]    = 0.f;             // Mark next as unused [Though this step in our case is not necessary as the whole weights array is already zero-inited]
+            return;
+        }
+        if (boneVertexIdxs[i] == targetVertexIdx) { // Already in the list, use that
+            weights[i] += weightToAdd;
+            return;
+        }
+    }
+    NOTSA_UNREACHABLE(); // OG code had UB in this case
 }
 
 // 0x5A48B0
@@ -121,8 +136,81 @@ void CClothesBuilder::StoreBoneArray(RpClump* clump, int32 a2) {
 }
 
 // 0x5A4940
-RpGeometry* CClothesBuilder::BlendGeometry(RpClump* clump, const char* a2, const char* a3, const char* a4, float a5, float a6, float a7) {
-    return plugin::CallAndReturn<RpGeometry*, 0x5A4940, RpClump*, const char*, const char*, const char*, float, float, float>(clump, a2, a3, a4, a5, a6, a7);
+RpGeometry* CClothesBuilder::BlendGeometry(RpClump* clump, const char* frameName0, const char* frameName1, const char* frameName2, float r0, float r1, float r2) {
+    assert(r0 + r1 + r2 <= 1.f);
+    assert(r0 + r1 + r2 >= 0.f);
+
+    RpAtomic* atomics[3]{};
+    for (auto i = 0u; const auto name : { frameName0, frameName1, frameName2 }) {
+        VERIFY(atomics[i++] = GetAtomicWithName(clump, name));
+    }
+
+    RpGeometry*      geos[3]{};
+    const RwUInt32*  boneIdxs[3]{};
+    RwMatrixWeights* boneWeights[3]{};
+    RwTexCoords*     uvs[3]{};
+    CVector*         verts[3];
+    CVector*         norms[3];
+    for (auto i = 0; i < 3; i++) {
+        const auto geo = geos[i] = RpAtomicGetGeometry(atomics[i]);
+        const auto skin          = RpSkinGeometryGetSkin(geo);
+        const auto mt            = RpGeometryGetMorphTarget(geo, 0);
+
+        verts[i]       = (CVector*)RpMorphTargetGetVertices(mt);
+        norms[i]       = (CVector*)RpMorphTargetGetVertexNormals(mt);
+        uvs[i]         = RpGeometryGetVertexTexCoords(geo, 1);
+        boneIdxs[i]    = RpSkinGetVertexBoneIndices(skin); // TODO/NOTE: This function returns a garbage pointer [or at least the data it points doesn't make any sense]
+        boneWeights[i] = RpSkinGetVertexBoneWeights(skin);
+    }
+
+    RpGeometryLock(geos[0], rpGEOMETRYLOCKALL);
+
+    for (auto i = 0; i < RpGeometryGetNumVertices(geos[0]); i++) {
+        verts[0][i] = multiply_weighted<CVector>({ {verts[0][i], r0}, {verts[1][i], r1}, {verts[2][i], r2} });
+        norms[0][i] = multiply_weighted<CVector>({ {norms[0][i], r0}, {norms[1][i], r1}, {norms[2][i], r2} }).Normalized(); // NOTE/TODO: I'm quite certain that this normalization here is useless
+        uvs[0][i].u = multiply_weighted<float>({ {uvs[0][i].u, r0}, {uvs[1][i].u, r1}, {uvs[2][i].u, r2} });
+        uvs[0][i].v = multiply_weighted<float>({ {uvs[0][i].v, r0}, {uvs[1][i].v, r1}, {uvs[2][i].v, r2} });
+
+        // Helper function to get the weight at a given weight index
+        const auto RwMatrixWeightsGetWeight = [](RwMatrixWeights& mw, int32 wi) -> float& {
+            switch (wi) {
+            case 0:  return mw.w0;
+            case 1:  return mw.w1;
+            case 2:  return mw.w2;
+            case 3:  return mw.w3;
+            default: NOTSA_UNREACHABLE();
+            }
+        };
+
+        // Calculate bone weights
+        float weights[8]{};
+        uint8 boneVertexIdxs[8]{};
+        for (auto g = 0; g < 3; g++) { // (g)eometry
+            for (auto wi = 0; wi < 4; wi++) {
+                const auto vtxIdx = i + wi;
+                AddWeightToBoneVertex(
+                    weights,
+                    boneVertexIdxs,
+                    RwMatrixWeightsGetWeight(boneWeights[g][vtxIdx], wi),
+                    boneIdxs[g][vtxIdx]
+                );
+            }
+        }
+        for (auto b = 0; b < 4; b++) {
+            const_cast<RwUInt32*>(boneIdxs[0])[i + b] = boneVertexIdxs[b];
+        }
+        const auto t = weights[4] != 0.f
+            ? 1.f / std::accumulate(weights, weights + 4, 0.f)
+            : 1.f;
+        for (auto wi = 0; wi < 4; wi++) {
+            RwMatrixWeightsGetWeight(boneWeights[0][i + wi], wi) = weights[wi] * t;
+        }
+    }
+
+    RpGeometryUnlock(geos[0]);
+    geos[0]->refCount++; // TODO: Function missing
+
+    return geos[0];
 }
 
 // 0x5A4F10
@@ -275,7 +363,7 @@ void CClothesBuilder::BlendTextures(RwTexture* dst, RwTexture* src1, RwTexture* 
     for (auto i = RwRasterGetHeight(dstRaster) * RwRasterGetWidth(dstRaster); i-- > 0; dstIt++, src1It++, src2It++, tatIt++) {
         const auto tatAlphaT = (float)tatIt[3] / 255.f;
         for (auto c = 3; i-- > 0; dstIt++, src1It++, src2It++, tatIt++) { // Copy RGB, alpha doesn't change
-            *dstIt = lerp(multiply_weighted<RwUInt8>({ { *dstIt, r1 }, { *src1It, r2 }, { *src2It, r3 } }), *tatIt, tatAlphaT);
+            *dstIt = (RwUInt8)lerp(multiply_weighted<RwUInt8>({ { *dstIt, r1 }, { *src1It, r2 }, { *src2It, r3 } }), *tatIt, tatAlphaT);
         }
     }
 
