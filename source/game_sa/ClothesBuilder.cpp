@@ -24,8 +24,8 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedGlobalInstall(GetAtomicWithName, 0x5A4810);
     RH_ScopedInstall(AddWeightToBoneVertex, 0x5A4840);
     RH_ScopedInstall(StoreBoneArray, 0x5A48B0, { .reversed = false });
-    RH_ScopedOverloadedInstall(BlendGeometry, "3", 0x5A4940, RpGeometry* (*)(RpClump*, const char*, const char*, const char*, float, float, float));
-    RH_ScopedOverloadedInstall(BlendGeometry, "2", 0x5A4F10, RpGeometry* (*)(RpClump*, const char*, const char*, float, float));
+    RH_ScopedOverloadedInstall(BlendGeometry, "3", 0x5A4940, RpGeometry * (*)(RpClump*, const char*, const char*, const char*, float, float, float), { .reversed = false });
+    RH_ScopedOverloadedInstall(BlendGeometry, "2", 0x5A4F10, RpGeometry* (*)(RpClump*, const char*, const char*, float, float), {.reversed = false});
     RH_ScopedInstall(CopyGeometry, 0x5A5340, { .reversed = false });
     RH_ScopedInstall(ConstructGeometryArray, 0x5A55A0, { .reversed = false });
     RH_ScopedInstall(DestroySkinArrays, 0x5A56C0, { .reversed = false });
@@ -192,7 +192,6 @@ RpGeometry* BlendGeometry(RpClump* clump, std::pair<const char*, float> (&&frame
         const auto Blend = [&](auto&& Get) {
             return multiply_weighted(fds | rng::views::transform([&](auto&& fd) { return WeightedValue{ std::invoke(Get, &fd)[i], fd.r }; }));
         };
-
         out.verts[i] = Blend(&GeoBlendData::verts);
         out.nrmls[i] = Blend(&GeoBlendData::nrmls);
         out.uvs[i]   = Blend(&GeoBlendData::uvs);
