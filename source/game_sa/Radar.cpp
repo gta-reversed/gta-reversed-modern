@@ -1173,7 +1173,7 @@ void CRadar::InitFrontEndMap() {
     rng::fill(MapLegendList, RADAR_SPRITE_NONE);
 
     vec2DRadarOrigin.Set(0.0f, 0.0f);
-    m_radarRange = 2990.0f; // todo: world const - 1.0f
+    m_radarRange = WORLD_BOUND_RANGE - 10.0f;
     MapLegendCounter = 0;
 
     rng::fill(ArrowBlipColour, CRGBA(0, 0, 0, 0));
