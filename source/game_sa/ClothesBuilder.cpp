@@ -30,7 +30,7 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedInstall(ConstructGeometryArray, 0x5A55A0, { .reversed = false }); // Makes the game crash - Probably a register is changed or smth
     RH_ScopedInstall(DestroySkinArrays, 0x5A56C0);
     RH_ScopedInstall(BuildBoneIndexConversionTable, 0x5A56E0);
-    RH_ScopedInstall(CopyTexture, 0x5A5730, { .reversed = false });
+    RH_ScopedInstall(CopyTexture, 0x5A5730);
     RH_ScopedInstall(PlaceTextureOnTopOfTexture, 0x5A57B0);
     RH_ScopedOverloadedInstall(BlendTextures, "Dst-Src", 0x5A5820, void (*)(RwTexture*, RwTexture*, float, float, int32));
     RH_ScopedOverloadedInstall(BlendTextures, "Dst-Src1-Src2", 0x5A59C0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32));
@@ -296,22 +296,47 @@ void CClothesBuilder::BuildBoneIndexConversionTable(uint8* pTable, RpHAnimHierar
     }
 }
 
-// 0x5A5730
-RwTexture* CClothesBuilder::CopyTexture(RwTexture* texture) {
-    return plugin::CallAndReturn<RwTexture*, 0x5A5730, RwTexture*>(texture);
-}
-
 void AssertTextureLayouts(std::initializer_list<RwTexture*> textures) {
     assert(textures.size() >= 2);
     for (auto i = 0u; i < textures.size() - 1; i++) {
         const auto r1 = RwTextureGetRaster(textures.begin()[i]), r2 = RwTextureGetRaster(textures.begin()[i + 1]);
 
-        assert(RwRasterGetStride(r1) == RwRasterGetStride(r2));
         assert(RwRasterGetWidth(r1) == RwRasterGetWidth(r2));
         assert(RwRasterGetHeight(r1) == RwRasterGetHeight(r2));
         assert(RwRasterGetDepth(r1) == RwRasterGetDepth(r2));
         assert(RwRasterGetDepth(r1) == 32);
     }
+}
+
+// 0x5A5730
+RwTexture* CClothesBuilder::CopyTexture(RwTexture* srcTex) {
+    const auto srcRaster = RwTextureGetRaster(srcTex);
+    
+    // Create a new raster to which we're going to copy to
+    const auto dstRaster = RwRasterCreate(
+        RwRasterGetWidth(srcRaster),
+        RwRasterGetHeight(srcRaster),
+        RwRasterGetDepth(srcRaster),
+        ((srcRaster->cFormat & 0x6F) << 8) | 4 // TODO
+    );
+    
+    // Copy data from the src raster to this one
+    const auto srcLck = RwRasterLock(srcRaster, 0, rwRASTERLOCKREAD);
+    memcpy(
+        RwRasterLock(dstRaster, 0, rwRASTERLOCKWRITE),
+        srcLck,
+        RwRasterGetHeight(srcRaster) * RwRasterGetStride(srcRaster)
+    );
+    RwRasterUnlock(srcRaster);
+    RwRasterUnlock(dstRaster);
+
+    // Create a texture from the copied raster
+    const auto dstTex = RwTextureCreate(dstRaster);
+    RwTextureSetFilterMode(dstTex, rwFILTERLINEAR);
+
+    AssertTextureLayouts({ dstTex, srcTex });
+
+    return dstTex;
 }
 
 // 0x5A57B0
