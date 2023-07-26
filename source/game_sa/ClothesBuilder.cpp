@@ -27,8 +27,8 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedOverloadedInstall(BlendGeometry, "3", 0x5A4940, RpGeometry * (*)(RpClump*, const char*, const char*, const char*, float, float, float), { .reversed = false });
     RH_ScopedOverloadedInstall(BlendGeometry, "2", 0x5A4F10, RpGeometry* (*)(RpClump*, const char*, const char*, float, float), {.reversed = false});
     RH_ScopedInstall(CopyGeometry, 0x5A5340, { .reversed = false });
-    RH_ScopedInstall(ConstructGeometryArray, 0x5A55A0, { .reversed = false });
-    RH_ScopedInstall(DestroySkinArrays, 0x5A56C0, { .reversed = false });
+    RH_ScopedInstall(ConstructGeometryArray, 0x5A55A0, { .reversed = false }); // Makes the game crash - Probably a register is changed or smth
+    RH_ScopedInstall(DestroySkinArrays, 0x5A56C0);
     RH_ScopedInstall(BuildBoneIndexConversionTable, 0x5A56E0);
     RH_ScopedInstall(CopyTexture, 0x5A5730, { .reversed = false });
     RH_ScopedInstall(PlaceTextureOnTopOfTexture, 0x5A57B0);
@@ -254,15 +254,35 @@ RpGeometry* CClothesBuilder::CopyGeometry(RpClump* clump, const char* a2, const 
 }
 
 // 0x5A55A0
-void CClothesBuilder::ConstructGeometryArray(RpGeometry** geometry, uint32* a2, float a3, float a4, float a5) {
-    plugin::Call<0x5A55A0, RpGeometry**, uint32*, float, float, float>(geometry, a2, a3, a4, a5);
+void CClothesBuilder::ConstructGeometryArray(RpGeometry** out, uint32* modelNameKeys, float normal, float fatness, float strength) {
+    for (auto i = 0; i < 10; i++) {
+        if (modelNameKeys[i] == 0) {
+            *out = nullptr;
+            continue;
+        }
+        const auto modelIdx = (eModelID)((int)MODEL_CLOTHES01_ID384 + i);
+        const auto mi       = CModelInfo::GetModelInfo(modelIdx);
+
+        CModelInfo::GetModelInfo(modelIdx)->bHasComplexHierarchy = true;
+        RequestGeometry(modelIdx, modelNameKeys[i]);
+        CStreaming::LoadAllRequestedModels(true);
+
+        if (i + 1 < 10 && modelNameKeys[i + 1]) { // Request next model to be loaded in advance
+            RequestGeometry((eModelID)((int)MODEL_CLOTHES01_ID384 + i + 1), modelNameKeys[i + 1]);
+            CStreaming::LoadRequestedModels();
+        }
+
+        *out = BlendGeometry(mi->m_pRwClump, "normal", "fat", "ripped", normal, fatness, strength);
+        StoreBoneArray(mi->m_pRwClump, i);
+        CStreaming::RemoveModel(modelIdx);
+    }
 }
 
 // inlined, see 0x5A6CE1
 // 0x5A56C0
-void CClothesBuilder::DestroySkinArrays(RwMatrixWeights* weights, uint32* a2) {
-    operator delete(weights);
-    operator delete(a2);
+void CClothesBuilder::DestroySkinArrays(RwMatrixWeights* weights, uint32* bones) {
+    delete weights;
+    delete bones;
 }
 
 // 0x5A56E0
