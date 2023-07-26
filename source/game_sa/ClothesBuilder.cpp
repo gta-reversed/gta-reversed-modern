@@ -23,7 +23,7 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedInstall(ReleaseGeometry, 0x5A47B0, { .reversed = false });
     RH_ScopedGlobalInstall(GetAtomicWithName, 0x5A4810);
     RH_ScopedInstall(AddWeightToBoneVertex, 0x5A4840);
-    RH_ScopedInstall(StoreBoneArray, 0x5A48B0, { .reversed = false });
+    RH_ScopedInstall(StoreBoneArray, 0x5A48B0);
     RH_ScopedOverloadedInstall(BlendGeometry, "3", 0x5A4940, RpGeometry * (*)(RpClump*, const char*, const char*, const char*, float, float, float), { .reversed = false });
     RH_ScopedOverloadedInstall(BlendGeometry, "2", 0x5A4F10, RpGeometry* (*)(RpClump*, const char*, const char*, float, float), {.reversed = false});
     RH_ScopedInstall(CopyGeometry, 0x5A5340, { .reversed = false });
@@ -131,8 +131,17 @@ void CClothesBuilder::AddWeightToBoneVertex(float (&weights)[8], uint8(&boneVert
 }
 
 // 0x5A48B0
-void CClothesBuilder::StoreBoneArray(RpClump* clump, int32 a2) {
-    plugin::Call<0x5A48B0, RpClump*, int32>(clump, a2);
+void CClothesBuilder::StoreBoneArray(RpClump* clump, int32 idx) {
+    const auto a = GetAtomicWithName(clump, "normal");
+    assert(a);
+
+    const auto h = RpSkinAtomicGetHAnimHierarchy(a);
+    assert(h);
+    
+    rng::fill(gBoneIndices[idx], -1);
+    for (auto i = h->numNodes; i-- > 0;) {
+        gBoneIndices[idx][i] = static_cast<int16>(h->pNodeInfo[i].nodeID);
+    }
 }
 
 /*
