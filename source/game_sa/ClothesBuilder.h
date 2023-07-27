@@ -53,7 +53,7 @@ public:
 
     static RpGeometry* CopyGeometry(RpClump* clump, const char* a2, const char* a3);
     static void ConstructGeometryArray(RpGeometry** ppGeometry, uint32* pModelKeys, float normal, float fatness, float strength);
-    static void DestroySkinArrays(RwMatrixWeights* weights, uint32* bones);
+    static void DestroySkinArrays(RwMatrixWeights* weights, RwUInt32* bones);
     static void BuildBoneIndexConversionTable(uint8* a1, RpHAnimHierarchy* a2, int32 a3);
 
     /*!

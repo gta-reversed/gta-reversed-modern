@@ -1,12 +1,18 @@
 #include "StdInc.h"
 
-#include "ClothesBuilder.h"
 #include <extensions/ci_string.hpp>
+
+#include "ClothesBuilder.h"
+#include "PedClothesDesc.h"
 
 CDirectory& playerImg = *(CDirectory*)0xBC12C0;
 CDirectory::DirectoryInfo& playerImgEntries = *(CDirectory::DirectoryInfo*)0xBBCDC8;
 
 auto& gBoneIndices = StaticRef<notsa::mdarray<int16, 10, 64>, 0xBBC8C8>();
+
+auto& ms_ratiosHaveChanged  = StaticRef<bool, 0x8D0AA4>();
+auto& ms_geometryHasChanged = StaticRef<bool, 0x8D0AA5>();
+auto& ms_textureHasChanged  = StaticRef<bool, 0x8D0AA6>();
 
 void CClothesBuilder::InjectHooks() {
     RH_ScopedClass(CClothesBuilder);
@@ -35,17 +41,19 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedOverloadedInstall(BlendTextures, "Dst-Src", 0x5A5820, void (*)(RwTexture*, RwTexture*, float, float, int32));
     RH_ScopedOverloadedInstall(BlendTextures, "Dst-Src1-Src2", 0x5A59C0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32));
     RH_ScopedOverloadedInstall(BlendTextures, "Dst-Src1-Src2-Tat", 0x5A5BC0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32, RwTexture*));
+    RH_ScopedGlobalInstall(GetTextureFromTxdAndLoadNextTxd, 0x5A5F70, { .reversed = false });
+    RH_ScopedInstall(ConstructTextures, 0x5A6040, { .reversed = false });
+    RH_ScopedInstall(ConstructGeometryAndSkinArrays, 0x5A6530, { .reversed = false });
+    RH_ScopedInstall(CreateSkinnedClump, 0x5A69D0);
+
+    // Unused palette stuff
     RH_ScopedInstall(InitPaletteOctTree, 0x5A5EB0, { .reversed = false });
     RH_ScopedInstall(ShutdownPaletteOctTree, 0x5A5EE0, { .reversed = false });
     RH_ScopedInstall(ReducePaletteOctTree, 0x5A5EF0, { .reversed = false });
     RH_ScopedInstall(AddColour, 0x5A5F00, { .reversed = false });
     RH_ScopedInstall(FillPalette, 0x5A5F30, { .reversed = false });
     RH_ScopedInstall(FindNearestColour, 0x5A5F40, { .reversed = false });
-    RH_ScopedGlobalInstall(GetTextureFromTxdAndLoadNextTxd, 0x5A5F70, { .reversed = false });
-    RH_ScopedInstall(ConstructTextures, 0x5A6040, { .reversed = false });
-    RH_ScopedInstall(ConstructGeometryAndSkinArrays, 0x5A6530, { .reversed = false });
     RH_ScopedInstall(ReducePaletteSize, 0x5A6870, { .reversed = false });
-    RH_ScopedInstall(CreateSkinnedClump, 0x5A69D0, { .reversed = false });
 }
 
 // inlined
@@ -289,7 +297,7 @@ void CClothesBuilder::ConstructGeometryArray(RpGeometry** out, uint32* modelName
 
 // inlined, see 0x5A6CE1
 // 0x5A56C0
-void CClothesBuilder::DestroySkinArrays(RwMatrixWeights* weights, uint32* bones) {
+void CClothesBuilder::DestroySkinArrays(RwMatrixWeights* weights, RwUInt32* bones) {
     delete weights;
     delete bones;
 }
@@ -517,8 +525,8 @@ void CClothesBuilder::ConstructTextures(RwTexDictionary* dict, uint32* hashes, f
 }
 
 // 0x5A6530
-void CClothesBuilder::ConstructGeometryAndSkinArrays(RpHAnimHierarchy* animHierarchy, RpGeometry** geometry1, RwMatrixWeights** weights, uint32** a4, uint32 a5, RpGeometry** geometry2, RpMaterial** material) {
-    plugin::Call<0x5A6530, RpHAnimHierarchy*, RpGeometry**, RwMatrixWeights**, uint32**, uint32, RpGeometry**, RpMaterial**>(animHierarchy, geometry1, weights, a4, a5, geometry2, material);
+void CClothesBuilder::ConstructGeometryAndSkinArrays(RpHAnimHierarchy* pBoneHier, RpGeometry** ppGeometry, RwMatrixWeights** ppWeights, uint32** ppIndices, uint32 numModels, RpGeometry** pGeometrys, RpMaterial** pMaterial) {
+    plugin::Call<0x5A6530>(pBoneHier, ppGeometry, ppWeights, ppIndices, numModels, pGeometrys, pMaterial);
 }
 
 // unused
@@ -528,6 +536,167 @@ void CClothesBuilder::ReducePaletteSize(RwTexture* texture, int32 numColorsToRed
 }
 
 // 0x5A69D0
-RpClump* CClothesBuilder::CreateSkinnedClump(RpClump* clump, RwTexDictionary* dict, CPedClothesDesc& newClothes, const CPedClothesDesc* oldClothes, bool bCutscenePlayer) {
-    return plugin::CallAndReturn<RpClump*, 0x5A69D0, RpClump*, RwTexDictionary*, CPedClothesDesc&, const CPedClothesDesc*, bool>(clump, dict, newClothes, oldClothes, bCutscenePlayer);
+RpClump* CClothesBuilder::CreateSkinnedClump(RpClump* bones, RwTexDictionary* dict, CPedClothesDesc& ndscr, const CPedClothesDesc* odscr, bool bCutscenePlayer) {
+    LoadCdDirectory();
+
+    const struct {
+        eClothesModelPart mp;
+        const char*       name;
+    } parts[]{
+        {eClothesModelPart::CLOTHES_MODEL_TORSO, "torso"},
+        {eClothesModelPart::CLOTHES_MODEL_HEAD, "head"},
+        {eClothesModelPart::CLOTHES_MODEL_HANDS, "hands"},
+        {eClothesModelPart::CLOTHES_MODEL_LEGS, "legs"},
+        {eClothesModelPart::CLOTHES_MODEL_SHOES, "feet"}
+    };
+    for (const auto [mp, name] : parts) {
+        if (!ndscr.m_anModelKeys[(int)mp]) {
+            ndscr.SetModel(name, mp);
+        }
+    }
+
+    if (odscr) {
+        ms_geometryHasChanged = false;
+        ms_ratiosHaveChanged  = false;
+        if (odscr->m_fFatStat != ndscr.m_fFatStat || odscr->m_fMuscleStat != ndscr.m_fMuscleStat) {
+            ms_textureHasChanged = true;
+            ms_geometryHasChanged = true;
+        } else {
+            ms_textureHasChanged = true;
+        }
+        ms_geometryHasChanged = !rng::equal(ndscr.m_anModelKeys, odscr->m_anModelKeys);
+        ms_ratiosHaveChanged  = !rng::equal(ndscr.m_anTextureKeys, odscr->m_anTextureKeys);
+        if (!ms_ratiosHaveChanged && !ms_geometryHasChanged && !ms_textureHasChanged) {
+            return nullptr;
+        }
+    } else {
+        ms_ratiosHaveChanged = ms_geometryHasChanged = ms_textureHasChanged = true;
+    }
+    CPedClothesDesc dscr = ndscr;
+    PreprocessClothesDesc(dscr, bCutscenePlayer);
+
+    //> 0x5A42B0 - Calculate blend ratios
+    float rNormal, rFatness, rMuscle;
+    {
+        rMuscle  = std::clamp(CStats::GetStatValue(STAT_MUSCLE) / 1000.f, 0.f, 1.f);
+        rFatness = std::clamp((dscr.m_fFatStat - 200.f) / 800.f, 0.f, 1.f);
+        rNormal  = 1.f - rMuscle - rFatness;
+        if (rNormal <= 0.f) {
+            const auto t = 1.f / (rFatness + rMuscle);
+            rMuscle  *= t;
+            rFatness *= t;
+            rNormal   = 0.f;
+        }
+    }
+
+    if ((ms_textureHasChanged || ms_ratiosHaveChanged) && !bCutscenePlayer) {
+        RwTexDictionaryForAllTextures(dict, [](RwTexture* t, void* data) {
+            RwTexDictionaryRemoveTexture(t);
+            RwTextureDestroy(t);
+            return t;
+        }, nullptr);
+        ConstructTextures(dict, dscr.m_anTextureKeys.data(), rNormal, rFatness, rMuscle);
+    }
+
+    constexpr auto NO_BODY_PARTS = 10;
+
+    constexpr const char* BODY_PART_TEX_NAMES[NO_BODY_PARTS]{
+        "torso",
+        "head",
+        "torso",
+        "legs",
+        "feet",
+        "necklace",
+        "watch",
+        "glasses",
+        "hat",
+        "extra1"
+    };
+
+    //> 0x5A6B2C
+    RpMaterial*       ms[NO_BODY_PARTS];
+    for (uint32 i{}; const auto name : BODY_PART_TEX_NAMES) {
+        ms[i++] = [&]() -> RpMaterial* {
+            if (const auto tex = RwTexDictionaryFindNamedTexture(dict, name)) {
+                const auto mat = RpMaterialCreate();
+                RpMaterialSetTexture(mat, tex);
+                const auto clr = RwRGBA(0xFF, 0xFF, 0xFF, 0xFF);
+                RpMaterialSetColor(mat, &clr);
+                return mat;
+            }
+            return nullptr;
+        }();
+    }
+
+    //> 0x5A6C5D
+    RpGeometry* gs[NO_BODY_PARTS];
+    ConstructGeometryArray(gs, dscr.m_anModelKeys.data(), rNormal, rFatness, rMuscle);
+
+    //> 0x5A6C6A
+    const auto boneAtomic = GetFirstAtomic(bones);
+    const auto boneSkin   = RpSkinGeometryGetSkin(RpAtomicGetGeometry(boneAtomic));
+    const auto boneAnimHr = RpSkinAtomicGetHAnimHierarchy(boneAtomic);
+
+    RwMatrixWeights* boneWeights;
+    RwUInt32*        boneIdxs;
+    RpGeometry*      tmpGeo;
+    ConstructGeometryAndSkinArrays(
+        boneAnimHr,
+        &tmpGeo,
+        &boneWeights,
+        &boneIdxs,
+        NO_BODY_PARTS,
+        gs,
+        ms
+    );
+    RpSkinGeometrySetSkin(
+        tmpGeo,
+        RpSkinCreate(
+            RpGeometryGetNumVertices(tmpGeo),
+            RpSkinGetNumBones(boneSkin),
+            boneWeights,
+            boneIdxs,
+            const_cast<RwMatrix*>(RpSkinGetSkinToBoneMatrices(boneSkin)) // TODO
+        )
+    );
+    DestroySkinArrays(boneWeights, boneIdxs);
+    
+    const auto hier = RpHAnimHierarchyCreateFromHierarchy(
+        boneAnimHr,
+        (RpHAnimHierarchyFlag)boneAnimHr->flags,       // TODO: Use function to access
+        boneAnimHr->currentAnim->maxInterpKeyFrameSize // TODO: Use function to access
+    );
+
+    const auto childFrame = RwFrameCreate();
+    RpHAnimFrameSetHierarchy(childFrame, hier);
+
+    const auto atomic = RpAtomicCreate();
+    RpAtomicSetGeometry(atomic, tmpGeo, NULL);
+    RpSkinAtomicSetHAnimHierarchy(atomic, hier);
+    RpAtomicSetFrame(atomic, childFrame);
+    RpSkinAtomicSetType(atomic, rpSKINTYPEGENERIC);
+
+    const auto rootFrame = RwFrameCreate();
+    RwFrameAddChild(rootFrame, childFrame);
+
+    const auto clump = RpClumpCreate();
+    RpClumpSetFrame(clump, rootFrame);
+    RpClumpAddAtomic(clump, atomic);
+
+    // Free memory
+    {
+        RpGeometryDestroy(tmpGeo);
+
+        RwTexDictionarySetCurrent(dict);
+        for (auto i = 0; i < NO_BODY_PARTS; i++) {
+            if (gs[i]) {
+                RpGeometryDestroy(gs[i]);
+            }
+            if (ms[i]) {
+                RpMaterialDestroy(ms[i]);
+            }
+        }
+    }
+
+    return clump;
 }
