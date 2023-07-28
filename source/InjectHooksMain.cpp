@@ -501,7 +501,6 @@ void InjectHooksMain() {
     CPtrListDoubleLink::InjectHooks();
     CPtrNodeSingleLink::InjectHooks();
     CPtrListSingleLink::InjectHooks();
-    List_c::InjectHooks();
     CReferences::InjectHooks();
     CPopulation::InjectHooks();
     CModelInfo::InjectHooks();
