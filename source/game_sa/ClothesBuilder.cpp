@@ -515,8 +515,30 @@ int32 CClothesBuilder::FindNearestColour(RwRGBA* color) {
 }
 
 // 0x5A5F70
-RwTexture* GetTextureFromTxdAndLoadNextTxd(RwTexture* destTexture, int32 txdId_withTexture, int32 CRC_nextTxd, int32* nextTxdId) {
-    return plugin::CallAndReturn<RwTexture*, 0x5A5F70, RwTexture*, int32, int32, int32*>(destTexture, txdId_withTexture, CRC_nextTxd, nextTxdId);
+RwTexture* GetTextureFromTxdAndLoadNextTxd(RwTexture* dstTex, int32 txdId_withTexture, int32 CRC_nextTxd, int32* nextTxdId) {
+    if (txdId_withTexture == -1) {
+        if (CRC_nextTxd) {
+            *nextTxdId = CClothesBuilder::RequestTexture(CRC_nextTxd);
+            CStreaming::LoadRequestedModels();
+        } else {
+            *nextTxdId = -1;
+        }
+        return dstTex;
+    }
+
+    CStreaming::LoadAllRequestedModels(true);
+    if (CRC_nextTxd) {
+        *nextTxdId = CClothesBuilder::RequestTexture(CRC_nextTxd);
+        CStreaming::LoadRequestedModels();
+    } else {
+        *nextTxdId = -1;
+    }
+    const auto tex = GetFirstTexture(CTxdStore::GetTxd(txdId_withTexture));
+    const auto res = dstTex
+        ? CClothesBuilder::PlaceTextureOnTopOfTexture(dstTex, tex), dstTex
+        : CClothesBuilder::CopyTexture(tex);
+    CStreaming::RemoveModel(TXDToModelId(txdId_withTexture));
+    return res;
 }
 
 // 0x5A6040
