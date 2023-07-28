@@ -41,19 +41,10 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedOverloadedInstall(BlendTextures, "Dst-Src", 0x5A5820, void (*)(RwTexture*, RwTexture*, float, float, int32));
     RH_ScopedOverloadedInstall(BlendTextures, "Dst-Src1-Src2", 0x5A59C0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32));
     RH_ScopedOverloadedInstall(BlendTextures, "Dst-Src1-Src2-Tat", 0x5A5BC0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32, RwTexture*));
-    RH_ScopedGlobalInstall(GetTextureFromTxdAndLoadNextTxd, 0x5A5F70, { .reversed = false });
+    RH_ScopedGlobalInstall(GetTextureFromTxdAndLoadNextTxd, 0x5A5F70);
     RH_ScopedInstall(ConstructTextures, 0x5A6040, { .reversed = false });
     RH_ScopedInstall(ConstructGeometryAndSkinArrays, 0x5A6530, { .reversed = false });
     RH_ScopedInstall(CreateSkinnedClump, 0x5A69D0);
-
-    // Unused palette stuff
-    RH_ScopedInstall(InitPaletteOctTree, 0x5A5EB0, { .reversed = false });
-    RH_ScopedInstall(ShutdownPaletteOctTree, 0x5A5EE0, { .reversed = false });
-    RH_ScopedInstall(ReducePaletteOctTree, 0x5A5EF0, { .reversed = false });
-    RH_ScopedInstall(AddColour, 0x5A5F00, { .reversed = false });
-    RH_ScopedInstall(FillPalette, 0x5A5F30, { .reversed = false });
-    RH_ScopedInstall(FindNearestColour, 0x5A5F40, { .reversed = false });
-    RH_ScopedInstall(ReducePaletteSize, 0x5A6870, { .reversed = false });
 }
 
 // inlined
@@ -194,7 +185,7 @@ RpGeometry* BlendGeometry(RpClump* clump, std::pair<const char*, float> (&&frame
         fds[i] = {
             a,
             g,
-            (const RwUInt8*)RpSkinGetVertexBoneIndices(s), // NOTE: Not sure why it's casted to UInt8, but that really is how the data is stored
+            (const RwUInt8*)RpSkinGetVertexBoneIndices(s), // NOTE: Not sure why it's casted to UInt8, but that really is how the data is stored / TODO: Okay, so actually it seems like something is fucked
             RpSkinGetVertexBoneWeights(s),
             RpGeometryGetVertexTexCoords(g, 1),
             (CVector*)RpMorphTargetGetVertices(mt),
@@ -467,53 +458,6 @@ void CClothesBuilder::BlendTextures(RwTexture* dst, RwTexture* src1, RwTexture* 
     CTimer::Resume();
 }
 
-// unused or inlined
-// 0x5A5EB0
-void CClothesBuilder::InitPaletteOctTree(int32 numColors) {
-    /*
-    COctTree::InitPool(&PC_Scratch[1024], 15360u);
-    COctTreeBase::Init(&gOctTreeBase, numColors);
-    */
-}
-
-// 0x5A5EE0
-void CClothesBuilder::ShutdownPaletteOctTree() {
-    // COctTree::ShutdownPool();
-}
-
-// 0x5A5EF0
-void CClothesBuilder::ReducePaletteOctTree(int32 numColorsToReduce) {
-    // gOctTreeBase.ReduceBranches(newBranchesCount);
-}
-
-// 0x5A5F00
-bool CClothesBuilder::AddColour(RwRGBA* color) {
-    return plugin::CallAndReturn<bool, 0x5A5F00, RwRGBA*>(color);
-    /*
-    if (!color->alpha)
-        gOctTreeBase.m_bHasTransparentPixels = 1;
-
-    return gOctTreeBase.Insert(color);
-    */
-}
-
-// 0x5A5F30
-void CClothesBuilder::FillPalette(RwRGBA* color) {
-    // gOctTreeBase.FillPalette(color);
-}
-
-// unused
-// 0x5A5F40
-int32 CClothesBuilder::FindNearestColour(RwRGBA* color) {
-    return plugin::CallAndReturn<int32, 0x5A5F40, RwRGBA*>(color);
-    /*
-    if (color->alpha)
-        return gOctTreeBase.FindNearestColour(color);
-    else
-        return 0;
-    */
-}
-
 // 0x5A5F70
 RwTexture* GetTextureFromTxdAndLoadNextTxd(RwTexture* dstTex, int32 txdId_withTexture, int32 CRC_nextTxd, int32* nextTxdId) {
     if (txdId_withTexture == -1) {
@@ -549,12 +493,6 @@ void CClothesBuilder::ConstructTextures(RwTexDictionary* dict, uint32* hashes, f
 // 0x5A6530
 void CClothesBuilder::ConstructGeometryAndSkinArrays(RpHAnimHierarchy* pBoneHier, RpGeometry** ppGeometry, RwMatrixWeights** ppWeights, uint32** ppIndices, uint32 numModels, RpGeometry** pGeometrys, RpMaterial** pMaterial) {
     plugin::Call<0x5A6530>(pBoneHier, ppGeometry, ppWeights, ppIndices, numModels, pGeometrys, pMaterial);
-}
-
-// unused
-// 0x5A6870
-void CClothesBuilder::ReducePaletteSize(RwTexture* texture, int32 numColorsToReduce) {
-    plugin::Call<0x5A6870, RwTexture*, int32>(texture, numColorsToReduce);
 }
 
 // 0x5A69D0

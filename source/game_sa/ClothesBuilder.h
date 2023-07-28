@@ -103,15 +103,8 @@ public:
     * @arg r3 Ratio of the `src2` texture
     */
     static void BlendTextures(RwTexture* dst, RwTexture* src1, RwTexture* src2, float r1, float r2, float r3, int32 numColors, RwTexture* tattoos);
-    static void InitPaletteOctTree(int32 numColors);
-    static void ShutdownPaletteOctTree();
-    static void ReducePaletteOctTree(int32 numColorsToReduce);
-    static bool AddColour(RwRGBA* color);
-    static void FillPalette(RwRGBA* color);
-    static int32 FindNearestColour(RwRGBA* color);
     static void ConstructTextures(RwTexDictionary* dict, uint32* hashes, float factorA, float factorB, float factorC);
     static void ConstructGeometryAndSkinArrays(RpHAnimHierarchy* animHierarchy, RpGeometry** geometry1, RwMatrixWeights** weights, uint32** a4, uint32 a5, RpGeometry** geometry2, RpMaterial** material);
-    static void ReducePaletteSize(RwTexture* texture, int32 numColorsToReduce);
     static RpClump* CreateSkinnedClump(RpClump* clump, RwTexDictionary* dict, CPedClothesDesc& newClothes, const CPedClothesDesc* oldClothes, bool CutscenePlayer);
 };
 
