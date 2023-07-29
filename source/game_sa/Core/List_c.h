@@ -11,31 +11,36 @@ class ListItem_c;
 
 template <typename T>
 class TList_c {
-    class Iterator {
-        using ListT = TList_c<T>;
+    template<typename Y>
+    class BaseIterator {
     public:
         using iterator_category = std::forward_iterator_tag; // Actually it's bidirectional, but there are quirks, so let's pretend like its not
         using difference_type   = std::ptrdiff_t;
-        using value_type        = T;
-        using pointer           = T*;
-        using reference         = T&;
+        using value_type        = Y;
+        using pointer           = Y*;
+        using reference         = Y&;
 
-        Iterator(pointer ptr) : m_ptr{ ptr } {}
+        BaseIterator(pointer ptr) : m_ptr{ ptr } {}
 
         reference operator*() const { return *m_ptr; }
-        pointer operator->()        { return m_ptr; }
+        pointer operator->() { return m_ptr; }
 
-        Iterator& operator++()   { assert(m_ptr); m_ptr = m_ptr->m_pNext; return *this; }
-        Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+        auto& operator++() { assert(m_ptr); m_ptr = m_ptr->m_pNext; return *this; }
+        auto  operator++(int) { const auto tmp{ *this }; ++(*this); return tmp; }
 
         // NOTE: Won't work properly in case `list.end() == *this` [Because `m_ptr` will be null]
-        Iterator& operator--()   { assert(m_ptr); m_ptr = m_ptr->m_pPrev; return *this; }
-        Iterator operator--(int) { Iterator tmp = *this; --(*this); return tmp; }
+        auto& operator--() { assert(m_ptr); m_ptr = m_ptr->m_pPrev; return *this; }
+        auto  operator--(int) { const auto tmp{ *this }; --(*this); return tmp; }
 
-        friend bool operator<=>(const Iterator&, const Iterator&) = default;
+        friend bool operator==(const BaseIterator<Y>& lhs, const BaseIterator<Y>& rhs) { return lhs.m_ptr == rhs.m_ptr; }
+        friend bool operator!=(const BaseIterator<Y>& lhs, const BaseIterator<Y>& rhs) { return !(lhs == rhs); }
     private:
         pointer m_ptr;
     };
+public:
+    using iterator       = BaseIterator<T>;
+    using const_iterator = BaseIterator<const T>;
+
 public:
     void AddItem(T* item) {
         assert(item);
@@ -197,8 +202,14 @@ public:
 
     auto GetNumItems()    const { return m_cnt; }
 
-    auto begin()          const { return Iterator{ GetHead() }; }
-    auto end()            const { return Iterator{ nullptr }; }
+    auto cbegin()         const { return const_iterator{ GetHead() }; }
+    auto begin()          const { return cbegin(); }
+    auto begin()                { return iterator{ GetHead() }; }
+
+    // Past the end is always `nullptr` - Not really std comforting, but oh well
+    auto cend()           const { return const_iterator{ nullptr }; }
+    auto end()            const { return cend(); }
+    auto end()                  { return iterator{ nullptr }; }
 
 private:
     T*     m_head{};
