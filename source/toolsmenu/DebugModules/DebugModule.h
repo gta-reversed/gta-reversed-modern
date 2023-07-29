@@ -1,10 +1,12 @@
 #pragma once
 
+// NOTE: Ideally we'd use imconfig.h, but it's too finnicky
 #define IM_VEC2_CLASS_EXTRA \
     operator CVector2D() const { return {x, y}; } \
     ImVec2(const CVector2D& v) : x{v.x}, y{v.y} {} \
 
 #include <imgui.h>
+#include "../Utility.h" // TODO Remove this and add it individually to all places this headear is included in
 
 class DebugModule {
 public:
@@ -48,73 +50,3 @@ private:
     const char* m_wndName{};
     bool        m_wndIsOpen{};
 };
-
-namespace notsa {
-namespace ui {
-struct ScopedWindow {
-    ScopedWindow(const char* name, ImVec2 defaultSize, bool& open, ImGuiWindowFlags flags = 0) :
-        m_needsEnd{open}
-    {
-        if (open) {
-            ImGui::SetNextWindowSize(defaultSize, ImGuiCond_FirstUseEver);
-            ImGui::Begin(name, &open, flags);
-        }
-    }
-
-    ~ScopedWindow() {
-        if (m_needsEnd) {
-            ImGui::End();
-        }
-    }
-
-private:
-    bool m_needsEnd{};
-};
-
-struct ScopedChild {
-    template<typename... Ts>
-    ScopedChild(Ts&&... args) {
-        ImGui::BeginChild(std::forward<Ts>(args)...);
-    }
-
-    ~ScopedChild() { ImGui::EndChild(); }
-};
-
-template<typename T>
-struct ScopedID {
-    ScopedID(T id) { ImGui::PushID(id); }
-    ~ScopedID() { ImGui::PopID(); }
-};
-
-struct ScopedDisable {
-    ScopedDisable(bool disable) { ImGui::BeginDisabled(disable); }
-    ~ScopedDisable()            { ImGui::EndDisabled(); }
-};
-
-//! Render a nested menu (A series of `BeginMenu` calls). If all `BeginMenu` calls return `true` the provided `OnAllVisibleFn` is called.
-template<rng::input_range R, typename T>
-void DoNestedMenu(R&& menuPath, T OnAllVisibleFn) {
-    assert(menuPath.size() > 0); // Empty makes no sense
-
-    int32 nopen{};
-    for (auto name : menuPath) {
-        if (!ImGui::BeginMenu(name)) {
-            break;
-        }
-        nopen++;
-    }
-    if (nopen == rng::size(menuPath)) {
-        std::invoke(OnAllVisibleFn);
-    }
-    while (nopen--) {
-        ImGui::EndMenu();
-    }
-}
-
-//! Initializer list version of `DoNestedMenu` (So no ugly `std::to_array` has to be used)
-template<typename T>
-void DoNestedMenuIL(std::initializer_list<const char*> menuPath, T OnAllVisibleFn) {
-    DoNestedMenu(menuPath, OnAllVisibleFn);
-}
-}; // namespace ui
-}; // namespace notsa

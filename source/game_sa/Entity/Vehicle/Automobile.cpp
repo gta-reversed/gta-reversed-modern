@@ -694,8 +694,8 @@ void CAutomobile::ProcessControl()
                 CColDisk& colDisk = colData->m_pDisks[i];
                 if (colData->bUsesDisks) {
                     CVector& point = contactPoints[i];
-                    point = colDisk.m_vecStart;
-                    point.z -= colDisk.m_fStartRadius;
+                    point = colDisk.m_vecCenter;
+                    point.z -= colDisk.m_fRadius;
                     point = Multiply3x3(GetMatrix(), contactPoints[i]);
                 }
                 else {
@@ -1526,6 +1526,7 @@ void CAutomobile::ProcessFlyingCarStuff()
     }
 }
 
+// 0x6A45C0
 void CAutomobile::DoHoverSuspensionRatios()
 {
     if (GetUp().z >= 0.3f && !vehicleFlags.bIsDrowning) {
@@ -4135,11 +4136,12 @@ void CAutomobile::ReduceHornCounter() {
 static RwTexture*& renderLicensePlateTexture{ *(RwTexture**)0xC1BFD8 };
 
 // 0x6A2F00
-void CAutomobile::CustomCarPlate_BeforeRenderingStart(CVehicleModelInfo* model) {
-    if (model->m_pPlateMaterial) {
-        renderLicensePlateTexture = RpMaterialGetTexture(model->m_pPlateMaterial);
+void CAutomobile::CustomCarPlate_BeforeRenderingStart(const CVehicleModelInfo& mi)
+{
+    if (mi.m_pPlateMaterial) {
+        renderLicensePlateTexture = RpMaterialGetTexture(mi.m_pPlateMaterial);
         RwTextureAddRef(renderLicensePlateTexture);
-        RpMaterialSetTexture(model->m_pPlateMaterial, m_pCustomCarPlate);
+        RpMaterialSetTexture(mi.m_pPlateMaterial, m_pCustomCarPlate);
     }
 }
 
@@ -5109,7 +5111,6 @@ CObject* CAutomobile::SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collision
     *RwFrameGetMatrix(flyingObjFrame) = *frameLTM; // Set this frame's matrix to be the same as the component's - TODO: This most likely isn't the correct way to do this..
     CVisibilityPlugins::SetAtomicRenderCallback(clonedFlyingObjAtomic, nullptr);
     obj->AttachToRwObject((RwObject*)clonedFlyingObjAtomic, true);
-
     obj->m_bDontStream = true;
     obj->m_fMass = 10.f;
     obj->m_fTurnMass = 25.f;
@@ -5866,12 +5867,12 @@ void CAutomobile::PlaceOnRoadProperly()
             fColZ = colPoint.m_vecPoint.z;
             m_pEntityWeAreOn = colEntity;
 
-            m_FrontCollPoly.m_nLighting = colPoint.m_nLightingB;
+            m_FrontCollPoly.ligthing = colPoint.m_nLightingB;
             vecFrontCheck.z = fColZ;
         }
     }
     else if (bColFoundFront) {
-        m_FrontCollPoly.m_nLighting = colPoint.m_nLightingB;
+        m_FrontCollPoly.ligthing = colPoint.m_nLightingB;
         vecFrontCheck.z = fColZ;
     }
 
@@ -5893,12 +5894,12 @@ void CAutomobile::PlaceOnRoadProperly()
             fColZ = colPoint.m_vecPoint.z;
             m_pEntityWeAreOn = colEntity;
 
-            m_RearCollPoly.m_nLighting = colPoint.m_nLightingB;
+            m_RearCollPoly.ligthing = colPoint.m_nLightingB;
             vecRearCheck.z = fColZ;
         }
     }
     else if (bColFoundRear) {
-        m_RearCollPoly.m_nLighting = colPoint.m_nLightingB;
+        m_RearCollPoly.ligthing = colPoint.m_nLightingB;
         vecRearCheck.z = fColZ;
     }
 

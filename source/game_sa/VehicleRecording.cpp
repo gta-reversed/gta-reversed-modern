@@ -61,6 +61,8 @@ void CVehicleRecording::InjectHooks() {
 
 // 0x459390
 void CVehicleRecording::Init() {
+    ZoneScoped;
+
     rng::fill(bPlaybackGoingOn, false);
     rng::fill(bPlaybackPaused, false);
     rng::fill(pPlaybackBuffer, nullptr);
@@ -87,6 +89,8 @@ void CVehicleRecording::ShutDown() {
 
 // 0x459F70 hook not needed
 void CVehicleRecording::Render() {
+    ZoneScoped;
+
 }
 
 // 0x45A360

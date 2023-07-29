@@ -82,7 +82,7 @@ public:
 
         // for all arguments: add them to script code
         code.Pack(arguments...);
-        script.m_pBaseIP = script.m_pCurrentIP = code.GetData();
+        script.m_pBaseIP = script.m_IP = code.GetData();
 
         script.ProcessOneCommand();
         code.SaveResultVariables(&script);

@@ -55,7 +55,7 @@ public:
 
     /*!
     * @0x681720
-    * @brief Get the first primary task (that is, the first non-null entry from `m_aPrimaryTasks`)
+    * @brief Get the first present primary task (that is, the first non-null entry from `m_aPrimaryTasks`)
     */
     CTask* GetActiveTask();
 
@@ -67,7 +67,7 @@ public:
 
     /*!
     * @addr 0x681810
-    * @brief Similar to `FindActiveTaskByType` but only checks the given primary task
+    * @brief Similar to `FindActiveTaskByType` but only checks the given primary task's subtasks
     */
     CTask* FindTaskByType(ePrimaryTasks taskIndex, eTaskType taskType);
 
@@ -101,9 +101,6 @@ public:
     */
     void Flush();
 
-
-
-    /// Create the next subtask of `task`
     /*!
     * @addr 0x681920
     * @brief Set the next sub task of `task`
@@ -160,6 +157,12 @@ public:
     * @param taskIndex The index of the secondary task to be changed
     */
     void SetTaskSecondary(CTask* task, eSecondaryTask taskIndex) { ChangeTaskInSlot(m_aSecondaryTasks[taskIndex], task); }
+
+    /*!
+    * Abort the first task found out of the primary tasks given
+    * @notsa
+    */
+    void AbortFirstPrimaryTaskIn(std::initializer_list<ePrimaryTasks> idxs, CPed* ped, eAbortPriority priority = ABORT_PRIORITY_LEISURE, const CEvent* event = nullptr);
 
     /*!
     * @brief Clear primary tasks `TASK_PRIMARY_EVENT_RESPONSE_TEMP` and `TASK_PRIMARY_EVENT_RESPONSE_NONTEMP`
@@ -222,6 +225,17 @@ public:
 
     /*!
     * @notsa
+    * @brief Check if the simplest active task is any of the given types
+    */
+    bool IsSimplestActiveTaskOfType(std::initializer_list<eTaskType> types) {
+        if (const auto task = GetSimplestActiveTask()) {
+            return notsa::contains(types, task->GetTaskType());
+        }
+        return false;
+    }
+
+    /*!
+    * @notsa
     * @brief Find an active task from the give types and return the first one.
     */
     template<eTaskType... Ts>
@@ -236,7 +250,8 @@ public:
     * @brief Find an active task from the given types and return the first one.
     */
     template<Task... Ts>
-    auto Find() requires(sizeof...(Ts) > 1) { // Only use this overload if there's more than 1 Task
+        requires(sizeof...(Ts) > 1)
+    auto Find() {
         return Find<Ts::Type...>();
     }
 

@@ -23,7 +23,7 @@ void CGeneral::InjectHooks() {
     RH_ScopedInstall(SolveQuadratic, 0x53CE30);
     RH_ScopedInstall(GetAngleBetweenPoints, 0x53CEA0);
     RH_ScopedOverloadedInstall(GetRandomNumberInRange<int32>, "", 0x407180, int32(*)(int32, int32));
-    RH_ScopedOverloadedInstall(GetRandomNumberInRange<float>, "", 0x41BD90, float (*)(float, float));
+    RH_ScopedOverloadedInstall(GetRandomNumberInRange<float>, "", 0x41BD90, float (*)(float, float), { .enabled = false, .locked = true }); // There's a bug in the code at 0x6DF26D which causes the assert to be triggered, so I'm unhooking this for now
 }
 
 // 0x53CB00
@@ -126,15 +126,24 @@ uint32 CGeneral::GetNodeHeadingFromVector(float x, float y) {
     return (uint32)floor(angle / DegreesToRadians(45.0f));
 }
 
-// 0x53CE30
+/*!
+* Solves: ax² + bx + c = 0
+* @returns If there is a solution for the equation
+* @addr 0x53CE30
+*/
 bool CGeneral::SolveQuadratic(float a, float b, float c, float& x1, float& x2) {
-    float discriminant = b * b - 4.f * a * c;
-    if (discriminant < 0.0f)
-        return false;
+    // x12 = (-b ± √(b²-4ac)) / 2a
 
-    float discriminantSqrt = sqrt(discriminant);
-    x2 = (-b + discriminantSqrt) / (2.0f * a);
-    x1 = (-b - discriminantSqrt) / (2.0f * a);
+    const auto discr = b * b - 4.f * a * c;
+    if (discr < 0.0f) {
+        return false; // No solution
+    }
+
+
+    const auto discriminantSqrt = std::sqrt(discr);
+    const auto denom = 1.f / (2.f * a);
+    x1 = (-b - discriminantSqrt) * denom;
+    x2 = (-b + discriminantSqrt) * denom;
     return true;
 }
 

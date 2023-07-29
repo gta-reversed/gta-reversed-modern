@@ -28,7 +28,7 @@ public:
     constexpr CQuaternion(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 
     // Quat to matrix
-    void Get(RwMatrix* out);
+    void Get(RwMatrix* out) const;
 
     // Quat to euler angles
     void Get(float *x, float *y, float *z);

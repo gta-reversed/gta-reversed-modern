@@ -8,12 +8,21 @@
 
 #include "Rope.h"
 
+// NOTSA
+enum class eControlledCrane : int32 {
+    NONE,
+    MAGNO_CRANE,
+    WRECKING_BALL,
+    LAS_VEGAS_CRANE,
+    QUARRY_CRANE
+};
+
 class CRopes {
 public:
     static constexpr auto MAX_NUM_ROPES{ 8u };
 
     static inline std::array<CRope, MAX_NUM_ROPES>& aRopes = *(std::array<CRope, MAX_NUM_ROPES>*)0xB768B8; // Access using CRopes::GetRope()
-    static int32& PlayerControlsCrane;
+    static eControlledCrane& PlayerControlsCrane;
     static uint32& m_nRopeIdCreationCounter;
 
 public:
@@ -24,7 +33,7 @@ public:
     static void Update();
     static void Render();
 
-    static bool RegisterRope(CEntity* ropeObj, uint32 ropeType, CVector startPos, bool bExpires, uint8 segmentCount, uint8, CPhysical* holder, uint32 timeExpire);
+    static bool RegisterRope(uint32 ropeObj, uint32 ropeType, CVector startPos, bool bExpires, uint8 segmentCount, uint8, CPhysical* holder, uint32 timeExpire);
 
     static float FindPickupHeight(CEntity* entity);
     static int32 FindRope(uint32 id);

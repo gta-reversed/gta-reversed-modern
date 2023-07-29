@@ -77,3 +77,9 @@ void CBox::DrawWireFrame(CRGBA color, const CMatrix& transform) const {
     CLines::RenderLineNoClipping(v7, v3, colorARGB, colorARGB);
     CLines::RenderLineNoClipping(v7, v4, colorARGB, colorARGB);
 }
+
+bool CBox::IsPointInside(const CVector& point) const {
+    return point.x >= m_vecMin.x && point.x <= m_vecMax.x
+        && point.y >= m_vecMin.y && point.y <= m_vecMax.y
+        && point.z >= m_vecMin.z && point.z <= m_vecMax.z;
+}

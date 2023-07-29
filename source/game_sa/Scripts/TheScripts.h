@@ -18,9 +18,8 @@
 #include "StuckCarCheck.h"
 #include "UpsideDownCarCheck.h"
 #include "ScriptsForBrains.h"
-class CCheckpoint;
 
-enum eScriptParameterType;
+class CCheckpoint;
 
 enum class eCrossHairType : uint32 {
     NONE,
@@ -79,6 +78,12 @@ struct tScriptCheckpoint {
         m_nId        = 1;
         m_Checkpoint = nullptr;
     }
+
+    //! Get script thing ID
+    auto GetId()    const { return m_nId; }
+
+    //! If `*this` is currently in use
+    auto IsActive() const { return m_bUsed; }
 };
 VALIDATE_SIZE(tScriptCheckpoint, 0x8);
 
@@ -92,6 +97,12 @@ struct tScriptEffectSystem {
         m_nId       = 1;
         m_pFxSystem = nullptr;
     }
+
+    //! Get script thing ID
+    auto GetId()    const { return m_nId; }
+
+    //! If `*this` is currently in use
+    auto IsActive() const { return m_bUsed; }
 };
 VALIDATE_SIZE(tScriptEffectSystem, 0x8);
 
@@ -103,55 +114,38 @@ struct tScriptSequence {
         m_bUsed = false;
         m_nId   = 1;
     }
+
+    //! Get script thing ID
+    auto GetId()    const { return m_nId; }
+
+    //! If `*this` is currently in use
+    auto IsActive() const { return m_bUsed; }
 };
 VALIDATE_SIZE(tScriptSequence, 0x4);
 
 struct tScriptText {
-    float     m_fLetterWidth;
-    float     m_fLetterHeight;
-    CRGBA     m_Color;
-    bool      m_bJustify;
-    bool      m_bCentered;
-    bool      m_bWithBackground;
-    bool      m_bUnk;
-    float     m_fLineHeight;
-    float     m_fLineWidth;
-    CRGBA     m_BackgroundBoxColor;
-    bool      m_bProportional;
-    CRGBA     m_BackgroundColor;
-    int8      m_nShadowType;
-    int8      m_nOutlineType;
-    bool      m_bDrawBeforeFade;
-    bool      m_bRightJustify;
-    int32     m_nFont;
-    CVector2D m_Pos;
-    char      m_szGxtEntry[8];
-    int32     param1;
-    int32     param2;
-
-    tScriptText() { // 0x4690A8
-        m_fLetterWidth       = 0.48f;
-        m_fLetterHeight      = 1.12f;
-        m_Color              = CRGBA(225, 225, 225, 255);
-        m_fLineHeight        = SCREEN_WIDTH;
-        m_fLineWidth         = SCREEN_WIDTH;
-        m_bJustify           = false;
-        m_bRightJustify      = false;
-        m_bCentered          = false;
-        m_bWithBackground    = false;
-        m_bUnk               = false;
-        m_BackgroundBoxColor = CRGBA(128, 128, 128, 128);
-        m_bProportional      = true;
-        m_BackgroundColor    = CRGBA(0, 0, 0, 255);
-        m_nShadowType        = 2;
-        m_nOutlineType       = 0;
-        m_bDrawBeforeFade    = false;
-        m_nFont              = 1;
-        m_Pos                = CVector2D();
-        param1               = -1;
-        param2               = -1;
-        memset(&m_szGxtEntry, 0, sizeof(m_szGxtEntry));
-    }
+    // values from 0x4690A8
+    float     m_fLetterWidth{ 0.48f };
+    float     m_fLetterHeight{ 1.12f };
+    CRGBA     m_Color{ 225, 225, 225, 255 };
+    bool      m_bJustify{ false };
+    bool      m_bCentered{ false };
+    bool      m_bWithBackground{ false };
+    bool      m_bUnk{ false };
+    float     m_fLineHeight{ SCREEN_HEIGHT };
+    float     m_fLineWidth{ SCREEN_WIDTH };
+    CRGBA     m_BackgroundBoxColor{ 128, 128, 128, 128 };
+    bool      m_bProportional{ true };
+    CRGBA     m_BackgroundColor{ 0, 0, 0, 255 };
+    int8      m_nShadowType{ 2 };
+    int8      m_nOutlineType{ 0 };
+    bool      m_bDrawBeforeFade{ false };
+    bool      m_bRightJustify{ false };
+    int32     m_nFont{ 1 };
+    CVector2D m_Pos{};
+    char      m_szGxtEntry[8]{};
+    int32     param1{ -1 };
+    int32     param2{ -1 };
 };
 VALIDATE_SIZE(tScriptText, 0x44);
 
@@ -216,6 +210,12 @@ struct tScriptSearchlight {
     CVector  m_TargetSpot{};
     CVector  vf64{};
     CVector  vf70{};
+
+    //! Script thing ID
+    auto GetId() { return m_nId; }
+
+    //! If `*this` is currently in use
+    auto IsActive() const { return m_bUsed; }
 };
 VALIDATE_SIZE(tScriptSearchlight, 0x7C);
 
@@ -242,6 +242,12 @@ struct tScriptSphere {
         m_nId       = 0;
         m_fRadius   = 0.0f;
     }
+
+    //! Get script thing ID
+    auto GetId()    const { return m_nUniqueId; }
+
+    //! If `*this` is currently in use
+    auto IsActive() const { return m_bUsed; }
 };
 VALIDATE_SIZE(tScriptSphere, 0x18);
 
@@ -320,11 +326,7 @@ public:
     static inline uint16& NumberOfEntriesInSwitchTable = *reinterpret_cast<uint16*>(0xA43F50);
     static inline uint16& NumberOfEntriesStillToReadForSwitch = *reinterpret_cast<uint16*>(0xA43F60);
 
-    static inline std::array<tScriptCheckpoint, MAX_NUM_SCRIPT_CHECKPOINTS>&                     ScriptCheckpointArray          = *(std::array<tScriptCheckpoint, MAX_NUM_SCRIPT_CHECKPOINTS>*)0xA44070;
-    static inline uint16& NumberOfScriptCheckpoints = *reinterpret_cast<uint16*>(0xA44068);
 
-    static inline std::array<tScriptEffectSystem, MAX_NUM_SCRIPT_EFFECT_SYSTEMS>&                ScriptEffectSystemArray        = *(std::array<tScriptEffectSystem, MAX_NUM_SCRIPT_EFFECT_SYSTEMS>*)0xA44110;
-    static inline std::array<tScriptSequence, MAX_NUM_SCRIPT_SEQUENCE_TASKS>&                    ScriptSequenceTaskArray        = *(std::array<tScriptSequence, MAX_NUM_SCRIPT_SEQUENCE_TASKS>*)0xA43F68;
     static inline std::array<int16, MAX_NUM_CARDS>&                                              CardStack                      = *(std::array<int16, MAX_NUM_CARDS>*)0xA44218;
     static inline std::array<int32, MAX_NUM_MISSION_SCRIPTS>&                                    MultiScriptArray               = *(std::array<int32, MAX_NUM_MISSION_SCRIPTS>*)0xA444C8;
     static inline std::array<tScriptConnectLodsObject, MAX_NUM_SCRIPT_CONNECT_LODS_OBJECTS>&     ScriptConnectLodsObjects       = *(std::array<tScriptConnectLodsObject, MAX_NUM_SCRIPT_CONNECT_LODS_OBJECTS>*)0xA44800;
@@ -343,8 +345,6 @@ public:
 
     static inline std::array<tScriptBrainWaitEntity, MAX_NUM_ENTITIES_WAITING_FOR_SCRIPT_BRAIN>& EntitiesWaitingForScriptBrain  = *(std::array<tScriptBrainWaitEntity, MAX_NUM_ENTITIES_WAITING_FOR_SCRIPT_BRAIN>*)0xA476B0;
     static inline std::array<CRunningScript, MAX_NUM_SCRIPTS>&                                   ScriptsArray                   = *(std::array<CRunningScript, MAX_NUM_SCRIPTS>*)0xA8B430;
-    static inline std::array<tScriptSphere, MAX_NUM_SCRIPT_SPHERES>&                             ScriptSphereArray              = *(std::array<tScriptSphere, MAX_NUM_SCRIPT_SPHERES>*)0xA91268;
-
     static inline std::array<tScriptText, MAX_NUM_INTRO_TEXT_LINES>&                             IntroTextLines                 = *(std::array<tScriptText, MAX_NUM_INTRO_TEXT_LINES>*)0xA913E8;
     static inline uint16& NumberOfIntroTextLinesThisFrame = *reinterpret_cast<uint16*>(0xA44B68);
 
@@ -353,11 +353,22 @@ public:
 
     static inline std::array<CSprite2d, MAX_NUM_SCRIPT_SPRITES>&                                 ScriptSprites                  = *(std::array<CSprite2d, MAX_NUM_SCRIPT_SPRITES>*)0xA94B68;
 
-    static inline std::array<tScriptSearchlight, MAX_NUM_SCRIPT_SEARCH_LIGHT>&                   ScriptSearchLightArray         = *(std::array<tScriptSearchlight, MAX_NUM_SCRIPT_SEARCH_LIGHT>*)0xA94D68;
-    static inline uint16& NumberOfScriptSearchLights = *reinterpret_cast<uint16*>(0xA90830);
-
     static inline uint16& NumberOfExclusiveMissionScripts = *reinterpret_cast<uint16*>(0xA444B8);
     static inline uint16& NumberOfMissionScripts = *reinterpret_cast<uint16*>(0xA444BC);
+
+    //
+    // Script things
+    //
+
+    static inline std::array<tScriptSphere, MAX_NUM_SCRIPT_SPHERES>&                             ScriptSphereArray              = *(std::array<tScriptSphere, MAX_NUM_SCRIPT_SPHERES>*)0xA91268;
+    static inline std::array<tScriptEffectSystem, MAX_NUM_SCRIPT_EFFECT_SYSTEMS>&                ScriptEffectSystemArray        = *(std::array<tScriptEffectSystem, MAX_NUM_SCRIPT_EFFECT_SYSTEMS>*)0xA44110;
+    static inline std::array<tScriptSearchlight, MAX_NUM_SCRIPT_SEARCH_LIGHT>&                   ScriptSearchLightArray         = *(std::array<tScriptSearchlight, MAX_NUM_SCRIPT_SEARCH_LIGHT>*)0xA94D68;
+
+    static inline std::array<tScriptSequence, MAX_NUM_SCRIPT_SEQUENCE_TASKS>&                    ScriptSequenceTaskArray        = *(std::array<tScriptSequence, MAX_NUM_SCRIPT_SEQUENCE_TASKS>*)0xA43F68;
+    static inline uint16&                                                                        NumberOfScriptSearchLights     = *reinterpret_cast<uint16*>(0xA90830);
+
+    static inline std::array<tScriptCheckpoint, MAX_NUM_SCRIPT_CHECKPOINTS>&                     ScriptCheckpointArray          = *(std::array<tScriptCheckpoint, MAX_NUM_SCRIPT_CHECKPOINTS>*)0xA44070;
+    static inline uint16&                                                                        NumberOfScriptCheckpoints      = *reinterpret_cast<uint16*>(0xA44068);
 
     static inline bool& DbgFlag = *reinterpret_cast<bool*>(0x859CF8);
     static inline void*& SwitchDefaultAddress = *reinterpret_cast<void**>(0xA43F54);

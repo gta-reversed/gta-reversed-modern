@@ -16,10 +16,14 @@ RH_ScopedInstall(Process, 0x711D90, { .reversed = false });
 
 // 0x70F9E0
 void CStencilShadows::Init() {
+    ZoneScoped;
+
     plugin::Call<0x70F9E0>();
 }
 
 // 0x711D90
 void CStencilShadows::Process(CVector& cameraPos) {
+    ZoneScoped;
+
     plugin::Call<0x711D90, CVector&>(cameraPos);
 }

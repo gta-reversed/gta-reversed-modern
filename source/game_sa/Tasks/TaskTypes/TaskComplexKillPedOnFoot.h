@@ -32,7 +32,8 @@ public:
 public:
     static constexpr auto Type = TASK_COMPLEX_KILL_PED_ON_FOOT;
 
-    CTaskComplexKillPedOnFoot(CPed* target, int32 time, int32 pedFlags, int32 delay, int32 chance, uint8 nCompetence, /* notsa => */bool bWaitForPlayerToBeSafe = false, bool bWaitingForPlayerToBeSafe = false);
+    CTaskComplexKillPedOnFoot(CPed* target, int32 time = -1, int32 pedFlags = 0, int32 delay = 0, int32 chance = 0, uint8 nCompetence = 1, /* notsa => */bool bWaitForPlayerToBeSafe = false, bool bWaitingForPlayerToBeSafe = false);
+
     ~CTaskComplexKillPedOnFoot() override;
 
     eTaskType GetTaskType() override { return Type; }

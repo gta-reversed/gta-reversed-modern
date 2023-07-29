@@ -301,7 +301,7 @@ void CHud::SetVehicleName(const char* name) {
 }
 
 // 0x588BB0
-void CHud::SetZoneName(char* name, bool displayImmediately) {
+void CHud::SetZoneName(const char* name, bool displayImmediately) {
     if (displayImmediately) {
         m_pZoneName = name;
         return;
@@ -387,6 +387,8 @@ void CHud::Draw() {
 
 // 0x58D490
 void CHud::DrawAfterFade() {
+    ZoneScoped;
+
     RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     RWRSTATE(rwFILTERNEAREST));
     RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,    RWRSTATE(rwTEXTUREADDRESSCLAMP));
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
@@ -786,10 +788,12 @@ void CHud::DrawCrossHairs() {
 
         const auto RenderOneXLUSprite = [=](float x, float y, auto u, auto v) {
             CSprite::RenderOneXLUSprite(
-                x, y,
-                1.0f,
-                screenStretchCrossHairX / 2.0f, screenStretchCrossHairY / 2.0f,
-                255, 255, 255, 255, 0.01f, 255, u, v
+                { x, y, 1.0f } ,
+                { screenStretchCrossHairX / 2.0f, screenStretchCrossHairY / 2.0f },
+                255, 255, 255, 255,
+                0.01f,
+                255,
+                u, v
             );
         };
 
@@ -1121,7 +1125,7 @@ void CHud::DrawRadar() {
     if (vehicle && vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX) {
         float angle = PI - std::atan2(-vehicle->m_matrix->GetRight().z, vehicle->m_matrix->GetUp().z);
         CRadar::DrawRotatingRadarSprite(
-            &Sprites[SPRITE_RADAR_RING_PLANE],
+            Sprites[SPRITE_RADAR_RING_PLANE],
             SCREEN_STRETCH_X(87.0f),
             SCREEN_STRETCH_FROM_BOTTOM(66.0f),
             angle,
@@ -1572,7 +1576,14 @@ void CHud::DrawWeaponIcon(CPed* ped, int32 x, int32 y, float alpha) {
 
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,   RWRSTATE(NULL));
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(texture)));
-    CSprite::RenderOneXLUSprite(x0 + halfWidth, y0 + halfHeight, 1.0f, halfWidth, halfHeight, 255u, 255u, 255u, 255, 1.0f, 255, 0, 0);
+    CSprite::RenderOneXLUSprite(
+        { x0 + halfWidth, y0 + halfHeight, 1.0f },
+        { halfWidth, halfHeight },
+        255u, 255u, 255u, 255,
+        1.0f,
+        255,
+        0, 0
+    );
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,  RWRSTATE(FALSE));
 }
 

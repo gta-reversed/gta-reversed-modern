@@ -19,8 +19,8 @@
 
 union tPoolObjectFlags {
     struct {
-        uint8 nId : 7;
-        bool  bEmpty : 1;
+        uint8 nId : 7;    // Mask: 0x7F
+        bool  bEmpty : 1; // Mask: 0x80
     };
 
 private:
@@ -127,9 +127,9 @@ public:
     }
 
     // Returns slot index for this object
-    int32 GetIndex(A* obj) {
+    int32 GetIndex(const A* obj) {
         assert(IsFromObjectArray(obj));
-        return reinterpret_cast<B*>(obj) - m_pObjects;
+        return reinterpret_cast<const B*>(obj) - m_pObjects;
     }
 
     // Returns pointer to object by slot index
@@ -163,8 +163,10 @@ public:
             if (++m_nFirstFree >= m_nSize) {
                 if (bReachedTop) {
                     m_nFirstFree = -1;
-                    if constexpr (!DontDebugCheckAlloc) {
-                        NOTSA_UNREACHABLE("Allocation failed");
+                    if constexpr (DontDebugCheckAlloc) {
+                        DEV_LOG("Allocataion failed!"); // Code can handle alloc failures
+                    } else {
+                        NOTSA_DEBUG_BREAK(); // Code can't handle alloc failures, so break
                     }
                     return nullptr;
                 }
@@ -210,7 +212,7 @@ public:
     }
 
     // Returns SCM handle (ref) for object (0x424160)
-    int32 GetRef(A* obj) {
+    int32 GetRef(const A* obj) {
         const auto idx = GetIndex(obj);
         return (idx << 8) + m_byteMap[idx].IntValue();
     }
@@ -218,9 +220,9 @@ public:
     // Returns pointer to object by SCM handle (ref)
     A* GetAtRef(int32 ref) {
         int32 idx = ref >> 8; // It is possible the ref is invalid here, thats why we check for the idx is valid below (And also why GetIndexFromRef isn't used, it would assert)
-        return IsIndexInBounds(idx) && m_byteMap[idx].IntValue() == (ref & 0xFF) ?
-            reinterpret_cast<A*>(&m_pObjects[idx]) :
-            nullptr;
+        return IsIndexInBounds(idx) && m_byteMap[idx].IntValue() == (ref & 0xFF)
+            ? reinterpret_cast<A*>(&m_pObjects[idx])
+            : nullptr;
     }
 
     A* GetAtRefNoChecks(int32 ref) {
@@ -283,8 +285,8 @@ public:
     auto GetAllValid() {
         using namespace std;
         return span{ m_pObjects, (size_t)m_nSize }
-            | views::filter([this](auto&& obj) { return !IsFreeSlotAtIndex(GetIndex(&obj)); }) // Filter only slots in use
-            | views::transform([](auto&& obj) -> T {
+            | rngv::filter([this](auto&& obj) { return !IsFreeSlotAtIndex(GetIndex(&obj)); }) // Filter only slots in use
+            | rngv::transform([](auto&& obj) -> T {
                 if constexpr (std::is_pointer_v<T>) { // For pointers we also do an address-of
                     return static_cast<T>(&obj);
                 } else {

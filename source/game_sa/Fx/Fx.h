@@ -24,7 +24,7 @@ enum eSparkType : uint8 {
 };
 
 // original name unknown
-struct FxEntitySystem : public ListItem_c {
+struct FxEntitySystem : public ListItem_c<FxEntitySystem> {
     FxSystem_c* m_System;
     CEntity*    m_Entity;
 };
@@ -85,9 +85,9 @@ public:
     void SetFxQuality(FxQuality_e quality);
     [[nodiscard]] FxQuality_e GetFxQuality() const;
 
-    void AddBlood(CVector& origin, CVector& direction, int32 amount, float arg3);
+    void AddBlood(Const CVector& origin, Const CVector& direction, int32 amount, float arg3);
     void AddWood(CVector& origin, CVector& direction, int32 amount, float arg3);
-    void AddSparks(CVector& origin, CVector& direction, float force, int32 amount, CVector across, eSparkType sparksType, float spread, float life);
+    void AddSparks(Const CVector& origin, Const CVector& direction, float force, int32 amount, CVector across, eSparkType sparksType, float spread, float life);
     void AddTyreBurst(CVector& posn, CVector& velocity);
     void AddBulletImpact(CVector& posn, CVector& direction, int32 bulletFxType, int32 amount, float arg4);
     void AddPunchImpact(CVector& posn, CVector& velocity, int32 arg2);
@@ -100,7 +100,7 @@ public:
     void AddWheelSand(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness);
     void AddWheelDust(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness);
     void TriggerWaterHydrant(CVector& posn);
-    void TriggerGunshot(CEntity* entity, CVector& origin, CVector& target, bool doGunflash);
+    void TriggerGunshot(CEntity* entity, const CVector& origin, const CVector& target, bool doGunflash);
     void TriggerTankFire(CVector& origin, CVector& target);
     void TriggerWaterSplash(CVector& posn);
     void TriggerBulletSplash(CVector& posn);

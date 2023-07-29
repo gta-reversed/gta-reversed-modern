@@ -11,12 +11,12 @@ CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(CVehicle* targetVehic
 CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(CVehicle* targetVehicle, eMoveState moveState) : // NOTSA
     CTaskComplexEnterCarAsDriver{ targetVehicle }
 {
-    m_nMoveState = (int32)moveState;
+    m_moveState = moveState;
 }
 
 // 0x643780
 CTask* CTaskComplexEnterCarAsDriver::Clone() {
-    auto task = new CTaskComplexEnterCarAsDriver(m_pTargetVehicle);
-    task->m_nMoveState = m_nMoveState;
+    auto task = new CTaskComplexEnterCarAsDriver(m_car);
+    task->m_moveState = m_moveState;
     return task;
 }
