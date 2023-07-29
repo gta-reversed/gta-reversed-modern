@@ -20,6 +20,7 @@ class TList_c {
         using pointer           = Y*;
         using reference         = Y&;
 
+        BaseIterator() = default;
         BaseIterator(pointer ptr) : m_ptr{ ptr } {}
 
         reference operator*() const { return *m_ptr; }
@@ -210,6 +211,8 @@ public:
     auto cend()           const { return const_iterator{ nullptr }; }
     auto end()            const { return cend(); }
     auto end()                  { return iterator{ nullptr }; }
+
+    auto IsEmpty()        const { return m_head == nullptr; }
 
 private:
     T*     m_head{};
