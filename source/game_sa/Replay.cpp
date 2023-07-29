@@ -83,6 +83,8 @@ void CReplay::Init() {
 
 // 0x460500
 void CReplay::Update() {
+    ZoneScoped;
+
     if (CCutsceneMgr::IsCutsceneProcessing() || CPad::GetPad()->ArePlayerControlsDisabled()
         || FrontEndMenuManager.m_bMenuActive || CEntryExitManager::ms_exitEnterState) {
         Init();
@@ -1166,7 +1168,7 @@ bool CReplay::PlayBackThisFrameInterpolation(CAddressInReplayBuffer& buffer, flo
             modelling->up = TheCamera.GetMatrix().GetUp();
             modelling->right = TheCamera.GetMatrix().GetRight();
 
-            CameraFocus = cameraPacket.firstFocusPosn * interpolation + CameraFocus * (1.0f - interpolation);
+            CameraFocus = cameraPacket.firstFocusPosn * interpolation + CVector{ CameraFocus } * (1.0f - interpolation);
             bIsUsingRemoteCar = cameraPacket.isUsingRemoteVehicle;
             break;
         }

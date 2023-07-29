@@ -7,6 +7,7 @@
 #include "Event.h"
 
 enum ePedPieceTypes;
+class CPedDamageResponseCalculator;
 
 class NOTSA_EXPORT_VTABLE CEventDamage : public CEventEditableResponse {
 public:
@@ -57,6 +58,9 @@ public:
     void ComputeBodyPartToRemove(int32& boneFrameId);
     void ComputeDeathAnim(CPed* ped, bool bMakeActiveTaskAbortable);
     void ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable);
+
+    //! Either computes the damage, or sets it as computed (Without computing it) - Very common logic in the code
+    void ComputeDamageResponseIfAffectsPed(CPed* ped, CPedDamageResponseCalculator calculator, bool bSpeak);
 
 private:
     friend void InjectHooksMain();

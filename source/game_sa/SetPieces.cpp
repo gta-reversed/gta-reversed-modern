@@ -19,6 +19,8 @@ void CSetPieces::AddOne(uint8 type, CVector2D cornerA, CVector2D cornerB, CVecto
 
 // 0x4994F0
 void CSetPieces::Init() {
+    ZoneScoped;
+
     plugin::Call<0x4994F0>();
 }
 
@@ -34,5 +36,7 @@ bool CSetPieces::Save() {
 
 // 0x49AA00
 void CSetPieces::Update() {
+    ZoneScoped;
+
     plugin::Call<0x49AA00>();
 }

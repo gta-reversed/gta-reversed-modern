@@ -54,6 +54,8 @@ struct IfpHeader {
 
 // 0x5BF6B0
 void CAnimManager::Initialise() {
+    ZoneScoped;
+
     return plugin::Call<0x5BF6B0>();
 
     ms_numAnimations = 0;

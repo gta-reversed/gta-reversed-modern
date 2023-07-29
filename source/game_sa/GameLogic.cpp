@@ -129,6 +129,8 @@ void CGameLogic::ForceDeathRestart() {
 
 // 0x441210
 void CGameLogic::InitAtStartOfGame() {
+    ZoneScoped;
+
     ActivePlayers            = true;
     SkipState                = SKIP_NONE;
     NumAfterDeathStartPoints = 0;
@@ -560,6 +562,8 @@ void CGameLogic::StopPlayerMovingFromDirection(int32 playerId, CVector direction
 
 // 0x442AD0
 void CGameLogic::Update() {
+    ZoneScoped;
+
     CStats::UpdateRespectStat(0);
     CStats::UpdateSexAppealStat();
     SetPlayerWantedLevelForForbiddenTerritories(false);

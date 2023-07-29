@@ -13,7 +13,7 @@ class FxSystem_c;
 
 /* FX System BluePrint */
 
-class FxSystemBP_c : public ListItem_c {
+class FxSystemBP_c : public ListItem_c<FxSystemBP_c> {
 public:
     uint32      m_nNameKey;
     float       m_fLength;

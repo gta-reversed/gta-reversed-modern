@@ -38,6 +38,9 @@ public:
     bool FindItem(const char* name, uint32& outOffset, uint32& outStreamingSize) const;
     bool FindItem(uint32 hashKey, uint32& outOffset, uint32& outStreamingSize) const;
 
+    // notsa
+    bool HasLoaded() const { return m_nNumEntries != 0; }
+    void Clear() { m_nNumEntries = 0; }
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

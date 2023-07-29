@@ -181,6 +181,8 @@ void ModelIndices::InjectHooks() {
 // 0x5BCA10
 void InitModelIndices()
 {
+    ZoneScoped;
+
     using namespace ModelIndices;
 
     MI_TRAFFICLIGHTS               = -1;
@@ -351,6 +353,8 @@ void InitModelIndices()
 
 // 0x5B57C0
 void MatchAllModelStrings() {
+    ZoneScoped;
+
     using namespace ModelIndices;
 
     struct {const char* name; ModelIndex& index; } models[] = {

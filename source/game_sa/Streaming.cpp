@@ -384,6 +384,8 @@ int32 CStreaming::GetDiscInDrive() {
 
 // 0x408E20
 int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
+    ZoneScoped;
+
     uint32 nextRequestModelPos    = UINT32_MAX;
     uint32 firstRequestModelCdPos = UINT32_MAX;
     int32  firstRequestModelId    = MODEL_INVALID;
@@ -1089,6 +1091,8 @@ bool CStreaming::Save() {
 // streaming channel within CStreaming::ms_channel which is 1 (second streaming channel).
 // 0x40EA10
 void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests) {
+    ZoneScoped;
+
     if (m_bLoadingAllRequestedModels) {
         return;
     }
@@ -1154,8 +1158,10 @@ void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests) {
 // Load a directory (aka img file)
 // This will set the `CdSize, CdPosn, m_nImgId, m_nNextIndexOnCd` member variables of
 // each model present in the file (according to file name)
-void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId)
-{
+void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId) {
+    ZoneScoped;
+    ZoneText(filename, strlen(filename));
+
     auto* imgFile = CFileMgr::OpenFile(filename, "rb");
     if (!imgFile)
         return;
@@ -1638,6 +1644,8 @@ void CStreaming::FlushChannels()
 // Removes all unused (if not IsRequiredToBeKept()) IFP/TXDs models as well.
 // 0x40CBA0
 void CStreaming::RequestModelStream(int32 chIdx) {
+    ZoneScoped;
+
     int32 modelId = GetNextFileOnCd(CdStreamGetLastPosn(), true);
     if (modelId == MODEL_INVALID)
         return;
@@ -2076,6 +2084,8 @@ void CStreaming::ReInit() {
 // Loads `stream.ini` settings file
 // 0x5BCCD0
 void CStreaming::ReadIniFile() {
+    ZoneScoped;
+
     bool bHasDevkitMemory = false;
     auto* file = CFileMgr::OpenFile("stream.ini", "r");
     for (char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
@@ -2359,7 +2369,7 @@ bool CStreaming::RemoveLeastUsedModel(int32 streamingFlags) {
     }
 
     // todo: make more readable
-    if (TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM) > 50.0f
+    if (TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BB_BOTTOM) > 50.0f
             && (
                 ms_numPedsLoaded > 4
                 && RemoveLoadedZoneModel()
@@ -2846,6 +2856,8 @@ void CStreaming::Init() {
 
 // 0x5B8AD0
 void CStreaming::Init2() {
+    ZoneScoped;
+
     std::ranges::for_each(ms_aInfoForModel, [](CStreamingInfo& si) { si.Init(); });
     CStreamingInfo::ms_pArrayBase = &GetInfo(0);
 
@@ -2953,6 +2965,8 @@ void CStreaming::Init2() {
 
 // 0x4083C0
 void CStreaming::InitImageList() {
+    ZoneScoped;
+
     std::ranges::fill(ms_files, tStreamingFileDesc());
     AddImageToList("MODELS\\GTA3.IMG", true);
     AddImageToList("MODELS\\GTA_INT.IMG", true);
@@ -3374,7 +3388,7 @@ void CStreaming::StreamPedsForInterior(int32 interiorType) {
 // * -2 - Unload model from slot (If there's any)
 // * Positive values - Load given model into slot
 // 0x40BDA0
-void CStreaming::StreamPedsIntoRandomSlots(int32 modelArray[TOTAL_LOADED_PEDS]) {
+void CStreaming::StreamPedsIntoRandomSlots(const int32(&modelArray)[TOTAL_LOADED_PEDS]) {
     for (int32 i = 0; i < TOTAL_LOADED_PEDS; i++) {
         if (modelArray[i] >= 0) {
             // Load model into slot
@@ -3735,12 +3749,14 @@ void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
 
 // 0x40E670
 void CStreaming::Update() {
+    ZoneScoped;
+
     g_LoadMonitor.m_numModelsRequest = ms_numModelsRequested;
     if (CTimer::GetIsPaused())
         return;
 
     const auto& camPos = TheCamera.GetPosition();
-    const float fCamDistanceToGroundZ = camPos.z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
+    const float fCamDistanceToGroundZ = camPos.z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BB_BOTTOM);
     if (!ms_disableStreaming && !CRenderer::m_loadingPriority) {
         if (fCamDistanceToGroundZ >= 50.0f) {
             if (CGame::CanSeeOutSideFromCurrArea()) {

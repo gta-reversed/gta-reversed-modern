@@ -129,6 +129,8 @@ public:
     static CVector&        vecHunterGunPos; // { 0.0f, 4.8f, -1.3f }
     static CMatrix*        matW2B;
 
+    static constexpr auto Type = VEHICLE_TYPE_AUTOMOBILE;
+
 public:
     CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines);
     ~CAutomobile() override;
@@ -214,7 +216,7 @@ public:
     void SetTotalDamage(bool component);
     void ReduceHornCounter();
     // Apply custom car plate texture to vehicle
-    void CustomCarPlate_BeforeRenderingStart(CVehicleModelInfo* model);
+    void CustomCarPlate_BeforeRenderingStart(const CVehicleModelInfo& model);
     // Reset car plate texture after rendering
     void CustomCarPlate_AfterRenderingStop(CVehicleModelInfo* model);
     bool GetAllWheelsOffGround() const;

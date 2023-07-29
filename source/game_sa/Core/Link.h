@@ -6,7 +6,8 @@
 */
 #pragma once
 
-template <typename T> class CLink {
+template <typename T>
+class CLink {
 public:
     T         data;
     CLink<T>* prev;

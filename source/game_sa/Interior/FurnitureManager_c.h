@@ -11,7 +11,7 @@ class FurnitureManager_c {
 public:
     FurnitureGroup_c m_groups[9];
     FurnitureItem    m_furnitureItem[512];
-    List_c           m_furnitureList;
+    TList_c<void>    m_furnitureList;
 
 public:
     static void InjectHooks();

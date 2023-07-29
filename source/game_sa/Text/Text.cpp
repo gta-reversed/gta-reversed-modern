@@ -148,11 +148,9 @@ void CheckFileEncoding(const char* file, uint16 version, uint16 encoding) {
             return std::format("{}-bit unknown", e);
         }
     };
-    auto fileEncoding = GetEncodingName(encoding);
-
-    DEV_LOG("Loading '{}' version={:02d} ({})\n", file, version, fileEncoding.c_str());
+    DEV_LOG("Loading '{}' version={:02d} ({})", file, version, GetEncodingName(encoding));
     if (encoding != GAME_ENCODING) {
-        NOTSA_UNREACHABLE("File {} was compiled with {} encoding but {} is required.", file, fileEncoding, GetEncodingName(GAME_ENCODING));
+        NOTSA_UNREACHABLE("File {} was compiled with {} encoding but {} is required.", file, GetEncodingName(encoding), GetEncodingName(GAME_ENCODING));
     }
 }
 

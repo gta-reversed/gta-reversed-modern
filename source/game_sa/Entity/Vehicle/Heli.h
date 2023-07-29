@@ -97,6 +97,8 @@ public:
     static inline bool& bHeliControlsCheat                    = *(bool*)0xC1C970;
     static inline std::array<tHeliLight, 4>& HeliSearchLights = *(std::array<tHeliLight, 4>*)0xC1C990;
 
+    static constexpr auto Type = VEHICLE_TYPE_HELI;
+
 public:
     CHeli(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CHeli() override; // 0x6C4340, 0x6C4810

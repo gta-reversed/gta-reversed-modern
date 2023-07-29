@@ -122,6 +122,7 @@
 #include "Pickup.h"
 #include "Pickups.h"
 #include "PedIK.h"
+#include "HandShaker.h"
 
 // Plant
 #include "PlantMgr.h"
@@ -231,6 +232,7 @@
 #include "TaskComplexWanderMedic.h"
 #include "TaskComplexMoveBackAndJump.h"
 #include "TaskSimpleCarDriveTimed.h"
+#include "TaskComplexKillPedOnFootStealth.h"
 #include "TaskComplexDriveWander.h"
 #include "TaskSimpleStealthKill.h"
 #include "TaskSimpleCarSetPedOut.h"
@@ -382,6 +384,7 @@
 #include "TaskComplexEnterCar.h"
 #include "TaskComplexSmartFleePoint.h"
 #include "Interior/TaskInteriorBeInHouse.h"
+#include "Tasks/TaskTypes/TaskComplexKillPedOnFootArmed.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -396,8 +399,7 @@
 
 #include "platform/win/VideoPlayer/VideoPlayer.h"
 #include "platform/win/VideoMode.h"
-#include "platform/win/win.h"
-#include "platform/platform.h"
+#include "platform/win/Platform.h"
 
 #include "app/app.h"
 #include <RealTimeShadowManager.h>
@@ -410,11 +412,15 @@ void InjectHooksMain() {
     HookInstall(0x541DD0, CPad::UpdatePads); // [ImGui] Changes logic of the function and shouldn't be toggled on/off
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
 
+    CHandShaker::InjectHooks();
+    CCutsceneMgr::InjectHooks();
     CFileMgr::InjectHooks();
     CPedGroupPlacer::InjectHooks();
     CLoadedCarGroup::InjectHooks();
     RenderBuffer::InjectHooks();
     CStaticShadow::InjectHooks();
+    CPedGroup::InjectHooks();
+    CPedGroupMembership::InjectHooks();
     CRealTimeShadowManager::InjectHooks();
     CRealTimeShadow::InjectHooks();
     CPopCycle::InjectHooks();
@@ -499,7 +505,6 @@ void InjectHooksMain() {
     CPtrListDoubleLink::InjectHooks();
     CPtrNodeSingleLink::InjectHooks();
     CPtrListSingleLink::InjectHooks();
-    List_c::InjectHooks();
     CReferences::InjectHooks();
     CPopulation::InjectHooks();
     CModelInfo::InjectHooks();
@@ -804,10 +809,12 @@ void InjectHooksMain() {
         CTaskComplexInvestigateDisturbance::InjectHooks();
         // CTaskComplexKillAllThreats::InjectHooks();
         // CTaskComplexKillCriminal::InjectHooks();
+
+        CTaskComplexKillPedOnFootArmed::InjectHooks();
         CTaskComplexKillPedGroupOnFoot::InjectHooks();
-        // CTaskComplexKillPedOnFootArmed::InjectHooks();
         CTaskComplexKillPedOnFootMelee::InjectHooks();
-        // CTaskComplexKillPedOnFootStealth::InjectHooks();
+        CTaskComplexKillPedOnFootStealth::InjectHooks();
+
         CTaskComplexLeaveCarAndDie::InjectHooks();
         CTaskComplexLeaveBoat::InjectHooks();
         CTaskComplexLeaveCarAndFlee::InjectHooks();

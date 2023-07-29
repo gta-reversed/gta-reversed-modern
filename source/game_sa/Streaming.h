@@ -28,7 +28,7 @@ enum class eChannelState
 
     // A big model (also called a large file) is loaded in steps:
     // First, the variable `ms_bLoadingBigModel` is set to `true` in `RequestModelStream`.
-    // When the first half is finished loading, and `ProcessLoadingChannel` is called
+    // When the first half has finished loading, and `ProcessLoadingChannel` is called
     // `ConvertBufferToObject` will be called by it, which will set the model's load state to
     // `LOADSTATE_FINISHING`. When the latter function returns the former checks if
     // the model's loadstate is `FINISHING`, if it is the channel's state is set to
@@ -125,7 +125,7 @@ inline int32 DFFToModelId(int32 relativeId) { return RESOURCE_ID_DFF + relativeI
 inline int32 TXDToModelId(int32 relativeId) { return RESOURCE_ID_TXD + relativeId; }
 inline int32 COLToModelId(int32 relativeId) { return RESOURCE_ID_COL + relativeId; }
 inline int32 IPLToModelId(int32 relativeId) { return RESOURCE_ID_IPL + relativeId; }
-inline int32 DATToModelId(int32 relativeId) { return RESOURCE_ID_DAT + relativeId; }
+inline int32 DATToModelId(size_t relativeId) { return (size_t)RESOURCE_ID_DAT + relativeId; }
 inline int32 IFPToModelId(int32 relativeId) { return RESOURCE_ID_IFP + relativeId; }
 inline int32 RRRToModelId(int32 relativeId) { return RESOURCE_ID_RRR + relativeId; }
 inline int32 SCMToModelId(int32 relativeId) { return RESOURCE_ID_SCM + relativeId; }
@@ -370,7 +370,7 @@ public:
     static bool StreamFireEngineAndFireman(bool bStreamForFire);
     static void StreamOneNewCar();
     static void StreamPedsForInterior(int32 interiorType);
-    static void StreamPedsIntoRandomSlots(int32 modelArray[TOTAL_LOADED_PEDS]);
+    static void StreamPedsIntoRandomSlots(const int32 (&modelArray)[TOTAL_LOADED_PEDS]);
     static void StreamVehiclesAndPeds();
     static void StreamVehiclesAndPeds_Always(const CVector& unused);
     static void StreamZoneModels(const CVector& unused);

@@ -34,6 +34,8 @@ int32 CTaskSimpleFight::GetComboAnimGroupID() {
 
 // 0x5BEDC0
 void CTaskSimpleFight::LoadMeleeData() {
+    ZoneScoped;
+
     plugin::Call<0x5BEDC0>();
 }
 

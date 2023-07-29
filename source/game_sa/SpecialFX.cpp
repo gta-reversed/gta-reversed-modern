@@ -1,5 +1,6 @@
 #include "StdInc.h"
-
+#include "MotionBlurStreaks.h"
+#include "Checkpoints.h"
 #include "SpecialFX.h"
 
 extern RwTexture*& gpFinishFlagTex;
@@ -19,7 +20,7 @@ void CSpecialFX::InjectHooks() {
     RH_ScopedInstall(Update, 0x726AA0, { .reversed = false });
     RH_ScopedInstall(Shutdown, 0x723390);
     //RH_ScopedInstall(AddWeaponStreak, 0x0, { .reversed = false });
-    RH_ScopedInstall(Render, 0x726AD0, { .reversed = false });
+    RH_ScopedInstall(Render, 0x726AD0);
     RH_ScopedInstall(Render2DFXs, 0x721660, { .reversed = false });
     RH_ScopedInstall(ReplayStarted, 0x721D30);
 }
@@ -31,6 +32,8 @@ void CSpecialFX::Init() {
 
 // 0x726AA0
 void CSpecialFX::Update() {
+    ZoneScoped;
+
     plugin::Call<0x726AA0>();
 }
 
@@ -52,13 +55,14 @@ void CSpecialFX::AddWeaponStreak(eWeaponType weaponType) {
 
 // 0x726AD0
 void CSpecialFX::Render() {
-    plugin::Call<0x726AD0>();
-//    CMotionBlurStreaks::Render();
-//    CBulletTraces::Render();
-//    CBrightLights::Render();
-//    CShinyTexts::Render();
-//    C3dMarkers::Render();
-//    CCheckpoints::Render();
+    ZoneScoped;
+
+    CMotionBlurStreaks::Render();
+    CBulletTraces::Render();
+    CBrightLights::Render();
+    CShinyTexts::Render();
+    C3dMarkers::Render();
+    CCheckpoints::Render();
 }
 
 // 0x721660

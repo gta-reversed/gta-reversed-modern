@@ -37,6 +37,8 @@ void CShinyTexts::RenderOutGeometryBuffer() {
 
 // 0x724890
 void CShinyTexts::Render() {
+    ZoneScoped;
+
     if (NumShinyTexts == 0)
         return;
 

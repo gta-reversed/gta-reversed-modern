@@ -50,7 +50,10 @@ public:
     static void InjectHooks();
 
     CPedGroupIntelligence();
+    CPedGroupIntelligence(CPedGroup& owner); // notsa
     ~CPedGroupIntelligence();
+
+    void Flush();
 
     bool       AddEvent(CEvent* event);
     void       ComputeDefaultTasks(CPed* ped);

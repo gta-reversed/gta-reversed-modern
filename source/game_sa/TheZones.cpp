@@ -115,6 +115,8 @@ long double CTheZones::Calc2DDistanceBetween2Zones(CZone* zone1, CZone* zone2) {
 // Initializes CTheZones
 // 0x572670
 void CTheZones::Init() {
+    ZoneScoped;
+
     ((void(__cdecl*)())0x572670)();
 }
 
@@ -136,6 +138,27 @@ bool CTheZones::FindZone(CVector* point, int32 zonename_part1, int32 zonename_pa
     return ((bool(__cdecl*)(CVector*, int32, int32, eZoneType))0x572B80)(point, zonename_part1, zonename_part2, type);
 }
 
+//! Find zone by name `name` and of type `type` and check if `point` lies within it
+bool CTheZones::FindZone(const CVector& point, std::string_view name, eZoneType type) {
+    switch (type) {
+    case ZONE_TYPE_INFO:
+    case ZONE_TYPE_NAVI:
+        break;
+    default:
+        return false;
+    }
+
+    for (auto& zone : GetNavigationZones()) {
+        if ((type == ZONE_TYPE_INFO ? zone.GetInfoLabel() : zone.GetNaviLabel()) == name) {
+            if (PointLiesWithinZone(&point, &zone)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 // Returns pointer to zone by index
 // 0x572C40
 int16 CTheZones::FindZoneByLabel(const char* name, eZoneType type) {
@@ -150,6 +173,8 @@ void CTheZones::SetZoneRadarColours(int16 index, char flag, uint8 red, uint8 gre
 // Updates CTheZones info
 // 0x572D10
 void CTheZones::Update() {
+    ZoneScoped;
+
     ((void(__cdecl*)())0x572D10)();
 }
 

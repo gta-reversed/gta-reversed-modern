@@ -1078,7 +1078,7 @@ void CPed::GrantAmmo(eWeaponType weaponType, uint32 ammo) {
     if (wepSlot != -1) {
         auto& wepInSlot = GetWeaponInSlot(wepSlot);
 
-        wepInSlot.m_nTotalAmmo = std::min(ammo, 99'999u); // Clamp upper
+        wepInSlot.m_nTotalAmmo = std::min(wepInSlot.m_nTotalAmmo + ammo, 99'999u); // Clamp upper
 
         // TODO: Inlined
         if (wepInSlot.m_nState == WEAPONSTATE_OUT_OF_AMMO) {
@@ -2049,16 +2049,16 @@ void CPed::GetBonePosition(RwV3d& outPosition, ePedBones bone, bool updateSkinBo
         }
     } else if (!bCalledPreRender) { // Return static local bone position instead
         outPosition = MultiplyMatrixWithVector(*m_matrix, GetPedBoneStdPosition(bone));
-        return;
-    }
-
-    if (const auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump)) { // Use position of bone matrix from anim hierarchy (if any)
+    } else if (const auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump)) { // Use position of bone matrix from anim hierarchy (if any)
         // NOTE: Can't use `GetBoneMatrix` here, because it doesn't check for `hier`'s validity. (It's questionable whenever that's needed at all..)
         RwV3dAssign(&outPosition, RwMatrixGetPos(&RpHAnimHierarchyGetMatrixArray(hier)[RpHAnimIDGetIndex(hier, (size_t)bone)]));
     } else { // Not sure when can this happen.. GetTransformedBonePosition doesn't check this case.
         outPosition = GetPosition(); // Return something close to valid..
         assert(0); // Let's see if this is possible at all.
     }
+
+    // TODO: Sometimes this shit becomes nan, let's investigate
+    assert(!std::isnan(outPosition.x));
 }
 
 /*!
@@ -2096,6 +2096,7 @@ void CPed::SetPedState(ePedState pedState) {
         ReleaseCoverPoint();
         if (bClearRadarBlipOnDeath) {
             CRadar::ClearBlipForEntity(BLIP_CHAR, GetPedPool()->GetRef(this));
+            // TODO: Shouldn't we `bClearRadarBlipOnDeath = false` here?
         }
     }
 }
@@ -3670,6 +3671,17 @@ bool CPed::IsRunningOrSprinting() const {
     switch (m_nMoveState) {
     case PEDMOVE_RUN:
     case PEDMOVE_SPRINT:
+        return true;
+    }
+    return false;
+}
+
+bool CPed::IsPedStandingInPlace() const {
+    switch (m_nMoveState) {
+    case PEDMOVE_NONE:
+    case PEDMOVE_STILL:
+    case PEDMOVE_TURN_L:
+    case PEDMOVE_TURN_R:
         return true;
     }
     return false;

@@ -27,6 +27,8 @@ void CRestart::InjectHooks() {
 
 // 0x460630
 void CRestart::Initialise() {
+    ZoneScoped;
+
     for (auto i = 0u; i < MAX_RESTART_POINTS; i++) {
         HospitalRestartHeadings[i] = 0.0f;
         HospitalRestartPoints[i] = CVector{};

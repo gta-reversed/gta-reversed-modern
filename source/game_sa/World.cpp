@@ -154,6 +154,8 @@ void CWorld::ResetLineTestOptions() {
 
 // 0x5631E0
 void CWorld::Initialise() {
+    ZoneScoped;
+
     bDoingCarCollisions    = false;
     bNoMoreCollisionTorque = false;
     bIncludeDeadPeds       = false;
@@ -254,6 +256,8 @@ void CWorld::ProcessForAnimViewer() {
 
 // 0x563430
 void CWorld::ProcessPedsAfterPreRender() {
+    ZoneScoped;
+
     if (CTimer::bSkipProcessThisFrame)
         return;
 
@@ -651,8 +655,9 @@ void CWorld::ShutDown() {
 
 // 0x564360
 void CWorld::ClearForRestart() {
-    if (CCutsceneMgr::ms_cutsceneLoadStatus == 2)
+    if (CCutsceneMgr::HasLoaded()) {
         CCutsceneMgr::DeleteCutsceneData();
+    }
 
     CProjectileInfo::RemoveAllProjectiles();
     CObject::DeleteAllTempObjects();
@@ -1196,8 +1201,8 @@ void CWorld::RemoveFallenPeds() {
         if (vecPedPos.z > MAP_Z_LOW_LIMIT)
             continue;
         if (!ped->IsCreatedBy(ePedCreatedBy::PED_GAME) || ped->IsPlayer()) {
-            CNodeAddress pathNodeAddress = ThePaths.FindNodeClosestToCoors(vecPedPos, 1, 1000000.0f, 0, 0, 0, 0, 0);
-            if (pathNodeAddress.IsAreaValid()) {
+            CNodeAddress pathNodeAddress = ThePaths.FindNodeClosestToCoors(vecPedPos, PATH_TYPE_PED, 1000000.0f, 0, 0, 0, 0, 0);
+            if (pathNodeAddress.IsValid()) {
                 CVector pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
                 pathNodePos.z += 2.0f;
                 ped->Teleport(pathNodePos, false);
@@ -1231,8 +1236,8 @@ void CWorld::RemoveFallenCars() {
         };
 
         if (ShouldWeKeepIt()) {
-            CNodeAddress pathNodeAddress = ThePaths.FindNodeClosestToCoors(vecPos, 1, 1000000.0f, 0, 0, 0, 0, 0);
-            if (pathNodeAddress.IsAreaValid()) {
+            CNodeAddress pathNodeAddress = ThePaths.FindNodeClosestToCoors(vecPos, PATH_TYPE_PED, 1000000.0f, 0, 0, 0, 0, 0);
+            if (pathNodeAddress.IsValid()) {
                 const auto pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
                 vehicle->Teleport(pathNodePos + CVector(0, 0, 3), true);
             } else
@@ -1962,6 +1967,8 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
 
 // 0x5684A0
 void CWorld::Process() {
+    ZoneScoped;
+
     const auto IterateMovingList = [&](auto&& fn) {
         for (CPtrNodeDoubleLink* node = ms_listMovingEntityPtrs.GetNode(), *next{}; node; node = next) {
             next = node->m_next;
@@ -2008,6 +2015,8 @@ void CWorld::Process() {
 
     // Process moving entities (And possibly remove them from the world)
     {
+        ZoneScopedN("Process moving entities");
+
         const auto DoProcessMovingEntity = [&](CEntity* entity) {
             if (entity->m_bRemoveFromWorld) {
                 if (entity->IsPed()) {
@@ -2045,6 +2054,8 @@ void CWorld::Process() {
 
     g_LoadMonitor.StartTimer(true);
     if (CReplay::Mode == MODE_PLAYBACK) {
+        ZoneScopedN("Update entity RW");
+
         IterateMovingList([&](CEntity* entity) {
             entity->m_bIsInSafePosition = true;
             entity->UpdateRW();
@@ -2053,6 +2064,8 @@ void CWorld::Process() {
     } else {
         // Process collision
         {
+            ZoneScopedN("Process collision");
+
             const auto ProcessMovingEntityCollision = [](CEntity* entity) {
                 if (!entity->m_bIsInSafePosition) {
                     entity->ProcessCollision();
@@ -2091,6 +2104,8 @@ void CWorld::Process() {
 
         // Process "Shift" (Not sure what that is)
         {
+            ZoneScopedN("Process shift");
+
             bSecondShift = false;
 
             IterateMovingList([&](CEntity* entity) {
@@ -2834,6 +2849,8 @@ void CWorld::RepositionCertainDynamicObjects() {
 
 // 0x56BA00
 bool CWorld::ProcessLineOfSight(const CVector& origin, const CVector& target, CColPoint& outColPoint, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck, bool doShootThroughCheck) {
+    assert(!origin.HasNanOrInf() && !target.HasNanOrInf()); // We're getting random nan/inf's from somewhere, so let's try to root cause it...
+
     const int32 originSectorX = GetSectorX(origin.x);
     const int32 originSectorY = GetSectorY(origin.y);
     const int32 targetSectorX = GetSectorX(target.x);
