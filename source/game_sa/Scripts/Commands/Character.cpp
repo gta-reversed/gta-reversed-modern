@@ -814,7 +814,7 @@ auto RemoveCharElegantly(CRunningScript& S, CPed* ped) {
             ped->SetCharCreatedBy(PED_GAME);
             if (const auto grp = ped->GetGroup()) {
                 if (grp->GetMembership().IsFollower(ped)) { // TODO: Most likely inlined, this check makes no sense otherwise
-                    grp->GetMembership().RemoveMember(*ped);
+                    grp->GetMembership().RemoveMember(ped);
                 }
             }
             CPopulation::ms_nTotalMissionPeds--;
@@ -1344,7 +1344,7 @@ bool IsCharInSearchlight(uint32 searchLightIdx, CPed& ped) {
 // REMOVE_CHAR_FROM_GROUP
 void RemoveCharFromGroup(CPed& ped) {
     if (auto pedGroup = ped.GetGroup(); pedGroup && !pedGroup->GetMembership().IsLeader(&ped)) {
-        pedGroup->GetMembership().RemoveMember(ped);
+        pedGroup->GetMembership().RemoveMember(&ped);
         pedGroup->Process();
     }
 }
@@ -1386,13 +1386,13 @@ void DisableCharSpeech(CPed& ped, bool stopCurrentSpeech) {
 }
 
 // SET_CHAR_WANTED_BY_POLICE
-void SetCharWantedByPolice(CPed& ped) {
-    ped.bWantedByPolice = true;
+void SetCharWantedByPolice(CPed& ped, bool state) {
+    ped.bWantedByPolice = state;
 }
 
 // SET_CHAR_SIGNAL_AFTER_KILL
-void SetCharSignalAfterKill(CPed& ped) {
-    ped.bSignalAfterKill = true;
+void SetCharSignalAfterKill(CPed& ped, bool state) {
+    ped.bSignalAfterKill = state;
 }
 
 // SET_CHAR_COORDINATES_DONT_WARP_GANG_NO_OFFSET

@@ -181,13 +181,12 @@ CVector CVector::Average(const CVector* begin, const CVector* end) {
 }
 
 float CVector::Heading(bool limitAngle) const {
-    const auto heading = std::atan2(-x, y);
+    const auto radians = std::atan2(-x, y);
     if (limitAngle) {
-        return CGeneral::LimitRadianAngle(heading);
+        return CGeneral::LimitRadianAngle(radians);
     }
-    return heading;
+    return radians;
 }
-
 
 CVector* CrossProduct(CVector* out, CVector* a, CVector* b)
 {

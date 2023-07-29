@@ -138,6 +138,8 @@ void CShadows::AddPermanentShadow(uint8 type, RwTexture* texture, CVector* posn,
 
 // 0x70C950
 void CShadows::UpdatePermanentShadows() {
+    ZoneScoped;
+
     ((void(__cdecl*)())0x70C950)();
 }
 

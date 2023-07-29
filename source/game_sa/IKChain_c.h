@@ -11,7 +11,7 @@
 class CEntity;
 class CPed;
 
-class IKChain_c : public ListItem_c {
+class IKChain_c : public ListItem_c<IKChain_c> {
 public:
     static void InjectHooks();
 

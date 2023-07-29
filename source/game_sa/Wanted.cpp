@@ -368,6 +368,8 @@ bool CWanted::IsInPursuit(CCopPed* cop) {
 
 // 0x562360
 void CWanted::UpdateEachFrame() {
+    ZoneScoped;
+
     auto playerWanted = FindPlayerWanted();
     auto wantedLevel = playerWanted->GetWantedLevel();
 

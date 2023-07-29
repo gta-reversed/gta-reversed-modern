@@ -69,6 +69,8 @@ bool CStuckCarCheck::IsCarInStuckCarArray(int32 carHandle) {
 
 // 0x465680
 void CStuckCarCheck::Process() {
+    ZoneScoped;
+
     plugin::CallMethod<0x465680, CStuckCarCheck*>(this);
 }
 

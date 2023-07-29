@@ -127,6 +127,8 @@ void Fx_c::ExitEntitySystems() {
 
 // 0x49EA90
 void Fx_c::Init() {
+    ZoneScoped;
+
     g_fxMan.Init();
     g_fxMan.LoadFxProject("models\\effects.fxp");
     g_fxMan.SetWindData(&CWeather::WindDir, &CWeather::Wind);
@@ -159,11 +161,15 @@ void Fx_c::DestroyEntityFx(CEntity* entity) {
 
 // 0x49E640
 void Fx_c::Update(RwCamera* camera, float timeDelta) {
+    ZoneScoped;
+
     ((void(__thiscall*)(Fx_c*, RwCamera*, float))0x49E640)(this, camera, timeDelta);
 }
 
 // 0x49E650
 void Fx_c::Render(RwCamera* camera, bool heatHaze) {
+    ZoneScoped;
+
     g_fxMan.Render(camera, heatHaze);
 }
 

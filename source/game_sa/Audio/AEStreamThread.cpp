@@ -120,12 +120,18 @@ void CAEStreamThread::StopTrack() {
 
 // 0x4F15C0
 uint32 CAEStreamThread::MainLoop(void* param) {
+#ifdef TRACY_ENABLE
+    tracy::SetThreadName("AEStreamThread");
+#endif
+
     auto* stream = reinterpret_cast<CAEStreamThread*>(param);
 
     bool wasForeground = true;
     bool play = false;
 
     while (stream->m_bThreadActive) {
+        ZoneScoped;
+
         bool isForeground = IsForegroundApp();
         if (isForeground) {
             if (!wasForeground && play){

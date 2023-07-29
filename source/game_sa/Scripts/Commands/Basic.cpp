@@ -157,6 +157,7 @@ auto AndOr(CRunningScript& S, int32 logicalOp) { // 0x0D6
 // Script loading, stopping
 //
 
+// COMMAND_TERMINATE_THIS_SCRIPT
 auto TerminateThisScript(CRunningScript& S) { // 0x04E 
     if (S.m_bIsMission) {
         CTheScripts::bAlreadyRunningAMissionScript = false;
@@ -352,7 +353,7 @@ void notsa::script::commands::basic::RegisterHandlers() {
     REGISTER_COMMAND_HANDLER(COMMAND_ABS_LVAR_FLOAT, AbsStore<float>);
 
     REGISTER_COMMAND_HANDLER(COMMAND_GOTO, GoTo);
-    REGISTER_COMMAND_HANDLER(COMMAND_GOTO_IF_FALSE, GoToIfFalse);
+    //REGISTER_COMMAND_HANDLER(COMMAND_GOTO_IF_FALSE, GoToIfFalse);
     REGISTER_COMMAND_HANDLER(COMMAND_GOSUB,  GoToSub);
     REGISTER_COMMAND_HANDLER(COMMAND_RETURN_TRUE, ReturnTrue);
     REGISTER_COMMAND_HANDLER(COMMAND_RETURN_FALSE, ReturnFalse);

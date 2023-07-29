@@ -163,8 +163,9 @@ void CBulletTraces::AddTrace(CVector* posMuzzle, CVector* posBulletHit, eWeaponT
 }
 
 // 0x723C10
-void CBulletTraces::Render()
-{
+void CBulletTraces::Render() {
+    ZoneScoped;
+
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(RwBlendFunction::rwBLENDSRCALPHA));
     RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(RwBlendFunction::rwBLENDINVSRCALPHA));

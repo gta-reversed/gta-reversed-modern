@@ -4,6 +4,11 @@
 #include "TheScripts.h"
 #include "CarGenerator.h"
 #include "Hud.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
+
+static notsa::log_ptr logger;
+
+//static auto logger = NOTSA_MAKE_LOGGER("script");
 
 //! Define it to dump out all commands that don't have a custom handler (that is, they aren't reversed)
 //! Makes compilation slow, so don't enable unless necessary!
@@ -29,6 +34,8 @@
 static inline std::array<notsa::script::CommandHandlerFunction, (size_t)(COMMAND_HIGHEST_ID_TO_HOOK) + 1> s_CustomCommandHandlerTable{};
 
 void CRunningScript::InjectHooks() {
+    logger = NOTSA_MAKE_LOGGER("script");
+
     InjectCustomCommandHooks();
 
     RH_ScopedClass(CRunningScript);
@@ -206,7 +213,31 @@ void CRunningScript::RemoveScriptFromList(CRunningScript** queueList) {
  * @addr 0x465AA0
  */
 void CRunningScript::ShutdownThisScript() {
-    plugin::CallMethod<0x465AA0, CRunningScript*>(this);
+    return plugin::CallMethod<0x465AA0>(this);
+    /*
+    if (m_bIsExternal) {
+        const auto idx = CTheScripts::StreamedScripts.GetStreamedScriptWithThisStartAddress(m_pBaseIP);
+        CTheScripts::StreamedScripts.m_aScripts[idx].m_nStatus--;
+    }
+
+    switch (m_nExternalType) {
+    case 0:
+    case 2:
+    case 3:
+    case 5: {
+        const auto pedRef = m_bIsMission
+            ? CTheScripts::LocalVariablesForCurrentMission.front().iParam
+            : m_aLocalVars[0].iParam;
+        if (const auto ped = GetPedPool()->GetAtRef(pedRef)) {
+            ped->bHasAScriptBrain = false;
+            if (m_nExternalType == 5) {
+                CScriptedBrainTaskStore::SetTask(ped, new CTaskSimpleFinishBrain{});
+            }
+        }
+        break;
+    }
+    }
+    */
 }
 
 // 0x465C20
@@ -885,6 +916,8 @@ OpcodeResult CRunningScript::ProcessOneCommand() {
         };
     } op = { CTheScripts::Read2BytesFromScript(m_IP) };
 
+    SPDLOG_LOGGER_TRACE(logger, "[{}][IP: {:#x} + {:#x}]: {} [{:#x}]", m_szName, LOG_PTR(m_pBaseIP), LOG_PTR(m_IP - m_pBaseIP), notsa::script::GetScriptCommandName((eScriptCommands)op.command), (size_t)op.command);
+    
     m_bNotFlag = op.notFlag;
 
     if (const auto handler = CustomCommandHandlerOf((eScriptCommands)(op.command))) {

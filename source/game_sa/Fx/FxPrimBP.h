@@ -74,7 +74,7 @@ public:
     FxBufferedMatrix* m_pMatrixBuffered;
     RwTexture*        m_apTextures[4];
     int32             field_1C;
-    List_c            m_EmitterPtrs;
+    TList_c<void>     m_EmitterPtrs; // TODO: Correct (T)ype
     FxInfoManager_c   m_FxInfoManager;
 
 public:

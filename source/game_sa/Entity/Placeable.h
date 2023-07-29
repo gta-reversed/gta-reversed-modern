@@ -40,6 +40,7 @@ public:
     void GetOrientation(float& x, float& y, float& z);
     void SetHeading(float heading);
     float GetHeading();
+    float GetRoll() const;
     bool IsWithinArea(float x1, float y1, float x2, float y2) const;
     bool IsWithinArea(float x1, float y1, float z1, float x2, float y2, float z2) const;
     void RemoveMatrix();

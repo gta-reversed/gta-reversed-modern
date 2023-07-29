@@ -82,6 +82,8 @@ bool CGangWars::Save() {
 
 // 0x443920
 void CGangWars::InitAtStartOfGame() {
+    ZoneScoped;
+
     State               = NOT_IN_WAR;
     State2              = NO_ATTACK;
     NumSpecificZones    = 0;
@@ -731,6 +733,8 @@ void CGangWars::TellStreamingWhichGangsAreNeeded(uint32& gangsBitFlags) {
 
 // 0x446610
 void CGangWars::Update() {
+    ZoneScoped;
+
     return plugin::Call<0x446610>();
 
     if (CTheScripts::IsPlayerOnAMission() && !bIsPlayerOnAMission && NumSpecificZones == 0)
