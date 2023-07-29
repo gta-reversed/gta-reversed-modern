@@ -34,7 +34,6 @@ public:
     bool      m_bResetStatics;
     bool      m_bRotating;
     eCamMode  m_nMode;
-    char      _pad[2];
     uint32    m_nFinishTime;
     uint32    m_nDoCollisionChecksOnFrameNum;
     uint32    m_nDoCollisionCheckEveryNumOfFrames;
@@ -74,7 +73,7 @@ public:
     float     m_fTrueBeta;
     float     m_fTrueAlpha;
     float     m_fInitialPlayerOrientation;
-    float     m_fVerticalAngle;
+    float     m_fVerticalAngle;  ///< The radian angle ([-pi/2, pi/2]) relative to the entity the camera is locked on (the player usually)
     float     m_fAlphaSpeed;
     float     m_fFOV;
     float     m_fFOVSpeed;
@@ -103,7 +102,7 @@ public:
     CVehicle* m_pCarWeAreFocussingOnI;
     float     m_fCamBumpedHorz;
     float     m_fCamBumpedVert;
-    uint32    m_nCamBumpedTime;
+    uint32    m_nCamBumpedTime; // TODO: Probably float
     CVector   m_vecSourceSpeedOverOneFrame;
     CVector   m_vecTargetSpeedOverOneFrame;
     CVector   m_vecUpOverOneFrame;

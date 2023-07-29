@@ -8,6 +8,8 @@
 
 #include "eLevelName.h"
 #include "ePedRace.h"
+#include "ePedStats.h"
+#include <extensions/utility.hpp>
 
 class CLoadedCarGroup;
 class CPed;
@@ -51,13 +53,7 @@ public:
     static uint32& ms_nNumCop;
     static uint32& ms_nNumCivFemale;
     static uint32& ms_nNumCivMale;
-    // static uint16 m_nNumCarsInGroup[POPCYCLE_TOTAL_NUM_CARGROUPS] (34)
-    static uint16* m_nNumCarsInGroup;
-    // static uint16 m_nNumPedsInGroup[POPCYCLE_TOTAL_NUM_PEDGROUPS] (57)
-    static uint16* m_nNumPedsInGroup;
-    // static int16 m_CarGroups[POPCYCLE_TOTAL_NUM_CARGROUPS][23] (34)
-    static int16 (*m_CarGroups)[23];
-    static const uint16 m_defaultCarGroupModelId = 2000; // means not loaded
+    static const uint16 m_DefaultModelIDForUnusedSlot = 2000; // means not loaded
     static bool&   m_bDontCreateRandomGangMembers;
     static bool&   m_bOnlyCreateRandomGangMembers;
     static bool&   m_bDontCreateRandomCops;
@@ -66,15 +62,24 @@ public:
     static uint32& NumMiamiViceCops;
     static uint32& CurrentWorldZone;
 
-    /// Array of (possible) model IDs in a given popcycle group
-    static inline auto& m_PedGroups = *(std::array<std::array<int16, 21>, POPCYCLE_TOTAL_PEDGROUPS>*)0xC0F358;
+    //! Number of model IDs in each corresponding car group
+    static inline auto& m_nNumCarsInGroup = StaticRef<std::array<uint16, (size_t)(POPCYCLE_TOTAL_CARGROUPS)>, 0xC0EC78>();
+
+    //! Car model IDs in each corresponding car group
+    static inline auto& m_CarGroups       = StaticRef<notsa::mdarray<int16, (size_t)(POPCYCLE_TOTAL_CARGROUPS), 23>, 0xC0ED38>();
+
+    //! Number of model IDs in each corresponding ped group
+    static inline auto& m_nNumPedsInGroup = StaticRef<std::array<uint16, (size_t)(POPCYCLE_TOTAL_PEDGROUPS)>, 0xC0ECC0>();
+
+    //! Ped model IDs in each corresponding ped group
+    static inline auto& m_PedGroups       = StaticRef<notsa::mdarray<int16, (size_t)(POPCYCLE_TOTAL_PEDGROUPS), 21>, 0xC0F358>();
 
 public:
     static void InjectHooks();
     // static functions
 
     // returns ePedRace value
-    static int32 FindPedRaceFromName(char* modelName);
+    static ePedRace FindPedRaceFromName(const char* modelName);
     // loads pedgrp.dat
     static void LoadPedGroups();
     // loads cargrp.dat
@@ -83,50 +88,62 @@ public:
     static void Initialise();
     // empty function
     static void  Shutdown();
-    static float FindDummyDistForModel(int32 modelIndex);
+    static float FindDummyDistForModel(eModelID modelIndex);
     static float FindPedDensityMultiplierCullZone();
     // CWorld::Remove(ped); delete ped;
     static void RemovePed(CPed* ped);
     // returns 0
-    static int32 ChoosePolicePedOccupation();
-    static bool  ArePedStatsCompatible(int32 statType1, int32 statType2);
-    static bool  PedMICanBeCreatedAtAttractor(int32 modelIndex);
+    static eModelID ChoosePolicePedOccupation();
+    static bool  ArePedStatsCompatible(ePedStats statType1, ePedStats statType2);
+    static bool  PedMICanBeCreatedAtAttractor(eModelID modelIndex);
     // checks if ped with specific model index can be created at script attractor
-    static bool PedMICanBeCreatedAtThisAttractor(int32 modelIndex, char* attrName);
-    static bool PedMICanBeCreatedInInterior(int32 modelIndex);
+    static bool PedMICanBeCreatedAtThisAttractor(eModelID modelIndex, const char* attrName);
+    static bool PedMICanBeCreatedInInterior(eModelID modelIndex);
     // is model male
-    static bool IsMale(int32 modelIndex);
+    static bool IsMale(eModelID modelIndex);
     // is model female
-    static bool IsFemale(int32 modelIndex);
+    static bool IsFemale(eModelID modelIndex);
     // returns false
     static bool IsSecurityGuard(ePedType pedType);
     // checks if surface at this point is skateable
     static bool IsSkateable(const CVector& point);
     // calls CGangs::ChooseGangPedModel(int32); parameter - gang id?
-    static int32 ChooseGangOccupation(int32 arg0);
+    static eModelID ChooseGangOccupation(eGangID gangId);
     // empty function, returns ped
     static CPed* AddExistingPedInCar(CPed* ped, CVehicle* vehicle);
-    // updates ped counter, for updateState see eUpdatePedCounterState
-    static void UpdatePedCount(CPed* ped, uint8 updateState);
+
+    /*!
+    * @addr 0x611570
+    * 
+    * @brief updates ped counter, for updateState see eUpdatePedCounterState
+    *
+    * @param ped               The ped that was added/removed
+    * @param pedAddedOrRemoved Should be `false` if the ped was added, or `true` if it was removed 
+    */
+    static void UpdatePedCount(CPed* ped, bool pedAddedOrRemoved);
+
     // empty function
     static void MoveCarsAndPedsOutOfAbandonedZones();
     // empty function
     static void DealWithZoneChange(eLevelName arg0, eLevelName arg1, bool arg2);
     // returns ped creation distance multiplier
     static float PedCreationDistMultiplier();
-    static bool  IsSunbather(int32 modelIndex);
+    static bool  IsSunbather(eModelID modelIndex);
     static bool  IsSunbather(CPed* ped); // NOTSA
     // returns false
-    static bool CanSolicitPlayerOnFoot(int32 modelIndex);
+    static bool CanSolicitPlayerOnFoot(eModelID modelIndex);
     // returns true if ped type is PED_TYPE_PROSTITUTE
-    static bool CanSolicitPlayerInCar(int32 modelIndex);
-    // returns true if ped type is PED_TYPE_CIVMALE
-    static bool CanJeerAtStripper(int32 modelIndex);
-    static void PlaceGangMembers(ePedType pedType, int32 arg1, const CVector& posn);
-    static void LoadSpecificDriverModelsForCar(int32 carModelIndex);
+    static bool CanSolicitPlayerInCar(eModelID modelIndex);
+    // returns true if ped type is PED_TYPE_CIVMALE 
+    static bool CanJeerAtStripper(eModelID modelIndex);
+    static void PlaceGangMembers(ePedType pedType, uint32 numOfPeds, const CVector& posn);
+
+    static void LoadSpecificDriverModelsForCar(eModelID carModelIndex);
+    static void  RemoveSpecificDriverModelsForCar(eModelID carModelIndex);
+
+
     // returns ped model index
-    static int32 FindSpecificDriverModelForCar_ToUse(int32 carModelIndex);
-    static void  RemoveSpecificDriverModelsForCar(int32 carModelIndex);
+    static eModelID FindSpecificDriverModelForCar_ToUse(eModelID carModelIndex);
     static bool  IsCorrectTimeOfDayForEffect(const C2dEffect* effect);
     // return CPopulation::m_bMoreCarsAndFewerPeds? 1.7f : 1.0f;
     static float FindCarMultiplierMotorway();
@@ -137,27 +154,53 @@ public:
     static void  RemoveAllRandomPeds();
     static bool  TestRoomForDummyObject(CObject* object);
     static bool  TestSafeForRealObject(CDummyObject* dummyObject);
-    static CPed* AddPed(ePedType pedType, uint32 modelIndex, const CVector& posn, bool makeWander);
+    static CPed* AddPed(ePedType pedType, eModelID modelIndex, const CVector& posn, bool makeWander);
     // creates male01 ped in front of car?
     static CPed* AddDeadPedInFrontOfCar(const CVector& posn, CVehicle* vehicle);
-    static int32 ChooseCivilianOccupation(bool male, bool female, int32 animType, int32 ignoreModelIndex, int32 statType, bool arg5, bool arg6, bool checkAttractor, char* attrName);
-    static void  ChooseCivilianCoupleOccupations(int32& model1, int32& model2);
-    static int32 ChooseCivilianOccupationForVehicle(bool male, CVehicle* vehicle);
-    static void  CreateWaitingCoppers(CVector posn, float arg1);
-    // Creates ped in a vehicle. gangPedType can be set to -1
-    static CPed* AddPedInCar(CVehicle* vehicle, bool driver, int32 gangPedType, int32 seatNumber, bool male, bool criminal);
+    static eModelID ChooseCivilianOccupation(
+        bool         mustBeMale = false,
+        bool         mustBeFemale = false,
+        AssocGroupId mustUseThisAnimGroup = ANIM_GROUP_NONE,
+        eModelID     mustNotBeThisModel = MODEL_INVALID,
+        ePedStats    mustBeCompatibleWithThisPedStat = ePedStats::NONE,
+        bool         bOnlyOnFoots = false,
+        bool         doTestForUsedOccupations = true,
+        bool         isAtAttractor = false, 
+        const char*  attractorScriptName = nullptr
+    );
+    static void     ChooseCivilianCoupleOccupations(eModelID& husbandOccupation, eModelID& wifeyOccupation);
+    static eModelID ChooseCivilianOccupationForVehicle(bool mustBeMale, CVehicle* vehicle);
+    static void  CreateWaitingCoppers(CVector createAt, float createaWithHeading);
+    // Creates ped in a vehicle. `carRating` can be set to -1
+    static CPed* AddPedInCar(
+        CVehicle* veh,
+        bool      pedAsDriver,
+        int32     carRating,
+        int32     seatNumber,
+        bool      mustBeMale,
+        bool      isCriminal
+    );
     static void  PlaceMallPedsAsStationaryGroup(const CVector& posn);
-    static void  PlaceCouple(ePedType pedType1, int32 modelIndex1, ePedType pedType2, int32 modelIndex2, CVector posn);
+    static void  PlaceCouple(ePedType pedType1, eModelID modelIndex1, ePedType pedType2, eModelID modelIndex2, CVector placeAt);
     // Creates ped at attractor. decisionMakerType can be set to -1
-    static bool  AddPedAtAttractor(int32 modelIndex, C2dEffect* attractor, CVector posn, CEntity* entity, int32 decisionMakerType);
+    static bool  AddPedAtAttractor(eModelID modelIndex, C2dEffect* attractor, CVector posn, CEntity* entity, int32 decisionMakerType);
     static float FindDistanceToNearestPedOfType(ePedType pedType, CVector posn);
-    static int32 PickGangCar(int32 carGroupID);
-    static int32 PickRiotRoadBlockCar();
+    static float FindDistanceToNearestPed(CVector pos);
+    static eModelID PickGangCar(eGangID forGang);
+    static eModelID PickRiotRoadBlockCar();
     static void  ConvertToRealObject(CDummyObject* dummyObject);
     static void  ConvertToDummyObject(CObject* object);
     static bool  AddToPopulation(float arg0, float arg1, float arg2, float arg3);
     // returns number of generated peds?
-    static int32 GeneratePedsAtAttractors(CVector posn, float arg1, float arg2, float arg3, float arg4, int32 decisionMakerType, int32 numPeds);
+    static int32 GeneratePedsAtAttractors(
+        CVector pos,
+        float   minRadius,
+        float   maxRadius,
+        float   minRadiusClose,
+        float   maxRadiusClose,
+        int32   decisionMaker,
+        int32   numPedsToCreate
+    );
     static void GeneratePedsAtStartOfGame();
     static void ManageObject(CObject* object, const CVector& posn);
     static void ManageDummy(CDummy* dummy, const CVector& posn);
@@ -168,7 +211,7 @@ public:
     static void PopulateInterior(int32 numPeds, CVector posn);
     static void Update(bool generatePeds);
     static bool DoesCarGroupHaveModelId(int32 carGroupId, int32 modelId);
-    static uint32 GetTotalNumGang();
+    static uint32 CalculateTotalNumGangPeds();
 
     static const auto& GetPedGroupsOfGroup(ePopcycleGroup popcycleGroup) { return m_TranslationArray[popcycleGroup].pedGroupIds; }
     static ePopcyclePedGroup GetPedGroupId(ePopcycleGroup popcycleGroup, size_t worldZone = 0) { return static_cast<ePopcyclePedGroup>(m_TranslationArray[popcycleGroup].pedGroupIds[worldZone]); }
@@ -176,6 +219,9 @@ public:
     static int32 GetNumPedsInGroup(ePopcycleGroup popcycleGroup, int32 worldZone) { return m_nNumPedsInGroup[GetPedGroupId(popcycleGroup, worldZone)]; }
     static int32 GetNumPedsInGroup(ePopcyclePedGroup pedGroup) { return m_nNumPedsInGroup[pedGroup]; }
 
-    static auto GetModelsInPedGroup(ePopcyclePedGroup pedGroup) { return m_PedGroups[pedGroup] | rng::views::take((size_t)GetNumPedsInGroup(pedGroup)); }
-    static int32 GetPedGroupModelId(ePopcyclePedGroup pedGroup, int32 slot) { return GetModelsInPedGroup(pedGroup)[slot]; } // Doing it like this for (out-of-range) debug checks 
+    static auto GetModelsInPedGroup(ePopcyclePedGroup pedGroup) { return m_PedGroups[pedGroup] | rng::views::take((size_t)GetNumPedsInGroup(pedGroup)) | rng::views::transform([](auto model) {return (eModelID)model; }); }
+    static int32 GetPedGroupModelId(ePopcyclePedGroup pedGroup, int32 slot) { return GetModelsInPedGroup(pedGroup)[slot]; } // Doing it like this for (out-of-range) debug checks
+    static auto GetModelsInCarGroup(int32 carGroupId) { return m_CarGroups[carGroupId] | rng::views::take(m_nNumCarsInGroup[carGroupId]); }
+private:
+    static void UpdatePedCounts();
 };

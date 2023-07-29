@@ -8,16 +8,15 @@
 
 #include <numeric>
 #include <span>
-#include "PluginBase.h" // !!!
-#include "RenderWare.h"
+#include <rwplcore.h>
+#include "Vector2D.h"
 
 class CMatrix;
-class CVector2D;
 
 class CVector : public RwV3d {
 public:
     constexpr CVector() = default;
-    constexpr CVector(float X, float Y, float Z) : RwV3d{X, Y, Z} {}
+    constexpr CVector(float X, float Y, float Z) : RwV3d{ X, Y, Z } {}
     constexpr CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
     constexpr CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; }
     constexpr explicit CVector(float value) { x = y = z = value; }
@@ -28,6 +27,7 @@ public:
     static void InjectHooks();
 
     static CVector Random(float min, float max);
+    static CVector Random(CVector min, CVector max);
 
     // Returns length of vector
     float Magnitude() const;
@@ -137,6 +137,12 @@ public:
         return (&x)[i];
     }
 
+    //! Get a copy of `*this` vector projected onto `projectOnTo` (which is assumed to be unit length)
+    //! The result will have a magnitude of `sqrt(abs(this->Dot(projectOnTo)))`
+    CVector ProjectOnToNormal(const CVector& projectOnTo) const {
+        return projectOnTo * Dot(projectOnTo);
+    }
+
     //! Calculate the average position
     static CVector Average(const CVector* begin, const CVector* end);
 
@@ -153,9 +159,37 @@ public:
 
     /*!
     * @param reMapRangeTo0To2Pi Return value will be in interval [0, 2pi] instead of [-pi, pi]
-    * @returning The heading of the vector in radians.
+    * @return The heading of the vector in radians.
     */
     [[nodiscard]] float Heading(bool reMapRangeTo0To2Pi = false) const;
+
+    /*!
+    * @notsa
+    * @return Make all component's values absolute (positive).
+    */
+    static friend CVector abs(CVector vec) {
+        return { std::abs(vec.x), std::abs(vec.y), std::abs(vec.z) };
+    }
+
+    static friend CVector pow(CVector vec, float power) {
+        return { std::pow(vec.x, power), std::pow(vec.y, power), std::pow(vec.z, power) };
+    }
+    
+    friend constexpr CVector operator*(const CVector& vec, float multiplier) {
+        return { vec.x * multiplier, vec.y * multiplier, vec.z * multiplier };
+    }
+
+#ifdef _DEBUG
+    bool HasNanOrInf() const {
+        for (auto i = 0; i < 3; i++) {
+            const auto v = (*this)[i];
+            if (std::isnan(v) || std::isinf(v)) {
+                return true;
+            }
+        }
+        return false;
+    }
+#endif
 };
 VALIDATE_SIZE(CVector, 0xC);
 
@@ -187,9 +221,6 @@ constexpr inline bool operator==(const CVector& vecLeft, const CVector& vecRight
     return vecLeft.x == vecRight.x && vecLeft.y == vecRight.y && vecLeft.z == vecRight.z;
 }
 
-constexpr inline CVector operator*(const CVector& vec, float multiplier) {
-    return { vec.x * multiplier, vec.y * multiplier, vec.z * multiplier };
-}
 
 constexpr inline CVector operator/(const CVector& vec, float dividend) {
     return { vec.x / dividend, vec.y / dividend, vec.z / dividend };
@@ -213,6 +244,14 @@ inline float DistanceBetweenPointsSquared(const CVector& pointOne, const CVector
 
 inline CVector Lerp(const CVector& vecOne, const CVector& vecTwo, float fProgress) {
     return vecOne * (1.0F - fProgress) + vecTwo * fProgress;
+}
+
+//! Component-wise clamp of values
+inline CVector Clamp(CVector val, CVector min, CVector max) {
+    for (auto i = 0; i < 3; i++) {
+        val[i] = std::clamp(val[i], min[i], max[i]);
+    }
+    return val;
 }
 
 inline CVector Pow(const CVector& vec, float fPow) {

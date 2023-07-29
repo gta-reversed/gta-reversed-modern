@@ -105,6 +105,7 @@
 #include "Scripted2dEffects.h"
 #include "ScriptResourceManager.h"
 #include "PedAttractorManager.h"
+#include "Attractors/PedAttractorPedPlacer.h"
 #include "LoadingScreen.h"
 #include "Securom.h"
 #include "GridRef.h"
@@ -121,6 +122,7 @@
 #include "Pickup.h"
 #include "Pickups.h"
 #include "PedIK.h"
+#include "HandShaker.h"
 
 // Plant
 #include "PlantMgr.h"
@@ -142,6 +144,7 @@
 #include "TaskSimpleHitByGunFromLeft.h"
 #include "TaskSimpleHitByGunFromRear.h"
 #include "TaskSimpleHitByGunFromRight.h"
+#include "Tasks/TaskTypes/TaskComplexKillPedOnFootMelee.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculator.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorStandard.h"
 #include "SeekEntity/PosCalculators/EntitySeekPosCalculatorRadiusAngleOffset.h"
@@ -193,6 +196,7 @@
 #include "TaskSimpleTriggerLookAt.h"
 #include "TaskSimpleHitHead.h"
 #include "TaskUtilityLineUpPedWithCar.h"
+#include "Tasks/TaskTypes/TaskComplexKillPedGroupOnFoot.h"
 #include "TaskSimpleLand.h"
 #include "TaskSimpleJetPack.h"
 #include "TaskSimpleSitIdle.h"
@@ -228,11 +232,13 @@
 #include "TaskComplexWanderMedic.h"
 #include "TaskComplexMoveBackAndJump.h"
 #include "TaskSimpleCarDriveTimed.h"
+#include "TaskComplexKillPedOnFootStealth.h"
 #include "TaskComplexDriveWander.h"
 #include "TaskSimpleStealthKill.h"
 #include "TaskSimpleCarSetPedOut.h"
 #include "TaskSimpleAnim.h"
 #include "TaskSimpleRunAnim.h"
+#include "Tasks/TaskTypes/TaskComplexInvestigateDisturbance.h"
 #include "TaskComplexWanderCriminal.h"
 #include "TaskComplexWanderProstitute.h"
 #include "TaskComplexWalkRoundBuildingAttempt.h"
@@ -378,6 +384,7 @@
 #include "TaskComplexEnterCar.h"
 #include "TaskComplexSmartFleePoint.h"
 #include "Interior/TaskInteriorBeInHouse.h"
+#include "Tasks/TaskTypes/TaskComplexKillPedOnFootArmed.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -392,8 +399,7 @@
 
 #include "platform/win/VideoPlayer/VideoPlayer.h"
 #include "platform/win/VideoMode.h"
-#include "platform/win/win.h"
-#include "platform/platform.h"
+#include "platform/win/Platform.h"
 
 #include "app/app.h"
 #include <RealTimeShadowManager.h>
@@ -405,10 +411,16 @@ void InjectHooksMain() {
     HookInstall(0x53E230, &Render2dStuff);   // [ImGui] This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without
     HookInstall(0x541DD0, CPad::UpdatePads); // [ImGui] Changes logic of the function and shouldn't be toggled on/off
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
-    CFileMgr::InjectHooks();
 
+    CHandShaker::InjectHooks();
+    CCutsceneMgr::InjectHooks();
+    CFileMgr::InjectHooks();
+    CPedGroupPlacer::InjectHooks();
+    CLoadedCarGroup::InjectHooks();
     RenderBuffer::InjectHooks();
     CStaticShadow::InjectHooks();
+    CPedGroup::InjectHooks();
+    CPedGroupMembership::InjectHooks();
     CRealTimeShadowManager::InjectHooks();
     CRealTimeShadow::InjectHooks();
     CPopCycle::InjectHooks();
@@ -426,6 +438,7 @@ void InjectHooksMain() {
     CMenuSystem::InjectHooks();
     CCarFXRenderer::InjectHooks();
     CPedAttractorManager::InjectHooks();
+    CPedAttractorPedPlacer::InjectHooks();
     BoneNode_c::InjectHooks();
     BoneNodeManager_c::InjectHooks();
     CAnimBlendClumpData::InjectHooks();
@@ -492,7 +505,6 @@ void InjectHooksMain() {
     CPtrListDoubleLink::InjectHooks();
     CPtrNodeSingleLink::InjectHooks();
     CPtrListSingleLink::InjectHooks();
-    List_c::InjectHooks();
     CReferences::InjectHooks();
     CPopulation::InjectHooks();
     CModelInfo::InjectHooks();
@@ -794,13 +806,15 @@ void InjectHooksMain() {
         CTaskComplexHitResponse::InjectHooks();
         CTaskComplexInWater::InjectHooks();
         CTaskComplexInvestigateDeadPed::InjectHooks();
-        // CTaskComplexInvestigateDisturbance::InjectHooks();
+        CTaskComplexInvestigateDisturbance::InjectHooks();
         // CTaskComplexKillAllThreats::InjectHooks();
         // CTaskComplexKillCriminal::InjectHooks();
-        // CTaskComplexKillPedGroupOnFoot::InjectHooks();
-        // CTaskComplexKillPedOnFootArmed::InjectHooks();
-        // CTaskComplexKillPedOnFootMelee::InjectHooks();
-        // CTaskComplexKillPedOnFootStealth::InjectHooks();
+
+        CTaskComplexKillPedOnFootArmed::InjectHooks();
+        CTaskComplexKillPedGroupOnFoot::InjectHooks();
+        CTaskComplexKillPedOnFootMelee::InjectHooks();
+        CTaskComplexKillPedOnFootStealth::InjectHooks();
+
         CTaskComplexLeaveCarAndDie::InjectHooks();
         CTaskComplexLeaveBoat::InjectHooks();
         CTaskComplexLeaveCarAndFlee::InjectHooks();

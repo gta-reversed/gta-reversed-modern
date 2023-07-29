@@ -9,7 +9,7 @@
 #include "VehicleRecording.h"
 
 size_t& CStreaming::ms_memoryAvailable = *reinterpret_cast<size_t*>(0x8A5A80); // 25'600'000 == 25.6 MB
-int32& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<int32*>(0x8A5A84);
+uint32& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<uint32*>(0x8A5A84);
 bool& CStreaming::ms_bLoadVehiclesInLoadScene = *reinterpret_cast<bool*>(0x8A5A88);
 
 // Default models for each level (see eLevelNames)
@@ -384,6 +384,8 @@ int32 CStreaming::GetDiscInDrive() {
 
 // 0x408E20
 int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
+    ZoneScoped;
+
     uint32 nextRequestModelPos    = UINT32_MAX;
     uint32 firstRequestModelCdPos = UINT32_MAX;
     int32  firstRequestModelId    = MODEL_INVALID;
@@ -1089,6 +1091,8 @@ bool CStreaming::Save() {
 // streaming channel within CStreaming::ms_channel which is 1 (second streaming channel).
 // 0x40EA10
 void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests) {
+    ZoneScoped;
+
     if (m_bLoadingAllRequestedModels) {
         return;
     }
@@ -1154,8 +1158,10 @@ void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests) {
 // Load a directory (aka img file)
 // This will set the `CdSize, CdPosn, m_nImgId, m_nNextIndexOnCd` member variables of
 // each model present in the file (according to file name)
-void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId)
-{
+void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId) {
+    ZoneScoped;
+    ZoneText(filename, strlen(filename));
+
     auto* imgFile = CFileMgr::OpenFile(filename, "rb");
     if (!imgFile)
         return;
@@ -1164,7 +1170,7 @@ void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId)
     {
         char version[4];
         CFileMgr::Read(imgFile, &version, 4u);    // �VER2� for SA
-        assert(strncmp(version, "VER2", 4) == 0); // NOTSA
+        assert((std::string_view{version, 4u} == "VER2")); // NOTSA
     }
 
     int32 previousModelId = MODEL_INVALID;
@@ -1231,8 +1237,7 @@ void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId)
 
         } else if (ExtensionIs("DAT")) {
             // Extract nodes file sector from name (Remember the format: `nodesXX.dat` where XX is the id)
-            // TODO: Maybe one day add some error here if sscanf doesn't return 1 (that is, the number couldn't be read)
-            (void)sscanf(&entry.m_szName[sizeof("nodes") - 1], "%d", &modelId);
+            VERIFY(sscanf_s(&entry.m_szName[sizeof("nodes") - 1], "%d", &modelId) == 1);
             modelId += RESOURCE_ID_DAT;
 
         } else if (ExtensionIs("IFP")) {
@@ -1639,6 +1644,8 @@ void CStreaming::FlushChannels()
 // Removes all unused (if not IsRequiredToBeKept()) IFP/TXDs models as well.
 // 0x40CBA0
 void CStreaming::RequestModelStream(int32 chIdx) {
+    ZoneScoped;
+
     int32 modelId = GetNextFileOnCd(CdStreamGetLastPosn(), true);
     if (modelId == MODEL_INVALID)
         return;
@@ -2077,14 +2084,17 @@ void CStreaming::ReInit() {
 // Loads `stream.ini` settings file
 // 0x5BCCD0
 void CStreaming::ReadIniFile() {
+    ZoneScoped;
+
     bool bHasDevkitMemory = false;
     auto* file = CFileMgr::OpenFile("stream.ini", "r");
     for (char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
         if (*line == '#' || !*line)
             continue;
 
-        char* attribute = strtok(line, " ,\t");
-        char* value = strtok(nullptr, " ,\t");
+        char* nextToken{};
+        char* attribute = strtok_s(line, " ,\t", &nextToken);
+        char* value = strtok_s(nullptr, " ,\t", &nextToken);
         // NOTSA: atoi, atof are replaced by safe analogues
         // todo: Handle errors
         if (_stricmp(attribute, "memory") != 0 || bHasDevkitMemory)
@@ -2149,21 +2159,14 @@ void CStreaming::ReadIniFile() {
 
 // 0x40AFA0
 void CStreaming::ReclassifyLoadedCars() {
-    CLoadedCarGroup appropriateCarGroup = CPopulation::m_AppropriateLoadedCars;
-    CLoadedCarGroup inAppropriateCarGroup = CPopulation::m_InAppropriateLoadedCars;
-
-    CPopulation::m_AppropriateLoadedCars.Clear();
-    CPopulation::m_InAppropriateLoadedCars.Clear();
-
-    for (auto& group : { appropriateCarGroup, inAppropriateCarGroup }) {
-        for (auto i = 0; i < group.CountMembers(); i++) {
-            auto modelId = group.GetMember(i);
-            if (IsCarModelNeededInCurrentZone(modelId))
-                CPopulation::m_AppropriateLoadedCars.AddMember(modelId);
-            else
-                CPopulation::m_InAppropriateLoadedCars.AddMember(modelId);
+    CLoadedCarGroup appropriate{}, inAppropriate{};
+    for (const auto group : { &CPopulation::m_AppropriateLoadedCars, &CPopulation::m_InAppropriateLoadedCars }) {
+        for (auto modelId : group->GetAllModels()) {
+            (IsCarModelNeededInCurrentZone(modelId) ? appropriate : inAppropriate).AddMember((eModelID)(modelId));
         }
     }
+    CPopulation::m_AppropriateLoadedCars = appropriate;
+    CPopulation::m_InAppropriateLoadedCars = inAppropriate;
 }
 
 // 0x40CF80
@@ -2230,7 +2233,7 @@ void CStreaming::RemoveBuildingsNotInArea(eAreaCodes areaCode) {
 }
 
 // 0x4080F0
-void CStreaming::RemoveCarModel(int32 modelId) {
+void CStreaming::RemoveCarModel(eModelID modelId) {
     CPopulation::m_AppropriateLoadedCars.RemoveMember(modelId);
     CPopulation::m_InAppropriateLoadedCars.RemoveMember(modelId);
     CPopulation::m_LoadedBoats.RemoveMember(modelId);
@@ -2238,7 +2241,7 @@ void CStreaming::RemoveCarModel(int32 modelId) {
         group.RemoveMember(modelId);
     }
     ms_vehiclesLoaded.RemoveMember(modelId);
-    CPopulation::RemoveSpecificDriverModelsForCar(modelId);
+    CPopulation::RemoveSpecificDriverModelsForCar((eModelID)modelId);
 }
 
 // 0x40B080
@@ -2256,11 +2259,11 @@ void CStreaming::RemoveCurrentZonesModels() {
     RequestModel(MODEL_MALE01, STREAMING_GAME_REQUIRED);
 
     for (int32 gangId = 0; gangId < TOTAL_GANGS; gangId++) {
-        auto popcycleGroup = static_cast<ePopcycleGroup>(gangId + POPCYCLE_GROUP_BALLAS);
-        ePopcyclePedGroup pedGroupId = CPopulation::GetPedGroupId(popcycleGroup, 0);
-        for (int32 i = 0; i < 5; i++) { // todo: magic number
-            int32 modelId = CPopulation::GetPedGroupModelId(pedGroupId, i);
-            if (modelId != CPopulation::m_defaultCarGroupModelId) {
+        const auto gangPedGroupId = CPopulation::GetPedGroupId(static_cast<ePopcycleGroup>(gangId + POPCYCLE_GROUP_BALLAS));
+
+        // \/ NOTE: Originally they only processed the first 5 models... I'm not sure why, but this should work too.
+        for (const auto modelId : CPopulation::GetModelsInPedGroup(gangPedGroupId)) {
+            if (modelId != CPopulation::m_DefaultModelIDForUnusedSlot) {
                 SetModelAndItsTxdDeletable(modelId);
             }
         }
@@ -2366,7 +2369,7 @@ bool CStreaming::RemoveLeastUsedModel(int32 streamingFlags) {
     }
 
     // todo: make more readable
-    if (TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM) > 50.0f
+    if (TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BB_BOTTOM) > 50.0f
             && (
                 ms_numPedsLoaded > 4
                 && RemoveLoadedZoneModel()
@@ -2397,36 +2400,32 @@ bool CStreaming::CarIsCandidateForRemoval(int32 modelId) {
 // 0x40C020
 // Remove most of loaded vehicle models (the ones with neither `GAME/MISSION_REQUIRED` flags set and no references)
 bool CStreaming::RemoveLoadedVehicle() {
-    for (int32 i = 0; i < CPopulation::m_InAppropriateLoadedCars.CountMembers(); i++) {
-        const auto modelId = CPopulation::m_InAppropriateLoadedCars.GetMember(i);
-        if (CarIsCandidateForRemoval(modelId)) {
-            RemoveModel(modelId);
-            return true;
-        }
-    }
-
-    {
-        const auto numBoatsNeeded = m_bBoatsNeeded ? 2 : 0;
-        if (numBoatsNeeded < CPopulation::m_LoadedBoats.CountMembers()) {
-            for (int32 i = 0; i < CPopulation::m_LoadedBoats.CountMembers(); i++) {
-                int32 modelId = CPopulation::m_LoadedBoats.GetMember(i);
-                if (CarIsCandidateForRemoval(modelId)) {
-                    RemoveModel(modelId);
-                    return true;
-                }
+    const auto ProcessGroup = [](const CLoadedCarGroup& group) {
+        for (auto modelId : group.GetAllModels()) {
+            if (CarIsCandidateForRemoval(modelId)) {
+                RemoveModel(modelId);
+                return true;
             }
         }
+        return false;
+    };
+
+    if (ProcessGroup(CPopulation::m_InAppropriateLoadedCars)) {
+        return true;
     }
 
-    auto appropriateLoadedCars = CPopulation::m_AppropriateLoadedCars;
-    appropriateLoadedCars.SortBasedOnUsage();
-    for (int32 i = 0; i < appropriateLoadedCars.CountMembers(); i++) {
-        int32 modelId = appropriateLoadedCars.GetMember(i);
-        if (CarIsCandidateForRemoval(modelId)) {
-            RemoveModel(modelId);
-            return true;
+    if (CPopulation::m_LoadedBoats.CountMembers() >= (m_bBoatsNeeded ? 2u : 0u)) {
+        if (ProcessGroup(CPopulation::m_LoadedBoats)) {
+            return false;
         }
     }
+
+    auto sortedLoadedCars{ CPopulation::m_AppropriateLoadedCars };
+    sortedLoadedCars.SortBasedOnUsage();
+    if (ProcessGroup(sortedLoadedCars)) {
+        return true;
+    }
+
     return false;
 }
 
@@ -2466,7 +2465,7 @@ void CStreaming::RemoveModel(int32 modelId) {
                 break;
             }
             case MODEL_INFO_VEHICLE: {
-                RemoveCarModel(modelId);
+                RemoveCarModel((eModelID)(modelId));
                 break;
             }
             }
@@ -2753,7 +2752,7 @@ bool CStreaming::AddToLoadedVehiclesList(int32 modelId) {
             if (!IsCarModelNeededInCurrentZone(modelId))
                 loadedCarGroup = &CPopulation::m_InAppropriateLoadedCars;
         }
-        loadedCarGroup->AddMember(modelId);
+        loadedCarGroup->AddMember((eModelID)(modelId));
     }
 
     // Add it to gang's loaded vehicles
@@ -2761,13 +2760,13 @@ bool CStreaming::AddToLoadedVehiclesList(int32 modelId) {
         const int32 groupId = gangId + POPCYCLE_CARGROUP_BALLAS;
         for (int32 i = 0; i < CPopulation::m_nNumCarsInGroup[groupId]; i++) {
             if (CPopulation::m_CarGroups[groupId][i] == modelId) {
-                CPopulation::m_LoadedGangCars[gangId].AddMember(modelId);
+                CPopulation::m_LoadedGangCars[gangId].AddMember((eModelID)(modelId));
                 break;
             }
         }
     }
 
-    ms_vehiclesLoaded.AddMember(modelId);
+    ms_vehiclesLoaded.AddMember((eModelID)(modelId));
 
     return true;
 }
@@ -2796,14 +2795,14 @@ int32 CStreaming::GetDefaultCabDriverModel() {
 }
 
 // 0x407C50
-int32 CStreaming::GetDefaultCopCarModel(int32 ignoreLvpd1Model) {
-    int32 carModelId = ms_DefaultCopBikeModel;
+eModelID CStreaming::GetDefaultCopCarModel(bool ignoreLvpd1Model) {
+    eModelID carModelId = (eModelID)ms_DefaultCopBikeModel;
     if (!m_bCopBikeLoaded
         || ignoreLvpd1Model
         || !GetInfo(ms_DefaultCopBikerModel).IsLoaded()
         || !GetInfo(ms_DefaultCopBikeModel).IsLoaded()
     ) {
-        carModelId = ms_aDefaultCopCarModel[CTheZones::m_CurrLevel];
+        carModelId = (eModelID)ms_aDefaultCopCarModel[CTheZones::m_CurrLevel];
 
         if (!GetInfo(ms_aDefaultCopModel[CTheZones::m_CurrLevel]).IsLoaded()
          || !GetInfo(carModelId).IsLoaded()
@@ -2812,7 +2811,7 @@ int32 CStreaming::GetDefaultCopCarModel(int32 ignoreLvpd1Model) {
                 if (GetInfo(ms_aDefaultCopModel[i]).IsLoaded()
                  && GetInfo(ms_aDefaultCopCarModel[i]).IsLoaded()
                 ) {
-                    return ms_aDefaultCopCarModel[i];
+                    return (eModelID)ms_aDefaultCopCarModel[i];
                 }
             }
             return MODEL_INVALID;
@@ -2823,16 +2822,16 @@ int32 CStreaming::GetDefaultCopCarModel(int32 ignoreLvpd1Model) {
 
 // 0x407C00
 // Returns a loaded cop model.
-int32 CStreaming::GetDefaultCopModel() {
+eModelID CStreaming::GetDefaultCopModel() {
     // Try current level's model
     const auto& modelId = ms_aDefaultCopModel[CTheZones::m_CurrLevel];
     if (GetInfo(modelId).IsLoaded())
-        return modelId;
+        return (eModelID)modelId;
 
     // Try all other level's model
     for (const auto& mId : ms_aDefaultCopModel) {
         if (GetInfo(mId).IsLoaded()) {
-            return mId;
+            return (eModelID)mId;
         }
     }
 
@@ -2841,13 +2840,13 @@ int32 CStreaming::GetDefaultCopModel() {
 }
 
 // 0x407D40
-int32 CStreaming::GetDefaultFiremanModel() {
-    return ms_aDefaultFiremanModel[CTheZones::m_CurrLevel];
+eModelID CStreaming::GetDefaultFiremanModel() {
+    return (eModelID)ms_aDefaultFiremanModel[CTheZones::m_CurrLevel];
 }
 
 // 0x407D20
-int32 CStreaming::GetDefaultMedicModel() {
-    return ms_aDefaultMedicModel[CTheZones::m_CurrLevel];
+eModelID CStreaming::GetDefaultMedicModel() {
+    return (eModelID)ms_aDefaultMedicModel[CTheZones::m_CurrLevel];
 }
 
 // 0x5B9020
@@ -2857,6 +2856,8 @@ void CStreaming::Init() {
 
 // 0x5B8AD0
 void CStreaming::Init2() {
+    ZoneScoped;
+
     std::ranges::for_each(ms_aInfoForModel, [](CStreamingInfo& si) { si.Init(); });
     CStreamingInfo::ms_pArrayBase = &GetInfo(0);
 
@@ -2964,6 +2965,8 @@ void CStreaming::Init2() {
 
 // 0x4083C0
 void CStreaming::InitImageList() {
+    ZoneScoped;
+
     std::ranges::fill(ms_files, tStreamingFileDesc());
     AddImageToList("MODELS\\GTA3.IMG", true);
     AddImageToList("MODELS\\GTA_INT.IMG", true);
@@ -3272,7 +3275,7 @@ void CStreaming::StreamOneNewCar() {
         if (carModelId < 0)
             return;
         RequestModel(carModelId, STREAMING_KEEP_IN_MEMORY);
-        CPopulation::LoadSpecificDriverModelsForCar(carModelId);
+        CPopulation::LoadSpecificDriverModelsForCar((eModelID)carModelId);
         return;
     }
 
@@ -3285,7 +3288,7 @@ void CStreaming::StreamOneNewCar() {
         int32 boatModelId = CCarCtrl::ChooseCarModelToLoad(POPCYCLE_CARGROUP_BOATS);
         if (boatModelId >= 0) {
             RequestModel(boatModelId, STREAMING_KEEP_IN_MEMORY);
-            CPopulation::LoadSpecificDriverModelsForCar(boatModelId);
+            CPopulation::LoadSpecificDriverModelsForCar((eModelID)boatModelId);
             return;
         }
     }
@@ -3319,7 +3322,7 @@ void CStreaming::StreamOneNewCar() {
     }
 
     RequestModel(carModelId, STREAMING_KEEP_IN_MEMORY);
-    CPopulation::LoadSpecificDriverModelsForCar(carModelId);
+    CPopulation::LoadSpecificDriverModelsForCar((eModelID)carModelId);
 }
 
 // 0x40BBB0
@@ -3385,7 +3388,7 @@ void CStreaming::StreamPedsForInterior(int32 interiorType) {
 // * -2 - Unload model from slot (If there's any)
 // * Positive values - Load given model into slot
 // 0x40BDA0
-void CStreaming::StreamPedsIntoRandomSlots(int32 modelArray[TOTAL_LOADED_PEDS]) {
+void CStreaming::StreamPedsIntoRandomSlots(const int32(&modelArray)[TOTAL_LOADED_PEDS]) {
     for (int32 i = 0; i < TOTAL_LOADED_PEDS; i++) {
         if (modelArray[i] >= 0) {
             // Load model into slot
@@ -3651,8 +3654,9 @@ void CStreaming::StreamZoneModels(const CVector& unused) {
 
 // 0x40AA10
 void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
-    if (!CPopCycle::m_pCurrZoneInfo)
+    if (!CPopCycle::m_pCurrZoneInfo) {
         return;
+    }
 
     uint32 gangsNeeded = 0; // Bitfield of gangs to be loaded
     for (int32 i = 0; i < TOTAL_GANGS; i++) {
@@ -3661,12 +3665,13 @@ void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
         }
     }
     if (CCheat::IsActive(CHEAT_GANGS_CONTROLS_THE_STREETS)) {
-        gangsNeeded |= 0xFF; // All gangs basically
+        gangsNeeded |= 0xFF; // First 8 gangs
     }
 
     CGangWars::TellStreamingWhichGangsAreNeeded(gangsNeeded);
-    if (gangsNeeded == ms_loadedGangs && gangsNeeded == ms_loadedGangCars)
+    if (gangsNeeded == ms_loadedGangs && gangsNeeded == ms_loadedGangCars) {
         return; // Everything loaded already
+    }
 
     for (int32 gangId = 0; gangId < TOTAL_GANGS; gangId++) {
         // Unload all / load some (1 vehicle, 2 ped) models of gangs based on whenever they're in `gangsNeeded`.
@@ -3698,54 +3703,44 @@ void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
 
         // Handle vehicle models
         CLoadedCarGroup& loadedGangCarGroup = CPopulation::m_LoadedGangCars[gangId];
-        if (loadedGangCarGroup.CountMembers() < 1) {
-            if (!(gangsNeeded & gangBit) || ms_loadedGangCars & gangBit) /*gang not needed or is loaded*/ {
+        if (loadedGangCarGroup.CountMembers() < 1) { // TODO: Bug? Probably meant to be `>= 1`
+            if (!(gangsNeeded & gangBit) || (ms_loadedGangCars & gangBit)) /*gang not needed or is loaded*/ {
                 if (!(gangsNeeded & gangBit) && (ms_loadedGangCars & gangBit)) /*gang not needed but is loaded*/ {
-
-                    // Unload all car models related to this gang which are not needed,
-                    // that is, the model isn't in `m_AppropriateLoadedCars` nor any other gang needs it.
-                    CLoadedCarGroup loadedCarGroup = loadedGangCarGroup;
-                    for (int32 i = 0; i < loadedCarGroup.CountMembers(); i++) {
-                        int32 gangCarModelId = loadedCarGroup.GetMember(i);
-
-                        bool bKeepCarModel = false;
-
-                        for (int32 j = 0; j < CPopulation::m_AppropriateLoadedCars.CountMembers(); ++j) {
-                            if (gangCarModelId == CPopulation::m_AppropriateLoadedCars.GetMember(j)) {
-                                bKeepCarModel = true;
-                                break; // R* forgot this originally
-                            }
+                    // Unload all car models related to this gang which are not needed.
+                    const auto CanDeleteModel = [&](eModelID gangCarModelId) {
+                        if (notsa::contains(CPopulation::m_AppropriateLoadedCars.GetAllModels(), gangCarModelId)) {
+                            return false;
                         }
 
-                        // Check if any other gang used this car model.
-                        //
-                        // NOTE:
-                        // I think there should be a `if (!bKeepCarModel)` check
-                        // since the above loop might already have set `bKeepCarModel` to `true`.
-                        // Also if `modelId != CPopulation::m_defaultCarGroupModelId` is `false`
-                        // this loop will never set `bKeepCarModel` to `true`.
+                        if (CPopulation::m_DefaultModelIDForUnusedSlot == gangCarModelId) {
+                            return false;
+                        }
+
                         for (int32 otherGangId = 0; otherGangId < TOTAL_GANGS; otherGangId++) {
-                            if (otherGangId != gangId && (ms_loadedGangs & (1 << otherGangId))/*other gang is loaded*/) {
-                                const int32 carGroupId = otherGangId + POPCYCLE_CARGROUP_BALLAS;
-                                for (auto& modelId : CPopulation::m_CarGroups[carGroupId]) {
-                                    if (modelId != CPopulation::m_defaultCarGroupModelId && modelId == gangCarModelId) {
-                                        bKeepCarModel = true;
-                                    }
-                                }
+                            if (otherGangId == gangId || (ms_loadedGangs & (1 << otherGangId)) == 0) {
+                                continue;
+                            }
+                            if (notsa::contains(CPopulation::m_CarGroups[otherGangId + (int32)(POPCYCLE_CARGROUP_BALLAS)], gangCarModelId)) {
+                                return false;
                             }
                         }
-
-                        if (!bKeepCarModel) {
+                        
+                        return true;
+                    };
+                    const CLoadedCarGroup loadedGangCarGroupCpy{ loadedGangCarGroup }; // Make a copy here, as it might get modified (Because of us unloading models)
+                    for (auto gangCarModelId : loadedGangCarGroupCpy.GetAllModels()) {
+                        if (CanDeleteModel((eModelID)(gangCarModelId))) {
                             SetModelAndItsTxdDeletable(gangCarModelId);
                         }
                     }
                 }
-            } else /*gang is needed but not loaded*/ {
+            } else { /*gang is needed but not loaded*/
                 const int32 carGroupId = gangId + POPCYCLE_CARGROUP_BALLAS;
                 const uint16 numCars = CPopulation::m_nNumCarsInGroup[carGroupId];
                 const int32 modelId = CPopulation::m_CarGroups[carGroupId][CGeneral::GetRandomNumber() % numCars];
-                if (!GetInfo(modelId).IsLoaded())
+                if (!GetInfo(modelId).IsLoaded()) {
                     RequestModel(modelId, STREAMING_KEEP_IN_MEMORY); // Load 1 random car model
+                }
             }
         }
     }
@@ -3754,12 +3749,14 @@ void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
 
 // 0x40E670
 void CStreaming::Update() {
+    ZoneScoped;
+
     g_LoadMonitor.m_numModelsRequest = ms_numModelsRequested;
     if (CTimer::GetIsPaused())
         return;
 
     const auto& camPos = TheCamera.GetPosition();
-    const float fCamDistanceToGroundZ = camPos.z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
+    const float fCamDistanceToGroundZ = camPos.z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BB_BOTTOM);
     if (!ms_disableStreaming && !CRenderer::m_loadingPriority) {
         if (fCamDistanceToGroundZ >= 50.0f) {
             if (CGame::CanSeeOutSideFromCurrArea()) {
@@ -3821,7 +3818,7 @@ void CStreaming::UpdateForAnimViewer() {
     CVector position{};
     AddModelsToRequestList(position, 0);
     LoadRequestedModels();
-    sprintf(gString, "Requested %d, memory size %dK\n", ms_numModelsRequested, 2 * ms_memoryUsedBytes);
+    sprintf_s(gString, "Requested %d, memory size %dK\n", ms_numModelsRequested, 2 * ms_memoryUsedBytes);
 }
 
 // 0x407F80

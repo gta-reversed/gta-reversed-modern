@@ -174,7 +174,7 @@ bool CHud::HelpMessageDisplayed() {
 // 0x588F60
 void CHud::SetMessage(const char* message) {
     if (message) {
-        strncpy(m_Message, message, sizeof(m_Message));
+        strncpy_s(m_Message, message, sizeof(m_Message));
     } else {
         m_Message[0] = '\0';
     }
@@ -187,7 +187,7 @@ void CHud::SetBigMessage(char* message, eMessageStyle style) {
         return;
     }
 
-    strncpy(m_BigMessage[style], message, sizeof(m_BigMessage[style]));
+    strncpy_s(m_BigMessage[style], message, sizeof(m_BigMessage[style]));
 
     switch (style) {
     case STYLE_WHITE_MIDDLE_SMALLER: {
@@ -195,7 +195,7 @@ void CHud::SetBigMessage(char* message, eMessageStyle style) {
             OddJob2OffTimer = 0.0f;
             OddJob2On = 0;
         }
-        strncpy(LastBigMessage[style], message, sizeof(LastBigMessage[style]));
+        strncpy_s(LastBigMessage[style], message, sizeof(LastBigMessage[style]));
         break;
     }
     default: {
@@ -263,7 +263,7 @@ void CHud::SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float
     m_nHelpMessageStatId = statId;
     m_fHelpMessageStatUpdateValue = diff;
     m_nHelpMessageMaxStatValue = (uint32)max;
-    sprintf(gString, state == STAT_UPDATE_INCREASE ? "+" : "-");
+    sprintf_s(gString, state == STAT_UPDATE_INCREASE ? "+" : "-");
     AsciiToGxtChar(gString, m_pHelpMessage);
 }
 
@@ -301,7 +301,7 @@ void CHud::SetVehicleName(const char* name) {
 }
 
 // 0x588BB0
-void CHud::SetZoneName(char* name, bool displayImmediately) {
+void CHud::SetZoneName(const char* name, bool displayImmediately) {
     if (displayImmediately) {
         m_pZoneName = name;
         return;
@@ -387,6 +387,8 @@ void CHud::Draw() {
 
 // 0x58D490
 void CHud::DrawAfterFade() {
+    ZoneScoped;
+
     RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     RWRSTATE(rwFILTERNEAREST));
     RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,    RWRSTATE(rwTEXTUREADDRESSCLAMP));
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
@@ -786,10 +788,12 @@ void CHud::DrawCrossHairs() {
 
         const auto RenderOneXLUSprite = [=](float x, float y, auto u, auto v) {
             CSprite::RenderOneXLUSprite(
-                x, y,
-                1.0f,
-                screenStretchCrossHairX / 2.0f, screenStretchCrossHairY / 2.0f,
-                255, 255, 255, 255, 0.01f, 255, u, v
+                { x, y, 1.0f } ,
+                { screenStretchCrossHairX / 2.0f, screenStretchCrossHairY / 2.0f },
+                255, 255, 255, 255,
+                0.01f,
+                255,
+                u, v
             );
         };
 
@@ -1121,7 +1125,7 @@ void CHud::DrawRadar() {
     if (vehicle && vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX) {
         float angle = PI - std::atan2(-vehicle->m_matrix->GetRight().z, vehicle->m_matrix->GetUp().z);
         CRadar::DrawRotatingRadarSprite(
-            &Sprites[SPRITE_RADAR_RING_PLANE],
+            Sprites[SPRITE_RADAR_RING_PLANE],
             SCREEN_STRETCH_X(87.0f),
             SCREEN_STRETCH_FROM_BOTTOM(66.0f),
             angle,
@@ -1384,7 +1388,7 @@ void CHud::DrawAmmo(CPed* ped, int32 x, int32 y, float alpha) {
     const auto& ammoClip = CWeaponInfo::GetWeaponInfo(weapon.m_nType, ped->GetWeaponSkill())->m_nAmmoClip;
 
     if (ammoClip <= 1 || ammoClip >= 1000) {
-        sprintf(gString, "%d", totalAmmo);
+        sprintf_s(gString, "%d", totalAmmo);
     } else {
         uint32 total, current;
 
@@ -1405,7 +1409,7 @@ void CHud::DrawAmmo(CPed* ped, int32 x, int32 y, float alpha) {
 
             current = ammoInClip;
         }
-        sprintf(gString, "%d-%d", total, current);
+        sprintf_s(gString, "%d-%d", total, current);
     }
     AsciiToGxtChar(gString, gGxtString);
 
@@ -1457,7 +1461,7 @@ inline void CHud::DrawClock() {
     CFont::SetRightJustifyWrap(0.0f);
     CFont::SetEdge(2);
     CFont::SetDropColor({0, 0, 0, 255});
-    sprintf(ascii, "%02d:%02d", CClock::ms_nGameClockHours, CClock::ms_nGameClockMinutes);
+    sprintf_s(ascii, "%02d:%02d", CClock::ms_nGameClockHours, CClock::ms_nGameClockMinutes);
     AsciiToGxtChar(ascii, text);
     CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_LIGHT_GRAY));
     CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(32.0f), SCREEN_STRETCH_Y(22.0f), text);
@@ -1474,10 +1478,10 @@ inline void CHud::DrawMoney(const CPlayerInfo& playerInfo, uint8 alpha) {
         if (m_nDisplayMoney < 0) {
             m_nDisplayMoney = -m_nDisplayMoney;
         }
-        sprintf(ascii, "-$%07d", m_nDisplayMoney);
+        sprintf_s(ascii, "-$%07d", m_nDisplayMoney);
     } else {
         CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_GREEN, alpha));
-        sprintf(ascii, "$%08d", std::abs(playerInfo.m_nDisplayMoney));
+        sprintf_s(ascii, "$%08d", std::abs(playerInfo.m_nDisplayMoney));
     }
     AsciiToGxtChar(ascii, text);
     CFont::SetProportional(false);
@@ -1496,7 +1500,7 @@ inline void CHud::DrawMoney(const CPlayerInfo& playerInfo, uint8 alpha) {
 inline void CHud::DrawWeapon(CPlayerPed* ped0, CPlayerPed* ped1) {
     const auto magic = SCREEN_WIDTH * 0.17343046f; // todo: magic
     if (m_WeaponState) {
-        DrawWeaponIcon(ped0, SCREEN_WIDTH - (SCREEN_STRETCH_X(32.0f) + magic), (int32)SCREEN_STRETCH_Y(20.0f), (float)m_WeaponFadeTimer);
+        DrawWeaponIcon(ped0, (int32)(SCREEN_WIDTH - (SCREEN_STRETCH_X(32.0f) + magic)), (int32)SCREEN_STRETCH_Y(20.0f), (float)m_WeaponFadeTimer);
         if (ped1) {
             const auto posX = (int32)(SCREEN_WIDTH - (SCREEN_STRETCH_X(32.0f) + 111.0f));
             const auto posY = (int32)GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(138.0f), 12);
@@ -1572,7 +1576,14 @@ void CHud::DrawWeaponIcon(CPed* ped, int32 x, int32 y, float alpha) {
 
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,   RWRSTATE(NULL));
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(texture)));
-    CSprite::RenderOneXLUSprite(x0 + halfWidth, y0 + halfHeight, 1.0f, halfWidth, halfHeight, 255u, 255u, 255u, 255, 1.0f, 255, 0, 0);
+    CSprite::RenderOneXLUSprite(
+        { x0 + halfWidth, y0 + halfHeight, 1.0f },
+        { halfWidth, halfHeight },
+        255u, 255u, 255u, 255,
+        1.0f,
+        255,
+        0, 0
+    );
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,  RWRSTATE(FALSE));
 }
 

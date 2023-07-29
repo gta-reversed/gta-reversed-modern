@@ -59,7 +59,8 @@ public:
     static CPtrListSingleLink(&ms_aLodPtrLists)[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X];
     static CPtrListDoubleLink &ms_listMovingEntityPtrs;
     static CPtrListDoubleLink &ms_listObjectsWithControlCode;
-    static inline CColPoint(&m_aTempColPts)[32] = *(CColPoint(*)[32])0xB9ACD0;
+
+    static inline auto& m_aTempColPts = *(std::array<CColPoint, 32>*)0xB9ACD0;
     static CVector &SnookerTableMax; // default { 497.7925, -1670.3999, 13.19 }
     static CVector &SnookerTableMin; // default { 2495.8525, -1671.4099, 12.9 }
 
@@ -129,18 +130,35 @@ public:
     static void TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point, float radius, float visibleDistance, CEntity* victim, CEntity* creator, bool processVehicleBombTimer, float damage);
     static void Process();
     static bool GetIsLineOfSightSectorClear(CSector& sector, CRepeatSector& repeatSector, const CColLine& colLine, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doIgnoreCameraCheck);
+
+    /*!
+    * Find object that are "kinda" colliding at `point`
+    *
+    * @param point             The point to scan at
+    * @param radius            The radius of the scan
+    * @param b2D               Whenever the distance checks should be 2D (if false they're 3D)
+    * @param outCount          The number of entities colliding (Never more than `maxCount`)
+    * @param maxCount          The maximum number of entities to scan for
+    * @param outEntities [opt] Enitites that are colliding are stored here, array should be the same size as `maxCount`
+    * @param buildings         Check buildings?
+    * @param vehicles          Check vehicles?
+    * @param peds              Check peds?
+    * @param objects           Check objects?
+    * @param dummies           Check dummies?
+    */
     static void FindObjectsKindaColliding(const CVector& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
+
     static void FindObjectsIntersectingCube(const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
     static void FindObjectsIntersectingAngledCollisionBox(const CBox& box, const CMatrix& transform, const CVector& point, float x1, float y1, float x2, float y2, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
     static void FindMissionEntitiesIntersectingCube(const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehicles, bool peds, bool objects);
     static CEntity* FindNearestObjectOfType(int32 modelId, const CVector& point, float radius, bool b2D, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
     static float FindGroundZForCoord(float x, float y);
-    static float FindGroundZFor3DCoord(CVector coord, bool* outResult, CEntity** outEntity);
+    static float FindGroundZFor3DCoord(CVector coord, bool* outResult = nullptr, CEntity** outEntity = nullptr);
     static float FindRoofZFor3DCoord(float x, float y, float z, bool* outResult);
     static float FindLowestZForCoord(float x, float y);
     static void RepositionOneObject(CEntity* object);
     static void ClearExcitingStuffFromArea(const CVector& point, float radius, uint8 bRemoveProjectilesAndShadows);
-    static bool GetIsLineOfSightClear(const CVector& origin, const CVector& target, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck);
+    static bool GetIsLineOfSightClear(const CVector& origin, const CVector& target, bool buildings, bool vehicles, bool peds, bool objects, bool dummies = false, bool doSeeThroughCheck = false, bool doCameraIgnoreCheck = false);
     static bool ProcessLineOfSightSector(CSector& sector, CRepeatSector& repeatSector, const CColLine& colLine, CColPoint& outColPoint, float& maxTouchDistance, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck, bool doShootThroughCheck);
     static void TriggerExplosion(const CVector& point, float radius, float visibleDistance, CEntity* victim, CEntity* creator, bool processVehicleBombTimer, float damage);
     static void SetWorldOnFire(float x, float y, float z, float radius, CEntity* fireCreator);
@@ -165,14 +183,14 @@ public:
     {
         constexpr auto HalfOfTotalSectorsX = MAX_SECTORS_X / 2;
         constexpr auto fTotalMapUnitsX = MAX_WORLD_UNITS / MAX_SECTORS_X;
-        return (sector - HalfOfTotalSectorsX) * fTotalMapUnitsX + (fTotalMapUnitsX / 2);
+        return static_cast<float>((sector - HalfOfTotalSectorsX) * fTotalMapUnitsX + (fTotalMapUnitsX / 2));
     }
 
     static float GetSectorPosY(int32 sector)
     {
         constexpr auto HalfOfTotalSectorsY = MAX_SECTORS_Y / 2;
         constexpr auto fTotalMapUnitsY = MAX_WORLD_UNITS / MAX_SECTORS_Y;
-        return (sector - HalfOfTotalSectorsY) * fTotalMapUnitsY + (fTotalMapUnitsY / 2);
+        return static_cast<float>((sector - HalfOfTotalSectorsY) * fTotalMapUnitsY + (fTotalMapUnitsY / 2));
     }
 
     static CVector2D GetSectorPos(int32 sector) { return { GetSectorPosX(sector), GetSectorPosY(sector) }; }
@@ -246,10 +264,16 @@ public:
             std::forward<Fn>(fn)
         );
     }
+    // @notsa
+    static void PutToGroundIfTooLow(CVector& pos) {
+        if (pos.z <= MAP_Z_LOW_LIMIT) {
+            pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+        }
+    }
 };
 
 extern uint32 &FilledColPointIndex;
-static inline CColPoint (&gaTempSphereColPoints)[32] = *(CColPoint(*)[32])0xB9B250;
+static inline auto& gaTempSphereColPoints = *(std::array<CColPoint, 32>*)0xB9B250;
 extern int16 &TAG_SPRAYING_INCREMENT_VAL; // default 8
 
 uint16 GetCurrentScanCode();

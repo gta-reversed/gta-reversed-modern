@@ -127,6 +127,8 @@ void Fx_c::ExitEntitySystems() {
 
 // 0x49EA90
 void Fx_c::Init() {
+    ZoneScoped;
+
     g_fxMan.Init();
     g_fxMan.LoadFxProject("models\\effects.fxp");
     g_fxMan.SetWindData(&CWeather::WindDir, &CWeather::Wind);
@@ -159,11 +161,15 @@ void Fx_c::DestroyEntityFx(CEntity* entity) {
 
 // 0x49E640
 void Fx_c::Update(RwCamera* camera, float timeDelta) {
+    ZoneScoped;
+
     ((void(__thiscall*)(Fx_c*, RwCamera*, float))0x49E640)(this, camera, timeDelta);
 }
 
 // 0x49E650
 void Fx_c::Render(RwCamera* camera, bool heatHaze) {
+    ZoneScoped;
+
     g_fxMan.Render(camera, heatHaze);
 }
 
@@ -183,8 +189,8 @@ FxQuality_e Fx_c::GetFxQuality() const {
 }
 
 // 0x49EB00
-void Fx_c::AddBlood(CVector& origin, CVector& direction, int32 amount, float arg3) {
-    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int32, float))0x49EB00)(this, origin, direction, amount, arg3);
+void Fx_c::AddBlood(Const CVector& origin, Const CVector& direction, int32 amount, float arg3) {
+    ((void(__thiscall*)(Fx_c*, Const CVector&, Const CVector&, int32, float))0x49EB00)(this, origin, direction, amount, arg3);
 }
 
 // 0x49EE10
@@ -193,8 +199,8 @@ void Fx_c::AddWood(CVector& origin, CVector& direction, int32 amount, float arg3
 }
 
 // 0x49F040
-void Fx_c::AddSparks(CVector& origin, CVector& direction, float force, int32 amount, CVector across, eSparkType sparksType, float spread, float life) {
-    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, float, int32, CVector, uint8, float, float))0x49F040)(this, origin, direction, force, amount, across, sparksType, spread, life);
+void Fx_c::AddSparks(Const CVector& origin, Const CVector& direction, float force, int32 amount, CVector across, eSparkType sparksType, float spread, float life) {
+    ((void(__thiscall*)(Fx_c*, Const CVector&, Const CVector&, float, int32, CVector, uint8, float, float))0x49F040)(this, origin, direction, force, amount, across, sparksType, spread, life);
 }
 
 // 0x49F300
@@ -258,8 +264,8 @@ void Fx_c::TriggerWaterHydrant(CVector& posn) {
 }
 
 // 0x4A0DE0
-void Fx_c::TriggerGunshot(CEntity* entity, CVector& origin, CVector& target, bool doGunflash) {
-    ((void(__thiscall*)(Fx_c*, CEntity*, CVector&, CVector&, bool))0x4A0DE0)(this, entity, origin, target, doGunflash);
+void Fx_c::TriggerGunshot(CEntity* entity, const CVector& origin, const CVector& direction, bool doGunflash) {
+    ((void(__thiscall*)(Fx_c*, CEntity*, const CVector&, const CVector&, bool))0x4A0DE0)(this, entity, origin, direction, doGunflash);
 }
 
 // 0x4A0FA0

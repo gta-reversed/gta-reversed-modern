@@ -249,15 +249,16 @@ void CPhysical::ProcessControl()
 }
 
 // 0x54DFB0
-void CPhysical::ProcessCollision()
-{
+void CPhysical::ProcessCollision() {
+    ZoneScoped;
+
     auto* vehicle    = AsVehicle();
     auto* automobile = AsAutomobile();
     auto* bike       = AsBike();
 
     m_fMovingSpeed = 0.0f;
     physicalFlags.bProcessingShift = false;
-    physicalFlags.b13 = false;
+    physicalFlags.bSkipLineCol = false;
     if (m_bUsesCollision && !physicalFlags.bDisableSimpleCollision) {
         if (m_nStatus == STATUS_SIMPLE) {
             if (CheckCollision_SimpleCar() && m_nStatus == STATUS_SIMPLE) {
@@ -357,7 +358,7 @@ void CPhysical::ProcessCollision()
             ApplySpeed();
             m_matrix->Reorthogonalise();
             physicalFlags.bProcessingShift = false;
-            physicalFlags.b13 = false;
+            physicalFlags.bSkipLineCol = false;
             physicalFlags.b17 = true;
             bool bOldUsesCollision = m_bUsesCollision;
             m_bUsesCollision = false;
@@ -370,7 +371,7 @@ void CPhysical::ProcessCollision()
                 m_bIsStuck = false;
                 m_bIsInSafePosition = true;
                 physicalFlags.bProcessCollisionEvenIfStationary = false;
-                physicalFlags.b13 = false;
+                physicalFlags.bSkipLineCol = false;
                 m_fElasticity = fOldElasticity;
                 m_fMovingSpeed = DistanceBetweenPoints(oldEntityMatrix.GetPosition(), GetPosition());
                 RemoveAndAdd();
@@ -428,7 +429,7 @@ void CPhysical::ProcessCollision()
         ApplySpeed();
         m_matrix->Reorthogonalise();
         physicalFlags.bProcessingShift = false;
-        physicalFlags.b13 = false;
+        physicalFlags.bSkipLineCol = false;
         if (   m_vecMoveSpeed != 0.0f
             || m_vecTurnSpeed != 0.0f
             || physicalFlags.bProcessCollisionEvenIfStationary
@@ -450,7 +451,7 @@ void CPhysical::ProcessCollision()
         m_bIsStuck = false;
         m_bIsInSafePosition = true;
         physicalFlags.bProcessCollisionEvenIfStationary = false;
-        physicalFlags.b13 = false;
+        physicalFlags.bSkipLineCol = false;
         m_fElasticity = fOldElasticity;
         m_fMovingSpeed = DistanceBetweenPoints(oldEntityMatrix.GetPosition(), GetPosition());
         RemoveAndAdd();
@@ -462,8 +463,9 @@ void CPhysical::ProcessCollision()
 }
 
 // 0x54DB10
-void CPhysical::ProcessShift()
-{
+void CPhysical::ProcessShift() {
+    ZoneScoped;
+
     CRect boundingBox;
     GetBoundRect(&boundingBox);
     m_fMovingSpeed = 0.0f;
@@ -560,7 +562,7 @@ void CPhysical::ProcessShift()
 bool CPhysical::TestCollision(bool bApplySpeed) {
     CMatrix entityMatrix(*m_matrix);
     physicalFlags.b17 = true;
-    physicalFlags.b13 = true;
+    physicalFlags.bSkipLineCol = true;
     bool bOldUsesCollision = m_bUsesCollision;
     m_bUsesCollision = false;
     bool bTestForBlockedPositions = false;
@@ -577,7 +579,7 @@ bool CPhysical::TestCollision(bool bApplySpeed) {
     bool bCheckCollision = CheckCollision();
     m_bUsesCollision = bOldUsesCollision;
     physicalFlags.b17 = false;
-    physicalFlags.b13 = false;
+    physicalFlags.bSkipLineCol = false;
     *(CMatrix*)m_matrix = entityMatrix;
     if (bTestForBlockedPositions)
         ped->bTestForBlockedPositions = true;
@@ -588,7 +590,7 @@ bool CPhysical::TestCollision(bool bApplySpeed) {
 // 0x546D00
 int32 CPhysical::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) {
     CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
-    int32 totalColPointsToProcess = CCollision::ProcessColModels(*m_matrix, *colModel, entity->GetMatrix(), *entity->GetColModel(), *(CColPoint(*)[32])colPoint/*should be okay for now*/, nullptr, nullptr, false);
+    int32 totalColPointsToProcess = CCollision::ProcessColModels(*m_matrix, *colModel, entity->GetMatrix(), *entity->GetColModel(), *(std::array<CColPoint, 32>*)colPoint/*should be okay for now*/, nullptr, nullptr, false);
     if (totalColPointsToProcess > 0) {
         AddCollisionRecord(entity);
         if (!entity->IsBuilding())
@@ -1050,11 +1052,11 @@ bool CPhysical::ApplyCollision(CEntity* entity, CColPoint& colPoint, float& dama
 }
 
 // 0x543890
-bool CPhysical::ApplySoftCollision(CEntity* entity, CColPoint& colPoint, float& damageIntensity)
+bool CPhysical::ApplySoftCollision(CEntity* entity, CColPoint& colPoint, float& outDamageIntensity)
 {
     if (physicalFlags.bDisableTurnForce)
     {
-        ApplyCollision(entity, colPoint, damageIntensity);
+        ApplyCollision(entity, colPoint, outDamageIntensity);
     }
 
     CVector vecDistanceToPointFromThis = colPoint.m_vecPoint - GetPosition();
@@ -1106,35 +1108,35 @@ bool CPhysical::ApplySoftCollision(CEntity* entity, CColPoint& colPoint, float& 
             fDepth = colPoint.m_fDepth;
         }
 
-        damageIntensity = fDepth * CTimer::GetTimeStep() * SOFTCOL_DEPTH_MULT * fCollisionMass * 0.008f;
+        outDamageIntensity = fDepth * CTimer::GetTimeStep() * SOFTCOL_DEPTH_MULT * fCollisionMass * 0.008f;
         if (fSpeedDotProduct >= 0.0f)
         {
-            damageIntensity = 0.0f;
+            outDamageIntensity = 0.0f;
             return false;
         }
-        damageIntensity -= fCollisionMass * fSpeedDotProduct * fSoftColSpeedMult;
+        outDamageIntensity -= fCollisionMass * fSpeedDotProduct * fSoftColSpeedMult;
     }
     else
     {
-        damageIntensity = colPoint.m_fDepth * CTimer::GetTimeStep() * SOFTCOL_DEPTH_MULT * fCollisionMass * 0.008f;
+        outDamageIntensity = colPoint.m_fDepth * CTimer::GetTimeStep() * SOFTCOL_DEPTH_MULT * fCollisionMass * 0.008f;
         if (fSpeedDotProduct < 0.0f)
         {
-            damageIntensity -= SOFTCOL_CARLINE_SPEED_MULT * fCollisionMass * fSpeedDotProduct;
+            outDamageIntensity -= SOFTCOL_CARLINE_SPEED_MULT * fCollisionMass * fSpeedDotProduct;
         }
 
         float fRightDotProduct = DotProduct(&vecMoveDirection, &GetRight());
         vecMoveDirection -= 0.9f * fRightDotProduct * GetRight();
     }
 
-    if (damageIntensity == 0.0f)
+    if (outDamageIntensity == 0.0f)
     {
         return false;
     }
 
-    ApplyForce(vecMoveDirection * damageIntensity, vecDistanceToPointFromThis, true);
-    if (damageIntensity < 0.0f)
+    ApplyForce(vecMoveDirection * outDamageIntensity, vecDistanceToPointFromThis, true);
+    if (outDamageIntensity < 0.0f)
     {
-        damageIntensity *= -1.0f;
+        outDamageIntensity *= -1.0f;
     }
     return true;
 }
@@ -2102,7 +2104,7 @@ bool CPhysical::ProcessShiftSectorList(int32 sectorX, int32 sectorY)
 
                         if (IsPed())
                         {
-                            physicalFlags.b13 = true;
+                            physicalFlags.bSkipLineCol = true;
                         }
 
                         if (bCollidedEntityCollisionIgnored || bCollisionDisabled)
@@ -4065,7 +4067,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                 bCollidedEntityUnableToMove = false;
                 bThisOrCollidedEntityStuck = false;
 
-                physicalFlags.b13 = false;
+                physicalFlags.bSkipLineCol = false;
 
                 if (entity->IsBuilding()) {
                     bCollidedEntityCollisionIgnored = false;
@@ -4404,8 +4406,8 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                         } else if (totalColPointsToProcess > 0) {
                             for (int32 colPointIndex2 = 0; colPointIndex2 < totalColPointsToProcess; colPointIndex2++) {
                                 CColPoint* colPoint3 = &colPoints[colPointIndex2];
-                                if (bThisOrCollidedEntityStuck || (colPoint3->m_nPieceTypeA >= 13 && colPoint3->m_nPieceTypeA <= 16) ||
-                                    (colPoint3->m_nPieceTypeA >= 13 && colPoint3->m_nPieceTypeA <= 16) // BUG: I think it should be m_nPieceTypeB
+                                if (bThisOrCollidedEntityStuck || (colPoint3->m_nPieceTypeA >= 13 && colPoint3->m_nPieceTypeA <= 16)
+                                    // || (colPoint3->m_nPieceTypeA >= 13 && colPoint3->m_nPieceTypeA <= 16) // BUG: I think it should be m_nPieceTypeB
                                 ) {
                                     ++totalAcceptableColPoints;
                                     ApplySoftCollision(physicalEntity, *colPoint3, fThisDamageIntensity, fEntityDamageIntensity);
@@ -4596,6 +4598,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
         }
     }
 
+    assert(entity);
     if (m_bHasContacted && entity->m_bHasContacted)
     {
         if (totalColPointsToProcess > 0)
@@ -4648,8 +4651,10 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
     }
     else
     {
+        assert(entity);
         if (entity->m_bHasContacted)
         {
+            assert(physicalEntity);
             CVector vecOldFrictionMoveSpeed = physicalEntity->m_vecFrictionMoveSpeed;
             CVector vecOldFrictionTurnSpeed = physicalEntity->m_vecFrictionTurnSpeed;
             physicalEntity->ResetFrictionTurnSpeed();
@@ -4816,7 +4821,7 @@ bool CPhysical::CheckCollision()
     if (IsPed())
     {
         CPed* ped = AsPed();
-        if (!m_pAttachedTo && !physicalFlags.b17 && !physicalFlags.bProcessingShift && !physicalFlags.b13) {
+        if (!m_pAttachedTo && !physicalFlags.b17 && !physicalFlags.bProcessingShift && !physicalFlags.bSkipLineCol) {
             ped->m_standingOnEntity = nullptr;
             if (ped->bIsStanding) {
                 ped->bIsStanding = false;
@@ -4832,7 +4837,7 @@ bool CPhysical::CheckCollision()
                 case CLIMB_PULLUP:
                 case CLIMB_STANDUP:
                 case CLIMB_VAULT:
-                    physicalFlags.b13 = true;
+                    physicalFlags.bSkipLineCol = true;
                     break;
                 }
             }

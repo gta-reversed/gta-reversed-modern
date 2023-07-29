@@ -200,9 +200,7 @@ void CAnimBlendAssociation::SetCurrentTime(float currentTime) {
                 m_pNodeArray[i].SetupKeyFrameCompressed();
             }
         }
-    } else
-    //
-    {
+    } else {
         for (auto i = 0; i < m_nNumBlendNodes; i++) {
             if (m_pNodeArray[i].m_pAnimSequence) {
                 m_pNodeArray[i].FindKeyFrame(m_fCurrentTime);

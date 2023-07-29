@@ -9,10 +9,18 @@
 #include "eScriptCommands.h"
 #include "RunningScript.h"
 
+#if 0
 namespace notsa {
 namespace script {
 /// Type of the function used in the LUT
 using T_LUTFunction = OpcodeResult(*)(CRunningScript*);
+
+
+//! Whenever command has a handler made by us (or uses the default GTA one)
+template<eScriptCommands Command>
+static constexpr auto CommandHasCustomHandler() {
+    return CommandHandler<Command>::value;
+}
 
 namespace detail {
 
@@ -46,12 +54,12 @@ static constexpr auto GetHandlerOfCommand() {
 }
 
 constexpr void IterateCommandIDs(auto&& functor) {
-    ::notsa::IterateFunction<0, (int)COMMAND_HIGHEST_ID>(functor);
+    ::notsa::IterateFunction<0, (int)COMMAND_HIGHEST_ID_TO_HOOK>(functor);
 }
 
 /// Generate the script command handler look-up-table (LUT)
 static constexpr auto GenerateLUT() {
-    std::array<T_LUTFunction, (size_t)COMMAND_HIGHEST_ID> lut{};
+    std::array<T_LUTFunction, (size_t)COMMAND_HIGHEST_ID_TO_HOOK> lut{};
 
     IterateCommandIDs([&]<size_t Idx>() {
         lut[Idx] = GetHandlerOfCommand<(eScriptCommands)Idx>();
@@ -62,3 +70,4 @@ static constexpr auto GenerateLUT() {
 
 }; // namespace script
 }; // namespace notsa 
+#endif

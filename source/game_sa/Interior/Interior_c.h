@@ -17,7 +17,7 @@ class CObject;
 class Furniture_c;
 class InteriorGroup_c;
 
-class Interior_c : public ListItem_c {
+class Interior_c : public ListItem_c<Interior_c> {
 public:
     int32             m_interiorId;         // 0x8
     InteriorGroup_c*  m_pGroup;             // 0xC
@@ -25,12 +25,16 @@ public:
     tEffectFurniture* m_furnitureEffect;    // 0x14
     RwMatrix          m_matrix;             // 0x18
     int32             field_58;             // 0x58
-    List_c            m_list;               // 0x5C
-    uint8             m_tiles[900];         // 0x68
-    CNodeAddress      m_exitAddr{};         // 0x3EC
-    CNodeAddress      m_doorAddr{};         // 0x3EE
-    RwV3d             m_exitPos;
-    RwV3d             m_doorPos;
+    TList_c<void>     m_list;               // 0x5C - TODO: Figure out type
+    char              field_68[900];        // 0x68
+    int16             field_3EC;            // 0x3EC
+    int16             field_3EE;            // 0x3EE
+    CNodeAddress      m_nodeAddress;        // 0x3F0
+    int16             field_3F4;            // 0x3F4
+    int16             field_3F6;            // 0x3F6
+    int32             field_3F8;            // 0x3F8
+    int32             field_3FC;            // 0x3FC
+    CVector           m_position;           // 0x400
     int8              field_40C;            // 0x40C
     int8              m_interiorInfosCount; // 0x40D
     int32             field_412;            // 0x412
@@ -84,7 +88,7 @@ public:
     bool GetBoundingBox(FurnitureEntity_c* entity, CVector* a3);
     void ResetTiles();
     CObject* PlaceObject(uint8 isStealable, Furniture_c* furniture, float offsetX, float offsetY, float offsetZ, float rotationZ);
-    ListItem_c* GetFurnitureEntity(CEntity*);
+    FurnitureEntity_c* GetFurnitureEntity(CEntity*);
     bool IsPtInside(CVector* a2, float a3, float a4, float a5);
     void CalcMatrix(CVector* translation);
     void Furnish();

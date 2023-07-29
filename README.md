@@ -85,12 +85,8 @@ git clone --recurse-submodules https://github.com/gta-reversed/gta-reversed-mode
 
 You can create symbolic links for artifacts to not copy them every time you compiled the project.
 
-Open a console in the cloned git repo's directory (administrator privileges may be needed) and type in the following commands:
-```shell
-cd contrib
-link_asi.bat "<GAME_PATH>/scripts"
-```
-Replace `<GAME_PATH>` with the path to the game's root directory (i.e.: Where the `exe` is)
+Open a console with administrator privileges in the git repo's directory and run `contrib\link_asi.bat` or right click `link_asi.bat` file and click `Run as administrator`, then
+follow instructions at the command window.
     
 ### What to work on?
 Check [this](https://github.com/gta-reversed/gta-reversed-modern/discussions/402) out for some inspiration ;)

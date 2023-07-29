@@ -104,35 +104,35 @@ void CFont::LoadFontValues() {
         if (*line == '\0' || *line == '#')
             continue;
 
-        if (sscanf(line, "%31s", attrib) == EOF) // FIX_BUGS: buffer overflow
+        if (sscanf_s(line, "%s", SCANF_S_STR(attrib)) == EOF)
             continue;
 
         if (!memcmp(attrib, "[TOTAL_FONTS]", 14)) {
             auto nextLine = CFileLoader::LoadLine(file);
 
-            sscanf(nextLine, "%d", &totalFonts);
+            VERIFY(sscanf_s(nextLine, "%d", &totalFonts) == 1);
         }
         else if (!memcmp(attrib, "[FONT_ID]", 10)) {
             auto nextLine = CFileLoader::LoadLine(file);
 
-            sscanf(nextLine, "%d", &fontId);
+            VERIFY(sscanf_s(nextLine, "%d", &fontId) == 1);
         }
         else if (!memcmp(attrib, "[REPLACEMENT_SPACE_CHAR]", 25)) {
             auto nextLine = CFileLoader::LoadLine(file);
-            uint32 spaceValue;
+            uint8 spaceValue;
 
-            sscanf(nextLine, "%d", &spaceValue); // maybe use inttypes?
+            VERIFY(sscanf_s(nextLine, "%hhu", &spaceValue) == 1);
             gFontData[fontId].m_spaceValue = spaceValue;
         }
         else if (!memcmp(attrib, "[PROP]", 7)) {
             for (int32 i = 0; i < 26; i++) {
                 auto nextLine = CFileLoader::LoadLine(file);
-                int32 propValues[8];
+                int32 propValues[8]{};
 
-                sscanf(nextLine, "%d  %d  %d  %d  %d  %d  %d  %d",
+                VERIFY(sscanf_s(nextLine, "%d  %d  %d  %d  %d  %d  %d  %d",
                     &propValues[0], &propValues[1], &propValues[2], &propValues[3],
                     &propValues[4], &propValues[5], &propValues[6], &propValues[7]
-               );
+                ) == 8);
 
                 for (auto j = 0u; j < std::size(propValues); j++) {
                     gFontData[fontId].m_propValues[i * 8 + j] = propValues[j];
@@ -143,7 +143,7 @@ void CFont::LoadFontValues() {
             auto nextLine = CFileLoader::LoadLine(file);
             uint32 unpropValue;
 
-            sscanf(nextLine, "%d", &unpropValue);
+            VERIFY(sscanf_s(nextLine, "%d", &unpropValue) == 1);
             gFontData[fontId].m_unpropValue = unpropValue;
         }
     }
@@ -605,6 +605,8 @@ void CFont::SetOrientation(eFontAlignment alignment) {
 // Need to call this each frame
 // 0x719800
 void CFont::InitPerFrame() {
+    ZoneScoped;
+
     m_nFontOutline = 0;
     m_nFontOutlineOrShadow = 0;
     m_nFontShadow = 0;
@@ -627,7 +629,7 @@ float CFont::GetStringWidth(const char* string, bool full, bool scriptText) {
     size_t len = CMessages::GetStringLength(string);
     char data[400] = {0};
 
-    strncpy(data, string, len);
+    strncpy_s(data, string, len);
     CMessages::InsertPlayerControlKeysInString(data);
 
     float width = 0.0f;
@@ -678,6 +680,8 @@ float CFont::GetStringWidth(const char* string, bool full, bool scriptText) {
 
 // same as RenderFontBuffer() (0x71A210)
 void CFont::DrawFonts() {
+    ZoneScoped;
+
     RenderFontBuffer();
 }
 

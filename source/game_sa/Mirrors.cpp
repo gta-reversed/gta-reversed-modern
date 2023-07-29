@@ -99,6 +99,7 @@ void CMirrors::CreateBuffer() {
 
         RwRasterDestroy(pBuffer);
         pBuffer = nullptr;
+        break;
     default:
         NOTSA_UNREACHABLE();
         break;
@@ -115,6 +116,8 @@ void CMirrors::BuildCamMatrix(CMatrix& mat, CVector pointA, CVector pointB) {
 
 // 0x726090
 void CMirrors::RenderMirrorBuffer() {
+    ZoneScoped;
+
     if (TypeOfMirror == MIRROR_TYPE_NONE)
         return;
 
@@ -350,6 +353,8 @@ void CMirrors::BeforeConstructRenderList() {
 
 // 0x727140
 void CMirrors::BeforeMainRender() {
+    ZoneScoped;
+
     if (TypeOfMirror == MIRROR_TYPE_NONE)
         return;
 

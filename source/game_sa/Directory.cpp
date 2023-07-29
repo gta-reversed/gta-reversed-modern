@@ -114,7 +114,7 @@ CDirectory::DirectoryInfo* CDirectory::FindItem(const char* itemName) const {
 // 0x5324A0
 bool CDirectory::FindItem(const char* name, uint32& outOffset, uint32& outStreamingSize) const {
     if (DirectoryInfo* info = FindItem(name)) {
-        outOffset = info->m_nOffset;
+        outOffset        = info->m_nOffset;
         outStreamingSize = info->m_nStreamingSize;
         return true;
     }

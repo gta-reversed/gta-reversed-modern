@@ -7,6 +7,7 @@
 #include "PedGroups.h"
 #include "Checkpoint.h"
 #include "Checkpoints.h"
+#include "LoadingScreen.h"
 // #include "Scripted2dEffects.h"
 #include "Shadows.h"
 
@@ -25,6 +26,10 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(StartTestScript, 0x464D40);
     RH_ScopedInstall(AddToBuildingSwapArray, 0x481140);
     RH_ScopedInstall(UndoBuildingSwaps, 0x481290);
+    RH_ScopedInstall(IsPedStopped, 0x486110);
+    RH_ScopedInstall(HasCarModelBeenSuppressed, 0x46A810);
+    RH_ScopedInstall(HasVehicleModelBeenBlockedByScript, 0x46A890);
+    RH_ScopedInstall(Process, 0x46A000);
 }
 
 // 0x468D50
@@ -305,6 +310,28 @@ void CTheScripts::UndoBuildingSwaps() {
     }
 }
 
+// 0x486110
+bool CTheScripts::IsPedStopped(CPed* ped) {
+    if (ped->IsInVehicle()) {
+        return CTimer::GetTimeStep() / 100.f >= ped->m_pVehicle->m_fMovingSpeed;
+    }
+    if (!ped->IsPedStandingInPlace()) {
+        return false;
+    }
+    if (ped->IsPlayer()) {
+        if (RpAnimBlendClumpGetAssociation(ped->m_pRwClump, { ANIM_ID_RUN_STOP, ANIM_ID_RUN_STOPR, ANIM_ID_JUMP_LAUNCH, ANIM_ID_JUMP_GLIDE })) {
+            return false;
+        }
+    }
+    if (ped->bIsLanding || ped->bIsInTheAir || !ped->bIsStanding) {
+        return false;
+    }
+    if (ped->m_vecAnimMovingShiftLocal.IsZero()) {
+        return true;
+    }
+    return false;
+}
+
 // 0x464D50
 bool CTheScripts::IsPlayerOnAMission() {
     return plugin::CallAndReturn<bool, 0x464D50>();
@@ -330,19 +357,91 @@ void CTheScripts::WipeLocalVariableMemoryForMissionScript() {
     memset(&LocalVariablesForCurrentMission, 0, sizeof(LocalVariablesForCurrentMission));
 }
 
+// 0x46A810
+bool CTheScripts::HasCarModelBeenSuppressed(eModelID carModelId) {
+    return notsa::contains(SuppressedVehicleModels, carModelId);
+}
+
+// 0x46A890
+bool CTheScripts::HasVehicleModelBeenBlockedByScript(eModelID carModelId) {
+    return notsa::contains(VehicleModelsBlockedByScript, carModelId);
+}
+
 // 0x464D40
 void CTheScripts::StartTestScript() {
+    ZoneScoped;
+
     StartNewScript(MainSCMBlock);
 }
 
 // 0x46A000
 void CTheScripts::Process() {
-    plugin::Call<0x46A000>();
+    ZoneScoped;
+
+    if (CReplay::Mode == MODE_PLAYBACK) {
+        return;
+    }
+
+    CommandsExecuted = 0;
+
+    UpsideDownCars.UpdateTimers();
+    StuckCars.Process();
+    MissionCleanUp.CheckIfCollisionHasLoadedForMissionObjects();
+    CTheScripts::DrawScriptSpheres();
+    CTheScripts::ProcessAllSearchLights();
+    CTheScripts::ProcessWaitingForScriptBrainArray();
+
+    if (CTheScripts::FailCurrentMission) {
+        --CTheScripts::FailCurrentMission;
+    }
+
+    if (CTheScripts::UseTextCommands) {
+        rng::fill(IntroTextLines, tScriptText{});
+        NumberOfIntroTextLinesThisFrame = 0;
+
+        rng::fill(IntroRectangles, tScriptRectangle{});
+        NumberOfIntroRectanglesThisFrame = 0;
+
+        CTheScripts::UseTextCommands = false;
+    }
+
+    const auto timeStepMS = (int32)CTimer::GetTimeStepInMS();
+    LocalVariablesForCurrentMission[32].iParam += timeStepMS;
+    LocalVariablesForCurrentMission[33].iParam += timeStepMS;
+
+    CLoadingScreen::NewChunkLoaded();
+
+    for (auto it = pActiveScripts; it;) {
+        const auto next = it->m_pNext;
+
+        for (auto& t : it->m_anTimers) {
+            t += timeStepMS;
+        }
+        it->Process();
+
+        it = next;
+    }
+
+    CLoadingScreen::NewChunkLoaded();
+
+    for (auto& ped : GetPedPool()->GetAllValid()) {
+        if (ped.IsCreatedByMission()) {
+            ped.GetIntelligence()->RecordEventForScript(0, 0);
+        }
+    }
 }
 
 // 0x4939F0
 void CTheScripts::ProcessAllSearchLights() {
+    ZoneScoped;
+
     return plugin::Call<0x4939F0>();
+}
+
+void CTheScripts::ProcessWaitingForScriptBrainArray() {
+    ZoneScoped;
+
+    plugin::Call<0x46CF00>();
 }
 
 // 0x4812D0
@@ -495,8 +594,9 @@ void CTheScripts::ScriptDebugCircle2D(float x, float y, float width, float heigh
 }
 
 // 0x4810E0
-void CTheScripts::DrawScriptSpheres()
-{
+void CTheScripts::DrawScriptSpheres() {
+    ZoneScoped;
+
     return plugin::Call<0x4810E0>();
     for (auto& script : ScriptSphereArray) {
         if (script.m_bUsed) {
@@ -613,5 +713,7 @@ void CTheScripts::RenderTheScriptDebugLines() {
 
 // 0x493E30
 void CTheScripts::RenderAllSearchLights() {
+    ZoneScoped;
+
     return plugin::Call<0x493E30>();
 }

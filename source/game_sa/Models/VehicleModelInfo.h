@@ -130,8 +130,7 @@ VALIDATE_SIZE(UpgradePosnDesc, 0x20);
 class NOTSA_EXPORT_VTABLE CVehicleModelInfo : public CClumpModelInfo {
 public:
     RpMaterial*        m_pPlateMaterial;
-    char               m_szPlateText[8];
-    char               field_30;
+    char               m_szPlateText[9];
     uint8              m_nPlateType;
     char               m_szGameName[8];
     eVehicleType       m_nVehicleType;
@@ -331,7 +330,6 @@ public:
     int32 GetNumDoors();
     // get position of dummy in model-space
     CVector* GetModelDummyPosition(eVehicleDummy dummy) const { return &m_pVehicleStruct->m_avDummyPos[dummy]; } // NOTSA
-
     // Static method's
     // setup lights states for currently rendered vehicle
     static void SetupLightFlags(class CVehicle* vehicle);
@@ -463,6 +461,8 @@ public:
 
     tHandlingData& GetHandlingData() const;
     tFlyingHandlingData& GetFlyingHandlingData() const;
+
+    auto GetVehicleStruct() const { return m_pVehicleStruct; }
 };
 VALIDATE_SIZE(CVehicleModelInfo::CVehicleStructure, 0x314);
 VALIDATE_SIZE(CVehicleModelInfo, 0x308);

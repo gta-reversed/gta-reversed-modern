@@ -165,7 +165,7 @@ void InitializeAndStartNewScript() {
 
 bool MissionDebugModule::StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
     if (!m_bStartMission && CTheScripts::IsPlayerOnAMission()) {
-        if (CCutsceneMgr::ms_cutsceneLoadStatus == 2) {
+        if (CCutsceneMgr::HasLoaded()) {
             CCutsceneMgr::DeleteCutsceneData();
         }
         CTheScripts::FailCurrentMission = 2;
@@ -201,7 +201,7 @@ bool MissionDebugModule::StartMission(int32 missionId, bool bDoMissionCleanUp = 
         size_t bytesRead = 0;
         while (FrontEndMenuManager.CheckMissionPackValidMenu()) {
             CFileMgr::SetDirMyDocuments();
-            sprintf(gString, "MPACK//MPACK%d//SCR.SCM", CGame::bMissionPackGame);
+            sprintf_s(gString, "MPACK//MPACK%d//SCR.SCM", CGame::bMissionPackGame);
             auto* file = CFileMgr::OpenFile(gString, "rb");
             if (file) {
                 CFileMgr::Seek(file, offsetToMission, 0);

@@ -9,7 +9,7 @@ class CPed;
 class Interior_c;
 struct InteriorInfo_t;
 
-class InteriorGroup_c : public ListItem_c {
+class InteriorGroup_c : public ListItem_c<InteriorGroup_c> {
     CEntity*    m_pEntity;             // 0x8
     uint8       m_nId;                 // 0xC
     uint8       m_furnitureId;         // 0xD

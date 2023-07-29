@@ -31,6 +31,8 @@ void ProcObjectMan_c::Init() {
 
 // 0x5A3110
 void ProcObjectMan_c::Update() {
+    ZoneScoped;
+
     // NOP
 }
 
@@ -62,10 +64,10 @@ void ProcObjectMan_c::LoadDataFile() {
         int32 align;
         int32 useGrid;
 
-        RET_IGNORED(sscanf(
+        VERIFY(sscanf_s(
             line, "%s %s %f %f %d %d %f %f %f %f %f %f %d %d",
-            surfaceType,
-            objectName,
+            SCANF_S_STR(surfaceType),
+            SCANF_S_STR(objectName),
             &spacing,
             &minDist,
             &minRot, &maxRot,
@@ -73,7 +75,7 @@ void ProcObjectMan_c::LoadDataFile() {
             &minScaleZ, &maxScaleZ,
             &zOffsetMin, &zOffsetMax,
             &align, &useGrid
-        ));
+        ) == 14);
         m_ProcObjSurfaceInfos[m_numProcSurfaceInfos].Init(
             surfaceType,
             objectName,
@@ -96,7 +98,7 @@ ProcObjectListItem* ProcObjectMan_c::GetEntityFromPool() {
 }
 
 // 0x5A3130
-void ProcObjectMan_c::ReturnEntityToPool(ListItem_c* item) { // todo: EntityItem_c
+void ProcObjectMan_c::ReturnEntityToPool(ProcObjectListItem* item) {
     m_ObjectsList.AddItem(item);
 }
 

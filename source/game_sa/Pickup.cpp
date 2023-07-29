@@ -105,8 +105,9 @@ void CPickup::GiveUsAPickUpObject(CObject** obj, int32 slotIndex) {
     auto& object = *obj;
     object = nullptr;
 
-    if (CCutsceneMgr::ms_cutsceneLoadStatus == 2)
+    if (CCutsceneMgr::HasLoaded()) {
         return;
+    }
 
     if (mi->GetModelType() == MODEL_INFO_WEAPON) {
         CWeaponInfo::GetWeaponInfo(mi->AsWeaponModelInfoPtr()->m_weaponInfo);
@@ -194,7 +195,7 @@ void CPickup::ProcessGunShot(CVector* start, CVector* end) {
     if (!m_pObject)
         return;
 
-    if (const auto posn = m_pObject->GetPosition(); CCollision::TestLineSphere({start, end}, {4.0f, posn})) {
+    if (const auto& posn = m_pObject->GetPosition(); CCollision::TestLineSphere({start, end}, {posn, 4.0f})) {
         CExplosion::AddExplosion(nullptr, nullptr, EXPLOSION_MINE, posn, 0, true, -1.0f, false);
         Remove();
     }
@@ -590,7 +591,7 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
                                 break;
                             case PICKUP_PROPERTY_FORSALE:
                                 char labelKey[9];
-                                std::strncpy(labelKey, FindStringForTextIndex((ePickupPropertyText)m_nFlags.nPropertyTextIndex), 9);
+                                strncpy_s(labelKey, FindStringForTextIndex((ePickupPropertyText)m_nFlags.nPropertyTextIndex), 9);
                                 ModifyStringLabelForControlSetting(labelKey);
                                 CMessages::InsertNumberInString(TheText.Get(labelKey), m_nAmmo, 0, 0, 0, 0, 0, gGxtString);
 

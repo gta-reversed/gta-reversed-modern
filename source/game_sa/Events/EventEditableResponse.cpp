@@ -23,9 +23,11 @@ void CEventEditableResponse::InjectHooks() {
 }
 
 // 0x4AC450
-CEventEditableResponse::CEventEditableResponse() : CEvent() {
+CEventEditableResponse::CEventEditableResponse(eTaskType taskType) :
+    CEvent()
+{
     m_bAddToEventGroup = true;
-    m_taskId = TASK_NONE;
+    m_taskId = (int16)taskType;
     field_10 = -1;
 }
 

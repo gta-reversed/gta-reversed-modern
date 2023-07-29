@@ -703,6 +703,8 @@ RpAtomic* CVisibilityPlugins::RenderPlayerCB(RpAtomic* atomic) {
 
 // 0x733800
 void CVisibilityPlugins::RenderReallyDrawLastObjects() {
+    ZoneScoped;
+
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
@@ -711,9 +713,11 @@ void CVisibilityPlugins::RenderReallyDrawLastObjects() {
     RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
     RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATECULLMODE,          RWRSTATE(rwCULLMODECULLNONE));
+
     SetAmbientColours();
     DeActivateDirectional();
     RenderOrderedList(m_alphaReallyDrawLastList);
+
     RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
 }
 
@@ -984,6 +988,8 @@ RpAtomic* CVisibilityPlugins::RenderWeaponCB(RpAtomic* atomic) {
 
 // 0x732F30
 void CVisibilityPlugins::RenderWeaponPedsForPC() {
+    ZoneScoped;
+
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEFOGENABLE,            RWRSTATE(TRUE));
@@ -1033,12 +1039,6 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
     }
 }
 
-RpAtomic* CVisibilityPlugins::SetAtomicFlagCB(RpAtomic* atomic, void* data) {
-    uint16 flag = *reinterpret_cast<uint16*>(&data);
-    ATOMICPLG(atomic, m_flags) |= flag;
-    return atomic;
-}
-
 // 0x7322B0
 void CVisibilityPlugins::SetAtomicFlag(RpAtomic* atomic, uint16 flag) {
     ATOMICPLG(atomic, m_flags) |= flag;
@@ -1046,7 +1046,13 @@ void CVisibilityPlugins::SetAtomicFlag(RpAtomic* atomic, uint16 flag) {
 
 // 0x7322D0
 void CVisibilityPlugins::SetAtomicFlag(RpAtomic* atomic, int32 flag) {
-    ATOMICPLG(atomic, m_flags) |= flag;
+    ATOMICPLG(atomic, m_flags) |= flag; // how does this work??? m_flags is `uint16` ffs
+}
+
+RpAtomic* CVisibilityPlugins::SetAtomicFlagCB(RpAtomic* atomic, void* data) {
+    uint16 flag = *reinterpret_cast<uint16*>(&data);
+    SetAtomicFlag(atomic, flag);
+    return atomic;
 }
 
 // 0x732307
@@ -1151,4 +1157,8 @@ bool CVisibilityPlugins::VehicleVisibilityCB(RpClump* clump) {
 // 0x732AB0
 bool CVisibilityPlugins::VehicleVisibilityCB_BigVehicle(RpClump* clump) {
     return FrustumSphereCB(clump);
+}
+
+void weaponPedsForPc_Insert(CPed* ped) {
+    plugin::Call<0x5E46D0>(ped);
 }

@@ -28,9 +28,20 @@ void CVector::InjectHooks()
     RH_ScopedGlobalOverloadedInstall(DotProduct, "v3d*v3d*", 0x59C6D0, float(*)(CVector*, CVector*));
 }
 
-CVector::CVector(const CVector2D& v2, float z) :
-    CVector(v2.x, v2.y, z)
+/*!
+* @brief From a 2D vector and Z position
+*/
+CVector::CVector(const CVector2D& v2d, float Z) :
+    RwV3d{ v2d.x, v2d.y, Z }
 {
+}
+
+/*!
+* @returns A vector with each of its components set to a number in the given range [min, max)
+*/
+CVector CVector::Random(CVector min, CVector max) {
+    const auto Get = [=](float fmin, float fmax) { return CGeneral::GetRandomNumberInRange(fmin, fmax); };
+    return { Get(min.x, max.x), Get(min.y, max.y), Get(min.z, max.z) };
 }
 
 CVector CVector::Random(float min, float max) {
@@ -170,13 +181,12 @@ CVector CVector::Average(const CVector* begin, const CVector* end) {
 }
 
 float CVector::Heading(bool limitAngle) const {
-    const auto heading = std::atan2(-x, y);
+    const auto radians = std::atan2(-x, y);
     if (limitAngle) {
-        return CGeneral::LimitRadianAngle(heading);
+        return CGeneral::LimitRadianAngle(radians);
     }
-    return heading;
+    return radians;
 }
-
 
 CVector* CrossProduct(CVector* out, CVector* a, CVector* b)
 {

@@ -359,6 +359,8 @@ int32 CFireManager::StartScriptFire(const CVector& pos, CEntity* target, float _
 
 // 0x53AF00
 void CFireManager::Update() {
+    ZoneScoped;
+
     if (CReplay::Mode == MODE_PLAYBACK)
         return;
 
@@ -532,5 +534,5 @@ void CFireManager::Update() {
 
 // NOTSA
 CFire& CFireManager::GetRandomFire() {
-    return m_aFires[CGeneral::GetRandomNumberInRange(0, std::size(m_aFires))];
+    return CGeneral::RandomChoice(m_aFires);
 }

@@ -36,6 +36,8 @@ void InteriorManager_c::Init() {
 
 // 0x598F50
 int8 InteriorManager_c::Update() {
+    ZoneScoped;
+
     return plugin::CallMethodAndReturn<int8, 0x598F50, InteriorManager_c*>(this);
 }
 
@@ -80,8 +82,8 @@ int32 InteriorManager_c::ReturnInteriorToPool(Interior_c* interior) {
 }
 
 // 0x5984A0
-ListItem_c* InteriorManager_c::GetInteriorFromPool() {
-    return plugin::CallMethodAndReturn<ListItem_c*, 0x5984A0, InteriorManager_c*>(this);
+Interior_c* InteriorManager_c::GetInteriorFromPool() {
+    return plugin::CallMethodAndReturn<Interior_c*, 0x5984A0, InteriorManager_c*>(this);
 }
 
 // 0x5983D0

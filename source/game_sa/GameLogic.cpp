@@ -129,6 +129,8 @@ void CGameLogic::ForceDeathRestart() {
 
 // 0x441210
 void CGameLogic::InitAtStartOfGame() {
+    ZoneScoped;
+
     ActivePlayers            = true;
     SkipState                = SKIP_NONE;
     NumAfterDeathStartPoints = 0;
@@ -359,7 +361,7 @@ void CGameLogic::RestorePlayerStuffDuringResurrection(CPlayerPed* player, CVecto
     player->m_fArmour = 0.0f;
     player->m_fHealth = static_cast<float>(playerInfo->m_nMaxHealth);
     player->m_bIsVisible = true;
-    player->m_nDeathTime = 0;
+    player->m_nDeathTimeMS = 0;
     player->bDoBloodyFootprints = false;
     playerData->m_nDrunkenness = 0;
     playerData->m_nFadeDrunkenness = 0;
@@ -560,6 +562,8 @@ void CGameLogic::StopPlayerMovingFromDirection(int32 playerId, CVector direction
 
 // 0x442AD0
 void CGameLogic::Update() {
+    ZoneScoped;
+
     CStats::UpdateRespectStat(0);
     CStats::UpdateSexAppealStat();
     SetPlayerWantedLevelForForbiddenTerritories(false);

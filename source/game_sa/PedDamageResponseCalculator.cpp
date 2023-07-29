@@ -128,3 +128,4 @@ bool CPedDamageResponseCalculator::IsBleedingWeapon(CPed* ped) const {
 void CPedDamageResponseCalculator::ComputeDamageResponse(CPed* ped, CPedDamageResponse& response, bool bSpeak) {
     plugin::CallMethod<0x4B5AC0, CPedDamageResponseCalculator*, CPed*, CPedDamageResponse&, bool>(this, ped, response, bSpeak);
 }
+

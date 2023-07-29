@@ -12,7 +12,7 @@ public:
     std::array<float, 3> m_Seed;
     uint16 m_nMaxNumPlants[3];
     uint8 m_SurfaceId;
-    uint8 m_nLighting;
+    tColLighting m_nLighting;
 
     union {
         struct {
@@ -30,7 +30,7 @@ public:
 public:
     static void InjectHooks();
 
-    CPlantLocTri* Add(const CVector& p1, const CVector& p2, const CVector& p3, uint8 surface, uint8 lightning, bool createsPlants, bool createsObjects);
+    CPlantLocTri* Add(const CVector& p1, const CVector& p2, const CVector& p3, uint8 surface, tColLighting lightning, bool createsPlants, bool createsObjects);
     void Release();
 };
 VALIDATE_SIZE(CPlantLocTri, 0x54);

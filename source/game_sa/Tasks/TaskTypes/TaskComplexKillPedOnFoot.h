@@ -12,31 +12,32 @@
 
 class NOTSA_EXPORT_VTABLE CTaskComplexKillPedOnFoot : public CTaskComplex {
 public:
-    uint8      m_bit_1 : 1;
-    uint8      m_bit_2 : 1;
-    uint8      m_bit_3 : 1;
-    uint8      m_bit_4 : 1;
-    uint8      m_bit_5 : 1;
-    uint8      m_bit_6 : 1;
-    uint8      m_bit_7 : 1;
-    uint8      m_bit_8 : 1;
+    bool       m_bShotFiredByPlayerFlag : 1 = true;
+    bool       m_bNewTarget : 1 = true;
+    bool       m_bRoomToDragPedOutOfCar : 1 = true;
+    bool       m_bTargetKilled : 1 = false;
+    bool       m_bAimImmediate : 1 = false;
+    bool       m_bWaitForPlayerToBeSafe : 1 = false;
+    bool       m_bWaitingForPlayerToBeSafe : 1 = false;
+   
     CPed*      m_target;
     int32      m_pedFlags;
     int32      m_actionDelay;
     int32      m_actionChance;
-    uint8      field_20;
+    uint8      m_nCompetence;
     uint32     m_startTime;
-    uint32     m_time;
+    int32      m_time;
     CTaskTimer m_timer;
 
 public:
     static constexpr auto Type = TASK_COMPLEX_KILL_PED_ON_FOOT;
 
-    CTaskComplexKillPedOnFoot(CPed* target, int32 time, int32 pedFlags, int32 delay, int32 chance, int8 a7);
+    CTaskComplexKillPedOnFoot(CPed* target, int32 time = -1, int32 pedFlags = 0, int32 delay = 0, int32 chance = 0, uint8 nCompetence = 1, /* notsa => */bool bWaitForPlayerToBeSafe = false, bool bWaitingForPlayerToBeSafe = false);
+
     ~CTaskComplexKillPedOnFoot() override;
 
     eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override { return new CTaskComplexKillPedOnFoot(m_target, m_time, m_pedFlags, m_actionDelay, m_actionChance, field_20); }
+    CTask* Clone() override { return new CTaskComplexKillPedOnFoot(m_target, m_time, m_pedFlags, m_actionDelay, m_actionChance, m_nCompetence); }
     bool   MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

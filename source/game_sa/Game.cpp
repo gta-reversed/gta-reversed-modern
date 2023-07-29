@@ -139,7 +139,7 @@ void ValidateVersion() {
 
     static char(&version_name)[64] = *reinterpret_cast<char(*)[64]>(0xB72C28);
 
-    strncpy(version_name, &buf[15], 64u);
+    strncpy_s(version_name, &buf[15], 64u);
     CFileMgr::CloseFile(file);
 }
 
@@ -335,8 +335,10 @@ void CGame::GenerateTempPedAtStartOfNetworkGame() {
 
 // 0x5BF840
 bool CGame::Init1(char const *datFile) {
+    ZoneScoped;
+
     CMaths::InitMathsTables();
-    strcpy(aDatFile, datFile);
+    strcpy_s(aDatFile, datFile);
     CPools::Initialise();
     CPlaceable::InitMatrixArray();
     CIniFile::LoadIniFile();
@@ -425,6 +427,8 @@ bool CGame::Init1(char const *datFile) {
 
 // 0x5BA1A0
 bool CGame::Init2(const char* datFile) {
+    ZoneScoped;
+
     LoadingScreen("Loading the Game", "Add Particles");
     CTheZones::PostZoneCreation();
     CEntryExitManager::PostEntryExitsCreation();
@@ -525,6 +529,8 @@ bool CGame::Init2(const char* datFile) {
 
 // 0x5BA400
 bool CGame::Init3(const char* datFile) {
+    ZoneScoped;
+
     LoadingScreen("Loading the Game", "Load scene");
     CPad::GetPad(PED_TYPE_PLAYER1)->Clear(true, true);
     CPad::GetPad(PED_TYPE_PLAYER2)->Clear(true, true);
@@ -539,6 +545,8 @@ bool CGame::Init3(const char* datFile) {
 
 // 0x53BC80
 void CGame::Initialise(const char* datFile) {
+    ZoneScoped;
+
     Init1(datFile);
     CColAccel::startCache();
     CFileLoader::LoadLevel("DATA\\DEFAULT.DAT");
@@ -707,6 +715,8 @@ void CGame::InitialiseWhenRestarting() {
 
 // 0x53BEE0
 void CGame::Process() {
+    ZoneScoped;
+
     CPad::UpdatePads();
     g_LoadMonitor.BeginFrame();
 
@@ -749,8 +759,7 @@ void CGame::Process() {
 
         if (updateTimeDelta >= 4) {
             CPopulation::Update(false);
-        }
-        else {
+        } else {
             const auto timeBeforePopulationUpdate = GetTime();
             CPopulation::Update(true);
             updateTimeDelta = GetTime() - timeBeforePopulationUpdate;
@@ -794,8 +803,7 @@ void CGame::Process() {
 
         if (CReplay::ShouldStandardCameraBeProcessed()) {
             TheCamera.Process();
-        }
-        else {
+        } else {
             TheCamera.CCamera::ProcessFade();
         }
 

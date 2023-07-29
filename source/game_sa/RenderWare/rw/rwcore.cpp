@@ -598,8 +598,8 @@ RwBool RwD3D9DeviceSupportsDXTTexture() {
     return ((RwBool(__cdecl *)(void))0x7F9C30)();
 }
 
-void* RwD3D9GetCurrentD3DDevice() {
-    return ((void*(__cdecl *)(void))0x7F9D50)();
+IDirect3DDevice9* RwD3D9GetCurrentD3DDevice() {
+    return ((IDirect3DDevice9*(__cdecl *)(void))0x7F9D50)();
 }
 
 RwUInt32 RwD3D9EngineGetMaxMultiSamplingLevels() {
@@ -907,6 +907,7 @@ RwFrame* RwFrameCreate() {
 }
 
 RwBool RwFrameDestroy(RwFrame* frame) {
+    assert(frame);
     return ((RwBool(__cdecl *)(RwFrame*))0x7F05A0)(frame);
 }
 
@@ -1055,10 +1056,14 @@ RwBool RwBBoxContainsPoint(const RwBBox* boundBox, const RwV3d* vertex) {
 }
 
 RwCamera* RwCameraBeginUpdate(RwCamera* camera) {
+    ZoneScoped;
+
     return ((RwCamera*(__cdecl *)(RwCamera*))0x7EE190)(camera);
 }
 
 RwCamera* RwCameraEndUpdate(RwCamera* camera) {
+    ZoneScoped;
+
     return ((RwCamera*(__cdecl *)(RwCamera*))0x7EE180)(camera);
 }
 

@@ -39,6 +39,8 @@ bool CColAccel::isCacheLoading() {
 
 // 0x5B31A0
 void CColAccel::startCache() {
+    ZoneScoped;
+
     m_iCachingColSize = GetColModelPool()->GetSize();
     m_iSectionSize    = new int32[64];
     m_iplDefs         = new IplDef[TOTAL_IPL_MODEL_IDS]();
@@ -47,6 +49,8 @@ void CColAccel::startCache() {
 
 // 0x5B2AD0
 void CColAccel::endCache() {
+    ZoneScoped;
+
     if (m_iCacheState == eColAccelState::COLACCEL_STARTED) {
         auto* file = CFileMgr::OpenFileForWriting(mp_cCacheName);
         CFileMgr::Write(file, &m_iNumColItems,  sizeof(m_iNumColItems));
@@ -91,7 +95,7 @@ void CColAccel::addCacheCol(PackedModelStartEnd startEnd, const CColModel& colMo
     colEntry.m_boundBox = colModel.m_boundBox;
     colEntry.m_boundSphere = colModel.m_boundSphere;
     colEntry.m_nColSlot = colModel.m_nColSlot;
-    colEntry.m_bColModelNotEmpty = colModel.m_bNotEmpty;
+    colEntry.m_bColModelNotEmpty = colModel.m_bHasCollisionVolumes;
 
     ++m_iNumColItems;
 }
@@ -108,7 +112,7 @@ void CColAccel::cacheLoadCol() {
         cm->m_boundBox = colEntry.m_boundBox;
         cm->m_boundSphere = colEntry.m_boundSphere;
         cm->m_nColSlot = colEntry.m_nColSlot;
-        cm->m_bNotEmpty = colEntry.m_bColModelNotEmpty;
+        cm->m_bHasCollisionVolumes = colEntry.m_bColModelNotEmpty;
 
         mi->SetColModel(cm, true);
         CColStore::IncludeModelIndex(colEntry.m_nColSlot, colEntry.m_wModelStart);

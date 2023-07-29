@@ -30,7 +30,7 @@ function(supress_deps_warnings targets)
         )
     endforeach()
 endfunction()
-supress_deps_warnings(ogg imgui vorbisfile)
+supress_deps_warnings(ogg imgui vorbisfile spdlog)
 
 set_target_properties(${RE_PROJECT_LIB_NAME}
     PROPERTIES
@@ -38,6 +38,7 @@ set_target_properties(${RE_PROJECT_LIB_NAME}
     ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/"
     LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/"
     RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/"
+    COMPILE_WARNING_AS_ERROR ON
 )
 if (${RE_PROJECT}_UNITY_BUILD)
     set_target_properties(${RE_PROJECT_LIB_NAME}
@@ -62,7 +63,26 @@ target_link_libraries(${RE_PROJECT_LIB_NAME} PRIVATE
     ogg
     vorbisfile
     imgui
+    spdlog
+    Tracy::TracyClient
+    ddraw
+    Winmm
+    dxguid
+    strmiids
+    dsound
+    d3d9
 )
+
+if(WIN32) 
+    if(MSVC) # MSVC knows how to find dbghelp on it's own
+        target_link_libraries(${RE_PROJECT_LIB_NAME} PRIVATE
+            dbghelp
+        )
+    else()
+        message(FATAL_ERROR "Need to link dbghelp lib for win32")
+    endif()
+endif()
+
 target_include_directories(${RE_PROJECT_LIB_NAME} PRIVATE
     /
     toolsmenu/

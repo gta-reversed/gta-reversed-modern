@@ -27,12 +27,15 @@
 
 #include <ranges>
 namespace rng = std::ranges;
+namespace rngv = std::views;
 
 #include "Base.h"
 #include "config.h"
 
 #include "HookSystem.h"
 #include "reversiblehooks\ReversibleHooks.h"
+
+#include <tracy/Tracy.hpp>
 
 // DirectX
 #include <d3d9.h>
@@ -61,6 +64,8 @@ namespace rng = std::ranges;
 #include "game_sa\RenderWare\rw\rwtexdict.h"
 #include "game_sa\RenderWare\rw\skeleton.h"
 #include "game_sa\RenderWare\RenderWare.h"
+#include <PluginBase.h>
+#include <RenderWare.h>
 
 // oswrapper
 #include "oswrapper/oswrapper.h"
