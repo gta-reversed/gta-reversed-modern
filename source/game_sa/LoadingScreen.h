@@ -7,7 +7,6 @@
 #pragma once
 
 class CSprite2d;
-
 class CLoadingScreen {
 public:
     static constexpr size_t MAX_SPLASHES = 7u;

@@ -555,6 +555,8 @@ void CCamera::DealWithMirrorBeforeConstructRenderList(bool bActiveMirror, CVecto
 /// III/VC leftover
 // 0x50B8F0
 void CCamera::RenderMotionBlur() {
+    ZoneScoped;
+
     if (m_nBlurType) {
         // CMBlur::MotionBlurRender(); // todo: Add CMBlur::MotionBlurRender is NOP, 0x71D700
     }
@@ -1297,11 +1299,11 @@ void CCamera::AddShake(float duration, float a2, float a3, float a4, float a5) {
 }
 
 // 0x50D240
-void CCamera::AddShakeSimple(float duration, int32 type, float intensity) {
+void CCamera::AddShakeSimple(float durationMs, int32 type, float intensity) {
     m_fShakeIntensity = intensity;
     m_nShakeType = type;
     m_fStartShakeTime = static_cast<float>(CTimer::GetTimeInMS());
-    m_fEndShakeTime = m_fStartShakeTime + duration;
+    m_fEndShakeTime = m_fStartShakeTime + durationMs;
 }
 
 // 0x50D280
@@ -1316,6 +1318,8 @@ void CCamera::LerpFOV(float zoomInFactor, float zoomOutFactor, float timeLimit, 
 
 // 0x50B5D0
 void CCamera::ProcessFade() {
+    ZoneScoped;
+
     if (!m_bFading) {
         return;
     }
@@ -1498,6 +1502,8 @@ void CCamera::ProcessScriptedCommands() {
 
 // 0x52B730
 void CCamera::Process() {
+    ZoneScoped;
+
     plugin::CallMethod<0x52B730, CCamera*>(this);
 }
 

@@ -7,29 +7,19 @@ Building this project will result in a DLL file that can be injected into GTA:SA
 
 ### Progress
 The progress of reversed classes can be tracked [here](docs/ReversedClasses.MD). (needs to be updated)
+We currently estimate that about 50-60% of the code is done.
+Since this project is done as a hobby, and worked on at irregular intervals, there's no real time estimate.
 
 ### Coding Guidelines 
 Before you start writing code, please make sure to read the [coding guidelines](docs/CodingGuidelines.MD) for this project.
 
 ### Requirements
-
 * [Visual Studio 2022](https://visualstudio.microsoft.com/en/downloads/) (Community Edition is enough)
 * [CMake](https://cmake.org) (for those who want to use CMake instead of premake5)
 
-#### Game
-
-* GTA SA **Compact** exe
-* [ASI Loader](https://gtaforums.com/topic/523982-relopensrc-silents-asi-loader/)
-* [III.VC.SA.WindowedMode.asi](https://github.com/ThirteenAG/III.VC.SA.WindowedMode)
-* [Improved Fast Loader](https://www.gtagarage.com/mods/show.php?id=25665) (Optional)
-* Mouse Fix (**dinput8.dll**)
-
-You can download them in a single [archive](https://github.com/codenulls/gta-reversed/files/6949371/gta_sa.zip).
-Using other plugins is strongly discouraged as the compact version doesn't like them.
-
 ### Build Instructions
 
-You can either build with **Premake5** or **CMake**; that's up to you, but a C++20 capable compiler with <ranges> support is required.
+You can either build with **Premake5** or **CMake**; that's up to you, but a C++20 capable compiler [with `<ranges>`, `<format>` support] is required.
 
 First clone the project, including the submodules:
 ```shell
@@ -39,10 +29,11 @@ git clone --recurse-submodules https://github.com/gta-reversed/gta-reversed-mode
 <details>
 <summary>Premake5</summary>
 
-1) Execute `premake5.bat` for 2022, or `premake5.bat vs20xx` for other VS versions. (Note: Premake works fine with vs2019, CMake requires vs2022) (e.g: `premake5.bat vs2019`) 
+1) Execute `premake5.bat`
 
 2) You'll find gta_reversed.sln shortcut in the same folder as premake5.
 
+3) Open it, and once the project has loaded, just hit `CTRL + SHIFT + B`
 </details>
 
 <details>
@@ -80,13 +71,30 @@ git clone --recurse-submodules https://github.com/gta-reversed/gta-reversed-mode
 
 </details>
 
+### Game
+To install all the necessary files, run `install.py` with **__administrator privileges__** [Necessary to create symlinks on Windows] in the root directory.
+Alternatively, you can install them by yourself:
+
+* GTA SA **Compact** exe
+* [ASI Loader](https://gtaforums.com/topic/523982-relopensrc-silents-asi-loader/)
+* [III.VC.SA.WindowedMode.asi](https://github.com/ThirteenAG/III.VC.SA.WindowedMode)
+* Mouse Fix (**dinput8.dll**) [Can be found in the zip in `./contrib`]
+
+You can download them in a single [archive](https://github.com/gta-reversed/gta-reversed-modern/blob/master/contrib/plugins.zip).
+Using other plugins is strongly discouraged and we provide __**no support**__.
 
 ### Preparing Environment (Optional)
+[If you have ran `install.py` in the previous step then this step is already done]
 
-You can create symbolic links for artifacts to not copy them every time you compiled the project.
+<details>
+<summary>Instructions</summary>
 
-Open a console with administrator privileges in the git repo's directory and run `contrib\link_asi.bat` or right click `link_asi.bat` file and click `Run as administrator`, then
+You can create symbolic links [symlinks] for artifacts [the `.asi`] to need not copy them every time you compile the project.
+
+Open a console with **__administrator privileges__** in the git repo's directory and run `contrib\link_asi.bat` or right click `link_asi.bat` file and click `Run as administrator`, then
 follow instructions at the command window.
+
+</details>
     
 ### What to work on?
 Check [this](https://github.com/gta-reversed/gta-reversed-modern/discussions/402) out for some inspiration ;)

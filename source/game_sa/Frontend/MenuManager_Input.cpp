@@ -285,7 +285,11 @@ void CMenuManager::CheckForMenuClosing() {
 
                 if (IsVideoModeExclusive()) {
                     DIReleaseMouse();
+#ifdef FIX_BUGS // Causes the retarded fucktard code to not dispatch mouse input to WndProc => ImGUI mouse not working. Amazing piece of technology.
+                    InitialiseMouse(false);
+#else
                     InitialiseMouse(true);
+#endif // !FIX_BUGS
                 }
 
                 m_fStatsScrollSpeed = 150.0f;

@@ -11,10 +11,10 @@ public:
     // TODO: Use TList_c instead of List_c
 
     Interior_c      m_interiors[8];               // 0x0
-    List_c          m_interiorList;               // 0x3CA0
+    TList_c<void>   m_interiorList;               // 0x3CA0
     InteriorGroup_c m_interiorGroups[8];          // 0x3CAC
-    List_c          m_interiorGroupList;          // 0x428C
-    List_c          m_interiorGroupsList;         // 0x4298
+    TList_c<void>   m_interiorGroupList;          // 0x428C
+    TList_c<void>   m_interiorGroupsList;         // 0x4298
     int32           m_interiorCount;              // 0x42A4
     int32           m_InteriorIds[64];            // 0x42A8
     int32           m_objectCount;                // 0x43A8
@@ -46,14 +46,14 @@ public:
     int32 IsInteriorEffectVisible(C2dEffect* effect, CEntity* entity);
     int32 GetPedsInterior(CPed* ped);
     int32 ReturnInteriorToPool(Interior_c* interior);
-    ListItem_c* GetInteriorFromPool();
+    Interior_c* GetInteriorFromPool();
     int32 GetVectorsInterior(CVector* pos);
     int32 SetStealableObjectStolen(CEntity* entity, uint8 a3);
     int32 FindStealableObjectId(CEntity* entity);
     int32 FindStealableObjectId(int32 interiorId, int32 modelId, CVector point);
     bool HasInteriorHadStealDataSetup(Interior_c* interior);
     int8 IsGroupActive(int32 group);
-    ListItem_c* GetPedsInteriorGroup(CPed* ped);
+    InteriorGroup_c* GetPedsInteriorGroup(CPed* ped);
     int32 SetEntryExitPtr(CEntryExit* exit);
     int8 GetBoundingBox(CEntity* entity, CVector* pos);
     int8 ActivatePeds(uint8 enable);

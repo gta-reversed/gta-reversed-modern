@@ -23,6 +23,7 @@
 #include "./Spawner/SpawnerDebugModule.hpp"
 #include "./ImGuiDebugModule.hpp"
 #include "./ScriptDebugModule.hpp"
+#include "./CloudsDebugModule.hpp"
 #include "./AudioZonesDebugModule.h"
 
 DebugModules::DebugModules(ImGuiContext* ctx) :
@@ -51,6 +52,8 @@ void DebugModules::Render2D() {
 }
 
 void DebugModules::Render3D() {
+    ZoneScoped;
+
     for (auto& module : m_Modules) {
         module->Render3D();
     }
@@ -82,6 +85,7 @@ void DebugModules::CreateModules() {
     Add<AmbienceTrackManagerDebugModule>();
     Add<CutsceneTrackManagerDebugModule>();
     Add<notsa::debugmodules::ScriptDebugModule>();
+    Add<notsa::debugmodules::CloudsDebugModule>();
 
     // Stuff that is present in multiple menus
     Add<TimeCycleDebugModule>(); // Visualization + Extra

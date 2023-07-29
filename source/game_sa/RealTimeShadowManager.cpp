@@ -72,6 +72,8 @@ void CRealTimeShadowManager::ReInit() {
 
 // 0x706AB0
 void CRealTimeShadowManager::Update() {
+    ZoneScoped;
+
     if (m_bInitialised && m_bNeedsReinit) {
         ReInit();
         m_bNeedsReinit = false;

@@ -5,9 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-
-#include <win.h> // TODO: Remove (Included because of isForeground)
-
+#include <platform/win/Platform.h>
 #include <extensions/ci_string.hpp>
 
 #include "Fx.h"
@@ -300,6 +298,8 @@ void CCutsceneMgr::HideRequestedObjects() {
 
 // 0x4D5A20
 void CCutsceneMgr::Initialise() {
+    ZoneScoped;
+
     ms_cutsceneLoadStatus = LoadStatus::NOT_LOADED;
     ms_running            = false;
     ms_animLoaded         = false;
@@ -967,6 +967,8 @@ void CCutsceneMgr::StartCutscene() {
 
 // 0x4D5D00
 void CCutsceneMgr::Update() {
+    ZoneScoped;
+
     if (ms_cutsceneLoadStatus != LoadStatus::NOT_LOADED) {
         Update_overlay();
     }

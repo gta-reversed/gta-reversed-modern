@@ -295,6 +295,8 @@ void CRenderer::ProcessLodRenderLists() {
 
 // 0x553910
 void CRenderer::PreRender() {
+    ZoneScoped;
+
     assert(ms_nNoOfVisibleLods <= MAX_VISIBLE_LOD_PTRS);
     std::ranges::for_each(GetVisibleLodPtrs(), [](auto& entity) { entity->PreRender(); });
 
@@ -418,6 +420,8 @@ void CRenderer::RenderEverythingBarRoads() {
 
 // 0x553D00
 void CRenderer::RenderFirstPersonVehicle() {
+    ZoneScoped;
+
     if (m_pFirstPersonVehicle) {
         bool bRestoreAlphaTest = false;
         if (FindPlayerPed(0)->GetActiveWeapon().m_nType == WEAPON_MICRO_UZI) {
@@ -960,6 +964,8 @@ void CRenderer::ScanPtrList_RequestModels(CPtrList& list) {
 
 // 0x5556E0
 void CRenderer::ConstructRenderList() {
+    ZoneScoped;
+
     const auto& camPos = TheCamera.GetPosition();
 
     eZoneAttributes zoneAttributes = CCullZones::FindTunnelAttributesForCoors(camPos);

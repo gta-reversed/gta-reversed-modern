@@ -1253,8 +1253,9 @@ RpAtomic* CVehicleModelInfo::StoreAtomicUsedMaterialsCB(RpAtomic* atomic, void* 
     return atomic;
 }
 
-void CVehicleModelInfo::SetupCommonData()
-{
+void CVehicleModelInfo::SetupCommonData() {
+    ZoneScoped;
+
     LoadVehicleColours();
     CLoadingScreen::NewChunkLoaded();
     LoadVehicleUpgrades();

@@ -223,6 +223,8 @@ void CCheat::ApplyCheat(eCheats cheat) {
 
 // 0x438450
 void CCheat::ResetCheats() {
+    ZoneScoped;
+
     memset(&m_aCheatsActive, 0, sizeof(m_aCheatsActive));
     CWeather::ReleaseWeather();
     CTimer::ResetTimeScale();
@@ -232,6 +234,8 @@ void CCheat::ResetCheats() {
 
 // 0x439AF0
 void CCheat::DoCheats() {
+    ZoneScoped;
+
     for (auto key = 0; key < 256; ++key) {
         if (CPad::GetPad(0)->IsStandardKeyJustPressed(key)) {
             AddToCheatString(key);
