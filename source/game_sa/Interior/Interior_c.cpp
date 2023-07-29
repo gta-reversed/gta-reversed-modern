@@ -63,8 +63,8 @@ void Interior_c::InjectHooks() {
 }
 
 // 0x593BF0
-int32 Interior_c::Init(CVector* a2) {
-    return plugin::CallMethodAndReturn<int32, 0x593BF0, Interior_c*, CVector*>(this, a2);
+int32 Interior_c::Init(const CVector& pos) {
+    return plugin::CallMethodAndReturn<int32, 0x593BF0>(this, &pos);
 }
 
 // 0x592230
@@ -209,8 +209,8 @@ FurnitureEntity_c* Interior_c::GetFurnitureEntity(CEntity* entity) {
 }
 
 // 0x5913E0
-bool Interior_c::IsPtInside(CVector* a2, float a3, float a4, float a5) {
-    return plugin::CallMethodAndReturn<bool, 0x5913E0, Interior_c*, CVector*, float, float, float>(this, a2, a3, a4, a5);
+bool Interior_c::IsPtInside(const CVector& pt, CVector bias) {
+    return plugin::CallMethodAndReturn<bool, 0x5913E0, Interior_c*, const CVector&, CVector&>(this, pt, bias);
 }
 
 // 0x5914D0

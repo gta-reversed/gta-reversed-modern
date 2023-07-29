@@ -972,7 +972,7 @@ void CFileLoader::Load2dEffect(const char* line) {
         break;
     case EFFECT_ATTRACTOR:
         break;
-    case EFFECT_FURNITURE:
+    case EFFECT_INTERIOR:
         break;
     case EFFECT_ENEX:
         break;
