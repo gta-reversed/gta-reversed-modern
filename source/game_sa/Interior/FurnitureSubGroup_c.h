@@ -6,13 +6,13 @@
 
 class Furniture_c;
 
-class FurnitureSubGroup_c : public ListItem_c {
+class FurnitureSubGroup_c : public ListItem_c<FurnitureSubGroup_c> {
 public:
-    int32   m_nSubgroupId;
-    List_c  m_Furnitures;
-    bool    m_bCanPlaceInFrontOfWindow;
-    bool    m_bIsTall;
-    bool    m_bCanSteal;
+    int32         m_nSubgroupId;
+    TList_c<void> m_Furnitures;
+    bool          m_bCanPlaceInFrontOfWindow;
+    bool          m_bIsTall;
+    bool          m_bCanSteal;
 
 public:
     static void InjectHooks();

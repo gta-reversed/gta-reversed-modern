@@ -16,7 +16,7 @@ class CObject;
 class FurnitureEntity_c; // TODO
 class Furniture_c;
 
-class Interior_c : public ListItem_c {
+class Interior_c : public ListItem_c<Interior_c> {
 public:
     int32             m_interiorId;         // 0x8
     int32             m_pGroup;             // 0xC
@@ -24,7 +24,7 @@ public:
     tEffectFurniture* m_furnitureEffect;    // 0x14
     RwMatrix          m_matrix;             // 0x18
     int32             field_58;             // 0x58
-    List_c            m_list;               // 0x5C
+    TList_c<void>     m_list;               // 0x5C - TODO: Figure out type
     char              field_68[900];        // 0x68
     int16             field_3EC;            // 0x3EC
     int16             field_3EE;            // 0x3EE
@@ -87,7 +87,7 @@ public:
     int8 GetBoundingBox(FurnitureEntity_c* entity, CVector* a3);
     void ResetTiles();
     CObject* PlaceObject(uint8 isStealable, Furniture_c* furniture, float offsetX, float offsetY, float offsetZ, float rotationZ);
-    ListItem_c* GetFurnitureEntity(CEntity*);
+    FurnitureEntity_c* GetFurnitureEntity(CEntity*);
     bool IsPtInside(CVector* a2, float a3, float a4, float a5);
     void CalcMatrix(CVector* translation);
     void Furnish();
