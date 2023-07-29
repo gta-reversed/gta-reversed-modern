@@ -6,7 +6,6 @@
 
 #include "Vector.h"
 #include "NodeAddress.h"
-#include "tEffectFurniture.h"
 #include "InteriorInfo_t.h"
 #include "List_c.h"
 #include "ListItem_c.h"
