@@ -29,8 +29,8 @@ public:
     static auto ShouldLoadGangAnims() -> bool;
     static auto DoGangAbuseSpeech(CPed* talker, CPed* sayTo) -> void;
 
-    CPed* TryToPassObject(CPed* ped, CPedGroup* group);
-    void  UnrefAnimBlock(); // NOTSA
+    static CPed* TryToPassObject(CPed* ped, CPedGroup* group);
+    void         UnrefAnimBlock(); // NOTSA
 
     CTask*    Clone() override { return new CTaskComplexGangLeader{ *this }; }
     eTaskType GetTaskType() override { return Type; }

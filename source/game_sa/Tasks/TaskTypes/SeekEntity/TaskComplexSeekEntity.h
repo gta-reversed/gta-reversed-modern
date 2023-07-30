@@ -21,21 +21,21 @@
 
 template <std::derived_from<CEntitySeekPosCalculator> T_PosCalc>
 class NOTSA_EXPORT_VTABLE CTaskComplexSeekEntity : public CTaskComplex {
-    CEntity* m_entityToSeek{};
-    int32 m_seekInterval{};
-    int32 m_scanInterval{};
-    float m_maxEntityDist2D{};
-    float m_moveStateRadius{};
-    float m_minEntityDist2D{};
-    float m_unk2{}; // TODO: Used as the value for `CTaskComplexFollowNodeRoute::m_fUnkn2`
+    CEntity*   m_entityToSeek{};
+    int32      m_seekInterval{};
+    int32      m_scanInterval{};
+    float      m_maxEntityDist2D{};
+    float      m_moveStateRadius{};
+    float      m_minEntityDist2D{};
+    float      m_followNodeThresholdHeightChange{};
     CTaskTimer m_seekTimer{};
     CTaskTimer m_scanTimer{};
-    T_PosCalc m_entitySeekPosCalculator{};
+    T_PosCalc  m_entitySeekPosCalculator{};
     eMoveState m_moveState{ PEDMOVE_RUN };
-    bool m_flag0x1 : 1{};
-    bool m_faceSeekEntityAfterReachingIt : 1{};
-    bool m_hasReachedSeekEntity : 1{}; /// True when the distance between the `GetSeekPos()` and the `ped` is less than `m_maxEntityDist2D`
-    bool m_flag0x8 : 1{};
+    bool       m_playTiredAnim : 1{};
+    bool       m_faceSeekEntityAfterReachingIt : 1{};
+    bool       m_hasReachedSeekEntity : 1{}; /// True when the distance between the `GetSeekPos()` and the `ped` is less than `m_maxEntityDist2D`
+    
 public:
     /*!
     * NOTE: Since this task is templated but uses the same task type for all templated tasks
@@ -46,25 +46,27 @@ public:
     //static constexpr auto Type = eTaskType::TASK_COMPLEX_SEEK_ENTITY;
 
     CTaskComplexSeekEntity(
-        CEntity*  entity,
-        int32     scanInterval,
-        int32     seekInterval,
-        float     maxEntityDist2D,
-        float     moveStateRadius,
-        float     unk2,
-        bool      flag0,
-        bool      faceSeekEntityAfterReachingIt,
-        T_PosCalc seekPosCalculator = {} // NOTSA
+        CEntity*   entity,
+        int32      scanInterval,
+        int32      seekInterval,
+        float      maxEntityDist2D,
+        float      moveStateRadius,
+        float      unk2,
+        bool       flag0,
+        bool       faceSeekEntityAfterReachingIt,
+        T_PosCalc  seekPosCalculator = {}, 
+        eMoveState moveState = PEDMOVE_RUN
     ) :
         m_entityToSeek{ entity },
         m_seekInterval{ seekInterval },
         m_scanInterval{ scanInterval },
         m_maxEntityDist2D{ maxEntityDist2D },
         m_moveStateRadius{ moveStateRadius },
-        m_unk2{ unk2 },
-        m_flag0x1{ flag0 },
+        m_followNodeThresholdHeightChange{ unk2 },
+        m_playTiredAnim{ flag0 },
         m_faceSeekEntityAfterReachingIt{ faceSeekEntityAfterReachingIt },
-        m_entitySeekPosCalculator{ seekPosCalculator }
+        m_entitySeekPosCalculator{ seekPosCalculator },
+        m_moveState{ moveState }
     {
         CEntity::SafeRegisterRef(m_entityToSeek);
     }
@@ -75,11 +77,11 @@ public:
         m_scanInterval{ o.m_scanInterval },
         m_maxEntityDist2D{ o.m_maxEntityDist2D },
         m_moveStateRadius{ o.m_moveStateRadius },
-        m_unk2{ o.m_unk2 },
+        m_followNodeThresholdHeightChange{ o.m_followNodeThresholdHeightChange },
         m_entitySeekPosCalculator{ o.m_entitySeekPosCalculator },
         m_minEntityDist2D{ o.m_minEntityDist2D },
         m_moveState{ o.m_moveState },
-        m_flag0x1{ o.m_flag0x1 },
+        m_playTiredAnim{ o.m_playTiredAnim },
         m_faceSeekEntityAfterReachingIt{ true },
         m_hasReachedSeekEntity{ o.m_hasReachedSeekEntity }
     {
@@ -102,7 +104,7 @@ public:
                 GetSeekPos(ped),
                 m_maxEntityDist2D,
                 m_moveStateRadius,
-                m_unk2,
+                m_followNodeThresholdHeightChange,
                 false,
                 -1,
                 true
@@ -282,7 +284,7 @@ public:
                     return m_pSubTask;
                 }
 
-                if (!m_flag0x1) {
+                if (!m_playTiredAnim) {
                     return nullptr;
                 }
 
@@ -301,7 +303,7 @@ public:
 
             if (subTaskType == TASK_COMPLEX_FOLLOW_NODE_ROUTE) {
                 if (m_minEntityDist2D == 0.f || pedToSeekPosDist2dSq >= sq(m_minEntityDist2D - 1.f)) {
-                    static_cast<CTaskComplexFollowNodeRoute*>(m_pSubTask)->SetTarget(ped, seekPos, m_maxEntityDist2D, m_moveStateRadius, m_unk2, false);
+                    static_cast<CTaskComplexFollowNodeRoute*>(m_pSubTask)->SetTarget(ped, seekPos, m_maxEntityDist2D, m_moveStateRadius, m_followNodeThresholdHeightChange, false);
                 } else if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
                     return CreateSubTask(TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL, ped);
                 }
@@ -353,6 +355,9 @@ public:
             ped
         );
     }
+
+    auto& GetSeekPosCalculator() { return m_entitySeekPosCalculator; }
+    void SetMinEntityDist2D(float dist) { m_minEntityDist2D = dist; }
 
 protected: // Wrappers for hooks
     // 0x493730

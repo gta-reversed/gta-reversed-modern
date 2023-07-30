@@ -5,35 +5,37 @@
 
 class CPedGroup;
 
-class CTaskComplexGangFollower : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexGangFollower : public CTaskComplex {
 public:
-    CPedGroup* m_PedGroup;
-    CPed*      m_Ped;
-    CVector    m_PedPosn;
-    CVector    dword20;
-    CVector    dword2C;
-    float      dword38;
-    uint8      byte3C;
-    uint8      m_Flags;
-    int32      dword40;
-    int32      dword44;
-    uint8      byte48;
-    uint8      byte49;
+    CPedGroup* m_grp{};
+    CPed*      m_leader{};
+    CVector    m_leaderInitialPos{};
+    CVector    m_offsetPos{};
+    CVector    m_initialOffsetPos{};
+    float      m_targetRadius{};
+    uint8      m_grpMemshitIdx{};
+    bool       m_animsReferenced : 1{false};
+    bool       m_leaveGroup : 1{false};
+    bool       m_followLeader : 1{true};
+    bool       m_inPlayersGroup : 1{m_leader == FindPlayerPed()};
+    bool       m_usingStandingStillOffsets : 1{true};
+    CTaskTimer m_exhaleTimer{};
 
 public:
     static constexpr auto Type = eTaskType::TASK_COMPLEX_GANG_FOLLOWER;
 
     CTaskComplexGangFollower(CPedGroup* pedGroup, CPed* ped, uint8 a4, CVector pos, float a6);
+    CTaskComplexGangFollower(const CTaskComplexGangFollower&);
     ~CTaskComplexGangFollower() override;
 
-    eTaskType GetTaskType()  override{ return Type; }
-    CTask* Clone() override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
-    CTask* CreateNextSubTask(CPed* ped) override;
-    CTask* CreateFirstSubTask(CPed* ped) override;
-    CTask* ControlSubTask(CPed* ped) override;
+    CTask*    Clone() override { return new CTaskComplexGangFollower{ *this }; }
+    eTaskType GetTaskType() override { return Type; }
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
+    CTask*    CreateNextSubTask(CPed* ped) override;
+    CTask*    CreateFirstSubTask(CPed* ped) override;
+    CTask*    ControlSubTask(CPed* ped) override;
 
-    void CalculateOffsetPosition(CVector& pos);
+    CVector   CalculateOffsetPosition();
 
 private:
     friend void InjectHooksMain();
