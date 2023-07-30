@@ -91,6 +91,8 @@ void CCheckpoints::DeleteCP(uint32 id, uint16 type) {
 
 // 0x726060
 void CCheckpoints::Render() {
+    ZoneScoped;
+
     for (auto& checkpoint : m_aCheckPtArray) {
         if (checkpoint.m_bIsUsed) {
             checkpoint.Render();

@@ -1,5 +1,6 @@
 #pragma once
 
+// NOTE: Ideally we'd use imconfig.h, but it's too finnicky
 #define IM_VEC2_CLASS_EXTRA \
     operator CVector2D() const { return {x, y}; } \
     ImVec2(const CVector2D& v) : x{v.x}, y{v.y} {} \

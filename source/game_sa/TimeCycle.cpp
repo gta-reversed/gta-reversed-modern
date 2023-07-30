@@ -185,6 +185,8 @@ void CTimeCycle::Shutdown() {
 
 // 0x561760
 void CTimeCycle::Update() {
+    ZoneScoped;
+
     CalcColoursForPoint(TheCamera.GetPosition(), &m_CurrentColours);
 }
 

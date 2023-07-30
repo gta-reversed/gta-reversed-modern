@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include "app/app_debug.h"
+
 #define PLUGIN_API
 
 #define VALIDATE_SIZE(struc, size) static_assert(sizeof(struc) == size, "Invalid structure size of " #struc)
@@ -63,7 +65,10 @@ template<typename... Ts>
 [[noreturn]] static void unreachable(std::string_view method, std::string_view file, unsigned line, std::string_view fmt = "", Ts&&... fmtArgs) {
     const auto userDetails = std::vformat(fmt, std::make_format_args(std::forward<Ts>(fmtArgs)...));
     const auto mbMsg = std::format("File: {}\nIn: {}:{}\n\nDetails:\n{}", fs::relative(file, SOURCE_PATH).string(), method, line, userDetails.empty() ? "<None provided>" : userDetails.c_str());
-        
+
+    spdlog::error(mbMsg);
+    spdlog::dump_backtrace();
+
     const auto result = MessageBox(
         NULL,
         mbMsg.c_str(),
@@ -130,9 +135,15 @@ template<typename... Ts>
 * @tparam T    The type of the variable
 * @param Addr  The address of it
 */
+template<typename T>
+T& StaticRef(uintptr addr) {
+    return *reinterpret_cast<T*>(addr);
+}
+
+// TODO: Replace this with the one above
 template<typename T, uintptr Addr>
 T& StaticRef() {
-    return *reinterpret_cast<T*>(Addr);
+    return StaticRef<T>(Addr);
 }
 
 #define _IGNORED_

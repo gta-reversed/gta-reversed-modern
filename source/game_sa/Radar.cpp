@@ -115,7 +115,7 @@ void CRadar::InjectHooks() {
     RH_ScopedInstall(ChangeBlipColour, 0x583AB0);
     RH_ScopedOverloadedInstall(ClearActualBlip, "OG", 0x587C10, void (*)(int32));
     RH_ScopedInstall(ClearBlip, 0x587CE0);
-    RH_ScopedInstall(ClearBlipForEntity, 0x587C60);
+    RH_ScopedOverloadedInstall(ClearBlipForEntity, "OG", 0x587C60, void(*)(eBlipType, int32));
     RH_ScopedInstall(RequestMapSection, 0x584B50);
     RH_ScopedInstall(RemoveMapSection, 0x584BB0);
     RH_ScopedInstall(RemoveRadarSections, 0x584BF0);
@@ -1731,6 +1731,10 @@ void CRadar::ClearBlipForEntity(eBlipType blipType, int32 entityHandle) {
             ClearActualBlip(trace);
         }
     }
+}
+
+void CRadar::ClearBlipForEntity(CPed* ped) {
+    ClearBlipForEntity(BLIP_CHAR, GetPedPool()->GetIndex(ped));
 }
 
 /*

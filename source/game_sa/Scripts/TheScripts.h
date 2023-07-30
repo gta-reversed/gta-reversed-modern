@@ -124,51 +124,28 @@ struct tScriptSequence {
 VALIDATE_SIZE(tScriptSequence, 0x4);
 
 struct tScriptText {
-    float     m_fLetterWidth;
-    float     m_fLetterHeight;
-    CRGBA     m_Color;
-    bool      m_bJustify;
-    bool      m_bCentered;
-    bool      m_bWithBackground;
-    bool      m_bUnk;
-    float     m_fLineHeight;
-    float     m_fLineWidth;
-    CRGBA     m_BackgroundBoxColor;
-    bool      m_bProportional;
-    CRGBA     m_BackgroundColor;
-    int8      m_nShadowType;
-    int8      m_nOutlineType;
-    bool      m_bDrawBeforeFade;
-    bool      m_bRightJustify;
-    int32     m_nFont;
-    CVector2D m_Pos;
-    char      m_szGxtEntry[8];
-    int32     param1;
-    int32     param2;
-
-    tScriptText() { // 0x4690A8
-        m_fLetterWidth       = 0.48f;
-        m_fLetterHeight      = 1.12f;
-        m_Color              = CRGBA(225, 225, 225, 255);
-        m_fLineHeight        = SCREEN_WIDTH;
-        m_fLineWidth         = SCREEN_WIDTH;
-        m_bJustify           = false;
-        m_bRightJustify      = false;
-        m_bCentered          = false;
-        m_bWithBackground    = false;
-        m_bUnk               = false;
-        m_BackgroundBoxColor = CRGBA(128, 128, 128, 128);
-        m_bProportional      = true;
-        m_BackgroundColor    = CRGBA(0, 0, 0, 255);
-        m_nShadowType        = 2;
-        m_nOutlineType       = 0;
-        m_bDrawBeforeFade    = false;
-        m_nFont              = 1;
-        m_Pos                = CVector2D();
-        param1               = -1;
-        param2               = -1;
-        memset(&m_szGxtEntry, 0, sizeof(m_szGxtEntry));
-    }
+    // values from 0x4690A8
+    float     m_fLetterWidth{ 0.48f };
+    float     m_fLetterHeight{ 1.12f };
+    CRGBA     m_Color{ 225, 225, 225, 255 };
+    bool      m_bJustify{ false };
+    bool      m_bCentered{ false };
+    bool      m_bWithBackground{ false };
+    bool      m_bUnk{ false };
+    float     m_fLineHeight{ SCREEN_HEIGHT };
+    float     m_fLineWidth{ SCREEN_WIDTH };
+    CRGBA     m_BackgroundBoxColor{ 128, 128, 128, 128 };
+    bool      m_bProportional{ true };
+    CRGBA     m_BackgroundColor{ 0, 0, 0, 255 };
+    int8      m_nShadowType{ 2 };
+    int8      m_nOutlineType{ 0 };
+    bool      m_bDrawBeforeFade{ false };
+    bool      m_bRightJustify{ false };
+    int32     m_nFont{ 1 };
+    CVector2D m_Pos{};
+    char      m_szGxtEntry[8]{};
+    int32     param1{ -1 };
+    int32     param2{ -1 };
 };
 VALIDATE_SIZE(tScriptText, 0x44);
 

@@ -184,8 +184,15 @@ bool CdStreamRead(int32 streamId, void* lpBuffer, uint32 offsetAndHandle, int32 
 
 // 0x406560
 [[noreturn]] void WINAPI CdStreamThread(LPVOID lpParam) {
+#ifdef TRACY_ENABLE
+    tracy::SetThreadName("CdStreamThread");
+#endif
+
     while (true) {
         WaitForSingleObject(gStreamSemaphore, INFINITE);
+
+        ZoneScoped;
+
         const int32 streamId = GetFirstInQueue(&gStreamQueue);
         CdStream& stream = gCdStreams[streamId];
         stream.bInUse = true;
@@ -214,6 +221,7 @@ bool CdStreamRead(int32 streamId, void* lpBuffer, uint32 offsetAndHandle, int32 
                     stream.status = eCdStreamStatus::READING_FAILURE;
             }
         }
+
         RemoveFirstInQueue(&gStreamQueue);
 #ifdef APPLY_CD_STREAM_DEADLOCK_FIX
         CLockGuard lockGuard(cdStreamThreadSync);
