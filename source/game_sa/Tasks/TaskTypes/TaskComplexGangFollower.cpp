@@ -98,7 +98,7 @@ CTask* CTaskComplexGangFollower::CreateNextSubTask(CPed* ped) {
     const auto sttype = m_pSubTask->GetTaskType();
 
     if (m_leaveGroup && sttype == TASK_COMPLEX_SIGNAL_AT_PED) {
-        m_grp->GetMembership().RemoveMember(*ped);
+        m_grp->GetMembership().RemoveMember(ped);
         ped->GetTaskManager().SetTask(new CTaskComplexWanderGang{
             PEDMOVE_WALK,
             CGeneral::RandomNodeHeading(),
