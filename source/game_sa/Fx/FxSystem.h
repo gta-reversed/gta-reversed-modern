@@ -28,7 +28,7 @@ enum class eFxSystemPlayStatus {
 class FxSystemBP_c;
 class Particle_c;
 
-class FxSystem_c : public ListItem_c {
+class FxSystem_c : public ListItem_c<FxSystem_c> {
 public:
     // ListItem_c m_link;
     void *m_pBlueprint;

@@ -41,7 +41,7 @@ static void DeleteTaskAndNull(CTask*& task) {
 }
 
 /// Find the first task (or subtask) that is of the required type
-static CTask* FindFirstTaskOfType(CTask* task, eTaskType type) {
+inline CTask* FindFirstTaskOfType(CTask* task, eTaskType type) {
     for (; task; task = task->GetSubTask()) {
         if (task->GetTaskType() == type) {
             return task;
@@ -63,7 +63,7 @@ CTaskManager::~CTaskManager() {
 
 // 0x681720
 CTask* CTaskManager::GetActiveTask() {
-    for (auto& task : m_aPrimaryTasks) {
+    for (const auto task : m_aPrimaryTasks) {
         if (task) {
             return task;
         }
@@ -73,19 +73,19 @@ CTask* CTaskManager::GetActiveTask() {
 
 // 0x681740
 CTask* CTaskManager::FindActiveTaskByType(eTaskType taskType) {
-    // First try current active task, and its sub-tasks
+    // First try current active task and it's sub-tasks
     if (const auto task = FindFirstTaskOfType(GetActiveTask(), taskType)) {
         return task;
     }
 
-    // Now try secondarie's sub tasks
+    // The same as above, but for all secondary tasks
     for (const auto sec : m_aSecondaryTasks) {
-        // NOTE: Original code doesn't break first match, but that's by a bug, not intentional.
         if (const auto task = FindFirstTaskOfType(sec, taskType)) {
             return task;
         }
     }
 
+    // Not found
     return nullptr;
 }
 
@@ -184,7 +184,7 @@ void CTaskManager::AddSubTasks(CTask* toTask) {
         if (const auto sub = ctask->CreateFirstSubTask(m_pPed)) {
             ctask->SetSubTask(sub);
             task = sub; // Go on creating the subtask of the created task
-        } else { // No sub task, so we can stop here
+        } else { // No sub task created, so we can stop here
             if (ctask->m_pParentTask) {
                 SetNextSubTask(ctask->m_pParentTask->AsComplex()); // We're a subtask of the parent (if any), thus parent must be complex
             }
@@ -205,6 +205,15 @@ void CTaskManager::ParentsControlChildren(CTask* parent) {
             subTask->MakeAbortable(m_pPed, ABORT_PRIORITY_URGENT, nullptr);
             ctask->SetSubTask(newSubTask);
             AddSubTasks(newSubTask);
+            break;
+        }
+    }
+}
+
+void CTaskManager::AbortFirstPrimaryTaskIn(std::initializer_list<ePrimaryTasks> slots, CPed* ped, eAbortPriority priority, const CEvent* event) {
+    for (const auto slot : slots) {
+        if (const auto task = GetTaskPrimary(slot)) {
+            task->MakeAbortable(ped, priority, event);
             break;
         }
     }

@@ -67,13 +67,13 @@ bool CSprite::CalcScreenCoors(const RwV3d& posn, RwV3d* out, float* w, float* h,
     if (out->z >= CDraw::GetFarClipZ() && checkMaxVisible)
         return false;
 
-    const float recip = 1.0f / out->z;
+    const float rd = 1.0f / out->z; // reciprocal of depth
 
-    out->x = SCREEN_WIDTH * recip * out->x;
-    out->y = SCREEN_HEIGHT * recip * out->y;
+    out->x = SCREEN_WIDTH * rd * out->x;
+    out->y = SCREEN_HEIGHT * rd * out->y;
 
-    *w = SCREEN_WIDTH  * recip / CDraw::GetFOV() * 70.0f;
-    *h = SCREEN_HEIGHT * recip / CDraw::GetFOV() * 70.0f;
+    *w = SCREEN_WIDTH  * rd / CDraw::GetFOV() * 70.0f;
+    *h = SCREEN_HEIGHT * rd / CDraw::GetFOV() * 70.0f;
 
     return true;
 }
@@ -110,8 +110,8 @@ void CSprite::Set4Vertices2D(RwD3D9Vertex*, float, float, float, float, float, f
 /* --- XLU Sprite --- */
 
 // 0x70D000
-void CSprite::RenderOneXLUSprite(float x, float y, float z, float halfWidth, float halfHeight, uint8 r, uint8 g, uint8 b, int16 a, float rhw, uint8 intensity, uint8 udir, uint8 vdir) {
-    plugin::Call<0x70D000, float, float, float, float, float, uint8, uint8, uint8, int16, float, uint8, uint8, uint8>(x, y, z, halfWidth, halfHeight, r, g, b, a, rhw, intensity, udir, vdir);
+void CSprite::RenderOneXLUSprite(CVector pos, CVector2D halfSize, uint8 r, uint8 g, uint8 b, int16 intensity, float rhw, uint8 a, uint8 udir, uint8 vdir) {
+    plugin::Call<0x70D000>(pos, halfSize, r, g, b, intensity, rhw, a, udir, vdir);
 }
 
 // 0x70D320
@@ -120,8 +120,8 @@ void CSprite::RenderOneXLUSprite_Triangle(float, float, float, float, float, flo
 }
 
 // 0x70D490
-void CSprite::RenderOneXLUSprite_Rotate_Aspect(float, float, float, float, float, uint8, uint8, uint8, int16, float, float, uint8) {
-    assert(false);
+void CSprite::RenderOneXLUSprite_Rotate_Aspect(CVector pos, CVector2D size, uint8 r, uint8 g, uint8 b, int16 intensity, float rz, float rotation, uint8 alpha) {
+    plugin::Call<0x70D490>(pos, size, r, g, b, intensity, rz, rotation, alpha);
 }
 
 // Android
@@ -148,8 +148,8 @@ void CSprite::RenderOneXLUSprite2D_Rotate_Dimension(float, float, float, float, 
 /* --- Buffered XLU Sprite --- */
 
 // 0x70E4A0
-void CSprite::RenderBufferedOneXLUSprite(float x, float y, float z, float w, float h, uint8 r, uint8 g, uint8 b, int16 intensity, float recipNearZ, uint8 a11) {
-    plugin::Call<0x70E4A0, float, float, float, float, float, uint8, uint8, uint8, int16, float, uint8>(x, y, z, w, h, r, g, b, intensity, recipNearZ, a11);
+void CSprite::RenderBufferedOneXLUSprite(CVector pos, CVector2D size, uint8 r, uint8 g, uint8 b, int16 intensity, float recipNearZ, uint8 a11) {
+    plugin::Call<0x70E4A0>(pos, size, r, g, b, intensity, recipNearZ, a11);
 }
 
 // 0x70E780
@@ -157,9 +157,8 @@ void CSprite::RenderBufferedOneXLUSprite_Rotate_Aspect(float x, float y, float z
     plugin::Call<0x70E780, float, float, float, float, float, uint8, uint8, uint8, int16, float, float, uint8>(x, y, z, w, h, r, g, b, intensity, recipNearZ, angle, a12);
 }
 
-// 0x70EAB0
-void CSprite::RenderBufferedOneXLUSprite_Rotate_Dimension(float, float, float, float, float, uint8, uint8, uint8, int16, float, float, uint8) {
-    assert(false);
+void CSprite::RenderBufferedOneXLUSprite_Rotate_Dimension(CVector pos, CVector2D size, uint8 r, uint8 g, uint8 b, int16 intensity, float rz, float rotation, uint8 a) {
+    plugin::Call<0x70EAB0>(pos, size, r, g, b, intensity, rz, rotation, a);
 }
 
 // 0x70EDE0
@@ -168,8 +167,8 @@ void CSprite::RenderBufferedOneXLUSprite_Rotate_2Colours(float, float, float, fl
 }
 
 // 0x70F440
-void CSprite::RenderBufferedOneXLUSprite2D(float, float, float, float, const RwRGBA&, int16, uint8) {
-    assert(false);
+void CSprite::RenderBufferedOneXLUSprite2D(CVector2D pos, CVector2D size, const RwRGBA& color, int16 intensity, uint8 alpha) {
+    plugin::Call<0x70F440>(pos, size, &color, intensity, alpha);
 }
 
 // unused
