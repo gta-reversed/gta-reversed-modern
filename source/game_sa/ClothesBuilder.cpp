@@ -325,7 +325,7 @@ RwTexture* CClothesBuilder::CopyTexture(RwTexture* srcTex) {
         RwRasterGetWidth(srcRaster),
         RwRasterGetHeight(srcRaster),
         RwRasterGetDepth(srcRaster),
-        RwRasterGetFormat(srcRaster) | 4 // TODO
+        (RwRasterGetFormat(srcRaster) & rwRASTERFORMATPIXELFORMATMASK) | 4 // TODO
     );
     
     // Copy data from the src raster to this one
