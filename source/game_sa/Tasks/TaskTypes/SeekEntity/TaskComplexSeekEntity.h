@@ -51,8 +51,8 @@ public:
         int32      seekInterval,
         float      maxEntityDist2D,
         float      moveStateRadius,
-        float      unk2,
-        bool       flag0,
+        float      followNodeThresholdHeightChange,
+        bool       playTiredAnim,
         bool       faceSeekEntityAfterReachingIt,
         T_PosCalc  seekPosCalculator = {}, 
         eMoveState moveState = PEDMOVE_RUN
@@ -62,8 +62,8 @@ public:
         m_scanInterval{ scanInterval },
         m_maxEntityDist2D{ maxEntityDist2D },
         m_moveStateRadius{ moveStateRadius },
-        m_followNodeThresholdHeightChange{ unk2 },
-        m_playTiredAnim{ flag0 },
+        m_followNodeThresholdHeightChange{ followNodeThresholdHeightChange },
+        m_playTiredAnim{ playTiredAnim },
         m_faceSeekEntityAfterReachingIt{ faceSeekEntityAfterReachingIt },
         m_entitySeekPosCalculator{ seekPosCalculator },
         m_moveState{ moveState }
