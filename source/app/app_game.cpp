@@ -364,7 +364,6 @@ void Idle(void* param) {
     }
 
     RenderMenus();
-    notsa::ui::UIRenderer::GetSingleton().DrawLoop(); // NOTSA: ImGui menu draw loop
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
     DoFade();
     CHud::DrawAfterFade();

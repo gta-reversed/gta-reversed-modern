@@ -122,6 +122,7 @@
 #include "Pickup.h"
 #include "Pickups.h"
 #include "PedIK.h"
+#include "HandShaker.h"
 
 // Plant
 #include "PlantMgr.h"
@@ -411,12 +412,15 @@ void InjectHooksMain() {
     HookInstall(0x541DD0, CPad::UpdatePads); // [ImGui] Changes logic of the function and shouldn't be toggled on/off
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
 
+    CHandShaker::InjectHooks();
     CCutsceneMgr::InjectHooks();
     CFileMgr::InjectHooks();
     CPedGroupPlacer::InjectHooks();
     CLoadedCarGroup::InjectHooks();
     RenderBuffer::InjectHooks();
     CStaticShadow::InjectHooks();
+    CPedGroup::InjectHooks();
+    CPedGroupMembership::InjectHooks();
     CRealTimeShadowManager::InjectHooks();
     CRealTimeShadow::InjectHooks();
     CPopCycle::InjectHooks();
@@ -501,7 +505,6 @@ void InjectHooksMain() {
     CPtrListDoubleLink::InjectHooks();
     CPtrNodeSingleLink::InjectHooks();
     CPtrListSingleLink::InjectHooks();
-    List_c::InjectHooks();
     CReferences::InjectHooks();
     CPopulation::InjectHooks();
     CModelInfo::InjectHooks();

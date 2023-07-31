@@ -8,7 +8,7 @@
 #include <rwplcore.h>
 #include <rtquat.h>
 
-class BoneNode_c : public ListItem_c {
+class BoneNode_c : public ListItem_c<BoneNode_c> {
 public:
     ePedBones                m_BoneTag;
     RpHAnimBlendInterpFrame* m_InterpFrame;

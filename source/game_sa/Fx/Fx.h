@@ -24,7 +24,7 @@ enum eSparkType : uint8 {
 };
 
 // original name unknown
-struct FxEntitySystem : public ListItem_c {
+struct FxEntitySystem : public ListItem_c<FxEntitySystem> {
     FxSystem_c* m_System;
     CEntity*    m_Entity;
 };

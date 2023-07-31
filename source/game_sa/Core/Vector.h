@@ -246,6 +246,14 @@ inline CVector Lerp(const CVector& vecOne, const CVector& vecTwo, float fProgres
     return vecOne * (1.0F - fProgress) + vecTwo * fProgress;
 }
 
+//! Component-wise clamp of values
+inline CVector Clamp(CVector val, CVector min, CVector max) {
+    for (auto i = 0; i < 3; i++) {
+        val[i] = std::clamp(val[i], min[i], max[i]);
+    }
+    return val;
+}
+
 inline CVector Pow(const CVector& vec, float fPow) {
     return { pow(vec.x, fPow), pow(vec.y, fPow), pow(vec.z, fPow) };
 }
