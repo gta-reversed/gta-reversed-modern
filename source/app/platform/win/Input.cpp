@@ -131,7 +131,8 @@ void diPadSetPIDVID(LPDIRECTINPUTDEVICE8 dev, DWORD padNum) {
     WIN_FCHECK(dev->GetProperty(DIPROP_VIDPID, &vidpid.diph));
     auto& cfg = PadConfigs[padNum];
     cfg.vendorId = LOWORD(vidpid.dwData);
-    cfg.vendorId = HIWORD(vidpid.dwData);
+    cfg.productId = HIWORD(vidpid.dwData);
+    cfg.present = true;
 }
 
 // 0x7485C0

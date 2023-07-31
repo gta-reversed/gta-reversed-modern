@@ -98,7 +98,7 @@ ProcObjectListItem* ProcObjectMan_c::GetEntityFromPool() {
 }
 
 // 0x5A3130
-void ProcObjectMan_c::ReturnEntityToPool(ListItem_c* item) { // todo: EntityItem_c
+void ProcObjectMan_c::ReturnEntityToPool(ProcObjectListItem* item) {
     m_ObjectsList.AddItem(item);
 }
 

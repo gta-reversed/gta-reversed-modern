@@ -119,7 +119,7 @@ struct NotIsNull {
     }
 };
 
-// Find first non-null value in range. If found it's returned, `null` otherwise.
+//! Find first non-null value in range. If found it's returned, `null` otherwise.
 template<rng::input_range R, typename T_Ret = rng::range_value_t<R>>
     requires(std::is_pointer_v<T_Ret>)
 T_Ret FirstNonNull(R&& range) {

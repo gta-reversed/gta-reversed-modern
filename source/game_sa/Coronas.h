@@ -10,11 +10,8 @@
 
 class CCoronas {
 public:
-    // sun 2d position
-    static float& SunScreenX;
-    static float& SunScreenY;
     // are there any obstacles between sun and camera
-    static bool& SunBlockedByClouds;
+    static inline auto& SunBlockedByClouds = StaticRef<bool, 0xC3E030>();
     // change coronas brightness immediately
     static bool& bChangeBrightnessImmediately;
     // num of registered coronas in frame
@@ -29,15 +26,36 @@ public:
 
     static uint16 (&ms_aEntityLightsOffsets)[8];
 
+    inline static struct { // NOTSA
+        bool DisableWetRoadReflections;
+        bool AlwaysRenderWetRoadReflections; // Ignored if if `DisableReflections == false`
+    } s_DebugSettings{};
+
 public:
     static void InjectHooks();
 
     static void Init();
     static void Shutdown();
     static void Update();
+
+    /*!
+    * @addr 0x6FAEC0
+    * Renders the registered coronas
+    */
     static void Render();
+
+    /*!
+    * @addr 0x6FB630
+    * Renders registered coronas reflections on a wet roads ground
+    */
     static void RenderReflections();
+
+    /*!
+    * @addr 0x6FBAA0
+    * Renders sun's reflection on the water [sea]
+    */
     static void RenderSunReflection();
+
     static void RegisterCorona(uint32 id, CEntity* attachTo, uint8 red, uint8 green, uint8 blue, uint8 alpha, const CVector& posn,
                                float radius, float farClip, RwTexture* texture, eCoronaFlareType flareType, bool enableReflection, bool checkObstacles, int32 _param_not_used,
                                float angle, bool longDistance, float nearClip, uint8 fadeState, float fadeSpeed, bool onlyFromBelow, bool reflectionDelay);
