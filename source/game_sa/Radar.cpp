@@ -1643,17 +1643,17 @@ void CRadar::DrawCoordBlip(int32 blipIndex, bool isSprite) {
     }
 
     const auto GetHeight = [&] {
-        const auto zDiff = trace.GetWorldPos().z - FindPlayerCentreOfWorld_NoInteriorShift().z;
+        const auto zDiff = trace.GetWorldPos().z - FindPlayerCentreOfWorld_NoInteriorShift(PED_TYPE_PLAYER1).z;
 
-        if (zDiff < 2.0f) {
+        if (zDiff > 2.0f) {
             // trace is higher
             return RADAR_TRACE_LOW;
-        } else if (zDiff < -4.0f) {
+        } else if (zDiff >= -4.0f) {
             // player is higher
-            return RADAR_TRACE_HIGH;
+            return RADAR_TRACE_NORMAL;
         } else {
             // they are at the around the same elevation.
-            return RADAR_TRACE_NORMAL;
+            return RADAR_TRACE_HIGH;
         }
     };
 
