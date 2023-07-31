@@ -325,7 +325,7 @@ RwTexture* CClothesBuilder::CopyTexture(RwTexture* srcTex) {
         RwRasterGetWidth(srcRaster),
         RwRasterGetHeight(srcRaster),
         RwRasterGetDepth(srcRaster),
-        ((srcRaster->cFormat & 0x6F) << 8) | 4 // TODO
+        RwRasterGetFormat(srcRaster) | 4 // TODO
     );
     
     // Copy data from the src raster to this one
@@ -356,8 +356,8 @@ void CClothesBuilder::PlaceTextureOnTopOfTexture(RwTexture* dstTex, RwTexture* s
     const auto dstRaster = RwTextureGetRaster(dstTex);
     const auto srcRaster = RwTextureGetRaster(srcTex);
 
-    auto dstIt = (RwUInt32*)RwRasterLock(dstRaster, 0, rwRASTERLOCKWRITE | rwRASTERLOCKREAD);
-    auto srcIt = (RwUInt32*)RwRasterLock(srcRaster, 0, rwRASTERLOCKWRITE | rwRASTERLOCKREAD);
+    auto dstIt = (RwUInt32*)RwRasterLock(dstRaster, 0, rwRASTERLOCKREADWRITE);
+    auto srcIt = (RwUInt32*)RwRasterLock(srcRaster, 0, rwRASTERLOCKREADWRITE);
 
     // NOTE: They don't skip the stride, but it's fine [This way vectorization should be easier for the compiler]
     for (auto i = RwRasterGetHeight(dstRaster) * RwRasterGetWidth(dstRaster); i-- > 0; dstIt++, srcIt++) {
@@ -382,7 +382,7 @@ void CClothesBuilder::BlendTextures(RwTexture* dst, RwTexture* src, float r1, fl
     CTimer::Suspend();
 
     auto srcIt = RwRasterLock(srcRaster, 0, rwRASTERLOCKREAD);
-    auto dstIt = RwRasterLock(dstRaster, 0, rwRASTERLOCKREAD | rwRASTERLOCKWRITE);
+    auto dstIt = RwRasterLock(dstRaster, 0, rwRASTERLOCKREADWRITE);
 
     for (auto i = RwRasterGetHeight(dstRaster) * RwRasterGetWidth(dstRaster); i-- > 0; dstIt++, srcIt++) {
         for (auto c = 3; i-- > 0; dstIt++, srcIt++) { // Copy RGB, alpha stays the same
@@ -410,7 +410,7 @@ void CClothesBuilder::BlendTextures(RwTexture* dst, RwTexture* src1, RwTexture* 
 
     auto src1It = RwRasterLock(src1Raster, 0, rwRASTERLOCKREAD);
     auto src2It = RwRasterLock(src2Raster, 0, rwRASTERLOCKREAD);
-    auto dstIt  = RwRasterLock(dstRaster, 0, rwRASTERLOCKREAD | rwRASTERLOCKWRITE);
+    auto dstIt  = RwRasterLock(dstRaster, 0, rwRASTERLOCKREADWRITE);
 
     for (auto i = RwRasterGetHeight(dstRaster) * RwRasterGetWidth(dstRaster); i-- > 0; dstIt++, src1It++, src2It++) {
         for (auto c = 3; i-- > 0; dstIt++, src1It++, src2It++) { // Copy RGB, alpha doesn't change
@@ -441,7 +441,7 @@ void CClothesBuilder::BlendTextures(RwTexture* dst, RwTexture* src1, RwTexture* 
     auto src1It = RwRasterLock(src1Raster, 0, rwRASTERLOCKREAD);
     auto src2It = RwRasterLock(src2Raster, 0, rwRASTERLOCKREAD);
     auto tatIt  = RwRasterLock(tatRaster, 0, rwRASTERLOCKREAD);
-    auto dstIt  = RwRasterLock(dstRaster, 0, rwRASTERLOCKREAD | rwRASTERLOCKWRITE);
+    auto dstIt  = RwRasterLock(dstRaster, 0, rwRASTERLOCKREADWRITE);
 
     for (auto i = RwRasterGetHeight(dstRaster) * RwRasterGetWidth(dstRaster); i-- > 0; dstIt++, src1It++, src2It++, tatIt++) {
         const auto tatAlphaT = (float)tatIt[3] / 255.f;
