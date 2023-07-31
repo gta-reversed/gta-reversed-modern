@@ -843,9 +843,14 @@ void CRadar::ShowRadarTrace(float x, float y, uint32 size, CRGBA color) {
  * @brief Draws a coordinate blip to the map with height information.
  * @addr 0x584070
  */
-void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, CRGBA color, eRadarTraceHeight height) {
+void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint32 R, uint32 G, uint32 B, uint32 A, eRadarTraceHeight height) {
     Limit(x, y);
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
+
+    // NOTE: Those RGBA parameters are 4-bytes per channel.
+    // then we construct 1-byte per channel CRGBA. It's stupid isn't it?
+    // NOTE: {R,G,B,A} > 255 is possible, so we can't assert for x <= UCHAR_MAX.
+    const auto r = static_cast<uint8>(R), g = static_cast<uint8>(G), b = static_cast<uint8>(B), a = static_cast<uint8>(A);
 
     const auto size0 = float(size + 0), size1 = float(size + 1);
     const auto size2 = float(size + 2), size3 = float(size + 3);
@@ -857,14 +862,14 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, CRGBA color
             x,                           y + SCREEN_STRETCH_Y(size3),
             x + SCREEN_STRETCH_X(size3), y - SCREEN_STRETCH_Y(size2),
             x - SCREEN_STRETCH_X(size3), y - SCREEN_STRETCH_Y(size2),
-            { 0, 0, 0, color.a }
+            { 0, 0, 0, a }
         );
         CSprite2d::Draw2DPolygon( // draw triangle
             x,                           y + SCREEN_STRETCH_Y(size1),
             x,                           y + SCREEN_STRETCH_Y(size1),
             x + SCREEN_STRETCH_X(size1), y - SCREEN_STRETCH_Y(size1),
             x - SCREEN_STRETCH_X(size1), y - SCREEN_STRETCH_Y(size1),
-            color
+            { r, g, b, a }
         );
         break;
     case RADAR_TRACE_NORMAL:
@@ -873,7 +878,7 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, CRGBA color
                 x - SCREEN_STRETCH_X(size1), y - SCREEN_STRETCH_Y(size1),
                 x + SCREEN_STRETCH_X(size1), y + SCREEN_STRETCH_Y(size1)
             },
-            { 0, 0, 0, color.a }
+            { 0, 0, 0, a }
         );
 
         CSprite2d::DrawRect( // draw box
@@ -881,7 +886,7 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, CRGBA color
                 x - SCREEN_STRETCH_X(size0), y - SCREEN_STRETCH_Y(size0),
                 x + SCREEN_STRETCH_X(size0), y + SCREEN_STRETCH_Y(size0)
             },
-            color
+            { r, g, b, a }
         );
         break;
     case RADAR_TRACE_LOW:
@@ -890,7 +895,7 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, CRGBA color
             x - SCREEN_STRETCH_X(size3), y + SCREEN_STRETCH_Y(size2),
             x,                           y - SCREEN_STRETCH_Y(size3),
             x,                           y - SCREEN_STRETCH_Y(size3),
-            { 0, 0, 0, color.a }
+            { 0, 0, 0, a }
         );
 
         CSprite2d::Draw2DPolygon( // draw triangle
@@ -898,7 +903,7 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, CRGBA color
             x - SCREEN_STRETCH_X(size1), y + SCREEN_STRETCH_Y(size1),
             x,                           y - SCREEN_STRETCH_Y(size1),
             x,                           y - SCREEN_STRETCH_Y(size1),
-            color
+            { r, g, b, a }
         );
         break;
     }
@@ -1662,12 +1667,10 @@ void CRadar::DrawCoordBlip(int32 blipIndex, bool isSprite) {
         screenPos.x,
         screenPos.y,
         trace.m_nBlipSize,
-        {
-            color.r,
-            color.g,
-            color.b,
-            trace.m_bBlipFade ? color.a : CalculateBlipAlpha(realDist)
-        },
+        color.r,
+        color.g,
+        color.b,
+        trace.m_bBlipFade ? color.a : CalculateBlipAlpha(realDist),
         GetHeight()
     );
 
