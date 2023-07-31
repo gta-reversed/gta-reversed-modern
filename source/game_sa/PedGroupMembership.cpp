@@ -40,7 +40,9 @@ void CPedGroupMembership::AddFollower(CPed* ped) {
 
 // 0x5F6AE0
 void CPedGroupMembership::AddMember(CPed* member, int32 memIdx) {
+    assert(member);
     assert(!m_members[memIdx]);
+
     m_members[memIdx] = member;
     CEntity::RegisterReference(m_members[memIdx]);
     /* dead code before checking if the member is in the player's group */
@@ -60,8 +62,9 @@ void CPedGroupMembership::AppointNewLeader() {
         return;
     }
 
+    const auto leader = m_members[memId];
     RemoveMember(memId); // Must call as it does some cleanup
-    AddMember(m_members[memId], LEADER_MEM_ID);
+    AddMember(leader, LEADER_MEM_ID);
 }
 
 // 0x5F6A50
@@ -79,8 +82,8 @@ int32 CPedGroupMembership::CountMembersExcludingLeader() {
 
 // 0x5FB160
 void CPedGroupMembership::Flush() {
-    for (auto i = 0u; i < m_members.size(); i++) {
-        if (GetMember(i)) {
+    for (auto&& [i, mem] : notsa::enumerate(m_members)) {
+        if (mem) {
             RemoveMember(i);
         }
     }
