@@ -147,7 +147,7 @@ void CRadar::InjectHooks() {
     RH_ScopedInstall(ShowRadarTraceWithHeight, 0x584070);
     RH_ScopedInstall(DrawCoordBlip, 0x586D60);
 
-    RH_ScopedInstall(SetupAirstripBlips, 0x587D20, {.reversed = true}); // TEST
+    RH_ScopedInstall(SetupAirstripBlips, 0x587D20); // TEST
     RH_ScopedInstall(DrawBlips, 0x588050);
     // RH_ScopedInstall(ClipRadarPoly, 0x585040);
     // RH_ScopedInstall(DrawAreaOnRadar, 0x5853D0);
