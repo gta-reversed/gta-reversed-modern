@@ -289,6 +289,7 @@ void CClothesBuilder::ConstructGeometryArray(RpGeometry** out, uint32* modelName
 // inlined, see 0x5A6CE1
 // 0x5A56C0
 void CClothesBuilder::DestroySkinArrays(RwMatrixWeights* weights, RwUInt32* bones) {
+    // TODO: Should this be `delete[]` or `delete`?
     delete weights;
     delete bones;
 }
