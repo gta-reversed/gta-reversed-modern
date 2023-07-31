@@ -1649,10 +1649,10 @@ void CRadar::DrawCoordBlip(int32 blipIndex, bool isSprite) {
             // trace is higher
             return RADAR_TRACE_LOW;
         } else if (zDiff >= -4.0f) {
-            // player is higher
+            // they are at the around the same elevation.
             return RADAR_TRACE_NORMAL;
         } else {
-            // they are at the around the same elevation.
+            // player is higher
             return RADAR_TRACE_HIGH;
         }
     };
