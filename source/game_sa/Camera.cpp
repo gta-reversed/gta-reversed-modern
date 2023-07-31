@@ -1299,11 +1299,11 @@ void CCamera::AddShake(float duration, float a2, float a3, float a4, float a5) {
 }
 
 // 0x50D240
-void CCamera::AddShakeSimple(float duration, int32 type, float intensity) {
+void CCamera::AddShakeSimple(float durationMs, int32 type, float intensity) {
     m_fShakeIntensity = intensity;
     m_nShakeType = type;
     m_fStartShakeTime = static_cast<float>(CTimer::GetTimeInMS());
-    m_fEndShakeTime = m_fStartShakeTime + duration;
+    m_fEndShakeTime = m_fStartShakeTime + durationMs;
 }
 
 // 0x50D280

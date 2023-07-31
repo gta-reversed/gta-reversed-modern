@@ -7,10 +7,10 @@ void CPedGroupIntelligence::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     //RH_ScopedInstall(Constructor, 0x5F7250, { .reversed = false });
-    //RH_ScopedInstall(Destructor, 0x5F7350, { .reversed = false });
-
+    
     RH_ScopedOverloadedInstall(AddEvent, "", 0x5F7470, bool(CPedGroupIntelligence::*)(CEvent*), { .reversed = false });
     RH_ScopedInstall(SetScriptCommandTask, 0x5F8560, { .reversed = false });
+    RH_ScopedInstall(Flush, 0x5F7350, { .reversed = false });
     RH_ScopedInstall(GetTaskMain, 0x5F85A0, { .reversed = false });
     RH_ScopedInstall(ComputeDefaultTasks, 0x5F88D0, { .reversed = false });
     RH_ScopedInstall(GetTaskScriptCommand, 0x5F8690, { .reversed = false });
@@ -28,8 +28,18 @@ CPedGroupIntelligence::CPedGroupIntelligence() {
     plugin::CallMethod<0x5F7250, CPedGroupIntelligence*>(this);
 }
 
-// 0x5F7350
+CPedGroupIntelligence::CPedGroupIntelligence(CPedGroup& owner) :
+    m_pPedGroup{ &owner }
+{
+}
+
+// Unknown address (If any)
 CPedGroupIntelligence::~CPedGroupIntelligence() {
+    Flush(); // Not sure if it does this at all, but it worked so far, so let's leave it like this for now
+}
+
+// 0x5F7350
+void CPedGroupIntelligence::Flush() { // Pirulax: For some reason this is called `~CPedGroupIntelligence` in *there*...
     plugin::CallMethod<0x5F7350, CPedGroupIntelligence*>(this);
 }
 
@@ -85,6 +95,10 @@ CTask* CPedGroupIntelligence::GetTaskSecondary(CPed* ped) {
 // 0x5F8650
 eSecondaryTask CPedGroupIntelligence::GetTaskSecondarySlot(CPed* ped) {
     return plugin::CallMethodAndReturn<eSecondaryTask, 0x5F8650>(this, ped);
+}
+
+void CPedGroupIntelligence::Process() {
+    plugin::CallMethod<0x5FC4A0>(this);
 }
 
 // 0x5F88D0

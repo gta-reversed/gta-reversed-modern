@@ -1038,6 +1038,16 @@ void CPedIntelligence::operator delete(void* object) {
     GetPedIntelligencePool()->Delete(static_cast<CPedIntelligence*>(object));
 }
 
+// NOTSA
+CVehicle* CPedIntelligence::GetEnteringVehicle() {
+    for (const auto taskt : { TASK_COMPLEX_ENTER_CAR_AS_DRIVER, TASK_COMPLEX_ENTER_CAR_AS_PASSENGER }) {
+        if (const auto task = FindTaskByType(taskt)) {
+            return static_cast<CTaskComplexEnterCar*>(task)->GetVehicle();
+        }
+    }
+    return nullptr;
+}
+
 // 0x607140
 CPedIntelligence* CPedIntelligence::Constructor(CPed* ped) {
     this->CPedIntelligence::CPedIntelligence(ped);
