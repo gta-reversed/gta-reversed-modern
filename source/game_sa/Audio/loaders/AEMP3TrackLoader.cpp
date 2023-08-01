@@ -68,7 +68,8 @@ bool CAEMP3TrackLoader::LoadStreamPackTable(void) {
         fp = fopen("AUDIO\\CONFIG\\STRMPAKS.DAT", "w");
         fclose(fp);
 
-        m_paStreamPacks = (StreamPack*)CMemoryMgr::Malloc(0); // This is stupid?
+        // NOTSA: Originally (StreamPack*)CMemoryMgr::Malloc(0), return value is implementation-dependent.
+        m_paStreamPacks = nullptr;
         m_nStreamPackCount = 0;
         return false;
     }
@@ -98,7 +99,8 @@ bool CAEMP3TrackLoader::LoadTrackLookupTable(void) {
         fp = fopen("AUDIO\\CONFIG\\TRAKLKUP.DAT", "w");
         fclose(fp);
 
-        m_paTrackLookups = (tTrackLookup*)CMemoryMgr::Malloc(0); // This is stupid?
+        // NOTSA: Originally (tTrackLookup*)CMemoryMgr::Malloc(0), return value is implementation-dependent.
+        m_paTrackLookups = nullptr;
         m_nTrackCount = 0;
         return false;
     }
@@ -137,8 +139,8 @@ tTrackInfo* CAEMP3TrackLoader::GetTrackInfo(uint32 trackId) {
 
     char* path = new char[length]; // owned by to be ctor'd CAEDataStream.
     strcpy_s(path, length,
-        std::format("{}\\{}",
-            !m_bStreamingFromDVD ? "AUDIO\\STREAMS\\" : std::string{m_pszDvdDrivePath} + "AUDIO\\STREAMS\\",
+        std::format("{}AUDIO\\STREAMS\\{}",
+            !m_bStreamingFromDVD ? "" : std::string{m_pszDvdDrivePath},
             m_paStreamPacks[packId].m_szName
         ).c_str()
     );

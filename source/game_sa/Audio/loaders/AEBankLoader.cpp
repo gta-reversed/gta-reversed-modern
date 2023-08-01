@@ -64,6 +64,7 @@ bool CAEBankLoader::LoadBankSlotFile() {
 
     if (auto size = CFileMgr::GetTotalSize(file); size > 2) {
         CalculateBankSlotsInfosOffsets();
+        assert(m_nBankSlotCount > 0);
         m_nBufferSize = m_paBankSlots[m_nBankSlotCount - 1].m_nOffset + m_paBankSlots[m_nBankSlotCount - 1].m_nSize;
         m_pBuffer = (uint8*)CMemoryMgr::Malloc(m_nBufferSize);
     } else {

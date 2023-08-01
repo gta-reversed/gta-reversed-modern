@@ -64,7 +64,7 @@ void InjectCdStreamHooks() {
 
 // 0x4067B0
 int32 CdStreamOpen(const char* lpFileName) {
-    printf("CdStreamOpen: %s\n", lpFileName);
+    NOTSA_LOG_DEBUG("CdStreamOpen: {}", lpFileName);
     int32 freeHandleIndex = 0;
     for (; freeHandleIndex < MAX_CD_STREAM_HANDLES; freeHandleIndex++) {
         if (!gStreamFileHandles[freeHandleIndex])

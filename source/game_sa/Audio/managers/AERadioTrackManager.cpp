@@ -242,9 +242,9 @@ void CAERadioTrackManager::DisplayRadioStationName() {
         int station = m_nStationsListed + settings1.m_nCurrentRadioStation;
         if (station) {
             if (station >= RADIO_COUNT) {
-                station %= RADIO_COUNT;
+                station -= RADIO_COUNT - 1;
             } else if (station <= 0) {
-                station += 13;
+                station += RADIO_COUNT - 1;
             }
 
             CFont::SetFontStyle(eFontStyle::FONT_MENU);
@@ -265,8 +265,10 @@ void CAERadioTrackManager::DisplayRadioStationName() {
 
 // 0x4E9E10
 const char* CAERadioTrackManager::GetRadioStationName(eRadioID id) {
-    if (id <= 0)
+    if (id <= 0) {
+        NOTSA_UNREACHABLE();
         return nullptr;
+    }
 
     char str[8];
     GetRadioStationNameKey(id, str);
@@ -277,14 +279,14 @@ const char* CAERadioTrackManager::GetRadioStationName(eRadioID id) {
 void CAERadioTrackManager::GetRadioStationNameKey(eRadioID id, char* outStr) {
     switch (id) {
     case RADIO_OFF:
-        strcpy_s(outStr, 8u, "FEA_MON");
+        *std::format_to_n(outStr, 7u, "FEA_NON").out = '\0';
         break;
     case RADIO_USER_TRACKS:
-        strcpy_s(outStr, 8u, "FEA_MP3");
+        *std::format_to_n(outStr, 7u, "FEA_MP3").out = '\0';
         break;
     default:
         assert(0 <= id && id < RADIO_USER_TRACKS);
-        sprintf_s(outStr, 8u, "FEA_R%d", id - 1);
+        *std::format_to_n(outStr, 7u, "FEA_R{:d}", (int32)id - 1).out = '\0';
         break;
     }
 }

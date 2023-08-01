@@ -197,8 +197,8 @@ void CAEMP3BankLoader::Service() {
             const auto sectors = req.IsSingleSound() ? (req.m_nBankSize + sizeof(CdAudioStream)) / STREAMING_SECTOR_SIZE + 2 : 4;
             const auto bankOffsetInSectors = req.m_nBankOffset / STREAMING_SECTOR_SIZE;
 
-            // CHECK: req.m_pStreamOffset =?= req.m_pStreamBuffer
-            req.m_pStreamBuffer = req.m_pStreamOffset = (CdAudioStream*)CMemoryMgr::Malloc(sectors);
+            req.m_pStreamBuffer = (CdAudioStream*)CMemoryMgr::Malloc(sectors);
+            req.m_pStreamOffset = &req.m_pStreamBuffer[req.m_nBankOffset - bankOffsetInSectors * STREAMING_SECTOR_SIZE]; // == &buffer[0]?
             CdStreamRead(
                 m_iStreamingChannel,
                 req.m_pStreamBuffer,
@@ -256,8 +256,9 @@ void CAEMP3BankLoader::Service() {
                 const auto bankOffsetInSectors = req.m_nBankOffset / STREAMING_SECTOR_SIZE;
 
                 CMemoryMgr::Free(req.m_pStreamBuffer);
-                // CHECK: req.m_pStreamOffset =?= req.m_pStreamBuffer
-                req.m_pStreamBuffer = req.m_pStreamOffset = (CdAudioStream*)CMemoryMgr::Malloc(req.m_nBankOffset + 2 * STREAMING_SECTOR_SIZE);
+
+                req.m_pStreamBuffer = (CdAudioStream*)CMemoryMgr::Malloc(req.m_nBankOffset + 2 * STREAMING_SECTOR_SIZE);
+                req.m_pStreamOffset = &req.m_pStreamBuffer[req.m_nBankOffset - bankOffsetInSectors * STREAMING_SECTOR_SIZE]; // == &buffer[0]?
 
                 CdStreamRead(
                     m_iStreamingChannel,
