@@ -27,9 +27,9 @@
 #define EXTRA_DEBUG_LOGS
 
 #ifdef EXTRA_DEBUG_LOGS
-#define POP_DEV_LOG DEV_LOG
+#define POP_LOG_DEBUG DEV_LOG
 #else
-#define POP_DEV_LOG(...)
+#define POP_LOG_DEBUG(...)
 #endif
 
 float& CPopulation::PedDensityMultiplier = *(float*)0x8D2530;
@@ -167,7 +167,7 @@ void LoadGroup(const char* fileName, auto& outModelsInGroup, auto& outNumOfModel
     const auto file = CFileMgr::OpenFile(fileName, "r");
     CFileMgr::ChangeDir("\\");
 
-    POP_DEV_LOG("Loading `{}`...", fileName);
+    POP_LOG_DEBUG("Loading `{}`...", fileName);
 
     size_t currGrpIdx{}, lineno{1};
     for (;const auto l = CFileLoader::LoadLine(file); lineno++) { // Also replaces `,` with ` ` (space) (Important to know)
@@ -184,7 +184,7 @@ void LoadGroup(const char* fileName, auto& outModelsInGroup, auto& outNumOfModel
 
 #ifdef _DEBUG // See bottom of the outer loop for info
             if (currGrpIdx >= outModelsInGroup.size()) {
-                POP_DEV_LOG("Data found past-the-end! This would crash the vanilla game! [Line: {}]", lineno);
+                POP_LOG_DEBUG("Data found past-the-end! This would crash the vanilla game! [Line: {}]", lineno);
                 break;
             }
 #endif
@@ -194,7 +194,7 @@ void LoadGroup(const char* fileName, auto& outModelsInGroup, auto& outNumOfModel
             // loop is let to do one more iteration before breaking
             // to see if there are any more models to be added
             if (npeds >= outModelsInGroup[currGrpIdx].size()) {
-                POP_DEV_LOG("There are models to be added to the group, but there's no memory! [Group ID: {}; Line: {}]", currGrpIdx, lineno);
+                POP_LOG_DEBUG("There are models to be added to the group, but there's no memory! [Group ID: {}; Line: {}]", currGrpIdx, lineno);
                 break;
             }
             
@@ -212,7 +212,7 @@ void LoadGroup(const char* fileName, auto& outModelsInGroup, auto& outNumOfModel
             continue; // Blank line
         }
 
-        //POP_DEV_LOG("Loaded ({}) models into the group ({})", outNumOfModelsPerGroup[currGrpIdx], currGrpIdx);
+        //POP_LOG_DEBUG("Loaded ({}) models into the group ({})", outNumOfModelsPerGroup[currGrpIdx], currGrpIdx);
 
         // Only now set this
         outNumOfModelsPerGroup[currGrpIdx] = npeds;
@@ -1613,6 +1613,8 @@ void CPopulation::ConvertToDummyObject(CObject* object) {
 
 // 0x614720
 bool CPopulation::AddToPopulation(float arg0, float arg1, float arg2, float arg3) {
+    ZoneScoped;
+
     return ((bool(__cdecl*)(float, float, float, float))0x614720)(arg0, arg1, arg2, arg3);
 }
 
@@ -1626,6 +1628,8 @@ int32 CPopulation::GeneratePedsAtAttractors(
     int32   decisionMaker,
     int32   numPedsToCreate
 ) {
+    ZoneScoped;
+
     if (!numPedsToCreate) {
         return 0;
     }
@@ -1718,6 +1722,8 @@ int32 CPopulation::GeneratePedsAtAttractors(
 
 // 0x615C90
 void CPopulation::GeneratePedsAtStartOfGame() {
+    ZoneScoped;
+
     const auto minRadius = 10.f, maxRadius = 50.5f * PedCreationDistMultiplier();
     
     for (int32 i = 100; i --> 0;) { // "down to" operator in use
@@ -1770,26 +1776,36 @@ void CPopulation::ManageAllPopulation() {
 
 // 0x616190
 void CPopulation::ManagePopulation() {
+    ZoneScoped;
+
     // TODO: Implement original `framecounter % 32` pool splitting logic
     //       It's just a perf optimization, so I didn't bother
 
     const auto& center = FindPlayerCentreOfWorld();
-
-    for (auto& obj : GetObjectPool()->GetAllValid()) {
-        ManageObject(&obj, center);
+    {
+        ZoneScopedN("Manage Objects");
+        for (auto& obj : GetObjectPool()->GetAllValid()) {
+            ManageObject(&obj, center);
+        }
     }
-
-    for (auto& dummy : GetDummyPool()->GetAllValid()) {
-        ManageDummy(&dummy, center);
+    {
+        ZoneScopedN("Manage Dummies");
+        for (auto& dummy : GetDummyPool()->GetAllValid()) {
+            ManageDummy(&dummy, center);
+        }
     }
-
-    for (auto& ped : GetPedPool()->GetAllValid()) {
-        ManagePed(&ped, center);
+    {
+        ZoneScopedN("Manage Peds");
+        for (auto& ped : GetPedPool()->GetAllValid()) {
+            ManagePed(&ped, center);
+        }
     }
 }
 
 // 0x616300
 void CPopulation::RemovePedsIfThePoolGetsFull() {
+    ZoneScoped;
+
     if (CTimer::GetFrameCounter() % 8 != 5) {
         return;
     }
@@ -1859,6 +1875,8 @@ void CPopulation::PopulateInterior(int32 numPedsToCreate, CVector pos) {
 
 // 0x616650
 void CPopulation::Update(bool generatePeds) {
+    ZoneScoped;
+
     generatePeds = true;
     CurrentWorldZone = [] {
         switch (CWeather::WeatherRegion) {
@@ -1926,6 +1944,8 @@ uint32 CPopulation::CalculateTotalNumGangPeds() {
 
 // NOTSA - Moved here for reuseability
 void CPopulation::UpdatePedCounts() {
+    ZoneScoped;
+
     ms_nTotalGangPeds = CalculateTotalNumGangPeds();
     ms_nTotalCivPeds = ms_nNumCivMale + ms_nNumCivFemale;
     ms_nTotalPeds = ms_nTotalCivPeds + ms_nTotalGangPeds + ms_nNumCop + ms_nNumEmergency;

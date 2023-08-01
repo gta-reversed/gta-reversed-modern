@@ -602,6 +602,8 @@ void CAudioEngine::ResumeAllSounds() {
 
 // 0x507750
 void CAudioEngine::Service() {
+    ZoneScoped;
+
     m_FrontendAE.AddAudioEvent(AE_FRONTEND_WAKEUP_AMPLIFIER);
     if (!CTimer::GetIsPaused())
         m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED);

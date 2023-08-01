@@ -27,6 +27,8 @@ using Shape = CCollision::DebugSettings::ShapeShapeCollision::Shape;
 * @address 0x416260
 */
 void CCollision::Init() {
+    ZoneScoped;
+
     ms_colModelCache.Init(50);
     ms_collisionInMemory = 0;
     CColStore::Initialise();
@@ -57,6 +59,8 @@ void CCollision::SortOutCollisionAfterLoad() {
 
 // 0x416330
 void CCollision::CalculateTrianglePlanes(CCollisionData* colData) {
+    ZoneScoped;
+
     if (!colData->m_nNumTriangles)
         return;
 
@@ -80,6 +84,8 @@ void CCollision::CalculateTrianglePlanes(CCollisionData* colData) {
 
 // 0x416400
 void CCollision::RemoveTrianglePlanes(CCollisionData* colData) {
+    ZoneScoped;
+
     if (!colData->m_pTrianglePlanes)
         return;
 
@@ -90,6 +96,8 @@ void CCollision::RemoveTrianglePlanes(CCollisionData* colData) {
 
 // 0x411E70
 bool CCollision::TestSphereSphere(CColSphere const& sphere1, CColSphere const& sphere2) { // Yes, it's __stdcall
+    ZoneScoped;
+
     return (sphere1.m_vecCenter - sphere2.m_vecCenter).SquaredMagnitude() <= sq(sphere1.m_fRadius + sphere2.m_fRadius);
 }
 
@@ -128,6 +136,8 @@ void CalculateColPointInsideBox(CBox const& box, CVector const& point, CColPoint
 * @brief Tests if the \a bb is fully inside \a sphere
 */
 bool CCollision::TestSphereBox(CSphere const& sphere, CBox const& box) {
+    ZoneScoped;
+
     for (auto i = 0u; i < 3u; i++) {
         if (sphere.m_vecCenter[i] + sphere.m_fRadius < box.m_vecMin[i] ||
             sphere.m_vecCenter[i] - sphere.m_fRadius > box.m_vecMax[i]
@@ -142,6 +152,8 @@ bool CCollision::TestSphereBox(CSphere const& sphere, CBox const& box) {
 * @address 0x412130
 */
 bool CCollision::ProcessSphereBox(CColSphere const& sph, CColBox const& box, CColPoint & colp, float& minDistSq) {
+    ZoneScoped;
+
 	// GTA's code is too complicated, uses a huge 3x3x3 if statement
 	// we can simplify the structure a lot
     // Some of the original code, to give you an idea:
@@ -335,6 +347,8 @@ bool CCollision::ProcessSphereBox(CColSphere const& sph, CColBox const& box, CCo
 * @address 0x412700
 */
 bool __stdcall CCollision::PointInTriangle(CVector const& point, CVector const* triPoints) {
+    ZoneScoped;
+
     // Make everything relative to 0th vertex of the triangle
     const auto v1 = triPoints[1] - triPoints[0];
     const auto v2 = triPoints[2] - triPoints[0];
@@ -373,6 +387,8 @@ bool __stdcall CCollision::PointInTriangle(CVector const& point, CVector const* 
 * @returns Sq. dist. from `pt` to point closest to `pt` on the line segment (ln0, ln1) 
 */
 float CCollision::DistToLineSqr(CVector const& ln0, CVector const& ln1, CVector const& pt) {
+    ZoneScoped;
+
     // Make line end (l) and pt (pl_ip) relative to ln0 (by this ln0 becomes the space origin)
     const auto l = ln1 - ln0;
     const auto p = pt - ln0;
@@ -416,6 +432,8 @@ float CCollision::DistToLineSqr(CVector const& ln0, CVector const& ln1, CVector 
 
 // 0x417610
 float CCollision::DistToLine(const CVector& lineStart, const CVector& lineEnd, const CVector& point) {
+    ZoneScoped;
+
     return std::sqrt(DistToLineSqr(lineStart, lineEnd, point));
 }
 
@@ -424,6 +442,8 @@ float CCollision::DistToLine(const CVector& lineStart, const CVector& lineEnd, c
 * @brief Similar to \r DistToLineSqr it always returns the distance to the projected intersection point.
 */
 float CCollision::DistToMathematicalLine(CVector const* lineStart, CVector const* lineEnd, CVector const* point) {
+    ZoneScoped;
+
     const auto l = *lineEnd - *lineStart;
     const auto p = *point - *lineStart;
 
@@ -443,6 +463,8 @@ float CCollision::DistToMathematicalLine(CVector const* lineStart, CVector const
 * @brief Same as \r DistToMathematicalLine but in 2D
 */
 float CCollision::DistToMathematicalLine2D(float lineStartX, float lineStartY, float lineEndX, float lineEndY, float pointX, float pointY) {
+    ZoneScoped;
+
     const float px{ pointX - lineStartX }, py{ pointY - lineStartY };
     const auto  dot = px * lineEndX + py * lineEndY;
     const auto distSq = px * px + py * py - dot * dot;
@@ -454,6 +476,8 @@ float CCollision::DistToMathematicalLine2D(float lineStartX, float lineStartY, f
 * @brief TODO
 */
 float CCollision::DistAlongLine2D(float lineX, float lineY, float lineDirX, float lineDirY, float pointX, float pointY) {
+    ZoneScoped;
+
     return (pointX - lineX) * lineDirX + (pointY - lineY) * lineDirY;
 }
 
@@ -464,6 +488,8 @@ float CCollision::DistAlongLine2D(float lineX, float lineY, float lineDirX, floa
 * @notsa
 */
 CVector CCollision::GetClosestPtOnLine(const CVector& l0, const CVector& l1, const CVector& point) {
+    ZoneScoped;
+
     const auto lnMagSq = (l1 - l0).SquaredMagnitude();
 	const auto dot = (point - l0).Dot(l1 - l0);
     if (dot <= 0.0f) {
@@ -478,6 +504,8 @@ CVector CCollision::GetClosestPtOnLine(const CVector& l0, const CVector& l1, con
 
 // 0x417FD0
 void CCollision::ClosestPointOnLine(const CVector& l0, const CVector& l1, const CVector& point, CVector& closest) {
+    ZoneScoped;
+
     closest = GetClosestPtOnLine(l0, l1, point);
 }
 
@@ -511,6 +539,8 @@ float CCollision::ClosestPtSegmentSegment(
     float& s, float& t,
     CVector& c1, CVector& c2
 ) {
+    ZoneScoped;
+
     // Must be non-negative!
     assert(a >= 0.f);
     assert(e >= 0.f);
@@ -691,6 +721,8 @@ float ClosestSquaredDistanceBetweenFiniteLines(
 * @notsa
 */
 CVector CCollision::GetBaryCoordsOnTriangle(CVector a, CVector b, CVector c, CVector p) {
+    ZoneScoped;
+
     const auto vab = b - a, vac = c - a, vap = p - a;
     const auto bb  = vab.Dot(vab);
     const auto bc  = vab.Dot(vac);
@@ -711,6 +743,8 @@ CVector CCollision::GetBaryCoordsOnTriangle(CVector a, CVector b, CVector c, CVe
 * @notsa
 */
 CVector CCollision::GetClampedBaryCoordsIntoTriangle(CVector a, CVector b, CVector c, CVector p) {
+    ZoneScoped;
+
     // Calculate barycentric coords
     const auto [u, v, w] = GetBaryCoordsOnTriangle(a, b, c, p);
 
@@ -745,6 +779,8 @@ CVector CCollision::GetClampedBaryCoordsIntoTriangle(CVector a, CVector b, CVect
 * I'm leaving it here (even though it's unused), as it might actually be faster than the abovementioned function .
 */
 CVector CCollision::GetCoordsClampedIntoTriangle(CVector a, CVector b, CVector c, CVector p) {
+    ZoneScoped;
+
     const auto [u, v, w] = GetClampedBaryCoordsIntoTriangle(a, b, c, p);
     return a * u + b * v + c * w;
 }
@@ -891,6 +927,8 @@ NOTSA_FORCEINLINE bool ProcessLineSphere_Internal(
 * @param[in,out] depth `t` parameter - relative distance on line from it's origin (`line.start`)
 */
 bool CCollision::ProcessLineSphere(CColLine const& line, CColSphere const& sphere, CColPoint& colPoint, float& depth) {
+    ZoneScoped;
+
     if (!ProcessLineSphere_Internal(line, sphere, &colPoint.m_vecPoint, &depth)) {
         return false;
     }
@@ -913,12 +951,16 @@ bool CCollision::TestLineSphere(
     const CColLine& line,
     const CColSphere& sphere
 ) {
+    ZoneScoped;
+
     return ProcessLineSphere_Internal(line, sphere, nullptr, nullptr);
 }
 
 // 0x412C70
 // Maybe just adapt the code from: http://www.3dkingdoms.com/weekly/weekly.php?a=3 ? Looks nicer than this one
 bool CCollision::TestLineBox_DW(CColLine const& line, CBox const& box) {
+    ZoneScoped;
+
     const auto IsInBox = [bb = CBoundingBox(box)](const CVector& point) {
         return bb.IsPointWithin(point);
     };
@@ -1003,6 +1045,8 @@ bool CCollision::TestLineBox_DW(CColLine const& line, CBox const& box) {
 
 // 0x413070
 bool CCollision::TestLineBox(CColLine const& line, CBox const& box) {
+    ZoneScoped;
+
     return TestLineBox_DW(line, box);
 }
 
@@ -1011,6 +1055,8 @@ bool CCollision::TestLineBox(CColLine const& line, CBox const& box) {
 * @brief Test vertical \a line against \a bb
 */
 bool CCollision::TestVerticalLineBox(CColLine const& line, CBox const& box) {
+    ZoneScoped;
+
     for (auto i = 0u; i < 2u; i++) { // Deal with x, y axies
         if (   line.m_vecStart[i] <= box.m_vecMin[i]
             || line.m_vecStart[i] >= box.m_vecMax[i]
@@ -1035,6 +1081,8 @@ bool CCollision::TestVerticalLineBox(CColLine const& line, CBox const& box) {
 * @returns If there was a collision or not. If there was a collision, but calculated depth is bigger than `maxTouchDistance` it returns false regardless.
 */
 bool CCollision::ProcessLineBox(CColLine const& line, CColBox const& box, CColPoint& colPoint, float& maxTouchDistance) {
+    ZoneScoped;
+
     float mint, t, x, y, z;
     CVector normal;
     CVector p;
@@ -1155,6 +1203,8 @@ bool CCollision::ProcessLineBox(CColLine const& line, CColBox const& box, CColPo
 * @returns If there was an intersection - TODO: What if lines are colinear?
 */
 bool CCollision::Test2DLineAgainst2DLine(float line1StartX, float line1StartY, float line1EndX, float line1EndY, float line2StartX, float line2StartY, float line2EndX, float line2EndY) {
+    ZoneScoped;
+
     return ((line2StartX - line1StartX + line2EndX) * line1EndY - (line2StartY - line1StartY + line2EndY) * line1EndX)
         * ((line2StartX - line1StartX) * line1EndY - (line2StartY - line1StartY) * line1EndX) <= 0.0
         &&
@@ -1184,6 +1234,8 @@ bool CCollision::ProcessDiscCollision(
     float& lineRatio,
     CColPoint& lineColPoint
 ) {
+    ZoneScoped;
+
     const auto cp       = matBA * tempTriCol.m_vecPoint;
     const auto cpNormal = Multiply3x3(matBA, tempTriCol.m_vecNormal);
     
@@ -1393,6 +1445,8 @@ bool NOTSA_FORCEINLINE ProcessLineTriangle_Internal(
 * @addr 0x413AC0
 */
 bool CCollision::TestLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& plane) {
+    ZoneScoped;
+
     return ProcessLineTriangle_Internal<true>(line, tri.GetPoly(verts), plane, nullptr, nullptr, nullptr);
 }
 
@@ -1441,12 +1495,16 @@ bool CCollision::ProcessVerticalLineTriangle(
     float& maxTouchDistance,
     CStoredCollPoly* collPoly
 ) {
+    ZoneScoped;
+
     // Not really SA, but the only difference is an early out bounds check that I've implemented into `ProcessLineTriangle_Internal`
     return ProcessLineTriangle(line, verts, tri, plane, colPoint, maxTouchDistance, collPoly);
 }
 
 // 0x416450
 bool CCollision::ProcessSphereSphere(const CColSphere& spA, const CColSphere& spB, CColPoint& colPoint, float& maxTouchDistance) {
+    ZoneScoped;
+
     const auto spBToA = spA.m_vecCenter - spB.m_vecCenter;
     const auto distSq = spBToA.SquaredMagnitude();
  
@@ -1490,6 +1548,8 @@ bool CCollision::TestSphereTriangle(
     const CColTriangle& tri,
     const CColTrianglePlane& plane
 ) {
+    ZoneScoped;
+
     if (!CCollision::s_DebugSettings.ShapeShapeCollision.IsEnabled(Shape::SSPHERE, Shape::STRI)) {
         return false;
     }
@@ -1543,6 +1603,8 @@ bool CCollision::ProcessSphereTriangle(
     CColPoint& colPoint,
     float& maxTouchDistance
 ) {
+    ZoneScoped;
+
     if (!CCollision::s_DebugSettings.ShapeShapeCollision.IsEnabled(Shape::SSPHERE, Shape::STRI)) {
         return false;
     }
@@ -1595,6 +1657,8 @@ bool CCollision::TestLineOfSight(
     bool doSeeThroughCheck,
     bool doShootThroughCheck
 ) {
+    ZoneScoped;
+
     const auto cd = cm.GetData();
     if (!cd) {
         return false;
@@ -1644,6 +1708,8 @@ bool CCollision::TestLineOfSight(
 // 0x417950
 bool CCollision::ProcessLineOfSight(const CColLine& lnws, const CMatrix& transform, CColModel& colModel, CColPoint& colPoint, float& maxTouchDistance, bool doSeeThroughCheck,
                                     bool doShootThroughCheck) {
+    ZoneScoped;
+
     assert(colModel.m_pColData);
 
     const auto colData = colModel.m_pColData;
@@ -1709,6 +1775,8 @@ bool CCollision::ProcessVerticalLine(
     bool doShootThroughCheck,
     CStoredCollPoly* outColPoly
 ) {
+    ZoneScoped;
+
     const auto cd = cm.GetData();
     if (!cd) {
         return false;
@@ -1778,6 +1846,8 @@ bool CCollision::ProcessVerticalLine(
 
 // 0x417F20
 bool CCollision::SphereCastVsSphere(const CColSphere& spA, const CColSphere& spB, const CColSphere& spS) {
+    ZoneScoped;
+
     if (TestSphereSphere(spA, spS) || TestSphereSphere(spB, spS)) {
         return true;
     }
@@ -1799,6 +1869,8 @@ void CCollision::ClosestPointOnPoly(CColTriangle* arg0, CVector* arg1, CVector* 
 
 // 0x418580
 void CCollision::CalculateTrianglePlanes(CColModel* colModel) {
+    ZoneScoped;
+
     plugin::Call<0x418580, CColModel*>(colModel);
     if (colModel->m_pColData && colModel->m_pColData->m_pTriangles) {
         assert(colModel->m_pColData->m_pTrianglePlanes); // If model has triangles it should also have triPls by now (otherwise random crashes will occour)
@@ -1842,6 +1914,8 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
     float* maxTouchDistances,
     bool bReturnAllCollisions
 ) {
+    ZoneScoped;
+
     return plugin::CallAndReturn<int32, 0x4185C0, const CMatrix&, CColModel&, const CMatrix&, CColModel&, std::array<CColPoint, 32>*, CColPoint*, float*, bool>(
         transformA, cmA, transformB, cmB, &sphereCPs, lineCPs, maxTouchDistances, bReturnAllCollisions);
     /*
@@ -2238,6 +2312,8 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA,
 
 // 0x414D70
 bool CCollision::IsStoredPolyStillValidVerticalLine(const CVector& lineOrigin, float lnMag, CColPoint& colPoint, CStoredCollPoly* collPoly) {
+    ZoneScoped;
+
     if (!collPoly->valid) {
         return false;
     }
@@ -2258,6 +2334,8 @@ bool CCollision::IsStoredPolyStillValidVerticalLine(const CVector& lineOrigin, f
 
 // 0x415230
 CColBox CCollision::GetBoundingBoxFromTwoSpheres(const CColSphere& spA, const CColSphere& spB) {
+    ZoneScoped;
+
     CVector min, max;
     for (size_t i = 0; i < 3; i++) {
         std::tie(min[i], max[i]) = std::minmax(spA.m_vecCenter[i], spB.m_vecCenter[i]);
@@ -2270,6 +2348,8 @@ CColBox CCollision::GetBoundingBoxFromTwoSpheres(const CColSphere& spA, const CC
 
 // 0x4152C0
 bool CCollision::IsThisVehicleSittingOnMe(CVehicle* veh, CVehicle* vehOnMe) {
+    ZoneScoped;
+
     if (!veh || !vehOnMe) {
         return false;
     }
@@ -2312,6 +2392,8 @@ bool CCollision::CheckCameraCollisionPeds(
     const CVector& /*unused*/,
     float& /*unused*/
 ) {
+    ZoneScoped;
+
     constexpr auto gPedCylinderWidth = 1.f;
 
     bool addedAny = false;
@@ -2383,6 +2465,8 @@ bool CCollision::RayPolyPOP(CVector* arg0, CVector* arg1, CColTriangle* arg2, CV
 
 // 0x4156D0
 int32 CCollision::GetPrincipleAxis(const CVector& normal) {
+    ZoneScoped;
+
     const auto nx = std::abs(normal.x),
                ny = std::abs(normal.y),
                nz = std::abs(normal.z);
@@ -2412,6 +2496,8 @@ bool CCollision::PointInPoly(
     const CVector& normal,
     const CVector* verts // Uncompressed vertices
 ) {
+    ZoneScoped;
+
     // Shuffle look-up table
     constexpr uint8 lut[3][2]{
         { 1, 2 }, // X
@@ -2436,6 +2522,8 @@ bool CCollision::SphereCastVersusVsPoly(
     const CColTrianglePlane& triPlane,
     CompressedVector* verts
 ) {
+    ZoneScoped;
+
     const auto plNorm = triPlane.GetNormal();
 
     const auto spARadius = spA.m_fRadius;
@@ -2560,6 +2648,8 @@ bool CCollision::SphereCastVsBBox(
     const CColSphere& spB,
     const CColBox& box
 ) {
+    ZoneScoped;
+
     const auto     r = spA.m_fRadius;
     const CVector  vRadius{ r, r, r };
     return TestLineBox_DW(
@@ -2590,6 +2680,8 @@ bool CCollision::SphereCastVsCaches(
     int32& numOut,
     CColCacheEntry* out
 ) {
+    ZoneScoped;
+
     const CColSphere spBws{ spAws.m_vecCenter + velocity, spAws.m_fRadius };
 
     assert(!numIn || in[0].ent); 
@@ -2680,6 +2772,8 @@ bool CCollision::SphereCastVsEntity(
     const CColSphere& spBws,
     CEntity* entity
 ) {
+    ZoneScoped;
+
     if (!entity->m_bUsesCollision || TheCamera.IsExtraEntityToIgnore(entity)) {
         return false;
     }
@@ -2798,6 +2892,8 @@ bool CCollision::CheckCameraCollisionBuildings(
     const CColSphere& spA,
     const CColSphere& spB
 ) {
+    ZoneScoped;
+
     const auto plyrVeh = FindPlayerVehicle();
     const auto checkFlyerCollision = plyrVeh && plyrVeh->physicalFlags.bDontCollideWithFlyers;
 
@@ -2833,6 +2929,8 @@ bool CCollision::CheckCameraCollisionVehicles(
     const CColSphere& spB,
     const CVector* plyrVehVel
 ) {
+    ZoneScoped;
+
     static auto& gFramesSittingOnTimeOut = StaticRef<int32, 0x9689D4>();
     static auto& gpLastSittingOnEntity   = StaticRef<CEntity*, 0x9689D8>();
 
@@ -2887,6 +2985,8 @@ bool CCollision::CheckCameraCollisionObjects(
     const CColSphere& spA,
     const CColSphere& spB
 ) {
+    ZoneScoped;
+
     // Pirulax: At this point I'm certain R* devs were paid by lines written
 
     bool anyCollided = false;
@@ -2923,6 +3023,8 @@ bool CCollision::CheckPeds(
     const CVector& normal, /*unused*/
     float& nearest /*unused*/
 ) {
+    ZoneScoped;
+
     if (!bCamCollideWithPeds) {
         return false;
     }
@@ -2940,6 +3042,8 @@ bool CCollision::BuildCacheOfCameraCollision(
     const CColSphere& spA,
     const CColSphere& spB
 ) {
+    ZoneScoped;
+
     const auto spABBox = GetBoundingBoxFromTwoSpheres(spA, spB);
     const auto spABBSp = CColSphere{CSphere{ spABBox.GetCenter(), spABBox.GetSize().Magnitude() / 2.f} };
 
@@ -3005,6 +3109,8 @@ bool CCollision::CameraConeCastVsWorldCollision(
     float& dst,
     float minDist
 ) {
+    ZoneScoped;
+
     ColCache caches[2]{};
     gpColCache  = &caches[0];
     gpColCache2 = &caches[1];
@@ -3054,6 +3160,8 @@ bool CCollision::CameraConeCastVsWorldCollision(
 
 // 0x41A5A0
 bool CCollision::SphereVsEntity(CColSphere* sphere, CEntity* entity) {
+    ZoneScoped;
+
     NOTSA_UNREACHABLE(); /* unused */
 }
 

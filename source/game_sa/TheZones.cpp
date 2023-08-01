@@ -115,6 +115,8 @@ long double CTheZones::Calc2DDistanceBetween2Zones(CZone* zone1, CZone* zone2) {
 // Initializes CTheZones
 // 0x572670
 void CTheZones::Init() {
+    ZoneScoped;
+
     ((void(__cdecl*)())0x572670)();
 }
 
@@ -171,6 +173,8 @@ void CTheZones::SetZoneRadarColours(int16 index, char flag, uint8 red, uint8 gre
 // Updates CTheZones info
 // 0x572D10
 void CTheZones::Update() {
+    ZoneScoped;
+
     ((void(__cdecl*)())0x572D10)();
 }
 

@@ -360,6 +360,8 @@ void CGlass::GeneratePanesForWindow(ePaneType type, CVector point, CVector fwd, 
 
 // 0x71B0D0
 void CGlass::Update() {
+    ZoneScoped;
+
     for (auto& pane : aGlassPanes) {
         if (pane.m_bExist) {
             pane.Update();
@@ -369,6 +371,8 @@ void CGlass::Update() {
 
 // 0x71CE20
 void CGlass::Render() {
+    ZoneScoped;
+
     H1iLightPolyVerticesIdx = 0;
     HiLightPolyIndicesIdx = 0;
 

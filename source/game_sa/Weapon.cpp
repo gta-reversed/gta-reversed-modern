@@ -593,6 +593,8 @@ void CWeapon::Update(CPed* owner) {
 
 // 0x73A360
 void CWeapon::UpdateWeapons() {
+    ZoneScoped;
+
     CShotInfo::Update();
     CExplosion::Update();
     CProjectileInfo::Update();

@@ -8,8 +8,7 @@
 
 #include <numeric>
 #include <span>
-#include "PluginBase.h" // !!!
-#include "RenderWare.h"
+#include <rwplcore.h>
 #include "Vector2D.h"
 
 class CMatrix;
@@ -245,6 +244,14 @@ inline float DistanceBetweenPointsSquared(const CVector& pointOne, const CVector
 
 inline CVector Lerp(const CVector& vecOne, const CVector& vecTwo, float fProgress) {
     return vecOne * (1.0F - fProgress) + vecTwo * fProgress;
+}
+
+//! Component-wise clamp of values
+inline CVector Clamp(CVector val, CVector min, CVector max) {
+    for (auto i = 0; i < 3; i++) {
+        val[i] = std::clamp(val[i], min[i], max[i]);
+    }
+    return val;
 }
 
 inline CVector Pow(const CVector& vec, float fPow) {

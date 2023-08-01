@@ -28,6 +28,8 @@ void CEntryExitManager::InjectHooks() {
 
 // 0x43F880
 void CEntryExitManager::Init() {
+    ZoneScoped;
+
     mp_QuadTree = new CQuadTreeNode(WORLD_BOUNDS, 4);
 
     ms_exitEnterState = 0;
@@ -80,6 +82,8 @@ void CEntryExitManager::ShutdownForRestart() {
 
 // 0x440D10
 void CEntryExitManager::Update() {
+    ZoneScoped;
+
     const bool bDontShowMarkers =
          CCutsceneMgr::ms_cutsceneProcessing
       || CPad::GetPad()->DisablePlayerControls

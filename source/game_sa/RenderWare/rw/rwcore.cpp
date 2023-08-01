@@ -1056,10 +1056,14 @@ RwBool RwBBoxContainsPoint(const RwBBox* boundBox, const RwV3d* vertex) {
 }
 
 RwCamera* RwCameraBeginUpdate(RwCamera* camera) {
+    ZoneScoped;
+
     return ((RwCamera*(__cdecl *)(RwCamera*))0x7EE190)(camera);
 }
 
 RwCamera* RwCameraEndUpdate(RwCamera* camera) {
+    ZoneScoped;
+
     return ((RwCamera*(__cdecl *)(RwCamera*))0x7EE180)(camera);
 }
 

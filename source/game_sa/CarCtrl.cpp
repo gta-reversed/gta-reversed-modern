@@ -64,6 +64,8 @@ void CCarCtrl::InjectHooks()
 
 // 0x4212E0
 void CCarCtrl::Init() {
+    ZoneScoped;
+
     CarDensityMultiplier = 1.0f;
     NumRandomCars = 0;
     NumLawEnforcerCars = 0;
@@ -377,6 +379,8 @@ void CCarCtrl::GenerateOneRandomCar() {
 
 // 0x4341C0
 void CCarCtrl::GenerateRandomCars() {
+    ZoneScoped;
+
     plugin::Call<0x4341C0>();
 }
 
@@ -604,6 +608,8 @@ void CCarCtrl::PossiblyRemoveVehicle(CVehicle* vehicle) {
 
 // 0x423F10
 void CCarCtrl::PruneVehiclesOfInterest() {
+    ZoneScoped;
+
     if ((CTimer::GetFrameCounter() % 64) == 19 && FindPlayerCoors(-1).z < 950.0f) {
         for (size_t i = 0; i < std::size(apCarsToKeep); i++) {
             if (apCarsToKeep[i]) {
@@ -627,6 +633,8 @@ void CCarCtrl::RegisterVehicleOfInterest(CVehicle* vehicle) {
 
 // 0x4322B0
 void CCarCtrl::RemoveCarsIfThePoolGetsFull() {
+    ZoneScoped;
+
     if (CTimer::GetFrameCounter() % 8 != 3)
         return;
 
@@ -663,6 +671,8 @@ void CCarCtrl::RemoveCarsIfThePoolGetsFull() {
 
 // 0x42CD10
 void CCarCtrl::RemoveDistantCars() {
+    ZoneScoped;
+
     for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
         if (auto vehicle = GetVehiclePool()->GetAt(i)) {
             PossiblyRemoveVehicle(vehicle);

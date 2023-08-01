@@ -8,7 +8,7 @@ class Furniture_c;
 
 class FurnitureGroup_c {
 public:
-    List_c m_subGroupsList;
+    TList_c<void> m_subGroupsList;
 
 public:
     static void InjectHooks();
