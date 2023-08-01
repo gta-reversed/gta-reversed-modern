@@ -25,19 +25,37 @@ int16& CTheZones::TotalNumberOfZoneInfos = *(int16*)0xBA1DE8;
 void CTheZones::InjectHooks() {
     RH_ScopedClass(CTheZones);
     RH_ScopedCategoryGlobal();
-    RH_ScopedInstall(ResetZonesRevealed, 0x572110);
-    RH_ScopedInstall(GetCurrentZoneLockedOrUnlocked, 0x572130);
-    RH_ScopedInstall(PointLiesWithinZone, 0x572270);
-    RH_ScopedInstall(GetNavigationZone, 0x572590);
-    RH_ScopedInstall(GetMapZone, 0x5725A0);
-    RH_ScopedInstall(Save, 0x5D2E60);
-    RH_ScopedInstall(Load, 0x5D2F40);
-    RH_ScopedInstall(PostZoneCreation, 0x572B70);
+
+    RH_ScopedGlobalInstall(ResetZonesRevealed, 0x572110);
+    RH_ScopedGlobalInstall(GetCurrentZoneLockedOrUnlocked, 0x572130);
+    RH_ScopedGlobalInstall(PointLiesWithinZone, 0x572270);
+    RH_ScopedGlobalInstall(GetNavigationZone, 0x572590);
+    RH_ScopedGlobalInstall(GetMapZone, 0x5725A0);
+    RH_ScopedGlobalInstall(Save, 0x5D2E60);
+    RH_ScopedGlobalInstall(Load, 0x5D2F40);
+    RH_ScopedGlobalInstall(PostZoneCreation, 0x572B70);
+    RH_ScopedGlobalInstall(InitZonesPopulationSettings, 0x5720D0, { .reversed = false });
+    //RH_ScopedGlobalOverloadedInstall(Update, "", 0x572D10, int8(**)(), { .reversed = false });
+    RH_ScopedGlobalInstall(SetZoneRadarColours, 0x572CC0, { .reversed = false });
+    RH_ScopedGlobalInstall(FindZoneByLabel, 0x572C40, { .reversed = false });
+    //RH_ScopedGlobalInstall(FindZone, 0x572B80, { .reversed = false });
+    //RH_ScopedGlobalInstall(CheckZonesForOverlap, 0x572B60, { .reversed = false });
+    RH_ScopedGlobalInstall(CreateZone, 0x5728A0, { .reversed = false });
+    //RH_ScopedGlobalOverloadedInstall(Update, "", 0x572800, int8(**)(), { .reversed = false });
+    RH_ScopedGlobalInstall(Init, 0x572670, { .reversed = false });
+    RH_ScopedGlobalInstall(Calc2DDistanceBetween2Zones, 0x5725B0, { .reversed = false });
+    RH_ScopedGlobalInstall(FillZonesWithGangColours, 0x572440, { .reversed = false });
+    //RH_ScopedGlobalInstall(GetZoneInfo, 0x572400, { .reversed = false });
+    RH_ScopedGlobalInstall(FindSmallestZoneForPosition, 0x572360, { .reversed = false });
+    RH_ScopedGlobalInstall(GetLevelFromPosition, 0x572300, { .reversed = false });
+    RH_ScopedGlobalInstall(ZoneIsEntirelyContainedWithinOtherZone, 0x572220, { .reversed = false });
+    RH_ScopedGlobalInstall(AssignZoneInfoForThisZone, 0x572180, { .reversed = false });
+
 }
 
 // 0x5720D0
 void CTheZones::InitZonesPopulationSettings() {
-    ((void(__cdecl*)())0x5720D0)();
+    rng::fill(ZoneInfoArray, CZoneInfo{});
 }
 
 // 0x572110
