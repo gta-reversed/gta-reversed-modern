@@ -43,7 +43,7 @@ project "gta_reversed"
         "USE_GTASA_ALLOCATOR", 
         "EXTRA_DEBUG_FEATURES", 
         "FIX_BUGS",
-        "_CRT_SECURE_NO_WARNINGS"
+        "_CRT_SECURE_NO_WARNINGS",
 
         "TRACY_ENABLE",
         "TRACY_ON_DEMAND",
