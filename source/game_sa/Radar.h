@@ -203,10 +203,6 @@ public:
     static inline float& cachedCos = *(float*)0xBA8308;
     static inline float& cachedSin = *(float*)0xBA830C;
 
-    // original name unknown
-    static inline eRadarTraceHeight& legendTraceHeight = *(eRadarTraceHeight*)0xBAA350;
-    static inline uint32& legendTraceTimer = *(uint32*)0xBAA354;
-
     static SpriteFileName RadarBlipFileNames[];
 
     static inline float& m_radarRange = *(float*)0xBA8314; // 2990.0 by default
@@ -257,7 +253,7 @@ public:
     static void SetBlipFriendly(tBlipHandle blip, bool friendly);
     static void SetBlipEntryExit(tBlipHandle blip, CEntryExit* enex);
     static void ShowRadarTrace(float x, float y, uint32 size, CRGBA color);
-    static void ShowRadarTraceWithHeight(float x, float y, uint32 size, CRGBA color, eRadarTraceHeight height);
+    static void ShowRadarTraceWithHeight(float x, float y, uint32 size, uint32 r, uint32 g, uint32 b, uint32 a, eRadarTraceHeight height);
     static void ShowRadarMarker(CVector posn, uint32 color, float radius);
     static uint32 GetRadarTraceColour(eBlipColour color, bool bright, bool friendly);
     static void DrawRotatingRadarSprite(CSprite2d& sprite, float x, float y, float angle, uint32 width, uint32 height, CRGBA color);
@@ -313,7 +309,7 @@ public:
 
     static auto CachedRotateClockwise(const CVector2D& point) {
         return CVector2D{
-            cachedCos * point.x + cachedSin * point.y,
+            +cachedCos * point.x + cachedSin * point.y,
             -cachedSin * point.x + cachedCos * point.y
         };
     }
