@@ -19,7 +19,7 @@ void CAEMP3BankLoader::InjectHooks() {
     RH_ScopedInstall(GetSoundBankLoadingStatus, 0x4E0250);
     RH_ScopedInstall(IsSoundLoaded, 0x4E03B0);
     RH_ScopedInstall(GetSoundLoadingStatus, 0x4E0400);
-    RH_ScopedInstall(UpdateVirtualChannels, 0x4E0450);
+    RH_ScopedInstall(UpdateVirtualChannels, 0x4E0450, {.reversed = false});
     RH_ScopedInstall(LoadSoundBank, 0x4E0670);
     RH_ScopedInstall(LoadSound, 0x4E07A0);
     RH_ScopedInstall(Service, 0x4DFE30,{.reversed=false}); // TODO: broken
@@ -160,22 +160,27 @@ void CAEMP3BankLoader::LoadSoundBank(uint16 bankId, int16 bankSlot) {
 }
 
 // 0x4E07A0
-bool CAEMP3BankLoader::LoadSound(uint16 bankId, uint16 soundId, int16 bankSlot) {
+void CAEMP3BankLoader::LoadSound(uint16 bankId, uint16 soundId, int16 bankSlot) {
     if (!m_bInitialised)
-        return false;
+        return;
 
-    if (soundId >= 400u || bankId > m_nBankLookupCount || bankSlot < 0 || bankSlot > m_nBankSlotCount)
-        return false;
+    if (soundId >= NUM_BANK_SLOT_ITEMS || bankId > m_nBankLookupCount || bankSlot < 0 || bankSlot > m_nBankSlotCount)
+        return;
 
-    if (IsSoundBankLoaded(bankId, bankSlot) || DoesRequestExist(bankId, bankSlot, soundId))
-        return false;
+    if (IsSoundLoaded(bankId, soundId, bankSlot))
+        return;
+
+    for (auto& req : m_aRequests) {
+        if (req.m_nBankId == bankId && req.m_nBankSlotId == bankSlot && req.m_nNumSounds == soundId)
+            return;
+    }
 
     const auto bankLookup = GetBankLookup(bankId);
     auto& nextRequest = m_aRequests[m_iNextRequest];
 
     nextRequest.m_nBankId = bankId;
     nextRequest.m_nBankSlotId = bankSlot;
-    nextRequest.m_nNumSounds = -1;
+    nextRequest.m_nNumSounds = soundId;
     nextRequest.m_pBankSlotInfo = &m_paBankSlots[bankSlot];
     nextRequest.m_nPakFileNumber = bankLookup->m_nPakFileNumber;
     nextRequest.m_nBankOffset = bankLookup->m_nOffset;
@@ -184,7 +189,6 @@ bool CAEMP3BankLoader::LoadSound(uint16 bankId, uint16 soundId, int16 bankSlot) 
 
     m_iRequestCount++;
     m_iNextRequest = (m_iNextRequest + 1) % 50;
-    return true;
 }
 
 // 0x4DFE30, broken

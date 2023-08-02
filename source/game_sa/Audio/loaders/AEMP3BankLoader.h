@@ -18,7 +18,7 @@ public:
     bool GetSoundLoadingStatus(uint16 bankId, uint16 soundId, int16 bankSlot);
     void UpdateVirtualChannels(void*, int16*, int16*);
     void LoadSoundBank(uint16 bankId, int16 bankSlot);
-    bool LoadSound(uint16 bankId, uint16 soundId, int16 bankSlot);
+    void LoadSound(uint16 bankId, uint16 soundId, int16 bankSlot);
     void Service();
 
     // NOTSA

@@ -6,7 +6,7 @@ void CAEBankLoader::InjectHooks() {
     RH_ScopedCategory("Audio/Loaders");
 
     RH_ScopedInstall(Deconstructor, 0x4DFB20);
-    RH_ScopedInstall(GetBankLookup, 0x4E01B0, {.reversed = false});
+    RH_ScopedInstall(GetBankLookup, 0x4E01B0, {.reversed = true});
     RH_ScopedInstall(LoadBankLookupFile, 0x4DFBD0);
     RH_ScopedInstall(LoadBankSlotFile, 0x4E0590, {.reversed = false});
     RH_ScopedInstall(LoadSFXPakLookupFile, 0x4DFC70, {.reversed = false});
