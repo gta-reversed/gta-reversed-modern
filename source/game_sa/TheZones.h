@@ -13,8 +13,9 @@
 
 class CTheZones {
 public:
+    static inline auto&       ZonesVisited = StaticRef<std::array<bool, 100>, 0xBA3730>(); // Explored territories. Count: 100
+
     static eLevelName& m_CurrLevel;
-    static char*       ZonesVisited;                 // Explored territories. Count: 100
     static int32&      ZonesRevealed;                // Number of explored territories
     static int16&      TotalNumberOfNavigationZones; // Info zones
     static CZone       (&NavigationZoneArray)[380];
@@ -32,6 +33,7 @@ public:
     static void AssignZoneInfoForThisZone(int16 index);
     static bool ZoneIsEntirelyContainedWithinOtherZone(CZone* zone1, CZone* zone2);
     static bool GetCurrentZoneLockedOrUnlocked(CVector2D pos);
+    static bool SetCurrentZoneVisited(CVector2D pos, bool locked); // NOTSA
     // Returns true if point lies within zone
     static bool PointLiesWithinZone(const CVector* point, CZone* zone);
     // Returns eLevelName from position
