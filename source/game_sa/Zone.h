@@ -24,17 +24,17 @@ public:
     auto GetRect()           const { return CRect{ (float)m_fX1, (float)m_fY1, (float)m_fX2, (float)m_fY2 }; }
 
 public:
-    char       m_InfoLabel[8]; // Zone info `TheText.Get` key (Unsure)
-    char       m_TextLabel[8]; // Display name `TheText.Get` key
-    int16      m_fX1;
-    int16      m_fY1;
-    int16      m_fZ1;
-    int16      m_fX2;
-    int16      m_fY2;
-    int16      m_fZ2;
-    int16      m_nZoneExtraIndexInfo;
-    eZoneType  m_nType;
-    eLevelName m_nLevel;
+    char       m_InfoLabel[8]{}; // Zone info `TheText.Get` key (Unsure)
+    char       m_TextLabel[8]{}; // Display name `TheText.Get` key
+    int16      m_fX1{};
+    int16      m_fY1{};
+    int16      m_fZ1{};
+    int16      m_fX2{};
+    int16      m_fY2{};
+    int16      m_fZ2{};
+    int16      m_nZoneExtraIndexInfo{};
+    eZoneType  m_nType{};
+    eLevelName m_nLevel{};
 
 
 };
