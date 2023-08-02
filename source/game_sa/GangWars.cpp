@@ -600,7 +600,7 @@ void CGangWars::StartDefensiveGangWar() {
         }());
 
         bPlayerIsCloseby = false;
-        pZoneInfoToFightOver->Flags1 = pZoneInfoToFightOver->Flags1 & 0x9F | 0x40; // todo: flags
+        pZoneInfoToFightOver->radarMode = 2;
         pZoneInfoToFightOver->ZoneColor = CRGBA{ 255, 0, 0, 160 };
     } else {
         TimeTillNextAttack = CalculateTimeTillNextAttack();
@@ -657,7 +657,7 @@ void CGangWars::StartOffensiveGangWar() {
             Gang2 = Gang1;
 
         TellGangMembersTo(false);
-        zoneInfo->Flags1 = zoneInfo->Flags1 & 0x9F | 0x40; // todo: flags
+        pZoneInfoToFightOver->radarMode = 2;
         zoneInfo->ZoneColor = CRGBA{ 255, 0, 0, 160 };
         pDriveByCar = nullptr;
     }

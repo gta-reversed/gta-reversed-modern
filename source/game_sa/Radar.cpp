@@ -590,16 +590,13 @@ void CRadar::ChangeBlipColour(tBlipHandle blip, eBlipColour color) {
  * @returns True if it's revealed to the player.
  */
 bool CRadar::HasThisBlipBeenRevealed(int32 blipIndex) {
-    const auto& blipPos = ms_RadarTrace[blipIndex].m_vPosition;
-
     if (!FrontEndMenuManager.m_bDrawingMap
         || !ms_RadarTrace[blipIndex].m_bShortRange
         || CTheZones::ZonesRevealed > 80
-        || CTheZones::GetCurrentZoneLockedOrUnlocked(blipPos.x, blipPos.y)
+        || CTheZones::GetCurrentZoneLockedOrUnlocked(ms_RadarTrace[blipIndex].m_vPosition)
     ) {
         return true;
     }
-
     return false;
 }
 

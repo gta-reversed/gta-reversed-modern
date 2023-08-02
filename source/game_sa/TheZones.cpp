@@ -34,7 +34,7 @@ void CTheZones::InjectHooks() {
     RH_ScopedGlobalInstall(Save, 0x5D2E60);
     RH_ScopedGlobalInstall(Load, 0x5D2F40);
     RH_ScopedGlobalInstall(PostZoneCreation, 0x572B70);
-    RH_ScopedGlobalInstall(InitZonesPopulationSettings, 0x5720D0, { .reversed = false });
+    RH_ScopedGlobalInstall(InitZonesPopulationSettings, 0x5720D0);
     //RH_ScopedGlobalOverloadedInstall(Update, "", 0x572D10, int8(**)(), { .reversed = false });
     RH_ScopedGlobalInstall(SetZoneRadarColours, 0x572CC0, { .reversed = false });
     RH_ScopedGlobalInstall(FindZoneByLabel, 0x572C40, { .reversed = false });
@@ -65,8 +65,8 @@ void CTheZones::ResetZonesRevealed() {
 }
 
 // 0x572130
-bool CTheZones::GetCurrentZoneLockedOrUnlocked(float posx, float posy) {
-    return CTheZones::ZonesVisited[10 * (uint8)((posx + 3000.0) * 0.0016666667) - (uint8)((posy + 3000.0) * 0.0016666667) + 9] != 0; // todo: ugly
+bool CTheZones::GetCurrentZoneLockedOrUnlocked(CVector2D pos) {
+    return CTheZones::ZonesVisited[10 * (size_t)((pos.x + 3000.f) / 600.f) - (size_t)((pos.y + 3000.f) / 600.f) + 9] != 0;
 }
 
 // 0x572180

@@ -31,7 +31,7 @@ public:
     static void ResetZonesRevealed();
     static void AssignZoneInfoForThisZone(int16 index);
     static bool ZoneIsEntirelyContainedWithinOtherZone(CZone* zone1, CZone* zone2);
-    static bool GetCurrentZoneLockedOrUnlocked(float posx, float posy);
+    static bool GetCurrentZoneLockedOrUnlocked(CVector2D pos);
     // Returns true if point lies within zone
     static bool PointLiesWithinZone(const CVector* point, CZone* zone);
     // Returns eLevelName from position
