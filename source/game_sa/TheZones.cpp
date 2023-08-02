@@ -42,7 +42,7 @@ void CTheZones::InjectHooks() {
     RH_ScopedGlobalInstall(CreateZone, 0x5728A0);
     RH_ScopedGlobalInstall(Init, 0x572670);
     RH_ScopedGlobalInstall(AssignZoneInfoForThisZone, 0x572180);
-    //RH_ScopedGlobalInstall(FindZone, 0x572B80, { .reversed = false });
+    RH_ScopedGlobalInstall(FindZone, 0x572B80);
     //RH_ScopedGlobalInstall(CheckZonesForOverlap, 0x572B60, { .reversed = false });
     RH_ScopedGlobalInstall(Calc2DDistanceBetween2Zones, 0x5725B0, { .reversed = false });
     RH_ScopedGlobalInstall(FillZonesWithGangColours, 0x572440, { .reversed = false });
@@ -221,8 +221,11 @@ void CTheZones::CreateZone(
 
 // Returns 1 if point lies within the specified zonename otherwise return 0
 // 0x572B80
-bool CTheZones::FindZone(CVector* point, int32 zonename_part1, int32 zonename_part2, eZoneType type) {
-    return ((bool(__cdecl*)(CVector*, int32, int32, eZoneType))0x572B80)(point, zonename_part1, zonename_part2, type);
+bool CTheZones::FindZone(CVector* point, uint64_t packedZoneName, eZoneType type) {
+    char zoneName[sizeof(packedZoneName)];
+    memcpy(zoneName, &packedZoneName, sizeof(packedZoneName));
+    assert(zoneName[sizeof(packedZoneName) - 1] == 0);
+    return FindZone(*point, { zoneName }, type);
 }
 
 //! Find zone by name `name` and of type `type` and check if `point` lies within it

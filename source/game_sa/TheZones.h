@@ -52,9 +52,7 @@ public:
     static void SetCurrentZoneAsUnlocked();
     static void CreateZone(const char* name, eZoneType type, CVector pos1, CVector pos2, eLevelName level, const char* GXT_key);
 
-    static bool FindZone(CVector* point, int32 zonename_part1, int32 zonename_part2, eZoneType type);
-
-    
+    static bool FindZone(CVector* point, uint64_t zoneName, eZoneType type);
     static bool FindZone(const CVector& point, std::string_view name, eZoneType type);
     static int16 FindZoneByLabel(const char* name, eZoneType type);
     static void SetZoneRadarColours(int16 index, char flag, uint8 red, uint8 green, uint8 blue);
