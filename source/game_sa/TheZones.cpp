@@ -41,7 +41,7 @@ void CTheZones::InjectHooks() {
     RH_ScopedGlobalInstall(FindZoneByLabel, 0x572C40);
     //RH_ScopedGlobalInstall(FindZone, 0x572B80, { .reversed = false });
     //RH_ScopedGlobalInstall(CheckZonesForOverlap, 0x572B60, { .reversed = false });
-    RH_ScopedGlobalInstall(CreateZone, 0x5728A0, { .reversed = false });
+    RH_ScopedGlobalInstall(CreateZone, 0x5728A0);
     RH_ScopedGlobalInstall(Init, 0x572670, { .reversed = false });
     RH_ScopedGlobalInstall(Calc2DDistanceBetween2Zones, 0x5725B0, { .reversed = false });
     RH_ScopedGlobalInstall(FillZonesWithGangColours, 0x572440, { .reversed = false });
@@ -155,8 +155,47 @@ void CTheZones::SetCurrentZoneAsUnlocked() {
 
 // Creates a zone
 // 0x5728A0
-void CTheZones::CreateZone(const char* name, eZoneType type, float posX1, float posY1, float posZ1, float posX2, float posY2, float posZ2, eLevelName island, const char* GXT_key) {
-    ((void(__cdecl*)(const char*, eZoneType, float, float, float, float, float, float, eLevelName island, const char*))0x5728A0)(name, type, posX1, posY1, posZ1, posX2, posY2, posZ2, island, GXT_key);
+void CTheZones::CreateZone(
+    const char* infoLabel,
+    eZoneType   type,
+    CVector     pos1,
+    CVector     pos2,
+    eLevelName  level,
+    const char* textLabel
+) {
+    const auto z = [type]{
+        switch (type) {
+        case ZONE_TYPE_LOCAL_NAVI:
+        case ZONE_TYPE_NAVI:       return &NavigationZoneArray[TotalNumberOfNavigationZones++];
+        case ZONE_TYPE_MAP:        return &MapZoneArray[TotalNumberOfMapZones++];
+        }
+        NOTSA_UNREACHABLE();
+    }();
+
+    const auto StrCpyUpper = [](auto& dst, auto& src) {
+        strcpy_s(dst, src);
+        for (auto& ch : dst) {
+            if (ch == 0) {
+                break;
+            }
+            ch = toupper(ch);
+        }
+    };
+    StrCpyUpper(z->m_TextLabel, textLabel);
+    StrCpyUpper(z->m_InfoLabel, infoLabel);
+
+    std::tie(z->m_fX1, z->m_fX2) = std::minmax((int16)pos1.x, (int16)pos2.x);
+    std::tie(z->m_fY1, z->m_fY2) = std::minmax((int16)pos1.y, (int16)pos2.y);
+    std::tie(z->m_fZ1, z->m_fZ2) = std::minmax((int16)pos1.z, (int16)pos2.z);
+
+    z->m_nLevel = level;
+
+    switch (type) {
+    case ZONE_TYPE_LOCAL_NAVI:
+    case ZONE_TYPE_NAVI:
+        AssignZoneInfoForThisZone(TotalNumberOfNavigationZones - 1);
+        break;
+    }
 }
 
 // Returns 1 if point lies within the specified zonename otherwise return 0

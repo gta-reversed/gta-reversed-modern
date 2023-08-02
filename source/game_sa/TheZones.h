@@ -50,7 +50,7 @@ public:
 
     static void Init();
     static void SetCurrentZoneAsUnlocked();
-    static void CreateZone(const char* name, eZoneType type, float posX1, float posY1, float posZ1, float posX2, float posY2, float posZ2, eLevelName island, const char* GXT_key);
+    static void CreateZone(const char* name, eZoneType type, CVector pos1, CVector pos2, eLevelName level, const char* GXT_key);
 
     static bool FindZone(CVector* point, int32 zonename_part1, int32 zonename_part2, eZoneType type);
 
