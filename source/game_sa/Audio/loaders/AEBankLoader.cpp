@@ -6,10 +6,10 @@ void CAEBankLoader::InjectHooks() {
     RH_ScopedCategory("Audio/Loaders");
 
     RH_ScopedInstall(Deconstructor, 0x4DFB20);
-    RH_ScopedInstall(GetBankLookup, 0x4E01B0, {.reversed = true});
+    RH_ScopedInstall(GetBankLookup, 0x4E01B0);
     RH_ScopedInstall(LoadBankLookupFile, 0x4DFBD0);
-    RH_ScopedInstall(LoadBankSlotFile, 0x4E0590, {.reversed = false});
-    RH_ScopedInstall(LoadSFXPakLookupFile, 0x4DFC70, {.reversed = false});
+    RH_ScopedInstall(LoadBankSlotFile, 0x4E0590);
+    RH_ScopedInstall(LoadSFXPakLookupFile, 0x4DFC70, {.reversed = true});
     RH_ScopedInstall(CalculateBankSlotsInfosOffsets, 0x4DFBA0);
 }
 
@@ -84,7 +84,7 @@ bool CAEBankLoader::LoadBankSlotFile() {
     return m_pBuffer != nullptr;
 }
 
-// 0x4DFC70, broken
+// 0x4DFC70
 bool CAEBankLoader::LoadSFXPakLookupFile() {
     const auto file = CFileMgr::OpenFile("AUDIO\\CONFIG\\PAKFILES.DAT", "rb");
     bool failed = true;

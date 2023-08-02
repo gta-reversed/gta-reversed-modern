@@ -5,7 +5,6 @@
 #include "MemoryMgr.h"
 
 void CAEMP3TrackLoader::InjectHooks() {
-    // TODO
     RH_ScopedClass(CAEMP3TrackLoader);
     RH_ScopedCategory("Audio/Loaders");
 

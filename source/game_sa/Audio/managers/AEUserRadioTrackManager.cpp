@@ -21,9 +21,7 @@
 
 CAEUserRadioTrackManager& AEUserRadioTrackManager = *(CAEUserRadioTrackManager*)0xB6B970;
 
-#if 0
-// This is the default list
-static tAudioExtensionType defaultAudioExtensionTypes[] = {
+static auto audioExtensionTypes = std::to_array<tAudioExtensionType>({
     {".ogg", AUDIO_FILE_TYPE_VORBIS},
     {".mp3", AUDIO_FILE_TYPE_QUICKTIME}, // replaced to AUDIO_FILE_TYPE_WMA if QuickTime is not installed
     {".wav", AUDIO_FILE_TYPE_WAV},
@@ -31,24 +29,37 @@ static tAudioExtensionType defaultAudioExtensionTypes[] = {
     {".wmv", AUDIO_FILE_TYPE_WMA},
     {".aac", AUDIO_FILE_TYPE_QUICKTIME},
     {".m4a", AUDIO_FILE_TYPE_QUICKTIME},
-};
+#ifdef USERTRACK_FLAC_SUPPORT
+    {".flac", AUDIO_FILE_TYPE_FLAC},
 #endif
-tAudioExtensionType (&CAEUserRadioTrackManager::audioExtensionTypes)[7] = *reinterpret_cast<tAudioExtensionType (*)[7]>(0x8cbb28);
+});
 
 // 0x4f35b0
 bool CAEUserRadioTrackManager::Initialise() {
     m_bUserTracksLoaded = ReadUserTracks();
     m_bUserTracksLoadedCopy = m_bUserTracksLoaded;
-    memset(m_baDecodersSupported, 0, sizeof(m_baDecodersSupported));
+    rng::fill(m_baDecodersSupported, 0);
+
     m_baDecodersSupported[AUDIO_FILE_TYPE_VORBIS] = true;
     m_baDecodersSupported[AUDIO_FILE_TYPE_WAV] = true;
     m_baDecodersSupported[AUDIO_FILE_TYPE_WMA] = CAEWMADecoder::InitLibrary();
     m_baDecodersSupported[AUDIO_FILE_TYPE_QUICKTIME] = CAEMFDecoder::InitLibrary();
 
-    if (m_baDecodersSupported[AUDIO_FILE_TYPE_QUICKTIME] == false)
-        // change MP3 decoder from QuickTime to WMA
-        audioExtensionTypes[1].type = AUDIO_FILE_TYPE_WMA;
+#ifdef USERTRACK_FLAC_SUPPORT
+    m_baDecodersSupported[AUDIO_FILE_TYPE_FLAC] = CAEFlacDecoder::InitLibrary();
+#endif
 
+    if (m_baDecodersSupported[AUDIO_FILE_TYPE_QUICKTIME] == false) {
+        // change MP3 decoder from QuickTime to WMA
+        const auto typeMP3 = rng::find_if(audioExtensionTypes, [](const auto& type) {
+            return std::string_view{type.extension} == ".mp3";
+        });
+
+        if (typeMP3 != audioExtensionTypes.end()) {
+            typeMP3->type = AUDIO_FILE_TYPE_WMA;
+            NOTSA_LOG_DEBUG("Assigned MP3 decoder to be WMA because MediaFoundation decoder failed to load.");
+        }
+    }
     return true;
 }
 
@@ -139,6 +150,12 @@ CAEStreamingDecoder* CAEUserRadioTrackManager::LoadUserTrack(int32 trackID) {
             decoder = new CAEWMADecoder(dataStream);
             break;
         }
+#ifdef USERTRACK_FLAC_SUPPORT
+        case AUDIO_FILE_TYPE_FLAC: {
+            decoder = new CAEFlacDecoder(dataStream);
+            break;
+        }
+#endif
         }
     }
 
@@ -151,20 +168,21 @@ bool CAEUserRadioTrackManager::ReadUserTracks() {
     auto file = CFileMgr::OpenFile("sa-utrax.dat", "rb");
     CFileMgr::SetDir("");
 
-    if (file == nullptr)
+    if (!file)
         return false;
 
-    auto size = CFileMgr::GetTotalSize(file);
+    const auto size = CFileMgr::GetTotalSize(file);
     if (size == 0) {
         CFileMgr::CloseFile(file);
         return false;
     }
 
-    m_nUserTracksCount = size / sizeof(tUserTracksInfo);
-
+    // NOTSA: Don't leak memory in case of multiple calls.
     if (m_pUserTracksInfo) {
         CMemoryMgr::Free(m_pUserTracksInfo);
     }
+
+    m_nUserTracksCount = size / sizeof(tUserTracksInfo);
     m_pUserTracksInfo = (tUserTracksInfo*)CMemoryMgr::Malloc(size);
 
     CFileMgr::Read(file, m_pUserTracksInfo, size);
@@ -195,8 +213,8 @@ bool CAEUserRadioTrackManager::ScanUserTracks() {
 void CAEUserRadioTrackManager::DeleteUserTracksInfo() {
     TerminateThread(m_hwndUserTracksScanThreadHandle, 0);
     CFileMgr::SetDirMyDocuments();
-    remove("sa-ufiles.dat"); // todo: cross-platform
-    remove("sa-utrax.dat");
+    fs::remove("sa-ufiles.dat");
+    fs::remove("sa-utrax.dat");
     CFileMgr::SetDir("");
 
     m_nUserTracksScanState = USER_TRACK_SCAN_OFF;
@@ -237,8 +255,7 @@ int32 CAEUserRadioTrackManager::SelectUserTrackIndex() const {
 
 // 0x4f31f0
 eAudioFileType CAEUserRadioTrackManager::GetAudioFileType(const char* filename) {
-    constexpr size_t AUDIO_EXTENSIONS = sizeof(CAEUserRadioTrackManager::audioExtensionTypes) / sizeof(tAudioExtensionType);
-    const char*      dotPosition = strrchr(filename, '.');
+    const char* dotPosition = strrchr(filename, '.');
 
     if (dotPosition == nullptr)
         return AUDIO_FILE_TYPE_UNKNOWN;
