@@ -1,6 +1,8 @@
 #include "StdInc.h"
 
 #include "AEAudioHardware.h"
+#include "AEMP3BankLoader.h"
+#include "AEMP3TrackLoader.h"
 
 CAEAudioHardware& AEAudioHardware = *reinterpret_cast<CAEAudioHardware*>(0xB5F8B8);
 
@@ -18,17 +20,17 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(GetChannelPlayTimes, 0x4D8820, { .reversed = false });
     RH_ScopedInstall(SetChannelVolume, 0x4D8870);
     RH_ScopedInstall(LoadSoundBank, 0x4D88A0);
-    RH_ScopedInstall(IsSoundBankLoaded, 0x4D88C0, { .reversed = false });
-    RH_ScopedInstall(GetSoundBankLoadingStatus, 0x4D88D0, { .reversed = false });
+    RH_ScopedInstall(IsSoundBankLoaded, 0x4D88C0);
+    RH_ScopedInstall(GetSoundBankLoadingStatus, 0x4D88D0);
     RH_ScopedInstall(LoadSound, 0x4D8ED0);
-    RH_ScopedInstall(IsSoundLoaded, 0x4D8EF0, { .reversed = false });
-    RH_ScopedInstall(GetSoundLoadingStatus, 0x4D8F00, { .reversed = false });
+    RH_ScopedInstall(IsSoundLoaded, 0x4D8EF0);
+    RH_ScopedInstall(GetSoundLoadingStatus, 0x4D8F00);
     RH_ScopedInstall(StopSound, 0x4D88E0, { .reversed = false });
     RH_ScopedInstall(SetChannelPosition, 0x4D8920, { .reversed = false });
     RH_ScopedInstall(SetChannelFrequencyScalingFactor, 0x4D8960, { .reversed = false });
     RH_ScopedInstall(RescaleChannelVolumes, 0x4D8990, { .reversed = false });
     RH_ScopedInstall(UpdateReverbEnvironment, 0x4D8DA0, { .reversed = false });
-    RH_ScopedInstall(GetSoundHeadroom, 0x4D8E30, { .reversed = false });
+    RH_ScopedInstall(GetSoundHeadroom, 0x4D8E30);
     RH_ScopedInstall(EnableEffectsLoading, 0x4D8E40, { .reversed = false });
     RH_ScopedInstall(DisableEffectsLoading, 0x4D8E50, { .reversed = false });
     RH_ScopedInstall(GetVirtualChannelSoundLengths, 0x4D8E90);
@@ -54,9 +56,9 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(GetEffectsFaderScalingFactor, 0x4D9590);
     RH_ScopedInstall(SetNonStreamFaderScalingFactor, 0x4D95A0);
     RH_ScopedInstall(SetStreamFaderScalingFactor, 0x4D95B0);
-    RH_ScopedInstall(IsStreamingFromDVD, 0x4D95C0, { .reversed = false });
-    RH_ScopedInstall(GetDVDDriveLetter, 0x4D95D0, { .reversed = false });
-    RH_ScopedInstall(CheckDVD, 0x4D95E0, { .reversed = false });
+    RH_ScopedInstall(IsStreamingFromDVD, 0x4D95C0);
+    RH_ScopedInstall(GetDVDDriveLetter, 0x4D95D0);
+    RH_ScopedInstall(CheckDVD, 0x4D95E0);
     RH_ScopedInstall(PauseAllSounds, 0x4D95F0, { .reversed = false });
     RH_ScopedInstall(ResumeAllSounds, 0x4D9630, { .reversed = false });
     RH_ScopedInstall(InitDirectSoundListener, 0x4D9640, { .reversed = false });
@@ -138,32 +140,26 @@ void CAEAudioHardware::SetChannelVolume(int16 channel, uint16 channelId, float v
 }
 
 // 0x4D88A0
-bool CAEAudioHardware::LoadSoundBank(uint16 bankId, int16 bankSlotId) {
+void CAEAudioHardware::LoadSoundBank(uint16 bankId, int16 bankSlotId) {
     if (!m_bDisableEffectsLoading) {
-        return plugin::CallMethodAndReturn<bool, 0x4E0670>(m_pMP3BankLoader, bankId, bankSlotId);
-        // todo: return m_pMP3BankLoader->LoadSoundBank(bankId, bankSlotId);
+        m_pMP3BankLoader->LoadSoundBank(bankId, bankSlotId);
     }
-
-    return m_bDisableEffectsLoading;
 }
 
 // 0x4D88C0
 bool CAEAudioHardware::IsSoundBankLoaded(uint16 bankId, int16 bankSlotId) {
-    return plugin::CallMethodAndReturn<bool, 0x4D88C0, CAEAudioHardware*, uint16, int16>(this, bankId, bankSlotId);
-    // todo: return m_pMP3BankLoader->IsSoundBankLoaded(bankId, bankSlotId);
+    return m_pMP3BankLoader->IsSoundBankLoaded(bankId, bankSlotId);
 }
 
 // 0x4D88D0
 int8 CAEAudioHardware::GetSoundBankLoadingStatus(uint16 bankId, int16 bankSlotId) {
-    return plugin::CallMethodAndReturn<int8, 0x4D88D0, CAEAudioHardware*, uint16, int16>(this, bankId, bankSlotId);
-    // todo: return m_pMP3BankLoader->GetSoundBankLoadingStatus(bankId, bankSlotId);
+    return m_pMP3BankLoader->GetSoundBankLoadingStatus(bankId, bankSlotId);
 }
 
 // 0x4D8ED0
 bool CAEAudioHardware::LoadSound(uint16 bank, uint16 sound, int16 slot) {
     if (!m_bDisableEffectsLoading) {
-        return plugin::CallMethodAndReturn<bool, 0x4E07A0>(m_pMP3BankLoader, bank, sound, slot);
-        // todo: return m_pMP3BankLoader->LoadSound(bank, sound, slot);
+        return m_pMP3BankLoader->LoadSound(bank, sound, slot);
     }
 
     return m_bDisableEffectsLoading;
@@ -171,14 +167,12 @@ bool CAEAudioHardware::LoadSound(uint16 bank, uint16 sound, int16 slot) {
 
 // 0x4D8EF0
 bool CAEAudioHardware::IsSoundLoaded(uint16 bankId, uint16 sfxId, int16 bankSlot) {
-    return plugin::CallMethodAndReturn<bool, 0x4D8EF0, CAEAudioHardware*, uint16, uint16, int16>(this, bankId, sfxId, bankSlot);
-    // return m_pMP3BankLoader->IsSoundLoaded(bankId, sfxId, bankSlotId);
+    return m_pMP3BankLoader->IsSoundLoaded(bankId, sfxId, bankSlot);
 }
 
 // 0x4D8F00
 bool CAEAudioHardware::GetSoundLoadingStatus(uint16 bankId, uint16 sfxId, int16 bankSlot) {
-    return plugin::CallMethodAndReturn<bool, 0x4D8F00, CAEAudioHardware*, uint16, uint16, int16>(this, bankId, sfxId, bankSlot);
-    // return m_pMP3BankLoader->GetSoundLoadingStatus(bankId, sfxId, bankSlot);
+    return m_pMP3BankLoader->GetSoundLoadingStatus(bankId, sfxId, bankSlot);
 }
 
 // 0x4D88E0
@@ -217,8 +211,7 @@ void CAEAudioHardware::UpdateReverbEnvironment() {
 
 // 0x4D8E30
 float CAEAudioHardware::GetSoundHeadroom(uint16 sfxId, int16 bankSlotId) {
-    return plugin::CallMethodAndReturn<float, 0x4D8E30, CAEAudioHardware*, uint16, int16>(this, sfxId, bankSlotId);
-    // return m_pMP3BankLoader->GetSoundHeadroom(sfxId, bankSlotId);
+    return m_pMP3BankLoader->GetSoundHeadroom(sfxId, bankSlotId);
 }
 
 // 0x4D8E40
@@ -355,20 +348,17 @@ void CAEAudioHardware::SetStreamFaderScalingFactor(float factor) {
 
 // 0x4D95C0
 bool CAEAudioHardware::IsStreamingFromDVD() {
-    return plugin::CallMethodAndReturn<bool, 0x4D95C0, CAEAudioHardware*>(this);
-    // todo: return m_pMP3TrackLoader->m_bStreamingFromDVD;
+    return m_pMP3TrackLoader->m_bStreamingFromDVD;
 }
 
 // 0x4D95D0
 char CAEAudioHardware::GetDVDDriveLetter() {
-    return plugin::CallMethodAndReturn<char, 0x4D95D0, CAEAudioHardware*>(this);
-    // todo: return m_pMP3TrackLoader->m_szDvdDrivePath[0];
+    return m_pMP3TrackLoader->m_pszDvdDrivePath[0];
 }
 
 // 0x4D95E0
 bool CAEAudioHardware::CheckDVD() {
-    return plugin::CallMethodAndReturn<bool, 0x4D95E0, CAEAudioHardware*>(this);
-    // todo: return m_pMP3TrackLoader->IsCurrentAudioStreamAvailable();
+    return m_pMP3TrackLoader->IsCurrentAudioStreamAvailable();
 }
 
 // 0x4D95F0

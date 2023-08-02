@@ -22,6 +22,8 @@ struct CAEBankSlotItem {
 };
 VALIDATE_SIZE(CAEBankSlotItem, 0xC);
 
+constexpr auto NUM_BANK_SLOT_ITEMS = 400u;
+
 struct CAEBankSlot {
     uint32 m_nOffset;
     uint32 m_nSize;
@@ -29,7 +31,7 @@ struct CAEBankSlot {
     uint32 field_C;
     uint16 m_nBankId;
     uint16 m_nSoundCount; // -1: Single sound.
-    CAEBankSlotItem m_aSlotItems[400];
+    CAEBankSlotItem m_aSlotItems[NUM_BANK_SLOT_ITEMS];
 
     bool IsSingleSound() const { return m_nSoundCount == -1; }
 };
@@ -83,6 +85,7 @@ public:
     uint16 m_nBankSlotCount;
     uint16 m_nBankLookupCount;
     int16 m_nPakLookupCount;
+    uint16 __pad;
     bool m_bInitialised;
     uint32 m_nBufferSize;
     uint8* m_pBuffer;
@@ -93,7 +96,6 @@ public:
     uint16 m_iNextRequest;
     uint16 m_iStreamingChannel;
     uint16 m_aBankSlotSound[60];
-    uint32 pad; // not sure
 
 public:
     static void InjectHooks();

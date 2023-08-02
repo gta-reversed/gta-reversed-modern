@@ -104,7 +104,7 @@ public:
     void GetChannelPlayTimes(int16 channel, int16* playTimes);
     void SetChannelVolume(int16 channel, uint16 channelId, float volume, uint8 unused);
 
-    bool LoadSoundBank(uint16 bankId, int16 bankSlotId);
+    void LoadSoundBank(uint16 bankId, int16 bankSlotId);
     bool IsSoundBankLoaded(uint16 bankId, int16 bankSlotId);
     int8 GetSoundBankLoadingStatus(uint16 bankId, int16 bankSlotId);
 

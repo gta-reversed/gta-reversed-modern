@@ -17,7 +17,7 @@ public:
     bool IsSoundLoaded(uint16 bankId, uint16 soundId, int16 bankSlot);
     bool GetSoundLoadingStatus(uint16 bankId, uint16 soundId, int16 bankSlot);
     void UpdateVirtualChannels(void*, int16*, int16*);
-    bool LoadSoundBank(uint16 bankId, int16 bankSlot);
+    void LoadSoundBank(uint16 bankId, int16 bankSlot);
     bool LoadSound(uint16 bankId, uint16 soundId, int16 bankSlot);
     void Service();
 

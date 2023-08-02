@@ -6,9 +6,9 @@ void CAEBankLoader::InjectHooks() {
     RH_ScopedCategory("Audio/Loaders");
 
     RH_ScopedInstall(Deconstructor, 0x4DFB20);
-    RH_ScopedInstall(GetBankLookup, 0x4E01B0);
+    RH_ScopedInstall(GetBankLookup, 0x4E01B0, {.reversed = false});
     RH_ScopedInstall(LoadBankLookupFile, 0x4DFBD0);
-    RH_ScopedInstall(LoadBankSlotFile, 0x4E0590);
+    RH_ScopedInstall(LoadBankSlotFile, 0x4E0590, {.reversed = false});
     RH_ScopedInstall(LoadSFXPakLookupFile, 0x4DFC70, {.reversed = false});
     RH_ScopedInstall(CalculateBankSlotsInfosOffsets, 0x4DFBA0);
 }
@@ -62,14 +62,22 @@ bool CAEBankLoader::LoadBankSlotFile() {
     if (!file)
         return false;
 
+    m_pBuffer = nullptr; // NOTSA: for return check
+
     if (auto size = CFileMgr::GetTotalSize(file); size > 2) {
-        CalculateBankSlotsInfosOffsets();
-        assert(m_nBankSlotCount > 0);
-        m_nBufferSize = m_paBankSlots[m_nBankSlotCount - 1].m_nOffset + m_paBankSlots[m_nBankSlotCount - 1].m_nSize;
-        m_pBuffer = (uint8*)CMemoryMgr::Malloc(m_nBufferSize);
-    } else {
-        delete m_paBankSlots;
-        m_paBankSlots = nullptr;
+        CFileMgr::Read(file, &m_nBankSlotCount, 2u);
+        m_paBankSlots = new CAEBankSlot[m_nBankSlotCount];
+
+        if (CFileMgr::Read(file, m_paBankSlots, size - 2) == size - 2) {
+            CalculateBankSlotsInfosOffsets();
+            assert(m_nBankSlotCount > 0);
+            const auto& lastSlot = m_paBankSlots[m_nBankSlotCount - 1];
+            m_nBufferSize = lastSlot.m_nOffset + lastSlot.m_nSize;
+            m_pBuffer = (uint8*)CMemoryMgr::Malloc(m_nBufferSize);
+        } else {
+            delete m_paBankSlots;
+            m_paBankSlots = nullptr;
+        }
     }
 
     CFileMgr::CloseFile(file);
@@ -83,12 +91,12 @@ bool CAEBankLoader::LoadSFXPakLookupFile() {
     if (!file)
         return failed;
 
-    if (auto size = CFileMgr::GetTotalSize(file)) {
-        m_nPakLookupCount = size / sizeof(tPakLookup);
+    if (auto totalSize = CFileMgr::GetTotalSize(file)) {
+        m_nPakLookupCount = totalSize / sizeof(tPakLookup);
         m_paPakLookups = new tPakLookup[m_nPakLookupCount];
 
-        if (CFileMgr::Read(file, m_paPakLookups, size) == size) {
-            m_paStreamHandles = new int32[4 * m_nPakLookupCount];
+        if (CFileMgr::Read(file, m_paPakLookups, totalSize) == totalSize) {
+            m_paStreamHandles = new int32[m_nPakLookupCount];
 
             for (auto i = 0; i < m_nPakLookupCount; i++) {
                 // NOTSA: Originally a 128 char array allocated in the stack.
@@ -96,10 +104,11 @@ bool CAEBankLoader::LoadSFXPakLookupFile() {
             }
             failed = false;
         }
-    }
 
-    delete m_paPakLookups;
-    m_paPakLookups = nullptr;
+        delete m_paPakLookups;
+        m_paPakLookups = nullptr;
+    }
+    
     CFileMgr::CloseFile(file);
     return !failed;
 }

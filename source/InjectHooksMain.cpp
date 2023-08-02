@@ -28,6 +28,10 @@
 #include "AEPedAudioEntity.h"
 #include "AEPedlessSpeechAudioEntity.h"
 #include "AEPoliceScannerAudioEntity.h"
+#include "AEBankLoader.h"
+#include "AETrackLoader.h"
+#include "AEMP3BankLoader.h"
+#include "AEMP3TrackLoader.h"
 #include "AudioEngine.h"
 #include "Garage.h"
 #include "Garages.h"
@@ -732,6 +736,10 @@ void InjectHooksMain() {
         CAudioEngine::InjectHooks();
         CAEFireAudioEntity::InjectHooks();
         CAEExplosionAudioEntity::InjectHooks();
+        CAEMP3BankLoader::InjectHooks();
+        CAEMP3TrackLoader::InjectHooks();
+        CAEBankLoader::InjectHooks();
+        CAETrackLoader::InjectHooks();
     };
 
     const auto Plant = []() {
