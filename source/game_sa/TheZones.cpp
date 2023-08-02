@@ -9,6 +9,8 @@
 
 #include "TheZones.h"
 
+#include <Extensions/ci_string.hpp>
+
 // Variables
 eLevelName& CTheZones::m_CurrLevel = *(eLevelName*)0xBA6718;
 
@@ -36,7 +38,7 @@ void CTheZones::InjectHooks() {
     RH_ScopedGlobalInstall(InitZonesPopulationSettings, 0x5720D0);
     RH_ScopedGlobalInstall(Update, 0x572D10);
     RH_ScopedGlobalInstall(SetZoneRadarColours, 0x572CC0);
-    RH_ScopedGlobalInstall(FindZoneByLabel, 0x572C40, { .reversed = false });
+    RH_ScopedGlobalInstall(FindZoneByLabel, 0x572C40);
     //RH_ScopedGlobalInstall(FindZone, 0x572B80, { .reversed = false });
     //RH_ScopedGlobalInstall(CheckZonesForOverlap, 0x572B60, { .reversed = false });
     RH_ScopedGlobalInstall(CreateZone, 0x5728A0, { .reversed = false });
@@ -67,12 +69,12 @@ bool CTheZones::GetCurrentZoneLockedOrUnlocked(CVector2D pos) {
     return CTheZones::ZonesVisited[10 * (size_t)((pos.x + 3000.f) / 600.f) - (size_t)((pos.y + 3000.f) / 600.f) + 9] != 0;
 }
 
-bool CTheZones::SetCurrentZoneVisited(CVector2D pos, bool locked) {
-    bool& isLocked = CTheZones::ZonesVisited[10 * (size_t)((pos.x + 3000.f) / 600.f) - (size_t)((pos.y + 3000.f) / 600.f) + 9];
-    if (isLocked == locked) {
+bool CTheZones::SetCurrentZoneVisited(CVector2D pos, bool visited) {
+    bool& wasVisited = CTheZones::ZonesVisited[10 * (size_t)((pos.x + 3000.f) / 600.f) - (size_t)((pos.y + 3000.f) / 600.f) + 9];
+    if (wasVisited == visited) {
         return false;
     }
-    isLocked = locked;
+    wasVisited = visited;
     return true;
 }
 
@@ -187,7 +189,14 @@ bool CTheZones::FindZone(const CVector& point, std::string_view name, eZoneType 
 // Returns pointer to zone by index
 // 0x572C40
 int16 CTheZones::FindZoneByLabel(const char* name, eZoneType type) {
-    return ((int16(__cdecl*)(const char*, eZoneType))0x572C40)(name, type);
+    assert(type != eZoneType::ZONE_TYPE_INFO); // Originally an `if` returning `-1`, but let's be safe
+
+    for (auto&& [i, v] : notsa::enumerate(GetNavigationZones())) {
+        if (name == v.GetInfoLabel()) {
+            return (int16)i;
+        }
+    }
+    return -1;
 }
 
 // 0x572cc0
