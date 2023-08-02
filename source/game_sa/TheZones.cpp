@@ -39,17 +39,17 @@ void CTheZones::InjectHooks() {
     RH_ScopedGlobalInstall(Update, 0x572D10);
     RH_ScopedGlobalInstall(SetZoneRadarColours, 0x572CC0);
     RH_ScopedGlobalInstall(FindZoneByLabel, 0x572C40);
+    RH_ScopedGlobalInstall(CreateZone, 0x5728A0);
+    RH_ScopedGlobalInstall(Init, 0x572670);
+    RH_ScopedGlobalInstall(AssignZoneInfoForThisZone, 0x572180);
     //RH_ScopedGlobalInstall(FindZone, 0x572B80, { .reversed = false });
     //RH_ScopedGlobalInstall(CheckZonesForOverlap, 0x572B60, { .reversed = false });
-    RH_ScopedGlobalInstall(CreateZone, 0x5728A0);
-    RH_ScopedGlobalInstall(Init, 0x572670, { .reversed = false });
     RH_ScopedGlobalInstall(Calc2DDistanceBetween2Zones, 0x5725B0, { .reversed = false });
     RH_ScopedGlobalInstall(FillZonesWithGangColours, 0x572440, { .reversed = false });
     //RH_ScopedGlobalInstall(GetZoneInfo, 0x572400, { .reversed = false });
     RH_ScopedGlobalInstall(FindSmallestZoneForPosition, 0x572360, { .reversed = false });
     RH_ScopedGlobalInstall(GetLevelFromPosition, 0x572300, { .reversed = false });
     RH_ScopedGlobalInstall(ZoneIsEntirelyContainedWithinOtherZone, 0x572220, { .reversed = false });
-    RH_ScopedGlobalInstall(AssignZoneInfoForThisZone, 0x572180, { .reversed = false });
 
 }
 
@@ -79,8 +79,16 @@ bool CTheZones::SetCurrentZoneVisited(CVector2D pos, bool visited) {
 }
 
 // 0x572180
-void CTheZones::AssignZoneInfoForThisZone(int16 index) {
-    ((void(__cdecl*)(int16))0x572180)(index);
+void CTheZones::AssignZoneInfoForThisZone(int16 newZoneIndex) {
+    auto& zone = NavigationZoneArray[newZoneIndex];
+    zone.m_nZoneExtraIndexInfo = [&]{
+        for (const auto& [i, zoneInfo] : notsa::enumerate(GetNavigationZones())) {
+            if (i != newZoneIndex && zoneInfo.GetInfoLabel() == zone.GetInfoLabel()) {
+                return zoneInfo.m_nZoneExtraIndexInfo;
+            }
+        }
+        return TotalNumberOfZoneInfos++;
+    }();
 }
 
 // 0x572220
@@ -143,8 +151,20 @@ long double CTheZones::Calc2DDistanceBetween2Zones(CZone* zone1, CZone* zone2) {
 // 0x572670
 void CTheZones::Init() {
     ZoneScoped;
+    
+    rng::fill(NavigationZoneArray, CZone{});
+    rng::fill(MapZoneArray, CZone{});
+    InitZonesPopulationSettings();
+    rng::fill(ZonesVisited, false);
 
-    ((void(__cdecl*)())0x572670)();
+    TotalNumberOfZoneInfos       = 0;
+    TotalNumberOfNavigationZones = 0;
+    ZonesRevealed                = 0;
+    TotalNumberOfMapZones        = 0;
+    m_CurrLevel                  = LEVEL_NAME_COUNTRY_SIDE;
+
+    CreateZone("SAN_AND", ZONE_TYPE_NAVI, { -3000.f, -3000.f, -2000.f }, { 3000.f, 3000.f, 2000.f }, LEVEL_NAME_COUNTRY_SIDE, "SAN_AND");
+    CreateZone("THEMAP", ZONE_TYPE_MAP, { -3000.f, -3000.f, -2000.f }, { 3000.f, 3000.f, 2000.f }, LEVEL_NAME_COUNTRY_SIDE, "THEMAP");
 }
 
 // Unlock the current zone
@@ -173,6 +193,7 @@ void CTheZones::CreateZone(
     }();
 
     const auto StrCpyUpper = [](auto& dst, auto& src) {
+        rng::fill(dst, 0);
         strcpy_s(dst, src);
         for (auto& ch : dst) {
             if (ch == 0) {
@@ -228,7 +249,7 @@ bool CTheZones::FindZone(const CVector& point, std::string_view name, eZoneType 
 // Returns pointer to zone by index
 // 0x572C40
 int16 CTheZones::FindZoneByLabel(const char* name, eZoneType type) {
-    assert(type != eZoneType::ZONE_TYPE_INFO); // Originally an `if` returning `-1`, but let's be safe
+    assert(type == eZoneType::ZONE_TYPE_INFO); // Originally an `if` returning `-1`, but let's be safe
 
     for (auto&& [i, v] : notsa::enumerate(GetNavigationZones())) {
         if (name == v.GetInfoLabel()) {
