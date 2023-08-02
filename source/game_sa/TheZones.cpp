@@ -36,7 +36,7 @@ void CTheZones::InjectHooks() {
     RH_ScopedGlobalInstall(PostZoneCreation, 0x572B70);
     RH_ScopedGlobalInstall(InitZonesPopulationSettings, 0x5720D0);
     //RH_ScopedGlobalOverloadedInstall(Update, "", 0x572D10, int8(**)(), { .reversed = false });
-    RH_ScopedGlobalInstall(SetZoneRadarColours, 0x572CC0, { .reversed = false });
+    RH_ScopedGlobalInstall(SetZoneRadarColours, 0x572CC0);
     RH_ScopedGlobalInstall(FindZoneByLabel, 0x572C40, { .reversed = false });
     //RH_ScopedGlobalInstall(FindZone, 0x572B80, { .reversed = false });
     //RH_ScopedGlobalInstall(CheckZonesForOverlap, 0x572B60, { .reversed = false });
@@ -184,8 +184,10 @@ int16 CTheZones::FindZoneByLabel(const char* name, eZoneType type) {
 }
 
 // 0x572cc0
-void CTheZones::SetZoneRadarColours(int16 index, char flag, uint8 red, uint8 green, uint8 blue) {
-    ((void(__cdecl*)(int16, char, uint8, uint8, uint8))0x572cc0)(index, flag, red, green, blue);
+void CTheZones::SetZoneRadarColours(int16 index, char radarMode, uint8 red, uint8 green, uint8 blue) {
+    const auto zone = &ZoneInfoArray[NavigationZoneArray[index].m_nZoneExtraIndexInfo];
+    zone->radarMode = radarMode;
+    zone->ZoneColor = { red, green, blue, 255 };
 }
 
 // Updates CTheZones info
