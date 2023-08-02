@@ -34,6 +34,20 @@ struct CAEBankSlot {
     CAEBankSlotItem m_aSlotItems[NUM_BANK_SLOT_ITEMS];
 
     bool IsSingleSound() const { return m_nSoundCount == -1; }
+
+    // Calculate size of the slot item by <next item's offset> - <item's offset>
+    size_t CalculateSizeOfSlotItem(size_t index) const {
+        assert(m_nSoundCount == -1 || index < (size_t)m_nSoundCount);
+        const auto nextOffset = [&] {
+            if (index == m_nSoundCount - 1) {
+                return m_nSize;
+            } else {
+                return m_aSlotItems[index + 1].m_nOffset;
+            }
+        }();
+
+        return nextOffset - m_aSlotItems[index].m_nOffset;
+    }
 };
 VALIDATE_SIZE(CAEBankSlot, 0x12D4);
 

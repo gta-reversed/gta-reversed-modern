@@ -1,6 +1,12 @@
 #pragma once
 #include "AEBankLoader.h"
 
+struct tVirtualChannelSettings {
+    int16 m_aSlotId[300];
+    uint16 m_aSoundId[300];
+};
+VALIDATE_SIZE(tVirtualChannelSettings, 0x4B0);
+
 class CAEMP3BankLoader : public CAEBankLoader {
 public:
     static void InjectHooks();
@@ -16,7 +22,7 @@ public:
     int32 GetLoopOffset(uint16 soundId, int16 bankSlot);
     bool IsSoundLoaded(uint16 bankId, uint16 soundId, int16 bankSlot);
     bool GetSoundLoadingStatus(uint16 bankId, uint16 soundId, int16 bankSlot);
-    void UpdateVirtualChannels(void*, int16*, int16*);
+    void UpdateVirtualChannels(tVirtualChannelSettings* settings, int16* lengths, int16* loopStartTimes);
     void LoadSoundBank(uint16 bankId, int16 bankSlot);
     void LoadSound(uint16 bankId, uint16 soundId, int16 bankSlot);
     void Service();

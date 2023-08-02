@@ -14,7 +14,7 @@ public:
     static bool      ResolveProbability(float prob);
     static float     AudioLog10(float p);
 
-    static uint32    ConvertFromBytesToMS(uint32 a, uint32 frequency, uint16 frequencyMult);
+    static uint32    ConvertFromBytesToMS(uint32 lengthInBytes, uint32 frequency, uint16 frequencyMult);
     static uint32    ConvertFromMSToBytes(uint32 a, uint32 frequency, uint16 frequencyMult);
 
     static bool      GetBankAndSoundFromScriptSlotAudioEvent(int32* a1, int32* a2, int32* a3, int32 a4);

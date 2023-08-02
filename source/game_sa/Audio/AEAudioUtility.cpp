@@ -75,8 +75,8 @@ uint64 CAEAudioUtility::GetCurrentTimeInMilliseconds() {
 }
 
 // 0x4d9ef0
-uint32 CAEAudioUtility::ConvertFromBytesToMS(uint32 a, uint32 frequency, uint16 frequencyMult) {
-    return static_cast<uint32>(std::floorf(a / (float(frequency * frequencyMult) / 500.0f)));
+uint32 CAEAudioUtility::ConvertFromBytesToMS(uint32 lengthInBytes, uint32 frequency, uint16 frequencyMult) {
+    return static_cast<uint32>(std::floorf(lengthInBytes / (float(frequency * frequencyMult) / 500.0f)));
 }
 
 // 0x4d9f40

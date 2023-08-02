@@ -1,5 +1,6 @@
 #include "StdInc.h"
 #include "AEMP3BankLoader.h"
+#include "AEAudioUtility.h"
 
 // Naming scheme:
 // * BankLookup == BankId
@@ -19,7 +20,7 @@ void CAEMP3BankLoader::InjectHooks() {
     RH_ScopedInstall(GetSoundBankLoadingStatus, 0x4E0250);
     RH_ScopedInstall(IsSoundLoaded, 0x4E03B0);
     RH_ScopedInstall(GetSoundLoadingStatus, 0x4E0400);
-    RH_ScopedInstall(UpdateVirtualChannels, 0x4E0450, {.reversed = false});
+    RH_ScopedInstall(UpdateVirtualChannels, 0x4E0450);
     RH_ScopedInstall(LoadSoundBank, 0x4E0670);
     RH_ScopedInstall(LoadSound, 0x4E07A0);
     RH_ScopedInstall(Service, 0x4DFE30,{.reversed=false}); // TODO: broken
@@ -125,7 +126,37 @@ bool CAEMP3BankLoader::GetSoundLoadingStatus(uint16 bankId, uint16 soundId, int1
 }
 
 // 0x4E0450
-void CAEMP3BankLoader::UpdateVirtualChannels(void*, int16*, int16*) {}
+void CAEMP3BankLoader::UpdateVirtualChannels(tVirtualChannelSettings* settings, int16* lengths, int16* loopStartTimes) {
+    for (auto i = 0u; i < std::size(settings->m_aSlotId); i++) {
+        const auto slotId = settings->m_aSlotId[i];
+        const auto soundId = settings->m_aSoundId[i];
+        const auto& bankSlot = m_paBankSlots[slotId];
+
+        if (slotId < 0 || soundId < 0 || bankSlot.m_nBankId == -1 || (soundId >= bankSlot.m_nSoundCount && bankSlot.m_nSoundCount >= 0)) {
+            // perhaps invalid?
+            lengths[i] = -1;
+            loopStartTimes[i] = -1;
+        } else {
+            lengths[i] = CAEAudioUtility::ConvertFromBytesToMS(
+                bankSlot.CalculateSizeOfSlotItem(soundId),
+                bankSlot.m_aSlotItems[soundId].m_usSoundHeadroom,
+                1u
+            );
+
+            loopStartTimes[i] = [&]() -> int32 {
+                if (const auto loopOffset = bankSlot.m_aSlotItems[soundId].m_nLoopOffset; loopOffset != -1) {
+                    return CAEAudioUtility::ConvertFromBytesToMS(
+                        2 * loopOffset, // ??
+                        bankSlot.m_aSlotItems[soundId].m_usSampleRate,
+                        1u
+                    );
+                } else {
+                    return -1;
+                }
+            }();
+        }
+    }
+}
 
 // 0x4E0670
 void CAEMP3BankLoader::LoadSoundBank(uint16 bankId, int16 bankSlot) {
