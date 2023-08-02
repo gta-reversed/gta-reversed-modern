@@ -1,6 +1,6 @@
 #pragma once
 
-enum class eSoundRequestStatus {
+enum class eSoundRequestStatus : uint32 {
     UNK_0,
     JUST_LOADED,
     ALREADY_LOADED,
@@ -29,8 +29,8 @@ struct CAEBankSlot {
     uint32 m_nSize;
     uint32 field_8;
     uint32 field_C;
-    uint16 m_nBankId;
-    uint16 m_nSoundCount; // -1: Single sound.
+    int16 m_nBankId;
+    int16 m_nSoundCount; // -1: Single sound.
     CAEBankSlotItem m_aSlotItems[NUM_BANK_SLOT_ITEMS];
 
     bool IsSingleSound() const { return m_nSoundCount == -1; }
@@ -72,7 +72,7 @@ public:
     }
 
     bool IsSingleSound() const {
-        return m_nNumSounds == -1;
+        return m_nNumSounds == (uint16)-1;
     }
 };
 VALIDATE_SIZE(CAESoundRequest, 0x20);

@@ -13,7 +13,7 @@ public:
     bool IsSoundBankLoaded(uint16 bankId, int16 bankSlot);
     bool GetSoundBankLoadingStatus(uint16 bankId, int16 bankSlot);
     uint8* GetSoundBuffer(uint16 soundId, int16 bankSlot, uint32& outIndex, uint16& outSampleRate);
-    uint32 GetLoopOffset(uint16 soundId, int16 bankSlot);
+    int32 GetLoopOffset(uint16 soundId, int16 bankSlot);
     bool IsSoundLoaded(uint16 bankId, uint16 soundId, int16 bankSlot);
     bool GetSoundLoadingStatus(uint16 bankId, uint16 soundId, int16 bankSlot);
     void UpdateVirtualChannels(void*, int16*, int16*);

@@ -22,7 +22,7 @@ void CAEMP3BankLoader::InjectHooks() {
     RH_ScopedInstall(UpdateVirtualChannels, 0x4E0450);
     RH_ScopedInstall(LoadSoundBank, 0x4E0670);
     RH_ScopedInstall(LoadSound, 0x4E07A0);
-    RH_ScopedInstall(Service, 0x4DFE30,{.reversed=false});
+    RH_ScopedInstall(Service, 0x4DFE30,{.reversed=false}); // TODO: broken
 }
 
 // 0x4DFB10
@@ -65,10 +65,6 @@ float CAEMP3BankLoader::GetSoundHeadroom(uint16 soundId, int16 bankSlot) {
 // 0x4E0220
 bool CAEMP3BankLoader::IsSoundBankLoaded(uint16 bankId, int16 bankSlot) {
     assert(bankSlot < m_nBankSlotCount);
-    if (m_paBankSlots[bankSlot].m_nBankId == (uint16)-1) {
-        const auto& aaa = m_paBankSlots[bankSlot];
-        //NOTSA_DEBUG_BREAK();
-    }
     return m_bInitialised && m_paBankSlots[bankSlot].m_nBankId == bankId;
 }
 
@@ -79,7 +75,7 @@ bool CAEMP3BankLoader::GetSoundBankLoadingStatus(uint16 bankId, int16 bankSlot) 
 
 // 0x4E0280
 uint8* CAEMP3BankLoader::GetSoundBuffer(uint16 soundId, int16 bankSlot, uint32& outSize, uint16& outSampleRate) {
-    if (!m_bInitialised || m_paBankSlots[bankSlot].m_nBankId == -1)
+    if (!m_bInitialised || m_paBankSlots[bankSlot].m_nBankId == (uint16)-1)
         return nullptr;
 
     auto& bank = m_paBankSlots[bankSlot];
@@ -107,7 +103,7 @@ uint8* CAEMP3BankLoader::GetSoundBuffer(uint16 soundId, int16 bankSlot, uint32& 
 }
 
 // 0x4E0380
-uint32 CAEMP3BankLoader::GetLoopOffset(uint16 soundId, int16 bankSlot) {
+int32 CAEMP3BankLoader::GetLoopOffset(uint16 soundId, int16 bankSlot) {
     if (!m_bInitialised)
         return -1;
 
@@ -131,7 +127,7 @@ bool CAEMP3BankLoader::GetSoundLoadingStatus(uint16 bankId, uint16 soundId, int1
 // 0x4E0450
 void CAEMP3BankLoader::UpdateVirtualChannels(void*, int16*, int16*) {}
 
-// 0x4E0670, broken for some reason!!!
+// 0x4E0670
 void CAEMP3BankLoader::LoadSoundBank(uint16 bankId, int16 bankSlot) {
     if (!m_bInitialised)
         return;
@@ -191,7 +187,7 @@ bool CAEMP3BankLoader::LoadSound(uint16 bankId, uint16 soundId, int16 bankSlot) 
     return true;
 }
 
-// 0x4DFE30
+// 0x4DFE30, broken
 void CAEMP3BankLoader::Service() {
     // TODO: Refactor the shit out of this
     for (auto&& [i, req] : notsa::enumerate(m_aRequests)) {
@@ -200,16 +196,17 @@ void CAEMP3BankLoader::Service() {
             if (CdStreamGetStatus(m_iStreamingChannel) != eCdStreamStatus::READING_SUCCESS)
                 continue;
 
-            const auto sectors = req.IsSingleSound() ? (req.m_nBankSize + sizeof(CdAudioStream)) / STREAMING_SECTOR_SIZE + 2 : 4;
+            const auto numSectors = req.IsSingleSound() ? (req.m_nBankSize + sizeof(CdAudioStream)) / STREAMING_SECTOR_SIZE + 2 : 4;
             const auto bankOffsetInSectors = req.m_nBankOffset / STREAMING_SECTOR_SIZE;
 
-            req.m_pStreamBuffer = (CdAudioStream*)CMemoryMgr::Malloc(sectors * STREAMING_SECTOR_SIZE);
-            req.m_pStreamOffset = &req.m_pStreamBuffer[req.m_nBankOffset - bankOffsetInSectors * STREAMING_SECTOR_SIZE]; // == &buffer[0]?
+            req.m_pStreamBuffer = (CdAudioStream*)CMemoryMgr::Malloc(numSectors * STREAMING_SECTOR_SIZE);
+            req.m_pStreamOffset = req.m_pStreamBuffer;
+            //&req.m_pStreamBuffer[req.m_nBankOffset - bankOffsetInSectors * STREAMING_SECTOR_SIZE]; // == &buffer[0]?
             CdStreamRead(
                 m_iStreamingChannel,
                 req.m_pStreamBuffer,
                 bankOffsetInSectors & 0xFFFFFF | m_paStreamHandles[req.m_nPakFileNumber], // TODO: Encoding helper.
-                sectors
+                numSectors
             );
 
             req.m_nStatus = eSoundRequestStatus::ALREADY_LOADED;
@@ -235,7 +232,9 @@ void CAEMP3BankLoader::Service() {
                 m_aBankSlotSound[req.m_nBankSlotId] = -1;
 
                 CMemoryMgr::Free(req.m_pStreamBuffer);
-                req.Reset();
+                req.m_pStreamBuffer = nullptr;
+                req.m_nBankId = req.m_nBankSlotId = req.m_nNumSounds = -1;
+                req.m_nStatus = eSoundRequestStatus::UNK_0;
 
                 m_iRequestCount--;
             } else {
@@ -264,7 +263,7 @@ void CAEMP3BankLoader::Service() {
                 CMemoryMgr::Free(req.m_pStreamBuffer);
 
                 req.m_pStreamBuffer = (CdAudioStream*)CMemoryMgr::Malloc((bankOffsetInSectors + 2) * STREAMING_SECTOR_SIZE);
-                req.m_pStreamOffset = &req.m_pStreamBuffer[req.m_nBankOffset - bankOffsetInSectors * STREAMING_SECTOR_SIZE]; // == &buffer[0]?
+                req.m_pStreamOffset = req.m_pStreamBuffer; //&req.m_pStreamBuffer[req.m_nBankOffset - bankOffsetInSectors * STREAMING_SECTOR_SIZE]; // == &buffer[0]?
 
                 CdStreamRead(
                     m_iStreamingChannel,
@@ -278,7 +277,7 @@ void CAEMP3BankLoader::Service() {
             break;
         }
         case eSoundRequestStatus::UNK_3: {
-            if (CdStreamGetStatus(m_iStreamingChannel) != eCdStreamStatus::READING_SUCCESS || req.m_nNumSounds == -1)
+            if (CdStreamGetStatus(m_iStreamingChannel) != eCdStreamStatus::READING_SUCCESS || req.IsSingleSound())
                 continue;
 
             memcpy(
@@ -294,7 +293,9 @@ void CAEMP3BankLoader::Service() {
             m_aBankSlotSound[req.m_nBankSlotId] = req.m_nNumSounds;
 
             CMemoryMgr::Free(req.m_pStreamBuffer);
-            req.Reset();
+            req.m_pStreamBuffer = nullptr;
+            req.m_nBankId = req.m_nBankSlotId = req.m_nNumSounds = -1;
+            req.m_nStatus = eSoundRequestStatus::UNK_0;
 
             m_iRequestCount--;
 
