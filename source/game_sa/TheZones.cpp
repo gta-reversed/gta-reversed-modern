@@ -12,7 +12,6 @@
 // Variables
 eLevelName& CTheZones::m_CurrLevel = *(eLevelName*)0xBA6718;
 
-char* CTheZones::ZonesVisited = (char*)0xBA3730;
 int32& CTheZones::ZonesRevealed = *(int32*)0xBA372C;
 int16& CTheZones::TotalNumberOfMapZones = *(int16*)0xBA1900;
 CZone (&CTheZones::NavigationZoneArray)[380] = *(CZone(*)[380])0xBA3798;
@@ -35,13 +34,12 @@ void CTheZones::InjectHooks() {
     RH_ScopedGlobalInstall(Load, 0x5D2F40);
     RH_ScopedGlobalInstall(PostZoneCreation, 0x572B70);
     RH_ScopedGlobalInstall(InitZonesPopulationSettings, 0x5720D0);
-    //RH_ScopedGlobalOverloadedInstall(Update, "", 0x572D10, int8(**)(), { .reversed = false });
+    RH_ScopedGlobalInstall(Update, 0x572D10);
     RH_ScopedGlobalInstall(SetZoneRadarColours, 0x572CC0);
     RH_ScopedGlobalInstall(FindZoneByLabel, 0x572C40, { .reversed = false });
     //RH_ScopedGlobalInstall(FindZone, 0x572B80, { .reversed = false });
     //RH_ScopedGlobalInstall(CheckZonesForOverlap, 0x572B60, { .reversed = false });
     RH_ScopedGlobalInstall(CreateZone, 0x5728A0, { .reversed = false });
-    //RH_ScopedGlobalOverloadedInstall(Update, "", 0x572800, int8(**)(), { .reversed = false });
     RH_ScopedGlobalInstall(Init, 0x572670, { .reversed = false });
     RH_ScopedGlobalInstall(Calc2DDistanceBetween2Zones, 0x5725B0, { .reversed = false });
     RH_ScopedGlobalInstall(FillZonesWithGangColours, 0x572440, { .reversed = false });
@@ -60,13 +58,22 @@ void CTheZones::InitZonesPopulationSettings() {
 
 // 0x572110
 void CTheZones::ResetZonesRevealed() {
-    memset(ZonesVisited, 0, 100); // TODO: sizeof(CTheZones::ExploredTerritoriesArray)
+    rng::fill(ZonesVisited, false);
     ZonesRevealed = 0;
 }
 
 // 0x572130
 bool CTheZones::GetCurrentZoneLockedOrUnlocked(CVector2D pos) {
     return CTheZones::ZonesVisited[10 * (size_t)((pos.x + 3000.f) / 600.f) - (size_t)((pos.y + 3000.f) / 600.f) + 9] != 0;
+}
+
+bool CTheZones::SetCurrentZoneVisited(CVector2D pos, bool locked) {
+    bool& isLocked = CTheZones::ZonesVisited[10 * (size_t)((pos.x + 3000.f) / 600.f) - (size_t)((pos.y + 3000.f) / 600.f) + 9];
+    if (isLocked == locked) {
+        return false;
+    }
+    isLocked = locked;
+    return true;
 }
 
 // 0x572180
@@ -195,7 +202,26 @@ void CTheZones::SetZoneRadarColours(int16 index, char radarMode, uint8 red, uint
 void CTheZones::Update() {
     ZoneScoped;
 
-    ((void(__cdecl*)())0x572D10)();
+    const auto DELAY = 5000;
+
+    static auto CountSeconds = CTimer::GetTimeInMS() - DELAY;
+    assert(CTimer::GetTimeInMS() >= DELAY); // Avoid underflow
+
+    if (CGame::CanSeeOutSideFromCurrArea()) { // Inverted
+        if (CTimer::GetTimeInMS() - CountSeconds > DELAY) {
+            // Code from 0x572800
+            const auto pos = FindPlayerCoors();
+            m_CurrLevel = CTheZones::GetLevelFromPosition(pos);
+            if (   !CTheScripts::bPlayerIsOffTheMap
+                && CGame::CanSeeOutSideFromCurrArea()
+                && SetCurrentZoneVisited(pos, true)
+            ) {
+                CTheZones::ZonesRevealed++;
+            }
+        }
+    } else {
+        CountSeconds = CTimer::GetTimeInMS();
+    }
 }
 
 // Save CTheZones info
@@ -218,7 +244,7 @@ void CTheZones::Save() {
         CGenericGameStorage::SaveDataToWorkBuffer(&MapZoneArray[i], 0x20);
     }
 
-    CGenericGameStorage::SaveDataToWorkBuffer(ZonesVisited, 100);
+    SaveDataToWorkBuffer(ZonesVisited);
     CGenericGameStorage::SaveDataToWorkBuffer(&ZonesRevealed, 4);
 }
 
@@ -243,7 +269,7 @@ void CTheZones::Load() {
     for (int32 i = 0; i < TotalNumberOfMapZones; i++) {
         CGenericGameStorage::LoadDataFromWorkBuffer(&MapZoneArray[i], 0x20u);
     }
-    CGenericGameStorage::LoadDataFromWorkBuffer(ZonesVisited, 100);
+    LoadDataFromWorkBuffer(ZonesVisited);
     CGenericGameStorage::LoadDataFromWorkBuffer(&ZonesRevealed, 4u);
 }
 
