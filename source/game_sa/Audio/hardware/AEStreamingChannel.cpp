@@ -2,11 +2,6 @@
 
 #include "AEStreamingChannel.h"
 
-// 0x4F1800
-CAEStreamingChannel::CAEStreamingChannel(IDirectSound* directSound, uint16 channelId) : CAEAudioChannel(directSound, channelId, 48000, 16) {
-    plugin::CallMethod<0x4F1800, CAEStreamingChannel*, IDirectSound*, uint16>(this, directSound, channelId);
-}
-
 // 0x4F2200
 CAEStreamingChannel::~CAEStreamingChannel() {
     plugin::CallMethod<0x4F2200, CAEStreamingChannel*>(this);
@@ -19,7 +14,24 @@ void CAEStreamingChannel::Initialise() {
 
 // 0x4F1C70
 void CAEStreamingChannel::InitialiseSilence() {
-    return plugin::CallMethod<0x4F1C70, CAEStreamingChannel*>(this);
+    DSBUFFERDESC bufferDesc{};
+    bufferDesc.dwSize = 36;
+    bufferDesc.lpwfxFormat = &m_WaveFormat;
+    bufferDesc.dwBufferBytes = 0x8000;
+    bufferDesc.dwFlags = DSBCAPS_GLOBALFOCUS | DSBCAPS_LOCSOFTWARE;
+
+    if (SUCCEEDED(m_pDirectSound->CreateSoundBuffer(&bufferDesc, &m_pSilenceBuffer, 0))) {
+        void *audioPtr;
+        DWORD audioPtrBytes;
+
+        m_pSilenceBuffer->Lock(0, 0, &audioPtr, &audioPtrBytes, nullptr, 0, DSBLOCK_ENTIREBUFFER);
+        memset(audioPtr, 0, audioPtrBytes);
+        m_pSilenceBuffer->Unlock(audioPtr, audioPtrBytes, nullptr, 0);
+        m_pSilenceBuffer->Play(0, 0, DSBPLAY_LOOPING);
+
+    } else {
+        NOTSA_LOG_WARN("Creating silence buffer failed.");
+    }
 }
 
 // 0x4F1FF0
@@ -121,16 +133,16 @@ void CAEStreamingChannel::InjectHooks() {
     RH_ScopedClass(CAEStreamingChannel);
     RH_ScopedCategory("Audio/Hardware");
 
-    RH_ScopedInstall(Constructor, 0x4F1800, { .reversed = false });
+    RH_ScopedInstall(Constructor, 0x4F1800);
     // Install("CAEStreamingChannel", "~CAEStreamingChannel", 0x4F2200, static_cast<CAEStreamingChannel*(CAEStreamingChannel::*)()>(&CAEStreamingChannel::Destructor));
-    RH_ScopedInstall(SynchPlayback, 0x4F1870, { .reversed = false });
+    RH_ScopedInstall(SynchPlayback, 0x4F1870);
     RH_ScopedInstall(PrepareStream, 0x4F23D0, { .reversed = false });
     RH_ScopedInstall(Initialise, 0x4F22F0, { .reversed = false });
     RH_ScopedInstall(Pause, 0x4F2170, { .reversed = false });
     RH_ScopedInstall(SetReady, 0x4F1FF0, { .reversed = false });
     RH_ScopedInstall(SetBassEQ, 0x4F1F30, { .reversed = false });
     RH_ScopedInstall(FillBuffer, 0x4F1E20, { .reversed = false });
-    RH_ScopedInstall(InitialiseSilence, 0x4F1C70, { .reversed = false });
+    RH_ScopedInstall(InitialiseSilence, 0x4F1C70);
     RH_ScopedInstall(SetNextStream, 0x4F1DE0, { .reversed = false });
     RH_ScopedInstall(AddFX, 0x4F1AE0, { .reversed = false });
     // RH_ScopedOverloadedInstall(Stop, "", 0x4F1A90, int8(CAEStreamingChannel::*)(bool));

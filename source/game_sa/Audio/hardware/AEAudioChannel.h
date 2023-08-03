@@ -28,13 +28,7 @@ public:
     bool                  m_bLooped;
     uint8                 field_45;
     uint8                 field_46; // unused
-    uint16                field_47;
-    uint16                m_wFrequencyMult;
-    uint32                m_nBufferFrequency;
-    uint32                m_nBytesPerSec;
-    uint16                field_53;
-    uint16                m_wBitsPerSample;
-    uint16                field_57;
+    WAVEFORMATEX          m_WaveFormat;
     uint16                field_59;
 #ifdef USE_DSOUND
     char                  _pad;
@@ -83,7 +77,7 @@ private:
 VALIDATE_SIZE(CAEAudioChannel, 0x60);
 VALIDATE_OFFSET(CAEAudioChannel, m_pDirectSound, 0x4);
 VALIDATE_OFFSET(CAEAudioChannel, m_nChannelId, 0x3A);
-VALIDATE_OFFSET(CAEAudioChannel, m_nBufferFrequency, 0x4B);
-VALIDATE_OFFSET(CAEAudioChannel, m_wFrequencyMult, 0x49);
+//VALIDATE_OFFSET(CAEAudioChannel, m_nBufferFrequency, 0x4B);
+//VALIDATE_OFFSET(CAEAudioChannel, m_wFrequencyMult, 0x49);
 
 extern uint32& g_numSoundChannelsUsed;

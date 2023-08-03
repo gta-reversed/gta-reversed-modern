@@ -15,6 +15,7 @@
 #include "AEWaveDecoder.h"
 #include "AEWMADecoder.h"
 #include "AEVorbisDecoder.h"
+#include "AEFlacDecoder.h"
 
 #include "FileMgr.h"
 #include "MenuManager.h"

@@ -25,25 +25,25 @@ void CAEAudioChannel::InjectHooks() {
 
 // 0x4D7890
 CAEAudioChannel::CAEAudioChannel(IDirectSound* directSound, uint16 channelId, uint32 samplesPerSec, uint16 bitsPerSample) {
-    m_wBitsPerSample      = bitsPerSample;
     m_pDirectSound        = directSound;
     m_nChannelId          = channelId;
-    m_nBytesPerSec        = samplesPerSec * (bitsPerSample / 8);
     m_nFlags              = 0;
     m_nBufferStatus       = 0;
     m_nFrequency          = samplesPerSec;
-    field_57              = 0;
-    field_53              = 2;
-    m_wFrequencyMult      = 1;
-    m_nBufferFrequency    = samplesPerSec;
     m_nOriginalFrequency  = samplesPerSec;
-    field_47              = 1;
     m_fVolume             = -100.0f;
     m_pDirectSoundBuffer  = nullptr;
     m_pDirectSound3DBuffer= nullptr;
     m_bNoScalingFactor    = false;
     m_bLooped             = false;
     field_45              = 0;
+    m_WaveFormat.wFormatTag = WAVE_FORMAT_PCM;
+    m_WaveFormat.nChannels = 1;
+    m_WaveFormat.nSamplesPerSec = samplesPerSec;
+    m_WaveFormat.nAvgBytesPerSec = samplesPerSec * (bitsPerSample / 8);
+    m_WaveFormat.nBlockAlign = 2;
+    m_WaveFormat.wBitsPerSample = bitsPerSample;
+    m_WaveFormat.cbSize = 0;
 }
 
 // 0x4D7910
@@ -145,12 +145,12 @@ uint32 CAEAudioChannel::GetCurrentPlaybackPosition() const {
 
 // 0x4D79D0
 uint32 CAEAudioChannel::ConvertFromBytesToMS(uint32 bytes) const {
-    return CAEAudioUtility::ConvertFromBytesToMS(bytes, m_nBufferFrequency, m_wFrequencyMult);
+    return CAEAudioUtility::ConvertFromBytesToMS(bytes, m_WaveFormat.nSamplesPerSec, m_WaveFormat.nChannels);
 }
 
 // 0x4D79F0
 uint32 CAEAudioChannel::ConvertFromMsToBytes(uint32 ms) const {
-    return CAEAudioUtility::ConvertFromMSToBytes(ms, m_nBufferFrequency, m_wFrequencyMult);
+    return CAEAudioUtility::ConvertFromMSToBytes(ms, m_WaveFormat.nSamplesPerSec, m_WaveFormat.nChannels);
 }
 
 // 0x4D7A50

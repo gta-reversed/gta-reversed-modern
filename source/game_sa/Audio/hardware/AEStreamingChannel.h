@@ -6,29 +6,31 @@ class CAEStreamingDecoder;
 
 class NOTSA_EXPORT_VTABLE CAEStreamingChannel : public CAEAudioChannel {
 public:
-    uint8                field_60;
-    uint8                field_61;
-    bool                 m_bPrepareNewStream;
-    uint8                field_63;
-    uint8                field_64;
-    uint8                m_bFxEnabled;
-    uint8                m_nCurrentlyLoadedChunk;
-    uint8                field_67;
-    void*                m_pBuffer;
+    uint8                field_60{0u};
+    uint8                field_61{0u};
+    bool                 m_bPrepareNewStream{false};
+    uint8                m_bWrongSampleRate{false};
+    uint8                field_64{0u};
+    uint8                m_bFxEnabled{false};
+    uint8                m_nCurrentlyLoadedChunk{0u};
+    uint8                field_67{0u};
+    void*                m_pBuffer{nullptr};
     uint8                m_aBuffer[0x60000];
-    CAEStreamingDecoder* m_pStreamingDecoder;
-    CAEStreamingDecoder* m_pNextStreamingDecoder;
-    uint32               m_nState;
-    uint32               m_nStreamPlayTimeMs;
+    CAEStreamingDecoder* m_pStreamingDecoder{nullptr};
+    CAEStreamingDecoder* m_pNextStreamingDecoder{nullptr};
+    uint32               m_nState{(uint32)-6};
+    uint32               m_nStreamPlayTimeMs{0u};
     uint32               m_nPlayTime;
     uint32               field_60084;
-    int32                field_60088;
+    int32                field_60088{0u};
     uint64               m_nLastUpdateTime;
     IDirectSoundBuffer*  m_pSilenceBuffer;
-    float                m_fSomething;
+    float                m_fSomething{1.0f};
 
 public:
-    CAEStreamingChannel(IDirectSound* directSound, uint16 channelId);
+    CAEStreamingChannel(IDirectSound* directSound, uint16 channelId)
+        : CAEAudioChannel(directSound, channelId, 48000, 16)
+    {} // 0x4F1800
     ~CAEStreamingChannel() override;
 
     void   Service() override;
