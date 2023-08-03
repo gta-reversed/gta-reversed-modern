@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "AEStreamingChannel.h"
+#include <AESmoothFadeThread.h>
 
 // 0x4F2200
 CAEStreamingChannel::~CAEStreamingChannel() {
@@ -36,12 +37,52 @@ void CAEStreamingChannel::InitialiseSilence() {
 
 // 0x4F1FF0
 void CAEStreamingChannel::SetReady() {
-    plugin::CallMethod<0x4F1FF0, CAEStreamingChannel*>(this);
+    switch (m_nState) {
+    case StreamingChannelState::UNK_MINUS_5:
+        AESmoothFadeThread.CancelFade(m_pDirectSoundBuffer);
+        m_pDirectSoundBuffer->Stop();
+        m_nState = StreamingChannelState::UNK_MINUS_6;
+
+        break;
+    case StreamingChannelState::UNK_MINUS_6:
+        if (m_pStreamingDecoder)
+            m_nState = StreamingChannelState::UNK_MINUS_2;
+        break;
+    }
 }
 
 // 0x4F1F30
 void CAEStreamingChannel::SetBassEQ(IDirectSoundFXParamEq* paramEq, float gain) {
-    plugin::CallMethod<0x4F1F30, CAEStreamingChannel*, IDirectSoundFXParamEq*, float>(this, paramEq, gain);
+    if (!paramEq) {
+        if (m_bFxEnabled)
+            RemoveFX();
+
+        return;
+    }
+
+    if (!m_bFxEnabled && !AddFX())
+        return;
+
+    // per channel?
+    for (auto i = 0; i < 2; i++) {
+        auto* buffer8 = (IDirectSoundBuffer8*)(m_pDirectSoundBuffer);
+
+        if (FAILED(buffer8->GetObjectInPath(
+            GUID_All_Objects,
+            i,
+            IID_IDirectSoundFXParamEq,
+            reinterpret_cast<LPVOID*>(&paramEq)
+        )))
+            continue;
+
+        // TODO: check
+        DSFXParamEq params{};
+        paramEq->GetAllParameters(&params);
+        params.fGain *= gain;
+        paramEq->SetAllParameters(&params);
+
+        paramEq->Release();
+    }
 }
 
 // 0x4F2060
@@ -139,8 +180,8 @@ void CAEStreamingChannel::InjectHooks() {
     RH_ScopedInstall(PrepareStream, 0x4F23D0, { .reversed = false });
     RH_ScopedInstall(Initialise, 0x4F22F0, { .reversed = false });
     RH_ScopedInstall(Pause, 0x4F2170, { .reversed = false });
-    RH_ScopedInstall(SetReady, 0x4F1FF0, { .reversed = false });
-    RH_ScopedInstall(SetBassEQ, 0x4F1F30, { .reversed = false });
+    RH_ScopedInstall(SetReady, 0x4F1FF0);
+    RH_ScopedInstall(SetBassEQ, 0x4F1F30, { .reversed = true });
     RH_ScopedInstall(FillBuffer, 0x4F1E20, { .reversed = false });
     RH_ScopedInstall(InitialiseSilence, 0x4F1C70);
     RH_ScopedInstall(SetNextStream, 0x4F1DE0, { .reversed = false });
