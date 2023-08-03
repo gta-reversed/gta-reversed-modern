@@ -86,8 +86,32 @@ void CAEStreamingChannel::SetBassEQ(IDirectSoundFXParamEq* paramEq, float gain) 
 }
 
 // 0x4F2060
-void CAEStreamingChannel::SetFrequencyScalingFactor(float a2) {
-    plugin::CallMethod<0x4F2060, CAEStreamingChannel*, float>(this, a2);
+void CAEStreamingChannel::SetFrequencyScalingFactor(float factor) {
+    if (factor == 0.0f) {
+        if (!m_pDirectSoundBuffer || m_nState == StreamingChannelState::UNK_MINUS_7 || !IsBufferPlaying())
+            return;
+
+        if (!AESmoothFadeThread.RequestFade(m_pDirectSoundBuffer, -100.0f, 35, true))
+            m_pDirectSoundBuffer->Stop();
+
+        m_nState = StreamingChannelState::UNK_MINUS_7;
+    } else {
+        SetFrequency(static_cast<uint32>((float)m_nOriginalFrequency * factor));
+
+        if (m_nState == StreamingChannelState::UNK_MINUS_7)
+            return;
+
+        m_nState = StreamingChannelState::UNK_MINUS_1;
+
+        if (!m_pDirectSoundBuffer)
+            return;
+
+        m_pDirectSoundBuffer->SetVolume(-10'000);
+        m_pDirectSoundBuffer->Play(0, 0, m_bLooped ? DSBPLAY_LOOPING : 0);
+
+        if (!AESmoothFadeThread.RequestFade(m_pDirectSoundBuffer, m_fVolume, 35, true))
+            m_pDirectSoundBuffer->SetVolume(static_cast<int32>(m_fVolume * 100.0f));
+    }
 }
 
 // 0x4F1870
@@ -112,12 +136,23 @@ void CAEStreamingChannel::SetNextStream(CAEStreamingDecoder* decoder) {
 
 // 0x4F1A60
 int32 CAEStreamingChannel::GetPlayingTrackID() {
-    return plugin::CallMethodAndReturn<int32, 0x4F1A60, CAEStreamingChannel*>(this);
+    switch (m_nState) {
+    case StreamingChannelState::UNK_MINUS_3:
+    case StreamingChannelState::UNK_MINUS_4:
+    case StreamingChannelState::UNK_MINUS_1:
+    case StreamingChannelState::UNK_MINUS_5:
+        if (m_pStreamingDecoder)
+            return m_pStreamingDecoder->GetStreamID();
+
+        [[fallthrough]];
+    default:
+        return -1;
+    }
 }
 
 // 0x4F1A40
 int32 CAEStreamingChannel::GetActiveTrackID() {
-    return plugin::CallMethodAndReturn<int32, 0x4F1A40, CAEStreamingChannel*>(this);
+    return m_pStreamingDecoder ? m_pStreamingDecoder->GetStreamID() : -1;
 }
 
 // 0x4F18A0
@@ -132,7 +167,19 @@ bool CAEStreamingChannel::AddFX() {
 
 // 0x4F1C20
 void CAEStreamingChannel::RemoveFX() {
-    plugin::CallMethod<0x4F1C20, CAEStreamingChannel*>(this);
+    bool stopped{false};
+    if (bufferStatus.Bit0x1) {
+        m_pDirectSoundBuffer->Stop();
+        stopped = true;
+    }
+
+    auto* buffer8 = (IDirectSoundBuffer8*)m_pDirectSoundBuffer;
+    buffer8->SetFX(0, nullptr, nullptr);
+
+    if (stopped)
+        m_pDirectSoundBuffer->Play(0, 0, DSBPLAY_LOOPING);
+
+    m_bFxEnabled = false;
 }
 
 // 0x4F2040
@@ -151,18 +198,48 @@ uint16 CAEStreamingChannel::GetLength() {
 }
 
 // 0x4F1D40
-void CAEStreamingChannel::Play(int16 a2, int8 a3, float a4) {
-    plugin::CallMethod<0x4F1D40, CAEStreamingChannel*, int16, int8, float>(this, a2, a3, a4);
+void CAEStreamingChannel::Play(int16, int8 a3, float) {
+    if (!m_pStreamingDecoder || !m_pDirectSoundBuffer)
+        return;
+
+    SetOriginalFrequency(m_pStreamingDecoder->GetSampleRate());
+
+    if (m_nState != StreamingChannelState::UNK_MINUS_7)
+        field_61 = a3;
+
+    if (m_nState == StreamingChannelState::UNK_MINUS_5) {
+        AESmoothFadeThread.CancelFade(m_pDirectSoundBuffer);
+        m_pDirectSoundBuffer->Stop();
+
+        m_nState = StreamingChannelState::UNK_MINUS_6;
+    }
+
+    m_nState = StreamingChannelState::UNK_MINUS_1;
+    m_pDirectSoundBuffer->SetVolume(static_cast<int32>(m_fVolume * 100.0f));
+    m_pDirectSoundBuffer->Play(0, 0, DSBPLAY_LOOPING);
 }
 
 // 0x4F2170
 void CAEStreamingChannel::Pause() {
-    plugin::CallMethod<0x4F2170, CAEStreamingChannel*>(this);
+    if (!m_pDirectSoundBuffer)
+        return;
+
+    if (!AESmoothFadeThread.RequestFade(m_pDirectSoundBuffer, -100.0, 35, 1))
+        m_pDirectSoundBuffer->Stop();
+
+    m_nState = StreamingChannelState::UNK_MINUS_7;
 }
 
 // 0x4F1A90
 void CAEStreamingChannel::Stop() {
-    plugin::CallMethod<0x4F1A90, CAEStreamingChannel*>(this);
+    if (!AESmoothFadeThread.RequestFade(m_pDirectSoundBuffer, -100.0f, 35, true))
+        m_pDirectSoundBuffer->Stop();
+
+    // SA: dead code
+    if (false) {
+        m_nState = StreamingChannelState::UNK_MINUS_5;
+        field_60088 = 0;
+    }
 }
 
 // 0x4F2550
@@ -179,25 +256,25 @@ void CAEStreamingChannel::InjectHooks() {
     RH_ScopedInstall(SynchPlayback, 0x4F1870);
     RH_ScopedInstall(PrepareStream, 0x4F23D0, { .reversed = false });
     RH_ScopedInstall(Initialise, 0x4F22F0, { .reversed = false });
-    RH_ScopedInstall(Pause, 0x4F2170, { .reversed = false });
+    RH_ScopedInstall(Pause, 0x4F2170);
     RH_ScopedInstall(SetReady, 0x4F1FF0);
     RH_ScopedInstall(SetBassEQ, 0x4F1F30, { .reversed = true });
     RH_ScopedInstall(FillBuffer, 0x4F1E20, { .reversed = false });
     RH_ScopedInstall(InitialiseSilence, 0x4F1C70);
     RH_ScopedInstall(SetNextStream, 0x4F1DE0, { .reversed = false });
     RH_ScopedInstall(AddFX, 0x4F1AE0, { .reversed = false });
-    // RH_ScopedOverloadedInstall(Stop, "", 0x4F1A90, int8(CAEStreamingChannel::*)(bool));
-    RH_ScopedInstall(GetPlayingTrackID, 0x4F1A60, { .reversed = false });
-    RH_ScopedInstall(GetActiveTrackID, 0x4F1A40, { .reversed = false });
+    RH_ScopedInstall(Stop, 0x4F1A90);
+    RH_ScopedInstall(GetPlayingTrackID, 0x4F1A60);
+    RH_ScopedInstall(GetActiveTrackID, 0x4F1A40);
     RH_ScopedInstall(UpdatePlayTime, 0x4F18A0, { .reversed = false });
-    RH_ScopedInstall(RemoveFX, 0x4F1C20, { .reversed = false });
+    RH_ScopedInstall(RemoveFX, 0x4F1C20);
     RH_ScopedVirtualInstall(Service, 0x4F2550, { .reversed = false });
     RH_ScopedVirtualInstall(IsSoundPlaying, 0x4F2040, { .reversed = false });
     RH_ScopedVirtualInstall(GetPlayTime, 0x4F19E0, { .reversed = false });
     RH_ScopedVirtualInstall(GetLength, 0x4F1880, { .reversed = false });
-    RH_ScopedVirtualInstall(Play, 0x4F1D40, { .reversed = false });
-    // RH_ScopedVirtualOverloadedInstall(Stop, "", 0x4F21C0, int8(CAEStreamingChannel::*)());
-    RH_ScopedVirtualInstall(SetFrequencyScalingFactor, 0x4F2060, { .reversed = false });
+    RH_ScopedVirtualInstall(Play, 0x4F1D40);
+    // RH_ScopedVirtualOverloadedInstall(Stop, "", 0x4F21C0, int8(CAEStreamingChannel::*)()); <-- unused, maybe inlined?
+    RH_ScopedVirtualInstall(SetFrequencyScalingFactor, 0x4F2060);
 }
 
 // 0x4F1800

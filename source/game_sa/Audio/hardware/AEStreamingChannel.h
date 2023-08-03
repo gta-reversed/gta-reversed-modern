@@ -1,14 +1,16 @@
 #pragma once
 
 #include "AEAudioChannel.h"
-
-class CAEStreamingDecoder;
+#include "AEStreamingDecoder.h"
 
 enum class StreamingChannelState : int32 {
+    UNK_MINUS_7 = -7,
     UNK_MINUS_6 = -6,
     UNK_MINUS_5 = -5,
     UNK_MINUS_4 = -4,
+    UNK_MINUS_3 = -3,
     UNK_MINUS_2 = -2,
+    UNK_MINUS_1 = -1,
 };
 
 class NOTSA_EXPORT_VTABLE CAEStreamingChannel : public CAEAudioChannel {

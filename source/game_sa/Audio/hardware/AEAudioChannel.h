@@ -32,7 +32,12 @@ public:
     uint16                field_59;
 #ifdef USE_DSOUND
     char                  _pad;
-    uint32                m_nBufferStatus;
+    union {
+        struct {
+            bool Bit0x1 : 1;
+        } bufferStatus;
+        uint32 m_nBufferStatus;
+    };
 #endif
 
 public:
