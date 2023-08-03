@@ -22,6 +22,7 @@ public:
     auto GetInfoLabel()      const { return std::string_view{ m_InfoLabel }; }
     auto GetNaviLabel()      const { return std::string_view{ m_TextLabel }; }
     auto GetRect()           const { return CRect{ (float)m_fX1, (float)m_fY1, (float)m_fX2, (float)m_fY2 }; }
+    auto GetBB()             const { return CBox{ {(float)m_fX1, (float)m_fY1, (float)m_fZ1}, {(float)m_fX2, (float)m_fY2, (float)m_fZ2} }; }
 
 public:
     char       m_InfoLabel[8]{}; // Zone info `TheText.Get` key (Unsure)
