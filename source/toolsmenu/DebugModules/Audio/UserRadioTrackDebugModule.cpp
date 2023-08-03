@@ -4,6 +4,10 @@
 #include "AEUserRadioTrackManager.h"
 #include "UserRadioTrackDebugModule.h"
 
+#ifdef USERTRACK_FLAC_SUPPORT
+#include "FLAC/all.h"
+#endif
+
 using namespace ImGui;
 
 constexpr const char* AudioTypeFileNames[] = {"Unknown", "Vorbis", "WAV", "WMA", "QuickTime (MediaFoundation)", "FLAC"};
@@ -15,7 +19,6 @@ void UserRadioTrackDebugModule::RenderWindow() {
     }
 
     BeginGroup();
-
     Text("Supported decoders:\n");
     for (auto i = 1u; i < TOTAL_AUDIO_FILE_TYPE; i++) {
         Text("\t%s: %s\n", AudioTypeFileNames[i], AEUserRadioTrackManager.m_baDecodersSupported[i] ? "Supported" : "Unsupported");
@@ -32,6 +35,19 @@ void UserRadioTrackDebugModule::RenderWindow() {
             fs::path{AEUserRadioTrackManager.GetTrackPath(i)}.filename().string().c_str()
         );
     }
+
+#ifdef USERTRACK_FLAC_SUPPORT
+    static bool flacDecoderInit = false;
+    static bool runOnce = true;
+    if (std::exchange(runOnce, false)) {
+        auto* decoder = FLAC__stream_decoder_new();
+        flacDecoderInit = decoder != nullptr;
+    }
+    Text("libFLAC initialize status: %s\n", flacDecoderInit ? "Successful" : "Failed");
+#else
+    Text("libFLAC is not supported.\n");
+#endif
+
     EndGroup();
 }
 

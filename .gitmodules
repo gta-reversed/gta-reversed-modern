@@ -15,3 +15,6 @@
 	path = libs/tracy
 	url = https://github.com/wolfpld/tracy.git
 	
+[submodule "libs/flac"]
+	path = libs/flac
+	url = https://github.com/xiph/flac.git
