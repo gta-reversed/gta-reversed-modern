@@ -17,6 +17,7 @@
 
 // Extensions
 #define EXT_FAST_LOADER
+// #define USERTRACK_FLAC_SUPPORT
 
 #endif // !BAREBONES
 
