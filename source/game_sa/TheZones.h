@@ -13,7 +13,7 @@
 
 class CTheZones {
 public:
-    static inline auto&       ZonesVisited = StaticRef<std::array<bool, 100>, 0xBA3730>(); // Explored territories. Count: 100
+    static inline auto&       ZonesVisited = StaticRef<notsa::mdarray<bool, 10, 10>, 0xBA3730>(); // Explored territories. Count: 100
 
     static eLevelName& m_CurrLevel;
     static int32&      ZonesRevealed;                // Number of explored territories
@@ -32,8 +32,9 @@ public:
     static void ResetZonesRevealed();
     static void AssignZoneInfoForThisZone(int16 index);
     static bool ZoneIsEntirelyContainedWithinOtherZone(CZone* zone1, CZone* zone2);
+    static bool& GetZoneWasVisited(CVector2D pos); // NOTSA
+    static bool SetZoneWasVisited(CVector2D pos, bool locked); // NOTSA
     static bool GetCurrentZoneLockedOrUnlocked(CVector2D pos);
-    static bool SetCurrentZoneVisited(CVector2D pos, bool locked); // NOTSA
     // Returns true if point lies within zone
     static bool PointLiesWithinZone(const CVector* point, CZone* zone);
     // Returns eLevelName from position
@@ -46,7 +47,7 @@ public:
     static CZone* GetNavigationZone(uint16 index);
     // Returns pointer to zone by index
     static CZone* GetMapZone(uint16 index);
-    static long double Calc2DDistanceBetween2Zones(CZone* zone1, CZone* zone2);
+    static float Calc2DDistanceBetween2Zones(CZone* zone1, CZone* zone2);
 
     static void Init();
     static void SetCurrentZoneAsUnlocked();
@@ -79,5 +80,13 @@ public:
     
     static auto GetNavigationZones() {
         return std::span{NavigationZoneArray, (size_t)TotalNumberOfNavigationZones};
+    }
+
+    static auto GetMapZones() {
+        return std::span{MapZoneArray, (size_t)TotalNumberOfMapZones};
+    }
+
+    static auto GetZoneInfos() {
+        return ZoneInfoArray | rng::views::take((size_t)TotalNumberOfZoneInfos);
     }
 };
