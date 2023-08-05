@@ -609,7 +609,7 @@ void CAudioEngine::Service() {
         m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED);
 
     int32 trackPlayTime = AEAudioHardware.GetTrackPlayTime();
-    AEAudioHardware.GetChannelPlayTimes(m_nBackgroundAudioChannel, nullptr);
+    //AEAudioHardware.GetChannelPlayTimes(m_nBackgroundAudioChannel, nullptr); // Does nothing
     if (field_0 && trackPlayTime == -4) {
         field_1 = true;
     } else if (field_1) {
