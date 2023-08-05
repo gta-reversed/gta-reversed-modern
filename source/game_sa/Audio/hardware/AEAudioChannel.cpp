@@ -193,3 +193,7 @@ bool CAEAudioChannel::Lost() const {
 
     return true;
 }
+
+bool CAEAudioChannel::SetReverbAndDepth(uint32 reverb, uint32 depth) {
+    return plugin::CallMethodAndReturn<bool, 0x4D7AA0>(this, reverb, depth);
+}
