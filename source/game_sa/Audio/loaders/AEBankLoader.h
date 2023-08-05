@@ -18,7 +18,7 @@ struct CAEBankSlotItem {
     uint32 m_nOffset;
     uint32 m_nLoopOffset;
     uint16 m_usSampleRate;
-    uint16 m_usSoundHeadroom;
+    int16  m_usSoundHeadroom;
 };
 VALIDATE_SIZE(CAEBankSlotItem, 0xC);
 
