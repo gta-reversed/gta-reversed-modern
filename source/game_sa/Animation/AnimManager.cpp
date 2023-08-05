@@ -33,20 +33,20 @@ void CAnimManager::InjectHooks() {
     RH_ScopedOverloadedInstall(AddAnimation, "hier", 0x4D4330, CAnimBlendAssociation*(*)(RpClump*, CAnimBlendHierarchy*, int32));
     RH_ScopedInstall(AddAnimationAndSync, 0x4D3B30);
     RH_ScopedInstall(AddAnimAssocDefinition, 0x4D3BA0);
-    RH_ScopedInstall(AddAnimToAssocDefinition, 0x4D3C80, { .reversed = false });
-    RH_ScopedInstall(CreateAnimAssocGroups, 0x4D3CC0, { .reversed = false });
-    RH_ScopedInstall(RegisterAnimBlock, 0x4D3E50, { .reversed = false });
-    RH_ScopedInstall(RemoveLastAnimFile, 0x4D3ED0, { .reversed = false });
-    RH_ScopedInstall(RemoveAnimBlock, 0x4D3F40, { .reversed = false });
-    RH_ScopedInstall(AddAnimBlockRef, 0x4D3FB0, { .reversed = false });
-    RH_ScopedInstall(RemoveAnimBlockRefWithoutDelete, 0x4D3FF0, { .reversed = false });
-    RH_ScopedInstall(GetNumRefsToAnimBlock, 0x4D4010, { .reversed = false });
-    RH_ScopedInstall(UncompressAnimation, 0x4D41C0, { .reversed = false });
-    RH_ScopedInstall(RemoveFromUncompressedCache, 0x4D42A0, { .reversed = false });
+    RH_ScopedInstall(AddAnimToAssocDefinition, 0x4D3C80);
+    RH_ScopedInstall(CreateAnimAssocGroups, 0x4D3CC0);
+    RH_ScopedInstall(RegisterAnimBlock, 0x4D3E50);
+    RH_ScopedInstall(RemoveLastAnimFile, 0x4D3ED0);
+    RH_ScopedInstall(RemoveAnimBlock, 0x4D3F40);
+    RH_ScopedInstall(AddAnimBlockRef, 0x4D3FB0);
+    RH_ScopedInstall(RemoveAnimBlockRefWithoutDelete, 0x4D3FF0);
+    RH_ScopedInstall(GetNumRefsToAnimBlock, 0x4D4010);
+    RH_ScopedInstall(UncompressAnimation, 0x4D41C0);
+    RH_ScopedInstall(RemoveFromUncompressedCache, 0x4D42A0);
     RH_ScopedOverloadedInstall(BlendAnimation, "id", 0x4D4610, CAnimBlendAssociation*(*)(RpClump*, AssocGroupId, AnimationId, float), { .reversed = false });
     RH_ScopedOverloadedInstall(BlendAnimation, "hier", 0x4D4410, CAnimBlendAssociation*(*)(RpClump*, CAnimBlendHierarchy*, int32, float), { .reversed = false });
     RH_ScopedInstall(LoadAnimFiles, 0x4D5620);
-    RH_ScopedInstall(LoadAnimFile, 0x4D47F0, { .reversed = false });
+    RH_ScopedInstall(LoadAnimFile, 0x4D47F0, {.reversed = false});
 }
 
 struct IfpHeader {
@@ -183,9 +183,9 @@ const char* CAnimManager::GetAnimBlockName(AssocGroupId groupId) {
 }
 
 // NOTSA
-AssocGroupId CAnimManager::GetAnimationGroupId(const char* name) {
-    for (auto i = 0; i < ms_numAnimAssocDefinitions; i++) {
-        if (std::string_view{ name } == GetAnimGroupName((AssocGroupId)i)) {
+AssocGroupId CAnimManager::GetAnimationGroupIdByName(notsa::ci_string_view name) {
+    for (const auto& [i, gd] : notsa::enumerate(GetAssocGroupDefs())) {
+        if (gd.groupName == name) {
             return (AssocGroupId)i;
         }
     }
@@ -298,11 +298,10 @@ bool IsClumpSkinned(RpClump *clump) {
 
 // 0x4D3CC0
 void CAnimManager::CreateAnimAssocGroups() {
-    for (auto i = 0; i < ms_numAnimAssocDefinitions; i++) {
-        const auto group = &ms_aAnimAssocGroups[i];
+    for (auto&& [i, group] : notsa::enumerate(GetAssocGroups())) {
         const auto def   = &ms_aAnimAssocDefinitions[i];
         const auto block = GetAnimationBlock(def->blockName);
-        if (block == nullptr || !block->bLoaded || group->m_pAssociations) {
+        if (block == nullptr || !block->bLoaded || group.m_pAssociations) {
             continue;
         }
 
@@ -312,11 +311,11 @@ void CAnimManager::CreateAnimAssocGroups() {
             RpAnimBlendClumpInit(clump);
         }
 
-        group->m_nGroupID = i;
-        group->m_nIdOffset = def->animDesc->animId;
-        group->CreateAssociations(def->blockName, clump, const_cast<char**>(def->animNames), def->animsCount); // todo: remove const_cast
-        for (auto j = 0u; j < group->m_nNumAnimations; j++) {
-            group->GetAnimation(def->animDesc[j].animId)->m_nFlags |= def->animDesc[j].flags;
+        group.m_nGroupID = i;
+        group.m_nIdOffset = def->animDesc->animId;
+        group.CreateAssociations(def->blockName, clump, const_cast<char**>(def->animNames), def->animsCount); // todo: remove const_cast
+        for (auto j = 0u; j < group.m_nNumAnimations; j++) {
+            group.GetAnimation(def->animDesc[j].animId)->m_nFlags |= def->animDesc[j].flags;
         }
 
         if (clump) {
@@ -396,13 +395,35 @@ int32 CAnimManager::GetNumRefsToAnimBlock(int32 index) {
 }
 
 // 0x4D41C0
-void CAnimManager::UncompressAnimation(CAnimBlendHierarchy* hier) {
-    return plugin::Call<0x4D41C0, CAnimBlendHierarchy*>(hier);
+void CAnimManager::UncompressAnimation(CAnimBlendHierarchy* h) {
+    if (h->m_bKeepCompressed) {
+        if (h->m_fTotalTime == 0.f) {
+            h->CalcTotalTimeCompressed();
+        }
+    } else if (h->m_bIsCompressed) {
+        auto l = ms_animCache.Insert(h);
+        if (!l) { // Not more free links?
+            // Remove least recently added item
+            const auto llr = ms_animCache.GetTail();
+            llr->data->RemoveUncompressedData();
+            RemoveFromUncompressedCache(llr->data);
+            
+            // Now try again, this time it should succeed
+            VERIFY(l = ms_animCache.Insert(h));
+        }
+        h->m_Link = l;
+        h->Uncompress();
+    } else if (h->m_Link) { // Already uncompressed, add to cache
+        h->m_Link->Insert(ms_animCache.GetHead());
+    }
 }
 
 // 0x4D42A0
-void CAnimManager::RemoveFromUncompressedCache(CAnimBlendHierarchy* hier) {
-    return plugin::Call<0x4D42A0, CAnimBlendHierarchy*>(hier);
+void CAnimManager::RemoveFromUncompressedCache(CAnimBlendHierarchy* h) {
+    if (const auto l = h->m_Link) {
+        l->data->m_Link = nullptr;
+        ms_animCache.Remove(l);
+    }
 }
 
 // 0x4D4410
@@ -529,8 +550,6 @@ void CAnimManager::LoadAnimFiles() {
 
 // 0x4D47F0
 void CAnimManager::LoadAnimFile(RwStream* stream, bool loadCompressed, char const(*uncompressedAnimations)[32]) {
-    return plugin::Call<0x4D47F0, RwStream*, bool, char const(*)[32]>(stream, loadCompressed, uncompressedAnimations);
-
     RwStreamRead(stream, &header, sizeof(IfpHeader));
     if (header.ident == '3PNA' || header.ident == '2PNA') {
         LoadAnimFile_ANP23(stream, loadCompressed, header.ident == '3PNA');
@@ -544,7 +563,6 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
     if ((x)&3)                                                                                                                                                                     \
     (x) += 4 - ((x)&3)
 
-    /*
     IfpHeader info, name, dgan, cpan, anim;
     char buf[256];
     float* fbuf = (float*)buf;
@@ -567,7 +585,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
         }
     } else {
         animBlock = &ms_aAnimBlocks[ms_numAnimBlocks++];
-        strncpy_s(animBlock->szName, buf + 4, MAX_ANIMBLOCK_NAME);
+        strncpy_s(animBlock->szName, buf + 4, MAX_ANIM_BLOCK_NAME);
         animBlock->animationCount = *(int*)buf;
         animBlock->startAnimation = ms_numAnimations;
         animBlock->animationStyle = GetFirstAssocGroup(animBlock->szName);
@@ -578,7 +596,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
 
     int animIndex = animBlock->startAnimation;
     for (auto j = 0; j < animBlock->animationCount; j++) {
-        assert(animIndex < ARRAY_SIZE(ms_aAnimations));
+        assert(animIndex < (int32)std::size(ms_aAnimations));
         CAnimBlendHierarchy* hier = &ms_aAnimations[animIndex++];
 
         // animation name
@@ -589,7 +607,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
         hier->SetName(buf);
 
         //#ifdef ANIM_COMPRESSION
-        bool compressHier = compress;
+        bool isCompressed = compress;
         //#else
         //        bool compressHier = false;
         //#endif
@@ -598,32 +616,36 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
                 //if (!stricmp(uncompressedAnims[i], buf))
                 if (CKeyGen::GetUppercaseKey(uncompressedAnims[i]) == hier->m_hashKey)// {
                     //debug("Loading %s uncompressed\n", hier->name);
-                    compressHier = false;
+                    isCompressed = false;
                 //}
             }
         }
 
-        hier->m_bRunningCompressed = compressHier;
+        hier->m_bIsCompressed = isCompressed;
         hier->m_bKeepCompressed = false;
 
         // DG info has number of nodes/sequences
         RwStreamRead(stream, (char*)&dgan, sizeof(IfpHeader));
         ROUND_SIZE(dgan.size);
+
         RwStreamRead(stream, (char*)&info, sizeof(IfpHeader));
         ROUND_SIZE(info.size);
+
         RwStreamRead(stream, buf, info.size);
         int nSeq = *(int*)buf;
-        hier->numSequences = nSeq;
-        //hier->sequences = (CAnimBlendSequence*)CMemoryMgr::Malloc(nSeq * sizeof(CAnimBlendSequence));
-        hier->sequences = new CAnimBlendSequence[nSeq];
+        hier->m_nSeqCount = nSeq;
+        hier->m_pSequences = new CAnimBlendSequence[nSeq]; //= (CAnimBlendSequence*)CMemoryMgr::Malloc(nSeq * sizeof(CAnimBlendSequence));
 
-        for (auto k = 0; k < nSeq; k++) { // or seq++ ?
-            CAnimBlendSequence* seq = &hier->sequences[k];
+        for (auto s = 0; s < nSeq; s++) { // or seq++ ?
+            CAnimBlendSequence* seq = &hier->m_pSequences[s];
+
             // Each node has a name and key frames
             RwStreamRead(stream, &cpan, sizeof(IfpHeader));
             ROUND_SIZE(cpan.size);
+
             RwStreamRead(stream, &anim, sizeof(IfpHeader));
             ROUND_SIZE(anim.size);
+
             RwStreamRead(stream, buf, anim.size);
             int numFrames = *(int*)(buf + 28);
             seq->SetName(buf);
@@ -638,15 +660,17 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
             RwStreamRead(stream, &info, sizeof(info));
             //if (numFrames == 0)
             //    continue;
-            if (strncmp(info.ident, "KRTS", 4) == 0) {
+
+            if (memcmp(&info.ident, "KRTS", 4) == 0) {
                 hasScale = true;
-                seq->SetNumFrames(numFrames, true, compressHier, NULL);
-            } else if (strncmp(info.ident, "KRT0", 4) == 0) {
+                seq->SetNumFrames(numFrames, true, isCompressed, NULL);
+            } else if (memcmp(&info.ident, "KRT0", 4) == 0) {
                 hasTranslation = true;
-                seq->SetNumFrames(numFrames, true, compressHier, NULL);
-            } else if (strncmp(info.ident, "KR00", 4) == 0) {
-                seq->SetNumFrames(numFrames, false, compressHier, NULL);
+                seq->SetNumFrames(numFrames, true, isCompressed, NULL);
+            } else if (memcmp(&info.ident, "KR00", 4) == 0) {
+                seq->SetNumFrames(numFrames, false, isCompressed, NULL);
             }
+
             //if (seq->numFrames)
             // if(strstr(seq->name, "L Toe"))
             //	debug("anim %s has toe keyframes\n", hier->name); // BUG: seq->name
@@ -658,14 +682,14 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
                     rot.Conjugate();
                     CVector trans(fbuf[4], fbuf[5], fbuf[6]);
 
-                    if (compressHier) {
-                        KeyFrameTransCompressed* kf = (KeyFrameTransCompressed*)seq->GetKeyFrameCompressed(l);
+                    if (isCompressed) {
+                        KeyFrameTransCompressed* kf = (KeyFrameTransCompressed*)seq->GetCompressedFrame(l);
                         kf->SetRotation(rot);
                         kf->SetTranslation(trans);
                         // scaling ignored
                         kf->SetTime(fbuf[10]); // absolute time here
                     } else {
-                        KeyFrameTrans* kf = (KeyFrameTrans*)seq->GetKeyFrame(l);
+                        KeyFrameTrans* kf = (KeyFrameTrans*)seq->GetUncompressedFrame(l);
                         kf->rotation = rot;
                         kf->translation = trans;
                         // scaling ignored
@@ -677,13 +701,13 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
                     rot.Conjugate();
                     CVector trans(fbuf[4], fbuf[5], fbuf[6]);
 
-                    if (compressHier) {
-                        KeyFrameTransCompressed* kf = (KeyFrameTransCompressed*)seq->GetKeyFrameCompressed(l);
+                    if (isCompressed) {
+                        KeyFrameTransCompressed* kf = (KeyFrameTransCompressed*)seq->GetCompressedFrame(l);
                         kf->SetRotation(rot);
                         kf->SetTranslation(trans);
                         kf->SetTime(fbuf[7]); // absolute time here
                     } else {
-                        KeyFrameTrans* kf = (KeyFrameTrans*)seq->GetKeyFrame(l);
+                        KeyFrameTrans* kf = (KeyFrameTrans*)seq->GetUncompressedFrame(l);
                         kf->rotation = rot;
                         kf->translation = trans;
                         kf->deltaTime = fbuf[7]; // absolute time here
@@ -693,12 +717,12 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
                     CQuaternion rot(fbuf[0], fbuf[1], fbuf[2], fbuf[3]);
                     rot.Conjugate();
 
-                    if (compressHier) {
-                        KeyFrameCompressed* kf = (KeyFrameCompressed*)seq->GetKeyFrameCompressed(l);
+                    if (isCompressed) {
+                        KeyFrameCompressed* kf = (KeyFrameCompressed*)seq->GetCompressedFrame(l);
                         kf->SetRotation(rot);
                         kf->SetTime(fbuf[4]); // absolute time here
                     } else {
-                        KeyFrame* kf = (KeyFrame*)seq->GetKeyFrame(l);
+                        KeyFrame* kf = (KeyFrame*)seq->GetUncompressedFrame(l);
                         kf->rotation = rot;
                         kf->deltaTime = fbuf[4]; // absolute time here
                     }
@@ -706,7 +730,7 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
             }
         }
 
-        if (!compressHier) {
+        if (!isCompressed) {
             hier->RemoveQuaternionFlips();
             hier->CalcTotalTime();
         }
@@ -715,26 +739,26 @@ inline void CAnimManager::LoadAnimFile_ANPK(RwStream* stream, bool compress, con
     if (animIndex > ms_numAnimations) {
         ms_numAnimations = animIndex;
     }
-    */
+    
 #undef ROUND_SIZE
 }
 
 // NOTSA
 inline void CAnimManager::LoadAnimFile_ANP23(RwStream* stream, bool compress, bool isANP3) {
     char buf[256];
-    // char name[24];
+    char blockName[24];
     int nAnims, nSeq;
 
-    RwStreamRead(stream, &buf, 24);   // animation name
-    RwStreamRead(stream, &nAnims, 4);
+    RwStreamRead(stream, &blockName, sizeof(blockName));
+    RwStreamRead(stream, &nAnims, sizeof(nAnims));
 
-    CAnimBlock* animBlock = GetAnimationBlock(buf);
+    CAnimBlock* animBlock = GetAnimationBlock(blockName);
     if (animBlock) {
         if (animBlock->animationCount == 0) {
             animBlock->animationCount = nAnims;
             animBlock->startAnimation = ms_numAnimations;
         }
-    } else {
+    } else { // Register a new block
         animBlock = &ms_aAnimBlocks[ms_numAnimBlocks++];
         strncpy_s(animBlock->szName, buf, MAX_ANIM_BLOCK_NAME);
         animBlock->animationCount = nAnims;
@@ -808,7 +832,7 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* stream, bool compress, bo
             }
             if (!bInvalidType) {
                 if (k == 0) {
-                    hier->m_bRunningCompressed = bIsCompressed;
+                    hier->m_bIsCompressed = bIsCompressed;
                 }
 
                 seq->SetNumFrames(sdata.frames_count, bIsRoot, bIsCompressed, st);
@@ -821,7 +845,7 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* stream, bool compress, bo
                 }
             }
         }
-        if (!hier->m_bRunningCompressed) {
+        if (!hier->m_bIsCompressed) {
             hier->RemoveQuaternionFlips();
             hier->CalcTotalTime();
         }

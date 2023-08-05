@@ -11,6 +11,8 @@
 #include "AnimBlendAssociation.h"
 #include "AnimBlock.h"
 
+#include <extensions/ci_string.hpp>
+
 constexpr auto MAX_ANIM_BLOCK_NAME = 16;
 constexpr auto NUM_ANIM_ASSOC_GROUPS = 118;
 constexpr auto NUM_ANIM_BLOCKS = 180;
@@ -52,7 +54,7 @@ public:
     static CAnimBlendHierarchy* GetAnimation(const char* animName, const CAnimBlock* animBlock);
     static const char* GetAnimGroupName(AssocGroupId groupId);
     static const char* GetAnimBlockName(AssocGroupId groupId);
-    static AssocGroupId GetAnimationGroupId(const char* name);
+    static AssocGroupId GetAnimationGroupIdByName(notsa::ci_string_view name);
     static CAnimBlendStaticAssociation* GetAnimAssociation(AssocGroupId groupId, AnimationId animId);
     static CAnimBlendStaticAssociation* GetAnimAssociation(AssocGroupId groupId, const char* animName);
     static CAnimBlendAssociation* AddAnimationToClump(RpClump* clump, CAnimBlendAssociation* anim); // NOTSA - Internal
@@ -82,7 +84,8 @@ public:
     static AnimationId GetRandomGangTalkAnim();
 
     static auto GetAnimBlocks() { return ms_aAnimBlocks | rng::views::take(ms_numAnimBlocks); }
-    static auto GetAssocGroups() { return std::span(ms_aAnimAssocGroups, ms_numAnimAssocDefinitions); }
+    static auto GetAssocGroups() { return std::span{ms_aAnimAssocGroups, ms_numAnimAssocDefinitions}; }
+    static auto GetAssocGroupDefs() { return std::span{ms_aAnimAssocDefinitions, ms_numAnimAssocDefinitions}; }
 private:
     static void LoadAnimFile_ANPK(RwStream* stream, bool compress, const char (*uncompressedAnims)[32]);
     static void LoadAnimFile_ANP23(RwStream* stream, bool compress, bool isANP3);
