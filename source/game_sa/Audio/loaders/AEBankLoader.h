@@ -58,12 +58,15 @@ struct tPakLookup {
 VALIDATE_SIZE(tPakLookup, 0x34);
 
 // NOTSA
+#pragma warning(push)
+#pragma warning(disable : 4200) // nonstandard extension used: zero-sized array in struct/union
 struct CdAudioStream {
     int16 m_nSoundCount;
     int16 __pad;
     CAEBankSlotItem m_aSlotItems[400];
     uint8 m_aBankData[]; // uint16 samples?
 };
+#pragma warning(pop)
 VALIDATE_SIZE(CdAudioStream, 0x12C4 /* + samples*/);
 
 class CAESoundRequest {
