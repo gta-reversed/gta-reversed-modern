@@ -12,19 +12,14 @@
 
 class CZoneInfo {
 public:
-    uint8  GangDensity[10];
-    uint8  DrugDealerCounter; /// Counter updated in `UpdateDealerStrengths`. Only used durning gang wars. Max value is the size of the array in the beforementioned function (15 currently)
-    CRGBA  ZoneColor;
-    union {
-        struct {
-            uint8 zonePopulationType : 5;
-            uint8 radarMode : 2;
-            uint8 noCops : 1;
-            uint8 zonePopulationRace : 4; // Bitfield for race allowed in the zone. See `ePedRace`. Default value (RACE_DEFAULT) isn't counted. See `IsPedAppropriateForCurrentZone` for usage example.
-        };
-        struct {
-            uint8 Flags1, Flags2;
-        };
+    uint8  GangDensity[10]{};
+    uint8  DrugDealerCounter{}; /// Counter updated in `UpdateDealerStrengths`. Only used durning gang wars. Max value is the size of the array in the beforementioned function (15 currently)
+    CRGBA  ZoneColor{};
+    struct {
+        uint8 zonePopulationType : 5{ 5 };
+        uint8 radarMode : 2{};
+        uint8 noCops : 1{};
+        uint8 zonePopulationRace : 4{0b1111}; // Bitfield for race allowed in the zone. See `ePedRace`. Default value (RACE_DEFAULT) isn't counted. See `IsPedAppropriateForCurrentZone` for usage example.
     };
 
     auto GetSumOfGangDensity() const {
