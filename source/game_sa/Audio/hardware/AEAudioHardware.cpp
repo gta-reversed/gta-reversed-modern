@@ -3,6 +3,7 @@
 #include "AEAudioHardware.h"
 #include "AEMP3BankLoader.h"
 #include "AEMP3TrackLoader.h"
+#include "AEAudioEnvironment.h"
 
 CAEAudioHardware& AEAudioHardware = *reinterpret_cast<CAEAudioHardware*>(0xB5F8B8);
 
@@ -25,23 +26,23 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(LoadSound, 0x4D8ED0);
     RH_ScopedInstall(IsSoundLoaded, 0x4D8EF0);
     RH_ScopedInstall(GetSoundLoadingStatus, 0x4D8F00);
-    RH_ScopedInstall(StopSound, 0x4D88E0, { .reversed = false });
-    RH_ScopedInstall(SetChannelPosition, 0x4D8920, { .reversed = false });
-    RH_ScopedInstall(SetChannelFrequencyScalingFactor, 0x4D8960, { .reversed = false });
+    RH_ScopedInstall(StopSound, 0x4D88E0);
+    RH_ScopedInstall(SetChannelPosition, 0x4D8920);
+    RH_ScopedInstall(SetChannelFrequencyScalingFactor, 0x4D8960);
     RH_ScopedInstall(RescaleChannelVolumes, 0x4D8990, { .reversed = false });
-    RH_ScopedInstall(UpdateReverbEnvironment, 0x4D8DA0, { .reversed = false });
+    RH_ScopedInstall(UpdateReverbEnvironment, 0x4D8DA0);
     RH_ScopedInstall(GetSoundHeadroom, 0x4D8E30);
-    RH_ScopedInstall(EnableEffectsLoading, 0x4D8E40, { .reversed = false });
-    RH_ScopedInstall(DisableEffectsLoading, 0x4D8E50, { .reversed = false });
+    RH_ScopedInstall(EnableEffectsLoading, 0x4D8E40);
+    RH_ScopedInstall(DisableEffectsLoading, 0x4D8E50);
     RH_ScopedInstall(GetVirtualChannelSoundLengths, 0x4D8E90);
     RH_ScopedInstall(GetVirtualChannelSoundLoopStartTimes, 0x4D8EB0);
-    RH_ScopedInstall(PlayTrack, 0x4D8F10, { .reversed = false });
+    RH_ScopedInstall(PlayTrack, 0x4D8F10);
     RH_ScopedInstall(StartTrackPlayback, 0x4D8F30);
-    RH_ScopedInstall(StopTrack, 0x4D8F50, { .reversed = false });
-    RH_ScopedInstall(GetTrackPlayTime, 0x4D8F60, { .reversed = false });
-    RH_ScopedInstall(GetTrackLengthMs, 0x4D8F70, { .reversed = false });
-    RH_ScopedInstall(GetActiveTrackID, 0x4D8F80, { .reversed = false });
-    RH_ScopedInstall(GetPlayingTrackID, 0x4D8F90, { .reversed = false });
+    RH_ScopedInstall(StopTrack, 0x4D8F50);
+    RH_ScopedInstall(GetTrackPlayTime, 0x4D8F60);
+    RH_ScopedInstall(GetTrackLengthMs, 0x4D8F70);
+    RH_ScopedInstall(GetActiveTrackID, 0x4D8F80);
+    RH_ScopedInstall(GetPlayingTrackID, 0x4D8F90);
     RH_ScopedInstall(GetBeatInfo, 0x4D8FA0, { .reversed = false });
     RH_ScopedInstall(SetBassSetting, 0x4D94A0, { .reversed = false });
     RH_ScopedInstall(DisableBassEq, 0x4D94D0, { .reversed = false });
@@ -180,25 +181,28 @@ bool CAEAudioHardware::GetSoundLoadingStatus(uint16 bankId, uint16 sfxId, int16 
 // 0x4D88E0
 void CAEAudioHardware::StopSound(int16 channel, uint16 channelId) {
     if (channel >= 0 && channelId < m_anNumChannelsInSlot[channel]) {
-        auto channel_ = m_aChannels[channel + channelId];
-        if (channel_)
-            channel_->Stop();
+        const auto ch = m_aChannels[channel + channelId];
+        if (ch) {
+            ch->Stop();
+        }
     }
 }
 
 // 0x4D8920
 void CAEAudioHardware::SetChannelPosition(int16 channel, uint16 channelId, CVector* posn, uint8 unused) {
     if (channel >= 0 && channelId < m_anNumChannelsInSlot[channel]) {
-        auto channel_ = m_aChannels[channel + channelId];
-        if (channel_)
-            channel_->SetPosition(posn);
+        const auto ch = m_aChannels[channel + channelId];
+        if (ch) {
+            ch->SetPosition(posn);
+        }
     }
 }
 
 // 0x4D8960
 void CAEAudioHardware::SetChannelFrequencyScalingFactor(int16 channel, uint16 channelId, float factor) {
-    if (channel >= 0 && channelId < m_anNumChannelsInSlot[channel])
+    if (channel >= 0 && channelId < m_anNumChannelsInSlot[channel]) {
         m_afChannelsFrqScalingFactor[channel + channelId] = factor;
+    }
 }
 
 // 0x4D8990
@@ -208,7 +212,19 @@ void CAEAudioHardware::RescaleChannelVolumes() {
 
 // 0x4D8DA0
 void CAEAudioHardware::UpdateReverbEnvironment() {
-    plugin::CallMethod<0x4D8DA0, CAEAudioHardware*>(this);
+    int8 reverb;
+    int32 depth;
+    CAEAudioEnvironment::GetReverbEnvironmentAndDepth(&reverb, &depth);
+    if (reverb == m_nReverbEnvironment && depth == m_nReverbDepth) { // Nothing is changing?
+        return;
+    }
+    if (!rng::none_of(GetChannels(), [=](CAEAudioChannel* ch) { // Also covers the case of `m_nNumChannels == 0`
+        return ch && ch->SetReverbAndDepth(reverb, depth); }
+    )) {
+        return;
+    }
+    m_nReverbEnvironment = reverb;
+    m_nReverbDepth       = depth;
 }
 
 // 0x4D8E30
@@ -282,7 +298,40 @@ int32 CAEAudioHardware::GetPlayingTrackID() const {
 
 // 0x4D8FA0
 void CAEAudioHardware::GetBeatInfo(tBeatInfo* beatInfo) {
-    plugin::CallMethod<0x4D8FA0, CAEAudioHardware*, tBeatInfo*>(this, beatInfo);
+    const auto bi = &gBeatInfo;
+
+    if (m_pStreamThread.GetActiveTrackID() == -1) {
+    fail_no_beat_info:
+        bi->bBeatInfoPresent = false;
+        rng::fill(bi->BeatWindow, tTrackInfo::tBeat{});
+        return;
+    }
+
+    const auto tId       = m_pStreamThread.GetActiveTrackID();
+    const auto tInfo     = std::unique_ptr<tTrackInfo>{m_pMP3TrackLoader->GetTrackInfo(tId)};
+    const auto tPlayTime = m_pStreamThread.GetTrackPlayTime();
+
+    if (tPlayTime < 0 || tInfo->m_aBeats[0].m_nTime < 0) {
+        if (tPlayTime != -7) {
+            goto fail_no_beat_info;
+        }
+        return;
+    }
+
+    const auto cutOffTime = bi->BeatNumber
+        ? std::max(0, tPlayTime - 50)
+        : tPlayTime;
+
+    bi->bBeatInfoPresent  = true;
+    bi->BeatTypeThisFrame = 0;
+    bi->BeatNumber        = -1;
+    rng::fill(bi->BeatWindow, tTrackInfo::tBeat{});
+
+    //> 0x4D904C
+    size_t i = 0;
+    for (; tInfo->m_aBeats[i].m_nKey && tInfo->m_aBeats[i].m_nTime < cutOffTime; i++);
+
+
 }
 
 // unused?

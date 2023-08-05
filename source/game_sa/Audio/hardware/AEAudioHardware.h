@@ -4,6 +4,7 @@
 
 #include "Vector.h"
 
+#include "AETrackLoader.h"
 #include "AESoundManager.h"
 #include "AEStreamThread.h"
 
@@ -48,7 +49,7 @@ public:
     uint16                  field_86;
     int32                   m_nReverbDepth;
     uint16                  m_nNumAvailableChannels;
-    int16                   m_nNumChannels;
+    uint16                  m_nNumChannels;
     uint16                  m_anNumChannelsInSlot[MAX_NUM_AUDIO_CHANNELS];
     float                   m_afChannelVolumes[MAX_NUM_AUDIO_CHANNELS];
     float                   m_afUnkn[MAX_NUM_AUDIO_CHANNELS];
@@ -77,10 +78,12 @@ public:
     CAEStreamingChannel*    m_pStreamingChannel;
     CAEStreamThread         m_pStreamThread;
     CAEAudioChannel*        m_aChannels[MAX_NUM_AUDIO_CHANNELS];
-    uint32                  m_aBeatInfo[40];
-    int32                   field_1004;
-    int32                   field_1008;
-    int32                   field_100C;
+    struct tBeatInfo {
+        tTrackInfo::tBeat BeatWindow[20];
+        int32             bBeatInfoPresent;
+        int32             BeatTypeThisFrame;
+        int32             BeatNumber;
+    } gBeatInfo;
     uint8                   field_1010;
     int32                   field_1014;
 
@@ -167,6 +170,9 @@ public:
     void Query3DSoundEffects();
 
     void Service();
+
+private:
+    auto GetChannels() const { return std::span{m_aChannels, m_nNumChannels}; }
 };
 
 VALIDATE_SIZE(CAEAudioHardware, 0x1018);

@@ -15,8 +15,8 @@ VALIDATE_SIZE(StreamPack, 0x10);
 
 struct tTrackInfo {
     struct tBeat {
-        uint32 m_nTime;
-        uint32 m_nKey;
+        uint32 m_nTime{};
+        uint32 m_nKey{};
     } m_aBeats[1000];
 
     uint32 field_1F40[16];
