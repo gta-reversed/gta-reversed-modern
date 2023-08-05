@@ -51,6 +51,7 @@ project "gta_reversed"
         "TRACY_CALLSTACK",
 
         "SPDLOG_USE_STD_FORMAT",
+        
         "FLAC__NO_DLL",
     }
 
