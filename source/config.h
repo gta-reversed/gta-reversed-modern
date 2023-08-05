@@ -17,6 +17,8 @@
 
 // Extensions
 #define EXT_FAST_LOADER
+
+// do not uncomment -- doesn't work rn
 // #define USERTRACK_FLAC_SUPPORT
 
 #endif // !BAREBONES
