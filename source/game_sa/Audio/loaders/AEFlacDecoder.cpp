@@ -1,9 +1,9 @@
 #include "StdInc.h" // TODO: Remove
 
+#ifdef USERTRACK_FLAC_SUPPORT
+
 #include "AEFlacDecoder.h"
 #include "FLAC/all.h"
-
-#ifdef USERTRACK_FLAC_SUPPORT
 
 FLAC__StreamDecoderReadStatus read_callback(const FLAC__StreamDecoder* decoder, FLAC__byte buffer[],
     size_t* bytes, void* client_data)
