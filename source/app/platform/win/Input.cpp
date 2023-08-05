@@ -128,25 +128,11 @@ void diPadSetPIDVID(LPDIRECTINPUTDEVICE8 dev, DWORD padNum) {
 }
 
 // 0x7469A0
-int diMouseInit(bool bExclusive) {
-    int result = 0;
-    
-    result = PSGLOBAL(diInterface)->CreateDevice(GUID_SysMouse, &PSGLOBAL(diMouse), NULL);
-    if (SUCCEEDED(result)) {
-
-        result = PSGLOBAL(diMouse)->SetDataFormat(&c_dfDIMouse2);
-        if (SUCCEEDED(result)) {
-
-            result = PSGLOBAL(diMouse)->SetCooperativeLevel(PSGLOBAL(window), DISCL_FOREGROUND |
-                (bExclusive ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE));
-            if (SUCCEEDED(result)) {
-                PSGLOBAL(diMouse)->Acquire();
-                DEV_LOG("Successfully acquired DInput device");
-                return EXIT_SUCCESS;
-            }
-        }
-    }
-    return result;
+void diMouseInit(bool exclusive) {
+    WIN_FCHECK(PSGLOBAL(diInterface)->CreateDevice(GUID_SysMouse, &PSGLOBAL(diMouse), 0));
+    WIN_FCHECK(PSGLOBAL(diMouse)->SetDataFormat(&c_dfDIMouse2));
+    WIN_FCHECK(PSGLOBAL(diMouse)->SetCooperativeLevel(PSGLOBAL(window), DISCL_FOREGROUND | (exclusive ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE)));
+    WIN_FCHECK(PSGLOBAL(diMouse)->Acquire());
 }
 
 // 0x7485C0
@@ -205,15 +191,13 @@ BOOL CALLBACK EnumDevicesCallback(LPCDIDEVICEINSTANCEA inst, LPVOID) {
 }
 
 // 0x53F2D0
-// Directly returning CMouseControllerState
+// NOTSA(Grinch_): Directly returning CMouseControllerState
 CMouseControllerState GetMouseState() {
     DIMOUSESTATE2 mouseState;
     CMouseControllerState state;
 
-    // Grinch_ : We need current states, GetCapabilities() won't work!
     if (PSGLOBAL(diMouse)) {
-        HRESULT result = PSGLOBAL(diMouse)->GetDeviceState(sizeof(DIMOUSESTATE2), &mouseState);
-        if (SUCCEEDED(result)) {
+        if (SUCCEEDED(PSGLOBAL(diMouse)->GetDeviceState(sizeof(DIMOUSESTATE2), &mouseState))) {
             state.X = static_cast<float>(mouseState.lX);
             state.Y = static_cast<float>(mouseState.lY);
             state.Z = static_cast<float>(mouseState.lZ);

@@ -5,7 +5,7 @@
 
 namespace WinInput {
 
-int diMouseInit(bool exclusive);
+void diMouseInit(bool exclusive);
 void diPadInit();
 
 BOOL CALLBACK EnumDevicesCallback(LPCDIDEVICEINSTANCEA pInst, LPVOID);

@@ -235,8 +235,8 @@ void CPad::UpdatePads() {
 }
 
 // 0x53F3C0
+// NOTSA(Grinch_): Game does this a bit differently, but does the same thing
 void CPad::UpdateMouse() {
-    // Grinch_: Game does this a bit differently, but does the same thing
     if (ForegroundApp) {
         int32_t invertX, invertY;
 
