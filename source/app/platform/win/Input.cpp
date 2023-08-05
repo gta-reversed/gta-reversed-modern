@@ -127,38 +127,21 @@ void diPadSetPIDVID(LPDIRECTINPUTDEVICE8 dev, DWORD padNum) {
     cfg.present = true;
 }
 
-
-// 0x7469A0
-//void diMouseInit(bool exclusive) {
-//    DEV_LOG("Running the Sript 4");
-//    WIN_FCHECK(PSGLOBAL(diInterface)->CreateDevice(GUID_SysMouse, &PSGLOBAL(diMouse), 0));
-//    WIN_FCHECK(PSGLOBAL(diMouse)->SetDataFormat(&c_dfDIMouse2));
-//    WIN_FCHECK(PSGLOBAL(diMouse)->SetCooperativeLevel(PSGLOBAL(window), DISCL_FOREGROUND | (exclusive ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE)));
-//    DEV_LOG("Running the Sript 3");
-//    // Grinch_: This needs to run inside a loop or won't work
-//    DEV_LOG("Acquire Result: {}", PSGLOBAL(diMouse)->Acquire());
-//    /* if (PSGLOBAL(diMouse)->Acquire() == DIERR_NOTINITIALIZED) {
-//         DEV_LOG("Running the Sript 2");
-//         while (PSGLOBAL(diMouse)->Acquire() == DIERR_NOTINITIALIZED) {
-//             DEV_LOG("Running the Sript 1");
-//         };
-//     }*/
-//}
-
 // 0x7469A0
 int diMouseInit(bool bExclusive) {
     int result = 0;
-
+    
     result = PSGLOBAL(diInterface)->CreateDevice(GUID_SysMouse, &PSGLOBAL(diMouse), NULL);
     if (SUCCEEDED(result)) {
 
         result = PSGLOBAL(diMouse)->SetDataFormat(&c_dfDIMouse2);
         if (SUCCEEDED(result)) {
 
-            // Grinch_ : Dunno what's 5 & 6 but that's how the game does it
-            result = PSGLOBAL(diMouse)->SetCooperativeLevel(PSGLOBAL(window), bExclusive ? 5 : 6);
+            result = PSGLOBAL(diMouse)->SetCooperativeLevel(PSGLOBAL(window), DISCL_FOREGROUND |
+                (bExclusive ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE));
             if (SUCCEEDED(result)) {
                 PSGLOBAL(diMouse)->Acquire();
+                DEV_LOG("Successfully acquired DInput device");
                 return EXIT_SUCCESS;
             }
         }
