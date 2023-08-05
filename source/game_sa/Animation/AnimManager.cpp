@@ -7,6 +7,8 @@
 
 #include "StdInc.h"
 
+#include <extensions/ci_string.hpp>
+
 #include "AnimManager.h"
 #include "AnimAssocDescriptions.h"
 
@@ -14,23 +16,23 @@ void CAnimManager::InjectHooks() {
     RH_ScopedClass(CAnimManager);
     RH_ScopedCategory("Animation");
 
-    RH_ScopedInstall(Initialise, 0x5BF6B0, { .reversed = false });
-    RH_ScopedInstall(ReadAnimAssociationDefinitions, 0x5BC910, { .reversed = false });
+    RH_ScopedInstall(Initialise, 0x5BF6B0);
+    RH_ScopedInstall(ReadAnimAssociationDefinitions, 0x5BC910);
     RH_ScopedInstall(Shutdown, 0x4D4130);
     RH_ScopedOverloadedInstall(GetAnimationBlock, "", 0x4D3940, CAnimBlock*(*)(const char*));
-    RH_ScopedOverloadedInstall(GetAnimationBlockIndex, "by-name", 0x4D3990, int32(*)(const char*), { .reversed = false });
-    RH_ScopedInstall(GetFirstAssocGroup, 0x4D39B0, { .reversed = false });
+    RH_ScopedOverloadedInstall(GetAnimationBlockIndex, "by-name", 0x4D3990, int32(*)(const char*));
+    RH_ScopedInstall(GetFirstAssocGroup, 0x4D39B0);
     RH_ScopedOverloadedInstall(GetAnimation, "0", 0x4D39F0, CAnimBlendHierarchy*(*)(uint32, const CAnimBlock*));
     RH_ScopedOverloadedInstall(GetAnimation, "1", 0x4D42F0, CAnimBlendHierarchy*(*)(const char*, const CAnimBlock*));
     RH_ScopedInstall(GetAnimGroupName, 0x4D3A20);
     RH_ScopedInstall(GetAnimBlockName, 0x4D3A30);
     RH_ScopedInstall(CreateAnimAssociation, 0x4D3A40);
-    RH_ScopedOverloadedInstall(GetAnimAssociation, "", 0x4D3A60, CAnimBlendStaticAssociation*(*)(AssocGroupId, AnimationId));
-    RH_ScopedOverloadedInstall(GetAnimAssociation, "", 0x4D3A80, CAnimBlendStaticAssociation*(*)(AssocGroupId, const char*));
-    RH_ScopedOverloadedInstall(AddAnimation, "id", 0x4D3AA0, CAnimBlendAssociation*(*)(RpClump*, AssocGroupId, AnimationId), { .reversed = false });
-    RH_ScopedOverloadedInstall(AddAnimation, "hier", 0x4D4330, CAnimBlendAssociation*(*)(RpClump*, CAnimBlendHierarchy*, int32), { .reversed = false });
-    RH_ScopedInstall(AddAnimationAndSync, 0x4D3B30, { .reversed = false });
-    RH_ScopedInstall(AddAnimAssocDefinition, 0x4D3BA0, { .reversed = false });
+    RH_ScopedOverloadedInstall(GetAnimAssociation, "by-id", 0x4D3A60, CAnimBlendStaticAssociation*(*)(AssocGroupId, AnimationId));
+    RH_ScopedOverloadedInstall(GetAnimAssociation, "by-name", 0x4D3A80, CAnimBlendStaticAssociation*(*)(AssocGroupId, const char*));
+    RH_ScopedOverloadedInstall(AddAnimation, "id", 0x4D3AA0, CAnimBlendAssociation*(*)(RpClump*, AssocGroupId, AnimationId));
+    RH_ScopedOverloadedInstall(AddAnimation, "hier", 0x4D4330, CAnimBlendAssociation*(*)(RpClump*, CAnimBlendHierarchy*, int32));
+    RH_ScopedInstall(AddAnimationAndSync, 0x4D3B30);
+    RH_ScopedInstall(AddAnimAssocDefinition, 0x4D3BA0);
     RH_ScopedInstall(AddAnimToAssocDefinition, 0x4D3C80, { .reversed = false });
     RH_ScopedInstall(CreateAnimAssocGroups, 0x4D3CC0, { .reversed = false });
     RH_ScopedInstall(RegisterAnimBlock, 0x4D3E50, { .reversed = false });
@@ -56,8 +58,6 @@ struct IfpHeader {
 void CAnimManager::Initialise() {
     ZoneScoped;
 
-    return plugin::Call<0x5BF6B0>();
-
     ms_numAnimations = 0;
     ms_numAnimBlocks = 0;
     ms_numAnimAssocDefinitions = 118; // ANIM_TOTAL_GROUPS aka NUM_ANIM_ASSOC_GROUPS
@@ -68,36 +68,36 @@ void CAnimManager::Initialise() {
 
 // 0x5BC910
 void CAnimManager::ReadAnimAssociationDefinitions() {
-    // return plugin::Call<0x5BC910>();
-
     char name[32], block[32], type[32];
-    bool isAnimSection = false;
+    bool                 isAnimSection = false;
     AnimAssocDefinition* animStyle;
-    int animCount;
+    uint32               animCount;
 
     CFileMgr::SetDir("");
-    auto* file = CFileMgr::OpenFile("DATA\\ANIMGRP.DAT", "rb");
-    for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
-        if (!*line || *line == '#')
+    const auto f = CFileMgr::OpenFile("DATA\\ANIMGRP.DAT", "rb");
+    for (;;) {
+        const auto l = CFileLoader::LoadLine(f);
+        if (!l) {
+            break;
+        }
+        if (!*l || *l == '#') {
             continue;
-
+        }
         if (isAnimSection) {
-            if (sscanf_s(line, "%s", SCANF_S_STR(name)) == 1) {
+            if (sscanf_s(l, "%s", SCANF_S_STR(name)) == 1) {
                 if (!memcmp(name, "end", 4)) {
                     isAnimSection = false;
                 } else {
                     AddAnimToAssocDefinition(animStyle, name);
                 }
             }
-        }
-        else
-        {
-            VERIFY(sscanf_s(line, "%s %s %s %d", SCANF_S_STR(name), SCANF_S_STR(block), SCANF_S_STR(type), &animCount) == 4);
+        } else {
+            VERIFY(sscanf_s(l, "%s %s %s %d", SCANF_S_STR(name), SCANF_S_STR(block), SCANF_S_STR(type), &animCount) == 4);
             animStyle = AddAnimAssocDefinition(name, block, MODEL_MALE01, animCount, aStdAnimDescs);
             isAnimSection = true;
         }
     }
-    CFileMgr::CloseFile(file);
+    CFileMgr::CloseFile(f);
 }
 
 // 0x4D4130
@@ -138,32 +138,30 @@ int32 CAnimManager::GetAnimationBlockIndex(CAnimBlock* animBlock) {
 
 // 0x4D3990
 int32 CAnimManager::GetAnimationBlockIndex(const char* name) {
-    return plugin::CallAndReturn<int32, 0x4D3990, const char*>(name);
+    const auto b = GetAnimationBlock(name);
+    return b
+        ? (int32)(std::distance(ms_aAnimBlocks.data(), b))
+        : -1;
 }
 
 // 0x4D39B0
 AssocGroupId CAnimManager::GetFirstAssocGroup(const char* name) {
-    return plugin::CallAndReturn<AssocGroupId, 0x4D39B0, const char*>(name);
-
-    // ANIM_TOTAL_GROUPS
+    const auto namesv = notsa::ci_string_view{ name };
     for (auto i = 0; i < ANIM_GROUP_MAN; i++) {
-        if (!_stricmp(ms_aAnimAssocDefinitions[i].blockName, name)) {
+        if (ms_aAnimAssocDefinitions[i].blockName == namesv) {
             return static_cast<AssocGroupId>(i);
         }
     }
-
     return ANIM_GROUP_MAN;
 }
 
 // 0x4D39F0
 CAnimBlendHierarchy* CAnimManager::GetAnimation(uint32 hash, const CAnimBlock* animBlock) {
-    CAnimBlendHierarchy* hier = &ms_aAnimations[animBlock->startAnimation];
-
-    for (auto i = 0; i < animBlock->animationCount; i++) {
-        if (hier->m_hashKey == hash) {
-            return hier;
+    auto h = &ms_aAnimations[animBlock->startAnimation];
+    for (auto i = animBlock->animationCount; i-- > 0; h++) {
+        if (h->m_hashKey == hash) {
+            return h;
         }
-        hier++;
     }
     return nullptr;
 }
@@ -208,114 +206,93 @@ CAnimBlendStaticAssociation* CAnimManager::GetAnimAssociation(AssocGroupId group
     return ms_aAnimAssocGroups[groupId].GetAnimation(animName);
 }
 
+CAnimBlendAssociation* CAnimManager::AddAnimationToClump(RpClump* clump, CAnimBlendAssociation* anim) {
+    const auto clumpAnims = &RpClumpGetAnimBlendClumpData(clump)->m_Associations;
+    const auto syncWith = [&]() -> CAnimBlendAssociation* {
+        if (anim->IsMoving()) {
+            for (auto l = clumpAnims->next; l; l = l->next) {
+                const auto a = CAnimBlendAssociation::FromLink(l);
+                if (a->IsMoving()) {
+                    return a;
+                }
+            }
+        }
+        return nullptr;
+    }();
+    if (syncWith) {
+        anim->SyncAnimation(syncWith);
+        anim->m_nFlags |= ANIMATION_STARTED;
+    } else {
+        anim->Start(0.0f);
+    }
+    clumpAnims->Prepend(&anim->m_Link);
+    return anim;
+}
+
 // 0x4D3AA0
 CAnimBlendAssociation* CAnimManager::AddAnimation(RpClump* clump, AssocGroupId groupId, AnimationId animId) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D3AA0, RpClump*, AssocGroupId, AnimationId>(clump, groupId, animId);
-
-    CAnimBlendAssociation* anim = CreateAnimAssociation(groupId, animId);
-    CAnimBlendClumpData* clumpData = RpClumpGetAnimBlendClumpData(clump);
-    if (anim->IsMoving()) {
-        CAnimBlendAssociation* syncAnim;
-        CAnimBlendLink* link;
-        for (link = clumpData->m_Associations.next; link; link = link->next) {
-            syncAnim = CAnimBlendAssociation::FromLink(link);
-            if (syncAnim->IsMoving())
-                break;
-        }
-        if (link) {
-            anim->SyncAnimation(syncAnim);
-            anim->m_nFlags |= ANIMATION_STARTED;
-        } else
-            anim->Start(0.0f);
-    } else
-        anim->Start(0.0f);
-
-    clumpData->m_Associations.Prepend(&anim->m_Link);
-    return anim;
+    return AddAnimationToClump(clump, CreateAnimAssociation(groupId, animId));
 }
 
 // 0x4D4330
 CAnimBlendAssociation* CAnimManager::AddAnimation(RpClump* clump, CAnimBlendHierarchy* hier, int32 clumpAssocFlag) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D4330, RpClump*, CAnimBlendHierarchy*, int32>(clump, hier, clumpAssocFlag);
-
-    CAnimBlendAssociation* anim = new CAnimBlendAssociation(clump, hier);
+    const auto anim = new CAnimBlendAssociation(clump, hier);
     anim->m_nFlags |= clumpAssocFlag;
     anim->ReferenceAnimBlock();
     UncompressAnimation(hier);
-    CAnimBlendClumpData* clumpData = RpClumpGetAnimBlendClumpData(clump);
-    if (anim->IsMoving()) {
-        CAnimBlendAssociation* syncAnim;
-        CAnimBlendLink* link;
-        for (link = clumpData->m_Associations.next; link; link = link->next) {
-            syncAnim = CAnimBlendAssociation::FromLink(link);
-            if (syncAnim->IsMoving())
-                break;
-        }
-        if (link) {
-            anim->SyncAnimation(syncAnim);
-            anim->m_nFlags |= ANIMATION_STARTED;
-        } else
-            anim->Start(0.0f);
-    } else
-        anim->Start(0.0f);
-
-    clumpData->m_Associations.Prepend(&anim->m_Link);
-    return anim;
+    return AddAnimationToClump(clump, anim);
 }
 
 // 0x4D3B30
 CAnimBlendAssociation* CAnimManager::AddAnimationAndSync(RpClump* clump, CAnimBlendAssociation* animBlendAssoc, AssocGroupId groupId, AnimationId animId) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D3B30, RpClump*, CAnimBlendAssociation*, AssocGroupId, AnimationId>(clump, animBlendAssoc, groupId, animId);
-
-    CAnimBlendAssociation* anim = CreateAnimAssociation(groupId, animId);
-    CAnimBlendClumpData* clumpData = RpClumpGetAnimBlendClumpData(clump);
-    if (anim->IsMoving() && animBlendAssoc) {
-        anim->SyncAnimation(animBlendAssoc);
-        anim->m_nFlags |= ANIMATION_STARTED;
-    } else
-        anim->Start(0.0f);
-
-    clumpData->m_Associations.Prepend(&anim->m_Link);
-    return anim;
+    const auto a          = CreateAnimAssociation(groupId, animId);
+    const auto clumpAnims = RpClumpGetAnimBlendClumpData(clump);
+    if (a->IsMoving() && animBlendAssoc) {
+        a->SyncAnimation(animBlendAssoc);
+        a->m_nFlags |= ANIMATION_STARTED;
+    } else {
+        a->Start(0.0f);
+    }
+    clumpAnims->m_Associations.Prepend(&a->m_Link);
+    return a;
 }
 
 // 0x4D3BA0
 AnimAssocDefinition* CAnimManager::AddAnimAssocDefinition(const char* groupName, const char* blockName, uint32 modelIndex, uint32 animsCount, AnimDescriptor* descriptor) {
-    return plugin::CallAndReturn<AnimAssocDefinition*, 0x4D3BA0, const char*, const char*, uint32, uint32, void*>(groupName, blockName, modelIndex, animsCount, descriptor);
+    const auto d = &ms_aAnimAssocDefinitions[ms_numAnimAssocDefinitions++];
 
-    /*
-    auto* def = &ms_aAnimAssocDefinitions[ms_numAnimAssocDefinitions++];
-    strcpy_s(def->groupName, groupName);
-    strcpy_s(def->blockName, blockName);
-    def->modelIndex = modelIndex;
-    def->animsCount = animsCount;
-    def->animDesc   = descriptor;
-    def->animNames  = new char*[animsCount];
-    for (auto i = 0; i < animsCount; i++) {
-        def->animNames[i] = new char[24];
-        *def->animNames[i] = '\0';
+    strcpy_s(d->groupName, groupName);
+    strcpy_s(d->blockName, blockName);
+
+    d->modelIndex = modelIndex;
+    d->animsCount = animsCount;
+    d->animDesc   = descriptor;
+
+    d->animNames     = new const char*[animsCount];
+    const auto bufsz = AnimAssocDefinition::ANIM_NAME_BUF_SZ * animsCount;
+    const auto buf   = new char[bufsz];
+    memset(buf, 0, bufsz);
+    for (auto i = animsCount; i-->0;) {
+        d->animNames[i] = buf + i * 24;
     }
-    return def;
-    */
+
+    return d;
 }
 
 // 0x4D3C80
-void CAnimManager::AddAnimToAssocDefinition(AnimAssocDefinition* definition, const char* animName) {
-    return plugin::Call<0x4D3C80, AnimAssocDefinition*, const char*>(definition, animName);
-
-    /*
-    int i = 0;
-    while (*definition->animNames[i]) {
-        i++;
+void CAnimManager::AddAnimToAssocDefinition(AnimAssocDefinition* def, const char* animName) {
+    int32 i = 0;
+    for (; *def->animNames[i]; i++) {
+        assert(i < def->animsCount);
     }
-    strcpy_s(definition->animNames[i], animName);
-    */
+    // `const_cast` is fine here, because it's heap allocated [presumeably]
+    strcpy_s(const_cast<char*>(def->animNames[i]), AnimAssocDefinition::ANIM_NAME_BUF_SZ, animName);
 }
 
 // 0x4C4DC0
 bool IsClumpSkinned(RpClump *clump) {
-    auto* atomic = GetFirstAtomic(clump);
-    return atomic && RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic));
+    const auto a = GetFirstAtomic(clump);
+    return a && RpSkinGeometryGetSkin(RpAtomicGetGeometry(a));
 }
 
 // 0x4D3CC0

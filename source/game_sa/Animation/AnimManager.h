@@ -55,6 +55,7 @@ public:
     static AssocGroupId GetAnimationGroupId(const char* name);
     static CAnimBlendStaticAssociation* GetAnimAssociation(AssocGroupId groupId, AnimationId animId);
     static CAnimBlendStaticAssociation* GetAnimAssociation(AssocGroupId groupId, const char* animName);
+    static CAnimBlendAssociation* AddAnimationToClump(RpClump* clump, CAnimBlendAssociation* anim); // NOTSA - Internal
     static int32 GetNumRefsToAnimBlock(int32 index);
 
     static CAnimBlendAssociation* CreateAnimAssociation(AssocGroupId groupId, AnimationId animId);
