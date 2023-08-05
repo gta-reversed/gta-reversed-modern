@@ -1965,15 +1965,14 @@ int32 CFileLoader::LoadWeaponObject(const char* line) {
 
 // 0x5B4AB0
 void CFileLoader::LoadZone(const char* line) {
-    char  name[24];
-    int32 type;
+    char    infoLabel[24];
+    int32   type;
     CVector min{}, max{};
-    int32 island;
-    char  zoneName[12];
+    int32   level;
+    char    textLabel[12];
 
-    auto iNumRead = sscanf_s(line, "%s %d %f %f %f %f %f %f %d %s", SCANF_S_STR(name), &type, &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &island, SCANF_S_STR(zoneName));
-    if (iNumRead == 10)
-        CTheZones::CreateZone(name, static_cast<eZoneType>(type), min.x, min.y, min.z, max.x, max.y, max.z, static_cast<eLevelName>(island), zoneName);
+    VERIFY(sscanf_s(line, "%s %d %f %f %f %f %f %f %d %s", SCANF_S_STR(infoLabel), &type, &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &level, SCANF_S_STR(textLabel)) == 10);
+    CTheZones::CreateZone(infoLabel, static_cast<eZoneType>(type), min, max, static_cast<eLevelName>(level), textLabel);
 }
 
 // 0x5B51E0

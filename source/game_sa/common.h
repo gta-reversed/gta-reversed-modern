@@ -113,7 +113,8 @@ constexpr float TWO_PI         = 6.28318f;          // τ (TAU)
 
 constexpr float COS_45 = SQRT_2; // cos(45deg)
 
-constexpr float sq(float x) { return x * x; }
+template<typename T>
+constexpr T sq(T x) { return x * x; }
 
 struct SpriteFileName {
     const char* name;
@@ -145,6 +146,40 @@ static bool IsPointInSphere(const CVector& point, const CVector& center, float r
 // keywords: 0.017453292 flt_8595EC
 constexpr float DegreesToRadians(float angleInDegrees) {
     return angleInDegrees * PI / 180.0F;
+}
+
+//! @notsa
+inline RwTexCoords operator*(RwTexCoords lhs, float rhs) {
+    return { lhs.u * rhs, lhs.v * rhs };
+}
+
+//! @notsa
+inline RwTexCoords operator+(RwTexCoords lhs, RwTexCoords rhs) {
+    return { lhs.u + rhs.u, lhs.v + rhs.v };
+}
+
+template<typename T, typename Y = float>
+struct WeightedValue {
+    using value_type = T;
+
+    T v;
+    Y w;
+};
+
+template<rng::input_range R> // Range of WeightedValue`s
+auto multiply_weighted(R&& r) {
+    using T = rng::range_value_t<R>::value_type;
+
+    T a{};
+    for (const auto& vw : r) {
+        a = a + (T)(vw.v * vw.w);
+    }
+    return a;
+}
+
+template<typename T, typename Y = float, size_t N>
+auto multiply_weighted(WeightedValue<T, Y> (&&values)[N]) {
+    return multiply_weighted(values);
 }
 
 // Converts radians to degrees
