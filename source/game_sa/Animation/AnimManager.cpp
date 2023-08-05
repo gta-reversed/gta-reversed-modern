@@ -120,9 +120,10 @@ CAnimBlock* CAnimManager::GetAnimationBlock(AssocGroupId animGroup) {
 
 // 0x4D3940
 CAnimBlock* CAnimManager::GetAnimationBlock(const char* name) {
-    for (auto& block : std::span{ ms_aAnimBlocks.data(), (size_t)ms_numAnimBlocks }) {
-        if (_stricmp(block.szName, name) == 0) {
-            return &block;
+    const auto namesv = notsa::ci_string_view{ name };
+    for (auto& ab : GetAnimBlocks()) {
+        if (namesv == ab.szName) {
+            return &ab;
         }
     }
     return nullptr;
@@ -297,14 +298,13 @@ bool IsClumpSkinned(RpClump *clump) {
 
 // 0x4D3CC0
 void CAnimManager::CreateAnimAssocGroups() {
-    return plugin::Call<0x4D3CC0>();
-
     for (auto i = 0; i < ms_numAnimAssocDefinitions; i++) {
-        CAnimBlendAssocGroup* group = &ms_aAnimAssocGroups[i];
-        AnimAssocDefinition* def = &ms_aAnimAssocDefinitions[i];
-        CAnimBlock* block = GetAnimationBlock(def->blockName);
-        if (block == nullptr || !block->bLoaded || group->m_pAssociations)
+        const auto group = &ms_aAnimAssocGroups[i];
+        const auto def   = &ms_aAnimAssocDefinitions[i];
+        const auto block = GetAnimationBlock(def->blockName);
+        if (block == nullptr || !block->bLoaded || group->m_pAssociations) {
             continue;
+        }
 
         RpClump* clump = nullptr;
         if (def->modelIndex != MODEL_INVALID) {
@@ -330,59 +330,54 @@ void CAnimManager::CreateAnimAssocGroups() {
 
 // 0x4D3E50
 int32 CAnimManager::RegisterAnimBlock(const char* name) {
-    return plugin::CallAndReturn<int32, 0x4D3E50, const char*>(name);
-
-    CAnimBlock* animBlock = GetAnimationBlock(name);
-    if (animBlock == nullptr) {
-        animBlock = &ms_aAnimBlocks[ms_numAnimBlocks++];
-        strncpy_s(animBlock->szName, name, MAX_ANIM_BLOCK_NAME);
-        animBlock->animationCount = 0;
-        animBlock->animationStyle = GetFirstAssocGroup(name);
-        assert(animBlock->usRefs == 0);
+    CAnimBlock* ab = GetAnimationBlock(name);
+    if (ab == nullptr) { // Initialize a new anim block
+        ab = &ms_aAnimBlocks[ms_numAnimBlocks++];
+        strncpy_s(ab->szName, name, MAX_ANIM_BLOCK_NAME);
+        ab->animationCount = 0;
+        ab->animationStyle = GetFirstAssocGroup(name);
+        assert(ab->usRefs == 0);
     }
-    return GetAnimationBlockIndex(animBlock);
+
+    return GetAnimationBlockIndex(ab);
 }
 
 // 0x4D3ED0
 void CAnimManager::RemoveLastAnimFile() {
-    return plugin::Call<0x4D3ED0>();
-
-    ms_numAnimBlocks--;
-    ms_numAnimations = ms_aAnimBlocks[ms_numAnimBlocks].startAnimation;
-    for (auto i = 0; i < ms_aAnimBlocks[ms_numAnimBlocks].animationCount; i++) {
-        ms_aAnimations[ms_aAnimBlocks[ms_numAnimBlocks].startAnimation + i].Shutdown();
+    const auto ab = &GetAnimBlocks()[--ms_numAnimBlocks];
+    ms_numAnimations = ab->startAnimation;
+    for (auto i = 0; i < ab->animationCount; i++) { // Remove related animations too
+        ms_aAnimations[ab->startAnimation + i].Shutdown();
     }
-
-    ms_aAnimBlocks[ms_numAnimBlocks].bLoaded = false;
+    ab->bLoaded = false;
 }
 
 // 0x4D3F40
 void CAnimManager::RemoveAnimBlock(int32 index) {
-    return plugin::Call<0x4D3F40, int32>(index);
+    const auto ab = &GetAnimBlocks()[index];
 
-    CAnimBlock* block = &ms_aAnimBlocks[index];
-    for (auto i = 0; i < ms_numAnimAssocDefinitions; i++) {
-        if (ms_aAnimAssocGroups[i].m_pAnimBlock == block) {
-            ms_aAnimAssocGroups[i].DestroyAssociations();
+    for (auto& g : GetAssocGroups()) {
+        if (g.m_pAnimBlock == ab) {
+            g.DestroyAssociations();
         }
     }
-
-    for (auto i = 0; i < block->animationCount; i++) {
-        ms_aAnimations[block->startAnimation + i].Shutdown();
+    
+    for (auto i = 0; i < ab->animationCount; i++) { // Remove related animations too
+        ms_aAnimations[ab->startAnimation + i].Shutdown();
     }
 
-    block->bLoaded = false;
-    block->usRefs = 0;
+    ab->bLoaded = false;
+    ab->usRefs  = 0;
 }
 
 // 0x4D3FB0
 void CAnimManager::AddAnimBlockRef(int32 index) {
-    ms_aAnimBlocks[index].usRefs++;
+    GetAnimBlocks()[index].usRefs++;
 }
 
 // 0x4D3FD0
 void CAnimManager::RemoveAnimBlockRef(int32 index) {
-    ms_aAnimBlocks[index].usRefs--;
+    GetAnimBlocks()[index].usRefs--;
     /* see RemoveAnimBlockRefWithoutDelete, logically here should be called RemoveModel or something
     if (--ms_aAnimBlocks[index].usRefs == 0) {
         CStreaming::RemoveModel(IFPToModelId(index));
