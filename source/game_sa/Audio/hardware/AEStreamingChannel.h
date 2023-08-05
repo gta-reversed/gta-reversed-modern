@@ -2,6 +2,7 @@
 
 #include "AEAudioChannel.h"
 #include "AEStreamingDecoder.h"
+#include "AESmoothFadeThread.h"
 
 enum class StreamingChannelState : int32 {
     UNK_MINUS_7 = -7,
@@ -15,7 +16,7 @@ enum class StreamingChannelState : int32 {
 
 class NOTSA_EXPORT_VTABLE CAEStreamingChannel : public CAEAudioChannel {
 public:
-    uint8                 field_60{0u};
+    bool                  m_bInitialized{false};
     uint8                 field_61{0u};
     bool                  m_bPrepareNewStream{false};
     uint8                 m_bWrongSampleRate{false};
@@ -65,23 +66,56 @@ public:
     uint32 FillBuffer(void* buffer, uint32 size);
     void   SetBassEQ(IDirectSoundFXParamEq* paramEq, float gain);
     void   SetReady();
-    void   PrepareStream(CAEStreamingDecoder* stream, int8 arg2, bool bStopCurrent);
+    void   PrepareStream(CAEStreamingDecoder* stream, int8 arg2, uint32 audioBytes);
     void   Pause();
 
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CAEStreamingChannel* Constructor(IDirectSound* directSound, uint16 channelId);
-    CAEStreamingChannel* Destructor();
+    CAEStreamingChannel* Constructor(IDirectSound* directSound, uint16 channelId) {
+        this->CAEStreamingChannel::CAEStreamingChannel(directSound, channelId);
+        return this;
+    }
 
-    void  Service_Reversed();
-    bool  IsSoundPlaying_Reversed();
-    int32 GetPlayTime_Reversed();
-    int32 GetLength_Reversed();
-    void  Play_Reversed(int16 a2,  char a3, float a4);
-    void  Stop_Reversed();
-    void  SetFrequencyScalingFactor_Reversed(float a2);
+    CAEStreamingChannel* Destructor() {
+        this->CAEStreamingChannel::~CAEStreamingChannel();
+        return this;
+    }
+
+    void Service_Reversed() {
+        CAEStreamingChannel::Service();
+    }
+
+    bool IsSoundPlaying_Reversed() {
+        return CAEStreamingChannel::IsSoundPlaying();
+    }
+
+    int32 GetPlayTime_Reversed() {
+        return CAEStreamingChannel::GetPlayTime();
+    }
+
+    int32 GetLength_Reversed() {
+        return CAEStreamingChannel::GetLength();
+    }
+
+    void Play_Reversed(int16 a2, char a3, float a4) {
+        CAEStreamingChannel::Play(a2, a3, a4);
+    }
+
+    void Stop_Reversed() {
+        CAEStreamingChannel::Stop();
+    }
+
+    void SetFrequencyScalingFactor_Reversed(float a2) {
+        CAEStreamingChannel::SetFrequencyScalingFactor(a2);
+    }
+
+    // NOTSA
+    void DirectSoundBufferFadeToSilence() {
+        if (!AESmoothFadeThread.RequestFade(m_pDirectSoundBuffer, -100.0, 35, true))
+            m_pDirectSoundBuffer->Stop();
+    }
 };
 
 VALIDATE_SIZE(CAEStreamingChannel, 0x60098);

@@ -11,7 +11,10 @@ class CAEAudioChannel {
 public:
 #ifdef USE_DSOUND
     IDirectSound*         m_pDirectSound;
-    IDirectSoundBuffer*   m_pDirectSoundBuffer;
+    union {
+        IDirectSoundBuffer*  m_pDirectSoundBuffer;
+        IDirectSoundBuffer8* m_pDirectSoundBuffer8;
+    };
     IDirectSound3DBuffer* m_pDirectSound3DBuffer;
 #endif
 

@@ -19,7 +19,7 @@ public:
 
     static bool      GetBankAndSoundFromScriptSlotAudioEvent(int32* a1, int32* a2, int32* a3, int32 a4);
     static float     GetPiecewiseLinear(float x, int16 dataCount, float (*data)[2]);
-    static uint64    GetCurrentTimeInMilliseconds();
+    static uint64    GetCurrentTimeInMS();
 
     // NOTSA
     static eRadioID GetRandomRadioStation() {

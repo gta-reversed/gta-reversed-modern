@@ -138,10 +138,10 @@ uint32 CAEStreamThread::MainLoop(void* param) {
                 stream->m_pStreamingChannel->Play(0, 0, 1.0f);
             }
 
-            auto start = CAEAudioUtility::GetCurrentTimeInMilliseconds();
+            auto start = CAEAudioUtility::GetCurrentTimeInMS();
             stream->Service();
             stream->m_pStreamingChannel->Service();
-            auto end = CAEAudioUtility::GetCurrentTimeInMilliseconds();
+            auto end = CAEAudioUtility::GetCurrentTimeInMS();
             if (end - start < 5) {
                 OS_ThreadSleep(uint32(start - end + 5));
             }

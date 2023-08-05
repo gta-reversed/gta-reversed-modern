@@ -21,7 +21,7 @@ void CAEAudioUtility::InjectHooks() {
     RH_ScopedInstall(GetBankAndSoundFromScriptSlotAudioEvent, 0x4D9CC0, { .reversed = false });
     RH_ScopedInstall(FindVehicleOfPlayer, 0x4D9E10);
 
-    RH_ScopedInstall(GetCurrentTimeInMilliseconds, 0x4d9e80);
+    RH_ScopedInstall(GetCurrentTimeInMS, 0x4d9e80);
     RH_ScopedInstall(StaticInitialise, 0x5b97f0);
 }
 
@@ -67,7 +67,7 @@ float CAEAudioUtility::AudioLog10(float p) {
 
 // REFACTORED
 // 0x4d9e80
-uint64 CAEAudioUtility::GetCurrentTimeInMilliseconds() {
+uint64 CAEAudioUtility::GetCurrentTimeInMS() {
     using namespace std::chrono;
     auto nowMs = time_point_cast<milliseconds>(high_resolution_clock::now());
     auto value = duration_cast<milliseconds>(nowMs.time_since_epoch());
@@ -100,7 +100,7 @@ void CAEAudioUtility::StaticInitialise() {
         m_sfLogLookup[1][1] = log10f(v);
     }
 
-    startTimeMs = GetCurrentTimeInMilliseconds();
+    startTimeMs = GetCurrentTimeInMS();
 }
 
 // 0x4D9CC0
