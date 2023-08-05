@@ -542,7 +542,6 @@ bool psSelectDevice() {
 
     // Set selected videomode
     if (!RwEngineSetVideoMode(GcurSelVM)) {
-        DEV_LOG("Failed: RwEngineSetVideoMode({})", GcurSelVM);
         return FALSE;
     }
 

@@ -41,7 +41,7 @@ void CPad::InjectHooks() {
     RH_ScopedInstall(ClearMouseHistory, 0x541BD0);
     RH_ScopedInstall(Clear, 0x541A70);
     RH_ScopedInstall(Update, 0x541C40);
-    RH_ScopedInstall(UpdateMouse, 0x53F3C0, { .reversed = false });
+    RH_ScopedInstall(UpdateMouse, 0x53F3C0);
     RH_ScopedInstall(ProcessPad, 0x746A10, { .reversed = false });
     RH_ScopedInstall(ProcessPCSpecificStuff, 0x53FB40);
     RH_ScopedInstall(ReconcileTwoControllersInput, 0x53F530);
@@ -236,7 +236,25 @@ void CPad::UpdatePads() {
 
 // 0x53F3C0
 void CPad::UpdateMouse() {
-    plugin::CallMethod<0x53F3C0, CPad*>(this);
+    // Grinch_: Game does this a bit differently, but does the same thing
+    if (ForegroundApp) {
+        int32_t invertX, invertY;
+
+        invertX = FrontEndMenuManager.bInvertMouseX ? -1 : 1;
+        invertY = FrontEndMenuManager.bInvertMouseY ? -1 : 1;
+
+        CMouseControllerState state = WinInput::GetMouseState();
+        if (state.CheckForInput()) {
+            CPad::GetPad(0)->LastTimeTouched = CTimer::m_snTimeInMilliseconds;
+        }
+
+        // Write directly to NewMouseControllerState
+        std::memcpy(&CPad::OldMouseControllerState, &CPad::NewMouseControllerState,
+            sizeof(CPad::OldMouseControllerState));
+        std::memmove(&CPad::NewMouseControllerState, &state, sizeof(CPad::NewMouseControllerState));
+        CPad::NewMouseControllerState.X *= invertX;
+        CPad::NewMouseControllerState.Y *= invertY;
+    }
 }
 
 // 0x746A10
@@ -1200,5 +1218,5 @@ IDirectInputDevice8* DIReleaseMouse() { // todo: wininput
 }
 
 void InitialiseMouse(bool exclusive) {
-    WinInput::InitialiseMouse(exclusive);
+    WinInput::diMouseInit(exclusive);
 }

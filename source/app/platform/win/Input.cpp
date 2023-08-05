@@ -30,7 +30,7 @@ bool Initialise() {
         return false;
     }
 
-    InitialiseMouse(false);
+    diMouseInit(false);
     diPadInit();
 
     return true;
@@ -45,14 +45,6 @@ HRESULT ReleaseInput() {
 
 HRESULT Shutdown() {
     return ReleaseInput();
-}
-
-// 0x7469A0
-void InitialiseMouse(bool exclusive) {
-    WIN_FCHECK(PSGLOBAL(diInterface)->CreateDevice(GUID_SysMouse, &PSGLOBAL(diMouse), 0));
-    WIN_FCHECK(PSGLOBAL(diMouse)->SetDataFormat(&c_dfDIMouse2));
-    WIN_FCHECK(PSGLOBAL(diMouse)->SetCooperativeLevel(PSGLOBAL(window), DISCL_FOREGROUND | (exclusive ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE)));
-    WIN_FCHECK(PSGLOBAL(diMouse)->Acquire());
 }
 
 // 0x746D80
@@ -135,6 +127,45 @@ void diPadSetPIDVID(LPDIRECTINPUTDEVICE8 dev, DWORD padNum) {
     cfg.present = true;
 }
 
+
+// 0x7469A0
+//void diMouseInit(bool exclusive) {
+//    DEV_LOG("Running the Sript 4");
+//    WIN_FCHECK(PSGLOBAL(diInterface)->CreateDevice(GUID_SysMouse, &PSGLOBAL(diMouse), 0));
+//    WIN_FCHECK(PSGLOBAL(diMouse)->SetDataFormat(&c_dfDIMouse2));
+//    WIN_FCHECK(PSGLOBAL(diMouse)->SetCooperativeLevel(PSGLOBAL(window), DISCL_FOREGROUND | (exclusive ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE)));
+//    DEV_LOG("Running the Sript 3");
+//    // Grinch_: This needs to run inside a loop or won't work
+//    DEV_LOG("Acquire Result: {}", PSGLOBAL(diMouse)->Acquire());
+//    /* if (PSGLOBAL(diMouse)->Acquire() == DIERR_NOTINITIALIZED) {
+//         DEV_LOG("Running the Sript 2");
+//         while (PSGLOBAL(diMouse)->Acquire() == DIERR_NOTINITIALIZED) {
+//             DEV_LOG("Running the Sript 1");
+//         };
+//     }*/
+//}
+
+// 0x7469A0
+int diMouseInit(bool bExclusive) {
+    int result = 0;
+
+    result = PSGLOBAL(diInterface)->CreateDevice(GUID_SysMouse, &PSGLOBAL(diMouse), NULL);
+    if (SUCCEEDED(result)) {
+
+        result = PSGLOBAL(diMouse)->SetDataFormat(&c_dfDIMouse2);
+        if (SUCCEEDED(result)) {
+
+            // Grinch_ : Dunno what's 5 & 6 but that's how the game does it
+            result = PSGLOBAL(diMouse)->SetCooperativeLevel(PSGLOBAL(window), bExclusive ? 5 : 6);
+            if (SUCCEEDED(result)) {
+                PSGLOBAL(diMouse)->Acquire();
+                return EXIT_SUCCESS;
+            }
+        }
+    }
+    return result;
+}
+
 // 0x7485C0
 void diPadInit() {
     rng::fill(PadConfigs, CPadConfig{});
@@ -191,37 +222,30 @@ BOOL CALLBACK EnumDevicesCallback(LPCDIDEVICEINSTANCEA inst, LPVOID) {
 }
 
 // 0x53F2D0
+// Directly returning CMouseControllerState
 CMouseControllerState GetMouseState() {
-	CMouseControllerState state;
+    DIMOUSESTATE2 mouseState;
+    CMouseControllerState state;
 
-    if (!PSGLOBAL(diMouse)) {
-		InitialiseMouse(!FrontEndMenuManager.m_bMenuActive && IsVideoModeExclusive());
+    // Grinch_ : We need current states, GetCapabilities() won't work!
+    if (PSGLOBAL(diMouse)) {
+        HRESULT result = PSGLOBAL(diMouse)->GetDeviceState(sizeof(DIMOUSESTATE2), &mouseState);
+        if (SUCCEEDED(result)) {
+            state.X = static_cast<float>(mouseState.lX);
+            state.Y = static_cast<float>(mouseState.lY);
+            state.Z = static_cast<float>(mouseState.lZ);
+            state.wheelUp = (mouseState.lZ > 0);
+            state.wheelDown = (mouseState.lZ < 0);
+            state.lmb = mouseState.rgbButtons[0] & 0x80;
+            state.rmb = mouseState.rgbButtons[1] & 0x80;
+            state.mmb = mouseState.rgbButtons[2] & 0x80;
+            state.bmx1 = mouseState.rgbButtons[3] & 0x80;
+            state.bmx2 = mouseState.rgbButtons[4] & 0x80;
+        }
     }
-
-	if (PSGLOBAL(diMouse)) {
-        DIDEVCAPS devCaps{ .dwSize = sizeof(DIDEVCAPS) };
-		
-		PSGLOBAL(diMouse)->GetCapabilities(&devCaps);
-		switch (devCaps.dwButtons) {
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-		case 8:
-			state.mmb = true;
-            NOTSA_SWCFALLTHRU;
-		case 2:
-			state.rmb = true;
-            NOTSA_SWCFALLTHRU;
-		case 1:
-			state.lmb = true;
-		}
-
-		if (devCaps.dwAxes == 3) {
-			state.wheelUp = state.wheelDown = true;
-		}
-	}
+    else {
+		diMouseInit(!FrontEndMenuManager.m_bMenuActive && IsVideoModeExclusive());
+    }
 
 	return state;
 }
@@ -231,10 +255,18 @@ void InjectHooks() {
     RH_ScopedNamespaceName("Input");
 
     //RH_ScopedGlobalInstall(Initialise, 0x7487CF, { .reversed = false }); 
-    //RH_ScopedGlobalInstall(InitialiseMouse, 0x7469A0, { .reversed = false }); // Can't be hooked because it fails with ACCESS DENIED and crashes
+    RH_ScopedGlobalInstall(diMouseInit, 0x7469A0); // Can't be hooked because it fails with ACCESS DENIED and crashes
     //RH_ScopedGlobalInstall(InitialiseJoys, 0x7485C0, {.reversed = false});
     RH_ScopedGlobalInstall(EnumDevicesCallback, 0x747020);
     RH_ScopedGlobalInstall(diPadInit, 0x7485C0);
     RH_ScopedGlobalInstall(diPadSetRanges, 0x746D80);
+}
+
+bool IsKeyPressed(unsigned int keyCode) {
+    return (GetKeyState(keyCode) & 0x8000) != 0;
+}
+
+bool IsKeyDown(unsigned int keyCode) {
+    return GetAsyncKeyState(keyCode) >> 0x8;
 }
 } // namespace WinInput
