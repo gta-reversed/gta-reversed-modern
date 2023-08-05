@@ -17,7 +17,7 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(RequestVirtualChannelSoundInfo, 0x4D8E60);
     RH_ScopedInstall(Query3DSoundEffects, 0x4D8490, { .reversed = false });
     RH_ScopedInstall(GetNumAvailableChannels, 0x4D8810);
-    RH_ScopedInstall(GetChannelPlayTimes, 0x4D8820, { .reversed = false });
+    RH_ScopedInstall(GetChannelPlayTimes, 0x4D8820);
     RH_ScopedInstall(SetChannelVolume, 0x4D8870);
     RH_ScopedInstall(LoadSoundBank, 0x4D88A0);
     RH_ScopedInstall(IsSoundBankLoaded, 0x4D88C0);
@@ -130,7 +130,11 @@ uint16 CAEAudioHardware::GetNumAvailableChannels() const {
 
 // 0x4D8820
 void CAEAudioHardware::GetChannelPlayTimes(int16 channel, int16* playTimes) {
-    plugin::CallMethodAndReturn<int32, 0x4D8820, CAEAudioHardware*, int16, int16*>(this, channel, playTimes);
+    assert(playTimes); // NOTE: Originally just an if check, but I don't like quit errors
+
+    for (auto i = m_anNumChannelsInSlot[channel]; i-- > 0;) {
+        playTimes[i] = m_aChannels[channel + i]->GetPlayTime();
+    }
 }
 
 // 0x4D8870
