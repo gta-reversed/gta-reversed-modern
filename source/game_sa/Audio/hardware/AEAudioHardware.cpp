@@ -44,9 +44,9 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(GetActiveTrackID, 0x4D8F80);
     RH_ScopedInstall(GetPlayingTrackID, 0x4D8F90);
     RH_ScopedInstall(GetBeatInfo, 0x4D8FA0);
-    RH_ScopedInstall(SetBassSetting, 0x4D94A0, { .reversed = false });
-    RH_ScopedInstall(DisableBassEq, 0x4D94D0, { .reversed = false });
-    RH_ScopedInstall(EnableBassEq, 0x4D94E0, { .reversed = false });
+    RH_ScopedInstall(SetBassSetting, 0x4D94A0);
+    RH_ScopedInstall(DisableBassEq, 0x4D94D0);
+    RH_ScopedInstall(EnableBassEq, 0x4D94E0);
     RH_ScopedInstall(SetChannelFlags, 0x4D9500);
     RH_ScopedInstall(SetMusicMasterScalingFactor, 0x4D9530);
     RH_ScopedInstall(SetEffectsMasterScalingFactor, 0x4D9540);
@@ -355,16 +355,14 @@ void CAEAudioHardware::GetBeatInfo(tBeatInfo* beatInfo) {
     }
 }
 
-// unused?
 // 0x4D94E0
 void CAEAudioHardware::EnableBassEq() {
-    plugin::CallMethod<0x4D94E0, CAEAudioHardware*>(this);
-    // m_pStreamingChannel->SetBassEQ(m_nBassSet, m_fBassEqGain);
+    m_pStreamingChannel->SetBassEQ(m_nBassSet, m_fBassEqGain);
 }
 
 // 0x4D94D0
 void CAEAudioHardware::DisableBassEq() {
-    m_pStreamingChannel->SetBassEQ(nullptr, 0);
+    m_pStreamingChannel->SetBassEQ(0, 0.f);
 }
 
 // 0x4D9500

@@ -67,7 +67,7 @@ public:
     int16                   m_aSoundIdsInSlots[MAX_NUM_SOUNDS];
     int16                   m_anVirtualChannelSoundLoopStartTimes[MAX_NUM_SOUNDS];
     int16                   m_anVirtualChannelSoundLengths[MAX_NUM_SOUNDS];
-    uint32                  m_nBassSet;
+    uint8                   m_nBassSet;
     float                   m_fBassEqGain;
     CAEMP3BankLoader*       m_pMP3BankLoader;
     CAEMP3TrackLoader*      m_pMP3TrackLoader;
