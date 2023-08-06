@@ -12,8 +12,18 @@ struct FlacMetadata {
     uint32 sampleRate{};
 };
 
+struct FlacFillBufferInfo {
+    int16* writeBuffer{};
+    size_t maxBytes{};
+    size_t writeWrittenBytes{};
+    int16* leftoverBuffer{};
+    size_t leftoverWrittenBytes{};
+};
+
 class CAEFlacDecoder : public CAEStreamingDecoder {
 public:
+    static constexpr auto LEFTOVER_SAMPLES_SIZE = 80'000u;
+
     CAEFlacDecoder(CAEDataStream* dataStream) : CAEStreamingDecoder(dataStream) {}
     virtual ~CAEFlacDecoder();
 
@@ -34,14 +44,17 @@ public:
     auto& GetMetadata() {
         return m_metadata;
     }
-    auto* GetWriteBuffer() {
-        return m_CurrentWriteBuffer;
+    auto& GetFillBufferInfo() {
+        return m_fillBufferInfo;
     }
 
 private:
     FLAC__StreamDecoder* m_FlacStreamDecoder{};
-    uint8* m_CurrentWriteBuffer{};
+    FlacFillBufferInfo m_fillBufferInfo{};
     FlacMetadata m_metadata{};
     bool m_bInitialized{};
+
+    int16* m_bufferLeftoverSamples{};
+    size_t m_leftoverSamplesSize{};
 };
 #endif

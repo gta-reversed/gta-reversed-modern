@@ -457,7 +457,7 @@ void CAEStreamingChannel::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x4F1800);
     RH_ScopedInstall(Destructor, 0x4F2200);
     RH_ScopedInstall(SynchPlayback, 0x4F1870);
-    RH_ScopedInstall(PrepareStream, 0x4F23D0, { .reversed = false });
+    RH_ScopedInstall(PrepareStream, 0x4F23D0, { .reversed = true });
     RH_ScopedInstall(Initialise, 0x4F22F0);
     RH_ScopedInstall(Pause, 0x4F2170);
     RH_ScopedInstall(SetReady, 0x4F1FF0);

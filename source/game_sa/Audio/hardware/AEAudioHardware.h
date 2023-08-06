@@ -7,6 +7,7 @@
 #include "AETrackLoader.h"
 #include "AESoundManager.h"
 #include "AEStreamThread.h"
+#include "AudioEngine.h"
 
 #ifdef PlaySound
 #undef PlaySound
@@ -169,7 +170,6 @@ public:
 private:
     auto GetChannels() const { return std::span{m_aChannels, m_nNumChannels}; }
 };
-
 VALIDATE_SIZE(CAEAudioHardware, 0x1018);
 
 extern CAEAudioHardware& AEAudioHardware;
