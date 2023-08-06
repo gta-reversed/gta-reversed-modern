@@ -44,7 +44,7 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(GetActiveTrackID, 0x4D8F80);
     RH_ScopedInstall(GetPlayingTrackID, 0x4D8F90);
     RH_ScopedInstall(GetBeatInfo, 0x4D8FA0);
-    RH_ScopedInstall(SetBassSetting, 0x4D94A0);
+    RH_ScopedInstall(SetBassSetting, 0x4D94A0, {.reversed = false});
     RH_ScopedInstall(DisableBassEq, 0x4D94D0);
     RH_ScopedInstall(EnableBassEq, 0x4D94E0);
     RH_ScopedInstall(SetChannelFlags, 0x4D9500);
