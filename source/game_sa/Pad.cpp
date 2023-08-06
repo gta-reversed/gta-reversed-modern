@@ -11,6 +11,7 @@
 #include "UIRenderer.h"
 #include "ControllerConfigManager.h"
 #include "app.h"
+#include "platform/win/Platform.h"
 
 // mouse states
 CMouseControllerState& CPad::PCTempMouseControllerState = *(CMouseControllerState*)0xB73404;
@@ -42,14 +43,14 @@ void CPad::InjectHooks() {
     RH_ScopedInstall(Clear, 0x541A70);
     RH_ScopedInstall(Update, 0x541C40);
     RH_ScopedInstall(UpdateMouse, 0x53F3C0);
-    RH_ScopedInstall(ProcessPad, 0x746A10, { .reversed = false });
+    RH_ScopedInstall(ProcessPad, 0x746A10);
     RH_ScopedInstall(ProcessPCSpecificStuff, 0x53FB40);
     RH_ScopedInstall(ReconcileTwoControllersInput, 0x53F530);
     RH_ScopedInstall(SetTouched, 0x53F200);
     RH_ScopedInstall(GetTouchedTimeDelta, 0x53F210);
     RH_ScopedInstall(StartShake, 0x53F920);
     RH_ScopedInstall(StartShake_Distance, 0x53F9A0);
-    //RH_ScopedInstall(StartShake_Train, 0x53FA70, { .reversed = false }); 
+    RH_ScopedInstall(StartShake_Train, 0x53FA70); 
     RH_ScopedInstall(StopShaking, 0x53FB50);
     RH_ScopedInstall(GetCarGunLeftRight, 0x53FC50);
     RH_ScopedInstall(GetCarGunUpDown, 0x53FC10);
@@ -220,7 +221,7 @@ void CPad::UpdatePads() {
         GetPad(0)->UpdateMouse();
     }
 
-    ProcessPad(false);
+    ProcessPad(0);
     ControlsManager.ClearSimButtonPressCheckers();
 
     if (!ImIONavActive) {
@@ -258,8 +259,96 @@ void CPad::UpdateMouse() {
 }
 
 // 0x746A10
-void CPad::ProcessPad(bool padNum) {
-    ((void(__cdecl*)(bool))0x746A10)(padNum);
+void CPad::ProcessPad(int padNum) {
+    LPDIRECTINPUTDEVICE8* pDiDevice = nullptr;
+    DIJOYSTATE2 joyState;
+
+    if (padNum == 0) {
+        pDiDevice = &PSGLOBAL(diDevice1);
+    }
+    else if (padNum == 1) {
+        pDiDevice = &PSGLOBAL(diDevice2);
+    }
+    else {
+        return;
+    }
+    
+    if (!*pDiDevice) {
+        return;
+    }
+
+    if (SUCCEEDED((*pDiDevice)->Poll())) {
+        WIN_FCHECK((*pDiDevice)->GetDeviceState(sizeof(joyState), &joyState));
+
+        if (ControlsManager.m_bJoyJustInitialised) {
+            std::memcpy(&ControlsManager.m_OldJoyState, &joyState, sizeof(ControlsManager.m_OldJoyState));
+            std::memcpy(&ControlsManager.m_NewJoyState, &joyState, sizeof(ControlsManager.m_NewJoyState));
+            ControlsManager.m_bJoyJustInitialised = false;
+        } else {
+            std::memcpy(&ControlsManager.m_OldJoyState, &ControlsManager.m_NewJoyState, sizeof(ControlsManager.m_OldJoyState));
+            std::memcpy(&ControlsManager.m_NewJoyState, &joyState, sizeof(ControlsManager.m_NewJoyState));
+        }
+        RsPadEventHandler(RsEvent::rsPADBUTTONUP, &padNum);
+
+        if (*pDiDevice) {
+            float padX1 = joyState.lX / 2000.0f;
+            float padX2 = joyState.lY / 2000.0f;
+            float padY1 = 0.0f;
+            float padY2 = 0.0f;
+
+            if (SUCCEEDED(joyState.rgdwPOV[1])) {
+                padX1 = sin(joyState.rgdwPOV[1] / 5730.0f);
+                padY1 = cos(joyState.rgdwPOV[1] / 5730.0f) * -1.0f;
+            }
+            if (PadConfigs[padNum].rzAxisPresent && PadConfigs[padNum].zAxisPresent) {
+                padX2 = joyState.lZ / 2000.0f;
+                padY2 = joyState.lRz / 2000.0f;
+            }
+
+            padNum = CPad::padNumber != 0;
+            RsPadEventHandler(RsEvent::rsPADBUTTONUP, &padNum);
+            RsPadEventHandler(RsEvent::rsPADBUTTONDOWN, &padNum);
+            padNum = CPad::padNumber != 0;
+
+            CPad* pPad = CPad::GetPad(padNum);
+
+            if (fabs(padX1) > 0.3f) {
+                padX1 *= FrontEndMenuManager.m_bInvertPadX1 ? -1 : 1;
+                if (FrontEndMenuManager.m_bSwapPadAxis1) {
+                    pPad->PCTempJoyState.LeftStickY = static_cast<int>(padX1 * 128.0f);
+                } else {
+                    pPad->PCTempJoyState.LeftStickX = static_cast<int>(padX1 * 128.0f);
+                }
+            }
+            if (fabs(padY1) > 0.3f) {
+                padY1 *= FrontEndMenuManager.m_bInvertPadY1 ? -1 : 1;
+                if (FrontEndMenuManager.m_bSwapPadAxis2) {
+                    pPad->PCTempJoyState.LeftStickX = static_cast<int>(padY1 * 128.0f);
+                } else {
+                    pPad->PCTempJoyState.LeftStickY = static_cast<int>(padY1 * 128.0f);
+                }
+            }
+            if (fabs(padX2) > 0.3f) {
+                padX2 *= FrontEndMenuManager.m_bInvertPadX2 ? -1 : 1;
+                if (FrontEndMenuManager.m_bSwapPadAxis1) {
+                    pPad->PCTempJoyState.RightStickY = static_cast<int>(padX2 * 128.0f);
+                } else {
+                    pPad->PCTempJoyState.RightStickX = static_cast<int>(padX2 * 128.0f);
+                }
+            }
+            if (fabs(padY2) > 0.3f) {
+                padY2 *= FrontEndMenuManager.m_bInvertPadY2 ? -1 : 1;
+                if (!FrontEndMenuManager.m_bSwapPadAxis2) {
+                    pPad->PCTempJoyState.RightStickY = static_cast<int>(padY2 * 128.0f);
+                } else {
+                    pPad->PCTempJoyState.RightStickX = static_cast<int>(padY2 * 128.0f);
+                }
+            }
+        }
+    }
+    else {
+        (*pDiDevice)->Acquire();
+    }
 }
 
 // 0x53FB40
@@ -405,22 +494,23 @@ void CPad::StartShake_Distance(int16 time, uint8 freq, CVector pos) {
     }
 }
 
-/* todo:
 // 0x53FA70
 void CPad::StartShake_Train(const CVector2D& point) {
-    if (!FrontEndMenuManager.m_PrefsUseVibration || CCutsceneMgr::ms_running)
+    if (!FrontEndMenuManager.m_PrefsUseVibration || CCutsceneMgr::ms_running) {
         return;
+    }
 
-    if (FindPlayerVehicle(-1) && FindPlayerVehicle(-1)->IsTrain())
+    if (!(FindPlayerVehicle(-1) && FindPlayerVehicle(-1)->IsTrain())) {
         return;
+    }
 
-    auto fDistSq = DistanceBetweenPointsSquared(TheCamera.GetPosition(), point);
+    CVector cameraPos = TheCamera.m_matrix ? TheCamera.m_matrix->GetPosition() : TheCamera.m_placement.m_vPosn;
+    auto fDistSq = DistanceBetweenPointsSquared(cameraPos, CVector(point.x, point.y, 0));
     if (ShakeDur < 100 && fDistSq < 4900.0f) {
         ShakeDur = 100;
         ShakeFreq = static_cast<uint8>(70.0f - sqrt(fDistSq) + 30.0f);
     }
 }
-*/
 
 // 0x541D70
 void CPad::StopPadsShaking() {
