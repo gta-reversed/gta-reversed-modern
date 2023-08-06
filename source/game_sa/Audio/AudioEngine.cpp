@@ -16,8 +16,9 @@ void CAudioEngine::InjectHooks() {
     RH_ScopedClass(CAudioEngine);
     RH_ScopedCategory("Audio");
 
-    //RH_ScopedInstall(CAudioEngine, 0x507670, { .reversed = false });   // default
-    // Install("CAudioEngine", "~CAudioEngine", 0x506CD0, &CAudioEngine::~CAudioEngine); default
+    RH_ScopedInstall(Constructor, 0x507670);
+    RH_ScopedInstall(Destructor, 0x506CD0);
+
     RH_ScopedInstall(Initialise, 0x5B9C60);
     RH_ScopedInstall(Shutdown, 0x507CB0);
     RH_ScopedInstall(Restart, 0x506DB0);
