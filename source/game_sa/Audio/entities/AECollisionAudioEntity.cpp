@@ -80,13 +80,13 @@ void CAECollisionAudioEntity::PlayBulletHitCollisionSound(eSurfaceType surface, 
     {
         do
             iRand = CAEAudioUtility::GetRandomNumberInRange(7, 9);
-        while (iRand == m_nRandom);
+        while (iRand == m_nLastBulletHitSoundID);
     }
     else if (g_surfaceInfos.IsAudioWater(surface))
     {
         do
             iRand = CAEAudioUtility::GetRandomNumberInRange(16, 18);
-        while (iRand == m_nRandom);
+        while (iRand == m_nLastBulletHitSoundID);
         maxDistance = 2.0f;
         volume = volume + 6.0f;
     }
@@ -94,7 +94,7 @@ void CAECollisionAudioEntity::PlayBulletHitCollisionSound(eSurfaceType surface, 
     {
         do
             iRand = CAEAudioUtility::GetRandomNumberInRange(19, 21);
-        while (iRand == m_nRandom);
+        while (iRand == m_nLastBulletHitSoundID);
     }
     else if (g_surfaceInfos.IsAudioMetal(surface))
     {
@@ -103,32 +103,32 @@ void CAECollisionAudioEntity::PlayBulletHitCollisionSound(eSurfaceType surface, 
         {
             do
                 iRand = CAEAudioUtility::GetRandomNumberInRange(10, 12);
-            while (iRand == m_nRandom);
+            while (iRand == m_nLastBulletHitSoundID);
         }
         else
         {
             do
                 iRand = CAEAudioUtility::GetRandomNumberInRange(4, 6);
-            while (iRand == m_nRandom);
+            while (iRand == m_nLastBulletHitSoundID);
         }
     } else if (g_surfaceInfos.IsAudioGravelConcreteOrTile(surface))
     {
         do
             iRand = CAEAudioUtility::GetRandomNumberInRange(13, 15);
-        while (iRand == m_nRandom);
+        while (iRand == m_nLastBulletHitSoundID);
     }
     else
     {
         do
             iRand = CAEAudioUtility::GetRandomNumberInRange(1, 3);
-        while (iRand == m_nRandom);
+        while (iRand == m_nLastBulletHitSoundID);
     }
 
     if (iRand >= 0) {
         CAESound sound;
         sound.Initialise(3, iRand, this, posn, volume, maxDistance, 1.0f, 1.0f, 0, SOUND_DEFAULT, 0.02f, 0);
         AESoundManager.RequestNewSound(&sound);
-        m_nRandom = iRand;
+        m_nLastBulletHitSoundID = iRand;
     }
 }
 

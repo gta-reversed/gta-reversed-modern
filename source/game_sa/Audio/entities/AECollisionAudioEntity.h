@@ -15,10 +15,9 @@ VALIDATE_SIZE(tCollisionAudioEntry, 0x14);
 
 class NOTSA_EXPORT_VTABLE CAECollisionAudioEntity : public CAEAudioEntity {
 public:
-    int16                m_aHistory[194]; // NUM_FUCKING_SURFACES
-    int16                field_200;
-    int16                m_nRandom;
-    int32                m_nCurrentId;
+    int16                m_aHistory[NUM_FUCKING_SURFACES + 1];
+    int16                m_nLastBulletHitSoundID;
+    int32                m_nActiveCollisionSounds;
     tCollisionAudioEntry m_Entries[300];
 
 public:
