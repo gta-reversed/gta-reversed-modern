@@ -2,6 +2,7 @@
 
 #include "AEStreamThread.h"
 #include "AEAudioUtility.h"
+#include "AEMP3TrackLoader.h"
 
 void CAEStreamThread::InjectHooks() {
     RH_ScopedClass(CAEStreamThread);

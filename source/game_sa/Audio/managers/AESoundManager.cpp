@@ -80,6 +80,7 @@ void CAESoundManager::PauseManually(uint8 bPause) {
     m_bManuallyPaused = bPause;
 }
 
+// 0x4F0000
 void CAESoundManager::Service() {
     // Clear sounds uncancellable status for this frame
     std::fill_n(m_aChannelSoundUncancellable, m_nNumAvailableChannels, -1);
