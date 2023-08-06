@@ -60,8 +60,8 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(IsStreamingFromDVD, 0x4D95C0);
     RH_ScopedInstall(GetDVDDriveLetter, 0x4D95D0);
     RH_ScopedInstall(CheckDVD, 0x4D95E0);
-    RH_ScopedInstall(PauseAllSounds, 0x4D95F0, { .reversed = false });
-    RH_ScopedInstall(ResumeAllSounds, 0x4D9630, { .reversed = false });
+    RH_ScopedInstall(PauseAllSounds, 0x4D95F0);
+    RH_ScopedInstall(ResumeAllSounds, 0x4D9630);
     RH_ScopedInstall(InitDirectSoundListener, 0x4D9640, { .reversed = false });
     RH_ScopedInstall(Terminate, 0x4D97A0, { .reversed = false });
     RH_ScopedInstall(Service, 0x4D9870, { .reversed = false });
@@ -433,12 +433,20 @@ bool CAEAudioHardware::CheckDVD() {
 
 // 0x4D95F0
 void CAEAudioHardware::PauseAllSounds() {
-    plugin::CallMethod<0x4D95F0, CAEAudioHardware*>(this);
+    if (!m_bInitialised) {
+        return;
+    }
+    for (const auto ch : GetChannels()) {
+        ch->SetFrequencyScalingFactor(0.f);
+    }
 }
 
 // 0x4D9630
 void CAEAudioHardware::ResumeAllSounds() {
-    plugin::CallMethod<0x4D9630, CAEAudioHardware*>(this);
+    if (!m_bInitialised) {
+        return;
+    }
+    RescaleChannelVolumes();
 }
 
 // 0x4D8490
