@@ -329,7 +329,7 @@ void CAEAudioHardware::GetBeatInfo(tBeatInfo* beatInfo) {
 
     //> 0x4D904C
     size_t i = 0;
-    for (; tInfo->m_aBeats[i].m_nKey && tInfo->m_aBeats[i].m_nTime < cutOffTime; i++);
+    for (; tInfo->m_aBeats[i].m_nKey && tInfo->m_aBeats[i].m_nTime < (uint32)cutOffTime; i++);
 
 
 }

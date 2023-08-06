@@ -74,15 +74,54 @@ FLAC__StreamDecoderWriteStatus write_callback(const FLAC__StreamDecoder* decoder
         return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
 
     auto* flacDecoder = reinterpret_cast<CAEFlacDecoder*>(client_data);
-    auto& fillBufferInfo = flacDecoder->GetFillBufferInfo();
 
-    if (!fillBufferInfo.writeBuffer || !fillBufferInfo.maxBytes)
-        return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
+    const auto& metadata = flacDecoder->GetMetadata();
+    assert(metadata.bps <= 32);
 
-    const auto bps = flacDecoder->GetMetadata().bps;
-    assert(bps <= 32);
+    if (metadata.totalSamples == 0) {
+        NOTSA_LOG_ERR("FLAC decoder error: STREAMINFO doesn't have 'total_samples' info.");
+        return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
+    }
 
-    const auto ConvertSample = [bps](int32 sample) -> int16 {
+    const auto totalSize = metadata.totalSamples * metadata.channels * (metadata.bps / 8);
+
+    if (frame->header.number.sample_number == 0) {
+        const auto fname_static = std::tmpnam(nullptr);
+        if (!fname_static) {
+            NOTSA_LOG_ERR("FLAC decoder error: Couldn't create a temporary file to decode FLAC into WAV.");
+            return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
+        }
+        char* fname = new char[strlen(fname_static) + 1];
+        strcpy(fname, fname_static);
+
+        flacDecoder->AssignWaveFile(fopen(fname, "wb+"), fname, (uint32)totalSize + 44);
+    }
+
+    const auto wavFile = flacDecoder->GetWaveFile();
+
+    if (!wavFile)
+        return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
+
+    const auto WriteIntToFile = [wavFile](auto value, size_t size) {
+        assert(fwrite(&value, 1, size, wavFile) == size);
+    };
+    
+    if (frame->header.number.sample_number == 0) {
+        assert(fwrite("RIFF", 1, 4, wavFile) == 4);
+        WriteIntToFile(totalSize + 36, sizeof(uint32));
+        assert(fwrite("WAVEfmt ", 1, 8, wavFile) == 8);
+        WriteIntToFile(16, sizeof(uint32));
+        WriteIntToFile(1, sizeof(uint16));
+        WriteIntToFile(metadata.channels, sizeof(uint16));
+        WriteIntToFile(metadata.sampleRate, sizeof(uint32));
+        WriteIntToFile(metadata.sampleRate * metadata.channels * (metadata.bps / 8), sizeof(uint32));
+        WriteIntToFile(metadata.channels * (metadata.bps / 8), sizeof(uint16));
+        WriteIntToFile(16 /* metadata.bps */, sizeof(uint16));
+        assert(fwrite("data", 1, 4, wavFile) == 4);
+        WriteIntToFile(totalSize, sizeof(uint32));
+    }
+
+    const auto ConvertSample = [bps = metadata.bps](int32 sample) -> int16 {
         if (bps == 16) {
             return static_cast<int16>(sample);
         } else {
@@ -95,26 +134,14 @@ FLAC__StreamDecoderWriteStatus write_callback(const FLAC__StreamDecoder* decoder
         }
     };
 
-    assert(!fillBufferInfo.leftoverWrittenBytes && buffer);
+    for (auto i = 0u; i < frame->header.blocksize; i++) {
+        WriteIntToFile(ConvertSample(buffer[0][i]), sizeof(int16)); // left/mono
 
-    auto writeCount = frame->header.blocksize * sizeof(*buffer), leftoverCount = 0u;
-    if (writeCount > fillBufferInfo.maxBytes) {
-        leftoverCount = writeCount - fillBufferInfo.maxBytes;
-        writeCount = fillBufferInfo.maxBytes / sizeof(*buffer);
+        if (metadata.channels == 2)
+            WriteIntToFile(ConvertSample(buffer[1][i]), sizeof(int16)); // right
+        else
+            WriteIntToFile(ConvertSample(buffer[0][i]), sizeof(int16)); // mono
     }
-    assert(leftoverCount < CAEFlacDecoder::LEFTOVER_SAMPLES_SIZE * sizeof(int16));
-
-    for (auto i = 0u; i < writeCount; i++) {
-        fillBufferInfo.writeBuffer[2u * i + 0u] = ConvertSample(buffer[0][i]); // left
-        fillBufferInfo.writeBuffer[2u * i + 1u] = ConvertSample(buffer[1][i]); // right
-    }
-    fillBufferInfo.writeWrittenBytes = writeCount * sizeof(int16) * 2;
-
-    for (auto i = 0u; i < leftoverCount; i++) {
-        fillBufferInfo.leftoverBuffer[2u * i + 0u] = ConvertSample(buffer[0][i]); // left
-        fillBufferInfo.leftoverBuffer[2u * i + 1u] = ConvertSample(buffer[1][i]); // right
-    }
-    fillBufferInfo.leftoverWrittenBytes = leftoverCount * sizeof(int16) * 2;
 
     return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
 }
@@ -132,6 +159,14 @@ void metadata_callback(const FLAC__StreamDecoder* decoder, const FLAC__StreamMet
     decoderMetadata.sampleRate = metadata->data.stream_info.sample_rate;
     decoderMetadata.channels = metadata->data.stream_info.channels;
     decoderMetadata.bps = metadata->data.stream_info.bits_per_sample;
+
+    NOTSA_LOG_DEBUG(
+        "FLAC metadata:\nTotal samples: {}\nSample rate: {} Hz\nChannels: {}\nBits per sample: {} (will be converted to 16)\n",
+        decoderMetadata.totalSamples,
+        decoderMetadata.sampleRate,
+        decoderMetadata.channels,
+        decoderMetadata.bps
+    );
 }
 
 void error_callback(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderErrorStatus status,
@@ -146,6 +181,18 @@ void error_callback(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderError
     NOTSA_LOG_ERR("FLAC Stream decoder error: {}\n", FLAC__StreamDecoderErrorStatusString[status]);
 }
 
+CAEFlacDecoder::~CAEFlacDecoder() {
+    if (!m_WaveFileName.empty()) {
+        m_dataStream->Close();
+
+        std::error_code ec;
+        std::filesystem::remove(m_WaveFileName, ec);
+        if (ec != std::error_code{}) {
+            NOTSA_LOG_WARN("Couldn't remove temporary FLAC->WAV file '{}'. (msg={}, val={})", m_WaveFileName, ec.message(), ec.value());
+        }
+    }
+}
+
 bool CAEFlacDecoder::InitLibrary() {
     // Test stream decoder.
     if (const auto d = FLAC__stream_decoder_new(); d) {
@@ -156,14 +203,14 @@ bool CAEFlacDecoder::InitLibrary() {
 }
 
 bool CAEFlacDecoder::Initialise() {
-    m_FlacStreamDecoder = FLAC__stream_decoder_new();
-    if (!m_FlacStreamDecoder) {
+    const auto decoder = FLAC__stream_decoder_new();
+    if (!decoder) {
         NOTSA_LOG_WARN("FLAC__stream_decoder_new failed.");
         return false;
     }
     
-    const auto s = FLAC__stream_decoder_init_stream(
-        m_FlacStreamDecoder,
+    const auto initStatus = FLAC__stream_decoder_init_stream(
+        decoder,
         read_callback,
         seek_callback,
         tell_callback,
@@ -175,136 +222,31 @@ bool CAEFlacDecoder::Initialise() {
         this
     );
 
-    if (s != FLAC__STREAM_DECODER_INIT_STATUS_OK) {
+    if (initStatus != FLAC__STREAM_DECODER_INIT_STATUS_OK) {
         NOTSA_LOG_WARN("FLAC__stream_decoder_init_FILE failed.");
-        FLAC__stream_decoder_delete(std::exchange(m_FlacStreamDecoder, nullptr));
+        FLAC__stream_decoder_delete(decoder);
         return false;
     }
 
-    // Decode one stream just for checking metadata.
-    FLAC__stream_decoder_process_until_end_of_metadata(m_FlacStreamDecoder);
-    DEV_LOG("FLAC metadata:\nTotal samples: {}\nSample rate: {}\nChannels: {}\nBits per second: {}\n", m_metadata.totalSamples, m_metadata.sampleRate, m_metadata.channels,
-            m_metadata.bps);
+    const auto decodeRes = FLAC__stream_decoder_process_until_end_of_stream(decoder);
 
-    // Seek back after a dry run.
-    FLAC__stream_decoder_seek_absolute(m_FlacStreamDecoder, 0u);
-
-    if (m_metadata.channels != 2) {
-        NOTSA_LOG_WARN("FLAC decoder: Found non-stereo audio, skipping...");
-        FLAC__stream_decoder_delete(std::exchange(m_FlacStreamDecoder, nullptr));
+    DEV_LOG("Decoding result: {}", decodeRes ? "Successful" : "Failed");
+    if (!decodeRes)
         return false;
-    }
 
-    /*
-    if (m_metadata.bps != 16) {
-        NOTSA_LOG_WARN("FLAC decoder: Found != 16 BPS audio, skipping...");
-        FLAC__stream_decoder_delete(std::exchange(m_FlacStreamDecoder, nullptr));
+    CFileMgr::CloseFile(m_WaveFile);
+    const auto trackId = m_dataStream->m_nTrackId;
+
+    if (!m_WaveFileNameHeap)
         return false;
-    }
-    */
 
-    m_bufferLeftoverSamples = new int16[LEFTOVER_SAMPLES_SIZE];
+    m_WaveFileName = m_WaveFileNameHeap;
 
-    m_bInitialized = true;
-    return true;
-}
+    NOTSA_LOG_DEBUG("Loading temporary FLAC->WAV file '{}'", m_WaveFileName);
 
-CAEFlacDecoder::~CAEFlacDecoder() {
-    if (m_FlacStreamDecoder)
-        FLAC__stream_decoder_delete(std::exchange(m_FlacStreamDecoder, nullptr));
+    delete m_dataStream;
+    m_dataStream = new CAEDataStream(trackId, m_WaveFileNameHeap, 0, m_WaveFileLength, false);
 
-    delete m_bufferLeftoverSamples;
-}
-
-size_t CAEFlacDecoder::FillBuffer(void* dest, size_t size) {
-    if (!m_bInitialized || !m_metadata.channels || size == 0)
-        return 0u;
-
-    m_fillBufferInfo.writeBuffer = reinterpret_cast<int16*>(dest);
-
-    size_t totalRead = 0;
-
-        if (m_fillBufferInfo.leftoverWrittenBytes) {
-        NOTSA_LOG_WARN("Filling leftover decoded 0x{:x} bytes", m_fillBufferInfo.leftoverWrittenBytes);
-
-        const auto copySize = std::min(m_fillBufferInfo.leftoverWrittenBytes, size);
-        std::memcpy(dest, m_fillBufferInfo.leftoverBuffer, copySize);
-
-        m_fillBufferInfo.leftoverWrittenBytes -= copySize;
-        if (m_fillBufferInfo.leftoverWrittenBytes > size) {
-            std::memcpy(m_fillBufferInfo.leftoverBuffer, m_fillBufferInfo.leftoverBuffer + size, size - m_fillBufferInfo.leftoverWrittenBytes);
-
-            NOTSA_LOG_WARN("There are more leftover bytes! size=0x{:x}", m_fillBufferInfo.leftoverWrittenBytes);
-        }
-
-        totalRead = copySize;
-    }
-
-    while (totalRead < size) {
-        m_fillBufferInfo.maxBytes = size - totalRead;
-        const auto result = FLAC__stream_decoder_process_single(m_FlacStreamDecoder);
-
-        if (!result) {
-            NOTSA_LOG_ERR("FLAC__stream_decoder_process_single returned error!");
-            return totalRead;
-        }
-
-        const auto written = m_fillBufferInfo.writeWrittenBytes;
-
-        NOTSA_LOG_DEBUG("Decoded 0x{:x} bytes from FLAC file.", written);
-
-        m_fillBufferInfo.writeBuffer += written;
-        totalRead += written;
-    }
-    m_fillBufferInfo.writeBuffer = nullptr;
-    m_fillBufferInfo.writeWrittenBytes = 0;
-
-    if (m_fillBufferInfo.leftoverWrittenBytes)
-        NOTSA_LOG_WARN("There are 0x{:x} leftover decoded bytes, to be filled at next FillBuffer call.", m_fillBufferInfo.leftoverWrittenBytes);
-
-    return totalRead;
-}
-
-long CAEFlacDecoder::GetStreamLengthMs() {
-    // this is correct... right?
-    if (!m_bInitialized || !m_metadata.totalSamples || !m_metadata.sampleRate)
-        return 0;
-
-    return static_cast<long>((float)(m_metadata.totalSamples) / (float)(m_metadata.sampleRate) * 1000.0f);
-}
-
-long CAEFlacDecoder::GetStreamPlayTimeMs() {
-    // this is correct... right?
-    if (!m_bInitialized || !m_metadata.sampleRate)
-        return 0;
-
-    FLAC__uint64 position{};
-    FLAC__stream_decoder_get_decode_position(m_FlacStreamDecoder, &position);
-
-    return static_cast<long>((float)(position) / (float)(m_metadata.sampleRate) * 1000.0f);
-}
-
-void CAEFlacDecoder::SetCursor(unsigned long pos) {
-    if (!m_bInitialized || !m_metadata.sampleRate)
-        return;
-
-    const auto absolutePos = pos * m_metadata.sampleRate / 1000;
-
-    FLAC__stream_decoder_seek_absolute(m_FlacStreamDecoder, absolutePos);
-}
-
-int32 CAEFlacDecoder::GetSampleRate() {
-    if (!m_bInitialized || !m_metadata.sampleRate)
-        return -1;
-
-    if (m_metadata.sampleRate > (uint32)std::numeric_limits<int32>::max()) {
-        NOTSA_LOG_WARN("Unsigned sample rate (={}) is casted to signed int, this will surely brake something...", m_metadata.sampleRate);
-    }
-
-    return static_cast<int32>(m_metadata.sampleRate);
-}
-
-int32 CAEFlacDecoder::GetStreamID() {
-    return m_dataStream->m_nTrackId;
+    return m_dataStream->Initialise() && CAEWaveDecoder::Initialise();
 }
 #endif
