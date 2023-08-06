@@ -263,11 +263,9 @@ void CPad::ProcessPad(int padNum) {
 
     if (padNum == 0) {
         pDiDevice = &PSGLOBAL(diDevice1);
-    }
-    else if (padNum == 1) {
+    } else if (padNum == 1) {
         pDiDevice = &PSGLOBAL(diDevice2);
-    }
-    else {
+    } else {
         return;
     }
     
@@ -275,77 +273,55 @@ void CPad::ProcessPad(int padNum) {
         return;
     }
 
-    if (SUCCEEDED((*pDiDevice)->Poll())) {
-        WIN_FCHECK((*pDiDevice)->GetDeviceState(sizeof(joyState), &joyState));
-
-        if (ControlsManager.m_bJoyJustInitialised) {
-            std::memcpy(&ControlsManager.m_OldJoyState, &joyState, sizeof(ControlsManager.m_OldJoyState));
-            std::memcpy(&ControlsManager.m_NewJoyState, &joyState, sizeof(ControlsManager.m_NewJoyState));
-            ControlsManager.m_bJoyJustInitialised = false;
-        } else {
-            std::memcpy(&ControlsManager.m_OldJoyState, &ControlsManager.m_NewJoyState, sizeof(ControlsManager.m_OldJoyState));
-            std::memcpy(&ControlsManager.m_NewJoyState, &joyState, sizeof(ControlsManager.m_NewJoyState));
-        }
-        RsPadEventHandler(RsEvent::rsPADBUTTONUP, &padNum);
-
-        if (*pDiDevice) {
-            float padX1 = joyState.lX / 2000.0f;
-            float padX2 = joyState.lY / 2000.0f;
-            float padY1 = 0.0f;
-            float padY2 = 0.0f;
-
-            if (SUCCEEDED(joyState.rgdwPOV[1])) {
-                padX1 = sin(joyState.rgdwPOV[1] / 5730.0f);
-                padY1 = cos(joyState.rgdwPOV[1] / 5730.0f) * -1.0f;
-            }
-            if (PadConfigs[padNum].rzAxisPresent && PadConfigs[padNum].zAxisPresent) {
-                padX2 = joyState.lZ / 2000.0f;
-                padY2 = joyState.lRz / 2000.0f;
-            }
-
-            padNum = CPad::padNumber != 0;
-            RsPadEventHandler(RsEvent::rsPADBUTTONUP, &padNum);
-            RsPadEventHandler(RsEvent::rsPADBUTTONDOWN, &padNum);
-            padNum = CPad::padNumber != 0;
-
-            CPad* pPad = CPad::GetPad(padNum);
-
-            if (fabs(padX1) > 0.3f) {
-                padX1 *= FrontEndMenuManager.m_bInvertPadX1 ? -1 : 1;
-                if (FrontEndMenuManager.m_bSwapPadAxis1) {
-                    pPad->PCTempJoyState.LeftStickY = static_cast<int>(padX1 * 128.0f);
-                } else {
-                    pPad->PCTempJoyState.LeftStickX = static_cast<int>(padX1 * 128.0f);
-                }
-            }
-            if (fabs(padY1) > 0.3f) {
-                padY1 *= FrontEndMenuManager.m_bInvertPadY1 ? -1 : 1;
-                if (FrontEndMenuManager.m_bSwapPadAxis2) {
-                    pPad->PCTempJoyState.LeftStickX = static_cast<int>(padY1 * 128.0f);
-                } else {
-                    pPad->PCTempJoyState.LeftStickY = static_cast<int>(padY1 * 128.0f);
-                }
-            }
-            if (fabs(padX2) > 0.3f) {
-                padX2 *= FrontEndMenuManager.m_bInvertPadX2 ? -1 : 1;
-                if (FrontEndMenuManager.m_bSwapPadAxis1) {
-                    pPad->PCTempJoyState.RightStickY = static_cast<int>(padX2 * 128.0f);
-                } else {
-                    pPad->PCTempJoyState.RightStickX = static_cast<int>(padX2 * 128.0f);
-                }
-            }
-            if (fabs(padY2) > 0.3f) {
-                padY2 *= FrontEndMenuManager.m_bInvertPadY2 ? -1 : 1;
-                if (!FrontEndMenuManager.m_bSwapPadAxis2) {
-                    pPad->PCTempJoyState.RightStickY = static_cast<int>(padY2 * 128.0f);
-                } else {
-                    pPad->PCTempJoyState.RightStickX = static_cast<int>(padY2 * 128.0f);
-                }
-            }
-        }
-    }
-    else {
+    if (FAILED((*pDiDevice)->Poll())) {
         (*pDiDevice)->Acquire();
+        return;
+    }
+
+ 
+    WIN_FCHECK((*pDiDevice)->GetDeviceState(sizeof(joyState), &joyState));
+
+    if (ControlsManager.m_bJoyJustInitialised) {
+        std::memcpy(&ControlsManager.m_OldJoyState, &joyState, sizeof(ControlsManager.m_OldJoyState));
+        std::memcpy(&ControlsManager.m_NewJoyState, &joyState, sizeof(ControlsManager.m_NewJoyState));
+        ControlsManager.m_bJoyJustInitialised = false;
+    } else {
+        std::memcpy(&ControlsManager.m_OldJoyState, &ControlsManager.m_NewJoyState, sizeof(ControlsManager.m_OldJoyState));
+        std::memcpy(&ControlsManager.m_NewJoyState, &joyState, sizeof(ControlsManager.m_NewJoyState));
+    }
+    RsPadEventHandler(RsEvent::rsPADBUTTONUP, &padNum);
+
+    if (*pDiDevice) {
+        float padX1 = joyState.lX / 2000.0f;
+        float padX2 = joyState.lY / 2000.0f;
+        float padY1 = 0.0f;
+        float padY2 = 0.0f;
+
+        if (SUCCEEDED(joyState.rgdwPOV[1])) {
+            padX1 = sin(joyState.rgdwPOV[1] / 5730.0f);
+            padY1 = cos(joyState.rgdwPOV[1] / 5730.0f) * -1.0f;
+        }
+        if (PadConfigs[padNum].rzAxisPresent && PadConfigs[padNum].zAxisPresent) {
+            padX2 = joyState.lZ / 2000.0f;
+            padY2 = joyState.lRz / 2000.0f;
+        }
+
+        RsPadEventHandler(RsEvent::rsPADBUTTONUP, &padNum);
+        RsPadEventHandler(RsEvent::rsPADBUTTONDOWN, &padNum);
+        CPad* pPad = CPad::GetPad(padNum);
+
+        const auto UpdateJoyStickPosition = [](float pos, int16& outA, int16& outB, bool isInverted, bool isSwapped) {
+            if (fabs(pos) > 0.3f) {
+                pos = isInverted ? -pos : pos;
+                pos /= 128.f;
+                (isSwapped ? outA : outB) = (int32)pos;
+            }
+        };
+
+        UpdateJoyStickPosition(padX1, pPad->PCTempJoyState.LeftStickY, pPad->PCTempJoyState.LeftStickX, FrontEndMenuManager.m_bInvertPadX1, FrontEndMenuManager.m_bSwapPadAxis1);
+        UpdateJoyStickPosition(padY1, pPad->PCTempJoyState.LeftStickX, pPad->PCTempJoyState.LeftStickY, FrontEndMenuManager.m_bInvertPadY1, FrontEndMenuManager.m_bSwapPadAxis2);
+        UpdateJoyStickPosition(padX2, pPad->PCTempJoyState.LeftStickY, pPad->PCTempJoyState.LeftStickX, FrontEndMenuManager.m_bInvertPadX2, FrontEndMenuManager.m_bSwapPadAxis1);
+        UpdateJoyStickPosition(padY2, pPad->PCTempJoyState.LeftStickX, pPad->PCTempJoyState.LeftStickY, FrontEndMenuManager.m_bInvertPadY2, FrontEndMenuManager.m_bSwapPadAxis2);
     }
 }
 
@@ -498,12 +474,11 @@ void CPad::StartShake_Train(const CVector2D& point) {
         return;
     }
 
-    if (!(FindPlayerVehicle(-1) && FindPlayerVehicle(-1)->IsTrain())) {
+    if (!FindPlayerVehicle(-1) || !FindPlayerVehicle(-1)->IsTrain()) {
         return;
     }
 
-    CVector cameraPos = TheCamera.m_matrix ? TheCamera.m_matrix->GetPosition() : TheCamera.m_placement.m_vPosn;
-    auto fDistSq = DistanceBetweenPointsSquared(cameraPos, CVector(point.x, point.y, 0));
+    const auto fDistSq = (TheCamera.GetPosition() - point).SquaredMagnitude();
     if (ShakeDur < 100 && fDistSq < 4900.0f) {
         ShakeDur = 100;
         ShakeFreq = static_cast<uint8>(70.0f - sqrt(fDistSq) + 30.0f);
