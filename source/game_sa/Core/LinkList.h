@@ -75,6 +75,9 @@ public:
         link->Remove();
         freeListHead.Insert(link);
     }
+
+    auto GetTail() { return usedListTail.prev; }
+    auto GetHead() { return usedListHead.next; }
 };
 
 VALIDATE_SIZE(CLinkList<void*>, 0x34);

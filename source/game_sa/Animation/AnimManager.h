@@ -11,6 +11,8 @@
 #include "AnimBlendAssociation.h"
 #include "AnimBlock.h"
 
+#include <extensions/ci_string.hpp>
+
 constexpr auto MAX_ANIM_BLOCK_NAME = 16;
 constexpr auto NUM_ANIM_ASSOC_GROUPS = 118;
 constexpr auto NUM_ANIM_BLOCKS = 180;
@@ -19,10 +21,10 @@ class CAnimManager {
 public:
     static std::array<AnimAssocDefinition, NUM_ANIM_ASSOC_GROUPS> ms_aAnimAssocDefinitionsX; // replacement
     static inline AnimAssocDefinition (&ms_aAnimAssocDefinitions)[NUM_ANIM_ASSOC_GROUPS] = *(AnimAssocDefinition(*)[NUM_ANIM_ASSOC_GROUPS])0x8AA5A8; // std::array - see SurfaceInfos_c
-    static inline int32& ms_numAnimAssocDefinitions = *(int32*)0xB4EA28;
+    static inline uint32& ms_numAnimAssocDefinitions = *(uint32*)0xB4EA28;
 
     static inline CAnimBlendAssocGroup*& ms_aAnimAssocGroups = *(CAnimBlendAssocGroup**)0xB4EA34;
-    static inline int32& ms_numAnimBlocks = *(int32*)0xB4EA30;
+    static inline uint32& ms_numAnimBlocks = *(uint32*)0xB4EA30;
 
     static inline std::array<CAnimBlendHierarchy, 2500>& ms_aAnimations = *(std::array<CAnimBlendHierarchy, 2500>*)0xB4EA40;
     static inline int32& ms_numAnimations = *(int32*)0xB4EA2C;
@@ -52,9 +54,10 @@ public:
     static CAnimBlendHierarchy* GetAnimation(const char* animName, const CAnimBlock* animBlock);
     static const char* GetAnimGroupName(AssocGroupId groupId);
     static const char* GetAnimBlockName(AssocGroupId groupId);
-    static AssocGroupId GetAnimationGroupId(const char* name);
+    static AssocGroupId GetAnimationGroupIdByName(notsa::ci_string_view name);
     static CAnimBlendStaticAssociation* GetAnimAssociation(AssocGroupId groupId, AnimationId animId);
     static CAnimBlendStaticAssociation* GetAnimAssociation(AssocGroupId groupId, const char* animName);
+    static CAnimBlendAssociation* AddAnimationToClump(RpClump* clump, CAnimBlendAssociation* anim); // NOTSA - Internal
     static int32 GetNumRefsToAnimBlock(int32 index);
 
     static CAnimBlendAssociation* CreateAnimAssociation(AssocGroupId groupId, AnimationId animId);
@@ -79,7 +82,11 @@ public:
 
     /// NOTSA. Get random gangtalk anim
     static AnimationId GetRandomGangTalkAnim();
+
+    static auto GetAnimBlocks() { return ms_aAnimBlocks | rng::views::take(ms_numAnimBlocks); }
+    static auto GetAssocGroups() { return std::span{ms_aAnimAssocGroups, ms_numAnimAssocDefinitions}; }
+    static auto GetAssocGroupDefs() { return std::span{ms_aAnimAssocDefinitions, ms_numAnimAssocDefinitions}; }
 private:
-    static inline void LoadAnimFile_ANPK(RwStream* stream, bool compress, const char (*uncompressedAnims)[32]);
-    static inline void LoadAnimFile_ANP23(RwStream* stream, bool compress, bool isANP3);
+    static void LoadAnimFile_ANPK(RwStream* stream, bool compress, const char (*uncompressedAnims)[32]);
+    static void LoadAnimFile_ANP23(RwStream* stream, bool compress, bool isANP3);
 };
