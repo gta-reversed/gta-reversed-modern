@@ -6,6 +6,7 @@
 
 #include "AESoundManager.h"
 #include "AEStreamThread.h"
+#include "AudioEngine.h"
 
 #ifdef PlaySound
 #undef PlaySound
@@ -77,10 +78,7 @@ public:
     CAEStreamingChannel*    m_pStreamingChannel;
     CAEStreamThread         m_pStreamThread;
     CAEAudioChannel*        m_aChannels[MAX_NUM_AUDIO_CHANNELS];
-    uint32                  m_aBeatInfo[40];
-    int32                   field_1004;
-    int32                   field_1008;
-    int32                   field_100C;
+    tBeatInfo               m_BeatInfo;
     uint8                   field_1010;
     int32                   field_1014;
 
@@ -168,7 +166,6 @@ public:
 
     void Service();
 };
-
 VALIDATE_SIZE(CAEAudioHardware, 0x1018);
 
 extern CAEAudioHardware& AEAudioHardware;

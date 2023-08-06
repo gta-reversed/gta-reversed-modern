@@ -74,9 +74,9 @@ FLAC__StreamDecoderWriteStatus write_callback(const FLAC__StreamDecoder* decoder
         return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
 
     auto* flacDecoder = reinterpret_cast<CAEFlacDecoder*>(client_data);
-    const auto out = reinterpret_cast<int16*>(flacDecoder->GetWriteBuffer());
+    auto& fillBufferInfo = flacDecoder->GetFillBufferInfo();
 
-    if (!out)
+    if (!fillBufferInfo.writeBuffer || !fillBufferInfo.maxBytes)
         return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
 
     const auto bps = flacDecoder->GetMetadata().bps;
@@ -95,10 +95,27 @@ FLAC__StreamDecoderWriteStatus write_callback(const FLAC__StreamDecoder* decoder
         }
     };
 
-    for (auto i = 0u; i < frame->header.blocksize; i++) {
-        out[2u * i + 0u] = ConvertSample(buffer[0][i]); // left
-        out[2u * i + 1u] = ConvertSample(buffer[1][i]); // right
+    assert(!fillBufferInfo.leftoverWrittenBytes && buffer);
+
+    auto writeCount = frame->header.blocksize * sizeof(*buffer), leftoverCount = 0u;
+    if (writeCount > fillBufferInfo.maxBytes) {
+        leftoverCount = writeCount - fillBufferInfo.maxBytes;
+        writeCount = fillBufferInfo.maxBytes / sizeof(*buffer);
     }
+    assert(leftoverCount < CAEFlacDecoder::LEFTOVER_SAMPLES_SIZE * sizeof(int16));
+
+    for (auto i = 0u; i < writeCount; i++) {
+        fillBufferInfo.writeBuffer[2u * i + 0u] = ConvertSample(buffer[0][i]); // left
+        fillBufferInfo.writeBuffer[2u * i + 1u] = ConvertSample(buffer[1][i]); // right
+    }
+    fillBufferInfo.writeWrittenBytes = writeCount * sizeof(int16) * 2;
+
+    for (auto i = 0u; i < leftoverCount; i++) {
+        fillBufferInfo.leftoverBuffer[2u * i + 0u] = ConvertSample(buffer[0][i]); // left
+        fillBufferInfo.leftoverBuffer[2u * i + 1u] = ConvertSample(buffer[1][i]); // right
+    }
+    fillBufferInfo.leftoverWrittenBytes = leftoverCount * sizeof(int16) * 2;
+
     return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
 }
 
@@ -186,6 +203,8 @@ bool CAEFlacDecoder::Initialise() {
     }
     */
 
+    m_bufferLeftoverSamples = new int16[LEFTOVER_SAMPLES_SIZE];
+
     m_bInitialized = true;
     return true;
 }
@@ -193,19 +212,22 @@ bool CAEFlacDecoder::Initialise() {
 CAEFlacDecoder::~CAEFlacDecoder() {
     if (m_FlacStreamDecoder)
         FLAC__stream_decoder_delete(std::exchange(m_FlacStreamDecoder, nullptr));
+
+    delete m_bufferLeftoverSamples;
 }
 
 size_t CAEFlacDecoder::FillBuffer(void* dest, size_t size) {
     if (!m_bInitialized || !m_metadata.channels || size == 0)
         return 0u;
 
-    m_CurrentWriteBuffer = reinterpret_cast<uint8*>(dest);
+    m_fillBufferInfo.writeBuffer = reinterpret_cast<int16*>(dest);
 
     size_t totalRead = 0;
     uint64 initialPos{};
     FLAC__stream_decoder_get_decode_position(m_FlacStreamDecoder, &initialPos);
 
     while (totalRead < size) {
+        m_fillBufferInfo.maxBytes = size - totalRead;
         const auto result = FLAC__stream_decoder_process_single(m_FlacStreamDecoder);
 
         if (!result) {
@@ -219,10 +241,10 @@ size_t CAEFlacDecoder::FillBuffer(void* dest, size_t size) {
         assert(newPos > initialPos);
         const auto dist = newPos - initialPos;
 
-        m_CurrentWriteBuffer += dist;
+        m_fillBufferInfo.writeBuffer += dist;
         totalRead += static_cast<size_t>(dist);
     }
-    m_CurrentWriteBuffer = nullptr;
+    m_fillBufferInfo = {};
 
     return totalRead;
 }
