@@ -2,6 +2,7 @@
 
 #include "AEStreamThread.h"
 #include "AEAudioUtility.h"
+#include "AEMP3TrackLoader.h"
 
 void CAEStreamThread::InjectHooks() {
     RH_ScopedClass(CAEStreamThread);
@@ -9,6 +10,7 @@ void CAEStreamThread::InjectHooks() {
 
     RH_ScopedInstall(Initialise, 0x4F1680, { .reversed = false });
     RH_ScopedInstall(Start, 0x4F11F0);
+    RH_ScopedInstall(Stop, 0x4F1590);
     RH_ScopedInstall(Pause, 0x4F1200);
     RH_ScopedInstall(Resume, 0x4F1210);
     RH_ScopedInstall(WaitForExit, 0x4F1220);
@@ -54,6 +56,14 @@ void CAEStreamThread::Initialise(CAEStreamingChannel* streamingChannel) {
 void CAEStreamThread::Start() {
     m_bThreadActive = true;
     ResumeThread(m_nHandle);
+}
+
+// 0x4F1590
+void CAEStreamThread::Stop() {
+    m_bThreadActive = false;
+    if (std::exchange(m_bActive, false)) {
+        delete m_pMp3TrackLoader;
+    }
 }
 
 // 0x4F1200

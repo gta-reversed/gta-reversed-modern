@@ -1,9 +1,17 @@
 #include "StdInc.h"
 
+#include <extensions/utility.hpp>
+
 #include "AEStreamingChannel.h"
 #include "AEAudioUtility.h"
 
-static inline auto& s_SavedFXParamEq = *StaticRef<std::array<DSFXParamEq, 6>*>(0x8CBA70);
+//! Stereo channel FX Param EQ presets [0x8CBA70]
+static inline DSFXParamEq s_FXParamEqPresets[3][2]{
+    {{ 0.0f, 0.0f,  0.0f }, { 0.f,   0.0f,  0.0f }}, // Preset 1
+    {{ 80.f, 30.f,  4.0f }, { 180.f, 30.f,  1.5f }}, // Preset 2
+    {{ 80.f, 36.f, -15.f }, { 80.f,  36.f, -15.f }}, // Preset 3
+};
+
 
 // 0x4F2200
 CAEStreamingChannel::~CAEStreamingChannel() {
@@ -100,32 +108,32 @@ void CAEStreamingChannel::SetReady() {
 }
 
 // 0x4F1F30
-void CAEStreamingChannel::SetBassEQ(IDirectSoundFXParamEq* paramEq, float gain) {
-    if (!paramEq) {
+void CAEStreamingChannel::SetBassEQ(uint8 mode, float gain) {
+    if (mode == 0) {
         if (m_bFxEnabled)
             RemoveFX();
-
         return;
     }
 
-    if (!m_bFxEnabled && !AddFX())
+    if (!m_bFxEnabled && !AddFX()) {
         return;
+    }
 
-    // per channel?
     for (auto i = 0; i < 2; i++) {
+        IDirectSoundFXParamEq* fxEqParam;
         if (FAILED(m_pDirectSoundBuffer8->GetObjectInPath(
             GUID_All_Objects,
             i,
             IID_IDirectSoundFXParamEq,
-            reinterpret_cast<LPVOID*>(&paramEq)
-        )))
+            reinterpret_cast<LPVOID*>(&fxEqParam)
+        ))) {
             continue;
+        }
 
-        // da fuck?
-        auto savedFXParamEq = s_SavedFXParamEq[2 * static_cast<uint8>(reinterpret_cast<uintptr_t>(paramEq)) + i];
-        savedFXParamEq.fGain *= gain;
-        paramEq->SetAllParameters(&savedFXParamEq);
-        paramEq->Release();
+        DSFXParamEq savedFxExParam{ s_FXParamEqPresets[mode][i] };
+        savedFxExParam.fGain *= gain;
+        VERIFY(SUCCEEDED(fxEqParam->SetAllParameters(&savedFxExParam)));
+        fxEqParam->Release();
     }
 }
 
@@ -324,24 +332,17 @@ bool CAEStreamingChannel::AddFX() {
     )))
         return false;
 
-    IDirectSoundFXParamEq* fxParamEq{};
-    m_pDirectSoundBuffer8->GetObjectInPath(
-        GUID_All_Objects,
-        0,
-        IID_IDirectSoundFXParamEq,
-        reinterpret_cast<LPVOID*>(&fxParamEq)
-    );
-    fxParamEq->SetAllParameters(&s_SavedFXParamEq[0]);
-    fxParamEq->Release();
-
-    m_pDirectSoundBuffer8->GetObjectInPath(
-        GUID_All_Objects,
-        1,
-        IID_IDirectSoundFXParamEq,
-        reinterpret_cast<LPVOID*>(&fxParamEq)
-    );
-    fxParamEq->SetAllParameters(&s_SavedFXParamEq[1]);
-    fxParamEq->Release();
+    for (auto i = 0; i < 2; i++) { // Set both channels
+        IDirectSoundFXParamEq* fxParamEq{};
+        m_pDirectSoundBuffer8->GetObjectInPath(
+            GUID_All_Objects,
+            i,
+            IID_IDirectSoundFXParamEq,
+            reinterpret_cast<LPVOID*>(&fxParamEq)
+        );
+        fxParamEq->SetAllParameters(&s_FXParamEqPresets[0][i]);
+        fxParamEq->Release();
+    }
 
     if (wasStopped)
         m_pDirectSoundBuffer->Play(0, 0, DSBPLAY_LOOPING);

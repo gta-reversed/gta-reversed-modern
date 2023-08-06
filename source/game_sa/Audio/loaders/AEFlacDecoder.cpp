@@ -188,7 +188,7 @@ CAEFlacDecoder::~CAEFlacDecoder() {
         std::error_code ec;
         std::filesystem::remove(m_WaveFileName, ec);
         if (ec != std::error_code{}) {
-            NOTSA_LOG_WARN("Couldn't remove temporary FLAC->WAV file '{}'. (msg={}, val={})", m_WaveFileName, ec.message(), ec.value());
+            NOTSA_LOG_TRACE("Couldn't remove temporary FLAC->WAV file '{}'. (msg={}, val={})", m_WaveFileName, ec.message(), ec.value());
         }
     }
 }
@@ -230,7 +230,7 @@ bool CAEFlacDecoder::Initialise() {
 
     const auto decodeRes = FLAC__stream_decoder_process_until_end_of_stream(decoder);
 
-    DEV_LOG("Decoding result: {}", decodeRes ? "Successful" : "Failed");
+    NOTSA_LOG_TRACE("Decoding result: {}", decodeRes ? "Successful" : "Failed");
     if (!decodeRes)
         return false;
 
@@ -242,7 +242,7 @@ bool CAEFlacDecoder::Initialise() {
 
     m_WaveFileName = m_WaveFileNameHeap;
 
-    NOTSA_LOG_DEBUG("Loading temporary FLAC->WAV file '{}'", m_WaveFileName);
+    NOTSA_LOG_TRACE("Loading temporary FLAC->WAV file '{}'", m_WaveFileName);
 
     delete m_dataStream;
     m_dataStream = new CAEDataStream(trackId, m_WaveFileNameHeap, 0, m_WaveFileLength, false);

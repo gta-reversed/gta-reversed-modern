@@ -57,7 +57,7 @@ public:
     virtual void   Stop() = 0;
     virtual void   SetFrequencyScalingFactor(float factor);
 
-    void   SetPosition(CVector* vecPos) const;
+    void   SetPosition(const CVector& vecPos) const;
     float  GetVolume() const { return m_fVolume; };
     void   SetVolume(float volume);
     bool   IsBufferPlaying() const { return m_nBufferStatus & DSBSTATUS_PLAYING; };

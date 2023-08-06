@@ -100,7 +100,7 @@ void CAEAudioChannel::SetFrequencyScalingFactor_Reversed(float factor) {
 }
 
 // 0x4D7950
-void CAEAudioChannel::SetPosition(CVector* vecPos) const {
+void CAEAudioChannel::SetPosition(const CVector& vecPos) const {
     if (!m_pDirectSoundBuffer)
         return;
 
@@ -108,7 +108,7 @@ void CAEAudioChannel::SetPosition(CVector* vecPos) const {
         return;
 
 #ifdef USE_DSOUND
-    m_pDirectSound3DBuffer->SetPosition(vecPos->x, vecPos->y, vecPos->z, DS3D_DEFERRED);
+    m_pDirectSound3DBuffer->SetPosition(vecPos.x, vecPos.y, vecPos.z, DS3D_DEFERRED);
 #endif
 }
 

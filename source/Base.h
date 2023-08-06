@@ -146,6 +146,14 @@ T& StaticRef() {
     return StaticRef<T>(Addr);
 }
 
+template<typename T>
+void SAFE_RELEASE(T*& ptr) { // DirectX stuff `Release()`
+    if (ptr) {
+        ptr->Release();
+        ptr = nullptr;
+    }
+}
+
 #define _IGNORED_
 #define _CAN_BE_NULL_
 

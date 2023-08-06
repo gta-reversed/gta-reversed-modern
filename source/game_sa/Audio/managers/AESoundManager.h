@@ -49,6 +49,9 @@ public:
     void      CancelSoundsOwnedByAudioEntity(CAEAudioEntity* audioEntity, bool bFullStop);
     int16     GetVirtualChannelForPhysicalChannel(int16 physicalChannel);
 
+private:
+    CAESound* GetFreeSound(size_t* outIdx);
+
 public:
     bool IsPaused() const { return CTimer::GetIsPaused() || m_bManuallyPaused; }
     bool IsSoundPaused(const CAESound& sound) const { return CAESoundManager::IsPaused() && !sound.GetUnpausable(); }

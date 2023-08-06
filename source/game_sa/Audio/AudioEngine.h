@@ -15,7 +15,7 @@ class CVector;
 class tBeatInfo {
 public:
     tTrackInfo::tBeat BeatWindow[20];
-    int32             bBeatInfoPresent;
+    int32             IsBeatInfoPresent;
     int32             BeatTypeThisFrame;
     int32             BeatNumber;
 };
@@ -147,6 +147,18 @@ public:
     void Save();
     void Load();
 #endif
+private: // Wrappers for hooks
+
+    // 0x507670
+    CAudioEngine* Constructor() {
+        this->CAudioEngine::CAudioEngine();
+        return this;
+    }
+    // 0x506CD0
+    CAudioEngine* Destructor() {
+        this->CAudioEngine::~CAudioEngine();
+        return this;
+    }
 };
 
 VALIDATE_SIZE(CAudioEngine, 0x1FD8);

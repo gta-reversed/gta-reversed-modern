@@ -11,8 +11,8 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedClass(CAEAudioHardware);
     RH_ScopedCategory("Audio/Hardware");
 
-    // RH_ScopedInstall(Constructor, 0x4D83E0, { .reversed = false });
-    // RH_ScopedInstall(Destructor, 0x4D83A0, { .reversed = false });
+    RH_ScopedInstall(Constructor, 0x4D83E0);
+    RH_ScopedInstall(Destructor, 0x4D83A0);
 
     RH_ScopedInstall(AllocateChannels, 0x5B9340);
     RH_ScopedInstall(RequestVirtualChannelSoundInfo, 0x4D8E60);
@@ -43,10 +43,10 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(GetTrackLengthMs, 0x4D8F70);
     RH_ScopedInstall(GetActiveTrackID, 0x4D8F80);
     RH_ScopedInstall(GetPlayingTrackID, 0x4D8F90);
-    RH_ScopedInstall(GetBeatInfo, 0x4D8FA0, { .reversed = false });
-    RH_ScopedInstall(SetBassSetting, 0x4D94A0, { .reversed = false });
-    RH_ScopedInstall(DisableBassEq, 0x4D94D0, { .reversed = false });
-    RH_ScopedInstall(EnableBassEq, 0x4D94E0, { .reversed = false });
+    RH_ScopedInstall(GetBeatInfo, 0x4D8FA0);
+    RH_ScopedInstall(SetBassSetting, 0x4D94A0);
+    RH_ScopedInstall(DisableBassEq, 0x4D94D0);
+    RH_ScopedInstall(EnableBassEq, 0x4D94E0);
     RH_ScopedInstall(SetChannelFlags, 0x4D9500);
     RH_ScopedInstall(SetMusicMasterScalingFactor, 0x4D9530);
     RH_ScopedInstall(SetEffectsMasterScalingFactor, 0x4D9540);
@@ -60,37 +60,110 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(IsStreamingFromDVD, 0x4D95C0);
     RH_ScopedInstall(GetDVDDriveLetter, 0x4D95D0);
     RH_ScopedInstall(CheckDVD, 0x4D95E0);
-    RH_ScopedInstall(PauseAllSounds, 0x4D95F0, { .reversed = false });
-    RH_ScopedInstall(ResumeAllSounds, 0x4D9630, { .reversed = false });
-    RH_ScopedInstall(InitDirectSoundListener, 0x4D9640, { .reversed = false });
-    RH_ScopedInstall(Terminate, 0x4D97A0, { .reversed = false });
-    RH_ScopedInstall(Service, 0x4D9870, { .reversed = false });
+    RH_ScopedInstall(PauseAllSounds, 0x4D95F0);
+    RH_ScopedInstall(ResumeAllSounds, 0x4D9630);
+    RH_ScopedInstall(InitDirectSoundListener, 0x4D9640);
+    RH_ScopedInstall(Terminate, 0x4D97A0);
+    RH_ScopedInstall(Service, 0x4D9870);
     RH_ScopedInstall(Initialise, 0x4D9930, { .reversed = false });
 }
 
 // 0x4D83E0
 CAEAudioHardware::CAEAudioHardware() {
-    plugin::CallMethod<0x4D83E0, CAEAudioHardware*>(this);
-}
-
-// 0x4D83A0
-CAEAudioHardware::~CAEAudioHardware() {
-    plugin::CallMethod<0x4D83A0, CAEAudioHardware*>(this);
+    rng::fill(m_afChannelVolumes, -1000.f);
+    // Rest done using member initializers
 }
 
 // 0x4D9930
 bool CAEAudioHardware::Initialise() {
     return plugin::CallMethodAndReturn<bool, 0x4D9930, CAEAudioHardware*>(this);
+
+    //***
+    //* We need EAX headers here, so I won't bother with this function for now
+    //***
+    // 
+    //m_pMP3BankLoader  = new CAEMP3BankLoader;
+    //m_pMP3TrackLoader = new CAEMP3TrackLoader;
+    //if (!m_pMP3TrackLoader->Initialise() || !m_pMP3TrackLoader->Initialise()) {
+    //    NOTSA_LOG_ERR("Failed initializing MP3 module!");
+    //    return false;
+    //}
 }
 
 // 0x4D9640
 bool CAEAudioHardware::InitDirectSoundListener(uint32 numChannels, uint32 samplesPerSec, uint32 bitsPerSample) {
-    return plugin::CallMethodAndReturn<bool, 0x4D9640, CAEAudioHardware*, uint32, uint32, uint32>(this, numChannels, samplesPerSec, bitsPerSample);
+    if (m_pDSDevice == NULL) {
+        return false;
+    }
+
+    DSBUFFERDESC dsBuffDsc{
+        sizeof(DSBUFFERDESC),
+        DSBCAPS_CTRL3D | DSBCAPS_PRIMARYBUFFER,
+        0,
+        0,
+        0,
+    };
+    LPDIRECTSOUNDBUFFER soundbuf;
+    if (FAILED(m_pDSDevice->CreateSoundBuffer(&dsBuffDsc, &soundbuf, NULL))) {
+        return false;
+    }
+
+    const auto nBlockAlign = numChannels * bitsPerSample / 8;
+    WAVEFORMATEX wavFmt{
+        .wFormatTag      = 1,
+        .nChannels       = (WORD)numChannels,
+        .nSamplesPerSec  = samplesPerSec,
+        .nAvgBytesPerSec = samplesPerSec * nBlockAlign,
+        .nBlockAlign     = (WORD)nBlockAlign,
+        .wBitsPerSample  = (WORD)bitsPerSample,
+        .cbSize          = 0
+    };
+    if (FAILED(soundbuf->SetFormat(&wavFmt))) {
+#ifdef FIX_BUGS
+        soundbuf->Release();
+#endif
+        return false;
+    }
+
+    auto& listener = m_pDirectSound3dListener;
+    if (FAILED(soundbuf->QueryInterface(
+        IID_IDirectSound3DListener,
+        (LPVOID*)&listener
+    ))) {
+        soundbuf->Release();
+        return false;
+    }
+
+    listener->SetPosition(0.f, 0.f, 0.f, TRUE);
+    listener->SetOrientation(
+        0.f, 1.f, 0.f,  // In Front
+        0.f, 0.f, -1.f, // Bottom
+        TRUE
+    );
+    listener->SetRolloffFactor(0.f, TRUE);
+    listener->SetDopplerFactor(0.f, TRUE);
+    listener->CommitDeferredSettings();
+
+    soundbuf->Release();
+
+    Query3DSoundEffects();
+
+    return true;
 }
 
 // 0x4D97A0
 void CAEAudioHardware::Terminate() {
-    plugin::CallMethod<0x4D97A0, CAEAudioHardware*>(this);
+    m_bInitialised = false;
+    m_pStreamThread.Stop();
+    AESmoothFadeThread.Stop();
+    m_pStreamThread.WaitForExit();
+    for (const auto ch : GetChannels()) {
+        delete ch;
+    }
+    delete std::exchange(m_pMP3BankLoader, nullptr);
+    delete std::exchange(m_pMP3TrackLoader, nullptr);
+    SAFE_RELEASE(m_pDirectSound3dListener);
+    SAFE_RELEASE(m_pDSDevice);
 }
 
 void CAEAudioHardware::PlaySound(int16 channel, uint16 channelSlot, uint16 soundIdInSlot, uint16 bankSlot, int16 playPosition, int16 flags, float speed) {
@@ -189,7 +262,7 @@ void CAEAudioHardware::StopSound(int16 channel, uint16 channelId) {
 }
 
 // 0x4D8920
-void CAEAudioHardware::SetChannelPosition(int16 channel, uint16 channelId, CVector* posn, uint8 unused) {
+void CAEAudioHardware::SetChannelPosition(int16 channel, uint16 channelId, const CVector& posn, uint8 unused) {
     if (channel >= 0 && channelId < m_anNumChannelsInSlot[channel]) {
         const auto ch = m_aChannels[channel + channelId];
         if (ch) {
@@ -243,21 +316,20 @@ void CAEAudioHardware::DisableEffectsLoading() {
 }
 
 // 0x4D8E60
-void CAEAudioHardware::RequestVirtualChannelSoundInfo(uint16 channel, uint16 sfxId, uint16 bankSlotId) {
-    if (channel < MAX_NUM_SOUNDS) {
-        m_aBankSlotIds[channel] = bankSlotId;
-        m_aSoundIdsInSlots[channel] = sfxId;
-    }
+void CAEAudioHardware::RequestVirtualChannelSoundInfo(uint16 idx, uint16 sfxId, uint16 bankSlotId) {
+    assert(idx < MAX_NUM_SOUNDS);
+    m_aBankSlotIds[idx] = bankSlotId;
+    m_aSoundIdsInSlots[idx] = sfxId;
 }
 
 // 0x4D8E90
 void CAEAudioHardware::GetVirtualChannelSoundLengths(int16* soundLengths) {
-    memcpy(soundLengths, m_anVirtualChannelSoundLengths, sizeof(m_anVirtualChannelSoundLengths));
+    memcpy(soundLengths, m_VirtualChannelSoundLengths, sizeof(m_VirtualChannelSoundLengths));
 }
 
 // 0x4D8EB0
 void CAEAudioHardware::GetVirtualChannelSoundLoopStartTimes(int16* soundLoopStartTimes) {
-    memcpy(soundLoopStartTimes, m_anVirtualChannelSoundLoopStartTimes, sizeof(m_anVirtualChannelSoundLoopStartTimes)); // size is 600, replaced by loop?
+    memcpy(soundLoopStartTimes, m_VirtualChannelLoopTimes, sizeof(m_VirtualChannelLoopTimes)); // size is 600, replaced by loop?
 }
 
 // 0x4D8F10
@@ -301,8 +373,7 @@ void CAEAudioHardware::GetBeatInfo(tBeatInfo* beatInfo) {
     const auto bi = &gBeatInfo;
 
     if (m_pStreamThread.GetActiveTrackID() == -1) {
-    fail_no_beat_info:
-        bi->bBeatInfoPresent = false;
+        bi->IsBeatInfoPresent = false;
         rng::fill(bi->BeatWindow, tTrackInfo::tBeat{});
         return;
     }
@@ -311,39 +382,59 @@ void CAEAudioHardware::GetBeatInfo(tBeatInfo* beatInfo) {
     const auto tInfo     = std::unique_ptr<tTrackInfo>{m_pMP3TrackLoader->GetTrackInfo(tId)};
     const auto tPlayTime = m_pStreamThread.GetTrackPlayTime();
 
+    size_t i = 0;
+
     if (tPlayTime < 0 || tInfo->m_aBeats[0].m_nTime < 0) {
         if (tPlayTime != -7) {
-            goto fail_no_beat_info;
+            bi->IsBeatInfoPresent = false;
+            rng::fill(bi->BeatWindow, tTrackInfo::tBeat{});
         }
-        return;
+    } else {
+        const auto beatTimeWindowBegin = bi->BeatNumber
+            ? std::max(0u, (uint32)tPlayTime - 50u)
+            : (uint32)tPlayTime;
+
+        bi->IsBeatInfoPresent  = true;
+        bi->BeatTypeThisFrame = 0;
+        bi->BeatNumber        = -1;
+        rng::fill(bi->BeatWindow, tTrackInfo::tBeat{});
+
+        //> 0x4D904C - Find first beat in the given time window
+        for (; tInfo->m_aBeats[i].m_nKey && tInfo->m_aBeats[i].m_nTime < beatTimeWindowBegin; i++);
     }
 
-    const auto cutOffTime = bi->BeatNumber
-        ? std::max(0, tPlayTime - 50)
-        : tPlayTime;
+    // 0x4D9346 and 0x4D9088 combined - Copy beats at the beginning of the time window
+    for (auto k = 0u; k < std::min(10u, i); k++) {
+        auto& beat    = bi->BeatWindow[10 - i];
+        beat          = tInfo->m_aBeats[i - k - 1];
+        beat.m_nTime -= tPlayTime;
+    }
 
-    bi->bBeatInfoPresent  = true;
-    bi->BeatTypeThisFrame = 0;
-    bi->BeatNumber        = -1;
-    rng::fill(bi->BeatWindow, tTrackInfo::tBeat{});
+    if (tInfo->m_aBeats[i].m_nKey != 0) {
+        // 0x4D9078
+        if (i != bi->BeatNumber && i > 0) {
+            bi->BeatTypeThisFrame = tInfo->m_aBeats[i - 1].m_nKey;
+        }
 
-    //> 0x4D904C
-    size_t i = 0;
-    for (; tInfo->m_aBeats[i].m_nKey && tInfo->m_aBeats[i].m_nTime < (uint32)cutOffTime; i++);
-
-
+        // 0x4D91A9
+        for (auto k = 0u; k < std::min(std::size(tInfo->m_aBeats) - i, 10u); k++) { // Copy beats towards the end
+            auto& beat = bi->BeatWindow[10 + i];
+            if (beat.m_nKey) {
+                beat         =  tInfo->m_aBeats[i + k];
+                beat.m_nTime -= tPlayTime;
+            }
+        }
+    }
 }
 
-// unused?
 // 0x4D94E0
 void CAEAudioHardware::EnableBassEq() {
-    plugin::CallMethod<0x4D94E0, CAEAudioHardware*>(this);
-    // m_pStreamingChannel->SetBassEQ(m_nBassSet, m_fBassEqGain);
+    m_pStreamingChannel->SetBassEQ(m_nBassSet, m_fBassEqGain);
 }
 
 // 0x4D94D0
 void CAEAudioHardware::DisableBassEq() {
-    m_pStreamingChannel->SetBassEQ(nullptr, 0);
+    m_pStreamingChannel->SetBassEQ(0, 0.f);
 }
 
 // 0x4D9500
@@ -414,12 +505,20 @@ bool CAEAudioHardware::CheckDVD() {
 
 // 0x4D95F0
 void CAEAudioHardware::PauseAllSounds() {
-    plugin::CallMethod<0x4D95F0, CAEAudioHardware*>(this);
+    if (!m_bInitialised) {
+        return;
+    }
+    for (const auto ch : GetChannels()) {
+        ch->SetFrequencyScalingFactor(0.f);
+    }
 }
 
 // 0x4D9630
 void CAEAudioHardware::ResumeAllSounds() {
-    plugin::CallMethod<0x4D9630, CAEAudioHardware*>(this);
+    if (!m_bInitialised) {
+        return;
+    }
+    RescaleChannelVolumes();
 }
 
 // 0x4D8490
@@ -429,5 +528,21 @@ void CAEAudioHardware::Query3DSoundEffects() {
 
 // 0x4D9870
 void CAEAudioHardware::Service() {
-    plugin::CallMethod<0x4D9870, CAEAudioHardware*>(this);
+    VERIFY(SUCCEEDED(m_pDirectSound3dListener->CommitDeferredSettings()));
+    RescaleChannelVolumes();
+    if (m_n3dEffectsQueryResult) {
+        UpdateReverbEnvironment();
+    }
+    for (const auto ch : GetChannels()) {
+        ch->SynchPlayback();
+    }
+    for (const auto ch : GetChannels()) {
+        ch->Service();
+    }
+    m_pMP3BankLoader->UpdateVirtualChannels(
+        &m_VirtualChannelSettings,
+        m_VirtualChannelSoundLengths,
+        m_VirtualChannelLoopTimes
+    );
+    m_pMP3BankLoader->Service();
 }
