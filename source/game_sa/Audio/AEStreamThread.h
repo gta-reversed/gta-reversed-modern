@@ -40,6 +40,7 @@ public:
     void Initialise(CAEStreamingChannel* streamingChannel);
 
     void Start();
+    void Stop();
     void Pause() const;
     void Resume() const;
     void WaitForExit() const;

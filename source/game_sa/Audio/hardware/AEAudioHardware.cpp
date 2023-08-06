@@ -63,7 +63,7 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(PauseAllSounds, 0x4D95F0);
     RH_ScopedInstall(ResumeAllSounds, 0x4D9630);
     RH_ScopedInstall(InitDirectSoundListener, 0x4D9640, { .reversed = false });
-    RH_ScopedInstall(Terminate, 0x4D97A0, { .reversed = false });
+    RH_ScopedInstall(Terminate, 0x4D97A0);
     RH_ScopedInstall(Service, 0x4D9870, { .reversed = false });
     RH_ScopedInstall(Initialise, 0x4D9930, { .reversed = false });
 }
@@ -90,7 +90,17 @@ bool CAEAudioHardware::InitDirectSoundListener(uint32 numChannels, uint32 sample
 
 // 0x4D97A0
 void CAEAudioHardware::Terminate() {
-    plugin::CallMethod<0x4D97A0, CAEAudioHardware*>(this);
+    m_bInitialised = false;
+    m_pStreamThread.Stop();
+    AESmoothFadeThread.Stop();
+    m_pStreamThread.WaitForExit();
+    for (const auto ch : GetChannels()) {
+        delete ch;
+    }
+    delete std::exchange(m_pMP3BankLoader, nullptr);
+    delete std::exchange(m_pMP3TrackLoader, nullptr);
+    SAFE_RELEASE(m_pDirectSound3dListener);
+    SAFE_RELEASE(m_pDSDevice);
 }
 
 void CAEAudioHardware::PlaySound(int16 channel, uint16 channelSlot, uint16 soundIdInSlot, uint16 bankSlot, int16 playPosition, int16 flags, float speed) {
