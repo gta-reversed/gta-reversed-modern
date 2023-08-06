@@ -1867,8 +1867,8 @@ void CPopulation::PopulateInterior(int32 numPedsToCreate, CVector pos) {
 
         ped->GetIntelligence()->SetPedDecisionMakerType(7);
 
-        if (ped->m_nAnimGroup == CAnimManager::GetAnimationGroupId("jogger")) { // TODO: Move `GetAnimationGroupId` out the loop?
-            ped->m_nAnimGroup = CAnimManager::GetAnimationGroupId("man");
+        if (ped->m_nAnimGroup == CAnimManager::GetAnimationGroupIdByName("jogger")) { // TODO: Move `GetAnimationGroupId` out the loop?
+            ped->m_nAnimGroup = CAnimManager::GetAnimationGroupIdByName("man");
         }
     }
 }
