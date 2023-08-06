@@ -78,12 +78,7 @@ public:
     CAEStreamingChannel*    m_pStreamingChannel;
     CAEStreamThread         m_pStreamThread;
     CAEAudioChannel*        m_aChannels[MAX_NUM_AUDIO_CHANNELS];
-    struct tBeatInfo {
-        tTrackInfo::tBeat BeatWindow[20];
-        int32             bBeatInfoPresent;
-        int32             BeatTypeThisFrame;
-        int32             BeatNumber;
-    } gBeatInfo;
+    tBeatInfo               gBeatInfo;
     uint8                   field_1010;
     int32                   field_1014;
 

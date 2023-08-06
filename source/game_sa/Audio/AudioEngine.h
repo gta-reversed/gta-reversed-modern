@@ -6,6 +6,7 @@
 #include "AECollisionAudioEntity.h"
 #include "AEGlobalWeaponAudioEntity.h"
 #include "AEPedlessSpeechAudioEntity.h"
+#include "AETrackLoader.h"
 
 class CEntity;
 class CColPoint;
@@ -13,10 +14,10 @@ class CVector;
 
 class tBeatInfo {
 public:
-    char  f0[12];
-    char  fC[148];
-    int32 m_beatInfoPresent;
-    char  fA4[8];
+    tTrackInfo::tBeat BeatWindow[20];
+    int32             bBeatInfoPresent;
+    int32             BeatTypeThisFrame;
+    int32             BeatNumber;
 };
 VALIDATE_SIZE(tBeatInfo, 0xAC);
 
