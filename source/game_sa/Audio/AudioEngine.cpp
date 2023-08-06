@@ -488,7 +488,7 @@ tBeatInfo* CAudioEngine::GetBeatInfo() {
 // 0x5071D0
 bool CAudioEngine::IsBeatInfoPresent() {
     auto beatInfo = GetBeatInfo();
-    return beatInfo && beatInfo->bBeatInfoPresent;
+    return beatInfo && beatInfo->IsBeatInfoPresent;
 }
 
 // 0x507210

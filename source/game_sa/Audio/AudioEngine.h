@@ -15,7 +15,7 @@ class CVector;
 class tBeatInfo {
 public:
     tTrackInfo::tBeat BeatWindow[20];
-    int32             bBeatInfoPresent;
+    int32             IsBeatInfoPresent;
     int32             BeatTypeThisFrame;
     int32             BeatNumber;
 };

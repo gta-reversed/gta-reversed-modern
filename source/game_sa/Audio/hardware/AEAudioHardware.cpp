@@ -43,7 +43,7 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(GetTrackLengthMs, 0x4D8F70);
     RH_ScopedInstall(GetActiveTrackID, 0x4D8F80);
     RH_ScopedInstall(GetPlayingTrackID, 0x4D8F90);
-    RH_ScopedInstall(GetBeatInfo, 0x4D8FA0, { .reversed = false });
+    RH_ScopedInstall(GetBeatInfo, 0x4D8FA0);
     RH_ScopedInstall(SetBassSetting, 0x4D94A0, { .reversed = false });
     RH_ScopedInstall(DisableBassEq, 0x4D94D0, { .reversed = false });
     RH_ScopedInstall(EnableBassEq, 0x4D94E0, { .reversed = false });
@@ -301,8 +301,7 @@ void CAEAudioHardware::GetBeatInfo(tBeatInfo* beatInfo) {
     const auto bi = &gBeatInfo;
 
     if (m_pStreamThread.GetActiveTrackID() == -1) {
-    fail_no_beat_info:
-        bi->bBeatInfoPresent = false;
+        bi->IsBeatInfoPresent = false;
         rng::fill(bi->BeatWindow, tTrackInfo::tBeat{});
         return;
     }
@@ -311,27 +310,49 @@ void CAEAudioHardware::GetBeatInfo(tBeatInfo* beatInfo) {
     const auto tInfo     = std::unique_ptr<tTrackInfo>{m_pMP3TrackLoader->GetTrackInfo(tId)};
     const auto tPlayTime = m_pStreamThread.GetTrackPlayTime();
 
+    size_t i = 0;
+
     if (tPlayTime < 0 || tInfo->m_aBeats[0].m_nTime < 0) {
         if (tPlayTime != -7) {
-            goto fail_no_beat_info;
+            bi->IsBeatInfoPresent = false;
+            rng::fill(bi->BeatWindow, tTrackInfo::tBeat{});
         }
-        return;
+    } else {
+        const auto beatTimeWindowBegin = bi->BeatNumber
+            ? std::max(0u, (uint32)tPlayTime - 50u)
+            : (uint32)tPlayTime;
+
+        bi->IsBeatInfoPresent  = true;
+        bi->BeatTypeThisFrame = 0;
+        bi->BeatNumber        = -1;
+        rng::fill(bi->BeatWindow, tTrackInfo::tBeat{});
+
+        //> 0x4D904C - Find first beat in the given time window
+        for (; tInfo->m_aBeats[i].m_nKey && tInfo->m_aBeats[i].m_nTime < beatTimeWindowBegin; i++);
     }
 
-    const auto cutOffTime = bi->BeatNumber
-        ? std::max(0, tPlayTime - 50)
-        : tPlayTime;
+    // 0x4D9346 and 0x4D9088 combined - Copy beats at the beginning of the time window
+    for (auto k = 0u; k < std::min(10u, i); k++) {
+        auto& beat    = bi->BeatWindow[10 - i];
+        beat          = tInfo->m_aBeats[i - k - 1];
+        beat.m_nTime -= tPlayTime;
+    }
 
-    bi->bBeatInfoPresent  = true;
-    bi->BeatTypeThisFrame = 0;
-    bi->BeatNumber        = -1;
-    rng::fill(bi->BeatWindow, tTrackInfo::tBeat{});
+    if (tInfo->m_aBeats[i].m_nKey != 0) {
+        // 0x4D9078
+        if (i != bi->BeatNumber && i > 0) {
+            bi->BeatTypeThisFrame = tInfo->m_aBeats[i - 1].m_nKey;
+        }
 
-    //> 0x4D904C
-    size_t i = 0;
-    for (; tInfo->m_aBeats[i].m_nKey && tInfo->m_aBeats[i].m_nTime < cutOffTime; i++);
-
-
+        // 0x4D91A9
+        for (auto k = 0u; k < std::min(std::size(tInfo->m_aBeats) - i, 10u); k++) { // Copy beats towards the end
+            auto& beat = bi->BeatWindow[10 + i];
+            if (beat.m_nKey) {
+                beat         =  tInfo->m_aBeats[i + k];
+                beat.m_nTime -= tPlayTime;
+            }
+        }
+    }
 }
 
 // unused?
