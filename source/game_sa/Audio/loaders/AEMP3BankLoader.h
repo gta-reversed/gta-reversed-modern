@@ -2,8 +2,8 @@
 #include "AEBankLoader.h"
 
 struct tVirtualChannelSettings {
-    int16 m_aSlotId[300];
-    uint16 m_aSoundId[300];
+    int16 BankSlotIDs[300];
+    int16 SoundIDs[300];
 };
 VALIDATE_SIZE(tVirtualChannelSettings, 0x4B0);
 

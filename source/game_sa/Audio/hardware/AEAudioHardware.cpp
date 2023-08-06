@@ -62,9 +62,9 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(CheckDVD, 0x4D95E0);
     RH_ScopedInstall(PauseAllSounds, 0x4D95F0);
     RH_ScopedInstall(ResumeAllSounds, 0x4D9630);
-    RH_ScopedInstall(InitDirectSoundListener, 0x4D9640, { .reversed = false });
+    RH_ScopedInstall(InitDirectSoundListener, 0x4D9640);
     RH_ScopedInstall(Terminate, 0x4D97A0);
-    RH_ScopedInstall(Service, 0x4D9870, { .reversed = false });
+    RH_ScopedInstall(Service, 0x4D9870);
     RH_ScopedInstall(Initialise, 0x4D9930, { .reversed = false });
 }
 
@@ -85,7 +85,63 @@ bool CAEAudioHardware::Initialise() {
 
 // 0x4D9640
 bool CAEAudioHardware::InitDirectSoundListener(uint32 numChannels, uint32 samplesPerSec, uint32 bitsPerSample) {
-    return plugin::CallMethodAndReturn<bool, 0x4D9640, CAEAudioHardware*, uint32, uint32, uint32>(this, numChannels, samplesPerSec, bitsPerSample);
+    if (m_pDSDevice == NULL) {
+        return false;
+    }
+
+    DSBUFFERDESC dsBuffDsc{
+        sizeof(DSBUFFERDESC),
+        DSBCAPS_CTRL3D | DSBCAPS_PRIMARYBUFFER,
+        0,
+        0,
+        0,
+    };
+    LPDIRECTSOUNDBUFFER soundbuf;
+    if (FAILED(m_pDSDevice->CreateSoundBuffer(&dsBuffDsc, &soundbuf, NULL))) {
+        return false;
+    }
+
+    const auto nBlockAlign = numChannels * bitsPerSample / 8;
+    WAVEFORMATEX wavFmt{
+        .wFormatTag      = 1,
+        .nChannels       = (WORD)numChannels,
+        .nSamplesPerSec  = samplesPerSec,
+        .nAvgBytesPerSec = samplesPerSec * nBlockAlign,
+        .nBlockAlign     = (WORD)nBlockAlign,
+        .wBitsPerSample  = (WORD)bitsPerSample,
+        .cbSize          = 0
+    };
+    if (FAILED(soundbuf->SetFormat(&wavFmt))) {
+#ifdef FIX_BUGS
+        soundbuf->Release();
+#endif
+        return false;
+    }
+
+    auto& listener = m_pDirectSound3dListener;
+    if (FAILED(soundbuf->QueryInterface(
+        IID_IDirectSound3DListener,
+        (LPVOID*)&listener
+    ))) {
+        soundbuf->Release();
+        return false;
+    }
+
+    listener->SetPosition(0.f, 0.f, 0.f, TRUE);
+    listener->SetOrientation(
+        0.f, 1.f, 0.f,  // In Front
+        0.f, 0.f, -1.f, // Bottom
+        TRUE
+    );
+    listener->SetRolloffFactor(0.f, TRUE);
+    listener->SetDopplerFactor(0.f, TRUE);
+    listener->CommitDeferredSettings();
+
+    soundbuf->Release();
+
+    Query3DSoundEffects();
+
+    return true;
 }
 
 // 0x4D97A0
@@ -262,12 +318,12 @@ void CAEAudioHardware::RequestVirtualChannelSoundInfo(uint16 channel, uint16 sfx
 
 // 0x4D8E90
 void CAEAudioHardware::GetVirtualChannelSoundLengths(int16* soundLengths) {
-    memcpy(soundLengths, m_anVirtualChannelSoundLengths, sizeof(m_anVirtualChannelSoundLengths));
+    memcpy(soundLengths, m_VirtualChannelSoundLengths, sizeof(m_VirtualChannelSoundLengths));
 }
 
 // 0x4D8EB0
 void CAEAudioHardware::GetVirtualChannelSoundLoopStartTimes(int16* soundLoopStartTimes) {
-    memcpy(soundLoopStartTimes, m_anVirtualChannelSoundLoopStartTimes, sizeof(m_anVirtualChannelSoundLoopStartTimes)); // size is 600, replaced by loop?
+    memcpy(soundLoopStartTimes, m_VirtualChannelLoopTimes, sizeof(m_VirtualChannelLoopTimes)); // size is 600, replaced by loop?
 }
 
 // 0x4D8F10
@@ -466,5 +522,21 @@ void CAEAudioHardware::Query3DSoundEffects() {
 
 // 0x4D9870
 void CAEAudioHardware::Service() {
-    plugin::CallMethod<0x4D9870, CAEAudioHardware*>(this);
+    VERIFY(SUCCEEDED(m_pDirectSound3dListener->CommitDeferredSettings()));
+    RescaleChannelVolumes();
+    if (m_n3dEffectsQueryResult) {
+        UpdateReverbEnvironment();
+    }
+    for (const auto ch : GetChannels()) {
+        ch->SynchPlayback();
+    }
+    for (const auto ch : GetChannels()) {
+        ch->Service();
+    }
+    m_pMP3BankLoader->UpdateVirtualChannels(
+        &m_VirtualChannelSettings,
+        m_VirtualChannelSoundLengths,
+        m_VirtualChannelLoopTimes
+    );
+    m_pMP3BankLoader->Service();
 }

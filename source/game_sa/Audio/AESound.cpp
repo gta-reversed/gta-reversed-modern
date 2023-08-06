@@ -180,6 +180,7 @@ void CAESound::UpdatePlayTime(int16 soundLength, int16 loopStartTime, int16 play
         return;
     }
 
+    assert(soundLength > 0);
     m_nCurrentPlayPosition = loopStartTime + (m_nCurrentPlayPosition % soundLength);
 }
 

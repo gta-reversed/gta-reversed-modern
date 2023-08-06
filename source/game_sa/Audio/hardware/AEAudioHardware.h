@@ -8,6 +8,7 @@
 #include "AESoundManager.h"
 #include "AEStreamThread.h"
 #include "AudioEngine.h"
+#include "AEMP3BankLoader.h"
 
 #ifdef PlaySound
 #undef PlaySound
@@ -63,15 +64,21 @@ public:
     float                   m_fStreamFaderScalingFactor;
     float                   field_428;
     float                   field_42C;
-    int16                   m_aBankSlotIds[MAX_NUM_SOUNDS];
-    int16                   m_aSoundIdsInSlots[MAX_NUM_SOUNDS];
-    int16                   m_anVirtualChannelSoundLoopStartTimes[MAX_NUM_SOUNDS];
-    int16                   m_anVirtualChannelSoundLengths[MAX_NUM_SOUNDS];
+    union { // TODO: Get rid of the union, and use `m_VirtualChannelSettings` directly
+        tVirtualChannelSettings m_VirtualChannelSettings;
+        struct {
+            int16 m_aBankSlotIds[MAX_NUM_SOUNDS];
+            int16 m_aSoundIdsInSlots[MAX_NUM_SOUNDS];
+        };
+    };
+    int16                   m_VirtualChannelLoopTimes[MAX_NUM_SOUNDS];
+    int16                   m_VirtualChannelSoundLengths[MAX_NUM_SOUNDS];
+
     uint8                   m_nBassSet;
     float                   m_fBassEqGain;
     CAEMP3BankLoader*       m_pMP3BankLoader;
     CAEMP3TrackLoader*      m_pMP3TrackLoader;
-    IDirectSound8*          m_pDevice;
+    IDirectSound8*          m_pDSDevice;
     void*                   m_dwSpeakerConfig;
     void*                   m_n3dEffectsQueryResult;
     DSCAPS                  m_dsCaps;

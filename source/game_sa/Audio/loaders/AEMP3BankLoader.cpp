@@ -126,9 +126,9 @@ bool CAEMP3BankLoader::GetSoundLoadingStatus(uint16 bankId, uint16 soundId, int1
 
 // 0x4E0450
 void CAEMP3BankLoader::UpdateVirtualChannels(tVirtualChannelSettings* settings, int16* lengths, int16* loopStartTimes) {
-    for (auto i = 0u; i < std::size(settings->m_aSlotId); i++) {
-        const auto slotId = settings->m_aSlotId[i];
-        const auto soundId = settings->m_aSoundId[i];
+    for (auto i = 0u; i < std::size(settings->BankSlotIDs); i++) {
+        const auto slotId = settings->BankSlotIDs[i];
+        const auto soundId = settings->SoundIDs[i];
         const auto& bankSlot = m_paBankSlots[slotId];
 
         if (slotId < 0 || soundId < 0 || bankSlot.m_nBankId == -1 || (soundId >= bankSlot.m_nSoundCount && bankSlot.m_nSoundCount >= 0)) {
