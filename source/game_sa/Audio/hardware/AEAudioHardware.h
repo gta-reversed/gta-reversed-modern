@@ -91,8 +91,7 @@ public:
     CAEStreamThread         m_pStreamThread{};
     CAEAudioChannel*        m_aChannels[MAX_NUM_AUDIO_CHANNELS]{};
     tBeatInfo               gBeatInfo{};
-    uint8                   field_1010{};
-    int32                   field_1014{};
+    uint8                   m_PlayingTrackFlags{};
 
 public:
     static void InjectHooks();
@@ -136,7 +135,7 @@ public:
     void GetVirtualChannelSoundLengths(int16* outArr);
     void GetVirtualChannelSoundLoopStartTimes(int16* outArr);
 
-    void PlayTrack(uint32 trackId, int32 nextTrackId, uint32 a3, char a4, bool isUserTrack, bool nextIsUserTrack);
+    void PlayTrack(uint32 trackID, int nextTrackID, uint32 startOffsetMs, uint8 trackFlags, bool bUserTrack, bool bUserNextTrack);
     void StartTrackPlayback() const;
     void StopTrack();
 
@@ -195,6 +194,6 @@ private:
     }
 
 };
-VALIDATE_SIZE(CAEAudioHardware, 0x1018);
+VALIDATE_SIZE(CAEAudioHardware, 0x1014); // Size might be bigger, but nothing is accessed beyond `0x1014`
 
 extern CAEAudioHardware& AEAudioHardware;

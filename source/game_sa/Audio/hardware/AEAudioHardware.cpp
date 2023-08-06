@@ -189,12 +189,9 @@ int16 CAEAudioHardware::AllocateChannels(uint16 numChannels) {
 
 // 0x4D94A0
 void CAEAudioHardware::SetBassSetting(int8 nBassSet, float fBassEqGain) {
-    plugin::CallMethod<0x4D94A0, CAEAudioHardware*, int8, float>(this, nBassSet, fBassEqGain);
-    /*
-    m_nBassSet    = nBassSet;
+    m_nBassSet = nBassSet;
     m_fBassEqGain = fBassEqGain;
-    ??? m_pStreamingChannel->SetBassEQ(reinterpret_cast<IDirectSoundFXParamEq*>(nBassSet), fBassEqGain);
-    */
+    m_pStreamingChannel->SetBassEQ(nBassSet, fBassEqGain);
 }
 
 // 0x4D8810
@@ -333,14 +330,14 @@ void CAEAudioHardware::GetVirtualChannelSoundLoopStartTimes(int16* soundLoopStar
 }
 
 // 0x4D8F10
-void CAEAudioHardware::PlayTrack(uint32 trackId, int32 nextTrackId, uint32 a3, char a4, bool isUserTrack, bool nextIsUserTrack) {
-    field_1010 = a4;
-    m_pStreamThread.PlayTrack(trackId, nextTrackId, a3, a4, isUserTrack, nextIsUserTrack);
+void CAEAudioHardware::PlayTrack(uint32 trackID, int nextTrackID, uint32 startOffsetMs, uint8 trackFlags, bool bUserTrack, bool bUserNextTrack) {
+    m_PlayingTrackFlags = trackFlags;
+    m_pStreamThread.PlayTrack(trackID, nextTrackID, startOffsetMs, trackFlags, bUserTrack, bUserNextTrack);
 }
 
 // 0x4D8F30
 void CAEAudioHardware::StartTrackPlayback() const {
-    m_pStreamingChannel->Play(0, field_1010, 1.0f);
+    m_pStreamingChannel->Play(0, m_PlayingTrackFlags, 1.0f);
 }
 
 // 0x4D8F50
@@ -533,10 +530,10 @@ void CAEAudioHardware::Service() {
     if (m_n3dEffectsQueryResult) {
         UpdateReverbEnvironment();
     }
-    for (const auto ch : GetChannels()) {
+    for (const auto ch : GetChannels() | rng::views::drop(1)) {
         ch->SynchPlayback();
     }
-    for (const auto ch : GetChannels()) {
+    for (const auto ch : GetChannels() | rng::views::drop(1)) {
         ch->Service();
     }
     m_pMP3BankLoader->UpdateVirtualChannels(

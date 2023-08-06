@@ -153,8 +153,8 @@ bool CAudioEngine::Initialise() {
     m_CollisionAE.Initialise();
 
     m_nCurrentRadioStationId = RADIO_INVALID;
-    field_0 = false;
-    field_1 = false;
+    m_bPlayingMissionCompleteTrack = false;
+    m_bStoppingMissionCompleteTrack = false;
 
     CLoadingScreen::Continue();
 
@@ -440,11 +440,11 @@ void CAudioEngine::StopCutsceneTrack(bool a2) {
     AECutsceneTrackManager.StopCutsceneTrack();
 
     if (!a2) {
-        if (!field_0)
+        if (!m_bPlayingMissionCompleteTrack)
             return;
 
-        field_1 = true;
-        field_0 = false;
+        m_bStoppingMissionCompleteTrack = true;
+        m_bPlayingMissionCompleteTrack = false;
         return;
     }
 
@@ -456,22 +456,22 @@ void CAudioEngine::StopCutsceneTrack(bool a2) {
         if (AERadioTrackManager.IsVehicleRadioActive()) {
             tVehicleAudioSettings* settings = CAEVehicleAudioEntity::StaticGetPlayerVehicleAudioSettingsForRadio();
             AERadioTrackManager.StartRadio(settings);
-            field_0 = false;
+            m_bPlayingMissionCompleteTrack = false;
             return;
         }
-        field_0 = false;
+        m_bPlayingMissionCompleteTrack = false;
         return;
     }
     if (AERadioTrackManager.IsVehicleRadioActive())
         AERadioTrackManager.StartRadio(m_nCurrentRadioStationId, 0, 0, 0);
     m_nCurrentRadioStationId = RADIO_INVALID;
-    field_0 = false;
+    m_bPlayingMissionCompleteTrack = false;
 }
 
 // 0x507180
 void CAudioEngine::PlayPreloadedBeatTrack(bool a2) {
     AECutsceneTrackManager.PlayPreloadedCutsceneTrack();
-    field_0 = a2;
+    m_bPlayingMissionCompleteTrack = a2;
 }
 
 // 0x5071A0
@@ -510,7 +510,7 @@ void CAudioEngine::StopAmbienceTrack(bool a1) {
 
 // 0x507270
 bool CAudioEngine::DoesAmbienceTrackOverrideRadio() {
-    return AEAmbienceTrackManager.m_bStop;
+    return AEAmbienceTrackManager.m_OverrideRadio;
 }
 
 // 0x507280
@@ -611,11 +611,11 @@ void CAudioEngine::Service() {
 
     int32 trackPlayTime = AEAudioHardware.GetTrackPlayTime();
     //AEAudioHardware.GetChannelPlayTimes(m_nBackgroundAudioChannel, nullptr); // Does nothing
-    if (field_0 && trackPlayTime == -4) {
-        field_1 = true;
-    } else if (field_1) {
+    if (m_bPlayingMissionCompleteTrack && trackPlayTime == -4) {
+        m_bStoppingMissionCompleteTrack = true;
+    } else if (m_bStoppingMissionCompleteTrack) {
         if (trackPlayTime == -6) {
-            field_1 = false;
+            m_bStoppingMissionCompleteTrack = false;
             if (CAERadioTrackManager::IsVehicleRadioActive()) {
                 AERadioTrackManager.StartRadio(CAEVehicleAudioEntity::StaticGetPlayerVehicleAudioSettingsForRadio());
             }
@@ -712,8 +712,8 @@ void CAudioEngine::Reset() {
     AESoundManager.Service();
     AESoundManager.PauseManually(true);
     m_nCurrentRadioStationId = RADIO_INVALID;
-    field_0 = false;
-    field_1 = false;
+    m_bPlayingMissionCompleteTrack = false;
+    m_bStoppingMissionCompleteTrack = false;
 }
 
 // 0x507C30

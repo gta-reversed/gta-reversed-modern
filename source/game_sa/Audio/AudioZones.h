@@ -3,30 +3,22 @@
 #include "CompressedBox.h"
 #include <span>
 
-struct tAudioZoneSphere {
-    char    m_szName[8];
-    int16   m_nAudioZone;
-    union {
-        struct {
-            uint16 m_bIsActive : 1;
-        };
-        uint16 m_nFlags;
-    };
+struct tAudioZoneData {
+    char  m_szName[8];
+    int16 m_nAudioZone;
+    bool  m_bIsActive : 1;
+};
+VALIDATE_SIZE(tAudioZoneData, 0xC);
+
+struct tAudioZoneSphere : tAudioZoneData {
     CVector m_vPosn;
     float   m_fRadius;
 };
 VALIDATE_SIZE(tAudioZoneSphere, 0x1C);
 
-struct tAudioZoneBox {
-    char          m_szName[8];
-    int16         m_nAudioZone;
-    union {
-        struct {
-            uint16 m_bIsActive : 1;
-        };
-        uint16 m_nFlags;
-    };
+struct tAudioZoneBox : tAudioZoneData {
     CompressedBox m_Box;
+
     void DrawWireFrame(CRGBA color, const CMatrix& transform) const {
         m_Box.DrawWireFrame(color, transform);
     }
@@ -60,7 +52,7 @@ public:
     static void SwitchAudioZone(char* zoneName, bool enable);
     static void Update(bool a1, CVector posn);
 
-    static auto GetActiveAudioBoxes() {
+    static auto GetActiveAuZoBoxes() { // TODO/NOTE: This isn't how it works! See `m_aActiveBoxes`
         return m_aBoxes | rng::views::take((size_t)m_NumBoxes);
     }
 };

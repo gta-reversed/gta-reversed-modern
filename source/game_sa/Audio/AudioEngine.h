@@ -23,8 +23,8 @@ VALIDATE_SIZE(tBeatInfo, 0xAC);
 
 class CAudioEngine {
 public:
-    bool                        field_0;
-    bool                        field_1;
+    bool                        m_bPlayingMissionCompleteTrack;
+    bool                        m_bStoppingMissionCompleteTrack;
     eRadioID                    m_nCurrentRadioStationId;
     eRadioID                    m_nSavedRadioStationId;
     int32                       m_nBackgroundAudioChannel;
