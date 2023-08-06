@@ -127,29 +127,28 @@ public:
     bool            m_bRetuneJustStarted{false};
     bool            m_bRadioAutoSelect{true};
     uint8           m_nTracksInARow[RADIO_COUNT]{0};
-    uint8           m_nSavedGameClockDays{0};
-    uint8           m_nSavedGameClockHours{0};
-    int32           m_aListenTimes[RADIO_COUNT];
+    uint8           m_nSavedGameClockDays{0xff};
+    uint8           m_nSavedGameClockHours{0xff};
+    int32           m_aListenTimes[RADIO_COUNT]{}; // Filled from `CStats::FavoriteRadioStationList`
     uint32          m_nTimeRadioStationRetuned{0};
     uint32          m_nTimeToDisplayRadioName{0};
     uint32          m_nSavedTimeMs{0};
     uint32          m_nRetuneStartedTime;
     uint32          field_60{0};
-    int32           m_nChannel;
+    int32           m_HwClientHandle;
     eRadioTrackMode m_nMode{eRadioTrackMode::UNK_7};
     int32           m_nStationsListed{0};
     int32           m_nStationsListDown{0};
     int32           m_nSavedRadioStationId{-1};
-    int8            m_iRadioStationMenuRequest;
-    int8            m_iRadioStationRequest;
-    int32           field_7C;
+    int8            m_iRadioStationMenuRequest{ -1 };
+    int8            m_iRadioStationRequest{};
+    int32           field_7C{ -1 };
     float           m_f80{0.0f}; // 80 and 84 volume related fields. See ::UpdateRadioVolumes
     float           m_f84{0.0f};
-    tRadioSettings  settings1; // TODO: Maybe just make an array out of this??
-    tRadioSettings  settings2;
+    tRadioSettings  m_RadioSettings[2]{};
     tRadioState     m_aRadioState[RADIO_COUNT]{};
     uint32          field_368{0};
-    int8            m_nUserTrackPlayMode;
+    uint8           m_nUserTrackPlayMode{};
 
 public:
     static constexpr auto DJBANTER_INDEX_HISTORY_COUNT = 15;
@@ -195,6 +194,8 @@ public:
 
 public:
     static void InjectHooks();
+
+    CAERadioTrackManager(int32 hwClientHandle);
 
     CAERadioTrackManager() = default; // NOTSA
     ~CAERadioTrackManager() = default;
