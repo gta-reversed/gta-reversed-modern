@@ -223,8 +223,23 @@ size_t CAEFlacDecoder::FillBuffer(void* dest, size_t size) {
     m_fillBufferInfo.writeBuffer = reinterpret_cast<int16*>(dest);
 
     size_t totalRead = 0;
-    uint64 initialPos{};
-    FLAC__stream_decoder_get_decode_position(m_FlacStreamDecoder, &initialPos);
+
+        if (m_fillBufferInfo.leftoverWrittenBytes) {
+        NOTSA_LOG_WARN("Filling leftover decoded 0x{:x} bytes", m_fillBufferInfo.leftoverWrittenBytes);
+
+        const auto copySize = std::min(m_fillBufferInfo.leftoverWrittenBytes, size);
+        std::memcpy(dest, m_fillBufferInfo.leftoverBuffer, copySize);
+
+        if (m_fillBufferInfo.leftoverWrittenBytes > size) {
+            std::memcpy(m_fillBufferInfo.leftoverBuffer, m_fillBufferInfo.leftoverBuffer + size, size - m_fillBufferInfo.leftoverWrittenBytes);
+
+            m_fillBufferInfo.leftoverWrittenBytes -= size;
+
+            NOTSA_LOG_WARN("There are more leftover bytes! size=0x{:x}", m_fillBufferInfo.leftoverWrittenBytes);
+        }
+
+        totalRead = copySize;
+    }
 
     while (totalRead < size) {
         m_fillBufferInfo.maxBytes = size - totalRead;
@@ -235,16 +250,18 @@ size_t CAEFlacDecoder::FillBuffer(void* dest, size_t size) {
             return totalRead;
         }
 
-        uint64 newPos{};
-        FLAC__stream_decoder_get_decode_position(m_FlacStreamDecoder, &newPos);
+        const auto written = m_fillBufferInfo.writeWrittenBytes;
 
-        assert(newPos > initialPos);
-        const auto dist = newPos - initialPos;
+        NOTSA_LOG_DEBUG("Decoded 0x{:x} bytes from FLAC file.", written);
 
-        m_fillBufferInfo.writeBuffer += dist;
-        totalRead += static_cast<size_t>(dist);
+        m_fillBufferInfo.writeBuffer += written;
+        totalRead += written;
     }
-    m_fillBufferInfo = {};
+    m_fillBufferInfo.writeBuffer = nullptr;
+    m_fillBufferInfo.writeWrittenBytes = 0;
+
+    if (m_fillBufferInfo.leftoverWrittenBytes)
+        NOTSA_LOG_WARN("There are 0x{:x} leftover decoded bytes, to be filled at next FillBuffer call.", m_fillBufferInfo.leftoverWrittenBytes);
 
     return totalRead;
 }
@@ -272,10 +289,7 @@ void CAEFlacDecoder::SetCursor(unsigned long pos) {
     if (!m_bInitialized || !m_metadata.sampleRate)
         return;
 
-    // pos(in ms) = pos(in samples) / sample_rate
-    // <=> 1 / pos(in samples) = pos(in ms) / sample_rate
-    // <=> pos(in samples) = sample_rate / pos(in ms)
-    const auto absolutePos = m_metadata.sampleRate / (pos * 1000);
+    const auto absolutePos = pos * m_metadata.sampleRate / 1000;
 
     FLAC__stream_decoder_seek_absolute(m_FlacStreamDecoder, absolutePos);
 }
