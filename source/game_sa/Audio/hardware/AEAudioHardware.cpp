@@ -189,12 +189,9 @@ int16 CAEAudioHardware::AllocateChannels(uint16 numChannels) {
 
 // 0x4D94A0
 void CAEAudioHardware::SetBassSetting(int8 nBassSet, float fBassEqGain) {
-    plugin::CallMethod<0x4D94A0, CAEAudioHardware*, int8, float>(this, nBassSet, fBassEqGain);
-    /*
-    m_nBassSet    = nBassSet;
+    m_nBassSet = nBassSet;
     m_fBassEqGain = fBassEqGain;
-    ??? m_pStreamingChannel->SetBassEQ(reinterpret_cast<IDirectSoundFXParamEq*>(nBassSet), fBassEqGain);
-    */
+    m_pStreamingChannel->SetBassEQ(nBassSet, fBassEqGain);
 }
 
 // 0x4D8810
