@@ -184,38 +184,37 @@ void CAESound::UpdatePlayTime(int16 soundLength, int16 loopStartTime, int16 play
     m_nCurrentPlayPosition = loopStartTime + (m_nCurrentPlayPosition % soundLength);
 }
 
-void CAESound::GetRelativePosition(CVector* outPos) {
-    if (!GetFrontEnd())
-        return CAEAudioEnvironment::GetPositionRelativeToCamera(outPos, &m_vecCurrPosn);
-
-    *outPos = m_vecCurrPosn;
+CVector CAESound::GetRelativePosition() const {
+    if (!GetFrontEnd()) {
+        CVector out;
+        CAEAudioEnvironment::GetPositionRelativeToCamera(&out, &m_vecCurrPosn);
+        return out;
+    }
+    return m_vecCurrPosn;
 }
 
 void CAESound::CalculateFrequency() {
-    if (m_fSpeedVariability <= 0.0F || m_fSpeedVariability >= m_fSpeed)
-        m_fFrequency = m_fSpeed;
-    else
-        m_fFrequency = m_fSpeed + CAEAudioUtility::GetRandomNumberInRange(-m_fSpeedVariability, m_fSpeedVariability);
+    m_fFrequency = m_fSpeedVariability <= 0.0F || m_fSpeedVariability >= m_fSpeed
+        ? m_fSpeed
+        : m_fSpeed + CAEAudioUtility::GetRandomNumberInRange(-m_fSpeedVariability, m_fSpeedVariability);
 }
 
 void CAESound::UpdateFrequency() {
-    if (m_fSpeedVariability == 0.0F)
+    if (m_fSpeedVariability == 0.0F) {
         m_fFrequency = m_fSpeed;
+    }
 }
 
 float CAESound::GetRelativePlaybackFrequencyWithDoppler() {
-    if (GetFrontEnd())
-        return m_fFrequency;
-
-    return m_fFrequency * CAEAudioEnvironment::GetDopplerRelativeFrequency(m_fPrevCamDist, m_fCurrCamDist, m_nPrevTimeUpdate, m_nCurrTimeUpdate, m_fTimeScale);
+    return GetFrontEnd()
+        ? m_fFrequency
+        : m_fFrequency * CAEAudioEnvironment::GetDopplerRelativeFrequency(m_fPrevCamDist, m_fCurrCamDist, m_nPrevTimeUpdate, m_nCurrTimeUpdate, m_fTimeScale);
 }
 
 float CAESound::GetSlowMoFrequencyScalingFactor() {
-    if (GetUnpausable() || !CTimer::GetIsSlowMotionActive() || CCamera::GetActiveCamera().m_nMode == eCamMode::MODE_CAMERA) {
-        return 1.0F;
-    }
-
-    return fSlowMoFrequencyScalingFactor;
+    return GetUnpausable() || !CTimer::GetIsSlowMotionActive() || CCamera::GetActiveCamera().m_nMode == eCamMode::MODE_CAMERA
+        ? 1.f
+        : fSlowMoFrequencyScalingFactor;
 }
 
 void CAESound::NewVPSLentry() {

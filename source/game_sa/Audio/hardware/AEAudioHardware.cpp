@@ -262,7 +262,7 @@ void CAEAudioHardware::StopSound(int16 channel, uint16 channelId) {
 }
 
 // 0x4D8920
-void CAEAudioHardware::SetChannelPosition(int16 channel, uint16 channelId, CVector* posn, uint8 unused) {
+void CAEAudioHardware::SetChannelPosition(int16 channel, uint16 channelId, const CVector& posn, uint8 unused) {
     if (channel >= 0 && channelId < m_anNumChannelsInSlot[channel]) {
         const auto ch = m_aChannels[channel + channelId];
         if (ch) {
@@ -316,11 +316,10 @@ void CAEAudioHardware::DisableEffectsLoading() {
 }
 
 // 0x4D8E60
-void CAEAudioHardware::RequestVirtualChannelSoundInfo(uint16 channel, uint16 sfxId, uint16 bankSlotId) {
-    if (channel < MAX_NUM_SOUNDS) {
-        m_aBankSlotIds[channel] = bankSlotId;
-        m_aSoundIdsInSlots[channel] = sfxId;
-    }
+void CAEAudioHardware::RequestVirtualChannelSoundInfo(uint16 idx, uint16 sfxId, uint16 bankSlotId) {
+    assert(idx < MAX_NUM_SOUNDS);
+    m_aBankSlotIds[idx] = bankSlotId;
+    m_aSoundIdsInSlots[idx] = sfxId;
 }
 
 // 0x4D8E90

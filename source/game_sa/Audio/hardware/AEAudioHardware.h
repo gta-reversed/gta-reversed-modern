@@ -123,7 +123,7 @@ public:
     bool GetSoundLoadingStatus(uint16 bankId, uint16 sfxId, int16 bankSlot);
 
     void StopSound(int16 channel, uint16 channelSlot);
-    void SetChannelPosition(int16 channel, uint16 channelSlot, CVector* vecPos, uint8 unused);
+    void SetChannelPosition(int16 channel, uint16 channelSlot, const CVector& vecPos, uint8 unused);
     void SetChannelFrequencyScalingFactor(int16 channel, uint16 channelSlot, float freqFactor);
     void RescaleChannelVolumes();
     void UpdateReverbEnvironment();

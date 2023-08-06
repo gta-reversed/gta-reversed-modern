@@ -260,9 +260,7 @@ void CAESoundManager::Service() {
         AEAudioHardware.PlaySound(m_nChannel, curSound, sound.m_nSoundIdInSlot, sound.m_nBankSlotId, sound.m_nCurrentPlayPosition, flags.m_nFlags, sound.m_fSpeed);
         AEAudioHardware.SetChannelVolume(m_nChannel, curSound, sound.m_fFinalVolume, 0);
 
-        CVector vecPos;
-        sound.GetRelativePosition(&vecPos);
-        AEAudioHardware.SetChannelPosition(m_nChannel, curSound, &vecPos, 0);
+        AEAudioHardware.SetChannelPosition(m_nChannel, curSound, sound.GetRelativePosition(), 0);
         AEAudioHardware.SetChannelFrequencyScalingFactor(m_nChannel, curSound, freq * slomoFactor);
         ++curSound;
     }
@@ -285,16 +283,15 @@ void CAESoundManager::Service() {
             AEAudioHardware.SetChannelVolume(m_nChannel, i, -100.0F, 0);
             AEAudioHardware.SetChannelFrequencyScalingFactor(m_nChannel, i, 0.0F);
         }
-
-        CVector vecPos;
-        sound.GetRelativePosition(&vecPos);
-        AEAudioHardware.SetChannelPosition(m_nChannel, i, &vecPos, 0);
+        AEAudioHardware.SetChannelPosition(m_nChannel, i, sound.GetRelativePosition(), 0);
     }
 
     AEAudioHardware.Service();
+
     for (CAESound& sound : m_aSounds) {
-        if (!sound.IsUsed())
+        if (!sound.IsUsed()) {
             continue;
+        }
 
         sound.m_bWasServiced = 1;
         if (sound.m_nIgnoredServiceCycles > 0 && !CAESoundManager::IsSoundPaused(sound))
@@ -303,48 +300,40 @@ void CAESoundManager::Service() {
 }
 
 CAESound* CAESoundManager::RequestNewSound(CAESound* pSound) {
-    int16 firstFree;
-    for (firstFree = 0; firstFree < MAX_NUM_SOUNDS; ++firstFree) {
-        if (!m_aSounds[firstFree].IsUsed())
-            break;
+    size_t sidx;
+    auto s = GetFreeSound(&sidx);
+    if (s) {
+        *s = *pSound;
+        pSound->UnregisterWithPhysicalEntity();
+        s->NewVPSLentry();
+        AEAudioHardware.RequestVirtualChannelSoundInfo((uint16)sidx, s->m_nSoundIdInSlot, s->m_nBankSlotId);
     }
-
-    if (firstFree >= MAX_NUM_SOUNDS)
-        return nullptr;
-
-    auto& newSound = m_aSounds[firstFree];
-    newSound = *pSound;
-    pSound->UnregisterWithPhysicalEntity();
-    newSound.NewVPSLentry();
-    AEAudioHardware.RequestVirtualChannelSoundInfo(firstFree, newSound.m_nSoundIdInSlot, newSound.m_nBankSlotId);
-
-    return &newSound;
+    return s;
 }
 
 int16 CAESoundManager::AreSoundsPlayingInBankSlot(int16 bankSlot) {
     auto nPlaying = eSoundPlayingStatus::SOUND_NOT_PLAYING;
     for (CAESound& sound : m_aSounds) {
-        if (!sound.IsUsed() || sound.m_nBankSlotId != bankSlot)
-            continue;
-
-        if (sound.m_nHasStarted)
+        if (!sound.IsUsed() || sound.m_nBankSlotId != bankSlot) {
+            continue; 
+        }
+        if (sound.m_nHasStarted) {
             return eSoundPlayingStatus::SOUND_HAS_STARTED;
-
+        }
         nPlaying = eSoundPlayingStatus::SOUND_PLAYING;
     }
-
     return nPlaying;
 }
 
 int16 CAESoundManager::AreSoundsOfThisEventPlayingForThisEntity(int16 eventId, CAEAudioEntity* audioEntity) {
     auto nPlaying = eSoundPlayingStatus::SOUND_NOT_PLAYING;
     for (CAESound& sound : m_aSounds) {
-        if (!sound.IsUsed() || sound.m_nEvent != eventId || sound.m_pBaseAudio != audioEntity)
+        if (!sound.IsUsed() || sound.m_nEvent != eventId || sound.m_pBaseAudio != audioEntity) {
             continue;
-
-        if (sound.m_nHasStarted)
+        }
+        if (sound.m_nHasStarted) {
             return eSoundPlayingStatus::SOUND_HAS_STARTED;
-
+        }
         nPlaying = eSoundPlayingStatus::SOUND_PLAYING;
     }
 
@@ -354,12 +343,12 @@ int16 CAESoundManager::AreSoundsOfThisEventPlayingForThisEntity(int16 eventId, C
 int16 CAESoundManager::AreSoundsOfThisEventPlayingForThisEntityAndPhysical(int16 eventId, CAEAudioEntity* audioEntity, CPhysical* physical) {
     bool nPlaying = eSoundPlayingStatus::SOUND_NOT_PLAYING;
     for (CAESound& sound : m_aSounds) {
-        if (!sound.IsUsed() || sound.m_nEvent != eventId || sound.m_pBaseAudio != audioEntity || sound.m_pPhysicalEntity != physical)
+        if (!sound.IsUsed() || sound.m_nEvent != eventId || sound.m_pBaseAudio != audioEntity || sound.m_pPhysicalEntity != physical) {
             continue;
-
-        if (sound.m_nHasStarted)
+        }
+        if (sound.m_nHasStarted) {
             return eSoundPlayingStatus::SOUND_HAS_STARTED;
-
+        }
         nPlaying = eSoundPlayingStatus::SOUND_PLAYING;
     }
 
@@ -368,50 +357,64 @@ int16 CAESoundManager::AreSoundsOfThisEventPlayingForThisEntityAndPhysical(int16
 
 void CAESoundManager::CancelSoundsOfThisEventPlayingForThisEntity(int16 eventId, CAEAudioEntity* audioEntity) {
     for (CAESound& sound : m_aSounds) {
-        if (!sound.IsUsed() || sound.m_nEvent != eventId || sound.m_pBaseAudio != audioEntity)
+        if (!sound.IsUsed() || sound.m_nEvent != eventId || sound.m_pBaseAudio != audioEntity) {
             continue;
-
+        }
         sound.StopSoundAndForget();
     }
 }
 
 void CAESoundManager::CancelSoundsOfThisEventPlayingForThisEntityAndPhysical(int16 eventId, CAEAudioEntity* audioEntity, CPhysical* physical) {
     for (CAESound& sound : m_aSounds) {
-        if (!sound.IsUsed() || sound.m_nEvent != eventId || sound.m_pBaseAudio != audioEntity || sound.m_pPhysicalEntity != physical)
+        if (!sound.IsUsed() || sound.m_nEvent != eventId || sound.m_pBaseAudio != audioEntity || sound.m_pPhysicalEntity != physical) {
             continue;
-
+        }
         sound.StopSoundAndForget();
     }
 }
 
 void CAESoundManager::CancelSoundsInBankSlot(int16 bankSlot, bool bFullStop) {
     for (CAESound& sound : m_aSounds) {
-        if (!sound.IsUsed() || sound.m_nBankSlotId != bankSlot)
+        if (!sound.IsUsed() || sound.m_nBankSlotId != bankSlot) {
             continue;
-
-        if (bFullStop)
+        }
+        if (bFullStop) {
             sound.StopSoundAndForget();
-        else
+        } else {
             sound.StopSound();
+        }
     }
 }
 
 void CAESoundManager::CancelSoundsOwnedByAudioEntity(CAEAudioEntity* audioEntity, bool bFullStop) {
     for (CAESound& sound : m_aSounds) {
-        if (!sound.IsUsed() || sound.m_pBaseAudio != audioEntity)
+        if (!sound.IsUsed() || sound.m_pBaseAudio != audioEntity) {
             continue;
-
-        if (bFullStop)
+        }
+        if (bFullStop) {
             sound.StopSoundAndForget();
-        else
+        } else {
             sound.StopSound();
+        }
     }
 }
 
 int16 CAESoundManager::GetVirtualChannelForPhysicalChannel(int16 physicalChannel) {
-    const auto channel = physicalChannel - m_nChannel;
-    if (channel < 0 || channel >= m_nNumAvailableChannels)
+    const auto chIdx = physicalChannel - m_nChannel;
+    if (chIdx < 0 || chIdx >= m_nNumAvailableChannels) {
         return -1;
+    }
+    return m_aChannelSoundTable[chIdx];
+}
 
-    return m_aChannelSoundTable[channel];
+CAESound* CAESoundManager::GetFreeSound(size_t* outIdx) {
+    for (auto&& [i, s] : notsa::enumerate(m_aSounds)) {
+        if (!s.IsUsed()) {
+            if (outIdx) {
+                *outIdx = (size_t)i;
+            }
+            return &s;
+        }
+    }
+    return nullptr;
 }
