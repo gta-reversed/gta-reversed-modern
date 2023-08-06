@@ -230,10 +230,9 @@ size_t CAEFlacDecoder::FillBuffer(void* dest, size_t size) {
         const auto copySize = std::min(m_fillBufferInfo.leftoverWrittenBytes, size);
         std::memcpy(dest, m_fillBufferInfo.leftoverBuffer, copySize);
 
+        m_fillBufferInfo.leftoverWrittenBytes -= copySize;
         if (m_fillBufferInfo.leftoverWrittenBytes > size) {
             std::memcpy(m_fillBufferInfo.leftoverBuffer, m_fillBufferInfo.leftoverBuffer + size, size - m_fillBufferInfo.leftoverWrittenBytes);
-
-            m_fillBufferInfo.leftoverWrittenBytes -= size;
 
             NOTSA_LOG_WARN("There are more leftover bytes! size=0x{:x}", m_fillBufferInfo.leftoverWrittenBytes);
         }
