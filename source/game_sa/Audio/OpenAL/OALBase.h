@@ -1,7 +1,7 @@
 #pragma once
+#ifdef USE_OPENAL
 #include "extensions/HeapPtrArray.hpp"
 
-#ifdef USE_OPENAL
 // This class has to be heap allocated! (with  new`)
 class OALBase {
 public:
@@ -23,4 +23,7 @@ public:
     // NOTSA
     virtual void AddRef();
 };
+
+bool OALCheckErrors(std::string_view file, int32 line);
+#define OAL_CHECKED(c) (c, OALCheckErrors(__FILE__, __LINE__))
 #endif

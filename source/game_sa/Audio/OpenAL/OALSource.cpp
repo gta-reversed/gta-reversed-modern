@@ -20,7 +20,7 @@ OALSource::~OALSource() {
             break;
         }
 
-        std::erase(activeSources.vector(), this);
+        std::erase(activeSources, this);
         alDeleteSources(1, &m_sourceId);
         m_sourceId = 0;
     }
@@ -61,7 +61,7 @@ void OALSource::SetBuffer(OALBuffer* buffer) {
 
     if (m_oalBuffer)
         m_oalBuffer->Release();
-    
+
     m_type = buffer->m_preloopBufferId ? OALSourceType::OST_Preloop : OALSourceType::OST_Static;
 
     if (m_sourceId)
@@ -98,7 +98,7 @@ void OALSource::UnqueueBuffers() {
         auto queuedBuf = *queuedBufIt;
 
         m_posOffset += queuedBuf->m_bufferSize;
-        std::erase(m_queuedBuffers.vector(), queuedBuf);
+        std::erase(m_queuedBuffers, queuedBuf);
         queuedBuf->Release();
     }
 }
