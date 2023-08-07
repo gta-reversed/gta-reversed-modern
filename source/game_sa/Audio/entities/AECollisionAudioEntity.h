@@ -11,7 +11,7 @@ struct tCollisionAudioEntry {
     CEntity*  m_Entity1{nullptr};
     CEntity*  m_Entity2{nullptr};
     CAESound* m_Sound{nullptr};
-    int32     m_nTime{0};
+    uint32    m_nTime{0};
     eCollisionAudioEntryStatus m_nStatus{COL_AUDIO_ENTRY_STATUS_0};
     eSurfaceType m_nSurface1{NUM_FUCKING_SURFACES + 1}; // ?
     eSurfaceType m_nSurface2{NUM_FUCKING_SURFACES + 1}; // ?
@@ -39,7 +39,7 @@ public:
 
     void AddCollisionSoundToList(CEntity* entity1, CEntity* entity2, eSurfaceType surf1, eSurfaceType surf2, CAESound* sound, eCollisionAudioEntryStatus status);
 
-    int8 GetCollisionSoundStatus(CEntity* entity1, CEntity* entity2, eSurfaceType surf1, eSurfaceType surf2, int32* a5);
+    void GetCollisionSoundStatus(CEntity* entity1, CEntity* entity2, eSurfaceType surf1, eSurfaceType surf2, int32& outIndex);
 
     void PlayLoopingCollisionSound(CEntity* entity1, CEntity* entity2, eSurfaceType surf1, eSurfaceType surf2, float a5, CVector& posn, uint8 a7);
     void UpdateLoopingCollisionSound();
@@ -47,7 +47,7 @@ public:
     void PlayOneShotCollisionSound(CEntity* entity1, CEntity* entity2, eSurfaceType surf1, eSurfaceType surf2, float a5, CVector& posn);
     void PlayBulletHitCollisionSound(eSurfaceType surface, CVector& posn, float angleWithColPointNorm);
 
-    void ReportGlassCollisionEvent(int32 glassSoundType, Const CVector& posn, uint32 time);
+    void ReportGlassCollisionEvent(eAudioEvents glassSoundType, Const CVector& posn, uint32 time);
     void ReportWaterSplash(CVector posn, float volume);
     void ReportWaterSplash(CPhysical* physical, float height, bool splashMoreThanOnce);
     void ReportObjectDestruction(CEntity* entity);
