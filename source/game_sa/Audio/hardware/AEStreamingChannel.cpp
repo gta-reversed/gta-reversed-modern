@@ -12,7 +12,6 @@ static inline DSFXParamEq s_FXParamEqPresets[3][2]{
     {{ 80.f, 36.f, -15.f }, { 80.f,  36.f, -15.f }}, // Preset 3
 };
 
-
 // 0x4F2200
 CAEStreamingChannel::~CAEStreamingChannel() {
     DirectSoundBufferFadeToSilence();
@@ -148,10 +147,8 @@ void CAEStreamingChannel::SetFrequencyScalingFactor(float factor) {
     } else {
         SetFrequency(static_cast<uint32>((float)m_nOriginalFrequency * factor));
 
-        if (m_nState == StreamingChannelState::UNK_MINUS_7)
+        if (m_nState != StreamingChannelState::UNK_MINUS_7)
             return;
-
-        m_nState = StreamingChannelState::UNK_MINUS_1;
 
         if (!m_pDirectSoundBuffer)
             return;
@@ -161,6 +158,8 @@ void CAEStreamingChannel::SetFrequencyScalingFactor(float factor) {
 
         if (!AESmoothFadeThread.RequestFade(m_pDirectSoundBuffer, m_fVolume, 35, true))
             m_pDirectSoundBuffer->SetVolume(static_cast<int32>(m_fVolume * 100.0f));
+
+        m_nState = StreamingChannelState::UNK_MINUS_1;
     }
 }
 
@@ -203,7 +202,7 @@ uint32 CAEStreamingChannel::FillBuffer(void* buffer, uint32 size) {
     return filled;
 }
 
-// 0x4F23D0
+// 0x4F23D0, broken af
 void CAEStreamingChannel::PrepareStream(CAEStreamingDecoder* newDecoder, int8 arg2, uint32 audioBytes) {
     if (!newDecoder || !m_pDirectSoundBuffer)
         return;
@@ -394,7 +393,6 @@ int16 CAEStreamingChannel::GetPlayTime() {
         break;
     }
 
-    NOTSA_UNREACHABLE();
     return static_cast<int16>(m_nState); // possibly not intended.
 }
 
@@ -455,15 +453,15 @@ void CAEStreamingChannel::InjectHooks() {
     RH_ScopedClass(CAEStreamingChannel);
     RH_ScopedCategory("Audio/Hardware");
 
-    RH_ScopedInstall(Constructor, 0x4F1800);
+    RH_ScopedInstall(Constructor, 0x4F1800, { .reversed = false }); // makes game not load radio
     RH_ScopedInstall(Destructor, 0x4F2200);
     RH_ScopedInstall(SynchPlayback, 0x4F1870);
-    RH_ScopedInstall(PrepareStream, 0x4F23D0, { .reversed = true });
+    RH_ScopedInstall(PrepareStream, 0x4F23D0, { .reversed = false });
     RH_ScopedInstall(Initialise, 0x4F22F0);
     RH_ScopedInstall(Pause, 0x4F2170);
     RH_ScopedInstall(SetReady, 0x4F1FF0);
     RH_ScopedInstall(SetBassEQ, 0x4F1F30);
-    RH_ScopedInstall(FillBuffer, 0x4F1E20, { .reversed = true });
+    RH_ScopedInstall(FillBuffer, 0x4F1E20);
     RH_ScopedInstall(InitialiseSilence, 0x4F1C70);
     RH_ScopedInstall(SetNextStream, 0x4F1DE0);
     RH_ScopedInstall(AddFX, 0x4F1AE0);

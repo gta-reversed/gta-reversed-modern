@@ -78,9 +78,8 @@ private:
         return this;
     }
 
-    CAEStreamingChannel* Destructor() {
-        this->CAEStreamingChannel::~CAEStreamingChannel();
-        return this;
+    void Destructor() {
+        CAEStreamingChannel::~CAEStreamingChannel();
     }
 
     void Service_Reversed() {

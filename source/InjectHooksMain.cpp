@@ -32,6 +32,7 @@
 #include "AETrackLoader.h"
 #include "AEMP3BankLoader.h"
 #include "AEMP3TrackLoader.h"
+#include "AEStreamingChannel.h"
 #include "AudioEngine.h"
 #include "Garage.h"
 #include "Garages.h"
@@ -740,6 +741,7 @@ void InjectHooksMain() {
         CAEMP3TrackLoader::InjectHooks();
         CAEBankLoader::InjectHooks();
         CAETrackLoader::InjectHooks();
+        CAEStreamingChannel::InjectHooks();
     };
 
     const auto Plant = []() {
