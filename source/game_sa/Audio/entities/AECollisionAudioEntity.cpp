@@ -9,10 +9,10 @@ void CAECollisionAudioEntity::InjectHooks() {
     RH_ScopedClass(CAECollisionAudioEntity);
     RH_ScopedCategory("Audio/Entities");
 
-    RH_ScopedInstall(Initialise, 0x5B9BD0, { .reversed = false });
+    RH_ScopedInstall(Initialise, 0x5B9BD0);
     RH_ScopedInstall(InitialisePostLoading, 0x4DA050);
-    RH_ScopedInstall(AddCollisionSoundToList, 0x4DAAC0, { .reversed = false });
-    RH_ScopedInstall(Reset, 0x4DA320, { .reversed = false });
+    RH_ScopedInstall(AddCollisionSoundToList, 0x4DAAC0);
+    RH_ScopedInstall(Reset, 0x4DA320);
     RH_ScopedInstall(ReportGlassCollisionEvent, 0x4DA070, { .reversed = false });
     RH_ScopedInstall(UpdateLoopingCollisionSound, 0x4DA540, { .reversed = false });
     RH_ScopedInstall(GetCollisionSoundStatus, 0x4DA830, { .reversed = false });
@@ -29,7 +29,7 @@ void CAECollisionAudioEntity::InjectHooks() {
 
 // 0x5B9BD0
 void CAECollisionAudioEntity::Initialise() {
-    plugin::CallMethod<0x5B9BD0, CAECollisionAudioEntity*>(this);
+    *this = {};
 }
 
 // 0x4DA050
@@ -40,12 +40,40 @@ void CAECollisionAudioEntity::InitialisePostLoading() {
 
 // 0x4DA320
 void CAECollisionAudioEntity::Reset() {
-    plugin::CallMethod<0x4DA320, CAECollisionAudioEntity*>(this);
+    for (auto& entry : m_Entries) {
+        if (entry.m_nStatus != COL_AUDIO_ENTRY_STATUS_2)
+            continue;
+
+        if (entry.m_Sound)
+            entry.m_Sound->StopSoundAndForget();
+
+        entry = {};
+    }
 }
 
 // 0x4DAAC0
-void CAECollisionAudioEntity::AddCollisionSoundToList(CEntity* entity1, CEntity* entity2, eSurfaceType surf1, eSurfaceType surf2, CAESound* sound, int32 status) {
-    plugin::CallMethod<0x4DAAC0, CAECollisionAudioEntity*, CEntity*, CEntity*, uint8, uint8, CAESound*, int32>(this, entity1, entity2, surf1, surf2, sound, status);
+void CAECollisionAudioEntity::AddCollisionSoundToList(CEntity* entity1, CEntity* entity2, eSurfaceType surf1, eSurfaceType surf2, CAESound* sound,
+    eCollisionAudioEntryStatus status)
+{
+    // Find an entry with no sound.
+    const auto newEntry = rng::find_if(m_Entries, [](tCollisionAudioEntry& entry) {
+        return !entry.m_Sound;
+    });
+
+    if (newEntry == m_Entries.end()) {
+        // Game tries to access m_Entries[300] in this case.
+        NOTSA_UNREACHABLE();
+    }
+
+    // ? check
+    newEntry->m_Entity1 = entity1;
+    newEntry->m_Entity2 = entity2;
+    newEntry->m_nSurface1 = surf1;
+    newEntry->m_nSurface2 = surf2;
+    newEntry->m_Sound = sound;
+    newEntry->m_nStatus = status;
+    newEntry->m_nTime = status == COL_AUDIO_ENTRY_STATUS_2 ? CTimer::GetTimeInMS() + 100 : 0;
+    ++m_nActiveCollisionSounds;
 }
 
 // 0x4DA830
