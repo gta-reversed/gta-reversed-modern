@@ -107,6 +107,6 @@ bool C_PcSave::DeleteSlot(int32 slot) {
     }
     return false;
 #else
-    return std::filesystem::remove(path);
+    return !std::filesystem::remove(path);
 #endif
 }
