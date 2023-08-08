@@ -201,7 +201,8 @@ uint16 CAEAudioHardware::GetNumAvailableChannels() const {
 
 // 0x4D8820
 void CAEAudioHardware::GetChannelPlayTimes(int16 channel, int16* playTimes) {
-    assert(playTimes); // NOTE: Originally just an if check, but I don't like quit errors
+    if (!playTimes)
+        return;
 
     for (auto i = m_anNumChannelsInSlot[channel]; i-- > 0;) {
         playTimes[i] = m_aChannels[channel + i]->GetPlayTime();
