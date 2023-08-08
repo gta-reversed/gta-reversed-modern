@@ -282,12 +282,10 @@ void CPad::ProcessPad(int padNum) {
     WIN_FCHECK((*pDiDevice)->GetDeviceState(sizeof(joyState), &joyState));
 
     if (ControlsManager.m_bJoyJustInitialised) {
-        std::memcpy(&ControlsManager.m_OldJoyState, &joyState, sizeof(ControlsManager.m_OldJoyState));
-        std::memcpy(&ControlsManager.m_NewJoyState, &joyState, sizeof(ControlsManager.m_NewJoyState));
+        ControlsManager.m_OldJoyState = ControlsManager.m_NewJoyState = joyState;
         ControlsManager.m_bJoyJustInitialised = false;
     } else {
-        std::memcpy(&ControlsManager.m_OldJoyState, &ControlsManager.m_NewJoyState, sizeof(ControlsManager.m_OldJoyState));
-        std::memcpy(&ControlsManager.m_NewJoyState, &joyState, sizeof(ControlsManager.m_NewJoyState));
+        ControlsManager.m_OldJoyState = std::exchange(ControlsManager.m_NewJoyState, joyState);
     }
     RsPadEventHandler(RsEvent::rsPADBUTTONUP, &padNum);
 
