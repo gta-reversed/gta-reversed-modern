@@ -410,7 +410,10 @@
 #include <RealTimeShadowManager.h>
 
 #include "extensions/utility.hpp"
+#include "extensions/CommandLine.h"
 #include <RenderBuffer.hpp>
+
+#include "RootHookCategory.h"
 
 void InjectHooksMain() {
     HookInstall(0x53E230, &Render2dStuff);   // [ImGui] This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without
@@ -1239,6 +1242,12 @@ void InjectHooksMain() {
     Fx();
     Vehicle();
     Scripts();
+
+    if (CommandLine::unhookAll)
+        ReversibleHooks::GetRootCategory().SetAllItemsEnabled(false);
+
+    if (!CommandLine::unhookSome.empty() || !CommandLine::unhookExcept.empty())
+        NOTSA_LOG_WARN("Command line arguments --unhook and --unhook-except are unimplemented!");
 }
 
 void InjectHooksMain(HMODULE hThisDLL) {
