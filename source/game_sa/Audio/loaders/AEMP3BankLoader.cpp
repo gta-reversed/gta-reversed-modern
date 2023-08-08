@@ -17,7 +17,6 @@ void CAEMP3BankLoader::InjectHooks() {
     RH_ScopedInstall(IsSoundBankLoaded, 0x4E0220);
     RH_ScopedInstall(GetSoundBankLoadingStatus, 0x4E0250);
     RH_ScopedInstall(GetSoundBuffer, 0x4E0280);
-    RH_ScopedInstall(GetSoundBankLoadingStatus, 0x4E0250);
     RH_ScopedInstall(IsSoundLoaded, 0x4E03B0);
     RH_ScopedInstall(GetSoundLoadingStatus, 0x4E0400);
     RH_ScopedInstall(UpdateVirtualChannels, 0x4E0450);
