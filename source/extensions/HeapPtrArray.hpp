@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <cassert>
 
 // Dynamic array that frees all pointers on destruction.
 //
@@ -17,5 +18,15 @@ class HeapPtrArray : public std::vector<T*> {
                 free(ptr);
             }
         }
+    }
+
+    constexpr void push_back(const T*& value) {
+        assert(_CrtIsValidHeapPointer(value));
+        std::vector<T*>::push_back(value);
+    }
+
+    constexpr void push_back(T*&& value) {
+        assert(_CrtIsValidHeapPointer(value));
+        std::vector<T*>::push_back(value);
     }
 };

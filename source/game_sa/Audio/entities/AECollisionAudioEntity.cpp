@@ -214,7 +214,7 @@ void CAECollisionAudioEntity::ReportGlassCollisionEvent(eAudioEvents glassSoundT
 
 // 0x4DA190
 void CAECollisionAudioEntity::ReportWaterSplash(CVector posn, float volume) {
-    if (AEAudioHardware.IsSoundBankLoaded(39, 2)) {
+    if (!AEAudioHardware.IsSoundBankLoaded(39, 2)) {
         if (!AudioEngine.IsLoadingTuneActive())
             AEAudioHardware.LoadSoundBank(39, 2);
 
