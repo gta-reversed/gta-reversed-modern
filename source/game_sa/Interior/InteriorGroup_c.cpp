@@ -35,8 +35,8 @@ void InteriorGroup_c::InjectHooks() {
 }
 
 // 0x5947E0
-void InteriorGroup_c::Init(CEntity* entity, int32 a3) {
-    plugin::CallMethod<0x5947E0, InteriorGroup_c*, CEntity*, int32>(this, entity, a3);
+void InteriorGroup_c::Init(CEntity* entity, int32 id) {
+    plugin::CallMethod<0x5947E0, InteriorGroup_c*, CEntity*, int32>(this, entity, id);
 }
 
 // 0x5968E0

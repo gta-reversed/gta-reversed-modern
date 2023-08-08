@@ -441,7 +441,6 @@ void InjectHooksMain() {
     CPedAttractorPedPlacer::InjectHooks();
     BoneNode_c::InjectHooks();
     BoneNodeManager_c::InjectHooks();
-    CAnimBlendClumpData::InjectHooks();
     IKChainManager_c::InjectHooks();
     IKChain_c::InjectHooks();
     CCheckpoint::InjectHooks();
@@ -1222,12 +1221,14 @@ void InjectHooksMain() {
         CAnimManager::InjectHooks();
     };
 
+    Animation();
     App();
     Audio();
     Tasks();
     Events();
     Fx();
     Vehicle();
+    Interior();
     Scripts();
 }
 

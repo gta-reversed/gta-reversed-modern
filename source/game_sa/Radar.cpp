@@ -147,7 +147,7 @@ void CRadar::InjectHooks() {
     RH_ScopedInstall(ShowRadarTraceWithHeight, 0x584070);
     RH_ScopedInstall(DrawCoordBlip, 0x586D60);
 
-    RH_ScopedInstall(SetupAirstripBlips, 0x587D20, {.reversed = false}); // TEST
+    RH_ScopedInstall(SetupAirstripBlips, 0x587D20); // TEST
     RH_ScopedInstall(DrawBlips, 0x588050);
     // RH_ScopedInstall(ClipRadarPoly, 0x585040);
     // RH_ScopedInstall(DrawAreaOnRadar, 0x5853D0);
@@ -239,10 +239,6 @@ int32 CRadar::GetActualBlipArrayIndex(tBlipHandle blip) {
 
 // 0x5828A0
 void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType) {
-    if (blipType == RADAR_SPRITE_NONE) { // None => Player position
-        blipType = RADAR_SPRITE_MAP_HERE;
-    }
-
     CFont::PrintString(
         (float)x + SCREEN_STRETCH_X(20.0f),
         (float)y + SCREEN_STRETCH_Y(3.0f),
@@ -253,12 +249,17 @@ void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType) {
         RadarBlipSprites[blipType].Draw(
             {
                 (float)x,                           (float)y,
-                (float)x + SCREEN_STRETCH_X(16.0f), (float)y + SCREEN_STRETCH_Y(16.0f)
+                (float)x + SCREEN_STRETCH_X(16.0f), (float)y + SCREEN_STRETCH_X(16.0f)
             },
+            // NOTE: `y + SCREEN_STRETCH_X(16.0f)` is correct. It is here to make sprites
+            // square instead of dependent on the aspect ratio.
             { 255, 255, 255, 255 }
         );
         return;
     }
+
+    static auto& legendTraceHeight = StaticRef<eRadarTraceHeight, 0xBAA350>(); // = eRadarTraceHeight::RADAR_TRACE_LOW;
+    static auto& legendTraceTimer  = StaticRef<uint32, 0xBAA354>(); // = CTimer::GetTimeInMS();
 
     if (CTimer::GetTimeInMSPauseMode() - legendTraceTimer > 600) {
         legendTraceTimer = CTimer::GetTimeInMSPauseMode();
@@ -425,13 +426,7 @@ void CRadar::TransformRadarPointToScreenSpace(CVector2D& out, const CVector2D& i
  * @addr 0x583530
  */
 void CRadar::TransformRealWorldPointToRadarSpace(CVector2D& out, const CVector2D& in) {
-    const auto xOffset = (in.x - vec2DRadarOrigin.x) / m_radarRange;
-    const auto yOffset = (in.y - vec2DRadarOrigin.y) / m_radarRange;
-
-    out = {
-        cachedSin * yOffset + cachedCos * xOffset,
-        cachedCos * yOffset - cachedSin * xOffset
-    };
+    out = CachedRotateClockwise((in - vec2DRadarOrigin) / m_radarRange);
 }
 
 /*!
@@ -439,10 +434,7 @@ void CRadar::TransformRealWorldPointToRadarSpace(CVector2D& out, const CVector2D
  * @addr 0x5835A0
  */
 void CRadar::TransformRadarPointToRealWorldSpace(CVector2D& out, const CVector2D& in) {
-    out = CVector2D{
-        cachedCos * in.x - cachedSin * in.y,
-        cachedCos * in.y + cachedSin * in.x
-    } * m_radarRange + vec2DRadarOrigin;
+    out = CachedRotateCounterclockwise(in) * m_radarRange + vec2DRadarOrigin;
 }
 
 /*!
@@ -495,7 +487,7 @@ void CRadar::CalculateCachedSinCos() {
  * @brief Creates a new coordinate blip (i.e. tracing blip with no sprite)
  * @param type Type
  * @param posn Position
- * @param color Color
+ * @param color Color (Unused)
  * @param blipDisplay Display option
  * @param scriptName Script name (Unused) (from Android)
  * @addr 0x583820
@@ -511,7 +503,7 @@ tBlipHandle CRadar::SetCoordBlip(eBlipType type, CVector posn, eBlipColour color
     t.m_vPosition        = posn;
     t.m_nBlipDisplayFlag = blipDisplay;
     t.m_nBlipType        = type;
-    t.m_nColour          = color;
+    t.m_nColour          = BLIP_COLOUR_DESTINATION;
     t.m_fSphereRadius    = 1.f;
     t.m_nEntityHandle    = 0;
     t.m_nBlipSize        = 1;
@@ -590,16 +582,13 @@ void CRadar::ChangeBlipColour(tBlipHandle blip, eBlipColour color) {
  * @returns True if it's revealed to the player.
  */
 bool CRadar::HasThisBlipBeenRevealed(int32 blipIndex) {
-    const auto& blipPos = ms_RadarTrace[blipIndex].m_vPosition;
-
     if (!FrontEndMenuManager.m_bDrawingMap
         || !ms_RadarTrace[blipIndex].m_bShortRange
         || CTheZones::ZonesRevealed > 80
-        || CTheZones::GetCurrentZoneLockedOrUnlocked(blipPos.x, blipPos.y)
+        || CTheZones::GetCurrentZoneLockedOrUnlocked(ms_RadarTrace[blipIndex].m_vPosition)
     ) {
         return true;
     }
-
     return false;
 }
 
@@ -851,9 +840,14 @@ void CRadar::ShowRadarTrace(float x, float y, uint32 size, CRGBA color) {
  * @brief Draws a coordinate blip to the map with height information.
  * @addr 0x584070
  */
-void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, CRGBA color, eRadarTraceHeight height) {
+void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint32 R, uint32 G, uint32 B, uint32 A, eRadarTraceHeight height) {
     Limit(x, y);
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
+
+    // NOTE: Those RGBA parameters are 4-bytes per channel.
+    // then we construct 1-byte per channel CRGBA. It's stupid isn't it?
+    // NOTE: {R,G,B,A} > 255 is possible, so we can't assert for x <= UCHAR_MAX.
+    const auto r = static_cast<uint8>(R), g = static_cast<uint8>(G), b = static_cast<uint8>(B), a = static_cast<uint8>(A);
 
     const auto size0 = float(size + 0), size1 = float(size + 1);
     const auto size2 = float(size + 2), size3 = float(size + 3);
@@ -865,23 +859,23 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, CRGBA color
             x,                           y + SCREEN_STRETCH_Y(size3),
             x + SCREEN_STRETCH_X(size3), y - SCREEN_STRETCH_Y(size2),
             x - SCREEN_STRETCH_X(size3), y - SCREEN_STRETCH_Y(size2),
-            { 0, 0, 0, color.a }
+            { 0, 0, 0, a }
         );
         CSprite2d::Draw2DPolygon( // draw triangle
             x,                           y + SCREEN_STRETCH_Y(size1),
             x,                           y + SCREEN_STRETCH_Y(size1),
             x + SCREEN_STRETCH_X(size1), y - SCREEN_STRETCH_Y(size1),
             x - SCREEN_STRETCH_X(size1), y - SCREEN_STRETCH_Y(size1),
-            color
+            { r, g, b, a }
         );
         break;
     case RADAR_TRACE_NORMAL:
         CSprite2d::DrawRect( // draw black border
-            CRect(
+            {
                 x - SCREEN_STRETCH_X(size1), y - SCREEN_STRETCH_Y(size1),
                 x + SCREEN_STRETCH_X(size1), y + SCREEN_STRETCH_Y(size1)
-            ),
-            { 0, 0, 0, color.a }
+            },
+            { 0, 0, 0, a }
         );
 
         CSprite2d::DrawRect( // draw box
@@ -889,7 +883,7 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, CRGBA color
                 x - SCREEN_STRETCH_X(size0), y - SCREEN_STRETCH_Y(size0),
                 x + SCREEN_STRETCH_X(size0), y + SCREEN_STRETCH_Y(size0)
             },
-            color
+            { r, g, b, a }
         );
         break;
     case RADAR_TRACE_LOW:
@@ -898,7 +892,7 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, CRGBA color
             x - SCREEN_STRETCH_X(size3), y + SCREEN_STRETCH_Y(size2),
             x,                           y - SCREEN_STRETCH_Y(size3),
             x,                           y - SCREEN_STRETCH_Y(size3),
-            { 0, 0, 0, color.a }
+            { 0, 0, 0, a }
         );
 
         CSprite2d::Draw2DPolygon( // draw triangle
@@ -906,7 +900,7 @@ void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, CRGBA color
             x - SCREEN_STRETCH_X(size1), y + SCREEN_STRETCH_Y(size1),
             x,                           y - SCREEN_STRETCH_Y(size1),
             x,                           y - SCREEN_STRETCH_Y(size1),
-            color
+            { r, g, b, a }
         );
         break;
     }
@@ -998,7 +992,7 @@ void CRadar::DrawYouAreHereSprite(float x, float y) {
         );
     }
 
-    MapLegendList[++MapLegendCounter] = RADAR_SPRITE_MAP_HERE;
+    MapLegendList[MapLegendCounter++] = RADAR_SPRITE_MAP_HERE;
 }
 
 // 0x584A80
@@ -1181,7 +1175,7 @@ void CRadar::InitFrontEndMap() {
     rng::fill(MapLegendList, RADAR_SPRITE_NONE);
 
     vec2DRadarOrigin.Set(0.0f, 0.0f);
-    m_radarRange = 2990.0f; // todo: world const - 1.0f
+    m_radarRange = WORLD_BOUND_RANGE - 10.0f;
     MapLegendCounter = 0;
 
     rng::fill(ArrowBlipColour, CRGBA(0, 0, 0, 0));
@@ -1532,7 +1526,7 @@ void CRadar::DrawRadarMap() {
     const auto vehicle = FindPlayerVehicle();
 
     // Draw green rectangle when in plane
-    if (vehicle && vehicle->IsSubPlane() && ModelIndices::IsVortex(vehicle->m_nModelIndex)) {
+    if (vehicle && vehicle->IsSubPlane() && !ModelIndices::IsVortex(vehicle->m_nModelIndex)) {
         CVector playerPos = FindPlayerCentreOfWorld_NoInteriorShift(0);
 
         const auto cSin = cachedSin;
@@ -1562,7 +1556,6 @@ void CRadar::DrawRadarMap() {
 }
 
 // 0x586B00
-// TODO: Fix me - Zoom incorrect
 void CRadar::DrawMap() {
     const auto player = FindPlayerPed();
     const auto mapShouldDrawn = !CGame::currArea && player->m_nAreaCode == 0 && FrontEndMenuManager.m_nRadarMode != 1;
@@ -1578,7 +1571,7 @@ void CRadar::DrawMap() {
         else
             m_radarRange = RADAR_MIN_RANGE;
     } else {
-        if (vehicle && vehicle->IsSubPlane() && ModelIndices::IsVortex(vehicle->m_nModelIndex)) {
+        if (vehicle && vehicle->IsSubPlane() && !ModelIndices::IsVortex(vehicle->m_nModelIndex)) {
             const auto speedZ = vehicle->GetPosition().z * 1.0f / 200.0f;
 
             if (speedZ < RADAR_MIN_SPEED)
@@ -1652,17 +1645,17 @@ void CRadar::DrawCoordBlip(int32 blipIndex, bool isSprite) {
     }
 
     const auto GetHeight = [&] {
-        const auto zDiff = trace.GetWorldPos().z - FindPlayerCentreOfWorld_NoInteriorShift().z;
+        const auto zDiff = trace.GetWorldPos().z - FindPlayerCentreOfWorld_NoInteriorShift(PED_TYPE_PLAYER1).z;
 
-        if (zDiff < 2.0f) {
+        if (zDiff > 2.0f) {
             // trace is higher
             return RADAR_TRACE_LOW;
-        } else if (zDiff < -4.0f) {
-            // player is higher
-            return RADAR_TRACE_HIGH;
-        } else {
+        } else if (zDiff >= -4.0f) {
             // they are at the around the same elevation.
             return RADAR_TRACE_NORMAL;
+        } else {
+            // player is higher
+            return RADAR_TRACE_HIGH;
         }
     };
 
@@ -1671,12 +1664,10 @@ void CRadar::DrawCoordBlip(int32 blipIndex, bool isSprite) {
         screenPos.x,
         screenPos.y,
         trace.m_nBlipSize,
-        {
-            color.r,
-            color.g,
-            color.b,
-            trace.m_bBlipFade ? color.a : CalculateBlipAlpha(realDist)
-        },
+        color.r,
+        color.g,
+        color.b,
+        trace.m_bBlipFade ? color.a : CalculateBlipAlpha(realDist),
         GetHeight()
     );
 
@@ -1754,7 +1745,11 @@ CVector GetAirStripLocation(eAirstripLocation location) {
 // 0x587D20
 void CRadar::SetupAirstripBlips() {
     if (const auto veh = FindPlayerVehicle(); veh && veh->IsSubPlane() && !ModelIndices::IsVortex(veh->m_nModelIndex)) {
-        if ((CTimer::GetFrameCounter() & 4) == 0) {
+        // FIX_BUGS: FPS independent counter. SA: (CTimer::GetFrameCounter() & 4) == 0
+        static auto airstripBlipCounter = CTimer::GetTimeInMS() + 200;
+        if (CTimer::GetTimeInMS() >= airstripBlipCounter) {
+            airstripBlipCounter = CTimer::GetTimeInMS() + 200;
+
             if (airstrip_blip)
                 return;
 

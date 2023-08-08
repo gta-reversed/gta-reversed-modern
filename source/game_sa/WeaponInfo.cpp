@@ -232,7 +232,7 @@ void CWeaponInfo::LoadWeaponData() {
 
 
             if (!std::string_view{ animGrpName }.starts_with("null")) {
-                wi.m_eAnimGroup = CAnimManager::GetAnimationGroupId(animGrpName);
+                wi.m_eAnimGroup = CAnimManager::GetAnimationGroupIdByName(animGrpName);
             }
 
             if (wi.m_eAnimGroup >= ANIM_GROUP_PYTHON && wi.m_eAnimGroup <= ANIM_GROUP_SPRAYCAN) {
@@ -255,7 +255,7 @@ void CWeaponInfo::LoadWeaponData() {
 
             VERIFY(sscanf_s(line, "%*s %s %f %f %f %f %d %d %d %d", SCANF_S_STR(stealthAnimGrp), &aimX, &aimZ, &duckX, &duckZ, &RLoadA, &RLoadB, &crouchRLoadA, &crouchRLoadB) == 9);
 
-            g_GunAimingOffsets[CAnimManager::GetAnimationGroupId(stealthAnimGrp) - ANIM_GROUP_PYTHON] = {
+            g_GunAimingOffsets[CAnimManager::GetAnimationGroupIdByName(stealthAnimGrp) - ANIM_GROUP_PYTHON] = {
                 .AimX = aimX,
                 .AimZ = aimZ,
 
@@ -310,7 +310,7 @@ void CWeaponInfo::LoadWeaponData() {
             wi.m_nFlags = flags;
 
             if (!std::string_view{stealthAnimGrpName}.starts_with("null"))
-                wi.m_eAnimGroup = CAnimManager::GetAnimationGroupId(stealthAnimGrpName);
+                wi.m_eAnimGroup = CAnimManager::GetAnimationGroupIdByName(stealthAnimGrpName);
 
             if (modelId1 > 0)
                 CModelInfo::GetModelInfo(modelId1)->AsWeaponModelInfoPtr()->m_weaponInfo = wType;
