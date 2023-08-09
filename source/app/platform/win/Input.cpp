@@ -209,7 +209,7 @@ CMouseControllerState GetMouseState() {
             state.bmx1 = mouseState.rgbButtons[3] & 0x80;
             state.bmx2 = mouseState.rgbButtons[4] & 0x80;
         }
-} else {
+    } else {
 		diMouseInit(!FrontEndMenuManager.m_bMenuActive && IsVideoModeExclusive());
     }
 
