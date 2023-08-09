@@ -295,7 +295,7 @@ void CPad::ProcessPad(int padNum) {
         float padY1 = 0.0f;
         float padY2 = 0.0f;
 
-        if (SUCCEEDED(joyState.rgdwPOV[1])) {
+        if (joyState.rgdwPOV[1] >= 0) {
             padX1 = sin(joyState.rgdwPOV[1] / 5730.0f);
             padY1 = cos(joyState.rgdwPOV[1] / 5730.0f) * -1.0f;
         }
