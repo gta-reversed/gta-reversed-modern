@@ -63,6 +63,7 @@ void UIRenderer::PreRenderUpdate() {
         m_ImIO->MouseDrawCursor               = m_InputActive;
         m_ImIO->NavActive                     = m_InputActive;
         CPad::GetPad()->DisablePlayerControls = m_InputActive;
+        CPad::GetPad()->Clear(m_InputActive, true);
     }
 }
 
