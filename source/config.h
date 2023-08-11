@@ -21,6 +21,9 @@
 // do not uncomment -- doesn't work rn
 // #define USERTRACK_FLAC_SUPPORT
 
+// do not uncomment -- doesn't work rn
+// #define USE_OPENAL
+
 #endif // !BAREBONES
 
 #ifdef BUILD_PC
