@@ -59,7 +59,7 @@ void CAERadioTrackManager::InjectHooks() {
     RH_ScopedInstall(CheckForStationRetuneDuringPause, 0x4EB890, { .reversed = false });
     RH_ScopedInstall(TrackRadioStation, 0x4EAC30, { .reversed = false });
     RH_ScopedInstall(ChooseTracksForStation, 0x4EB180);
-    RH_ScopedInstall(AddMusicTrackIndexToHistory, 0x4E96C0, { .reversed = false });
+    RH_ScopedInstall(AddMusicTrackIndexToHistory, 0x4E96C0);
     RH_ScopedInstall(CheckForTrackConcatenation, 0x4EA930, { .reversed = false });
     RH_ScopedInstall(QueueUpTracksForStation, 0x4EA670, { .reversed = false });
     RH_ScopedInstall(ChooseDJBanterIndex, 0x4EA2D0, { .reversed = false });
@@ -71,7 +71,7 @@ void CAERadioTrackManager::InjectHooks() {
     RH_ScopedInstall(CheckForMissionStatsChanges, 0x4E8410);
     RH_ScopedInstall(StartTrackPlayback, 0x4EA640);
     RH_ScopedInstall(UpdateRadioVolumes, 0x4EA010, { .reversed = false });
-    RH_ScopedInstall(PlayRadioAnnouncement, 0x4E8400, { .reversed = false });
+    RH_ScopedInstall(PlayRadioAnnouncement, 0x4E8400);
     RH_ScopedInstall(GetCurrentRadioStationID, 0x4E83F0);
     RH_ScopedInstall(GetRadioStationListenTimes, 0x4E83E0);
     RH_ScopedInstall(GetRadioStationName, 0x4E9E10);

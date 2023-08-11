@@ -37,7 +37,7 @@ public:
     CAEStreamThread() = default; // 0x4F11D0
     ~CAEStreamThread();
 
-    void Initialise(CAEStreamingChannel* streamingChannel);
+    bool Initialise(CAEStreamingChannel* streamingChannel);
 
     void Start();
     void Stop();
@@ -53,7 +53,7 @@ public:
     int32 GetActiveTrackID() const;
     int32 GetPlayingTrackID() const;
 
-    static uint32 MainLoop(void* param);
+    static DWORD WINAPI MainLoop(LPVOID);
     void Service();
 };
 

@@ -635,7 +635,7 @@ void CWeapon::DoWeaponEffect(CVector origin, CVector target) {
 
     RwMatrix* mat = RwMatrixCreate();
     g_fx.CreateMatFromVec(mat, &origin, &target);
-
+    
     if (m_pFxSystem) {
         m_pFxSystem->SetMatrix(mat);
     } else {

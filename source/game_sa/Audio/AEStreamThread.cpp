@@ -29,9 +29,7 @@ CAEStreamThread::~CAEStreamThread() {
 }
 
 // 0x4F1680
-void CAEStreamThread::Initialise(CAEStreamingChannel* streamingChannel) {
-    return plugin::Call<0x4F1680, CAEStreamingChannel*>(streamingChannel);
-
+bool CAEStreamThread::Initialise(CAEStreamingChannel* streamingChannel) {
     m_bActive          = true;
     m_bThreadActive    = false;
     field_12           = 0;
@@ -42,14 +40,18 @@ void CAEStreamThread::Initialise(CAEStreamingChannel* streamingChannel) {
     m_nActiveTrackId   = streamingChannel->GetActiveTrackID();
     m_nTrackLengthMs   = streamingChannel->GetLength();
 
-    m_nHandle = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)(&CAEStreamThread::MainLoop), this, CREATE_SUSPENDED, (LPDWORD)(&m_lpThreadId));
+    m_nHandle = CreateThread(nullptr, 0, &CAEStreamThread::MainLoop, this, CREATE_SUSPENDED, (LPDWORD)(&m_lpThreadId));
+    assert(m_nHandle);
     SetThreadPriority(m_nHandle, 0);
+    InitializeCriticalSection(&m_criticalSection);
 
     OS_MutexObtain(&m_criticalSection);
     m_pStreamingChannel = streamingChannel;
 
-    // m_pMp3TrackLoader = new CAEMP3TrackLoader();
-    // m_pMp3TrackLoader->Initialise();
+    m_pMp3TrackLoader = new CAEMP3TrackLoader();
+    m_pMp3TrackLoader->Initialise();
+
+    return m_bActive;
 }
 
 // 0x4F11F0
@@ -129,35 +131,35 @@ void CAEStreamThread::StopTrack() {
 }
 
 // 0x4F15C0
-uint32 CAEStreamThread::MainLoop(void* param) {
+DWORD WINAPI CAEStreamThread::MainLoop(LPVOID data) {
 #ifdef TRACY_ENABLE
     tracy::SetThreadName("AEStreamThread");
 #endif
 
-    auto* stream = reinterpret_cast<CAEStreamThread*>(param);
+    const auto self = reinterpret_cast<CAEStreamThread*>(data);
 
     bool wasForeground = true;
     bool play = false;
 
-    while (stream->m_bThreadActive) {
+    while (self->m_bThreadActive) {
         ZoneScoped;
 
         bool isForeground = IsForegroundApp();
         if (isForeground) {
             if (!wasForeground && play){
-                stream->m_pStreamingChannel->Play(0, 0, 1.0f);
+                self->m_pStreamingChannel->Play(0, 0, 1.0f);
             }
 
             auto start = CAEAudioUtility::GetCurrentTimeInMS();
-            stream->Service();
-            stream->m_pStreamingChannel->Service();
+            self->Service();
+            self->m_pStreamingChannel->Service();
             auto end = CAEAudioUtility::GetCurrentTimeInMS();
             if (end - start < 5) {
                 OS_ThreadSleep(uint32(start - end + 5));
             }
         } else if (wasForeground) {
-            if (stream->m_pStreamingChannel->IsBufferPlaying()) {
-                stream->m_pStreamingChannel->Pause();
+            if (self->m_pStreamingChannel->IsBufferPlaying()) {
+                self->m_pStreamingChannel->Pause();
                 play = true;
             } else {
                 play = false;
