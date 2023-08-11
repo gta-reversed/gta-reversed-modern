@@ -78,7 +78,7 @@ enum ePedCreatedBy : uint8 {
 };
 
 enum eMoveState : uint32 {
-    PEDMOVE_NONE = 0,
+    PEDMOVE_NONE,
     PEDMOVE_STILL,
     PEDMOVE_TURN_L,
     PEDMOVE_TURN_R,
