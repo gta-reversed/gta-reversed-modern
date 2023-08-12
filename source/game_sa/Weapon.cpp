@@ -33,13 +33,13 @@ void CWeapon::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Constructor, 0x73B430);
+
     RH_ScopedInstall(Shutdown, 0x73A380);
     RH_ScopedInstall(Reload, 0x73AEB0);
     RH_ScopedInstall(IsTypeMelee, 0x73B1C0);
     RH_ScopedInstall(IsType2Handed, 0x73B1E0);
     RH_ScopedInstall(IsTypeProjectile, 0x73B210);
     RH_ScopedInstall(HasWeaponAmmoToBeUsed, 0x73B2A0);
-    RH_ScopedOverloadedInstall(CanBeUsedFor2Player, "", 0x73B240, bool (*)(eWeaponType weaponType));
     RH_ScopedInstall(InitialiseWeapons, 0x73A300);
     RH_ScopedInstall(ShutdownWeapons, 0x73A330);
     RH_ScopedInstall(UpdateWeapons, 0x73A360);
@@ -52,7 +52,27 @@ void CWeapon::InjectHooks() {
     RH_ScopedInstall(FireSniper, 0x73AAC0);
     RH_ScopedInstall(TakePhotograph, 0x73C1F0);
     RH_ScopedInstall(DoDoomAiming, 0x73CDC0);
+    RH_ScopedInstall(GenerateDamageEvent, 0x73A530);
     RH_ScopedInstall(FireInstantHitFromCar2, 0x73CBA0, { .reversed = false });
+    RH_ScopedInstall(Update, 0x73DB40, { .reversed = false });
+    RH_ScopedInstall(SetUpPelletCol, 0x73C710, { .reversed = false });
+    RH_ScopedInstall(FireAreaEffect, 0x73E800, { .reversed = false });
+    RH_ScopedInstall(FireInstantHitFromCar, 0x73EC40, { .reversed = false });
+    RH_ScopedInstall(FireFromCar, 0x73FA20, { .reversed = false });
+    RH_ScopedInstall(FireInstantHit, 0x73FB10, { .reversed = false });
+    RH_ScopedInstall(FireProjectile, 0x741360, { .reversed = false });
+    RH_ScopedInstall(DoBulletImpact, 0x73B550, { .reversed = false });
+    RH_ScopedInstall(LaserScopeDot, 0x73A8D0);
+    RH_ScopedInstall(FireM16_1stPerson, 0x741C00, { .reversed = false });
+    RH_ScopedInstall(Fire, 0x742300, { .reversed = false });
+    RH_ScopedGlobalInstall(DoTankDoomAiming, 0x73D1E0, { .reversed = false });
+    RH_ScopedGlobalInstall(DoDriveByAutoAiming, 0x73D720, { .reversed = false });
+    RH_ScopedGlobalInstall(FindNearestTargetEntityWithScreenCoors, 0x73E240, { .reversed = false });
+    RH_ScopedGlobalInstall(EvaluateTargetForHeatSeekingMissile, 0x73E560, { .reversed = false });
+    RH_ScopedGlobalInstall(CheckForShootingVehicleOccupant, 0x73F480, { .reversed = false });
+    RH_ScopedGlobalInstall(PickTargetForHeatSeekingMissile, 0x73F910, { .reversed = false });
+    RH_ScopedOverloadedInstall(CanBeUsedFor2Player, "Static", 0x73B240, bool(*)(eWeaponType));
+    RH_ScopedOverloadedInstall(CanBeUsedFor2Player, "Method", 0x73DEF0, bool(CWeapon::*)(), { .reversed = false });
 }
 
 // 0x73B430
@@ -124,30 +144,28 @@ void CWeapon::ShutdownWeapons() {
 
 // 0x73A380
 void CWeapon::Shutdown() {
-    int32 weaponModelID1 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD)->m_nModelId1;
-    int32 weaponModelID2 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD)->m_nModelId2;
-
-    if (weaponModelID1 != -1)
-        CModelInfo::GetModelInfo(weaponModelID1)->RemoveRef();
-
-    if (weaponModelID2 != -1)
-        CModelInfo::GetModelInfo(weaponModelID2)->RemoveRef();
-
-    m_nType = eWeaponType::WEAPON_UNARMED;
-    m_nState = eWeaponState::WEAPONSTATE_READY;
-    m_nTotalAmmo = 0;
-    m_nAmmoInClip = 0;
+    for (const auto m : CWeaponInfo::GetWeaponInfo(m_nType)->GetModels()) {
+        if (m != MODEL_INVALID) {
+            CModelInfo::GetModelInfo(m)->RemoveRef();
+        }
+    }
+    m_nType            = eWeaponType::WEAPON_UNARMED;
+    m_nState           = eWeaponState::WEAPONSTATE_READY;
+    m_nTotalAmmo       = 0;
+    m_nAmmoInClip      = 0;
     m_nTimeForNextShot = 0;
 }
 
 // 0x73A3E0
 void CWeapon::AddGunshell(CEntity* creator, CVector& position, const CVector2D& direction, float size) {
-    if (!creator || !creator->GetIsOnScreen())
+    if (!creator || !creator->GetIsOnScreen()) {
         return;
+    }
 
     // originally squared
-    if (DistanceBetweenPoints(creator->GetPosition(), TheCamera.GetPosition()) > 10.0f)
+    if (DistanceBetweenPoints(creator->GetPosition(), TheCamera.GetPosition()) > 10.0f) {
         return;
+    }
 
     CVector velocity(direction.x, direction.y, CGeneral::GetRandomNumberInRange(0.4f, 1.6f));
 
@@ -163,13 +181,118 @@ void CWeapon::AddGunshell(CEntity* creator, CVector& position, const CVector2D& 
 }
 
 // 0x73A530
-void CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType weaponType, int32 damageFactor, ePedPieceTypes pedPiece, int32 direction) {
-    plugin::Call<0x73A530, CPed*, CEntity*, eWeaponType, int32, ePedPieceTypes, int32>(victim, creator, weaponType, damageFactor, pedPiece, direction);
+bool CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType weaponType, int32 damageFactor, ePedPieceTypes pedPiece, uint8 direction) {
+    CPedDamageResponseCalculator pedDmgRespCalc{
+        creator,
+        (float)damageFactor,
+        weaponType,
+        pedPiece,
+        false
+    };
+
+    CEventDamage eventDmg{
+        creator,
+        CTimer::GetTimeInMS(),
+        weaponType,
+        pedPiece,
+        direction,
+        false,
+        victim->bInVehicle
+    };
+
+    if (   victim->m_fHealth <= 0.f
+        && CLocalisation::Blood()
+        && CLocalisation::KickingWhenDown()
+        && victim->GetTaskManager().GetSimplestActiveTask()->GetTaskType() == TASK_SIMPLE_DEAD
+    ) {
+        const auto floorHitAnim = CAnimManager::BlendAnimation(
+            victim->m_pRwClump,
+            ANIM_GROUP_DEFAULT,
+            RpAnimBlendClumpGetFirstAssociation(victim->m_pRwClump, ANIMATION_800) ? ANIM_ID_FLOOR_HIT_F : ANIM_ID_FLOOR_HIT
+        );
+        if (floorHitAnim) {
+            floorHitAnim->Start();
+        }
+        return true;
+    }
+
+    if (!victim->IsAlive()) {
+        return true;
+    }
+
+    if (!eventDmg.AffectsPed(victim)) {
+        return false;
+    }
+
+    if (creator == FindPlayerPed()) {
+        CCrime::ReportCrime(CRIME_DAMAGED_PED, victim, static_cast<CPed*>(creator));
+    }
+
+    pedDmgRespCalc.ComputeDamageResponse(
+        victim,
+        eventDmg.m_damageResponse,
+        true
+    );
+
+    bool ret = true;
+    if ((CWeaponInfo::GetWeaponInfo(weaponType)->m_nWeaponFire == eWeaponFire::WEAPON_FIRE_MELEE || weaponType == WEAPON_FALL && creator && creator->GetType() == ENTITY_TYPE_OBJECT) && !victim->bInVehicle) {
+        eventDmg.ComputeAnim(victim, true);
+        switch (eventDmg.m_nAnimID) {
+        case ANIM_ID_SHOT_PARTIAL:
+        case ANIM_ID_SHOT_LEFTP:
+        case ANIM_ID_SHOT_PARTIAL_B:
+        case ANIM_ID_SHOT_RIGHTP: { //> 0x73A769 - Inverted
+            auto anim = RpAnimBlendClumpGetAssociation(victim->m_pRwClump, eventDmg.m_nAnimID);
+            if (!anim) {
+                anim = CAnimManager::AddAnimation(
+                    victim->m_pRwClump,
+                    (AssocGroupId)eventDmg.m_nAnimGroup,
+                    (AnimationId)eventDmg.m_nAnimID
+                );
+            }
+            anim->m_fBlendAmount = 0.f;
+            anim->m_fBlendDelta = eventDmg.m_fAnimBlend;
+            anim->m_fSpeed = eventDmg.m_fAnimSpeed;
+            anim->Start();
+            break;
+        }
+        case ANIM_ID_NO_ANIMATION_SET:
+            break;
+        case ANIM_ID_DOOR_LHINGE_O:
+            ret = false;
+            break;
+        default: { //< 0x73A7B5
+            const auto a = CAnimManager::BlendAnimation(
+                victim->m_pRwClump,
+                (AssocGroupId)eventDmg.m_nAnimGroup,
+                (AnimationId)eventDmg.m_nAnimID,
+                eventDmg.m_fAnimBlend
+            );
+            a->m_fSpeed = eventDmg.m_fAnimSpeed;
+            a->SetFlag(ANIMATION_STARTED);
+            break;
+        }
+        }
+    }
+    bool isStealth = false;
+    if (creator && creator->IsPed()) {
+        const auto pcreator = creator->AsPed();
+        if (pcreator->GetTaskManager().GetActiveTask()->GetTaskType() == TASK_SIMPLE_STEALTH_KILL || weaponType == WEAPON_PISTOL_SILENCED) {
+            isStealth = true;
+        }
+    }
+    eventDmg.m_b05 = isStealth;
+    if (!victim->bInVehicle || victim->m_fHealth <= 0.f || !victim->GetTaskManager().GetActiveTask() || victim->GetTaskManager().GetActiveTask()->GetTaskType() != TASK_SIMPLE_GANG_DRIVEBY) {
+        victim->GetEventGroup().Add(eventDmg);
+    }
+    return ret;
+
 }
 
 // 0x73A8D0
 bool CWeapon::LaserScopeDot(CVector* outCoord, float* outSize) {
-    return plugin::CallMethodAndReturn<bool, 0x73A8D0, CWeapon*, CVector*, float*>(this, outCoord, outSize);
+    /* UNUSED */
+    NOTSA_UNREACHABLE();
 }
 
 // 0x73AAC0
@@ -491,34 +614,29 @@ void CWeapon::SetUpPelletCol(int32 numPellets, CEntity* owner, CEntity* victim, 
 
 // 0x73CBA0
 void CWeapon::FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehicle* vehicle, CEntity* owner) {
-    return plugin::CallMethod<0x73CBA0, CWeapon*, CVector, CVector, CVehicle*, CEntity*>(this, startPoint, endPoint, vehicle, owner);
-
     const auto player = FindPlayerPed();
-    CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD);
+    //CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD); // useless
     CCrime::ReportCrime(CRIME_FIRE_WEAPON, player, player);
 
-    CEntity* entity;
-    if (owner) {
-        entity = owner;
-    } else {
-        entity = vehicle;
-    }
-    CEventGunShot event(entity, startPoint, endPoint, m_nType == WEAPON_PISTOL_SILENCED || m_nType == WEAPON_TEARGAS);
-    GetEventGlobalGroup()->Add(&event);
+    GetEventGlobalGroup()->Add(CEventGunShot{
+        notsa::coalesce<CEntity*>(owner, vehicle),
+        startPoint,
+        endPoint,
+        m_nType == WEAPON_PISTOL_SILENCED || m_nType == WEAPON_TEARGAS
+    });
     g_InterestingEvents.Add(CInterestingEvents::EType::INTERESTING_EVENT_22, owner);
 
-    CVector direction{};
-    CPointLights::AddLight(PLTYPE_POINTLIGHT, startPoint, direction, 3.0f, 0.25f, 0.22f, 0.0f, 0, false, nullptr);
+    CPointLights::AddLight(PLTYPE_POINTLIGHT, startPoint, {}, 3.0f, 0.25f, 0.22f, 0.0f, 0, false, nullptr);
     CWorld::bIncludeBikers = true;
     CWorld::pIgnoreEntity = vehicle;
     CBirds::HandleGunShot(&startPoint, &endPoint);
     CShadows::GunShotSetsOilOnFire(startPoint, endPoint);
 
     CEntity* victim{};
-    CColPoint outColPoint{};
-    CWorld::ProcessLineOfSight(&startPoint, &endPoint, outColPoint, victim, true, true, true, true, true, false, false, true);
+    CColPoint cpImpact{};
+    CWorld::ProcessLineOfSight(&startPoint, &endPoint, cpImpact, victim, true, true, true, true, true, false, false, true);
     CWorld::ResetLineTestOptions();
-    DoBulletImpact(owner, victim, &startPoint, &endPoint, &outColPoint, 0);
+    DoBulletImpact(owner, victim, &startPoint, &endPoint, &cpImpact, 0);
 }
 
 /*!

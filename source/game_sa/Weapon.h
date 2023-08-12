@@ -109,7 +109,7 @@ public:
     void Update(CPed* owner);
     static void UpdateWeapons();
 
-    static void GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType weaponType, int32 damageFactor, ePedPieceTypes pedPiece, int32 direction);
+    static bool GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType weaponType, int32 damageFactor, ePedPieceTypes pedPiece, uint8 direction);
     static bool CanBeUsedFor2Player(eWeaponType weaponType);
     static float TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner);
     static void DoDoomAiming(CEntity* owner, CVector* start, CVector* end);

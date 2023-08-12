@@ -124,7 +124,7 @@ public:
     void SetCurrentTime(float currentTime);
     void SetDeleteCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data = nullptr);
     void SetFinishCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data = nullptr);
-    void Start(float currentTime);
+    void Start(float currentTime = 0.f);
     void SyncAnimation(CAnimBlendAssociation* syncWith);
     bool UpdateBlend(float mult);
     bool UpdateTime(float a1, float a2);
