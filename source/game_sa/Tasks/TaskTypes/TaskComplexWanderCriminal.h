@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TaskComplexWander.h"
+#include "eMoveState.h"
 
 class NOTSA_EXPORT_VTABLE CTaskComplexWanderCriminal : public CTaskComplexWander {
 public:
@@ -8,7 +9,7 @@ public:
     uint32     m_nMinNextScanTime;
 
 public:
-    CTaskComplexWanderCriminal(int32 MoveState, uint8 Dir, bool bWanderSensibly = true);
+    CTaskComplexWanderCriminal(eMoveState MoveState, uint8 Dir, bool bWanderSensibly = true);
     ~CTaskComplexWanderCriminal() override = default; // 0x48E720
 
     CTask* Clone() override { return new CTaskComplexWanderCriminal(m_nMoveState, m_nDir); }// 0x48E650
