@@ -104,7 +104,7 @@ public:
     bool FireInstantHit(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, CEntity* targetEntity = nullptr, CVector* target = nullptr, CVector* originForDriveBy = nullptr, bool arg6 = false, bool muzzle = false);
     bool FireProjectile(CEntity* firingEntity, CVector* origin, CEntity* targetEntity = nullptr, CVector* target = nullptr, float force = 0.f);
     bool FireM16_1stPerson(CPed* owner);
-    bool Fire(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, CEntity* targetEntity, CVector* target, CVector* originForDriveBy);
+    bool Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CEntity* targetEnt, CVector* targetPosn, CVector* altPosn);
 
     void Update(CPed* owner);
     static void UpdateWeapons();
@@ -126,6 +126,7 @@ public:
 
 private:
     void KillFx(); // NOTSA
+    void DecrementAmmo();
 
 private:
     friend void InjectHooksMain();

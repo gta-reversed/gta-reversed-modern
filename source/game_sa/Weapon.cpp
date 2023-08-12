@@ -64,7 +64,7 @@ void CWeapon::InjectHooks() {
     RH_ScopedInstall(DoBulletImpact, 0x73B550, { .reversed = false });
     RH_ScopedInstall(LaserScopeDot, 0x73A8D0);
     RH_ScopedInstall(FireM16_1stPerson, 0x741C00);
-    RH_ScopedInstall(Fire, 0x742300, { .reversed = false });
+    RH_ScopedInstall(Fire, 0x742300);
     RH_ScopedGlobalInstall(DoTankDoomAiming, 0x73D1E0, { .reversed = false });
     RH_ScopedGlobalInstall(DoDriveByAutoAiming, 0x73D720, { .reversed = false });
     RH_ScopedGlobalInstall(FindNearestTargetEntityWithScreenCoors, 0x73E240, { .reversed = false });
@@ -1066,9 +1066,301 @@ bool CWeapon::FireM16_1stPerson(CPed* owner) {
 }
 
 // 0x742300
-bool CWeapon::Fire(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, CEntity* targetEntity, CVector* target, CVector* originForDriveBy) {
-    return plugin::CallMethodAndReturn<bool, 0x742300, CWeapon*, CEntity*, CVector*, CVector*, CEntity*, CVector*, CVector*>(this, firingEntity, origin, muzzlePosn, targetEntity,
-                                                                                                                             target, originForDriveBy);
+bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CEntity* targetEnt, CVector* targetPosn, CVector* altPosn) {
+    const auto firedByPed = firedBy && firedBy->IsPed()
+        ? firedBy->AsPed()
+        : nullptr;
+    const auto wi = &GetWeaponInfo(firedByPed);
+
+    CVector point{ 0.f, 0.f, 0.6f };
+
+
+    const auto fxPos = startPosn
+        ? startPosn
+        : &point;
+    const auto shotOrigin = startPosn
+        ? barrelPosn
+        : &point;
+    if (!startPosn) {
+        point     = firedBy->GetMatrix() * point;
+        startPosn = &point;
+    }
+
+    if (field_14) {
+        const auto r = 0.15f;
+
+        const auto h = firedBy->GetHeading();
+        fxPos->x -= std::sin(h) * r;
+        fxPos->y += std::cos(h) * r;
+    }
+
+    switch (m_nState) {
+    case WEAPONSTATE_READY:
+    case WEAPONSTATE_FIRING:
+        break;
+    default:
+        return false;
+    }
+
+    if (!m_nAmmoInClip) {
+        if (!m_nTotalAmmo) {
+            return false;
+        }
+        m_nAmmoInClip = std::min<uint32>(m_nTotalAmmo, wi->m_nAmmoClip);
+    }
+
+    const auto [hasFired, delayNextShot] = [&]() -> std::pair<bool, bool> {
+        switch (m_nType) {
+        case WEAPON_GRENADE:
+        case WEAPON_TEARGAS:
+        case WEAPON_MOLOTOV:
+        case WEAPON_REMOTE_SATCHEL_CHARGE: { // 0x74268B
+            if (targetPosn) {
+                return {
+                    FireProjectile( // 0x742705
+                        firedBy,
+                        shotOrigin,
+                        targetEnt,
+                        targetPosn,
+                        std::clamp(((firedBy->GetPosition() - *targetPosn).Magnitude() - 10.f) / 10.f, 0.2f, 1.f)
+                    ),
+                    true
+                };
+            } else if (firedBy == FindPlayerPed()) { // 0x74271F
+                return {
+                    FireProjectile(
+                        firedBy,
+                        shotOrigin,
+                        targetEnt,
+                        nullptr,
+                        firedBy->AsPed()->m_pPlayerData->m_fAttackButtonCounter * 0.0375f
+                    ),
+                    true
+                };
+            }
+            return {
+                FireProjectile( // 0x74274E
+                    firedBy,
+                    shotOrigin,
+                    targetEnt,
+                    nullptr,
+                    0.3f
+                ),
+                true
+            };
+        }
+        case WEAPON_PISTOL:
+        case WEAPON_PISTOL_SILENCED:
+        case WEAPON_DESERT_EAGLE:
+        case WEAPON_MICRO_UZI:
+        case WEAPON_MP5:
+        case WEAPON_AK47:
+        case WEAPON_M4:
+        case WEAPON_TEC9:
+        case WEAPON_COUNTRYRIFLE:
+        case WEAPON_MINIGUN: { // 0x7424FE
+            if (   firedByPed
+                && firedByPed->m_nPedType == PED_TYPE_PLAYER1
+                && notsa::contains({ MODE_M16_1STPERSON, MODE_HELICANNON_1STPERSON }, TheCamera.m_PlayerWeaponMode.m_nMode)
+            ) {
+                return { FireM16_1stPerson(firedByPed), true };
+            }
+            const auto fired = FireInstantHit(firedBy, startPosn, shotOrigin, targetEnt, targetPosn, altPosn, false, true);
+            if (firedByPed) { // 0x74255B
+                if (!firedByPed->bInVehicle) {
+                    return { fired, false };
+                }
+                if (const auto t = firedByPed->GetTaskManager().GetActiveTask()) {
+                    return { fired, t->GetTaskType() == TASK_SIMPLE_GANG_DRIVEBY };
+                }
+            }
+            return { fired, true };
+        }
+        case WEAPON_SHOTGUN:
+        case WEAPON_SAWNOFF_SHOTGUN:
+        case WEAPON_SPAS12_SHOTGUN:
+            return {
+                FireInstantHit( // 0x742495
+                    firedBy,
+                    startPosn,
+                    shotOrigin,
+                    targetEnt,
+                    targetPosn,
+                    altPosn,
+                    false,
+                    true
+                ),
+                true
+            };
+        case WEAPON_SNIPERRIFLE: { // 0x7424AC
+            if (firedByPed && firedByPed->m_nPedType == PED_TYPE_PLAYER1 && TheCamera.m_PlayerWeaponMode.m_nMode == MODE_SNIPER) {
+                return {
+                    FireSniper(firedByPed, targetEnt, targetPosn),
+                    true
+                }; 
+            }
+            return {
+                FireInstantHit(
+                    firedBy,
+                    startPosn,
+                    shotOrigin,
+                    targetEnt,
+                    targetPosn,
+                    nullptr,
+                    false,
+                    true
+                ),
+                true
+            };
+        }
+        case WEAPON_RLAUNCHER:
+        case WEAPON_RLAUNCHER_HS: { // 0x7425B3
+            if (firedByPed) {
+                const auto CanFire = [&](CVector origin, CVector end) {
+                    return (origin - end).SquaredMagnitude() <= sq(8.f) && !firedBy->IsPed();
+                };
+                if (   targetEnt  && !CanFire(firedBy->GetPosition(), targetEnt->GetPosition())
+                    || targetPosn && !CanFire(firedBy->GetPosition(), targetPosn)
+                ) {
+                    return { false, true };
+                }
+            }
+            return {
+                FireProjectile(
+                    firedBy,
+                    shotOrigin,
+                    targetEnt,
+                    targetPosn
+                ),
+                true
+            };
+        }
+        case WEAPON_FLAMETHROWER:
+        case WEAPON_SPRAYCAN:
+        case WEAPON_EXTINGUISHER:
+            return {
+                FireAreaEffect(
+                    firedBy,
+                    shotOrigin,
+                    targetEnt,
+                    targetPosn
+                ),
+                true
+            };
+        case WEAPON_DETONATOR: {
+            assert(firedByPed);
+            CWorld::UseDetonator(firedByPed);
+            m_nAmmoInClip = m_nTotalAmmo  = 1;
+            return { true, true };
+        }
+        case WEAPON_CAMERA:
+            return {
+                TakePhotograph(firedBy, shotOrigin),
+                true
+            };
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
+
+    // 0x74279A
+    if (hasFired) {
+        // 0x7427B3
+        const bool isPlayerFiring = firedByPed && m_nType != WEAPON_CAMERA && firedByPed->IsPlayer();
+        if (firedByPed) {
+            if (m_nType != WEAPON_CAMERA) {
+                firedByPed->bFiringWeapon = true;
+            }
+            firedByPed->m_weaponAudio.AddAudioEvent(AE_WEAPON_FIRE);
+            if (isPlayerFiring && targetEnt && targetEnt->IsPed() && m_nType != WEAPON_PISTOL_SILENCED) {
+                firedByPed->Say(182, 200); // 0x74280E
+            }
+        }
+
+        // 0x74282C
+        if (m_nType == WEAPON_REMOTE_SATCHEL_CHARGE) {
+            firedByPed->GiveWeapon(WEAPON_DETONATOR, true, true);
+            if (firedByPed->GetWeapon(WEAPON_REMOTE_SATCHEL_CHARGE).m_nTotalAmmo <= 1) {
+                firedByPed->GetWeapon(WEAPON_DETONATOR).m_nState = eWeaponState::WEAPONSTATE_READY;
+                firedByPed->SetCurrentWeapon(WEAPON_DETONATOR);
+            }
+        }
+
+        //> 0x74286D - Increase stats
+        if (isPlayerFiring) {
+            switch (m_nType)
+            {
+            case WEAPON_GRENADE:
+            case WEAPON_MOLOTOV:
+            case WEAPON_ROCKET:
+            case WEAPON_RLAUNCHER:
+            case WEAPON_RLAUNCHER_HS:
+            case WEAPON_REMOTE_SATCHEL_CHARGE:
+            case WEAPON_DETONATOR:
+                CStats::IncrementStat(STAT_KGS_OF_EXPLOSIVES_USED);
+                break;
+            case WEAPON_PISTOL:
+            case WEAPON_PISTOL_SILENCED:
+            case WEAPON_DESERT_EAGLE:
+            case WEAPON_SHOTGUN:
+            case WEAPON_SAWNOFF_SHOTGUN:
+            case WEAPON_SPAS12_SHOTGUN:
+            case WEAPON_MICRO_UZI:
+            case WEAPON_MP5:
+            case WEAPON_AK47:
+            case WEAPON_M4:
+            case WEAPON_TEC9:
+            case WEAPON_COUNTRYRIFLE:
+            case WEAPON_SNIPERRIFLE:
+            case WEAPON_MINIGUN:
+                CStats::IncrementStat(STAT_BULLETS_FIRED);
+                break;
+            default:
+                break;
+            }
+        }
+
+        // 0x7428A6
+        if (!CCheat::IsActive(CHEAT_INFINITE_AMMO)) {
+            if (m_nAmmoInClip) {
+                m_nAmmoInClip--;
+            }
+            if (m_nTotalAmmo > 0) {
+                if (isPlayerFiring
+                        ? m_nType == WEAPON_DETONATOR || CStats::GetPercentageProgress() < 100.f
+                        : m_nTotalAmmo < 25'000
+                ) {
+                    m_nTotalAmmo--;    
+                }
+            }
+        }
+
+        m_nState = WEAPONSTATE_FIRING;
+
+        if (!m_nAmmoInClip) { // 0x7428FB
+            if (m_nTotalAmmo) {
+                m_nState = WEAPONSTATE_RELOADING;
+                m_nTimeForNextShot = firedBy == FindPlayerPed() && FindPlayerInfo().m_bFastReload
+                    ? wi->GetWeaponReloadTime()
+                    : wi->GetWeaponReloadTime() / 4;
+                m_nTimeForNextShot += CTimer::GetTimeInMS();
+            } else if (TheCamera.GetActiveCam().m_nMode == MODE_CAMERA) {
+                CPad::GetPad()->Clear(false, true);
+            }
+            return true;
+        }
+        m_nTimeForNextShot = delayNextShot
+            ? m_nType == WEAPON_CAMERA
+                ? 1100
+                : (uint32)((wi->m_fAnimLoopEnd - wi->m_fAnimLoopStart) * 900.f)
+            : 0;
+        m_nTimeForNextShot += CTimer::GetTimeInMS();
+    }
+    // 0x7429F2
+    if (m_nType == WEAPON_UNARMED || m_nType == WEAPON_BASEBALLBAT) {
+        return true;
+    }
+    return hasFired;
 }
 
 CWeaponInfo& CWeapon::GetWeaponInfo(CPed* owner) const {
