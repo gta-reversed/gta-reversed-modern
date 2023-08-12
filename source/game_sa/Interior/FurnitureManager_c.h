@@ -28,3 +28,5 @@ public:
     static int32 GetSubGroupId(const char* name);
 };
 VALIDATE_SIZE(FurnitureManager_c, 0x2078);
+
+static inline auto& g_furnitureMan = StaticRef<FurnitureManager_c, 0xBAB380>();

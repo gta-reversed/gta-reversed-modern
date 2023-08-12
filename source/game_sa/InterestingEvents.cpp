@@ -40,7 +40,7 @@ CInterestingEvents::CInterestingEvents() {
     };
 
     SetOptions(INTERESTING_EVENT_0,     5,  2000);
-    SetOptions(INTERESTING_EVENT_1,     1,  5000);
+    SetOptions(PEDS_CHATTING,     1,  5000);
     SetOptions(INTERESTING_EVENT_2,     1,  5000);
     SetOptions(INTERESTING_EVENT_3,     1,  5000);
     SetOptions(INTERESTING_EVENT_4,     2,  3000);

@@ -285,7 +285,6 @@ void CGame::ShutDownForRestart() {
     CReplay::EmptyReplayBuffer();
     CMovingThings::Shutdown();
     rng::for_each(CWorld::Players, [](auto& info) { info.Clear(); });
-    memset(CTheZones::ZonesVisited, 0, sizeof(CTheZones::ZonesVisited));
     CTheScripts::UndoBuildingSwaps();
     CTheScripts::UndoEntityInvisibilitySettings();
     g_interiorMan.Exit();

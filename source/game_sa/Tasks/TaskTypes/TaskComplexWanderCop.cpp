@@ -19,14 +19,14 @@ void CTaskComplexWanderCop::InjectHooks() {
     RH_ScopedInstall(LookForCriminals, 0x66B300);
     RH_ScopedInstall(ShouldPursuePlayer, 0x66B160);
 }
-CTaskComplexWanderCop* CTaskComplexWanderCop::Constructor(int32 moveState, uint8 dir) { this->CTaskComplexWanderCop::CTaskComplexWanderCop(moveState, dir); return this; }
+CTaskComplexWanderCop* CTaskComplexWanderCop::Constructor(eMoveState moveState, uint8 dir) { this->CTaskComplexWanderCop::CTaskComplexWanderCop(moveState, dir); return this; }
 CTask* CTaskComplexWanderCop::CreateNextSubTask(CPed* ped) { return CreateNextSubTask_Reversed(ped); }
 CTask* CTaskComplexWanderCop::CreateFirstSubTask(CPed* ped) { return CreateFirstSubTask_Reversed(ped); }
 CTask* CTaskComplexWanderCop::ControlSubTask(CPed* ped) { return ControlSubTask_Reversed(ped); }
 void CTaskComplexWanderCop::ScanForStuff(CPed* ped) { return ScanForStuff_Reversed(ped); }
 
 // 0x460D80
-CTaskComplexWanderCop::CTaskComplexWanderCop(int32 moveState, uint8 dir) : CTaskComplexWander(moveState, dir, true, 0.5f) {
+CTaskComplexWanderCop::CTaskComplexWanderCop(eMoveState moveState, uint8 dir) : CTaskComplexWander(moveState, dir, true, 0.5f) {
     m_pGoToPointAndStandStillTask = nullptr;
     m_nTimePassedSinceLastLookedForCriminals = 0;
     m_nTimePassedSinceLastLookedForCarAlarmsAndStolenCopCars = 0;

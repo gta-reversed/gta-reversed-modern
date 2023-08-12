@@ -3467,7 +3467,7 @@ void CStreaming::StreamVehiclesAndPeds() {
         if (CWeather::WeatherRegion == WEATHER_REGION_SF) {
             pedGroupId = POPCYCLE_PEDGROUP_BUSINESS_LA;
         } else if (CPopCycle::m_pCurrZoneInfo) {
-            const auto& currenZoneFlags = CPopCycle::m_pCurrZoneInfo->Flags2;
+            const auto& currenZoneFlags = CPopCycle::m_pCurrZoneInfo->zonePopulationRace;
             if (currenZoneFlags & 1)
                 pedGroupId = 0; // POPCYCLE_PEDGROUP_WORKERS_LA ?
             else if (currenZoneFlags & 2)

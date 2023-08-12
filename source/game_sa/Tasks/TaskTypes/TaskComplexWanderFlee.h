@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TaskComplexWander.h"
+#include "eMoveState.h"
 
 class CPed;
 class CTaskComplexWanderFlee;
@@ -9,7 +10,7 @@ class NOTSA_EXPORT_VTABLE CTaskComplexWanderFlee : public CTaskComplexWander {
 public:
     static void InjectHooks();
 
-    CTaskComplexWanderFlee(int32 moveState, uint8 dir);
+    CTaskComplexWanderFlee(eMoveState moveState, uint8 dir);
     CTaskComplexWanderFlee(const CTaskComplexWanderFlee&);
     ~CTaskComplexWanderFlee() = default;
 
@@ -19,7 +20,7 @@ public:
 
 private: // Wrappers for hooks
     // 0x65B320
-    CTaskComplexWanderFlee* Constructor(int32 moveState, uint8 dir) {
+    CTaskComplexWanderFlee* Constructor(eMoveState moveState, uint8 dir) {
         this->CTaskComplexWanderFlee::CTaskComplexWanderFlee(moveState, dir);
         return this;
     }

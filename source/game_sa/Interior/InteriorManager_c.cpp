@@ -1,49 +1,144 @@
 #include "StdInc.h"
+
 #include "InteriorManager_c.h"
+#include "FurnitureManager_c.h"
+
+#include <TaskTypes/TaskSimpleCarDrive.h>
 
 void InteriorManager_c::InjectHooks() {
     RH_ScopedClass(InteriorManager_c);
     RH_ScopedCategory("Interior");
 
     RH_ScopedGlobalInstall(AddSameGroupEffectInfos, 0x598430, { .reversed = false });
-    RH_ScopedGlobalInstall(AreAnimsLoaded, 0x5980F0, { .reversed = false });
+    RH_ScopedGlobalInstall(AreAnimsLoaded, 0x5980F0);
     RH_ScopedInstall(PruneVisibleEffects, 0x598A60, { .reversed = false });
-    RH_ScopedInstall(Exit, 0x598010, { .reversed = false });
+    RH_ScopedInstall(Exit, 0x598010);
     RH_ScopedInstall(GetVisibleEffects, 0x598D80, { .reversed = false });
     RH_ScopedInstall(IsInteriorEffectVisible, 0x598690, { .reversed = false });
-    RH_ScopedInstall(GetPedsInterior, 0x598620, { .reversed = false });
-    RH_ScopedInstall(ReturnInteriorToPool, 0x5984B0, { .reversed = false });
-    RH_ScopedInstall(GetInteriorFromPool, 0x5984A0, { .reversed = false });
-    RH_ScopedInstall(GetVectorsInterior, 0x5983D0, { .reversed = false });
-    RH_ScopedInstall(SetStealableObjectStolen, 0x598390, { .reversed = false });
-    // RH_ScopedOverloadedInstall(FindStealableObjectId, "", 0x598360,  int32(InteriorManager_c::*)(CEntity *));
-    // RH_ScopedOverloadedInstall(FindStealableObjectId, "", 0x5982F0,  int32(InteriorManager_c::*)(int32, int32, CVector));
-    RH_ScopedInstall(HasInteriorHadStealDataSetup, 0x5982B0, { .reversed = false });
-    RH_ScopedInstall(IsGroupActive, 0x598280, { .reversed = false });
-    RH_ScopedInstall(GetPedsInteriorGroup, 0x598240, { .reversed = false });
-    RH_ScopedInstall(SetEntryExitPtr, 0x598180, { .reversed = false });
-    RH_ScopedInstall(GetBoundingBox, 0x598090, { .reversed = false });
-    RH_ScopedInstall(ActivatePeds, 0x598080, { .reversed = false });
+    RH_ScopedInstall(GetPedsInterior, 0x598620);
+    RH_ScopedInstall(ReturnInteriorToPool, 0x5984B0);
+    RH_ScopedInstall(GetInteriorFromPool, 0x5984A0);
+    RH_ScopedInstall(GetVectorsInterior, 0x5983D0);
+    RH_ScopedInstall(SetStealableObjectStolen, 0x598390);
+    RH_ScopedOverloadedInstall(FindStealableObjectId, "1", 0x598360,  int32(InteriorManager_c::*)(CEntity *));
+    RH_ScopedOverloadedInstall(FindStealableObjectId, "2", 0x5982F0,  int32(InteriorManager_c::*)(int32, int32, CVector));
+    RH_ScopedInstall(HasInteriorHadStealDataSetup, 0x5982B0);
+    RH_ScopedInstall(IsGroupActive, 0x598280);
+    RH_ScopedInstall(GetPedsInteriorGroup, 0x598240);
+    RH_ScopedInstall(SetEntryExitPtr, 0x598180);
+    RH_ScopedInstall(GetBoundingBox, 0x598090);
+    RH_ScopedInstall(ActivatePeds, 0x598080);
     RH_ScopedInstall(inlined_prune_visible_effects, 0x598070, { .reversed = false });
-    RH_ScopedInstall(Update, 0x598F50, { .reversed = false });
-    RH_ScopedInstall(Init, 0x5C0500, { .reversed = false });
+    RH_ScopedInstall(Update, 0x598F50);
+    RH_ScopedInstall(Init, 0x5C0500);
 }
 
 // 0x5C0500
 void InteriorManager_c::Init() {
-    plugin::CallMethod<0x5C0500, InteriorManager_c*>(this);
+    m_freeze = false;
+    m_pruneVisibleEffects = true;
+    m_bPedsEnabled = true;
+    for (auto& i : m_interiors) {
+        m_interiorPool.AddItem(&i);
+    }
+    for (auto&& [i, g] : notsa::enumerate(m_interiorGroups)) {
+        g.m_id = (uint8)i;
+        m_interiorGroupPool.AddItem(&g);
+    }
+    g_furnitureMan.Init();
+    m_enex = nullptr;
+    m_interiorCount = 0;
+    m_objectCount = 0;
+    rng::fill(m_interiorPedsAliveState, true);
+    m_lastUpdateTimeInMs = UINT32_MAX;
 }
 
 // 0x598F50
-int8 InteriorManager_c::Update() {
+bool InteriorManager_c::Update() {
     ZoneScoped;
 
-    return plugin::CallMethodAndReturn<int8, 0x598F50, InteriorManager_c*>(this);
+    if (m_freeze) {
+        return false;
+    }
+
+    const auto plyr = FindPlayerPed();
+
+    InteriorEffectInfo_t visibleFxBuf[32];
+    const auto numVisibleFx = plyr->m_nAreaCode != eAreaCodes::AREA_CODE_NORMAL_WORLD && m_pruneVisibleEffects && !plyr->GetTaskManager().GetActiveTaskAs<CTaskSimpleCarDrive>()
+        ? GetVisibleEffects(visibleFxBuf, std::size(visibleFxBuf))
+        : 0;
+    PruneVisibleEffects(visibleFxBuf, numVisibleFx, 8, 20.f);
+    const auto visibleFx = visibleFxBuf | rng::views::take(numVisibleFx);
+
+    const auto InteriorGroupHasSameEffect = [](InteriorEffectInfo_t& fx, InteriorGroup_c& g) {
+        return fx.entity == g.GetEntity() && fx.fxs[0]->m_groupId == g.GetId();
+    };
+
+    for (auto& g : m_interiorGroupList) {
+        if (rng::none_of(visibleFx, [&](InteriorEffectInfo_t& fx){
+            return InteriorGroupHasSameEffect(fx, g) && !fx.culled;
+        })) { // Remove this group
+            g.Exit();
+            m_interiorGroupPool.AddItem(&g);
+            m_interiorGroupList.RemoveItem(&g); 
+        }
+    }
+
+    bool hasAddedAnyInteriors{};
+    for (auto& fx : visibleFx) {
+        //> 0x599071
+        if (fx.culled) {
+            continue;
+        }
+
+        //> 0x59909F
+        if (rng::any_of(m_interiorGroupList, [&](InteriorGroup_c& g) {
+            return InteriorGroupHasSameEffect(fx, g);
+        })) {
+            continue;
+        }
+
+        //> 0x5990B8
+        const auto grp = m_interiorGroupPool.RemoveHead();
+        assert(grp);
+        grp->Init(fx.entity, fx.fxs[0]->m_groupId);
+        grp->m_enex = m_enex;
+        m_interiorGroupList.AddItem(grp);
+
+        //> 0x59910C
+        for (auto k = fx.numFx; k-->0;) {
+            const auto i = m_interiorPool.RemoveHead();
+            if (!k) {
+                break;
+            }
+            const auto& fxpos = fx.entity->GetPosition();
+
+            i->m_box        = fx.fxs[k];
+            i->m_interiorId = (uint32)(fxpos.x * fxpos.y * fxpos.z) + fx.fxIds[k];
+            i->m_areaCode   = fx.entity->m_nAreaCode;
+            i->m_pGroup     = grp;
+
+            i->Init(fx.fxs[k]->m_pos);
+            grp->AddInterior(i);
+
+            hasAddedAnyInteriors = true;
+        }
+
+        grp->Setup();
+
+        m_lastUpdateTimeInMs = CTimer::GetTimeInMS();
+    }
+    
+    for (auto& g : m_interiorGroupList) {
+        g.Update();
+    }
+
+    return hasAddedAnyInteriors;
 }
 
 // 0x598A60
-void InteriorManager_c::PruneVisibleEffects(InteriorEffectInfo_t* effectInfo, int32 a2, int32 a3, float a4) {
-    plugin::CallMethod<0x598A60, InteriorManager_c*, InteriorEffectInfo_t*, int32, int32, float>(this, effectInfo, a2, a3, a4);
+void InteriorManager_c::PruneVisibleEffects(InteriorEffectInfo_t* pInteriorEffectInfos, int32 numInfos, int32 reqdNumInfos, float maxDis) {
+    plugin::CallMethod<0x598A60, InteriorManager_c*, InteriorEffectInfo_t*, int32, int32, float>(this, pInteriorEffectInfos, numInfos, reqdNumInfos, maxDis);
 }
 
 // 0x598430
@@ -53,12 +148,26 @@ int8 InteriorManager_c::AddSameGroupEffectInfos(InteriorEffectInfo_t* effectInfo
 
 // 0x5980F0
 bool InteriorManager_c::AreAnimsLoaded(int32 animBlock) {
-    return plugin::CallAndReturn<bool, 0x5980F0, int32>(animBlock);
+    animBlock = [&] {
+        switch (animBlock) {
+        case 0:  return CAnimManager::GetAnimationBlockIndex("int_house");
+        case 1:  return CAnimManager::GetAnimationBlockIndex("int_shop");
+        case 2:  return CAnimManager::GetAnimationBlockIndex("int_office");
+        default: return animBlock;
+        }
+    }();
+    return CAnimManager::GetAnimationBlock((AssocGroupId)animBlock)->bLoaded;
 }
 
 // 0x598010
 void InteriorManager_c::Exit() {
-    plugin::CallMethod<0x598010, InteriorManager_c*>(this);
+    for (auto& g : m_interiorGroupList) {
+        g.Exit();
+    }
+    m_interiorGroupList.RemoveAll();
+    m_interiorPool.RemoveAll();
+    m_interiorGroupPool.RemoveAll();
+    g_furnitureMan.Exit();
 }
 
 // 0x598D80
@@ -72,66 +181,112 @@ int32 InteriorManager_c::IsInteriorEffectVisible(C2dEffect* effect, CEntity* ent
 }
 
 // 0x598620
-int32 InteriorManager_c::GetPedsInterior(CPed* ped) {
-    return plugin::CallMethodAndReturn<int32, 0x598620, InteriorManager_c*, CPed*>(this, ped);
+Interior_c* InteriorManager_c::GetPedsInterior(CPed* ped) {
+    return GetVectorsInterior(ped->GetPosition());
 }
 
 // 0x5984B0
-int32 InteriorManager_c::ReturnInteriorToPool(Interior_c* interior) {
-    return plugin::CallMethodAndReturn<int32, 0x5984B0, InteriorManager_c*, Interior_c*>(this, interior);
+void InteriorManager_c::ReturnInteriorToPool(Interior_c* interior) {
+    m_interiorPool.AddItem(interior);
 }
 
 // 0x5984A0
 Interior_c* InteriorManager_c::GetInteriorFromPool() {
-    return plugin::CallMethodAndReturn<Interior_c*, 0x5984A0, InteriorManager_c*>(this);
+    return m_interiorPool.RemoveHead();
 }
 
 // 0x5983D0
-int32 InteriorManager_c::GetVectorsInterior(CVector* pos) {
-    return plugin::CallMethodAndReturn<int32, 0x5983D0, InteriorManager_c*, CVector*>(this, pos);
+Interior_c* InteriorManager_c::GetVectorsInterior(const CVector& pt) { // TODO: Name is shit, should be `GetInteriorOfPoint` or something similar
+    for (auto& g : m_interiorGroupList) {
+        for (auto& i : g.GetInteriors()) {
+            if (i && i->IsPtInside(pt)) {
+                return i;
+            }
+        }
+    }
+    return nullptr;
 }
 
 // 0x598390
-int32 InteriorManager_c::SetStealableObjectStolen(CEntity* entity, uint8 a3) {
-    return plugin::CallMethodAndReturn<int32, 0x598390, InteriorManager_c*, CEntity*, uint8>(this, entity, a3);
+void InteriorManager_c::SetStealableObjectStolen(CEntity* entity, uint8 isStolen) {
+    if (const auto idx = FindStealableObjectId(entity); idx != -1) {
+        m_objects[idx].wasStolen = isStolen;
+    }
 }
 
 // 0x598360
 int32 InteriorManager_c::FindStealableObjectId(CEntity* entity) {
-    return plugin::CallMethodAndReturn<int32, 0x598360, InteriorManager_c*, CEntity*>(this, entity);
+    for (auto&& [i, v] : notsa::enumerate(GetObjects())) {
+        if (v.entity == entity) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 // 0x5982F0
 int32 InteriorManager_c::FindStealableObjectId(int32 interiorId, int32 modelId, CVector point) {
-    return plugin::CallMethodAndReturn<int32, 0x5982F0, InteriorManager_c*, int32, int32, CVector>(this, interiorId, modelId, point);
+    for (auto&& [i, v] : notsa::enumerate(GetObjects())) {
+        if (v.interiorId == interiorId && v.modelId == modelId && v.pos == point) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 // 0x5982B0
 bool InteriorManager_c::HasInteriorHadStealDataSetup(Interior_c* interior) {
-    return plugin::CallMethodAndReturn<bool, 0x5982B0, InteriorManager_c*, Interior_c*>(this, interior);
+    return m_interiorCount && notsa::contains(GetInteriorIds(), interior->m_interiorId);
 }
 
 // 0x598280
-int8 InteriorManager_c::IsGroupActive(int32 group) {
-    return plugin::CallMethodAndReturn<int8, 0x598280, InteriorManager_c*, int32>(this, group);
+int8 InteriorManager_c::IsGroupActive(int32 groupType) {
+    return rng::any_of(m_interiorGroupList, [&](InteriorGroup_c& g) {
+        return g.m_groupType == groupType;
+    });
 }
 
 // 0x598240
 InteriorGroup_c* InteriorManager_c::GetPedsInteriorGroup(CPed* ped) {
-    return plugin::CallMethodAndReturn<InteriorGroup_c*, 0x598240, InteriorManager_c*, CPed*>(this, ped);
+    for (auto& grp : m_interiorGroupList) {
+        if (notsa::contains(grp.GetPeds(), ped)) {
+            return &grp;
+        }
+    }
+    return nullptr;
 }
 
 // 0x598180
-int32 InteriorManager_c::SetEntryExitPtr(CEntryExit* exit) {
-    return plugin::CallMethodAndReturn<int32, 0x598180, InteriorManager_c*, CEntryExit*>(this, exit);
+void InteriorManager_c::SetEntryExitPtr(CEntryExit* enex) {
+    if ((enex->m_pLink ? enex->m_pLink : enex)->m_nArea == eAreaCodes::AREA_CODE_NORMAL_WORLD) {
+        return;
+    }
+    if (enex->m_recEntrance == m_enexRect) {
+        return;
+    }
+
+    m_objectCount   = 0;
+    m_interiorCount = 0;
+
+    rng::fill(m_interiorPedsAliveState, true);
+
+    m_enex     = enex;
+    m_enexRect = enex->m_recEntrance;
 }
 
 // 0x598090
-int8 InteriorManager_c::GetBoundingBox(CEntity* entity, CVector* pos) {
-    return plugin::CallMethodAndReturn<int8, 0x598090, InteriorManager_c*, CEntity*, CVector*>(this, entity, pos);
+bool InteriorManager_c::GetBoundingBox(FurnitureEntity_c* entity, CVector* pos) {
+    for (auto& grp : m_interiorGroupList) {
+        for (const auto i : grp.GetInteriors()) {
+            if (i) {
+                return i->GetBoundingBox(entity, pos);
+            }
+        }
+    }
+    return false;
 }
 
 // 0x598080
-int8 InteriorManager_c::ActivatePeds(uint8 enable) {
-    return plugin::CallMethodAndReturn<int8, 0x598080, InteriorManager_c*, uint8>(this, enable);
+void InteriorManager_c::ActivatePeds(bool enable) {
+    m_bPedsEnabled = enable;
 }
