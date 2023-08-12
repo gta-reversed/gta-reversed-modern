@@ -68,9 +68,9 @@ void CWeapon::InjectHooks() {
     RH_ScopedGlobalInstall(DoTankDoomAiming, 0x73D1E0, { .reversed = false });
     RH_ScopedGlobalInstall(DoDriveByAutoAiming, 0x73D720, { .reversed = false });
     RH_ScopedGlobalInstall(FindNearestTargetEntityWithScreenCoors, 0x73E240, { .reversed = false });
-    RH_ScopedGlobalInstall(EvaluateTargetForHeatSeekingMissile, 0x73E560, { .reversed = false });
+    RH_ScopedGlobalInstall(EvaluateTargetForHeatSeekingMissile, 0x73E560);
     RH_ScopedGlobalInstall(CheckForShootingVehicleOccupant, 0x73F480, { .reversed = false });
-    RH_ScopedGlobalInstall(PickTargetForHeatSeekingMissile, 0x73F910, { .reversed = false });
+    RH_ScopedGlobalInstall(PickTargetForHeatSeekingMissile, 0x73F910);
     RH_ScopedOverloadedInstall(CanBeUsedFor2Player, "Static", 0x73B240, bool(*)(eWeaponType));
     RH_ScopedOverloadedInstall(CanBeUsedFor2Player, "Method", 0x73DEF0, bool(CWeapon::*)(), { .reversed = false });
 }
@@ -813,13 +813,83 @@ bool CWeapon::CanBeUsedFor2Player() {
 }
 
 // 0x73E240
-void CWeapon::FindNearestTargetEntityWithScreenCoors(float screenX, float screenY, float range, CVector point, float* outX, float* outY) {
-    plugin::Call<0x73E240, float, float, float, CVector, float*, float*>(screenX, screenY, range, point, outX, outY);
+CEntity* CWeapon::FindNearestTargetEntityWithScreenCoors(float screenX, float screenY, float range, CVector point, float* outScrX, float* outScrY) {
+    screenX = (screenX + 1.f) * SCREEN_WIDTH / 2.f;
+    screenY = (screenY + 1.f) * SCREEN_HEIGHT / 2.f;
+
+    float    closestScrDistSq = sq(SCREEN_WIDTH / 15.f);
+    CEntity* closest{};
+    const auto ProcessEntity = [&](CEntity* e) {
+        const auto epos = e->GetPosition();
+
+        CVector scrPos;
+        CVector scrSz;
+        if (!CSprite::CalcScreenCoors(epos, &scrPos, &scrSz.x, &scrSz.y, true, true)) {
+            return;
+        }
+        const auto scrDistSq = (CVector2D{ scrPos } - CVector2D{screenX, screenY}).SquaredMagnitude();
+        if (scrDistSq >= closestScrDistSq) {
+            return;
+        }
+        if (sq(range) <= (point - epos).SquaredMagnitude()) {
+            return;
+        }
+        closestScrDistSq = scrDistSq;
+        closest          = e;
+
+        if (outScrX && outScrY) {
+            *outScrX = scrPos.x / (SCREEN_WIDTH / 2.f) - 1.f;
+            *outScrY = scrPos.y / (SCREEN_HEIGHT / 2.f) - 1.f;
+        }
+    };
+
+    for (auto& ped : GetPedPool()->GetAllValid()) {
+        if (ped.IsStateDead() || ped.bInVehicle) {
+            continue;
+        }
+        if (!CDarkel::ThisPedShouldBeKilledForFrenzy(ped)) {
+            continue;
+        }
+        ProcessEntity(&ped);
+    }
+
+    for (auto& veh : GetVehiclePool()->GetAllValid()) {
+        if (&veh == FindPlayerVehicle()) {
+            continue;
+        }
+        if (!CDarkel::ThisVehicleShouldBeKilledForFrenzy(veh)) {
+            continue;
+        }
+        ProcessEntity(&veh);
+    }
+
+    return closest;
 }
 
 // 0x73E560
-float CWeapon::EvaluateTargetForHeatSeekingMissile(CEntity* entity, CVector& posn, CVector& direction, float distanceMultiplier, bool fromVehicle, CEntity* lastEntity) {
-    return plugin::CallAndReturn<float, 0x73E560, CEntity*, CVector&, CVector&, float, bool, CEntity*>(entity, posn, direction, distanceMultiplier, fromVehicle, lastEntity);
+float CWeapon::EvaluateTargetForHeatSeekingMissile(CEntity* potentialTarget, const CVector& origin, const CVector& aimingDir, float tolerance, bool arePlanesPriority, CEntity* preferredExistingTarget) {
+    const auto potentialTargetDist = (origin - potentialTarget->GetPosition()).Magnitude();
+
+    const auto lineDir                   = aimingDir * 250.f;
+    const auto potentialTargetDistToLine = CCollision::DistToLine(origin, origin + aimingDir, potentialTarget->GetPosition());
+
+    auto ret = std::sqrt(potentialTargetDist) / 10.f + potentialTargetDistToLine / potentialTargetDist;
+
+    if (potentialTargetDistToLine * tolerance >= potentialTargetDist) {
+        return -1.f;
+    }
+
+    if (arePlanesPriority) {
+        if (potentialTarget->IsVehicle() && notsa::contains({ VEHICLE_TYPE_PLANE, VEHICLE_TYPE_HELI }, potentialTarget->AsVehicle()->m_nVehicleSubType)) {
+            ret *= 0.25f;
+        }
+    }
+
+    if (preferredExistingTarget && preferredExistingTarget == potentialTarget) {
+        ret *= 0.25f;
+    }
+
+    return ret;
 }
 
 // 0x73E690
@@ -936,8 +1006,27 @@ bool CWeapon::CheckForShootingVehicleOccupant(CEntity** pCarEntity, CColPoint* c
 }
 
 // 0x73F910
-CEntity* CWeapon::PickTargetForHeatSeekingMissile(CVector origin, CVector direction, float distanceMultiplier, CEntity* ignoreEntity, bool fromVehicle, CEntity* lastEntity) {
-    return plugin::CallAndReturn<CEntity*, 0x73F910, CVector, CVector, float, CEntity*, bool, CEntity*>(origin, direction, distanceMultiplier, ignoreEntity, fromVehicle, lastEntity);
+CEntity* CWeapon::PickTargetForHeatSeekingMissile(CVector origin, CVector direction, float distanceMultiplier, CEntity* ignoreEntity, bool arePlanesPriority, CEntity* preferredExistingTarget) {
+    float minRating  = FLT_MAX;
+    CEntity* minRated{};
+    const auto point = origin + direction * 5.f;
+    for (auto& veh : GetVehiclePool()->GetAllValid()) {
+        if (&veh == ignoreEntity) {
+            continue;
+        }
+        if (!veh.vehicleFlags.bVehicleCanBeTargettedByHS) {
+            continue;
+        }
+        if (veh.m_fHealth <= 0.f) {
+            continue;
+        }
+        const auto rating = EvaluateTargetForHeatSeekingMissile(&veh, point, direction, distanceMultiplier, arePlanesPriority, preferredExistingTarget);
+        if (rating >= 0.f && rating <= minRating) {
+            minRating = rating;
+            minRated  = &veh;
+        }
+    }
+    return minRated;
 }
 
 // 0x73FA20
@@ -1340,9 +1429,11 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
         if (!m_nAmmoInClip) { // 0x7428FB
             if (m_nTotalAmmo) {
                 m_nState = WEAPONSTATE_RELOADING;
-                m_nTimeForNextShot = firedBy == FindPlayerPed() && FindPlayerInfo().m_bFastReload
-                    ? wi->GetWeaponReloadTime()
-                    : wi->GetWeaponReloadTime() / 4;
+                m_nTimeForNextShot = s_DebugSettings.NoShotDelay
+                    ? 0
+                    : firedBy == FindPlayerPed() && FindPlayerInfo().m_bFastReload
+                        ? wi->GetWeaponReloadTime() / 4
+                        : wi->GetWeaponReloadTime();
                 m_nTimeForNextShot += CTimer::GetTimeInMS();
             } else if (TheCamera.GetActiveCam().m_nMode == MODE_CAMERA) {
                 CPad::GetPad()->Clear(false, true);
