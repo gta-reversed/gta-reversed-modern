@@ -64,6 +64,10 @@ public:
     static bool&      ms_bTakePhoto;
     static CColModel& ms_PelletTestCol;
 
+    static inline struct DebugSettings {
+        bool NoShotDelay;
+    } s_DebugSettings;
+
 public:
     CWeapon() { // 0x441E00
         field_14    = 0;

@@ -1163,7 +1163,6 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
 
     CVector point{ 0.f, 0.f, 0.6f };
 
-
     const auto fxPos = startPosn
         ? startPosn
         : &point;
@@ -1440,11 +1439,14 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
             }
             return true;
         }
-        m_nTimeForNextShot = delayNextShot
-            ? m_nType == WEAPON_CAMERA
-                ? 1100
-                : (uint32)((wi->m_fAnimLoopEnd - wi->m_fAnimLoopStart) * 900.f)
-            : 0;
+
+        m_nTimeForNextShot = s_DebugSettings.NoShotDelay
+            ? 0
+            : delayNextShot
+                ? m_nType == WEAPON_CAMERA
+                    ? 1100
+                    : (uint32)((wi->m_fAnimLoopEnd - wi->m_fAnimLoopStart) * 900.f)
+                : 0;
         m_nTimeForNextShot += CTimer::GetTimeInMS();
     }
     // 0x7429F2
