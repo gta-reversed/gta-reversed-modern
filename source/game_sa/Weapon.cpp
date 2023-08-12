@@ -72,7 +72,7 @@ void CWeapon::InjectHooks() {
     RH_ScopedGlobalInstall(CheckForShootingVehicleOccupant, 0x73F480, { .reversed = false });
     RH_ScopedGlobalInstall(PickTargetForHeatSeekingMissile, 0x73F910);
     RH_ScopedOverloadedInstall(CanBeUsedFor2Player, "Static", 0x73B240, bool(*)(eWeaponType));
-    RH_ScopedOverloadedInstall(CanBeUsedFor2Player, "Method", 0x73DEF0, bool(CWeapon::*)(), { .reversed = false });
+    RH_ScopedOverloadedInstall(CanBeUsedFor2Player, "Method", 0x73DEF0, bool(CWeapon::*)());
 }
 
 // 0x73B430
