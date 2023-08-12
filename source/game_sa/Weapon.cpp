@@ -709,18 +709,14 @@ void CWeapon::Update(CPed* owner) {
     const auto wi = &GetWeaponInfo(owner);
     const auto ao = &wi->GetAimingOffset();
 
-    const auto ProcessReloadAudioIf = [
-        &,
-        rloadA = owner->bIsDucking ? ao->CrouchRLoadA : ao->RLoadA,
-        rloadB = owner->bIsDucking ? ao->CrouchRLoadB : ao->RLoadB
-    ](auto Pred) {
+    const auto ProcessReloadAudioIf = [&](auto Pred) {
         const auto ProcessOne = [&](uint32 delay, eAudioEvents ae) {
             if (Pred(delay, ae)) {
                 owner->m_weaponAudio.AddAudioEvent(ae);
             }
         };
-        ProcessOne(rloadA, AE_WEAPON_RELOAD_A);
-        ProcessOne(rloadB, AE_WEAPON_RELOAD_B);
+        ProcessOne(owner->bIsDucking ? ao->CrouchRLoadA : ao->RLoadA, AE_WEAPON_RELOAD_A);
+        ProcessOne(owner->bIsDucking ? ao->CrouchRLoadB : ao->RLoadB, AE_WEAPON_RELOAD_B);
     };
 
     switch (m_nState) {
@@ -945,8 +941,34 @@ CEntity* CWeapon::PickTargetForHeatSeekingMissile(CVector origin, CVector direct
 }
 
 // 0x73FA20
-void CWeapon::FireFromCar(CVehicle* vehicle, bool leftSide, bool rightSide) {
-    plugin::CallMethod<0x73FA20, CWeapon*, CVehicle*, bool, bool>(this, vehicle, leftSide, rightSide);
+bool CWeapon::FireFromCar(CVehicle* vehicle, bool leftSide, bool rightSide) {
+    if (m_nState != WEAPONSTATE_READY || m_nAmmoInClip <= 0) {
+        return false;
+    }
+    if (!CWeapon::FireInstantHitFromCar(vehicle, leftSide, rightSide)) {
+        return notsa::IsFixBugs() ? false : true;
+    }
+    if (const auto d = vehicle->m_pDriver) {
+        d->m_weaponAudio.AddAudioEvent(AE_WEAPON_FIRE);
+    }
+    if (!CCheat::IsActive(CHEAT_INFINITE_AMMO)) {
+        if (m_nAmmoInClip) { // NOTE: I'm pretty sure this is redundant
+            m_nAmmoInClip--;
+        }
+        if (  m_nTotalAmmo < 25'000 && m_nTotalAmmo > 0
+            && (vehicle->GetStatus() != STATUS_PLAYER || CStats::GetPercentageProgress() < 100.f)
+        ) {
+            m_nTotalAmmo--;
+        }
+    }
+    m_nState = WEAPONSTATE_FIRING;
+    if (m_nAmmoInClip) {
+        m_nTimeForNextShot = CTimer::GetTimeInMS() + 1000; // NOTE: Shoot delay can be adjusted here
+    } else if (m_nTotalAmmo) {
+        m_nState = WEAPONSTATE_RELOADING;
+        m_nTimeForNextShot = CTimer::GetTimeInMS() + GetWeaponInfo().GetWeaponReloadTime();
+    }
+    return true;
 }
 
 // 0x73FB10

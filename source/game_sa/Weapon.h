@@ -99,7 +99,7 @@ public:
 
     bool FireAreaEffect(CEntity* firingEntity, const CVector& origin, CEntity* targetEntity, CVector* target);
     bool FireInstantHitFromCar(CVehicle* vehicle, bool leftSide, bool rightSide);
-    void FireFromCar(CVehicle* vehicle, bool leftSide, bool rightSide);
+    bool FireFromCar(CVehicle* vehicle, bool leftSide, bool rightSide);
     void FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehicle* vehicle, CEntity* owner);
     bool FireInstantHit(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, CEntity* targetEntity = nullptr, CVector* target = nullptr, CVector* originForDriveBy = nullptr, bool arg6 = false, bool muzzle = false);
     bool FireProjectile(CEntity* firingEntity, CVector* origin, CEntity* targetEntity = nullptr, CVector* target = nullptr, float force = 0.f);
