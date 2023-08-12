@@ -56,7 +56,7 @@ void CWeapon::InjectHooks() {
     RH_ScopedInstall(FireInstantHitFromCar2, 0x73CBA0);
     RH_ScopedInstall(Update, 0x73DB40);
     RH_ScopedInstall(SetUpPelletCol, 0x73C710, { .reversed = false });
-    RH_ScopedInstall(FireAreaEffect, 0x73E800, { .reversed = false });
+    RH_ScopedInstall(FireAreaEffect, 0x73E800);
     RH_ScopedInstall(FireInstantHitFromCar, 0x73EC40, { .reversed = false });
     RH_ScopedInstall(FireFromCar, 0x73FA20, { .reversed = false });
     RH_ScopedInstall(FireInstantHit, 0x73FB10, { .reversed = false });
@@ -827,7 +827,7 @@ float CWeapon::EvaluateTargetForHeatSeekingMissile(CEntity* entity, CVector& pos
 }
 
 // 0x73E690
-void CWeapon::DoWeaponEffect(CVector origin, CVector target) {
+void CWeapon::DoWeaponEffect(CVector origin, CVector dir) {
     char fxName[32]{};
     switch (m_nType) {
     case eWeaponType::WEAPON_FLAMETHROWER:
@@ -844,7 +844,7 @@ void CWeapon::DoWeaponEffect(CVector origin, CVector target) {
     }
 
     RwMatrix* mat = RwMatrixCreate();
-    g_fx.CreateMatFromVec(mat, &origin, &target);
+    g_fx.CreateMatFromVec(mat, &origin, &dir);
 
     if (m_pFxSystem) {
         m_pFxSystem->SetMatrix(mat);
@@ -867,8 +867,66 @@ void CWeapon::DoWeaponEffect(CVector origin, CVector target) {
 }
 
 // 0x73E800
-bool CWeapon::FireAreaEffect(CEntity* firingEntity, CVector* origin, CEntity* targetEntity, CVector* target) {
-    return plugin::CallMethodAndReturn<bool, 0x73E800, CWeapon*, CEntity*, CVector*, CEntity*, CVector*>(this, firingEntity, origin, targetEntity, target);
+bool CWeapon::FireAreaEffect(CEntity* firingEntity, const CVector& origin, CEntity* targetEntity, CVector* target) {
+    const auto wi = &GetWeaponInfo(); // TODO/NOTE: Why not `GetWeaponInfo(firingEntity)`?
+    const auto [shotDir, shotPt] = [&]() -> std::pair<CVector, CVector> {
+        if (!targetEntity && !target) {
+            if (firingEntity == FindPlayerPed() && TheCamera.m_aCams[0].Using3rdPersonMouseCam()) {
+                CVector camPos, camTargetPos;
+                TheCamera.Find3rdPersonCamTargetVector(wi->m_fWeaponRange, origin, &camPos, &camTargetPos);
+                return {
+                    (camTargetPos - camPos) / wi->m_fWeaponRange, // Scale to a unit vector
+                    camTargetPos
+                }; 
+            } else {
+                // NOTE: Moved here from `0x73E83F`
+                // NOTE: Original code used degs instead of radians
+                //       and then converted back to radians... So we're gonna stick to radians only ;)
+                const auto heading = [&] { // 0x73E83F
+                    if (targetEntity) {
+                        return (targetEntity->GetPosition() - origin).Heading();
+                    }
+                    if (target) {
+                        return (*target - origin).Heading();
+                    }
+                    return firingEntity->GetHeading();
+                }();
+                CVector dir{
+                    -std::sin(heading),
+                    std::cos(heading),
+                    0.f
+                };
+                if (firingEntity->IsPed()) {
+                    if (const auto pd = firingEntity->AsPed()->m_pPlayerData) {
+                        dir.z = -std::tan(pd->m_fLookPitch);
+                    }
+                }
+                return { dir, origin + dir };
+            }
+        } else {
+            const auto ptTarget = target
+                ? *target
+                : targetEntity->IsPed()
+                    ? targetEntity->AsPed()->GetBonePosition(BONE_SPINE1)
+                    : targetEntity->GetPosition();
+            return { (ptTarget - origin).Normalized(), ptTarget };
+        }
+    }();
+    CShotInfo::AddShot(firingEntity, m_nType, origin, shotPt);
+    DoWeaponEffect(origin, shotDir);
+    if (m_nType == WEAPON_FLAMETHROWER && CGeneral::RandomBool(1.f / 3.f * 100.f)) {
+        if (CCreepingFire::TryToStartFireAtCoors(
+            shotDir * CVector::Random(3.5f, 6.f) + origin + CVector{0.f, 0.f, 0.5f},
+            0,
+            true,
+            false,
+            2.3f)
+        ) {
+            CStats::IncrementStat(STAT_FIRES_STARTED);
+        }
+    }
+    CCrime::ReportCrime(CRIME_FIRE_WEAPON, nullptr, firingEntity->AsPed());
+    return true;
 }
 
 // 0x73EC40

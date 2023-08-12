@@ -97,7 +97,7 @@ public:
     // outX and outY will be placed in [-1;1] ranges
     void DoWeaponEffect(CVector origin, CVector target);
 
-    bool FireAreaEffect(CEntity* firingEntity, CVector* origin, CEntity* targetEntity, CVector* target);
+    bool FireAreaEffect(CEntity* firingEntity, const CVector& origin, CEntity* targetEntity, CVector* target);
     bool FireInstantHitFromCar(CVehicle* vehicle, bool leftSide, bool rightSide);
     void FireFromCar(CVehicle* vehicle, bool leftSide, bool rightSide);
     void FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehicle* vehicle, CEntity* owner);
