@@ -53,7 +53,7 @@ void CWeapon::InjectHooks() {
     RH_ScopedInstall(TakePhotograph, 0x73C1F0);
     RH_ScopedInstall(DoDoomAiming, 0x73CDC0);
     RH_ScopedInstall(GenerateDamageEvent, 0x73A530);
-    RH_ScopedInstall(FireInstantHitFromCar2, 0x73CBA0, { .reversed = false });
+    RH_ScopedInstall(FireInstantHitFromCar2, 0x73CBA0);
     RH_ScopedInstall(Update, 0x73DB40, { .reversed = false });
     RH_ScopedInstall(SetUpPelletCol, 0x73C710, { .reversed = false });
     RH_ScopedInstall(FireAreaEffect, 0x73E800, { .reversed = false });
