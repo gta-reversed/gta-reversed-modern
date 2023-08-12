@@ -15,18 +15,7 @@
 #include "Shadows.h"
 #include "Birds.h"
 
-float& CWeapon::ms_fExtinguisherAimAngle = *(float*)0x8D610C;
-bool& CWeapon::bPhotographHasBeenTaken = *(bool*)0xC8A7C0;
-bool& CWeapon::ms_bTakePhoto = *(bool*)0xC8A7C1;
-CColModel& CWeapon::ms_PelletTestCol = *(CColModel*)0xC8A7DC;
-float& fPlayerAimScale = *(float*)0x8D6110;
-float& fPlayerAimScaleDist = *(float*)0x8D6114;
-float& fPlayerAimRotRate = *(float*)0x8D6118;
-float& SHOTGUN_SPREAD_RATE = *(float*)0x8D611C;
-uint32& SHOTGUN_NUM_PELLETS = *(uint32*)0x8D6120;
-uint32& SPAS_NUM_PELLETS = *(uint32*)0x8D6124;
-float& PELLET_COL_SCALE_RATIO_MULT = *(float*)0x8D6128;
-float* fReloadAnimSampleFraction = (float*)0x8D612C;
+//float& PELLET_COL_SCALE_RATIO_MULT = *(float*)0x8D6128; // 1.3
 
 void CWeapon::InjectHooks() {
     RH_ScopedClass(CWeapon);
@@ -76,18 +65,11 @@ void CWeapon::InjectHooks() {
 }
 
 // 0x73B430
-CWeapon::CWeapon(eWeaponType weaponType, int32 ammo) {
-    m_nType = weaponType;
-    m_nState = eWeaponState::WEAPONSTATE_READY;
-    m_nAmmoInClip = 0;
-    m_nTotalAmmo = std::min(ammo, 99999);
-
+CWeapon::CWeapon(eWeaponType weaponType, uint32 ammo) :
+    m_Type{ weaponType },
+    m_TotalAmmo{ std::min<uint32>(ammo, 99'999) }
+{
     Reload();
-
-    m_nTimeForNextShot = 0;
-    field_14 = 0;
-    m_pFxSystem = nullptr;
-    m_bNoModel = false;
 }
 
 CWeapon* CWeapon::Constructor(eWeaponType weaponType, int32 ammo) {
@@ -97,14 +79,14 @@ CWeapon* CWeapon::Constructor(eWeaponType weaponType, int32 ammo) {
 
 // 0x73B4A0
 void CWeapon::Initialise(eWeaponType weaponType, int32 ammo, CPed* owner) {
-    m_nType = weaponType;
-    m_nState = eWeaponState::WEAPONSTATE_READY;
-    m_nAmmoInClip = 0;
-    m_nTotalAmmo = std::min(ammo, 99999);
+    m_Type = weaponType;
+    m_State = eWeaponState::WEAPONSTATE_READY;
+    m_AmmoInClip = 0;
+    m_TotalAmmo = std::min(ammo, 99999);
 
     Reload(owner);
 
-    m_nTimeForNextShot = 0;
+    m_TimeForNextShotMs = 0;
 
     int32 model1 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD)->m_nModelId1;
     int32 model2 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD)->m_nModelId2;
@@ -115,8 +97,8 @@ void CWeapon::Initialise(eWeaponType weaponType, int32 ammo, CPed* owner) {
     if (model2 != -1)
         CModelInfo::GetModelInfo(model2)->AddRef();
 
-    m_pFxSystem = nullptr;
-    m_bNoModel = false;
+    m_FxSystem = nullptr;
+    m_DontPlaceInHand = false;
 }
 
 // 0x73A300
@@ -144,16 +126,16 @@ void CWeapon::ShutdownWeapons() {
 
 // 0x73A380
 void CWeapon::Shutdown() {
-    for (const auto m : CWeaponInfo::GetWeaponInfo(m_nType)->GetModels()) {
+    for (const auto m : CWeaponInfo::GetWeaponInfo(m_Type)->GetModels()) {
         if (m != MODEL_INVALID) {
             CModelInfo::GetModelInfo(m)->RemoveRef();
         }
     }
-    m_nType            = eWeaponType::WEAPON_UNARMED;
-    m_nState           = eWeaponState::WEAPONSTATE_READY;
-    m_nTotalAmmo       = 0;
-    m_nAmmoInClip      = 0;
-    m_nTimeForNextShot = 0;
+    m_Type            = eWeaponType::WEAPON_UNARMED;
+    m_State           = eWeaponState::WEAPONSTATE_READY;
+    m_TotalAmmo       = 0;
+    m_AmmoInClip      = 0;
+    m_TimeForNextShotMs = 0;
 }
 
 // 0x73A3E0
@@ -171,7 +153,7 @@ void CWeapon::AddGunshell(CEntity* creator, CVector& position, const CVector2D& 
 
     FxPrtMult_c fxprt(0.5f, 0.5f, 0.5f, 1.0f, size, 1.0f, 1.0f);
 
-    switch (m_nType) {
+    switch (m_Type) {
     case eWeaponType::WEAPON_SPAS12_SHOTGUN:
     case eWeaponType::WEAPON_SHOTGUN:
         fxprt.SetColor(0.6f, 0.1f, 0.1f);
@@ -326,7 +308,7 @@ bool CWeapon::FireSniper(CPed* shooter, CEntity* victim, CVector* target) {
     velocity.Normalise();
     velocity *= 16.0f;
 
-    CBulletInfo::AddBullet(shooter, m_nType, activeCam.m_vecSource, velocity);
+    CBulletInfo::AddBullet(shooter, m_Type, activeCam.m_vecSource, velocity);
 
     // recoil effect for players
     if (shooter->IsPlayer()) {
@@ -344,7 +326,7 @@ bool CWeapon::FireSniper(CPed* shooter, CEntity* victim, CVector* target) {
     }
 
     CVector targetPoint = velocity * 40.0f + activeCam.m_vecSource;
-    bool hasNoSound = m_nType == eWeaponType::WEAPON_PISTOL_SILENCED || m_nType == eWeaponType::WEAPON_TEARGAS;
+    bool hasNoSound = m_Type == eWeaponType::WEAPON_PISTOL_SILENCED || m_Type == eWeaponType::WEAPON_TEARGAS;
     CEventGroup* eventGroup = GetEventGlobalGroup();
 
     CEventGunShot gs(shooter, activeCam.m_vecSource, targetPoint, hasNoSound);
@@ -360,22 +342,22 @@ bool CWeapon::FireSniper(CPed* shooter, CEntity* victim, CVector* target) {
 
 // 0x73AEB0
 void CWeapon::Reload(CPed* owner) {
-    if (!m_nTotalAmmo)
+    if (!m_TotalAmmo)
         return;
 
     uint32 ammo = GetWeaponInfo(owner).m_nAmmoClip;
-    m_nAmmoInClip = std::min(ammo, m_nTotalAmmo);
+    m_AmmoInClip = std::min(ammo, m_TotalAmmo);
 }
 
 // 0x73B1C0
 bool CWeapon::IsTypeMelee() {
-    auto weaponInfo = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD);
+    auto weaponInfo = CWeaponInfo::GetWeaponInfo(m_Type, eWeaponSkill::STD);
     return weaponInfo->m_nWeaponFire == eWeaponFire::WEAPON_FIRE_MELEE;
 }
 
 // 0x73B1E0
 bool CWeapon::IsType2Handed() {
-    switch (m_nType) {
+    switch (m_Type) {
     case eWeaponType::WEAPON_M4:
     case eWeaponType::WEAPON_AK47:
     case eWeaponType::WEAPON_SPAS12_SHOTGUN:
@@ -391,7 +373,7 @@ bool CWeapon::IsType2Handed() {
 
 // 0x73B210
 bool CWeapon::IsTypeProjectile() {
-    switch (m_nType) {
+    switch (m_Type) {
     case eWeaponType::WEAPON_GRENADE:
     case eWeaponType::WEAPON_REMOTE_SATCHEL_CHARGE:
     case eWeaponType::WEAPON_TEARGAS:
@@ -418,7 +400,7 @@ bool CWeapon::CanBeUsedFor2Player(eWeaponType weaponType) {
 
 // 0x73B2A0
 bool CWeapon::HasWeaponAmmoToBeUsed() {
-    switch (m_nType) {
+    switch (m_Type) {
     case eWeaponType::WEAPON_UNARMED:
     case eWeaponType::WEAPON_BRASSKNUCKLE:
     case eWeaponType::WEAPON_GOLFCLUB:
@@ -436,7 +418,7 @@ bool CWeapon::HasWeaponAmmoToBeUsed() {
         return true;
     }
 
-    return m_nTotalAmmo != 0;
+    return m_TotalAmmo != 0;
 }
 
 // 0x73B300
@@ -450,11 +432,10 @@ bool CWeapon::ProcessLineOfSight(const CVector& startPoint, const CVector& endPo
 
 // 0x73B360
 void CWeapon::StopWeaponEffect() {
-    if (!m_pFxSystem || m_nType == eWeaponType::WEAPON_MOLOTOV)
-        return;
-
-    m_pFxSystem->Kill();
-    m_pFxSystem = nullptr;
+    if (m_FxSystem && m_Type != WEAPON_MOLOTOV) {
+        m_FxSystem->Kill();
+        m_FxSystem = nullptr;
+    }
 }
 
 // 0x73B380
@@ -622,7 +603,7 @@ void CWeapon::FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehi
         notsa::coalesce<CEntity*>(owner, vehicle),
         startPoint,
         endPoint,
-        m_nType == WEAPON_PISTOL_SILENCED || m_nType == WEAPON_TEARGAS
+        m_Type == WEAPON_PISTOL_SILENCED || m_Type == WEAPON_TEARGAS
     });
     g_InterestingEvents.Add(CInterestingEvents::EType::INTERESTING_EVENT_22, owner);
 
@@ -719,30 +700,30 @@ void CWeapon::Update(CPed* owner) {
         ProcessOne(owner->bIsDucking ? ao->CrouchRLoadB : ao->RLoadB, AE_WEAPON_RELOAD_B);
     };
 
-    switch (m_nState) {
+    switch (m_State) {
     case WEAPONSTATE_FIRING: {
-        if (owner && notsa::contains({ WEAPON_SPAS12_SHOTGUN, WEAPON_SHOTGUN }, m_nType)) { // 0x73DBA5    
+        if (owner && notsa::contains({ WEAPON_SPAS12_SHOTGUN, WEAPON_SHOTGUN }, m_Type)) { // 0x73DBA5    
             ProcessReloadAudioIf([&](uint32 rload, eAudioEvents ae) {
                 if (!rload) {
                     return false;
                 }
-                const auto nextShotEnd = m_nTimeForNextShot + rload;
+                const auto nextShotEnd = m_TimeForNextShotMs + rload;
                 return CTimer::GetPreviousTimeInMS() < nextShotEnd && CTimer::GetTimeInMS() >= nextShotEnd;
             });
         }
-        if (CTimer::GetTimeInMS() > m_nTimeForNextShot) {
-            m_nState = wi->m_nWeaponFire == eWeaponFire::WEAPON_FIRE_MELEE || m_nTotalAmmo != 0
+        if (CTimer::GetTimeInMS() > m_TimeForNextShotMs) {
+            m_State = wi->m_nWeaponFire == eWeaponFire::WEAPON_FIRE_MELEE || m_TotalAmmo != 0
                 ? eWeaponState::WEAPONSTATE_READY
                 : eWeaponState::WEAPONSTATE_OUT_OF_AMMO;
         }
         break;
     }
     case WEAPONSTATE_RELOADING: {
-        if (owner && m_nType < WEAPON_LAST_WEAPON) {
+        if (owner && m_Type < WEAPON_LAST_WEAPON) {
             const auto DoPlayAnimlessReloadAudio = [&] {
                 ProcessReloadAudioIf([
                     &,
-                    shootDelta = m_nTimeForNextShot - wi->GetWeaponReloadTime()
+                    shootDelta = m_TimeForNextShotMs - wi->GetWeaponReloadTime()
                 ](uint32 rload, eAudioEvents ae) {
                     const auto audioTimeMs = rload + shootDelta;
                     return CTimer::GetPreviousTimeInMS() < audioTimeMs && CTimer::GetTimeInMS() >= audioTimeMs;
@@ -761,14 +742,14 @@ void CWeapon::Update(CPed* owner) {
                         const auto rloadS = (float)rloadMs / 1000.f;
                         return rloadS <= animRLoad->m_fCurrentTime && animRLoad->m_fCurrentTime - animRLoad->m_fTimeStep < rloadS;
                     });
-                    if (CTimer::GetTimeInMS() > m_nTimeForNextShot) {
+                    if (CTimer::GetTimeInMS() > m_TimeForNextShotMs) {
                         if (animRLoad->GetTimeProgress() < 0.9f) {
-                            m_nTimeForNextShot = CTimer::GetTimeInMS();
+                            m_TimeForNextShotMs = CTimer::GetTimeInMS();
                         }
                     }
                 } else if (owner->GetIntelligence()->GetTaskUseGun()) { // 0x73DDF9
-                    if (CTimer::GetTimeInMS() > m_nTimeForNextShot) {
-                        m_nTimeForNextShot = CTimer::GetTimeInMS();
+                    if (CTimer::GetTimeInMS() > m_TimeForNextShotMs) {
+                        m_TimeForNextShotMs = CTimer::GetTimeInMS();
                     }
                 } else { // 0x73DE16
                     DoPlayAnimlessReloadAudio();
@@ -778,20 +759,20 @@ void CWeapon::Update(CPed* owner) {
             }
         }
         //> 0x73DEA4
-        if (CTimer::GetTimeInMS() > m_nTimeForNextShot) {
+        if (CTimer::GetTimeInMS() > m_TimeForNextShotMs) {
             Reload(owner);
-            m_nState = WEAPONSTATE_READY;
+            m_State = WEAPONSTATE_READY;
         }
-        KillFx();
+        StopWeaponEffect();
         break;
     }
     case WEAPONSTATE_MELEE_MADECONTACT: {
-        m_nState = WEAPONSTATE_READY;
-        KillFx();
+        m_State = WEAPONSTATE_READY;
+        StopWeaponEffect();
         break;
     }
     default: {
-        KillFx();
+        StopWeaponEffect();
         break;
     }
     }
@@ -809,7 +790,7 @@ void CWeapon::UpdateWeapons() {
 
 // 0x73DEF0
 bool CWeapon::CanBeUsedFor2Player() {
-    return CanBeUsedFor2Player(m_nType);
+    return CanBeUsedFor2Player(m_Type);
 }
 
 // 0x73E240
@@ -822,8 +803,8 @@ CEntity* CWeapon::FindNearestTargetEntityWithScreenCoors(float screenX, float sc
     const auto ProcessEntity = [&](CEntity* e) {
         const auto epos = e->GetPosition();
 
-        CVector scrPos;
-        CVector scrSz;
+        CVector scrPos{};
+        CVector scrSz{};
         if (!CSprite::CalcScreenCoors(epos, &scrPos, &scrSz.x, &scrSz.y, true, true)) {
             return;
         }
@@ -895,7 +876,7 @@ float CWeapon::EvaluateTargetForHeatSeekingMissile(CEntity* potentialTarget, con
 // 0x73E690
 void CWeapon::DoWeaponEffect(CVector origin, CVector dir) {
     char fxName[32]{};
-    switch (m_nType) {
+    switch (m_Type) {
     case eWeaponType::WEAPON_FLAMETHROWER:
         strcpy_s(fxName, "flamethrower");
         break;
@@ -912,22 +893,22 @@ void CWeapon::DoWeaponEffect(CVector origin, CVector dir) {
     RwMatrix* mat = RwMatrixCreate();
     g_fx.CreateMatFromVec(mat, &origin, &dir);
 
-    if (m_pFxSystem) {
-        m_pFxSystem->SetMatrix(mat);
+    if (m_FxSystem) {
+        m_FxSystem->SetMatrix(mat);
     } else {
         CVector posn{};
-        m_pFxSystem = g_fxMan.CreateFxSystem(fxName, &posn, mat, false);
+        m_FxSystem = g_fxMan.CreateFxSystem(fxName, &posn, mat, false);
 
-        if (!m_pFxSystem) {
+        if (!m_FxSystem) {
             RwMatrixDestroy(mat);
             return;
         }
 
-        m_pFxSystem->CopyParentMatrix();
-        m_pFxSystem->Play();
-        m_pFxSystem->SetMustCreatePrts(true);
+        m_FxSystem->CopyParentMatrix();
+        m_FxSystem->Play();
+        m_FxSystem->SetMustCreatePrts(true);
     }
-    m_pFxSystem->SetConstTime(1, 1.0f);
+    m_FxSystem->SetConstTime(1, 1.0f);
 
     RwMatrixDestroy(mat);
 }
@@ -978,9 +959,9 @@ bool CWeapon::FireAreaEffect(CEntity* firingEntity, const CVector& origin, CEnti
             return { (ptTarget - origin).Normalized(), ptTarget };
         }
     }();
-    CShotInfo::AddShot(firingEntity, m_nType, origin, shotPt);
+    CShotInfo::AddShot(firingEntity, m_Type, origin, shotPt);
     DoWeaponEffect(origin, shotDir);
-    if (m_nType == WEAPON_FLAMETHROWER && CGeneral::RandomBool(1.f / 3.f * 100.f)) {
+    if (m_Type == WEAPON_FLAMETHROWER && CGeneral::RandomBool(1.f / 3.f * 100.f)) {
         if (CCreepingFire::TryToStartFireAtCoors(
             shotDir * CVector::Random(3.5f, 6.f) + origin + CVector{0.f, 0.f, 0.5f},
             0,
@@ -1031,7 +1012,7 @@ CEntity* CWeapon::PickTargetForHeatSeekingMissile(CVector origin, CVector direct
 
 // 0x73FA20
 bool CWeapon::FireFromCar(CVehicle* vehicle, bool leftSide, bool rightSide) {
-    if (m_nState != WEAPONSTATE_READY || m_nAmmoInClip <= 0) {
+    if (m_State != WEAPONSTATE_READY || m_AmmoInClip <= 0) {
         return false;
     }
     if (!CWeapon::FireInstantHitFromCar(vehicle, leftSide, rightSide)) {
@@ -1041,27 +1022,34 @@ bool CWeapon::FireFromCar(CVehicle* vehicle, bool leftSide, bool rightSide) {
         d->m_weaponAudio.AddAudioEvent(AE_WEAPON_FIRE);
     }
     if (!CCheat::IsActive(CHEAT_INFINITE_AMMO)) {
-        if (m_nAmmoInClip) { // NOTE: I'm pretty sure this is redundant
-            m_nAmmoInClip--;
+        if (m_AmmoInClip) { // NOTE: I'm pretty sure this is redundant
+            m_AmmoInClip--;
         }
-        if (  m_nTotalAmmo < 25'000 && m_nTotalAmmo > 0
+        if (  m_TotalAmmo < 25'000 && m_TotalAmmo > 0
             && (vehicle->GetStatus() != STATUS_PLAYER || CStats::GetPercentageProgress() < 100.f)
         ) {
-            m_nTotalAmmo--;
+            m_TotalAmmo--;
         }
     }
-    m_nState = WEAPONSTATE_FIRING;
-    if (m_nAmmoInClip) {
-        m_nTimeForNextShot = CTimer::GetTimeInMS() + 1000; // NOTE: Shoot delay can be adjusted here
-    } else if (m_nTotalAmmo) {
-        m_nState = WEAPONSTATE_RELOADING;
-        m_nTimeForNextShot = CTimer::GetTimeInMS() + GetWeaponInfo().GetWeaponReloadTime();
+    m_State = WEAPONSTATE_FIRING;
+    if (m_AmmoInClip) {
+        m_TimeForNextShotMs = CTimer::GetTimeInMS() + 1000; // NOTE: Shoot delay can be adjusted here
+    } else if (m_TotalAmmo) {
+        m_State = WEAPONSTATE_RELOADING;
+        m_TimeForNextShotMs = CTimer::GetTimeInMS() + GetWeaponInfo().GetWeaponReloadTime();
     }
     return true;
 }
 
 // 0x73FB10
 bool CWeapon::FireInstantHit(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, CEntity* targetEntity, CVector* target, CVector* originForDriveBy, bool arg6, bool muzzle) {
+    constexpr auto PLAYER_AIM_SCALE      = 0.75f;
+    constexpr auto PLAYER_AIM_SCALE_DIST = 5.00f;
+    constexpr auto PLAYER_ANIM_ROT_RATE  = 0.0062832f;
+    constexpr auto SHOTGUN_SPREAD_RATE   = 0.05f;
+    constexpr auto SHOTGUN_NUM_PELLETS   = 15u;
+    constexpr auto SPAS_NUM_PELLETS      = 4u;
+
     return plugin::CallMethodAndReturn<bool, 0x73FB10, CWeapon*, CEntity*, CVector*, CVector*, CEntity*, CVector*, CVector*, bool, bool>(this, firingEntity, origin, muzzlePosn, targetEntity, target, originForDriveBy, arg6, muzzle);
 }
 
@@ -1105,7 +1093,7 @@ bool CWeapon::FireM16_1stPerson(CPed* owner) {
     CColPoint shotCP;
     CEntity*  shotHitEntity;
     if (CWorld::ProcessLineOfSight(camOriginPos, camTargetPos, shotCP, shotHitEntity, true, true, true, true, true, false, false, true)) {
-        CheckForShootingVehicleOccupant(&shotHitEntity, &shotCP, m_nType, camOriginPos, camTargetPos);
+        CheckForShootingVehicleOccupant(&shotHitEntity, &shotCP, m_Type, camOriginPos, camTargetPos);
     }
 
     CWorld::bIncludeDeadPeds = false;
@@ -1125,7 +1113,7 @@ bool CWeapon::FireM16_1stPerson(CPed* owner) {
     //> 0x741E48 - Visual/physical feedback for the player(s)
     if (owner->IsPlayer()) {
         auto intensity = [&]{
-            switch (m_nType) {
+            switch (m_Type) {
             case WEAPON_AK47:
                 return 0.00015f;
             case WEAPON_M4:
@@ -1174,7 +1162,7 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
         startPosn = &point;
     }
 
-    if (field_14) {
+    if (m_IsFirstPersonWeaponModeSelected) {
         const auto r = 0.15f;
 
         const auto h = firedBy->GetHeading();
@@ -1182,7 +1170,7 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
         fxPos->y += std::cos(h) * r;
     }
 
-    switch (m_nState) {
+    switch (m_State) {
     case WEAPONSTATE_READY:
     case WEAPONSTATE_FIRING:
         break;
@@ -1190,15 +1178,15 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
         return false;
     }
 
-    if (!m_nAmmoInClip) {
-        if (!m_nTotalAmmo) {
+    if (!m_AmmoInClip) {
+        if (!m_TotalAmmo) {
             return false;
         }
-        m_nAmmoInClip = std::min<uint32>(m_nTotalAmmo, wi->m_nAmmoClip);
+        m_AmmoInClip = std::min<uint32>(m_TotalAmmo, wi->m_nAmmoClip);
     }
 
     const auto [hasFired, delayNextShot] = [&]() -> std::pair<bool, bool> {
-        switch (m_nType) {
+        switch (m_Type) {
         case WEAPON_GRENADE:
         case WEAPON_TEARGAS:
         case WEAPON_MOLOTOV:
@@ -1338,7 +1326,7 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
         case WEAPON_DETONATOR: {
             assert(firedByPed);
             CWorld::UseDetonator(firedByPed);
-            m_nAmmoInClip = m_nTotalAmmo  = 1;
+            m_AmmoInClip = m_TotalAmmo  = 1;
             return { true, true };
         }
         case WEAPON_CAMERA:
@@ -1354,29 +1342,29 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
     // 0x74279A
     if (hasFired) {
         // 0x7427B3
-        const bool isPlayerFiring = firedByPed && m_nType != WEAPON_CAMERA && firedByPed->IsPlayer();
+        const bool isPlayerFiring = firedByPed && m_Type != WEAPON_CAMERA && firedByPed->IsPlayer();
         if (firedByPed) {
-            if (m_nType != WEAPON_CAMERA) {
+            if (m_Type != WEAPON_CAMERA) {
                 firedByPed->bFiringWeapon = true;
             }
             firedByPed->m_weaponAudio.AddAudioEvent(AE_WEAPON_FIRE);
-            if (isPlayerFiring && targetEnt && targetEnt->IsPed() && m_nType != WEAPON_PISTOL_SILENCED) {
+            if (isPlayerFiring && targetEnt && targetEnt->IsPed() && m_Type != WEAPON_PISTOL_SILENCED) {
                 firedByPed->Say(182, 200); // 0x74280E
             }
         }
 
         // 0x74282C
-        if (m_nType == WEAPON_REMOTE_SATCHEL_CHARGE) {
+        if (m_Type == WEAPON_REMOTE_SATCHEL_CHARGE) {
             firedByPed->GiveWeapon(WEAPON_DETONATOR, true, true);
-            if (firedByPed->GetWeapon(WEAPON_REMOTE_SATCHEL_CHARGE).m_nTotalAmmo <= 1) {
-                firedByPed->GetWeapon(WEAPON_DETONATOR).m_nState = eWeaponState::WEAPONSTATE_READY;
+            if (firedByPed->GetWeapon(WEAPON_REMOTE_SATCHEL_CHARGE).m_TotalAmmo <= 1) {
+                firedByPed->GetWeapon(WEAPON_DETONATOR).m_State = eWeaponState::WEAPONSTATE_READY;
                 firedByPed->SetCurrentWeapon(WEAPON_DETONATOR);
             }
         }
 
         //> 0x74286D - Increase stats
         if (isPlayerFiring) {
-            switch (m_nType)
+            switch (m_Type)
             {
             case WEAPON_GRENADE:
             case WEAPON_MOLOTOV:
@@ -1410,65 +1398,58 @@ bool CWeapon::Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CE
 
         // 0x7428A6
         if (!CCheat::IsActive(CHEAT_INFINITE_AMMO)) {
-            if (m_nAmmoInClip) {
-                m_nAmmoInClip--;
+            if (m_AmmoInClip) {
+                m_AmmoInClip--;
             }
-            if (m_nTotalAmmo > 0) {
+            if (m_TotalAmmo > 0) {
                 if (isPlayerFiring
-                        ? m_nType == WEAPON_DETONATOR || CStats::GetPercentageProgress() < 100.f
-                        : m_nTotalAmmo < 25'000
+                        ? m_Type == WEAPON_DETONATOR || CStats::GetPercentageProgress() < 100.f
+                        : m_TotalAmmo < 25'000
                 ) {
-                    m_nTotalAmmo--;    
+                    m_TotalAmmo--;    
                 }
             }
         }
 
-        m_nState = WEAPONSTATE_FIRING;
+        m_State = WEAPONSTATE_FIRING;
 
-        if (!m_nAmmoInClip) { // 0x7428FB
-            if (m_nTotalAmmo) {
-                m_nState = WEAPONSTATE_RELOADING;
-                m_nTimeForNextShot = s_DebugSettings.NoShotDelay
+        if (!m_AmmoInClip) { // 0x7428FB
+            if (m_TotalAmmo) {
+                m_State = WEAPONSTATE_RELOADING;
+                m_TimeForNextShotMs = s_DebugSettings.NoShotDelay
                     ? 0
                     : firedBy == FindPlayerPed() && FindPlayerInfo().m_bFastReload
                         ? wi->GetWeaponReloadTime() / 4
                         : wi->GetWeaponReloadTime();
-                m_nTimeForNextShot += CTimer::GetTimeInMS();
+                m_TimeForNextShotMs += CTimer::GetTimeInMS();
             } else if (TheCamera.GetActiveCam().m_nMode == MODE_CAMERA) {
                 CPad::GetPad()->Clear(false, true);
             }
             return true;
         }
 
-        m_nTimeForNextShot = s_DebugSettings.NoShotDelay
+        m_TimeForNextShotMs = s_DebugSettings.NoShotDelay
             ? 0
             : delayNextShot
-                ? m_nType == WEAPON_CAMERA
+                ? m_Type == WEAPON_CAMERA
                     ? 1100
                     : (uint32)((wi->m_fAnimLoopEnd - wi->m_fAnimLoopStart) * 900.f)
                 : 0;
-        m_nTimeForNextShot += CTimer::GetTimeInMS();
+        m_TimeForNextShotMs += CTimer::GetTimeInMS();
     }
     // 0x7429F2
-    if (m_nType == WEAPON_UNARMED || m_nType == WEAPON_BASEBALLBAT) {
+    if (m_Type == WEAPON_UNARMED || m_Type == WEAPON_BASEBALLBAT) {
         return true;
     }
     return hasFired;
 }
 
 CWeaponInfo& CWeapon::GetWeaponInfo(CPed* owner) const {
-    return GetWeaponInfo(owner ? owner->GetWeaponSkill(m_nType) : eWeaponSkill::STD);
+    return GetWeaponInfo(owner ? owner->GetWeaponSkill(m_Type) : eWeaponSkill::STD);
 }
 
 CWeaponInfo& CWeapon::GetWeaponInfo(eWeaponSkill skill) const {
-    return *CWeaponInfo::GetWeaponInfo(m_nType, skill);
-}
-
-void CWeapon::KillFx() {
-    if (m_pFxSystem && m_nType != WEAPON_MOLOTOV) {
-        m_pFxSystem->Kill();
-        m_pFxSystem = nullptr;
-    }
+    return *CWeaponInfo::GetWeaponInfo(m_Type, skill);
 }
 
 // 0x73AF00

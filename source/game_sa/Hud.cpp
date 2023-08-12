@@ -648,10 +648,10 @@ void CHud::DrawCrossHairs() {
     if (!player->m_pTargetedObject && !player->bIsRestoringLook && (!localTakUseGun || !localTakUseGun->m_bSkipAim)) {
         if (camMode == MODE_AIMWEAPON || camMode == MODE_AIMWEAPON_FROMCAR || camMode == MODE_AIMWEAPON_ATTACHED) {
             if (player->m_nPedState != ePedState::PEDSTATE_ENTER_CAR && player->m_nPedState != ePedState::PEDSTATE_CARJACK) {
-                if ((activeWeapon.m_nType >= eWeaponType::WEAPON_PISTOL &&
-                     activeWeapon.m_nType <= eWeaponType::WEAPON_COUNTRYRIFLE
+                if ((activeWeapon.m_Type >= eWeaponType::WEAPON_PISTOL &&
+                     activeWeapon.m_Type <= eWeaponType::WEAPON_COUNTRYRIFLE
                     ) ||
-                     activeWeapon.m_nType == eWeaponType::WEAPON_FLAMETHROWER || activeWeapon.m_nType == eWeaponType::WEAPON_MINIGUN
+                     activeWeapon.m_Type == eWeaponType::WEAPON_FLAMETHROWER || activeWeapon.m_Type == eWeaponType::WEAPON_MINIGUN
                 ) {
                     bDrawCircleCrossHair = camMode == MODE_AIMWEAPON || TheCamera.m_bTransitionState;
                 }
@@ -740,10 +740,10 @@ void CHud::DrawCrossHairs() {
     float screenOffsetCenterX = 0.0f;
     float screenOffsetCenterY = 0.0f;
 
-    if (activeWeapon.m_nType == eWeaponType::WEAPON_CAMERA || activeWeapon.m_nType == eWeaponType::WEAPON_SNIPERRIFLE ||
+    if (activeWeapon.m_Type == eWeaponType::WEAPON_CAMERA || activeWeapon.m_Type == eWeaponType::WEAPON_SNIPERRIFLE ||
         CTheScripts::bDrawCrossHair == eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON
     ) {
-        if (activeWeapon.m_nType == eWeaponType::WEAPON_CAMERA || CTheScripts::bDrawCrossHair == eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON) {
+        if (activeWeapon.m_Type == eWeaponType::WEAPON_CAMERA || CTheScripts::bDrawCrossHair == eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON) {
             screenStretchCrossHairX = SCREEN_STRETCH_X(256.0f);
             screenStretchCrossHairY = SCREEN_STRETCH_Y(192.0f);
         } else {
@@ -1138,7 +1138,7 @@ void CHud::DrawRadar() {
     CPlayerPed* player = FindPlayerPed();
     // Draws Altimeter on Planes And Helis or when parachuting down
     if (vehicle && (vehicle->IsSubPlane() || vehicle->IsSubHeli() && vehicle->m_nModelIndex != MODEL_VORTEX)
-        || player->GetActiveWeapon().m_nType == WEAPON_PARACHUTE
+        || player->GetActiveWeapon().m_Type == WEAPON_PARACHUTE
     ) {
         rect.left   = SCREEN_STRETCH_X(40.0f) - SCREEN_STRETCH_X(20.0f);
         rect.bottom    = SCREEN_STRETCH_FROM_BOTTOM(104.0f);
@@ -1383,16 +1383,16 @@ void CHud::DrawAmmo(CPed* ped, int32 x, int32 y, float alpha) {
     const auto MAX_CLIP = 9999;
 
     const auto& weapon = ped->GetActiveWeapon();
-    const auto& totalAmmo = weapon.m_nTotalAmmo;
-    const auto& ammoInClip = weapon.m_nAmmoInClip;
-    const auto& ammoClip = CWeaponInfo::GetWeaponInfo(weapon.m_nType, ped->GetWeaponSkill())->m_nAmmoClip;
+    const auto& totalAmmo = weapon.m_TotalAmmo;
+    const auto& ammoInClip = weapon.m_AmmoInClip;
+    const auto& ammoClip = CWeaponInfo::GetWeaponInfo(weapon.m_Type, ped->GetWeaponSkill())->m_nAmmoClip;
 
     if (ammoClip <= 1 || ammoClip >= 1000) {
         sprintf_s(gString, "%d", totalAmmo);
     } else {
         uint32 total, current;
 
-        if (weapon.m_nType == WEAPON_FLAMETHROWER ) {
+        if (weapon.m_Type == WEAPON_FLAMETHROWER ) {
             uint32 out = MAX_CLIP;
             if ((totalAmmo - ammoInClip) / 10 <= MAX_CLIP) {
                 out = (totalAmmo - ammoInClip) / 10u;
@@ -1422,19 +1422,19 @@ void CHud::DrawAmmo(CPed* ped, int32 x, int32 y, float alpha) {
     CFont::SetDropColor({ 0, 0, 0, 255 });
     CFont::SetFontStyle(eFontStyle::FONT_SUBTITLES);
 
-    if (   totalAmmo - weapon.m_nAmmoInClip >= MAX_CLIP
+    if (   totalAmmo - weapon.m_AmmoInClip >= MAX_CLIP
         || CDarkel::FrenzyOnGoing()
-        || weapon.m_nType == WEAPON_UNARMED
-        || weapon.m_nType == WEAPON_DETONATOR
-        || weapon.m_nType == WEAPON_DILDO1
-        || weapon.m_nType == WEAPON_DILDO2
-        || weapon.m_nType == WEAPON_VIBE1
-        || weapon.m_nType == WEAPON_VIBE2
-        || weapon.m_nType == WEAPON_FLOWERS
-        || weapon.m_nType == WEAPON_CANE
-        || weapon.m_nType == WEAPON_PARACHUTE
-        || CWeaponInfo::GetWeaponInfo(weapon.m_nType)->m_nWeaponFire == WEAPON_FIRE_USE
-        || CWeaponInfo::GetWeaponInfo(weapon.m_nType)->m_nSlot <= 1
+        || weapon.m_Type == WEAPON_UNARMED
+        || weapon.m_Type == WEAPON_DETONATOR
+        || weapon.m_Type == WEAPON_DILDO1
+        || weapon.m_Type == WEAPON_DILDO2
+        || weapon.m_Type == WEAPON_VIBE1
+        || weapon.m_Type == WEAPON_VIBE2
+        || weapon.m_Type == WEAPON_FLOWERS
+        || weapon.m_Type == WEAPON_CANE
+        || weapon.m_Type == WEAPON_PARACHUTE
+        || CWeaponInfo::GetWeaponInfo(weapon.m_Type)->m_nWeaponFire == WEAPON_FIRE_USE
+        || CWeaponInfo::GetWeaponInfo(weapon.m_Type)->m_nSlot <= 1
     ) {
         CFont::SetEdge(0);
         return;

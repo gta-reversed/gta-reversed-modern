@@ -568,7 +568,7 @@ public:
     bool IsInVehicle(const CVehicle* veh) const { return bInVehicle && m_pVehicle == veh; }
     CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
     int32 GetPadNumber() const;
-    bool IsCurrentlyUnarmed() { return GetActiveWeapon().m_nType == WEAPON_UNARMED; }
+    bool IsCurrentlyUnarmed() { return GetActiveWeapon().m_Type == WEAPON_UNARMED; }
 
     /*!
      * @notsa
@@ -599,7 +599,7 @@ public:
      * @brief Give weapon according to given CWeapon struct.
      */
     eWeaponSlot GiveWeapon(const CWeapon& weapon, bool likeUnused) {
-        return GiveWeapon(weapon.m_nType, weapon.m_nTotalAmmo, likeUnused);
+        return GiveWeapon(weapon.m_Type, weapon.m_TotalAmmo, likeUnused);
     }
 
     auto GetPedModelInfo() const { return reinterpret_cast<CPedModelInfo*>(GetModelInfo()); }

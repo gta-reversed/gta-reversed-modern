@@ -102,7 +102,7 @@ bool CTaskSimplePlayerOnFoot::ProcessPed(CPed* ped) {
     if (player->GetPadFromPlayer()) {
         CPedIntelligence* intelligence = player->GetIntelligence();
         bool bPedMoving = player->m_nMoveState >= PEDMOVE_WALK;
-        if (player->GetActiveWeapon().m_nType == WEAPON_CHAINSAW) {
+        if (player->GetActiveWeapon().m_Type == WEAPON_CHAINSAW) {
             if (const auto fightingTask = intelligence->GetTaskFighting()) {
                 if (fightingTask->m_nCurrentMove == FIGHT_ATTACK_FIGHTIDLE) {
                     bPedMoving = true;
@@ -137,7 +137,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
     CTaskManager* taskManager = &player->GetTaskManager();
     CPad* pad = player->GetPadFromPlayer();
 
-    eWeaponType weaponType = player->GetActiveWeapon().m_nType;
+    eWeaponType weaponType = player->GetActiveWeapon().m_Type;
     eWeaponSkill weaponSkill = player->GetWeaponSkill();
     CWeaponInfo* weaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, weaponSkill);
 
@@ -190,7 +190,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
         }
 
         if (!TheCamera.Using1stPersonWeaponMode()) {
-            weaponType = player->GetActiveWeapon().m_nType;
+            weaponType = player->GetActiveWeapon().m_Type;
             if (weaponType == WEAPON_RLAUNCHER || weaponType == WEAPON_RLAUNCHER_HS || weaponType == WEAPON_SNIPERRIFLE || weaponType == WEAPON_CAMERA) {
                 CTaskSimpleUseGun* simpleTaskUseGun = intelligence->GetTaskUseGun();
                 if (simpleTaskUseGun) {
@@ -271,7 +271,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                 auto* pTaskSimpleStealthKill = new CTaskSimpleStealthKill(true, targetEntity, weaponInfo->m_eAnimGroup);
                 taskManager->SetTask(pTaskSimpleStealthKill, TASK_PRIMARY_PRIMARY, false);
 
-                eWeaponType activeWeaponType = player->GetActiveWeapon().m_nType;
+                eWeaponType activeWeaponType = player->GetActiveWeapon().m_Type;
                 CPedDamageResponseCalculator damageCalculator(player, 0.0f, activeWeaponType, PED_PIECE_TORSO, false);
                 CEventDamage eventDamage(player, CTimer::GetTimeInMS(), activeWeaponType, PED_PIECE_TORSO, 0, false, targetEntity->bInVehicle);
                 if (eventDamage.AffectsPed(targetEntity)) {
@@ -288,7 +288,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                     break;
                 }
                 case 4: {
-                    if (!CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_nType, eWeaponSkill::STD)->flags.bHeavy) {
+                    if (!CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_Type, eWeaponSkill::STD)->flags.bHeavy) {
                         fightCommand = 12;
                     } else {
                         fightCommand = 11;
@@ -300,7 +300,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                     break;
                 }
                 default: {
-                    if (pad->GetMeleeAttack(false) && player->GetActiveWeapon().m_nType == WEAPON_CHAINSAW && taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
+                    if (pad->GetMeleeAttack(false) && player->GetActiveWeapon().m_Type == WEAPON_CHAINSAW && taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
                         fightCommand = 11;
                     } else {
                         handleFighting = true;
@@ -325,7 +325,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
         if (weaponInfo->m_nWeaponFire == WEAPON_FIRE_USE) {
             if (pad->WeaponJustDown(nullptr)) {
                 uint8 activeWeaponSlot = player->m_nActiveWeaponSlot;
-                weaponType = player->m_aWeapons[activeWeaponSlot].m_nType;
+                weaponType = player->m_aWeapons[activeWeaponSlot].m_Type;
                 CWeapon* playerWeapon = &player->m_aWeapons[activeWeaponSlot];
                 if (weaponType == WEAPON_DETONATOR) {
                     playerWeapon->Fire(player, &player->GetPosition(), &player->GetPosition(), nullptr, nullptr, nullptr);
@@ -351,7 +351,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                         int32 fightCommand = 2;
                         if (CTaskSimpleUseGun::RequirePistolWhip(player, targetedObject)) {
                             fightCommand = 5;
-                        } else if (player->GetActiveWeapon().m_nState == 2) {
+                        } else if (player->GetActiveWeapon().m_State == 2) {
                             if (!pad->GetTarget() && !targetedObject && !playerData->m_bFreeAiming) {
                                 break;
                             }
@@ -373,7 +373,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                             player->m_pPlayerData->m_fAttackButtonCounter = 0;
                         }
                         if (!pad->GetTarget()) {
-                            if (player->GetActiveWeapon().m_nType == WEAPON_EXTINGUISHER) {
+                            if (player->GetActiveWeapon().m_Type == WEAPON_EXTINGUISHER) {
                                 playerData->m_fLookPitch = -CWeapon::ms_fExtinguisherAimAngle;
                             } else {
                                 playerData->m_fLookPitch = 0.0f;
@@ -384,9 +384,9 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                     case WEAPON_FIRE_PROJECTILE: {
                         uint8 activeWeaponSlot = player->m_nActiveWeaponSlot;
                         CWeapon* activeWeapon = &player->m_aWeapons[activeWeaponSlot];
-                        if (activeWeapon->m_nType == WEAPON_RLAUNCHER || activeWeapon->m_nType == WEAPON_RLAUNCHER_HS) {
+                        if (activeWeapon->m_Type == WEAPON_RLAUNCHER || activeWeapon->m_Type == WEAPON_RLAUNCHER_HS) {
                             int32 fightCommand = 2;
-                            if (activeWeapon->m_nState == WEAPONSTATE_RELOADING) {
+                            if (activeWeapon->m_State == WEAPONSTATE_RELOADING) {
                                 fightCommand = 1;
                             }
                             CTask* secondaryTask = taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
@@ -422,7 +422,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                     case WEAPON_FIRE_CAMERA: {
                         uint8 activeWeaponSlot = player->m_nActiveWeaponSlot;
                         CWeapon* activeWeapon = &player->m_aWeapons[activeWeaponSlot];
-                        if (CCamera::GetActiveCamera().m_nMode == MODE_CAMERA && CTimer::GetTimeInMS() > activeWeapon->m_nTimeForNextShot) {
+                        if (CCamera::GetActiveCamera().m_nMode == MODE_CAMERA && CTimer::GetTimeInMS() > activeWeapon->m_TimeForNextShotMs) {
                             CVector firingPoint(0.0f, 0.0f, 0.6f);
                             CVector outputFiringPoint = *player->m_matrix * firingPoint;
                             activeWeapon->Fire(player, &outputFiringPoint, nullptr, nullptr, nullptr, nullptr);
@@ -451,7 +451,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
     CVector firingPoint(0.0f, 0.0f, 0.0f);
     CVector upVector(0.0f, 0.0f, 0.0f);
 
-    if (player->GetActiveWeapon().m_nState == WEAPONSTATE_RELOADING && weaponInfo->flags.bReload) {
+    if (player->GetActiveWeapon().m_State == WEAPONSTATE_RELOADING && weaponInfo->flags.bReload) {
         if (!intelligence->GetTaskUseGun()) {
             AssocGroupId animGroupId = weaponInfo->m_eAnimGroup;
             AnimationId crouchReloadAnimID = weaponInfo->flags.bReload ? ANIM_ID_RELOAD : ANIM_ID_WALK;
@@ -565,7 +565,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                          !CLocalisation::KickingWhenDown() && ((pedState = targetedEntity->m_nPedState, pedState == PEDSTATE_DIE) || pedState == PEDSTATE_DEAD)) ||
                     player->DoesTargetHaveToBeBroken(player->m_pTargetedObject, activeWeapon) ||
                     !player->bCanPointGunAtTarget &&
-                        (activeWeapon->m_nType, weaponSkill = player->GetWeaponSkill(), !(CWeaponInfo::GetWeaponInfo(activeWeapon->m_nType, weaponSkill)->flags.bCanAim))) {
+                        (activeWeapon->m_Type, weaponSkill = player->GetWeaponSkill(), !(CWeaponInfo::GetWeaponInfo(activeWeapon->m_Type, weaponSkill)->flags.bCanAim))) {
                     player->ClearWeaponTarget();
                     playerData->m_bFreeAiming = 1;
                 }
@@ -579,12 +579,12 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                     }
                 }
 
-                if (CWeaponInfo::GetWeaponInfo(activeWeapon->m_nType, eWeaponSkill::STD)->m_nWeaponFire == WEAPON_FIRE_INSTANT_HIT) {
+                if (CWeaponInfo::GetWeaponInfo(activeWeapon->m_Type, eWeaponSkill::STD)->m_nWeaponFire == WEAPON_FIRE_INSTANT_HIT) {
                     targetedEntity = (CPed*)player->m_pTargetedObject;
                     if (targetedEntity && targetedEntity->IsPed() && intelligence->IsInSeeingRange(player->GetPosition())) {
                         CTask* activePrimaryTask = intelligence->GetActivePrimaryTask();
                         if (!activePrimaryTask || activePrimaryTask->GetTaskType() != TASK_COMPLEX_REACT_TO_GUN_AIMED_AT) {
-                            if (activeWeapon->m_nType != WEAPON_PISTOL_SILENCED) {
+                            if (activeWeapon->m_Type != WEAPON_PISTOL_SILENCED) {
                                 player->Say(176);
                             }
                             CPedGroup* pedGroup = CPedGroups::GetPedsGroup(targetedEntity);
@@ -974,7 +974,7 @@ int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPlayerPed* player, bool bAvoi
             player->m_pPlayerData->m_fMoveBlendRatio = 0.0f;
         }
     }
-    if (!(CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_nType, eWeaponSkill::STD)->flags.bHeavy)) {
+    if (!(CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_Type, eWeaponSkill::STD)->flags.bHeavy)) {
         if (!player->m_standingOnEntity || !player->m_standingOnEntity->m_bIsStatic || player->m_standingOnEntity->m_bHasContacted) {
             if (!player->GetIntelligence()->GetTaskHold(false) || !((CTaskSimpleHoldEntity*)player->GetIntelligence()->GetTaskHold(false))->m_pAnimBlendAssociation) {
                 CAnimBlendHierarchy* animHierarchy = nullptr;
@@ -1008,7 +1008,7 @@ int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPlayerPed* player, bool bAvoi
         player->GetIntelligence()->SetTaskDuckSecondary(0);
     }
 
-    if (!player->bIsInTheAir && !(CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_nType, eWeaponSkill::STD)->flags.bHeavy) && pad->JumpJustDown() && !pad->GetTarget() &&
+    if (!player->bIsInTheAir && !(CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_Type, eWeaponSkill::STD)->flags.bHeavy) && pad->JumpJustDown() && !pad->GetTarget() &&
         !player->m_pAttachedTo) {
         // Possibly inlined code? Like CCamera::IsInSniperMode()
         switch (CCamera::GetActiveCamera().m_nMode) {

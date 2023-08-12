@@ -424,7 +424,7 @@ void CRenderer::RenderFirstPersonVehicle() {
 
     if (m_pFirstPersonVehicle) {
         bool bRestoreAlphaTest = false;
-        if (FindPlayerPed(0)->GetActiveWeapon().m_nType == WEAPON_MICRO_UZI) {
+        if (FindPlayerPed(0)->GetActiveWeapon().m_Type == WEAPON_MICRO_UZI) {
             bRestoreAlphaTest = true;
             RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(80u));
         }

@@ -48,33 +48,18 @@ class CWeaponInfo;
 
 class CWeapon {
 public:
-    eWeaponType  m_nType;
-    eWeaponState m_nState;
-    uint32       m_nAmmoInClip;
-    uint32       m_nTotalAmmo;
-    uint32       m_nTimeForNextShot;
-    uint8        field_14;
-    bool         m_bNoModel; // Used in case of goggles (infrared/nightvision) : When they're put on the weapon model isn't and shouldn't be loaded.
-    uint8        field_16;
-    uint8        field_17;
-    FxSystem_c*  m_pFxSystem; // flamethrower, spraycan, extinguisher particle
-
-    static float&     ms_fExtinguisherAimAngle; // default -0.34907 rad. (-pi/8)
-    static bool&      bPhotographHasBeenTaken;
-    static bool&      ms_bTakePhoto;
-    static CColModel& ms_PelletTestCol;
+    static inline auto& ms_fExtinguisherAimAngle = StaticRef<float>(0x8D610C); // default -0.34907 rad. (-pi/8)
+    static inline auto& bPhotographHasBeenTaken  = StaticRef<bool>(0xC8A7C0);
+    static inline auto& ms_bTakePhoto            = StaticRef<bool>(0xC8A7C1);
+    static inline auto& ms_PelletTestCol         = StaticRef<CColModel>(0xC8A7DC);
 
     static inline struct DebugSettings {
         bool NoShotDelay;
     } s_DebugSettings;
 
 public:
-    CWeapon() { // 0x441E00
-        field_14    = 0;
-        m_bNoModel  = false;
-        m_pFxSystem = nullptr;
-    };
-    CWeapon(eWeaponType weaponType, int32 ammo);
+    CWeapon() = default;
+    CWeapon(eWeaponType weaponType, uint32 ammo);
     CWeapon(const CWeapon&) = delete;
 
     void Initialise(eWeaponType weaponType, int32 ammo, CPed* owner);
@@ -128,26 +113,28 @@ public:
     CWeaponInfo& GetWeaponInfo(CPed* owner = nullptr) const;
     CWeaponInfo& GetWeaponInfo(eWeaponSkill skill) const;
 
-private:
-    void KillFx(); // NOTSA
-    void DecrementAmmo();
+    auto GetType()          const noexcept { return m_Type; }
+    auto GetState()         const noexcept { return m_State; }
+    auto GetAmmoInClip()    const noexcept { return m_AmmoInClip; }
+    auto GetTotalAmmo()     const noexcept { return m_TotalAmmo; }
 
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
     CWeapon* Constructor(eWeaponType weaponType, int32 ammo);
+
+public: // TODO: Eventually make this private
+    eWeaponType  m_Type{};                            //< Weapon's type
+    eWeaponState m_State{};                           //< Current weapon state
+    uint32       m_AmmoInClip{};                      //< Count of ammo in the clip currently
+    uint32       m_TotalAmmo{};                       //< The total amount of ammo (Anything above 25k is considered infinite in case of player peds)
+    uint32       m_TimeForNextShotMs{};               //< When the next shot is allowed to be fired
+    bool         m_IsFirstPersonWeaponModeSelected{}; //< Fuck knows, unused
+    bool         m_DontPlaceInHand{};                 //< Used in case of goggles (infrared/nightvision) : When they're put on the weapon model isn't [and shouldn't be] loaded.
+    FxSystem_c*  m_FxSystem{};                        //< Fx system [flamethrower, spraycan, extinguisher]
 };
 
 VALIDATE_SIZE(CWeapon, 0x1C);
-
-extern float &fPlayerAimScale; // default 0.75
-extern float &fPlayerAimScaleDist; // default 5.0
-extern float &fPlayerAimRotRate; // default 0.0062832
-extern float &SHOTGUN_SPREAD_RATE; // default 0.05
-extern uint32 &SHOTGUN_NUM_PELLETS; // default 15
-extern uint32 &SPAS_NUM_PELLETS; // default 4
-extern float &PELLET_COL_SCALE_RATIO_MULT; // default 1.3
-extern float *fReloadAnimSampleFraction; // default { 0.5, 0.7, 0.75, 0.75, 0.7 }
 
 void FireOneInstantHitRound(CVector* startPoint, CVector* endPoint, int32 intensity);
