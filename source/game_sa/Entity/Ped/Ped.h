@@ -27,6 +27,7 @@
 #include "ePedState.h"
 #include "ePedStats.h"
 #include "ePedType.h"
+#include "eMoveState.h"
 
 class CPedGroup;
 class CCivilianPed;
@@ -75,17 +76,6 @@ enum ePedCreatedBy : uint8 {
     PED_GAME = 1,
     PED_MISSION = 2,
     PED_GAME_MISSION = 3, // used for the playbacked peds on replay
-};
-
-enum eMoveState : uint32 {
-    PEDMOVE_NONE = 0,
-    PEDMOVE_STILL,
-    PEDMOVE_TURN_L,
-    PEDMOVE_TURN_R,
-    PEDMOVE_WALK,
-    PEDMOVE_JOG,
-    PEDMOVE_RUN,
-    PEDMOVE_SPRINT
 };
 
 enum eFightingStyle : int8 {
