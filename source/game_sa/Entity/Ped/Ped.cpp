@@ -2049,15 +2049,10 @@ void CPed::GetBonePosition(RwV3d& outPosition, ePedBones bone, bool updateSkinBo
         }
     } else if (!bCalledPreRender) { // Return static local bone position instead
         outPosition = MultiplyMatrixWithVector(*m_matrix, GetPedBoneStdPosition(bone));
-        assert(!std::isnan(outPosition.x)); // TODO: Sometimes this shit becomes nan, let's investigate
-    } else if (const auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump)) { // Use position of bone matrix from anim hierarchy (if any)
-        // NOTE: Can't use `GetBoneMatrix` here, because it doesn't check for `hier`'s validity. (It's questionable whenever that's needed at all..)
-        RwV3dAssign(&outPosition, RwMatrixGetPos(&RpHAnimHierarchyGetMatrixArray(hier)[RpHAnimIDGetIndex(hier, (size_t)bone)]));
-        assert(!std::isnan(outPosition.x)); // TODO: Sometimes this shit becomes nan, let's investigate
-    } else { // Not sure when can this happen.. GetTransformedBonePosition doesn't check this case.
-        outPosition = GetPosition(); // Return something close to valid..
-        assert(0); // Let's see if this is possible at all.
+        return;
     }
+    RwV3dAssign(&outPosition, RwMatrixGetPos(&GetBoneMatrix(bone)));
+    assert(!std::isnan(outPosition.x)); // TODO: Sometimes this shit becomes nan, let's investigate
 }
 
 /*!
