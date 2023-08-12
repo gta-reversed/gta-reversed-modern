@@ -58,12 +58,12 @@ void CWeapon::InjectHooks() {
     RH_ScopedInstall(SetUpPelletCol, 0x73C710, { .reversed = false });
     RH_ScopedInstall(FireAreaEffect, 0x73E800);
     RH_ScopedInstall(FireInstantHitFromCar, 0x73EC40, { .reversed = false });
-    RH_ScopedInstall(FireFromCar, 0x73FA20, { .reversed = false });
+    RH_ScopedInstall(FireFromCar, 0x73FA20);
     RH_ScopedInstall(FireInstantHit, 0x73FB10, { .reversed = false });
     RH_ScopedInstall(FireProjectile, 0x741360, { .reversed = false });
     RH_ScopedInstall(DoBulletImpact, 0x73B550, { .reversed = false });
     RH_ScopedInstall(LaserScopeDot, 0x73A8D0);
-    RH_ScopedInstall(FireM16_1stPerson, 0x741C00, { .reversed = false });
+    RH_ScopedInstall(FireM16_1stPerson, 0x741C00);
     RH_ScopedInstall(Fire, 0x742300, { .reversed = false });
     RH_ScopedGlobalInstall(DoTankDoomAiming, 0x73D1E0, { .reversed = false });
     RH_ScopedGlobalInstall(DoDriveByAutoAiming, 0x73D720, { .reversed = false });
@@ -497,8 +497,8 @@ float CWeapon::TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner
 }
 
 // 0x73B550
-void CWeapon::DoBulletImpact(CEntity* owner, CEntity* victim, CVector* startPoint, CVector* endPoint, CColPoint* colPoint, int32 arg5) {
-    plugin::CallMethod<0x73B550, CWeapon*, CEntity*, CEntity*, CVector*, CVector*, CColPoint*, int32>(this, owner, victim, startPoint, endPoint, colPoint, arg5);
+void CWeapon::DoBulletImpact(CEntity* owner, CEntity* victim, const CVector& startPoint, const CVector& endPoint, const CColPoint& colPoint, int32 arg5) {
+    plugin::CallMethod<0x73B550, CWeapon*, CEntity*, CEntity*, const CVector&, const CVector&, const CColPoint&, int32>(this, owner, victim, startPoint, endPoint, colPoint, arg5);
 }
 
 /*!
@@ -636,7 +636,7 @@ void CWeapon::FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehi
     CColPoint cpImpact{};
     CWorld::ProcessLineOfSight(&startPoint, &endPoint, cpImpact, victim, true, true, true, true, true, false, false, true);
     CWorld::ResetLineTestOptions();
-    DoBulletImpact(owner, victim, &startPoint, &endPoint, &cpImpact, 0);
+    DoBulletImpact(owner, victim, startPoint, endPoint, cpImpact, 0);
 }
 
 /*!
@@ -982,8 +982,87 @@ bool CWeapon::FireProjectile(CEntity* firingEntity, CVector* origin, CEntity* ta
 }
 
 // 0x741C00
-bool CWeapon::FireM16_1stPerson(CEntity* owner) {
-    return plugin::CallMethodAndReturn<bool, 0x741C00, CWeapon*, CEntity*>(this, owner);
+bool CWeapon::FireM16_1stPerson(CPed* owner) {
+    const auto cam = &TheCamera.GetActiveCam();
+
+    switch (cam->m_nMode) {
+    case MODE_M16_1STPERSON:
+    case MODE_SNIPER:
+    case MODE_CAMERA:
+    case MODE_ROCKETLAUNCHER:
+    case MODE_ROCKETLAUNCHER_HS:
+    case MODE_M16_1STPERSON_RUNABOUT:
+    case MODE_SNIPER_RUNABOUT:
+    case MODE_ROCKETLAUNCHER_RUNABOUT:
+    case MODE_ROCKETLAUNCHER_RUNABOUT_HS:
+    case MODE_HELICANNON_1STPERSON:
+        break;
+    default:
+        return false;
+    }
+
+    const auto wi = &GetWeaponInfo(); // NOTE: Why not `GetWeaponInfo(owner)`
+
+    CWorld::bIncludeDeadPeds = true;
+    CWorld::bIncludeCarTyres = true;
+    CWorld::bIncludeBikers   = true;
+
+    const auto camOriginPos = cam->m_vecSource;
+    const auto camTargetPos = camOriginPos + cam->m_vecFront * 3.f;
+
+    CBirds::HandleGunShot(&camOriginPos, &camTargetPos);
+    CShadows::GunShotSetsOilOnFire(camOriginPos, camTargetPos);
+
+    CColPoint shotCP;
+    CEntity*  shotHitEntity;
+    if (CWorld::ProcessLineOfSight(camOriginPos, camTargetPos, shotCP, shotHitEntity, true, true, true, true, true, false, false, true)) {
+        CheckForShootingVehicleOccupant(&shotHitEntity, &shotCP, m_nType, camOriginPos, camTargetPos);
+    }
+
+    CWorld::bIncludeDeadPeds = false;
+    CWorld::bIncludeCarTyres = false;
+    CWorld::bIncludeBikers   = false;
+    CWorld::pIgnoreEntity    = nullptr;
+
+    //> 0x741DC4 - Check if hit entity is within range
+    if (shotHitEntity) {
+        if (TargetWeaponRangeMultiplier(shotHitEntity, owner) * wi->m_fWeaponRange >= (camOriginPos - shotCP.m_vecPoint).SquaredMagnitude2D()) {
+            shotHitEntity = nullptr;
+        }
+    }
+
+    DoBulletImpact(owner, shotHitEntity, &camOriginPos, &camTargetPos, shotCP, false);
+
+    //> 0x741E48 - Visual/physical feedback for the player(s)
+    if (owner->IsPlayer()) {
+        auto intensity = [&]{
+            switch (m_nType) {
+            case WEAPON_AK47:
+                return 0.00015f;
+            case WEAPON_M4:
+                return 0.0003f;
+            default:
+                return 0.0002f;
+            }
+        }();
+        if (FindPlayerPed()->bIsDucking || FindPlayerPed()->m_pAttachedTo) {
+            intensity *= 0.3f;
+        }
+
+        // Move the camera around a little
+        cam->m_fHorizontalAngle += (float)CGeneral::GetRandomNumberInRange(-64, 64);
+        cam->m_fVerticalAngle += (float)CGeneral::GetRandomNumberInRange(-64, 64);
+
+        // Do pad shaking
+        const auto shakeFreq = (uint8)lerp(130.f, 210.f, std::clamp((20.f - (wi->m_fAnimLoopEnd - wi->m_fAnimLoopStart) * 900.f) / 80.f, 0.f, 1.f));
+        CPad::GetPad(owner->GetPadNumber())->StartShake(
+            (int16)(CTimer::GetTimeStep() * 20'000.f / (float)shakeFreq),
+            shakeFreq,
+            0
+        );
+    }
+
+    return true;
 }
 
 // 0x742300
