@@ -125,6 +125,9 @@ public:
     CWeaponInfo& GetWeaponInfo(eWeaponSkill skill) const;
 
 private:
+    void KillFx(); // NOTSA
+
+private:
     friend void InjectHooksMain();
     static void InjectHooks();
 

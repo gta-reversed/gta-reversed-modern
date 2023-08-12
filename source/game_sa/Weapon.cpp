@@ -54,7 +54,7 @@ void CWeapon::InjectHooks() {
     RH_ScopedInstall(DoDoomAiming, 0x73CDC0);
     RH_ScopedInstall(GenerateDamageEvent, 0x73A530);
     RH_ScopedInstall(FireInstantHitFromCar2, 0x73CBA0);
-    RH_ScopedInstall(Update, 0x73DB40, { .reversed = false });
+    RH_ScopedInstall(Update, 0x73DB40);
     RH_ScopedInstall(SetUpPelletCol, 0x73C710, { .reversed = false });
     RH_ScopedInstall(FireAreaEffect, 0x73E800, { .reversed = false });
     RH_ScopedInstall(FireInstantHitFromCar, 0x73EC40, { .reversed = false });
@@ -706,7 +706,99 @@ void CWeapon::DoDriveByAutoAiming(CEntity* owner, CVehicle* vehicle, CVector* st
 
 // 0x73DB40
 void CWeapon::Update(CPed* owner) {
-    plugin::CallMethod<0x73DB40, CWeapon*, CPed*>(this, owner);
+    const auto wi = &GetWeaponInfo(owner);
+    const auto ao = &wi->GetAimingOffset();
+
+    const auto ProcessReloadAudioIf = [
+        &,
+        rloadA = owner->bIsDucking ? ao->CrouchRLoadA : ao->RLoadA,
+        rloadB = owner->bIsDucking ? ao->CrouchRLoadB : ao->RLoadB
+    ](auto Pred) {
+        const auto ProcessOne = [&](uint32 delay, eAudioEvents ae) {
+            if (Pred(delay, ae)) {
+                owner->m_weaponAudio.AddAudioEvent(ae);
+            }
+        };
+        ProcessOne(rloadA, AE_WEAPON_RELOAD_A);
+        ProcessOne(rloadB, AE_WEAPON_RELOAD_B);
+    };
+
+    switch (m_nState) {
+    case WEAPONSTATE_FIRING: {
+        if (owner && notsa::contains({ WEAPON_SPAS12_SHOTGUN, WEAPON_SHOTGUN }, m_nType)) { // 0x73DBA5    
+            ProcessReloadAudioIf([&](uint32 rload, eAudioEvents ae) {
+                if (!rload) {
+                    return false;
+                }
+                const auto nextShotEnd = m_nTimeForNextShot + rload;
+                return CTimer::GetPreviousTimeInMS() < nextShotEnd && CTimer::GetTimeInMS() >= nextShotEnd;
+            });
+        }
+        if (CTimer::GetTimeInMS() > m_nTimeForNextShot) {
+            m_nState = wi->m_nWeaponFire == eWeaponFire::WEAPON_FIRE_MELEE || m_nTotalAmmo != 0
+                ? eWeaponState::WEAPONSTATE_READY
+                : eWeaponState::WEAPONSTATE_OUT_OF_AMMO;
+        }
+        break;
+    }
+    case WEAPONSTATE_RELOADING: {
+        if (owner && m_nType < WEAPON_LAST_WEAPON) {
+            const auto DoPlayAnimlessReloadAudio = [&] {
+                ProcessReloadAudioIf([
+                    &,
+                    shootDelta = m_nTimeForNextShot - wi->GetWeaponReloadTime()
+                ](uint32 rload, eAudioEvents ae) {
+                    const auto audioTimeMs = rload + shootDelta;
+                    return CTimer::GetPreviousTimeInMS() < audioTimeMs && CTimer::GetTimeInMS() >= audioTimeMs;
+                });
+            };
+            if (wi->flags.bReload && (!owner->IsPlayer() || !FindPlayerInfo().m_bFastReload)) { // 0x73DCCE
+                auto animRLoad = RpAnimBlendClumpGetAssociation(
+                    owner->m_pRwClump,
+                    ANIM_ID_RELOAD //(wi->m_nFlags & 0x1000) != 0 ? ANIM_ID_RELOAD : ANIM_ID_WALK // Always going to be `ANIM_ID_RELOAD`
+                );
+                if (!animRLoad) {
+                    animRLoad = RpAnimBlendClumpGetAssociation(owner->m_pRwClump, wi->GetCrouchReloadAnimationID());
+                }
+                if (animRLoad) { // 0x73DD30
+                    ProcessReloadAudioIf([&](uint32 rloadMs, eAudioEvents ae) {
+                        const auto rloadS = (float)rloadMs / 1000.f;
+                        return rloadS <= animRLoad->m_fCurrentTime && animRLoad->m_fCurrentTime - animRLoad->m_fTimeStep < rloadS;
+                    });
+                    if (CTimer::GetTimeInMS() > m_nTimeForNextShot) {
+                        if (animRLoad->GetTimeProgress() < 0.9f) {
+                            m_nTimeForNextShot = CTimer::GetTimeInMS();
+                        }
+                    }
+                } else if (owner->GetIntelligence()->GetTaskUseGun()) { // 0x73DDF9
+                    if (CTimer::GetTimeInMS() > m_nTimeForNextShot) {
+                        m_nTimeForNextShot = CTimer::GetTimeInMS();
+                    }
+                } else { // 0x73DE16
+                    DoPlayAnimlessReloadAudio();
+                }
+            } else {
+                DoPlayAnimlessReloadAudio();
+            }
+        }
+        //> 0x73DEA4
+        if (CTimer::GetTimeInMS() > m_nTimeForNextShot) {
+            Reload(owner);
+            m_nState = WEAPONSTATE_READY;
+        }
+        KillFx();
+        break;
+    }
+    case WEAPONSTATE_MELEE_MADECONTACT: {
+        m_nState = WEAPONSTATE_READY;
+        KillFx();
+        break;
+    }
+    default: {
+        KillFx();
+        break;
+    }
+    }
 }
 
 // 0x73A360
@@ -826,6 +918,13 @@ CWeaponInfo& CWeapon::GetWeaponInfo(CPed* owner) const {
 
 CWeaponInfo& CWeapon::GetWeaponInfo(eWeaponSkill skill) const {
     return *CWeaponInfo::GetWeaponInfo(m_nType, skill);
+}
+
+void CWeapon::KillFx() {
+    if (m_pFxSystem && m_nType != WEAPON_MOLOTOV) {
+        m_pFxSystem->Kill();
+        m_pFxSystem = nullptr;
+    }
 }
 
 // 0x73AF00

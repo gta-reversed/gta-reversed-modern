@@ -124,6 +124,8 @@ public:
     static auto GetWeaponInfo(CPed* ped) {
         return GetWeaponInfo(ped->GetActiveWeapon().m_nType, ped->GetWeaponSkill());
     }
+
+    const auto& GetAimingOffset() const { return g_GunAimingOffsets[m_nAimOffsetIndex]; }
 };
 VALIDATE_SIZE(CWeaponInfo, 0x70);
 
