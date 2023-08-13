@@ -8,7 +8,7 @@ void CAEStreamThread::InjectHooks() {
     RH_ScopedClass(CAEStreamThread);
     RH_ScopedCategory("Audio");
 
-    RH_ScopedInstall(Initialise, 0x4F1680, { .reversed = false });
+    RH_ScopedInstall(Initialise, 0x4F1680);
     RH_ScopedInstall(Start, 0x4F11F0);
     RH_ScopedInstall(Stop, 0x4F1590);
     RH_ScopedInstall(Pause, 0x4F1200);

@@ -7,6 +7,9 @@
 uint64& CAEAudioUtility::startTimeMs = *reinterpret_cast<uint64*>(0xb610f8);
 float (&CAEAudioUtility::m_sfLogLookup)[50][2] = *reinterpret_cast<float (*)[50][2]>(0xb61100);
 
+// NOTE: Not sure about the size.
+static inline auto& gScriptBanksLookup = *reinterpret_cast<std::array<int32, 628>*>(0x8ABC70);
+
 void CAEAudioUtility::InjectHooks() {
     RH_ScopedClass(CAEAudioUtility);
     RH_ScopedCategory("Audio");
@@ -18,7 +21,7 @@ void CAEAudioUtility::InjectHooks() {
     RH_ScopedInstall(AudioLog10, 0x4d9e50);
     RH_ScopedInstall(ConvertFromBytesToMS, 0x4d9ef0);
     RH_ScopedInstall(ConvertFromMSToBytes, 0x4d9f40);
-    RH_ScopedInstall(GetBankAndSoundFromScriptSlotAudioEvent, 0x4D9CC0, { .reversed = false });
+    RH_ScopedInstall(GetBankAndSoundFromScriptSlotAudioEvent, 0x4D9CC0);
     RH_ScopedInstall(FindVehicleOfPlayer, 0x4D9E10);
 
     RH_ScopedInstall(GetCurrentTimeInMS, 0x4d9e80);
@@ -104,8 +107,29 @@ void CAEAudioUtility::StaticInitialise() {
 }
 
 // 0x4D9CC0
-bool CAEAudioUtility::GetBankAndSoundFromScriptSlotAudioEvent(int32* a1, int32* a2, int32* a3, int32 a4) {
-    return plugin::CallAndReturn<bool, 0x4D9CC0, int32*, int32*, int32*, int32>(a1, a2, a3, a4);
+bool CAEAudioUtility::GetBankAndSoundFromScriptSlotAudioEvent(int32& slot, int32& outBank, int32& outSound, int32 a4) {
+    if (slot < 1800)
+        return false;
+
+    if (slot < 2000) {
+        outBank = gScriptBanksLookup[slot];
+        return true;
+    }
+
+    if (slot == 0xFFFF) { // (int16)-1
+        outBank = 291;
+
+        if (a4 > 3)
+            outSound = 0;
+        else
+            outSound = 2 * (a4 % 2);
+
+        return true;
+    }
+
+    outBank = static_cast<int32>(std::floor(float(slot - 2000) / 200.0f)) + 147;
+    outSound = (slot - 2000) % 200;
+    return true;
 }
 
 // 0x4D9E10
