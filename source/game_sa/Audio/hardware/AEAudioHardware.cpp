@@ -4,6 +4,8 @@
 #include "AEMP3BankLoader.h"
 #include "AEMP3TrackLoader.h"
 #include "AEAudioEnvironment.h"
+#include "AEStaticChannel.h"
+#include "AEUserRadioTrackManager.h"
 
 CAEAudioHardware& AEAudioHardware = *reinterpret_cast<CAEAudioHardware*>(0xB5F8B8);
 
@@ -44,7 +46,7 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(GetActiveTrackID, 0x4D8F80);
     RH_ScopedInstall(GetPlayingTrackID, 0x4D8F90);
     RH_ScopedInstall(GetBeatInfo, 0x4D8FA0);
-    RH_ScopedInstall(SetBassSetting, 0x4D94A0, {.reversed = false});
+    RH_ScopedInstall(SetBassSetting, 0x4D94A0);
     RH_ScopedInstall(DisableBassEq, 0x4D94D0);
     RH_ScopedInstall(EnableBassEq, 0x4D94E0);
     RH_ScopedInstall(SetChannelFlags, 0x4D9500);
@@ -65,7 +67,7 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(InitDirectSoundListener, 0x4D9640);
     RH_ScopedInstall(Terminate, 0x4D97A0);
     RH_ScopedInstall(Service, 0x4D9870);
-    RH_ScopedInstall(Initialise, 0x4D9930, { .reversed = false });
+    RH_ScopedInstall(Initialise, 0x4D9930, { .reversed = true });
 }
 
 // 0x4D83E0
@@ -76,25 +78,96 @@ CAEAudioHardware::CAEAudioHardware() {
 
 // 0x4D9930
 bool CAEAudioHardware::Initialise() {
-    return plugin::CallMethodAndReturn<bool, 0x4D9930, CAEAudioHardware*>(this);
+    m_pMP3BankLoader  = new CAEMP3BankLoader;
+    m_pMP3TrackLoader = new CAEMP3TrackLoader;
+    if (!m_pMP3BankLoader->Initialise() || !m_pMP3TrackLoader->Initialise()) {
+        NOTSA_LOG_ERR("Failed initializing MP3 module!");
+        return false;
+    }
 
-    //***
-    //* We need EAX headers here, so I won't bother with this function for now
-    //***
-    // 
-    //m_pMP3BankLoader  = new CAEMP3BankLoader;
-    //m_pMP3TrackLoader = new CAEMP3TrackLoader;
-    //if (!m_pMP3TrackLoader->Initialise() || !m_pMP3TrackLoader->Initialise()) {
-    //    NOTSA_LOG_ERR("Failed initializing MP3 module!");
+    CoInitialize(nullptr);
+
+    // TODO: We need EAX headers here.
+    //
+    // Though, EAX through DirectSound IS NOT SUPPORTED after Windows Vista since
+    // Windows doesn't emulate EAX extensions.
+    //
+    // Wine or 3rd party DSOUND libraries may support it so we should have them
+    // here.
+
+    // if (FAILED(EAXDirectSoundCreate(&DSDEVID_DefaultPlayback, &m_pDSDevice, 0)))
     //    return false;
-    //}
+
+    if (FAILED(DirectSoundCreate8(&DSDEVID_DefaultPlayback, &m_pDSDevice, 0)))
+        return false;
+
+    m_dsCaps.dwSize = 96;
+    m_pDSDevice->GetCaps(&m_dsCaps);
+
+    if (FAILED(m_pDSDevice->SetCooperativeLevel(PSGLOBAL(window), DSSCL_PRIORITY))
+        || !InitDirectSoundListener(2, 48'000, 16))
+        return false;
+
+    m_pDSDevice->GetSpeakerConfig((LPDWORD)&m_nSpeakerConfig);
+
+    m_pStreamingChannel = new CAEStreamingChannel(m_pDSDevice, 0);
+    m_pStreamingChannel->Initialise();
+
+    const uint32 freeHw3DAllBuffers = m_dsCaps.dwFreeHw3DAllBuffers;
+    if (freeHw3DAllBuffers < 24) {
+        m_nNumChannels = 48;
+        AESmoothFadeThread.m_nNumAvailableBuffers = 48;
+        field_4 = 0;
+    } else {
+        m_nNumChannels = std::min(freeHw3DAllBuffers, 64u) - 7;
+        field_4 = 1;
+        AESmoothFadeThread.m_nNumAvailableBuffers = 7;
+    }
+
+    m_aChannels[0] = m_pStreamingChannel;
+    for (auto i = 1u; i < m_nNumChannels; i++) {
+        m_aChannels[i] = new CAEStaticChannel(m_pDSDevice, i, field_4, 44'100, 16);
+    }
+
+    m_pStreamingChannel->SetVolume(-100.0f);
+    m_awChannelFlags[0] = 55; // todo: flag
+
+    if (FrontEndMenuManager.m_bTracksAutoScan) {
+        AEUserRadioTrackManager.ScanUserTracks();
+
+        // Wait other threads until scanning is done.
+        auto& state = AEUserRadioTrackManager.m_nUserTracksScanState;
+        while (state != USER_TRACK_SCAN_IN_PROGRESS) {
+            switch (state) {
+            case USER_TRACK_SCAN_COMPLETE:
+            case USER_TRACK_SCAN_ERROR:
+                // Set off after ended up complete or failed.
+                state = USER_TRACK_SCAN_OFF;
+                break;
+            default:
+                break;
+            }
+
+            Sleep(100);
+        }
+    }
+
+    AEUserRadioTrackManager.Initialise();
+    AESmoothFadeThread.Initialise();
+    AESmoothFadeThread.Start();
+    m_pStreamThread.Initialise(m_pStreamingChannel);
+    m_pStreamThread.Start();
+
+    m_nNumAvailableChannels = m_nNumChannels;
+    m_bInitialised = true;
+
+    return true;
 }
 
 // 0x4D9640
 bool CAEAudioHardware::InitDirectSoundListener(uint32 numChannels, uint32 samplesPerSec, uint32 bitsPerSample) {
-    if (m_pDSDevice == NULL) {
+    if (!m_pDSDevice)
         return false;
-    }
 
     DSBUFFERDESC dsBuffDsc{
         sizeof(DSBUFFERDESC),

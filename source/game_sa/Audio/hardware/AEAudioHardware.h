@@ -83,7 +83,7 @@ public:
     CAEMP3BankLoader*       m_pMP3BankLoader{};
     CAEMP3TrackLoader*      m_pMP3TrackLoader{};
     IDirectSound8*          m_pDSDevice{};
-    void*                   m_dwSpeakerConfig{};
+    uint32                  m_nSpeakerConfig{};
     void*                   m_n3dEffectsQueryResult{};
     DSCAPS                  m_dsCaps{};
     IDirectSound3DListener* m_pDirectSound3dListener{};
