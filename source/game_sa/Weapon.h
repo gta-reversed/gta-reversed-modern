@@ -79,6 +79,13 @@ public:
     bool HasWeaponAmmoToBeUsed();
     void StopWeaponEffect();
     void DoBulletImpact(CEntity* owner, CEntity* victim, const CVector& startPoint, const CVector& endPoint, const CColPoint& colPoint, int32 arg5);
+    /*!
+    * @addr 0x73C1F0
+    * @brief Marks all peds and objects that are in range (125 units) and in frame (on the screen - 0.1 relative border) as photographed.
+    *
+    * @param owner Camera owner - unused.
+    * @param point Pos of the camflash effect
+    */
     bool TakePhotograph(CEntity* owner, CVector* point);
     void SetUpPelletCol(int32 numPellets, CEntity* owner, CEntity* victim, CVector& point, CColPoint& colPoint, CMatrix& outMatrix);
     bool CanBeUsedFor2Player();
@@ -101,6 +108,13 @@ public:
     static bool GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType weaponType, int32 damageFactor, ePedPieceTypes pedPiece, uint8 direction);
     static bool CanBeUsedFor2Player(eWeaponType weaponType);
     static float TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner);
+
+    /*!
+    * @addr 0x73CDC0
+    * @brief Find closest entity in range that is visible to `owner` (Eg.: Is in [-PI/8, PI/8] angle) and modify `end->z` to be pointing at it. idk..
+    *
+    * @param end out Z axis is modified
+    */
     static void DoDoomAiming(CEntity* owner, CVector* start, CVector* end);
     static void DoTankDoomAiming(CEntity* vehicle, CEntity* owner, CVector* startPoint, CVector* endPoint);
     static void DoDriveByAutoAiming(CEntity* owner, CVehicle* vehicle, CVector* startPoint, CVector* endPoint, bool canAimVehicles);

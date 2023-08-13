@@ -84,14 +84,11 @@ void CWeapon::Initialise(eWeaponType weaponType, int32 ammo, CPed* owner) {
 
     m_TimeForNextShotMs = 0;
 
-    int32 model1 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD)->m_nModelId1;
-    int32 model2 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD)->m_nModelId2;
-
-    if (model1 != -1)
-        CModelInfo::GetModelInfo(model1)->AddRef();
-
-    if (model2 != -1)
-        CModelInfo::GetModelInfo(model2)->AddRef();
+    for (const auto m : CWeaponInfo::GetWeaponInfo(m_Type)->GetModels()) {
+        if (m != MODEL_INVALID) {
+            CModelInfo::GetModelInfo(m)->AddRef();
+        }
+    }
 
     m_FxSystem = nullptr;
     m_DontPlaceInHand = false;
@@ -127,6 +124,7 @@ void CWeapon::Shutdown() {
             CModelInfo::GetModelInfo(m)->RemoveRef();
         }
     }
+
     m_Type            = eWeaponType::WEAPON_UNARMED;
     m_State           = eWeaponState::WEAPONSTATE_READY;
     m_TotalAmmo       = 0;
@@ -141,20 +139,18 @@ void CWeapon::AddGunshell(CEntity* creator, CVector& position, const CVector2D& 
     }
 
     // originally squared
-    if (DistanceBetweenPoints(creator->GetPosition(), TheCamera.GetPosition()) > 10.0f) {
+    if ((creator->GetPosition() - TheCamera.GetPosition()).SquaredMagnitude() > sq(10.0f)) {
         return;
     }
 
+    // Add gunshell fx particle
     CVector velocity(direction.x, direction.y, CGeneral::GetRandomNumberInRange(0.4f, 1.6f));
-
     FxPrtMult_c fxprt(0.5f, 0.5f, 0.5f, 1.0f, size, 1.0f, 1.0f);
-
     switch (m_Type) {
     case eWeaponType::WEAPON_SPAS12_SHOTGUN:
     case eWeaponType::WEAPON_SHOTGUN:
         fxprt.SetColor(0.6f, 0.1f, 0.1f);
     }
-
     g_fx.m_GunShell->AddParticle(&position, &velocity, 0.0f, &fxprt, -1.0f, 1.2f, 0.6f, 0);
 }
 
@@ -338,8 +334,9 @@ bool CWeapon::FireSniper(CPed* shooter, CEntity* victim, CVector* target) {
 
 // 0x73AEB0
 void CWeapon::Reload(CPed* owner) {
-    if (!m_TotalAmmo)
+    if (!m_TotalAmmo) {
         return;
+    }
 
     uint32 ammo = GetWeaponInfo(owner).m_nAmmoClip;
     m_AmmoInClip = std::min(ammo, m_TotalAmmo);
@@ -347,8 +344,7 @@ void CWeapon::Reload(CPed* owner) {
 
 // 0x73B1C0
 bool CWeapon::IsTypeMelee() {
-    auto weaponInfo = CWeaponInfo::GetWeaponInfo(m_Type, eWeaponSkill::STD);
-    return weaponInfo->m_nWeaponFire == eWeaponFire::WEAPON_FIRE_MELEE;
+    return GetWeaponInfo().m_nWeaponFire == eWeaponFire::WEAPON_FIRE_MELEE;
 }
 
 // 0x73B1E0
@@ -363,7 +359,6 @@ bool CWeapon::IsType2Handed() {
     case eWeaponType::WEAPON_COUNTRYRIFLE:
         return true;
     }
-
     return false;
 }
 
@@ -377,7 +372,6 @@ bool CWeapon::IsTypeProjectile() {
     case eWeaponType::WEAPON_FREEFALL_BOMB:
         return true;
     }
-
     return false;
 }
 
@@ -390,7 +384,6 @@ bool CWeapon::CanBeUsedFor2Player(eWeaponType weaponType) {
     case eWeaponType::WEAPON_PARACHUTE:
         return false;
     }
-
     return true;
 }
 
@@ -413,7 +406,6 @@ bool CWeapon::HasWeaponAmmoToBeUsed() {
     case eWeaponType::WEAPON_PARACHUTE:
         return true;
     }
-
     return m_TotalAmmo != 0;
 }
 
@@ -422,7 +414,6 @@ bool CWeapon::ProcessLineOfSight(const CVector& startPoint, const CVector& endPo
                                  bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool arg11, bool doIgnoreCameraCheck) {
     CBirds::HandleGunShot(&startPoint, &endPoint);
     CShadows::GunShotSetsOilOnFire(startPoint, endPoint);
-
     return CWorld::ProcessLineOfSight(startPoint, endPoint, outColPoint, outEntity, buildings, vehicles, peds, objects, dummies, false, doIgnoreCameraCheck, true);
 }
 
@@ -436,13 +427,15 @@ void CWeapon::StopWeaponEffect() {
 
 // 0x73B380
 float CWeapon::TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner) {
-    if (!victim || !weaponOwner)
+    if (!victim || !weaponOwner) {
         return 1.0f;
+    }
 
     switch (victim->m_nType) {
     case ENTITY_TYPE_VEHICLE: {
-        if (!victim->AsVehicle()->IsBike())
+        if (!victim->AsVehicle()->IsBike()) {
             return 3.0f;
+        }
         break;
     }
     case ENTITY_TYPE_PED: {
@@ -453,15 +446,18 @@ float CWeapon::TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner
         }
 
         if (CEntity* attachedTo = pedVictim->m_pAttachedTo) {
-            if (attachedTo->IsVehicle() && !attachedTo->AsVehicle()->IsBike())
+            if (attachedTo->IsVehicle() && !attachedTo->AsVehicle()->IsBike()) {
                 return 3.0f;
+            }
         }
+
         break;
     }
     }
 
-    if (!weaponOwner->IsPed() || !weaponOwner->AsPed()->IsPlayer())
+    if (!weaponOwner->IsPed() || !weaponOwner->AsPed()->IsPlayer()) {
         return 1.0f;
+    }
 
     switch (CCamera::GetActiveCamera().m_nMode) {
     case MODE_TWOPLAYER_IN_CAR_AND_SHOOTING:
@@ -743,13 +739,7 @@ void CWeapon::DoBulletImpact(CEntity* firedBy, CEntity* victim, const CVector& s
     }
 }
 
-/*!
-* @addr 0x73C1F0
-* @brief Marks all peds and objects that are in range (125 units) and in frame (on the screen - 0.1 relative border) as photographed.
-*
-* @param owner Camera owner - unused.
-* @param point Pos of the camflash effect
-*/
+// 0x73C1F0
 bool CWeapon::TakePhotograph(CEntity* owner, CVector* point) {
     UNUSED(owner);
 
@@ -856,15 +846,13 @@ void CWeapon::SetUpPelletCol(int32 numPellets, CEntity* owner, CEntity* victim, 
 
 // 0x73CBA0
 void CWeapon::FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehicle* vehicle, CEntity* owner) {
-    const auto player = FindPlayerPed();
-    //CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD); // useless
-    CCrime::ReportCrime(CRIME_FIRE_WEAPON, player, player);
+    CCrime::ReportCrime(CRIME_FIRE_WEAPON, FindPlayerPed(), FindPlayerPed());
 
     GetEventGlobalGroup()->Add(CEventGunShot{
         notsa::coalesce<CEntity*>(owner, vehicle),
         startPoint,
         endPoint,
-        m_Type == WEAPON_PISTOL_SILENCED || m_Type == WEAPON_TEARGAS
+        notsa::contains({WEAPON_PISTOL_SILENCED, WEAPON_TEARGAS}, GetType())
     });
     g_InterestingEvents.Add(CInterestingEvents::EType::INTERESTING_EVENT_22, owner);
 
@@ -881,12 +869,7 @@ void CWeapon::FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehi
     DoBulletImpact(owner, victim, startPoint, endPoint, cpImpact, 0);
 }
 
-/*!
-* @addr 0x73CDC0
-* @brief Find closest entity in range that is visible to `owner` (Eg.: Is in [-PI/8, PI/8] angle) and modify `end->z` to be pointing at it. idk..
-*
-* @param end out Z axis is modified
-*/
+// 0x73CDC0
 void CWeapon::DoDoomAiming(CEntity* owner, CVector* start, CVector* end) {
     int16 inRangeCount{};
     std::array<CEntity*, 16> objInRange{};
@@ -1108,6 +1091,7 @@ CEntity* CWeapon::FindNearestTargetEntityWithScreenCoors(float screenX, float sc
     return closest;
 }
 
+// notsa
 auto CWeapon::GetProjectileType() {
     switch (GetType()) {
     case eWeaponType::WEAPON_RLAUNCHER:
@@ -1152,22 +1136,15 @@ float CWeapon::EvaluateTargetForHeatSeekingMissile(CEntity* potentialTarget, con
 
 // 0x73E690
 void CWeapon::DoWeaponEffect(CVector origin, CVector dir) {
-    char fxName[32]{};
+    const char* fxName{};
     switch (m_Type) {
-    case eWeaponType::WEAPON_FLAMETHROWER:
-        strcpy_s(fxName, "flamethrower");
-        break;
-    case eWeaponType::WEAPON_EXTINGUISHER:
-        strcpy_s(fxName, "extinguisher");
-        break;
-    case eWeaponType::WEAPON_SPRAYCAN:
-        strcpy_s(fxName, "spraycan");
-        break;
-    default:
-        return StopWeaponEffect();
+    case eWeaponType::WEAPON_FLAMETHROWER: fxName = "flamethrower"; break;
+    case eWeaponType::WEAPON_EXTINGUISHER: fxName = "extinguisher"; break;
+    case eWeaponType::WEAPON_SPRAYCAN:     fxName = "spraycan";     break;
+    default:                               StopWeaponEffect();      return;
     }
 
-    RwMatrix* mat = RwMatrixCreate();
+    const auto mat = RwMatrixCreate();
     g_fx.CreateMatFromVec(mat, &origin, &dir);
 
     if (m_FxSystem) {
