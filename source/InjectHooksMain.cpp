@@ -413,7 +413,7 @@
 #include "extensions/CommandLine.h"
 #include <RenderBuffer.hpp>
 
-#include "RootHookCategory.h"
+#include "ReversibleHooks/RootHookCategory.h"
 
 void InjectHooksMain() {
     HookInstall(0x53E230, &Render2dStuff);   // [ImGui] This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without

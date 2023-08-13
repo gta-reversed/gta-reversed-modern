@@ -11,8 +11,7 @@ struct tAudioZoneData {
 VALIDATE_SIZE(tAudioZoneData, 0xC);
 
 struct tAudioZoneSphere : tAudioZoneData {
-    CVector m_vPosn;
-    float   m_fRadius;
+    CSphere m_Sphere;
 };
 VALIDATE_SIZE(tAudioZoneSphere, 0x1C);
 
@@ -27,19 +26,19 @@ VALIDATE_SIZE(tAudioZoneBox, 0x18);
 
 class CAudioZones {
 public:
-    static int32 (&m_aActiveBoxes)[10];
-    static int32 (&m_aActiveSpheres)[10];
+    static inline auto& m_aActiveBoxes = *reinterpret_cast<std::array<int32, 10>*>(0xB6DC6C);
+    static inline auto& m_aActiveSpheres = *reinterpret_cast<std::array<int32, 10>*>(0xB6DC94);
 
-    static uint32& m_NumActiveBoxes;
-    static uint32& m_NumActiveSpheres;
-    static uint32& m_NumBoxes;
-    static uint32& m_NumSpheres;
+    static inline auto& m_NumActiveBoxes = *reinterpret_cast<uint32*>(0xB6DCBC);
+    static inline auto& m_NumActiveSpheres = *reinterpret_cast<uint32*>(0xB6DCC0);
+    static inline auto& m_NumBoxes = *reinterpret_cast<uint32*>(0xB6DCC4);
+    static inline auto& m_NumSpheres = *reinterpret_cast<uint32*>(0xB6DCC8);
 
     static constexpr int32 NUM_AUDIO_BOXES = 158;
-    static tAudioZoneBox (&m_aBoxes)[NUM_AUDIO_BOXES];
+    static inline auto& m_aBoxes = *reinterpret_cast<std::array<tAudioZoneBox, NUM_AUDIO_BOXES>*>(0xB6DCD0);
 
     static constexpr int32 NUM_AUDIO_SPHERES = 3;
-    static tAudioZoneSphere (&m_aSpheres)[NUM_AUDIO_SPHERES];
+    static inline auto& m_aSpheres = *reinterpret_cast<std::array<tAudioZoneSphere, NUM_AUDIO_SPHERES>*>(0xB6EBA8);
 
 public:
     static void InjectHooks();
@@ -49,10 +48,19 @@ public:
     static void RegisterAudioBox(char name[8], int32 id, bool isActive, CVector min, CVector max);
     static void RegisterAudioSphere(char name[8], int32 id, bool isActive, CVector position, float radius);
 
-    static void SwitchAudioZone(char* zoneName, bool enable);
-    static void Update(bool a1, CVector posn);
+    static void SwitchAudioZone(const char* zoneName, bool enable);
+    static void Update(bool forceUpdate, CVector posn);
 
     static auto GetActiveAuZoBoxes() { // TODO/NOTE: This isn't how it works! See `m_aActiveBoxes`
         return m_aBoxes | rng::views::take((size_t)m_NumBoxes);
+    }
+
+    // TODO: idc about func at top rn.
+    static auto GetAvailableBoxes() {
+        return m_aBoxes | rng::views::take((size_t)m_NumBoxes);
+    }
+
+    static auto GetAvailableSpheres() {
+        return m_aSpheres | rng::views::take((size_t)m_NumSpheres);
     }
 };

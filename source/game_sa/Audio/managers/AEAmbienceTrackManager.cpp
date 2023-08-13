@@ -92,7 +92,7 @@ void CAEAmbienceTrackManager::UpdateAmbienceTrackAndVolume() {
         if (CAudioZones::m_NumActiveSpheres) { // 0x4D6F0D
             const auto& sp = CAudioZones::m_aSpheres[CAudioZones::m_aActiveSpheres[0]];
             activeAuZoIdx = sp.m_nAudioZone;
-            activeAuZoPos = sp.m_vPosn;
+            activeAuZoPos = sp.m_Sphere.m_vecCenter;
         } else if (CAudioZones::m_NumActiveBoxes) {
             const auto& box = CAudioZones::m_aBoxes[CAudioZones::m_aActiveBoxes[0]];
             activeAuZoIdx = box.m_nAudioZone;
