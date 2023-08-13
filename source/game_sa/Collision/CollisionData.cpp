@@ -229,7 +229,7 @@ CLink<CCollisionData*>* CCollisionData::GetLinkPtr() {
 
 auto CCollisionData::GetNumFaceGroups() const -> uint32 {
     // See `CCollisionData` header for explanation :)
-    assert(m_pTriangles);
+    assert(!bHasFaceGroups || m_pTriangles);
     return bHasFaceGroups
         ? *reinterpret_cast<uint32*>(reinterpret_cast<uint8*>(m_pTriangles) - sizeof(uint32))
         : 0u;

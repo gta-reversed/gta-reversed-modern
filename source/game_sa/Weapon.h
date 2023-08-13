@@ -91,7 +91,7 @@ public:
     bool FireFromCar(CVehicle* vehicle, bool leftSide, bool rightSide);
     void FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehicle* vehicle, CEntity* owner);
     bool FireInstantHit(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, CEntity* targetEntity = nullptr, CVector* target = nullptr, CVector* originForDriveBy = nullptr, bool arg6 = false, bool muzzle = false);
-    bool FireProjectile(CEntity* firingEntity, CVector* origin, CEntity* targetEntity = nullptr, CVector* target = nullptr, float force = 0.f);
+    bool FireProjectile(CEntity* firingEntity, const CVector& origin, CEntity* targetEntity = nullptr, const CVector* targetPos = nullptr, float force = 0.f);
     bool FireM16_1stPerson(CPed* owner);
     bool Fire(CEntity* firedBy, CVector* startPosn, CVector* barrelPosn, CEntity* targetEnt, CVector* targetPosn, CVector* altPosn);
 
@@ -123,6 +123,10 @@ private:
     static void InjectHooks();
 
     CWeapon* Constructor(eWeaponType weaponType, int32 ammo);
+
+    //! @notsa
+    //! @brief Get the projectile type of this weapon - Only valid for weapons that fire a projectile [like rlaunchers, etc], or are itself a projectile [ex.: grenades]
+    auto GetProjectileType();
 
 public: // TODO: Eventually make this private
     eWeaponType  m_Type{};                            //< Weapon's type

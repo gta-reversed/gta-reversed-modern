@@ -49,7 +49,7 @@ void CWeapon::InjectHooks() {
     RH_ScopedInstall(FireInstantHitFromCar, 0x73EC40, { .reversed = false });
     RH_ScopedInstall(FireFromCar, 0x73FA20);
     RH_ScopedInstall(FireInstantHit, 0x73FB10, { .reversed = false });
-    RH_ScopedInstall(FireProjectile, 0x741360, { .reversed = false });
+    RH_ScopedInstall(FireProjectile, 0x741360);
     RH_ScopedInstall(DoBulletImpact, 0x73B550, { .reversed = false });
     RH_ScopedInstall(LaserScopeDot, 0x73A8D0);
     RH_ScopedInstall(FireM16_1stPerson, 0x741C00);
@@ -847,6 +847,22 @@ CEntity* CWeapon::FindNearestTargetEntityWithScreenCoors(float screenX, float sc
     return closest;
 }
 
+auto CWeapon::GetProjectileType() {
+    switch (GetType()) {
+    case eWeaponType::WEAPON_RLAUNCHER:
+        return eWeaponType::WEAPON_ROCKET;
+    case eWeaponType::WEAPON_RLAUNCHER_HS:
+        return eWeaponType::WEAPON_ROCKET_HS;
+    case WEAPON_GRENADE:
+    case WEAPON_TEARGAS:
+    case WEAPON_MOLOTOV:
+    case WEAPON_REMOTE_SATCHEL_CHARGE:
+        return GetType();
+    default:
+        NOTSA_UNREACHABLE();
+    }
+}
+
 // 0x73E560
 float CWeapon::EvaluateTargetForHeatSeekingMissile(CEntity* potentialTarget, const CVector& origin, const CVector& aimingDir, float tolerance, bool arePlanesPriority, CEntity* preferredExistingTarget) {
     const auto potentialTargetDist = (origin - potentialTarget->GetPosition()).Magnitude();
@@ -1054,8 +1070,169 @@ bool CWeapon::FireInstantHit(CEntity* firingEntity, CVector* origin, CVector* mu
 }
 
 // 0x741360
-bool CWeapon::FireProjectile(CEntity* firingEntity, CVector* origin, CEntity* targetEntity, CVector* target, float force) {
-    return plugin::CallMethodAndReturn<bool, 0x741360, CWeapon*, CEntity*, CVector*, CEntity*, CVector*, float>(this, firingEntity, origin, targetEntity, target, force);
+bool CWeapon::FireProjectile(CEntity* firedBy, const CVector& origin, CEntity* targetEntity, const CVector* targetPos, float force) {
+    assert(firedBy);
+
+    const auto firedByPed = firedBy->IsPed()
+        ? firedBy->AsPed()
+        : nullptr;
+    auto projOrigin     = origin;
+    auto losCheckTarget = origin;
+    auto losCheckOrigin = origin;
+    auto projType = GetProjectileType();
+    if (notsa::contains({ WEAPON_RLAUNCHER, WEAPON_RLAUNCHER_HS }, GetType())) {
+        if (firedByPed && firedByPed->IsPlayer()) {
+            switch (TheCamera.GetActiveCam().m_nMode) {
+            case MODE_M16_1STPERSON:
+            case MODE_SNIPER:
+            case MODE_ROCKETLAUNCHER:
+            case MODE_ROCKETLAUNCHER_HS:
+            case MODE_M16_1STPERSON_RUNABOUT:
+            case MODE_SNIPER_RUNABOUT:
+            case MODE_ROCKETLAUNCHER_RUNABOUT:
+            case MODE_ROCKETLAUNCHER_RUNABOUT_HS:
+                break;
+            default:
+                return false;
+            }
+            projOrigin = origin + TheCamera.GetActiveCam().m_vecFront;
+        } else {
+            projOrigin = origin + firedBy->GetForward();
+        }
+        if (firedByPed) {
+            if (firedByPed->IsPlayer()) { // 0x7416DC
+                CEntity* hsMissleTarget{};
+                if (GetType() == WEAPON_RLAUNCHER_HS && CWeaponEffects::IsLockedOn(WEAPONEFFECTS_LOCK_ON)) {
+                    const auto pd = firedByPed->m_pPlayerData;
+                    if (pd->m_nFireHSMissilePressedTime) {
+                        hsMissleTarget = PickTargetForHeatSeekingMissile(
+                            firedBy->GetPosition(),
+                            firedBy->GetForward(),
+                            1.2f,
+                            firedBy,
+                            false,
+                            pd->m_LastHSMissileTarget
+                        );
+                        if (hsMissleTarget == pd->m_LastHSMissileTarget && CTimer::GetTimeInMS() - pd->m_nFireHSMissilePressedTime > 1500) { // 0x74178B
+                            const auto ch = &gCrossHair[0];
+                            ch->m_color                 = { 255, 0, 0, 255 };
+                            ch->m_fRotation             = 1.f;
+                            ch->m_nTimeWhenToDeactivate = 0;
+                        }
+                    }
+                }
+                if (hsMissleTarget) { // 0x7417BB
+                    targetEntity = hsMissleTarget;
+                } else {
+                    targetEntity = nullptr;
+                    projType     = WEAPON_ROCKET;
+                }
+            } else { // 0x7418A3
+                if (targetEntity || targetPos) {
+                    CWorld::pIgnoreEntity = firedBy;
+                    const auto losClear = CWorld::GetIsLineOfSightClear(
+                        projOrigin,
+                        projOrigin + ((targetEntity ? targetEntity->GetPosition() : *targetPos) - projOrigin).Normalized() * 8.f,
+                        true,
+                        false,
+                        false,
+                        false
+                    );
+                    CWorld::pIgnoreEntity = nullptr;
+                    if (!losClear) {
+                        return false;
+                    }
+                }
+            }
+        }
+    } else { // 0x74139B
+        if (const auto t = (origin - firedBy->GetPosition()).Dot(firedBy->GetForward()); t < 0.3f) { // 0x7413FC
+            projOrigin += (0.3f - t) * firedBy->GetForward();
+        }
+        losCheckTarget = projOrigin;
+        if (projOrigin.z - firedBy->GetPosition().z > 0.f) {
+            losCheckTarget += firedBy->GetForward() * 0.6f;
+        }
+        losCheckOrigin = projOrigin - (projOrigin - firedBy->GetPosition()).ProjectOnToNormal(firedBy->GetForward()); // 0x7415A2
+    }
+
+    // 0x7418F5
+    CWorld::pIgnoreEntity = firedBy;
+    if (CWorld::GetIsLineOfSightClear(
+        losCheckOrigin,
+        losCheckTarget,
+        true,
+        true,
+        false,
+        true
+    )) {
+        if (projType == WEAPON_ROCKET && targetEntity && targetPos) {
+            const auto projTargetPos = targetEntity
+                ? targetEntity->GetPosition()
+                : *targetPos;
+            const auto projDir = (projTargetPos - losCheckOrigin).Normalized();
+            CProjectileInfo::AddProjectile( // 0x741AF9
+                firedBy,
+                WEAPON_ROCKET,
+                projOrigin,
+                force,
+                &projDir,
+                targetEntity
+            );
+        } else {
+            CProjectileInfo::AddProjectile(
+                firedBy,
+                projType,
+                projOrigin,
+                force,
+                nullptr,
+                targetEntity
+            );
+        }
+
+    } else if (notsa::contains({ WEAPON_GRENADE, WEAPON_REMOTE_SATCHEL_CHARGE }, GetType()) && firedBy->IsPed()) { // 0x74193B
+        const auto thorwableProjOrigin = firedBy->GetPosition() - firedBy->GetForward() - CVector{0.f, 0.f, 0.4f};
+        if (CWorld::TestSphereAgainstWorld(thorwableProjOrigin, 0.3f, nullptr, false, false, true, false, false, false)) { // 0x7419CE
+            CProjectileInfo::AddProjectile(
+                firedBy,
+                projType,
+                thorwableProjOrigin,
+                force,
+                nullptr,
+                targetEntity
+            );
+        } else {
+            CProjectileInfo::RemoveNotAdd(firedBy, projType, projOrigin);
+        }
+    } else {
+        CProjectileInfo::RemoveNotAdd(firedBy, projType, projOrigin);
+    }
+    CWorld::pIgnoreEntity = nullptr;
+
+    if (firedByPed) { // 0x741A74
+        CCrime::ReportCrime(CRIME_EXPLOSION, firedByPed, firedByPed);
+        g_InterestingEvents.Add(CInterestingEvents::INTERESTING_EVENT_22, firedBy);
+    } else if (firedBy->IsVehicle()) { // 0x741B10
+        if (const auto drvr = firedBy->AsVehicle()->m_pDriver) {
+            CCrime::ReportCrime(CRIME_FIRE_WEAPON, firedBy, drvr);
+            g_InterestingEvents.Add(CInterestingEvents::INTERESTING_EVENT_22, drvr);
+        }
+    }
+
+    GetEventGlobalGroup()->Add(
+        CEventGunShot{
+            firedBy,
+            projOrigin,
+            targetEntity
+                ? targetEntity->GetPosition()
+                : targetPos
+                    ? *targetPos
+                    : projOrigin,
+            notsa::contains({WEAPON_PISTOL_SILENCED, WEAPON_TEARGAS}, GetType())
+        }
+    );
+
+    return true;
 }
 
 // 0x741C00
