@@ -81,15 +81,15 @@ public:
 
     void Update(RwCamera* camera, float timeDelta);
     void Render(RwCamera* camera, bool heatHaze);
-    void CreateMatFromVec(RwMatrix* out, CVector* origin, CVector* direction);
+    void CreateMatFromVec(RwMatrix* out, const CVector* origin, const CVector* direction);
     void SetFxQuality(FxQuality_e quality);
     [[nodiscard]] FxQuality_e GetFxQuality() const;
 
     void AddBlood(Const CVector& origin, Const CVector& direction, int32 amount, float arg3);
     void AddWood(CVector& origin, CVector& direction, int32 amount, float arg3);
     void AddSparks(Const CVector& origin, Const CVector& direction, float force, int32 amount, CVector across, eSparkType sparksType, float spread, float life);
-    void AddTyreBurst(CVector& posn, CVector& velocity);
-    void AddBulletImpact(CVector& posn, CVector& direction, int32 bulletFxType, int32 amount, float arg4);
+    void AddTyreBurst(const CVector& posn, const CVector& velocity);
+    void AddBulletImpact(const CVector& posn, const CVector& direction, int32 bulletFxType, int32 amount, float arg4);
     void AddPunchImpact(CVector& posn, CVector& velocity, int32 arg2);
     void AddDebris(CVector& posn, RwRGBA& color, float scale, int32 amount);
     void AddGlass(CVector& posn, RwRGBA& color, float scale, int32 amount);

@@ -122,11 +122,15 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CWeapon* Constructor(eWeaponType weaponType, int32 ammo);
-
     //! @notsa
     //! @brief Get the projectile type of this weapon - Only valid for weapons that fire a projectile [like rlaunchers, etc], or are itself a projectile [ex.: grenades]
     auto GetProjectileType();
+
+    //! @notsa
+    CWeapon* Constructor(eWeaponType weaponType, uint32 ammo) {
+        this->CWeapon::CWeapon(weaponType, ammo);
+        return this;
+    }
 
 public: // TODO: Eventually make this private
     eWeaponType  m_Type{};                            //< Weapon's type

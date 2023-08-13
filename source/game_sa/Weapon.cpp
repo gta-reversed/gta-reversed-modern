@@ -8,6 +8,7 @@
 
 #include "Weapon.h"
 
+#include "Glass.h"
 #include "WeaponInfo.h"
 #include "CreepingFire.h"
 #include "BulletInfo.h"
@@ -50,7 +51,7 @@ void CWeapon::InjectHooks() {
     RH_ScopedInstall(FireFromCar, 0x73FA20);
     RH_ScopedInstall(FireInstantHit, 0x73FB10, { .reversed = false });
     RH_ScopedInstall(FireProjectile, 0x741360);
-    RH_ScopedInstall(DoBulletImpact, 0x73B550, { .reversed = false });
+    RH_ScopedInstall(DoBulletImpact, 0x73B550);
     RH_ScopedInstall(LaserScopeDot, 0x73A8D0);
     RH_ScopedInstall(FireM16_1stPerson, 0x741C00);
     RH_ScopedInstall(Fire, 0x742300);
@@ -70,11 +71,6 @@ CWeapon::CWeapon(eWeaponType weaponType, uint32 ammo) :
     m_TotalAmmo{ std::min<uint32>(ammo, 99'999) }
 {
     Reload();
-}
-
-CWeapon* CWeapon::Constructor(eWeaponType weaponType, int32 ammo) {
-    this->CWeapon::CWeapon(weaponType, ammo);
-    return this;
 }
 
 // 0x73B4A0
@@ -478,8 +474,273 @@ float CWeapon::TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner
 }
 
 // 0x73B550
-void CWeapon::DoBulletImpact(CEntity* owner, CEntity* victim, const CVector& startPoint, const CVector& endPoint, const CColPoint& colPoint, int32 arg5) {
-    plugin::CallMethod<0x73B550, CWeapon*, CEntity*, CEntity*, const CVector&, const CVector&, const CColPoint&, int32>(this, owner, victim, startPoint, endPoint, colPoint, arg5);
+void CWeapon::DoBulletImpact(CEntity* firedBy, CEntity* victim, const CVector& startPoint, const CVector& endPoint, const CColPoint& hitCP, int32 incrementalHit) {
+    const auto firedByPed = firedBy->IsPed()
+        ? firedBy->AsPed()
+        : nullptr;
+    const auto firedByPlayer = firedByPed && firedByPed->IsPlayer()
+        ? firedByPed->AsPlayer()
+        : nullptr;
+
+    const auto wi = &GetWeaponInfo(firedByPed);
+
+    if (firedByPed && firedByPed->IsPlayer()) {
+        CCrime::ReportCrime(CRIME_FIRE_WEAPON, victim, firedByPed);
+    }
+
+    if (victim) { // Inverted
+        CBulletTraces::AddTrace( // 0x73B60C
+            incrementalHit
+                ? startPoint + (hitCP.m_vecPoint - startPoint) * 0.4f
+                : startPoint,
+            hitCP.m_vecPoint,
+            GetType(),
+            firedBy
+        );
+
+        const auto DoBulletHitFx = [&] {
+            if (incrementalHit <= 0) {
+                if ((endPoint - startPoint).Dot(hitCP.m_vecNormal) < 0.f) { // Normal is opposite to that of the bullet's direction
+                    AudioEngine.ReportBulletHit(
+                        victim,
+                        hitCP.m_nSurfaceTypeB,
+                        hitCP.m_vecPoint,
+                        RWRAD2DEG((float)std::asin(-incrementalHit))
+                    );
+                }
+            }
+        };
+
+#ifdef FIX_BUGS
+        if (firedByPlayer && (firedByPlayer != victim || firedBy->GetStatus() == STATUS_PLAYER)) { // 0x73B6D0
+#else
+        if (firedByPlayer && firedByPlayer != victim || firedBy->GetStatus() == STATUS_PLAYER) { // 0x73B6D0
+#endif
+            if (notsa::contains({ ENTITY_TYPE_PED, ENTITY_TYPE_VEHICLE, ENTITY_TYPE_OBJECT }, victim->GetType())) {
+                if (CStats::GetStatValue(STAT_BULLETS_FIRED) >= CStats::GetStatValue(STAT_BULLETS_THAT_HIT)) {
+                    CStats::IncrementStat(STAT_BULLETS_THAT_HIT);
+                }
+            }
+            if (CWeaponInfo::WeaponHasSkillStats(GetType())) { // 0x73B738
+                // Redundant `if` check here was removed
+                if ([&]{
+                    const auto victimEntity = notsa::coalesce(firedByPlayer->m_pTargetedObject, victim);
+
+                    // NOTE: The code is written upside down to make the controlflow easier
+
+                    if (victimEntity->IsPed() && CPedGroups::AreInSameGroup(victimEntity->AsPed(), firedByPed)) {
+                        return false;
+                    }
+
+                    switch (victimEntity->GetType()) {
+                    case eEntityType::ENTITY_TYPE_PED: {
+                        const auto victimPed = victimEntity->AsPed();
+                        return !CPedGroups::AreInSameGroup(victimPed, firedByPed) && victimPed->m_fHealth > 0.f;
+                    }
+                    case eEntityType::ENTITY_TYPE_VEHICLE: {
+                        const auto victimVeh = victimEntity->AsVehicle();
+                        if (notsa::contains(eCarPiece_WheelPieces, (eCarPiece)hitCP.m_nPieceTypeB)) {
+                            if (!victimVeh->BurstTyre(hitCP.m_nPieceTypeB, true)) {
+                                return false;
+                            }
+                        }
+                        if (victimVeh->physicalFlags.bBulletProof || !victimVeh->vehicleFlags.bCanBeDamaged) {
+                            return false;
+                        }
+                        if (victimVeh->m_fHealth <= 0.f || victimVeh->GetStatus() == STATUS_WRECKED) {
+                            return false;
+                        }
+                        return true;
+                    }
+                    case eEntityType::ENTITY_TYPE_OBJECT: {
+                        const auto victimObj = victimEntity->AsObject();
+                        return victimObj->m_fHealth > 0.f && victimObj->m_nColDamageEffect && victimObj->m_pObjectInfo->m_fColDamageMultiplier >= 0.5f;
+                    }
+                    }
+                    return false;
+                }()) {
+                    CStats::UpdateStatsWhenWeaponHit(GetType());
+                }
+                
+            }
+        }
+
+        if (!victim->IsPed()) { // 0x73B85B
+            CGlass::WasGlassHitByBullet(victim, hitCP.m_vecPoint);
+
+            const auto DoBulletImpactFx = [&] {
+                if (TheCamera.IsSphereVisible(hitCP.m_vecPoint, 1.f)) {
+                    g_fx.AddBulletImpact(
+                        &hitCP.m_vecPoint,
+                        &hitCP.m_vecNormal,
+                        hitCP.m_nSurfaceTypeB,
+                        incrementalHit ? 2 : 8,
+                        hitCP.m_nLightingA.GetCurrentLighting()
+                    );
+                }
+            };
+
+            switch (victim->GetType()) {
+            case eEntityType::ENTITY_TYPE_BUILDING: { // 0x73C014
+                DoBulletImpactFx();
+                if (firedByPlayer) {
+                    firedByPlayer->m_pPlayerData->m_nModelIndexOfLastBuildingShot = victim->m_nModelIndex;
+                }
+                break;
+            }
+            case eEntityType::ENTITY_TYPE_VEHICLE: { // 0x73BD2A
+                const auto victimVeh = victim->AsVehicle();
+                if (!notsa::contains(eCarPiece_WheelPieces, (eCarPiece)hitCP.m_nPieceTypeB)) {
+                    victimVeh->InflictDamage(
+                        firedBy,
+                        GetType(),
+                        (float)(firedByPlayer && TheCamera.GetActiveCam().m_nMode == MODE_TWOPLAYER_IN_CAR_AND_SHOOTING ? 2 * wi->m_nDamage : wi->m_nDamage),
+                        hitCP.m_vecPoint
+                    );
+                    DoBulletImpactFx();
+                    if (g_LoadMonitor.m_bForceProcLevel != CLoadMonitor::EProcessingLevel::HIGH) { // 0x73BF6C - NOTE/TODO: Useless, remove
+                        const auto wepForceMult = [this]{
+                            switch (GetType()) {
+                            case WEAPON_DESERT_EAGLE:
+                            case WEAPON_MINIGUN:
+                                return -20.f;
+                            case WEAPON_SHOTGUN:
+                            case WEAPON_SPAS12_SHOTGUN:
+                                return -4.0f;
+                            default:
+                                return -10.f;
+                            }
+                        }();
+                        victimVeh->ApplyForce(
+                            hitCP.m_vecNormal * (wepForceMult * std::min(1.f, victimVeh->m_fMass / 1000.f)),
+                            hitCP.m_vecPoint - victimVeh->GetPosition(),
+                            true
+                        );
+                    }
+                } else { // 0x73BD3F
+                    victimVeh->BurstTyre(hitCP.m_nPieceTypeB, true);
+                    g_fx.AddTyreBurst(hitCP.m_vecPoint, hitCP.m_vecNormal);
+                    if (firedByPed) { // Add event to occupants
+                        const auto AddEventVehicleDamageWeapon = [&](CPed* ped) {
+                            if (ped) {
+                                ped->GetEventGroup().Add(CEventVehicleDamageWeapon{
+                                    victimVeh,
+                                    firedBy,
+                                    GetType()
+                                });
+                            }
+                        };
+                        AddEventVehicleDamageWeapon(victimVeh->m_pDriver);
+                        rng::for_each(victimVeh->GetPassengers(), AddEventVehicleDamageWeapon);
+                    }
+                }
+                break;
+            }
+            case eEntityType::ENTITY_TYPE_OBJECT: { // 0x73BB4F
+                const auto victimObj = victim->AsObject();
+                const auto oinfo     = victimObj->m_pObjectInfo;
+
+                DoBulletImpactFx();
+                if (victimObj->m_nColDamageEffect < 200) {
+                    if (!victimObj->physicalFlags.bDisableCollisionForce && oinfo->m_fColDamageMultiplier < 99.9f) {
+                        if (victimObj->IsStatic() && oinfo->m_fUprootLimit <= 0.f) {
+                            victimObj->SetIsStatic(false);
+                            victimObj->AddToMovingList();
+                        }
+                        if (!victimObj->IsStatic()) { // 0x73BC6B - Move the object a little
+                            float force = -2.f;
+                            if (victimObj->physicalFlags.bDisableZ || victimObj->physicalFlags.bDisableMoveForce) {
+                                force *= 0.1f;
+                            }
+                            if (incrementalHit) {
+                                force *= 0.2f;
+                            }
+                            victimObj->ApplyForce(
+                                hitCP.m_vecNormal * force,
+                                hitCP.m_vecPoint - victimObj->GetPosition(),
+                                true
+                            );
+                        }
+                    }
+                } else { // 0x73BB94
+                    victimObj->ObjectDamage(
+                        [&]{
+                            switch (oinfo->m_nGunBreakMode) {
+                            case 1:  return 151.f;
+                            case 2:  return 151.f * oinfo->m_fSmashMultiplier;
+                            default: return 50.f;
+                            }
+                        }(),
+                        &hitCP.m_vecPoint,
+                        &hitCP.m_vecNormal,
+                        firedBy,
+                        GetType()
+                    );
+                }
+
+                break;
+            }
+            }
+            DoBulletHitFx();
+        } else if (victim != firedBy) {
+            const auto victimPed = victim->AsPed();
+            if (   !firedByPed
+                || firedByPed->m_nPedType != victimPed->m_nPedType
+                || notsa::contains({ PED_TYPE_CIVMALE, PED_TYPE_CIVFEMALE }, victimPed->m_nPedType)
+                || firedByPlayer
+            ) {
+                const auto bAddBloodFx = [&]{
+                    if (incrementalHit > 0) { // 0x73B8B8
+                        return false;
+                    }
+                    DoBulletHitFx();
+                    return GenerateDamageEvent(
+                        victimPed,
+                        firedBy,
+                        GetType(),
+                        [&] {
+                            if (firedByPlayer
+                                && (victim->GetPosition() - startPoint).SquaredMagnitude() <= 1.f
+                                && !victimPed->bNoCriticalHits
+                                && !notsa::contains({ WEAPON_SHOTGUN, WEAPON_SPAS12_SHOTGUN }, GetType())
+                            ) {
+                                return 150;
+                            }
+                            return incrementalHit < 0
+                                ? -(incrementalHit * (int32)wi->m_nDamage)
+                                : (int32)wi->m_nDamage;
+                        }(),
+                        (ePedPieceTypes)hitCP.m_nSurfaceTypeB,
+                        victimPed->GetLocalDirection(startPoint - victimPed->GetPosition2D())
+                    );
+                }();
+                if (firedByPlayer) { // 0x73BA79
+                    CCrime::ReportCrime(CRIME_DAMAGE_CAR, victim, firedByPed);
+                }
+                if (CLocalisation::Blood() && bAddBloodFx) { // 0x73BA81
+                    g_fx.AddBlood(
+                        hitCP.m_vecPoint,
+                        hitCP.m_vecNormal,
+                        hitCP.m_nPieceTypeB == ePedPieceTypes::PED_PIECE_HEAD
+                                ? victimPed->m_fHealth <= 0.f ? 32 : 16
+                                : incrementalHit ? 4 : 8,
+                        victimPed->m_fContactSurfaceBrightness
+                    );
+                }
+            }
+        }
+    } else {
+        CBulletTraces::AddTrace(startPoint, endPoint, GetType(), firedBy);
+    }
+
+    // 0x73C11B [Moved down here]
+    if (firedByPed && firedByPed->IsPlayer()) { // 0x73C14B
+        firedByPed->AsPlayer()->GetPadFromPlayer()->StartShake_Distance(
+            240,
+            128,
+            FindPlayerPed()->GetPosition()
+        );
+    }
 }
 
 /*!
