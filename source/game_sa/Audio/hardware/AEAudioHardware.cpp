@@ -594,7 +594,33 @@ void CAEAudioHardware::ResumeAllSounds() {
 
 // 0x4D8490
 void CAEAudioHardware::Query3DSoundEffects() {
-    return plugin::CallMethod<0x4D8490, CAEAudioHardware*>(this);
+    DSBUFFERDESC bufferDesc;
+    bufferDesc.guid3DAlgorithm = GUID_NULL;
+    bufferDesc.lpwfxFormat = nullptr;
+    bufferDesc.dwFlags = DSBCAPS_CTRL3D;
+    bufferDesc.dwReserved = 0;
+    bufferDesc.dwSize = sizeof(DSBUFFERDESC);
+    bufferDesc.dwBufferBytes = 1024;
+
+    IDirectSoundBuffer* ppDSBuffer{};
+    if (FAILED(m_pDSDevice->CreateSoundBuffer(&bufferDesc, &ppDSBuffer, 0)) || !ppDSBuffer)
+        return;
+
+    IDirectSound3DBuffer* ppDS3DBuffer{};
+    if (FAILED(ppDSBuffer->QueryInterface(IID_IDirectSound3DBuffer, (LPVOID*)&ppDS3DBuffer)) || !ppDS3DBuffer)
+        ppDSBuffer->Release();
+
+    IKsPropertySet* ppIKsPropertySet{};
+    if (ppDS3DBuffer->QueryInterface(IID_IKsPropertySet, (LPVOID*)&ppIKsPropertySet) == S_OK) {
+        // TODO: EAX (0x4D8593)
+        m_n3dEffectsQueryResult = 1;
+        SAFE_RELEASE(ppIKsPropertySet);
+    }
+    if (!m_n3dEffectsQueryResult)
+        m_n3dEffectsQueryResult = 2;
+
+    SAFE_RELEASE(ppDS3DBuffer);
+    SAFE_RELEASE(ppDSBuffer);
 }
 
 // 0x4D9870

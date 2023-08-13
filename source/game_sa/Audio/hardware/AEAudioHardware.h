@@ -84,7 +84,7 @@ public:
     CAEMP3TrackLoader*      m_pMP3TrackLoader{};
     IDirectSound8*          m_pDSDevice{};
     uint32                  m_nSpeakerConfig{};
-    void*                   m_n3dEffectsQueryResult{};
+    int32                   m_n3dEffectsQueryResult{};
     DSCAPS                  m_dsCaps{};
     IDirectSound3DListener* m_pDirectSound3dListener{};
     CAEStreamingChannel*    m_pStreamingChannel{};
