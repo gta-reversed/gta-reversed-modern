@@ -203,7 +203,7 @@ bool CEventObjectCollision::AffectsPed_Reversed(CPed* ped)
     return false;
 }
 
-CEventBuildingCollision::CEventBuildingCollision(int16 pieceType, float damageIntensity, CBuilding* building, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState)
+CEventBuildingCollision::CEventBuildingCollision(uint16 pieceType, float damageIntensity, CBuilding* building, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState)
 {
     m_pieceType = pieceType;
     m_moveState = moveState;
