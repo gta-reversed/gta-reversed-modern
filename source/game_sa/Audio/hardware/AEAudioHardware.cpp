@@ -67,7 +67,7 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedInstall(InitDirectSoundListener, 0x4D9640);
     RH_ScopedInstall(Terminate, 0x4D97A0);
     RH_ScopedInstall(Service, 0x4D9870);
-    RH_ScopedInstall(Initialise, 0x4D9930, { .reversed = true });
+    RH_ScopedInstall(Initialise, 0x4D9930, { .reversed = false });
 }
 
 // 0x4D83E0
