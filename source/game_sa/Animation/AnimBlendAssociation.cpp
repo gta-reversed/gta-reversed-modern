@@ -316,3 +316,7 @@ void CAnimBlendAssociation::ReferenceAnimBlock() {
 CAnimBlendNode* CAnimBlendAssociation::GetNode(int32 nodeIndex) {
     return &m_pNodeArray[nodeIndex];
 }
+
+float SClumpAnimAssoc::GetTimeProgress() const {
+    return m_fCurrentTime / m_pHierarchy->m_fTotalTime;
+}

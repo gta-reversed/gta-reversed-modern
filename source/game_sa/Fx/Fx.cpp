@@ -174,8 +174,8 @@ void Fx_c::Render(RwCamera* camera, bool heatHaze) {
 }
 
 // 0x49E950
-void Fx_c::CreateMatFromVec(RwMatrix* out, CVector* origin, CVector* direction) {
-    ((void(__thiscall*)(Fx_c*, RwMatrix*, CVector*, CVector*))0x49E950)(this, out, origin, direction);
+void Fx_c::CreateMatFromVec(RwMatrix* out, const CVector* origin, const CVector* direction) {
+    ((void(__thiscall*)(Fx_c*, RwMatrix*, const CVector*, const CVector*))0x49E950)(this, out, origin, direction);
 }
 
 // 0x49EA40
@@ -204,13 +204,13 @@ void Fx_c::AddSparks(Const CVector& origin, Const CVector& direction, float forc
 }
 
 // 0x49F300
-void Fx_c::AddTyreBurst(CVector& posn, CVector& velocity) {
-    ((void(__thiscall*)(Fx_c*, CVector&, CVector&))0x49F300)(this, posn, velocity);
+void Fx_c::AddTyreBurst(const CVector& posn, const CVector& velocity) {
+    ((void(__thiscall*)(Fx_c*, const CVector&, const CVector&))0x49F300)(this, posn, velocity);
 }
 
 // 0x49F3D0
-void Fx_c::AddBulletImpact(CVector& posn, CVector& direction, int32 bulletFxType, int32 amount, float arg4) {
-    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int32, int32, float))0x49F3D0)(this, posn, direction, bulletFxType, amount, arg4);
+void Fx_c::AddBulletImpact(const CVector& posn, const CVector& direction, int32 bulletFxType, int32 amount, float arg4) {
+    ((void(__thiscall*)(Fx_c*, const CVector&, const CVector&, int32, int32, float))0x49F3D0)(this, posn, direction, bulletFxType, amount, arg4);
 }
 
 // 0x49F670

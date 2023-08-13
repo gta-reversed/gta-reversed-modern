@@ -18,6 +18,12 @@ namespace notsa {
 //};
 namespace rng = std::ranges;
 
+//! [mostly] Works like C#'s `??` (null coalescing operator) or GCC's `?:`
+template<typename T>
+T coalesce(T a, T b) {
+    return a ? a : b;
+}
+
 /*!
 * Much like std::stoi [and variants] but takes an `std::string_view` + in debug does error checking [unlike the C stuff]
 * @param str   The string to convert

@@ -159,7 +159,7 @@ bool CTaskSimpleGunControl::ProcessPed(CPed* ped) {
     auto [nextGunCmd, dontCheckLeisureDur] = [&, this]() -> std::pair<eGunCommand, bool> {
         using enum eGunCommand;
 
-        if (ped->GetActiveWeapon().m_nState == WEAPONSTATE_RELOADING && winfo.flags.bReload) {
+        if (ped->GetActiveWeapon().m_State == WEAPONSTATE_RELOADING && winfo.flags.bReload) {
             return { RELOAD, false }; // 0x625517
         }
 
