@@ -29,10 +29,19 @@ UIRenderer::UIRenderer() :
     m_ImIO->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
     m_ImIO->NavActive   = false;
 
+    // NOTSA: Better to move font to memory, for linux or mac builds? ( are we doing that? )
+    m_ImIO->FontDefault = m_ImIO->Fonts->AddFontFromFileTTF("C:/Windows/Fonts/trebucbd.ttf", SCREEN_SCALE_Y(10.0f));
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowBorderSize = 0.0f;
+    style.FrameBorderSize = 0.0f;
+    style.PopupBorderSize = 0.0f;
+    style.ChildBorderSize = 0.0f;
+    style.PopupBorderSize = 0.0f;
+
     ImGui_ImplWin32_Init(PSGLOBAL(window));
     ImGui_ImplDX9_Init(GetD3DDevice());
 
-    DEV_LOG("I say hello!");
+    DEV_LOG("ImGui Init");
 }
 
 UIRenderer::~UIRenderer() {
@@ -40,7 +49,7 @@ UIRenderer::~UIRenderer() {
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext(m_ImCtx);
 
-    //DEV_LOG("Good bye!");
+    DEV_LOG("ImGui Shutdown");
 }
 
 void UIRenderer::PreRenderUpdate() {
@@ -55,15 +64,9 @@ void UIRenderer::PreRenderUpdate() {
 
     // A delay of a frame has to be added, otherwise the release of F7 wont be processed
     // and the menu will close
-    const auto Shortcut = [](ImGuiKeyChord chord) {
-        return ImGui::Shortcut(chord, ImGuiKeyOwner_Any, ImGuiInputFlags_RouteAlways);
-    };
+    const auto Shortcut = [](ImGuiKeyChord chord) { return ImGui::Shortcut(chord, ImGuiKeyOwner_Any, ImGuiInputFlags_RouteAlways); };
     if (Shortcut(ImGuiKey_F7) || Shortcut(ImGuiKey_M | ImGuiMod_Ctrl)) {
-        m_InputActive                         = !m_InputActive;
-        m_ImIO->MouseDrawCursor               = m_InputActive;
-        m_ImIO->NavActive                     = m_InputActive;
-        CPad::GetPad()->DisablePlayerControls = m_InputActive;
-        CPad::GetPad()->Clear(m_InputActive, true);
+        SetPlayerInput(!m_InputActive);
     }
 }
 
@@ -145,20 +148,15 @@ void UIRenderer::DebugCode() {
     //    );
     //}
 
+    if (pad->IsF7JustPressed() || (pad->IsCtrlPressed() && pad->IsStandardKeyJustPressed('m'))) {
+        SetPlayerInput(!m_InputActive);
+    }
     if (pad->IsStandardKeyJustPressed('0')) {
         if (const auto veh = FindPlayerVehicle()) {
             veh->Fix();
             veh->AsAutomobile()->SetRandomDamage(false);
         }
     }
-
-    if (pad->IsStandardKeyJustPressed('9')) {
-        if (const auto veh = FindPlayerVehicle()) {
-            veh->Fix();
-            veh->AsAutomobile()->SetRandomDamage(true);
-        }
-    }
-
     if (pad->IsStandardKeyJustPressed('1')) {
         CCheat::JetpackCheat();
     }
@@ -186,10 +184,21 @@ void UIRenderer::DebugCode() {
     if (pad->IsStandardKeyJustPressed('7')) {
         CMessages::AddMessageWithNumberQ("PRESS ~k~~PED_ANSWER_PHONE~TO FUCK ~1~~1~~1~", 1000, 0, 1, 2, 3, 4, 5, 6);
     }
-
     if (pad->IsStandardKeyJustPressed('8')) {
         CMessages::AddToPreviousBriefArray("PRESS ~k~~PED_ANSWER_PHONE~ TO FUCK");
     }
+    if (pad->IsStandardKeyJustPressed('9')) {
+        if (const auto veh = FindPlayerVehicle()) {
+            veh->Fix();
+            veh->AsAutomobile()->SetRandomDamage(true);
+        }
+    }
+}
+void UIRenderer::SetPlayerInput(bool state) {
+    m_InputActive = !m_InputActive;
+    m_ImIO->MouseDrawCursor = m_InputActive;
+    m_ImIO->NavActive = m_InputActive;
+    CPad::GetPad()->Clear(m_InputActive, true);
 }
 }; // namespace ui
 }; // namespace notsa

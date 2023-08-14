@@ -37,6 +37,8 @@ private:
     //! Random code you want to run (Called from `PreRenderUpdate`)
     void DebugCode();
 
+    void SetPlayerInput(bool state);
+
 private:
     friend void ::RenderEffects();  // For `Render3D()`
     friend void ::FrontendIdle();   // For `DrawLoop()` VVV
