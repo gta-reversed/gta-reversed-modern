@@ -345,9 +345,9 @@ void CAERadioTrackManager::CheckForMissionStatsChanges() {
         }
     }
 
-    float statsCitiesPassed = CStats::GetStatValue(STAT_CITY_UNLOCKED);
-    if ((float)m_nStatsCitiesPassed < statsCitiesPassed) {
-        m_nStatsCitiesPassed = (uint8)statsCitiesPassed;
+    const auto statsCitiesPassed = CStats::GetStatValue<uint8>(STAT_CITY_UNLOCKED);
+    if (m_nStatsCitiesPassed < statsCitiesPassed) {
+        m_nStatsCitiesPassed = statsCitiesPassed;
         if (statsCitiesPassed == 1 || statsCitiesPassed == 2) {
             m_nStatsLastHitGameClockDays = CClock::GetGameClockDays();
             m_nStatsLastHitGameClockHours = CClock::GetGameClockHours();
@@ -358,9 +358,9 @@ void CAERadioTrackManager::CheckForMissionStatsChanges() {
     }
 
     const auto Update = [](uint8& inputStat, const eStats stat, const auto specialDJBanterIndex) {
-        float statValue = CStats::GetStatValue(stat);
-        if ((float)inputStat < statValue) {
-            inputStat = (uint8)statValue;
+        const auto statValue = CStats::GetStatValue<uint8>(stat);
+        if (inputStat < statValue) {
+            inputStat = statValue;
             if (inputStat == 1) {
                 m_nStatsLastHitGameClockDays = CClock::GetGameClockDays();
                 m_nStatsLastHitGameClockHours = CClock::GetGameClockHours();
