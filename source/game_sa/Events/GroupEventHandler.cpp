@@ -5,10 +5,13 @@
 #include "Tasks/TaskTypes/TaskComplexStareAtPed.h"
 #include "Tasks/TaskTypes/TaskSimpleNone.h"
 
+#include "Tasks/Allocators/TaskAllocatorPlayerCommandAttack.h"
+
 #include "Events/EventVehicleDamage.h"
 #include "Events/EventGunShot.h"
 #include "Events/EventSexyPed.h"
 #include "Events/EventAcquaintancePed.h"
+#include "Events/GroupEvents.h"
 
 #include "TaskAllocator.h"
 
@@ -23,7 +26,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeResponseShotFired, 0x5FBDF0);
     RH_ScopedInstall(ComputeResponseSexyPed, 0x5FB390);
     RH_ScopedInstall(ComputeResponseSeenCop, 0x5FBCB0);
-    RH_ScopedInstall(ComputeResponsePlayerCommand, 0x5FB470, { .reversed = false });
+    RH_ScopedInstall(ComputeResponsePlayerCommand, 0x5FB470);
     RH_ScopedInstall(ComputeResponsePedThreat, 0x5FBB90, { .reversed = false });
     RH_ScopedInstall(ComputeResponsePedFriend, 0x5FB2D0, { .reversed = false });
     RH_ScopedInstall(ComputeResponseNewGangMember, 0x5F9840, { .reversed = false });
@@ -152,8 +155,18 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseSeenCop(const CEventSeenCop& 
 }
 
 // 0x5FB470
-CTaskAllocator* CGroupEventHandler::ComputeResponsePlayerCommand(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB470, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponsePlayerCommand(const CEventPlayerCommandToGroup& e, CPedGroup* pg, CPed* originator) {
+    switch (e.m_command) {
+    case ePlayerGroupCommand::PLAYER_GROUP_COMMAND_GATHER:
+        return ComputeResponseGather(e, pg, originator);
+    case ePlayerGroupCommand::PLAYER_GROUP_COMMAND_ATTACK:
+        return new CTaskAllocatorPlayerCommandAttack{
+            e.m_target,
+            e.m_target->GetGroupId(),
+            e.m_target->m_nPedType
+        };
+    }
+    return nullptr;
 }
 
 // 0x5FBB90
@@ -293,7 +306,7 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
         return ComputeResponsLeaderQuitEnteringCar(*e, g, p);
     case EVENT_PLAYER_COMMAND_TO_GROUP:
     case EVENT_PLAYER_COMMAND_TO_GROUP_GATHER:
-        return ComputeResponsePlayerCommand(*e, g, p);
+        return ComputeResponsePlayerCommand(static_cast<const CEventPlayerCommandToGroup&>(*e), g, p);
     case EVENT_SEEN_COP:
         return ComputeResponseSeenCop(static_cast<const CEventSeenCop&>(*e), g, p);
     case EVENT_DANGER:
