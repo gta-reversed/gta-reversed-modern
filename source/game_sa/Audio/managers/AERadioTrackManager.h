@@ -146,7 +146,8 @@ public:
     int32           field_7C{ -1 };
     float           m_f80{0.0f}; // 80 and 84 volume related fields. See ::UpdateRadioVolumes
     float           m_f84{0.0f};
-    tRadioSettings  m_RadioSettings[2]{};
+    tRadioSettings  m_RequestedSettings{}; // settings1
+    tRadioSettings  m_ActiveSettings{}; // settings2
     tRadioState     m_aRadioState[RADIO_COUNT]{};
     uint32          field_368{0};
     uint8           m_nUserTrackPlayMode{};
