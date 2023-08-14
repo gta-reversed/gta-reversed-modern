@@ -8,9 +8,9 @@ class CGroupEventHandler {
 public:
     static void InjectHooks();
 
-    static bool IsKillTaskAppropriate(CPedGroup* group, CPed* ped);
-    static bool ComputeWalkAlongsideResponse(CPedGroup* group, CPed* ped1, CPed* ped2);
-    static void ComputeStareResponse(CPedGroup* group, CPed* ped1, CPed* ped2, int32, int32);
+    static bool IsKillTaskAppropriate(CPedGroup* pg, CPed* ped);
+    static bool ComputeWalkAlongsideResponse(CPedGroup* pg, CPed* ped1, CPed* ped2);
+    static void ComputeStareResponse(CPedGroup* pg, CPed* stareAt, CPed* originatorPed, int32 timeout, int32 timeoutBias);
     static void ComputeResponseVehicleDamage(const CEvent& event, CPedGroup* group, CPed* ped);
     static void ComputeResponseShotFired(const CEvent& event, CPedGroup* group, CPed* ped);
     static void ComputeResponseSexyPed(const CEvent& event, CPedGroup* group, CPed* ped);

@@ -2,13 +2,16 @@
 
 #include "GroupEventHandler.h"
 
+#include "Tasks/TaskTypes/TaskComplexStareAtPed.h"
+#include "Tasks/TaskTypes/TaskSimpleNone.h"
+
 void CGroupEventHandler::InjectHooks() {
     RH_ScopedClass(CGroupEventHandler);
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(IsKillTaskAppropriate, 0x5F7A60);
     RH_ScopedInstall(ComputeWalkAlongsideResponse, 0x5FA910);
-    RH_ScopedInstall(ComputeStareResponse, 0x5F9BD0, { .reversed = false });
+    RH_ScopedInstall(ComputeStareResponse, 0x5F9BD0);
     RH_ScopedInstall(ComputeResponseVehicleDamage, 0x5FC070, { .reversed = false });
     RH_ScopedInstall(ComputeResponseShotFired, 0x5FBDF0, { .reversed = false });
     RH_ScopedInstall(ComputeResponseSexyPed, 0x5FB390, { .reversed = false });
@@ -59,8 +62,23 @@ bool CGroupEventHandler::ComputeWalkAlongsideResponse(CPedGroup* group, CPed* pe
 }
 
 // 0x5F9BD0
-void CGroupEventHandler::ComputeStareResponse(CPedGroup* group, CPed* ped1, CPed* ped2, int32 a4, int32 a5) {
-    plugin::Call<0x5F9BD0, CPedGroup*, CPed*, CPed*, int32, int32>(group, ped1, ped2, a4, a5);
+void CGroupEventHandler::ComputeStareResponse(CPedGroup* pg, CPed* stareAt, CPed* originatorPed, int32 timeout, int32 timeoutBias) {
+    if (!stareAt) {
+        return;
+    }
+    if (!pg->GetMembership().GetLeader()) {
+        return;
+    }
+    if ((stareAt->GetPosition() - pg->GetMembership().GetLeader()->GetPosition()).SquaredMagnitude2D() >= sq(8.f)) {
+        return;
+    }
+    for (auto& m : pg->GetMembership().GetMembers()) {
+        pg->GetIntelligence().SetTask(
+            &m,
+            new CTaskComplexStareAtPed{ pg, stareAt, timeout + CGeneral::GetRandomNumberInRange(-timeoutBias, timeoutBias) },
+            pg->GetIntelligence().m_pedTaskPairs
+        );
+    }
 }
 
 // 0x5FC070

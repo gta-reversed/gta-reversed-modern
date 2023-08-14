@@ -33,13 +33,15 @@ public:
     CPedGroup*                     m_pPedGroup;
     CEventGroupEvent*              m_pOldEventGroupEvent;
     CEventGroupEvent*              m_pEventGroupEvent;
-    CPedTaskPair                   m_groupTasks[32]; // todo: split array
-    /* TODO: Split above to below:
-    * CPedTaskPair m_pedTaskPairs[8];
-    * CPedTaskPair m_secondaryPedTaskPairs[8];
-    * CPedTaskPair m_scriptCommandPedTaskPairs[8];
-    * CPedTaskPair m_defaultPedTaskPairs[8];
-    */
+    union {
+        CPedTaskPair     m_groupTasks[32]; // todo: split array
+        struct {
+            CPedTaskPair m_pedTaskPairs[8];
+            CPedTaskPair m_secondaryPedTaskPairs[8];
+            CPedTaskPair m_scriptCommandPedTaskPairs[8];
+            CPedTaskPair m_defaultPedTaskPairs[8];
+        };
+    };
     CPedGroupDefaultTaskAllocator* m_pPedGroupDefaultTaskAllocator;
     CTaskAllocator*                m_pPrimaryTaskAllocator;
     CTaskAllocator*                m_pEventResponseTaskAllocator;
