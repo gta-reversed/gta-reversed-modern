@@ -8,6 +8,7 @@
 #include "Events/EventVehicleDamage.h"
 #include "Events/EventGunShot.h"
 #include "Events/EventSexyPed.h"
+#include "Events/EventAcquaintancePed.h"
 
 #include "TaskAllocator.h"
 
@@ -21,7 +22,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeResponseVehicleDamage, 0x5FC070);
     RH_ScopedInstall(ComputeResponseShotFired, 0x5FBDF0);
     RH_ScopedInstall(ComputeResponseSexyPed, 0x5FB390);
-    RH_ScopedInstall(ComputeResponseSeenCop, 0x5FBCB0, { .reversed = false });
+    RH_ScopedInstall(ComputeResponseSeenCop, 0x5FBCB0);
     RH_ScopedInstall(ComputeResponsePlayerCommand, 0x5FB470, { .reversed = false });
     RH_ScopedInstall(ComputeResponsePedThreat, 0x5FBB90, { .reversed = false });
     RH_ScopedInstall(ComputeResponsePedFriend, 0x5FB2D0, { .reversed = false });
@@ -141,8 +142,13 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseSexyPed(const CEventSexyPed& 
 }
 
 // 0x5FBCB0
-CTaskAllocator* CGroupEventHandler::ComputeResponseSeenCop(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FBCB0, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseSeenCop(const CEventSeenCop& e, CPedGroup* pg, CPed* originator) {
+    switch (e.m_taskId) {
+    case TASK_GROUP_KILL_THREATS_BASIC: return ComputeKillThreatsBasicResponse(pg, e.m_ped, originator, false);
+    case TASK_GROUP_FLEE_THREAT:        return ComputeFleePedResponse(pg, e.m_ped, originator, false);
+    case TASK_GROUP_HAND_SIGNAL:        return ComputeHandSignalResponse(pg, e.m_ped, originator);
+    }
+    return nullptr;
 }
 
 // 0x5FB470
@@ -241,8 +247,8 @@ CTaskAllocator* CGroupEventHandler::ComputeHassleSexyPedResponse(CPedGroup* pg, 
 }
 
 // 0x5FA820
-CTaskAllocator* CGroupEventHandler::ComputeHandSignalResponse(CPedGroup* group, CPed* ped1, CPed* ped2) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA820, CPedGroup*, CPed*, CPed*>(group, ped1, ped2);
+CTaskAllocator* CGroupEventHandler::ComputeHandSignalResponse(CPedGroup* pg, CPed* threat, CPed* originator) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA820, CPedGroup*, CPed*, CPed*>(pg, threat, originator);
 }
 
 // 0x5FA550
@@ -289,7 +295,7 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
     case EVENT_PLAYER_COMMAND_TO_GROUP_GATHER:
         return ComputeResponsePlayerCommand(*e, g, p);
     case EVENT_SEEN_COP:
-        return ComputeResponseSeenCop(*e, g, p);
+        return ComputeResponseSeenCop(static_cast<const CEventSeenCop&>(*e), g, p);
     case EVENT_DANGER:
         return ComputeResponseDanger(*e, g, p);
     case EVENT_LEADER_ENTRY_EXIT:

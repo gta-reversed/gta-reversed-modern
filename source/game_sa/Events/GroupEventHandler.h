@@ -8,6 +8,7 @@ class CTaskAllocator;
 class CEventVehicleDamage;
 class CEventGunShot;
 class CEventSexyPed;
+class CEventSeenCop;
 
 class CGroupEventHandler {
 public:
@@ -21,7 +22,7 @@ public:
     static CTaskAllocator* ComputeResponseVehicleDamage(const CEventVehicleDamage& event, CPedGroup* group, CPed* ped);
     static CTaskAllocator* ComputeResponseShotFired(const CEventGunShot& event, CPedGroup* group, CPed* ped);
     static CTaskAllocator* ComputeResponseSexyPed(const CEventSexyPed& event, CPedGroup* group, CPed* ped);
-    static CTaskAllocator* ComputeResponseSeenCop(const CEvent& event, CPedGroup* group, CPed* ped);
+    static CTaskAllocator* ComputeResponseSeenCop(const CEventSeenCop& event, CPedGroup* group, CPed* ped);
     static CTaskAllocator* ComputeResponsePlayerCommand(const CEvent& event, CPedGroup* group, CPed* ped);
     static CTaskAllocator* ComputeResponsePedThreat(const CEvent& event, CPedGroup* group, CPed* ped);
     static CTaskAllocator* ComputeResponsePedFriend(const CEvent& event, CPedGroup* group, CPed* ped);
