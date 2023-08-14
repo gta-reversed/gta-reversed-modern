@@ -140,7 +140,7 @@ public:
     void     GetLightingFromCollisionBelow();
     void     ProcessSamSiteBehaviour();
     void     ProcessTrainCrossingBehaviour();
-    void     ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection, CEntity* damager, eWeaponType weaponType);
+    void     ObjectDamage(float damage, const CVector* fxOrigin, const CVector* fxDirection, CEntity* damager, eWeaponType weaponType);
     void     Explode();
     void     ObjectFireDamage(float damage, CEntity* damager);
 

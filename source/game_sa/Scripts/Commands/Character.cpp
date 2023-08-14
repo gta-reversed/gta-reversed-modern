@@ -705,7 +705,7 @@ auto IsCurrentCharWeapon(CPed& ped, eWeaponType wep) {
     if (wep == WEAPON_ANYMELEE && ped.GetActiveWeapon().IsTypeMelee()) {
         return true;
     }
-    return ped.GetActiveWeapon().m_nType == wep;
+    return ped.GetActiveWeapon().m_Type == wep;
 }
 
 // GET_RANDOM_CHAR_IN_ZONE
@@ -882,8 +882,8 @@ auto SetCharMoney(CPed& ped, int16 money) {
 // GET_AMMO_IN_CHAR_WEAPON
 auto GetAmmoInCharWeapon(CPed& ped, eWeaponType wtype) -> uint32 {
     for (auto& wep : ped.m_aWeapons) { 
-        if (wep.m_nType == wtype) { // Originally they continued looping, but that doesn't make sense (A ped can't have the same weapon _twice_)
-            return wep.m_nTotalAmmo;
+        if (wep.m_Type == wtype) { // Originally they continued looping, but that doesn't make sense (A ped can't have the same weapon _twice_)
+            return wep.m_TotalAmmo;
         }
     }
     return 0;
@@ -947,7 +947,7 @@ auto ClearCharLastWeaponDamage(CPed& ped) {
 
 // GET_CURRENT_CHAR_WEAPON
 auto GetCurrentCharWeapon(CPed& ped) {
-    return ped.GetActiveWeapon().m_nType;
+    return ped.GetActiveWeapon().m_Type;
 }
 
 // CAN_CHAR_SEE_DEAD_CHAR
@@ -976,7 +976,7 @@ auto RemoveAllCharWeapons(CPed& ped) {
 
 // HAS_CHAR_GOT_WEAPON
 auto HasCharGotWeapon(CPed& ped, eWeaponType wtype) {
-    return notsa::contains(ped.m_aWeapons, wtype, [](CWeapon& w) { return w.m_nType; });
+    return notsa::contains(ped.m_aWeapons, wtype, [](CWeapon& w) { return w.m_Type; });
 }
 
 // GET_DEAD_CHAR_PICKUP_COORDS
@@ -1018,7 +1018,7 @@ auto IsCharInWater(CPed* ped) {
 // GET_CHAR_WEAPON_IN_SLOT
 auto GetCharWeaponInSlot(CPed& ped, eWeaponSlot slut) {
     const auto& wep = ped.GetWeaponInSlot(slut);
-    return notsa::script::return_multiple(wep.m_nType, wep.m_nTotalAmmo, CPickups::ModelForWeapon(wep.m_nType));
+    return notsa::script::return_multiple(wep.m_Type, wep.m_TotalAmmo, CPickups::ModelForWeapon(wep.m_Type));
 }
 
 // GET_OFFSET_FROM_CHAR_IN_WORLD_COORDS
@@ -1311,7 +1311,7 @@ auto GetCharModel(CPed& ped) {
 // SET_CURRENT_CHAR_WEAPON
 void SetCurrentCharWeapon(CPed& ped, eWeaponType weaponType) {
     for (auto&& [slot, weapon] : notsa::enumerate(ped.m_aWeapons)) {
-        if (weapon.m_nType != weaponType)
+        if (weapon.m_Type != weaponType)
             continue;
 
         if (ped.IsPlayer()) {

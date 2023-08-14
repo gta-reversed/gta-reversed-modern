@@ -229,7 +229,7 @@ void Render2dStuff() {
         CPed* player = FindPlayerPed();
         eWeaponType weaponType = WEAPON_UNARMED;
         if (player)
-            weaponType = player->GetActiveWeapon().m_nType;
+            weaponType = player->GetActiveWeapon().m_Type;
         eCamMode camMode = CCamera::GetActiveCamera().m_nMode;
         bool firstPersonWeapon = false;
         if (camMode == MODE_SNIPER || camMode == MODE_SNIPER_RUNABOUT || camMode == MODE_ROCKETLAUNCHER || camMode == MODE_ROCKETLAUNCHER_RUNABOUT || camMode == MODE_CAMERA ||

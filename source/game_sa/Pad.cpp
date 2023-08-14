@@ -438,7 +438,7 @@ void CPad::StartShake(int16 time, uint8 freq, uint32 shakeDelayMs) {
                 ShakeDur = time;
                 ShakeFreq = freq;
             }
-            NoShakeBeforeThis = float(shakeDelayMs + CTimer::GetTimeInMS());
+            NoShakeBeforeThis = (float)(shakeDelayMs + CTimer::GetTimeInMS());
             NoShakeFreq = freq;
         }
     } else {

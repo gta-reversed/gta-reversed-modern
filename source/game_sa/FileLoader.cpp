@@ -738,7 +738,7 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
         // Return pointer for offset in allocated memory (relative to where it was in the file)
         const auto GetDataPtr = [&]() {
             return reinterpret_cast<T>(
-                p
+                  p
                 + sizeof(CCollisionData)                // Must offset by this (See memory layout above)
                 + fileOffset
                 + sizeof(FileHeader::FileInfo::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compensate for it.
@@ -764,6 +764,8 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
     cd->m_pShadowTriangles = nullptr;
 
     cm.m_bIsSingleColDataAlloc = true;
+
+    assert(!cd->bHasFaceGroups || cd->m_pTriangles); // If it has face groups it should also have triangles allocated
 }
 
 // 0x537CE0
@@ -834,6 +836,8 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
     cd->m_pTrianglePlanes = nullptr;
 
     cm.m_bIsSingleColDataAlloc = true;
+
+    assert(!cd->bHasFaceGroups || cd->m_pTriangles); // If it has face groups it should also have triangles allocated
 }
 
 // 0x537AE0
@@ -904,6 +908,8 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
     cd->m_pTrianglePlanes = nullptr;
 
     cm.m_bIsSingleColDataAlloc = true;
+
+    assert(!cd->bHasFaceGroups || cd->m_pTriangles); // If it has face groups it should also have triangles allocated
 }
 
 // 0x5B3C60

@@ -104,7 +104,7 @@ void CAECollisionAudioEntity::UpdateLoopingCollisionSound() {
 }
 
 // 0x4DB7C0
-void CAECollisionAudioEntity::PlayBulletHitCollisionSound(eSurfaceType surface, CVector& posn, float angleWithColPointNorm) {
+void CAECollisionAudioEntity::PlayBulletHitCollisionSound(eSurfaceType surface, const CVector& posn, float angleWithColPointNorm) {
     if (surface >= NUM_FUCKING_SURFACES)
         return;
 
@@ -268,12 +268,13 @@ void CAECollisionAudioEntity::ReportCollision(CEntity* entity1, CEntity* entity2
 }
 
 // 0x4DBDF0
-void CAECollisionAudioEntity::ReportBulletHit(CEntity* entity, eSurfaceType surface, CVector& posn, float angleWithColPointNorm) {
+void CAECollisionAudioEntity::ReportBulletHit(CEntity* entity, eSurfaceType surface, const CVector& posn, float angleWithColPointNorm) {
     if (AEAudioHardware.IsSoundBankLoaded(27, 3)) {
         if (entity && entity->IsVehicle()) {
-            surface = entity->AsVehicle()->IsSubBMX() ? eSurfaceType(188) : SURFACE_CAR; // todo: C* Surface
+            surface = entity->AsVehicle()->IsSubBMX()
+                ? eSurfaceType(188) // todo: C* Surface
+                : SURFACE_CAR; 
         }
-
         PlayBulletHitCollisionSound(surface, posn, angleWithColPointNorm);
     }
 }

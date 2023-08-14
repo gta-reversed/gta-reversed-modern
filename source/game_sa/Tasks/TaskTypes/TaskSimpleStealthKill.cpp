@@ -121,14 +121,14 @@ void CTaskSimpleStealthKill::ManageAnim(CPed* ped) {
         CPedDamageResponseCalculator damageCalculator{
             ped,
             CPedDamageResponseCalculator::ms_damageFactor,
-            m_target->GetActiveWeapon().m_nType,
+            m_target->GetActiveWeapon().m_Type,
             PED_PIECE_TORSO,
             false
         };
         CEventDamage eventDamage{
             m_target,
             CTimer::GetTimeInMS(),
-            m_target->GetActiveWeapon().m_nType,
+            m_target->GetActiveWeapon().m_Type,
             PED_PIECE_TORSO,
             0,
             false,
