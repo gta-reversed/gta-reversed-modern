@@ -770,7 +770,7 @@ void CAERadioTrackManager::CheckForPause() {
         // todo: See CAEVehicleAudioEntity::Terminate:437 m_nRadioType.
         tVehicleAudioSettings* settings = CAEVehicleAudioEntity::StaticGetPlayerVehicleAudioSettingsForRadio();
 
-        const bool isRadioTypeOrdinary = [radioType = settings->m_nRadioType]{
+        const bool isRadioTypeOrdinary = settings && [radioType = settings->m_nRadioType]{
             switch (radioType) {
             case RADIO_CIVILIAN:
             case RADIO_EMERGENCY:
@@ -781,7 +781,7 @@ void CAERadioTrackManager::CheckForPause() {
             }
         }();
 
-        if (settings && isRadioTypeOrdinary || AudioEngine.IsAmbienceRadioActive()) {
+        if (isRadioTypeOrdinary || AudioEngine.IsAmbienceRadioActive()) {
             m_bPauseMode = false;
             AEAudioHardware.SetChannelFrequencyScalingFactor(m_HwClientHandle, 0, 1.0f);
         } else {
