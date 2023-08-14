@@ -6,7 +6,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedClass(CGroupEventHandler);
     RH_ScopedCategory("Events");
 
-    RH_ScopedInstall(IsKillTaskAppropriate, 0x5F7A60, { .reversed = false });
+    RH_ScopedInstall(IsKillTaskAppropriate, 0x5F7A60);
     RH_ScopedInstall(ComputeWalkAlongsideResponse, 0x5FA910, { .reversed = false });
     RH_ScopedInstall(ComputeStareResponse, 0x5F9BD0, { .reversed = false });
     RH_ScopedInstall(ComputeResponseVehicleDamage, 0x5FC070, { .reversed = false });
@@ -41,8 +41,16 @@ void CGroupEventHandler::InjectHooks() {
 }
 
 // 0x5F7A60
-void CGroupEventHandler::IsKillTaskAppropriate(CPedGroup* group, CPed* ped) {
-    plugin::Call<0x5F7A60, CPedGroup*, CPed*>(group, ped);
+bool CGroupEventHandler::IsKillTaskAppropriate(CPedGroup* g, CPed* ped) {
+    if (g->m_bIsMissionGroup || ped->GetActiveWeapon().IsTypeMelee()) { // TODO/NOTE: This `IsTypeMelee()` check should be inverted I think [By following the logic of the code in the loop]
+        return true;
+    }
+    for (auto& m : g->GetMembership().GetMembers()) {
+        if (!m.GetActiveWeapon().IsTypeMelee()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // 0x5FA910
