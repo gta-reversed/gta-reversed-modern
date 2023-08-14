@@ -6,6 +6,7 @@
 #include "Tasks/TaskTypes/TaskSimpleNone.h"
 
 #include "Events/EventVehicleDamage.h"
+#include "Events/EventGunShot.h"
 
 #include "TaskAllocator.h"
 
@@ -91,20 +92,29 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseVehicleDamage(const CEventVeh
     if (!e.m_attacker || !e.m_attacker->IsPed()) {
         return nullptr;
     }
-    const auto attacker = e.m_attacker->AsPed();
+    const auto threat = e.m_attacker->AsPed();
     switch (e.m_taskId) {
-    case TASK_GROUP_KILL_THREATS_BASIC:  return ComputeKillThreatsBasicResponse(pg, attacker, originator, true);
-    case TASK_GROUP_KILL_PLAYER_BASIC:   return ComputeKillPlayerBasicResponse(pg, attacker, originator, true); 
-    case TASK_GROUP_FLEE_THREAT:         return ComputeFleePedResponse(pg, attacker, originator, true);         
+    case TASK_GROUP_KILL_THREATS_BASIC:  return ComputeKillThreatsBasicResponse(pg, threat, originator, true);
+    case TASK_GROUP_KILL_PLAYER_BASIC:   return ComputeKillPlayerBasicResponse(pg, threat, originator, true); 
+    case TASK_GROUP_FLEE_THREAT:         return ComputeFleePedResponse(pg, threat, originator, true);         
     case TASK_GROUP_USE_MEMBER_DECISION: return ComputeMemberResponses(e, pg, originator);                      
-    case TASK_GROUP_DRIVEBY:             return ComputeDrivebyResponse(pg, attacker, originator);
+    case TASK_GROUP_DRIVEBY:             return ComputeDrivebyResponse(pg, threat, originator);
     default:                             return nullptr;
     }
 }
 
 // 0x5FBDF0
-CTaskAllocator* CGroupEventHandler::ComputeResponseShotFired(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FBDF0, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseShotFired(const CEventGunShot& e, CPedGroup* pg, CPed* originator) {
+    if (!e.m_firedBy || !e.m_firedBy->IsPed()) {
+        return nullptr;
+    }
+    const auto threat = e.m_firedBy->AsPed();
+    switch (e.m_taskId) {
+    case TASK_GROUP_KILL_THREATS_BASIC:  return ComputeKillThreatsBasicResponse(pg, threat, originator, false);
+    case TASK_GROUP_FLEE_THREAT:         return ComputeFleePedResponse(pg, threat, originator, false);
+    case TASK_GROUP_USE_MEMBER_DECISION: return ComputeMemberResponses(e, pg, originator);
+    }
+    return nullptr;
 }
 
 // 0x5FB390
@@ -193,8 +203,8 @@ CTaskAllocator* CGroupEventHandler::ComputeLeanOnVehicleResponse(const CEvent& e
 }
 
 // 0x5FB590
-CTaskAllocator* CGroupEventHandler::ComputeKillThreatsBasicResponse(CPedGroup* group, CPed* ped1, CPed* ped2, uint8 a4) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB590, CPedGroup*, CPed*, CPed*, uint8>(group, ped1, ped2, a4);
+CTaskAllocator* CGroupEventHandler::ComputeKillThreatsBasicResponse(CPedGroup* group, CPed* threat, CPed* originator, uint8 bDamageOriginator) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB590, CPedGroup*, CPed*, CPed*, uint8>(group, threat, originator, bDamageOriginator);
 }
 
 // 0x5FB670
@@ -237,7 +247,7 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
     case EVENT_DAMAGE:
         return ComputeResponseDamage(*e, g, p);
     case EVENT_SHOT_FIRED:
-        return ComputeResponseShotFired(*e, g, p);
+        return ComputeResponseShotFired(static_cast<const CEventGunShot&>(*e), g, p);
     case EVENT_SEXY_PED:
         return ComputeResponseSexyPed(*e, g, p);
     case EVENT_GUN_AIMED_AT:
