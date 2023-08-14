@@ -27,7 +27,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeResponseSexyPed, 0x5FB390);
     RH_ScopedInstall(ComputeResponseSeenCop, 0x5FBCB0);
     RH_ScopedInstall(ComputeResponsePlayerCommand, 0x5FB470);
-    RH_ScopedInstall(ComputeResponsePedThreat, 0x5FBB90, { .reversed = false });
+    RH_ScopedInstall(ComputeResponsePedThreat, 0x5FBB90);
     RH_ScopedInstall(ComputeResponsePedFriend, 0x5FB2D0, { .reversed = false });
     RH_ScopedInstall(ComputeResponseNewGangMember, 0x5F9840, { .reversed = false });
     RH_ScopedInstall(ComputeResponseLeaderExitedCar, 0x5F90A0, { .reversed = false });
@@ -67,7 +67,7 @@ bool CGroupEventHandler::IsKillTaskAppropriate(CPedGroup* g, CPed* ped) {
 }
 
 // 0x5FA910
-CTaskAllocator* CGroupEventHandler::ComputeWalkAlongsideResponse(CPedGroup* group, CPed* ped1, CPed* ped2) {
+CTaskAllocator* CGroupEventHandler::ComputeWalkAlongsideResponse(CPedGroup* pg, CPed* ped1, CPed* ped2) {
     NOTSA_UNREACHABLE(); // Unused
 }
 
@@ -170,88 +170,103 @@ CTaskAllocator* CGroupEventHandler::ComputeResponsePlayerCommand(const CEventPla
 }
 
 // 0x5FBB90
-CTaskAllocator* CGroupEventHandler::ComputeResponsePedThreat(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FBB90, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponsePedThreat(const CEventAcquaintancePed& e, CPedGroup* pg, CPed* originator) {
+    if (!e.m_ped) {
+        return nullptr;
+    }
+    if (pg->GetMembership().IsMember(e.m_ped)) {
+        return nullptr;
+    }
+    switch (e.m_taskId) {
+    case TASK_GROUP_KILL_THREATS_BASIC:    return ComputeKillThreatsBasicResponse(pg, e.m_ped, originator, false);
+    case TASK_GROUP_STARE_AT_PED:          return ComputeStareResponse(pg, e.m_ped, originator, 99'999'999, false); // 1.15740739583 days
+    case TASK_GROUP_FLEE_THREAT:           return ComputeFleePedResponse(pg, e.m_ped, originator, false);
+    case TASK_GROUP_HASSLE_THREAT:         return ComputeHassleThreatResponse(pg, e.m_ped, originator, true);
+    case TASK_GROUP_USE_MEMBER_DECISION:   return ComputeMemberResponses(e, pg, originator);
+    case TASK_GROUP_DRIVEBY:               return ComputeDrivebyResponse(pg, e.m_ped, originator);
+    case TASK_GROUP_HASSLE_THREAT_PASSIVE: return ComputeHassleThreatResponse(pg, e.m_ped, originator, false);
+    }
+    return nullptr;
 }
 
 // 0x5FB2D0
-CTaskAllocator* CGroupEventHandler::ComputeResponsePedFriend(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB2D0, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponsePedFriend(const CEvent& e, CPedGroup* pg, CPed* ped) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB2D0, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
 }
 
 // 0x5F9840
-CTaskAllocator* CGroupEventHandler::ComputeResponseNewGangMember(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9840, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseNewGangMember(const CEvent& e, CPedGroup* pg, CPed* ped) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9840, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
 }
 
 // 0x5F90A0
-CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderExitedCar(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F90A0, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderExitedCar(const CEvent& e, CPedGroup* pg, CPed* ped) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5F90A0, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
 }
 
 // 0x5F8900
-CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderEnteredCar(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F8900, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderEnteredCar(const CEvent& e, CPedGroup* pg, CPed* ped) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5F8900, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
 }
 
 // 0x5F9710
-CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderEnterExit(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9710, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderEnterExit(const CEvent& e, CPedGroup* pg, CPed* ped) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9710, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
 }
 
 // 0x5FBD10
-CTaskAllocator* CGroupEventHandler::ComputeResponseGunAimedAt(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FBD10, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseGunAimedAt(const CEvent& e, CPedGroup* pg, CPed* ped) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FBD10, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
 }
 
 // 0x5F99F0
-CTaskAllocator* CGroupEventHandler::ComputeResponseGather(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F99F0, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseGather(const CEvent& e, CPedGroup* pg, CPed* ped) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5F99F0, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
 }
 
 // 0x5FBE70
-CTaskAllocator* CGroupEventHandler::ComputeResponseDraggedOutCar(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FBE70, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseDraggedOutCar(const CEvent& e, CPedGroup* pg, CPed* ped) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FBE70, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
 }
 
 // 0x5FB540
-CTaskAllocator* CGroupEventHandler::ComputeResponseDanger(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB540, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseDanger(const CEvent& e, CPedGroup* pg, CPed* ped) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB540, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
 }
 
 // 0x5FBF50
-CTaskAllocator* CGroupEventHandler::ComputeResponseDamage(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FBF50, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseDamage(const CEvent& e, CPedGroup* pg, CPed* ped) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FBF50, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
 }
 
 // 0x5F9530
-CTaskAllocator* CGroupEventHandler::ComputeResponsLeaderQuitEnteringCar(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9530, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponsLeaderQuitEnteringCar(const CEvent& e, CPedGroup* pg, CPed* ped) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9530, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
 }
 
 // 0x5FAA50
-CTaskAllocator* CGroupEventHandler::ComputeMemberResponses(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FAA50, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeMemberResponses(const CEvent& e, CPedGroup* pg, CPed* ped) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FAA50, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
 }
 
 // 0x5F9B20
-CTaskAllocator* CGroupEventHandler::ComputeLeanOnVehicleResponse(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9B20, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeLeanOnVehicleResponse(const CEvent& e, CPedGroup* pg, CPed* ped) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9B20, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
 }
 
 // 0x5FB590
-CTaskAllocator* CGroupEventHandler::ComputeKillThreatsBasicResponse(CPedGroup* group, CPed* threat, CPed* originator, uint8 bDamageOriginator) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB590, CPedGroup*, CPed*, CPed*, uint8>(group, threat, originator, bDamageOriginator);
+CTaskAllocator* CGroupEventHandler::ComputeKillThreatsBasicResponse(CPedGroup* pg, CPed* threat, CPed* originator, uint8 bDamageOriginator) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB590, CPedGroup*, CPed*, CPed*, uint8>(pg, threat, originator, bDamageOriginator);
 }
 
 // 0x5FB670
-CTaskAllocator* CGroupEventHandler::ComputeKillPlayerBasicResponse(CPedGroup* group, CPed* ped1, CPed* ped2, uint8 a4) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB670, CPedGroup*, CPed*, CPed*, uint8>(group, ped1, ped2, a4);
+CTaskAllocator* CGroupEventHandler::ComputeKillPlayerBasicResponse(CPedGroup* pg, CPed* ped1, CPed* ped2, uint8 a4) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB670, CPedGroup*, CPed*, CPed*, uint8>(pg, ped1, ped2, a4);
 }
 
 // 0x5F9D50
-CTaskAllocator* CGroupEventHandler::ComputeHassleThreatResponse(CPedGroup* group, CPed* ped1, CPed* ped2, bool a4) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9D50, CPedGroup*, CPed*, CPed*, bool>(group, ped1, ped2, a4);
+CTaskAllocator* CGroupEventHandler::ComputeHassleThreatResponse(CPedGroup* pg, CPed* threat, CPed* originator, bool bBeAggressive) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9D50, CPedGroup*, CPed*, CPed*, bool>(pg, threat, originator, bBeAggressive);
 }
 
 // 0x5FA020
@@ -265,13 +280,13 @@ CTaskAllocator* CGroupEventHandler::ComputeHandSignalResponse(CPedGroup* pg, CPe
 }
 
 // 0x5FA550
-CTaskAllocator* CGroupEventHandler::ComputeGreetResponse(CPedGroup* group, CPed* ped1, CPed* ped2) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA550, CPedGroup*, CPed*, CPed*>(group, ped1, ped2);
+CTaskAllocator* CGroupEventHandler::ComputeGreetResponse(CPedGroup* pg, CPed* ped1, CPed* ped2) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA550, CPedGroup*, CPed*, CPed*>(pg, ped1, ped2);
 }
 
 // 0x5FA130
-CTaskAllocator* CGroupEventHandler::ComputeFleePedResponse(CPedGroup* group, CPed* ped1, CPed* ped2, uint8 a4) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA130, CPedGroup*, CPed*, CPed*, uint8>(group, ped1, ped2, a4);
+CTaskAllocator* CGroupEventHandler::ComputeFleePedResponse(CPedGroup* pg, CPed* ped1, CPed* ped2, uint8 a4) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA130, CPedGroup*, CPed*, CPed*, uint8>(pg, ped1, ped2, a4);
 }
 
 // 0x5FC200
@@ -291,7 +306,7 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
         return ComputeResponseGunAimedAt(*e, g, p);
     case EVENT_ACQUAINTANCE_PED_HATE:
     case EVENT_ACQUAINTANCE_PED_DISLIKE:
-        return ComputeResponsePedThreat(*e, g, p);
+        return ComputeResponsePedThreat(static_cast<const CEventAcquaintancePed&>(*e), g, p);
     case EVENT_ACQUAINTANCE_PED_LIKE:
     case EVENT_ACQUAINTANCE_PED_RESPECT:
         return ComputeResponsePedFriend(*e, g, p);
@@ -323,11 +338,11 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
 }
 
 // 0x5F7A00
-CTaskAllocator* CGroupEventHandler::ComputeDrivebyResponse(CPedGroup* group, CPed* ped1, CPed* ped2) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F7A00, CPedGroup*, CPed*, CPed*>(group, ped1, ped2);
+CTaskAllocator* CGroupEventHandler::ComputeDrivebyResponse(CPedGroup* pg, CPed* ped1, CPed* ped2) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5F7A00, CPedGroup*, CPed*, CPed*>(pg, ped1, ped2);
 }
 
 // 0x5FA290
-CTaskAllocator* CGroupEventHandler::ComputeDoDealResponse(CPedGroup* group, CPed* ped1, CPed* ped2) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA290, CPedGroup*, CPed*, CPed*>(group, ped1, ped2);
+CTaskAllocator* CGroupEventHandler::ComputeDoDealResponse(CPedGroup* pg, CPed* ped1, CPed* ped2) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA290, CPedGroup*, CPed*, CPed*>(pg, ped1, ped2);
 }
