@@ -760,35 +760,33 @@ void CAERadioTrackManager::AddDJBanterIndexToHistory(eRadioID id, int8 trackInde
 // 0x4EA590
 void CAERadioTrackManager::CheckForPause() {
     if (CTimer::GetIsPaused()) {
-        if (m_bEnabledInPauseMode) {
-            AEAudioHardware.SetChannelFrequencyScalingFactor(m_HwClientHandle, 0, 1.0f);
-        } else {
-            AEAudioHardware.SetChannelFrequencyScalingFactor(m_HwClientHandle, 0, 0.0f);
-        }
         m_bPauseMode = true;
-    } else {
-        // todo: See CAEVehicleAudioEntity::Terminate:437 m_nRadioType.
-        tVehicleAudioSettings* settings = CAEVehicleAudioEntity::StaticGetPlayerVehicleAudioSettingsForRadio();
+        AEAudioHardware.SetChannelFrequencyScalingFactor(m_HwClientHandle, 0, m_bEnabledInPauseMode ? 1.0f : 0.0f);
 
-        const bool isRadioTypeOrdinary = settings && [radioType = settings->m_nRadioType]{
-            switch (radioType) {
-            case RADIO_CIVILIAN:
-            case RADIO_EMERGENCY:
-            case RADIO_UNKNOWN:
-                return true;
-            default:
-                return false;
-            }
-        }();
+        return;
+    }
 
-        if (isRadioTypeOrdinary || AudioEngine.IsAmbienceRadioActive()) {
-            m_bPauseMode = false;
-            AEAudioHardware.SetChannelFrequencyScalingFactor(m_HwClientHandle, 0, 1.0f);
-        } else {
-            StopRadio(nullptr, false);
-            AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
-            m_bPauseMode = false;
+    // todo: See CAEVehicleAudioEntity::Terminate:437 m_nRadioType.
+    tVehicleAudioSettings* settings = CAEVehicleAudioEntity::StaticGetPlayerVehicleAudioSettingsForRadio();
+
+    const bool isRadioTypeOrdinary = settings && [radioType = settings->m_nRadioType]{
+        switch (radioType) {
+        case RADIO_CIVILIAN:
+        case RADIO_EMERGENCY:
+        case RADIO_UNKNOWN:
+            return true;
+        default:
+            return false;
         }
+    }();
+
+    if (isRadioTypeOrdinary || CAudioEngine::IsAmbienceRadioActive()) {
+        m_bPauseMode = false;
+        AEAudioHardware.SetChannelFrequencyScalingFactor(m_HwClientHandle, 0, 1.0f);
+    } else {
+        StopRadio(nullptr, false);
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
+        m_bPauseMode = false;
     }
 }
 
