@@ -5,6 +5,8 @@
 #include "Tasks/TaskTypes/TaskComplexStareAtPed.h"
 #include "Tasks/TaskTypes/TaskSimpleNone.h"
 
+#include "Events/EventVehicleDamage.h"
+
 void CGroupEventHandler::InjectHooks() {
     RH_ScopedClass(CGroupEventHandler);
     RH_ScopedCategory("Events");
@@ -12,7 +14,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(IsKillTaskAppropriate, 0x5F7A60);
     RH_ScopedInstall(ComputeWalkAlongsideResponse, 0x5FA910);
     RH_ScopedInstall(ComputeStareResponse, 0x5F9BD0);
-    RH_ScopedInstall(ComputeResponseVehicleDamage, 0x5FC070, { .reversed = false });
+    RH_ScopedInstall(ComputeResponseVehicleDamage, 0x5FC070);
     RH_ScopedInstall(ComputeResponseShotFired, 0x5FBDF0, { .reversed = false });
     RH_ScopedInstall(ComputeResponseSexyPed, 0x5FB390, { .reversed = false });
     RH_ScopedInstall(ComputeResponseSeenCop, 0x5FBCB0, { .reversed = false });
@@ -82,8 +84,18 @@ void CGroupEventHandler::ComputeStareResponse(CPedGroup* pg, CPed* stareAt, CPed
 }
 
 // 0x5FC070
-void CGroupEventHandler::ComputeResponseVehicleDamage(const CEvent& event, CPedGroup* group, CPed* ped) {
-    plugin::Call<0x5FC070, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+void CGroupEventHandler::ComputeResponseVehicleDamage(const CEventVehicleDamage& e, CPedGroup* pg, CPed* originator) {
+    if (!e.m_attacker || !e.m_attacker->IsPed()) {
+        return;
+    }
+    const auto attacker = e.m_attacker->AsPed();
+    switch (e.m_taskId) {
+    case TASK_GROUP_KILL_THREATS_BASIC:  ComputeKillThreatsBasicResponse(pg, attacker, originator, true); break;
+    case TASK_GROUP_KILL_PLAYER_BASIC:   ComputeKillPlayerBasicResponse(pg, attacker, originator, true);  break;
+    case TASK_GROUP_FLEE_THREAT:         ComputeFleePedResponse(pg, attacker, originator, true);          break;
+    case TASK_GROUP_USE_MEMBER_DECISION: ComputeMemberResponses(e, pg, originator);                       break;
+    case TASK_GROUP_DRIVEBY:             ComputeDrivebyResponse(pg, attacker, originator);                break;
+    }
 }
 
 // 0x5FBDF0
