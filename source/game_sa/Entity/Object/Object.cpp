@@ -1014,7 +1014,7 @@ void CObject::ProcessTrainCrossingBehaviour() {
 }
 
 // 0x5A0D90
-void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection, CEntity* damager, eWeaponType weaponType) {
+void CObject::ObjectDamage(float damage, const CVector* fxOrigin, const CVector* fxDirection, CEntity* damager, eWeaponType weaponType) {
     if (!m_bUsesCollision)
         return;
 

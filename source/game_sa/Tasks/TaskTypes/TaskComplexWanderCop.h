@@ -3,6 +3,7 @@
 #include "TaskComplexWander.h"
 #include "TaskComplexGoToPointAndStandStill.h"
 #include "TaskTimer.h"
+#include "eMoveState.h"
 
 class CPed;
 
@@ -16,7 +17,7 @@ public:
     CTaskTimer                          m_nSubTaskCreatedTimer;
 
 public:
-    CTaskComplexWanderCop(int32 moveState, uint8 dir);
+    CTaskComplexWanderCop(eMoveState moveState, uint8 dir);
     ~CTaskComplexWanderCop() override;
 
     eWanderType GetWanderType() override { return WANDER_TYPE_COP; } // 0x460D50
@@ -35,7 +36,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskComplexWanderCop* Constructor(int32 moveState, uint8 dir);
+    CTaskComplexWanderCop* Constructor(eMoveState moveState, uint8 dir);
 
     CTask* Clone_Reversed();
     CTask* CreateNextSubTask_Reversed(CPed* ped);
