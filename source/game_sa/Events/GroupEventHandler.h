@@ -27,7 +27,7 @@ public:
     static CTaskAllocator* ComputeResponseSeenCop(const CEventSeenCop& event, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponsePlayerCommand(const CEventPlayerCommandToGroup& event, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponsePedThreat(const CEventAcquaintancePed& event, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponsePedFriend(const CEvent& e, CPedGroup* pg, CPed* ped);
+    static CTaskAllocator* ComputeResponsePedFriend(const CEventAcquaintancePed& e, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponseNewGangMember(const CEvent& e, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponseLeaderExitedCar(const CEvent& e, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponseLeaderEnteredCar(const CEvent& e, CPedGroup* pg, CPed* ped);

@@ -28,7 +28,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeResponseSeenCop, 0x5FBCB0);
     RH_ScopedInstall(ComputeResponsePlayerCommand, 0x5FB470);
     RH_ScopedInstall(ComputeResponsePedThreat, 0x5FBB90);
-    RH_ScopedInstall(ComputeResponsePedFriend, 0x5FB2D0, { .reversed = false });
+    RH_ScopedInstall(ComputeResponsePedFriend, 0x5FB2D0);
     RH_ScopedInstall(ComputeResponseNewGangMember, 0x5F9840, { .reversed = false });
     RH_ScopedInstall(ComputeResponseLeaderExitedCar, 0x5F90A0, { .reversed = false });
     RH_ScopedInstall(ComputeResponsLeaderQuitEnteringCar, 0x5F9530, { .reversed = false });
@@ -51,6 +51,17 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeEventResponseTasks, 0x5FC200);
     RH_ScopedInstall(ComputeDrivebyResponse, 0x5F7A00, { .reversed = false });
     RH_ScopedInstall(ComputeDoDealResponse, 0x5FA290, { .reversed = false });
+}
+
+bool IsPedInPlayersGroup(CPedGroup* pg, CPed* p) {
+    const auto playerGrp = &FindPlayerPed(-1)->GetPlayerGroup();
+    if (pg == playerGrp) {
+        return true;
+    }
+    if (playerGrp->GetMembership().IsMember(p)) {
+        return true;
+    }
+    return false;
 }
 
 // 0x5F7A60
@@ -130,11 +141,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseSexyPed(const CEventSexyPed& 
     if (pg->GetMembership().IsMember(e.m_SexyPed)) {
         return nullptr;
     }
-    const auto playerGrp = &FindPlayerPed(-1)->GetPlayerGroup();
-    if (pg == playerGrp) {
-        return nullptr;
-    }
-    if (playerGrp->GetMembership().IsMember(e.m_SexyPed)) {
+    if (IsPedInPlayersGroup(pg, e.m_SexyPed)) {
         return nullptr;
     }
     switch (e.m_taskId) {
@@ -190,8 +197,18 @@ CTaskAllocator* CGroupEventHandler::ComputeResponsePedThreat(const CEventAcquain
 }
 
 // 0x5FB2D0
-CTaskAllocator* CGroupEventHandler::ComputeResponsePedFriend(const CEvent& e, CPedGroup* pg, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB2D0, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponsePedFriend(const CEventAcquaintancePed& e, CPedGroup* pg, CPed* ped) {
+    if (!e.m_ped) {
+        return nullptr;
+    }
+    if (IsPedInPlayersGroup(pg, e.m_ped)) {
+        return nullptr;
+    }
+    switch (e.m_taskId) {
+    case TASK_GROUP_PARTNER_DEAL:  return ComputeDoDealResponse(pg, e.m_ped, originator);
+    case TASK_GROUP_PARTNER_GREET: return ComputeGreetResponse(pg, e.m_ped, originator);
+    }
+    return nullptr;
 }
 
 // 0x5F9840
@@ -309,7 +326,7 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
         return ComputeResponsePedThreat(static_cast<const CEventAcquaintancePed&>(*e), g, p);
     case EVENT_ACQUAINTANCE_PED_LIKE:
     case EVENT_ACQUAINTANCE_PED_RESPECT:
-        return ComputeResponsePedFriend(*e, g, p);
+        return ComputeResponsePedFriend(static_cast<const CEventAcquaintancePed&>(*e), g, p);
     case EVENT_VEHICLE_DAMAGE_WEAPON:
     case EVENT_VEHICLE_DAMAGE_COLLISION:
         return ComputeResponseVehicleDamage(static_cast<const CEventVehicleDamage&>(*e), g, p);
@@ -338,11 +355,11 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
 }
 
 // 0x5F7A00
-CTaskAllocator* CGroupEventHandler::ComputeDrivebyResponse(CPedGroup* pg, CPed* ped1, CPed* ped2) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F7A00, CPedGroup*, CPed*, CPed*>(pg, ped1, ped2);
+CTaskAllocator* CGroupEventHandler::ComputeDrivebyResponse(CPedGroup* pg, CPed* friendp, CPed* originator) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5F7A00, CPedGroup*, CPed*, CPed*>(pg, friendp, originator);
 }
 
 // 0x5FA290
-CTaskAllocator* CGroupEventHandler::ComputeDoDealResponse(CPedGroup* pg, CPed* ped1, CPed* ped2) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA290, CPedGroup*, CPed*, CPed*>(pg, ped1, ped2);
+CTaskAllocator* CGroupEventHandler::ComputeDoDealResponse(CPedGroup* pg, CPed* friendp, CPed* originator) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA290, CPedGroup*, CPed*, CPed*>(pg, friendp, originator);
 }
