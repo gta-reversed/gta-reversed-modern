@@ -4,6 +4,9 @@
 
 #include "Tasks/TaskTypes/TaskComplexStareAtPed.h"
 #include "Tasks/TaskTypes/TaskSimpleNone.h"
+#include "Tasks/TaskTypes/TaskComplexLeaveAnyCar.h"
+#include "Tasks/TaskTypes/TaskComplexGangJoinRespond.h"
+#include "Tasks/TaskTypes/TaskSimpleGoToPoint.h"
 
 #include "Tasks/Allocators/TaskAllocatorPlayerCommandAttack.h"
 
@@ -96,7 +99,11 @@ CTaskAllocator* CGroupEventHandler::ComputeStareResponse(CPedGroup* pg, CPed* st
     for (auto& m : pg->GetMembership().GetMembers()) {
         pg->GetIntelligence().SetTask(
             &m,
-            new CTaskComplexStareAtPed{ pg, stareAt, timeout + CGeneral::GetRandomNumberInRange(-timeoutBias, timeoutBias) },
+            CTaskComplexStareAtPed{
+                pg,
+                stareAt,
+                timeout + CGeneral::GetRandomNumberInRange(-timeoutBias, timeoutBias)
+            },
             pg->GetIntelligence().m_pedTaskPairs
         );
     }
@@ -197,7 +204,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponsePedThreat(const CEventAcquain
 }
 
 // 0x5FB2D0
-CTaskAllocator* CGroupEventHandler::ComputeResponsePedFriend(const CEventAcquaintancePed& e, CPedGroup* pg, CPed* ped) {
+CTaskAllocator* CGroupEventHandler::ComputeResponsePedFriend(const CEventAcquaintancePed& e, CPedGroup* pg, CPed* originator) {
     if (!e.m_ped) {
         return nullptr;
     }
@@ -212,8 +219,28 @@ CTaskAllocator* CGroupEventHandler::ComputeResponsePedFriend(const CEventAcquain
 }
 
 // 0x5F9840
-CTaskAllocator* CGroupEventHandler::ComputeResponseNewGangMember(const CEvent& e, CPedGroup* pg, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9840, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseNewGangMember(const CEventNewGangMember& e, CPedGroup* pg, CPed* ped) {
+    if (!e.m_member || pg->GetMembership().IsMember(e.m_member)) {
+        return nullptr;
+    }
+    CTaskComplexSequence tseq{
+        new CTaskComplexLeaveAnyCar{0, false, true},
+        new CTaskComplexGangJoinRespond{true}
+    };
+    if (pg->GetMembership().GetLeader() == FindPlayerPed()) {
+        tseq.AddTask(new CTaskSimpleGoToPoint{
+            eMoveState::PEDMOVE_RUN,
+            FindPlayerPed()->GetPosition(),
+            3.f,
+            true
+        });
+    }
+    pg->GetIntelligence().SetTask(
+        e.m_member,
+        tseq,
+        pg->GetIntelligence().m_pedTaskPairs
+    );
+    return nullptr;
 }
 
 // 0x5F90A0
@@ -346,7 +373,7 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
     case EVENT_LEADER_ENTRY_EXIT:
         return ComputeResponseLeaderEnterExit(*e, g, p);
     case EVENT_NEW_GANG_MEMBER:
-        return ComputeResponseNewGangMember(*e, g, p);
+        return ComputeResponseNewGangMember(static_cast<const CEventNewGangMember&>(*e), g, p);
     case EVENT_LEAN_ON_VEHICLE:
         return ComputeLeanOnVehicleResponse(*e, g, p);
     default:

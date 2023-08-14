@@ -127,6 +127,6 @@ bool CPedGroupIntelligence::ReportFinishedTask(const CPed* ped, const CTask* tas
 }
 
 // 0x5F7540
-void CPedGroupIntelligence::SetTask(CPed* ped, const CTask* task, CPedTaskPair* pair, int32 arg5, bool arg6) {
-    plugin::Call<0x5F7540, CPed*, const CTask*, CPedTaskPair*, int32, bool>(ped, task, pair, arg5, arg6);
+void CPedGroupIntelligence::SetTask(CPed* ped, const CTask& task, CPedTaskPair* pair, int32 arg5, bool arg6) {
+    plugin::Call<0x5F7540, CPed*, const CTask*, CPedTaskPair*, int32, bool>(ped, &task, pair, arg5, arg6);
 }

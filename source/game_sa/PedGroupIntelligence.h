@@ -98,7 +98,8 @@ public:
         return AddEvent(&event);
     }
 
-    static void SetTask(CPed* ped, const CTask* task, CPedTaskPair* pair, int32 arg5 = -1, bool arg6 = false);
+    //! `task` shouldn't be `new`-d, but rather stack allocated!
+    static void SetTask(CPed* ped, const CTask& task, CPedTaskPair* pair, int32 arg5 = -1, bool arg6 = false);
 };
 
 VALIDATE_SIZE(CPedGroupIntelligence, 0x2A0);

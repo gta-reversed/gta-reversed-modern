@@ -11,6 +11,7 @@ class CEventSexyPed;
 class CEventSeenCop;
 class CEventPlayerCommandToGroup;
 class CEventAcquaintancePed;
+class CEventNewGangMember;
 
 class CGroupEventHandler {
 public:
@@ -28,7 +29,7 @@ public:
     static CTaskAllocator* ComputeResponsePlayerCommand(const CEventPlayerCommandToGroup& event, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponsePedThreat(const CEventAcquaintancePed& event, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponsePedFriend(const CEventAcquaintancePed& e, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponseNewGangMember(const CEvent& e, CPedGroup* pg, CPed* ped);
+    static CTaskAllocator* ComputeResponseNewGangMember(const CEventNewGangMember& e, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponseLeaderExitedCar(const CEvent& e, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponseLeaderEnteredCar(const CEvent& e, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponseLeaderEnterExit(const CEvent& e, CPedGroup* pg, CPed* ped);

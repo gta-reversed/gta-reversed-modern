@@ -108,9 +108,9 @@ CTask* CTaskComplexSequence::ControlSubTask_Reversed(CPed* ped) {
 
 // 0x632D10
 void CTaskComplexSequence::AddTask(CTask* task) {
-    for (auto& m_aTask : m_aTasks) {
-        if (!m_aTask) {
-            m_aTask = task;
+    for (auto& t : m_aTasks) {
+        if (!t) {
+            t = task;
             return;
         }
     }
