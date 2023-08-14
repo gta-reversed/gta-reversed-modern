@@ -168,6 +168,10 @@ public:
     * @brief Clear primary tasks `TASK_PRIMARY_EVENT_RESPONSE_TEMP` and `TASK_PRIMARY_EVENT_RESPONSE_NONTEMP`
     */
     void ClearTaskEventResponse();
+
+    /*!
+    * @addr 0x681C10
+    */
     void ManageTasks();
 
     // Why they doesn't have version for *primary tasks*? :thinking:
@@ -175,9 +179,15 @@ public:
         return m_aPrimaryTasks[taskIndex];
     }
 
+    /*!
+    * Get all the primary tasks [there might be null entries]
+    */
     auto& GetPrimaryTasks() const { return m_aPrimaryTasks; }
-    auto& GetSecondaryTasks() const { return m_aSecondaryTasks; }
 
+    /*!
+    * Get all the primary tasks [there might be null entries]
+    */
+    auto& GetSecondaryTasks() const { return m_aSecondaryTasks; }
 
     // NOTSA - Check if any of the given tasks is active
     bool IsAnyTaskActiveByType(std::initializer_list<eTaskType> types) {
@@ -186,6 +196,7 @@ public:
         });
     }
 
+    // TODO: Replace with `Find<>(true)`
     CTask* FindActiveTaskFromList(std::initializer_list<eTaskType> types) {
         for (auto type : types) {
             if (const auto task = FindActiveTaskByType(type)) {
