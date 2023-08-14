@@ -7,7 +7,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(IsKillTaskAppropriate, 0x5F7A60);
-    RH_ScopedInstall(ComputeWalkAlongsideResponse, 0x5FA910, { .reversed = false });
+    RH_ScopedInstall(ComputeWalkAlongsideResponse, 0x5FA910);
     RH_ScopedInstall(ComputeStareResponse, 0x5F9BD0, { .reversed = false });
     RH_ScopedInstall(ComputeResponseVehicleDamage, 0x5FC070, { .reversed = false });
     RH_ScopedInstall(ComputeResponseShotFired, 0x5FBDF0, { .reversed = false });
@@ -54,8 +54,8 @@ bool CGroupEventHandler::IsKillTaskAppropriate(CPedGroup* g, CPed* ped) {
 }
 
 // 0x5FA910
-void CGroupEventHandler::ComputeWalkAlongsideResponse(CPedGroup* group, CPed* ped1, CPed* ped2) {
-    plugin::Call<0x5FA910, CPedGroup*, CPed*, CPed*>(group, ped1, ped2);
+bool CGroupEventHandler::ComputeWalkAlongsideResponse(CPedGroup* group, CPed* ped1, CPed* ped2) {
+    NOTSA_UNREACHABLE(); // Unused
 }
 
 // 0x5F9BD0

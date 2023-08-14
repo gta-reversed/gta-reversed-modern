@@ -9,7 +9,7 @@ public:
     static void InjectHooks();
 
     static bool IsKillTaskAppropriate(CPedGroup* group, CPed* ped);
-    static void ComputeWalkAlongsideResponse(CPedGroup* group, CPed* ped1, CPed* ped2);
+    static bool ComputeWalkAlongsideResponse(CPedGroup* group, CPed* ped1, CPed* ped2);
     static void ComputeStareResponse(CPedGroup* group, CPed* ped1, CPed* ped2, int32, int32);
     static void ComputeResponseVehicleDamage(const CEvent& event, CPedGroup* group, CPed* ped);
     static void ComputeResponseShotFired(const CEvent& event, CPedGroup* group, CPed* ped);
