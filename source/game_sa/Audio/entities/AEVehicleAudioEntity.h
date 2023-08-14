@@ -94,12 +94,12 @@ struct tVehicleAudioSettings {
     int16             m_nEngineOnSoundBankId;
     int16             m_nEngineOffSoundBankId;
     int8              m_nBassSetting; // m_nStereo
-    float             m_fBassEq;
+    float             m_fBassEq; // m_fBassFactor
     float             field_C;
     int8              m_nHornToneSoundInBank; // sfx id
     float             m_fHornHigh;
     char              m_nDoorSound;
-    char              field_19;
+    char              m_EngineUpgrade;
     eRadioID          m_nRadioID;
     eRadioType        m_nRadioType;
     int8              m_nVehTypeForAudio;

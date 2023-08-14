@@ -54,12 +54,12 @@ void CAERadioTrackManager::InjectHooks() {
     RH_ScopedInstall(AddDJBanterIndexToHistory, 0x4E97B0, { .reversed = false });
     RH_ScopedInstall(AddAdvertIndexToHistory, 0x4E9760, { .reversed = false });
     RH_ScopedInstall(AddIdentIndexToHistory, 0x4E9720, { .reversed = false });
-    // RH_ScopedOverloadedInstall(StartRadio, "", 0x4EB3C0, void (CAERadioTrackManager::*)(int8, int8, float, uint8));
-    // RH_ScopedOverloadedInstall(StartRadio, "", 0x4EB550, void (CAERadioTrackManager::*)(tVehicleAudioSettings*));
+    RH_ScopedOverloadedInstall(StartRadio, "manual", 0x4EB3C0, void (CAERadioTrackManager::*)(eRadioID, int8, float, uint8), {.reversed = false});
+    RH_ScopedOverloadedInstall(StartRadio, "with-settings", 0x4EB550, void (CAERadioTrackManager::*)(tVehicleAudioSettings*));
     RH_ScopedInstall(CheckForStationRetuneDuringPause, 0x4EB890, { .reversed = false });
     RH_ScopedInstall(TrackRadioStation, 0x4EAC30, { .reversed = false });
     RH_ScopedInstall(ChooseTracksForStation, 0x4EB180);
-    RH_ScopedInstall(AddMusicTrackIndexToHistory, 0x4E96C0);
+    RH_ScopedInstall(AddMusicTrackIndexToHistory, 0x4E96C0, {.reversed = false});
     RH_ScopedInstall(CheckForTrackConcatenation, 0x4EA930, { .reversed = false });
     RH_ScopedInstall(QueueUpTracksForStation, 0x4EA670, { .reversed = false });
     RH_ScopedInstall(ChooseDJBanterIndex, 0x4EA2D0, { .reversed = false });
@@ -501,7 +501,52 @@ void CAERadioTrackManager::PlayRadioAnnouncement(uint32) {
 
 // 0x4EB550
 void CAERadioTrackManager::StartRadio(tVehicleAudioSettings* settings) {
-    plugin::CallMethod<0x4EB550, CAERadioTrackManager*, tVehicleAudioSettings*>(this, settings);
+    // plugin::CallMethod<0x4EB550, CAERadioTrackManager*, tVehicleAudioSettings*>(this, settings);
+
+    if (CReplay::Mode == MODE_PLAYBACK)
+        return;
+
+    if (settings->m_nRadioType == RADIO_EMERGENCY) {
+        StartRadio(RADIO_EMERGENCY_AA, settings->m_nBassSetting, settings->m_fBassEq, 0);
+        return;
+    }
+
+    if (settings->m_nRadioType != RADIO_CIVILIAN)
+        return;
+
+    const bool needsRetune = [&] {
+       if (!m_bRadioAutoSelect)
+           return false;
+
+       const auto savedId = m_nSavedRadioStationId;
+       if (savedId < 0 || savedId == settings->m_nRadioID || savedId == RADIO_OFF || savedId == RADIO_EMERGENCY_AA)
+           return false;
+
+       if (CTimer::GetTimeInMS() > m_nSavedTimeMs + 60'000)
+           return false;
+
+       const auto savedHours = m_nSavedGameClockHours;
+       auto savedDays = m_nSavedGameClockDays;
+       if (savedHours < 0 || savedDays < 0)
+           return false;
+
+       if (savedDays > CClock::GetGameClockDays()) {
+           const auto month = CClock::GetGameClockMonth();
+           savedDays += CClock::daysInMonth[month == 0 ? 11 : month - 1]; // prev month
+       }
+
+       if (CClock::GetGameClockHours() + 24 * savedDays - savedHours > 5)
+           return false;
+
+       return true;
+    }();
+
+    if (needsRetune) {
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_RADIO_RETUNE_START);
+        StartRadio(m_nSavedRadioStationId, settings->m_nBassSetting, settings->m_fBassEq, 0);
+    } else {
+        StartRadio(settings->m_nRadioID, settings->m_nBassSetting, settings->m_fBassEq, 0);
+    }
 }
 
 // 0x4EB3C0

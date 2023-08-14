@@ -139,7 +139,8 @@ public:
     eRadioTrackMode m_nMode{eRadioTrackMode::UNK_7};
     int32           m_nStationsListed{0};
     int32           m_nStationsListDown{0};
-    int32           m_nSavedRadioStationId{-1};
+    eRadioID        m_nSavedRadioStationId{RADIO_INVALID};
+    uint8           __saved_radio_station_pad[3]; // TODO: check
     int8            m_iRadioStationMenuRequest{ -1 };
     int8            m_iRadioStationRequest{};
     int32           field_7C{ -1 };
