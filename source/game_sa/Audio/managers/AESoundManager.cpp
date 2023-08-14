@@ -103,10 +103,7 @@ void CAESoundManager::Service() {
         m_nUpdateTime = CTimer::GetTimeInMSPauseMode();
         m_bPauseTimeInUse = true;
     } else {
-        if (m_bPauseTimeInUse)
-            timeSinceLastUpdate = CTimer::GetTimeInMS() - m_nPauseUpdateTime;
-        else
-            timeSinceLastUpdate = CTimer::GetTimeInMS() - m_nUpdateTime;
+        timeSinceLastUpdate = CTimer::GetTimeInMS() - (m_bPauseTimeInUse ? m_nPauseUpdateTime : m_nUpdateTime);
 
         m_nUpdateTime = CTimer::GetTimeInMS();
         m_bPauseTimeInUse = false;
@@ -118,8 +115,7 @@ void CAESoundManager::Service() {
     AEAudioHardware.GetVirtualChannelSoundLoopStartTimes(m_aSoundLoopStartTimes);
 
     // Initialize sounds that are using percentage specified start positions 0x4F011C
-    for (auto i = 0; i < MAX_NUM_SOUNDS; ++i) {
-        auto& sound = m_aSounds[i];
+    for (auto&& [i, sound] : notsa::enumerate(m_aSounds)) {
         if (!sound.IsUsed() || !sound.WasServiced() || !sound.GetStartPercentage())
             continue;
 
@@ -127,7 +123,8 @@ void CAESoundManager::Service() {
         if (sound.m_nHasStarted)
             continue;
 
-        sound.m_nCurrentPlayPosition *= uint16(static_cast<float>(m_aSoundLengths[i]) / 100.0F);
+        //sound.m_nCurrentPlayPosition *= uint16(static_cast<float>(m_aSoundLengths[i]) / 100.0F);
+        sound.m_nCurrentPlayPosition = static_cast<uint16>((float)(sound.m_nCurrentPlayPosition * m_aSoundLengths[i]) / 100.0f);
     }
 
     // Stop sounds that turned inactive
@@ -143,8 +140,7 @@ void CAESoundManager::Service() {
     }
 
     // Update sounds playtime
-    for (auto i = 0; i < MAX_NUM_SOUNDS; ++i) {
-        auto& sound = m_aSounds[i];
+    for (auto&& [i, sound] : notsa::enumerate(m_aSounds)) {
         if (!sound.IsUsed() || !sound.WasServiced() || sound.m_nIgnoredServiceCycles)
             continue;
 
@@ -185,8 +181,7 @@ void CAESoundManager::Service() {
     }
 
     // Mark some more songs as uncancellable under specific conditions
-    for (auto i = 0; i < MAX_NUM_SOUNDS; ++i) {
-        auto& sound = m_aSounds[i];
+    for (auto&& [i, sound] : notsa::enumerate(m_aSounds)) {
         if (!sound.IsUsed() || (sound.m_nHasStarted && sound.GetUncancellable()) || sound.m_nIgnoredServiceCycles)
             continue;
 
@@ -230,8 +225,7 @@ void CAESoundManager::Service() {
     }
 
     // Play sounds that require that
-    auto curSound = 0;
-    for (auto i = 0; i < m_nNumAvailableChannels; ++i) {
+    for (auto i = 0, curSound = 0; i < m_nNumAvailableChannels; ++i, ++curSound) {
         const auto uncancell = m_aChannelSoundUncancellable[i];
         if (uncancell == -1)
             continue;
@@ -250,24 +244,13 @@ void CAESoundManager::Service() {
         auto slomoFactor = sound.GetSlowMoFrequencyScalingFactor();
 
         CAEAudioHardwarePlayFlags flags{};
-        flags.m_nFlags = 0;
-
-        flags.m_bIsFrontend        = sound.GetFrontEnd();
-        flags.m_bIsUncompressable  = sound.GetUncompressable();
-        flags.m_bIsUnduckable      = sound.GetUnduckable();
-        flags.m_bIsStartPercentage = sound.GetStartPercentage();
-        flags.m_bIsMusicMastered   = sound.GetMusicMastered();
-        flags.m_bIsRolledOff       = sound.GetRolledOff();
-        flags.m_bIsSmoothDucking   = sound.GetSmoothDucking();
-        flags.m_bIsForcedFront     = sound.GetForcedFront();
-        flags.m_bUnpausable        = flags.m_bIsFrontend ? sound.GetUnpausable() : false;
+        flags.CopyFromAESound(sound);
 
         AEAudioHardware.PlaySound(m_nChannel, curSound, sound.m_nSoundIdInSlot, sound.m_nBankSlotId, sound.m_nCurrentPlayPosition, flags.m_nFlags, sound.m_fSpeed);
         AEAudioHardware.SetChannelVolume(m_nChannel, curSound, sound.m_fFinalVolume, 0);
 
         AEAudioHardware.SetChannelPosition(m_nChannel, curSound, sound.GetRelativePosition(), 0);
         AEAudioHardware.SetChannelFrequencyScalingFactor(m_nChannel, curSound, freq * slomoFactor);
-        ++curSound;
     }
 
     for (auto i = 0; i < m_nNumAvailableChannels; ++i) {
@@ -298,7 +281,7 @@ void CAESoundManager::Service() {
             continue;
         }
 
-        sound.m_bWasServiced = 1;
+        sound.m_bWasServiced = true;
         if (sound.m_nIgnoredServiceCycles > 0 && !CAESoundManager::IsSoundPaused(sound))
             --sound.m_nIgnoredServiceCycles;
     }

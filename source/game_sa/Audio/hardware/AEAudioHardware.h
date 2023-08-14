@@ -15,7 +15,7 @@
 #endif
 
 union CAEAudioHardwarePlayFlags {
-    uint16 m_nFlags;
+    uint16 m_nFlags{};
     struct {
         uint16 m_bIsFrontend : 1;
         uint16 m_bIsUncompressable : 1;
@@ -29,6 +29,18 @@ union CAEAudioHardwarePlayFlags {
         uint16 m_bIsForcedFront : 1;
         uint16 m_bUnpausable : 1;
     };
+
+    void CopyFromAESound(const CAESound& sound) {
+        m_bIsFrontend        = sound.GetFrontEnd();
+        m_bIsUncompressable  = sound.GetUncompressable();
+        m_bIsUnduckable      = sound.GetUnduckable();
+        m_bIsStartPercentage = sound.GetStartPercentage();
+        m_bIsMusicMastered   = sound.GetMusicMastered();
+        m_bIsRolledOff       = sound.GetRolledOff();
+        m_bIsSmoothDucking   = sound.GetSmoothDucking();
+        m_bIsForcedFront     = sound.GetForcedFront();
+        m_bUnpausable        = m_bIsFrontend ? sound.GetUnpausable() : false;
+    }
 };
 
 class CAEStreamingChannel;
