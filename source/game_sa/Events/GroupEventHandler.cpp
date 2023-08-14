@@ -19,7 +19,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeWalkAlongsideResponse, 0x5FA910);
     RH_ScopedInstall(ComputeStareResponse, 0x5F9BD0);
     RH_ScopedInstall(ComputeResponseVehicleDamage, 0x5FC070);
-    RH_ScopedInstall(ComputeResponseShotFired, 0x5FBDF0, { .reversed = false });
+    RH_ScopedInstall(ComputeResponseShotFired, 0x5FBDF0);
     RH_ScopedInstall(ComputeResponseSexyPed, 0x5FB390);
     RH_ScopedInstall(ComputeResponseSeenCop, 0x5FBCB0, { .reversed = false });
     RH_ScopedInstall(ComputeResponsePlayerCommand, 0x5FB470, { .reversed = false });
