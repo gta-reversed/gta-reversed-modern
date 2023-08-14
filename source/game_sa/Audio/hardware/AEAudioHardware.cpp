@@ -333,9 +333,9 @@ void CAEAudioHardware::StopSound(int16 channel, uint16 channelId) {
 }
 
 // 0x4D8920
-void CAEAudioHardware::SetChannelPosition(int16 channel, uint16 channelId, const CVector& posn, uint8 unused) {
-    if (channel >= 0 && channelId < m_anNumChannelsInSlot[channel]) {
-        const auto ch = m_aChannels[channel + channelId];
+void CAEAudioHardware::SetChannelPosition(int16 slotId, uint16 channelId, const CVector& posn, uint8 unused) {
+    if (slotId >= 0 && channelId < m_anNumChannelsInSlot[slotId]) {
+        const auto ch = m_aChannels[slotId + channelId];
         if (ch) {
             ch->SetPosition(posn);
         }
