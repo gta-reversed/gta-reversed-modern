@@ -7,6 +7,7 @@
 
 #include "Events/EventVehicleDamage.h"
 #include "Events/EventGunShot.h"
+#include "Events/EventSexyPed.h"
 
 #include "TaskAllocator.h"
 
@@ -19,7 +20,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeStareResponse, 0x5F9BD0);
     RH_ScopedInstall(ComputeResponseVehicleDamage, 0x5FC070);
     RH_ScopedInstall(ComputeResponseShotFired, 0x5FBDF0, { .reversed = false });
-    RH_ScopedInstall(ComputeResponseSexyPed, 0x5FB390, { .reversed = false });
+    RH_ScopedInstall(ComputeResponseSexyPed, 0x5FB390);
     RH_ScopedInstall(ComputeResponseSeenCop, 0x5FBCB0, { .reversed = false });
     RH_ScopedInstall(ComputeResponsePlayerCommand, 0x5FB470, { .reversed = false });
     RH_ScopedInstall(ComputeResponsePedThreat, 0x5FBB90, { .reversed = false });
@@ -118,8 +119,25 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseShotFired(const CEventGunShot
 }
 
 // 0x5FB390
-CTaskAllocator* CGroupEventHandler::ComputeResponseSexyPed(const CEvent& event, CPedGroup* group, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB390, const CEvent&, CPedGroup*, CPed*>(event, group, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseSexyPed(const CEventSexyPed& e, CPedGroup* pg, CPed* originator) {
+    if (!e.m_SexyPed) {
+        return nullptr;
+    }
+    if (pg->GetMembership().IsMember(e.m_SexyPed)) {
+        return nullptr;
+    }
+    const auto playerGrp = &FindPlayerPed(-1)->GetPlayerGroup();
+    if (pg == playerGrp) {
+        return nullptr;
+    }
+    if (playerGrp->GetMembership().IsMember(e.m_SexyPed)) {
+        return nullptr;
+    }
+    switch (e.m_taskId) {
+    case TASK_GROUP_STARE_AT_PED:    return ComputeStareResponse(pg, e.m_SexyPed, originator, CGeneral::GetRandomNumberInRange(3000, 5000), 1000);
+    case TASK_GROUP_HASSLE_SEXY_PED: return ComputeHassleSexyPedResponse(pg, e.m_SexyPed, originator);
+    }
+    return nullptr;
 }
 
 // 0x5FBCB0
@@ -218,8 +236,8 @@ CTaskAllocator* CGroupEventHandler::ComputeHassleThreatResponse(CPedGroup* group
 }
 
 // 0x5FA020
-CTaskAllocator* CGroupEventHandler::ComputeHassleSexyPedResponse(CPedGroup* group, CPed* ped1, CPed* ped2) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA020, CPedGroup*, CPed*, CPed*>(group, ped1, ped2);
+CTaskAllocator* CGroupEventHandler::ComputeHassleSexyPedResponse(CPedGroup* pg, CPed* sexyPed, CPed* originator) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA020, CPedGroup*, CPed*, CPed*>(pg, sexyPed, originator);
 }
 
 // 0x5FA820
