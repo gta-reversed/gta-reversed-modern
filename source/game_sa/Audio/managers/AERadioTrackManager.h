@@ -78,9 +78,9 @@ VALIDATE_SIZE(tRadioState, 0x2C);
 //typedef int8 RadioStationId; => eRadioID
 
 // NOTSA
-template<size_t Count>
+template<typename T, size_t Count>
 struct tRadioIndexHistory {
-    std::array<int32, Count> indices{-1};
+    std::array<T, Count> indices{-1};
 
     void Reset() {
         rng::fill(indices, -1);
@@ -94,7 +94,7 @@ struct tRadioIndexHistory {
         indices[0] = index;
     }
 };
-VALIDATE_SIZE(tRadioIndexHistory<1>, 0x04);
+static_assert(sizeof(tRadioIndexHistory<int32, 1>) == sizeof(int32)); // No VALIDATE_SIZE because the preprocessor is dumb
 
 enum class eRadioTrackMode {
     UNK_0,
@@ -146,10 +146,10 @@ public:
     static constexpr auto ADVERT_INDEX_HISTORY_COUNT   = 40;
     static constexpr auto IDENT_INDEX_HISTORY_COUNT    = 8;
     static constexpr auto MUSIC_TRACK_HISTORY_COUNT    = 20;
-    using DJBanterIndexHistory = tRadioIndexHistory<DJBANTER_INDEX_HISTORY_COUNT>;
-    using AdvertIndexHistory   = tRadioIndexHistory<ADVERT_INDEX_HISTORY_COUNT>;
-    using IdentIndexHistory    = tRadioIndexHistory<IDENT_INDEX_HISTORY_COUNT>;
-    using MusicTrackHistory    = tRadioIndexHistory<MUSIC_TRACK_HISTORY_COUNT>;
+    using DJBanterIndexHistory = tRadioIndexHistory<int32, DJBANTER_INDEX_HISTORY_COUNT>;
+    using AdvertIndexHistory   = tRadioIndexHistory<int32, ADVERT_INDEX_HISTORY_COUNT>;
+    using IdentIndexHistory    = tRadioIndexHistory<int32, IDENT_INDEX_HISTORY_COUNT>;
+    using MusicTrackHistory    = tRadioIndexHistory<int8, MUSIC_TRACK_HISTORY_COUNT>;
 
     static inline DJBanterIndexHistory (&m_nDJBanterIndexHistory)[RADIO_COUNT] = *(DJBanterIndexHistory(*)[RADIO_COUNT])0xB61D78; // 210
     static inline AdvertIndexHistory (&m_nAdvertIndexHistory)[RADIO_COUNT] = *(AdvertIndexHistory(*)[RADIO_COUNT])0xB620C0;       // 560
