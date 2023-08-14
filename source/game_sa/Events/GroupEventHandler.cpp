@@ -7,6 +7,11 @@
 #include "Tasks/TaskTypes/TaskComplexLeaveAnyCar.h"
 #include "Tasks/TaskTypes/TaskComplexGangJoinRespond.h"
 #include "Tasks/TaskTypes/TaskSimpleGoToPoint.h"
+#include "Tasks/TaskTypes/TaskComplexEnterCarAsPassenger.h"
+#include "Tasks/TaskTypes/TaskComplexEnterCarAsPassengerWait.h"
+#include "Tasks/TaskTypes/TaskComplexLeaveCar.h"
+#include "Tasks/TaskTypes/TaskComplexLeaveCarAsPassengerWait.h"
+#include "Tasks/TaskTypes/TaskComplexSmartFleeEntity.h"
 
 #include "Tasks/Allocators/TaskAllocatorPlayerCommandAttack.h"
 
@@ -15,6 +20,7 @@
 #include "Events/EventSexyPed.h"
 #include "Events/EventAcquaintancePed.h"
 #include "Events/GroupEvents.h"
+#include "Events/LeaderEvents.h"
 
 #include "TaskAllocator.h"
 
@@ -33,7 +39,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeResponsePedThreat, 0x5FBB90);
     RH_ScopedInstall(ComputeResponsePedFriend, 0x5FB2D0);
     RH_ScopedInstall(ComputeResponseNewGangMember, 0x5F9840, { .reversed = false });
-    RH_ScopedInstall(ComputeResponseLeaderExitedCar, 0x5F90A0, { .reversed = false });
+    RH_ScopedInstall(ComputeResponseLeaderExitedCar, 0x5F90A0);
     RH_ScopedInstall(ComputeResponsLeaderQuitEnteringCar, 0x5F9530, { .reversed = false });
     RH_ScopedInstall(ComputeResponseLeaderEnteredCar, 0x5F8900, { .reversed = false });
     RH_ScopedInstall(ComputeResponseLeaderEnterExit, 0x5F9710, { .reversed = false });
@@ -244,8 +250,80 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseNewGangMember(const CEventNew
 }
 
 // 0x5F90A0
-CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderExitedCar(const CEvent& e, CPedGroup* pg, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F90A0, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderExitedCar(const CEventLeaderExitedCarAsDriver& e, CPedGroup* pg, CPed* originator) {
+    const auto leader = pg->GetMembership().GetLeader();
+    for (auto&& [i, m] : notsa::enumerate(pg->GetMembership().GetFollowers())) {
+        if (m.m_pVehicle && m.bInVehicle && m.m_pVehicle == leader->m_pVehicle) { // Already in the leader's vehicle
+            continue; 
+        }
+        CVehicle* mveh{};
+        if (const auto t = m.GetTaskManager().Find<CTaskComplexEnterCarAsPassengerWait>(false); !t || !(mveh = t->GetTarget())) {
+            if (const auto t = m.GetTaskManager().Find<CTaskComplexEnterCarAsPassenger>(false); !t || !(mveh = t->GetTarget())) {
+                continue;
+            }
+        }
+        const auto SetTask = [&](auto task) {
+            pg->GetIntelligence().SetTask(
+                &m,
+                std::move(task),
+                pg->GetIntelligence().m_pedTaskPairs
+            );
+        };
+        const auto isVehOnFire = mveh->m_pFireParticle && mveh->m_pFireParticle->GetPlayStatus() == eFxSystemPlayStatus::FX_PLAYING;
+        if (notsa::contains({ 15, 16 }, mveh->m_pHandlingData->m_nAnimGroup)) { // TODO: Enums
+            if (isVehOnFire) { // INVERTED - 0x5F9483 
+                SetTask(CTaskComplexSequence{
+                    new CTaskComplexLeaveCarAsPassengerWait{mveh},
+                    new CTaskComplexSmartFleeEntity{
+                        mveh,
+                        false,
+                        15.f,
+                        1'000'000,
+                        1000,
+                        fEntityPosChangeThreshold
+                    }
+                });
+            } else { // 0x5F937C
+                SetTask(CTaskComplexLeaveCarAsPassengerWait{
+                    mveh
+                });
+            }
+        } else {
+            // NOTSA/NOTE:
+            // To make this behave the same as the OG code we'd have to either:
+            // - Use `pg->GetMembership() * 500`
+            // - Use an `for i` loop [to iterate the array]
+            // But I'm way too fancy to do that, so...
+            if (isVehOnFire) { // INVERTED
+                SetTask(CTaskComplexSequence{ // 0x5F9193
+                    new CTaskComplexLeaveCar{
+                        mveh,
+                        eTargetDoor::TARGET_DOOR_FRONT_LEFT,
+                        CGeneral::GetRandomNumberInRange(-250, 250) + (i + 1) * 500, // SEE NOTE
+                        false,
+                        false
+                    },
+                    new CTaskComplexSmartFleeEntity{
+                        mveh,
+                        false,
+                        15.f,
+                        1'000'000,
+                        1'000,
+                        fEntityPosChangeThreshold
+                    }
+                });
+            } else { // 0x5F92E7
+                SetTask(CTaskComplexLeaveCar{
+                     mveh,
+                    eTargetDoor::TARGET_DOOR_FRONT_LEFT,
+                    CGeneral::GetRandomNumberInRange(-250, 250) + i * 500, // SEE NOTE
+                    false,
+                    false
+                });
+            }
+        }
+    }
+    return nullptr;
 }
 
 // 0x5F8900
@@ -360,7 +438,7 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
     case EVENT_LEADER_ENTERED_CAR_AS_DRIVER:
         return ComputeResponseLeaderEnteredCar(*e, g, p);
     case EVENT_LEADER_EXITED_CAR_AS_DRIVER:
-        return ComputeResponseLeaderExitedCar(*e, g, p);
+        return ComputeResponseLeaderExitedCar(static_cast<const CEventLeaderExitedCarAsDriver&>(*e), g, p);
     case EVENT_LEADER_QUIT_ENTERING_CAR_AS_DRIVER:
         return ComputeResponsLeaderQuitEnteringCar(*e, g, p);
     case EVENT_PLAYER_COMMAND_TO_GROUP:

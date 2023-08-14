@@ -51,7 +51,7 @@ public:
     CVector        GetTargetPos();
     CVehicle*      GetCameraAvoidVehicle();
 
-    auto GetVehicle() const { return m_car; }
+    auto GetTarget() const { return m_car; }
 private:
     // 0x63A220
     CTaskComplexEnterCar* Constructor(CVehicle* vehicle, bool bAsDriver, bool bQuitAfterOpeningDoor, bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff) {

@@ -104,6 +104,9 @@ public:
              | rng::views::transform([](CPed* mem) -> CPed& { return *mem; }); // Dereference
     }
 
+    //! Get followers [that is, members excl. the leader]
+    auto GetFollowers() { return GetMembers(false); }
+
     /*!
     * @notsa
     * @brief Find the member of this group closest to the ped.

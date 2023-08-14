@@ -12,6 +12,7 @@ class CEventSeenCop;
 class CEventPlayerCommandToGroup;
 class CEventAcquaintancePed;
 class CEventNewGangMember;
+class CEventLeaderExitedCarAsDriver;
 
 class CGroupEventHandler {
 public:
@@ -30,7 +31,7 @@ public:
     static CTaskAllocator* ComputeResponsePedThreat(const CEventAcquaintancePed& event, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponsePedFriend(const CEventAcquaintancePed& e, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponseNewGangMember(const CEventNewGangMember& e, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponseLeaderExitedCar(const CEvent& e, CPedGroup* pg, CPed* ped);
+    static CTaskAllocator* ComputeResponseLeaderExitedCar(const CEventLeaderExitedCarAsDriver& e, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponseLeaderEnteredCar(const CEvent& e, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponseLeaderEnterExit(const CEvent& e, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponseGunAimedAt(const CEvent& e, CPedGroup* pg, CPed* ped);
@@ -54,3 +55,4 @@ public:
     static CTaskAllocator* ComputeDoDealResponse(CPedGroup* pg, CPed* ped1, CPed* ped2);
 };
 
+static inline auto& fEntityPosChangeThreshold = StaticRef<float>(0xC18CF0);
