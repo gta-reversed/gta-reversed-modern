@@ -43,7 +43,7 @@ public:
     static uint32& TotalNumStatMessages;
     static char (&LastMissionPassedName)[8];
     static int32 (&TimesMissionAttempted)[100];
-    static int32 (&FavoriteRadioStationList)[14];
+    static int32 (&FavoriteRadioStationList)[RADIO_COUNT];
     static int32 (&PedsKilledOfThisType)[32];
     static float (&StatReactionValue)[59];
     static int32 (&StatTypesInt)[223];

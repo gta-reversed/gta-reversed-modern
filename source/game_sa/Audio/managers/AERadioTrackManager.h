@@ -99,12 +99,6 @@ struct tRadioIndexHistory {
 };
 VALIDATE_SIZE(tRadioIndexHistory<1>, 0x04);
 
-//struct tMusicTrackHistory {
-//    int32 historyIndices[5];
-//};
-using tMusicTrackHistory = tRadioIndexHistory<5>;
-VALIDATE_SIZE(tMusicTrackHistory, 0x14);
-
 enum class eRadioTrackMode {
     UNK_0,
     UNK_1,
@@ -141,9 +135,10 @@ public:
     int32           m_nStationsListDown{0};
     eRadioID        m_nSavedRadioStationId{RADIO_INVALID};
     uint8           __saved_radio_station_pad[3]; // TODO: check
-    int8            m_iRadioStationMenuRequest{ -1 };
-    int8            m_iRadioStationRequest{};
-    int32           field_7C{ -1 };
+    eRadioID        m_iRadioStationMenuRequest{ RADIO_INVALID };
+    eRadioID        m_iRadioStationRequest{ RADIO_INVALID };
+    eRadioID        m_iRadioStationScriptRequest{ RADIO_INVALID };
+    uint8           __radio_station_script_req_pad[3]; // TODO: check
     float           m_f80{0.0f}; // 80 and 84 volume related fields. See ::UpdateRadioVolumes
     float           m_f84{0.0f};
     tRadioSettings  m_RequestedSettings{}; // settings1
@@ -156,14 +151,16 @@ public:
     static constexpr auto DJBANTER_INDEX_HISTORY_COUNT = 15;
     static constexpr auto ADVERT_INDEX_HISTORY_COUNT   = 40;
     static constexpr auto IDENT_INDEX_HISTORY_COUNT    = 8;
+    static constexpr auto MUSIC_TRACK_HISTORY_COUNT    = 5;
     using DJBanterIndexHistory = tRadioIndexHistory<DJBANTER_INDEX_HISTORY_COUNT>;
     using AdvertIndexHistory   = tRadioIndexHistory<ADVERT_INDEX_HISTORY_COUNT>;
     using IdentIndexHistory    = tRadioIndexHistory<IDENT_INDEX_HISTORY_COUNT>;
+    using MusicTrackHistory    = tRadioIndexHistory<MUSIC_TRACK_HISTORY_COUNT>;
 
     static inline DJBanterIndexHistory (&m_nDJBanterIndexHistory)[RADIO_COUNT] = *(DJBanterIndexHistory(*)[RADIO_COUNT])0xB61D78; // 210
     static inline AdvertIndexHistory (&m_nAdvertIndexHistory)[RADIO_COUNT] = *(AdvertIndexHistory(*)[RADIO_COUNT])0xB620C0;       // 560
     static inline IdentIndexHistory (&m_nIdentIndexHistory)[RADIO_COUNT] = *(IdentIndexHistory(*)[RADIO_COUNT])0xB62980;          // 112
-    static inline tMusicTrackHistory (&m_nMusicTrackIndexHistory)[RADIO_COUNT] = *(tMusicTrackHistory(*)[RADIO_COUNT])0xB62B40;   // 280
+    static inline MusicTrackHistory (&m_nMusicTrackIndexHistory)[RADIO_COUNT] = *(MusicTrackHistory(*)[RADIO_COUNT])0xB62B40;   // 280
 
     static uint8& m_nStatsLastHitTimeOutHours;   // = -1;
     static uint8& m_nStatsLastHitGameClockHours; // = -1;

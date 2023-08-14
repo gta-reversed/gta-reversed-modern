@@ -54,7 +54,7 @@ void CAERadioTrackManager::InjectHooks() {
     RH_ScopedInstall(AddDJBanterIndexToHistory, 0x4E97B0, { .reversed = false });
     RH_ScopedInstall(AddAdvertIndexToHistory, 0x4E9760, { .reversed = false });
     RH_ScopedInstall(AddIdentIndexToHistory, 0x4E9720, { .reversed = false });
-    RH_ScopedOverloadedInstall(StartRadio, "manual", 0x4EB3C0, void (CAERadioTrackManager::*)(eRadioID, int8, float, uint8), {.reversed = true});
+    RH_ScopedOverloadedInstall(StartRadio, "manual", 0x4EB3C0, void (CAERadioTrackManager::*)(eRadioID, int8, float, uint8));
     RH_ScopedOverloadedInstall(StartRadio, "with-settings", 0x4EB550, void (CAERadioTrackManager::*)(tVehicleAudioSettings*));
     RH_ScopedInstall(CheckForStationRetuneDuringPause, 0x4EB890, { .reversed = false });
     RH_ScopedInstall(TrackRadioStation, 0x4EAC30, { .reversed = false });
@@ -78,14 +78,14 @@ void CAERadioTrackManager::InjectHooks() {
     RH_ScopedInstall(GetRadioStationNameKey, 0x4E8380);
     RH_ScopedInstall(HasRadioRetuneJustStarted, 0x4E8370);
     RH_ScopedInstall(StopRadio, 0x4E9820, { .reversed = false });
-    RH_ScopedInstall(IsRadioOn, 0x4E8350, { .reversed = false });
+    RH_ScopedInstall(IsRadioOn, 0x4E8350, { .reversed = true });
     RH_ScopedInstall(InitialiseRadioStationID, 0x4E8330);
     RH_ScopedInstall(SetBassEnhanceOnOff, 0x4E9DB0);
     RH_ScopedInstall(SetBassSetting, 0x4E82F0);
     RH_ScopedInstall(SetRadioAutoRetuneOnOff, 0x4E82E0);
-    RH_ScopedInstall(RetuneRadio, 0x4E8290, { .reversed = false });
+    RH_ScopedInstall(RetuneRadio, 0x4E8290, { .reversed = true });
     RH_ScopedInstall(ResetStatistics, 0x4E8200);
-    RH_ScopedInstall(Reset, 0x4E7F80, { .reversed = false });
+    RH_ScopedInstall(Reset, 0x4E7F80, { .reversed = true });
 }
 
 // Code from 0x5B9390
@@ -122,7 +122,30 @@ void CAERadioTrackManager::InitialiseRadioStationID(eRadioID id) {
 
 // 0x4E7F80
 void CAERadioTrackManager::Reset() {
-    plugin::CallMethod<0x4E7F80, CAERadioTrackManager*>(this);
+    m_bInitialised = false;
+    m_bDisplayStationName = false;
+    rng::copy(CStats::FavoriteRadioStationList, m_aListenTimes);
+
+    rng::for_each(m_nDJBanterIndexHistory, &DJBanterIndexHistory::Reset);
+    rng::for_each(m_nAdvertIndexHistory, &AdvertIndexHistory::Reset);
+    rng::for_each(m_nIdentIndexHistory, &IdentIndexHistory::Reset);
+    rng::for_each(m_nMusicTrackIndexHistory, &MusicTrackHistory::Reset);
+    rng::for_each(m_aRadioState, [](auto& s) { s.Reset(); });
+
+    m_RequestedSettings = m_ActiveSettings = tRadioSettings{CAEAudioUtility::GetRandomRadioStation()};
+    m_nStationsListed = m_nStationsListDown = 0;
+    m_nTimeRadioStationRetuned = m_nTimeToDisplayRadioName = 0;
+    m_prev = field_60 = 0;
+    m_nRetuneStartedTime = 0;
+    m_bEnabledInPauseMode = false;
+    m_nSavedGameClockDays = m_nSavedGameClockHours = -1;
+    m_bRadioAutoSelect = m_bBassEnhance = true;
+    m_nSavedRadioStationId = m_iRadioStationMenuRequest = m_iRadioStationScriptRequest = RADIO_INVALID;
+    m_nSpecialDJBanterPending = 3; // todo: enum
+    m_nSpecialDJBanterIndex = -1;
+    m_bPauseMode = m_bRetuneJustStarted = false;
+    m_f80 = m_f84 = 0.0f;
+    ResetStatistics();
 }
 
 // 0x4E8200
@@ -203,8 +226,6 @@ void CAERadioTrackManager::SetBassEnhanceOnOff(bool enable) {
 
 // 0x4E8290
 void CAERadioTrackManager::RetuneRadio(eRadioID id) {
-    return plugin::CallMethod<0x4E8290, CAERadioTrackManager*, eRadioID>(this, id);
-
     const auto retunedStation = [id] {
         if (id == RADIO_USER_TRACKS && !AEUserRadioTrackManager.m_nUserTracksCount) {
             return RADIO_OFF;
@@ -217,7 +238,7 @@ void CAERadioTrackManager::RetuneRadio(eRadioID id) {
         m_iRadioStationMenuRequest = retunedStation;
         m_nRetuneStartedTime = CTimer::GetTimeInMSPauseMode();
     } else {
-        field_7C = retunedStation;
+        m_iRadioStationScriptRequest = retunedStation;
     }
 }
 
@@ -555,8 +576,7 @@ void CAERadioTrackManager::StartRadio(eRadioID id, int8 bassValue, float bassGai
     if (CTimer::GetIsPaused()) {
         m_bEnabledInPauseMode = true;
 
-        const auto running = m_nMode != eRadioTrackMode::UNK_7 || m_bInitialised || m_nStationsListed || m_nStationsListDown;
-        if (running && id == m_ActiveSettings.m_nCurrentRadioStation) {
+        if (IsRadioOn() && id == m_ActiveSettings.m_nCurrentRadioStation) {
             m_aRadioState[id].m_iTimeInPauseModeInMs = CTimer::GetTimeInMSPauseMode();
             return;
         }
