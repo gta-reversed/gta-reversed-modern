@@ -106,6 +106,7 @@ CAESound::~CAESound() {
     UnregisterWithPhysicalEntity();
 }
 
+// 0x4EF680
 CAESound& CAESound::operator=(const CAESound& sound) {
     if (this == &sound)
         return *this;
@@ -144,15 +145,18 @@ CAESound& CAESound::operator=(const CAESound& sound) {
     return *this;
 }
 
+// 0x4EF1A0
 void CAESound::UnregisterWithPhysicalEntity() {
     CEntity::ClearReference(m_pPhysicalEntity);
 }
 
+// 0x4EF1C0
 void CAESound::StopSound() {
     m_nPlayingState = eSoundState::SOUND_STOPPED;
     UnregisterWithPhysicalEntity();
 }
 
+// 0x4EF2B0
 void CAESound::SetIndividualEnvironment(uint16 envFlag, uint16 bEnabled) {
     if (bEnabled)
         m_nEnvironmentFlags |= envFlag;
@@ -184,39 +188,43 @@ void CAESound::UpdatePlayTime(int16 soundLength, int16 loopStartTime, int16 play
     m_nCurrentPlayPosition = loopStartTime + (m_nCurrentPlayPosition % soundLength);
 }
 
-CVector CAESound::GetRelativePosition() const {
+// 0x4EF350
+void CAESound::GetRelativePosition(CVector& out) const {
     if (!GetFrontEnd()) {
-        CVector out;
         CAEAudioEnvironment::GetPositionRelativeToCamera(&out, &m_vecCurrPosn);
-        return out;
     }
-    return m_vecCurrPosn;
+    out = m_vecCurrPosn;
 }
 
+// 0x4EF390
 void CAESound::CalculateFrequency() {
     m_fFrequency = m_fSpeedVariability <= 0.0F || m_fSpeedVariability >= m_fSpeed
         ? m_fSpeed
         : m_fSpeed + CAEAudioUtility::GetRandomNumberInRange(-m_fSpeedVariability, m_fSpeedVariability);
 }
 
+// 0x4EF3E0
 void CAESound::UpdateFrequency() {
     if (m_fSpeedVariability == 0.0F) {
         m_fFrequency = m_fSpeed;
     }
 }
 
+// 0x4EF400
 float CAESound::GetRelativePlaybackFrequencyWithDoppler() {
     return GetFrontEnd()
         ? m_fFrequency
         : m_fFrequency * CAEAudioEnvironment::GetDopplerRelativeFrequency(m_fPrevCamDist, m_fCurrCamDist, m_nPrevTimeUpdate, m_nCurrTimeUpdate, m_fTimeScale);
 }
 
+// 0x4EF440
 float CAESound::GetSlowMoFrequencyScalingFactor() {
     return GetUnpausable() || !CTimer::GetIsSlowMotionActive() || CCamera::GetActiveCamera().m_nMode == eCamMode::MODE_CAMERA
         ? 1.f
         : fSlowMoFrequencyScalingFactor;
 }
 
+// 0x4EF7A0
 void CAESound::NewVPSLentry() {
     m_nHasStarted = 0;
     m_nPlayingState = eSoundState::SOUND_ACTIVE;
@@ -226,6 +234,7 @@ void CAESound::NewVPSLentry() {
     CalculateFrequency();
 }
 
+// 0x4EF820
 void CAESound::RegisterWithPhysicalEntity(CEntity* entity) {
     CAESound::UnregisterWithPhysicalEntity();
     if (entity) {
@@ -234,12 +243,14 @@ void CAESound::RegisterWithPhysicalEntity(CEntity* entity) {
     }
 }
 
+// 0x4EF850
 void CAESound::StopSoundAndForget() {
     m_bRequestUpdates = false;
     m_pBaseAudio = nullptr;
     StopSound();
 }
 
+// 0x4EF880
 void CAESound::SetPosition(CVector vecPos) {
     if (!m_nLastFrameUpdate) {
         m_vecPrevPosn = vecPos;
@@ -268,6 +279,7 @@ void CAESound::SetPosition(CVector vecPos) {
     }
 }
 
+// 0x4EFA10
 void CAESound::CalculateVolume() {
     if (GetFrontEnd())
         m_fFinalVolume = m_fVolume - m_fSoundHeadRoom;
@@ -280,6 +292,7 @@ void CAESound::CalculateVolume() {
     }
 }
 
+// 0x4EFE50
 void CAESound::Initialise(int16 bankSlotId, int16 sfxId, CAEAudioEntity* baseAudio, CVector posn, float volume, float maxDistance, float speed, float timeScale,
                           uint8 ignoredServiceCycles, eSoundEnvironment environmentFlags, float speedVariability, int16 currPlayPosn)
 {
@@ -312,6 +325,7 @@ void CAESound::Initialise(int16 bankSlotId, int16 sfxId, CAEAudioEntity* baseAud
     m_fFrequency            = 1.0F;
 }
 
+// 0x4EFF50
 void CAESound::UpdateParameters(int16 curPlayPos) {
     if (GetLifespanTiedToPhysicalEntity()) {
         if (!m_pPhysicalEntity)
@@ -327,6 +341,7 @@ void CAESound::UpdateParameters(int16 curPlayPos) {
     }
 }
 
+// 0x4EFFD0
 void CAESound::SoundHasFinished() {
     UpdateParameters(-1);
     UnregisterWithPhysicalEntity();
