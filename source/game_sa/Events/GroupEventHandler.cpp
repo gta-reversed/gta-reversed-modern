@@ -267,7 +267,7 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
     case EVENT_SHOT_FIRED:
         return ComputeResponseShotFired(static_cast<const CEventGunShot&>(*e), g, p);
     case EVENT_SEXY_PED:
-        return ComputeResponseSexyPed(*e, g, p);
+        return ComputeResponseSexyPed(static_cast<const CEventSexyPed&>(*e), g, p);
     case EVENT_GUN_AIMED_AT:
         return ComputeResponseGunAimedAt(*e, g, p);
     case EVENT_ACQUAINTANCE_PED_HATE:
