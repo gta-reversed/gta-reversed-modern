@@ -51,10 +51,10 @@ void CAERadioTrackManager::InjectHooks() {
     RH_ScopedInstall(CheckForStationRetune, 0x4EB660, { .reversed = false });
     RH_ScopedInstall(CheckForPause, 0x4EA590);
     RH_ScopedInstall(IsVehicleRadioActive, 0x4E9800, { .reversed = false });
-    RH_ScopedInstall(AddDJBanterIndexToHistory, 0x4E97B0, { .reversed = false });
-    RH_ScopedInstall(AddAdvertIndexToHistory, 0x4E9760, { .reversed = false });
-    RH_ScopedInstall(AddIdentIndexToHistory, 0x4E9720, { .reversed = false });
-    RH_ScopedInstall(AddMusicTrackIndexToHistory, 0x4E96C0, {.reversed = false});
+    RH_ScopedInstall(AddDJBanterIndexToHistory, 0x4E97B0);
+    RH_ScopedInstall(AddAdvertIndexToHistory, 0x4E9760);
+    RH_ScopedInstall(AddIdentIndexToHistory, 0x4E9720);
+    RH_ScopedInstall(AddMusicTrackIndexToHistory, 0x4E96C0);
     RH_ScopedOverloadedInstall(StartRadio, "manual", 0x4EB3C0, void (CAERadioTrackManager::*)(eRadioID, int8, float, uint8));
     RH_ScopedOverloadedInstall(StartRadio, "with-settings", 0x4EB550, void (CAERadioTrackManager::*)(tVehicleAudioSettings*));
     RH_ScopedInstall(CheckForStationRetuneDuringPause, 0x4EB890);
@@ -729,25 +729,32 @@ int8 CAERadioTrackManager::ChooseTalkRadioShow() {
 
 // 0x4E96C0
 void CAERadioTrackManager::AddMusicTrackIndexToHistory(eRadioID id, int8 trackIndex) {
-    m_nMusicTrackIndexHistory[id].PutAtFirst(trackIndex);
-    m_nTracksInARow[id]++;
+    if (trackIndex >= 0 && m_nMusicTrackIndexHistory[id].indices[0] != trackIndex) {
+        m_nMusicTrackIndexHistory[id].PutAtFirst(trackIndex);
+        m_nTracksInARow[id]++;
+    }
 }
 
 // 0x4E9720
 void CAERadioTrackManager::AddIdentIndexToHistory(eRadioID id, int8 trackIndex) {
-    m_nIdentIndexHistory[id].PutAtFirst(trackIndex);
+    if (m_nIdentIndexHistory[id].indices[0] != trackIndex)
+        m_nIdentIndexHistory[id].PutAtFirst(trackIndex);
 }
 
 // 0x4E9760
 void CAERadioTrackManager::AddAdvertIndexToHistory(eRadioID id, int8 trackIndex) {
-    m_nAdvertIndexHistory[id].PutAtFirst(trackIndex);
-    m_nTracksInARow[id] = 0;
+    if (m_nAdvertIndexHistory[id].indices[0] != trackIndex) {
+        m_nAdvertIndexHistory[id].PutAtFirst(trackIndex);
+        m_nTracksInARow[id] = 0;
+    }
 }
 
 // 0x4E97B0
 void CAERadioTrackManager::AddDJBanterIndexToHistory(eRadioID id, int8 trackIndex) {
-    m_nDJBanterIndexHistory[id].PutAtFirst(trackIndex);
-    m_nTracksInARow[id] = 0;
+    if (m_nDJBanterIndexHistory[id].indices[0] != trackIndex) {
+        m_nDJBanterIndexHistory[id].PutAtFirst(trackIndex);
+        m_nTracksInARow[id] = 0;
+    }
 }
 
 // 0x4EA590

@@ -87,9 +87,6 @@ struct tRadioIndexHistory {
     }
 
     void PutAtFirst(int32 index) {
-        if (indices[0] == index)
-            return;
-
         if constexpr (Count > 1) {
             // rotate all elements to right.
             std::rotate(indices.rbegin(), indices.rbegin() + 1, indices.rend());
