@@ -133,12 +133,9 @@ public:
     eRadioTrackMode m_nMode{eRadioTrackMode::UNK_7};
     int32           m_nStationsListed{0};
     int32           m_nStationsListDown{0};
-    eRadioID        m_nSavedRadioStationId{RADIO_INVALID};
-    uint8           __saved_radio_station_pad[3]; // TODO: check
-    eRadioID        m_iRadioStationMenuRequest{ RADIO_INVALID };
-    eRadioID        m_iRadioStationRequest{ RADIO_INVALID };
-    eRadioID        m_iRadioStationScriptRequest{ RADIO_INVALID };
-    uint8           __radio_station_script_req_pad[3]; // TODO: check
+    int32           m_nSavedRadioStationId{-1};         // TODO: convert to eRadioID after finished reversing
+    int32           m_iRadioStationMenuRequest{ -1 };   // <-
+    int32           m_iRadioStationScriptRequest{ -1 }; // <-
     float           m_f80{0.0f}; // 80 and 84 volume related fields. See ::UpdateRadioVolumes
     float           m_f84{0.0f};
     tRadioSettings  m_RequestedSettings{}; // settings1
@@ -151,7 +148,7 @@ public:
     static constexpr auto DJBANTER_INDEX_HISTORY_COUNT = 15;
     static constexpr auto ADVERT_INDEX_HISTORY_COUNT   = 40;
     static constexpr auto IDENT_INDEX_HISTORY_COUNT    = 8;
-    static constexpr auto MUSIC_TRACK_HISTORY_COUNT    = 5;
+    static constexpr auto MUSIC_TRACK_HISTORY_COUNT    = 20;
     using DJBanterIndexHistory = tRadioIndexHistory<DJBANTER_INDEX_HISTORY_COUNT>;
     using AdvertIndexHistory   = tRadioIndexHistory<ADVERT_INDEX_HISTORY_COUNT>;
     using IdentIndexHistory    = tRadioIndexHistory<IDENT_INDEX_HISTORY_COUNT>;
