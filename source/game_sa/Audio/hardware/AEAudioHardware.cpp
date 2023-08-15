@@ -85,7 +85,7 @@ bool CAEAudioHardware::Initialise() {
         return false;
     }
 
-    CoInitialize(nullptr);
+    VERIFY(SUCCEEDED(CoInitialize(nullptr)));
 
     // TODO: We need EAX headers here.
     //

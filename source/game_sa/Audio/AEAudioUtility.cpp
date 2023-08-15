@@ -112,7 +112,7 @@ bool CAEAudioUtility::GetBankAndSoundFromScriptSlotAudioEvent(int32& slot, int32
         return false;
 
     if (slot < 2000) {
-        outBank = gScriptBanksLookup[slot];
+        outBank = gScriptBanksLookup[slot - 1800];
         return true;
     }
 
