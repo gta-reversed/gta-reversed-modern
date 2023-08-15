@@ -71,7 +71,6 @@ target_link_libraries(${RE_PROJECT_LIB_NAME} PRIVATE
     strmiids
     dsound
     d3d9
-    FLAC
 )
 
 if(WIN32) 
