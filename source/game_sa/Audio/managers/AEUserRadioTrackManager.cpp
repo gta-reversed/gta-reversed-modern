@@ -420,6 +420,48 @@ std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring& path)
     std::wstring out = target;
     delete[] target;
     return out;
+
+    /*
+    if (depth >= 15 || !fs::exists(dir))
+        return 0;
+
+    int32 numTracks{};
+    for (auto& entry : fs::directory_iterator(dir)) {
+        if (fs::is_directory(entry)) {
+            // NOTE: STD can also do recursive search, maybe use that?
+            numTracks += WriteUserTracksFile(entry.path(), currentLength, file, offsets, depth + 1);
+            continue;
+        }
+
+        auto path = entry.path();
+#ifdef WIN32
+        if (path.extension() == ".lnk")
+            path = ResolveShortcut(path.wstring());
+#endif
+
+        // TODO: symlink
+        if (!fs::is_regular_file(path))
+            continue;
+
+        // if shortcut was a directory.
+        if (fs::is_directory(path)) {
+            numTracks += WriteUserTracksFile(path, currentLength, file, offsets, depth + 1);
+            continue;
+        }
+
+        const auto u8path = path.string();
+        const auto fileType = GetAudioFileType(reinterpret_cast<const char*>(u8path.c_str()));
+        if (fileType != AUDIO_FILE_TYPE_UNKNOWN) {
+            size_t pathLen = u8path.length();
+            CFileMgr::Write(file, reinterpret_cast<const char*>(u8path.c_str()), pathLen);
+            offsets.push_back({currentLength, pathLen, fileType});
+            currentLength += pathLen;
+            numTracks++;
+        }
+    }
+
+    return numTracks;
+    */
 }
 
 void CAEUserRadioTrackManager::InjectHooks() {
