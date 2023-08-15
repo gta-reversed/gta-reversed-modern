@@ -24,7 +24,6 @@ CPed*& CAEPedSpeechAudioEntity::s_pConversationPed2 = *(CPed**)0xB6140C;
 CPed*& CAEPedSpeechAudioEntity::s_pConversationPed1 = *(CPed**)0xB61410;
 int16& CAEPedSpeechAudioEntity::s_NextSpeechSlot = *(int16*)0xB61414;
 int16& CAEPedSpeechAudioEntity::s_PhraseMemory = *(int16*)0xB61418;
-// CAEPedSpeechAudioEntity::Slot (&CAEPedSpeechAudioEntity::s_PedSpeechSlots)[6] = *(CAEPedSpeechAudioEntity::Slot(*)[6])0xB61C38;
 uint32 (&gGlobalSpeechContextNextPlayTime)[360] = *(uint32(*)[360])0xB61670;
 
 // 0x4E4F10
@@ -43,28 +42,59 @@ CAEPedSpeechAudioEntity::CAEPedSpeechAudioEntity() : CAEAudioEntity() {
 }
 
 // 0x4E4600
-int8 CAEPedSpeechAudioEntity::IsGlobalContextImportantForInterupting(int16 a1) {
-    return plugin::CallAndReturn<int8, 0x4E4600, int16>(a1);
+bool CAEPedSpeechAudioEntity::IsGlobalContextImportantForInterupting(int16 globalCtx) {
+    // return plugin::CallAndReturn<int8, 0x4E4600, int16>(a1);
+    switch (globalCtx) {
+    case 13:
+    case 15:
+    case 125:
+    case 126:
+    case 127:
+        return true;
+    default:
+        return false;
+    }
 }
 
 // 0x4E46F0
-int8 CAEPedSpeechAudioEntity::IsGlobalContextUberImportant(int16 a1) {
-    return plugin::CallAndReturn<int8, 0x4E46F0, int16>(a1);
+bool CAEPedSpeechAudioEntity::IsGlobalContextUberImportant(int16 globalCtx) {
+    return false;
 }
 
 // 0x4E4700
-int16 CAEPedSpeechAudioEntity::GetNextMoodToUse(int16 a1) {
-    return plugin::CallAndReturn<int16, 0x4E4700, int16>(a1);
+int16 CAEPedSpeechAudioEntity::GetNextMoodToUse(int16 lastMood) {
+    switch (lastMood) {
+    case 0:
+    case 7:
+        return 1;
+    case 6:
+        return 0;
+    case 8:
+        return 4;
+    default:
+        return 5;
+    }
 }
 
 // 0x4E4760
-int32 CAEPedSpeechAudioEntity::GetVoiceForMood(int16 a1) {
-    return plugin::CallAndReturn<int32, 0x4E4760, int16>(a1);
+int32 CAEPedSpeechAudioEntity::GetVoiceForMood(int16 mood) {
+    auto rnd = CAEAudioUtility::GetRandomNumberInRange(0, 1);
+    if (mood < 0 || mood >= 10)
+        return rnd + 10;
+    return rnd + 2 * mood;
 }
 
 // 0x4E4950
 int16 CAEPedSpeechAudioEntity::CanWePlayScriptedSpeech() {
-    return plugin::CallAndReturn<int16, 0x4E4950>();
+    for (auto i = 0; i < 5; i++) {
+        const auto slot = (s_NextSpeechSlot + i) % 5;
+        if (s_PedSpeechSlots[slot].m_nState)
+            continue;
+
+        s_NextSpeechSlot = slot;
+        return slot;
+    }
+    return -1;
 }
 
 // 0x4E4AE0
@@ -423,11 +453,11 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedCategory("Audio/Entities");
 
     RH_ScopedInstall(Constructor, 0x4E4F10);
-    RH_ScopedInstall(IsGlobalContextImportantForInterupting, 0x4E4600, { .reversed = false });
-    RH_ScopedInstall(IsGlobalContextUberImportant, 0x4E46F0, { .reversed = false });
-    RH_ScopedInstall(GetNextMoodToUse, 0x4E4700, { .reversed = false });
-    RH_ScopedInstall(GetVoiceForMood, 0x4E4760, { .reversed = false });
-    RH_ScopedInstall(CanWePlayScriptedSpeech, 0x4E4950, { .reversed = false });
+    RH_ScopedInstall(IsGlobalContextImportantForInterupting, 0x4E4600, { .reversed = true });
+    RH_ScopedInstall(IsGlobalContextUberImportant, 0x4E46F0, { .reversed = true });
+    RH_ScopedInstall(GetNextMoodToUse, 0x4E4700, { .reversed = true });
+    RH_ScopedInstall(GetVoiceForMood, 0x4E4760, { .reversed = true });
+    RH_ScopedInstall(CanWePlayScriptedSpeech, 0x4E4950, { .reversed = true });
     RH_ScopedInstall(GetSpeechContextVolumeOffset, 0x4E4AE0, { .reversed = false });
     RH_ScopedInstall(RequestPedConversation, 0x4E50E0, { .reversed = false });
     RH_ScopedInstall(ReleasePedConversation, 0x4E52A0, { .reversed = false });

@@ -18,6 +18,23 @@ enum eAudioPedType : int16 {
     PED_TYPE_SPC    = 5
 };
 
+struct tSpeechSlot {
+    uint16 m_nState;
+    uint16 field_02;
+    CAEPedSpeechAudioEntity* m_PedSpeechAE;
+    uint32 field_08;
+    uint16 m_nSoundId;
+    uint16 m_nBankId;
+    uint32 m_nTime;
+    uint16 m_nPhraseId;
+    uint16 m_nVoiceType;
+    uint8 field_18;
+    uint8 field_19;
+    uint8 field_1A;
+    uint8 field_1B;
+};
+VALIDATE_SIZE(tSpeechSlot, 0x1C);
+
 class NOTSA_EXPORT_VTABLE CAEPedSpeechAudioEntity : public CAEAudioEntity {
 public:
     char      field_7C[20];
@@ -67,7 +84,9 @@ public:
 
     static int16& s_NextSpeechSlot;
     static int16& s_PhraseMemory;
-    // static CAEPedSpeechAudioEntity::Slot (&s_PedSpeechSlots)[6];
+
+    static constexpr auto NUM_PED_SPEECH_SLOTS = 6;
+    static inline auto& s_PedSpeechSlots = *reinterpret_cast<std::array<tSpeechSlot, NUM_PED_SPEECH_SLOTS>*>(0xB61C38);
 
 public:
     static void InjectHooks();
@@ -75,10 +94,10 @@ public:
     CAEPedSpeechAudioEntity();
     ~CAEPedSpeechAudioEntity() = default;
 
-    static int8 IsGlobalContextImportantForInterupting(int16 a1); // typo: Interrupting
-    static int8 IsGlobalContextUberImportant(int16 a1);
-    static int16 GetNextMoodToUse(int16 a1);
-    static int32 GetVoiceForMood(int16 a1);
+    static bool IsGlobalContextImportantForInterupting(int16 globalCtx); // typo: Interrupting
+    static bool IsGlobalContextUberImportant(int16 globalCtx);
+    static int16 GetNextMoodToUse(int16 lastMood);
+    static int32 GetVoiceForMood(int16 mood);
     static int16 CanWePlayScriptedSpeech();
     static float GetSpeechContextVolumeOffset(int16 a1);
     static int8 RequestPedConversation(CPed* ped1, CPed* ped2);

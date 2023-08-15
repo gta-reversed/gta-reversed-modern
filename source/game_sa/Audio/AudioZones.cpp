@@ -76,7 +76,7 @@ void CAudioZones::Update(bool forceUpdate, CVector posn) {
 
     for (auto&& [idx, sphere] : notsa::enumerate(GetAvailableSpheres())) {
         // Do not add more to list if it's filled.
-        if (m_NumActiveSpheres >= 10)
+        if (m_NumActiveSpheres >= std::size(m_aActiveSpheres))
             break;
 
         if (!sphere.m_bIsActive)
@@ -88,7 +88,7 @@ void CAudioZones::Update(bool forceUpdate, CVector posn) {
 
     for (auto&& [idx, box] : notsa::enumerate(GetAvailableBoxes())) {
         // Do not add more to list if it's filled.
-        if (m_NumActiveBoxes >= 10)
+        if (m_NumActiveBoxes >= std::size(m_aActiveBoxes))
             break;
 
         if (!box.m_bIsActive)
