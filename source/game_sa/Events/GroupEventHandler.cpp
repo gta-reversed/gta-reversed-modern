@@ -12,6 +12,7 @@
 #include "Tasks/TaskTypes/TaskComplexLeaveCar.h"
 #include "Tasks/TaskTypes/TaskComplexLeaveCarAsPassengerWait.h"
 #include "Tasks/TaskTypes/TaskComplexSmartFleeEntity.h"
+#include "Tasks/TaskTypes/TaskSimpleWaitUntilLeaderAreaCodesMatch.h"
 
 #include "Tasks/Allocators/TaskAllocatorPlayerCommandAttack.h"
 
@@ -42,7 +43,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeResponseLeaderExitedCar, 0x5F90A0);
     RH_ScopedInstall(ComputeResponsLeaderQuitEnteringCar, 0x5F9530, { .reversed = false });
     RH_ScopedInstall(ComputeResponseLeaderEnteredCar, 0x5F8900, { .reversed = false });
-    RH_ScopedInstall(ComputeResponseLeaderEnterExit, 0x5F9710, { .reversed = false });
+    RH_ScopedInstall(ComputeResponseLeaderEnterExit, 0x5F9710);
     RH_ScopedInstall(ComputeResponseGunAimedAt, 0x5FBD10, { .reversed = false });
     RH_ScopedInstall(ComputeResponseGather, 0x5F99F0, { .reversed = false });
     RH_ScopedInstall(ComputeResponseDraggedOutCar, 0x5FBE70, { .reversed = false });
@@ -332,8 +333,28 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderEnteredCar(const CEvent
 }
 
 // 0x5F9710
-CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderEnterExit(const CEvent& e, CPedGroup* pg, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9710, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderEnterExit(const CEventLeaderEntryExit& e, CPedGroup* pg, CPed* originator) {
+    const auto pgms = &pg->GetMembership();
+    const auto leader = pgms->GetLeader();
+    if (!leader) {
+        return nullptr;
+    }
+    for (auto& m : pgms->GetFollowers()) {
+        if (m.bInVehicle) {
+            continue;
+        }
+        CTaskSimpleWaitUntilLeaderAreaCodesMatch task{leader};
+        if (task.ProcessPed(&m)) {
+            m.m_bUsesCollision = true;
+        } else {
+            pg->GetIntelligence().SetTask(
+                &m,
+                std::move(task),
+                pg->GetIntelligence().m_pedTaskPairs
+            );
+        }
+    }
+    return nullptr;
 }
 
 // 0x5FBD10
@@ -449,7 +470,7 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
     case EVENT_DANGER:
         return ComputeResponseDanger(*e, g, p);
     case EVENT_LEADER_ENTRY_EXIT:
-        return ComputeResponseLeaderEnterExit(*e, g, p);
+        return ComputeResponseLeaderEnterExit(static_cast<const CEventLeaderEntryExit&>(*e), g, p);
     case EVENT_NEW_GANG_MEMBER:
         return ComputeResponseNewGangMember(static_cast<const CEventNewGangMember&>(*e), g, p);
     case EVENT_LEAN_ON_VEHICLE:
