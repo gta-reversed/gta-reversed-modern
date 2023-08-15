@@ -385,6 +385,7 @@
 #include "TaskComplexSmartFleePoint.h"
 #include "Interior/TaskInteriorBeInHouse.h"
 #include "Tasks/TaskTypes/TaskComplexKillPedOnFootArmed.h"
+#include "Tasks/TaskTypes/TaskSimpleWaitUntilLeaderAreaCodesMatch.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -814,6 +815,7 @@ void InjectHooksMain() {
         CTaskComplexKillPedOnFootMelee::InjectHooks();
         CTaskComplexKillPedOnFootStealth::InjectHooks();
 
+        CTaskSimpleWaitUntilLeaderAreaCodesMatch::InjectHooks();
         CTaskComplexLeaveCarAndDie::InjectHooks();
         CTaskComplexLeaveBoat::InjectHooks();
         CTaskComplexLeaveCarAndFlee::InjectHooks();
