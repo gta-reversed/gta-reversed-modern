@@ -15,7 +15,6 @@
 #include "AEWaveDecoder.h"
 #include "AEWMADecoder.h"
 #include "AEVorbisDecoder.h"
-#include "AEFlacDecoder.h"
 
 #include "FileMgr.h"
 #include "MenuManager.h"
@@ -45,10 +44,6 @@ bool CAEUserRadioTrackManager::Initialise() {
     m_baDecodersSupported[AUDIO_FILE_TYPE_WAV] = true;
     m_baDecodersSupported[AUDIO_FILE_TYPE_WMA] = CAEWMADecoder::InitLibrary();
     m_baDecodersSupported[AUDIO_FILE_TYPE_QUICKTIME] = CAEMFDecoder::InitLibrary();
-
-#ifdef USERTRACK_FLAC_SUPPORT
-    m_baDecodersSupported[AUDIO_FILE_TYPE_FLAC] = CAEFlacDecoder::InitLibrary();
-#endif
 
     if (m_baDecodersSupported[AUDIO_FILE_TYPE_QUICKTIME] == false) {
         // change MP3 decoder from QuickTime to WMA
@@ -135,28 +130,18 @@ CAEStreamingDecoder* CAEUserRadioTrackManager::LoadUserTrack(int32 trackID) {
 
         switch (targetOffset.fileType) {
         case AUDIO_FILE_TYPE_UNKNOWN:
-        default: {
-            delete dataStream;
-            return nullptr;
-        }
-        case AUDIO_FILE_TYPE_VORBIS: {
+        case AUDIO_FILE_TYPE_VORBIS:
             decoder = new CAEVorbisDecoder(dataStream, true);
             break;
-        }
-        case AUDIO_FILE_TYPE_WAV: {
+        case AUDIO_FILE_TYPE_WAV:
             decoder = new CAEWaveDecoder(dataStream);
             break;
-        }
-        case AUDIO_FILE_TYPE_WMA: {
+        case AUDIO_FILE_TYPE_WMA:
             decoder = new CAEWMADecoder(dataStream);
             break;
-        }
-#ifdef USERTRACK_FLAC_SUPPORT
-        case AUDIO_FILE_TYPE_FLAC: {
-            decoder = new CAEFlacDecoder(dataStream);
-            break;
-        }
-#endif
+        default:
+            delete dataStream;
+            return nullptr;
         }
     }
 
