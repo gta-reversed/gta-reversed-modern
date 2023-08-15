@@ -116,7 +116,7 @@ bool CAEAudioUtility::GetBankAndSoundFromScriptSlotAudioEvent(int32& slot, int32
         return true;
     }
 
-    if (slot == 0xFFFF) { // (int16)-1
+    if (slot == 0xFFFF) { // (uint16)-1
         outBank = 291;
 
         if (a4 > 3)

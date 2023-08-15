@@ -12,7 +12,7 @@ public:
     CAEMP3TrackLoader*    m_pMp3TrackLoader;
     bool                  m_bActive;
     bool                  m_bThreadActive;
-    char                  field_12;
+    char                  m_bNeedsService;
     bool                  m_bIsUserTrack;
     bool                  m_bNextIsUserTrack;
     char                  m_bPreparingStream;
@@ -20,8 +20,8 @@ public:
     char                  field_17;
     uint32                m_iTrackId;
     uint32                field_1C;
-    uint32                m_iNextTrackId;
-    int8                  field_24;
+    int32                 m_iNextTrackId;
+    int8                  m_TrackFlags;
     char                  field_25;
     char                  field_26;
     char                  field_27;

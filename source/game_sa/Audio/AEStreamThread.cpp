@@ -3,6 +3,8 @@
 #include "AEStreamThread.h"
 #include "AEAudioUtility.h"
 #include "AEMP3TrackLoader.h"
+#include "AEUserRadioTrackManager.h"
+#include "AEVorbisDecoder.h"
 
 void CAEStreamThread::InjectHooks() {
     RH_ScopedClass(CAEStreamThread);
@@ -21,6 +23,7 @@ void CAEStreamThread::InjectHooks() {
     RH_ScopedInstall(GetPlayingTrackID, 0x4F1570);
     RH_ScopedInstall(StopTrack, 0x4F1580);
     RH_ScopedInstall(MainLoop, 0x4F15C0);
+    RH_ScopedInstall(Service, 0x4F1290);
 }
 
 // 0x4F11E0
@@ -32,7 +35,7 @@ CAEStreamThread::~CAEStreamThread() {
 bool CAEStreamThread::Initialise(CAEStreamingChannel* streamingChannel) {
     m_bActive          = true;
     m_bThreadActive    = false;
-    field_12           = 0;
+    m_bNeedsService = 0;
     m_bPreparingStream = 0;
     m_bStopRequest     = false;
     m_nPlayingTrackId  = streamingChannel->GetPlayingTrackID();
@@ -117,10 +120,10 @@ void CAEStreamThread::PlayTrack(uint32 iTrackId, int32 iNextTrackId, uint32 a3, 
     m_iTrackId         = iTrackId;
     m_iNextTrackId     = iNextTrackId;
     field_1C           = a3;
-    field_24           = a4;
+    m_TrackFlags = a4;
     m_bIsUserTrack     = bIsUserTrack;
     m_bNextIsUserTrack = bNextIsUserTrack;
-    field_12           = 1;
+    m_bNeedsService = 1;
 
     OS_MutexRelease(&m_criticalSection);
 }
@@ -174,5 +177,79 @@ DWORD WINAPI CAEStreamThread::MainLoop(LPVOID data) {
 
 // 0x4F1290
 void CAEStreamThread::Service() {
-    plugin::CallMethod<0x4F1290, CAEStreamThread*>(this);
+    m_pStreamingChannel->UpdatePlayTime();
+    if (m_bStopRequest) {
+        m_pStreamingChannel->Stop();
+        m_bStopRequest = false;
+    }
+
+    const auto SaveStreamingState = [&] {
+        if (m_bPreparingStream)
+            return;
+
+        m_nPlayingTrackId = m_pStreamingChannel->GetPlayingTrackID();
+        m_nPlayTime = m_pStreamingChannel->GetPlayTime();
+        m_nActiveTrackId = m_pStreamingChannel->GetActiveTrackID();
+        m_nTrackLengthMs = m_pStreamingChannel->GetLength();
+    };
+
+    if (!m_bNeedsService) {
+        SaveStreamingState();
+        return;
+    }
+
+    EnterCriticalSection(&m_criticalSection);
+    m_bNeedsService = false;
+
+    const auto LoadDecoder = [&](bool userTrackCheck, uint32 trackId) {
+        CAEStreamingDecoder* ptr{};
+        if (userTrackCheck) {
+            ptr = AEUserRadioTrackManager.LoadUserTrack(trackId);
+        } else {
+            ptr = new CAEVorbisDecoder(m_pMp3TrackLoader->GetDataStream(trackId), 0);
+        }
+
+        if (ptr && !ptr->Initialise()) {
+            delete std::exchange(ptr, nullptr);
+        }
+        return ptr;
+    };
+
+    CAEStreamingDecoder* nextDecoder{};
+    if (m_iNextTrackId != -1) { // RADIO_INVALID
+         nextDecoder = LoadDecoder(m_bNextIsUserTrack, m_iNextTrackId);
+    } else {
+        m_pStreamingChannel->SetNextStream(nullptr);
+    }
+
+    if (m_iNextTrackId == -1 || m_pStreamingChannel->GetPlayingTrackID() != m_iTrackId) {
+        auto* currDecoder = LoadDecoder(m_bIsUserTrack, m_iTrackId);
+        if (currDecoder) {
+            currDecoder->SetCursor(currDecoder->GetStreamLengthMs());
+
+            m_pStreamingChannel->SetNextStream(nextDecoder);
+            m_pStreamingChannel->PrepareStream(currDecoder, m_TrackFlags, 1u);
+            m_bPreparingStream = false;
+        } else {
+            m_pStreamingChannel->SetNextStream(nullptr);
+            if (nextDecoder) {
+                m_pStreamingChannel->PrepareStream(nextDecoder, m_TrackFlags, 1u);
+                m_bPreparingStream = false;
+            } else {
+                m_bPreparingStream = true;
+            }
+        }
+    } else {
+        if (nextDecoder)
+            m_pStreamingChannel->SetNextStream(nextDecoder);
+        m_pStreamingChannel->SetReady();
+    }
+
+    if (m_bPreparingStream) {
+        m_nPlayingTrackId = m_iNextTrackId == -1 ? m_iTrackId : m_iNextTrackId;
+        m_nActiveTrackId = m_iNextTrackId == -1 ? m_iTrackId : m_iNextTrackId;
+    }
+    SaveStreamingState();
+
+    LeaveCriticalSection(&m_criticalSection);
 }
