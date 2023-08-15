@@ -22,6 +22,7 @@
 #include "Events/EventAcquaintancePed.h"
 #include "Events/GroupEvents.h"
 #include "Events/LeaderEvents.h"
+#include "Events/EventGunAimedAt.h"
 
 #include "TaskAllocator.h"
 
@@ -44,7 +45,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeResponsLeaderQuitEnteringCar, 0x5F9530, { .reversed = false });
     RH_ScopedInstall(ComputeResponseLeaderEnteredCar, 0x5F8900, { .reversed = false });
     RH_ScopedInstall(ComputeResponseLeaderEnterExit, 0x5F9710);
-    RH_ScopedInstall(ComputeResponseGunAimedAt, 0x5FBD10, { .reversed = false });
+    RH_ScopedInstall(ComputeResponseGunAimedAt, 0x5FBD10);
     RH_ScopedInstall(ComputeResponseGather, 0x5F99F0, { .reversed = false });
     RH_ScopedInstall(ComputeResponseDraggedOutCar, 0x5FBE70, { .reversed = false });
     RH_ScopedInstall(ComputeResponseDanger, 0x5FB540, { .reversed = false });
@@ -358,8 +359,25 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderEnterExit(const CEventL
 }
 
 // 0x5FBD10
-CTaskAllocator* CGroupEventHandler::ComputeResponseGunAimedAt(const CEvent& e, CPedGroup* pg, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FBD10, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseGunAimedAt(const CEventGunAimedAt& e, CPedGroup* pg, CPed* ped) {
+    const auto src = e.GetSourceEntity();
+    if (!src || !src->IsPed()) {
+        return nullptr;
+    }
+    const auto srcped = src->AsPed();
+    if (pg->m_bIsMissionGroup && srcped->IsPlayer()) {
+        if (const auto l = pg->GetMembership().GetLeader()) {
+            if (!l->GetActiveWeapon().IsTypeMelee() && !l->GetIntelligence()->IsFriendlyWith(*srcped)) {
+                const_cast<CEventGunAimedAt*>(&e)->m_taskId = TASK_GROUP_KILL_THREATS_BASIC; // nice R*
+            }
+        }
+    }
+    switch (e.m_taskId) {
+    case TASK_GROUP_KILL_THREATS_BASIC:  return ComputeKillThreatsBasicResponse(pg, srcped, ped, false);
+    case TASK_GROUP_FLEE_THREAT:         return ComputeFleePedResponse(pg, srcped, ped, false);
+    case TASK_GROUP_USE_MEMBER_DECISION: return ComputeMemberResponses(e, pg, ped);
+    }
+    return nullptr;
 }
 
 // 0x5F99F0
@@ -446,7 +464,7 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
     case EVENT_SEXY_PED:
         return ComputeResponseSexyPed(static_cast<const CEventSexyPed&>(*e), g, p);
     case EVENT_GUN_AIMED_AT:
-        return ComputeResponseGunAimedAt(*e, g, p);
+        return ComputeResponseGunAimedAt(static_cast<const CEventGunAimedAt&>(*e), g, p);
     case EVENT_ACQUAINTANCE_PED_HATE:
     case EVENT_ACQUAINTANCE_PED_DISLIKE:
         return ComputeResponsePedThreat(static_cast<const CEventAcquaintancePed&>(*e), g, p);
