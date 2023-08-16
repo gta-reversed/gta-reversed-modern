@@ -18,6 +18,7 @@ class CEventGunAimedAt;
 class CEventPlayerCommandToGroupGather;
 class CEventDraggedOutCar;
 class CEventDanger;
+class CEventDamage;
 
 class CGroupEventHandler {
 public:
@@ -43,7 +44,7 @@ public:
     static CTaskAllocator* ComputeResponseGather(const CEventPlayerCommandToGroupGather& e, CPedGroup* pg, CPed* originator);
     static CTaskAllocator* ComputeResponseDraggedOutCar(const CEventDraggedOutCar& e, CPedGroup* pg, CPed* originator);
     static CTaskAllocator* ComputeResponseDanger(const CEventDanger& e, CPedGroup* pg, CPed* originator);
-    static CTaskAllocator* ComputeResponseDamage(const CEvent& e, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponseDamage(const CEventDamage& e, CPedGroup* pg, CPed* originator);
     static CTaskAllocator* ComputeResponsLeaderQuitEnteringCar(const CEvent&, CPedGroup* pg, CPed* originator);
     static CTaskAllocator* ComputeMemberResponses(const CEvent& e, CPedGroup* pg, CPed* originator);
     static CTaskAllocator* ComputeLeanOnVehicleResponse(const CEvent& e, CPedGroup* pg, CPed* originator);

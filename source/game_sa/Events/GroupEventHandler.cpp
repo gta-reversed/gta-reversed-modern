@@ -27,6 +27,7 @@
 #include "Events/EventGunAimedAt.h"
 #include "Events/EventDraggedOutCar.h"
 #include "Events/EventDanger.h"
+#include "Events/EventDamage.h"
 
 #include "TaskAllocator.h"
 
@@ -81,7 +82,7 @@ bool IsPedInPlayersGroup(CPedGroup* pg, CPed* p) {
 
 // 0x5F7A60
 bool CGroupEventHandler::IsKillTaskAppropriate(CPedGroup* g, CPed* originator) {
-    if (g->m_bIsMissionGroup || ped->GetActiveWeapon().IsTypeMelee()) { // TODO/NOTE: This `IsTypeMelee()` check should be inverted I think [By following the logic of the code in the loop]
+    if (g->m_bIsMissionGroup || originator->GetActiveWeapon().IsTypeMelee()) { // TODO/NOTE: This `IsTypeMelee()` check should be inverted I think [By following the logic of the code in the loop]
         return true;
     }
     for (auto& m : g->GetMembership().GetMembers()) {
@@ -154,13 +155,13 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseShotFired(const CEventGunShot
 
 // 0x5FB390
 CTaskAllocator* CGroupEventHandler::ComputeResponseSexyPed(const CEventSexyPed& e, CPedGroup* pg, CPed* originator) {
-    if (!e.m_Sexyoriginator) {
+    if (!e.m_SexyPed) {
         return nullptr;
     }
-    if (pg->GetMembership().IsMember(e.m_Sexyoriginator)) {
+    if (pg->GetMembership().IsMember(e.m_SexyPed)) {
         return nullptr;
     }
-    if (IsPedInPlayersGroup(pg, e.m_Sexyoriginator)) {
+    if (IsPedInPlayersGroup(pg, e.m_SexyPed)) {
         return nullptr;
     }
     switch (e.m_taskId) {
@@ -197,10 +198,10 @@ CTaskAllocator* CGroupEventHandler::ComputeResponsePlayerCommand(const CEventPla
 
 // 0x5FBB90
 CTaskAllocator* CGroupEventHandler::ComputeResponsePedThreat(const CEventAcquaintancePed& e, CPedGroup* pg, CPed* originator) {
-    if (!e.m_originator) {
+    if (!e.m_ped) {
         return nullptr;
     }
-    if (pg->GetMembership().IsMember(e.m_originator)) {
+    if (pg->GetMembership().IsMember(e.m_ped)) {
         return nullptr;
     }
     switch (e.m_taskId) {
@@ -217,10 +218,10 @@ CTaskAllocator* CGroupEventHandler::ComputeResponsePedThreat(const CEventAcquain
 
 // 0x5FB2D0
 CTaskAllocator* CGroupEventHandler::ComputeResponsePedFriend(const CEventAcquaintancePed& e, CPedGroup* pg, CPed* originator) {
-    if (!e.m_originator) {
+    if (!e.m_ped) {
         return nullptr;
     }
-    if (IsPedInPlayersGroup(pg, e.m_originator)) {
+    if (IsPedInPlayersGroup(pg, e.m_ped)) {
         return nullptr;
     }
     switch (e.m_taskId) {
@@ -371,14 +372,14 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseGunAimedAt(const CEventGunAim
     const auto srcped = src->AsPed();
     if (pg->m_bIsMissionGroup && srcped->IsPlayer()) {
         if (const auto l = pg->GetMembership().GetLeader()) {
-            if (!l->GetActiveWeapon().IsTypeMelee() && !l->GetIntelligence()->IsFriendlyWith(*srcoriginator)) {
+            if (!l->GetActiveWeapon().IsTypeMelee() && !l->GetIntelligence()->IsFriendlyWith(*originator)) {
                 const_cast<CEventGunAimedAt*>(&e)->m_taskId = TASK_GROUP_KILL_THREATS_BASIC; // nice R*
             }
         }
     }
     switch (e.m_taskId) {
-    case TASK_GROUP_KILL_THREATS_BASIC:  return ComputeKillThreatsBasicResponse(pg, srcped, ped, false);
-    case TASK_GROUP_FLEE_THREAT:         return ComputeFleePedResponse(pg, srcped, ped, false);
+    case TASK_GROUP_KILL_THREATS_BASIC:  return ComputeKillThreatsBasicResponse(pg, srcped, originator, false);
+    case TASK_GROUP_FLEE_THREAT:         return ComputeFleePedResponse(pg, srcped, originator, false);
     case TASK_GROUP_USE_MEMBER_DECISION: return ComputeMemberResponses(e, pg, originator);
     }
     return nullptr;
@@ -436,7 +437,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseDanger(const CEventDanger& e,
 }
 
 // 0x5FBF50
-CTaskAllocator* CGroupEventHandler::ComputeResponseDamage(const CEvent& e, CPedGroup* pg, CPed* originator) {
+CTaskAllocator* CGroupEventHandler::ComputeResponseDamage(const CEventDamage& e, CPedGroup* pg, CPed* originator) {
     return plugin::CallAndReturn<CTaskAllocator*, 0x5FBF50, const CEvent&, CPedGroup*, CPed*>(e, pg, originator);
 }
 
@@ -496,9 +497,9 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
     const auto& e = ge.m_event;
     switch (e->GetEventType()) {
     case EVENT_DRAGGED_OUT_CAR:
-        return ComputeResponseDraggedOutCar(*e, g, p);
+        return ComputeResponseDraggedOutCar(static_cast<const CEventDraggedOutCar&<(*e), g, p);
     case EVENT_DAMAGE:
-        return ComputeResponseDamage(*e, g, p);
+        return ComputeResponseDamage(static_cast<const CEventDamage&>(*e), g, p);
     case EVENT_SHOT_FIRED:
         return ComputeResponseShotFired(static_cast<const CEventGunShot&>(*e), g, p);
     case EVENT_SEXY_PED:
@@ -526,7 +527,7 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
     case EVENT_SEEN_COP:
         return ComputeResponseSeenCop(static_cast<const CEventSeenCop&>(*e), g, p);
     case EVENT_DANGER:
-        return ComputeResponseDanger(*e, g, p);
+        return ComputeResponseDanger(static_cast<const CEventDanger&>(*e), g, p);
     case EVENT_LEADER_ENTRY_EXIT:
         return ComputeResponseLeaderEnterExit(static_cast<const CEventLeaderEntryExit&>(*e), g, p);
     case EVENT_NEW_GANG_MEMBER:
