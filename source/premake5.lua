@@ -35,8 +35,7 @@ project "gta_reversed"
         "../libs/imgui/misc/cpp",
         "../libs/dxsdk",
         "../libs/spdlog/include",
-        "../libs/tracy/public",
-        "../libs/flac/include"
+        "../libs/tracy/public"
     }
     
     defines { 
@@ -50,9 +49,7 @@ project "gta_reversed"
         "TRACY_ON_DEMAND",
         "TRACY_CALLSTACK",
 
-        "SPDLOG_USE_STD_FORMAT",
-        
-        "FLAC__NO_DLL",
+        "SPDLOG_USE_STD_FORMAT"
     }
 
     links { 
@@ -85,8 +82,7 @@ project "gta_reversed"
         "../%{cfg.targetdir}/vorbis.lib", 
         "../%{cfg.targetdir}/vorbisfile.lib", 
         "../%{cfg.targetdir}/vorbisenc.lib",  
-        "../%{cfg.targetdir}/imgui.lib", 
-        "../%{cfg.targetdir}/flac.lib",
+        "../%{cfg.targetdir}/imgui.lib",
         "../libs/dxsdk/d3d9.lib", 
         "../libs/dxsdk/dinput.lib",
     }
