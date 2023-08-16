@@ -55,7 +55,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeResponseGather, 0x5F99F0);
     RH_ScopedInstall(ComputeResponseDraggedOutCar, 0x5FBE70);
     RH_ScopedInstall(ComputeResponseDanger, 0x5FB540);
-    RH_ScopedInstall(ComputeResponseDamage, 0x5FBF50, { .reversed = false });
+    RH_ScopedInstall(ComputeResponseDamage, 0x5FBF50);
     RH_ScopedInstall(ComputeMemberResponses, 0x5FAA50, { .reversed = false });
     RH_ScopedInstall(ComputeLeanOnVehicleResponse, 0x5F9B20, { .reversed = false });
     RH_ScopedInstall(ComputeKillThreatsBasicResponse, 0x5FB590, { .reversed = false });
