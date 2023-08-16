@@ -24,6 +24,7 @@
 #include "Tasks/Allocators/TaskAllocatorPlayerCommandAttack.h"
 #include "Tasks/Allocators/TaskAllocatorKillThreatsBasic.h"
 #include "Tasks/Allocators/TaskAllocatorKillThreatsBasicRandomGroup.h"
+#include "Tasks/Allocators/TaskAllocatorKillThreatsDriveby.h"
 
 #include "Events/EventVehicleDamage.h"
 #include "Events/EventGunShot.h"
@@ -73,7 +74,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeGreetResponse, 0x5FA550, { .reversed = false });
     RH_ScopedInstall(ComputeFleePedResponse, 0x5FA130, { .reversed = false });
     RH_ScopedInstall(ComputeEventResponseTasks, 0x5FC200);
-    RH_ScopedInstall(ComputeDrivebyResponse, 0x5F7A00, { .reversed = false });
+    RH_ScopedInstall(ComputeDrivebyResponse, 0x5F7A00);
     RH_ScopedInstall(ComputeDoDealResponse, 0x5FA290, { .reversed = false });
 }
 
@@ -648,8 +649,8 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
 }
 
 // 0x5F7A00
-CTaskAllocator* CGroupEventHandler::ComputeDrivebyResponse(CPedGroup* pg, CPed* friendp, CPed* originator) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F7A00, CPedGroup*, CPed*, CPed*>(pg, friendp, originator);
+CTaskAllocator* CGroupEventHandler::ComputeDrivebyResponse(CPedGroup* pg, CPed* threat, CPed* originator) {
+    return new CTaskAllocatorKillThreatsDriveby{threat};
 }
 
 // 0x5FA290
