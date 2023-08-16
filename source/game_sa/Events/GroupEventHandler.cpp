@@ -17,9 +17,11 @@
 #include "Tasks/TaskTypes/SeekEntity/TaskComplexSeekEntity.h"
 #include "Tasks/TaskTypes/SeekEntity/PosCalculators/EntitySeekPosCalculatorStandard.h"
 #include "Tasks/TaskTypes/TaskGoToVehicleAndLean.h"
+#include "Tasks/TaskTypes/TaskComplexKillPedOnFoot.h"
 
 #include "Tasks/Allocators/TaskAllocatorPlayerCommandAttack.h"
 #include "Tasks/Allocators/TaskAllocatorKillThreatsBasic.h"
+#include "Tasks/Allocators/TaskAllocatorKillThreatsBasicRandomGroup.h"
 
 #include "Events/EventVehicleDamage.h"
 #include "Events/EventGunShot.h"
@@ -507,12 +509,28 @@ CTaskAllocator* CGroupEventHandler::ComputeKillThreatsBasicResponse(CPedGroup* p
     if (!IsKillTaskAppropriate(pg, threat)) {
         return ComputeFleePedResponse(pg, threat, originator, false);
     }
+    if (!pg->m_bIsMissionGroup) {
+        return new CTaskAllocatorKillThreatsBasicRandomGroup{threat};
+    }
     return new CTaskAllocatorKillThreatsBasic{threat};
 }
 
 // 0x5FB670
-CTaskAllocator* CGroupEventHandler::ComputeKillPlayerBasicResponse(CPedGroup* pg, CPed* ped1, CPed* ped2, bool bDamageOriginator) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB670, CPedGroup*, CPed*, CPed*, uint8>(pg, ped1, ped2, bDamageOriginator);
+CTaskAllocator* CGroupEventHandler::ComputeKillPlayerBasicResponse(CPedGroup* pg, CPed* threat, CPed* originator, bool bDamageOriginator) {
+    if (!threat) {
+        return nullptr;
+    }
+    if (!IsKillTaskAppropriate(pg, threat)) {
+        return ComputeFleePedResponse(pg, threat, originator, false);
+    }
+    for (auto& m : pg->GetMembership().GetMembers()) {
+        pg->GetIntelligence().SetTask(
+            &m,
+            CTaskComplexKillPedOnFoot{ threat },
+            pg->GetIntelligence().GetPedTaskPairs()
+        );
+    }
+    return nullptr;
 }
 
 // 0x5F9D50
