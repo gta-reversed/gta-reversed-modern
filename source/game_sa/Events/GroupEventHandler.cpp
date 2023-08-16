@@ -26,6 +26,7 @@
 #include "Events/LeaderEvents.h"
 #include "Events/EventGunAimedAt.h"
 #include "Events/EventDraggedOutCar.h"
+#include "Events/EventDanger.h"
 
 #include "TaskAllocator.h"
 
@@ -79,7 +80,7 @@ bool IsPedInPlayersGroup(CPedGroup* pg, CPed* p) {
 }
 
 // 0x5F7A60
-bool CGroupEventHandler::IsKillTaskAppropriate(CPedGroup* g, CPed* ped) {
+bool CGroupEventHandler::IsKillTaskAppropriate(CPedGroup* g, CPed* originator) {
     if (g->m_bIsMissionGroup || ped->GetActiveWeapon().IsTypeMelee()) { // TODO/NOTE: This `IsTypeMelee()` check should be inverted I think [By following the logic of the code in the loop]
         return true;
     }
@@ -153,13 +154,13 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseShotFired(const CEventGunShot
 
 // 0x5FB390
 CTaskAllocator* CGroupEventHandler::ComputeResponseSexyPed(const CEventSexyPed& e, CPedGroup* pg, CPed* originator) {
-    if (!e.m_SexyPed) {
+    if (!e.m_Sexyoriginator) {
         return nullptr;
     }
-    if (pg->GetMembership().IsMember(e.m_SexyPed)) {
+    if (pg->GetMembership().IsMember(e.m_Sexyoriginator)) {
         return nullptr;
     }
-    if (IsPedInPlayersGroup(pg, e.m_SexyPed)) {
+    if (IsPedInPlayersGroup(pg, e.m_Sexyoriginator)) {
         return nullptr;
     }
     switch (e.m_taskId) {
@@ -196,10 +197,10 @@ CTaskAllocator* CGroupEventHandler::ComputeResponsePlayerCommand(const CEventPla
 
 // 0x5FBB90
 CTaskAllocator* CGroupEventHandler::ComputeResponsePedThreat(const CEventAcquaintancePed& e, CPedGroup* pg, CPed* originator) {
-    if (!e.m_ped) {
+    if (!e.m_originator) {
         return nullptr;
     }
-    if (pg->GetMembership().IsMember(e.m_ped)) {
+    if (pg->GetMembership().IsMember(e.m_originator)) {
         return nullptr;
     }
     switch (e.m_taskId) {
@@ -216,10 +217,10 @@ CTaskAllocator* CGroupEventHandler::ComputeResponsePedThreat(const CEventAcquain
 
 // 0x5FB2D0
 CTaskAllocator* CGroupEventHandler::ComputeResponsePedFriend(const CEventAcquaintancePed& e, CPedGroup* pg, CPed* originator) {
-    if (!e.m_ped) {
+    if (!e.m_originator) {
         return nullptr;
     }
-    if (IsPedInPlayersGroup(pg, e.m_ped)) {
+    if (IsPedInPlayersGroup(pg, e.m_originator)) {
         return nullptr;
     }
     switch (e.m_taskId) {
@@ -230,7 +231,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponsePedFriend(const CEventAcquain
 }
 
 // 0x5F9840
-CTaskAllocator* CGroupEventHandler::ComputeResponseNewGangMember(const CEventNewGangMember& e, CPedGroup* pg, CPed* ped) {
+CTaskAllocator* CGroupEventHandler::ComputeResponseNewGangMember(const CEventNewGangMember& e, CPedGroup* pg, CPed* originator) {
     if (!e.m_member || pg->GetMembership().IsMember(e.m_member)) {
         return nullptr;
     }
@@ -332,8 +333,8 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderExitedCar(const CEventE
 }
 
 // 0x5F8900
-CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderEnteredCar(const CEvent& e, CPedGroup* pg, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F8900, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderEnteredCar(const CEvent& e, CPedGroup* pg, CPed* originator) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5F8900, const CEvent&, CPedGroup*, CPed*>(e, pg, originator);
 }
 
 // 0x5F9710
@@ -362,7 +363,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderEnterExit(const CEventL
 }
 
 // 0x5FBD10
-CTaskAllocator* CGroupEventHandler::ComputeResponseGunAimedAt(const CEventGunAimedAt& e, CPedGroup* pg, CPed* ped) {
+CTaskAllocator* CGroupEventHandler::ComputeResponseGunAimedAt(const CEventGunAimedAt& e, CPedGroup* pg, CPed* originator) {
     const auto src = e.GetSourceEntity();
     if (!src || !src->IsPed()) {
         return nullptr;
@@ -370,7 +371,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseGunAimedAt(const CEventGunAim
     const auto srcped = src->AsPed();
     if (pg->m_bIsMissionGroup && srcped->IsPlayer()) {
         if (const auto l = pg->GetMembership().GetLeader()) {
-            if (!l->GetActiveWeapon().IsTypeMelee() && !l->GetIntelligence()->IsFriendlyWith(*srcped)) {
+            if (!l->GetActiveWeapon().IsTypeMelee() && !l->GetIntelligence()->IsFriendlyWith(*srcoriginator)) {
                 const_cast<CEventGunAimedAt*>(&e)->m_taskId = TASK_GROUP_KILL_THREATS_BASIC; // nice R*
             }
         }
@@ -378,7 +379,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseGunAimedAt(const CEventGunAim
     switch (e.m_taskId) {
     case TASK_GROUP_KILL_THREATS_BASIC:  return ComputeKillThreatsBasicResponse(pg, srcped, ped, false);
     case TASK_GROUP_FLEE_THREAT:         return ComputeFleePedResponse(pg, srcped, ped, false);
-    case TASK_GROUP_USE_MEMBER_DECISION: return ComputeMemberResponses(e, pg, ped);
+    case TASK_GROUP_USE_MEMBER_DECISION: return ComputeMemberResponses(e, pg, originator);
     }
     return nullptr;
 }
@@ -423,28 +424,28 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseDraggedOutCar(const CEventDra
 }
 
 // 0x5FB540
-CTaskAllocator* CGroupEventHandler::ComputeResponseDanger(const CEvent& e, CPedGroup* pg, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB540, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseDanger(const CEventDanger& e, CPedGroup* pg, CPed* originator) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB540, const CEvent&, CPedGroup*, CPed*>(e, pg, originator);
 }
 
 // 0x5FBF50
-CTaskAllocator* CGroupEventHandler::ComputeResponseDamage(const CEvent& e, CPedGroup* pg, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FBF50, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseDamage(const CEvent& e, CPedGroup* pg, CPed* originator) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FBF50, const CEvent&, CPedGroup*, CPed*>(e, pg, originator);
 }
 
 // 0x5F9530
-CTaskAllocator* CGroupEventHandler::ComputeResponsLeaderQuitEnteringCar(const CEvent& e, CPedGroup* pg, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9530, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponsLeaderQuitEnteringCar(const CEvent& e, CPedGroup* pg, CPed* originator) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9530, const CEvent&, CPedGroup*, CPed*>(e, pg, originator);
 }
 
 // 0x5FAA50
-CTaskAllocator* CGroupEventHandler::ComputeMemberResponses(const CEvent& e, CPedGroup* pg, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FAA50, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
+CTaskAllocator* CGroupEventHandler::ComputeMemberResponses(const CEvent& e, CPedGroup* pg, CPed* originator) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FAA50, const CEvent&, CPedGroup*, CPed*>(e, pg, originator);
 }
 
 // 0x5F9B20
-CTaskAllocator* CGroupEventHandler::ComputeLeanOnVehicleResponse(const CEvent& e, CPedGroup* pg, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9B20, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
+CTaskAllocator* CGroupEventHandler::ComputeLeanOnVehicleResponse(const CEvent& e, CPedGroup* pg, CPed* originator) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9B20, const CEvent&, CPedGroup*, CPed*>(e, pg, originator);
 }
 
 // 0x5FB590

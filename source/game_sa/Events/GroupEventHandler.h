@@ -17,6 +17,7 @@ class CEventLeaderEntryExit;
 class CEventGunAimedAt;
 class CEventPlayerCommandToGroupGather;
 class CEventDraggedOutCar;
+class CEventDanger;
 
 class CGroupEventHandler {
 public:
@@ -25,27 +26,27 @@ public:
     static bool IsKillTaskAppropriate(CPedGroup* pg, CPed* ped);
 
     static CTaskAllocator* ComputeWalkAlongsideResponse(CPedGroup* pg, CPed* ped1, CPed* ped2);
-    static CTaskAllocator* ComputeStareResponse(CPedGroup* pg, CPed* stareAt, CPed* originatorPed, int32 timeout, int32 timeoutBias);
+    static CTaskAllocator* ComputeStareResponse(CPedGroup* pg, CPed* stareAt, CPed* originator, int32 timeout, int32 timeoutBias);
 
-    static CTaskAllocator* ComputeResponseVehicleDamage(const CEventVehicleDamage& event, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponseShotFired(const CEventGunShot& event, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponseSexyPed(const CEventSexyPed& event, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponseSeenCop(const CEventSeenCop& event, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponsePlayerCommand(const CEventPlayerCommandToGroup& event, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponsePedThreat(const CEventAcquaintancePed& event, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponsePedFriend(const CEventAcquaintancePed& e, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponseNewGangMember(const CEventNewGangMember& e, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponseLeaderExitedCar(const CEventEditableResponse& e, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponseLeaderEnteredCar(const CEvent& e, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponseLeaderEnterExit(const CEventLeaderEntryExit& e, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponseGunAimedAt(const CEventGunAimedAt& e, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponseGather(const CEventPlayerCommandToGroupGather& e, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponseDraggedOutCar(const CEventDraggedOutCar& e, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponseDanger(const CEvent& e, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponseDamage(const CEvent& e, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponsLeaderQuitEnteringCar(const CEvent&, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeMemberResponses(const CEvent& e, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeLeanOnVehicleResponse(const CEvent& e, CPedGroup* pg, CPed* ped);
+    static CTaskAllocator* ComputeResponseVehicleDamage(const CEventVehicleDamage& event, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponseShotFired(const CEventGunShot& event, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponseSexyPed(const CEventSexyPed& event, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponseSeenCop(const CEventSeenCop& event, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponsePlayerCommand(const CEventPlayerCommandToGroup& event, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponsePedThreat(const CEventAcquaintancePed& event, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponsePedFriend(const CEventAcquaintancePed& e, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponseNewGangMember(const CEventNewGangMember& e, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponseLeaderExitedCar(const CEventEditableResponse& e, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponseLeaderEnteredCar(const CEvent& e, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponseLeaderEnterExit(const CEventLeaderEntryExit& e, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponseGunAimedAt(const CEventGunAimedAt& e, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponseGather(const CEventPlayerCommandToGroupGather& e, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponseDraggedOutCar(const CEventDraggedOutCar& e, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponseDanger(const CEventDanger& e, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponseDamage(const CEvent& e, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeResponsLeaderQuitEnteringCar(const CEvent&, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeMemberResponses(const CEvent& e, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeLeanOnVehicleResponse(const CEvent& e, CPedGroup* pg, CPed* originator);
 
     static CTaskAllocator* ComputeKillThreatsBasicResponse(CPedGroup* pg, CPed* ped1, CPed* ped2, uint8);
     static CTaskAllocator* ComputeKillPlayerBasicResponse(CPedGroup* pg, CPed* ped1, CPed* ped2, uint8);
