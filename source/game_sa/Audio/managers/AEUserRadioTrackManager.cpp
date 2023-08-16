@@ -285,9 +285,10 @@ DWORD __stdcall CAEUserRadioTrackManager::WriteUserTracksThread(CAEUserRadioTrac
             if (amountOfTracks > 0)
                 CFileMgr::Write(utrax, offsets.data(), amountOfTracks * sizeof(tUserTracksInfo));
 
-            // SA: Game supposedly duplicates the entry if there is only one?
+            // SA: Game duplicates the entry if there is only one?
             if (amountOfTracks == 1)
                 CFileMgr::Write(utrax, offsets.data(), sizeof(tUserTracksInfo));
+
             CFileMgr::CloseFile(utrax);
 
             FrontEndMenuManager.m_nUserTrackIndex = 0;
@@ -346,12 +347,12 @@ int32 CAEUserRadioTrackManager::WriteUserTracksFile(const std::wstring& dir, siz
             continue;
         }
 
-        // NOTSA: Use generic path (POSIX like) instead of Windows paths.
-        const auto pathStr = path.generic_string();
-        const auto fileType = GetAudioFileType(reinterpret_cast<const char*>(pathStr.c_str()));
+        // NOTSA: Use UTF-8 generic path (POSIX like) instead of Windows paths.
+        const auto pathStr = UnicodeToUTF8(path.generic_wstring());
+        const auto fileType = GetAudioFileType(pathStr.c_str());
         if (fileType != AUDIO_FILE_TYPE_UNKNOWN) {
             size_t pathLen = pathStr.length();
-            CFileMgr::Write(file, reinterpret_cast<const char*>(pathStr.c_str()), pathLen);
+            CFileMgr::Write(file, pathStr.c_str(), pathLen);
             offsets.push_back({currentLength, pathLen, fileType});
             currentLength += pathLen;
             numTracks++;
@@ -372,21 +373,22 @@ char* CAEUserRadioTrackManager::ResolveShortcut(const char* path) {
 }
 
 std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring& path) {
-    IShellLinkW*  shellLink = nullptr;
-    IPersistFile* persistFile = nullptr;
+    IShellLinkW* shellLink{};
+    IPersistFile* persistFile{};
 
     if (FAILED(CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_IShellLinkW, (void**)&shellLink))) {
-        assert(true && "CoCreateInstance failed");
+        NOTSA_UNREACHABLE("CoCreateInstance(CLSID_ShellLink) failed");
     }
 
     if (FAILED(shellLink->QueryInterface(IID_IPersistFile, (void**)&persistFile))) {
+        NOTSA_LOG_ERR("QueryInterface(IID_IPersistFile) failed.");
         shellLink->Release();
-        return std::wstring();
+        return {};
     }
 
-    wchar_t*         target = new wchar_t[MAX_PATH];
+    std::wstring target(MAX_PATH, L'\0');
     WIN32_FIND_DATAW findData{};
-    if (FAILED(persistFile->Load(path.c_str(), STGM_READ)) || FAILED(shellLink->GetPath(target, MAX_PATH, &findData, 0))) {
+    if (FAILED(persistFile->Load(path.c_str(), STGM_READ)) || FAILED(shellLink->GetPath(target.data(), MAX_PATH, &findData, 0))) {
         persistFile->Release();
         shellLink->Release();
         NOTSA_UNREACHABLE("Load or GetPath failed");
