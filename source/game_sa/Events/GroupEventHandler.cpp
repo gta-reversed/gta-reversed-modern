@@ -18,6 +18,8 @@
 #include "Tasks/TaskTypes/SeekEntity/PosCalculators/EntitySeekPosCalculatorStandard.h"
 #include "Tasks/TaskTypes/TaskGoToVehicleAndLean.h"
 #include "Tasks/TaskTypes/TaskComplexKillPedOnFoot.h"
+#include "Tasks/TaskTypes/TaskGangHassleVehicle.h"
+#include "Tasks/TaskTypes/TaskGangHasslePed.h"
 
 #include "Tasks/Allocators/TaskAllocatorPlayerCommandAttack.h"
 #include "Tasks/Allocators/TaskAllocatorKillThreatsBasic.h"
@@ -62,10 +64,10 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeResponseDanger, 0x5FB540);
     RH_ScopedInstall(ComputeResponseDamage, 0x5FBF50);
     RH_ScopedInstall(ComputeMemberResponses, 0x5FAA50);
-    RH_ScopedInstall(ComputeLeanOnVehicleResponse, 0x5F9B20, { .reversed = false });
-    RH_ScopedInstall(ComputeKillThreatsBasicResponse, 0x5FB590, { .reversed = false });
-    RH_ScopedInstall(ComputeKillPlayerBasicResponse, 0x5FB670, { .reversed = false });
-    RH_ScopedInstall(ComputeHassleThreatResponse, 0x5F9D50, { .reversed = false });
+    RH_ScopedInstall(ComputeLeanOnVehicleResponse, 0x5F9B20);
+    RH_ScopedInstall(ComputeKillThreatsBasicResponse, 0x5FB590);
+    RH_ScopedInstall(ComputeKillPlayerBasicResponse, 0x5FB670);
+    RH_ScopedInstall(ComputeHassleThreatResponse, 0x5F9D50);
     RH_ScopedInstall(ComputeHassleSexyPedResponse, 0x5FA020, { .reversed = false });
     RH_ScopedInstall(ComputeHandSignalResponse, 0x5FA820, { .reversed = false });
     RH_ScopedInstall(ComputeGreetResponse, 0x5FA550, { .reversed = false });
@@ -510,9 +512,9 @@ CTaskAllocator* CGroupEventHandler::ComputeKillThreatsBasicResponse(CPedGroup* p
         return ComputeFleePedResponse(pg, threat, originator, false);
     }
     if (pg->m_bIsMissionGroup) {
-        return new CTaskAllocatorKillThreatsBasicRandomGroup{threat};
+        return new CTaskAllocatorKillThreatsBasic{threat};
     }
-    return new CTaskAllocatorKillThreatsBasic{threat};
+    return new CTaskAllocatorKillThreatsBasicRandomGroup{threat};
 }
 
 // 0x5FB670
@@ -535,7 +537,46 @@ CTaskAllocator* CGroupEventHandler::ComputeKillPlayerBasicResponse(CPedGroup* pg
 
 // 0x5F9D50
 CTaskAllocator* CGroupEventHandler::ComputeHassleThreatResponse(CPedGroup* pg, CPed* threat, CPed* originator, bool bBeAggressive) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9D50, CPedGroup*, CPed*, CPed*, bool>(pg, threat, originator, bBeAggressive);
+    if (!threat) {
+        return nullptr;
+    }
+    const auto leader = pg->GetMembership().GetLeader();
+    if (!leader) {
+        return nullptr;
+    }
+    if ((leader->GetPosition() - threat->GetPosition()).SquaredMagnitude() >= sq(12.f)) {
+        return nullptr;
+    }
+    for (auto& m : pg->GetMembership().GetMembers()) {
+        const auto SetTask = [&](auto&& t) {
+            pg->GetIntelligence().SetTask(
+                &m,
+                std::move(t),
+                pg->GetIntelligence().GetPedTaskPairs()
+            );
+        };
+        if (threat->IsInVehicle() && threat->m_pVehicle->IsSubAutomobile()) {
+            if (!bBeAggressive) {
+                if (threat->m_pVehicle->GetSpareHasslePosId() != -1) {
+                    SetTask(CTaskGangHassleVehicle{
+                        threat->m_pVehicle,
+                        -1,
+                        0,
+                        0.25f,
+                        0.65f
+                    });
+                }
+            }
+        } else {
+            SetTask(CTaskGangHasslePed{
+                threat,
+                bBeAggressive ? 2 : 1, // TODO: Enum
+                12'000,
+                20'000
+            });
+        }
+    }
+    return nullptr;
 }
 
 // 0x5FA020
