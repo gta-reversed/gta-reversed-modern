@@ -80,6 +80,16 @@ bool IsPedInPlayersGroup(CPedGroup* pg, CPed* p) {
     return false;
 }
 
+void MaybeAdjustTaskOfGroupThreatEvent(const CEventEditableResponse& e, CPedGroup* pg, CPed* originator, CPed* srcPed) {
+    if (pg->m_bIsMissionGroup && srcPed->IsPlayer()) {
+        if (const auto l = pg->GetMembership().GetLeader()) {
+            if (!l->GetActiveWeapon().IsTypeMelee() && !l->GetIntelligence()->IsFriendlyWith(*originator)) {
+                const_cast<CEventEditableResponse*>(&e)->m_taskId = TASK_GROUP_KILL_THREATS_BASIC; // nice R*
+            }
+        }
+    }
+}
+
 // 0x5F7A60
 bool CGroupEventHandler::IsKillTaskAppropriate(CPedGroup* g, CPed* originator) {
     if (g->m_bIsMissionGroup || originator->GetActiveWeapon().IsTypeMelee()) { // TODO/NOTE: This `IsTypeMelee()` check should be inverted I think [By following the logic of the code in the loop]
@@ -369,17 +379,11 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseGunAimedAt(const CEventGunAim
     if (!src || !src->IsPed()) {
         return nullptr;
     }
-    const auto srcped = src->AsPed();
-    if (pg->m_bIsMissionGroup && srcped->IsPlayer()) {
-        if (const auto l = pg->GetMembership().GetLeader()) {
-            if (!l->GetActiveWeapon().IsTypeMelee() && !l->GetIntelligence()->IsFriendlyWith(*originator)) {
-                const_cast<CEventGunAimedAt*>(&e)->m_taskId = TASK_GROUP_KILL_THREATS_BASIC; // nice R*
-            }
-        }
-    }
+    const auto srcPed = src->AsPed();
+    MaybeAdjustTaskOfGroupThreatEvent(e, pg, originator, srcPed);
     switch (e.m_taskId) {
-    case TASK_GROUP_KILL_THREATS_BASIC:  return ComputeKillThreatsBasicResponse(pg, srcped, originator, false);
-    case TASK_GROUP_FLEE_THREAT:         return ComputeFleePedResponse(pg, srcped, originator, false);
+    case TASK_GROUP_KILL_THREATS_BASIC:  return ComputeKillThreatsBasicResponse(pg, srcPed, originator, false);
+    case TASK_GROUP_FLEE_THREAT:         return ComputeFleePedResponse(pg, srcPed, originator, false);
     case TASK_GROUP_USE_MEMBER_DECISION: return ComputeMemberResponses(e, pg, originator);
     }
     return nullptr;
@@ -439,7 +443,19 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseDanger(const CEventDanger& e,
 
 // 0x5FBF50
 CTaskAllocator* CGroupEventHandler::ComputeResponseDamage(const CEventDamage& e, CPedGroup* pg, CPed* originator) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FBF50, const CEvent&, CPedGroup*, CPed*>(e, pg, originator);
+    const auto src = e.GetSourceEntity();
+    if (!src || !src->IsPed()) {
+        return nullptr;
+    }
+    const auto srcPed = src->AsPed();
+    MaybeAdjustTaskOfGroupThreatEvent(e, pg, originator, srcPed);
+    switch (e.m_taskId) {
+    case TASK_GROUP_KILL_THREATS_BASIC:  return ComputeKillThreatsBasicResponse(pg, srcPed, originator,  true);
+    case TASK_GROUP_KILL_PLAYER_BASIC:   return ComputeKillPlayerBasicResponse(pg, srcPed, originator, true);
+    case TASK_GROUP_FLEE_THREAT:         return ComputeFleePedResponse(pg, srcPed, originator, true);
+    case TASK_GROUP_USE_MEMBER_DECISION: return ComputeMemberResponses(e, pg, originator);
+    }
+    return nullptr;
 }
 
 // 0x5F9530
@@ -498,7 +514,7 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
     const auto& e = ge.m_event;
     switch (e->GetEventType()) {
     case EVENT_DRAGGED_OUT_CAR:
-        return ComputeResponseDraggedOutCar(static_cast<const CEventDraggedOutCar&<(*e), g, p);
+        return ComputeResponseDraggedOutCar(static_cast<const CEventDraggedOutCar&>(*e), g, p);
     case EVENT_DAMAGE:
         return ComputeResponseDamage(static_cast<const CEventDamage&>(*e), g, p);
     case EVENT_SHOT_FIRED:

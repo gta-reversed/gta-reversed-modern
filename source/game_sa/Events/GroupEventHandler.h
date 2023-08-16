@@ -19,6 +19,7 @@ class CEventPlayerCommandToGroupGather;
 class CEventDraggedOutCar;
 class CEventDanger;
 class CEventDamage;
+class CEventEditableResponse;
 
 class CGroupEventHandler {
 public:
