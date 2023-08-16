@@ -51,7 +51,7 @@ public:
     static CTaskAllocator* ComputeMemberResponses(const CEventEditableResponse& e, CPedGroup* pg, CPed* originator);
     static CTaskAllocator* ComputeLeanOnVehicleResponse(const CEventLeanOnVehicle& e, CPedGroup* pg, CPed* originator);
 
-    static CTaskAllocator* ComputeKillThreatsBasicResponse(CPedGroup* pg, CPed* ped1, CPed* ped2, bool bDamageOriginator);
+    static CTaskAllocator* ComputeKillThreatsBasicResponse(CPedGroup* pg, CPed* threat, CPed* originator, bool bDamageOriginator);
     static CTaskAllocator* ComputeKillPlayerBasicResponse(CPedGroup* pg, CPed* ped1, CPed* ped2, bool bDamageOriginator);
     static CTaskAllocator* ComputeHassleThreatResponse(CPedGroup* pg, CPed* ped1, CPed* ped2, bool);
     static CTaskAllocator* ComputeHassleSexyPedResponse(CPedGroup* pg, CPed* ped1, CPed* ped2);

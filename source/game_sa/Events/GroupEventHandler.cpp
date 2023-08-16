@@ -19,6 +19,7 @@
 #include "Tasks/TaskTypes/TaskGoToVehicleAndLean.h"
 
 #include "Tasks/Allocators/TaskAllocatorPlayerCommandAttack.h"
+#include "Tasks/Allocators/TaskAllocatorKillThreatsBasic.h"
 
 #include "Events/EventVehicleDamage.h"
 #include "Events/EventGunShot.h"
@@ -94,8 +95,8 @@ void MaybeAdjustTaskOfGroupThreatEvent(const CEventEditableResponse& e, CPedGrou
 }
 
 // 0x5F7A60
-bool CGroupEventHandler::IsKillTaskAppropriate(CPedGroup* g, CPed* originator) {
-    if (g->m_bIsMissionGroup || originator->GetActiveWeapon().IsTypeMelee()) { // TODO/NOTE: This `IsTypeMelee()` check should be inverted I think [By following the logic of the code in the loop]
+bool CGroupEventHandler::IsKillTaskAppropriate(CPedGroup* g, CPed* threat) {
+    if (g->m_bIsMissionGroup || threat->GetActiveWeapon().IsTypeMelee()) {
         return true;
     }
     for (auto& m : g->GetMembership().GetMembers()) {
@@ -503,7 +504,10 @@ CTaskAllocator* CGroupEventHandler::ComputeLeanOnVehicleResponse(const CEventLea
 
 // 0x5FB590
 CTaskAllocator* CGroupEventHandler::ComputeKillThreatsBasicResponse(CPedGroup* pg, CPed* threat, CPed* originator, bool bDamageOriginator) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB590, CPedGroup*, CPed*, CPed*, uint8>(pg, threat, originator, bDamageOriginator);
+    if (!IsKillTaskAppropriate(pg, threat)) {
+        return ComputeFleePedResponse(pg, threat, originator, false);
+    }
+    return new CTaskAllocatorKillThreatsBasic{threat};
 }
 
 // 0x5FB670
