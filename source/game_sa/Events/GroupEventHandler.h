@@ -15,6 +15,7 @@ class CEventNewGangMember;
 class CEventLeaderExitedCarAsDriver;
 class CEventLeaderEntryExit;
 class CEventGunAimedAt;
+class CEventPlayerCommandToGroupGather;
 
 class CGroupEventHandler {
 public:
@@ -37,7 +38,7 @@ public:
     static CTaskAllocator* ComputeResponseLeaderEnteredCar(const CEvent& e, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponseLeaderEnterExit(const CEventLeaderEntryExit& e, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponseGunAimedAt(const CEventGunAimedAt& e, CPedGroup* pg, CPed* ped);
-    static CTaskAllocator* ComputeResponseGather(const CEvent& e, CPedGroup* pg, CPed* ped);
+    static CTaskAllocator* ComputeResponseGather(const CEventPlayerCommandToGroupGather& e, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponseDraggedOutCar(const CEvent& e, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponseDanger(const CEvent& e, CPedGroup* pg, CPed* ped);
     static CTaskAllocator* ComputeResponseDamage(const CEvent& e, CPedGroup* pg, CPed* ped);

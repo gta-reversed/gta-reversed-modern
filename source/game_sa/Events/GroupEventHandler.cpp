@@ -13,6 +13,8 @@
 #include "Tasks/TaskTypes/TaskComplexLeaveCarAsPassengerWait.h"
 #include "Tasks/TaskTypes/TaskComplexSmartFleeEntity.h"
 #include "Tasks/TaskTypes/TaskSimpleWaitUntilLeaderAreaCodesMatch.h"
+#include "Tasks/TaskTypes/SeekEntity/TaskComplexSeekEntity.h"
+#include "Tasks/TaskTypes/SeekEntity/PosCalculators/EntitySeekPosCalculatorStandard.h"
 
 #include "Tasks/Allocators/TaskAllocatorPlayerCommandAttack.h"
 
@@ -180,7 +182,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseSeenCop(const CEventSeenCop& 
 CTaskAllocator* CGroupEventHandler::ComputeResponsePlayerCommand(const CEventPlayerCommandToGroup& e, CPedGroup* pg, CPed* originator) {
     switch (e.m_command) {
     case ePlayerGroupCommand::PLAYER_GROUP_COMMAND_GATHER:
-        return ComputeResponseGather(e, pg, originator);
+        return ComputeResponseGather(static_cast<const CEventPlayerCommandToGroupGather&>(e), pg, originator);
     case ePlayerGroupCommand::PLAYER_GROUP_COMMAND_ATTACK:
         return new CTaskAllocatorPlayerCommandAttack{
             e.m_target,
@@ -381,8 +383,25 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseGunAimedAt(const CEventGunAim
 }
 
 // 0x5F99F0
-CTaskAllocator* CGroupEventHandler::ComputeResponseGather(const CEvent& e, CPedGroup* pg, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F99F0, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseGather(const CEventPlayerCommandToGroupGather& e, CPedGroup* pg, CPed* originator) {
+    for (auto& m : pg->GetMembership().GetFollowers()) { // NOTE: I'm not 100% sure whenever the leader should be included or not
+        pg->GetIntelligence().SetTask(
+            &m,
+            CTaskComplexSeekEntity<CEntitySeekPosCalculatorStandard>{
+                originator,
+                50'000,
+                1'000,
+                7.5f,
+                2.f,
+                2.f,
+                true,
+                true,
+                CEntitySeekPosCalculatorStandard{}
+            },
+            pg->GetIntelligence().m_pedTaskPairs
+        );
+    }
+    return nullptr;
 }
 
 // 0x5FBE70
