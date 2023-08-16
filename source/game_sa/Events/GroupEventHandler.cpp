@@ -16,6 +16,7 @@
 #include "Tasks/TaskTypes/TaskSimpleWaitUntilLeaderAreaCodesMatch.h"
 #include "Tasks/TaskTypes/SeekEntity/TaskComplexSeekEntity.h"
 #include "Tasks/TaskTypes/SeekEntity/PosCalculators/EntitySeekPosCalculatorStandard.h"
+#include "Tasks/TaskTypes/TaskGoToVehicleAndLean.h"
 
 #include "Tasks/Allocators/TaskAllocatorPlayerCommandAttack.h"
 
@@ -29,6 +30,7 @@
 #include "Events/EventDraggedOutCar.h"
 #include "Events/EventDanger.h"
 #include "Events/EventDamage.h"
+#include "Events/EventLeanOnVehicle.h"
 
 #include "TaskAllocator.h"
 
@@ -56,7 +58,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeResponseDraggedOutCar, 0x5FBE70);
     RH_ScopedInstall(ComputeResponseDanger, 0x5FB540);
     RH_ScopedInstall(ComputeResponseDamage, 0x5FBF50);
-    RH_ScopedInstall(ComputeMemberResponses, 0x5FAA50, { .reversed = false });
+    RH_ScopedInstall(ComputeMemberResponses, 0x5FAA50);
     RH_ScopedInstall(ComputeLeanOnVehicleResponse, 0x5F9B20, { .reversed = false });
     RH_ScopedInstall(ComputeKillThreatsBasicResponse, 0x5FB590, { .reversed = false });
     RH_ScopedInstall(ComputeKillPlayerBasicResponse, 0x5FB670, { .reversed = false });
@@ -128,7 +130,7 @@ CTaskAllocator* CGroupEventHandler::ComputeStareResponse(CPedGroup* pg, CPed* st
                 stareAt,
                 timeout + CGeneral::GetRandomNumberInRange(-timeoutBias, timeoutBias)
             },
-            pg->GetIntelligence().m_pedTaskPairs
+            pg->GetIntelligence().GetPedTaskPairs()
         );
     }
     return nullptr;
@@ -262,7 +264,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseNewGangMember(const CEventNew
     pg->GetIntelligence().SetTask(
         e.m_member,
         tseq,
-        pg->GetIntelligence().m_pedTaskPairs
+        pg->GetIntelligence().GetPedTaskPairs()
     );
     return nullptr;
 }
@@ -284,7 +286,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderExitedCar(const CEventE
             pg->GetIntelligence().SetTask(
                 &m,
                 std::move(task),
-                pg->GetIntelligence().m_pedTaskPairs
+                pg->GetIntelligence().GetPedTaskPairs()
             );
         };
         const auto isVehOnFire = mveh->m_pFireParticle && mveh->m_pFireParticle->GetPlayStatus() == eFxSystemPlayStatus::FX_PLAYING;
@@ -367,7 +369,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderEnterExit(const CEventL
             pg->GetIntelligence().SetTask(
                 &m,
                 std::move(task),
-                pg->GetIntelligence().m_pedTaskPairs
+                pg->GetIntelligence().GetPedTaskPairs()
             );
         }
     }
@@ -406,7 +408,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseGather(const CEventPlayerComm
                 true,
                 CEntitySeekPosCalculatorStandard{}
             },
-            pg->GetIntelligence().m_pedTaskPairs
+            pg->GetIntelligence().GetPedTaskPairs()
         );
     }
     return nullptr;
@@ -478,7 +480,7 @@ CTaskAllocator* CGroupEventHandler::ComputeMemberResponses(const CEventEditableR
             pg->GetIntelligence().SetTask(
                 &m,
                 *rt,
-                pg->GetIntelligence().m_pedTaskPairs
+                pg->GetIntelligence().GetPedTaskPairs()
             );
         }
     }
@@ -486,8 +488,17 @@ CTaskAllocator* CGroupEventHandler::ComputeMemberResponses(const CEventEditableR
 }
 
 // 0x5F9B20
-CTaskAllocator* CGroupEventHandler::ComputeLeanOnVehicleResponse(const CEvent& e, CPedGroup* pg, CPed* originator) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5F9B20, const CEvent&, CPedGroup*, CPed*>(e, pg, originator);
+CTaskAllocator* CGroupEventHandler::ComputeLeanOnVehicleResponse(const CEventLeanOnVehicle& e, CPedGroup* pg, CPed* originator) {
+    const auto leader = pg->GetMembership().GetLeader();
+    if (!leader) {
+        return nullptr;
+    }
+    pg->GetIntelligence().SetTask(
+        leader,
+        CTaskGoToVehicleAndLean{e.m_vehicle, e.m_leanAnimDurationInMs},
+        pg->GetIntelligence().GetPedTaskPairs()
+    );
+    return nullptr;
 }
 
 // 0x5FB590
@@ -567,7 +578,7 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
     case EVENT_NEW_GANG_MEMBER:
         return ComputeResponseNewGangMember(static_cast<const CEventNewGangMember&>(*e), g, p);
     case EVENT_LEAN_ON_VEHICLE:
-        return ComputeLeanOnVehicleResponse(*e, g, p);
+        return ComputeLeanOnVehicleResponse(static_cast<const CEventLeanOnVehicle&>(*e), g, p);
     default:
         return nullptr;
     }

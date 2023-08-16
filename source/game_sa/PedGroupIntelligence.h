@@ -98,6 +98,8 @@ public:
         return AddEvent(&event);
     }
 
+    auto GetPedTaskPairs() { return m_pedTaskPairs; }
+
     //! `task` shouldn't be `new`-d, but rather stack allocated!
     static void SetTask(CPed* ped, const CTask& task, CPedTaskPair* pair, int32 slot = -1, bool force = false);
 };
