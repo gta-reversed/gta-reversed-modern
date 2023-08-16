@@ -52,7 +52,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeResponseGunAimedAt, 0x5FBD10);
     RH_ScopedInstall(ComputeResponseGather, 0x5F99F0);
     RH_ScopedInstall(ComputeResponseDraggedOutCar, 0x5FBE70);
-    RH_ScopedInstall(ComputeResponseDanger, 0x5FB540, { .reversed = false });
+    RH_ScopedInstall(ComputeResponseDanger, 0x5FB540);
     RH_ScopedInstall(ComputeResponseDamage, 0x5FBF50, { .reversed = false });
     RH_ScopedInstall(ComputeMemberResponses, 0x5FAA50, { .reversed = false });
     RH_ScopedInstall(ComputeLeanOnVehicleResponse, 0x5F9B20, { .reversed = false });
@@ -425,7 +425,14 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseDraggedOutCar(const CEventDra
 
 // 0x5FB540
 CTaskAllocator* CGroupEventHandler::ComputeResponseDanger(const CEventDanger& e, CPedGroup* pg, CPed* originator) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB540, const CEvent&, CPedGroup*, CPed*>(e, pg, originator);
+    const auto esrc = e.GetSourceEntity();
+    if (!esrc || !esrc->IsPed()) {
+        return nullptr;
+    }
+    switch (e.m_taskId) {
+    case TASK_GROUP_FLEE_THREAT: return ComputeFleePedResponse(pg, esrc->AsPed(), originator, false);
+    }
+    return nullptr;
 }
 
 // 0x5FBF50
