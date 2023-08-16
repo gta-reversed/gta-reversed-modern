@@ -25,6 +25,7 @@
 #include "Events/GroupEvents.h"
 #include "Events/LeaderEvents.h"
 #include "Events/EventGunAimedAt.h"
+#include "Events/EventDraggedOutCar.h"
 
 #include "TaskAllocator.h"
 
@@ -49,7 +50,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeResponseLeaderEnterExit, 0x5F9710);
     RH_ScopedInstall(ComputeResponseGunAimedAt, 0x5FBD10);
     RH_ScopedInstall(ComputeResponseGather, 0x5F99F0);
-    RH_ScopedInstall(ComputeResponseDraggedOutCar, 0x5FBE70, { .reversed = false });
+    RH_ScopedInstall(ComputeResponseDraggedOutCar, 0x5FBE70);
     RH_ScopedInstall(ComputeResponseDanger, 0x5FB540, { .reversed = false });
     RH_ScopedInstall(ComputeResponseDamage, 0x5FBF50, { .reversed = false });
     RH_ScopedInstall(ComputeMemberResponses, 0x5FAA50, { .reversed = false });
@@ -254,7 +255,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseNewGangMember(const CEventNew
 }
 
 // 0x5F90A0
-CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderExitedCar(const CEventLeaderExitedCarAsDriver& e, CPedGroup* pg, CPed* originator) {
+CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderExitedCar(const CEventEditableResponse&, CPedGroup* pg, CPed* originator) {
     const auto leader = pg->GetMembership().GetLeader();
     for (auto&& [i, m] : notsa::enumerate(pg->GetMembership().GetFollowers())) {
         if (m.m_pVehicle && m.bInVehicle && m.m_pVehicle == leader->m_pVehicle) { // Already in the leader's vehicle
@@ -405,8 +406,20 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseGather(const CEventPlayerComm
 }
 
 // 0x5FBE70
-CTaskAllocator* CGroupEventHandler::ComputeResponseDraggedOutCar(const CEvent& e, CPedGroup* pg, CPed* ped) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FBE70, const CEvent&, CPedGroup*, CPed*>(e, pg, ped);
+CTaskAllocator* CGroupEventHandler::ComputeResponseDraggedOutCar(const CEventDraggedOutCar& e, CPedGroup* pg, CPed* originator) {
+    if (!e.m_CarJacker) {
+        return nullptr;
+    }
+    assert(!e.m_CarJacker->IsPed()); // Original code just `returns nullptr` in this case, but but since `m_CarJacker` is typed as `CPed*` it *should* be at least a `CPed*`
+    switch (e.m_taskId) {
+    case TASK_GROUP_KILL_THREATS_BASIC:
+        return e.m_CarJacker->IsPlayer() && originator && originator->GetIntelligence()->Respects(e.m_CarJacker) && !pg->m_bIsMissionGroup
+            ? ComputeFleePedResponse(pg, e.m_CarJacker, originator, false)
+            : ComputeKillThreatsBasicResponse(pg, e.m_CarJacker, originator, false);
+    case TASK_GROUP_FLEE_THREAT:         return ComputeFleePedResponse(pg, e.m_CarJacker, originator, false);
+    case TASK_GROUP_USE_MEMBER_DECISION: return ComputeMemberResponses(e, pg, originator);
+    case TASK_GROUP_EXIT_CAR:            return ComputeResponseLeaderExitedCar(static_cast<const CEventEditableResponse&>(e), pg, originator);
+    }
 }
 
 // 0x5FB540
