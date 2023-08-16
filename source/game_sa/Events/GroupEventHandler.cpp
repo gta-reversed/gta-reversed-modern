@@ -509,7 +509,7 @@ CTaskAllocator* CGroupEventHandler::ComputeKillThreatsBasicResponse(CPedGroup* p
     if (!IsKillTaskAppropriate(pg, threat)) {
         return ComputeFleePedResponse(pg, threat, originator, false);
     }
-    if (!pg->m_bIsMissionGroup) {
+    if (pg->m_bIsMissionGroup) {
         return new CTaskAllocatorKillThreatsBasicRandomGroup{threat};
     }
     return new CTaskAllocatorKillThreatsBasic{threat};
