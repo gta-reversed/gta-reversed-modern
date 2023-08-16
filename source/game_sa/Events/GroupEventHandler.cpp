@@ -502,13 +502,13 @@ CTaskAllocator* CGroupEventHandler::ComputeLeanOnVehicleResponse(const CEventLea
 }
 
 // 0x5FB590
-CTaskAllocator* CGroupEventHandler::ComputeKillThreatsBasicResponse(CPedGroup* pg, CPed* threat, CPed* originator, uint8 bDamageOriginator) {
+CTaskAllocator* CGroupEventHandler::ComputeKillThreatsBasicResponse(CPedGroup* pg, CPed* threat, CPed* originator, bool bDamageOriginator) {
     return plugin::CallAndReturn<CTaskAllocator*, 0x5FB590, CPedGroup*, CPed*, CPed*, uint8>(pg, threat, originator, bDamageOriginator);
 }
 
 // 0x5FB670
-CTaskAllocator* CGroupEventHandler::ComputeKillPlayerBasicResponse(CPedGroup* pg, CPed* ped1, CPed* ped2, uint8 a4) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB670, CPedGroup*, CPed*, CPed*, uint8>(pg, ped1, ped2, a4);
+CTaskAllocator* CGroupEventHandler::ComputeKillPlayerBasicResponse(CPedGroup* pg, CPed* ped1, CPed* ped2, bool bDamageOriginator) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FB670, CPedGroup*, CPed*, CPed*, uint8>(pg, ped1, ped2, bDamageOriginator);
 }
 
 // 0x5F9D50
@@ -532,8 +532,8 @@ CTaskAllocator* CGroupEventHandler::ComputeGreetResponse(CPedGroup* pg, CPed* pe
 }
 
 // 0x5FA130
-CTaskAllocator* CGroupEventHandler::ComputeFleePedResponse(CPedGroup* pg, CPed* ped1, CPed* ped2, uint8 a4) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA130, CPedGroup*, CPed*, CPed*, uint8>(pg, ped1, ped2, a4);
+CTaskAllocator* CGroupEventHandler::ComputeFleePedResponse(CPedGroup* pg, CPed* ped1, CPed* ped2, bool bDamageOriginator) {
+    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA130, CPedGroup*, CPed*, CPed*, uint8>(pg, ped1, ped2, bDamageOriginator);
 }
 
 // 0x5FC200
