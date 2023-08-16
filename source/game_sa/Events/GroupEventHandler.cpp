@@ -422,6 +422,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseDraggedOutCar(const CEventDra
     case TASK_GROUP_USE_MEMBER_DECISION: return ComputeMemberResponses(e, pg, originator);
     case TASK_GROUP_EXIT_CAR:            return ComputeResponseLeaderExitedCar(static_cast<const CEventEditableResponse&>(e), pg, originator);
     }
+    return nullptr;
 }
 
 // 0x5FB540
