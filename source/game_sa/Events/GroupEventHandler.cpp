@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "GroupEventHandler.h"
+#include "EventHandler.h"
 
 #include "Tasks/TaskTypes/TaskComplexStareAtPed.h"
 #include "Tasks/TaskTypes/TaskSimpleNone.h"
@@ -464,8 +465,24 @@ CTaskAllocator* CGroupEventHandler::ComputeResponsLeaderQuitEnteringCar(const CE
 }
 
 // 0x5FAA50
-CTaskAllocator* CGroupEventHandler::ComputeMemberResponses(const CEvent& e, CPedGroup* pg, CPed* originator) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FAA50, const CEvent&, CPedGroup*, CPed*>(e, pg, originator);
+CTaskAllocator* CGroupEventHandler::ComputeMemberResponses(const CEventEditableResponse& e, CPedGroup* pg, CPed* originator) {
+    const std::unique_ptr<CEventEditableResponse> ce{ static_cast<CEventEditableResponse*>(const_cast<CEventEditableResponse&>(e).Clone()) };
+    for (auto& m : pg->GetMembership().GetFollowers()) { // NOTE: I'm not 100% sure whenever the leader should be included or not
+        if (!m.IsAlive()) {
+            continue;
+        }
+        if (ce->HasEditableResponse()) {
+            ce->m_taskId = TASK_NONE;
+            ce->ComputeResponseTaskType(&m, true);
+        } else if (const auto rt = std::unique_ptr<CTask>(CEventHandler::ComputeEventResponseTask(m, *ce))) {
+            pg->GetIntelligence().SetTask(
+                &m,
+                *rt,
+                pg->GetIntelligence().m_pedTaskPairs
+            );
+        }
+    }
+    return nullptr;
 }
 
 // 0x5F9B20

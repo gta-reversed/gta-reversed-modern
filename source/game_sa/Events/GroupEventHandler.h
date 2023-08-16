@@ -47,7 +47,7 @@ public:
     static CTaskAllocator* ComputeResponseDanger(const CEventDanger& e, CPedGroup* pg, CPed* originator);
     static CTaskAllocator* ComputeResponseDamage(const CEventDamage& e, CPedGroup* pg, CPed* originator);
     static CTaskAllocator* ComputeResponsLeaderQuitEnteringCar(const CEvent&, CPedGroup* pg, CPed* originator);
-    static CTaskAllocator* ComputeMemberResponses(const CEvent& e, CPedGroup* pg, CPed* originator);
+    static CTaskAllocator* ComputeMemberResponses(const CEventEditableResponse& e, CPedGroup* pg, CPed* originator);
     static CTaskAllocator* ComputeLeanOnVehicleResponse(const CEvent& e, CPedGroup* pg, CPed* originator);
 
     static CTaskAllocator* ComputeKillThreatsBasicResponse(CPedGroup* pg, CPed* ped1, CPed* ped2, uint8);

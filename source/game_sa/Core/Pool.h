@@ -247,7 +247,7 @@ public:
     }
 
     // 0x5A1CD0
-    bool IsObjectValid(A *obj) {
+    bool IsObjectValid(const A *obj) {
         auto slot = GetIndex(obj);
         return slot >= 0 &&
                slot < m_nSize &&
