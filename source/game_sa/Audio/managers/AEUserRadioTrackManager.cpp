@@ -397,9 +397,7 @@ std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring& path)
     persistFile->Release();
     shellLink->Release();
 
-    std::wstring out = target;
-    delete[] target;
-    return out;
+    return target;
 }
 
 void CAEUserRadioTrackManager::InjectHooks() {
