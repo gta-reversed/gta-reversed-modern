@@ -50,7 +50,7 @@ public:
 
 private:
     static DWORD __stdcall WriteUserTracksThread(CAEUserRadioTrackManager* self);
-    int32   WriteUserTracksFile(const char* dir, size_t& currentLength, auto file, std::vector<tUserTracksInfo>& offsets, int32 depth);
+    int32 WriteUserTracksFile(const char* dir, size_t& currentLength, auto file, std::vector<tUserTracksInfo>& offsets, int32 depth);
     char* ResolveShortcut(const char* path);
 
     // Private functions which aren't part of GTASA itself
