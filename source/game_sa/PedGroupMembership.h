@@ -121,10 +121,9 @@ public:
     template<std::predicate<CPed&> Pred>
     auto GetMemberClosestToIf(CPed* ped, Pred&& pred, bool includeLeader = true) -> FindClosestMemberResult {
         const auto& pedPos = ped->GetPosition();
-
         float closestDistSq{ std::numeric_limits<float>::max() };
         CPed* closest{};
-        for (auto& mem : GetMembers()) {
+        for (auto& mem : GetMembers(includeLeader)) {
             if (&mem == ped) {
                 continue;
             }
@@ -136,7 +135,6 @@ public:
                 closest       = &mem;
             }
         }
-
         return { closest, closestDistSq };
     }
 
