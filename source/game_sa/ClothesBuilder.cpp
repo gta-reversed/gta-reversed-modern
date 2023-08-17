@@ -95,18 +95,16 @@ void CClothesBuilder::ReleaseGeometry(int32 numToRelease) {
 RpAtomic* GetAtomicWithName(RpClump* clump, const char* name) {
     struct Context {
         notsa::ci_string_view name{};
-        RpAtomic*             a{};
+        RpAtomic*             atomic{};
     } c{name};
     RpClumpForAllAtomics(clump, [](RpAtomic* a, void* data) { // 0x5A47E0
-        auto& c = *static_cast<Context*>(data);
-
-        if (c.name == GetFrameNodeName(RpAtomicGetFrame(a))) {
-            c.a = a;
+        auto& ctx = *static_cast<Context*>(data);
+        if (ctx.name == GetFrameNodeName(RpAtomicGetFrame(a))) {
+            ctx.atomic = a;
         }
-
         return a;
     }, &c);
-    return c.a;
+    return c.atomic;
 }
 
 // 0x5A4840
