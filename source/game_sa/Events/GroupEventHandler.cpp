@@ -132,14 +132,13 @@ CTaskAllocator* CGroupEventHandler::ComputeStareResponse(CPedGroup* pg, CPed* st
         return nullptr;
     }
     for (auto& m : pg->GetMembership().GetMembers()) {
-        pg->GetIntelligence().SetTask(
+        pg->GetIntelligence().SetEventResponseTask(
             &m,
             CTaskComplexStareAtPed{
                 pg,
                 stareAt,
                 timeout + CGeneral::GetRandomNumberInRange(-timeoutBias, timeoutBias)
-            },
-            pg->GetIntelligence().GetPedTaskPairs()
+            }
         );
     }
     return nullptr;
@@ -157,8 +156,8 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseVehicleDamage(const CEventVeh
     case TASK_GROUP_FLEE_THREAT:         return ComputeFleePedResponse(pg, threat, originator, true);         
     case TASK_GROUP_USE_MEMBER_DECISION: return ComputeMemberResponses(e, pg, originator);                      
     case TASK_GROUP_DRIVEBY:             return ComputeDrivebyResponse(pg, threat, originator);
-    default:                             return nullptr;
     }
+    return nullptr;
 }
 
 // 0x5FBDF0
@@ -270,11 +269,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseNewGangMember(const CEventNew
             true
         });
     }
-    pg->GetIntelligence().SetTask(
-        e.m_member,
-        tseq,
-        pg->GetIntelligence().GetPedTaskPairs()
-    );
+    pg->GetIntelligence().SetEventResponseTask(e.m_member, tseq);
     return nullptr;
 }
 
@@ -291,12 +286,8 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderExitedCar(const CEventE
                 continue;
             }
         }
-        const auto SetTask = [&](auto task) {
-            pg->GetIntelligence().SetTask(
-                &m,
-                std::move(task),
-                pg->GetIntelligence().GetPedTaskPairs()
-            );
+        const auto SetTask = [&](const auto& task) {
+            pg->GetIntelligence().SetEventResponseTask(&m, task);
         };
         const auto isVehOnFire = mveh->m_pFireParticle && mveh->m_pFireParticle->GetPlayStatus() == eFxSystemPlayStatus::FX_PLAYING;
         if (notsa::contains({ 15, 16 }, mveh->m_pHandlingData->m_nAnimGroup)) { // TODO: Enums
@@ -362,7 +353,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderEnteredCar(const CEvent
 
 // 0x5F9710
 CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderEnterExit(const CEventLeaderEntryExit& e, CPedGroup* pg, CPed* originator) {
-    const auto pgms = &pg->GetMembership();
+    const auto pgms   = &pg->GetMembership();
     const auto leader = pgms->GetLeader();
     if (!leader) {
         return nullptr;
@@ -375,11 +366,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseLeaderEnterExit(const CEventL
         if (task.ProcessPed(&m)) {
             m.m_bUsesCollision = true;
         } else {
-            pg->GetIntelligence().SetTask(
-                &m,
-                std::move(task),
-                pg->GetIntelligence().GetPedTaskPairs()
-            );
+            pg->GetIntelligence().SetEventResponseTask(&m, task);
         }
     }
     return nullptr;
@@ -403,8 +390,8 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseGunAimedAt(const CEventGunAim
 
 // 0x5F99F0
 CTaskAllocator* CGroupEventHandler::ComputeResponseGather(const CEventPlayerCommandToGroupGather& e, CPedGroup* pg, CPed* originator) {
-    for (auto& m : pg->GetMembership().GetFollowers()) { // NOTE: I'm not 100% sure whenever the leader should be included or not
-        pg->GetIntelligence().SetTask(
+    for (auto& m : pg->GetMembership().GetFollowers()) {
+        pg->GetIntelligence().SetEventResponseTask(
             &m,
             CTaskComplexSeekEntity<CEntitySeekPosCalculatorStandard>{
                 originator,
@@ -416,8 +403,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseGather(const CEventPlayerComm
                 true,
                 true,
                 CEntitySeekPosCalculatorStandard{}
-            },
-            pg->GetIntelligence().GetPedTaskPairs()
+            }
         );
     }
     return nullptr;
@@ -478,7 +464,7 @@ CTaskAllocator* CGroupEventHandler::ComputeResponsLeaderQuitEnteringCar(const CE
 // 0x5FAA50
 CTaskAllocator* CGroupEventHandler::ComputeMemberResponses(const CEventEditableResponse& e, CPedGroup* pg, CPed* originator) {
     const std::unique_ptr<CEventEditableResponse> ce{ static_cast<CEventEditableResponse*>(const_cast<CEventEditableResponse&>(e).Clone()) };
-    for (auto& m : pg->GetMembership().GetFollowers()) { // NOTE: I'm not 100% sure whenever the leader should be included or not
+    for (auto& m : pg->GetMembership().GetFollowers()) {
         if (!m.IsAlive()) {
             continue;
         }
@@ -486,11 +472,7 @@ CTaskAllocator* CGroupEventHandler::ComputeMemberResponses(const CEventEditableR
             ce->m_taskId = TASK_NONE;
             ce->ComputeResponseTaskType(&m, true);
         } else if (const auto rt = std::unique_ptr<CTask>(CEventHandler::ComputeEventResponseTask(m, *ce))) {
-            pg->GetIntelligence().SetTask(
-                &m,
-                *rt,
-                pg->GetIntelligence().GetPedTaskPairs()
-            );
+            pg->GetIntelligence().SetEventResponseTask(&m, *rt);
         }
     }
     return nullptr;
@@ -502,10 +484,9 @@ CTaskAllocator* CGroupEventHandler::ComputeLeanOnVehicleResponse(const CEventLea
     if (!leader) {
         return nullptr;
     }
-    pg->GetIntelligence().SetTask(
+    pg->GetIntelligence().SetEventResponseTask(
         leader,
-        CTaskGoToVehicleAndLean{e.m_vehicle, e.m_leanAnimDurationInMs},
-        pg->GetIntelligence().GetPedTaskPairs()
+        CTaskGoToVehicleAndLean{e.m_vehicle, e.m_leanAnimDurationInMs}
     );
     return nullptr;
 }
@@ -530,10 +511,9 @@ CTaskAllocator* CGroupEventHandler::ComputeKillPlayerBasicResponse(CPedGroup* pg
         return ComputeFleePedResponse(pg, threat, originator, false);
     }
     for (auto& m : pg->GetMembership().GetMembers()) {
-        pg->GetIntelligence().SetTask(
+        pg->GetIntelligence().SetEventResponseTask(
             &m,
-            CTaskComplexKillPedOnFoot{ threat },
-            pg->GetIntelligence().GetPedTaskPairs()
+            CTaskComplexKillPedOnFoot{ threat }
         );
     }
     return nullptr;
@@ -552,12 +532,8 @@ CTaskAllocator* CGroupEventHandler::ComputeHassleThreatResponse(CPedGroup* pg, C
         return nullptr;
     }
     for (auto& m : pg->GetMembership().GetMembers()) {
-        const auto SetTask = [&](auto&& t) {
-            pg->GetIntelligence().SetTask(
-                &m,
-                std::move(t),
-                pg->GetIntelligence().GetPedTaskPairs()
-            );
+        const auto SetTask = [&](const auto& t) {
+            pg->GetIntelligence().SetEventResponseTask(&m, t);
         };
         if (threat->IsInVehicle() && threat->m_pVehicle->IsSubAutomobile()) {
             if (!bBeAggressive) {
@@ -592,10 +568,9 @@ CTaskAllocator* CGroupEventHandler::ComputeHassleSexyPedResponse(CPedGroup* pg, 
         if (!CGeneral::RandomBool(25.f)) {
             continue;
         }
-        pg->GetIntelligence().SetTask(
+        pg->GetIntelligence().SetEventResponseTask(
             &m,
-            CTaskGangHasslePed{sexyPed, 0, 8'000, 12'000},
-            pg->GetIntelligence().GetPedTaskPairs()
+            CTaskGangHasslePed{sexyPed, 0, 8'000, 12'000}
         );
     }
     return nullptr;
@@ -610,10 +585,9 @@ CTaskAllocator* CGroupEventHandler::ComputeHandSignalResponse(CPedGroup* pg, CPe
         if (m.IsPlayer()) {
             continue;
         }
-        pg->GetIntelligence().SetTask(
+        pg->GetIntelligence().SetEventResponseTask(
             &m,
-            CTaskComplexSignalAtPed{signalAt},
-            pg->GetIntelligence().GetPedTaskPairs()
+            CTaskComplexSignalAtPed{signalAt}
         );
     }
     return nullptr;
@@ -636,7 +610,7 @@ CTaskAllocator* CGroupEventHandler::ComputeGreetResponse(CPedGroup* pg, CPed* to
         return nullptr;
     }
     const auto partnerType = CGeneral::GetRandomNumberInRange(0, 6);
-    pg->GetIntelligence().SetTask(
+    pg->GetIntelligence().SetEventResponseTask(
         closestToGreeter,
         CTaskComplexPartnerGreet{
             "CompGreetResp",
@@ -645,8 +619,7 @@ CTaskAllocator* CGroupEventHandler::ComputeGreetResponse(CPedGroup* pg, CPed* to
             0.f,
             partnerType,
             {}
-        },
-        pg->GetIntelligence().GetPedTaskPairs()
+        }
     );
     toGreet->GetEventGroup().Add(CEventCreatePartnerTask{
         partnerType + 1,
@@ -692,7 +665,7 @@ CTaskAllocator* CGroupEventHandler::ComputeDoDealResponse(CPedGroup* pg, CPed* d
         return nullptr;
     }
     const auto partnerType = CGeneral::GetRandomNumberInRange(0, 6);
-    pg->GetIntelligence().SetTask(
+    pg->GetIntelligence().SetEventResponseTask(
         closestToGreeter,
         CTaskComplexPartnerDeal{
             "CompDoDealResp",
@@ -700,8 +673,7 @@ CTaskAllocator* CGroupEventHandler::ComputeDoDealResponse(CPedGroup* pg, CPed* d
             true,
             0.f,
             {}
-        },
-        pg->GetIntelligence().GetPedTaskPairs()
+        }
     );
     dealWith->GetEventGroup().Add(CEventCreatePartnerTask{
         partnerType + 1,
@@ -743,7 +715,6 @@ CTaskAllocator* CGroupEventHandler::ComputeFleePedResponse(CPedGroup* pg, CPed* 
     for (auto& m : pg->GetMembership().GetMembers()) {
         pg->GetIntelligence().SetEventResponseTask(
             threat,
-            true,
             CTaskComplexSmartFleeEntity{
                 &m,
                 false,

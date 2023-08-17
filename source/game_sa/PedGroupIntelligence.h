@@ -98,6 +98,8 @@ public:
         const CTask& secondaryTask = CTaskSimpleNone{},
         int32        slot = -1
     );
+    //! @notsa
+    void SetEventResponseTask(CPed* ped, const CTask& task) { SetEventResponseTask(ped, true, task); }
     int32 SetEventResponseTaskAllocator(int32 a2);
     int32 SetGroupDecisionMakerType(int32 a2);
     void  SetPrimaryTaskAllocator(CTaskAllocator* taskAllocator);

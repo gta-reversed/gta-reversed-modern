@@ -53,13 +53,13 @@ public:
 
     static CTaskAllocator* ComputeKillThreatsBasicResponse(CPedGroup* pg, CPed* threat, CPed* originator, bool bDamageOriginator);
     static CTaskAllocator* ComputeKillPlayerBasicResponse(CPedGroup* pg, CPed* threat, CPed* originator, bool bDamageOriginator);
-    static CTaskAllocator* ComputeHassleThreatResponse(CPedGroup* pg, CPed* ped1, CPed* ped2, bool);
-    static CTaskAllocator* ComputeHassleSexyPedResponse(CPedGroup* pg, CPed* ped1, CPed* ped2);
-    static CTaskAllocator* ComputeHandSignalResponse(CPedGroup* pg, CPed* ped1, CPed* ped2);
-    static CTaskAllocator* ComputeGreetResponse(CPedGroup* pg, CPed* ped1, CPed* ped2);
+    static CTaskAllocator* ComputeHassleThreatResponse(CPedGroup* pg, CPed* threat, CPed* originator, bool bDamageOriginator);
+    static CTaskAllocator* ComputeHassleSexyPedResponse(CPedGroup* pg, CPed* sexyPed, CPed* originator);
+    static CTaskAllocator* ComputeHandSignalResponse(CPedGroup* pg, CPed* signalAt, CPed* originator);
+    static CTaskAllocator* ComputeGreetResponse(CPedGroup* pg, CPed* toGreet, CPed* originator);
     static CTaskAllocator* ComputeDoDealResponse(CPedGroup* pg, CPed* dealWith, CPed* originator);
     static CTaskAllocator* ComputeFleePedResponse(CPedGroup* pg, CPed* threat, CPed* originator, bool bDamageOriginator);
-    static CTaskAllocator* ComputeDrivebyResponse(CPedGroup* pg, CPed* threat, CPed* ped2);
+    static CTaskAllocator* ComputeDrivebyResponse(CPedGroup* pg, CPed* threat, CPed* originator);
 
     static CTaskAllocator* ComputeEventResponseTasks(const CEventGroupEvent& groupEvent, CPedGroup* pg);
 };

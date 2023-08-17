@@ -19,7 +19,7 @@ void CPedGroupIntelligence::InjectHooks() {
     RH_ScopedInstall(SetGroupDecisionMakerType, 0x5F7340, { .reversed = false });
     RH_ScopedInstall(SetPrimaryTaskAllocator, 0x5F7410, { .reversed = false });
     RH_ScopedInstall(SetDefaultTaskAllocatorType, 0x5FBB70, { .reversed = false });
-    RH_ScopedInstall(SetEventResponseTask, 0x5F8510);
+    //RH_ScopedInstall(SetEventResponseTask, 0x5F8510); // Register allocation is weird, better not to hook it
 
     RH_ScopedOverloadedInstall(ReportFinishedTask, "", 0x5F86F0, bool(CPedGroupIntelligence::*)(const CPed*, const CTask*), { .reversed = false });
 }
