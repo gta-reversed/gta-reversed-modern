@@ -130,7 +130,7 @@ void CGarages::GivePlayerDetonator() {
     auto player = FindPlayerPed();
     auto slot = CWeaponInfo::GetWeaponInfo(WEAPON_DETONATOR, eWeaponSkill::STD)->m_nSlot;
     player->GiveWeapon(WEAPON_DETONATOR, 1, true);
-    player->m_aWeapons[slot].m_nState = WEAPONSTATE_READY;
+    player->m_aWeapons[slot].m_State = WEAPONSTATE_READY;
     player->m_pPlayerData->m_nChosenWeapon = slot;
     if (player->m_nSavedWeapon != WEAPON_UNIDENTIFIED)
         player->m_nSavedWeapon = WEAPON_DETONATOR;

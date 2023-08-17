@@ -350,7 +350,7 @@ void CAudioEngine::ReportFrontendAudioEvent(eAudioEvents eventId, float volumeCh
 }
 
 // 0x506EC0
-void CAudioEngine::ReportBulletHit(CEntity* entity, eSurfaceType surface, CVector& posn, float angleWithColPointNorm) {
+void CAudioEngine::ReportBulletHit(CEntity* entity, eSurfaceType surface, const CVector& posn, float angleWithColPointNorm) {
     m_CollisionAE.ReportBulletHit(entity, surface, posn, angleWithColPointNorm);
 }
 

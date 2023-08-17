@@ -289,7 +289,7 @@ public:
     auto AsBuilding()         { return reinterpret_cast<CBuilding*>(this); }
     auto AsDummy()            { return reinterpret_cast<CDummy*>(this); }
 
-    [[nodiscard]] auto GetType() const noexcept { return m_nType; }
+    [[nodiscard]] auto GetType() const noexcept { return (eEntityType)m_nType; }
     void SetType(eEntityType type) { m_nType = type; }
 
     [[nodiscard]] auto GetStatus() const noexcept { return m_nStatus; }

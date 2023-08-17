@@ -337,7 +337,7 @@ CTaskSimpleClimb* CPedIntelligence::GetTaskClimb() {
 // 0x6011B0
 bool CPedIntelligence::GetUsingParachute() {
     CWeapon* activeWeapon = &m_pPed->GetActiveWeapon();
-    if (activeWeapon->m_nType != WEAPON_PARACHUTE) {
+    if (activeWeapon->m_Type != WEAPON_PARACHUTE) {
         return false;
     }
 
@@ -605,7 +605,7 @@ void CPedIntelligence::ProcessAfterPreRender() {
     }
 
     CWeapon* activeWeapon = &m_pPed->GetActiveWeapon();
-    if (activeWeapon->m_nType == WEAPON_MOLOTOV && activeWeapon->m_pFxSystem)
+    if (activeWeapon->m_Type == WEAPON_MOLOTOV && activeWeapon->m_FxSystem)
     {
         RpHAnimHierarchy* animHierarchy = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
         int32 animIDIndex = RpHAnimIDGetIndex(animHierarchy, 24); // 24 = BONE_R_HAND?
@@ -619,7 +619,7 @@ void CPedIntelligence::ProcessAfterPreRender() {
         memcpy(&matrix, m_pPed->GetModellingMatrix(), sizeof(matrix));
         matrix.pos = pointOut;
         RwMatrixUpdate(&matrix);
-        activeWeapon->m_pFxSystem->SetMatrix(&matrix);
+        activeWeapon->m_FxSystem->SetMatrix(&matrix);
     }
 
     if (m_pPed->bInVehicle)

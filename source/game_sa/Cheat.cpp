@@ -356,7 +356,7 @@ void CCheat::DrivebyCheat() {
     Toggle(CHEAT_WEAPON_AIMING_WHILE_DRIVING);
 
     CPlayerPed *player = FindPlayerPed();
-    if (IsActive(CHEAT_WEAPON_AIMING_WHILE_DRIVING) && player->m_aWeapons[WEAPON_KNIFE].m_nType == WEAPON_UNARMED) {
+    if (IsActive(CHEAT_WEAPON_AIMING_WHILE_DRIVING) && player->m_aWeapons[WEAPON_KNIFE].m_Type == WEAPON_UNARMED) {
         player->GiveDelayedWeapon(WEAPON_MICRO_UZI, 150);
         player->SetCurrentWeapon(WEAPON_MICRO_UZI);
     }

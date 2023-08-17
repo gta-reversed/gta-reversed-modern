@@ -241,7 +241,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* ped) {
             }
         }
         RpAnimBlendClumpSetBlendDeltas(player->m_pRwClump, 0x10, -8.0f); // todo: ANIMATION_PARTIAL ?
-        FxSystem_c::SafeKillAndClear(player->GetActiveWeapon().m_pFxSystem); // Removes fire or something in water
+        FxSystem_c::SafeKillAndClear(player->GetActiveWeapon().m_FxSystem); // Removes fire or something in water
 
         if (player->IsPlayer() && !m_nSwimState) {
             float waterLevel = 0.0f;
