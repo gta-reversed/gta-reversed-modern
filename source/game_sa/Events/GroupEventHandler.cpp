@@ -21,6 +21,7 @@
 #include "Tasks/TaskTypes/TaskGangHassleVehicle.h"
 #include "Tasks/TaskTypes/TaskGangHasslePed.h"
 
+#include "Tasks/Allocators/TaskAllocator.h"
 #include "Tasks/Allocators/TaskAllocatorPlayerCommandAttack.h"
 #include "Tasks/Allocators/TaskAllocatorKillThreatsBasic.h"
 #include "Tasks/Allocators/TaskAllocatorKillThreatsBasicRandomGroup.h"
@@ -38,7 +39,6 @@
 #include "Events/EventDamage.h"
 #include "Events/EventLeanOnVehicle.h"
 
-#include "TaskAllocator.h"
 
 void CGroupEventHandler::InjectHooks() {
     RH_ScopedClass(CGroupEventHandler);

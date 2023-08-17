@@ -59,7 +59,7 @@ public:
     static CTaskAllocator* ComputeGreetResponse(CPedGroup* pg, CPed* ped1, CPed* ped2);
     static CTaskAllocator* ComputeFleePedResponse(CPedGroup* pg, CPed* threat, CPed* originator, bool bDamageOriginator);
     static CTaskAllocator* ComputeEventResponseTasks(const CEventGroupEvent& groupEvent, CPedGroup* pg);
-    static CTaskAllocator* ComputeDrivebyResponse(CPedGroup* pg, CPed* ped1, CPed* ped2);
+    static CTaskAllocator* ComputeDrivebyResponse(CPedGroup* pg, CPed* threat, CPed* ped2);
     static CTaskAllocator* ComputeDoDealResponse(CPedGroup* pg, CPed* ped1, CPed* ped2);
 };
 
