@@ -134,12 +134,9 @@ bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup(CPedGroup* pedGroup)
     return CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed(pedGroup);
 }
 
-bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
-{
-    auto oldEventGroupEvent = pedGroup->GetIntelligence().m_pOldEventGroupEvent;
-    if (oldEventGroupEvent)
-        return oldEventGroupEvent->m_event->GetEventType() == EVENT_LEADER_ENTERED_CAR_AS_DRIVER;
-    return false;
+bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup) {
+    const auto oe = pedGroup->GetIntelligence().GetOldEvent();
+    return oe && oe->GetEvent().GetEventType() == EVENT_LEADER_ENTERED_CAR_AS_DRIVER;
 }
 
 CEventAreaCodes::CEventAreaCodes(CPed* ped)

@@ -32,58 +32,37 @@ enum class ePedGroupDefaultTaskAllocatorType : uint32 {
 
 class CPedGroupIntelligence {
 public:
-    CPedGroup*                     m_pPedGroup;
-    CEventGroupEvent*              m_pOldEventGroupEvent;
-    CEventGroupEvent*              m_pEventGroupEvent;
-    union {
-        CPedTaskPair     m_groupTasks[32]; // todo: split array
-        struct {
-            CPedTaskPair m_pedTaskPairs[8];
-            CPedTaskPair m_secondaryPedTaskPairs[8];
-            CPedTaskPair m_scriptCommandPedTaskPairs[8];
-            CPedTaskPair m_defaultPedTaskPairs[8];
-        };
-    };
-    CPedGroupDefaultTaskAllocator* m_pPedGroupDefaultTaskAllocator;
-    CTaskAllocator*                m_pPrimaryTaskAllocator;
-    CTaskAllocator*                m_pEventResponseTaskAllocator;
-    int32                          m_nDecisionMakerType;
-    int32                          m_nTaskSequenceId; // Used in CTaskSequences::ms_taskSequence
-
-public:
     static void InjectHooks();
 
-    CPedGroupIntelligence();
-    CPedGroupIntelligence(CPedGroup& owner); // notsa
+    CPedGroupIntelligence(CPedGroup* owner);
     ~CPedGroupIntelligence();
 
     void Flush();
 
-    bool       AddEvent(CEvent* event);
-    void       ComputeDefaultTasks(CPed* ped);
-    void*      ComputeEventResponseTasks();
-    void       ComputeScriptCommandTasks();
-    static void       FlushTasks(CPedTaskPair* taskpair, CPed* ped);
+    bool            AddEvent(CEvent* event);
+    void            ComputeDefaultTasks(CPed* ped);
+    CTaskAllocator* ComputeEventResponseTasks();
+    void            ComputeScriptCommandTasks();
+    static void     FlushTasks(CPedTaskPair (&taskPairs)[8], CPed* ped);
 
-    CTask*         GetTask(CPed* ped, CPedTaskPair const* taskPair);
+    CTask*         GetTask(CPed* ped, const CPedTaskPair (&taskPairs)[8]);
     CTask*         GetTaskMain(CPed* ped);
     CTask*         GetTaskDefault(CPed* ped);
     CTask*         GetTaskScriptCommand(CPed* ped);
     CTask*         GetTaskSecondary(CPed* ped);
     eSecondaryTask GetTaskSecondarySlot(CPed* ped);
 
-    bool       IsCurrentEventValid();
-    bool       IsGroupResponding();
-    void       Process();
-    void       ProcessIgnorePlayerGroup();
-    void       ReportAllBarScriptTasksFinished();
-    void       ReportAllTasksFinished(CPedTaskPair* taskpair);
-    void       ReportAllTasksFinished();
-    bool       ReportFinishedTask(const CPed* ped, const CTask* task, CPedTaskPair* taskpair);
-    bool       ReportFinishedTask(const CPed* ped, const CTask* task);
-    void       SetDefaultTask(CPed* ped, const CTask* task);
-    void       SetDefaultTaskAllocator(CPedGroupDefaultTaskAllocator const* PedGroupDefaultTaskAllocator);
-    //! see ePedGroupDefaultTaskAllocatorType
+    bool IsCurrentEventValid();
+    bool IsGroupResponding();
+    void Process();
+    void ProcessIgnorePlayerGroup();
+    void ReportAllBarScriptTasksFinished();
+    void ReportAllTasksFinished(CPedTaskPair (&taskPairs)[8]);
+    void ReportAllTasksFinished();
+    bool ReportFinishedTask(const CPed* ped, const CTask* task, CPedTaskPair* taskpair);
+    bool ReportFinishedTask(const CPed* ped, const CTask* task);
+    void SetDefaultTask(CPed* ped, const CTask* task);
+    void SetDefaultTaskAllocator(CPedGroupDefaultTaskAllocator const* PedGroupDefaultTaskAllocator);
     void SetDefaultTaskAllocatorType(ePedGroupDefaultTaskAllocatorType nPedGroupTaskAllocator);
 
     /*!
@@ -100,21 +79,47 @@ public:
     );
     //! @notsa
     void SetEventResponseTask(CPed* ped, const CTask& task) { SetEventResponseTask(ped, true, task); }
-    int32 SetEventResponseTaskAllocator(int32 a2);
-    int32 SetGroupDecisionMakerType(int32 a2);
-    void  SetPrimaryTaskAllocator(CTaskAllocator* taskAllocator);
-    void  SetScriptCommandTask(CPed* ped, const CTask* task);
+    void SetEventResponseTaskAllocator(CTaskAllocator* a);
+    void SetGroupDecisionMakerType(int32 t);
+    void SetPrimaryTaskAllocator(CTaskAllocator* taskAllocator);
+    void SetScriptCommandTask(CPed* ped, const CTask* task);
 
-    /// Helper so events can be directly passed in without having to it into a variable
+    auto GetOldEvent()     { return m_pOldEventGroupEvent; }
+    auto GetCurrentEvent() { return m_pEventGroupEvent; }
+
     template<std::derived_from<CEvent> T>
-    auto AddEvent(T event) {
+    auto AddEvent(T event) { // TODO: Remove in final
         return AddEvent(&event);
     }
 
-    auto GetPedTaskPairs() { return m_pedTaskPairs; }
-
     //! `task` shouldn't be `new`-d, but rather stack allocated!
     static void SetTask(CPed* ped, const CTask& task, CPedTaskPair* pair, int32 slot = -1, bool force = false);
-};
 
+private: // Wrappers for hooks
+    // 0x5F7250
+    CPedGroupIntelligence* Constructor() {
+        this->CPedGroupIntelligence::CPedGroupIntelligence(nullptr);
+        return this;
+    }
+
+    // 0x5F7350
+    CPedGroupIntelligence* Destructor() {
+        this->CPedGroupIntelligence::~CPedGroupIntelligence();
+        return this;
+    }
+
+private:
+    CPedGroup*                     m_pPedGroup{};
+    CEventGroupEvent*              m_pOldEventGroupEvent{};
+    CEventGroupEvent*              m_pEventGroupEvent{};
+    CPedTaskPair                   m_PedTaskPairs[TOTAL_PED_GROUP_MEMBERS]{};
+    CPedTaskPair                   m_SecondaryPedTaskPairs[TOTAL_PED_GROUP_MEMBERS]{};
+    CPedTaskPair                   m_ScriptCommandPedTaskPairs[TOTAL_PED_GROUP_MEMBERS]{};
+    CPedTaskPair                   m_DefaultPedTaskPairs[TOTAL_PED_GROUP_MEMBERS]{};
+    CPedGroupDefaultTaskAllocator* m_DefaultTaskAllocator{};
+    CTaskAllocator*                m_PrimaryTaskAllocator{};
+    CTaskAllocator*                m_EventResponseTaskAllocator{};
+    int32                          m_DecisionMakerType{-1};
+    int32                          m_TaskSeqId{-1}; // Used in CTaskSequences::ms_taskSequence
+};
 VALIDATE_SIZE(CPedGroupIntelligence, 0x2A0);

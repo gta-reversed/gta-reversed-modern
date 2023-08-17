@@ -91,18 +91,22 @@ void CPedGroup::Teleport(const CVector& pos) {
         leader->Teleport(pos, false);
     }
 
-    if (const auto oevent = m_groupIntelligence.m_pOldEventGroupEvent) {
-        if (oevent->GetEventType() == EVENT_LEADER_ENTRY_EXIT) {
+    if (const auto oe = m_groupIntelligence.GetOldEvent()) {
+        if (oe->GetEventType() == EVENT_LEADER_ENTRY_EXIT) {
             return;
         }
     }
 
     // Set *followers* out of the vehicle
-    for (auto& flwr : GetMembership().GetMembers(false)) {
-        if (!flwr.IsAlive() || !flwr.bInVehicle || flwr.IsCreatedByMission()) {
+    for (auto& f : GetMembership().GetFollowers()) {
+        if (!f.IsAlive() || !f.bInVehicle || f.IsCreatedByMission()) {
             continue;
         }
-        CTaskSimpleCarSetPedOut{ flwr.m_pVehicle, (eTargetDoor)CCarEnterExit::ComputeTargetDoorToExit(flwr.m_pVehicle, &flwr), false }.ProcessPed(&flwr);
+        CTaskSimpleCarSetPedOut{
+            f.m_pVehicle,
+            (eTargetDoor)CCarEnterExit::ComputeTargetDoorToExit(f.m_pVehicle, &f),
+            false
+        }.ProcessPed(&f);
     }
 
     // Teleport *followers*
