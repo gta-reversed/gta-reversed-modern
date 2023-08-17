@@ -74,7 +74,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeHassleSexyPedResponse, 0x5FA020);
     RH_ScopedInstall(ComputeHandSignalResponse, 0x5FA820);
     RH_ScopedInstall(ComputeGreetResponse, 0x5FA550);
-    RH_ScopedInstall(ComputeFleePedResponse, 0x5FA130, { .reversed = false });
+    RH_ScopedInstall(ComputeFleePedResponse, 0x5FA130);
     RH_ScopedInstall(ComputeEventResponseTasks, 0x5FC200);
     RH_ScopedInstall(ComputeDrivebyResponse, 0x5F7A00);
     RH_ScopedInstall(ComputeDoDealResponse, 0x5FA290, { .reversed = false });
@@ -630,7 +630,7 @@ CTaskAllocator* CGroupEventHandler::ComputeGreetResponse(CPedGroup* pg, CPed* to
     if (!leader) {
         return nullptr;
     }
-    const auto [closestToGreeter, closestToGreeterDistSq]  = pg->GetMembership().GetMemberClosestTo(toGreet);
+    const auto [closestToGreeter, closestToGreeterDistSq] = pg->GetMembership().GetMemberClosestTo(toGreet);
     if (!closestToGreeter || closestToGreeterDistSq < sq(4.f) && closestToGreeterDistSq > sq(10.f)) {
         return nullptr;
     }
@@ -675,8 +675,30 @@ CTaskAllocator* CGroupEventHandler::ComputeGreetResponse(CPedGroup* pg, CPed* to
 }
 
 // 0x5FA130
-CTaskAllocator* CGroupEventHandler::ComputeFleePedResponse(CPedGroup* pg, CPed* ped1, CPed* ped2, bool bDamageOriginator) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA130, CPedGroup*, CPed*, CPed*, uint8>(pg, ped1, ped2, bDamageOriginator);
+CTaskAllocator* CGroupEventHandler::ComputeFleePedResponse(CPedGroup* pg, CPed* threat, CPed* originator, bool bDamageOriginator) {
+    if (!threat) {
+        return nullptr;
+    }
+    const auto leader = pg->GetMembership().GetLeader();
+    if (!leader) {
+        return nullptr;
+    }
+    /* rand(); */
+    for (auto& m : pg->GetMembership().GetMembers()) {
+        pg->GetIntelligence().SetEventResponseTask(
+            threat,
+            true,
+            CTaskComplexSmartFleeEntity{
+                &m,
+                false,
+                60.f,
+                10'000,
+                1'000,
+                fEntityPosChangeThreshold
+            }
+        );
+    }
+    return nullptr;
 }
 
 // 0x5FC200
