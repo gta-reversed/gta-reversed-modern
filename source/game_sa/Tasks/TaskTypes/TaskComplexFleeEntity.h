@@ -45,7 +45,7 @@ public:
     CTask* CreateSubTask(eTaskType taskType);
 
     CTask*    Clone() override { return new CTaskComplexFleeEntity{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;

@@ -22,7 +22,7 @@ public:
     explicit CTaskSimpleJump(bool bCanClimb);
     ~CTaskSimpleJump() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;

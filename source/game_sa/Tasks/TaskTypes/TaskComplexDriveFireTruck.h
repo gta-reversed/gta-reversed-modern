@@ -15,7 +15,7 @@ public:
     CTaskComplexDriveFireTruck(CVehicle* vehicle, CPed* partnerFireman, bool bIsDriver);
     ~CTaskComplexDriveFireTruck() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

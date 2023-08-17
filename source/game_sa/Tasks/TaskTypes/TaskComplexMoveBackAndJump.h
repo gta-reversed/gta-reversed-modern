@@ -19,7 +19,7 @@ public:
     static CTask* CreateSubTask(eTaskType taskType);
 
     CTask*    Clone() override { return new CTaskComplexMoveBackAndJump{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override { return m_pSubTask; }

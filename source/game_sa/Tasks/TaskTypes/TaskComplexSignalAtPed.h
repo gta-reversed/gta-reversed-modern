@@ -22,7 +22,7 @@ public:
     ~CTaskComplexSignalAtPed();
 
     CTask*    Clone() override { return new CTaskComplexSignalAtPed{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask*    CreateNextSubTask(CPed * ped) override;
     CTask*    CreateFirstSubTask(CPed * ped) override;
     CTask*    ControlSubTask(CPed * ped) override;

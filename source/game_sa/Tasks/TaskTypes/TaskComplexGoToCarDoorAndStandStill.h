@@ -31,7 +31,7 @@ public:
     CTaskComplexGoToCarDoorAndStandStill(CVehicle* vehicle, int32 moveState, bool a4, int32 a5, float a6, float a7, float a8, int32 a9);
     ~CTaskComplexGoToCarDoorAndStandStill() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override { return new CTaskComplexGoToCarDoorAndStandStill(m_Vehicle, m_nMoveState, f14, f44, m_fRadius, f1C, f20, f24); } // 0x6498B0
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;

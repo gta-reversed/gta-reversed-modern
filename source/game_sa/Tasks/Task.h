@@ -36,7 +36,7 @@ public:
     virtual CTask* Clone() = 0;
     virtual CTask* GetSubTask() = 0;
     virtual bool IsSimple() = 0;
-    virtual eTaskType GetTaskType() = 0;
+    virtual eTaskType GetTaskType() const = 0;
     virtual void StopTimer(const CEvent* event);
     virtual bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) = 0;
 

@@ -22,7 +22,7 @@ public:
     CTaskGangHasslePed(CPed* ped, int32 a3, int32 a4, int32 a5);
     ~CTaskGangHasslePed() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override { return new CTaskGangHasslePed(m_Ped, dword10, m_RndMin, m_RndMax); } // 0x6620D0
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

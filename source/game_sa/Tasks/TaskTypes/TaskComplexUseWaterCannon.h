@@ -12,7 +12,7 @@ public:
     explicit CTaskComplexUseWaterCannon(CFire* pFire);
     ~CTaskComplexUseWaterCannon() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

@@ -24,7 +24,7 @@ public:
     ~CTaskComplexUseScriptedBrain();
 
     CTask*    Clone() override { return new CTaskComplexUseScriptedBrain{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;

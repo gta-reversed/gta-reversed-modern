@@ -16,7 +16,7 @@ public:
     explicit CTaskComplexGangJoinRespond(uint8 a2);
     ~CTaskComplexGangJoinRespond() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override { return new CTaskComplexGangJoinRespond(byteC); } // 0x662290;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; } // 0x661790;
     CTask* CreateNextSubTask(CPed* ped) override;

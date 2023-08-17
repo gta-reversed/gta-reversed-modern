@@ -12,7 +12,7 @@ public:
     ~CTaskComplexCarDriveWander() override = default;
 
     CTask* Clone() override { return new CTaskComplexCarDrive(m_pVehicle, m_fSpeed, -1, static_cast<eCarDrivingStyle>(m_nCarDrivingStyle)); };
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     void SetUpCar() override;
     CTask* CreateSubTaskCannotGetInCar(CPed* ped) override;
 };

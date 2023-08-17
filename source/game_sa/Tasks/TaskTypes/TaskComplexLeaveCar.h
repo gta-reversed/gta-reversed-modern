@@ -34,7 +34,7 @@ public:
     CTaskComplexLeaveCar(const CTaskComplexLeaveCar& o); // NOTSA
     ~CTaskComplexLeaveCar() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override { return new CTaskComplexLeaveCar{ *this }; } // 0x63D9E0
     bool   MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;

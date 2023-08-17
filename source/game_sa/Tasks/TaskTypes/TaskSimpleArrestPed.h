@@ -14,7 +14,7 @@ public:
     CTaskSimpleArrestPed(CPed* ped);
     ~CTaskSimpleArrestPed() override;
 
-    eTaskType GetTaskType() override { return Type; } // 0x68B680
+    eTaskType GetTaskType() const override { return Type; } // 0x68B680
     CTask* Clone() override { return new CTaskSimpleArrestPed(m_Ped); } // 0x68CD10
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed*) override;

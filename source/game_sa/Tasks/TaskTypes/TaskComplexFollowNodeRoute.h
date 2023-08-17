@@ -43,7 +43,7 @@ public:
     CTaskComplexFollowNodeRoute(int32 mode, const CVector& targetPos, float radius, float fUnkn1, float fUnkn2, bool bUnknFlag, int32 time, bool bUnknFlag2);
     ~CTaskComplexFollowNodeRoute() override;
 
-    eTaskType GetTaskType() override { return Type; } // 0x66EB60
+    eTaskType GetTaskType() const override { return Type; } // 0x66EB60
     CTask* Clone() override;
     void StopTimer(const CEvent* event) override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;

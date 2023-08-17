@@ -58,7 +58,7 @@ public:
         return new CTaskComplexSeekEntityAnyMeans{ *this };
     }
 
-    eTaskType GetTaskType() override {
+    eTaskType GetTaskType() const override {
         return Type;
     }
 

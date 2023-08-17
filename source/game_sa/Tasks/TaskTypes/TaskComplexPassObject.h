@@ -30,7 +30,7 @@ public:
     void AbortIK(CPed* ped);
 
     CTask*    Clone() override { return new CTaskComplexPassObject{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;

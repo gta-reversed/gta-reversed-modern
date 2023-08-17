@@ -12,7 +12,7 @@ public:
     explicit CTaskComplexHitByGunResponse(int32 direction);
     ~CTaskComplexHitByGunResponse() override = default; // 0x631E30
 
-    eTaskType GetTaskType() override { return Type; } // 0x631DF0
+    eTaskType GetTaskType() const override { return Type; } // 0x631DF0
     CTask* Clone() override { return new CTaskComplexHitByGunResponse(m_Direction); } // 0x636640
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override { return nullptr; } // 0x631E40

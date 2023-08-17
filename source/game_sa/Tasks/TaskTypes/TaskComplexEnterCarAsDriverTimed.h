@@ -31,7 +31,7 @@ public:
     ~CTaskComplexEnterCarAsDriverTimed();
 
     CTask*    Clone() override { return new CTaskComplexEnterCarAsDriverTimed{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask*    CreateNextSubTask(CPed* ped) override { return nullptr; }
     CTask*    CreateFirstSubTask(CPed* ped) override;

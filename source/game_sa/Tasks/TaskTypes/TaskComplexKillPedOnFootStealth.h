@@ -22,7 +22,7 @@ public:
     ~CTaskComplexKillPedOnFootStealth() = default;
 
     CTask*    Clone() override { return new CTaskComplexKillPedOnFootStealth{ *this }; } // 0x623400
-    eTaskType GetTaskType() override { return Type; } // 0x620FE0
+    eTaskType GetTaskType() const override { return Type; } // 0x620FE0
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;

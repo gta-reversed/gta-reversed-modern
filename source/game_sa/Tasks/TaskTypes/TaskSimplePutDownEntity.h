@@ -17,16 +17,18 @@ public:
     static constexpr auto Type = TASK_SIMPLE_PUTDOWN_ENTITY;
 
     CTask*    Clone() override;
-    eTaskType GetTaskType() override;
+    eTaskType GetTaskType() const override { return TASK_SIMPLE_PUTDOWN_ENTITY; }
 
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskSimplePutDownEntity* Constructor();
-
-    CTask*    Clone_Reversed();
-    eTaskType GetId_Reversed() { return TASK_SIMPLE_PUTDOWN_ENTITY; };
+private: // Wrappers for hooks
+    // 0x691990
+    CTaskSimplePutDownEntity* Constructor() {
+        this->CTaskSimplePutDownEntity::CTaskSimplePutDownEntity();
+        return this;
+    }
 };
 
 VALIDATE_SIZE(CTaskSimplePutDownEntity, 0x40);

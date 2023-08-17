@@ -32,7 +32,7 @@ public:
     CTaskComplexSequence();
     ~CTaskComplexSequence() override;
 
-    eTaskType GetTaskType() override { return Type; } // 0x632C60
+    eTaskType GetTaskType() const override { return Type; } // 0x632C60
     CTask* Clone() override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;

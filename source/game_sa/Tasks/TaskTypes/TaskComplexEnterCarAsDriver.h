@@ -17,7 +17,7 @@ public:
     CTaskComplexEnterCarAsDriver(CVehicle* targetVehicle, eMoveState moveState);
     ~CTaskComplexEnterCarAsDriver() override = default;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override;
 };
 VALIDATE_SIZE(CTaskComplexEnterCarAsDriver, 0x50);

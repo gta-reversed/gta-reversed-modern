@@ -15,7 +15,7 @@ public:
     CTaskComplexEnterCarAsPassenger(CVehicle* targetVehicle, int32 nTargetSeat, bool bCarryOnAfterFallingOff);
     ~CTaskComplexEnterCarAsPassenger() override = default;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override;
 };
 

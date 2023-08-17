@@ -16,7 +16,7 @@ public:
     CTaskComplexCarSlowBeDraggedOutAndStandUp(CVehicle* vehicle, int32 a3);
     ~CTaskComplexCarSlowBeDraggedOutAndStandUp() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override { return new CTaskComplexCarSlowBeDraggedOutAndStandUp(m_Vehicle, dword10); } // 0x64A190;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;

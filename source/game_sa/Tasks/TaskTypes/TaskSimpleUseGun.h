@@ -53,7 +53,7 @@ public:
     ~CTaskSimpleUseGun() override;
 
     CTask* Clone() override { return new CTaskSimpleUseGun(m_pTarget, m_vecTarget, m_nLastCommand, m_nBurstLength, m_bAimImmediate); }
-    eTaskType GetTaskType() override { return Type; };
+    eTaskType GetTaskType() const override { return Type; };
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;

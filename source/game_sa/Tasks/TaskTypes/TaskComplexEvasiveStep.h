@@ -14,7 +14,7 @@ public:
     CTaskComplexEvasiveStep(CEntity* entity, const CVector& pos);
     ~CTaskComplexEvasiveStep() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override { return new CTaskComplexEvasiveStep(m_Entity, m_Pos); }
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

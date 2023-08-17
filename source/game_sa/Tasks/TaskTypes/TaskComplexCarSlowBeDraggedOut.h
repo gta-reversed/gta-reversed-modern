@@ -20,7 +20,7 @@ public:
     ~CTaskComplexCarSlowBeDraggedOut() override;
 
     CTask*    Clone() override { return new CTaskComplexCarSlowBeDraggedOut(m_Vehicle, m_Door, field_14); } // 0x64A120
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;

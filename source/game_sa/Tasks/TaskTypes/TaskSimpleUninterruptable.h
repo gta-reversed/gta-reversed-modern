@@ -9,7 +9,7 @@ public:
     CTaskSimpleUninterruptable() = default;
     ~CTaskSimpleUninterruptable() override = default;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override { return new CTaskSimpleUninterruptable(); }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return priority == ABORT_PRIORITY_IMMEDIATE; }
     bool ProcessPed(CPed* ped) override { return false; }

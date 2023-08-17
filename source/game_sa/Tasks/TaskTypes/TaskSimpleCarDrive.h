@@ -43,7 +43,7 @@ public:
     explicit CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask = {}, bool updateCurrentVehicle = {});
     ~CTaskSimpleCarDrive() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override;
     bool ProcessPed(class CPed* ped) override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;

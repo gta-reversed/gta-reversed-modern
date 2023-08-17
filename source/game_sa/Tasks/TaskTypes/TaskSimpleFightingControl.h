@@ -29,7 +29,7 @@ public:
     int16 CalcMoveCommand(CPed* ped);
 
     CTask* Clone() override { return new CTaskSimpleFightingControl{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     bool ProcessPed(CPed* ped) override;
 

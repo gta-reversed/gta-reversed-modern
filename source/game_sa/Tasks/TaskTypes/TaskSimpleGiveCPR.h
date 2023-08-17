@@ -22,7 +22,7 @@ public:
     explicit CTaskSimpleGiveCPR(CAccident* accident);
     ~CTaskSimpleGiveCPR() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override;
     bool ProcessPed(CPed* ped) override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;

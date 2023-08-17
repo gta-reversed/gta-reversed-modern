@@ -141,7 +141,7 @@ public:
         return new CTaskComplexSeekEntity{ *this };
     }
 
-    eTaskType GetTaskType() override {
+    eTaskType GetTaskType() const override {
         return eTaskType::TASK_COMPLEX_SEEK_ENTITY;
     }
 

@@ -20,7 +20,7 @@ public:
     explicit CTaskComplexUseSequence(int32 sequenceIndex);
     ~CTaskComplexUseSequence() override;
 
-    eTaskType GetTaskType() override { return Type; } // 0x635490
+    eTaskType GetTaskType() const override { return Type; } // 0x635490
     CTask* Clone() override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;

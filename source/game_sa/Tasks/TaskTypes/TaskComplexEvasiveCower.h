@@ -13,7 +13,7 @@ public:
     CTaskComplexEvasiveCower(CEntity* entity, CVector& pos);
     ~CTaskComplexEvasiveCower() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override { return new CTaskComplexEvasiveCower(m_Entity, m_Pos); }
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

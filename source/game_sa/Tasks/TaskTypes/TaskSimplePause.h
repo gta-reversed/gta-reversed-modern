@@ -15,7 +15,7 @@ public:
     ~CTaskSimplePause() = default;
 
     CTask* Clone() override;
-    eTaskType GetTaskType() override {
+    eTaskType GetTaskType() const override {
         return TASK_SIMPLE_PAUSE;
     };
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;

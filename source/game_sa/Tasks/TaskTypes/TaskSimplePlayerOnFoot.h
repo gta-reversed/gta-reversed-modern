@@ -30,7 +30,7 @@ public:
     CTaskSimplePlayerOnFoot();
     ~CTaskSimplePlayerOnFoot() override = default;
 
-    eTaskType GetTaskType() override {
+    eTaskType GetTaskType() const override {
         return Type;
     } // 0x6857C0
     CTask* Clone() override {

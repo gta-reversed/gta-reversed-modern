@@ -12,7 +12,7 @@ public:
     CTaskComplexObserveTrafficLights() = default; // 0x631790
     ~CTaskComplexObserveTrafficLights() override = default; // 0x6317C0
 
-    eTaskType GetTaskType() override { return Type; }    // 0x6317B0
+    eTaskType GetTaskType() const override { return Type; }    // 0x6317B0
     CTask* Clone() override { return new CTaskComplexObserveTrafficLights(); }          // 0x636410
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; }  // 0x6317D0
     CTask* CreateNextSubTask(CPed* ped) override;

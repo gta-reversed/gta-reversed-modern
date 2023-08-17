@@ -21,7 +21,7 @@ public:
     ~CTaskSimpleWaitUntilAreaCodesMatch();
 
     CTask*    Clone() override { return new CTaskSimpleWaitUntilAreaCodesMatch{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return priority == ABORT_PRIORITY_IMMEDIATE; }
     bool      ProcessPed(CPed* ped) override;
 private: // Wrappers for hooks

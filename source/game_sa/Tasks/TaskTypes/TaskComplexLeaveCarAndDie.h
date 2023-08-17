@@ -14,6 +14,6 @@ public:
     CTaskComplexLeaveCarAndDie(const CTaskComplexLeaveCarAndDie&);
 
     CTask*    Clone() override { return new CTaskComplexLeaveCarAndDie{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask*    CreateFirstSubTask(CPed * ped) override;
 };

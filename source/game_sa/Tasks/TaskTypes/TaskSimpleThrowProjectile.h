@@ -26,7 +26,7 @@ public:
     CTaskSimpleThrowProjectile(CEntity* target, CVector posn);
     ~CTaskSimpleThrowProjectile() override;
 
-    eTaskType GetTaskType() override { return Type; } // 0x61F6F0
+    eTaskType GetTaskType() const override { return Type; } // 0x61F6F0
     CTask* Clone() override { return new CTaskSimpleThrowProjectile(m_pTarget, m_vecPosition); } // 0x623030
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;

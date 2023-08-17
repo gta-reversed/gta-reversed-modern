@@ -31,7 +31,7 @@ public:
 
 
     CTask* Clone() override { return new CTaskSimpleCarCloseDoorFromOutside{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;

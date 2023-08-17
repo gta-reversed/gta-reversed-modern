@@ -31,7 +31,7 @@ public:
     CTaskSimpleCarSetPedInAsPassenger(CVehicle* targetVehicle, eTargetDoor nTargetDoor, bool warpingInToCar /* notsa arg */ = false, CTaskUtilityLineUpPedWithCar* utility = nullptr);
     ~CTaskSimpleCarSetPedInAsPassenger() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return false; }
     bool ProcessPed(CPed* ped) override;

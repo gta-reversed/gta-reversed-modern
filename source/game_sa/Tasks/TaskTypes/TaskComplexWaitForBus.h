@@ -19,7 +19,7 @@ public:
     ~CTaskComplexWaitForBus() = default;
 
     CTask*    Clone() override { return new CTaskComplexWaitForBus{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return true; }
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;

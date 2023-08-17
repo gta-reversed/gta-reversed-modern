@@ -23,7 +23,7 @@ public:
     CTaskSimpleRunAnim(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, int32 nTaskType, const char* taskName _IGNORED_, bool bHoldLastFrame);
 
     CTask* Clone() override;
-    eTaskType GetTaskType() override { return static_cast<eTaskType>(m_nTaskType); }
+    eTaskType GetTaskType() const override { return static_cast<eTaskType>(m_nTaskType); }
     bool ProcessPed(CPed* ped) override;
 
     void StartAnim(CPed* ped);

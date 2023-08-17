@@ -19,7 +19,7 @@ public:
     CTaskComplexMedicTreatInjuredPed(CVehicle* vehicle, CPed* ped, bool isDriver);
     ~CTaskComplexMedicTreatInjuredPed() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;

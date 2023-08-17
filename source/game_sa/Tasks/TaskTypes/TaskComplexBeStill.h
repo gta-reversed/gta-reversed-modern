@@ -9,7 +9,7 @@ public:
     CTaskComplexBeStill() = default;
     ~CTaskComplexBeStill() override = default; // 0x5F6700
 
-    eTaskType GetTaskType() override { return Type; } // 0x5F66D0
+    eTaskType GetTaskType() const override { return Type; } // 0x5F66D0
     CTask* Clone() override { return new CTaskComplexBeStill(); } // 0x5F6680
 
     CTask* ControlSubTask(CPed* ped) override;

@@ -28,7 +28,7 @@ public:
     CTaskComplexGoToPointAndStandStill(eMoveState moveState, const CVector& targetPoint, float fRadius = 1.5f, float fMoveStateRadius = 2.f, bool bUnknown = false, bool bGoToPoint = false);
     ~CTaskComplexGoToPointAndStandStill() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask*    Clone() override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

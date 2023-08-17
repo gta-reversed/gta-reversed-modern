@@ -56,7 +56,7 @@ public:
     CTaskSimpleHoldEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* animBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags);
     ~CTaskSimpleHoldEntity() override;
 
-    eTaskType GetTaskType() override { return Type; }; // 0x691460
+    eTaskType GetTaskType() const override { return Type; }; // 0x691460
     CTask* Clone() override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;

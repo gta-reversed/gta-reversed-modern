@@ -24,7 +24,7 @@ public:
     explicit CTaskComplexJump(eComplexJumpType type);
     ~CTaskComplexJump() override = default;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override;
     CTask* ControlSubTask(CPed* ped) override { return m_pSubTask; }
     CTask* CreateFirstSubTask(CPed* ped) override;

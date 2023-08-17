@@ -26,7 +26,7 @@ public:
     CTaskComplexFollowLeaderInFormation(CPedGroup* pedGroup, CPed* ped, const CVector& posn, float dist = -1.f);
     ~CTaskComplexFollowLeaderInFormation() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask*    Clone() override { return plugin::CallMethodAndReturn<CTask*, 0x695740, CTaskComplexFollowLeaderInFormation*>(this); } // 0x695740
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;

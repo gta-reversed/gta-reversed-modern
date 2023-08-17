@@ -27,7 +27,7 @@ public:
     ~CTaskComplexCarDrive() override;
 
     CTask*    Clone() override;
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
 
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

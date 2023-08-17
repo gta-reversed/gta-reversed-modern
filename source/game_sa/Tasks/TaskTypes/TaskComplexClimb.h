@@ -10,5 +10,5 @@ public:
     ~CTaskComplexClimb() override = default; // 0x46A6E0
 
     CTask* Clone() override { return new CTaskComplexClimb(); } // 0x46A6B0
-    eTaskType GetTaskType() override { return Type; } // 0x46A6C0
+    eTaskType GetTaskType() const override { return Type; } // 0x46A6C0
 };

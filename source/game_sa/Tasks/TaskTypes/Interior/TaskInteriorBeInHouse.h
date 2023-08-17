@@ -27,7 +27,7 @@ public:
     void GetInfoForPedToUse(CPed* ped, int32* outDuration);
 
     CTask*    Clone() override { return new CTaskInteriorBeInHouse{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask*    CreateNextSubTask(CPed* ped) override { return CreateFirstSubTask(ped); }
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override { return m_pSubTask; }

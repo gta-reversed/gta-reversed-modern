@@ -13,7 +13,7 @@ public:
     CTaskComplexObserveTrafficLightsAndAchieveHeading(int32 durationInMs, float targetHeading);
     ~CTaskComplexObserveTrafficLightsAndAchieveHeading() override = default; // 0x631980
 
-    eTaskType GetTaskType() override { return Type; } // 0x631940
+    eTaskType GetTaskType() const override { return Type; } // 0x631940
     CTask* Clone() override;
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

@@ -22,7 +22,7 @@ public:
     ~CTaskSimpleSetPedAsAutoDriver();
 
     CTask*    Clone() override { return new CTaskSimpleSetPedAsAutoDriver{*this}; }
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return false; }
     bool      ProcessPed(CPed* ped) override;
 

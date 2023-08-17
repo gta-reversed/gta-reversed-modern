@@ -14,7 +14,7 @@ public:
     CTaskComplexInAirAndLand(bool bUsingJumpGlide, bool bUsingFallGlide);
     ~CTaskComplexInAirAndLand() override = default;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override { return new CTaskComplexInAirAndLand(m_bUsingJumpGlide, m_bUsingFallGlide); }
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;

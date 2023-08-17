@@ -72,7 +72,7 @@ public:
     CTaskSimpleJetPack* Constructor(const CVector* pVecTargetPos, float fCruiseHeight, int32 nHoverTime, CEntity* entity);
     ~CTaskSimpleJetPack() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;

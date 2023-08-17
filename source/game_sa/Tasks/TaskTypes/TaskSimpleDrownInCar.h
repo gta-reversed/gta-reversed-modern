@@ -9,7 +9,7 @@ public:
     CTaskSimpleDrownInCar() = default;  // 0x62FF20
     ~CTaskSimpleDrownInCar() override = default; // 0x62FF60
 
-    eTaskType GetTaskType() override { return Type; }; // 0x62FF40
+    eTaskType GetTaskType() const override { return Type; }; // 0x62FF40
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return false; } // 0x62FF50
     CTask* Clone() override { return new CTaskSimpleDrownInCar(); } // 0x636010
     bool ProcessPed(CPed* ped) override;

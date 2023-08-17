@@ -38,7 +38,7 @@ public:
     void IfNotAlreadySetPlayerCanExitCarFlag(); // NOTSA?
 
     CTask* Clone() override { return new CTaskSimpleCarOpenDoorFromOutside{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;

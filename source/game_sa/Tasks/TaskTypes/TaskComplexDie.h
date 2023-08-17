@@ -40,7 +40,7 @@ public:
     );
     ~CTaskComplexDie() override = default; // 0x6300C0 0x637910
 
-    eTaskType GetTaskType() override { return Type; } // 0x6300B0
+    eTaskType GetTaskType() const override { return Type; } // 0x6300B0
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

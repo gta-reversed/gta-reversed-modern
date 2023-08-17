@@ -28,7 +28,7 @@ public:
     );
     ~CTaskComplexBeInCouple() override;
 
-    eTaskType GetTaskType() override { return Type; } // 0x683770
+    eTaskType GetTaskType() const override { return Type; } // 0x683770
     CTask* Clone() override { return new CTaskComplexBeInCouple(m_partner, m_isLeader, m_holdHands, m_lookAtEachOther, m_giveUpDist); } // 0x6839C0
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
 

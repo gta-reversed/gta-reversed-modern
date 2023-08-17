@@ -17,7 +17,7 @@ public:
     CTaskGoToVehicleAndLean(CVehicle* vehicle, int32 leanAnimDurationInMs);
     ~CTaskGoToVehicleAndLean() override;
 
-    eTaskType GetTaskType() override { return Type; } // 0x660ED0
+    eTaskType GetTaskType() const override { return Type; } // 0x660ED0
     CTask* Clone() override { return new CTaskGoToVehicleAndLean(m_Vehicle, m_LeanAnimDurationInMs); } // 0x6621B0
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;

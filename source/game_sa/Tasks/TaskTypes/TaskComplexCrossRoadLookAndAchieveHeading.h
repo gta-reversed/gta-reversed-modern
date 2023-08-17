@@ -18,7 +18,7 @@ public:
     CTask* CreateFirstSubTask(CPed* ped) override { return CreateSubTask(TASK_SIMPLE_ACHIEVE_HEADING, ped); } // 0x631C90
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateSubTask(eTaskType taskType, CPed* ped);
-    eTaskType GetTaskType() override { return Type; } // 0x631B10
+    eTaskType GetTaskType() const override { return Type; } // 0x631B10
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
 
 #if ANDROID

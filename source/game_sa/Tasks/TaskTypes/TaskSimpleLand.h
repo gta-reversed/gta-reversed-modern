@@ -21,7 +21,7 @@ public:
     explicit CTaskSimpleLand(AnimationId nAnimId);
     ~CTaskSimpleLand() override;
 
-    eTaskType GetTaskType() override { return Type; }
+    eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() override { return new CTaskSimpleLand(m_nAnimId); }
     bool ProcessPed(CPed* ped) override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
