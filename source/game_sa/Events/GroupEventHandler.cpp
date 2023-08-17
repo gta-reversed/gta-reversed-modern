@@ -2,6 +2,7 @@
 
 #include "GroupEventHandler.h"
 #include "EventHandler.h"
+#include "IKChainManager_c.h"
 
 #include "Tasks/TaskTypes/TaskComplexStareAtPed.h"
 #include "Tasks/TaskTypes/TaskSimpleNone.h"
@@ -21,6 +22,7 @@
 #include "Tasks/TaskTypes/TaskGangHassleVehicle.h"
 #include "Tasks/TaskTypes/TaskGangHasslePed.h"
 #include "Tasks/TaskTypes/TaskComplexSignalAtPed.h"
+#include "Tasks/TaskTypes/TaskComplexPartnerGreet.h"
 
 #include "Tasks/Allocators/TaskAllocator.h"
 #include "Tasks/Allocators/TaskAllocatorPlayerCommandAttack.h"
@@ -71,7 +73,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeHassleThreatResponse, 0x5F9D50);
     RH_ScopedInstall(ComputeHassleSexyPedResponse, 0x5FA020);
     RH_ScopedInstall(ComputeHandSignalResponse, 0x5FA820);
-    RH_ScopedInstall(ComputeGreetResponse, 0x5FA550, { .reversed = false });
+    RH_ScopedInstall(ComputeGreetResponse, 0x5FA550);
     RH_ScopedInstall(ComputeFleePedResponse, 0x5FA130, { .reversed = false });
     RH_ScopedInstall(ComputeEventResponseTasks, 0x5FC200);
     RH_ScopedInstall(ComputeDrivebyResponse, 0x5F7A00);
@@ -587,7 +589,7 @@ CTaskAllocator* CGroupEventHandler::ComputeHassleSexyPedResponse(CPedGroup* pg, 
     }
     for (auto& m : pg->GetMembership().GetFollowers()) {
         if (!CGeneral::RandomBool(25.f)) {
-            return;
+            continue;
         }
         pg->GetIntelligence().SetTask(
             &m,
@@ -617,8 +619,59 @@ CTaskAllocator* CGroupEventHandler::ComputeHandSignalResponse(CPedGroup* pg, CPe
 }
 
 // 0x5FA550
-CTaskAllocator* CGroupEventHandler::ComputeGreetResponse(CPedGroup* pg, CPed* ped1, CPed* ped2) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA550, CPedGroup*, CPed*, CPed*>(pg, ped1, ped2);
+CTaskAllocator* CGroupEventHandler::ComputeGreetResponse(CPedGroup* pg, CPed* toGreet, CPed* originator) {
+    if (!toGreet) {
+        return nullptr;
+    }
+    if (!toGreet->GetTaskManager().Has<TASK_COMPLEX_WANDER>()) {
+        return nullptr;
+    }
+    const auto leader = pg->GetMembership().GetLeader();
+    if (!leader) {
+        return nullptr;
+    }
+    const auto [closestToGreeter, closestToGreeterDistSq]  = pg->GetMembership().GetMemberClosestTo(toGreet);
+    if (!closestToGreeter || closestToGreeterDistSq < sq(4.f) && closestToGreeterDistSq > sq(10.f)) {
+        return nullptr;
+    }
+    const auto partnerType = CGeneral::GetRandomNumberInRange(0, 6);
+    pg->GetIntelligence().SetTask(
+        closestToGreeter,
+        CTaskComplexPartnerGreet{
+            "CompGreetResp",
+            toGreet,
+            true,
+            0.f,
+            partnerType,
+            {}
+        },
+        pg->GetIntelligence().GetPedTaskPairs()
+    );
+    toGreet->GetEventGroup().Add(CEventCreatePartnerTask{
+        partnerType + 1,
+        closestToGreeter,
+        false,
+        0.f // Seems odd
+    });
+    for (auto& m : pg->GetMembership().GetMembers()) {
+        if (&m == closestToGreeter) {
+            continue;
+        }
+        g_ikChainMan.LookAt(
+            "CompGreetResp",
+            &m,
+            closestToGreeter,
+            CGeneral::GetRandomNumberInRange(3000, 6000),
+            BONE_HEAD,
+            nullptr,
+            true,
+            0.25f,
+            500,
+            3,
+            0
+        );
+    }
+    return nullptr;
 }
 
 // 0x5FA130
