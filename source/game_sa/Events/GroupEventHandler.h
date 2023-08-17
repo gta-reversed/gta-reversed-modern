@@ -57,10 +57,11 @@ public:
     static CTaskAllocator* ComputeHassleSexyPedResponse(CPedGroup* pg, CPed* ped1, CPed* ped2);
     static CTaskAllocator* ComputeHandSignalResponse(CPedGroup* pg, CPed* ped1, CPed* ped2);
     static CTaskAllocator* ComputeGreetResponse(CPedGroup* pg, CPed* ped1, CPed* ped2);
+    static CTaskAllocator* ComputeDoDealResponse(CPedGroup* pg, CPed* dealWith, CPed* originator);
     static CTaskAllocator* ComputeFleePedResponse(CPedGroup* pg, CPed* threat, CPed* originator, bool bDamageOriginator);
-    static CTaskAllocator* ComputeEventResponseTasks(const CEventGroupEvent& groupEvent, CPedGroup* pg);
     static CTaskAllocator* ComputeDrivebyResponse(CPedGroup* pg, CPed* threat, CPed* ped2);
-    static CTaskAllocator* ComputeDoDealResponse(CPedGroup* pg, CPed* ped1, CPed* ped2);
+
+    static CTaskAllocator* ComputeEventResponseTasks(const CEventGroupEvent& groupEvent, CPedGroup* pg);
 };
 
 static inline auto& fEntityPosChangeThreshold = StaticRef<float>(0xC18CF0);

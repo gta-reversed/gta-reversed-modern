@@ -23,6 +23,7 @@
 #include "Tasks/TaskTypes/TaskGangHasslePed.h"
 #include "Tasks/TaskTypes/TaskComplexSignalAtPed.h"
 #include "Tasks/TaskTypes/TaskComplexPartnerGreet.h"
+#include "Tasks/TaskTypes/TaskComplexPartnerDeal.h"
 
 #include "Tasks/Allocators/TaskAllocator.h"
 #include "Tasks/Allocators/TaskAllocatorPlayerCommandAttack.h"
@@ -77,7 +78,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeFleePedResponse, 0x5FA130);
     RH_ScopedInstall(ComputeEventResponseTasks, 0x5FC200);
     RH_ScopedInstall(ComputeDrivebyResponse, 0x5F7A00);
-    RH_ScopedInstall(ComputeDoDealResponse, 0x5FA290, { .reversed = false });
+    RH_ScopedInstall(ComputeDoDealResponse, 0x5FA290);
 }
 
 bool IsPedInPlayersGroup(CPedGroup* pg, CPed* p) {
@@ -674,6 +675,61 @@ CTaskAllocator* CGroupEventHandler::ComputeGreetResponse(CPedGroup* pg, CPed* to
     return nullptr;
 }
 
+// 0x5FA290
+CTaskAllocator* CGroupEventHandler::ComputeDoDealResponse(CPedGroup* pg, CPed* dealWith, CPed* originator) { // Pretty much copy-paste of `ComputeGreetResponse`
+    if (!dealWith) {
+        return nullptr;
+    }
+    if (!dealWith->GetTaskManager().Has<TASK_COMPLEX_WANDER>()) {
+        return nullptr;
+    }
+    const auto leader = pg->GetMembership().GetLeader();
+    if (!leader) {
+        return nullptr;
+    }
+    const auto [closestToGreeter, closestToGreeterDistSq] = pg->GetMembership().GetMemberClosestTo(dealWith);
+    if (!closestToGreeter || closestToGreeterDistSq < sq(4.f) && closestToGreeterDistSq > sq(10.f)) {
+        return nullptr;
+    }
+    const auto partnerType = CGeneral::GetRandomNumberInRange(0, 6);
+    pg->GetIntelligence().SetTask(
+        closestToGreeter,
+        CTaskComplexPartnerDeal{
+            "CompDoDealResp",
+            dealWith,
+            true,
+            0.f,
+            {}
+        },
+        pg->GetIntelligence().GetPedTaskPairs()
+    );
+    dealWith->GetEventGroup().Add(CEventCreatePartnerTask{
+        partnerType + 1,
+        closestToGreeter,
+        false,
+        0.f // Seems odd
+    });
+    for (auto& m : pg->GetMembership().GetMembers()) {
+        if (&m == closestToGreeter) {
+            continue;
+        }
+        g_ikChainMan.LookAt(
+            "CompGreetResp",
+            &m,
+            closestToGreeter,
+            CGeneral::GetRandomNumberInRange(3000, 6000),
+            BONE_HEAD,
+            nullptr,
+            true,
+            0.25f,
+            500,
+            3,
+            0
+        );
+    }
+    return nullptr;
+}
+
 // 0x5FA130
 CTaskAllocator* CGroupEventHandler::ComputeFleePedResponse(CPedGroup* pg, CPed* threat, CPed* originator, bool bDamageOriginator) {
     if (!threat) {
@@ -699,6 +755,11 @@ CTaskAllocator* CGroupEventHandler::ComputeFleePedResponse(CPedGroup* pg, CPed* 
         );
     }
     return nullptr;
+}
+
+// 0x5F7A00
+CTaskAllocator* CGroupEventHandler::ComputeDrivebyResponse(CPedGroup* pg, CPed* threat, CPed* originator) {
+    return new CTaskAllocatorKillThreatsDriveby{threat};
 }
 
 // 0x5FC200
@@ -747,14 +808,4 @@ CTaskAllocator* CGroupEventHandler::ComputeEventResponseTasks(const CEventGroupE
     default:
         return nullptr;
     }
-}
-
-// 0x5F7A00
-CTaskAllocator* CGroupEventHandler::ComputeDrivebyResponse(CPedGroup* pg, CPed* threat, CPed* originator) {
-    return new CTaskAllocatorKillThreatsDriveby{threat};
-}
-
-// 0x5FA290
-CTaskAllocator* CGroupEventHandler::ComputeDoDealResponse(CPedGroup* pg, CPed* friendp, CPed* originator) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA290, CPedGroup*, CPed*, CPed*>(pg, friendp, originator);
 }
