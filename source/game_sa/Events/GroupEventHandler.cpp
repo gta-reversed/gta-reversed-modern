@@ -39,7 +39,6 @@
 #include "Events/EventDamage.h"
 #include "Events/EventLeanOnVehicle.h"
 
-
 void CGroupEventHandler::InjectHooks() {
     RH_ScopedClass(CGroupEventHandler);
     RH_ScopedCategory("Events");
@@ -69,7 +68,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeKillThreatsBasicResponse, 0x5FB590);
     RH_ScopedInstall(ComputeKillPlayerBasicResponse, 0x5FB670);
     RH_ScopedInstall(ComputeHassleThreatResponse, 0x5F9D50);
-    RH_ScopedInstall(ComputeHassleSexyPedResponse, 0x5FA020, { .reversed = false });
+    RH_ScopedInstall(ComputeHassleSexyPedResponse, 0x5FA020);
     RH_ScopedInstall(ComputeHandSignalResponse, 0x5FA820, { .reversed = false });
     RH_ScopedInstall(ComputeGreetResponse, 0x5FA550, { .reversed = false });
     RH_ScopedInstall(ComputeFleePedResponse, 0x5FA130, { .reversed = false });
@@ -582,7 +581,19 @@ CTaskAllocator* CGroupEventHandler::ComputeHassleThreatResponse(CPedGroup* pg, C
 
 // 0x5FA020
 CTaskAllocator* CGroupEventHandler::ComputeHassleSexyPedResponse(CPedGroup* pg, CPed* sexyPed, CPed* originator) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA020, CPedGroup*, CPed*, CPed*>(pg, sexyPed, originator);
+    if (!sexyPed) {
+        return nullptr;
+    }
+    for (auto& m : pg->GetMembership().GetFollowers()) {
+        if (!CGeneral::RandomBool(25.f)) {
+            return;
+        }
+        pg->GetIntelligence().SetTask(
+            &m,
+            CTaskGangHasslePed{sexyPed, 0, 8'000, 12'000},
+            pg->GetIntelligence().GetPedTaskPairs()
+        );
+    }
 }
 
 // 0x5FA820
