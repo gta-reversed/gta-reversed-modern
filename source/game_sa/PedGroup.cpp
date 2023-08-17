@@ -111,13 +111,13 @@ void CPedGroup::Teleport(const CVector& pos) {
 
     // Teleport *followers*
     const auto& offsets = CTaskComplexFollowLeaderInFormation::ms_offsets.offsets;
-    for (auto&& [offsetIdx, flwr] : notsa::enumerate(GetMembership().GetMembers(false))) {
-        if (!flwr.IsAlive()) {
+    for (auto&& [offsetIdx, f] : notsa::enumerate(GetMembership().GetMembers(false))) {
+        if (!f.IsAlive()) {
             continue;
         }
-        flwr.Teleport(pos + CVector{ offsets[offsetIdx] }, false);
-        flwr.PositionAnyPedOutOfCollision();
-        flwr.GetTaskManager().AbortFirstPrimaryTaskIn({ TASK_PRIMARY_PHYSICAL_RESPONSE, TASK_PRIMARY_EVENT_RESPONSE_TEMP, TASK_PRIMARY_EVENT_RESPONSE_NONTEMP }, &flwr);
+        f.Teleport(pos + CVector{ offsets[offsetIdx] }, false);
+        f.PositionAnyPedOutOfCollision();
+        f.GetTaskManager().AbortFirstPrimaryTaskIn({ TASK_PRIMARY_PHYSICAL_RESPONSE, TASK_PRIMARY_EVENT_RESPONSE_TEMP, TASK_PRIMARY_EVENT_RESPONSE_NONTEMP }, &f);
     }
 }
 

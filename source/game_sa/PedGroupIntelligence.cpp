@@ -7,12 +7,12 @@ void CPedGroupIntelligence::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Constructor, 0x5F7250, { .reversed = false });
-    RH_ScopedInstall(Destructor, 0x5F7350, { .reversed = false });
 
     RH_ScopedGlobalInstall(FlushTasks, 0x5F79C0, { .reversed = false });
-    RH_ScopedGlobalInstall(SetTask, 0x5F7540, { .reversed = false });
     //RH_ScopedGlobalInstall(ReportFinishedTask_, 0x5F76C0, { .reversed = false });
 
+    RH_ScopedInstall(SetTask, 0x5F7540);
+    RH_ScopedInstall(Flush, 0x5F7350);
     RH_ScopedInstall(SetDefaultTaskAllocatorType, 0x5FBB70, { .reversed = false });
     RH_ScopedInstall(SetDefaultTaskAllocator, 0x5FB280, { .reversed = false });
     RH_ScopedInstall(ComputeDefaultTasks, 0x5F88D0, { .reversed = false });
@@ -23,7 +23,7 @@ void CPedGroupIntelligence::InjectHooks() {
     RH_ScopedInstall(GetTaskScriptCommand, 0x5F8690, { .reversed = false });
     RH_ScopedInstall(GetTaskSecondarySlot, 0x5F8650, { .reversed = false });
     RH_ScopedInstall(GetTaskSecondary, 0x5F8620, { .reversed = false });
-    RH_ScopedInstall(GetTaskMain, 0x5F85A0, { .reversed = false });
+    RH_ScopedInstall(GetTaskMain, 0x5F85A0);
     RH_ScopedInstall(SetScriptCommandTask, 0x5F8560, { .reversed = false });
     RH_ScopedInstall(IsCurrentEventValid, 0x5F77A0, { .reversed = false });
     RH_ScopedInstall(IsGroupResponding, 0x5F7760, { .reversed = false });
@@ -34,6 +34,7 @@ void CPedGroupIntelligence::InjectHooks() {
     RH_ScopedInstall(SetGroupDecisionMakerType, 0x5F7340, { .reversed = false });
     RH_ScopedInstall(ComputeEventResponseTasks, 0x5FC440, { .reversed = false });
     RH_ScopedInstall(Process, 0x5FC4A0, { .reversed = false });
+    RH_ScopedInstall(ReportAllTasksFinished, 0x5F7730);
 
     RH_ScopedOverloadedInstall(ReportFinishedTask, "", 0x5F86F0, bool(CPedGroupIntelligence::*)(const CPed*, const CTask*), { .reversed = false });
 }
@@ -65,11 +66,20 @@ void CPedGroupIntelligence::SetScriptCommandTask(CPed* ped, const CTask* task) {
     plugin::CallMethod<0x5F8560, CPedGroupIntelligence*, CPed*, const CTask*>(this, ped, task);
 }
 
-CTask* CPedGroupIntelligence::GetTask(CPed* ped, const CPedTaskPair (&taskPairs)[8]) {
+// notsa
+CPedTaskPair* CPedGroupIntelligence::GetPedsTaskPair(CPed* ped, PedTaskPairs& taskPairs) const {
     for (auto& tp : taskPairs) {
         if (tp.m_Ped == ped) {
-            return tp.m_Task;
+            return &tp;
         }
+    }
+    return nullptr;   
+}
+
+// notsa (not sure)
+CTask* CPedGroupIntelligence::GetTask(CPed* ped, PedTaskPairs& taskPairs) {
+    if (const auto tp = GetPedsTaskPair(ped, taskPairs)) {
+        return tp->m_Task;
     }
     return nullptr;
 }
@@ -137,14 +147,22 @@ bool CPedGroupIntelligence::ReportFinishedTask(const CPed* ped, const CTask* tas
 }
 
 // 0x5F7540
-void CPedGroupIntelligence::SetTask(CPed* ped, const CTask& task, CPedTaskPair* pair, int32 slot, bool force) {
+void CPedGroupIntelligence::SetTask(CPed* ped, const CTask& task, PedTaskPairs& taskPairs, int32 slot, bool force) {
     assert(!GetTaskPool()->IsObjectValid(&task)); // Shouldn't be `new`'d [Keep in mind that there might be false positives]
-    plugin::Call<0x5F7540, CPed*, const CTask*, CPedTaskPair*, int32, bool>(ped, &task, pair, slot, force);
+
+    const auto tp = GetPedsTaskPair(ped, taskPairs);
+    if (tp && (force || tp->m_Task->GetTaskType() != const_cast<CTask&>(task).GetTaskType())) {
+        delete std::exchange(tp->m_Task, const_cast<CTask&>(task).Clone());
+        tp->m_Slot = slot;
+    } else if (!tp->m_Task) {
+        tp->m_Task = const_cast<CTask&>(task).Clone();
+        tp->m_Slot = slot;
+    }
 }
 
 // 0x5F79C0
-void CPedGroupIntelligence::FlushTasks(CPedTaskPair (&taskPairs)[8], CPed* ped) {
-    return plugin::Call<0x5F79C0, CPedTaskPair *, CPed *>(taskPairs, ped);
+void CPedGroupIntelligence::FlushTasks(PedTaskPairs& taskPairs, CPed* ped) {
+    return plugin::Call<0x5F79C0, PedTaskPairs&, CPed*>(taskPairs, ped);
 }
 
 // 0x5FB280
@@ -169,7 +187,7 @@ void CPedGroupIntelligence::ReportAllBarScriptTasksFinished() {
 }
 
 // 0x5F7730
-void CPedGroupIntelligence::ReportAllTasksFinished(CPedTaskPair(&taskPairs)[8]) {
+void CPedGroupIntelligence::ReportAllTasksFinished(PedTaskPairs& taskPairs) {
     for (auto& tp : taskPairs) {
         delete tp.m_Task;
         tp.m_Task = nullptr;

@@ -31,6 +31,7 @@ enum class ePedGroupDefaultTaskAllocatorType : uint32 {
 };
 
 class CPedGroupIntelligence {
+    using PedTaskPairs = std::array<CPedTaskPair, TOTAL_PED_GROUP_MEMBERS>;
 public:
     static void InjectHooks();
 
@@ -43,9 +44,12 @@ public:
     void            ComputeDefaultTasks(CPed* ped);
     CTaskAllocator* ComputeEventResponseTasks();
     void            ComputeScriptCommandTasks();
-    static void     FlushTasks(CPedTaskPair (&taskPairs)[8], CPed* ped);
+    static void     FlushTasks(PedTaskPairs& taskPairs, CPed* ped);
 
-    CTask*         GetTask(CPed* ped, const CPedTaskPair (&taskPairs)[8]);
+    //! @notsa
+    CPedTaskPair*  GetPedsTaskPair(CPed* ped, PedTaskPairs& taskPairs) const;
+
+    CTask*         GetTask(CPed* ped, PedTaskPairs& taskPairs);
     CTask*         GetTaskMain(CPed* ped);
     CTask*         GetTaskDefault(CPed* ped);
     CTask*         GetTaskScriptCommand(CPed* ped);
@@ -57,8 +61,8 @@ public:
     void Process();
     void ProcessIgnorePlayerGroup();
     void ReportAllBarScriptTasksFinished();
-    void ReportAllTasksFinished(CPedTaskPair (&taskPairs)[8]);
-    void ReportAllTasksFinished();
+    void ReportAllTasksFinished(PedTaskPairs& taskPairs);
+    //void ReportAllTasksFinished();
     bool ReportFinishedTask(const CPed* ped, const CTask* task, CPedTaskPair* taskpair);
     bool ReportFinishedTask(const CPed* ped, const CTask* task);
     void SetDefaultTask(CPed* ped, const CTask* task);
@@ -93,7 +97,7 @@ public:
     }
 
     //! `task` shouldn't be `new`-d, but rather stack allocated!
-    static void SetTask(CPed* ped, const CTask& task, CPedTaskPair* pair, int32 slot = -1, bool force = false);
+    void SetTask(CPed* ped, const CTask& task, PedTaskPairs& taskPairs, int32 slot = -1, bool force = false);
 
 private: // Wrappers for hooks
     // 0x5F7250
@@ -102,20 +106,14 @@ private: // Wrappers for hooks
         return this;
     }
 
-    // 0x5F7350
-    CPedGroupIntelligence* Destructor() {
-        this->CPedGroupIntelligence::~CPedGroupIntelligence();
-        return this;
-    }
-
 private:
     CPedGroup*                     m_pPedGroup{};
     CEventGroupEvent*              m_pOldEventGroupEvent{};
     CEventGroupEvent*              m_pEventGroupEvent{};
-    CPedTaskPair                   m_PedTaskPairs[TOTAL_PED_GROUP_MEMBERS]{};
-    CPedTaskPair                   m_SecondaryPedTaskPairs[TOTAL_PED_GROUP_MEMBERS]{};
-    CPedTaskPair                   m_ScriptCommandPedTaskPairs[TOTAL_PED_GROUP_MEMBERS]{};
-    CPedTaskPair                   m_DefaultPedTaskPairs[TOTAL_PED_GROUP_MEMBERS]{};
+    PedTaskPairs                   m_PedTaskPairs{};
+    PedTaskPairs                   m_SecondaryPedTaskPairs{};
+    PedTaskPairs                   m_ScriptCommandPedTaskPairs{};
+    PedTaskPairs                   m_DefaultPedTaskPairs{};
     CPedGroupDefaultTaskAllocator* m_DefaultTaskAllocator{};
     CTaskAllocator*                m_PrimaryTaskAllocator{};
     CTaskAllocator*                m_EventResponseTaskAllocator{};
