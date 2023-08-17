@@ -248,10 +248,7 @@ public:
 
     // 0x5A1CD0
     bool IsObjectValid(const A *obj) {
-        auto slot = GetIndex(obj);
-        return slot >= 0 &&
-               slot < m_nSize &&
-               !IsFreeSlotAtIndex(slot);
+        return IsFromObjectArray(obj) && !IsFreeSlotAtIndex(GetIndex(obj));
     }
 
     // Helper so we don't write memcpy manually
