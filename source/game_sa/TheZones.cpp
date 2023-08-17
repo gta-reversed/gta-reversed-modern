@@ -65,7 +65,7 @@ void CTheZones::ResetZonesRevealed() {
 // NOTSA
 bool& CTheZones::GetZoneWasVisited(CVector2D pos) {
 #ifdef FIX_BUGS
-    return ZonesVisited[(size_t)((fmaxf(fminf(pos.x, 2999.f), -2999.f) + 3000.f) / 600.f)][9LL - (size_t)((fmaxf(fminf(pos.y, 2999.f), -2999.f) + 3000.f) / 600.f)];
+    return ZonesVisited[(size_t)((std::clamp(pos.x, -2999.f, 2999.f) + 3000.f) / 600.f)][9LL - (size_t)((std::clamp(pos.y, -2999.f, 2999.f) + 3000.f) / 600.f)];
 #else
     return ZonesVisited[10 * (size_t)((pos.x + 3000.f) / 600.f) - (size_t)((pos.y + 3000.f) / 600.f) + 9];
 #endif

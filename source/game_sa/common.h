@@ -182,11 +182,6 @@ auto multiply_weighted(WeightedValue<T, Y> (&&values)[N]) {
     return multiply_weighted(values);
 }
 
-template<typename T, size_t N>
-auto multiply_weighted(WeightedValue<T> (&&values)[N]) {
-    return multiply_weighted(values);
-}
-
 // Converts radians to degrees
 // 57.295826
 constexpr float RadiansToDegrees(float angleInRadians) {

@@ -229,16 +229,17 @@ CLink<CCollisionData*>* CCollisionData::GetLinkPtr() {
 
 auto CCollisionData::GetNumFaceGroups() const -> uint32 {
     // See `CCollisionData` header for explanation :)
-    return bHasFaceGroups ? *reinterpret_cast<uint32*>(reinterpret_cast<uint8*>(m_pTriangles) - sizeof(uint32)) : 0u;
+    assert(!bHasFaceGroups || m_pTriangles);
+    return bHasFaceGroups
+        ? *reinterpret_cast<uint32*>(reinterpret_cast<uint8*>(m_pTriangles) - sizeof(uint32))
+        : 0u;
 }
 
 auto CCollisionData::GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup> {
     using namespace ColHelpers;
-
-    if (bHasFaceGroups) {
-        // See `CCollisionData` header for explanation
-        const auto numfg = GetNumFaceGroups();
-        return std::span{
+    if (const auto numfg = GetNumFaceGroups()) {
+        assert(numfg);
+        return std::span{ // See `CCollisionData` header for explanation
             reinterpret_cast<TFaceGroup*>(reinterpret_cast<uint8*>(m_pTriangles) - sizeof(uint32) - sizeof(TFaceGroup) * numfg),
             numfg
         };

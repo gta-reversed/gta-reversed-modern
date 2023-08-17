@@ -110,6 +110,7 @@ enum eCarPiece {
     CAR_PIECE_WHEEL_RR,
     CAR_PIECE_WINDSCREEN = 19,
 };
+constexpr inline eCarPiece eCarPiece_WheelPieces[]{ CAR_PIECE_WHEEL_LF, CAR_PIECE_WHEEL_RF, CAR_PIECE_WHEEL_RL, CAR_PIECE_WHEEL_RR };
 
 enum eRotationAxis : int32 {
     AXIS_X = 0,

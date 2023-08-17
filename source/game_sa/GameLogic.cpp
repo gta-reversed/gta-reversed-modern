@@ -86,7 +86,7 @@ void CGameLogic::DoWeaponStuffAtStartOf2PlayerGame(bool shareWeapons) {
 
     if (shareWeapons) {
         for (auto& weapon : player1->m_aWeapons) {
-            if (weapon.m_nType == WEAPON_UNARMED)
+            if (weapon.m_Type == WEAPON_UNARMED)
                 continue;
 
             player2->GiveWeapon(weapon, true);
@@ -342,7 +342,7 @@ void CGameLogic::RestorePedsWeapons(CPed* ped) {
         const auto IsModelLoaded = [](int id) { return id == MODEL_INVALID || CStreaming::GetInfo(id).IsLoaded(); };
 
         if (rng::all_of(weapon.GetWeaponInfo().GetModels(), IsModelLoaded)) { // FIX_BUGS: They checked modelId1 twice
-            ped->GiveWeapon(weapon.m_nType, weapon.m_nTotalAmmo, true);
+            ped->GiveWeapon(weapon.m_Type, weapon.m_TotalAmmo, true);
         }
     }
 }

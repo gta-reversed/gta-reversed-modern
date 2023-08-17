@@ -332,7 +332,7 @@ public:
             Multiply3x3(Invert(commonBoat->GetMatrix()), newPedPos - boatPos),
             (int16)CGeneral::LimitRadianAngle(CGeneral::GetRadianAngleBetweenPoints(pedToBoatDir, {})),
             0.2f,
-            ped->GetActiveWeapon().m_nType
+            ped->GetActiveWeapon().m_Type
         );
 
         return new CTaskSimpleStandStill{ 2000 };
