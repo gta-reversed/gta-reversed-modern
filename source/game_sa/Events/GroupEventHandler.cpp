@@ -20,6 +20,7 @@
 #include "Tasks/TaskTypes/TaskComplexKillPedOnFoot.h"
 #include "Tasks/TaskTypes/TaskGangHassleVehicle.h"
 #include "Tasks/TaskTypes/TaskGangHasslePed.h"
+#include "Tasks/TaskTypes/TaskComplexSignalAtPed.h"
 
 #include "Tasks/Allocators/TaskAllocator.h"
 #include "Tasks/Allocators/TaskAllocatorPlayerCommandAttack.h"
@@ -69,7 +70,7 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeKillPlayerBasicResponse, 0x5FB670);
     RH_ScopedInstall(ComputeHassleThreatResponse, 0x5F9D50);
     RH_ScopedInstall(ComputeHassleSexyPedResponse, 0x5FA020);
-    RH_ScopedInstall(ComputeHandSignalResponse, 0x5FA820, { .reversed = false });
+    RH_ScopedInstall(ComputeHandSignalResponse, 0x5FA820);
     RH_ScopedInstall(ComputeGreetResponse, 0x5FA550, { .reversed = false });
     RH_ScopedInstall(ComputeFleePedResponse, 0x5FA130, { .reversed = false });
     RH_ScopedInstall(ComputeEventResponseTasks, 0x5FC200);
@@ -594,11 +595,25 @@ CTaskAllocator* CGroupEventHandler::ComputeHassleSexyPedResponse(CPedGroup* pg, 
             pg->GetIntelligence().GetPedTaskPairs()
         );
     }
+    return nullptr;
 }
 
 // 0x5FA820
-CTaskAllocator* CGroupEventHandler::ComputeHandSignalResponse(CPedGroup* pg, CPed* threat, CPed* originator) {
-    return plugin::CallAndReturn<CTaskAllocator*, 0x5FA820, CPedGroup*, CPed*, CPed*>(pg, threat, originator);
+CTaskAllocator* CGroupEventHandler::ComputeHandSignalResponse(CPedGroup* pg, CPed* signalAt, CPed* originator) {
+    if (!signalAt) {
+        return nullptr;
+    }
+    for (auto& m : pg->GetMembership().GetMembers()) {
+        if (m.IsPlayer()) {
+            continue;
+        }
+        pg->GetIntelligence().SetTask(
+            &m,
+            CTaskComplexSignalAtPed{signalAt},
+            pg->GetIntelligence().GetPedTaskPairs()
+        );
+    }
+    return nullptr;
 }
 
 // 0x5FA550
