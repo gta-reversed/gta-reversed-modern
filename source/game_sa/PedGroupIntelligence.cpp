@@ -19,6 +19,7 @@ void CPedGroupIntelligence::InjectHooks() {
     RH_ScopedInstall(SetGroupDecisionMakerType, 0x5F7340, { .reversed = false });
     RH_ScopedInstall(SetPrimaryTaskAllocator, 0x5F7410, { .reversed = false });
     RH_ScopedInstall(SetDefaultTaskAllocatorType, 0x5FBB70, { .reversed = false });
+    RH_ScopedInstall(SetEventResponseTask, 0x5F8510);
 
     RH_ScopedOverloadedInstall(ReportFinishedTask, "", 0x5F86F0, bool(CPedGroupIntelligence::*)(const CPed*, const CTask*), { .reversed = false });
 }
@@ -119,6 +120,16 @@ void CPedGroupIntelligence::SetPrimaryTaskAllocator(CTaskAllocator* taskAllocato
 // 0x5FBB70
 void CPedGroupIntelligence::SetDefaultTaskAllocatorType(ePedGroupDefaultTaskAllocatorType nPedGroupTaskAllocator) {
     plugin::CallMethod<0x5FBB70, CPedGroupIntelligence*, ePedGroupDefaultTaskAllocatorType>(this, nPedGroupTaskAllocator);
+}
+
+// 0x5F8510
+void CPedGroupIntelligence::SetEventResponseTask(CPed* ped, bool hasMainTask, const CTask& mainTask, bool hasSecondaryTask, const CTask& secondaryTask, int32 slot) {
+    if (hasMainTask) {
+        SetTask(ped, mainTask, m_pedTaskPairs);
+    }
+    if (hasSecondaryTask) {
+        SetTask(ped, secondaryTask, m_secondaryPedTaskPairs, slot, false);
+    }
 }
 
 // 0x5F86F0

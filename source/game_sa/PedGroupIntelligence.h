@@ -10,6 +10,8 @@
 
 #include "PedTaskPair.h"
 
+#include "Tasks/TaskTypes/TaskSimpleNone.h"
+
 class CPed;
 class CTask;
 class CGroupEventHandler;
@@ -83,10 +85,19 @@ public:
     void       SetDefaultTaskAllocator(CPedGroupDefaultTaskAllocator const* PedGroupDefaultTaskAllocator);
     //! see ePedGroupDefaultTaskAllocatorType
     void SetDefaultTaskAllocatorType(ePedGroupDefaultTaskAllocatorType nPedGroupTaskAllocator);
-    //! arg3 always true
-    //! arg5 always false
-    //! arg7 always  -1
-    void  SetEventResponseTask(CPed* ped, bool arg3, const CTask* task1, bool arg5, const CTask* task2, int32 arg7);
+
+    /*!
+    * @addr 0x5F8510
+    * @note The tasks passed to this function **shouldn't** be `new`-d, but rather stack allocated! Also, it's often inlined into an unused `CTaskSimpleNone` and `SetTask` call.
+    */
+    void SetEventResponseTask(
+        CPed*        ped,
+        bool         hasMainTask,
+        const CTask& mainTask,
+        bool         hasSecondaryTask = false,
+        const CTask& secondaryTask = CTaskSimpleNone{},
+        int32        slot = -1
+    );
     int32 SetEventResponseTaskAllocator(int32 a2);
     int32 SetGroupDecisionMakerType(int32 a2);
     void  SetPrimaryTaskAllocator(CTaskAllocator* taskAllocator);
