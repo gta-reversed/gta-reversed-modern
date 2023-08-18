@@ -43,7 +43,7 @@ public:
     static uint32& TotalNumStatMessages;
     static char (&LastMissionPassedName)[8];
     static int32 (&TimesMissionAttempted)[100];
-    static int32 (&FavoriteRadioStationList)[14];
+    static int32 (&FavoriteRadioStationList)[RADIO_COUNT];
     static int32 (&PedsKilledOfThisType)[32];
     static float (&StatReactionValue)[59];
     static int32 (&StatTypesInt)[223];
@@ -71,14 +71,14 @@ public:
     static void InjectHooks();
 
     static char* GetStatID(eStats stat);
-    static bool GetStatType(eStats stat);
+    static bool IsStatFloat(eStats stat);
     static float GetStatValue(eStats stat);
     static int8 GetTimesMissionAttempted(uint8 missionId);
     static void RegisterMissionAttempted(uint8 missionId);
     static void RegisterMissionPassed(uint8 missionId);
     static bool PopulateFavoriteRadioStationList();
     static int32* GetFullFavoriteRadioStationList();
-    static int32 FindMostFavoriteRadioStation();
+    static eRadioID FindMostFavoriteRadioStation();
     static int32 FindLeastFavoriteRadioStation();
     static int32 FindCriminalRatingNumber();
     static float GetPercentageProgress();
@@ -122,4 +122,22 @@ public:
     static void ModifyStat(eStats stat, float value);
     static bool Save();
     static bool Load();
+
+    // NOTSA
+    template<typename T> requires std::is_arithmetic_v<T>
+    static T GetStatValue(eStats stat) {
+        if constexpr (std::is_integral_v<T>) {
+            // NOTE: First func checks if it's not a float stat, allowing unused ones.
+            // Second check eliminates them as well.
+            assert(!IsStatFloat(stat) && stat >= FIRST_INT_STAT);
+        }
+        if constexpr (std::is_floating_point_v<T>) {
+            assert(IsStatFloat(stat));
+        }
+        const float r = CStats::GetStatValue(stat);
+
+        // there shouldn't be any stat value bigger than int64::max.
+        assert(std::is_floating_point_v<T> || std::in_range<T>(static_cast<int64>(r)));
+        return static_cast<T>(r);
+    }
 };

@@ -124,7 +124,8 @@ public:
     bool  GetForcedFront() const { return m_bForcedFront; }
     void  SetIndividualEnvironment(uint16 envFlag, uint16 bEnabled); // pass eSoundEnvironment as envFlag
     void  UpdatePlayTime(int16 soundLength, int16 loopStartTime, int16 playProgress);
-    void  GetRelativePosition(CVector* outPos);
+    void GetRelativePosition(CVector& out) const;
+    CVector GetRelativePosition() const { CVector out; GetRelativePosition(out); return out; } // NOTSA
     void  CalculateFrequency();
     void  UpdateFrequency();
     float GetRelativePlaybackFrequencyWithDoppler();

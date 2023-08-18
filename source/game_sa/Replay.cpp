@@ -1526,13 +1526,13 @@ void CReplay::TriggerPlayback(eReplayCamMode mode, CVector fixedCamPos, bool loa
     bAllowLookAroundCam = true;
     FramesActiveLookAroundCam = 0;
 
-    OldRadioStation = [&]() -> int8 {
+    OldRadioStation = [&]() -> eRadioID {
         if (FindPlayerVehicle()) {
             AudioEngine.StopRadio(nullptr, false);
             return AERadioTrackManager.GetCurrentRadioStationID();
         }
 
-        return 0;
+        return RADIO_EMERGENCY_AA; // Possibly not intended.
     }();
 
     CurrArea = CGame::currArea;

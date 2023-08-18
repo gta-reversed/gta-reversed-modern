@@ -14,7 +14,7 @@ inline struct FastLoaderConfig {
 
     INI_CONFIG_SECTION("FastLoader");
 
-    int32  SaveGameToLoad       = -2;         //< -2 - Don't load, -1 = Load first available, 0 <= - load from save slot
+    int32  SaveGameToLoad       = -2;         //< -2 - Don't load, -1 = Load first available, 0 = unused, 1 <= - load from save slot
     uint32 SkipSaveGameLoadKey  = VK_CONTROL; //< Skip auto-loading save game (If enabled)
     uint32 SoundDelay           = 50;
 
@@ -46,7 +46,7 @@ inline struct FastLoaderConfig {
 
         if (slot == -1) { // Find first valid slot and load that
             for (auto i = 0u; i < MAX_SAVEGAME_SLOTS; i++) {
-                if (CheckIfSaveFileExists(i)) { // Save file IDs start from 1, not 0
+                if (CheckIfSaveFileExists(i)) {
                     return StartGame(i); // Load this slot
                 }
             }
@@ -55,12 +55,12 @@ inline struct FastLoaderConfig {
         }
 
         // Load game from slot
-        assert(slot >= 0);
-        if (!CheckIfSaveFileExists(slot)) {
-            DEV_LOG("Save slot {} is empty!", slot + 1);
+        assert(slot > 0);
+        if (!CheckIfSaveFileExists(slot - 1)) {
+            DEV_LOG("Save slot {} is empty!", slot);
             return false;
         }
-        DEV_LOG("Loading game from slot ({})", slot + 1);
+        DEV_LOG("Loading game from slot ({})", slot);
 
         if (!NoLoadingTune) {
             for (size_t i = 0; i < SoundDelay; i++) {
@@ -69,7 +69,7 @@ inline struct FastLoaderConfig {
         }
 
         // Actually load the game (By simulating the user going in the menu and doing it)
-        FrontEndMenuManager.SimulateGameLoad(false, slot);
+        FrontEndMenuManager.SimulateGameLoad(false, slot - 1);
 
         return true;
     }

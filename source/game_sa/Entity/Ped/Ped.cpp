@@ -2265,7 +2265,7 @@ void CPed::PlayFootSteps() {
         }
         }
 
-        if (m_pedAudio.field_7C) { // Move condition out here, but originally it was at 0x5E5AFA and 0x5E5A68
+        if (m_pedAudio.m_iRadioStationScriptRequest) { // Move condition out here, but originally it was at 0x5E5AFA and 0x5E5A68
             const auto DoAddSkateAE = [&, this](eAudioEvents audio) {
                 // 0x5E5AB4
                 m_pedAudio.AddAudioEvent(audio,
@@ -2296,7 +2296,7 @@ void CPed::PlayFootSteps() {
 
     // 0x5E5E56 and 0x5E5D57.. Seems like inlined?
     const auto DoFootStepAE = [&, this](bool isLeftFoot) {
-        if (m_pedAudio.field_7C) {
+        if (m_pedAudio.m_iRadioStationScriptRequest) {
             const auto DoAddFootStepAE = [&, this](float volume, float speed) {
                 m_pedAudio.AddAudioEvent(isLeftFoot ? eAudioEvents::AE_PED_FOOTSTEP_RIGHT : eAudioEvents::AE_PED_FOOTSTEP_LEFT, volume, speed);
             };
