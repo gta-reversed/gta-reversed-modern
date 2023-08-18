@@ -151,7 +151,10 @@ void CPedGroupIntelligence::SetTask(CPed* ped, const CTask& task, PedTaskPairs& 
     assert(!GetTaskPool()->IsObjectValid(&task)); // Shouldn't be `new`'d [Keep in mind that there might be false positives]
 
     const auto tp = GetPedsTaskPair(ped, taskPairs);
-    if (tp && (force || tp->m_Task->GetTaskType() != const_cast<CTask&>(task).GetTaskType())) {
+    if (!tp) {
+        return;
+    }
+    if (tp->m_Task && (force || tp->m_Task->GetTaskType() != const_cast<CTask&>(task).GetTaskType())) {
         delete std::exchange(tp->m_Task, const_cast<CTask&>(task).Clone());
         tp->m_Slot = slot;
     } else if (!tp->m_Task) {
