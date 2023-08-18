@@ -398,6 +398,42 @@ void CAERadioTrackManager::CheckForMissionStatsChanges() {
 // 0x4EA930
 void CAERadioTrackManager::CheckForTrackConcatenation() {
     plugin::CallMethod<0x4EA930, CAERadioTrackManager*>(this);
+    /*
+    const auto utPlayMode = AEUserRadioTrackManager.GetUserTrackPlayMode();
+    if (m_ActiveSettings.m_nCurrentRadioStation == RADIO_USER_TRACKS && utPlayMode != 0) {
+        if (utPlayMode == 2 && m_ActiveSettings.m_iTrackPlayTime != -4) { // ???
+            AEUserRadioTrackManager.SetUserTrackIndex(m_ActiveSettings.m_aTrackQueue.front());
+
+            m_ActiveSettings.m_aTrackQueue[1] = AEUserRadioTrackManager.SelectUserTrackIndex();
+            m_ActiveSettings.m_aTrackTypes[1] = TYPE_USER_TRACK;
+            m_ActiveSettings.m_aTrackIndexes[1] = m_ActiveSettings.m_aTrackQueue[1];
+
+            AEAudioHardware.PlayTrack(
+                m_ActiveSettings.m_aTrackQueue[0],
+                m_ActiveSettings.m_aTrackQueue[1],
+                0u,
+                m_ActiveSettings.m_nTrackFlags,
+                m_ActiveSettings.m_aTrackTypes[0] == TYPE_USER_TRACK,
+                m_ActiveSettings.m_aTrackTypes[1] == TYPE_USER_TRACK // always true?
+            );
+        }
+        m_nUserTrackPlayMode = AEUserRadioTrackManager.GetUserTrackPlayMode();
+    }
+
+    const auto nextTrack = m_ActiveSettings.m_aTrackQueue[1];
+    if (AEAudioHardware.GetActiveTrackID() == nextTrack && nextTrack >= 0) {
+        m_ActiveSettings.SwitchToNextTrack();
+
+        if (m_ActiveSettings.m_aTrackQueue[1] == -1) {
+            const auto radioId = m_ActiveSettings.m_nCurrentRadioStation;
+            if (radioId == RADIO_USER_TRACKS) {
+                if (!FrontEndMenuManager.m_nRadioMode && CAEAudioUtility::ResolveProbability(0.17f)) {
+                    m_ActiveSettings.m_aTrackQueue
+                }
+            }
+        }
+    }
+    */
 }
 
 // 0x4EB660

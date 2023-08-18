@@ -172,17 +172,14 @@ void CAEMP3BankLoader::LoadSoundBank(uint16 bankId, int16 bankSlot) {
             return;
     }
 
-    const auto bankLookup = GetBankLookup(bankId);
-    auto& nextRequest = m_aRequests[m_iNextRequest];
-
-    nextRequest.m_nBankId = bankId;
-    nextRequest.m_nBankSlotId = bankSlot;
-    nextRequest.m_nNumSounds = -1;
-    nextRequest.m_pBankSlotInfo = &m_paBankSlots[bankSlot];
-    nextRequest.m_nPakFileNumber = bankLookup->m_nPakFileNumber;
-    nextRequest.m_nBankOffset = bankLookup->m_nOffset;
-    nextRequest.m_nBankSize = bankLookup->m_nSize;
-    nextRequest.m_nStatus = eSoundRequestStatus::JUST_LOADED;
+    m_aRequests[m_iNextRequest] = CAESoundRequest(
+        bankId,
+        bankSlot,
+        -1,
+        m_paBankSlots[bankSlot],
+        GetBankLookup(bankId),
+        eSoundRequestStatus::JUST_LOADED
+    );
 
     m_iRequestCount++;
     m_iNextRequest = (m_iNextRequest + 1) % std::size(m_aRequests);

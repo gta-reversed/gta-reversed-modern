@@ -61,7 +61,6 @@ project "gta_reversed"
         "spdlog",
         "imgui",
         "tracy",
-        "flac",
         "ddraw.lib",
         "Winmm.lib",
         "dxguid.lib",

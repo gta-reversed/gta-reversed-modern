@@ -20,19 +20,19 @@ enum {
 struct tRadioSettings {
     static constexpr size_t NUM_TRACKS = 5u;
 
-    int32 m_aTrackQueue[NUM_TRACKS]{-1};
+    std::array<int32, NUM_TRACKS> m_aTrackQueue{-1};
     int32 m_iCurrentTrackID{-1};
     int32 m_iPrevTrackID{-1};
     int32 m_iTrackPlayTime{0};
     int32 m_iTrackLengthMs{0};
-    int8  m_f24{2}; // TODO: enum
+    int8 m_nTrackFlags{2}; // TODO: enum
     eRadioID m_nCurrentRadioStation{RADIO_OFF}; // NOTSA init value.
     int8  m_nBassSet{0};
     float m_fBassGain{}; // unk. init
-    int8  m_aTrackTypes[NUM_TRACKS]{TYPE_NONE};
+    std::array<int8, NUM_TRACKS> m_aTrackTypes{TYPE_NONE};
     int8  m_iCurrentTrackType{TYPE_NONE};
     int8  m_iPrevTrackType{TYPE_NONE};
-    int8  m_aTrackIndexes[NUM_TRACKS]{-1};
+    std::array<int8, NUM_TRACKS> m_aTrackIndexes{-1};
     int8  m_iCurrentTrackIndex{-1};
     int8  m_iPrevTrackIndex{-1};
 
@@ -46,6 +46,21 @@ struct tRadioSettings {
             m_aTrackTypes[i]   = TYPE_NONE;
             m_aTrackIndexes[i] = -1;
         }
+    }
+
+    void SwitchToNextTrack() {
+        m_iPrevTrackID = m_aTrackQueue.front();
+        m_iPrevTrackType = m_aTrackTypes.front();
+        m_iPrevTrackIndex = m_aTrackIndexes.front();
+
+        const auto Rotate = [](auto& arr, auto invalidValue) {
+            std::copy(arr.begin() + 1, arr.end(), arr.begin());
+            arr.back() = invalidValue;
+        };
+
+        Rotate(m_aTrackQueue,   -1);
+        Rotate(m_aTrackTypes,   TYPE_NONE);
+        Rotate(m_aTrackIndexes, -1);
     }
 };
 VALIDATE_SIZE(tRadioSettings, 0x3C);

@@ -71,16 +71,26 @@ VALIDATE_SIZE(CdAudioStream, 0x12C4 /* + samples*/);
 
 class CAESoundRequest {
 public:
-    CAEBankSlot* m_pBankSlotInfo;
-    uint32 m_nBankOffset;
-    uint32 m_nBankSize;
-    CdAudioStream* m_pStreamOffset;
-    CdAudioStream* m_pStreamBuffer;
-    eSoundRequestStatus m_nStatus;
-    uint16 m_nBankId;
-    uint16 m_nBankSlotId;
-    uint16 m_nNumSounds;
-    uint8 m_nPakFileNumber;
+    CAEBankSlot* m_pBankSlotInfo{};
+    uint32 m_nBankOffset{};
+    uint32 m_nBankSize{};
+    CdAudioStream* m_pStreamOffset{};
+    CdAudioStream* m_pStreamBuffer{};
+    eSoundRequestStatus m_nStatus{eSoundRequestStatus::UNK_0};
+    int16 m_nBankId{-1};
+    int16 m_nBankSlotId{-1};
+    int16 m_nNumSounds{-1};
+    uint8 m_nPakFileNumber{};
+
+public:
+    CAESoundRequest() = default;
+
+    CAESoundRequest(int16 bankId, int16 bankSlot, int16 numSounds, CAEBankSlot& slot,
+                    CAEBankLookupItem* lookup, eSoundRequestStatus status)
+        : m_nBankId(bankId), m_nBankSlotId(bankSlot), m_nNumSounds(numSounds), m_pBankSlotInfo(&slot)
+        , m_nPakFileNumber(lookup->m_nPakFileNumber), m_nBankOffset(lookup->m_nOffset), m_nBankSize(lookup->m_nSize)
+        , m_nStatus(status)
+    {}
 
     void Reset() {
         m_nBankId = m_nBankSlotId = m_nNumSounds = -1;
@@ -89,7 +99,7 @@ public:
     }
 
     bool IsSingleSound() const {
-        return m_nNumSounds == (uint16)-1;
+        return m_nNumSounds == -1;
     }
 };
 VALIDATE_SIZE(CAESoundRequest, 0x20);
