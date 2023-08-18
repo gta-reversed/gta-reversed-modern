@@ -24,7 +24,7 @@ public:
     ~CTaskComplexFacial() override = default; // 0x690D90
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask* Clone() override { return new CTaskComplexFacial(); }; // 0x6928B0
+    CTask* Clone() const override { return new CTaskComplexFacial(); }; // 0x6928B0
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

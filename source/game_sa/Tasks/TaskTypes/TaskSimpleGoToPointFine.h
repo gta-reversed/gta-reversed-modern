@@ -13,7 +13,7 @@ public:
     ~CTaskSimpleGoToPointFine() override = default;
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask*    Clone() override;
+    CTask*    Clone() const override;
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool      ProcessPed(CPed* ped) override;
 
@@ -30,7 +30,7 @@ private:
 
     CTaskSimpleGoToPointFine* Constructor(float moveRatio, CVector targetPoint, float fRadius, CEntity* entity);
 
-    CTask* Clone_Reversed();
+    CTask*  Clone_Reversed() const;
     bool   MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool   ProcessPed_Reversed(CPed* ped);
 };

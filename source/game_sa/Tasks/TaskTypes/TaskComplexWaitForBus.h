@@ -18,7 +18,7 @@ public:
     CTaskComplexWaitForBus(const CTaskComplexWaitForBus&);
     ~CTaskComplexWaitForBus() = default;
 
-    CTask*    Clone() override { return new CTaskComplexWaitForBus{ *this }; }
+    CTask*    Clone() const override { return new CTaskComplexWaitForBus{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return true; }
     CTask*    CreateNextSubTask(CPed* ped) override;

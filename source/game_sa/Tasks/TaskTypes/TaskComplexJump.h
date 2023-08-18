@@ -25,7 +25,7 @@ public:
     ~CTaskComplexJump() override = default;
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask* Clone() override;
+    CTask* Clone() const override;
     CTask* ControlSubTask(CPed* ped) override { return m_pSubTask; }
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
@@ -37,7 +37,7 @@ private:
 
     CTaskComplexJump* Constructor(eComplexJumpType jumpType);
 
-    CTask* Clone_Reversed();
+    CTask*  Clone_Reversed() const;
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     bool   MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);

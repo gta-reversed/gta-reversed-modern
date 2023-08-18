@@ -21,7 +21,7 @@ public:
     CTaskSimpleWaitForBus(const CTaskSimpleWaitForBus&);
     ~CTaskSimpleWaitForBus() = default;
 
-    CTask*    Clone() override { return new CTaskSimpleWaitForBus{*this}; }
+    CTask*    Clone() const override { return new CTaskSimpleWaitForBus{*this}; }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return true; }
     bool      ProcessPed(CPed* ped) override;

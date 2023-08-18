@@ -37,7 +37,7 @@ public:
     ~CTaskSimpleDie() override;
 
     eTaskType GetTaskType() const override { return Type; } // 0x62FA50
-    CTask*    Clone() override;
+    CTask*    Clone() const override;
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool      ProcessPed(CPed* ped) override;
 
@@ -49,7 +49,7 @@ public:
     CTaskSimpleDie* Constructor(CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags, float blendDelta, float animSpeed);
     CTaskSimpleDie* Destructor();
 
-    CTask*    Clone_Reversed();
+    CTask*     Clone_Reversed() const;
     bool      MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool      ProcessPed_Reversed(CPed* ped);
 };

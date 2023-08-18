@@ -25,7 +25,7 @@ public:
 
     CTask* CreateSubTask(eTaskType taskType, CPed* a3);
 
-    CTask*    Clone() override { return new CTaskComplexWaitForBackup{ *this }; }
+    CTask*    Clone() const override { return new CTaskComplexWaitForBackup{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;

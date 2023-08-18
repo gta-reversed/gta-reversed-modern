@@ -20,7 +20,7 @@ public:
     ~CTaskSimpleIKLookAt() override = default; // 0x633EF0
 
     eTaskType GetTaskType() const override { return Type; }
-    CTaskSimpleIKLookAt* Clone() override;
+    CTaskSimpleIKLookAt* Clone() const override;
     bool CreateIKChain(CPed* ped) override;
 
     void UpdateLookAtInfo(const char* strPurpose, CPed* ped, CEntity* targetPed, int32 time, ePedBones pedBoneID, RwV3d lookAtOffset, bool useTorso, float fSpeed, int32 blendTime, int32 unused);

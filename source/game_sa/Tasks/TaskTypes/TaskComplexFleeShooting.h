@@ -24,7 +24,7 @@ public:
     CTaskComplexFleeShooting(const CTaskComplexFleeShooting&);
     ~CTaskComplexFleeShooting();
 
-    CTask*    Clone() override { return new CTaskComplexFleeShooting{ *this }; }
+    CTask*    Clone() const override { return new CTaskComplexFleeShooting{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;

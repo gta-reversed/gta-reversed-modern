@@ -21,7 +21,7 @@ public:
     ~CTaskSimpleTired() override = default;
 
     eTaskType GetTaskType() const override { return Type; } // 0x630F50
-    CTask* Clone() override { return new CTaskSimpleTired(m_TiredDurationMs); } // 0x636180
+    CTask* Clone() const override { return new CTaskSimpleTired(m_TiredDurationMs); } // 0x636180
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
 
     bool ProcessPed(CPed* ped) override;

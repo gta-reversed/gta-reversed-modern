@@ -27,7 +27,7 @@ public:
 
     void StartAnim(CPed* ped);
 
-    CTask*    Clone() override { return new CTaskSimpleRunTimedAnim{ *this }; }
+    CTask*    Clone() const override { return new CTaskSimpleRunTimedAnim{ *this }; }
     eTaskType GetTaskType() const override { return m_taskId; }
     bool      ProcessPed(CPed* ped) override;
 private: // Wrappers for hooks

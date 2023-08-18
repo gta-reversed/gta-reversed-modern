@@ -45,7 +45,7 @@ public:
     CTaskComplexSunbathe(const CTaskComplexSunbathe&);
     ~CTaskComplexSunbathe();
     
-    CTask*    Clone() override { return new CTaskComplexSunbathe{ *this }; }
+    CTask*    Clone() const override { return new CTaskComplexSunbathe{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask*    CreateNextSubTask(CPed* ped) override;

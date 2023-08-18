@@ -45,7 +45,7 @@ public:
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed*) override { return m_pSubTask; } // 0x630580
-    CTask* Clone() override {
+    CTask* Clone() const override {
         return new CTaskComplexDie(m_nWeaponType, m_nAnimGroup, m_nAnimID, m_fBlendDelta, m_fAnimSpeed, m_bBeingKilledByStealth,
                                    m_bFallingToDeath, m_nFallToDeathDir, m_bFallToDeathOverRailing);
     } // 0x636060

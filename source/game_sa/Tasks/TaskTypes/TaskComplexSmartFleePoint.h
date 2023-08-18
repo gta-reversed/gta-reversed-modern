@@ -34,7 +34,7 @@ public:
     CTask* CreateSubTask(eTaskType taskType, CPed* ped);
     int8 SetFleePosition(CVector const& a2, float a3, bool a4);
 
-    CTask*    Clone() override { return new CTaskComplexSmartFleePoint{ *this }; }
+    CTask*    Clone() const override { return new CTaskComplexSmartFleePoint{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask*    CreateNextSubTask(CPed* ped) override;

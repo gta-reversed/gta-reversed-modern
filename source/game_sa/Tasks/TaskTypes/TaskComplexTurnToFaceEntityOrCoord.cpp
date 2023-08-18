@@ -42,7 +42,7 @@ CTaskComplexTurnToFaceEntityOrCoord::~CTaskComplexTurnToFaceEntityOrCoord() {
 }
 
 // 0x66D250
-CTask* CTaskComplexTurnToFaceEntityOrCoord::Clone() {
+CTask* CTaskComplexTurnToFaceEntityOrCoord::Clone() const {
     if (m_bFaceEntity) {
         return new CTaskComplexTurnToFaceEntityOrCoord(m_EntityToFace, m_fChangeRateMult, m_fMaxHeading);
     } else {

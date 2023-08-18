@@ -23,7 +23,7 @@ public:
     ~CTaskSimpleGoToPoint() override = default;
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask* Clone() override { return new CTaskSimpleGoToPoint(m_moveState, m_vecTargetPoint, m_fRadius, gotoPointFlags.m_bMoveTowardsTargetPoint, gotoPointFlags.m_b04); } // 0x66CC60
+    CTask* Clone() const override { return new CTaskSimpleGoToPoint(m_moveState, m_vecTargetPoint, m_fRadius, gotoPointFlags.m_bMoveTowardsTargetPoint, gotoPointFlags.m_b04); } // 0x66CC60
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 

@@ -35,7 +35,7 @@ public:
     ~CTaskComplexDestroyCarArmed() override;
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask* Clone() override { return new CTaskComplexDestroyCarArmed{ *this }; }
+    CTask* Clone() const override { return new CTaskComplexDestroyCarArmed{ *this }; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

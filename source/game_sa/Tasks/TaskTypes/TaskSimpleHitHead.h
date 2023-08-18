@@ -14,7 +14,7 @@ public:
     ~CTaskSimpleHitHead() override;
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask* Clone() override { return new CTaskSimpleHitHead(); }
+    CTask* Clone() const override { return new CTaskSimpleHitHead(); }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
     static void FinishAnimCB(CAnimBlendAssociation* anim, void* data);

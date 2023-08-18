@@ -24,7 +24,7 @@ public:
 
     CTask* CreateSubTask(eTaskType taskType);
 
-    CTask*    Clone() override { return new CTaskComplexSitDownThenIdleThenStandUp{ *this }; }
+    CTask*    Clone() const override { return new CTaskComplexSitDownThenIdleThenStandUp{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask*    CreateNextSubTask(CPed * ped) override;

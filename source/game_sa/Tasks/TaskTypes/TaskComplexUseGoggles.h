@@ -16,7 +16,7 @@ public:
     ~CTaskComplexUseGoggles() override = default; // 0x634F20
 
     eTaskType GetTaskType() const override { return Type; } // 0x634F10
-    CTask* Clone() override { return new CTaskComplexUseGoggles(); }      // 0x637060
+    CTask* Clone() const override { return new CTaskComplexUseGoggles(); }      // 0x637060
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

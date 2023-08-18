@@ -32,7 +32,7 @@ public:
     ~CTaskComplexFallToDeath() override = default; // 0x6790B0
 
     eTaskType GetTaskType() const override { return Type; }; // 0x6790A0
-    CTask* Clone() override { return new CTaskComplexFallToDeath(static_cast<int32>(m_nFallToDeathDir), m_Posn, b0x8, b0x10); } // 0x67C480
+    CTask* Clone() const override { return new CTaskComplexFallToDeath(static_cast<int32>(m_nFallToDeathDir), m_Posn, b0x8, b0x10); } // 0x67C480
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

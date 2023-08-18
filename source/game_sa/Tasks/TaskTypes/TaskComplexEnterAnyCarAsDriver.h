@@ -9,7 +9,7 @@ public:
     CTaskComplexEnterAnyCarAsDriver() = default;
     ~CTaskComplexEnterAnyCarAsDriver() = default;
 
-    CTask* Clone() override { return new CTaskComplexEnterAnyCarAsDriver{}; }
+    CTask* Clone() const override { return new CTaskComplexEnterAnyCarAsDriver{}; }
     eTaskType GetTaskType() const override { return Type; };
     CTask* CreateNextSubTask(CPed* ped) override { return nullptr; }
     CTask* CreateFirstSubTask(CPed* ped) override;

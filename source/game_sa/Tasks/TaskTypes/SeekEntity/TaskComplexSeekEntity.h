@@ -137,7 +137,7 @@ public:
         }
     }
 
-    CTask* Clone() override {
+    CTask* Clone() const override {
         return new CTaskComplexSeekEntity{ *this };
     }
 

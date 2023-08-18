@@ -15,7 +15,7 @@ public:
     ~CTaskComplexEvasiveStep() override;
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask* Clone() override { return new CTaskComplexEvasiveStep(m_Entity, m_Pos); }
+    CTask* Clone() const override { return new CTaskComplexEvasiveStep(m_Entity, m_Pos); }
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override { return m_pSubTask; } // 0x653550

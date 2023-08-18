@@ -23,7 +23,7 @@ public:
     CTaskSimpleSay(const CTaskSimpleSay& o) : CTaskSimpleSay{o.m_sayId, o.m_sayDuration} {} // NOTSA
     ~CTaskSimpleSay() = default;
 
-    CTask* Clone() override { return new CTaskSimpleSay(*this); }
+    CTask* Clone() const override { return new CTaskSimpleSay(*this); }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return true; }
     bool      ProcessPed(CPed* ped) override;

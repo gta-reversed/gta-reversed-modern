@@ -32,7 +32,7 @@ public:
     CPed* TryToPassObject(CPed* ped, CPedGroup* group);
     void  UnrefAnimBlock(); // NOTSA
 
-    CTask*    Clone() override { return new CTaskComplexGangLeader{ *this }; }
+    CTask*    Clone() const override { return new CTaskComplexGangLeader{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask*    CreateNextSubTask(CPed* ped) override;

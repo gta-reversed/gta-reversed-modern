@@ -22,7 +22,7 @@ public:
 
     CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
-    CTask*    Clone() override { return new CTaskComplexRoadRage{ *this }; }
+    CTask*    Clone() const override { return new CTaskComplexRoadRage{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask*    CreateNextSubTask(CPed* ped) override;

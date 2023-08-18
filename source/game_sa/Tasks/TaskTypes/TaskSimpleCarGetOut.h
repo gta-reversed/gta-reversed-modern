@@ -33,7 +33,7 @@ public:
 
     void StartAnim(const CPed* ped);
 
-    CTask* Clone() override { return new CTaskSimpleCarGetOut{ *this }; }
+    CTask* Clone() const override { return new CTaskSimpleCarGetOut{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     bool ProcessPed(CPed* ped) override;

@@ -23,7 +23,7 @@ public:
     ~CTaskSimpleCarWaitToSlowDown() override;
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask* Clone() override { return new CTaskSimpleCarWaitToSlowDown(m_TargetVehicle, m_SlowType); }
+    CTask* Clone() const override { return new CTaskSimpleCarWaitToSlowDown(m_TargetVehicle, m_SlowType); }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;

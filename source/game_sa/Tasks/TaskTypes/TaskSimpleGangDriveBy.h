@@ -44,7 +44,7 @@ public:
     ~CTaskSimpleGangDriveBy() override;
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask* Clone() override;
+    CTask* Clone() const override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 };

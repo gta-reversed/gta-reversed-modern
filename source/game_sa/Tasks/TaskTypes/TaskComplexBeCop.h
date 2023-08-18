@@ -10,6 +10,6 @@ class NOTSA_EXPORT_VTABLE CTaskComplexBeCop : public CTaskComplexWanderCop {
     };
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask* Clone() override { return new CTaskComplexBeCop(m_nMoveState, m_nDir, m_pGoToPointAndStandStillTask->Clone()); }
+    CTask* Clone() const override { return new CTaskComplexBeCop(m_nMoveState, m_nDir, m_pGoToPointAndStandStillTask->Clone()); }
 };
 VALIDATE_SIZE(CTaskComplexBeCop, 0x50);

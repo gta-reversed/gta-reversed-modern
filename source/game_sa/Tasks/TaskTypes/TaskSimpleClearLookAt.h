@@ -15,7 +15,7 @@ public:
     CTaskSimpleClearLookAt() = default;
     ~CTaskSimpleClearLookAt() = default;
 
-    CTask*    Clone() override { return new CTaskSimpleClearLookAt(*this); }
+    CTask*    Clone() const override { return new CTaskSimpleClearLookAt(*this); }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return true; }
     bool      ProcessPed(CPed* ped) override;

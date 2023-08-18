@@ -13,7 +13,7 @@ public:
     ~CTaskSimpleSetStayInSamePlace() override = default;
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask* Clone() override { return new CTaskSimpleSetStayInSamePlace(m_bStayInSamePlace); }
+    CTask* Clone() const override { return new CTaskSimpleSetStayInSamePlace(m_bStayInSamePlace); }
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; }
     bool ProcessPed(CPed* ped) override;
 };

@@ -22,7 +22,7 @@ public:
     ~CTaskLeanOnVehicle() override;
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask*    Clone() override { return new CTaskLeanOnVehicle(m_Vehicle, m_LeanAnimDurationInMs, field_10); } // 0x6610A0
+    CTask*    Clone() const override { return new CTaskLeanOnVehicle(m_Vehicle, m_LeanAnimDurationInMs, field_10); } // 0x6610A0
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool      ProcessPed(CPed* ped) override;
 

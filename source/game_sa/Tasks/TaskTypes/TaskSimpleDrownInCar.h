@@ -11,7 +11,7 @@ public:
 
     eTaskType GetTaskType() const override { return Type; }; // 0x62FF40
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return false; } // 0x62FF50
-    CTask* Clone() override { return new CTaskSimpleDrownInCar(); } // 0x636010
+    CTask* Clone() const override { return new CTaskSimpleDrownInCar(); } // 0x636010
     bool ProcessPed(CPed* ped) override;
 
 private:

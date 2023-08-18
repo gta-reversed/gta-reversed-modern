@@ -54,7 +54,7 @@ public:
         CEntity::SafeCleanUpRef(m_entity);
     }
 
-    CTask* Clone() override {
+    CTask* Clone() const override {
         return new CTaskComplexSeekEntityAnyMeans{ *this };
     }
 

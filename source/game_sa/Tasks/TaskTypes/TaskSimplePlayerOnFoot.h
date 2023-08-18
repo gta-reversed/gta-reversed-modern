@@ -33,7 +33,7 @@ public:
     eTaskType GetTaskType() const override {
         return Type;
     } // 0x6857C0
-    CTask* Clone() override {
+    CTask* Clone() const override {
         return new CTaskSimplePlayerOnFoot();
     } // 0x68AFF0
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;

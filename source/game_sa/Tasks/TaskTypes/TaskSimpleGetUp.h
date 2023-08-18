@@ -15,7 +15,7 @@ public:
     ~CTaskSimpleGetUp() override;
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask* Clone() override { return new CTaskSimpleGetUp(); }
+    CTask* Clone() const override { return new CTaskSimpleGetUp(); }
     bool ProcessPed(class CPed* ped) override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
 

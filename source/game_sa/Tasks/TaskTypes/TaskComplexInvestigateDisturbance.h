@@ -22,7 +22,7 @@ public:
     CTaskComplexInvestigateDisturbance(const CTaskComplexInvestigateDisturbance&);
     ~CTaskComplexInvestigateDisturbance();
 
-    CTask*    Clone() override { return new CTaskComplexInvestigateDisturbance{ *this }; }
+    CTask*    Clone() const override { return new CTaskComplexInvestigateDisturbance{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return !m_pSubTask || m_pSubTask->MakeAbortable(ped, priority, event); }
     CTask*    CreateNextSubTask(CPed* ped) override;

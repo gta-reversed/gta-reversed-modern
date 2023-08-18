@@ -33,7 +33,7 @@ public:
     CTask() { m_pParentTask = nullptr; } // 0x61A340
     virtual ~CTask() = default;          // 0x61A660
 
-    virtual CTask* Clone() = 0;
+    virtual CTask* Clone() const = 0;
     virtual CTask* GetSubTask() = 0;
     virtual bool IsSimple() = 0;
     virtual eTaskType GetTaskType() const = 0;

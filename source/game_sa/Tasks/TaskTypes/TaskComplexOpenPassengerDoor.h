@@ -12,5 +12,5 @@ public:
     ~CTaskComplexOpenPassengerDoor() override = default; // 0x640420
 
     eTaskType GetTaskType() const override{ return Type; } // 0x640410
-    CTask* Clone() override { return new CTaskComplexOpenPassengerDoor(m_car, m_targetSeat); } // 0x6438E0
+    CTask* Clone() const override { return new CTaskComplexOpenPassengerDoor(m_car, m_targetSeat); } // 0x6438E0
 };

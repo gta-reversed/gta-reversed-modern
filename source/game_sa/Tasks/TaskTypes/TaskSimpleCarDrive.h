@@ -44,7 +44,7 @@ public:
     ~CTaskSimpleCarDrive() override;
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask* Clone() override;
+    CTask* Clone() const override;
     bool ProcessPed(class CPed* ped) override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool SetPedPosition(CPed* ped) override;

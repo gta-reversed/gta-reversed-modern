@@ -44,7 +44,7 @@ public:
     ~CTaskComplexFollowNodeRoute() override;
 
     eTaskType GetTaskType() const override { return Type; } // 0x66EB60
-    CTask* Clone() override;
+    CTask* Clone() const override;
     void StopTimer(const CEvent* event) override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;

@@ -18,7 +18,7 @@ public:
     CTaskSimpleWaitUntilPedIsInCar(CPed* pedToWaitFor);
     ~CTaskSimpleWaitUntilPedIsInCar();
 
-    CTask*    Clone() override { return new CTaskSimpleWaitUntilPedIsInCar{ *this }; }
+    CTask*    Clone() const override { return new CTaskSimpleWaitUntilPedIsInCar{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return true; }
     bool      ProcessPed(CPed* ped) override;

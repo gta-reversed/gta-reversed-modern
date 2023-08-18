@@ -2,7 +2,7 @@
 
 #include "TaskSimpleHoldEntity.h"
 
-class CTaskSimplePickUpEntity : public CTaskSimpleHoldEntity {
+class NOTSA_EXPORT_VTABLE CTaskSimplePickUpEntity : public CTaskSimpleHoldEntity {
 public:
     float m_fMovePedUntilAnimProgress; //< value can be 0.0 to 1.0. Ped Will stop moving when the current `m_fCurrentTime`
                                        //< of `m_pAnimBlendAssociation` is equal or greater than this.
@@ -11,11 +11,11 @@ public:
 public:
     static constexpr auto Type = TASK_SIMPLE_PICKUP_ENTITY;
 
-    CTaskSimplePickUpEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* animBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags, float fMovePedUntilAnimProgress);
-    CTaskSimplePickUpEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, AnimationId animId, AssocGroupId groupId, float fMovePedUntilAnimProgress);
+    CTaskSimplePickUpEntity(CEntity* entityToHold, const CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* animBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags, float fMovePedUntilAnimProgress);
+    CTaskSimplePickUpEntity(CEntity* entityToHold, const CVector* posn, uint8 boneFrameId, uint8 boneFlags, AnimationId animId, AssocGroupId groupId, float fMovePedUntilAnimProgress);
     ~CTaskSimplePickUpEntity() override = default;
 
-    CTask* Clone() override;
+    CTask* Clone() const override;
     eTaskType GetTaskType() const override { return TASK_SIMPLE_PICKUP_ENTITY; }
 
 private:

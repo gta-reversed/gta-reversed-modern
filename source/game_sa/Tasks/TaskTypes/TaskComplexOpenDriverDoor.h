@@ -13,7 +13,7 @@ public:
     ~CTaskComplexOpenDriverDoor() override = default;
 
     eTaskType GetTaskType() const override { return Type; } // 0x6403C0
-    CTask* Clone() override {
+    CTask* Clone() const override {
         auto task = new CTaskComplexOpenDriverDoor(m_car);
         task->m_moveState = m_moveState;
         return task;

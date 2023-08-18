@@ -32,7 +32,7 @@ public:
     ~CTaskGangHassleVehicle() override;
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask*    Clone() override { return new CTaskGangHassleVehicle(m_Vehicle, m_nHasslePosId, byte18, dword1C, m_fOffsetX); } // 0x65FC00;
+    CTask*    Clone() const override { return new CTaskGangHassleVehicle(m_Vehicle, m_nHasslePosId, byte18, dword1C, m_fOffsetX); } // 0x65FC00;
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;

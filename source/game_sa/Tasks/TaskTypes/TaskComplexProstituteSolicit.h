@@ -41,7 +41,7 @@ public:
     ~CTaskComplexProstituteSolicit() override;
 
     eTaskType GetTaskType() const override { return Type; } // 0x661AE0
-    CTask* Clone() override { return new CTaskComplexProstituteSolicit(m_pClient); } // 0x6622F0
+    CTask* Clone() const override { return new CTaskComplexProstituteSolicit(m_pClient); } // 0x6622F0
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;

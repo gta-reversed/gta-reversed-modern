@@ -24,7 +24,7 @@ public:
     ~CTaskComplexDriveToPoint() override = default;
 
     eTaskType GetTaskType() const override { return Type;}
-    CTask* Clone() override { return new CTaskComplexDriveToPoint(m_pVehicle, m_Point, m_fSpeed, field_30, m_carModelIndexToCreate, m_Radius, m_nCarDrivingStyle); }
+    CTask* Clone() const override { return new CTaskComplexDriveToPoint(m_pVehicle, m_Point, m_fSpeed, field_30, m_carModelIndexToCreate, m_Radius, m_nCarDrivingStyle); }
 
     void SetUpCar() override;
     CTask* CreateSubTaskCannotGetInCar(CPed* ped) override;

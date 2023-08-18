@@ -73,7 +73,7 @@ public:
     ~CTaskSimpleJetPack() override;
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask* Clone() override;
+    CTask* Clone() const override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 
@@ -87,7 +87,7 @@ public:
 
     static void InjectHooks();
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
-    CTask* Clone_Reversed();
+    CTask*  Clone_Reversed() const;
 };
 VALIDATE_SIZE(CTaskSimpleJetPack, 0x70);
 

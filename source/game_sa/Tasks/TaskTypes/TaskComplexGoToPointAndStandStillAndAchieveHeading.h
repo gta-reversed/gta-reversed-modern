@@ -21,7 +21,7 @@ public:
     ~CTaskComplexGoToPointAndStandStillAndAchieveHeading() override = default; // 0x668D40
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask* Clone() override { return new CTaskComplexGoToPointAndStandStillAndAchieveHeading(m_MoveState, m_TargetPos, m_Angle, m_Radius, m_ChangeRateMult, m_MaxHeading); } // 0x66CFD0
+    CTask* Clone() const override { return new CTaskComplexGoToPointAndStandStillAndAchieveHeading(m_MoveState, m_TargetPos, m_Angle, m_Radius, m_ChangeRateMult, m_MaxHeading); } // 0x66CFD0
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

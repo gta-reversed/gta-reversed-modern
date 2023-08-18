@@ -14,9 +14,9 @@ CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(CVehicle* targetVehic
     m_moveState = moveState;
 }
 
-// 0x643780
-CTask* CTaskComplexEnterCarAsDriver::Clone() {
-    auto task = new CTaskComplexEnterCarAsDriver(m_car);
-    task->m_moveState = m_moveState;
-    return task;
+// For 0x643780
+CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(const CTaskComplexEnterCarAsDriver& o) :
+    CTaskComplexEnterCarAsDriver{ m_car }
+{
+    m_moveState = o.m_moveState;
 }

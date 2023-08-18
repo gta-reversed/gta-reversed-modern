@@ -3,24 +3,29 @@
 #include "TaskComplexUseSequence.h"
 
 void CTaskComplexUseSequence::InjectHooks() {
-    RH_ScopedClass(CTaskComplexUseSequence);
+    RH_ScopedVirtualClass(CTaskComplexUseSequence, 0x86e518, 11);
     RH_ScopedCategory("Tasks");
 
     RH_ScopedInstall(Constructor, 0x635450);
-    RH_ScopedVirtualInstall(Clone, 0x637100);
-    RH_ScopedVirtualInstall(MakeAbortable, 0x639730);
-    RH_ScopedVirtualInstall(CreateNextSubTask, 0x6354A0);
-    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x6354D0);
-    RH_ScopedVirtualInstall(ControlSubTask, 0x635530);
+    RH_ScopedVMTInstall(Clone, 0x637100);
+    RH_ScopedVMTInstall(MakeAbortable, 0x639730);
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x6354A0);
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x6354D0);
+    RH_ScopedVMTInstall(ControlSubTask, 0x635530);
 }
 
 // 0x635450
-CTaskComplexUseSequence::CTaskComplexUseSequence(int32 sequenceIndex) {
-    m_nSequenceIndex = sequenceIndex;
-    m_nCurrentTaskIndex = 0;
-    m_nSequenceRepeatedCount = 0;
-    m_nEndTaskIndex = -1;
+CTaskComplexUseSequence::CTaskComplexUseSequence(int32 sequenceIndex) :
+    m_nSequenceIndex{sequenceIndex}
+{
     CTaskSequences::ms_taskSequence[m_nSequenceIndex].m_nReferenceCount++;
+}
+
+CTaskComplexUseSequence::CTaskComplexUseSequence(const CTaskComplexUseSequence& o) :
+    CTaskComplexUseSequence{o.m_nCurrentTaskIndex}
+{
+    m_nCurrentTaskIndex = o.m_nCurrentTaskIndex;
+    m_nEndTaskIndex     = o.m_nEndTaskIndex;
 }
 
 CTaskComplexUseSequence::~CTaskComplexUseSequence() {
@@ -38,11 +43,6 @@ CTaskComplexUseSequence::~CTaskComplexUseSequence() {
 CTaskComplexUseSequence* CTaskComplexUseSequence::Constructor(int32 sequenceIndex) {
     this->CTaskComplexUseSequence::CTaskComplexUseSequence(sequenceIndex);
     return this;
-}
-
-// 0x637100
-CTask* CTaskComplexUseSequence::Clone() {
-    return CTaskComplexUseSequence::Clone_Reversed();
 }
 
 // 0x639730
@@ -63,14 +63,6 @@ CTask* CTaskComplexUseSequence::CreateFirstSubTask(CPed* ped) {
 // 0x635530
 CTask* CTaskComplexUseSequence::ControlSubTask(CPed* ped) {
     return ControlSubTask_Reversed(ped);
-}
-
-CTask* CTaskComplexUseSequence::Clone_Reversed() {
-    auto* task = new CTaskComplexUseSequence();
-    task->m_nCurrentTaskIndex = m_nCurrentTaskIndex;
-    task->m_nEndTaskIndex = m_nEndTaskIndex;
-    CTaskSequences::ms_taskSequence[m_nSequenceIndex].m_nReferenceCount++;
-    return task;
 }
 
 bool CTaskComplexUseSequence::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {

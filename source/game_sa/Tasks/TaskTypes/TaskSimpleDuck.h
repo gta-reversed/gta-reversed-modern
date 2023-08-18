@@ -42,7 +42,7 @@ public:
     ~CTaskSimpleDuck() override;
 
     eTaskType GetTaskType() const override { return Type; }
-    CTask* Clone() override { return new CTaskSimpleDuck(m_nDuckControlType, m_nLengthOfDuck, m_nShotWhizzingCounter); }
+    CTask* Clone() const override { return new CTaskSimpleDuck(m_nDuckControlType, m_nLengthOfDuck, m_nShotWhizzingCounter); }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 

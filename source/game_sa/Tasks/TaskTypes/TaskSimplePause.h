@@ -14,7 +14,7 @@ public:
     explicit CTaskSimplePause(int32 time = 0);
     ~CTaskSimplePause() = default;
 
-    CTask* Clone() override;
+    CTask* Clone() const override;
     eTaskType GetTaskType() const override {
         return TASK_SIMPLE_PAUSE;
     };

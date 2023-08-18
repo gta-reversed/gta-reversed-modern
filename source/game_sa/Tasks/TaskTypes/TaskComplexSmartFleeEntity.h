@@ -41,7 +41,7 @@ public:
     ~CTaskComplexSmartFleeEntity() override;
 
     eTaskType GetTaskType() const override { return Type; } // 0x65C4C0
-    CTask*    Clone() override { return new CTaskComplexSmartFleeEntity{ *this }; }
+    CTask*    Clone() const override { return new CTaskComplexSmartFleeEntity{ *this }; }
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;

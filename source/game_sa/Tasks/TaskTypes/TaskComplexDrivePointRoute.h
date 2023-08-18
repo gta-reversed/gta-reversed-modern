@@ -32,7 +32,7 @@ public:
     /// NOTSA: Create `CTaskComplexDriveToPoint` for the current point.
     CTask* CreateTaskForCurrentPoint() const;
 
-    CTask*    Clone() override { return new CTaskComplexDrivePointRoute{ *this }; }
+    CTask*    Clone() const override { return new CTaskComplexDrivePointRoute{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override { return CreateTaskForCurrentPoint(); }

@@ -20,7 +20,7 @@ public:
     CTaskComplexUseAttractor(const CTaskComplexUseAttractor&);
     ~CTaskComplexUseAttractor() = default;
 
-    CTask*    Clone() override { return new CTaskComplexUseAttractor{ *this }; }
+    CTask*    Clone() const override { return new CTaskComplexUseAttractor{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;

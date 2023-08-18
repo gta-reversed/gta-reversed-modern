@@ -47,7 +47,7 @@ public:
     CTaskSimpleGunControl(const CTaskSimpleGunControl&);
     ~CTaskSimpleGunControl();
 
-    CTask*    Clone() override { return new CTaskSimpleGunControl{*this}; }
+    CTask*    Clone() const override { return new CTaskSimpleGunControl{*this}; }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     bool      ProcessPed(CPed* ped) override;

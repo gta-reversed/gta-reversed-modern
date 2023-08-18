@@ -30,7 +30,7 @@ public:
     CTaskComplexAvoidOtherPedWhileWandering(CPed* ped, const CVector& targetPoint, int32 moveState);
     ~CTaskComplexAvoidOtherPedWhileWandering() override;
 
-    CTask* Clone() override;
+    CTask* Clone() const override;
     CTask* ControlSubTask(CPed* ped) override;
     eTaskType GetTaskType() const override { return Type; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;

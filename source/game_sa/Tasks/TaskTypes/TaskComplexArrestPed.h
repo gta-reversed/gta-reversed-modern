@@ -19,7 +19,7 @@ public:
     explicit CTaskComplexArrestPed(CPed* ped);
     ~CTaskComplexArrestPed() override;
 
-    CTask* Clone() override { return new CTaskComplexArrestPed(m_PedToArrest); }
+    CTask* Clone() const override { return new CTaskComplexArrestPed(m_PedToArrest); }
     eTaskType GetTaskType() const override { return Type; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;

@@ -37,7 +37,7 @@ public:
     void StartAnim(CPed* ped);
     void IfNotAlreadySetPlayerCanExitCarFlag(); // NOTSA?
 
-    CTask* Clone() override { return new CTaskSimpleCarOpenDoorFromOutside{ *this }; }
+    CTask* Clone() const override { return new CTaskSimpleCarOpenDoorFromOutside{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     bool ProcessPed(CPed* ped) override;

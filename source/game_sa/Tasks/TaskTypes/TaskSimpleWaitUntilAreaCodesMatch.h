@@ -20,7 +20,7 @@ public:
     CTaskSimpleWaitUntilAreaCodesMatch(const CTaskSimpleWaitUntilAreaCodesMatch& o) : CTaskSimpleWaitUntilAreaCodesMatch{o.m_pedToWaitFor} {} // NOTSA
     ~CTaskSimpleWaitUntilAreaCodesMatch();
 
-    CTask*    Clone() override { return new CTaskSimpleWaitUntilAreaCodesMatch{ *this }; }
+    CTask*    Clone() const override { return new CTaskSimpleWaitUntilAreaCodesMatch{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return priority == ABORT_PRIORITY_IMMEDIATE; }
     bool      ProcessPed(CPed* ped) override;

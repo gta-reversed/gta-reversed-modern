@@ -19,7 +19,7 @@ public:
     explicit CTaskComplexFollowPedFootsteps(CPed* ped);
     ~CTaskComplexFollowPedFootsteps() override;
 
-    CTask* Clone() override {
+    CTask* Clone() const override {
         return new CTaskComplexFollowPedFootsteps(m_targetPed);
     }
     eTaskType GetTaskType() const override { return Type; }

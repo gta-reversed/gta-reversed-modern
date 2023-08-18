@@ -20,7 +20,7 @@ public:
     CTaskSimpleSetCharDecisionMaker(const CTaskSimpleSetCharDecisionMaker&); // NOTSA
     ~CTaskSimpleSetCharDecisionMaker() = default;
 
-    CTask*    Clone() override { return new CTaskSimpleSetCharDecisionMaker{*this}; }
+    CTask*    Clone() const override { return new CTaskSimpleSetCharDecisionMaker{*this}; }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return false; }
     bool      ProcessPed(CPed* ped) override;

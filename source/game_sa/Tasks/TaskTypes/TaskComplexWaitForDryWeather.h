@@ -16,7 +16,7 @@ public:
     CTaskComplexWaitForDryWeather(const CTaskComplexWaitForDryWeather&);
     ~CTaskComplexWaitForDryWeather() = default;
 
-    CTask*    Clone() override { return new CTaskComplexWaitForDryWeather{ *this }; }
+    CTask*    Clone() const override { return new CTaskComplexWaitForDryWeather{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;

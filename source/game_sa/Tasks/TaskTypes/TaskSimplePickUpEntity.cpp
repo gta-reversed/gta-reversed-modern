@@ -15,7 +15,7 @@ void CTaskSimplePickUpEntity::InjectHooks() {
 
 CTaskSimplePickUpEntity::CTaskSimplePickUpEntity(
     CEntity* entityToHold,
-    CVector* posn,
+    const CVector* posn,
     uint8 boneFrameId,
     uint8 boneFlags,
     CAnimBlock* pAnimBlock,
@@ -30,7 +30,7 @@ CTaskSimplePickUpEntity::CTaskSimplePickUpEntity(
 
 CTaskSimplePickUpEntity::CTaskSimplePickUpEntity(
     CEntity* entityToHold,
-    CVector* posn,
+    const CVector* posn,
     uint8 boneFrameId,
     uint8 boneFlags,
     AnimationId animId,
@@ -43,7 +43,7 @@ CTaskSimplePickUpEntity::CTaskSimplePickUpEntity(
 }
 
 // 0x692A90
-CTask* CTaskSimplePickUpEntity::Clone() {
+CTask* CTaskSimplePickUpEntity::Clone() const {
     return m_pAnimBlendHierarchy
         ? new CTaskSimplePickUpEntity(
             m_pEntityToHold,

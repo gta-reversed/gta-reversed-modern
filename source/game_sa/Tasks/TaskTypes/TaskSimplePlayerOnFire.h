@@ -22,7 +22,7 @@ public:
     CTaskSimplePlayerOnFire(const CTaskSimplePlayerOnFire&) : CTaskSimplePlayerOnFire{} {} // NOTSA
     ~CTaskSimplePlayerOnFire() = default;
 
-    CTask*    Clone() override { return new CTaskSimplePlayerOnFire{*this}; }
+    CTask*    Clone() const override { return new CTaskSimplePlayerOnFire{*this}; }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return false; }
     bool      ProcessPed(CPed* ped) override;

@@ -22,7 +22,7 @@ public:
     CTaskSimpleCarSetTempAction(const CTaskSimpleCarSetTempAction&);
     ~CTaskSimpleCarSetTempAction() = default;
 
-    CTask*    Clone() override { return new CTaskSimpleCarSetTempAction(*this); }
+    CTask*    Clone() const override { return new CTaskSimpleCarSetTempAction(*this); }
     eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     bool      ProcessPed(CPed* ped) override;

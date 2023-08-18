@@ -23,7 +23,7 @@ public:
 
     CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
-    CTask*    Clone() override { return new CTaskComplexReactToGunAimedAt{ *this }; }
+    CTask*    Clone() const override { return new CTaskComplexReactToGunAimedAt{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;
