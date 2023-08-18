@@ -11,7 +11,7 @@ public:
 
     eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() const override { return new CTaskSimpleNone(); }
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; }
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override { return true; }
     bool ProcessPed(CPed* ped) override { return true; }
 };
 VALIDATE_SIZE(CTaskSimpleNone, 0x8);

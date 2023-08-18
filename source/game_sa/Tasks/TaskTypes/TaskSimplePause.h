@@ -18,7 +18,7 @@ public:
     eTaskType GetTaskType() const override {
         return TASK_SIMPLE_PAUSE;
     };
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed(CPed* ped) override;
     bool ProcessPed_Reversed(CPed* ped);

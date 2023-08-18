@@ -18,7 +18,7 @@ public:
 
     eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() const override { return new CTaskComplexGangJoinRespond(byteC); } // 0x662290;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; } // 0x661790;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override { return true; } // 0x661790;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

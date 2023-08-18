@@ -38,7 +38,7 @@ public:
     virtual bool IsSimple() = 0;
     virtual eTaskType GetTaskType() const = 0;
     virtual void StopTimer(const CEvent* event);
-    virtual bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) = 0;
+    virtual bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) = 0;
 
     static bool IsGoToTask(CTask* task);
     static bool IsTaskPtr(CTask* task);

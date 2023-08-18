@@ -16,7 +16,7 @@ public:
 
     eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() const override { return new CTaskSimpleEvasiveDive(m_Vehicle); }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
 
     void StartAnim(CPed* ped);

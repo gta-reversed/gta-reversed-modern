@@ -38,7 +38,7 @@ public:
 
     eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() const override { return new CTaskComplexKillPedOnFoot(m_target, m_time, m_pedFlags, m_actionDelay, m_actionChance, m_nCompetence); }
-    bool   MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool   MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

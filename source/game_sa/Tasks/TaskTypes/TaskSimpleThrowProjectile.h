@@ -28,7 +28,7 @@ public:
 
     eTaskType GetTaskType() const override { return Type; } // 0x61F6F0
     CTask* Clone() const override { return new CTaskSimpleThrowProjectile(m_pTarget, m_vecPosition); } // 0x623030
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
 
     bool ControlThrow(bool bUpdateStartTime, CEntity* entity, CVector* posn);

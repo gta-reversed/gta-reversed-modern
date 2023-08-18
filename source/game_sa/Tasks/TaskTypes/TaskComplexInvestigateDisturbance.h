@@ -24,7 +24,7 @@ public:
 
     CTask*    Clone() const override { return new CTaskComplexInvestigateDisturbance{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return !m_pSubTask || m_pSubTask->MakeAbortable(ped, priority, event); }
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override { return !m_pSubTask || m_pSubTask->MakeAbortable(ped, priority, event); }
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override { return m_pSubTask; }

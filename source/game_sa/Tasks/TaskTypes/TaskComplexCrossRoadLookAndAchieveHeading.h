@@ -19,7 +19,7 @@ public:
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateSubTask(eTaskType taskType, CPed* ped);
     eTaskType GetTaskType() const override { return Type; } // 0x631B10
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
 
 #if ANDROID
     void Serialize();

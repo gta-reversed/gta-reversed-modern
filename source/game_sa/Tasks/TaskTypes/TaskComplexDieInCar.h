@@ -22,7 +22,7 @@ public:
     CTask* CreateSubTask(eTaskType taskType, CPed* ped);
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
 
     void PreparePedVehicleForPedDeath(CVehicle* vehicle);
 

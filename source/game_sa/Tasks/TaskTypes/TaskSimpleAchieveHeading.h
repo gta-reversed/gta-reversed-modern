@@ -22,7 +22,7 @@ public:
 
     eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() const override { return new CTaskSimpleAchieveHeading(m_fAngle, m_fChangeRateMult, m_fMaxHeading); } // 0x66CCF0
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(class CPed* ped) override;
 
     void QuitIK(CPed* ped) const;

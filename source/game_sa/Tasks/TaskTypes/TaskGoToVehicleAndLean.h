@@ -19,7 +19,7 @@ public:
 
     eTaskType GetTaskType() const override { return Type; } // 0x660ED0
     CTask* Clone() const override { return new CTaskGoToVehicleAndLean(m_Vehicle, m_LeanAnimDurationInMs); } // 0x6621B0
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

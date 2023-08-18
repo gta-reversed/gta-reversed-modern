@@ -32,7 +32,7 @@ public:
 
     CTask* Clone() const override { return new CTaskSimpleCarCloseDoorFromInside{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;
 

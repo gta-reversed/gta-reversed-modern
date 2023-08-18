@@ -24,7 +24,7 @@ public:
     eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() const override { return new CTaskSimpleLand(m_nAnimId); }
     bool ProcessPed(CPed* ped) override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
 
     bool LeftFootLanded();
     bool RightFootLanded();

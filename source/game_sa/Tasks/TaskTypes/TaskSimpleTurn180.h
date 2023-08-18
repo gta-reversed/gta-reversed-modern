@@ -26,7 +26,7 @@ public:
     CTask*    Clone() const override { return new CTaskSimpleTurn180{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
     bool      ProcessPed(CPed* ped) override;
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return false; }
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override { return false; }
 
 private: // Wrappers for hooks
     // 0x631CC0

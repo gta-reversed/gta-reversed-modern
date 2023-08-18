@@ -145,7 +145,7 @@ public:
         return eTaskType::TASK_COMPLEX_SEEK_ENTITY;
     }
 
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override {
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override {
         if (priority == ABORT_PRIORITY_LEISURE) {
             m_scanInterval = -1;
             m_scanTimer.SetAsOutOfTime();

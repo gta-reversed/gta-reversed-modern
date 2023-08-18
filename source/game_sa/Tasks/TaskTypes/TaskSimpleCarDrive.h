@@ -46,7 +46,7 @@ public:
     eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() const override;
     bool ProcessPed(class CPed* ped) override;
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool SetPedPosition(CPed* ped) override;
 
     void TriggerIK(CPed* ped) const;

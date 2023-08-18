@@ -35,7 +35,7 @@ public:
 
     eTaskType GetTaskType() const override { return Type; } // 0x690CA0
     CTask* Clone() const override { return new CTaskSimpleFacial(m_nFacialExpression, m_nDuration); } // 0x692820
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
     static AnimationId GetAnimId(eFacialExpression expression);
 };

@@ -25,7 +25,7 @@ public:
     eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() const override;
     bool ProcessPed(CPed* ped) override;
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
 
     void ReviveDeadPed(CPed* ped);
     static void FinishGiveCPRAnimCB(CAnimBlendAssociation* anim, void* ptask);

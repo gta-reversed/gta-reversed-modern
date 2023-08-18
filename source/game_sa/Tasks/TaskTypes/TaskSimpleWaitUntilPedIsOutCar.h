@@ -21,7 +21,7 @@ public:
 
     CTask* Clone() const override { return new CTaskSimpleWaitUntilPedIsOutCar(m_PedToWaitFor, m_Pos); }
     eTaskType GetTaskType() const override { return Type; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return true; }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override { return true; }
     bool ProcessPed(CPed * ped) override;
 
 private:

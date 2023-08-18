@@ -41,7 +41,7 @@ public:
     ~CTaskComplexDie() override = default; // 0x6300C0 0x637910
 
     eTaskType GetTaskType() const override { return Type; } // 0x6300B0
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed*) override { return m_pSubTask; } // 0x630580

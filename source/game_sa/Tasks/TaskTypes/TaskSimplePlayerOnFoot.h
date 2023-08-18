@@ -36,7 +36,7 @@ public:
     CTask* Clone() const override {
         return new CTaskSimplePlayerOnFoot();
     } // 0x68AFF0
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
 
     void ProcessPlayerWeapon(CPlayerPed* player);

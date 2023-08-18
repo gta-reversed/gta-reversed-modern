@@ -29,7 +29,7 @@ public:
     CTask* ControlSubTask(CPed* ped) override { return m_pSubTask; }
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
-    bool   MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool   MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
 
 private:
     friend void InjectHooksMain();

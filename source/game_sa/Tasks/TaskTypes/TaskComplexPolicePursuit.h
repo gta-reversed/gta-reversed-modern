@@ -16,7 +16,7 @@ public:
     ~CTaskComplexPolicePursuit() override;
 
     eTaskType GetTaskType() const override { return Type; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return m_pSubTask->MakeAbortable(ped, priority, event); } // 0x68BAB0
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override { return m_pSubTask->MakeAbortable(ped, priority, event); } // 0x68BAB0
     CTask* Clone() const override { return new CTaskComplexPolicePursuit{*this}; } // 0x68CDD0
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

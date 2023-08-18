@@ -17,7 +17,7 @@ public:
 
     eTaskType GetTaskType() const override { return Type; }
     CTask* Clone() const override { return new CTaskComplexPartnerChat(m_commandName, m_partner, m_leadSpeaker,  m_distanceMultiplier, m_updateDirectionCount, m_conversationEnabled, field_75, m_point); }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     virtual CTaskComplexSequence* GetPartnerSequence();
 
     static void InjectHooks();

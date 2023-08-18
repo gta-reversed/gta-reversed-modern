@@ -67,7 +67,7 @@ public:
 
     CTask* Clone() const override { return new CTaskSimpleClimb(m_pClimbEnt, m_vecHandholdPos, m_fHandholdHeading, m_nSurfaceType, (eClimbHeights)m_nHeightForAnim, m_bForceClimb); }
     bool ProcessPed(CPed* ped) override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     eTaskType GetTaskType() const override { return Type; }
 
     static CEntity* TestForClimb(CPed* ped, CVector& climbPos, float& fAngle, uint8& nSurfaceType, bool theBool);
