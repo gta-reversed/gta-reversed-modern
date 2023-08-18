@@ -72,9 +72,9 @@ public:
     CTaskSimpleJetPack* Constructor(const CVector* pVecTargetPos, float fCruiseHeight, int32 nHoverTime, CEntity* entity);
     ~CTaskSimpleJetPack() override;
 
-    eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override;
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override;
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
 
     void RenderJetPack(CPed* ped);
@@ -87,7 +87,7 @@ public:
 
     static void InjectHooks();
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
-    CTask* Clone_Reversed();
+    CTask*  Clone_Reversed() const;
 };
 VALIDATE_SIZE(CTaskSimpleJetPack, 0x70);
 

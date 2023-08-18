@@ -33,7 +33,7 @@ public:
     explicit CTaskSimpleAnim(bool bHoldLastFrame);
     ~CTaskSimpleAnim() override;
 
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     static void FinishRunAnimCB(CAnimBlendAssociation* blendAssoc, void* data); //data is CTaskSimpleAnim
 
     static void InjectHooks();

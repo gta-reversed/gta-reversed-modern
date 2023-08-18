@@ -9,8 +9,8 @@ public:
     CTaskComplexGetUpAndStandStill() = default;
     ~CTaskComplexGetUpAndStandStill() override = default;
 
-    eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override { return new CTaskComplexGetUpAndStandStill(); }
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override { return new CTaskComplexGetUpAndStandStill(); }
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

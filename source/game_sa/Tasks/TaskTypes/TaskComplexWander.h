@@ -49,7 +49,7 @@ public:
     CTaskComplexWander(eMoveState moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
     ~CTaskComplexWander() override = default;
 
-    eTaskType GetTaskType() override { return Type; } // 0x460CD0
+    eTaskType GetTaskType() const override { return Type; } // 0x460CD0
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

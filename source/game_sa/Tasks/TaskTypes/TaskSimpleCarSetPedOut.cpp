@@ -15,8 +15,8 @@ CTaskSimpleCarSetPedOut::~CTaskSimpleCarSetPedOut() {
     CEntity::SafeCleanUpRef(m_pTargetVehicle);
 }
 
-CTask* CTaskSimpleCarSetPedOut::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x649F50, CTask*>(this);
+CTask* CTaskSimpleCarSetPedOut::Clone() const {
+    return plugin::CallMethodAndReturn<CTask*, 0x649F50, const CTask*>(this);
 }
 
 bool CTaskSimpleCarSetPedOut::ProcessPed(CPed* ped) {

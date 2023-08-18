@@ -29,9 +29,9 @@ public:
     void StartAnim(const CPed* ped);
     CPed* GetJackedPed() const; // NOTSA
 
-    CTask* Clone() override { return new CTaskSimpleCarSlowDragPedOut(m_Vehicle, m_TargetDoor, m_LineUpPedWithCarTask, m_bWasPedStatic); } // 0x649FD0
-    eTaskType GetTaskType() override { return Type; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
+    CTask* Clone() const override { return new CTaskSimpleCarSlowDragPedOut(m_Vehicle, m_TargetDoor, m_LineUpPedWithCarTask, m_bWasPedStatic); } // 0x649FD0
+    eTaskType GetTaskType() const override { return Type; }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;
 

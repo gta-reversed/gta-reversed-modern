@@ -13,12 +13,12 @@ public:
     CTaskComplexObserveTrafficLightsAndAchieveHeading(int32 durationInMs, float targetHeading);
     ~CTaskComplexObserveTrafficLightsAndAchieveHeading() override = default; // 0x631980
 
-    eTaskType GetTaskType() override { return Type; } // 0x631940
-    CTask* Clone() override;
+    eTaskType GetTaskType() const override { return Type; } // 0x631940
+    CTask* Clone() const override;
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
 
     CTask* CreateSubTask(eTaskType taskType) const;
 

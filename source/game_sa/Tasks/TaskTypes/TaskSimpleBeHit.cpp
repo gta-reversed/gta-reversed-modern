@@ -49,7 +49,7 @@ CTaskSimpleBeHit::~CTaskSimpleBeHit() {
 }
 
 // 0x623290
-CTask* CTaskSimpleBeHit::Clone() {
+CTask* CTaskSimpleBeHit::Clone() const {
     auto task = new CTaskSimpleBeHit(m_Attacker, m_eHitZone, m_nDirn, m_nHitPower);
     task->m_bAnimAdded = m_bAnimAdded;
     task->m_nAnimId = m_nAnimId;

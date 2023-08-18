@@ -21,9 +21,9 @@ public:
     CTaskLeanOnVehicle(CEntity* vehicle, int32 leanAnimDurationInMs, uint8 a4);
     ~CTaskLeanOnVehicle() override;
 
-    eTaskType GetTaskType() override { return Type; }
-    CTask*    Clone() override { return new CTaskLeanOnVehicle(m_Vehicle, m_LeanAnimDurationInMs, field_10); } // 0x6610A0
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() const override { return Type; }
+    CTask*    Clone() const override { return new CTaskLeanOnVehicle(m_Vehicle, m_LeanAnimDurationInMs, field_10); } // 0x6610A0
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool      ProcessPed(CPed* ped) override;
 
     static void FinishAnimCB(CAnimBlendAssociation* assoc, void* data);
