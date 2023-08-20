@@ -4,7 +4,7 @@
 
 #include "TaskComplex.h"
 #include "TaskTimer.h"
-#include "Ped.h" // TODO: eMoveState (When possible move to an enum file)
+#include "eMoveState.h"
 #include "extensions/utility.hpp"
 #include "PedPlacement.h"
 #include "TaskSimpleCarDriveTimed.h"
@@ -18,8 +18,9 @@
 #include "TaskSimpleStandStill.h"
 #include "TaskSimpleTired.h"
 #include "PosCalculators/EntitySeekPosCalculator.h"
+#include "PosCalculators/EntitySeekPosCalculatorStandard.h"
 
-template <std::derived_from<CEntitySeekPosCalculator> T_PosCalc>
+template <std::derived_from<CEntitySeekPosCalculator> T_PosCalc = CEntitySeekPosCalculatorStandard>
 class NOTSA_EXPORT_VTABLE CTaskComplexSeekEntity : public CTaskComplex {
     CEntity* m_entityToSeek{};
     int32 m_seekInterval{};
@@ -41,9 +42,10 @@ public:
     * NOTE: Since this task is templated but uses the same task type for all templated tasks
     *       our template magic stuff in TaskManager might not work properly with it,
     *       because at runtime all templated tasks will have the same type.
-    * NOTE: I commented this out for now, this way there'll be a compile time error (as Type won't be defined)
+    *       Accessing anything before `m_entitySeekPosCalculator` is fine either way
+    *       but anything after it depends on the actual `T_PosCalc` used [which can't [easily] be figured out at runtime]
     */
-    //static constexpr auto Type = eTaskType::TASK_COMPLEX_SEEK_ENTITY;
+    static constexpr auto Type = eTaskType::TASK_COMPLEX_SEEK_ENTITY;
 
     CTaskComplexSeekEntity(
         CEntity*  entity,
@@ -353,6 +355,8 @@ public:
             ped
         );
     }
+
+    auto GetEntityToSeek() const { return m_entityToSeek; }
 
 protected: // Wrappers for hooks
     // 0x493730

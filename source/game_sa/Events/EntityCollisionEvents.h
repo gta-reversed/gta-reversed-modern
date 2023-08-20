@@ -125,6 +125,8 @@ public:
     CEventBuildingCollision* Clone() override { return new CEventBuildingCollision(m_pieceType, m_damageIntensity, m_building, &m_impactNormal, &m_impactPos, m_moveState); }
     bool AffectsPed(CPed* ped) override;
 
+    static bool CanTreatBuildingAsObject(CBuilding* building);
+    bool IsHeadOnCollision(CPed* ped);
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
@@ -132,8 +134,6 @@ private:
     CEventBuildingCollision* Constructor(int16 pieceType, float damageIntensity, CBuilding* building, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState);
 
     bool AffectsPed_Reversed(CPed* ped);
-    bool IsHeadOnCollision(CPed* ped);
-    static bool CanTreatBuildingAsObject(CBuilding* building);
 };
 
 VALIDATE_SIZE(CEventBuildingCollision, 0x30);

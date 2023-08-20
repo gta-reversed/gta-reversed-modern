@@ -8,12 +8,24 @@
 #include "Tasks/TaskTypes/TaskComplexFacial.h"
 #include "Tasks/TaskTypes/TaskSimpleWaitUntilAreaCodesMatch.h"
 #include "Tasks/TaskTypes/TaskComplexUseEffect.h"
+#include "Tasks/TaskTypes/TaskComplexKillPedOnFoot.h"
+#include "Tasks/TaskTypes/SeekEntity/TaskComplexSeekEntity.h"
+#include "Tasks/TaskTypes/TaskComplexWalkRoundObject.h"
+#include "Tasks/TaskTypes/TaskSimpleGoTo.h"
+#include "Tasks/TaskTypes/TaskSimpleHitHead.h"
+#include "Tasks/TaskTypes/TaskComplexEnterCarAsPassengerWait.h"
+#include "Tasks/TaskTypes/TaskComplexWalkRoundBuildingAttempt.h"
+#include "Tasks/TaskTypes/TaskComplexMoveBackAndJump.h"
+#include "Tasks/TaskTypes/TaskComplexJump.h"
+#include "Tasks/TaskTypes/TaskComplexGangFollower.h"
+#include "Tasks/TaskTypes/TaskSimpleClimb.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 #include "EventSexyVehicle.h"
 
 #include "Events/EventAttractor.h"
+#include "Events/EntityCollisionEvents.h"
 
 void CEventHandler::InjectHooks() {
     RH_ScopedClass(CEventHandler);
@@ -35,7 +47,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeAreaCodesResponse, 0x4BBF50);
     RH_ScopedInstall(ComputeAttractorResponse, 0x4B9BE0);
     // RH_ScopedInstall(ComputeBuildingCollisionPassiveResponse, 0x0, { .reversed = false });
-    RH_ScopedInstall(ComputeBuildingCollisionResponse, 0x4BF2B0, { .reversed = false });
+    RH_ScopedInstall(ComputeBuildingCollisionResponse, 0x4BF2B0);
     RH_ScopedInstall(ComputeCarUpsideDownResponse, 0x4BBC30, { .reversed = false });
     RH_ScopedInstall(ComputeChatPartnerResponse, 0x4B98E0, { .reversed = false });
     RH_ScopedInstall(ComputeCopCarBeingStolenResponse, 0x4BB740, { .reversed = false });
@@ -369,8 +381,175 @@ void CEventHandler::ComputeBuildingCollisionPassiveResponse(CEvent* e, CTask* ta
 }
 
 // 0x4BF2B0
-void CEventHandler::ComputeBuildingCollisionResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BF2B0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeBuildingCollisionResponse(CEventBuildingCollision* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!tactive || !e->m_building || e->m_moveState == PEDMOVE_STILL) {
+            return nullptr;
+        }
+
+        const auto tm = &m_ped->GetTaskManager();
+
+        const auto tKillPedOnFoot    = tm->Find<CTaskComplexKillPedOnFoot>();
+        const auto tSeekEntity       = tm->Find<CTaskComplexSeekEntity<>>(); // Hackery, because we don't know what `T_PosCalc` actually is...
+        const auto tEnterCarPsgrWait = tm->Find<CTaskComplexEnterCarAsPassengerWait>();
+        const auto tGoToPoint        = CTask::IsGoToTask(tsimplest)
+            ? static_cast<CTaskSimpleGoTo*>(tsimplest)
+            : nullptr;
+
+        const auto isHeadOnCollision = e->IsHeadOnCollision(m_ped) ;
+
+        if (e->CanTreatBuildingAsObject(e->m_building)) { // 0x4BF36E
+            if (tGoToPoint) {
+                return new CTaskComplexWalkRoundObject{
+                    e->m_moveState,
+                    tGoToPoint->m_vecTargetPoint,
+                    e->m_building
+                };
+            }
+            return nullptr;
+        }
+
+        const auto randomBool = CGeneral::RandomBool(1.f / 15.f * 100.f); // 0x4BF3D4
+
+        if (m_ped->bIsStanding && e->m_impactNormal.z > COS_45) { // 0x4BF3FE
+            return nullptr;
+        }
+
+        if (!tGoToPoint && (!tKillPedOnFoot || !tKillPedOnFoot->m_target)) { // 0x4BF41E
+            if (isHeadOnCollision && !CPedGeometryAnalyser::CanPedJumpObstacle(*m_ped, *e->m_building, e->m_impactNormal, e->m_impactPos) && e->m_moveState > eMoveState::PEDMOVE_WALK) {
+                return new CTaskSimpleHitHead{};
+            }
+        }
+
+        if (isHeadOnCollision) { // 0x4BF4D1
+            if (!tSeekEntity && !tKillPedOnFoot && !tEnterCarPsgrWait && !randomBool) {
+                return new CTaskComplexWalkRoundBuildingAttempt{
+                    (eMoveState)e->m_moveState,
+                    tGoToPoint->m_vecTargetPoint,
+                    e->m_impactPos,
+                    e->m_impactNormal,
+                    isHeadOnCollision
+                };
+            }
+
+            if (CPedGeometryAnalyser::CanPedJumpObstacle(*m_ped, *e->m_building, e->m_impactNormal, e->m_impactPos)) { // 0x4BF540
+                if (e->m_moveState > eMoveState::PEDMOVE_WALK) {
+                    return new CTaskComplexMoveBackAndJump{};
+                }
+                return new CTaskComplexJump{COMPLEX_JUMP_TYPE_JUMP};
+            }
+
+            if (tKillPedOnFoot) { // 0x4BF5C2
+                if (!tKillPedOnFoot->m_target) {
+                    return nullptr;
+                }
+                if (CPedGeometryAnalyser::CanPedTargetPed(*m_ped, *tKillPedOnFoot->m_target, true)) {
+                    return nullptr;
+                }
+                return new CTaskComplexWalkRoundBuildingAttempt{
+                    (eMoveState)e->m_moveState,
+                    tKillPedOnFoot->m_target,
+                    {},
+                    e->m_impactPos,
+                    e->m_impactNormal,
+                    isHeadOnCollision
+                };
+            }
+
+            CEntity* targetEntity{};
+            if (tSeekEntity) { // 0x4BF660
+                targetEntity = tSeekEntity->GetEntityToSeek();
+            } else if (!tEnterCarPsgrWait) { // 0x4BF664
+                return new CTaskComplexWalkRoundBuildingAttempt{
+                    (eMoveState)e->m_moveState,
+                    tGoToPoint->m_vecTargetPoint, // For this code path to be reachable the code at 0x4BF47F can't be reachable, thus we use `tGoToPoint->m_vecTargetPoint`
+                    e->m_impactPos,
+                    e->m_impactNormal,
+                    isHeadOnCollision
+                };
+            } else if (const auto targetv = tEnterCarPsgrWait->GetTarget()) {
+                targetEntity = targetv->m_pDriver;
+            } else {
+                return nullptr;
+            }
+
+            if (!targetEntity) { // 0x4BF6A6
+                return nullptr;
+            }
+
+            if (CTaskComplexGangFollower::ms_bUseClimbing) { // 0x4BF6B3
+                if (CPedGroups::IsInPlayersGroup(m_ped)) {
+                    CVector climbPos;
+                    float   climbGrabHeading;
+                    uint8   climbSurfaceType;
+                    if (const auto entityToClimb = CTaskSimpleClimb::TestForClimb(m_ped, climbPos, climbGrabHeading, climbSurfaceType, true)) {
+                        return new CTaskSimpleClimb{
+                            entityToClimb,
+                            climbPos,
+                            climbGrabHeading,
+                            climbSurfaceType,
+                            climbPos.z - m_ped->GetPosition().z < CTaskSimpleClimb::ms_fMinForStretchGrab ? CLIMB_PULLUP : CLIMB_GRAB,
+                            true
+                        };
+                    }
+                }
+            }
+
+            if (targetEntity->IsPed()) {
+                if (!g_ikChainMan.IsLooking(m_ped)) { // 0x4BF77F
+                    g_ikChainMan.LookAt(
+                        "CompBldgCollResp",
+                        m_ped,
+                        targetEntity,
+                        3'000,
+                        BONE_HEAD,
+                        nullptr,
+                        true,
+                        0.25f,
+                        500,
+                        3,
+                        false
+                    );
+                }
+                /* nop GetTaskSecondary */
+            }
+
+            return new CTaskComplexWalkRoundBuildingAttempt{ // 0x4BF814
+                (eMoveState)e->m_moveState,
+                targetEntity,
+                {},
+                e->m_impactPos,
+                e->m_impactNormal,
+                isHeadOnCollision
+            };
+        } else {
+            const auto DoWalkAroundBuldingTask = [&](CEntity* aroundEntity) {
+                if (aroundEntity) {
+                    return new CTaskComplexWalkRoundBuildingAttempt{
+                        (eMoveState)e->m_moveState,
+                        aroundEntity,
+                        {},
+                        e->m_impactPos,
+                        e->m_impactNormal,
+                        false
+                    }; 
+                }
+                return new CTaskComplexWalkRoundBuildingAttempt{
+                    (eMoveState)e->m_moveState,
+                    tGoToPoint->m_vecTargetPoint, // For this code path to be reachable the code at 0x4BF47F can't be reachable, thus we use `tGoToPoint->m_vecTargetPoint`
+                    e->m_impactPos,
+                    e->m_impactNormal,
+                    false
+                };
+            };
+            if (tKillPedOnFoot) { // 0x004BF825
+                return DoWalkAroundBuldingTask(tKillPedOnFoot->m_target);
+            } else if (tSeekEntity) { // 0x4BF8C3
+                return DoWalkAroundBuldingTask(tSeekEntity->GetEntityToSeek());
+            }
+        }
+        return nullptr;
+    }();
 }
 
 // 0x4BBC30
@@ -759,7 +938,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeObjectCollisionResponse(e, tactive, tsimplest);
         break;
     case EVENT_BUILDING_COLLISION:
-        ComputeBuildingCollisionResponse(e, tactive, tsimplest);
+        ComputeBuildingCollisionResponse(static_cast<CEventBuildingCollision*>(e), tactive, tsimplest);
         break;
     case EVENT_DRAGGED_OUT_CAR:
         ComputeDraggedOutCarResponse(e, tactive, tsimplest);
@@ -948,9 +1127,5 @@ CTask* CEventHandler::ComputeEventResponseTask(const CPed& ped, const CEvent& e)
         eh.m_eventResponseTask = nullptr;
     }
     eh.Flush();
-    delete eh.m_history.m_tempEvent;
-    delete eh.m_history.m_nonTempEvent;
-    delete eh.m_history.m_storedActiveEvent;
-
     return task;
 }

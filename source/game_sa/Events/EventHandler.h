@@ -15,6 +15,7 @@ class CPed;
 class CEventDamage;
 class CEventAreaCodes;
 class CEventAttractor;
+class CEventBuildingCollision;
 
 class CEventHandler {
 public:
@@ -47,7 +48,7 @@ public:
     void ComputeAreaCodesResponse(CEventAreaCodes* e, CTask* tactive, CTask* tsimplest);
     void ComputeAttractorResponse(CEventAttractor* e, CTask* tactive, CTask* tsimplest);
     void ComputeBuildingCollisionPassiveResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
-    void ComputeBuildingCollisionResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputeBuildingCollisionResponse(CEventBuildingCollision* e, CTask* tactive, CTask* tsimplest); // NOTSA: Return type
     void ComputeCarUpsideDownResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeChatPartnerResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeCopCarBeingStolenResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
