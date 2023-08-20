@@ -26,5 +26,6 @@ public:
     virtual CTask* CreateNextSubTask(CPed* ped) = 0;
     virtual CTask* CreateFirstSubTask(CPed* ped) = 0;
     virtual CTask* ControlSubTask(CPed* ped) = 0;
+    // #vtable: 11
 };
 VALIDATE_SIZE(CTaskComplex, 0xC);

@@ -25,6 +25,8 @@ public:
     CEvent* Clone_Reversed();
     bool BaseEventTakesPriorityOverBaseEvent(const CEventGroupEvent& other);
 
+    auto& GetEvent() const { return *m_event; }
+
 private:
     bool IsPriorityEvent() const;
 };

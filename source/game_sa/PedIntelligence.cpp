@@ -664,11 +664,11 @@ bool CPedIntelligence::Respects(CPed* ped) const {
 // 0x601CC0
 bool CPedIntelligence::IsInACarOrEnteringOne() {
     if (const auto task = m_TaskMgr.Find<CTaskComplexEnterCarAsDriver>()) {
-        return !!task->GetVehicle();
+        return !!task->GetTarget();
     }
 
     if (const auto task = m_TaskMgr.Find<CTaskComplexEnterCarAsPassenger>()) {
-        return !!task->GetVehicle();
+        return !!task->GetTarget();
     }
 
     if (const auto task = m_TaskMgr.Find<CTaskSimpleCarDrive>()) {
@@ -758,16 +758,15 @@ bool CPedIntelligence::TestForStealthKill(CPed* target, bool bFullTest) {
         auto hate = target->GetAcquaintance().GetAcquaintances(ACQUAINTANCE_HATE);
         auto dislike = target->GetAcquaintance().GetAcquaintances(ACQUAINTANCE_DISLIKE);
         auto pedFlag = CPedType::GetPedFlag(m_pPed->m_nPedType);
-
         bool bAcquaintancesFlagSet = (
             (hate && (pedFlag & hate)) ||
             (dislike && (pedFlag & dislike))
         );
-        CPedGroup* pedGroup = CPedGroups::GetPedsGroup(target);
-        if (bAcquaintancesFlagSet && pedGroup) {
-            CEventGroupEvent* eventGroupEvent = pedGroup->GetIntelligence().m_pOldEventGroupEvent;
-            if (eventGroupEvent && eventGroupEvent->GetSourceEntity() == m_pPed && bAcquaintancesFlagSet)
+        if (bAcquaintancesFlagSet && target->GetGroup()) {
+            const auto oe = target->GetGroup()->GetIntelligence().GetOldEvent();
+            if (oe && oe->GetSourceEntity() == m_pPed && bAcquaintancesFlagSet) {
                 return false;
+            }
         }
     }
     return true;
@@ -775,8 +774,7 @@ bool CPedIntelligence::TestForStealthKill(CPed* target, bool bFullTest) {
 
 // 0x602050
 void CPedIntelligence::RecordEventForScript(int32 eventId, int32 eventPriority) {
-    if (eventId != EVENT_SCRIPT_COMMAND && (!eventId || eventPriority > m_nEventPriority))
-    {
+    if (eventId != EVENT_SCRIPT_COMMAND && (!eventId || eventPriority > m_nEventPriority)) {
         m_nEventId = eventId;
         m_nEventPriority = eventPriority;
     }
@@ -1042,7 +1040,7 @@ void CPedIntelligence::operator delete(void* object) {
 CVehicle* CPedIntelligence::GetEnteringVehicle() {
     for (const auto taskt : { TASK_COMPLEX_ENTER_CAR_AS_DRIVER, TASK_COMPLEX_ENTER_CAR_AS_PASSENGER }) {
         if (const auto task = FindTaskByType(taskt)) {
-            return static_cast<CTaskComplexEnterCar*>(task)->GetVehicle();
+            return static_cast<CTaskComplexEnterCar*>(task)->GetTarget();
         }
     }
     return nullptr;

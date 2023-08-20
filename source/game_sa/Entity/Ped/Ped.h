@@ -515,8 +515,8 @@ public:
     bool IsCreatedBy(ePedCreatedBy v) const noexcept { return v == m_nCreatedBy; }
     bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }
 
-    int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
     CPedGroup* GetGroup() const { return CPedGroups::GetPedsGroup(this); }
+    int32 GetGroupId();
     CPedClothesDesc* GetClothesDesc() { return m_pPlayerData->m_pPedClothesDesc; }
 
     CPedIntelligence* GetIntelligence() { return m_pIntelligence; }

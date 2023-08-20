@@ -91,29 +91,33 @@ void CPedGroup::Teleport(const CVector& pos) {
         leader->Teleport(pos, false);
     }
 
-    if (const auto oevent = m_groupIntelligence.m_pOldEventGroupEvent) {
-        if (oevent->GetEventType() == EVENT_LEADER_ENTRY_EXIT) {
+    if (const auto oe = m_groupIntelligence.GetOldEvent()) {
+        if (oe->GetEventType() == EVENT_LEADER_ENTRY_EXIT) {
             return;
         }
     }
 
     // Set *followers* out of the vehicle
-    for (auto& flwr : GetMembership().GetMembers(false)) {
-        if (!flwr.IsAlive() || !flwr.bInVehicle || flwr.IsCreatedByMission()) {
+    for (auto& f : GetMembership().GetFollowers()) {
+        if (!f.IsAlive() || !f.bInVehicle || f.IsCreatedByMission()) {
             continue;
         }
-        CTaskSimpleCarSetPedOut{ flwr.m_pVehicle, (eTargetDoor)CCarEnterExit::ComputeTargetDoorToExit(flwr.m_pVehicle, &flwr), false }.ProcessPed(&flwr);
+        CTaskSimpleCarSetPedOut{
+            f.m_pVehicle,
+            (eTargetDoor)CCarEnterExit::ComputeTargetDoorToExit(f.m_pVehicle, &f),
+            false
+        }.ProcessPed(&f);
     }
 
     // Teleport *followers*
     const auto& offsets = CTaskComplexFollowLeaderInFormation::ms_offsets.offsets;
-    for (auto&& [offsetIdx, flwr] : notsa::enumerate(GetMembership().GetMembers(false))) {
-        if (!flwr.IsAlive()) {
+    for (auto&& [offsetIdx, f] : notsa::enumerate(GetMembership().GetMembers(false))) {
+        if (!f.IsAlive()) {
             continue;
         }
-        flwr.Teleport(pos + CVector{ offsets[offsetIdx] }, false);
-        flwr.PositionAnyPedOutOfCollision();
-        flwr.GetTaskManager().AbortFirstPrimaryTaskIn({ TASK_PRIMARY_PHYSICAL_RESPONSE, TASK_PRIMARY_EVENT_RESPONSE_TEMP, TASK_PRIMARY_EVENT_RESPONSE_NONTEMP }, &flwr);
+        f.Teleport(pos + CVector{ offsets[offsetIdx] }, false);
+        f.PositionAnyPedOutOfCollision();
+        f.GetTaskManager().AbortFirstPrimaryTaskIn({ TASK_PRIMARY_PHYSICAL_RESPONSE, TASK_PRIMARY_EVENT_RESPONSE_TEMP, TASK_PRIMARY_EVENT_RESPONSE_NONTEMP }, &f);
     }
 }
 
