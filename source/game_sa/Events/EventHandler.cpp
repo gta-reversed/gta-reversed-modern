@@ -2,10 +2,11 @@
 
 #include "EventHandler.h"
 
-#include "TaskSimpleStandStill.h"
-#include "TaskComplexInAirAndLand.h"
-#include "TaskComplexStuckInAir.h"
+#include "Tasks/TaskTypes/TaskSimpleStandStill.h"
+#include "Tasks/TaskTypes/TaskComplexInAirAndLand.h"
+#include "Tasks/TaskTypes/TaskComplexStuckInAir.h"
 #include "Tasks/TaskTypes/TaskComplexFacial.h"
+#include "Tasks/TaskTypes/TaskSimpleWaitUntilAreaCodesMatch.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
@@ -28,8 +29,7 @@ void CEventHandler::InjectHooks() {
     // RH_ScopedInstall(RecordPassiveEvent, 0x0, { .reversed = false });
     RH_ScopedInstall(RegisterKill, 0x4B9340);
     RH_ScopedInstall(SetEventResponseTask, 0x4BC600);
-   
-    RH_ScopedInstall(ComputeAreaCodesResponse, 0x4BBF50, { .reversed = false });
+    RH_ScopedInstall(ComputeAreaCodesResponse, 0x4BBF50);
     RH_ScopedInstall(ComputeAttractorResponse, 0x4B9BE0, { .reversed = false });
     // RH_ScopedInstall(ComputeBuildingCollisionPassiveResponse, 0x0, { .reversed = false });
     RH_ScopedInstall(ComputeBuildingCollisionResponse, 0x4BF2B0, { .reversed = false });
@@ -337,8 +337,11 @@ bool CEventHandler::IsKillTaskAppropriate(CPed* ped1, CPed* ped2, const CEvent& 
 }
 
 // 0x4BBF50
-void CEventHandler::ComputeAreaCodesResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BBF50, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeAreaCodesResponse(CEventAreaCodes* e, CTask* tactive, CTask* tsimplest) {
+    if (!e->m_ped) {
+        return;
+    }
+    m_eventResponseTask = new CTaskSimpleWaitUntilAreaCodesMatch{e->m_ped};
 }
 
 // 0x4B9BE0
