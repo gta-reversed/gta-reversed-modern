@@ -20,6 +20,7 @@ class CEventBuildingCollision;
 class CEventChatPartner;
 class CEventCopCarBeingStolen;
 class CEventCreatePartnerTask;
+class CEventDanger;
 
 class CEventHandler {
 public:
@@ -58,7 +59,7 @@ public:
     void ComputeCopCarBeingStolenResponse(CEventCopCarBeingStolen* e, CTask* tactive, CTask* tsimplest);
     void ComputeCreatePartnerTaskResponse(CEventCreatePartnerTask* e, CTask* tactive, CTask* tsimplest);
     void ComputeDamageResponse(CEvent* e, CTask* tactive, CTask* tsimplest, CTask* task3);
-    void ComputeDangerResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputeDangerResponse(CEventDanger* e, CTask* tactive, CTask* tsimplest);
     void ComputeDeadPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeDeathResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeDontJoinGroupResponse(CEvent* e, CTask* tactive, CTask* tsimplest);

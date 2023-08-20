@@ -23,11 +23,14 @@
 #include "Tasks/TaskTypes/TaskComplexPartnerChat.h"
 #include "Tasks/TaskTypes/TaskComplexPartnerDeal.h"
 #include "Tasks/TaskTypes/TaskComplexPartnerGreet.h"
+#include "Tasks/TaskTypes/TaskComplexCarDriveMission.h"
+#include "Tasks/TaskTypes/TaskComplexSmartFleeEntity.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 #include "EventSexyVehicle.h"
 
+#include "Events/EventDanger.h"
 #include "Events/EventCreatePartnerTask.h"
 #include "Events/EventCopCarBeingStolen.h"
 #include "Events/EventChatPartner.h"
@@ -61,7 +64,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeCopCarBeingStolenResponse, 0x4BB740);
     RH_ScopedInstall(ComputeCreatePartnerTaskResponse, 0x4BB130);
     RH_ScopedInstall(ComputeDamageResponse, 0x4C0170, { .reversed = false });
-    RH_ScopedInstall(ComputeDangerResponse, 0x4BC230, { .reversed = false });
+    RH_ScopedInstall(ComputeDangerResponse, 0x4BC230);
     RH_ScopedInstall(ComputeDeadPedResponse, 0x4B9470, { .reversed = false });
     RH_ScopedInstall(ComputeDeathResponse, 0x4B9400, { .reversed = false });
     RH_ScopedInstall(ComputeDontJoinGroupResponse, 0x4BC1D0, { .reversed = false });
@@ -649,8 +652,34 @@ void CEventHandler::ComputeDamageResponse(CEvent* e, CTask* tactive, CTask* tsim
 }
 
 // 0x4BC230
-void CEventHandler::ComputeDangerResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BC230, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeDangerResponse(CEventDanger* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_dangerFrom) {
+            return nullptr;
+        }
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_CAR_DRIVE_MISSION_FLEE_SCENE: {
+            if (m_ped->bInVehicle) {
+                if (!m_ped->m_pVehicle->IsDriver(m_ped)) {
+                    return nullptr;
+                }
+                return new CTaskComplexCarDriveMissionFleeScene{m_ped->m_pVehicle};
+            }
+            [[fallthrough]];
+        }
+        case TASK_COMPLEX_SMART_FLEE_ENTITY: {
+            return new CTaskComplexSmartFleeEntity{
+                e->m_dangerFrom,
+                true,
+                100'000.f,
+                1'000'000,
+                1'000,
+                fEntityPosChangeThreshold
+            };
+        }
+        }
+        return nullptr;
+    }();
 }
 
 // 0x4B9470
@@ -1162,7 +1191,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeOnEscalatorResponse(e, tactive, tsimplest);
         break;
     case EVENT_DANGER:
-        ComputeDangerResponse(e, tactive, tsimplest);
+        ComputeDangerResponse(static_cast<CEventDanger*>(e), tactive, tsimplest);
         break;
     case EVENT_VEHICLE_ON_FIRE:
         ComputeVehicleOnFireResponse(e, tactive, tsimplest);
