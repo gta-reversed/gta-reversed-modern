@@ -109,20 +109,13 @@ bool CEventLeaderExitedCarAsDriver::AffectsPedGroup(CPedGroup* pedGroup)
     return CEventLeaderExitedCarAsDriver::AffectsPedGroup_Reversed(pedGroup);
 }
 
-bool CEventLeaderExitedCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
-{
-    for (int32 i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
-        CPedGroupMembership& memberShip = pedGroup->GetMembership();
-        CPed* member = memberShip.GetMember(i);
-        if (!member)
-            continue;
-
-        if (member->m_pVehicle && member->bInVehicle && member->m_pVehicle == memberShip.GetLeader()->m_pVehicle)
+bool CEventLeaderExitedCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pg) {
+    const auto leader = pg->GetMembership().GetLeader();
+    for (auto& m : pg->GetMembership().GetFollowers()) {
+        if (m.m_pVehicle && m.bInVehicle && m.m_pVehicle == leader->m_pVehicle) {
             return true;
-
-        if (member->GetIntelligence()->FindTaskByType(TASK_COMPLEX_ENTER_CAR_AS_PASSENGER)
-            || member->GetIntelligence()->FindTaskByType(TASK_COMPLEX_ENTER_CAR_AS_PASSENGER_WAIT))
-        {
+        }
+        if (m.GetTaskManager().HasAnyOf<TASK_COMPLEX_ENTER_CAR_AS_PASSENGER, TASK_COMPLEX_ENTER_CAR_AS_PASSENGER_WAIT>(false)) {
             return true;
         }
     }
@@ -141,12 +134,9 @@ bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup(CPedGroup* pedGroup)
     return CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed(pedGroup);
 }
 
-bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
-{
-    auto oldEventGroupEvent = pedGroup->GetIntelligence().m_pOldEventGroupEvent;
-    if (oldEventGroupEvent)
-        return oldEventGroupEvent->m_event->GetEventType() == EVENT_LEADER_ENTERED_CAR_AS_DRIVER;
-    return false;
+bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup) {
+    const auto oe = pedGroup->GetIntelligence().GetOldEvent();
+    return oe && oe->GetEvent().GetEventType() == EVENT_LEADER_ENTERED_CAR_AS_DRIVER;
 }
 
 CEventAreaCodes::CEventAreaCodes(CPed* ped)

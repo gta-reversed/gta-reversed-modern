@@ -3300,6 +3300,13 @@ bool CPed::IsInVehicleThatHasADriver() {
 
 /*!
 * @notsa
+*/
+int32 CPed::GetGroupId() {
+    return GetGroup() ? GetGroup()->GetId() : -1;
+}
+
+/*!
+* @notsa
 * @returns If ped is follower of \a group
 */
 bool CPed::IsFollowerOfGroup(const CPedGroup& group) const {

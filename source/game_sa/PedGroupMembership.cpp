@@ -241,7 +241,7 @@ void CPedGroupMembership::SetLeader(CPed* ped) {
 }
 
 // NOTSA
-auto CPedGroupMembership::FindClosestFollowerToLeader() -> FindMemberResult {
+auto CPedGroupMembership::FindClosestFollowerToLeader() -> FindClosestMemberResult {
     if (const auto leader = GetLeader()) {
         return GetMemberClosestTo(leader);
     }
