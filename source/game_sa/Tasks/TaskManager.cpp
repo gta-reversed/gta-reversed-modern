@@ -308,6 +308,14 @@ void CTaskManager::ManageTasks() {
         secondaryTask = nullptr;
     }
 }
+// @notsa
+CTask* CTaskManager::GetPrimaryNonTempResponseTask() const {
+    return notsa::coalesce(GetTaskPrimary(TASK_PRIMARY_PHYSICAL_RESPONSE), GetTaskPrimary(TASK_PRIMARY_EVENT_RESPONSE_NONTEMP));
+}
+
+CTask* CTaskManager::GetPrimaryTempResponseTask() const {
+    return  GetTaskPrimary(TASK_PRIMARY_EVENT_RESPONSE_TEMP);
+}
 
 void CTaskManager::ChangeTaskInSlot(CTask*& taskInSlot, CTask* changeTo) {
     // Nothing to do in case they're the same

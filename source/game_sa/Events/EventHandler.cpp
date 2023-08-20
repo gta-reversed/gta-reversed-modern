@@ -21,7 +21,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(Flush, 0x4C3790);
     RH_ScopedInstall(FlushImmediately, 0x4C3820);
     RH_ScopedInstall(GetCurrentEventType, 0x4B8CC0, { .reversed = false });
-    RH_ScopedInstall(HandleEvents, 0x4C3F10, { .reversed = false });
+    RH_ScopedInstall(HandleEvents, 0x4C3F10);
     RH_ScopedInstall(IsKillTaskAppropriate, 0x4BC3E0, { .reversed = false });
     RH_ScopedInstall(IsTemporaryEvent, 0x4BC370);
     // RH_ScopedInstall(RecordActiveEvent, 0x0, { .reversed = false });
@@ -109,7 +109,106 @@ CEventHandler::CEventHandler(CPed* ped) {
 
 // 0x4C3F10
 void CEventHandler::HandleEvents() {
-    plugin::CallMethod<0x4C3F10, CEventHandler*>(this);
+    m_history.TickStoredEvent(m_ped);
+
+    const auto lastAbortedTask  = m_history.m_AbortedTask;
+
+    const auto pedTM            = &m_ped->GetTaskManager();
+    const auto primaryTask      = m_ped->GetIntelligence()->GetActivePrimaryTask();
+    const auto responseTempTask = pedTM->GetTaskPrimary(TASK_PRIMARY_EVENT_RESPONSE_TEMP);
+    const auto responseTask     = pedTM->GetPrimaryNonTempResponseTask();
+
+    const auto pedEG                = &m_ped->GetEventGroup();
+    const auto highestPriorityEvent = pedEG->GetHighestPriorityEvent();
+    pedEG->TickEvents();
+
+    m_history.m_AbortedTask = !lastAbortedTask || !primaryTask || lastAbortedTask != primaryTask
+        ? nullptr
+        : primaryTask;
+
+    if (!responseTempTask) {
+        if (!responseTask) {
+            m_history.m_AbortedTask = nullptr;
+        }
+        m_history.ClearTempEvent();
+    }
+
+    if (!responseTask) {
+        m_history.ClearNonTempEvent();
+    }
+
+    if (const auto priorityEvent = pedEG->GetHighestPriorityEvent()) {
+        if (priorityEvent->GetEventType() == EVENT_DAMAGE) { // 0x4C4004
+            m_ped->SetIsStatic(false);
+        }
+
+        if (const auto currEvent = m_history.GetCurrentEvent()) { // 0x4C4015
+            if (currEvent->GetEventType() == highestPriorityEvent->GetEventType()) {
+                pedEG->Remove(highestPriorityEvent);
+                pedEG->RemoveInvalidEvents(false);
+                pedEG->Reorganise();
+                if (!primaryTask) {
+                    m_history.m_AbortedTask = nullptr;
+                    m_history.ClearAllEvents();
+                }
+                return;
+            }
+        }
+
+        if (m_history.TakesPriorityOverCurrentEvent(*priorityEvent)) { // 0x4C40DE
+            const auto activeTask = pedTM->GetActiveTask();
+
+            const auto hasStoppedTimers = [&]{
+                if (!activeTask || activeTask->MakeAbortable(m_ped, ABORT_PRIORITY_URGENT, priorityEvent)) {
+                    pedTM->StopTimers(priorityEvent);
+                    return true;
+                }
+                return false;
+            }();
+
+            if (primaryTask) {
+                if (!hasStoppedTimers) { // 0x4C41A9
+                    priorityEvent->m_nTimeActive--;
+                    activeTask->MakeAbortable(m_ped, ABORT_PRIORITY_LEISURE, priorityEvent);
+                    m_history.m_AbortedTask = activeTask;
+                    pedEG->RemoveInvalidEvents(false);
+                    pedEG->Reorganise();
+                    return;
+                } else {
+                    ComputeEventResponseTask(priorityEvent, lastAbortedTask);
+                    m_history.m_AbortedTask = nullptr;
+                    if (m_eventResponseTask) {
+                        m_history.RecordCurrentEvent(m_ped, *priorityEvent);
+                    }
+                }
+            } else if (lastAbortedTask) { // 0x4C4176
+                ComputeEventResponseTask(priorityEvent, lastAbortedTask);
+                m_history.m_AbortedTask = nullptr;
+                if (m_eventResponseTask) {
+                    m_history.RecordCurrentEvent(m_ped, *priorityEvent);
+                }
+            } else { // 0x4C4135
+                if (!hasStoppedTimers) {
+                    priorityEvent->m_nTimeActive--;
+                    pedEG->RemoveInvalidEvents(false);
+                    pedEG->Reorganise();
+                    return;
+                } else {
+                    ComputeEventResponseTask(priorityEvent, lastAbortedTask);
+                    if (m_eventResponseTask) {
+                        m_history.RecordCurrentEvent(m_ped, *priorityEvent);
+                    }
+                }
+            }
+            SetEventResponseTask(*priorityEvent);
+            pedEG->Remove(priorityEvent);
+        }
+        pedEG->RemoveInvalidEvents(false);
+        pedEG->Reorganise();
+    } else if (!primaryTask) {
+        m_history.m_AbortedTask = nullptr;
+        m_history.ClearAllEvents();
+    }
 }
 
 void CEventHandler::RecordActiveEvent(const CEvent& event) {

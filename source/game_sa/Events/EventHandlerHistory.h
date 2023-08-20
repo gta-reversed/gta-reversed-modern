@@ -5,11 +5,11 @@
 class CEvent;
 class CEventHandlerHistory {
 public:
-    CTask* m_task = nullptr;
-    CEvent* m_nonTempEvent = nullptr;
-    CEvent* m_tempEvent = nullptr;
-    CEvent* m_storedActiveEvent = nullptr;
-    CTaskTimer m_storedActiveEventTimer;
+    CTask* m_AbortedTask{};
+    CEvent* m_CurrentNonTempEvent{};
+    CEvent* m_CurrentTempEvent{};
+    CEvent* m_StoredEventActive{};
+    CTaskTimer m_StoreTimer{};
 
 public:
     static void InjectHooks();
@@ -22,14 +22,14 @@ public:
     void ClearTempEvent();
     void ClearStoredActiveEvent();
     void Flush();
-    CEvent* GetCurrentEvent() { return m_tempEvent ? m_tempEvent : m_nonTempEvent; }
-    int32 GetCurrentEventPriority();
-    CEvent* GetStoredActiveEvent() { return m_storedActiveEvent; }
-    bool IsRespondingToEvent(eEventType eventType);
+    CEvent* GetCurrentEvent() const { return m_CurrentTempEvent ? m_CurrentTempEvent : m_CurrentNonTempEvent; }
+    int32 GetCurrentEventPriority() const;
+    CEvent* GetStoredActiveEvent() const { return m_StoredEventActive; }
+    bool IsRespondingToEvent(eEventType eventType) const;
     void RecordCurrentEvent(CPed* ped, CEvent& event);
     void StoreActiveEvent();
-    bool TakesPriorityOverCurrentEvent(CEvent& event);
-    void TickStoredEvent(CPed* ped);
+    bool TakesPriorityOverCurrentEvent(CEvent& event) const;
+    void TickStoredEvent(CPed*);
 };
 
 VALIDATE_SIZE(CEventHandlerHistory, 0x1C);

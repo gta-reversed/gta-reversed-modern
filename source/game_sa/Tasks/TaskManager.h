@@ -171,9 +171,15 @@ public:
     void ManageTasks();
 
     // Why they doesn't have version for *primary tasks*? :thinking:
-    CTask* GetTaskPrimary(int32 taskIndex) noexcept {
+    CTask* GetTaskPrimary(int32 taskIndex) const noexcept {
         return m_aPrimaryTasks[taskIndex];
     }
+
+    //! @notsa
+    CTask* GetPrimaryNonTempResponseTask() const;
+
+    //! @notsa
+    CTask* GetPrimaryTempResponseTask() const;
 
     auto& GetPrimaryTasks() const { return m_aPrimaryTasks; }
     auto& GetSecondaryTasks() const { return m_aSecondaryTasks; }
