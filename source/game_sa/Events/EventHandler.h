@@ -14,6 +14,7 @@ class CPed;
 
 class CEventDamage;
 class CEventAreaCodes;
+class CEventAttractor;
 
 class CEventHandler {
 public:
@@ -44,7 +45,7 @@ public:
     void SetEventResponseTask(const CEvent& event);
 
     void ComputeAreaCodesResponse(CEventAreaCodes* e, CTask* tactive, CTask* tsimplest);
-    void ComputeAttractorResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputeAttractorResponse(CEventAttractor* e, CTask* tactive, CTask* tsimplest);
     void ComputeBuildingCollisionPassiveResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeBuildingCollisionResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeCarUpsideDownResponse(CEvent* e, CTask* tactive, CTask* tsimplest);

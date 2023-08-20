@@ -7,10 +7,13 @@
 #include "Tasks/TaskTypes/TaskComplexStuckInAir.h"
 #include "Tasks/TaskTypes/TaskComplexFacial.h"
 #include "Tasks/TaskTypes/TaskSimpleWaitUntilAreaCodesMatch.h"
+#include "Tasks/TaskTypes/TaskComplexUseEffect.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 #include "EventSexyVehicle.h"
+
+#include "Events/EventAttractor.h"
 
 void CEventHandler::InjectHooks() {
     RH_ScopedClass(CEventHandler);
@@ -30,7 +33,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(RegisterKill, 0x4B9340);
     RH_ScopedInstall(SetEventResponseTask, 0x4BC600);
     RH_ScopedInstall(ComputeAreaCodesResponse, 0x4BBF50);
-    RH_ScopedInstall(ComputeAttractorResponse, 0x4B9BE0, { .reversed = false });
+    RH_ScopedInstall(ComputeAttractorResponse, 0x4B9BE0);
     // RH_ScopedInstall(ComputeBuildingCollisionPassiveResponse, 0x0, { .reversed = false });
     RH_ScopedInstall(ComputeBuildingCollisionResponse, 0x4BF2B0, { .reversed = false });
     RH_ScopedInstall(ComputeCarUpsideDownResponse, 0x4BBC30, { .reversed = false });
@@ -345,77 +348,86 @@ void CEventHandler::ComputeAreaCodesResponse(CEventAreaCodes* e, CTask* tactive,
 }
 
 // 0x4B9BE0
-void CEventHandler::ComputeAttractorResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B9BE0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeAttractorResponse(CEventAttractor* e, CTask* tactive, CTask* tsimplest) {
+    if (e->GetEventType() == EVENT_ATTRACTOR && !e->m_entity) {
+        return;
+    }
+    if (e->m_taskId == TASK_NONE) {
+        m_eventResponseTask = nullptr;
+    } else if (e->m_taskId == TASK_COMPLEX_USE_EFFECT) {
+        if (GetPedAttractorManager()->HasEmptySlot(e->m_2dEffect, e->m_entity)) { // inverted
+            m_eventResponseTask = new CTaskComplexUseEffect{e->m_2dEffect, e->m_entity};
+        }
+    }
 }
 
 // 0x0
 // EVENT_POTENTIAL_WALK_INTO_BUILDING
 // ANDROID IDB 0x3025F8 (1.0)
-void CEventHandler::ComputeBuildingCollisionPassiveResponse(CEvent* event, CTask* task1, CTask* task2) {
+void CEventHandler::ComputeBuildingCollisionPassiveResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
     // NOP
 }
 
 // 0x4BF2B0
-void CEventHandler::ComputeBuildingCollisionResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BF2B0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeBuildingCollisionResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BF2B0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BBC30
-void CEventHandler::ComputeCarUpsideDownResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BBC30, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeCarUpsideDownResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BBC30, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4B98E0
-void CEventHandler::ComputeChatPartnerResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B98E0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeChatPartnerResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4B98E0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BB740
-void CEventHandler::ComputeCopCarBeingStolenResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BB740, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeCopCarBeingStolenResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BB740, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BB130
-void CEventHandler::ComputeCreatePartnerTaskResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BB130, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeCreatePartnerTaskResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BB130, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4C0170
-void CEventHandler::ComputeDamageResponse(CEvent* event, CTask* task1, CTask* task2, CTask* task3) {
-    plugin::CallMethod<0x4C0170, CEventHandler*, CEvent*, CTask*, CTask*, CTask*>(this, event, task1, task2, task3);
+void CEventHandler::ComputeDamageResponse(CEvent* e, CTask* tactive, CTask* tsimplest, CTask* abortedTaskEventResponse) {
+    plugin::CallMethod<0x4C0170, CEventHandler*, CEvent*, CTask*, CTask*, CTask*>(this, e, tactive, tsimplest, abortedTaskEventResponse);
 }
 
 // 0x4BC230
-void CEventHandler::ComputeDangerResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BC230, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeDangerResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BC230, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4B9470
-void CEventHandler::ComputeDeadPedResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B9470, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeDeadPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4B9470, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4B9400
-void CEventHandler::ComputeDeathResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B9400, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeDeathResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4B9400, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BC1D0
-void CEventHandler::ComputeDontJoinGroupResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BC1D0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeDontJoinGroupResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BC1D0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 
     // m_eventResponseTask = new CTaskComplexGangJoinRespond(0);
 }
 
 // 0x4BCC30
-void CEventHandler::ComputeDraggedOutCarResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BCC30, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeDraggedOutCarResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BCC30, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BBFB0
-void CEventHandler::ComputeFireNearbyResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BBFB0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeFireNearbyResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BBFB0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
     /*
     auto taskId = task1->GetTaskType();
     if (taskId == TASK_NONE) {
@@ -427,45 +439,45 @@ void CEventHandler::ComputeFireNearbyResponse(CEvent* event, CTask* task1, CTask
 }
 
 // 0x4C3430
-void CEventHandler::ComputeGotKnockedOverByCarResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4C3430, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeGotKnockedOverByCarResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4C3430, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4C2840
-void CEventHandler::ComputeGunAimedAtResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4C2840, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeGunAimedAtResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4C2840, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BAC10
-void CEventHandler::ComputeHighAngerAtPlayerResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BAC10, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeHighAngerAtPlayerResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BAC10, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BAF80
-void CEventHandler::ComputeInWaterResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BAF80, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeInWaterResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BAF80, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
     // m_eventResponseTask = new CTaskComplexInWater();
 }
 
 // 0x4BAFE0
-void CEventHandler::ComputeInteriorUseInfoResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BAFE0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeInteriorUseInfoResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BAFE0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
     // m_eventResponseTask = new CTaskInteriorUseInfo(task1->m_interiorInfo, task1->m_interior, task1->m_actionAnimTime, task1->m_loopAction);
 }
 
 // 0x4B9FF0
-void CEventHandler::ComputeKnockOffBikeResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B9FF0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeKnockOffBikeResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4B9FF0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BAAD0
-void CEventHandler::ComputeLowAngerAtPlayerResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BAAD0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeLowAngerAtPlayerResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BAAD0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BA990
-void CEventHandler::ComputeLowHealthResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BA990, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeLowHealthResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BA990, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
     /*
     auto taskId = task1->GetTaskType();
     if (taskId == TASK_NONE) {
@@ -477,28 +489,28 @@ void CEventHandler::ComputeLowHealthResponse(CEvent* event, CTask* task1, CTask*
 }
 
 // 0x4BBB90
-void CEventHandler::ComputeObjectCollisionPassiveResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BBB90, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeObjectCollisionPassiveResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BBB90, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4B92B0
-void CEventHandler::ComputeObjectCollisionResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B92B0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeObjectCollisionResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4B92B0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BC150
-void CEventHandler::ComputeOnEscalatorResponse(CEvent* event, CTask* task1, CTask* task2) {
+void CEventHandler::ComputeOnEscalatorResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
     m_eventResponseTask = new CTaskSimpleStandStill(0, true, false, 8.0f);
 }
 
 // 0x4BAD50
-void CEventHandler::ComputeOnFireResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BAD50, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeOnFireResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BAD50, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BB0C0
-void CEventHandler::ComputePassObjectResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BB0C0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputePassObjectResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BB0C0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
     /*
     auto _event = static_cast<CEventPassObject*>(event);
     // m_eventResponseTask = new CTaskComplexPassObject(_event->m_giver, _event->m_dontPassObject);
@@ -506,51 +518,51 @@ void CEventHandler::ComputePassObjectResponse(CEvent* event, CTask* task1, CTask
 }
 
 // 0x4BDB80
-void CEventHandler::ComputePedCollisionWithPedResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BDB80, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputePedCollisionWithPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BDB80, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BE7D0
-void CEventHandler::ComputePedCollisionWithPlayerResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BE7D0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputePedCollisionWithPlayerResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BE7D0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4C1590
-void CEventHandler::ComputePedEnteredVehicleResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4C1590, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputePedEnteredVehicleResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4C1590, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4B9DD0
-void CEventHandler::ComputePedFriendResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B9DD0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputePedFriendResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4B9DD0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4B9D40
-void CEventHandler::ComputePedSoundQuietResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B9D40, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputePedSoundQuietResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4B9D40, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4B9C90
-void CEventHandler::ComputePedThreatBadlyLitResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B9C90, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputePedThreatBadlyLitResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4B9C90, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4C19A0
-void CEventHandler::ComputePedThreatResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4C19A0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputePedThreatResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4C19A0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4C1910
-void CEventHandler::ComputePedToChaseResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4C1910, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputePedToChaseResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4C1910, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
     /*
     m_eventResponseTask = new CTaskComplexSeekEntity(static_cast<CTask*>(task1)->entity, 30000, 1000, 1.0f, 2.0f, 2.0f, 1, 1);
     */
 }
 
 // 0x4B9B50
-void CEventHandler::ComputePedToFleeResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B9B50, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputePedToFleeResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4B9B50, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 
     /*
     if (auto* ped = static_cast<CEventPedToFlee*>(event)->m_currPedToKill) {
@@ -566,29 +578,29 @@ void CEventHandler::ComputePersonalityResponseToDamage(CEventDamage* damageEvent
 }
 
 // 0x4B8CE0
-void CEventHandler::ComputePlayerCollisionWithPedResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B8CE0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputePlayerCollisionWithPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4B8CE0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BB280
-void CEventHandler::ComputePlayerWantedLevelResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BB280, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputePlayerWantedLevelResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BB280, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
     //m_eventResponseTask = new CTaskComplexPolicePursuit();
 }
 
 // 0x4C2610
-void CEventHandler::ComputePotentialPedCollideResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4C2610, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputePotentialPedCollideResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4C2610, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BBCD0
-void CEventHandler::ComputePotentialWalkIntoFireResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BBCD0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputePotentialWalkIntoFireResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BBCD0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BAA30
-void CEventHandler::ComputeReallyLowHealthResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BAA30, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeReallyLowHealthResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BAA30, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
     /*
     auto taskId = task1->GetTaskType();
     if (taskId == TASK_NONE) {
@@ -600,28 +612,28 @@ void CEventHandler::ComputeReallyLowHealthResponse(CEvent* event, CTask* task1, 
 }
 
 // 0x4B97B0
-void CEventHandler::ComputeReviveResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B97B0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeReviveResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4B97B0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BA7C0
-void CEventHandler::ComputeScriptCommandResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BA7C0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeScriptCommandResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BA7C0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BC050
-void CEventHandler::ComputeSeenCopResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BC050, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeSeenCopResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BC050, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4C35F0
-void CEventHandler::ComputeSeenPanickedPedResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4C35F0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeSeenPanickedPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4C35F0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4B99F0
-void CEventHandler::ComputeSexyPedResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B99F0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeSexyPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4B99F0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
     /*
     const auto taskId = task1->GetTaskType();
     auto entity = static_cast<CTask*>(task1)->entity;
@@ -637,8 +649,8 @@ void CEventHandler::ComputeSexyPedResponse(CEvent* event, CTask* task1, CTask* t
 }
 
 // 0x4B9AA0
-void CEventHandler::ComputeSexyVehicleResponse(CEvent* event, CTask* task1, CTask* task2) {
-    auto evnt = reinterpret_cast<CEventSexyVehicle*>(event);
+void CEventHandler::ComputeSexyVehicleResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    auto evnt = reinterpret_cast<CEventSexyVehicle*>(e);
     if (evnt->m_vehicle) {
         g_InterestingEvents.Add(CInterestingEvents::EType::INTERESTING_EVENT_8, evnt->m_vehicle);
         m_eventResponseTask = new CTaskSimpleStandStill(5000, false, false, 8.0f);
@@ -649,168 +661,166 @@ void CEventHandler::ComputeSexyVehicleResponse(CEvent* event, CTask* task1, CTas
 // task1 TASK_COMPLEX_CAR_DRIVE_WANDER 711 911 912 911 1204
 // task2 TASK_SIMPLE_CAR_DRIVE         709 400 900 900 900
 // 0x4BC710
-void CEventHandler::ComputeShotFiredResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BC710, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeShotFiredResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BC710, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BBE30
-void CEventHandler::ComputeShotFiredWhizzedByResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BBE30, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeShotFiredWhizzedByResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BBE30, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BB050
-void CEventHandler::ComputeSignalAtPedResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BB050, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeSignalAtPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BB050, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 
     //m_eventResponseTask = new CTaskComplexSignalAtPed(*(task1 + 12), *(task1 + 16), *(task1 + 20));
 }
 
 // 0x4BB800
-void CEventHandler::ComputeSpecialResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BB800, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeSpecialResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BB800, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BD6A0
-void CEventHandler::ComputeVehicleCollisionResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BD6A0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeVehicleCollisionResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BD6A0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4C2FC0
-void CEventHandler::ComputeVehicleDamageResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4C2FC0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeVehicleDamageResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4C2FC0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BA8B0
-void CEventHandler::ComputeVehicleDiedResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BA8B0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeVehicleDiedResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BA8B0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x?
-void CEventHandler::ComputeVehicleHitAndRunResponse(CEvent* event, CTask* task1, CTask* task2) {
+void CEventHandler::ComputeVehicleHitAndRunResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
     // NOP
 }
 
 // 0x4BB2E0
-void CEventHandler::ComputeVehicleOnFireResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BB2E0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeVehicleOnFireResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BB2E0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4C0BD0
-void CEventHandler::ComputeVehiclePotentialCollisionResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4C0BD0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeVehiclePotentialCollisionResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4C0BD0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4B96D0
-void CEventHandler::ComputeVehiclePotentialPassiveCollisionResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B96D0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeVehiclePotentialPassiveCollisionResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4B96D0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4B9F80
-void CEventHandler::ComputeVehicleToStealResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B9F80, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeVehicleToStealResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4B9F80, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4BAE30
-void CEventHandler::ComputeWaterCannonResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4BAE30, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+void CEventHandler::ComputeWaterCannonResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
+    plugin::CallMethod<0x4BAE30, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
 // 0x4C3870
-void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
-    return plugin::CallMethod<0x4C3870, CEventHandler*, CEvent*, CTask*>(this, event, task);
+void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
+    return plugin::CallMethod<0x4C3870, CEventHandler*, CEvent*, CTask*>(this, e, task);
 
     m_physicalResponseTask = nullptr;
-    m_eventResponseTask = nullptr;
-    m_attackTask = nullptr;
-    m_sayTask = nullptr;
-    m_partialAnimTask = nullptr;
+    m_eventResponseTask    = nullptr;
+    m_attackTask           = nullptr;
+    m_sayTask              = nullptr;
+    m_partialAnimTask      = nullptr;
 
-    CTask* task1 = m_ped->GetTaskManager().GetActiveTask();
-    CTask* task2 = nullptr;
-    if (task1)
-        task2 = m_ped->GetTaskManager().GetSimplestActiveTask();
+    const auto tactive = m_ped->GetTaskManager().GetActiveTask();
+    const auto tsimplest = tactive ? m_ped->GetTaskManager().GetSimplestActiveTask() : nullptr;
+    
+    //DEV_LOG("event: {} tactive: {} tsimplest: {}", (int32)event->GetEventType(), (int32)tactive->GetTaskType(), (int32)tsimplest->GetTaskType()); // NOTSA
 
-    DEV_LOG("event: {} task1: {} task2: {}", (int32)event->GetEventType(), (int32)task1->GetTaskType(), (int32)task2->GetTaskType()); // NOTSA
-
-    switch (event->GetEventType()) {
+    switch (e->GetEventType()) {
     case EVENT_VEHICLE_COLLISION:
-        ComputeVehicleCollisionResponse(event, task1, task2);
+        ComputeVehicleCollisionResponse(e, tactive, tsimplest);
         break;
     case EVENT_PED_COLLISION_WITH_PED:
-        ComputePedCollisionWithPedResponse(event, task1, task2);
+        ComputePedCollisionWithPedResponse(e, tactive, tsimplest);
         break;
     case EVENT_PED_COLLISION_WITH_PLAYER:
-        ComputePedCollisionWithPlayerResponse(event, task1, task2);
+        ComputePedCollisionWithPlayerResponse(e, tactive, tsimplest);
         break;
     case EVENT_PLAYER_COLLISION_WITH_PED:
-        ComputePlayerCollisionWithPedResponse(event, task1, task2);
+        ComputePlayerCollisionWithPedResponse(e, tactive, tsimplest);
         break;
     case EVENT_OBJECT_COLLISION:
-        ComputeObjectCollisionResponse(event, task1, task2);
+        ComputeObjectCollisionResponse(e, tactive, tsimplest);
         break;
     case EVENT_BUILDING_COLLISION:
-        ComputeBuildingCollisionResponse(event, task1, task2);
+        ComputeBuildingCollisionResponse(e, tactive, tsimplest);
         break;
     case EVENT_DRAGGED_OUT_CAR:
-        ComputeDraggedOutCarResponse(event, task1, task2);
+        ComputeDraggedOutCarResponse(e, tactive, tsimplest);
         break;
     case EVENT_KNOCK_OFF_BIKE:
-        ComputeKnockOffBikeResponse(event, task1, task2);
+        ComputeKnockOffBikeResponse(e, tactive, tsimplest);
         break;
     case EVENT_DAMAGE:
-        ComputeDamageResponse(event, task1, task2, task);
+        ComputeDamageResponse(e, tactive, tsimplest, task);
         break;
     case EVENT_DEATH:
-        ComputeDeathResponse(event, task1, task2);
+        ComputeDeathResponse(e, tactive, tsimplest);
         break;
     case EVENT_DEAD_PED:
-        ComputeDeadPedResponse(event, task1, task2);
+        ComputeDeadPedResponse(e, tactive, tsimplest);
         break;
     case EVENT_POTENTIAL_GET_RUN_OVER:
-        ComputeVehiclePotentialCollisionResponse(event, task1, task2);
+        ComputeVehiclePotentialCollisionResponse(e, tactive, tsimplest);
         break;
     case EVENT_POTENTIAL_WALK_INTO_PED:
-        ComputePotentialPedCollideResponse(event, task1, task2);
+        ComputePotentialPedCollideResponse(e, tactive, tsimplest);
         break;
     case EVENT_SHOT_FIRED:
-        ComputeShotFiredResponse(event, task1, task2);
+        ComputeShotFiredResponse(e, tactive, tsimplest);
         break;
     case EVENT_COP_CAR_BEING_STOLEN:
-        ComputeCopCarBeingStolenResponse(event, task1, task2);
+        ComputeCopCarBeingStolenResponse(e, tactive, tsimplest);
         break;
     case EVENT_PED_ENTERED_MY_VEHICLE:
-        ComputePedEnteredVehicleResponse(event, task1, task2);
+        ComputePedEnteredVehicleResponse(e, tactive, tsimplest);
         break;
     case EVENT_REVIVE:
-        ComputeReviveResponse(event, task1, task2);
+        ComputeReviveResponse(e, tactive, tsimplest);
         break;
     case EVENT_CHAT_PARTNER:
-        ComputeChatPartnerResponse(event, task1, task2);
+        ComputeChatPartnerResponse(e, tactive, tsimplest);
         break;
     case EVENT_SEXY_PED:
-        ComputeSexyPedResponse(event, task1, task2);
+        ComputeSexyPedResponse(e, tactive, tsimplest);
         break;
     case EVENT_SEXY_VEHICLE:
-        ComputeSexyVehicleResponse(event, task1, task2);
+        ComputeSexyVehicleResponse(e, tactive, tsimplest);
         break;
     case EVENT_PED_TO_CHASE:
-        ComputePedToChaseResponse(event, task1, task2);
+        ComputePedToChaseResponse(e, tactive, tsimplest);
         break;
     case EVENT_PED_TO_FLEE:
-        ComputePedToFleeResponse(event, task1, task2);
+        ComputePedToFleeResponse(e, tactive, tsimplest);
         break;
     case EVENT_ATTRACTOR:
     case EVENT_SCRIPTED_ATTRACTOR:
-        ComputeAttractorResponse(event, task1, task2);
+        ComputeAttractorResponse(static_cast<CEventAttractor*>(e), tactive, tsimplest);
         break;
     case EVENT_VEHICLE_TO_STEAL:
-        ComputeVehicleToStealResponse(event, task1, task2);
+        ComputeVehicleToStealResponse(e, tactive, tsimplest);
         break;
     case EVENT_GUN_AIMED_AT:
-        ComputeGunAimedAtResponse(event, task1, task2);
+        ComputeGunAimedAtResponse(e, tactive, tsimplest);
         break;
     case EVENT_SCRIPT_COMMAND:
-        ComputeScriptCommandResponse(event, task1, task2);
+        ComputeScriptCommandResponse(e, tactive, tsimplest);
         break;
     case EVENT_IN_AIR:
         if (!m_ped->bIsStanding) {
@@ -818,109 +828,109 @@ void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
         }
         break;
     case EVENT_VEHICLE_DIED:
-        ComputeVehicleDiedResponse(event, task1, task2);
+        ComputeVehicleDiedResponse(e, tactive, tsimplest);
         break;
     case EVENT_ACQUAINTANCE_PED_HATE:
     case EVENT_ACQUAINTANCE_PED_DISLIKE:
-        ComputePedThreatResponse(event, task1, task2);
+        ComputePedThreatResponse(e, tactive, tsimplest);
         break;
     case EVENT_ACQUAINTANCE_PED_LIKE:
     case EVENT_ACQUAINTANCE_PED_RESPECT:
-        ComputePedFriendResponse(event, task1, task2);
+        ComputePedFriendResponse(e, tactive, tsimplest);
         break;
     case EVENT_VEHICLE_DAMAGE_WEAPON:
     case EVENT_VEHICLE_DAMAGE_COLLISION:
-        ComputeVehicleDamageResponse(event, task1, task2);
+        ComputeVehicleDamageResponse(e, tactive, tsimplest);
         break;
     case EVENT_SPECIAL:
-        ComputeSpecialResponse(event, task1, task2);
+        ComputeSpecialResponse(e, tactive, tsimplest);
         break;
     case EVENT_GOT_KNOCKED_OVER_BY_CAR:
-        ComputeGotKnockedOverByCarResponse(event, task1, task2);
+        ComputeGotKnockedOverByCarResponse(e, tactive, tsimplest);
         break;
     case EVENT_POTENTIAL_WALK_INTO_OBJECT:
-        ComputeObjectCollisionPassiveResponse(event, task1, task2);
+        ComputeObjectCollisionPassiveResponse(e, tactive, tsimplest);
         break;
     case EVENT_CAR_UPSIDE_DOWN:
-        ComputeCarUpsideDownResponse(event, task1, task2);
+        ComputeCarUpsideDownResponse(e, tactive, tsimplest);
         break;
     case EVENT_POTENTIAL_WALK_INTO_FIRE:
-        ComputePotentialWalkIntoFireResponse(event, task1, task2);
+        ComputePotentialWalkIntoFireResponse(e, tactive, tsimplest);
         break;
     case EVENT_SHOT_FIRED_WHIZZED_BY:
-        ComputeShotFiredWhizzedByResponse(event, task1, task2);
+        ComputeShotFiredWhizzedByResponse(e, tactive, tsimplest);
         break;
     case EVENT_LOW_ANGER_AT_PLAYER:
-        ComputeLowAngerAtPlayerResponse(event, task1, task2);
+        ComputeLowAngerAtPlayerResponse(e, tactive, tsimplest);
         break;
     case EVENT_HIGH_ANGER_AT_PLAYER:
-        ComputeHighAngerAtPlayerResponse(event, task1, task2);
+        ComputeHighAngerAtPlayerResponse(e, tactive, tsimplest);
         break;
     case EVENT_HEALTH_REALLY_LOW:
-        ComputeReallyLowHealthResponse(event, task1, task2);
+        ComputeReallyLowHealthResponse(e, tactive, tsimplest);
         break;
     case EVENT_HEALTH_LOW:
-        ComputeLowHealthResponse(event, task1, task2);
+        ComputeLowHealthResponse(e, tactive, tsimplest);
         break;
     case EVENT_POTENTIAL_WALK_INTO_VEHICLE:
-        ComputeVehiclePotentialPassiveCollisionResponse(event, task1, task2);
+        ComputeVehiclePotentialPassiveCollisionResponse(e, tactive, tsimplest);
         break;
     case EVENT_ON_FIRE:
-        ComputeOnFireResponse(event, task1, task2);
+        ComputeOnFireResponse(e, tactive, tsimplest);
         break;
     case EVENT_FIRE_NEARBY:
-        ComputeFireNearbyResponse(event, task1, task2);
+        ComputeFireNearbyResponse(e, tactive, tsimplest);
         break;
     case EVENT_SOUND_QUIET:
-        ComputePedSoundQuietResponse(event, task1, task2);
+        ComputePedSoundQuietResponse(e, tactive, tsimplest);
         break;
     case EVENT_ACQUAINTANCE_PED_HATE_BADLY_LIT:
-        ComputePedThreatBadlyLitResponse(event, task1, task2);
+        ComputePedThreatBadlyLitResponse(e, tactive, tsimplest);
         break;
     case EVENT_WATER_CANNON:
-        ComputeWaterCannonResponse(event, task1, task2);
+        ComputeWaterCannonResponse(e, tactive, tsimplest);
         break;
     case EVENT_SEEN_PANICKED_PED:
-        ComputeSeenPanickedPedResponse(event, task1, task2);
+        ComputeSeenPanickedPedResponse(e, tactive, tsimplest);
         break;
     case EVENT_IN_WATER:
-        ComputeInWaterResponse(event, task1, task2);
+        ComputeInWaterResponse(e, tactive, tsimplest);
         break;
     case EVENT_AREA_CODES:
-        ComputeAreaCodesResponse(event, task1, task2);
+        ComputeAreaCodesResponse(static_cast<CEventAreaCodes*>(e), tactive, tsimplest);
         break;
     case EVENT_PLAYER_WANTED_LEVEL:
-        ComputePlayerWantedLevelResponse(event, task1, task2);
+        ComputePlayerWantedLevelResponse(e, tactive, tsimplest);
         break;
     case EVENT_CREATE_PARTNER_TASK:
-        ComputeCreatePartnerTaskResponse(event, task1, task2);
+        ComputeCreatePartnerTaskResponse(e, tactive, tsimplest);
         break;
     case EVENT_SEEN_COP:
-        ComputeSeenCopResponse(event, task1, task2);
+        ComputeSeenCopResponse(e, tactive, tsimplest);
         break;
     case EVENT_ON_ESCALATOR:
-        ComputeOnEscalatorResponse(event, task1, task2);
+        ComputeOnEscalatorResponse(e, tactive, tsimplest);
         break;
     case EVENT_DANGER:
-        ComputeDangerResponse(event, task1, task2);
+        ComputeDangerResponse(e, tactive, tsimplest);
         break;
     case EVENT_VEHICLE_ON_FIRE:
-        ComputeVehicleOnFireResponse(event, task1, task2);
+        ComputeVehicleOnFireResponse(e, tactive, tsimplest);
         break;
     case EVENT_INTERIOR_USE_INFO:
-        ComputeInteriorUseInfoResponse(event, task1, task2);
+        ComputeInteriorUseInfoResponse(e, tactive, tsimplest);
         break;
     case EVENT_SIGNAL_AT_PED:
-        ComputeSignalAtPedResponse(event, task1, task2);
+        ComputeSignalAtPedResponse(e, tactive, tsimplest);
         break;
     case EVENT_PASS_OBJECT:
-        ComputePassObjectResponse(event, task1, task2);
+        ComputePassObjectResponse(e, tactive, tsimplest);
         break;
     case EVENT_STUCK_IN_AIR:
         m_eventResponseTask = new CTaskComplexStuckInAir();
         break;
     case EVENT_DONT_JOIN_GROUP:
-        ComputeDontJoinGroupResponse(event, task1, task2);
+        ComputeDontJoinGroupResponse(e, tactive, tsimplest);
         break;
     default:
         return;
