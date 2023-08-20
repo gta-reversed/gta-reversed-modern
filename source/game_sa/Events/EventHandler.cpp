@@ -26,6 +26,7 @@
 #include "IKChainManager_c.h"
 #include "EventSexyVehicle.h"
 
+#include "Events/EventCopCarBeingStolen.h"
 #include "Events/EventChatPartner.h"
 #include "Events/EventAttractor.h"
 #include "Events/EntityCollisionEvents.h"
@@ -54,7 +55,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeBuildingCollisionResponse, 0x4BF2B0);
     RH_ScopedInstall(ComputeCarUpsideDownResponse, 0x4BBC30);
     RH_ScopedInstall(ComputeChatPartnerResponse, 0x4B98E0);
-    RH_ScopedInstall(ComputeCopCarBeingStolenResponse, 0x4BB740, { .reversed = false });
+    RH_ScopedInstall(ComputeCopCarBeingStolenResponse, 0x4BB740);
     RH_ScopedInstall(ComputeCreatePartnerTaskResponse, 0x4BB130, { .reversed = false });
     RH_ScopedInstall(ComputeDamageResponse, 0x4C0170, { .reversed = false });
     RH_ScopedInstall(ComputeDangerResponse, 0x4BC230, { .reversed = false });
@@ -592,8 +593,16 @@ void CEventHandler::ComputeChatPartnerResponse(CEventChatPartner* e, CTask* tact
 }
 
 // 0x4BB740
-void CEventHandler::ComputeCopCarBeingStolenResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BB740, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeCopCarBeingStolenResponse(CEventCopCarBeingStolen* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_hijacker || !e->m_vehicle || m_ped->GetVehicleIfInOne() != e->m_vehicle) {
+            return nullptr;
+        }
+        if (e->m_hijacker->IsPlayer()) {
+            FindPlayerWanted()->SetWantedLevelNoDrop(1);
+        }
+        return new CTaskComplexLeaveCar{ e->m_vehicle, 0, 0, true, false };
+    }();
 }
 
 // 0x4BB130
@@ -994,7 +1003,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeShotFiredResponse(e, tactive, tsimplest);
         break;
     case EVENT_COP_CAR_BEING_STOLEN:
-        ComputeCopCarBeingStolenResponse(e, tactive, tsimplest);
+        ComputeCopCarBeingStolenResponse(static_cast<CEventCopCarBeingStolen*>(e), tactive, tsimplest);
         break;
     case EVENT_PED_ENTERED_MY_VEHICLE:
         ComputePedEnteredVehicleResponse(e, tactive, tsimplest);

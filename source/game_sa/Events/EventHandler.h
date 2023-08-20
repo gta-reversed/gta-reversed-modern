@@ -18,6 +18,7 @@ class CEventAreaCodes;
 class CEventAttractor;
 class CEventBuildingCollision;
 class CEventChatPartner;
+class CEventCopCarBeingStolen;
 
 class CEventHandler {
 public:
@@ -53,7 +54,7 @@ public:
     void ComputeBuildingCollisionResponse(CEventBuildingCollision* e, CTask* tactive, CTask* tsimplest);
     void ComputeCarUpsideDownResponse(CEventCarUpsideDown* e, CTask* tactive, CTask* tsimplest);
     void ComputeChatPartnerResponse(CEventChatPartner* e, CTask* tactive, CTask* tsimplest);
-    void ComputeCopCarBeingStolenResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputeCopCarBeingStolenResponse(CEventCopCarBeingStolen* e, CTask* tactive, CTask* tsimplest);
     void ComputeCreatePartnerTaskResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeDamageResponse(CEvent* e, CTask* tactive, CTask* tsimplest, CTask* task3);
     void ComputeDangerResponse(CEvent* e, CTask* tactive, CTask* tsimplest);

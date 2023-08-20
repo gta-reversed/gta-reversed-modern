@@ -509,7 +509,7 @@ public:
     void SetWeaponAccuracy(uint8 acc) { m_nWeaponAccuracy = acc; }
 
     CAcquaintance& GetAcquaintance() { return m_acquaintance; }
-    CVehicle* GetVehicleIfInOne() { return bInVehicle ? m_pVehicle : nullptr; }
+    CVehicle* GetVehicleIfInOne() const { return bInVehicle ? m_pVehicle : nullptr; }
 
     uint8 GetCreatedBy() { return m_nCreatedBy; }
     bool IsCreatedBy(ePedCreatedBy v) const noexcept { return v == m_nCreatedBy; }
