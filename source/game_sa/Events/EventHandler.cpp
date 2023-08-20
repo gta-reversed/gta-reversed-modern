@@ -26,7 +26,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(IsTemporaryEvent, 0x4BC370);
     // RH_ScopedInstall(RecordActiveEvent, 0x0, { .reversed = false });
     // RH_ScopedInstall(RecordPassiveEvent, 0x0, { .reversed = false });
-    RH_ScopedInstall(RegisterKill, 0x4B9340, { .reversed = false });
+    RH_ScopedInstall(RegisterKill, 0x4B9340);
     RH_ScopedInstall(SetEventResponseTask, 0x4BC600, { .reversed = false });
    
     RH_ScopedInstall(ComputeAreaCodesResponse, 0x4BBF50, { .reversed = false });
@@ -214,8 +214,21 @@ void CEventHandler::RecordPassiveEvent(const CEvent& event) {
 }
 
 // 0x4B9340
-void CEventHandler::RegisterKill(const CPed* ped, const CEntity* entity, eWeaponType weaponType, bool a4) {
-    plugin::Call<0x4B9340, const CPed*, const CEntity*, eWeaponType, bool>(ped, entity, weaponType, a4);
+void CEventHandler::RegisterKill(const CPed* ped, const CEntity* inflictedBy, eWeaponType weaponUsed, bool wasHeadShot) {
+    if (!ped) {
+        return;
+    }
+    if (inflictedBy && inflictedBy->IsPed() && inflictedBy->AsPed()->IsPlayer() && inflictedBy != ped) {
+        const auto pi = &FindPlayerInfo();
+        pi->m_nHavocCaused += 10;
+        pi->m_fCurrentChaseValue += 5.f;
+        CDarkel::RegisterKillByPlayer(*ped, weaponUsed, wasHeadShot, inflictedBy->AsPed()->m_nPedType);
+        CPedGroups::RegisterKillByPlayer();
+    } else if (inflictedBy && inflictedBy->IsVehicle() && inflictedBy == FindPlayerVehicle()) {
+        CStats::IncrementStat(STAT_PEOPLE_YOUVE_WASTED);
+    } else {
+        CDarkel::RegisterKillNotByPlayer(ped);
+    }
 }
 
 // 0x4BC600
