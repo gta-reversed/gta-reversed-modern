@@ -987,7 +987,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeReviveResponse(e, tactive, tsimplest);
         break;
     case EVENT_CHAT_PARTNER:
-        ComputeChatPartnerResponse(e, tactive, tsimplest);
+        ComputeChatPartnerResponse(static_cast<CEventChatPartner*>(e), tactive, tsimplest);
         break;
     case EVENT_SEXY_PED:
         ComputeSexyPedResponse(e, tactive, tsimplest);
