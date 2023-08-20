@@ -23,7 +23,7 @@ public:
     TList_c<FxSystemBP_c>    m_FxSystemBPs;
     TList_c<FxSystem_c>      m_FxSystems;
     FxEmitterPrt_c*          m_FxEmitters;
-    TList_c<FxEmitterPrt_c>  m_FxEmitterParticles;
+    TList_c<Particle_c>      m_FxEmitterParticles;
     int32                    m_nFxTxdIndex;
     CVector*                 m_pWindDir;
     float*                   m_pfWindSpeed;
@@ -56,7 +56,7 @@ public:
     void CalcFrustumInfo(RwCamera* camera);
 
     void ReturnParticle(FxEmitterPrt_c* emitter);
-    FxEmitterPrt_c* GetParticle(int8 arg0);
+    Particle_c* GetParticle(int8 primType);
     void FreeUpParticle();
 
     void Update(RwCamera* camera, float timeDelta);

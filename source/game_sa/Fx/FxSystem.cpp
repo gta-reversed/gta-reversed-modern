@@ -172,8 +172,14 @@ void FxSystem_c::AttachToBone(CEntity* entity, ePedBones boneId) {
 }
 
 auto CanAddParticle() {
-    auto v10 = (uint32)((float)(uint32)rand() * RAND_MAX_INT_RECIPROCAL * 100.0f); // [0, 199]
-    return (g_fx.GetFxQuality() || v10 >= 50) && (g_fx.GetFxQuality() != FX_QUALITY_MEDIUM || v10 >= 25);
+    switch (g_fx.GetFxQuality()) {
+    case FX_QUALITY_LOW:
+        return CGeneral::RandomBool(50.0f);
+    case FX_QUALITY_MEDIUM:
+        return CGeneral::RandomBool(75.0f);
+    default:
+        return true;
+    }
 }
 
 //  0x4AA440

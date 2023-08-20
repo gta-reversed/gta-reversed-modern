@@ -21,31 +21,31 @@ void FxManager_c::InjectHooks() {
     RH_ScopedClass(FxManager_c);
     RH_ScopedCategory("Fx");
 
-    // + RH_ScopedInstall(Constructor, 0x4A9470);
-    // + RH_ScopedInstall(Destructor, 0x4A90A0);
-    // + RH_ScopedInstall(Init, 0x4A98E0);
-    // + RH_ScopedInstall(Exit, 0x4A9A10);
-    // + RH_ScopedInstall(DestroyFxSystem, 0x4A9810);
-    // + RH_ScopedInstall(DestroyAllFxSystems, 0x4A98B0);
-    // + RH_ScopedInstall(Update, 0x4A9A80);
-    // + RH_ScopedInstall(LoadFxProject, 0x5C2420);
-    // + RH_ScopedInstall(UnloadFxProject, 0x4A9AE0);
-    // + RH_ScopedInstall(LoadFxSystemBP, 0x5C1F50);
-    // + RH_ScopedInstall(FindFxSystemBP, 0x4A9360);
-    // + RH_ScopedInstall(GetFrustumInfo, 0x4A9130);
-    // + RH_ScopedInstall(CalcFrustumInfo, 0x4A9140);
-    // + RH_ScopedInstall(Render, 0x4A92A0);
-    // + RH_ScopedInstall(ReturnParticle, 0x4A93B0);
-    // + RH_ScopedInstall(GetParticle, 0x4A93C0);
-    // + RH_ScopedInstall(FreeUpParticle, 0x4A9400);
-    // + RH_ScopedInstall(SetWindData, 0x4A93E0);
-    // + RH_ScopedInstall(FxRwMatrixCreate, 0x4A9440);
-    // + RH_ScopedInstall(FxRwMatrixDestroy, 0x4A9460);
-    // + RH_ScopedInstall(ShouldCreate, 0x4A9500);
-    // + RH_ScopedOverloadedInstall(CreateFxSystem, "2", 0x4A9BB0, FxSystem_c* (FxManager_c::*)(const char*, RwMatrix*, RwMatrix*, bool));
-    // + RH_ScopedOverloadedInstall(CreateFxSystem, "1", 0x4A95C0, FxSystem_c* (FxManager_c::*)(FxSystemBP_c*, RwMatrix*, RwMatrix*, bool));
-    // + RH_ScopedOverloadedInstall(CreateFxSystem, "4", 0x4A9BE0, FxSystem_c* (FxManager_c::*)(const char*, CVector*, RwMatrix*, bool));
-    // + RH_ScopedOverloadedInstall(CreateFxSystem, "3", 0x4A96B0, FxSystem_c* (FxManager_c::*)(FxSystemBP_c*, CVector*, RwMatrix*, bool));
+    RH_ScopedInstall(Constructor, 0x4A9470);
+    RH_ScopedInstall(Destructor, 0x4A90A0);
+    RH_ScopedInstall(Init, 0x4A98E0);
+    RH_ScopedInstall(Exit, 0x4A9A10);
+    RH_ScopedInstall(DestroyFxSystem, 0x4A9810);
+    RH_ScopedInstall(DestroyAllFxSystems, 0x4A98B0);
+    RH_ScopedInstall(Update, 0x4A9A80);
+    RH_ScopedInstall(LoadFxProject, 0x5C2420);
+    RH_ScopedInstall(UnloadFxProject, 0x4A9AE0);
+    RH_ScopedInstall(LoadFxSystemBP, 0x5C1F50);
+    RH_ScopedInstall(FindFxSystemBP, 0x4A9360);
+    RH_ScopedInstall(GetFrustumInfo, 0x4A9130);
+    RH_ScopedInstall(CalcFrustumInfo, 0x4A9140);
+    RH_ScopedInstall(Render, 0x4A92A0);
+    RH_ScopedInstall(ReturnParticle, 0x4A93B0);
+    RH_ScopedInstall(GetParticle, 0x4A93C0);
+    RH_ScopedInstall(FreeUpParticle, 0x4A9400);
+    RH_ScopedInstall(SetWindData, 0x4A93E0);
+    RH_ScopedInstall(FxRwMatrixCreate, 0x4A9440);
+    RH_ScopedInstall(FxRwMatrixDestroy, 0x4A9460);
+    RH_ScopedInstall(ShouldCreate, 0x4A9500);
+    RH_ScopedOverloadedInstall(CreateFxSystem, "2", 0x4A9BB0, FxSystem_c* (FxManager_c::*)(const char*, RwMatrix*, RwMatrix*, bool));
+    RH_ScopedOverloadedInstall(CreateFxSystem, "1", 0x4A95C0, FxSystem_c* (FxManager_c::*)(FxSystemBP_c*, RwMatrix*, RwMatrix*, bool));
+    RH_ScopedOverloadedInstall(CreateFxSystem, "4", 0x4A9BE0, FxSystem_c* (FxManager_c::*)(const char*, CVector*, RwMatrix*, bool));
+    RH_ScopedOverloadedInstall(CreateFxSystem, "3", 0x4A96B0, FxSystem_c* (FxManager_c::*)(FxSystemBP_c*, CVector*, RwMatrix*, bool));
 }
 
 // 0x4A9470
@@ -223,7 +223,7 @@ void FxManager_c::CalcFrustumInfo(RwCamera* camera) {
     const auto angle = RadiansToDegrees(std::atan2(dist, 1.0f));
     const auto radius = std::sqrt(dist * dist + 1.0f) * farClip / DegreesToRadians(std::sin((180.0f - (angle + angle)))) * std::sin(DegreesToRadians(angle));
 
-    m_Frustum.m_Sphere.m_vecCenter = matrix->pos + matrix->at * radius;
+    m_Frustum.m_Sphere.m_vecCenter = CVector{matrix->pos} + CVector{matrix->at} * radius;
     m_Frustum.m_Sphere.m_fRadius   = radius;
 
     m_Frustum.m_Planes[0] = camera->frustumPlanes[2].plane;
@@ -271,12 +271,11 @@ void FxManager_c::ReturnParticle(FxEmitterPrt_c* emitter) {
     m_FxEmitterParticles.AddItem(emitter);
 }
 
-// 0x4A93C0
-FxEmitterPrt_c* FxManager_c::GetParticle(int8 arg0) {
-    if (arg0)
-        return nullptr;
-    else
-        return m_FxEmitterParticles.RemoveHead();
+// 0x4A93C0 -- has no xref with primType != 0.
+Particle_c* FxManager_c::GetParticle(int8 primType) {
+    assert(!primType);
+
+    return !primType ? m_FxEmitterParticles.RemoveHead() : nullptr;
 }
 
 // 0x4A9400
