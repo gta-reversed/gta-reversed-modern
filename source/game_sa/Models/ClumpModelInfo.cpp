@@ -330,7 +330,6 @@ RwFrame* CClumpModelInfo::FindFrameFromNameWithoutIdCB(RwFrame* frame, void* sea
         searchInfo->m_pFrame = frame;
         return nullptr;
     }
-
     RwFrameForAllChildren(frame, FindFrameFromNameWithoutIdCB, searchData);
     if (searchInfo->m_pFrame)
         return nullptr;

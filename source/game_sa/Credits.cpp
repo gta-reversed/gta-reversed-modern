@@ -30,6 +30,8 @@ void CCredits::Stop() {
 
 // 0x53D5B0
 void CCredits::Render() {
+    ZoneScoped;
+
     if (bCreditsGoing && !FrontEndMenuManager.m_bMenuActive) {
         RenderCredits();
     }

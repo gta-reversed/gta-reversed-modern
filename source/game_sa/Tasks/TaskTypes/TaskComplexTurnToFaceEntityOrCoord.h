@@ -21,8 +21,8 @@ public:
     CTaskComplexTurnToFaceEntityOrCoord(const CVector& coords, float changeRateMult = 0.5f, float maxHeading = 0.2f);
     ~CTaskComplexTurnToFaceEntityOrCoord() override;
 
-    eTaskType GetTaskType() override { return Type; } // 0x66B900
-    CTask* Clone() override; // 0x66D250
+    eTaskType GetTaskType() const override { return Type; } // 0x66B900
+    CTask* Clone() const override; // 0x66D250
     CTask* CreateNextSubTask(CPed* ped) override { return nullptr; } // 0x66B9C0
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

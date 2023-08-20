@@ -703,6 +703,8 @@ RpAtomic* CVisibilityPlugins::RenderPlayerCB(RpAtomic* atomic) {
 
 // 0x733800
 void CVisibilityPlugins::RenderReallyDrawLastObjects() {
+    ZoneScoped;
+
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
@@ -711,9 +713,11 @@ void CVisibilityPlugins::RenderReallyDrawLastObjects() {
     RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
     RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATECULLMODE,          RWRSTATE(rwCULLMODECULLNONE));
+
     SetAmbientColours();
     DeActivateDirectional();
     RenderOrderedList(m_alphaReallyDrawLastList);
+
     RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
 }
 
@@ -984,6 +988,8 @@ RpAtomic* CVisibilityPlugins::RenderWeaponCB(RpAtomic* atomic) {
 
 // 0x732F30
 void CVisibilityPlugins::RenderWeaponPedsForPC() {
+    ZoneScoped;
+
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEFOGENABLE,            RWRSTATE(TRUE));
@@ -997,7 +1003,7 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
             ped->SetupLighting();
             const CWeapon& activeWeapon = ped->GetActiveWeapon();
             RpHAnimHierarchy* pRpAnimHierarchy = GetAnimHierarchyFromSkinClump(ped->m_pRwClump);
-            const int32 boneID = activeWeapon.m_nType != WEAPON_PARACHUTE ? BONE_R_HAND : BONE_SPINE1;
+            const int32 boneID = activeWeapon.m_Type != WEAPON_PARACHUTE ? BONE_R_HAND : BONE_SPINE1;
             int32 animIDIndex = RpHAnimIDGetIndex(pRpAnimHierarchy, boneID);
             RwMatrix* pRightHandMatrix = &RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy)[animIDIndex];
             { // todo: NOTSA
@@ -1008,7 +1014,7 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
             RwFrame* weaponFrame = RpClumpGetFrame(ped->m_pWeaponObject);
             RwMatrix* weaponRwMatrix = RwFrameGetMatrix(weaponFrame);
             memcpy(weaponRwMatrix, pRightHandMatrix, sizeof(RwMatrixTag));
-            if (activeWeapon.m_nType == WEAPON_PARACHUTE) {
+            if (activeWeapon.m_Type == WEAPON_PARACHUTE) {
                 static RwV3d rightWeaponTranslate = { 0.1f, -0.15f, 0.0f };
                 RwMatrixTranslate(weaponRwMatrix, &rightWeaponTranslate, rwCOMBINEPRECONCAT);
                 RwMatrixRotate(weaponRwMatrix, &CPedIK::YaxisIK, 90.0f, rwCOMBINEPRECONCAT);
@@ -1017,7 +1023,7 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
             RwFrameUpdateObjects(weaponFrame);
             RpClumpRender(ped->m_pWeaponObject);
             eWeaponSkill weaponSkill = ped->GetWeaponSkill();
-            if (CWeaponInfo::GetWeaponInfo(activeWeapon.m_nType, weaponSkill)->flags.bTwinPistol) {
+            if (CWeaponInfo::GetWeaponInfo(activeWeapon.m_Type, weaponSkill)->flags.bTwinPistol) {
                 int32 animIDIndex = RpHAnimIDGetIndex(pRpAnimHierarchy, BONE_L_HAND);
                 RwMatrix* pLeftHandMatrix = &RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy)[animIDIndex];
                 memcpy(weaponRwMatrix, pLeftHandMatrix, sizeof(RwMatrixTag));
@@ -1151,4 +1157,8 @@ bool CVisibilityPlugins::VehicleVisibilityCB(RpClump* clump) {
 // 0x732AB0
 bool CVisibilityPlugins::VehicleVisibilityCB_BigVehicle(RpClump* clump) {
     return FrustumSphereCB(clump);
+}
+
+void weaponPedsForPc_Insert(CPed* ped) {
+    plugin::Call<0x5E46D0>(ped);
 }

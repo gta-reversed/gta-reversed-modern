@@ -76,6 +76,8 @@ void CWeather::InjectHooks() {
 
 // 0x72A480
 void CWeather::Init() {
+    ZoneScoped;
+
     NewWeatherType = WEATHER_EXTRASUNNY_LA;
     OldWeatherType = WEATHER_EXTRASUNNY_LA;
     WeatherRegion  = WEATHER_REGION_DEFAULT;
@@ -298,6 +300,8 @@ void CWeather::SetWeatherToAppropriateTypeNow() {
 
 // 0x72B850
 void CWeather::Update() {
+    ZoneScoped;
+
     plugin::Call<0x72B850>();
 }
 

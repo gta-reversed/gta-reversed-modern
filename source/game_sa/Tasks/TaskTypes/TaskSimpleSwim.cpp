@@ -24,7 +24,9 @@ bool CTaskSimpleSwim::MakeAbortable(class CPed* ped, eAbortPriority priority, co
 bool CTaskSimpleSwim::ProcessPed(CPed* ped) { return ProcessPed_Reversed(ped); }
 
 // 0x688930
-CTaskSimpleSwim::CTaskSimpleSwim(CVector* pos, CPed* ped) : CTaskSimple(), m_vecPos{ CVector() } {
+CTaskSimpleSwim::CTaskSimpleSwim(const CVector* pos, CPed* ped) :
+    m_vecPos{pos ? *pos : CVector{}}
+{
     m_bFinishedBlending = false;
     m_bAnimBlockRefAdded = false;
     m_fAnimSpeed = -1.0f;
@@ -39,9 +41,6 @@ CTaskSimpleSwim::CTaskSimpleSwim(CVector* pos, CPed* ped) : CTaskSimple(), m_vec
     m_nTimeStep = 0;
     m_nSwimState = SWIM_TREAD;
     m_AnimID = ANIM_ID_NO_ANIMATION_SET;
-
-    if (pos)
-        m_vecPos = *pos;
 
     CEntity::SafeRegisterRef(m_pPed);
 
@@ -241,7 +240,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* ped) {
             }
         }
         RpAnimBlendClumpSetBlendDeltas(player->m_pRwClump, 0x10, -8.0f); // todo: ANIMATION_PARTIAL ?
-        FxSystem_c::SafeKillAndClear(player->GetActiveWeapon().m_pFxSystem); // Removes fire or something in water
+        FxSystem_c::SafeKillAndClear(player->GetActiveWeapon().m_FxSystem); // Removes fire or something in water
 
         if (player->IsPlayer() && !m_nSwimState) {
             float waterLevel = 0.0f;

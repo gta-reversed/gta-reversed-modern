@@ -89,12 +89,12 @@ public:
     int8      m_nRadioVolume;
     bool      m_bRadioEq;
 
-    int8      m_nRadioStation;
+    eRadioID  m_nRadioStation;
     char      field_53;
     int32     m_nCurrentScreenItem;
     bool      m_bQuitGameNoDVD; // CMenuManager::WaitForUserCD 0x57C5E0
 
-    bool      m_bDrawRadarOrMap;
+    bool      m_bDrawingMap;
     bool      m_bStreamingDisabled;
     bool      m_bAllStreamingStuffLoaded;
 
@@ -103,14 +103,13 @@ public:
     int8      m_nGameState;
     char      m_bIsSaveDone;
     bool      m_bLoadingData;
-
     float     m_fMapZoom;
     CVector2D m_vMapOrigin;
     CVector2D m_vMousePos;  // Red marker position (world coordinates)
     bool      m_bMapLoaded;
 
-    int32     m_nTitleLanguage;
-    int32     m_nTextLanguage;
+    int32     m_nTitleLanguage; // Value is PRIMARYLANGID(GetSystemDefaultLCID())
+    int32     m_nTextLanguage; // TODO: Change to `eLanguage`
     eLanguage m_nPrefsLanguage;
     eLanguage m_nPreviousLanguage;
     int32     m_nLanguageF0x88;
@@ -314,6 +313,7 @@ public:
     void DisplayHelperText(const char* key);
     void SetHelperText(eHelperText messageId);
     void ResetHelperText();
+    void NoDiskInDriveMessage();
 
     void MessageScreen(const char* key, bool blackBackground, bool cameraUpdateStarted);
     void SmallMessageScreen(const char* key);
@@ -343,13 +343,18 @@ public:
 
     // NOTSA
     const char* GetMovieFileName() const {
-        if (m_nTitleLanguage == 12 || m_nTitleLanguage == 7) {
+        switch (m_nTitleLanguage) {
+        case 12:
+        case 7:
             return "movies\\GTAtitlesGER.mpg";
-        } else {
-            return "movies\\GTAtitles.mpg";
         }
+        return "movies\\GTAtitles.mpg";
     }
 
+    //! Simulate that we came into the menu and clicked to load game
+    //! @param newGame If we should start a new game
+    //! @param slot    Slot of the save-game to load (Ignored if `newGame`)
+    void SimulateGameLoad(bool newGame, uint32 slot);
 private:
     static void SetBrightness(float brightness, bool arg2);
 };

@@ -70,7 +70,7 @@ void CTaskSimpleDie::StartAnim(CPed* ped) {
 }
 
 // 0x635DA0
-CTask* CTaskSimpleDie::Clone() {
+CTask* CTaskSimpleDie::Clone() const {
     if (m_animHierarchy) {
         return new CTaskSimpleDie(m_animHierarchy, m_animFlags, m_blendDelta, m_animSpeed);
     } else {

@@ -42,7 +42,7 @@ void CMenuManager::PlaceRedMarker() {
         m_nTargetBlipIndex = 0;
     } else {
         AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_SELECT);
-        m_nTargetBlipIndex = CRadar::SetCoordBlip(BLIP_COORD, { m_vMousePos.x, m_vMousePos.y, 0.0f }, 0, BLIP_DISPLAY_BLIPONLY, "CODEWAY");
+        m_nTargetBlipIndex = CRadar::SetCoordBlip(BLIP_COORD, { m_vMousePos.x, m_vMousePos.y, 0.0f }, BLIP_COLOUR_RED, BLIP_DISPLAY_BLIPONLY, "CODEWAY");
         CRadar::SetBlipSprite(m_nTargetBlipIndex, RADAR_SPRITE_WAYPOINT);
     }
 }
@@ -143,11 +143,11 @@ void CMenuManager::PrintBriefs() {
         float h = 100.0f;
         for (auto i = 0u; i < BRIEFS_MAX_LINES_ON_SCREEN; i++) {
             auto& brief = CMessages::PreviousBriefs[m_nSelectedRow - i];
-            if (!brief.m_pText)
+            if (!brief.Text)
                 continue;
 
-            CMessages::InsertNumberInString(brief.m_pText, brief.m_nNumber, gGxtString);
-            CMessages::InsertStringInString(gGxtString, brief.m_pString);
+            CMessages::InsertNumberInString2(brief.Text, brief.NumbersToInsert, gGxtString);
+            CMessages::InsertStringInString(gGxtString, brief.StringToInsert);
             CMessages::InsertPlayerControlKeysInString(gGxtString);
             CFont::PrintString(StretchX(70.0f), StretchY(h), gGxtString);
 
@@ -168,7 +168,7 @@ void CMenuManager::PrintBriefs() {
 
     if (drawArrows) {
         // up arrow
-        if (m_nSelectedRow < 19u && CMessages::PreviousBriefs[m_nSelectedRow + 1].m_pText) {
+        if (m_nSelectedRow < 19u && CMessages::PreviousBriefs[m_nSelectedRow + 1].Text) {
             CSprite2d::Draw2DPolygon(
                 StretchX(50.0f), StretchY(100.0f),
                 StretchX(55.0f), StretchY(110.0f),

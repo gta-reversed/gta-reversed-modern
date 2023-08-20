@@ -5,12 +5,18 @@
 
 namespace WinInput {
 
+void diMouseInit(bool exclusive);
+void diPadInit();
+
+BOOL CALLBACK EnumDevicesCallback(LPCDIDEVICEINSTANCEA pInst, LPVOID);
+CMouseControllerState GetMouseState();
+
 void InjectHooks();
 bool Initialise();
-void InitialiseMouse(bool exclusive);
-void InitialiseJoys();
-BOOL CALLBACK EnumDevicesCallback(LPCDIDEVICEINSTANCEA pInst, LPVOID);
 
-const CMouseControllerState& GetMouseButtonMask();
+bool IsKeyDown(unsigned int keyCode);
+bool IsKeyPressed(unsigned int keyCode);
+
+HRESULT Shutdown();
 
 }; // namespace WinInput

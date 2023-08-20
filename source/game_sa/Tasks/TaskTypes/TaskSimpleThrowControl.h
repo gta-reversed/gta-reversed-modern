@@ -22,9 +22,9 @@ public:
     CTaskSimpleThrowControl(const CTaskSimpleThrowControl&);
     ~CTaskSimpleThrowControl();
 
-    eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override { return new CTaskSimpleThrowControl{ *this }; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override { return new CTaskSimpleThrowControl{ *this }; }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
 
 private: // Wrappers for hooks

@@ -17,9 +17,9 @@ public:
     CTaskSimplePlayHandSignalAnim(AnimationId animationId, float fBlendFactor, bool bFatHands, bool bHoldLastFrame);
     ~CTaskSimplePlayHandSignalAnim() override;
 
-    eTaskType GetTaskType() override { return Type; } // 0x61AEA0;
-    CTask* Clone() override { return new CTaskSimplePlayHandSignalAnim(m_nAnimationBlockIndex, m_fBlendFactor, m_bUseFatHands, m_bHoldLastFrame); }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return CTaskSimpleAnim::MakeAbortable(ped, priority, event); }
+    eTaskType GetTaskType() const override { return Type; } // 0x61AEA0;
+    CTask* Clone() const override { return new CTaskSimplePlayHandSignalAnim(m_nAnimationBlockIndex, m_fBlendFactor, m_bUseFatHands, m_bHoldLastFrame); }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override { return CTaskSimpleAnim::MakeAbortable(ped, priority, event); }
     bool ProcessPed(CPed* ped) override;
 
     void StartAnim(CPed* ped);

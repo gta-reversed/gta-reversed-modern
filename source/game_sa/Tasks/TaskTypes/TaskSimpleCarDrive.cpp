@@ -152,7 +152,7 @@ void CTaskSimpleCarDrive::ProcessBopping(CPed* ped, bool a3) {
 }
 
 // 0x63DC20
-CTask* CTaskSimpleCarDrive::Clone() {
+CTask* CTaskSimpleCarDrive::Clone() const {
     auto task = new CTaskSimpleCarDrive(m_pVehicle);
     task->m_bUpdateCurrentVehicle = m_bUpdateCurrentVehicle;
     return task;

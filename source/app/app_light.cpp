@@ -126,6 +126,8 @@ void LightsEnable(int32 enable) {
 
 // 0x7354E0
 void SetLightsWithTimeOfDayColour(RpWorld* world) {
+    ZoneScoped;
+
     assert(world);
 
     if (pAmbient) {

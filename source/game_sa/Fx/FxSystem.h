@@ -32,7 +32,7 @@ class FxPrimBP_c;
 class FxBox_c;
 struct Particle_c;
 
-class FxSystem_c : public ListItem_c {
+class FxSystem_c : public ListItem_c<FxSystem_c> {
 public:
     FxSystemBP_c* m_SystemBP;
     RwMatrix*     m_ParentMatrix;

@@ -10,6 +10,7 @@ enum eTrafficLightsState {
 };
 
 enum eTrafficLightsDirection {
+    DIR_DISABLED = 0,
     DIR_NORTH_SOUTH = 1,
     DIR_WEST_EAST = 2
 };

@@ -13,10 +13,11 @@ public:
     static constexpr auto Type = TASK_COMPLEX_ENTER_CAR_AS_PASSENGER;
 
     CTaskComplexEnterCarAsPassenger(CVehicle* targetVehicle, int32 nTargetSeat, bool bCarryOnAfterFallingOff);
+    CTaskComplexEnterCarAsPassenger(const CTaskComplexEnterCarAsPassenger&);
     ~CTaskComplexEnterCarAsPassenger() override = default;
 
-    eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override;
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override { return new CTaskComplexEnterCarAsPassenger{*this}; } // 0x6437F0
 };
 
 VALIDATE_SIZE(CTaskComplexEnterCarAsPassenger, 0x50);

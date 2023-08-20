@@ -10,10 +10,12 @@ public:
     CPed* m_ped;
 
 public:
+    static constexpr auto Type = EVENT_GUN_AIMED_AT;
+
     explicit CEventGunAimedAt(CPed* ped);
     ~CEventGunAimedAt() override;
 
-    eEventType GetEventType() const override { return EVENT_GUN_AIMED_AT; }
+    eEventType GetEventType() const override { return Type; }
     int32 GetEventPriority() const override { return 50; }
     int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;

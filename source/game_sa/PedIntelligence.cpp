@@ -275,7 +275,7 @@ CTaskSimpleThrowProjectile* CPedIntelligence::GetTaskThrow() {
 }
 
 // 0x600FF0
-CTask* CPedIntelligence::GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask) {
+CTaskSimpleHoldEntity* CPedIntelligence::GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask) {
     if (const auto task = CTask::DynCast<CTaskSimpleHoldEntity>(m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM))) {
         return task;
     }
@@ -283,7 +283,7 @@ CTask* CPedIntelligence::GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask) 
     if (!bIgnoreCheckingForSimplestActiveTask) {
         if (const auto task = m_TaskMgr.GetSimplestActiveTask()) {
             if (CTask::IsA<TASK_SIMPLE_PICKUP_ENTITY, TASK_SIMPLE_PUTDOWN_ENTITY>(task)) {
-                return task;
+                return static_cast<CTaskSimpleHoldEntity*>(task);
             }
         }
     }
@@ -337,7 +337,7 @@ CTaskSimpleClimb* CPedIntelligence::GetTaskClimb() {
 // 0x6011B0
 bool CPedIntelligence::GetUsingParachute() {
     CWeapon* activeWeapon = &m_pPed->GetActiveWeapon();
-    if (activeWeapon->m_nType != WEAPON_PARACHUTE) {
+    if (activeWeapon->m_Type != WEAPON_PARACHUTE) {
         return false;
     }
 
@@ -605,7 +605,7 @@ void CPedIntelligence::ProcessAfterPreRender() {
     }
 
     CWeapon* activeWeapon = &m_pPed->GetActiveWeapon();
-    if (activeWeapon->m_nType == WEAPON_MOLOTOV && activeWeapon->m_pFxSystem)
+    if (activeWeapon->m_Type == WEAPON_MOLOTOV && activeWeapon->m_FxSystem)
     {
         RpHAnimHierarchy* animHierarchy = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
         int32 animIDIndex = RpHAnimIDGetIndex(animHierarchy, 24); // 24 = BONE_R_HAND?
@@ -619,7 +619,7 @@ void CPedIntelligence::ProcessAfterPreRender() {
         memcpy(&matrix, m_pPed->GetModellingMatrix(), sizeof(matrix));
         matrix.pos = pointOut;
         RwMatrixUpdate(&matrix);
-        activeWeapon->m_pFxSystem->SetMatrix(&matrix);
+        activeWeapon->m_FxSystem->SetMatrix(&matrix);
     }
 
     if (m_pPed->bInVehicle)
@@ -1036,6 +1036,16 @@ void* CPedIntelligence::operator new(unsigned size) {
 // 0x6074E0
 void CPedIntelligence::operator delete(void* object) {
     GetPedIntelligencePool()->Delete(static_cast<CPedIntelligence*>(object));
+}
+
+// NOTSA
+CVehicle* CPedIntelligence::GetEnteringVehicle() {
+    for (const auto taskt : { TASK_COMPLEX_ENTER_CAR_AS_DRIVER, TASK_COMPLEX_ENTER_CAR_AS_PASSENGER }) {
+        if (const auto task = FindTaskByType(taskt)) {
+            return static_cast<CTaskComplexEnterCar*>(task)->GetVehicle();
+        }
+    }
+    return nullptr;
 }
 
 // 0x607140

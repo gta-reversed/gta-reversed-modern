@@ -1,9 +1,8 @@
 #pragma once
 
-//#include <array>
-
 #include "Base.h"
 #include "Utility.hpp"
+#include "ReadArg.hpp" // TODO: We only use `PooledType` from here, so move that out to somewhere common between the 2 headers (because including this here is ugly)
 #include "TheScripts.h"
 #include "RunningScript.h" // ScriptParams
 #include "Pools.h"
@@ -14,7 +13,7 @@ namespace script {
 * Bool is a sepcial case, it isn't stored, but rather updates the compare flag.
 * TODO: Actually verify this theory.
 */
-void StoreArg(CRunningScript* S, bool arg) {
+inline void StoreArg(CRunningScript* S, bool arg) {
     S->UpdateCompareFlag(arg);
 }
 /*!
@@ -24,9 +23,10 @@ void StoreArg(CRunningScript* S, bool arg) {
 * @param arg    The argument to store
 */
 template<typename T>
-void StoreArg(CRunningScript* S, const T& arg) requires (std::is_arithmetic_v<T>) { // Add requirements to filter out possible mistakes (Like returning an unsupported type)
+    requires (std::is_arithmetic_v<T>)
+inline void StoreArg(CRunningScript* S, const T& arg) { // Add requirements to filter out possible mistakes (Like returning an unsupported type)
     tScriptParam* dest = [&] {
-        auto& ip = S->m_pCurrentIP;
+        auto& ip = S->m_IP;
 
         // Helper
         const auto ReadArrayInfo = [S] {
@@ -36,7 +36,7 @@ void StoreArg(CRunningScript* S, const T& arg) requires (std::is_arithmetic_v<T>
             return std::make_tuple(offset, idx);
         };
 
-        switch (CTheScripts::Read1ByteFromScript(ip)) {
+        switch (const auto t = CTheScripts::Read1ByteFromScript(ip)) {
         case SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE:
             return reinterpret_cast<tScriptParam*>(&CTheScripts::ScriptSpace[CTheScripts::Read2BytesFromScript(ip)]);
         case SCRIPT_PARAM_LOCAL_NUMBER_VARIABLE: {
@@ -51,7 +51,7 @@ void StoreArg(CRunningScript* S, const T& arg) requires (std::is_arithmetic_v<T>
             return S->GetPointerToLocalArrayElement(offset, idx, 1);
         }
         default:
-            NOTSA_UNREACHABLE("Variable type unknown");
+            NOTSA_UNREACHABLE("Variable type unknown ={:x}", t);
         }
     }();
     static_assert(sizeof(T) <= sizeof(tScriptParam)); // Otherwise we'd be overwriting the script => bad
@@ -62,40 +62,56 @@ void StoreArg(CRunningScript* S, const T& arg) requires (std::is_arithmetic_v<T>
 
 // Vector overloads
 
-void StoreArg(CRunningScript* script, const CVector& v3) {
+inline void StoreArg(CRunningScript* script, const CVector& v3) {
     for (auto&& c : v3.GetComponents()) {
         StoreArg(script, c);
     }
 }
 
-void StoreArg(CRunningScript* S, const CVector2D& v2) {
+inline void StoreArg(CRunningScript* S, const CVector2D& v2) {
     for (auto&& c : v2.GetComponents()) {
         StoreArg(S, c);
     }
 }
 
-void StoreArg(CRunningScript* S, CompareFlagUpdate flag) {
+inline void StoreArg(CRunningScript* S, CompareFlagUpdate flag) {
     S->UpdateCompareFlag(flag.state);
 }
 
 // Below must be after the basic overloads, otherwise won't compile
 
+//! Store a pooled type (CPed, CVehicle, etc) - It pushes a handle of the entity to the script
+template<detail::PooledType T>
+inline void StoreArg(CRunningScript* S, const T& value) {
+    const auto StoreEntity = [&](auto ptr) { StoreArg(S, detail::PoolOf<std::remove_cvref_t<T>>().GetRef(ptr)); };
+    if constexpr (std::is_pointer_v<T>) {
+        if (value) { // As always, pointers might be null, so we have to check.
+            StoreEntity(value);
+        } else {
+            StoreArg(S, -1); // If null, store `-1` (indicates an invalid handle, it is handled properly!)
+        }
+    } else { // References are never invalid
+        StoreEntity(&value);
+    }
+}
+
+
 /*!
-* @brief Overload for types that have a pool (thus we store a reference)
-*/
-template<typename T, typename Y = std::decay_t<T>>
-void StoreArg(CRunningScript* S, T* arg) requires(detail::PoolOf<Y>()) {
-    StoreArg(S, detail::PoolOf<Y>().GetRef(arg));
+ * @brief Overload for enum types. They're casted to their underlying type.
+ */
+template <typename T>
+    requires std::is_enum_v<T>
+inline void StoreArg(CRunningScript* S, T value) {
+    StoreArg(S, static_cast<std::underlying_type_t<T>>(value));
 }
 
 /*!
 * @brief Overload for MultiReturn => Stores each arg separately, in same order as they appear in the multireturn
 */
 template<typename... Ts>
-void StoreArg(CRunningScript* S, const MultiRet<Ts...>& arg) {
+inline void StoreArg(CRunningScript* S, const MultiRet<Ts...>& arg) {
     std::apply([S](const Ts&... args) { (StoreArg(S, args), ...); }, arg);
 }
-
 
 }; // namespace script
 }; // namespace notsa

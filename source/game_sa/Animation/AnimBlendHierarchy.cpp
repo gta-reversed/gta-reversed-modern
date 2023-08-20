@@ -28,7 +28,7 @@ void CAnimBlendHierarchy::InjectHooks() {
 CAnimBlendHierarchy::CAnimBlendHierarchy() {
     m_pSequences = nullptr;
     m_nSeqCount = 0;
-    m_bRunningCompressed = false;
+    m_bIsCompressed = false;
     m_bKeepCompressed = false;
     m_nAnimBlockId = -1;
     m_fTotalTime = 0.0f;
@@ -44,7 +44,7 @@ CAnimBlendHierarchy::~CAnimBlendHierarchy() {
 // 0x4CF980
 void CAnimBlendHierarchy::Shutdown() {
     RemoveAnimSequences();
-    m_bRunningCompressed = false;
+    m_bIsCompressed = false;
 }
 
 // 0x4CF8E0
@@ -156,7 +156,7 @@ void CAnimBlendHierarchy::Uncompress() {
         CMemoryMgr::Free(oldFrameData);
     }
 
-    m_bRunningCompressed = false;
+    m_bIsCompressed = false;
     if (m_fTotalTime == 0.0f) {
         RemoveQuaternionFlips();
         CalcTotalTime();
@@ -194,7 +194,7 @@ void CAnimBlendHierarchy::RemoveUncompressedData() {
         CMemoryMgr::Free(oldFrameData);
     }
 
-    m_bRunningCompressed = true;
+    m_bIsCompressed = true;
 }
 
 // 0x4CF800

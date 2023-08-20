@@ -13,9 +13,9 @@ public:
     CTaskSimpleDead(uint32 deathTime, bool);
     ~CTaskSimpleDead() override = default; // 0x6305F0
 
-    eTaskType GetTaskType() override { return Type; } // 0x6305D0
-    CTask* Clone() override { return new CTaskSimpleDead(m_nDeathTimeMS, m_nFlags); } // 0x636100
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; }; // 0x6305E0
+    eTaskType GetTaskType() const override { return Type; } // 0x6305D0
+    CTask* Clone() const override { return new CTaskSimpleDead(m_nDeathTimeMS, m_nFlags); } // 0x636100
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override { return true; }; // 0x6305E0
     bool ProcessPed(CPed* ped) override;
 
     static void InjectHooks();

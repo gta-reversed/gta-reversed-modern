@@ -94,7 +94,7 @@ public:
     CTaskSimpleFight* GetTaskFighting();
     CTaskSimpleUseGun* GetTaskUseGun();
     CTaskSimpleThrowProjectile* GetTaskThrow();
-    CTask* GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask = true);
+    CTaskSimpleHoldEntity* GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask = true);
     CTaskSimpleSwim* GetTaskSwim();
     CTaskSimpleDuck* GetTaskDuck(bool bIgnoreCheckingForSimplestActiveTask = true);
     CTaskSimpleJetPack* GetTaskJetPack();
@@ -148,7 +148,11 @@ public:
         return false;
     }
 
-    CEventHandler&   GetEventHandler() { return m_eventHandler; }
+    //! Get the vehicle the ped is entering now (If any)
+    CVehicle* GetEnteringVehicle();
+
+    CEventHandler&   GetEventHandler()    { return m_eventHandler; }
+    CEventGroup&     GetEventGroup()      { return m_eventGroup; }
     CEventScanner&   GetEventScanner()    { return m_eventScanner; }
     CPedScanner&     GetPedScanner()      { return m_pedScanner; }
     CVehicleScanner& GetVehicleScanner()  { return m_vehicleScanner; }

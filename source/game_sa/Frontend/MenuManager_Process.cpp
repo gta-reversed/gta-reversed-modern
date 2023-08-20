@@ -17,6 +17,8 @@
 
 // 0x57B440
 void CMenuManager::Process() {
+    ZoneScoped;
+
     if (m_bMenuActive) {
         ProcessStreaming(m_bAllStreamingStuffLoaded);
         UserInput();

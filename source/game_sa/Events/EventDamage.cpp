@@ -954,3 +954,20 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
         }
     }
 }
+
+void CEventDamage::ComputeAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
+    if (ped->m_fHealth <= 0.f) {
+        ComputeDeathAnim(ped, bMakeActiveTaskAbortable);
+    } else {
+        ComputeDeathAnim(ped, bMakeActiveTaskAbortable);
+    }
+}
+
+// NOTSA
+void CEventDamage::ComputeDamageResponseIfAffectsPed(CPed* ped, CPedDamageResponseCalculator calculator, bool bSpeak) {
+    if (AffectsPed(ped)) {
+        calculator.ComputeDamageResponse(ped, m_damageResponse, bSpeak);
+    } else {
+        m_damageResponse.SetDamageAsCalculated();
+    }
+}

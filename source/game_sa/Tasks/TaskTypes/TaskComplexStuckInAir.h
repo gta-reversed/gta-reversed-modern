@@ -9,8 +9,8 @@ public:
     CTaskComplexStuckInAir() = default;           // 0x67BA40
     ~CTaskComplexStuckInAir() override = default; // 0x67BA70
 
-    eTaskType GetTaskType() override { return Type; } // 0x67BA60
-    CTask* Clone() override { return new CTaskComplexStuckInAir(); }       // 0x67C700
+    eTaskType GetTaskType() const override { return Type; } // 0x67BA60
+    CTask* Clone() const override { return new CTaskComplexStuckInAir(); }       // 0x67C700
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;

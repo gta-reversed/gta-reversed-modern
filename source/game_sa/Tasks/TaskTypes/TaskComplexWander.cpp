@@ -36,7 +36,7 @@ void CTaskComplexWander::InjectHooks() {
     RH_ScopedOverloadedInstall(ScanForBlockedNode, "1", 0x66F4C0, bool(CTaskComplexWander::*)(const CVector&, CEntity*));
     RH_ScopedInstall(GetWanderTaskByPedType, 0x673D00);
 }
-CTaskComplexWander* CTaskComplexWander::Constructor(int32 moveState, uint8 dir, bool bWanderSensibly, float fTargetRadius) { this->CTaskComplexWander::CTaskComplexWander(moveState, dir, bWanderSensibly, fTargetRadius); return this; }
+CTaskComplexWander* CTaskComplexWander::Constructor(eMoveState moveState, uint8 dir, bool bWanderSensibly, float fTargetRadius) { this->CTaskComplexWander::CTaskComplexWander(moveState, dir, bWanderSensibly, fTargetRadius); return this; }
 CTask* CTaskComplexWander::CreateNextSubTask(CPed* ped) { return CreateNextSubTask_Reversed(ped); }
 CTask* CTaskComplexWander::CreateFirstSubTask(CPed* ped) { return CreateFirstSubTask_Reversed(ped); }
 CTask* CTaskComplexWander::ControlSubTask(CPed* ped) { return ControlSubTask_Reversed(ped); }
@@ -44,8 +44,8 @@ void CTaskComplexWander::UpdateDir(CPed* ped) { return UpdateDir_Reversed(ped); 
 void CTaskComplexWander::UpdatePathNodes(const CPed* ped, uint8 dir, CNodeAddress& originNode, CNodeAddress& targetNode, uint8& outDir) { return UpdatePathNodes_Reversed(ped, dir, originNode, targetNode, outDir); }
 
 // 0x66F450
-CTaskComplexWander::CTaskComplexWander(int32 moveState, uint8 dir, bool bWanderSensibly, float fTargetRadius) : CTaskComplex() {
-    m_nMoveState = static_cast<eMoveState>(moveState); // todo: change signature
+CTaskComplexWander::CTaskComplexWander(eMoveState moveState, uint8 dir, bool bWanderSensibly, float fTargetRadius) : CTaskComplex() {
+    m_nMoveState = moveState;
     m_nDir = dir;
     m_fTargetRadius = fTargetRadius;
     m_bWanderSensibly = bWanderSensibly;
@@ -221,7 +221,7 @@ void CTaskComplexWander::UpdatePathNodes_Reversed(const CPed* ped, uint8 dir, CN
     originNode = targetNode;
     targetNode.m_wAreaId = (uint16)-1;
     const CVector& pos = ped->GetPosition();
-    ThePaths.FindNextNodeWandering(PATH_TYPE_BOATS, pos, &originNode, &targetNode, dir, &outDir);
+    ThePaths.FindNextNodeWandering(PATH_TYPE_PED, pos, &originNode, &targetNode, dir, &outDir);
 }
 
 // 0x671CB0
@@ -272,7 +272,7 @@ void CTaskComplexWander::ComputeTargetPos(const CPed* ped, CVector& outTargetPos
 
 // 0x669F30
 bool CTaskComplexWander::ValidNodes() const {
-    if (m_NextNode.IsAreaValid() && m_LastNode.IsAreaValid()) {
+    if (m_NextNode.IsValid() && m_LastNode.IsValid()) {
         if (m_NextNode.m_wAreaId != m_LastNode.m_wAreaId || m_NextNode.m_wNodeId != m_LastNode.m_wNodeId) {
             return true;
         }
@@ -282,7 +282,7 @@ bool CTaskComplexWander::ValidNodes() const {
 
 // 0x674560
 void CTaskComplexWander::ScanForBlockedNodes(CPed* ped) {
-    if (m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT && m_NextNode.IsAreaValid()) {
+    if (m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT && m_NextNode.IsValid()) {
         if (ScanForBlockedNode(ped, m_NextNode)) {
             m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_LEISURE, nullptr);
 
@@ -341,7 +341,7 @@ float CTaskComplexWander::GetDistSqOfClosestPathNodeToPed(CPed* ped) {
     return rng::min(
         std::array{ m_NextNode, m_LastNode }
      | rng::views::transform([ped](CNodeAddress node) {
-            if (node.IsValid() && ThePaths.IsNodesLoaded(node)) {
+            if (node.IsValid() && ThePaths.IsAreaNodesAvailable(node)) {
                 return (ped->GetPosition() - ThePaths.GetPathNode(node)->GetNodeCoors()).SquaredMagnitude();
             }
             return 999'999.f;

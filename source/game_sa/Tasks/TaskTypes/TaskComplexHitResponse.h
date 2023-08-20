@@ -12,8 +12,8 @@ public:
     explicit CTaskComplexHitResponse(int32 direction);
     ~CTaskComplexHitResponse() override = default; // 0x631DA0
 
-    eTaskType GetTaskType() override { return Type; } // 0x631D90
-    CTask* Clone() override { return new CTaskComplexHitResponse(m_Direction); } // 0x6365E0
+    eTaskType GetTaskType() const override { return Type; } // 0x631D90
+    CTask* Clone() const override { return new CTaskComplexHitResponse(m_Direction); } // 0x6365E0
     CTask* CreateNextSubTask(CPed* ped) override { return nullptr; } // 0x631DB0
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override { return m_pSubTask; } // 0x631DC0

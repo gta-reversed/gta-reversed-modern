@@ -1,15 +1,15 @@
 #pragma once
 
-template<typename T, float CompressValue> requires std::is_integral_v<T>
+//! Fixed point number (With implicit conversion to float)
+template<std::integral T, float CompressValue>
 class FixedFloat {
     T value{};
 
 public:
     constexpr FixedFloat() = default;
-    constexpr FixedFloat(float X) : value(X * CompressValue) {}
-    explicit constexpr FixedFloat(T X) : value(X) {}
+    constexpr FixedFloat(float v) : value(static_cast<T>(v * CompressValue)) {}
+    template<std::integral Y>
+    constexpr FixedFloat(Y x) : value(x) {}
 
-    constexpr operator float() const {
-        return value / CompressValue;
-    }
+    constexpr operator float() const { return static_cast<float>(value) / CompressValue; }
 };

@@ -64,6 +64,8 @@ void CPickups::InjectHooks() {
 
 // 0x454A70
 void CPickups::Init() {
+    ZoneScoped;
+
     NumMessages = 0;
     for (auto& pickup : aPickUps) {
         pickup.m_nPickupType = PICKUP_NONE;
@@ -580,8 +582,8 @@ void CPickups::RenderPickUpText() {
         }
 
         // TODO: scaled wrong in windowed mode, but it's fine in fullscreen.
-        auto scaleX = std::min(SCREEN_WIDTH_UNIT, message.width / 30.0f);
-        auto scaleY = std::min(SCREEN_WIDTH_UNIT, message.height / 30.0f);
+        auto scaleX = std::min(SCREEN_STRETCH_X(1.0f), message.width / 30.0f);
+        auto scaleY = std::min(SCREEN_STRETCH_X(1.0f), message.height / 30.0f);
 
         CFont::SetProportional(true);
         CFont::SetBackground(false, false);
@@ -621,6 +623,8 @@ bool CPickups::TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, ePick
 
 // 0x458DE0
 void CPickups::Update() {
+    ZoneScoped;
+
     if (CReplay::Mode == MODE_PLAYBACK)
         return;
 

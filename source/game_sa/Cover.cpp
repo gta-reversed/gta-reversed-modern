@@ -27,6 +27,8 @@ void CCover::InjectHooks() {
 
 // 0x698710
 void CCover::Init() {
+    ZoneScoped;
+
     plugin::Call<0x698710>();
 }
 
@@ -51,6 +53,8 @@ bool CCover::ShouldThisBuildingHaveItsCoverPointsCreated(CBuilding* building) {
 
 // 0x6997E0
 void CCover::Update() {
+    ZoneScoped;
+
     plugin::Call<0x6997E0>();
 }
 
@@ -83,13 +87,13 @@ void CCover::Find2HighestPoints(CColTriangle* triangle, CVector* vertPositions, 
 }
 
 // 0x6992B0
-CCoverPoint* CCover::FindAndReserveCoverPoint(CPed* ped, CVector& position, bool a3) {
-    return plugin::CallAndReturn<CCoverPoint*, 0x6992B0, CPed*, CVector&, bool>(ped, position, a3);
+CCoverPoint* CCover::FindAndReserveCoverPoint(CPed* ped, const CVector& position, bool a3) {
+    return plugin::CallAndReturn<CCoverPoint*, 0x6992B0, CPed*, const CVector&, bool>(ped, position, a3);
 }
 
 // 0x699570
-bool CCover::FindCoordinatesCoverPoint(CCoverPoint* point, CPed* ped, CVector& position, CVector& outCoordinates) {
-    return plugin::CallAndReturn<bool, 0x699570, CCoverPoint*, CPed*, CVector&, CVector&>(point, ped, position, outCoordinates);
+bool CCover::FindCoordinatesCoverPoint(CCoverPoint* point, CPed* ped, const CVector& position, CVector& outCoordinates) {
+    return plugin::CallAndReturn<bool, 0x699570, CCoverPoint*, CPed*, const CVector&, CVector&>(point, ped, position, outCoordinates);
 }
 
 void CCover::FindCoverPointsForThisBuilding(CBuilding* building) {
@@ -99,7 +103,7 @@ void CCover::FindCoverPointsForThisBuilding(CBuilding* building) {
 
     for (int32 iFxInd = 0; iFxInd < mi->m_n2dfxCount; ++iFxInd) {
         auto* effect = mi->Get2dEffect(iFxInd);
-        if (effect->m_nType != e2dEffectType::EFFECT_COVER_POINT)
+        if (effect->m_type != e2dEffectType::EFFECT_COVER_POINT)
             continue;
 
         auto vecDir = CVector(effect->coverPoint.m_vecDirection.x, effect->coverPoint.m_vecDirection.y, 0.0F);
@@ -107,7 +111,7 @@ void CCover::FindCoverPointsForThisBuilding(CBuilding* building) {
 
         const auto fTwoPiToChar = 256.0F / TWO_PI;
         const auto ucAngle = static_cast<uint8>(atan2(vedTransformed.x, vedTransformed.y) * fTwoPiToChar);
-        auto vecPoint = building->GetMatrix() * effect->m_vecPosn;
+        auto vecPoint = building->GetMatrix() * effect->m_pos;
         CCover::AddCoverPoint(3, building, &vecPoint, effect->coverPoint.m_nType, ucAngle);
     }
 }

@@ -36,7 +36,7 @@ public:
 
     CTaskSimpleHoldEntity(
         CEntity* entityToHold,
-        CVector* posn,
+        const CVector* posn,
         uint8 boneFrameId,
         uint8 boneFlags = HOLD_ENTITY_UPDATE_TRANSLATION_ONLY,
         AnimationId animId = AnimationId::ANIM_ID_NO_ANIMATION_SET,
@@ -52,13 +52,13 @@ public:
         AssocGroupId groupId = AssocGroupId::ANIM_GROUP_DEFAULT,
         bool bDisAllowDroppingOnAnimEnd = true
     );
-    CTaskSimpleHoldEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, const char* animName, const char* animBlockName, eAnimationFlags animFlags);
-    CTaskSimpleHoldEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* animBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags);
+    CTaskSimpleHoldEntity(CEntity* entityToHold, const CVector* posn, uint8 boneFrameId, uint8 boneFlags, const char* animName, const char* animBlockName, eAnimationFlags animFlags);
+    CTaskSimpleHoldEntity(CEntity* entityToHold, const CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* animBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags);
     ~CTaskSimpleHoldEntity() override;
 
-    eTaskType GetTaskType() override { return Type; }; // 0x691460
-    CTask* Clone() override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() const override { return Type; }; // 0x691460
+    CTask* Clone() const override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;
 
@@ -79,7 +79,7 @@ private:
     CTaskSimpleHoldEntity* Constructor(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, const char* animName, const char* animBlockName, eAnimationFlags animFlags);
     CTaskSimpleHoldEntity* Constructor(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* animBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags);
 
-    CTask* Clone_Reversed();
+    CTask*  Clone_Reversed() const;
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed_Reversed(CPed* ped);
     bool SetPedPosition_Reversed(CPed* ped);

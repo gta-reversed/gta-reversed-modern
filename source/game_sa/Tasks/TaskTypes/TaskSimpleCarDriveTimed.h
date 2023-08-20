@@ -16,8 +16,8 @@ public:
     CTaskSimpleCarDriveTimed(CVehicle* vehicle, int32 nTime);
     ~CTaskSimpleCarDriveTimed() override = default;
 
-    eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override { return new CTaskSimpleCarDriveTimed(m_pVehicle, m_nTime); }
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override { return new CTaskSimpleCarDriveTimed(m_pVehicle, m_nTime); }
     bool ProcessPed(class CPed* ped) override;
 
 private:
