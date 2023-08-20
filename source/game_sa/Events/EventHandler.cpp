@@ -19,6 +19,7 @@
 #include "Tasks/TaskTypes/TaskComplexJump.h"
 #include "Tasks/TaskTypes/TaskComplexGangFollower.h"
 #include "Tasks/TaskTypes/TaskSimpleClimb.h"
+#include "Tasks/TaskTypes/TaskComplexLeaveCar.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
@@ -26,6 +27,7 @@
 
 #include "Events/EventAttractor.h"
 #include "Events/EntityCollisionEvents.h"
+#include "Events/EventCarUpsideDown.h"
 
 void CEventHandler::InjectHooks() {
     RH_ScopedClass(CEventHandler);
@@ -48,7 +50,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeAttractorResponse, 0x4B9BE0);
     // RH_ScopedInstall(ComputeBuildingCollisionPassiveResponse, 0x0, { .reversed = false });
     RH_ScopedInstall(ComputeBuildingCollisionResponse, 0x4BF2B0);
-    RH_ScopedInstall(ComputeCarUpsideDownResponse, 0x4BBC30, { .reversed = false });
+    RH_ScopedInstall(ComputeCarUpsideDownResponse, 0x4BBC30);
     RH_ScopedInstall(ComputeChatPartnerResponse, 0x4B98E0, { .reversed = false });
     RH_ScopedInstall(ComputeCopCarBeingStolenResponse, 0x4BB740, { .reversed = false });
     RH_ScopedInstall(ComputeCreatePartnerTaskResponse, 0x4BB130, { .reversed = false });
@@ -553,8 +555,19 @@ void CEventHandler::ComputeBuildingCollisionResponse(CEventBuildingCollision* e,
 }
 
 // 0x4BBC30
-void CEventHandler::ComputeCarUpsideDownResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BBC30, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeCarUpsideDownResponse(CEventCarUpsideDown* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!m_ped->IsInVehicle() || m_ped->m_pVehicle != e->m_vehicle) {
+            return nullptr;
+        }
+        return new CTaskComplexLeaveCar{
+            e->m_vehicle,
+            0,
+            CGeneral::GetRandomNumberInRange(100, 400),
+            true,
+            false
+        };
+    }();
 }
 
 // 0x4B98E0

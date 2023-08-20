@@ -12,6 +12,7 @@ class CTask;
 class CEvent;
 class CPed;
 
+class CEventCarUpsideDown;
 class CEventDamage;
 class CEventAreaCodes;
 class CEventAttractor;
@@ -49,7 +50,7 @@ public:
     void ComputeAttractorResponse(CEventAttractor* e, CTask* tactive, CTask* tsimplest);
     void ComputeBuildingCollisionPassiveResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeBuildingCollisionResponse(CEventBuildingCollision* e, CTask* tactive, CTask* tsimplest); // NOTSA: Return type
-    void ComputeCarUpsideDownResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputeCarUpsideDownResponse(CEventCarUpsideDown* e, CTask* tactive, CTask* tsimplest);
     void ComputeChatPartnerResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeCopCarBeingStolenResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeCreatePartnerTaskResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
