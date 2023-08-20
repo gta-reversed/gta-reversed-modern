@@ -25,11 +25,14 @@
 #include "Tasks/TaskTypes/TaskComplexPartnerGreet.h"
 #include "Tasks/TaskTypes/TaskComplexCarDriveMission.h"
 #include "Tasks/TaskTypes/TaskComplexSmartFleeEntity.h"
+#include "Tasks/TaskTypes/TaskComplexInvestigateDeadPed.h"
+#include "Tasks/TaskTypes/TaskSimpleDuck.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 #include "EventSexyVehicle.h"
 
+#include "Events/EventDeadPed.h"
 #include "Events/EventDanger.h"
 #include "Events/EventCreatePartnerTask.h"
 #include "Events/EventCopCarBeingStolen.h"
@@ -65,7 +68,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeCreatePartnerTaskResponse, 0x4BB130);
     RH_ScopedInstall(ComputeDamageResponse, 0x4C0170, { .reversed = false });
     RH_ScopedInstall(ComputeDangerResponse, 0x4BC230);
-    RH_ScopedInstall(ComputeDeadPedResponse, 0x4B9470, { .reversed = false });
+    RH_ScopedInstall(ComputeDeadPedResponse, 0x4B9470);
     RH_ScopedInstall(ComputeDeathResponse, 0x4B9400, { .reversed = false });
     RH_ScopedInstall(ComputeDontJoinGroupResponse, 0x4BC1D0, { .reversed = false });
     RH_ScopedInstall(ComputeDraggedOutCarResponse, 0x4BCC30, { .reversed = false });
@@ -682,9 +685,77 @@ void CEventHandler::ComputeDangerResponse(CEventDanger* e, CTask* tactive, CTask
     }();
 }
 
+/*
+m_eventResponseTask = [&]() -> CTask* {
+
+}();
+*/
 // 0x4B9470
-void CEventHandler::ComputeDeadPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4B9470, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeDeadPedResponse(CEventDeadPed* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->GetDeadPed()) {
+            return nullptr;
+        }
+        if (m_ped->IsPlayer()) {
+            if ((m_ped->GetPosition() - e->GetDeadPed()->GetPosition()).SquaredMagnitude2D() >= sq(0.75f)) {
+                return nullptr;
+            }
+            if (m_ped->GetIntelligence()->GetTaskFighting()) {
+                return nullptr;
+            }
+            if (g_ikChainMan.IsLooking(m_ped)) {
+                return nullptr;
+            }
+            const auto c = &TheCamera.GetActiveCam();
+            switch (c->m_nMode) {
+            case MODE_SNIPER:
+            case MODE_CAMERA:
+            case MODE_ROCKETLAUNCHER:
+            case MODE_ROCKETLAUNCHER_HS:
+            case MODE_M16_1STPERSON:
+            case MODE_1STPERSON:
+            case MODE_HELICANNON_1STPERSON:
+                return nullptr;
+            }
+            if (c->GetWeaponFirstPersonOn()) {
+                return nullptr;
+            }
+            g_ikChainMan.LookAt(
+                "CompDeadPedResp",
+                m_ped,
+                e->GetDeadPed(),
+                500,
+                BONE_HEAD,
+                nullptr,
+                true,
+                0.25f,
+                500,
+                3,
+                false
+            );
+        }
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_SMART_FLEE_ENTITY:
+            return new CTaskComplexSmartFleeEntity{
+                e->GetDeadPed(),
+                true,
+                100'000.f,
+                1'000'000,
+                1'000,
+                fEntityPosChangeThreshold
+            };
+        case TASK_COMPLEX_INVESTIGATE_DEAD_PED:
+            return new CTaskComplexInvestigateDeadPed{e->GetDeadPed()};
+        case TASK_SIMPLE_DUCK_FOREVER:
+            return new CTaskSimpleDuck{
+                DUCK_STANDALONE,
+                57599u,
+                -1
+            };
+        default:
+            return nullptr;
+        }
+    }();
 }
 
 // 0x4B9400
@@ -1053,7 +1124,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeDeathResponse(e, tactive, tsimplest);
         break;
     case EVENT_DEAD_PED:
-        ComputeDeadPedResponse(e, tactive, tsimplest);
+        ComputeDeadPedResponse(static_cast<CEventDeadPed*>(e), tactive, tsimplest);
         break;
     case EVENT_POTENTIAL_GET_RUN_OVER:
         ComputeVehiclePotentialCollisionResponse(e, tactive, tsimplest);
