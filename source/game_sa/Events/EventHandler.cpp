@@ -15,7 +15,8 @@ void CEventHandler::InjectHooks() {
     RH_ScopedClass(CEventHandler);
     RH_ScopedCategory("Events");
 
-    using namespace ReversibleHooks;
+    RH_ScopedInstall(Constructor, 0x4C3E80);
+    RH_ScopedInstall(Destructor, 0x4C3EC0);
 
     RH_ScopedInstall(Flush, 0x4C3790);
     RH_ScopedInstall(FlushImmediately, 0x4C3820);
@@ -104,11 +105,6 @@ CEventHandler::CEventHandler(CPed* ped) {
     m_sayTask              = nullptr;
     m_partialAnimTask      = nullptr;
     m_history.ClearAllEvents();
-}
-
-CEventHandler* CEventHandler::Constructor(CPed* ped) {
-    this->CEventHandler::CEventHandler(ped);
-    return this;
 }
 
 // 0x4C3F10

@@ -27,7 +27,6 @@ public:
     static void InjectHooks();
 
     explicit CEventHandler(CPed* ped);
-    CEventHandler* Constructor(CPed* ped);
     ~CEventHandler() = default;
 
     void Flush();
@@ -109,6 +108,19 @@ public:
     CTask* ComputeEventResponseTask(CPed* ped, CEvent* event);
 
     auto& GetHistory() { return m_history; }
+
+private:
+    // 0x4C3E80
+    CEventHandler* Constructor(CPed * ped) {
+        this->CEventHandler::CEventHandler(ped);
+        return this;
+    }
+
+    // 0x4C3EC0
+    CEventHandler* Destructor() {
+        this->CEventHandler::~CEventHandler();
+        return this;
+    }
 };
 
 VALIDATE_SIZE(CEventHandler, 0x34);
