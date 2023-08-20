@@ -42,7 +42,7 @@ CAEPedSpeechAudioEntity::CAEPedSpeechAudioEntity() : CAEAudioEntity() {
 }
 
 // 0x4E4600
-bool CAEPedSpeechAudioEntity::IsGlobalContextImportantForInterupting(int16 globalCtx) {
+bool __stdcall CAEPedSpeechAudioEntity::IsGlobalContextImportantForInterupting(int16 globalCtx) {
     // return plugin::CallAndReturn<int8, 0x4E4600, int16>(a1);
     switch (globalCtx) {
     case 13:
@@ -56,13 +56,13 @@ bool CAEPedSpeechAudioEntity::IsGlobalContextImportantForInterupting(int16 globa
     }
 }
 
-// 0x4E46F0
+// 0x4E46F0 - unused
 bool CAEPedSpeechAudioEntity::IsGlobalContextUberImportant(int16 globalCtx) {
     return false;
 }
 
 // 0x4E4700
-int16 CAEPedSpeechAudioEntity::GetNextMoodToUse(int16 lastMood) {
+int16 __stdcall CAEPedSpeechAudioEntity::GetNextMoodToUse(int16 lastMood) {
     switch (lastMood) {
     case 0:
     case 7:
@@ -77,7 +77,7 @@ int16 CAEPedSpeechAudioEntity::GetNextMoodToUse(int16 lastMood) {
 }
 
 // 0x4E4760
-int32 CAEPedSpeechAudioEntity::GetVoiceForMood(int16 mood) {
+int32 __stdcall CAEPedSpeechAudioEntity::GetVoiceForMood(int16 mood) {
     auto rnd = CAEAudioUtility::GetRandomNumberInRange(0, 1);
     if (mood < 0 || mood >= 10)
         return rnd + 10;
@@ -534,11 +534,11 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedCategory("Audio/Entities");
 
     RH_ScopedInstall(Constructor, 0x4E4F10);
-    RH_ScopedInstall(IsGlobalContextImportantForInterupting, 0x4E4600, { .reversed = true });
-    RH_ScopedInstall(IsGlobalContextUberImportant, 0x4E46F0, { .reversed = true });
-    RH_ScopedInstall(GetNextMoodToUse, 0x4E4700, { .reversed = true });
-    RH_ScopedInstall(GetVoiceForMood, 0x4E4760, { .reversed = true });
-    RH_ScopedInstall(CanWePlayScriptedSpeech, 0x4E4950, { .reversed = true });
+    RH_ScopedInstall(IsGlobalContextImportantForInterupting, 0x4E4600);
+    RH_ScopedInstall(IsGlobalContextUberImportant, 0x4E46F0);
+    RH_ScopedInstall(GetNextMoodToUse, 0x4E4700);
+    RH_ScopedInstall(GetVoiceForMood, 0x4E4760);
+    RH_ScopedInstall(CanWePlayScriptedSpeech, 0x4E4950);
     RH_ScopedInstall(GetSpeechContextVolumeOffset, 0x4E4AE0, { .reversed = false });
     RH_ScopedInstall(RequestPedConversation, 0x4E50E0, { .reversed = false });
     RH_ScopedInstall(ReleasePedConversation, 0x4E52A0, { .reversed = false });

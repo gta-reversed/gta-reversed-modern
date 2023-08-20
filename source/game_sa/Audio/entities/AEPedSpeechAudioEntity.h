@@ -115,10 +115,10 @@ public:
     CAEPedSpeechAudioEntity();
     ~CAEPedSpeechAudioEntity() = default;
 
-    static bool IsGlobalContextImportantForInterupting(int16 globalCtx); // typo: Interrupting
+    static bool __stdcall IsGlobalContextImportantForInterupting(int16 globalCtx); // typo: Interrupting
     static bool IsGlobalContextUberImportant(int16 globalCtx);
-    static int16 GetNextMoodToUse(int16 lastMood);
-    static int32 GetVoiceForMood(int16 mood);
+    static int16 __stdcall GetNextMoodToUse(int16 lastMood);
+    static int32 __stdcall GetVoiceForMood(int16 mood);
     static int16 CanWePlayScriptedSpeech();
     static float GetSpeechContextVolumeOffset(int16 a1);
     static int8 RequestPedConversation(CPed* ped1, CPed* ped2);
