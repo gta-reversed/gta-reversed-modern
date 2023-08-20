@@ -31,35 +31,49 @@ void CTaskComplexWalkRoundBuildingAttempt::InjectHooks() {
 
 // 0x654740
 CTaskComplexWalkRoundBuildingAttempt::CTaskComplexWalkRoundBuildingAttempt(eMoveState moveState, CVector const& targetPos, CVector const& pos, CVector const& normal, bool flag_0x1) :
-    m_target{targetPos},
+    m_targetPos{targetPos},
     m_pos{pos},
     m_normal{normal},
-    m_flag0x1{flag_0x1},
+    m_bIsHeadOnCollision{flag_0x1},
     m_moveState{(int8)moveState}
 {
     m_normal.z = 0.f;
     m_normal.Normalise();
 }
 
+// 0x654840
+CTaskComplexWalkRoundBuildingAttempt::CTaskComplexWalkRoundBuildingAttempt(eMoveState moveState, CEntity* target, CVector const& offset, CVector const& pos, CVector const& normal, bool bIsHeadOnCollision) :
+    m_pos{pos},
+    m_normal{normal},
+    m_targetEntity{target},
+    m_offset{offset},
+    m_moveState{(int8)moveState},
+    m_bIsHeadOnCollision{bIsHeadOnCollision},
+    m_isWalkingAroundEntity{true}
+{
+    m_normal.z = 0.f;
+    m_normal.Normalise();
+
+    CEntity::RegisterReference(m_targetEntity);
+}
+
 CTaskComplexWalkRoundBuildingAttempt::CTaskComplexWalkRoundBuildingAttempt(const CTaskComplexWalkRoundBuildingAttempt& o) :
-    CTaskComplexWalkRoundBuildingAttempt{(eMoveState)o.m_moveState, o.m_target, o.m_pos, o.m_normal, o.m_flag0x1}
+    CTaskComplexWalkRoundBuildingAttempt{(eMoveState)o.m_moveState, o.m_targetPos, o.m_pos, o.m_normal, o.m_bIsHeadOnCollision}
 {
 }
 
 // 0x654950
 CTaskComplexWalkRoundBuildingAttempt::~CTaskComplexWalkRoundBuildingAttempt() {
     for (auto route : { m_crapRoute, m_route }) {
-        if (route) {
-            delete route;
-        }
+        delete route;
     }
-    CEntity::SafeCleanUpRef(m_entity);
+    CEntity::SafeCleanUpRef(m_targetEntity);
 }
 
 // 0x654B80
 void CTaskComplexWalkRoundBuildingAttempt::ComputeMoveDir(CPed const& ped, CVector& outDir) {
     const CVector2D normal{ m_normal };
-    const CVector2D targetToPos = m_target - m_pos;
+    const CVector2D targetToPos = m_targetPos - m_pos;
     outDir = CVector{ targetToPos - targetToPos.ProjectOnToNormal(normal), 0.f };
 }
 
@@ -94,7 +108,7 @@ CTask* CTaskComplexWalkRoundBuildingAttempt::CreateSubTask(eTaskType taskType, C
     case TASK_SIMPLE_GO_TO_POINT:
         return new CTaskSimpleGoToPoint{
             (eMoveState)m_moveState,
-            m_target,
+            m_targetPos,
             0.5f,
             false,
             false
@@ -159,7 +173,7 @@ void CTaskComplexWalkRoundBuildingAttempt::ComputeRoute(CPed const& ped) {
     const auto normal2x = m_normal * 2.f;
 
     size_t numPointsGenerated{};
-    for (int32 num{1}; num >= -1; numPointsGenerated++, num -= m_flag0x1 ? 2 : 3) {
+    for (int32 num{1}; num >= -1; numPointsGenerated++, num -= m_bIsHeadOnCollision ? 2 : 3) {
         CVector moveDir{};
         ComputeMoveDir(ped, moveDir);
         moveDir *= CGeneral::GetRandomNumberInRange(-0.2f, 0.2f) + (float)m_nAttempts; // Apply some semi-random spread
@@ -174,7 +188,7 @@ void CTaskComplexWalkRoundBuildingAttempt::ComputeRoute(CPed const& ped) {
             continue;
         }
 
-        if (CWorld::GetIsLineOfSightClear(target, m_target, true, false, false, false, false, false, false)) {
+        if (CWorld::GetIsLineOfSightClear(target, m_targetPos, true, false, false, false, false, false, false)) {
             m_route->AddPoints(target);
             m_routeHasPoints = true;
             return;
@@ -198,14 +212,14 @@ void CTaskComplexWalkRoundBuildingAttempt::ComputeRoute(CPed const& ped) {
             m_crapRouteHasPoints = true;
         }
 
-        if (CWorld::GetIsLineOfSightClear(targetOffseted, m_target, true, false, false, false, false, false, false)) {
+        if (CWorld::GetIsLineOfSightClear(targetOffseted, m_targetPos, true, false, false, false, false, false, false)) {
             m_route->MaybeAddPoints(target, targetOffseted);
             m_routeHasPoints = true;
         }
     }
 
     if (m_nAttempts == 1) { // Current is the first attempt
-        if (numPointsGenerated == (m_flag0x1 ? 2 : 1)) {
+        if (numPointsGenerated == (m_bIsHeadOnCollision ? 2 : 1)) {
             m_nAttempts = 20;
         }
     }
@@ -249,12 +263,12 @@ CTask* CTaskComplexWalkRoundBuildingAttempt::CreateNextSubTask(CPed* ped) {
 
 // 0x654A00
 CTask* CTaskComplexWalkRoundBuildingAttempt::CreateFirstSubTask(CPed* ped) {
-    if (m_flag0x4) {
-        if (!m_entity) {
+    if (m_isWalkingAroundEntity) {
+        if (!m_targetEntity) {
             ped->bIgnoreHeightCheckOnGotoPointTask = false;
             return nullptr;
         }
-        m_target = m_entity->GetMatrix() * m_offset;
+        m_targetPos = m_targetEntity->GetMatrix() * m_offset;
     }
 
     ped->bIgnoreHeightCheckOnGotoPointTask = true;
@@ -276,8 +290,8 @@ CTask* CTaskComplexWalkRoundBuildingAttempt::CreateFirstSubTask(CPed* ped) {
 
 // 0x658020
 CTask* CTaskComplexWalkRoundBuildingAttempt::ControlSubTask(CPed* ped) {
-    if (m_flag0x4) {
-        if (!m_entity || (m_entity->GetMatrix() * m_offset - m_target).SquaredMagnitude() >= sq(4.f)) {
+    if (m_isWalkingAroundEntity) {
+        if (!m_targetEntity || (m_targetEntity->GetMatrix() * m_offset - m_targetPos).SquaredMagnitude() >= sq(4.f)) {
             m_justAbort = true;
             return CreateSubTask(TASK_SIMPLE_STAND_STILL, ped);
         }
