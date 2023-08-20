@@ -391,9 +391,9 @@ void CEventHandler::ComputeBuildingCollisionResponse(CEventBuildingCollision* e,
 
         const auto tm = &m_ped->GetTaskManager();
 
-        const auto tKillPedOnFoot    = tm->Find<CTaskComplexKillPedOnFoot>();
-        const auto tSeekEntity       = tm->Find<CTaskComplexSeekEntity<>>(); // Hackery, because we don't know what `T_PosCalc` actually is...
-        const auto tEnterCarPsgrWait = tm->Find<CTaskComplexEnterCarAsPassengerWait>();
+        const auto tKillPedOnFoot    = tm->Find<CTaskComplexKillPedOnFoot>(false);
+        const auto tSeekEntity       = tm->Find<CTaskComplexSeekEntity<>>(false); // Hackery, because we don't know what `T_PosCalc` actually is...
+        const auto tEnterCarPsgrWait = tm->Find<CTaskComplexEnterCarAsPassengerWait>(false);
         const auto tGoToPoint        = CTask::IsGoToTask(tsimplest)
             ? static_cast<CTaskSimpleGoTo*>(tsimplest)
             : nullptr;
