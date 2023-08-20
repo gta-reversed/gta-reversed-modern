@@ -1044,7 +1044,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeObjectCollisionPassiveResponse(e, tactive, tsimplest);
         break;
     case EVENT_CAR_UPSIDE_DOWN:
-        ComputeCarUpsideDownResponse(e, tactive, tsimplest);
+        ComputeCarUpsideDownResponse(static_cast<CEventCarUpsideDown*>(e), tactive, tsimplest);
         break;
     case EVENT_POTENTIAL_WALK_INTO_FIRE:
         ComputePotentialWalkIntoFireResponse(e, tactive, tsimplest);
