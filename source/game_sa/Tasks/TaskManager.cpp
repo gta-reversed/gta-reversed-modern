@@ -9,6 +9,8 @@
 
 #include "TaskManager.h"
 
+#include "Tasks/TaskTypes/TaskComplexFacial.h"
+
 void CTaskManager::InjectHooks() {
     RH_ScopedClass(CTaskManager);
     RH_ScopedCategory("Tasks");
@@ -97,6 +99,10 @@ CTask* CTaskManager::FindTaskByType(ePrimaryTasks taskIndex, eTaskType taskId) {
 // 0x681810
 CTask* CTaskManager::GetTaskSecondary(eSecondaryTask taskIndex) {
     return m_aSecondaryTasks[taskIndex];
+}
+
+CTaskComplexFacial* CTaskManager::GetTaskSecondaryFacial() {
+    return static_cast<CTaskComplexFacial*>(GetTaskSecondary(TASK_SECONDARY_FACIAL_COMPLEX));
 }
 
 // NOTSA?

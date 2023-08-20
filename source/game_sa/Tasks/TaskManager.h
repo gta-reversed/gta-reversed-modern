@@ -39,6 +39,7 @@ enum eSecondaryTask : uint32 // array indexes
 class CTaskComplex;
 class CTaskSimple;
 class CPed;
+class CTaskComplexFacial;
 
 class CTaskManager {
 public:
@@ -76,6 +77,8 @@ public:
     * @brief Get the secondary task at `taskIndex`
     */
     CTask* GetTaskSecondary(eSecondaryTask taskIndex);
+
+    CTaskComplexFacial* GetTaskSecondaryFacial();
 
     /*
     * @addr unknown

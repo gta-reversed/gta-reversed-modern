@@ -5,7 +5,7 @@
 #include "TaskSimpleStandStill.h"
 #include "TaskComplexInAirAndLand.h"
 #include "TaskComplexStuckInAir.h"
-// #include "TaskComplexSmartFleeEntity.h"
+#include "Tasks/TaskTypes/TaskComplexFacial.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
@@ -27,7 +27,7 @@ void CEventHandler::InjectHooks() {
     // RH_ScopedInstall(RecordActiveEvent, 0x0, { .reversed = false });
     // RH_ScopedInstall(RecordPassiveEvent, 0x0, { .reversed = false });
     RH_ScopedInstall(RegisterKill, 0x4B9340);
-    RH_ScopedInstall(SetEventResponseTask, 0x4BC600, { .reversed = false });
+    RH_ScopedInstall(SetEventResponseTask, 0x4BC600);
    
     RH_ScopedInstall(ComputeAreaCodesResponse, 0x4BBF50, { .reversed = false });
     RH_ScopedInstall(ComputeAttractorResponse, 0x4B9BE0, { .reversed = false });
@@ -233,7 +233,45 @@ void CEventHandler::RegisterKill(const CPed* ped, const CEntity* inflictedBy, eW
 
 // 0x4BC600
 void CEventHandler::SetEventResponseTask(const CEvent& event) {
-    plugin::CallMethod<0x4BC600, CEventHandler*, const CEvent&>(this, event);
+    const auto i  = m_ped->GetIntelligence();
+    const auto tm = &i->m_TaskMgr;
+
+    if (m_physicalResponseTask) {
+        i->AddTaskPhysResponse(m_physicalResponseTask, true);
+    }
+
+    if (m_eventResponseTask) {
+        if (IsTemporaryEvent(event)) {
+            i->AddTaskEventResponseTemp(m_eventResponseTask, false);
+        } else {
+            i->AddTaskEventResponseTemp(nullptr, 0);
+            i->AddTaskEventResponseNonTemp(m_eventResponseTask, false);
+        }
+    }
+
+    if (m_attackTask) {
+        if (const auto tattack = tm->GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
+            tattack->MakeAbortable(m_ped);
+        }
+        tm->SetTaskSecondary(m_attackTask, TASK_SECONDARY_ATTACK);
+    }
+
+    if (m_sayTask) {
+        tm->SetTaskSecondary(m_sayTask, TASK_SECONDARY_SAY);
+    }
+
+    if (m_partialAnimTask) {
+        tm->SetTaskSecondary(m_partialAnimTask, TASK_SECONDARY_PARTIAL_ANIM);
+    }
+
+    if (event.HasEditableResponse()) {
+        const auto eeditable = &static_cast<const CEventEditableResponse&>(event);
+        if (const auto tfacial = tm->GetTaskSecondaryFacial()) {
+            if (eeditable->GetFacialExpressionType() != eFacialExpression::NONE) {
+                tfacial->SetRequest(eeditable->GetFacialExpressionType(), 10'000);
+            }
+        }
+    }
 }
 
 // 0x4C3790

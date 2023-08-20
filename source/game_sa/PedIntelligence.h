@@ -86,7 +86,7 @@ public:
     bool IsInSeeingRange(const CVector& posn) const;
     bool FindRespectedFriendInInformRange();
     bool IsRespondingToEvent(eEventType eventType);
-    void AddTaskPhysResponse(CTask* task, int32 unUsed);
+    void AddTaskPhysResponse(CTask* task, int32 unUsed = 1);
     void AddTaskEventResponseTemp(CTask* task, int32 unUsed);
     void AddTaskEventResponseNonTemp(CTask* task, int32 unUsed);
     void AddTaskPrimaryMaybeInGroup(CTask* task, bool bAffectsPed);
