@@ -15,13 +15,13 @@ class CPed;
 
 class CEventHandler {
 public:
-    CPed*                m_ped;
-    CEventHandlerHistory m_history;
-    CTask*               m_physicalResponseTask;
-    CTask*               m_eventResponseTask;
-    CTask*               m_attackTask;
-    CTask*               m_sayTask;
-    CTask*               m_partialAnimTask;
+    CPed*                m_ped{};
+    CEventHandlerHistory m_history{};
+    CTask*               m_physicalResponseTask{};
+    CTask*               m_eventResponseTask{};
+    CTask*               m_attackTask{};
+    CTask*               m_sayTask{};
+    CTask*               m_partialAnimTask{};
 
 public:
     static void InjectHooks();

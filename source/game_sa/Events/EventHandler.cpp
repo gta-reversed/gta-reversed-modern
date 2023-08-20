@@ -97,14 +97,9 @@ void CEventHandler::InjectHooks() {
 }
 
 // 0x4C3E80
-CEventHandler::CEventHandler(CPed* ped) {
-    m_ped                  = ped;
-    m_physicalResponseTask = nullptr;
-    m_eventResponseTask    = nullptr;
-    m_attackTask           = nullptr;
-    m_sayTask              = nullptr;
-    m_partialAnimTask      = nullptr;
-    m_history.ClearAllEvents();
+CEventHandler::CEventHandler(CPed* ped) :
+    m_ped{ped}
+{
 }
 
 // 0x4C3F10
