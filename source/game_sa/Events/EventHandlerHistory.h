@@ -30,6 +30,8 @@ public:
     void StoreActiveEvent();
     bool TakesPriorityOverCurrentEvent(CEvent& event) const;
     void TickStoredEvent(CPed*);
+
+    void RecordAbortedTask(CTask* task) { m_AbortedTask = task; }
 };
 
 VALIDATE_SIZE(CEventHandlerHistory, 0x1C);

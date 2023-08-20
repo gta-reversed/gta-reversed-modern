@@ -176,10 +176,10 @@ public:
     }
 
     //! @notsa
-    CTask* GetPrimaryNonTempResponseTask() const;
+    CTask* GetPresistentEventResponseTask() const;
 
     //! @notsa
-    CTask* GetPrimaryTempResponseTask() const;
+    CTask* GetTemporaryEventResponseTask() const;
 
     auto& GetPrimaryTasks() const { return m_aPrimaryTasks; }
     auto& GetSecondaryTasks() const { return m_aSecondaryTasks; }

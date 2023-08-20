@@ -309,11 +309,11 @@ void CTaskManager::ManageTasks() {
     }
 }
 // @notsa
-CTask* CTaskManager::GetPrimaryNonTempResponseTask() const {
+CTask* CTaskManager::GetPresistentEventResponseTask() const {
     return notsa::coalesce(GetTaskPrimary(TASK_PRIMARY_PHYSICAL_RESPONSE), GetTaskPrimary(TASK_PRIMARY_EVENT_RESPONSE_NONTEMP));
 }
 
-CTask* CTaskManager::GetPrimaryTempResponseTask() const {
+CTask* CTaskManager::GetTemporaryEventResponseTask() const {
     return  GetTaskPrimary(TASK_PRIMARY_EVENT_RESPONSE_TEMP);
 }
 
