@@ -21,11 +21,14 @@
 #include "Tasks/TaskTypes/TaskSimpleClimb.h"
 #include "Tasks/TaskTypes/TaskComplexLeaveCar.h"
 #include "Tasks/TaskTypes/TaskComplexPartnerChat.h"
+#include "Tasks/TaskTypes/TaskComplexPartnerDeal.h"
+#include "Tasks/TaskTypes/TaskComplexPartnerGreet.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 #include "EventSexyVehicle.h"
 
+#include "Events/EventCreatePartnerTask.h"
 #include "Events/EventCopCarBeingStolen.h"
 #include "Events/EventChatPartner.h"
 #include "Events/EventAttractor.h"
@@ -56,7 +59,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeCarUpsideDownResponse, 0x4BBC30);
     RH_ScopedInstall(ComputeChatPartnerResponse, 0x4B98E0);
     RH_ScopedInstall(ComputeCopCarBeingStolenResponse, 0x4BB740);
-    RH_ScopedInstall(ComputeCreatePartnerTaskResponse, 0x4BB130, { .reversed = false });
+    RH_ScopedInstall(ComputeCreatePartnerTaskResponse, 0x4BB130);
     RH_ScopedInstall(ComputeDamageResponse, 0x4C0170, { .reversed = false });
     RH_ScopedInstall(ComputeDangerResponse, 0x4BC230, { .reversed = false });
     RH_ScopedInstall(ComputeDeadPedResponse, 0x4B9470, { .reversed = false });
@@ -606,8 +609,38 @@ void CEventHandler::ComputeCopCarBeingStolenResponse(CEventCopCarBeingStolen* e,
 }
 
 // 0x4BB130
-void CEventHandler::ComputeCreatePartnerTaskResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BB130, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeCreatePartnerTaskResponse(CEventCreatePartnerTask* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_partner) {
+            return nullptr;
+        }
+        switch (e->m_partnerType) {
+        case 0:
+            return new CTaskComplexPartnerDeal{
+                "CompPartnerTaskResp",
+                e->m_partner,
+                e->m_isLeadSpeaker,
+                e->m_meetDist,
+                {}
+            };
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6: 
+            return new CTaskComplexPartnerGreet{
+                "CompPartnerTaskResp",
+                e->m_partner,
+                e->m_isLeadSpeaker,
+                e->m_meetDist,
+                e->m_partnerType - 1,
+                {}
+            };
+        default:
+            return nullptr;
+        }
+    }();
 }
 
 // 0x4C0170
@@ -1120,7 +1153,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputePlayerWantedLevelResponse(e, tactive, tsimplest);
         break;
     case EVENT_CREATE_PARTNER_TASK:
-        ComputeCreatePartnerTaskResponse(e, tactive, tsimplest);
+        ComputeCreatePartnerTaskResponse(static_cast<CEventCreatePartnerTask*>(e), tactive, tsimplest);
         break;
     case EVENT_SEEN_COP:
         ComputeSeenCopResponse(e, tactive, tsimplest);
