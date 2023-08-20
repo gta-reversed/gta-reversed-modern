@@ -430,10 +430,10 @@ void CClothesBuilder::BlendTextures(RwTexture* dst, RwTexture* src1, RwTexture* 
 
     AssertTextureLayouts({ dst, src1, src2, tattoos });
 
-    const auto dstRaster = RwTextureGetRaster(dst);
+    const auto dstRaster  = RwTextureGetRaster(dst);
     const auto src1Raster = RwTextureGetRaster(src1);
     const auto src2Raster = RwTextureGetRaster(src2);
-    const auto tatRaster = RwTextureGetRaster(src2);
+    const auto tatRaster  = RwTextureGetRaster(tattoos);
 
     CTimer::Suspend();
 
