@@ -20,7 +20,6 @@ class CPedGroupMembership {
 public:
 
     static constexpr int32 LEADER_MEM_ID = 7; ///< Leader's member ID
-    
     //static const float& ms_fMaxSeparation;
     //static const float& ms_fPlayerGroupMaxSeparation;
 
