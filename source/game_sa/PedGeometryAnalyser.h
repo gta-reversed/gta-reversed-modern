@@ -63,8 +63,8 @@ class CPedGeometryAnalyser {
 public:
     static void InjectHooks();
     
-    static void CanPedJumpObstacle(const CPed& ped, const CEntity& entity);
-    static void CanPedJumpObstacle(const CPed& ped, const CEntity& entity, const CVector&, const CVector&);
+    static bool CanPedJumpObstacle(const CPed& ped, const CEntity& entity);
+    static bool CanPedJumpObstacle(const CPed& ped, const CEntity& entity, const CVector& contactNormal, const CVector& contactPos);
 
     static bool CanPedTargetPed(CPed& ped, CPed& targetPed, bool checkDirection);
     static bool CanPedTargetPoint(const CPed& ped, const CVector& a2, bool a3);
