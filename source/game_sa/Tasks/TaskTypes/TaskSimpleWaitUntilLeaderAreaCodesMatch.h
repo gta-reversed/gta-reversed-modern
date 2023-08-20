@@ -20,8 +20,8 @@ public:
     using CTaskSimpleWaitUntilAreaCodesMatch::CTaskSimpleWaitUntilAreaCodesMatch;
     CTaskSimpleWaitUntilLeaderAreaCodesMatch(const CTaskSimpleWaitUntilLeaderAreaCodesMatch& o) = default;
 
-    CTask*    Clone() override { return new CTaskSimpleWaitUntilLeaderAreaCodesMatch{*this}; }
-    eTaskType GetTaskType() override { return Type; }
+    CTask*    Clone() const override { return new CTaskSimpleWaitUntilLeaderAreaCodesMatch{*this}; }
+    eTaskType GetTaskType() const override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     bool      ProcessPed(CPed* ped) override;
 };
