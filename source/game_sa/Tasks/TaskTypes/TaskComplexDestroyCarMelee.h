@@ -29,9 +29,9 @@ public:
     void CalculateSearchPositionAndRanges(CPed* ped);
     CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
-    eTaskType GetTaskType() override { return Type; }
-    CTask*    Clone() override { return new CTaskComplexDestroyCarMelee(m_VehToDestroy); } // 0x6235A0
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() const override { return Type; }
+    CTask*    Clone() const override { return new CTaskComplexDestroyCarMelee(m_VehToDestroy); } // 0x6235A0
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;

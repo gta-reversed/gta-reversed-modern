@@ -41,10 +41,10 @@ public:
     CTaskSimpleInAir(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump);
     ~CTaskSimpleInAir() override;
 
-    eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override { return new CTaskSimpleInAir(m_bUsingJumpGlide, m_bUsingFallGlide, m_bUsingClimbJump); }
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override { return new CTaskSimpleInAir(m_bUsingJumpGlide, m_bUsingFallGlide, m_bUsingClimbJump); }
     bool ProcessPed(CPed* ped) override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
 
     bool ProcessPed_Reversed(CPed* ped);
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);

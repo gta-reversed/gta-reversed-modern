@@ -47,7 +47,7 @@ CTaskComplexGotoDoorAndOpen::~CTaskComplexGotoDoorAndOpen() {
 }
 
 // 0x66BCA0
-CTask* CTaskComplexGotoDoorAndOpen::Clone() {
+CTask* CTaskComplexGotoDoorAndOpen::Clone() const {
     if ((m_nFlags & 1) != 0) { // todo: flags
         return new CTaskComplexGotoDoorAndOpen(m_Object);
     } else {

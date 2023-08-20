@@ -43,9 +43,8 @@ CTaskSimpleGangDriveBy::~CTaskSimpleGangDriveBy()
     CEntity::SafeCleanUpRef(m_pTargetEntity);
 }
 
-CTask* CTaskSimpleGangDriveBy::Clone()
-{
-    return plugin::CallMethodAndReturn<CTask*, 0x6236D0, CTask*>(this);
+CTask* CTaskSimpleGangDriveBy::Clone() const {
+    return plugin::CallMethodAndReturn<CTask*, 0x6236D0, const CTask*>(this);
 }
 
 bool CTaskSimpleGangDriveBy::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)

@@ -17,8 +17,8 @@ public:
     CTaskComplexCarDriveMission(CVehicle* vehicle, CEntity* targetVehicle, eCarMission carDriveMission, eCarDrivingStyle carDrivingStyle, float fSpeed);
     ~CTaskComplexCarDriveMission() override;
 
-    CTask* Clone() override { return new CTaskComplexCarDriveMission(m_pVehicle, m_pTargetVehicle, m_nCarMission, (eCarDrivingStyle)m_nCarDrivingStyle, m_fSpeed); }
-    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() const override { return new CTaskComplexCarDriveMission(m_pVehicle, m_pTargetVehicle, m_nCarMission, (eCarDrivingStyle)m_nCarDrivingStyle, m_fSpeed); }
+    eTaskType GetTaskType() const override { return Type; }
     void SetUpCar() override;
 
 private:
@@ -40,8 +40,8 @@ public:
     ~CTaskComplexCarDriveMissionFleeScene() override = default; // 0x4B89F0
 
     static constexpr auto Type = TASK_COMPLEX_CAR_DRIVE_MISSION_FLEE_SCENE;
-    eTaskType GetTaskType() override { return Type; } // 0x4B89C0
-    CTask* Clone() override { return new CTaskComplexCarDriveMissionFleeScene(m_pVehicle); } // 0x4B8950
+    eTaskType GetTaskType() const override { return Type; } // 0x4B89C0
+    CTask* Clone() const override { return new CTaskComplexCarDriveMissionFleeScene(m_pVehicle); } // 0x4B8950
 };
 
 class CTaskComplexCarDriveMissionKillPed : public CTaskComplexCarDriveMission {
@@ -50,6 +50,6 @@ public:
     ~CTaskComplexCarDriveMissionKillPed() override = default; // 0x4B8AD0
 
     static constexpr auto Type = TASK_COMPLEX_CAR_DRIVE_MISSION_KILL_PED;
-    eTaskType GetTaskType() override { return Type; } // 0x4B8AA0
-    CTask* Clone() override { return new CTaskComplexCarDriveMissionKillPed(m_pVehicle, m_pTargetVehicle); } // 0x4B8A30
+    eTaskType GetTaskType() const override { return Type; } // 0x4B8AA0
+    CTask* Clone() const override { return new CTaskComplexCarDriveMissionKillPed(m_pVehicle, m_pTargetVehicle); } // 0x4B8A30
 };

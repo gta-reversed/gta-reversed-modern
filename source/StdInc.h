@@ -29,6 +29,9 @@
 namespace rng = std::ranges;
 namespace rngv = std::views;
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include "Base.h"
 #include "config.h"
 

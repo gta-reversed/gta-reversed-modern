@@ -26,8 +26,8 @@ public:
     CTaskComplexCarDrive(CVehicle* vehicle, float speed, int32 carModelIndexToCreate, eCarDrivingStyle carDrivingStyle);
     ~CTaskComplexCarDrive() override;
 
-    CTask*    Clone() override;
-    eTaskType GetTaskType() override { return Type; }
+    CTask*    Clone() const override;
+    eTaskType GetTaskType() const override { return Type; }
 
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

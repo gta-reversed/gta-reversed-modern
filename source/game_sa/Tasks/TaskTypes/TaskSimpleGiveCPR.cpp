@@ -35,7 +35,7 @@ CTaskSimpleGiveCPR::~CTaskSimpleGiveCPR() {
 }
 
 // 0x659A10
-CTask* CTaskSimpleGiveCPR::Clone() {
+CTask* CTaskSimpleGiveCPR::Clone() const {
     return Clone_Reversed();
 }
 
@@ -49,7 +49,7 @@ bool CTaskSimpleGiveCPR::MakeAbortable(CPed* ped, eAbortPriority priority, const
     return MakeAbortable_Reversed(ped, priority, event);
 }
 
-CTask* CTaskSimpleGiveCPR::Clone_Reversed() {
+CTask* CTaskSimpleGiveCPR::Clone_Reversed() const {
     return new CTaskSimpleGiveCPR(m_pAccident);
 }
 

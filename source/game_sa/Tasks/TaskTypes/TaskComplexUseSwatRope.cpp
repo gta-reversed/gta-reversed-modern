@@ -51,7 +51,7 @@ CTaskComplexUseSwatRope::~CTaskComplexUseSwatRope() {
 }
 
 // 0x659C30
-CTask* CTaskComplexUseSwatRope::Clone() {
+CTask* CTaskComplexUseSwatRope::Clone() const {
     return Clone_Reversed();
 }
 
@@ -75,7 +75,7 @@ CTask* CTaskComplexUseSwatRope::ControlSubTask(CPed* ped) {
     return ControlSubTask_Reversed(ped);
 }
 
-CTask* CTaskComplexUseSwatRope::Clone_Reversed() {
+CTask* CTaskComplexUseSwatRope::Clone_Reversed() const {
     if (m_bIsOnHeli)
         return new CTaskComplexUseSwatRope(m_nRopeId, m_pHeli);
     else

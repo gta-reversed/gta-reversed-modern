@@ -46,7 +46,7 @@ public:
 
 static CSync cdStreamThreadSync;
 #endif
-
+#include "AEBankLoader.h"
 void InjectCdStreamHooks() {
     RH_ScopedNamespaceName("CdStream");
     RH_ScopedCategoryGlobal();
@@ -64,6 +64,7 @@ void InjectCdStreamHooks() {
 
 // 0x4067B0
 int32 CdStreamOpen(const char* lpFileName) {
+    NOTSA_LOG_DEBUG("CdStreamOpen: {}", lpFileName);
     int32 freeHandleIndex = 0;
     for (; freeHandleIndex < MAX_CD_STREAM_HANDLES; freeHandleIndex++) {
         if (!gStreamFileHandles[freeHandleIndex])

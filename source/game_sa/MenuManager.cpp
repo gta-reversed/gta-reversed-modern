@@ -317,7 +317,7 @@ void CMenuManager::DoSettingsBeforeStartingAGame() {
     if (m_bMenuActive)
         AudioEngine.Reset();
 
-    m_nRadioStation = static_cast<int8>(CAEAudioUtility::GetRandomNumberInRange(1, RADIO_COUNT - 1));
+    m_nRadioStation = CAEAudioUtility::GetRandomRadioStation();
     m_bDontDrawFrontEnd = true;
     m_bStartGameLoading = true;
 
@@ -435,12 +435,12 @@ void CMenuManager::ScrollRadioStations(int8 numStations) {
         return;
     }
 
-    m_nRadioStation += numStations;
-    if (m_nRadioStation <= 0) {
-        m_nRadioStation = RADIO_COUNT - 1;
+    m_nRadioStation = static_cast<eRadioID>(m_nRadioStation + numStations);
+    if (m_nRadioStation <= RADIO_EMERGENCY_AA) {
+        m_nRadioStation = RADIO_OFF;
     }
     if (m_nRadioStation >= RADIO_COUNT) {
-        m_nRadioStation = 1;
+        m_nRadioStation = RADIO_CLASSIC_HIP_HOP;
     }
     AudioEngine.RetuneRadio(m_nRadioStation);
     SaveSettings();
@@ -602,7 +602,7 @@ void CMenuManager::LoadSettings() {
         SetDefaultPreferences(SCREEN_CONTROLLER_SETUP);
         m_nPrefsVideoMode = -1; // Originally 0. Look at: `psSelectDevice`.
         m_nPrefsLanguage = eLanguage::AMERICAN;
-        m_nRadioStation = 1;
+        m_nRadioStation = RADIO_CLASSIC_HIP_HOP;
 
         CFileMgr::CloseFile(file);
         CFileMgr::SetDir("");

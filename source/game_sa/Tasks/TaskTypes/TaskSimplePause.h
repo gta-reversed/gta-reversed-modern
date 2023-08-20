@@ -14,11 +14,11 @@ public:
     explicit CTaskSimplePause(int32 time = 0);
     ~CTaskSimplePause() = default;
 
-    CTask* Clone() override;
-    eTaskType GetTaskType() override {
+    CTask* Clone() const override;
+    eTaskType GetTaskType() const override {
         return TASK_SIMPLE_PAUSE;
     };
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed(CPed* ped) override;
     bool ProcessPed_Reversed(CPed* ped);
