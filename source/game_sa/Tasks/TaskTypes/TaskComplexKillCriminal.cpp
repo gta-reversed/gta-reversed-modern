@@ -25,6 +25,8 @@ CTaskComplexKillCriminal::CTaskComplexKillCriminal(CPed* criminal, bool randomiz
     m_Criminal{criminal},
     m_Randomize{randomize}
 {
+    assert(m_Criminal);
+
     if (m_Criminal) {
         if (m_Criminal->IsPlayer() || notsa::contains({ PED_TYPE_COP, PED_TYPE_MEDIC, PED_TYPE_FIREMAN, PED_TYPE_MISSION1 }, m_Criminal->m_nPedType) || m_Criminal->IsCreatedByMission()) {
             m_Criminal = nullptr; // Interesting solution, but okay

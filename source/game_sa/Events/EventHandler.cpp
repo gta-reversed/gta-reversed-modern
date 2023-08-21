@@ -29,11 +29,21 @@
 #include "Tasks/TaskTypes/TaskSimpleDuck.h"
 #include "Tasks/TaskTypes/TaskSimpleDead.h"
 #include "Tasks/TaskTypes/TaskComplexGangJoinRespond.h"
+#include "Tasks/TaskTypes/TaskComplexEnterCarAsDriver.h"
+#include "Tasks/TaskTypes/TaskComplexEnterCarAsPassenger.h"
+#include "Tasks/TaskTypes/TaskSimplePause.h"
+#include "Tasks/TaskTypes/TaskSimpleAchieveHeading.h"
+#include "Tasks/TaskTypes/TaskSimpleShakeFist.h"
+#include "Tasks/TaskTypes/TaskComplexStealCar.h"
+#include "Tasks/TaskTypes/TaskComplexDragPedFromCar.h"
+#include "Tasks/TaskTypes/TaskComplexKillCriminal.h"
+#include "Tasks/TaskTypes/TaskComplexDestroyCar.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 #include "EventSexyVehicle.h"
 
+#include "Events/EventDraggedOutCar.h"
 #include "Events/GroupEvents.h"
 #include "Events/EventDeath.h"
 #include "Events/EventDeadPed.h"
@@ -44,6 +54,8 @@
 #include "Events/EventAttractor.h"
 #include "Events/EntityCollisionEvents.h"
 #include "Events/EventCarUpsideDown.h"
+
+constexpr auto fSafeDistance = 60.f;
 
 void CEventHandler::InjectHooks() {
     RH_ScopedClass(CEventHandler);
@@ -75,7 +87,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeDeadPedResponse, 0x4B9470);
     RH_ScopedInstall(ComputeDeathResponse, 0x4B9400);
     RH_ScopedInstall(ComputeDontJoinGroupResponse, 0x4BC1D0);
-    RH_ScopedInstall(ComputeDraggedOutCarResponse, 0x4BCC30, { .reversed = false });
+    RH_ScopedInstall(ComputeDraggedOutCarResponse, 0x4BCC30);
     RH_ScopedInstall(ComputeFireNearbyResponse, 0x4BBFB0, { .reversed = false });
     RH_ScopedInstall(ComputeGotKnockedOverByCarResponse, 0x4C3430, { .reversed = false });
     RH_ScopedInstall(ComputeGunAimedAtResponse, 0x4C2840, { .reversed = false });
@@ -777,8 +789,110 @@ void CEventHandler::ComputeDontJoinGroupResponse(CEventDontJoinPlayerGroup* e, C
 }
 
 // 0x4BCC30
-void CEventHandler::ComputeDraggedOutCarResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BCC30, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeDraggedOutCarResponse(CEventDraggedOutCar* e, CTask* tactive, CTask* tsimplest) {
+    // Pirulax: You gotta love when 500+ sloc is compressed to 100 :D
+    m_eventResponseTask = [&]() -> CTask* {
+        if (m_ped->IsPlayer() || !e->m_Vehicle) {
+            return nullptr;
+        }
+
+        if (e->m_Vehicle->GetAnimGroupId() == ANIM_GROUP_COACHCARANIMS) { // 0x4BCC7E
+            return new CTaskComplexSmartFleeEntity{
+                e->m_CarJacker,
+                false,
+                fSafeDistance,
+                1'000'000,
+                1'000,
+                fEntityPosChangeThreshold
+            };
+        }
+
+        const auto CreateFinalSeq = [&](CTask* response) -> CTask* {
+            const auto leaveCarTask = e->m_Vehicle->IsDriver(m_ped) || e->m_Vehicle->GetPassengers()[0] == m_ped // 0x4BCCF2
+                ? new CTaskComplexLeaveCar{ e->m_Vehicle, 0, 0, false, true }
+                : nullptr;
+
+            if (leaveCarTask && response) { // 0x4BD63A
+                return new CTaskComplexSequence{ leaveCarTask, response };
+            }
+
+            return leaveCarTask
+                ? leaveCarTask // NOTE: Slightly changed the code. Originally it boiled down to `new CTaskComplexSequence{ leaveCarTask, nullptr }`. This way we save an allocation.
+                : response;    // `response` might be null, that's fine
+        };
+
+        const auto CreateStealCarBackSeq = [&](bool dragOutPedIfPassenger, bool killJacker) {
+            const auto s = new CTaskComplexSequence{};
+
+            // Make important life decisions
+            if (CGeneral::RandomBool(50.f)) {
+                s->AddTask(new CTaskSimplePause{CGeneral::GetRandomNumberInRange(500, 1'500)});
+            } else {
+                s->AddTasks(
+                    new CTaskSimpleAchieveHeading{m_ped, e->m_CarJacker},
+                    new CTaskSimpleShakeFist{}
+                );
+            }
+
+            // Maybe kill the fucker
+            if (killJacker) {
+                s->AddTask(new CTaskComplexKillPedOnFoot{e->m_CarJacker});
+            }
+
+            // Talk a little
+            m_ped->Say(120);
+
+            // Try stealing the car back
+            if (e->m_IsDriverSeat) {
+                s->AddTask(new CTaskComplexStealCar{e->m_Vehicle});
+            } else {
+                if (dragOutPedIfPassenger) { // TODO/BUG: I really wonder if this is just a bug [that is, that they didn't include this in both [0x4BCF68 and 0x4BD3FA] places]
+                    s->AddTask(new CTaskComplexDragPedFromCar{e->m_CarJacker});
+                } 
+                s->AddTask(new CTaskComplexEnterCarAsPassenger{e->m_Vehicle});
+            }
+
+            return CreateFinalSeq(s);
+        };
+        switch (e->m_taskId) {
+        case TASK_NONE: // 0x4BCD68
+            return CreateFinalSeq(nullptr); // Nothing to do
+        case TASK_SIMPLE_HIT_HEAD: { // 0x4BCD74
+            if (e->m_IsDriverSeat) {
+                return CreateFinalSeq(new CTaskComplexEnterCarAsDriver{ e->m_Vehicle });
+            }
+            return CreateFinalSeq(new CTaskComplexEnterCarAsPassenger{ e->m_Vehicle });
+        }
+        case TASK_COMPLEX_EVASIVE_STEP: { // 0x4BCD85
+            return CreateStealCarBackSeq(false, true);
+        }
+        case TASK_COMPLEX_KILL_CRIMINAL: { // 0x4BD111
+            if (!e->m_CarJacker || e->m_CarJacker->IsPlayer()) {
+                return CreateFinalSeq(nullptr);
+            }
+            return CreateFinalSeq(new CTaskComplexKillCriminal{e->m_CarJacker});
+        }
+        case TASK_COMPLEX_DESTROY_CAR: { // 0x4BD173
+            return CreateFinalSeq(new CTaskComplexDestroyCar{e->m_Vehicle});
+        }
+        case TASK_COMPLEX_KILL_PED_ON_FOOT: { // 0x4BD1B4
+            assert(e->m_CarJacker); // There's some code after fleeing, but it makes no sense since `e->m_CarJacker` would be null. Pretty sure they forgot a `break`.
+            if (IsKillTaskAppropriate(m_ped, e->m_CarJacker, *e)) {
+                return CreateStealCarBackSeq(true, false);
+            }
+            return CreateFinalSeq(new CTaskComplexSmartFleeEntity{
+                e->m_CarJacker,
+                true,
+                100'000.f,
+                1'000'000,
+                1'000,
+                fEntityPosChangeThreshold
+            });
+        }
+        default:
+            return nullptr;
+        }
+    }();
 }
 
 // 0x4BBFB0
@@ -1118,7 +1232,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeBuildingCollisionResponse(static_cast<CEventBuildingCollision*>(e), tactive, tsimplest);
         break;
     case EVENT_DRAGGED_OUT_CAR:
-        ComputeDraggedOutCarResponse(e, tactive, tsimplest);
+        ComputeDraggedOutCarResponse(static_cast<CEventDraggedOutCar*>(e), tactive, tsimplest);
         break;
     case EVENT_KNOCK_OFF_BIKE:
         ComputeKnockOffBikeResponse(e, tactive, tsimplest);

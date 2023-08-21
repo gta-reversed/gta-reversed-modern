@@ -23,7 +23,7 @@ public:
     int32 InitFromData(int32 id, const char* line);
 
     cTransmission& GetTransmission()       { return m_transmissionData; }
-    auto           GetAnimGroup()    const { return static_cast<AssocGroupId>((uint32)ANIM_GROUP_STDCARAMIMS + m_nAnimGroup); }
+    auto           GetAnimGroupId()    const { return static_cast<AssocGroupId>((uint32)ANIM_GROUP_STDCARAMIMS + m_nAnimGroup); }
 
 public:
     int32         m_nVehicleId;

@@ -18,7 +18,7 @@ public:
 
     static void InjectHooks();
 
-    CTaskComplexKillCriminal(CPed* criminal, bool randomize);
+    CTaskComplexKillCriminal(CPed* criminal, bool randomize = false);
     CTaskComplexKillCriminal(const CTaskComplexKillCriminal&);
     ~CTaskComplexKillCriminal();
 
