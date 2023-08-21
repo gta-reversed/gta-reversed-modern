@@ -733,6 +733,7 @@ void CEventHandler::ComputeDeadPedResponse(CEventDeadPed* e, CTask* tactive, CTa
                 3,
                 false
             );
+            return nullptr;
         }
         switch (e->m_taskId) {
         case TASK_COMPLEX_SMART_FLEE_ENTITY:
