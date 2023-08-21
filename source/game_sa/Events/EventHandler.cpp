@@ -91,8 +91,8 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeDeathResponse, 0x4B9400);
     RH_ScopedInstall(ComputeDontJoinGroupResponse, 0x4BC1D0);
     RH_ScopedInstall(ComputeDraggedOutCarResponse, 0x4BCC30);
-    RH_ScopedInstall(ComputeFireNearbyResponse, 0x4BBFB0, { .reversed = false });
-    RH_ScopedInstall(ComputeGotKnockedOverByCarResponse, 0x4C3430, { .reversed = false });
+    RH_ScopedInstall(ComputeFireNearbyResponse, 0x4BBFB0);
+    RH_ScopedInstall(ComputeGotKnockedOverByCarResponse, 0x4C3430);
     RH_ScopedInstall(ComputeGunAimedAtResponse, 0x4C2840, { .reversed = false });
     RH_ScopedInstall(ComputeHighAngerAtPlayerResponse, 0x4BAC10, { .reversed = false });
     RH_ScopedInstall(ComputeInWaterResponse, 0x4BAF80, { .reversed = false });
