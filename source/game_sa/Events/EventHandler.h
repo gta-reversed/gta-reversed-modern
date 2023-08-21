@@ -26,6 +26,7 @@ class CEventDeath;
 class CEventDontJoinPlayerGroup;
 class CEventDraggedOutCar;
 class CEventFireNearby;
+class CEventGotKnockedOverByCar;
 
 class CEventHandler {
 public:
@@ -70,7 +71,7 @@ public:
     void ComputeDontJoinGroupResponse(CEventDontJoinPlayerGroup* e, CTask* tactive, CTask* tsimplest);
     void ComputeDraggedOutCarResponse(CEventDraggedOutCar* e, CTask* tactive, CTask* tsimplest);
     void ComputeFireNearbyResponse(CEventFireNearby* e, CTask* tactive, CTask* tsimplest);
-    void ComputeGotKnockedOverByCarResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputeGotKnockedOverByCarResponse(CEventGotKnockedOverByCar* e, CTask* tactive, CTask* tsimplest);
     void ComputeGunAimedAtResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeHighAngerAtPlayerResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeInWaterResponse(CEvent* e, CTask* tactive, CTask* tsimplest);

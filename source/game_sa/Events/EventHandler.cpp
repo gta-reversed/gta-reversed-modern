@@ -45,6 +45,7 @@
 #include "EventSexyVehicle.h"
 
 #include "Events/EventDraggedOutCar.h"
+#include "Events/EventGotKnockedOverByCar.h"
 #include "Events/GroupEvents.h"
 #include "Events/EventDeath.h"
 #include "Events/EventDeadPed.h"
@@ -692,14 +693,7 @@ void CEventHandler::ComputeDangerResponse(CEventDanger* e, CTask* tactive, CTask
             [[fallthrough]];
         }
         case TASK_COMPLEX_SMART_FLEE_ENTITY: {
-            return new CTaskComplexSmartFleeEntity{
-                e->m_dangerFrom,
-                true,
-                100'000.f,
-                1'000'000,
-                1'000,
-                fEntityPosChangeThreshold
-            };
+            return new CTaskComplexSmartFleeEntity{ e->m_dangerFrom, true, 100'000.f };
         }
         }
         return nullptr;
@@ -758,14 +752,7 @@ void CEventHandler::ComputeDeadPedResponse(CEventDeadPed* e, CTask* tactive, CTa
         }
         switch (e->m_taskId) {
         case TASK_COMPLEX_SMART_FLEE_ENTITY:
-            return new CTaskComplexSmartFleeEntity{
-                e->GetDeadPed(),
-                true,
-                100'000.f,
-                1'000'000,
-                1'000,
-                fEntityPosChangeThreshold
-            };
+            return new CTaskComplexSmartFleeEntity{e->GetDeadPed(), true, 100'000.f};
         case TASK_COMPLEX_INVESTIGATE_DEAD_PED:
             return new CTaskComplexInvestigateDeadPed{e->GetDeadPed()};
         case TASK_SIMPLE_DUCK_FOREVER:
@@ -799,14 +786,7 @@ void CEventHandler::ComputeDraggedOutCarResponse(CEventDraggedOutCar* e, CTask* 
         }
 
         if (e->m_Vehicle->GetAnimGroupId() == ANIM_GROUP_COACHCARANIMS) { // 0x4BCC7E
-            return new CTaskComplexSmartFleeEntity{
-                e->m_CarJacker,
-                false,
-                fSafeDistance,
-                1'000'000,
-                1'000,
-                fEntityPosChangeThreshold
-            };
+            return new CTaskComplexSmartFleeEntity{e->m_CarJacker, false, fSafeDistance};
         }
 
         const auto CreateFinalSeq = [&](CTask* response) -> CTask* {
@@ -882,14 +862,7 @@ void CEventHandler::ComputeDraggedOutCarResponse(CEventDraggedOutCar* e, CTask* 
             if (IsKillTaskAppropriate(m_ped, e->m_CarJacker, *e)) {
                 return CreateStealCarBackSeq(true, false);
             }
-            return CreateFinalSeq(new CTaskComplexSmartFleeEntity{
-                e->m_CarJacker,
-                true,
-                100'000.f,
-                1'000'000,
-                1'000,
-                fEntityPosChangeThreshold
-            });
+            return CreateFinalSeq(new CTaskComplexSmartFleeEntity{e->m_CarJacker, true, 100'000.f});
         }
         default:
             return nullptr;
@@ -911,8 +884,35 @@ void CEventHandler::ComputeFireNearbyResponse(CEventFireNearby* e, CTask* tactiv
 }
 
 // 0x4C3430
-void CEventHandler::ComputeGotKnockedOverByCarResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4C3430, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeGotKnockedOverByCarResponse(CEventGotKnockedOverByCar* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_vehicle) {
+            return nullptr;
+        }
+        const auto drvr = e->m_vehicle->m_pDriver;
+        if (!drvr) {
+            return nullptr;
+        }
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_KILL_PED_ON_FOOT: { // 0x4C346E
+            if (IsKillTaskAppropriate(m_ped, drvr, *e)) {
+                return new CTaskComplexKillPedOnFoot{drvr};
+            }
+            return new CTaskComplexSmartFleeEntity{drvr, true, 100'000.f};
+        }
+        case TASK_COMPLEX_FLEE_ENTITY: { // 0x4C347B
+            // There was an incorrect (it was inverted) null check at `0x4C3496`
+            // The opposite case (when `drvr == nullptr` was a no-op anyways because `CTaskComplexSmartFleeEntity` does nothing when `fleeEntity == nullptr`)
+            return notsa::IsFixBugs()
+                ? new CTaskComplexSmartFleeEntity{drvr, true, 100'000.f}
+                : nullptr; 
+        }
+        case TASK_COMPLEX_KILL_CRIMINAL: {
+            return new CTaskComplexKillCriminal{drvr};
+        }
+        }
+        return nullptr;
+    }();
 }
 
 // 0x4C2840
@@ -1318,7 +1318,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeSpecialResponse(e, tactive, tsimplest);
         break;
     case EVENT_GOT_KNOCKED_OVER_BY_CAR:
-        ComputeGotKnockedOverByCarResponse(e, tactive, tsimplest);
+        ComputeGotKnockedOverByCarResponse(static_cast<CEventGotKnockedOverByCar*>(e), tactive, tsimplest);
         break;
     case EVENT_POTENTIAL_WALK_INTO_OBJECT:
         ComputeObjectCollisionPassiveResponse(e, tactive, tsimplest);
