@@ -24,11 +24,11 @@ public:
     CTaskComplexSequence() = default;
 
     //! Construct using multiple tasks, same as constructing and then calling `AddTask` for every task passed in.
-    template<Task... T>
-    CTaskComplexSequence(T*... tasks) :
+    template<Task... Ts>
+    CTaskComplexSequence(Ts*... ts) :
         CTaskComplexSequence{}
     {
-        (AddTask(tasks), ...);
+        AddTasks(ts...);
     }
 
     CTaskComplexSequence(const CTaskComplexSequence&);
@@ -41,6 +41,11 @@ public:
     CTask* ControlSubTask(CPed* ped) override;
 
     void AddTask(CTask* task);
+
+    //! @brief Add multiple tasks at once
+    template<Task... Ts>
+    void AddTasks(Ts*... ts) { (AddTask(ts), ...); }
+
     void AddTask(int32 id, CTask* task);
     CTask* CreateNextSubTask(CPed* ped, int32& taskIndex, int32& repeatCount) const;
     void Flush();
