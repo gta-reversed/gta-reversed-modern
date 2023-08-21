@@ -44,7 +44,7 @@ public:
     void Flush();
     void FlushImmediately();
 
-    eEventType GetCurrentEventType();
+    eEventType GetCurrentEventType() const;
     void HandleEvents();
     bool IsKillTaskAppropriate(CPed* ped1, CPed* ped2, const CEvent& event);
     static bool IsTemporaryEvent(const CEvent& event);

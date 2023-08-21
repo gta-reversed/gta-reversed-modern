@@ -54,7 +54,7 @@ void CEventHandler::InjectHooks() {
 
     RH_ScopedInstall(Flush, 0x4C3790);
     RH_ScopedInstall(FlushImmediately, 0x4C3820);
-    RH_ScopedInstall(GetCurrentEventType, 0x4B8CC0, { .reversed = false });
+    RH_ScopedInstall(GetCurrentEventType, 0x4B8CC0);
     RH_ScopedInstall(HandleEvents, 0x4C3F10);
     RH_ScopedInstall(IsKillTaskAppropriate, 0x4BC3E0, { .reversed = false });
     RH_ScopedInstall(IsTemporaryEvent, 0x4BC370);
@@ -333,8 +333,11 @@ void CEventHandler::FlushImmediately() {
 }
 
 // 0x4B8CC0
-eEventType CEventHandler::GetCurrentEventType() {
-    return plugin::CallMethodAndReturn<eEventType, 0x4B8CC0, CEventHandler*>(this);
+eEventType CEventHandler::GetCurrentEventType() const {
+    if (const auto e = m_history.GetCurrentEvent()) {
+        return e->GetEventType();
+    }
+    return EVENT_NONE;
 }
 
 // 0x4BC370
