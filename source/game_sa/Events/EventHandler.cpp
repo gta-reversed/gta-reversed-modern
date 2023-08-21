@@ -28,11 +28,13 @@
 #include "Tasks/TaskTypes/TaskComplexInvestigateDeadPed.h"
 #include "Tasks/TaskTypes/TaskSimpleDuck.h"
 #include "Tasks/TaskTypes/TaskSimpleDead.h"
+#include "Tasks/TaskTypes/TaskComplexGangJoinRespond.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 #include "EventSexyVehicle.h"
 
+#include "Events/GroupEvents.h"
 #include "Events/EventDeath.h"
 #include "Events/EventDeadPed.h"
 #include "Events/EventDanger.h"
@@ -72,7 +74,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeDangerResponse, 0x4BC230);
     RH_ScopedInstall(ComputeDeadPedResponse, 0x4B9470);
     RH_ScopedInstall(ComputeDeathResponse, 0x4B9400);
-    RH_ScopedInstall(ComputeDontJoinGroupResponse, 0x4BC1D0, { .reversed = false });
+    RH_ScopedInstall(ComputeDontJoinGroupResponse, 0x4BC1D0);
     RH_ScopedInstall(ComputeDraggedOutCarResponse, 0x4BCC30, { .reversed = false });
     RH_ScopedInstall(ComputeFireNearbyResponse, 0x4BBFB0, { .reversed = false });
     RH_ScopedInstall(ComputeGotKnockedOverByCarResponse, 0x4C3430, { .reversed = false });
@@ -763,16 +765,12 @@ void CEventHandler::ComputeDeadPedResponse(CEventDeadPed* e, CTask* tactive, CTa
 
 // 0x4B9400
 void CEventHandler::ComputeDeathResponse(CEventDeath* e, CTask* tactive, CTask* tsimplest) {
-    m_eventResponseTask = [&]() -> CTask* {
-        return new CTaskSimpleDead{e->GetDeathTime(), e->HasDrowned()};
-    }();
+    m_eventResponseTask = new CTaskSimpleDead{e->GetDeathTime(), e->HasDrowned()};
 }
 
 // 0x4BC1D0
-void CEventHandler::ComputeDontJoinGroupResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BC1D0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
-
-    // m_eventResponseTask = new CTaskComplexGangJoinRespond(0);
+void CEventHandler::ComputeDontJoinGroupResponse(CEventDontJoinPlayerGroup* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = new CTaskComplexGangJoinRespond{false};
 }
 
 // 0x4BCC30
@@ -1285,7 +1283,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         m_eventResponseTask = new CTaskComplexStuckInAir();
         break;
     case EVENT_DONT_JOIN_GROUP:
-        ComputeDontJoinGroupResponse(e, tactive, tsimplest);
+        ComputeDontJoinGroupResponse(static_cast<CEventDontJoinPlayerGroup*>(e), tactive, tsimplest);
         break;
     default:
         return;
