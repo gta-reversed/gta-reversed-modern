@@ -38,6 +38,7 @@
 #include "Tasks/TaskTypes/TaskComplexDragPedFromCar.h"
 #include "Tasks/TaskTypes/TaskComplexKillCriminal.h"
 #include "Tasks/TaskTypes/TaskComplexDestroyCar.h"
+#include "Tasks/TaskTypes/TaskComplexExtinguishFires.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
@@ -54,6 +55,7 @@
 #include "Events/EventAttractor.h"
 #include "Events/EntityCollisionEvents.h"
 #include "Events/EventCarUpsideDown.h"
+#include "Events/EventFireNearby.h"
 
 constexpr auto fSafeDistance = 60.f;
 
@@ -896,16 +898,16 @@ void CEventHandler::ComputeDraggedOutCarResponse(CEventDraggedOutCar* e, CTask* 
 }
 
 // 0x4BBFB0
-void CEventHandler::ComputeFireNearbyResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BBFB0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
-    /*
-    auto taskId = task1->GetTaskType();
-    if (taskId == TASK_NONE) {
-        m_eventResponseTask = nullptr;
-    } else if (taskId == TASK_COMPLEX_EXTINGUISH_FIRES) {
-        m_eventResponseTask = new CTaskComplexExtinguishFires();
-    }
-    */
+void CEventHandler::ComputeFireNearbyResponse(CEventFireNearby* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        switch (e->m_taskId) {
+        case TASK_NONE:
+            break;
+        case TASK_COMPLEX_EXTINGUISH_FIRES:
+            return new CTaskComplexExtinguishFires{};
+        }
+        return nullptr;
+    }();
 }
 
 // 0x4C3430
@@ -1349,7 +1351,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeOnFireResponse(e, tactive, tsimplest);
         break;
     case EVENT_FIRE_NEARBY:
-        ComputeFireNearbyResponse(e, tactive, tsimplest);
+        ComputeFireNearbyResponse(static_cast<CEventFireNearby*>(e), tactive, tsimplest);
         break;
     case EVENT_SOUND_QUIET:
         ComputePedSoundQuietResponse(e, tactive, tsimplest);
