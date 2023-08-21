@@ -27,11 +27,13 @@
 #include "Tasks/TaskTypes/TaskComplexSmartFleeEntity.h"
 #include "Tasks/TaskTypes/TaskComplexInvestigateDeadPed.h"
 #include "Tasks/TaskTypes/TaskSimpleDuck.h"
+#include "Tasks/TaskTypes/TaskSimpleDead.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 #include "EventSexyVehicle.h"
 
+#include "Events/EventDeath.h"
 #include "Events/EventDeadPed.h"
 #include "Events/EventDanger.h"
 #include "Events/EventCreatePartnerTask.h"
@@ -69,7 +71,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeDamageResponse, 0x4C0170, { .reversed = false });
     RH_ScopedInstall(ComputeDangerResponse, 0x4BC230);
     RH_ScopedInstall(ComputeDeadPedResponse, 0x4B9470);
-    RH_ScopedInstall(ComputeDeathResponse, 0x4B9400, { .reversed = false });
+    RH_ScopedInstall(ComputeDeathResponse, 0x4B9400);
     RH_ScopedInstall(ComputeDontJoinGroupResponse, 0x4BC1D0, { .reversed = false });
     RH_ScopedInstall(ComputeDraggedOutCarResponse, 0x4BCC30, { .reversed = false });
     RH_ScopedInstall(ComputeFireNearbyResponse, 0x4BBFB0, { .reversed = false });
@@ -760,8 +762,10 @@ void CEventHandler::ComputeDeadPedResponse(CEventDeadPed* e, CTask* tactive, CTa
 }
 
 // 0x4B9400
-void CEventHandler::ComputeDeathResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4B9400, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeDeathResponse(CEventDeath* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        return new CTaskSimpleDead{e->GetDeathTime(), e->HasDrowned()};
+    }();
 }
 
 // 0x4BC1D0
@@ -1122,7 +1126,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeDamageResponse(e, tactive, tsimplest, task);
         break;
     case EVENT_DEATH:
-        ComputeDeathResponse(e, tactive, tsimplest);
+        ComputeDeathResponse(static_cast<CEventDeath*>(e), tactive, tsimplest);
         break;
     case EVENT_DEAD_PED:
         ComputeDeadPedResponse(static_cast<CEventDeadPed*>(e), tactive, tsimplest);
