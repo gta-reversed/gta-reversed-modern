@@ -56,7 +56,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(FlushImmediately, 0x4C3820);
     RH_ScopedInstall(GetCurrentEventType, 0x4B8CC0);
     RH_ScopedInstall(HandleEvents, 0x4C3F10);
-    RH_ScopedInstall(IsKillTaskAppropriate, 0x4BC3E0, { .reversed = false });
+    RH_ScopedInstall(IsKillTaskAppropriate, 0x4BC3E0);
     RH_ScopedInstall(IsTemporaryEvent, 0x4BC370);
     // RH_ScopedInstall(RecordActiveEvent, 0x0, { .reversed = false });
     // RH_ScopedInstall(RecordPassiveEvent, 0x0, { .reversed = false });
@@ -369,7 +369,7 @@ bool CEventHandler::IsTemporaryEvent(const CEvent& event) {
 
 // 0x4BC3E0
 bool CEventHandler::IsKillTaskAppropriate(CPed* ped1, CPed* ped2, const CEvent& event) {
-    return plugin::CallMethodAndReturn<bool, 0x4BC3E0, CEventHandler*, CPed*, CPed*, const CEvent&>(this, ped1, ped2, event);
+    return !ped1->IsCreatedByMission() && (!ped1->GetActiveWeapon().IsTypeMelee() || ped2->GetActiveWeapon().IsTypeMelee());
 }
 
 // 0x4BBF50
