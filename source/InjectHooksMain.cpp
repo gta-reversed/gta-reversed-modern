@@ -410,6 +410,7 @@
 #include "Interior/TaskInteriorBeInHouse.h"
 #include "Tasks/TaskTypes/TaskComplexKillPedOnFootArmed.h"
 #include "Tasks/TaskTypes/TaskSimpleWaitUntilLeaderAreaCodesMatch.h"
+#include "Tasks/TaskTypes/TaskComplexUseClosestFreeScriptedAttractor.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -802,7 +803,7 @@ void InjectHooksMain() {
         // CTaskInteriorSitInChair::InjectHooks();
         // CTaskInteriorUseInfo::InjectHooks();
         };
-
+        CTaskComplexUseClosestFreeScriptedAttractor::InjectHooks();
         CTaskSimpleLeaveGroup::InjectHooks();
         CTaskGangHasslePed::InjectHooks();
         CTaskGangHassleVehicle::InjectHooks();
