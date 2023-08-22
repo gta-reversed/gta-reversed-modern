@@ -39,11 +39,22 @@
 #include "Tasks/TaskTypes/TaskComplexKillCriminal.h"
 #include "Tasks/TaskTypes/TaskComplexDestroyCar.h"
 #include "Tasks/TaskTypes/TaskComplexExtinguishFires.h"
+#include "Tasks/TaskTypes/TaskComplexUseClosestFreeScriptedAttractor.h"
+#include "Tasks/TaskTypes/TaskComplexUseClosestFreeScriptedAttractorRun.h"
+#include "Tasks/TaskTypes/TaskComplexUseClosestFreeScriptedAttractorSprint.h"
+#include "Tasks/TaskTypes/TaskSimpleCower.h"
+#include "Tasks/TaskTypes/TaskSimpleHandsUp.h"
+#include "Tasks/TaskTypes/TaskComplexReactToGunAimedAt.h"
+#include "Tasks/TaskTypes/TaskComplexKillPedOnFootStealth.h"
+#include "Tasks/TaskTypes/TaskComplexCarDriveMission.h"
+#include "Tasks/TaskTypes/TaskComplexFleeEntity.h"
+#include "Tasks/TaskTypes/TaskComplexFleeAnyMeans.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 #include "EventSexyVehicle.h"
 
+#include "Events/EventGunAimedAt.h"
 #include "Events/EventDraggedOutCar.h"
 #include "Events/EventGotKnockedOverByCar.h"
 #include "Events/GroupEvents.h"
@@ -93,7 +104,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeDraggedOutCarResponse, 0x4BCC30);
     RH_ScopedInstall(ComputeFireNearbyResponse, 0x4BBFB0);
     RH_ScopedInstall(ComputeGotKnockedOverByCarResponse, 0x4C3430);
-    RH_ScopedInstall(ComputeGunAimedAtResponse, 0x4C2840, { .reversed = false });
+    RH_ScopedInstall(ComputeGunAimedAtResponse, 0x4C2840);
     RH_ScopedInstall(ComputeHighAngerAtPlayerResponse, 0x4BAC10, { .reversed = false });
     RH_ScopedInstall(ComputeInWaterResponse, 0x4BAF80, { .reversed = false });
     RH_ScopedInstall(ComputeInteriorUseInfoResponse, 0x4BAFE0, { .reversed = false });
@@ -700,11 +711,6 @@ void CEventHandler::ComputeDangerResponse(CEventDanger* e, CTask* tactive, CTask
     }();
 }
 
-/*
-m_eventResponseTask = [&]() -> CTask* {
-
-}();
-*/
 // 0x4B9470
 void CEventHandler::ComputeDeadPedResponse(CEventDeadPed* e, CTask* tactive, CTask* tsimplest) {
     m_eventResponseTask = [&]() -> CTask* {
@@ -874,8 +880,6 @@ void CEventHandler::ComputeDraggedOutCarResponse(CEventDraggedOutCar* e, CTask* 
 void CEventHandler::ComputeFireNearbyResponse(CEventFireNearby* e, CTask* tactive, CTask* tsimplest) {
     m_eventResponseTask = [&]() -> CTask* {
         switch (e->m_taskId) {
-        case TASK_NONE:
-            break;
         case TASK_COMPLEX_EXTINGUISH_FIRES:
             return new CTaskComplexExtinguishFires{};
         }
@@ -916,10 +920,87 @@ void CEventHandler::ComputeGotKnockedOverByCarResponse(CEventGotKnockedOverByCar
 }
 
 // 0x4C2840
-void CEventHandler::ComputeGunAimedAtResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4C2840, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeGunAimedAtResponse(CEventGunAimedAt* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (m_ped->IsPlayer()) {
+            return nullptr;
+        }
+
+        const auto IsFleeTask = [](CTask* t) {
+            return notsa::contains({TASK_COMPLEX_SMART_FLEE_ENTITY, TASK_COMPLEX_SMART_FLEE_POINT}, t->GetTaskType());
+        };
+        if (IsFleeTask(tactive) || IsFleeTask(tsimplest)) {
+            return new CTaskComplexSmartFleeEntity{e->m_ped, false, fSafeDistance}; // 0x4C28F5
+        }
+
+        if (m_ped->IsCreatedBy(PED_GAME) && !m_ped->bInVehicle && !m_ped->GetActiveWeapon().IsTypeMelee()) {
+            if (e->m_ped && e->m_ped->IsPlayer() && !m_ped->GetIntelligence()->IsFriendlyWith(*e->m_ped)) {
+                e->m_taskId = TASK_COMPLEX_KILL_PED_ON_FOOT; // 0x4C296F
+            }
+        }
+
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR: // 0x4C2A7A
+            return new CTaskComplexUseClosestFreeScriptedAttractor{};
+        case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR_RUN:
+            return new CTaskComplexUseClosestFreeScriptedAttractorRun{};
+        case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR_SPRINT:
+            return new CTaskComplexUseClosestFreeScriptedAttractorSprint{};
+        case TASK_SIMPLE_COWER:
+            return new CTaskSimpleCower{};
+        case TASK_SIMPLE_HANDS_UP:
+            return new CTaskSimpleHandsUp{5'000};
+        case TASK_SIMPLE_DUCK: {
+            if (const auto t = m_ped->GetIntelligence()->GetTaskDuck()) {
+                return t;
+            }
+            return new CTaskSimpleDuck{DUCK_STANDALONE, 5'000};
+        }
+        case TASK_SIMPLE_DUCK_FOREVER:
+            return new CTaskSimpleDuck{DUCK_STANDALONE, 0x967Fu}; // are they trying to tell us something? "Fu" :D
+        case TASK_COMPLEX_REACT_TO_GUN_AIMED_AT: // 0x4C2B2C
+            return new CTaskComplexReactToGunAimedAt{e->m_ped}; 
+        case TASK_COMPLEX_KILL_PED_ON_FOOT_STEALTH: // 0x4C2E30
+            return new CTaskComplexKillPedOnFootStealth{e->m_ped};
+        case TASK_COMPLEX_KILL_CRIMINAL:
+            return new CTaskComplexKillCriminal{e->m_ped};
+        case TASK_COMPLEX_KILL_PED_ON_FOOT: { // 0x4C2E3D
+            if (IsKillTaskAppropriate(m_ped, e->m_ped, *e)) {
+                return new CTaskComplexKillPedOnFoot{e->m_ped};
+            }
+            return new CTaskComplexFleeEntity{e->m_ped, false};
+        }
+        case TASK_COMPLEX_FLEE_ANY_MEANS: // 0x4C2B36
+            return new CTaskComplexFleeAnyMeans{e->m_ped, true, fSafeDistance};
+        case TASK_COMPLEX_CAR_DRIVE_MISSION_FLEE_SCENE: {// 0x4C2BF
+            if (const auto v = m_ped->m_pVehicle) {
+                if (v->IsDriver(m_ped)) {
+                    return new CTaskComplexCarDriveMissionFleeScene{v}; // 0x4C2C39
+                }
+            }
+            if (!m_ped->bWantedByPolice || !e->m_ped->IsCop()) {
+                return new CTaskComplexFleeEntity{e->m_ped, false};
+            }
+            return new CTaskComplexFleeAnyMeans{e->m_ped, true, fSafeDistance};
+        }
+        case TASK_COMPLEX_FLEE_ENTITY: // 0x4C2BEE
+            return new CTaskComplexFleeEntity{e->m_ped, false};
+        case TASK_COMPLEX_SMART_FLEE_ENTITY: { // 0x4C2B5C
+            if (!m_ped->bWantedByPolice || !e->m_ped->IsCop()) {
+                return new CTaskComplexFleeEntity{e->m_ped, false};
+            }
+            return new CTaskComplexFleeAnyMeans{e->m_ped, true, fSafeDistance};
+        }
+        }
+        NOTSA_UNREACHABLE();
+    }();
 }
 
+/*
+m_eventResponseTask = [&]() -> CTask* {
+
+}();
+*/
 // 0x4BAC10
 void CEventHandler::ComputeHighAngerAtPlayerResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
     plugin::CallMethod<0x4BAC10, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
@@ -1289,7 +1370,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeVehicleToStealResponse(e, tactive, tsimplest);
         break;
     case EVENT_GUN_AIMED_AT:
-        ComputeGunAimedAtResponse(e, tactive, tsimplest);
+        ComputeGunAimedAtResponse(static_cast<CEventGunAimedAt*>(e), tactive, tsimplest);
         break;
     case EVENT_SCRIPT_COMMAND:
         ComputeScriptCommandResponse(e, tactive, tsimplest);
