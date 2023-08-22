@@ -26,16 +26,17 @@ CTask* CTaskComplexDie::CreateNextSubTask(CPed* ped) { return CreateNextSubTask_
 CTask* CTaskComplexDie::CreateFirstSubTask(CPed* ped) { return CreateFirstSubTask_Reversed(ped); }
 
 // 0x630040
-CTaskComplexDie::CTaskComplexDie(eWeaponType nWeaponType,
-                                 AssocGroupId animGroup,
-                                 AnimationId animID,
-                                 float fBlendDelta,
-                                 float fAnimSpeed,
-                                 bool bBeingKilledByStealth,
-                                 bool bFallingToDeath,
-                                 eFallDir nFallToDeathDir,
-                                 bool bFallToDeathOverRailing) : CTaskComplex()
-{
+CTaskComplexDie::CTaskComplexDie(
+    eWeaponType nWeaponType,
+    AssocGroupId animGroup,
+    AnimationId animID,
+    float fBlendDelta,
+    float fAnimSpeed,
+    bool bBeingKilledByStealth,
+    bool bFallingToDeath,
+    eFallDir nFallToDeathDir,
+    bool bFallToDeathOverRailing
+) {
     m_nWeaponType             = nWeaponType;
     m_nAnimID                 = animID;
     m_fBlendDelta             = fBlendDelta;
