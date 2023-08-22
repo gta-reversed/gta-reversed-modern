@@ -7,13 +7,20 @@
 class CPed;
 class C2dEffect;
 
-class NOTSA_EXPORT_VTABLE CTaskComplexUseClosestFreeScriptedAttractor final : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexUseClosestFreeScriptedAttractor : public CTaskComplex {
 public:
     static constexpr auto Type = eTaskType::TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR;
 
     static void InjectHooks();
 
+
     CTaskComplexUseClosestFreeScriptedAttractor(/*bool unused = false*/) = default;
+
+    /*!
+     * @notsa
+    */
+    CTaskComplexUseClosestFreeScriptedAttractor(eMoveState ms);
+
     CTaskComplexUseClosestFreeScriptedAttractor(const CTaskComplexUseClosestFreeScriptedAttractor&);
     ~CTaskComplexUseClosestFreeScriptedAttractor() = default;
 

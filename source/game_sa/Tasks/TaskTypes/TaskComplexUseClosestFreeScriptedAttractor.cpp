@@ -17,6 +17,11 @@ void CTaskComplexUseClosestFreeScriptedAttractor::InjectHooks() {
     RH_ScopedVMTInstall(ControlSubTask, 0x634890);
 }
 
+CTaskComplexUseClosestFreeScriptedAttractor::CTaskComplexUseClosestFreeScriptedAttractor(eMoveState ms) :
+    m_MoveState{ms}
+{
+}
+
 CTaskComplexUseClosestFreeScriptedAttractor::CTaskComplexUseClosestFreeScriptedAttractor(const CTaskComplexUseClosestFreeScriptedAttractor&) :
     CTaskComplexUseClosestFreeScriptedAttractor{}
 {
