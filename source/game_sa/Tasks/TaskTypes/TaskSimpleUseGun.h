@@ -9,6 +9,8 @@
 #include "TaskSimple.h"
 #include "Vector.h"
 #include "Vector2D.h"
+#include "TaskSimpleGunControl.h"
+
 class CWeaponInfo;
 class CAnimBlendAssociation;
 class CEntity;
@@ -78,6 +80,8 @@ public:
     void SetMoveAnim(CPed* ped);
     void StartAnim(CPed* ped);
     void StartCountDown(uint8, bool);
+
+    auto GetLastGunCommand() const { return (eGunCommand)m_nLastCommand; }
 
 #if ANDROID
     void CreateTask();

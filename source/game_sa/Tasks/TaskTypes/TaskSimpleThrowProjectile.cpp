@@ -35,7 +35,7 @@ bool CTaskSimpleThrowProjectile::MakeAbortable(CPed* ped, eAbortPriority priorit
         }
     } else if (event && event->GetEventType() == EVENT_DAMAGE) {
         const auto* eventDamage = static_cast<const CEventDamage*>(event);
-        if (eventDamage->m_damageResponse.m_bHealthZero && eventDamage->m_bAddToEventGroup || eventDamage->m_bKnockOffPed) {
+        if (eventDamage->m_damageResponse.m_bHealthZero && eventDamage->m_bAddToEventGroup || eventDamage->m_bFallDown) {
             if (m_pAnim) {
                 m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
                 m_pAnim->m_fBlendDelta = -4.0f;

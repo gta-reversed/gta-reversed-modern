@@ -810,6 +810,8 @@ void InjectHooksMain() {
         CTaskComplexUseClosestFreeScriptedAttractorSprint::InjectHooks();
         CTaskComplexUseClosestFreeScriptedAttractor::InjectHooks();
 
+        CTaskSimpleChoking::InjectHooks();
+
         CTaskSimpleLeaveGroup::InjectHooks();
         CTaskGangHasslePed::InjectHooks();
         CTaskGangHassleVehicle::InjectHooks();

@@ -26,6 +26,7 @@ class CEventDeath;
 class CEventDontJoinPlayerGroup;
 class CEventDraggedOutCar;
 class CEventFireNearby;
+class CEventDamage;
 class CEventGotKnockedOverByCar;
 class CEventGunAimedAt;
 
@@ -65,7 +66,7 @@ public:
     void ComputeChatPartnerResponse(CEventChatPartner* e, CTask* tactive, CTask* tsimplest);
     void ComputeCopCarBeingStolenResponse(CEventCopCarBeingStolen* e, CTask* tactive, CTask* tsimplest);
     void ComputeCreatePartnerTaskResponse(CEventCreatePartnerTask* e, CTask* tactive, CTask* tsimplest);
-    void ComputeDamageResponse(CEvent* e, CTask* tactive, CTask* tsimplest, CTask* task3);
+    void ComputeDamageResponse(CEventDamage* e, CTask* tactive, CTask* tsimplest, CTask* abortedTaskEventResponse);
     void ComputeDangerResponse(CEventDanger* e, CTask* tactive, CTask* tsimplest);
     void ComputeDeadPedResponse(CEventDeadPed* e, CTask* tactive, CTask* tsimplest);
     void ComputeDeathResponse(CEventDeath* e, CTask* tactive, CTask* tsimplest);

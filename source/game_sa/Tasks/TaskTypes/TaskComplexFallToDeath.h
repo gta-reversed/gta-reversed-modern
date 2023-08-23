@@ -38,6 +38,8 @@ public:
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
 
+    static bool CalcFall(CPed* ped, int32& fallDir, bool& bFallToDeathOverRailing);
+
 private:
     void UpdateAnims(CPed* ped);
 

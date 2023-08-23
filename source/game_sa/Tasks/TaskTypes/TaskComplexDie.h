@@ -4,7 +4,12 @@
 #include "eWeaponType.h"
 class CVehicle;
 
-enum class eFallDir : uint8 { FORWARD, LEFT, BACKWARD, RIGHT };
+enum class eFallDir : uint8 {
+    FORWARD,
+    LEFT,
+    BACKWARD,
+    RIGHT
+};
 
 class NOTSA_EXPORT_VTABLE CTaskComplexDie : public CTaskComplex {
 public:

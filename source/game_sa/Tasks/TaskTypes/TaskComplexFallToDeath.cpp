@@ -15,6 +15,7 @@ void CTaskComplexFallToDeath::InjectHooks() {
     RH_ScopedInstall(ControlSubTask_Reversed, 0x679510);
     RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x679120);
     RH_ScopedInstall(CreateNextSubTask_Reversed, 0x679270);
+    RH_ScopedInstall(CalcFall, 0x6796C0);
 }
 
 CTaskComplexFallToDeath* CTaskComplexFallToDeath::Constructor(int32 direction, const CVector& posn, bool a4, bool a5) { this->CTaskComplexFallToDeath::CTaskComplexFallToDeath(direction, posn, a4, a5); return this; }
@@ -143,4 +144,55 @@ CTask* CTaskComplexFallToDeath::CreateNextSubTask_Reversed(CPed* ped) {
     default:
         return nullptr;
     }
+}
+
+// 0x6796C0
+bool CTaskComplexFallToDeath::CalcFall(CPed* ped, int32& outFallDir, bool& outFallToDeathOverRailing) {
+    if (ped->bInVehicle || ped->physicalFlags.bSubmergedInWater) {
+        return false;
+    }
+
+    eFallDir rndFallDirs[4]{eFallDir::FORWARD, eFallDir::LEFT, eFallDir::BACKWARD, eFallDir::RIGHT};
+    for (auto i = 8; i-- > 0;) {
+        const auto GetRandomEntry = [&]() -> eFallDir& {
+            return CGeneral::RandomChoice(rndFallDirs);
+        };
+        std::swap(GetRandomEntry(), GetRandomEntry());
+    }
+
+    const CVector pedPos{ped->GetPosition()};
+    for (auto i = 0;i < 2;i++) {
+        const auto vecFallDir = [&]{
+            outFallDir = (int32)rndFallDirs[i];
+            switch (rndFallDirs[i]) {
+            case eFallDir::FORWARD:
+                return ped->GetForward();
+            case eFallDir::LEFT:
+                return -ped->GetRight();
+            case eFallDir::BACKWARD:
+                return -ped->GetForward();
+            case eFallDir::RIGHT:
+                return ped->GetRight();
+            default:
+                NOTSA_UNREACHABLE();
+            }
+        }();
+        const auto IsLOSClear = [](CVector origin, CVector target) {
+            return !CWorld::GetIsLineOfSightClear(origin, target, true, true, false, true, false, false, false);
+        };
+        constexpr auto FALL_OFFSET_Z = CVector{0.f, 0.f, 0.375f};
+        auto fallPos = pedPos + vecFallDir * 1.5f + FALL_OFFSET_Z;
+        if (!IsLOSClear(fallPos, fallPos - CVector{0.f, 0.f, 4.f})) {
+            continue;
+        }
+        fallPos += vecFallDir * 0.7f;
+        if (!IsLOSClear(fallPos, pedPos + CVector{0.f, 0.f, 0.375f})) {
+            continue;
+        }
+        fallPos -= FALL_OFFSET_Z;
+        constexpr auto FALL_OVER_RAILING_OFFSET_Z = CVector{0.f, 0.f, -0.5f};
+        outFallToDeathOverRailing = !IsLOSClear(pedPos, fallPos + FALL_OVER_RAILING_OFFSET_Z);
+        return true;
+    }
+    return false;
 }

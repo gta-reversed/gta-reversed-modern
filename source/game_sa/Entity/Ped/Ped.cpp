@@ -1925,7 +1925,7 @@ eWeaponSkill CPed::GetWeaponSkill() {
 */
 eWeaponSkill CPed::GetWeaponSkill(eWeaponType weaponType)
 {
-    if (!CWeaponInfo::WeaponHasSkillStats(weaponType)) {
+    if (!CWeaponInfo::TypeHasSkillStats(weaponType)) {
         return eWeaponSkill::STD;
     }
 

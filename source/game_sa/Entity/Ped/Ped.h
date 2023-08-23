@@ -117,7 +117,7 @@ public:
         bool bCanPointGunAtTarget : 1 = false;   // can ped point gun at target
         bool bIsTalking : 1 = false;             // is ped talking(see Chat())
 
-        bool bInVehicle : 1 = false;             // is in a vehicle
+        bool bInVehicle : 1 = false;             // is in a vehicle [Sometimes accessed as `(ped->m_nPedFlags >> 8) & 1`]
         bool bIsInTheAir : 1 = false;            // is in the air
         bool bIsLanding : 1 = false;             // is landing after being in the air
         bool bHitSomethingLastFrame : 1 = false; // has been in a collision last frame

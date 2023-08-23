@@ -49,11 +49,22 @@
 #include "Tasks/TaskTypes/TaskComplexCarDriveMission.h"
 #include "Tasks/TaskTypes/TaskComplexFleeEntity.h"
 #include "Tasks/TaskTypes/TaskComplexFleeAnyMeans.h"
+#include "Tasks/TaskTypes/TaskComplexDie.h"
+#include "Tasks/TaskTypes/TaskSimpleStealthKill.h"
+#include "Tasks/TaskTypes/TaskComplexFallToDeath.h"
+#include "Tasks/TaskTypes/TaskSimpleFall.h"
+#include "Tasks/TaskTypes/TaskSimpleGetUp.h"
+#include "Tasks/TaskTypes/TaskSimpleUseGun.h"
+#include "Tasks/TaskTypes/TaskSimpleGunControl.h"
+#include "Tasks/TaskTypes/TaskSimpleChoking.h"
+#include "Tasks/TaskTypes/TaskSimpleBeHit.h"
+#include "Tasks/TaskTypes/TaskComplexFallAndGetUp.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
-#include "EventSexyVehicle.h"
 
+#include "Events/EventSexyVehicle.h"
+#include "Events/EventDamage.h"
 #include "Events/EventGunAimedAt.h"
 #include "Events/EventDraggedOutCar.h"
 #include "Events/EventGotKnockedOverByCar.h"
@@ -96,7 +107,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeChatPartnerResponse, 0x4B98E0);
     RH_ScopedInstall(ComputeCopCarBeingStolenResponse, 0x4BB740);
     RH_ScopedInstall(ComputeCreatePartnerTaskResponse, 0x4BB130);
-    RH_ScopedInstall(ComputeDamageResponse, 0x4C0170, { .reversed = false });
+    RH_ScopedInstall(ComputeDamageResponse, 0x4C0170);
     RH_ScopedInstall(ComputeDangerResponse, 0x4BC230);
     RH_ScopedInstall(ComputeDeadPedResponse, 0x4B9470);
     RH_ScopedInstall(ComputeDeathResponse, 0x4B9400);
@@ -683,8 +694,286 @@ void CEventHandler::ComputeCreatePartnerTaskResponse(CEventCreatePartnerTask* e,
 }
 
 // 0x4C0170
-void CEventHandler::ComputeDamageResponse(CEvent* e, CTask* tactive, CTask* tsimplest, CTask* abortedTaskEventResponse) {
-    plugin::CallMethod<0x4C0170, CEventHandler*, CEvent*, CTask*, CTask*, CTask*>(this, e, tactive, tsimplest, abortedTaskEventResponse);
+void CEventHandler::ComputeDamageResponse(CEventDamage* e, CTask* tactive, CTask* tsimplest, CTask* abortedTaskEventResponse) {
+    m_eventResponseTask = [&]() -> CTask* {
+        const auto DoComputeDamageAndResponseForPersonality = [&] {
+            const auto ce = m_history.GetCurrentEvent();
+            if (!ce || ce->GetEventType() != EVENT_DAMAGE || !e->IsSameEventForAI(static_cast<CEventDamage&>(*ce))) {
+                if (!m_ped->GetTaskManager().Has<TASK_COMPLEX_REACT_TO_ATTACK>() && !m_ped->IsPlayer()) {
+                    if (const auto esrc = e->GetSourceEntity()) {
+                        if (esrc->IsPed()) {
+                            ComputePersonalityResponseToDamage(e, esrc);
+                        }
+                    }
+                }
+            }
+            return m_eventResponseTask;
+        };
+
+        if (!e->m_bAddToEventGroup) {
+            // NOTE(Pirulax): Originally the code here used `e->m_pSourceEntity`, but that was probably just a mistake, as the other code piece [copy paste of it] used `e->GetSourceEntity()`.
+            return DoComputeDamageAndResponseForPersonality();
+        }
+
+        e->ProcessDamage(m_ped);
+
+        switch (e->m_weaponType) {
+        case WEAPON_RAMMEDBYCAR:
+        case WEAPON_RUNOVERBYCAR:
+            g_InterestingEvents.Add(CInterestingEvents::INTERESTING_EVENT_15, m_ped);
+        }
+
+        if (const auto v = m_ped->GetVehicleIfInOne()) {
+            if (v->IsBike() || v->IsSubQuad()) {
+                if (!e->m_bFallDown && !e->HasKilledPed()) {
+                    ComputePersonalityResponseToDamage(e, e->m_pSourceEntity);
+                } else {
+                    ComputeKnockOffBikeResponse(e, tactive, tsimplest); // 0x4C02DE
+                }
+                return m_eventResponseTask;
+            }
+        }
+
+        if (e->HasKilledPed() || m_ped->m_fHealth < 1.f || (m_ped->bInVehicle && e->m_bFallDown)) { // 0x4C0315
+            if (const auto v = m_ped->GetVehicleIfInOne()) {
+                if (v->IsBike() || v->IsSubQuad()) { // 0x4C07E5
+                    ComputeKnockOffBikeResponse(e, tactive, tsimplest);
+                    return m_eventResponseTask;
+                }
+            }
+
+            // TODO(Pirulax):
+            // Eventually remove these lambdas.
+            // I'm pretty sure this code can be linearized, but first I want to make sure it actually works :D
+            const auto DoDie = [&](bool bFallingToDeath = false, eFallDir fallToDeathDir = eFallDir::FORWARD, bool bFallToDeathOverRailing = false) { // 0x4C0AA2
+                g_InterestingEvents.Add(CInterestingEvents::INTERESTING_EVENT_28, m_ped);
+                if (const auto tPhyResp = m_ped->GetTaskManager().GetTaskPrimary(TASK_PRIMARY_PHYSICAL_RESPONSE)) {
+                    if (tPhyResp->GetTaskType() != TASK_SIMPLE_CHOKING || !notsa::contains({ WEAPON_SPRAYCAN, WEAPON_EXTINGUISHER, WEAPON_TEARGAS }, e->m_weaponType)) {
+                        m_ped->GetIntelligence()->AddTaskPhysResponse(nullptr);
+                    }
+                }
+
+                if (e->m_pSourceEntity) {
+                    RegisterKill(m_ped, e->m_pSourceEntity, e->m_weaponType, e->WasHeadShot());
+                }
+
+                return new CTaskComplexDie{
+                    e->m_weaponType,
+                    e->m_nAnimGroup,
+                    e->m_nAnimID,
+                    e->m_fAnimBlend,
+                    e->m_fAnimSpeed,
+                    tactive && tactive->GetTaskType() == TASK_SIMPLE_STEALTH_KILL && !static_cast<CTaskSimpleStealthKill*>(tactive)->m_bKeepTargetAlive,
+                    bFallingToDeath,
+                    fallToDeathDir,
+                    bFallToDeathOverRailing
+                };
+            };
+
+            const auto DoDieMaybeFall = [&]{ // 0x4C0A1C
+                if (notsa::contains({ ANIM_ID_NO_ANIMATION_SET, ANIM_ID_DOOR_LHINGE_O }, e->m_nAnimID)) {
+                    e->ComputeDeathAnim(m_ped, false);
+                }
+                if (!m_ped->IsPlayer() && e->m_pSourceEntity) {
+                    if (notsa::contains({
+                        WEAPON_PISTOL,
+                        WEAPON_PISTOL_SILENCED,
+                        WEAPON_DESERT_EAGLE,
+                        WEAPON_SHOTGUN,
+                        WEAPON_SAWNOFF_SHOTGUN,
+                        WEAPON_SPAS12_SHOTGUN,
+                        WEAPON_MICRO_UZI,
+                        WEAPON_MP5,
+                        WEAPON_AK47,
+                        WEAPON_M4,
+                        WEAPON_TEC9,
+                        WEAPON_COUNTRYRIFLE,
+                        WEAPON_MINIGUN
+                    }, e->m_weaponType)) {
+                        if (e->m_pSourceEntity->IsPed() && e->m_pSourceEntity->AsPed()->IsCreatedByMission()) {
+                            int32 fallToDeathDir;
+                            bool  bFallToDeathOverRailing;
+                            bool  bFallToDeath = CTaskComplexFallToDeath::CalcFall(m_ped, fallToDeathDir, bFallToDeathOverRailing);
+                            return DoDie(bFallToDeath, (eFallDir)(fallToDeathDir), bFallToDeathOverRailing);
+                        }
+                    }
+                }
+                return DoDie();
+            };
+
+            if (!notsa::contains({ ANIM_ID_NO_ANIMATION_SET, ANIM_ID_DOOR_LHINGE_O }, e->m_nAnimID)) {
+                return DoDie();
+            }
+
+            if (!tsimplest) {
+                return DoDieMaybeFall();
+            }
+
+            switch (tsimplest->GetTaskType()) {
+            case TASK_SIMPLE_FALL: {
+                if (const auto dr = &e->m_damageResponse; e->m_weaponType == WEAPON_FALL && dr->m_fDamageArmor + dr->m_fDamageHealth >= 20.f) { // 0x4C083E - Add blood
+                    for (auto i = 10; i-- > 0;) {
+                        g_fx.AddBlood(
+                            m_ped->GetPosition() + CVector::Random({-0.5f, -0.5f, 0.f}, {0.5f, 0.5f, 0.f}),
+                            {0.f, 0.f, 2.f},
+                            10,
+                            m_ped->m_fContactSurfaceBrightness
+                        );
+                    }
+                }
+                const auto tfall = CTask::Cast<CTaskSimpleFall>(tsimplest);
+                if (const auto a = tfall->m_pAnim) { // 0x4C08ED
+                    if (a->m_fBlendAmount > 0.5f && a->m_fBlendDelta >= 0.f && a->m_fCurrentTime < a->m_pHierarchy->m_fTotalTime) {
+                        e->m_nAnimGroup = (AssocGroupId)a->m_nAnimGroup;
+                        e->m_nAnimID    = (AnimationId)a->m_nAnimId;
+                        e->m_fAnimBlend = 4.f;
+                        e->m_fAnimSpeed = 1.f;
+                        return DoDieMaybeFall();
+                    }
+                }
+                if (!tfall->m_bIsFinished) {
+                    return DoDieMaybeFall();
+                }
+                e->m_fAnimBlend = 4.f;
+                e->m_fAnimSpeed = 1.f;
+                e->m_nAnimGroup = ANIM_GROUP_DEFAULT;
+                if (const auto a = RpAnimBlendClumpGetFirstAssociation(m_ped->m_pRwClump, ANIMATION_800)) { // 0x4C094E
+                    e->m_nAnimID = ANIM_ID_FLOOR_HIT_F;
+                    return DoDieMaybeFall();
+                }
+                break;
+            }
+            case TASK_SIMPLE_GET_UP: { // 0x4C0987
+                const auto tgup = CTask::Cast<CTaskSimpleGetUp>(tsimplest);
+                if (!tgup->m_Anim || tgup->m_Anim->GetTimeProgress() >= 0.5f) {
+                    if (tgup->m_bHasPedGotUp) {
+                        return DoDieMaybeFall();
+                    }
+                    e->m_nAnimID = RpAnimBlendClumpGetFirstAssociation(m_ped->m_pRwClump, ANIMATION_800)
+                        ? ANIM_ID_FLOOR_HIT_F
+                        : ANIM_ID_FLOOR_HIT;
+                    
+                } else if (!tgup->m_bHasPedGotUp) {
+                    e->m_nAnimID = tgup->m_Anim->m_nAnimId == ANIM_ID_GETUP_FRONT
+                        ? ANIM_ID_FLOOR_HIT_F
+                        : ANIM_ID_FLOOR_HIT;
+                }
+                e->m_nAnimGroup = ANIM_GROUP_DEFAULT;
+                e->m_fAnimBlend = 4.f;
+                e->m_fAnimSpeed = 1.f;
+                return DoDieMaybeFall();
+            }
+            default:
+                return DoDieMaybeFall();
+            }
+        }
+
+        if (!e->m_pSourceEntity) {
+            return nullptr;
+        }
+
+        if (CWeaponInfo::TypeIsWeapon(e->m_weaponType)) {
+            if (m_ped->bInVehicle) { // 0x4C0332
+                return DoComputeDamageAndResponseForPersonality();
+            }
+
+            const auto eventSrcPed = e->m_pSourceEntity->IsPed()
+                ? e->m_pSourceEntity->AsPed()
+                : nullptr;
+
+            if (eventSrcPed) { // 0x4C0338
+                if (const auto killerStealthTask = eventSrcPed->GetTaskManager().GetActiveTaskAs<CTaskSimpleStealthKill>()) {
+                    m_physicalResponseTask = new CTaskSimpleStealthKill{false, eventSrcPed, killerStealthTask->m_animGrpId};
+                    m_ped->SetPedState(PEDSTATE_DIE_BY_STEALTH);
+                    return nullptr;
+                }
+            }
+
+            if (e->m_nAnimID == ANIM_ID_NO_ANIMATION_SET) {
+                e->ComputeAnim(m_ped, false);
+            }
+
+            // Do choking if it applies to this weapon type
+            if (notsa::contains({ WEAPON_SPRAYCAN, WEAPON_EXTINGUISHER, WEAPON_TEARGAS }, e->m_weaponType)) { // 0x4C03F8 - TODO: `WeaponIsChocking`
+                if (!notsa::IsFixBugs() || eventSrcPed) { // Original code just crashed at this point
+                    const auto t = eventSrcPed->GetIntelligence()->GetTaskUseGun();
+                    if (!t || t->GetLastGunCommand() != eGunCommand::PISTOLWHIP) {
+                        const auto bIsTearGas = e->m_weaponType == WEAPON_TEARGAS;
+                        if (const auto t = CTask::DynCast<CTaskSimpleChoking>(m_ped->GetTaskManager().GetTaskPrimary(TASK_PRIMARY_PHYSICAL_RESPONSE))) {
+                            t->UpdateChoke(m_ped, eventSrcPed, bIsTearGas);
+                        } else {
+                            m_physicalResponseTask = new CTaskSimpleChoking{eventSrcPed, bIsTearGas};
+                        }
+                        return DoComputeDamageAndResponseForPersonality();
+                    }
+                }
+            }
+
+            // Otherwise
+            if (!e->m_bFallDown && !notsa::contains({ ANIM_ID_NO_ANIMATION_SET, ANIM_ID_DOOR_LHINGE_O }, e->m_nAnimID)) {
+                if (CAnimManager::GetAnimAssociation(e->m_nAnimGroup, e->m_nAnimID)->m_nFlags & ANIMATION_ADD_TO_BLEND) { // 0x4C04B7
+                    if (!e->GetAnimAdded()) {
+                        if (!notsa::contains({ANIM_ID_SHOT_PARTIAL, ANIM_ID_SHOT_LEFTP, ANIM_ID_SHOT_PARTIAL_B, ANIM_ID_SHOT_RIGHTP}, e->m_nAnimID)) {
+                            const auto a = CAnimManager::BlendAnimation(m_ped->m_pRwClump, e->m_nAnimGroup, e->m_nAnimID, e->m_fAnimBlend);
+                            a->SetSpeed(e->m_fAnimSpeed);
+                            a->SetCurrentTime(0.f);
+                            e->m_bAnimAdded = true;
+                        } else {
+                            auto a = RpAnimBlendClumpGetAssociation(m_ped->m_pRwClump, e->GetAnimId()); // 0x4C04DE
+                            if (!a) {
+                                a = CAnimManager::BlendAnimation(m_ped->m_pRwClump, e->GetAnimGroup(), e->GetAnimId());
+                            }
+                            a->SetBlend(0.f, e->m_fAnimBlend);
+                            a->SetSpeed(e->m_fAnimSpeed);
+                            a->SetCurrentTime(0.f);
+                        }
+                    }
+                } else { // 0x4C0593 
+                    const auto tBeHit = new CTaskSimpleBeHit{
+                        eventSrcPed,
+                        e->m_pedPieceType,
+                        e->m_ucDirection,
+                        (int32)e->GetDamageResponse().GetTotalDamage()
+                    };
+                    m_physicalResponseTask = tBeHit;
+
+                    tBeHit->m_nAnimId    = e->GetAnimId();
+                    tBeHit->m_nAnimGroup = e->GetAnimGroup();
+                    tBeHit->m_bAnimAdded = e->GetAnimAdded();
+                }
+            } else {
+                m_physicalResponseTask = new CTaskComplexFallAndGetUp{
+                    e->GetAnimId(),
+                    e->GetAnimGroup(),
+                    (int32)(1000.f / ((float)m_ped->m_nWeaponShootingRate / 40.f))
+                };
+            }
+
+            return DoComputeDamageAndResponseForPersonality();
+        }
+
+        if (!m_ped->bInVehicle) { // 0x4C06D9
+            if (!notsa::contains({ ANIM_ID_NO_ANIMATION_SET, ANIM_ID_DOOR_LHINGE_O }, e->m_nAnimID)) {
+                if (notsa::contains({ WEAPON_RAMMEDBYCAR, WEAPON_RUNOVERBYCAR, WEAPON_FALL }, e->m_weaponType)) {
+                    m_physicalResponseTask = new CTaskComplexFallAndGetUp{ // 0x4C0748
+                        e->GetAnimId(),
+                        e->GetAnimGroup(),
+                        m_ped->IsPlayer() ? 500 : 1000
+                    };
+                    const auto knockedOverByVeh = e->m_pSourceEntity->IsVehicle()
+                        ? e->m_pSourceEntity->AsVehicle()
+                        : e->m_pSourceEntity->IsPed()
+                            ? e->m_pSourceEntity->AsPed()->GetVehicleIfInOne()
+                            : nullptr;
+                    if (knockedOverByVeh) {
+                        m_ped->GetEventGroup().Add(CEventGotKnockedOverByCar{knockedOverByVeh});
+                    }
+                }
+            }
+        }
+
+        return nullptr;
+    }();
 }
 
 // 0x4BC230
@@ -1321,7 +1610,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeKnockOffBikeResponse(e, tactive, tsimplest);
         break;
     case EVENT_DAMAGE:
-        ComputeDamageResponse(e, tactive, tsimplest, task);
+        ComputeDamageResponse(static_cast<CEventDamage*>(e), tactive, tsimplest, task);
         break;
     case EVENT_DEATH:
         ComputeDeathResponse(static_cast<CEventDeath*>(e), tactive, tsimplest);
