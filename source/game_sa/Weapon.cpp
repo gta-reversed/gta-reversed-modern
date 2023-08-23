@@ -255,7 +255,7 @@ bool CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType we
             isStealth = true;
         }
     }
-    eventDmg.m_b05 = isStealth;
+    eventDmg.m_bStealthMode = isStealth;
     if (!victim->bInVehicle || victim->m_fHealth <= 0.f || !victim->GetTaskManager().GetActiveTask() || victim->GetTaskManager().GetActiveTask()->GetTaskType() != TASK_SIMPLE_GANG_DRIVEBY) {
         victim->GetEventGroup().Add(eventDmg);
     }
@@ -517,7 +517,7 @@ void CWeapon::DoBulletImpact(CEntity* firedBy, CEntity* victim, const CVector& s
                     CStats::IncrementStat(STAT_BULLETS_THAT_HIT);
                 }
             }
-            if (CWeaponInfo::WeaponHasSkillStats(GetType())) { // 0x73B738
+            if (CWeaponInfo::TypeHasSkillStats(GetType())) { // 0x73B738
                 // Redundant `if` check here was removed
                 if ([&]{
                     const auto victimEntity = notsa::coalesce(firedByPlayer->m_pTargetedObject, victim);
