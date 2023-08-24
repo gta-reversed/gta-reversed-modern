@@ -253,6 +253,7 @@
 #include "TaskComplexKillPedOnFoot.h"
 #include "TaskSimpleThrowProjectile.h"
 #include "TaskSimpleGoToPoint.h"
+#include "TaskInteriorUseInfo.h"
 #include "TaskComplexWanderMedic.h"
 #include "TaskComplexMoveBackAndJump.h"
 #include "TaskSimpleCarDriveTimed.h"
@@ -795,15 +796,15 @@ void InjectHooksMain() {
 
     const auto Tasks = []() {
         const auto Interior = [] {
-        CTaskInteriorBeInHouse::InjectHooks();
-        // CTaskInteriorBeInOffice::InjectHooks();
-        // CTaskInteriorBeInShop::InjectHooks();
-        // CTaskInteriorGoToInfo::InjectHooks();
-        // CTaskInteriorLieInBed::InjectHooks();
-        // CTaskInteriorShopKeeper::InjectHooks();
-        // CTaskInteriorSitAtDesk::InjectHooks();
-        // CTaskInteriorSitInChair::InjectHooks();
-        // CTaskInteriorUseInfo::InjectHooks();
+            CTaskInteriorBeInHouse::InjectHooks();
+        //  CTaskInteriorBeInOffice::InjectHooks();
+        //  CTaskInteriorBeInShop::InjectHooks();
+        //  CTaskInteriorGoToInfo::InjectHooks();
+        //  CTaskInteriorLieInBed::InjectHooks();
+        //  CTaskInteriorShopKeeper::InjectHooks();
+        //  CTaskInteriorSitAtDesk::InjectHooks();
+        //  CTaskInteriorSitInChair::InjectHooks();
+            CTaskInteriorUseInfo::InjectHooks();
         };
 
         CTaskComplexUseClosestFreeScriptedAttractorRun::InjectHooks();
