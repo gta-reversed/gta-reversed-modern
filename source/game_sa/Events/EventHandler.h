@@ -8,10 +8,12 @@
 
 #include "EventHandlerHistory.h"
 
-class CTask;
-class CEvent;
 class CPed;
 
+class CTask;
+class CTaskInteriorUseInfo;
+
+class CEvent;
 class CEventCarUpsideDown;
 class CEventDamage;
 class CEventAreaCodes;
@@ -31,6 +33,7 @@ class CEventGotKnockedOverByCar;
 class CEventGunAimedAt;
 class CEventHighAngerAtPlayer;
 class CEventInWater;
+class CEventInteriorUseInfo;
 
 class CEventHandler {
 public:
@@ -79,7 +82,7 @@ public:
     void ComputeGunAimedAtResponse(CEventGunAimedAt* e, CTask* tactive, CTask* tsimplest);
     void ComputeHighAngerAtPlayerResponse(CEventHighAngerAtPlayer* e, CTask* tactive, CTask* tsimplest);
     void ComputeInWaterResponse(CEventInWater* e, CTask* tactive, CTask* tsimplest);
-    void ComputeInteriorUseInfoResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputeInteriorUseInfoResponse(CEventInteriorUseInfo* e, CTaskInteriorUseInfo* tactive, CTask* tsimplest);
     void ComputeKnockOffBikeResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeLowAngerAtPlayerResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeLowHealthResponse(CEvent* e, CTask* tactive, CTask* tsimplest);

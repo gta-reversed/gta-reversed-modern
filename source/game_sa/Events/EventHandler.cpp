@@ -60,10 +60,12 @@
 #include "Tasks/TaskTypes/TaskSimpleBeHit.h"
 #include "Tasks/TaskTypes/TaskComplexFallAndGetUp.h"
 #include "Tasks/TaskTypes/TaskComplexInWater.h"
+#include "Tasks/TaskTypes/Interior/TaskInteriorUseInfo.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 
+#include "Events/EventInteriorUseInfo.h"
 #include "Events/EventInWater.h"
 #include "Events/MentalStateEvents.h"
 #include "Events/EventSexyVehicle.h"
@@ -121,7 +123,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeGunAimedAtResponse, 0x4C2840);
     RH_ScopedInstall(ComputeHighAngerAtPlayerResponse, 0x4BAC10);
     RH_ScopedInstall(ComputeInWaterResponse, 0x4BAF80);
-    RH_ScopedInstall(ComputeInteriorUseInfoResponse, 0x4BAFE0, { .reversed = false });
+    RH_ScopedInstall(ComputeInteriorUseInfoResponse, 0x4BAFE0);
     RH_ScopedInstall(ComputeKnockOffBikeResponse, 0x4B9FF0, { .reversed = false });
     RH_ScopedInstall(ComputeLowAngerAtPlayerResponse, 0x4BAAD0, { .reversed = false });
     RH_ScopedInstall(ComputeLowHealthResponse, 0x4BA990, { .reversed = false });
@@ -1317,9 +1319,8 @@ void CEventHandler::ComputeInWaterResponse(CEventInWater* e, CTask* tactive, CTa
 }
 
 // 0x4BAFE0
-void CEventHandler::ComputeInteriorUseInfoResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BAFE0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
-    // m_eventResponseTask = new CTaskInteriorUseInfo(task1->m_interiorInfo, task1->m_interior, task1->m_actionAnimTime, task1->m_loopAction);
+void CEventHandler::ComputeInteriorUseInfoResponse(CEventInteriorUseInfo* e, CTaskInteriorUseInfo* tUseInfo, CTask* tsimplest) {
+    m_eventResponseTask = tUseInfo->Clone();
 }
 
 // 0x4B9FF0
@@ -1775,7 +1776,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeVehicleOnFireResponse(e, tactive, tsimplest);
         break;
     case EVENT_INTERIOR_USE_INFO:
-        ComputeInteriorUseInfoResponse(e, tactive, tsimplest);
+        ComputeInteriorUseInfoResponse(static_cast<CEventInteriorUseInfo*>(e), CTask::DynCast<CTaskInteriorUseInfo>(tactive), tsimplest);
         break;
     case EVENT_SIGNAL_AT_PED:
         ComputeSignalAtPedResponse(e, tactive, tsimplest);
