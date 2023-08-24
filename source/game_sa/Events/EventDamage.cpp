@@ -1017,4 +1017,5 @@ bool CEventDamage::WasHeadShot() const {
     case WEAPON_UZI_DRIVEBY:
         return m_damageResponse.m_bForceDeath && m_pedPieceType == PED_PIECE_HEAD;
     }
+    return false;
 }

@@ -59,10 +59,13 @@
 #include "Tasks/TaskTypes/TaskSimpleChoking.h"
 #include "Tasks/TaskTypes/TaskSimpleBeHit.h"
 #include "Tasks/TaskTypes/TaskComplexFallAndGetUp.h"
+#include "Tasks/TaskTypes/TaskComplexInWater.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 
+#include "Events/EventInWater.h"
+#include "Events/MentalStateEvents.h"
 #include "Events/EventSexyVehicle.h"
 #include "Events/EventDamage.h"
 #include "Events/EventGunAimedAt.h"
@@ -117,7 +120,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeGotKnockedOverByCarResponse, 0x4C3430);
     RH_ScopedInstall(ComputeGunAimedAtResponse, 0x4C2840);
     RH_ScopedInstall(ComputeHighAngerAtPlayerResponse, 0x4BAC10);
-    RH_ScopedInstall(ComputeInWaterResponse, 0x4BAF80, { .reversed = false });
+    RH_ScopedInstall(ComputeInWaterResponse, 0x4BAF80);
     RH_ScopedInstall(ComputeInteriorUseInfoResponse, 0x4BAFE0, { .reversed = false });
     RH_ScopedInstall(ComputeKnockOffBikeResponse, 0x4B9FF0, { .reversed = false });
     RH_ScopedInstall(ComputeLowAngerAtPlayerResponse, 0x4BAAD0, { .reversed = false });
@@ -1309,9 +1312,8 @@ void CEventHandler::ComputeHighAngerAtPlayerResponse(CEventHighAngerAtPlayer* e,
 }
 
 // 0x4BAF80
-void CEventHandler::ComputeInWaterResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BAF80, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
-    // m_eventResponseTask = new CTaskComplexInWater();
+void CEventHandler::ComputeInWaterResponse(CEventInWater* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = new CTaskComplexInWater{};
 }
 
 // 0x4BAFE0
@@ -1749,7 +1751,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeSeenPanickedPedResponse(e, tactive, tsimplest);
         break;
     case EVENT_IN_WATER:
-        ComputeInWaterResponse(e, tactive, tsimplest);
+        ComputeInWaterResponse(static_cast<CEventInWater*>(e), tactive, tsimplest);
         break;
     case EVENT_AREA_CODES:
         ComputeAreaCodesResponse(static_cast<CEventAreaCodes*>(e), tactive, tsimplest);
