@@ -65,6 +65,7 @@
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 
+#include "Events/EventLowAngerAtPlayer.h"
 #include "Events/EventInteriorUseInfo.h"
 #include "Events/EventInWater.h"
 #include "Events/MentalStateEvents.h"
@@ -1329,8 +1330,21 @@ void CEventHandler::ComputeKnockOffBikeResponse(CEvent* e, CTask* tactive, CTask
 }
 
 // 0x4BAAD0
-void CEventHandler::ComputeLowAngerAtPlayerResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BAAD0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeLowAngerAtPlayerResponse(CEventLowAngerAtPlayer* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* { // Same code as `ComputeHighAngerAtPlayerResponse`
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_KILL_PED_ON_FOOT:
+            return new CTaskComplexKillPedOnFoot{FindPlayerPed()};
+        case TASK_COMPLEX_SMART_FLEE_ENTITY:
+            return new CTaskComplexSmartFleeEntity{FindPlayerPed(), false, 60.f};
+        case TASK_NONE:
+            return nullptr;
+        case TASK_SIMPLE_DUCK_FOREVER:
+            return new CTaskSimpleDuck{DUCK_STANDALONE, 0xE0FFu, -1};
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
 }
 
 // 0x4BA990
@@ -1719,7 +1733,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeShotFiredWhizzedByResponse(e, tactive, tsimplest);
         break;
     case EVENT_LOW_ANGER_AT_PLAYER:
-        ComputeLowAngerAtPlayerResponse(e, tactive, tsimplest);
+        ComputeLowAngerAtPlayerResponse(static_cast<CEventLowAngerAtPlayer*>(e), tactive, tsimplest);
         break;
     case EVENT_HIGH_ANGER_AT_PLAYER:
         ComputeHighAngerAtPlayerResponse(static_cast<CEventHighAngerAtPlayer*>(e), tactive, tsimplest);
