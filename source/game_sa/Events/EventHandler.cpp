@@ -116,7 +116,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeFireNearbyResponse, 0x4BBFB0);
     RH_ScopedInstall(ComputeGotKnockedOverByCarResponse, 0x4C3430);
     RH_ScopedInstall(ComputeGunAimedAtResponse, 0x4C2840);
-    RH_ScopedInstall(ComputeHighAngerAtPlayerResponse, 0x4BAC10, { .reversed = false });
+    RH_ScopedInstall(ComputeHighAngerAtPlayerResponse, 0x4BAC10);
     RH_ScopedInstall(ComputeInWaterResponse, 0x4BAF80, { .reversed = false });
     RH_ScopedInstall(ComputeInteriorUseInfoResponse, 0x4BAFE0, { .reversed = false });
     RH_ScopedInstall(ComputeKnockOffBikeResponse, 0x4B9FF0, { .reversed = false });
@@ -1291,8 +1291,21 @@ m_eventResponseTask = [&]() -> CTask* {
 }();
 */
 // 0x4BAC10
-void CEventHandler::ComputeHighAngerAtPlayerResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BAC10, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeHighAngerAtPlayerResponse(CEventHighAngerAtPlayer* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_KILL_PED_ON_FOOT:
+            return new CTaskComplexKillPedOnFoot{FindPlayerPed()};
+        case TASK_COMPLEX_SMART_FLEE_ENTITY:
+            return new CTaskComplexSmartFleeEntity{FindPlayerPed(), false, 60.f};
+        case TASK_NONE:
+            return nullptr;
+        case TASK_SIMPLE_DUCK_FOREVER:
+            return new CTaskSimpleDuck{DUCK_STANDALONE, 0xE0FFu, -1};
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
 }
 
 // 0x4BAF80
@@ -1706,7 +1719,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeLowAngerAtPlayerResponse(e, tactive, tsimplest);
         break;
     case EVENT_HIGH_ANGER_AT_PLAYER:
-        ComputeHighAngerAtPlayerResponse(e, tactive, tsimplest);
+        ComputeHighAngerAtPlayerResponse(static_cast<CEventHighAngerAtPlayer*>(e), tactive, tsimplest);
         break;
     case EVENT_HEALTH_REALLY_LOW:
         ComputeReallyLowHealthResponse(e, tactive, tsimplest);
