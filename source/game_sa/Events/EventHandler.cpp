@@ -63,10 +63,13 @@
 #include "Tasks/TaskTypes/Interior/TaskInteriorUseInfo.h"
 #include "Tasks/TaskTypes/TaskComplexDiveFromAttachedEntityAndGetUp.h"
 #include "Tasks/TaskTypes/TaskComplexWalkRoundObject.h"
+#include "Tasks/TaskTypes/TaskSimplePlayerOnFire.h"
+#include "Tasks/TaskTypes/TaskComplexOnFire.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 
+#include "Events/EventOnFire.h"
 #include "Events/PotentialWalkIntoEvents.h"
 #include "Events/EventLowAngerAtPlayer.h"
 #include "Events/EventInteriorUseInfo.h"
@@ -134,7 +137,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeObjectCollisionPassiveResponse, 0x4BBB90);
     RH_ScopedInstall(ComputeObjectCollisionResponse, 0x4B92B0);
     RH_ScopedInstall(ComputeOnEscalatorResponse, 0x4BC150);
-    RH_ScopedInstall(ComputeOnFireResponse, 0x4BAD50, { .reversed = false });
+    RH_ScopedInstall(ComputeOnFireResponse, 0x4BAD50);
     RH_ScopedInstall(ComputePassObjectResponse, 0x4BB0C0, { .reversed = false });
     RH_ScopedInstall(ComputePedCollisionWithPedResponse, 0x4BDB80, { .reversed = false });
     RH_ScopedInstall(ComputePedCollisionWithPlayerResponse, 0x4BE7D0, { .reversed = false });
@@ -1406,8 +1409,17 @@ void CEventHandler::ComputeOnEscalatorResponse(CEvent* e, CTask* tactive, CTask*
 }
 
 // 0x4BAD50
-void CEventHandler::ComputeOnFireResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BAD50, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeOnFireResponse(CEventOnFire* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (m_ped->IsPlayer()) {
+            if (m_ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM)) {
+                return nullptr;
+            }
+            return new CTaskSimplePlayerOnFire{};
+        } else {
+            return new CTaskComplexOnFire{};
+        }
+    }();
 }
 
 // 0x4BB0C0
@@ -1778,7 +1790,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeVehiclePotentialPassiveCollisionResponse(e, tactive, tsimplest);
         break;
     case EVENT_ON_FIRE:
-        ComputeOnFireResponse(e, tactive, tsimplest);
+        ComputeOnFireResponse(static_cast<CEventOnFire*>(e), tactive, tsimplest);
         break;
     case EVENT_FIRE_NEARBY:
         ComputeFireNearbyResponse(static_cast<CEventFireNearby*>(e), tactive, tsimplest);
