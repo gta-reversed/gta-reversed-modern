@@ -129,7 +129,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeInWaterResponse, 0x4BAF80);
     RH_ScopedInstall(ComputeInteriorUseInfoResponse, 0x4BAFE0);
     RH_ScopedInstall(ComputeKnockOffBikeResponse, 0x4B9FF0, { .reversed = false });
-    RH_ScopedInstall(ComputeLowAngerAtPlayerResponse, 0x4BAAD0, { .reversed = false });
+    RH_ScopedInstall(ComputeLowAngerAtPlayerResponse, 0x4BAAD0);
     RH_ScopedInstall(ComputeLowHealthResponse, 0x4BA990);
     RH_ScopedInstall(ComputeObjectCollisionPassiveResponse, 0x4BBB90);
     RH_ScopedInstall(ComputeObjectCollisionResponse, 0x4B92B0, { .reversed = false });
