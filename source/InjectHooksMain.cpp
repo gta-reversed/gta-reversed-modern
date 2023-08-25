@@ -256,6 +256,7 @@
 #include "TaskInteriorUseInfo.h"
 #include "TaskComplexWanderMedic.h"
 #include "TaskComplexMoveBackAndJump.h"
+#include "TaskComplexSeekEntityAiming.h"
 #include "TaskSimpleCarDriveTimed.h"
 #include "TaskComplexKillPedOnFootStealth.h"
 #include "TaskComplexDriveWander.h"
@@ -899,7 +900,7 @@ void InjectHooksMain() {
         CTaskComplexSeekEntityRadiusAngleOffset::InjectHooks();
         CTaskComplexSeekEntityStandard::InjectHooks();
         CTaskComplexSeekEntityXYOffset::InjectHooks();
-        // CTaskComplexSeekEntityAiming::InjectHooks();
+        CTaskComplexSeekEntityAiming::InjectHooks();
         CTaskComplexSeekEntityAnyMeansXYOffset::InjectHooks();
         // CTaskComplexShuffleSeats::InjectHooks();
         CTaskComplexSignalAtPed::InjectHooks();
