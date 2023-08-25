@@ -37,6 +37,7 @@ class CEventInteriorUseInfo;
 class CEventLowAngerAtPlayer;
 class CEventHealthLow;
 class CEventPotentialWalkIntoObject;
+class CEventObjectCollision;
 
 class CEventHandler {
 public:
@@ -90,7 +91,7 @@ public:
     void ComputeLowAngerAtPlayerResponse(CEventLowAngerAtPlayer* e, CTask* tactive, CTask* tsimplest);
     void ComputeLowHealthResponse(CEventHealthLow* e, CTask* tactive, CTask* tsimplest);
     void ComputeObjectCollisionPassiveResponse(CEventPotentialWalkIntoObject* e, CTask* tactive, CTask* tsimplest);
-    void ComputeObjectCollisionResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputeObjectCollisionResponse(CEventObjectCollision* e, CTask* tactive, CTask* tsimplest);
     void ComputeOnEscalatorResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeOnFireResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputePassObjectResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
