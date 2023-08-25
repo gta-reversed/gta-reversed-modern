@@ -3,6 +3,7 @@
 #include <array>
 #include <span>
 
+#include "Enums/eDirection.h"
 #include "Vector.h"
 #include "Base.h"
 
@@ -92,10 +93,11 @@ public:
 
     static int32 ComputeMoveDirToAvoidEntity(const CPed& ped, CEntity& entity, CVector& posn);
 
+    static CVector ComputeEntityDir(const CEntity& entity, eDirection dir);
     static CVector* ComputeEntityDirs(const CEntity& entity, CVector* posn);
-    static int32 ComputeEntityHitSide(const CPed& ped, CEntity& entity);
-    static int32 ComputeEntityHitSide(const CVector& point1, const CVector* point2, const float* x);
-    static int32 ComputeEntityHitSide(const CVector& point, CEntity& entity);
+    static int32 ComputeEntityHitSide(const CPed& ped, CEntity& entity); // Returns `eDirection`
+    static int32 ComputeEntityHitSide(const CVector& point1, const CVector* point2, const float* x); // Returns `eDirection`
+    static int32 ComputeEntityHitSide(const CVector& point, CEntity& entity); // Returns `eDirection`
     static int32 ComputePedHitSide(const CPed& ped, const CPhysical& physical);
     static int32 ComputePedHitSide(const CPed& ped, const CVector& posn);
     static int32 ComputePedShotSide(const CPed& ped, const CVector& posn);

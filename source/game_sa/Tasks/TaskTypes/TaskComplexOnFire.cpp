@@ -48,7 +48,7 @@ CTask* CTaskComplexOnFire::CreateSubTask(eTaskType taskType) {
             0.0,
             false,
             false,
-            eFallDir::FORWARD,
+            eDirection::FORWARD,
             false
         };
     case TASK_COMPLEX_SMART_FLEE_ENTITY:

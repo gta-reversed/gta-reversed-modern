@@ -207,6 +207,17 @@ int32 CPedGeometryAnalyser::ComputeMoveDirToAvoidEntity(const CPed& ped, CEntity
     return plugin::CallAndReturn<int32, 0x5F3730, const CPed&, CEntity&, CVector&>(ped, entity, posn);
 }
 
+//! @notsa
+CVector CPedGeometryAnalyser::ComputeEntityDir(const CEntity& entity, eDirection dir) {
+    switch (dir) {
+    case eDirection::FORWARD:  return entity.GetForward();
+    case eDirection::LEFT:  return -entity.GetRight();
+    case eDirection::BACKWARD:  return -entity.GetForward();
+    case eDirection::RIGHT:  return entity.GetRight();
+    default: NOTSA_UNREACHABLE();
+    }
+}
+
 // 0x5F1500
 CVector* CPedGeometryAnalyser::ComputeEntityDirs(const CEntity& entity, CVector* posn) {
     return plugin::CallAndReturn<CVector*, 0x5F1500, const CEntity&, CVector*>(entity, posn);

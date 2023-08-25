@@ -1,15 +1,14 @@
 #pragma once
 
 #include "TaskComplex.h"
-
-enum class eFallDir : uint8;
+#include "Enums/eDirection.h"
 
 class CTaskComplexFallToDeath : public CTaskComplex {
 public:
     CVector     m_Posn;
     AnimationId m_nAnimId;
     AnimationId m_nAnimId1;
-    eFallDir    m_nFallToDeathDir;
+    eDirection    m_nFallToDeathDir;
     union {
         struct {
             uint8 b0x1  : 1;

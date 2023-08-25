@@ -29,7 +29,7 @@ CTaskComplexFallToDeath::CTaskComplexFallToDeath(int32 direction, const CVector&
     m_Posn                  = posn;
     m_nAnimId               = ANIM_ID_UNDEFINED;
     m_nAnimId1              = ANIM_ID_UNDEFINED;
-    m_nFallToDeathDir       = static_cast<eFallDir>(direction);
+    m_nFallToDeathDir       = static_cast<eDirection>(direction);
     m_nFlags = m_nFlags & 0xE0 | (8 * ((uint8)bFallToDeathOverRailing | (2 * (uint8)a5))); // todo: flags
 }
 
@@ -60,7 +60,7 @@ CTask* CTaskComplexFallToDeath::ControlSubTask_Reversed(CPed* ped) {
         if (!b0x2) {
             b0x2 = true;
             ped->bIsDrowning = true;
-            return new CTaskComplexDie(WEAPON_DROWNING, ANIM_GROUP_DEFAULT, ANIM_ID_DROWN, 4.0f, 1.0f, false, false, eFallDir::FORWARD, false);
+            return new CTaskComplexDie(WEAPON_DROWNING, ANIM_GROUP_DEFAULT, ANIM_ID_DROWN, 4.0f, 1.0f, false, false, eDirection::FORWARD, false);
         }
     }
 
@@ -92,10 +92,10 @@ CTask* CTaskComplexFallToDeath::CreateFirstSubTask_Reversed(CPed* ped) {
 
     m_nAnimId = [&] {
         switch (m_nFallToDeathDir) {
-        case eFallDir::FORWARD:  return ANIM_ID_KO_SKID_BACK;
-        case eFallDir::LEFT:     return ANIM_ID_KO_SPIN_L;
-        case eFallDir::BACKWARD: return ANIM_ID_KO_SKID_FRONT;
-        case eFallDir::RIGHT:    return ANIM_ID_KO_SPIN_R;
+        case eDirection::FORWARD:  return ANIM_ID_KO_SKID_BACK;
+        case eDirection::LEFT:     return ANIM_ID_KO_SPIN_L;
+        case eDirection::BACKWARD: return ANIM_ID_KO_SKID_FRONT;
+        case eDirection::RIGHT:    return ANIM_ID_KO_SPIN_R;
         default:
             NOTSA_UNREACHABLE("");
             return ANIM_ID_UNDEFINED;
@@ -152,9 +152,9 @@ bool CTaskComplexFallToDeath::CalcFall(CPed* ped, int32& outFallDir, bool& outFa
         return false;
     }
 
-    eFallDir rndFallDirs[4]{eFallDir::FORWARD, eFallDir::LEFT, eFallDir::BACKWARD, eFallDir::RIGHT};
+    eDirection rndFallDirs[4]{eDirection::FORWARD, eDirection::LEFT, eDirection::BACKWARD, eDirection::RIGHT};
     for (auto i = 8; i-- > 0;) {
-        const auto GetRandomEntry = [&]() -> eFallDir& {
+        const auto GetRandomEntry = [&]() -> eDirection& {
             return CGeneral::RandomChoice(rndFallDirs);
         };
         std::swap(GetRandomEntry(), GetRandomEntry());
@@ -165,13 +165,13 @@ bool CTaskComplexFallToDeath::CalcFall(CPed* ped, int32& outFallDir, bool& outFa
         const auto vecFallDir = [&]{
             outFallDir = (int32)rndFallDirs[i];
             switch (rndFallDirs[i]) {
-            case eFallDir::FORWARD:
+            case eDirection::FORWARD:
                 return ped->GetForward();
-            case eFallDir::LEFT:
+            case eDirection::LEFT:
                 return -ped->GetRight();
-            case eFallDir::BACKWARD:
+            case eDirection::BACKWARD:
                 return -ped->GetForward();
-            case eFallDir::RIGHT:
+            case eDirection::RIGHT:
                 return ped->GetRight();
             default:
                 NOTSA_UNREACHABLE();
