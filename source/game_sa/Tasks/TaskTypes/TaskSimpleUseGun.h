@@ -31,8 +31,8 @@ public:
     };
     bool m_bSkipAim;
 
-    uint8 m_nNextCommand; // 0x1 reloading - 0x2 firing
-    uint8 m_nLastCommand; // active command - 0x1 reloading - 0x2 firing
+    eGunCommand m_nNextCommand;
+    eGunCommand m_nLastCommand; // active command
     CVector2D m_vecMoveCommand;
     CEntity* m_pTarget;
     CVector m_vecTarget;
@@ -51,7 +51,7 @@ public:
 public:
     static constexpr auto Type = TASK_SIMPLE_USE_GUN;
 
-    CTaskSimpleUseGun(CEntity* targetEntity, CVector vecTarget, uint8 nCommand, uint16 nBurstLength = 1, bool bAimImmediate = false);
+    CTaskSimpleUseGun(CEntity* targetEntity, CVector vecTarget = {}, eGunCommand nCommand = eGunCommand::AIM, uint16 nBurstLength = 1, bool bAimImmediate = false);
     ~CTaskSimpleUseGun() override;
 
     CTask* Clone() const override { return new CTaskSimpleUseGun(m_pTarget, m_vecTarget, m_nLastCommand, m_nBurstLength, m_bAimImmediate); }
@@ -66,7 +66,7 @@ public:
     int32 SkipAim(CPed* ped);
     int32 ClearAnim(CPed* ped);
 
-    bool ControlGun(CPed* ped, CEntity* target, int8 nCount);
+    bool ControlGun(CPed* ped, CEntity* target, eGunCommand cmd);
     bool ControlGunMove(const CVector2D& moveSpeed);
 
     void FinishGunAnimCB(CAnimBlendAssociation* anim, void* data);
@@ -92,7 +92,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskSimpleUseGun* Constructor(CEntity* targetEntity, CVector vecTarget, uint8 nCommand, uint16 nBurstLength = 1, bool bAimImmediate = false);
+    CTaskSimpleUseGun* Constructor(CEntity* targetEntity, CVector vecTarget, eGunCommand nCommand, uint16 nBurstLength = 1, bool bAimImmediate = false);
 };
 
 VALIDATE_SIZE(CTaskSimpleUseGun, 0x3C);

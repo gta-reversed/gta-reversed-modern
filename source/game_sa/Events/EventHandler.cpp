@@ -71,6 +71,9 @@
 #include "Tasks/TaskTypes/TaskComplexLeaveCarAndWander.h"
 #include "Tasks/TaskTypes/TaskComplexProstituteSolicit.h"
 #include "Tasks/TaskTypes/TaskComplexInvestigateDisturbance.h"
+#include "Tasks/TaskTypes/TaskComplexSeekEntityAiming.h"
+#include "Tasks/TaskTypes/TaskSimpleGangDriveBy.h"
+#include "Tasks/TaskTypes/TaskComplexDriveWander.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
@@ -154,7 +157,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputePedFriendResponse, 0x4B9DD0);
     RH_ScopedInstall(ComputePedSoundQuietResponse, 0x4B9D40);
     RH_ScopedInstall(ComputePedThreatBadlyLitResponse, 0x4B9C90);
-    RH_ScopedInstall(ComputePedThreatResponse, 0x4C19A0, { .reversed = false });
+    RH_ScopedInstall(ComputePedThreatResponse, 0x4C19A0);
     RH_ScopedInstall(ComputePedToChaseResponse, 0x4C1910, { .reversed = false });
     RH_ScopedInstall(ComputePedToFleeResponse, 0x4B9B50, { .reversed = false });
     RH_ScopedInstall(ComputePersonalityResponseToDamage, 0x4BF9B0, { .reversed = false });
@@ -1513,8 +1516,143 @@ void CEventHandler::ComputePedThreatBadlyLitResponse(CEventAcquaintancePedHateBa
 }
 
 // 0x4C19A0
-void CEventHandler::ComputePedThreatResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4C19A0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputePedThreatResponse(CEventAcquaintancePedHate* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_AcquaintancePed) {
+            return nullptr;
+        }
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_SEEK_ENTITY_AIMING: // 0x4C215A
+            return new CTaskComplexSeekEntityAiming{e->m_AcquaintancePed, 10.f, 5.f};
+        case TASK_SMART_FLEE_ENTITY_WALKING:
+            return new CTaskComplexSmartFleeEntity{e->m_AcquaintancePed, false, 60.f};
+        case TASK_COMPLEX_KILL_PED_ON_FOOT_TIMED: // 0x4C1E7A [yeah, this is from down below]
+        case TASK_COMPLEX_KILL_PED_ON_FOOT: { // 0x4C1D71
+            if (IsKillTaskAppropriate(m_ped, e->m_AcquaintancePed, *e)) {
+                return new CTaskComplexKillPedOnFoot{
+                    e->m_AcquaintancePed,
+                    e->m_taskId == TASK_COMPLEX_KILL_PED_ON_FOOT ? -1 : 10'000
+                };
+            }
+            if (m_ped->bWantedByPolice && e->m_AcquaintancePed->IsCop()) {
+                return new CTaskComplexFleeAnyMeans{e->m_AcquaintancePed, true, 60.f};
+            }
+            if (!m_ped->IsInVehicle() || !m_ped->m_pVehicle->IsDriver(m_ped)) {
+                return new CTaskComplexSmartFleeEntity{e->m_AcquaintancePed, false, 60.f};
+            }
+            return new CTaskComplexCarDriveMissionFleeScene{m_ped->m_pVehicle};
+        }
+        case TASK_SIMPLE_GUN_CTRL: // 0x4C2123
+            return new CTaskSimpleGunControl{ 
+                e->m_AcquaintancePed,
+                {},
+                {},
+                eGunCommand::NONE,
+                1,
+                10'000
+            };
+        case TASK_SIMPLE_GANG_DRIVEBY: {
+            if (!m_ped->IsInVehicle() || !m_ped->m_pVehicle->IsDriver(m_ped) || !m_ped->GetTaskManager().Find<CTaskComplexCarDrive>()) {
+                return nullptr;
+            }
+            const auto pedActiveWI = &m_ped->GetActiveWeapon().GetWeaponInfo(m_ped);
+            if (pedActiveWI->GetFireType() != WEAPON_FIRE_INSTANT_HIT) {
+                return nullptr;
+            }
+            const auto maxFireRange = std::max(pedActiveWI->m_fTargetRange, m_ped->GetIntelligence()->GetPedFOVRange() + 5.f);
+            if ((e->m_AcquaintancePed->GetPosition() - m_ped->GetPosition()).SquaredMagnitude() >= sq(maxFireRange)) { // out of shooting range
+                return nullptr;
+            }
+            return new CTaskSimpleGangDriveBy{ // 0x4C229B
+                e->m_AcquaintancePed,
+                nullptr,
+                maxFireRange,
+                90,
+                eDrivebyStyle::AI_ALL_DIRN,
+                false
+            };
+        }
+        case TASK_COMPLEX_KILL_PED_ON_FOOT_STEALTH: // 0x4C22C6
+          return new CTaskComplexKillPedOnFootStealth{e->m_AcquaintancePed};
+        case TASK_COMPLEX_KILL_PED_ON_FOOT_KINDA_STAND_STILL: {
+            if (IsKillTaskAppropriate(m_ped, e->m_AcquaintancePed, *e)) {
+                m_ped->bKindaStayInSamePlace = true;
+                return new CTaskComplexKillPedOnFoot{e->m_AcquaintancePed};
+            }
+            if (m_ped->bWantedByPolice && e->m_AcquaintancePed->IsCop()) {
+                return new CTaskComplexFleeAnyMeans{e->m_AcquaintancePed, true, 60.f};
+            }
+            return new CTaskComplexSmartFleeEntity{e->m_AcquaintancePed, false, 60.f}; // 0x4C20F0
+        }
+        case TASK_COMPLEX_KILL_PED_AND_REENTER_CAR: // 0x4C1D64
+            if (m_ped->m_pVehicle) {
+                return new CTaskComplexSequence{
+                    new CTaskComplexKillPedOnFoot{e->m_AcquaintancePed},
+                    new CTaskComplexCarDriveWander{m_ped->m_pVehicle}
+                };
+            }
+            return new CTaskComplexKillPedOnFoot{e->m_AcquaintancePed};
+        case TASK_COMPLEX_KILL_CRIMINAL: { // 0x4C1D64
+            if (e->m_AcquaintancePed->IsPlayer()) {
+                return nullptr;
+            }
+            return new CTaskComplexKillCriminal{e->m_AcquaintancePed, true};
+        }
+        case TASK_COMPLEX_FLEE_ANY_MEANS: // 0x4C19D3
+            return new CTaskComplexFleeAnyMeans{e->m_AcquaintancePed, true, 60.f};
+        case TASK_COMPLEX_SEQUENCE: {
+            const auto seqIdx = m_ped->GetIntelligence()->m_NextEventResponseSequence;
+            if (seqIdx < 0) {
+                return nullptr;
+            }
+            const auto seq = &CTaskSequences::ms_taskSequence[seqIdx];
+            if (!seq->m_Tasks[0]) {
+                return nullptr;
+            }
+            return new CTaskComplexUseSequence{seqIdx};
+        }
+        case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR:
+            return new CTaskComplexUseClosestFreeScriptedAttractor{};
+        case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR_RUN:
+            return new CTaskComplexUseClosestFreeScriptedAttractorRun{};
+        case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR_SPRINT:
+            return new CTaskComplexUseClosestFreeScriptedAttractorSprint{};
+        case TASK_SIMPLE_COWER:
+            return new CTaskSimpleCower{};
+        case TASK_SIMPLE_HANDS_UP: // 0x4C1B39
+            return new CTaskSimpleHandsUp{5'000};
+        case TASK_COMPLEX_FLEE_ENTITY:
+            return new CTaskComplexSmartFleeEntity{e->m_AcquaintancePed, false, 60.f};
+        case TASK_COMPLEX_SMART_FLEE_ENTITY: { // 0x4C1C4B
+            if (m_ped->bWantedByPolice && e->m_AcquaintancePed->IsCop()) {
+                return new CTaskComplexSmartFleeEntity{
+                    e->m_AcquaintancePed,
+                    false,
+                    60.f,
+                    1'000'000,
+                    1'000,
+                    1.f,
+                    e->GetEventType() == EVENT_ACQUAINTANCE_PED_DISLIKE ? eMoveState::PEDMOVE_WALK : eMoveState::PEDMOVE_SPRINT
+                };
+            }
+            return new CTaskComplexFleeAnyMeans{e->m_AcquaintancePed, true, 60.f};
+        }
+        case TASK_SIMPLE_DUCK_FOREVER: // 0x4C1B5E
+            return new CTaskSimpleDuck{DUCK_STANDALONE, 0x967Fu};
+        case TASK_SIMPLE_DUCK: { // 0x4C1BA1
+            if (const auto t = m_ped->GetIntelligence()->GetTaskDuck()) {
+                return t;
+            }
+            return new CTaskSimpleDuck{DUCK_STANDALONE, 5'000};
+        }
+        case TASK_COMPLEX_LEAVE_CAR :
+            return new CTaskComplexLeaveCar{m_ped->m_pVehicle, 0, 0, false, 1};
+        case TASK_NONE:
+            return nullptr;
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
 }
 
 // 0x4C1910
@@ -1797,7 +1935,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         break;
     case EVENT_ACQUAINTANCE_PED_HATE:
     case EVENT_ACQUAINTANCE_PED_DISLIKE:
-        ComputePedThreatResponse(e, tactive, tsimplest);
+        ComputePedThreatResponse(static_cast<CEventAcquaintancePedHate*>(e), tactive, tsimplest);
         break;
     case EVENT_ACQUAINTANCE_PED_LIKE:
     case EVENT_ACQUAINTANCE_PED_RESPECT:

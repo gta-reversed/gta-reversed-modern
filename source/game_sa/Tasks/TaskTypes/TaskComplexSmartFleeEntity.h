@@ -35,7 +35,10 @@ public:
         float safeDistance = 30.f,
         int32 fleeTime = 1'000'000,
         int32 posCheckPeriod = 1000, 
-        float posChangeTolerance = 1.f /* = fEntityPosChangeThreshold */
+        float posChangeTolerance = 1.f, /* = fEntityPosChangeThreshold */
+
+        // VVV NOTSA ARGS VVV //
+        eMoveState moveState = PEDMOVE_SPRINT
     );
     CTaskComplexSmartFleeEntity(const CTaskComplexSmartFleeEntity&);
     ~CTaskComplexSmartFleeEntity() override;

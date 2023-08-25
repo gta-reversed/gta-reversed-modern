@@ -115,8 +115,8 @@ CPedIntelligence::CPedIntelligence(CPed* ped) :
     m_fSeeingRange                        = 15.0f;
     m_nDmNumPedsToScan                    = 3;
     m_fDmRadius                           = 15.0f;
-    field_CC                              = 30.0f;
-    field_D0                              = -1;
+    m_FollowNodeThresholdDistance                              = 30.0f;
+    m_NextEventResponseSequence                              = -1;
     m_nEventId                            = 0;
     m_nEventPriority                      = 0;
     field_188                             = 0;

@@ -65,13 +65,13 @@ CTask* CTaskComplexFleeShooting::ControlSubTask(CPed* ped) {
     if (const auto attack = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
         if (const auto useGun = CTask::DynCast<CTaskSimpleUseGun>(attack)) {
             if (m_gunTimer.IsOutOfTime()) {
-                if ((eGunCommand)useGun->m_nLastCommand == eGunCommand::FIREBURST) {
+                if (useGun->m_nLastCommand == eGunCommand::FIREBURST) {
                     m_gunTimer.Start(m_shootRecoverTime);
 
-                    useGun->ControlGun(ped, fleeFrom, (int8)eGunCommand::END_LEISURE);
+                    useGun->ControlGun(ped, fleeFrom, eGunCommand::END_LEISURE);
                 }
             } else {
-                useGun->ControlGun(ped, fleeFrom, (int8)eGunCommand::FIREBURST);
+                useGun->ControlGun(ped, fleeFrom, eGunCommand::FIREBURST);
             }
         }
     } else {
@@ -81,7 +81,7 @@ CTask* CTaskComplexFleeShooting::ControlSubTask(CPed* ped) {
                 m_gunTimer.Start(m_shootTime);
 
                 ped->GetTaskManager().SetTaskSecondary(
-                    new CTaskSimpleUseGun{ fleeFrom, {}, (int8)eGunCommand::FIREBURST, 3 },
+                    new CTaskSimpleUseGun{ fleeFrom, {}, eGunCommand::FIREBURST, 3 },
                     TASK_SECONDARY_ATTACK
                 );
             }

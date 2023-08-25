@@ -123,6 +123,8 @@ public:
     auto GetTargetHeadRange() const -> float;
     auto GetWeaponReloadTime() const -> uint32;
 
+    auto GetFireType() const { return m_nWeaponFire; }
+
     static bool TypeHasSkillStats(eWeaponType type);
 
     /*!

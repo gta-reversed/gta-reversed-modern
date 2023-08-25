@@ -8,7 +8,7 @@ class CTaskComplexCarDriveWander : public CTaskComplexCarDrive {
 public:
     static constexpr auto Type = TASK_COMPLEX_CAR_DRIVE_WANDER;
 
-    CTaskComplexCarDriveWander(CVehicle* vehicle, eCarDrivingStyle carDrivingStyle, float fSpeed);
+    CTaskComplexCarDriveWander(CVehicle* vehicle, eCarDrivingStyle carDrivingStyle = DRIVING_STYLE_STOP_FOR_CARS, float fSpeed = 10.f);
     ~CTaskComplexCarDriveWander() override = default;
 
     CTask* Clone() const override { return new CTaskComplexCarDrive(m_pVehicle, m_fSpeed, -1, static_cast<eCarDrivingStyle>(m_nCarDrivingStyle)); };

@@ -28,15 +28,19 @@ CTaskComplexSmartFleeEntity::CTaskComplexSmartFleeEntity(
     float safeDistance,
     int32 fleeTime,
     int32 posCheckPeriod,
-    float posChangeTolerance
+    float posChangeTolerance,
+
+    // VVV NOTSA ARGS VVV //
+    eMoveState moveState
 )  :
 
     fleeFrom{fleeFrom},
     m_pedScream{scream},
     m_safeDistance{safeDistance},
     m_time{fleeTime},
-    m_posCheckPeriod{ posCheckPeriod },
-    m_posChangeTolerance{ posChangeTolerance }
+    m_posCheckPeriod{posCheckPeriod},
+    m_posChangeTolerance{posChangeTolerance},
+    m_moveState{moveState}
 {
     CEntity::SafeRegisterRef(fleeFrom);
 }
