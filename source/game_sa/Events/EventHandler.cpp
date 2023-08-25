@@ -133,7 +133,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeLowHealthResponse, 0x4BA990);
     RH_ScopedInstall(ComputeObjectCollisionPassiveResponse, 0x4BBB90);
     RH_ScopedInstall(ComputeObjectCollisionResponse, 0x4B92B0);
-    RH_ScopedInstall(ComputeOnEscalatorResponse, 0x4BC150, { .reversed = false });
+    RH_ScopedInstall(ComputeOnEscalatorResponse, 0x4BC150);
     RH_ScopedInstall(ComputeOnFireResponse, 0x4BAD50, { .reversed = false });
     RH_ScopedInstall(ComputePassObjectResponse, 0x4BB0C0, { .reversed = false });
     RH_ScopedInstall(ComputePedCollisionWithPedResponse, 0x4BDB80, { .reversed = false });
@@ -1402,7 +1402,7 @@ void CEventHandler::ComputeObjectCollisionResponse(CEventObjectCollision* e, CTa
 
 // 0x4BC150
 void CEventHandler::ComputeOnEscalatorResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    m_eventResponseTask = new CTaskSimpleStandStill(0, true, false, 8.0f);
+    m_eventResponseTask = new CTaskSimpleStandStill{0, true};
 }
 
 // 0x4BAD50
