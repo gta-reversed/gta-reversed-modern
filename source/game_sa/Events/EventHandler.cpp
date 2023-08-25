@@ -61,6 +61,7 @@
 #include "Tasks/TaskTypes/TaskComplexFallAndGetUp.h"
 #include "Tasks/TaskTypes/TaskComplexInWater.h"
 #include "Tasks/TaskTypes/Interior/TaskInteriorUseInfo.h"
+#include "Tasks/TaskTypes/TaskComplexDiveFromAttachedEntityAndGetUp.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
@@ -751,7 +752,7 @@ void CEventHandler::ComputeDamageResponse(CEventDamage* e, CTask* tactive, CTask
             // TODO(Pirulax):
             // Eventually remove these lambdas.
             // I'm pretty sure this code can be linearized, but first I want to make sure it actually works :D
-            const auto DoDie = [&](bool bFallingToDeath = false, eFallDir fallToDeathDir = eFallDir::FORWARD, bool bFallToDeathOverRailing = false) { // 0x4C0AA2
+            const auto DoDie = [&](bool bFallingToDeath = false, eDirection fallToDeathDir = eDirection::FORWARD, bool bFallToDeathOverRailing = false) { // 0x4C0AA2
                 g_InterestingEvents.Add(CInterestingEvents::INTERESTING_EVENT_28, m_ped);
                 if (const auto tPhyResp = m_ped->GetTaskManager().GetTaskPrimary(TASK_PRIMARY_PHYSICAL_RESPONSE)) {
                     if (tPhyResp->GetTaskType() != TASK_SIMPLE_CHOKING || !notsa::contains({ WEAPON_SPRAYCAN, WEAPON_EXTINGUISHER, WEAPON_TEARGAS }, e->m_weaponType)) {
@@ -800,7 +801,7 @@ void CEventHandler::ComputeDamageResponse(CEventDamage* e, CTask* tactive, CTask
                             int32 fallToDeathDir;
                             bool  bFallToDeathOverRailing;
                             bool  bFallToDeath = CTaskComplexFallToDeath::CalcFall(m_ped, fallToDeathDir, bFallToDeathOverRailing);
-                            return DoDie(bFallToDeath, (eFallDir)(fallToDeathDir), bFallToDeathOverRailing);
+                            return DoDie(bFallToDeath, (eDirection)(fallToDeathDir), bFallToDeathOverRailing);
                         }
                     }
                 }
@@ -1291,11 +1292,6 @@ void CEventHandler::ComputeGunAimedAtResponse(CEventGunAimedAt* e, CTask* tactiv
     }();
 }
 
-/*
-m_eventResponseTask = [&]() -> CTask* {
-
-}();
-*/
 // 0x4BAC10
 void CEventHandler::ComputeHighAngerAtPlayerResponse(CEventHighAngerAtPlayer* e, CTask* tactive, CTask* tsimplest) {
     m_eventResponseTask = [&]() -> CTask* {
@@ -1347,17 +1343,23 @@ void CEventHandler::ComputeLowAngerAtPlayerResponse(CEventLowAngerAtPlayer* e, C
     }();
 }
 
+/*
+m_eventResponseTask = [&]() -> CTask* {
+
+}();
+*/
 // 0x4BA990
-void CEventHandler::ComputeLowHealthResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BA990, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
-    /*
-    auto taskId = task1->GetTaskType();
-    if (taskId == TASK_NONE) {
-        m_eventResponseTask = nullptr;
-    } else if (taskId == TASK_COMPLEX_DIVE_FROM_ATTACHED_ENTITY_AND_GET_UP) {
-        m_eventResponseTask = new CTaskComplexDiveFromAttachedEntityAndGetUp(0);
-    }
-    */
+void CEventHandler::ComputeLowHealthResponse(CEventHealthLow* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_DIVE_FROM_ATTACHED_ENTITY_AND_GET_UP:
+            return new CTaskComplexDiveFromAttachedEntityAndGetUp{};
+        case TASK_NONE:
+            return nullptr;
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
 }
 
 // 0x4BBB90
@@ -1742,7 +1744,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeReallyLowHealthResponse(e, tactive, tsimplest);
         break;
     case EVENT_HEALTH_LOW:
-        ComputeLowHealthResponse(e, tactive, tsimplest);
+        ComputeLowHealthResponse(static_cast<CEventHealthLow*>(e), tactive, tsimplest);
         break;
     case EVENT_POTENTIAL_WALK_INTO_VEHICLE:
         ComputeVehiclePotentialPassiveCollisionResponse(e, tactive, tsimplest);
