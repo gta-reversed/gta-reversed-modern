@@ -41,6 +41,7 @@ class CEventObjectCollision;
 class CEventOnFire;
 class CEventPassObject;
 class CEventAcquaintancePed;
+class CEventSoundQuiet;
 
 class CEventHandler {
 public:
@@ -102,7 +103,7 @@ public:
     void ComputePedCollisionWithPlayerResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputePedEnteredVehicleResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputePedFriendResponse(CEventAcquaintancePed* e, CTask* tactive, CTask* tsimplest);
-    void ComputePedSoundQuietResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputePedSoundQuietResponse(CEventSoundQuiet* e, CTask* tactive, CTask* tsimplest);
     void ComputePedThreatBadlyLitResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputePedThreatResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputePedToChaseResponse(CEvent* e, CTask* tactive, CTask* tsimplest);

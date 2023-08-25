@@ -70,10 +70,12 @@
 #include "Tasks/TaskTypes/TaskComplexLeaveCarAndFlee.h"
 #include "Tasks/TaskTypes/TaskComplexLeaveCarAndWander.h"
 #include "Tasks/TaskTypes/TaskComplexProstituteSolicit.h"
+#include "Tasks/TaskTypes/TaskComplexInvestigateDisturbance.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 
+#include "Events/EventSoundQuiet.h"
 #include "Events/EventAcquaintancePed.h"
 #include "Events/EventPassObject.h"
 #include "Events/EventOnFire.h"
@@ -150,7 +152,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputePedCollisionWithPlayerResponse, 0x4BE7D0, { .reversed = false });
     RH_ScopedInstall(ComputePedEnteredVehicleResponse, 0x4C1590, { .reversed = false });
     RH_ScopedInstall(ComputePedFriendResponse, 0x4B9DD0);
-    RH_ScopedInstall(ComputePedSoundQuietResponse, 0x4B9D40, { .reversed = false });
+    RH_ScopedInstall(ComputePedSoundQuietResponse, 0x4B9D40);
     RH_ScopedInstall(ComputePedThreatBadlyLitResponse, 0x4B9C90, { .reversed = false });
     RH_ScopedInstall(ComputePedThreatResponse, 0x4C19A0, { .reversed = false });
     RH_ScopedInstall(ComputePedToChaseResponse, 0x4C1910, { .reversed = false });
@@ -1387,11 +1389,6 @@ void CEventHandler::ComputeObjectCollisionPassiveResponse(CEventPotentialWalkInt
     }();
 }
 
-/*
-m_eventResponseTask = [&]() -> CTask* {
-
-}();
-*/
 // 0x4B92B0
 void CEventHandler::ComputeObjectCollisionResponse(CEventObjectCollision* e, CTask* tactive, CTask* tsimplest) { // Same code as `ComputeObjectCollisionPassiveResponse`
     m_eventResponseTask = [&]() -> CTask* {
@@ -1476,9 +1473,26 @@ void CEventHandler::ComputePedFriendResponse(CEventAcquaintancePed* e, CTask* ta
     }();
 }
 
+/*
+m_eventResponseTask = [&]() -> CTask* {
+
+}();
+*/
 // 0x4B9D40
-void CEventHandler::ComputePedSoundQuietResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4B9D40, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputePedSoundQuietResponse(CEventSoundQuiet* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->GetSourceEntity()) {
+            return nullptr;
+        }
+        switch (e->m_taskId) {
+        case TASK_NONE:
+            return nullptr;
+        case TASK_COMPLEX_INVESTIGATE_DISTURBANCE:
+            return new CTaskComplexInvestigateDisturbance{e->m_position, e->GetSourceEntity()};
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
 }
 
 // 0x4B9C90
@@ -1821,7 +1835,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeFireNearbyResponse(static_cast<CEventFireNearby*>(e), tactive, tsimplest);
         break;
     case EVENT_SOUND_QUIET:
-        ComputePedSoundQuietResponse(e, tactive, tsimplest);
+        ComputePedSoundQuietResponse(static_cast<CEventSoundQuiet*>(e), tactive, tsimplest);
         break;
     case EVENT_ACQUAINTANCE_PED_HATE_BADLY_LIT:
         ComputePedThreatBadlyLitResponse(e, tactive, tsimplest);
