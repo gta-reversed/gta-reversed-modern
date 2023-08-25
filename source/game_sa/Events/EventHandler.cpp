@@ -62,10 +62,12 @@
 #include "Tasks/TaskTypes/TaskComplexInWater.h"
 #include "Tasks/TaskTypes/Interior/TaskInteriorUseInfo.h"
 #include "Tasks/TaskTypes/TaskComplexDiveFromAttachedEntityAndGetUp.h"
+#include "Tasks/TaskTypes/TaskComplexWalkRoundObject.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 
+#include "Events/PotentialWalkIntoEvents.h"
 #include "Events/EventLowAngerAtPlayer.h"
 #include "Events/EventInteriorUseInfo.h"
 #include "Events/EventInWater.h"
@@ -129,7 +131,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeKnockOffBikeResponse, 0x4B9FF0, { .reversed = false });
     RH_ScopedInstall(ComputeLowAngerAtPlayerResponse, 0x4BAAD0, { .reversed = false });
     RH_ScopedInstall(ComputeLowHealthResponse, 0x4BA990, { .reversed = false });
-    RH_ScopedInstall(ComputeObjectCollisionPassiveResponse, 0x4BBB90, { .reversed = false });
+    RH_ScopedInstall(ComputeObjectCollisionPassiveResponse, 0x4BBB90);
     RH_ScopedInstall(ComputeObjectCollisionResponse, 0x4B92B0, { .reversed = false });
     RH_ScopedInstall(ComputeOnEscalatorResponse, 0x4BC150, { .reversed = false });
     RH_ScopedInstall(ComputeOnFireResponse, 0x4BAD50, { .reversed = false });
@@ -1363,8 +1365,21 @@ void CEventHandler::ComputeLowHealthResponse(CEventHealthLow* e, CTask* tactive,
 }
 
 // 0x4BBB90
-void CEventHandler::ComputeObjectCollisionPassiveResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BBB90, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeObjectCollisionPassiveResponse(CEventPotentialWalkIntoObject* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_object || m_ped->bInVehicle || e->m_moveState == PEDMOVE_STILL) {
+            return nullptr;
+        }
+        if (!tsimplest || !CTask::IsGoToTask(tsimplest)) {
+            return nullptr;
+        }
+        const auto tGoTo = static_cast<CTaskSimpleGoTo*>(tsimplest);
+        return new CTaskComplexWalkRoundObject{
+            e->m_moveState,
+            tGoTo->m_vecTargetPoint,
+            e->m_object
+        };
+    }();
 }
 
 // 0x4B92B0
@@ -1723,7 +1738,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeGotKnockedOverByCarResponse(static_cast<CEventGotKnockedOverByCar*>(e), tactive, tsimplest);
         break;
     case EVENT_POTENTIAL_WALK_INTO_OBJECT:
-        ComputeObjectCollisionPassiveResponse(e, tactive, tsimplest);
+        ComputeObjectCollisionPassiveResponse(static_cast<CEventPotentialWalkIntoObject*>(e), tactive, tsimplest);
         break;
     case EVENT_CAR_UPSIDE_DOWN:
         ComputeCarUpsideDownResponse(static_cast<CEventCarUpsideDown*>(e), tactive, tsimplest);

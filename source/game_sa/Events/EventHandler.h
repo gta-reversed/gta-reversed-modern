@@ -36,6 +36,7 @@ class CEventInWater;
 class CEventInteriorUseInfo;
 class CEventLowAngerAtPlayer;
 class CEventHealthLow;
+class CEventPotentialWalkIntoObject;
 
 class CEventHandler {
 public:
@@ -88,7 +89,7 @@ public:
     void ComputeKnockOffBikeResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeLowAngerAtPlayerResponse(CEventLowAngerAtPlayer* e, CTask* tactive, CTask* tsimplest);
     void ComputeLowHealthResponse(CEventHealthLow* e, CTask* tactive, CTask* tsimplest);
-    void ComputeObjectCollisionPassiveResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputeObjectCollisionPassiveResponse(CEventPotentialWalkIntoObject* e, CTask* tactive, CTask* tsimplest);
     void ComputeObjectCollisionResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeOnEscalatorResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeOnFireResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
