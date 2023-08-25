@@ -153,7 +153,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputePedEnteredVehicleResponse, 0x4C1590, { .reversed = false });
     RH_ScopedInstall(ComputePedFriendResponse, 0x4B9DD0);
     RH_ScopedInstall(ComputePedSoundQuietResponse, 0x4B9D40);
-    RH_ScopedInstall(ComputePedThreatBadlyLitResponse, 0x4B9C90, { .reversed = false });
+    RH_ScopedInstall(ComputePedThreatBadlyLitResponse, 0x4B9C90);
     RH_ScopedInstall(ComputePedThreatResponse, 0x4C19A0, { .reversed = false });
     RH_ScopedInstall(ComputePedToChaseResponse, 0x4C1910, { .reversed = false });
     RH_ScopedInstall(ComputePedToFleeResponse, 0x4B9B50, { .reversed = false });
@@ -1496,8 +1496,20 @@ void CEventHandler::ComputePedSoundQuietResponse(CEventSoundQuiet* e, CTask* tac
 }
 
 // 0x4B9C90
-void CEventHandler::ComputePedThreatBadlyLitResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4B9C90, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputePedThreatBadlyLitResponse(CEventAcquaintancePedHateBadlyLit* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_AcquaintancePed) {
+            return nullptr;
+        }
+        switch (e->m_taskId) {
+        case TASK_NONE:
+            return nullptr;
+        case TASK_COMPLEX_INVESTIGATE_DISTURBANCE:
+            return new CTaskComplexInvestigateDisturbance{e->m_point, e->m_AcquaintancePed};
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
 }
 
 // 0x4C19A0
@@ -1838,7 +1850,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputePedSoundQuietResponse(static_cast<CEventSoundQuiet*>(e), tactive, tsimplest);
         break;
     case EVENT_ACQUAINTANCE_PED_HATE_BADLY_LIT:
-        ComputePedThreatBadlyLitResponse(e, tactive, tsimplest);
+        ComputePedThreatBadlyLitResponse(static_cast<CEventAcquaintancePedHateBadlyLit*>(e), tactive, tsimplest);
         break;
     case EVENT_WATER_CANNON:
         ComputeWaterCannonResponse(e, tactive, tsimplest);
