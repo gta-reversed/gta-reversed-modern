@@ -65,10 +65,12 @@
 #include "Tasks/TaskTypes/TaskComplexWalkRoundObject.h"
 #include "Tasks/TaskTypes/TaskSimplePlayerOnFire.h"
 #include "Tasks/TaskTypes/TaskComplexOnFire.h"
+#include "Tasks/TaskTypes/TaskComplexPassObject.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 
+#include "Events/EventPassObject.h"
 #include "Events/EventOnFire.h"
 #include "Events/PotentialWalkIntoEvents.h"
 #include "Events/EventLowAngerAtPlayer.h"
@@ -138,7 +140,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeObjectCollisionResponse, 0x4B92B0);
     RH_ScopedInstall(ComputeOnEscalatorResponse, 0x4BC150);
     RH_ScopedInstall(ComputeOnFireResponse, 0x4BAD50);
-    RH_ScopedInstall(ComputePassObjectResponse, 0x4BB0C0, { .reversed = false });
+    RH_ScopedInstall(ComputePassObjectResponse, 0x4BB0C0);
     RH_ScopedInstall(ComputePedCollisionWithPedResponse, 0x4BDB80, { .reversed = false });
     RH_ScopedInstall(ComputePedCollisionWithPlayerResponse, 0x4BE7D0, { .reversed = false });
     RH_ScopedInstall(ComputePedEnteredVehicleResponse, 0x4C1590, { .reversed = false });
@@ -1423,12 +1425,8 @@ void CEventHandler::ComputeOnFireResponse(CEventOnFire* e, CTask* tactive, CTask
 }
 
 // 0x4BB0C0
-void CEventHandler::ComputePassObjectResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BB0C0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
-    /*
-    auto _event = static_cast<CEventPassObject*>(event);
-    // m_eventResponseTask = new CTaskComplexPassObject(_event->m_giver, _event->m_dontPassObject);
-    */
+void CEventHandler::ComputePassObjectResponse(CEventPassObject* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = new CTaskComplexPassObject{e->m_giver, e->m_dontPassObject};
 }
 
 // 0x4BDB80
@@ -1838,7 +1836,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeSignalAtPedResponse(e, tactive, tsimplest);
         break;
     case EVENT_PASS_OBJECT:
-        ComputePassObjectResponse(e, tactive, tsimplest);
+        ComputePassObjectResponse(static_cast<CEventPassObject*>(e), tactive, tsimplest);
         break;
     case EVENT_STUCK_IN_AIR:
         m_eventResponseTask = new CTaskComplexStuckInAir();

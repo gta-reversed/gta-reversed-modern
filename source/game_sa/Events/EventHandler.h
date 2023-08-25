@@ -39,7 +39,7 @@ class CEventHealthLow;
 class CEventPotentialWalkIntoObject;
 class CEventObjectCollision;
 class CEventOnFire;
-
+class CEventPassObject;
 class CEventHandler {
 public:
     CPed*                m_ped{};
@@ -95,7 +95,7 @@ public:
     void ComputeObjectCollisionResponse(CEventObjectCollision* e, CTask* tactive, CTask* tsimplest);
     void ComputeOnEscalatorResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeOnFireResponse(CEventOnFire* e, CTask* tactive, CTask* tsimplest);
-    void ComputePassObjectResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputePassObjectResponse(CEventPassObject* e, CTask* tactive, CTask* tsimplest);
     void ComputePedCollisionWithPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputePedCollisionWithPlayerResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputePedEnteredVehicleResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
