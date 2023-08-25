@@ -66,10 +66,15 @@
 #include "Tasks/TaskTypes/TaskSimplePlayerOnFire.h"
 #include "Tasks/TaskTypes/TaskComplexOnFire.h"
 #include "Tasks/TaskTypes/TaskComplexPassObject.h"
+#include "Tasks/TaskTypes/TaskComplexScreamInCarThenLeave.h"
+#include "Tasks/TaskTypes/TaskComplexLeaveCarAndFlee.h"
+#include "Tasks/TaskTypes/TaskComplexLeaveCarAndWander.h"
+#include "Tasks/TaskTypes/TaskComplexProstituteSolicit.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 
+#include "Events/EventAcquaintancePed.h"
 #include "Events/EventPassObject.h"
 #include "Events/EventOnFire.h"
 #include "Events/PotentialWalkIntoEvents.h"
@@ -144,7 +149,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputePedCollisionWithPedResponse, 0x4BDB80, { .reversed = false });
     RH_ScopedInstall(ComputePedCollisionWithPlayerResponse, 0x4BE7D0, { .reversed = false });
     RH_ScopedInstall(ComputePedEnteredVehicleResponse, 0x4C1590, { .reversed = false });
-    RH_ScopedInstall(ComputePedFriendResponse, 0x4B9DD0, { .reversed = false });
+    RH_ScopedInstall(ComputePedFriendResponse, 0x4B9DD0);
     RH_ScopedInstall(ComputePedSoundQuietResponse, 0x4B9D40, { .reversed = false });
     RH_ScopedInstall(ComputePedThreatBadlyLitResponse, 0x4B9C90, { .reversed = false });
     RH_ScopedInstall(ComputePedThreatResponse, 0x4C19A0, { .reversed = false });
@@ -1445,8 +1450,30 @@ void CEventHandler::ComputePedEnteredVehicleResponse(CEvent* e, CTask* tactive, 
 }
 
 // 0x4B9DD0
-void CEventHandler::ComputePedFriendResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4B9DD0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputePedFriendResponse(CEventAcquaintancePed* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR:
+            return new CTaskComplexUseClosestFreeScriptedAttractor{};
+        case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR_RUN:
+            return new CTaskComplexUseClosestFreeScriptedAttractorRun{};
+        case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR_SPRINT:
+            return new CTaskComplexUseClosestFreeScriptedAttractorSprint{};
+        case TASK_COMPLEX_PROSTITUTE_SOLICIT: {
+            if (m_ped->GetTaskManager().Find<CTaskComplexProstituteSolicit>(false)) {
+                return nullptr;
+            }
+            if (m_ped->bInVehicle) {
+                return nullptr;
+            }
+            return new CTaskComplexProstituteSolicit{e->m_AcquaintancePed};
+        }
+        case TASK_NONE:
+            return nullptr;
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
 }
 
 // 0x4B9D40
@@ -1748,7 +1775,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         break;
     case EVENT_ACQUAINTANCE_PED_LIKE:
     case EVENT_ACQUAINTANCE_PED_RESPECT:
-        ComputePedFriendResponse(e, tactive, tsimplest);
+        ComputePedFriendResponse(static_cast<CEventAcquaintancePed*>(e), tactive, tsimplest);
         break;
     case EVENT_VEHICLE_DAMAGE_WEAPON:
     case EVENT_VEHICLE_DAMAGE_COLLISION:

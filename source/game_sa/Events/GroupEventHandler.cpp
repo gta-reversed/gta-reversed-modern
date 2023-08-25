@@ -195,9 +195,9 @@ CTaskAllocator* CGroupEventHandler::ComputeResponseSexyPed(const CEventSexyPed& 
 // 0x5FBCB0
 CTaskAllocator* CGroupEventHandler::ComputeResponseSeenCop(const CEventSeenCop& e, CPedGroup* pg, CPed* originator) {
     switch (e.m_taskId) {
-    case TASK_GROUP_KILL_THREATS_BASIC: return ComputeKillThreatsBasicResponse(pg, e.m_ped, originator, false);
-    case TASK_GROUP_FLEE_THREAT:        return ComputeFleePedResponse(pg, e.m_ped, originator, false);
-    case TASK_GROUP_HAND_SIGNAL:        return ComputeHandSignalResponse(pg, e.m_ped, originator);
+    case TASK_GROUP_KILL_THREATS_BASIC: return ComputeKillThreatsBasicResponse(pg, e.m_AcquaintancePed, originator, false);
+    case TASK_GROUP_FLEE_THREAT:        return ComputeFleePedResponse(pg, e.m_AcquaintancePed, originator, false);
+    case TASK_GROUP_HAND_SIGNAL:        return ComputeHandSignalResponse(pg, e.m_AcquaintancePed, originator);
     }
     return nullptr;
 }
@@ -219,35 +219,35 @@ CTaskAllocator* CGroupEventHandler::ComputeResponsePlayerCommand(const CEventPla
 
 // 0x5FBB90
 CTaskAllocator* CGroupEventHandler::ComputeResponsePedThreat(const CEventAcquaintancePed& e, CPedGroup* pg, CPed* originator) {
-    if (!e.m_ped) {
+    if (!e.m_AcquaintancePed) {
         return nullptr;
     }
-    if (pg->GetMembership().IsMember(e.m_ped)) {
+    if (pg->GetMembership().IsMember(e.m_AcquaintancePed)) {
         return nullptr;
     }
     switch (e.m_taskId) {
-    case TASK_GROUP_KILL_THREATS_BASIC:    return ComputeKillThreatsBasicResponse(pg, e.m_ped, originator, false);
-    case TASK_GROUP_STARE_AT_PED:          return ComputeStareResponse(pg, e.m_ped, originator, 99'999'999, false); // 1.15740739583 days
-    case TASK_GROUP_FLEE_THREAT:           return ComputeFleePedResponse(pg, e.m_ped, originator, false);
-    case TASK_GROUP_HASSLE_THREAT:         return ComputeHassleThreatResponse(pg, e.m_ped, originator, true);
+    case TASK_GROUP_KILL_THREATS_BASIC:    return ComputeKillThreatsBasicResponse(pg, e.m_AcquaintancePed, originator, false);
+    case TASK_GROUP_STARE_AT_PED:          return ComputeStareResponse(pg, e.m_AcquaintancePed, originator, 99'999'999, false); // 1.15740739583 days
+    case TASK_GROUP_FLEE_THREAT:           return ComputeFleePedResponse(pg, e.m_AcquaintancePed, originator, false);
+    case TASK_GROUP_HASSLE_THREAT:         return ComputeHassleThreatResponse(pg, e.m_AcquaintancePed, originator, true);
     case TASK_GROUP_USE_MEMBER_DECISION:   return ComputeMemberResponses(e, pg, originator);
-    case TASK_GROUP_DRIVEBY:               return ComputeDrivebyResponse(pg, e.m_ped, originator);
-    case TASK_GROUP_HASSLE_THREAT_PASSIVE: return ComputeHassleThreatResponse(pg, e.m_ped, originator, false);
+    case TASK_GROUP_DRIVEBY:               return ComputeDrivebyResponse(pg, e.m_AcquaintancePed, originator);
+    case TASK_GROUP_HASSLE_THREAT_PASSIVE: return ComputeHassleThreatResponse(pg, e.m_AcquaintancePed, originator, false);
     }
     return nullptr;
 }
 
 // 0x5FB2D0
 CTaskAllocator* CGroupEventHandler::ComputeResponsePedFriend(const CEventAcquaintancePed& e, CPedGroup* pg, CPed* originator) {
-    if (!e.m_ped) {
+    if (!e.m_AcquaintancePed) {
         return nullptr;
     }
-    if (IsPedInPlayersGroup(pg, e.m_ped)) {
+    if (IsPedInPlayersGroup(pg, e.m_AcquaintancePed)) {
         return nullptr;
     }
     switch (e.m_taskId) {
-    case TASK_GROUP_PARTNER_DEAL:  return ComputeDoDealResponse(pg, e.m_ped, originator);
-    case TASK_GROUP_PARTNER_GREET: return ComputeGreetResponse(pg, e.m_ped, originator);
+    case TASK_GROUP_PARTNER_DEAL:  return ComputeDoDealResponse(pg, e.m_AcquaintancePed, originator);
+    case TASK_GROUP_PARTNER_GREET: return ComputeGreetResponse(pg, e.m_AcquaintancePed, originator);
     }
     return nullptr;
 }
