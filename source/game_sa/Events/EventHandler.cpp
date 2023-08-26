@@ -238,7 +238,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputePedToFleeResponse, 0x4B9B50);
     RH_ScopedInstall(ComputePersonalityResponseToDamage, 0x4BF9B0);
     RH_ScopedInstall(ComputePlayerCollisionWithPedResponse, 0x4B8CE0);
-    RH_ScopedInstall(ComputePlayerWantedLevelResponse, 0x4BB280, { .reversed = false });
+    RH_ScopedInstall(ComputePlayerWantedLevelResponse, 0x4BB280);
     RH_ScopedInstall(ComputePotentialPedCollideResponse, 0x4C2610, { .reversed = false });
     RH_ScopedInstall(ComputePotentialWalkIntoFireResponse, 0x4BBCD0, { .reversed = false });
     RH_ScopedInstall(ComputeReallyLowHealthResponse, 0x4BAA30, { .reversed = false });
@@ -1922,8 +1922,7 @@ void CEventHandler::ComputePlayerCollisionWithPedResponse(CEventPlayerCollisionW
 
 // 0x4BB280
 void CEventHandler::ComputePlayerWantedLevelResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BB280, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
-    //m_eventResponseTask = new CTaskComplexPolicePursuit();
+    NOTSA_UNREACHABLE(); // This even't doesn't seem to exist
 }
 
 // 0x4C2610
