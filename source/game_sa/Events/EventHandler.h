@@ -112,7 +112,7 @@ public:
     void ComputePedThreatResponse(CEventAcquaintancePedHate* e, CTask* tactive, CTask* tsimplest);
     void ComputePedToChaseResponse(CEventPedToChase* e, CTask* tactive, CTask* tsimplest);
     void ComputePedToFleeResponse(CEventPedToFlee* e, CTask* tactive, CTask* tsimplest);
-    void ComputePersonalityResponseToDamage(CEventDamage* damageEvent, CEntity* entity);
+    void ComputePersonalityResponseToDamage(CEventDamage* e, CPed* src);
     void ComputePlayerCollisionWithPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputePlayerWantedLevelResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputePotentialPedCollideResponse(CEvent* e, CTask* tactive, CTask* tsimplest);

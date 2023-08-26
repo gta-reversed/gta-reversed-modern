@@ -162,7 +162,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputePedThreatResponse, 0x4C19A0);
     RH_ScopedInstall(ComputePedToChaseResponse, 0x4C1910);
     RH_ScopedInstall(ComputePedToFleeResponse, 0x4B9B50);
-    RH_ScopedInstall(ComputePersonalityResponseToDamage, 0x4BF9B0, { .reversed = false });
+    RH_ScopedInstall(ComputePersonalityResponseToDamage, 0x4BF9B0);
     RH_ScopedInstall(ComputePlayerCollisionWithPedResponse, 0x4B8CE0, { .reversed = false });
     RH_ScopedInstall(ComputePlayerWantedLevelResponse, 0x4BB280, { .reversed = false });
     RH_ScopedInstall(ComputePotentialPedCollideResponse, 0x4C2610, { .reversed = false });
@@ -728,7 +728,7 @@ void CEventHandler::ComputeDamageResponse(CEventDamage* e, CTask* tactive, CTask
                 if (!m_ped->GetTaskManager().Has<TASK_COMPLEX_REACT_TO_ATTACK>() && !m_ped->IsPlayer()) {
                     if (const auto esrc = e->GetSourceEntity()) {
                         if (esrc->IsPed()) {
-                            ComputePersonalityResponseToDamage(e, esrc);
+                            ComputePersonalityResponseToDamage(e, esrc->AsPed());
                         }
                     }
                 }
@@ -752,7 +752,8 @@ void CEventHandler::ComputeDamageResponse(CEventDamage* e, CTask* tactive, CTask
         if (const auto v = m_ped->GetVehicleIfInOne()) {
             if (v->IsBike() || v->IsSubQuad()) {
                 if (!e->m_bFallDown && !e->HasKilledPed()) {
-                    ComputePersonalityResponseToDamage(e, e->m_pSourceEntity);
+                    assert(e->m_pSourceEntity->IsPed());
+                    ComputePersonalityResponseToDamage(e, e->m_pSourceEntity->AsPed());
                 } else {
                     ComputeKnockOffBikeResponse(e, tactive, tsimplest); // 0x4C02DE
                 }
@@ -1688,8 +1689,76 @@ void CEventHandler::ComputePedToFleeResponse(CEventPedToFlee* e, CTask* tactive,
 }
 
 // 0x4BF9B0
-void CEventHandler::ComputePersonalityResponseToDamage(CEventDamage* damageEvent, CEntity* entity) {
-    plugin::CallMethod<0x4BF9B0, CEventHandler*, CEventDamage*, CEntity*>(this, damageEvent, entity);
+void CEventHandler::ComputePersonalityResponseToDamage(CEventDamage* e, CPed* src) {
+    m_eventResponseTask = [&]() -> CTask* {
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_KILL_PED_ON_FOOT_STEALTH: // 0x4BFF02
+            return new CTaskComplexKillPedOnFootStealth{src};
+        case TASK_COMPLEX_KILL_CRIMINAL: { // 0x4BFF17
+            if (src->IsPlayer()) {
+                return nullptr;
+            }
+            if (IsKillTaskAppropriate(m_ped, src, *e)) {
+                return new CTaskComplexKillCriminal{src, false};
+            }
+            return new CTaskComplexSmartFleeEntity{src, false, 60.f};
+        }
+        case TASK_COMPLEX_KILL_PED_ON_FOOT: { // 0x4BFFE3
+            // I've copy pasted this piece of code at least 3 times now
+            if (IsKillTaskAppropriate(m_ped, src, *e)) {
+                return new CTaskComplexKillPedOnFoot{src};
+            }
+            if (m_ped->bWantedByPolice && src->IsCop()) {
+                return new CTaskComplexFleeAnyMeans{src, true, 60.f};
+            }
+            if (!m_ped->IsInVehicle() || !m_ped->m_pVehicle->IsDriver(m_ped)) {
+                return new CTaskComplexSmartFleeEntity{src, false, 60.f};
+            }
+            return new CTaskComplexCarDriveMissionFleeScene{m_ped->m_pVehicle};
+        }
+        case TASK_COMPLEX_FLEE_ANY_MEANS: // 0x4BFC28
+            return new CTaskComplexFleeAnyMeans{src, true, 60.f};
+        case TASK_COMPLEX_SMART_FLEE_ENTITY: // 0x4BFC58
+            m_ped->Say(178);
+            [[fallthrough]];
+        case TASK_COMPLEX_FLEE_ENTITY: { // 0x4BFD1B
+            if (m_ped->bWantedByPolice && src->IsCop()) {
+                return new CTaskComplexFleeAnyMeans{src, true, 60.f};
+            }
+            return new CTaskComplexSmartFleeEntity{src, false, 60.f};
+        }
+        case TASK_COMPLEX_CAR_DRIVE_MISSION_KILL_PED: { // 0x4BFDD7
+            if (m_ped->IsInVehicle()) {
+                return new CTaskComplexCarDriveMissionKillPed{m_ped->m_pVehicle, src};
+            }
+            return new CTaskComplexKillPedOnFoot{src};
+        }
+        case TASK_COMPLEX_CAR_DRIVE_MISSION_FLEE_SCENE: { // 0x4BF9DD
+            if (m_ped->IsInVehicle()) {
+                return new CTaskComplexCarDriveMissionKillPed{m_ped->m_pVehicle, src};
+            }
+            return new CTaskComplexFleeAnyMeans{src, true, 60.f};
+        }
+        case TASK_COMPLEX_DIVE_FROM_ATTACHED_ENTITY_AND_GET_UP: // 0x4BFAE2
+            return new CTaskComplexDiveFromAttachedEntityAndGetUp{};
+        case TASK_SIMPLE_DUCK_FOREVER: // 0x4BFAEE
+            return new CTaskSimpleDuck{DUCK_STANDALONE, 0xE0FF};
+        case TASK_SIMPLE_DUCK: { // 0x4BFB29
+            if (const auto t = m_ped->GetIntelligence()->GetTaskDuck()) {
+                return t;
+            }
+            return new CTaskSimpleDuck{DUCK_STANDALONE, CGeneral::GetRandomNumberInRange<uint16>(2'000, 5'000)};
+        }
+        case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR:
+            return new CTaskComplexUseClosestFreeScriptedAttractor{};
+        case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR_RUN:
+            return new CTaskComplexUseClosestFreeScriptedAttractorRun{};
+        case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR_SPRINT:
+            return new CTaskComplexUseClosestFreeScriptedAttractorSprint{};
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
 }
 
 // 0x4B8CE0
