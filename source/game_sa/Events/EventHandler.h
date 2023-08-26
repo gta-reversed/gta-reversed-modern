@@ -44,6 +44,7 @@ class CEventAcquaintancePed;
 class CEventSoundQuiet;
 class CEventAcquaintancePedHateBadlyLit;
 class CEventAcquaintancePedHate;
+class CEventPedToChase;
 
 class CEventHandler {
 public:
@@ -108,7 +109,7 @@ public:
     void ComputePedSoundQuietResponse(CEventSoundQuiet* e, CTask* tactive, CTask* tsimplest);
     void ComputePedThreatBadlyLitResponse(CEventAcquaintancePedHateBadlyLit* e, CTask* tactive, CTask* tsimplest);
     void ComputePedThreatResponse(CEventAcquaintancePedHate* e, CTask* tactive, CTask* tsimplest);
-    void ComputePedToChaseResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputePedToChaseResponse(CEventPedToChase* e, CTask* tactive, CTask* tsimplest);
     void ComputePedToFleeResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputePersonalityResponseToDamage(CEventDamage* damageEvent, CEntity* entity);
     void ComputePlayerCollisionWithPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest);

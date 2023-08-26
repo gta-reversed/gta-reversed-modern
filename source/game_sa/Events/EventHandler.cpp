@@ -78,6 +78,7 @@
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 
+#include "Events/EventPedToChase.h"
 #include "Events/EventSoundQuiet.h"
 #include "Events/EventAcquaintancePed.h"
 #include "Events/EventPassObject.h"
@@ -158,7 +159,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputePedSoundQuietResponse, 0x4B9D40);
     RH_ScopedInstall(ComputePedThreatBadlyLitResponse, 0x4B9C90);
     RH_ScopedInstall(ComputePedThreatResponse, 0x4C19A0);
-    RH_ScopedInstall(ComputePedToChaseResponse, 0x4C1910, { .reversed = false });
+    RH_ScopedInstall(ComputePedToChaseResponse, 0x4C1910);
     RH_ScopedInstall(ComputePedToFleeResponse, 0x4B9B50, { .reversed = false });
     RH_ScopedInstall(ComputePersonalityResponseToDamage, 0x4BF9B0, { .reversed = false });
     RH_ScopedInstall(ComputePlayerCollisionWithPedResponse, 0x4B8CE0, { .reversed = false });
@@ -1476,11 +1477,6 @@ void CEventHandler::ComputePedFriendResponse(CEventAcquaintancePed* e, CTask* ta
     }();
 }
 
-/*
-m_eventResponseTask = [&]() -> CTask* {
-
-}();
-*/
 // 0x4B9D40
 void CEventHandler::ComputePedSoundQuietResponse(CEventSoundQuiet* e, CTask* tactive, CTask* tsimplest) {
     m_eventResponseTask = [&]() -> CTask* {
@@ -1656,13 +1652,29 @@ void CEventHandler::ComputePedThreatResponse(CEventAcquaintancePedHate* e, CTask
 }
 
 // 0x4C1910
-void CEventHandler::ComputePedToChaseResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4C1910, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
-    /*
-    m_eventResponseTask = new CTaskComplexSeekEntity(static_cast<CTask*>(task1)->entity, 30000, 1000, 1.0f, 2.0f, 2.0f, 1, 1);
-    */
+void CEventHandler::ComputePedToChaseResponse(CEventPedToChase* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_ped) {
+            return nullptr;
+        }
+        return new CTaskComplexSeekEntity<>{
+            e->m_ped,
+            30'000,
+            1'000,
+            1.f,
+            2.f,
+            2.f,
+            true,
+            true
+        };
+    }();
 }
 
+/*
+m_eventResponseTask = [&]() -> CTask* {
+
+}();
+*/
 // 0x4B9B50
 void CEventHandler::ComputePedToFleeResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
     plugin::CallMethod<0x4B9B50, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
@@ -1907,7 +1919,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeSexyVehicleResponse(e, tactive, tsimplest);
         break;
     case EVENT_PED_TO_CHASE:
-        ComputePedToChaseResponse(e, tactive, tsimplest);
+        ComputePedToChaseResponse(static_cast<CEventPedToChase*>(e), tactive, tsimplest);
         break;
     case EVENT_PED_TO_FLEE:
         ComputePedToFleeResponse(e, tactive, tsimplest);
