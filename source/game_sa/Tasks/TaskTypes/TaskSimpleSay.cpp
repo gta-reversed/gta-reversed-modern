@@ -15,7 +15,7 @@ void CTaskSimpleSay::InjectHooks() {
 }
 
 // 0x48E360
-CTaskSimpleSay::CTaskSimpleSay(uint32 sayId, uint32 sayDuration) :
+CTaskSimpleSay::CTaskSimpleSay(uint32 sayId, int32 sayDuration) :
     m_sayDuration{sayDuration},
     m_sayId{sayId}
 {

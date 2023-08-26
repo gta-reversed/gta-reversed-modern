@@ -46,6 +46,7 @@ class CEventAcquaintancePedHateBadlyLit;
 class CEventAcquaintancePedHate;
 class CEventPedToChase;
 class CEventPedToFlee;
+class CEventPlayerCollisionWithPed;
 
 class CEventHandler {
 public:
@@ -113,7 +114,7 @@ public:
     void ComputePedToChaseResponse(CEventPedToChase* e, CTask* tactive, CTask* tsimplest);
     void ComputePedToFleeResponse(CEventPedToFlee* e, CTask* tactive, CTask* tsimplest);
     void ComputePersonalityResponseToDamage(CEventDamage* e, CPed* src);
-    void ComputePlayerCollisionWithPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputePlayerCollisionWithPedResponse(CEventPlayerCollisionWithPed* e, CTask* tactive, CTask* tsimplest);
     void ComputePlayerWantedLevelResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputePotentialPedCollideResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputePotentialWalkIntoFireResponse(CEvent* e, CTask* tactive, CTask* tsimplest);

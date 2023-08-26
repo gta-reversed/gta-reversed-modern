@@ -74,10 +74,15 @@
 #include "Tasks/TaskTypes/TaskComplexSeekEntityAiming.h"
 #include "Tasks/TaskTypes/TaskSimpleGangDriveBy.h"
 #include "Tasks/TaskTypes/TaskComplexDriveWander.h"
+#include "Tasks/TaskTypes/TaskComplexFollowLeaderInFormation.h"
+#include "Tasks/TaskTypes/TaskSimpleSay.h"
+#include "Tasks/TaskTypes/TaskComplexHitResponse.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
+#include "PedStats.h"
 
+#include "Events/EntityCollisionEvents.h"
 #include "Events/EventPedToFlee.h"
 #include "Events/EventPedToChase.h"
 #include "Events/EventSoundQuiet.h"
@@ -107,6 +112,75 @@
 #include "Events/EventFireNearby.h"
 
 constexpr auto fSafeDistance = 60.f;
+
+/*****
+ * Refactor idea:
+ * `Compute*` functions could just return:
+ * `Response::Event ComputeBuildingCollisionResponse();`
+ * So `SetEventResponseTask` and `ComputeEventResponseTask` could completely be replaced
+ * And we could remove the ugly lambda wrapping from all the `Compute*` functions.
+ *****
+namespace Response {
+enum class ResponseType {
+    PHYSICAL,
+    EVENT,
+    SECONDARY_AIM,
+    SECONDARY_SAY,
+    SECONDARY_PARTIAL_ANIM,
+};
+template<ResponseType RespType>
+struct Base {
+    static inline constexpr auto Type = RespType;
+
+    CTask* task;
+};
+struct Physical : Base<ResponseType::PHYSICAL> {};
+struct Primary: Base<ResponseType::EVENT>{};
+struct SecondaryAim: Base<ResponseType::SECONDARY_AIM>{};
+struct SecondarySay : Base<ResponseType::SECONDARY_SAY>{};
+struct SecondaryPartialAnim : Base<ResponseType::SECONDARY_PARTIAL_ANIM>{};
+
+template<typename... Ts>
+void ProcessEventResponse( // TODO: Make this a mathod
+    CTask*& physical,
+    CTask*& event,
+    CTask*& secondaryAim,
+    CTask*& secondarySay,
+    CTask*& secondaryPartialAnim,
+    std::tuple<Ts...> responses
+) {
+    std::apply([]<typename T>(T r){
+        using enum ResponseType;
+        switch (T::Idx) {
+        case PHYSICAL:               physical = r;             break;
+        case EVENT:                  event = r;                break;
+        case SECONDARY_AIM:          secondaryAim = r;         break;
+        case SECONDARY_SAY:          secondarySay = r;         break;
+        case SECONDARY_PARTIAL_ANIM: secondaryPartialAnim = r; break;
+        default:                     NOTSA_UNREACHABLE();
+        }
+    }, responses);
+}
+
+template<typename T>
+void Process( // TODO: Make this a mathod
+    CTask*& physical,
+    CTask*& event,
+    CTask*& secondaryAim,
+    CTask*& secondarySay,
+    CTask*& secondaryPartialAnim,
+    T       response
+) {
+    return Process(
+        physical
+        event
+        secondaryAim
+        secondarySay
+        secondaryPartialAnim
+        std::make_tuple(response)
+    );
+}
+};*/
 
 void CEventHandler::InjectHooks() {
     RH_ScopedClass(CEventHandler);
@@ -163,7 +237,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputePedToChaseResponse, 0x4C1910);
     RH_ScopedInstall(ComputePedToFleeResponse, 0x4B9B50);
     RH_ScopedInstall(ComputePersonalityResponseToDamage, 0x4BF9B0);
-    RH_ScopedInstall(ComputePlayerCollisionWithPedResponse, 0x4B8CE0, { .reversed = false });
+    RH_ScopedInstall(ComputePlayerCollisionWithPedResponse, 0x4B8CE0);
     RH_ScopedInstall(ComputePlayerWantedLevelResponse, 0x4BB280, { .reversed = false });
     RH_ScopedInstall(ComputePotentialPedCollideResponse, 0x4C2610, { .reversed = false });
     RH_ScopedInstall(ComputePotentialWalkIntoFireResponse, 0x4BBCD0, { .reversed = false });
@@ -1762,8 +1836,88 @@ void CEventHandler::ComputePersonalityResponseToDamage(CEventDamage* e, CPed* sr
 }
 
 // 0x4B8CE0
-void CEventHandler::ComputePlayerCollisionWithPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4B8CE0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputePlayerCollisionWithPedResponse(CEventPlayerCollisionWithPed* e, CTask* tactive, CTask* tsimplest) {
+    std::tie(m_eventResponseTask, m_sayTask) = [&]() -> std::pair<CTask*, CTask*> {
+        const auto plyr = m_ped->AsPlayer();
+        if (!e->m_victim) {
+            return {nullptr, nullptr};
+        }
+
+        if (e->m_victim->GetTaskManager().GetActiveTaskAs<CTaskComplexFollowLeaderInFormation>()) { // 0x4B8DAE - Moved here to be able to early out
+            return {nullptr, new CTaskSimpleSay{28}};
+        }
+
+        const auto victimToPlayer             = (e->m_victim->GetPosition() - plyr->GetPosition());
+        const auto isCollisionInFrontOfPlayer = !std::signbit(victimToPlayer.Dot(plyr->GetForward()));
+        const auto isCollisionBehindVictim    = std::signbit(victimToPlayer.Dot(e->m_victim->GetForward()));
+
+        const auto DoLookAt = [&](CPed* looker, int32 time) {
+            g_ikChainMan.LookAt(
+                "CompPlayerCollPedResp",
+                looker,
+                looker == e->m_victim ? plyr : e->m_victim,
+                time,
+                BONE_HEAD,
+                nullptr,
+                true,
+                0.25f,
+                500,
+                3,
+                false
+            );
+        };
+
+        if (e->m_movestate == PEDMOVE_WALK) { // 0x4B8DF1
+            if (e->m_victimMoveState == PEDMOVE_WALK) { // Both peds were walking
+                if (isCollisionInFrontOfPlayer || isCollisionBehindVictim) { // 0x4B8E05 and 0x4B8E5F
+                    DoLookAt(isCollisionInFrontOfPlayer ? plyr : e->m_victim, 2000);
+                    if (isCollisionBehindVictim) {
+                        plyr->AnnoyPlayerPed(false);
+                    }
+                }
+                return {nullptr, new CTaskSimpleSay{28}}; // Just say something, and move on
+            }
+        } else if (!notsa::contains({PEDMOVE_RUN, PEDMOVE_SPRINT}, e->m_movestate) || !notsa::contains({PEDMOVE_WALK, PEDMOVE_RUN, PEDMOVE_SPRINT}, e->m_victimMoveState)) { // 0x4B8EDC - One of the peds was walking and the othe was running/sprinting
+            if (e->m_movestate == PEDMOVE_STILL && notsa::contains({ PEDMOVE_WALK, PEDMOVE_RUN, PEDMOVE_SPRINT }, e->m_victimMoveState) && isCollisionBehindVictim) {
+                DoLookAt(plyr, 2'000);
+                return {
+                    e->m_victimMoveState != PEDMOVE_WALK
+                        ? new CTaskComplexHitResponse{CPedGeometryAnalyser::ComputePedHitSide(*e->m_victim, *plyr)}
+                        : nullptr,
+                    new CTaskSimpleSay{28}
+                };
+            } else if (notsa::contains({PEDMOVE_RUN, PEDMOVE_SPRINT}, e->m_movestate)) { // 0x4B8FBF
+                if (notsa::contains({PEDMOVE_NONE, PEDMOVE_STILL}, e->m_victimMoveState) && isCollisionInFrontOfPlayer && e->m_movestate == PEDMOVE_SPRINT) { // 0x4B8FCD
+                    DoLookAt(plyr, 2'000);
+                    return {nullptr, new CTaskSimpleSay{28}};
+                }
+            }
+        } else if (!isCollisionInFrontOfPlayer && isCollisionBehindVictim || !isCollisionBehindVictim) { // 0x4B9057 and 0x4B905F
+            DoLookAt(plyr, 2'000);
+            plyr->AnnoyPlayerPed(false);
+            return {nullptr, new CTaskSimpleSay{28}};
+        } else if (e->m_victimMoveState != PEDMOVE_WALK) { // 0x4B9068
+            const auto plyrHitSide = CPedGeometryAnalyser::ComputePedHitSide(*e->m_victim, *plyr);
+            plyr->AnnoyPlayerPed(false);
+            if (   (plyr->m_pStats->m_fDefendWeakness <= 1.5f || e->m_victim->m_pStats->m_fDefendWeakness <= 1.5f) && plyr->m_pStats->m_fDefendWeakness <= 1.5f // 0x4B9073
+                || plyr->m_pStats->m_fDefendWeakness <=e->m_victim->m_pStats->m_fDefendWeakness
+            ) { 
+                // 0x4B90A6
+                DoLookAt(plyr, 2'000);
+                return {
+                    e->m_movestate == PEDMOVE_SPRINT
+                    ? new CTaskComplexHitResponse{plyrHitSide}
+                    : nullptr,
+                    new CTaskSimpleSay{28}
+                };
+            }
+            return { // 0x4B90DF
+                new CTaskComplexFallAndGetUp{plyrHitSide, false},
+                nullptr
+            };
+        }
+        return {nullptr, nullptr};
+    }();
 }
 
 // 0x4BB280
@@ -1937,7 +2091,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputePedCollisionWithPlayerResponse(e, tactive, tsimplest);
         break;
     case EVENT_PLAYER_COLLISION_WITH_PED:
-        ComputePlayerCollisionWithPedResponse(e, tactive, tsimplest);
+        ComputePlayerCollisionWithPedResponse(static_cast<CEventPlayerCollisionWithPed*>(e), tactive, tsimplest);
         break;
     case EVENT_OBJECT_COLLISION:
         ComputeObjectCollisionResponse(static_cast<CEventObjectCollision*>(e), tactive, tsimplest);

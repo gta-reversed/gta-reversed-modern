@@ -38,7 +38,7 @@ public:
         return false;
     }
 
-    void StartIfNotAlready(uint32 interval) { // NOTSA
+    void StartIfNotAlready(int32 interval) { // NOTSA
         if (!m_bStarted) {
             m_nStartTime = CTimer::GetTimeInMS();
             m_nInterval = (int32)interval;
