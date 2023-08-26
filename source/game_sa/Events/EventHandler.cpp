@@ -78,6 +78,7 @@
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 
+#include "Events/EventPedToFlee.h"
 #include "Events/EventPedToChase.h"
 #include "Events/EventSoundQuiet.h"
 #include "Events/EventAcquaintancePed.h"
@@ -160,7 +161,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputePedThreatBadlyLitResponse, 0x4B9C90);
     RH_ScopedInstall(ComputePedThreatResponse, 0x4C19A0);
     RH_ScopedInstall(ComputePedToChaseResponse, 0x4C1910);
-    RH_ScopedInstall(ComputePedToFleeResponse, 0x4B9B50, { .reversed = false });
+    RH_ScopedInstall(ComputePedToFleeResponse, 0x4B9B50);
     RH_ScopedInstall(ComputePersonalityResponseToDamage, 0x4BF9B0, { .reversed = false });
     RH_ScopedInstall(ComputePlayerCollisionWithPedResponse, 0x4B8CE0, { .reversed = false });
     RH_ScopedInstall(ComputePlayerWantedLevelResponse, 0x4BB280, { .reversed = false });
@@ -1676,15 +1677,14 @@ m_eventResponseTask = [&]() -> CTask* {
 }();
 */
 // 0x4B9B50
-void CEventHandler::ComputePedToFleeResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4B9B50, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
-
-    /*
-    if (auto* ped = static_cast<CEventPedToFlee*>(event)->m_currPedToKill) {
-        m_currPedToKill->Say(69);
-        m_eventResponseTask = new CTaskComplexSmartFleeEntity(ped, 1, 100.0f, -1, 1000, 1.0f);
-    }
-    */
+void CEventHandler::ComputePedToFleeResponse(CEventPedToFlee* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_ped) {
+            return nullptr;
+        }
+        m_ped->Say(69);
+        return new CTaskComplexSmartFleeEntity{e->m_ped, true, 100.f, -1};
+    }();
 }
 
 // 0x4BF9B0
@@ -1922,7 +1922,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputePedToChaseResponse(static_cast<CEventPedToChase*>(e), tactive, tsimplest);
         break;
     case EVENT_PED_TO_FLEE:
-        ComputePedToFleeResponse(e, tactive, tsimplest);
+        ComputePedToFleeResponse(static_cast<CEventPedToFlee*>(e), tactive, tsimplest);
         break;
     case EVENT_ATTRACTOR:
     case EVENT_SCRIPTED_ATTRACTOR:
