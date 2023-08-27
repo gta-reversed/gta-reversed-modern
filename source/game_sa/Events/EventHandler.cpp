@@ -79,6 +79,9 @@
 #include "Tasks/TaskTypes/TaskComplexHitResponse.h"
 #include "Tasks/TaskTypes/TaskComplexAvoidOtherPedWhileWandering.h"
 #include "Tasks/TaskTypes/TaskComplexPartnerShove.h"
+#include "Tasks/TaskTypes/TaskComplexSmartFleePoint.h"
+#include "Tasks/TaskTypes/TaskComplexFleePoint.h"
+#include "Tasks/TaskTypes/TaskComplexWalkRoundFire.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
@@ -242,7 +245,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputePlayerCollisionWithPedResponse, 0x4B8CE0);
     RH_ScopedInstall(ComputePlayerWantedLevelResponse, 0x4BB280);
     RH_ScopedInstall(ComputePotentialPedCollideResponse, 0x4C2610);
-    RH_ScopedInstall(ComputePotentialWalkIntoFireResponse, 0x4BBCD0, { .reversed = false });
+    RH_ScopedInstall(ComputePotentialWalkIntoFireResponse, 0x4BBCD0);
     RH_ScopedInstall(ComputeReallyLowHealthResponse, 0x4BAA30, { .reversed = false });
     RH_ScopedInstall(ComputeReviveResponse, 0x4B97B0, { .reversed = false });
     RH_ScopedInstall(ComputeScriptCommandResponse, 0x4BA7C0, { .reversed = false });
@@ -1748,11 +1751,6 @@ void CEventHandler::ComputePedToChaseResponse(CEventPedToChase* e, CTask* tactiv
     }();
 }
 
-/*
-m_eventResponseTask = [&]() -> CTask* {
-
-}();
-*/
 // 0x4B9B50
 void CEventHandler::ComputePedToFleeResponse(CEventPedToFlee* e, CTask* tactive, CTask* tsimplest) {
     m_eventResponseTask = [&]() -> CTask* {
@@ -1924,7 +1922,7 @@ void CEventHandler::ComputePlayerCollisionWithPedResponse(CEventPlayerCollisionW
 
 // 0x4BB280
 void CEventHandler::ComputePlayerWantedLevelResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    NOTSA_UNREACHABLE(); // This even't doesn't seem to exist
+    NOTSA_UNREACHABLE(); // This event doesn't seem to exist
 }
 
 // 0x4C2610
@@ -1987,10 +1985,36 @@ void CEventHandler::ComputePotentialPedCollideResponse(CEventPotentialWalkIntoPe
 }
 
 // 0x4BBCD0
-void CEventHandler::ComputePotentialWalkIntoFireResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BBCD0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputePotentialWalkIntoFireResponse(CEventPotentialWalkIntoFire* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!tsimplest || !CTask::IsGoToTask(tsimplest)) {
+            return nullptr;
+        }
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_SMART_FLEE_POINT:
+            return new CTaskComplexSmartFleePoint{e->m_firePos, false, 60.f, 1'000'000};
+        case TASK_COMPLEX_WALK_ROUND_FIRE:
+            return new CTaskComplexWalkRoundFire{
+                e->m_moveState,
+                e->m_firePos,
+                e->m_radius,
+                static_cast<CTaskSimpleGoTo*>(tsimplest)->m_vecTargetPoint
+            };
+        case TASK_COMPLEX_FLEE_POINT:
+            return new CTaskComplexFleePoint{e->m_firePos, false, 60.f, 1'000'000};
+        case TASK_NONE:
+            return nullptr;
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
 }
 
+/*
+m_eventResponseTask = [&]() -> CTask* {
+
+}();
+*/
 // 0x4BAA30
 void CEventHandler::ComputeReallyLowHealthResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
     plugin::CallMethod<0x4BAA30, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
@@ -2248,7 +2272,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeCarUpsideDownResponse(static_cast<CEventCarUpsideDown*>(e), tactive, tsimplest);
         break;
     case EVENT_POTENTIAL_WALK_INTO_FIRE:
-        ComputePotentialWalkIntoFireResponse(e, tactive, tsimplest);
+        ComputePotentialWalkIntoFireResponse(static_cast<CEventPotentialWalkIntoFire*>(e), tactive, tsimplest);
         break;
     case EVENT_SHOT_FIRED_WHIZZED_BY:
         ComputeShotFiredWhizzedByResponse(e, tactive, tsimplest);

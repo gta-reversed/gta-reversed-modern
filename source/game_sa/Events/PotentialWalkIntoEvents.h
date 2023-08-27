@@ -65,10 +65,10 @@ public:
     CVector m_firePos;
     float m_fireSize;
     float m_radius;
-    int32 m_moveState;
+    eMoveState m_moveState;
 
 public:
-    CEventPotentialWalkIntoFire(const CVector& firePos, float fireSize, int32 moveState);
+    CEventPotentialWalkIntoFire(const CVector& firePos, float fireSize, eMoveState moveState);
     ~CEventPotentialWalkIntoFire() override = default;
 
     eEventType GetEventType() const override { return EVENT_POTENTIAL_WALK_INTO_FIRE; }
@@ -81,7 +81,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CEventPotentialWalkIntoFire* Constructor(const CVector& firePos, float fireSize, int32 moveState);
+    CEventPotentialWalkIntoFire* Constructor(const CVector& firePos, float fireSize, eMoveState moveState);
 
     bool AffectsPed_Reversed(CPed* ped);
 };

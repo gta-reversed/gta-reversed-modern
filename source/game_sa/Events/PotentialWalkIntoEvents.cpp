@@ -164,23 +164,22 @@ bool CEventPotentialWalkIntoObject::AffectsPed_Reversed(CPed* ped) {
 }
 
 // 0x4B1E20
-CEventPotentialWalkIntoFire::CEventPotentialWalkIntoFire(const CVector& firePos, float fireSize, int32 moveState) {
-    m_firePos = firePos;
-    m_fireSize = fireSize;
-    m_moveState = moveState;
+CEventPotentialWalkIntoFire::CEventPotentialWalkIntoFire(const CVector& firePos, float fireSize, eMoveState moveState) :
+    m_firePos{firePos},
+    m_fireSize{fireSize},
+    m_moveState{moveState}
+{
     if (fireSize < 1.0f) {
-        m_radius = 0.7f + 0.35f;
+        m_radius = 0.7f;
     } else {
-        if (fireSize >= 2.0f)
-            m_radius = 1.5f;
-        else
-            m_radius = 1.0f;
-
-        m_radius += 0.35f;
+        m_radius = fireSize >= 2.0f
+            ? 1.5f
+            : 1.0f;
     }
+    m_radius += 0.35f;
 }
 
-CEventPotentialWalkIntoFire* CEventPotentialWalkIntoFire::Constructor(const CVector& firePos, float fireSize, int32 moveState) {
+CEventPotentialWalkIntoFire* CEventPotentialWalkIntoFire::Constructor(const CVector& firePos, float fireSize, eMoveState moveState) {
     this->CEventPotentialWalkIntoFire::CEventPotentialWalkIntoFire(firePos, fireSize, moveState);
     return this;
 }
