@@ -271,7 +271,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeVehicleToStealResponse, 0x4B9F80, { .reversed = false });
     RH_ScopedInstall(ComputeWaterCannonResponse, 0x4BAE30, { .reversed = false });
 
-    // RH_ScopedOverloadedInstall(ComputeEventResponseTask, "0", 0x4C3870, void (CEventHandler::*)(CEvent*, CTask*));
+    RH_ScopedOverloadedInstall(ComputeEventResponseTask, "0", 0x4C3870, void (CEventHandler::*)(CEvent*, CTask*));
     RH_ScopedOverloadedInstall(ComputeEventResponseTask, "Ped", 0x4C4220, CTask*(*)(const CPed&, const CEvent&));
 }
 
@@ -2193,8 +2193,6 @@ void CEventHandler::ComputeWaterCannonResponse(CEvent* e, CTask* tactive, CTask*
 
 // 0x4C3870
 void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
-    return plugin::CallMethod<0x4C3870, CEventHandler*, CEvent*, CTask*>(this, e, task);
-
     m_physicalResponseTask = nullptr;
     m_eventResponseTask    = nullptr;
     m_attackTask           = nullptr;
