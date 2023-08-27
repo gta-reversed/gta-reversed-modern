@@ -49,6 +49,7 @@ class CEventPedToChase;
 class CEventPedToFlee;
 class CEventPlayerCollisionWithPed;
 class CEventPotentialWalkIntoPed;
+class CEventHealthReallyLow;
 
 class CEventHandler {
 public:
@@ -120,7 +121,7 @@ public:
     void ComputePlayerWantedLevelResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputePotentialPedCollideResponse(CEventPotentialWalkIntoPed* e, CTask* tactive, CTask* tsimplest);
     void ComputePotentialWalkIntoFireResponse(CEventPotentialWalkIntoFire* e, CTask* tactive, CTask* tsimplest);
-    void ComputeReallyLowHealthResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputeReallyLowHealthResponse(CEventHealthReallyLow* e, CTask* tactive, CTask* tsimplest);
     void ComputeReviveResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeScriptCommandResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeSeenCopResponse(CEvent* e, CTask* tactive, CTask* tsimplest);

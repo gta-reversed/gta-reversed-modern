@@ -2016,16 +2016,17 @@ m_eventResponseTask = [&]() -> CTask* {
 }();
 */
 // 0x4BAA30
-void CEventHandler::ComputeReallyLowHealthResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BAA30, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
-    /*
-    auto taskId = task1->GetTaskType();
-    if (taskId == TASK_NONE) {
-        m_eventResponseTask = nullptr;
-    } else if (taskId == TASK_COMPLEX_DIVE_FROM_ATTACHED_ENTITY_AND_GET_UP) {
-        m_eventResponseTask = new CTaskComplexDiveFromAttachedEntityAndGetUp(0);
-    }
-    */
+void CEventHandler::ComputeReallyLowHealthResponse(CEventHealthReallyLow* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_DIVE_FROM_ATTACHED_ENTITY_AND_GET_UP:
+            return new CTaskComplexDiveFromAttachedEntityAndGetUp{0};
+        case TASK_NONE:
+            return nullptr;
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();    
 }
 
 // 0x4B97B0
@@ -2284,7 +2285,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeHighAngerAtPlayerResponse(static_cast<CEventHighAngerAtPlayer*>(e), tactive, tsimplest);
         break;
     case EVENT_HEALTH_REALLY_LOW:
-        ComputeReallyLowHealthResponse(e, tactive, tsimplest);
+        ComputeReallyLowHealthResponse(static_cast<CEventHealthReallyLow*>(e), tactive, tsimplest);
         break;
     case EVENT_HEALTH_LOW:
         ComputeLowHealthResponse(static_cast<CEventHealthLow*>(e), tactive, tsimplest);
