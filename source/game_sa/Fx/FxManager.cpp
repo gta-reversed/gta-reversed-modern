@@ -25,8 +25,8 @@ void FxManager_c::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x4A90A0);
     RH_ScopedInstall(Init, 0x4A98E0);
     RH_ScopedInstall(Exit, 0x4A9A10);
-    RH_ScopedInstall(DestroyFxSystem, 0x4A9810, {.reversed = true});
-    RH_ScopedInstall(DestroyAllFxSystems, 0x4A98B0, {.reversed = false});
+    RH_ScopedInstall(DestroyFxSystem, 0x4A9810);
+    RH_ScopedInstall(DestroyAllFxSystems, 0x4A98B0, {.reversed = false}); // <-- broken for some reason?
     RH_ScopedInstall(Update, 0x4A9A80);
     RH_ScopedInstall(LoadFxProject, 0x5C2420);
     RH_ScopedInstall(UnloadFxProject, 0x4A9AE0);
@@ -65,8 +65,6 @@ FxManager_c* FxManager_c::Destructor() {
 
 // 0x4A98E0
 bool FxManager_c::Init() {
-    // return ((bool(__thiscall*)(FxManager_c*))0x4A98E0)(this);
-
     m_Pool.Init();
 
     m_nCurrentMatrix = 0;
@@ -82,8 +80,6 @@ bool FxManager_c::Init() {
 
 // 0x4A9A10
 void FxManager_c::Exit() {
-    // ((void(__thiscall*)(FxManager_c*))0x4A9A10)(this);
-
     DestroyAllFxSystems();
     m_FxSystemBPs.RemoveAll();
     m_FxEmitters = nullptr;
@@ -95,8 +91,6 @@ void FxManager_c::Exit() {
 
 // 0x4A9810
 void FxManager_c::DestroyFxSystem(FxSystem_c* system) {
-    // ((void(__thiscall*)(FxManager_c*, FxSystem_c*))0x4A9810)(this, system);
-
     assert(system);
     assert(system->m_SystemBP);
 
@@ -119,8 +113,6 @@ void FxManager_c::DestroyFxSystem(FxSystem_c* system) {
 
 // 0x4A98B0
 void FxManager_c::DestroyAllFxSystems() {
-    // ((void(__thiscall*)(FxManager_c*))0x4A98B0)(this);
-
     for (FxSystem_c* it = m_FxSystems.GetHead(); it; it = m_FxSystems.GetNext(it)) {
         DestroyFxSystem(it);
     }
@@ -128,11 +120,14 @@ void FxManager_c::DestroyAllFxSystems() {
 
 // 0x5C2420
 bool FxManager_c::LoadFxProject(const char* path) {
-    // return ((bool(__thiscall*)(FxManager_c*, const char*))0x5C2420)(this, filename);
-
     char txdPath[256]; // to be set to "models\\effectsPC.txd"
     strcpy(txdPath, path);
     strcpy(&txdPath[strlen(path) - strlen(".fxp")], "PC.txd");
+
+    // NOTSA: sanity check
+    if (!fs::exists(txdPath)) {
+        NOTSA_LOG_ERR("Fx TXD file '{}' doesn't exists. Game will crash after trying to render a fx!", txdPath);
+    }
 
     m_nFxTxdIndex = CTxdStore::AddTxdSlot("fx");
     CTxdStore::LoadTxd(m_nFxTxdIndex, txdPath);
@@ -213,18 +208,15 @@ FxSystemBP_c* FxManager_c::FindFxSystemBP(const char* name) {
 
 // 0x4A9140
 void FxManager_c::CalcFrustumInfo(RwCamera* camera) {
-    // ((void(__thiscall*)(FxManager_c*, RwCamera*))0x4A9140)(this, camera);
-
     const auto* matrix     = RwFrameGetMatrix(RwCameraGetFrame(camera));
     const auto* viewWindow = RwCameraGetViewWindow(camera);
     const auto farClip     = RwCameraGetFarClipPlane(camera);
 
     const auto dist  = RwV2dLength(viewWindow);
     const auto angle = RadiansToDegrees(std::atan2(dist, 1.0f));
-    const auto radius = std::sqrt(dist * dist + 1.0f) * farClip / DegreesToRadians(std::sin((180.0f - (angle + angle)))) * std::sin(DegreesToRadians(angle));
+    const auto radius = std::sqrt(sq(dist) + 1.0f) * farClip / std::sin(DegreesToRadians(180.0f - 2.0f * angle)) * std::sin(DegreesToRadians(angle));
 
-    m_Frustum.m_Sphere.m_vecCenter = CVector{matrix->pos} + CVector{matrix->at} * radius;
-    m_Frustum.m_Sphere.m_fRadius   = radius;
+    m_Frustum.m_Sphere = {CVector{matrix->pos} + CVector{matrix->at} * radius, radius};
 
     m_Frustum.m_Planes[0] = camera->frustumPlanes[2].plane;
     m_Frustum.m_Planes[1] = camera->frustumPlanes[3].plane;

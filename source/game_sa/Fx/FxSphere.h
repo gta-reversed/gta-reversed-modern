@@ -1,14 +1,11 @@
 #pragma once
 
 #include "FxPlane.h"
+#include "Sphere.h"
 
-class CVector;
-
-class FxSphere_c /*: public RwSphere*/ {
+class FxSphere_c : public CSphere {
 public:
-    CVector m_vecCenter;
-    float   m_fRadius;
-    uint32  m_nNumPlanesPassed; // m_LastPlaneRejected
+    uint32 m_nNumPlanesPassed; // m_LastPlaneRejected
 
 public:
     static void InjectHooks();
@@ -18,6 +15,9 @@ public:
     static void  operator delete(void* data, bool32 bUseGlobalHeep);
 
     FxSphere_c();
+
+    // NOTSA
+    FxSphere_c(CVector center, float radius) : CSphere(center, radius), m_nNumPlanesPassed(0) {}
 
     inline bool  IsCollision(FxSphere_c* sphere) const;
     inline float GetDistToPlane(FxPlane_c* plane) const;
