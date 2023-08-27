@@ -82,11 +82,14 @@
 #include "Tasks/TaskTypes/TaskComplexSmartFleePoint.h"
 #include "Tasks/TaskTypes/TaskComplexFleePoint.h"
 #include "Tasks/TaskTypes/TaskComplexWalkRoundFire.h"
+#include "Tasks/TaskTypes/TaskComplexGetUpAndStandStill.h"
+#include "Tasks/TaskTypes/TaskComplexWander.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 #include "PedStats.h"
 
+#include "Events/EventRevived.h"
 #include "Events/EntityCollisionEvents.h"
 #include "Events/EventPedToFlee.h"
 #include "Events/EventPedToChase.h"
@@ -2030,8 +2033,31 @@ void CEventHandler::ComputeReallyLowHealthResponse(CEventHealthReallyLow* e, CTa
 }
 
 // 0x4B97B0
-void CEventHandler::ComputeReviveResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4B97B0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeReviveResponse(CEventRevived* e, CTask* tactive, CTask* tsimplest) {
+    std::tie(m_eventResponseTask, m_sayTask) = [&]() -> std::pair<CTask*, CTask*> {
+        m_ped->m_fHealth = 100.f;
+        m_ped->m_bUsesCollision = true;
+        m_ped->bKnockedUpIntoAir = false;
+        m_ped->bKnockedOffBike = false;
+        m_ped->bKilledByStealth = false;
+        m_ped->SetPedState(PEDSTATE_IDLE);
+        m_ped->physicalFlags.bDestroyed = false;
+
+        m_ped->RestartNonPartialAnims();
+
+        const auto tm = &m_ped->GetTaskManager();
+        if (!tm->GetTaskPrimary(TASK_PRIMARY_DEFAULT) && !tm->GetTaskPrimary(TASK_PRIMARY_PRIMARY)) {
+            tm->SetTask(
+                CTaskComplexWander::GetWanderTaskByPedType(m_ped),
+                TASK_PRIMARY_PRIMARY
+            );
+        }
+        
+        return {
+            new CTaskComplexGetUpAndStandStill{},
+            new CTaskSimpleSay{179}
+        };
+    }();
 }
 
 // 0x4BA7C0
@@ -2210,7 +2236,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputePedEnteredVehicleResponse(e, tactive, tsimplest);
         break;
     case EVENT_REVIVE:
-        ComputeReviveResponse(e, tactive, tsimplest);
+        ComputeReviveResponse(static_cast<CEventRevived*>(e), tactive, tsimplest);
         break;
     case EVENT_CHAT_PARTNER:
         ComputeChatPartnerResponse(static_cast<CEventChatPartner*>(e), tactive, tsimplest);
