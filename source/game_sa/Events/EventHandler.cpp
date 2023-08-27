@@ -89,6 +89,7 @@
 #include "IKChainManager_c.h"
 #include "PedStats.h"
 
+#include "Events/EventScriptCommand.h"
 #include "Events/EventRevived.h"
 #include "Events/EntityCollisionEvents.h"
 #include "Events/EventPedToFlee.h"
@@ -249,9 +250,9 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputePlayerWantedLevelResponse, 0x4BB280);
     RH_ScopedInstall(ComputePotentialPedCollideResponse, 0x4C2610);
     RH_ScopedInstall(ComputePotentialWalkIntoFireResponse, 0x4BBCD0);
-    RH_ScopedInstall(ComputeReallyLowHealthResponse, 0x4BAA30, { .reversed = false });
-    RH_ScopedInstall(ComputeReviveResponse, 0x4B97B0, { .reversed = false });
-    RH_ScopedInstall(ComputeScriptCommandResponse, 0x4BA7C0, { .reversed = false });
+    RH_ScopedInstall(ComputeReallyLowHealthResponse, 0x4BAA30);
+    RH_ScopedInstall(ComputeReviveResponse, 0x4B97B0);
+    RH_ScopedInstall(ComputeScriptCommandResponse, 0x4BA7C0);
     RH_ScopedInstall(ComputeSeenCopResponse, 0x4BC050, { .reversed = false });
     RH_ScopedInstall(ComputeSeenPanickedPedResponse, 0x4C35F0, { .reversed = false });
     RH_ScopedInstall(ComputeSexyPedResponse, 0x4B99F0, { .reversed = false });
@@ -2061,8 +2062,27 @@ void CEventHandler::ComputeReviveResponse(CEventRevived* e, CTask* tactive, CTas
 }
 
 // 0x4BA7C0
-void CEventHandler::ComputeScriptCommandResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BA7C0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeScriptCommandResponse(CEventScriptCommand* e, CTask* tactive, CTask* tsimplest) {
+    const auto tm = &m_ped->GetTaskManager();
+
+    const auto taskIdx = e->m_primaryTaskIndex == TASK_PRIMARY_PRIMARY
+        ? TASK_PRIMARY_PRIMARY
+        : TASK_PRIMARY_DEFAULT;
+    const auto t = tm->GetTaskPrimary(taskIdx);
+    if (t && !t->MakeAbortable(m_ped, ABORT_PRIORITY_URGENT, e)) {
+        t->MakeAbortable(m_ped, ABORT_PRIORITY_LEISURE, e);
+        const auto ce = static_cast<CEventScriptCommand*>(m_ped->GetEventGroup().Add(e));
+        if (const auto r = CPedScriptedTaskRecord::GetRecordAssociatedWithEvent(e)) {
+            r->AssociateWithEvent(ce);
+        }
+    } else {
+        const auto ct = e->CloneScriptTask();
+        tm->ClearTaskEventResponse();
+        tm->SetTask(ct, taskIdx, true);
+        if (const auto r = CPedScriptedTaskRecord::GetRecordAssociatedWithEvent(e)) {
+            r->AssociateWithTask(ct);
+        }
+    }
 }
 
 // 0x4BC050
@@ -2264,7 +2284,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeGunAimedAtResponse(static_cast<CEventGunAimedAt*>(e), tactive, tsimplest);
         break;
     case EVENT_SCRIPT_COMMAND:
-        ComputeScriptCommandResponse(e, tactive, tsimplest);
+        ComputeScriptCommandResponse(static_cast<CEventScriptCommand*>(e), tactive, tsimplest);
         break;
     case EVENT_IN_AIR:
         if (!m_ped->bIsStanding) {
