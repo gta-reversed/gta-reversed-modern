@@ -70,7 +70,7 @@ public:
     FxSystem_c* Constructor();
     FxSystem_c* Destructor();
 
-    bool Init(FxSystemBP_c* systemBP, RwMatrix* local, RwMatrix* parent);
+    bool Init(FxSystemBP_c* systemBP, const RwMatrix& local, RwMatrix* parent);
     void Exit();
 
     void Play();

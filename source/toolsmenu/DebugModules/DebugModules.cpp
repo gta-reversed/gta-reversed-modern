@@ -16,7 +16,8 @@
 #include "./CDarkelDebugModule.h"
 #include "./HooksDebugModule.h"
 #include "./CTeleportDebugModule.h"
-#include "./FXDebugModule.h"
+#include "./ParticleDebugModule.h"
+#include "./PostEffectsDebugModule.h"
 #include "./PoolsDebugModule.h"
 #include "./TimeCycleDebugModule.h"
 #include "./CullZonesDebugModule.h"
@@ -70,7 +71,7 @@ void DebugModules::CreateModules() {
 
     // "Settings" menu
     Add<HooksDebugModule>();
-    Add<FXDebugModule>();
+    Add<PostEffectsDebugModule>();
 
     // "Visualization" menu
     Add<CollisionDebugModule>();
@@ -90,6 +91,7 @@ void DebugModules::CreateModules() {
     Add<notsa::debugmodules::ScriptDebugModule>();
     Add<notsa::debugmodules::CloudsDebugModule>();
     Add<notsa::debugmodules::WeaponDebugModule>();
+    Add<ParticleDebugModule>();
 
     // Stuff that is present in multiple menus
     Add<TimeCycleDebugModule>(); // Visualization + Extra

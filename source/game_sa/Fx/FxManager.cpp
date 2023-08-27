@@ -42,10 +42,10 @@ void FxManager_c::InjectHooks() {
     RH_ScopedInstall(FxRwMatrixCreate, 0x4A9440);
     RH_ScopedInstall(FxRwMatrixDestroy, 0x4A9460);
     RH_ScopedInstall(ShouldCreate, 0x4A9500);
-    RH_ScopedOverloadedInstall(CreateFxSystem, "2", 0x4A9BB0, FxSystem_c* (FxManager_c::*)(const char*, RwMatrix*, RwMatrix*, bool));
-    RH_ScopedOverloadedInstall(CreateFxSystem, "1", 0x4A95C0, FxSystem_c* (FxManager_c::*)(FxSystemBP_c*, RwMatrix*, RwMatrix*, bool));
-    RH_ScopedOverloadedInstall(CreateFxSystem, "4", 0x4A9BE0, FxSystem_c* (FxManager_c::*)(const char*, CVector*, RwMatrix*, bool));
-    RH_ScopedOverloadedInstall(CreateFxSystem, "3", 0x4A96B0, FxSystem_c* (FxManager_c::*)(FxSystemBP_c*, CVector*, RwMatrix*, bool));
+    RH_ScopedOverloadedInstall(CreateFxSystem, "2", 0x4A9BB0, FxSystem_c* (FxManager_c::*)(const char*, const RwMatrix&, RwMatrix*, bool));
+    RH_ScopedOverloadedInstall(CreateFxSystem, "1", 0x4A95C0, FxSystem_c* (FxManager_c::*)(FxSystemBP_c*, const RwMatrix&, RwMatrix*, bool));
+    RH_ScopedOverloadedInstall(CreateFxSystem, "4", 0x4A9BE0, FxSystem_c* (FxManager_c::*)(const char*, const CVector&, RwMatrix*, bool));
+    RH_ScopedOverloadedInstall(CreateFxSystem, "3", 0x4A96B0, FxSystem_c* (FxManager_c::*)(FxSystemBP_c*, const CVector&, RwMatrix*, bool));
 }
 
 // 0x4A9470
@@ -199,10 +199,7 @@ FxSystemBP_c* FxManager_c::FindFxSystemBP(const char* name) {
         }
     }
 
-    char str[128];
-    sprintf(str, "Cannot Find Fx System Blueprint - %s\n", name);
-    printf("%s", str); // todo: DEV_LOG
-
+    NOTSA_LOG_ERR("Couldn't find Fx system bp '{}'", name);
     return nullptr;
 }
 
@@ -300,28 +297,28 @@ void FxManager_c::FxRwMatrixDestroy(RwMatrix* matrix) {
 }
 
 // 0x4A9BB0
-FxSystem_c* FxManager_c::CreateFxSystem(const char* name, RwMatrix* transform, RwMatrix* objectMatrix, bool ignoreBoundingChecks) {
+FxSystem_c* FxManager_c::CreateFxSystem(const char* name, const RwMatrix& transform, RwMatrix* objectMatrix, bool ignoreBoundingChecks) {
     FxSystemBP_c* systemBP = FindFxSystemBP(name);
     assert(systemBP);
     return CreateFxSystem(systemBP, transform, objectMatrix, ignoreBoundingChecks);
 }
 
 // 0x4A9BE0
-FxSystem_c* FxManager_c::CreateFxSystem(Const char* name, CVector* point, RwMatrix* objectMatrix, bool ignoreBoundingChecks) {
+FxSystem_c* FxManager_c::CreateFxSystem(Const char* name, const CVector& point, RwMatrix* objectMatrix, bool ignoreBoundingChecks) {
     FxSystemBP_c* systemBP = FindFxSystemBP(name);
     assert(systemBP);
     return CreateFxSystem(systemBP, point, objectMatrix, ignoreBoundingChecks);
 }
 
 // 0x4A96B0
-FxSystem_c* FxManager_c::CreateFxSystem(FxSystemBP_c* systemBP, CVector* point, RwMatrix* objectMatrix, bool ignoreBoundingChecks) {
+FxSystem_c* FxManager_c::CreateFxSystem(FxSystemBP_c* systemBP, const CVector& point, RwMatrix* objectMatrix, bool ignoreBoundingChecks) {
     if (systemBP) {
         auto* pointMatrix = FxRwMatrixCreate();
         RwMatrixSetIdentity(pointMatrix);
-        RwV3dAssign(RwMatrixGetPos(pointMatrix), point);
+        RwV3dAssign(RwMatrixGetPos(pointMatrix), &point);
         RwMatrixUpdate(pointMatrix);
 
-        FxSystem_c* system = CreateFxSystem(systemBP, pointMatrix, objectMatrix, ignoreBoundingChecks);
+        FxSystem_c* system = CreateFxSystem(systemBP, *pointMatrix, objectMatrix, ignoreBoundingChecks);
 
         FxRwMatrixDestroy(pointMatrix);
         return system;
@@ -330,7 +327,7 @@ FxSystem_c* FxManager_c::CreateFxSystem(FxSystemBP_c* systemBP, CVector* point, 
 }
 
 // 0x4A9500
-bool FxManager_c::ShouldCreate(FxSystemBP_c* system, RwMatrix* transform, RwMatrix* objectMatrix, bool ignoreBoundingChecks) {
+bool FxManager_c::ShouldCreate(FxSystemBP_c* system, const RwMatrix& transform, RwMatrix* objectMatrix, bool ignoreBoundingChecks) {
     if (ignoreBoundingChecks)
         return true;
 
@@ -339,9 +336,9 @@ bool FxManager_c::ShouldCreate(FxSystemBP_c* system, RwMatrix* transform, RwMatr
 
     auto* curr = FxRwMatrixCreate();
     if (objectMatrix)
-        RwMatrixMultiply(curr, transform, objectMatrix);
+        RwMatrixMultiply(curr, &transform, objectMatrix);
     else
-        *curr = *transform;
+        *curr = transform;
 
     FxSphere_c pointsOut;
     RwV3dTransformPoints(&pointsOut.m_vecCenter, reinterpret_cast<const RwV3d*>(system->m_BoundingSphere), 1, curr);
@@ -351,7 +348,7 @@ bool FxManager_c::ShouldCreate(FxSystemBP_c* system, RwMatrix* transform, RwMatr
 }
 
 // 0x4A95C0
-FxSystem_c* FxManager_c::CreateFxSystem(FxSystemBP_c* systemBP, RwMatrix* transform, RwMatrix* objectMatrix, bool ignoreBoundingChecks) {
+FxSystem_c* FxManager_c::CreateFxSystem(FxSystemBP_c* systemBP, const RwMatrix& transform, RwMatrix* objectMatrix, bool ignoreBoundingChecks) {
     if (systemBP && ShouldCreate(systemBP, transform, objectMatrix, ignoreBoundingChecks)) {
         auto* fx = new FxSystem_c();
         fx->Init(systemBP, transform, objectMatrix);

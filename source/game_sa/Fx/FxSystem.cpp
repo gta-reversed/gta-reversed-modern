@@ -70,19 +70,19 @@ FxSystem_c::~FxSystem_c() {
 }
 
 // 0x4AA750
-bool FxSystem_c::Init(FxSystemBP_c* systemBP, RwMatrix* local, RwMatrix* parent) {
-    m_SystemBP      = systemBP;
-    m_LocalMatrix   = *local;
-    m_ParentMatrix  = parent;
-    m_fCurrentTime  = 0;
-    m_nPlayStatus   = eFxSystemPlayStatus::FX_STOPPED;
-    m_nKillStatus   = eFxSystemKillStatus::FX_NOT_KILLED;
-    m_UseConstTime  = false;
-    m_nConstTime    = 0;
-    m_nRateMult     = 1000;
-    m_nTimeMult     = 1000;
-    m_VelAdd = CVector();
-    m_useZTest = true;
+bool FxSystem_c::Init(FxSystemBP_c* systemBP, const RwMatrix& local, RwMatrix* parent) {
+    m_SystemBP     = systemBP;
+    m_LocalMatrix  = local;
+    m_ParentMatrix = parent;
+    m_fCurrentTime = 0;
+    m_nPlayStatus  = eFxSystemPlayStatus::FX_STOPPED;
+    m_nKillStatus  = eFxSystemKillStatus::FX_NOT_KILLED;
+    m_UseConstTime = false;
+    m_nConstTime   = 0;
+    m_nRateMult    = 1000;
+    m_nTimeMult    = 1000;
+    m_VelAdd       = CVector();
+    m_useZTest     = true;
 
     m_BoundingSphere = nullptr;
     if (m_SystemBP->m_BoundingSphere) {
