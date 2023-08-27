@@ -2,7 +2,7 @@
 
 #include "TaskComplexUseClosestFreeScriptedAttractor.h"
 
-class CTaskComplexUseClosestFreeScriptedAttractorRun final : public CTaskComplexUseClosestFreeScriptedAttractor {
+class NOTSA_EXPORT_VTABLE CTaskComplexUseClosestFreeScriptedAttractorRun final : public CTaskComplexUseClosestFreeScriptedAttractor {
 public:
     static constexpr auto Type = eTaskType::TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR_RUN;
 
