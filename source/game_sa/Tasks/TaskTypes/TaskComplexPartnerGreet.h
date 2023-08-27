@@ -1,6 +1,6 @@
 #include "TaskComplexPartner.h"
 
-class CTaskComplexPartnerGreet final : public CTaskComplexPartner {
+class NOTSA_EXPORT_VTABLE CTaskComplexPartnerGreet final : public CTaskComplexPartner {
 public:
     int32 field_70;
     int32 m_handShakeType;
