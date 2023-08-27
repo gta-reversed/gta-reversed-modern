@@ -694,7 +694,7 @@ bool CPedIntelligence::IsPedGoingSomewhereOnFoot() {
 }
 
 // 0x601D70
-int32 CPedIntelligence::GetMoveStateFromGoToTask() {
+eMoveState CPedIntelligence::GetMoveStateFromGoToTask() {
     auto* task = m_TaskMgr.GetSimplestActiveTask();
     if (task && CTask::IsGoToTask(task)) {
         return static_cast<CTaskSimpleGoTo*>(task)->m_moveState;

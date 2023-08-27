@@ -204,20 +204,16 @@ bool CEventPotentialWalkIntoFire::AffectsPed_Reversed(CPed* ped) {
     return false;
 }
 
-CEventPotentialWalkIntoPed::CEventPotentialWalkIntoPed(CPed* ped, const CVector& targetPoint, int32 moveState) {
-    m_targetPoint = targetPoint;
-    m_ped = ped;
-    m_moveState = moveState;
-    ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+CEventPotentialWalkIntoPed::CEventPotentialWalkIntoPed(CPed* ped, const CVector& targetPoint, eMoveState moveState) :
+    m_targetPoint{targetPoint},
+    m_ped{ped},
+    m_moveState{moveState}
+{
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventPotentialWalkIntoPed::~CEventPotentialWalkIntoPed() {
     CEntity::SafeCleanUpRef(m_ped);
-}
-
-CEventPotentialWalkIntoPed* CEventPotentialWalkIntoPed::Constructor(CPed* ped, const CVector& targetPoint, int32 moveState) {
-    this->CEventPotentialWalkIntoPed::CEventPotentialWalkIntoPed(ped, targetPoint, moveState);
-    return this;
 }
 
 // 0x4AE800

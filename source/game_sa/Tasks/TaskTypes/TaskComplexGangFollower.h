@@ -8,7 +8,7 @@ class CPedGroup;
 class CTaskComplexGangFollower : public CTaskComplex {
 public:
     CPedGroup* m_PedGroup;
-    CPed*      m_Ped;
+    CPed*      m_Leader;
     CVector    m_PedPosn;
     CVector    dword20;
     CVector    dword2C;

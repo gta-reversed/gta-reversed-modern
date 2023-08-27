@@ -77,6 +77,8 @@
 #include "Tasks/TaskTypes/TaskComplexFollowLeaderInFormation.h"
 #include "Tasks/TaskTypes/TaskSimpleSay.h"
 #include "Tasks/TaskTypes/TaskComplexHitResponse.h"
+#include "Tasks/TaskTypes/TaskComplexAvoidOtherPedWhileWandering.h"
+#include "Tasks/TaskTypes/TaskComplexPartnerShove.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
@@ -239,7 +241,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputePersonalityResponseToDamage, 0x4BF9B0);
     RH_ScopedInstall(ComputePlayerCollisionWithPedResponse, 0x4B8CE0);
     RH_ScopedInstall(ComputePlayerWantedLevelResponse, 0x4BB280);
-    RH_ScopedInstall(ComputePotentialPedCollideResponse, 0x4C2610, { .reversed = false });
+    RH_ScopedInstall(ComputePotentialPedCollideResponse, 0x4C2610);
     RH_ScopedInstall(ComputePotentialWalkIntoFireResponse, 0x4BBCD0, { .reversed = false });
     RH_ScopedInstall(ComputeReallyLowHealthResponse, 0x4BAA30, { .reversed = false });
     RH_ScopedInstall(ComputeReviveResponse, 0x4B97B0, { .reversed = false });
@@ -1926,8 +1928,62 @@ void CEventHandler::ComputePlayerWantedLevelResponse(CEvent* e, CTask* tactive, 
 }
 
 // 0x4C2610
-void CEventHandler::ComputePotentialPedCollideResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4C2610, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputePotentialPedCollideResponse(CEventPotentialWalkIntoPed* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_ped) {
+            return nullptr;
+        }
+        const auto moveState = tsimplest && CTask::IsGoToTask(tsimplest)
+            ? e->m_moveState
+            : PEDMOVE_WALK;
+        switch (e->m_taskId) {
+        case TASK_NONE: // 0x4C281B
+            return nullptr;
+        case TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING: { // 0x4C2707
+            const auto tGangFollower = m_ped->GetTaskManager().Find<CTaskComplexGangFollower>();
+            const auto wanderingMoveState = [&]{
+                if (moveState <= PEDMOVE_WALK) {
+                    return moveState;
+                }
+                if (!tGangFollower || !tGangFollower->m_Leader) {
+                    return moveState;
+                }
+                const auto gangLeader = tGangFollower->m_Leader;
+                const auto leaderMoveState = gangLeader->IsPlayer()
+                    ? gangLeader->m_nMoveState
+                    : gangLeader->GetIntelligence()->GetMoveStateFromGoToTask();
+                if (leaderMoveState >= PEDMOVE_RUN) {
+                    return moveState;
+                }
+                const auto tSeekEntity = m_ped->GetTaskManager().Find<CTaskComplexSeekEntity<>>();
+                if (!tSeekEntity) {
+                    return moveState;
+                }
+                const auto pedToLeaderDistSq = (gangLeader->GetPosition() - m_ped->GetPosition()).SquaredMagnitude();
+#ifdef FIX_BUGS
+                if (std::sqrt(pedToLeaderDistSq) - tSeekEntity->GetMoveStateRadius() < tSeekEntity->GetMoveStateRadius()) {
+#else
+                if (pedToLeaderDistSq - sq(tSeekEntity->GetMoveStateRadius()) < sq(tSeekEntity->GetMoveStateRadius())) {
+#endif
+                    return PEDMOVE_WALK;
+                }
+                return moveState;
+            }();
+            return new CTaskComplexAvoidOtherPedWhileWandering{e->m_ped, e->m_targetPoint, wanderingMoveState, tGangFollower != nullptr};
+        }
+        case TASK_COMPLEX_PARTNER_SHOVE:
+            return new CTaskComplexPartnerShove{
+                "CompPotPedCollResp",
+                e->m_ped,
+                true,
+                0.5f,
+                1,
+                {}
+            };
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();  
 }
 
 // 0x4BBCD0
@@ -2117,7 +2173,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeVehiclePotentialCollisionResponse(e, tactive, tsimplest);
         break;
     case EVENT_POTENTIAL_WALK_INTO_PED:
-        ComputePotentialPedCollideResponse(e, tactive, tsimplest);
+        ComputePotentialPedCollideResponse(static_cast<CEventPotentialWalkIntoPed*>(e), tactive, tsimplest);
         break;
     case EVENT_SHOT_FIRED:
         ComputeShotFiredResponse(e, tactive, tsimplest);

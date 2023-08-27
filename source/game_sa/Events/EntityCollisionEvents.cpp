@@ -126,7 +126,7 @@ bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped) {
     }
                 
     if (const auto task = ped->GetTaskManager().GetActiveTaskAs<CTaskComplexAvoidOtherPedWhileWandering>()) {
-        if (task->m_ped == m_victim) {
+        if (task->m_OtherPed == m_victim) {
             return false;
         }
     }

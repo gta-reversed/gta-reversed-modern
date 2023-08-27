@@ -357,6 +357,7 @@ public:
     }
 
     auto GetEntityToSeek() const { return m_entityToSeek; }
+    auto GetMoveStateRadius() const { return m_moveStateRadius; }
 
 protected: // Wrappers for hooks
     // 0x493730
