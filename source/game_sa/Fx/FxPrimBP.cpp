@@ -81,12 +81,12 @@ bool FxPrimBP_c::Load(FILESTREAM file, int32 version, FxName32_t* textureNames) 
     }
 
     assert(textureNames);
-    ReadFieldImpl(file, textureNames[0].value, "TEXTURE:");
+    ReadFieldImpl(file, textureNames[0], "TEXTURE:");
 
     if (version > 101) {
-        ReadFieldImpl(file, textureNames[1].value, "TEXTURE2:");
-        ReadFieldImpl(file, textureNames[2].value, "TEXTURE3:");
-        ReadFieldImpl(file, textureNames[3].value, "TEXTURE4:");
+        ReadFieldImpl(file, textureNames[1], "TEXTURE2:");
+        ReadFieldImpl(file, textureNames[2], "TEXTURE3:");
+        ReadFieldImpl(file, textureNames[3], "TEXTURE4:");
     }
 
     m_bAlphaOn    = ReadField<bool>(file, "ALPHAON:");

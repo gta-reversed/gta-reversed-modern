@@ -14,15 +14,15 @@ void FxEmitterBP_c::InjectHooks() {
     RH_ScopedClass(FxEmitterBP_c);
     RH_ScopedCategory("Fx");
 
-    // RH_ScopedInstall(Constructor, 0x4A18D0);
-    // RH_ScopedInstall(RenderHeatHaze, 0x4A1940);
-    // RH_ScopedInstall(UpdateParticle, 0x4A21D0);
-    // RH_ScopedInstall(CreateInstance_Reversed, 0x4A2B40); // bad
-    // RH_ScopedInstall(Update_Reversed, 0x4A2BC0);
-    // RH_ScopedInstall(Load_Reversed, 0x5C25F0);
-    // RH_ScopedInstall(LoadTextures_Reversed, 0x5C0A30);
-    // RH_ScopedInstall(Render_Reversed, 0x4A2C40);
-    // RH_ScopedInstall(FreePrtFromPrim_Reversed, 0x4A2510);
+    RH_ScopedInstall(Constructor, 0x4A18D0);
+    RH_ScopedInstall(RenderHeatHaze, 0x4A1940, {.reversed = false});
+    RH_ScopedInstall(UpdateParticle, 0x4A21D0, {.reversed = false});
+    RH_ScopedInstall(CreateInstance_Reversed, 0x4A2B40, {.reversed = false}); // bad
+    RH_ScopedInstall(Update_Reversed, 0x4A2BC0, {.reversed = false});
+    RH_ScopedInstall(Load_Reversed, 0x5C25F0, {.reversed = false});
+    RH_ScopedInstall(LoadTextures_Reversed, 0x5C0A30, {.reversed = true});
+    RH_ScopedInstall(Render_Reversed, 0x4A2C40, {.reversed = false});
+    RH_ScopedInstall(FreePrtFromPrim_Reversed, 0x4A2510, {.reversed = false});
 }
 
 FxPrim_c* FxEmitterBP_c::CreateInstance() { return CreateInstance_Reversed(); }
@@ -54,8 +54,6 @@ FxPrim_c* FxEmitterBP_c::CreateInstance_Reversed() {
 
 // 0x4A2BC0
 void FxEmitterBP_c::Update_Reversed(float deltaTime) {
-    return plugin::CallMethod<0x4A2BC0, FxEmitterBP_c*, float>(this, deltaTime);
-
     for (auto it = m_Particles.GetHead(); it; it = m_Particles.GetNext(it)) {
         if (it->m_System->m_nKillStatus == eFxSystemKillStatus::FX_3) {
             it->m_System->m_nKillStatus = eFxSystemKillStatus::FX_KILLED;
@@ -71,8 +69,6 @@ void FxEmitterBP_c::Update_Reversed(float deltaTime) {
 
 // 0x5C25F0
 bool FxEmitterBP_c::Load_Reversed(FILESTREAM file, int32 version, FxName32_t* textureNames) {
-    return plugin::CallMethodAndReturn<bool, 0x5C25F0, FxEmitterBP_c*, FILESTREAM, int32, FxName32_t*>(this, file, version, textureNames);
-
     FxPrimBP_c::Load(file, version, textureNames);
 
     m_nLodStart = uint16(ReadField<float>(file, "LODSTART:") * 64.0f);
@@ -83,23 +79,19 @@ bool FxEmitterBP_c::Load_Reversed(FILESTREAM file, int32 version, FxName32_t* te
 
 // 0x5C0A30
 bool FxEmitterBP_c::LoadTextures_Reversed(FxName32_t* textureNames, int32 version) {
-    // return plugin::CallMethodAndReturn<bool, 0x5C0A30, FxEmitterBP_c*, int32, FxName32_t*>(this, version, textureNames);
-
     assert(textureNames);
 
     const auto LoadTexture = [&](auto ind) -> RwTexture* {
-        const auto name = textureNames[ind].value;
         char mask[64];
-        sprintf(mask, "%sm", name);
+        sprintf(mask, "%sm", textureNames[ind]);
 
-        auto* texture = RwTextureRead(name, mask);
-        return texture ? texture : RwTextureRead(name, nullptr);
+        auto* texture = RwTextureRead(textureNames[ind], mask);
+        return texture ? texture : RwTextureRead(textureNames[ind], nullptr);
     };
 
     const auto LoadTextureIfExists = [=](auto ind) -> RwTexture* {
         assert(&textureNames[ind]);
-        auto name = textureNames[ind].value;
-        return strncmp(name, "NULL", 5u) != 0 ? LoadTexture(ind) : nullptr;
+        return strncmp(textureNames[ind], "NULL", 5u) != 0 ? LoadTexture(ind) : nullptr;
     };
 
     m_apTextures[0] = LoadTexture(0);
@@ -115,7 +107,69 @@ bool FxEmitterBP_c::LoadTextures_Reversed(FxName32_t* textureNames, int32 versio
 
 // 0x4A2C40
 void FxEmitterBP_c::Render_Reversed(RwCamera* camera, uint32 txdHashKey, float brightness, bool doHeatHaze) {
-    plugin::CallMethod<0x4A2C40, FxEmitterBP_c*, RwCamera*, uint32, float, bool>(this, camera, txdHashKey, brightness, doHeatHaze);
+    return plugin::CallMethod<0x4A2C40, FxEmitterBP_c*, RwCamera*, uint32, float, bool>(this, camera, txdHashKey, brightness, doHeatHaze);
+
+    /*
+    static constexpr RwBlendFunction g_BlendFunctions[] = {
+        rwBLENDZERO,      rwBLENDONE,          rwBLENDSRCCOLOR,  rwBLENDINVSRCCOLOR,  rwBLENDSRCALPHA, rwBLENDINVSRCALPHA,
+        rwBLENDDESTALPHA, rwBLENDINVDESTALPHA, rwBLENDDESTCOLOR, rwBLENDINVDESTCOLOR, rwBLENDSRCALPHASAT
+    };
+
+    if (doHeatHaze) {
+        if (m_FxInfoManager.m_bHasHeatHazeParticleEmitter)
+            RenderHeatHaze(camera, txdHashKey, brightness);
+        return;
+    }
+
+    if (IsFxInfoPresent(FX_INFO_HEATHAZE_DATA)) {
+        if (m_Particles.GetNumItems())
+            g_fxMan.m_bHeatHazeEnabled = true;
+        return;
+    }
+
+    if (!m_Particles.GetNumItems())
+        return;
+
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(m_bAlphaOn));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(g_BlendFunctions[m_bAlphaOn ? m_nSrcBlendId : 1]));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(g_BlendFunctions[m_bAlphaOn ? m_nDstBlendId : 0]));
+
+    auto* raster = RwTextureGetRaster(m_apTextures[0]);
+    RenderBegin(raster, nullptr, rwIM3D_VERTEXUV);
+
+    for (auto* prt = (FxEmitterPrt_c*)m_Particles.GetHead(); prt; prt = (FxEmitterPrt_c*)m_Particles.GetNext(prt)) {
+        const auto pos = [prt] {
+            if (prt->m_bLocalToSystem) {
+                // Get updated matrix position.
+                CVector out{};
+                auto* mat = g_fxMan.FxRwMatrixCreate();
+                prt->m_System->GetCompositeMatrix(mat);
+                RwV3dTransformPoint(&out, &prt->m_Pos, mat); // SA: RwV3dTransformPoints(...,...,1,...)
+                g_fxMan.FxRwMatrixDestroy(mat);
+                return out;
+            } else {
+                return prt->m_Pos;
+            }
+        }();
+
+        RenderInfo_t renderInfo{};
+        m_FxInfoManager.ProcessRenderInfo(
+            prt->m_System->m_fCurrentTime,
+            prt->m_fCurrentLife / prt->m_fTotalLife,
+            0.0f,
+            prt->m_System->m_SystemBP->m_fLength,
+            false,
+            &renderInfo
+        );
+
+        if (renderInfo.m_SmokeType > -1) {
+            // RenderSmoke();
+            CGeneral::GetRandomNumberInRange(0.0f, 1.0f) *
+        }
+    }
+
+    RenderEnd();
+    */
 }
 
 // 0x4A2510
@@ -125,7 +179,7 @@ bool FxEmitterBP_c::FreePrtFromPrim_Reversed(FxSystem_c* system) {
 
 // todo: eFxInfo
 // 0x4A24D0
-bool FxEmitterBP_c::IsFxInfoPresent(int32 type) const {
+bool FxEmitterBP_c::IsFxInfoPresent(eFxInfoType type) const {
     if (m_FxInfoManager.m_nNumInfos <= 0)
         return false;
 

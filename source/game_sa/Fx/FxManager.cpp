@@ -130,18 +130,18 @@ void FxManager_c::DestroyAllFxSystems() {
 bool FxManager_c::LoadFxProject(const char* path) {
     // return ((bool(__thiscall*)(FxManager_c*, const char*))0x5C2420)(this, filename);
 
-    char txdPath[256];
+    char txdPath[256]; // to be set to "models\\effectsPC.txd"
     strcpy(txdPath, path);
     strcpy(&txdPath[strlen(path) - strlen(".fxp")], "PC.txd");
 
     m_nFxTxdIndex = CTxdStore::AddTxdSlot("fx");
-    CTxdStore::LoadTxd(m_nFxTxdIndex, path);
+    CTxdStore::LoadTxd(m_nFxTxdIndex, txdPath);
     CTxdStore::AddRef(m_nFxTxdIndex);
     CTxdStore::PushCurrentTxd();
     CTxdStore::SetCurrentTxd(m_nFxTxdIndex);
 
     auto* file = CFileMgr::OpenFile(path, "r");
-    if (file == INVALID_HANDLE_VALUE)
+    if (!file)
         return false;
 
     char line[256], buffer[128];

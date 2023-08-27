@@ -5,11 +5,12 @@
 #include "EmissionInfo.h"
 #include "MovementInfo.h"
 #include "RenderInfo.h"
+#include "eFxInfoType.h"
 
 class FxInfo_c {
 protected:
-    uint16 m_nType;
-    uint8  m_bTimeModeParticle;
+    eFxInfoType m_nType;
+    bool        m_bTimeModeParticle;
 
 public:
     FxInfo_c() = default;    // 0x4A4B30

@@ -5,7 +5,7 @@
  *   SA - San Andreas (Version 109)
  */
 
-enum eFxInfoType {
+enum eFxInfoType : uint16 {
     FX_INFO_EMRATE_DATA           = 0x1001, // MH SA
     //                            = 0x1002  //
     FX_INFO_EMSIZE_DATA           = 0x1004, // MH SA

@@ -13,9 +13,10 @@
 class FxPrim_c;
 class FxPrimBP_c;
 
-struct FxName32_t {
-    char value[32];
-};
+// struct FxName32_t {
+//    char value[32];
+// };
+using FxName32_t = char[32];
 
 struct FxBufferedMatrix {
     union {
