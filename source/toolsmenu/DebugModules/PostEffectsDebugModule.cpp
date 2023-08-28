@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
-#include "FXDebugModule.h"
+#include "PostEffectsDebugModule.h"
 #include "PostEffects.h"
 
-void FXDebugModule::RenderMenuEntry() {
+void PostEffectsDebugModule::RenderMenuEntry() {
     notsa::ui::DoNestedMenuIL({ "Settings", "Post FX" }, [&] {
         ImGui::Checkbox("In Cutscene",            &CPostEffects::m_bInCutscene          );
         ImGui::Checkbox("Skip Post Process",      &CPostEffects::m_bDisableAllPostEffect);
