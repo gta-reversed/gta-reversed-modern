@@ -71,7 +71,7 @@ void FxEmitter_c::AddParticle_Reversed(CVector* pos, CVector* vel, float timeSin
     }
 
     auto mat2 = g_fxMan.FxRwMatrixCreate();
-    m_PrimBP->GetRWMatrix(mat2);
+    m_PrimBP->GetRWMatrix(*mat2);
     RwMatrixMultiply(mat1, mat2, mat0);
     g_fxMan.FxRwMatrixDestroy(mat2);
 
@@ -108,7 +108,7 @@ void FxEmitter_c::AddParticle_Reversed(RwMatrix* mat, CVector* vel, float timeSi
     }
 
     auto mat3 = g_fxMan.FxRwMatrixCreate();
-    m_PrimBP->GetRWMatrix(mat3);
+    m_PrimBP->GetRWMatrix(*mat3);
     RwMatrixMultiply(mat2, mat3, mat1);
     g_fxMan.FxRwMatrixDestroy(mat3);
 
@@ -160,7 +160,7 @@ void FxEmitter_c::CreateParticles(float currentTime, float deltaTime) {
         }
 
         auto mat2 = g_fxMan.FxRwMatrixCreate();
-        m_PrimBP->GetRWMatrix(mat2);
+        m_PrimBP->GetRWMatrix(*mat2);
         RwMatrixMultiply(mat, mat2, mat1);
         g_fxMan.FxRwMatrixDestroy(mat2);
 
@@ -215,7 +215,7 @@ FxEmitterPrt_c* FxEmitter_c::CreateParticle(EmissionInfo_t* emissionInfo, RwMatr
     particle->m_CurrentRotation = CGeneral::GetRandomNumberInRange(0.0f, 1.0f) * (emissionInfo->m_fRotationMaxAngle - emissionInfo->m_fRotationMinAngle) + emissionInfo->m_fRotationMinAngle;
 
     if (createLocal) {
-        m_PrimBP->GetRWMatrix(wldMat);
+        m_PrimBP->GetRWMatrix(*wldMat);
     }
 
     CVector vec;

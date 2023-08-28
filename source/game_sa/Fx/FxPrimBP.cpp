@@ -26,18 +26,11 @@ FxPrimBP_c::~FxPrimBP_c() {
 }
 
 // 0x4A9DC0
-void FxPrimBP_c::GetRWMatrix(RwMatrix* outMatrix) {
-    // plugin::CallMethod<0x4A9DC0, FxPrimBP_c*, RwMatrix*>(this, outMatrix);
-    // return;
-
+void FxPrimBP_c::GetRWMatrix(RwMatrix& outMatrix) {
     if (m_pMatrixBuffered) {
-        m_pMatrixBuffered->UncompressInto(outMatrix);
+        m_pMatrixBuffered->CopyToRwMatrix(outMatrix);
     } else {
-        // identity matrix
-        outMatrix->right = { 1.0f, 0.0f, 0.0f };
-        outMatrix->up    = { 0.0f, 1.0f, 0.0f };
-        outMatrix->at    = { 0.0f, 0.0f, 1.0f };
-        outMatrix->pos   = { 0.0f, 0.0f, 0.0f };
+        RwMatrixSetIdentity(&outMatrix);
     }
 }
 
@@ -50,34 +43,30 @@ bool FxPrimBP_c::Load(FILESTREAM file, int32 version, FxName32_t* textureNames) 
     ReadFieldImpl(file, field, "FX_PRIM_BASE_DATA:");
     ReadFieldImpl(file, field, "NAME:");
     
-    float mat[4][3];
+    CVector mat[4];
     ReadLine(file, line, sizeof(line));
     (void)sscanf(
         line,
         "%s %f %f %f %f %f %f %f %f %f %f %f %f",
         field,
-        &mat[0][0], &mat[0][1], &mat[0][2], // right
-        &mat[1][0], &mat[1][1], &mat[1][2], // up
-        &mat[2][0], &mat[2][1], &mat[2][2], // at
-        &mat[3][0], &mat[3][1], &mat[3][2]  // pos
+        &mat[0].x, &mat[0].y, &mat[0].z, // right
+        &mat[1].x, &mat[1].y, &mat[1].z, // up
+        &mat[2].x, &mat[2].y, &mat[2].z, // at
+        &mat[3].x, &mat[3].y, &mat[3].z  // pos
     );
 
     // if it's identity matrix, don't allocate it
-    if (mat[0][0] == 1.f && mat[0][1] == 0.f && mat[0][2] == 0.f &&
-        mat[1][0] == 0.f && mat[1][1] == 1.f && mat[1][2] == 0.f &&
-        mat[2][0] == 0.f && mat[2][1] == 0.f && mat[2][2] == 1.f &&
-        mat[3][0] == 0.f && mat[3][1] == 0.f && mat[3][2] == 0.f
+    if (mat[0] == CVector{1.0f, 0.0f, 0.0f} &&
+        mat[1] == CVector{0.0f, 1.0f, 0.0f} &&
+        mat[2] == CVector{0.0f, 0.0f, 1.0f} &&
+        mat[3] == CVector{0.0f, 0.0f, 0.0f}
     ) {
         m_pMatrixBuffered = nullptr;
     } else {
         m_pMatrixBuffered = g_fxMan.Allocate<FxBufferedMatrix>(1);
         assert(m_pMatrixBuffered);
 
-        for (auto i = 0; i < 4; i++) {
-            for (auto j = 0; j < 3; j++) {
-                m_pMatrixBuffered->data[i] = int16(mat[i][j] * std::numeric_limits<int16>::max());
-            }
-        }
+        m_pMatrixBuffered->CopyFromVectors(mat[0], mat[1], mat[2], mat[3]);
     }
 
     assert(textureNames);

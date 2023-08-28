@@ -9,6 +9,7 @@
 #include "RenderWare.h"
 #include "List_c.h"
 #include "FxInfoManager.h"
+#include "extensions/FixedVector.hpp"
 
 class FxPrim_c;
 class FxPrimBP_c;
@@ -19,38 +20,32 @@ class FxPrimBP_c;
 using FxName32_t = char[32];
 
 struct FxBufferedMatrix {
-    union {
-        struct {
-            CompressedVector right;
-            CompressedVector up;
-            CompressedVector at;
-            CompressedVector pos;
-        };
-        int16 data[12];
-    };
+    static constexpr float FX_RECIPROCAL = std::numeric_limits<int16>::max();
 
-    void CompressInto(RwMatrix* mat) {
-        mat->right = CompressFxVector(right);
-        mat->up    = CompressFxVector(up);
-        mat->at    = CompressFxVector(at);
-        mat->pos   = CompressFxVector(pos);
+    FixedVector<int16, FX_RECIPROCAL> right;
+    FixedVector<int16, FX_RECIPROCAL> up;
+    FixedVector<int16, FX_RECIPROCAL> at;
+    FixedVector<int16, FX_RECIPROCAL> pos;
+
+    void CopyFromRwMatrix(const RwMatrix& mat) {
+        right = static_cast<CVector>(mat.right);
+        up    = static_cast<CVector>(mat.up);
+        at    = static_cast<CVector>(mat.at);
+        pos   = static_cast<CVector>(mat.pos);
     }
 
-    void UncompressInto(RwMatrix* out) {
-        out->right = UncompressFxVector(right);
-        out->up    = UncompressFxVector(up);
-        out->at    = UncompressFxVector(at);
-        out->pos   = UncompressFxVector(pos);
+    void CopyFromVectors(const CVector& r, const CVector& u, const CVector& a, const CVector& p) {
+        right = r; up = u; at = a; pos = p;
     }
 
-    int16 operator[](size_t i) const {
-        return (&right.x)[i];
-    }
-
-    int16& operator[](size_t i) {
-        return (&right.x)[i];
+    void CopyToRwMatrix(RwMatrix& out) {
+        out.right = right;
+        out.up    = up;
+        out.at    = at;
+        out.pos   = pos;
     }
 };
+VALIDATE_SIZE(FxBufferedMatrix, 0x18);
 
 class FxPrimBP_c {
 public:
@@ -76,7 +71,7 @@ public:
     virtual void Render(RwCamera* camera, uint32 a2, float a3, bool bCanRenderHeatHaze) = 0;
     virtual bool FreePrtFromPrim(FxSystem_c* system) = 0;
 
-    void GetRWMatrix(RwMatrix* outMatrix);
+    void GetRWMatrix(RwMatrix& outMatrix);
 };
 
 VALIDATE_SIZE(FxPrimBP_c, 0x40);
