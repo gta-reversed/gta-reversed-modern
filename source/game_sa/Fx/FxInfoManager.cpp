@@ -151,7 +151,7 @@ void FxInfoManager_c::Load(FILESTREAM file, int32 version) {
     char line[256], field[128];
     for (auto& info : GetInfos()) {
         ReadLine(file, line, sizeof(line));
-        RET_IGNORED(sscanf(line, "%s", field));
+        VERIFY(sscanf(line, "%s", field) == 1);
 
         const auto GetType = [=]() -> int32 {
             for (auto& [type, name] : FXINFOMANAGER_C_LOAD_MAPPING) {
@@ -159,9 +159,7 @@ void FxInfoManager_c::Load(FILESTREAM file, int32 version) {
                     return type;
                 }
             }
-            printf("Unknown FX Info: %s", field); // NOTSA
-            assert(true);
-            return 0;
+            NOTSA_UNREACHABLE("Unknown FX Info: %s", field); // NOTSA
         };
         auto infoType = GetType();
 
