@@ -45,7 +45,7 @@ bool FxPrimBP_c::Load(FILESTREAM file, int32 version, FxName32_t* textureNames) 
     
     CVector mat[4];
     ReadLine(file, line, sizeof(line));
-    (void)sscanf(
+    VERIFY(sscanf(
         line,
         "%s %f %f %f %f %f %f %f %f %f %f %f %f",
         field,
@@ -53,7 +53,7 @@ bool FxPrimBP_c::Load(FILESTREAM file, int32 version, FxName32_t* textureNames) 
         &mat[1].x, &mat[1].y, &mat[1].z, // up
         &mat[2].x, &mat[2].y, &mat[2].z, // at
         &mat[3].x, &mat[3].y, &mat[3].z  // pos
-    );
+    ) == 13);
 
     // if it's identity matrix, don't allocate it
     if (mat[0] == CVector{1.0f, 0.0f, 0.0f} &&
