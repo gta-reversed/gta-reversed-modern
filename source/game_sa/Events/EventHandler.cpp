@@ -92,7 +92,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeWaterCannonResponse, 0x4BAE30, { .reversed = false });
 
     // RH_ScopedOverloadedInstall(ComputeEventResponseTask, "0", 0x4C3870, void (CEventHandler::*)(CEvent*, CTask*));
-    // RH_ScopedOverloadedInstall(ComputeEventResponseTask, "1", 0x4C4220, CTask* (CEventHandler::*)(CPed*, CEvent*));
+    RH_ScopedOverloadedInstall(ComputeEventResponseTask, "Ped", 0x4C4220, CTask*(*)(const CPed&, const CEvent&));
 }
 
 // 0x4C3E80
@@ -784,24 +784,20 @@ void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
     }
 }
 
-// should be (const CPed& ped, const CEvent& event);
 // 0x4C4220
-CTask* CEventHandler::ComputeEventResponseTask(CPed* ped, CEvent* event) {
-    return plugin::CallAndReturn<CTask*, 0x4C4220, CPed*, CEvent*>(ped, event);
-    /*
+CTask* CEventHandler::ComputeEventResponseTask(const CPed& ped, const CEvent& e) {
     CTask* task = nullptr;
 
-    CEventHandler handler(ped);
-    handler.ComputeEventResponseTask(event, nullptr);
-    if (handler.m_eventResponseTask) {
-        task = handler.m_eventResponseTask;
-        handler.m_eventResponseTask = nullptr;
+    CEventHandler eh{const_cast<CPed*>(&ped)};
+    eh.ComputeEventResponseTask(const_cast<CEvent*>(&e), nullptr);
+    if (eh.m_eventResponseTask) {
+        task = eh.m_eventResponseTask;
+        eh.m_eventResponseTask = nullptr;
     }
-    handler.Flush();
-    delete handler.m_history.m_tempEvent;
-    delete handler.m_history.m_nonTempEvent;
-    delete handler.m_history.m_storedActiveEvent;
+    eh.Flush();
+    delete eh.m_history.m_tempEvent;
+    delete eh.m_history.m_nonTempEvent;
+    delete eh.m_history.m_storedActiveEvent;
 
     return task;
-    */
 }

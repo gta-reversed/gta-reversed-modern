@@ -8,19 +8,68 @@ void CAEStaticChannel::InjectHooks() {
     RH_ScopedClass(CAEStaticChannel);
     RH_ScopedCategory("Audio/Hardware");
 
+    RH_ScopedVirtualInstall(Service, 0x4F10D0);
     RH_ScopedVirtualInstall(IsSoundPlaying, 0x4F0F40);
     RH_ScopedVirtualInstall(GetPlayTime, 0x4F0F70);
     RH_ScopedVirtualInstall(GetLength, 0x4F0FA0);
+    RH_ScopedVirtualInstall(Play, 0x4F0BD0);
     RH_ScopedVirtualInstall(SynchPlayback, 0x4F1040);
     RH_ScopedVirtualInstall(Stop, 0x4F0FB0);
+
+    RH_ScopedInstall(SetAudioBuffer, 0x4F0C40, {.reversed = false});
 }
 
 CAEStaticChannel::CAEStaticChannel(IDirectSound* pDirectSound, uint16 channelId, bool arg3, uint32 samplesPerSec, uint16 bitsPerSample)
     : CAEAudioChannel(pDirectSound, channelId, samplesPerSec, bitsPerSample)
 {
-    m_bUnkn1 = false;
+    m_bNeedData = false;
     m_bNeedsSynch = false;
     field_8A = arg3;
+}
+
+// 0x4F10D0
+void CAEStaticChannel::Service() {
+    if (!m_pDirectSoundBuffer) {
+        m_nBufferStatus = 0;
+        return;
+    }
+
+    if (m_bNeedData && (int32)(CTimer::GetTimeInMS() - m_nSyncTime) > field_74) {
+        uint8* ppvAudioPtr1{};
+        DWORD pdwAudioBytes{};
+
+        VERIFY(SUCCEEDED(m_pDirectSoundBuffer->Lock(
+            m_dwLockOffset,
+            m_nNumLockBytes,
+            reinterpret_cast<LPVOID*>(&ppvAudioPtr1),
+            &pdwAudioBytes,
+            nullptr,
+            0,
+            0
+        )));
+
+        for (auto i = 0u; i < m_nNumLoops; i++) {
+            memcpy(
+                &ppvAudioPtr1[i * m_nNumLockBytes],
+                (uint8*)m_pBuffer + m_nCurrentBufferOffset,
+                m_nNumLockBytes
+            );
+        }
+        VERIFY(SUCCEEDED(m_pDirectSoundBuffer->Unlock(ppvAudioPtr1, pdwAudioBytes, nullptr, 0)));
+        m_bNeedData = false;
+    }
+
+    UpdateStatus();
+
+    if (!m_bNoScalingFactor && !bufferStatus.Bit0x1) {
+        if (const auto buf = std::exchange(m_pDirectSoundBuffer, nullptr)) {
+            --g_numSoundChannelsUsed;
+            buf->Release();
+        }
+    }
+}
+void CAEStaticChannel::Service_Reversed() {
+    CAEStaticChannel::Service();
 }
 
 // 0x4F0F40
@@ -57,7 +106,21 @@ uint16 CAEStaticChannel::GetLength_Reversed() {
     return CAEStaticChannel::GetLength();
 }
 
-// 0x4F1040
+// 0x4F0BD0
+void CAEStaticChannel::Play(int16 timeInMs, int8 unused, float scalingFactor) {
+    if (m_bLooped && m_nCurrentBufferOffset != 0 || !timeInMs) {
+        m_bUnkn2 = false;
+    } else {
+        m_pDirectSoundBuffer->SetCurrentPosition(ConvertFromMsToBytes(timeInMs));
+        m_bUnkn2 = true;
+    }
+    m_bNeedsSynch = true;
+    m_bNoScalingFactor = scalingFactor == 0.0f;
+}
+void CAEStaticChannel::Play_Reversed(int16 a, int8 b, float c) {
+    CAEStaticChannel::Play(a, b, c);
+}
+    // 0x4F1040
 void CAEStaticChannel::SynchPlayback() {
     if (!m_pDirectSoundBuffer || !m_bNeedsSynch || m_bNoScalingFactor)
         return;
@@ -102,4 +165,8 @@ void CAEStaticChannel::Stop() {
 }
 void CAEStaticChannel::Stop_Reversed() {
     CAEStaticChannel::Stop();
+}
+
+bool CAEStaticChannel::SetAudioBuffer(IDirectSound3DBuffer* buffer, uint16 size, int16 f88, int16 f8c, int16 loopOffset, uint16 frequency) {
+    return false;
 }

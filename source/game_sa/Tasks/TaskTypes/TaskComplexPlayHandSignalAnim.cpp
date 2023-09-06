@@ -69,8 +69,8 @@ CTask* CTaskComplexPlayHandSignalAnim::CreateSubTask(eTaskType taskType) {
 }
 
 // 0x61BA00
-CTask* CTaskComplexPlayHandSignalAnim::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x61BA00, CTaskComplexPlayHandSignalAnim*>(this);
+CTask* CTaskComplexPlayHandSignalAnim::Clone() const {
+    return plugin::CallMethodAndReturn<CTask*, 0x61BA00, const CTaskComplexPlayHandSignalAnim*>(this);
 }
 
 // 0x61B570

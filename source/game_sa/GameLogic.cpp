@@ -98,24 +98,28 @@ void CGameLogic::DoWeaponStuffAtStartOf2PlayerGame(bool shareWeapons) {
 
 // 0x441B70
 // 1 - Los Santos, 2 - San Fierro, 3 - Las Venturas
-uint32 CGameLogic::FindCityClosestToPoint(CVector2D point) {
-    constexpr CVector2D cityCoords[] = {
-        { 1670.0f, -1137.0f}, // LS
-        {-1810.0f,   884.0f}, // SF
-        { 2161.0f,  2140.0f}, // LV
+eLevelName CGameLogic::FindCityClosestToPoint(CVector2D point) {
+    constexpr struct {
+        eLevelName level;
+        CVector2D coords;
+    } CITIES[] = {
+        {LEVEL_NAME_LOS_SANTOS,   { 1670.0f, -1137.0f}},
+        {LEVEL_NAME_SAN_FIERRO,   {-1810.0f,   884.0f}},
+        {LEVEL_NAME_LAS_VENTURAS, { 2161.0f,  2140.0f}},
     };
-    std::pair<float, size_t> closest{FLT_MAX, 3}; // NOTSA
-    for (auto&& [i, d] : notsa::enumerate(cityCoords)) {
-        if (const auto d = DistanceBetweenPoints2D(cityCoords[i], point); d < closest.first) {
-            closest = {d, i};
+
+    std::pair<float, eLevelName> closest{FLT_MAX, NUM_LEVELS}; // NOTSA
+    for (const auto& city : CITIES) {
+        if (const auto d = DistanceBetweenPoints2D(city.coords, point); d < closest.first) {
+            closest = {d, city.level};
         }
     }
 
-    if (closest.second == 3) {
+    if (closest.second == NUM_LEVELS) {
         NOTSA_UNREACHABLE();
     }
 
-    return closest.second + 1;
+    return closest.second;
 }
 
 // 0x441240

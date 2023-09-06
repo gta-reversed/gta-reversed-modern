@@ -18,6 +18,42 @@ enum eAudioPedType : int16 {
     PED_TYPE_SPC    = 5
 };
 
+class CAEPedSpeechAudioEntity;
+
+struct tSpeechSlot {
+    uint16 m_nState;
+    uint16 field_02;
+    CAEPedSpeechAudioEntity* m_PedSpeechAE;
+    uint32 field_08;
+    uint16 m_nSoundId;
+    uint16 m_nBankId;
+    uint32 m_nTime;
+    uint16 m_nPhraseId;
+    uint16 m_nVoiceType;
+    uint8 field_18;
+    uint8 field_19;
+    uint8 field_1A;
+    uint8 field_1B;
+
+    void Reset() {
+        m_PedSpeechAE = nullptr;
+        m_nState = field_08 = m_nTime = 0;
+        m_nSoundId = m_nBankId = m_nPhraseId = m_nVoiceType = -1;
+        field_19 = field_1A = field_18 = 0;
+    }
+};
+VALIDATE_SIZE(tSpeechSlot, 0x1C);
+
+struct tPhraseMemory {
+    int16 m_nSoundId{-1};
+    int16 m_nBankId{-1};
+
+    void Reset() {
+        m_nSoundId = m_nBankId = -1;
+    }
+};
+VALIDATE_SIZE(tPhraseMemory, 0x04);
+
 class NOTSA_EXPORT_VTABLE CAEPedSpeechAudioEntity : public CAEAudioEntity {
 public:
     char      field_7C[20];
@@ -42,7 +78,7 @@ public:
     float     m_fVoiceVolume;
     int16     m_nCurrentPhraseId;
     int16     field_B2;
-    int32     field_B4[19];
+    uint32    field_B4[19];
 
 public:
     static int16& s_nCJWellDressed;
@@ -66,8 +102,12 @@ public:
     static int16& s_pConversationPedSlot2;
 
     static int16& s_NextSpeechSlot;
-    static int16& s_PhraseMemory;
-    // static CAEPedSpeechAudioEntity::Slot (&s_PedSpeechSlots)[6];
+
+    static constexpr auto PHRASE_MEMORY_COUNT = 150;
+    static inline auto& s_PhraseMemory = *reinterpret_cast<std::array<tPhraseMemory, PHRASE_MEMORY_COUNT>*>(0xB61418);
+
+    static constexpr auto NUM_PED_SPEECH_SLOTS = 6;
+    static inline auto& s_PedSpeechSlots = *reinterpret_cast<std::array<tSpeechSlot, NUM_PED_SPEECH_SLOTS>*>(0xB61C38);
 
 public:
     static void InjectHooks();
@@ -75,10 +115,10 @@ public:
     CAEPedSpeechAudioEntity();
     ~CAEPedSpeechAudioEntity() = default;
 
-    static int8 IsGlobalContextImportantForInterupting(int16 a1); // typo: Interrupting
-    static int8 IsGlobalContextUberImportant(int16 a1);
-    static int16 GetNextMoodToUse(int16 a1);
-    static int32 GetVoiceForMood(int16 a1);
+    static bool __stdcall IsGlobalContextImportantForInterupting(int16 globalCtx); // typo: Interrupting
+    static bool IsGlobalContextUberImportant(int16 globalCtx);
+    static int16 __stdcall GetNextMoodToUse(int16 lastMood);
+    static int32 __stdcall GetVoiceForMood(int16 mood);
     static int16 CanWePlayScriptedSpeech();
     static float GetSpeechContextVolumeOffset(int16 a1);
     static int8 RequestPedConversation(CPed* ped1, CPed* ped2);
@@ -96,18 +136,18 @@ public:
     static int16 GetAudioPedType(Const char* name);
     static int32 GetVoice(char* name, int16 type);
     static void DisableAllPedSpeech();
-    bool        IsGlobalContextPain(int16 a1);
+    bool        IsGlobalContextPain(int16 globalCtx);
     static void SetCJMood(int16, uint32, int16, int16, int16);
     static void EnableAllPedSpeech();
     static bool IsCJDressedInForGangSpeech();
     int8        GetSexForSpecialPed(uint32 a1);
 
-    bool IsGlobalContextImportantForWidescreen(int16 a1);
+    bool IsGlobalContextImportantForWidescreen(int16 globalCtx);
     int32 GetRepeatTime(int16 a1);
-    void LoadAndPlaySpeech(uint32 a2);
-    int32 GetNumSlotsPlayingContext(int16 a2);
-    int32 GetNextPlayTime(int16 a2);
-    void SetNextPlayTime(int16 a2);
+    void LoadAndPlaySpeech(uint32 offset);
+    int32 GetNumSlotsPlayingContext(int16 context);
+    uint32 GetNextPlayTime(int16 globalCtx);
+    void SetNextPlayTime(int16 globalCtx);
     void DisablePedSpeech(int16 a1);
     void DisablePedSpeechForScriptSpeech(int16 a1);
     int8 CanPedSayGlobalContext(int16 a2);
@@ -146,6 +186,12 @@ private:
     bool WillPedChatAboutTopic_Reversed(int16 topic);
     int16 GetPedType_Reversed();
     bool IsPedFemaleForAudio_Reversed();
+
+    // NOTSA
+    tSpeechSlot& GetCurrentPedSpeech() {
+        assert(m_nPedSpeechSlotIndex >= 0 && (size_t)(m_nPedSpeechSlotIndex) < std::size(s_PedSpeechSlots));
+        return s_PedSpeechSlots[m_nPedSpeechSlotIndex];
+    }
 };
 
 VALIDATE_SIZE(CAEPedSpeechAudioEntity, 0x100);

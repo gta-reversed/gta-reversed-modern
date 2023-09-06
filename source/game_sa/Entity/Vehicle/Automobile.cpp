@@ -4927,8 +4927,7 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately) {
             m_pFireParticle = g_fxMan.CreateFxSystem(
                 typ == 1 ? "fire_car" : "fire_large",
                 &pos,
-                mat
-            );
+                mat);
         }
         if (m_pFireParticle) {
             m_pFireParticle->Play();

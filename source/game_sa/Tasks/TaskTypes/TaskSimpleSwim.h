@@ -53,12 +53,12 @@ public:
 public:
     static constexpr auto Type = TASK_SIMPLE_SWIM;
 
-    CTaskSimpleSwim(CVector* pos, CPed* ped);
+    CTaskSimpleSwim(const CVector* pos, CPed* ped);
     ~CTaskSimpleSwim() override;
 
-    CTask* Clone() override { return new CTaskSimpleSwim(&m_vecPos, m_pPed); } // 0x68B050
-    eTaskType GetTaskType() override { return Type; }; // 0x6889F0
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    CTask* Clone() const override { return new CTaskSimpleSwim{&m_vecPos, m_pPed}; } // 0x68B050
+    eTaskType GetTaskType() const override { return Type; }; // 0x6889F0
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
 
     void CreateFxSystem(CPed* ped, RwMatrix* pRwMatrix);

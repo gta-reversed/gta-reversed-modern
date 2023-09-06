@@ -47,8 +47,8 @@ void CTaskSimpleIKManager::AddIKChainTask(CTaskSimpleIKChain* task, int32 slot) 
 }
 
 // 0x639350
-CTask* CTaskSimpleIKManager::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x639350, CTaskSimpleIKManager*>(this);
+CTask* CTaskSimpleIKManager::Clone() const {
+    return plugin::CallMethodAndReturn<CTask*, 0x639350, const CTaskSimpleIKManager*>(this);
 }
 
 // 0x6338A0
