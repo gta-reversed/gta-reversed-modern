@@ -2,16 +2,16 @@
 
 class CHandShaker {
 public:
-    CVector vec;
-    CVector vec1;
-    CVector vec2;
-    CVector vec3;
-    CVector vec4;
-    CMatrix matrix;
-    float   f84;
-    float   f88;
-    int32   n8C;
-    float   f90;
+  CVector m_ang;
+  CVector m_lim;              //! Angle (`m_ang`) limit [That is, `m_ang` is clamped to [-m_lim, m_lim])
+  CVector m_motion;           
+  CVector m_vel;              ///! Motion velocity
+  CVector m_slow;             ///! Slow motion velocity
+  CMatrix m_resultMat;        ///!
+  float   m_scaleReactionMin;
+  float   m_scaleReactionMax;
+  int32   m_twitchFreq;
+  float   m_twitchVel;
 
 public:
     static void InjectHooks();
@@ -21,7 +21,7 @@ public:
 
     void SetDefaults();
     void Reset();
-    void Process(float a1);
+    void Process(float degree);
 };
 
 VALIDATE_SIZE(CHandShaker, 0x94);

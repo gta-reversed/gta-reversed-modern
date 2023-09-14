@@ -10,12 +10,14 @@
 #include "./Audio/CutsceneTrackManagerDebugModule.h"
 #include "./Audio/AmbienceTrackManagerDebugModule.h"
 #include "./Audio/PoliceScannerAudioEntityDebugModule.h"
+#include "./Audio/UserRadioTrackDebugModule.h"
 #include "./CStreamingDebugModule.h"
 #include "./CPickupsDebugModule.h"
 #include "./CDarkelDebugModule.h"
 #include "./HooksDebugModule.h"
 #include "./CTeleportDebugModule.h"
-#include "./FXDebugModule.h"
+#include "./ParticleDebugModule.h"
+#include "./PostEffectsDebugModule.h"
 #include "./PoolsDebugModule.h"
 #include "./TimeCycleDebugModule.h"
 #include "./CullZonesDebugModule.h"
@@ -23,6 +25,9 @@
 #include "./Spawner/SpawnerDebugModule.hpp"
 #include "./ImGuiDebugModule.hpp"
 #include "./ScriptDebugModule.hpp"
+#include "./CloudsDebugModule.hpp"
+#include "./AudioZonesDebugModule.h"
+#include "./WeaponDebugModule.hpp"
 
 DebugModules::DebugModules(ImGuiContext* ctx) :
     m_ImCtx(ctx)
@@ -50,6 +55,8 @@ void DebugModules::Render2D() {
 }
 
 void DebugModules::Render3D() {
+    ZoneScoped;
+
     for (auto& module : m_Modules) {
         module->Render3D();
     }
@@ -64,7 +71,7 @@ void DebugModules::CreateModules() {
 
     // "Settings" menu
     Add<HooksDebugModule>();
-    Add<FXDebugModule>();
+    Add<PostEffectsDebugModule>();
 
     // "Visualization" menu
     Add<CollisionDebugModule>();
@@ -80,12 +87,17 @@ void DebugModules::CreateModules() {
     Add<PoliceScannerAudioEntityDebugModule>();
     Add<AmbienceTrackManagerDebugModule>();
     Add<CutsceneTrackManagerDebugModule>();
+    Add<UserRadioTrackDebugModule>();
     Add<notsa::debugmodules::ScriptDebugModule>();
+    Add<notsa::debugmodules::CloudsDebugModule>();
+    Add<notsa::debugmodules::WeaponDebugModule>();
+    Add<ParticleDebugModule>();
 
     // Stuff that is present in multiple menus
     Add<TimeCycleDebugModule>(); // Visualization + Extra
     Add<CullZonesDebugModule>(); // Visualization + Extra
     Add<COcclusionDebugModule>(); // Visualization + Extra
+    Add<AudioZonesDebugModule>(); // Visualization + Extra
     Add<notsa::debugmodules::ImGui>(); // Stats + Extra
 }
 

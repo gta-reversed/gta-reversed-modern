@@ -35,7 +35,7 @@ CTaskComplexFollowNodeRoute::~CTaskComplexFollowNodeRoute() {
 }
 
 // 0x6713E0
-CTask* CTaskComplexFollowNodeRoute::Clone() {
+CTask* CTaskComplexFollowNodeRoute::Clone() const {
     auto* task = new CTaskComplexFollowNodeRoute(m_nMode, m_vecTargetPos, m_fRadius, m_fUnkn1, m_fUnkn2, m_bUnknFlag0x1, m_nTime, m_bUnknFlag0x8);
     task->m_nodeAddress1 = m_nodeAddress1;
     return task;

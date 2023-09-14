@@ -30,6 +30,7 @@ constexpr int32 MAX_LOD_PTR_LISTS_X = 30;
 constexpr int32 MAX_LOD_PTR_LISTS_Y = 30;
 constexpr int32 MAX_LOD_PTR_LISTS = MAX_LOD_PTR_LISTS_X * MAX_LOD_PTR_LISTS_Y;
 
+constexpr inline float WORLD_BOUND_RANGE = 3000.0f;
 constexpr inline CRect WORLD_BOUNDS{-3000.0F, -3000.0F, 3000.0F, 3000.0F};
 constexpr float MAP_Z_LOW_LIMIT = -100.0f;
 
@@ -153,7 +154,7 @@ public:
     static void FindMissionEntitiesIntersectingCube(const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehicles, bool peds, bool objects);
     static CEntity* FindNearestObjectOfType(int32 modelId, const CVector& point, float radius, bool b2D, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
     static float FindGroundZForCoord(float x, float y);
-    static float FindGroundZFor3DCoord(CVector coord, bool* outResult, CEntity** outEntity);
+    static float FindGroundZFor3DCoord(CVector coord, bool* outResult = nullptr, CEntity** outEntity = nullptr);
     static float FindRoofZFor3DCoord(float x, float y, float z, bool* outResult);
     static float FindLowestZForCoord(float x, float y);
     static void RepositionOneObject(CEntity* object);

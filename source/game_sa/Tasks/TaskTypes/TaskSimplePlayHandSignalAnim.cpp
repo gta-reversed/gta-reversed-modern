@@ -56,7 +56,7 @@ void CTaskSimplePlayHandSignalAnim::StartAnim(CPed* ped) {
     const AnimationId animId = static_cast<const AnimationId>(CGeneral::GetRandomNumberInRange((int32)ANIM_ID_GSIGN1, (int32)ANIM_ID_GSIGN5 + 1));
 
     // Pointing / weapon logic
-    if (ped->GetEntityThatThisPedIsHolding() || g_ikChainMan.IsArmPointing(0, ped) || ped->GetActiveWeapon().m_nType != eWeaponType::WEAPON_UNARMED) {
+    if (ped->GetEntityThatThisPedIsHolding() || g_ikChainMan.IsArmPointing(0, ped) || ped->GetActiveWeapon().m_Type != eWeaponType::WEAPON_UNARMED) {
         m_pAnim = CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_HANDSIGNALL, animId, m_fBlendFactor);
         m_pAnim->SetFinishCallback(CTaskSimpleAnim::FinishRunAnimCB, this);
 

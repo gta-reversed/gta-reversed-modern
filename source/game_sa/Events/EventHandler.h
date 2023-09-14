@@ -106,7 +106,7 @@ public:
     void ComputeWaterCannonResponse(CEvent* event, CTask* task1, CTask* task2);
 
     void ComputeEventResponseTask(CEvent* event, CTask* task);
-    CTask* ComputeEventResponseTask(CPed* ped, CEvent* event);
+    static CTask* ComputeEventResponseTask(const CPed& ped, const CEvent& e);
 
     auto& GetHistory() { return m_history; }
 };

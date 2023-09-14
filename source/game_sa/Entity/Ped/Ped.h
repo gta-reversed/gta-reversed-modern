@@ -27,6 +27,7 @@
 #include "ePedState.h"
 #include "ePedStats.h"
 #include "ePedType.h"
+#include "eMoveState.h"
 
 class CPedGroup;
 class CCivilianPed;
@@ -75,17 +76,6 @@ enum ePedCreatedBy : uint8 {
     PED_GAME = 1,
     PED_MISSION = 2,
     PED_GAME_MISSION = 3, // used for the playbacked peds on replay
-};
-
-enum eMoveState : uint32 {
-    PEDMOVE_NONE = 0,
-    PEDMOVE_STILL,
-    PEDMOVE_TURN_L,
-    PEDMOVE_TURN_R,
-    PEDMOVE_WALK,
-    PEDMOVE_JOG,
-    PEDMOVE_RUN,
-    PEDMOVE_SPRINT
 };
 
 enum eFightingStyle : int8 {
@@ -525,8 +515,8 @@ public:
     bool IsCreatedBy(ePedCreatedBy v) const noexcept { return v == m_nCreatedBy; }
     bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }
 
-    int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
     CPedGroup* GetGroup() const { return CPedGroups::GetPedsGroup(this); }
+    int32 GetGroupId();
     CPedClothesDesc* GetClothesDesc() { return m_pPlayerData->m_pPedClothesDesc; }
 
     CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
@@ -541,6 +531,7 @@ public:
     CWeapon& GetWeaponInSlot(size_t slot) noexcept { return m_aWeapons[slot]; }
     CWeapon& GetWeaponInSlot(eWeaponSlot slot) noexcept { return m_aWeapons[(size_t)slot]; }
     CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
+    CWeapon& GetWeapon(eWeaponType wt) noexcept { return GetWeaponInSlot(GetWeaponSlot(wt)); }
 
     void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
     bool IsStateDriving() const noexcept { return m_nPedState == PEDSTATE_DRIVING; }
@@ -567,7 +558,7 @@ public:
     bool IsInVehicle(const CVehicle* veh) const { return bInVehicle && m_pVehicle == veh; }
     CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
     int32 GetPadNumber() const;
-    bool IsCurrentlyUnarmed() { return GetActiveWeapon().m_nType == WEAPON_UNARMED; }
+    bool IsCurrentlyUnarmed() { return GetActiveWeapon().m_Type == WEAPON_UNARMED; }
 
     /*!
      * @notsa
@@ -598,7 +589,7 @@ public:
      * @brief Give weapon according to given CWeapon struct.
      */
     eWeaponSlot GiveWeapon(const CWeapon& weapon, bool likeUnused) {
-        return GiveWeapon(weapon.m_nType, weapon.m_nTotalAmmo, likeUnused);
+        return GiveWeapon(weapon.m_Type, weapon.m_TotalAmmo, likeUnused);
     }
 
     auto GetPedModelInfo() const { return reinterpret_cast<CPedModelInfo*>(GetModelInfo()); }

@@ -605,6 +605,8 @@ void CFont::SetOrientation(eFontAlignment alignment) {
 // Need to call this each frame
 // 0x719800
 void CFont::InitPerFrame() {
+    ZoneScoped;
+
     m_nFontOutline = 0;
     m_nFontOutlineOrShadow = 0;
     m_nFontShadow = 0;
@@ -678,6 +680,8 @@ float CFont::GetStringWidth(const char* string, bool full, bool scriptText) {
 
 // same as RenderFontBuffer() (0x71A210)
 void CFont::DrawFonts() {
+    ZoneScoped;
+
     RenderFontBuffer();
 }
 

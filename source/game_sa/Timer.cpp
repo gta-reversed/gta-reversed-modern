@@ -233,8 +233,9 @@ void CTimer::UpdateVariables(float timeElapsed)
 }
 
 // 0x561B10
-void CTimer::Update()
-{
+void CTimer::Update() {
+    ZoneScoped;
+
     if (!ms_fnTimerFunction)
         return;
 

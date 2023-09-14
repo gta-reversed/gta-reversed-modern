@@ -294,6 +294,7 @@ RwRaster* RwRasterShowRaster(RwRaster* raster, void* dev, RwUInt32 flags) {
     return ((RwRaster*(__cdecl *)(RwRaster*, void*, RwUInt32))0x7FB1A0)(raster, dev, flags);
 }
 
+//! NOTE: This function is responsible for calculating the `stride` in the `raster`
 RwUInt8* RwRasterLock(RwRaster* raster, RwUInt8 level, RwInt32 lockMode) {
     return ((RwUInt8*(__cdecl *)(RwRaster*, RwUInt8, RwInt32))0x7FB2D0)(raster, level, lockMode);
 }
@@ -1056,10 +1057,14 @@ RwBool RwBBoxContainsPoint(const RwBBox* boundBox, const RwV3d* vertex) {
 }
 
 RwCamera* RwCameraBeginUpdate(RwCamera* camera) {
+    ZoneScoped;
+
     return ((RwCamera*(__cdecl *)(RwCamera*))0x7EE190)(camera);
 }
 
 RwCamera* RwCameraEndUpdate(RwCamera* camera) {
+    ZoneScoped;
+
     return ((RwCamera*(__cdecl *)(RwCamera*))0x7EE180)(camera);
 }
 

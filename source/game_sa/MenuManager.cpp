@@ -67,7 +67,7 @@ void CMenuManager::InjectHooks() {
     RH_ScopedInstall(CheckFrontEndDownInput, 0x5738B0);
     RH_ScopedInstall(CheckFrontEndLeftInput, 0x573920);
     RH_ScopedInstall(CheckFrontEndRightInput, 0x573990);
-    RH_ScopedInstall(CheckForMenuClosing, 0x576B70);
+    RH_ScopedInstall(CheckForMenuClosing, 0x576B70, { .locked = true });  // Must be hooked at all times otherwise imgui stops working! [The input at least does]
     RH_ScopedInstall(CheckHover, 0x57C4F0);
     RH_ScopedInstall(CheckMissionPackValidMenu, 0x57D720);
     RH_ScopedInstall(CheckCodesForControls, 0x57DB20, { .reversed = false });
@@ -317,7 +317,7 @@ void CMenuManager::DoSettingsBeforeStartingAGame() {
     if (m_bMenuActive)
         AudioEngine.Reset();
 
-    m_nRadioStation = static_cast<int8>(CAEAudioUtility::GetRandomNumberInRange(1, RADIO_COUNT - 1));
+    m_nRadioStation = CAEAudioUtility::GetRandomRadioStation();
     m_bDontDrawFrontEnd = true;
     m_bStartGameLoading = true;
 
@@ -435,12 +435,12 @@ void CMenuManager::ScrollRadioStations(int8 numStations) {
         return;
     }
 
-    m_nRadioStation += numStations;
-    if (m_nRadioStation <= 0) {
-        m_nRadioStation = RADIO_COUNT - 1;
+    m_nRadioStation = static_cast<eRadioID>(m_nRadioStation + numStations);
+    if (m_nRadioStation <= RADIO_EMERGENCY_AA) {
+        m_nRadioStation = RADIO_OFF;
     }
     if (m_nRadioStation >= RADIO_COUNT) {
-        m_nRadioStation = 1;
+        m_nRadioStation = RADIO_CLASSIC_HIP_HOP;
     }
     AudioEngine.RetuneRadio(m_nRadioStation);
     SaveSettings();
@@ -491,7 +491,7 @@ void CMenuManager::SetDefaultPreferences(eMenuScreen screen) {
         m_bWidescreenOn                  = false;
         m_bMapLegend                     = false;
         m_nRadarMode                     = eRadarMode::MAPS_AND_BLIPS;
-        m_nDisplayVideoMode              = m_nPrefsVideoMode;
+        m_nDisplayVideoMode              = -1; // Originally m_nPrefsVideoMode. Look at: `psSelectDevice`.
         m_ShowLocationsBlips             = true;
         m_ShowContactsBlips              = true;
         m_ShowMissionBlips               = true;
@@ -572,6 +572,13 @@ void CMenuManager::JumpToGenericMessageScreen(eMenuScreen screen, const char* ti
 
 // 0x57C520
 void CMenuManager::CentreMousePointer() {
+#ifdef FIX_BUGS
+    // Not really a vanilla bug, because the vanilla game stops rendering when not in foreground
+    if (!IsForegroundApp()) {
+        return;
+    }
+#endif
+
     CVector2D pos{ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
     if (pos.x != 0.0f && pos.y != 0.0f) {
         RsMouseSetPos(&pos);
@@ -593,9 +600,9 @@ void CMenuManager::LoadSettings() {
         SetDefaultPreferences(SCREEN_DISPLAY_SETTINGS);
         SetDefaultPreferences(SCREEN_DISPLAY_ADVANCED);
         SetDefaultPreferences(SCREEN_CONTROLLER_SETUP);
-        m_nPrefsVideoMode = 0;
+        m_nPrefsVideoMode = -1; // Originally 0. Look at: `psSelectDevice`.
         m_nPrefsLanguage = eLanguage::AMERICAN;
-        m_nRadioStation = 1;
+        m_nRadioStation = RADIO_CLASSIC_HIP_HOP;
 
         CFileMgr::CloseFile(file);
         CFileMgr::SetDir("");

@@ -22,8 +22,8 @@ public:
     CTaskSimpleRunAnim(AssocGroupId animGroup, AnimationId animId, float fBlendDelta = 4.f, bool bHoldLastFrame = false);
     CTaskSimpleRunAnim(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, int32 nTaskType, const char* taskName _IGNORED_, bool bHoldLastFrame);
 
-    CTask* Clone() override;
-    eTaskType GetTaskType() override { return static_cast<eTaskType>(m_nTaskType); }
+    CTask* Clone() const override;
+    eTaskType GetTaskType() const override { return static_cast<eTaskType>(m_nTaskType); }
     bool ProcessPed(CPed* ped) override;
 
     void StartAnim(CPed* ped);
@@ -35,7 +35,7 @@ private:
     CTaskSimpleRunAnim* Constructor(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, bool bHoldLastFrame);
     CTaskSimpleRunAnim* Constructor2(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, int32 nTaskType, const char* taskName _IGNORED_, bool bHoldLastFrame);
 
-    CTask* Clone_Reversed();
+    CTask*  Clone_Reversed() const;
     bool ProcessPed_Reversed(CPed* ped);
 };
 

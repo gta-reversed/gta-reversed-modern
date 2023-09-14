@@ -387,7 +387,7 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
                             const auto& weaponInfo = CWeaponInfo::GetWeaponInfo(weapon);
                             auto& pedWeapon = player->GetWeaponInSlot(weaponInfo->m_nSlot);
 
-                            if (pedWeapon.m_nType != weapon) {
+                            if (pedWeapon.m_Type != weapon) {
                                 if (!CStreaming::GetInfo(m_pObject->m_nModelIndex).IsLoaded()) {
                                     return false;
                                 }
@@ -403,7 +403,7 @@ bool CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
                                     }
                                 };
 
-                                if (pedWeapon.m_nType != WEAPON_UNARMED && (pedWeapon.m_nTotalAmmo != 0 || IsSlotExchangeable(weaponInfo->m_nSlot))) {
+                                if (pedWeapon.m_Type != WEAPON_UNARMED && (pedWeapon.m_TotalAmmo != 0 || IsSlotExchangeable(weaponInfo->m_nSlot))) {
                                     CPickups::PlayerOnWeaponPickup = 6;
 
                                     if (IsSlotExchangeable(weaponInfo->m_nSlot)) {

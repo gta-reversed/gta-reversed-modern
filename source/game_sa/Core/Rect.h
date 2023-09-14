@@ -104,6 +104,9 @@ public:
     * @brief Check if this rectangle is inside another one
     */
     bool Contains(const CRect& o) const;
+
+    bool operator==(const CRect&) const = default;
+    bool operator!=(const CRect&) const = default;
 };
 
 VALIDATE_SIZE(CRect, 0x10);

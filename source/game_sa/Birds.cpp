@@ -38,6 +38,8 @@ void CBirds::InjectHooks() {
 
 // 0x711EC0
 void CBirds::Init() {
+    ZoneScoped;
+
     for (auto& bird : aBirds) {
         bird.m_bCreated = false;
     }
@@ -142,6 +144,8 @@ void CBirds::Shutdown() {
 
 // 0x712330
 void CBirds::Update() {
+    ZoneScoped;
+
     const auto& vecCamPos = TheCamera.GetPosition();
 
     if (!CGame::currArea
@@ -249,6 +253,8 @@ void CBirds::Update() {
 
 // 0x712810
 void CBirds::Render() {
+    ZoneScoped;
+
     if (uiNumberOfBirds == 0)
         return;
 

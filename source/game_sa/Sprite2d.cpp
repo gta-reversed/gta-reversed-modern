@@ -169,13 +169,14 @@ void CSprite2d::Draw(float x1, float y1, float x2, float y2, float x3, float y3,
 }
 
 // 0x727260
-void CSprite2d::SetRecipNearClip()
-{
+void CSprite2d::SetRecipNearClip() {
+    ZoneScoped;
     // NOP
 }
 
-void CSprite2d::InitPerFrame()
-{
+void CSprite2d::InitPerFrame() {
+    ZoneScoped;
+
     nextBufferVertex = 0;
     nextBufferIndex = 0;
     RecipNearClip = 1.0f / RwCameraGetNearClipPlane(Scene.m_pRwCamera);

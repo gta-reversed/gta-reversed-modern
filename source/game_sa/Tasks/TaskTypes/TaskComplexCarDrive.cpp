@@ -61,7 +61,7 @@ CTaskComplexCarDrive::~CTaskComplexCarDrive() {
 }
 
 // 0x63DC90
-CTask* CTaskComplexCarDrive::Clone() {
+CTask* CTaskComplexCarDrive::Clone() const {
     auto* task = new CTaskComplexCarDrive(m_pVehicle, m_fSpeed, m_carModelIndexToCreate, static_cast<eCarDrivingStyle>(m_nCarDrivingStyle));
     task->m_asDriver = m_asDriver;
     return task;

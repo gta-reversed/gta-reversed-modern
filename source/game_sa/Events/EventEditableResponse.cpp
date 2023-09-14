@@ -156,67 +156,68 @@ void CEventEditableResponse::TriggerLookAt(CPed* ped) {
 
 // 0x4B56C0
 void CEventEditableResponse::ComputeResponseTaskType(CPed* ped, bool bDecisionMakerTypeInGroup) {
-    if (m_taskId == TASK_NONE) {
-        int32 eventSourceType = CEventSource::ComputeEventSourceType(*this, *ped);
-        CDecisionMakerTypes::GetInstance()->MakeDecision(
-            ped,
-            GetEventType(),
-            eventSourceType,
-            ped->bInVehicle,
-            TASK_SIMPLE_INFORM_RESPECTED_FRIENDS,
-            TASK_SIMPLE_INFORM_GROUP,
-            TASK_SIMPLE_LOOK_AT_ENTITY_OR_COORD,
-            -1,
-            bDecisionMakerTypeInGroup,
-            m_taskId,
-            field_10
-        );
+    if (m_taskId != TASK_NONE) {
+        return;
     }
+    CDecisionMakerTypes::GetInstance()->MakeDecision(
+        ped,
+        GetEventType(),
+        CEventSource::ComputeEventSourceType(*this, *ped),
+        ped->bInVehicle,
+        TASK_SIMPLE_INFORM_RESPECTED_FRIENDS,
+        TASK_SIMPLE_INFORM_GROUP,
+        TASK_SIMPLE_LOOK_AT_ENTITY_OR_COORD,
+        -1,
+        bDecisionMakerTypeInGroup,
+        m_taskId,
+        field_10
+    );
 }
 
 // 0x4B57A0
 void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
-    if (m_taskId == TASK_NONE) {
-        CPed* groupLeader = pedGroup->GetMembership().GetLeader();
-        CPed* member = groupLeader;
-        if (groupLeader && groupLeader->IsPlayer())
-            member = nullptr;
-        if (!member) {
-            for (size_t memberId = 0; memberId < TOTAL_PED_GROUP_FOLLOWERS; memberId++) {
-                member = pedGroup->GetMembership().GetMember(memberId);
-                if (member)
-                    break;
-            }
+    if (m_taskId != TASK_NONE) {
+        return;
+    }
+    CPed* groupLeader = pedGroup->GetMembership().GetLeader();
+    CPed* member = groupLeader;
+    if (groupLeader && groupLeader->IsPlayer())
+        member = nullptr;
+    if (!member) {
+        for (size_t memberId = 0; memberId < TOTAL_PED_GROUP_FOLLOWERS; memberId++) {
+            member = pedGroup->GetMembership().GetMember(memberId);
+            if (member)
+                break;
         }
-        if (member) {
-            int32 eventSourceType = CEventSource::ComputeEventSourceType(*this, *member);
+    }
+    if (member) {
+        int32 eventSourceType = CEventSource::ComputeEventSourceType(*this, *member);
+        m_taskId = CDecisionMakerTypes::GetInstance()->MakeDecision(
+            pedGroup,
+            GetEventType(),
+            eventSourceType,
+            member->bInVehicle,
+            TASK_SIMPLE_INFORM_GROUP,
+            TASK_SIMPLE_INFORM_RESPECTED_FRIENDS,
+            TASK_SIMPLE_LOOK_AT_ENTITY_OR_COORD,
+            -1
+        );
+    } else {
+        m_taskId = TASK_NONE;
+    }
+    groupLeader = pedGroup->GetMembership().GetLeader();
+    if (m_taskId == TASK_NONE && groupLeader) {
+        if (groupLeader->IsPlayer()) {
+            int32 eventSourceType = CEventSource::ComputeEventSourceType(*this, *groupLeader);
             m_taskId = CDecisionMakerTypes::GetInstance()->MakeDecision(
                 pedGroup,
                 GetEventType(),
-                eventSourceType,
-                member->bInVehicle,
+                eventSourceType, groupLeader->bInVehicle,
                 TASK_SIMPLE_INFORM_GROUP,
                 TASK_SIMPLE_INFORM_RESPECTED_FRIENDS,
                 TASK_SIMPLE_LOOK_AT_ENTITY_OR_COORD,
                 -1
             );
-        } else {
-            m_taskId = TASK_NONE;
-        }
-        groupLeader = pedGroup->GetMembership().GetLeader();
-        if (m_taskId == TASK_NONE && groupLeader) {
-            if (groupLeader->IsPlayer()) {
-                int32 eventSourceType = CEventSource::ComputeEventSourceType(*this, *groupLeader);
-                m_taskId = CDecisionMakerTypes::GetInstance()->MakeDecision(
-                    pedGroup,
-                    GetEventType(),
-                    eventSourceType, groupLeader->bInVehicle,
-                    TASK_SIMPLE_INFORM_GROUP,
-                    TASK_SIMPLE_INFORM_RESPECTED_FRIENDS,
-                    TASK_SIMPLE_LOOK_AT_ENTITY_OR_COORD,
-                    -1
-                );
-            }
         }
     }
 }

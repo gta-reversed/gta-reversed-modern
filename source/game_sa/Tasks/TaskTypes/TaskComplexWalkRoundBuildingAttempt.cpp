@@ -237,6 +237,7 @@ CTask* CTaskComplexWalkRoundBuildingAttempt::CreateNextSubTask(CPed* ped) {
     case TASK_SIMPLE_GO_TO_POINT:
     case TASK_SIMPLE_SCRATCH_HEAD:
     case TASK_SIMPLE_LOOK_ABOUT:
+    case TASK_SIMPLE_HIT_WALL:
         return CreateSubTask(m_routeHasPoints ? TASK_SIMPLE_ACHIEVE_HEADING : TASK_SIMPLE_LOOK_ABOUT, ped);
     case TASK_SIMPLE_STAND_STILL:
     case TASK_COMPLEX_FOLLOW_POINT_ROUTE:

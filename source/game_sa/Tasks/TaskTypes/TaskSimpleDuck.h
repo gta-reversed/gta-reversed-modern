@@ -41,9 +41,9 @@ public:
     CTaskSimpleDuck(eDuckControlTypes DuckControlType, uint16 nLengthOfDuck, int16 nUseShotsWhizzingEvents = -1);
     ~CTaskSimpleDuck() override;
 
-    eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override { return new CTaskSimpleDuck(m_nDuckControlType, m_nLengthOfDuck, m_nShotWhizzingCounter); }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override { return new CTaskSimpleDuck(m_nDuckControlType, m_nLengthOfDuck, m_nShotWhizzingCounter); }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
 
     static bool CanPedDuck(CPed* ped);

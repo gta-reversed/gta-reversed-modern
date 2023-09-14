@@ -101,7 +101,6 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(UpdateLightingFromStoredPolys, 0x6D0CC0);
     RH_ScopedInstall(CalculateLightingFromCollision, 0x6D0CF0);
     RH_ScopedInstall(ProcessWheel, 0x6D6C00);
-    RH_ScopedInstall(AddExhaustParticles, 0x6DE240);
     RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
     RH_ScopedInstall(ProcessBoatControl, 0x6DBCE0);
     RH_ScopedInstall(ChangeLawEnforcerState, 0x6D2330);
@@ -138,7 +137,6 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(CarHasRoof, 0x6D25D0);
     RH_ScopedInstall(HeightAboveCeiling, 0x6D2600);
     RH_ScopedInstall(SetComponentVisibility, 0x6D2700);
-    RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
     RH_ScopedInstall(SetComponentAtomicAlpha, 0x6D2960);
     RH_ScopedInstall(UpdateClumpAlpha, 0x6D2980);
     RH_ScopedInstall(UpdatePassengerList, 0x6D29E0);

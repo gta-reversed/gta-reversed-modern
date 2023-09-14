@@ -122,3 +122,108 @@ project "imgui"
         "imgui/backends", 
         "imgui/misc/cpp" 
     }
+
+project "spdlog"
+    cppdialect "C++20"
+    kind "StaticLib"
+    targetname "spdlog"
+    warnings "Off"
+
+    vpaths {
+        ["Headers/*"] = {"spdlog/include/spdlog/**.*",},
+        ["Sources/*"] = {"spdlog/src/**.c*",},
+        ["*"] = {"premake5.lua", "CMakeLists.txt"}
+    }
+
+    files {
+        "spdlog/src/spdlog.cpp", 
+        "spdlog/src/stdout_sinks.cpp", 
+        "spdlog/src/color_sinks.cpp", 
+        "spdlog/src/file_sinks.cpp", 
+        "spdlog/src/async.cpp", 
+        "spdlog/src/cfg.cpp",
+        "spdlog/include/**"
+    }
+
+    includedirs {
+        "spdlog/include"
+    }
+
+    defines {
+        "SPDLOG_COMPILED_LIB"
+    }
+    
+project "tracy"
+    language "C++"
+    kind "StaticLib"
+    targetname "tracy"
+    warnings "Off"
+
+    vpaths {
+        ["Headers/*"] = {"tracy/**.h*",},
+        ["Sources/*"] = {"tracy/**.cpp",},
+        ["*"] = {"premake5.lua", "CMakeLists.txt"}
+    }
+
+    includedirs {
+        "tracy/public/",
+    }
+
+    files {
+        "tracy/public/TracyClient.cpp",
+        
+        -- tracy_includes
+        "tracy/public/tracy/TracyC.h",
+        "tracy/public/tracy/Tracy.hpp",
+        "tracy/public/tracy/TracyD3D11.hpp",
+        "tracy/public/tracy/TracyD3D12.hpp",
+        "tracy/public/tracy/TracyLua.hpp",
+        "tracy/public/tracy/TracyOpenCL.hpp",
+        "tracy/public/tracy/TracyOpenGL.hpp",
+        "tracy/public/tracy/TracyVulkan.hpp",
+
+        -- client_includes
+        "tracy/public/client/tracy_concurrentqueue.h",
+        "tracy/public/client/tracy_rpmalloc.hpp",
+        "tracy/public/client/tracy_SPSCQueue.h",
+        "tracy/public/client/TracyArmCpuTable.hpp",
+        "tracy/public/client/TracyCallstack.h",
+        "tracy/public/client/TracyCallstack.hpp",
+        "tracy/public/client/TracyCpuid.hpp",
+        "tracy/public/client/TracyDebug.hpp",
+        "tracy/public/client/TracyDxt1.hpp",
+        "tracy/public/client/TracyFastVector.hpp",
+        "tracy/public/client/TracyLock.hpp",
+        "tracy/public/client/TracyProfiler.hpp",
+        "tracy/public/client/TracyRingBuffer.hpp",
+        "tracy/public/client/TracyScoped.hpp",
+        "tracy/public/client/TracyStringHelpers.hpp",
+        "tracy/public/client/TracySysPower.hpp",
+        "tracy/public/client/TracySysTime.hpp",
+        "tracy/public/client/TracySysTrace.hpp",
+        "tracy/public/client/TracyThread.hpp",
+
+        -- common_includes
+        "tracy/public/common/tracy_lz4.hpp",
+        "tracy/public/common/tracy_lz4hc.hpp",
+        "tracy/public/common/TracyAlign.hpp",
+        "tracy/public/common/TracyAlloc.hpp",
+        "tracy/public/common/TracyApi.h",
+        "tracy/public/common/TracyColor.hpp",
+        "tracy/public/common/TracyForceInline.hpp",
+        "tracy/public/common/TracyMutex.hpp",
+        "tracy/public/common/TracyProtocol.hpp",
+        "tracy/public/common/TracyQueue.hpp",
+        "tracy/public/common/TracySocket.hpp",
+        "tracy/public/common/TracyStackFrames.hpp",
+        "tracy/public/common/TracySystem.hpp",
+        "tracy/public/common/TracyUwp.hpp",
+        "tracy/public/common/TracyYield.hpp",
+    }
+
+    defines {
+        "TRACY_ENABLE",
+        "TRACY_CALLSTACK",
+        "TRACY_ON_DEMAND",
+        --"TRACY_NO_CODE_TRANSFER" -- Uncomment if you want callstacks to be working
+    }

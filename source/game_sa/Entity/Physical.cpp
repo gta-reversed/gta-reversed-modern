@@ -249,8 +249,9 @@ void CPhysical::ProcessControl()
 }
 
 // 0x54DFB0
-void CPhysical::ProcessCollision()
-{
+void CPhysical::ProcessCollision() {
+    ZoneScoped;
+
     auto* vehicle    = AsVehicle();
     auto* automobile = AsAutomobile();
     auto* bike       = AsBike();
@@ -462,8 +463,9 @@ void CPhysical::ProcessCollision()
 }
 
 // 0x54DB10
-void CPhysical::ProcessShift()
-{
+void CPhysical::ProcessShift() {
+    ZoneScoped;
+
     CRect boundingBox;
     GetBoundRect(&boundingBox);
     m_fMovingSpeed = 0.0f;

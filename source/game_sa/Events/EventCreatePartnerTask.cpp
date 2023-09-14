@@ -3,11 +3,12 @@
 #include "EventCreatePartnerTask.h"
 
 // 0x5F6190
-CEventCreatePartnerTask::CEventCreatePartnerTask(int32 randomNumber, CPed* partner, bool leadSpeaker, float distanceMultiplier) {
-    m_randomNumber = randomNumber;
-    m_leadSpeaker = leadSpeaker;
-    m_distanceMultiplier = distanceMultiplier;
-    m_partner = partner;
+CEventCreatePartnerTask::CEventCreatePartnerTask(int32 type, CPed* partner, bool isLeadSpeaker, float meetDist) :
+    m_type{type},
+    m_partner{partner},
+    m_isLeadSpeaker{isLeadSpeaker},
+    m_meetDist{meetDist}
+{
     CEntity::SafeRegisterRef(m_partner);
 }
 

@@ -148,7 +148,11 @@ public:
         return false;
     }
 
-    CEventHandler&   GetEventHandler() { return m_eventHandler; }
+    //! Get the vehicle the ped is entering now (If any)
+    CVehicle* GetEnteringVehicle();
+
+    CEventHandler&   GetEventHandler()    { return m_eventHandler; }
+    CEventGroup&     GetEventGroup()      { return m_eventGroup; }
     CEventScanner&   GetEventScanner()    { return m_eventScanner; }
     CPedScanner&     GetPedScanner()      { return m_pedScanner; }
     CVehicleScanner& GetVehicleScanner()  { return m_vehicleScanner; }

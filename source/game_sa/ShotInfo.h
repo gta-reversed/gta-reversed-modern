@@ -26,8 +26,9 @@ public:
     static float *ms_afRandTable; // static float ms_afRandTable[20]
 
 public:
+    static void InjectHooks();
+
     static void Initialise();
-    // dummy function
     static void Shutdown();
     static bool AddShot(CEntity* creator, eWeaponType weaponType, CVector origin, CVector target);
     static bool GetFlameThrowerShotPosn(uint8 shotId, CVector* outPos);

@@ -22,9 +22,9 @@ public:
     explicit CTaskSimpleJump(bool bCanClimb);
     ~CTaskSimpleJump() override;
 
-    eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() const override { return Type; }
+    CTask* Clone() const override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
 
     bool CheckIfJumpBlocked(CPed* ped);
@@ -34,7 +34,7 @@ public:
 
     static void InjectHooks();
     CTaskSimpleJump* Constructor(bool bCanClimb);
-    CTask* Clone_Reversed();
+    CTask*  Clone_Reversed() const;
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed_Reversed(CPed* ped);
 };

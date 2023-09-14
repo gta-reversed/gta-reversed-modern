@@ -32,8 +32,8 @@ CTaskComplexAvoidOtherPedWhileWandering* CTaskComplexAvoidOtherPedWhileWandering
     return this;
 }
 
-CTask* CTaskComplexAvoidOtherPedWhileWandering::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x66D050, CTaskComplexAvoidOtherPedWhileWandering*>(this);
+CTask* CTaskComplexAvoidOtherPedWhileWandering::Clone() const {
+    return plugin::CallMethodAndReturn<CTask*, 0x66D050, const CTaskComplexAvoidOtherPedWhileWandering*>(this);
 }
 
 CTask* CTaskComplexAvoidOtherPedWhileWandering::ControlSubTask(CPed* ped) {

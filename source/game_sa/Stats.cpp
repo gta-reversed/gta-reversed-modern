@@ -44,9 +44,9 @@ void CStats::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x55C0C0);
-    RH_ScopedInstall(GetStatValue, 0x558E40);
+    RH_ScopedOverloadedInstall(GetStatValue, "-OG", 0x558E40, float(*)(eStats));
     RH_ScopedInstall(SetStatValue, 0x55A070);
-    RH_ScopedInstall(GetStatType, 0x558E30);
+    RH_ScopedInstall(IsStatFloat, 0x558E30);
     RH_ScopedInstall(GetFullFavoriteRadioStationList, 0x558F90);
     RH_ScopedInstall(FindCriminalRatingNumber, 0x559080);
     RH_ScopedInstall(GetPercentageProgress, 0x5591E0);
@@ -113,7 +113,7 @@ void CStats::Init() {
 
 // 0x558E40
 float CStats::GetStatValue(eStats stat) {
-    if (!GetStatType(stat)) { // int32
+    if (!IsStatFloat(stat)) { // int32
         assert(stat >= FIRST_INT_STAT);
 
         return static_cast<float>(StatTypesInt[stat - FIRST_INT_STAT]);
@@ -124,7 +124,7 @@ float CStats::GetStatValue(eStats stat) {
 
 // 0x55A070
 void CStats::SetStatValue(eStats stat, float value) {
-    if (GetStatType(stat)) {
+    if (IsStatFloat(stat)) {
         StatTypesFloat[stat] = value;
     } else { // int32
         assert(stat >= FIRST_INT_STAT);
@@ -135,7 +135,7 @@ void CStats::SetStatValue(eStats stat, float value) {
 }
 
 // 0x558E30
-bool CStats::GetStatType(eStats stat) {
+bool CStats::IsStatFloat(eStats stat) {
     return stat < FIRST_UNUSED_STAT;
 }
 
@@ -150,8 +150,8 @@ int32* CStats::GetFullFavoriteRadioStationList() {
 }
 
 // 0x558FA0
-int32 CStats::FindMostFavoriteRadioStation() {
-    return plugin::CallAndReturn<int32, 0x558FA0>();
+eRadioID CStats::FindMostFavoriteRadioStation() {
+    return plugin::CallAndReturn<eRadioID, 0x558FA0>();
 }
 
 // 0x559010
@@ -508,7 +508,7 @@ void CStats::IncrementStat(eStats stat, float value)
     if (value <= 0.0f)
         return;
 
-    if (GetStatType(stat)) { // float
+    if (IsStatFloat(stat)) { // float
         StatTypesFloat[stat] += value;
 
         if (IsStatCapped(stat))
@@ -704,7 +704,7 @@ bool CStats::Load() {
 // Unused
 // 0x558DE0
 char* CStats::GetStatID(eStats stat) {
-    if (!GetStatType(stat)) // int32
+    if (!IsStatFloat(stat)) // int32
         sprintf_s(gString, "stat_i_%d", stat);
     else
         sprintf_s(gString, "stat_f_%d", stat);

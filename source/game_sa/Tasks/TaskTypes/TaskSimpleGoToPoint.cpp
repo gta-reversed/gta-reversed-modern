@@ -85,7 +85,7 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(CPed* ped) {
                 }
                 else {
                     bool bSprinting = false;
-                    CWeaponInfo* pWeaponInfo = CWeaponInfo::GetWeaponInfo(ped->GetActiveWeapon().m_nType, eWeaponSkill::STD);
+                    CWeaponInfo* pWeaponInfo = CWeaponInfo::GetWeaponInfo(ped->GetActiveWeapon().m_Type, eWeaponSkill::STD);
                     if (!pWeaponInfo->flags.bHeavy) {
                         auto* task = static_cast<CTaskSimpleHoldEntity*>(ped->GetIntelligence()->GetTaskHold(false));
                         if (!task || !task->m_pAnimBlendAssociation) {

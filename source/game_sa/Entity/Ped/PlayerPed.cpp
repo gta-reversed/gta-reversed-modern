@@ -278,7 +278,7 @@ bool CPlayerPed::DoesPlayerWantNewWeapon(eWeaponType weaponType, bool arg1) {
     // GetPadFromPlayer(); // Called, but not used
 
     auto weaponSlot = GetWeaponSlot(weaponType);
-    auto weaponInSlotType = GetWeaponInSlot(weaponSlot).m_nType;
+    auto weaponInSlotType = GetWeaponInSlot(weaponSlot).m_Type;
     if (weaponInSlotType == weaponType)
         return true;
 
@@ -322,7 +322,7 @@ void CPlayerPed::PickWeaponAllowedFor2Player() {
 
 // 0x609830
 void CPlayerPed::UpdateCameraWeaponModes(CPad* pad) {
-    switch (GetActiveWeapon().m_nType) {
+    switch (GetActiveWeapon().m_Type) {
     case eWeaponType::WEAPON_M4:
         TheCamera.SetNewPlayerWeaponMode(eCamMode::MODE_M16_1STPERSON, 0, 0);
         break;
@@ -372,7 +372,7 @@ float CPlayerPed::GetWeaponRadiusOnScreen() {
         return 0.0f;
 
     const float accuracyProg = 0.5f / wepInfo.m_fAccuracy;
-    switch (wep.m_nType) {
+    switch (wep.m_Type) {
     case eWeaponType::WEAPON_SHOTGUN:
     case eWeaponType::WEAPON_SPAS12_SHOTGUN:
     case eWeaponType::WEAPON_SAWNOFF_SHOTGUN:
@@ -745,7 +745,7 @@ void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
     CWeapon& wep = GetActiveWeapon();
     CWeaponInfo& wepInfo = wep.GetWeaponInfo(this);
 
-    wep.m_nAmmoInClip = std::min<uint32>(wep.m_nTotalAmmo, (uint32)wepInfo.m_nAmmoClip);
+    wep.m_AmmoInClip = std::min<uint32>(wep.m_TotalAmmo, (uint32)wepInfo.m_nAmmoClip);
 
     if (!wepInfo.flags.bCanAim)
         ClearWeaponTarget();
@@ -802,7 +802,7 @@ bool CPlayerPed::DoesTargetHaveToBeBroken(CEntity* entity, CWeapon* weapon) {
     if (weapon->GetWeaponInfo(this).m_fTargetRange < (entity->GetPosition() - GetPosition()).Magnitude())
         return true;
 
-    if (weapon->m_nType == eWeaponType::WEAPON_SPRAYCAN) {
+    if (weapon->m_Type == eWeaponType::WEAPON_SPRAYCAN) {
         if (entity->IsBuilding()) {
             if (CTagManager::IsTag(entity)) {
                 if (CTagManager::GetAlpha(entity) == 255) { // they probably used -1
@@ -924,7 +924,7 @@ void CPlayerPed::SetInitialState(bool bGroupCreated) {
 // 0x60D000
 void CPlayerPed::MakeChangesForNewWeapon(uint32 weaponSlot) {
     if (weaponSlot != -1)
-        MakeChangesForNewWeapon(GetWeaponInSlot(weaponSlot).m_nType);
+        MakeChangesForNewWeapon(GetWeaponInSlot(weaponSlot).m_Type);
 }
 
 static auto& PLAYER_MAX_TARGET_VIEW_ANGLE = *(float*)0x8D243C; // 140.0f
@@ -1030,7 +1030,7 @@ void CPlayerPed::ProcessControl() {
     if (!bCanPointGunAtTarget) {
         m_pPlayerData->m_pWanted->Update();
         PruneReferences();
-        if (GetActiveWeapon().m_nType == WEAPON_MINIGUN) {
+        if (GetActiveWeapon().m_Type == WEAPON_MINIGUN) {
             auto weaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_MINIGUN, eWeaponSkill::STD);
             if (m_pIntelligence->GetTaskUseGun()) {
                 auto animAssoc = m_pIntelligence->GetTaskUseGun()->m_pAnim;
@@ -1039,7 +1039,7 @@ void CPlayerPed::ProcessControl() {
                         m_pPlayerData->m_fGunSpinSpeed += CTimer::GetTimeStep() * 0.025f;
                         m_pPlayerData->m_fGunSpinSpeed = std::min(m_pPlayerData->m_fGunSpinSpeed, 0.45f);
                     }
-                    if (pad->GetWeapon(this) && GetActiveWeapon().m_nTotalAmmo > 0 && animAssoc->m_fCurrentTime >= weaponInfo->m_fAnimLoopStart) 
+                    if (pad->GetWeapon(this) && GetActiveWeapon().m_TotalAmmo > 0 && animAssoc->m_fCurrentTime >= weaponInfo->m_fAnimLoopStart) 
                         m_weaponAudio.AddAudioEvent(AE_WEAPON_FIRE_MINIGUN_AMMO);
                     else 
                         m_weaponAudio.AddAudioEvent(AE_WEAPON_FIRE_MINIGUN_NO_AMMO);
@@ -1051,19 +1051,19 @@ void CPlayerPed::ProcessControl() {
                 }
             }
         }
-        if (GetActiveWeapon().m_nType == WEAPON_CHAINSAW && m_nPedState != PEDSTATE_ATTACK && !bInVehicle) {
+        if (GetActiveWeapon().m_Type == WEAPON_CHAINSAW && m_nPedState != PEDSTATE_ATTACK && !bInVehicle) {
             m_pIntelligence->GetTaskSwim(); // hmmm?
         }
         if (m_pTargetedObject) {
             ClearReference(m_p3rdPersonMouseTarget);
             if (m_pTargetedObject->IsPed()) {
                 CPed* targetPed = m_pTargetedObject->AsPed();
-                auto weaponInfo = CWeaponInfo::GetWeaponInfo(GetActiveWeapon().m_nType, GetWeaponSkill());
+                auto weaponInfo = CWeaponInfo::GetWeaponInfo(GetActiveWeapon().m_Type, GetWeaponSkill());
                 float targetHeadRange = weaponInfo->GetTargetHeadRange();
                 markColor = targetPed->m_fHealth / targetPed->m_fMaxHealth;
                 bool instantFireHit = false;
                 if (targetPed->IsAlive()) {
-                    auto stdWeaponInfo = CWeaponInfo::GetWeaponInfo(GetActiveWeapon().m_nType, eWeaponSkill::STD);
+                    auto stdWeaponInfo = CWeaponInfo::GetWeaponInfo(GetActiveWeapon().m_Type, eWeaponSkill::STD);
                     if (stdWeaponInfo->m_nWeaponFire == WEAPON_FIRE_INSTANT_HIT) {
                         instantFireHit = true;
                         CVector distance = targetPed->GetPosition() - GetPosition();
@@ -1141,8 +1141,8 @@ void CPlayerPed::ProcessControl() {
     if (pad) {
         if (pad->WeaponJustDown(this)) {
             auto& activeWeapon = GetActiveWeapon();
-            auto weaponType = activeWeapon.m_nType;
-            if (!TheCamera.Using1stPersonWeaponMode() || activeWeapon.m_nState == WEAPONSTATE_OUT_OF_AMMO) {
+            auto weaponType = activeWeapon.m_Type;
+            if (!TheCamera.Using1stPersonWeaponMode() || activeWeapon.m_State == WEAPONSTATE_OUT_OF_AMMO) {
                 if (!m_pIntelligence->GetTaskSwim()) {
                     if (weaponType == WEAPON_SNIPERRIFLE) {
                         AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_FIRE_FAIL_SNIPERRIFFLE, 0.0f, 1.0f);
@@ -1198,7 +1198,7 @@ void CPlayerPed::ProcessControl() {
                 m_pPlayerData->m_bDontAllowWeaponChange = false;
         }
     }
-    if (m_nPedState != PEDSTATE_SNIPER_MODE && GetActiveWeapon().m_nState == WEAPONSTATE_FIRING)
+    if (m_nPedState != PEDSTATE_SNIPER_MODE && GetActiveWeapon().m_State == WEAPONSTATE_FIRING)
         m_pPlayerData->m_nLastTimeFiring = CTimer::GetTimeInMS();
     ProcessGroupBehaviour(pad);
     if (bInVehicle)

@@ -82,6 +82,8 @@ bool CGangWars::Save() {
 
 // 0x443920
 void CGangWars::InitAtStartOfGame() {
+    ZoneScoped;
+
     State               = NOT_IN_WAR;
     State2              = NO_ATTACK;
     NumSpecificZones    = 0;
@@ -598,7 +600,7 @@ void CGangWars::StartDefensiveGangWar() {
         }());
 
         bPlayerIsCloseby = false;
-        pZoneInfoToFightOver->Flags1 = pZoneInfoToFightOver->Flags1 & 0x9F | 0x40; // todo: flags
+        pZoneInfoToFightOver->radarMode = 2;
         pZoneInfoToFightOver->ZoneColor = CRGBA{ 255, 0, 0, 160 };
     } else {
         TimeTillNextAttack = CalculateTimeTillNextAttack();
@@ -655,7 +657,7 @@ void CGangWars::StartOffensiveGangWar() {
             Gang2 = Gang1;
 
         TellGangMembersTo(false);
-        zoneInfo->Flags1 = zoneInfo->Flags1 & 0x9F | 0x40; // todo: flags
+        pZoneInfoToFightOver->radarMode = 2;
         zoneInfo->ZoneColor = CRGBA{ 255, 0, 0, 160 };
         pDriveByCar = nullptr;
     }
@@ -731,6 +733,8 @@ void CGangWars::TellStreamingWhichGangsAreNeeded(uint32& gangsBitFlags) {
 
 // 0x446610
 void CGangWars::Update() {
+    ZoneScoped;
+
     return plugin::Call<0x446610>();
 
     if (CTheScripts::IsPlayerOnAMission() && !bIsPlayerOnAMission && NumSpecificZones == 0)

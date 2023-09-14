@@ -4,16 +4,15 @@
 
 #include "Vector.h"
 
-class C2dEffect;
-class CEntity;
+struct C2dEffectInterior;
+class  CEntity;
 
 struct InteriorEffectInfo_t {
-    CEntity*   m_pEntity;
-    int32      m_nEffectCount;
-    C2dEffect* m_pEffects[8];
-    int32      m_nEffectIndicesInModelInfo[8];
-    int32      m_field_48;
-    bool       m_field_4C;
-    int8       m_field_4D[3];
+    CEntity*           entity;
+    size_t             numFx;
+    C2dEffectInterior* fxs[8];
+    int32              fxIds[8];
+    float              distSq;
+    bool8              culled;
 };
 VALIDATE_SIZE(InteriorEffectInfo_t, 0x50);

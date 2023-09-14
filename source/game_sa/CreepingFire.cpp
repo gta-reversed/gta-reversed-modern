@@ -25,6 +25,8 @@ void CCreepingFire::SetReadyToBurn() {
 
 // 0x539CE0
 void CCreepingFire::Update() {
+    ZoneScoped;
+
     uint8& status = m_aFireStatus[CTimer::GetFrameCounter() % 32][(CTimer::GetFrameCounter() / 32) % 32];
     if (status == 4) {
         status = 0;

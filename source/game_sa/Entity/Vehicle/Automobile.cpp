@@ -4927,8 +4927,7 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately) {
             m_pFireParticle = g_fxMan.CreateFxSystem(
                 typ == 1 ? "fire_car" : "fire_large",
                 &pos,
-                mat
-            );
+                mat);
         }
         if (m_pFireParticle) {
             m_pFireParticle->Play();
@@ -5111,7 +5110,6 @@ CObject* CAutomobile::SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collision
     *RwFrameGetMatrix(flyingObjFrame) = *frameLTM; // Set this frame's matrix to be the same as the component's - TODO: This most likely isn't the correct way to do this..
     CVisibilityPlugins::SetAtomicRenderCallback(clonedFlyingObjAtomic, nullptr);
     obj->AttachToRwObject((RwObject*)clonedFlyingObjAtomic, true);
-
     obj->m_bDontStream = true;
     obj->m_fMass = 10.f;
     obj->m_fTurnMass = 25.f;

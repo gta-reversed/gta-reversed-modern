@@ -28,6 +28,8 @@ void CConversations::InjectHooks() {
 
 // 0x43A7B0
 void CConversations::Clear() {
+    ZoneScoped;
+    
     rng::for_each(m_aConversations, &CConversationForPed::Clear);
     rng::for_each(m_aNodes, &CConversationNode::Clear);
 
@@ -46,6 +48,8 @@ void CConversations::RemoveConversationForPed(CPed* ped) {
 
 // 0x43C590
 void CConversations::Update() {
+    ZoneScoped;
+
     switch (m_AwkwardSayStatus) {
     case AwkwardSayState::AUDIO_PLAYING:
         if (AudioEngine.GetMissionAudioLoadingStatus(0)) {

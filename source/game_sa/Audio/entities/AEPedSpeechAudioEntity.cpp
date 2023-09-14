@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
-#include "StdInc.h"
-
 #include "AEPedSpeechAudioEntity.h"
 #include "AEAudioUtility.h"
+#include "PedClothesDesc.h"
+#include <AEAudioHardware.h>
 
 int16& CAEPedSpeechAudioEntity::s_nCJWellDressed = *(int16*)0xB613D0;
 int16& CAEPedSpeechAudioEntity::s_nCJFat = *(int16*)0xB613D4;
@@ -23,9 +23,8 @@ int16& CAEPedSpeechAudioEntity::s_pConversationPedSlot1 = *(int16*)0xB61408;
 CPed*& CAEPedSpeechAudioEntity::s_pConversationPed2 = *(CPed**)0xB6140C;
 CPed*& CAEPedSpeechAudioEntity::s_pConversationPed1 = *(CPed**)0xB61410;
 int16& CAEPedSpeechAudioEntity::s_NextSpeechSlot = *(int16*)0xB61414;
-int16& CAEPedSpeechAudioEntity::s_PhraseMemory = *(int16*)0xB61418;
-// CAEPedSpeechAudioEntity::Slot (&CAEPedSpeechAudioEntity::s_PedSpeechSlots)[6] = *(CAEPedSpeechAudioEntity::Slot(*)[6])0xB61C38;
-uint32 (&gGlobalSpeechContextNextPlayTime)[360] = *(uint32(*)[360])0xB61670;
+static inline auto& gGlobalSpeechContextNextPlayTime = *reinterpret_cast<std::array<uint32, 360>*>(0xB61670);
+static inline auto& gSpeechContextLookup = *reinterpret_cast<notsa::mdarray<int16, 8, 360>*>(0x8C6A68);
 
 // 0x4E4F10
 CAEPedSpeechAudioEntity::CAEPedSpeechAudioEntity() : CAEAudioEntity() {
@@ -43,28 +42,59 @@ CAEPedSpeechAudioEntity::CAEPedSpeechAudioEntity() : CAEAudioEntity() {
 }
 
 // 0x4E4600
-int8 CAEPedSpeechAudioEntity::IsGlobalContextImportantForInterupting(int16 a1) {
-    return plugin::CallAndReturn<int8, 0x4E4600, int16>(a1);
+bool __stdcall CAEPedSpeechAudioEntity::IsGlobalContextImportantForInterupting(int16 globalCtx) {
+    // return plugin::CallAndReturn<int8, 0x4E4600, int16>(a1);
+    switch (globalCtx) {
+    case 13:
+    case 15:
+    case 125:
+    case 126:
+    case 127:
+        return true;
+    default:
+        return false;
+    }
 }
 
-// 0x4E46F0
-int8 CAEPedSpeechAudioEntity::IsGlobalContextUberImportant(int16 a1) {
-    return plugin::CallAndReturn<int8, 0x4E46F0, int16>(a1);
+// 0x4E46F0 - unused
+bool CAEPedSpeechAudioEntity::IsGlobalContextUberImportant(int16 globalCtx) {
+    return false;
 }
 
 // 0x4E4700
-int16 CAEPedSpeechAudioEntity::GetNextMoodToUse(int16 a1) {
-    return plugin::CallAndReturn<int16, 0x4E4700, int16>(a1);
+int16 __stdcall CAEPedSpeechAudioEntity::GetNextMoodToUse(int16 lastMood) {
+    switch (lastMood) {
+    case 0:
+    case 7:
+        return 1;
+    case 6:
+        return 0;
+    case 8:
+        return 4;
+    default:
+        return 5;
+    }
 }
 
 // 0x4E4760
-int32 CAEPedSpeechAudioEntity::GetVoiceForMood(int16 a1) {
-    return plugin::CallAndReturn<int32, 0x4E4760, int16>(a1);
+int32 __stdcall CAEPedSpeechAudioEntity::GetVoiceForMood(int16 mood) {
+    auto rnd = CAEAudioUtility::GetRandomNumberInRange(0, 1);
+    if (mood < 0 || mood >= 10)
+        return rnd + 10;
+    return rnd + 2 * mood;
 }
 
 // 0x4E4950
 int16 CAEPedSpeechAudioEntity::CanWePlayScriptedSpeech() {
-    return plugin::CallAndReturn<int16, 0x4E4950>();
+    for (auto i = 0; i < 5; i++) {
+        const auto slot = (s_NextSpeechSlot + i) % 5;
+        if (s_PedSpeechSlots[slot].m_nState)
+            continue;
+
+        s_NextSpeechSlot = slot;
+        return slot;
+    }
+    return -1;
 }
 
 // 0x4E4AE0
@@ -89,7 +119,18 @@ int16 CAEPedSpeechAudioEntity::GetCurrentCJMood() {
 
 // 0x5B98C0
 void CAEPedSpeechAudioEntity::StaticInitialise() {
-    plugin::Call<0x5B98C0>();
+    rng::for_each(s_PedSpeechSlots, &tSpeechSlot::Reset);
+    rng::for_each(s_PhraseMemory, &tPhraseMemory::Reset);
+    s_NextSpeechSlot = 0;
+    Reset();
+    s_pConversationPed1 = s_pConversationPed2 = nullptr;
+    s_pConversationPedSlot1 = s_pConversationPedSlot2 = 0;
+    s_pPlayerConversationPed = nullptr;
+    s_bPedConversationHappening = s_bPlayerConversationHappening = false;
+    rng::fill(s_Conversation, -1);
+    s_nCJBasicMood = s_nCJGangBanging = s_nCJFat = s_nCJWellDressed = -1;
+    s_NextSpeechSlot = s_nCJMoodOverrideTime = 0;
+    s_bAllSpeechDisabled = s_bAPlayerSpeaking = s_bForceAudible = 0;
 }
 
 // 0x4E4470
@@ -188,8 +229,8 @@ void CAEPedSpeechAudioEntity::DisableAllPedSpeech() {
 }
 
 // 0x4E44F0
-bool CAEPedSpeechAudioEntity::IsGlobalContextPain(int16 a1) {
-    return plugin::CallAndReturn<bool, 0x4E44F0, CAEPedSpeechAudioEntity*, int16>(this, a1);
+bool CAEPedSpeechAudioEntity::IsGlobalContextPain(int16 globalCtx) {
+    return globalCtx > 339 && globalCtx < 359;
 }
 
 // 0x4E3ED0
@@ -204,7 +245,36 @@ void CAEPedSpeechAudioEntity::EnableAllPedSpeech() {
 
 // 0x4E4270
 bool CAEPedSpeechAudioEntity::IsCJDressedInForGangSpeech() {
-    return plugin::CallAndReturn<bool, 0x4E4270>();
+    static constexpr struct {
+        eClothesTexturePart clothesPart;
+        const char* textureName;
+    } GANG_SPEECH_CLOTHES[] = {
+        { CLOTHES_TEXTURE_TORSO,   "hoodyagreen" },
+        { CLOTHES_TEXTURE_TORSO,   "shirtbgang"  },
+        { CLOTHES_TEXTURE_LEGS,    "tracktrgang" },
+        { CLOTHES_TEXTURE_LEGS,    "denimsgang"  },
+        { CLOTHES_TEXTURE_HATS,    "bandgang"    },
+        { CLOTHES_TEXTURE_HATS,    "hockey"      },
+        { CLOTHES_TEXTURE_HATS,    "capgang"     },
+        { CLOTHES_TEXTURE_HATS,    "capgangback" },
+        { CLOTHES_TEXTURE_HATS,    "capgangside" },
+        { CLOTHES_TEXTURE_HATS,    "capgangover" },
+        { CLOTHES_TEXTURE_HATS,    "capgangup"   },
+        { CLOTHES_TEXTURE_GLASSES, "bandred3"    },
+        { CLOTHES_TEXTURE_GLASSES, "bandblue3"   },
+        { CLOTHES_TEXTURE_GLASSES, "bandgang3"   },
+        { CLOTHES_TEXTURE_GLASSES, "bandblack3"  },
+    };
+
+    if (!FindPlayerPed(PED_TYPE_PLAYER1))
+        return false;
+
+    if (CGameLogic::FindCityClosestToPoint(FindPlayerCoors()) != LEVEL_NAME_LOS_SANTOS)
+        return false;
+
+    return rng::any_of(GANG_SPEECH_CLOTHES, [pcd = FindPlayerPed()->GetClothesDesc()](auto& gc) {
+        return pcd->m_anTextureKeys[gc.clothesPart] == CKeyGen::GetUppercaseKey(gc.textureName);
+    });
 }
 
 // 0x4E4260
@@ -214,8 +284,8 @@ int8 CAEPedSpeechAudioEntity::GetSexForSpecialPed(uint32 a1) {
 
 // Methods
 // 0x4E46B0
-bool CAEPedSpeechAudioEntity::IsGlobalContextImportantForWidescreen(int16 a1) {
-    return plugin::CallMethodAndReturn<bool, 0x4E46B0, CAEPedSpeechAudioEntity*, int16>(this, a1);
+bool CAEPedSpeechAudioEntity::IsGlobalContextImportantForWidescreen(int16 globalCtx) {
+    return notsa::contains({4, 2}, m_nVoiceType) || notsa::contains({13, 15, 116}, globalCtx);
 }
 
 // 0x4E47E0
@@ -224,23 +294,64 @@ int32 CAEPedSpeechAudioEntity::GetRepeatTime(int16 a1) {
 }
 
 // 0x4E4840
-void CAEPedSpeechAudioEntity::LoadAndPlaySpeech(uint32 a2) {
-    plugin::CallMethod<0x4E4840>(this, a2);
+void CAEPedSpeechAudioEntity::LoadAndPlaySpeech(uint32 offset) {
+    //plugin::CallMethod<0x4E4840>(this, offset);
+    auto& currSpeech = GetCurrentPedSpeech();
+    if (currSpeech.m_nState != 0 && currSpeech.m_nState != 4)
+        return;
+
+    AEAudioHardware.LoadSound(m_nBankId, m_nSoundId, m_nPedSpeechSlotIndex + 20); // TODO: Helper
+    currSpeech.m_nState = 1;
+    currSpeech.m_nBankId = m_nBankId;
+    currSpeech.m_nSoundId = m_nSoundId;
+    currSpeech.m_PedSpeechAE = this;
+    currSpeech.m_nTime = CTimer::GetTimeInMS() + offset;
+    currSpeech.m_nVoiceType = m_nVoiceType;
+    currSpeech.m_nPhraseId = m_nCurrentPhraseId;
+    // byte_B61C50[28 * m_nPedSpeechSlotIndex] = field_9C;
 }
 
 // 0x4E49B0
-int32 CAEPedSpeechAudioEntity::GetNumSlotsPlayingContext(int16 a2) {
-    return plugin::CallMethodAndReturn<int32, 0x4E49B0, CAEPedSpeechAudioEntity*, int16>(this, a2);
+int32 CAEPedSpeechAudioEntity::GetNumSlotsPlayingContext(int16 context) {
+    return rng::count_if(s_PedSpeechSlots, [&](tSpeechSlot& speech) {
+        return speech.m_nState && speech.m_nPhraseId == context;
+    });
 }
 
 // 0x4E49E0
-int32 CAEPedSpeechAudioEntity::GetNextPlayTime(int16 a2) {
-    return plugin::CallMethodAndReturn<int32, 0x4E49E0>(this, a2);
+uint32 CAEPedSpeechAudioEntity::GetNextPlayTime(int16 globalCtx) {
+    if (globalCtx > 359) // todo: const
+        return 0;
+
+    if (IsGlobalContextPain(globalCtx))
+        return field_B4[globalCtx - 340];
+
+    return gGlobalSpeechContextNextPlayTime[globalCtx];
 }
 
 // 0x4E4A20
-void CAEPedSpeechAudioEntity::SetNextPlayTime(int16 a2) {
-    plugin::CallMethod<0x4E4A20>(this, a2);
+void CAEPedSpeechAudioEntity::SetNextPlayTime(int16 globalCtx) {
+    // plugin::CallMethod<0x4E4A20>(this, globalCtx);
+
+    if (globalCtx > 359)
+        return;
+
+    for (auto& lookup : gSpeechContextLookup) {
+        if (lookup[0] == -1)
+            break;
+
+        if (lookup[0] != globalCtx)
+            continue;
+
+        const auto playTime = lookup[6] + CAEAudioUtility::GetRandomNumberInRange(1, 1000);
+        auto& ctxNextPlayTime = [&]() -> uint32& {
+            if (IsGlobalContextPain(globalCtx))
+                return field_B4[globalCtx - 340];
+            else
+                return gGlobalSpeechContextNextPlayTime[globalCtx];
+        }() = CTimer::GetTimeInMS() + playTime;
+        return;
+    }
 }
 
 // 0x4E56D0
@@ -423,16 +534,16 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedCategory("Audio/Entities");
 
     RH_ScopedInstall(Constructor, 0x4E4F10);
-    RH_ScopedInstall(IsGlobalContextImportantForInterupting, 0x4E4600, { .reversed = false });
-    RH_ScopedInstall(IsGlobalContextUberImportant, 0x4E46F0, { .reversed = false });
-    RH_ScopedInstall(GetNextMoodToUse, 0x4E4700, { .reversed = false });
-    RH_ScopedInstall(GetVoiceForMood, 0x4E4760, { .reversed = false });
-    RH_ScopedInstall(CanWePlayScriptedSpeech, 0x4E4950, { .reversed = false });
+    RH_ScopedInstall(IsGlobalContextImportantForInterupting, 0x4E4600);
+    RH_ScopedInstall(IsGlobalContextUberImportant, 0x4E46F0);
+    RH_ScopedInstall(GetNextMoodToUse, 0x4E4700);
+    RH_ScopedInstall(GetVoiceForMood, 0x4E4760);
+    RH_ScopedInstall(CanWePlayScriptedSpeech, 0x4E4950);
     RH_ScopedInstall(GetSpeechContextVolumeOffset, 0x4E4AE0, { .reversed = false });
     RH_ScopedInstall(RequestPedConversation, 0x4E50E0, { .reversed = false });
     RH_ScopedInstall(ReleasePedConversation, 0x4E52A0, { .reversed = false });
     RH_ScopedInstall(GetCurrentCJMood, 0x4E53B0, { .reversed = false });
-    RH_ScopedInstall(StaticInitialise, 0x5B98C0, { .reversed = false });
+    RH_ScopedInstall(StaticInitialise, 0x5B98C0, { .reversed = true });
     RH_ScopedInstall(GetSpecificSpeechContext, 0x4E4470, { .reversed = false });
     RH_ScopedInstall(Service, 0x4E3710, { .reversed = false });
     RH_ScopedInstall(Reset, 0x4E37B0);
@@ -444,17 +555,17 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedInstall(GetAudioPedType, 0x4E3C60);
     RH_ScopedInstall(GetVoice, 0x4E3CD0, { .reversed = false });
     RH_ScopedInstall(DisableAllPedSpeech, 0x4E3EB0);
-    RH_ScopedInstall(IsGlobalContextPain, 0x4E44F0, { .reversed = false });
+    RH_ScopedInstall(IsGlobalContextPain, 0x4E44F0, { .reversed = true });
     RH_ScopedInstall(SetCJMood, 0x4E3ED0, { .reversed = false });
     RH_ScopedInstall(EnableAllPedSpeech, 0x4E3EC0);
-    RH_ScopedInstall(IsCJDressedInForGangSpeech, 0x4E4270, { .reversed = false });
+    RH_ScopedInstall(IsCJDressedInForGangSpeech, 0x4E4270, { .reversed = true });
     RH_ScopedInstall(GetSexForSpecialPed, 0x4E4260);
-    RH_ScopedInstall(IsGlobalContextImportantForWidescreen, 0x4E46B0, { .reversed = false });
+    RH_ScopedInstall(IsGlobalContextImportantForWidescreen, 0x4E46B0, { .reversed = true });
     RH_ScopedInstall(GetRepeatTime, 0x4E47E0, { .reversed = false });
     RH_ScopedInstall(LoadAndPlaySpeech, 0x4E4840, { .reversed = false });
-    RH_ScopedInstall(GetNumSlotsPlayingContext, 0x4E49B0, { .reversed = false });
-    RH_ScopedInstall(GetNextPlayTime, 0x4E49E0, { .reversed = false });
-    RH_ScopedInstall(SetNextPlayTime, 0x4E4A20, { .reversed = false });
+    RH_ScopedInstall(GetNumSlotsPlayingContext, 0x4E49B0, { .reversed = true });
+    RH_ScopedInstall(GetNextPlayTime, 0x4E49E0, { .reversed = true });
+    RH_ScopedInstall(SetNextPlayTime, 0x4E4A20, { .reversed = true });
     RH_ScopedInstall(DisablePedSpeech, 0x4E56D0);
     RH_ScopedInstall(DisablePedSpeechForScriptSpeech, 0x4E5700);
     RH_ScopedInstall(CanPedSayGlobalContext, 0x4E5730, { .reversed = false });
