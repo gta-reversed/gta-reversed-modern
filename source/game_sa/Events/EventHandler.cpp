@@ -84,6 +84,7 @@
 #include "Tasks/TaskTypes/TaskComplexWalkRoundFire.h"
 #include "Tasks/TaskTypes/TaskComplexGetUpAndStandStill.h"
 #include "Tasks/TaskTypes/TaskComplexWander.h"
+#include "Tasks/TaskTypes/TaskGangHasslePed.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
@@ -120,6 +121,7 @@
 #include "Events/EventCarUpsideDown.h"
 #include "Events/EventFireNearby.h"
 #include "Events/EventSeenPanickedPed.h"
+#include "Events/EventSexyPed.h"
 
 constexpr auto fSafeDistance = 60.f;
 
@@ -256,7 +258,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeScriptCommandResponse, 0x4BA7C0);
     RH_ScopedInstall(ComputeSeenCopResponse, 0x4BC050);
     RH_ScopedInstall(ComputeSeenPanickedPedResponse, 0x4C35F0);
-    RH_ScopedInstall(ComputeSexyPedResponse, 0x4B99F0, { .reversed = false });
+    RH_ScopedInstall(ComputeSexyPedResponse, 0x4B99F0);
     RH_ScopedInstall(ComputeSexyVehicleResponse, 0x4B9AA0, { .reversed = false });
     RH_ScopedInstall(ComputeShotFiredResponse, 0x4BC710, { .reversed = false });
     RH_ScopedInstall(ComputeShotFiredWhizzedByResponse, 0x4BBE30, { .reversed = false });
@@ -2077,12 +2079,6 @@ void CEventHandler::ComputeScriptCommandResponse(CEventScriptCommand* e, CTask* 
     }
 }
 
-/*
-m_eventResponseTask = [&]() -> CTask* {
-
-}();
-*/
-
 // 0x4BC050
 void CEventHandler::ComputeSeenCopResponse(CEventSeenCop* e, CTask* tactive, CTask* tsimplest) {
     m_eventResponseTask = [&]() -> CTask* {
@@ -2097,7 +2093,7 @@ void CEventHandler::ComputeSeenCopResponse(CEventSeenCop* e, CTask* tactive, CTa
         case TASK_COMPLEX_KILL_PED_ON_FOOT:
             return new CTaskComplexKillPedOnFoot{ e->m_AcquaintancePed };
         default:
-            NOTSA_UNREACHABLE();
+            NOTSA_UNREACHABLE(); // Not sure
         }
     }();
 }
@@ -2125,26 +2121,31 @@ void CEventHandler::ComputeSeenPanickedPedResponse(CEventSeenPanickedPed* e, CTa
         case TASK_COMPLEX_SMART_FLEE_ENTITY:
             return new CTaskComplexSmartFleeEntity{ currEvntSrc, false, 45.f };
         default:
-            NOTSA_UNREACHABLE();
+            NOTSA_UNREACHABLE(); // Not sure
         }
     }();
 }
+/*
+m_eventResponseTask = [&]() -> CTask* {
+
+}();
+*/
 
 // 0x4B99F0
-void CEventHandler::ComputeSexyPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4B99F0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
-    /*
-    const auto taskId = task1->GetTaskType();
-    auto entity = static_cast<CTask*>(task1)->entity;
-    if (!entity)
-        return;
-
-    if (taskId == TASK_NONE) {
-        m_eventResponseTask = nullptr;
-    } else if (taskId == TASK_COMPLEX_GANG_HASSLE_PED) {
-        m_eventResponseTask = new CTaskComplexGangHasslePed(entity, 0, 10000, 30000);
-    }
-    */
+void CEventHandler::ComputeSexyPedResponse(CEventSexyPed* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_SexyPed) {
+            return nullptr;
+        }
+        switch (e->m_taskId) {
+        case TASK_NONE:
+            return nullptr;
+        case TASK_COMPLEX_GANG_HASSLE_PED:
+            return new CTaskGangHasslePed{ e->m_SexyPed, 0, 10'000, 30'000 };
+        default:
+            NOTSA_UNREACHABLE(); // Not sure
+        }
+    }();
 }
 
 // 0x4B9AA0
@@ -2295,7 +2296,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeChatPartnerResponse(static_cast<CEventChatPartner*>(e), tactive, tsimplest);
         break;
     case EVENT_SEXY_PED:
-        ComputeSexyPedResponse(e, tactive, tsimplest);
+        ComputeSexyPedResponse(static_cast<CEventSexyPed*>(e), tactive, tsimplest);
         break;
     case EVENT_SEXY_VEHICLE:
         ComputeSexyVehicleResponse(e, tactive, tsimplest);
