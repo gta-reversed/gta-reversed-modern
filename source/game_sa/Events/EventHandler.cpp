@@ -86,6 +86,7 @@
 #include "Tasks/TaskTypes/TaskComplexWander.h"
 #include "Tasks/TaskTypes/TaskGangHasslePed.h"
 #include "Tasks/TaskTypes/TaskComplexSignalAtPed.h"
+#include "Tasks/TaskTypes/TaskComplexArrestPed.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
@@ -126,6 +127,7 @@
 #include "Events/EventGunShot.h"
 #include "Events/EventGunShotWhizzedBy.h"
 #include "Events/EventSignalAtPed.h"
+#include "Events/EventSpecial.h"
 
 constexpr auto fSafeDistance = 60.f;
 
@@ -267,7 +269,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeShotFiredResponse, 0x4BC710);
     RH_ScopedInstall(ComputeShotFiredWhizzedByResponse, 0x4BBE30);
     RH_ScopedInstall(ComputeSignalAtPedResponse, 0x4BB050);
-    RH_ScopedInstall(ComputeSpecialResponse, 0x4BB800, { .reversed = false });
+    RH_ScopedInstall(ComputeSpecialResponse, 0x4BB800);
     RH_ScopedInstall(ComputeVehicleCollisionResponse, 0x4BD6A0, { .reversed = false });
     RH_ScopedInstall(ComputeVehicleDamageResponse, 0x4C2FC0, { .reversed = false });
     RH_ScopedInstall(ComputeVehicleDiedResponse, 0x4BA8B0, { .reversed = false });
@@ -2274,8 +2276,47 @@ void CEventHandler::ComputeSignalAtPedResponse(CEventSignalAtPed* e, CTask* tact
 }
 
 // 0x4BB800
-void CEventHandler::ComputeSpecialResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BB800, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeSpecialResponse(CEventSpecial* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_KILL_PED_ON_FOOT:
+            return new CTaskComplexKillPedOnFoot{ FindPlayerPed() }; // 0x4BBB0F
+        case TASK_COMPLEX_SMART_FLEE_ENTITY:
+            return new CTaskComplexSmartFleeEntity{ FindPlayerPed(), false, 60.f }; // 0x4BBA54
+        case TASK_COMPLEX_SMART_FLEE_POINT:
+            return new CTaskComplexSmartFleePoint{ FindPlayerPed()->GetPosition(), false, 1000.f, 100'000 }; // 0x4BBAA6
+        case TASK_COMPLEX_CAR_DRIVE_MISSION_FLEE_SCENE:
+            return new CTaskComplexCarDriveMissionFleeScene{nullptr}; // 0x4BBAD2 - Makes no sense
+        case TASK_COMPLEX_ARREST_PED:
+            return new CTaskComplexArrestPed{ FindPlayerPed() }; // 0x4BBB65
+        case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR:
+            return new CTaskComplexUseClosestFreeScriptedAttractor{};
+        case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR_RUN:
+            return new CTaskComplexUseClosestFreeScriptedAttractorRun{};
+        case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR_SPRINT:
+            return new CTaskComplexUseClosestFreeScriptedAttractorSprint{};
+        case TASK_COMPLEX_LEAVE_CAR_AND_WANDER: {
+            if (const auto v = m_ped->m_pVehicle) {
+                return new CTaskComplexLeaveCarAndWander{ v }; // 0x4BB9D7
+            }
+            return nullptr;
+        }
+        case TASK_COMPLEX_LEAVE_CAR: {
+            if (const auto v = m_ped->m_pVehicle) {
+                return new CTaskComplexLeaveCar{ v, TARGET_DOOR_FRONT_LEFT, 0, true, false }; // 0x4BB98E
+            }
+            return nullptr;
+        }
+        case TASK_COMPLEX_LEAVE_CAR_AND_FLEE: {
+            if (const auto v = m_ped->m_pVehicle) { 
+                return new CTaskComplexLeaveCarAndFlee{ v, FindPlayerPed()->GetPosition(), TARGET_DOOR_FRONT_LEFT, 0, false }; // 0x4BB98E
+            }
+            return nullptr;
+        }
+        default:
+            NOTSA_UNREACHABLE(); // not sure
+        }
+    }();
 }
 
 // 0x4BD6A0
@@ -2318,7 +2359,7 @@ void CEventHandler::ComputeVehicleToStealResponse(CEvent* e, CTask* tactive, CTa
     plugin::CallMethod<0x4B9F80, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
-// 0x4BAE30
+//  
 void CEventHandler::ComputeWaterCannonResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
     plugin::CallMethod<0x4BAE30, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
@@ -2437,7 +2478,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeVehicleDamageResponse(e, tactive, tsimplest);
         break;
     case EVENT_SPECIAL:
-        ComputeSpecialResponse(e, tactive, tsimplest);
+        ComputeSpecialResponse(static_cast<CEventSpecial*>(e), tactive, tsimplest);
         break;
     case EVENT_GOT_KNOCKED_OVER_BY_CAR:
         ComputeGotKnockedOverByCarResponse(static_cast<CEventGotKnockedOverByCar*>(e), tactive, tsimplest);
