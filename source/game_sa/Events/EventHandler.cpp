@@ -85,6 +85,7 @@
 #include "Tasks/TaskTypes/TaskComplexGetUpAndStandStill.h"
 #include "Tasks/TaskTypes/TaskComplexWander.h"
 #include "Tasks/TaskTypes/TaskGangHasslePed.h"
+#include "Tasks/TaskTypes/TaskComplexSignalAtPed.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
@@ -124,6 +125,7 @@
 #include "Events/EventSexyPed.h"
 #include "Events/EventGunShot.h"
 #include "Events/EventGunShotWhizzedBy.h"
+#include "Events/EventSignalAtPed.h"
 
 constexpr auto fSafeDistance = 60.f;
 
@@ -264,7 +266,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeSexyVehicleResponse, 0x4B9AA0);
     RH_ScopedInstall(ComputeShotFiredResponse, 0x4BC710);
     RH_ScopedInstall(ComputeShotFiredWhizzedByResponse, 0x4BBE30);
-    RH_ScopedInstall(ComputeSignalAtPedResponse, 0x4BB050, { .reversed = false });
+    RH_ScopedInstall(ComputeSignalAtPedResponse, 0x4BB050);
     RH_ScopedInstall(ComputeSpecialResponse, 0x4BB800, { .reversed = false });
     RH_ScopedInstall(ComputeVehicleCollisionResponse, 0x4BD6A0, { .reversed = false });
     RH_ScopedInstall(ComputeVehicleDamageResponse, 0x4C2FC0, { .reversed = false });
@@ -2265,10 +2267,10 @@ void CEventHandler::ComputeShotFiredWhizzedByResponse(CEventGunShotWhizzedBy* e,
 }
 
 // 0x4BB050
-void CEventHandler::ComputeSignalAtPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BB050, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
-
-    //m_eventResponseTask = new CTaskComplexSignalAtPed(*(task1 + 12), *(task1 + 16), *(task1 + 20));
+void CEventHandler::ComputeSignalAtPedResponse(CEventSignalAtPed* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        return new CTaskComplexSignalAtPed{ e->m_SignalAt, e->m_InitialPause, e->m_bPlayAnimAtEnd };
+    }();
 }
 
 // 0x4BB800
@@ -2513,7 +2515,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeInteriorUseInfoResponse(static_cast<CEventInteriorUseInfo*>(e), CTask::DynCast<CTaskInteriorUseInfo>(tactive), tsimplest);
         break;
     case EVENT_SIGNAL_AT_PED:
-        ComputeSignalAtPedResponse(e, tactive, tsimplest);
+        ComputeSignalAtPedResponse(static_cast<CEventSignalAtPed*>(e), tactive, tsimplest);
         break;
     case EVENT_PASS_OBJECT:
         ComputePassObjectResponse(static_cast<CEventPassObject*>(e), tactive, tsimplest);
