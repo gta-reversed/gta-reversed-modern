@@ -2373,7 +2373,9 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
     m_partialAnimTask      = nullptr;
 
     const auto tactive = m_ped->GetTaskManager().GetActiveTask();
-    const auto tsimplest = tactive ? m_ped->GetTaskManager().GetSimplestActiveTask() : nullptr;
+    const auto tsimplest = tactive
+        ? m_ped->GetTaskManager().GetSimplestActiveTask()
+        : nullptr;
     
     //DEV_LOG("event: {} tactive: {} tsimplest: {}", (int32)event->GetEventType(), (int32)tactive->GetTaskType(), (int32)tsimplest->GetTaskType()); // NOTSA
 

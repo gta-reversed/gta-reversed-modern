@@ -253,7 +253,6 @@
 #include "TaskComplexKillPedOnFoot.h"
 #include "TaskSimpleThrowProjectile.h"
 #include "TaskSimpleGoToPoint.h"
-#include "TaskInteriorUseInfo.h"
 #include "TaskComplexWanderMedic.h"
 #include "TaskComplexMoveBackAndJump.h"
 #include "TaskComplexSeekEntityAiming.h"
@@ -417,6 +416,9 @@
 #include "Tasks/TaskTypes/TaskComplexUseClosestFreeScriptedAttractor.h"
 #include "Tasks/TaskTypes/TaskComplexUseClosestFreeScriptedAttractorRun.h"
 #include "Tasks/TaskTypes/TaskComplexUseClosestFreeScriptedAttractorSprint.h"
+
+// Interior Tasks
+#include "Tasks/TaskTypes/Interior/TaskInteriorUseInfo.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
