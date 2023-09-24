@@ -259,7 +259,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeSeenCopResponse, 0x4BC050);
     RH_ScopedInstall(ComputeSeenPanickedPedResponse, 0x4C35F0);
     RH_ScopedInstall(ComputeSexyPedResponse, 0x4B99F0);
-    RH_ScopedInstall(ComputeSexyVehicleResponse, 0x4B9AA0, { .reversed = false });
+    RH_ScopedInstall(ComputeSexyVehicleResponse, 0x4B9AA0);
     RH_ScopedInstall(ComputeShotFiredResponse, 0x4BC710, { .reversed = false });
     RH_ScopedInstall(ComputeShotFiredWhizzedByResponse, 0x4BBE30, { .reversed = false });
     RH_ScopedInstall(ComputeSignalAtPedResponse, 0x4BB050, { .reversed = false });
@@ -2149,13 +2149,15 @@ void CEventHandler::ComputeSexyPedResponse(CEventSexyPed* e, CTask* tactive, CTa
 }
 
 // 0x4B9AA0
-void CEventHandler::ComputeSexyVehicleResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    auto evnt = reinterpret_cast<CEventSexyVehicle*>(e);
-    if (evnt->m_vehicle) {
-        g_InterestingEvents.Add(CInterestingEvents::EType::INTERESTING_EVENT_8, evnt->m_vehicle);
-        m_eventResponseTask = new CTaskSimpleStandStill(5000, false, false, 8.0f);
-        g_ikChainMan.LookAt("CompSexyVhclResp", m_ped, evnt->m_vehicle, 5000, BONE_UNKNOWN, nullptr, true, 0.25f, 500, 3, false);
-    }
+void CEventHandler::ComputeSexyVehicleResponse(CEventSexyVehicle* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_vehicle) {
+            return nullptr;
+        }
+        g_InterestingEvents.Add(CInterestingEvents::EType::INTERESTING_EVENT_8, e->m_vehicle);
+        g_ikChainMan.LookAt("CompSexyVhclResp", m_ped, e->m_vehicle, 5000, BONE_UNKNOWN, nullptr, true, 0.25f, 500, 3, false);
+        return new CTaskSimpleStandStill(5000, false, false, 8.0f);
+    }();
 }
 
 // task1 TASK_COMPLEX_CAR_DRIVE_WANDER 711 911 912 911 1204
@@ -2299,7 +2301,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeSexyPedResponse(static_cast<CEventSexyPed*>(e), tactive, tsimplest);
         break;
     case EVENT_SEXY_VEHICLE:
-        ComputeSexyVehicleResponse(e, tactive, tsimplest);
+        ComputeSexyVehicleResponse(static_cast<CEventSexyVehicle*>(e), tactive, tsimplest);
         break;
     case EVENT_PED_TO_CHASE:
         ComputePedToChaseResponse(static_cast<CEventPedToChase*>(e), tactive, tsimplest);
