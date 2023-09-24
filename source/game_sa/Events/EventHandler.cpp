@@ -122,6 +122,7 @@
 #include "Events/EventFireNearby.h"
 #include "Events/EventSeenPanickedPed.h"
 #include "Events/EventSexyPed.h"
+#include "Events/EventGunShot.h"
 
 constexpr auto fSafeDistance = 60.f;
 
@@ -260,7 +261,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeSeenPanickedPedResponse, 0x4C35F0);
     RH_ScopedInstall(ComputeSexyPedResponse, 0x4B99F0);
     RH_ScopedInstall(ComputeSexyVehicleResponse, 0x4B9AA0);
-    RH_ScopedInstall(ComputeShotFiredResponse, 0x4BC710, { .reversed = false });
+    RH_ScopedInstall(ComputeShotFiredResponse, 0x4BC710);
     RH_ScopedInstall(ComputeShotFiredWhizzedByResponse, 0x4BBE30, { .reversed = false });
     RH_ScopedInstall(ComputeSignalAtPedResponse, 0x4BB050, { .reversed = false });
     RH_ScopedInstall(ComputeSpecialResponse, 0x4BB800, { .reversed = false });
@@ -2160,11 +2161,69 @@ void CEventHandler::ComputeSexyVehicleResponse(CEventSexyVehicle* e, CTask* tact
     }();
 }
 
-// task1 TASK_COMPLEX_CAR_DRIVE_WANDER 711 911 912 911 1204
-// task2 TASK_SIMPLE_CAR_DRIVE         709 400 900 900 900
 // 0x4BC710
-void CEventHandler::ComputeShotFiredResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BC710, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeShotFiredResponse(CEventGunShot* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_firedBy) {
+            return nullptr;
+        }
+        const auto firedByPed = e->m_firedBy->IsPed()
+            ? e->m_firedBy->AsPed()
+            : nullptr;
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_TURN_TO_FACE_ENTITY: // 0x4BCAE4
+            return new CTaskComplexTurnToFaceEntityOrCoord{e->m_firedBy, 0.5f};
+        case TASK_COMPLEX_KILL_PED_ON_FOOT: { // 0x4BC8F6
+            if (!firedByPed || firedByPed->m_nPedType == m_ped->m_nPedType) {
+                return nullptr;
+            }
+            if (IsKillTaskAppropriate(m_ped, firedByPed, *e)) {
+                return new CTaskComplexKillPedOnFoot{firedByPed}; // 0x4BC950
+            }
+            if (m_ped->IsInVehicle()) {
+                if (m_ped->m_pVehicle->IsDriver(m_ped)) {
+                    return new CTaskComplexCarDriveMissionFleeScene{ m_ped->m_pVehicle }; // 0x4BC997
+                }
+                if (m_ped->m_pVehicle->m_pDriver) {
+                    return nullptr; // 0x4BC9CC
+                }
+            }
+            return new CTaskComplexSmartFleeEntity{e->m_firedBy, false, 60.f};
+        }
+        case TASK_COMPLEX_KILL_PED_ON_FOOT_STEALTH: // 0x4BCB16
+            return new CTaskComplexKillPedOnFootStealth{ firedByPed };
+        case TASK_COMPLEX_KILL_CRIMINAL: { // 0x4BCA16
+            if (!firedByPed || firedByPed->m_nPedType == m_ped->m_nPedType || firedByPed->IsPlayer()) {
+                return nullptr;
+            }
+            if (IsKillTaskAppropriate(m_ped, firedByPed, *e)) { // 0x4BCA51 - Inverted
+                return new CTaskComplexKillCriminal{ firedByPed, false }; // 0x4BCA7F
+            }
+            return new CTaskComplexSmartFleeEntity{ e->m_firedBy, false, 60.f };
+        }
+        case TASK_COMPLEX_SMART_FLEE_ENTITY: // 0x4BC8CE
+            return new CTaskComplexSmartFleeEntity{ e->m_firedBy, true, 60.f };
+        case TASK_COMPLEX_CAR_DRIVE_MISSION_FLEE_SCENE: { // 0x4BC7EB
+            const auto v = m_ped->m_pVehicle;
+            if (v && v->IsDriver(m_ped)) {
+                return new CTaskComplexCarDriveMissionFleeScene{ v }; // 0x4BC835
+            }
+            return new CTaskComplexSmartFleeEntity{ v, false, 60.f }; // 0x4BC885
+        }
+        case TASK_SIMPLE_DUCK_FOREVER:
+            return new CTaskSimpleDuck{ DUCK_STANDALONE, 0x967Fu, -1 };
+        case TASK_NONE:
+            return nullptr;
+        case TASK_SIMPLE_DUCK: {
+            if (m_ped->GetIntelligence()->GetTaskDuck(true)) {
+                return new CTaskSimpleDuck{ DUCK_STANDALONE, 3000, -1 };
+            }
+            return nullptr;
+        }
+        default:
+            NOTSA_UNREACHABLE(); // not sure
+        }
+    }();
 }
 
 // 0x4BBE30
@@ -2283,7 +2342,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputePotentialPedCollideResponse(static_cast<CEventPotentialWalkIntoPed*>(e), tactive, tsimplest);
         break;
     case EVENT_SHOT_FIRED:
-        ComputeShotFiredResponse(e, tactive, tsimplest);
+        ComputeShotFiredResponse(static_cast<CEventGunShot*>(e), tactive, tsimplest);
         break;
     case EVENT_COP_CAR_BEING_STOLEN:
         ComputeCopCarBeingStolenResponse(static_cast<CEventCopCarBeingStolen*>(e), tactive, tsimplest);
