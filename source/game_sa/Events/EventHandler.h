@@ -52,6 +52,7 @@ class CEventPotentialWalkIntoPed;
 class CEventHealthReallyLow;
 class CEventRevived;
 class CEventScriptCommand;
+class CEventSeenCop;
 
 class CEventHandler {
 public:
@@ -126,7 +127,7 @@ public:
     void ComputeReallyLowHealthResponse(CEventHealthReallyLow* e, CTask* tactive, CTask* tsimplest);
     void ComputeReviveResponse(CEventRevived* e, CTask* tactive, CTask* tsimplest);
     void ComputeScriptCommandResponse(CEventScriptCommand* e, CTask* tactive, CTask* tsimplest);
-    void ComputeSeenCopResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputeSeenCopResponse(CEventSeenCop* e, CTask* tactive, CTask* tsimplest);
     void ComputeSeenPanickedPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeSexyPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeSexyVehicleResponse(CEvent* e, CTask* tactive, CTask* tsimplest);

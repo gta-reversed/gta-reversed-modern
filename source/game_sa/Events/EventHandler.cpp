@@ -150,7 +150,7 @@ struct SecondarySay : Base<ResponseType::SECONDARY_SAY>{};
 struct SecondaryPartialAnim : Base<ResponseType::SECONDARY_PARTIAL_ANIM>{};
 
 template<typename... Ts>
-void ProcessEventResponse( // TODO: Make this a mathod
+void ProcessEventResponse( // TODO: Make this a method
     CTask*& physical,
     CTask*& event,
     CTask*& secondaryAim,
@@ -172,7 +172,7 @@ void ProcessEventResponse( // TODO: Make this a mathod
 }
 
 template<typename T>
-void Process( // TODO: Make this a mathod
+void Process( // TODO: Make this a method
     CTask*& physical,
     CTask*& event,
     CTask*& secondaryAim,
@@ -253,7 +253,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeReallyLowHealthResponse, 0x4BAA30);
     RH_ScopedInstall(ComputeReviveResponse, 0x4B97B0);
     RH_ScopedInstall(ComputeScriptCommandResponse, 0x4BA7C0);
-    RH_ScopedInstall(ComputeSeenCopResponse, 0x4BC050, { .reversed = false });
+    RH_ScopedInstall(ComputeSeenCopResponse, 0x4BC050);
     RH_ScopedInstall(ComputeSeenPanickedPedResponse, 0x4C35F0, { .reversed = false });
     RH_ScopedInstall(ComputeSexyPedResponse, 0x4B99F0, { .reversed = false });
     RH_ScopedInstall(ComputeSexyVehicleResponse, 0x4B9AA0, { .reversed = false });
@@ -2014,11 +2014,6 @@ void CEventHandler::ComputePotentialWalkIntoFireResponse(CEventPotentialWalkInto
     }();
 }
 
-/*
-m_eventResponseTask = [&]() -> CTask* {
-
-}();
-*/
 // 0x4BAA30
 void CEventHandler::ComputeReallyLowHealthResponse(CEventHealthReallyLow* e, CTask* tactive, CTask* tsimplest) {
     m_eventResponseTask = [&]() -> CTask* {
@@ -2072,22 +2067,42 @@ void CEventHandler::ComputeScriptCommandResponse(CEventScriptCommand* e, CTask* 
     if (t && !t->MakeAbortable(m_ped, ABORT_PRIORITY_URGENT, e)) {
         t->MakeAbortable(m_ped, ABORT_PRIORITY_LEISURE, e);
         const auto ce = static_cast<CEventScriptCommand*>(m_ped->GetEventGroup().Add(e));
-        if (const auto r = CPedScriptedTaskRecord::GetRecordAssociatedWithEvent(e)) {
-            r->AssociateWithEvent(ce);
+        if (const auto tr = CPedScriptedTaskRecord::GetRecordAssociatedWithEvent(e)) {
+            tr->AssociateWithEvent(ce);
         }
     } else {
         const auto ct = e->CloneScriptTask();
         tm->ClearTaskEventResponse();
         tm->SetTask(ct, taskIdx, true);
-        if (const auto r = CPedScriptedTaskRecord::GetRecordAssociatedWithEvent(e)) {
-            r->AssociateWithTask(ct);
+        if (const auto tr = CPedScriptedTaskRecord::GetRecordAssociatedWithEvent(e)) {
+            tr->AssociateWithTask(ct);
         }
     }
 }
 
+/*
+m_eventResponseTask = [&]() -> CTask* {
+
+}();
+*/
+
 // 0x4BC050
-void CEventHandler::ComputeSeenCopResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BC050, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeSeenCopResponse(CEventSeenCop* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_AcquaintancePed) {
+            return nullptr;
+        }
+        switch (e->m_taskId) {
+        case TASK_FINISHED:
+            return nullptr;
+        case TASK_COMPLEX_SMART_FLEE_ENTITY:
+            return new CTaskComplexSmartFleeEntity{ e->m_AcquaintancePed, false, 60.f };
+        case TASK_COMPLEX_KILL_PED_ON_FOOT:
+            return new CTaskComplexKillPedOnFoot{ e->m_AcquaintancePed };
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
 }
 
 // 0x4C35F0
@@ -2368,7 +2383,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeCreatePartnerTaskResponse(static_cast<CEventCreatePartnerTask*>(e), tactive, tsimplest);
         break;
     case EVENT_SEEN_COP:
-        ComputeSeenCopResponse(e, tactive, tsimplest);
+        ComputeSeenCopResponse(static_cast<CEventSeenCop*>(e), tactive, tsimplest);
         break;
     case EVENT_ON_ESCALATOR:
         ComputeOnEscalatorResponse(e, tactive, tsimplest);
