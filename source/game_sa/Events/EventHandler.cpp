@@ -119,6 +119,7 @@
 #include "Events/EntityCollisionEvents.h"
 #include "Events/EventCarUpsideDown.h"
 #include "Events/EventFireNearby.h"
+#include "Events/EventSeenPanickedPed.h"
 
 constexpr auto fSafeDistance = 60.f;
 
@@ -254,7 +255,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeReviveResponse, 0x4B97B0);
     RH_ScopedInstall(ComputeScriptCommandResponse, 0x4BA7C0);
     RH_ScopedInstall(ComputeSeenCopResponse, 0x4BC050);
-    RH_ScopedInstall(ComputeSeenPanickedPedResponse, 0x4C35F0, { .reversed = false });
+    RH_ScopedInstall(ComputeSeenPanickedPedResponse, 0x4C35F0);
     RH_ScopedInstall(ComputeSexyPedResponse, 0x4B99F0, { .reversed = false });
     RH_ScopedInstall(ComputeSexyVehicleResponse, 0x4B9AA0, { .reversed = false });
     RH_ScopedInstall(ComputeShotFiredResponse, 0x4BC710, { .reversed = false });
@@ -1161,11 +1162,7 @@ void CEventHandler::ComputeDeadPedResponse(CEventDeadPed* e, CTask* tactive, CTa
         case TASK_COMPLEX_INVESTIGATE_DEAD_PED:
             return new CTaskComplexInvestigateDeadPed{e->GetDeadPed()};
         case TASK_SIMPLE_DUCK_FOREVER:
-            return new CTaskSimpleDuck{
-                DUCK_STANDALONE,
-                57599u,
-                -1
-            };
+            return new CTaskSimpleDuck{ DUCK_STANDALONE, 57599u, -1 };
         default:
             return nullptr;
         }
@@ -2106,8 +2103,31 @@ void CEventHandler::ComputeSeenCopResponse(CEventSeenCop* e, CTask* tactive, CTa
 }
 
 // 0x4C35F0
-void CEventHandler::ComputeSeenPanickedPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4C35F0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeSeenPanickedPedResponse(CEventSeenPanickedPed* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        const auto thisEventSrc = e->GetSourceEntity();
+        if (!thisEventSrc) {
+            return nullptr;
+        }
+        const auto currEvnt = m_history.GetCurrentEvent();
+        if (!currEvnt) {
+            return nullptr;
+        }
+        const auto currEvntSrc = currEvnt->GetSourceEntity();
+        if (!currEvntSrc) {
+            return nullptr;
+        }
+        switch (e->m_taskId) {
+        case TASK_SIMPLE_DUCK_FOREVER:
+            return new CTaskSimpleDuck{ DUCK_STANDALONE, 57599u, -1 };
+        case TASK_COMPLEX_FLEE_ENTITY:
+            return new CTaskComplexFleeEntity{ currEvntSrc, true, 45.f };
+        case TASK_COMPLEX_SMART_FLEE_ENTITY:
+            return new CTaskComplexSmartFleeEntity{ currEvntSrc, false, 45.f };
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
 }
 
 // 0x4B99F0
@@ -2368,7 +2388,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeWaterCannonResponse(e, tactive, tsimplest);
         break;
     case EVENT_SEEN_PANICKED_PED:
-        ComputeSeenPanickedPedResponse(e, tactive, tsimplest);
+        ComputeSeenPanickedPedResponse(static_cast<CEventSeenPanickedPed*>(e), tactive, tsimplest);
         break;
     case EVENT_IN_WATER:
         ComputeInWaterResponse(static_cast<CEventInWater*>(e), tactive, tsimplest);
