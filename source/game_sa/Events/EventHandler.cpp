@@ -123,6 +123,7 @@
 #include "Events/EventSeenPanickedPed.h"
 #include "Events/EventSexyPed.h"
 #include "Events/EventGunShot.h"
+#include "Events/EventGunShotWhizzedBy.h"
 
 constexpr auto fSafeDistance = 60.f;
 
@@ -262,7 +263,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeSexyPedResponse, 0x4B99F0);
     RH_ScopedInstall(ComputeSexyVehicleResponse, 0x4B9AA0);
     RH_ScopedInstall(ComputeShotFiredResponse, 0x4BC710);
-    RH_ScopedInstall(ComputeShotFiredWhizzedByResponse, 0x4BBE30, { .reversed = false });
+    RH_ScopedInstall(ComputeShotFiredWhizzedByResponse, 0x4BBE30);
     RH_ScopedInstall(ComputeSignalAtPedResponse, 0x4BB050, { .reversed = false });
     RH_ScopedInstall(ComputeSpecialResponse, 0x4BB800, { .reversed = false });
     RH_ScopedInstall(ComputeVehicleCollisionResponse, 0x4BD6A0, { .reversed = false });
@@ -2227,8 +2228,40 @@ void CEventHandler::ComputeShotFiredResponse(CEventGunShot* e, CTask* tactive, C
 }
 
 // 0x4BBE30
-void CEventHandler::ComputeShotFiredWhizzedByResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BBE30, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeShotFiredWhizzedByResponse(CEventGunShotWhizzedBy* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        const auto esrc = e->GetSourceEntity();
+        if (!esrc) {
+            return nullptr;
+        }
+        switch (e->m_taskId) {
+        case TASK_NONE:
+            return nullptr; // 0x4BBE91
+        case TASK_SIMPLE_DUCK_WHILE_SHOTS_WHIZZING: { // 0x4BBE68
+            const auto ProcessTaskDuck = [this](CTaskSimpleDuck* tDuck) {
+                if (tDuck->m_nShotWhizzingCounter >= 0) {
+                    tDuck->RestartTask(m_ped);
+                }
+            };
+
+            if (tsimplest) {
+                if (const auto tDuck = CTask::DynCast<CTaskSimpleDuck>(tsimplest)) {
+                    ProcessTaskDuck(tDuck);
+                    return nullptr;
+                }
+            }
+
+            if (const auto tDuck = m_ped->GetIntelligence()->GetTaskDuck()) {
+                ProcessTaskDuck(tDuck);
+                return nullptr;
+            }
+
+            return new CTaskSimpleDuck{ DUCK_STANDALONE_WEAPON_CROUCH, CGeneral::GetRandomNumberInRange<uint16>(3'000, 5'000), 1'000 };
+        }
+        default:
+            NOTSA_UNREACHABLE();
+        }
+    }();
 }
 
 // 0x4BB050
@@ -2417,7 +2450,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputePotentialWalkIntoFireResponse(static_cast<CEventPotentialWalkIntoFire*>(e), tactive, tsimplest);
         break;
     case EVENT_SHOT_FIRED_WHIZZED_BY:
-        ComputeShotFiredWhizzedByResponse(e, tactive, tsimplest);
+        ComputeShotFiredWhizzedByResponse(static_cast<CEventGunShotWhizzedBy*>(e), tactive, tsimplest);
         break;
     case EVENT_LOW_ANGER_AT_PLAYER:
         ComputeLowAngerAtPlayerResponse(static_cast<CEventLowAngerAtPlayer*>(e), tactive, tsimplest);

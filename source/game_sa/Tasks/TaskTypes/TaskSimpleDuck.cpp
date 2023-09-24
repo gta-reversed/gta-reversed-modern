@@ -8,6 +8,8 @@ void CTaskSimpleDuck::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x691FC0);
     RH_ScopedInstall(Destructor, 0x692030);
+
+    RH_ScopedInstall(RestartTask, 0x692390);
     RH_ScopedInstall(CanPedDuck, 0x692610, { .reversed = false });
     //RH_ScopedInstall(ControlDuckMove, 0x6923F0, { .reversed = false }); // todo
     RH_ScopedInstall(IsTaskInUseByOtherTasks, 0x61C3D0, { .reversed = false });
@@ -99,5 +101,17 @@ void CTaskSimpleDuck::SetDuckTimer(uint16 lengthOfDuck) {
     if (m_nDuckControlType != DUCK_SCRIPT_CONTROLLED) {
         m_nStartTime = CTimer::GetTimeInMS();
         m_nLengthOfDuck = lengthOfDuck;
+    }
+}
+
+// 0x692390
+void CTaskSimpleDuck::RestartTask(CPed* ped) {
+    if (m_bNeedToSetDuckFlag) {
+        ped->bIsDucking = true;
+        m_bNeedToSetDuckFlag = false;
+    }
+    m_nStartTime = CTimer::GetTimeInMS();
+    if (m_nShotWhizzingCounter >= 0) {
+        m_nShotWhizzingCounter = CGeneral::GetRandomNumberInRange(1000, 2500);
     }
 }

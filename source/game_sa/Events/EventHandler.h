@@ -57,6 +57,7 @@ class CEventSeenPanickedPed;
 class CEventSexyPed;
 class CEventSexyVehicle;
 class CEventGunShot;
+class CEventGunShotWhizzedBy;
 
 class CEventHandler {
 public:
@@ -136,7 +137,7 @@ public:
     void ComputeSexyPedResponse(CEventSexyPed* e, CTask* tactive, CTask* tsimplest);
     void ComputeSexyVehicleResponse(CEventSexyVehicle* e, CTask* tactive, CTask* tsimplest);
     void ComputeShotFiredResponse(CEventGunShot* e, CTask* tactive, CTask* tsimplest);
-    void ComputeShotFiredWhizzedByResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputeShotFiredWhizzedByResponse(CEventGunShotWhizzedBy* e, CTask* tactive, CTask* tsimplest);
     void ComputeSignalAtPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeSpecialResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeVehicleCollisionResponse(CEvent* e, CTask* tactive, CTask* tsimplest);

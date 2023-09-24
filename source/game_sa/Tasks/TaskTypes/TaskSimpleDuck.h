@@ -53,6 +53,7 @@ public:
     bool IsTaskInUseByOtherTasks();
     void ForceStopMove();
     void SetDuckTimer(uint16 lengthOfDuck); // 0x692530
+    void RestartTask(CPed* ped);
 
 private:
     friend void InjectHooksMain();
