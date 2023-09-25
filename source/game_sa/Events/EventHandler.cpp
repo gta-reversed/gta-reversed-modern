@@ -87,6 +87,9 @@
 #include "Tasks/TaskTypes/TaskGangHasslePed.h"
 #include "Tasks/TaskTypes/TaskComplexSignalAtPed.h"
 #include "Tasks/TaskTypes/TaskComplexArrestPed.h"
+#include "Tasks/TaskTypes/TaskComplexHitPedWithCar.h"
+#include "Tasks/TaskTypes/TaskComplexEvasiveStep.h"
+#include "Tasks/TaskTypes/TaskComplexWalkRoundCar.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
@@ -270,7 +273,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeShotFiredWhizzedByResponse, 0x4BBE30);
     RH_ScopedInstall(ComputeSignalAtPedResponse, 0x4BB050);
     RH_ScopedInstall(ComputeSpecialResponse, 0x4BB800);
-    RH_ScopedInstall(ComputeVehicleCollisionResponse, 0x4BD6A0, { .reversed = false });
+    RH_ScopedInstall(ComputeVehicleCollisionResponse, 0x4BD6A0);
     RH_ScopedInstall(ComputeVehicleDamageResponse, 0x4C2FC0, { .reversed = false });
     RH_ScopedInstall(ComputeVehicleDiedResponse, 0x4BA8B0, { .reversed = false });
     // RH_ScopedInstall(ComputeVehicleHitAndRunResponse, 0x0, { .reversed = false });
@@ -2320,8 +2323,102 @@ void CEventHandler::ComputeSpecialResponse(CEventSpecial* e, CTask* tactive, CTa
 }
 
 // 0x4BD6A0
-void CEventHandler::ComputeVehicleCollisionResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BD6A0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeVehicleCollisionResponse(CEventVehicleCollision* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_vehicle) {
+            return nullptr;
+        }
+        m_ped->bPushedAlongByCar = false;
+        if (e->m_evadeType == VEHICLE_EVADE_BY_HITSIDE) {
+            return new CTaskComplexEvasiveStep{e->m_vehicle, CTaskComplexHitPedWithCar::ComputeEvasiveStepMoveDir(m_ped, e->m_vehicle)}; // 0x4BD74A
+        }
+        const auto IncrementAngerIfPlayerIsDriver = [&]() {
+            if (const auto d = e->m_vehicle->m_pDriver) {
+                if (d->IsPlayer()) {
+                    d->GetIntelligence()->IncrementAngerAtPlayer(2);
+                }
+            }
+        };
+        const auto eVehVelSq = e->m_vehicle->GetMoveSpeed().SquaredMagnitude();
+        if (eVehVelSq >= sq(0.5f)) { // 0x4BD754
+            if (m_ped->m_pEntityIgnoredCollision != e->m_vehicle) { // Moved up here from 0x4BD861
+                m_ped->bPushedAlongByCar = true;
+            }
+            float eDmgIntensity = e->m_fDamageIntensity;
+            if (m_ped->IsPlayer()) {
+                if (m_ped->bIsStanding) {
+                    const auto fwdImpactDot = (m_ped->GetForward() * m_ped->m_vecAnimMovingShiftLocal.y).Dot(e->m_impactNormal);
+                    if (fwdImpactDot < 0.f) { // Impact is opposite to our forwards vector
+                        eDmgIntensity = std::max(0.f, fwdImpactDot * m_ped->m_fMass + eDmgIntensity); // 0x4BD7B4
+                    }
+                }
+                eDmgIntensity = std::min(20.f, eDmgIntensity);
+            }
+            IncrementAngerIfPlayerIsDriver();
+            return new CTaskComplexHitPedWithCar{ e->m_vehicle, eDmgIntensity };
+        }
+        if ((!m_ped->IsPlayer() || m_ped->GetTaskManager().GetTaskPrimary(TASK_PRIMARY_PRIMARY)) && tsimplest && CTask::IsGoToTask(tsimplest)) {
+            if (e->m_vehicle == m_ped->m_standingOnEntity) {
+                if (std::abs(m_ped->m_fCurrentRotation - m_ped->m_fCurrentRotation) < 0.01f && CPedGeometryAnalyser::CanPedJumpObstacle(*m_ped, *e->m_vehicle)) {
+                    return new CTaskComplexJump{ COMPLEX_JUMP_TYPE_JUMP }; // 0x4BD925
+                }
+            }    
+            return new CTaskComplexWalkRoundCar{ // 0x4BD997
+                m_ped->GetGroup()
+                    ? PEDMOVE_RUN
+                    : (eMoveState)e->m_moveState,
+                static_cast<CTaskSimpleGoTo*>(tsimplest)->m_vecTargetPoint,
+                e->m_vehicle,
+                m_ped->GetIntelligence()->IsPedGoingForCarDoor(),
+                e->m_DirectionToWalkRoundCar
+            };   
+        }
+        if (m_ped->IsPlayer() && !m_ped->bIsInTheAir) { // 0x4BD9A3   
+            if (m_ped->m_pPlayerData->m_fMoveBlendRatio != 0.f || !e->m_vehicle->m_pDriver) { // 0x4BDAD2
+                g_ikChainMan.LookAt(
+                    "CompVehicleCollResp",
+                    m_ped,
+                    e->m_vehicle,
+                    800,
+                    BONE_UNKNOWN,
+                    nullptr,
+                    true,
+                    0.25f,
+                    500,
+                    3,
+                    false
+                );
+                return nullptr;
+            }
+            m_ped->AsPlayer()->AnnoyPlayerPed(false);
+            g_ikChainMan.LookAt(
+                "CompVehicleCollResp",
+                m_ped,
+                e->m_vehicle,
+                1300,
+                BONE_UNKNOWN,
+                nullptr,
+                true,
+                0.25f,
+                500,
+                3,
+                false
+            );
+            switch (m_ped->GetActiveWeapon().GetType()) {
+            case WEAPON_GOLFCLUB:
+            case WEAPON_KNIFE:
+            case WEAPON_BRASSKNUCKLE:
+            case WEAPON_UNARMED:
+                return new CTaskSimpleShakeFist{};
+            }
+        } else {
+            if (eVehVelSq >= sq(0.001f)) {
+                IncrementAngerIfPlayerIsDriver();
+                return new CTaskComplexHitPedWithCar{ e->m_vehicle, e->m_fDamageIntensity };
+            }
+        }
+        return nullptr;
+    }();
 }
 
 // 0x4C2FC0
@@ -2381,7 +2478,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
 
     switch (e->GetEventType()) {
     case EVENT_VEHICLE_COLLISION:
-        ComputeVehicleCollisionResponse(e, tactive, tsimplest);
+        ComputeVehicleCollisionResponse(static_cast<CEventVehicleCollision*>(e), tactive, tsimplest);
         break;
     case EVENT_PED_COLLISION_WITH_PED:
         ComputePedCollisionWithPedResponse(e, tactive, tsimplest);

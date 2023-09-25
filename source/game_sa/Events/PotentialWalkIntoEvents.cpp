@@ -77,9 +77,9 @@ bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped) {
         return false;
 
     if (const auto task = ped->GetTaskManager().Find<CTaskComplexWalkRoundCar>()) {
-        if (task->m_vehicle != m_vehicle) {
-            if ((m_vehicle->m_pTrailer && m_vehicle->m_pTrailer == task->m_vehicle) ||
-                (m_vehicle->m_pTractor && m_vehicle->m_pTractor == task->m_vehicle)
+        if (task->m_Veh != m_vehicle) {
+            if ((m_vehicle->m_pTrailer && m_vehicle->m_pTrailer == task->m_Veh) ||
+                (m_vehicle->m_pTractor && m_vehicle->m_pTractor == task->m_Veh)
             ) {
                 task->SetNewVehicle(m_vehicle, 0);
             }

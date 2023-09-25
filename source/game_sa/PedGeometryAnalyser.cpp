@@ -211,10 +211,10 @@ int32 CPedGeometryAnalyser::ComputeMoveDirToAvoidEntity(const CPed& ped, CEntity
 CVector CPedGeometryAnalyser::ComputeEntityDir(const CEntity& entity, eDirection dir) {
     switch (dir) {
     case eDirection::FORWARD:  return entity.GetForward();
-    case eDirection::LEFT:  return -entity.GetRight();
-    case eDirection::BACKWARD:  return -entity.GetForward();
-    case eDirection::RIGHT:  return entity.GetRight();
-    default: NOTSA_UNREACHABLE();
+    case eDirection::LEFT:     return -entity.GetRight();
+    case eDirection::BACKWARD: return -entity.GetForward();
+    case eDirection::RIGHT:    return entity.GetRight();
+    default:                   NOTSA_UNREACHABLE();
     }
 }
 

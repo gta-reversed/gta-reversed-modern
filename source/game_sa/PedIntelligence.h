@@ -132,6 +132,7 @@ public:
     void Process();
     CTask* GetActivePrimaryTask();
     float GetPedFOVRange() const;
+    void IncrementAngerAtPlayer(uint8 anger);
 
     void SetDmRadius(float r) { m_fDmRadius = r; }
     void SetNumPedsToScan(uint32 n) { m_nDmNumPedsToScan = n; }
