@@ -91,6 +91,7 @@
 #include "Tasks/TaskTypes/TaskComplexEvasiveStep.h"
 #include "Tasks/TaskTypes/TaskComplexWalkRoundCar.h"
 #include "Tasks/TaskTypes/TaskComplexRoadRage.h"
+#include "Tasks/TaskTypes/TaskComplexLeaveAnyCar.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
@@ -279,7 +280,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeVehicleDamageResponse, 0x4C2FC0);
     RH_ScopedInstall(ComputeVehicleDiedResponse, 0x4BA8B0);
     // RH_ScopedInstall(ComputeVehicleHitAndRunResponse, 0x0, { .reversed = false });
-    RH_ScopedInstall(ComputeVehicleOnFireResponse, 0x4BB2E0, { .reversed = false });
+    RH_ScopedInstall(ComputeVehicleOnFireResponse, 0x4BB2E0);
     RH_ScopedInstall(ComputeVehiclePotentialCollisionResponse, 0x4C0BD0, { .reversed = false });
     RH_ScopedInstall(ComputeVehiclePotentialPassiveCollisionResponse, 0x4B96D0, { .reversed = false });
     RH_ScopedInstall(ComputeVehicleToStealResponse, 0x4B9F80, { .reversed = false });
@@ -2542,13 +2543,50 @@ void CEventHandler::ComputeVehicleDiedResponse(CEventVehicleDied* e, CTask* tact
 }
 
 // 0x?
-void CEventHandler::ComputeVehicleHitAndRunResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    // NOP
+void CEventHandler::ComputeVehicleHitAndRunResponse(CEventVehicleHitAndRun* e, CTask* tactive, CTask* tsimplest) {
+    NOTSA_UNREACHABLE();
 }
 
 // 0x4BB2E0
-void CEventHandler::ComputeVehicleOnFireResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BB2E0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeVehicleOnFireResponse(CEventVehicleOnFire* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_vehicle) {
+            return nullptr;
+        }
+        if ((e->m_vehicle->GetStatus() == STATUS_WRECKED || e->m_vehicle->m_fHealth <= 0.f) && m_ped->IsInVehicle()) {
+            if (m_ped->IsInVehicle() && (m_ped->m_pVehicle->IsBike() || m_ped->m_pVehicle->IsSubQuad())) {
+                ComputeKnockOffBikeResponse(e, tactive, tsimplest);
+                return m_eventResponseTask;
+            }
+            return new CTaskComplexDie{ WEAPON_EXPLOSION, ANIM_GROUP_DEFAULT, ANIM_ID_KO_SHOT_FRONT_0 };
+        }
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_LEAVE_CAR: {
+            return new CTaskComplexLeaveAnyCar{ 0, 0, false };
+        case TASK_COMPLEX_LEAVE_CAR_AND_FLEE:
+            return new CTaskComplexSequence{
+                new CTaskComplexLeaveAnyCar{ 0, 0, true }, // 0x4BB43D
+                new CTaskComplexSmartFleeEntity{ e->m_vehicle, false, 15.f } // 0x4BB48B
+            };
+        case TASK_COMPLEX_LEAVE_CAR_AND_WANDER:
+            return new CTaskComplexSequence{ // Why use a sequence here?
+                new CTaskComplexLeaveAnyCar{ 0, 0, false } // 0x4BB506
+            };
+        case TASK_COMPLEX_CAR_DRIVE_MISSION_FLEE_SCENE: {
+            if (m_ped->m_pVehicle && m_ped->m_pVehicle->IsDriver(m_ped)) {
+                return new CTaskComplexCarDriveMissionFleeScene{ m_ped->m_pVehicle };
+            }
+            return new CTaskComplexSmartFleeEntity{ m_ped->m_pVehicle, false, 60.f };
+        }
+        case TASK_COMPLEX_FLEE_ENTITY:
+            return new CTaskComplexFleeEntity{ e->m_vehicle, false, 15.f };
+        case TASK_COMPLEX_SMART_FLEE_ENTITY:
+            return new CTaskComplexSmartFleeEntity{ m_ped->m_pVehicle, false, 15.f };
+        default:
+            NOTSA_UNREACHABLE();
+        }
+        }
+    }();
 }
 
 // 0x4C0BD0
@@ -2759,7 +2797,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeDangerResponse(static_cast<CEventDanger*>(e), tactive, tsimplest);
         break;
     case EVENT_VEHICLE_ON_FIRE:
-        ComputeVehicleOnFireResponse(e, tactive, tsimplest);
+        ComputeVehicleOnFireResponse(static_cast<CEventVehicleOnFire*>(e), tactive, tsimplest);
         break;
     case EVENT_INTERIOR_USE_INFO:
         ComputeInteriorUseInfoResponse(static_cast<CEventInteriorUseInfo*>(e), CTask::DynCast<CTaskInteriorUseInfo>(tactive), tsimplest);
