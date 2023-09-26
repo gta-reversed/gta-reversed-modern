@@ -62,6 +62,7 @@ class CEventSignalAtPed;
 class CEventSpecial;
 class CEventVehicleCollision;
 class CEventVehicleDamage;
+class CEventVehicleDied;
 
 class CEventHandler {
 public:
@@ -146,7 +147,7 @@ public:
     void ComputeSpecialResponse(CEventSpecial* e, CTask* tactive, CTask* tsimplest);
     void ComputeVehicleCollisionResponse(CEventVehicleCollision* e, CTask* tactive, CTask* tsimplest);
     void ComputeVehicleDamageResponse(CEventVehicleDamage* e, CTask* tactive, CTask* tsimplest);
-    void ComputeVehicleDiedResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputeVehicleDiedResponse(CEventVehicleDied* e, CTask* tactive, CTask* tsimplest);
     void ComputeVehicleHitAndRunResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeVehicleOnFireResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputeVehiclePotentialCollisionResponse(CEvent* e, CTask* tactive, CTask* tsimplest);

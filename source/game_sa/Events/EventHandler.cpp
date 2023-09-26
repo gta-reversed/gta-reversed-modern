@@ -277,7 +277,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeSpecialResponse, 0x4BB800);
     RH_ScopedInstall(ComputeVehicleCollisionResponse, 0x4BD6A0);
     RH_ScopedInstall(ComputeVehicleDamageResponse, 0x4C2FC0);
-    RH_ScopedInstall(ComputeVehicleDiedResponse, 0x4BA8B0, { .reversed = false });
+    RH_ScopedInstall(ComputeVehicleDiedResponse, 0x4BA8B0);
     // RH_ScopedInstall(ComputeVehicleHitAndRunResponse, 0x0, { .reversed = false });
     RH_ScopedInstall(ComputeVehicleOnFireResponse, 0x4BB2E0, { .reversed = false });
     RH_ScopedInstall(ComputeVehiclePotentialCollisionResponse, 0x4C0BD0, { .reversed = false });
@@ -2526,8 +2526,19 @@ void CEventHandler::ComputeVehicleDamageResponse(CEventVehicleDamage* e, CTask* 
 }
 
 // 0x4BA8B0
-void CEventHandler::ComputeVehicleDiedResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BA8B0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeVehicleDiedResponse(CEventVehicleDied* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_vehicle) {
+            return nullptr;
+        }
+        m_ped->physicalFlags.bDestroyed = true;
+        m_ped->m_fHealth = 0.f;
+        if (m_ped->IsInVehicle() && (m_ped->m_pVehicle->IsBike() || m_ped->m_pVehicle->IsSubQuad())) {
+            ComputeKnockOffBikeResponse(e, tactive, tsimplest);
+            return m_eventResponseTask;
+        }
+        return new CTaskComplexDie{ WEAPON_EXPLOSION, ANIM_GROUP_DEFAULT, ANIM_ID_KO_SHOT_FRONT_0 };
+    }();
 }
 
 // 0x?
@@ -2661,7 +2672,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         }
         break;
     case EVENT_VEHICLE_DIED:
-        ComputeVehicleDiedResponse(e, tactive, tsimplest);
+        ComputeVehicleDiedResponse(static_cast<CEventVehicleDied*>(e), tactive, tsimplest);
         break;
     case EVENT_ACQUAINTANCE_PED_HATE:
     case EVENT_ACQUAINTANCE_PED_DISLIKE:
