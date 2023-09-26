@@ -265,7 +265,7 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
     field_768 = 0;
     m_pAttachedTo = nullptr;
     m_nTurretAmmo = 0;
-    field_460 = nullptr;
+    m_roadRageWith = nullptr;
     field_468 = 0;
     m_nWeaponModelId = -1;
     m_nMoneyCount = 0;

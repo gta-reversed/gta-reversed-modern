@@ -53,6 +53,7 @@ public:
     void SetCanBeEmptied(bool flush);
     void DeRegister();
     void SetRepeatMode(bool repeat);
+    bool IsActive() const { return m_Tasks[0] != nullptr; }
 
 private:
     friend void InjectHooksMain();

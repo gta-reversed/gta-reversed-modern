@@ -313,8 +313,8 @@ bool CWeapon::FireSniper(CPed* shooter, CEntity* victim, CVector* target) {
 
     if (shooter->m_nType == ENTITY_TYPE_PED) {
         CCrime::ReportCrime(CRIME_FIRE_WEAPON, shooter, shooter);
-    } else if (shooter->m_nType == ENTITY_TYPE_VEHICLE && shooter->field_460) {
-        CCrime::ReportCrime(CRIME_FIRE_WEAPON, shooter, shooter->field_460);
+    } else if (shooter->m_nType == ENTITY_TYPE_VEHICLE && shooter->m_roadRageWith) {
+        CCrime::ReportCrime(CRIME_FIRE_WEAPON, shooter, shooter->m_roadRageWith);
     }
 
     CVector targetPoint = velocity * 40.0f + activeCam.m_vecSource;

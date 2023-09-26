@@ -101,7 +101,7 @@ public:
     CAEPedSpeechAudioEntity m_pedSpeech;
     CAEPedWeaponAudioEntity m_weaponAudio;
     char                    field_43C[36];
-    CPed*                   field_460;
+    CPed*                   m_roadRageWith;
     char                    field_464[4];
     int32                   field_468;
 

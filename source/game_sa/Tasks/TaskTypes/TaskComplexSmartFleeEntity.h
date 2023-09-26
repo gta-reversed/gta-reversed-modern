@@ -32,7 +32,7 @@ public:
     CTaskComplexSmartFleeEntity(
         CEntity* fleeEntity,
         bool scream,
-        float safeDistance = 30.f,
+        float safeDistance,
         int32 fleeTime = 1'000'000,
         int32 posCheckPeriod = 1000, 
         float posChangeTolerance = 1.f, /* = fEntityPosChangeThreshold */

@@ -90,11 +90,13 @@
 #include "Tasks/TaskTypes/TaskComplexHitPedWithCar.h"
 #include "Tasks/TaskTypes/TaskComplexEvasiveStep.h"
 #include "Tasks/TaskTypes/TaskComplexWalkRoundCar.h"
+#include "Tasks/TaskTypes/TaskComplexRoadRage.h"
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
 #include "PedStats.h"
 
+#include "Events/EventVehicleDamage.h"
 #include "Events/EventScriptCommand.h"
 #include "Events/EventRevived.h"
 #include "Events/EntityCollisionEvents.h"
@@ -274,7 +276,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeSignalAtPedResponse, 0x4BB050);
     RH_ScopedInstall(ComputeSpecialResponse, 0x4BB800);
     RH_ScopedInstall(ComputeVehicleCollisionResponse, 0x4BD6A0);
-    RH_ScopedInstall(ComputeVehicleDamageResponse, 0x4C2FC0, { .reversed = false });
+    RH_ScopedInstall(ComputeVehicleDamageResponse, 0x4C2FC0);
     RH_ScopedInstall(ComputeVehicleDiedResponse, 0x4BA8B0, { .reversed = false });
     // RH_ScopedInstall(ComputeVehicleHitAndRunResponse, 0x0, { .reversed = false });
     RH_ScopedInstall(ComputeVehicleOnFireResponse, 0x4BB2E0, { .reversed = false });
@@ -2422,8 +2424,105 @@ void CEventHandler::ComputeVehicleCollisionResponse(CEventVehicleCollision* e, C
 }
 
 // 0x4C2FC0
-void CEventHandler::ComputeVehicleDamageResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4C2FC0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeVehicleDamageResponse(CEventVehicleDamage* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!m_ped->m_pVehicle || m_ped->m_pVehicle != e->m_vehicle) {
+            return nullptr;
+        }
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_KILL_PED_ON_FOOT: { // 0x4C31C5
+            if (!e->m_attacker) { 
+                return nullptr;
+            }
+            switch (e->m_attacker->GetType()) {
+            case ENTITY_TYPE_PED: {
+                if (IsKillTaskAppropriate(m_ped, e->m_attacker->AsPed(), *e)) {
+                    return new CTaskComplexKillPedOnFoot{ e->m_attacker->AsPed() }; // 0x4C33DA
+                }
+                if (!notsa::IsFixBugs() || m_ped->m_pVehicle) { // Not a bug per-se, as it's harmless, but we can save an `new` call
+                    if (m_ped->m_pVehicle && m_ped->m_pVehicle->IsDriver(m_ped)) {
+                        return new CTaskComplexCarDriveMissionFleeScene{ m_ped->m_pVehicle }; // 0x4C332B
+                    } else {
+                        return new CTaskComplexSmartFleeEntity{ m_ped->m_pVehicle, false, 60.f }; // 0x4C33A6
+                    }
+                }
+                return nullptr;
+            }
+            case ENTITY_TYPE_VEHICLE:
+                return new CTaskComplexKillPedOnFoot{ e->m_attacker->AsVehicle()->m_pDriver }; // `driver == null` is not UB
+            }
+            return nullptr;
+        }
+        case TASK_COMPLEX_ROAD_RAGE: { // 0x4C31CE
+            if (!e->m_attacker) { 
+                return nullptr;
+            }
+            switch (e->m_attacker->GetType()) {
+            case ENTITY_TYPE_PED:
+                return new CTaskComplexRoadRage{ e->m_attacker->AsPed() };
+            case ENTITY_TYPE_VEHICLE:
+                return new CTaskComplexRoadRage{ e->m_attacker->AsVehicle()->m_pDriver }; // `driver == null` is not UB
+            }
+            return nullptr;
+        }
+        case TASK_COMPLEX_KILL_CRIMINAL: { // 0x4C31E8
+            if (!e->m_attacker) { 
+                return nullptr;
+            }
+            switch (e->m_attacker->GetType()) {
+            case ENTITY_TYPE_PED: {
+                if (!e->m_attacker->AsPed()->IsPlayer()) {
+                    return new CTaskComplexKillCriminal{ e->m_attacker->AsPed() };
+                }
+                return nullptr;
+            }
+            case ENTITY_TYPE_VEHICLE: {
+                const auto attacker = e->m_attacker->AsVehicle();
+                if (!attacker->m_pDriver || !attacker->m_pDriver->IsPlayer()) {
+                    return new CTaskComplexKillCriminal{ attacker->m_pDriver };
+                }
+                return nullptr;
+            }
+            }
+            return nullptr;
+        }
+        case TASK_COMPLEX_CAR_DRIVE_MISSION_KILL_PED: { // 0x4C3111
+            if (!e->m_attacker) { 
+                return nullptr;
+            }
+            switch (e->m_attacker->GetType()) {
+            case ENTITY_TYPE_PED:
+            case ENTITY_TYPE_VEHICLE: {
+                if (   e->GetSourceEntity() == FindPlayerPed() // Interesting...
+                    && CTheScripts::IsPlayerOnAMission()
+                    && m_ped->IsCreatedBy(PED_GAME)
+                    && e->m_weaponType == WEAPON_RAMMEDBYCAR
+                ) { 
+                    return new CTaskComplexCarDriveMissionFleeScene{ m_ped->m_pVehicle }; // 0x4C3171
+                }
+                return new CTaskComplexCarDriveMissionKillPed{ m_ped->m_pVehicle, e->m_attacker }; // 0x4C31B6
+            }
+            }
+            return nullptr;
+        }
+        case TASK_COMPLEX_LEAVE_CAR_AND_FLEE: // 0x4C3022
+            return new CTaskComplexLeaveCarAndFlee{ m_ped->m_pVehicle, m_ped->GetPosition() };
+        case TASK_COMPLEX_CAR_DRIVE_MISSION_FLEE_SCENE: { // 0x4C3027
+            if (!m_ped->m_pVehicle->IsDriver(m_ped)) {
+                return new CTaskComplexSmartFleeEntity{ m_ped->m_pVehicle, false, 60.f }; // 0x4C302E
+            }
+            return new CTaskComplexCarDriveMissionFleeScene{ m_ped->m_pVehicle }; 
+        }
+        case TASK_COMPLEX_SEQUENCE: {
+            const auto nextSeqIdx = m_ped->GetIntelligence()->m_NextEventResponseSequence;
+            if (nextSeqIdx >= 0 && CTaskSequences::Get(nextSeqIdx)->IsActive()) {
+                return new CTaskComplexUseSequence{ nextSeqIdx }; // 0x4C3105
+            }
+            return nullptr;
+        }
+        }
+        return nullptr;
+    }();
 }
 
 // 0x4BA8B0
@@ -2460,7 +2559,7 @@ void CEventHandler::ComputeVehicleToStealResponse(CEvent* e, CTask* tactive, CTa
 void CEventHandler::ComputeWaterCannonResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
     plugin::CallMethod<0x4BAE30, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
-
+ 
 // 0x4C3870
 void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
     m_physicalResponseTask = nullptr;
@@ -2574,7 +2673,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         break;
     case EVENT_VEHICLE_DAMAGE_WEAPON:
     case EVENT_VEHICLE_DAMAGE_COLLISION:
-        ComputeVehicleDamageResponse(e, tactive, tsimplest);
+        ComputeVehicleDamageResponse(static_cast<CEventVehicleDamage*>(e), tactive, tsimplest);
         break;
     case EVENT_SPECIAL:
         ComputeSpecialResponse(static_cast<CEventSpecial*>(e), tactive, tsimplest);
