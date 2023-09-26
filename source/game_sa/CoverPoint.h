@@ -22,6 +22,11 @@ public:
     CPed*    m_apCoveredPeds[2];
 
 public:
+    CCoverPoint() {
+        m_nMaxPedsInCover = 0;
+    }
+
+public:
     bool CanAccomodateAnotherPed();
     void ReleaseCoverPointForPed(CPed* ped);
     void ReserveCoverPointForPed(CPed* ped);
