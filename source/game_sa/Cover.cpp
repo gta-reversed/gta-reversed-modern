@@ -29,14 +29,9 @@ void CCover::InjectHooks() {
 void CCover::Init() {
     ZoneScoped;
 
-    CCover::m_NumPoints = 0;
-    CCover::m_ListOfProcessedBuildings.Flush();
-
-    CCoverPoint* coverPoint = CCover::m_aPoints.data();
-    do {
-        coverPoint->m_nMaxPedsInCover = 0;
-        coverPoint++;
-    } while ((int)coverPoint < (int)&CCover::m_ListOfProcessedBuildings);
+    m_NumPoints = 0;
+    m_ListOfProcessedBuildings.Flush();
+    rng::fill(m_aPoints, CCoverPoint{});
 }
 
 // unused
