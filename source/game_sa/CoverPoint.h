@@ -13,23 +13,18 @@ class CPed;
 
 class CCoverPoint {
 public:
-    char     m_nMaxPedsInCover;
-    char     m_nCoverType;
-    char     m_nDirection;
-    char     _pad3;
-    CVector  m_vecOffset;
-    CEntity* m_pCoverEntity;
-    CPed*    m_apCoveredPeds[2];
+    CCoverPoint() = default;
 
-public:
-    CCoverPoint() {
-        m_nMaxPedsInCover = 0;
-    }
-
-public:
     bool CanAccomodateAnotherPed();
     void ReleaseCoverPointForPed(CPed* ped);
     void ReserveCoverPointForPed(CPed* ped);
-};
 
+public:
+    char     m_nMaxPedsInCover{};
+    char     m_nCoverType{};
+    char     m_nDirection{};
+    CVector  m_vecOffset{};
+    CEntity* m_pCoverEntity{};
+    CPed*    m_apCoveredPeds[2]{};
+};
 VALIDATE_SIZE(CCoverPoint, 0x1C);
