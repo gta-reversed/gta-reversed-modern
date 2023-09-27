@@ -284,7 +284,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeVehicleOnFireResponse, 0x4BB2E0);
     RH_ScopedInstall(ComputeVehiclePotentialCollisionResponse, 0x4C0BD0);
     RH_ScopedInstall(ComputeVehiclePotentialPassiveCollisionResponse, 0x4B96D0);
-    RH_ScopedInstall(ComputeVehicleToStealResponse, 0x4B9F80, { .reversed = false });
+    RH_ScopedInstall(ComputeVehicleToStealResponse, 0x4B9F80);
     RH_ScopedInstall(ComputeWaterCannonResponse, 0x4BAE30, { .reversed = false });
 
     RH_ScopedOverloadedInstall(ComputeEventResponseTask, "0", 0x4C3870, void (CEventHandler::*)(CEvent*, CTask*));
@@ -2748,8 +2748,13 @@ void CEventHandler::ComputeVehiclePotentialPassiveCollisionResponse(CEventPotent
 }
 
 // 0x4B9F80
-void CEventHandler::ComputeVehicleToStealResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4B9F80, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeVehicleToStealResponse(CEventVehicleToSteal* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!m_ped->bInVehicle || !e->m_vehicle) {
+            return nullptr;
+        }
+        return new CTaskComplexStealCar{ e->m_vehicle };
+    }();
 }
 
 // 0x4BAE30
@@ -2844,7 +2849,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeAttractorResponse(static_cast<CEventAttractor*>(e), tactive, tsimplest);
         break;
     case EVENT_VEHICLE_TO_STEAL:
-        ComputeVehicleToStealResponse(e, tactive, tsimplest);
+        ComputeVehicleToStealResponse(static_cast<CEventVehicleToSteal*>(e), tactive, tsimplest);
         break;
     case EVENT_GUN_AIMED_AT:
         ComputeGunAimedAtResponse(static_cast<CEventGunAimedAt*>(e), tactive, tsimplest);
