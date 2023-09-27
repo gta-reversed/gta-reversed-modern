@@ -118,7 +118,7 @@ void CCover::FindCoverPointsForThisBuilding(CBuilding* building) {
 
 // 0x698D40
 uint8 CCover::FindDirFromVector(float x, float y) {
-    return plugin::CallAndReturn<uint8, 0x698D40, float, float>(x, y);
+    return (uint8)((atan2(-x, y)) * 40.743664);
 }
 
 // 0x698D60
