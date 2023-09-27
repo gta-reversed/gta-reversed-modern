@@ -29,8 +29,9 @@ UIRenderer::UIRenderer() :
     m_ImIO->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
     m_ImIO->NavActive   = false;
 
-    // NOTSA: Better to move font to memory, for linux or mac builds? ( are we doing that? )
+#ifdef WIN32
     m_ImIO->FontDefault = m_ImIO->Fonts->AddFontFromFileTTF("C:/Windows/Fonts/trebucbd.ttf", SCREEN_SCALE_Y(10.0f));
+#endif
     ImGuiStyle& style = ImGui::GetStyle();
     style.WindowBorderSize = 0.0f;
     style.FrameBorderSize = 0.0f;
@@ -147,8 +148,14 @@ void UIRenderer::DebugCode() {
     //        TASK_PRIMARY_PRIMARY
     //    );
     //}
-
-    if (pad->IsF7JustPressed() || (pad->IsCtrlPressed() && pad->IsStandardKeyJustPressed('m'))) {
+    
+    if (pad->IsF7JustPressed() || (pad->IsCtrlPressed() && pad->IsStandardKeyJustPressed('M'))) {
+        CPad::GetPad(0)->NewMouseControllerState.Clear();
+        CPad::GetPad(0)->NewMouseControllerState.X = 0;
+        CPad::GetPad(0)->NewMouseControllerState.Y = 0;
+        CPad::GetPad(0)->OldMouseControllerState.Clear();
+        CPad::GetPad(0)->OldMouseControllerState.X = 0;
+        CPad::GetPad(0)->OldMouseControllerState.Y = 0;
         SetPlayerInput(!m_InputActive);
     }
     if (pad->IsStandardKeyJustPressed('0')) {
