@@ -35,7 +35,10 @@ void CCover::Init() {
 // unused
 // 0x698DB0
 void CCover::RemoveCoverPointIfEntityLost(CCoverPoint* point) {
-    plugin::Call<0x698DB0>();
+    if (0 < point->m_nMaxPedsInCover && point->m_nMaxPedsInCover < 4 && !point->m_pCoverEntity) {
+        point->m_nMaxPedsInCover = 0;
+        m_NumPoints--;
+    }
 }
 
 // 0x698740
