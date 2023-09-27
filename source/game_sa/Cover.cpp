@@ -6,7 +6,9 @@ void CCover::InjectHooks() {
     RH_ScopedClass(CCover);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(Init, 0x698710, {.reversed = false});
+    RH_ScopedInstall(Init, 0x698710);
+    RH_ScopedInstall(RemoveCoverPointIfEntityLost, 0x698DB0);
+    RH_ScopedInstall(Init, 0x698710);
     RH_ScopedInstall(RemoveCoverPointIfEntityLost, 0x698DB0);
     RH_ScopedInstall(RemoveCoverPointsForThisEntity, 0x698740, {.reversed = false});
     RH_ScopedInstall(ShouldThisBuildingHaveItsCoverPointsCreated, 0x699230);
@@ -29,7 +31,9 @@ void CCover::InjectHooks() {
 void CCover::Init() {
     ZoneScoped;
 
-    plugin::Call<0x698710>();
+    m_NumPoints = 0;
+    m_ListOfProcessedBuildings.Flush();
+    rng::fill(m_aPoints, CCoverPoint{});
 }
 
 // unused
