@@ -13,7 +13,7 @@ public:
 
     static void InjectHooks();
 
-    CTaskComplexWalkRoundCar(eMoveState moveState, CVector const& targetPt, CVehicle* vehicle, bool isPedGoingForCarDoor, uint8 forceThisDirectionRoundCar);
+    CTaskComplexWalkRoundCar(eMoveState moveState, CVector const& targetPt, CVehicle* vehicle, bool isPedGoingForCarDoor, uint8 forceThisDirectionRoundCar = {});
     CTaskComplexWalkRoundCar(const CTaskComplexWalkRoundCar&);
     ~CTaskComplexWalkRoundCar();
 

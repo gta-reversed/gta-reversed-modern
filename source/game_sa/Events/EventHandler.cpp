@@ -283,7 +283,7 @@ void CEventHandler::InjectHooks() {
     // RH_ScopedInstall(ComputeVehicleHitAndRunResponse, 0x0, { .reversed = false });
     RH_ScopedInstall(ComputeVehicleOnFireResponse, 0x4BB2E0);
     RH_ScopedInstall(ComputeVehiclePotentialCollisionResponse, 0x4C0BD0);
-    RH_ScopedInstall(ComputeVehiclePotentialPassiveCollisionResponse, 0x4B96D0, { .reversed = false });
+    RH_ScopedInstall(ComputeVehiclePotentialPassiveCollisionResponse, 0x4B96D0);
     RH_ScopedInstall(ComputeVehicleToStealResponse, 0x4B9F80, { .reversed = false });
     RH_ScopedInstall(ComputeWaterCannonResponse, 0x4BAE30, { .reversed = false });
 
@@ -2727,8 +2727,24 @@ void CEventHandler::ComputeVehiclePotentialCollisionResponse(CEventPotentialGetR
 }
 
 // 0x4B96D0
-void CEventHandler::ComputeVehiclePotentialPassiveCollisionResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4B96D0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeVehiclePotentialPassiveCollisionResponse(CEventPotentialWalkIntoVehicle* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_vehicle || !m_ped->bInVehicle || !CTask::IsGoToTask(tsimplest)) {
+            return nullptr;
+        }
+        const auto tGoTo = static_cast<CTaskSimpleGoTo*>(tsimplest);
+        if (tGoTo->m_moveState == PEDMOVE_STILL) {
+            return nullptr;
+        }
+        return new CTaskComplexWalkRoundCar{
+            m_ped->GetGroup()
+            ? PEDMOVE_RUN
+            : (eMoveState)e->m_moveState,
+            static_cast<CTaskSimpleGoTo*>(tsimplest)->m_vecTargetPoint,
+            e->m_vehicle,
+            m_ped->GetIntelligence()->IsPedGoingForCarDoor(),
+        };
+    }();
 }
 
 // 0x4B9F80
@@ -2736,7 +2752,7 @@ void CEventHandler::ComputeVehicleToStealResponse(CEvent* e, CTask* tactive, CTa
     plugin::CallMethod<0x4B9F80, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
 
-//  
+// 0x4BAE30
 void CEventHandler::ComputeWaterCannonResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
     plugin::CallMethod<0x4BAE30, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
@@ -2887,7 +2903,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeLowHealthResponse(static_cast<CEventHealthLow*>(e), tactive, tsimplest);
         break;
     case EVENT_POTENTIAL_WALK_INTO_VEHICLE:
-        ComputeVehiclePotentialPassiveCollisionResponse(e, tactive, tsimplest);
+        ComputeVehiclePotentialPassiveCollisionResponse(static_cast<CEventPotentialWalkIntoVehicle*>(e), tactive, tsimplest);
         break;
     case EVENT_ON_FIRE:
         ComputeOnFireResponse(static_cast<CEventOnFire*>(e), tactive, tsimplest);
