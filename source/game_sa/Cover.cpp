@@ -22,7 +22,7 @@ void CCover::InjectHooks() {
     RH_ScopedInstall(FindCoverPointsForThisBuilding, 0x699120);
     RH_ScopedInstall(FindDirFromVector, 0x698D40);
     RH_ScopedInstall(FindVectorFromDir, 0x698D60);
-    RH_ScopedInstall(FindVectorFromFirstToMissingVertex, 0x698790, {.reversed = false});
+    RH_ScopedInstall(FindVectorFromFirstToMissingVertex, 0x698790);
 }
 
 // 0x698710
@@ -138,5 +138,22 @@ CVector CCover::FindVectorFromDir(uint8 direction) {
 // unused
 // 0x698790
 CVector CCover::FindVectorFromFirstToMissingVertex(CColTriangle* triangle, int32* a3, CVector* vertPositions) {
-    return plugin::CallAndReturn<CVector, 0x698790, CColTriangle*, int32*, CVector*>(triangle, a3, vertPositions);
+    uint16 vertexIndex;
+    uint16 referenceIndex = *a3;
+
+    // Is vertex missing ?
+    if ((triangle->vA != referenceIndex && triangle->vA != a3[1])) {
+        vertexIndex = triangle->vA;
+    } else if (triangle->vB != referenceIndex && triangle->vB != a3[1]) {
+        vertexIndex = triangle->vB;
+    } else {
+        vertexIndex = triangle->vC;
+    }
+
+    CVector vector;
+    vector.x = vertPositions[vertexIndex].x - vertPositions[referenceIndex].x;
+    vector.y = vertPositions[vertexIndex].y - vertPositions[referenceIndex].y;
+    vector.z = vertPositions[vertexIndex].z - vertPositions[referenceIndex].z;
+
+    return vector;
 }
