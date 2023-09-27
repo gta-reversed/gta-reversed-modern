@@ -97,6 +97,7 @@
 #include "IKChainManager_c.h"
 #include "PedStats.h"
 
+#include "Events/EventPotentialGetRunOver.h"
 #include "Events/EventVehicleDamage.h"
 #include "Events/EventScriptCommand.h"
 #include "Events/EventRevived.h"
@@ -281,7 +282,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeVehicleDiedResponse, 0x4BA8B0);
     // RH_ScopedInstall(ComputeVehicleHitAndRunResponse, 0x0, { .reversed = false });
     RH_ScopedInstall(ComputeVehicleOnFireResponse, 0x4BB2E0);
-    RH_ScopedInstall(ComputeVehiclePotentialCollisionResponse, 0x4C0BD0, { .reversed = false });
+    RH_ScopedInstall(ComputeVehiclePotentialCollisionResponse, 0x4C0BD0);
     RH_ScopedInstall(ComputeVehiclePotentialPassiveCollisionResponse, 0x4B96D0, { .reversed = false });
     RH_ScopedInstall(ComputeVehicleToStealResponse, 0x4B9F80, { .reversed = false });
     RH_ScopedInstall(ComputeWaterCannonResponse, 0x4BAE30, { .reversed = false });
@@ -2590,8 +2591,139 @@ void CEventHandler::ComputeVehicleOnFireResponse(CEventVehicleOnFire* e, CTask* 
 }
 
 // 0x4C0BD0
-void CEventHandler::ComputeVehiclePotentialCollisionResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4C0BD0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeVehiclePotentialCollisionResponse(CEventPotentialGetRunOver* e, CTask* tactive, CTask* tsimplest) {
+    std::tie(m_eventResponseTask, m_partialAnimTask) = [&]() -> std::pair<CTask*, CTask*> {
+        if (!e->m_Vehicle || m_ped->bInVehicle) {
+            return {};
+        }
+        const CVector pedPos{m_ped->GetPosition()};
+
+        CVector vehBB[4];
+        CPedGeometryAnalyser::ComputeEntityBoundingBoxCorners(pedPos.z, *e->m_Vehicle, vehBB);
+
+        CVector vehBBPlanes[4];
+        float vehBBPlanesDot[4];
+        CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncachedAll(pedPos.z, *e->m_Vehicle, &vehBBPlanes, vehBBPlanesDot);
+
+        CVector dirToAvoidVehicle;
+        CPedGeometryAnalyser::ComputeMoveDirToAvoidEntity(*m_ped, *e->m_Vehicle, dirToAvoidVehicle);
+
+        // 0x4C0DA2 - 0x4C0E1D
+        const auto vehFwdSpeedSq       = e->m_Vehicle->GetMoveSpeed().Dot(e->m_Vehicle->GetForward());
+        const auto vehFwdSpeedPerSec = vehFwdSpeedSq * CTimer::GetTimestepPerSecond();
+        const auto vehBBCenter  = vehFwdSpeedSq > 0.f
+            ? (vehBB[3] + vehBB[0]) / 2.f   // Front side
+            : (vehBB[2] + vehBB[1]) / 2.f;  // Back side
+        const auto pedToVehBBCenter         = pedPos - vehBBCenter;
+        const auto pedToVehBBCenterFwdDot   = pedToVehBBCenter.Dot(e->m_Vehicle->GetForward());
+        const auto pedToVehBBCenterRightDot = pedToVehBBCenter.Dot(e->m_Vehicle->GetRight());
+
+        if (m_ped->IsPlayer()) {
+            const auto plyrPed = m_ped->AsPlayer();
+            if (   std::abs(pedToVehBBCenterFwdDot) < 3.f
+                && std::abs(pedToVehBBCenterFwdDot) > std::abs(vehFwdSpeedPerSec)
+                && plyrPed->m_pPlayerData->m_fMoveBlendRatio < 1.f
+                && g_ikChainMan.IsLooking(plyrPed)
+            ) { // 0x4C0E84
+                plyrPed->AnnoyPlayerPed(false);
+                g_ikChainMan.LookAt(
+                    "CompVhclPotCollResp",
+                    plyrPed,
+                    e->m_Vehicle,
+                    1500,
+                    BONE_UNKNOWN,
+                    nullptr,
+                    true,
+                    0.25f,
+                    500,
+                    3,
+                    false
+                );
+                switch (plyrPed->GetActiveWeapon().GetType()) {
+                case WEAPON_UNARMED:
+                case WEAPON_BASEBALLBAT:
+                case WEAPON_PISTOL:
+                case WEAPON_PISTOL_SILENCED:
+                case WEAPON_MICRO_UZI:
+                    return { nullptr, new CTaskSimpleShakeFist{} }; // 0x4C0F14
+                }
+                return {};
+            };
+        } else if (std::abs(pedToVehBBCenterFwdDot) <= std::abs(2.f * vehFwdSpeedPerSec)) { // 0x4C0F3D
+            if (std::abs(vehFwdSpeedSq) <= 0.05f) {
+                return {}; // Too slow
+            }
+            const auto rndChance = CGeneral::GetRandomNumberInRange(0.f, 1.f);
+            const auto [chanceToEvadeBack, chanceForHornNeeded, chanceToEvadeFront, minPedDistToBBCenterX] = [&]() -> std::array<float, 4> {
+                if (std::abs(vehFwdSpeedSq) <= 0.3f) {
+                    return {0.02f, 0.05f, 0.1f, 0.7f};
+                }
+                return {0.05f, 0.1f, 0.2f, 0.175f};
+            }();
+            const auto vehBBMaxX = e->m_Vehicle->GetColModel()->GetBoundingBox().m_vecMax.x;
+            if ((e->m_Vehicle->GetPosition() - pedPos).Dot(e->m_Vehicle->GetForward()) > 0.f) { // 0x4C0F6D - Is the vehicle going forwards?
+                if (vehBBMaxX - minPedDistToBBCenterX < std::abs(pedToVehBBCenterRightDot)) { // 
+                    if (rndChance >= chanceToEvadeFront * 0.5f) { // Inverted
+                        return { new CTaskComplexEvasiveStep{ e->m_Vehicle, dirToAvoidVehicle }, nullptr };
+                    } else { // 0x4C0FD2
+                        m_ped->m_fAimingRotation = (e->m_Vehicle->GetPosition2D() - m_ped->GetPosition2D()).Heading();
+                        return { new CTaskSimpleShakeFist{}, nullptr };
+                    }
+                } else if (rndChance < chanceToEvadeFront) { // 0x4C10DD
+                    const auto pedHeading = (e->m_Vehicle->GetPosition2D() - m_ped->GetPosition2D()).Heading();
+                    m_ped->m_fCurrentRotation = pedHeading;
+                    m_ped->m_fAimingRotation  = pedHeading;
+                    m_ped->SetHeading(pedHeading);
+
+                    return { new CTaskSimpleHandsUp{ 3000 }, nullptr }; // 0x4C117B
+                }
+            } else {
+                if (rndChance > chanceForHornNeeded && !e->m_Vehicle->m_nHornCounter) {
+                    return {};
+                }
+                if (rndChance > chanceToEvadeBack) {
+                    return { new CTaskComplexEvasiveStep{ e->m_Vehicle, dirToAvoidVehicle }, nullptr }; // 0x4C121E
+                }
+            }
+            return { new CTaskComplexEvasiveDiveAndGetUp{ e->m_Vehicle, 0, dirToAvoidVehicle, true }, nullptr }; // 0x4C11BA
+        } else if (e->m_Vehicle->GetStatus() == STATUS_PLAYER && m_ped->IsCreatedBy(PED_GAME)) {
+            const auto currPedEvent = m_ped->GetIntelligence()->GetEventHandler().GetHistory().GetCurrentEvent();
+            if (e->m_Vehicle->m_nHornCounter && (!currPedEvent || currPedEvent->GetEventType() != EVENT_POTENTIAL_GET_RUN_OVER)) { // 0x4C12A0
+                const auto rndNum = CGeneral::GetRandomNumberInRange(0, 1000);
+                if (rndNum < 25 && !m_ped->IsCop()) { // 0x4C12C0
+                    return { new CTaskComplexFleeEntity{ e->m_Vehicle, false, 60.f, CGeneral::GetRandomNumberInRange(750, 1250)}, nullptr };
+                } else if (rndNum < 400) {
+                    if (rndNum < 100) { // 0x4C1335
+                        return { // Linus Torvalds would nuke this code with 6 levels of indentation xD
+                            new CTaskComplexSequence{
+                                new CTaskSimpleAchieveHeading{ (e->m_Vehicle->GetPosition2D() - m_ped->GetPosition2D()).Heading() },
+                                new CTaskSimpleShakeFist{}
+                            },
+                            nullptr
+                        };
+                    } else {
+                        g_ikChainMan.LookAt(
+                            "CompVhclPotCollResp",
+                            m_ped,
+                            e->m_Vehicle,
+                            1300,
+                            BONE_UNKNOWN,
+                            nullptr,
+                            true,
+                            0.25f,
+                            500,
+                            3,
+                            false
+                        );
+                        if (rndNum < 200) {
+                            return { new CTaskSimpleAchieveHeading{ (e->m_Vehicle->GetPosition2D() - m_ped->GetPosition2D()).Heading() }, nullptr };
+                        }
+                    }
+                }
+            }
+        }
+        return {};
+    }();
 }
 
 // 0x4B96D0
@@ -2659,7 +2791,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeDeadPedResponse(static_cast<CEventDeadPed*>(e), tactive, tsimplest);
         break;
     case EVENT_POTENTIAL_GET_RUN_OVER:
-        ComputeVehiclePotentialCollisionResponse(e, tactive, tsimplest);
+        ComputeVehiclePotentialCollisionResponse(static_cast<CEventPotentialGetRunOver*>(e), tactive, tsimplest);
         break;
     case EVENT_POTENTIAL_WALK_INTO_PED:
         ComputePotentialPedCollideResponse(static_cast<CEventPotentialWalkIntoPed*>(e), tactive, tsimplest);
