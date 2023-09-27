@@ -5,7 +5,6 @@
 #include "Tasks/TaskTypes/TaskSimpleStandStill.h"
 #include "Tasks/TaskTypes/TaskComplexInAirAndLand.h"
 #include "Tasks/TaskTypes/TaskComplexStuckInAir.h"
-#include "Tasks/TaskTypes/TaskComplexFacial.h"
 #include "Tasks/TaskTypes/TaskSimpleWaitUntilAreaCodesMatch.h"
 #include "Tasks/TaskTypes/TaskComplexUseEffect.h"
 #include "Tasks/TaskTypes/TaskComplexKillPedOnFoot.h"
@@ -54,7 +53,6 @@
 #include "Tasks/TaskTypes/TaskComplexFallToDeath.h"
 #include "Tasks/TaskTypes/TaskSimpleFall.h"
 #include "Tasks/TaskTypes/TaskSimpleGetUp.h"
-#include "Tasks/TaskTypes/TaskSimpleUseGun.h"
 #include "Tasks/TaskTypes/TaskSimpleGunControl.h"
 #include "Tasks/TaskTypes/TaskSimpleChoking.h"
 #include "Tasks/TaskTypes/TaskSimpleBeHit.h"
@@ -66,7 +64,6 @@
 #include "Tasks/TaskTypes/TaskSimplePlayerOnFire.h"
 #include "Tasks/TaskTypes/TaskComplexOnFire.h"
 #include "Tasks/TaskTypes/TaskComplexPassObject.h"
-#include "Tasks/TaskTypes/TaskComplexScreamInCarThenLeave.h"
 #include "Tasks/TaskTypes/TaskComplexLeaveCarAndFlee.h"
 #include "Tasks/TaskTypes/TaskComplexLeaveCarAndWander.h"
 #include "Tasks/TaskTypes/TaskComplexProstituteSolicit.h"
@@ -95,7 +92,6 @@
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
-#include "PedStats.h"
 
 #include "Events/EventPotentialGetRunOver.h"
 #include "Events/EventVehicleDamage.h"
@@ -285,7 +281,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputeVehiclePotentialCollisionResponse, 0x4C0BD0);
     RH_ScopedInstall(ComputeVehiclePotentialPassiveCollisionResponse, 0x4B96D0);
     RH_ScopedInstall(ComputeVehicleToStealResponse, 0x4B9F80);
-    RH_ScopedInstall(ComputeWaterCannonResponse, 0x4BAE30, { .reversed = false });
+    RH_ScopedInstall(ComputeWaterCannonResponse, 0x4BAE30);
 
     RH_ScopedOverloadedInstall(ComputeEventResponseTask, "0", 0x4C3870, void (CEventHandler::*)(CEvent*, CTask*));
     RH_ScopedOverloadedInstall(ComputeEventResponseTask, "Ped", 0x4C4220, CTask*(*)(const CPed&, const CEvent&));
@@ -2758,10 +2754,18 @@ void CEventHandler::ComputeVehicleToStealResponse(CEventVehicleToSteal* e, CTask
 }
 
 // 0x4BAE30
-void CEventHandler::ComputeWaterCannonResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4BAE30, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputeWaterCannonResponse(CEventHitByWaterCannon* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        m_ped->Say(344);
+        m_ped->ApplyMoveForce({ 0.f, 0.f, CTimer::GetTimeStep() * 2.f });
+        m_ped->SetMoveSpeedXY((CVector2D{e->m_moveSpeed} * 0.6f + CVector2D{m_ped->GetMoveSpeed()}) / 2.f);
+        if (const auto speed = m_ped->GetMoveSpeed().Magnitude2D(); speed >= 0.2f) {
+            m_ped->SetMoveSpeedXY(0.2f / speed * CVector2D{m_ped->GetMoveSpeed()});
+        }
+        return new CTaskComplexFallAndGetUp{ CPedGeometryAnalyser::ComputePedHitSide(*m_ped, e->m_moveSpeed), 0 };
+    }();
 }
- 
+
 // 0x4C3870
 void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
     m_physicalResponseTask = nullptr;
@@ -2923,7 +2927,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputePedThreatBadlyLitResponse(static_cast<CEventAcquaintancePedHateBadlyLit*>(e), tactive, tsimplest);
         break;
     case EVENT_WATER_CANNON:
-        ComputeWaterCannonResponse(e, tactive, tsimplest);
+        ComputeWaterCannonResponse(static_cast<CEventHitByWaterCannon*>(e), tactive, tsimplest);
         break;
     case EVENT_SEEN_PANICKED_PED:
         ComputeSeenPanickedPedResponse(static_cast<CEventSeenPanickedPed*>(e), tactive, tsimplest);

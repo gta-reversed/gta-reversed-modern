@@ -67,6 +67,7 @@ class CEventVehicleHitAndRun;
 class CEventVehicleOnFire;
 class CEventPotentialGetRunOver;
 class CEventPotentialWalkIntoVehicle;
+class CEventHitByWaterCannon;
 
 class CEventHandler {
 public:
@@ -157,7 +158,7 @@ public:
     void ComputeVehiclePotentialCollisionResponse(CEventPotentialGetRunOver* e, CTask* tactive, CTask* tsimplest);
     void ComputeVehiclePotentialPassiveCollisionResponse(CEventPotentialWalkIntoVehicle* e, CTask* tactive, CTask* tsimplest);
     void ComputeVehicleToStealResponse(CEventVehicleToSteal* e, CTask* tactive, CTask* tsimplest);
-    void ComputeWaterCannonResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputeWaterCannonResponse(CEventHitByWaterCannon* e, CTask* tactive, CTask* tsimplest);
 
     void ComputeEventResponseTask(CEvent* event, CTask* task);
     static CTask* ComputeEventResponseTask(const CPed& ped, const CEvent& e);
