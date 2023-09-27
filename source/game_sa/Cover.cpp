@@ -7,7 +7,9 @@ void CCover::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x698710);
-    RH_ScopedInstall(RemoveCoverPointIfEntityLost, 0x698DB0, {.reversed = false});
+    RH_ScopedInstall(RemoveCoverPointIfEntityLost, 0x698DB0);
+    RH_ScopedInstall(Init, 0x698710);
+    RH_ScopedInstall(RemoveCoverPointIfEntityLost, 0x698DB0);
     RH_ScopedInstall(RemoveCoverPointsForThisEntity, 0x698740, {.reversed = false});
     RH_ScopedInstall(ShouldThisBuildingHaveItsCoverPointsCreated, 0x699230);
     RH_ScopedInstall(Update, 0x6997E0, {.reversed = false});
@@ -20,8 +22,8 @@ void CCover::InjectHooks() {
     RH_ScopedInstall(FindAndReserveCoverPoint, 0x6992B0, {.reversed = false});
     RH_ScopedInstall(FindCoordinatesCoverPoint, 0x699570, {.reversed = false});
     RH_ScopedInstall(FindCoverPointsForThisBuilding, 0x699120);
-    RH_ScopedInstall(FindDirFromVector, 0x698D40, {.reversed = false});
-    RH_ScopedInstall(FindVectorFromDir, 0x698D60, {.reversed = false});
+    RH_ScopedInstall(FindDirFromVector, 0x698D40);
+    RH_ScopedInstall(FindVectorFromDir, 0x698D60);
     RH_ScopedInstall(FindVectorFromFirstToMissingVertex, 0x698790, {.reversed = false});
 }
 
@@ -37,7 +39,10 @@ void CCover::Init() {
 // unused
 // 0x698DB0
 void CCover::RemoveCoverPointIfEntityLost(CCoverPoint* point) {
-    plugin::Call<0x698DB0>();
+    if (0 < point->m_nMaxPedsInCover && point->m_nMaxPedsInCover < 4 && !point->m_pCoverEntity) {
+        point->m_nMaxPedsInCover = 0;
+        m_NumPoints--;
+    }
 }
 
 // 0x698740
@@ -120,12 +125,16 @@ void CCover::FindCoverPointsForThisBuilding(CBuilding* building) {
 
 // 0x698D40
 uint8 CCover::FindDirFromVector(float x, float y) {
-    return plugin::CallAndReturn<uint8, 0x698D40, float, float>(x, y);
+    return (uint8)((atan2(-x, y)) * 40.743664);
 }
 
 // 0x698D60
 CVector CCover::FindVectorFromDir(uint8 direction) {
-    return plugin::CallAndReturn<CVector, 0x698D60, uint8>(direction);
+    CVector vector;
+    vector.x = (float)sin(direction * 0.02454369);
+    vector.y = (float)cos(direction * 0.02454369);
+    vector.z = 0.0;
+    return vector;
 }
 
 // unused
