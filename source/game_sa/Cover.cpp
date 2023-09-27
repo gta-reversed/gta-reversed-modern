@@ -8,8 +8,6 @@ void CCover::InjectHooks() {
 
     RH_ScopedInstall(Init, 0x698710);
     RH_ScopedInstall(RemoveCoverPointIfEntityLost, 0x698DB0);
-    RH_ScopedInstall(Init, 0x698710);
-    RH_ScopedInstall(RemoveCoverPointIfEntityLost, 0x698DB0);
     RH_ScopedInstall(RemoveCoverPointsForThisEntity, 0x698740, {.reversed = false});
     RH_ScopedInstall(ShouldThisBuildingHaveItsCoverPointsCreated, 0x699230);
     RH_ScopedInstall(Update, 0x6997E0, {.reversed = false});
