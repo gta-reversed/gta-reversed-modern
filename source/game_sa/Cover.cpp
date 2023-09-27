@@ -7,7 +7,7 @@ void CCover::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x698710, {.reversed = false});
-    RH_ScopedInstall(RemoveCoverPointIfEntityLost, 0x698DB0, {.reversed = false});
+    RH_ScopedInstall(RemoveCoverPointIfEntityLost, 0x698DB0);
     RH_ScopedInstall(RemoveCoverPointsForThisEntity, 0x698740, {.reversed = false});
     RH_ScopedInstall(ShouldThisBuildingHaveItsCoverPointsCreated, 0x699230);
     RH_ScopedInstall(Update, 0x6997E0, {.reversed = false});
@@ -20,8 +20,8 @@ void CCover::InjectHooks() {
     RH_ScopedInstall(FindAndReserveCoverPoint, 0x6992B0, {.reversed = false});
     RH_ScopedInstall(FindCoordinatesCoverPoint, 0x699570, {.reversed = false});
     RH_ScopedInstall(FindCoverPointsForThisBuilding, 0x699120);
-    RH_ScopedInstall(FindDirFromVector, 0x698D40, {.reversed = false});
-    RH_ScopedInstall(FindVectorFromDir, 0x698D60, {.reversed = false});
+    RH_ScopedInstall(FindDirFromVector, 0x698D40);
+    RH_ScopedInstall(FindVectorFromDir, 0x698D60);
     RH_ScopedInstall(FindVectorFromFirstToMissingVertex, 0x698790, {.reversed = false});
 }
 
