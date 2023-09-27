@@ -123,7 +123,11 @@ uint8 CCover::FindDirFromVector(float x, float y) {
 
 // 0x698D60
 CVector CCover::FindVectorFromDir(uint8 direction) {
-    return plugin::CallAndReturn<CVector, 0x698D60, uint8>(direction);
+    CVector vector;
+    vector.x = (float)sin(direction * 0.02454369);
+    vector.y = (float)cos(direction * 0.02454369);
+    vector.z = 0.0;
+    return vector;
 }
 
 // unused
