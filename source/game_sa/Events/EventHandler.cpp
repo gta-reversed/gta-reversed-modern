@@ -1,7 +1,12 @@
 #include "StdInc.h"
 
 #include "EventHandler.h"
+#include "InterestingEvents.h"
+#include "IKChainManager_c.h"
+#include "PedStats.h"
 
+#include "Tasks/TaskTypes/TaskComplexFacial.h"
+#include "Tasks/TaskTypes/TaskSimpleUseGun.h"
 #include "Tasks/TaskTypes/TaskSimpleStandStill.h"
 #include "Tasks/TaskTypes/TaskComplexInAirAndLand.h"
 #include "Tasks/TaskTypes/TaskComplexStuckInAir.h"
@@ -89,10 +94,9 @@
 #include "Tasks/TaskTypes/TaskComplexWalkRoundCar.h"
 #include "Tasks/TaskTypes/TaskComplexRoadRage.h"
 #include "Tasks/TaskTypes/TaskComplexLeaveAnyCar.h"
+#include "Tasks/TaskTypes/TaskComplexScreamInCarThenLeave.h"
 
-#include "InterestingEvents.h"
-#include "IKChainManager_c.h"
-
+#include "Events/EventPedEnteredMyVehicle.h"
 #include "Events/EventPotentialGetRunOver.h"
 #include "Events/EventVehicleDamage.h"
 #include "Events/EventScriptCommand.h"
@@ -250,7 +254,7 @@ void CEventHandler::InjectHooks() {
     RH_ScopedInstall(ComputePassObjectResponse, 0x4BB0C0);
     RH_ScopedInstall(ComputePedCollisionWithPedResponse, 0x4BDB80, { .reversed = false });
     RH_ScopedInstall(ComputePedCollisionWithPlayerResponse, 0x4BE7D0, { .reversed = false });
-    RH_ScopedInstall(ComputePedEnteredVehicleResponse, 0x4C1590, { .reversed = false });
+    RH_ScopedInstall(ComputePedEnteredVehicleResponse, 0x4C1590);
     RH_ScopedInstall(ComputePedFriendResponse, 0x4B9DD0);
     RH_ScopedInstall(ComputePedSoundQuietResponse, 0x4B9D40);
     RH_ScopedInstall(ComputePedThreatBadlyLitResponse, 0x4B9C90);
@@ -1537,10 +1541,64 @@ void CEventHandler::ComputePedCollisionWithPedResponse(CEvent* e, CTask* tactive
 void CEventHandler::ComputePedCollisionWithPlayerResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
     plugin::CallMethod<0x4BE7D0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
+/*
+m_eventResponseTask = [&]() -> CTask* {
+
+}();
+*/
 
 // 0x4C1590
-void CEventHandler::ComputePedEnteredVehicleResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
-    plugin::CallMethod<0x4C1590, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
+void CEventHandler::ComputePedEnteredVehicleResponse(CEventPedEnteredMyVehicle* e, CTask* tactive, CTask* tsimplest) {
+    m_eventResponseTask = [&]() -> CTask* {
+        if (!e->m_Vehicle || !e->m_PedThatEntered || !m_ped->bInVehicle) {
+            return nullptr;
+        }
+        /* m_ped->m_pVehicle->IsDriver(m_ped) */
+        if (e->m_Vehicle->m_pHandlingData->GetAnimGroupId() == ANIM_GROUP_COACHCARANIMS) {
+            return new CTaskComplexSmartFleeEntity{ e->m_PedThatEntered, false, 60.f };
+        }
+        g_InterestingEvents.Add(CInterestingEvents::INTERESTING_EVENT_20, e->m_Vehicle);
+        const auto LeaveCarAndFlee = [&]{
+            return new CTaskComplexLeaveCarAndFlee{
+                e->m_Vehicle,
+                e->m_Vehicle->GetPosition(),
+                e->m_TargetDoor,
+                CGeneral::GetRandomNumberInRange(300, 600)
+            };
+        };
+        switch (e->m_taskId) {
+        case TASK_COMPLEX_KILL_CRIMINAL: { // 0x4C17ED
+            if (e->m_PedThatEntered->IsPlayer()) {
+                return nullptr;
+            }
+            return new CTaskComplexKillCriminal{ e->m_PedThatEntered };
+        }
+        case TASK_COMPLEX_DESTROY_CAR: // 0x4C1849
+            return new CTaskComplexDestroyCar{ e->m_Vehicle };
+        case TASK_COMPLEX_KILL_PED_ON_FOOT: { // 0x4C186A
+            if (!IsKillTaskAppropriate(m_ped, e->m_PedThatEntered, *e)) {
+                return LeaveCarAndFlee();
+            }
+            return new CTaskComplexKillPedOnFoot{ e->m_PedThatEntered };
+        }
+        case TASK_COMPLEX_SCREAM_IN_CAR_THEN_LEAVE: { // 0x4C1759
+            if (e->m_PedThatEntered->IsPlayer() && CTheScripts::IsPlayerOnAMission()) {
+                return LeaveCarAndFlee();
+            }
+            return new CTaskComplexScreamInCarThenLeave{ e->m_Vehicle, e->m_TargetDoor };
+        }
+        case TASK_COMPLEX_LEAVE_CAR: // 0x4C16CE
+            return new CTaskComplexLeaveCar{ e->m_Vehicle, e->m_TargetDoor, CGeneral::GetRandomNumberInRange(300, 600), false, true };
+        case TASK_COMPLEX_LEAVE_CAR_AND_FLEE: // 0x4C18C9
+            return LeaveCarAndFlee();
+        case TASK_COMPLEX_LEAVE_CAR_AND_WANDER: // 0x4C1744
+            return new CTaskComplexLeaveCarAndWander{ e->m_Vehicle, e->m_TargetDoor, CGeneral::GetRandomNumberInRange(300, 600), false };
+        case TASK_NONE: // 0x4C16F1
+            return nullptr;
+        default:
+            NOTSA_UNREACHABLE(); // Not sure
+        }
+    }();
 }
 
 // 0x4B9DD0
@@ -2134,11 +2192,6 @@ void CEventHandler::ComputeSeenPanickedPedResponse(CEventSeenPanickedPed* e, CTa
         }
     }();
 }
-/*
-m_eventResponseTask = [&]() -> CTask* {
-
-}();
-*/
 
 // 0x4B99F0
 void CEventHandler::ComputeSexyPedResponse(CEventSexyPed* e, CTask* tactive, CTask* tsimplest) {
@@ -2828,7 +2881,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* e, CTask* task) {
         ComputeCopCarBeingStolenResponse(static_cast<CEventCopCarBeingStolen*>(e), tactive, tsimplest);
         break;
     case EVENT_PED_ENTERED_MY_VEHICLE:
-        ComputePedEnteredVehicleResponse(e, tactive, tsimplest);
+        ComputePedEnteredVehicleResponse(static_cast<CEventPedEnteredMyVehicle*>(e), tactive, tsimplest);
         break;
     case EVENT_REVIVE:
         ComputeReviveResponse(static_cast<CEventRevived*>(e), tactive, tsimplest);

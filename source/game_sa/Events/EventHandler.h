@@ -68,6 +68,7 @@ class CEventVehicleOnFire;
 class CEventPotentialGetRunOver;
 class CEventPotentialWalkIntoVehicle;
 class CEventHitByWaterCannon;
+class CEventPedEnteredMyVehicle;
 
 class CEventHandler {
 public:
@@ -127,7 +128,7 @@ public:
     void ComputePassObjectResponse(CEventPassObject* e, CTask* tactive, CTask* tsimplest);
     void ComputePedCollisionWithPedResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
     void ComputePedCollisionWithPlayerResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
-    void ComputePedEnteredVehicleResponse(CEvent* e, CTask* tactive, CTask* tsimplest);
+    void ComputePedEnteredVehicleResponse(CEventPedEnteredMyVehicle* e, CTask* tactive, CTask* tsimplest);
     void ComputePedFriendResponse(CEventAcquaintancePed* e, CTask* tactive, CTask* tsimplest);
     void ComputePedSoundQuietResponse(CEventSoundQuiet* e, CTask* tactive, CTask* tsimplest);
     void ComputePedThreatBadlyLitResponse(CEventAcquaintancePedHateBadlyLit* e, CTask* tactive, CTask* tsimplest);
