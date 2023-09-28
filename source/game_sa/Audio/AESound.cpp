@@ -184,8 +184,12 @@ void CAESound::UpdatePlayTime(int16 soundLength, int16 loopStartTime, int16 play
         return;
     }
 
-    assert(soundLength > 0);
-    m_nCurrentPlayPosition = loopStartTime + (m_nCurrentPlayPosition % soundLength);
+    // Avoid division by 0
+    // This seems to have been fixed the same way in Android
+    // The cause is/can be missing audio files, but I'm lazy to fix it, so this is gonna be fine for now
+    m_nCurrentPlayPosition = !notsa::IsFixBugs() || soundLength > 0
+        ? loopStartTime + (m_nCurrentPlayPosition % soundLength)
+        : loopStartTime;
 }
 
 // 0x4EF350
