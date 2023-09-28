@@ -7,7 +7,7 @@
 class CVehicle;
 class CPointRoute;
 
-class CTaskComplexWalkRoundCar : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexWalkRoundCar final : public CTaskComplex {
 public:
     static constexpr auto Type = eTaskType::TASK_COMPLEX_WALK_ROUND_CAR;
 
