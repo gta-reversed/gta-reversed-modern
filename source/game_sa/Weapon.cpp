@@ -248,17 +248,17 @@ bool CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType we
         }
         }
     }
-    bool isStealth = false;
-    if (creator && creator->IsPed()) {
-        const auto pcreator = creator->AsPed();
-        if (pcreator->GetTaskManager().GetActiveTask()->GetTaskType() == TASK_SIMPLE_STEALTH_KILL || weaponType == WEAPON_PISTOL_SILENCED) {
-            isStealth = true;
-        }
-    }
-    eventDmg.m_bStealthMode = isStealth;
+
+    // 0x73A828
+    eventDmg.m_bStealthMode =
+           creator
+        && creator->IsPed()
+        && (weaponType == WEAPON_PISTOL_SILENCED || creator->AsPed()->GetTaskManager().GetActiveTask()->GetTaskType() == TASK_SIMPLE_STEALTH_KILL);
+
     if (!victim->bInVehicle || victim->m_fHealth <= 0.f || !victim->GetTaskManager().GetActiveTask() || victim->GetTaskManager().GetActiveTask()->GetTaskType() != TASK_SIMPLE_GANG_DRIVEBY) {
         victim->GetEventGroup().Add(eventDmg);
     }
+
     return ret;
 
 }
