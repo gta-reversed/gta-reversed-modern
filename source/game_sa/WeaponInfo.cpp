@@ -109,9 +109,9 @@ uint32 CWeaponInfo::GetWeaponInfoIndex(eWeaponType wt, eWeaponSkill skill) {
 
     const auto GetNonSTDSkillLevelIndex = [wt](uint32 i) {
         assert(TypeHasSkillStats(wt));
-        return WEAPON_LAST_WEAPON                   // Offset for std skill level
+        return WEAPON_LAST_WEAPON           // Offset for std skill level
             + wt - FIRST_WEAPON_WITH_SKILLS // Offset for this weapon [relative to the other weapons with skill levels]
-            + i * NUM_WEAPONS_WITH_SKILL;                   // Offset for skill level
+            + i * NUM_WEAPONS_WITH_SKILL;   // Offset for skill level
     };
 
     switch (skill) {
