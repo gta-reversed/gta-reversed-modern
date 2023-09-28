@@ -1515,16 +1515,13 @@ void CEventHandler::ComputeOnEscalatorResponse(CEvent* e, CTask* tactive, CTask*
 
 // 0x4BAD50
 void CEventHandler::ComputeOnFireResponse(CEventOnFire* e, CTask* tactive, CTask* tsimplest) {
-    m_eventResponseTask = [&]() -> CTask* {
-        if (m_ped->IsPlayer()) {
-            if (m_ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM)) {
-                return nullptr;
-            }
-            return new CTaskSimplePlayerOnFire{};
-        } else {
-            return new CTaskComplexOnFire{};
+    if (m_ped->IsPlayer()) {
+        if (!m_ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM)) {
+            m_partialAnimTask = new CTaskSimplePlayerOnFire{};
         }
-    }();
+    } else {
+        m_eventResponseTask = new CTaskComplexOnFire{};
+    }
 }
 
 // 0x4BB0C0
