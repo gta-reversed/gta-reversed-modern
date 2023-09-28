@@ -1541,11 +1541,6 @@ void CEventHandler::ComputePedCollisionWithPedResponse(CEvent* e, CTask* tactive
 void CEventHandler::ComputePedCollisionWithPlayerResponse(CEvent* e, CTask* tactive, CTask* tsimplest) {
     plugin::CallMethod<0x4BE7D0, CEventHandler*, CEvent*, CTask*, CTask*>(this, e, tactive, tsimplest);
 }
-/*
-m_eventResponseTask = [&]() -> CTask* {
-
-}();
-*/
 
 // 0x4C1590
 void CEventHandler::ComputePedEnteredVehicleResponse(CEventPedEnteredMyVehicle* e, CTask* tactive, CTask* tsimplest) {
@@ -1976,8 +1971,8 @@ void CEventHandler::ComputePlayerCollisionWithPedResponse(CEventPlayerCollisionW
                 DoLookAt(plyr, 2'000);
                 return {
                     e->m_movestate == PEDMOVE_SPRINT
-                    ? new CTaskComplexHitResponse{plyrHitSide}
-                    : nullptr,
+                        ? new CTaskComplexHitResponse{plyrHitSide}
+                        : nullptr,
                     new CTaskSimpleSay{28}
                 };
             }
@@ -2028,7 +2023,7 @@ void CEventHandler::ComputePotentialPedCollideResponse(CEventPotentialWalkIntoPe
                     return moveState;
                 }
                 const auto pedToLeaderDistSq = (gangLeader->GetPosition() - m_ped->GetPosition()).SquaredMagnitude();
-#ifdef FIX_BUGS
+#ifdef FIX_BUGS // Can't do substraction and shit with squared values, it won't work too well
                 if (std::sqrt(pedToLeaderDistSq) - tSeekEntity->GetMoveStateRadius() < tSeekEntity->GetMoveStateRadius()) {
 #else
                 if (pedToLeaderDistSq - sq(tSeekEntity->GetMoveStateRadius()) < sq(tSeekEntity->GetMoveStateRadius())) {
@@ -2097,14 +2092,14 @@ void CEventHandler::ComputeReallyLowHealthResponse(CEventHealthReallyLow* e, CTa
 // 0x4B97B0
 void CEventHandler::ComputeReviveResponse(CEventRevived* e, CTask* tactive, CTask* tsimplest) {
     std::tie(m_eventResponseTask, m_sayTask) = [&]() -> std::pair<CTask*, CTask*> {
-        m_ped->m_fHealth = 100.f;
-        m_ped->m_bUsesCollision = true;
-        m_ped->bKnockedUpIntoAir = false;
-        m_ped->bKnockedOffBike = false;
-        m_ped->bKilledByStealth = false;
-        m_ped->SetPedState(PEDSTATE_IDLE);
+        m_ped->m_fHealth                = 100.f;
+        m_ped->m_bUsesCollision         = true;
+        m_ped->bKnockedUpIntoAir        = false;
+        m_ped->bKnockedOffBike          = false;
+        m_ped->bKilledByStealth         = false;
         m_ped->physicalFlags.bDestroyed = false;
 
+        m_ped->SetPedState(PEDSTATE_IDLE);
         m_ped->RestartNonPartialAnims();
 
         const auto tm = &m_ped->GetTaskManager();
@@ -2125,7 +2120,6 @@ void CEventHandler::ComputeReviveResponse(CEventRevived* e, CTask* tactive, CTas
 // 0x4BA7C0
 void CEventHandler::ComputeScriptCommandResponse(CEventScriptCommand* e, CTask* tactive, CTask* tsimplest) {
     const auto tm = &m_ped->GetTaskManager();
-
     const auto taskIdx = e->m_primaryTaskIndex == TASK_PRIMARY_PRIMARY
         ? TASK_PRIMARY_PRIMARY
         : TASK_PRIMARY_DEFAULT;
