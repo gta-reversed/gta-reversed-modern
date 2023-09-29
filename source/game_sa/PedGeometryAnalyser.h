@@ -112,9 +112,17 @@ public:
     static bool GetIsLineOfSightClear(const CVector& a1, const CVector& a2, CEntity& a3);
     static CPed* GetNearestPed(const CVector& point);
 
-    static bool IsEntityBlockingTarget(CEntity* entity, const CVector& point, float distance);
-    static bool IsInAir(const CPed& ped);
-    static bool IsWanderPathClear(const CVector& a1, const CVector& a2, float a3, int32 a4);
+    static bool   IsEntityBlockingTarget(CEntity* entity, const CVector& point, float distance);
+    static bool   IsInAir(const CPed& ped);
+
+    enum class WanderPathClearness : uint32 {
+        BLOCKED_HEIGHT,
+        BLOCKED_LOS,
+        BLOCKED_WATER,
+        BLOCKED_SHARP_DROP,
+        CLEAR,
+    };
+    static WanderPathClearness IsWanderPathClear(const CVector& a1, const CVector& a2, float a3, int32 a4);
 
     static bool LiesInsideBoundingBox(const CPed& ped, const CVector& posn, CEntity& entity);
 };

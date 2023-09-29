@@ -18,7 +18,7 @@ void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedInstall(GetNextWaypoint, 0x669980, { .reversed = false });
     RH_ScopedInstall(ComputeRoute, 0x6699E0, { .reversed = false });
     RH_ScopedInstall(CalcBlendRatio, 0x66EDC0);
-    RH_ScopedInstall(CanGoStraightThere, 0x66EF20, { .reversed = false });
+    RH_ScopedInstall(CanGoStraightThere, 0x66EF20);
     RH_ScopedInstall(ComputePathNodes, 0x66EFA0, { .reversed = false });
 
     RH_ScopedVMTInstall(Clone, 0x6713E0);
@@ -141,9 +141,14 @@ float CTaskComplexFollowNodeRoute::CalcBlendRatio(CPed* ped, bool slowing) {
 
 // 0x66EF20
 bool CTaskComplexFollowNodeRoute::CanGoStraightThere(CPed* ped, const CVector& from, const CVector& to, float maxDist) {
-    return plugin::CallMethodAndReturn<bool, 0x66EF20, CTaskComplexFollowNodeRoute*, CPed const&, CVector const&, CVector const&, float>(this, *ped, from, to, maxDist);
+    if ((from - to).SquaredMagnitude() >= sq(maxDist)) {
+        return false;
+    }
+    if (ped->bIgnoreHeightDifferenceFollowingNodes) {
+        return true;
+    }
+    return CPedGeometryAnalyser::IsWanderPathClear(from, to, m_FollowNodeThresholdHeightChange, 4) == CPedGeometryAnalyser::WanderPathClearness::CLEAR;
 }
-
 
 // 0x671750
 void CTaskComplexFollowNodeRoute::SetTarget(CPed* ped, const CVector& target, float radius, float fUnkn1, float fUnkn2, bool bForce) {

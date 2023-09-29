@@ -283,8 +283,8 @@ bool CPedGeometryAnalyser::IsInAir(const CPed& ped) {
 }
 
 // 0x5F2F70
-bool CPedGeometryAnalyser::IsWanderPathClear(const CVector& a1, const CVector& a2, float a3, int32 a4) {
-    return plugin::CallAndReturn<bool, 0x5F2F70, const CVector&, const CVector&, float, int32>(a1, a2, a3, a4);
+CPedGeometryAnalyser::WanderPathClearness CPedGeometryAnalyser::IsWanderPathClear(const CVector& a1, const CVector& a2, float a3, int32 a4) {
+    return plugin::CallAndReturn<WanderPathClearness, 0x5F2F70, const CVector&, const CVector&, float, int32>(a1, a2, a3, a4);
 }
 
 // 0x5F3880
