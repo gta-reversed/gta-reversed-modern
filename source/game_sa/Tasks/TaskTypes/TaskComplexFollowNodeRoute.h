@@ -42,7 +42,7 @@ public:
     float     CalcBlendRatio(CPed* ped, bool bUsePointRoute);
     bool      CanGoStraightThere(CPed* ped, const CVector& from, const CVector& to, float maxDist);
     void      ComputePathNodes(const CPed* ped);
-    void      SetTarget(CPed* ped, const CVector& target, float radius, float fUnkn1, float fUnkn2, bool bForce);
+    void      SetTarget(CPed* ped, const CVector& target, float targetPtTolerance, float slowDownDistance, float followNodeThresholdHeightChange, bool bForce);
 
 private:
 

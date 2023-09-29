@@ -12,7 +12,7 @@ void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x66EB70);
 
     RH_ScopedInstall(CalcGoToTaskType, 0x66EBE0);
-    RH_ScopedInstall(SetTarget, 0x671750, { .reversed = false });
+    RH_ScopedInstall(SetTarget, 0x671750);
     RH_ScopedInstall(CreateSubTask, 0x669690, { .reversed = false });
     RH_ScopedInstall(GetLastWaypoint, 0x6698E0, { .reversed = false });
     RH_ScopedInstall(GetNextWaypoint, 0x669980, { .reversed = false });
@@ -151,8 +151,28 @@ bool CTaskComplexFollowNodeRoute::CanGoStraightThere(CPed* ped, const CVector& f
 }
 
 // 0x671750
-void CTaskComplexFollowNodeRoute::SetTarget(CPed* ped, const CVector& target, float radius, float fUnkn1, float fUnkn2, bool bForce) {
-    return plugin::CallMethodAndReturn<void, 0x671750, CTaskComplexFollowNodeRoute*, CPed const*, CVector const&, float, float, float, bool>(this, ped, target, radius, fUnkn1, fUnkn2, bForce);
+void CTaskComplexFollowNodeRoute::SetTarget(CPed* ped, const CVector& targetPt, float targetPtTolerance, float slowDownDistance, float followNodeThresholdHeightChange, bool bForce) {
+    if (!bForce) {
+        if (m_TargetPt == targetPt && m_TargetPtTolerance == targetPtTolerance && m_SlowDownDist == slowDownDistance && m_FollowNodeThresholdHeightChange == followNodeThresholdHeightChange) {
+            return; // Nothing changed
+        }
+    }
+
+    m_TargetPt                        = targetPt;
+    m_TargetPtTolerance               = targetPtTolerance;
+    m_SlowDownDist                    = slowDownDistance;
+    m_FollowNodeThresholdHeightChange = followNodeThresholdHeightChange;
+
+    if (m_bUseBlending) {
+        m_SpeedDecreaseDist = m_SpeedIncreaseDist = 0.0;
+        m_SpeedDecreaseAmt  = m_SpeedIncreaseAmt  = 0.f;
+        m_bSlowingDown      = m_bSpeedingUp       = false;
+    }
+
+    ComputePathNodes(ped);
+    ComputeRoute();
+
+    m_bNewTarget = true;
 }
 
 // 0x669690
