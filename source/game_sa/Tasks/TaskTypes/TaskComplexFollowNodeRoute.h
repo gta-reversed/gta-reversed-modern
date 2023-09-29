@@ -46,7 +46,7 @@ public:
 
 private:
 
-    auto GetCurrentPt() const { return (*m_PtRoute)[m_CurrPt]; }
+    auto GetCurrentPt() const { return (*m_PtRoute)[m_CurrPtIdx]; }
 public:
     CVector      m_TargetPt{};                              //< Point we're trying to get to
     eMoveState   m_MoveState{};                             //< Move state to use to get to this point
@@ -57,7 +57,7 @@ public:
     CNodeRoute*  m_NodeRoute{};
     CPointRoute* m_PtRoute{};
     CNodeAddress m_CurrNode{};
-    int32        m_CurrPt{};                                //< Current point we're at [If using `m_PtRoute`]
+    uint32       m_CurrPtIdx{};                                //< Current point we're at [If using `m_PtRoute`]
     int32        m_Time{};
     CTaskTimer   m_Timer{};
     bool         m_bKeepNodesHeadingAwayFromTarget : 1{};

@@ -18,8 +18,8 @@ void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedInstall(CalcGoToTaskType, 0x66EBE0);
     RH_ScopedInstall(SetTarget, 0x671750);
     RH_ScopedInstall(CreateSubTask, 0x669690);
-    RH_ScopedInstall(GetLastWaypoint, 0x6698E0, { .reversed = false });
-    RH_ScopedInstall(GetNextWaypoint, 0x669980, { .reversed = false });
+    RH_ScopedInstall(GetLastWaypoint, 0x6698E0);
+    RH_ScopedInstall(GetNextWaypoint, 0x669980);
     RH_ScopedInstall(ComputeRoute, 0x6699E0, { .reversed = false });
     RH_ScopedInstall(CalcBlendRatio, 0x66EDC0);
     RH_ScopedInstall(CanGoStraightThere, 0x66EF20);
@@ -102,11 +102,14 @@ eTaskType CTaskComplexFollowNodeRoute::CalcGoToTaskType(CPed* ped, eTaskType sub
     m_bWillSlowDown    = false;
 
     if (m_MoveState >= PEDMOVE_JOG) {
-        m_CurrPt = std::min(m_CurrPt, (int32)m_PtRoute->GetNumPt() - 1);
+        m_CurrPtIdx = std::min(m_CurrPtIdx, m_PtRoute->GetNumPt() - 1);
 
-        if (m_CurrPt < 0) {
-            return TASK_SIMPLE_GO_TO_POINT;
-        }
+        // Original code used signed int for `m_CurrPtIdx`, but it's seemingly never set to a negative value in the code
+        // Thus we can simplify the code a whole lot
+        assert((int32)m_CurrPtIdx >= 0); // Check sign bit (cruel version)
+        //if (m_CurrPtIdx < 0) {
+        //    return TASK_SIMPLE_GO_TO_POINT;
+        //}
 
         const auto& currPt                     = GetCurrentPt();
         const auto  cosAngleBetweenRoutePoints = (currPt - GetLastWaypoint(ped)).Normalized().Dot((GetNextWaypoint(ped) - currPt).Normalized()); // I'm pretty sure they're missing an `abs` here
@@ -203,12 +206,21 @@ CTask* CTaskComplexFollowNodeRoute::CreateSubTask(eTaskType taskType, CPed* ped)
 
 // 0x6698E0
 CVector CTaskComplexFollowNodeRoute::GetLastWaypoint(CPed* ped) {
-    return plugin::CallMethodAndReturn<CVector, 0x6698E0>(this, ped);
+    if (m_PtRoute->GetNumPt() == 1) {
+        return (*m_PtRoute)[0];
+    }
+    return m_CurrPtIdx != 0
+        ? (*m_PtRoute)[m_CurrPtIdx - 1]
+        : ped->GetPosition();
 }
 
 // 0x669980
 CVector CTaskComplexFollowNodeRoute::GetNextWaypoint(CPed* ped) {
-    return plugin::CallMethodAndReturn<CVector, 0x669980>(this, ped);
+    if (m_PtRoute->GetNumPt() == 1) {
+        return (*m_PtRoute)[0];
+    }
+    const auto nextPt = m_CurrPtIdx + 1;
+    return (*m_PtRoute)[nextPt < m_PtRoute->GetNumPt() ? nextPt : m_CurrPtIdx - 1];
 }
 
 // 0x66EFA0
