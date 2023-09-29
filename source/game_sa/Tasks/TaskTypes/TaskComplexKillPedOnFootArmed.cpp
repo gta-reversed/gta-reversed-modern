@@ -193,7 +193,7 @@ bool CTaskComplexKillPedOnFootArmed::MakeAbortable(CPed* ped, eAbortPriority pri
     switch (priority) {
     case ABORT_PRIORITY_LEISURE: {
         if (const auto aimedAtEvent = CEvent::DynCast<const CEventGunAimedAt>(event)) {
-            if (aimedAtEvent->m_ped == m_target) {
+            if (aimedAtEvent->m_AimedBy == m_target) {
                 return false;
             }
         }

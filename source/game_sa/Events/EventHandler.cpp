@@ -1341,11 +1341,11 @@ void CEventHandler::ComputeGunAimedAtResponse(CEventGunAimedAt* e, CTask* tactiv
             return notsa::contains({TASK_COMPLEX_SMART_FLEE_ENTITY, TASK_COMPLEX_SMART_FLEE_POINT}, t->GetTaskType());
         };
         if (IsFleeTask(tactive) || IsFleeTask(tsimplest)) {
-            return new CTaskComplexSmartFleeEntity{e->m_ped, false, fSafeDistance}; // 0x4C28F5
+            return new CTaskComplexSmartFleeEntity{e->m_AimedBy, false, fSafeDistance}; // 0x4C28F5
         }
 
         if (m_ped->IsCreatedBy(PED_GAME) && !m_ped->bInVehicle && !m_ped->GetActiveWeapon().IsTypeMelee()) {
-            if (e->m_ped && e->m_ped->IsPlayer() && !m_ped->GetIntelligence()->IsFriendlyWith(*e->m_ped)) {
+            if (e->m_AimedBy && e->m_AimedBy->IsPlayer() && !m_ped->GetIntelligence()->IsFriendlyWith(*e->m_AimedBy)) {
                 e->m_taskId = TASK_COMPLEX_KILL_PED_ON_FOOT; // 0x4C296F
             }
         }
@@ -1370,37 +1370,37 @@ void CEventHandler::ComputeGunAimedAtResponse(CEventGunAimedAt* e, CTask* tactiv
         case TASK_SIMPLE_DUCK_FOREVER:
             return new CTaskSimpleDuck{DUCK_STANDALONE, 0x967Fu}; // are they trying to tell us something? "Fu" :D
         case TASK_COMPLEX_REACT_TO_GUN_AIMED_AT: // 0x4C2B2C
-            return new CTaskComplexReactToGunAimedAt{e->m_ped}; 
+            return new CTaskComplexReactToGunAimedAt{e->m_AimedBy}; 
         case TASK_COMPLEX_KILL_PED_ON_FOOT_STEALTH: // 0x4C2E30
-            return new CTaskComplexKillPedOnFootStealth{e->m_ped};
+            return new CTaskComplexKillPedOnFootStealth{e->m_AimedBy};
         case TASK_COMPLEX_KILL_CRIMINAL:
-            return new CTaskComplexKillCriminal{e->m_ped};
+            return new CTaskComplexKillCriminal{e->m_AimedBy};
         case TASK_COMPLEX_KILL_PED_ON_FOOT: { // 0x4C2E3D
-            if (IsKillTaskAppropriate(m_ped, e->m_ped, *e)) {
-                return new CTaskComplexKillPedOnFoot{e->m_ped};
+            if (IsKillTaskAppropriate(m_ped, e->m_AimedBy, *e)) {
+                return new CTaskComplexKillPedOnFoot{e->m_AimedBy};
             }
-            return new CTaskComplexFleeEntity{e->m_ped, false};
+            return new CTaskComplexFleeEntity{e->m_AimedBy, false};
         }
         case TASK_COMPLEX_FLEE_ANY_MEANS: // 0x4C2B36
-            return new CTaskComplexFleeAnyMeans{e->m_ped, true, fSafeDistance};
+            return new CTaskComplexFleeAnyMeans{e->m_AimedBy, true, fSafeDistance};
         case TASK_COMPLEX_CAR_DRIVE_MISSION_FLEE_SCENE: {// 0x4C2BF
             if (const auto v = m_ped->m_pVehicle) {
                 if (v->IsDriver(m_ped)) {
                     return new CTaskComplexCarDriveMissionFleeScene{v}; // 0x4C2C39
                 }
             }
-            if (!m_ped->bWantedByPolice || !e->m_ped->IsCop()) {
-                return new CTaskComplexFleeEntity{e->m_ped, false};
+            if (!m_ped->bWantedByPolice || !e->m_AimedBy->IsCop()) {
+                return new CTaskComplexFleeEntity{e->m_AimedBy, false};
             }
-            return new CTaskComplexFleeAnyMeans{e->m_ped, true, fSafeDistance};
+            return new CTaskComplexFleeAnyMeans{e->m_AimedBy, true, fSafeDistance};
         }
         case TASK_COMPLEX_FLEE_ENTITY: // 0x4C2BEE
-            return new CTaskComplexFleeEntity{e->m_ped, false};
+            return new CTaskComplexFleeEntity{e->m_AimedBy, false};
         case TASK_COMPLEX_SMART_FLEE_ENTITY: { // 0x4C2B5C
-            if (!m_ped->bWantedByPolice || !e->m_ped->IsCop()) {
-                return new CTaskComplexFleeEntity{e->m_ped, false};
+            if (!m_ped->bWantedByPolice || !e->m_AimedBy->IsCop()) {
+                return new CTaskComplexFleeEntity{e->m_AimedBy, false};
             }
-            return new CTaskComplexFleeAnyMeans{e->m_ped, true, fSafeDistance};
+            return new CTaskComplexFleeAnyMeans{e->m_AimedBy, true, fSafeDistance};
         }
         }
         NOTSA_UNREACHABLE();
