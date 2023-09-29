@@ -5,7 +5,7 @@
 
 class CPointRoute;
 
-class CTaskComplexFollowNodeRoute final : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexFollowNodeRoute final : public CTaskComplex {
 public:
     static constexpr auto Type = TASK_COMPLEX_FOLLOW_NODE_ROUTE;
 
