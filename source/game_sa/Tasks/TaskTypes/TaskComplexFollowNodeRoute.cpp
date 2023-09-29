@@ -3,6 +3,10 @@
 #include "TaskComplexFollowNodeRoute.h"
 
 #include "Tasks/TaskTypes/TaskSimpleGoToPointFine.h"
+#include "Tasks/TaskTypes/TaskComplexGoToPointAndStandStill.h"
+#include "Tasks/TaskTypes/TaskComplexLeaveCar.h"
+#include "Tasks/TaskTypes/TaskSimpleGoToPoint.h"
+#include "Tasks/TaskTypes/TaskSimpleStandStill.h"
 
 void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexFollowNodeRoute, 0x8700a8, 11);
@@ -13,7 +17,7 @@ void CTaskComplexFollowNodeRoute::InjectHooks() {
 
     RH_ScopedInstall(CalcGoToTaskType, 0x66EBE0);
     RH_ScopedInstall(SetTarget, 0x671750);
-    RH_ScopedInstall(CreateSubTask, 0x669690, { .reversed = false });
+    RH_ScopedInstall(CreateSubTask, 0x669690);
     RH_ScopedInstall(GetLastWaypoint, 0x6698E0, { .reversed = false });
     RH_ScopedInstall(GetNextWaypoint, 0x669980, { .reversed = false });
     RH_ScopedInstall(ComputeRoute, 0x6699E0, { .reversed = false });
@@ -176,8 +180,25 @@ void CTaskComplexFollowNodeRoute::SetTarget(CPed* ped, const CVector& targetPt, 
 }
 
 // 0x669690
-CTask* CTaskComplexFollowNodeRoute::CreateSubTask(eTaskType taskType, CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x669690, CTaskComplexFollowNodeRoute*, int32, CPed*>(this, taskType, ped);
+CTask* CTaskComplexFollowNodeRoute::CreateSubTask(eTaskType taskType, CPed* ped) const {
+    switch (taskType) {
+    case TASK_SIMPLE_GO_TO_POINT_FINE:
+        return new CTaskSimpleGoToPointFine{ CTaskSimpleGoToPointFine::BaseRatio(m_MoveState), GetCurrentPt() };
+    case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL:
+        return new CTaskComplexGoToPointAndStandStill{ m_MoveState, GetCurrentPt(), m_TargetPtTolerance, m_SlowDownDist };
+    case TASK_COMPLEX_LEAVE_CAR:
+        return new CTaskComplexLeaveCar{ ped->m_pVehicle, TARGET_DOOR_FRONT_LEFT, 0, true, false };
+    case TASK_SIMPLE_GO_TO_POINT:
+        return new CTaskSimpleGoToPoint{ m_MoveState, GetCurrentPt() };
+    case TASK_SIMPLE_STAND_STILL: {
+        ped->Teleport(m_TargetPt, false); // NOTE/TODO: I guess accidentally left in? Or hacky workaround?
+        return new CTaskSimpleStandStill{};
+    }
+    case TASK_FINISHED:
+        return nullptr;
+    default:
+        NOTSA_UNREACHABLE();
+    }
 }
 
 // 0x6698E0

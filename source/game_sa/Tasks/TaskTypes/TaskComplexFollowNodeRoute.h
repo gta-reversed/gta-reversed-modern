@@ -32,7 +32,7 @@ public:
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;
 
-    CTask*    CreateSubTask(eTaskType taskType, CPed* ped);
+    CTask*    CreateSubTask(eTaskType taskType, CPed* ped) const;
 
     CVector   GetLastWaypoint(CPed* ped);
     CVector   GetNextWaypoint(CPed* ped);
