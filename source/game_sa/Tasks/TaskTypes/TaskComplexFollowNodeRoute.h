@@ -44,6 +44,9 @@ public:
     void      ComputePathNodes(const CPed* ped);
     void      SetTarget(CPed* ped, const CVector& target, float radius, float fUnkn1, float fUnkn2, bool bForce);
 
+private:
+
+    auto GetCurrentPt() const { return (*m_PtRoute)[m_CurrPt]; }
 public:
     CVector      m_TargetPt{};                              //< Point we're trying to get to
     eMoveState   m_MoveState{};                             //< Move state to use to get to this point

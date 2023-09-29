@@ -2,6 +2,8 @@
 
 #include "TaskComplexFollowNodeRoute.h"
 
+#include "Tasks/TaskTypes/TaskSimpleGoToPointFine.h"
+
 void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexFollowNodeRoute, 0x8700a8, 11);
     RH_ScopedCategory("Tasks/TaskTypes");
@@ -15,7 +17,7 @@ void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedInstall(GetLastWaypoint, 0x6698E0, { .reversed = false });
     RH_ScopedInstall(GetNextWaypoint, 0x669980, { .reversed = false });
     RH_ScopedInstall(ComputeRoute, 0x6699E0, { .reversed = false });
-    RH_ScopedInstall(CalcBlendRatio, 0x66EDC0, { .reversed = false });
+    RH_ScopedInstall(CalcBlendRatio, 0x66EDC0);
     RH_ScopedInstall(CanGoStraightThere, 0x66EF20, { .reversed = false });
     RH_ScopedInstall(ComputePathNodes, 0x66EFA0, { .reversed = false });
 
@@ -102,7 +104,7 @@ eTaskType CTaskComplexFollowNodeRoute::CalcGoToTaskType(CPed* ped, eTaskType sub
             return TASK_SIMPLE_GO_TO_POINT;
         }
 
-        const auto& currPt                     = (*m_PtRoute)[m_CurrPt];
+        const auto& currPt                     = GetCurrentPt();
         const auto  cosAngleBetweenRoutePoints = (currPt - GetLastWaypoint(ped)).Normalized().Dot((GetNextWaypoint(ped) - currPt).Normalized()); // I'm pretty sure they're missing an `abs` here
         if (m_bWillSlowDown = cosAngleBetweenRoutePoints <= COS_45) { // Keep in mind that the angles are inverted, so `<= COS_45` means "angle is more than 45"
             const auto sprint   = m_MoveState == PEDMOVE_SPRINT;
@@ -123,8 +125,18 @@ eTaskType CTaskComplexFollowNodeRoute::CalcGoToTaskType(CPed* ped, eTaskType sub
 }
 
 // 0x66EDC0
-float CTaskComplexFollowNodeRoute::CalcBlendRatio(CPed* ped, bool bUsePointRoute) {
-    return plugin::CallMethodAndReturn<float, 0x66EDC0, CTaskComplexFollowNodeRoute*, CPed *, bool>(this, ped, bUsePointRoute);
+float CTaskComplexFollowNodeRoute::CalcBlendRatio(CPed* ped, bool slowing) {
+    const auto spdChangeDistSq = sq(slowing ? m_SpeedDecreaseDist : m_SpeedIncreaseDist);
+    const auto distToPtSq      = ((slowing ? GetCurrentPt() : GetLastWaypoint(ped)) - ped->GetPosition()).SquaredMagnitude();
+    if (distToPtSq >= spdChangeDistSq) {
+        return -1.f;
+    }
+    const auto spdChangeAmt   = slowing ? m_SpeedDecreaseAmt : m_SpeedIncreaseAmt;
+    const auto spdChangeRatio = std::cos(std::clamp(distToPtSq / spdChangeDistSq, 0.f, 1.f) * PI) * 0.5f + 0.5f; // NOTE/BUG: Not sure how well diving squared values will work out :D
+    return std::max(
+        CTaskSimpleGoToPointFine::BaseRatio(PEDMOVE_WALK) + 0.75f,
+        CTaskSimpleGoToPointFine::BaseRatio(m_MoveState) - spdChangeRatio * spdChangeAmt
+    );
 }
 
 // 0x66EF20
