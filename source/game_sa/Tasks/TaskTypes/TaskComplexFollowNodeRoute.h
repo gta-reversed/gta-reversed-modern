@@ -5,75 +5,84 @@
 
 class CPointRoute;
 
-class CTaskComplexFollowNodeRoute : public CTaskComplex {
-public:
-    CVector      m_vecTargetPos;
-    int32        m_nMode;
-    float        m_fRadius;
-    float        m_fUnkn1;
-    float        m_fUnkn2;
-    CNodeAddress m_nodeAddress1;
-    CNodeRoute*  m_pNodeRoute;
-    CPointRoute* m_pPointRoute;
-    CNodeAddress m_nodeAddress2;
-    int32        unkn0;
-    int32        m_nTime;
-    int32        m_nTimeStarted;
-    int32        m_nTimeStopped;
-    bool         bUnkn1;
-    bool         m_bStoppedMaybe;
-    union {
-        uint32 m_nFlags;
-        struct {
-            uint32 m_bUnknFlag0x1 : 1;
-            uint32 m_bUnknFlag0x2 : 1;
-            uint32 m_bUnknFlag0x4 : 1;
-            uint32 m_bUnknFlag0x8 : 1;
-
-            uint32 : 1;
-            uint32 m_bUnknFlag0x20 : 1;
-            uint32 m_bUnknFlag0x40 : 1;
-        };
-    };
-    float m_afUnkn[4];
-
+class CTaskComplexFollowNodeRoute final : public CTaskComplex {
 public:
     static constexpr auto Type = TASK_COMPLEX_FOLLOW_NODE_ROUTE;
 
-    CTaskComplexFollowNodeRoute(int32 mode, const CVector& targetPos, float radius, float fUnkn1, float fUnkn2, bool bUnknFlag, int32 time, bool bUnknFlag2);
+    //static eTaskType GetSubTaskType(int32 unkn, bool bUnkn, const CPointRoute& pointRoute);
+
+    CTaskComplexFollowNodeRoute(
+        eMoveState     moveState,
+        const CVector& targetPt,
+        float          targetPtTolerance,
+        float          slowDownDist,
+        float          followNodeThresholdHeightChange,
+        bool           bKeepNodesHeadingAwayFromTarget,
+        int32          time,
+        bool           bUseBlending
+    );
+    CTaskComplexFollowNodeRoute(const CTaskComplexFollowNodeRoute&);
     ~CTaskComplexFollowNodeRoute() override;
 
     eTaskType GetTaskType() const override { return Type; } // 0x66EB60
-    CTask* Clone() const override;
-    void StopTimer(const CEvent* event) override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
-    CTask* CreateNextSubTask(CPed* ped) override;
-    CTask* CreateFirstSubTask(CPed* ped) override;
-    CTask* ControlSubTask(CPed* ped) override;
+    CTask*    Clone() const override { return new CTaskComplexFollowNodeRoute{*this}; }
+    void      StopTimer(const CEvent* event) override;
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
+    CTask*    CreateNextSubTask(CPed* ped) override;
+    CTask*    CreateFirstSubTask(CPed* ped) override;
+    CTask*    ControlSubTask(CPed* ped) override;
 
-    CTask* CreateSubTask(eTaskType taskType, CPed* ped);
-    uint32 GetRouteSize();
-    static eTaskType GetSubTaskType(int32 unkn, bool bUnkn, const CPointRoute& pointRoute);
-    CVector GetLastWaypoint(CPed* ped);
-    CVector GetNextWaypoint(CPed* ped);
-    void ComputeRoute();
+    CTask*    CreateSubTask(eTaskType taskType, CPed* ped);
+
+    CVector   GetLastWaypoint(CPed* ped);
+    //CVector GetNextWaypoint(CPed* ped);
+    //uint32  GetRouteSize();
+    void      ComputeRoute();
     eTaskType CalcGoToTaskType(CPed* ped, eTaskType taskType);
-    float CalcBlendRatio(CPed* ped, bool bUsePointRoute);
-    bool CanGoStraightThere(CPed* ped, const CVector& from, const CVector& to, float maxDist);
-    void ComputePathNodes(const CPed* ped);
-    void SetTarget(CPed* ped, const CVector& target, float radius, float fUnkn1, float fUnkn2, bool bForce);
+    float     CalcBlendRatio(CPed* ped, bool bUsePointRoute);
+    bool      CanGoStraightThere(CPed* ped, const CVector& from, const CVector& to, float maxDist);
+    void      ComputePathNodes(const CPed* ped);
+    void      SetTarget(CPed* ped, const CVector& target, float radius, float fUnkn1, float fUnkn2, bool bForce);
 
-private:
+public:
+    CVector      m_TargetPt{};                              //< Point we're trying to get to
+    eMoveState   m_MoveState{};                             //< Move state to use to get to this point
+    float        m_TargetPtTolerance{};                     //< Tolerance [Determinates how close the ped has to get to the point for the task to be considered as finished]
+    float        m_SlowDownDist{};                      
+    float        m_FollowNodeThresholdHeightChange{};   
+    CNodeAddress m_StartNode{};
+    CNodeRoute*  m_NodeRoute{};
+    CPointRoute* m_PtRoute{};
+    CNodeAddress m_CurrNode{};
+    int32        m_Progress{};
+    int32        m_Time{};
+    CTaskTimer   m_Timer{};
+    bool         m_bKeepNodesHeadingAwayFromTarget : 1{};
+    bool         m_LastRoutePointIsTarget : 1{};
+    bool         m_bNewTarget : 1{};
+    bool         m_bUseBlending : 1{};
+    bool         m_bWillSlowDown : 1{};
+    bool         m_bSlowingDown : 1{};
+    bool         m_bSpeedingUp : 1{};
+    float        m_SpeedDecreaseDist{};
+    float        m_SpeedIncreaseDist{};
+    float        m_SpeedDecreaseAmt{};
+    float        m_SpeedIncreaseAmt{};
+
+private: // Hook shit, ignore
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTask* Clone_Reversed() { return CTaskComplexFollowNodeRoute::Clone(); };
-    void StopTimer_Reversed(const CEvent* event) { CTaskComplexFollowNodeRoute::StopTimer(event); };
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) { return CTaskComplexFollowNodeRoute::MakeAbortable(ped, priority, event); };
-    CTask* CreateNextSubTask_Reversed(CPed* ped) { return CTaskComplexFollowNodeRoute::CreateNextSubTask(ped); };
-    CTask* CreateFirstSubTask_Reversed(CPed* ped) { return CTaskComplexFollowNodeRoute::CreateFirstSubTask(ped); };
-    CTask* ControlSubTask_Reversed(CPed* ped) { return CTaskComplexFollowNodeRoute::ControlSubTask(ped); };
+    // 0x66EA30
+    CTaskComplexFollowNodeRoute* Constructor(eMoveState moveState, CVector const& targetPoint, float radius, float a5, float a6, bool a7, int32 time, bool a9) {
+        this->CTaskComplexFollowNodeRoute::CTaskComplexFollowNodeRoute(moveState, targetPoint, radius, a5, a6, a7, time, a9);
+        return this;
+    }
 
+    // 0x66EB70
+    CTaskComplexFollowNodeRoute* Destructor() {
+        this->CTaskComplexFollowNodeRoute::~CTaskComplexFollowNodeRoute();
+        return this;
+    }
 };
-
 VALIDATE_SIZE(CTaskComplexFollowNodeRoute, 0x60);
