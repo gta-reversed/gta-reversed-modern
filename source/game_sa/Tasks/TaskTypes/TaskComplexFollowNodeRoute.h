@@ -35,7 +35,7 @@ public:
     CTask*    CreateSubTask(eTaskType taskType, CPed* ped);
 
     CVector   GetLastWaypoint(CPed* ped);
-    //CVector GetNextWaypoint(CPed* ped);
+    CVector   GetNextWaypoint(CPed* ped);
     //uint32  GetRouteSize();
     void      ComputeRoute();
     eTaskType CalcGoToTaskType(CPed* ped, eTaskType taskType);
@@ -54,7 +54,7 @@ public:
     CNodeRoute*  m_NodeRoute{};
     CPointRoute* m_PtRoute{};
     CNodeAddress m_CurrNode{};
-    int32        m_Progress{};
+    int32        m_CurrPt{};                                //< Current point we're at [If using `m_PtRoute`]
     int32        m_Time{};
     CTaskTimer   m_Timer{};
     bool         m_bKeepNodesHeadingAwayFromTarget : 1{};

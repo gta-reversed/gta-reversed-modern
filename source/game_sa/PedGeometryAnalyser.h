@@ -48,6 +48,9 @@ public:
     /// Clear all points
     void Clear() { m_nNumPoints = 0; }
 
+    /// Get the number of points
+    auto GetNumPt() const { return m_nNumPoints; }
+
     // Access active points
     CVector& operator[](size_t idx)       { return GetPoints()[idx]; }
     CVector  operator[](size_t idx) const { return GetPoints()[idx]; }
