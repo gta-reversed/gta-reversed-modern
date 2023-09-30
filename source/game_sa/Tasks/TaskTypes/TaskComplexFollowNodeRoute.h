@@ -40,7 +40,7 @@ public:
     void      ComputeRoute();
     eTaskType CalcGoToTaskType(CPed* ped, eTaskType taskType);
     float     CalcBlendRatio(CPed* ped, bool bUsePointRoute);
-    bool      CanGoStraightThere(CPed* ped, const CVector& from, const CVector& to, float maxDist);
+    bool      CanGoStraightThere(const CPed* ped, const CVector& from, const CVector& to, float maxDist);
     void      ComputePathNodes(const CPed* ped);
     void      SetTarget(CPed* ped, const CVector& target, float targetPtTolerance, float slowDownDistance, float followNodeThresholdHeightChange, bool bForce);
 

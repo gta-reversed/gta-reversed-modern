@@ -677,7 +677,7 @@ auto SetCharOnlyDamagedByPlayer(CPed& ped, bool enabled) {
 auto GetClosestCharNode(CVector pos) -> CVector {
     CWorld::PutToGroundIfTooLow(pos);
     if (const auto node = ThePaths.FindNodeClosestToCoors(pos)) {
-        return ThePaths.GetPathNode(node)->GetNodeCoors();
+        return ThePaths.GetPathNode(node)->GetPosition();
     }
     return {}; // Can't find anything nearby
 }

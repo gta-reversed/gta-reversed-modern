@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Interior/InteriorManager_c.h"
+
 #include "TaskComplexFollowNodeRoute.h"
 
 #include "Tasks/TaskTypes/TaskSimpleGoToPointFine.h"
@@ -23,7 +25,7 @@ void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedInstall(ComputeRoute, 0x6699E0, { .reversed = false });
     RH_ScopedInstall(CalcBlendRatio, 0x66EDC0);
     RH_ScopedInstall(CanGoStraightThere, 0x66EF20);
-    RH_ScopedInstall(ComputePathNodes, 0x66EFA0, { .reversed = false });
+    RH_ScopedInstall(ComputePathNodes, 0x66EFA0);
 
     RH_ScopedVMTInstall(Clone, 0x6713E0);
     RH_ScopedVMTInstall(GetTaskType, 0x66EB60);
@@ -102,7 +104,7 @@ eTaskType CTaskComplexFollowNodeRoute::CalcGoToTaskType(CPed* ped, eTaskType sub
     m_bWillSlowDown    = false;
 
     if (m_MoveState >= PEDMOVE_JOG) {
-        m_CurrPtIdx = std::min(m_CurrPtIdx, m_PtRoute->GetNumPt() - 1);
+        m_CurrPtIdx = std::min(m_CurrPtIdx, m_PtRoute->GetSize() - 1);
 
         // Original code used signed int for `m_CurrPtIdx`, but it's seemingly never set to a negative value in the code
         // Thus we can simplify the code a whole lot
@@ -147,7 +149,7 @@ float CTaskComplexFollowNodeRoute::CalcBlendRatio(CPed* ped, bool slowing) {
 }
 
 // 0x66EF20
-bool CTaskComplexFollowNodeRoute::CanGoStraightThere(CPed* ped, const CVector& from, const CVector& to, float maxDist) {
+bool CTaskComplexFollowNodeRoute::CanGoStraightThere(const CPed* ped, const CVector& from, const CVector& to, float maxDist) {
     if ((from - to).SquaredMagnitude() >= sq(maxDist)) {
         return false;
     }
@@ -206,7 +208,7 @@ CTask* CTaskComplexFollowNodeRoute::CreateSubTask(eTaskType taskType, CPed* ped)
 
 // 0x6698E0
 CVector CTaskComplexFollowNodeRoute::GetLastWaypoint(CPed* ped) {
-    if (m_PtRoute->GetNumPt() == 1) {
+    if (m_PtRoute->GetSize() == 1) {
         return (*m_PtRoute)[0];
     }
     return m_CurrPtIdx != 0
@@ -216,16 +218,119 @@ CVector CTaskComplexFollowNodeRoute::GetLastWaypoint(CPed* ped) {
 
 // 0x669980
 CVector CTaskComplexFollowNodeRoute::GetNextWaypoint(CPed* ped) {
-    if (m_PtRoute->GetNumPt() == 1) {
+    if (m_PtRoute->GetSize() == 1) {
         return (*m_PtRoute)[0];
     }
     const auto nextPt = m_CurrPtIdx + 1;
-    return (*m_PtRoute)[nextPt < m_PtRoute->GetNumPt() ? nextPt : m_CurrPtIdx - 1];
+    return (*m_PtRoute)[nextPt < m_PtRoute->GetSize() ? nextPt : m_CurrPtIdx - 1];
 }
 
 // 0x66EFA0
 void CTaskComplexFollowNodeRoute::ComputePathNodes(CPed const* ped) {
-    return plugin::CallMethodAndReturn<void, 0x66EFA0, CTaskComplexFollowNodeRoute*, CPed const*>(this, ped);
+    // Make sure TargetPt.z is on the ground
+    {
+        bool hasTargetPtGroundZ;
+        float targetPtGroundZ = CWorld::FindGroundZFor3DCoord(m_TargetPt + CVector{0.f, 0.f, 1.f}, &hasTargetPtGroundZ);
+        if (hasTargetPtGroundZ) {
+            m_TargetPt.z = targetPtGroundZ + 1.f;
+        }
+    }
+
+    const CVector pedPos = ped->GetPosition();
+
+    if (CanGoStraightThere(ped, pedPos, m_TargetPt, ped->GetIntelligence()->m_FollowNodeThresholdDist)) {
+        ThePaths.ComputeRoute(
+            PATH_TYPE_PED,
+            ped->GetPosition(),
+            m_TargetPt,
+            m_StartNode,
+            *m_NodeRoute
+        );
+        m_StartNode = {};
+    }
+
+    if (std::abs(pedPos.z - m_TargetPt.z) >= m_FollowNodeThresholdHeightChange || m_NodeRoute->IsEmpty() || m_bKeepNodesHeadingAwayFromTarget) { // 0x66F147
+        if (!m_NodeRoute->IsEmpty() && !m_bKeepNodesHeadingAwayFromTarget && m_NodeRoute->GetAll()[0]) {
+            const auto routeFirstNode = m_NodeRoute->GetAll()[0];
+            if (ThePaths.IsAreaNodesAvailable(routeFirstNode)) {
+                if ((m_TargetPt - pedPos).Magnitude2D() + 50.f < (ThePaths.GetPathNode(routeFirstNode)->GetPosition() - pedPos).Magnitude2D()) {
+                    m_NodeRoute->Clear(); // 0x66F209
+                }
+            }
+        }
+    } else if (m_NodeRoute->GetAll()[0]) {
+        const auto routeFirstNode = m_NodeRoute->GetAll()[0];
+        if (ThePaths.IsAreaNodesAvailable(routeFirstNode)) {
+            if ((m_TargetPt - pedPos).Magnitude2D() + 3.f < (ThePaths.GetPathNode(routeFirstNode)->GetPosition() - pedPos).Magnitude2D()) {
+                m_NodeRoute->Clear(); // 0x66F139
+            }
+        }
+    }
+
+    if (g_interiorMan.GetPedsInteriorGroup(ped)) { // 0x66F216
+        if (!m_NodeRoute->IsEmpty()) {
+            const auto routeFirstNode = m_NodeRoute->GetAll()[0];
+            if (routeFirstNode && ThePaths.IsAreaNodesAvailable(routeFirstNode)) {
+                const auto pedInt = g_interiorMan.GetPedsInterior(ped); // 0x66F2EE
+
+                auto routeFirstNodeCoors = ThePaths.GetPathNode(routeFirstNode)->GetPosition();
+                routeFirstNodeCoors.z += 1.f;
+                const auto routeFirstNodeInt = g_interiorMan.GetVectorsInterior(routeFirstNodeCoors); // 0x66F330
+
+                if (pedInt) {
+                    if (pedInt != routeFirstNodeInt) {
+                        if (!ThePaths.These2NodesAreAdjacent(routeFirstNode, pedInt->GetNodeAddress())) {
+                            m_NodeRoute->Clear();
+                            ThePaths.ComputeRoute( // 0x66F38D
+                                PATH_TYPE_PED,
+                                ped->GetPosition(),
+                                m_TargetPt,
+                                pedInt->GetNodeAddress(),
+                                *m_NodeRoute
+                            );
+                        }
+                    }
+                } else if (routeFirstNodeInt) {
+                    if (!ThePaths.These2NodesAreAdjacent(routeFirstNode, routeFirstNodeInt->GetNodeAddress())) {
+                        m_NodeRoute->Clear();
+                        ThePaths.ComputeRoute( // 0x66F3E0
+                            PATH_TYPE_PED,
+                            ped->GetPosition(),
+                            m_TargetPt,
+                            pedInt->GetNodeAddress(),
+                            *m_NodeRoute
+                        );
+                        m_NodeRoute->Reverse();
+                    }
+                }
+            }
+        }
+    } else {
+        // Make the route as short as possible by "cutting" down excess nodes
+        for (const auto& [i, node] : notsa::enumerate(m_NodeRoute->GetAll())) {
+            assert(node); // Original code checks for this too, but I don't think this is possible
+
+            CVector nodePos;
+            if (ThePaths.IsAreaNodesAvailable(node)) {
+                nodePos = ThePaths.GetPathNode(node)->GetPosition();
+            } else if (notsa::IsFixBugs()) {
+                continue; 
+            }
+            nodePos.z += 1.f;
+            if (CanGoStraightThere(ped, nodePos, m_TargetPt, ped->GetIntelligence()->m_FollowNodeThresholdDist)) {
+                m_NodeRoute->ResizeTo(i + 1);
+                break;
+            }
+        }
+    }
+
+    // 0x66F3F2
+    m_CurrPtIdx = m_CurrNode
+        ? notsa::indexof(m_NodeRoute->GetAll(), m_CurrNode, 0)
+        : 0;
+    if (!m_NodeRoute->IsEmpty()) {
+        m_CurrNode = (*m_NodeRoute)[m_CurrPtIdx];
+    }
 }
 
 // 0x669520
