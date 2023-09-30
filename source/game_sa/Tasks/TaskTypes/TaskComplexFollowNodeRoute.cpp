@@ -22,7 +22,7 @@ void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedInstall(CreateSubTask, 0x669690);
     RH_ScopedInstall(GetLastWaypoint, 0x6698E0);
     RH_ScopedInstall(GetNextWaypoint, 0x669980);
-    RH_ScopedInstall(ComputeRoute, 0x6699E0, { .reversed = false });
+    RH_ScopedInstall(ComputeRoute, 0x6699E0);
     RH_ScopedInstall(CalcBlendRatio, 0x66EDC0);
     RH_ScopedInstall(CanGoStraightThere, 0x66EF20);
     RH_ScopedInstall(ComputePathNodes, 0x66EFA0);
@@ -91,7 +91,16 @@ void CTaskComplexFollowNodeRoute::StopTimer(const CEvent* event) {
 
 // 0x6699E0
 void CTaskComplexFollowNodeRoute::ComputeRoute() {
-    return plugin::CallMethodAndReturn<void, 0x6699E0, CTaskComplexFollowNodeRoute*>(this);
+    m_PtRoute->Clear();
+    for (const auto& node : m_NodeRoute->GetAll()) {
+        if (!ThePaths.IsAreaNodesAvailable(node)) {
+            continue;
+        }
+        m_PtRoute->Add(ThePaths.GetPathNode(node)->GetPosition());
+    }
+    if (m_LastRoutePointIsTarget = !m_PtRoute->IsFull()) {
+        m_PtRoute->Add(m_TargetPt);
+    }
 }
 
 // 0x66EBE0
