@@ -10,13 +10,13 @@ void CTaskComplexCarDrive::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexCarDrive, 0x86E934, 14);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    RH_ScopedInstall(Constructor_0, 0x63C9D0, { .enabled = false});
-    RH_ScopedInstall(Constructor_1, 0x63C940, { .enabled = false});
+    RH_ScopedInstall(Constructor_0, 0x63C9D0, { .enabled = false });
+    RH_ScopedInstall(Constructor_1, 0x63C940, { .enabled = false });
     RH_ScopedInstall(Destructor, 0x63CA40);
 
     RH_ScopedInstall(CreateSubTask, 0x642FA0, { .enabled = false, .locked = true });
 
-    RH_ScopedVMTInstall(CreateSubTaskCannotGetInCar, 0x643200, { .enabled = false});
+    RH_ScopedVMTInstall(CreateSubTaskCannotGetInCar, 0x643200, { .enabled = false });
     RH_ScopedVMTInstall(SetUpCar, 0x63CAE0, { .enabled = false});
     RH_ScopedVMTInstall(Drive, 0x63CAD0, { .enabled = false});
     RH_ScopedVMTInstall(Clone, 0x63DC90, { .enabled = false});
@@ -28,35 +28,37 @@ void CTaskComplexCarDrive::InjectHooks() {
 // 0x63C9D0
 // asDriver stuff is NOTSA
 CTaskComplexCarDrive::CTaskComplexCarDrive(CVehicle* vehicle, bool asDriver) :
-    m_asDriver{asDriver}
+    m_bAsDriver{asDriver},
+    m_Veh{vehicle}
 {
-    m_pVehicle              = vehicle;
-    m_fSpeed                = 0.0f;
-    m_carModelIndexToCreate = -1;
-    m_nCarDrivingStyle      = DRIVING_STYLE_STOP_FOR_CARS;
-    m_bSavedVehicleBehavior = false;
-    CEntity::SafeRegisterRef(m_pVehicle);
+    CEntity::SafeRegisterRef(m_Veh);
 }
 
 // 0x63C940
-CTaskComplexCarDrive::CTaskComplexCarDrive(CVehicle* vehicle, float speed, int32 carModelIndexToCreate, eCarDrivingStyle carDrivingStyle) : CTaskComplex() {
-    m_fSpeed                = speed;
-    m_carModelIndexToCreate = carModelIndexToCreate;
-    m_pVehicle              = vehicle;
-    m_nCarDrivingStyle      = carDrivingStyle;
-    m_bSavedVehicleBehavior = false;
-    CEntity::SafeRegisterRef(m_pVehicle);
+CTaskComplexCarDrive::CTaskComplexCarDrive(CVehicle* vehicle, float speed, eModelID carModelIndexToCreate, eCarDrivingStyle carDrivingStyle) :
+    m_CruiseSpeed{speed},
+    m_DesiredCarModel{carModelIndexToCreate},
+    m_Veh{vehicle},
+    m_CarDrivingStyle{static_cast<uint32>(carDrivingStyle)}
+{
+    CEntity::SafeRegisterRef(m_Veh);
+}
+
+CTaskComplexCarDrive::CTaskComplexCarDrive(const CTaskComplexCarDrive& o) :
+    CTaskComplexCarDrive{ m_Veh, m_CruiseSpeed, m_DesiredCarModel, static_cast<eCarDrivingStyle>(m_CarDrivingStyle) }
+{
+    m_bAsDriver = o.m_bAsDriver;
 }
 
 // 0x63CA40
 CTaskComplexCarDrive::~CTaskComplexCarDrive() {
-    if (m_pVehicle) {
-        if (m_bSavedVehicleBehavior) {
-            m_pVehicle->m_autoPilot.m_nCarDrivingStyle = static_cast<eCarDrivingStyle>(m_nOldCarDrivingStyle);
-            m_pVehicle->m_autoPilot.m_nCarMission      = static_cast<eCarMission>(m_nCarMission);
-            m_pVehicle->m_autoPilot.m_nCruiseSpeed     = m_nSpeed;
+    if (m_Veh) {
+        if (m_bIsCarSetUp) {
+            m_Veh->m_autoPilot.m_nCarDrivingStyle = static_cast<eCarDrivingStyle>(m_OriginalDrivingStyle);
+            m_Veh->m_autoPilot.m_nCarMission      = static_cast<eCarMission>(m_OriginalMission);
+            m_Veh->m_autoPilot.m_nCruiseSpeed     = m_OriginalSpeed;
         }
-        CEntity::SafeCleanUpRef(m_pVehicle);
+        CEntity::SafeCleanUpRef(m_Veh);
     }
 }
 
@@ -74,29 +76,29 @@ CTask* CTaskComplexCarDrive::CreateNextSubTask(CPed* ped) {
 
 // 0x645100
 CTask* CTaskComplexCarDrive::CreateFirstSubTask(CPed* ped) {
-    if (!m_pVehicle) {
+    if (!m_Veh) {
         if (ped->m_pVehicle && ped->bInVehicle) {
-            m_pVehicle = ped->m_pVehicle;
-            m_pVehicle->RegisterReference(reinterpret_cast<CEntity**>(m_pVehicle));
+            m_Veh = ped->m_pVehicle;
+            m_Veh->RegisterReference(reinterpret_cast<CEntity**>(m_Veh));
             return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
         }
-        return m_asDriver ? CreateSubTask(TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER, ped) : nullptr;
+        return m_bAsDriver ? CreateSubTask(TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER, ped) : nullptr;
     }
 
     if (ped->m_pVehicle && ped->bInVehicle) {
-        if (ped->m_pVehicle == m_pVehicle)
+        if (ped->m_pVehicle == m_Veh)
             return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
         else
             return CreateSubTask(TASK_COMPLEX_LEAVE_ANY_CAR, ped);
     } else {
-        if (!m_pVehicle->IsBike()) {
+        if (!m_Veh->IsBike()) {
             CUpsideDownCarCheck carCheck;
-            if (carCheck.IsCarUpsideDown(m_pVehicle) == 0) {
-                return CreateSubTask(m_asDriver ? TASK_COMPLEX_ENTER_CAR_AS_DRIVER : TASK_COMPLEX_ENTER_CAR_AS_PASSENGER, ped);
+            if (carCheck.IsCarUpsideDown(m_Veh) == 0) {
+                return CreateSubTask(m_bAsDriver ? TASK_COMPLEX_ENTER_CAR_AS_DRIVER : TASK_COMPLEX_ENTER_CAR_AS_PASSENGER, ped);
             }
-            return m_asDriver ? CreateSubTask(TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER, ped) : nullptr;
+            return m_bAsDriver ? CreateSubTask(TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER, ped) : nullptr;
         }
-        return CreateSubTask(m_asDriver ? TASK_COMPLEX_ENTER_CAR_AS_DRIVER : TASK_COMPLEX_ENTER_CAR_AS_PASSENGER, ped);
+        return CreateSubTask(m_bAsDriver ? TASK_COMPLEX_ENTER_CAR_AS_DRIVER : TASK_COMPLEX_ENTER_CAR_AS_PASSENGER, ped);
     }
 }
 
@@ -108,8 +110,8 @@ CTask* CTaskComplexCarDrive::ControlSubTask(CPed* ped) {
             return Drive(ped);
         case TASK_COMPLEX_GO_TO_POINT_ANY_MEANS:
             if (ped->m_pVehicle && ped->bInVehicle) {
-                m_pVehicle = ped->m_pVehicle;
-                m_pVehicle->RegisterReference(reinterpret_cast<CEntity**>(m_pVehicle));
+                m_Veh = ped->m_pVehicle;
+                m_Veh->RegisterReference(reinterpret_cast<CEntity**>(m_Veh));
                 return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
             }
         }
@@ -119,10 +121,10 @@ CTask* CTaskComplexCarDrive::ControlSubTask(CPed* ped) {
 
 // 0x63CAE0
 void CTaskComplexCarDrive::SetUpCar() {
-    m_nOldCarDrivingStyle   = m_pVehicle->m_autoPilot.m_nCarDrivingStyle;
-    m_nCarMission           = m_pVehicle->m_autoPilot.m_nCarMission;
-    m_nSpeed                = m_pVehicle->m_autoPilot.m_nCruiseSpeed;
-    m_bSavedVehicleBehavior = true;
+    m_OriginalDrivingStyle   = m_Veh->m_autoPilot.m_nCarDrivingStyle;
+    m_OriginalMission           = m_Veh->m_autoPilot.m_nCarMission;
+    m_OriginalSpeed                = m_Veh->m_autoPilot.m_nCruiseSpeed;
+    m_bIsCarSetUp = true;
 }
 
 // 0x643200
