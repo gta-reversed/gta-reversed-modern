@@ -16,13 +16,13 @@ void CTaskComplexCarDrive::InjectHooks() {
 
     RH_ScopedInstall(CreateSubTask, 0x642FA0, { .enabled = false, .locked = true });
 
-    RH_ScopedVMTInstall(CreateSubTaskCannotGetInCar, 0x643200, { .enabled = false });
-    RH_ScopedVMTInstall(SetUpCar, 0x63CAE0, { .enabled = false});
-    RH_ScopedVMTInstall(Drive, 0x63CAD0, { .enabled = false});
-    RH_ScopedVMTInstall(Clone, 0x63DC90, { .enabled = false});
+    RH_ScopedVMTInstall(CreateSubTaskCannotGetInCar, 0x643200);
+    RH_ScopedVMTInstall(SetUpCar, 0x63CAE0);
+    RH_ScopedVMTInstall(Drive, 0x63CAD0);
+    RH_ScopedVMTInstall(Clone, 0x63DC90);
     RH_ScopedVMTInstall(CreateNextSubTask, 0x644E20);
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x645100);
-    RH_ScopedVMTInstall(ControlSubTask, 0x645240, { .enabled = false});
+    RH_ScopedVMTInstall(ControlSubTask, 0x645240);
 }
 
 // 0x63C9D0
@@ -138,12 +138,12 @@ CTask* CTaskComplexCarDrive::CreateFirstSubTask(CPed* ped) {
 
 // 0x645240
 CTask* CTaskComplexCarDrive::ControlSubTask(CPed* ped) {
-    if (ped->m_pVehicle && ped->bInVehicle) {
+    if (ped->IsInVehicle()) {
         switch (m_pSubTask->GetTaskType()) {
         case TASK_SIMPLE_CAR_DRIVE:
             return Drive(ped);
         case TASK_COMPLEX_GO_TO_POINT_ANY_MEANS:
-            if (ped->m_pVehicle && ped->bInVehicle) {
+            if (ped->IsInVehicle()) {
                 CEntity::ChangeEntityReference(m_Veh, ped->m_pVehicle);
                 return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
             }
@@ -154,20 +154,10 @@ CTask* CTaskComplexCarDrive::ControlSubTask(CPed* ped) {
 
 // 0x63CAE0
 void CTaskComplexCarDrive::SetUpCar() {
-    m_OriginalDrivingStyle   = m_Veh->m_autoPilot.m_nCarDrivingStyle;
-    m_OriginalMission           = m_Veh->m_autoPilot.m_nCarMission;
-    m_OriginalSpeed                = m_Veh->m_autoPilot.m_nCruiseSpeed;
-    m_bIsCarSetUp = true;
-}
-
-// 0x643200
-CTask* CTaskComplexCarDrive::CreateSubTaskCannotGetInCar(CPed* ped) {
-    return CreateSubTask(TASK_FINISHED, ped);
-}
-
-// 0x63CAD0
-CTask* CTaskComplexCarDrive::Drive(CPed* ped) {
-    return m_pSubTask;
+    m_OriginalDrivingStyle  = m_Veh->m_autoPilot.m_nCarDrivingStyle;
+    m_OriginalMission       = m_Veh->m_autoPilot.m_nCarMission;
+    m_OriginalSpeed         = m_Veh->m_autoPilot.m_nCruiseSpeed;
+    m_bIsCarSetUp           = true;
 }
 
 // 0x642FA0

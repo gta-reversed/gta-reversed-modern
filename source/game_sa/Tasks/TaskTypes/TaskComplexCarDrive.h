@@ -22,8 +22,8 @@ public:
     CTask*    ControlSubTask(CPed* ped) override;
 
     virtual void   SetUpCar();
-    virtual CTask* CreateSubTaskCannotGetInCar(CPed* ped);
-    virtual CTask* Drive(CPed* ped);
+    virtual CTask* CreateSubTaskCannotGetInCar(CPed* ped) { return CreateSubTask(TASK_FINISHED, ped); }
+    virtual CTask* Drive(CPed* ped) { return m_pSubTask; }
 
     CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
