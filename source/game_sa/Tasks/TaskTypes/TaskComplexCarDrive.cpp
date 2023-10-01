@@ -13,8 +13,8 @@ void CTaskComplexCarDrive::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexCarDrive, 0x86E934, 14);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    RH_ScopedInstall(Constructor_0, 0x63C9D0, { .enabled = false });
-    RH_ScopedInstall(Constructor_1, 0x63C940, { .enabled = false });
+    RH_ScopedInstall(Constructor_0, 0x63C9D0);
+    RH_ScopedInstall(Constructor_1, 0x63C940);
     RH_ScopedInstall(Destructor, 0x63CA40);
 
     RH_ScopedInstall(CreateSubTask, 0x642FA0);
