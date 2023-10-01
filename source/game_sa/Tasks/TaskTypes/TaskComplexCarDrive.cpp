@@ -5,6 +5,9 @@
 #include "TaskComplexEnterCarAsDriver.h"
 #include "TaskSimpleCarDrive.h"
 #include "TaskComplexWander.h"
+#include "TaskComplexEnterAnyCarAsDriver.h"
+#include "TaskComplexLeaveAnyCar.h"
+#include "TaskSimpleCreateCarAndGetIn.h"
 
 void CTaskComplexCarDrive::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexCarDrive, 0x86E934, 14);
@@ -14,7 +17,7 @@ void CTaskComplexCarDrive::InjectHooks() {
     RH_ScopedInstall(Constructor_1, 0x63C940, { .enabled = false });
     RH_ScopedInstall(Destructor, 0x63CA40);
 
-    RH_ScopedInstall(CreateSubTask, 0x642FA0, { .enabled = false, .locked = true });
+    RH_ScopedInstall(CreateSubTask, 0x642FA0);
 
     RH_ScopedVMTInstall(CreateSubTaskCannotGetInCar, 0x643200);
     RH_ScopedVMTInstall(SetUpCar, 0x63CAE0);
@@ -154,46 +157,33 @@ CTask* CTaskComplexCarDrive::ControlSubTask(CPed* ped) {
 
 // 0x63CAE0
 void CTaskComplexCarDrive::SetUpCar() {
-    m_OriginalDrivingStyle  = m_Veh->m_autoPilot.m_nCarDrivingStyle;
-    m_OriginalMission       = m_Veh->m_autoPilot.m_nCarMission;
-    m_OriginalSpeed         = m_Veh->m_autoPilot.m_nCruiseSpeed;
-    m_bIsCarSetUp           = true;
+    m_OriginalDrivingStyle = m_Veh->m_autoPilot.m_nCarDrivingStyle;
+    m_OriginalMission      = m_Veh->m_autoPilot.m_nCarMission;
+    m_OriginalSpeed        = m_Veh->m_autoPilot.m_nCruiseSpeed;
+    m_bIsCarSetUp          = true;
 }
 
 // 0x642FA0
 CTask* CTaskComplexCarDrive::CreateSubTask(eTaskType taskType, CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x642FA0, CTaskComplexCarDrive*, eTaskType, CPed*>(this, taskType, ped);
-
-    /*
-    if (taskType <= TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER) {
-        if (taskType != TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER) {
-            switch (taskType) {
-            case TASK_COMPLEX_ENTER_CAR_AS_PASSENGER:
-                return new CTaskComplexEnterCarAsPassenger(m_pVehicle, 0, false);
-            case TASK_COMPLEX_ENTER_CAR_AS_DRIVER:
-                return new CTaskComplexEnterCarAsDriver(m_pVehicle);
-            case TASK_SIMPLE_CAR_DRIVE:
-                SetUpCar();
-                return new CTaskSimpleCarDrive(m_pVehicle, nullptr, false);
-            case TASK_COMPLEX_LEAVE_ANY_CAR:
-                return new CTaskComplexLeaveAnyCar(0, true, false); // todo:
-            default:
-                return nullptr;
-            }
-            return nullptr;
-        }
-        return new CTaskComplexEnterAnyCarAsDriver(); // todo:
-    }
-    return nullptr;
-
     switch (taskType) {
+    case TASK_COMPLEX_ENTER_CAR_AS_PASSENGER:
+        return new CTaskComplexEnterCarAsPassenger{ m_Veh };
+    case TASK_COMPLEX_ENTER_CAR_AS_DRIVER:
+        return new CTaskComplexEnterCarAsDriver{ m_Veh };
+    case TASK_SIMPLE_CAR_DRIVE:
+        SetUpCar();
+        return new CTaskSimpleCarDrive{ m_Veh };
+    case TASK_COMPLEX_LEAVE_ANY_CAR:
+        return new CTaskComplexLeaveAnyCar{ 0, true, false };
+    case TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER:
+        return new CTaskComplexEnterAnyCarAsDriver{};
     case TASK_SIMPLE_CREATE_CAR_AND_GET_IN:
-        return new CTaskSimpleCreateCarAndGetIn(&ped->GetPosition(), m_carModelIndexToCreate); // todo:
+        return new CTaskSimpleCreateCarAndGetIn{ ped->GetPosition(), m_DesiredCarModel };
     case TASK_COMPLEX_WANDER:
         return CTaskComplexWander::GetWanderTaskByPedType(ped);
     case TASK_FINISHED:
         return nullptr;
+    default:
+        NOTSA_UNREACHABLE();
     }
-    return nullptr;
-    */
 }
