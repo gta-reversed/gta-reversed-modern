@@ -406,7 +406,7 @@ void CCutsceneMgr::LoadCutsceneData_loading() {
         }();
 
         // Finally, create the fx
-        csfx.m_pFxSystem = g_fxMan.CreateFxSystem(csfx.m_szEffectName, &fxTransform, objMat, true);
+        csfx.m_pFxSystem = g_fxMan.CreateFxSystem(csfx.m_szEffectName, fxTransform, objMat, true);
     }
 
     // Finally, process attachments

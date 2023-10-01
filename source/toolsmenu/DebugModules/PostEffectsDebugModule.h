@@ -2,7 +2,7 @@
 
 #include "DebugModule.h"
 
-class FXDebugModule : public DebugModule {
+class PostEffectsDebugModule : public DebugModule {
 public:
     void RenderMenuEntry() override final;
 };
