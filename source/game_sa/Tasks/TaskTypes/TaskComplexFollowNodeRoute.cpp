@@ -37,27 +37,27 @@ void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedVMTInstall(MakeAbortable, 0x669520);
     RH_ScopedVMTInstall(CreateNextSubTask, 0x6718D0);
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x671800);
-    RH_ScopedVMTInstall(ControlSubTask, 0x671AB0, { .reversed = false });
+    RH_ScopedVMTInstall(ControlSubTask, 0x671AB0);
 }
 
 // 0x66EA30
 CTaskComplexFollowNodeRoute::CTaskComplexFollowNodeRoute(
     eMoveState     moveState,
-    const CVector& targetPt,
-    float          targetPtTolerance,
+    const CVector& target,
+    float          targetTolerance,
     float          slowDownDist,
     float          followNodeThresholdHeightChange,
     bool           bKeepNodesHeadingAwayFromTarget,
-    int32          time,
+    int32          timeToFinishMs,
     bool           bUseBlending
 ) :
     m_MoveState{moveState},
-    m_TargetPt{targetPt},
-    m_TargetPtTolerance{targetPtTolerance},
+    m_TargetPt{target},
+    m_TargetTolerance{targetTolerance},
     m_SlowDownDist{slowDownDist},
     m_FollowNodeThresholdHeightChange{followNodeThresholdHeightChange},
     m_bKeepNodesHeadingAwayFromTarget{bKeepNodesHeadingAwayFromTarget},
-    m_Time{time},
+    m_TimeToFinishMs{timeToFinishMs},
     m_bUseBlending{bUseBlending},
     m_NodeRoute{new CNodeRoute{}},
     m_PtRoute{new CPointRoute{}}
@@ -69,11 +69,11 @@ CTaskComplexFollowNodeRoute::CTaskComplexFollowNodeRoute(const CTaskComplexFollo
     CTaskComplexFollowNodeRoute{
         o.m_MoveState,
         o.m_TargetPt,
-        o.m_TargetPtTolerance,
+        o.m_TargetTolerance,
         o.m_SlowDownDist,
         o.m_FollowNodeThresholdHeightChange,
         o.m_bKeepNodesHeadingAwayFromTarget,
-        o.m_Time,
+        o.m_TimeToFinishMs,
         o.m_bUseBlending
     }
 {
@@ -102,21 +102,7 @@ eTaskType CTaskComplexFollowNodeRoute::GetSubTaskType(uint32 progress, bool bLas
 // 0x6694E0
 void CTaskComplexFollowNodeRoute::StopTimer(const CEvent* event) {
     if (!CEventHandler::IsTemporaryEvent(*event)) {
-        m_Timer.Stop();
-    }
-}
-
-// 0x6699E0
-void CTaskComplexFollowNodeRoute::ComputeRoute() {
-    m_PtRoute->Clear();
-    for (const auto& node : m_NodeRoute->GetAll()) {
-        if (!ThePaths.IsAreaNodesAvailable(node)) {
-            continue;
-        }
-        m_PtRoute->Add(ThePaths.GetPathNode(node)->GetPosition());
-    }
-    if (m_LastRoutePointIsTarget = !m_PtRoute->IsFull()) {
-        m_PtRoute->Add(m_TargetPt);
+        m_FinishedTimer.Stop();
     }
 }
 
@@ -130,17 +116,14 @@ eTaskType CTaskComplexFollowNodeRoute::CalcGoToTaskType(CPed* ped, eTaskType sub
     m_bWillSlowDown    = false;
 
     if (m_MoveState >= PEDMOVE_JOG) {
-        m_CurrPtIdx = std::min(m_CurrPtIdx, m_PtRoute->GetSize() - 1);
+        if (m_PtRoute->IsEmpty()) { // [Code moved from 0x66EC22]: The only way the value could be negative is for `m_PtRoute->GetSize()` to be `0`
+            return TASK_SIMPLE_GO_TO_POINT;
+        }
 
-        // Original code used signed int for `m_CurrPtIdx`, but it's seemingly never set to a negative value in the code
-        // Thus we can simplify the code a whole lot
-        assert((int32)m_CurrPtIdx >= 0); // Check sign bit (cruel version)
-        //if (m_CurrPtIdx < 0) {
-        //    return TASK_SIMPLE_GO_TO_POINT;
-        //}
+        assert(m_CurrPtIdx + 1 <= m_PtRoute->GetSize()); // Original code just clamped the value [But that's a quite error imo]
 
-        const auto& currPt                     = GetCurrentPt();
-        const auto  cosAngleBetweenRoutePoints = (currPt - GetLastWaypoint(ped)).Normalized().Dot((GetNextWaypoint(ped) - currPt).Normalized()); // I'm pretty sure they're missing an `abs` here
+        const CVector currPt                     = GetCurrentPt();
+        const auto    cosAngleBetweenRoutePoints = (currPt - GetLastWaypoint(ped)).Normalized().Dot((GetNextWaypoint(ped) - currPt).Normalized()); // I'm pretty sure they're missing an `abs` here
         if (m_bWillSlowDown = cosAngleBetweenRoutePoints <= COS_45) { // Keep in mind that the angles are inverted, so `<= COS_45` means "angle is more than 45"
             const auto sprint   = m_MoveState == PEDMOVE_SPRINT;
             m_SpeedIncreaseDist = m_SpeedDecreaseDist = sprint ? 5.f : 4.f;
@@ -160,7 +143,7 @@ eTaskType CTaskComplexFollowNodeRoute::CalcGoToTaskType(CPed* ped, eTaskType sub
 }
 
 // 0x66EDC0
-float CTaskComplexFollowNodeRoute::CalcBlendRatio(CPed* ped, bool slowing) {
+float CTaskComplexFollowNodeRoute::CalcBlendRatio(CPed* ped, bool slowing) const {
     const auto spdChangeDistSq = sq(slowing ? m_SpeedDecreaseDist : m_SpeedIncreaseDist);
     const auto distToPtSq      = ((slowing ? GetCurrentPt() : GetLastWaypoint(ped)) - ped->GetPosition()).SquaredMagnitude();
     if (distToPtSq >= spdChangeDistSq) {
@@ -175,7 +158,7 @@ float CTaskComplexFollowNodeRoute::CalcBlendRatio(CPed* ped, bool slowing) {
 }
 
 // 0x66EF20
-bool CTaskComplexFollowNodeRoute::CanGoStraightThere(const CPed* ped, const CVector& from, const CVector& to, float maxDist) {
+bool CTaskComplexFollowNodeRoute::CanGoStraightThere(const CPed* ped, const CVector& from, const CVector& to, float maxDist) const {
     if ((from - to).SquaredMagnitude() >= sq(maxDist)) {
         return false;
     }
@@ -186,15 +169,15 @@ bool CTaskComplexFollowNodeRoute::CanGoStraightThere(const CPed* ped, const CVec
 }
 
 // 0x671750
-void CTaskComplexFollowNodeRoute::SetTarget(CPed* ped, const CVector& targetPt, float targetPtTolerance, float slowDownDistance, float followNodeThresholdHeightChange, bool bForce) {
+void CTaskComplexFollowNodeRoute::SetTarget(CPed* ped, const CVector& targetPt, float targetTolerance, float slowDownDistance, float followNodeThresholdHeightChange, bool bForce) {
     if (!bForce) {
-        if (m_TargetPt == targetPt && m_TargetPtTolerance == targetPtTolerance && m_SlowDownDist == slowDownDistance && m_FollowNodeThresholdHeightChange == followNodeThresholdHeightChange) {
+        if (m_TargetPt == targetPt && m_TargetTolerance == targetTolerance && m_SlowDownDist == slowDownDistance && m_FollowNodeThresholdHeightChange == followNodeThresholdHeightChange) {
             return; // Nothing changed
         }
     }
 
     m_TargetPt                        = targetPt;
-    m_TargetPtTolerance               = targetPtTolerance;
+    m_TargetTolerance                 = targetTolerance;
     m_SlowDownDist                    = slowDownDistance;
     m_FollowNodeThresholdHeightChange = followNodeThresholdHeightChange;
 
@@ -216,7 +199,7 @@ CTask* CTaskComplexFollowNodeRoute::CreateSubTask(eTaskType taskType, CPed* ped)
     case TASK_SIMPLE_GO_TO_POINT_FINE:
         return new CTaskSimpleGoToPointFine{ CTaskSimpleGoToPointFine::BaseRatio(m_MoveState), GetCurrentPt() };
     case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL:
-        return new CTaskComplexGoToPointAndStandStill{ m_MoveState, GetCurrentPt(), m_TargetPtTolerance, m_SlowDownDist };
+        return new CTaskComplexGoToPointAndStandStill{ m_MoveState, GetCurrentPt(), m_TargetTolerance, m_SlowDownDist };
     case TASK_COMPLEX_LEAVE_CAR:
         return new CTaskComplexLeaveCar{ ped->m_pVehicle, TARGET_DOOR_FRONT_LEFT, 0, true, false };
     case TASK_SIMPLE_GO_TO_POINT:
@@ -233,7 +216,7 @@ CTask* CTaskComplexFollowNodeRoute::CreateSubTask(eTaskType taskType, CPed* ped)
 }
 
 // 0x6698E0
-CVector CTaskComplexFollowNodeRoute::GetLastWaypoint(CPed* ped) {
+CVector CTaskComplexFollowNodeRoute::GetLastWaypoint(CPed* ped) const {
     if (m_PtRoute->GetSize() == 1) {
         return (*m_PtRoute)[0];
     }
@@ -243,7 +226,7 @@ CVector CTaskComplexFollowNodeRoute::GetLastWaypoint(CPed* ped) {
 }
 
 // 0x669980
-CVector CTaskComplexFollowNodeRoute::GetNextWaypoint(CPed* ped) {
+CVector CTaskComplexFollowNodeRoute::GetNextWaypoint(CPed* ped) const {
     if (m_PtRoute->GetSize() == 1) {
         return (*m_PtRoute)[0];
     }
@@ -359,6 +342,20 @@ void CTaskComplexFollowNodeRoute::ComputePathNodes(CPed const* ped) {
     }
 }
 
+// 0x6699E0
+void CTaskComplexFollowNodeRoute::ComputeRoute() {
+    m_PtRoute->Clear();
+    for (const auto& node : m_NodeRoute->GetAll()) {
+        if (!ThePaths.IsAreaNodesAvailable(node)) {
+            continue;
+        }
+        m_PtRoute->Add(ThePaths.GetPathNode(node)->GetPosition());
+    }
+    if (m_LastRoutePointIsTarget = !m_PtRoute->IsFull()) {
+        m_PtRoute->Add(m_TargetPt);
+    }
+}
+
 // 0x669520
 bool CTaskComplexFollowNodeRoute::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
     if (event) {
@@ -393,7 +390,7 @@ bool CTaskComplexFollowNodeRoute::MakeAbortable(CPed* ped, eAbortPriority priori
 CTask* CTaskComplexFollowNodeRoute::CreateNextSubTask(CPed* ped) {
     const auto subTaskType = m_pSubTask->GetTaskType();
 
-    if (m_Timer.IsOutOfTime()) {
+    if (m_FinishedTimer.IsOutOfTime()) {
         if (subTaskType == TASK_SIMPLE_STAND_STILL) {
             ped->Teleport(m_TargetPt, false);
             return CreateSubTask(TASK_FINISHED, ped); // 0x671949
@@ -414,7 +411,7 @@ CTask* CTaskComplexFollowNodeRoute::CreateNextSubTask(CPed* ped) {
         }
         case TASK_SIMPLE_STAND_STILL: // 0x6719B6
             return CreateSubTask(TASK_FINISHED, ped);
-        case TASK_SIMPLE_GO_TO_POINT: { // 0x6719FC - Go to next pt
+        case TASK_SIMPLE_GO_TO_POINT: { // 0x6719FC - Go to next node in the route
             m_CurrPtIdx++;
             if (m_CurrPtIdx < m_NodeRoute->GetSize()) { 
                 m_CurrNode = (*m_NodeRoute)[m_CurrPtIdx];
@@ -425,13 +422,17 @@ CTask* CTaskComplexFollowNodeRoute::CreateNextSubTask(CPed* ped) {
         default:
             return nullptr; // 0x6719C9             
         }
-    } else {
-        if (m_CurrPtIdx + 1 == m_PtRoute->GetSize()) { // 0x671A3A
-            SetTarget(ped, m_TargetPt, m_TargetPtTolerance, m_SlowDownDist, m_FollowNodeThresholdHeightChange, true);
+    } else { // 0x671A3A - Proceed to the next point
+        if (m_CurrPtIdx + 1 == m_PtRoute->GetSize()) { // Reached the last point in the route, calculate next few
+            SetTarget(ped, m_TargetPt, m_TargetTolerance, m_SlowDownDist, m_FollowNodeThresholdHeightChange, true);
             return CreateFirstSubTask(ped);
+        } else { // Continue the current route
+            assert(!m_PtRoute->IsEmpty());
+            assert(m_CurrPtIdx < m_PtRoute->GetSize());
+
+            m_CurrPtIdx++;
+            m_CurrNode = (*m_NodeRoute)[m_CurrPtIdx];
         }
-        m_CurrPtIdx++;
-        m_CurrNode = (*m_NodeRoute)[m_CurrPtIdx];
     }
 
     const auto tt = GetSubTaskType(m_CurrPtIdx, m_LastRoutePointIsTarget, *m_PtRoute);
@@ -440,8 +441,8 @@ CTask* CTaskComplexFollowNodeRoute::CreateNextSubTask(CPed* ped) {
 
 // 0x671800
 CTask* CTaskComplexFollowNodeRoute::CreateFirstSubTask(CPed* ped) {
-    if (m_Time >= 0) {
-        m_Timer.Start(m_Time);
+    if (m_TimeToFinishMs >= 0) {
+        m_FinishedTimer.Start(m_TimeToFinishMs);
     }
 
     if (m_bUseBlending) {
@@ -454,7 +455,7 @@ CTask* CTaskComplexFollowNodeRoute::CreateFirstSubTask(CPed* ped) {
         return CreateSubTask(TASK_COMPLEX_LEAVE_CAR, ped);
     }
 
-    SetTarget(ped, m_TargetPt, m_TargetPtTolerance, m_SlowDownDist, m_FollowNodeThresholdHeightChange, true);
+    SetTarget(ped, m_TargetPt, m_TargetTolerance, m_SlowDownDist, m_FollowNodeThresholdHeightChange, true);
     m_bNewTarget = false;
 
     const auto tt = GetSubTaskType(m_CurrPtIdx, m_LastRoutePointIsTarget, *m_PtRoute);
@@ -464,6 +465,51 @@ CTask* CTaskComplexFollowNodeRoute::CreateFirstSubTask(CPed* ped) {
 
 // 0x671AB0
 CTask* CTaskComplexFollowNodeRoute::ControlSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn< CTask*, 0x671AB0, CTaskComplexFollowNodeRoute*, CPed*>(this, ped);
+    const auto subTaskType = m_pSubTask->GetTaskType();
+
+    if (m_bNewTarget && subTaskType != TASK_COMPLEX_LEAVE_CAR) {
+        return CreateFirstSubTask(ped);
+    }
+
+    if (m_FinishedTimer.IsOutOfTime()) {
+        if (subTaskType != TASK_SIMPLE_STAND_STILL) {
+            return m_pSubTask->MakeAbortable(ped)
+                ? CreateSubTask(TASK_SIMPLE_STAND_STILL, ped)
+                : m_pSubTask;
+        }
+    }
+
+    if (m_bUseBlending) {
+        // If we're already going fine (Eg.: using `CTaskSimpleGoToPointFine`), adjust move ratio
+        if (subTaskType == TASK_SIMPLE_GO_TO_POINT_FINE) {
+            const auto tGoToPointFine = static_cast<CTaskSimpleGoToPointFine*>(m_pSubTask);
+
+            const auto br = CalcBlendRatio(ped, true);
+            tGoToPointFine->SetMoveRatio(br >= 0.f ? br : CTaskSimpleGoToPointFine::BaseRatio(m_MoveState));
+
+            if (m_bSpeedingUp && br < 0.f) {
+                m_bSpeedingUp = false;
+                return CreateSubTask(TASK_SIMPLE_GO_TO_POINT, ped);
+            }
+        }
+
+        // If we're supposed to slow down (use `CTaskSimpleGoToPointFine`), but aren't yet
+        if (m_bWillSlowDown && !m_bSlowingDown && subTaskType != TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL) { // 0x671BA8
+            if (const auto br = CalcBlendRatio(ped, true); br >= 0.f) { // Blend ratios under 0 use the standard `CTaskSimpleGoToPoint`
+                m_bSpeedingUp   = false;
+                m_bWillSlowDown = false;
+                m_bSlowingDown  = true;
+
+                const auto tGoToPtFine = subTaskType != TASK_SIMPLE_GO_TO_POINT_FINE
+                    ? CreateSubTask(TASK_SIMPLE_GO_TO_POINT_FINE, ped)
+                    : m_pSubTask;
+                static_cast<CTaskSimpleGoToPointFine*>(tGoToPtFine)->SetMoveRatio(br);
+
+                return tGoToPtFine;
+            }
+        }
+    }
+
+    return m_pSubTask;
 }
 
