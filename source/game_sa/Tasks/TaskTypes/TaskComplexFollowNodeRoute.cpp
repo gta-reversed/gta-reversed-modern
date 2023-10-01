@@ -36,7 +36,7 @@ void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedVMTInstall(StopTimer, 0x6694E0);
     RH_ScopedVMTInstall(MakeAbortable, 0x669520);
     RH_ScopedVMTInstall(CreateNextSubTask, 0x6718D0);
-    RH_ScopedVMTInstall(CreateFirstSubTask, 0x671800, { .reversed = false });
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x671800);
     RH_ScopedVMTInstall(ControlSubTask, 0x671AB0, { .reversed = false });
 }
 
@@ -427,27 +427,39 @@ CTask* CTaskComplexFollowNodeRoute::CreateNextSubTask(CPed* ped) {
         }
     } else {
         if (m_CurrPtIdx + 1 == m_PtRoute->GetSize()) { // 0x671A3A
-            SetTarget(
-                ped,
-                m_TargetPt,
-                m_TargetPtTolerance,
-                m_SlowDownDist,
-                m_FollowNodeThresholdHeightChange,
-                true
-            );
+            SetTarget(ped, m_TargetPt, m_TargetPtTolerance, m_SlowDownDist, m_FollowNodeThresholdHeightChange, true);
             return CreateFirstSubTask(ped);
         }
         m_CurrPtIdx++;
         m_CurrNode = (*m_NodeRoute)[m_CurrPtIdx];
     }
 
-    const auto nextTaskType = GetSubTaskType(m_CurrPtIdx, m_LastRoutePointIsTarget, *m_PtRoute);
-    return CreateSubTask(m_bUseBlending ? nextTaskType : CTaskComplexFollowNodeRoute::CalcGoToTaskType(ped, nextTaskType), ped);
+    const auto tt = GetSubTaskType(m_CurrPtIdx, m_LastRoutePointIsTarget, *m_PtRoute);
+    return CreateSubTask(m_bUseBlending ? tt : CTaskComplexFollowNodeRoute::CalcGoToTaskType(ped, tt), ped);
 }
 
 // 0x671800
 CTask* CTaskComplexFollowNodeRoute::CreateFirstSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn< CTask*, 0x671800, CTaskComplexFollowNodeRoute*, CPed*>(this, ped);
+    if (m_Time >= 0) {
+        m_Timer.Start(m_Time);
+    }
+
+    if (m_bUseBlending) {
+        m_SpeedDecreaseDist = m_SpeedIncreaseDist = 0.0;
+        m_SpeedDecreaseAmt  = m_SpeedIncreaseAmt  = 0.f;
+        m_bSlowingDown      = m_bSpeedingUp       = false;
+    }
+
+    if (ped->bInVehicle) {
+        return CreateSubTask(TASK_COMPLEX_LEAVE_CAR, ped);
+    }
+
+    SetTarget(ped, m_TargetPt, m_TargetPtTolerance, m_SlowDownDist, m_FollowNodeThresholdHeightChange, true);
+    m_bNewTarget = false;
+
+    const auto tt = GetSubTaskType(m_CurrPtIdx, m_LastRoutePointIsTarget, *m_PtRoute);
+    return CreateSubTask(m_bUseBlending ? tt : CTaskComplexFollowNodeRoute::CalcGoToTaskType(ped, tt), ped);
+    
 }
 
 // 0x671AB0
