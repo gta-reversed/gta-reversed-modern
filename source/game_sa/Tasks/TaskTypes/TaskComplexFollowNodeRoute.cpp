@@ -10,6 +10,8 @@
 #include "Tasks/TaskTypes/TaskSimpleGoToPoint.h"
 #include "Tasks/TaskTypes/TaskSimpleStandStill.h"
 
+#include "Events/PotentialWalkIntoEvents.h"
+
 void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexFollowNodeRoute, 0x8700a8, 11);
     RH_ScopedCategory("Tasks/TaskTypes");
@@ -30,7 +32,7 @@ void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedVMTInstall(Clone, 0x6713E0);
     RH_ScopedVMTInstall(GetTaskType, 0x66EB60);
     RH_ScopedVMTInstall(StopTimer, 0x6694E0);
-    RH_ScopedVMTInstall(MakeAbortable, 0x669520, { .reversed = false });
+    RH_ScopedVMTInstall(MakeAbortable, 0x669520);
     RH_ScopedVMTInstall(CreateNextSubTask, 0x6718D0, { .reversed = false });
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x671800, { .reversed = false });
     RH_ScopedVMTInstall(ControlSubTask, 0x671AB0, { .reversed = false });
@@ -344,7 +346,32 @@ void CTaskComplexFollowNodeRoute::ComputePathNodes(CPed const* ped) {
 
 // 0x669520
 bool CTaskComplexFollowNodeRoute::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
-    return plugin::CallMethodAndReturn<bool, 0x669520, CTaskComplexFollowNodeRoute*, CPed*, eAbortPriority, CEvent const*>(this, ped, priority, event);
+    if (event) {
+        if (m_CurrPtIdx + 1 != m_PtRoute->GetSize()) {
+            const auto vehicle = [&]() -> CVehicle* {
+                switch (event->GetEventType()) {
+                case EVENT_POTENTIAL_WALK_INTO_VEHICLE:
+                    return static_cast<const CEventPotentialWalkIntoVehicle*>(event)->m_vehicle;
+                case EVENT_VEHICLE_COLLISION:
+                    return static_cast<const CEventVehicleCollision*>(event)->m_vehicle;
+                default:
+                    return nullptr;
+                }
+            }();
+            if (vehicle && vehicle->GetMoveSpeed().SquaredMagnitude() <= sq(0.125f)) {
+                switch (m_pSubTask->GetTaskType()) {
+                case TASK_SIMPLE_GO_TO_POINT:
+                case TASK_SIMPLE_GO_TO_POINT_FINE: {
+                    const auto tGoToSubTask = static_cast<CTaskSimpleGoTo*>(m_pSubTask);
+                    if (CPedGeometryAnalyser::IsEntityBlockingTarget(vehicle, tGoToSubTask->GetTargetPt(), tGoToSubTask->GetTargetPtRadius())) {
+                        tGoToSubTask->SetTargetPtRadius((ped->GetPosition() - vehicle->GetPosition()).Magnitude2D());
+                    }
+                }
+                }
+            }
+        }
+    }
+    return m_pSubTask->MakeAbortable(ped, priority, event);
 }
 
 // 0x6718D0
