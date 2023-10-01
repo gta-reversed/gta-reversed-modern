@@ -20,7 +20,7 @@ void CTaskComplexCarDrive::InjectHooks() {
     RH_ScopedVMTInstall(SetUpCar, 0x63CAE0, { .enabled = false});
     RH_ScopedVMTInstall(Drive, 0x63CAD0, { .enabled = false});
     RH_ScopedVMTInstall(Clone, 0x63DC90, { .enabled = false});
-    RH_ScopedVMTInstall(CreateNextSubTask, 0x644E20, { .enabled = false, .locked = true });
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x644E20);
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x645100, { .enabled = false, .locked = true});
     RH_ScopedVMTInstall(ControlSubTask, 0x645240, { .enabled = false});
 }
@@ -62,16 +62,48 @@ CTaskComplexCarDrive::~CTaskComplexCarDrive() {
     }
 }
 
-// 0x63DC90
-CTask* CTaskComplexCarDrive::Clone() const {
-    auto* task = new CTaskComplexCarDrive(m_pVehicle, m_fSpeed, m_carModelIndexToCreate, static_cast<eCarDrivingStyle>(m_nCarDrivingStyle));
-    task->m_asDriver = m_asDriver;
-    return task;
-}
-
 // 0x644E20
 CTask* CTaskComplexCarDrive::CreateNextSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x644E20, CTaskComplexCarDrive*, CPed*>(this, ped);
+    const auto Create = [this, ped](eTaskType tt) {
+        return CreateSubTask(tt, ped);
+    };
+    switch (m_pSubTask->GetTaskType()) {
+    case TASK_COMPLEX_ENTER_CAR_AS_PASSENGER: // 0x644E93
+        return Create(ped->IsInVehicle() ? TASK_SIMPLE_CAR_DRIVE : TASK_FINISHED);
+    case TASK_COMPLEX_ENTER_CAR_AS_DRIVER: // 0x644E65
+        return Create(ped->IsInVehicle() ? TASK_SIMPLE_CAR_DRIVE : TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER);
+    case TASK_SIMPLE_CAR_DRIVE: // 0x644E56
+        return CreateFirstSubTask(ped);
+    case TASK_COMPLEX_LEAVE_ANY_CAR: { // 0x644EC8
+        if (m_Veh) {
+            return m_bAsDriver
+                ? Create(TASK_COMPLEX_ENTER_CAR_AS_DRIVER)
+                : Create(TASK_COMPLEX_ENTER_CAR_AS_PASSENGER);
+        } else {
+            return m_bAsDriver
+                ? Create(TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER)
+                : Create(TASK_FINISHED);
+        }
+    }
+    case TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER: { // 0x644F39
+        if (ped->IsInVehicle()) {
+            CEntity::ChangeEntityReference(m_Veh, ped->m_pVehicle);
+            return Create(TASK_SIMPLE_CAR_DRIVE);
+        }
+        return m_DesiredCarModel == MODEL_INVALID
+            ? CreateSubTaskCannotGetInCar(ped)
+            : Create(TASK_SIMPLE_CREATE_CAR_AND_GET_IN);
+    }
+    case TASK_SIMPLE_CREATE_CAR_AND_GET_IN: { // 0x644FA3
+        if (ped->IsInVehicle()) {
+            CEntity::ChangeEntityReference(m_Veh, ped->m_pVehicle);
+            return Create(TASK_SIMPLE_CAR_DRIVE);
+        }
+        return CreateSubTaskCannotGetInCar(ped);
+    }
+    default:
+        NOTSA_UNREACHABLE();
+    }
 }
 
 // 0x645100
