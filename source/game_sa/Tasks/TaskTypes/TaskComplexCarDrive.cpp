@@ -21,7 +21,7 @@ void CTaskComplexCarDrive::InjectHooks() {
     RH_ScopedVMTInstall(Drive, 0x63CAD0, { .enabled = false});
     RH_ScopedVMTInstall(Clone, 0x63DC90, { .enabled = false});
     RH_ScopedVMTInstall(CreateNextSubTask, 0x644E20);
-    RH_ScopedVMTInstall(CreateFirstSubTask, 0x645100, { .enabled = false, .locked = true});
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x645100);
     RH_ScopedVMTInstall(ControlSubTask, 0x645240, { .enabled = false});
 }
 
@@ -108,30 +108,32 @@ CTask* CTaskComplexCarDrive::CreateNextSubTask(CPed* ped) {
 
 // 0x645100
 CTask* CTaskComplexCarDrive::CreateFirstSubTask(CPed* ped) {
-    if (!m_Veh) {
-        if (ped->m_pVehicle && ped->bInVehicle) {
-            m_Veh = ped->m_pVehicle;
-            m_Veh->RegisterReference(reinterpret_cast<CEntity**>(m_Veh));
-            return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
-        }
-        return m_bAsDriver ? CreateSubTask(TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER, ped) : nullptr;
-    }
-
-    if (ped->m_pVehicle && ped->bInVehicle) {
-        if (ped->m_pVehicle == m_Veh)
-            return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
-        else
-            return CreateSubTask(TASK_COMPLEX_LEAVE_ANY_CAR, ped);
-    } else {
-        if (!m_Veh->IsBike()) {
-            CUpsideDownCarCheck carCheck;
-            if (carCheck.IsCarUpsideDown(m_Veh) == 0) {
-                return CreateSubTask(m_bAsDriver ? TASK_COMPLEX_ENTER_CAR_AS_DRIVER : TASK_COMPLEX_ENTER_CAR_AS_PASSENGER, ped);
+    return CreateSubTask([this, ped] {
+        if (!m_Veh) {
+            if (ped->IsInVehicle()) {
+                CEntity::ChangeEntityReference(m_Veh, ped->m_pVehicle);
+                return TASK_SIMPLE_CAR_DRIVE;
             }
-            return m_bAsDriver ? CreateSubTask(TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER, ped) : nullptr;
+            return m_bAsDriver
+                ? TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER
+                : TASK_FINISHED;
         }
-        return CreateSubTask(m_bAsDriver ? TASK_COMPLEX_ENTER_CAR_AS_DRIVER : TASK_COMPLEX_ENTER_CAR_AS_PASSENGER, ped);
-    }
+        if (ped->IsInVehicle()) {
+            return ped->m_pVehicle == m_Veh
+                ? TASK_SIMPLE_CAR_DRIVE
+                : TASK_COMPLEX_LEAVE_ANY_CAR;
+        }
+        if (!m_Veh->IsBike()) {
+            if (CUpsideDownCarCheck{}.IsCarUpsideDown(m_Veh)) {
+                return m_bAsDriver
+                    ? TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER
+                    : TASK_FINISHED;
+            }
+        }
+        return m_bAsDriver
+            ? TASK_COMPLEX_ENTER_CAR_AS_DRIVER
+            : TASK_COMPLEX_ENTER_CAR_AS_PASSENGER;
+    }(), ped);
 }
 
 // 0x645240
@@ -142,8 +144,7 @@ CTask* CTaskComplexCarDrive::ControlSubTask(CPed* ped) {
             return Drive(ped);
         case TASK_COMPLEX_GO_TO_POINT_ANY_MEANS:
             if (ped->m_pVehicle && ped->bInVehicle) {
-                m_Veh = ped->m_pVehicle;
-                m_Veh->RegisterReference(reinterpret_cast<CEntity**>(m_Veh));
+                CEntity::ChangeEntityReference(m_Veh, ped->m_pVehicle);
                 return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
             }
         }
