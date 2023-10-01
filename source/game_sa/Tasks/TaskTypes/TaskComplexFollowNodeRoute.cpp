@@ -19,6 +19,8 @@ void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x66EA30);
     RH_ScopedInstall(Destructor, 0x66EB70);
 
+    RH_ScopedInstall(GetSubTaskType, 0x669650);
+
     RH_ScopedInstall(CalcGoToTaskType, 0x66EBE0);
     RH_ScopedInstall(SetTarget, 0x671750);
     RH_ScopedInstall(CreateSubTask, 0x669690);
@@ -33,7 +35,7 @@ void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedVMTInstall(GetTaskType, 0x66EB60);
     RH_ScopedVMTInstall(StopTimer, 0x6694E0);
     RH_ScopedVMTInstall(MakeAbortable, 0x669520);
-    RH_ScopedVMTInstall(CreateNextSubTask, 0x6718D0, { .reversed = false });
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x6718D0);
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x671800, { .reversed = false });
     RH_ScopedVMTInstall(ControlSubTask, 0x671AB0, { .reversed = false });
 }
@@ -82,6 +84,19 @@ CTaskComplexFollowNodeRoute::CTaskComplexFollowNodeRoute(const CTaskComplexFollo
 CTaskComplexFollowNodeRoute::~CTaskComplexFollowNodeRoute() {
     delete m_PtRoute;
     delete m_NodeRoute;
+}
+
+// 0x669650
+eTaskType CTaskComplexFollowNodeRoute::GetSubTaskType(uint32 progress, bool bLastRoutePointIsTarget, const CPointRoute& route) {
+    if (!bLastRoutePointIsTarget) {
+        return TASK_SIMPLE_GO_TO_POINT;
+    }
+    if (progress == route.GetSize()) {
+        return TASK_FINISHED;
+    }
+    return route.GetSize() != progress + 1
+        ? TASK_SIMPLE_GO_TO_POINT
+        : TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL;
 }
 
 // 0x6694E0
@@ -207,7 +222,7 @@ CTask* CTaskComplexFollowNodeRoute::CreateSubTask(eTaskType taskType, CPed* ped)
     case TASK_SIMPLE_GO_TO_POINT:
         return new CTaskSimpleGoToPoint{ m_MoveState, GetCurrentPt() };
     case TASK_SIMPLE_STAND_STILL: {
-        ped->Teleport(m_TargetPt, false); // NOTE/TODO: I guess accidentally left in? Or hacky workaround?
+        ped->Teleport(m_TargetPt, false);
         return new CTaskSimpleStandStill{};
     }
     case TASK_FINISHED:
@@ -376,7 +391,58 @@ bool CTaskComplexFollowNodeRoute::MakeAbortable(CPed* ped, eAbortPriority priori
 
 // 0x6718D0
 CTask* CTaskComplexFollowNodeRoute::CreateNextSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn< CTask*, 0x6718D0, CTaskComplexFollowNodeRoute*, CPed*>(this, ped);
+    const auto subTaskType = m_pSubTask->GetTaskType();
+
+    if (m_Timer.IsOutOfTime()) {
+        if (subTaskType == TASK_SIMPLE_STAND_STILL) {
+            ped->Teleport(m_TargetPt, false);
+            return CreateSubTask(TASK_FINISHED, ped); // 0x671949
+        }
+    }
+
+    if (subTaskType == TASK_COMPLEX_LEAVE_CAR) { // 0x671969
+        return ped->bInVehicle
+            ? CreateSubTask(TASK_FINISHED, ped)
+            : CreateFirstSubTask(ped);
+    }
+
+    if (m_LastRoutePointIsTarget) { // Inverted
+        switch (subTaskType) {
+        case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL: { // 0x6719E8
+            m_CurrPtIdx++;
+            break;
+        }
+        case TASK_SIMPLE_STAND_STILL: // 0x6719B6
+            return CreateSubTask(TASK_FINISHED, ped);
+        case TASK_SIMPLE_GO_TO_POINT: { // 0x6719FC - Go to next pt
+            m_CurrPtIdx++;
+            if (m_CurrPtIdx < m_NodeRoute->GetSize()) { 
+                m_CurrNode = (*m_NodeRoute)[m_CurrPtIdx];
+            }
+            break;
+        }
+        case TASK_SIMPLE_GO_TO_POINT_FINE: // 0x671AA7
+        default:
+            return nullptr; // 0x6719C9             
+        }
+    } else {
+        if (m_CurrPtIdx + 1 == m_PtRoute->GetSize()) { // 0x671A3A
+            SetTarget(
+                ped,
+                m_TargetPt,
+                m_TargetPtTolerance,
+                m_SlowDownDist,
+                m_FollowNodeThresholdHeightChange,
+                true
+            );
+            return CreateFirstSubTask(ped);
+        }
+        m_CurrPtIdx++;
+        m_CurrNode = (*m_NodeRoute)[m_CurrPtIdx];
+    }
+
+    const auto nextTaskType = GetSubTaskType(m_CurrPtIdx, m_LastRoutePointIsTarget, *m_PtRoute);
+    return CreateSubTask(m_bUseBlending ? nextTaskType : CTaskComplexFollowNodeRoute::CalcGoToTaskType(ped, nextTaskType), ped);
 }
 
 // 0x671800

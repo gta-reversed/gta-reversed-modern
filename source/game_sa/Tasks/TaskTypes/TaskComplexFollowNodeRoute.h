@@ -24,6 +24,8 @@ public:
     CTaskComplexFollowNodeRoute(const CTaskComplexFollowNodeRoute&);
     ~CTaskComplexFollowNodeRoute() override;
 
+    static eTaskType GetSubTaskType(uint32 progress, bool bLastRoutePointIsTarget, const CPointRoute& route);
+
     eTaskType GetTaskType() const override { return Type; } // 0x66EB60
     CTask*    Clone() const override { return new CTaskComplexFollowNodeRoute{*this}; }
     void      StopTimer(const CEvent* event) override;
