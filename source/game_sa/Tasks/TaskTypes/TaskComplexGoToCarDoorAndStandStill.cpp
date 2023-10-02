@@ -3,47 +3,57 @@
 #include "TaskComplexGoToCarDoorAndStandStill.h"
 
 void CTaskComplexGoToCarDoorAndStandStill::InjectHooks() {
-    RH_ScopedClass(CTaskComplexGoToCarDoorAndStandStill);
+    RH_ScopedVirtualClass(CTaskComplexGoToCarDoorAndStandStill, 0x86ec4c, 11);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x645780);
     RH_ScopedInstall(Destructor, 0x64A580);
+
     RH_ScopedInstall(IsVehicleInRange, 0x6458A0, { .reversed = false });
     RH_ScopedInstall(ComputeRouteToDoor, 0x645910, { .reversed = false });
+    RH_ScopedInstall(CreateSubTask, 0x64A5F0, { .reversed = false });
 
-    RH_ScopedVirtualInstall2(CreateSubTask, 0x64A5F0, { .reversed = false });
-    RH_ScopedVirtualInstall2(Clone, 0x6498B0, { .reversed = false });
-    RH_ScopedVirtualInstall2(MakeAbortable, 0x645840, { .reversed = false });
-    RH_ScopedVirtualInstall2(CreateNextSubTask, 0x64D2B0, { .reversed = false });
-    RH_ScopedVirtualInstall2(CreateFirstSubTask, 0x64D440, { .reversed = false });
-    RH_ScopedVirtualInstall2(ControlSubTask, 0x64A820, { .reversed = false });
+    RH_ScopedVMTInstall(Clone, 0x6498B0, { .reversed = false });
+    RH_ScopedVMTInstall(GetTaskType, 0x645830, { .reversed = false });
+    RH_ScopedVMTInstall(MakeAbortable, 0x645840, { .reversed = false });
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x64D2B0, { .reversed = false });
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x64D440, { .reversed = false });
+    RH_ScopedVMTInstall(ControlSubTask, 0x64A820, { .reversed = false });
 }
 
 // 0x645780
-CTaskComplexGoToCarDoorAndStandStill::CTaskComplexGoToCarDoorAndStandStill(CVehicle* vehicle, int32 moveState, bool a4, int32 a5, float radius, float a7, float a8, int32 a9) {
-    m_Vehicle = vehicle;
-    m_nMoveState = moveState;
-    f14 = a4;
-    m_fRadius = radius;
-    f1C = a7;
-    f20 = a8;
-    f24 = a9;
-    f28 = 0;
-    f2C = 0.0f;
-    f30 = false;
-    m_nDoorId = 0;
-    m_vecPositionToOpenCarDoor = CVector{};
-    f44 = a5;
-    f48 = false;
-    f49 = false;
-    m_PointRoute = nullptr;
+CTaskComplexGoToCarDoorAndStandStill::CTaskComplexGoToCarDoorAndStandStill(
+    CVehicle*  vehicle,
+    eMoveState moveState,
+    bool       bIsDriver,
+    int32      targetSeat,
+    float      targetRadius,
+    float      slowDownDist,
+    float      maxSeekDist,
+    int32      maxSeekTime
+) :
+    m_Vehicle{vehicle},
+    m_MoveState{moveState},
+    m_bIsDriver{bIsDriver},
+    m_TargetRadius{targetRadius},
+    m_SlowDownDist{slowDownDist},
+    m_MaxSeekDist{maxSeekDist},
+    m_MaxSeekTime{maxSeekTime},
+    m_TargetSeat{targetSeat}
+{
     CEntity::SafeRegisterRef(m_Vehicle);
+}
+
+// 0x6498B0
+CTaskComplexGoToCarDoorAndStandStill::CTaskComplexGoToCarDoorAndStandStill(const CTaskComplexGoToCarDoorAndStandStill& o) :
+    CTaskComplexGoToCarDoorAndStandStill{ o.m_Vehicle, o.m_MoveState, o.m_bIsDriver, o.m_TargetSeat, o.m_TargetRadius, o.m_SlowDownDist, o.m_MaxSeekDist, o.m_MaxSeekTime }
+{
 }
 
 // 0x64A580
 CTaskComplexGoToCarDoorAndStandStill::~CTaskComplexGoToCarDoorAndStandStill() {
     CEntity::SafeCleanUpRef(m_Vehicle);
-    if (m_PointRoute) delete m_PointRoute; // allocated on the pool, a check is required
+    delete m_RouteToDoor;
 }
 
 // 0x645840
