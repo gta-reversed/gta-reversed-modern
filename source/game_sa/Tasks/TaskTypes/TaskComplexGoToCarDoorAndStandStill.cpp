@@ -15,7 +15,7 @@ void CTaskComplexGoToCarDoorAndStandStill::InjectHooks() {
 
     RH_ScopedVMTInstall(Clone, 0x6498B0, { .reversed = false });
     RH_ScopedVMTInstall(GetTaskType, 0x645830, { .reversed = false });
-    RH_ScopedVMTInstall(MakeAbortable, 0x645840, { .reversed = false });
+    RH_ScopedVMTInstall(MakeAbortable, 0x645840);
     RH_ScopedVMTInstall(CreateNextSubTask, 0x64D2B0, { .reversed = false });
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x64D440, { .reversed = false });
     RH_ScopedVMTInstall(ControlSubTask, 0x64A820, { .reversed = false });
@@ -58,7 +58,14 @@ CTaskComplexGoToCarDoorAndStandStill::~CTaskComplexGoToCarDoorAndStandStill() {
 
 // 0x645840
 bool CTaskComplexGoToCarDoorAndStandStill::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return plugin::CallMethodAndReturn<bool, 0x645840, CTaskComplexGoToCarDoorAndStandStill*, CPed*, int32, CEvent const*>(this, ped, priority, event);
+    if (m_bTryingToEnterInWater) {
+        if (m_pSubTask && m_pSubTask->GetTaskType() == TASK_SIMPLE_PAUSE) {
+            if (event && notsa::contains({ EVENT_IN_WATER, EVENT_IN_AIR }, event->GetEventType())) {
+                return false;
+            }
+        }
+    }
+    return m_pSubTask->MakeAbortable(ped, priority, event);
 }
 
 // 0x64A5F0
