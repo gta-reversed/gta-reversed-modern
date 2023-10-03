@@ -16,7 +16,7 @@ void CTaskComplexGoToCarDoorAndStandStill::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x64A580);
 
     RH_ScopedInstall(IsVehicleInRange, 0x6458A0);
-    RH_ScopedInstall(ComputeRouteToDoor, 0x645910, { .reversed = false });
+    RH_ScopedInstall(ComputeRouteToDoor, 0x645910);
     RH_ScopedInstall(CreateSubTask, 0x64A5F0);
 
     RH_ScopedVMTInstall(Clone, 0x6498B0);
@@ -234,8 +234,32 @@ bool CTaskComplexGoToCarDoorAndStandStill::IsVehicleInRange(const CPed& ped) {
 }
 
 // 0x645910
-CVector* CTaskComplexGoToCarDoorAndStandStill::ComputeRouteToDoor(const CPed& ped) {
-    return plugin::CallMethodAndReturn<CVector*, 0x645910, CTaskComplexGoToCarDoorAndStandStill*, CPed const&>(this, ped);
+void CTaskComplexGoToCarDoorAndStandStill::ComputeRouteToDoor(const CPed& ped) {
+    if (!m_RouteToDoor) {
+        m_RouteToDoor = new CPointRoute{};
+    }
+    m_RouteToDoor->Clear();
+
+    const CVector pedPos = ped.GetPosition();
+
+    CVector vehBBPlanes[4];
+    float   vehBBPlanesDot[4];
+    CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncachedAll(pedPos.z, *m_Vehicle, &vehBBPlanes, vehBBPlanesDot);
+    const auto CalculatePositionOnPlane = [&](CVector pos, int32 side) {
+        return pos - pos.ProjectOnToNormal(vehBBPlanes[side]);
+    };
+
+    const auto pedPosOnBBPlane  = CalculatePositionOnPlane(pedPos, CPedGeometryAnalyser::ComputeEntityHitSide(pedPos, *m_Vehicle));
+    const auto doorPosOnBBPlane = CalculatePositionOnPlane(m_TargetPt, CPedGeometryAnalyser::ComputeEntityHitSide(m_TargetPt, *m_Vehicle));
+
+    CPointRoute routeAroundVeh{};
+    CPedGeometryAnalyser::ComputeRouteRoundEntityBoundingBox(ped, pedPosOnBBPlane, *m_Vehicle, doorPosOnBBPlane, routeAroundVeh, 0);
+
+    m_RouteToDoor->MaybeAddPoint(pedPosOnBBPlane);
+    for (const auto& pt : routeAroundVeh.GetPoints()) {
+        m_RouteToDoor->MaybeAddPoint(pt);
+    }
+    m_RouteToDoor->MaybeAddPoint(doorPosOnBBPlane);
 }
 
 // Based on SA code
