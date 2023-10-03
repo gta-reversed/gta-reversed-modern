@@ -253,6 +253,7 @@
 #include "TaskComplexCrossRoadLookAndAchieveHeading.h"
 #include "TaskComplexGoToPointAndStandStill.h"
 #include "TaskSimpleAchieveHeading.h"
+#include "TaskSimpleCarGoToPointNearDoorUntilDoorNotInUse.h"
 #include "TaskSimpleGiveCPR.h"
 #include "TaskSimpleCarSetPedInAsPassenger.h"
 #include "TaskComplexDriveFireTruck.h"
@@ -943,7 +944,7 @@ void InjectHooksMain() {
         // CTaskSimpleCarForcePedOut::InjectHooks();
         CTaskSimpleCarGetOut::InjectHooks();
         CTaskSimpleCarGetIn::InjectHooks();
-        // CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse::InjectHooks();
+        CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse::InjectHooks();
         CTaskSimpleCarOpenDoorFromOutside::InjectHooks();
         CTaskSimpleCarJumpOut::InjectHooks();
         CTaskSimpleCarOpenLockedDoorFromOutside::InjectHooks();
