@@ -15,7 +15,7 @@ void CTaskComplexGoToCarDoorAndStandStill::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x645780);
     RH_ScopedInstall(Destructor, 0x64A580);
 
-    RH_ScopedInstall(IsVehicleInRange, 0x6458A0, { .reversed = false });
+    RH_ScopedInstall(IsVehicleInRange, 0x6458A0);
     RH_ScopedInstall(ComputeRouteToDoor, 0x645910, { .reversed = false });
     RH_ScopedInstall(CreateSubTask, 0x64A5F0);
 
@@ -230,7 +230,7 @@ CTask* CTaskComplexGoToCarDoorAndStandStill::ControlSubTask(CPed* ped) {
 
 // 0x6458A0
 bool CTaskComplexGoToCarDoorAndStandStill::IsVehicleInRange(const CPed& ped) {
-    return plugin::CallMethodAndReturn<bool, 0x6458A0, CTaskComplexGoToCarDoorAndStandStill*, const CPed&>(this, ped);
+    return (ped.GetPosition() - m_Vehicle->GetPosition()).SquaredMagnitude() <= sq(m_MaxSeekDist);
 }
 
 // 0x645910
