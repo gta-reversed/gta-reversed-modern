@@ -5,7 +5,7 @@
 class CVector;
 class CVehicle;
 
-class CTaskComplexGoToCarDoorAndStandStill : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexGoToCarDoorAndStandStill : public CTaskComplex {
 public:
     static constexpr auto Type = TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL;
 
