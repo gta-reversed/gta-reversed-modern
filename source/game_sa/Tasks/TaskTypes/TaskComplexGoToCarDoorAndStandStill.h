@@ -29,7 +29,7 @@ public:
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;
 
-    CTask*    CreateSubTask(eTaskType taskType, const CPed* ped);
+    CTask*    CreateSubTask(eTaskType taskType, CPed* ped);
     bool      IsVehicleInRange(const CPed& ped);
     CVector*  ComputeRouteToDoor(const CPed & ped);
 

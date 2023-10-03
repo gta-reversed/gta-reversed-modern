@@ -1,6 +1,12 @@
 #include "StdInc.h"
 
 #include "TaskComplexGoToCarDoorAndStandStill.h"
+#include "TaskSimpleCarGoToPointNearDoorUntilDoorNotInUse.h"
+#include "TaskSimplePause.h"
+#include "TaskSimpleStandStill.h"
+#include "TaskSimpleCarWaitForDoorNotToBeInUse.h"
+#include "TaskComplexFollowPointRoute.h"
+#include "TaskSimpleGoToPoint.h"
 
 void CTaskComplexGoToCarDoorAndStandStill::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexGoToCarDoorAndStandStill, 0x86ec4c, 11);
@@ -11,7 +17,7 @@ void CTaskComplexGoToCarDoorAndStandStill::InjectHooks() {
 
     RH_ScopedInstall(IsVehicleInRange, 0x6458A0, { .reversed = false });
     RH_ScopedInstall(ComputeRouteToDoor, 0x645910, { .reversed = false });
-    RH_ScopedInstall(CreateSubTask, 0x64A5F0, { .reversed = false });
+    RH_ScopedInstall(CreateSubTask, 0x64A5F0);
 
     RH_ScopedVMTInstall(Clone, 0x6498B0, { .reversed = false });
     RH_ScopedVMTInstall(GetTaskType, 0x645830, { .reversed = false });
@@ -69,8 +75,25 @@ bool CTaskComplexGoToCarDoorAndStandStill::MakeAbortable(CPed* ped, eAbortPriori
 }
 
 // 0x64A5F0
-CTask* CTaskComplexGoToCarDoorAndStandStill::CreateSubTask(eTaskType taskType, const CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x64A5F0, CTaskComplexGoToCarDoorAndStandStill*, eTaskType, const CPed*>(this, taskType, ped);
+CTask* CTaskComplexGoToCarDoorAndStandStill::CreateSubTask(eTaskType taskType, CPed* ped) {
+    switch (taskType) {
+    case TASK_SIMPLE_GO_TO_POINT_NEAR_CAR_DOOR_UNTIL_DOOR_NOT_IN_USE:
+        return new CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse{ m_Vehicle, m_TargetDoor, m_TargetPt, m_MoveState };
+    case TASK_SIMPLE_PAUSE:
+        return new CTaskSimplePause{ 1 };
+    case TASK_SIMPLE_STAND_STILL:
+        return new CTaskSimpleStandStill{ 1 };
+    case TASK_SIMPLE_CAR_WAIT_FOR_DOOR_NOT_TO_BE_IN_USE:
+        return new CTaskSimpleCarWaitForDoorNotToBeInUse{ m_Vehicle, m_TargetDoor };
+    case TASK_COMPLEX_FOLLOW_POINT_ROUTE:
+        return new CTaskComplexFollowPointRoute{ m_MoveState, *m_RouteToDoor };
+    case TASK_SIMPLE_GO_TO_POINT: {
+        ped->bHasJustLeftCar = true;
+        return new CTaskSimpleGoToPoint{ m_MoveState, m_TargetPt, m_TargetRadius };
+    }
+    default:
+        NOTSA_UNREACHABLE();
+    }
 }
 
 // 0x64D2B0
