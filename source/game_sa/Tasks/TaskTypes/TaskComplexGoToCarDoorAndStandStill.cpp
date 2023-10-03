@@ -213,17 +213,17 @@ CTask* CTaskComplexGoToCarDoorAndStandStill::ControlSubTask(CPed* ped) {
             return CreateSubTask(TASK_SIMPLE_STAND_STILL, ped); // 0x64A94A
         }
 
-        if (!CCarEnterExit::IsPathToDoorBlockedByVehicleCollisionModel(ped, m_Vehicle, m_TargetPt)) {
+        if (!CCarEnterExit::IsPathToDoorBlockedByVehicleCollisionModel(ped, m_Vehicle, doorOpenPos)) {
             m_TargetPt = doorOpenPos;
             return CreateSubTask(TASK_SIMPLE_GO_TO_POINT, ped); // 0x64A990
         }
 
-        if ((m_TargetPt - doorOpenPos).SquaredMagnitude() >= sq(0.1f)) {
-            return m_pSubTask;
+        if ((m_TargetPt - doorOpenPos).SquaredMagnitude() >= sq(0.1f)) { // 0x64A9D1
+            m_TargetPt = doorOpenPos;
+            return CreateFirstSubTask(ped);
         }
 
-        m_TargetPt = doorOpenPos;
-        return CreateFirstSubTask(ped);
+        return m_pSubTask;
     }
     default:
         NOTSA_UNREACHABLE("SubTaskType: {}", (int)tt);
