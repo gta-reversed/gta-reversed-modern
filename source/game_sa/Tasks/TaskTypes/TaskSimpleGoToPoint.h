@@ -30,6 +30,8 @@ public:
     // bDontCheckRadius is always false
     void UpdatePoint(const CVector& targetPosition, float fRadius = 0.5f, bool bDontCheckRadius = false);
 
+    bool WasTaskSuccessful(CPed* ped) const { return gotoPointFlags.m_b03 && std::abs(m_vecTargetPoint.z - ped->GetPosition().z) < 3.f; }
+
     static void InjectHooks();
     auto Constructor(eMoveState moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6) { this->CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(moveState, targetPoint, fRadius, bMoveTowardsTargetPoint, a6); return this; }
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);

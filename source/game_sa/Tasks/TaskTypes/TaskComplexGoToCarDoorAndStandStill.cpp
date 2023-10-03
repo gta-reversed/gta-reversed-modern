@@ -22,7 +22,7 @@ void CTaskComplexGoToCarDoorAndStandStill::InjectHooks() {
     RH_ScopedVMTInstall(Clone, 0x6498B0);
     RH_ScopedVMTInstall(GetTaskType, 0x645830);
     RH_ScopedVMTInstall(MakeAbortable, 0x645840);
-    RH_ScopedVMTInstall(CreateNextSubTask, 0x64D2B0, { .reversed = false });
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x64D2B0);
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x64D440, { .reversed = false });
     RH_ScopedVMTInstall(ControlSubTask, 0x64A820, { .reversed = false });
 }
@@ -98,7 +98,30 @@ CTask* CTaskComplexGoToCarDoorAndStandStill::CreateSubTask(eTaskType taskType, C
 
 // 0x64D2B0
 CTask* CTaskComplexGoToCarDoorAndStandStill::CreateNextSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x64D2B0, CTaskComplexGoToCarDoorAndStandStill*, CPed*>(this, ped);
+    switch (const auto tt = m_pSubTask->GetTaskType()) {
+    case TASK_COMPLEX_FOLLOW_POINT_ROUTE: { // 0x64D3B8
+        m_TargetPt = CCarEnterExit::GetPositionToOpenCarDoor(m_Vehicle, m_TargetDoor);
+        return CreateSubTask(TASK_SIMPLE_GO_TO_POINT, ped);
+    }
+    case TASK_SIMPLE_GO_TO_POINT: { // 0x64D3E9
+        m_bAchievedTargetDoor |= static_cast<CTaskSimpleGoToPoint*>(m_pSubTask)->WasTaskSuccessful(ped);
+        return CreateSubTask(TASK_FINISHED, ped);
+    }
+    case TASK_SIMPLE_GO_TO_POINT_NEAR_CAR_DOOR_UNTIL_DOOR_NOT_IN_USE: // 0x64D387
+        return CreateSubTask(TASK_SIMPLE_CAR_WAIT_FOR_DOOR_NOT_TO_BE_IN_USE, ped);
+    case TASK_SIMPLE_CAR_WAIT_FOR_DOOR_NOT_TO_BE_IN_USE: // 0x64D2EB
+        return CreateFirstSubTask(ped); 
+    case TASK_SIMPLE_STAND_STILL: // 0x64D420
+        return CreateSubTask(TASK_FINISHED, ped);
+    case TASK_SIMPLE_PAUSE: { // 0x64D314
+        if (m_bTryingToEnterInWater) {
+            m_bAchievedTargetDoor |= (ped->GetPosition() - m_TargetPt).SquaredMagnitude2D() <= sq(0.5f);
+        }
+        return CreateSubTask(TASK_FINISHED, ped);
+    }
+    default:
+        NOTSA_UNREACHABLE("SubTaskType: {}", (int)tt);
+    }
 }
 
 // 0x64D440
