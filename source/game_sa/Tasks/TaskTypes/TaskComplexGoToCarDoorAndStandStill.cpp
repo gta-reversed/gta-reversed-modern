@@ -19,7 +19,7 @@ void CTaskComplexGoToCarDoorAndStandStill::InjectHooks() {
     RH_ScopedInstall(ComputeRouteToDoor, 0x645910, { .reversed = false });
     RH_ScopedInstall(CreateSubTask, 0x64A5F0);
 
-    RH_ScopedVMTInstall(Clone, 0x6498B0, { .reversed = false });
+    RH_ScopedVMTInstall(Clone, 0x6498B0);
     RH_ScopedVMTInstall(GetTaskType, 0x645830, { .reversed = false });
     RH_ScopedVMTInstall(MakeAbortable, 0x645840);
     RH_ScopedVMTInstall(CreateNextSubTask, 0x64D2B0, { .reversed = false });
