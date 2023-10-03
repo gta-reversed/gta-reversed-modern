@@ -21,7 +21,7 @@ void CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse::InjectHooks() {
 // 0x646D70
 CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse::CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse(
     CVehicle*      vehicle,
-    eTargetDoor    targetDoor,
+    int32          targetDoor,
     const CVector& targetPt,
     eMoveState     moveState
 ) :

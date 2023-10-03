@@ -49,7 +49,7 @@ public:
     float        m_MaxSeekDist{};
     int32        m_MaxSeekTime{};
     CTaskTimer   m_SeekTimer{};
-    eTargetDoor  m_TargetDoor{};
+    int32        m_TargetDoor{};
     CVector      m_TargetPt{};
     int32        m_TargetSeat{};
     bool         m_bTryingToEnterInWater{};

@@ -20,7 +20,7 @@ public:
 
     CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse(
         CVehicle*      vehicle,
-        eTargetDoor    targetDoor,
+        int32          targetDoor,
         const CVector& targetPt,
         eMoveState     moveState
     );
@@ -41,7 +41,7 @@ protected:
 
 private: // Wrappers for hooks
     // 0x646D70
-    CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse* Constructor(CVehicle* vehicle, eTargetDoor targetDoor, const CVector& targetPt, eMoveState moveState) {
+    CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse* Constructor(CVehicle* vehicle, int32 targetDoor, const CVector& targetPt, eMoveState moveState) {
         this->CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse::CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse(vehicle, targetDoor, targetPt, moveState);
         return this;
     }
