@@ -91,6 +91,8 @@ CTask* CTaskComplexGoToCarDoorAndStandStill::CreateSubTask(eTaskType taskType, C
         ped->bHasJustLeftCar = true;
         return new CTaskSimpleGoToPoint{ m_MoveState, m_TargetPt, m_TargetRadius };
     }
+    case TASK_FINISHED:
+        return nullptr;
     default:
         NOTSA_UNREACHABLE();
     }
