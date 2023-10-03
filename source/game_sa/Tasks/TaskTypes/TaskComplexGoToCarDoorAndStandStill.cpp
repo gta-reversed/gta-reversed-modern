@@ -24,7 +24,7 @@ void CTaskComplexGoToCarDoorAndStandStill::InjectHooks() {
     RH_ScopedVMTInstall(MakeAbortable, 0x645840);
     RH_ScopedVMTInstall(CreateNextSubTask, 0x64D2B0);
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x64D440);
-    RH_ScopedVMTInstall(ControlSubTask, 0x64A820, { .reversed = false });
+    RH_ScopedVMTInstall(ControlSubTask, 0x64A820);
 }
 
 // 0x645780
@@ -135,32 +135,19 @@ CTask* CTaskComplexGoToCarDoorAndStandStill::CreateFirstSubTask(CPed* ped) {
             return TASK_SIMPLE_PAUSE;
         }
 
-        bool bWaitForDoorToBeFreeIfBlocked = false;
-
-        // Calculate door to use and it's position
-        // Original code is much different, I had to refactor it to get rid of the copy pasta
-        if (m_TargetSeat != 0) {
-            if (!m_bIsDriver) {
-                if (const auto psgrAtDoor = m_Vehicle->GetPassengers()[CCarEnterExit::ComputePassengerIndexFromCarDoor(m_Vehicle, m_TargetDoor)]) {
-                    if (psgrAtDoor->bThisPedIsATargetPriority) {
-                        return TASK_SIMPLE_STAND_STILL;
-                    }
-                }
-            }
-            m_TargetDoor = m_TargetSeat;
-            m_TargetPt   = CCarEnterExit::GetPositionToOpenCarDoor(m_Vehicle, m_TargetSeat);
-        } else {
-            if (m_bIsDriver) {
-                if (!CCarEnterExit::GetNearestCarDoor(ped, m_Vehicle, m_TargetPt, m_TargetDoor)) {
+        if (m_TargetSeat != 0 && !m_bIsDriver) {
+            if (const auto psgrAtDoor = m_Vehicle->GetPassengers()[CCarEnterExit::ComputePassengerIndexFromCarDoor(m_Vehicle, m_TargetDoor)]) {
+                if (psgrAtDoor->bThisPedIsATargetPriority) {
                     return TASK_SIMPLE_STAND_STILL;
                 }
-            } else {
-                if (!CCarEnterExit::GetNearestCarPassengerDoor(ped, m_Vehicle, &m_TargetPt, &m_TargetDoor, true, true, true)) {
-                    if (!CCarEnterExit::GetNearestCarPassengerDoor(ped, m_Vehicle, &m_TargetPt, &m_TargetDoor, true, false, true)) {
-                        return TASK_SIMPLE_STAND_STILL;
-                    }
-                    bWaitForDoorToBeFreeIfBlocked = true;
-                }
+            }
+        }
+
+        // Calculate the door to use
+        bool bCanWaitForDoorToBeFree;
+        if (!CalculateTargetDoor(ped, bCanWaitForDoorToBeFree)) {
+            if (!bCanWaitForDoorToBeFree) {
+                return TASK_SIMPLE_STAND_STILL;
             }
         }
 
@@ -171,7 +158,7 @@ CTask* CTaskComplexGoToCarDoorAndStandStill::CreateFirstSubTask(CPed* ped) {
         }
 
         // Otherwise we can just go to the door straight
-        return bWaitForDoorToBeFreeIfBlocked
+        return bCanWaitForDoorToBeFree
             ? TASK_SIMPLE_GO_TO_POINT_NEAR_CAR_DOOR_UNTIL_DOOR_NOT_IN_USE
             : TASK_SIMPLE_GO_TO_POINT;
     }(), ped);
@@ -179,7 +166,66 @@ CTask* CTaskComplexGoToCarDoorAndStandStill::CreateFirstSubTask(CPed* ped) {
 
 // 0x64A820
 CTask* CTaskComplexGoToCarDoorAndStandStill::ControlSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x64A820, CTaskComplexGoToCarDoorAndStandStill*, CPed*>(this, ped);
+    if (!m_Vehicle) {
+        return nullptr;
+    }
+
+    if (!ped->IsCop()) {
+        if (const auto drvr = m_Vehicle->m_pDriver) {
+            if (drvr->IsPlayer() && drvr->m_nPedState == PEDSTATE_ARRESTED) {
+                return CreateSubTask(TASK_SIMPLE_STAND_STILL, ped); // 0x64A875
+            }
+        }
+    }
+
+    switch (const auto tt = m_pSubTask->GetTaskType()) {
+    case TASK_SIMPLE_GO_TO_POINT_NEAR_CAR_DOOR_UNTIL_DOOR_NOT_IN_USE:
+    case TASK_SIMPLE_PAUSE:
+    case TASK_SIMPLE_STAND_STILL:
+    case TASK_SIMPLE_CAR_WAIT_FOR_DOOR_NOT_TO_BE_IN_USE: { // 0x64A890
+        if (m_TargetDoor != 0) { // TODO: Enum
+            m_TargetPt = CCarEnterExit::GetPositionToOpenCarDoor(m_Vehicle, m_TargetDoor);
+        }
+        return m_pSubTask;
+    }
+    case TASK_SIMPLE_GO_TO_POINT: { // 0x64AA11
+        ped->bPushOtherPeds = true;
+
+        if (!IsVehicleInRange(*ped)) { // Inverted
+            m_TargetPt = CCarEnterExit::GetPositionToOpenCarDoor(m_Vehicle, m_TargetDoor);
+            return CreateSubTask(TASK_SIMPLE_STAND_STILL, ped); // 0x64AA50 
+        }
+
+        if (bool bCanWaitForDoorToBeFree; !CalculateTargetDoor(ped, bCanWaitForDoorToBeFree)) {
+            return CreateSubTask(bCanWaitForDoorToBeFree ? TASK_SIMPLE_GO_TO_POINT_NEAR_CAR_DOOR_UNTIL_DOOR_NOT_IN_USE : TASK_SIMPLE_STAND_STILL, ped);
+        }
+        static_cast<CTaskSimpleGoToPoint*>(m_pSubTask)->UpdatePoint(m_TargetPt, m_TargetRadius);
+
+        return m_pSubTask;
+    }
+    case TASK_COMPLEX_FOLLOW_POINT_ROUTE: { // 0x64A8FA
+        const auto doorOpenPos = CCarEnterExit::GetPositionToOpenCarDoor(m_Vehicle, m_TargetDoor);
+
+        if (!IsVehicleInRange(*ped)) {
+            m_TargetPt = doorOpenPos;
+            return CreateSubTask(TASK_SIMPLE_STAND_STILL, ped); // 0x64A94A
+        }
+
+        if (!CCarEnterExit::IsPathToDoorBlockedByVehicleCollisionModel(ped, m_Vehicle, m_TargetPt)) {
+            m_TargetPt = doorOpenPos;
+            return CreateSubTask(TASK_SIMPLE_GO_TO_POINT, ped); // 0x64A990
+        }
+
+        if ((m_TargetPt - doorOpenPos).SquaredMagnitude() >= sq(0.1f)) {
+            return m_pSubTask;
+        }
+
+        m_TargetPt = doorOpenPos;
+        return CreateFirstSubTask(ped);
+    }
+    default:
+        NOTSA_UNREACHABLE("SubTaskType: {}", (int)tt);
+    }
 }
 
 // 0x6458A0
@@ -190,4 +236,27 @@ bool CTaskComplexGoToCarDoorAndStandStill::IsVehicleInRange(const CPed& ped) {
 // 0x645910
 CVector* CTaskComplexGoToCarDoorAndStandStill::ComputeRouteToDoor(const CPed& ped) {
     return plugin::CallMethodAndReturn<CVector*, 0x645910, CTaskComplexGoToCarDoorAndStandStill*, CPed const&>(this, ped);
+}
+
+// Based on SA code
+// Calculate door to use and it's position
+// Original code is much different, I had to refactor it to get rid of the copy pasta
+bool CTaskComplexGoToCarDoorAndStandStill::CalculateTargetDoor(CPed* ped, bool& bCanWaitForDoorToBeFree) {
+    bCanWaitForDoorToBeFree = false;
+    if (m_TargetSeat != 0) {
+        m_TargetDoor = m_TargetSeat;
+        m_TargetPt   = CCarEnterExit::GetPositionToOpenCarDoor(m_Vehicle, m_TargetSeat);
+    } else {
+        if (m_bIsDriver) {
+            if (!CCarEnterExit::GetNearestCarDoor(ped, m_Vehicle, m_TargetPt, m_TargetDoor)) {
+                return false;
+            }
+        } else {
+            if (!CCarEnterExit::GetNearestCarPassengerDoor(ped, m_Vehicle, &m_TargetPt, &m_TargetDoor, true, true, true)) {
+                bCanWaitForDoorToBeFree = CCarEnterExit::GetNearestCarPassengerDoor(ped, m_Vehicle, &m_TargetPt, &m_TargetDoor, true, false, true);
+                return false;
+            }
+        }
+    }
+    return true;
 }

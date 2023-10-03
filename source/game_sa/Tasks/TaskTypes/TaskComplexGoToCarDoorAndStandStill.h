@@ -29,9 +29,11 @@ public:
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;
 
+protected:
     CTask*    CreateSubTask(eTaskType taskType, CPed* ped);
     bool      IsVehicleInRange(const CPed& ped);
-    CVector*  ComputeRouteToDoor(const CPed & ped);
+    CVector*  ComputeRouteToDoor(const CPed& ped);
+    bool      CalculateTargetDoor(CPed* ped, bool& bCanWaitForDoorToBeFree);
 
 private:
     friend void InjectHooksMain();
