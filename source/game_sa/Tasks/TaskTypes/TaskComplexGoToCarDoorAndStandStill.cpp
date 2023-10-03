@@ -84,7 +84,7 @@ CTask* CTaskComplexGoToCarDoorAndStandStill::CreateSubTask(eTaskType taskType, C
     case TASK_SIMPLE_STAND_STILL:
         return new CTaskSimpleStandStill{ 1 };
     case TASK_SIMPLE_CAR_WAIT_FOR_DOOR_NOT_TO_BE_IN_USE:
-        return new CTaskSimpleCarWaitForDoorNotToBeInUse{ m_Vehicle, m_TargetDoor };
+        return new CTaskSimpleCarWaitForDoorNotToBeInUse{ m_Vehicle, (uint32)m_TargetDoor };
     case TASK_COMPLEX_FOLLOW_POINT_ROUTE:
         return new CTaskComplexFollowPointRoute{ m_MoveState, *m_RouteToDoor };
     case TASK_SIMPLE_GO_TO_POINT: {
