@@ -150,12 +150,11 @@ void UIRenderer::DebugCode() {
     //}
     
     if (pad->IsF7JustPressed() || (pad->IsCtrlPressed() && pad->IsStandardKeyJustPressed('M'))) {
-        CPad::GetPad(0)->NewMouseControllerState.Clear();
-        CPad::GetPad(0)->NewMouseControllerState.X = 0;
-        CPad::GetPad(0)->NewMouseControllerState.Y = 0;
-        CPad::GetPad(0)->OldMouseControllerState.Clear();
-        CPad::GetPad(0)->OldMouseControllerState.X = 0;
-        CPad::GetPad(0)->OldMouseControllerState.Y = 0;
+        pad->NewMouseControllerState.X = 0;
+        pad->NewMouseControllerState.Y = 0;
+        pad->OldMouseControllerState.Clear();
+        pad->OldMouseControllerState.X = 0;
+        pad->OldMouseControllerState.Y = 0;
         SetPlayerInput(!m_InputActive);
     }
     if (pad->IsStandardKeyJustPressed('0')) {
