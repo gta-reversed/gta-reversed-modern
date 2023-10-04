@@ -18,7 +18,7 @@ void CTaskComplexEnterBoatAsDriver::InjectHooks() {
     RH_ScopedVMTInstall(Clone, 0x63D920);
     RH_ScopedVMTInstall(GetTaskType, 0x63B640);
     RH_ScopedVMTInstall(CreateNextSubTask, 0x640E60);
-    RH_ScopedVMTInstall(CreateFirstSubTask, 0x640ED0, { .reversed = false });
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x640ED0);
     RH_ScopedVMTInstall(ControlSubTask, 0x63B6B0, { .reversed = false });
 }
 
@@ -77,7 +77,11 @@ CTask* CTaskComplexEnterBoatAsDriver::CreateNextSubTask(CPed* ped) {
 
 // 0x640ED0
 CTask* CTaskComplexEnterBoatAsDriver::CreateFirstSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x640ED0, CTaskComplexEnterBoatAsDriver*, CPed*>(this, ped);
+    return CreateSubTask(
+        ped->m_pContactEntity == m_EnterInto || ped->m_standingOnEntity == m_EnterInto
+            ? TASK_COMPLEX_GO_TO_BOAT_STEERING_WHEEL
+            : TASK_FINISHED
+    );
 }
 
 // 0x63B6B0
