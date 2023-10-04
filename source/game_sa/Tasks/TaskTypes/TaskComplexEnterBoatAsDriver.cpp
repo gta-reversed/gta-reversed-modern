@@ -4,6 +4,7 @@
 #include "TaskComplexGetOnBoatSeat.h"
 #include "TaskSimpleCarSetPedInAsDriver.h"
 #include "TaskComplexGoToBoatSteeringWheel.h"
+#include "TaskSimpleCarSlowDragPedOut.h"
 
 void CTaskComplexEnterBoatAsDriver::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexEnterBoatAsDriver, 0x86e7d0, 11);
@@ -16,7 +17,7 @@ void CTaskComplexEnterBoatAsDriver::InjectHooks() {
 
     RH_ScopedVMTInstall(Clone, 0x63D920);
     RH_ScopedVMTInstall(GetTaskType, 0x63B640);
-    RH_ScopedVMTInstall(CreateNextSubTask, 0x640E60, { .reversed = false });
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x640E60);
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x640ED0, { .reversed = false });
     RH_ScopedVMTInstall(ControlSubTask, 0x63B6B0, { .reversed = false });
 }
@@ -57,7 +58,21 @@ CTask* CTaskComplexEnterBoatAsDriver::CreateSubTask(eTaskType tt) {
 
 // 0x640E60
 CTask* CTaskComplexEnterBoatAsDriver::CreateNextSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x640E60, CTaskComplexEnterBoatAsDriver*, CPed*>(this, ped);
+    return CreateSubTask([this, ped] {
+        switch (m_pSubTask->GetTaskType()) {
+        case TASK_COMPLEX_GO_TO_BOAT_STEERING_WHEEL: {
+            return CTask::Cast<CTaskSimpleCarSlowDragPedOut>(m_pSubTask)->m_bWasPedStatic
+                ? TASK_COMPLEX_GET_ON_BOAT_SEAT
+                : TASK_FINISHED;
+        }
+        case TASK_COMPLEX_GET_ON_BOAT_SEAT:
+            return TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER;
+        case TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER:
+            return TASK_FINISHED;
+        default:
+            NOTSA_UNREACHABLE();
+    }
+    }());
 }
 
 // 0x640ED0
