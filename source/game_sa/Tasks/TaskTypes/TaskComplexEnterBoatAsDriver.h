@@ -19,7 +19,7 @@ public:
     eTaskType GetTaskType() const override { return Type; }
     CTask*    CreateNextSubTask(CPed* ped) override;
     CTask*    CreateFirstSubTask(CPed* ped) override;
-    CTask*    ControlSubTask(CPed* ped) override;
+    CTask*    ControlSubTask(CPed* ped) override { return m_pSubTask; }
 
     CTask* CreateSubTask(eTaskType tt);
 
