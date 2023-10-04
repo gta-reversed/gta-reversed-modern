@@ -3,7 +3,7 @@
 #include "TaskComplex.h"
 class CVehicle;
 
-class CTaskComplexGetOnBoatSeat : CTaskComplex {
+class CTaskComplexGetOnBoatSeat : public CTaskComplex {
 public:
     CVehicle* m_Vehicle;
 
