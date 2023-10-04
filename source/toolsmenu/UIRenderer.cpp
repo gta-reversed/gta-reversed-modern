@@ -65,7 +65,8 @@ void UIRenderer::PreRenderUpdate() {
     const auto Shortcut = [](ImGuiKeyChord chord) { return ImGui::Shortcut(chord, ImGuiKeyOwner_Any, ImGuiInputFlags_RouteAlways); };
     if (Shortcut(ImGuiKey_F7) || Shortcut(ImGuiKey_M | ImGuiMod_Ctrl)) {
         auto pad = CPad::GetPad(0);
-        if (!m_InputActive) {
+        m_InputActive = !m_InputActive;
+        if (m_InputActive) {
             pad->NewMouseControllerState.Clear();
             pad->NewMouseControllerState.X = 0;
             pad->NewMouseControllerState.Y = 0;
@@ -73,7 +74,6 @@ void UIRenderer::PreRenderUpdate() {
             pad->OldMouseControllerState.X = 0;
             pad->OldMouseControllerState.Y = 0;
         }
-        m_InputActive = !m_InputActive;
         m_ImIO->MouseDrawCursor = m_InputActive;
         m_ImIO->NavActive = m_InputActive;
         pad->Clear(m_InputActive, true);
