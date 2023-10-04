@@ -262,6 +262,7 @@
 #include "TaskComplexPassObject.h"
 #include "TaskComplexEnterCarAsPassenger.h"
 #include "TaskComplexEnterCarAsDriver.h"
+#include "TaskSimpleCarShuffle.h"
 #include "TaskComplexReactToGunAimedAt.h"
 #include "TaskSimpleNone.h"
 #include "TaskComplexKillPedOnFoot.h"
@@ -949,7 +950,7 @@ void InjectHooksMain() {
         CTaskSimpleCarOpenLockedDoorFromOutside::InjectHooks();
         // CTaskSimpleCarSetPedSlowDraggedOut::InjectHooks();
         CTaskSimpleCarSetTempAction::InjectHooks();
-        // CTaskSimpleCarShuffle::InjectHooks();
+        CTaskSimpleCarShuffle::InjectHooks();
         // CTaskSimpleCarSlowBeDraggedOut::InjectHooks();
         CTaskSimpleCarWaitToSlowDown::InjectHooks();
         CTaskSimpleCarWaitForDoorNotToBeInUse::InjectHooks();

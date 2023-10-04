@@ -75,7 +75,7 @@ auto CTaskSimpleCarJumpOut::ComputeAnimID() -> std::pair<AssocGroupId, Animation
             NOTSA_UNREACHABLE();
         }
     }();
-    return { (AssocGroupId)m_veh->GetAnimGroup().GetGroup(animId), animId };
+    return { m_veh->GetAnimGroup().GetGroup(animId), animId };
 }
 
 // 0x647510
