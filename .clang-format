@@ -175,8 +175,10 @@ WhitespaceSensitiveMacros:
   - RH_ScopedVMTInstall
   - RH_ScopedVirtualInstall
   - RH_ScopedGlobalInstall
-AlignConsecutiveShortCaseStatements:
-  Enabled: true
-  AcrossEmptyLines: true
-  AcrossComments: true
-  AlignCaseColons: false
+
+# VS's clang-format is not up-to-date enough for this yet
+#AlignConsecutiveShortCaseStatements:
+#  Enabled: true
+#  AcrossEmptyLines: true
+#  AcrossComments: true
+#  AlignCaseColons: false

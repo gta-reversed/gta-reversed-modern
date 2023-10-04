@@ -205,6 +205,11 @@ public:
 
     // Deallocates object
     void Delete(A* obj) {
+#ifdef FIX_BUGS // C++ says that `delete nullptr` is well defined, and should do nothing.
+        if (!obj) {
+            return;
+        }
+#endif
         int32 index = GetIndex(obj);
         m_byteMap[index].bEmpty = true;
         if (index < m_nFirstFree)
