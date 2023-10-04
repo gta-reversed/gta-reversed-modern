@@ -29,9 +29,6 @@ UIRenderer::UIRenderer() :
     m_ImIO->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
     m_ImIO->NavActive   = false;
 
-#ifdef WIN32
-    m_ImIO->FontDefault = m_ImIO->Fonts->AddFontFromFileTTF("C:/Windows/Fonts/trebucbd.ttf", SCREEN_SCALE_Y(10.0f));
-#endif
     ImGuiStyle& style = ImGui::GetStyle();
     style.WindowBorderSize = 0.0f;
     style.FrameBorderSize = 0.0f;
@@ -42,7 +39,7 @@ UIRenderer::UIRenderer() :
     ImGui_ImplWin32_Init(PSGLOBAL(window));
     ImGui_ImplDX9_Init(GetD3DDevice());
 
-    DEV_LOG("ImGui Init");
+    DEV_LOG("I say hello!");
 }
 
 UIRenderer::~UIRenderer() {
@@ -50,7 +47,7 @@ UIRenderer::~UIRenderer() {
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext(m_ImCtx);
 
-    DEV_LOG("ImGui Shutdown");
+    DEV_LOG("Good bye!");
 }
 
 void UIRenderer::PreRenderUpdate() {
@@ -67,7 +64,19 @@ void UIRenderer::PreRenderUpdate() {
     // and the menu will close
     const auto Shortcut = [](ImGuiKeyChord chord) { return ImGui::Shortcut(chord, ImGuiKeyOwner_Any, ImGuiInputFlags_RouteAlways); };
     if (Shortcut(ImGuiKey_F7) || Shortcut(ImGuiKey_M | ImGuiMod_Ctrl)) {
-        SetPlayerInput(!m_InputActive);
+        auto pad = CPad::GetPad(0);
+        if (!m_InputActive) {
+            pad->NewMouseControllerState.Clear();
+            pad->NewMouseControllerState.X = 0;
+            pad->NewMouseControllerState.Y = 0;
+            pad->OldMouseControllerState.Clear();
+            pad->OldMouseControllerState.X = 0;
+            pad->OldMouseControllerState.Y = 0;
+        }
+        m_InputActive = !m_InputActive;
+        m_ImIO->MouseDrawCursor = m_InputActive;
+        m_ImIO->NavActive = m_InputActive;
+        pad->Clear(m_InputActive, true);
     }
 }
 
@@ -149,15 +158,6 @@ void UIRenderer::DebugCode() {
     //    );
     //}
     
-    if (pad->IsF7JustPressed() || (pad->IsCtrlPressed() && pad->IsStandardKeyJustPressed('M'))) {
-        CPad::GetPad(0)->NewMouseControllerState.Clear();
-        CPad::GetPad(0)->NewMouseControllerState.X = 0;
-        CPad::GetPad(0)->NewMouseControllerState.Y = 0;
-        CPad::GetPad(0)->OldMouseControllerState.Clear();
-        CPad::GetPad(0)->OldMouseControllerState.X = 0;
-        CPad::GetPad(0)->OldMouseControllerState.Y = 0;
-        SetPlayerInput(!m_InputActive);
-    }
     if (pad->IsStandardKeyJustPressed('0')) {
         if (const auto veh = FindPlayerVehicle()) {
             veh->Fix();
@@ -200,12 +200,6 @@ void UIRenderer::DebugCode() {
             veh->AsAutomobile()->SetRandomDamage(true);
         }
     }
-}
-void UIRenderer::SetPlayerInput(bool state) {
-    m_InputActive = !m_InputActive;
-    m_ImIO->MouseDrawCursor = m_InputActive;
-    m_ImIO->NavActive = m_InputActive;
-    CPad::GetPad()->Clear(m_InputActive, true);
 }
 }; // namespace ui
 }; // namespace notsa

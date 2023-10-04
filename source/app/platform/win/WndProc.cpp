@@ -136,9 +136,17 @@ BOOL GTATranslateShiftKey(RsKeyCodes*) { // The in keycode is ignored, so we won
 LRESULT CALLBACK __MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     const auto imio = ImGui::GetCurrentContext() ? &ImGui::GetIO() : nullptr;
 
-    // NOTSA (Grinch_) : Only pass input to ImGui when mouse is visible
-    if (imio && imio->MouseDrawCursor) {
-        ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam);
+    if (imio) {
+        if (imio->MouseDrawCursor) {
+            imio->ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+
+        } else {
+            imio->ConfigFlags |= ImGuiConfigFlags_NoMouse;
+        }
+    }
+
+    if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam)) {
+        return true;
     }
 
     switch (uMsg) {
