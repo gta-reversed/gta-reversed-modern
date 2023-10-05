@@ -139,8 +139,8 @@ public:
 
     //! Get a copy of `*this` vector projected onto `projectOnTo` (which is assumed to be unit length)
     //! The result will have a magnitude of `sqrt(abs(this->Dot(projectOnTo)))`
-    CVector ProjectOnToNormal(const CVector& projectOnTo) const {
-        return projectOnTo * Dot(projectOnTo);
+    CVector ProjectOnToNormal(const CVector& projectOnTo, float offset = 0.f) const {
+        return projectOnTo * (Dot(projectOnTo) + offset);
     }
 
     //! Calculate the average position
