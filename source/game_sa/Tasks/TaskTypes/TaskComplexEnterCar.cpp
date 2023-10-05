@@ -103,26 +103,26 @@ CVector CTaskComplexEnterCar::GetTargetPos() const {
 
 // 0x63A690
 CVehicle* CTaskComplexEnterCar::GetCameraAvoidVehicle() {
-    if (!m_Car || !m_pSubTask) {
-        return nullptr;
+    if (m_Car && m_pSubTask) {
+        switch (m_pSubTask->GetTaskType()) {
+        case TASK_COMPLEX_LEAVE_CAR:
+        case TASK_SIMPLE_CAR_OPEN_DOOR_FROM_OUTSIDE:
+        case TASK_SIMPLE_CAR_OPEN_LOCKED_DOOR_FROM_OUTSIDE:
+        case TASK_SIMPLE_BIKE_PICK_UP:
+        case TASK_SIMPLE_STAND_STILL:
+        case TASK_SIMPLE_CAR_QUICK_DRAG_PED_OUT:
+        case TASK_SIMPLE_CAR_SLOW_DRAG_PED_OUT:
+        case TASK_SIMPLE_CAR_SET_PED_OUT:
+        case TASK_COMPLEX_ENTER_BOAT_AS_DRIVER:
+        case TASK_SIMPLE_CAR_DRIVE_TIMED:
+        case TASK_SIMPLE_CAR_GET_IN:
+        case TASK_SIMPLE_CAR_CLOSE_DOOR_FROM_INSIDE:
+        case TASK_SIMPLE_CAR_SHUFFLE:
+        case TASK_SIMPLE_CAR_ALIGN:
+        case TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER:
+        case TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER:
+            return m_Car;
+        }
     }
-    switch (m_pSubTask->GetTaskType()) {
-    case TASK_COMPLEX_LEAVE_CAR:
-    case TASK_SIMPLE_CAR_OPEN_DOOR_FROM_OUTSIDE:
-    case TASK_SIMPLE_CAR_OPEN_LOCKED_DOOR_FROM_OUTSIDE:
-    case TASK_SIMPLE_BIKE_PICK_UP:
-    case TASK_SIMPLE_STAND_STILL:
-    case TASK_SIMPLE_CAR_QUICK_DRAG_PED_OUT:
-    case TASK_SIMPLE_CAR_SLOW_DRAG_PED_OUT:
-    case TASK_SIMPLE_CAR_SET_PED_OUT:
-    case TASK_COMPLEX_ENTER_BOAT_AS_DRIVER:
-    case TASK_SIMPLE_CAR_DRIVE_TIMED:
-    case TASK_SIMPLE_CAR_GET_IN:
-    case TASK_SIMPLE_CAR_CLOSE_DOOR_FROM_INSIDE:
-    case TASK_SIMPLE_CAR_SHUFFLE:
-    case TASK_SIMPLE_CAR_ALIGN:
-    case TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER:
-    case TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER:
-        return m_Car;
-    }
+    return nullptr;
 }
