@@ -13,9 +13,9 @@ CTaskComplexCarDriveWander::CTaskComplexCarDriveWander(CVehicle* vehicle, eCarDr
 // 0x63CB60
 void CTaskComplexCarDriveWander::SetUpCar() {
     m_OriginalDrivingStyle = m_Veh->m_autoPilot.m_nCarDrivingStyle;
-    m_OriginalMission         = m_Veh->m_autoPilot.m_nCarMission;
-    m_OriginalSpeed              = m_Veh->m_autoPilot.m_nCruiseSpeed;
-    m_bIsCarSetUp = true;
+    m_OriginalMission      = m_Veh->m_autoPilot.m_nCarMission;
+    m_OriginalSpeed        = m_Veh->m_autoPilot.m_nCruiseSpeed;
+    m_bIsCarSetUp          = true;
     if (!CCarCtrl::bCarIsBeingCreated) {
         CCarCtrl::JoinCarWithRoadSystem(m_Veh);
         m_Veh->m_nStatus = STATUS_PHYSICS;
