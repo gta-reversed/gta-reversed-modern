@@ -134,9 +134,8 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
 
     // These are likely some functions inlined from `CCarEnterExit`
     const auto CanUseTargetDoor = [this]() {
-        const auto door = (eDoors)m_TargetDoor;
-        return (m_Car->IsDoorReady(door) || m_Car->IsDoorFullyOpen(door))
-            || (!m_Car->IsDoorMissing(door) && !m_Car->IsDoorFullyOpen(door) && !m_Car->IsDoorClosed(door));
+        return (m_Car->IsDoorReadyU32(m_TargetDoor) || m_Car->IsDoorFullyOpenU32(m_TargetDoor))
+            || (!m_Car->IsDoorMissingU32(m_TargetDoor) && !m_Car->IsDoorFullyOpenU32(m_TargetDoor) && !m_Car->IsDoorClosedU32(m_TargetDoor));
     };
 
     switch (const auto tt = m_pSubTask->GetTaskType()) {
@@ -445,7 +444,7 @@ CTask* CTaskComplexEnterCar::CreateSubTask(eTaskType taskType, CPed* ped) {
             m_DoorFlagsSet = 0;
 
             if (m_Car->IsAutomobile()) {
-                if (!m_Car->IsDoorMissing((eDoors)m_TargetDoor)) { // Important to cast!
+                if (!m_Car->IsDoorMissingU32(m_TargetDoor)) {
                     m_Car->AsAutomobile()->m_damageManager.SetDoorOpen((eDoors)m_TargetDoor);
                 }
             }

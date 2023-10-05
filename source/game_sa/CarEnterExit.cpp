@@ -81,13 +81,13 @@ void CCarEnterExit::AddInCarAnim(const CVehicle* vehicle, CPed* ped, bool bAsDri
 // 0x64EE10
 bool CCarEnterExit::CarHasDoorToClose(const CVehicle* vehicle, int32 doorId) {
     auto& veh = const_cast<CVehicle&>(*vehicle);
-    return !veh.IsDoorMissing(doorId) && !veh.IsDoorClosed(doorId);
+    return !veh.IsDoorMissingU32(doorId) && !veh.IsDoorClosedU32(doorId);
 }
 
-// 0X64EDD0
-bool CCarEnterExit::CarHasDoorToOpen(const CVehicle* vehicle, eDoors doorId) {
+// 0x64EDD0
+bool CCarEnterExit::CarHasDoorToOpen(const CVehicle* vehicle, int32 doorId) {
     auto& veh = const_cast<CVehicle&>(*vehicle);
-    return !veh.IsDoorMissing(doorId) && !veh.IsDoorFullyOpen(doorId);
+    return !veh.IsDoorMissingU32((uint32)doorId) && !veh.IsDoorMissingU32((uint32)doorId);
 }
 
 // 0x64EE50
