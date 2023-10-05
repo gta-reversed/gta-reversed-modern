@@ -39,7 +39,7 @@ void CTaskComplexEnterCar::InjectHooks() {
     RH_ScopedInstall(SetVehicleFlags, 0x63AB90);
     RH_ScopedInstall(CreateSubTask, 0x63E040);
 
-    RH_ScopedVMTInstall(MakeAbortable, 0x63A730, { .reversed = false });
+    RH_ScopedVMTInstall(MakeAbortable, 0x63A730);
     RH_ScopedVMTInstall(CreateNextSubTask, 0x63E990, { .reversed = false });
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x643A60, { .reversed = false });
     RH_ScopedVMTInstall(ControlSubTask, 0x63A890, { .reversed = false });
@@ -70,7 +70,24 @@ CTaskComplexEnterCar::~CTaskComplexEnterCar() {
 
 // 0x63A730
 bool CTaskComplexEnterCar::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return plugin::CallMethodAndReturn<bool, 0x63A730, CTask*, CPed*, int32, const CEvent*>(this, ped, priority, event);
+    if (!m_Car) {
+        return true;
+    }
+    if (priority == ABORT_PRIORITY_IMMEDIATE) {
+        m_pSubTask->MakeAbortable(ped, priority, event);
+        CTaskSimpleStandStill{ -1 }.ProcessPed(ped);
+        if (m_TargetDoor != 0) { // TODO: Enum
+            CTaskSimpleCarSetPedOut{ m_Car, (eTargetDoor)m_TargetDoor, false }.ProcessPed(ped);
+            if (CCarEnterExit::CarHasDoorToClose(m_Car, (eDoors)m_TargetDoor)) {
+                CTaskSimpleCarCloseDoorFromOutside{ m_Car, m_TargetDoor, nullptr }.MakeAbortable(ped, priority, event);
+            }
+        }
+        return true;
+    }
+    if (m_pSubTask->GetTaskType() == TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL) {
+        return m_pSubTask->MakeAbortable(ped, priority, event);
+    }
+    return false;
 }
 
 // 0x63E990
