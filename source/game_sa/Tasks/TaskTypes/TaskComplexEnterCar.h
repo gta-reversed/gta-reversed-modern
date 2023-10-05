@@ -34,8 +34,14 @@ public:
 protected:
     virtual CTask* CreateNextSubTask_AfterSimpleCarAlign(CPed* ped);
 
-    void SetVehicleFlags(CPed* ped);
-    bool IsTargetDoorOnTheLeft() const { return m_TargetDoor == 10 || m_TargetDoor == 11; }
+    void  SetVehicleFlags(CPed* ped);
+    bool  IsTargetDoorOnTheLeft() const { return m_TargetDoor == 10 || m_TargetDoor == 11; } // NOTSA
+    int32 ComputeTargetDoorOppositeToFlag() const;
+
+    void PreparePedForVehicleEnter(CPed* ped);
+    void PrepareVehicleForPedEnter(CPed* ped);
+    void CreateTaskUtilityLineUpPedWithCar(CPed* ped);
+
 protected:
     CVehicle*                     m_Car{};                            //< Vehicle to get into/onto
     bool                          m_bAsDriver : 1{};                  //< Enter as driver

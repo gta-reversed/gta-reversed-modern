@@ -30,13 +30,13 @@ public:
     CTask*    ControlSubTask(CPed* ped) override;
 
     auto      GetTargetPt() const { return m_TargetPt; }
+    bool      HasAchievedDoor() const { return m_bAchievedTargetDoor; }
 
 protected:
     CTask*    CreateSubTask(eTaskType taskType, CPed* ped);
     bool      IsVehicleInRange(const CPed& ped);
     void      ComputeRouteToDoor(const CPed& ped);
     bool      CalculateTargetDoor(CPed* ped, bool& bCanWaitForDoorToBeFree);
-
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

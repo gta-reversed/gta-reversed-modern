@@ -30,7 +30,7 @@ public:
 
     static void AddInCarAnim(const CVehicle* vehicle, CPed* ped, bool bAsDriver);
     static bool CarHasDoorToClose(const CVehicle* vehicle, int32 doorId);
-    static bool CarHasDoorToOpen(const CVehicle* vehicle, int32 doorId);
+    static bool CarHasDoorToOpen(const CVehicle* vehicle, eDoors doorId);
     static bool CarHasOpenableDoor(const CVehicle* vehicle, int32 doorId_UnusedArg, const CPed* ped);
     static bool CarHasPartiallyOpenDoor(const CVehicle* vehicle, int32 doorId);
     static int32 ComputeDoorFlag(const CVehicle* vehicle, int32 doorId, bool bCheckVehicleType);

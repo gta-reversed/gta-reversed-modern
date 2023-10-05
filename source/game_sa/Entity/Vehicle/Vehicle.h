@@ -524,7 +524,7 @@ public:
     void KillPedsInVehicle();
     bool IsUpsideDown() const;
     bool IsOnItsSide() const;
-    bool CanPedOpenLocks(CPed* ped);
+    bool CanPedOpenLocks(const CPed* ped) const;
     [[nodiscard]] bool CanDoorsBeDamaged() const;
     bool CanPedEnterCar();
     void ProcessCarAlarm();

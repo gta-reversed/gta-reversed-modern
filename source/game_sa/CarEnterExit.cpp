@@ -18,7 +18,7 @@ void CCarEnterExit::InjectHooks() {
     RH_ScopedInstall(AddInCarAnim, 0x64F720);
     RH_ScopedInstall(CarHasDoorToClose, 0x64EE10);
     // RH_ScopedInstall(CarHasDoorToOpen, 0x0);
-    // RH_ScopedInstall(CarHasOpenableDoor, 0x0);
+    RH_ScopedInstall(CarHasOpenableDoor, 0x64EE50);
     // RH_ScopedInstall(CarHasPartiallyOpenDoor, 0x0);
     RH_ScopedInstall(ComputeDoorFlag, 0x64E550);
     // RH_ScopedInstall(ComputeOppositeDoorFlag, 0x0);
@@ -85,13 +85,14 @@ bool CCarEnterExit::CarHasDoorToClose(const CVehicle* vehicle, int32 doorId) {
 }
 
 // 0X64EDD0
-bool CCarEnterExit::CarHasDoorToOpen(const CVehicle* vehicle, int32 doorId) {
-    return plugin::CallAndReturn<bool, 0X64EDD0, const CVehicle*, int32>(vehicle, doorId);
+bool CCarEnterExit::CarHasDoorToOpen(const CVehicle* vehicle, eDoors doorId) {
+    auto& veh = const_cast<CVehicle&>(*vehicle);
+    return !veh.IsDoorMissing(doorId) && !veh.IsDoorFullyOpen(doorId);
 }
 
-// 0x
+// 0x64EE50
 bool CCarEnterExit::CarHasOpenableDoor(const CVehicle* vehicle, int32 doorId_UnusedArg, const CPed* ped) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32, const CPed*>(vehicle, doorId_UnusedArg, ped);
+    return vehicle->CanPedOpenLocks(ped);
 }
 
 // 0x
@@ -520,8 +521,9 @@ void CCarEnterExit::MakeUndraggedDriverPedLeaveCar(const CVehicle* vehicle, cons
     plugin::Call<0x0, const CVehicle*, const CPed*>(vehicle, ped);
 }
 
+// 0x64F540
 void CCarEnterExit::MakeUndraggedPassengerPedsLeaveCar(const CVehicle* targetVehicle, const CPed* draggedPed, const CPed* ped) {
-    plugin::Call<0x0, const CVehicle*, const CPed*, const CPed*>(targetVehicle, draggedPed, ped);
+    plugin::Call<0x64F540, const CVehicle*, const CPed*, const CPed*>(targetVehicle, draggedPed, ped);
 }
 
 // unused
