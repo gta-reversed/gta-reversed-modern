@@ -15,7 +15,9 @@
 #include <TaskTypes/TaskComplexWanderStandard.h>
 #include <TaskTypes/TaskComplexTurnToFaceEntityOrCoord.h>
 #include <TaskTypes/TaskComplexKillPedOnFoot.h>
-//#include <TaskTypes/TaskComplexUseEffect.h>
+#include <TaskTypes/TaskComplexEnterCarAsDriver.h>
+#include <TaskTypes/TaskComplexEnterCarAsPassenger.h>
+#include <TaskTypes/TaskSimpleCarSetPedOut.h>
 
 #include <Attractors/PedAttractorPedPlacer.h>
 
@@ -25,8 +27,6 @@
 #include <TimeCycle.h>
 #include <ePedBones.h>
 #include <SearchLight.h>
-#include <TaskComplexEnterCarAsDriver.h>
-#include <TaskSimpleCarSetPedOut.h>
 
 using namespace notsa::script;
 /*!
@@ -1363,7 +1363,7 @@ CVehicle* GetCarCharIsUsing(CPed& ped) {
     if (const auto task = ped.GetTaskManager().Find<CTaskComplexEnterCarAsDriver>(false)) {
         return task->GetTargetCar();
     }
-    if (const auto task = ped.GetTaskManager().Find<CTaskComplexEnterCar>(false)) {
+    if (const auto task = ped.GetTaskManager().Find<CTaskComplexEnterCarAsPassenger>(false)) {
         return task->GetTargetCar();
     }
     return nullptr;
