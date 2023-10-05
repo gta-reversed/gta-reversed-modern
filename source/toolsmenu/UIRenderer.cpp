@@ -157,7 +157,6 @@ void UIRenderer::DebugCode() {
     //        TASK_PRIMARY_PRIMARY
     //    );
     //}
-    
     if (pad->IsStandardKeyJustPressed('0')) {
         if (const auto veh = FindPlayerVehicle()) {
             veh->Fix();
