@@ -426,6 +426,7 @@
 #include "Interior/TaskInteriorBeInHouse.h"
 #include "Tasks/TaskTypes/TaskComplexKillPedOnFootArmed.h"
 #include "Tasks/TaskTypes/TaskSimpleWaitUntilLeaderAreaCodesMatch.h"
+#include "TaskComplexSmartFleePoint.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
