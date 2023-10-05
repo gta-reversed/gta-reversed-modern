@@ -82,7 +82,7 @@ std::pair<AssocGroupId, AnimationId> CTaskSimpleCarSlowDragPedOut::ComputeAnimID
             return ANIM_ID_UNDEFINED;
         }
     }();
-    return { (AssocGroupId)m_Vehicle->GetAnimGroup().GetGroup(animationId), animationId};
+    return { m_Vehicle->GetAnimGroup().GetGroup(animationId), animationId};
 }
 
 // 0x64C010
