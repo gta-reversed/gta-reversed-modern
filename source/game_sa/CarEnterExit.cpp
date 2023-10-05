@@ -20,7 +20,7 @@ void CCarEnterExit::InjectHooks() {
     // RH_ScopedInstall(CarHasDoorToOpen, 0x0);
     // RH_ScopedInstall(CarHasOpenableDoor, 0x0);
     // RH_ScopedInstall(CarHasPartiallyOpenDoor, 0x0);
-    // RH_ScopedInstall(ComputeDoorFlag, 0x0);
+    RH_ScopedInstall(ComputeDoorFlag, 0x64E550);
     // RH_ScopedInstall(ComputeOppositeDoorFlag, 0x0);
     RH_ScopedInstall(ComputePassengerIndexFromCarDoor, 0x64F1E0);
     RH_ScopedInstall(ComputeSlowJackedPed, 0x64F070);
@@ -99,9 +99,27 @@ bool CCarEnterExit::CarHasPartiallyOpenDoor(const CVehicle* vehicle, int32 doorI
     return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32>(vehicle, doorId);
 }
 
-// 0x
-int32 CCarEnterExit::ComputeDoorFlag(const CVehicle* vehicle, int32 doorId, bool bCheckVehicleType) {
-    return plugin::CallAndReturn<int32, 0x0, const CVehicle*, int32, bool>(vehicle, doorId, bCheckVehicleType);
+// 0x64E550
+int32 CCarEnterExit::ComputeDoorFlag(const CVehicle* vehicle, int32 doorId, bool bSettingFlags) {
+    if (bSettingFlags && (vehicle->IsBike() || vehicle->m_pHandlingData->m_bTandemSeats)) {
+        switch (doorId) {
+        case 8:
+        case 10:
+        case 18: return 5;
+        case 9:
+        case 11: return 10;
+        default: NOTSA_UNREACHABLE(); // Originally `return 0`
+        }
+    } else {
+        switch (doorId) {
+        case 8:  return 4;
+        case 9:  return 8;
+        case 10:
+        case 18: return 1;
+        case 11: return 2;
+        default: NOTSA_UNREACHABLE(); // Originally `return 0`
+        }
+    }
 }
 
 // 0x

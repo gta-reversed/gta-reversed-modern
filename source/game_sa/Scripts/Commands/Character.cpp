@@ -1360,19 +1360,13 @@ CVehicle* GetCarCharIsUsing(CPed& ped) {
     if (ped.bInVehicle) {
         return ped.m_pVehicle;
     }
-
-    auto task = reinterpret_cast<CTaskComplexEnterCar*>([&ped]() -> CTask* {
-        if (auto driver = ped.GetIntelligence()->FindTaskByType(TASK_COMPLEX_ENTER_CAR_AS_DRIVER)) {
-            return driver;
-        }
-        if (auto passenger = ped.GetIntelligence()->FindTaskByType(TASK_COMPLEX_ENTER_CAR_AS_PASSENGER)) {
-            return passenger;
-        }
-
-        return nullptr;
-    }());
-
-    return task ? task->m_car : nullptr;
+    if (const auto task = ped.GetTaskManager().Find<CTaskComplexEnterCarAsDriver>(false)) {
+        return task->GetTargetCar();
+    }
+    if (const auto task = ped.GetTaskManager().Find<CTaskComplexEnterCar>(false)) {
+        return task->GetTargetCar();
+    }
+    return nullptr;
 }
 
 // ENABLE_CHAR_SPEECH

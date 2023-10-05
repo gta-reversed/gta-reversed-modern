@@ -3324,7 +3324,7 @@ void CVehicle::KillPedsGettingInVehicle() {
         }
 
         if (const auto task = static_cast<CTaskComplexEnterCar*>(ped.GetTaskManager().Find<CTaskComplexEnterCarAsPassenger, CTaskComplexEnterCarAsDriver>());
-            !task || task->m_car != this
+            !task || task->GetTargetCar() != this
         ) {
             continue;
         }
