@@ -77,7 +77,7 @@ auto CTaskSimpleCarOpenDoorFromOutside::ComputeAnimID() -> std::pair<AssocGroupI
             NOTSA_UNREACHABLE();
         }
     }();
-    return { (AssocGroupId)m_veh->GetAnimGroup().GetGroup(animId), animId };
+    return { m_veh->GetAnimGroup().GetGroup(animId), animId };
 }
 
 // 0x645FA0
