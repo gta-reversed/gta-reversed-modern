@@ -62,8 +62,7 @@ void CAECollisionAudioEntity::AddCollisionSoundToList(CEntity* entity1, CEntity*
     });
 
     if (newEntry == m_Entries.end()) {
-        // Game tries to access m_Entries[300] in this case.
-        NOTSA_UNREACHABLE();
+        return;
     }
 
     // ? check

@@ -1119,7 +1119,7 @@ void InjectHooksMain() {
         CTaskSimpleIKPointArm::InjectHooks();
         CTaskSimpleIKLookAt::InjectHooks();
         CTaskComplexDie::InjectHooks();
-        // CTaskComplexEnterBoatAsDriver::InjectHooks();
+        CTaskComplexEnterBoatAsDriver::InjectHooks();
         CTaskSimpleFight::InjectHooks();
         CTaskComplexUseWaterCannon::InjectHooks();
         // CTaskComplexDriveToPoint::InjectHooks();
