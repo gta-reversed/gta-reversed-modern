@@ -6,21 +6,21 @@ void CTaskComplexFollowNodeRoute::InjectHooks() {
     RH_ScopedClass(CTaskComplexFollowNodeRoute);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    // RH_ScopedInstall(CTaskComplexFollowNodeRoute, 0x66EA30);
-    // RH_ScopedInstall(CTaskComplexFollowNodeRoute, 0x66EB70);
-    // RH_ScopedInstall(Clone, 0x6713E0);
-    // RH_ScopedInstall(StopTimer, 0x6694E0);
-    // RH_ScopedInstall(MakeAbortable, 0x669520);
-    // RH_ScopedInstall(CreateSubTask, 0x669690);
-    // RH_ScopedInstall(ComputeRoute, 0x6699E0);
-    // RH_ScopedInstall(CalcGoToTaskType, 0x66EBE0);
-    // RH_ScopedInstall(CalcBlendRatio, 0x66EDC0);
-    // RH_ScopedInstall(CanGoStraightThere, 0x66EF20);
-    // RH_ScopedInstall(ComputePathNodes, 0x66EFA0);
-    // RH_ScopedInstall(SetTarget, 0x671750);
-    // RH_ScopedInstall(CreateFirstSubTask, 0x671800);
-    // RH_ScopedInstall(CreateNextSubTask, 0x6718D0);
-    // RH_ScopedInstall(ControlSubTask, 0x671AB0);
+    //RH_ScopedInstall(CTaskComplexFollowNodeRoute, 0x66EA30, { .reversed = false }); // TODO: Constructor
+    //RH_ScopedInstall(CTaskComplexFollowNodeRoute, 0x66EB70, { .reversed = false }); // TODO: Constructor
+    RH_ScopedInstall(Clone, 0x6713E0, { .reversed = false });
+    RH_ScopedInstall(StopTimer, 0x6694E0, { .reversed = false });
+    RH_ScopedInstall(MakeAbortable, 0x669520, { .reversed = false });
+    RH_ScopedInstall(CreateSubTask, 0x669690, { .reversed = false });
+    //RH_ScopedInstall(ComputeRoute, 0x6699E0, { .reversed = false });
+    RH_ScopedInstall(CalcGoToTaskType, 0x66EBE0, { .reversed = false });
+    //RH_ScopedInstall(CalcBlendRatio, 0x66EDC0, { .reversed = false });
+    //RH_ScopedInstall(CanGoStraightThere, 0x66EF20, { .reversed = false });
+    RH_ScopedInstall(ComputePathNodes, 0x66EFA0, { .reversed = false });
+    RH_ScopedInstall(SetTarget, 0x671750, { .reversed = false });
+    RH_ScopedInstall(CreateFirstSubTask, 0x671800, { .reversed = false });
+    RH_ScopedInstall(CreateNextSubTask, 0x6718D0, { .reversed = false });
+    RH_ScopedInstall(ControlSubTask, 0x671AB0, { .reversed = false });
 }
 
 // 0x66EA30
@@ -35,7 +35,7 @@ CTaskComplexFollowNodeRoute::~CTaskComplexFollowNodeRoute() {
 }
 
 // 0x6713E0
-CTask* CTaskComplexFollowNodeRoute::Clone() {
+CTask* CTaskComplexFollowNodeRoute::Clone() const {
     auto* task = new CTaskComplexFollowNodeRoute(m_nMode, m_vecTargetPos, m_fRadius, m_fUnkn1, m_fUnkn2, m_bUnknFlag0x1, m_nTime, m_bUnknFlag0x8);
     task->m_nodeAddress1 = m_nodeAddress1;
     return task;
@@ -51,84 +51,48 @@ void CTaskComplexFollowNodeRoute::StopTimer(const CEvent* event) {
     }
 }
 
-// 0x669520
-bool CTaskComplexFollowNodeRoute::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return plugin::CallMethodAndReturn<bool, 0x669520, CTaskComplexFollowNodeRoute*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
-}
-
-// 0x669690
-CTask* CTaskComplexFollowNodeRoute::CreateSubTask(eTaskType taskType, CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x669690, CTaskComplexFollowNodeRoute*, eTaskType, CPed*>(this, taskType, ped);
-}
-
-uint32 CTaskComplexFollowNodeRoute::GetRouteSize() {
-    assert(0);
-    return 0;
-}
-
-eTaskType CTaskComplexFollowNodeRoute::GetSubTaskType(int32 unkn, bool bUnkn, const CPointRoute& pointRoute) {
-    assert(0);
-    return (eTaskType)-1;
-}
-
-// 0x6698E0
-CVector CTaskComplexFollowNodeRoute::GetLastWaypoint(CPed* ped) {
-    assert(0);
-    return 0;
-}
-
-CVector CTaskComplexFollowNodeRoute::GetNextWaypoint(CPed* ped) {
-    assert(0);
-    return 0;
-}
-
-// 0x6699E0
-void CTaskComplexFollowNodeRoute::ComputeRoute() {
-    assert(0);
-}
-
 // 0x66EBE0
 eTaskType CTaskComplexFollowNodeRoute::CalcGoToTaskType(CPed* ped, eTaskType taskType) {
-    assert(0);
-    return (eTaskType)-1;
-}
-
-// 0x66EDC0
-float CTaskComplexFollowNodeRoute::CalcBlendRatio(CPed* ped, bool bUsePointRoute) {
-    assert(0);
-    return 0;
-}
-
-// 0x66EF20
-bool CTaskComplexFollowNodeRoute::CanGoStraightThere(CPed* ped, const CVector& from, const CVector& to, float maxDist) {
-    assert(0);
-    return 0;
-}
-
-// 0x66EFA0
-void CTaskComplexFollowNodeRoute::ComputePathNodes(const CPed* ped) {
-    assert(0);
+    return plugin::CallMethodAndReturn<eTaskType, 0x66EBE0, CTaskComplexFollowNodeRoute*, CPed*, eTaskType>(this, ped, taskType);
 }
 
 // 0x671750
 void CTaskComplexFollowNodeRoute::SetTarget(CPed* ped, const CVector& target, float radius, float fUnkn1, float fUnkn2, bool bForce) {
-    assert(0);
+    return plugin::CallMethodAndReturn<void, 0x671750, CTaskComplexFollowNodeRoute*, CPed const*, CVector const&, float, float, float, bool>(this, ped, target, radius, fUnkn1, fUnkn2, bForce);
 }
 
-// 0x671800
-CTask* CTaskComplexFollowNodeRoute::CreateFirstSubTask(CPed* ped) {
-    assert(0);
-    return 0;
+// 0x669690
+CTask* CTaskComplexFollowNodeRoute::CreateSubTask(eTaskType taskType, CPed* ped) {
+    return plugin::CallMethodAndReturn<CTask*, 0x669690, CTaskComplexFollowNodeRoute*, int32, CPed*>(this, taskType, ped);
+}
+
+// 0x6698E0
+CVector CTaskComplexFollowNodeRoute::GetLastWaypoint(CPed* ped) {
+    NOTSA_UNREACHABLE(); // This shit is RVO'd => I'm lazy to fix it
+}
+
+// 0x66EFA0
+void CTaskComplexFollowNodeRoute::ComputePathNodes(CPed const* ped) {
+    return plugin::CallMethodAndReturn<void, 0x66EFA0, CTaskComplexFollowNodeRoute*, CPed const*>(this, ped);
+}
+
+// 0x669520
+bool CTaskComplexFollowNodeRoute::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+    return plugin::CallMethodAndReturn<bool, 0x669520, CTaskComplexFollowNodeRoute*, CPed*, eAbortPriority, CEvent const*>(this, ped, priority, event);
 }
 
 // 0x6718D0
 CTask* CTaskComplexFollowNodeRoute::CreateNextSubTask(CPed* ped) {
-    assert(0);
-    return 0;
+    return plugin::CallMethodAndReturn< CTask*, 0x6718D0, CTaskComplexFollowNodeRoute*, CPed*>(this, ped);
+}
+
+// 0x671800
+CTask* CTaskComplexFollowNodeRoute::CreateFirstSubTask(CPed* ped) {
+    return plugin::CallMethodAndReturn< CTask*, 0x671800, CTaskComplexFollowNodeRoute*, CPed*>(this, ped);
 }
 
 // 0x671AB0
 CTask* CTaskComplexFollowNodeRoute::ControlSubTask(CPed* ped) {
-    assert(0);
-    return 0;
+    return plugin::CallMethodAndReturn< CTask*, 0x671AB0, CTaskComplexFollowNodeRoute*, CPed*>(this, ped);
 }
+

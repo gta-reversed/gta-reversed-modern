@@ -66,11 +66,11 @@ void CTaskSimpleDie::StartAnim(CPed* ped) {
     ped->ClearAll();
     ped->m_fHealth = 0.0f;                     // todo: SetHealth or something ?
     ped->StopNonPartialAnims();
-    ped->m_nDeathTime = CTimer::GetTimeInMS(); // todo: m_nDeathTime int32 to uint32?
+    ped->m_nDeathTimeMS = CTimer::GetTimeInMS(); // todo: m_nDeathTimeMS int32 to uint32?
 }
 
 // 0x635DA0
-CTask* CTaskSimpleDie::Clone() {
+CTask* CTaskSimpleDie::Clone() const {
     if (m_animHierarchy) {
         return new CTaskSimpleDie(m_animHierarchy, m_animFlags, m_blendDelta, m_animSpeed);
     } else {

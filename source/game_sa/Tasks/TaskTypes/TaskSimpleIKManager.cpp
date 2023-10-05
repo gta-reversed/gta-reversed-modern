@@ -10,7 +10,7 @@ void CTaskSimpleIKManager::InjectHooks() {
 
     RH_ScopedInstall(AddIKChainTask, 0x633940);
     RH_ScopedInstall(GetTaskAtSlot, 0x6339B0);
-    // RH_ScopedInstall(Clone_Reversed, 0x639350);
+    RH_ScopedInstall(Clone_Reversed, 0x639350, { .reversed = false });
     RH_ScopedInstall(GetTaskType_Reversed, 0x633820);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x6338A0);
     RH_ScopedInstall(ProcessPed_Reversed, 0x6338E0);
@@ -47,8 +47,8 @@ void CTaskSimpleIKManager::AddIKChainTask(CTaskSimpleIKChain* task, int32 slot) 
 }
 
 // 0x639350
-CTask* CTaskSimpleIKManager::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x639350, CTaskSimpleIKManager*>(this);
+CTask* CTaskSimpleIKManager::Clone() const {
+    return plugin::CallMethodAndReturn<CTask*, 0x639350, const CTaskSimpleIKManager*>(this);
 }
 
 // 0x6338A0

@@ -67,6 +67,7 @@ CTask* CTaskComplexDieInCar::CreateSubTask(eTaskType taskType, CPed* ped) {
 
 // 0x6375F0
 CTask* CTaskComplexDieInCar::CreateFirstSubTask_Reversed(CPed* ped) {
+    assert(ped);
     ped->SetPedState(PEDSTATE_DIE);
 
     auto currentEvent = ped->GetEventHandlerHistory().GetCurrentEvent();

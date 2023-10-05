@@ -36,6 +36,7 @@ public:
     bool Load_Reversed();
     bool Save_Reversed();
 
+    void ProcessControl() override;
     bool Load() override;
     bool Save() override;
 
@@ -69,7 +70,7 @@ public:
     void MakePlayerGroupDisappear();
     void MakePlayerGroupReappear();
     void ResetSprintEnergy();
-    bool HandleSprintEnergy(bool arg0, float arg1);
+    bool HandleSprintEnergy(bool sprint, float adrenalineConsumedPerTimeStep);
     float ControlButtonSprint(eSprintType sprintType);
     float GetButtonSprintResults(eSprintType sprintType);
     void ResetPlayerBreath();
@@ -109,8 +110,7 @@ public:
     static void SetupPlayerPed(int playerId);
 
     // NOTSA
-    CPedGroup& GetGroup() const noexcept { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
-    CPedGroupMembership& GetGroupMembership() const noexcept { return GetGroup().GetMembership(); }
+    CPedGroup& GetPlayerGroup() const noexcept { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
 };
 
 VALIDATE_SIZE(CPlayerPed, 0x7A4);

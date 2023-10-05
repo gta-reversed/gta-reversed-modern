@@ -19,9 +19,9 @@ void CMenuSystem::InjectHooks() {
     RH_ScopedInstall(CheckForAccept, 0x5807C0);
     RH_ScopedInstall(CheckForSelected, 0x5807E0);
     RH_ScopedInstall(Input, 0x5825D0);
-    // RH_ScopedInstall(InputStandardMenu, 0x580800); // bad
+    RH_ScopedInstall(InputStandardMenu, 0x580800, { .reversed = false }); // bad
     RH_ScopedInstall(InputGridMenu, 0x580BD0);
-    // RH_ScopedInstall(DisplayStandardMenu, 0x580E00); // bad
+    RH_ScopedInstall(DisplayStandardMenu, 0x580E00, { .reversed = false }); // bad
     RH_ScopedInstall(DisplayGridMenu, 0x5816E0);
     RH_ScopedInstall(Process, 0x582630);
     RH_ScopedInstall(HighlightOneItem, 0x581C10);
@@ -29,7 +29,7 @@ void CMenuSystem::InjectHooks() {
     RH_ScopedInstall(CreateNewMenu, 0x582300);
     RH_ScopedInstall(ActivateItems, 0x581990);
     RH_ScopedInstall(ActivateOneItem, 0x581B30);
-    // RH_ScopedInstall(FillGridWithCarColours, 0x5820E0);
+    RH_ScopedInstall(FillGridWithCarColours, 0x5820E0, { .reversed = false });
     RH_ScopedInstall(InsertMenu, 0x581E00);
     RH_ScopedInstall(SwitchOffMenu, 0x580750);
 }
@@ -51,13 +51,13 @@ void CMenuSystem::SetActiveMenuItem(MenuId id, int8 item) {
 // 0x581C40
 void CMenuSystem::SetColumnHeader(MenuId id, uint8 column, Const char* header) {
     assert(column < MENU_COL_COUNT);
-    strcpy(MenuNumber[id]->m_aacColumnHeaders[column], header ? header : "\0");
+    strcpy_s(MenuNumber[id]->m_aacColumnHeaders[column], header ? header : "\0");
 }
 
 // NOTSA
 void CMenuSystem::SetRowTitle(MenuId id, uint8 column, uint8 row, Const char* title) {
     assert(column < MENU_COL_COUNT);
-    strcpy(MenuNumber[id]->m_aaacRowTitles[column][row], title ? title : "\0");
+    strcpy_s(MenuNumber[id]->m_aaacRowTitles[column][row], title ? title : "\0");
 }
 
 // 0x582080
@@ -514,7 +514,7 @@ MenuId CMenuSystem::CreateNewMenu(eMenuType type, const char* title, float x, fl
         menu->m_vPosn = { x, y };
         menu->m_bColumnBackground = background != 0;
         if (title) {
-            strcpy(menu->m_szTitle, title);
+            strcpy_s(menu->m_szTitle, title);
         } else {
             menu->m_szTitle[0] = '\0';
         }

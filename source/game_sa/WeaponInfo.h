@@ -116,8 +116,17 @@ public:
     static uint32 GetWeaponInfoIndex(eWeaponType weaponType, eWeaponSkill skill);
     // Return both model IDs as an array
     [[nodiscard]] auto GetModels() const { return std::to_array({ m_nModelId1, m_nModelId2 }); }
-};
 
+    //! NOTSA: Load models of this weapon (Blocks thread until loaded)
+    void StreamModelsForWeapon(eStreamingFlags streamingFlags);
+
+    //! NOTSA: GetWeaponInfo for specific ped.
+    static auto GetWeaponInfo(CPed* ped) {
+        return GetWeaponInfo(ped->GetActiveWeapon().m_Type, ped->GetWeaponSkill());
+    }
+
+    const auto& GetAimingOffset() const { return g_GunAimingOffsets[m_nAimOffsetIndex]; }
+};
 VALIDATE_SIZE(CWeaponInfo, 0x70);
 
 // list of weapon infos. Count: MAX_WEAPON_INFOS (80)

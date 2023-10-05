@@ -44,7 +44,7 @@ bool CTaskSimpleCreateCarAndGetIn::MakeAbortable(CPed* ped, eAbortPriority prior
 // 0x64CF40
 bool CTaskSimpleCreateCarAndGetIn::ProcessPed(CPed* ped) {
     CVector nodePos{};
-    if (!ThePaths.FindNodeCoorsForScript(nodePos, ThePaths.FindNodeClosestToCoors(m_Pos, 0, 999999.88f, 1, 1, 0, 0, 0))) {
+    if (!ThePaths.FindNodeCoorsForScript(nodePos, ThePaths.FindNodeClosestToCoors(m_Pos, PATH_TYPE_VEH, 999999.88f, 1, 1, 0, 0, 0))) {
         if (!m_bWaitTimeSet) {
             m_nTimeMs = CTimer::GetTimeInMS();
             m_nWaitTime = 2000;

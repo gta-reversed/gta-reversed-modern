@@ -160,8 +160,9 @@ void CClumpModelInfo::SetAnimFile_Reversed(const char* filename)
     if (!strcmp(filename, "null"))
         return;
 
-    auto name = new char[strlen(filename) + 1];
-    strcpy(name, filename);
+    const auto size = strlen(filename) + 1;
+    auto name = new char[size];
+    strcpy_s(name, size, filename);
     m_animFileName = name;
 }
 
@@ -329,7 +330,6 @@ RwFrame* CClumpModelInfo::FindFrameFromNameWithoutIdCB(RwFrame* frame, void* sea
         searchInfo->m_pFrame = frame;
         return nullptr;
     }
-
     RwFrameForAllChildren(frame, FindFrameFromNameWithoutIdCB, searchData);
     if (searchInfo->m_pFrame)
         return nullptr;

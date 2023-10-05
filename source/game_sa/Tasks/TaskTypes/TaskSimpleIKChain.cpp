@@ -45,7 +45,7 @@ CTaskSimpleIKChain::~CTaskSimpleIKChain() {
 }
 
 // 0x633B00
-CTask* CTaskSimpleIKChain::Clone() {
+CTask* CTaskSimpleIKChain::Clone() const {
     auto* task = new CTaskSimpleIKChain("", m_nEffectorBoneTag, m_vecEffectorVec, m_nPivotBoneTag, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, m_fSpeed, m_nTime, m_nBlendTime);
     if (m_pIKChain) {
         task->m_fBlend       = m_fBlend;

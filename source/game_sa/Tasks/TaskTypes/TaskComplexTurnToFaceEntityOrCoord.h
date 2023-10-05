@@ -8,21 +8,21 @@ class CEntity;
 
 class CTaskComplexTurnToFaceEntityOrCoord : public CTaskComplex {
 public:
-    CEntity* m_EntityToFace;
-    bool     m_bFaceEntity;
-    CVector  m_CoordsToFace;
-    float    m_fChangeRateMult;
-    float    m_fMaxHeading;
+    CEntity* m_EntityToFace{};
+    bool     m_bFaceEntity{};
+    CVector  m_CoordsToFace{};
+    float    m_fChangeRateMult{};
+    float    m_fMaxHeading{};
 
 public:
     constexpr static auto Type = TASK_COMPLEX_TURN_TO_FACE_ENTITY;
 
-    CTaskComplexTurnToFaceEntityOrCoord(CEntity* entity, float changeRateMult, float maxHeading);
-    CTaskComplexTurnToFaceEntityOrCoord(const CVector& coords, float changeRateMult, float maxHeading);
+    CTaskComplexTurnToFaceEntityOrCoord(CEntity* entity, float changeRateMult = 0.5f, float maxHeading = 0.2f);
+    CTaskComplexTurnToFaceEntityOrCoord(const CVector& coords, float changeRateMult = 0.5f, float maxHeading = 0.2f);
     ~CTaskComplexTurnToFaceEntityOrCoord() override;
 
-    eTaskType GetTaskType() override { return Type; } // 0x66B900
-    CTask* Clone() override; // 0x66D250
+    eTaskType GetTaskType() const override { return Type; } // 0x66B900
+    CTask* Clone() const override; // 0x66D250
     CTask* CreateNextSubTask(CPed* ped) override { return nullptr; } // 0x66B9C0
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

@@ -14,12 +14,18 @@ CTaskSimpleCarSetPedInAsDriver::CTaskSimpleCarSetPedInAsDriver(CVehicle* targetV
     CEntity::SafeRegisterRef(m_pTargetVehicle);
 }
 
+CTaskSimpleCarSetPedInAsDriver::CTaskSimpleCarSetPedInAsDriver(CVehicle* targetVehicle, bool warpingInToCar, CTaskUtilityLineUpPedWithCar* utility) : // NOTSA
+    CTaskSimpleCarSetPedInAsDriver{ targetVehicle, utility }
+{
+    m_bWarpingInToCar = warpingInToCar;
+}
+
 CTaskSimpleCarSetPedInAsDriver::~CTaskSimpleCarSetPedInAsDriver() {
     CEntity::SafeCleanUpRef(m_pTargetVehicle);
 }
 
 // 0x649E00
-CTask* CTaskSimpleCarSetPedInAsDriver::Clone() {
+CTask* CTaskSimpleCarSetPedInAsDriver::Clone() const {
     auto task = new CTaskSimpleCarSetPedInAsDriver(m_pTargetVehicle, m_pUtility);
     task->m_bWarpingInToCar = m_bWarpingInToCar;
     task->m_nDoorFlagsToClear = m_nDoorFlagsToClear;

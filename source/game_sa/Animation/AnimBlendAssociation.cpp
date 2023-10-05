@@ -200,9 +200,7 @@ void CAnimBlendAssociation::SetCurrentTime(float currentTime) {
                 m_pNodeArray[i].SetupKeyFrameCompressed();
             }
         }
-    } else
-    //
-    {
+    } else {
         for (auto i = 0; i < m_nNumBlendNodes; i++) {
             if (m_pNodeArray[i].m_pAnimSequence) {
                 m_pNodeArray[i].FindKeyFrame(m_fCurrentTime);
@@ -317,4 +315,8 @@ void CAnimBlendAssociation::ReferenceAnimBlock() {
 // 0x4CEB60
 CAnimBlendNode* CAnimBlendAssociation::GetNode(int32 nodeIndex) {
     return &m_pNodeArray[nodeIndex];
+}
+
+float SClumpAnimAssoc::GetTimeProgress() const {
+    return m_fCurrentTime / m_pHierarchy->m_fTotalTime;
 }

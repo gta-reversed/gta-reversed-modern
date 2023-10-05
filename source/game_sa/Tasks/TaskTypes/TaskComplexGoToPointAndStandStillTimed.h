@@ -9,12 +9,12 @@ public:
     CTaskTimer m_timer;
 
 public:
-    CTaskComplexGoToPointAndStandStillTimed(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int32 time);
+    CTaskComplexGoToPointAndStandStillTimed(eMoveState moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int32 time);
     ~CTaskComplexGoToPointAndStandStillTimed() override;
 
-    CTask* Clone() override;
+    CTask* Clone() const override;
     void StopTimer(const CEvent* event) override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
 
@@ -22,8 +22,13 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskComplexGoToPointAndStandStillTimed* Constructor(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int32 time);
-    CTask* Clone_Reversed();
+    // 0x6685E0
+    CTaskComplexGoToPointAndStandStillTimed* Constructor(eMoveState moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int32 time) {
+        this->CTaskComplexGoToPointAndStandStillTimed::CTaskComplexGoToPointAndStandStillTimed(moveState, targetPoint, fRadius, fMoveStateRadius, time);
+        return this;
+    }
+
+    CTask*  Clone_Reversed() const;
     void StopTimer_Reversed(const CEvent* event);
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     CTask* CreateFirstSubTask_Reversed(CPed* ped);

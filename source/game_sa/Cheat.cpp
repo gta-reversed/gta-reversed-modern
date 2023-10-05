@@ -27,9 +27,6 @@ bool& CCheat::m_bHasPlayerCheated = *reinterpret_cast<bool*>(0x96918C);
 bool CCheat::m_bShowMappings;
 uint32 CCheat::m_nLastScriptBypassTime;
 
-bool G_CHEAT_BIG_HEAD = false;  // temp
-bool G_CHEAT_THIN_BODY = false; // temp
-
 // NOTSA
 struct Cheat {
     DWORD   installAddress;
@@ -226,6 +223,8 @@ void CCheat::ApplyCheat(eCheats cheat) {
 
 // 0x438450
 void CCheat::ResetCheats() {
+    ZoneScoped;
+
     memset(&m_aCheatsActive, 0, sizeof(m_aCheatsActive));
     CWeather::ReleaseWeather();
     CTimer::ResetTimeScale();
@@ -235,6 +234,8 @@ void CCheat::ResetCheats() {
 
 // 0x439AF0
 void CCheat::DoCheats() {
+    ZoneScoped;
+
     for (auto key = 0; key < 256; ++key) {
         if (CPad::GetPad(0)->IsStandardKeyJustPressed(key)) {
             AddToCheatString(key);
@@ -355,7 +356,7 @@ void CCheat::DrivebyCheat() {
     Toggle(CHEAT_WEAPON_AIMING_WHILE_DRIVING);
 
     CPlayerPed *player = FindPlayerPed();
-    if (IsActive(CHEAT_WEAPON_AIMING_WHILE_DRIVING) && player->m_aWeapons[WEAPON_KNIFE].m_nType == WEAPON_UNARMED) {
+    if (IsActive(CHEAT_WEAPON_AIMING_WHILE_DRIVING) && player->m_aWeapons[WEAPON_KNIFE].m_Type == WEAPON_UNARMED) {
         player->GiveDelayedWeapon(WEAPON_MICRO_UZI, 150);
         player->SetCurrentWeapon(WEAPON_MICRO_UZI);
     }
@@ -1112,13 +1113,12 @@ void CCheat::TheGamblerCheat() {
 }
 
 void CCheat::BigHeadCheat() {
-    G_CHEAT_BIG_HEAD ^= true; // Toggle(CHEAT_BIG_HEAD);
+    Toggle(CHEAT_BIG_HEAD);
 }
 
 void CCheat::ThinBodyCheat() {
-    G_CHEAT_THIN_BODY ^= true; // Toggle(CHEAT_THIN_BODY);
+    Toggle(CHEAT_THIN_BODY);
 }
-
 
 // **** DEBUG STUFF ****
 

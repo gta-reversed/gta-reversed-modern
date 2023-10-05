@@ -9,12 +9,12 @@ void CPlayerInfo::InjectHooks() {
     RH_ScopedClass(CPlayerInfo);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Constructor, 0x571920); hooking ctor will produce bugs with weapons, you will never give weapon through cheat or something
+    RH_ScopedInstall(Constructor, 0x571920, { .enabled = false, .locked = true }); // hooking ctor will produce bugs with weapons, you will never give weapon through cheat or something
     RH_ScopedInstall(CancelPlayerEnteringCars, 0x56E860);
-    // RH_ScopedInstall(FindObjectToSteal, 0x56DBD0);
+    RH_ScopedInstall(FindObjectToSteal, 0x56DBD0, { .reversed = false });
     RH_ScopedInstall(EvaluateCarPosition, 0x56DAD0);
-    // RH_ScopedInstall(Process, 0x56F8D0);
-    // RH_ScopedInstall(FindClosestCarSectorList, 0x56F4E0);
+    RH_ScopedInstall(Process, 0x56F8D0, { .reversed = false });
+    RH_ScopedInstall(FindClosestCarSectorList, 0x56F4E0, { .reversed = false });
     RH_ScopedInstall(Clear, 0x56F330);
     RH_ScopedInstall(StreamParachuteWeapon, 0x56EB30);
     RH_ScopedInstall(AddHealth, 0x56EAB0);
@@ -239,7 +239,7 @@ void CPlayerInfo::StreamParachuteWeapon(bool unk) {
     if (m_pPed && m_pPed->IsInVehicle()) {
         if (m_pPed->m_pVehicle->IsSubPlane() || m_pPed->m_pVehicle->IsSubHeli()) {
             if (m_nRequireParachuteTimer <= (uint32)CTimer::GetTimeStepInMS()) {
-                const auto groundHeight = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
+                const auto groundHeight = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BB_BOTTOM);
                 const auto vehToGroundZDist = m_pPed->m_pVehicle->GetPosition().z - groundHeight;
                 m_nRequireParachuteTimer = (vehToGroundZDist <= 50.f) ? 0 : 5000;
             } else {
@@ -314,8 +314,7 @@ void CPlayerInfo::MakePlayerSafe(bool enable, float radius) {
 void CPlayerInfo::PlayerFailedCriticalMission() {
     if (m_nPlayerState == PLAYERSTATE_PLAYING) {
         m_nPlayerState = PLAYERSTATE_FAILED_MISSION;
-        CGameLogic::GameState = GAME_STATE_TITLE;
-        CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS();
+        CGameLogic::SetMissionFailed();
         CDarkel::ResetOnPlayerDeath();
     }
 }
@@ -535,6 +534,6 @@ CPlayerInfo& CPlayerInfo::operator=(const CPlayerInfo& rhs) {
     m_pSkinTexture                     = rhs.m_pSkinTexture;
     m_bParachuteReferenced             = rhs.m_bParachuteReferenced;
     m_nRequireParachuteTimer           = rhs.m_nRequireParachuteTimer;
-    strcpy(m_szSkinName, rhs.m_szSkinName);
+    strcpy_s(m_szSkinName, rhs.m_szSkinName);
     return *this;
 }

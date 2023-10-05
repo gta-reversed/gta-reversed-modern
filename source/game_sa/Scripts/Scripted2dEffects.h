@@ -52,7 +52,7 @@ VALIDATE_SIZE(tUserList, 0x24);
 
 class CScripted2dEffects {
 public:
-    static inline std::array<const C2dEffect, 64>&      ms_effects               = *(std::array<const C2dEffect, 64>*)0xC3AB00; // class maybe
+    static inline std::array<C2dEffect, 64>&            ms_effects               = *(std::array<C2dEffect, 64>*)0xC3AB00; // class maybe
     static inline std::array<CScriptedEffectPairs, 64>& ms_effectPairs           = *(std::array<CScriptedEffectPairs, 64>*)0xC3BB00;
     static inline std::array<tUserList, 64>&            ms_userLists             = *(std::array<tUserList, 64>*)0xC3A200; // class maybe
     static inline std::array<bool, 64>&                 ms_activated             = *(std::array<bool, 64>*)0xC3A1A0;
@@ -71,6 +71,9 @@ public:
 
     static int32 AddScripted2DEffect(float radius);
     static void ReturnScripted2DEffect(int32 index);
+
+    /// Index of the effect if it's from `ms_effects` `nullopt` otherwise.
+    static auto IndexOfEffect(const C2dEffect* effect) ->std::optional<size_t>;
 
     static void Load() { } // NOP
     static void Save() { } // NOP

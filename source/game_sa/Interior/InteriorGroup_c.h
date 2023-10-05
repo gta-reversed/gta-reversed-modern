@@ -9,24 +9,23 @@ class CPed;
 class Interior_c;
 struct InteriorInfo_t;
 
-class InteriorGroup_c : public ListItem_c {
+class InteriorGroup_c : public ListItem_c<InteriorGroup_c> {
+public:
     CEntity*    m_pEntity;             // 0x8
-    uint8       m_nId;                 // 0xC
-    uint8       m_furnitureId;         // 0xD
-    uint8       m_animType;            // 0xE
-    uint8       m_interiorCount;       // 0xF
+    uint8       m_id;                  // 0xC
+    uint8       m_groupId;             // 0xD
+    uint8       m_groupType;           // 0xE
+    uint8       m_numInteriors;        // 0xF
     Interior_c* m_interiors[8];        // 0x10
-    int32       field_30;              // 0x30
-    int8        m_isVisible;           // 0x34
-    int8        m_removePeds;          // 0x35
-    int8        m_pedCount;            // 0x36
-    int8        field_37;              // 0x37
+    CEntryExit* m_enex;                // 0x30
+    bool        m_isVisible;           // 0x34
+    bool        m_lastIsVisible;       // 0x35
+    int8        m_numPeds;             // 0x36
     CPed*       m_peds[16];            // 0x38
-    int32       field_78[16];          // 0x78
+    CPed*       m_pedsToRemove[16];    // 0x78
     int8        m_pathSetupComplete;   // 0xB8
     int8        m_updatePeds;          // 0xB9
     int8        m_animBlockReferenced; // 0xBA
-    int8        field_BB;              // 0xBB
 
 public:
     static void InjectHooks();
@@ -34,7 +33,10 @@ public:
     InteriorGroup_c() = default;  // 0x597FE0
     ~InteriorGroup_c() = default; // 0x597FF0
 
-    void Init(CEntity* entity, int32 a3);
+    auto GetInteriors() { return m_interiors | rng::views::take(m_numInteriors); }
+    auto GetPeds() { return m_peds | rng::views::take(m_numPeds); }
+
+    void Init(CEntity* entity, int32 id);
     void Update();
     int32 AddInterior(Interior_c* interior);
     void SetupPeds();
@@ -58,5 +60,8 @@ public:
     bool FindInteriorInfo(int32 a2, InteriorInfo_t** a3, Interior_c** a4);
     int32 GetNumInteriorInfos(int32 a2);
     int32 GetRandomInterior();
+    auto GetId() const { return m_id; }
+
+    auto GetInteriors() const { return m_interiors | std::views::take(m_numInteriors); }
 };
 VALIDATE_SIZE(InteriorGroup_c, 0xBC);

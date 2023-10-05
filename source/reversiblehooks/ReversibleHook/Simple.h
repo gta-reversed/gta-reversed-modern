@@ -15,7 +15,7 @@ struct SHookContent {
 VALIDATE_SIZE(SHookContent, 0x34);
 
 struct Simple : Base {
-    // TODO: Refactor this copy-pate and document it
+    // TODO: Refactor this copy-paste and document it
 
     SHookContent m_HookContent{};
     uint8        m_OriginalFunctionContent[sizeof(m_HookContent)]{};
@@ -37,8 +37,9 @@ struct Simple : Base {
     auto GetHookGTAAddress() const { return (void*)m_iRealHookedAddress; }
     auto GetHookOurAddress() const { return (void*)m_iLibFunctionAddress; }
 
-    virtual void Switch() override;
-    virtual void Check() override;
+    void        Switch() override;
+    void        Check() override;
+    const char* Symbol() const override { return "S"; }
 };
 
 };

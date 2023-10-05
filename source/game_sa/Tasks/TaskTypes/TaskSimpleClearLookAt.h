@@ -10,14 +10,14 @@ class NOTSA_EXPORT_VTABLE CTaskSimpleClearLookAt : public CTaskSimple {
 public:
     static void InjectHooks();
 
-    constexpr static auto Type = eTaskType::TASK_SIMPLE_IK_LOOK_AT;
+    constexpr static auto Type = eTaskType::TASK_SIMPLE_CLEAR_LOOK_AT;
 
     CTaskSimpleClearLookAt() = default;
     ~CTaskSimpleClearLookAt() = default;
 
-    CTask*    Clone() override { return new CTaskSimpleClearLookAt(*this); }
-    eTaskType GetTaskType() override { return Type; }
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return true; }
+    CTask*    Clone() const override { return new CTaskSimpleClearLookAt(*this); }
+    eTaskType GetTaskType() const override { return Type; }
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override { return true; }
     bool      ProcessPed(CPed* ped) override;
 
 private: // Wrappers for hooks

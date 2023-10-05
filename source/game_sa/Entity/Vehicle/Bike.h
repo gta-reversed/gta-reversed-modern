@@ -26,7 +26,8 @@ enum eBikeNodes {
     BIKE_NUM_NODES
 };
 
-class CBike : public CVehicle {
+class NOTSA_EXPORT_VTABLE CBike : public CVehicle {
+    static constexpr auto NUM_SUSP_LINES = 4;
 public:
     RwFrame* m_aBikeNodes[BIKE_NUM_NODES];
     bool     m_bLeanMatrixCalculated;
@@ -50,10 +51,10 @@ public:
     tBikeHandlingData* m_BikeHandling;
     CRideAnimData m_RideAnimData;
     uint8 m_nWheelStatus[2];
-    CColPoint m_aWheelColPoints[4];
-    float m_aWheelRatios[4];
-    float m_aRatioHistory[4];
-    float m_aWheelCounts[4];
+    CColPoint m_aWheelColPoints[NUM_SUSP_LINES];
+    float m_aWheelRatios[NUM_SUSP_LINES];
+    float m_aRatioHistory[NUM_SUSP_LINES];
+    float m_aWheelCounts[NUM_SUSP_LINES];
     float m_fBrakeCount;
     eSkidmarkType m_aWheelSkidmarkType[2];
     bool m_bWheelBloody[2];
@@ -62,8 +63,8 @@ public:
     float m_aWheelAngularVelocity[2];
     float m_aWheelSuspensionHeights[2];
     float m_aWheelOrigHeights[2];
-    float m_fSuspensionLength[4];
-    float m_fLineLength[4];
+    float m_fSuspensionLength[NUM_SUSP_LINES];
+    float m_fLineLength[NUM_SUSP_LINES];
     float m_fHeightAboveRoad;
     float m_fExtraTractionMult;
     float m_fSwingArmLength;
@@ -86,6 +87,8 @@ public:
     uint8 m_nDriveWheelsOnGroundLastFrame;
     float m_fGasPedalAudioRevs;
     tWheelState m_aWheelState[2];
+
+    static constexpr auto Type = VEHICLE_TYPE_BIKE;
 
 public:
     CBike(int32 modelIndex, eVehicleCreatedBy createdBy); // 0x6BF430

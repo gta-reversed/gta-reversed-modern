@@ -24,12 +24,12 @@ public:
 
     static inline bool& bDrawClock = *(bool*)0xBAA400;
 
-    static inline char*& m_pVehicleNameToPrint = *(char**)0xBAA444;
+    static inline const char*& m_pVehicleNameToPrint = *(const char**)0xBAA444;
     static inline eNameState& m_VehicleState = *(eNameState*)0xBAA448;
     static inline int32& m_VehicleFadeTimer = *(int32*)0xBAA44C;
     static inline int32& m_VehicleNameTimer = *(int32*)0xBAA450;
-    static inline char*& m_pLastVehicleName = *(char**)0xBAA454;
-    static inline char*& m_pVehicleName = *(char**)0xBAA458;
+    static inline const char*& m_pLastVehicleName = *(const char**)0xBAA454;
+    static inline const char*& m_pVehicleName = *(const char**)0xBAA458;
 
     static inline bool& m_bDraw3dMarkers = *(bool*)0xBAA45C;
     static inline bool& m_Wants_To_Draw_Hud = *(bool*)0xBAA45D;
@@ -51,9 +51,9 @@ public:
     static inline eNameState& m_ZoneState = *(eNameState*)0xBAA930;
     static inline int32& m_ZoneFadeTimer = *(int32*)0xBAA934;
     static inline uint32& m_ZoneNameTimer = *(uint32*)0xBAA938;
-    static inline char*& m_ZoneToPrint = *(char**)0xBAB1D0;
-    static inline char*& m_pLastZoneName = *(char**)0xBAB1D4;
-    static inline char*& m_pZoneName = *(char**)0xBAB1D8;
+    static inline const char*& m_ZoneToPrint = *(const char**)0xBAB1D0; // TODO: Use GxtChar
+    static inline const char*& m_pLastZoneName = *(const char**)0xBAB1D4;
+    static inline const char*& m_pZoneName = *(const char**)0xBAB1D8;
 
     static inline eHudItem& m_ItemToFlash = *(eHudItem*)0xBAB1DC;
     static inline bool& bDrawingVitalStats = *(bool*)0xBAB1DE;
@@ -118,8 +118,8 @@ public:
     static void SetHelpMessage(char const* text, bool quickMessage, bool permanent, bool addToBrief);
     static void SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float diff, float max);
     static void SetHelpMessageWithNumber(char const* text, int32 number, bool quickMessage, bool permanent);
-    static void SetVehicleName(char* name);
-    static void SetZoneName(char* name, bool displayImmediately);
+    static void SetVehicleName(const char* name);
+    static void SetZoneName(const char* name, bool displayImmediately);
 
     static void Draw();
     static void DrawAfterFade();

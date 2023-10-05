@@ -2,6 +2,7 @@
 
 #include "TaskSimpleAnim.h"
 #include "TaskTimer.h"
+#include "AnimationEnums.h"
 
 class CTaskSimpleRunTimedAnim;
 class CPed;
@@ -20,14 +21,14 @@ public:
     static void InjectHooks();
 
     CTaskSimpleRunTimedAnim(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, uint32 durationMs, bool holdLastFrame);
-    CTaskSimpleRunTimedAnim(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, uint32 durationMs, uint32 taskId, const char* unused2, bool holdLastFrame);
+    CTaskSimpleRunTimedAnim(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, uint32 durationMs, eTaskType taskType, const char* taskName, bool holdLastFrame);
     CTaskSimpleRunTimedAnim(const CTaskSimpleRunTimedAnim& o) : CTaskSimpleRunTimedAnim{o.m_animGrpId, o.m_animId, o.m_blendDelta, o.m_unused1, o.m_durationMs, o.m_bHoldLastFrame} {} // NOTSA
     ~CTaskSimpleRunTimedAnim() = default;
 
     void StartAnim(CPed* ped);
 
-    CTask*    Clone() override { return new CTaskSimpleRunTimedAnim{ *this }; }
-    eTaskType GetTaskType() override { return m_taskId; }
+    CTask*    Clone() const override { return new CTaskSimpleRunTimedAnim{ *this }; }
+    eTaskType GetTaskType() const override { return m_taskId; }
     bool      ProcessPed(CPed* ped) override;
 private: // Wrappers for hooks
     // 0x61AB70
@@ -37,8 +38,8 @@ private: // Wrappers for hooks
     }
 
     // 0x61ABE0
-    CTaskSimpleRunTimedAnim* Constructor(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, uint32 durationMs, uint32 taskId, const char* unused2, bool holdLastFrame) {
-        this->CTaskSimpleRunTimedAnim::CTaskSimpleRunTimedAnim(groupId, animId, blendDelta, unused1, durationMs, taskId, unused2, holdLastFrame);
+    CTaskSimpleRunTimedAnim* Constructor(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, uint32 durationMs, eTaskType taskType, const char* unused2, bool holdLastFrame) {
+        this->CTaskSimpleRunTimedAnim::CTaskSimpleRunTimedAnim(groupId, animId, blendDelta, unused1, durationMs, taskType, unused2, holdLastFrame);
         return this;
     }
 

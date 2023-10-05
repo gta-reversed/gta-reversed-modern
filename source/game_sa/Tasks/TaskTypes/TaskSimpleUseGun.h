@@ -52,9 +52,9 @@ public:
     CTaskSimpleUseGun(CEntity* targetEntity, CVector vecTarget, uint8 nCommand, uint16 nBurstLength = 1, bool bAimImmediate = false);
     ~CTaskSimpleUseGun() override;
 
-    CTask* Clone() override { return new CTaskSimpleUseGun(m_pTarget, m_vecTarget, m_nLastCommand, m_nBurstLength, m_bAimImmediate); }
-    eTaskType GetTaskType() override { return Type; };
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    CTask* Clone() const override { return new CTaskSimpleUseGun(m_pTarget, m_vecTarget, m_nLastCommand, m_nBurstLength, m_bAimImmediate); }
+    eTaskType GetTaskType() const override { return Type; };
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;
 
@@ -65,7 +65,7 @@ public:
     int32 ClearAnim(CPed* ped);
 
     bool ControlGun(CPed* ped, CEntity* target, int8 nCount);
-    bool ControlGunMove(CVector2D* moveSpeed);
+    bool ControlGunMove(const CVector2D& moveSpeed);
 
     void FinishGunAnimCB(CAnimBlendAssociation* anim, void* data);
 
@@ -73,7 +73,7 @@ public:
     bool PlayerPassiveControlGun();
     void RemoveStanceAnims(CPed* ped, float);
     static bool RequirePistolWhip(CPed* ped, CEntity* entity);
-    void Reset(CPed* ped, CEntity* entity, CVector posn, int8, short);
+    void Reset(CPed* ped, CEntity* entity, CVector posn, int8 unused, int16 burstAmmoCnt);
 
     void SetMoveAnim(CPed* ped);
     void StartAnim(CPed* ped);

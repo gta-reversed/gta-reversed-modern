@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 if (MSVC)
     set(CMAKE_GENERATOR_PLATFORM Win32)
 endif()
@@ -9,6 +12,10 @@ if (MSVC_TOOLSET_VERSION)
 endif()
 
 project(GTASA C CXX)
+
+if (MSVC)
+    add_compile_options("/bigobj")
+endif()
 
 option(BUILD_DOC "Build documentation" OFF)
 
@@ -32,7 +39,7 @@ set(CMAKE_INSTALL_BINDIR .)
 set(CMAKE_INSTALL_LIBDIR ${RE_PROJECT_LIB_NAME}/lib)
 set(CMAKE_INSTALL_INCLUDEDIR ${RE_PROJECT_LIB_NAME}/include)
 
-add_subdirectory(libs/ EXCLUDE_FROM_ALL)
+add_subdirectory(libs/ EXCLUDE_FROM_ALL SYSTEM)
 add_subdirectory(source)
 
 function(create_source_group target)

@@ -1,0 +1,8 @@
+#pragma once
+
+enum eControllerType {
+    CONTROLLER_KEYBOARD1,
+    CONTROLLER_KEYBOARD2,
+    CONTROLLER_MOUSE,
+    CONTROLLER_PAD,
+};

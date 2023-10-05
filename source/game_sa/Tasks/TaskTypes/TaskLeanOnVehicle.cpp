@@ -8,9 +8,12 @@ void CTaskLeanOnVehicle::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x660F90);
     RH_ScopedInstall(Destructor, 0x661030);
-    RH_ScopedGlobalInstall(FinishAnimCB, 0x661160);
-    // RH_ScopedInstall(MakeAbortable_Reversed, 0x661110);
-    // RH_ScopedInstall(ProcessPed, 0x6648C0);
+
+    RH_ScopedInstall(FinishAnimCB, 0x661160);
+
+    RH_ScopedVirtualInstall2(MakeAbortable, 0x661110, { .reversed = false });
+    RH_ScopedVirtualInstall2(ProcessPed, 0x6648C0, { .reversed = false });
+
 }
 
 // 0x660F90

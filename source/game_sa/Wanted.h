@@ -52,7 +52,7 @@ public:
     bool                        m_bLeavePlayerAlone;
 
     static uint32 &MaximumWantedLevel;
-    static uint32 MaximumChaosLevel;
+    static uint32 &MaximumChaosLevel;
     static bool &bUseNewsHeliInAdditionToPolice;
 
 public:

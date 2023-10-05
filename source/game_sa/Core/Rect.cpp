@@ -62,8 +62,13 @@ inline bool CRect::IsPointInside(const CVector2D& point, float tolerance) const
 {
     return left   - tolerance <= point.x
         && right  + tolerance >= point.x
-        && bottom    - tolerance <= point.y
-        && top + tolerance >= point.y;
+        && bottom - tolerance <= point.y
+        && top    + tolerance >= point.y;
+}
+
+bool CRect::IsRectInside(const CRect& rect) const {
+    return rect.left <= right && rect.right >= left
+        && rect.top <= bottom && rect.bottom >= top;
 }
 
 // 0x43E020
@@ -96,4 +101,39 @@ inline void CRect::StretchToPoint(float x, float y)
 
     if (y > top)
         top = y;
+}
+
+bool CRect::DoConstrainPoint(CVector2D& pt) const {
+    auto hasConstrained = false;
+
+    const auto DoConstrain = [&](float& outPos, float constraint) {
+        outPos         = constraint;
+        hasConstrained = true;
+    };
+
+    if (right < pt.x) {
+        DoConstrain(pt.x, right);
+    } else if (pt.x < left) {
+        DoConstrain(pt.x, left);
+    }
+
+    if (pt.y > top) {
+        DoConstrain(pt.y, top);
+    } else if (bottom > pt.y) {
+        DoConstrain(pt.y, bottom);
+    }
+
+    return hasConstrained;
+}
+
+// NOTSA
+bool CRect::OverlapsWith(const CRect& o) const {
+    return (right >= o.left && left <= o.right)
+        && (bottom <= o.top && top >= o.bottom);
+}
+
+// NOTSA
+bool CRect::Contains(const CRect& o) const {
+    return (o.left >= left && o.right <= right)
+        && (o.top <= top && o.bottom >= bottom);
 }

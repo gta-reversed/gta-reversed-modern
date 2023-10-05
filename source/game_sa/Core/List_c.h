@@ -6,102 +6,217 @@
 */
 #pragma once
 
-#include "ListItem_c.h"
+template <typename T>
+class ListItem_c;
 
-/**
- * Double linked list base implementation
- *
- * NOTE: You should not use this class directly, use TList_c template instead.
- */
-class List_c {
+template <typename T>
+class TList_c {
+    template<typename Y>
+    class BaseIterator {
+    public:
+        using iterator_category = std::forward_iterator_tag; // Actually it's bidirectional, but there are quirks, so let's pretend like its not
+        using difference_type   = std::ptrdiff_t;
+        using value_type        = Y;
+        using pointer           = Y*;
+        using reference         = Y&;
+
+        BaseIterator() = default;
+        BaseIterator(pointer ptr) : m_ptr{ ptr } {}
+
+        reference operator*() const { return *m_ptr; }
+        pointer operator->() { return m_ptr; }
+
+        auto& operator++() { assert(m_ptr); m_ptr = m_ptr->m_pNext; return *this; }
+        auto  operator++(int) { const auto tmp{ *this }; ++(*this); return tmp; }
+
+        // NOTE: Won't work properly in case `list.end() == *this` [Because `m_ptr` will be null]
+        auto& operator--() { assert(m_ptr); m_ptr = m_ptr->m_pPrev; return *this; }
+        auto  operator--(int) { const auto tmp{ *this }; --(*this); return tmp; }
+
+        friend bool operator==(const BaseIterator<Y>& lhs, const BaseIterator<Y>& rhs) { return lhs.m_ptr == rhs.m_ptr; }
+        friend bool operator!=(const BaseIterator<Y>& lhs, const BaseIterator<Y>& rhs) { return !(lhs == rhs); }
+    private:
+        pointer m_ptr;
+    };
 public:
-    List_c() : m_pHead(nullptr), m_pTail(nullptr), m_nCount(0) {}
-    ~List_c() = default;
+    using iterator       = BaseIterator<T>;
+    using const_iterator = BaseIterator<const T>;
 
 public:
-    ListItem_c* m_pHead;
-    ListItem_c* m_pTail;
-    uint32      m_nCount;
+    void AddItem(T* item) {
+        assert(item);
 
-public:
-    static void InjectHooks();
+        auto* pOldHead = m_head;
+        m_head = item;
+        item->m_pPrev = nullptr;
+        item->m_pNext = pOldHead;
 
-    // Add new item to the head
-    void AddItem(ListItem_c* item);
+        if (pOldHead)
+            pOldHead->m_pPrev = item;
+        else
+            m_tail = item;
 
-    // Remove given item from the list and decrease counter
-    void RemoveItem(ListItem_c* item);
+        ++m_cnt;
+    }
 
-    // Remove heading item and return it's pointer
-    ListItem_c* RemoveHead();
+    void AppendItem(T* item) {
+        auto* pOldTail = m_tail;
+        m_tail = item;
+        item->m_pPrev = pOldTail;
+        item->m_pNext = nullptr;
 
-    // Remove tail item and return it's pointer
-    ListItem_c* RemoveTail();
+        if (pOldTail)
+            pOldTail->m_pNext = item;
+        else
+            m_head = item;
 
-    // Remove all items
-    void RemoveAll();
+        ++m_cnt;
+    }
 
-    // Get number of items in the list
-    uint32 GetNumItems() const;
+    
+    void InsertAfterItem(T* addedItem, T* pExistingItem) {
+        ++m_cnt; // BUG: We increment count even though the item wasn't added to table, and there's no certainity that it will
+        if (!m_head)
+            return;
 
-    // Append item to the list
-    void AppendItem(ListItem_c* item);
+        auto curItem = GetHead();
+        while (curItem && curItem != pExistingItem)
+            curItem = GetNext(curItem);
 
-    // Append item to the list
-    void InsertAfterItem(ListItem_c* addedItem, ListItem_c* pExistingItem);
+        if (!curItem)
+            return;
 
-    // Append item to the list
-    void InsertBeforeItem(ListItem_c* addedItem, ListItem_c* pExistingItem);
+        addedItem->m_pPrev = curItem;
+        addedItem->m_pNext = curItem->m_pNext;
+        auto* pOldNext = curItem->m_pNext;
+        curItem->m_pNext = addedItem;
+        if (pOldNext)
+            pOldNext->m_pPrev = addedItem;
+        else
+            m_tail = addedItem;
+    }
 
-    // Get list head
-    ListItem_c* GetHead();
+    void InsertBeforeItem(T* addedItem, T* pExistingItem) {
+        ++m_cnt; // BUG: We increment count even though the item wasn't added to table, and there's no certainity that it will
 
-    // Get list head
-    ListItem_c* GetTail();
+        if (!m_head)
+            return;
 
-    // Get next item in a list
-    ListItem_c* GetNext(ListItem_c* item);
+        auto curItem = GetHead();
+        while (curItem && curItem != pExistingItem)
+            curItem = GetNext(curItem);
 
-    // Get previous item
-    ListItem_c* GetPrev(ListItem_c* item);
+        if (!curItem)
+            return;
 
-    // Get N-th item from list head/tail
-    ListItem_c* GetItemOffset(bool bFromHead, int32 iOffset);
+        addedItem->m_pPrev = curItem->m_pPrev;
+        addedItem->m_pNext = curItem;
+        auto* oldPrev = curItem->m_pPrev;
+        curItem->m_pPrev = addedItem;
+        if (oldPrev)
+            oldPrev->m_pNext = addedItem;
+        else
+            m_head = addedItem;
+    }
+    
+    void RemoveItem(T* item) {
+        assert(item);
+
+        if (item->m_pNext)
+            item->m_pNext->m_pPrev = item->m_pPrev;
+        else
+            m_tail = item->m_pPrev;
+
+        if (item->m_pPrev)
+            item->m_pPrev->m_pNext = item->m_pNext;
+        else
+            m_head = item->m_pNext;
+
+        --m_cnt;
+    }
+
+    void RemoveAll() {
+        m_head = nullptr;
+        m_tail = nullptr;
+        m_cnt  = 0;
+    }
+
+    T* RemoveHead() {
+        if (!m_head)
+            return nullptr;
+
+        --m_cnt;
+        auto* pOldHead = m_head;
+        if (m_head == m_tail) {
+            m_tail = nullptr;
+            m_head = nullptr;
+            return pOldHead;
+        }
+
+        if (m_head->m_pNext)
+            m_head->m_pNext->m_pPrev = nullptr;
+
+        m_head = m_head->m_pNext;
+        return pOldHead;
+    }
+
+    T* RemoveTail() {
+        if (!m_tail) {
+            return nullptr;
+        }
+
+        --m_cnt;
+        const auto oldTail = m_tail;
+        m_tail->m_pPrev->m_pNext = nullptr;
+        m_tail = m_tail->m_pPrev;
+        return oldTail;
+    }
+
+    T* GetItemOffset(bool bFromHead, int32 iOffset) {
+        if (bFromHead) {
+            auto* result = GetHead();
+            if (iOffset > 0 && result) {
+                int32 iCounter = 0;
+                while (iCounter < iOffset && result) {
+                    ++iCounter;
+                    result = GetNext(result);
+                }
+            }
+            return result;
+        } else {
+            auto* result = GetTail();
+            if (iOffset > 0 && result) {
+                int32 iCounter = 0;
+                while (iCounter < iOffset && result) {
+                    ++iCounter;
+                    result = GetPrev(result);
+                }
+            }
+            return result;
+        }
+    }
+
+    T*   GetNext(T* item) const { assert(item); return item->m_pNext; }
+    T*   GetPrev(T* item) const { assert(item); return item->m_pPrev; }
+    T*   GetHead()        const { return m_head; }
+    T*   GetTail()        const { return m_tail; }
+
+    auto GetNumItems()    const { return m_cnt; }
+
+    auto cbegin()         const { return const_iterator{ GetHead() }; }
+    auto begin()          const { return cbegin(); }
+    auto begin()                { return iterator{ GetHead() }; }
+
+    // Past the end is always `nullptr` - Not really std comforting, but oh well
+    auto cend()           const { return const_iterator{ nullptr }; }
+    auto end()            const { return cend(); }
+    auto end()                  { return iterator{ nullptr }; }
+
+    auto IsEmpty()        const { return m_head == nullptr; }
+
+private:
+    T*     m_head{};
+    T*     m_tail{};
+    size_t m_cnt{};
 };
-
-/**
- * Double linked list template wrapper
- * (not an original game class name)
- */
-template <typename ItemType> class TList_c : public List_c {
-public:
-    ItemType* GetHead() {
-        return static_cast<ItemType*>(List_c::GetHead());
-    }
-
-    ItemType* GetTail() {
-        return static_cast<ItemType*>(List_c::GetTail());
-    }
-
-    ItemType* RemoveHead() {
-        return static_cast<ItemType*>(List_c::RemoveHead());
-    }
-
-    ItemType* RemoveTail() {
-        return static_cast<ItemType*>(List_c::RemoveTail());
-    }
-
-    ItemType* GetNext(ItemType* item) {
-        return static_cast<ItemType*>(List_c::GetNext(item));
-    }
-
-    ItemType* GetPrev(ItemType* item) {
-        return static_cast<ItemType*>(List_c::GetPrev(item));
-    }
-
-    ItemType* GetItemOffset(bool bFromHead, int32 iOffset) {
-        return static_cast<ItemType*>(List_c::GetItemOffset(bFromHead, iOffset));
-    }
-};
-
-VALIDATE_SIZE(List_c, 0xC);
+using List_c = TList_c<void>;

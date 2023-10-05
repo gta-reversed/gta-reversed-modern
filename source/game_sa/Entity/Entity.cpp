@@ -80,7 +80,7 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(UpdateAnim, 0x535F00);
     RH_ScopedInstall(IsVisible, 0x536BC0);
     RH_ScopedInstall(GetDistanceFromCentreOfMassToBaseOfModel, 0x536BE0);
-    RH_ScopedInstall(CleanUpOldReference, 0x571A00);
+    RH_ScopedOverloadedInstall(CleanUpOldReference, "", 0x571A00, void(CEntity::*)(CEntity**));
     RH_ScopedInstall(ResolveReferences, 0x571A40);
     RH_ScopedInstall(PruneReferences, 0x571A90);
     RH_ScopedOverloadedInstall(RegisterReference, "", 0x571B70, void(CEntity::*)(CEntity**));
@@ -748,7 +748,7 @@ void CEntity::PreRender_Reversed()
             auto vecStreakEnd = vecPos + vecScaledCam;
             if (CVector2D(obj->m_vecMoveSpeed).Magnitude() > 0.03F) {
                 float fWaterLevel;
-                if (!CWaterLevel::GetWaterLevelNoWaves(vecPos.x, vecPos.y, vecPos.z, &fWaterLevel, nullptr, nullptr) || vecPos.z > fWaterLevel) {
+                if (!CWaterLevel::GetWaterLevelNoWaves(vecPos, &fWaterLevel, nullptr, nullptr) || vecPos.z > fWaterLevel) {
                     CMotionBlurStreaks::RegisterStreak(reinterpret_cast<uint32>(this), 255, 160, 100, 255, vecStreakStart, vecStreakEnd);
                 }
             }
@@ -930,15 +930,11 @@ void CEntity::UpdateRwFrame()
 }
 
 // 0x532B20
-void CEntity::UpdateRpHAnim()
-{
-    auto* firstAtomic = GetFirstAtomic(m_pRwClump);
-    if (!firstAtomic)
-        return;
-
-    if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(firstAtomic)) && !m_bDontUpdateHierarchy) {
-        auto* animHierarchy = GetAnimHierarchyFromSkinClump(m_pRwClump);
-        RpHAnimHierarchyUpdateMatrices(animHierarchy);
+void CEntity::UpdateRpHAnim() {
+    if (const auto atomic = GetFirstAtomic(m_pRwClump)) {
+        if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic)) && !m_bDontUpdateHierarchy) {
+            RpHAnimHierarchyUpdateMatrices(GetAnimHierarchyFromSkinClump(m_pRwClump));
+        }
     }
 }
 
@@ -976,7 +972,7 @@ bool CEntity::HasPreRenderEffects()
             return false;
 
         for (int32 i = 0; i < mi->m_n2dfxCount; ++i) {
-            if (mi->Get2dEffect(i)->m_nType == e2dEffectType::EFFECT_LIGHT)
+            if (mi->Get2dEffect(i)->m_type == e2dEffectType::EFFECT_LIGHT)
                 return true;
         }
 
@@ -1123,8 +1119,8 @@ CVector* CEntity::FindTriggerPointCoors(CVector* outVec, int32 triggerIndex)
     auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
     for (int32 iFxInd = 0; iFxInd < mi->m_n2dfxCount; ++iFxInd) {
         auto effect = mi->Get2dEffect(iFxInd);
-        if (effect->m_nType == e2dEffectType::EFFECT_TRIGGER_POINT && effect->slotMachineIndex.m_nId == triggerIndex) {
-            *outVec = GetMatrix() * effect->m_vecPosn;
+        if (effect->m_type == e2dEffectType::EFFECT_TRIGGER_POINT && effect->slotMachineIndex.m_nId == triggerIndex) {
+            *outVec = GetMatrix() * effect->m_pos;
             return outVec;
         }
     }
@@ -1134,20 +1130,23 @@ CVector* CEntity::FindTriggerPointCoors(CVector* outVec, int32 triggerIndex)
 }
 
 /**
- * Returns a random effect with the given effectType among all the effects of the entity.
- * @param effectType Type of effect. See e2dEffectType. (Always EFFECT_ATTRACTOR)
- * @param bCheckForEmptySlot Should check for empty slot. (Always true)
- * @return Random effect
  * @addr 0x533410
+ * 
+ * Returns a random effect with the given effectType among all the effects of the entity.
+ * 
+ * @param   effectType Type of effect. See e2dEffectType. (Always EFFECT_ATTRACTOR)
+ * @param   bCheckForEmptySlot Should check for empty slot. (Always true)
+ * 
+ * @return Random effect
  */
 C2dEffect* CEntity::GetRandom2dEffect(int32 effectType, bool bCheckForEmptySlot)
 {
-    C2dEffect* apArr[32]{};
+    C2dEffect* apArr[32]{}; // todo: static_vector
     auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
-    int32 iFoundCount = 0;
+    size_t iFoundCount = 0;
     for (int32 iFxInd = 0; iFxInd < mi->m_n2dfxCount; ++iFxInd) {
         auto effect = mi->Get2dEffect(iFxInd);
-        if (effect->m_nType != effectType)
+        if (effect->m_type != effectType)
             continue;
 
         if (bCheckForEmptySlot && !GetPedAttractorManager()->HasEmptySlot(effect, this))
@@ -1160,8 +1159,7 @@ C2dEffect* CEntity::GetRandom2dEffect(int32 effectType, bool bCheckForEmptySlot)
     }
 
     if (iFoundCount) {
-        auto iRandInd = CGeneral::GetRandomNumberInRange(0, iFoundCount);
-        return apArr[iRandInd];
+        return apArr[CGeneral::GetRandomNumberInRange(0u, iFoundCount)]; 
     }
 
     return nullptr;
@@ -1198,13 +1196,13 @@ void CEntity::CreateEffects()
 
     for (int32 iFxInd = 0; iFxInd < mi->m_n2dfxCount; ++iFxInd) {
         auto effect = mi->Get2dEffect(iFxInd);
-        switch (effect->m_nType) {
+        switch (effect->m_type) {
         case e2dEffectType::EFFECT_LIGHT: {
             m_bHasPreRenderEffects = true;
             break;
         }
         case e2dEffectType::EFFECT_PARTICLE: {
-            g_fx.CreateEntityFx(this, effect->particle.m_szName, &effect->m_vecPosn, GetModellingMatrix());
+            g_fx.CreateEntityFx(this, effect->particle.m_szName, &effect->m_pos, GetModellingMatrix());
             break;
         }
         case e2dEffectType::EFFECT_ATTRACTOR: {
@@ -1213,8 +1211,8 @@ void CEntity::CreateEffects()
             break;
         }
         case e2dEffectType::EFFECT_ENEX: {
-            auto vecExit = effect->m_vecPosn + effect->enEx.m_vecExitPosn;
-            auto vecWorldEffect = TransformFromObjectSpace(effect->m_vecPosn);
+            auto vecExit = effect->m_pos + effect->enEx.m_vecExitPosn;
+            auto vecWorldEffect = TransformFromObjectSpace(effect->m_pos);
             auto vecWorldExit = TransformFromObjectSpace(vecExit);
 
             if (effect->enEx.bTimedEffect) {
@@ -1241,7 +1239,7 @@ void CEntity::CreateEffects()
                 vecWorldExit.z,
                 fExitRot,
                 effect->enEx.m_nInteriorId,
-                effect->enEx.m_nFlags1 + (effect->enEx.m_nFlags2 << 8),
+                (CEntryExit::eFlags)(effect->enEx.m_nFlags1 + (effect->enEx.m_nFlags2 << 8)),
                 effect->enEx.m_nSkyColor,
                 effect->enEx.m_nTimeOn,
                 effect->enEx.m_nTimeOff,
@@ -1251,8 +1249,8 @@ void CEntity::CreateEffects()
 
             if (iEnExId != -1) {
                 auto addedEffect = CEntryExitManager::mp_poolEntryExits->GetAt(iEnExId);
-                if (addedEffect->m_pLink && !addedEffect->m_pLink->m_nFlags.bEnableAccess)
-                    addedEffect->m_nFlags.bEnableAccess = false;
+                if (addedEffect->m_pLink && !addedEffect->m_pLink->bEnableAccess)
+                    addedEffect->bEnableAccess = false;
             }
             break;
         }
@@ -1279,13 +1277,13 @@ void CEntity::CreateEffects()
             RwFrameRotate(frame, &axis2, effect->roadsign.m_vecRotation.z, RwOpCombineType::rwCOMBINEREPLACE);
             RwFrameRotate(frame, &axis0, effect->roadsign.m_vecRotation.x, RwOpCombineType::rwCOMBINEPOSTCONCAT);
             RwFrameRotate(frame, &axis1, effect->roadsign.m_vecRotation.y, RwOpCombineType::rwCOMBINEPOSTCONCAT);
-            RwFrameTranslate(frame, &effect->m_vecPosn, RwOpCombineType::rwCOMBINEPOSTCONCAT);
+            RwFrameTranslate(frame, &effect->m_pos, RwOpCombineType::rwCOMBINEPOSTCONCAT);
             RwFrameUpdateObjects(frame);
             effect->roadsign.m_pAtomic = signAtomic;
             break;
         }
         case e2dEffectType::EFFECT_ESCALATOR: {
-            auto vecStart = TransformFromObjectSpace(effect->m_vecPosn);
+            auto vecStart = TransformFromObjectSpace(effect->m_pos);
             auto vecBottom = TransformFromObjectSpace(effect->escalator.m_vecBottom);
             auto vecTop = TransformFromObjectSpace(effect->escalator.m_vecTop);
             auto vecEnd = TransformFromObjectSpace(effect->escalator.m_vecEnd);
@@ -1307,7 +1305,7 @@ void CEntity::DestroyEffects()
 
     for (int32 iFxInd = 0; iFxInd < mi->m_n2dfxCount; ++iFxInd) {
         auto effect = mi->Get2dEffect(iFxInd);
-        switch (effect->m_nType) {
+        switch (effect->m_type) {
         case e2dEffectType::EFFECT_ATTRACTOR: {
             if (effect->pedAttractor.m_nAttractorType == ePedAttractorType::PED_ATTRACTOR_TRIGGER_SCRIPT)
                 CTheScripts::ScriptsForBrains.MarkAttractorScriptBrainWithThisNameAsNoLongerNeeded(effect->pedAttractor.m_szScriptName);
@@ -1323,12 +1321,12 @@ void CEntity::DestroyEffects()
             break;
         }
         case e2dEffectType::EFFECT_ENEX: {
-            auto vecWorld = TransformFromObjectSpace(effect->m_vecPosn);
+            auto vecWorld = TransformFromObjectSpace(effect->m_pos);
             auto iNearestEnex = CEntryExitManager::FindNearestEntryExit(vecWorld, 1.5F, -1);
             if (iNearestEnex != -1) {
                 auto enex = CEntryExitManager::mp_poolEntryExits->GetAt(iNearestEnex);
-                if (enex->m_nFlags.bEnteredWithoutExit)
-                    enex->m_nFlags.bDeleteEnex = true;
+                if (enex->bEnteredWithoutExit)
+                    enex->bDeleteEnex = true;
                 else
                     CEntryExitManager::DeleteOne(iNearestEnex);
             }
@@ -1402,11 +1400,8 @@ CVector* CEntity::GetBoundCentre(CVector* pOutCentre)
 }
 
 // 0x534290
-void CEntity::GetBoundCentre(CVector& outCentre)
-{
-    auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
-    const auto& colCenter = mi->GetColModel()->GetBoundCenter();
-    TransformFromObjectSpace(outCentre, colCenter);
+void CEntity::GetBoundCentre(CVector& outCentre) {
+    TransformFromObjectSpace(outCentre, GetColModel()->GetBoundCenter());
 }
 
 CVector CEntity::GetBoundCentre()
@@ -1428,7 +1423,7 @@ void CEntity::RenderEffects()
 
     for (int32 iFxInd = 0; iFxInd < mi->m_n2dfxCount; ++iFxInd) {
         auto effect = mi->Get2dEffect(iFxInd);
-        if (effect->m_nType != e2dEffectType::EFFECT_ROADSIGN)
+        if (effect->m_type != e2dEffectType::EFFECT_ROADSIGN)
             continue;
 
         CCustomRoadsignMgr::RenderRoadsignAtomic(effect->roadsign.m_pAtomic, TheCamera.GetPosition());
@@ -1461,19 +1456,10 @@ bool CEntity::GetIsTouching(const CVector& centre, float radius)
 }
 
 // 0x534540
-bool CEntity::GetIsOnScreen()
-{
+bool CEntity::GetIsOnScreen() {
     CVector thisVec;
     GetBoundCentre(thisVec);
-    auto fThisRadius = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundRadius();
-
-    if (TheCamera.IsSphereVisible(thisVec, fThisRadius, reinterpret_cast<RwMatrix*>(&TheCamera.m_mMatInverse)))
-        return true;
-
-    if (TheCamera.m_bMirrorActive)
-        return TheCamera.IsSphereVisible(thisVec, fThisRadius, reinterpret_cast<RwMatrix*>(&TheCamera.m_mMatMirrorInverse));
-
-    return false;
+    return TheCamera.IsSphereVisible(thisVec, CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundRadius());
 }
 
 // 0x5345D0
@@ -1607,12 +1593,15 @@ RwMatrix* CEntity::GetModellingMatrix() {
 }
 
 // 0x535300
-CColModel* CEntity::GetColModel()
-{
-    if (IsVehicle() && AsVehicle()->m_vehicleSpecialColIndex > -1)
-        return &CVehicle::m_aSpecialColModel[AsVehicle()->m_vehicleSpecialColIndex];
-    else
-        return CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
+CColModel* CEntity::GetColModel() const {
+    if (IsVehicle()) {
+        const auto veh = static_cast<const CVehicle*>(this);
+        if (veh->m_vehicleSpecialColIndex > -1) {
+            return &CVehicle::m_aSpecialColModel[veh->m_vehicleSpecialColIndex];
+        }
+    }
+    
+    return CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
 }
 
 // 0x535340
@@ -1928,8 +1917,8 @@ void CEntity::ProcessLightsForEntity()
         auto fIntensity = 1.0F;
         auto uiRand = m_nRandomSeed ^ CCoronas::ms_aEntityLightsOffsets[iFxInd & 0x7];
 
-        if (effect->m_nType == e2dEffectType::EFFECT_SUN_GLARE && CWeather::SunGlare >= 0.0F) {
-            auto vecEffPos = TransformFromObjectSpace(effect->m_vecPosn);
+        if (effect->m_type == e2dEffectType::EFFECT_SUN_GLARE && CWeather::SunGlare >= 0.0F) {
+            auto vecEffPos = TransformFromObjectSpace(effect->m_pos);
 
             auto vecDir = vecEffPos - GetPosition();
             vecDir.Normalise();
@@ -1979,10 +1968,10 @@ void CEntity::ProcessLightsForEntity()
             continue;
         }
 
-        if (effect->m_nType != e2dEffectType::EFFECT_LIGHT)
+        if (effect->m_type != e2dEffectType::EFFECT_LIGHT)
             continue;
 
-        auto vecEffPos = TransformFromObjectSpace(effect->m_vecPosn);
+        auto vecEffPos = TransformFromObjectSpace(effect->m_pos);
         auto bDoColorLight = false;
         auto bDoNoColorLight = false;
         auto bCoronaVisible = false;
@@ -2515,6 +2504,10 @@ bool CEntity::IsInCurrentAreaOrBarberShopInterior()
     return m_nAreaCode == CGame::currArea || m_nAreaCode == AREA_CODE_13;
 }
 
+bool CEntity::IsInCurrentArea() const {
+    return m_nAreaCode == CGame::currArea;
+}
+
 // 0x446F90
 void CEntity::UpdateRW() {
     if (!m_pRwObject)
@@ -2537,6 +2530,14 @@ CBaseModelInfo* CEntity::GetModelInfo() const {
     return CModelInfo::GetModelInfo(m_nModelIndex);
 }
 
+bool CEntity::ProcessScan() {
+    if (IsScanCodeCurrent()) {
+        return false;
+    }
+    SetCurrentScanCode();
+    return true;
+}
+
 RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* atomic, void* data)
 {
     auto geometry = RpAtomicGetGeometry(atomic);
@@ -2547,7 +2548,7 @@ RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* atomic, void* data)
 
 RpMaterial* CEntity::SetMaterialAlphaCB(RpMaterial* material, void* data)
 {
-    material->color.alpha = (RwUInt8)data;
+    RpMaterialGetColor(material)->alpha = (RwUInt8)std::bit_cast<uintptr_t>(data);
     return material;
 }
 

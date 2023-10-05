@@ -24,6 +24,8 @@ void CCustomRoadsignMgr::InjectHooks()
 
 // 0x6FE120
 bool CCustomRoadsignMgr::Initialise() {
+    ZoneScoped;
+
     CTxdStore::PushCurrentTxd();
     CTxdStore::SetCurrentTxd(CTxdStore::FindTxdSlot("particle"));
 
@@ -93,7 +95,7 @@ RwTexture* CCustomRoadsignMgr::CreateRoadsignTexture(char* name, int32 numOfChar
     }
 
     char nameCopy[12] {};
-    strncpy(nameCopy, name, 10);
+    strncpy_s(nameCopy, name, 10);
     RwTextureSetName(texture, nameCopy);
     RwTextureSetFilterMode(texture, rwFILTERLINEAR);
     return texture;
@@ -332,7 +334,7 @@ RpAtomic* CCustomRoadsignMgr::RenderRoadsignAtomic(RpAtomic* atomic, const CVect
 
 RpMaterial* RoadsignSetMaterialAlphaCB(RpMaterial* material, void* data)
 {
-    RpMaterialGetColor(material)->alpha = (RwUInt8)data;
+    RpMaterialGetColor(material)->alpha = (RwUInt8)std::bit_cast<uintptr_t>(data);
     return material;
 }
 

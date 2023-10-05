@@ -25,10 +25,10 @@ CTask* CTaskComplexStuckInAir::CreateSubTask(eTaskType taskType, CPed* ped) {
 void CTaskComplexStuckInAir::InjectHooks() {
     RH_ScopedClass(CTaskComplexStuckInAir);
     RH_ScopedCategory("Tasks/TaskTypes");
-    // RH_ScopedVirtualInstall(ControlSubTask, 0x67BE50);
-    // RH_ScopedVirtualInstall(CreateFirstSubTask, 0x67BE20);
-    // RH_ScopedVirtualInstall(CreateNextSubTask, 0x67BD10);
-    // RH_ScopedVirtualInstall(CreateSubTask, 0x67BA80);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x67BE50, { .reversed = false });
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x67BE20, { .reversed = false });
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x67BD10, { .reversed = false });
+    RH_ScopedVirtualInstall(CreateSubTask, 0x67BA80, { .reversed = false });
 }
 
 CTask* CTaskComplexStuckInAir::ControlSubTask_Reversed(CPed* ped) {

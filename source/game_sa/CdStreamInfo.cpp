@@ -46,7 +46,7 @@ public:
 
 static CSync cdStreamThreadSync;
 #endif
-
+#include "AEBankLoader.h"
 void InjectCdStreamHooks() {
     RH_ScopedNamespaceName("CdStream");
     RH_ScopedCategoryGlobal();
@@ -64,6 +64,7 @@ void InjectCdStreamHooks() {
 
 // 0x4067B0
 int32 CdStreamOpen(const char* lpFileName) {
+    NOTSA_LOG_DEBUG("CdStreamOpen: {}", lpFileName);
     int32 freeHandleIndex = 0;
     for (; freeHandleIndex < MAX_CD_STREAM_HANDLES; freeHandleIndex++) {
         if (!gStreamFileHandles[freeHandleIndex])
@@ -75,7 +76,7 @@ int32 CdStreamOpen(const char* lpFileName) {
     gStreamFileHandles[freeHandleIndex] = file;
     if (file == INVALID_HANDLE_VALUE)
         return 0;
-    strncpy(gCdImageNames[freeHandleIndex], lpFileName, MAX_CD_STREAM_IMAGE_NAME_SIZE);
+    strncpy_s(gCdImageNames[freeHandleIndex], lpFileName, MAX_CD_STREAM_IMAGE_NAME_SIZE);
     return freeHandleIndex << 24;
 }
 
@@ -165,7 +166,7 @@ bool CdStreamRead(int32 streamId, void* lpBuffer, uint32 offsetAndHandle, int32 
         stream.bLocked = false;
         AddToQueue(&gStreamQueue, streamId);
         if (!ReleaseSemaphore(gStreamSemaphore, 1, nullptr))
-            printf("Signal Sema Error\n");
+            DEV_LOG("Signal Sema Error");
         return true;
     }
     const DWORD numberOfBytesToRead = sectorCount * STREAMING_SECTOR_SIZE;
@@ -183,9 +184,16 @@ bool CdStreamRead(int32 streamId, void* lpBuffer, uint32 offsetAndHandle, int32 
 }
 
 // 0x406560
-[[noreturn]] DWORD WINAPI CdStreamThread(LPVOID lpParam) {
+[[noreturn]] void WINAPI CdStreamThread(LPVOID lpParam) {
+#ifdef TRACY_ENABLE
+    tracy::SetThreadName("CdStreamThread");
+#endif
+
     while (true) {
         WaitForSingleObject(gStreamSemaphore, INFINITE);
+
+        ZoneScoped;
+
         const int32 streamId = GetFirstInQueue(&gStreamQueue);
         CdStream& stream = gCdStreams[streamId];
         stream.bInUse = true;
@@ -214,6 +222,7 @@ bool CdStreamRead(int32 streamId, void* lpBuffer, uint32 offsetAndHandle, int32 
                     stream.status = eCdStreamStatus::READING_FAILURE;
             }
         }
+
         RemoveFirstInQueue(&gStreamQueue);
 #ifdef APPLY_CD_STREAM_DEADLOCK_FIX
         CLockGuard lockGuard(cdStreamThreadSync);
@@ -234,22 +243,22 @@ void CdStreamInitThread() {
         HANDLE hSemaphore = OS_SemaphoreCreate(2, nullptr);
         stream.sync.hSemaphore = hSemaphore;
         if (!hSemaphore) {
-            printf("%s: failed to create sync semaphore\n", "cdvd_stream");
+            DEV_LOG("cdvd_stream: failed to create sync semaphore");
             return;
         }
     }
     InitialiseQueue(&gStreamQueue, gStreamCount + 1);
     gStreamSemaphore = OS_SemaphoreCreate(5, "CdStream");
     if (gStreamSemaphore) {
-        gStreamingThread = CreateThread(nullptr, 0x10000, CdStreamThread, nullptr, CREATE_SUSPENDED, &gStreamingThreadId);
+        gStreamingThread = CreateThread(nullptr, 0x10000, (LPTHREAD_START_ROUTINE)CdStreamThread, nullptr, CREATE_SUSPENDED, &gStreamingThreadId);
         if (gStreamingThread) {
             SetThreadPriority(gStreamingThread, GetThreadPriority(GetCurrentThread()));
             ResumeThread(gStreamingThread);
         } else {
-            printf("%s: failed to create streaming thread\n", "cdvd_stream");
+            DEV_LOG("cdvd_stream: failed to create streaming thread");
         }
     } else {
-        printf("%s: failed to create stream semaphore\n", "cdvd_stream");
+        DEV_LOG("cdvd_stream: failed to create stream semaphore");
     }
 }
 

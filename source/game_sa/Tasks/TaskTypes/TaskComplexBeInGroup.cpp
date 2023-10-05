@@ -53,7 +53,11 @@ void CTaskComplexBeInGroup::MonitorSecondaryGroupTask(CPed* ped) {
     auto& groupIntel = CPedGroups::GetGroup(m_nGroupId).GetIntelligence();
     const auto grpSecTask = groupIntel.GetTaskSecondary(ped);
     const auto pedGrpSecTaskSlot = groupIntel.GetTaskSecondarySlot(ped);
+#ifdef FIX_BUGS
+    const auto pedGrpSecTask = pedGrpSecTaskSlot != -1 ? ped->GetTaskManager().GetTaskSecondary(pedGrpSecTaskSlot) : nullptr;
+#else
     const auto pedGrpSecTask = ped->GetTaskManager().GetTaskSecondary(pedGrpSecTaskSlot);
+#endif // FIX_BUGS
     if (m_SecondaryTask == grpSecTask) {
         if (m_SecondaryTask) { // Check if theres any task at all (Not both nullptr)
             // Check if ped has finished the task
@@ -66,7 +70,7 @@ void CTaskComplexBeInGroup::MonitorSecondaryGroupTask(CPed* ped) {
     } else { // Group has a new task, apply it to the ped
 
         // Abort peds task in the previous stored slot
-        if (const auto task = ped->GetTaskManager().GetTaskSecondary(m_nSecondaryTaskSlot)) {
+        if (const auto task = ped->GetTaskManager().GetTaskSecondary((eSecondaryTask)m_nSecondaryTaskSlot)) {
             task->MakeAbortable(ped, ABORT_PRIORITY_LEISURE, nullptr);
         }
 

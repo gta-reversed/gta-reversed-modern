@@ -8,11 +8,11 @@ void CTaskSimpleDuck::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x691FC0);
     RH_ScopedInstall(Destructor, 0x692030);
-    // RH_ScopedInstall(CanPedDuck, 0x692610);
-    // RH_ScopedInstall(ControlDuckMove, 0x6923F0);
-    // RH_ScopedInstall(IsTaskInUseByOtherTasks, 0x61C3D0);
-    // RH_ScopedVirtualInstall(MakeAbortable, 0x692100);
-    // RH_ScopedVirtualInstall(ProcessPed, 0x694390);
+    RH_ScopedInstall(CanPedDuck, 0x692610, { .reversed = false });
+    //RH_ScopedInstall(ControlDuckMove, 0x6923F0, { .reversed = false }); // todo
+    RH_ScopedInstall(IsTaskInUseByOtherTasks, 0x61C3D0, { .reversed = false });
+    RH_ScopedVirtualInstall(MakeAbortable, 0x692100, { .reversed = false });
+    RH_ScopedVirtualInstall(ProcessPed, 0x694390, { .reversed = false });
 }
 
 // 0x691FC0
@@ -87,4 +87,17 @@ bool CTaskSimpleDuck::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
 
 bool CTaskSimpleDuck::ProcessPed_Reversed(CPed* ped) {
     return CTaskSimpleDuck::ProcessPed(ped);
+}
+
+// 0x6924B0
+void CTaskSimpleDuck::ForceStopMove() {
+    m_bIsInControl = true;
+    m_vecMoveCommand.y = 0.f;
+}
+
+void CTaskSimpleDuck::SetDuckTimer(uint16 lengthOfDuck) {
+    if (m_nDuckControlType != DUCK_SCRIPT_CONTROLLED) {
+        m_nStartTime = CTimer::GetTimeInMS();
+        m_nLengthOfDuck = lengthOfDuck;
+    }
 }

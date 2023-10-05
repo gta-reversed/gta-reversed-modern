@@ -22,6 +22,7 @@ CTaskComplexTurnToFaceEntityOrCoord::CTaskComplexTurnToFaceEntityOrCoord(CEntity
     m_fMaxHeading{ maxHeading },
     m_bFaceEntity{ true }
 {
+    assert((uintptr_t)entity != (uintptr_t)-1);
     CEntity::SafeRegisterRef(m_EntityToFace);
 }
 
@@ -41,7 +42,7 @@ CTaskComplexTurnToFaceEntityOrCoord::~CTaskComplexTurnToFaceEntityOrCoord() {
 }
 
 // 0x66D250
-CTask* CTaskComplexTurnToFaceEntityOrCoord::Clone() {
+CTask* CTaskComplexTurnToFaceEntityOrCoord::Clone() const {
     if (m_bFaceEntity) {
         return new CTaskComplexTurnToFaceEntityOrCoord(m_EntityToFace, m_fChangeRateMult, m_fMaxHeading);
     } else {

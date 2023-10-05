@@ -13,7 +13,7 @@ public:
     uint32              m_hashKey;
     CAnimBlendSequence* m_pSequences;
     uint16              m_nSeqCount;
-    bool                m_bRunningCompressed;
+    bool                m_bIsCompressed;
     bool                m_bKeepCompressed;
     int32               m_nAnimBlockId;
     float               m_fTotalTime;

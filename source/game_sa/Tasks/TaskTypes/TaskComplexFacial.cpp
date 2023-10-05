@@ -6,14 +6,14 @@ void CTaskComplexFacial::InjectHooks() {
     RH_ScopedClass(CTaskComplexFacial);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    // RH_ScopedInstall(Constructor, 0x690D20);
-    // RH_ScopedInstall(StopAll, 0x691250);
-    // RH_ScopedVirtualInstall(Clone, 0x6928B0);
-    // RH_ScopedVirtualInstall(GetTaskType, 0x690D80);
-    // RH_ScopedVirtualInstall(MakeAbortable, 0x690DA0);
-    // RH_ScopedVirtualInstall(CreateNextSubTask, 0x690DC0);
-    // RH_ScopedVirtualInstall(CreateFirstSubTask, 0x690F30);
-    // RH_ScopedVirtualInstall(ControlSubTask, 0x690FC0);
+    RH_ScopedInstall(Constructor, 0x690D20, { .reversed = false });
+    RH_ScopedInstall(StopAll, 0x691250, { .reversed = false });
+    RH_ScopedVirtualInstall(Clone, 0x6928B0, { .reversed = false });
+    RH_ScopedVirtualInstall(GetTaskType, 0x690D80, { .reversed = false });
+    RH_ScopedVirtualInstall(MakeAbortable, 0x690DA0, { .reversed = false });
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x690DC0, { .reversed = false });
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x690F30, { .reversed = false });
+    RH_ScopedVirtualInstall(ControlSubTask, 0x690FC0, { .reversed = false });
 }
 
 // 0x690D20

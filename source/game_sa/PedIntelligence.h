@@ -90,13 +90,13 @@ public:
     void AddTaskEventResponseTemp(CTask* task, int32 unUsed);
     void AddTaskEventResponseNonTemp(CTask* task, int32 unUsed);
     void AddTaskPrimaryMaybeInGroup(CTask* task, bool bAffectsPed);
-    CTask* FindTaskByType(int32 taskId);
+    CTask* FindTaskByType(eTaskType taskId);
     CTaskSimpleFight* GetTaskFighting();
     CTaskSimpleUseGun* GetTaskUseGun();
     CTaskSimpleThrowProjectile* GetTaskThrow();
-    CTask* GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask);
+    CTaskSimpleHoldEntity* GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask = true);
     CTaskSimpleSwim* GetTaskSwim();
-    CTaskSimpleDuck* GetTaskDuck(bool bIgnoreCheckingForSimplestActiveTask);
+    CTaskSimpleDuck* GetTaskDuck(bool bIgnoreCheckingForSimplestActiveTask = true);
     CTaskSimpleJetPack* GetTaskJetPack();
     CTaskSimpleInAir* GetTaskInAir();
     CTaskSimpleClimb* GetTaskClimb();
@@ -148,12 +148,17 @@ public:
         return false;
     }
 
+    //! Get the vehicle the ped is entering now (If any)
+    CVehicle* GetEnteringVehicle();
+
+    CEventHandler&   GetEventHandler()    { return m_eventHandler; }
+    CEventGroup&     GetEventGroup()      { return m_eventGroup; }
     CEventScanner&   GetEventScanner()    { return m_eventScanner; }
     CPedScanner&     GetPedScanner()      { return m_pedScanner; }
     CVehicleScanner& GetVehicleScanner()  { return m_vehicleScanner; }
-    CEntity**        GetPedEntities()     { return m_pedScanner.m_apEntities; }     // 0x4893E0
+    CEntity**        GetPedEntities()     { return m_pedScanner.m_apEntities.data(); }     // 0x4893E0
     CEntity*         GetPedEntity(uint32 index) { return GetPedEntities()[index]; } // todo: GetPedEntity or degrades readability?
-    CEntity**        GetVehicleEntities() { return m_vehicleScanner.m_apEntities; }
+    CEntity**        GetVehicleEntities() { return m_vehicleScanner.m_apEntities.data(); }
 
 private:
     CPedIntelligence* Constructor(CPed* ped);

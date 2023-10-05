@@ -68,6 +68,8 @@ public:
     uint32       m_nSmokeTimer;
     bool         m_bSmokeEjectorEnabled;
 
+    static constexpr auto Type = VEHICLE_TYPE_PLANE;
+
 public:
     static int32& GenPlane_ModelIndex;
     static uint32& GenPlane_Status;

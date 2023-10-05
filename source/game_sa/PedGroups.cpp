@@ -57,13 +57,13 @@ bool CPedGroups::IsGroupLeader(CPed* ped) {
 }
 
 // 0x5F7E80
-CPedGroup* CPedGroups::GetPedsGroup(CPed* ped) {
-    return plugin::CallAndReturn<CPedGroup*, 0x5F7E80, CPed*>(ped);
+CPedGroup* CPedGroups::GetPedsGroup(const CPed* ped) {
+    return plugin::CallAndReturn<CPedGroup*, 0x5F7E80>(ped);
 }
 
 // 0x5F7EE0
-int32 CPedGroups::GetGroupId(CPedGroup* pedGroup) {
-    return plugin::CallAndReturn<int32, 0x5F7EE0, CPedGroup*>(pedGroup);
+int32 CPedGroups::GetGroupId(const CPedGroup* pedGroup) {
+    return plugin::CallAndReturn<int32, 0x5F7EE0, const CPedGroup*>(pedGroup);
 }
 
 // 0x5FC800

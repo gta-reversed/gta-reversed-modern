@@ -16,7 +16,7 @@ void CWeaponInfo::InjectHooks() {
     RH_ScopedInstall(LoadWeaponData, 0x5BE670);
     RH_ScopedInstall(Initialise, 0x5BF750);
     RH_ScopedInstall(Shutdown, 0x743C50);
-    RH_ScopedInstall(GetWeaponInfo, 0x743C60);
+    RH_ScopedOverloadedInstall(GetWeaponInfo, "original", 0x743C60, CWeaponInfo*(*)(eWeaponType, eWeaponSkill));
     RH_ScopedInstall(GetSkillStatIndex, 0x743CD0);
     RH_ScopedInstall(FindWeaponType, 0x743D10);
     RH_ScopedInstall(GetCrouchReloadAnimationID, 0x685700);
@@ -106,9 +106,18 @@ uint32 CWeaponInfo::GetWeaponInfoIndex(eWeaponType weaponType, eWeaponSkill skil
     case eWeaponSkill::STD:  return (uint32)weaponType;
     case eWeaponSkill::PRO:  return (uint32)weaponType + 25u + 1 * numWeaponsWithSkill;
     case eWeaponSkill::COP:  return (uint32)weaponType + 25u + 2 * numWeaponsWithSkill;
+    default:                 NOTSA_UNREACHABLE("Invalid weapon skill");
     }
-    NOTSA_UNREACHABLE("GetWeaponInfoIndex: Something went wrong");
-    return WEAPON_LAST_WEAPON;
+}
+
+// NOTSA
+void CWeaponInfo::StreamModelsForWeapon(eStreamingFlags streamingFlags) {
+    for (auto modelId : GetModels()) {
+        if (modelId != MODEL_INVALID) {
+            CStreaming::RequestModel(modelId, streamingFlags | STREAMING_PRIORITY_REQUEST);
+        }
+    }
+    CStreaming::LoadAllRequestedModels(true);
 }
 
 // NOTSA
@@ -131,14 +140,10 @@ auto GetBaseComboByName(const char* name) {
 
 // 0x5BE670
 void CWeaponInfo::LoadWeaponData() {
-    auto f = CFileMgr::OpenFile("DATA\\WEAPON.DAT", "rb"); // I wonder why they open it in binary mode
+    auto f = CFileMgr::OpenFile("DATA\\WEAPON.DAT", "rb");
     for (auto line = CFileLoader::LoadLine(f); line; line = CFileLoader::LoadLine(f)) {
         if (std::string_view{line}.find("ENDWEAPONDATA") != std::string_view::npos) // Not quite the way they did it, but it's fine.
             break;
-
-        // Read beginning of line here (that is, from the first char up to the first string)
-        // This is quite a hacky solution, they should've just skipped to the first non-ws character manually
-        char unused[32]{};
 
         switch ((uint8)line[0]) { // Gotta cast it because of `case 163`
         case '$': { // Gun data
@@ -165,15 +170,14 @@ void CWeaponInfo::LoadWeaponData() {
             float speed{}, radius{};
             float lifespan{}, spread{};
 
-            (void)sscanf(line,
-                "%s %s %s %f %f %d %d %d %s %d %d %f %f %f %d %d %f %f %d %d %d %d %d %d %d %x %f %f %f %f",
-                unused,
-                weaponName,
-                fireTypeName,
+            VERIFY(sscanf_s(line,
+                "%*s %s %s %f %f %d %d %d %s %d %d %f %f %f %d %d %f %f %d %d %d %d %d %d %d %x %f %f %f %f",
+                SCANF_S_STR(weaponName),
+                SCANF_S_STR(fireTypeName),
                 &targetRange, &weaponRange,
                 &modelId1, &modelId2,
                 &slot,
-                animGrpName,
+                SCANF_S_STR(animGrpName),
                 &ammo,
                 &dmg,
                 &offset.x, &offset.y, &offset.z,
@@ -185,11 +189,11 @@ void CWeaponInfo::LoadWeaponData() {
                 &animLoopInfo[1].start, &animLoopInfo[1].end, &animLoopInfo[1].fire,
                 &breakoutTime,
                 &flags,
-                &speed,
-                &radius,
-                &lifespan,
-                &spread
-            );
+                &speed,    // optional
+                &radius,   // optional
+                &lifespan, // optional
+                &spread    // optional
+            ) >= 25);
 
             const auto weaponType = FindWeaponType(weaponName);
             const auto skillLevel = WeaponHasSkillStats(weaponType) ? (eWeaponSkill)skill : eWeaponSkill::STD;
@@ -228,7 +232,7 @@ void CWeaponInfo::LoadWeaponData() {
 
 
             if (!std::string_view{ animGrpName }.starts_with("null")) {
-                wi.m_eAnimGroup = CAnimManager::GetAnimationGroupId(animGrpName);
+                wi.m_eAnimGroup = CAnimManager::GetAnimationGroupIdByName(animGrpName);
             }
 
             if (wi.m_eAnimGroup >= ANIM_GROUP_PYTHON && wi.m_eAnimGroup <= ANIM_GROUP_SPRAYCAN) {
@@ -249,9 +253,9 @@ void CWeaponInfo::LoadWeaponData() {
             uint32 RLoadA{}, RLoadB{};
             uint32 crouchRLoadA{}, crouchRLoadB{};
 
-            (void)sscanf(line, "%s %s %f %f %f %f %d %d %d %d", unused, stealthAnimGrp, &aimX, &aimZ, &duckX, &duckZ, &RLoadA, &RLoadB, &crouchRLoadA, &crouchRLoadB);
+            VERIFY(sscanf_s(line, "%*s %s %f %f %f %f %d %d %d %d", SCANF_S_STR(stealthAnimGrp), &aimX, &aimZ, &duckX, &duckZ, &RLoadA, &RLoadB, &crouchRLoadA, &crouchRLoadB) == 9);
 
-            g_GunAimingOffsets[CAnimManager::GetAnimationGroupId(stealthAnimGrp) - ANIM_GROUP_PYTHON] = {
+            g_GunAimingOffsets[CAnimManager::GetAnimationGroupIdByName(stealthAnimGrp) - ANIM_GROUP_PYTHON] = {
                 .AimX = aimX,
                 .AimZ = aimZ,
 
@@ -278,21 +282,20 @@ void CWeaponInfo::LoadWeaponData() {
             uint32 flags{};
             char stealthAnimGrpName[32]{};
 
-            (void)sscanf(line,
-                "%s %s %s %f %f %d %d %d %s %d %x %s",
-                unused,
-                weaponName,
-                fireTypeName,
+            VERIFY(sscanf_s(line,
+                "%*s %s %s %f %f %d %d %d %s %d %x %s",
+                SCANF_S_STR(weaponName),
+                SCANF_S_STR(fireTypeName),
                 &targetRange,
                 &weaponRange,
                 &modelId1,
                 &modelId2,
                 &slot,
-                baseComboName,
+                SCANF_S_STR(baseComboName),
                 &numCombos,
                 &flags,
-                stealthAnimGrpName
-            );
+                SCANF_S_STR(stealthAnimGrpName)
+            ) == 11);
 
             auto wType = FindWeaponType(weaponName);
             auto& wi = aWeaponInfo[(uint32)wType];
@@ -307,7 +310,7 @@ void CWeaponInfo::LoadWeaponData() {
             wi.m_nFlags = flags;
 
             if (!std::string_view{stealthAnimGrpName}.starts_with("null"))
-                wi.m_eAnimGroup = CAnimManager::GetAnimationGroupId(stealthAnimGrpName);
+                wi.m_eAnimGroup = CAnimManager::GetAnimationGroupIdByName(stealthAnimGrpName);
 
             if (modelId1 > 0)
                 CModelInfo::GetModelInfo(modelId1)->AsWeaponModelInfoPtr()->m_weaponInfo = wType;

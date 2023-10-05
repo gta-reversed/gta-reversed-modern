@@ -174,7 +174,7 @@ void* CObject::operator new(size_t size) {
 
 // 0x5A1EF0
 void* CObject::operator new(size_t size, int32 poolRef) {
-    return GetObjectPool()->New(poolRef);
+    return GetObjectPool()->NewAt(poolRef);
 }
 
 // 0x5A1F20
@@ -634,7 +634,7 @@ bool CObject::Save() {
 // 0x44A4D0
 void CObject::ProcessGarageDoorBehaviour() {
     if (m_nGarageDoorGarageIndex < 0)
-        m_nGarageDoorGarageIndex = CGarages::FindGarageForObject(this);
+        m_nGarageDoorGarageIndex = static_cast<int8>(CGarages::FindGarageForObject(this));
 
     if (m_nGarageDoorGarageIndex < 0)
         return;
@@ -799,7 +799,7 @@ void CObject::Init() {
     } else {
         CObjectData::SetObjectData(m_nModelIndex, *this);
         auto* mi = GetModelInfo();
-        if (mi->GetColModel()->m_bNotEmpty) {
+        if (mi->GetColModel()->m_bHasCollisionVolumes) {
             CColStore::AddRef(mi->GetColModel()->m_nColSlot);
             objectFlags.bHasNoModel = true;
 
@@ -1014,7 +1014,7 @@ void CObject::ProcessTrainCrossingBehaviour() {
 }
 
 // 0x5A0D90
-void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection, CEntity* damager, eWeaponType weaponType) {
+void CObject::ObjectDamage(float damage, const CVector* fxOrigin, const CVector* fxDirection, CEntity* damager, eWeaponType weaponType) {
     if (!m_bUsesCollision)
         return;
 
@@ -1159,7 +1159,7 @@ void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection
 
         RwMatrix particleMat;
         g_fx.CreateMatFromVec(&particleMat, fxOrigin, fxDirection);
-        auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, &particleMat, nullptr, false);
+        auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, particleMat, nullptr, false);
         if (fxSystem)
             fxSystem->PlayAndKill();
 
@@ -1168,7 +1168,7 @@ void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection
 
     auto vecPoint = *m_matrix * m_pObjectInfo->m_vFxOffset;
     vecPoint += GetPosition();
-    auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, &vecPoint, nullptr, false);
+    auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, vecPoint, nullptr, false);
     if (fxSystem)
         fxSystem->PlayAndKill();
 }
@@ -1404,16 +1404,16 @@ void CObject::ProcessControlLogic() {
         if (m_nModelIndex == ModelIndices::MI_MAGNOCRANE) {
             auto vecRopePoint = *m_matrix * CVector(0.0F, 36.64F, -1.69F);
             vecRopePoint.z += fRopeLengthChange;
-            CRopes::RegisterRope(this, static_cast<uint32>(eRopeType::CRANE_MAGNO), vecRopePoint, false, nSegments, 1u, this, 20'000u);
+            CRopes::RegisterRope((uint32)this, static_cast<uint32>(eRopeType::CRANE_MAGNO), vecRopePoint, false, nSegments, 1u, this, 20'000u);
         } else if (m_nModelIndex == ModelIndices::MI_CRANETROLLEY) {
             const auto nRopeType = static_cast<const uint32>(GetPosition().x >= 0 ? eRopeType::CRANE_TROLLEY : eRopeType::WRECKING_BALL);
             auto vecRopePoint = *m_matrix * CVector(0.0F, 0.0F, 0.0F);
             vecRopePoint.z += fRopeLengthChange;
-            CRopes::RegisterRope(this, nRopeType, vecRopePoint, false, nSegments, 1u, this, 20'000u);
+            CRopes::RegisterRope((uint32)this, nRopeType, vecRopePoint, false, nSegments, 1u, this, 20'000u);
         } else {
             auto vecRopePoint = *m_matrix * CVector(0.0F, 0.0F, 59.0F);
             vecRopePoint.z += fRopeLengthChange;
-            CRopes::RegisterRope(this, static_cast<uint32>(eRopeType::QUARRY_CRANE_ARM), vecRopePoint, false, nSegments, 1u, this, 20'000u);
+            CRopes::RegisterRope((uint32)this, static_cast<uint32>(eRopeType::QUARRY_CRANE_ARM), vecRopePoint, false, nSegments, 1u, this, 20'000u);
         }
     }
 

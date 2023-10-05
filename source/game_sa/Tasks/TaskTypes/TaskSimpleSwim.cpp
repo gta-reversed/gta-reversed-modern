@@ -24,7 +24,9 @@ bool CTaskSimpleSwim::MakeAbortable(class CPed* ped, eAbortPriority priority, co
 bool CTaskSimpleSwim::ProcessPed(CPed* ped) { return ProcessPed_Reversed(ped); }
 
 // 0x688930
-CTaskSimpleSwim::CTaskSimpleSwim(CVector* pos, CPed* ped) : CTaskSimple(), m_vecPos{ CVector() } {
+CTaskSimpleSwim::CTaskSimpleSwim(const CVector* pos, CPed* ped) :
+    m_vecPos{pos ? *pos : CVector{}}
+{
     m_bFinishedBlending = false;
     m_bAnimBlockRefAdded = false;
     m_fAnimSpeed = -1.0f;
@@ -39,9 +41,6 @@ CTaskSimpleSwim::CTaskSimpleSwim(CVector* pos, CPed* ped) : CTaskSimple(), m_vec
     m_nTimeStep = 0;
     m_nSwimState = SWIM_TREAD;
     m_AnimID = ANIM_ID_NO_ANIMATION_SET;
-
-    if (pos)
-        m_vecPos = *pos;
 
     CEntity::SafeRegisterRef(m_pPed);
 
@@ -117,7 +116,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* ped) {
         return true;
     }
 
-    if (m_fSwimStopTime > SWIM_STOP_TIME || ped->bIsStanding) {
+    if (m_fSwimStopTime > SWIM_STOP_TIME || ped->bInVehicle) {
         CAnimBlendAssociation* assoc = nullptr;
         if (m_AnimID != ANIM_ID_NO_ANIMATION_SET) {
             assoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, m_AnimID);
@@ -158,7 +157,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* ped) {
             else
                 m_nTimeStep -= swimmingTimeStep;
 
-            ped->m_pPlayerData->m_fMoveBlendRatio = DistanceBetweenPoints(ped->GetPosition(), m_vecPos);
+            ped->m_pPlayerData->m_fMoveBlendRatio = DistanceBetweenPoints2D(ped->GetPosition(), m_vecPos);
             if (ped->m_pPlayerData->m_fMoveBlendRatio < 0.5f) {
                 ped->m_pPlayerData->m_fMoveBlendRatio = 0.0f;
                 CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 4.0f);
@@ -216,7 +215,7 @@ void CTaskSimpleSwim::ApplyRollAndPitch(CPed* ped) const {
     if (ped->m_pRwObject) {
         CMatrix pedMatrix(ped->GetModellingMatrix(), false);
         CMatrix rotationMatrix;
-        rotationMatrix.SetTranslate(CVector(0.0f, 0.0f, 0.0f));
+        rotationMatrix.SetTranslate(CVector{});
         rotationMatrix.RotateY(m_fTurningRotationY);
         rotationMatrix.RotateX(m_fRotationX);
         pedMatrix *= rotationMatrix;
@@ -241,7 +240,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* ped) {
             }
         }
         RpAnimBlendClumpSetBlendDeltas(player->m_pRwClump, 0x10, -8.0f); // todo: ANIMATION_PARTIAL ?
-        FxSystem_c::SafeKillAndClear(player->GetActiveWeapon().m_pFxSystem); // Removes fire or something in water
+        FxSystem_c::SafeKillAndClear(player->GetActiveWeapon().m_FxSystem); // Removes fire or something in water
 
         if (player->IsPlayer() && !m_nSwimState) {
             float waterLevel = 0.0f;
@@ -658,6 +657,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* ped) {
     case SWIM_UNDERWATER_SPRINTING: {
         uint32 oxygen = 5;
         if (ped->IsPlayer()) {
+            assert(ped->m_pPlayerData);
             oxygen = static_cast<uint32>(((100.0f - ped->m_pPlayerData->m_fBreath / CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 100.0f) / 3.0f));
         }
         if ((unsigned)CGeneral::GetRandomNumberInRange(0, 100) < oxygen) {
@@ -794,7 +794,7 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* ped) {
                 } else {
                     ped->m_fAimingRotation -= DegreesToRadians(360.0f);
                 }
-                if (CGameLogic::IsPlayerAllowedToGoInThisDirection(ped, vecPedWalkDirection.x, vecPedWalkDirection.y, vecPedWalkDirection.z, 0.0f)) {
+                if (CGameLogic::IsPlayerAllowedToGoInThisDirection(ped, vecPedWalkDirection, 0.0f)) {
                     pedWalkX = (
                         vecPedWalkDirection.x * ped->m_matrix->GetRight().x +
                         vecPedWalkDirection.y * ped->m_matrix->GetRight().y +

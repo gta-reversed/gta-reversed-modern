@@ -26,14 +26,14 @@ void C2dEffect::InjectHooks()
     RH_ScopedGlobalInstall(t2dEffectPluginDestructor, 0x6FA880);
     RH_ScopedGlobalInstall(t2dEffectPluginCopyConstructor, 0x6F9FB0);
 
-    //RH_ScopedGlobalInstall(Rwt2dEffectPluginDataChunkReadCallBack, 0x6F9FD0);
+    RH_ScopedGlobalInstall(Rwt2dEffectPluginDataChunkReadCallBack, 0x6F9FD0, { .reversed = false });
     RH_ScopedGlobalInstall(Rwt2dEffectPluginDataChunkWriteCallBack, 0x6FA620);
     RH_ScopedGlobalInstall(Rwt2dEffectPluginDataChunkGetSizeCallBack, 0x6FA630);
 }
 
 void C2dEffect::Shutdown()
 {
-    if (m_nType == e2dEffectType::EFFECT_ROADSIGN) {
+    if (m_type == e2dEffectType::EFFECT_ROADSIGN) {
         if (roadsign.m_pText) {
             CMemoryMgr::Free(roadsign.m_pText);
             roadsign.m_pText = nullptr;
@@ -44,7 +44,7 @@ void C2dEffect::Shutdown()
             roadsign.m_pAtomic = nullptr;
         }
     }
-    else if (m_nType == e2dEffectType::EFFECT_LIGHT) {
+    else if (m_type == e2dEffectType::EFFECT_LIGHT) {
         if (light.m_pCoronaTex) {
             RwTextureDestroy(light.m_pCoronaTex);
             light.m_pCoronaTex = nullptr;

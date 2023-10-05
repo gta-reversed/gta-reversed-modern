@@ -88,17 +88,6 @@ float& CPostEffects::m_RadiosityPixelsY = *(float*)0xC40318;        // SCREEN_HE
 uint32& CPostEffects::m_RadiosityFilterPasses = *(uint32*)0x8D5110; // 1
 uint32& CPostEffects::m_RadiosityRenderPasses = *(uint32*)0x8D510C; // 2
 
-static RwBlendFunction& gStoredRenderStateSrcBlend = *(RwBlendFunction*)(0xC40280);
-static RwBlendFunction& gStoredRenderStateDestBlend = *(RwBlendFunction*)(0xC40284);
-static bool& gStoredRenderStateFogEnable = *(bool*)(0xC40288);
-static RwCullMode& gStoredRenderStateCullMode = *(RwCullMode*)(0xC4028C);
-static bool& gStoredRenderStateZTestEnable = *(bool*)(0xC40290);
-static bool& gStoredRenderStateZWriteEnable = *(bool*)(0xC40294);
-static RwShadeMode& gStoredRenderStateShadeMode = *(RwShadeMode*)(0xC40298);
-static bool& gStoredRenderStateVertexAlphaEnable = *(bool*)(0xC4029C);
-static RwTextureAddressMode& gStoredRenderStateTextureAddress = *(RwTextureAddressMode*)(0xC402A0);
-static RwTextureFilterMode& gStoredRenderStateTextureFilter = *(RwTextureFilterMode*)(0xC402A4);
-
 // see NightVision
 static float& fRasterFrontBufferWidth = *(float*)0xC4015C;
 static float& fRasterFrontBufferHeight = *(float*)0xC40160;
@@ -134,15 +123,15 @@ void CPostEffects::InjectHooks() {
     RH_ScopedClass(CPostEffects);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Initialise, 0x704630);
+    RH_ScopedInstall(Initialise, 0x704630, { .reversed = false });
     RH_ScopedInstall(Close, 0x7010C0);
     RH_ScopedInstall(DoScreenModeDependentInitializations, 0x7046D0);
-    // RH_ScopedInstall(SetupBackBufferVertex, 0x7043D0);
+    RH_ScopedInstall(SetupBackBufferVertex, 0x7043D0, { .reversed = false });
     RH_ScopedInstall(Update, 0x7046A0);
     RH_ScopedInstall(DrawQuad, 0x700EC0);
-    // RH_ScopedInstall(FilterFX_StoreAndSetDayNightBalance, 0x7034B0);
-    // RH_ScopedInstall(FilterFX_RestoreDayNightBalance, 0x7034D0);
-    // RH_ScopedInstall(ImmediateModeFilterStuffInitialize, 0x703CC0);
+    RH_ScopedInstall(FilterFX_StoreAndSetDayNightBalance, 0x7034B0, { .reversed = false });
+    RH_ScopedInstall(FilterFX_RestoreDayNightBalance, 0x7034D0, { .reversed = false });
+    RH_ScopedInstall(ImmediateModeFilterStuffInitialize, 0x703CC0, { .reversed = false });
     RH_ScopedInstall(ImmediateModeRenderStatesSet, 0x700D70);
     RH_ScopedInstall(ImmediateModeRenderStatesStore, 0x700CC0);
     RH_ScopedInstall(ImmediateModeRenderStatesReStore, 0x700E00);
@@ -152,25 +141,25 @@ void CPostEffects::InjectHooks() {
     RH_ScopedInstall(ScriptInfraredVisionSwitch, 0x701140);
     RH_ScopedInstall(ScriptNightVisionSwitch, 0x701120);
     RH_ScopedInstall(ScriptResetForEffects, 0x7010F0);
-    // RH_ScopedInstall(UnderWaterRipple, 0x7039C0);
+    RH_ScopedInstall(UnderWaterRipple, 0x7039C0, { .reversed = false });
     RH_ScopedInstall(HeatHazeFXInit, 0x701450);
-    // RH_ScopedInstall(HeatHazeFX, 0x701780);
+    RH_ScopedInstall(HeatHazeFX, 0x701780, { .reversed = false });
     RH_ScopedInstall(IsVisionFXActive, 0x7034F0);
-    // RH_ScopedInstall(NightVision, 0x7011C0);
+    RH_ScopedInstall(NightVision, 0x7011C0, { .reversed = false });
     RH_ScopedInstall(NightVisionSetLights, 0x7012E0);
     RH_ScopedInstall(SetFilterMainColour, 0x703520);
     RH_ScopedInstall(InfraredVision, 0x703F80);
     RH_ScopedInstall(InfraredVisionSetLightsForDefaultObjects, 0x701430);
     RH_ScopedInstall(InfraredVisionStoreAndSetLightsForHeatObjects, 0x701320);
     RH_ScopedInstall(InfraredVisionRestoreLightsForHeatObjects, 0x701410);
-    // RH_ScopedInstall(Fog, 0x704150);
-    // RH_ScopedInstall(CCTV, 0x702F40);
-    // RH_ScopedInstall(Grain, 0x7037C0);
-    // RH_ScopedInstall(SpeedFX, 0x7030A0);
-    // RH_ScopedInstall(DarknessFilter, 0x702F00);
+    RH_ScopedInstall(Fog, 0x704150, { .reversed = false });
+    RH_ScopedInstall(CCTV, 0x702F40, { .reversed = false });
+    RH_ScopedInstall(Grain, 0x7037C0, { .reversed = false });
+    RH_ScopedInstall(SpeedFX, 0x7030A0, { .reversed = false });
+    RH_ScopedInstall(DarknessFilter, 0x702F00, { .reversed = false });
     RH_ScopedInstall(ColourFilter, 0x703650);
-    // RH_ScopedInstall(Radiosity, 0x702080);
-    // RH_ScopedInstall(Render, 0x7046E0);
+    RH_ScopedInstall(Radiosity, 0x702080, { .reversed = false });
+    RH_ScopedInstall(Render, 0x7046E0, { .reversed = false });
 }
 
 // 0x704630
@@ -254,7 +243,7 @@ void CPostEffects::SetupBackBufferVertex() {
 
     pRasterFrontBuffer = RasterCreatePostEffects({ 0, 0, 64, 64 });
     if (!pRasterFrontBuffer) {
-        printf("Error subrastering");
+        DEV_LOG("Error subrastering");
         RwRasterDestroy(pRasterFrontBuffer);
         pRasterFrontBuffer = nullptr;
     }
@@ -264,6 +253,8 @@ void CPostEffects::SetupBackBufferVertex() {
 
 // 0x7046A0
 void CPostEffects::Update() {
+    ZoneScoped;
+
     m_bRainEnable = CWeather::Rain > 0.0f;
     if (!pRasterFrontBuffer) {
         SetupBackBufferVertex();
@@ -469,50 +460,50 @@ void CPostEffects::HeatHazeFXInit() {
         m_HeatHazeFXRandomShift = 0;
         m_HeatHazeFXSpeedMin    = 12;
         m_HeatHazeFXSpeedMax    = 18;
-        m_HeatHazeFXScanSizeX   = uint32(SCREEN_WIDTH_UNIT  * 47.0f);
-        m_HeatHazeFXScanSizeY   = uint32(SCREEN_HEIGHT_UNIT * 47.0f);
-        m_HeatHazeFXRenderSizeX = uint32(SCREEN_WIDTH_UNIT  * 50.0f);
-        m_HeatHazeFXRenderSizeY = uint32(SCREEN_HEIGHT_UNIT * 50.0f);
+        m_HeatHazeFXScanSizeX   = uint32(SCREEN_STRETCH_X(47.0f));
+        m_HeatHazeFXScanSizeY   = uint32(SCREEN_STRETCH_Y(47.0f));
+        m_HeatHazeFXRenderSizeX = uint32(SCREEN_STRETCH_X(50.0f));
+        m_HeatHazeFXRenderSizeY = uint32(SCREEN_STRETCH_Y(50.0f));
         break;
     case HEAT_HAZE_1:
         m_HeatHazeFXIntensity   = 32;
         m_HeatHazeFXRandomShift = 0;
         m_HeatHazeFXSpeedMin    = 6;
         m_HeatHazeFXSpeedMax    = 10;
-        m_HeatHazeFXScanSizeX   = uint32(SCREEN_WIDTH_UNIT  * 100.0f);
-        m_HeatHazeFXScanSizeY   = uint32(SCREEN_HEIGHT_UNIT * 52.0f);
-        m_HeatHazeFXRenderSizeX = uint32(SCREEN_WIDTH_UNIT  * 100.0f);
-        m_HeatHazeFXRenderSizeY = uint32(SCREEN_HEIGHT_UNIT * 60.0f);
+        m_HeatHazeFXScanSizeX   = uint32(SCREEN_STRETCH_X(100.0f));
+        m_HeatHazeFXScanSizeY   = uint32(SCREEN_STRETCH_Y(52.0f));
+        m_HeatHazeFXRenderSizeX = uint32(SCREEN_STRETCH_X(100.0f));
+        m_HeatHazeFXRenderSizeY = uint32(SCREEN_STRETCH_Y(60.0f));
         break;
     case HEAT_HAZE_2:
         m_HeatHazeFXIntensity   = 32;
         m_HeatHazeFXRandomShift = 0;
         m_HeatHazeFXSpeedMin    = 4;
         m_HeatHazeFXSpeedMax    = 8;
-        m_HeatHazeFXScanSizeX   = uint32(SCREEN_WIDTH_UNIT  * 70.0f);
-        m_HeatHazeFXScanSizeY   = uint32(SCREEN_HEIGHT_UNIT * 70.0f);
-        m_HeatHazeFXRenderSizeX = uint32(SCREEN_WIDTH_UNIT  * 80.0f);
-        m_HeatHazeFXRenderSizeY = uint32(SCREEN_HEIGHT_UNIT * 80.0f);
+        m_HeatHazeFXScanSizeX   = uint32(SCREEN_STRETCH_X(70.0f));
+        m_HeatHazeFXScanSizeY   = uint32(SCREEN_STRETCH_Y(70.0f));
+        m_HeatHazeFXRenderSizeX = uint32(SCREEN_STRETCH_X(80.0f));
+        m_HeatHazeFXRenderSizeY = uint32(SCREEN_STRETCH_Y(80.0f));
         break;
     case HEAT_HAZE_3:
         m_HeatHazeFXRandomShift = 0;
         m_HeatHazeFXIntensity   = 150;
         m_HeatHazeFXSpeedMin    = 5;
         m_HeatHazeFXSpeedMax    = 8;
-        m_HeatHazeFXScanSizeX   = uint32(SCREEN_WIDTH_UNIT  * 60.0f);
-        m_HeatHazeFXScanSizeY   = uint32(SCREEN_HEIGHT_UNIT * 24.0f);
-        m_HeatHazeFXRenderSizeX = uint32(SCREEN_WIDTH_UNIT  * 62.0f);
-        m_HeatHazeFXRenderSizeY = uint32(SCREEN_HEIGHT_UNIT * 24.0f);
+        m_HeatHazeFXScanSizeX   = uint32(SCREEN_STRETCH_X(60.0f));
+        m_HeatHazeFXScanSizeY   = uint32(SCREEN_STRETCH_Y(24.0f));
+        m_HeatHazeFXRenderSizeX = uint32(SCREEN_STRETCH_X(62.0f));
+        m_HeatHazeFXRenderSizeY = uint32(SCREEN_STRETCH_Y(24.0f));
         break;
     case HEAT_HAZE_4:
         m_HeatHazeFXRandomShift = 1;
         m_HeatHazeFXIntensity   = 150;
         m_HeatHazeFXSpeedMin    = 5;
         m_HeatHazeFXSpeedMax    = 8;
-        m_HeatHazeFXScanSizeX   = uint32(SCREEN_WIDTH_UNIT  * 60.0f);
-        m_HeatHazeFXScanSizeY   = uint32(SCREEN_HEIGHT_UNIT * 24.0f);
-        m_HeatHazeFXRenderSizeX = uint32(SCREEN_WIDTH_UNIT  * 62.0f);
-        m_HeatHazeFXRenderSizeY = uint32(SCREEN_HEIGHT_UNIT * 24.0f);
+        m_HeatHazeFXScanSizeX   = uint32(SCREEN_STRETCH_X(60.0f));
+        m_HeatHazeFXScanSizeY   = uint32(SCREEN_STRETCH_Y(24.0f));
+        m_HeatHazeFXRenderSizeX = uint32(SCREEN_STRETCH_X(62.0f));
+        m_HeatHazeFXRenderSizeY = uint32(SCREEN_STRETCH_Y(24.0f));
         break;
     default:
         break;
@@ -674,9 +665,9 @@ void CPostEffects::InfraredVisionStoreAndSetLightsForHeatObjects(CPed* ped) {
     // here we go to fuck cold carbon (Explanation: https://sampik.ru/articles/468-pochemu-piratskij-perevod-gtasa-takoj-strannyj.html)
     // gradually changing from red to blue (dead)
     if (ped->m_nPedState == PEDSTATE_DEAD) {
-        auto time = CTimer::GetTimeInMS() - ped->m_nDeathTime;
+        auto time = CTimer::GetTimeInMS() - ped->m_nDeathTimeMS;
         if (time < 0)
-            time = ped->m_nDeathTime - CTimer::GetTimeInMS();
+            time = ped->m_nDeathTimeMS - CTimer::GetTimeInMS();
 
         auto delta = (float)time / 10'000.0f;
 
@@ -764,5 +755,7 @@ void CPostEffects::Radiosity(int32 intensityLimit, int32 filterPasses, int32 ren
 
 // 0x7046E0
 void CPostEffects::Render() {
+    ZoneScoped;
+
     plugin::Call<0x7046E0>();
 }

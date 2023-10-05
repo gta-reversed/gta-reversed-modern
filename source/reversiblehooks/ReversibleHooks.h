@@ -3,6 +3,9 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <filesystem>
+
+#include "ReversibleHook/Base.h"
 
 //
 // Helper macros - For help regarding usage see how they're used (`Find all references` and take a look)
@@ -12,13 +15,18 @@
 //
 
 // Set scoped namespace name (This only works if you only use `ScopedGlobal` macros)
-#define RH_ScopedNamespaceName(name) \
-    ReversibleHooks::ScopeName RHCurrentScopeName {name};
+#define RH_ScopedNamespaceName(ns) \
+    ReversibleHooks::ScopeName RHCurrentScopeName {ns};
 
 // Use when `name` is a class
-#define RH_ScopedClass(name) \
-    using RHCurrentNS = name; \
-    ReversibleHooks::ScopeName RHCurrentScopeName {#name};
+#define RH_ScopedClass(cls) \
+    using RHCurrentNS = cls; \
+    ReversibleHooks::ScopeName RHCurrentScopeName {#cls};
+
+// Use when `name` is a class
+#define RH_ScopedNamedClass(cls, name) \
+    using RHCurrentNS = cls; \
+    ReversibleHooks::ScopeName RHCurrentScopeName {name};
 
 #define RH_ScopedVirtualClass(cls, addrGTAVtbl, nVirtFns_) \
     using RHCurrentNS = cls; \
@@ -74,6 +82,9 @@
 // Similar to RH_ScopedInstall but you can specify the name explicitly.
 #define RH_ScopedNamedInstall(fn, fnName, fnAddr, ...) \
     ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, fnName, fnAddr, &RHCurrentNS::fn __VA_OPT__(,) __VA_ARGS__)
+
+#define RH_ScopedVMTOverloadedInstall(fn, suffix, fnGTAAddr, addrCast, ...) \
+    ReversibleHooks::InstallVirtual(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn "-" suffix, pGTAVTbl, pOurVTbl, (void*)(static_cast<addrCast>(&fn)), nVirtFns __VA_OPT__(,) __VA_ARGS__)
 
 // Install a hook on a virtual function. To use it, `RH_ScopedVirtualClass` must be used instead of `RH_ScopedClass`
 #define RH_ScopedVMTInstall(fn, fnGTAAddr, ...) \
@@ -144,6 +155,12 @@ namespace ReversibleHooks {
 
     void InstallVirtual(std::string_view category, std::string fnName, void** vtblGTA, void** vtblOur, void* fnGTAAddr, size_t nVirtFns, const HookInstallOptions& opt = {});
 
+    /*!
+    * @param category Category's path, eg.: "Global/"
+    * @param item     Item to add
+    */
+    void AddItemToCategory(std::string_view category, std::shared_ptr<ReversibleHook::Base> item);
+
     /*static void Switch(std::shared_ptr<SReversibleHook> pHook) {
         detail::HookSwitch(pHook);
     }*/
@@ -155,4 +172,6 @@ namespace ReversibleHooks {
 
     void OnInjectionBegin(HMODULE hModule);
     void OnInjectionEnd();
+
+    void WriteHooksToFile(const std::filesystem::path&);
 };

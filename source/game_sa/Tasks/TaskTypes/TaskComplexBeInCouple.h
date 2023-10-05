@@ -3,24 +3,34 @@
 #include "TaskComplex.h"
 
 class CTaskComplexBeInCouple : public CTaskComplex {
+    enum WalkSide : int32 {
+        NONE,
+        RIGHT,
+        LEFT,
+    };
 public:
-    int32 fC;
-    CPed* m_Ped;
-    bool  byte14;
-    bool  byte15;
-    bool  byte16;
-    float float18;
-    int8  byte1C;
-
+    WalkSide m_walkOnSide{};
+    CPed*    m_partner{}; // The other ped this (the owner of the task) ped is together with
+    bool     m_isLeader{};
+    bool     m_holdHands{};
+    bool     m_lookAtEachOther{};
+    float    m_giveUpDist{};
+    int8     m_prevSide{};
 public:
     static constexpr auto Type = TASK_COMPLEX_BE_IN_COUPLE;
 
-    CTaskComplexBeInCouple(CPed* ped, bool a3, bool a4, bool a5, float a6);
+    CTaskComplexBeInCouple(
+        CPed* pPed,
+        bool  isLeader,
+        bool  holdHands = true,
+        bool  lookAtEachOther = true,
+        float giveUpDist = 10.f
+    );
     ~CTaskComplexBeInCouple() override;
 
-    eTaskType GetTaskType() override { return Type; } // 0x683770
-    CTask* Clone() override { return new CTaskComplexBeInCouple(m_Ped, byte14, byte15, byte16, float18); } // 0x6839C0
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() const override { return Type; } // 0x683770
+    CTask* Clone() const override { return new CTaskComplexBeInCouple(m_partner, m_isLeader, m_holdHands, m_lookAtEachOther, m_giveUpDist); } // 0x6839C0
+    bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
 
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
