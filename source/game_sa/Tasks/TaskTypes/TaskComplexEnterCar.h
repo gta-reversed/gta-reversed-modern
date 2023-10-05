@@ -26,7 +26,7 @@ public:
     CTask*         CreateFirstSubTask(CPed* ped) override;
     CTask*         ControlSubTask(CPed* ped) override;
     CTask*         CreateSubTask(eTaskType type, CPed* ped);
-    CVector        GetTargetPos();
+    CVector        GetTargetPos() const;
     CVehicle*      GetCameraAvoidVehicle();
 
 

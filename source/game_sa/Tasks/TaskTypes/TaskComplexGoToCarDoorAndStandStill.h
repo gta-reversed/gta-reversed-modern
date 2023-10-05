@@ -29,6 +29,8 @@ public:
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;
 
+    auto      GetTargetPt() const { return m_TargetPt; }
+
 protected:
     CTask*    CreateSubTask(eTaskType taskType, CPed* ped);
     bool      IsVehicleInRange(const CPed& ped);

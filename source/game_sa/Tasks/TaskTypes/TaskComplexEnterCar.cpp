@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "TaskComplexEnterCar.h"
+#include "TaskComplexGoToCarDoorAndStandStill.h"
 
 void CTaskComplexEnterCar::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexEnterCar, 0x86e6f0, 12);
@@ -9,7 +10,7 @@ void CTaskComplexEnterCar::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x63A220);
     RH_ScopedInstall(Destructor, 0x63DFA0);
 
-    RH_ScopedInstall(GetTargetPos, 0x63A300, { .reversed = false });
+    RH_ScopedInstall(GetTargetPos, 0x63A300);
     RH_ScopedInstall(GetCameraAvoidVehicle, 0x63A690);
     RH_ScopedInstall(SetVehicleFlags, 0x63AB90);
     RH_ScopedInstall(CreateSubTask, 0x63E040, { .reversed = false });
@@ -90,10 +91,14 @@ void CTaskComplexEnterCar::SetVehicleFlags(CPed* ped) {
     }
 }
 
-CVector CTaskComplexEnterCar::GetTargetPos() {
-    CVector temp;
-    plugin::CallMethod<0x63A300, CTaskComplexEnterCar*, CVector&>(this, temp);
-    return temp;
+CVector CTaskComplexEnterCar::GetTargetPos() const {
+    if (m_TargetDoor != 0) { // TODO: Enum
+        return m_TargetDoorPos;
+    }
+    if (const auto tGoTo = CTask::DynCast<CTaskComplexGoToCarDoorAndStandStill>(m_pSubTask)) {
+        return tGoTo->GetTargetPt();
+    }
+    return {};
 }
 
 // 0x63A690
