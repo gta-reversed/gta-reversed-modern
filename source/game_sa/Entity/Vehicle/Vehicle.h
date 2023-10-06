@@ -456,16 +456,16 @@ public:
     //!!!!!!!!!!!!!!!!!!!
     // PAY CLOSE ATTENTION TO WHICH VERSION OF THE FUNCTIONS DOWN BELOW YOU'RE CALLING!
     //!!!!!!!!!!!!!!!!!!!
-    virtual float GetDooorAngleOpenRatio(eDoors door) { return 0.0F; }
     virtual float GetDooorAngleOpenRatioU32(uint32 door) { return 0.0F; }
-    virtual bool IsDoorReady(eDoors door) { return false; }
+    virtual float GetDooorAngleOpenRatio(eDoors door) { return 0.0F; }
     virtual bool IsDoorReadyU32(uint32 door) { return false; }
-    virtual bool IsDoorFullyOpen(eDoors door) { return false; }
+    virtual bool IsDoorReady(eDoors door) { return false; }
     virtual bool IsDoorFullyOpenU32(uint32 door) { return false; }
-    virtual bool IsDoorClosed(eDoors door){ return false; }
+    virtual bool IsDoorFullyOpen(eDoors door) { return false; }
     virtual bool IsDoorClosedU32(uint32 door){ return false; }
-    virtual bool IsDoorMissing(eDoors door) { return false; }
+    virtual bool IsDoorClosed(eDoors door){ return false; }
     virtual bool IsDoorMissingU32(uint32 door){ return false; }
+    virtual bool IsDoorMissing(eDoors door) { return false; }
 
     // check if car has roof as extra
     virtual bool IsOpenTopCar(){ return false; }
