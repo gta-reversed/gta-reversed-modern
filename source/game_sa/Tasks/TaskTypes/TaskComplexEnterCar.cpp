@@ -189,16 +189,17 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
             return C(TASK_FINISHED);
         }
 
-        if (m_bQuitAfterOpeningDoor || CCarEnterExit::IsCarSlowJackRequired(m_Car, m_TargetDoor)) { // 0x63EEBE
+        if (m_bQuitAfterDraggingPedOut || CCarEnterExit::IsCarSlowJackRequired(m_Car, m_TargetDoor)) { // 0x63EEBE
             CEntity::ChangeEntityReference(m_DraggedPed, CCarEnterExit::ComputeSlowJackedPed(m_Car, m_TargetDoor));
 
-            if (m_bQuitAfterOpeningDoor || m_DraggedPed && !CPedGroups::AreInSameGroup(ped, m_DraggedPed) && !m_DraggedPed->bDontDragMeOutCar) { // 0x63EEBE
+            if (m_bQuitAfterDraggingPedOut || m_DraggedPed && !CPedGroups::AreInSameGroup(ped, m_DraggedPed) && !m_DraggedPed->bDontDragMeOutCar) { // 0x63EEBE
                 if (m_DraggedPed && m_DraggedPed->IsPlayer() && CGameLogic::SkipState == SKIP_IN_PROGRESS) { // 0x63EF63
                     if (const auto draggedPedGrp = m_DraggedPed->GetGroup()) {
                         if (draggedPedGrp->GetMembership().IsLeader(m_DraggedPed)) {
                             draggedPedGrp->GetIntelligence().AddEvent(CEventLeaderQuitEnteringCarAsDriver{});
                         }
                     }
+                    return C(TASK_FINISHED);
                 }
 
                 if (m_DraggedPed) { // 0x63F034
@@ -220,14 +221,14 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
                     }
                     return C(TASK_FINISHED);
                 }
-            } else if (m_DraggedPed && (m_bAsDriver ? m_Car->IsDriver(m_DraggedPed) : m_DraggedPed == m_Car->GetPassengers()[CCarEnterExit::ComputePassengerIndexFromCarDoor(m_Car, m_TargetDoor)])) { // 0x63EF18 - Check if it's  necessary to drag the ped out
-                if (CCarEnterExit::CarHasDoorToClose(m_Car, (eDoors)m_TargetDoor)) {
-                    return C(TASK_SIMPLE_CAR_CLOSE_DOOR_FROM_OUTSIDE);
-                }
-                return C(TASK_FINISHED);
             }
-            return C(TASK_SIMPLE_CAR_GET_IN);
+        } else if (m_DraggedPed && (m_bAsDriver ? m_Car->IsDriver(m_DraggedPed) : m_DraggedPed == m_Car->GetPassengers()[CCarEnterExit::ComputePassengerIndexFromCarDoor(m_Car, m_TargetDoor)])) { // 0x63EF18 - Check if it's  necessary to drag the ped out
+            if (CCarEnterExit::CarHasDoorToClose(m_Car, (eDoors)m_TargetDoor)) {
+                return C(TASK_SIMPLE_CAR_CLOSE_DOOR_FROM_OUTSIDE);
+            }
+            return C(TASK_FINISHED);
         }
+        return C(TASK_SIMPLE_CAR_GET_IN);
     case TASK_SIMPLE_CAR_CLOSE_DOOR_FROM_INSIDE: { // 0x63F69A
         if (!m_Car || !CCarEnterExit::IsVehicleHealthy(m_Car) || !CCarEnterExit::IsPedHealthy(ped)) { // 0x63F69A
             return C(TASK_FINISHED);
