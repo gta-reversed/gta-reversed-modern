@@ -32,7 +32,7 @@ void CCarEnterExit::InjectHooks() {
     RH_ScopedInstall(IsCarDoorInUse, 0x64ec90, { .reversed = false });
     // RH_ScopedInstall(IsCarDoorReady, 0x0);
     // RH_ScopedInstall(IsCarQuickJackPossible, 0x0);
-    // RH_ScopedInstall(IsCarSlowJackRequired, 0x0);
+    RH_ScopedInstall(IsCarSlowJackRequired, 0x64EF70, { .reversed = false });
     RH_ScopedInstall(IsClearToDriveAway, 0x6509B0);
     RH_ScopedInstall(IsPathToDoorBlockedByVehicleCollisionModel, 0x651210);
     RH_ScopedInstall(IsPedHealthy, 0x64EEE0);
@@ -389,9 +389,9 @@ bool CCarEnterExit::IsCarQuickJackPossible(const CVehicle* vehicle, int32 doorId
     return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32, const CPed*>(vehicle, doorId, ped);
 }
 
-// 0x
+// 0x64EF70
 bool CCarEnterExit::IsCarSlowJackRequired(const CVehicle* vehicle, int32 doorId) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32>(vehicle, doorId);
+    return plugin::CallAndReturn<bool, 0x64EF70, const CVehicle*, int32>(vehicle, doorId);
 }
 
 // 0x6509B0
