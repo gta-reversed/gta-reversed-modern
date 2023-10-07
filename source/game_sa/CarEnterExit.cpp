@@ -387,13 +387,11 @@ bool CCarEnterExit::IsCarDoorReady(const CVehicle* vehicle, int32 doorId) {
 // 0x64EF00
 bool CCarEnterExit::IsCarQuickJackPossible(CVehicle* vehicle, int32 doorId, const CPed* ped) {
     // I think doorId 10 is the driver's door
-    if (doorId == 10 && vehicle->IsAutomobile() && !vehicle->IsDoorMissingU32(doorId) && vehicle->IsDoorClosedU32(doorId)) {
-        if (notsa::IsFixBugs()) {
-            return vehicle->CanPedOpenLocks(ped);
-        } else {
-            vehicle->CanPedOpenLocks(ped); // This does *nothing*
-        }
-    }
+    //if (doorId == 10 && vehicle->IsAutomobile() && !vehicle->IsDoorMissingU32(doorId) && vehicle->IsDoorClosedU32(doorId)) {
+    //    // This does *nothing* - I tried `return vehicle->CanPedOpenLocks(ped);` but that just breaks everything.
+    //    // Basically, returning anything but `false` from here breaks the code (in `CTaskComplexEnterCar`)
+    //    vehicle->CanPedOpenLocks(ped); 
+    //}
     return false;
 }
 
