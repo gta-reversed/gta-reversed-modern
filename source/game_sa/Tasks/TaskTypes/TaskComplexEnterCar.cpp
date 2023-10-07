@@ -49,7 +49,7 @@ void CTaskComplexEnterCar::InjectHooks() {
 
     RH_ScopedVMTInstall(MakeAbortable, 0x63A730);
     RH_ScopedVMTInstall(CreateNextSubTask, 0x63E990);
-    RH_ScopedVMTInstall(CreateFirstSubTask, 0x643A60, { .reversed = false });
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x643A60);
     RH_ScopedVMTInstall(ControlSubTask, 0x63A890, { .reversed = false });
     RH_ScopedVMTInstall(CreateNextSubTask_AfterSimpleCarAlign, 0x63F970);
 }
@@ -482,7 +482,46 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask_AfterSimpleCarAlign(CPed* ped) {
 
 // 0x643A60
 CTask* CTaskComplexEnterCar::CreateFirstSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x643A60, CTask*, CPed*>(this, ped);
+    const auto C = [this, ped](eTaskType tt){ return CreateSubTask(tt, ped); };
+
+    if (   !m_Car || m_Car->m_pFire
+        || !CCarEnterExit::IsVehicleHealthy(m_Car) || !CCarEnterExit::IsPedHealthy(ped)
+        || !m_bAsDriver && !m_Car->m_nNumPassengers
+        || m_Car->IsTrain() && m_Car->AsTrain()->trainFlags.bNotOnARailRoad
+    ) {
+        return C(TASK_FINISHED);
+    }
+
+    if (m_bAsDriver && !m_bQuitAfterDraggingPedOut && !m_bQuitAfterOpeningDoor) {
+        if (const auto pedGrp = ped->GetGroup()) {
+            if (pedGrp->GetMembership().IsLeader(ped)) {
+                pedGrp->GetIntelligence().AddEvent(CEventGroupEvent{ ped, new CEventLeaderEnteredCarAsDriver{ m_Car } });
+            }
+        }
+    }
+
+    if (ped->bInVehicle) {
+        return C(ped->m_pVehicle == m_Car ? TASK_SIMPLE_CAR_DRIVE_TIMED : TASK_COMPLEX_LEAVE_CAR);
+    }
+
+    if (m_Car->IsBoat()) {
+        return C(TASK_COMPLEX_ENTER_BOAT_AS_DRIVER);
+    }
+
+    if (const auto tGoToCarDoor = static_cast<CTaskComplexGoToCarDoorAndStandStill*>(C(TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL))) {
+        if (ped->physicalFlags.bSubmergedInWater && !ped->bIsStanding) {
+            if (notsa::contains({ MODEL_SKIMMER, MODEL_VORTEX, MODEL_SEASPAR, MODEL_LEVIATHN }, m_Car->GetModelID())) {
+                if (CCarEnterExit::GetNearestCarDoor(ped, m_Car, m_TargetDoorPos, m_TargetDoor)) {
+                    tGoToCarDoor->SetTargetPt(m_TargetDoorPos);
+                    tGoToCarDoor->SetTargetDoor(m_TargetDoor);
+                    tGoToCarDoor->SetTryingToEnterInWater(true);
+                }
+            }
+        }
+        return tGoToCarDoor;
+    }
+
+    return nullptr;
 }
 
 // 0x63A890

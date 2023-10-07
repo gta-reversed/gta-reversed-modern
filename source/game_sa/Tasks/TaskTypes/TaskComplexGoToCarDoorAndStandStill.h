@@ -29,8 +29,14 @@ public:
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;
 
-    auto      GetTargetPt() const { return m_TargetPt; }
+    auto      GetTargetPt()     const { return m_TargetPt; }
+    void      SetTargetPt(CVector pt) { m_TargetPt = pt; }
+
+    void      SetTargetDoor(int32 door) { m_TargetDoor = door; }
+
     bool      HasAchievedDoor() const { return m_bAchievedTargetDoor; }
+
+    void      SetTryingToEnterInWater(bool v) { m_bTryingToEnterInWater = v; }
 
 protected:
     CTask*    CreateSubTask(eTaskType taskType, CPed* ped);
