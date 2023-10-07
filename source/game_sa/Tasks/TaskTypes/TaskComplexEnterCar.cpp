@@ -1,5 +1,8 @@
 #include "StdInc.h"
 
+#include "IKChainManager_c.h"
+
+#include "TaskSimpleBikeJacked.h"
 #include "TaskComplexEnterCar.h"
 #include "TaskSimpleDuck.h"
 #include "TaskComplexCarSlowBeDraggedOutAndStandUp.h"
@@ -48,7 +51,7 @@ void CTaskComplexEnterCar::InjectHooks() {
     RH_ScopedVMTInstall(CreateNextSubTask, 0x63E990);
     RH_ScopedVMTInstall(CreateFirstSubTask, 0x643A60, { .reversed = false });
     RH_ScopedVMTInstall(ControlSubTask, 0x63A890, { .reversed = false });
-    RH_ScopedVMTInstall(CreateNextSubTask_AfterSimpleCarAlign, 0x63F970, { .reversed = false });
+    RH_ScopedVMTInstall(CreateNextSubTask_AfterSimpleCarAlign, 0x63F970);
 }
 
 // 0x63A220
@@ -196,23 +199,14 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
                 if (m_DraggedPed && m_DraggedPed->IsPlayer() && CGameLogic::SkipState == SKIP_IN_PROGRESS) { // 0x63EF63
                     if (const auto draggedPedGrp = m_DraggedPed->GetGroup()) {
                         if (draggedPedGrp->GetMembership().IsLeader(m_DraggedPed)) {
-                            draggedPedGrp->GetIntelligence().AddEvent(CEventLeaderQuitEnteringCarAsDriver{});
+                            draggedPedGrp->GetIntelligence().AddEvent(CEventGroupEvent{ m_DraggedPed, new CEventLeaderQuitEnteringCarAsDriver{} });
                         }
                     }
                     return C(TASK_FINISHED);
                 }
 
                 if (m_DraggedPed) { // 0x63F034
-                    m_DraggedPed->GetIntelligence()->AddTaskPrimaryMaybeInGroup(new CTaskComplexCarSlowBeDraggedOutAndStandUp{ m_Car, m_TargetDoor }, true);
-                    m_DraggedPed->GetIntelligence()->GetEventGroup().Add(CEventDraggedOutCar{ m_Car, ped, m_Car->IsDriver(m_DraggedPed) });
-                    if (m_Car->IsDriver(m_DraggedPed)) {
-                        if (const auto draggedPedGrp = m_DraggedPed->GetGroup()) {
-                            if (draggedPedGrp->GetMembership().IsLeader(m_DraggedPed)) {
-                                draggedPedGrp->GetIntelligence().AddEvent(CEventLeaderExitedCarAsDriver{});
-                            }
-                        }
-                    }
-                    return C(TASK_SIMPLE_CAR_SLOW_DRAG_PED_OUT);
+                    return CreateDragPedOutSubTask(ped);
                 }
 
                 if (m_bQuitAfterDraggingPedOut) {
@@ -332,6 +326,160 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
     }
 }
 
+// 0x63F970
+CTask* CTaskComplexEnterCar::CreateNextSubTask_AfterSimpleCarAlign(CPed* ped) {
+    const auto DoLookAtPassengers = [this, ped]() {
+        if (!m_Car->vehicleFlags.bIsBus) { // 0x64013E
+            const auto ProcessOneOccupant = [ped](CPed* occupant) {
+                if (!occupant) {
+                    return;
+                }
+                using namespace CGeneral;
+                g_ikChainMan.LookAt(
+                    "TaskEnterCar",
+                    occupant,
+                    ped,
+                    ped->GetIntelligence()->IsFriendlyWith(*occupant) || CPedGroups::AreInSameGroup(ped, occupant)
+                    ? GetRandomNumberInRange(2'000, 3'000)
+                    : GetRandomNumberInRange(6'000, 8'000),
+                    BONE_HEAD,
+                    nullptr,
+                    false,
+                    0.5f,
+                    350,
+                    3,
+                    false
+                );
+                };
+            rng::for_each(m_Car->GetPassengers(), ProcessOneOccupant);
+            ProcessOneOccupant(m_Car->m_pDriver);
+        }
+    };
+    const auto C = [&, this](eTaskType tt, bool bDoLookAt = true){
+        if (bDoLookAt) {
+            DoLookAtPassengers();
+        }
+        return CreateSubTask(tt, ped);
+    };
+
+    if (m_Car->GetMoveSpeed().SquaredMagnitude2D() > sq(ped->IsPlayer() ? 0.2f : 0.1f)) {
+        ped->m_bUsesCollision = true;
+        return C(ped->IsPlayer() ? TASK_FINISHED : TASK_COMPLEX_FALL_AND_GET_UP);
+    }
+
+    if (m_bQuitAfterOpeningDoor) { // 0x63FA2E
+        if (CCarEnterExit::CarHasDoorToOpen(m_Car, m_TargetDoor)) {
+            return C(CCarEnterExit::CarHasOpenableDoor(m_Car, m_TargetDoor, ped) ? TASK_SIMPLE_CAR_OPEN_DOOR_FROM_OUTSIDE : TASK_SIMPLE_CAR_OPEN_LOCKED_DOOR_FROM_OUTSIDE);
+        }
+        m_bQuitAfterOpeningDoor = false;
+        return C(TASK_FINISHED);
+    }
+
+    if (!m_bQuitAfterDraggingPedOut && CCarEnterExit::IsCarQuickJackPossible(m_Car, m_TargetDoor, ped)) { // 0x63FA8D
+        DoLookAtPassengers();
+        return nullptr;
+    }
+
+    if (!m_Car->IsBike() && !m_Car->IsSubQuad()) {
+        if (CCarEnterExit::CarHasDoorToOpen(m_Car, m_TargetDoor)) {
+            if (!CCarEnterExit::CarHasOpenableDoor(m_Car, m_TargetDoor, ped)) {
+                return C(TASK_SIMPLE_CAR_OPEN_LOCKED_DOOR_FROM_OUTSIDE);
+            }
+            if (m_bQuitAfterDraggingPedOut || m_bQuitAfterOpeningDoor || m_Car->GetAnimGroupId() == ANIM_GROUP_CONVCARANIMS || m_TargetDoor != 10 || m_Car->m_pDriver) {
+                return C(TASK_SIMPLE_CAR_OPEN_DOOR_FROM_OUTSIDE);
+            }
+            return C(TASK_SIMPLE_CAR_GET_IN);
+        }
+
+        if (!CCarEnterExit::IsCarSlowJackRequired(m_Car, m_TargetDoor)) {
+            return C(m_bQuitAfterDraggingPedOut ? TASK_FINISHED : TASK_SIMPLE_CAR_GET_IN);
+        }
+
+        if (const auto slowJackedPed = CCarEnterExit::ComputeSlowJackedPed(m_Car, m_TargetDoor)) { // 0x63FB5E
+            CEntity::ChangeEntityReference(m_DraggedPed, slowJackedPed);
+        }
+
+        if (!m_DraggedPed || !m_DraggedPed->IsPlayer() || CGameLogic::SkipState != SKIP_IN_PROGRESS) { // 0x63FB68
+            if (m_bQuitAfterDraggingPedOut) {
+                if (!m_DraggedPed) {
+                    return C(TASK_FINISHED);
+                }
+            } else { // 0x63FC2E
+                if (!m_DraggedPed || CPedGroups::AreInSameGroup(m_DraggedPed, ped) || m_DraggedPed->bDontDragMeOutCar) { // 0x63FC41
+                    if (!m_DraggedPed || !m_bAsDriver || !m_Car->IsDriver(m_DraggedPed)) { // 0x63FC63 - Inverted
+                        if (!m_DraggedPed || m_bAsDriver || m_DraggedPed != m_Car->GetPassengers()[CCarEnterExit::ComputePassengerIndexFromCarDoor(m_Car, m_TargetDoor)]) {
+                            return C(TASK_SIMPLE_CAR_GET_IN);
+                        }
+                    }
+                    return C(CCarEnterExit::CarHasDoorToClose(m_Car, m_TargetDoor) ? TASK_SIMPLE_CAR_CLOSE_DOOR_FROM_OUTSIDE : TASK_FINISHED);
+                }
+            }
+            DoLookAtPassengers();
+            return CreateDragPedOutSubTask(ped);
+        }
+
+        if (const auto pedGrp = m_DraggedPed->GetGroup()) { // 0x63FB95
+            if (pedGrp->GetMembership().IsLeader(m_DraggedPed)) {
+                pedGrp->GetIntelligence().AddEvent(CEventGroupEvent{ m_DraggedPed, new CEventLeaderQuitEnteringCarAsDriver{} });
+            }
+        }
+
+        return C(TASK_FINISHED);
+    }
+
+    if (!CCarEnterExit::IsCarSlowJackRequired(m_Car, m_TargetDoor)) {
+        if (m_bQuitAfterDraggingPedOut) { // 0x6400AE
+            return C(TASK_FINISHED);
+        }
+
+        if (m_Car->GetStatus() == STATUS_ABANDONED && m_Car->IsBike()) { // 0x6400C8 - Inverted
+            if (const auto& r = m_Car->GetRight(); r.z >= 0.5f || r.z <= -0.5f || m_Car->GetUp().z <= 0.f) { // 0x6400F3 - Check if the bike is on it's side
+                return C(TASK_SIMPLE_BIKE_PICK_UP);
+            }
+            m_Car->AsBike()->bikeFlags.bGettingPickedUp = true;
+        }
+
+        return C(TASK_SIMPLE_CAR_GET_IN);
+    }
+
+    CEntity::ChangeEntityReference(m_DraggedPed, CCarEnterExit::ComputeSlowJackedPed(m_Car, m_TargetDoor));
+
+
+    if (m_DraggedPed && m_DraggedPed->IsPlayer() && CGameLogic::SkipState == SKIP_IN_PROGRESS) { // 0x63FE9B - Inverted
+        if (const auto draggedPedGrp = m_DraggedPed->GetGroup()) {
+            if (draggedPedGrp->GetMembership().IsLeader(m_DraggedPed)) {
+                draggedPedGrp->GetIntelligence().AddEvent(CEventGroupEvent{ m_DraggedPed, new CEventLeaderQuitEnteringCarAsDriver{} });
+            }
+        }
+        return C(TASK_FINISHED, false);
+    }
+
+    assert(m_DraggedPed);
+
+    const auto AddJackedTaskToPed = [this, ped](CPed* jacked, int32 door) {
+        jacked->GetIntelligence()->AddTaskPrimaryMaybeInGroup(new CTaskSimpleBikeJacked{
+            m_Car,
+            (uint32)door,
+            (uint32)m_DraggedPedDownTime,
+            ped,
+            true
+        }, true);
+    };
+
+    AddJackedTaskToPed(m_DraggedPed, m_TargetDoor != 18 || !m_Car->GetPassengers()[0] ? 10 : 11); // 0x63FF50
+    if (m_Car->IsDriver(m_DraggedPed) && m_Car->GetPassengers()[0]) {
+        AddJackedTaskToPed(m_Car->GetPassengers()[0], 11);
+
+        if (const auto draggedPedGrp = m_DraggedPed->GetGroup()) {
+            if (draggedPedGrp->GetMembership().IsLeader(m_DraggedPed)) {
+                draggedPedGrp->GetIntelligence().AddEvent(CEventGroupEvent{ m_DraggedPed, new CEventLeaderExitedCarAsDriver{} });
+            }
+        }
+    }
+
+    return C(m_bQuitAfterDraggingPedOut || m_TargetDoor != 18 ? TASK_SIMPLE_CAR_SLOW_DRAG_PED_OUT : TASK_SIMPLE_CAR_GET_IN);
+}
+
 // 0x643A60
 CTask* CTaskComplexEnterCar::CreateFirstSubTask(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x643A60, CTask*, CPed*>(this, ped);
@@ -381,7 +529,7 @@ CTask* CTaskComplexEnterCar::CreateSubTask(eTaskType taskType, CPed* ped) {
             if (!ped->bInVehicle) { // 0x63E717
                 if (const auto pedGrp = ped->GetGroup()) {
                     if (pedGrp->GetMembership().IsLeader(ped)) {
-                        pedGrp->GetIntelligence().AddEvent(CEventLeaderQuitEnteringCarAsDriver{});
+                        pedGrp->GetIntelligence().AddEvent(CEventGroupEvent{ ped, new CEventLeaderQuitEnteringCarAsDriver{} });
                     }
                 }
             }
@@ -461,11 +609,6 @@ CTask* CTaskComplexEnterCar::CreateSubTask(eTaskType taskType, CPed* ped) {
     }
 }
 
-// 0x63F970
-CTask* CTaskComplexEnterCar::CreateNextSubTask_AfterSimpleCarAlign(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x63F970, CTask*, CPed*>(this, ped);
-}
-
 // 0x63AB90
 void CTaskComplexEnterCar::SetVehicleFlags(CPed* ped) {
     m_DoorFlagsSet = CCarEnterExit::ComputeDoorFlag(m_Car, m_TargetDoor, true);
@@ -515,6 +658,20 @@ void CTaskComplexEnterCar::CreateTaskUtilityLineUpPedWithCar(CPed* ped) {
         0,
         m_TargetDoor
     };
+}
+
+// NOTSA - Copy paste code elimination
+CTask* CTaskComplexEnterCar::CreateDragPedOutSubTask(CPed* ped) {
+    m_DraggedPed->GetIntelligence()->AddTaskPrimaryMaybeInGroup(new CTaskComplexCarSlowBeDraggedOutAndStandUp{ m_Car, m_TargetDoor }, true);
+    m_DraggedPed->GetIntelligence()->GetEventGroup().Add(CEventDraggedOutCar{ m_Car, ped, m_Car->IsDriver(m_DraggedPed) });
+    if (m_Car->IsDriver(m_DraggedPed)) {
+        if (const auto draggedPedGrp = m_DraggedPed->GetGroup()) {
+            if (draggedPedGrp->GetMembership().IsLeader(m_DraggedPed)) {
+                draggedPedGrp->GetIntelligence().AddEvent(CEventGroupEvent{ m_DraggedPed, new CEventLeaderExitedCarAsDriver{} });
+            }
+        }
+    }
+    return CreateSubTask(TASK_SIMPLE_CAR_SLOW_DRAG_PED_OUT, ped);
 }
 
 CVector CTaskComplexEnterCar::GetTargetPos() const {

@@ -31,7 +31,7 @@ void CCarEnterExit::InjectHooks() {
     RH_ScopedInstall(GetPositionToOpenCarDoor, 0x64E740, { .reversed = false });
     RH_ScopedInstall(IsCarDoorInUse, 0x64ec90, { .reversed = false });
     // RH_ScopedInstall(IsCarDoorReady, 0x0);
-    // RH_ScopedInstall(IsCarQuickJackPossible, 0x0);
+    RH_ScopedInstall(IsCarQuickJackPossible, 0x64EF00);
     RH_ScopedInstall(IsCarSlowJackRequired, 0x64EF70, { .reversed = false });
     RH_ScopedInstall(IsClearToDriveAway, 0x6509B0);
     RH_ScopedInstall(IsPathToDoorBlockedByVehicleCollisionModel, 0x651210);
@@ -384,9 +384,17 @@ bool CCarEnterExit::IsCarDoorReady(const CVehicle* vehicle, int32 doorId) {
     return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32>(vehicle, doorId);
 }
 
-// 0x
-bool CCarEnterExit::IsCarQuickJackPossible(const CVehicle* vehicle, int32 doorId, const CPed* ped) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32, const CPed*>(vehicle, doorId, ped);
+// 0x64EF00
+bool CCarEnterExit::IsCarQuickJackPossible(CVehicle* vehicle, int32 doorId, const CPed* ped) {
+    // I think doorId 10 is the driver's door
+    if (doorId == 10 && vehicle->IsAutomobile() && !vehicle->IsDoorMissingU32(doorId) && vehicle->IsDoorClosedU32(doorId)) {
+        if (notsa::IsFixBugs()) {
+            return vehicle->CanPedOpenLocks(ped);
+        } else {
+            vehicle->CanPedOpenLocks(ped); // This does *nothing*
+        }
+    }
+    return false;
 }
 
 // 0x64EF70
