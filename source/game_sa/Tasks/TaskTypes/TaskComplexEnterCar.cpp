@@ -566,7 +566,7 @@ CTask* CTaskComplexEnterCar::ControlSubTask(CPed* ped) {
         return m_pSubTask;
     }
 
-    switch (m_pSubTask->GetTaskType()) { // 0x63AA03 - `if (m_bAsDriver || ped->IsPlayer())` is uselss here as `CheckForPlayerQuit` checks for it too
+    switch (m_pSubTask->GetTaskType()) { // 0x63AA03 - `if (m_bAsDriver || ped->IsPlayer())` is useless here as `CheckForPlayerQuit` checks for it too
     case TASK_SIMPLE_CAR_WAIT_FOR_DOOR_NOT_TO_BE_IN_USE:
     case TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL:
     case TASK_NONE:
