@@ -174,7 +174,7 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped) {
         PreparePedForVehicleEnter(ped);
         CreateTaskUtilityLineUpPedWithCar(ped);
 
-        return m_Car->IsBike() || m_Car->IsSubQuad()
+        return m_Car->IsBike() || m_Car->IsSubQuad() // For bikes/quads we don't have to align, and can immidiately continue, for everything else first align, then do the rest.
             ? CreateNextSubTask_AfterSimpleCarAlign(ped)
             : C(TASK_SIMPLE_CAR_ALIGN);
     }
@@ -380,12 +380,12 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask_AfterSimpleCarAlign(CPed* ped) {
         return nullptr;
     }
 
-    if (!m_Car->IsBike() && !m_Car->IsSubQuad()) {
+    if (!m_Car->IsBike() && !m_Car->IsSubQuad()) { // 0x63FAA6
         if (CCarEnterExit::CarHasDoorToOpen(m_Car, m_TargetDoor)) {
-            if (!CCarEnterExit::CarHasOpenableDoor(m_Car, m_TargetDoor, ped)) {
+            if (!CCarEnterExit::CarHasOpenableDoor(m_Car, m_TargetDoor, ped)) { // 0x63FADA
                 return C(TASK_SIMPLE_CAR_OPEN_LOCKED_DOOR_FROM_OUTSIDE);
             }
-            if (m_bQuitAfterDraggingPedOut || m_bQuitAfterOpeningDoor || m_Car->GetAnimGroupId() == ANIM_GROUP_CONVCARANIMS || m_TargetDoor != 10 || m_Car->m_pDriver) {
+            if (m_bQuitAfterDraggingPedOut || m_bQuitAfterOpeningDoor || m_Car->GetAnimGroupId() != ANIM_GROUP_CONVCARANIMS || m_TargetDoor != 10 || m_Car->m_pDriver) { // 0x63FAE6
                 return C(TASK_SIMPLE_CAR_OPEN_DOOR_FROM_OUTSIDE);
             }
             return C(TASK_SIMPLE_CAR_GET_IN);
