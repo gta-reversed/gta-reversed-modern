@@ -33,6 +33,7 @@ public:
     void      SetTargetPt(CVector pt) { m_TargetPt = pt; }
 
     void      SetTargetDoor(int32 door) { m_TargetDoor = door; }
+    auto      GetTargetDoor() const     { return m_TargetDoor; }
 
     bool      HasAchievedDoor() const { return m_bAchievedTargetDoor; }
 
