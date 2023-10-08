@@ -246,7 +246,7 @@ void CMessages::AddToPreviousBriefArray(const char* text, int32 n1, int32 n2, in
         1
     );
 
-    // Now construct at the 0th enry (as it's now freed up)
+    // Now construct at the 0th entry (as it's now freed up)
     new (&PreviousBriefs[0]) tPreviousBrief {
         .Text            = text,
         .NumbersToInsert = numbers,
