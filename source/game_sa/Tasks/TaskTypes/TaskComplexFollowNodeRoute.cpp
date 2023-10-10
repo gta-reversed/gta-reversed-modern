@@ -306,7 +306,7 @@ void CTaskComplexFollowNodeRoute::ComputePathNodes(CPed const* ped) {
                             PATH_TYPE_PED,
                             ped->GetPosition(),
                             m_TargetPt,
-                            pedInt->GetNodeAddress(),
+                            routeFirstNodeInt->GetNodeAddress(),
                             *m_NodeRoute
                         );
                         m_NodeRoute->Reverse();
