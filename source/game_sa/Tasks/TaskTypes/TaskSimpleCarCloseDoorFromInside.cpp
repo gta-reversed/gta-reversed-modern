@@ -71,7 +71,7 @@ void CTaskSimpleCarCloseDoorFromInside::ComputeAnimID(AssocGroupId& outGroup, An
         default:  NOTSA_UNREACHABLE();
         }
     }();
-    outGroup = (AssocGroupId)m_veh->GetAnimGroup().GetGroup(outAnimId);
+    outGroup = m_veh->GetAnimGroup().GetGroup(outAnimId);
 }
 
 // NOTSA
@@ -141,7 +141,7 @@ bool CTaskSimpleCarCloseDoorFromInside::ProcessPed(CPed* ped) {
     }
 
     const auto animId = (AnimationId)m_anim->m_nAnimId;
-    m_veh->ProcessOpenDoor(ped, m_door, (AssocGroupId)m_veh->GetAnimGroup().GetGroup(animId), animId, m_anim->m_fCurrentTime);
+    m_veh->ProcessOpenDoor(ped, m_door, m_veh->GetAnimGroup().GetGroup(animId), animId, m_anim->m_fCurrentTime);
 
     return false;
 }

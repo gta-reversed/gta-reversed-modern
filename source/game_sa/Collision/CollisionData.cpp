@@ -228,11 +228,11 @@ CLink<CCollisionData*>* CCollisionData::GetLinkPtr() {
 }
 
 auto CCollisionData::GetNumFaceGroups() const -> uint32 {
-    // See `CCollisionData` header for explanation :)
-    assert(!bHasFaceGroups || m_pTriangles);
-    return bHasFaceGroups
-        ? *reinterpret_cast<uint32*>(reinterpret_cast<uint8*>(m_pTriangles) - sizeof(uint32))
-        : 0u;
+    if (bHasFaceGroups) {
+        assert(m_pTriangles);
+        return *reinterpret_cast<uint32*>(reinterpret_cast<byte*>(m_pTriangles) - sizeof(uint32)); // See `CCollisionData` header for explanation :)
+    }
+    return 0;
 }
 
 auto CCollisionData::GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup> {
@@ -249,7 +249,7 @@ auto CCollisionData::GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup> 
 
 auto CCollisionData::GetTriVertices(const CColTriangle& tri) const->std::array<CVector, 3> {
     std::array<CVector, 3> verts;
-    for (const auto [i, j] : notsa::enumerate(tri.m_vertIndices)) {
+    for (auto&& [i, j] : notsa::enumerate(tri.m_vertIndices)) {
         verts[i] = UncompressVector(m_pVertices[j]);
     }
     return verts;

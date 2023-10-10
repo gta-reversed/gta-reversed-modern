@@ -65,7 +65,7 @@ void CTaskSimpleCarGetIn::StartAnim(CPed const* ped) {
         }();
 
         const auto grpId = [this, animId]{
-            const auto grpId = (AssocGroupId)m_veh->GetAnimGroup().GetGroup(animId);
+            const auto grpId = m_veh->GetAnimGroup().GetGroup(animId);
             if (grpId == AssocGroupId::ANIM_GROUP_CONVCARANIMS) {
                 if (m_door == TARGET_DOOR_DRIVER) {
                     if (m_veh->IsDoorMissing(TARGET_DOOR_DRIVER) || !m_veh->IsDoorClosed(TARGET_DOOR_DRIVER)) {
