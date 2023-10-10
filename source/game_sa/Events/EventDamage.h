@@ -35,6 +35,8 @@ public:
     CPedDamageResponse m_damageResponse;
 
 public:
+    static constexpr auto Type = eEventType::EVENT_DAMAGE;
+
     CEventDamage(const CEventDamage& event);
     CEventDamage(CEntity* source, uint32 startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, uint8 direction, bool a7, bool bPedInVehicle);
     ~CEventDamage() override;
