@@ -118,7 +118,7 @@ void CPathFind::Init() {
     m_nNumForbiddenAreas = 0;
     m_loadAreaRequestPending = false;
 
-    for (auto i = 0u; i < NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS; ++i) {
+    for (auto i = 0u; i < NUM_TOTAL_PATH_NODE_AREAS; ++i) {
         m_pPathNodes[i] = nullptr;
         m_pNaviNodes[i] = nullptr;
         m_pNodeLinks[i] = nullptr;
