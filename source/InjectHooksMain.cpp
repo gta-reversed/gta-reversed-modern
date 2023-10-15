@@ -254,6 +254,7 @@
 #include "TaskComplexGoToPointAndStandStill.h"
 #include "TaskSimpleAchieveHeading.h"
 #include "TaskSimpleCarGoToPointNearDoorUntilDoorNotInUse.h"
+#include "Tasks/TaskTypes/Interior/TaskInteriorBeInOffice.h"
 #include "TaskSimpleGiveCPR.h"
 #include "TaskSimpleCarSetPedInAsPassenger.h"
 #include "TaskComplexDriveFireTruck.h"
@@ -807,8 +808,8 @@ void InjectHooksMain() {
 
     const auto Tasks = []() {
         const auto Interior = [] {
-        CTaskInteriorBeInHouse::InjectHooks();
-        // CTaskInteriorBeInOffice::InjectHooks();
+            CTaskInteriorBeInHouse::InjectHooks();
+            CTaskInteriorBeInOffice::InjectHooks();
         // CTaskInteriorBeInShop::InjectHooks();
         // CTaskInteriorGoToInfo::InjectHooks();
         // CTaskInteriorLieInBed::InjectHooks();
