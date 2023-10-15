@@ -253,6 +253,7 @@
 #include "TaskComplexCrossRoadLookAndAchieveHeading.h"
 #include "TaskComplexGoToPointAndStandStill.h"
 #include "TaskSimpleAchieveHeading.h"
+#include "Tasks/TaskTypes/Interior/TaskInteriorSitAtDesk.h"
 #include "TaskSimpleCarGoToPointNearDoorUntilDoorNotInUse.h"
 #include "TaskSimpleGiveCPR.h"
 #include "TaskSimpleCarSetPedInAsPassenger.h"
@@ -813,7 +814,7 @@ void InjectHooksMain() {
         // CTaskInteriorGoToInfo::InjectHooks();
         // CTaskInteriorLieInBed::InjectHooks();
         // CTaskInteriorShopKeeper::InjectHooks();
-        // CTaskInteriorSitAtDesk::InjectHooks();
+            CTaskInteriorSitAtDesk::InjectHooks();
         // CTaskInteriorSitInChair::InjectHooks();
         // CTaskInteriorUseInfo::InjectHooks();
         };

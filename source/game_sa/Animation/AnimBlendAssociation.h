@@ -97,6 +97,7 @@ struct SClumpAnimAssoc {
     [[nodiscard]] bool HasYTranslation()  const { return (m_nFlags & ANIMATION_TRANSLATE_X) != 0; }
     [[nodiscard]] bool HasXTranslation()  const { return (m_nFlags & ANIMATION_TRANSLATE_Y) != 0; }
     [[nodiscard]] bool IsIndestructible() const { return (m_nFlags & ANIMATION_INDESTRUCTIBLE) != 0; }
+    [[nodiscard]] auto GetId()        const { return (AnimationId)m_nAnimId; }
 };
 
 class NOTSA_EXPORT_VTABLE CAnimBlendAssociation : public SClumpAnimAssoc {
