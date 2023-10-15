@@ -28,7 +28,7 @@ CTaskSimpleIKLookAt::CTaskSimpleIKLookAt(Const char* name, CEntity* lookAtEntity
 }
 
 // 0x633F00
-CTaskSimpleIKLookAt* CTaskSimpleIKLookAt::Clone() {
+CTaskSimpleIKLookAt* CTaskSimpleIKLookAt::Clone() const {
     auto* task = new CTaskSimpleIKLookAt("", m_pEntity, m_nTime, m_nOffsetBoneTag, m_vecOffsetPos, m_bUseTorso, m_fSpeed, m_nBlendTime, m_nPriority);
     if (m_pIKChain) {
         task->m_fBlend        = m_fBlend;

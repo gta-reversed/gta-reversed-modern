@@ -29,6 +29,9 @@
 namespace rng = std::ranges;
 namespace rngv = std::views;
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #include "Base.h"
 #include "config.h"
 
@@ -413,19 +416,9 @@ namespace rngv = std::views;
 #include "game_sa\Audio\config\eAudioSlot.h"
 #include "game_sa\Audio\config\eSFX.h"
 
-#include "game_sa\Fx\CarFXRenderer.h"
-#include "game_sa\Fx\FxBox.h"
-#include "game_sa\Fx\FxEmitterBP.h"
-#include "game_sa\Fx\FxFrustumInfo.h"
-#include "game_sa\Fx\FxInfoManager.h"
+#include "game_sa\Fx\eFxInfoType.h"
 #include "game_sa\Fx\FxManager.h"
-#include "game_sa\Fx\FxMemoryPool.h"
-#include "game_sa\Fx\FxPlane.h"
-#include "game_sa\Fx\FxPrimBP.h"
 #include "game_sa\Fx\FxPrtMult.h"
-#include "game_sa\Fx\FxSphere.h"
-#include "game_sa\Fx\FxSystemBP.h"
-#include "game_sa\Fx\FxSystem.h"
 #include "game_sa\Fx\Fx.h"
 
 #include "game_sa\Models\AtomicModelInfo.h"

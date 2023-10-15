@@ -1,36 +1,74 @@
 #include "StdInc.h"
 
 // Audio
-#include "AEAudioChannel.h"
+// -- General
 #include "AEAudioEnvironment.h"
-#include "AEAudioHardware.h"
 #include "AEAudioUtility.h"
-#include "AEDataStream.h"
-#include "AEMFDecoder.h"
 #include "AESmoothFadeThread.h"
-#include "AESoundManager.h"
-#include "AEStaticChannel.h"
-#include "AEVorbisDecoder.h"
-#include "AEWaveDecoder.h"
-#include "AEWMADecoder.h"
-#include "AEStreamingDecoder.h"
-#include "AEUserRadioTrackManager.h"
-#include "AEWaterCannonAudioEntity.h"
-#include "AEDoorAudioEntity.h"
+#include "AESound.h"
 #include "AEStreamThread.h"
-#include "AEFrontendAudioEntity.h"
-#include "AEScriptAudioEntity.h"
-#include "AERadioTrackManager.h"
-#include "AEAmbienceTrackManager.h"
-#include "AECutsceneTrackManager.h"
+#include "AudioEngine.h"
+#include "AudioZones.h"
+// -- Entities
+#include "AEAudioEntity.h"
 #include "AECollisionAudioEntity.h"
+#include "AEDoorAudioEntity.h"
+#include "AEExplosionAudioEntity.h"
+#include "AEFireAudioEntity.h"
+#include "AEFrontendAudioEntity.h"
 #include "AEGlobalWeaponAudioEntity.h"
 #include "AEPedAudioEntity.h"
 #include "AEPedlessSpeechAudioEntity.h"
+#include "AEPedSpeechAudioEntity.h"
+#include "AEPedWeaponAudioEntity.h"
 #include "AEPoliceScannerAudioEntity.h"
-#include "AudioEngine.h"
+#include "AEScriptAudioEntity.h"
+#include "AETwinLoopSoundEntity.h"
+#include "AEVehicleAudioEntity.h"
+#include "AEWaterCannonAudioEntity.h"
+#include "AEWeaponAudioEntity.h"
+#include "AEWeatherAudioEntity.h"
+// -- Hardware
+#include "AEAudioChannel.h"
+#include "AEAudioHardware.h"
+#include "AEStaticChannel.h"
+#include "AEStreamingChannel.h"
+// -- Loaders
+#include "AEBankLoader.h"
+#include "AEDataStream.h"
+#include "AEMFDecoder.h"
+#include "AEMP3BankLoader.h"
+#include "AEMP3TrackLoader.h"
+#include "AEStreamingDecoder.h"
+#include "AEStreamTransformer.h"
+#include "AETrackLoader.h"
+#include "AEVorbisDecoder.h"
+#include "AEWaveDecoder.h"
+#include "AEWMADecoder.h"
+// -- Managers
+#include "AEAmbienceTrackManager.h"
+#include "AECutsceneTrackManager.h"
+#include "AERadioTrackManager.h"
+#include "AESoundManager.h"
+#include "AEUserRadioTrackManager.h"
+
+
 #include "Garage.h"
 #include "Garages.h"
+
+// FX
+#include "FxSystemBP.h"
+#include "FxSystem.h"
+#include "FxSphere.h"
+#include "FxPrimBP.h"
+#include "FxPrim.h"
+#include "FxMemoryPool.h"
+#include "FxManager.h"
+#include "FxFrustumInfo.h"
+#include "FxEmitterPrt.h"
+#include "FxEmitterBP.h"
+#include "FxEmitter.h"
+#include "Fx.h"
 
 #include "UIRenderer.h"
 
@@ -215,6 +253,7 @@
 #include "TaskComplexCrossRoadLookAndAchieveHeading.h"
 #include "TaskComplexGoToPointAndStandStill.h"
 #include "TaskSimpleAchieveHeading.h"
+#include "TaskSimpleCarGoToPointNearDoorUntilDoorNotInUse.h"
 #include "TaskSimpleGiveCPR.h"
 #include "TaskSimpleCarSetPedInAsPassenger.h"
 #include "TaskComplexDriveFireTruck.h"
@@ -224,6 +263,7 @@
 #include "TaskComplexPassObject.h"
 #include "TaskComplexEnterCarAsPassenger.h"
 #include "TaskComplexEnterCarAsDriver.h"
+#include "TaskSimpleCarShuffle.h"
 #include "TaskComplexReactToGunAimedAt.h"
 #include "TaskSimpleNone.h"
 #include "TaskComplexKillPedOnFoot.h"
@@ -385,6 +425,7 @@
 #include "TaskComplexSmartFleePoint.h"
 #include "Interior/TaskInteriorBeInHouse.h"
 #include "Tasks/TaskTypes/TaskComplexKillPedOnFootArmed.h"
+#include "Tasks/TaskTypes/TaskSimpleWaitUntilLeaderAreaCodesMatch.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -405,7 +446,10 @@
 #include <RealTimeShadowManager.h>
 
 #include "extensions/utility.hpp"
+#include "extensions/CommandLine.h"
 #include <RenderBuffer.hpp>
+
+#include "ReversibleHooks/RootHookCategory.h"
 
 void InjectHooksMain() {
     HookInstall(0x53E230, &Render2dStuff);   // [ImGui] This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without
@@ -481,7 +525,6 @@ void InjectHooksMain() {
     CFireManager::InjectHooks();
     CGroupEventHandler::InjectHooks();
     CVehicleRecording::InjectHooks();
-    Fx_c::InjectHooks();
     CBrightLights::InjectHooks();
     CShinyTexts::InjectHooks();
     CPedTaskPair::InjectHooks();
@@ -696,41 +739,60 @@ void InjectHooksMain() {
     Pools();
 
     const auto Audio = []() {
-        CAEVehicleAudioEntity::InjectHooks();
-        CAESoundManager::InjectHooks();
-        CAESound::InjectHooks();
-        CAEAudioHardware::InjectHooks();
+        // General
         CAEAudioEnvironment::InjectHooks();
         CAEAudioUtility::InjectHooks();
-        CAEAudioChannel::InjectHooks();
-        CAEStaticChannel::InjectHooks();
         CAESmoothFadeThread::InjectHooks();
-        CAEDataStream::InjectHooks();
-        CAEStreamingDecoder::InjectHooks();
-        CAEMFDecoder::InjectHooks();
-        CAEUserRadioTrackManager::InjectHooks();
-        CAEVorbisDecoder::InjectHooks();
-        CAEWaveDecoder::InjectHooks();
-        CAEWMADecoder::InjectHooks();
-        CAEWaterCannonAudioEntity::InjectHooks();
-        CAETwinLoopSoundEntity::InjectHooks();
-        CAEDoorAudioEntity::InjectHooks();
-        CAEWeatherAudioEntity::InjectHooks();
+        CAESound::InjectHooks();
         CAEStreamThread::InjectHooks();
-        CAEFrontendAudioEntity::InjectHooks();
-        CAEWeaponAudioEntity::InjectHooks();
-        CAEScriptAudioEntity::InjectHooks();
-        CAERadioTrackManager::InjectHooks();
-        CAEAmbienceTrackManager::InjectHooks();
-        CAECutsceneTrackManager::InjectHooks();
+        CAudioEngine::InjectHooks();
+        CAudioZones::InjectHooks();
+
+        // Entities
+        // CAEAudioEntity::InjectHooks(); -- inlined
         CAECollisionAudioEntity::InjectHooks();
+        CAEDoorAudioEntity::InjectHooks();
+        CAEExplosionAudioEntity::InjectHooks();
+        CAEFireAudioEntity::InjectHooks();
+        CAEFrontendAudioEntity::InjectHooks();
         CAEGlobalWeaponAudioEntity::InjectHooks();
         CAEPedAudioEntity::InjectHooks();
         CAEPedlessSpeechAudioEntity::InjectHooks();
+        CAEPedSpeechAudioEntity::InjectHooks();
+        CAEPedWeaponAudioEntity::InjectHooks();
         CAEPoliceScannerAudioEntity::InjectHooks();
-        CAudioEngine::InjectHooks();
-        CAEFireAudioEntity::InjectHooks();
-        CAEExplosionAudioEntity::InjectHooks();
+        CAEScriptAudioEntity::InjectHooks();
+        CAETwinLoopSoundEntity::InjectHooks();
+        CAEVehicleAudioEntity::InjectHooks();
+        CAEWaterCannonAudioEntity::InjectHooks();
+        // CAEWeaponAudioEntity::InjectHooks();
+        CAEWeatherAudioEntity::InjectHooks();
+
+        // Hardware
+        CAEAudioChannel::InjectHooks();
+        CAEAudioHardware::InjectHooks();
+        CAEStaticChannel::InjectHooks();
+        CAEStreamingChannel::InjectHooks();
+
+        // Loaders
+        CAEBankLoader::InjectHooks();
+        CAEDataStream::InjectHooks();
+        CAEMFDecoder::InjectHooks();
+        CAEMP3BankLoader::InjectHooks();
+        CAEMP3TrackLoader::InjectHooks();
+        CAEStreamingDecoder::InjectHooks();
+        // CAEStreamTransformer::InjectHooks(); -- injected by AEDataStream::InjectHooks.
+        CAETrackLoader::InjectHooks();
+        CAEVorbisDecoder::InjectHooks();
+        CAEWaveDecoder::InjectHooks();
+        CAEWMADecoder::InjectHooks();
+
+        // Managers
+        CAEAmbienceTrackManager::InjectHooks();
+        CAECutsceneTrackManager::InjectHooks();
+        CAERadioTrackManager::InjectHooks();
+        CAESoundManager::InjectHooks();
+        CAEUserRadioTrackManager::InjectHooks();
     };
 
     const auto Plant = []() {
@@ -814,6 +876,7 @@ void InjectHooksMain() {
         CTaskComplexKillPedOnFootMelee::InjectHooks();
         CTaskComplexKillPedOnFootStealth::InjectHooks();
 
+        CTaskSimpleWaitUntilLeaderAreaCodesMatch::InjectHooks();
         CTaskComplexLeaveCarAndDie::InjectHooks();
         CTaskComplexLeaveBoat::InjectHooks();
         CTaskComplexLeaveCarAndFlee::InjectHooks();
@@ -882,13 +945,13 @@ void InjectHooksMain() {
         // CTaskSimpleCarForcePedOut::InjectHooks();
         CTaskSimpleCarGetOut::InjectHooks();
         CTaskSimpleCarGetIn::InjectHooks();
-        // CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse::InjectHooks();
+        CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse::InjectHooks();
         CTaskSimpleCarOpenDoorFromOutside::InjectHooks();
         CTaskSimpleCarJumpOut::InjectHooks();
         CTaskSimpleCarOpenLockedDoorFromOutside::InjectHooks();
         // CTaskSimpleCarSetPedSlowDraggedOut::InjectHooks();
         CTaskSimpleCarSetTempAction::InjectHooks();
-        // CTaskSimpleCarShuffle::InjectHooks();
+        CTaskSimpleCarShuffle::InjectHooks();
         // CTaskSimpleCarSlowBeDraggedOut::InjectHooks();
         CTaskSimpleCarWaitToSlowDown::InjectHooks();
         CTaskSimpleCarWaitForDoorNotToBeInUse::InjectHooks();
@@ -1056,7 +1119,7 @@ void InjectHooksMain() {
         CTaskSimpleIKPointArm::InjectHooks();
         CTaskSimpleIKLookAt::InjectHooks();
         CTaskComplexDie::InjectHooks();
-        // CTaskComplexEnterBoatAsDriver::InjectHooks();
+        CTaskComplexEnterBoatAsDriver::InjectHooks();
         CTaskSimpleFight::InjectHooks();
         CTaskComplexUseWaterCannon::InjectHooks();
         // CTaskComplexDriveToPoint::InjectHooks();
@@ -1163,10 +1226,18 @@ void InjectHooksMain() {
     };
 
     const auto Fx = []() {
-        FxManager_c::InjectHooks();
         FxSystemBP_c::InjectHooks();
-        // FxSystem_c::InjectHooks();
+        FxSystem_c::InjectHooks();
+        FxSphere_c::InjectHooks();
         FxPrimBP_c::InjectHooks();
+        FxMemoryPool_c::InjectHooks();
+        FxInfoManager_c::InjectHooks();
+        FxManager_c::InjectHooks();
+        // ReversibleHooks::Install("FxFrustumInfo_c", "IsCollision", 0x4AA030, &FxFrustumInfo_c::IsCollision);
+        FxEmitterPrt_c::InjectHooks();
+        FxEmitterBP_c::InjectHooks();
+        FxEmitter_c::InjectHooks();
+        Fx_c::InjectHooks();
     };
 
     const auto Vehicle = []() {
@@ -1230,6 +1301,12 @@ void InjectHooksMain() {
     Vehicle();
     Interior();
     Scripts();
+
+    if (CommandLine::unhookAll)
+        ReversibleHooks::GetRootCategory().SetAllItemsEnabled(false);
+
+    if (!CommandLine::unhookSome.empty() || !CommandLine::unhookExcept.empty())
+        NOTSA_LOG_WARN("Command line arguments --unhook and --unhook-except are unimplemented!");
 }
 
 void InjectHooksMain(HMODULE hThisDLL) {

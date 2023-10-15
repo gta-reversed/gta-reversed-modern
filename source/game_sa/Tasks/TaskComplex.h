@@ -20,11 +20,12 @@ public:
 
     CTask* GetSubTask() override;
     bool IsSimple() override;
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override; // Seems like priority defaults to `ABORT_PRIORITY_URGENT` and `event = nullptr`
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
 
     virtual void SetSubTask(CTask* subTask);
     virtual CTask* CreateNextSubTask(CPed* ped) = 0;
     virtual CTask* CreateFirstSubTask(CPed* ped) = 0;
     virtual CTask* ControlSubTask(CPed* ped) = 0;
+    // #vtable: 11
 };
 VALIDATE_SIZE(CTaskComplex, 0xC);

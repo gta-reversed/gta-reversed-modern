@@ -42,7 +42,7 @@ CTaskComplexDriveFireTruck::~CTaskComplexDriveFireTruck() {
 }
 
 // 0x659BC0
-CTask* CTaskComplexDriveFireTruck::Clone() {
+CTask* CTaskComplexDriveFireTruck::Clone() const {
     return Clone_Reversed();
 }
 
@@ -61,7 +61,7 @@ CTask* CTaskComplexDriveFireTruck::ControlSubTask(CPed* ped) {
     return ControlSubTask_Reversed(ped);
 }
 
-CTask* CTaskComplexDriveFireTruck::Clone_Reversed() {
+CTask* CTaskComplexDriveFireTruck::Clone_Reversed() const {
     return new CTaskComplexDriveFireTruck(m_pVehicle, m_pPartnerFireman, m_bIsDriver);
 }
 
@@ -128,7 +128,7 @@ CTask* CTaskComplexDriveFireTruck::CreateSubTask(eTaskType taskType, CPed* ped) 
     case TASK_COMPLEX_CAR_DRIVE_WANDER:
         return new CTaskComplexCarDriveWander(m_pVehicle, DRIVING_STYLE_STOP_FOR_CARS, 10.0F);
     case TASK_COMPLEX_CAR_DRIVE_TO_POINT:
-        return new CTaskComplexDriveToPoint(m_pVehicle, m_pFire->m_vecPosition, 30.0F, 0, -1, 25.0F, DRIVING_STYLE_AVOID_CARS);
+        return new CTaskComplexDriveToPoint(m_pVehicle, m_pFire->m_vecPosition, 30.0F, 0, MODEL_INVALID, 25.0F, DRIVING_STYLE_AVOID_CARS);
     case TASK_COMPLEX_USE_WATER_CANNON:
         return new CTaskComplexUseWaterCannon(m_pFire);
     case TASK_SIMPLE_CAR_DRIVE:

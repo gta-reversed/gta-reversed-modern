@@ -30,7 +30,7 @@ CTaskComplexJump::CTaskComplexJump(eComplexJumpType type) : CTaskComplex() {
 }
 
 // 0x67C5A0
-CTask* CTaskComplexJump::Clone() {
+CTask* CTaskComplexJump::Clone() const {
     return Clone_Reversed();
 }
 
@@ -49,7 +49,7 @@ bool CTaskComplexJump::MakeAbortable(CPed* ped, eAbortPriority priority, const C
     return MakeAbortable_Reversed(ped, priority, event);
 }
 
-CTask* CTaskComplexJump::Clone_Reversed() {
+CTask* CTaskComplexJump::Clone_Reversed() const {
     auto newTask = new CTaskComplexJump(m_nType);
     newTask->m_bHighJump = this->m_bHighJump;
     return newTask;

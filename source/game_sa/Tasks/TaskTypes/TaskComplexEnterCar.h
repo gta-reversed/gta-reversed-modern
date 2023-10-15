@@ -42,7 +42,7 @@ public:
     CTaskComplexEnterCar(CVehicle* targetVehicle, bool bAsDriver, bool bQuitAfterOpeningDoor, bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff = false);
     ~CTaskComplexEnterCar() override;
 
-    bool           MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool           MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) override;
     CTask*         CreateNextSubTask(CPed* ped) override;
     CTask*         CreateFirstSubTask(CPed* ped) override;
     CTask*         ControlSubTask(CPed* ped) override;
@@ -51,7 +51,7 @@ public:
     CVector        GetTargetPos();
     CVehicle*      GetCameraAvoidVehicle();
 
-    auto GetVehicle() const { return m_car; }
+    auto GetTarget() const { return m_car; }
 private:
     // 0x63A220
     CTaskComplexEnterCar* Constructor(CVehicle* vehicle, bool bAsDriver, bool bQuitAfterOpeningDoor, bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff) {

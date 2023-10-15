@@ -11,6 +11,7 @@
 #include "UIRenderer.h"
 #include "ControllerConfigManager.h"
 #include "app.h"
+#include "platform/win/Platform.h"
 
 // mouse states
 CMouseControllerState& CPad::PCTempMouseControllerState = *(CMouseControllerState*)0xB73404;
@@ -41,15 +42,15 @@ void CPad::InjectHooks() {
     RH_ScopedInstall(ClearMouseHistory, 0x541BD0);
     RH_ScopedInstall(Clear, 0x541A70);
     RH_ScopedInstall(Update, 0x541C40);
-    RH_ScopedInstall(UpdateMouse, 0x53F3C0, { .reversed = false });
-    RH_ScopedInstall(ProcessPad, 0x746A10, { .reversed = false });
+    RH_ScopedInstall(UpdateMouse, 0x53F3C0);
+    RH_ScopedInstall(ProcessPad, 0x746A10);
     RH_ScopedInstall(ProcessPCSpecificStuff, 0x53FB40);
     RH_ScopedInstall(ReconcileTwoControllersInput, 0x53F530);
     RH_ScopedInstall(SetTouched, 0x53F200);
     RH_ScopedInstall(GetTouchedTimeDelta, 0x53F210);
     RH_ScopedInstall(StartShake, 0x53F920);
     RH_ScopedInstall(StartShake_Distance, 0x53F9A0);
-    //RH_ScopedInstall(StartShake_Train, 0x53FA70, { .reversed = false }); 
+    RH_ScopedInstall(StartShake_Train, 0x53FA70); 
     RH_ScopedInstall(StopShaking, 0x53FB50);
     RH_ScopedInstall(GetCarGunLeftRight, 0x53FC50);
     RH_ScopedInstall(GetCarGunUpDown, 0x53FC10);
@@ -220,7 +221,7 @@ void CPad::UpdatePads() {
         GetPad(0)->UpdateMouse();
     }
 
-    ProcessPad(false);
+    ProcessPad(0);
     ControlsManager.ClearSimButtonPressCheckers();
 
     if (!ImIONavActive) {
@@ -235,13 +236,91 @@ void CPad::UpdatePads() {
 }
 
 // 0x53F3C0
+// NOTSA(Grinch_): Game does this a bit differently, but does the same thing
 void CPad::UpdateMouse() {
-    plugin::CallMethod<0x53F3C0, CPad*>(this);
+    if (ForegroundApp) {
+        int32_t invertX, invertY;
+
+        invertX = FrontEndMenuManager.bInvertMouseX ? -1 : 1;
+        invertY = FrontEndMenuManager.bInvertMouseY ? -1 : 1;
+
+        CMouseControllerState state = WinInput::GetMouseState();
+        if (state.CheckForInput()) {
+            CPad::GetPad(0)->LastTimeTouched = CTimer::m_snTimeInMilliseconds;
+        }
+
+        // Write directly to NewMouseControllerState
+         CPad::OldMouseControllerState = std::exchange(CPad::NewMouseControllerState, state);
+        CPad::NewMouseControllerState.X *= invertX;
+        CPad::NewMouseControllerState.Y *= invertY;
+    }
 }
 
 // 0x746A10
-void CPad::ProcessPad(bool padNum) {
-    ((void(__cdecl*)(bool))0x746A10)(padNum);
+void CPad::ProcessPad(int padNum) {
+    LPDIRECTINPUTDEVICE8* pDiDevice = nullptr;
+    DIJOYSTATE2 joyState;
+
+    if (padNum == 0) {
+        pDiDevice = &PSGLOBAL(diDevice1);
+    } else if (padNum == 1) {
+        pDiDevice = &PSGLOBAL(diDevice2);
+    } else {
+        return;
+    }
+    
+    if (!*pDiDevice) {
+        return;
+    }
+
+    if (FAILED((*pDiDevice)->Poll())) {
+        (*pDiDevice)->Acquire();
+        return;
+    }
+
+ 
+    WIN_FCHECK((*pDiDevice)->GetDeviceState(sizeof(joyState), &joyState));
+
+    if (ControlsManager.m_bJoyJustInitialised) {
+        ControlsManager.m_OldJoyState = ControlsManager.m_NewJoyState = joyState;
+        ControlsManager.m_bJoyJustInitialised = false;
+    } else {
+        ControlsManager.m_OldJoyState = std::exchange(ControlsManager.m_NewJoyState, joyState);
+    }
+    RsPadEventHandler(RsEvent::rsPADBUTTONUP, &padNum);
+
+    if (*pDiDevice) {
+        float padX1 = joyState.lX / 2000.0f;
+        float padX2 = joyState.lY / 2000.0f;
+        float padY1 = 0.0f;
+        float padY2 = 0.0f;
+
+        if (joyState.rgdwPOV[1] >= 0) {
+            padX1 = sin(joyState.rgdwPOV[1] / 5730.0f);
+            padY1 = cos(joyState.rgdwPOV[1] / 5730.0f) * -1.0f;
+        }
+        if (PadConfigs[padNum].rzAxisPresent && PadConfigs[padNum].zAxisPresent) {
+            padX2 = joyState.lZ / 2000.0f;
+            padY2 = joyState.lRz / 2000.0f;
+        }
+
+        RsPadEventHandler(RsEvent::rsPADBUTTONUP, &padNum);
+        RsPadEventHandler(RsEvent::rsPADBUTTONDOWN, &padNum);
+        CPad* pPad = CPad::GetPad(padNum);
+
+        const auto UpdateJoyStickPosition = [](float pos, int16& outA, int16& outB, bool isInverted, bool isSwapped) {
+            if (fabs(pos) > 0.3f) {
+                pos = isInverted ? -pos : pos;
+                pos /= 128.f;
+                (isSwapped ? outA : outB) = (int32)pos;
+            }
+        };
+
+        UpdateJoyStickPosition(padX1, pPad->PCTempJoyState.LeftStickY, pPad->PCTempJoyState.LeftStickX, FrontEndMenuManager.m_bInvertPadX1, FrontEndMenuManager.m_bSwapPadAxis1);
+        UpdateJoyStickPosition(padY1, pPad->PCTempJoyState.LeftStickX, pPad->PCTempJoyState.LeftStickY, FrontEndMenuManager.m_bInvertPadY1, FrontEndMenuManager.m_bSwapPadAxis2);
+        UpdateJoyStickPosition(padX2, pPad->PCTempJoyState.LeftStickY, pPad->PCTempJoyState.LeftStickX, FrontEndMenuManager.m_bInvertPadX2, FrontEndMenuManager.m_bSwapPadAxis1);
+        UpdateJoyStickPosition(padY2, pPad->PCTempJoyState.LeftStickX, pPad->PCTempJoyState.LeftStickY, FrontEndMenuManager.m_bInvertPadY2, FrontEndMenuManager.m_bSwapPadAxis2);
+    }
 }
 
 // 0x53FB40
@@ -359,7 +438,7 @@ void CPad::StartShake(int16 time, uint8 freq, uint32 shakeDelayMs) {
                 ShakeDur = time;
                 ShakeFreq = freq;
             }
-            NoShakeBeforeThis = float(shakeDelayMs + CTimer::GetTimeInMS());
+            NoShakeBeforeThis = (float)(shakeDelayMs + CTimer::GetTimeInMS());
             NoShakeFreq = freq;
         }
     } else {
@@ -387,22 +466,22 @@ void CPad::StartShake_Distance(int16 time, uint8 freq, CVector pos) {
     }
 }
 
-/* todo:
 // 0x53FA70
 void CPad::StartShake_Train(const CVector2D& point) {
-    if (!FrontEndMenuManager.m_PrefsUseVibration || CCutsceneMgr::ms_running)
+    if (!FrontEndMenuManager.m_PrefsUseVibration || CCutsceneMgr::ms_running) {
         return;
+    }
 
-    if (FindPlayerVehicle(-1) && FindPlayerVehicle(-1)->IsTrain())
+    if (!FindPlayerVehicle(-1) || !FindPlayerVehicle(-1)->IsTrain()) {
         return;
+    }
 
-    auto fDistSq = DistanceBetweenPointsSquared(TheCamera.GetPosition(), point);
+    const auto fDistSq = (TheCamera.GetPosition() - point).SquaredMagnitude();
     if (ShakeDur < 100 && fDistSq < 4900.0f) {
         ShakeDur = 100;
         ShakeFreq = static_cast<uint8>(70.0f - sqrt(fDistSq) + 30.0f);
     }
 }
-*/
 
 // 0x541D70
 void CPad::StopPadsShaking() {
@@ -1200,5 +1279,5 @@ IDirectInputDevice8* DIReleaseMouse() { // todo: wininput
 }
 
 void InitialiseMouse(bool exclusive) {
-    WinInput::InitialiseMouse(exclusive);
+    WinInput::diMouseInit(exclusive);
 }

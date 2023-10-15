@@ -1014,7 +1014,7 @@ void CObject::ProcessTrainCrossingBehaviour() {
 }
 
 // 0x5A0D90
-void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection, CEntity* damager, eWeaponType weaponType) {
+void CObject::ObjectDamage(float damage, const CVector* fxOrigin, const CVector* fxDirection, CEntity* damager, eWeaponType weaponType) {
     if (!m_bUsesCollision)
         return;
 
@@ -1159,7 +1159,7 @@ void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection
 
         RwMatrix particleMat;
         g_fx.CreateMatFromVec(&particleMat, fxOrigin, fxDirection);
-        auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, &particleMat, nullptr, false);
+        auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, particleMat, nullptr, false);
         if (fxSystem)
             fxSystem->PlayAndKill();
 
@@ -1168,7 +1168,7 @@ void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection
 
     auto vecPoint = *m_matrix * m_pObjectInfo->m_vFxOffset;
     vecPoint += GetPosition();
-    auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, &vecPoint, nullptr, false);
+    auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, vecPoint, nullptr, false);
     if (fxSystem)
         fxSystem->PlayAndKill();
 }

@@ -52,8 +52,7 @@ CTask* CTaskComplexTreatAccident::ControlSubTask(CPed* ped)
 }
 
 // 0x659A90
-CTask* CTaskComplexTreatAccident::Clone()
-{
+CTask* CTaskComplexTreatAccident::Clone() const {
     return Clone_Reversed();
 }
 
@@ -103,8 +102,7 @@ CTask* CTaskComplexTreatAccident::ControlSubTask_Reversed(CPed* ped)
     return m_pSubTask;
 }
 
-CTask* CTaskComplexTreatAccident::Clone_Reversed()
-{
+CTask* CTaskComplexTreatAccident::Clone_Reversed() const {
     return new CTaskComplexTreatAccident(m_pAccident);
 }
 

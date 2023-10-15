@@ -165,7 +165,7 @@ void CGame::ShutdownRenderWare() {
 }
 
 // 0x53C4A0
-bool CGame::CanSeeOutSideFromCurrArea() {
+bool CGame::CanSeeOutSideFromCurrArea() { // pattern: !CGame::currArea 
     return currArea == AREA_CODE_NORMAL_WORLD;
 }
 

@@ -35,7 +35,7 @@ project "gta_reversed"
         "../libs/imgui/misc/cpp",
         "../libs/dxsdk",
         "../libs/spdlog/include",
-        "../libs/tracy/public",
+        "../libs/tracy/public"
     }
     
     defines { 
@@ -43,6 +43,7 @@ project "gta_reversed"
         "USE_GTASA_ALLOCATOR", 
         "EXTRA_DEBUG_FEATURES", 
         "FIX_BUGS",
+        "_CRT_SECURE_NO_WARNINGS",
 
         "TRACY_ENABLE",
         "TRACY_ON_DEMAND",
@@ -80,7 +81,7 @@ project "gta_reversed"
         "../%{cfg.targetdir}/vorbis.lib", 
         "../%{cfg.targetdir}/vorbisfile.lib", 
         "../%{cfg.targetdir}/vorbisenc.lib",  
-        "../%{cfg.targetdir}/imgui.lib", 
+        "../%{cfg.targetdir}/imgui.lib",
         "../libs/dxsdk/d3d9.lib", 
         "../libs/dxsdk/dinput.lib",
     }

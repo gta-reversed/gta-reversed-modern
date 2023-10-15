@@ -19,6 +19,11 @@
 
 constexpr auto NO_FOREGROUND_PAUSE = true;
 
+// 0x747300
+char* getDvdGamePath() {
+    return plugin::CallAndReturn<char*, 0x747300>();
+}
+
 // 0x746870
 void MessageLoop() {
     MSG msg;

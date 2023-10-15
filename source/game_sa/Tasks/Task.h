@@ -33,12 +33,12 @@ public:
     CTask() { m_pParentTask = nullptr; } // 0x61A340
     virtual ~CTask() = default;          // 0x61A660
 
-    virtual CTask* Clone() = 0;
+    virtual CTask* Clone() const = 0;
     virtual CTask* GetSubTask() = 0;
     virtual bool IsSimple() = 0;
-    virtual eTaskType GetTaskType() = 0;
+    virtual eTaskType GetTaskType() const = 0;
     virtual void StopTimer(const CEvent* event);
-    virtual bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) = 0;
+    virtual bool MakeAbortable(CPed* ped, eAbortPriority priority = ABORT_PRIORITY_URGENT, const CEvent* event = nullptr) = 0;
 
     static bool IsGoToTask(CTask* task);
     static bool IsTaskPtr(CTask* task);

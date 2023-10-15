@@ -7,14 +7,15 @@ CTaskComplexPolicePursuit::CTaskComplexPolicePursuit() : CTaskComplex() {
     plugin::CallMethod<0x68BA70, CTaskComplexPolicePursuit*>(this);
 }
 
+// 0x68CDD0
+CTaskComplexPolicePursuit::CTaskComplexPolicePursuit(const CTaskComplexPolicePursuit& o) :
+    CTaskComplexPolicePursuit{}
+{
+}
+
 // 0x68D880
 CTaskComplexPolicePursuit::~CTaskComplexPolicePursuit() {
     plugin::CallMethod<0x68D880, CTaskComplexPolicePursuit*>(this);
-}
-
-// 0x68CDD0
-CTask* CTaskComplexPolicePursuit::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x68CDD0, CTaskComplexPolicePursuit*>(this);
 }
 
 // 0x690920
@@ -79,7 +80,7 @@ CTaskComplexPolicePursuit* CTaskComplexPolicePursuit::Constructor() {
 }
 
 // 0x68CDD0
-CTask* CTaskComplexPolicePursuit::Clone_Reversed() {
+CTask* CTaskComplexPolicePursuit::Clone_Reversed() const {
     return CTaskComplexPolicePursuit::Clone();
 }
 
