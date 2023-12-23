@@ -11,10 +11,10 @@ public:
     bool   m_affectsDeadPeds;
 
 public:
+    static constexpr auto Type = eEventType::EVENT_SCRIPT_COMMAND;
+
     CEventScriptCommand(int32 primaryTaskIndex, CTask* task, bool affectsDeadPeds = false);
     ~CEventScriptCommand() override;
-
-    static constexpr auto Type = eEventType::EVENT_SCRIPT_COMMAND;
 
     eEventType GetEventType() const override { return Type; }
     int32 GetEventPriority() const override;

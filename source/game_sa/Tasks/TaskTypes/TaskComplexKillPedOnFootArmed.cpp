@@ -197,14 +197,15 @@ bool CTaskComplexKillPedOnFootArmed::MakeAbortable(CPed* ped, eAbortPriority pri
                 return false;
             }
         }
-        [[fallthrough]];
+        break;
     }
     case ABORT_PRIORITY_IMMEDIATE:
-        return m_pSubTask->MakeAbortable(ped, priority, event);
+        break;
     case ABORT_PRIORITY_LEISURE:
     default:
         return false;
     }
+    return m_pSubTask->MakeAbortable(ped, priority, event);
 }
 
 // 0x62C190
