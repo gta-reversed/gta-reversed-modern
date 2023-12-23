@@ -40,8 +40,7 @@ bool CTaskComplexUseScriptedBrain::MakeAbortable(CPed* ped, eAbortPriority prior
         return m_pSubTask->MakeAbortable(ped, priority, event);
     }
 
-    if (const auto* e = CEvent::DynCast<const CEventScriptCommand>(event);
-        !e || e->m_task->GetTaskType() != TASK_COMPLEX_USE_EFFECT) {
+    if (auto* e = CEvent::DynCast<const CEventScriptCommand>(event); !e || e->m_task->GetTaskType() != TASK_COMPLEX_USE_EFFECT) {
         return m_pSubTask->MakeAbortable(ped, priority, event);
     }
 
