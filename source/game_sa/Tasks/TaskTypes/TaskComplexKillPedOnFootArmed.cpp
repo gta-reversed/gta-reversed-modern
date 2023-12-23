@@ -191,20 +191,20 @@ CTask* CTaskComplexKillPedOnFootArmed::CreateSubTask(eTaskType taskType, CPed* p
 // 0x6212B0
 bool CTaskComplexKillPedOnFootArmed::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
     switch (priority) {
-    case ABORT_PRIORITY_LEISURE: {
+    case ABORT_PRIORITY_URGENT: {
         if (const auto aimedAtEvent = CEvent::DynCast<const CEventGunAimedAt>(event)) {
             if (aimedAtEvent->m_ped == m_target) {
                 return false;
             }
         }
-        break;
+        [[fallthrough]];
     }
     case ABORT_PRIORITY_IMMEDIATE:
-        break;
+        return m_pSubTask->MakeAbortable(ped, priority, event);
+    case ABORT_PRIORITY_LEISURE:
     default:
         return false;
     }
-    return m_pSubTask->MakeAbortable(ped, priority, event);
 }
 
 // 0x62C190
