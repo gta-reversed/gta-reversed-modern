@@ -425,6 +425,6 @@ void InjectWinMainStuff() {
     RH_ScopedGlobalInstall(CommandLineToArgv, 0x746480, { .reversed = false });
 
     // Unhooking these 2 after the game has started will do nothing
-    RH_ScopedGlobalInstall(NOTSA_WinMain, 0x748710);
-    RH_ScopedGlobalInstall(InitInstance, 0x745560);
+    RH_ScopedGlobalInstall(NOTSA_WinMain, 0x748710, {.locked = true});
+    RH_ScopedGlobalInstall(InitInstance, 0x745560, {.locked = true});
 }
