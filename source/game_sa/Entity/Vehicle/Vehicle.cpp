@@ -3126,7 +3126,7 @@ void CVehicle::SetupRender() {
         vehicleFlags.bDontSetColourWhenRemapping = false;
     } else {
         // Make sure it's loaded, if not, request it to be loaded
-        if (CStreaming::IsModelLoaded(ModelIdToTXD(m_nRemapTxd))) {
+        if (CStreaming::IsModelLoaded(TXDToModelId(m_nRemapTxd))) {
             // If there was a remap texture set, remove it
             if (m_pRemapTexture) {
                 m_pRemapTexture = nullptr;
@@ -3151,7 +3151,7 @@ void CVehicle::SetupRender() {
                 m_nPrimaryColor = 1;
             }
         } else {
-            CStreaming::RequestModel(ModelIdToTXD(m_nRemapTxd), STREAMING_KEEP_IN_MEMORY);
+            CStreaming::RequestModel(TXDToModelId(m_nRemapTxd), STREAMING_KEEP_IN_MEMORY);
         }
     }
 

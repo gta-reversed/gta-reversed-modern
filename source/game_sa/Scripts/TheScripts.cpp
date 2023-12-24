@@ -30,6 +30,8 @@ void CTheScripts::InjectHooks() {
     RH_ScopedInstall(HasCarModelBeenSuppressed, 0x46A810);
     RH_ScopedInstall(HasVehicleModelBeenBlockedByScript, 0x46A890);
     RH_ScopedInstall(Process, 0x46A000);
+
+    RH_ScopedInstall(ProcessAllSearchLights, 0x4939F0);
 }
 
 // 0x468D50
@@ -435,7 +437,85 @@ void CTheScripts::Process() {
 void CTheScripts::ProcessAllSearchLights() {
     ZoneScoped;
 
-    return plugin::Call<0x4939F0>();
+    //return plugin::Call<0x4939F0>();
+    for (auto& light : ScriptSearchLightArray) {
+        if (!light.IsActive() || !(light.m_nFlags & 0b1000'0000)) {
+            continue;
+        }
+
+        switch (light.m_nFlags & 0b111'1111) {
+        case 1: {
+            const auto d = light.m_PathCoord1 - light.m_Target;
+            if (d.SquaredMagnitude() > sq(light.m_fPathSpeed)) {
+                light.m_Target *= d.Normalized();
+                break;
+            }
+
+            light.m_Target = light.m_PathCoord1;
+            light.m_nFlags = 0b1000'0010;
+            break;
+        }
+        case 2: {
+            const auto d = light.m_PathCoord2 - light.m_Target;
+            if (d.SquaredMagnitude() > sq(light.m_fPathSpeed)) {
+                light.m_Target *= d.Normalized();
+                break;
+            }
+
+            light.m_Target = light.m_PathCoord2;
+            light.m_nFlags = 0b1000'0001;
+            break;
+        }
+        case 3: {
+            const auto d = light.m_FollowingEntity->GetPosition() - light.m_Target;
+            if (d.SquaredMagnitude() > sq(light.m_fPathSpeed)) {
+                light.m_Target *= d.Normalized();
+                break;
+            }
+
+            light.m_Target = light.m_FollowingEntity->GetPosition();
+            /* flag is not altered */
+            break;
+        }
+        case 4: {
+            auto d = light.m_PathCoord1 - light.m_FollowingEntity->GetPosition();
+            if (d.SquaredMagnitude() > sq(light.m_fPathSpeed)) {
+                light.m_Target *= d.Normalized();
+                break;
+            }
+
+            light.m_Target     = light.m_PathCoord1;
+            light.m_fPathSpeed = 0.0f;
+            light.m_PathCoord1 = CVector{};
+            light.m_nFlags     = 0b1000'0000;
+            break;
+        }
+        default:
+            break;
+        }
+
+        auto* bulb = light.m_Bulb;
+        if (!bulb) {
+            continue;
+        }
+
+        const auto prevPos    = bulb->GetPosition();
+        const auto tgtBulbDir = (light.m_Target - bulb->GetPosition()).Normalized();
+
+        const auto Transform = [&](CEntity* entity) {
+            const auto rotX = std::atan2(tgtBulbDir.z, tgtBulbDir.Magnitude2D());
+            const auto rotZ = tgtBulbDir.Heading();
+
+            entity->m_matrix->RotateX(rotX);
+            entity->m_matrix->RotateZ(rotZ);
+            entity->GetPosition() += prevPos;
+            entity->UpdateRW();
+            entity->UpdateRwFrame();
+        };
+
+        Transform(bulb);
+        Transform(light.m_Housing);
+    }
 }
 
 void CTheScripts::ProcessWaitingForScriptBrainArray() {
