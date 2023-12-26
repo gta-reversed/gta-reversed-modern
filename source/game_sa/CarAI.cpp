@@ -8,6 +8,8 @@
 
 #include "CarAI.h"
 #include "CarCtrl.h"
+#include "TaskComplexMedicTreatInjuredPed.h"
+#include "TaskSimpleCarDrive.h"
 
 void CCarAI::InjectHooks() {
     RH_ScopedClass(CCarAI);
