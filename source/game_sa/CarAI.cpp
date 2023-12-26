@@ -45,9 +45,9 @@ void CCarAI::AddAmbulanceOccupants(CVehicle* vehicle) {
     CPed* driver    = vehicle->SetUpDriver(PED_TYPE_NONE, false, false);
     CPed* passenger = vehicle->SetupPassenger(1, PED_TYPE_NONE, false, false);
 
-    driver->GetTaskManager().SetTask(new CTaskSimpleCarDrive{ vehicle, nullptr, false }, TASK_PRIMARY_DEFAULT);
+    driver->GetTaskManager().SetTask(new CTaskSimpleCarDrive{ vehicle }, TASK_PRIMARY_DEFAULT);
     driver->GetTaskManager().SetTask(new CTaskComplexMedicTreatInjuredPed{ vehicle, passenger, true }, TASK_PRIMARY_PRIMARY);
-    passenger->GetTaskManager().SetTask(new CTaskSimpleCarDrive{ vehicle, nullptr, false }, TASK_PRIMARY_DEFAULT);
+    passenger->GetTaskManager().SetTask(new CTaskSimpleCarDrive{ vehicle }, TASK_PRIMARY_DEFAULT);
     passenger->GetTaskManager().SetTask(new CTaskComplexMedicTreatInjuredPed{ vehicle, driver, false }, TASK_PRIMARY_PRIMARY);
 }
 
