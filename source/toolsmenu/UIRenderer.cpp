@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "UIRenderer.h"
+#include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskComplexFollowNodeRoute.h"
 #include "TaskComplexExtinguishFires.h"
 #include "TaskComplexStealCar.h"
@@ -166,8 +167,11 @@ void UIRenderer::DebugCode() {
         }
     }
 
-    if (pad->IsStandardKeyJustPressed('1')) {
-        CCheat::JetpackCheat();
+    if (pad->IsStandardKeyJustPressed('T')) {
+        FindPlayerPed()->GetTaskManager().SetTask(
+            new CTaskComplexTurnToFaceEntityOrCoord{ CVector{} },
+            TASK_PRIMARY_PRIMARY
+        );
     }
     if (pad->IsStandardKeyJustPressed('2')) {
         CCheat::MoneyArmourHealthCheat();
