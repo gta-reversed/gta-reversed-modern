@@ -176,7 +176,7 @@ void ProcessEventResponse( // TODO: Make this a method
 ) {
     std::apply([]<typename T>(T r){
         using enum ResponseType;
-        switch (T::Idx) {
+        switch (T::Type) {
         case PHYSICAL:               physical = r;             break;
         case EVENT:                  event = r;                break;
         case SECONDARY_AIM:          secondaryAim = r;         break;
@@ -460,10 +460,10 @@ void CEventHandler::SetEventResponseTask(const CEvent& event) {
     }
 
     if (event.HasEditableResponse()) {
-        const auto eeditable = &static_cast<const CEventEditableResponse&>(event);
+        const auto eEditable = &static_cast<const CEventEditableResponse&>(event);
         if (const auto tfacial = tm->GetTaskSecondaryFacial()) {
-            if (eeditable->GetFacialExpressionType() != eFacialExpression::NONE) {
-                tfacial->SetRequest(eeditable->GetFacialExpressionType(), 10'000);
+            if (eEditable->GetFacialExpressionType() != eFacialExpression::NONE) {
+                tfacial->SetRequest(eEditable->GetFacialExpressionType(), 10'000);
             }
         }
     }
@@ -836,7 +836,9 @@ void CEventHandler::ComputeDamageResponse(CEventDamage* e, CTask* tactive, CTask
         };
 
         if (!e->m_bAddToEventGroup) {
-            // NOTE(Pirulax): Originally the code here used `e->m_pSourceEntity`, but that was probably just a mistake, as the other code piece [copy paste of it] used `e->GetSourceEntity()`.
+            // NOTE(Pirulax):
+            // Originally the code here used `e->m_pSourceEntity`, but that was probably just a mistake,
+            // as the other code piece [copy paste of it] used `e->GetSourceEntity()`.
             return DoComputeDamageAndResponseForPersonality();
         }
 

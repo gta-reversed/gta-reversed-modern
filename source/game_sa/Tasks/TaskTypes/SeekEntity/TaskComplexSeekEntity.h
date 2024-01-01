@@ -32,6 +32,8 @@ class NOTSA_EXPORT_VTABLE CTaskComplexSeekEntity : public CTaskComplex {
     CTaskTimer m_seekTimer{};
     CTaskTimer m_scanTimer{};
     T_PosCalc m_entitySeekPosCalculator{};
+
+    // Everything here mustn't be accesed without the proper `T_PosCalc` type!
     eMoveState m_moveState{ PEDMOVE_RUN };
     bool m_flag0x1 : 1{};
     bool m_faceSeekEntityAfterReachingIt : 1{};

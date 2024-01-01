@@ -108,7 +108,7 @@ bool CTaskSimpleThrowProjectile::MakeAbortable(CPed* ped, eAbortPriority priorit
             m_Anim                = nullptr;
         }
     } else if (const auto eDmg = CEvent::DynCast<const CEventDamage>(event)) {
-        if (eDmg->m_damageResponse.m_bHealthZero && eDmg->m_bAddToEventGroup || eDmg->m_bKnockOffPed) {
+        if (eDmg->m_damageResponse.m_bHealthZero && eDmg->m_bAddToEventGroup || eDmg->m_bFallDown) {
             if (m_Anim) {
                 m_Anim->SetDefaultFinishCallback();
                 m_Anim->m_fBlendDelta = -4.0f;
