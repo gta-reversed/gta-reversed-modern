@@ -85,12 +85,12 @@ CTask* CTaskComplexWalkRoundBuildingAttempt::CreateSubTask(eTaskType taskType, C
         * Achieve heading to the first point of the point route
         */
         assert(approxEqual(
-            (m_route->m_vecPoints[0] - ped->GetPosition()).Heading(),
-            CGeneral::LimitRadianAngle(CGeneral::GetRadianAngleBetweenPoints({ m_route->m_vecPoints[0] - ped->GetPosition() }, {})),
+            (m_route->m_Entries[0] - ped->GetPosition()).Heading(),
+            CGeneral::LimitRadianAngle(CGeneral::GetRadianAngleBetweenPoints({ m_route->m_Entries[0] - ped->GetPosition() }, {})),
             0.001f
         )); // TODO: Remove if doesn't assert
         return new CTaskSimpleAchieveHeading{
-            (m_route->m_vecPoints[0] - ped->GetPosition()).Heading(),
+            (m_route->m_Entries[0] - ped->GetPosition()).Heading(),
             1.f,
             0.1f
         };
@@ -147,9 +147,9 @@ void CTaskComplexWalkRoundBuildingAttempt::ComputeCrapRoute(CPed const& ped) {
             if (cpToPedDir.NormaliseAndMag() < 0.35f) {
                 return;
             }
-            m_crapRoute->AddPoints(cp.m_vecPoint - cpToPedDir * 0.35f);
+            m_crapRoute->Add(cp.m_vecPoint - cpToPedDir * 0.35f);
         } else {
-            m_crapRoute->AddPoints(target);
+            m_crapRoute->Add(target);
         }
     }
 
@@ -205,7 +205,7 @@ void CTaskComplexWalkRoundBuildingAttempt::ComputeRoute(CPed const& ped) {
         }
 
         if (!m_crapRouteHasPoints) {
-            m_crapRoute->MaybeAddPoints(
+            m_crapRoute->AddMultipleUnlessFull(
                 target,
                 targetOffseted
             );

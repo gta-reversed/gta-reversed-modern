@@ -43,6 +43,7 @@ public:
 
     void QuitIK(CPed* ped) const;
     void SetUpIK(CPed* ped);
+    void SetHeading(float heading, float maxHeading, float changeRateMult);
 
     static void InjectHooks() {};
 };

@@ -93,3 +93,10 @@ void CTaskSimpleAchieveHeading::SetUpIK(CPed* ped) {
     g_ikChainMan.LookAt("TaskAchvHeading", ped, nullptr, 5000, BONE_UNKNOWN, &pos, false, 0.25f, 500, 3, false);
     m_b1 = true;
 }
+
+// unknown addr
+void CTaskSimpleAchieveHeading::SetHeading(float heading, float maxHeading, float changeRateMult) {
+    m_fAngle          = heading;
+    m_fChangeRateMult = changeRateMult;
+    m_fMaxHeading     = maxHeading;
+}

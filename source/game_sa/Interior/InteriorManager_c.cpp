@@ -181,7 +181,7 @@ int32 InteriorManager_c::IsInteriorEffectVisible(C2dEffect* effect, CEntity* ent
 }
 
 // 0x598620
-Interior_c* InteriorManager_c::GetPedsInterior(CPed* ped) {
+Interior_c* InteriorManager_c::GetPedsInterior(const CPed* ped) {
     return GetVectorsInterior(ped->GetPosition());
 }
 
@@ -247,7 +247,7 @@ int8 InteriorManager_c::IsGroupActive(int32 groupType) {
 }
 
 // 0x598240
-InteriorGroup_c* InteriorManager_c::GetPedsInteriorGroup(CPed* ped) {
+InteriorGroup_c* InteriorManager_c::GetPedsInteriorGroup(const CPed* ped) {
     for (auto& grp : m_interiorGroupList) {
         if (notsa::contains(grp.GetPeds(), ped)) {
             return &grp;

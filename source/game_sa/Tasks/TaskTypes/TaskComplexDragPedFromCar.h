@@ -14,7 +14,7 @@ public:
     ~CTaskComplexDragPedFromCar() override;
 
     eTaskType GetTaskType() const override { return Type; } // 0x6404C0
-    CTask* Clone() const override { return new CTaskComplexDragPedFromCar(m_Ped, m_draggedPedDownTime); } // 0x643950
+    CTask* Clone() const override { return new CTaskComplexDragPedFromCar(m_Ped, m_DraggedPedDownTime); } // 0x643950
 
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

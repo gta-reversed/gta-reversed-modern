@@ -1203,7 +1203,7 @@ void CWorld::RemoveFallenPeds() {
         if (!ped->IsCreatedBy(ePedCreatedBy::PED_GAME) || ped->IsPlayer()) {
             CNodeAddress pathNodeAddress = ThePaths.FindNodeClosestToCoors(vecPedPos, PATH_TYPE_PED, 1000000.0f, 0, 0, 0, 0, 0);
             if (pathNodeAddress.IsValid()) {
-                CVector pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
+                CVector pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetPosition();
                 pathNodePos.z += 2.0f;
                 ped->Teleport(pathNodePos, false);
             } else
@@ -1238,7 +1238,7 @@ void CWorld::RemoveFallenCars() {
         if (ShouldWeKeepIt()) {
             CNodeAddress pathNodeAddress = ThePaths.FindNodeClosestToCoors(vecPos, PATH_TYPE_PED, 1000000.0f, 0, 0, 0, 0, 0);
             if (pathNodeAddress.IsValid()) {
-                const auto pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
+                const auto pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetPosition();
                 vehicle->Teleport(pathNodePos + CVector(0, 0, 3), true);
             } else
                 vehicle->Teleport(CVector(vecPos.x, vecPos.y, 0), true);

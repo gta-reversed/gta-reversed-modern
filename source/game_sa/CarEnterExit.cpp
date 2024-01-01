@@ -18,9 +18,9 @@ void CCarEnterExit::InjectHooks() {
     RH_ScopedInstall(AddInCarAnim, 0x64F720);
     RH_ScopedInstall(CarHasDoorToClose, 0x64EE10);
     // RH_ScopedInstall(CarHasDoorToOpen, 0x0);
-    // RH_ScopedInstall(CarHasOpenableDoor, 0x0);
+    RH_ScopedInstall(CarHasOpenableDoor, 0x64EE50);
     // RH_ScopedInstall(CarHasPartiallyOpenDoor, 0x0);
-    // RH_ScopedInstall(ComputeDoorFlag, 0x0);
+    RH_ScopedInstall(ComputeDoorFlag, 0x64E550);
     // RH_ScopedInstall(ComputeOppositeDoorFlag, 0x0);
     RH_ScopedInstall(ComputePassengerIndexFromCarDoor, 0x64F1E0);
     RH_ScopedInstall(ComputeSlowJackedPed, 0x64F070);
@@ -31,8 +31,8 @@ void CCarEnterExit::InjectHooks() {
     RH_ScopedInstall(GetPositionToOpenCarDoor, 0x64E740, { .reversed = false });
     RH_ScopedInstall(IsCarDoorInUse, 0x64ec90, { .reversed = false });
     // RH_ScopedInstall(IsCarDoorReady, 0x0);
-    // RH_ScopedInstall(IsCarQuickJackPossible, 0x0);
-    // RH_ScopedInstall(IsCarSlowJackRequired, 0x0);
+    RH_ScopedInstall(IsCarQuickJackPossible, 0x64EF00);
+    RH_ScopedInstall(IsCarSlowJackRequired, 0x64EF70, { .reversed = false });
     RH_ScopedInstall(IsClearToDriveAway, 0x6509B0);
     RH_ScopedInstall(IsPathToDoorBlockedByVehicleCollisionModel, 0x651210);
     RH_ScopedInstall(IsPedHealthy, 0x64EEE0);
@@ -81,17 +81,18 @@ void CCarEnterExit::AddInCarAnim(const CVehicle* vehicle, CPed* ped, bool bAsDri
 // 0x64EE10
 bool CCarEnterExit::CarHasDoorToClose(const CVehicle* vehicle, int32 doorId) {
     auto& veh = const_cast<CVehicle&>(*vehicle);
-    return !veh.IsDoorMissing(doorId) && !veh.IsDoorClosed(doorId);
+    return !veh.IsDoorMissingU32(doorId) && !veh.IsDoorClosedU32(doorId);
 }
 
-// 0X64EDD0
+// 0x64EDD0
 bool CCarEnterExit::CarHasDoorToOpen(const CVehicle* vehicle, int32 doorId) {
-    return plugin::CallAndReturn<bool, 0X64EDD0, const CVehicle*, int32>(vehicle, doorId);
+    auto& veh = const_cast<CVehicle&>(*vehicle);
+    return !veh.IsDoorMissingU32((uint32)doorId) && !veh.IsDoorMissingU32((uint32)doorId);
 }
 
-// 0x
+// 0x64EE50
 bool CCarEnterExit::CarHasOpenableDoor(const CVehicle* vehicle, int32 doorId_UnusedArg, const CPed* ped) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32, const CPed*>(vehicle, doorId_UnusedArg, ped);
+    return vehicle->CanPedOpenLocks(ped);
 }
 
 // 0x
@@ -99,9 +100,27 @@ bool CCarEnterExit::CarHasPartiallyOpenDoor(const CVehicle* vehicle, int32 doorI
     return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32>(vehicle, doorId);
 }
 
-// 0x
-int32 CCarEnterExit::ComputeDoorFlag(const CVehicle* vehicle, int32 doorId, bool bCheckVehicleType) {
-    return plugin::CallAndReturn<int32, 0x0, const CVehicle*, int32, bool>(vehicle, doorId, bCheckVehicleType);
+// 0x64E550
+int32 CCarEnterExit::ComputeDoorFlag(const CVehicle* vehicle, int32 doorId, bool bSettingFlags) {
+    if (bSettingFlags && (vehicle->IsBike() || vehicle->m_pHandlingData->m_bTandemSeats)) {
+        switch (doorId) {
+        case 8:
+        case 10:
+        case 18: return 5;
+        case 9:
+        case 11: return 10;
+        default: NOTSA_UNREACHABLE(); // Originally `return 0`
+        }
+    } else {
+        switch (doorId) {
+        case 8:  return 4;
+        case 9:  return 8;
+        case 10:
+        case 18: return 1;
+        case 11: return 2;
+        default: NOTSA_UNREACHABLE(); // Originally `return 0`
+        }
+    }
 }
 
 // 0x
@@ -365,14 +384,20 @@ bool CCarEnterExit::IsCarDoorReady(const CVehicle* vehicle, int32 doorId) {
     return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32>(vehicle, doorId);
 }
 
-// 0x
-bool CCarEnterExit::IsCarQuickJackPossible(const CVehicle* vehicle, int32 doorId, const CPed* ped) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32, const CPed*>(vehicle, doorId, ped);
+// 0x64EF00
+bool CCarEnterExit::IsCarQuickJackPossible(CVehicle* vehicle, int32 doorId, const CPed* ped) {
+    // I think doorId 10 is the driver's door
+    //if (doorId == 10 && vehicle->IsAutomobile() && !vehicle->IsDoorMissingU32(doorId) && vehicle->IsDoorClosedU32(doorId)) {
+    //    // This does *nothing* - I tried `return vehicle->CanPedOpenLocks(ped);` but that just breaks everything.
+    //    // Basically, returning anything but `false` from here breaks the code (in `CTaskComplexEnterCar`)
+    //    vehicle->CanPedOpenLocks(ped); 
+    //}
+    return false;
 }
 
-// 0x
+// 0x64EF70
 bool CCarEnterExit::IsCarSlowJackRequired(const CVehicle* vehicle, int32 doorId) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32>(vehicle, doorId);
+    return plugin::CallAndReturn<bool, 0x64EF70, const CVehicle*, int32>(vehicle, doorId);
 }
 
 // 0x6509B0
@@ -502,8 +527,9 @@ void CCarEnterExit::MakeUndraggedDriverPedLeaveCar(const CVehicle* vehicle, cons
     plugin::Call<0x0, const CVehicle*, const CPed*>(vehicle, ped);
 }
 
+// 0x64F540
 void CCarEnterExit::MakeUndraggedPassengerPedsLeaveCar(const CVehicle* targetVehicle, const CPed* draggedPed, const CPed* ped) {
-    plugin::Call<0x0, const CVehicle*, const CPed*, const CPed*>(targetVehicle, draggedPed, ped);
+    plugin::Call<0x64F540, const CVehicle*, const CPed*, const CPed*>(targetVehicle, draggedPed, ped);
 }
 
 // unused
