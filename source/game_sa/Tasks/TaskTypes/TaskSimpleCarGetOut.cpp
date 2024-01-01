@@ -165,7 +165,7 @@ bool CTaskSimpleCarGetOut::ProcessPed(CPed* ped) {
         StartAnim(ped);
         ped->SetPedPositionInCar();
         ped->ReplaceWeaponWhenExitingVehicle();
-        m_vehHasDoorToOpen = CCarEnterExit::CarHasDoorToOpen(m_veh, m_door);
+        m_vehHasDoorToOpen = CCarEnterExit::CarHasDoorToOpen(m_veh, (eDoors)m_door);
     }
 
     return false;
