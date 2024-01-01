@@ -87,8 +87,9 @@ struct SClumpAnimAssoc {
     int16                m_nAnimId;
     uint16               m_nFlags; // TODO: use bitfield
 
-    float GetTimeProgress()               const;
-    float GetBlendAmount(float weight)    const { return IsPartial() ? m_fBlendAmount : m_fBlendAmount * weight; }
+    float GetTimeProgress()                  const;
+    float GetBlendAmount(float weight = 1.f) const { return IsPartial() ? m_fBlendAmount : m_fBlendAmount * weight; }
+
     [[nodiscard]] bool IsRunning()        const { return (m_nFlags & ANIMATION_STARTED) != 0; }
     [[nodiscard]] bool IsRepeating()      const { return (m_nFlags & ANIMATION_LOOPED) != 0; }
     [[nodiscard]] bool IsPartial()        const { return (m_nFlags & ANIMATION_PARTIAL) != 0; }
@@ -120,6 +121,7 @@ public:
     void Init(CAnimBlendStaticAssociation& source);
 
     void ReferenceAnimBlock();
+    void SetBlendDelta(float value) { m_fBlendDelta = value; }
     void SetBlend(float blendAmount, float blendDelta);
     void SetBlendTo(float blendAmount, float blendDelta);
     void SetCurrentTime(float currentTime);
