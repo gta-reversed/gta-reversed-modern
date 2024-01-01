@@ -308,12 +308,14 @@ void CEventHandler::HandleEvents() {
     const auto tempEventRespTask       = pedTM->GetTemporaryEventResponseTask();
     const auto presistentEventRespTask = pedTM->GetPresistentEventResponseTask();
 
-    const auto pedEG                = &m_ped->GetEventGroup();
-    const auto highestPriorityEvent = pedEG->GetHighestPriorityEvent();
+    const auto pedEG                     = &m_ped->GetEventGroup();
+    const auto pedEGHighestPriorityEvent = pedEG->GetHighestPriorityEvent();
 
     pedEG->TickEvents();
 
-    m_history.RecordAbortedTask(!lastAbortedTask || !primaryTask || lastAbortedTask != primaryTask ? nullptr : primaryTask);
+    if (!lastAbortedTask) {
+        m_history.RecordAbortedTask(primaryTask && lastAbortedTask == primaryTask ? primaryTask : nullptr);
+    }
 
     if (!tempEventRespTask) {
         if (!presistentEventRespTask) {
@@ -332,8 +334,8 @@ void CEventHandler::HandleEvents() {
         }
 
         if (const auto currEvent = m_history.GetCurrentEvent()) { // 0x4C4015
-            if (currEvent->GetEventType() == highestPriorityEvent->GetEventType()) {
-                pedEG->Remove(highestPriorityEvent);
+            if (currEvent->GetEventType() == pedEGHighestPriorityEvent->GetEventType()) {
+                pedEG->Remove(pedEGHighestPriorityEvent);
                 pedEG->RemoveInvalidEvents(false);
                 pedEG->Reorganise();
                 if (!primaryTask) {
@@ -1893,6 +1895,9 @@ void CEventHandler::ComputePersonalityResponseToDamage(CEventDamage* e, CPed* sr
             return new CTaskComplexUseClosestFreeScriptedAttractorRun{};
         case TASK_COMPLEX_USE_CLOSEST_FREE_SCRIPTED_ATTRACTOR_SPRINT:
             return new CTaskComplexUseClosestFreeScriptedAttractorSprint{};
+        case TASK_SIMPLE_BE_DAMAGED: // 0x4BFA09
+        case TASK_NONE:
+            return nullptr;
         default:
             NOTSA_UNREACHABLE();
         }

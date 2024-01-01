@@ -130,7 +130,7 @@ public:
     void ProcessStaticCounter();
     void ProcessFirst();
     void Process();
-    CTask* GetActivePrimaryTask();
+    CTask* GetActivePrimaryTask() const;
     float GetPedFOVRange() const;
     void IncrementAngerAtPlayer(uint8 anger);
 

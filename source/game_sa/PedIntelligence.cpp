@@ -1007,18 +1007,13 @@ void CPedIntelligence::Process() {
 }
 
 // 0x4B85B0
-CTask* CPedIntelligence::GetActivePrimaryTask()
-{
-    CTask* task = m_TaskMgr.GetTaskPrimary(TASK_PRIMARY_PHYSICAL_RESPONSE);
-    if (task != nullptr)
-        return task;
-
-    task = m_TaskMgr.GetTaskPrimary(TASK_PRIMARY_EVENT_RESPONSE_TEMP);
-    if (task != nullptr)
-        return task;
-
-    task = m_TaskMgr.GetTaskPrimary(TASK_PRIMARY_EVENT_RESPONSE_NONTEMP);
-    return task;
+CTask* CPedIntelligence::GetActivePrimaryTask() const {
+    for (const auto i : { TASK_PRIMARY_PHYSICAL_RESPONSE, TASK_PRIMARY_EVENT_RESPONSE_TEMP, TASK_PRIMARY_EVENT_RESPONSE_NONTEMP }) {
+        if (CTask* task = m_TaskMgr.GetTaskPrimary(TASK_PRIMARY_PHYSICAL_RESPONSE)) {
+            return task;
+        }
+    }
+    return nullptr;
 }
 
 // 0x4ABEA0

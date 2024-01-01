@@ -316,7 +316,12 @@ void CTaskManager::ManageTasks() {
 }
 // @notsa
 CTask* CTaskManager::GetPresistentEventResponseTask() const {
-    return notsa::coalesce(GetTaskPrimary(TASK_PRIMARY_PHYSICAL_RESPONSE), GetTaskPrimary(TASK_PRIMARY_EVENT_RESPONSE_NONTEMP));
+    for (const auto i : { TASK_PRIMARY_PHYSICAL_RESPONSE, TASK_PRIMARY_EVENT_RESPONSE_NONTEMP }) {
+        if (const auto t = GetTaskPrimary(i)) {
+            return t;
+        }
+    }
+    return nullptr;
 }
 
 CTask* CTaskManager::GetTemporaryEventResponseTask() const {
