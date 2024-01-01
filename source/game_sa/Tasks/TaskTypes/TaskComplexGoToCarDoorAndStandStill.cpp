@@ -88,10 +88,10 @@ CTask* CTaskComplexGoToCarDoorAndStandStill::CreateSubTask(eTaskType taskType, C
     case TASK_SIMPLE_CAR_WAIT_FOR_DOOR_NOT_TO_BE_IN_USE:
         return new CTaskSimpleCarWaitForDoorNotToBeInUse{ m_Vehicle, (uint32)m_TargetDoor };
     case TASK_COMPLEX_FOLLOW_POINT_ROUTE:
-        return new CTaskComplexFollowPointRoute{ m_MoveState, *m_RouteToDoor };
+        return new CTaskComplexFollowPointRoute{ m_MoveState, *m_RouteToDoor, CTaskComplexFollowPointRoute::Mode::ONE_WAY, 0.5f, 5.f, false, false, false };
     case TASK_SIMPLE_GO_TO_POINT: {
         ped->bHasJustLeftCar = true;
-        return new CTaskSimpleGoToPoint{ m_MoveState, m_TargetPt, m_TargetRadius };
+        return new CTaskSimpleGoToPoint{ m_MoveState, m_TargetPt, m_TargetRadius, true };
     }
     case TASK_FINISHED:
         return nullptr;

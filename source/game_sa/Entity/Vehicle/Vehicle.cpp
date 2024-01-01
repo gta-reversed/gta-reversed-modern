@@ -1726,7 +1726,7 @@ bool CVehicle::IsOnItsSide() const {
 }
 
 // 0x6D1E20
-bool CVehicle::CanPedOpenLocks(CPed* ped) {
+bool CVehicle::CanPedOpenLocks(const CPed* ped) const {
     switch (m_nDoorLock) {
     case CARLOCK_LOCKED:
     case CARLOCK_COP_CAR:
@@ -3324,7 +3324,7 @@ void CVehicle::KillPedsGettingInVehicle() {
         }
 
         if (const auto task = static_cast<CTaskComplexEnterCar*>(ped.GetTaskManager().Find<CTaskComplexEnterCarAsPassenger, CTaskComplexEnterCarAsDriver>());
-            !task || task->m_car != this
+            !task || task->GetTargetCar() != this
         ) {
             continue;
         }
