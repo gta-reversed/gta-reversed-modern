@@ -189,7 +189,7 @@ void CTaskComplexWalkRoundBuildingAttempt::ComputeRoute(CPed const& ped) {
         }
 
         if (CWorld::GetIsLineOfSightClear(target, m_targetPos, true, false, false, false, false, false, false)) {
-            m_route->AddPoints(target);
+            m_route->Add(target);
             m_routeHasPoints = true;
             return;
         }
@@ -205,15 +205,12 @@ void CTaskComplexWalkRoundBuildingAttempt::ComputeRoute(CPed const& ped) {
         }
 
         if (!m_crapRouteHasPoints) {
-            m_crapRoute->AddMultipleUnlessFull(
-                target,
-                targetOffseted
-            );
+            m_crapRoute->AddMultipleUnlessFull(target, targetOffseted);
             m_crapRouteHasPoints = true;
         }
 
         if (CWorld::GetIsLineOfSightClear(targetOffseted, m_targetPos, true, false, false, false, false, false, false)) {
-            m_route->MaybeAddPoints(target, targetOffseted);
+            m_route->AddMultipleUnlessFull(target, targetOffseted);
             m_routeHasPoints = true;
         }
     }
