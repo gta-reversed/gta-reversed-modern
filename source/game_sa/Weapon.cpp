@@ -209,7 +209,9 @@ bool CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType we
     );
 
     bool ret = true;
-    if ((CWeaponInfo::GetWeaponInfo(weaponType)->m_nWeaponFire == eWeaponFire::WEAPON_FIRE_MELEE || weaponType == WEAPON_FALL && creator && creator->GetType() == ENTITY_TYPE_OBJECT) && !victim->bInVehicle) { // 0x73A6F1
+
+    // Using eWeaponSkill::STD will cause an assert if weaponType is not an actual weapon (ex.: WEAPON_FALL)
+    if ((CWeaponInfo::GetWeaponInfo(weaponType, notsa::IsFixBugs() ? eWeaponSkill::POOR : eWeaponSkill::STD)->m_nWeaponFire == eWeaponFire::WEAPON_FIRE_MELEE || weaponType == WEAPON_FALL && creator && creator->GetType() == ENTITY_TYPE_OBJECT) && !victim->bInVehicle) { // 0x73A6F1
         eventDmg.ComputeAnim(victim, true);
         switch (eventDmg.m_nAnimID) {
         case ANIM_ID_SHOT_PARTIAL:
