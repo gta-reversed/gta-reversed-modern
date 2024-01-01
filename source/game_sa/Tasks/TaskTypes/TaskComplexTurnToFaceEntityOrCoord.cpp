@@ -7,8 +7,8 @@ void CTaskComplexTurnToFaceEntityOrCoord::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexTurnToFaceEntityOrCoord, 0x86ff94, 11);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    RH_ScopedOverloadedInstall(Constructor, "1", 0x66B890, CTaskComplexTurnToFaceEntityOrCoord*(CTaskComplexTurnToFaceEntityOrCoord::*)(CEntity *, float, float));
-    RH_ScopedOverloadedInstall(Constructor, "2", 0x66B910, CTaskComplexTurnToFaceEntityOrCoord*(CTaskComplexTurnToFaceEntityOrCoord::*)(CVector const&, float, float));
+    RH_ScopedOverloadedInstall(Constructor, "Coords", 0x66B890, CTaskComplexTurnToFaceEntityOrCoord*(CTaskComplexTurnToFaceEntityOrCoord::*)(CEntity*, float, float));
+    RH_ScopedOverloadedInstall(Constructor, "Entity", 0x66B910, CTaskComplexTurnToFaceEntityOrCoord*(CTaskComplexTurnToFaceEntityOrCoord::*)(CVector const&, float, float));
     RH_ScopedInstall(Destructor, 0x66B960);
 
     RH_ScopedInstall(ComputeTargetHeading, 0x66B9D0);
