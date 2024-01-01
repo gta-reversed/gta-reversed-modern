@@ -83,7 +83,7 @@ CTask* CTaskComplexTrackEntity::CreateNextSubTask(CPed* ped) {
     }
 
     return new CTaskComplexFollowNodeRoute{
-        6,
+        PEDMOVE_RUN,
         m_toTrack->GetPosition(),
         0.5f,
         0.2f,

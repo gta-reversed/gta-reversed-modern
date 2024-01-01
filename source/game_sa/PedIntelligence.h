@@ -45,7 +45,7 @@ public:
     float                  m_fSeeingRange;
     uint32                 m_nDmNumPedsToScan;
     float                  m_fDmRadius;
-    float                  field_CC;
+    float                  m_FollowNodeThresholdDist;
     char                   field_D0;
     uint8                  m_nEventId;
     uint8                  m_nEventPriority;

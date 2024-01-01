@@ -154,7 +154,7 @@ public:
     static void InjectHooks();
 
     /// Get uncompressed world position
-    CVector GetNodeCoors() const {
+    CVector GetPosition() const {
         return UncompressLargeVector(m_vPos);
     }
 
