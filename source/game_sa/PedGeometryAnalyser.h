@@ -5,6 +5,7 @@
 
 #include "Vector.h"
 #include "Base.h"
+#include "Route.hpp"
 
 class CVector;
 class CEntity;
@@ -12,51 +13,11 @@ class CPed;
 class CColSphere;
 class CPhysical;
 
-class CPointRoute {
+class CPointRoute : public notsa::Route<CVector> {
 public:
     static void* operator new(uint32 size);
     static void operator delete(void* ptr, size_t sz);
-
-    /// Get all active points
-    auto GetPoints()       { return m_vecPoints | rng::views::take(m_nNumPoints); }
-    auto GetPoints() const { return m_vecPoints | rng::views::take(m_nNumPoints); }
-
-    /// Are there are no points
-    bool IsEmpty() const { return m_nNumPoints == 0; }
-
-    /// Is there space for more points
-    bool IsFull()  const { return (size_t)m_nNumPoints >= std::size(m_vecPoints); }
-
-    /// Add a point (Doesn't check whenever there's space for it)
-    template<typename... T_Points>
-    void AddPoints(T_Points&&... point) { ((m_vecPoints[m_nNumPoints++] = point), ...); }
-
-    /// Add a point if we aren't full yet
-    void MaybeAddPoint(const CVector& point) {
-        if (!IsFull()) {
-            AddPoints(point);
-        }
-    }
-
-    /// Add points if there's space for them
-    template<typename... T_Points>
-    void MaybeAddPoints(T_Points&&... point) { (MaybeAddPoint(point), ...); }
-
-    /// Reverse the order of points
-    void Reverse() { rng::reverse(GetPoints()); }
-
-    /// Clear all points
-    void Clear() { m_nNumPoints = 0; }
-
-    // Access active points
-    CVector& operator[](size_t idx)       { return GetPoints()[idx]; }
-    CVector  operator[](size_t idx) const { return GetPoints()[idx]; }
-
-    // TODO: Make private
-    uint32                 m_nNumPoints{};
-    std::array<CVector, 8> m_vecPoints; // NOTE: Use `GetPoints` to iterate over only the valid points
 };
-
 VALIDATE_SIZE(CPointRoute, 0x64);
 
 class CPedGeometryAnalyser {
@@ -109,9 +70,17 @@ public:
     static bool GetIsLineOfSightClear(const CVector& a1, const CVector& a2, CEntity& a3);
     static CPed* GetNearestPed(const CVector& point);
 
-    static bool IsEntityBlockingTarget(CEntity* entity, const CVector& point, float distance);
-    static bool IsInAir(const CPed& ped);
-    static bool IsWanderPathClear(const CVector& a1, const CVector& a2, float a3, int32 a4);
+    static bool   IsEntityBlockingTarget(CEntity* entity, const CVector& point, float distance);
+    static bool   IsInAir(const CPed& ped);
+
+    enum class WanderPathClearness : uint32 {
+        BLOCKED_HEIGHT,
+        BLOCKED_LOS,
+        BLOCKED_WATER,
+        BLOCKED_SHARP_DROP,
+        CLEAR,
+    };
+    static WanderPathClearness IsWanderPathClear(const CVector& a1, const CVector& a2, float a3, int32 a4);
 
     static bool LiesInsideBoundingBox(const CPed& ped, const CVector& posn, CEntity& entity);
 };
