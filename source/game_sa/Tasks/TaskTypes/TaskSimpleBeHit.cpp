@@ -174,23 +174,21 @@ bool CTaskSimpleBeHit::ProcessPed(CPed* ped) {
     }
 
     if (m_nDirn == 0 && m_Attacker && !m_Attacker->IsPlayer()) { // todo: m_nDirn == 0
-        const auto dir = m_Attacker->GetPosition() - ped->GetPosition();
-        ped->m_fAimingRotation = dir.Heading();
+        ped->m_fAimingRotation = (m_Attacker->GetPosition() - ped->GetPosition()).Heading();
     }
 
-    if (m_Anim)
+    if (m_Anim) {
         return false;
+    }
 
-    const auto ResetAndSay = [ped] {
-        ped->DisablePedSpeech(true);
-        ped->EnablePedSpeech();
-        return ped->Say(16, 1000) >= 0;
-    };
-    if (m_Attacker && m_Attacker->IsPlayer() && m_Attacker->m_nPedType != PED_TYPE_GANG2 && ResetAndSay()) {
-        // NOP todo: remove lambda
-    } else {
+    if (   !m_Attacker
+        || !m_Attacker->IsPlayer()
+        || m_Attacker->m_nPedType != PED_TYPE_GANG2
+        || (ped->DisablePedSpeech(true), ped->EnablePedSpeech(), ped->Say(16, 1000) < 0)
+    ) {
         ped->Say(345);
     }
+
     StartAnim(ped);
     return false;
 }
