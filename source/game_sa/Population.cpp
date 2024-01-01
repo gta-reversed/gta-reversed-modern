@@ -1185,7 +1185,7 @@ void CPopulation::CreateWaitingCoppers(CVector createAt, float createaWithHeadin
             const auto veh = new CAutomobile{ copCarModel, RANDOM_VEHICLE, true };
 
             // Set vehicle's position to the node's 
-            veh->SetPosn(ThePaths.GetPathNode(nodeAddr)->GetNodeCoors());
+            veh->SetPosn(ThePaths.GetPathNode(nodeAddr)->GetPosition());
             veh->SetStatus(STATUS_ABANDONED);
 
             // Adjust vehicle to be pointing at the creation coords
