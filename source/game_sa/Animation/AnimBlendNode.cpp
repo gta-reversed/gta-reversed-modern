@@ -20,51 +20,51 @@ void CAnimBlendNode::InjectHooks() {
     RH_ScopedInstall(NextKeyFrame, 0x4D04A0, { .reversed = false });
     RH_ScopedInstall(NextKeyFrameCompressed, 0x4D0570, { .reversed = false });
     RH_ScopedInstall(SetupKeyFrameCompressed, 0x4D0650);
-    RH_ScopedInstall(Update, 0x4D06C0, { .reversed = false });
+    RH_ScopedInstall(Update, 0x4D06C0);
     RH_ScopedInstall(UpdateCompressed, 0x4D08D0, { .reversed = false });
 }
 
 // 0x4CFB70
 void CAnimBlendNode::Init() {
-    m_pAnimBlendAssociation = nullptr;
-    m_pAnimSequence = nullptr;
-    m_fRemainingTime = 0.0f;
-    m_PreviousKeyFrameId = -1;
-    m_nNextKeyFrameId = -1;
+    m_BlendAssoc = nullptr;
+    m_BlendSeq = nullptr;
+    m_RemainingTime = 0.0f;
+    m_KeyFrameB = -1;
+    m_KeyFrameA = -1;
 }
 
 // 0x4D0240
 bool CAnimBlendNode::FindKeyFrame(float time) {
-    if (m_pAnimSequence->m_nFrameCount < 1) {
+    if (m_BlendSeq->m_nFrameCount < 1) {
         return false;
     }
 
-    m_nNextKeyFrameId = 0;
-    m_PreviousKeyFrameId = m_nNextKeyFrameId;
+    m_KeyFrameA = 0;
+    m_KeyFrameB = m_KeyFrameA;
 
-    if (m_pAnimSequence->m_nFrameCount == 1) {
-        m_fRemainingTime = 0.0f;
+    if (m_BlendSeq->m_nFrameCount == 1) {
+        m_RemainingTime = 0.0f;
         CalcDeltas();
         return true;
     }
 
     // advance until t is between m_PreviousKeyFrameId and m_nNextKeyFrameId
     // maybe check if GetUncompressedFrame is < numFrames?
-    while (time > m_pAnimSequence->GetUncompressedFrame(++m_nNextKeyFrameId)->deltaTime) {
-        time -= m_pAnimSequence->GetUncompressedFrame(m_nNextKeyFrameId)->deltaTime;
-        if (m_nNextKeyFrameId + 1 >= m_pAnimSequence->m_nFrameCount) {
+    while (time > m_BlendSeq->GetUncompressedFrame(++m_KeyFrameA)->deltaTime) {
+        time -= m_BlendSeq->GetUncompressedFrame(m_KeyFrameA)->deltaTime;
+        if (m_KeyFrameA + 1 >= m_BlendSeq->m_nFrameCount) {
             // reached end of animation
-            if (!m_pAnimBlendAssociation->IsRepeating()) {
+            if (!m_BlendAssoc->IsRepeating()) {
                 CalcDeltas();
-                m_fRemainingTime = 0.0f;
+                m_RemainingTime = 0.0f;
                 return false;
             }
-            m_nNextKeyFrameId = 0;
+            m_KeyFrameA = 0;
         }
-        m_PreviousKeyFrameId = m_nNextKeyFrameId;
+        m_KeyFrameB = m_KeyFrameA;
     }
 
-    m_fRemainingTime = m_pAnimSequence->GetUncompressedFrame(m_nNextKeyFrameId)->deltaTime - time;
+    m_RemainingTime = m_BlendSeq->GetUncompressedFrame(m_KeyFrameA)->deltaTime - time;
 
     CalcDeltas();
     return true;
@@ -72,30 +72,30 @@ bool CAnimBlendNode::FindKeyFrame(float time) {
 
 // 0x4D00E0
 void CAnimBlendNode::CalcTheta(float angle) {
-    m_fTheta0 = std::acos(std::min(angle, 1.0f));
-    m_fTheta1 = m_fTheta0 == 0.0f ? 0.0f : 1.0f / std::sin(m_fTheta0);
+    m_Theta = std::acos(std::min(angle, 1.0f));
+    m_InvSinTheta = m_Theta == 0.0f ? 0.0f : 1.0f / std::sin(m_Theta);
 }
 
 // 0x4D0190
 void CAnimBlendNode::CalcDeltas() {
-    if (!m_pAnimSequence->m_numFramesSet) {
+    if (!m_BlendSeq->m_bHasRotation) {
         return;
     }
 
-    KeyFrame* kfA = m_pAnimSequence->GetUncompressedFrame(m_nNextKeyFrameId);
-    KeyFrame* kfB = m_pAnimSequence->GetUncompressedFrame(m_PreviousKeyFrameId);
+    KeyFrame* kfA = m_BlendSeq->GetUncompressedFrame(m_KeyFrameA);
+    KeyFrame* kfB = m_BlendSeq->GetUncompressedFrame(m_KeyFrameB);
 
     CalcTheta(DotProduct(kfA->rotation, kfB->rotation));
 }
 
 // 0x4D0350
 void CAnimBlendNode::CalcDeltasCompressed() {
-    if (!m_pAnimSequence->m_numFramesSet) {
+    if (!m_BlendSeq->m_bHasRotation) {
         return;
     }
 
-    KeyFrameCompressed* kfA = m_pAnimSequence->GetCompressedFrame(m_nNextKeyFrameId);
-    KeyFrameCompressed* kfB = m_pAnimSequence->GetCompressedFrame(m_PreviousKeyFrameId);
+    KeyFrameCompressed* kfA = m_BlendSeq->GetCompressedFrame(m_KeyFrameA);
+    KeyFrameCompressed* kfB = m_BlendSeq->GetCompressedFrame(m_KeyFrameB);
     CQuaternion rotA, rotB;
     kfA->GetRotation(&rotA);
     kfB->GetRotation(&rotB);
@@ -144,18 +144,18 @@ bool CAnimBlendNode::NextKeyFrameNoCalc() {
 
 // 0x4D0650
 bool CAnimBlendNode::SetupKeyFrameCompressed() {
-    if (m_pAnimSequence->m_nFrameCount < 1) {
+    if (m_BlendSeq->m_nFrameCount < 1) {
         return false;
     }
 
-    m_nNextKeyFrameId = 1;
-    m_PreviousKeyFrameId = 0;
+    m_KeyFrameA = 1;
+    m_KeyFrameB = 0;
 
-    if (m_pAnimSequence->m_nFrameCount == 1) {
-        m_nNextKeyFrameId = 0;
-        m_fRemainingTime = 0.0f;
+    if (m_BlendSeq->m_nFrameCount == 1) {
+        m_KeyFrameA = 0;
+        m_RemainingTime = 0.0f;
     } else
-        m_fRemainingTime = m_pAnimSequence->GetCompressedFrame(m_nNextKeyFrameId)->GetDeltaTime();
+        m_RemainingTime = m_BlendSeq->GetCompressedFrame(m_KeyFrameA)->GetDeltaTime();
 
     CalcDeltasCompressed();
     return true;
@@ -163,7 +163,38 @@ bool CAnimBlendNode::SetupKeyFrameCompressed() {
 
 // 0x4D06C0
 bool CAnimBlendNode::Update(CVector& trans, CQuaternion& rot, float weight) {
-    return plugin::CallMethodAndReturn<bool, 0x4D06C0, CAnimBlendNode*, CVector&, CQuaternion&, float>(this, trans, rot, weight);
+    bool looped = false;
+
+    trans = CVector(0.0f, 0.0f, 0.0f);
+    rot   = CQuaternion(0.0f, 0.0f, 0.0f, 0.0f);
+
+    if (m_BlendAssoc->IsRunning()) {
+        m_RemainingTime -= m_BlendAssoc->m_TimeStep;
+        if (m_RemainingTime <= 0.0f) {
+            looped = NextKeyFrame();
+        }
+    }
+
+    float blend = m_BlendAssoc->GetBlendAmount(weight);
+    if (blend > 0.0f) {
+        KeyFrameTrans* kfA = (KeyFrameTrans*)m_BlendSeq->GetKeyFrame(m_KeyFrameA);
+        KeyFrameTrans* kfB = (KeyFrameTrans*)m_BlendSeq->GetKeyFrame(m_KeyFrameB);
+
+        const float t = kfA->deltaTime == 0.0f
+            ? 0.0f
+            : (kfA->deltaTime - m_RemainingTime) / kfA->deltaTime;
+
+        if (m_BlendSeq->m_bHasTranslation) {
+            trans = kfB->translation + t * (kfA->translation - kfB->translation);
+            trans *= blend;
+        }
+        if (m_BlendSeq->m_bHasRotation) {
+            rot.Slerp(kfB->rotation, kfA->rotation, m_Theta, m_InvSinTheta, t);
+            rot *= blend;
+        }
+    }
+
+    return looped;
 }
 
 // 0x4D08D0
@@ -173,9 +204,9 @@ bool CAnimBlendNode::UpdateCompressed(CVector& trans, CQuaternion& rot, float we
 
 // 0x4D0160
 bool CAnimBlendNode::UpdateTime() {
-    if (m_pAnimBlendAssociation->IsRunning()) {
-        m_fRemainingTime -= m_pAnimBlendAssociation->m_fTimeStep;
-        if (m_fRemainingTime <= 0.0f) {
+    if (m_BlendAssoc->IsRunning()) {
+        m_RemainingTime -= m_BlendAssoc->m_TimeStep;
+        if (m_RemainingTime <= 0.0f) {
             return NextKeyFrameNoCalc();
         }
     }

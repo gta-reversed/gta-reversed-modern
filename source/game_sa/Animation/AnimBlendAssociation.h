@@ -75,28 +75,28 @@ public:
 
 struct SClumpAnimAssoc {
     CAnimBlendLink       m_Link;
-    uint16               m_nNumBlendNodes;
+    uint16               m_NumBlendNodes;
     int16                m_nAnimGroup;
-    CAnimBlendNode*      m_pNodeArray;
-    CAnimBlendHierarchy* m_pHierarchy;
-    float                m_fBlendAmount;
-    float                m_fBlendDelta;
-    float                m_fCurrentTime;
-    float                m_fSpeed;
-    float                m_fTimeStep;
-    int16                m_nAnimId;
-    uint16               m_nFlags; // TODO: use bitfield
+    CAnimBlendNode*      m_BlendNodes; // NOTE: Order of these depends on order of nodes in Clump this was built from
+    CAnimBlendHierarchy* m_BlendHier;
+    float                m_BlendAmount;
+    float                m_BlendDelta; // How much `BlendAmount` changes over time
+    float                m_CurrentTime;
+    float                m_Speed;
+    float                m_TimeStep;
+    int16                m_AnimId;
+    uint16               m_Flags; // TODO: use bitfield
 
     float GetTimeProgress()                  const;
-    float GetBlendAmount(float weight = 1.f) const { return IsPartial() ? m_fBlendAmount : m_fBlendAmount * weight; }
+    float GetBlendAmount(float weight = 1.f) const { return IsPartial() ? m_BlendAmount : m_BlendAmount * weight; }
 
-    [[nodiscard]] bool IsRunning()        const { return (m_nFlags & ANIMATION_STARTED) != 0; }
-    [[nodiscard]] bool IsRepeating()      const { return (m_nFlags & ANIMATION_LOOPED) != 0; }
-    [[nodiscard]] bool IsPartial()        const { return (m_nFlags & ANIMATION_PARTIAL) != 0; }
-    [[nodiscard]] bool IsMoving()         const { return (m_nFlags & ANIMATION_MOVEMENT) != 0; }
-    [[nodiscard]] bool HasYTranslation()  const { return (m_nFlags & ANIMATION_TRANSLATE_X) != 0; }
-    [[nodiscard]] bool HasXTranslation()  const { return (m_nFlags & ANIMATION_TRANSLATE_Y) != 0; }
-    [[nodiscard]] bool IsIndestructible() const { return (m_nFlags & ANIMATION_INDESTRUCTIBLE) != 0; }
+    [[nodiscard]] bool IsRunning()        const { return (m_Flags & ANIMATION_STARTED) != 0; }
+    [[nodiscard]] bool IsRepeating()      const { return (m_Flags & ANIMATION_LOOPED) != 0; }
+    [[nodiscard]] bool IsPartial()        const { return (m_Flags & ANIMATION_PARTIAL) != 0; }
+    [[nodiscard]] bool IsMoving()         const { return (m_Flags & ANIMATION_MOVEMENT) != 0; }
+    [[nodiscard]] bool HasYTranslation()  const { return (m_Flags & ANIMATION_TRANSLATE_X) != 0; }
+    [[nodiscard]] bool HasXTranslation()  const { return (m_Flags & ANIMATION_TRANSLATE_Y) != 0; }
+    [[nodiscard]] bool IsIndestructible() const { return (m_Flags & ANIMATION_INDESTRUCTIBLE) != 0; }
 };
 
 class NOTSA_EXPORT_VTABLE CAnimBlendAssociation : public SClumpAnimAssoc {
@@ -121,7 +121,7 @@ public:
     void Init(CAnimBlendStaticAssociation& source);
 
     void ReferenceAnimBlock();
-    void SetBlendDelta(float value) { m_fBlendDelta = value; }
+    void SetBlendDelta(float value) { m_BlendDelta = value; }
     void SetBlend(float blendAmount, float blendDelta);
     void SetBlendTo(float blendAmount, float blendDelta);
     void SetCurrentTime(float currentTime);
@@ -137,9 +137,9 @@ public:
     // NOTSA
     void SetFlag(eAnimationFlags flag, bool value = true) {
         if (value)
-            m_nFlags |= (int)flag;
+            m_Flags |= (int)flag;
         else
-            m_nFlags &= ~(int)flag;
+            m_Flags &= ~(int)flag;
     }
 
     static CAnimBlendAssociation* FromLink(CAnimBlendLink* link) {
@@ -147,10 +147,10 @@ public:
     }
 
     void SetSpeed(float speed) {
-        m_fSpeed = speed;
+        m_Speed = speed;
     }
 
-    auto GetNodes() { return std::span{ &m_pNodeArray, m_nNumBlendNodes }; }
+    auto GetNodes() { return std::span{ &m_BlendNodes, m_NumBlendNodes }; }
     void SetDefaultFinishCallback() { SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); }
 private:
     friend void InjectHooksMain();

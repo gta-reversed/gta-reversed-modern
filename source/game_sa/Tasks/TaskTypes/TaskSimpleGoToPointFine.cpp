@@ -123,7 +123,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped) {
     }
 
     if (pIdleTiredAnimAssoc) {
-        pIdleTiredAnimAssoc->m_fBlendDelta = -4.0f;
+        pIdleTiredAnimAssoc->m_BlendDelta = -4.0f;
         delete pIdleTiredAnimAssoc;
     }
 
@@ -136,50 +136,50 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped) {
             delete walkAnimAssoc;
             if (!runAnimAssoc) {
                 runAnimAssoc = CAnimManager::AddAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_RUN);
-                runAnimAssoc->m_fBlendAmount = 0.0f;
-                runAnimAssoc->m_fSpeed = 1.0f;
+                runAnimAssoc->m_BlendAmount = 0.0f;
+                runAnimAssoc->m_Speed = 1.0f;
             }
-            runAnimAssoc->m_nFlags |= ANIMATION_STARTED;
-            runAnimAssoc->m_fBlendDelta = 0.0f;
-            runAnimAssoc->m_fBlendAmount = 3.0f - m_fMoveRatio;
+            runAnimAssoc->m_Flags |= ANIMATION_STARTED;
+            runAnimAssoc->m_BlendDelta = 0.0f;
+            runAnimAssoc->m_BlendAmount = 3.0f - m_fMoveRatio;
             if (!sprintAnimAssoc) {
                 sprintAnimAssoc = CAnimManager::AddAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_SPRINT);
-                sprintAnimAssoc->m_fBlendAmount = 0.0f;
-                sprintAnimAssoc->m_fSpeed = 1.0f;
+                sprintAnimAssoc->m_BlendAmount = 0.0f;
+                sprintAnimAssoc->m_Speed = 1.0f;
             }
-            sprintAnimAssoc->m_nFlags |= ANIMATION_STARTED;
-            sprintAnimAssoc->m_fBlendDelta = 0.0f;
+            sprintAnimAssoc->m_Flags |= ANIMATION_STARTED;
+            sprintAnimAssoc->m_BlendDelta = 0.0f;
             moveState = PEDMOVE_SPRINT;
-            sprintAnimAssoc->m_fBlendAmount = m_fMoveRatio - 2.0f;
+            sprintAnimAssoc->m_BlendAmount = m_fMoveRatio - 2.0f;
         } else {
             if (!walkAnimAssoc) {
                 walkAnimAssoc = CAnimManager::AddAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_WALK);
-                walkAnimAssoc->m_fBlendAmount = 0.0f;
-                walkAnimAssoc->m_fSpeed = 1.0f;
+                walkAnimAssoc->m_BlendAmount = 0.0f;
+                walkAnimAssoc->m_Speed = 1.0f;
             }
-            walkAnimAssoc->m_nFlags |= ANIMATION_STARTED;
-            walkAnimAssoc->m_fBlendDelta = 0.0f;
-            walkAnimAssoc->m_fBlendAmount = 2.0f - m_fMoveRatio;
+            walkAnimAssoc->m_Flags |= ANIMATION_STARTED;
+            walkAnimAssoc->m_BlendDelta = 0.0f;
+            walkAnimAssoc->m_BlendAmount = 2.0f - m_fMoveRatio;
             if (!runAnimAssoc) {
                 runAnimAssoc = CAnimManager::AddAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_RUN);
-                runAnimAssoc->m_fBlendAmount = 0.0f;
-                runAnimAssoc->m_fSpeed = 1.0f;
+                runAnimAssoc->m_BlendAmount = 0.0f;
+                runAnimAssoc->m_Speed = 1.0f;
             }
-            runAnimAssoc->m_nFlags |= ANIMATION_STARTED;
-            runAnimAssoc->m_fBlendDelta = 0.0f;
-            runAnimAssoc->m_fBlendAmount = m_fMoveRatio - 1.0f;
+            runAnimAssoc->m_Flags |= ANIMATION_STARTED;
+            runAnimAssoc->m_BlendDelta = 0.0f;
+            runAnimAssoc->m_BlendAmount = m_fMoveRatio - 1.0f;
             delete sprintAnimAssoc;
             moveState = PEDMOVE_RUN;
         }
     } else {
         if (!walkAnimAssoc) {
             walkAnimAssoc = CAnimManager::AddAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_WALK);
-            walkAnimAssoc->m_fBlendAmount = 0.0f;
-            walkAnimAssoc->m_fSpeed = 1.0f;
+            walkAnimAssoc->m_BlendAmount = 0.0f;
+            walkAnimAssoc->m_Speed = 1.0f;
         }
-        walkAnimAssoc->m_nFlags |= ANIMATION_STARTED;
-        walkAnimAssoc->m_fBlendAmount = 1.0f;
-        walkAnimAssoc->m_fBlendDelta = 0.0f;
+        walkAnimAssoc->m_Flags |= ANIMATION_STARTED;
+        walkAnimAssoc->m_BlendAmount = 1.0f;
+        walkAnimAssoc->m_BlendDelta = 0.0f;
         delete runAnimAssoc;
         delete sprintAnimAssoc;
     }

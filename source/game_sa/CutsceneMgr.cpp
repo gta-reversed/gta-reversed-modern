@@ -880,7 +880,7 @@ void CCutsceneMgr::SetCutsceneAnim(const char* animName, CObject* object) {
     const auto blendData = RpClumpGetAnimBlendClumpData(object->m_pRwClump);
     blendData->m_Associations.Prepend(&cpyOfTheAnim->m_Link);
 
-    if (cpyOfTheAnim->m_pHierarchy->m_bKeepCompressed) {
+    if (cpyOfTheAnim->m_BlendHier->m_bKeepCompressed) {
         blendData->m_Frames->m_bIsCompressed = true;
     }
 }
@@ -914,9 +914,9 @@ void CCutsceneMgr::SetupCutsceneToStart() {
                 anim->SetFlag(ANIMATION_STARTED, true);
             } else {
                 // Get anim translation and offset the object's position by it
-                const auto animTrans = anim->m_pHierarchy->m_bIsCompressed
-                    ? anim->m_pHierarchy->m_pSequences->GetCompressedFrame(1)->GetTranslation()
-                    : anim->m_pHierarchy->m_pSequences->GetUncompressedFrame(1)->translation;
+                const auto animTrans = anim->m_BlendHier->m_bIsCompressed
+                    ? anim->m_BlendHier->m_pSequences->GetCompressedFrame(1)->GetTranslation()
+                    : anim->m_BlendHier->m_pSequences->GetUncompressedFrame(1)->translation;
                 SetObjPos(ms_cutsceneOffset + animTrans);
 
                 // Start the anim

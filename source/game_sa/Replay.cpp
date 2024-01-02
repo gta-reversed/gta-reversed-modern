@@ -139,20 +139,20 @@ void CReplay::StorePedAnimation(CPed* ped, CStoredAnimationState& state) {
     CAnimBlendAssociation* second{};
     const auto main = RpAnimBlendClumpGetMainAssociation(ped->m_pRwClump, &second, &blendValue);
     if (main) {
-        state[0] = AnimationState::Make(main->m_nAnimId, main->m_fCurrentTime, main->m_fSpeed, static_cast<uint8>(main->m_nAnimGroup));
+        state[0] = AnimationState::Make(main->m_AnimId, main->m_CurrentTime, main->m_Speed, static_cast<uint8>(main->m_nAnimGroup));
     } else {
         state[0] = AnimationState::Make(ANIM_ID_IDLE, 0.0f, 1.0f, 0);
     }
 
     if (second) {
-        state[1] = AnimationState::MakeBlend(second->m_nAnimId, second->m_fCurrentTime, second->m_fSpeed, static_cast<uint8>(second->m_nAnimGroup), blendValue);
+        state[1] = AnimationState::MakeBlend(second->m_AnimId, second->m_CurrentTime, second->m_Speed, static_cast<uint8>(second->m_nAnimGroup), blendValue);
     } else {
         state[1] = AnimationState::MakeBlend(ANIM_ID_WALK, 0.0f, 0.0f, 0, 0.0f);
     }
 
     const auto partial = RpAnimBlendClumpGetMainPartialAssociation(ped->m_pRwClump);
-    if (partial && partial->m_nAnimId >= ANIM_ID_WALK) {
-        state[2] = AnimationState::MakeBlend(partial->m_nAnimId, partial->m_fCurrentTime, partial->m_fSpeed, static_cast<uint8>(partial->m_nAnimGroup), partial->m_fBlendAmount);
+    if (partial && partial->m_AnimId >= ANIM_ID_WALK) {
+        state[2] = AnimationState::MakeBlend(partial->m_AnimId, partial->m_CurrentTime, partial->m_Speed, static_cast<uint8>(partial->m_nAnimGroup), partial->m_BlendAmount);
     } else {
         state[2] = AnimationState::MakeBlend(ANIM_ID_WALK, 0.0f, 0.0f, 0, 0.0f);
     }

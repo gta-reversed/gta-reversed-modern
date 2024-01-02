@@ -371,7 +371,7 @@ void CEntity::CreateRwObject_Reversed()
             if (pLodAssoc) {
                 auto pAssoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump);
                 if (pAssoc)
-                    pAssoc->SetCurrentTime(pLodAssoc->m_fCurrentTime);
+                    pAssoc->SetCurrentTime(pLodAssoc->m_CurrentTime);
             }
         }
         break;

@@ -35,14 +35,14 @@ CTaskSimpleDuck::CTaskSimpleDuck(eDuckControlTypes DuckControlType, uint16 nLeng
 CTaskSimpleDuck::~CTaskSimpleDuck() {
     if (m_pDuckAnim) {
         m_pDuckAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
-        if (m_pDuckAnim->m_fBlendAmount > 0.0f && m_pDuckAnim->m_fBlendDelta >= 0.0f && (m_pDuckAnim->m_nFlags & ANIMATION_PARTIAL) != 0)
-            m_pDuckAnim->m_fBlendDelta = -8.0f;
+        if (m_pDuckAnim->m_BlendAmount > 0.0f && m_pDuckAnim->m_BlendDelta >= 0.0f && (m_pDuckAnim->m_Flags & ANIMATION_PARTIAL) != 0)
+            m_pDuckAnim->m_BlendDelta = -8.0f;
     }
 
     if (m_pMoveAnim) {
         m_pMoveAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
-        if (m_pMoveAnim->m_fBlendAmount > 0.0f && m_pMoveAnim->m_fBlendDelta >= 0.0f)
-            m_pMoveAnim->m_fBlendDelta = -8.0f;
+        if (m_pMoveAnim->m_BlendAmount > 0.0f && m_pMoveAnim->m_BlendDelta >= 0.0f)
+            m_pMoveAnim->m_BlendDelta = -8.0f;
     }
 }
 

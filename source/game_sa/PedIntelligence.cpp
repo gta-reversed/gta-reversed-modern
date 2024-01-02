@@ -354,7 +354,7 @@ bool CPedIntelligence::GetUsingParachute() {
         return false;
     }
 
-    int32 blockID = animAssoc->m_pHierarchy->m_nAnimBlockId;
+    int32 blockID = animAssoc->m_BlendHier->m_nAnimBlockId;
     if (_stricmp(CAnimManager::ms_aAnimBlocks[blockID].szName, "parachute") != 0) {
         while (true) {
             animAssoc = RpAnimBlendGetNextAssociation(animAssoc);

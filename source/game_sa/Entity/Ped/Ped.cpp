@@ -424,8 +424,8 @@ void CPed::SetMoveAnim() {
         case PEDMOVE_RUN:
         case PEDMOVE_SPRINT: {
             for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump, ANIMATION_PARTIAL); assoc; assoc = RpAnimBlendGetNextAssociation(assoc, ANIMATION_PARTIAL)) {
-                if ((assoc->m_nFlags & ANIMATION_UNLOCK_LAST_FRAME) == 0 && (assoc->m_nFlags & ANIMATION_ADD_TO_BLEND) == 0) {
-                    assoc->m_fBlendDelta = -2.f;
+                if ((assoc->m_Flags & ANIMATION_UNLOCK_LAST_FRAME) == 0 && (assoc->m_Flags & ANIMATION_ADD_TO_BLEND) == 0) {
+                    assoc->m_BlendDelta = -2.f;
                     assoc->SetFlag(ANIMATION_FREEZE_LAST_FRAME, true);
                 }
             }
@@ -706,9 +706,9 @@ void CPed::SetMoveState(eMoveState moveState) {
 void CPed::SetMoveAnimSpeed(CAnimBlendAssociation* association) {
     const auto pitchFactor = std::clamp(m_pedIK.m_fSlopePitch, -0.3f, 0.3f);
     if (IsCreatedByMission()) {
-        association->m_fSpeed = pitchFactor + 1.f;
+        association->m_Speed = pitchFactor + 1.f;
     } else {
-        association->m_fSpeed = pitchFactor + 1.2f - (float)m_nRandomSeed * RAND_MAX_FLOAT_RECIPROCAL * 0.4f; // todo: use GetRandom from CGeneral::
+        association->m_Speed = pitchFactor + 1.2f - (float)m_nRandomSeed * RAND_MAX_FLOAT_RECIPROCAL * 0.4f; // todo: use GetRandom from CGeneral::
     }
 }
 
@@ -717,7 +717,7 @@ void CPed::SetMoveAnimSpeed(CAnimBlendAssociation* association) {
 */
 void CPed::StopNonPartialAnims() {
     for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
-        if ((assoc->m_nFlags & ANIMATION_PARTIAL) == 0) {
+        if ((assoc->m_Flags & ANIMATION_PARTIAL) == 0) {
             assoc->SetFlag(ANIMATION_STARTED, false);
         }
     }
@@ -728,7 +728,7 @@ void CPed::StopNonPartialAnims() {
 */
 void CPed::RestartNonPartialAnims() {
     for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
-        if ((assoc->m_nFlags & ANIMATION_PARTIAL) == 0) {
+        if ((assoc->m_Flags & ANIMATION_PARTIAL) == 0) {
             assoc->SetFlag(ANIMATION_STARTED, true);
         }
     }
@@ -1495,7 +1495,7 @@ float CPed::GetWalkAnimSpeed() {
     //       It won't work correctly if first frame is not a root frame, nor if the animation happens on any other axis than Y, etc..
 
     const auto lastFrame = firstSequence.GetUncompressedFrame(firstSequence.m_nFrameCount - 1);
-    const auto lastFrameY = firstSequence.m_isRoot
+    const auto lastFrameY = firstSequence.m_bHasTranslation
                                 ? lastFrame->translation.y
                                 : ((KeyFrame*)lastFrame)->rotation.imag.y;
 
@@ -3222,9 +3222,9 @@ void CPed::RemoveWeaponAnims(int32 likeUnused, float blendDelta) {
     bool bFoundNotPartialAnim{};
     for (auto i = 0; i < 34; i++) { // TODO: Magic number `34`
         if (const auto assoc = RpAnimBlendClumpGetAssociation(m_pRwClump, ANIM_ID_FIRE)) {
-            assoc->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
-            if ((assoc->m_nFlags & ANIMATION_PARTIAL)) {
-                assoc->m_fBlendDelta = blendDelta;
+            assoc->m_Flags |= ANIMATION_FREEZE_LAST_FRAME;
+            if ((assoc->m_Flags & ANIMATION_PARTIAL)) {
+                assoc->m_BlendDelta = blendDelta;
             } else {
                 bFoundNotPartialAnim = true;
             }

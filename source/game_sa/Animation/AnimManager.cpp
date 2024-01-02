@@ -222,7 +222,7 @@ CAnimBlendAssociation* CAnimManager::AddAnimationToClump(RpClump* clump, CAnimBl
     }();
     if (syncWith) {
         anim->SyncAnimation(syncWith);
-        anim->m_nFlags |= ANIMATION_STARTED;
+        anim->m_Flags |= ANIMATION_STARTED;
     } else {
         anim->Start(0.0f);
     }
@@ -238,7 +238,7 @@ CAnimBlendAssociation* CAnimManager::AddAnimation(RpClump* clump, AssocGroupId g
 // 0x4D4330
 CAnimBlendAssociation* CAnimManager::AddAnimation(RpClump* clump, CAnimBlendHierarchy* hier, int32 clumpAssocFlag) {
     const auto anim = new CAnimBlendAssociation(clump, hier);
-    anim->m_nFlags |= clumpAssocFlag;
+    anim->m_Flags |= clumpAssocFlag;
     anim->ReferenceAnimBlock();
     UncompressAnimation(hier);
     return AddAnimationToClump(clump, anim);
@@ -250,7 +250,7 @@ CAnimBlendAssociation* CAnimManager::AddAnimationAndSync(RpClump* clump, CAnimBl
     const auto clumpAnims = RpClumpGetAnimBlendClumpData(clump);
     if (a->IsMoving() && animBlendAssoc) {
         a->SyncAnimation(animBlendAssoc);
-        a->m_nFlags |= ANIMATION_STARTED;
+        a->m_Flags |= ANIMATION_STARTED;
     } else {
         a->Start(0.0f);
     }

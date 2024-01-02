@@ -64,7 +64,7 @@ bool CTaskSimpleStandStill::ProcessPed_Reversed(CPed* ped) {
 
     if (m_bUseAnimIdleStance) {
         auto pIdleAnimAssoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_IDLE);
-        if (pIdleAnimAssoc && pIdleAnimAssoc->m_fBlendAmount > 0.99f)
+        if (pIdleAnimAssoc && pIdleAnimAssoc->m_BlendAmount > 0.99f)
             return true;
     }
 

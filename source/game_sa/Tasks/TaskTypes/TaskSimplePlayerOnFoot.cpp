@@ -214,7 +214,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
 
             CAnimBlendAssociation* animAssoc = RpAnimBlendClumpGetAssociation(player->m_pRwClump, ANIM_ID_KILL_PARTIAL);
             if (animAssoc) {
-                animAssoc->m_fBlendAmount = -2.0f;
+                animAssoc->m_BlendAmount = -2.0f;
             }
 
             if (fightCommand == 0) {
@@ -258,7 +258,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
             } else {
                 animAssociation = RpAnimBlendClumpGetAssociation(player->m_pRwClump, ANIM_ID_KILL_PARTIAL);
                 if (animAssociation) {
-                    animAssociation->m_fBlendAmount = -2.0f;
+                    animAssociation->m_BlendAmount = -2.0f;
                 }
             }
 
@@ -267,7 +267,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player) {
                 bCheckButtonCircleStateOnly = true;
             }
             uint8 meleeAttackJustDown = pad->MeleeAttackJustDown(bCheckButtonCircleStateOnly);
-            if (meleeAttackJustDown && animAssociation && animAssociation->m_fBlendAmount > 0.5f && targetEntity && intelligence->TestForStealthKill(targetEntity, true)) {
+            if (meleeAttackJustDown && animAssociation && animAssociation->m_BlendAmount > 0.5f && targetEntity && intelligence->TestForStealthKill(targetEntity, true)) {
                 auto* pTaskSimpleStealthKill = new CTaskSimpleStealthKill(true, targetEntity, weaponInfo->m_eAnimGroup);
                 taskManager->SetTask(pTaskSimpleStealthKill, TASK_PRIMARY_PRIMARY, false);
 
@@ -704,8 +704,8 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
             CStreaming::SetModelIsDeletable(IFPToModelId(m_nAnimationBlockIndex));
             CAnimBlendAssociation* animAssoc = nullptr;
             for (animAssoc = RpAnimBlendClumpGetFirstAssociation(player->m_pRwClump); animAssoc; animAssoc = RpAnimBlendGetNextAssociation(animAssoc)) {
-                if (animAssoc->m_nFlags & ANIMATION_200) {
-                    animAssoc->m_fBlendDelta = -8.0f;
+                if (animAssoc->m_Flags & ANIMATION_200) {
+                    animAssoc->m_BlendDelta = -8.0f;
                 }
             }
         }
@@ -736,7 +736,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
             };
             auto animation = animations[randomNumber];
             CAnimBlendAssociation* animNewAssoc = CAnimManager::BlendAnimation(player->m_pRwClump, animation.assoc, animation.animId, 8.0f);
-            animNewAssoc->m_nFlags |= ANIMATION_200;
+            animNewAssoc->m_Flags |= ANIMATION_200;
             gLastTouchTimeDelta = touchTimeDelta;
             gLastRandomNumberForIdleAnimationID = randomNumber;
             if (CStats::GetStatValue(STAT_MANAGEMENT_ISSUES_MISSION_ACCOMPLISHED) != 0.0f && CTimer::GetTimeInMS() > 1200000) {
@@ -748,7 +748,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
     CAnimBlendAssociation* animAssoc1 = RpAnimBlendClumpGetFirstAssociation(player->m_pRwClump);
     if (animAssoc1) {
         while (true) {
-            uint32 animHierarchyIndex = (uint32)animAssoc1->m_pHierarchy - (uint32)CAnimManager::ms_aAnimations.data();
+            uint32 animHierarchyIndex = (uint32)animAssoc1->m_BlendHier - (uint32)CAnimManager::ms_aAnimations.data();
             animHierarchyIndex = animHierarchyIndex / 6 + ((animHierarchyIndex >> 31) >> 2);
             animHierarchyIndex = animHierarchyIndex + (animHierarchyIndex >> 31);
 
@@ -875,7 +875,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
                     return;
                 }
                 auto pNewAnimation = CAnimManager::BlendAnimation(player->m_pRwClump, player->m_nAnimGroup, ANIM_ID_RUN, gDuckAnimBlendData);
-                pNewAnimation->m_nFlags |= ANIMATION_STARTED;
+                pNewAnimation->m_Flags |= ANIMATION_STARTED;
                 player->m_pPlayerData->m_fMoveBlendRatio = 1.5f;
                 pedMoveState = PEDMOVE_RUN;
             } else {
@@ -883,7 +883,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
                     return;
                 }
                 auto pNewAnimation = CAnimManager::BlendAnimation(player->m_pRwClump, player->m_nAnimGroup, ANIM_ID_WALK, gDuckAnimBlendData);
-                pNewAnimation->m_nFlags |= ANIMATION_STARTED;
+                pNewAnimation->m_Flags |= ANIMATION_STARTED;
                 player->m_pPlayerData->m_fMoveBlendRatio = 1.5f;
                 pedMoveState = PEDMOVE_WALK;
             }
@@ -891,7 +891,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
             player->m_nSwimmingMoveState = pedMoveState;
         } else if (pedMoveBlendRatio > 0.5f) {
             auto pNewAnimation = CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_GUNMOVE_FWD, gDuckAnimBlendData);
-            pNewAnimation->m_nFlags |= ANIMATION_STARTED;
+            pNewAnimation->m_Flags |= ANIMATION_STARTED;
             player->m_pPlayerData->m_fMoveBlendRatio = 1.0f;
             moveSpeed.x = 1.0f;
             moveSpeed.y = 0.0f;

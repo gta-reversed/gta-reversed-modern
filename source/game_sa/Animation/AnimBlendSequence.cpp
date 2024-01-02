@@ -45,7 +45,7 @@ void CAnimBlendSequence::CompressKeyframes(uint8* frameData) {
     }
 
     void* frames = (frameData ? frameData : CMemoryMgr::Malloc(GetDataSize(true)));
-    if (m_isRoot) {
+    if (m_bHasTranslation) {
         auto* kftc = (KeyFrameTransCompressed*)frames;
         auto* kf = (KeyFrameTrans*)m_pFrames;
         for (auto i = 0; i < m_nFrameCount; i++, kf++, kftc++) {
@@ -80,9 +80,9 @@ void CAnimBlendSequence::RemoveUncompressedData(uint8* frameData) {
 // 0x4D0C90
 size_t CAnimBlendSequence::GetDataSize(bool compressed) const {
     if (compressed) {
-        return m_nFrameCount * (m_isRoot ? sizeof(KeyFrameTransCompressed) : sizeof(KeyFrameCompressed));
+        return m_nFrameCount * (m_bHasTranslation ? sizeof(KeyFrameTransCompressed) : sizeof(KeyFrameCompressed));
     } else {
-        return m_nFrameCount * (m_isRoot ? sizeof(KeyFrameTrans) : sizeof(KeyFrame));
+        return m_nFrameCount * (m_bHasTranslation ? sizeof(KeyFrameTrans) : sizeof(KeyFrame));
     }
 }
 
@@ -117,12 +117,12 @@ void CAnimBlendSequence::SetBoneTag(int32 boneId) {
 }
 
 // 0x4D0CD0
-void CAnimBlendSequence::SetNumFrames(int32 count, bool root, bool compressed, CAnimBlendSequence* frameData) {
-    m_isRoot = root;
+void CAnimBlendSequence::SetNumFrames(int32 count, bool bHasTranslation, bool compressed, CAnimBlendSequence* frameData) {
+    m_bHasTranslation = bHasTranslation;
     m_nFrameCount = (uint16)count;
     m_pFrames = frameData ? frameData : CMemoryMgr::Malloc(GetDataSize(compressed));
     m_usingExternalMemory = frameData != nullptr; // NOTSA
-    m_numFramesSet = true;
+    m_bHasRotation = true;
     m_isCompressed = compressed; // condition has been removed
 }
 
@@ -133,7 +133,7 @@ void CAnimBlendSequence::Uncompress(uint8* frameData) {
     }
 
     void* frames = (frameData ? frameData : CMemoryMgr::Malloc(GetDataSize(false)));
-    if (m_isRoot) {
+    if (m_bHasTranslation) {
         auto* kftc = (KeyFrameTransCompressed*)m_pFrames;
         auto* kf = (KeyFrameTrans*)frames;
         for (auto i = 0; i < m_nFrameCount; i++, kf++, kftc++) {
@@ -184,7 +184,7 @@ void CAnimBlendSequence::Print() {
 // Can return child frame casted as root frame, the translation shouldn't be accessed then
 // 0x4CF1F0
 KeyFrameTrans* CAnimBlendSequence::GetUncompressedFrame(int32 frame) const {
-    if (m_isRoot) {
+    if (m_bHasTranslation) {
         return &static_cast<KeyFrameTrans*>(m_pFrames)[frame];
     }
 
@@ -195,7 +195,7 @@ KeyFrameTrans* CAnimBlendSequence::GetUncompressedFrame(int32 frame) const {
 // Can return child frame casted as root frame, the translation shouldn't be accessed then
 // 0x4CF220
 KeyFrameTransCompressed* CAnimBlendSequence::GetCompressedFrame(int32 frame) const {
-    if (m_isRoot) {
+    if (m_bHasTranslation) {
         return &static_cast<KeyFrameTransCompressed*>(m_pFrames)[frame];
     }
 

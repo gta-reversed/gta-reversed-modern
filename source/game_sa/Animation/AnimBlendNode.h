@@ -11,17 +11,17 @@
 
 class CAnimBlendNode {
 public:
-    float m_fTheta0; // angle between two quaternions
-    float m_fTheta1; // 1 / sin(m_theta0), used in slerp calculation
+    float m_Theta;       // angle between two quaternions
+    float m_InvSinTheta; // 1 / sin(m_Theta), used in slerp calculation
 
-    // indices into array in sequence
-    int16 m_nNextKeyFrameId;
-    int16 m_PreviousKeyFrameId;
+    // Indices into array in sequence
+    int16 m_KeyFrameA; // Next key frame
+    int16 m_KeyFrameB; // Previous key frame
 
-    float m_fRemainingTime; // time until frames have to advance
+    float m_RemainingTime; // Time until frames have to advance
 
-    CAnimBlendSequence*    m_pAnimSequence;
-    CAnimBlendAssociation* m_pAnimBlendAssociation;
+    CAnimBlendSequence*    m_BlendSeq;
+    CAnimBlendAssociation* m_BlendAssoc;
 
 public:
     static void InjectHooks();

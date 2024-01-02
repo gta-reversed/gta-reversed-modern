@@ -18,8 +18,8 @@ public:
     };
     union {
         struct {
-            uint16 m_numFramesSet : 1;
-            uint16 m_isRoot : 1;              // Root key frames have translation values (quaternion).
+            uint16 m_bHasRotation : 1;
+            uint16 m_bHasTranslation : 1;     // Root key frames have translation values (quaternion).
             uint16 m_isCompressed : 1;        // Compressed key frames.
             uint16 m_usingExternalMemory : 1; // When this flag is NOT set, you have to loop through all key frames in m_pFrames and free them separately.
             uint16 m_hasBoneIdSet : 1;
@@ -45,6 +45,12 @@ public:
     void SetName(const char* string);
     void SetNumFrames(int32 count, bool root, bool compressed, CAnimBlendSequence* frameData); // root -> isTranslated?
     void Uncompress(uint8* frameData);
+
+    KeyFrame* GetKeyFrame(size_t n) const {
+        return m_bHasTranslation ?
+            &((KeyFrameTrans*)m_pFrames)[n] :
+            &((KeyFrame*)m_pFrames)[n];
+    }
 
     KeyFrameTrans* GetUncompressedFrame(int32 frame) const;
     KeyFrameTransCompressed* GetCompressedFrame(int32 frame) const;
