@@ -66,6 +66,8 @@ void CTheScripts::InjectHooks() {
 
     RH_ScopedInstall(ReadObjectNamesFromScript, 0x486720);
     RH_ScopedInstall(UpdateObjectIndices, 0x486780);
+
+    RH_ScopedInstall(DrawScriptSpheres, 0x4810E0);
 }
 
 // 0x468D50
@@ -967,22 +969,24 @@ void CTheScripts::ScriptDebugCircle2D(float x, float y, float width, float heigh
 void CTheScripts::DrawScriptSpheres() {
     ZoneScoped;
 
-    return plugin::Call<0x4810E0>();
-    for (auto& script : ScriptSphereArray) {
-        if (script.m_bUsed) {
-            /* todo:
-            C3dMarkers::PlaceMarkerSet(
-                script.nId,
-                MARKER3D_CYLINDER,
-                script.vCoords,
-                script.fRadius,
-                SPHERE_MARKER_R, SPHERE_MARKER_G, SPHERE_MARKER_B, SPHERE_MARKER_A,
-                SPHERE_MARKER_PULSE_PERIOD,
-                SPHERE_MARKER_PULSE_FRACTION,
-                0
-            );
-            */
+    for (auto& ss : ScriptSphereArray) {
+        if (!ss.m_bUsed) {
+            continue;
         }
+
+        C3dMarkers::PlaceMarkerSet(
+            ss.m_nId,
+            e3dMarkerType::MARKER3D_CYLINDER,
+            ss.m_vCoords,
+            ss.m_fRadius,
+            255,
+            0,
+            0,
+            228,
+            2048,
+            0.1f,
+            0
+        );
     }
 }
 
