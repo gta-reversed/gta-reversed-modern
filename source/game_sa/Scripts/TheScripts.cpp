@@ -413,8 +413,83 @@ int32 CTheScripts::GetActualScriptThingIndex(int32 index, eScriptThingType type)
 }
 
 // 0x483720
+// TODO: TEST REFACTOR!
 int32 CTheScripts::GetNewUniqueScriptThingIndex(int32 index, eScriptThingType type) {
-    return plugin::CallAndReturn<uint32, 0x483720, int32, char>(index, type);
+    //return plugin::CallAndReturn<uint32, 0x483720, int32, char>(index, type);
+
+    const auto MakeUniqueIndex = [](uint16 lo, uint16 hi) {
+        return lo | (uint32)(hi << 16);
+    };
+
+    // TODO better name
+    const auto IsIdWeird = [](int16 id) {
+        return id == -1 || id == -2;
+    };
+
+    switch (type) {
+    case eScriptThingType::SCRIPT_THING_SPHERE: {
+        auto& uniqueId = ScriptSphereArray[index].m_nUniqueId;
+        uniqueId = IsIdWeird(uniqueId) ? 1 : uniqueId + 1;
+
+        return MakeUniqueIndex(index, uniqueId);
+    }
+    case eScriptThingType::SCRIPT_THING_EFFECT_SYSTEM: {
+        auto& id = ScriptEffectSystemArray[index].m_nId;
+        id = IsIdWeird(id) ? 1 : id + 1;
+
+        return MakeUniqueIndex(index, id);
+    }
+    case eScriptThingType::SCRIPT_THING_SEARCH_LIGHT: {
+        auto& id = ScriptSearchLightArray[index].m_nId;
+        id       = IsIdWeird(id) ? 1 : id + 1;
+
+        return MakeUniqueIndex(index, id);
+    }
+    case eScriptThingType::SCRIPT_THING_CHECKPOINT: {
+        auto& id = ScriptCheckpointArray[index].m_nId;
+        id       = IsIdWeird(id) ? 1 : id + 1;
+
+        return MakeUniqueIndex(index, id);
+    }
+    case eScriptThingType::SCRIPT_THING_SEQUENCE_TASK: {
+        auto& id = ScriptSequenceTaskArray[index].m_nId;
+        id       = IsIdWeird(id) ? 1 : id + 1;
+
+        ScriptSequenceTaskArray[index].m_bUsed = true;
+        return MakeUniqueIndex(index, id);
+    }
+    case eScriptThingType::SCRIPT_THING_FIRE: {
+        auto& id = gFireManager.m_aFires[index].m_nScriptReferenceIndex;
+        id       = IsIdWeird(id) ? 1 : id + 1;
+
+        return MakeUniqueIndex(index, id);
+    }
+    case eScriptThingType::SCRIPT_THING_2D_EFFECT: {
+        auto& id = CScripted2dEffects::ScriptReferenceIndex[index];
+        id       = IsIdWeird(id) ? 1 : id + 1;
+
+        return MakeUniqueIndex(index, id);
+    }
+    case eScriptThingType::SCRIPT_THING_DECISION_MAKER: {
+        CDecisionMakerTypes::GetInstance();
+
+        auto& id = CDecisionMakerTypes::ScriptReferenceIndex[index];
+        id       = IsIdWeird(id) ? 1 : id + 1;
+
+        CDecisionMakerTypes::GetInstance(); // ? TODO check if we really need these
+        return MakeUniqueIndex(index, id);
+    }
+    case eScriptThingType::SCRIPT_THING_PED_GROUP: {
+        auto& id = CPedGroups::ScriptReferenceIndex[index];
+        id       = IsIdWeird(id) ? 1 : id + 1;
+
+        return MakeUniqueIndex(index, id);
+    }
+    default:
+        break;
+    }
+
+    return -1;
 }
 
 // 0x464D20
