@@ -28,6 +28,13 @@ public:
     void SetUpIK(CPed* ped);
     void QuitIK(CPed* ped);
 
+    auto GetTargetPt()           const { return m_vecTargetPoint; }
+    void SetTargetPt(CVector pt)       { m_vecTargetPoint = pt;   }
+
+    auto GetTargetPtRadius()        const { return m_fRadius; }
+    void SetTargetPtRadius(float r)       { m_fRadius = r;    }
+
+
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

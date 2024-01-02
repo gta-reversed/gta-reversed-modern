@@ -98,7 +98,7 @@ public:
             return new CTaskComplexTurnToFaceEntityOrCoord{ m_entityToSeek };
         case TASK_COMPLEX_FOLLOW_NODE_ROUTE:
             return new CTaskComplexFollowNodeRoute{
-                (int32)m_moveState,
+                m_moveState,
                 GetSeekPos(ped),
                 m_maxEntityDist2D,
                 m_moveStateRadius,

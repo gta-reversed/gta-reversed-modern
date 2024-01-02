@@ -77,8 +77,10 @@ bool CTaskComplexGoToCarDoorAndStandStill::MakeAbortable(CPed* ped, eAbortPriori
 // 0x64A5F0
 CTask* CTaskComplexGoToCarDoorAndStandStill::CreateSubTask(eTaskType taskType, CPed* ped) {
     switch (taskType) {
-    case TASK_SIMPLE_GO_TO_POINT_NEAR_CAR_DOOR_UNTIL_DOOR_NOT_IN_USE:
+    case TASK_SIMPLE_GO_TO_POINT_NEAR_CAR_DOOR_UNTIL_DOOR_NOT_IN_USE: {
+        ped->bHasJustLeftCar = true;
         return new CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse{ m_Vehicle, m_TargetDoor, m_TargetPt, m_MoveState };
+    }
     case TASK_SIMPLE_PAUSE:
         return new CTaskSimplePause{ 1 };
     case TASK_SIMPLE_STAND_STILL:
@@ -86,10 +88,10 @@ CTask* CTaskComplexGoToCarDoorAndStandStill::CreateSubTask(eTaskType taskType, C
     case TASK_SIMPLE_CAR_WAIT_FOR_DOOR_NOT_TO_BE_IN_USE:
         return new CTaskSimpleCarWaitForDoorNotToBeInUse{ m_Vehicle, (uint32)m_TargetDoor };
     case TASK_COMPLEX_FOLLOW_POINT_ROUTE:
-        return new CTaskComplexFollowPointRoute{ m_MoveState, *m_RouteToDoor };
+        return new CTaskComplexFollowPointRoute{ m_MoveState, *m_RouteToDoor, CTaskComplexFollowPointRoute::Mode::ONE_WAY, 0.5f, 5.f, false, false, false };
     case TASK_SIMPLE_GO_TO_POINT: {
         ped->bHasJustLeftCar = true;
-        return new CTaskSimpleGoToPoint{ m_MoveState, m_TargetPt, m_TargetRadius };
+        return new CTaskSimpleGoToPoint{ m_MoveState, m_TargetPt, m_TargetRadius, true };
     }
     case TASK_FINISHED:
         return nullptr;
@@ -138,7 +140,7 @@ CTask* CTaskComplexGoToCarDoorAndStandStill::CreateFirstSubTask(CPed* ped) {
         }
 
         if (m_TargetSeat != 0 && !m_bIsDriver) {
-            if (const auto psgrAtDoor = m_Vehicle->GetPassengers()[CCarEnterExit::ComputePassengerIndexFromCarDoor(m_Vehicle, m_TargetDoor)]) {
+            if (const auto psgrAtDoor = m_Vehicle->GetPassengers()[CCarEnterExit::ComputePassengerIndexFromCarDoor(m_Vehicle, m_TargetSeat)]) {
                 if (psgrAtDoor->bThisPedIsATargetPriority) {
                     return TASK_SIMPLE_STAND_STILL;
                 }
@@ -257,11 +259,11 @@ void CTaskComplexGoToCarDoorAndStandStill::ComputeRouteToDoor(const CPed& ped) {
     CPointRoute routeAroundVeh{};
     CPedGeometryAnalyser::ComputeRouteRoundEntityBoundingBox(ped, pedPosOnBBPlane, *m_Vehicle, doorPosOnBBPlane, routeAroundVeh, 0);
 
-    m_RouteToDoor->MaybeAddPoint(pedPosOnBBPlane);
-    for (const auto& pt : routeAroundVeh.GetPoints()) {
-        m_RouteToDoor->MaybeAddPoint(pt);
+    m_RouteToDoor->AddUnlessFull(pedPosOnBBPlane);
+    for (const auto& pt : routeAroundVeh.GetAll()) {
+        m_RouteToDoor->AddUnlessFull(pt);
     }
-    m_RouteToDoor->MaybeAddPoint(doorPosOnBBPlane);
+    m_RouteToDoor->AddUnlessFull(doorPosOnBBPlane);
 }
 
 // Based on SA code
