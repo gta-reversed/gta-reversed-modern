@@ -10,6 +10,7 @@
 #include "LoadingScreen.h"
 #include "Scripted2dEffects.h"
 #include "Shadows.h"
+#include "VehicleRecording.h"
 
 static inline bool gAllowScriptedFixedCameraCollision = false;
 
@@ -23,8 +24,8 @@ void CTheScripts::InjectHooks() {
     RH_ScopedCategory("Scripts");
 
     RH_ScopedInstall(Init, 0x468D50, { .reversed = true });
-    RH_ScopedOverloadedInstall(StartNewScript, "", 0x464C20, CRunningScript* (*)(uint8*));
-    // RH_ScopedOverloadedInstall(StartNewScript, "index", 0x464C90, CRunningScript* (*)(uint8*, uint16));
+    RH_ScopedOverloadedInstall(StartNewScript, "last-idle", 0x464C20, CRunningScript* (*)(uint8*));
+    RH_ScopedOverloadedInstall(StartNewScript, "indexed", 0x464C90, CRunningScript* (*)(uint8*, uint16));
     RH_ScopedInstall(StartTestScript, 0x464D40);
     RH_ScopedInstall(AddToBuildingSwapArray, 0x481140);
     RH_ScopedInstall(UndoBuildingSwaps, 0x481290);
@@ -45,7 +46,7 @@ void CTheScripts::InjectHooks() {
 
     RH_ScopedInstall(CleanUpThisObject, 0x4866C0);
     RH_ScopedInstall(CleanUpThisPed, 0x486300, {.reversed = false});
-    RH_ScopedInstall(CleanUpThisVehicle, 0x486670, {.reversed = false});
+    RH_ScopedInstall(CleanUpThisVehicle, 0x486670, {.reversed = true});
     RH_ScopedInstall(ClearAllVehicleModelsBlockedByScript, 0x46A840);
     RH_ScopedInstall(ClearAllSuppressedCarModels, 0x46A7C0);
     RH_ScopedInstall(ClearSpaceForMissionEntity, 0x486B00, {.reversed = false});
@@ -336,7 +337,18 @@ void CTheScripts::CleanUpThisPed(CPed* ped) {
 
 // 0x486670
 void CTheScripts::CleanUpThisVehicle(CVehicle* vehicle) {
-    plugin::Call<0x486670, CVehicle*>(vehicle);
+    //plugin::Call<0x486670, CVehicle*>(vehicle);
+    if (!vehicle || vehicle->m_nCreatedBy != eVehicleCreatedBy::MISSION_VEHICLE) {
+        return;
+    }
+
+    vehicle->physicalFlags.bDontApplySpeed        = false;
+    vehicle->physicalFlags.bDisableCollisionForce = false;
+    vehicle->vehicleFlags.bIsLocked               = false;
+
+    CCarCtrl::RemoveFromInterestingVehicleList(vehicle);
+    CVehicleRecording::StopPlaybackRecordedCar(vehicle);
+    vehicle->SetVehicleCreatedBy(eVehicleCreatedBy::RANDOM_VEHICLE);
 }
 
 // 0x46A840
@@ -539,8 +551,28 @@ CRunningScript* CTheScripts::StartNewScript(uint8* startIP) {
 }
 
 // 0x464C90
-CRunningScript* StartNewScript(uint8* startIP, uint16 index) {
-    return plugin::CallAndReturn<CRunningScript*, 0x464C90, uint8*, uint16>(startIP, index);
+CRunningScript* CTheScripts::StartNewScript(uint8* startIP, uint16 index) {
+    //return plugin::CallAndReturn<CRunningScript*, 0x464C90, uint8*, uint16>(startIP, index);
+    if (!pIdleScripts) {
+        return nullptr;
+    }
+
+    auto* script = pIdleScripts;
+    while (script && script != &ScriptsArray[index]) {
+        script = script->m_pNext;
+    }
+
+    if (!script) {
+        return nullptr;
+    }
+
+    script->RemoveScriptFromList(&pIdleScripts);
+    script->Init();
+    script->SetCurrentIp(startIP);
+    script->AddScriptToList(&pActiveScripts);
+    script->SetActive(true);
+
+    return script;
 }
 
 void CTheScripts::UndoBuildingSwaps() {
