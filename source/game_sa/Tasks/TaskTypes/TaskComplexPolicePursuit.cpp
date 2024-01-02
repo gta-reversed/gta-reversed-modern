@@ -21,8 +21,8 @@ void CTaskComplexPolicePursuit::InjectHooks() {
     RH_ScopedVMTInstall(Clone, 0x68CDD0, { .reversed = false });
     RH_ScopedVMTInstall(GetTaskType, 0x68BAA0, { .reversed = false });
     RH_ScopedVMTInstall(MakeAbortable, 0x68BAB0, { .reversed = false });
-    RH_ScopedVMTInstall(CreateNextSubTask, 0x68BAC0, { .reversed = false });
-    RH_ScopedVMTInstall(CreateFirstSubTask, 0x6908E0, { .reversed = false });
+    RH_ScopedVMTInstall(CreateNextSubTask, 0x68BAC0);
+    RH_ScopedVMTInstall(CreateFirstSubTask, 0x6908E0);
     RH_ScopedVMTInstall(ControlSubTask, 0x690920, { .reversed = false });
 }
 
@@ -152,19 +152,20 @@ CTask* CTaskComplexPolicePursuit::CreateSubTask(eTaskType taskType, CPed* ped) {
         return new CTaskSimpleStandStill{};
     case TASK_SIMPLE_SCRATCH_HEAD:
         return new CTaskSimpleScratchHead{};
+    case TASK_FINISHED:
+        return nullptr;
     default:
         NOTSA_UNREACHABLE("Invalid TaskType({})", taskType);
     }
 }
 
-// 0x68BAC0
-CTask* CTaskComplexPolicePursuit::CreateNextSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x68BAC0, CTaskComplexPolicePursuit*, CPed*>(this, ped);
-}
-
 // 0x6908E0
 CTask* CTaskComplexPolicePursuit::CreateFirstSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x6908E0, CTaskComplexPolicePursuit*, CPed*>(this, ped);
+    if (SetPursuit(ped->AsCop())) {
+        return CreateSubTask(TASK_COMPLEX_ARREST_PED, ped);
+    }
+    m_bCouldJoinPursuit = false;
+    return CreateSubTask(TASK_FINISHED, ped);
 }
 
 // 0x690920

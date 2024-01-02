@@ -9,7 +9,7 @@ class NOTSA_EXPORT_VTABLE CTaskComplexPolicePursuit : public CTaskComplex {
 public:
     bool     m_bRoadBlockCop : 1{};
     bool     m_bPlayerInCullZone : 1{};
-    bool     m_bCouldJoinPursuit : 1{};
+    bool     m_bCouldJoinPursuit : 1{true};
     CCopPed* m_Pursuer{};
     CPed*    m_Persecuted{};
 
@@ -31,7 +31,7 @@ public:
 
     CTask*    Clone() const override { return new CTaskComplexPolicePursuit{ *this }; }
     eTaskType GetTaskType() const override { return Type; }
-    CTask*    CreateNextSubTask(CPed* ped) override;
+    CTask*    CreateNextSubTask(CPed* ped) override { return nullptr; }
     CTask*    CreateFirstSubTask(CPed* ped) override;
     CTask*    ControlSubTask(CPed* ped) override;
 
