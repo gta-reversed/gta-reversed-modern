@@ -10,7 +10,7 @@ void CTaskComplexPolicePursuit::InjectHooks() {
 
     RH_ScopedInstall(SetWeapon, 0x68BAD0);
     RH_ScopedInstall(ClearPursuit, 0x68BD90);
-    RH_ScopedInstall(SetPursuit, 0x68BBD0, { .reversed = false });
+    RH_ScopedInstall(SetPursuit, 0x68BBD0);
     RH_ScopedInstall(PersistPursuit, 0x68BDC0, { .reversed = false });
     RH_ScopedInstall(CreateSubTask, 0x68D910, { .reversed = false });
     RH_ScopedVMTInstall(Clone, 0x68CDD0, { .reversed = false });
@@ -81,7 +81,25 @@ void __stdcall CTaskComplexPolicePursuit::ClearPursuit(CCopPed* pursuer) {
 
 // 0x68BBD0
 int8 CTaskComplexPolicePursuit::SetPursuit(CPed* ped) {
-    return plugin::CallMethodAndReturn<int8, 0x68BBD0, CTaskComplexPolicePursuit*, CPed*>(this, ped);
+    // Find closest player
+    float minDistSq = FLT_MAX;
+    CPlayerPed* closestPlayer{};
+    for (const auto& v : CWorld::Players) {
+        const auto plyr = v.m_pPed;
+        const auto distSq = (plyr->GetPosition() - ped->GetPosition()).SquaredMagnitude();
+        if (distSq >= minDistSq) {
+            continue;
+        }
+        if (plyr->bInVehicle) {
+            if (distSq * plyr->m_pVehicle->GetMoveSpeed().SquaredMagnitude() >= sq(4.f)) { // TODO/BUG: Why `*`?
+                continue;
+            }
+        }
+        closestPlayer = plyr;
+        minDistSq     = distSq;
+    }
+    CEntity::ChangeEntityReference(m_Persecuted, closestPlayer);
+    return closestPlayer && FindPlayerWanted()->SetPursuitCop(ped->AsCop());
 }
 
 // 0x68BDC0
